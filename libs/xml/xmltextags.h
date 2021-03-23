@@ -52,52 +52,52 @@ enum TextureType
 class XmlTagBuilder
 {
 private:
-CopiedString m_savefilename;
-xmlDocPtr doc;
-xmlXPathContextPtr context;
+	CopiedString m_savefilename;
+	xmlDocPtr doc;
+	xmlXPathContextPtr context;
 
-xmlXPathObjectPtr XpathEval( const char* queryString ){
-	const xmlChar* expression = (const xmlChar*)queryString;
-	xmlXPathObjectPtr result = xmlXPathEvalExpression( expression, context );
-	return result;
-};
-
-char* GetTagsXpathExpression( char* buffer, const char* shader, NodeTagType nodeTagType ){
-	strcpy( buffer, "/root/*/*[@path='" );
-	strcat( buffer, shader );
-
-	switch ( nodeTagType )
-	{
-	case TAG:
-		strcat( buffer, "']/tag" );
-		break;
-	case EMPTY:
-		strcat( buffer, "']" );
+	xmlXPathObjectPtr XpathEval( const char* queryString ){
+		const xmlChar* expression = (const xmlChar*)queryString;
+		xmlXPathObjectPtr result = xmlXPathEvalExpression( expression, context );
+		return result;
 	};
 
-	return buffer;
-}
+	char* GetTagsXpathExpression( char* buffer, const char* shader, NodeTagType nodeTagType ){
+		strcpy( buffer, "/root/*/*[@path='" );
+		strcat( buffer, shader );
+
+		switch ( nodeTagType )
+		{
+		case TAG:
+			strcat( buffer, "']/tag" );
+			break;
+		case EMPTY:
+			strcat( buffer, "']" );
+		};
+
+		return buffer;
+	}
 
 public:
-XmlTagBuilder();
-~XmlTagBuilder();
+	XmlTagBuilder();
+	~XmlTagBuilder();
 
-bool CreateXmlDocument();
-bool OpenXmlDoc( const char* file, const char* savefile = 0 );
-bool SaveXmlDoc( const char* file );
-bool SaveXmlDoc( void );
-bool AddShaderNode( const char* shader, TextureType textureType, NodeShaderType nodeShaderType );
-bool DeleteShaderNode( const char* shader );
-bool CheckShaderTag( const char* shader );
-bool CheckShaderTag( const char* shader, const char* content );
-bool AddShaderTag( const char* shader, const char* content, NodeTagType nodeTagType );
-bool DeleteTag( const char* tag );
-int RenameShaderTag( const char* oldtag, CopiedString newtag );
-bool DeleteShaderTag( const char* shader, const char* tag );
-void GetShaderTags( const char* shader, std::vector<CopiedString>& tags );
-void GetUntagged( std::set<CopiedString>& shaders );
-void GetAllTags( std::set<CopiedString>& tags );
-void TagSearch( const char* expression, std::set<CopiedString>& paths );
+	bool CreateXmlDocument();
+	bool OpenXmlDoc( const char* file, const char* savefile = 0 );
+	bool SaveXmlDoc( const char* file );
+	bool SaveXmlDoc( void );
+	bool AddShaderNode( const char* shader, TextureType textureType, NodeShaderType nodeShaderType );
+	bool DeleteShaderNode( const char* shader );
+	bool CheckShaderTag( const char* shader );
+	bool CheckShaderTag( const char* shader, const char* content );
+	bool AddShaderTag( const char* shader, const char* content, NodeTagType nodeTagType );
+	bool DeleteTag( const char* tag );
+	int RenameShaderTag( const char* oldtag, CopiedString newtag );
+	bool DeleteShaderTag( const char* shader, const char* tag );
+	void GetShaderTags( const char* shader, std::vector<CopiedString>& tags );
+	void GetUntagged( std::set<CopiedString>& shaders );
+	void GetAllTags( std::set<CopiedString>& tags );
+	void TagSearch( const char* expression, std::set<CopiedString>& paths );
 };
 
 #endif

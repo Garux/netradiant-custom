@@ -36,15 +36,15 @@ class Matrix4;
 class CameraView
 {
 public:
-virtual void setModelview( const Matrix4& modelview ) = 0;
-virtual void setFieldOfView( float fieldOfView ) = 0;
+	virtual void setModelview( const Matrix4& modelview ) = 0;
+	virtual void setFieldOfView( float fieldOfView ) = 0;
 };
 
 class CameraModel
 {
 public:
-STRING_CONSTANT( Name, "CameraModel" );
-virtual void setCameraView( CameraView* view, const Callback& disconnect ) = 0;
+	STRING_CONSTANT( Name, "CameraModel" );
+	virtual void setCameraView( CameraView* view, const Callback& disconnect ) = 0;
 };
 
 template<typename Element> class BasicVector3;

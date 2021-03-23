@@ -55,7 +55,7 @@ inline scene::Node& entity_for_eclass( EntityClass* eclass ){
 		return New_MiscModel( eclass );
 	}
 	else if ( classname_equal( eclass->name(), "light" )
-			  || classname_equal( eclass->name(), "lightJunior" ) ) {
+	       || classname_equal( eclass->name(), "lightJunior" ) ) {
 		return New_Light( eclass );
 	}
 	if ( !eclass->fixedsize ) {
@@ -90,9 +90,9 @@ inline scene::Node& node_for_eclass( EntityClass* eclass ){
 	Node_getEntity( node )->setKeyValue( "classname", eclass->name() );
 
 	if ( g_gameType == eGameTypeDoom3
-		 && string_not_empty( eclass->name() )
-		 && !string_equal( eclass->name(), "worldspawn" )
-		 && !string_equal( eclass->name(), "UNKNOWN_CLASS" ) ) {
+	     && string_not_empty( eclass->name() )
+	     && !string_equal( eclass->name(), "worldspawn" )
+	     && !string_equal( eclass->name(), "UNKNOWN_CLASS" ) ) {
 		char buffer[1024];
 		strcpy( buffer, eclass->name() );
 		strcat( buffer, "_1" );
@@ -126,27 +126,27 @@ bool g_stupidQuakeBug = false;
 class ConnectEntities
 {
 public:
-Entity* m_e1;
-Entity* m_e2;
-int m_index;
-ConnectEntities( Entity* e1, Entity* e2, int index ) : m_e1( e1 ), m_e2( e2 ), m_index( index ){
-}
-const char *keyname(){
-	StringOutputStream key( 16 );
-	if ( m_index <= 0 ) {
-		return "target";
+	Entity* m_e1;
+	Entity* m_e2;
+	int m_index;
+	ConnectEntities( Entity* e1, Entity* e2, int index ) : m_e1( e1 ), m_e2( e2 ), m_index( index ){
 	}
-	if ( m_index == 1 ) {
-		return "killtarget";
+	const char *keyname(){
+		StringOutputStream key( 16 );
+		if ( m_index <= 0 ) {
+			return "target";
+		}
+		if ( m_index == 1 ) {
+			return "killtarget";
+		}
+		key << "target" << m_index;
+		return key.c_str();
 	}
-	key << "target" << m_index;
-	return key.c_str();
-}
-void connect( const char* name ){
-	m_e1->setKeyValue( keyname(), name );
-	m_e2->setKeyValue( "targetname", name );
-}
-typedef MemberCaller1<ConnectEntities, const char*, &ConnectEntities::connect> ConnectCaller;
+	void connect( const char* name ){
+		m_e1->setKeyValue( keyname(), name );
+		m_e2->setKeyValue( "targetname", name );
+	}
+	typedef MemberCaller1<ConnectEntities, const char*, &ConnectEntities::connect> ConnectCaller;
 };
 
 inline Entity* ScenePath_getEntity( const scene::Path& path ){
@@ -160,93 +160,70 @@ inline Entity* ScenePath_getEntity( const scene::Path& path ){
 class Quake3EntityCreator : public EntityCreator
 {
 public:
-scene::Node& createEntity( EntityClass* eclass ){
-	return node_for_eclass( eclass );
-}
-void setKeyValueChangedFunc( KeyValueChangedFunc func ){
-	EntityKeyValues::setKeyValueChangedFunc( func );
-}
-void setCounter( Counter* counter ){
-	EntityKeyValues::setCounter( counter );
-}
-void connectEntities( const scene::Path& path, const scene::Path& targetPath, int index ){
-	Entity* e1 = ScenePath_getEntity( path );
-	Entity* e2 = ScenePath_getEntity( targetPath );
-
-	if ( e1 == 0 || e2 == 0 ) {
-		globalErrorStream() << "entityConnectSelected: both of the selected instances must be an entity\n";
-		return;
+	scene::Node& createEntity( EntityClass* eclass ){
+		return node_for_eclass( eclass );
 	}
-
-	if ( e1 == e2 ) {
-		globalErrorStream() << "entityConnectSelected: the selected instances must not both be from the same entity\n";
-		return;
+	void setKeyValueChangedFunc( KeyValueChangedFunc func ){
+		EntityKeyValues::setKeyValueChangedFunc( func );
 	}
+	void setCounter( Counter* counter ){
+		EntityKeyValues::setCounter( counter );
+	}
+	void connectEntities( const scene::Path& path, const scene::Path& targetPath, int index ){
+		Entity* e1 = ScenePath_getEntity( path );
+		Entity* e2 = ScenePath_getEntity( targetPath );
 
-
-	UndoableCommand undo( "entityConnectSelected" );
-
-	if ( g_gameType == eGameTypeDoom3 ) {
-		StringOutputStream key( 16 );
-		if ( index >= 0 ) {
-			key << "target";
-			if ( index != 0 ) {
-				key << index;
-			}
-			e1->setKeyValue( key.c_str(), e2->getKeyValue( "name" ) );
-			key.clear();
+		if ( e1 == 0 || e2 == 0 ) {
+			globalErrorStream() << "entityConnectSelected: both of the selected instances must be an entity\n";
+			return;
 		}
-		else
-		{
-			for ( unsigned int i = 0; ; ++i )
-			{
+
+		if ( e1 == e2 ) {
+			globalErrorStream() << "entityConnectSelected: the selected instances must not both be from the same entity\n";
+			return;
+		}
+
+
+		UndoableCommand undo( "entityConnectSelected" );
+
+		if ( g_gameType == eGameTypeDoom3 ) {
+			StringOutputStream key( 16 );
+			if ( index >= 0 ) {
 				key << "target";
-				if ( i != 0 ) {
-					key << i;
+				if ( index != 0 ) {
+					key << index;
 				}
-				const char* value = e1->getKeyValue( key.c_str() );
-				if ( string_empty( value ) ) {
-					e1->setKeyValue( key.c_str(), e2->getKeyValue( "name" ) );
-					break;
-				}
+				e1->setKeyValue( key.c_str(), e2->getKeyValue( "name" ) );
 				key.clear();
-			}
-		}
-	}
-	else
-	{
-		ConnectEntities connector( e1, e2, index );
-		//killconnect
-		if( index == 1 ){
-			const char* value = e2->getKeyValue( "targetname" );
-			if ( !string_empty( value ) ) {
-				connector.connect( value );
 			}
 			else
 			{
-				const char* type = e2->getKeyValue( "classname" );
-				if ( string_empty( type ) ) {
-					type = "t";
+				for ( unsigned int i = 0; ; ++i )
+				{
+					key << "target";
+					if ( i != 0 ) {
+						key << i;
+					}
+					const char* value = e1->getKeyValue( key.c_str() );
+					if ( string_empty( value ) ) {
+						e1->setKeyValue( key.c_str(), e2->getKeyValue( "name" ) );
+						break;
+					}
+					key.clear();
 				}
-				StringOutputStream key( 64 );
-				key << type << "1";
-				GlobalNamespace().makeUnique( key.c_str(), ConnectEntities::ConnectCaller( connector ) );
 			}
 		}
-		//normal connect
-		else{
-			//prioritize existing target key
-			//checking, if ent got other connected ones already, could be better solution
-			const char* value = e1->getKeyValue( "target" );
-			if ( !string_empty( value ) ) {
-				connector.connect( value );
-			}
-			else{
-				value = e2->getKeyValue( "targetname" );
+		else
+		{
+			ConnectEntities connector( e1, e2, index );
+			//killconnect
+			if( index == 1 ){
+				const char* value = e2->getKeyValue( "targetname" );
 				if ( !string_empty( value ) ) {
 					connector.connect( value );
 				}
-				else{
+				else
+				{
 					const char* type = e2->getKeyValue( "classname" );
 					if ( string_empty( type ) ) {
 						type = "t";
@@ -256,62 +233,85 @@ void connectEntities( const scene::Path& path, const scene::Path& targetPath, in
 					GlobalNamespace().makeUnique( key.c_str(), ConnectEntities::ConnectCaller( connector ) );
 				}
 			}
+			//normal connect
+			else{
+				//prioritize existing target key
+				//checking, if ent got other connected ones already, could be better solution
+				const char* value = e1->getKeyValue( "target" );
+				if ( !string_empty( value ) ) {
+					connector.connect( value );
+				}
+				else{
+					value = e2->getKeyValue( "targetname" );
+					if ( !string_empty( value ) ) {
+						connector.connect( value );
+					}
+					else{
+						const char* type = e2->getKeyValue( "classname" );
+						if ( string_empty( type ) ) {
+							type = "t";
+						}
+						StringOutputStream key( 64 );
+						key << type << "1";
+						GlobalNamespace().makeUnique( key.c_str(), ConnectEntities::ConnectCaller( connector ) );
+					}
+				}
+			}
 		}
+		SceneChangeNotify();
 	}
-	SceneChangeNotify();
-}
-void setLightRadii( bool lightRadii ){
-	g_lightRadii = lightRadii;
-}
-bool getLightRadii(){
-	return g_lightRadii;
-}
-void setShowNames( bool showNames ){
-	g_showNames = showNames;
-}
-bool getShowNames(){
-	return g_showNames;
-}
-void setShowBboxes( bool showBboxes ){
-	g_showBboxes = showBboxes;
-}
-bool getShowBboxes(){
-	return g_showBboxes;
-}
-void setShowConnections( bool showConnections ){
-	g_showConnections = showConnections;
-}
-bool getShowConnections(){
-	return g_showConnections;
-}
-void setShowNamesDist( int dist ){
-	g_showNamesDist = dist;
-}
-int getShowNamesDist(){
-	return g_showNamesDist;
-}
-void setShowNamesRatio( int ratio ){
-	g_showNamesRatio = ratio;
-}
-int getShowNamesRatio(){
-	return g_showNamesRatio;
-}
-void setShowTargetNames( bool showNames ){
-	g_showTargetNames = showNames;
-}
-bool getShowTargetNames(){
-	return g_showTargetNames;
-}
-void setShowAngles( bool showAngles ){
-	g_showAngles = showAngles;
-}
-bool getShowAngles(){
-	return g_showAngles;
-}
+	void setLightRadii( bool lightRadii ){
+		g_lightRadii = lightRadii;
+	}
+	bool getLightRadii(){
+		return g_lightRadii;
+	}
+	void setShowNames( bool showNames ){
+		g_showNames = showNames;
+	}
+	bool getShowNames(){
+		return g_showNames;
+	}
+	void setShowBboxes( bool showBboxes ){
+		g_showBboxes = showBboxes;
+	}
+	bool getShowBboxes(){
+		return g_showBboxes;
+	}
+	void setShowConnections( bool showConnections ){
+		g_showConnections = showConnections;
+	}
+	bool getShowConnections(){
+		return g_showConnections;
+	}
+	void setShowNamesDist( int dist ){
+		g_showNamesDist = dist;
+	}
+	int getShowNamesDist(){
+		return g_showNamesDist;
+	}
+	void setShowNamesRatio( int ratio ){
+		g_showNamesRatio = ratio;
+	}
+	int getShowNamesRatio(){
+		return g_showNamesRatio;
+	}
+	void setShowTargetNames( bool showNames ){
+		g_showTargetNames = showNames;
+	}
+	bool getShowTargetNames(){
+		return g_showTargetNames;
+	}
+	void setShowAngles( bool showAngles ){
+		g_showAngles = showAngles;
+	}
+	bool getShowAngles(){
+		return g_showAngles;
+	}
 
-void printStatistics() const {
-	StringPool_analyse( EntityKeyValues::getPool() );
-}
+	void printStatistics() const {
+		StringPool_analyse( EntityKeyValues::getPool() );
+	}
 };
 
 Quake3EntityCreator g_Quake3EntityCreator;
@@ -324,25 +324,25 @@ EntityCreator& GetEntityCreator(){
 
 class filter_entity_classname : public EntityFilter
 {
-const char* m_classname;
+	const char* m_classname;
 public:
-filter_entity_classname( const char* classname ) : m_classname( classname ){
-}
-bool filter( const Entity& entity ) const {
-	return string_equal( entity.getKeyValue( "classname" ), m_classname );
-}
+	filter_entity_classname( const char* classname ) : m_classname( classname ){
+	}
+	bool filter( const Entity& entity ) const {
+		return string_equal( entity.getKeyValue( "classname" ), m_classname );
+	}
 };
 
 class filter_entity_classgroup : public EntityFilter
 {
-const char* m_classgroup;
-std::size_t m_length;
+	const char* m_classgroup;
+	std::size_t m_length;
 public:
-filter_entity_classgroup( const char* classgroup ) : m_classgroup( classgroup ), m_length( string_length( m_classgroup ) ){
-}
-bool filter( const Entity& entity ) const {
-	return string_equal_n( entity.getKeyValue( "classname" ), m_classgroup, m_length );
-}
+	filter_entity_classgroup( const char* classgroup ) : m_classgroup( classgroup ), m_length( string_length( m_classgroup ) ){
+	}
+	bool filter( const Entity& entity ) const {
+		return string_equal_n( entity.getKeyValue( "classname" ), m_classgroup, m_length );
+	}
 };
 
 filter_entity_classname g_filter_entity_func_group( "func_group" );
@@ -354,19 +354,19 @@ filter_entity_classgroup g_filter_entity_path( "path_" );
 class filter_entity_misc_model : public EntityFilter
 {
 public:
-bool filter( const Entity& entity ) const {
-	return entity.getEntityClass().miscmodel_is;
-}
+	bool filter( const Entity& entity ) const {
+		return entity.getEntityClass().miscmodel_is;
+	}
 };
 filter_entity_misc_model g_filter_entity_misc_model;
 
 class filter_entity_doom3model : public EntityFilter
 {
 public:
-bool filter( const Entity& entity ) const {
-	return string_equal( entity.getKeyValue( "classname" ), "func_static" )
-		   && !string_equal( entity.getKeyValue( "model" ), entity.getKeyValue( "name" ) );
-}
+	bool filter( const Entity& entity ) const {
+		return string_equal( entity.getKeyValue( "classname" ), "func_static" )
+		    && !string_equal( entity.getKeyValue( "model" ), entity.getKeyValue( "name" ) );
+	}
 };
 
 filter_entity_doom3model g_filter_entity_doom3model;
@@ -375,10 +375,10 @@ filter_entity_doom3model g_filter_entity_doom3model;
 class filter_entity_not_func_detail : public EntityFilter
 {
 public:
-bool filter( const Entity& entity ) const {
-	return entity.isContainer()
-		   && !string_equal_n( entity.getKeyValue( "classname" ), "func_detail", 11 );
-}
+	bool filter( const Entity& entity ) const {
+		return entity.isContainer()
+		    && !string_equal_n( entity.getKeyValue( "classname" ), "func_detail", 11 );
+	}
 };
 
 filter_entity_not_func_detail g_filter_entity_not_func_detail;
@@ -386,12 +386,12 @@ filter_entity_not_func_detail g_filter_entity_not_func_detail;
 class filter_entity_world : public EntityFilter
 {
 public:
-bool filter( const Entity& entity ) const {
-	const char* value = entity.getKeyValue( "classname" );
-	return string_equal( value, "worldspawn" )
-		   || string_equal( value, "func_group" )
-		   || string_equal_n( value, "func_detail", 11 );
-}
+	bool filter( const Entity& entity ) const {
+		const char* value = entity.getKeyValue( "classname" );
+		return string_equal( value, "worldspawn" )
+		    || string_equal( value, "func_group" )
+		    || string_equal_n( value, "func_detail", 11 );
+	}
 };
 
 filter_entity_world g_filter_entity_world;
@@ -399,11 +399,11 @@ filter_entity_world g_filter_entity_world;
 class filter_entity_point : public EntityFilter
 {
 public:
-bool filter( const Entity& entity ) const {
-	return !entity.isContainer()
-		&& !entity.getEntityClass().miscmodel_is
-		&& !string_equal_prefix( entity.getEntityClass().name(), "light" );
-}
+	bool filter( const Entity& entity ) const {
+		return !entity.isContainer()
+		    && !entity.getEntityClass().miscmodel_is
+		    && !string_equal_prefix( entity.getEntityClass().name(), "light" );
+	}
 };
 
 filter_entity_point g_filter_entity_point;

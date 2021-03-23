@@ -40,52 +40,52 @@ const GLenum RenderIndexTypeID = GL_UNSIGNED_INT;
 /// \brief A resizable buffer of indices.
 class IndexBuffer
 {
-typedef std::vector<RenderIndex> Indices;
-Indices m_data;
+	typedef std::vector<RenderIndex> Indices;
+	Indices m_data;
 public:
-typedef Indices::iterator iterator;
-typedef Indices::const_iterator const_iterator;
+	typedef Indices::iterator iterator;
+	typedef Indices::const_iterator const_iterator;
 
-iterator begin(){
-	return m_data.begin();
-}
-const_iterator begin() const {
-	return m_data.begin();
-}
-iterator end(){
-	return m_data.end();
-}
-const_iterator end() const {
-	return m_data.end();
-}
+	iterator begin(){
+		return m_data.begin();
+	}
+	const_iterator begin() const {
+		return m_data.begin();
+	}
+	iterator end(){
+		return m_data.end();
+	}
+	const_iterator end() const {
+		return m_data.end();
+	}
 
-bool empty() const {
-	return m_data.empty();
-}
-std::size_t size() const {
-	return m_data.size();
-}
-const RenderIndex* data() const {
-	return &( *m_data.begin() );
-}
-RenderIndex& operator[]( std::size_t index ){
-	return m_data[index];
-}
-const RenderIndex& operator[]( std::size_t index ) const {
-	return m_data[index];
-}
-void clear(){
-	m_data.clear();
-}
-void reserve( std::size_t max_indices ){
-	m_data.reserve( max_indices );
-}
-void insert( RenderIndex index ){
-	m_data.push_back( index );
-}
-void swap( IndexBuffer& other ){
-	std::swap( m_data, other.m_data );
-}
+	bool empty() const {
+		return m_data.empty();
+	}
+	std::size_t size() const {
+		return m_data.size();
+	}
+	const RenderIndex* data() const {
+		return &( *m_data.begin() );
+	}
+	RenderIndex& operator[]( std::size_t index ){
+		return m_data[index];
+	}
+	const RenderIndex& operator[]( std::size_t index ) const {
+		return m_data[index];
+	}
+	void clear(){
+		m_data.clear();
+	}
+	void reserve( std::size_t max_indices ){
+		m_data.reserve( max_indices );
+	}
+	void insert( RenderIndex index ){
+		m_data.push_back( index );
+	}
+	void swap( IndexBuffer& other ){
+		std::swap( m_data, other.m_data );
+	}
 };
 
 namespace std
@@ -102,50 +102,50 @@ inline void swap( IndexBuffer& self, IndexBuffer& other ){
 template<typename Vertex>
 class VertexBuffer
 {
-typedef typename std::vector<Vertex> Vertices;
-Vertices m_data;
+	typedef typename std::vector<Vertex> Vertices;
+	Vertices m_data;
 public:
-typedef typename Vertices::iterator iterator;
-typedef typename Vertices::const_iterator const_iterator;
+	typedef typename Vertices::iterator iterator;
+	typedef typename Vertices::const_iterator const_iterator;
 
-iterator begin(){
-	return m_data.begin();
-}
-iterator end(){
-	return m_data.end();
-}
-const_iterator begin() const {
-	return m_data.begin();
-}
-const_iterator end() const {
-	return m_data.end();
-}
+	iterator begin(){
+		return m_data.begin();
+	}
+	iterator end(){
+		return m_data.end();
+	}
+	const_iterator begin() const {
+		return m_data.begin();
+	}
+	const_iterator end() const {
+		return m_data.end();
+	}
 
-bool empty() const {
-	return m_data.empty();
-}
-RenderIndex size() const {
-	return RenderIndex( m_data.size() );
-}
-const Vertex* data() const {
-	return &( *m_data.begin() );
-}
-Vertex& operator[]( std::size_t index ){
-	return m_data[index];
-}
-const Vertex& operator[]( std::size_t index ) const {
-	return m_data[index];
-}
+	bool empty() const {
+		return m_data.empty();
+	}
+	RenderIndex size() const {
+		return RenderIndex( m_data.size() );
+	}
+	const Vertex* data() const {
+		return &( *m_data.begin() );
+	}
+	Vertex& operator[]( std::size_t index ){
+		return m_data[index];
+	}
+	const Vertex& operator[]( std::size_t index ) const {
+		return m_data[index];
+	}
 
-void clear(){
-	m_data.clear();
-}
-void reserve( std::size_t max_vertices ){
-	m_data.reserve( max_vertices );
-}
-void push_back( const Vertex& vertex ){
-	m_data.push_back( vertex );
-}
+	void clear(){
+		m_data.clear();
+	}
+	void reserve( std::size_t max_vertices ){
+		m_data.reserve( max_vertices );
+	}
+	void push_back( const Vertex& vertex ){
+		m_data.push_back( vertex );
+	}
 };
 
 /// \brief A wrapper around a VertexBuffer which inserts only vertices which have not already been inserted.
@@ -154,122 +154,122 @@ void push_back( const Vertex& vertex ){
 template<typename Vertex>
 class UniqueVertexBuffer
 {
-typedef VertexBuffer<Vertex> Vertices;
-Vertices& m_data;
+	typedef VertexBuffer<Vertex> Vertices;
+	Vertices& m_data;
 
-struct bnode
-{
-	bnode()
-		: m_left( 0 ), m_right( 0 ){
-	}
-	RenderIndex m_left;
-	RenderIndex m_right;
-};
-
-std::vector<bnode> m_btree;
-RenderIndex m_prev0;
-RenderIndex m_prev1;
-RenderIndex m_prev2;
-
-RenderIndex find_or_insert( const Vertex& vertex ){
-	RenderIndex index = 0;
-
-	while ( 1 )
+	struct bnode
 	{
-		if ( vertex < m_data[index] ) {
-			bnode& node = m_btree[index];
-			if ( node.m_left != 0 ) {
-				index = node.m_left;
-				continue;
-			}
-			else
-			{
-				node.m_left = RenderIndex( m_btree.size() );
-				m_btree.push_back( bnode() );
-				m_data.push_back( vertex );
-				return RenderIndex( m_btree.size() - 1 );
-			}
+		bnode()
+			: m_left( 0 ), m_right( 0 ){
 		}
-		if ( m_data[index] < vertex ) {
-			bnode& node = m_btree[index];
-			if ( node.m_right != 0 ) {
-				index = node.m_right;
-				continue;
-			}
-			else
-			{
-				node.m_right = RenderIndex( m_btree.size() );
-				m_btree.push_back( bnode() );
-				m_data.push_back( vertex );
-				return RenderIndex( m_btree.size() - 1 );
-			}
-		}
+		RenderIndex m_left;
+		RenderIndex m_right;
+	};
 
-		return index;
+	std::vector<bnode> m_btree;
+	RenderIndex m_prev0;
+	RenderIndex m_prev1;
+	RenderIndex m_prev2;
+
+	RenderIndex find_or_insert( const Vertex& vertex ){
+		RenderIndex index = 0;
+
+		while ( 1 )
+		{
+			if ( vertex < m_data[index] ) {
+				bnode& node = m_btree[index];
+				if ( node.m_left != 0 ) {
+					index = node.m_left;
+					continue;
+				}
+				else
+				{
+					node.m_left = RenderIndex( m_btree.size() );
+					m_btree.push_back( bnode() );
+					m_data.push_back( vertex );
+					return RenderIndex( m_btree.size() - 1 );
+				}
+			}
+			if ( m_data[index] < vertex ) {
+				bnode& node = m_btree[index];
+				if ( node.m_right != 0 ) {
+					index = node.m_right;
+					continue;
+				}
+				else
+				{
+					node.m_right = RenderIndex( m_btree.size() );
+					m_btree.push_back( bnode() );
+					m_data.push_back( vertex );
+					return RenderIndex( m_btree.size() - 1 );
+				}
+			}
+
+			return index;
+		}
 	}
-}
 public:
-UniqueVertexBuffer( Vertices& data )
-	: m_data( data ), m_prev0( 0 ), m_prev1( 0 ), m_prev2( 0 ){
-}
-
-typedef typename Vertices::const_iterator iterator;
-
-iterator begin() const {
-	return m_data.begin();
-}
-iterator end() const {
-	return m_data.end();
-}
-
-std::size_t size() const {
-	return m_data.size();
-}
-const Vertex* data() const {
-	return &( *m_data.begin() );
-}
-Vertex& operator[]( std::size_t index ){
-	return m_data[index];
-}
-const Vertex& operator[]( std::size_t index ) const {
-	return m_data[index];
-}
-
-void clear(){
-	m_prev0 = 0;
-	m_prev1 = 0;
-	m_prev2 = 0;
-	m_data.clear();
-	m_btree.clear();
-}
-void reserve( std::size_t max_vertices ){
-	m_data.reserve( max_vertices );
-	m_btree.reserve( max_vertices );
-}
-/// \brief Returns the index of the element equal to \p vertex.
-RenderIndex insert( const Vertex& vertex ){
-	if ( m_data.empty() ) {
-		m_data.push_back( vertex );
-		m_btree.push_back( bnode() );
-		return 0;
+	UniqueVertexBuffer( Vertices& data )
+		: m_data( data ), m_prev0( 0 ), m_prev1( 0 ), m_prev2( 0 ){
 	}
 
-	if ( m_data[m_prev0] == vertex ) {
+	typedef typename Vertices::const_iterator iterator;
+
+	iterator begin() const {
+		return m_data.begin();
+	}
+	iterator end() const {
+		return m_data.end();
+	}
+
+	std::size_t size() const {
+		return m_data.size();
+	}
+	const Vertex* data() const {
+		return &( *m_data.begin() );
+	}
+	Vertex& operator[]( std::size_t index ){
+		return m_data[index];
+	}
+	const Vertex& operator[]( std::size_t index ) const {
+		return m_data[index];
+	}
+
+	void clear(){
+		m_prev0 = 0;
+		m_prev1 = 0;
+		m_prev2 = 0;
+		m_data.clear();
+		m_btree.clear();
+	}
+	void reserve( std::size_t max_vertices ){
+		m_data.reserve( max_vertices );
+		m_btree.reserve( max_vertices );
+	}
+/// \brief Returns the index of the element equal to \p vertex.
+	RenderIndex insert( const Vertex& vertex ){
+		if ( m_data.empty() ) {
+			m_data.push_back( vertex );
+			m_btree.push_back( bnode() );
+			return 0;
+		}
+
+		if ( m_data[m_prev0] == vertex ) {
+			return m_prev0;
+		}
+		if ( m_prev1 != m_prev0 && m_data[m_prev1] == vertex ) {
+			return m_prev1;
+		}
+		if ( m_prev2 != m_prev0 && m_prev2 != m_prev1 && m_data[m_prev2] == vertex ) {
+			return m_prev2;
+		}
+
+		m_prev2 = m_prev1;
+		m_prev1 = m_prev0;
+		m_prev0 = find_or_insert( vertex );
+
 		return m_prev0;
 	}
-	if ( m_prev1 != m_prev0 && m_data[m_prev1] == vertex ) {
-		return m_prev1;
-	}
-	if ( m_prev2 != m_prev0 && m_prev2 != m_prev1 && m_data[m_prev2] == vertex ) {
-		return m_prev2;
-	}
-
-	m_prev2 = m_prev1;
-	m_prev1 = m_prev0;
-	m_prev0 = find_or_insert( vertex );
-
-	return m_prev0;
-}
 };
 
 
@@ -519,8 +519,8 @@ enum UnitSphereOctant
 /// \brief Returns the octant for \p normal indicating the sign of the region of unit-sphere space it lies within.
 inline UnitSphereOctant normal3f_classify_octant( const Normal3f& normal ){
 	return static_cast<UnitSphereOctant>(
-			   ( ( normal.x() > 0 ) << 0 ) | ( ( normal.y() > 0 ) << 1 ) | ( ( normal.z() > 0 ) << 2 )
-			   );
+	           ( ( normal.x() > 0 ) << 0 ) | ( ( normal.y() > 0 ) << 1 ) | ( ( normal.z() > 0 ) << 2 )
+	       );
 }
 
 /// \brief Returns \p normal with its components signs made positive based on \p octant.
@@ -569,17 +569,17 @@ enum UnitSphereSextant
 /// \p normal must be normalised.
 inline UnitSphereSextant normal3f_classify_sextant( const Normal3f& normal ){
 	return
-		normal.x() >= normal.y()
-		? normal.x() >= normal.z()
-		? normal.y() >= normal.z()
-		? UNITSPHERESEXTANT_XYZ
-		: UNITSPHERESEXTANT_XZY
-		: UNITSPHERESEXTANT_ZXY
-		: normal.y() >= normal.z()
-		? normal.x() >= normal.z()
-		? UNITSPHERESEXTANT_YXZ
-		: UNITSPHERESEXTANT_YZX
-		: UNITSPHERESEXTANT_ZYX;
+	    normal.x() >= normal.y()
+	    ? normal.x() >= normal.z()
+	      ? normal.y() >= normal.z()
+	        ? UNITSPHERESEXTANT_XYZ
+	        : UNITSPHERESEXTANT_XZY
+	      : UNITSPHERESEXTANT_ZXY
+	    : normal.y() >= normal.z()
+	      ? normal.x() >= normal.z()
+	        ? UNITSPHERESEXTANT_YXZ
+	        : UNITSPHERESEXTANT_YZX
+	      : UNITSPHERESEXTANT_ZYX;
 }
 
 /// \brief Returns \p normal with its components sorted so that x > y > z based on \p sextant.
@@ -622,10 +622,10 @@ inline Normal3f normal3f_folded_quantised( const Normal3f& folded ){
 
 	// decompress
 	return normal3f_normalised( Normal3f(
-									static_cast<float>( c_quantise_normal - zbits - ybits ),
-									static_cast<float>( ybits ),
-									static_cast<float>( zbits )
-									) );
+	                                static_cast<float>( c_quantise_normal - zbits - ybits ),
+	                                static_cast<float>( ybits ),
+	                                static_cast<float>( zbits )
+	                            ) );
 }
 
 /// \brief Returns \p normal quantised by compressing and then decompressing its representation.
@@ -676,10 +676,10 @@ inline spherical_t spherical_from_normal3f( const Normal3f& normal ){
 
 inline Normal3f normal3f_from_spherical( const spherical_t& spherical ){
 	return Normal3f(
-			   static_cast<float>( cos( spherical.longditude ) * sin( spherical.latitude ) ),
-			   static_cast<float>( sin( spherical.longditude ) * sin( spherical.latitude ) ),
-			   static_cast<float>( cos( spherical.latitude ) )
-			   );
+	           static_cast<float>( cos( spherical.longditude ) * sin( spherical.latitude ) ),
+	           static_cast<float>( sin( spherical.longditude ) * sin( spherical.latitude ) ),
+	           static_cast<float>( cos( spherical.latitude ) )
+	       );
 }
 
 inline uniformspherical_t uniformspherical_from_spherical( const spherical_t& spherical ){
@@ -851,171 +851,171 @@ inline void pointvertex_gl_array( const PointVertex_t* array ){
 template<typename PointVertex_t>
 class RenderablePointArray : public OpenGLRenderable
 {
-const Array<PointVertex_t>& m_array;
-const GLenum m_mode;
+	const Array<PointVertex_t>& m_array;
+	const GLenum m_mode;
 public:
-RenderablePointArray( const Array<PointVertex_t>& array, GLenum mode )
-	: m_array( array ), m_mode( mode ){
-}
-void render( RenderStateFlags state ) const {
+	RenderablePointArray( const Array<PointVertex_t>& array, GLenum mode )
+		: m_array( array ), m_mode( mode ){
+	}
+	void render( RenderStateFlags state ) const {
 #define NV_DRIVER_BUG 0
 #if NV_DRIVER_BUG
-	glColorPointer( 4, GL_UNSIGNED_BYTE, 0, 0 );
-	glVertexPointer( 3, GL_FLOAT, 0, 0 );
-	glDrawArrays( GL_TRIANGLE_FAN, 0, 0 );
+		glColorPointer( 4, GL_UNSIGNED_BYTE, 0, 0 );
+		glVertexPointer( 3, GL_FLOAT, 0, 0 );
+		glDrawArrays( GL_TRIANGLE_FAN, 0, 0 );
 #endif
-	pointvertex_gl_array( m_array.data() );
-	glDrawArrays( m_mode, 0, GLsizei( m_array.size() ) );
-}
+		pointvertex_gl_array( m_array.data() );
+		glDrawArrays( m_mode, 0, GLsizei( m_array.size() ) );
+	}
 };
 
 class RenderablePointVector : public OpenGLRenderable
 {
-std::vector<PointVertex> m_vector;
-const GLenum m_mode;
+	std::vector<PointVertex> m_vector;
+	const GLenum m_mode;
 public:
-RenderablePointVector( GLenum mode )
-	: m_mode( mode ){
-}
+	RenderablePointVector( GLenum mode )
+		: m_mode( mode ){
+	}
 
-void render( RenderStateFlags state ) const {
-	pointvertex_gl_array( &m_vector.front() );
-	glDrawArrays( m_mode, 0, GLsizei( m_vector.size() ) );
-}
+	void render( RenderStateFlags state ) const {
+		pointvertex_gl_array( &m_vector.front() );
+		glDrawArrays( m_mode, 0, GLsizei( m_vector.size() ) );
+	}
 
-std::size_t size() const {
-	return m_vector.size();
-}
-bool empty() const {
-	return m_vector.empty();
-}
-void clear(){
-	m_vector.clear();
-}
-void reserve( std::size_t size ){
-	m_vector.reserve( size );
-}
-void push_back( const PointVertex& point ){
-	m_vector.push_back( point );
-}
+	std::size_t size() const {
+		return m_vector.size();
+	}
+	bool empty() const {
+		return m_vector.empty();
+	}
+	void clear(){
+		m_vector.clear();
+	}
+	void reserve( std::size_t size ){
+		m_vector.reserve( size );
+	}
+	void push_back( const PointVertex& point ){
+		m_vector.push_back( point );
+	}
 };
 
 
 class RenderableVertexBuffer : public OpenGLRenderable
 {
-const GLenum m_mode;
-const VertexBuffer<PointVertex>& m_vertices;
+	const GLenum m_mode;
+	const VertexBuffer<PointVertex>& m_vertices;
 public:
-RenderableVertexBuffer( GLenum mode, const VertexBuffer<PointVertex>& vertices )
-	: m_mode( mode ), m_vertices( vertices ){
-}
+	RenderableVertexBuffer( GLenum mode, const VertexBuffer<PointVertex>& vertices )
+		: m_mode( mode ), m_vertices( vertices ){
+	}
 
-void render( RenderStateFlags state ) const {
-	pointvertex_gl_array( m_vertices.data() );
-	glDrawArrays( m_mode, 0, m_vertices.size() );
-}
+	void render( RenderStateFlags state ) const {
+		pointvertex_gl_array( m_vertices.data() );
+		glDrawArrays( m_mode, 0, m_vertices.size() );
+	}
 };
 
 class RenderableIndexBuffer : public OpenGLRenderable
 {
-const GLenum m_mode;
-const IndexBuffer& m_indices;
-const VertexBuffer<PointVertex>& m_vertices;
+	const GLenum m_mode;
+	const IndexBuffer& m_indices;
+	const VertexBuffer<PointVertex>& m_vertices;
 public:
-RenderableIndexBuffer( GLenum mode, const IndexBuffer& indices, const VertexBuffer<PointVertex>& vertices )
-	: m_mode( mode ), m_indices( indices ), m_vertices( vertices ){
-}
+	RenderableIndexBuffer( GLenum mode, const IndexBuffer& indices, const VertexBuffer<PointVertex>& vertices )
+		: m_mode( mode ), m_indices( indices ), m_vertices( vertices ){
+	}
 
-void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const {
 #if 1
-	pointvertex_gl_array( m_vertices.data() );
-	glDrawElements( m_mode, GLsizei( m_indices.size() ), RenderIndexTypeID, m_indices.data() );
+		pointvertex_gl_array( m_vertices.data() );
+		glDrawElements( m_mode, GLsizei( m_indices.size() ), RenderIndexTypeID, m_indices.data() );
 #else
-	glBegin( m_mode );
-	if ( state & RENDER_COLOURARRAY != 0 ) {
-		for ( std::size_t i = 0; i < m_indices.size(); ++i )
-		{
-			glColor4ubv( &m_vertices[m_indices[i]].colour.r );
-			glVertex3fv( &m_vertices[m_indices[i]].vertex.x );
+		glBegin( m_mode );
+		if ( state & RENDER_COLOURARRAY != 0 ) {
+			for ( std::size_t i = 0; i < m_indices.size(); ++i )
+			{
+				glColor4ubv( &m_vertices[m_indices[i]].colour.r );
+				glVertex3fv( &m_vertices[m_indices[i]].vertex.x );
+			}
 		}
-	}
-	else
-	{
-		for ( std::size_t i = 0; i < m_indices.size(); ++i )
+		else
 		{
-			glVertex3fv( &m_vertices[m_indices[i]].vertex.x );
+			for ( std::size_t i = 0; i < m_indices.size(); ++i )
+			{
+				glVertex3fv( &m_vertices[m_indices[i]].vertex.x );
+			}
 		}
-	}
-	glEnd();
+		glEnd();
 #endif
-}
+	}
 };
 
 class RenderableDepthTestedPointArray : public OpenGLRenderable
 {
-Array<DepthTestedPointVertex>& m_array;
-const GLenum m_mode;
+	Array<DepthTestedPointVertex>& m_array;
+	const GLenum m_mode;
 public:
-RenderableDepthTestedPointArray( Array<DepthTestedPointVertex>& array, GLenum mode )
-	: m_array( array ), m_mode( mode ){
-}
-void render( RenderStateFlags state ) const {
-	if( state & RENDER_COLOURWRITE ){ // render depending on visibility
-		for( auto& p : m_array ){
-			GLuint sampleCount;
-			glGetQueryObjectuiv( p.query, GL_QUERY_RESULT, &sampleCount );
-			if ( sampleCount == 0 ){
-				p.colour = colour_occluded;
+	RenderableDepthTestedPointArray( Array<DepthTestedPointVertex>& array, GLenum mode )
+		: m_array( array ), m_mode( mode ){
+	}
+	void render( RenderStateFlags state ) const {
+		if( state & RENDER_COLOURWRITE ){ // render depending on visibility
+			for( auto& p : m_array ){
+				GLuint sampleCount;
+				glGetQueryObjectuiv( p.query, GL_QUERY_RESULT, &sampleCount );
+				if ( sampleCount == 0 ){
+					p.colour = colour_occluded;
+				}
+				else{
+					p.colour = colour_vertex;
+				}
 			}
-			else{
-				p.colour = colour_vertex;
+			pointvertex_gl_array( m_array.data() );
+			glDrawArrays( m_mode, 0, GLsizei( m_array.size() ) );
+		}
+		else{ // test visibility
+			for( auto& p : m_array ){
+				if( p.query == 0 )
+					glGenQueries( 1, &p.query );
+				glBeginQuery( GL_SAMPLES_PASSED, p.query );
+				glVertexPointer( 3, GL_FLOAT, 0, &p.vertex );
+				glDrawArrays( m_mode, 0, 1 );
+				glEndQuery( GL_SAMPLES_PASSED );
 			}
 		}
-		pointvertex_gl_array( m_array.data() );
-		glDrawArrays( m_mode, 0, GLsizei( m_array.size() ) );
 	}
-	else{ // test visibility
-		for( auto& p : m_array ){
-			if( p.query == 0 )
-				glGenQueries( 1, &p.query );
-			glBeginQuery( GL_SAMPLES_PASSED, p.query );
-			glVertexPointer( 3, GL_FLOAT, 0, &p.vertex );
-			glDrawArrays( m_mode, 0, 1 );
-			glEndQuery( GL_SAMPLES_PASSED );
-		}
-	}
-}
 };
 
 
 class RemapXYZ
 {
 public:
-static void set( Vertex3f& vertex, float x, float y, float z ){
-	vertex.x() = x;
-	vertex.y() = y;
-	vertex.z() = z;
-}
+	static void set( Vertex3f& vertex, float x, float y, float z ){
+		vertex.x() = x;
+		vertex.y() = y;
+		vertex.z() = z;
+	}
 };
 
 class RemapYZX
 {
 public:
-static void set( Vertex3f& vertex, float x, float y, float z ){
-	vertex.x() = z;
-	vertex.y() = x;
-	vertex.z() = y;
-}
+	static void set( Vertex3f& vertex, float x, float y, float z ){
+		vertex.x() = z;
+		vertex.y() = x;
+		vertex.z() = y;
+	}
 };
 
 class RemapZXY
 {
 public:
-static void set( Vertex3f& vertex, float x, float y, float z ){
-	vertex.x() = y;
-	vertex.y() = z;
-	vertex.z() = x;
-}
+	static void set( Vertex3f& vertex, float x, float y, float z ){
+		vertex.x() = y;
+		vertex.y() = z;
+		vertex.z() = x;
+	}
 };
 
 template<typename remap_policy>
@@ -1061,90 +1061,90 @@ inline void draw_circle( const std::size_t segments, const float radius, PointVe
 #if 0
 class PointVertexArrayIterator
 {
-PointVertex* m_point;
+	PointVertex* m_point;
 public:
-PointVertexArrayIterator( PointVertex* point )
-	: m_point( point ){
-}
-PointVertexArrayIterator& operator++(){
-	++m_point;
-	return *this;
-}
-PointVertexArrayIterator operator++( int ){
-	PointVertexArrayIterator tmp( *this );
-	++m_point;
-	return tmp;
-}
-Vertex3f& operator*(){
-	return m_point.vertex;
-}
-Vertex3f* operator->(){
-	return &( operator*() );
-}
+	PointVertexArrayIterator( PointVertex* point )
+		: m_point( point ){
+	}
+	PointVertexArrayIterator& operator++(){
+		++m_point;
+		return *this;
+	}
+	PointVertexArrayIterator operator++( int ){
+		PointVertexArrayIterator tmp( *this );
+		++m_point;
+		return tmp;
+	}
+	Vertex3f& operator*(){
+		return m_point.vertex;
+	}
+	Vertex3f* operator->(){
+		return &( operator*() );
+	}
 }
 
 template<typename remap_policy, typename iterator_type
-		 inline void draw_circle( const std::size_t segments, const float radius, iterator_type start, remap_policy remap ){
-			 const float increment = c_pi / (double)( segments << 2 );
+inline void draw_circle( const std::size_t segments, const float radius, iterator_type start, remap_policy remap ){
+	const float increment = c_pi / (double)( segments << 2 );
 
-			 std::size_t count = 0;
-			 iterator_type pxpy( start );
-			 iterator_type pypx( pxpy + ( segments << 1 ) );
-			 iterator_type pynx( pxpy + ( segments << 1 ) );
-			 iterator_type nxpy( pypx + ( segments << 1 ) );
-			 iterator_type nxny( pypx + ( segments << 1 ) );
-			 iterator_type nynx( nxpy + ( segments << 1 ) );
-			 iterator_type nypx( nxpy + ( segments << 1 ) );
-			 iterator_type pxny( start );
-			 while ( count < segments )
-			 {
-				 const float theta = increment * count;
-				 const float x = radius * cos( theta );
-				 const float y = radius * sin( theta );
+	std::size_t count = 0;
+	iterator_type pxpy( start );
+	iterator_type pypx( pxpy + ( segments << 1 ) );
+	iterator_type pynx( pxpy + ( segments << 1 ) );
+	iterator_type nxpy( pypx + ( segments << 1 ) );
+	iterator_type nxny( pypx + ( segments << 1 ) );
+	iterator_type nynx( nxpy + ( segments << 1 ) );
+	iterator_type nypx( nxpy + ( segments << 1 ) );
+	iterator_type pxny( start );
+	while ( count < segments )
+	{
+		const float theta = increment * count;
+		const float x = radius * cos( theta );
+		const float y = radius * sin( theta );
 
-				 remap_policy::set( ( *pxpy ), x, y, 0 );
-				 remap_policy::set( ( *pxny ), x,-y, 0 );
-				 remap_policy::set( ( *nxpy ),-x, y, 0 );
-				 remap_policy::set( ( *nxny ),-x,-y, 0 );
+		remap_policy::set( ( *pxpy ), x, y, 0 );
+		remap_policy::set( ( *pxny ), x,-y, 0 );
+		remap_policy::set( ( *nxpy ),-x, y, 0 );
+		remap_policy::set( ( *nxny ),-x,-y, 0 );
 
-				 remap_policy::set( ( *pypx ), y, x, 0 );
-				 remap_policy::set( ( *pynx ), y,-x, 0 );
-				 remap_policy::set( ( *nypx ),-y, x, 0 );
-				 remap_policy::set( ( *nynx ),-y,-x, 0 );
-			 }
-		 }
+		remap_policy::set( ( *pypx ), y, x, 0 );
+		remap_policy::set( ( *pynx ), y,-x, 0 );
+		remap_policy::set( ( *nypx ),-y, x, 0 );
+		remap_policy::set( ( *nynx ),-y,-x, 0 );
+	}
+}
 
-		 template<typename remap_policy, typename iterator_type
-				  inline void draw_semicircle( const std::size_t segments, const float radius, iterator_type start, remap_policy remap )
-				  {
-					  const float increment = c_pi / (double)( segments << 2 );
+template<typename remap_policy, typename iterator_type
+inline void draw_semicircle( const std::size_t segments, const float radius, iterator_type start, remap_policy remap )
+{
+	const float increment = c_pi / (double)( segments << 2 );
 
-					  std::size_t count = 0;
-					  iterator_type pxpy( start );
-					  iterator_type pypx( pxpy + ( segments << 1 ) );
-					  iterator_type pynx( pxpy + ( segments << 1 ) );
-					  iterator_type nxpy( pypx + ( segments << 1 ) );
-					  iterator_type nxny( pypx + ( segments << 1 ) );
-					  iterator_type nynx( nxpy + ( segments << 1 ) );
-					  iterator_type nypx( nxpy + ( segments << 1 ) );
-					  iterator_type pxny( start );
-					  while ( count < segments )
-					  {
-						  const float theta = increment * count;
-						  const float x = radius * cos( theta );
-						  const float y = radius * sin( theta );
+	std::size_t count = 0;
+	iterator_type pxpy( start );
+	iterator_type pypx( pxpy + ( segments << 1 ) );
+	iterator_type pynx( pxpy + ( segments << 1 ) );
+	iterator_type nxpy( pypx + ( segments << 1 ) );
+	iterator_type nxny( pypx + ( segments << 1 ) );
+	iterator_type nynx( nxpy + ( segments << 1 ) );
+	iterator_type nypx( nxpy + ( segments << 1 ) );
+	iterator_type pxny( start );
+	while ( count < segments )
+	{
+		const float theta = increment * count;
+		const float x = radius * cos( theta );
+		const float y = radius * sin( theta );
 
-						  remap_policy::set( ( *pxpy ), x, y, 0 );
-						  remap_policy::set( ( *pxny ), x,-y, 0 );
-						  remap_policy::set( ( *nxpy ),-x, y, 0 );
-						  remap_policy::set( ( *nxny ),-x,-y, 0 );
+		remap_policy::set( ( *pxpy ), x, y, 0 );
+		remap_policy::set( ( *pxny ), x,-y, 0 );
+		remap_policy::set( ( *nxpy ),-x, y, 0 );
+		remap_policy::set( ( *nxny ),-x,-y, 0 );
 
-                          //remap_policy::set((*pypx), y, x, 0);
-                          //remap_policy::set((*pynx), y,-x, 0);
-                          //remap_policy::set((*nypx),-y, x, 0);
-                          //remap_policy::set((*nynx),-y,-x, 0);
-					  }
-				  }
+		//remap_policy::set((*pypx), y, x, 0);
+		//remap_policy::set((*pynx), y,-x, 0);
+		//remap_policy::set((*nypx),-y, x, 0);
+		//remap_policy::set((*nynx),-y,-x, 0);
+	}
+}
 
 
 #endif
@@ -1174,17 +1174,17 @@ inline void ArbitraryMeshTriangle_calcTangents( const ArbitraryMeshVertex& a, co
 	t = Vector3( 0, 0, 0 );
 	{
 		Vector3 cross(
-			vector3_cross(
-				vector3_subtracted(
-					Vector3( b.vertex.x(), b.texcoord.s(), b.texcoord.t() ),
-					Vector3( a.vertex.x(), a.texcoord.s(), a.texcoord.t() )
-					),
-				vector3_subtracted(
-					Vector3( c.vertex.x(), c.texcoord.s(), c.texcoord.t() ),
-					Vector3( a.vertex.x(), a.texcoord.s(), a.texcoord.t() )
-					)
-				)
-			);
+		    vector3_cross(
+		        vector3_subtracted(
+		            Vector3( b.vertex.x(), b.texcoord.s(), b.texcoord.t() ),
+		            Vector3( a.vertex.x(), a.texcoord.s(), a.texcoord.t() )
+		        ),
+		        vector3_subtracted(
+		            Vector3( c.vertex.x(), c.texcoord.s(), c.texcoord.t() ),
+		            Vector3( a.vertex.x(), a.texcoord.s(), a.texcoord.t() )
+		        )
+		    )
+		);
 
 		if ( fabs( cross.x() ) > 0.000001f ) {
 			s.x() = -cross.y() / cross.x();
@@ -1197,17 +1197,17 @@ inline void ArbitraryMeshTriangle_calcTangents( const ArbitraryMeshVertex& a, co
 
 	{
 		Vector3 cross(
-			vector3_cross(
-				vector3_subtracted(
-					Vector3( b.vertex.y(), b.texcoord.s(), b.texcoord.t() ),
-					Vector3( a.vertex.y(), a.texcoord.s(), a.texcoord.t() )
-					),
-				vector3_subtracted(
-					Vector3( c.vertex.y(), c.texcoord.s(), c.texcoord.t() ),
-					Vector3( a.vertex.y(), a.texcoord.s(), a.texcoord.t() )
-					)
-				)
-			);
+		    vector3_cross(
+		        vector3_subtracted(
+		            Vector3( b.vertex.y(), b.texcoord.s(), b.texcoord.t() ),
+		            Vector3( a.vertex.y(), a.texcoord.s(), a.texcoord.t() )
+		        ),
+		        vector3_subtracted(
+		            Vector3( c.vertex.y(), c.texcoord.s(), c.texcoord.t() ),
+		            Vector3( a.vertex.y(), a.texcoord.s(), a.texcoord.t() )
+		        )
+		    )
+		);
 
 		if ( fabs( cross.x() ) > 0.000001f ) {
 			s.y() = -cross.y() / cross.x();
@@ -1220,17 +1220,17 @@ inline void ArbitraryMeshTriangle_calcTangents( const ArbitraryMeshVertex& a, co
 
 	{
 		Vector3 cross(
-			vector3_cross(
-				vector3_subtracted(
-					Vector3( b.vertex.z(), b.texcoord.s(), b.texcoord.t() ),
-					Vector3( a.vertex.z(), a.texcoord.s(), a.texcoord.t() )
-					),
-				vector3_subtracted(
-					Vector3( c.vertex.z(), c.texcoord.s(), c.texcoord.t() ),
-					Vector3( a.vertex.z(), a.texcoord.s(), a.texcoord.t() )
-					)
-				)
-			);
+		    vector3_cross(
+		        vector3_subtracted(
+		            Vector3( b.vertex.z(), b.texcoord.s(), b.texcoord.t() ),
+		            Vector3( a.vertex.z(), a.texcoord.s(), a.texcoord.t() )
+		        ),
+		        vector3_subtracted(
+		            Vector3( c.vertex.z(), c.texcoord.s(), c.texcoord.t() ),
+		            Vector3( a.vertex.z(), a.texcoord.s(), a.texcoord.t() )
+		        )
+		    )
+		);
 
 		if ( fabs( cross.x() ) > 0.000001f ) {
 			s.z() = -cross.y() / cross.x();
@@ -1291,13 +1291,13 @@ public:
 			//so that the result will be properly aligned.
 #if 0
 			const float verts[4][2] = { { screenPos.x(), screenPos.y() },
-										{ screenPos.x(), screenPos.y() + height + .01f },
-										{ screenPos.x() + width + .01f, screenPos.y() + height + .01f },
-										{ screenPos.x() + width + .01f, screenPos.y() } };
+			                            { screenPos.x(), screenPos.y() + height + .01f },
+			                            { screenPos.x() + width + .01f, screenPos.y() + height + .01f },
+			                            { screenPos.x() + width + .01f, screenPos.y() } };
 			const float coords[4][2] = { { subTex / 3.f, 1 },
-										{ subTex / 3.f, 0 },
-										{ ( subTex + 1 ) / 3.f, 0 },
-										{ ( subTex + 1 ) / 3.f, 1 } };
+			                             { subTex / 3.f, 0 },
+			                             { ( subTex + 1 ) / 3.f, 0 },
+			                             { ( subTex + 1 ) / 3.f, 1 } };
 			glVertexPointer( 2, GL_FLOAT, 0, verts );
 			glTexCoordPointer( 2, GL_FLOAT, 0, coords );
 			glDrawArrays( GL_QUADS, 0, 4 );

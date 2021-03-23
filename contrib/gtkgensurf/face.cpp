@@ -41,8 +41,8 @@ void PlaneFromPoints( float *p0, float *p1, float *p2, PLANE *plane ){
 	plane->normal[2] = t1[0] * t2[1] - t1[1] * t2[0];
 
 	length = (vec)( sqrt( plane->normal[0] * plane->normal[0] +
-						  plane->normal[1] * plane->normal[1] +
-						  plane->normal[2] * plane->normal[2]  ) );
+	                      plane->normal[1] * plane->normal[1] +
+	                      plane->normal[2] * plane->normal[2]  ) );
 	if ( length == 0 ) {
 		VectorClear( plane->normal );
 	}
@@ -263,7 +263,7 @@ void ChopWindingInPlace( MY_WINDING **inout, vec3 normal, vec dist, vec epsilon 
 
 		dot = dists[i] / ( dists[i] - dists[i + 1] );
 		for ( j = 0 ; j < 3 ; j++ )
-		{   // avoid round off error when possible
+		{	// avoid round off error when possible
 			if ( normal[j] == 1 ) {
 				mid[j] = dist;
 			}

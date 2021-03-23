@@ -110,8 +110,8 @@ void windingTestInfinity(){
 		if( i == winding.size() ){
 			++windingTestInfinity_OK;
 		}
-		fail:
-			;
+fail:
+		;
 	}
 
 	globalWarningStream() << windingTestInfinity_badNormal << " windingTestInfinity_badNormal\n";
@@ -189,7 +189,7 @@ void Winding_createInfinite( FixedWinding& winding, const Plane3& plane, double 
 	}
 
 	const DoubleVector3 vup0 = ( maxi == 2 )? DoubleVector3( 0, -normal[2], normal[1] )
-									: DoubleVector3( -normal[1], normal[0], 0 );
+	                                        : DoubleVector3( -normal[1], normal[0], 0 );
 	const DoubleVector3 vright0 = vector3_cross( vup0, normal );
 	const DoubleVector3 org = normal * plane.dist();
 

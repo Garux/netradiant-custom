@@ -104,205 +104,205 @@ void Scene_EntitySetKeyValue_Selected_Undoable( const char* key, const char* val
 class EntityAttribute
 {
 public:
-virtual GtkWidget* getWidget() const = 0;
-virtual void update() = 0;
-virtual void release() = 0;
+	virtual GtkWidget* getWidget() const = 0;
+	virtual void update() = 0;
+	virtual void release() = 0;
 };
 
 class BooleanAttribute final : public EntityAttribute
 {
-CopiedString m_key;
-GtkCheckButton* m_check;
+	CopiedString m_key;
+	GtkCheckButton* m_check;
 
-static gboolean toggled( GtkWidget *widget, BooleanAttribute* self ){
-	self->apply();
-	return FALSE;
-}
+	static gboolean toggled( GtkWidget *widget, BooleanAttribute* self ){
+		self->apply();
+		return FALSE;
+	}
 public:
-BooleanAttribute( const char* key ) :
-	m_key( key ),
-	m_check( 0 ){
-	GtkCheckButton* check = GTK_CHECK_BUTTON( gtk_check_button_new() );
-	gtk_widget_show( GTK_WIDGET( check ) );
+	BooleanAttribute( const char* key ) :
+		m_key( key ),
+		m_check( 0 ){
+		GtkCheckButton* check = GTK_CHECK_BUTTON( gtk_check_button_new() );
+		gtk_widget_show( GTK_WIDGET( check ) );
 
-	m_check = check;
+		m_check = check;
 
-	guint handler = g_signal_connect( G_OBJECT( check ), "toggled", G_CALLBACK( toggled ), this );
-	g_object_set_data( G_OBJECT( check ), "handler", gint_to_pointer( handler ) );
+		guint handler = g_signal_connect( G_OBJECT( check ), "toggled", G_CALLBACK( toggled ), this );
+		g_object_set_data( G_OBJECT( check ), "handler", gint_to_pointer( handler ) );
 
-	update();
-}
-GtkWidget* getWidget() const {
-	return GTK_WIDGET( m_check );
-}
-void release(){
-	delete this;
-}
-void apply(){
-	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( m_check ) ) ? "1" : "" );
-}
-typedef MemberCaller<BooleanAttribute, &BooleanAttribute::apply> ApplyCaller;
-
-void update(){
-	const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
-	if ( !string_empty( value ) ) {
-		toggle_button_set_active_no_signal( GTK_TOGGLE_BUTTON( m_check ), atoi( value ) != 0 );
+		update();
 	}
-	else
-	{
-		toggle_button_set_active_no_signal( GTK_TOGGLE_BUTTON( m_check ), false );
+	GtkWidget* getWidget() const {
+		return GTK_WIDGET( m_check );
 	}
-}
-typedef MemberCaller<BooleanAttribute, &BooleanAttribute::update> UpdateCaller;
+	void release(){
+		delete this;
+	}
+	void apply(){
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( m_check ) ) ? "1" : "" );
+	}
+	typedef MemberCaller<BooleanAttribute, &BooleanAttribute::apply> ApplyCaller;
+
+	void update(){
+		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
+		if ( !string_empty( value ) ) {
+			toggle_button_set_active_no_signal( GTK_TOGGLE_BUTTON( m_check ), atoi( value ) != 0 );
+		}
+		else
+		{
+			toggle_button_set_active_no_signal( GTK_TOGGLE_BUTTON( m_check ), false );
+		}
+	}
+	typedef MemberCaller<BooleanAttribute, &BooleanAttribute::update> UpdateCaller;
 };
 
 
 class StringAttribute : public EntityAttribute
 {
-CopiedString m_key;
-GtkEntry* m_entry;
-NonModalEntry m_nonModal;
+	CopiedString m_key;
+	GtkEntry* m_entry;
+	NonModalEntry m_nonModal;
 public:
-StringAttribute( const char* key ) :
-	m_key( key ),
-	m_entry( 0 ),
-	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
-	GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
-	gtk_widget_show( GTK_WIDGET( entry ) );
-	gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
+	StringAttribute( const char* key ) :
+		m_key( key ),
+		m_entry( 0 ),
+		m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
+		GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+		gtk_widget_show( GTK_WIDGET( entry ) );
+		gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
 
-	m_entry = entry;
-	m_nonModal.connect( m_entry );
-}
-virtual ~StringAttribute() = default;
-GtkWidget* getWidget() const {
-	return GTK_WIDGET( m_entry );
-}
-GtkEntry* getEntry() const {
-	return m_entry;
-}
+		m_entry = entry;
+		m_nonModal.connect( m_entry );
+	}
+	virtual ~StringAttribute() = default;
+	GtkWidget* getWidget() const {
+		return GTK_WIDGET( m_entry );
+	}
+	GtkEntry* getEntry() const {
+		return m_entry;
+	}
 
-void release(){
-	delete this;
-}
-void apply(){
-	StringOutputStream value( 64 );
-	value << gtk_entry_get_text( m_entry );
-	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), value.c_str() );
-}
-typedef MemberCaller<StringAttribute, &StringAttribute::apply> ApplyCaller;
+	void release(){
+		delete this;
+	}
+	void apply(){
+		StringOutputStream value( 64 );
+		value << gtk_entry_get_text( m_entry );
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), value.c_str() );
+	}
+	typedef MemberCaller<StringAttribute, &StringAttribute::apply> ApplyCaller;
 
-void update(){
-	StringOutputStream value( 64 );
-	value << SelectedEntity_getValueForKey( m_key.c_str() );
-	gtk_entry_set_text( m_entry, value.c_str() );
-}
-typedef MemberCaller<StringAttribute, &StringAttribute::update> UpdateCaller;
+	void update(){
+		StringOutputStream value( 64 );
+		value << SelectedEntity_getValueForKey( m_key.c_str() );
+		gtk_entry_set_text( m_entry, value.c_str() );
+	}
+	typedef MemberCaller<StringAttribute, &StringAttribute::update> UpdateCaller;
 };
 
 class ShaderAttribute : public StringAttribute
 {
 public:
-ShaderAttribute( const char* key ) : StringAttribute( key ){
-	GlobalShaderEntryCompletion::instance().connect( StringAttribute::getEntry() );
-}
+	ShaderAttribute( const char* key ) : StringAttribute( key ){
+		GlobalShaderEntryCompletion::instance().connect( StringAttribute::getEntry() );
+	}
 };
 
 class TextureAttribute : public StringAttribute
 {
 public:
-TextureAttribute( const char* key ) : StringAttribute( key ){
-	if( string_empty( GlobalRadiant().getGameDescriptionKeyValue( "show_wads" ) ) )
-		GlobalAllShadersEntryCompletion::instance().connect( StringAttribute::getEntry() );	// with textures/
-	else
-		GlobalTextureEntryCompletion::instance().connect( StringAttribute::getEntry() );	// w/o
-}
+	TextureAttribute( const char* key ) : StringAttribute( key ){
+		if( string_empty( GlobalRadiant().getGameDescriptionKeyValue( "show_wads" ) ) )
+			GlobalAllShadersEntryCompletion::instance().connect( StringAttribute::getEntry() );	// with textures/
+		else
+			GlobalTextureEntryCompletion::instance().connect( StringAttribute::getEntry() );	// w/o
+	}
 };
 
 
 class ColorAttribute final : public EntityAttribute
 {
-CopiedString m_key;
-BrowsedPathEntry m_entry;
-NonModalEntry m_nonModal;
+	CopiedString m_key;
+	BrowsedPathEntry m_entry;
+	NonModalEntry m_nonModal;
 public:
-ColorAttribute( const char* key ) :
-	m_key( key ),
-	m_entry( BrowseCaller( *this ) ),
-	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
-	m_nonModal.connect( m_entry.m_entry.m_entry );
-}
-void release(){
-	delete this;
-}
-GtkWidget* getWidget() const {
-	return GTK_WIDGET( m_entry.m_entry.m_frame );
-}
-void apply(){
-	StringOutputStream value( 64 );
-	value << gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) );
-	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), value.c_str() );
-}
-typedef MemberCaller<ColorAttribute, &ColorAttribute::apply> ApplyCaller;
-void update(){
-	StringOutputStream value( 64 );
-	value << SelectedEntity_getValueForKey( m_key.c_str() );
-	gtk_entry_set_text( GTK_ENTRY( m_entry.m_entry.m_entry ), value.c_str() );
-}
-typedef MemberCaller<ColorAttribute, &ColorAttribute::update> UpdateCaller;
-void browse( const BrowsedPathEntry::SetPathCallback& setPath ){ /* hijack BrowsedPathEntry to call colour chooser */
-	Vector3 color( 1, 1, 1 );
-	string_parse_vector3( gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) ), color );
-	if( color_dialog( gtk_widget_get_toplevel( GTK_WIDGET( m_entry.m_entry.m_frame ) ), color ) ){
-		char buffer[64];
-		sprintf( buffer, "%g %g %g", color[0], color[1], color[2] );
-		gtk_entry_set_text( GTK_ENTRY( m_entry.m_entry.m_entry ), buffer );
-		apply();
+	ColorAttribute( const char* key ) :
+		m_key( key ),
+		m_entry( BrowseCaller( *this ) ),
+		m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
+		m_nonModal.connect( m_entry.m_entry.m_entry );
 	}
-}
-typedef MemberCaller1<ColorAttribute, const BrowsedPathEntry::SetPathCallback&, &ColorAttribute::browse> BrowseCaller;
+	void release(){
+		delete this;
+	}
+	GtkWidget* getWidget() const {
+		return GTK_WIDGET( m_entry.m_entry.m_frame );
+	}
+	void apply(){
+		StringOutputStream value( 64 );
+		value << gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) );
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), value.c_str() );
+	}
+	typedef MemberCaller<ColorAttribute, &ColorAttribute::apply> ApplyCaller;
+	void update(){
+		StringOutputStream value( 64 );
+		value << SelectedEntity_getValueForKey( m_key.c_str() );
+		gtk_entry_set_text( GTK_ENTRY( m_entry.m_entry.m_entry ), value.c_str() );
+	}
+	typedef MemberCaller<ColorAttribute, &ColorAttribute::update> UpdateCaller;
+	void browse( const BrowsedPathEntry::SetPathCallback& setPath ){ /* hijack BrowsedPathEntry to call colour chooser */
+		Vector3 color( 1, 1, 1 );
+		string_parse_vector3( gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) ), color );
+		if( color_dialog( gtk_widget_get_toplevel( GTK_WIDGET( m_entry.m_entry.m_frame ) ), color ) ){
+			char buffer[64];
+			sprintf( buffer, "%g %g %g", color[0], color[1], color[2] );
+			gtk_entry_set_text( GTK_ENTRY( m_entry.m_entry.m_entry ), buffer );
+			apply();
+		}
+	}
+	typedef MemberCaller1<ColorAttribute, const BrowsedPathEntry::SetPathCallback&, &ColorAttribute::browse> BrowseCaller;
 };
 
 
 class ModelAttribute final : public EntityAttribute
 {
-CopiedString m_key;
-BrowsedPathEntry m_entry;
-NonModalEntry m_nonModal;
+	CopiedString m_key;
+	BrowsedPathEntry m_entry;
+	NonModalEntry m_nonModal;
 public:
-ModelAttribute( const char* key ) :
-	m_key( key ),
-	m_entry( BrowseCaller( *this ) ),
-	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
-	m_nonModal.connect( m_entry.m_entry.m_entry );
-}
-void release(){
-	delete this;
-}
-GtkWidget* getWidget() const {
-	return GTK_WIDGET( m_entry.m_entry.m_frame );
-}
-void apply(){
-	StringOutputStream value( 64 );
-	value << gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) );
-	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), value.c_str() );
-}
-typedef MemberCaller<ModelAttribute, &ModelAttribute::apply> ApplyCaller;
-void update(){
-	StringOutputStream value( 64 );
-	value << SelectedEntity_getValueForKey( m_key.c_str() );
-	gtk_entry_set_text( GTK_ENTRY( m_entry.m_entry.m_entry ), value.c_str() );
-}
-typedef MemberCaller<ModelAttribute, &ModelAttribute::update> UpdateCaller;
-void browse( const BrowsedPathEntry::SetPathCallback& setPath ){
-	const char *filename = misc_model_dialog( gtk_widget_get_toplevel( GTK_WIDGET( m_entry.m_entry.m_frame ) ), gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) ) );
-
-	if ( filename != 0 ) {
-		setPath( filename );
-		apply();
+	ModelAttribute( const char* key ) :
+		m_key( key ),
+		m_entry( BrowseCaller( *this ) ),
+		m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
+		m_nonModal.connect( m_entry.m_entry.m_entry );
 	}
-}
-typedef MemberCaller1<ModelAttribute, const BrowsedPathEntry::SetPathCallback&, &ModelAttribute::browse> BrowseCaller;
+	void release(){
+		delete this;
+	}
+	GtkWidget* getWidget() const {
+		return GTK_WIDGET( m_entry.m_entry.m_frame );
+	}
+	void apply(){
+		StringOutputStream value( 64 );
+		value << gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) );
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), value.c_str() );
+	}
+	typedef MemberCaller<ModelAttribute, &ModelAttribute::apply> ApplyCaller;
+	void update(){
+		StringOutputStream value( 64 );
+		value << SelectedEntity_getValueForKey( m_key.c_str() );
+		gtk_entry_set_text( GTK_ENTRY( m_entry.m_entry.m_entry ), value.c_str() );
+	}
+	typedef MemberCaller<ModelAttribute, &ModelAttribute::update> UpdateCaller;
+	void browse( const BrowsedPathEntry::SetPathCallback& setPath ){
+		const char *filename = misc_model_dialog( gtk_widget_get_toplevel( GTK_WIDGET( m_entry.m_entry.m_frame ) ), gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) ) );
+
+		if ( filename != 0 ) {
+			setPath( filename );
+			apply();
+		}
+	}
+	typedef MemberCaller1<ModelAttribute, const BrowsedPathEntry::SetPathCallback&, &ModelAttribute::browse> BrowseCaller;
 };
 
 const char* browse_sound( GtkWidget* parent, const char* filepath ){
@@ -336,43 +336,43 @@ const char* browse_sound( GtkWidget* parent, const char* filepath ){
 
 class SoundAttribute final : public EntityAttribute
 {
-CopiedString m_key;
-BrowsedPathEntry m_entry;
-NonModalEntry m_nonModal;
+	CopiedString m_key;
+	BrowsedPathEntry m_entry;
+	NonModalEntry m_nonModal;
 public:
-SoundAttribute( const char* key ) :
-	m_key( key ),
-	m_entry( BrowseCaller( *this ) ),
-	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
-	m_nonModal.connect( m_entry.m_entry.m_entry );
-}
-void release(){
-	delete this;
-}
-GtkWidget* getWidget() const {
-	return GTK_WIDGET( m_entry.m_entry.m_frame );
-}
-void apply(){
-	StringOutputStream value( 64 );
-	value << gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) );
-	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), value.c_str() );
-}
-typedef MemberCaller<SoundAttribute, &SoundAttribute::apply> ApplyCaller;
-void update(){
-	StringOutputStream value( 64 );
-	value << SelectedEntity_getValueForKey( m_key.c_str() );
-	gtk_entry_set_text( GTK_ENTRY( m_entry.m_entry.m_entry ), value.c_str() );
-}
-typedef MemberCaller<SoundAttribute, &SoundAttribute::update> UpdateCaller;
-void browse( const BrowsedPathEntry::SetPathCallback& setPath ){
-	const char *filename = browse_sound( gtk_widget_get_toplevel( GTK_WIDGET( m_entry.m_entry.m_frame ) ), gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) ) );
-
-	if ( filename != 0 ) {
-		setPath( filename );
-		apply();
+	SoundAttribute( const char* key ) :
+		m_key( key ),
+		m_entry( BrowseCaller( *this ) ),
+		m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
+		m_nonModal.connect( m_entry.m_entry.m_entry );
 	}
-}
-typedef MemberCaller1<SoundAttribute, const BrowsedPathEntry::SetPathCallback&, &SoundAttribute::browse> BrowseCaller;
+	void release(){
+		delete this;
+	}
+	GtkWidget* getWidget() const {
+		return GTK_WIDGET( m_entry.m_entry.m_frame );
+	}
+	void apply(){
+		StringOutputStream value( 64 );
+		value << gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) );
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), value.c_str() );
+	}
+	typedef MemberCaller<SoundAttribute, &SoundAttribute::apply> ApplyCaller;
+	void update(){
+		StringOutputStream value( 64 );
+		value << SelectedEntity_getValueForKey( m_key.c_str() );
+		gtk_entry_set_text( GTK_ENTRY( m_entry.m_entry.m_entry ), value.c_str() );
+	}
+	typedef MemberCaller<SoundAttribute, &SoundAttribute::update> UpdateCaller;
+	void browse( const BrowsedPathEntry::SetPathCallback& setPath ){
+		const char *filename = browse_sound( gtk_widget_get_toplevel( GTK_WIDGET( m_entry.m_entry.m_frame ) ), gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) ) );
+
+		if ( filename != 0 ) {
+			setPath( filename );
+			apply();
+		}
+	}
+	typedef MemberCaller1<SoundAttribute, const BrowsedPathEntry::SetPathCallback&, &SoundAttribute::browse> BrowseCaller;
 };
 
 
@@ -401,56 +401,56 @@ public:
 
 class AngleAttribute final : public EntityAttribute
 {
-CopiedString m_key;
-GtkEntry* m_entry;
-NonModalEntry m_nonModal;
-CamAnglesButton m_butt;
-GtkBox* m_hbox;
+	CopiedString m_key;
+	GtkEntry* m_entry;
+	NonModalEntry m_nonModal;
+	CamAnglesButton m_butt;
+	GtkBox* m_hbox;
 public:
-AngleAttribute( const char* key ) :
-	m_key( key ),
-	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ),
-	m_butt( ApplyVecCaller( *this ) ){
-	m_entry = numeric_entry_new();
-	m_nonModal.connect( m_entry );
+	AngleAttribute( const char* key ) :
+		m_key( key ),
+		m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ),
+		m_butt( ApplyVecCaller( *this ) ){
+		m_entry = numeric_entry_new();
+		m_nonModal.connect( m_entry );
 
-	m_hbox = GTK_BOX( gtk_hbox_new( FALSE, 4 ) );
-	gtk_widget_show( GTK_WIDGET( m_hbox ) );
-	gtk_box_pack_start( m_hbox, GTK_WIDGET( m_entry ), TRUE, TRUE, 0 );
-	gtk_box_pack_start( m_hbox, GTK_WIDGET( m_butt.m_button ), FALSE, FALSE, 0 );
-}
-void release(){
-	delete this;
-}
-GtkWidget* getWidget() const {
-	return GTK_WIDGET( m_hbox );
-}
-void apply(){
-	StringOutputStream angle( 32 );
-	angle << angle_normalised( entry_get_float( m_entry ) );
-	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angle.c_str() );
-}
-typedef MemberCaller<AngleAttribute, &AngleAttribute::apply> ApplyCaller;
-
-void update(){
-	const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
-	if ( !string_empty( value ) ) {
+		m_hbox = GTK_BOX( gtk_hbox_new( FALSE, 4 ) );
+		gtk_widget_show( GTK_WIDGET( m_hbox ) );
+		gtk_box_pack_start( m_hbox, GTK_WIDGET( m_entry ), TRUE, TRUE, 0 );
+		gtk_box_pack_start( m_hbox, GTK_WIDGET( m_butt.m_button ), FALSE, FALSE, 0 );
+	}
+	void release(){
+		delete this;
+	}
+	GtkWidget* getWidget() const {
+		return GTK_WIDGET( m_hbox );
+	}
+	void apply(){
 		StringOutputStream angle( 32 );
-		angle << angle_normalised( atof( value ) );
-		gtk_entry_set_text( m_entry, angle.c_str() );
+		angle << angle_normalised( entry_get_float( m_entry ) );
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angle.c_str() );
 	}
-	else
-	{
-		gtk_entry_set_text( m_entry, "0" );
-	}
-}
-typedef MemberCaller<AngleAttribute, &AngleAttribute::update> UpdateCaller;
+	typedef MemberCaller<AngleAttribute, &AngleAttribute::apply> ApplyCaller;
 
-void apply( const Vector3& angles ){
-	entry_set_float( m_entry, angles[1] );
-	apply();
-}
-typedef MemberCaller1<AngleAttribute, const Vector3&, &AngleAttribute::apply> ApplyVecCaller;
+	void update(){
+		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
+		if ( !string_empty( value ) ) {
+			StringOutputStream angle( 32 );
+			angle << angle_normalised( atof( value ) );
+			gtk_entry_set_text( m_entry, angle.c_str() );
+		}
+		else
+		{
+			gtk_entry_set_text( m_entry, "0" );
+		}
+	}
+	typedef MemberCaller<AngleAttribute, &AngleAttribute::update> UpdateCaller;
+
+	void apply( const Vector3& angles ){
+		entry_set_float( m_entry, angles[1] );
+		apply();
+	}
+	typedef MemberCaller1<AngleAttribute, const Vector3&, &AngleAttribute::apply> ApplyVecCaller;
 };
 
 namespace
@@ -461,353 +461,353 @@ const String buttons[] = { "up", "down", "yaw" };
 
 class DirectionAttribute final : public EntityAttribute
 {
-CopiedString m_key;
-GtkEntry* m_entry;
-NonModalEntry m_nonModal;
-RadioHBox m_radio;
-NonModalRadio m_nonModalRadio;
-CamAnglesButton m_butt;
-GtkHBox* m_hbox;
+	CopiedString m_key;
+	GtkEntry* m_entry;
+	NonModalEntry m_nonModal;
+	RadioHBox m_radio;
+	NonModalRadio m_nonModalRadio;
+	CamAnglesButton m_butt;
+	GtkHBox* m_hbox;
 public:
-DirectionAttribute( const char* key ) :
-	m_key( key ),
-	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ),
-	m_radio( RadioHBox_new( STRING_ARRAY_RANGE( buttons ) ) ),
-	m_nonModalRadio( ApplyRadioCaller( *this ) ),
-	m_butt( ApplyVecCaller( *this ) ){
-	m_entry = numeric_entry_new();
-	m_nonModal.connect( m_entry );
+	DirectionAttribute( const char* key ) :
+		m_key( key ),
+		m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ),
+		m_radio( RadioHBox_new( STRING_ARRAY_RANGE( buttons ) ) ),
+		m_nonModalRadio( ApplyRadioCaller( *this ) ),
+		m_butt( ApplyVecCaller( *this ) ){
+		m_entry = numeric_entry_new();
+		m_nonModal.connect( m_entry );
 
-	m_nonModalRadio.connect( m_radio.m_radio );
+		m_nonModalRadio.connect( m_radio.m_radio );
 
-	m_hbox = GTK_HBOX( gtk_hbox_new( FALSE, 4 ) );
-	gtk_widget_show( GTK_WIDGET( m_hbox ) );
+		m_hbox = GTK_HBOX( gtk_hbox_new( FALSE, 4 ) );
+		gtk_widget_show( GTK_WIDGET( m_hbox ) );
 
-	gtk_box_pack_start( GTK_BOX( m_hbox ), GTK_WIDGET( m_radio.m_hbox ), TRUE, TRUE, 0 );
-	gtk_box_pack_start( GTK_BOX( m_hbox ), GTK_WIDGET( m_entry ), TRUE, TRUE, 0 );
-	gtk_box_pack_start( GTK_BOX( m_hbox ), GTK_WIDGET( m_butt.m_button ), FALSE, FALSE, 0 );
-}
-void release(){
-	delete this;
-}
-GtkWidget* getWidget() const {
-	return GTK_WIDGET( m_hbox );
-}
-void apply(){
-	StringOutputStream angle( 32 );
-	angle << angle_normalised( entry_get_float( m_entry ) );
-	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angle.c_str() );
-}
-typedef MemberCaller<DirectionAttribute, &DirectionAttribute::apply> ApplyCaller;
+		gtk_box_pack_start( GTK_BOX( m_hbox ), GTK_WIDGET( m_radio.m_hbox ), TRUE, TRUE, 0 );
+		gtk_box_pack_start( GTK_BOX( m_hbox ), GTK_WIDGET( m_entry ), TRUE, TRUE, 0 );
+		gtk_box_pack_start( GTK_BOX( m_hbox ), GTK_WIDGET( m_butt.m_button ), FALSE, FALSE, 0 );
+	}
+	void release(){
+		delete this;
+	}
+	GtkWidget* getWidget() const {
+		return GTK_WIDGET( m_hbox );
+	}
+	void apply(){
+		StringOutputStream angle( 32 );
+		angle << angle_normalised( entry_get_float( m_entry ) );
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angle.c_str() );
+	}
+	typedef MemberCaller<DirectionAttribute, &DirectionAttribute::apply> ApplyCaller;
 
-void update(){
-	const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
-	if ( !string_empty( value ) ) {
-		float f = float(atof( value ) );
-		if ( f == -1 ) {
-			gtk_widget_set_sensitive( GTK_WIDGET( m_entry ), FALSE );
-			radio_button_set_active_no_signal( m_radio.m_radio, 0 );
-			gtk_entry_set_text( m_entry, "" );
-		}
-		else if ( f == -2 ) {
-			gtk_widget_set_sensitive( GTK_WIDGET( m_entry ), FALSE );
-			radio_button_set_active_no_signal( m_radio.m_radio, 1 );
-			gtk_entry_set_text( m_entry, "" );
+	void update(){
+		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
+		if ( !string_empty( value ) ) {
+			float f = float(atof( value ) );
+			if ( f == -1 ) {
+				gtk_widget_set_sensitive( GTK_WIDGET( m_entry ), FALSE );
+				radio_button_set_active_no_signal( m_radio.m_radio, 0 );
+				gtk_entry_set_text( m_entry, "" );
+			}
+			else if ( f == -2 ) {
+				gtk_widget_set_sensitive( GTK_WIDGET( m_entry ), FALSE );
+				radio_button_set_active_no_signal( m_radio.m_radio, 1 );
+				gtk_entry_set_text( m_entry, "" );
+			}
+			else
+			{
+				gtk_widget_set_sensitive( GTK_WIDGET( m_entry ), TRUE );
+				radio_button_set_active_no_signal( m_radio.m_radio, 2 );
+				StringOutputStream angle( 32 );
+				angle << angle_normalised( f );
+				gtk_entry_set_text( m_entry, angle.c_str() );
+			}
 		}
 		else
 		{
-			gtk_widget_set_sensitive( GTK_WIDGET( m_entry ), TRUE );
 			radio_button_set_active_no_signal( m_radio.m_radio, 2 );
-			StringOutputStream angle( 32 );
-			angle << angle_normalised( f );
-			gtk_entry_set_text( m_entry, angle.c_str() );
+			gtk_entry_set_text( m_entry, "0" );
 		}
 	}
-	else
-	{
-		radio_button_set_active_no_signal( m_radio.m_radio, 2 );
-		gtk_entry_set_text( m_entry, "0" );
-	}
-}
-typedef MemberCaller<DirectionAttribute, &DirectionAttribute::update> UpdateCaller;
+	typedef MemberCaller<DirectionAttribute, &DirectionAttribute::update> UpdateCaller;
 
-void applyRadio(){
-	int index = radio_button_get_active( m_radio.m_radio );
-	if ( index == 0 ) {
-		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), "-1" );
+	void applyRadio(){
+		int index = radio_button_get_active( m_radio.m_radio );
+		if ( index == 0 ) {
+			Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), "-1" );
+		}
+		else if ( index == 1 ) {
+			Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), "-2" );
+		}
+		else if ( index == 2 ) {
+			apply();
+		}
 	}
-	else if ( index == 1 ) {
-		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), "-2" );
-	}
-	else if ( index == 2 ) {
+	typedef MemberCaller<DirectionAttribute, &DirectionAttribute::applyRadio> ApplyRadioCaller;
+
+	void apply( const Vector3& angles ){
+		entry_set_float( m_entry, angles[1] );
 		apply();
 	}
-}
-typedef MemberCaller<DirectionAttribute, &DirectionAttribute::applyRadio> ApplyRadioCaller;
-
-void apply( const Vector3& angles ){
-	entry_set_float( m_entry, angles[1] );
-	apply();
-}
-typedef MemberCaller1<DirectionAttribute, const Vector3&, &DirectionAttribute::apply> ApplyVecCaller;
+	typedef MemberCaller1<DirectionAttribute, const Vector3&, &DirectionAttribute::apply> ApplyVecCaller;
 };
 
 
 class AnglesEntry
 {
 public:
-GtkEntry* m_roll;
-GtkEntry* m_pitch;
-GtkEntry* m_yaw;
-AnglesEntry() : m_roll( 0 ), m_pitch( 0 ), m_yaw( 0 ){
-}
+	GtkEntry* m_roll;
+	GtkEntry* m_pitch;
+	GtkEntry* m_yaw;
+	AnglesEntry() : m_roll( 0 ), m_pitch( 0 ), m_yaw( 0 ){
+	}
 };
 
 class AnglesAttribute final : public EntityAttribute
 {
-CopiedString m_key;
-AnglesEntry m_angles;
-NonModalEntry m_nonModal;
-CamAnglesButton m_butt;
-GtkBox* m_hbox;
+	CopiedString m_key;
+	AnglesEntry m_angles;
+	NonModalEntry m_nonModal;
+	CamAnglesButton m_butt;
+	GtkBox* m_hbox;
 public:
-AnglesAttribute( const char* key ) :
-	m_key( key ),
-	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ),
-	m_butt( ApplyVecCaller( *this ) ){
-	m_hbox = GTK_BOX( gtk_hbox_new( FALSE, 4 ) );
-	gtk_widget_show( GTK_WIDGET( m_hbox ) );
-	{
-		GtkEntry* entry = numeric_entry_new();
-		gtk_box_pack_start( m_hbox, GTK_WIDGET( entry ), TRUE, TRUE, 0 );
-		m_angles.m_pitch = entry;
-		m_nonModal.connect( m_angles.m_pitch );
-	}
-	{
-		GtkEntry* entry = numeric_entry_new();
-		gtk_box_pack_start( m_hbox, GTK_WIDGET( entry ), TRUE, TRUE, 0 );
-		m_angles.m_yaw = entry;
-		m_nonModal.connect( m_angles.m_yaw );
-	}
-	{
-		GtkEntry* entry = numeric_entry_new();
-		gtk_box_pack_start( m_hbox, GTK_WIDGET( entry ), TRUE, TRUE, 0 );
-		m_angles.m_roll = entry;
-		m_nonModal.connect( m_angles.m_roll );
-	}
-	gtk_box_pack_start( m_hbox, GTK_WIDGET( m_butt.m_button ), FALSE, FALSE, 0 );
-}
-void release(){
-	delete this;
-}
-GtkWidget* getWidget() const {
-	return GTK_WIDGET( m_hbox );
-}
-void apply(){
-	StringOutputStream angles( 64 );
-	angles << angle_normalised( entry_get_float( m_angles.m_pitch ) )
-		   << " " << angle_normalised( entry_get_float( m_angles.m_yaw ) )
-		   << " " << angle_normalised( entry_get_float( m_angles.m_roll ) );
-	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angles.c_str() );
-}
-typedef MemberCaller<AnglesAttribute, &AnglesAttribute::apply> ApplyCaller;
-
-void update(){
-	StringOutputStream angle( 32 );
-	const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
-	if ( !string_empty( value ) ) {
-		DoubleVector3 pitch_yaw_roll;
-		if ( !string_parse_vector3( value, pitch_yaw_roll ) ) {
-			pitch_yaw_roll = DoubleVector3( 0, 0, 0 );
+	AnglesAttribute( const char* key ) :
+		m_key( key ),
+		m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ),
+		m_butt( ApplyVecCaller( *this ) ){
+		m_hbox = GTK_BOX( gtk_hbox_new( FALSE, 4 ) );
+		gtk_widget_show( GTK_WIDGET( m_hbox ) );
+		{
+			GtkEntry* entry = numeric_entry_new();
+			gtk_box_pack_start( m_hbox, GTK_WIDGET( entry ), TRUE, TRUE, 0 );
+			m_angles.m_pitch = entry;
+			m_nonModal.connect( m_angles.m_pitch );
 		}
-
-		angle << angle_normalised( pitch_yaw_roll.x() );
-		gtk_entry_set_text( m_angles.m_pitch, angle.c_str() );
-		angle.clear();
-
-		angle << angle_normalised( pitch_yaw_roll.y() );
-		gtk_entry_set_text( m_angles.m_yaw, angle.c_str() );
-		angle.clear();
-
-		angle << angle_normalised( pitch_yaw_roll.z() );
-		gtk_entry_set_text( m_angles.m_roll, angle.c_str() );
-		angle.clear();
+		{
+			GtkEntry* entry = numeric_entry_new();
+			gtk_box_pack_start( m_hbox, GTK_WIDGET( entry ), TRUE, TRUE, 0 );
+			m_angles.m_yaw = entry;
+			m_nonModal.connect( m_angles.m_yaw );
+		}
+		{
+			GtkEntry* entry = numeric_entry_new();
+			gtk_box_pack_start( m_hbox, GTK_WIDGET( entry ), TRUE, TRUE, 0 );
+			m_angles.m_roll = entry;
+			m_nonModal.connect( m_angles.m_roll );
+		}
+		gtk_box_pack_start( m_hbox, GTK_WIDGET( m_butt.m_button ), FALSE, FALSE, 0 );
 	}
-	else
-	{
-		gtk_entry_set_text( m_angles.m_pitch, "0" );
-		gtk_entry_set_text( m_angles.m_yaw, "0" );
-		gtk_entry_set_text( m_angles.m_roll, "0" );
+	void release(){
+		delete this;
 	}
-}
-typedef MemberCaller<AnglesAttribute, &AnglesAttribute::update> UpdateCaller;
+	GtkWidget* getWidget() const {
+		return GTK_WIDGET( m_hbox );
+	}
+	void apply(){
+		StringOutputStream angles( 64 );
+		angles << angle_normalised( entry_get_float( m_angles.m_pitch ) )
+		       << " " << angle_normalised( entry_get_float( m_angles.m_yaw ) )
+		       << " " << angle_normalised( entry_get_float( m_angles.m_roll ) );
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angles.c_str() );
+	}
+	typedef MemberCaller<AnglesAttribute, &AnglesAttribute::apply> ApplyCaller;
 
-void apply( const Vector3& angles ){
-	entry_set_float( m_angles.m_pitch, angles[0] );
-	entry_set_float( m_angles.m_yaw, angles[1] );
-	entry_set_float( m_angles.m_roll, 0 );
-	apply();
-}
-typedef MemberCaller1<AnglesAttribute, const Vector3&, &AnglesAttribute::apply> ApplyVecCaller;
+	void update(){
+		StringOutputStream angle( 32 );
+		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
+		if ( !string_empty( value ) ) {
+			DoubleVector3 pitch_yaw_roll;
+			if ( !string_parse_vector3( value, pitch_yaw_roll ) ) {
+				pitch_yaw_roll = DoubleVector3( 0, 0, 0 );
+			}
+
+			angle << angle_normalised( pitch_yaw_roll.x() );
+			gtk_entry_set_text( m_angles.m_pitch, angle.c_str() );
+			angle.clear();
+
+			angle << angle_normalised( pitch_yaw_roll.y() );
+			gtk_entry_set_text( m_angles.m_yaw, angle.c_str() );
+			angle.clear();
+
+			angle << angle_normalised( pitch_yaw_roll.z() );
+			gtk_entry_set_text( m_angles.m_roll, angle.c_str() );
+			angle.clear();
+		}
+		else
+		{
+			gtk_entry_set_text( m_angles.m_pitch, "0" );
+			gtk_entry_set_text( m_angles.m_yaw, "0" );
+			gtk_entry_set_text( m_angles.m_roll, "0" );
+		}
+	}
+	typedef MemberCaller<AnglesAttribute, &AnglesAttribute::update> UpdateCaller;
+
+	void apply( const Vector3& angles ){
+		entry_set_float( m_angles.m_pitch, angles[0] );
+		entry_set_float( m_angles.m_yaw, angles[1] );
+		entry_set_float( m_angles.m_roll, 0 );
+		apply();
+	}
+	typedef MemberCaller1<AnglesAttribute, const Vector3&, &AnglesAttribute::apply> ApplyVecCaller;
 };
 
 class Vector3Entry
 {
 public:
-GtkEntry* m_x;
-GtkEntry* m_y;
-GtkEntry* m_z;
-Vector3Entry() : m_x( 0 ), m_y( 0 ), m_z( 0 ){
-}
+	GtkEntry* m_x;
+	GtkEntry* m_y;
+	GtkEntry* m_z;
+	Vector3Entry() : m_x( 0 ), m_y( 0 ), m_z( 0 ){
+	}
 };
 
 class Vector3Attribute final : public EntityAttribute
 {
-CopiedString m_key;
-Vector3Entry m_vector3;
-NonModalEntry m_nonModal;
-GtkBox* m_hbox;
+	CopiedString m_key;
+	Vector3Entry m_vector3;
+	NonModalEntry m_nonModal;
+	GtkBox* m_hbox;
 public:
-Vector3Attribute( const char* key ) :
-	m_key( key ),
-	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
-	m_hbox = GTK_BOX( gtk_hbox_new( TRUE, 4 ) );
-	gtk_widget_show( GTK_WIDGET( m_hbox ) );
-	{
-		GtkEntry* entry = numeric_entry_new();
-		gtk_box_pack_start( m_hbox, GTK_WIDGET( entry ), TRUE, TRUE, 0 );
-		m_vector3.m_x = entry;
-		m_nonModal.connect( m_vector3.m_x );
-	}
-	{
-		GtkEntry* entry = numeric_entry_new();
-		gtk_box_pack_start( m_hbox, GTK_WIDGET( entry ), TRUE, TRUE, 0 );
-		m_vector3.m_y = entry;
-		m_nonModal.connect( m_vector3.m_y );
-	}
-	{
-		GtkEntry* entry = numeric_entry_new();
-		gtk_box_pack_start( m_hbox, GTK_WIDGET( entry ), TRUE, TRUE, 0 );
-		m_vector3.m_z = entry;
-		m_nonModal.connect( m_vector3.m_z );
-	}
-}
-void release(){
-	delete this;
-}
-GtkWidget* getWidget() const {
-	return GTK_WIDGET( m_hbox );
-}
-void apply(){
-	StringOutputStream vector3( 64 );
-	vector3 << entry_get_float( m_vector3.m_x )
-			<< " " << entry_get_float( m_vector3.m_y )
-			<< " " << entry_get_float( m_vector3.m_z );
-	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), vector3.c_str() );
-}
-typedef MemberCaller<Vector3Attribute, &Vector3Attribute::apply> ApplyCaller;
-
-void update(){
-	StringOutputStream buffer( 32 );
-	const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
-	if ( !string_empty( value ) ) {
-		DoubleVector3 x_y_z;
-		if ( !string_parse_vector3( value, x_y_z ) ) {
-			x_y_z = DoubleVector3( 0, 0, 0 );
+	Vector3Attribute( const char* key ) :
+		m_key( key ),
+		m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
+		m_hbox = GTK_BOX( gtk_hbox_new( TRUE, 4 ) );
+		gtk_widget_show( GTK_WIDGET( m_hbox ) );
+		{
+			GtkEntry* entry = numeric_entry_new();
+			gtk_box_pack_start( m_hbox, GTK_WIDGET( entry ), TRUE, TRUE, 0 );
+			m_vector3.m_x = entry;
+			m_nonModal.connect( m_vector3.m_x );
 		}
-
-		buffer << x_y_z.x();
-		gtk_entry_set_text( m_vector3.m_x, buffer.c_str() );
-		buffer.clear();
-
-		buffer << x_y_z.y();
-		gtk_entry_set_text( m_vector3.m_y, buffer.c_str() );
-		buffer.clear();
-
-		buffer << x_y_z.z();
-		gtk_entry_set_text( m_vector3.m_z, buffer.c_str() );
-		buffer.clear();
+		{
+			GtkEntry* entry = numeric_entry_new();
+			gtk_box_pack_start( m_hbox, GTK_WIDGET( entry ), TRUE, TRUE, 0 );
+			m_vector3.m_y = entry;
+			m_nonModal.connect( m_vector3.m_y );
+		}
+		{
+			GtkEntry* entry = numeric_entry_new();
+			gtk_box_pack_start( m_hbox, GTK_WIDGET( entry ), TRUE, TRUE, 0 );
+			m_vector3.m_z = entry;
+			m_nonModal.connect( m_vector3.m_z );
+		}
 	}
-	else
-	{
-		gtk_entry_set_text( m_vector3.m_x, "0" );
-		gtk_entry_set_text( m_vector3.m_y, "0" );
-		gtk_entry_set_text( m_vector3.m_z, "0" );
+	void release(){
+		delete this;
 	}
-}
-typedef MemberCaller<Vector3Attribute, &Vector3Attribute::update> UpdateCaller;
+	GtkWidget* getWidget() const {
+		return GTK_WIDGET( m_hbox );
+	}
+	void apply(){
+		StringOutputStream vector3( 64 );
+		vector3 << entry_get_float( m_vector3.m_x )
+		        << " " << entry_get_float( m_vector3.m_y )
+		        << " " << entry_get_float( m_vector3.m_z );
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), vector3.c_str() );
+	}
+	typedef MemberCaller<Vector3Attribute, &Vector3Attribute::apply> ApplyCaller;
+
+	void update(){
+		StringOutputStream buffer( 32 );
+		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
+		if ( !string_empty( value ) ) {
+			DoubleVector3 x_y_z;
+			if ( !string_parse_vector3( value, x_y_z ) ) {
+				x_y_z = DoubleVector3( 0, 0, 0 );
+			}
+
+			buffer << x_y_z.x();
+			gtk_entry_set_text( m_vector3.m_x, buffer.c_str() );
+			buffer.clear();
+
+			buffer << x_y_z.y();
+			gtk_entry_set_text( m_vector3.m_y, buffer.c_str() );
+			buffer.clear();
+
+			buffer << x_y_z.z();
+			gtk_entry_set_text( m_vector3.m_z, buffer.c_str() );
+			buffer.clear();
+		}
+		else
+		{
+			gtk_entry_set_text( m_vector3.m_x, "0" );
+			gtk_entry_set_text( m_vector3.m_y, "0" );
+			gtk_entry_set_text( m_vector3.m_z, "0" );
+		}
+	}
+	typedef MemberCaller<Vector3Attribute, &Vector3Attribute::update> UpdateCaller;
 };
 
 class NonModalComboBox
 {
-Callback m_changed;
-guint m_changedHandler;
+	Callback m_changed;
+	guint m_changedHandler;
 
-static gboolean changed( GtkComboBox *widget, NonModalComboBox* self ){
-	self->m_changed();
-	return FALSE;
-}
+	static gboolean changed( GtkComboBox *widget, NonModalComboBox* self ){
+		self->m_changed();
+		return FALSE;
+	}
 
 public:
-NonModalComboBox( const Callback& changed ) : m_changed( changed ), m_changedHandler( 0 ){
-}
-void connect( GtkComboBox* combo ){
-	m_changedHandler = g_signal_connect( G_OBJECT( combo ), "changed", G_CALLBACK( changed ), this );
-}
-void setActive( GtkComboBox* combo, int value ){
-	g_signal_handler_disconnect( G_OBJECT( combo ), m_changedHandler );
-	gtk_combo_box_set_active( combo, value );
-	connect( combo );
-}
+	NonModalComboBox( const Callback& changed ) : m_changed( changed ), m_changedHandler( 0 ){
+	}
+	void connect( GtkComboBox* combo ){
+		m_changedHandler = g_signal_connect( G_OBJECT( combo ), "changed", G_CALLBACK( changed ), this );
+	}
+	void setActive( GtkComboBox* combo, int value ){
+		g_signal_handler_disconnect( G_OBJECT( combo ), m_changedHandler );
+		gtk_combo_box_set_active( combo, value );
+		connect( combo );
+	}
 };
 
 class ListAttribute final : public EntityAttribute
 {
-CopiedString m_key;
-GtkComboBox* m_combo;
-NonModalComboBox m_nonModal;
-const ListAttributeType& m_type;
+	CopiedString m_key;
+	GtkComboBox* m_combo;
+	NonModalComboBox m_nonModal;
+	const ListAttributeType& m_type;
 public:
-ListAttribute( const char* key, const ListAttributeType& type ) :
-	m_key( key ),
-	m_combo( 0 ),
-	m_nonModal( ApplyCaller( *this ) ),
-	m_type( type ){
-	GtkWidget* combo = gtk_combo_box_text_new();
+	ListAttribute( const char* key, const ListAttributeType& type ) :
+		m_key( key ),
+		m_combo( 0 ),
+		m_nonModal( ApplyCaller( *this ) ),
+		m_type( type ){
+		GtkWidget* combo = gtk_combo_box_text_new();
 
-	for ( ListAttributeType::const_iterator i = type.begin(); i != type.end(); ++i )
-	{
-		gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT( combo ), ( *i ).first.c_str() );
+		for ( ListAttributeType::const_iterator i = type.begin(); i != type.end(); ++i )
+		{
+			gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT( combo ), ( *i ).first.c_str() );
+		}
+
+		gtk_widget_show( combo );
+		m_nonModal.connect( GTK_COMBO_BOX( combo ) );
+
+		m_combo = GTK_COMBO_BOX( combo );
 	}
-
-	gtk_widget_show( combo );
-	m_nonModal.connect( GTK_COMBO_BOX( combo ) );
-
-	m_combo = GTK_COMBO_BOX( combo );
-}
-void release(){
-	delete this;
-}
-GtkWidget* getWidget() const {
-	return GTK_WIDGET( m_combo );
-}
-void apply(){
-	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), m_type[gtk_combo_box_get_active( m_combo )].second.c_str() );
-}
-typedef MemberCaller<ListAttribute, &ListAttribute::apply> ApplyCaller;
-
-void update(){
-	const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
-	ListAttributeType::const_iterator i = m_type.findValue( value );
-	if ( i != m_type.end() ) {
-		m_nonModal.setActive( m_combo, static_cast<int>( std::distance( m_type.begin(), i ) ) );
+	void release(){
+		delete this;
 	}
-	else
-	{
-		m_nonModal.setActive( m_combo, 0 );
+	GtkWidget* getWidget() const {
+		return GTK_WIDGET( m_combo );
 	}
-}
-typedef MemberCaller<ListAttribute, &ListAttribute::update> UpdateCaller;
+	void apply(){
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), m_type[gtk_combo_box_get_active( m_combo )].second.c_str() );
+	}
+	typedef MemberCaller<ListAttribute, &ListAttribute::apply> ApplyCaller;
+
+	void update(){
+		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
+		ListAttributeType::const_iterator i = m_type.findValue( value );
+		if ( i != m_type.end() ) {
+			m_nonModal.setActive( m_combo, static_cast<int>( std::distance( m_type.begin(), i ) ) );
+		}
+		else
+		{
+			m_nonModal.setActive( m_combo, 0 );
+		}
+	}
+	typedef MemberCaller<ListAttribute, &ListAttribute::update> UpdateCaller;
 };
 
 
@@ -861,15 +861,15 @@ void GlobalEntityAttributes_clear(){
 
 class GetKeyValueVisitor : public Entity::Visitor
 {
-KeyValues& m_keyvalues;
+	KeyValues& m_keyvalues;
 public:
-GetKeyValueVisitor( KeyValues& keyvalues )
-	: m_keyvalues( keyvalues ){
-}
+	GetKeyValueVisitor( KeyValues& keyvalues )
+		: m_keyvalues( keyvalues ){
+	}
 
-void visit( const char* key, const char* value ){
-	m_keyvalues.insert( KeyValues::value_type( CopiedString( key ), CopiedString( value ) ) );
-}
+	void visit( const char* key, const char* value ){
+		m_keyvalues.insert( KeyValues::value_type( CopiedString( key ), CopiedString( value ) ) );
+	}
 
 };
 
@@ -889,22 +889,22 @@ void Entity_GetKeyValues( const Entity& entity, KeyValues& keyvalues, KeyValues&
 void Entity_GetKeyValues_Selected( KeyValues& keyvalues, KeyValues& defaultValues ){
 	class EntityGetKeyValues : public SelectionSystem::Visitor
 	{
-	KeyValues& m_keyvalues;
-	KeyValues& m_defaultValues;
-	mutable std::set<Entity*> m_visited;
-public:
-	EntityGetKeyValues( KeyValues& keyvalues, KeyValues& defaultValues )
-		: m_keyvalues( keyvalues ), m_defaultValues( defaultValues ){
-	}
-	void visit( scene::Instance& instance ) const {
-		Entity* entity = Node_getEntity( instance.path().top() );
-		if ( entity == 0 && instance.path().size() != 1 ) {
-			entity = Node_getEntity( instance.path().parent() );
+		KeyValues& m_keyvalues;
+		KeyValues& m_defaultValues;
+		mutable std::set<Entity*> m_visited;
+	public:
+		EntityGetKeyValues( KeyValues& keyvalues, KeyValues& defaultValues )
+			: m_keyvalues( keyvalues ), m_defaultValues( defaultValues ){
 		}
-		if ( entity != 0 && m_visited.insert( entity ).second ) {
-			Entity_GetKeyValues( *entity, m_keyvalues, m_defaultValues );
+		void visit( scene::Instance& instance ) const {
+			Entity* entity = Node_getEntity( instance.path().top() );
+			if ( entity == 0 && instance.path().size() != 1 ) {
+				entity = Node_getEntity( instance.path().parent() );
+			}
+			if ( entity != 0 && m_visited.insert( entity ).second ) {
+				Entity_GetKeyValues( *entity, m_keyvalues, m_defaultValues );
+			}
 		}
-	}
 	} visitor( keyvalues, defaultValues );
 	GlobalSelectionSystem().foreachSelected( visitor );
 }
@@ -919,15 +919,15 @@ const char* keyvalues_valueforkey( KeyValues& keyvalues, const char* key ){
 
 class EntityClassListStoreAppend : public EntityClassVisitor
 {
-GtkListStore* store;
+	GtkListStore* store;
 public:
-EntityClassListStoreAppend( GtkListStore* store_ ) : store( store_ ){
-}
-void visit( EntityClass* e ){
-	GtkTreeIter iter;
-	gtk_list_store_append( store, &iter );
-	gtk_list_store_set( store, &iter, 0, e->name(), 1, e, -1 );
-}
+	EntityClassListStoreAppend( GtkListStore* store_ ) : store( store_ ){
+	}
+	void visit( EntityClass* e ){
+		GtkTreeIter iter;
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, e->name(), 1, e, -1 );
+	}
 };
 
 void EntityClassList_fill(){
@@ -1042,8 +1042,8 @@ void SurfaceFlags_setEntityClass( EntityClass* eclass ){
 			str << LowerCase( eclass->flagnames[spawn_table[i]] );
 
 			gtk_table_attach( g_spawnflagsTable, widget, i % 4, i % 4 + 1, i / 4, i / 4 + 1,
-							  (GtkAttachOptions)( GTK_FILL ),
-							  (GtkAttachOptions)( GTK_FILL ), 0, 0 );
+			                  (GtkAttachOptions)( GTK_FILL ),
+			                  (GtkAttachOptions)( GTK_FILL ), 0, 0 );
 			g_object_unref( G_OBJECT( widget ) );
 
 			gtk_label_set_text( GTK_LABEL( gtk_bin_get_child( GTK_BIN( widget ) ) ), str.c_str() );
@@ -1088,48 +1088,48 @@ template<typename Attribute>
 class StatelessAttributeCreator
 {
 public:
-static EntityAttribute* create( const char* name ){
-	return new Attribute( name );
-}
+	static EntityAttribute* create( const char* name ){
+		return new Attribute( name );
+	}
 };
 
 class EntityAttributeFactory
 {
-typedef EntityAttribute* ( *CreateFunc )( const char* name );
-typedef std::map<const char*, CreateFunc, RawStringLess> Creators;
-Creators m_creators;
+	typedef EntityAttribute* ( *CreateFunc )( const char* name );
+	typedef std::map<const char*, CreateFunc, RawStringLess> Creators;
+	Creators m_creators;
 public:
-EntityAttributeFactory(){
-	m_creators.insert( Creators::value_type( "string", &StatelessAttributeCreator<StringAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "array", &StatelessAttributeCreator<StringAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "integer", &StatelessAttributeCreator<StringAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "boolean", &StatelessAttributeCreator<BooleanAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "real", &StatelessAttributeCreator<StringAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "angle", &StatelessAttributeCreator<AngleAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "direction", &StatelessAttributeCreator<DirectionAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "vector3", &StatelessAttributeCreator<Vector3Attribute>::create ) );
-	m_creators.insert( Creators::value_type( "real3", &StatelessAttributeCreator<Vector3Attribute>::create ) );
-	m_creators.insert( Creators::value_type( "angles", &StatelessAttributeCreator<AnglesAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "color", &StatelessAttributeCreator<ColorAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "target", &StatelessAttributeCreator<StringAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "targetname", &StatelessAttributeCreator<StringAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "sound", &StatelessAttributeCreator<SoundAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "shader", &StatelessAttributeCreator<ShaderAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "texture", &StatelessAttributeCreator<TextureAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "model", &StatelessAttributeCreator<ModelAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "skin", &StatelessAttributeCreator<StringAttribute>::create ) );
-}
-EntityAttribute* create( const char* type, const char* name ){
-	Creators::iterator i = m_creators.find( type );
-	if ( i != m_creators.end() ) {
-		return ( *i ).second( name );
+	EntityAttributeFactory(){
+		m_creators.insert( Creators::value_type( "string", &StatelessAttributeCreator<StringAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "array", &StatelessAttributeCreator<StringAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "integer", &StatelessAttributeCreator<StringAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "boolean", &StatelessAttributeCreator<BooleanAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "real", &StatelessAttributeCreator<StringAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "angle", &StatelessAttributeCreator<AngleAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "direction", &StatelessAttributeCreator<DirectionAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "vector3", &StatelessAttributeCreator<Vector3Attribute>::create ) );
+		m_creators.insert( Creators::value_type( "real3", &StatelessAttributeCreator<Vector3Attribute>::create ) );
+		m_creators.insert( Creators::value_type( "angles", &StatelessAttributeCreator<AnglesAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "color", &StatelessAttributeCreator<ColorAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "target", &StatelessAttributeCreator<StringAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "targetname", &StatelessAttributeCreator<StringAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "sound", &StatelessAttributeCreator<SoundAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "shader", &StatelessAttributeCreator<ShaderAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "texture", &StatelessAttributeCreator<TextureAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "model", &StatelessAttributeCreator<ModelAttribute>::create ) );
+		m_creators.insert( Creators::value_type( "skin", &StatelessAttributeCreator<StringAttribute>::create ) );
 	}
-	const ListAttributeType* listType = GlobalEntityClassManager().findListType( type );
-	if ( listType != 0 ) {
-		return new ListAttribute( name, *listType );
+	EntityAttribute* create( const char* type, const char* name ){
+		Creators::iterator i = m_creators.find( type );
+		if ( i != m_creators.end() ) {
+			return ( *i ).second( name );
+		}
+		const ListAttributeType* listType = GlobalEntityClassManager().findListType( type );
+		if ( listType != 0 ) {
+			return new ListAttribute( name, *listType );
+		}
+		return 0;
 	}
-	return 0;
-}
 };
 
 typedef Static<EntityAttributeFactory> GlobalEntityAttributeFactory;
@@ -1238,13 +1238,13 @@ void EntityInspector_updateKeyValues(){
 
 class EntityInspectorDraw
 {
-IdleDraw m_idleDraw;
+	IdleDraw m_idleDraw;
 public:
-EntityInspectorDraw() : m_idleDraw( FreeCaller<EntityInspector_updateKeyValues>( ) ){
-}
-void queueDraw(){
-	m_idleDraw.queueDraw();
-}
+	EntityInspectorDraw() : m_idleDraw( FreeCaller<EntityInspector_updateKeyValues>( ) ){
+	}
+	void queueDraw(){
+		m_idleDraw.queueDraw();
+	}
 };
 
 EntityInspectorDraw g_EntityInspectorDraw;
@@ -1689,8 +1689,8 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 						GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
 						gtk_widget_show( GTK_WIDGET( entry ) );
 						gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 0, 1,
-										  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
-										  (GtkAttachOptions)( 0 ), 0, 0 );
+						                  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
+						                  (GtkAttachOptions)( 0 ), 0, 0 );
 						gtk_widget_set_events( GTK_WIDGET( entry ), GDK_KEY_PRESS_MASK );
 						g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( EntityEntry_keypress ), 0 );
 						g_entityKeyEntry = entry;
@@ -1700,8 +1700,8 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 						GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
 						gtk_widget_show( GTK_WIDGET( entry ) );
 						gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 1, 2,
-										  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
-										  (GtkAttachOptions)( 0 ), 0, 0 );
+						                  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
+						                  (GtkAttachOptions)( 0 ), 0, 0 );
 						gtk_widget_set_events( GTK_WIDGET( entry ), GDK_KEY_PRESS_MASK );
 						g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( EntityEntry_keypress ), 0 );
 						g_entityValueEntry = entry;
@@ -1711,8 +1711,8 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 						GtkLabel* label = GTK_LABEL( gtk_label_new( "Value" ) );
 						gtk_widget_show( GTK_WIDGET( label ) );
 						gtk_table_attach( table, GTK_WIDGET( label ), 0, 1, 1, 2,
-										  (GtkAttachOptions)( GTK_FILL ),
-										  (GtkAttachOptions)( 0 ), 0, 0 );
+						                  (GtkAttachOptions)( GTK_FILL ),
+						                  (GtkAttachOptions)( 0 ), 0, 0 );
 						gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 					}
 
@@ -1720,16 +1720,16 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 						GtkLabel* label = GTK_LABEL( gtk_label_new( "Key" ) );
 						gtk_widget_show( GTK_WIDGET( label ) );
 						gtk_table_attach( table, GTK_WIDGET( label ), 0, 1, 0, 1,
-										  (GtkAttachOptions)( GTK_FILL ),
-										  (GtkAttachOptions)( 0 ), 0, 0 );
+						                  (GtkAttachOptions)( GTK_FILL ),
+						                  (GtkAttachOptions)( 0 ), 0, 0 );
 						gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 					}
 
 					/* select by key/value buttons */
 					GtkTable* tab = GTK_TABLE( gtk_table_new( 2, 2, FALSE ) );
 					gtk_table_attach( table, GTK_WIDGET( tab ), 2, 3, 0, 2,
-									  (GtkAttachOptions)( GTK_FILL ),
-									  (GtkAttachOptions)( 0 ), 0, 0 );
+					                  (GtkAttachOptions)( GTK_FILL ),
+					                  (GtkAttachOptions)( 0 ), 0, 0 );
 					table = tab;
 					gtk_widget_show( GTK_WIDGET( table ) );
 					gtk_table_set_row_spacings( table, 0 );
@@ -1741,8 +1741,8 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 						gtk_widget_set_tooltip_text( button, "Select by key" );
 						gtk_widget_show( button );
 						gtk_table_attach( table, button, 0, 1, 0, 1,
-										  (GtkAttachOptions)( GTK_FILL ),
-										  (GtkAttachOptions)( 0 ), 0, 0 );
+						                  (GtkAttachOptions)( GTK_FILL ),
+						                  (GtkAttachOptions)( 0 ), 0, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_selectByKey ), 0 );
 					}
 					{
@@ -1752,8 +1752,8 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 						gtk_widget_set_tooltip_text( button, "Select by value" );
 						gtk_widget_show( button );
 						gtk_table_attach( table, button, 0, 1, 1, 2,
-										  (GtkAttachOptions)( GTK_FILL ),
-										  (GtkAttachOptions)( 0 ), 0, 0 );
+						                  (GtkAttachOptions)( GTK_FILL ),
+						                  (GtkAttachOptions)( 0 ), 0, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_selectByValue ), 0 );
 					}
 					{
@@ -1763,8 +1763,8 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 						gtk_widget_set_tooltip_text( button, "Select by key + value" );
 						gtk_widget_show( button );
 						gtk_table_attach( table, button, 1, 2, 0, 2,
-										  (GtkAttachOptions)( GTK_FILL ),
-										  (GtkAttachOptions)( GTK_FILL ), 0, 0 );
+						                  (GtkAttachOptions)( GTK_FILL ),
+						                  (GtkAttachOptions)( GTK_FILL ), 0, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_selectByKeyValue ), 0 );
 					}
 				}
@@ -1875,26 +1875,26 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 
 class EntityInspector : public ModuleObserver
 {
-std::size_t m_unrealised;
+	std::size_t m_unrealised;
 public:
-EntityInspector() : m_unrealised( 1 ){
-}
-void realise(){
-	if ( --m_unrealised == 0 ) {
-		if ( g_entityInspector_windowConstructed ) {
-			//globalOutputStream() << "Entity Inspector: realise\n";
-			EntityClassList_fill();
+	EntityInspector() : m_unrealised( 1 ){
+	}
+	void realise(){
+		if ( --m_unrealised == 0 ) {
+			if ( g_entityInspector_windowConstructed ) {
+				//globalOutputStream() << "Entity Inspector: realise\n";
+				EntityClassList_fill();
+			}
 		}
 	}
-}
-void unrealise(){
-	if ( ++m_unrealised == 1 ) {
-		if ( g_entityInspector_windowConstructed ) {
-			//globalOutputStream() << "Entity Inspector: unrealise\n";
-			EntityClassList_clear();
+	void unrealise(){
+		if ( ++m_unrealised == 1 ) {
+			if ( g_entityInspector_windowConstructed ) {
+				//globalOutputStream() << "Entity Inspector: unrealise\n";
+				EntityClassList_clear();
+			}
 		}
 	}
-}
 };
 
 EntityInspector g_EntityInspector;

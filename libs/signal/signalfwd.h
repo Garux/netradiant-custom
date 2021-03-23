@@ -18,25 +18,25 @@ class Opaque;
 template<typename Type>
 class Handle
 {
-Type* p;
+	Type* p;
 public:
-Handle() : p( 0 ){
-}
-explicit Handle( Type* p ) : p( p ){
-}
-Type* get() const {
-	return p;
-}
-bool isNull() const {
-	return p == 0;
-}
+	Handle() : p( 0 ){
+	}
+	explicit Handle( Type* p ) : p( p ){
+	}
+	Type* get() const {
+		return p;
+	}
+	bool isNull() const {
+		return p == 0;
+	}
 };
 
 template<typename Handler>
 class SignalFwd
 {
 public:
-typedef Handle< Opaque<Handler> > handler_id_type;
+	typedef Handle< Opaque<Handler> > handler_id_type;
 };
 
 typedef SignalFwd<SignalHandler>::handler_id_type SignalHandlerId;

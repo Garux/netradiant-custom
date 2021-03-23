@@ -387,7 +387,7 @@ void SetPortalSphere( vportal_t *p ){
 #define WCONVEX_EPSILON     0.2
 
 static bool Winding_PlanesConcave( const fixedWinding_t *w1, const fixedWinding_t *w2,
-						   const Plane3f& plane1, const Plane3f& plane2 ){
+                                   const Plane3f& plane1, const Plane3f& plane2 ){
 	int i;
 
 	if ( !w1 || !w2 ) {
@@ -428,7 +428,9 @@ static bool TryMergeLeaves( int l1num, int l2num ){
 		if ( k ) {
 			l1 = &leafs[l1num];
 		}
-		else{l1 = &faceleafs[l1num]; }
+		else{
+			l1 = &faceleafs[l1num];
+		}
 		for ( i = 0; i < l1->numportals; i++ )
 		{
 			p1 = l1->portals[i];
@@ -902,7 +904,7 @@ void LoadPortals( char *name ){
 			Error( "LoadPortals: portal %i has too many points", i );
 		}
 		if ( leafnums[0] > portalclusters
-			 || leafnums[1] > portalclusters ) {
+		  || leafnums[1] > portalclusters ) {
 			Error( "LoadPortals: reading portal %i", i );
 		}
 		if ( fscanf( f, "%i ", &flags ) != 1 ) {

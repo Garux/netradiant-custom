@@ -56,9 +56,9 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 
 	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	g_signal_connect( G_OBJECT( window ), "delete_event",
-						G_CALLBACK( dialog_delete_callback ), NULL );
+	                  G_CALLBACK( dialog_delete_callback ), NULL );
 	g_signal_connect( G_OBJECT( window ), "destroy",
-						G_CALLBACK( gtk_widget_destroy ), NULL );
+	                  G_CALLBACK( gtk_widget_destroy ), NULL );
 	gtk_window_set_title( GTK_WINDOW( window ), lpCaption );
 	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
@@ -86,7 +86,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "Ok" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
 		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -96,7 +96,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "Ok" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
 		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -104,7 +104,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "Cancel" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
 		gtk_widget_show( w );
 		ret = IDCANCEL;
 	}
@@ -112,7 +112,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "Yes" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDYES ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDYES ) );
 		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -120,13 +120,13 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "No" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDNO ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDNO ) );
 		gtk_widget_show( w );
 
 		w = gtk_button_new_with_label( "Cancel" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
 		gtk_widget_show( w );
 		ret = IDCANCEL;
 	}
@@ -135,7 +135,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "Yes" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDYES ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDYES ) );
 		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -143,7 +143,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "No" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDNO ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDNO ) );
 		gtk_widget_show( w );
 		ret = IDNO;
 	}
@@ -231,8 +231,8 @@ bool g_bHelp = false;
 bool g_bClosing = false;
 
 const char *PLUGIN_ABOUT = "Texture Tools for Radiant\n\n"
-						   "Gtk port by Leonardo Zide (leo@lokigames.com)\n"
-						   "Original version by Timothee \"TTimo\" Besset (timo@qeradiant.com)";
+                           "Gtk port by Leonardo Zide (leo@lokigames.com)\n"
+                           "Original version by Timothee \"TTimo\" Besset (timo@qeradiant.com)";
 
 extern "C" void* WINAPI QERPlug_GetFuncTable(){
 	return &g_FuncTable;
@@ -340,8 +340,10 @@ void InitTexView( IWindow* hwndDlg ){
 		// we have something selected
 		// setup: compute BBox for the winding ( in ST space )
 		//++timo FIXME: move this in a C2DView member ? used as well for patches
-		g_2DView.m_Mins[0] = +9999.0f; g_2DView.m_Mins[1] = +9999.0f;
-		g_2DView.m_Maxs[0] = -9999.0f; g_2DView.m_Maxs[1] = -9999.0f;
+		g_2DView.m_Mins[0] = +9999.0f;
+		g_2DView.m_Mins[1] = +9999.0f;
+		g_2DView.m_Maxs[0] = -9999.0f;
+		g_2DView.m_Maxs[1] = -9999.0f;
 		for ( i = 0; i < g_pSelectedFaceWinding->numpoints; i++ )
 		{
 			if ( g_pSelectedFaceWinding->points[i][3] < g_2DView.m_Mins[0] ) {
@@ -383,8 +385,10 @@ void InitTexView( IWindow* hwndDlg ){
 		g_bPatch = true;
 		int i,j;
 		// compute BBox for all patch points
-		g_2DView.m_Mins[0] = +9999.0f; g_2DView.m_Mins[1] = +9999.0f;
-		g_2DView.m_Maxs[0] = -9999.0f; g_2DView.m_Maxs[1] = -9999.0f;
+		g_2DView.m_Mins[0] = +9999.0f;
+		g_2DView.m_Mins[1] = +9999.0f;
+		g_2DView.m_Maxs[0] = -9999.0f;
+		g_2DView.m_Maxs[1] = -9999.0f;
 		for ( i = 0; i < g_pPatch->width; i++ )
 		{
 			for ( j = 0; j < g_pPatch->height; j++ )
@@ -523,8 +527,8 @@ static bool CanProcess(){
 		if ( !g_bTexViewReady ) {
 			g_bClosing = true;
 			DoMessageBox( "You must have brush primitives activated in your project settings and\n"
-						  "have a patch or a single face selected to use the TexTool plugin.\n"
-						  "See plugins/TexToolHelp for documentation.", "TexTool plugin", MB_ICONERROR | MB_OK );
+			              "have a patch or a single face selected to use the TexTool plugin.\n"
+			              "See plugins/TexToolHelp for documentation.", "TexTool plugin", MB_ICONERROR | MB_OK );
 			// decref, this will destroy
 			g_pToolWnd->DecRef();
 			g_pToolWnd = NULL;
@@ -547,9 +551,11 @@ static void button_press( GtkWidget *widget, GdkEventButton *event, gpointer dat
 		switch ( event->button )
 		{
 		case 1:
-			g_pManager->OnLButtonDown( event->x, event->y ); break;
+			g_pManager->OnLButtonDown( event->x, event->y );
+			break;
 		case 3:
-			g_2DView.OnRButtonDown( event->x, event->y ); break;
+			g_2DView.OnRButtonDown( event->x, event->y );
+			break;
 		}
 	}
 }
@@ -559,9 +565,11 @@ static void button_release( GtkWidget *widget, GdkEventButton *event, gpointer d
 		switch ( event->button )
 		{
 		case 1:
-			g_pManager->OnLButtonUp( event->x, event->y ); break;
+			g_pManager->OnLButtonUp( event->x, event->y );
+			break;
 		case 3:
-			g_2DView.OnRButtonUp( event->x, event->y ); break;
+			g_2DView.OnRButtonUp( event->x, event->y );
+			break;
 		}
 	}
 }
@@ -640,20 +648,20 @@ static GtkWidget* CreateOpenGLWidget(){
 	g_pToolWidget = g_QglTable.m_pfn_glwidget_new( FALSE, g_QglTable.m_pfn_GetQeglobalsGLWidget() );
 
 	gtk_widget_set_events( g_pToolWidget, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_KEY_PRESS_MASK |
-						   GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK );
+	                       GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK );
 
 	// Connect signal handlers
 	g_signal_connect( G_OBJECT( g_pToolWidget ), "expose_event", G_CALLBACK( expose ), NULL );
 	g_signal_connect( G_OBJECT( g_pToolWidget ), "motion_notify_event",
-						G_CALLBACK( motion ), NULL );
+	                  G_CALLBACK( motion ), NULL );
 	g_signal_connect( G_OBJECT( g_pToolWidget ), "button_press_event",
-						G_CALLBACK( button_press ), NULL );
+	                  G_CALLBACK( button_press ), NULL );
 	g_signal_connect( G_OBJECT( g_pToolWidget ), "button_release_event",
-						G_CALLBACK( button_release ), NULL );
+	                  G_CALLBACK( button_release ), NULL );
 
 	g_signal_connect( G_OBJECT( g_pToolWnd ), "delete_event", G_CALLBACK( close ), NULL );
 	g_signal_connect( G_OBJECT( g_pToolWnd ), "key_press_event",
-						G_CALLBACK( keypress ), NULL );
+	                  G_CALLBACK( keypress ), NULL );
 
 	return g_pToolWidget;
 }
@@ -771,7 +779,7 @@ bool CWindowListener::OnKeyPressed( char *s ){
 }
 
 extern "C" void QERPlug_Dispatch( const char* p, vec3_t vMin, vec3_t vMax, bool bSingleBrush ){
-  #if 0
+#if 0
 	// if it's the first call, perhaps we need some additional init steps
 	if ( !g_bQglInitDone ) {
 		g_QglTable.m_nSize = sizeof( OpenGLBinding );
@@ -788,7 +796,7 @@ extern "C" void QERPlug_Dispatch( const char* p, vec3_t vMin, vec3_t vMax, bool 
 	if ( !g_bSelectedFaceInitDone ) {
 		g_SelectedFaceTable.m_nSize = sizeof( _QERSelectedFaceTable );
 		if ( g_FuncTable.m_pfnRequestInterface( QERSelectedFaceTable_GUID,
-												static_cast<LPVOID>( &g_SelectedFaceTable ) ) ) {
+		                                        static_cast<LPVOID>( &g_SelectedFaceTable ) ) ) {
 			g_bSelectedFaceInitDone = true;
 		}
 		else
@@ -821,7 +829,7 @@ extern "C" void QERPlug_Dispatch( const char* p, vec3_t vMin, vec3_t vMax, bool 
 			return;
 		}
 	}
-  #endif
+#endif
 
 	if ( !strcmp( p, "About..." ) ) {
 		DoMessageBox( PLUGIN_ABOUT, "About ...", MB_OK );
@@ -847,7 +855,7 @@ extern "C" void QERPlug_Dispatch( const char* p, vec3_t vMin, vec3_t vMax, bool 
 	else if ( !strcmp( p, "Help..." ) ) {
 		if ( !g_bHelp ) {
 			DoMessageBox( "Select a brush face (ctrl+shift+left mouse) or a patch, and hit Go...\n"
-						  "See tutorials for more", "TexTool plugin", MB_OK );
+			              "See tutorials for more", "TexTool plugin", MB_OK );
 		}
 		else{
 			DoMessageBox( "Are you kidding me ?", "TexTool plugin", MB_OK );

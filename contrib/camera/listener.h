@@ -27,47 +27,54 @@
 class CListener : public IWindowListener
 {
 public:
-bool OnMouseMove( guint32 nFlags, gdouble x, gdouble y );
-bool OnLButtonDown( guint32 nFlags, gdouble x, gdouble y );
-bool OnMButtonDown( guint32 nFlags, gdouble x, gdouble y );
-bool OnRButtonDown( guint32 nFlags, gdouble x, gdouble y );
-bool OnLButtonUp( guint32 nFlags, gdouble x, gdouble y );
-bool OnMButtonUp( guint32 nFlags, gdouble x, gdouble y );
-bool OnRButtonUp( guint32 nFlags, gdouble x, gdouble y );
-bool OnKeyPressed( char *s ) { return false; }
-bool Paint() { return true; }
-void Close() { }
-
-void UnRegister();
-void Register();
-CListener();
-virtual ~CListener();
-
-void IncRef() { refCount++; }
-void DecRef() {
-	refCount--; if ( refCount <= 0 ) {
-		delete this;
+	bool OnMouseMove( guint32 nFlags, gdouble x, gdouble y );
+	bool OnLButtonDown( guint32 nFlags, gdouble x, gdouble y );
+	bool OnMButtonDown( guint32 nFlags, gdouble x, gdouble y );
+	bool OnRButtonDown( guint32 nFlags, gdouble x, gdouble y );
+	bool OnLButtonUp( guint32 nFlags, gdouble x, gdouble y );
+	bool OnMButtonUp( guint32 nFlags, gdouble x, gdouble y );
+	bool OnRButtonUp( guint32 nFlags, gdouble x, gdouble y );
+	bool OnKeyPressed( char *s ) {
+		return false;
 	}
-}
-
-void SetViewType( VIEWTYPE vt ) {
-	if ( m_vt != vt ) {
-		oldValid = false;
+	bool Paint() {
+		return true;
 	}
-	m_vt = vt;
-}
+	void Close() { }
+
+	void UnRegister();
+	void Register();
+	CListener();
+	virtual ~CListener();
+
+	void IncRef() {
+		refCount++;
+	}
+	void DecRef() {
+		refCount--;
+		if ( refCount <= 0 ) {
+			delete this;
+		}
+	}
+
+	void SetViewType( VIEWTYPE vt ) {
+		if ( m_vt != vt ) {
+			oldValid = false;
+		}
+		m_vt = vt;
+	}
 
 private:
-IXYWndWrapper *g_pXYWndWrapper;
+	IXYWndWrapper *g_pXYWndWrapper;
 
-bool m_bHooked;
-int refCount;
-VIEWTYPE m_vt;
+	bool m_bHooked;
+	int refCount;
+	VIEWTYPE m_vt;
 
 // mouse button status
-bool m_bLeftMBPressed, m_bRightMBPressed, m_bMiddleMBPressed;
+	bool m_bLeftMBPressed, m_bRightMBPressed, m_bMiddleMBPressed;
 
 // old mouse coordinates
-bool oldValid;
-gdouble old_x, old_y;
+	bool oldValid;
+	gdouble old_x, old_y;
 };

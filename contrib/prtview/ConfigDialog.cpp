@@ -55,8 +55,9 @@ static gint dialog_delete_callback( GtkWidget *widget, GdkEvent* event, gpointer
 static int DoColor( PackedColour *c ){
 	GtkWidget* dlg;
 	GdkColor clr = { 0, guint16( GetRValue( *c ) * ( 65535 / 255 ) ),
-						guint16( GetGValue( *c ) * ( 65535 / 255 ) ),
-						guint16( GetBValue( *c ) * ( 65535 / 255 ) ) };
+	                    guint16( GetGValue( *c ) * ( 65535 / 255 ) ),
+	                    guint16( GetBValue( *c ) * ( 65535 / 255 ) )
+	               };
 	int loop = 1, ret = IDCANCEL;
 
 	dlg = gtk_color_selection_dialog_new( "Choose Color" );
@@ -250,9 +251,9 @@ void DoConfigDialog(){
 	gtk_window_set_modal( GTK_WINDOW( dlg ), TRUE );
 	gtk_window_set_title( GTK_WINDOW( dlg ), "Portal Viewer Configuration" );
 	g_signal_connect( G_OBJECT( dlg ), "delete_event",
-						G_CALLBACK( dialog_delete_callback ), NULL );
+	                  G_CALLBACK( dialog_delete_callback ), NULL );
 	g_signal_connect( G_OBJECT( dlg ), "destroy",
-						G_CALLBACK( gtk_widget_destroy ), NULL );
+	                  G_CALLBACK( gtk_widget_destroy ), NULL );
 	g_object_set_data( G_OBJECT( dlg ), "loop", &loop );
 	g_object_set_data( G_OBJECT( dlg ), "ret", &ret );
 
@@ -294,43 +295,43 @@ void DoConfigDialog(){
 	button = gtk_button_new_with_label( "Color" );
 	gtk_widget_show( button );
 	gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnColor3d ), NULL );
 
 	button = gtk_button_new_with_label( "Depth Color" );
 	gtk_widget_show( button );
 	gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnColorFog ), NULL );
 
 	aa3check = gtk_check_button_new_with_label( "Anti-Alias (May not work on some video cards)" );
 	gtk_widget_show( aa3check );
 	gtk_table_attach( GTK_TABLE( table ), aa3check, 1, 4, 0, 1,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	g_signal_connect( G_OBJECT( aa3check ), "toggled", G_CALLBACK( OnAntiAlias3d ), NULL );
 
 	depthcheck = gtk_check_button_new_with_label( "Depth Cue" );
 	gtk_widget_show( depthcheck );
 	gtk_table_attach( GTK_TABLE( table ), depthcheck, 1, 2, 1, 2,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	g_signal_connect( G_OBJECT( depthcheck ), "toggled", G_CALLBACK( OnFog ), NULL );
 
 	linescheck = gtk_check_button_new_with_label( "Lines" );
 	gtk_widget_show( linescheck );
 	gtk_table_attach( GTK_TABLE( table ), linescheck, 2, 3, 1, 2,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	g_signal_connect( G_OBJECT( linescheck ), "toggled", G_CALLBACK( OnLines ), NULL );
 
 	polyscheck = gtk_check_button_new_with_label( "Polygons" );
 	gtk_widget_show( polyscheck );
 	gtk_table_attach( GTK_TABLE( table ), polyscheck, 3, 4, 1, 2,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	g_signal_connect( G_OBJECT( polyscheck ), "toggled", G_CALLBACK( OnPoly ), NULL );
 
 	zlist = gtk_combo_box_text_new();
@@ -353,15 +354,15 @@ void DoConfigDialog(){
 	transslider = gtk_hscale_new( GTK_ADJUSTMENT( adj ) );
 	gtk_widget_show( transslider );
 	gtk_table_attach( GTK_TABLE( table ), transslider, 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_scale_set_draw_value( GTK_SCALE( transslider ), FALSE );
 
 	translabel = gtk_label_new( "" );
 	gtk_widget_show( translabel );
 	gtk_table_attach( GTK_TABLE( table ), translabel, 1, 2, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_misc_set_alignment( GTK_MISC( translabel ), 0.0, 0.0 );
 	g_signal_connect( adj, "value_changed", G_CALLBACK( OnScrollTrans ), translabel );
 
@@ -369,15 +370,15 @@ void DoConfigDialog(){
 	clipslider = gtk_hscale_new( GTK_ADJUSTMENT( adj ) );
 	gtk_widget_show( clipslider );
 	gtk_table_attach( GTK_TABLE( table ), clipslider, 0, 1, 1, 2,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_scale_set_draw_value( GTK_SCALE( clipslider ), FALSE );
 
 	cliplabel = gtk_label_new( "" );
 	gtk_widget_show( cliplabel );
 	gtk_table_attach( GTK_TABLE( table ), cliplabel, 1, 2, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_misc_set_alignment( GTK_MISC( cliplabel ), 0.0, 0.0 );
 	g_signal_connect( adj, "value_changed", G_CALLBACK( OnScrollClip ), cliplabel );
 
@@ -451,7 +452,7 @@ void DoConfigDialog(){
 	gtk_widget_show( button );
 	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
-						G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
+	                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
 	gtk_widget_set_size_request( button, 60, -1 );
 
 	// initialize dialog

@@ -192,16 +192,16 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 		for ( i = 0 ; i < numthreads ; i++ )
 		{
 			threadhandle[i] = CreateThread(
-				NULL,                         // LPSECURITY_ATTRIBUTES  lpThreadAttributes,
-				//0,                          // SIZE_T                 dwStackSize,
+			                      NULL,                         // LPSECURITY_ATTRIBUTES  lpThreadAttributes,
+			                      //0,                          // SIZE_T                 dwStackSize,
 
-				/* ydnar: cranking stack size to eliminate radiosity crash with 1MB stack on win32 */
-				( 4096 * 1024 ),
+			                      /* ydnar: cranking stack size to eliminate radiosity crash with 1MB stack on win32 */
+			                      ( 4096 * 1024 ),
 
-				(LPTHREAD_START_ROUTINE)func, // LPTHREAD_START_ROUTINE lpStartAddress,
-				(LPVOID)i,                    // LPVOID                 lpParameter,
-				0,                            // DWORD                  dwCreationFlags,
-				NULL );                       // LPDWORD                lpThreadId
+			                      (LPTHREAD_START_ROUTINE)func, // LPTHREAD_START_ROUTINE lpStartAddress,
+			                      (LPVOID)i,                    // LPVOID                 lpParameter,
+			                      0,                            // DWORD                  dwCreationFlags,
+			                      NULL );                       // LPDWORD                lpThreadId
 		}
 
 		for ( i = 0 ; i < numthreads ; i++ )
@@ -303,7 +303,7 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	for ( i = 0 ; i < numthreads ; i++ )
 	{
 		if ( pthread_create( &work_threads[i], attrib
-							 , (pthread_startroutine_t)func, (pthread_addr_t)i ) == -1 ) {
+		                     , (pthread_startroutine_t)func, (pthread_addr_t)i ) == -1 ) {
 			Error( "pthread_create failed" );
 		}
 	}
@@ -390,7 +390,7 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	for ( i = 0 ; i < numthreads - 1 ; i++ )
 	{
 		pid[i] = sprocsp( ( void ( * )( void *, size_t ) )func, PR_SALL, (void *)i
-						  , NULL, 0x200000 ); // 2 meg stacks
+		                  , NULL, 0x200000 ); // 2 meg stacks
 		if ( pid[i] == -1 ) {
 			perror( "sproc" );
 			Error( "sproc failed" );

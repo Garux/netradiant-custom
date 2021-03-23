@@ -226,12 +226,12 @@ static void jpeg_buffer_src( j_decompress_ptr cinfo, void* buffer, int bufsize )
 	 */
 	if ( cinfo->src == NULL ) { /* first time for this JPEG object? */
 		cinfo->src = (struct jpeg_source_mgr *)
-					 ( *cinfo->mem->alloc_small )( (j_common_ptr) cinfo, JPOOL_PERMANENT,
-												   sizeof( my_source_mgr ) );
+		             ( *cinfo->mem->alloc_small )( (j_common_ptr) cinfo, JPOOL_PERMANENT,
+		                                           sizeof( my_source_mgr ) );
 		src = (my_src_ptr) cinfo->src;
 		src->buffer = (JOCTET *)
-					  ( *cinfo->mem->alloc_small )( (j_common_ptr) cinfo, JPOOL_PERMANENT,
-													INPUT_BUF_SIZE * sizeof( JOCTET ) );
+		              ( *cinfo->mem->alloc_small )( (j_common_ptr) cinfo, JPOOL_PERMANENT,
+		                                            INPUT_BUF_SIZE * sizeof( JOCTET ) );
 	}
 
 	src = (my_src_ptr) cinfo->src;

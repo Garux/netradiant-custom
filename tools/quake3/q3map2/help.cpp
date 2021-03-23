@@ -63,7 +63,7 @@ void HelpOptions(const char* group_name, int indentation, int width, struct Help
 				printf("%s%26c",indent,' ');
 			int fragment = width - printed;
 			while ( fragment > 0 && options[i].description[j+fragment-1] != ' ')
-					fragment--;
+				fragment--;
 			j += fwrite(options[i].description+j, sizeof(char), fragment, stdout);
 			putchar('\n');
 			printed = indentation+26;

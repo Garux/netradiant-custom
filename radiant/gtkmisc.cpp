@@ -106,8 +106,8 @@ GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const ch
 bool color_dialog( GtkWidget *parent, Vector3& color, const char* title ){
 	GtkWidget* dlg;
 	GdkColor clr = { 0, guint16( color[0] * 65535 ),
-						guint16( color[1] * 65535 ),
-						guint16( color[2] * 65535 ) };
+	                    guint16( color[1] * 65535 ),
+	                    guint16( color[2] * 65535 ) };
 	ModalDialog dialog;
 
 	dlg = gtk_color_selection_dialog_new( title );

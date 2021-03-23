@@ -28,19 +28,19 @@
 class IToolbarButton
 {
 public:
-enum EType
-{
-	eSpace,
-	eButton,
-	eToggleButton,
-	eRadioButton,
-};
+	enum EType
+	{
+		eSpace,
+		eButton,
+		eToggleButton,
+		eRadioButton,
+	};
 
-virtual const char* getImage() const = 0;
-virtual const char* getText() const = 0;
-virtual const char* getTooltip() const = 0;
-virtual EType getType() const = 0;
-virtual void activate() const = 0;
+	virtual const char* getImage() const = 0;
+	virtual const char* getText() const = 0;
+	virtual const char* getTooltip() const = 0;
+	virtual EType getType() const = 0;
+	virtual void activate() const = 0;
 };
 
 typedef std::size_t ( *PFN_TOOLBARBUTTONCOUNT )();

@@ -71,9 +71,9 @@ int DoLoadPortalFileDialog(){
 	gtk_window_set_modal( GTK_WINDOW( dlg ), TRUE );
 	gtk_window_set_title( GTK_WINDOW( dlg ), "Load .prt" );
 	g_signal_connect( G_OBJECT( dlg ), "delete_event",
-						G_CALLBACK( dialog_delete_callback ), NULL );
+	                  G_CALLBACK( dialog_delete_callback ), NULL );
 	g_signal_connect( G_OBJECT( dlg ), "destroy",
-						G_CALLBACK( gtk_widget_destroy ), NULL );
+	                  G_CALLBACK( gtk_widget_destroy ), NULL );
 	g_object_set_data( G_OBJECT( dlg ), "loop", &loop );
 	g_object_set_data( G_OBJECT( dlg ), "ret", &ret );
 
@@ -113,14 +113,14 @@ int DoLoadPortalFileDialog(){
 	gtk_widget_show( button );
 	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
-						G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
+	                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
 	gtk_widget_set_size_request( button, 60, -1 );
 
 	button = gtk_button_new_with_label( "OK" );
 	gtk_widget_show( button );
 	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
-						G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
+	                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
 	gtk_widget_set_size_request( button, 60, -1 );
 
 	strcpy( portals.fn, GlobalRadiant().getMapName() );

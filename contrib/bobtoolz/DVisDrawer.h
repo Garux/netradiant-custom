@@ -57,25 +57,25 @@ typedef std::list<DMetaSurf*> DMetaSurfaces;
 
 class DVisDrawer : public Renderable, public OpenGLRenderable
 {
-Shader* m_shader_solid;
-Shader* m_shader_wireframe;
+	Shader* m_shader_solid;
+	Shader* m_shader_wireframe;
 public:
-DVisDrawer();
-virtual ~DVisDrawer();
+	DVisDrawer();
+	virtual ~DVisDrawer();
 
 protected:
-DMetaSurfaces* m_list;
-int refCount;
+	DMetaSurfaces* m_list;
+	int refCount;
 public:
-void ClearPoints();
-void SetList( DMetaSurfaces* pointList );
+	void ClearPoints();
+	void SetList( DMetaSurfaces* pointList );
 
-void render( RenderStateFlags state ) const;
-void renderSolid( Renderer& renderer, const VolumeTest& volume ) const;
-void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const;
+	void render( RenderStateFlags state ) const;
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const;
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const;
 
-void constructShaders();
-void destroyShaders();
+	void constructShaders();
+	void destroyShaders();
 
 };
 

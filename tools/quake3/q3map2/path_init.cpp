@@ -203,12 +203,12 @@ game_t *GetGame( char *arg ){
 
 	/* joke */
 	if ( striEqual( arg, "quake1" ) ||
-		 striEqual( arg, "quake2" ) ||
-		 striEqual( arg, "unreal" ) ||
-		 striEqual( arg, "ut2k3" ) ||
-		 striEqual( arg, "dn3d" ) ||
-		 striEqual( arg, "dnf" ) ||
-		 striEqual( arg, "hl" ) ) {
+	     striEqual( arg, "quake2" ) ||
+	     striEqual( arg, "unreal" ) ||
+	     striEqual( arg, "ut2k3" ) ||
+	     striEqual( arg, "dn3d" ) ||
+	     striEqual( arg, "dnf" ) ||
+	     striEqual( arg, "hl" ) ) {
 		Sys_Printf( "April fools, silly rabbit!\n" );
 		exit( 0 );
 	}

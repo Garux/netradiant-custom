@@ -156,9 +156,9 @@ inline Vector3 CubicBezier_evaluate( const Vector3* firstPoint, double t ){
 
 inline Vector3 CubicBezier_evaluateMid( const Vector3* firstPoint ){
 	return vector3_scaled( firstPoint[0], 0.125 )
-		   + vector3_scaled( firstPoint[1], 0.375 )
-		   + vector3_scaled( firstPoint[2], 0.375 )
-		   + vector3_scaled( firstPoint[3], 0.125 );
+	     + vector3_scaled( firstPoint[1], 0.375 )
+	     + vector3_scaled( firstPoint[2], 0.375 )
+	     + vector3_scaled( firstPoint[3], 0.125 );
 }
 
 inline Vector3 CatmullRom_evaluate( const ControlPoints& controlPoints, double t ){
@@ -181,11 +181,11 @@ inline Vector3 CatmullRom_evaluate( const ControlPoints& controlPoints, double t
 	Vector3 bezierPoints[4];
 	bezierPoints[0] = controlPoints[segment];
 	bezierPoints[1] = ( segment > 0 )
-					  ? controlPoints[segment] + vector3_scaled( controlPoints[segment + 1] - controlPoints[segment - 1], reciprocal_alpha * 0.5 )
-					  : controlPoints[segment] + vector3_scaled( controlPoints[segment + 1] - controlPoints[segment], reciprocal_alpha );
+	                  ? controlPoints[segment] + vector3_scaled( controlPoints[segment + 1] - controlPoints[segment - 1], reciprocal_alpha * 0.5 )
+	                  : controlPoints[segment] + vector3_scaled( controlPoints[segment + 1] - controlPoints[segment], reciprocal_alpha );
 	bezierPoints[2] = ( segment < controlPoints.size() - 2 )
-					  ? controlPoints[segment + 1] + vector3_scaled( controlPoints[segment] - controlPoints[segment + 2], reciprocal_alpha * 0.5 )
-					  : controlPoints[segment + 1] + vector3_scaled( controlPoints[segment] - controlPoints[segment + 1], reciprocal_alpha );
+	                  ? controlPoints[segment + 1] + vector3_scaled( controlPoints[segment] - controlPoints[segment + 2], reciprocal_alpha * 0.5 )
+	                  : controlPoints[segment + 1] + vector3_scaled( controlPoints[segment] - controlPoints[segment + 1], reciprocal_alpha );
 	bezierPoints[3] = controlPoints[segment + 1];
 	return CubicBezier_evaluate( bezierPoints, t );
 }
@@ -195,8 +195,8 @@ typedef Array<float> Knots;
 inline double BSpline_basis( const Knots& knots, std::size_t i, std::size_t degree, double t ){
 	if ( degree == 0 ) {
 		if ( knots[i] <= t
-			 && t < knots[i + 1]
-			 && knots[i] < knots[i + 1] ) {
+		  && t < knots[i + 1]
+		  && knots[i] < knots[i + 1] ) {
 			return 1;
 		}
 		return 0;

@@ -204,28 +204,28 @@ void StartBSP(){
 
 class EntityWriteMiniPrt
 {
-mutable DEntity world;
-FILE* pFile;
-std::list<Str>* exclusionList;
+	mutable DEntity world;
+	FILE* pFile;
+	std::list<Str>* exclusionList;
 public:
-EntityWriteMiniPrt( FILE* pFile, std::list<Str>* exclusionList )
-	: pFile( pFile ), exclusionList( exclusionList ){
-}
-void operator()( scene::Instance& instance ) const {
-	const char* classname = Node_getEntity( instance.path().top() )->getKeyValue( "classname" );
+	EntityWriteMiniPrt( FILE* pFile, std::list<Str>* exclusionList )
+		: pFile( pFile ), exclusionList( exclusionList ){
+	}
+	void operator()( scene::Instance& instance ) const {
+		const char* classname = Node_getEntity( instance.path().top() )->getKeyValue( "classname" );
 
-	if ( !strcmp( classname, "worldspawn" ) ) {
-		world.LoadFromEntity( instance.path().top(), false );
-		world.RemoveNonCheckBrushes( exclusionList, true );
-		world.SaveToFile( pFile );
+		if ( !strcmp( classname, "worldspawn" ) ) {
+			world.LoadFromEntity( instance.path().top(), false );
+			world.RemoveNonCheckBrushes( exclusionList, true );
+			world.SaveToFile( pFile );
+		}
+		else if ( strstr( classname, "info_" ) ) {
+			world.ClearBrushes();
+			world.ClearEPairs();
+			world.LoadEPairList( Node_getEntity( instance.path().top() ) );
+			world.SaveToFile( pFile );
+		}
 	}
-	else if ( strstr( classname, "info_" ) ) {
-		world.ClearBrushes();
-		world.ClearEPairs();
-		world.LoadEPairList( Node_getEntity( instance.path().top() ) );
-		world.SaveToFile( pFile );
-	}
-}
 };
 
 void BuildMiniPrt( std::list<Str>* exclusionList ){
@@ -256,21 +256,21 @@ void BuildMiniPrt( std::list<Str>* exclusionList ){
 
 class EntityFindByTargetName
 {
-const char* targetname;
+	const char* targetname;
 public:
-mutable const scene::Path* result;
-EntityFindByTargetName( const char* targetname )
-	: targetname( targetname ), result( 0 ){
-}
-void operator()( scene::Instance& instance ) const {
-	if ( result == 0 ) {
-		const char* value = Node_getEntity( instance.path().top() )->getKeyValue( "targetname" );
+	mutable const scene::Path* result;
+	EntityFindByTargetName( const char* targetname )
+		: targetname( targetname ), result( 0 ){
+	}
+	void operator()( scene::Instance& instance ) const {
+		if ( result == 0 ) {
+			const char* value = Node_getEntity( instance.path().top() )->getKeyValue( "targetname" );
 
-		if ( !strcmp( value, targetname ) ) {
-			result = &instance.path();
+			if ( !strcmp( value, targetname ) ) {
+				result = &instance.path();
+			}
 		}
 	}
-}
 };
 
 const scene::Path* FindEntityFromTargetname( const char* targetname ){
@@ -298,8 +298,8 @@ void FillDefaultTexture( _QERFaceData* faceData, vec3_t va, vec3_t vb, vec3_t vc
 }
 
 float Determinant3x3( float a1, float a2, float a3,
-					  float b1, float b2, float b3,
-					  float c1, float c2, float c3 ){
+                      float b1, float b2, float b3,
+                      float c1, float c2, float c3 ){
 	return a1 * ( b2 * c3 - b3 * c2 ) - a2 * ( b1 * c3 - b3 * c1 ) + a3 * ( b1 * c2 - b2 * c1 );
 }
 

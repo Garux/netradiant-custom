@@ -119,25 +119,25 @@ void setGridPower( GridPower power );
 
 class GridMenuItem
 {
-GridPower m_id;
+	GridPower m_id;
 
-GridMenuItem( const GridMenuItem& other ); // NOT COPYABLE
-GridMenuItem& operator=( const GridMenuItem& other ); // NOT ASSIGNABLE
+	GridMenuItem( const GridMenuItem& other ); // NOT COPYABLE
+	GridMenuItem& operator=( const GridMenuItem& other ); // NOT ASSIGNABLE
 public:
-ToggleItem m_item;
+	ToggleItem m_item;
 
-GridMenuItem( GridPower id ) : m_id( id ), m_item( ExportCaller( *this ) ){
-}
-void set(){
-	g_grid_power = m_id;
-	m_item.update();
-	setGridPower( m_id );
-}
-typedef MemberCaller<GridMenuItem, &GridMenuItem::set> SetCaller;
-void active( const BoolImportCallback& importCallback ){
-	importCallback( g_grid_power == m_id );
-}
-typedef MemberCaller1<GridMenuItem, const BoolImportCallback&, &GridMenuItem::active> ExportCaller;
+	GridMenuItem( GridPower id ) : m_id( id ), m_item( ExportCaller( *this ) ){
+	}
+	void set(){
+		g_grid_power = m_id;
+		m_item.update();
+		setGridPower( m_id );
+	}
+	typedef MemberCaller<GridMenuItem, &GridMenuItem::set> SetCaller;
+	void active( const BoolImportCallback& importCallback ){
+		importCallback( g_grid_power == m_id );
+	}
+	typedef MemberCaller1<GridMenuItem, const BoolImportCallback&, &GridMenuItem::active> ExportCaller;
 };
 
 GridMenuItem g_gridMenu0125( GRIDPOWER_0125 );
@@ -258,19 +258,19 @@ void Grid_registerShortcuts(){
 
 void Grid_constructPreferences( PreferencesPage& page ){
 	page.appendCombo(
-		"Default grid spacing",
-		g_grid_default,
-		ARRAY_RANGE( g_gridnames )
-		);
+	    "Default grid spacing",
+	    g_grid_default,
+	    ARRAY_RANGE( g_gridnames )
+	);
 	{
 		const char* coords[] = { "4096", "8192", "16384", "32768", "65536" };
 
 		page.appendCombo(
-			"Max grid coordinate",
-			STRING_ARRAY_RANGE( coords ),
-			IntImportCallback( maxGridCoordPowerImportCaller() ),
-			IntExportCallback( maxGridCoordPowerExportCaller() )
-			);
+		    "Max grid coordinate",
+		    STRING_ARRAY_RANGE( coords ),
+		    IntImportCallback( maxGridCoordPowerImportCaller() ),
+		    IntExportCallback( maxGridCoordPowerExportCaller() )
+		);
 	}
 }
 void Grid_constructPage( PreferenceGroup& group ){

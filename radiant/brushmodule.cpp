@@ -46,7 +46,9 @@ bool getTextureLockEnabled(){
 }
 
 const char* getTexdefTypeIdLabel(){
-	return g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ? "AP" : g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ? "BP" : "220";
+	return g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ? "AP"
+	     : g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ? "BP"
+	     : "220";
 }
 
 const char* BrushType_getName( EBrushType type ){
@@ -82,27 +84,27 @@ typedef FreeCaller1<const BoolImportCallback&, Face_exportSnapPlanes> FaceExport
 
 void Brush_constructPreferences( PreferencesPage& page ){
 	page.appendCheckBox(
-		"", "Snap planes to integer grid",
-		FaceImportSnapPlanesCaller(),
-		FaceExportSnapPlanesCaller()
-		);
+	    "", "Snap planes to integer grid",
+	    FaceImportSnapPlanesCaller(),
+	    FaceExportSnapPlanesCaller()
+	);
 	page.appendEntry(
-		"Default texture scale",
-		g_texdef_default_scale
-		);
+	    "Default texture scale",
+	    g_texdef_default_scale
+	);
 	if ( g_multipleBrushTypes ) {
 		const char* names[] = { BrushType_getName( g_brushTypes[0] ), BrushType_getName( g_brushTypes[1] ), BrushType_getName( g_brushTypes[2] ) };
 		page.appendCombo(
-			"New map Brush Type",
-			g_brushType,
-			STRING_ARRAY_RANGE( names )
-			);
+		    "New map Brush Type",
+		    g_brushType,
+		    STRING_ARRAY_RANGE( names )
+		);
 	}
 	// d1223m
 	page.appendCheckBox( "",
-						 "Always use caulk for new brushes",
-						 g_brush_always_caulk
-						 );
+	                     "Always use caulk for new brushes",
+	                     g_brush_always_caulk
+	                   );
 }
 void Brush_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Brush", "Brush Settings" ) );
@@ -133,17 +135,17 @@ void Brush_Construct( EBrushType type ){
 			}
 		}
 		GlobalPreferenceSystem().registerPreference(
-			"BrushType",
-			IntImportStringCaller( g_brushType ),
-			IntExportStringCaller( g_brushType )
-			);
+		    "BrushType",
+		    IntImportStringCaller( g_brushType ),
+		    IntExportStringCaller( g_brushType )
+		);
 		type = g_brushTypes[g_brushType];
 	}
 	// d1223m
 	GlobalPreferenceSystem().registerPreference(
-		"BrushAlwaysCaulk",
-		BoolImportStringCaller( g_brush_always_caulk ),
-		BoolExportStringCaller( g_brush_always_caulk ) );
+	    "BrushAlwaysCaulk",
+	    BoolImportStringCaller( g_brush_always_caulk ),
+	    BoolExportStringCaller( g_brush_always_caulk ) );
 
 	Brush_registerCommands();
 	Brush_registerPreferencesPage();
@@ -217,22 +219,22 @@ typedef Callback1<Face&> FaceCallback;
 class Quake3BrushCreator : public BrushCreator
 {
 public:
-scene::Node& createBrush(){
-	return ( new BrushNode )->node();
-}
-EBrushType getFormat() const {
-	return Brush::m_type;
-}
-void toggleFormat( EBrushType type ) const {
-	Brush_toggleFormat( type );
-}
-void Brush_forEachFace( scene::Node& brush, const BrushFaceDataCallback& callback ){
-	::Brush_forEachFace( *Node_getBrush( brush ), FaceCallback( BrushFaceDataFromFaceCaller( callback ) ) );
-}
-bool Brush_addFace( scene::Node& brush, const _QERFaceData& faceData ){
-	Node_getBrush( brush )->undoSave();
-	return Node_getBrush( brush )->addPlane( faceData.m_p0, faceData.m_p1, faceData.m_p2, faceData.m_shader, TextureProjection( faceData.m_texdef, brushprimit_texdef_t(), Vector3( 0, 0, 0 ), Vector3( 0, 0, 0 ) ) ) != 0;
-}
+	scene::Node& createBrush(){
+		return ( new BrushNode )->node();
+	}
+	EBrushType getFormat() const {
+		return Brush::m_type;
+	}
+	void toggleFormat( EBrushType type ) const {
+		Brush_toggleFormat( type );
+	}
+	void Brush_forEachFace( scene::Node& brush, const BrushFaceDataCallback& callback ){
+		::Brush_forEachFace( *Node_getBrush( brush ), FaceCallback( BrushFaceDataFromFaceCaller( callback ) ) );
+	}
+	bool Brush_addFace( scene::Node& brush, const _QERFaceData& faceData ){
+		Node_getBrush( brush )->undoSave();
+		return Node_getBrush( brush )->addPlane( faceData.m_p0, faceData.m_p1, faceData.m_p2, faceData.m_shader, TextureProjection( faceData.m_texdef, brushprimit_texdef_t(), Vector3( 0, 0, 0 ), Vector3( 0, 0, 0 ) ) ) != 0;
+	}
 };
 
 Quake3BrushCreator g_Quake3BrushCreator;
@@ -258,22 +260,22 @@ class BrushDependencies :
 
 class BrushDoom3API : public TypeSystemRef
 {
-BrushCreator* m_brushdoom3;
+	BrushCreator* m_brushdoom3;
 public:
-typedef BrushCreator Type;
-STRING_CONSTANT( Name, "doom3" );
+	typedef BrushCreator Type;
+	STRING_CONSTANT( Name, "doom3" );
 
-BrushDoom3API(){
-	Brush_Construct( eBrushTypeDoom3 );
+	BrushDoom3API(){
+		Brush_Construct( eBrushTypeDoom3 );
 
-	m_brushdoom3 = &GetBrushCreator();
-}
-~BrushDoom3API(){
-	Brush_Destroy();
-}
-BrushCreator* getTable(){
-	return m_brushdoom3;
-}
+		m_brushdoom3 = &GetBrushCreator();
+	}
+	~BrushDoom3API(){
+		Brush_Destroy();
+	}
+	BrushCreator* getTable(){
+		return m_brushdoom3;
+	}
 };
 
 typedef SingletonModule<BrushDoom3API, BrushDependencies> BrushDoom3Module;
@@ -283,22 +285,22 @@ StaticRegisterModule staticRegisterBrushDoom3( StaticBrushDoom3Module::instance(
 
 class BrushQuake4API : public TypeSystemRef
 {
-BrushCreator* m_brushquake4;
+	BrushCreator* m_brushquake4;
 public:
-typedef BrushCreator Type;
-STRING_CONSTANT( Name, "quake4" );
+	typedef BrushCreator Type;
+	STRING_CONSTANT( Name, "quake4" );
 
-BrushQuake4API(){
-	Brush_Construct( eBrushTypeQuake4 );
+	BrushQuake4API(){
+		Brush_Construct( eBrushTypeQuake4 );
 
-	m_brushquake4 = &GetBrushCreator();
-}
-~BrushQuake4API(){
-	Brush_Destroy();
-}
-BrushCreator* getTable(){
-	return m_brushquake4;
-}
+		m_brushquake4 = &GetBrushCreator();
+	}
+	~BrushQuake4API(){
+		Brush_Destroy();
+	}
+	BrushCreator* getTable(){
+		return m_brushquake4;
+	}
 };
 
 typedef SingletonModule<BrushQuake4API, BrushDependencies> BrushQuake4Module;
@@ -308,27 +310,27 @@ StaticRegisterModule staticRegisterBrushQuake4( StaticBrushQuake4Module::instanc
 
 class BrushQuake3API : public TypeSystemRef
 {
-BrushCreator* m_brushquake3;
+	BrushCreator* m_brushquake3;
 public:
-typedef BrushCreator Type;
-STRING_CONSTANT( Name, "quake3" );
+	typedef BrushCreator Type;
+	STRING_CONSTANT( Name, "quake3" );
 
-BrushQuake3API(){
-	g_multipleBrushTypes = true;
-	g_brushTypes[0] = eBrushTypeQuake3;
-	g_brushTypes[1] = eBrushTypeQuake3BP;
-	g_brushTypes[2] = eBrushTypeQuake3Valve220;
+	BrushQuake3API(){
+		g_multipleBrushTypes = true;
+		g_brushTypes[0] = eBrushTypeQuake3;
+		g_brushTypes[1] = eBrushTypeQuake3BP;
+		g_brushTypes[2] = eBrushTypeQuake3Valve220;
 
-	Brush_Construct( eBrushTypeQuake3BP );
+		Brush_Construct( eBrushTypeQuake3BP );
 
-	m_brushquake3 = &GetBrushCreator();
-}
-~BrushQuake3API(){
-	Brush_Destroy();
-}
-BrushCreator* getTable(){
-	return m_brushquake3;
-}
+		m_brushquake3 = &GetBrushCreator();
+	}
+	~BrushQuake3API(){
+		Brush_Destroy();
+	}
+	BrushCreator* getTable(){
+		return m_brushquake3;
+	}
 };
 
 typedef SingletonModule<BrushQuake3API, BrushDependencies> BrushQuake3Module;
@@ -338,27 +340,27 @@ StaticRegisterModule staticRegisterBrushQuake3( StaticBrushQuake3Module::instanc
 
 class BrushQuake2API : public TypeSystemRef
 {
-BrushCreator* m_brushquake2;
+	BrushCreator* m_brushquake2;
 public:
-typedef BrushCreator Type;
-STRING_CONSTANT( Name, "quake2" );
+	typedef BrushCreator Type;
+	STRING_CONSTANT( Name, "quake2" );
 
-BrushQuake2API(){
-	g_multipleBrushTypes = true;
-	g_brushTypes[0] = eBrushTypeQuake2;
-	g_brushTypes[1] = eBrushTypeQuake3BP;
-	g_brushTypes[2] = eBrushTypeQuake3Valve220;
+	BrushQuake2API(){
+		g_multipleBrushTypes = true;
+		g_brushTypes[0] = eBrushTypeQuake2;
+		g_brushTypes[1] = eBrushTypeQuake3BP;
+		g_brushTypes[2] = eBrushTypeQuake3Valve220;
 
-	Brush_Construct( eBrushTypeQuake2 );
+		Brush_Construct( eBrushTypeQuake2 );
 
-	m_brushquake2 = &GetBrushCreator();
-}
-~BrushQuake2API(){
-	Brush_Destroy();
-}
-BrushCreator* getTable(){
-	return m_brushquake2;
-}
+		m_brushquake2 = &GetBrushCreator();
+	}
+	~BrushQuake2API(){
+		Brush_Destroy();
+	}
+	BrushCreator* getTable(){
+		return m_brushquake2;
+	}
 };
 
 typedef SingletonModule<BrushQuake2API, BrushDependencies> BrushQuake2Module;
@@ -368,27 +370,27 @@ StaticRegisterModule staticRegisterBrushQuake2( StaticBrushQuake2Module::instanc
 
 class BrushQuake1API : public TypeSystemRef
 {
-BrushCreator* m_brushquake1;
+	BrushCreator* m_brushquake1;
 public:
-typedef BrushCreator Type;
-STRING_CONSTANT( Name, "quake" );
+	typedef BrushCreator Type;
+	STRING_CONSTANT( Name, "quake" );
 
-BrushQuake1API(){
-	g_multipleBrushTypes = true;
-	g_brushTypes[0] = eBrushTypeQuake;
-	g_brushTypes[1] = eBrushTypeQuake3BP;
-	g_brushTypes[2] = eBrushTypeValve220;
+	BrushQuake1API(){
+		g_multipleBrushTypes = true;
+		g_brushTypes[0] = eBrushTypeQuake;
+		g_brushTypes[1] = eBrushTypeQuake3BP;
+		g_brushTypes[2] = eBrushTypeValve220;
 
-	Brush_Construct( eBrushTypeQuake );
+		Brush_Construct( eBrushTypeQuake );
 
-	m_brushquake1 = &GetBrushCreator();
-}
-~BrushQuake1API(){
-	Brush_Destroy();
-}
-BrushCreator* getTable(){
-	return m_brushquake1;
-}
+		m_brushquake1 = &GetBrushCreator();
+	}
+	~BrushQuake1API(){
+		Brush_Destroy();
+	}
+	BrushCreator* getTable(){
+		return m_brushquake1;
+	}
 };
 
 typedef SingletonModule<BrushQuake1API, BrushDependencies> BrushQuake1Module;
@@ -398,22 +400,22 @@ StaticRegisterModule staticRegisterBrushQuake1( StaticBrushQuake1Module::instanc
 
 class BrushHalfLifeAPI : public TypeSystemRef
 {
-BrushCreator* m_brushhalflife;
+	BrushCreator* m_brushhalflife;
 public:
-typedef BrushCreator Type;
-STRING_CONSTANT( Name, "halflife" );
+	typedef BrushCreator Type;
+	STRING_CONSTANT( Name, "halflife" );
 
-BrushHalfLifeAPI(){
-	Brush_Construct( eBrushTypeValve220 );
+	BrushHalfLifeAPI(){
+		Brush_Construct( eBrushTypeValve220 );
 
-	m_brushhalflife = &GetBrushCreator();
-}
-~BrushHalfLifeAPI(){
-	Brush_Destroy();
-}
-BrushCreator* getTable(){
-	return m_brushhalflife;
-}
+		m_brushhalflife = &GetBrushCreator();
+	}
+	~BrushHalfLifeAPI(){
+		Brush_Destroy();
+	}
+	BrushCreator* getTable(){
+		return m_brushhalflife;
+	}
 };
 
 typedef SingletonModule<BrushHalfLifeAPI, BrushDependencies> BrushHalfLifeModule;

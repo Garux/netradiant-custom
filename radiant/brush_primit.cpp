@@ -202,7 +202,7 @@ inline void BPTexdef_fromTransform( brushprimit_texdef_t& bp_texdef, const Matri
 
 inline void Texdef_fromTransform( TextureProjection& projection, float width, float height, const Matrix4& transform ){
 	ASSERT_MESSAGE( ( transform[0] != 0 || transform[4] != 0 )
-					&& ( transform[1] != 0 || transform[5] != 0 ), "invalid texture matrix" );
+	             && ( transform[1] != 0 || transform[5] != 0 ), "invalid texture matrix" );
 
 	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ) {
 		BPTexdef_fromTransform( projection.m_brushprimit_texdef, transform );
@@ -448,10 +448,10 @@ void AddPointToBounds( const Vector3& v, Vector3& mins, Vector3& maxs ){
 template<typename Element>
 inline BasicVector3<Element> vector3_inverse( const BasicVector3<Element>& self ){
 	return BasicVector3<Element>(
-			   Element( 1.0 / self.x() ),
-			   Element( 1.0 / self.y() ),
-			   Element( 1.0 / self.z() )
-			   );
+	           Element( 1.0 / self.x() ),
+	           Element( 1.0 / self.y() ),
+	           Element( 1.0 / self.z() )
+	       );
 }
 #endif
 
@@ -461,7 +461,7 @@ inline BasicVector3<Element> vector3_inverse( const BasicVector3<Element>& self 
 // NOTE : the three vectors are understood as columns of the matrix
 inline float SarrusDet( const Vector3& a, const Vector3& b, const Vector3& c ){
 	return a[0] * b[1] * c[2] + b[0] * c[1] * a[2] + c[0] * a[1] * b[2]
-		   - c[0] * b[1] * a[2] - a[1] * b[0] * c[2] - a[0] * b[2] * c[1];
+	     - c[0] * b[1] * a[2] - a[1] * b[0] * c[2] - a[0] * b[2] * c[1];
 }
 
 // in many case we know three points A,B,C in two axis base B1 and B2
@@ -513,9 +513,9 @@ void FaceToBrushPrimitFace( face_t *f ){
 	float ST[3][5]; // [ point index ] [ xyz ST ]
 	//++timo not used as long as brushprimit_texdef and texdef are static
 /*	f->brushprimit_texdef.contents=f->texdef.contents;
-    f->brushprimit_texdef.flags=f->texdef.flags;
-    f->brushprimit_texdef.value=f->texdef.value;
-    strcpy(f->brushprimit_texdef.name,f->texdef.name); */
+	f->brushprimit_texdef.flags=f->texdef.flags;
+	f->brushprimit_texdef.value=f->texdef.value;
+	strcpy(f->brushprimit_texdef.name,f->texdef.name); */
 #ifdef DBG_BP
 	if ( f->plane.normal[0] == 0.0f && f->plane.normal[1] == 0.0f && f->plane.normal[2] == 0.0f ) {
 		globalWarningStream() << "Warning : f->plane.normal is (0,0,0) in FaceToBrushPrimitFace\n";
@@ -613,7 +613,7 @@ void TexMat_Assign( texmat_t texmat, const texmat_t other ){
 }
 
 void ConvertTexMatWithDimensions( const texmat_t texmat1, std::size_t w1, std::size_t h1,
-								  texmat_t texmat2, std::size_t w2, std::size_t h2 ){
+                                  texmat_t texmat2, std::size_t w2, std::size_t h2 ){
 	TexMat_Assign( texmat2, texmat1 );
 	TexMat_Scale( texmat2, static_cast<float>( w1 ) / static_cast<float>( w2 ), static_cast<float>( h1 ) / static_cast<float>( h2 ) );
 }
@@ -622,7 +622,7 @@ void ConvertTexMatWithDimensions( const texmat_t texmat1, std::size_t w1, std::s
 // if 0 for qtexture_t, basic 2x2 texture is assumed ( straight mapping between s/t coordinates and geometric coordinates )
 void ConvertTexMatWithQTexture( const float texMat1[2][3], const qtexture_t *qtex1, float texMat2[2][3], const qtexture_t *qtex2 ){
 	ConvertTexMatWithDimensions( texMat1, ( qtex1 ) ? qtex1->width : 2, ( qtex1 ) ? qtex1->height : 2,
-								 texMat2, ( qtex2 ) ? qtex2->width : 2, ( qtex2 ) ? qtex2->height : 2 );
+	                             texMat2, ( qtex2 ) ? qtex2->width : 2, ( qtex2 ) ? qtex2->height : 2 );
 }
 
 void ConvertTexMatWithQTexture( const brushprimit_texdef_t *texMat1, const qtexture_t *qtex1, brushprimit_texdef_t *texMat2, const qtexture_t *qtex2 ){
@@ -933,12 +933,12 @@ void BPMatMul( float A[2][3], float B[2][3], float C[2][3] ){
 
 void BPMatDump( float A[2][3] ){
 	globalOutputStream() << "" << A[0][0]
-						 << " " << A[0][1]
-						 << " " << A[0][2]
-						 << "\n" << A[1][0]
-						 << " " << A[1][2]
-						 << " " << A[1][2]
-						 << "\n0 0 1\n";
+	                     << " " << A[0][1]
+	                     << " " << A[0][2]
+	                     << "\n" << A[1][0]
+	                     << " " << A[1][2]
+	                     << " " << A[1][2]
+	                     << "\n0 0 1\n";
 }
 
 void BPMatRotate( float A[2][3], float theta ){
@@ -1339,18 +1339,18 @@ inline void print_vector3( const Vector3& v ){
 
 inline void print_3x3( const Matrix4& m ){
 	globalOutputStream() << "( " << m.xx() << " " << m.xy() << " " << m.xz() << " ) "
-						 << "( " << m.yx() << " " << m.yy() << " " << m.yz() << " ) "
-						 << "( " << m.zx() << " " << m.zy() << " " << m.zz() << " )\n";
+	                     << "( " << m.yx() << " " << m.yy() << " " << m.yz() << " ) "
+	                     << "( " << m.zx() << " " << m.zy() << " " << m.zz() << " )\n";
 }
 
 
 inline Matrix4 matrix4_rotation_for_vector3( const Vector3& x, const Vector3& y, const Vector3& z ){
 	return Matrix4(
-			   x.x(), x.y(), x.z(), 0,
-			   y.x(), y.y(), y.z(), 0,
-			   z.x(), z.y(), z.z(), 0,
-			   0, 0, 0, 1
-			   );
+	           x.x(), x.y(), x.z(), 0,
+	           y.x(), y.y(), y.z(), 0,
+	           z.x(), z.y(), z.z(), 0,
+	           0, 0, 0, 1
+	       );
 }
 
 inline Matrix4 matrix4_swap_axes( const Vector3& from, const Vector3& to ){
@@ -1385,23 +1385,23 @@ inline Matrix4 matrix4_swap_axes( const Vector3& from, const Vector3& to ){
 
 inline Matrix4 matrix4_reflection_for_plane( const Plane3& plane ){
 	return Matrix4(
-			   static_cast<float>( 1 - ( 2 * plane.a * plane.a ) ),
-			   static_cast<float>( -2 * plane.a * plane.b ),
-			   static_cast<float>( -2 * plane.a * plane.c ),
-			   0,
-			   static_cast<float>( -2 * plane.b * plane.a ),
-			   static_cast<float>( 1 - ( 2 * plane.b * plane.b ) ),
-			   static_cast<float>( -2 * plane.b * plane.c ),
-			   0,
-			   static_cast<float>( -2 * plane.c * plane.a ),
-			   static_cast<float>( -2 * plane.c * plane.b ),
-			   static_cast<float>( 1 - ( 2 * plane.c * plane.c ) ),
-			   0,
-			   static_cast<float>( -2 * plane.d * plane.a ),
-			   static_cast<float>( -2 * plane.d * plane.b ),
-			   static_cast<float>( -2 * plane.d * plane.c ),
-			   1
-			   );
+	           static_cast<float>( 1 - ( 2 * plane.a * plane.a ) ),
+	           static_cast<float>( -2 * plane.a * plane.b ),
+	           static_cast<float>( -2 * plane.a * plane.c ),
+	           0,
+	           static_cast<float>( -2 * plane.b * plane.a ),
+	           static_cast<float>( 1 - ( 2 * plane.b * plane.b ) ),
+	           static_cast<float>( -2 * plane.b * plane.c ),
+	           0,
+	           static_cast<float>( -2 * plane.c * plane.a ),
+	           static_cast<float>( -2 * plane.c * plane.b ),
+	           static_cast<float>( 1 - ( 2 * plane.c * plane.c ) ),
+	           0,
+	           static_cast<float>( -2 * plane.d * plane.a ),
+	           static_cast<float>( -2 * plane.d * plane.b ),
+	           static_cast<float>( -2 * plane.d * plane.c ),
+	           1
+	       );
 }
 
 inline Matrix4 matrix4_reflection_for_plane45( const Plane3& plane, const Vector3& from, const Vector3& to ){
@@ -1524,12 +1524,12 @@ void Texdef_transformLocked_original( TextureProjection& projection, std::size_t
 #endif
 
 double Det3x3( double a00, double a01, double a02,
-			  double a10, double a11, double a12,
-			  double a20, double a21, double a22 ){
+               double a10, double a11, double a12,
+               double a20, double a21, double a22 ){
 	return
-		a00 * ( a11 * a22 - a12 * a21 )
-		-   a01 * ( a10 * a22 - a12 * a20 )
-		+   a02 * ( a10 * a21 - a11 * a20 );
+	        a00 * ( a11 * a22 - a12 * a21 )
+	    -   a01 * ( a10 * a22 - a12 * a20 )
+	    +   a02 * ( a10 * a21 - a11 * a20 );
 }
 
 void BP_from_ST( brushprimit_texdef_t& bp, const DoubleVector3 points[3], const DoubleVector3 st[3], const DoubleVector3& normal, const bool normalize = true ){
@@ -1554,28 +1554,28 @@ void BP_from_ST( brushprimit_texdef_t& bp, const DoubleVector3 points[3], const 
 	//     - st[i] = texMat[i][0]*x + texMat[i][1]*y + texMat[i][2]
 	//       (for three vertices)
 	D = Det3x3(
-		xyI[0], xyI[1], 1,
-		xyJ[0], xyJ[1], 1,
-		xyK[0], xyK[1], 1
-		);
+	        xyI[0], xyI[1], 1,
+	        xyJ[0], xyJ[1], 1,
+	        xyK[0], xyK[1], 1
+	    );
 	if ( D != 0 ) {
 		for ( std::size_t i = 0; i < 2; ++i )
 		{
 			D0 = Det3x3(
-				stI[i], xyI[1], 1,
-				stJ[i], xyJ[1], 1,
-				stK[i], xyK[1], 1
-				);
+			         stI[i], xyI[1], 1,
+			         stJ[i], xyJ[1], 1,
+			         stK[i], xyK[1], 1
+			     );
 			D1 = Det3x3(
-				xyI[0], stI[i], 1,
-				xyJ[0], stJ[i], 1,
-				xyK[0], stK[i], 1
-				);
+			         xyI[0], stI[i], 1,
+			         xyJ[0], stJ[i], 1,
+			         xyK[0], stK[i], 1
+			     );
 			D2 = Det3x3(
-				xyI[0], xyI[1], stI[i],
-				xyJ[0], xyJ[1], stJ[i],
-				xyK[0], xyK[1], stK[i]
-				);
+			         xyI[0], xyI[1], stI[i],
+			         xyJ[0], xyJ[1], stJ[i],
+			         xyK[0], xyK[1], stK[i]
+			     );
 			bp.coords[i][0] = D0 / D;
 			bp.coords[i][1] = D1 / D;
 			bp.coords[i][2] = normalize? fmod( D2 / D, 1.0 ) : ( D2 / D );
@@ -1585,13 +1585,13 @@ void BP_from_ST( brushprimit_texdef_t& bp, const DoubleVector3 points[3], const 
 }
 
 const Vector3 BaseAxes[] = {
-            Vector3( 0.0,  0.0,  1.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0, -1.0,  0.0),
-            Vector3( 0.0,  0.0, -1.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0, -1.0,  0.0),
-            Vector3( 1.0,  0.0,  0.0), Vector3( 0.0,  1.0,  0.0), Vector3( 0.0,  0.0, -1.0),
-            Vector3(-1.0,  0.0,  0.0), Vector3( 0.0,  1.0,  0.0), Vector3( 0.0,  0.0, -1.0),
-            Vector3( 0.0,  1.0,  0.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0,  0.0, -1.0),
-            Vector3( 0.0, -1.0,  0.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0,  0.0, -1.0),
-        };
+	Vector3( 0.0,  0.0,  1.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0, -1.0,  0.0),
+	Vector3( 0.0,  0.0, -1.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0, -1.0,  0.0),
+	Vector3( 1.0,  0.0,  0.0), Vector3( 0.0,  1.0,  0.0), Vector3( 0.0,  0.0, -1.0),
+	Vector3(-1.0,  0.0,  0.0), Vector3( 0.0,  1.0,  0.0), Vector3( 0.0,  0.0, -1.0),
+	Vector3( 0.0,  1.0,  0.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0,  0.0, -1.0),
+	Vector3( 0.0, -1.0,  0.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0,  0.0, -1.0),
+};
 
 std::size_t planeNormalIndex( const Vector3& normal ) {
 #if 0
@@ -1663,7 +1663,7 @@ void AP_from_axes( const Vector3& axisX, const Vector3& axisY, const DoubleVecto
 
 	// finally compute the scaling factors
 	Vector2 scale( vector3_length( projectedXAxis ),
-						vector3_length( projectedYAxis ) );
+	               vector3_length( projectedYAxis ) );
 
 	// the sign of the scaling factors depends on the angle between the new texture axis and the projected transformed axis
 	if( vector3_dot( xAxis, normalizedXAxis ) < 0 )
@@ -1673,7 +1673,7 @@ void AP_from_axes( const Vector3& axisX, const Vector3& axisY, const DoubleVecto
 
 	// determine the new texture coordinates of the transformed center of the face, sans offsets
 	const Vector2 newInvariantTexCoords( vector3_dot( xAxis / scale[0], invariant ),
-										vector3_dot( yAxis / scale[1], invariant ) );
+	                                     vector3_dot( yAxis / scale[1], invariant ) );
 //		globalOutputStream() << "newInvariantTexCoords: " << newInvariantTexCoords[0] << " " << newInvariantTexCoords[1] << "\n";
 	// since the center should be invariant, the offsets are determined by the difference of the current and
 	// the original texture coordinates of the center
@@ -1711,7 +1711,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 #if 0
 		const DoubleVector3 normalTransformed( matrix4_transformed_normal( identity2transformed, plane.normal() ) );
 #else
-        /* this is also handling scale = 0 case */
+		/* this is also handling scale = 0 case */
 		DoubleVector3 normalTransformed( plane3_for_points( points ).normal() );
 		if( matrix4_handedness( identity2transformed ) == MATRIX4_LEFTHANDED )
 			vector3_negate( normalTransformed );
@@ -1732,7 +1732,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		#elif 0
 		const Vector3 newNormal( matrix4_transformed_normal( identity2transformed, plane.normal() ) );
 		#elif 1
-        /* this is also handling scale = 0 case */
+		/* this is also handling scale = 0 case */
 		DoubleVector3 texX, texY;
 		ComputeAxisBase( plane.normal(), texX, texY );
 		const DoubleVector3 anchor = plane.normal() * plane.dist();
@@ -1755,12 +1755,12 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		Vector3 yAxis = BaseAxes[index * 3 + 2];
 		Vector3 zAxis = BaseAxes[( index / 2 ) * 6];
 //			globalOutputStream() << xAxis << " " << yAxis << " " << zAxis << "\n";
-        Matrix4 rotmat = matrix4_rotation_for_axisangle( vector3_cross( yAxis, xAxis ), degrees_to_radians( projection.m_texdef.rotate ) );
-        matrix4_transform_direction( rotmat, xAxis );
-        matrix4_transform_direction( rotmat, yAxis );
+		Matrix4 rotmat = matrix4_rotation_for_axisangle( vector3_cross( yAxis, xAxis ), degrees_to_radians( projection.m_texdef.rotate ) );
+		matrix4_transform_direction( rotmat, xAxis );
+		matrix4_transform_direction( rotmat, yAxis );
 
 		const Vector2 invariantTexCoords( vector3_dot( xAxis / projection.m_texdef.scale[0], invariant ) + projection.m_texdef.shift[0],
-											vector3_dot( yAxis / projection.m_texdef.scale[1], invariant ) + projection.m_texdef.shift[1] );
+		                                  vector3_dot( yAxis / projection.m_texdef.scale[1], invariant ) + projection.m_texdef.shift[1] );
 //			globalOutputStream() << "invariantTexCoords: " << invariantTexCoords[0] << " " << invariantTexCoords[1] << "\n";
 		// project the texture axes onto the boundary plane along the texture Z axis
 		const Vector3 boundaryOffset  = plane3_project_point( plane, Vector3( 0, 0, 0 ), zAxis );
@@ -1833,7 +1833,7 @@ void Texdef_transform( TextureProjection& projection, std::size_t width, std::si
 		return; //TODO FIXME !!! this (and whole pipeline?) is called with g_matrix4_identity after every transform //now only on freezeTransform, it seems
 	}
 	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ||
-		 g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ) {
+	     g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ) {
 		Texdef_transformLocked( projection, width, height, plane, identity2transformed, invariant );
 	}
 	else if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ) {
@@ -1850,12 +1850,12 @@ void Texdef_transform( TextureProjection& projection, std::size_t width, std::si
 		Vector3 yAxis = BaseAxes[index * 3 + 2];
 		Vector3 zAxis = BaseAxes[( index / 2 ) * 6];
 //			globalOutputStream() << xAxis << " " << yAxis << " " << zAxis << "\n";
-        Matrix4 rotmat = matrix4_rotation_for_axisangle( vector3_cross( yAxis, xAxis ), degrees_to_radians( projection.m_texdef.rotate ) );
-        matrix4_transform_direction( rotmat, xAxis );
-        matrix4_transform_direction( rotmat, yAxis );
+		Matrix4 rotmat = matrix4_rotation_for_axisangle( vector3_cross( yAxis, xAxis ), degrees_to_radians( projection.m_texdef.rotate ) );
+		matrix4_transform_direction( rotmat, xAxis );
+		matrix4_transform_direction( rotmat, yAxis );
 
 		const Vector2 invariantTexCoords( vector3_dot( xAxis / projection.m_texdef.scale[0], invariant ) + projection.m_texdef.shift[0],
-											vector3_dot( yAxis / projection.m_texdef.scale[1], invariant ) + projection.m_texdef.shift[1] );
+		                                  vector3_dot( yAxis / projection.m_texdef.scale[1], invariant ) + projection.m_texdef.shift[1] );
 //			globalOutputStream() << "invariantTexCoords: " << invariantTexCoords[0] << " " << invariantTexCoords[1] << "\n";
 		// project the texture axes onto the boundary plane along the texture Z axis
 		const Vector3 boundaryOffset  = plane3_project_point( plane, Vector3( 0, 0, 0 ), zAxis );
@@ -1994,8 +1994,8 @@ void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, st
 
 inline bool BP_degenerate( const brushprimit_texdef_t& bp ){
 	return vector2_cross( Vector2( bp.coords[0][0], bp.coords[0][1] ),
-							Vector2( bp.coords[1][0], bp.coords[1][1] ) ) == 0
-							|| bp.coords[0][0] != bp.coords[0][0];
+	                      Vector2( bp.coords[1][0], bp.coords[1][1] ) ) == 0
+	       || bp.coords[0][0] != bp.coords[0][0];
 }
 
 /// g_bp_globals.m_texdefTypeId must be == TEXDEFTYPEID_BRUSHPRIMITIVES during this
@@ -2064,29 +2064,30 @@ void Valve220_from_BP( TextureProjection& projection, const Plane3& plane, std::
 /// g_bp_globals.m_texdefTypeId == 'in' during this
 void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, TextureProjection& projection, std::size_t width, std::size_t height ) {
 	switch( out ) {
-	case TEXDEFTYPEID_QUAKE: {
-		if( in == TEXDEFTYPEID_VALVE ){
+	case TEXDEFTYPEID_QUAKE:
+		{
+			if( in == TEXDEFTYPEID_VALVE ){
+				Matrix4 local2tex;
+				Texdef_Construct_local2tex( projection, width, height, plane.normal(), local2tex );
+				BPTexdef_fromST011( projection, plane, local2tex );
+
+				const TexdefTypeId tmp = g_bp_globals.m_texdefTypeId;
+				g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_BRUSHPRIMITIVES;
+				AP_from_BP( projection, plane, width, height );
+				g_bp_globals.m_texdefTypeId = tmp;
+			}
+			else if( in == TEXDEFTYPEID_BRUSHPRIMITIVES ){
+				AP_from_BP( projection, plane, width, height );
+			}
+		}
+		break;
+	case TEXDEFTYPEID_BRUSHPRIMITIVES:
+		{
 			Matrix4 local2tex;
 			Texdef_Construct_local2tex( projection, width, height, plane.normal(), local2tex );
 			BPTexdef_fromST011( projection, plane, local2tex );
-
-			const TexdefTypeId tmp = g_bp_globals.m_texdefTypeId;
-			g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_BRUSHPRIMITIVES;
-			AP_from_BP( projection, plane, width, height );
-			g_bp_globals.m_texdefTypeId = tmp;
 		}
-		else if( in == TEXDEFTYPEID_BRUSHPRIMITIVES ){
-			AP_from_BP( projection, plane, width, height );
-		}
-	}
-	break;
-	case TEXDEFTYPEID_BRUSHPRIMITIVES:
-	{
-		Matrix4 local2tex;
-		Texdef_Construct_local2tex( projection, width, height, plane.normal(), local2tex );
-		BPTexdef_fromST011( projection, plane, local2tex );
-	}
-	break;
+		break;
 	case TEXDEFTYPEID_VALVE:
 		if( in == TEXDEFTYPEID_QUAKE ) {
 			Matrix4 basis;

@@ -61,24 +61,24 @@ class EntityDependencies :
 
 class EntityQ3API : public TypeSystemRef
 {
-EntityCreator* m_entityq3;
+	EntityCreator* m_entityq3;
 public:
-typedef EntityCreator Type;
-STRING_CONSTANT( Name, "quake3" );
+	typedef EntityCreator Type;
+	STRING_CONSTANT( Name, "quake3" );
 
-EntityQ3API(){
-	Entity_Construct();
+	EntityQ3API(){
+		Entity_Construct();
 
-	m_entityq3 = &GetEntityCreator();
+		m_entityq3 = &GetEntityCreator();
 
-	GlobalReferenceCache().setEntityCreator( *m_entityq3 );
-}
-~EntityQ3API(){
-	Entity_Destroy();
-}
-EntityCreator* getTable(){
-	return m_entityq3;
-}
+		GlobalReferenceCache().setEntityCreator( *m_entityq3 );
+	}
+	~EntityQ3API(){
+		Entity_Destroy();
+	}
+	EntityCreator* getTable(){
+		return m_entityq3;
+	}
 };
 
 typedef SingletonModule<EntityQ3API, EntityDependencies> EntityQ3Module;
@@ -88,24 +88,24 @@ EntityQ3Module g_EntityQ3Module;
 
 class EntityQ1API : public TypeSystemRef
 {
-EntityCreator* m_entityq1;
+	EntityCreator* m_entityq1;
 public:
-typedef EntityCreator Type;
-STRING_CONSTANT( Name, "quake" );
+	typedef EntityCreator Type;
+	STRING_CONSTANT( Name, "quake" );
 
-EntityQ1API(){
-	Entity_Construct( eGameTypeQuake1 );
+	EntityQ1API(){
+		Entity_Construct( eGameTypeQuake1 );
 
-	m_entityq1 = &GetEntityCreator();
+		m_entityq1 = &GetEntityCreator();
 
-	GlobalReferenceCache().setEntityCreator( *m_entityq1 );
-}
-~EntityQ1API(){
-	Entity_Destroy();
-}
-EntityCreator* getTable(){
-	return m_entityq1;
-}
+		GlobalReferenceCache().setEntityCreator( *m_entityq1 );
+	}
+	~EntityQ1API(){
+		Entity_Destroy();
+	}
+	EntityCreator* getTable(){
+		return m_entityq1;
+	}
 };
 
 typedef SingletonModule<EntityQ1API, EntityDependencies> EntityQ1Module;
@@ -115,24 +115,24 @@ EntityQ1Module g_EntityQ1Module;
 
 class EntityWolfAPI : public TypeSystemRef
 {
-EntityCreator* m_entitywolf;
+	EntityCreator* m_entitywolf;
 public:
-typedef EntityCreator Type;
-STRING_CONSTANT( Name, "wolf" );
+	typedef EntityCreator Type;
+	STRING_CONSTANT( Name, "wolf" );
 
-EntityWolfAPI(){
-	Entity_Construct( eGameTypeRTCW );
+	EntityWolfAPI(){
+		Entity_Construct( eGameTypeRTCW );
 
-	m_entitywolf = &GetEntityCreator();
+		m_entitywolf = &GetEntityCreator();
 
-	GlobalReferenceCache().setEntityCreator( *m_entitywolf );
-}
-~EntityWolfAPI(){
-	Entity_Destroy();
-}
-EntityCreator* getTable(){
-	return m_entitywolf;
-}
+		GlobalReferenceCache().setEntityCreator( *m_entitywolf );
+	}
+	~EntityWolfAPI(){
+		Entity_Destroy();
+	}
+	EntityCreator* getTable(){
+		return m_entitywolf;
+	}
 };
 
 typedef SingletonModule<EntityWolfAPI, EntityDependencies> EntityWolfModule;
@@ -142,24 +142,24 @@ EntityWolfModule g_EntityWolfModule;
 
 class EntityDoom3API : public TypeSystemRef
 {
-EntityCreator* m_entitydoom3;
+	EntityCreator* m_entitydoom3;
 public:
-typedef EntityCreator Type;
-STRING_CONSTANT( Name, "doom3" );
+	typedef EntityCreator Type;
+	STRING_CONSTANT( Name, "doom3" );
 
-EntityDoom3API(){
-	Entity_Construct( eGameTypeDoom3 );
+	EntityDoom3API(){
+		Entity_Construct( eGameTypeDoom3 );
 
-	m_entitydoom3 = &GetEntityCreator();
+		m_entitydoom3 = &GetEntityCreator();
 
-	GlobalReferenceCache().setEntityCreator( *m_entitydoom3 );
-}
-~EntityDoom3API(){
-	Entity_Destroy();
-}
-EntityCreator* getTable(){
-	return m_entitydoom3;
-}
+		GlobalReferenceCache().setEntityCreator( *m_entitydoom3 );
+	}
+	~EntityDoom3API(){
+		Entity_Destroy();
+	}
+	EntityCreator* getTable(){
+		return m_entitydoom3;
+	}
 };
 
 typedef SingletonModule<EntityDoom3API, EntityDependencies> EntityDoom3Module;

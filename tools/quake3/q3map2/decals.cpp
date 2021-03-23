@@ -177,7 +177,7 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 				for ( k = 0; k < 3; k++ )
 				{
 					if ( fabs( deltas[ k ][ j ] ) > delta &&
-						 fabs( texDeltas[ k ][ i ] ) > texDelta  ) {
+					     fabs( texDeltas[ k ][ i ] ) > texDelta  ) {
 						delta = deltas[ k ][ j ];
 						texDelta = texDeltas[ k ][ i ];
 					}
@@ -201,15 +201,15 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 	/* debug code */
 	#if 1
 	Sys_Printf( "Mat: [ %f %f %f %f ] [ %f %f %f %f ] Theta: %lf (%lf)\n",
-				dp->texMat[ 0 ][ 0 ], dp->texMat[ 0 ][ 1 ], dp->texMat[ 0 ][ 2 ], dp->texMat[ 0 ][ 3 ],
-				dp->texMat[ 1 ][ 0 ], dp->texMat[ 1 ][ 1 ], dp->texMat[ 1 ][ 2 ], dp->texMat[ 1 ][ 3 ],
-				radians_to_degrees( acos( vector3_dot( dp->texMat[ 0 ].vec3(), dp->texMat[ 1 ].vec3() ) ) ),
-				radians_to_degrees( acos( vector3_dot( axis[ 0 ], axis[ 1 ] ) ) ) );
+	            dp->texMat[ 0 ][ 0 ], dp->texMat[ 0 ][ 1 ], dp->texMat[ 0 ][ 2 ], dp->texMat[ 0 ][ 3 ],
+	            dp->texMat[ 1 ][ 0 ], dp->texMat[ 1 ][ 1 ], dp->texMat[ 1 ][ 2 ], dp->texMat[ 1 ][ 3 ],
+	            radians_to_degrees( acos( vector3_dot( dp->texMat[ 0 ].vec3(), dp->texMat[ 1 ].vec3() ) ) ),
+	            radians_to_degrees( acos( vector3_dot( axis[ 0 ], axis[ 1 ] ) ) ) );
 
 	Sys_Printf( "XYZ: %f %f %f ST: %f %f ST(t): %lf %lf\n",
-				a->xyz[ 0 ], a->xyz[ 1 ], a->xyz[ 2 ],
-				a->st[ 0 ], a->st[ 1 ],
-				vector3_dot( a->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ], vector3_dot( a->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ] );
+	            a->xyz[ 0 ], a->xyz[ 1 ], a->xyz[ 2 ],
+	            a->st[ 0 ], a->st[ 1 ],
+	            vector3_dot( a->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ], vector3_dot( a->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ] );
 	#endif
 
 	/* test texture matrix */
@@ -217,21 +217,21 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 	t = vector3_dot( a->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
 	if ( !float_equal_epsilon( s, a->st[ 0 ], 0.01 ) || !float_equal_epsilon( t, a->st[ 1 ], 0.01 ) ) {
 		Sys_Printf( "Bad texture matrix! (A) (%f, %f) != (%f, %f)\n",
-					s, t, a->st[ 0 ], a->st[ 1 ] );
+		            s, t, a->st[ 0 ], a->st[ 1 ] );
 		//%	return false;
 	}
 	s = vector3_dot( b->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
 	t = vector3_dot( b->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
 	if ( !float_equal_epsilon( s, b->st[ 0 ], 0.01 ) || !float_equal_epsilon( t, b->st[ 1 ], 0.01 ) ) {
 		Sys_Printf( "Bad texture matrix! (B) (%f, %f) != (%f, %f)\n",
-					s, t, b->st[ 0 ], b->st[ 1 ] );
+		            s, t, b->st[ 0 ], b->st[ 1 ] );
 		//%	return false;
 	}
 	s = vector3_dot( c->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
 	t = vector3_dot( c->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
 	if ( !float_equal_epsilon( s, c->st[ 0 ], 0.01 ) || !float_equal_epsilon( t, c->st[ 1 ], 0.01 ) ) {
 		Sys_Printf( "Bad texture matrix! (C) (%f, %f) != (%f, %f)\n",
-					s, t, c->st[ 0 ], c->st[ 1 ] );
+		            s, t, c->st[ 0 ], c->st[ 1 ] );
 		//%	return false;
 	}
 
@@ -450,7 +450,7 @@ void ProcessDecals( void ){
 
 						/* planar? (nuking this optimization as it doesn't work on non-rectangular quads) */
 						if ( 0 && PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz ) &&
-							 fabs( plane3_distance_to_point( plane, dv[ 1 ]->xyz ) ) <= PLANAR_EPSILON ) {
+						     fabs( plane3_distance_to_point( plane, dv[ 1 ]->xyz ) ) <= PLANAR_EPSILON ) {
 							/* make a quad projector */
 							MakeDecalProjector( p->shaderInfo, projection, distance, 4, dv );
 						}
@@ -697,7 +697,7 @@ static void ProjectDecalOntoPatch( decalProjector_t *dp, mapDrawSurface_t *ds ){
  */
 
 static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *ds ){
-	
+
 	/* triangle surfaces without shaders don't get marks by default */
 	if ( ds->type == ESurfaceType::Triangles && ds->shaderInfo->shaderText == NULL ) {
 		return;

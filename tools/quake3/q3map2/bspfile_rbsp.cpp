@@ -158,7 +158,7 @@ static void AddLightGridLumps( FILE *file, rbspHeader_t *header ){
 				for ( c = 0; c < 3; c++ )
 				{
 					if ( abs( (int) in->ambient[ k ][ c ] - (int) out->ambient[ k ][ c ] ) > LG_EPSILON ||
-						 abs( (int) in->directed[ k ][ c ] - (int) out->directed[ k ][ c ] ) > LG_EPSILON ) {
+					     abs( (int) in->directed[ k ][ c ] - (int) out->directed[ k ][ c ] ) > LG_EPSILON ) {
 						bad = true;
 						break;
 					}

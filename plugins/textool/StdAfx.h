@@ -99,27 +99,33 @@ extern "C" void Sys_Printf( char *text, ... );
 // NOTE: I'm not too sure about the bool flags being any use.. they are supposed to tell if we handle the event or not
 class CWindowListener : public IWindowListener
 {
-int refCount;
+	int refCount;
 public:
 // Increment the number of references to this object
-void IncRef() { refCount++; }
-// Decrement the reference count
-void DecRef() {
-	if ( --refCount <= 0 ) {
-		delete this;
+	void IncRef() {
+		refCount++;
 	}
-}
+// Decrement the reference count
+	void DecRef() {
+		if ( --refCount <= 0 ) {
+			delete this;
+		}
+	}
 // IWindowListener ---------------------------------------
-bool OnLButtonDown( guint32 nFlags, double x, double y );
-bool OnMButtonDown( guint32 nFlags, double x, double y ) { return false; }
-bool OnRButtonDown( guint32 nFlags, double x, double y );
-bool OnLButtonUp( guint32 nFlags, double x, double y );
-bool OnMButtonUp( guint32 nFlags, double x, double y ) { return false; }
-bool OnRButtonUp( guint32 nFlags, double x, double y );
-bool OnMouseMove( guint32 nFlags, double x, double y );
-bool OnKeyPressed( char *s );
-bool Paint();
-void Close();
+	bool OnLButtonDown( guint32 nFlags, double x, double y );
+	bool OnMButtonDown( guint32 nFlags, double x, double y ) {
+		return false;
+	}
+	bool OnRButtonDown( guint32 nFlags, double x, double y );
+	bool OnLButtonUp( guint32 nFlags, double x, double y );
+	bool OnMButtonUp( guint32 nFlags, double x, double y ) {
+		return false;
+	}
+	bool OnRButtonUp( guint32 nFlags, double x, double y );
+	bool OnMouseMove( guint32 nFlags, double x, double y );
+	bool OnKeyPressed( char *s );
+	bool Paint();
+	void Close();
 };
 
 #include "2DView.h"
@@ -148,11 +154,11 @@ class CSynapseClientTexTool : public CSynapseClient
 {
 public:
 // CSynapseClient API
-bool RequestAPI( APIDescriptor_t *pAPI );
-const char* GetInfo();
+	bool RequestAPI( APIDescriptor_t *pAPI );
+	const char* GetInfo();
 
-CSynapseClientTexTool() { }
-virtual ~CSynapseClientTexTool() { }
+	CSynapseClientTexTool() { }
+	virtual ~CSynapseClientTexTool() { }
 };
 
 extern IWindow *g_pToolWnd;

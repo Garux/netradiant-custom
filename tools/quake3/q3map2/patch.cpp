@@ -140,9 +140,9 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, const Vector3
 			points[ j ] = points[ j - 2 ];
 
 		/* insert new points */
-		 points[ i + 1 ] = prev;
-		 points[ i + 2 ] = mid;
-		 points[ i + 3 ] = next;
+		points[ i + 1 ] = prev;
+		points[ i + 2 ] = mid;
+		points[ i + 3 ] = next;
 
 		/* back up and recheck this set again, it may need more subdivision */
 		i -= 2;
@@ -431,12 +431,12 @@ void PatchMapDrawSurfs( entity_t *e ){
 			if ( i != c1 ) {
 				// we have a connection
 				bordering[k * patchCount + l] =
-					bordering[l * patchCount + k] = 1;
+				    bordering[l * patchCount + k] = 1;
 			}
 			else {
 				// no connection
 				bordering[k * patchCount + l] =
-					bordering[l * patchCount + k] = 0;
+				    bordering[l * patchCount + k] = 0;
 			}
 
 		}

@@ -29,7 +29,7 @@
 #include "StdAfx.h"
 
 void CControlPointsManagerBFace::Init( int iPts, CtrlPts_t *Pts, C2DView *p2DView, int TexSize[2],
-									   _QERFaceData* pFaceData, OpenGLBinding *pQglTable ){
+                                       _QERFaceData* pFaceData, OpenGLBinding *pQglTable ){
 	ManagerState = Idle;
 	m_NumPoints = iPts;
 	m_pPts = Pts;
@@ -37,9 +37,11 @@ void CControlPointsManagerBFace::Init( int iPts, CtrlPts_t *Pts, C2DView *p2DVie
 	memcpy( &m_RefPts, Pts, sizeof( CtrlPts_t ) );
 	// init TM
 	memset( m_TM, 0, sizeof( float[2][3] ) );
-	m_TM[0][0] = 1.0f; m_TM[1][1] = 1.0f;
+	m_TM[0][0] = 1.0f;
+	m_TM[1][1] = 1.0f;
 	m_bGotAnchor = false;
-	m_TransOffset[0] = 0.0f; m_TransOffset[1] = 0.0f;
+	m_TransOffset[0] = 0.0f;
+	m_TransOffset[1] = 0.0f;
 	m_TexSize[0] = TexSize[0];
 	m_TexSize[1] = TexSize[1];
 	m_pFaceData = pFaceData;
@@ -110,11 +112,13 @@ bool CControlPointsManagerBFace::OnMouseMove( int xPos, int yPos ){
 			// current position of the Anchor in XY space
 			XYSpaceForSTSpace( XYAnchor, m_Anchor );
 			// compute transformation matrix
-			XYTM[0][0] = c; XYTM[1][1] = c;
+			XYTM[0][0] = c;
+			XYTM[1][1] = c;
 			if ( cross[2] > 0 ) {
 				s *= -1.0f;
 			}
-			XYTM[0][1] = s; XYTM[1][0] = -s;
+			XYTM[0][1] = s;
+			XYTM[1][0] = -s;
 			XYTM[0][2] = -c * XYRefAnchor[0] - s * XYRefAnchor[1] + XYAnchor[0];
 			XYTM[1][2] = s * XYRefAnchor[0] - c * XYRefAnchor[1] + XYAnchor[1];
 			// express this transformation matrix in ST space

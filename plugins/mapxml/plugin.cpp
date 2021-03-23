@@ -41,45 +41,45 @@ class MapXMLDependencies :
 	public GlobalEntityClassManagerModuleRef,
 	public GlobalSceneGraphModuleRef
 {
-PatchModuleRef m_patchDef2Doom3Module;
-PatchModuleRef m_patchDoom3Module;
+	PatchModuleRef m_patchDef2Doom3Module;
+	PatchModuleRef m_patchDoom3Module;
 public:
-MapXMLDependencies() :
-	GlobalBrushModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ) ),
-	GlobalEntityClassManagerModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclass" ) ),
-	m_patchDef2Doom3Module( "def2doom3" ),
-	m_patchDoom3Module( "doom3" ){
-}
-BrushCreator& getBrushDoom3(){
-	return GlobalBrushModule::getTable();
-}
-PatchCreator& getPatchDoom3(){
-	return *m_patchDoom3Module.getTable();
-}
-PatchCreator& getPatchDef2Doom3(){
-	return *m_patchDef2Doom3Module.getTable();
-}
+	MapXMLDependencies() :
+		GlobalBrushModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ) ),
+		GlobalEntityClassManagerModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclass" ) ),
+		m_patchDef2Doom3Module( "def2doom3" ),
+		m_patchDoom3Module( "doom3" ){
+	}
+	BrushCreator& getBrushDoom3(){
+		return GlobalBrushModule::getTable();
+	}
+	PatchCreator& getPatchDoom3(){
+		return *m_patchDoom3Module.getTable();
+	}
+	PatchCreator& getPatchDef2Doom3(){
+		return *m_patchDef2Doom3Module.getTable();
+	}
 };
 
 class MapXMLAPI final : public TypeSystemRef, public MapFormat
 {
 public:
-typedef MapFormat Type;
-STRING_CONSTANT( Name, "xmldoom3" );
+	typedef MapFormat Type;
+	STRING_CONSTANT( Name, "xmldoom3" );
 
-MapXMLAPI(){
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "xml doom3 maps", "*.xmap" ) );
-}
-MapFormat* getTable(){
-	return this;
-}
+	MapXMLAPI(){
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "xml doom3 maps", "*.xmap" ) );
+	}
+	MapFormat* getTable(){
+		return this;
+	}
 
-void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-	Map_Read( root, inputStream, entityTable );
-}
-void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
-	Map_Write( root, traverse, outputStream );
-}
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+		Map_Read( root, inputStream, entityTable );
+	}
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+		Map_Write( root, traverse, outputStream );
+	}
 };
 
 typedef SingletonModule<MapXMLAPI, MapXMLDependencies> MapXMLModule;

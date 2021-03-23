@@ -22,39 +22,39 @@
 class ExportData
 {
 public:
-ExportData( const StringSetWithLambda& ignorelist, collapsemode mode );
-virtual ~ExportData( void );
+	ExportData( const StringSetWithLambda& ignorelist, collapsemode mode );
+	virtual ~ExportData( void );
 
-virtual void BeginBrush( Brush& b );
-virtual void AddBrushFace( Face& f );
-virtual void EndBrush( void );
+	virtual void BeginBrush( Brush& b );
+	virtual void AddBrushFace( Face& f );
+	virtual void EndBrush( void );
 
-virtual bool WriteToFile( const std::string& path, collapsemode mode ) const = 0;
+	virtual bool WriteToFile( const std::string& path, collapsemode mode ) const = 0;
 
 protected:
 
 // a group of faces
-class group
-{
-public:
-std::string name;
-std::list<const Face*> faces;
-};
+	class group
+	{
+	public:
+		std::string name;
+		std::list<const Face*> faces;
+	};
 
-std::list<group> groups;
+	std::list<group> groups;
 
 private:
 
 // "textures/common/caulk" -> "caulk"
-void GetShaderNameFromShaderPath( const char* path, std::string& name );
+	void GetShaderNameFromShaderPath( const char* path, std::string& name );
 
-group* current;
-const collapsemode mode;
-const StringSetWithLambda& ignorelist;
+	group* current;
+	const collapsemode mode;
+	const StringSetWithLambda& ignorelist;
 };
 
-ExportData::ExportData( const StringSetWithLambda& _ignorelist, collapsemode _mode )
-	:   mode( _mode ),
+ExportData::ExportData( const StringSetWithLambda& _ignorelist, collapsemode _mode ) :
+	mode( _mode ),
 	ignorelist( _ignorelist ){
 	current = 0;
 
@@ -154,21 +154,21 @@ void ExportData::GetShaderNameFromShaderPath( const char* path, std::string& nam
 class ExportDataAsWavefront : public ExportData
 {
 private:
-const bool expmat;
-const bool limNames;
-const bool objs;
-const bool weld;
+	const bool expmat;
+	const bool limNames;
+	const bool objs;
+	const bool weld;
 
 public:
-ExportDataAsWavefront( const StringSetWithLambda& _ignorelist, collapsemode _mode, bool _expmat, bool _limNames, bool _objs, bool _weld )
-	: ExportData( _ignorelist, _mode ),
-	expmat( _expmat ),
-	limNames( _limNames ),
-	objs( _objs ),
-	weld( _weld ){
-}
+	ExportDataAsWavefront( const StringSetWithLambda& _ignorelist, collapsemode _mode, bool _expmat, bool _limNames, bool _objs, bool _weld )
+		: ExportData( _ignorelist, _mode ),
+		  expmat( _expmat ),
+		  limNames( _limNames ),
+		  objs( _objs ),
+		  weld( _weld ){
+	}
 
-bool WriteToFile( const std::string& path, collapsemode mode ) const;
+	bool WriteToFile( const std::string& path, collapsemode mode ) const;
 };
 
 bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode mode ) const {
@@ -241,8 +241,8 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 				const Vector3& vertex = w[i].vertex;
 				if( weld ){
 					auto found = std::find_if( vertices.begin(), vertices.end(), [&vertex]( const Vector3& othervertex ){
-										return Edge_isDegenerate( vertex, othervertex );
-									} );
+						return Edge_isDegenerate( vertex, othervertex );
+					} );
 					if( found == vertices.end() ){ // unique vertex, add to the list
 						vertices.emplace_back( vertex );
 					}
@@ -336,40 +336,40 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 class ForEachFace : public BrushVisitor
 {
 public:
-ForEachFace( ExportData& _exporter )
-	: exporter( _exporter )
-{}
+	ForEachFace( ExportData& _exporter )
+		: exporter( _exporter )
+	{}
 
-void visit( Face& face ) const {
-	if( face.contributes() )
-		exporter.AddBrushFace( face );
-}
+	void visit( Face& face ) const {
+		if( face.contributes() )
+			exporter.AddBrushFace( face );
+	}
 
 private:
-ExportData& exporter;
+	ExportData& exporter;
 };
 
 class ForEachSelected : public SelectionSystem::Visitor
 {
 public:
-ForEachSelected( ExportData& _exporter )
-	: exporter( _exporter )
-{}
+	ForEachSelected( ExportData& _exporter )
+		: exporter( _exporter )
+	{}
 
-void visit( scene::Instance& instance ) const {
-	BrushInstance* bptr = InstanceTypeCast<BrushInstance>::cast( instance );
-	if ( bptr ) {
-		Brush& brush( bptr->getBrush() );
+	void visit( scene::Instance& instance ) const {
+		BrushInstance* bptr = InstanceTypeCast<BrushInstance>::cast( instance );
+		if ( bptr ) {
+			Brush& brush( bptr->getBrush() );
 
-		exporter.BeginBrush( brush );
-		ForEachFace face_vis( exporter );
-		brush.forEachFace( face_vis );
-		exporter.EndBrush();
+			exporter.BeginBrush( brush );
+			ForEachFace face_vis( exporter );
+			brush.forEachFace( face_vis );
+			exporter.EndBrush();
+		}
 	}
-}
 
 private:
-ExportData& exporter;
+	ExportData& exporter;
 };
 
 #include "plugin.h"

@@ -27,21 +27,21 @@
 
 class EntityFilterWrapper : public Filter
 {
-bool m_active;
-bool m_invert;
-EntityFilter& m_filter;
+	bool m_active;
+	bool m_invert;
+	EntityFilter& m_filter;
 public:
-EntityFilterWrapper( EntityFilter& filter, bool invert ) : m_invert( invert ), m_filter( filter ){
-}
-void setActive( bool active ){
-	m_active = active;
-}
-bool active(){
-	return m_active;
-}
-bool filter( const Entity& entity ){
-	return m_invert ^ m_filter.filter( entity );
-}
+	EntityFilterWrapper( EntityFilter& filter, bool invert ) : m_invert( invert ), m_filter( filter ){
+	}
+	void setActive( bool active ){
+		m_active = active;
+	}
+	bool active(){
+		return m_active;
+	}
+	bool filter( const Entity& entity ){
+		return m_invert ^ m_filter.filter( entity );
+	}
 };
 
 

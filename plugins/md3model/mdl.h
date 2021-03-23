@@ -22,7 +22,9 @@
 #if !defined( INCLUDED_MDL_H )
 #define INCLUDED_MDL_H
 
-namespace scene { class Node; }
+namespace scene {
+class Node;
+}
 class ArchiveFile;
 scene::Node& loadMDLModel( ArchiveFile& file );
 

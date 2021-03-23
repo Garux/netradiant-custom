@@ -51,10 +51,10 @@ class UFOAIPluginDependencies :
 	public GlobalEntityClassManagerModuleRef
 {
 public:
-UFOAIPluginDependencies( void ) :
-	GlobalEntityModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ) ),
-	GlobalEntityClassManagerModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclass" ) ){
-}
+	UFOAIPluginDependencies( void ) :
+		GlobalEntityModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ) ),
+		GlobalEntityClassManagerModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclass" ) ){
+	}
 };
 
 namespace UFOAI
@@ -79,8 +79,8 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 	const char *message = NULL;
 	if ( string_equal( command, "About" ) ) {
 		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_mainwnd ),
-										 "UFO:AI Plugin (http://ufoai.sf.net)\nBuild: " __DATE__ "\nRadiant version: " RADIANT_VERSION "\nPlugin version: " PLUGIN_VERSION "\nAuthor: Martin Gerhardy (tlh2000/mattn)\n", "About",
-										 eMB_OK, eMB_ICONDEFAULT );
+		                                 "UFO:AI Plugin (http://ufoai.sf.net)\nBuild: " __DATE__ "\nRadiant version: " RADIANT_VERSION "\nPlugin version: " PLUGIN_VERSION "\nAuthor: Martin Gerhardy (tlh2000/mattn)\n", "About",
+		                                 eMB_OK, eMB_ICONDEFAULT );
 	}
 	else if ( string_equal( command, "Level 1" ) ) {
 		filter_level( CONTENTS_LEVEL1 );
@@ -130,8 +130,8 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 
 	if ( message != NULL ) {
 		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_mainwnd ),
-										 message, "Note",
-										 eMB_OK, eMB_ICONDEFAULT );
+		                                 message, "Note",
+		                                 eMB_OK, eMB_ICONDEFAULT );
 	}
 	SceneChangeNotify();
 }
@@ -140,21 +140,21 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 
 class UFOAIModule : public TypeSystemRef
 {
-_QERPluginTable m_plugin;
+	_QERPluginTable m_plugin;
 public:
-typedef _QERPluginTable Type;
-STRING_CONSTANT( Name, "UFO:AI" );
+	typedef _QERPluginTable Type;
+	STRING_CONSTANT( Name, "UFO:AI" );
 
-UFOAIModule(){
-	m_plugin.m_pfnQERPlug_Init = &UFOAI::init;
-	m_plugin.m_pfnQERPlug_GetName = &UFOAI::getName;
-	m_plugin.m_pfnQERPlug_GetCommandList = &UFOAI::getCommandList;
-	m_plugin.m_pfnQERPlug_GetCommandTitleList = &UFOAI::getCommandTitleList;
-	m_plugin.m_pfnQERPlug_Dispatch = &UFOAI::dispatch;
-}
-_QERPluginTable* getTable(){
-	return &m_plugin;
-}
+	UFOAIModule(){
+		m_plugin.m_pfnQERPlug_Init = &UFOAI::init;
+		m_plugin.m_pfnQERPlug_GetName = &UFOAI::getName;
+		m_plugin.m_pfnQERPlug_GetCommandList = &UFOAI::getCommandList;
+		m_plugin.m_pfnQERPlug_GetCommandTitleList = &UFOAI::getCommandTitleList;
+		m_plugin.m_pfnQERPlug_Dispatch = &UFOAI::dispatch;
+	}
+	_QERPluginTable* getTable(){
+		return &m_plugin;
+	}
 };
 
 typedef SingletonModule<UFOAIModule, UFOAIPluginDependencies> SingletonUFOAIModule;
@@ -165,31 +165,31 @@ SingletonUFOAIModule g_UFOAIModule;
 class UFOAIToolbarDependencies : public ModuleRef<_QERPluginTable>
 {
 public:
-UFOAIToolbarDependencies() : ModuleRef<_QERPluginTable>( "UFO:AI" ){
-}
+	UFOAIToolbarDependencies() : ModuleRef<_QERPluginTable>( "UFO:AI" ){
+	}
 };
 
 class UFOAIToolbarModule : public TypeSystemRef
 {
-_QERPlugToolbarTable m_table;
+	_QERPlugToolbarTable m_table;
 public:
-typedef _QERPlugToolbarTable Type;
-STRING_CONSTANT( Name, "UFO:AI" );
+	typedef _QERPlugToolbarTable Type;
+	STRING_CONSTANT( Name, "UFO:AI" );
 
-UFOAIToolbarModule(){
-	if ( !strcmp( GlobalRadiant().getGameDescriptionKeyValue( "name" ), "UFO:Alien Invasion" ) ) {
-		m_table.m_pfnToolbarButtonCount = ToolbarButtonCount;
-		m_table.m_pfnGetToolbarButton = GetToolbarButton;
+	UFOAIToolbarModule(){
+		if ( !strcmp( GlobalRadiant().getGameDescriptionKeyValue( "name" ), "UFO:Alien Invasion" ) ) {
+			m_table.m_pfnToolbarButtonCount = ToolbarButtonCount;
+			m_table.m_pfnGetToolbarButton = GetToolbarButton;
+		}
+		else
+		{
+			m_table.m_pfnToolbarButtonCount = ToolbarNoButtons;
+			m_table.m_pfnGetToolbarButton = GetToolbarNoButton;
+		}
 	}
-	else
-	{
-		m_table.m_pfnToolbarButtonCount = ToolbarNoButtons;
-		m_table.m_pfnGetToolbarButton = GetToolbarNoButton;
+	_QERPlugToolbarTable* getTable(){
+		return &m_table;
 	}
-}
-_QERPlugToolbarTable* getTable(){
-	return &m_table;
-}
 };
 
 typedef SingletonModule<UFOAIToolbarModule, UFOAIToolbarDependencies> SingletonUFOAIToolbarModule;

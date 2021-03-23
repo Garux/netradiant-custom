@@ -87,7 +87,7 @@ inline bool path_equal_n( const char* path, const char* other, std::size_t n ){
 inline bool path_is_absolute( const char* path ){
 #if defined( WIN32 )
 	return path[0] == '/'
-		   || ( path[0] != '\0' && path[1] == ':' ); // local drive
+	    || ( path[0] != '\0' && path[1] == ':' ); // local drive
 #elif defined( POSIX )
 	return path[0] == '/';
 #endif
@@ -188,17 +188,17 @@ inline bool extension_equal( const char* extension, const char* other ){
 template<typename Functor>
 class MatchFileExtension
 {
-const char* m_extension;
-const Functor& m_functor;
+	const char* m_extension;
+	const Functor& m_functor;
 public:
-MatchFileExtension( const char* extension, const Functor& functor ) : m_extension( extension ), m_functor( functor ){
-}
-void operator()( const char* name ) const {
-	const char* extension = path_get_extension( name );
-	if ( extension_equal( extension, m_extension ) ) {
-		m_functor( name );
+	MatchFileExtension( const char* extension, const Functor& functor ) : m_extension( extension ), m_functor( functor ){
 	}
-}
+	void operator()( const char* name ) const {
+		const char* extension = path_get_extension( name );
+		if ( extension_equal( extension, m_extension ) ) {
+			m_functor( name );
+		}
+	}
 };
 
 /// \brief A functor which invokes its contained \p functor if the \p name argument matches its \p extension.
@@ -225,12 +225,12 @@ inline StringRange PathFilenameless( const char *path ){
 class PathCleaned
 {
 public:
-const char* m_path;
-const char* m_end;
-PathCleaned( const char* path ) : m_path( path ), m_end( path + std::strlen( path ) ){
-}
-PathCleaned( const StringRange& range ) : m_path( range.first ), m_end( range.last ){
-}
+	const char* m_path;
+	const char* m_end;
+	PathCleaned( const char* path ) : m_path( path ), m_end( path + std::strlen( path ) ){
+	}
+	PathCleaned( const StringRange& range ) : m_path( range.first ), m_end( range.last ){
+	}
 };
 
 /// \brief Writes \p path to \p ostream with dos-style separators replaced by unix-style separators.
@@ -252,9 +252,9 @@ TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const PathCl
 class DirectoryCleaned
 {
 public:
-const char* m_path;
-DirectoryCleaned( const char* path ) : m_path( path ){
-}
+	const char* m_path;
+	DirectoryCleaned( const char* path ) : m_path( path ){
+	}
 };
 
 /// \brief Writes \p path to \p ostream with dos-style separators replaced by unix-style separators, and appends a separator if necessary.

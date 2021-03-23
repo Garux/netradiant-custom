@@ -34,50 +34,50 @@ typedef idVec3 &vec3_p;
 
 class angles_t {
 public:
-float pitch;
-float yaw;
-float roll;
+	float pitch;
+	float yaw;
+	float roll;
 
-angles_t();
-angles_t( float pitch, float yaw, float roll );
-angles_t( const idVec3 &vec );
+	angles_t();
+	angles_t( float pitch, float yaw, float roll );
+	angles_t( const idVec3 &vec );
 
-friend void     toAngles( idVec3 &src, angles_t &dst );
-friend void     toAngles( quat_t &src, angles_t &dst );
-friend void     toAngles( mat3_t &src, angles_t &dst );
+	friend void     toAngles( idVec3 &src, angles_t &dst );
+	friend void     toAngles( quat_t &src, angles_t &dst );
+	friend void     toAngles( mat3_t &src, angles_t &dst );
 
-operator vec3_p();
+	operator vec3_p();
 
-float operator[]( int index ) const;
-float&          operator[]( int index );
+	float operator[]( int index ) const;
+	float&          operator[]( int index );
 
-void            set( float pitch, float yaw, float roll );
+	void            set( float pitch, float yaw, float roll );
 
-void operator=( angles_t const &a );
-void operator=( idVec3 const &a );
+	void operator=( angles_t const &a );
+	void operator=( idVec3 const &a );
 
-friend angles_t operator+( const angles_t &a, const angles_t &b );
-angles_t        &operator+=( angles_t const &a );
-angles_t        &operator+=( idVec3 const &a );
+	friend angles_t operator+( const angles_t &a, const angles_t &b );
+	angles_t        &operator+=( angles_t const &a );
+	angles_t        &operator+=( idVec3 const &a );
 
-friend angles_t operator-( angles_t &a, angles_t &b );
-angles_t        &operator-=( angles_t &a );
+	friend angles_t operator-( angles_t &a, angles_t &b );
+	angles_t        &operator-=( angles_t &a );
 
-friend angles_t operator*( const angles_t &a, float b );
-friend angles_t operator*( float a, const angles_t &b );
-angles_t        &operator*=( float a );
+	friend angles_t operator*( const angles_t &a, float b );
+	friend angles_t operator*( float a, const angles_t &b );
+	angles_t        &operator*=( float a );
 
-friend int operator==( angles_t &a, angles_t &b );
+	friend int operator==( angles_t &a, angles_t &b );
 
-friend int operator!=( angles_t &a, angles_t &b );
+	friend int operator!=( angles_t &a, angles_t &b );
 
-void            toVectors( idVec3 *forward, idVec3 *right = NULL, idVec3 *up = NULL );
-idVec3          toForward( void );
+	void            toVectors( idVec3 *forward, idVec3 *right = NULL, idVec3 *up = NULL );
+	idVec3          toForward( void );
 
-angles_t        &Zero( void );
+	angles_t        &Zero( void );
 
-angles_t        &Normalize360( void );
-angles_t        &Normalize180( void );
+	angles_t        &Normalize360( void );
+	angles_t        &Normalize180( void );
 };
 
 extern angles_t ang_zero;

@@ -22,7 +22,9 @@
 #if !defined( INCLUDED_MDC_H )
 #define INCLUDED_MDC_H
 
-namespace scene { class Node; }
+namespace scene {
+class Node;
+}
 class ArchiveFile;
 scene::Node& loadMDCModel( ArchiveFile& file );
 

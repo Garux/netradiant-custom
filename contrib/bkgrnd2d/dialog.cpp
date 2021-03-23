@@ -40,20 +40,20 @@ static GtkWidget *pNotebook;
 class CBackgroundDialogPage
 {
 private:
-GtkWidget *m_pWidget;
-GtkWidget *m_pTabLabel;
-GtkWidget *m_pFileLabel;
-GtkWidget *m_pPosLabel;
-VIEWTYPE m_vt;
-bool m_bValidFile;
+	GtkWidget *m_pWidget;
+	GtkWidget *m_pTabLabel;
+	GtkWidget *m_pFileLabel;
+	GtkWidget *m_pPosLabel;
+	VIEWTYPE m_vt;
+	bool m_bValidFile;
 
 public:
-CBackgroundImage *m_pImage;
-CBackgroundDialogPage( VIEWTYPE vt );
-void Append( GtkWidget *notebook );
-void Browse();
-void Reload();
-void SetPosLabel();
+	CBackgroundImage *m_pImage;
+	CBackgroundDialogPage( VIEWTYPE vt );
+	void Append( GtkWidget *notebook );
+	void Browse();
+	void Reload();
+	void SetPosLabel();
 //  ~BackgroundDialogPage();
 };
 
@@ -142,7 +142,7 @@ void CBackgroundDialogPage::Browse(){
 //TODO patern gets fucked up sometimes if empty
 //http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=915
 	newfile = g_FuncTable.m_pfnFileDialog( pDialogWnd,TRUE,
-										   "Load Background Image",browsedir,FILETYPE_KEY );
+	                                       "Load Background Image",browsedir,FILETYPE_KEY );
 	if ( !newfile ) {
 		Syn_Printf( MSG_PREFIX "newfile = NULL\n" );
 		return;
@@ -166,7 +166,7 @@ void CBackgroundDialogPage::SetPosLabel(){
 	char s[64];
 	// TODO no snprintf ?
 	sprintf( s, "Size/Position (%d,%d) (%d,%d)",(int)( m_pImage->m_xmin ),
-			 (int)( m_pImage->m_ymin ),(int)( m_pImage->m_xmax ),(int)( m_pImage->m_ymax ) );
+	         (int)( m_pImage->m_ymin ),(int)( m_pImage->m_xmax ),(int)( m_pImage->m_ymax ) );
 	gtk_label_set_text( GTK_LABEL( m_pPosLabel ),s );
 }
 
@@ -215,14 +215,14 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 
 	w = gtk_button_new_with_label( "Browse..." );
 	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( browse_callback ),
-					  ( gpointer ) this );
+	                  ( gpointer ) this );
 	gtk_box_pack_start( GTK_BOX( hbox ),w, FALSE, FALSE, 5 );
 	gtk_widget_set_tooltip_text( w, "Select a file" );
 	gtk_widget_show( w );
 
 	w = gtk_button_new_with_label( "Reload" );
 	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( reload_callback ),
-					  ( gpointer ) this );
+	                  ( gpointer ) this );
 	// TODO disable until we have file
 	// gtk_widget_set_sensitive(w,FALSE);
 	gtk_widget_set_tooltip_text( w, "Reload current file" );
@@ -248,7 +248,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	gtk_range_set_value( GTK_RANGE( w ),0.5 );
 	gtk_scale_set_value_pos( GTK_SCALE( w ),GTK_POS_LEFT );
 	g_signal_connect( G_OBJECT( w ), "value-changed",
-					  G_CALLBACK( alpha_adjust_callback ), ( gpointer ) this );
+	                  G_CALLBACK( alpha_adjust_callback ), ( gpointer ) this );
 	gtk_box_pack_start( GTK_BOX( hbox ),w, TRUE, TRUE, 5 );
 	gtk_widget_set_tooltip_text( w, "Set image transparancy" );
 	gtk_widget_show( w );
@@ -267,7 +267,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	w = gtk_button_new_with_label( "from selection" );
 	gtk_box_pack_start( GTK_BOX( hbox ),w, TRUE, FALSE, 5 );
 	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( size_sel_callback ),
-					  ( gpointer ) this );
+	                  ( gpointer ) this );
 	gtk_widget_set_tooltip_text( w, "Set the size of the image to the bounding rectangle of all selected brushes and entities" );
 	gtk_widget_show( w );
 
@@ -275,7 +275,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 		w = gtk_button_new_with_label( "from map mins/maxs" );
 		gtk_box_pack_start( GTK_BOX( hbox ),w, TRUE, FALSE, 2 );
 		g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( size_mm_callback ),
-						  ( gpointer ) this );
+		                  ( gpointer ) this );
 		gtk_widget_set_tooltip_text( w, "Set the size of the image using the mapcoordsmins and mapcoordsmaxs keys of the worldspawn entity" );
 		gtk_widget_show( w );
 	}
@@ -313,17 +313,17 @@ void InitBackgroundDialog(){
 	CBackgroundDialogPage *pPage;
 
 	pDialogWnd = gtk_dialog_new_with_buttons( "Background Images",
-											  GTK_WINDOW( g_pMainWidget ),
-											  (GtkDialogFlags)( GTK_DIALOG_DESTROY_WITH_PARENT ),
+	                                          GTK_WINDOW( g_pMainWidget ),
+	                                          (GtkDialogFlags)( GTK_DIALOG_DESTROY_WITH_PARENT ),
 	                                          // TODO dialog with no buttons
-	                                          //										  GTK_STOCK_CLOSE,
-	                                          //										  GTK_RESPONSE_CLOSE,
-											  NULL );
+	                                          //  GTK_STOCK_CLOSE,
+	                                          //  GTK_RESPONSE_CLOSE,
+	                                          NULL );
 	g_signal_connect( G_OBJECT( pDialogWnd ), "delete_event",
-						G_CALLBACK( close_callback ), NULL );
+	                  G_CALLBACK( close_callback ), NULL );
 	g_signal_connect( G_OBJECT( pDialogWnd ), "response",
-						G_CALLBACK( response_callback ), NULL );
-//  g_signal_connect( G_OBJECT (pDialogWnd), "expose_event", G_CALLBACK( ci_expose ), NULL );
+	                  G_CALLBACK( response_callback ), NULL );
+//	g_signal_connect( G_OBJECT (pDialogWnd), "expose_event", G_CALLBACK( ci_expose ), NULL );
 
 	pNotebook = gtk_notebook_new();
 	pPage = new CBackgroundDialogPage( XY );

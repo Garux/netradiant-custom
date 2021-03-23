@@ -57,100 +57,100 @@
 /* specialized copy of class CompiledGraph */
 class ModelGraph final : public scene::Graph, public scene::Instantiable::Observer
 {
-typedef std::map<PathConstReference, scene::Instance*> InstanceMap;
+	typedef std::map<PathConstReference, scene::Instance*> InstanceMap;
 
-InstanceMap m_instances;
-scene::Path m_rootpath;
+	InstanceMap m_instances;
+	scene::Path m_rootpath;
 
-scene::Instantiable::Observer& m_observer;
+	scene::Instantiable::Observer& m_observer;
 
 public:
 
-ModelGraph( scene::Instantiable::Observer& observer ) : m_observer( observer ){
-}
+	ModelGraph( scene::Instantiable::Observer& observer ) : m_observer( observer ){
+	}
 
-void addSceneChangedCallback( const SignalHandler& handler ){
-	ASSERT_MESSAGE( 0, "Reached unreachable: addSceneChangedCallback()" );
-}
-void sceneChanged(){
-	ASSERT_MESSAGE( 0, "Reached unreachable: sceneChanged()" );
-}
+	void addSceneChangedCallback( const SignalHandler& handler ){
+		ASSERT_MESSAGE( 0, "Reached unreachable: addSceneChangedCallback()" );
+	}
+	void sceneChanged(){
+		ASSERT_MESSAGE( 0, "Reached unreachable: sceneChanged()" );
+	}
 
-scene::Node& root(){
-	ASSERT_MESSAGE( !m_rootpath.empty(), "scenegraph root does not exist" );
-	return m_rootpath.top();
-}
-void insert_root( scene::Node& root ){
-	//globalOutputStream() << "insert_root\n";
+	scene::Node& root(){
+		ASSERT_MESSAGE( !m_rootpath.empty(), "scenegraph root does not exist" );
+		return m_rootpath.top();
+	}
+	void insert_root( scene::Node& root ){
+		//globalOutputStream() << "insert_root\n";
 
-	ASSERT_MESSAGE( m_rootpath.empty(), "scenegraph root already exists" );
+		ASSERT_MESSAGE( m_rootpath.empty(), "scenegraph root already exists" );
 
-	root.IncRef();
+		root.IncRef();
 
-	Node_traverseSubgraph( root, InstanceSubgraphWalker( this, scene::Path(), 0 ) );
+		Node_traverseSubgraph( root, InstanceSubgraphWalker( this, scene::Path(), 0 ) );
 
-	m_rootpath.push( makeReference( root ) );
-}
-void erase_root(){
-	//globalOutputStream() << "erase_root\n";
+		m_rootpath.push( makeReference( root ) );
+	}
+	void erase_root(){
+		//globalOutputStream() << "erase_root\n";
 
-	ASSERT_MESSAGE( !m_rootpath.empty(), "scenegraph root does not exist" );
+		ASSERT_MESSAGE( !m_rootpath.empty(), "scenegraph root does not exist" );
 
-	scene::Node& root = m_rootpath.top();
+		scene::Node& root = m_rootpath.top();
 
-	m_rootpath.pop();
+		m_rootpath.pop();
 
-	Node_traverseSubgraph( root, UninstanceSubgraphWalker( this, scene::Path() ) );
+		Node_traverseSubgraph( root, UninstanceSubgraphWalker( this, scene::Path() ) );
 
-	root.DecRef();
-}
-void boundsChanged(){
-	ASSERT_MESSAGE( 0, "Reached unreachable: boundsChanged()" );
-}
+		root.DecRef();
+	}
+	void boundsChanged(){
+		ASSERT_MESSAGE( 0, "Reached unreachable: boundsChanged()" );
+	}
 
-void traverse( const Walker& walker ){
-	ASSERT_MESSAGE( 0, "Reached unreachable: traverse()" );
-}
+	void traverse( const Walker& walker ){
+		ASSERT_MESSAGE( 0, "Reached unreachable: traverse()" );
+	}
 
-void traverse_subgraph( const Walker& walker, const scene::Path& start ){
-	ASSERT_MESSAGE( 0, "Reached unreachable: traverse_subgraph()" );
-}
+	void traverse_subgraph( const Walker& walker, const scene::Path& start ){
+		ASSERT_MESSAGE( 0, "Reached unreachable: traverse_subgraph()" );
+	}
 
-scene::Instance* find( const scene::Path& path ){
-	ASSERT_MESSAGE( 0, "Reached unreachable: find()" );
-	return nullptr;
-}
+	scene::Instance* find( const scene::Path& path ){
+		ASSERT_MESSAGE( 0, "Reached unreachable: find()" );
+		return nullptr;
+	}
 
-void insert( scene::Instance* instance ){
-	m_instances.insert( InstanceMap::value_type( PathConstReference( instance->path() ), instance ) );
-	m_observer.insert( instance );
-}
-void erase( scene::Instance* instance ){
-	m_instances.erase( PathConstReference( instance->path() ) );
-	m_observer.erase( instance );
-}
+	void insert( scene::Instance* instance ){
+		m_instances.insert( InstanceMap::value_type( PathConstReference( instance->path() ), instance ) );
+		m_observer.insert( instance );
+	}
+	void erase( scene::Instance* instance ){
+		m_instances.erase( PathConstReference( instance->path() ) );
+		m_observer.erase( instance );
+	}
 
-SignalHandlerId addBoundsChangedCallback( const SignalHandler& boundsChanged ){
-	ASSERT_MESSAGE( 0, "Reached unreachable: addBoundsChangedCallback()" );
-	return Handle<Opaque<SignalHandler>>( nullptr );
-}
-void removeBoundsChangedCallback( SignalHandlerId id ){
-	ASSERT_MESSAGE( 0, "Reached unreachable: removeBoundsChangedCallback()" );
-}
+	SignalHandlerId addBoundsChangedCallback( const SignalHandler& boundsChanged ){
+		ASSERT_MESSAGE( 0, "Reached unreachable: addBoundsChangedCallback()" );
+		return Handle<Opaque<SignalHandler>>( nullptr );
+	}
+	void removeBoundsChangedCallback( SignalHandlerId id ){
+		ASSERT_MESSAGE( 0, "Reached unreachable: removeBoundsChangedCallback()" );
+	}
 
-TypeId getNodeTypeId( const char* name ){
-	ASSERT_MESSAGE( 0, "Reached unreachable: getNodeTypeId()" );
-	return 0;
-}
+	TypeId getNodeTypeId( const char* name ){
+		ASSERT_MESSAGE( 0, "Reached unreachable: getNodeTypeId()" );
+		return 0;
+	}
 
-TypeId getInstanceTypeId( const char* name ){
-	ASSERT_MESSAGE( 0, "Reached unreachable: getInstanceTypeId()" );
-	return 0;
-}
+	TypeId getInstanceTypeId( const char* name ){
+		ASSERT_MESSAGE( 0, "Reached unreachable: getInstanceTypeId()" );
+		return 0;
+	}
 
-void clear(){
-	DeleteSubgraph( root() );
-}
+	void clear(){
+		DeleteSubgraph( root() );
+	}
 
 };
 
@@ -158,177 +158,177 @@ void clear(){
 /// \brief A sequence of node references which notifies an observer of inserts and deletions, and uses the global undo system to provide undo for modifications.
 class TraversableModelNodeSet : public scene::Traversable
 {
-UnsortedNodeSet m_children;
-Observer* m_observer;
+	UnsortedNodeSet m_children;
+	Observer* m_observer;
 
-void copy( const TraversableModelNodeSet& other ){
-	m_children = other.m_children;
-}
-void notifyInsertAll(){
-	if ( m_observer ) {
-		for ( UnsortedNodeSet::iterator i = m_children.begin(); i != m_children.end(); ++i )
-		{
-			m_observer->insert( *i );
+	void copy( const TraversableModelNodeSet& other ){
+		m_children = other.m_children;
+	}
+	void notifyInsertAll(){
+		if ( m_observer ) {
+			for ( UnsortedNodeSet::iterator i = m_children.begin(); i != m_children.end(); ++i )
+			{
+				m_observer->insert( *i );
+			}
 		}
 	}
-}
-void notifyEraseAll(){
-	if ( m_observer ) {
-		for ( UnsortedNodeSet::iterator i = m_children.begin(); i != m_children.end(); ++i )
-		{
-			m_observer->erase( *i );
+	void notifyEraseAll(){
+		if ( m_observer ) {
+			for ( UnsortedNodeSet::iterator i = m_children.begin(); i != m_children.end(); ++i )
+			{
+				m_observer->erase( *i );
+			}
 		}
 	}
-}
 public:
-TraversableModelNodeSet()
-	: m_observer( 0 ){
-}
-TraversableModelNodeSet( const TraversableModelNodeSet& other )
-	: scene::Traversable( other ), m_observer( 0 ){
-	copy( other );
-	notifyInsertAll();
-}
-~TraversableModelNodeSet(){
-	notifyEraseAll();
-}
-TraversableModelNodeSet& operator=( const TraversableModelNodeSet& other ){
+	TraversableModelNodeSet()
+		: m_observer( 0 ){
+	}
+	TraversableModelNodeSet( const TraversableModelNodeSet& other )
+		: scene::Traversable( other ), m_observer( 0 ){
+		copy( other );
+		notifyInsertAll();
+	}
+	~TraversableModelNodeSet(){
+		notifyEraseAll();
+	}
+	TraversableModelNodeSet& operator=( const TraversableModelNodeSet& other ){
 #if 1 // optimised change-tracking using diff algorithm
-	if ( m_observer ) {
-		nodeset_diff( m_children, other.m_children, m_observer );
-	}
-	copy( other );
+		if ( m_observer ) {
+			nodeset_diff( m_children, other.m_children, m_observer );
+		}
+		copy( other );
 #else
-	TraversableModelNodeSet tmp( other );
-	tmp.swap( *this );
+		TraversableModelNodeSet tmp( other );
+		tmp.swap( *this );
 #endif
-	return *this;
-}
-void swap( TraversableModelNodeSet& other ){
-	std::swap( m_children, other.m_children );
-	std::swap( m_observer, other.m_observer );
-}
+		return *this;
+	}
+	void swap( TraversableModelNodeSet& other ){
+		std::swap( m_children, other.m_children );
+		std::swap( m_observer, other.m_observer );
+	}
 
-void attach( Observer* observer ){
-	ASSERT_MESSAGE( m_observer == 0, "TraversableModelNodeSet::attach: observer cannot be attached" );
-	m_observer = observer;
-	notifyInsertAll();
-}
-void detach( Observer* observer ){
-	ASSERT_MESSAGE( m_observer == observer, "TraversableModelNodeSet::detach: observer cannot be detached" );
-	notifyEraseAll();
-	m_observer = 0;
-}
+	void attach( Observer* observer ){
+		ASSERT_MESSAGE( m_observer == 0, "TraversableModelNodeSet::attach: observer cannot be attached" );
+		m_observer = observer;
+		notifyInsertAll();
+	}
+	void detach( Observer* observer ){
+		ASSERT_MESSAGE( m_observer == observer, "TraversableModelNodeSet::detach: observer cannot be detached" );
+		notifyEraseAll();
+		m_observer = 0;
+	}
 /// \brief \copydoc scene::Traversable::insert()
-void insert( scene::Node& node ){
-	ASSERT_MESSAGE( (volatile intptr_t)&node != 0, "TraversableModelNodeSet::insert: sanity check failed" );
+	void insert( scene::Node& node ){
+		ASSERT_MESSAGE( (volatile intptr_t)&node != 0, "TraversableModelNodeSet::insert: sanity check failed" );
 
-	ASSERT_MESSAGE( m_children.find( NodeSmartReference( node ) ) == m_children.end(), "TraversableModelNodeSet::insert - element already exists" );
+		ASSERT_MESSAGE( m_children.find( NodeSmartReference( node ) ) == m_children.end(), "TraversableModelNodeSet::insert - element already exists" );
 
-	m_children.insert( NodeSmartReference( node ) );
+		m_children.insert( NodeSmartReference( node ) );
 
-	if ( m_observer ) {
-		m_observer->insert( node );
+		if ( m_observer ) {
+			m_observer->insert( node );
+		}
 	}
-}
 /// \brief \copydoc scene::Traversable::erase()
-void erase( scene::Node& node ){
-	ASSERT_MESSAGE( (volatile intptr_t)&node != 0, "TraversableModelNodeSet::erase: sanity check failed" );
+	void erase( scene::Node& node ){
+		ASSERT_MESSAGE( (volatile intptr_t)&node != 0, "TraversableModelNodeSet::erase: sanity check failed" );
 
-	ASSERT_MESSAGE( m_children.find( NodeSmartReference( node ) ) != m_children.end(), "TraversableModelNodeSet::erase - failed to find element" );
+		ASSERT_MESSAGE( m_children.find( NodeSmartReference( node ) ) != m_children.end(), "TraversableModelNodeSet::erase - failed to find element" );
 
-	if ( m_observer ) {
-		m_observer->erase( node );
+		if ( m_observer ) {
+			m_observer->erase( node );
+		}
+
+		m_children.erase( NodeSmartReference( node ) );
 	}
-
-	m_children.erase( NodeSmartReference( node ) );
-}
 /// \brief \copydoc scene::Traversable::traverse()
-void traverse( const Walker& walker ){
-	UnsortedNodeSet::iterator i = m_children.begin();
-	while ( i != m_children.end() )
-	{
-		// post-increment the iterator
-		Node_traverseSubgraph( *i++, walker );
-		// the Walker can safely remove the current node from
-		// this container without invalidating the iterator
+	void traverse( const Walker& walker ){
+		UnsortedNodeSet::iterator i = m_children.begin();
+		while ( i != m_children.end() )
+		{
+			// post-increment the iterator
+			Node_traverseSubgraph( *i++, walker );
+			// the Walker can safely remove the current node from
+			// this container without invalidating the iterator
+		}
 	}
-}
 /// \brief \copydoc scene::Traversable::empty()
-bool empty() const {
-	return m_children.empty();
-}
+	bool empty() const {
+		return m_children.empty();
+	}
 };
 
 /* specialized copy of class MapRoot */
 class ModelGraphRoot : public scene::Node::Symbiot, public scene::Instantiable, public scene::Traversable::Observer
 {
-class TypeCasts
-{
-NodeTypeCastTable m_casts;
+	class TypeCasts
+	{
+		NodeTypeCastTable m_casts;
+	public:
+		TypeCasts(){
+			NodeStaticCast<ModelGraphRoot, scene::Instantiable>::install( m_casts );
+			NodeContainedCast<ModelGraphRoot, scene::Traversable>::install( m_casts );
+			NodeContainedCast<ModelGraphRoot, TransformNode>::install( m_casts );
+		}
+		NodeTypeCastTable& get(){
+			return m_casts;
+		}
+	};
+
+	scene::Node m_node;
+	IdentityTransform m_transform;
+	TraversableModelNodeSet m_traverse;
+	InstanceSet m_instances;
 public:
-TypeCasts(){
-	NodeStaticCast<ModelGraphRoot, scene::Instantiable>::install( m_casts );
-	NodeContainedCast<ModelGraphRoot, scene::Traversable>::install( m_casts );
-	NodeContainedCast<ModelGraphRoot, TransformNode>::install( m_casts );
-}
-NodeTypeCastTable& get(){
-	return m_casts;
-}
-};
+	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-scene::Node m_node;
-IdentityTransform m_transform;
-TraversableModelNodeSet m_traverse;
-InstanceSet m_instances;
-public:
-typedef LazyStatic<TypeCasts> StaticTypeCasts;
+	scene::Traversable& get( NullType<scene::Traversable>){
+		return m_traverse;
+	}
+	TransformNode& get( NullType<TransformNode>){
+		return m_transform;
+	}
 
-scene::Traversable& get( NullType<scene::Traversable>){
-	return m_traverse;
-}
-TransformNode& get( NullType<TransformNode>){
-	return m_transform;
-}
+	ModelGraphRoot() : m_node( this, this, StaticTypeCasts::instance().get() ){
+		m_node.m_isRoot = true;
 
-ModelGraphRoot() : m_node( this, this, StaticTypeCasts::instance().get() ){
-	m_node.m_isRoot = true;
+		m_traverse.attach( this );
+	}
+	~ModelGraphRoot(){
+	}
+	void release(){
+		m_traverse.detach( this );
+		delete this;
+	}
+	scene::Node& node(){
+		return m_node;
+	}
 
-	m_traverse.attach( this );
-}
-~ModelGraphRoot(){
-}
-void release(){
-	m_traverse.detach( this );
-	delete this;
-}
-scene::Node& node(){
-	return m_node;
-}
+	void insert( scene::Node& child ){
+		m_instances.insert( child );
+	}
+	void erase( scene::Node& child ){
+		m_instances.erase( child );
+	}
 
-void insert( scene::Node& child ){
-	m_instances.insert( child );
-}
-void erase( scene::Node& child ){
-	m_instances.erase( child );
-}
+	scene::Node& clone() const {
+		return ( new ModelGraphRoot( *this ) )->node();
+	}
 
-scene::Node& clone() const {
-	return ( new ModelGraphRoot( *this ) )->node();
-}
-
-scene::Instance* create( const scene::Path& path, scene::Instance* parent ){
-	return new SelectableInstance( path, parent );
-}
-void forEachInstance( const scene::Instantiable::Visitor& visitor ){
-	m_instances.forEachInstance( visitor );
-}
-void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ){
-	m_instances.insert( observer, path, instance );
-}
-scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ){
-	return m_instances.erase( observer, path );
-}
+	scene::Instance* create( const scene::Path& path, scene::Instance* parent ){
+		return new SelectableInstance( path, parent );
+	}
+	void forEachInstance( const scene::Instantiable::Visitor& visitor ){
+		m_instances.forEachInstance( visitor );
+	}
+	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ){
+		m_instances.insert( observer, path, instance );
+	}
+	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ){
+		return m_instances.erase( observer, path );
+	}
 };
 
 
@@ -342,88 +342,88 @@ class ModelNode :
 	public scene::Instantiable,
 	public scene::Traversable::Observer
 {
-class TypeCasts
-{
-NodeTypeCastTable m_casts;
+	class TypeCasts
+	{
+		NodeTypeCastTable m_casts;
+	public:
+		TypeCasts(){
+			NodeStaticCast<ModelNode, scene::Instantiable>::install( m_casts );
+			NodeContainedCast<ModelNode, scene::Traversable>::install( m_casts );
+			NodeContainedCast<ModelNode, TransformNode>::install( m_casts );
+		}
+		NodeTypeCastTable& get(){
+			return m_casts;
+		}
+	};
+
+
+	scene::Node m_node;
+	InstanceSet m_instances;
+	SingletonModel m_model;
+	MatrixTransform m_transform;
+
+	void construct(){
+		m_model.attach( this );
+	}
+	void destroy(){
+		m_model.detach( this );
+	}
+
 public:
-TypeCasts(){
-	NodeStaticCast<ModelNode, scene::Instantiable>::install( m_casts );
-	NodeContainedCast<ModelNode, scene::Traversable>::install( m_casts );
-	NodeContainedCast<ModelNode, TransformNode>::install( m_casts );
-}
-NodeTypeCastTable& get(){
-	return m_casts;
-}
-};
+	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
+	scene::Traversable& get( NullType<scene::Traversable>){
+		return m_model.getTraversable();
+	}
+	TransformNode& get( NullType<TransformNode>){
+		return m_transform;
+	}
 
-scene::Node m_node;
-InstanceSet m_instances;
-SingletonModel m_model;
-MatrixTransform m_transform;
+	ModelNode() :
+		m_node( this, this, StaticTypeCasts::instance().get() ){
+		construct();
+	}
+	ModelNode( const ModelNode& other ) :
+		scene::Node::Symbiot( other ),
+		scene::Instantiable( other ),
+		scene::Traversable::Observer( other ),
+		m_node( this, this, StaticTypeCasts::instance().get() ){
+		construct();
+	}
+	~ModelNode(){
+		destroy();
+	}
 
-void construct(){
-	m_model.attach( this );
-}
-void destroy(){
-	m_model.detach( this );
-}
+	void release(){
+		delete this;
+	}
+	scene::Node& node(){
+		return m_node;
+	}
 
-public:
-typedef LazyStatic<TypeCasts> StaticTypeCasts;
+	void insert( scene::Node& child ){
+		m_instances.insert( child );
+	}
+	void erase( scene::Node& child ){
+		m_instances.erase( child );
+	}
 
-scene::Traversable& get( NullType<scene::Traversable>){
-	return m_model.getTraversable();
-}
-TransformNode& get( NullType<TransformNode>){
-	return m_transform;
-}
+	scene::Instance* create( const scene::Path& path, scene::Instance* parent ){
+		return new SelectableInstance( path, parent );
+	}
+	void forEachInstance( const scene::Instantiable::Visitor& visitor ){
+		m_instances.forEachInstance( visitor );
+	}
+	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ){
+		m_instances.insert( observer, path, instance );
+	}
+	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ){
+		return m_instances.erase( observer, path );
+	}
 
-ModelNode() :
-	m_node( this, this, StaticTypeCasts::instance().get() ){
-	construct();
-}
-ModelNode( const ModelNode& other ) :
-	scene::Node::Symbiot( other ),
-	scene::Instantiable( other ),
-	scene::Traversable::Observer( other ),
-	m_node( this, this, StaticTypeCasts::instance().get() ){
-	construct();
-}
-~ModelNode(){
-	destroy();
-}
-
-void release(){
-	delete this;
-}
-scene::Node& node(){
-	return m_node;
-}
-
-void insert( scene::Node& child ){
-	m_instances.insert( child );
-}
-void erase( scene::Node& child ){
-	m_instances.erase( child );
-}
-
-scene::Instance* create( const scene::Path& path, scene::Instance* parent ){
-	return new SelectableInstance( path, parent );
-}
-void forEachInstance( const scene::Instantiable::Visitor& visitor ){
-	m_instances.forEachInstance( visitor );
-}
-void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ){
-	m_instances.insert( observer, path, instance );
-}
-scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ){
-	return m_instances.erase( observer, path );
-}
-
-void setModel( const char* modelname ){
-	m_model.modelChanged( modelname );
-}
+	void setModel( const char* modelname ){
+		m_model.modelChanged( modelname );
+	}
 };
 
 
@@ -474,8 +474,8 @@ class CellPos
 
 	int m_index = 0;
 public:
-	CellPos( int width, int cellSize, int fontHeight )
-	: m_cellSize( cellSize ), m_fontHeight( fontHeight ),
+	CellPos( int width, int cellSize, int fontHeight ) :
+		m_cellSize( cellSize ), m_fontHeight( fontHeight ),
 		m_fontDescent( GlobalOpenGL().m_font->getPixelDescent() ),
 		m_plusWidth( 8 ),
 		m_plusHeight( 0 ),
@@ -669,19 +669,20 @@ public:
 				const float scale = m_cellPos.getCellSize() / aabb.extents[ vector3_max_abs_component_index( aabb.extents ) ];
 				aabb.extents.z() *= 2; // prioritize Z for orientation
 				const Matrix4 rotation = matrix4_rotation_for_euler_xyz_degrees(
-											vector3_min_abs_component_index( aabb.extents ) == 0? Vector3( 0, 0, -90 )
-											: vector3_min_abs_component_index( aabb.extents ) == 2? Vector3( 90, 0, 0 )
-											: g_vector3_identity );
-				const_cast<Matrix4&>( transformNode->localToParent() ) = matrix4_multiplied_by_matrix4(
-																			matrix4_translation_for_vec3( m_cellPos.getOrigin() ),
-																			matrix4_multiplied_by_matrix4(
-																				rotation,
-																				matrix4_multiplied_by_matrix4(
-																					matrix4_scale_for_vec3( Vector3( scale, scale, scale ) ),
-																					matrix4_translation_for_vec3( -aabb.origin )
-																				)
-																			)
-																		);
+				                             vector3_min_abs_component_index( aabb.extents ) == 0? Vector3( 0, 0, -90 )
+				                             : vector3_min_abs_component_index( aabb.extents ) == 2? Vector3( 90, 0, 0 )
+				                             : g_vector3_identity );
+				const_cast<Matrix4&>( transformNode->localToParent() ) =
+				        matrix4_multiplied_by_matrix4(
+				            matrix4_translation_for_vec3( m_cellPos.getOrigin() ),
+				            matrix4_multiplied_by_matrix4(
+				                rotation,
+				                matrix4_multiplied_by_matrix4(
+				                    matrix4_scale_for_vec3( Vector3( scale, scale, scale ) ),
+				                    matrix4_translation_for_vec3( -aabb.origin )
+				                )
+				            )
+				        );
 				instance->parent()->transformChangedLocal();
 				instance->transformChangedLocal();
 //%		globalOutputStream() << transformNode->localToParent() << " transformNode->localToParent()\n";
@@ -694,47 +695,47 @@ public:
 
 class ModelRenderer : public Renderer
 {
-struct state_type
-{
-	state_type() :
-		m_state( 0 ){
-	}
-	Shader* m_state;
-};
+	struct state_type
+	{
+		state_type() :
+			m_state( 0 ){
+		}
+		Shader* m_state;
+	};
 public:
-ModelRenderer( RenderStateFlags globalstate ) :
-	m_globalstate( globalstate ){
-	m_state_stack.push_back( state_type() );
-}
-
-void SetState( Shader* state, EStyle style ){
-	ASSERT_NOTNULL( state );
-	if ( style == eFullMaterials ) {
-		m_state_stack.back().m_state = state;
+	ModelRenderer( RenderStateFlags globalstate ) :
+		m_globalstate( globalstate ){
+		m_state_stack.push_back( state_type() );
 	}
-}
-EStyle getStyle() const {
-	return eFullMaterials;
-}
-void PushState(){
-	m_state_stack.push_back( m_state_stack.back() );
-}
-void PopState(){
-	ASSERT_MESSAGE( !m_state_stack.empty(), "popping empty stack" );
-	m_state_stack.pop_back();
-}
-void Highlight( EHighlightMode mode, bool bEnable = true ){
-}
-void addRenderable( const OpenGLRenderable& renderable, const Matrix4& localToWorld ){
-	m_state_stack.back().m_state->addRenderable( renderable, localToWorld );
-}
 
-void render( const Matrix4& modelview, const Matrix4& projection ){
-	GlobalShaderCache().render( m_globalstate, modelview, projection );
-}
+	void SetState( Shader* state, EStyle style ){
+		ASSERT_NOTNULL( state );
+		if ( style == eFullMaterials ) {
+			m_state_stack.back().m_state = state;
+		}
+	}
+	EStyle getStyle() const {
+		return eFullMaterials;
+	}
+	void PushState(){
+		m_state_stack.push_back( m_state_stack.back() );
+	}
+	void PopState(){
+		ASSERT_MESSAGE( !m_state_stack.empty(), "popping empty stack" );
+		m_state_stack.pop_back();
+	}
+	void Highlight( EHighlightMode mode, bool bEnable = true ){
+	}
+	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& localToWorld ){
+		m_state_stack.back().m_state->addRenderable( renderable, localToWorld );
+	}
+
+	void render( const Matrix4& modelview, const Matrix4& projection ){
+		GlobalShaderCache().render( m_globalstate, modelview, projection );
+	}
 private:
-std::vector<state_type> m_state_stack;
-RenderStateFlags m_globalstate;
+	std::vector<state_type> m_state_stack;
+	RenderStateFlags m_globalstate;
 };
 
 /*
@@ -762,21 +763,21 @@ void ModelBrowser_render(){
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	const unsigned int globalstate = RENDER_DEPTHTEST
-									| RENDER_COLOURWRITE
-									| RENDER_DEPTHWRITE
-									| RENDER_ALPHATEST
-									| RENDER_BLEND
-									| RENDER_CULLFACE
-									| RENDER_COLOURARRAY
-									| RENDER_POLYGONSMOOTH
-									| RENDER_LINESMOOTH
-									| RENDER_FOG
-									| RENDER_COLOURCHANGE
-									| RENDER_FILL
-									| RENDER_LIGHTING
-									| RENDER_TEXTURE
-									| RENDER_SMOOTH
-									| RENDER_SCALED;
+	                               | RENDER_COLOURWRITE
+	                               | RENDER_DEPTHWRITE
+	                               | RENDER_ALPHATEST
+	                               | RENDER_BLEND
+	                               | RENDER_CULLFACE
+	                               | RENDER_COLOURARRAY
+	                               | RENDER_POLYGONSMOOTH
+	                               | RENDER_LINESMOOTH
+	                               | RENDER_FOG
+	                               | RENDER_COLOURCHANGE
+	                               | RENDER_FILL
+	                               | RENDER_LIGHTING
+	                               | RENDER_TEXTURE
+	                               | RENDER_SMOOTH
+	                               | RENDER_SCALED;
 
 
 	Matrix4 m_projection;
@@ -789,17 +790,9 @@ void ModelBrowser_render(){
 	m_projection[13] = 0.0f;
 	m_projection[14] = -1.0f;
 
-	m_projection[1] =
-		m_projection[2] =
-			m_projection[3] =
-
-				m_projection[4] =
-					m_projection[6] =
-						m_projection[7] =
-
-							m_projection[8] =
-								m_projection[9] =
-									m_projection[11] = 0.0f;
+	m_projection[1] = m_projection[2] = m_projection[3] =
+	m_projection[4] = m_projection[6] = m_projection[7] =
+	m_projection[8] = m_projection[9] = m_projection[11] = 0.0f;
 
 	m_projection[15] = 1.0f;
 
@@ -812,17 +805,17 @@ void ModelBrowser_render(){
 
 	// axis base
 	//XZ:
-		m_modelview[0]  =  1;
-		m_modelview[1]  =  0;
-		m_modelview[2]  =  0;
+	m_modelview[0]  =  1;
+	m_modelview[1]  =  0;
+	m_modelview[2]  =  0;
 
-		m_modelview[4]  =  0;
-		m_modelview[5]  =  0;
-		m_modelview[6]  =  1;
+	m_modelview[4]  =  0;
+	m_modelview[5]  =  0;
+	m_modelview[6]  =  1;
 
-		m_modelview[8]  =  0;
-		m_modelview[9]  =  1;
-		m_modelview[10] =  0;
+	m_modelview[8]  =  0;
+	m_modelview[9]  =  1;
+	m_modelview[10] =  0;
 
 
 	m_modelview[3] = m_modelview[7] = m_modelview[11] = 0;
@@ -842,7 +835,7 @@ void ModelBrowser_render(){
 
 
 	if( g_ModelBrowser.m_currentFolder != nullptr ){
-		{ // prepare for 2d stuff
+		{	// prepare for 2d stuff
 			glDisable( GL_BLEND );
 
 			if ( GlobalOpenGL().GL_1_3() ) {
@@ -860,7 +853,7 @@ void ModelBrowser_render(){
 			glDisable( GL_DEPTH_TEST );
 		}
 
-		{ // brighter background squares
+		{	// brighter background squares
 			glColor4f( 0.3f, 0.3f, 0.3f, 1.f );
 			glDepthMask( GL_FALSE );
 			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -916,7 +909,7 @@ void ModelBrowser_render(){
 			renderer.render( m_modelview, m_projection );
 		}
 
-		{ // prepare for 2d stuff
+		{	// prepare for 2d stuff
 			glColor4f( 1, 1, 1, 1 );
 			glDisable( GL_BLEND );
 
@@ -935,7 +928,7 @@ void ModelBrowser_render(){
 			glDisable( GL_DEPTH_TEST );
 			glLineWidth( 1 );
 		}
-		{ // render model file names
+		{	// render model file names
 			CellPos cellPos = g_ModelBrowser.constructCellPos();
 			for( const CopiedString& string : g_ModelBrowser.m_currentFolder->m_files ){
 				const Vector3 pos = cellPos.getTextPos();
@@ -1196,7 +1189,7 @@ public:
 	const ModelFoldersMap& m_modelFoldersMap;
 	bool m_avoid_pk3dir;
 	ModelPaths_ArchiveVisitor( const StringSetWithLambda& modelExtensions, ModelFS& modelFS, const ModelFoldersMap& modelFoldersMap )
-	: m_modelExtensions( modelExtensions ),	m_modelFS( modelFS ), m_modelFoldersMap( modelFoldersMap ){
+		: m_modelExtensions( modelExtensions ),	m_modelFS( modelFS ), m_modelFoldersMap( modelFoldersMap ){
 	}
 	void visit( const char* name ) override {
 		if( m_modelExtensions.find( path_get_extension( name ) ) != m_modelExtensions.end() && ( !m_avoid_pk3dir || !string_in_string_nocase( name, ".pk3dir/" ) ) ){
@@ -1213,9 +1206,9 @@ void ModelPaths_addFromArchive( ModelPaths_ArchiveVisitor& visitor, const char *
 		for( const auto& folder : visitor.m_modelFoldersMap ){
 			/* should better avoid .pk3dir traversal right in archive implementation for normal folders */
 			visitor.m_avoid_pk3dir = string_empty( folder.first.c_str() ) // root
-									&& folder.second > 1 // deep nuff
-									&& string_equal_suffix( archiveName, "/" ) // normal folder, not archive
-									&& !string_equal_suffix_nocase( archiveName, ".pk3dir/" ); // not .pk3dir
+			                      && folder.second > 1 // deep nuff
+			                      && string_equal_suffix( archiveName, "/" ) // normal folder, not archive
+			                      && !string_equal_suffix_nocase( archiveName, ".pk3dir/" ); // not .pk3dir
 			archive->forEachFile( Archive::VisitorFunc( visitor, Archive::eFiles, folder.second ), folder.first.c_str() );
 		}
 	}
@@ -1274,14 +1267,14 @@ GtkWidget* ModelBrowser_constructWindow( GtkWindow* toplevel ){
 	gtk_table_attach( GTK_TABLE( table ), vbox, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0 );
 	gtk_widget_show( vbox );
 
-	{ // menu bar
+	{	// menu bar
 		GtkToolbar* toolbar = toolbar_new();
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( toolbar ), FALSE, FALSE, 0 );
 
 		GtkToolButton* button = toolbar_append_button( toolbar, "Reload Model Folders Tree View", "texbro_refresh.png", FreeCaller<ModelBrowser_constructTree>() );
 //		gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
 	}
-	{ // TreeView
+	{	// TreeView
 		GtkWidget* scr = gtk_scrolled_window_new( NULL, NULL );
 		gtk_container_set_border_width( GTK_CONTAINER( scr ), 0 );
 		// vertical only scrolling for treeview
@@ -1309,7 +1302,7 @@ GtkWidget* ModelBrowser_constructWindow( GtkWindow* toplevel ){
 
 		gtk_box_pack_start( GTK_BOX( vbox ), scr, TRUE, TRUE, 0 );
 	}
-	{ // gl_widget scrollbar
+	{	// gl_widget scrollbar
 		GtkWidget* w = g_ModelBrowser.m_gl_scroll = gtk_vscrollbar_new( GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 0, 1, 1, 0 ) ) );
 		gtk_table_attach( GTK_TABLE( table ), w, 2, 3, 0, 1, GTK_SHRINK, GTK_FILL, 0, 0 );
 		gtk_widget_show( w );
@@ -1317,7 +1310,7 @@ GtkWidget* ModelBrowser_constructWindow( GtkWindow* toplevel ){
 		GtkAdjustment *vadjustment = gtk_range_get_adjustment( GTK_RANGE( w ) );
 		g_signal_connect( G_OBJECT( vadjustment ), "value_changed", G_CALLBACK( ModelBrowser_scrollbarScroll ), &g_ModelBrowser );
 	}
-	{ // gl_widget
+	{	// gl_widget
 		GtkWidget* w = g_ModelBrowser.m_gl_widget = glwidget_new( TRUE );
 		g_object_ref( G_OBJECT( w ) );
 
@@ -1378,11 +1371,11 @@ void ModelBrowser_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Model Browser", "Model Browser Preferences" ) );
 
 	page.appendSpinner( "Model View Size", 80.0, 16.0, 8192.0,
-						IntImportCallback( CellSizeImportCaller( g_ModelBrowser.m_cellSize ) ),
-						IntExportCallback( IntExportCaller( g_ModelBrowser.m_cellSize ) ) );
+	                    IntImportCallback( CellSizeImportCaller( g_ModelBrowser.m_cellSize ) ),
+	                    IntExportCallback( IntExportCaller( g_ModelBrowser.m_cellSize ) ) );
 	page.appendEntry( "List of *folderToLoad/depth*",
-						StringImportCallback( FoldersToLoadImportCaller( g_ModelBrowser.m_prefFoldersToLoad ) ),
-						StringExportCallback( StringExportCaller( g_ModelBrowser.m_prefFoldersToLoad ) ) );
+	                  StringImportCallback( FoldersToLoadImportCaller( g_ModelBrowser.m_prefFoldersToLoad ) ),
+	                  StringExportCallback( StringExportCaller( g_ModelBrowser.m_prefFoldersToLoad ) ) );
 }
 void ModelBrowser_registerPreferencesPage(){
 	PreferencesDialog_addSettingsPage( FreeCaller1<PreferenceGroup&, ModelBrowser_constructPage>() );

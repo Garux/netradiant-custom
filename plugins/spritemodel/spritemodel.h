@@ -32,31 +32,35 @@
 class CSpriteModel : public IRender //, public ISelect
 {
 public:
-CSpriteModel();
-~CSpriteModel();
+	CSpriteModel();
+	~CSpriteModel();
 
-void IncRef() { refCount++; }
-void DecRef() {
-	if ( --refCount == 0 ) {
-		delete this;
+	void IncRef() {
+		refCount++;
 	}
-}
+	void DecRef() {
+		if ( --refCount == 0 ) {
+			delete this;
+		}
+	}
 
 //IRender
-void Draw( int state, int rflags ) const;
-const aabb_t *GetAABB() const { return &m_BBox; }
+	void Draw( int state, int rflags ) const;
+	const aabb_t *GetAABB() const {
+		return &m_BBox;
+	}
 
 //ISelect
 //bool TestRay (const ray_t *ray, vec_t *dist) const;
 
-void Construct( IShader *pShader );
+	void Construct( IShader *pShader );
 
 protected:
-IShader *m_pShader;
+	IShader *m_pShader;
 
 private:
-int refCount;
-aabb_t m_BBox;
+	int refCount;
+	aabb_t m_BBox;
 };
 
 void LoadSpriteModel( entity_interfaces_t *interfaces, const char *name );

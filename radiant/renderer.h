@@ -51,59 +51,59 @@ inline VolumeIntersectionValue Cullable_testVisible( scene::Instance& instance, 
 template<typename _Walker>
 class CullingWalker
 {
-const VolumeTest& m_volume;
-const _Walker& m_walker;
+	const VolumeTest& m_volume;
+	const _Walker& m_walker;
 public:
-CullingWalker( const VolumeTest& volume, const _Walker& walker )
-	: m_volume( volume ), m_walker( walker ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance, VolumeIntersectionValue parentVisible ) const {
-	VolumeIntersectionValue visible = Cullable_testVisible( instance, m_volume, parentVisible );
-	if ( visible != c_volumeOutside ) {
-		return m_walker.pre( path, instance );
+	CullingWalker( const VolumeTest& volume, const _Walker& walker )
+		: m_volume( volume ), m_walker( walker ){
 	}
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance, VolumeIntersectionValue parentVisible ) const {
-	return m_walker.post( path, instance );
-}
+	bool pre( const scene::Path& path, scene::Instance& instance, VolumeIntersectionValue parentVisible ) const {
+		VolumeIntersectionValue visible = Cullable_testVisible( instance, m_volume, parentVisible );
+		if ( visible != c_volumeOutside ) {
+			return m_walker.pre( path, instance );
+		}
+		return true;
+	}
+	void post( const scene::Path& path, scene::Instance& instance, VolumeIntersectionValue parentVisible ) const {
+		return m_walker.post( path, instance );
+	}
 };
 
 template<typename Walker_>
 class ForEachVisible : public scene::Graph::Walker
 {
-const VolumeTest& m_volume;
-const Walker_& m_walker;
-mutable std::vector<VolumeIntersectionValue> m_state;
+	const VolumeTest& m_volume;
+	const Walker_& m_walker;
+	mutable std::vector<VolumeIntersectionValue> m_state;
 public:
-ForEachVisible( const VolumeTest& volume, const Walker_& walker )
-	: m_volume( volume ), m_walker( walker ){
-	m_state.push_back( c_volumePartial );
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	VolumeIntersectionValue visible = ( path.top().get().visible() ) ? m_state.back() : c_volumeOutside;
-
-	if ( visible == c_volumePartial ) {
-		visible = m_volume.TestAABB( instance.worldAABB() );
+	ForEachVisible( const VolumeTest& volume, const Walker_& walker )
+		: m_volume( volume ), m_walker( walker ){
+		m_state.push_back( c_volumePartial );
 	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		VolumeIntersectionValue visible = ( path.top().get().visible() ) ? m_state.back() : c_volumeOutside;
 
-	m_state.push_back( visible );
+		if ( visible == c_volumePartial ) {
+			visible = m_volume.TestAABB( instance.worldAABB() );
+		}
 
-	if ( visible == c_volumeOutside ) {
-		return false;
-	}
-	else
-	{
-		return m_walker.pre( path, instance, m_state.back() );
-	}
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	if ( m_state.back() != c_volumeOutside ) {
-		m_walker.post( path, instance, m_state.back() );
-	}
+		m_state.push_back( visible );
 
-	m_state.pop_back();
-}
+		if ( visible == c_volumeOutside ) {
+			return false;
+		}
+		else
+		{
+			return m_walker.pre( path, instance, m_state.back() );
+		}
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		if ( m_state.back() != c_volumeOutside ) {
+			m_walker.post( path, instance, m_state.back() );
+		}
+
+		m_state.pop_back();
+	}
 };
 
 template<typename Functor>
@@ -113,57 +113,57 @@ inline void Scene_forEachVisible( scene::Graph& graph, const VolumeTest& volume,
 
 class RenderHighlighted
 {
-Renderer& m_renderer;
-const VolumeTest& m_volume;
+	Renderer& m_renderer;
+	const VolumeTest& m_volume;
 public:
-RenderHighlighted( Renderer& renderer, const VolumeTest& volume )
-	: m_renderer( renderer ), m_volume( volume ){
-}
-void render( const Renderable& renderable ) const {
-	switch ( m_renderer.getStyle() )
-	{
-	case Renderer::eFullMaterials:
-		renderable.renderSolid( m_renderer, m_volume );
-		break;
-	case Renderer::eWireframeOnly:
-		renderable.renderWireframe( m_renderer, m_volume );
-		break;
+	RenderHighlighted( Renderer& renderer, const VolumeTest& volume )
+		: m_renderer( renderer ), m_volume( volume ){
 	}
-}
-typedef ConstMemberCaller1<RenderHighlighted, const Renderable&, &RenderHighlighted::render> RenderCaller;
-
-bool pre( const scene::Path& path, scene::Instance& instance, VolumeIntersectionValue parentVisible ) const {
-	m_renderer.PushState();
-
-	if ( Cullable_testVisible( instance, m_volume, parentVisible ) != c_volumeOutside ) {
-		Renderable* renderable = Instance_getRenderable( instance );
-		if ( renderable ) {
-			renderable->viewChanged();
-		}
-
-		if ( Instance_isSelected( instance ) ) {
-			if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
-				m_renderer.Highlight( Renderer::eFace );
-			}
-			else if ( renderable ) {
-				renderable->renderComponents( m_renderer, m_volume );
-			}
-			//if( !(GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && path.size() == 2) )
-			//if( !( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && node_is_group( path.top() ) ) )
-			if( !( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && Node_isEntity( path.top() ) ) )
-				m_renderer.Highlight( Renderer::ePrimitive );
-		}
-
-		if ( renderable ) {
-			render( *renderable );
+	void render( const Renderable& renderable ) const {
+		switch ( m_renderer.getStyle() )
+		{
+		case Renderer::eFullMaterials:
+			renderable.renderSolid( m_renderer, m_volume );
+			break;
+		case Renderer::eWireframeOnly:
+			renderable.renderWireframe( m_renderer, m_volume );
+			break;
 		}
 	}
+	typedef ConstMemberCaller1<RenderHighlighted, const Renderable&, &RenderHighlighted::render> RenderCaller;
 
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance, VolumeIntersectionValue parentVisible ) const {
-	m_renderer.PopState();
-}
+	bool pre( const scene::Path& path, scene::Instance& instance, VolumeIntersectionValue parentVisible ) const {
+		m_renderer.PushState();
+
+		if ( Cullable_testVisible( instance, m_volume, parentVisible ) != c_volumeOutside ) {
+			Renderable* renderable = Instance_getRenderable( instance );
+			if ( renderable ) {
+				renderable->viewChanged();
+			}
+
+			if ( Instance_isSelected( instance ) ) {
+				if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
+					m_renderer.Highlight( Renderer::eFace );
+				}
+				else if ( renderable ) {
+					renderable->renderComponents( m_renderer, m_volume );
+				}
+				//if( !(GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && path.size() == 2) )
+				//if( !( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && node_is_group( path.top() ) ) )
+				if( !( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && Node_isEntity( path.top() ) ) )
+					m_renderer.Highlight( Renderer::ePrimitive );
+			}
+
+			if ( renderable ) {
+				render( *renderable );
+			}
+		}
+
+		return true;
+	}
+	void post( const scene::Path& path, scene::Instance& instance, VolumeIntersectionValue parentVisible ) const {
+		m_renderer.PopState();
+	}
 };
 
 inline void Scene_Render( Renderer& renderer, const VolumeTest& volume ){

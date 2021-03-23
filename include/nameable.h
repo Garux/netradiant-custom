@@ -30,11 +30,11 @@ typedef Callback1<const char*> NameCallback;
 class Nameable
 {
 public:
-STRING_CONSTANT( Name, "Nameable" );
+	STRING_CONSTANT( Name, "Nameable" );
 
-virtual const char* name() const = 0;
-virtual void attach( const NameCallback& callback ) = 0;
-virtual void detach( const NameCallback& callback ) = 0;
+	virtual const char* name() const = 0;
+	virtual void attach( const NameCallback& callback ) = 0;
+	virtual void detach( const NameCallback& callback ) = 0;
 };
 
 

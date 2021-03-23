@@ -33,9 +33,9 @@ class View;
 class SelectionSystemWindowObserver : public WindowObserver
 {
 public:
-virtual void setView( const View& view ) = 0;
-virtual void setRectangleDrawCallback( const RectangleCallback& callback ) = 0;
-virtual void incMouseMove( const WindowVector& delta ) = 0;
+	virtual void setView( const View& view ) = 0;
+	virtual void setRectangleDrawCallback( const RectangleCallback& callback ) = 0;
+	virtual void incMouseMove( const WindowVector& delta ) = 0;
 };
 
 SelectionSystemWindowObserver* NewWindowObserver();

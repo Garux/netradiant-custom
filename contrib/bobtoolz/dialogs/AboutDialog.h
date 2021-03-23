@@ -33,11 +33,11 @@ class CAboutDialog : public CDialog
 {
 // Construction
 public:
-CAboutDialog( CWnd* pParent = NULL );     // standard constructor
+	CAboutDialog( CWnd* pParent = NULL );     // standard constructor
 
 // Dialog Data
 //{{AFX_DATA(CAboutDialog)
-enum { IDD = IDD_ABOUT };
+	enum { IDD = IDD_ABOUT };
 //}}AFX_DATA
 
 
@@ -45,7 +45,7 @@ enum { IDD = IDD_ABOUT };
 // ClassWizard generated virtual function overrides
 //{{AFX_VIRTUAL(CAboutDialog)
 protected:
-virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
+	virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
 //}}AFX_VIRTUAL
 
 // Implementation
@@ -55,7 +55,7 @@ protected:
 //{{AFX_MSG(CAboutDialog)
 // NOTE: the ClassWizard will add member functions here
 //}}AFX_MSG
-DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP()
 };
 
 //{{AFX_INSERT_LOCATION}}

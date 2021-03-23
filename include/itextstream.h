@@ -34,7 +34,7 @@ class TextInputStream
 public:
 /// \brief Attempts to read the next \p length characters from the stream to \p buffer.
 /// Returns the number of characters actually stored in \p buffer.
-virtual std::size_t read( char* buffer, std::size_t length ) = 0;
+	virtual std::size_t read( char* buffer, std::size_t length ) = 0;
 };
 
 /// \brief A write-only character-stream.
@@ -43,7 +43,7 @@ class TextOutputStream
 public:
 /// \brief Attempts to write \p length characters to the stream from \p buffer.
 /// Returns the number of characters actually read from \p buffer.
-virtual std::size_t write( const char* buffer, std::size_t length ) = 0;
+	virtual std::size_t write( const char* buffer, std::size_t length ) = 0;
 };
 
 /// \brief Calls the overloaded function ostream_write() to perform text formatting specific to the type being written.
@@ -68,25 +68,25 @@ inline TextOutputStream& operator<<( TextOutputStream& ostream, const T& t ){
 class NullOutputStream : public TextOutputStream
 {
 public:
-std::size_t write( const char*, std::size_t length ){
-	return length;
-}
+	std::size_t write( const char*, std::size_t length ){
+		return length;
+	}
 };
 
 class OutputStreamHolder
 {
-NullOutputStream m_nullOutputStream;
-TextOutputStream* m_outputStream;
+	NullOutputStream m_nullOutputStream;
+	TextOutputStream* m_outputStream;
 public:
-OutputStreamHolder()
-	: m_outputStream( &m_nullOutputStream ){
-}
-void setOutputStream( TextOutputStream& outputStream ){
-	m_outputStream = &outputStream;
-}
-TextOutputStream& getOutputStream(){
-	return *m_outputStream;
-}
+	OutputStreamHolder()
+		: m_outputStream( &m_nullOutputStream ){
+	}
+	void setOutputStream( TextOutputStream& outputStream ){
+		m_outputStream = &outputStream;
+	}
+	TextOutputStream& getOutputStream(){
+		return *m_outputStream;
+	}
 };
 
 typedef Static<OutputStreamHolder> GlobalOutputStream;

@@ -116,84 +116,99 @@ static unsigned char* OpenBitmapFile(){
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint32_t*)&( filesize ),4,1,fp ); m_bytesRead += 4;
+	rc = fread( (uint32_t*)&( filesize ),4,1,fp );
+	m_bytesRead += 4;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint16_t*)&( res1 ),2,1,fp ); m_bytesRead += 2;
+	rc = fread( (uint16_t*)&( res1 ),2,1,fp );
+	m_bytesRead += 2;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint16_t*)&( res2 ),2,1,fp ); m_bytesRead += 2;
+	rc = fread( (uint16_t*)&( res2 ),2,1,fp );
+	m_bytesRead += 2;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint32_t*)&( pixoff ),4,1,fp ); m_bytesRead += 4;
+	rc = fread( (uint32_t*)&( pixoff ),4,1,fp );
+	m_bytesRead += 4;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint32_t*)&( bmisize ),4,1,fp ); m_bytesRead += 4;
+	rc = fread( (uint32_t*)&( bmisize ),4,1,fp );
+	m_bytesRead += 4;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint32_t  *)&( bmWidth ),4,1,fp ); m_bytesRead += 4;
+	rc = fread( (uint32_t  *)&( bmWidth ),4,1,fp );
+	m_bytesRead += 4;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint32_t*)&( bmHeight ),4,1,fp ); m_bytesRead += 4;
+	rc = fread( (uint32_t*)&( bmHeight ),4,1,fp );
+	m_bytesRead += 4;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint16_t*)&( bmPlanes ),2,1,fp ); m_bytesRead += 2;
+	rc = fread( (uint16_t*)&( bmPlanes ),2,1,fp );
+	m_bytesRead += 2;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint16_t*)&( bmBitsPixel ),2,1,fp ); m_bytesRead += 2;
+	rc = fread( (uint16_t*)&( bmBitsPixel ),2,1,fp );
+	m_bytesRead += 2;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint32_t*)&( compression ),4,1,fp ); m_bytesRead += 4;
+	rc = fread( (uint32_t*)&( compression ),4,1,fp );
+	m_bytesRead += 4;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint32_t*)&( sizeimage ),4,1,fp ); m_bytesRead += 4;
+	rc = fread( (uint32_t*)&( sizeimage ),4,1,fp );
+	m_bytesRead += 4;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint32_t*)&( xscale ),4,1,fp ); m_bytesRead += 4;
+	rc = fread( (uint32_t*)&( xscale ),4,1,fp );
+	m_bytesRead += 4;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint32_t*)&( yscale ),4,1,fp ); m_bytesRead += 4;
+	rc = fread( (uint32_t*)&( yscale ),4,1,fp );
+	m_bytesRead += 4;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint32_t*)&( colors ),4,1,fp ); m_bytesRead += 4;
+	rc = fread( (uint32_t*)&( colors ),4,1,fp );
+	m_bytesRead += 4;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
-	rc = fread( (uint32_t*)&( impcol ),4,1,fp ); m_bytesRead += 4;
+	rc = fread( (uint32_t*)&( impcol ),4,1,fp );
+	m_bytesRead += 4;
 	if ( rc != 1 ) {
 		INVALID_FORMAT;
 	}
 
 	if ( bmBitsPixel != 8 ) {
 		g_FuncTable.m_pfnMessageBox( g_pWnd, "This is not an 8-bit image. GenSurf can't use it.",
-									 "Bitmap", eMB_OK, eMB_ICONWARNING );
+		                             "Bitmap", eMB_OK, eMB_ICONWARNING );
 		fclose( fp );
 		return NULL;
 	}
@@ -321,7 +336,8 @@ static unsigned char* OpenBitmapFile(){
 						c1 = getc( fp );
 						for ( i = 0; i < c; x++, i++ )
 						{
-							*pp = c1; pp++;
+							*pp = c1;
+							pp++;
 						}
 					}
 					else
@@ -349,7 +365,8 @@ static unsigned char* OpenBitmapFile(){
 							for ( i = 0; i < c; x++, i++ )
 							{
 								c1 = getc( fp );
-								*pp = c1; pp++;
+								*pp = c1;
+								pp++;
 							}
 
 							if ( c & 1 ) {
@@ -369,7 +386,8 @@ static unsigned char* OpenBitmapFile(){
 						c1 = getc( fp );
 						for ( i = 0; i < c; x++, i++ )
 						{
-							*pp = ( i & 1 ) ? ( c1 & 0x0f ) : ( ( c1 >> 4 ) & 0x0f ); pp++;
+							*pp = ( i & 1 ) ? ( c1 & 0x0f ) : ( ( c1 >> 4 ) & 0x0f );
+							pp++;
 						}
 					}
 					else
@@ -399,7 +417,8 @@ static unsigned char* OpenBitmapFile(){
 								if ( ( i & 1 ) == 0 ) {
 									c1 = getc( fp );
 								}
-								*pp = ( i & 1 ) ? ( c1 & 0x0f ) : ( ( c1 >> 4 ) & 0x0f ); pp++;
+								*pp = ( i & 1 ) ? ( c1 & 0x0f ) : ( ( c1 >> 4 ) & 0x0f );
+								pp++;
 							}
 
 							if ( ( ( c & 3 ) == 1 ) || ( ( c & 3 ) == 2 ) ) {
@@ -439,7 +458,7 @@ bool OpenBitmap(){
 	if ( g_pWnd ) {
 		gtk_entry_set_text( GTK_ENTRY( g_object_get_data( G_OBJECT( g_pWnd ), "bmp_file" ) ), gbmp.name );
 		gtk_widget_set_sensitive( GTK_WIDGET( g_object_get_data( G_OBJECT( g_pWnd ), "bmp_reload" ) ),
-								  strlen( gbmp.name ) ? TRUE : FALSE );
+		                          strlen( gbmp.name ) ? TRUE : FALSE );
 
 		UpdatePreview( true );
 	}

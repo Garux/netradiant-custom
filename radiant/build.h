@@ -27,7 +27,7 @@ void build_clear_variables();
 class CommandListener
 {
 public:
-virtual void execute( const char* command ) = 0;
+	virtual void execute( const char* command ) = 0;
 };
 void build_run( const char* name, CommandListener& listener );
 

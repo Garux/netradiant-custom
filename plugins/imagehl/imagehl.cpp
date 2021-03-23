@@ -38,17 +38,17 @@ class ImageDependencies : public GlobalFileSystemModuleRef
 
 class ImageHLWAPI
 {
-_QERPlugImageTable m_imagehlw;
+	_QERPlugImageTable m_imagehlw;
 public:
-typedef _QERPlugImageTable Type;
-STRING_CONSTANT( Name, "hlw" );
+	typedef _QERPlugImageTable Type;
+	STRING_CONSTANT( Name, "hlw" );
 
-ImageHLWAPI(){
-	m_imagehlw.loadImage = LoadHLW;
-}
-_QERPlugImageTable* getTable(){
-	return &m_imagehlw;
-}
+	ImageHLWAPI(){
+		m_imagehlw.loadImage = LoadHLW;
+	}
+	_QERPlugImageTable* getTable(){
+		return &m_imagehlw;
+	}
 };
 
 typedef SingletonModule<ImageHLWAPI, ImageDependencies> ImageHLWModule;
@@ -58,17 +58,17 @@ ImageHLWModule g_ImageHLWModule;
 
 class ImageMipAPI
 {
-_QERPlugImageTable m_imagemip;
+	_QERPlugImageTable m_imagemip;
 public:
-typedef _QERPlugImageTable Type;
-STRING_CONSTANT( Name, "mip" );
+	typedef _QERPlugImageTable Type;
+	STRING_CONSTANT( Name, "mip" );
 
-ImageMipAPI(){
-	m_imagemip.loadImage = LoadMIP;
-}
-_QERPlugImageTable* getTable(){
-	return &m_imagemip;
-}
+	ImageMipAPI(){
+		m_imagemip.loadImage = LoadMIP;
+	}
+	_QERPlugImageTable* getTable(){
+		return &m_imagemip;
+	}
 };
 
 typedef SingletonModule<ImageMipAPI, ImageDependencies> ImageMipModule;
@@ -78,17 +78,17 @@ ImageMipModule g_ImageMipModule;
 
 class ImageSpriteAPI
 {
-_QERPlugImageTable m_imagesprite;
+	_QERPlugImageTable m_imagesprite;
 public:
-typedef _QERPlugImageTable Type;
-STRING_CONSTANT( Name, "spr" );
+	typedef _QERPlugImageTable Type;
+	STRING_CONSTANT( Name, "spr" );
 
-ImageSpriteAPI(){
-	m_imagesprite.loadImage = LoadIDSP;
-}
-_QERPlugImageTable* getTable(){
-	return &m_imagesprite;
-}
+	ImageSpriteAPI(){
+		m_imagesprite.loadImage = LoadIDSP;
+	}
+	_QERPlugImageTable* getTable(){
+		return &m_imagesprite;
+	}
 };
 
 typedef SingletonModule<ImageSpriteAPI, ImageDependencies> ImageSpriteModule;

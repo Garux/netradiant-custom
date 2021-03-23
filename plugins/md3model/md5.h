@@ -22,7 +22,9 @@
 #if !defined( INCLUDED_MD5_H )
 #define INCLUDED_MD5_H
 
-namespace scene { class Node; }
+namespace scene {
+class Node;
+}
 class ArchiveFile;
 scene::Node& loadMD5Model( ArchiveFile& file );
 

@@ -67,15 +67,18 @@ bool CListener::OnMouseMove( unsigned int nFlags, double x, double y ){
 		switch ( m_vt ) {
 		case XY:
 			VectorSet( delta, click[0] - old_x, click[1] - old_y, 0 );
-			old_x = click[0]; old_y = click[1];
+			old_x = click[0];
+			old_y = click[1];
 			break;
 		case XZ:
 			VectorSet( delta, click[0] - old_x, 0, click[2] - old_y );
-			old_x = click[0]; old_y = click[2];
+			old_x = click[0];
+			old_y = click[2];
 			break;
 		case YZ:
 			VectorSet( delta, 0, click[1] - old_x, click[2] - old_y );
-			old_x = click[1]; old_y = click[2];
+			old_x = click[1];
+			old_y = click[2];
 			break;
 		}
 
@@ -108,15 +111,21 @@ bool CListener::OnLButtonDown( unsigned int nFlags, double x, double y ){
 
 	switch ( m_vt ) {
 	case XY:
-		old_x = org[0]; old_y = org[1]; org[2] = 64 * 1024;
+		old_x = org[0];
+		old_y = org[1];
+		org[2] = 64 * 1024;
 		VectorSet( delta, 0, 0, -1 );
 		break;
 	case XZ:
-		old_x = org[0]; old_y = org[2]; org[1] = 64 * 1024;
+		old_x = org[0];
+		old_y = org[2];
+		org[1] = 64 * 1024;
 		VectorSet( delta, 0, -1, 0 );
 		break;
 	case YZ:
-		old_x = org[1]; old_y = org[2]; org[0] = 64 * 1024;
+		old_x = org[1];
+		old_y = org[2];
+		org[0] = 64 * 1024;
 		VectorSet( delta, -1, 0, 0 );
 		break;
 	}

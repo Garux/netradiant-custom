@@ -30,17 +30,17 @@
 
 class ArchiveWadAPI
 {
-_QERArchiveTable m_archivewad;
+	_QERArchiveTable m_archivewad;
 public:
-typedef _QERArchiveTable Type;
-STRING_CONSTANT( Name, "wad" );
+	typedef _QERArchiveTable Type;
+	STRING_CONSTANT( Name, "wad" );
 
-ArchiveWadAPI(){
-	m_archivewad.m_pfnOpenArchive = &OpenArchive;
-}
-_QERArchiveTable* getTable(){
-	return &m_archivewad;
-}
+	ArchiveWadAPI(){
+		m_archivewad.m_pfnOpenArchive = &OpenArchive;
+	}
+	_QERArchiveTable* getTable(){
+		return &m_archivewad;
+	}
 };
 
 typedef SingletonModule<ArchiveWadAPI> ArchiveWadModule;

@@ -81,7 +81,7 @@ int Com_AddToGrowList( growList_t *list, void *data ) {
 void *Com_GrowListElement( const growList_t *list, int index ) {
 	if ( index < 0 || index >= list->currentElements ) {
 		Com_Error( ERR_DROP, "Com_GrowListElement: %i out of range of %i",
-				   index, list->currentElements );
+		           index, list->currentElements );
 	}
 	return list->elements[index];
 }
@@ -190,7 +190,7 @@ int Com_Filter( const char *filter, const char *name, int casesensitive ){
 					}
 					else {
 						if ( toupper( *name ) >= toupper( *filter ) &&
-							 toupper( *name ) <= toupper( *( filter + 2 ) ) ) {
+						     toupper( *name ) <= toupper( *( filter + 2 ) ) ) {
 							found = qtrue;
 						}
 					}
@@ -345,12 +345,24 @@ static int ( *_LittleLong )( int l );
 static float ( *_BigFloat )( float l );
 static float ( *_LittleFloat )( float l );
 
-short   BigShort( short l ){return _BigShort( l ); }
-short   LittleShort( short l ) {return _LittleShort( l ); }
-int     BigLong( int l ) {return _BigLong( l ); }
-int     LittleLong( int l ) {return _LittleLong( l ); }
-float   BigFloat( float l ) {return _BigFloat( l ); }
-float   LittleFloat( float l ) {return _LittleFloat( l ); }
+short   BigShort( short l ){
+	return _BigShort( l );
+}
+short   LittleShort( short l ) {
+	return _LittleShort( l );
+}
+int     BigLong( int l ) {
+	return _BigLong( l );
+}
+int     LittleLong( int l ) {
+	return _LittleLong( l );
+}
+float   BigFloat( float l ) {
+	return _BigFloat( l );
+}
+float   LittleFloat( float l ) {
+	return _LittleFloat( l );
+}
 
 short   ShortSwap( short l ){
 	byte b1,b2;

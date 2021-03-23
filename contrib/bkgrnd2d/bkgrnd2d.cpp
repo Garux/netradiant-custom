@@ -293,7 +293,7 @@ bool CBackgroundImage::SetExtentsSel(){
 	}
 
 	if ( ( (int)mins[m_ix] == (int)maxs[m_ix] ) ||
-		 ( (int)mins[m_iy] == (int)maxs[m_iy] ) ) {
+	     ( (int)mins[m_iy] == (int)maxs[m_iy] ) ) {
 		Syn_Printf( MSG_PREFIX "tiny selection\n" );
 		return false;
 	}

@@ -114,58 +114,58 @@ Vector3 Camera_getOrigin(){
 
 class RadiantCoreAPI
 {
-_QERFuncTable_1 m_radiantcore;
+	_QERFuncTable_1 m_radiantcore;
 public:
-typedef _QERFuncTable_1 Type;
-STRING_CONSTANT( Name, "*" );
+	typedef _QERFuncTable_1 Type;
+	STRING_CONSTANT( Name, "*" );
 
-RadiantCoreAPI(){
-	m_radiantcore.getEnginePath = &EnginePath_get;
-	m_radiantcore.getLocalRcPath = &LocalRcPath_get;
-	m_radiantcore.getAppPath = &AppPath_get;
-	m_radiantcore.getGameToolsPath = &GameToolsPath_get;
-	m_radiantcore.getSettingsPath = &SettingsPath_get;
-	m_radiantcore.getMapsPath = &getMapsPath;
+	RadiantCoreAPI(){
+		m_radiantcore.getEnginePath = &EnginePath_get;
+		m_radiantcore.getLocalRcPath = &LocalRcPath_get;
+		m_radiantcore.getAppPath = &AppPath_get;
+		m_radiantcore.getGameToolsPath = &GameToolsPath_get;
+		m_radiantcore.getSettingsPath = &SettingsPath_get;
+		m_radiantcore.getMapsPath = &getMapsPath;
 
-	m_radiantcore.getGameName = &gamename_get;
-	m_radiantcore.getGameMode = &gamemode_get;
+		m_radiantcore.getGameName = &gamename_get;
+		m_radiantcore.getGameMode = &gamemode_get;
 
-	m_radiantcore.getMapName = &getMapName;
-	m_radiantcore.getMapWorldEntity = getMapWorldEntity;
-	m_radiantcore.getGridSize = GetGridSize;
+		m_radiantcore.getMapName = &getMapName;
+		m_radiantcore.getMapWorldEntity = getMapWorldEntity;
+		m_radiantcore.getGridSize = GetGridSize;
 
-	m_radiantcore.getGameDescriptionKeyValue = &GameDescription_getKeyValue;
-	m_radiantcore.getRequiredGameDescriptionKeyValue = &GameDescription_getRequiredKeyValue;
+		m_radiantcore.getGameDescriptionKeyValue = &GameDescription_getKeyValue;
+		m_radiantcore.getRequiredGameDescriptionKeyValue = &GameDescription_getRequiredKeyValue;
 
-	m_radiantcore.attachGameToolsPathObserver = Radiant_attachGameToolsPathObserver;
-	m_radiantcore.detachGameToolsPathObserver = Radiant_detachGameToolsPathObserver;
-	m_radiantcore.attachEnginePathObserver = Radiant_attachEnginePathObserver;
-	m_radiantcore.detachEnginePathObserver = Radiant_detachEnginePathObserver;
-	m_radiantcore.attachGameNameObserver = Radiant_attachGameNameObserver;
-	m_radiantcore.detachGameNameObserver = Radiant_detachGameNameObserver;
-	m_radiantcore.attachGameModeObserver = Radiant_attachGameModeObserver;
-	m_radiantcore.detachGameModeObserver = Radiant_detachGameModeObserver;
+		m_radiantcore.attachGameToolsPathObserver = Radiant_attachGameToolsPathObserver;
+		m_radiantcore.detachGameToolsPathObserver = Radiant_detachGameToolsPathObserver;
+		m_radiantcore.attachEnginePathObserver = Radiant_attachEnginePathObserver;
+		m_radiantcore.detachEnginePathObserver = Radiant_detachEnginePathObserver;
+		m_radiantcore.attachGameNameObserver = Radiant_attachGameNameObserver;
+		m_radiantcore.detachGameNameObserver = Radiant_detachGameNameObserver;
+		m_radiantcore.attachGameModeObserver = Radiant_attachGameModeObserver;
+		m_radiantcore.detachGameModeObserver = Radiant_detachGameModeObserver;
 
-	m_radiantcore.XYWindowDestroyed_connect = XYWindowDestroyed_connect;
-	m_radiantcore.XYWindowDestroyed_disconnect = XYWindowDestroyed_disconnect;
-	m_radiantcore.XYWindowMouseDown_connect = XYWindowMouseDown_connect;
-	m_radiantcore.XYWindowMouseDown_disconnect = XYWindowMouseDown_disconnect;
-	m_radiantcore.XYWindow_getViewType = XYWindow_getViewType;
-	m_radiantcore.XYWindow_windowToWorld = XYWindow_windowToWorld;
+		m_radiantcore.XYWindowDestroyed_connect = XYWindowDestroyed_connect;
+		m_radiantcore.XYWindowDestroyed_disconnect = XYWindowDestroyed_disconnect;
+		m_radiantcore.XYWindowMouseDown_connect = XYWindowMouseDown_connect;
+		m_radiantcore.XYWindowMouseDown_disconnect = XYWindowMouseDown_disconnect;
+		m_radiantcore.XYWindow_getViewType = XYWindow_getViewType;
+		m_radiantcore.XYWindow_windowToWorld = XYWindow_windowToWorld;
 
-	m_radiantcore.Camera_getOrigin = Camera_getOrigin;
+		m_radiantcore.Camera_getOrigin = Camera_getOrigin;
 
-	m_radiantcore.TextureBrowser_getSelectedShader = TextureBrowser_GetSelectedShader;
+		m_radiantcore.TextureBrowser_getSelectedShader = TextureBrowser_GetSelectedShader;
 
-	m_radiantcore.m_pfnMessageBox = &gtk_MessageBox;
-	m_radiantcore.m_pfnFileDialog = &file_dialog;
-	m_radiantcore.m_pfnColorDialog = &color_dialog;
-	m_radiantcore.m_pfnDirDialog = &dir_dialog;
-	m_radiantcore.m_pfnNewImage = &new_plugin_image;
-}
-_QERFuncTable_1* getTable(){
-	return &m_radiantcore;
-}
+		m_radiantcore.m_pfnMessageBox = &gtk_MessageBox;
+		m_radiantcore.m_pfnFileDialog = &file_dialog;
+		m_radiantcore.m_pfnColorDialog = &color_dialog;
+		m_radiantcore.m_pfnDirDialog = &dir_dialog;
+		m_radiantcore.m_pfnNewImage = &new_plugin_image;
+	}
+	_QERFuncTable_1* getTable(){
+		return &m_radiantcore;
+	}
 };
 
 typedef SingletonModule<RadiantCoreAPI> RadiantCoreModule;
@@ -190,103 +190,103 @@ class RadiantDependencies :
 	public GlobalScripLibModuleRef,
 	public GlobalNamespaceModuleRef
 {
-ImageModulesRef m_image_modules;
-MapModulesRef m_map_modules;
-ToolbarModulesRef m_toolbar_modules;
-PluginModulesRef m_plugin_modules;
+	ImageModulesRef m_image_modules;
+	MapModulesRef m_map_modules;
+	ToolbarModulesRef m_toolbar_modules;
+	PluginModulesRef m_plugin_modules;
 
 public:
-RadiantDependencies() :
-	GlobalEntityModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ) ),
-	GlobalShadersModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "shaders" ) ),
-	GlobalBrushModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ) ),
-	GlobalEntityClassManagerModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclass" ) ),
-	m_image_modules( GlobalRadiant().getRequiredGameDescriptionKeyValue( "texturetypes" ) ),
-	m_map_modules( GlobalRadiant().getRequiredGameDescriptionKeyValue( "maptypes" ) ),
-	m_toolbar_modules( "*" ),
-	m_plugin_modules( "*" ){
-}
+	RadiantDependencies() :
+		GlobalEntityModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ) ),
+		GlobalShadersModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "shaders" ) ),
+		GlobalBrushModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ) ),
+		GlobalEntityClassManagerModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclass" ) ),
+		m_image_modules( GlobalRadiant().getRequiredGameDescriptionKeyValue( "texturetypes" ) ),
+		m_map_modules( GlobalRadiant().getRequiredGameDescriptionKeyValue( "maptypes" ) ),
+		m_toolbar_modules( "*" ),
+		m_plugin_modules( "*" ){
+	}
 
-ImageModules& getImageModules(){
-	return m_image_modules.get();
-}
-MapModules& getMapModules(){
-	return m_map_modules.get();
-}
-ToolbarModules& getToolbarModules(){
-	return m_toolbar_modules.get();
-}
-PluginModules& getPluginModules(){
-	return m_plugin_modules.get();
-}
+	ImageModules& getImageModules(){
+		return m_image_modules.get();
+	}
+	MapModules& getMapModules(){
+		return m_map_modules.get();
+	}
+	ToolbarModules& getToolbarModules(){
+		return m_toolbar_modules.get();
+	}
+	PluginModules& getPluginModules(){
+		return m_plugin_modules.get();
+	}
 };
 
 class Radiant : public TypeSystemRef
 {
 public:
-Radiant(){
-	Preferences_Init();
+	Radiant(){
+		Preferences_Init();
 
-	GlobalFiletypes().addType( "sound", "wav", filetype_t( "PCM sound files", "*.wav" ) );
+		GlobalFiletypes().addType( "sound", "wav", filetype_t( "PCM sound files", "*.wav" ) );
 
-	Selection_construct();
-	HomePaths_Construct();
-	VFS_Construct();
-	Grid_construct();
-	MultiMon_Construct();
-	MRU_Construct();
-	Pointfile_Construct();
-	BuildMenu_Construct();
-	Map_Construct();
-	EntityList_Construct();
-	MainFrame_Construct();
-	GroupDialog_Construct();
-	SurfaceInspector_Construct();
-	PatchInspector_Construct();
-	CamWnd_Construct();
-	XYWindow_Construct();
-	BuildMonitor_Construct();
-	TextureBrowser_Construct();
-	ModelBrowser_Construct();
-	Entity_Construct();
-	Autosave_Construct();
-	EntityInspector_construct();
-	FindTextureDialog_Construct();
-	NullModel_construct();
-	MapRoot_construct();
+		Selection_construct();
+		HomePaths_Construct();
+		VFS_Construct();
+		Grid_construct();
+		MultiMon_Construct();
+		MRU_Construct();
+		Pointfile_Construct();
+		BuildMenu_Construct();
+		Map_Construct();
+		EntityList_Construct();
+		MainFrame_Construct();
+		GroupDialog_Construct();
+		SurfaceInspector_Construct();
+		PatchInspector_Construct();
+		CamWnd_Construct();
+		XYWindow_Construct();
+		BuildMonitor_Construct();
+		TextureBrowser_Construct();
+		ModelBrowser_Construct();
+		Entity_Construct();
+		Autosave_Construct();
+		EntityInspector_construct();
+		FindTextureDialog_Construct();
+		NullModel_construct();
+		MapRoot_construct();
 
-	EnginePath_verify();
-	EnginePath_Realise();
-}
-~Radiant(){
-	EnginePath_Unrealise();
+		EnginePath_verify();
+		EnginePath_Realise();
+	}
+	~Radiant(){
+		EnginePath_Unrealise();
 
-	MapRoot_destroy();
-	NullModel_destroy();
-	FindTextureDialog_Destroy();
-	EntityInspector_destroy();
-	Autosave_Destroy();
-	Entity_Destroy();
-	ModelBrowser_Destroy();
-	TextureBrowser_Destroy();
-	BuildMonitor_Destroy();
-	XYWindow_Destroy();
-	CamWnd_Destroy();
-	PatchInspector_Destroy();
-	SurfaceInspector_Destroy();
-	GroupDialog_Destroy();
-	MainFrame_Destroy();
-	EntityList_Destroy();
-	Map_Destroy();
-	BuildMenu_Destroy();
-	Pointfile_Destroy();
-	MRU_Destroy();
-	MultiMon_Destroy();
-	Grid_destroy();
-	VFS_Destroy();
-	HomePaths_Destroy();
-	Selection_destroy();
-}
+		MapRoot_destroy();
+		NullModel_destroy();
+		FindTextureDialog_Destroy();
+		EntityInspector_destroy();
+		Autosave_Destroy();
+		Entity_Destroy();
+		ModelBrowser_Destroy();
+		TextureBrowser_Destroy();
+		BuildMonitor_Destroy();
+		XYWindow_Destroy();
+		CamWnd_Destroy();
+		PatchInspector_Destroy();
+		SurfaceInspector_Destroy();
+		GroupDialog_Destroy();
+		MainFrame_Destroy();
+		EntityList_Destroy();
+		Map_Destroy();
+		BuildMenu_Destroy();
+		Pointfile_Destroy();
+		MRU_Destroy();
+		MultiMon_Destroy();
+		Grid_destroy();
+		VFS_Destroy();
+		HomePaths_Destroy();
+		Selection_destroy();
+	}
 };
 
 namespace

@@ -29,8 +29,8 @@
 class PanedState
 {
 public:
-float position;
-int size;
+	float position;
+	int size;
 };
 
 gboolean hpaned_allocate( GtkWidget* widget, GtkAllocation* allocation, PanedState* paned ){

@@ -29,16 +29,16 @@
 class zip_magic
 {
 public:
-bool operator==( const zip_magic& other ) const {
-	return m_value[0] == other.m_value[0]
-		   && m_value[1] == other.m_value[1]
-		   && m_value[2] == other.m_value[2]
-		   && m_value[3] == other.m_value[3];
-}
-bool operator!=( const zip_magic& other ) const {
-	return !( *this == other );
-}
-char m_value[4];
+	bool operator==( const zip_magic& other ) const {
+		return m_value[0] == other.m_value[0]
+		    && m_value[1] == other.m_value[1]
+		    && m_value[2] == other.m_value[2]
+		    && m_value[3] == other.m_value[3];
+	}
+	bool operator!=( const zip_magic& other ) const {
+		return !( *this == other );
+	}
+	char m_value[4];
 };
 
 inline void istream_read_zip_magic( InputStream& istream, zip_magic& magic ){

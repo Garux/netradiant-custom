@@ -335,7 +335,7 @@ void CreateEntityLights( void ){
 			intensity = 300.0f;
 		}
 
-		{ /* ydnar: set light scale (sof2) */
+		{	/* ydnar: set light scale (sof2) */
 			float scale;
 			if( e->read_keyvalue( scale, "scale" ) && scale != 0.f )
 				intensity *= scale;
@@ -347,7 +347,7 @@ void CreateEntityLights( void ){
 
 		intensity /= numSamples;
 
-		{ /* ydnar: get filter radius */
+		{	/* ydnar: get filter radius */
 			light->filterRadius = std::max( 0.f, e->floatForKey( "_filterradius", "_filteradius", "_filter" ) );
 		}
 
@@ -384,7 +384,7 @@ void CreateEntityLights( void ){
 			e2 = FindTargetEntity( target );
 			if ( e2 == NULL ) {
 				Sys_Warning( "light at (%i %i %i) has missing target\n",
-							(int) light->origin[ 0 ], (int) light->origin[ 1 ], (int) light->origin[ 2 ] );
+				             (int) light->origin[ 0 ], (int) light->origin[ 1 ], (int) light->origin[ 2 ] );
 				light->photons *= pointScale;
 			}
 			else
@@ -787,7 +787,7 @@ int LightContributionToSample( trace_t *trace ){
 				return 0;
 			}
 			else if ( angle < 0.0f &&
-					  ( trace->twoSided || ( light->flags & LightFlags::Twosided ) ) ) {
+			          ( trace->twoSided || ( light->flags & LightFlags::Twosided ) ) ) {
 				angle = -angle;
 
 				/* no deluxemap contribution from "other side" light */
@@ -1130,7 +1130,7 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&c
 		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
 		{
 			if ( styles[ lightmapNum ] == trace->light->style ||
-				 styles[ lightmapNum ] == LS_NONE ) {
+			     styles[ lightmapNum ] == LS_NONE ) {
 				break;
 			}
 		}
@@ -1159,9 +1159,9 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&c
 
 		/* cheap mode */
 		if ( cheap &&
-			 colors[ 0 ][ 0 ] >= 255.0f &&
-			 colors[ 0 ][ 1 ] >= 255.0f &&
-			 colors[ 0 ][ 2 ] >= 255.0f ) {
+		     colors[ 0 ][ 0 ] >= 255.0f &&
+		     colors[ 0 ][ 1 ] >= 255.0f &&
+		     colors[ 0 ][ 2 ] >= 255.0f ) {
 			break;
 		}
 	}
@@ -1627,9 +1627,9 @@ void TraceGrid( int num ){
 	#if 0
 	//%	Sys_FPrintf( SYS_VRB, "%10d %10d %10d ", &gp->ambient[ 0 ][ 0 ], &gp->ambient[ 0 ][ 1 ], &gp->ambient[ 0 ][ 2 ] );
 	Sys_FPrintf( SYS_VRB, "%9d Amb: (%03.1f %03.1f %03.1f) Dir: (%03.1f %03.1f %03.1f)\n",
-				 num,
-				 gp->ambient[ 0 ][ 0 ], gp->ambient[ 0 ][ 1 ], gp->ambient[ 0 ][ 2 ],
-				 gp->directed[ 0 ][ 0 ], gp->directed[ 0 ][ 1 ], gp->directed[ 0 ][ 2 ] );
+	             num,
+	             gp->ambient[ 0 ][ 0 ], gp->ambient[ 0 ][ 1 ], gp->ambient[ 0 ][ 2 ],
+	             gp->directed[ 0 ][ 0 ], gp->directed[ 0 ][ 1 ], gp->directed[ 0 ][ 2 ] );
 	#endif
 
 	/* store direction */
@@ -1803,7 +1803,7 @@ void LightWorld( bool fastAllocate ){
 		RunThreadsOnIndividual( numRawGridPoints, true, TraceGrid );
 		inGrid = false;
 		Sys_Printf( "%d x %d x %d = %d grid\n",
-					gridBounds[ 0 ], gridBounds[ 1 ], gridBounds[ 2 ], numBSPGridPoints );
+		            gridBounds[ 0 ], gridBounds[ 1 ], gridBounds[ 2 ], numBSPGridPoints );
 
 		/* ydnar: emit statistics on light culling */
 		Sys_FPrintf( SYS_VRB, "%9d grid points envelope culled\n", gridEnvelopeCulled );
@@ -2344,7 +2344,7 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( striEqual( argv[ i ], "-lightmapsize" )
-				|| striEqual( argv[ i ], "-extlmhacksize" ) ) {
+		       || striEqual( argv[ i ], "-extlmhacksize" ) ) {
 			const bool extlmhack = striEqual( argv[ i ], "-extlmhacksize" );
 
 			lmCustomSizeW = lmCustomSizeH = atoi( argv[ i + 1 ] );
@@ -2355,7 +2355,7 @@ int LightMain( int argc, char **argv ){
 			i++;
 			/* must be a power of 2 and greater than 2 */
 			if ( ( ( lmCustomSizeW - 1 ) & lmCustomSizeW ) || lmCustomSizeW < 2 ||
-				 ( ( lmCustomSizeH - 1 ) & lmCustomSizeH ) || lmCustomSizeH < 2 ) {
+			     ( ( lmCustomSizeH - 1 ) & lmCustomSizeH ) || lmCustomSizeH < 2 ) {
 				Sys_Warning( "Lightmap size must be a power of 2, greater or equal to 2 pixels.\n" );
 				lmCustomSizeW = lmCustomSizeH = game->lightmapSize;
 			}

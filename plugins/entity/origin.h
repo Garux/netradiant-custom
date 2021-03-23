@@ -46,14 +46,14 @@ inline void write_origin( const Vector3& origin, Entity* entity, const char* key
 
 inline Vector3 origin_translated( const Vector3& origin, const Vector3& translation ){
 	return vector3_snapped(
-		matrix4_get_translation_vec3(
-			matrix4_multiplied_by_matrix4(
-				matrix4_translation_for_vec3( origin ),
-				matrix4_translation_for_vec3( translation )
-			)
-		),
-		1e-4
-	);
+	           matrix4_get_translation_vec3(
+	               matrix4_multiplied_by_matrix4(
+	                   matrix4_translation_for_vec3( origin ),
+	                   matrix4_translation_for_vec3( translation )
+	               )
+	           ),
+	           1e-4
+	       );
 }
 
 inline Vector3 origin_snapped( const Vector3& origin, float snap ){
@@ -62,25 +62,25 @@ inline Vector3 origin_snapped( const Vector3& origin, float snap ){
 
 class OriginKey
 {
-Callback m_originChanged;
+	Callback m_originChanged;
 public:
-Vector3 m_origin;
+	Vector3 m_origin;
 
 
-OriginKey( const Callback& originChanged )
-	: m_originChanged( originChanged ), m_origin( ORIGINKEY_IDENTITY ){
-}
+	OriginKey( const Callback& originChanged )
+		: m_originChanged( originChanged ), m_origin( ORIGINKEY_IDENTITY ){
+	}
 
-void originChanged( const char* value ){
-	read_origin( m_origin, value );
-	m_originChanged();
-}
-typedef MemberCaller1<OriginKey, const char*, &OriginKey::originChanged> OriginChangedCaller;
+	void originChanged( const char* value ){
+		read_origin( m_origin, value );
+		m_originChanged();
+	}
+	typedef MemberCaller1<OriginKey, const char*, &OriginKey::originChanged> OriginChangedCaller;
 
 
-void write( Entity* entity ) const {
-	write_origin( m_origin, entity, "origin" );
-}
+	void write( Entity* entity ) const {
+		write_origin( m_origin, entity, "origin" );
+	}
 };
 
 
@@ -99,50 +99,50 @@ inline void BrushDoom3_setDoom3GroupOrigin( scene::Node& node, const Vector3& or
 
 class SetDoom3GroupOriginWalker : public scene::Traversable::Walker
 {
-const Vector3& m_origin;
+	const Vector3& m_origin;
 public:
-SetDoom3GroupOriginWalker( const Vector3& origin ) : m_origin( origin ){
-}
-bool pre( scene::Node& node ) const {
-	BrushDoom3_setDoom3GroupOrigin( node, m_origin );
-	return true;
-}
+	SetDoom3GroupOriginWalker( const Vector3& origin ) : m_origin( origin ){
+	}
+	bool pre( scene::Node& node ) const {
+		BrushDoom3_setDoom3GroupOrigin( node, m_origin );
+		return true;
+	}
 };
 
 class Doom3GroupOrigin : public scene::Traversable::Observer
 {
-scene::Traversable& m_set;
-const Vector3& m_origin;
-bool m_enabled;
+	scene::Traversable& m_set;
+	const Vector3& m_origin;
+	bool m_enabled;
 
 public:
-Doom3GroupOrigin( scene::Traversable& set, const Vector3& origin ) : m_set( set ), m_origin( origin ), m_enabled( false ){
-}
-
-void enable(){
-	m_enabled = true;
-	originChanged();
-}
-void disable(){
-	m_enabled = false;
-}
-
-void originChanged(){
-	if ( m_enabled ) {
-		m_set.traverse( SetDoom3GroupOriginWalker( m_origin ) );
+	Doom3GroupOrigin( scene::Traversable& set, const Vector3& origin ) : m_set( set ), m_origin( origin ), m_enabled( false ){
 	}
-}
 
-void insert( scene::Node& node ){
-	if ( m_enabled ) {
-		BrushDoom3_setDoom3GroupOrigin( node, m_origin );
+	void enable(){
+		m_enabled = true;
+		originChanged();
 	}
-}
-void erase( scene::Node& node ){
-	if ( m_enabled ) {
-		BrushDoom3_setDoom3GroupOrigin( node, Vector3( 0, 0, 0 ) );
+	void disable(){
+		m_enabled = false;
 	}
-}
+
+	void originChanged(){
+		if ( m_enabled ) {
+			m_set.traverse( SetDoom3GroupOriginWalker( m_origin ) );
+		}
+	}
+
+	void insert( scene::Node& node ){
+		if ( m_enabled ) {
+			BrushDoom3_setDoom3GroupOrigin( node, m_origin );
+		}
+	}
+	void erase( scene::Node& node ){
+		if ( m_enabled ) {
+			BrushDoom3_setDoom3GroupOrigin( node, Vector3( 0, 0, 0 ) );
+		}
+	}
 };
 
 

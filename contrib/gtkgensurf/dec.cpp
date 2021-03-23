@@ -135,18 +135,18 @@ void MakeDecimatedMap( int *NumNodes, int *NumTris, NODE **pNode, TRI **pTri ){
 			for ( j = 0, Node[i].tri = -1; ( j < NumTris[0] ) && ( Node[i].tri == -1 ); j++ )
 			{
 				if ( side( Node[i].p[j1],          Node[i].p[j2],
-						   Node[Tri[j].v[0]].p[j1],Node[Tri[j].v[0]].p[j2],
-						   Node[Tri[j].v[1]].p[j1],Node[Tri[j].v[1]].p[j2] ) < 0. ) {
+				           Node[Tri[j].v[0]].p[j1],Node[Tri[j].v[0]].p[j2],
+				           Node[Tri[j].v[1]].p[j1],Node[Tri[j].v[1]].p[j2] ) < 0. ) {
 					continue;
 				}
 				if ( side( Node[i].p[j1],          Node[i].p[j2],
-						   Node[Tri[j].v[1]].p[j1],Node[Tri[j].v[1]].p[j2],
-						   Node[Tri[j].v[2]].p[j1],Node[Tri[j].v[2]].p[j2] ) < 0. ) {
+				           Node[Tri[j].v[1]].p[j1],Node[Tri[j].v[1]].p[j2],
+				           Node[Tri[j].v[2]].p[j1],Node[Tri[j].v[2]].p[j2] ) < 0. ) {
 					continue;
 				}
 				if ( side( Node[i].p[j1],          Node[i].p[j2],
-						   Node[Tri[j].v[2]].p[j1],Node[Tri[j].v[2]].p[j2],
-						   Node[Tri[j].v[0]].p[j1],Node[Tri[j].v[0]].p[j2] ) < 0. ) {
+				           Node[Tri[j].v[2]].p[j1],Node[Tri[j].v[2]].p[j2],
+				           Node[Tri[j].v[0]].p[j1],Node[Tri[j].v[0]].p[j2] ) < 0. ) {
 					continue;
 				}
 				Node[i].tri = j;
@@ -157,22 +157,22 @@ void MakeDecimatedMap( int *NumNodes, int *NumTris, NODE **pNode, TRI **pTri ){
 				   SetCursor(ghCursorCurrent);
 				 */
 				g_FuncTable.m_pfnMessageBox( g_pRadiantWnd,
-											 "Error: Couldn't find the triangle bounding a point.",
-											 "Decimation Error", eMB_OK, eMB_ICONWARNING );
+				                             "Error: Couldn't find the triangle bounding a point.",
+				                             "Decimation Error", eMB_OK, eMB_ICONWARNING );
 				return;
 			}
 			if ( !Tri[Node[i].tri].flag ) {
 				PlaneFromPoints( Node[Tri[Node[i].tri].v[0]].p,
-								 Node[Tri[Node[i].tri].v[1]].p,
-								 Node[Tri[Node[i].tri].v[2]].p,
-								 &Tri[Node[i].tri].plane );
+				                 Node[Tri[Node[i].tri].v[1]].p,
+				                 Node[Tri[Node[i].tri].v[2]].p,
+				                 &Tri[Node[i].tri].plane );
 				Tri[Node[i].tri].flag = 1;
 			}
 			Node[i].error =
-				Node[i].p[j0] - ( Tri[Node[i].tri].plane.dist -
-								  Tri[Node[i].tri].plane.normal[j1] * Node[i].p[j1] -
-								  Tri[Node[i].tri].plane.normal[j2] * Node[i].p[j2]  ) /
-				Tri[Node[i].tri].plane.normal[j0];
+			    Node[i].p[j0] - ( Tri[Node[i].tri].plane.dist -
+			                      Tri[Node[i].tri].plane.normal[j1] * Node[i].p[j1] -
+			                      Tri[Node[i].tri].plane.normal[j2] * Node[i].p[j2]  ) /
+			    Tri[Node[i].tri].plane.normal[j0];
 			biggesterror = max( biggesterror,Absolute( Node[i].error ) );
 		}
 		if ( biggesterror == 0 ) {
@@ -249,18 +249,18 @@ void MakeDecimatedMap( int *NumNodes, int *NumTris, NODE **pNode, TRI **pTri ){
 			for ( j = 0; j < NumTris[0] && Node[i].tri == -1; j++ )
 			{
 				if ( side( Node[i].p[j1],          Node[i].p[j2],
-						   Node[Tri[j].v[0]].p[j1],Node[Tri[j].v[0]].p[j2],
-						   Node[Tri[j].v[1]].p[j1],Node[Tri[j].v[1]].p[j2] ) < 0. ) {
+				           Node[Tri[j].v[0]].p[j1],Node[Tri[j].v[0]].p[j2],
+				           Node[Tri[j].v[1]].p[j1],Node[Tri[j].v[1]].p[j2] ) < 0. ) {
 					continue;
 				}
 				if ( side( Node[i].p[j1],          Node[i].p[j2],
-						   Node[Tri[j].v[1]].p[j1],Node[Tri[j].v[1]].p[j2],
-						   Node[Tri[j].v[2]].p[j1],Node[Tri[j].v[2]].p[j2] ) < 0. ) {
+				           Node[Tri[j].v[1]].p[j1],Node[Tri[j].v[1]].p[j2],
+				           Node[Tri[j].v[2]].p[j1],Node[Tri[j].v[2]].p[j2] ) < 0. ) {
 					continue;
 				}
 				if ( side( Node[i].p[j1],          Node[i].p[j2],
-						   Node[Tri[j].v[2]].p[j1],Node[Tri[j].v[2]].p[j2],
-						   Node[Tri[j].v[0]].p[j1],Node[Tri[j].v[0]].p[j2] ) < 0. ) {
+				           Node[Tri[j].v[2]].p[j1],Node[Tri[j].v[2]].p[j2],
+				           Node[Tri[j].v[0]].p[j1],Node[Tri[j].v[0]].p[j2] ) < 0. ) {
 					continue;
 				}
 				Node[i].tri = j;
@@ -271,22 +271,22 @@ void MakeDecimatedMap( int *NumNodes, int *NumTris, NODE **pNode, TRI **pTri ){
 				   SetCursor(ghCursorCurrent);
 				 */
 				g_FuncTable.m_pfnMessageBox( g_pRadiantWnd,
-											 "Error: Couldn't find the triangle bounding a point.",
-											 "Decimation Error", eMB_OK, eMB_ICONWARNING );
+				                             "Error: Couldn't find the triangle bounding a point.",
+				                             "Decimation Error", eMB_OK, eMB_ICONWARNING );
 				return;
 			}
 			if ( !Tri[Node[i].tri].flag ) {
 				PlaneFromPoints( Node[Tri[Node[i].tri].v[0]].p,
-								 Node[Tri[Node[i].tri].v[1]].p,
-								 Node[Tri[Node[i].tri].v[2]].p,
-								 &Tri[Node[i].tri].plane );
+				                 Node[Tri[Node[i].tri].v[1]].p,
+				                 Node[Tri[Node[i].tri].v[2]].p,
+				                 &Tri[Node[i].tri].plane );
 				Tri[Node[i].tri].flag = 1;
 			}
 			Node[i].error =
-				Node[i].p[j0] - ( Tri[Node[i].tri].plane.dist -
-								  Tri[Node[i].tri].plane.normal[j1] * Node[i].p[j1] -
-								  Tri[Node[i].tri].plane.normal[j2] * Node[i].p[j2]  ) /
-				Tri[Node[i].tri].plane.normal[j0];
+			    Node[i].p[j0] - ( Tri[Node[i].tri].plane.dist -
+			                      Tri[Node[i].tri].plane.normal[j1] * Node[i].p[j1] -
+			                      Tri[Node[i].tri].plane.normal[j2] * Node[i].p[j2]  ) /
+			    Tri[Node[i].tri].plane.normal[j0];
 			if ( Absolute( Node[i].error ) > 0.5 ) {
 				NumNodesUsed++;
 				Node[i].used++;
@@ -756,7 +756,7 @@ int compare( TRITABLE *t1, TRITABLE *t2 ){
 }
 
 void MakeBrushes( int NumTris, NODE *Node, TRI *Tri,bool surf,
-				  int offset,char *texture0, char *texture1, char *texture2 ){
+                  int offset,char *texture0, char *texture1, char *texture2 ){
 	extern double backface;
 	BRUSH brush;
 	int contents;
@@ -1016,7 +1016,7 @@ void MakeBrushes( int NumTris, NODE *Node, TRI *Tri,bool surf,
 		for ( j = 0; j < 5; j++ )
 		{
 			strcpy( brush.face[j].texture,
-					( strlen( texture1 ) ? texture1 : texture0 ) );
+			        ( strlen( texture1 ) ? texture1 : texture0 ) );
 			brush.face[j].Shift[0] = (float)TexOffset[0];
 			brush.face[j].Shift[1] = (float)TexOffset[1];
 			brush.face[j].Rotate   = 0.;
@@ -1205,8 +1205,8 @@ void MapOut( int NumNodes,int NumTris, NODE *Node, TRI *Tri ){
 								for ( t = 0; t < 3 && OK; t++ )
 								{
 									s[t] = side( Node[q[h0]].p[j1],Node[q[h0]].p[j2],
-												 Node[q[h1]].p[j1],Node[q[h1]].p[j2],
-												 Node[Tri[k].v[t]].p[j1],Node[Tri[k].v[t]].p[j2] );
+									             Node[q[h1]].p[j1],Node[q[h1]].p[j2],
+									             Node[Tri[k].v[t]].p[j1],Node[Tri[k].v[t]].p[j2] );
 								}
 								if ( ( s[1] > 0 || s[2] > 0 ) && s[0] < 0 ) {
 									OK = 0;

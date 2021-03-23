@@ -52,127 +52,127 @@ typedef std::list<Entity*> entitylist_t;
 
 class EntityFindByName : public scene::Graph::Walker
 {
-const char* m_name;
-entitylist_t& m_entitylist;
-/* this starts at 1 << level */
-int m_flag;
-int m_hide;
+	const char* m_name;
+	entitylist_t& m_entitylist;
+	/* this starts at 1 << level */
+	int m_flag;
+	int m_hide;
 public:
-EntityFindByName( const char* name, entitylist_t& entitylist, int flag, bool hide )
-	: m_name( name ), m_entitylist( entitylist ), m_flag( flag ), m_hide( hide ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	int spawnflagsInt;
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0 ) {
-		if ( string_equal( m_name, entity->getKeyValue( "classname" ) ) ) {
-			const char *spawnflags = entity->getKeyValue( "spawnflags" );
-			globalOutputStream() << "spawnflags for " << m_name << ": " << spawnflags << ".\n";
+	EntityFindByName( const char* name, entitylist_t& entitylist, int flag, bool hide )
+		: m_name( name ), m_entitylist( entitylist ), m_flag( flag ), m_hide( hide ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		int spawnflagsInt;
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 ) {
+			if ( string_equal( m_name, entity->getKeyValue( "classname" ) ) ) {
+				const char *spawnflags = entity->getKeyValue( "spawnflags" );
+				globalOutputStream() << "spawnflags for " << m_name << ": " << spawnflags << ".\n";
 
-			if ( !string_empty( spawnflags ) ) {
-				spawnflagsInt = atoi( spawnflags );
-				if ( !( spawnflagsInt & m_flag ) ) {
-					hide_node( path.top(), m_hide );   // hide/unhide
-					m_entitylist.push_back( entity );
+				if ( !string_empty( spawnflags ) ) {
+					spawnflagsInt = atoi( spawnflags );
+					if ( !( spawnflagsInt & m_flag ) ) {
+						hide_node( path.top(), m_hide );   // hide/unhide
+						m_entitylist.push_back( entity );
+					}
+				}
+				else
+				{
+					globalWarningStream() << "UFO:AI: Warning: no spawnflags for " << m_name << ".\n";
 				}
 			}
-			else
-			{
-				globalWarningStream() << "UFO:AI: Warning: no spawnflags for " << m_name << ".\n";
-			}
 		}
+		return true;
 	}
-	return true;
-}
 };
 
 class ForEachFace : public BrushVisitor
 {
 public:
-mutable int m_contentFlagsVis;
-mutable int m_surfaceFlagsVis;
+	mutable int m_contentFlagsVis;
+	mutable int m_surfaceFlagsVis;
 
-ForEachFace() {
-	m_contentFlagsVis = -1;
-	m_surfaceFlagsVis = -1;
-}
+	ForEachFace() {
+		m_contentFlagsVis = -1;
+		m_surfaceFlagsVis = -1;
+	}
 
-void visit( Face& face ) const {
+	void visit( Face& face ) const {
 #if _DEBUG
-	if ( m_surfaceFlagsVis < 0 ) {
-		m_surfaceFlagsVis = face.getShader().m_flags.m_surfaceFlags;
-	}
-	else if ( m_surfaceFlagsVis >= 0 && m_surfaceFlagsVis != face.getShader().m_flags.m_surfaceFlags ) {
-		globalWarningStream() << "Faces with different surfaceflags at brush\n";
-	}
-	if ( m_contentFlagsVis < 0 ) {
-		m_contentFlagsVis = face.getShader().m_flags.m_contentFlags;
-	}
-	else if ( m_contentFlagsVis >= 0 && m_contentFlagsVis != face.getShader().m_flags.m_contentFlags ) {
-		globalWarningStream() << "Faces with different contentflags at brush\n";
-	}
+		if ( m_surfaceFlagsVis < 0 ) {
+			m_surfaceFlagsVis = face.getShader().m_flags.m_surfaceFlags;
+		}
+		else if ( m_surfaceFlagsVis >= 0 && m_surfaceFlagsVis != face.getShader().m_flags.m_surfaceFlags ) {
+			globalWarningStream() << "Faces with different surfaceflags at brush\n";
+		}
+		if ( m_contentFlagsVis < 0 ) {
+			m_contentFlagsVis = face.getShader().m_flags.m_contentFlags;
+		}
+		else if ( m_contentFlagsVis >= 0 && m_contentFlagsVis != face.getShader().m_flags.m_contentFlags ) {
+			globalWarningStream() << "Faces with different contentflags at brush\n";
+		}
 #else
-	m_surfaceFlagsVis = face.getShader().m_flags.m_surfaceFlags;
-	m_contentFlagsVis = face.getShader().m_flags.m_contentFlags;
+		m_surfaceFlagsVis = face.getShader().m_flags.m_surfaceFlags;
+		m_contentFlagsVis = face.getShader().m_flags.m_contentFlags;
 #endif
-}
+	}
 };
 
 typedef std::list<Brush*> brushlist_t;
 
 class BrushGetLevel : public scene::Graph::Walker
 {
-brushlist_t& m_brushlist;
-int m_flag;
-bool m_content;     // if true - use m_contentFlags - otherwise m_surfaceFlags
-mutable bool m_notset;
-mutable bool m_hide;
+	brushlist_t& m_brushlist;
+	int m_flag;
+	bool m_content;     // if true - use m_contentFlags - otherwise m_surfaceFlags
+	mutable bool m_notset;
+	mutable bool m_hide;
 public:
-BrushGetLevel( brushlist_t& brushlist, int flag, bool content, bool notset, bool hide )
-	: m_brushlist( brushlist ), m_flag( flag ), m_content( content ), m_notset( notset ), m_hide( hide ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Brush* brush = Node_getBrush( path.top() );
-	if ( brush != 0 ) {
-		ForEachFace faces;
-		brush->forEachFace( faces );
-		// contentflags?
-		if ( m_content ) {
-			// are any flags set?
-			if ( faces.m_contentFlagsVis > 0 ) {
-				// flag should not be set
-				if ( m_notset && ( !( faces.m_contentFlagsVis & m_flag ) ) ) {
-					hide_node( path.top(), m_hide );
-					m_brushlist.push_back( brush );
-				}
-				// check whether flag is set
-				else if ( !m_notset && ( ( faces.m_contentFlagsVis & m_flag ) ) ) {
-					hide_node( path.top(), m_hide );
-					m_brushlist.push_back( brush );
-				}
-			}
-		}
-		// surfaceflags?
-		else
-		{
-			// are any flags set?
-			if ( faces.m_surfaceFlagsVis > 0 ) {
-				// flag should not be set
-				if ( m_notset && ( !( faces.m_surfaceFlagsVis & m_flag ) ) ) {
-					hide_node( path.top(), m_hide );
-					m_brushlist.push_back( brush );
-				}
-				// check whether flag is set
-				else if ( !m_notset && ( ( faces.m_surfaceFlagsVis & m_flag ) ) ) {
-					hide_node( path.top(), m_hide );
-					m_brushlist.push_back( brush );
-				}
-			}
-		}
-
+	BrushGetLevel( brushlist_t& brushlist, int flag, bool content, bool notset, bool hide )
+		: m_brushlist( brushlist ), m_flag( flag ), m_content( content ), m_notset( notset ), m_hide( hide ){
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		Brush* brush = Node_getBrush( path.top() );
+		if ( brush != 0 ) {
+			ForEachFace faces;
+			brush->forEachFace( faces );
+			// contentflags?
+			if ( m_content ) {
+				// are any flags set?
+				if ( faces.m_contentFlagsVis > 0 ) {
+					// flag should not be set
+					if ( m_notset && ( !( faces.m_contentFlagsVis & m_flag ) ) ) {
+						hide_node( path.top(), m_hide );
+						m_brushlist.push_back( brush );
+					}
+					// check whether flag is set
+					else if ( !m_notset && ( ( faces.m_contentFlagsVis & m_flag ) ) ) {
+						hide_node( path.top(), m_hide );
+						m_brushlist.push_back( brush );
+					}
+				}
+			}
+			// surfaceflags?
+			else
+			{
+				// are any flags set?
+				if ( faces.m_surfaceFlagsVis > 0 ) {
+					// flag should not be set
+					if ( m_notset && ( !( faces.m_surfaceFlagsVis & m_flag ) ) ) {
+						hide_node( path.top(), m_hide );
+						m_brushlist.push_back( brush );
+					}
+					// check whether flag is set
+					else if ( !m_notset && ( ( faces.m_surfaceFlagsVis & m_flag ) ) ) {
+						hide_node( path.top(), m_hide );
+						m_brushlist.push_back( brush );
+					}
+				}
+			}
+
+		}
+		return true;
+	}
 };
 
 /**

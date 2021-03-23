@@ -33,20 +33,20 @@ class CDoorDialog : public CDialog
 {
 // Construction
 public:
-CDoorDialog( CWnd* pParent = NULL );     // standard constructor
+	CDoorDialog( CWnd* pParent = NULL );     // standard constructor
 
 // Dialog Data
 //{{AFX_DATA(CDoorDialog)
-enum { IDD = IDD_DOOR_DIALOG };
-CString m_fbTextureName;
-BOOL m_bSclMainHor;
-BOOL m_bSclMainVert;
-BOOL m_bSclTrimHor;
-BOOL m_bSclTrimVert;
-CString m_trimTextureName;
-CString m_trimTexSetBox;
-CString m_mainTexSetBox;
-int m_doorDirection;
+	enum { IDD = IDD_DOOR_DIALOG };
+	CString m_fbTextureName;
+	BOOL m_bSclMainHor;
+	BOOL m_bSclMainVert;
+	BOOL m_bSclTrimHor;
+	BOOL m_bSclTrimVert;
+	CString m_trimTextureName;
+	CString m_trimTexSetBox;
+	CString m_mainTexSetBox;
+	int m_doorDirection;
 //}}AFX_DATA
 
 
@@ -54,7 +54,7 @@ int m_doorDirection;
 // ClassWizard generated virtual function overrides
 //{{AFX_VIRTUAL(CDoorDialog)
 protected:
-virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
+	virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
 //}}AFX_VIRTUAL
 
 // Implementation
@@ -62,10 +62,10 @@ protected:
 
 // Generated message map functions
 //{{AFX_MSG(CDoorDialog)
-afx_msg void OnSetMaintexBtn();
-afx_msg void OnSetTrimtexBtn();
+	afx_msg void OnSetMaintexBtn();
+	afx_msg void OnSetTrimtexBtn();
 //}}AFX_MSG
-DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP()
 };
 
 //{{AFX_INSERT_LOCATION}}

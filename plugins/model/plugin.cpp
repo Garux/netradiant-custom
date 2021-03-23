@@ -94,13 +94,13 @@ void pico_initialise(){
 
 class PicoModelLoader : public ModelLoader
 {
-const picoModule_t* m_module;
+	const picoModule_t* m_module;
 public:
-PicoModelLoader( const picoModule_t* module ) : m_module( module ){
-}
-scene::Node& loadModel( ArchiveFile& file ){
-	return loadPicoModel( m_module, file );
-}
+	PicoModelLoader( const picoModule_t* module ) : m_module( module ){
+	}
+	scene::Node& loadModel( ArchiveFile& file ){
+		return loadPicoModel( m_module, file );
+	}
 };
 
 class ModelPicoDependencies :
@@ -116,38 +116,38 @@ class ModelPicoDependencies :
 
 class ModelPicoAPI : public TypeSystemRef
 {
-PicoModelLoader m_modelLoader;
+	PicoModelLoader m_modelLoader;
 public:
-typedef ModelLoader Type;
+	typedef ModelLoader Type;
 
-ModelPicoAPI( const char* extension, const picoModule_t* module ) :
-	m_modelLoader( module ){
-	StringOutputStream filter( 128 );
-	filter << "*." << extension;
-	GlobalFiletypesModule::getTable().addType( Type::Name(), extension, filetype_t( module->displayName, filter.c_str() ) );
-}
-ModelLoader* getTable(){
-	return &m_modelLoader;
-}
+	ModelPicoAPI( const char* extension, const picoModule_t* module ) :
+		m_modelLoader( module ){
+		StringOutputStream filter( 128 );
+		filter << "*." << extension;
+		GlobalFiletypesModule::getTable().addType( Type::Name(), extension, filetype_t( module->displayName, filter.c_str() ) );
+	}
+	ModelLoader* getTable(){
+		return &m_modelLoader;
+	}
 };
 
 class PicoModelAPIConstructor
 {
-CopiedString m_extension;
-const picoModule_t* m_module;
+	CopiedString m_extension;
+	const picoModule_t* m_module;
 public:
-PicoModelAPIConstructor( const char* extension, const picoModule_t* module ) :
-	m_extension( extension ), m_module( module ){
-}
-const char* getName(){
-	return m_extension.c_str();
-}
-ModelPicoAPI* constructAPI( ModelPicoDependencies& dependencies ){
-	return new ModelPicoAPI( m_extension.c_str(), m_module );
-}
-void destroyAPI( ModelPicoAPI* api ){
-	delete api;
-}
+	PicoModelAPIConstructor( const char* extension, const picoModule_t* module ) :
+		m_extension( extension ), m_module( module ){
+	}
+	const char* getName(){
+		return m_extension.c_str();
+	}
+	ModelPicoAPI* constructAPI( ModelPicoDependencies& dependencies ){
+		return new ModelPicoAPI( m_extension.c_str(), m_module );
+	}
+	void destroyAPI( ModelPicoAPI* api ){
+		delete api;
+	}
 };
 
 

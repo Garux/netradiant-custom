@@ -168,66 +168,66 @@ void AddSplineControl( const char* control, splinePoint_t* pSP ) {
 
 class EntityBuildPaths
 {
-mutable DEntity e;
-DTrainDrawer& drawer;
+	mutable DEntity e;
+	DTrainDrawer& drawer;
 public:
-EntityBuildPaths( DTrainDrawer& drawer ) : drawer( drawer ){
-}
-void operator()( scene::Instance& instance ) const {
-	e.ClearEPairs();
-	e.LoadEPairList( Node_getEntity( instance.path().top() ) );
+	EntityBuildPaths( DTrainDrawer& drawer ) : drawer( drawer ){
+	}
+	void operator()( scene::Instance& instance ) const {
+		e.ClearEPairs();
+		e.LoadEPairList( Node_getEntity( instance.path().top() ) );
 
-	const char* classname = e.m_Classname.GetBuffer();
-	const char* target;
-	const char* control;
-	const char* targetname;
-	vec3_t vOrigin;
+		const char* classname = e.m_Classname.GetBuffer();
+		const char* target;
+		const char* control;
+		const char* targetname;
+		vec3_t vOrigin;
 
-	e.SpawnString( "targetname", NULL, &targetname );
-	e.SpawnVector( "origin", "0 0 0", vOrigin );
+		e.SpawnString( "targetname", NULL, &targetname );
+		e.SpawnVector( "origin", "0 0 0", vOrigin );
 
-	if ( !strcmp( classname, "info_train_spline_main" ) ) {
-		if ( !targetname ) {
-			globalWarningStream() << "info_train_spline_main with no targetname";
-			return;
-		}
+		if ( !strcmp( classname, "info_train_spline_main" ) ) {
+			if ( !targetname ) {
+				globalWarningStream() << "info_train_spline_main with no targetname";
+				return;
+			}
 
-		e.SpawnString( "target", NULL, &target );
+			e.SpawnString( "target", NULL, &target );
 
-		if ( !target ) {
-			drawer.AddControlPoint( targetname, vOrigin );
-		}
-		else {
-			splinePoint_t* pSP = drawer.AddSplinePoint( targetname, target, vOrigin );
+			if ( !target ) {
+				drawer.AddControlPoint( targetname, vOrigin );
+			}
+			else {
+				splinePoint_t* pSP = drawer.AddSplinePoint( targetname, target, vOrigin );
 
-			e.SpawnString( "control", NULL, &control );
+				e.SpawnString( "control", NULL, &control );
 
-			if ( control ) {
-				AddSplineControl( control, pSP );
-
-				for ( int j = 2;; j++ ) {
-					char buffer[32];
-					sprintf( buffer, "control%i", j );
-
-					e.SpawnString( buffer, NULL, &control );
-					if ( !control ) {
-						break;
-					}
-
+				if ( control ) {
 					AddSplineControl( control, pSP );
+
+					for ( int j = 2;; j++ ) {
+						char buffer[32];
+						sprintf( buffer, "control%i", j );
+
+						e.SpawnString( buffer, NULL, &control );
+						if ( !control ) {
+							break;
+						}
+
+						AddSplineControl( control, pSP );
+					}
 				}
 			}
 		}
-	}
-	else if ( !strcmp( classname, "info_train_spline_control" ) ) {
-		if ( !targetname ) {
-			globalWarningStream() << "info_train_spline_control with no targetname";
-			return;
-		}
+		else if ( !strcmp( classname, "info_train_spline_control" ) ) {
+			if ( !targetname ) {
+				globalWarningStream() << "info_train_spline_control with no targetname";
+				return;
+			}
 
-		drawer.AddControlPoint( targetname, vOrigin );
+			drawer.AddControlPoint( targetname, vOrigin );
+		}
 	}
-}
 };
 
 void DTrainDrawer::BuildPaths() {

@@ -215,7 +215,7 @@ bool    LoadBSPFile( const char *filename ) {
 		return false;
 	}
 	if ( ( header->version != Q3_BSP_VERSION ) &&
-		 ( header->version != WOLF_BSP_VERSION ) ) {
+	     ( header->version != WOLF_BSP_VERSION ) ) {
 		DoMessageBox( "File is incorrect version", "Error", eMB_OK );
 		return false;
 	}
@@ -241,7 +241,7 @@ bool    LoadBSPFile( const char *filename ) {
 }
 
 void FreeBSPData(){
-	#define DEL( a ) delete[] a; a = 0;
+#define DEL( a ) delete[] a; a = 0;
 	DEL( visBytes );
 	DEL( dnodes );
 	DEL( dplanes );

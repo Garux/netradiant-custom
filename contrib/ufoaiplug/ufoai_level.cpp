@@ -34,21 +34,21 @@ class Level;
  */
 class EntityFindByClassname : public scene::Graph::Walker
 {
-const char* m_name;
-Entity*& m_entity;
+	const char* m_name;
+	Entity*& m_entity;
 public:
-EntityFindByClassname( const char* name, Entity*& entity ) : m_name( name ), m_entity( entity ){
-	m_entity = 0;
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( m_entity == 0 ) {
-		Entity* entity = Node_getEntity( path.top() );
-		if ( entity != 0 && string_equal( m_name, entity->getKeyValue( "classname" ) ) ) {
-			m_entity = entity;
-		}
+	EntityFindByClassname( const char* name, Entity*& entity ) : m_name( name ), m_entity( entity ){
+		m_entity = 0;
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( m_entity == 0 ) {
+			Entity* entity = Node_getEntity( path.top() );
+			if ( entity != 0 && string_equal( m_name, entity->getKeyValue( "classname" ) ) ) {
+				m_entity = entity;
+			}
+		}
+		return true;
+	}
 };
 
 /**
@@ -65,24 +65,24 @@ Entity* Scene_FindEntityByClass( const char* name ){
  */
 class EntityFindFlags : public scene::Graph::Walker
 {
-const char *m_classname;
-const char *m_flag;
-int *m_count;
+	const char *m_classname;
+	const char *m_flag;
+	int *m_count;
 
 public:
-EntityFindFlags( const char *classname, const char *flag, int *count ) : m_classname( classname ), m_flag( flag ), m_count( count ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	const char *str;
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0 && string_equal( m_classname, entity->getKeyValue( "classname" ) ) ) {
-		str = entity->getKeyValue( m_flag );
-		if ( string_empty( str ) ) {
-			( *m_count )++;
-		}
+	EntityFindFlags( const char *classname, const char *flag, int *count ) : m_classname( classname ), m_flag( flag ), m_count( count ){
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		const char *str;
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 && string_equal( m_classname, entity->getKeyValue( "classname" ) ) ) {
+			str = entity->getKeyValue( m_flag );
+			if ( string_empty( str ) ) {
+				( *m_count )++;
+			}
+		}
+		return true;
+	}
 };
 
 
@@ -91,32 +91,32 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
  */
 class EntityFindTeams : public scene::Graph::Walker
 {
-const char *m_classname;
-int *m_count;
-int *m_team;
+	const char *m_classname;
+	int *m_count;
+	int *m_team;
 
 public:
-EntityFindTeams( const char *classname, int *count, int *team ) : m_classname( classname ), m_count( count ), m_team( team ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	const char *str;
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0 && string_equal( m_classname, entity->getKeyValue( "classname" ) ) ) {
-		if ( m_count ) {
-			( *m_count )++;
-		}
-		// now get the highest teamnum
-		if ( m_team ) {
-			str = entity->getKeyValue( "team" );
-			if ( !string_empty( str ) ) {
-				if ( atoi( str ) > *m_team ) {
-					( *m_team ) = atoi( str );
+	EntityFindTeams( const char *classname, int *count, int *team ) : m_classname( classname ), m_count( count ), m_team( team ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		const char *str;
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 && string_equal( m_classname, entity->getKeyValue( "classname" ) ) ) {
+			if ( m_count ) {
+				( *m_count )++;
+			}
+			// now get the highest teamnum
+			if ( m_team ) {
+				str = entity->getKeyValue( "team" );
+				if ( !string_empty( str ) ) {
+					if ( atoi( str ) > *m_team ) {
+						( *m_team ) = atoi( str );
+					}
 				}
 			}
 		}
+		return true;
 	}
-	return true;
-}
 };
 
 /**

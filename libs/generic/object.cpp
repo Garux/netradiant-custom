@@ -25,11 +25,11 @@ namespace
 {
 class Blah
 {
-int i;
+	int i;
 public:
-Blah(){
-	i = 3;
-}
+	Blah(){
+		i = 3;
+	}
 };
 
 void Test(){

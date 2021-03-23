@@ -54,23 +54,23 @@ enum
 class Filter
 {
 public:
-virtual void setActive( bool active ) = 0;
+	virtual void setActive( bool active ) = 0;
 };
 
 class Filterable
 {
 public:
-virtual void updateFiltered() = 0;
+	virtual void updateFiltered() = 0;
 };
 
 class FilterSystem
 {
 public:
-INTEGER_CONSTANT( Version, 1 );
-STRING_CONSTANT( Name, "filters" );
-virtual void addFilter( Filter& filter, int mask ) = 0;
-virtual void registerFilterable( Filterable& filterable ) = 0;
-virtual void unregisterFilterable( Filterable& filterable ) = 0;
+	INTEGER_CONSTANT( Version, 1 );
+	STRING_CONSTANT( Name, "filters" );
+	virtual void addFilter( Filter& filter, int mask ) = 0;
+	virtual void registerFilterable( Filterable& filterable ) = 0;
+	virtual void unregisterFilterable( Filterable& filterable ) = 0;
 };
 
 #include "modulesystem.h"

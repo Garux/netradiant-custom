@@ -72,12 +72,12 @@ GtkWindow* create_simple_modal_dialog_window( const char* title, ModalDialog& di
 class RadioHBox
 {
 public:
-GtkHBox* m_hbox;
-GtkRadioButton* m_radio;
-RadioHBox( GtkHBox* hbox, GtkRadioButton* radio ) :
-	m_hbox( hbox ),
-	m_radio( radio ){
-}
+	GtkHBox* m_hbox;
+	GtkRadioButton* m_radio;
+	RadioHBox( GtkHBox* hbox, GtkRadioButton* radio ) :
+		m_hbox( hbox ),
+		m_radio( radio ){
+	}
 };
 
 RadioHBox RadioHBox_new( StringArrayRange names );
@@ -86,14 +86,14 @@ RadioHBox RadioHBox_new( StringArrayRange names );
 class PathEntry
 {
 public:
-GtkFrame* m_frame;
-GtkEntry* m_entry;
-GtkButton* m_button;
-PathEntry( GtkFrame* frame, GtkEntry* entry, GtkButton* button ) :
-	m_frame( frame ),
-	m_entry( entry ),
-	m_button( button ){
-}
+	GtkFrame* m_frame;
+	GtkEntry* m_entry;
+	GtkButton* m_button;
+	PathEntry( GtkFrame* frame, GtkEntry* entry, GtkButton* button ) :
+		m_frame( frame ),
+		m_entry( entry ),
+		m_button( button ){
+	}
 };
 
 PathEntry PathEntry_new();
@@ -101,13 +101,13 @@ PathEntry PathEntry_new();
 class BrowsedPathEntry
 {
 public:
-typedef Callback1<const char*> SetPathCallback;
-typedef Callback1<const SetPathCallback&> BrowseCallback;
+	typedef Callback1<const char*> SetPathCallback;
+	typedef Callback1<const SetPathCallback&> BrowseCallback;
 
-PathEntry m_entry;
-BrowseCallback m_browse;
+	PathEntry m_entry;
+	BrowseCallback m_browse;
 
-BrowsedPathEntry( const BrowseCallback& browse );
+	BrowsedPathEntry( const BrowseCallback& browse );
 };
 
 GtkLabel* DialogLabel_new( const char* name );

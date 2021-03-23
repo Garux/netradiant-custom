@@ -30,112 +30,112 @@
 template<typename Copyable>
 class BasicUndoMemento : public UndoMemento
 {
-Copyable m_data;
+	Copyable m_data;
 public:
-BasicUndoMemento( const Copyable& data )
-	: m_data( data ){
-}
+	BasicUndoMemento( const Copyable& data )
+		: m_data( data ){
+	}
 
-void release(){
-	delete this;
-}
+	void release(){
+		delete this;
+	}
 
-const Copyable& get() const {
-	return m_data;
-}
+	const Copyable& get() const {
+		return m_data;
+	}
 };
 
 
 template<typename Copyable>
 class ObservedUndoableObject : public Undoable
 {
-typedef Callback1<const Copyable&> ImportCallback;
+	typedef Callback1<const Copyable&> ImportCallback;
 
-Copyable& m_object;
-ImportCallback m_importCallback;
-UndoObserver* m_undoQueue;
-MapFile* m_map;
+	Copyable& m_object;
+	ImportCallback m_importCallback;
+	UndoObserver* m_undoQueue;
+	MapFile* m_map;
 public:
 
-ObservedUndoableObject<Copyable>( Copyable & object, const ImportCallback &importCallback )
-	: m_object( object ), m_importCallback( importCallback ), m_undoQueue( 0 ), m_map( 0 )
-{
-}
-~ObservedUndoableObject(){
-}
-
-MapFile* map(){
-	return m_map;
-}
-
-void instanceAttach( MapFile* map ){
-	m_map = map;
-	m_undoQueue = GlobalUndoSystem().observer( this );
-}
-void instanceDetach( MapFile* map ){
-	m_map = 0;
-	m_undoQueue = 0;
-	GlobalUndoSystem().release( this );
-}
-
-void save(){
-	if ( m_map != 0 ) {
-		m_map->changed();
+	ObservedUndoableObject<Copyable>( Copyable & object, const ImportCallback &importCallback )
+		: m_object( object ), m_importCallback( importCallback ), m_undoQueue( 0 ), m_map( 0 )
+	{
 	}
-	if ( m_undoQueue != 0 ) {
-		m_undoQueue->save( this );
+	~ObservedUndoableObject(){
 	}
-}
 
-UndoMemento* exportState() const {
-	return new BasicUndoMemento<Copyable>( m_object );
-}
-void importState( const UndoMemento* state ){
-	save();
-	m_importCallback( ( static_cast<const BasicUndoMemento<Copyable>*>( state ) )->get() );
-}
+	MapFile* map(){
+		return m_map;
+	}
+
+	void instanceAttach( MapFile* map ){
+		m_map = map;
+		m_undoQueue = GlobalUndoSystem().observer( this );
+	}
+	void instanceDetach( MapFile* map ){
+		m_map = 0;
+		m_undoQueue = 0;
+		GlobalUndoSystem().release( this );
+	}
+
+	void save(){
+		if ( m_map != 0 ) {
+			m_map->changed();
+		}
+		if ( m_undoQueue != 0 ) {
+			m_undoQueue->save( this );
+		}
+	}
+
+	UndoMemento* exportState() const {
+		return new BasicUndoMemento<Copyable>( m_object );
+	}
+	void importState( const UndoMemento* state ){
+		save();
+		m_importCallback( ( static_cast<const BasicUndoMemento<Copyable>*>( state ) )->get() );
+	}
 };
 
 template<typename Copyable>
 class UndoableObject : public Undoable
 {
-Copyable& m_object;
-UndoObserver* m_undoQueue;
-MapFile* m_map;
+	Copyable& m_object;
+	UndoObserver* m_undoQueue;
+	MapFile* m_map;
 
 public:
-UndoableObject( Copyable& object )
-	: m_object( object ), m_undoQueue( 0 ), m_map( 0 )
-{}
-~UndoableObject(){
-}
-
-void instanceAttach( MapFile* map ){
-	m_map = map;
-	m_undoQueue = GlobalUndoSystem().observer( this );
-}
-void instanceDetach( MapFile* map ){
-	m_map = 0;
-	m_undoQueue = 0;
-	GlobalUndoSystem().release( this );
-}
-
-void save(){
-	if ( m_map != 0 ) {
-		m_map->changed();
+	UndoableObject( Copyable& object )
+		: m_object( object ), m_undoQueue( 0 ), m_map( 0 )
+	{}
+	~UndoableObject(){
 	}
-	if ( m_undoQueue != 0 ) {
-		m_undoQueue->save( this );
-	}
-}
 
-UndoMemento* exportState() const {
-	return new BasicUndoMemento<Copyable>( m_object );
-}
-void importState( const UndoMemento* state ){
-	save();
-	m_object = ( static_cast<const BasicUndoMemento<Copyable>*>( state ) )->get();
-}
+	void instanceAttach( MapFile* map ){
+		m_map = map;
+		m_undoQueue = GlobalUndoSystem().observer( this );
+	}
+	void instanceDetach( MapFile* map ){
+		m_map = 0;
+		m_undoQueue = 0;
+		GlobalUndoSystem().release( this );
+	}
+
+	void save(){
+		if ( m_map != 0 ) {
+			m_map->changed();
+		}
+		if ( m_undoQueue != 0 ) {
+			m_undoQueue->save( this );
+		}
+	}
+
+	UndoMemento* exportState() const {
+		return new BasicUndoMemento<Copyable>( m_object );
+	}
+	void importState( const UndoMemento* state ){
+		save();
+		m_object = ( static_cast<const BasicUndoMemento<Copyable>*>( state ) )->get();
+	}
 };
 
 #endif

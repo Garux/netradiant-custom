@@ -138,8 +138,8 @@ void PrintTree_r( node_t *node, int depth ){
 
 	plane = &mapplanes[node->planenum];
 	Sys_Printf( "#%d (%5.2f %5.2f %5.2f):%5.2f\n", node->planenum,
-				plane->normal()[0], plane->normal()[1], plane->normal()[2],
-				plane->dist() );
+	            plane->normal()[0], plane->normal()[1], plane->normal()[2],
+	            plane->dist() );
 	PrintTree_r( node->children[0], depth + 1 );
 	PrintTree_r( node->children[1], depth + 1 );
 }

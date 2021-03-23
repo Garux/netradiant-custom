@@ -64,12 +64,12 @@ class CSynapseClientBkgrnd2d : public CSynapseClient
 {
 public:
 // CSynapseClient API
-bool RequestAPI( APIDescriptor_t *pAPI );
-const char* GetInfo();
-const char* GetName();
+	bool RequestAPI( APIDescriptor_t *pAPI );
+	const char* GetInfo();
+	const char* GetName();
 
-CSynapseClientBkgrnd2d() { }
-virtual ~CSynapseClientBkgrnd2d() { }
+	CSynapseClientBkgrnd2d() { }
+	virtual ~CSynapseClientBkgrnd2d() { }
 };
 #define MSG_PREFIX "bkgrnd2d: "
 #define MSG_WARN "bkgrnd2d WARNING: "

@@ -41,93 +41,103 @@ class CControlPointsManager
 {
 protected:
 // used by Render
-OpenGLBinding *m_pQglTable;
-C2DView       *m_p2DView;
+	OpenGLBinding *m_pQglTable;
+	C2DView       *m_p2DView;
 public:
-CControlPointsManager() { m_pQglTable = NULL; m_p2DView = NULL; }
-virtual ~CControlPointsManager() { }
-void Init( C2DView *p2DView, OpenGLBinding *pQglTable ) { m_pQglTable = pQglTable; m_p2DView = p2DView; }
+	CControlPointsManager() {
+		m_pQglTable = NULL;
+		m_p2DView = NULL;
+	}
+	virtual ~CControlPointsManager() { }
+	void Init( C2DView *p2DView, OpenGLBinding *pQglTable ) {
+		m_pQglTable = pQglTable;
+		m_p2DView = p2DView;
+	}
 
-virtual bool OnLButtonDown( int x, int y ) = 0;
-virtual bool OnMouseMove( int x, int y ) = 0;
-virtual bool OnLButtonUp( int x, int y ) = 0;
+	virtual bool OnLButtonDown( int x, int y ) = 0;
+	virtual bool OnMouseMove( int x, int y ) = 0;
+	virtual bool OnLButtonUp( int x, int y ) = 0;
 
-virtual void render() = 0;
-virtual void Commit() = 0;
+	virtual void render() = 0;
+	virtual void Commit() = 0;
 };
 
 // brush face manager
 class CControlPointsManagerBFace : public CControlPointsManager
 {
-enum      EManagerState { Idle, Drag } ManagerState;
-int m_NumPoints;
+	enum      EManagerState { Idle, Drag } ManagerState;
+	int m_NumPoints;
 // initial geometry
-CtrlPts_t m_RefPts;
+	CtrlPts_t m_RefPts;
 // current geometry
-CtrlPts_t *m_pPts;
+	CtrlPts_t *m_pPts;
 // transform matrix ( 2DView is Window <-> ST )
-float m_TM[2][3];
+	float m_TM[2][3];
 // texture size for ST <-> XY
-int m_TexSize[2];
+	int m_TexSize[2];
 // used when translating
-float m_TransOffset[2];
+	float m_TransOffset[2];
 // dragged point index
-int m_iDragPoint;
+	int m_iDragPoint;
 // do we have an anchor ?
-bool m_bGotAnchor;
+	bool m_bGotAnchor;
 // anchor point index
-int m_iAnchorPoint;
+	int m_iAnchorPoint;
 // coordinates of Anchor
-float m_Anchor[2];
+	float m_Anchor[2];
 // used for commit
-_QERFaceData  *m_pFaceData;
+	_QERFaceData  *m_pFaceData;
 
 public:
 // construction / init -------------------------------------------------
-CControlPointsManagerBFace() { ManagerState = Idle; }
-virtual ~CControlPointsManagerBFace() { }
+	CControlPointsManagerBFace() {
+		ManagerState = Idle;
+	}
+	virtual ~CControlPointsManagerBFace() { }
 // NOTE: pQglTable is sent to CControlPointsManager::Init
-void Init( int iPts, CtrlPts_t * Pts, C2DView * p2DView, int TexSize[2], _QERFaceData * pFaceData, OpenGLBinding * pQglTable );
+	void Init( int iPts, CtrlPts_t * Pts, C2DView * p2DView, int TexSize[2], _QERFaceData * pFaceData, OpenGLBinding * pQglTable );
 // CControlPointsManager interface -------------------------------------
 
-virtual bool OnLButtonDown( int x, int y );
-virtual bool OnMouseMove( int x, int y );
-virtual bool OnLButtonUp( int x, int y );
+	virtual bool OnLButtonDown( int x, int y );
+	virtual bool OnMouseMove( int x, int y );
+	virtual bool OnLButtonUp( int x, int y );
 
-virtual void render();
-virtual void Commit();
+	virtual void render();
+	virtual void Commit();
 
 private:
 // internal members
-void UpdateCtrlPts();
-void ComputeTransOffset( int i );
-void XYSpaceForSTSpace( float xy[2], const float st[2] );
+	void UpdateCtrlPts();
+	void ComputeTransOffset( int i );
+	void XYSpaceForSTSpace( float xy[2], const float st[2] );
 };
 
 // patch manager
 class CControlPointsManagerPatch : public CControlPointsManager
 {
-enum      EManagerState { Idle, Drag } ManagerState;
+	enum      EManagerState { Idle, Drag } ManagerState;
 // reference data, used for commits
-patchMesh_t* m_pPatch;
+	patchMesh_t* m_pPatch;
 // work patch, holds current data
-patchMesh_t* m_pWorkPatch;
-int m_iDragPoint[2];
+	patchMesh_t* m_pWorkPatch;
+	int m_iDragPoint[2];
 
 public:
 // construction / init -------------------------------------------------
-CControlPointsManagerPatch() { ManagerState = Idle; }
-virtual ~CControlPointsManagerPatch() { }
+	CControlPointsManagerPatch() {
+		ManagerState = Idle;
+	}
+	virtual ~CControlPointsManagerPatch() { }
 // NOTE: pQglTable is sent to CControlPointsManager::Init
-void Init( patchMesh_t* pWorkPatch, C2DView *p2DView, OpenGLBinding *pQglTable, patchMesh_t* pPatch );
+	void Init( patchMesh_t* pWorkPatch, C2DView *p2DView, OpenGLBinding *pQglTable, patchMesh_t* pPatch );
 // CControlPointsManager interface -------------------------------------
 
-virtual bool OnLButtonDown( int x, int y );
-virtual bool OnMouseMove( int x, int y );
-virtual bool OnLButtonUp( int x, int y );
+	virtual bool OnLButtonDown( int x, int y );
+	virtual bool OnMouseMove( int x, int y );
+	virtual bool OnLButtonUp( int x, int y );
 
-virtual void render();
-virtual void Commit();
+	virtual void render();
+	virtual void Commit();
 };
 
 #endif

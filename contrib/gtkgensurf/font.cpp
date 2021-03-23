@@ -232,7 +232,7 @@ void texfont_init(){
 			}
 
 	g_GLTable.m_pfn_qglTexImage2D( GL_TEXTURE_2D, 0, GL_INTENSITY4, 128, 128, 0,
-								   GL_LUMINANCE, GL_UNSIGNED_BYTE, buf );
+	                               GL_LUMINANCE, GL_UNSIGNED_BYTE, buf );
 	free( buf );
 }
 

@@ -51,9 +51,9 @@ void LoadPCXPalette( const char *filename, byte palette[768] ){
 	const pcx_header_t* pcx = reinterpret_cast<const pcx_header_t*>( buffer );
 
 	if ( pcx->manufacturer != 0x0a
-		 || pcx->version != 5
-		 || pcx->encoding != 1
-		 || pcx->bits_per_pixel != 8 ) {
+	  || pcx->version != 5
+	  || pcx->encoding != 1
+	  || pcx->bits_per_pixel != 8 ) {
 		return;
 	}
 

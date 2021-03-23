@@ -39,12 +39,12 @@
  */
 
 static float Det3x3( float a00, float a01, float a02,
-					 float a10, float a11, float a12,
-					 float a20, float a21, float a22 ){
+                     float a10, float a11, float a12,
+                     float a20, float a21, float a22 ){
 	return
-		a00 * ( a11 * a22 - a12 * a21 )
-		-   a01 * ( a10 * a22 - a12 * a20 )
-		+   a02 * ( a10 * a21 - a11 * a20 );
+	        a00 * ( a11 * a22 - a12 * a21 )
+	    -   a01 * ( a10 * a22 - a12 * a20 )
+	    +   a02 * ( a10 * a21 - a11 * a20 );
 }
 
 void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *bestVert[3] ){
@@ -163,27 +163,27 @@ static void ConvertOriginBrush( FILE *f, int num, const Vector3& origin, bool br
 	{
 		if ( brushPrimitives ) {
 			fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
-					 origin[0] + 8 * S( i,0,0 ), origin[1] + 8 * S( i,0,1 ), origin[2] + 8 * S( i,0,2 ),
-					 origin[0] + 8 * S( i,1,0 ), origin[1] + 8 * S( i,1,1 ), origin[2] + 8 * S( i,1,2 ),
-					 origin[0] + 8 * S( i,2,0 ), origin[1] + 8 * S( i,2,1 ), origin[2] + 8 * S( i,2,2 ),
-					 1.0f / 16.0f, 0.0f, FRAC( ( S( i,5,0 ) * origin[0] + S( i,5,1 ) * origin[1] + S( i,5,2 ) * origin[2] ) / 16.0 + 0.5 ),
-					 0.0f, 1.0f / 16.0f, FRAC( ( S( i,6,0 ) * origin[0] + S( i,6,1 ) * origin[1] + S( i,6,2 ) * origin[2] ) / 16.0 + 0.5 ),
-					 "common/origin",
-					 0
-					 );
+			         origin[0] + 8 * S( i,0,0 ), origin[1] + 8 * S( i,0,1 ), origin[2] + 8 * S( i,0,2 ),
+			         origin[0] + 8 * S( i,1,0 ), origin[1] + 8 * S( i,1,1 ), origin[2] + 8 * S( i,1,2 ),
+			         origin[0] + 8 * S( i,2,0 ), origin[1] + 8 * S( i,2,1 ), origin[2] + 8 * S( i,2,2 ),
+			         1.0f / 16.0f, 0.0f, FRAC( ( S( i,5,0 ) * origin[0] + S( i,5,1 ) * origin[1] + S( i,5,2 ) * origin[2] ) / 16.0 + 0.5 ),
+			         0.0f, 1.0f / 16.0f, FRAC( ( S( i,6,0 ) * origin[0] + S( i,6,1 ) * origin[1] + S( i,6,2 ) * origin[2] ) / 16.0 + 0.5 ),
+			         "common/origin",
+			         0
+			       );
 		}
 		else
 		{
 			fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %s %.8f %.8f %.8f %.8f %.8f %d 0 0\n",
-					 origin[0] + 8 * S( i,0,0 ), origin[1] + 8 * S( i,0,1 ), origin[2] + 8 * S( i,0,2 ),
-					 origin[0] + 8 * S( i,1,0 ), origin[1] + 8 * S( i,1,1 ), origin[2] + 8 * S( i,1,2 ),
-					 origin[0] + 8 * S( i,2,0 ), origin[1] + 8 * S( i,2,1 ), origin[2] + 8 * S( i,2,2 ),
-					 "common/origin",
-					 FRAC( ( S( i,3,0 ) * origin[0] + S( i,3,1 ) * origin[1] + S( i,3,2 ) * origin[2] ) / 16.0 + 0.5 ) * originSize,
-					 FRAC( ( S( i,4,0 ) * origin[0] + S( i,4,1 ) * origin[1] + S( i,4,2 ) * origin[2] ) / 16.0 + 0.5 ) * originSize,
-					 0.0f, 16.0 / originSize, 16.0 / originSize,
-					 0
-					 );
+			         origin[0] + 8 * S( i,0,0 ), origin[1] + 8 * S( i,0,1 ), origin[2] + 8 * S( i,0,2 ),
+			         origin[0] + 8 * S( i,1,0 ), origin[1] + 8 * S( i,1,1 ), origin[2] + 8 * S( i,1,2 ),
+			         origin[0] + 8 * S( i,2,0 ), origin[1] + 8 * S( i,2,1 ), origin[2] + 8 * S( i,2,2 ),
+			         "common/origin",
+			         FRAC( ( S( i,3,0 ) * origin[0] + S( i,3,1 ) * origin[1] + S( i,3,2 ) * origin[2] ) / 16.0 + 0.5 ) * originSize,
+			         FRAC( ( S( i,4,0 ) * origin[0] + S( i,4,1 ) * origin[1] + S( i,4,2 ) * origin[2] ) / 16.0 + 0.5 ) * originSize,
+			         0.0f, 16.0 / originSize, 16.0 / originSize,
+			         0
+			       );
 		}
 	}
 #undef S
@@ -313,25 +313,25 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, const Vector3
 		{
 			if ( brushPrimitives ) {
 				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
-						 pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
-						 pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
-						 pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
-						 1.0f / 32.0f, 0.0f, 0.0f,
-						 0.0f, 1.0f / 32.0f, 0.0f,
-						 texture,
-						 0
-						 );
+				         pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+				         pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+				         pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+				         1.0f / 32.0f, 0.0f, 0.0f,
+				         0.0f, 1.0f / 32.0f, 0.0f,
+				         texture,
+				         0
+				       );
 			}
 			else
 			{
 				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %s %.8f %.8f %.8f %.8f %.8f %d 0 0\n",
-						 pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
-						 pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
-						 pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
-						 texture,
-						 0.0f, 0.0f, 0.0f, 0.5f, 0.5f,
-						 0
-						 );
+				         pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+				         pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+				         pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+				         texture,
+				         0.0f, 0.0f, 0.0f, 0.5f, 0.5f,
+				         0
+				       );
 			}
 		}
 	}
@@ -534,53 +534,53 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 				//     - st[i] = texMat[i][0]*x + texMat[i][1]*y + texMat[i][2]
 				//       (for three vertices)
 				D = Det3x3(
-					xyI[0], xyI[1], 1,
-					xyJ[0], xyJ[1], 1,
-					xyK[0], xyK[1], 1
-					);
+				        xyI[0], xyI[1], 1,
+				        xyJ[0], xyJ[1], 1,
+				        xyK[0], xyK[1], 1
+				    );
 				if ( D != 0 ) {
 					for ( i = 0; i < 2; ++i )
 					{
 						D0 = Det3x3(
-							stI[i], xyI[1], 1,
-							stJ[i], xyJ[1], 1,
-							stK[i], xyK[1], 1
-							);
+						         stI[i], xyI[1], 1,
+						         stJ[i], xyJ[1], 1,
+						         stK[i], xyK[1], 1
+						     );
 						D1 = Det3x3(
-							xyI[0], stI[i], 1,
-							xyJ[0], stJ[i], 1,
-							xyK[0], stK[i], 1
-							);
+						         xyI[0], stI[i], 1,
+						         xyJ[0], stJ[i], 1,
+						         xyK[0], stK[i], 1
+						     );
 						D2 = Det3x3(
-							xyI[0], xyI[1], stI[i],
-							xyJ[0], xyJ[1], stJ[i],
-							xyK[0], xyK[1], stK[i]
-							);
+						         xyI[0], xyI[1], stI[i],
+						         xyJ[0], xyJ[1], stJ[i],
+						         xyK[0], xyK[1], stK[i]
+						     );
 						buildSide->texMat[i] = { D0 / D, D1 / D, D2 / D };
 					}
 				}
 				else{
 					fprintf( stderr, "degenerate triangle found when solving texMat equations for\n(%f %f %f) (%f %f %f) (%f %f %f)\n( %f %f %f )\n( %f %f %f ) -> ( %f %f )\n( %f %f %f ) -> ( %f %f )\n( %f %f %f ) -> ( %f %f )\n",
-							 buildPlane.normal()[0], buildPlane.normal()[1], buildPlane.normal()[2],
-							 vert[0]->normal[0], vert[0]->normal[1], vert[0]->normal[2],
-							 texX[0], texX[1], texX[2], texY[0], texY[1], texY[2],
-							 vert[0]->xyz[0], vert[0]->xyz[1], vert[0]->xyz[2], xyI[0], xyI[1],
-							 vert[1]->xyz[0], vert[1]->xyz[1], vert[1]->xyz[2], xyJ[0], xyJ[1],
-							 vert[2]->xyz[0], vert[2]->xyz[1], vert[2]->xyz[2], xyK[0], xyK[1]
-							 );
+					         buildPlane.normal()[0], buildPlane.normal()[1], buildPlane.normal()[2],
+					         vert[0]->normal[0], vert[0]->normal[1], vert[0]->normal[2],
+					         texX[0], texX[1], texX[2], texY[0], texY[1], texY[2],
+					         vert[0]->xyz[0], vert[0]->xyz[1], vert[0]->xyz[2], xyI[0], xyI[1],
+					         vert[1]->xyz[0], vert[1]->xyz[1], vert[1]->xyz[2], xyJ[0], xyJ[1],
+					         vert[2]->xyz[0], vert[2]->xyz[1], vert[2]->xyz[2], xyK[0], xyK[1]
+					       );
 				}
 
 				/* print brush side */
 				/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
 				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
-						 pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
-						 pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
-						 pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
-						 buildSide->texMat[0][0], buildSide->texMat[0][1], FRAC( buildSide->texMat[0][2] ),
-						 buildSide->texMat[1][0], buildSide->texMat[1][1], FRAC( buildSide->texMat[1][2] ),
-						 texture,
-						 0
-						 );
+				         pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+				         pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+				         pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+				         buildSide->texMat[0][0], buildSide->texMat[0][1], FRAC( buildSide->texMat[0][2] ),
+				         buildSide->texMat[1][0], buildSide->texMat[1][1], FRAC( buildSide->texMat[1][2] ),
+				         texture,
+				         0
+				       );
 			}
 			else
 			{
@@ -613,33 +613,36 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 					tv = 2;
 				}
 
-				stI[0] = vert[0]->st[0] * buildSide->shaderInfo->shaderWidth; stI[1] = vert[0]->st[1] * buildSide->shaderInfo->shaderHeight;
-				stJ[0] = vert[1]->st[0] * buildSide->shaderInfo->shaderWidth; stJ[1] = vert[1]->st[1] * buildSide->shaderInfo->shaderHeight;
-				stK[0] = vert[2]->st[0] * buildSide->shaderInfo->shaderWidth; stK[1] = vert[2]->st[1] * buildSide->shaderInfo->shaderHeight;
+				stI[0] = vert[0]->st[0] * buildSide->shaderInfo->shaderWidth;
+				stI[1] = vert[0]->st[1] * buildSide->shaderInfo->shaderHeight;
+				stJ[0] = vert[1]->st[0] * buildSide->shaderInfo->shaderWidth;
+				stJ[1] = vert[1]->st[1] * buildSide->shaderInfo->shaderHeight;
+				stK[0] = vert[2]->st[0] * buildSide->shaderInfo->shaderWidth;
+				stK[1] = vert[2]->st[1] * buildSide->shaderInfo->shaderHeight;
 
 				D = Det3x3(
-					vert[0]->xyz[sv], vert[0]->xyz[tv], 1,
-					vert[1]->xyz[sv], vert[1]->xyz[tv], 1,
-					vert[2]->xyz[sv], vert[2]->xyz[tv], 1
-					);
+				        vert[0]->xyz[sv], vert[0]->xyz[tv], 1,
+				        vert[1]->xyz[sv], vert[1]->xyz[tv], 1,
+				        vert[2]->xyz[sv], vert[2]->xyz[tv], 1
+				    );
 				if ( D != 0 ) {
 					for ( i = 0; i < 2; ++i )
 					{
 						D0 = Det3x3(
-							stI[i], vert[0]->xyz[tv], 1,
-							stJ[i], vert[1]->xyz[tv], 1,
-							stK[i], vert[2]->xyz[tv], 1
-							);
+						         stI[i], vert[0]->xyz[tv], 1,
+						         stJ[i], vert[1]->xyz[tv], 1,
+						         stK[i], vert[2]->xyz[tv], 1
+						     );
 						D1 = Det3x3(
-							vert[0]->xyz[sv], stI[i], 1,
-							vert[1]->xyz[sv], stJ[i], 1,
-							vert[2]->xyz[sv], stK[i], 1
-							);
+						         vert[0]->xyz[sv], stI[i], 1,
+						         vert[1]->xyz[sv], stJ[i], 1,
+						         vert[2]->xyz[sv], stK[i], 1
+						     );
 						D2 = Det3x3(
-							vert[0]->xyz[sv], vert[0]->xyz[tv], stI[i],
-							vert[1]->xyz[sv], vert[1]->xyz[tv], stJ[i],
-							vert[2]->xyz[sv], vert[2]->xyz[tv], stK[i]
-							);
+						         vert[0]->xyz[sv], vert[0]->xyz[tv], stI[i],
+						         vert[1]->xyz[sv], vert[1]->xyz[tv], stJ[i],
+						         vert[2]->xyz[sv], vert[2]->xyz[tv], stK[i]
+						     );
 						sts[i] = { D0 / D, D1 / D, D2 / D };
 						//Sys_Printf( "%.3f %.3f %.3f \n", sts[i][0], sts[i][1], sts[i][2] );
 					}
@@ -671,13 +674,13 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 				/* print brush side */
 				/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
 				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %s %.8f %.8f %.8f %.8f %.8f %d 0 0\n",
-						 pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
-						 pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
-						 pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
-						 texture,
-						 shift[0], shift[1], rotate, scale[0], scale[1],
-						 0
-						 );
+				         pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+				         pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+				         pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+				         texture,
+				         shift[0], shift[1], rotate, scale[0], scale[1],
+				         0
+				       );
 			}
 		}
 		else
@@ -692,25 +695,25 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 
 			if ( brushPrimitives ) {
 				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
-						 pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
-						 pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
-						 pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
-						 1.0f / 16.0f, 0.0f, 0.0f,
-						 0.0f, 1.0f / 16.0f, 0.0f,
-						 texture,
-						 0
-						 );
+				         pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+				         pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+				         pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+				         1.0f / 16.0f, 0.0f, 0.0f,
+				         0.0f, 1.0f / 16.0f, 0.0f,
+				         texture,
+				         0
+				       );
 			}
 			else
 			{
 				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %s %.8f %.8f %.8f %.8f %.8f %d 0 0\n",
-						 pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
-						 pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
-						 pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
-						 texture,
-						 0.0f, 0.0f, 0.0f, 0.25f, 0.25f,
-						 0
-						 );
+				         pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+				         pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+				         pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+				         texture,
+				         0.0f, 0.0f, 0.0f, 0.25f, 0.25f,
+				         0
+				       );
 			}
 		}
 	}
@@ -768,10 +771,10 @@ for ( i = 0; i < brush->numSides; i++ )
 	/* print brush side */
 	/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
 	fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %s 0 0 0 0.5 0.5 0 0 0\n",
-			 pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
-			 pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
-			 pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
-			 texture );
+	         pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+	         pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+	         pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+	         texture );
 }
 #endif
 

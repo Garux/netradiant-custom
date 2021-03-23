@@ -105,7 +105,7 @@ void ExpandWildcards( int *argc, char ***argv ){
 	{
 		path = ( *argv )[i];
 		if ( path[0] == '-'
-			 || ( !strchr( path, '*' ) && !strchr( path, '?' ) ) ) {
+		     || ( !strchr( path, '*' ) && !strchr( path, '?' ) ) ) {
 			ex_argv[ex_argc++] = path;
 			continue;
 		}

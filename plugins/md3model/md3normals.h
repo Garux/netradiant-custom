@@ -32,10 +32,10 @@ inline Normal3f DecodeNormal( const byte bytes[2] ){
 	double lng = bytes[1] * ( c_pi / 128.0 );
 
 	return Normal3f(
-			   static_cast<float>( cos( lat ) * sin( lng ) ),
-			   static_cast<float>( sin( lat ) * sin( lng ) ),
-			   static_cast<float>( cos( lng ) )
-			   );
+	           static_cast<float>( cos( lat ) * sin( lng ) ),
+	           static_cast<float>( sin( lat ) * sin( lng ) ),
+	           static_cast<float>( cos( lng ) )
+	       );
 }
 
 #endif

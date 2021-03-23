@@ -161,7 +161,7 @@ mapDrawSurface_t *MakeCelSurface( mapDrawSurface_t *src, shaderInfo_t *si ){
 
 	/* don't create cel surfaces for certain types of shaders */
 	if ( ( src->shaderInfo->compileFlags & C_TRANSLUCENT ) ||
-		 ( src->shaderInfo->compileFlags & C_SKY ) ) {
+	     ( src->shaderInfo->compileFlags & C_SKY ) ) {
 		return NULL;
 	}
 
@@ -292,7 +292,7 @@ void TidyEntitySurfaces( entity_t *e ){
 
 			/* this surface ok? */
 			if ( in->type == ESurfaceType::Flare || in->type == ESurfaceType::Shader ||
-				 ( in->type != ESurfaceType::Bad && in->numVerts > 0 ) ) {
+			     ( in->type != ESurfaceType::Bad && in->numVerts > 0 ) ) {
 				break;
 			}
 
@@ -1385,7 +1385,7 @@ void ClipSideIntoTree_r( winding_t *w, side_t *side, node_t *node ){
 
 		const Plane3f& plane = mapplanes[ node->planenum ].plane;
 		ClipWindingEpsilonStrict( w, plane,
-								  ON_EPSILON, &front, &back ); /* strict, we handle the "winding disappeared" case */
+		                          ON_EPSILON, &front, &back ); /* strict, we handle the "winding disappeared" case */
 		if ( !front && !back ) {
 			/* in doubt, register it in both nodes */
 			front = CopyWinding( w );
@@ -1557,11 +1557,11 @@ void CullSides( entity_t *e ){
 
 					/* get autosprite and polygonoffset status */
 					if ( side1->shaderInfo &&
-						 ( side1->shaderInfo->autosprite || side1->shaderInfo->polygonOffset ) ) {
+					     ( side1->shaderInfo->autosprite || side1->shaderInfo->polygonOffset ) ) {
 						continue;
 					}
 					if ( side2->shaderInfo &&
-						 ( side2->shaderInfo->autosprite || side2->shaderInfo->polygonOffset ) ) {
+					     ( side2->shaderInfo->autosprite || side2->shaderInfo->polygonOffset ) ) {
 						continue;
 					}
 
@@ -2085,8 +2085,8 @@ static int FilterTrianglesIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
 	{
 		/* error check */
 		if ( ds->indexes[ i ] >= ds->numVerts ||
-			 ds->indexes[ i + 1 ] >= ds->numVerts ||
-			 ds->indexes[ i + 2 ] >= ds->numVerts ) {
+		     ds->indexes[ i + 1 ] >= ds->numVerts ||
+		     ds->indexes[ i + 2 ] >= ds->numVerts ) {
 			Error( "Index %d greater than vertex count %d", ds->indexes[ i ], ds->numVerts );
 		}
 
@@ -2131,8 +2131,8 @@ static int FilterFoliageIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
 		{
 			/* error check */
 			if ( ds->indexes[ i ] >= ds->numVerts ||
-				 ds->indexes[ i + 1 ] >= ds->numVerts ||
-				 ds->indexes[ i + 2 ] >= ds->numVerts ) {
+			     ds->indexes[ i + 1 ] >= ds->numVerts ||
+			     ds->indexes[ i + 2 ] >= ds->numVerts ) {
 				Error( "Index %d greater than vertex count %d", ds->indexes[ i ], ds->numVerts );
 			}
 
@@ -2243,8 +2243,8 @@ int FindDrawIndexes( int numIndexes, int *indexes ){
 		{
 			/* test 3 indexes */
 			if ( indexes[ 0 ] == bspDrawIndexes[ i ] &&
-				 indexes[ 1 ] == bspDrawIndexes[ i + 1 ] &&
-				 indexes[ 2 ] == bspDrawIndexes[ i + 2 ] ) {
+			     indexes[ 1 ] == bspDrawIndexes[ i + 1 ] &&
+			     indexes[ 2 ] == bspDrawIndexes[ i + 2 ] ) {
 				numRedundantIndexes += numIndexes;
 				return i;
 			}
@@ -2259,9 +2259,9 @@ int FindDrawIndexes( int numIndexes, int *indexes ){
 	{
 		/* test first 4 indexes */
 		if ( indexes[ 0 ] == bspDrawIndexes[ i ] &&
-			 indexes[ 1 ] == bspDrawIndexes[ i + 1 ] &&
-			 indexes[ 2 ] == bspDrawIndexes[ i + 2 ] &&
-			 indexes[ 3 ] == bspDrawIndexes[ i + 3 ] ) {
+		     indexes[ 1 ] == bspDrawIndexes[ i + 1 ] &&
+		     indexes[ 2 ] == bspDrawIndexes[ i + 2 ] &&
+		     indexes[ 3 ] == bspDrawIndexes[ i + 3 ] ) {
 			/* handle 4 indexes */
 			if ( numIndexes == 4 ) {
 				return i;
@@ -2310,10 +2310,10 @@ void EmitDrawIndexes( mapDrawSurface_t *ds, bspDrawSurface_t *out ){
 			if ( ds->type != ESurfaceType::Patch ) {
 				if ( bspDrawIndexes[ numBSPDrawIndexes ] < 0 || bspDrawIndexes[ numBSPDrawIndexes ] >= ds->numVerts ) {
 					Sys_Warning( "%d %s has invalid index %d (%d)\n",
-								numBSPDrawSurfaces,
-								ds->shaderInfo->shader.c_str(),
-								bspDrawIndexes[ numBSPDrawIndexes ],
-								i );
+					             numBSPDrawSurfaces,
+					             ds->shaderInfo->shader.c_str(),
+					             bspDrawIndexes[ numBSPDrawIndexes ],
+					             i );
 					bspDrawIndexes[ numBSPDrawIndexes ] = 0;
 				}
 			}
@@ -2495,7 +2495,7 @@ static void OptimizeTriangleSurface( mapDrawSurface_t *ds ){
 
 	/* certain surfaces don't get optimized */
 	if ( ds->numIndexes <= VERTEX_CACHE_SIZE ||
-		 ds->shaderInfo->autosprite ) {
+	     ds->shaderInfo->autosprite ) {
 		return;
 	}
 
@@ -2643,10 +2643,10 @@ void EmitTriangleSurface( mapDrawSurface_t *ds ){
 	/* ydnar: gs mods: handle lightmapped terrain (force to planar type) */
 	//%	else if( vector3_length( ds->lightmapAxis ) <= 0.0f || ds->type == ESurfaceType::Triangles || ds->type == ESurfaceType::Foghull || debugSurfaces )
 	else if ( ( vector3_length( ds->lightmapAxis ) <= 0.0f && !ds->planar ) ||
-			  ds->type == ESurfaceType::Triangles ||
-			  ds->type == ESurfaceType::Foghull ||
-			  ds->numVerts > maxLMSurfaceVerts ||
-			  debugSurfaces ) {
+	          ds->type == ESurfaceType::Triangles ||
+	          ds->type == ESurfaceType::Foghull ||
+	          ds->numVerts > maxLMSurfaceVerts ||
+	          debugSurfaces ) {
 		out->surfaceType = MST_TRIANGLE_SOUP;
 	}
 
@@ -3476,8 +3476,8 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 				if ( out->numVerts == 3 && out->numIndexes > 3 ) {
 					Sys_Printf( "\n" );
 					Sys_Warning( "Potentially bad %s surface (%d: %d, %d)\n     %s\n",
-								surfaceTypeName( ds->type ),
-								numBSPDrawSurfaces - 1, out->numVerts, out->numIndexes, si->shader.c_str() );
+					             surfaceTypeName( ds->type ),
+					             numBSPDrawSurfaces - 1, out->numVerts, out->numIndexes, si->shader.c_str() );
 				}
 			}
 

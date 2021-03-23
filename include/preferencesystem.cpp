@@ -58,28 +58,28 @@ void SavePrefs( PreferenceDictionary& preferences, const char* filename ){
 class StringPreference
 {
 public:
-class Observer
-{
-public:
-virtual void onChanged() = 0;
-};
+	class Observer
+	{
+	public:
+		virtual void onChanged() = 0;
+	};
 
 private:
-CopiedString m_string;
-Observer& m_observer;
+	CopiedString m_string;
+	Observer& m_observer;
 public:
-StringPreference( Observer& observer )
-	: m_observer( observer ){
-}
-void importString( const char* value ){
-	m_string = value;
-	m_observer.onChanged();
-}
-typedef MemberCaller1<StringPreference, const char*, &StringPreference::importString> ImportStringCaller;
-void exportString( StringImportCallback& importer ){
-	importer( m_string.c_str() );
-}
-typedef MemberCaller1<StringPreference, StringImportCallback&, &StringPreference::exportString> ExportStringCaller;
+	StringPreference( Observer& observer )
+		: m_observer( observer ){
+	}
+	void importString( const char* value ){
+		m_string = value;
+		m_observer.onChanged();
+	}
+	typedef MemberCaller1<StringPreference, const char*, &StringPreference::importString> ImportStringCaller;
+	void exportString( StringImportCallback& importer ){
+		importer( m_string.c_str() );
+	}
+	typedef MemberCaller1<StringPreference, StringImportCallback&, &StringPreference::exportString> ExportStringCaller;
 };
 
 inline void int_export( int i, StringImportCallback& importer ){
@@ -95,79 +95,79 @@ inline int int_import( const char* value ){
 class IntPreference
 {
 public:
-class Observer
-{
-public:
-virtual void onChanged() = 0;
-};
+	class Observer
+	{
+	public:
+		virtual void onChanged() = 0;
+	};
 
 private:
-int m_int;
-Observer& m_observer;
+	int m_int;
+	Observer& m_observer;
 public:
 
-IntPreference( Observer& observer )
-	: m_observer( observer ){
-}
-void importString( const char* value ){
-	m_int = int_import( value );
-	m_observer.onChanged();
-}
-typedef MemberCaller1<IntPreference, const char*, &IntPreference::importString> ImportStringCaller;
-void exportString( StringImportCallback& importer ){
-	int_export( m_int, importer );
-}
-typedef MemberCaller1<IntPreference, StringImportCallback&, &IntPreference::exportString> ExportStringCaller;
+	IntPreference( Observer& observer )
+		: m_observer( observer ){
+	}
+	void importString( const char* value ){
+		m_int = int_import( value );
+		m_observer.onChanged();
+	}
+	typedef MemberCaller1<IntPreference, const char*, &IntPreference::importString> ImportStringCaller;
+	void exportString( StringImportCallback& importer ){
+		int_export( m_int, importer );
+	}
+	typedef MemberCaller1<IntPreference, StringImportCallback&, &IntPreference::exportString> ExportStringCaller;
 };
 
 class IntPreferenceImporter
 {
-int& m_i;
+	int& m_i;
 public:
 
-IntPreferenceImporter( int& i )
-	: m_i( i ){
-}
-void importString( const char* value ){
-	m_i = int_import( value );
-}
+	IntPreferenceImporter( int& i )
+		: m_i( i ){
+	}
+	void importString( const char* value ){
+		m_i = int_import( value );
+	}
 };
 
 
 class TestPrefs
 {
 public:
-TestPrefs(){
-	PreferenceDictionary preferences;
+	TestPrefs(){
+		PreferenceDictionary preferences;
 
-	class StringObserver : public StringPreference::Observer
-	{
-public:
-	void onChanged(){
-		int bleh = 0;
+		class StringObserver : public StringPreference::Observer
+		{
+		public:
+			void onChanged(){
+				int bleh = 0;
+			}
+		} string_observer;
+		StringPreference string1( string_observer );
+		string1.importString( "twenty-three" );
+
+		class IntObserver : public IntPreference::Observer
+		{
+		public:
+			void onChanged(){
+				int bleh = 0;
+			}
+
+		} int_observer;
+		IntPreference int1( int_observer );
+		int1.importString( "23" );
+
+		preferences.registerPreference( "string1", StringPreference::ImportStringCaller( string1 ), StringPreference::ExportStringCaller( string1 ) );
+		preferences.registerPreference( "int1", IntPreference::ImportStringCaller( int1 ), IntPreference::ExportStringCaller( int1 ) );
+
+		LoadPrefs( preferences, "test.pref" );
+		SavePrefs( preferences, "test.pref" );
+
 	}
-	} string_observer;
-	StringPreference string1( string_observer );
-	string1.importString( "twenty-three" );
-
-	class IntObserver : public IntPreference::Observer
-	{
-public:
-	void onChanged(){
-		int bleh = 0;
-	}
-
-	} int_observer;
-	IntPreference int1( int_observer );
-	int1.importString( "23" );
-
-	preferences.registerPreference( "string1", StringPreference::ImportStringCaller( string1 ), StringPreference::ExportStringCaller( string1 ) );
-	preferences.registerPreference( "int1", IntPreference::ImportStringCaller( int1 ), IntPreference::ExportStringCaller( int1 ) );
-
-	LoadPrefs( preferences, "test.pref" );
-	SavePrefs( preferences, "test.pref" );
-
-}
 };
 
 #if 0

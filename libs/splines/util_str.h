@@ -37,115 +37,117 @@ void TestStringClass();
 class strdata
 {
 public:
-strdata () : len( 0 ), refcount( 0 ), data( NULL ), alloced( 0 ) {}
-~strdata (){
-	if ( data ) {
-		delete [] data;
-	}
-}
-
-void AddRef() { refcount++; }
-bool DelRef(){       // True if killed
-	refcount--;
-	if ( refcount < 0 ) {
-		delete this;
-		return true;
+	strdata () : len( 0 ), refcount( 0 ), data( NULL ), alloced( 0 ) {}
+	~strdata (){
+		if ( data ) {
+			delete [] data;
+		}
 	}
 
-	return false;
-}
+	void AddRef() {
+		refcount++;
+	}
+	bool DelRef(){       // True if killed
+		refcount--;
+		if ( refcount < 0 ) {
+			delete this;
+			return true;
+		}
 
-int len;
-int refcount;
-char *data;
-int alloced;
+		return false;
+	}
+
+	int len;
+	int refcount;
+	char *data;
+	int alloced;
 };
 
 class idStr {
 protected:
-strdata *m_data;
-void EnsureAlloced( int, bool keepold = true );
-void EnsureDataWritable();
+	strdata *m_data;
+	void EnsureAlloced( int, bool keepold = true );
+	void EnsureDataWritable();
 
 public:
-~idStr();
-idStr();
-idStr( const char *text );
-idStr( const idStr& string );
-idStr( const idStr string, int start, int end );
-idStr( const char ch );
-idStr( const int num );
-idStr( const float num );
-idStr( const unsigned num );
-int length( void ) const;
-int allocated( void ) const;
-const char * c_str( void ) const;
+	~idStr();
+	idStr();
+	idStr( const char *text );
+	idStr( const idStr& string );
+	idStr( const idStr string, int start, int end );
+	idStr( const char ch );
+	idStr( const int num );
+	idStr( const float num );
+	idStr( const unsigned num );
+	int length( void ) const;
+	int allocated( void ) const;
+	const char * c_str( void ) const;
 
-void        append( const char *text );
-void        append( const idStr& text );
-char operator[]( int index ) const;
-char&       operator[]( int index );
+	void        append( const char *text );
+	void        append( const idStr& text );
+	char operator[]( int index ) const;
+	char&       operator[]( int index );
 
-void operator=( const idStr& text );
-void operator=( const char *text );
+	void operator=( const idStr& text );
+	void operator=( const char *text );
 
-friend  idStr operator+( const idStr& a, const idStr& b );
-friend  idStr operator+( const idStr& a, const char *b );
-friend  idStr operator+( const char *a, const idStr& b );
+	friend  idStr operator+( const idStr& a, const idStr& b );
+	friend  idStr operator+( const idStr& a, const char *b );
+	friend  idStr operator+( const char *a, const idStr& b );
 
-friend  idStr operator+( const idStr& a, const float b );
-friend  idStr operator+( const idStr& a, const int b );
-friend  idStr operator+( const idStr& a, const unsigned b );
-friend  idStr operator+( const idStr& a, const bool b );
-friend  idStr operator+( const idStr& a, const char b );
+	friend  idStr operator+( const idStr& a, const float b );
+	friend  idStr operator+( const idStr& a, const int b );
+	friend  idStr operator+( const idStr& a, const unsigned b );
+	friend  idStr operator+( const idStr& a, const bool b );
+	friend  idStr operator+( const idStr& a, const char b );
 
-idStr&      operator+=( const idStr& a );
-idStr&      operator+=( const char *a );
-idStr&      operator+=( const float a );
-idStr&      operator+=( const char a );
-idStr&      operator+=( const int a );
-idStr&      operator+=( const unsigned a );
-idStr&      operator+=( const bool a );
+	idStr&      operator+=( const idStr& a );
+	idStr&      operator+=( const char *a );
+	idStr&      operator+=( const float a );
+	idStr&      operator+=( const char a );
+	idStr&      operator+=( const int a );
+	idStr&      operator+=( const unsigned a );
+	idStr&      operator+=( const bool a );
 
-friend  bool operator==( const idStr& a, const idStr& b );
-friend  bool operator==( const idStr& a, const char *b );
-friend  bool operator==( const char *a, const idStr& b );
+	friend  bool operator==( const idStr& a, const idStr& b );
+	friend  bool operator==( const idStr& a, const char *b );
+	friend  bool operator==( const char *a, const idStr& b );
 
-friend  bool operator!=( const idStr& a, const idStr& b );
-friend  bool operator!=( const idStr& a, const char *b );
-friend  bool operator!=( const char *a, const idStr& b );
+	friend  bool operator!=( const idStr& a, const idStr& b );
+	friend  bool operator!=( const idStr& a, const char *b );
+	friend  bool operator!=( const char *a, const idStr& b );
 
-operator const char *() const;
-operator const char *();
+	operator const char *() const;
+	operator const char *();
 
-int      icmpn( const char *text, int n ) const;
-int      icmpn( const idStr& text, int n ) const;
-int      icmp( const char *text ) const;
-int      icmp( const idStr& text ) const;
-int      cmpn( const char *text, int n ) const;
-int      cmpn( const idStr& text, int n ) const;
-int      cmp( const char *text ) const;
-int      cmp( const idStr& text ) const;
+	int      icmpn( const char *text, int n ) const;
+	int      icmpn( const idStr& text, int n ) const;
+	int      icmp( const char *text ) const;
+	int      icmp( const idStr& text ) const;
+	int      cmpn( const char *text, int n ) const;
+	int      cmpn( const idStr& text, int n ) const;
+	int      cmp( const char *text ) const;
+	int      cmp( const idStr& text ) const;
 
-void     tolower( void );
-void     toupper( void );
+	void     tolower( void );
+	void     toupper( void );
 
-static char     *tolower( char *s1 );
-static char     *toupper( char *s1 );
+	static char     *tolower( char *s1 );
+	static char     *toupper( char *s1 );
 
-static int      icmpn( const char *s1, const char *s2, int n );
-static int      icmp( const char *s1, const char *s2 );
-static int      cmpn( const char *s1, const char *s2, int n );
-static int      cmp( const char *s1, const char *s2 );
+	static int      icmpn( const char *s1, const char *s2, int n );
+	static int      icmp( const char *s1, const char *s2 );
+	static int      cmpn( const char *s1, const char *s2, int n );
+	static int      cmp( const char *s1, const char *s2 );
 
-static void     snprintf( char *dst, int size, const char *fmt, ... );
+	static void     snprintf( char *dst, int size, const char *fmt, ... );
 
-static bool      isNumeric( const char *str );
-bool    isNumeric( void ) const;
+	static bool      isNumeric( const char *str );
+	bool    isNumeric( void ) const;
 
-void     CapLength( int );
+	void     CapLength( int );
 
-void     BackSlashesToSlashes();
+	void     BackSlashesToSlashes();
 
 };
 
@@ -163,7 +165,7 @@ inline idStr::idStr() : m_data( NULL ){
 
 inline idStr::idStr
 (
-	const char *text
+    const char *text
 ) : m_data( NULL ){
 	int len;
 
@@ -185,7 +187,7 @@ inline idStr::idStr
 
 inline idStr::idStr
 (
-	const idStr& text
+    const idStr& text
 ) : m_data( NULL ){
 	m_data = text.m_data;
 	m_data->AddRef();
@@ -193,9 +195,9 @@ inline idStr::idStr
 
 inline idStr::idStr
 (
-	const idStr text,
-	int start,
-	int end
+    const idStr text,
+    int start,
+    int end
 ) : m_data( NULL ){
 	int i;
 	int len;
@@ -226,7 +228,7 @@ inline idStr::idStr
 
 inline idStr::idStr
 (
-	const char ch
+    const char ch
 ) : m_data( NULL ){
 	EnsureAlloced( 2 );
 
@@ -237,7 +239,7 @@ inline idStr::idStr
 
 inline idStr::idStr
 (
-	const float num
+    const float num
 ) : m_data( NULL ){
 	char text[ 32 ];
 	int len;
@@ -251,7 +253,7 @@ inline idStr::idStr
 
 inline idStr::idStr
 (
-	const int num
+    const int num
 ) : m_data( NULL ){
 	char text[ 32 ];
 	int len;
@@ -265,7 +267,7 @@ inline idStr::idStr
 
 inline idStr::idStr
 (
-	const unsigned num
+    const unsigned num
 ) : m_data( NULL ){
 	char text[ 32 ];
 	int len;
@@ -293,7 +295,7 @@ inline const char *idStr::c_str( void ) const {
 
 inline void idStr::append
 (
-	const char *text
+    const char *text
 ){
 	int len;
 
@@ -310,7 +312,7 @@ inline void idStr::append
 
 inline void idStr::append
 (
-	const idStr& text
+    const idStr& text
 ){
 	int len;
 
@@ -342,7 +344,7 @@ inline char idStr::operator[]( int index ) const {
 
 inline char& idStr::operator[]
 (
-	int index
+    int index
 ){
 	// Used for result for invalid indices
 	static char dummy = 0;
@@ -370,7 +372,7 @@ inline char& idStr::operator[]
 
 inline void idStr::operator=
 (
-	const idStr& text
+    const idStr& text
 ){
 	// adding the reference before deleting our current reference prevents
 	// us from deleting our string if we are copying from ourself
@@ -381,7 +383,7 @@ inline void idStr::operator=
 
 inline void idStr::operator=
 (
-	const char *text
+    const char *text
 ){
 	int len;
 
@@ -441,8 +443,8 @@ inline void idStr::operator=
 
 inline idStr operator+
 (
-	const idStr& a,
-	const idStr& b
+    const idStr& a,
+    const idStr& b
 ){
 	idStr result( a );
 
@@ -453,8 +455,8 @@ inline idStr operator+
 
 inline idStr operator+
 (
-	const idStr& a,
-	const char *b
+    const idStr& a,
+    const char *b
 ){
 	idStr result( a );
 
@@ -465,8 +467,8 @@ inline idStr operator+
 
 inline idStr operator+
 (
-	const char *a,
-	const idStr& b
+    const char *a,
+    const idStr& b
 ){
 	idStr result( a );
 
@@ -477,8 +479,8 @@ inline idStr operator+
 
 inline idStr operator+
 (
-	const idStr& a,
-	const bool b
+    const idStr& a,
+    const bool b
 ){
 	idStr result( a );
 
@@ -489,8 +491,8 @@ inline idStr operator+
 
 inline idStr operator+
 (
-	const idStr& a,
-	const char b
+    const idStr& a,
+    const char b
 ){
 	char text[ 2 ];
 
@@ -502,7 +504,7 @@ inline idStr operator+
 
 inline idStr& idStr::operator+=
 (
-	const idStr& a
+    const idStr& a
 ){
 	append( a );
 	return *this;
@@ -510,7 +512,7 @@ inline idStr& idStr::operator+=
 
 inline idStr& idStr::operator+=
 (
-	const char *a
+    const char *a
 ){
 	append( a );
 	return *this;
@@ -518,7 +520,7 @@ inline idStr& idStr::operator+=
 
 inline idStr& idStr::operator+=
 (
-	const char a
+    const char a
 ){
 	char text[ 2 ];
 
@@ -531,7 +533,7 @@ inline idStr& idStr::operator+=
 
 inline idStr& idStr::operator+=
 (
-	const bool a
+    const bool a
 ){
 	append( a ? "true" : "false" );
 	return *this;
@@ -539,16 +541,16 @@ inline idStr& idStr::operator+=
 
 inline bool operator==
 (
-	const idStr& a,
-	const idStr& b
+    const idStr& a,
+    const idStr& b
 ){
 	return ( !strcmp( a.c_str(), b.c_str() ) );
 }
 
 inline bool operator==
 (
-	const idStr& a,
-	const char *b
+    const idStr& a,
+    const char *b
 ){
 	assert( b );
 	if ( !b ) {
@@ -559,8 +561,8 @@ inline bool operator==
 
 inline bool operator==
 (
-	const char *a,
-	const idStr& b
+    const char *a,
+    const idStr& b
 ){
 	assert( a );
 	if ( !a ) {
@@ -571,32 +573,32 @@ inline bool operator==
 
 inline bool operator!=
 (
-	const idStr& a,
-	const idStr& b
+    const idStr& a,
+    const idStr& b
 ){
 	return !( a == b );
 }
 
 inline bool operator!=
 (
-	const idStr& a,
-	const char *b
+    const idStr& a,
+    const char *b
 ){
 	return !( a == b );
 }
 
 inline bool operator!=
 (
-	const char *a,
-	const idStr& b
+    const char *a,
+    const idStr& b
 ){
 	return !( a == b );
 }
 
 inline int idStr::icmpn
 (
-	const char *text,
-	int n
+    const char *text,
+    int n
 ) const {
 	assert( m_data );
 	assert( text );
@@ -606,8 +608,8 @@ inline int idStr::icmpn
 
 inline int idStr::icmpn
 (
-	const idStr& text,
-	int n
+    const idStr& text,
+    int n
 ) const {
 	assert( m_data );
 	assert( text.m_data );
@@ -617,7 +619,7 @@ inline int idStr::icmpn
 
 inline int idStr::icmp
 (
-	const char *text
+    const char *text
 ) const {
 	assert( m_data );
 	assert( text );
@@ -627,7 +629,7 @@ inline int idStr::icmp
 
 inline int idStr::icmp
 (
-	const idStr& text
+    const idStr& text
 ) const {
 	assert( c_str() );
 	assert( text.c_str() );
@@ -637,7 +639,7 @@ inline int idStr::icmp
 
 inline int idStr::cmp
 (
-	const char *text
+    const char *text
 ) const {
 	assert( m_data );
 	assert( text );
@@ -647,7 +649,7 @@ inline int idStr::cmp
 
 inline int idStr::cmp
 (
-	const idStr& text
+    const idStr& text
 ) const {
 	assert( c_str() );
 	assert( text.c_str() );
@@ -657,8 +659,8 @@ inline int idStr::cmp
 
 inline int idStr::cmpn
 (
-	const char *text,
-	int n
+    const char *text,
+    int n
 ) const {
 	assert( c_str() );
 	assert( text );
@@ -668,8 +670,8 @@ inline int idStr::cmpn
 
 inline int idStr::cmpn
 (
-	const idStr& text,
-	int n
+    const idStr& text,
+    int n
 ) const {
 	assert( c_str() );
 	assert( text.c_str()  );
@@ -679,7 +681,7 @@ inline int idStr::cmpn
 
 inline void idStr::tolower
 (
-	void
+    void
 ){
 	assert( m_data );
 
@@ -690,7 +692,7 @@ inline void idStr::tolower
 
 inline void idStr::toupper
 (
-	void
+    void
 ){
 	assert( m_data );
 
@@ -701,7 +703,7 @@ inline void idStr::toupper
 
 inline bool idStr::isNumeric
 (
-	void
+    void
 ) const {
 	assert( m_data );
 	return idStr::isNumeric( m_data->data );
@@ -713,7 +715,7 @@ inline idStr::operator const char *() {
 
 inline idStr::operator const char *
 (
-	void
+    void
 ) const {
 	return c_str();
 }

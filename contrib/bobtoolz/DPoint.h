@@ -33,13 +33,13 @@
 class DPoint
 {
 public:
-DPoint();
-virtual ~DPoint();
+	DPoint();
+	virtual ~DPoint();
 
-bool operator ==( vec3_t other );
+	bool operator ==( vec3_t other );
 
-vec3_t _pnt;
-unsigned char m_uData;
+	vec3_t _pnt;
+	unsigned char m_uData;
 };
 
 //typedef CList<DPoint*, DPoint*> DPointList;

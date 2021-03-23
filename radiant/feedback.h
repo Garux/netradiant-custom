@@ -41,10 +41,10 @@ class IGL2DWindow
 {
 public:
 // Increment the number of references to this object
-virtual void IncRef() = 0;
+	virtual void IncRef() = 0;
 // Decrement the reference count
-virtual void DecRef() = 0;
-virtual void Draw2D( VIEWTYPE vt ) = 0;
+	virtual void DecRef() = 0;
+	virtual void Draw2D( VIEWTYPE vt ) = 0;
 };
 
 // 3D window
@@ -52,132 +52,153 @@ class IGL3DWindow
 {
 public:
 // Increment the number of references to this object
-virtual void IncRef() = 0;
+	virtual void IncRef() = 0;
 // Decrement the reference count
-virtual void DecRef() = 0;
-virtual void Draw3D() = 0;
+	virtual void DecRef() = 0;
+	virtual void Draw3D() = 0;
 };
 
 // a select message with a brush/entity select information
 class CSelectMsg : public ISAXHandler
 {
-enum { SELECT_MESSAGE, SELECT_BRUSH } ESelectState;
-StringOutputStream message;
-StringOutputStream brush;
+	enum { SELECT_MESSAGE, SELECT_BRUSH } ESelectState;
+	StringOutputStream message;
+	StringOutputStream brush;
 public:
-CSelectMsg() { ESelectState = SELECT_MESSAGE; }
+	CSelectMsg() {
+		ESelectState = SELECT_MESSAGE;
+	}
 // SAX interface
-void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs );
-void saxEndElement( message_info_t *ctx, const xmlChar *name );
-void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
+	void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs );
+	void saxEndElement( message_info_t *ctx, const xmlChar *name );
+	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
 // for use in the dialog window
-const char* getName() { return message.c_str(); }
-IGL2DWindow* Highlight();
-void DropHighlight() { }
+	const char* getName() {
+		return message.c_str();
+	}
+	IGL2DWindow* Highlight();
+	void DropHighlight() { }
 };
 
 class CPointMsg final : public ISAXHandler, public IGL2DWindow
 {
-enum { POINT_MESSAGE, POINT_POINT } EPointState;
-StringOutputStream message;
-StringOutputStream point;
-Vector3 pt;
-int refCount;
+	enum { POINT_MESSAGE, POINT_POINT } EPointState;
+	StringOutputStream message;
+	StringOutputStream point;
+	Vector3 pt;
+	int refCount;
 public:
-CPointMsg() { EPointState = POINT_MESSAGE; refCount = 0; }
+	CPointMsg() {
+		EPointState = POINT_MESSAGE;
+		refCount = 0;
+	}
 // SAX interface
-void Release(){
-	delete this;
-}
-void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs );
-void saxEndElement( message_info_t *ctx, const xmlChar *name );
-void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
+	void Release(){
+		delete this;
+	}
+	void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs );
+	void saxEndElement( message_info_t *ctx, const xmlChar *name );
+	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
 // for use in the dialog window
-const char* getName() { return message.c_str(); }
-IGL2DWindow* Highlight();
-void DropHighlight();
+	const char* getName() {
+		return message.c_str();
+	}
+	IGL2DWindow* Highlight();
+	void DropHighlight();
 
 // IGL2DWindow interface --------------------------------
 // Increment the number of references to this object
-void IncRef() { refCount++; }
-// Decrement the reference count
-void DecRef() {
-	refCount--; if ( refCount <= 0 ) {
-		delete this;
+	void IncRef() {
+		refCount++;
 	}
-}
-void Draw2D( VIEWTYPE vt );
+// Decrement the reference count
+	void DecRef() {
+		refCount--;
+		if ( refCount <= 0 ) {
+			delete this;
+		}
+	}
+	void Draw2D( VIEWTYPE vt );
 };
 
 class CWindingMsg final : public ISAXHandler, public IGL2DWindow
 {
-enum { WINDING_MESSAGE, WINDING_WINDING } EPointState;
-StringOutputStream message;
-StringOutputStream winding;
-Vector3 wt[256];
-int numpoints;
-int refCount;
+	enum { WINDING_MESSAGE, WINDING_WINDING } EPointState;
+	StringOutputStream message;
+	StringOutputStream winding;
+	Vector3 wt[256];
+	int numpoints;
+	int refCount;
 public:
-CWindingMsg() { EPointState = WINDING_MESSAGE; refCount = 0; numpoints = 0; }
+	CWindingMsg() {
+		EPointState = WINDING_MESSAGE;
+		refCount = 0;
+		numpoints = 0;
+	}
 // SAX interface
-void Release(){
-	delete this;
-}
-void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs );
-void saxEndElement( message_info_t *ctx, const xmlChar *name );
-void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
+	void Release(){
+		delete this;
+	}
+	void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs );
+	void saxEndElement( message_info_t *ctx, const xmlChar *name );
+	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
 // for use in the dialog window
-const char* getName() { return message.c_str(); }
-IGL2DWindow* Highlight();
-void DropHighlight();
+	const char* getName() {
+		return message.c_str();
+	}
+	IGL2DWindow* Highlight();
+	void DropHighlight();
 
 // IGL2DWindow interface --------------------------------
 // Increment the number of references to this object
-void IncRef() { refCount++; }
-// Decrement the reference count
-void DecRef() {
-	refCount--; if ( refCount <= 0 ) {
-		delete this;
+	void IncRef() {
+		refCount++;
 	}
-}
-void Draw2D( VIEWTYPE vt );
+// Decrement the reference count
+	void DecRef() {
+		refCount--;
+		if ( refCount <= 0 ) {
+			delete this;
+		}
+	}
+	void Draw2D( VIEWTYPE vt );
 };
 
 typedef struct _GtkListStore GtkListStore;
 
 class CDbgDlg : public Dialog
 {
-GPtrArray *m_pFeedbackElements;
+	GPtrArray *m_pFeedbackElements;
 // the list widget we use in the dialog
-GtkListStore* m_clist;
-ISAXHandler *m_pHighlight;
-IGL2DWindow* m_pDraw2D;
+	GtkListStore* m_clist;
+	ISAXHandler *m_pHighlight;
+	IGL2DWindow* m_pDraw2D;
 public:
-CDbgDlg(){
-	m_pFeedbackElements = g_ptr_array_new();
-	m_pHighlight = NULL;
-	m_pDraw2D = NULL;
-}
+	CDbgDlg(){
+		m_pFeedbackElements = g_ptr_array_new();
+		m_pHighlight = NULL;
+		m_pDraw2D = NULL;
+	}
 // refresh items
-void Push( ISAXHandler * );
+	void Push( ISAXHandler * );
 // clean the debug window, release all ISAXHanlders we have
-void Init();
-ISAXHandler *GetElement( std::size_t row );
-void SetHighlight( gint row );
-void DropHighlight();
-void draw2D( VIEWTYPE viewType ){
-	if ( m_pDraw2D != 0 ) {
-		m_pDraw2D->Draw2D( viewType );
+	void Init();
+	ISAXHandler *GetElement( std::size_t row );
+	void SetHighlight( gint row );
+	void DropHighlight();
+	void draw2D( VIEWTYPE viewType ){
+		if ( m_pDraw2D != 0 ) {
+			m_pDraw2D->Draw2D( viewType );
+		}
 	}
-}
-void destroyWindow(){
-	if ( GetWidget() != 0 ) {
-		Destroy();
+	void destroyWindow(){
+		if ( GetWidget() != 0 ) {
+			Destroy();
+		}
 	}
-}
 //  void HideDlg();
 protected:
-GtkWindow* BuildDialog();
+	GtkWindow* BuildDialog();
 };
 
 extern CDbgDlg g_DbgDlg;

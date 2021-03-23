@@ -170,33 +170,33 @@ bool DTreePlanter::FindDropPoint( vec3_t in, vec3_t out ) {
 
 class TreePlanterDropEntityIfSelected
 {
-mutable DEntity ent;
-DTreePlanter& planter;
+	mutable DEntity ent;
+	DTreePlanter& planter;
 public:
-TreePlanterDropEntityIfSelected( DTreePlanter& planter ) : planter( planter ){
-}
-void operator()( scene::Instance& instance ) const {
-	if ( !instance.isSelected() ) {
-		return;
+	TreePlanterDropEntityIfSelected( DTreePlanter& planter ) : planter( planter ){
 	}
-	ent.LoadFromEntity( instance.path().top() );
+	void operator()( scene::Instance& instance ) const {
+		if ( !instance.isSelected() ) {
+			return;
+		}
+		ent.LoadFromEntity( instance.path().top() );
 
-	DEPair* pEpair = ent.FindEPairByKey( "origin" );
-	if ( !pEpair ) {
-		return;
+		DEPair* pEpair = ent.FindEPairByKey( "origin" );
+		if ( !pEpair ) {
+			return;
+		}
+
+		vec3_t vec, out;
+		sscanf( pEpair->value.GetBuffer(), "%f %f %f", &vec[0], &vec[1], &vec[2] );
+
+		planter.FindDropPoint( vec, out );
+
+		char buffer[256];
+		sprintf( buffer, "%f %f %f", out[0], out[1], out[2] );
+		ent.AddEPair( "origin", buffer );
+		ent.RemoveFromRadiant();
+		ent.BuildInRadiant( false );
 	}
-
-	vec3_t vec, out;
-	sscanf( pEpair->value.GetBuffer(), "%f %f %f", &vec[0], &vec[1], &vec[2] );
-
-	planter.FindDropPoint( vec, out );
-
-	char buffer[256];
-	sprintf( buffer, "%f %f %f", out[0], out[1], out[2] );
-	ent.AddEPair( "origin", buffer );
-	ent.RemoveFromRadiant();
-	ent.BuildInRadiant( false );
-}
 };
 
 void DTreePlanter::DropEntsToGround( void ) {
@@ -241,35 +241,35 @@ void DTreePlanter::MakeChain( int linkNum, const char* linkName ) {
 void DTreePlanter::SelectChain( void ) {
 /*	char buffer[256];
 
-    for(int i = 0; i < m_linkNum; i++) {
-        DEntity e("info_train_spline_main");
+	for(int i = 0; i < m_linkNum; i++) {
+		DEntity e("info_train_spline_main");
 
-        sprintf( buffer, "%s_pt%i", m_linkName, i );
-        e.AddEPair( "targetname", buffer );
+		sprintf( buffer, "%s_pt%i", m_linkName, i );
+		e.AddEPair( "targetname", buffer );
 
-        sprintf( buffer, "0 %i 0", i * 64 );
-        e.AddEPair( "origin", buffer );
+		sprintf( buffer, "0 %i 0", i * 64 );
+		e.AddEPair( "origin", buffer );
 
-        if(i != m_linkNum-1) {
-            sprintf( buffer, "%s_pt%i", m_linkName, i+1 );
-            e.AddEPair( "target", buffer );
+		if(i != m_linkNum-1) {
+			sprintf( buffer, "%s_pt%i", m_linkName, i+1 );
+			e.AddEPair( "target", buffer );
 
-            sprintf( buffer, "%s_ctl%i", m_linkName, i );
-            e.AddEPair( "control", buffer );
-        }
+			sprintf( buffer, "%s_ctl%i", m_linkName, i );
+			e.AddEPair( "control", buffer );
+		}
 
-        e.BuildInRadiant( false );
-    }
+		e.BuildInRadiant( false );
+	}
 
-    for(int i = 0; i < m_linkNum-1; i++) {
-        DEntity e("info_train_spline_control");
+	for(int i = 0; i < m_linkNum-1; i++) {
+		DEntity e("info_train_spline_control");
 
-        sprintf( buffer, "%s_ctl%i", m_linkName, i );
-        e.AddEPair( "targetname", buffer );
+		sprintf( buffer, "%s_ctl%i", m_linkName, i );
+		e.AddEPair( "targetname", buffer );
 
-        sprintf( buffer, "0 %i 0", (i * 64) + 32);
-        e.AddEPair( "origin", buffer );
+		sprintf( buffer, "0 %i 0", (i * 64) + 32);
+		e.AddEPair( "origin", buffer );
 
-        e.BuildInRadiant( false );
-    }*/
+		e.BuildInRadiant( false );
+	}*/
 }

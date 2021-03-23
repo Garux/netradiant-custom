@@ -60,19 +60,19 @@ void QERApp_GetCamWindowExtents( int *x, int *y, int *width, int *height ){
 
 class CameraAPI
 {
-_QERCameraTable m_camera;
+	_QERCameraTable m_camera;
 public:
-typedef _QERCameraTable Type;
-STRING_CONSTANT( Name, "*" );
+	typedef _QERCameraTable Type;
+	STRING_CONSTANT( Name, "*" );
 
-CameraAPI(){
-	m_camera.m_pfnGetCamera = &QERApp_GetCamera;
-	m_camera.m_pfnSetCamera = &QERApp_SetCamera;
-	m_camera.m_pfnGetCamWindowExtents = &QERApp_GetCamWindowExtents;
-}
-_QERCameraTable* getTable(){
-	return &m_camera;
-}
+	CameraAPI(){
+		m_camera.m_pfnGetCamera = &QERApp_GetCamera;
+		m_camera.m_pfnSetCamera = &QERApp_SetCamera;
+		m_camera.m_pfnGetCamWindowExtents = &QERApp_GetCamWindowExtents;
+	}
+	_QERCameraTable* getTable(){
+		return &m_camera;
+	}
 };
 
 #include "modulesystem/singletonmodule.h"

@@ -196,8 +196,8 @@ struct camera_t
 
 	static camera_draw_mode draw_mode;
 
-	camera_t( View* view, const Callback& update, const Callback1<const MotionDeltaValues&>& update_motion_freemove )
-		: width( 0 ),
+	camera_t( View* view, const Callback& update, const Callback1<const MotionDeltaValues&>& update_motion_freemove ) :
+		width( 0 ),
 		height( 0 ),
 		timing( false ),
 		origin( 0, 0, 0 ),
@@ -227,17 +227,19 @@ inline Matrix4 projection_for_camera( float near_z, float far_z, float fieldOfVi
 		std::swap( half_width, half_height );
 
 	return matrix4_frustum(
-			   -half_width,
-			   half_width,
-			   -half_height,
-			   half_height,
-			   near_z,
-			   far_z
-			   );
+	           -half_width,
+	           half_width,
+	           -half_height,
+	           half_height,
+	           near_z,
+	           far_z
+	       );
 }
 
 float Camera_getFarClipPlane( camera_t& camera ){
-	return ( g_camwindow_globals_private.m_bCubicClipping ) ? pow( 2.0, ( g_camwindow_globals.m_nCubicScale + 7 ) / 2.0 ) : ( ( g_MaxWorldCoord - g_MinWorldCoord ) * sqrt( 3 ) );
+	return ( g_camwindow_globals_private.m_bCubicClipping )
+	       ? pow( 2.0, ( g_camwindow_globals.m_nCubicScale + 7 ) / 2.0 )
+	       : ( ( g_MaxWorldCoord - g_MinWorldCoord ) * sqrt( 3 ) );
 }
 
 void Camera_updateProjection( camera_t& camera ){
@@ -354,10 +356,10 @@ void Camera_FreeMove( camera_t& camera, int dx, int dy ){
 		if( camera.m_orbit ){
 #if 0
 			const Vector3 radangles( euler_degrees_to_radians( camera.angles ) );
-			const Vector3 viewdir(	cos( radangles[1] ) * cos( radangles[0] ),
-									sin( radangles[1] ) * cos( radangles[0] ),
-									sin( radangles[0] )
-									);
+			const Vector3 viewdir( cos( radangles[1] ) * cos( radangles[0] ),
+			                       sin( radangles[1] ) * cos( radangles[0] ),
+			                       sin( radangles[0] )
+			                     );
 			const float len = vector3_length( camera.origin - camera.m_orbit_center );
 			camera.origin = camera.m_orbit_center - viewdir * len;
 #else
@@ -463,9 +465,9 @@ void Cam_KeyControl( camera_t& camera, float dtime ){
 	}
 	else{ /* accelerate */
 		camera.m_keymove_speed_current = std::min( camera.m_keymove_speed_current
-													+ g_camwindow_globals_private.m_nMoveSpeed * dtime
-													/ g_camwindow_globals_private.m_time_toMaxSpeed * static_cast<float>( msec_per_sec ),
-													static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) );
+		                                           + g_camwindow_globals_private.m_nMoveSpeed * dtime
+		                                           / g_camwindow_globals_private.m_time_toMaxSpeed * static_cast<float>( msec_per_sec ),
+		                                           static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) );
 	}
 	const float dpos = dtime * camera.m_keymove_speed_current;
 	// Update position
@@ -686,28 +688,28 @@ void Camera_PitchDown_Discrete( camera_t& camera ){
 
 class RadiantCameraView : public CameraView
 {
-camera_t& m_camera;
-View* m_view;
-Callback m_update;
+	camera_t& m_camera;
+	View* m_view;
+	Callback m_update;
 public:
-RadiantCameraView( camera_t& camera, View* view, const Callback& update ) : m_camera( camera ), m_view( view ), m_update( update ){
-}
-void update(){
-	m_view->Construct( m_camera.projection, m_camera.modelview, m_camera.width, m_camera.height );
-	m_update();
-}
-void setModelview( const Matrix4& modelview ){
-	m_camera.modelview = modelview;
-	matrix4_multiply_by_matrix4( m_camera.modelview, g_radiant2opengl );
-	matrix4_affine_invert( m_camera.modelview );
-	Camera_updateVectors( m_camera );
-	update();
-}
-void setFieldOfView( float fieldOfView ){
-	float farClip = Camera_getFarClipPlane( m_camera );
-	m_camera.projection = projection_for_camera( camera_t::near_z, farClip, fieldOfView, m_camera.width, m_camera.height );
-	update();
-}
+	RadiantCameraView( camera_t& camera, View* view, const Callback& update ) : m_camera( camera ), m_view( view ), m_update( update ){
+	}
+	void update(){
+		m_view->Construct( m_camera.projection, m_camera.modelview, m_camera.width, m_camera.height );
+		m_update();
+	}
+	void setModelview( const Matrix4& modelview ){
+		m_camera.modelview = modelview;
+		matrix4_multiply_by_matrix4( m_camera.modelview, g_radiant2opengl );
+		matrix4_affine_invert( m_camera.modelview );
+		Camera_updateVectors( m_camera );
+		update();
+	}
+	void setFieldOfView( float fieldOfView ){
+		float farClip = Camera_getFarClipPlane( m_camera );
+		m_camera.projection = projection_for_camera( camera_t::near_z, farClip, fieldOfView, m_camera.width, m_camera.height );
+		update();
+	}
 };
 
 
@@ -766,9 +768,9 @@ public:
 			renderer.SetState( shader, Renderer::eFullMaterials );
 
 			Vector4 points[3] = { Vector4( bounds.origin - g_vector3_axes[1] * bounds.extents - g_vector3_axes[2] * bounds.extents, 1 ),
-									Vector4( bounds.origin - g_vector3_axes[0] * bounds.extents - g_vector3_axes[2] * bounds.extents, 1 ),
-									Vector4( bounds.origin - g_vector3_axes[0] * bounds.extents - g_vector3_axes[1] * bounds.extents, 1 ),
-									};
+			                      Vector4( bounds.origin - g_vector3_axes[0] * bounds.extents - g_vector3_axes[2] * bounds.extents, 1 ),
+			                      Vector4( bounds.origin - g_vector3_axes[0] * bounds.extents - g_vector3_axes[1] * bounds.extents, 1 ),
+			                    };
 			for( std::size_t i = 0; i < 3; ++i ){
 				matrix4_transform_vector4( view.GetViewMatrix(), points[i] );
 				points[i].x() /= points[i].w();
@@ -818,107 +820,107 @@ class RenderableCamWorkzone : public OpenGLRenderable
 	mutable Array<Colour4b> m_colorarr0[3];
 	mutable Array<Colour4b> m_colorarr1[3];
 public:
-void render( RenderStateFlags state ) const {
-	glEnableClientState( GL_EDGE_FLAG_ARRAY );
+	void render( RenderStateFlags state ) const {
+		glEnableClientState( GL_EDGE_FLAG_ARRAY );
 
-	const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
+		const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
 
-	for( std::size_t i = 0; i < 3; ++i ){
-		const std::size_t i2 = ( i + 1 ) % 3;
-		const std::size_t i3 = ( i + 2 ) % 3;
-//		const Vector3 normal = g_vector3_axes[i];
-		const float offset = 1024;
-		std::vector<Vector3> points;
-		points.reserve( 4 );
-		points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
-		if( bounds.extents[i2] != 0 ){
-			points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
-		}
-		if( bounds.extents[i3] != 0 ){
-			points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
+		for( std::size_t i = 0; i < 3; ++i ){
+			const std::size_t i2 = ( i + 1 ) % 3;
+			const std::size_t i3 = ( i + 2 ) % 3;
+//			const Vector3 normal = g_vector3_axes[i];
+			const float offset = 1024;
+			std::vector<Vector3> points;
+			points.reserve( 4 );
+			points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
 			if( bounds.extents[i2] != 0 ){
-				points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
+				points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
 			}
-		}
+			if( bounds.extents[i3] != 0 ){
+				points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
+				if( bounds.extents[i2] != 0 ){
+					points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
+				}
+			}
 
-		const float grid = GetGridSize();
-		const std::size_t approx_count = ( std::max( 0.f, bounds.extents[i] ) + offset ) * 4 / grid + 8;
+			const float grid = GetGridSize();
+			const std::size_t approx_count = ( std::max( 0.f, bounds.extents[i] ) + offset ) * 4 / grid + 8;
 
-		Array<Vector3>& verticesarr( m_verticesarr[i] );
-		Array<GLboolean>& edgearr( m_edgearr[i] );
-		Array<Colour4b>& colorarr0( m_colorarr0[i] );
-		Array<Colour4b>& colorarr1( m_colorarr1[i] );
-		if( verticesarr.size() < approx_count ){
-			verticesarr.resize( approx_count );
-			edgearr.resize( approx_count );
-			colorarr0.resize( approx_count );
-			colorarr1.resize( approx_count );
-		}
+			Array<Vector3>& verticesarr( m_verticesarr[i] );
+			Array<GLboolean>& edgearr( m_edgearr[i] );
+			Array<Colour4b>& colorarr0( m_colorarr0[i] );
+			Array<Colour4b>& colorarr1( m_colorarr1[i] );
+			if( verticesarr.size() < approx_count ){
+				verticesarr.resize( approx_count );
+				edgearr.resize( approx_count );
+				colorarr0.resize( approx_count );
+				colorarr1.resize( approx_count );
+			}
 
-		float coord = float_snapped( bounds.origin[i] - std::max( 0.f, bounds.extents[i] ) - offset, grid );
+			float coord = float_snapped( bounds.origin[i] - std::max( 0.f, bounds.extents[i] ) - offset, grid );
 //		const float coord_end = float_snapped( bounds.origin[i] + std::max( 0.f, bounds.extents[i] ) + offset, grid ) + 0.1f;
-		const bool start0 = float_snapped( coord, grid * 2 ) == coord;
-		std::size_t count = 0;
+			const bool start0 = float_snapped( coord, grid * 2 ) == coord;
+			std::size_t count = 0;
 
-		for( ; count < approx_count - 4; count += 4 ){
-			verticesarr[count][i] =
-			verticesarr[count + 1][i] = coord;
-			const float alpha = std::max( 0.f, std::min( 1.f, ( offset + bounds.extents[i] - std::fabs( coord - bounds.origin[i] ) ) / offset ) );
-			colorarr0[count] = colorarr0[count + 1] = Colour4b( 255, 0, 0, alpha * 255 );
-			colorarr1[count] = colorarr1[count + 1] = Colour4b( 255, 255, 255, alpha * 255 );
-			coord += grid;
-			verticesarr[count + 2][i] =
-			verticesarr[count + 3][i] = coord;
-			const float alpha2 = std::max( 0.f, std::min( 1.f, ( offset + bounds.extents[i] - std::fabs( coord - bounds.origin[i] ) ) / offset ) );
-			colorarr0[count + 2] = colorarr0[count + 3] = Colour4b( 255, 0, 0, alpha2 * 255 );
-			colorarr1[count + 2] = colorarr1[count + 3] = Colour4b( 255, 255, 255, alpha2 * 255 );
-			coord += grid;
-			edgearr[count] =
-			edgearr[count + 2] = GL_FALSE;
-			edgearr[count + 1] =
-			edgearr[count + 3] = GL_TRUE;
-		}
+			for( ; count < approx_count - 4; count += 4 ){
+				verticesarr[count][i] =
+				verticesarr[count + 1][i] = coord;
+				const float alpha = std::max( 0.f, std::min( 1.f, ( offset + bounds.extents[i] - std::fabs( coord - bounds.origin[i] ) ) / offset ) );
+				colorarr0[count] = colorarr0[count + 1] = Colour4b( 255, 0, 0, alpha * 255 );
+				colorarr1[count] = colorarr1[count + 1] = Colour4b( 255, 255, 255, alpha * 255 );
+				coord += grid;
+				verticesarr[count + 2][i] =
+				verticesarr[count + 3][i] = coord;
+				const float alpha2 = std::max( 0.f, std::min( 1.f, ( offset + bounds.extents[i] - std::fabs( coord - bounds.origin[i] ) ) / offset ) );
+				colorarr0[count + 2] = colorarr0[count + 3] = Colour4b( 255, 0, 0, alpha2 * 255 );
+				colorarr1[count + 2] = colorarr1[count + 3] = Colour4b( 255, 255, 255, alpha2 * 255 );
+				coord += grid;
+				edgearr[count] =
+				edgearr[count + 2] = GL_FALSE;
+				edgearr[count + 1] =
+				edgearr[count + 3] = GL_TRUE;
+			}
 
-		if( points.size() == 1 ){
-			points.push_back( points[0] + g_vector3_axes[i2] * 8 );
-			for( std::size_t k = 0; k < count; k += 4 ){
-				edgearr[k + 1] = GL_FALSE;
+			if( points.size() == 1 ){
+				points.push_back( points[0] + g_vector3_axes[i2] * 8 );
+				for( std::size_t k = 0; k < count; k += 4 ){
+					edgearr[k + 1] = GL_FALSE;
+				}
+			}
+
+			glVertexPointer( 3, GL_FLOAT, sizeof( Vector3 ), verticesarr.data()->data() );
+			glEdgeFlagPointer( sizeof( GLboolean ), edgearr.data() );
+			for( std::vector<Vector3>::const_iterator j = points.begin(); j != points.end(); ++++j ){
+				const std::vector<Vector3>::const_iterator jj = j + 1;
+				for( std::size_t k = 0; k < count; k += 4 ){
+					verticesarr[k][i2] = ( *j )[i2];
+					verticesarr[k][i3] = ( *j )[i3];
+					verticesarr[k + 1][i2] = ( *jj )[i2];
+					verticesarr[k + 1][i3] = ( *jj )[i3];
+					verticesarr[k + 2][i2] = ( *jj )[i2];
+					verticesarr[k + 2][i3] = ( *jj )[i3];
+					verticesarr[k + 3][i2] = ( *j )[i2];
+					verticesarr[k + 3][i3] = ( *j )[i3];
+				}
+
+				glPolygonOffset( -2, 2 );
+				glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( Colour4b ), colorarr0.data() );
+				glDrawArrays( GL_QUADS, start0? 0 : 2, GLsizei( count - ( start0? 4 : 2 ) ) );
+
+				glPolygonOffset( 1, -1 );
+				glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( Colour4b ), colorarr1.data() );
+				glDrawArrays( GL_QUADS, start0? 2 : 0, GLsizei( count - ( start0? 2 : 4 ) ) );
+				glPolygonOffset( -1, 1 ); // restore default
 			}
 		}
 
-		glVertexPointer( 3, GL_FLOAT, sizeof( Vector3 ), verticesarr.data()->data() );
-		glEdgeFlagPointer( sizeof( GLboolean ), edgearr.data() );
-		for( std::vector<Vector3>::const_iterator j = points.begin(); j != points.end(); ++++j ){
-			const std::vector<Vector3>::const_iterator jj = j + 1;
-			for( std::size_t k = 0; k < count; k += 4 ){
-				verticesarr[k][i2] = ( *j )[i2];
-				verticesarr[k][i3] = ( *j )[i3];
-				verticesarr[k + 1][i2] = ( *jj )[i2];
-				verticesarr[k + 1][i3] = ( *jj )[i3];
-				verticesarr[k + 2][i2] = ( *jj )[i2];
-				verticesarr[k + 2][i3] = ( *jj )[i3];
-				verticesarr[k + 3][i2] = ( *j )[i2];
-				verticesarr[k + 3][i3] = ( *j )[i3];
-			}
-
-			glPolygonOffset( -2, 2 );
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( Colour4b ), colorarr0.data() );
-			glDrawArrays( GL_QUADS, start0? 0 : 2, GLsizei( count - ( start0? 4 : 2 ) ) );
-
-			glPolygonOffset( 1, -1 );
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( Colour4b ), colorarr1.data() );
-			glDrawArrays( GL_QUADS, start0? 2 : 0, GLsizei( count - ( start0? 2 : 4 ) ) );
-			glPolygonOffset( -1, 1 ); // restore default
-		}
+		glDisableClientState( GL_EDGE_FLAG_ARRAY );
 	}
 
-	glDisableClientState( GL_EDGE_FLAG_ARRAY );
-}
-
-void render( Renderer& renderer, Shader* shader ) const {
-	renderer.SetState( shader, Renderer::eFullMaterials );
-	renderer.addRenderable( *this, g_matrix4_identity );
-}
+	void render( Renderer& renderer, Shader* shader ) const {
+		renderer.SetState( shader, Renderer::eFullMaterials );
+		renderer.addRenderable( *this, g_matrix4_identity );
+	}
 };
 
 
@@ -927,108 +929,108 @@ void render( Renderer& renderer, Shader* shader ) const {
 
 class CamWnd
 {
-View m_view;
-camera_t m_Camera;
-RadiantCameraView m_cameraview;
+	View m_view;
+	camera_t m_Camera;
+	RadiantCameraView m_cameraview;
 #if 0
-int m_PositionDragCursorX;
-int m_PositionDragCursorY;
+	int m_PositionDragCursorX;
+	int m_PositionDragCursorY;
 #endif
 
-guint m_freemove_handle_focusout;
+	guint m_freemove_handle_focusout;
 
-static Shader* m_state_select0;
-static Shader* m_state_select1;
-static Shader* m_state_wire;
-static Shader* m_state_facewire;
-static Shader* m_state_workzone;
-static Shader* m_state_text;
+	static Shader* m_state_select0;
+	static Shader* m_state_select1;
+	static Shader* m_state_wire;
+	static Shader* m_state_facewire;
+	static Shader* m_state_workzone;
+	static Shader* m_state_text;
 
-FreezePointer m_freezePointer;
+	FreezePointer m_freezePointer;
 
-CamDrawSize m_draw_size;
-RenderableCamWorkzone m_draw_workzone;
+	CamDrawSize m_draw_size;
+	RenderableCamWorkzone m_draw_workzone;
 
 public:
-FBO* m_fbo;
-FBO* fbo_get(){
-	return m_fbo = m_fbo? m_fbo : GlobalOpenGL().support_ARB_framebuffer_object? new FBO : new FBO_fallback;
-}
-GtkWidget* m_gl_widget;
-GtkWindow* m_parent;
-
-SelectionSystemWindowObserver* m_window_observer;
-XORRectangle m_XORRectangle;
-
-DeferredDraw m_deferredDraw;
-DeferredMotion m_deferred_motion;
-
-guint m_selection_button_press_handler;
-guint m_selection_button_release_handler;
-guint m_selection_motion_handler;
-
-guint m_freelook_button_press_handler;
-guint m_freelook_button_release_handler;
-
-guint m_sizeHandler;
-guint m_exposeHandler;
-
-Timer m_render_time;
-
-CamWnd();
-~CamWnd();
-
-bool m_drawing;
-void queue_draw(){
-	//ASSERT_MESSAGE(!m_drawing, "CamWnd::queue_draw(): called while draw is already in progress");
-	if ( m_drawing ) {
-		return;
+	FBO* m_fbo;
+	FBO* fbo_get(){
+		return m_fbo = m_fbo? m_fbo : GlobalOpenGL().support_ARB_framebuffer_object? new FBO : new FBO_fallback;
 	}
-	//globalOutputStream() << "queue... ";
-	m_deferredDraw.draw();
-}
-void draw();
+	GtkWidget* m_gl_widget;
+	GtkWindow* m_parent;
 
-static void captureStates(){
-	m_state_text = GlobalShaderCache().capture( "$TEXT" );
-	m_state_workzone = GlobalShaderCache().capture( "$CAM_WORKZONE" );
-	m_state_facewire = GlobalShaderCache().capture( "$CAM_FACEWIRE" );
-	m_state_wire = GlobalShaderCache().capture( "$CAM_WIRE" );
-	m_state_select0 = GlobalShaderCache().capture( "$CAM_OVERLAY" );
-	m_state_select1 = GlobalShaderCache().capture( "$CAM_HIGHLIGHT" );
-}
-static void releaseStates(){
-	GlobalShaderCache().release( "$CAM_HIGHLIGHT" );
-	GlobalShaderCache().release( "$CAM_OVERLAY" );
-	GlobalShaderCache().release( "$CAM_WIRE" );
-	GlobalShaderCache().release( "$CAM_FACEWIRE" );
-	GlobalShaderCache().release( "$CAM_WORKZONE" );
-	GlobalShaderCache().release( "$TEXT" );
-}
+	SelectionSystemWindowObserver* m_window_observer;
+	XORRectangle m_XORRectangle;
 
-camera_t& getCamera(){
-	return m_Camera;
-}
+	DeferredDraw m_deferredDraw;
+	DeferredMotion m_deferred_motion;
 
-void BenchMark();
-void Cam_ChangeFloor( bool up );
+	guint m_selection_button_press_handler;
+	guint m_selection_button_release_handler;
+	guint m_selection_motion_handler;
 
-void DisableFreeMove();
-void EnableFreeMove();
-bool m_bFreeMove;
-bool m_bFreeMove_entering;
+	guint m_freelook_button_press_handler;
+	guint m_freelook_button_release_handler;
 
-CameraView& getCameraView(){
-	return m_cameraview;
-}
+	guint m_sizeHandler;
+	guint m_exposeHandler;
 
-Timer m_rightClickTimer;
-float m_rightClickMove;
+	Timer m_render_time;
 
-void selection_motion_freemove( const MotionDeltaValues& delta );
+	CamWnd();
+	~CamWnd();
+
+	bool m_drawing;
+	void queue_draw(){
+		//ASSERT_MESSAGE(!m_drawing, "CamWnd::queue_draw(): called while draw is already in progress");
+		if ( m_drawing ) {
+			return;
+		}
+		//globalOutputStream() << "queue... ";
+		m_deferredDraw.draw();
+	}
+	void draw();
+
+	static void captureStates(){
+		m_state_text = GlobalShaderCache().capture( "$TEXT" );
+		m_state_workzone = GlobalShaderCache().capture( "$CAM_WORKZONE" );
+		m_state_facewire = GlobalShaderCache().capture( "$CAM_FACEWIRE" );
+		m_state_wire = GlobalShaderCache().capture( "$CAM_WIRE" );
+		m_state_select0 = GlobalShaderCache().capture( "$CAM_OVERLAY" );
+		m_state_select1 = GlobalShaderCache().capture( "$CAM_HIGHLIGHT" );
+	}
+	static void releaseStates(){
+		GlobalShaderCache().release( "$CAM_HIGHLIGHT" );
+		GlobalShaderCache().release( "$CAM_OVERLAY" );
+		GlobalShaderCache().release( "$CAM_WIRE" );
+		GlobalShaderCache().release( "$CAM_FACEWIRE" );
+		GlobalShaderCache().release( "$CAM_WORKZONE" );
+		GlobalShaderCache().release( "$TEXT" );
+	}
+
+	camera_t& getCamera(){
+		return m_Camera;
+	}
+
+	void BenchMark();
+	void Cam_ChangeFloor( bool up );
+
+	void DisableFreeMove();
+	void EnableFreeMove();
+	bool m_bFreeMove;
+	bool m_bFreeMove_entering;
+
+	CameraView& getCameraView(){
+		return m_cameraview;
+	}
+
+	Timer m_rightClickTimer;
+	float m_rightClickMove;
+
+	void selection_motion_freemove( const MotionDeltaValues& delta );
 
 private:
-void Cam_Draw();
+	void Cam_Draw();
 };
 
 typedef MemberCaller<CamWnd, &CamWnd::queue_draw> CamWndQueueDraw;
@@ -1428,93 +1430,93 @@ void KeyEvent_disconnect( const char* name ){
 
 void CamWnd_registerCommands( CamWnd& camwnd ){
 	GlobalKeyEvents_insert( "CameraForward", accelerator_null(),
-							ReferenceCaller<camera_t, Camera_MoveForward_KeyDown>( camwnd.getCamera() ),
-							ReferenceCaller<camera_t, Camera_MoveForward_KeyUp>( camwnd.getCamera() )
-							);
+	                        ReferenceCaller<camera_t, Camera_MoveForward_KeyDown>( camwnd.getCamera() ),
+	                        ReferenceCaller<camera_t, Camera_MoveForward_KeyUp>( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraBack", accelerator_null(),
-							ReferenceCaller<camera_t, Camera_MoveBack_KeyDown>( camwnd.getCamera() ),
-							ReferenceCaller<camera_t, Camera_MoveBack_KeyUp>( camwnd.getCamera() )
-							);
+	                        ReferenceCaller<camera_t, Camera_MoveBack_KeyDown>( camwnd.getCamera() ),
+	                        ReferenceCaller<camera_t, Camera_MoveBack_KeyUp>( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraLeft", accelerator_null(),
-							ReferenceCaller<camera_t, Camera_RotateLeft_KeyDown>( camwnd.getCamera() ),
-							ReferenceCaller<camera_t, Camera_RotateLeft_KeyUp>( camwnd.getCamera() )
-							);
+	                        ReferenceCaller<camera_t, Camera_RotateLeft_KeyDown>( camwnd.getCamera() ),
+	                        ReferenceCaller<camera_t, Camera_RotateLeft_KeyUp>( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraRight", accelerator_null(),
-							ReferenceCaller<camera_t, Camera_RotateRight_KeyDown>( camwnd.getCamera() ),
-							ReferenceCaller<camera_t, Camera_RotateRight_KeyUp>( camwnd.getCamera() )
-							);
+	                        ReferenceCaller<camera_t, Camera_RotateRight_KeyDown>( camwnd.getCamera() ),
+	                        ReferenceCaller<camera_t, Camera_RotateRight_KeyUp>( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraStrafeRight", accelerator_null(),
-							ReferenceCaller<camera_t, Camera_MoveRight_KeyDown>( camwnd.getCamera() ),
-							ReferenceCaller<camera_t, Camera_MoveRight_KeyUp>( camwnd.getCamera() )
-							);
+	                        ReferenceCaller<camera_t, Camera_MoveRight_KeyDown>( camwnd.getCamera() ),
+	                        ReferenceCaller<camera_t, Camera_MoveRight_KeyUp>( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraStrafeLeft", accelerator_null(),
-							ReferenceCaller<camera_t, Camera_MoveLeft_KeyDown>( camwnd.getCamera() ),
-							ReferenceCaller<camera_t, Camera_MoveLeft_KeyUp>( camwnd.getCamera() )
-							);
+	                        ReferenceCaller<camera_t, Camera_MoveLeft_KeyDown>( camwnd.getCamera() ),
+	                        ReferenceCaller<camera_t, Camera_MoveLeft_KeyUp>( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraUp", accelerator_null(),
-							ReferenceCaller<camera_t, Camera_MoveUp_KeyDown>( camwnd.getCamera() ),
-							ReferenceCaller<camera_t, Camera_MoveUp_KeyUp>( camwnd.getCamera() )
-							);
+	                        ReferenceCaller<camera_t, Camera_MoveUp_KeyDown>( camwnd.getCamera() ),
+	                        ReferenceCaller<camera_t, Camera_MoveUp_KeyUp>( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraDown", accelerator_null(),
-							ReferenceCaller<camera_t, Camera_MoveDown_KeyDown>( camwnd.getCamera() ),
-							ReferenceCaller<camera_t, Camera_MoveDown_KeyUp>( camwnd.getCamera() )
-							);
+	                        ReferenceCaller<camera_t, Camera_MoveDown_KeyDown>( camwnd.getCamera() ),
+	                        ReferenceCaller<camera_t, Camera_MoveDown_KeyUp>( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraAngleUp", accelerator_null(),
-							ReferenceCaller<camera_t, Camera_PitchUp_KeyDown>( camwnd.getCamera() ),
-							ReferenceCaller<camera_t, Camera_PitchUp_KeyUp>( camwnd.getCamera() )
-							);
+	                        ReferenceCaller<camera_t, Camera_PitchUp_KeyDown>( camwnd.getCamera() ),
+	                        ReferenceCaller<camera_t, Camera_PitchUp_KeyUp>( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraAngleDown", accelerator_null(),
-							ReferenceCaller<camera_t, Camera_PitchDown_KeyDown>( camwnd.getCamera() ),
-							ReferenceCaller<camera_t, Camera_PitchDown_KeyUp>( camwnd.getCamera() )
-							);
+	                        ReferenceCaller<camera_t, Camera_PitchDown_KeyDown>( camwnd.getCamera() ),
+	                        ReferenceCaller<camera_t, Camera_PitchDown_KeyUp>( camwnd.getCamera() )
+	                      );
 
 	GlobalKeyEvents_insert( "CameraFreeMoveForward", accelerator_null(),
-							FreeMoveCameraMoveForwardKeyDownCaller( camwnd.getCamera() ),
-							FreeMoveCameraMoveForwardKeyUpCaller( camwnd.getCamera() )
-							);
+	                        FreeMoveCameraMoveForwardKeyDownCaller( camwnd.getCamera() ),
+	                        FreeMoveCameraMoveForwardKeyUpCaller( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraFreeMoveBack", accelerator_null(),
-							FreeMoveCameraMoveBackKeyDownCaller( camwnd.getCamera() ),
-							FreeMoveCameraMoveBackKeyUpCaller( camwnd.getCamera() )
-							);
+	                        FreeMoveCameraMoveBackKeyDownCaller( camwnd.getCamera() ),
+	                        FreeMoveCameraMoveBackKeyUpCaller( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraFreeMoveLeft", accelerator_null(),
-							FreeMoveCameraMoveLeftKeyDownCaller( camwnd.getCamera() ),
-							FreeMoveCameraMoveLeftKeyUpCaller( camwnd.getCamera() )
-							);
+	                        FreeMoveCameraMoveLeftKeyDownCaller( camwnd.getCamera() ),
+	                        FreeMoveCameraMoveLeftKeyUpCaller( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraFreeMoveRight", accelerator_null(),
-							FreeMoveCameraMoveRightKeyDownCaller( camwnd.getCamera() ),
-							FreeMoveCameraMoveRightKeyUpCaller( camwnd.getCamera() )
-							);
+	                        FreeMoveCameraMoveRightKeyDownCaller( camwnd.getCamera() ),
+	                        FreeMoveCameraMoveRightKeyUpCaller( camwnd.getCamera() )
+	                      );
 
 	GlobalKeyEvents_insert( "CameraFreeMoveForward2", accelerator_null(),
-							FreeMoveCameraMoveForwardKeyDownCaller( camwnd.getCamera() ),
-							FreeMoveCameraMoveForwardKeyUpCaller( camwnd.getCamera() )
-							);
+	                        FreeMoveCameraMoveForwardKeyDownCaller( camwnd.getCamera() ),
+	                        FreeMoveCameraMoveForwardKeyUpCaller( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraFreeMoveBack2", accelerator_null(),
-							FreeMoveCameraMoveBackKeyDownCaller( camwnd.getCamera() ),
-							FreeMoveCameraMoveBackKeyUpCaller( camwnd.getCamera() )
-							);
+	                        FreeMoveCameraMoveBackKeyDownCaller( camwnd.getCamera() ),
+	                        FreeMoveCameraMoveBackKeyUpCaller( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraFreeMoveLeft2", accelerator_null(),
-							FreeMoveCameraMoveLeftKeyDownCaller( camwnd.getCamera() ),
-							FreeMoveCameraMoveLeftKeyUpCaller( camwnd.getCamera() )
-							);
+	                        FreeMoveCameraMoveLeftKeyDownCaller( camwnd.getCamera() ),
+	                        FreeMoveCameraMoveLeftKeyUpCaller( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraFreeMoveRight2", accelerator_null(),
-							FreeMoveCameraMoveRightKeyDownCaller( camwnd.getCamera() ),
-							FreeMoveCameraMoveRightKeyUpCaller( camwnd.getCamera() )
-							);
+	                        FreeMoveCameraMoveRightKeyDownCaller( camwnd.getCamera() ),
+	                        FreeMoveCameraMoveRightKeyUpCaller( camwnd.getCamera() )
+	                      );
 
 	GlobalKeyEvents_insert( "CameraFreeMoveUp", accelerator_null(),
-							FreeMoveCameraMoveUpKeyDownCaller( camwnd.getCamera() ),
-							FreeMoveCameraMoveUpKeyUpCaller( camwnd.getCamera() )
-							);
+	                        FreeMoveCameraMoveUpKeyDownCaller( camwnd.getCamera() ),
+	                        FreeMoveCameraMoveUpKeyUpCaller( camwnd.getCamera() )
+	                      );
 	GlobalKeyEvents_insert( "CameraFreeMoveDown", accelerator_null(),
-							FreeMoveCameraMoveDownKeyDownCaller( camwnd.getCamera() ),
-							FreeMoveCameraMoveDownKeyUpCaller( camwnd.getCamera() )
-							);
+	                        FreeMoveCameraMoveDownKeyDownCaller( camwnd.getCamera() ),
+	                        FreeMoveCameraMoveDownKeyUpCaller( camwnd.getCamera() )
+	                      );
 
 	GlobalKeyEvents_insert( "CameraFreeFocus", accelerator_null(),
-							FreeMoveCameraFocusKeyDownCaller( camwnd.getCamera() ),
-							FreeMoveCameraFocusKeyUpCaller( camwnd.getCamera() )
-							);
+	                        FreeMoveCameraFocusKeyDownCaller( camwnd.getCamera() ),
+	                        FreeMoveCameraFocusKeyUpCaller( camwnd.getCamera() )
+	                      );
 
 	GlobalCommands_insert( "CameraForward", ReferenceCaller<camera_t, Camera_MoveForward_Discrete>( camwnd.getCamera() ) );
 	GlobalCommands_insert( "CameraBack", ReferenceCaller<camera_t, Camera_MoveBack_Discrete>( camwnd.getCamera() ) );
@@ -1755,35 +1757,35 @@ CamWnd::~CamWnd(){
 
 class FloorHeightWalker : public scene::Graph::Walker
 {
-Vector3 m_current;
+	Vector3 m_current;
 public:
-mutable float m_bestUp;
-mutable float m_bestDown;
-mutable float m_bottom;
-FloorHeightWalker( const Vector3& current ) :
-	m_current( current ), m_bestUp( g_MaxWorldCoord ), m_bestDown( g_MinWorldCoord ), m_bottom( g_MaxWorldCoord ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if( !path.top().get().visible() )
-		return false;
-	if ( !path.top().get().isRoot() && !node_is_group( path.top() ) ) {
-		const AABB& aabb = instance.worldAABB();
-		if( instance.isSelected() || ( m_current.x() > aabb.origin.x() - aabb.extents.x()
-										&& m_current.x() < aabb.origin.x() + aabb.extents.x()
-										&& m_current.y() > aabb.origin.y() - aabb.extents.y()
-										&& m_current.y() < aabb.origin.y() + aabb.extents.y() ) ){
-			const float floorHeight = aabb.origin.z() + aabb.extents.z() + 32.f;
-			if ( floorHeight > m_current.z() + 0.1f && floorHeight < m_bestUp ) /* 0.1f epsilon to prevent jam at (close?) coords */
-				m_bestUp = floorHeight;
-			if ( floorHeight < m_current.z() - 0.1f && floorHeight > m_bestDown )
-				m_bestDown = floorHeight;
-			const float bottom = aabb.origin.z() - aabb.extents.z() - 16.f;
-			if( m_bottom > bottom )
-				m_bottom = bottom;
-		}
+	mutable float m_bestUp;
+	mutable float m_bestDown;
+	mutable float m_bottom;
+	FloorHeightWalker( const Vector3& current ) :
+		m_current( current ), m_bestUp( g_MaxWorldCoord ), m_bestDown( g_MinWorldCoord ), m_bottom( g_MaxWorldCoord ){
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if( !path.top().get().visible() )
+			return false;
+		if ( !path.top().get().isRoot() && !node_is_group( path.top() ) ) {
+			const AABB& aabb = instance.worldAABB();
+			if( instance.isSelected() || ( m_current.x() > aabb.origin.x() - aabb.extents.x()
+			                               && m_current.x() < aabb.origin.x() + aabb.extents.x()
+			                               && m_current.y() > aabb.origin.y() - aabb.extents.y()
+			                               && m_current.y() < aabb.origin.y() + aabb.extents.y() ) ){
+				const float floorHeight = aabb.origin.z() + aabb.extents.z() + 32.f;
+				if ( floorHeight > m_current.z() + 0.1f && floorHeight < m_bestUp ) /* 0.1f epsilon to prevent jam at (close?) coords */
+					m_bestUp = floorHeight;
+				if ( floorHeight < m_current.z() - 0.1f && floorHeight > m_bestDown )
+					m_bestDown = floorHeight;
+				const float bottom = aabb.origin.z() - aabb.extents.z() - 16.f;
+				if( m_bottom > bottom )
+					m_bottom = bottom;
+			}
+		}
+		return true;
+	}
 };
 
 void CamWnd::Cam_ChangeFloor( bool up ){
@@ -1820,7 +1822,7 @@ Sys_GetCursorPos( &m_PositionDragCursorX, &m_PositionDragCursorY );
 
 // motion
 if ( ( m_bFreeMove && ( buttons == ( RAD_CONTROL | RAD_SHIFT ) ) )
-	 || ( !m_bFreeMove && ( buttons == ( RAD_RBUTTON | RAD_CONTROL ) ) ) ) {
+  || ( !m_bFreeMove && ( buttons == ( RAD_RBUTTON | RAD_CONTROL ) ) ) ) {
 	Cam_PositionDrag();
 	CamWnd_Update( camwnd );
 	CameraMovedNotify();
@@ -1891,80 +1893,80 @@ void CamWnd::DisableFreeMove(){
 
 class CamRenderer : public Renderer
 {
-struct state_type
-{
-	state_type() : m_highlight( 0 ), m_state( 0 ), m_lights( 0 ){
-	}
-	unsigned int m_highlight;
-	Shader* m_state;
-	const LightList* m_lights;
-};
+	struct state_type
+	{
+		state_type() : m_highlight( 0 ), m_state( 0 ), m_lights( 0 ){
+		}
+		unsigned int m_highlight;
+		Shader* m_state;
+		const LightList* m_lights;
+	};
 
-std::vector<state_type> m_state_stack;
-RenderStateFlags m_globalstate;
-Shader* m_state_facewire;
-Shader* m_state_wire;
-Shader* m_state_select0;
-Shader* m_state_select1;
-const Vector3& m_viewer;
+	std::vector<state_type> m_state_stack;
+	RenderStateFlags m_globalstate;
+	Shader* m_state_facewire;
+	Shader* m_state_wire;
+	Shader* m_state_select0;
+	Shader* m_state_select1;
+	const Vector3& m_viewer;
 
 public:
-CamRenderer( RenderStateFlags globalstate, Shader* facewire, Shader* wire, Shader* select0, Shader* select1, const Vector3& viewer ) :
-	m_globalstate( globalstate ),
-	m_state_facewire( facewire ),
-	m_state_wire( wire ),
-	m_state_select0( select0 ),
-	m_state_select1( select1 ),
-	m_viewer( viewer ){
-	ASSERT_NOTNULL( select0 );
-//	ASSERT_NOTNULL( select1 );
-	m_state_stack.push_back( state_type() );
-}
-
-void SetState( Shader* state, EStyle style ){
-	ASSERT_NOTNULL( state );
-	if ( style == eFullMaterials ) {
-		m_state_stack.back().m_state = state;
-	}
-}
-EStyle getStyle() const {
-	return eFullMaterials;
-}
-void PushState(){
-	m_state_stack.push_back( m_state_stack.back() );
-}
-void PopState(){
-	ASSERT_MESSAGE( !m_state_stack.empty(), "popping empty stack" );
-	m_state_stack.pop_back();
-}
-void Highlight( EHighlightMode mode, bool bEnable = true ){
-	( bEnable )
-	? m_state_stack.back().m_highlight |= mode
-	: m_state_stack.back().m_highlight &= ~mode;
-}
-void setLights( const LightList& lights ){
-	m_state_stack.back().m_lights = &lights;
-}
-void addRenderable( const OpenGLRenderable& renderable, const Matrix4& world ){
-	if ( m_state_stack.back().m_highlight & ePrimitive ) {
-		m_state_select0->addRenderable( renderable, world, m_state_stack.back().m_lights );
-	}
-	else if ( m_state_wire && m_state_stack.back().m_highlight & ePrimitiveWire ) {
-		m_state_wire->addRenderable( renderable, world, m_state_stack.back().m_lights );
-	}
-	if ( m_state_select1 && m_state_stack.back().m_highlight & eFace ) {
-		m_state_select1->addRenderable( renderable, world, m_state_stack.back().m_lights );
-	}
-	if ( m_state_facewire && m_state_stack.back().m_highlight & eFaceWire ) {
-		m_state_facewire->addRenderable( renderable, world, m_state_stack.back().m_lights );
+	CamRenderer( RenderStateFlags globalstate, Shader* facewire, Shader* wire, Shader* select0, Shader* select1, const Vector3& viewer ) :
+		m_globalstate( globalstate ),
+		m_state_facewire( facewire ),
+		m_state_wire( wire ),
+		m_state_select0( select0 ),
+		m_state_select1( select1 ),
+		m_viewer( viewer ){
+		ASSERT_NOTNULL( select0 );
+	//	ASSERT_NOTNULL( select1 );
+		m_state_stack.push_back( state_type() );
 	}
 
-	m_state_stack.back().m_state->addRenderable( renderable, world, m_state_stack.back().m_lights );
-}
+	void SetState( Shader* state, EStyle style ){
+		ASSERT_NOTNULL( state );
+		if ( style == eFullMaterials ) {
+			m_state_stack.back().m_state = state;
+		}
+	}
+	EStyle getStyle() const {
+		return eFullMaterials;
+	}
+	void PushState(){
+		m_state_stack.push_back( m_state_stack.back() );
+	}
+	void PopState(){
+		ASSERT_MESSAGE( !m_state_stack.empty(), "popping empty stack" );
+		m_state_stack.pop_back();
+	}
+	void Highlight( EHighlightMode mode, bool bEnable = true ){
+		( bEnable )
+		? m_state_stack.back().m_highlight |= mode
+		: m_state_stack.back().m_highlight &= ~mode;
+	}
+	void setLights( const LightList& lights ){
+		m_state_stack.back().m_lights = &lights;
+	}
+	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& world ){
+		if ( m_state_stack.back().m_highlight & ePrimitive ) {
+			m_state_select0->addRenderable( renderable, world, m_state_stack.back().m_lights );
+		}
+		else if ( m_state_wire && m_state_stack.back().m_highlight & ePrimitiveWire ) {
+			m_state_wire->addRenderable( renderable, world, m_state_stack.back().m_lights );
+		}
+		if ( m_state_select1 && m_state_stack.back().m_highlight & eFace ) {
+			m_state_select1->addRenderable( renderable, world, m_state_stack.back().m_lights );
+		}
+		if ( m_state_facewire && m_state_stack.back().m_highlight & eFaceWire ) {
+			m_state_facewire->addRenderable( renderable, world, m_state_stack.back().m_lights );
+		}
 
-void render( const Matrix4& modelview, const Matrix4& projection ){
-	GlobalShaderCache().render( m_globalstate, modelview, projection, m_viewer );
-}
+		m_state_stack.back().m_state->addRenderable( renderable, world, m_state_stack.back().m_lights );
+	}
+
+	void render( const Matrix4& modelview, const Matrix4& projection ){
+		GlobalShaderCache().render( m_globalstate, modelview, projection, m_viewer );
+	}
 };
 
 /*
@@ -2081,27 +2083,27 @@ void CamWnd::Cam_Draw(){
 		break;
 	case cd_solid:
 		globalstate |= RENDER_FILL
-					   | RENDER_LIGHTING
-					   | RENDER_SMOOTH
-					   | RENDER_SCALED;
+		            | RENDER_LIGHTING
+		            | RENDER_SMOOTH
+		            | RENDER_SCALED;
 		break;
 	case cd_texture:
 	case cd_texture_plus_wire:
 		globalstate |= RENDER_FILL
-					   | RENDER_LIGHTING
-					   | RENDER_TEXTURE
-					   | RENDER_SMOOTH
-					   | RENDER_SCALED;
+		            | RENDER_LIGHTING
+		            | RENDER_TEXTURE
+		            | RENDER_SMOOTH
+		            | RENDER_SCALED;
 		break;
 	case cd_lighting:
 		globalstate |= RENDER_FILL
-					   | RENDER_LIGHTING
-					   | RENDER_TEXTURE
-					   | RENDER_SMOOTH
-					   | RENDER_SCALED
-					   | RENDER_BUMP
-					   | RENDER_PROGRAM
-					   | RENDER_SCREEN;
+		            | RENDER_LIGHTING
+		            | RENDER_TEXTURE
+		            | RENDER_SMOOTH
+		            | RENDER_SCALED
+		            | RENDER_BUMP
+		            | RENDER_PROGRAM
+		            | RENDER_SCREEN;
 		break;
 	default:
 		globalstate = 0;
@@ -2114,11 +2116,11 @@ void CamWnd::Cam_Draw(){
 
 	{
 		CamRenderer renderer( globalstate,
-							g_camwindow_globals_private.m_bFaceWire ? m_state_facewire : 0,
-							m_Camera.draw_mode == cd_texture_plus_wire ? m_state_wire : 0,
-							m_state_select0,
-							g_camwindow_globals_private.m_bFaceFill ? m_state_select1 : 0,
-							m_view.getViewer() );
+		                      g_camwindow_globals_private.m_bFaceWire ? m_state_facewire : 0,
+		                      m_Camera.draw_mode == cd_texture_plus_wire ? m_state_wire : 0,
+		                      m_state_select0,
+		                      g_camwindow_globals_private.m_bFaceFill ? m_state_select1 : 0,
+		                      m_view.getViewer() );
 
 		Scene_Render( renderer, m_view );
 
@@ -2496,57 +2498,57 @@ void Camera_constructPreferences( PreferencesPage& page ){
 	page.appendCheckBox( "", "Invert mouse vertical axis", g_camwindow_globals_private.m_bCamInverseMouse );
 	page.appendCheckBox( "", "Zoom to Mouse pointer", g_camwindow_globals_private.m_bZoomToPointer );
 	page.appendCheckBox(
-		"", "Discrete movement",
-		FreeCaller1<bool, CamWnd_Move_Discrete_Import>(),
-		BoolExportCaller( g_camwindow_globals_private.m_bCamDiscrete )
-		);
+	    "", "Discrete movement",
+	    FreeCaller1<bool, CamWnd_Move_Discrete_Import>(),
+	    BoolExportCaller( g_camwindow_globals_private.m_bCamDiscrete )
+	);
 	page.appendCheckBox(
-		"", "Enable far-clip plane",
-		FreeCaller1<bool, Camera_SetFarClip>(),
-		BoolExportCaller( g_camwindow_globals_private.m_bCubicClipping )
-		);
+	    "", "Enable far-clip plane",
+	    FreeCaller1<bool, Camera_SetFarClip>(),
+	    BoolExportCaller( g_camwindow_globals_private.m_bCubicClipping )
+	);
 	page.appendCheckBox(
-		"", "Colorize selection",
-		BoolImportCaller( g_camwindow_globals_private.m_bFaceFill ),
-		BoolExportCaller( g_camwindow_globals_private.m_bFaceFill )
-		);
+	    "", "Colorize selection",
+	    BoolImportCaller( g_camwindow_globals_private.m_bFaceFill ),
+	    BoolExportCaller( g_camwindow_globals_private.m_bFaceFill )
+	);
 	page.appendCheckBox(
-		"", "Selected faces wire",
-		BoolImportCaller( g_camwindow_globals_private.m_bFaceWire ),
-		BoolExportCaller( g_camwindow_globals_private.m_bFaceWire )
-		);
+	    "", "Selected faces wire",
+	    BoolImportCaller( g_camwindow_globals_private.m_bFaceWire ),
+	    BoolExportCaller( g_camwindow_globals_private.m_bFaceWire )
+	);
 
 	const char* render_modes[]{ "Wireframe", "Flatshade", "Textured", "Textured+Wire", "Lighting" };
 	page.appendCombo(
-		"Render Mode",
-		StringArrayRange( render_modes, render_modes + ARRAY_SIZE( render_modes ) - ( g_pGameDescription->mGameType == "doom3"? 0 : 1 ) ),
-		IntImportCallback( RenderModeImportCaller() ),
-		IntExportCallback( RenderModeExportCaller() )
-		);
+	    "Render Mode",
+	    StringArrayRange( render_modes, render_modes + ARRAY_SIZE( render_modes ) - ( g_pGameDescription->mGameType == "doom3"? 0 : 1 ) ),
+	    IntImportCallback( RenderModeImportCaller() ),
+	    IntExportCallback( RenderModeExportCaller() )
+	);
 
 	if( GlobalOpenGL().support_ARB_framebuffer_object ){
 		const char* samples[] = { "0", "2", "4", "8", "16", "32" };
 
 		page.appendCombo(
-			"MSAA",
-			STRING_ARRAY_RANGE( samples ),
-			IntImportCallback( MSAAImportCaller() ),
-			IntExportCallback( MSAAExportCaller() )
-			);
+		    "MSAA",
+		    STRING_ARRAY_RANGE( samples ),
+		    IntImportCallback( MSAAImportCaller() ),
+		    IntExportCallback( MSAAExportCaller() )
+		);
 	}
 
 	const char* strafe_mode[] = { "None", "Up", "Forward", "Both", "Both Inverted" };
 
 	page.appendCombo(
-		"Strafe Mode",
-		g_camwindow_globals_private.m_strafeMode,
-		STRING_ARRAY_RANGE( strafe_mode )
-		);
+	    "Strafe Mode",
+	    g_camwindow_globals_private.m_strafeMode,
+	    STRING_ARRAY_RANGE( strafe_mode )
+	);
 
 	page.appendSpinner(	"Field Of View", 110.0, 1.0, 175.0,
-		FloatImportCallback( fieldOfViewImportCaller() ),
-		FloatExportCallback( FloatExportCaller( camera_t::fieldOfView ) )
-		);
+	                    FloatImportCallback( fieldOfViewImportCaller() ),
+	                    FloatExportCallback( FloatExportCaller( camera_t::fieldOfView ) )
+	                  );
 }
 void Camera_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Camera", "Camera View Preferences" ) );

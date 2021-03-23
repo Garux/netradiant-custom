@@ -63,8 +63,8 @@ void graph_tree_model_delete( GraphTreeModel* model ){
 
 bool graph_tree_model_subtree_find_node( GraphTreeModel* model, GtkTreeIter* parent, const scene::Node& node, GtkTreeIter* iter ){
 	for ( gboolean success = gtk_tree_model_iter_children( GTK_TREE_MODEL( model ), iter, parent );
-		  success;
-		  success = gtk_tree_model_iter_next( GTK_TREE_MODEL( model ), iter ) )
+	      success;
+	      success = gtk_tree_model_iter_next( GTK_TREE_MODEL( model ), iter ) )
 	{
 		scene::Node* current;
 		gtk_tree_model_get_pointer( GTK_TREE_MODEL( model ), iter, 0, &current );
@@ -172,27 +172,27 @@ typedef scene::Node* NodePointer;
 class NodeNameLess
 {
 public:
-bool operator()( const NodePointer& self, const NodePointer& other ) const {
-	if ( self == 0 ) {
-		return true;
+	bool operator()( const NodePointer& self, const NodePointer& other ) const {
+		if ( self == 0 ) {
+			return true;
+		}
+		if ( other == 0 ) {
+			return false;
+		}
+		int result = string_compare( node_get_name( self ), node_get_name( other ) );
+		if ( result == 0 ) {
+			return self < other;
+		}
+		return result < 0;
 	}
-	if ( other == 0 ) {
-		return false;
-	}
-	int result = string_compare( node_get_name( self ), node_get_name( other ) );
-	if ( result == 0 ) {
-		return self < other;
-	}
-	return result < 0;
-}
 };
 
 class PathNameLess
 {
 public:
-bool operator()( const PathConstReference& self, const PathConstReference& other ) const {
-	return std::lexicographical_compare( self.get().begin(), self.get().end(), other.get().begin(), other.get().end(), NodeNameLess() );
-}
+	bool operator()( const PathConstReference& self, const PathConstReference& other ) const {
+		return std::lexicographical_compare( self.get().begin(), self.get().end(), other.get().begin(), other.get().end(), NodeNameLess() );
+	}
 };
 
 typedef std::map<PathConstReference, scene::Instance*, PathNameLess> graph_type;
@@ -508,7 +508,7 @@ static gboolean graph_tree_model_drag_data_received( GtkTreeDragDest *drag_dest,
 	GtkTreeModel *src_model = 0;
 	GtkTreePath *src_path = 0;
 	if ( gtk_tree_get_row_drag_data( selection_data, &src_model, &src_path )
-		 && src_model == tree_model ) {
+	     && src_model == tree_model ) {
 		/* Copy the given row to a new position */
 		GtkTreeIter iter;
 
@@ -599,17 +599,17 @@ GType graph_tree_model_get_type( void ){
 		};
 
 		graph_tree_model_type = g_type_register_static( G_TYPE_OBJECT, "GraphTreeModel",
-														&graph_tree_model_info, (GTypeFlags)0 );
+		                                                &graph_tree_model_info, (GTypeFlags)0 );
 
 		g_type_add_interface_static( graph_tree_model_type,
-									 GTK_TYPE_TREE_MODEL,
-									 &tree_model_info );
+		                             GTK_TYPE_TREE_MODEL,
+		                             &tree_model_info );
 		g_type_add_interface_static( graph_tree_model_type,
-									 GTK_TYPE_TREE_DRAG_SOURCE,
-									 &drag_source_info );
+		                             GTK_TYPE_TREE_DRAG_SOURCE,
+		                             &drag_source_info );
 		g_type_add_interface_static( graph_tree_model_type,
-									 GTK_TYPE_TREE_DRAG_DEST,
-									 &drag_dest_info );
+		                             GTK_TYPE_TREE_DRAG_DEST,
+		                             &drag_dest_info );
 	}
 
 	return graph_tree_model_type;
@@ -631,17 +631,17 @@ void graph_tree_model_delete( GraphTreeModel* model ){
 
 class TempNameable : public Nameable
 {
-const char* m_name;
+	const char* m_name;
 public:
-TempNameable( const char* name ) : m_name( name ){
-}
-const char* name() const {
-	return m_name;
-}
-void attach( const NameCallback& callback ){
-}
-void detach( const NameCallback& callback ){
-}
+	TempNameable( const char* name ) : m_name( name ){
+	}
+	const char* name() const {
+		return m_name;
+	}
+	void attach( const NameCallback& callback ){
+	}
+	void detach( const NameCallback& callback ){
+	}
 };
 
 void node_attach_name_changed_callback( scene::Node& node, const NameCallback& callback ){
@@ -744,84 +744,84 @@ void graph_tree_model_row_changed( GraphTreeNode& node );
 class GraphTreeNode
 {
 public:
-typedef std::pair<CopiedString, scene::Node*> key_type;
+	typedef std::pair<CopiedString, scene::Node*> key_type;
 private:
-struct Compare{
-	bool operator()( const key_type& one, const key_type& other ) const {
-		const int n = string_compare( one.first.c_str(), other.first.c_str() );
-		return n != 0? n < 0 : one.second < other.second;
-	}
-};
-typedef std::map<key_type, GraphTreeNode*, Compare> ChildNodes;
-ChildNodes m_childnodes;
+	struct Compare{
+		bool operator()( const key_type& one, const key_type& other ) const {
+			const int n = string_compare( one.first.c_str(), other.first.c_str() );
+			return n != 0? n < 0 : one.second < other.second;
+		}
+	};
+	typedef std::map<key_type, GraphTreeNode*, Compare> ChildNodes;
+	ChildNodes m_childnodes;
 
-struct Dummy{};
-std::list<Dummy> m_list; // dummy list for child index identification
-std::list<Dummy>::const_iterator m_parentListIterator; // iterator from parent's list
-bool m_searchFromEnd = false; //silly optimization
+	struct Dummy{};
+	std::list<Dummy> m_list; // dummy list for child index identification
+	std::list<Dummy>::const_iterator m_parentListIterator; // iterator from parent's list
+	bool m_searchFromEnd = false; //silly optimization
 public:
-Reference<scene::Instance> m_instance;
-GraphTreeNode* m_parent;
+	Reference<scene::Instance> m_instance;
+	GraphTreeNode* m_parent;
 
-typedef ChildNodes::iterator iterator;
-typedef ChildNodes::value_type value_type;
-typedef ChildNodes::size_type size_type;
+	typedef ChildNodes::iterator iterator;
+	typedef ChildNodes::value_type value_type;
+	typedef ChildNodes::size_type size_type;
 
-GraphTreeNode( scene::Instance& instance ) : m_instance( instance ), m_parent( 0 ){
-	m_instance.get().setChildSelectedChangedCallback( RowChangedCaller( *this ) );
-}
-~GraphTreeNode(){
-	m_instance.get().setChildSelectedChangedCallback( Callback() );
-	ASSERT_MESSAGE( empty(), "GraphTreeNode::~GraphTreeNode: memory leak" );
-}
-GraphTreeNode() = delete;
-GraphTreeNode( const GraphTreeNode& ) = delete;
-GraphTreeNode( GraphTreeNode&& ) noexcept = delete;
-GraphTreeNode& operator=( const GraphTreeNode& ) = delete;
-GraphTreeNode& operator=( GraphTreeNode&& ) noexcept = delete;
+	GraphTreeNode( scene::Instance& instance ) : m_instance( instance ), m_parent( 0 ){
+		m_instance.get().setChildSelectedChangedCallback( RowChangedCaller( *this ) );
+	}
+	~GraphTreeNode(){
+		m_instance.get().setChildSelectedChangedCallback( Callback() );
+		ASSERT_MESSAGE( empty(), "GraphTreeNode::~GraphTreeNode: memory leak" );
+	}
+	GraphTreeNode() = delete;
+	GraphTreeNode( const GraphTreeNode& ) = delete;
+	GraphTreeNode( GraphTreeNode&& ) noexcept = delete;
+	GraphTreeNode& operator=( const GraphTreeNode& ) = delete;
+	GraphTreeNode& operator=( GraphTreeNode&& ) noexcept = delete;
 
-iterator begin(){
-	return m_childnodes.begin();
-}
-iterator end(){
-	return m_childnodes.end();
-}
+	iterator begin(){
+		return m_childnodes.begin();
+	}
+	iterator end(){
+		return m_childnodes.end();
+	}
 
-size_type size() const {
-	return m_childnodes.size();
-}
-bool empty() const {
-	return m_childnodes.empty();
-}
+	size_type size() const {
+		return m_childnodes.size();
+	}
+	bool empty() const {
+		return m_childnodes.empty();
+	}
 // may not be called on the root node!
-int getIndex() const {
-	const int idx = m_parent->m_searchFromEnd?
-	                m_parent->m_list.size() - std::distance( m_parentListIterator, m_parent->m_list.cend() ) :
-	                std::distance( m_parent->m_list.cbegin(), m_parentListIterator );
-	m_parent->m_searchFromEnd = idx * 2 > int( m_parent->size() );
-	return idx;
-}
+	int getIndex() const {
+		const int idx = m_parent->m_searchFromEnd?
+		                m_parent->m_list.size() - std::distance( m_parentListIterator, m_parent->m_list.cend() ) :
+		                std::distance( m_parent->m_list.cbegin(), m_parentListIterator );
+		m_parent->m_searchFromEnd = idx * 2 > int( m_parent->size() );
+		return idx;
+	}
 
-iterator insert( const value_type& value ){
-	auto [ i, inserted ] = m_childnodes.insert( value );
-	ASSERT_MESSAGE( inserted, "GraphTreeNode::insert: already added" );
-	( *i ).second->m_parent = this;
-	const auto pos = std::next( i ) == end()? m_list.end() : std::next( i )->second->m_parentListIterator;
-	i->second->m_parentListIterator = m_list.insert( pos, Dummy() );
-	return i;
-}
-void erase( iterator i ){
-	m_list.erase( i->second->m_parentListIterator );
-	m_childnodes.erase( i );
-}
-iterator find( const key_type& key ){
-	return m_childnodes.find( key );
-}
+	iterator insert( const value_type& value ){
+		auto [ i, inserted ] = m_childnodes.insert( value );
+		ASSERT_MESSAGE( inserted, "GraphTreeNode::insert: already added" );
+		( *i ).second->m_parent = this;
+		const auto pos = std::next( i ) == end()? m_list.end() : std::next( i )->second->m_parentListIterator;
+		i->second->m_parentListIterator = m_list.insert( pos, Dummy() );
+		return i;
+	}
+	void erase( iterator i ){
+		m_list.erase( i->second->m_parentListIterator );
+		m_childnodes.erase( i );
+	}
+	iterator find( const key_type& key ){
+		return m_childnodes.find( key );
+	}
 
-void rowChanged(){
-	graph_tree_model_row_changed( *this );
-}
-typedef MemberCaller<GraphTreeNode, &GraphTreeNode::rowChanged> RowChangedCaller;
+	void rowChanged(){
+		graph_tree_model_row_changed( *this );
+	}
+	typedef MemberCaller<GraphTreeNode, &GraphTreeNode::rowChanged> RowChangedCaller;
 };
 
 struct GraphTreeModel
@@ -1008,8 +1008,8 @@ scene::Node* g_null_node = 0;
 class NullInstance : public scene::Instance
 {
 public:
-NullInstance() : scene::Instance( scene::Path( makeReference( *g_null_node ) ), 0, 0, Static<InstanceTypeCastTable>::instance() ){
-}
+	NullInstance() : scene::Instance( scene::Path( makeReference( *g_null_node ) ), 0, 0, Static<InstanceTypeCastTable>::instance() ){
+	}
 };
 
 namespace
@@ -1080,11 +1080,11 @@ GType graph_tree_model_get_type( void ){
 		};
 
 		graph_tree_model_type = g_type_register_static( G_TYPE_OBJECT, "GraphTreeModel",
-														&graph_tree_model_info, (GTypeFlags)0 );
+		                                                &graph_tree_model_info, (GTypeFlags)0 );
 
 		g_type_add_interface_static( graph_tree_model_type,
-									 GTK_TYPE_TREE_MODEL,
-									 &tree_model_info );
+		                             GTK_TYPE_TREE_MODEL,
+		                             &tree_model_info );
 	}
 
 	return graph_tree_model_type;
@@ -1256,182 +1256,182 @@ void graph_tree_model_erase( GraphTreeModel* model, const scene::Instance& insta
 class TestGraphTreeModel
 {
 public:
-TestGraphTreeModel(){
-	gtk_init( 0, 0 );
+	TestGraphTreeModel(){
+		gtk_init( 0, 0 );
 
-	graph_type graph;
+		graph_type graph;
 
-	scene::Node* root = *(scene::Node*)0xa0000000;
-	scene::Node* node1 = (scene::Node*)0xa0000001;
-	scene::Node* node2 = (scene::Node*)0xa0000002;
-	scene::Node* node3 = (scene::Node*)0xa0000003;
-	scene::Node* node4 = (scene::Node*)0xa0000004;
-	scene::Instance* instance = (scene::Instance*)0xaaaaaaaa;
+		scene::Node* root = *(scene::Node*)0xa0000000;
+		scene::Node* node1 = (scene::Node*)0xa0000001;
+		scene::Node* node2 = (scene::Node*)0xa0000002;
+		scene::Node* node3 = (scene::Node*)0xa0000003;
+		scene::Node* node4 = (scene::Node*)0xa0000004;
+		scene::Instance* instance = (scene::Instance*)0xaaaaaaaa;
 
-	scene::Path rootpath( root );
+		scene::Path rootpath( root );
 
-	graph.insert( graph_type::value_type( rootpath, instance ) );
+		graph.insert( graph_type::value_type( rootpath, instance ) );
 
-	rootpath.push( node1 );
-	graph.insert( graph_type::value_type( rootpath, instance ) );
-	rootpath.pop();
+		rootpath.push( node1 );
+		graph.insert( graph_type::value_type( rootpath, instance ) );
+		rootpath.pop();
 
-	rootpath.push( node2 );
-	graph.insert( graph_type::value_type( rootpath, instance ) );
-	rootpath.push( node3 );
-	graph.insert( graph_type::value_type( rootpath, instance ) );
-	rootpath.pop();
-	rootpath.push( node4 );
-	graph.insert( graph_type::value_type( rootpath, instance ) );
-	rootpath.pop();
-	rootpath.pop();
+		rootpath.push( node2 );
+		graph.insert( graph_type::value_type( rootpath, instance ) );
+		rootpath.push( node3 );
+		graph.insert( graph_type::value_type( rootpath, instance ) );
+		rootpath.pop();
+		rootpath.push( node4 );
+		graph.insert( graph_type::value_type( rootpath, instance ) );
+		rootpath.pop();
+		rootpath.pop();
 
-	GtkTreeModel* model = GTK_TREE_MODEL( graph_tree_model_new( &graph ) );
-
-	{
-		gint n_columns = gtk_tree_model_get_n_columns( model );
-		ASSERT_MESSAGE( n_columns == 2, "test failed!" );
-	}
-
-	{
-		GType type = gtk_tree_model_get_column_type( model, 0 );
-		ASSERT_MESSAGE( type == G_TYPE_POINTER, "test failed!" );
-	}
-
-	{
-		GType type = gtk_tree_model_get_column_type( model, 1 );
-		ASSERT_MESSAGE( type == G_TYPE_POINTER, "test failed!" );
-	}
-
-
-	{
-		GtkTreeIter iter;
-		gtk_tree_model_get_iter_first( model, &iter );
-
-		graph_type::iterator i = graph_iterator_read_tree_iter( &iter );
-		ASSERT_MESSAGE( ( *i ).first.get().size() == 2 && ( *i ).first.get().top() == node1, "test failed!" );
-	}
-
-	{
-		GtkTreeIter iter;
-		gtk_tree_model_get_iter_first( model, &iter );
-
-		ASSERT_MESSAGE( !gtk_tree_model_iter_has_child( model, &iter ), "test failed!" );
-
-		ASSERT_MESSAGE( gtk_tree_model_iter_n_children( model, &iter ) == 0, "test failed!" );
-
-		gtk_tree_model_iter_next( model, &iter );
-
-		ASSERT_MESSAGE( gtk_tree_model_iter_has_child( model, &iter ), "test failed!" );
-
-		ASSERT_MESSAGE( gtk_tree_model_iter_n_children( model, &iter ) == 2, "test failed!" );
+		GtkTreeModel* model = GTK_TREE_MODEL( graph_tree_model_new( &graph ) );
 
 		{
-			GtkTreeIter child;
-			gtk_tree_model_iter_nth_child( model, &child, &iter, 0 );
+			gint n_columns = gtk_tree_model_get_n_columns( model );
+			ASSERT_MESSAGE( n_columns == 2, "test failed!" );
+		}
 
-			scene::Node* test;
-			gtk_tree_model_get_value( model, &child, 0, (GValue*)&test );
-			ASSERT_MESSAGE( test == node3, "test failed!" );
+		{
+			GType type = gtk_tree_model_get_column_type( model, 0 );
+			ASSERT_MESSAGE( type == G_TYPE_POINTER, "test failed!" );
+		}
+
+		{
+			GType type = gtk_tree_model_get_column_type( model, 1 );
+			ASSERT_MESSAGE( type == G_TYPE_POINTER, "test failed!" );
+		}
+
+
+		{
+			GtkTreeIter iter;
+			gtk_tree_model_get_iter_first( model, &iter );
+
+			graph_type::iterator i = graph_iterator_read_tree_iter( &iter );
+			ASSERT_MESSAGE( ( *i ).first.get().size() == 2 && ( *i ).first.get().top() == node1, "test failed!" );
+		}
+
+		{
+			GtkTreeIter iter;
+			gtk_tree_model_get_iter_first( model, &iter );
+
+			ASSERT_MESSAGE( !gtk_tree_model_iter_has_child( model, &iter ), "test failed!" );
+
+			ASSERT_MESSAGE( gtk_tree_model_iter_n_children( model, &iter ) == 0, "test failed!" );
+
+			gtk_tree_model_iter_next( model, &iter );
+
+			ASSERT_MESSAGE( gtk_tree_model_iter_has_child( model, &iter ), "test failed!" );
+
+			ASSERT_MESSAGE( gtk_tree_model_iter_n_children( model, &iter ) == 2, "test failed!" );
 
 			{
-				GtkTreeIter parent;
-				gtk_tree_model_iter_parent( model, &parent, &child );
+				GtkTreeIter child;
+				gtk_tree_model_iter_nth_child( model, &child, &iter, 0 );
 
 				scene::Node* test;
-				gtk_tree_model_get_value( model, &parent, 0, (GValue*)&test );
-				ASSERT_MESSAGE( test == node2, "test failed!" );
+				gtk_tree_model_get_value( model, &child, 0, (GValue*)&test );
+				ASSERT_MESSAGE( test == node3, "test failed!" );
+
+				{
+					GtkTreeIter parent;
+					gtk_tree_model_iter_parent( model, &parent, &child );
+
+					scene::Node* test;
+					gtk_tree_model_get_value( model, &parent, 0, (GValue*)&test );
+					ASSERT_MESSAGE( test == node2, "test failed!" );
+				}
+			}
+
+			{
+				GtkTreeIter child;
+				gtk_tree_model_iter_nth_child( model, &child, &iter, 1 );
+
+				scene::Node* test;
+				gtk_tree_model_get_value( model, &child, 0, (GValue*)&test );
+				ASSERT_MESSAGE( test == node4, "test failed!" );
 			}
 		}
 
 		{
-			GtkTreeIter child;
-			gtk_tree_model_iter_nth_child( model, &child, &iter, 1 );
+			GtkTreeIter iter;
+			std::size_t count = 0;
+			for ( gboolean good = gtk_tree_model_get_iter_first( model, &iter ); good; good = gtk_tree_model_iter_next( model, &iter ) )
+			{
+				scene::Node* test;
+				gtk_tree_model_get_value( model, &iter, 0, (GValue*)&test );
 
-			scene::Node* test;
-			gtk_tree_model_get_value( model, &child, 0, (GValue*)&test );
-			ASSERT_MESSAGE( test == node4, "test failed!" );
+				ASSERT_MESSAGE( ( count == 0 && test == node1 ) || ( count == 1 && test == node2 ), "test failed!" );
+				++count;
+			}
+
+			ASSERT_MESSAGE( count == 2, "test failed!" );
+
 		}
-	}
 
-	{
-		GtkTreeIter iter;
-		std::size_t count = 0;
-		for ( gboolean good = gtk_tree_model_get_iter_first( model, &iter ); good; good = gtk_tree_model_iter_next( model, &iter ) )
 		{
+			GtkTreeIter iter;
+			gtk_tree_model_get_iter_first( model, &iter );
+
 			scene::Node* test;
 			gtk_tree_model_get_value( model, &iter, 0, (GValue*)&test );
-
-			ASSERT_MESSAGE( ( count == 0 && test == node1 ) || ( count == 1 && test == node2 ), "test failed!" );
-			++count;
+			ASSERT_MESSAGE( test == node1, "test failed!" );
 		}
 
-		ASSERT_MESSAGE( count == 2, "test failed!" );
+		{
+			GtkTreeIter iter;
+			GtkTreePath* path = gtk_tree_path_new_from_string( "0" );
+			gtk_tree_model_get_iter( model, &iter, path );
+			gtk_tree_path_free( path );
 
+			graph_type::iterator i = graph_iterator_read_tree_iter( &iter );
+			ASSERT_MESSAGE( ( *i ).first.get().size() == 2 && ( *i ).first.get().top() == node1, "test failed!" );
+		}
+
+		{
+			GtkTreeIter iter;
+			GtkTreePath* path = gtk_tree_path_new_from_string( "1" );
+			gtk_tree_model_get_iter( model, &iter, path );
+			gtk_tree_path_free( path );
+
+			graph_type::iterator i = graph_iterator_read_tree_iter( &iter );
+			ASSERT_MESSAGE( ( *i ).first.get().size() == 2 && ( *i ).first.get().top() == node2, "test failed!" );
+		}
+
+		{
+			GtkTreeIter iter;
+			graph_type::iterator i = graph.begin();
+			++i;
+			graph_iterator_write_tree_iter( i, &iter );
+
+			GtkTreePath* path = gtk_tree_model_get_path( model, &iter );
+
+			gint depth = gtk_tree_path_get_depth( path );
+			gint* indices = gtk_tree_path_get_indices( path );
+
+			ASSERT_MESSAGE( depth == 1 && indices[0] == 0, "test failed!" );
+
+			gtk_tree_path_free( path );
+		}
+
+		{
+			GtkTreeIter iter;
+			graph_type::iterator i = graph.begin();
+			++i;
+			++i;
+			graph_iterator_write_tree_iter( i, &iter );
+
+			GtkTreePath* path = gtk_tree_model_get_path( model, &iter );
+
+			gint depth = gtk_tree_path_get_depth( path );
+			gint* indices = gtk_tree_path_get_indices( path );
+
+			ASSERT_MESSAGE( depth == 1 && indices[0] == 1, "test failed!" );
+
+			gtk_tree_path_free( path );
+		}
 	}
-
-	{
-		GtkTreeIter iter;
-		gtk_tree_model_get_iter_first( model, &iter );
-
-		scene::Node* test;
-		gtk_tree_model_get_value( model, &iter, 0, (GValue*)&test );
-		ASSERT_MESSAGE( test == node1, "test failed!" );
-	}
-
-	{
-		GtkTreeIter iter;
-		GtkTreePath* path = gtk_tree_path_new_from_string( "0" );
-		gtk_tree_model_get_iter( model, &iter, path );
-		gtk_tree_path_free( path );
-
-		graph_type::iterator i = graph_iterator_read_tree_iter( &iter );
-		ASSERT_MESSAGE( ( *i ).first.get().size() == 2 && ( *i ).first.get().top() == node1, "test failed!" );
-	}
-
-	{
-		GtkTreeIter iter;
-		GtkTreePath* path = gtk_tree_path_new_from_string( "1" );
-		gtk_tree_model_get_iter( model, &iter, path );
-		gtk_tree_path_free( path );
-
-		graph_type::iterator i = graph_iterator_read_tree_iter( &iter );
-		ASSERT_MESSAGE( ( *i ).first.get().size() == 2 && ( *i ).first.get().top() == node2, "test failed!" );
-	}
-
-	{
-		GtkTreeIter iter;
-		graph_type::iterator i = graph.begin();
-		++i;
-		graph_iterator_write_tree_iter( i, &iter );
-
-		GtkTreePath* path = gtk_tree_model_get_path( model, &iter );
-
-		gint depth = gtk_tree_path_get_depth( path );
-		gint* indices = gtk_tree_path_get_indices( path );
-
-		ASSERT_MESSAGE( depth == 1 && indices[0] == 0, "test failed!" );
-
-		gtk_tree_path_free( path );
-	}
-
-	{
-		GtkTreeIter iter;
-		graph_type::iterator i = graph.begin();
-		++i;
-		++i;
-		graph_iterator_write_tree_iter( i, &iter );
-
-		GtkTreePath* path = gtk_tree_model_get_path( model, &iter );
-
-		gint depth = gtk_tree_path_get_depth( path );
-		gint* indices = gtk_tree_path_get_indices( path );
-
-		ASSERT_MESSAGE( depth == 1 && indices[0] == 1, "test failed!" );
-
-		gtk_tree_path_free( path );
-	}
-}
 };
 
 

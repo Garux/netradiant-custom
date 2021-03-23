@@ -63,13 +63,21 @@ extern _QERBrushTable __BRUSHTABLENAME;
 #include <algorithm>
 #else
 template <class T>
-inline T min( T x, T y ) { return ( x < y ) ? x : y; }
+inline T min( T x, T y ) {
+	return ( x < y ) ? x : y;
+}
 template <class T>
-inline T max( T x, T y ) { return ( x > y ) ? x : y; }
+inline T max( T x, T y ) {
+	return ( x > y ) ? x : y;
+}
 #endif
 
-typedef struct { long x, y; } Point;
-typedef struct { long left, top, right, bottom; } Rect;
+typedef struct {
+	long x, y;
+} Point;
+typedef struct {
+	long left, top, right, bottom;
+} Rect;
 
 #define NAME_MAX 255
 

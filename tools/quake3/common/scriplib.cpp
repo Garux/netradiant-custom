@@ -243,7 +243,7 @@ skipspace:
 
 	// ; # // comments
 	if ( *script->script_p == ';' || *script->script_p == '#'
-		 || ( script->script_p[0] == '/' && script->script_p[1] == '/' ) ) {
+	     || ( script->script_p[0] == '/' && script->script_p[1] == '/' ) ) {
 		if ( !crossline ) {
 			Error( "Line %i is incomplete\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 		}

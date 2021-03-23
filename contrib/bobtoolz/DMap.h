@@ -35,24 +35,24 @@ class DEntity;
 class DMap
 {
 public:
-static void RebuildEntity( DEntity* ent );
+	static void RebuildEntity( DEntity* ent );
 
-void ResetTextures( const char* textureName, float fScale[2],      float fShift[2],      int rotation, const char* newTextureName, int bResetTextureName,  int bResetScale[2],  int bResetShift[2],  int bResetRotation );
-void LoadAll( bool bLoadPatches = false );
-void BuildInRadiant( bool bAllowDestruction );
-int m_nNextEntity;
-DEntity* GetWorldSpawn();
-void ClearEntities();
+	void ResetTextures( const char* textureName, float fScale[2],      float fShift[2],      int rotation, const char* newTextureName, int bResetTextureName,  int bResetScale[2],  int bResetShift[2],  int bResetRotation );
+	void LoadAll( bool bLoadPatches = false );
+	void BuildInRadiant( bool bAllowDestruction );
+	int m_nNextEntity;
+	DEntity* GetWorldSpawn();
+	void ClearEntities();
 
-DEntity* GetEntityForID( int ID );
-DEntity* AddEntity( const char* classname = "worldspawn", int ID = -1 );
+	DEntity* GetEntityForID( int ID );
+	DEntity* AddEntity( const char* classname = "worldspawn", int ID = -1 );
 
-std::list<DEntity*> entityList;
+	std::list<DEntity*> entityList;
 
-DMap();
-virtual ~DMap();
+	DMap();
+	virtual ~DMap();
 
-int FixBrushes();
+	int FixBrushes();
 };
 
 #endif // !defined(AFX_DMAP_H__ACAE597A_D26D_49AD_AA69_EDE743DB54FA__INCLUDED_)

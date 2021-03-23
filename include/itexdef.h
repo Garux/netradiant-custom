@@ -25,17 +25,17 @@
 class texdef_t
 {
 public:
-float shift[2];
-float rotate;
-float scale[2];
+	float shift[2];
+	float rotate;
+	float scale[2];
 
-texdef_t(){
-	shift[0] = 0;
-	shift[1] = 0;
-	rotate = 0;
-	scale[0] = 1;
-	scale[1] = 1;
-}
+	texdef_t(){
+		shift[0] = 0;
+		shift[1] = 0;
+		rotate = 0;
+		scale[0] = 1;
+		scale[1] = 1;
+	}
 };
 
 #endif

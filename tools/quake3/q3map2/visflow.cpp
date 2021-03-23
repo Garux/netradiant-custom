@@ -198,7 +198,7 @@ fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, const visP
 
 		dot = dists[i] / ( dists[i] - dists[i + 1] );
 		for ( j = 0 ; j < 3 ; j++ )
-		{   // avoid round off error when possible
+		{	// avoid round off error when possible
 			if ( split.normal()[j] == 1 ) {
 				mid[j] = split.dist();
 			}
@@ -271,12 +271,12 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 				}
 				d = plane3_distance_to_point( plane, source->points[k] );
 				if ( d < -ON_EPSILON ) { // source is on the negative side, so we want all
-					                    // pass and target on the positive side
+				                        // pass and target on the positive side
 					fliptest = false;
 					break;
 				}
 				else if ( d > ON_EPSILON ) { // source is on the positive side, so we want all
-					                        // pass and target on the negative side
+				                            // pass and target on the negative side
 					fliptest = true;
 					break;
 				}
@@ -460,7 +460,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		}
 
 		if ( !more &&
-			 ( thread->base->portalvis[pnum >> 3] & ( 1 << ( pnum & 7 ) ) ) ) { // can't see anything new
+		     ( thread->base->portalvis[pnum >> 3] & ( 1 << ( pnum & 7 ) ) ) ) { // can't see anything new
 			continue;
 		}
 
@@ -637,7 +637,7 @@ void PortalFlow( int portalnum ){
 	c_can = CountBits( p->portalvis, numportals * 2 );
 
 	Sys_FPrintf( SYS_VRB, "portal:%4i  mightsee:%4i  cansee:%4i (%i chains)\n",
-				 (int)( p - portals ), c_might, c_can, data.c_chains );
+	             (int)( p - portals ), c_might, c_can, data.c_chains );
 }
 
 /*
@@ -1097,7 +1097,7 @@ fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, con
 
 		dot = dists[i] / ( dists[i] - dists[i + 1] );
 		for ( j = 0 ; j < 3 ; j++ )
-		{   // avoid round off error when possible
+		{	// avoid round off error when possible
 			if ( split.normal()[j] == 1 ) {
 				mid[j] = split.dist();
 			}
@@ -1156,12 +1156,12 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, 
 				}
 				const double d = plane3_distance_to_point( plane, source->points[k] );
 				if ( d < -ON_EPSILON ) { // source is on the negative side, so we want all
-					                    // pass and target on the positive side
+				                        // pass and target on the positive side
 					fliptest = false;
 					break;
 				}
 				else if ( d > ON_EPSILON ) { // source is on the positive side, so we want all
-					                        // pass and target on the negative side
+				                            // pass and target on the negative side
 					fliptest = true;
 					break;
 				}
@@ -1616,7 +1616,7 @@ void RecursiveLeafBitFlow( int leafnum, byte *mightsee, byte *cansee ){
 		for ( j = 0 ; j < portallongs ; j++ )
 		{
 			( (long *)newmight )[j] = ( (long *)mightsee )[j]
-									  & ( (long *)p->portalflood )[j];
+			                          & ( (long *)p->portalflood )[j];
 			more |= ( (long *)newmight )[j] & ~( (long *)cansee )[j];
 		}
 

@@ -31,18 +31,18 @@ class TokenWriter;
 class MapImporter
 {
 public:
-STRING_CONSTANT( Name, "MapImporter" );
+	STRING_CONSTANT( Name, "MapImporter" );
 
-virtual bool importTokens( Tokeniser& tokeniser ) = 0;
+	virtual bool importTokens( Tokeniser& tokeniser ) = 0;
 };
 
 /// \brief A node whose state can be exported to a token stream.
 class MapExporter
 {
 public:
-STRING_CONSTANT( Name, "MapExporter" );
+	STRING_CONSTANT( Name, "MapExporter" );
 
-virtual void exportTokens( TokenWriter& writer ) const = 0;
+	virtual void exportTokens( TokenWriter& writer ) const = 0;
 };
 
 #include "iscenegraph.h"
@@ -59,13 +59,13 @@ typedef void ( *GraphTraversalFunc )( scene::Node& root, const scene::Traversabl
 class MapFormat
 {
 public:
-INTEGER_CONSTANT( Version, 2 );
-STRING_CONSTANT( Name, "map" );
+	INTEGER_CONSTANT( Version, 2 );
+	STRING_CONSTANT( Name, "map" );
 
 /// \brief Read a map graph into \p root from \p outputStream, using \p entityTable to create entities.
-virtual void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const = 0;
+	virtual void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const = 0;
 /// \brief Write the map graph obtained by applying \p traverse to \p root into \p outputStream.
-virtual void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const = 0;
+	virtual void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const = 0;
 };
 
 

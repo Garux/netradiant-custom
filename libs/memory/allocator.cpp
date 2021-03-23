@@ -33,13 +33,13 @@ namespace
 {
 class Bleh
 {
-int* m_blah;
+	int* m_blah;
 public:
-Bleh( int* blah ) : m_blah( blah ){
-}
-~Bleh(){
-	*m_blah = 15;
-}
+	Bleh( int* blah ) : m_blah( blah ){
+	}
+	~Bleh(){
+		*m_blah = 15;
+	}
 };
 
 void TestAllocator(){

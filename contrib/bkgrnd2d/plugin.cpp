@@ -80,12 +80,11 @@ static const char *PLUGIN_NAME = "2d window background plugin";
 
 //backwards for some reason
 static const char *PLUGIN_COMMANDS = CMD_ABOUT ";"
-									 CMD_SEP ";"
-									 CMD_CONFIG
-;
+                                     CMD_SEP ";"
+                                     CMD_CONFIG;
 
 static const char *PLUGIN_ABOUT = "2d window background v0.25\n\n"
-								  "By reyalP (hellsownpuppy@yahoo.com)";
+                                  "By reyalP (hellsownpuppy@yahoo.com)";
 
 
 
@@ -139,23 +138,23 @@ struct toolbar_button_info_s toolbar_buttons[NUM_TOOLBAR_BUTTONS] =
 class Bkgrnd2dButton : public IToolbarButton
 {
 public:
-const toolbar_button_info_s *bi;
-virtual const char* getImage() const {
-	return bi->image;
-}
-virtual const char* getText() const {
-	return bi->text;
-}
-virtual const char* getTooltip() const {
-	return bi->tip;
-}
-virtual void activate() const {
-	bi->func();
-	return ;
-}
-virtual EType getType() const {
-	return bi->type;
-}
+	const toolbar_button_info_s *bi;
+	virtual const char* getImage() const {
+		return bi->image;
+	}
+	virtual const char* getText() const {
+		return bi->text;
+	}
+	virtual const char* getTooltip() const {
+		return bi->tip;
+	}
+	virtual void activate() const {
+		bi->func();
+		return ;
+	}
+	virtual EType getType() const {
+		return bi->type;
+	}
 };
 
 Bkgrnd2dButton g_bkgrnd2dbuttons[NUM_TOOLBAR_BUTTONS];

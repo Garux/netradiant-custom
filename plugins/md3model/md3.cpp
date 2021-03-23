@@ -240,12 +240,12 @@ int MD3Surface_read( Surface& surface, unsigned char* buffer ){
 			istream_read_md3St( stStream, md3St );
 
 			surface.vertices().push_back(
-				ArbitraryMeshVertex(
-					Vertex3f( md3Xyz.xyz[0] * MD3_XYZ_SCALE, md3Xyz.xyz[1] * MD3_XYZ_SCALE, md3Xyz.xyz[2] * MD3_XYZ_SCALE ),
-					DecodeNormal( reinterpret_cast<byte*>( &md3Xyz.normal ) ),
-					TexCoord2f( md3St.st[0], md3St.st[1] )
-					)
-				);
+			    ArbitraryMeshVertex(
+			        Vertex3f( md3Xyz.xyz[0] * MD3_XYZ_SCALE, md3Xyz.xyz[1] * MD3_XYZ_SCALE, md3Xyz.xyz[2] * MD3_XYZ_SCALE ),
+			        DecodeNormal( reinterpret_cast<byte*>( &md3Xyz.normal ) ),
+			        TexCoord2f( md3St.st[0], md3St.st[1] )
+			    )
+			);
 		}
 	}
 

@@ -99,13 +99,13 @@ GtkMenuItem* g_plugins_menu_separator = 0;
 void PluginsMenu_populate(){
 	class PluginsMenuConstructor : public PluginsVisitor
 	{
-	GtkMenu* m_menu;
-public:
-	PluginsMenuConstructor( GtkMenu* menu ) : m_menu( menu ){
-	}
-	void visit( IPlugIn& plugin ){
-		PlugInMenu_Add( m_menu, &plugin );
-	}
+		GtkMenu* m_menu;
+	public:
+		PluginsMenuConstructor( GtkMenu* menu ) : m_menu( menu ){
+		}
+		void visit( IPlugIn& plugin ){
+			PlugInMenu_Add( m_menu, &plugin );
+		}
 	};
 
 	PluginsMenuConstructor constructor( g_plugins_menu );

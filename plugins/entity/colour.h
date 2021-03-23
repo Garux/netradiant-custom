@@ -47,51 +47,51 @@ inline void write_colour( const Vector3& colour, Entity* entity ){
 
 class Colour
 {
-Callback m_colourChanged;
-Shader* m_state;
-Shader* m_state_additive;
+	Callback m_colourChanged;
+	Shader* m_state;
+	Shader* m_state_additive;
 
-void capture_state(){
-	m_state = colour_capture_state_fill( m_colour );
-	m_state_additive = colour_capture_state_add( m_colour );
-}
-void release_state(){
-	colour_release_state_fill( m_colour );
-	colour_release_state_add( m_colour );
-}
+	void capture_state(){
+		m_state = colour_capture_state_fill( m_colour );
+		m_state_additive = colour_capture_state_add( m_colour );
+	}
+	void release_state(){
+		colour_release_state_fill( m_colour );
+		colour_release_state_add( m_colour );
+	}
 
 public:
-Vector3 m_colour;
+	Vector3 m_colour;
 
-Colour( const Callback& colourChanged )
-	: m_colourChanged( colourChanged ){
-	default_colour( m_colour );
-	capture_state();
-}
-~Colour(){
-	release_state();
-}
+	Colour( const Callback& colourChanged )
+		: m_colourChanged( colourChanged ){
+		default_colour( m_colour );
+		capture_state();
+	}
+	~Colour(){
+		release_state();
+	}
 
-void colourChanged( const char* value ){
-	release_state();
-	read_colour( m_colour, value );
-	capture_state();
+	void colourChanged( const char* value ){
+		release_state();
+		read_colour( m_colour, value );
+		capture_state();
 
-	m_colourChanged();
-}
-typedef MemberCaller1<Colour, const char*, &Colour::colourChanged> ColourChangedCaller;
+		m_colourChanged();
+	}
+	typedef MemberCaller1<Colour, const char*, &Colour::colourChanged> ColourChangedCaller;
 
 
-void write( Entity* entity ) const {
-	write_colour( m_colour, entity );
-}
+	void write( Entity* entity ) const {
+		write_colour( m_colour, entity );
+	}
 
-Shader* state() const {
-	return m_state;
-}
-Shader* state_additive() const {
-	return m_state_additive;
-}
+	Shader* state() const {
+		return m_state;
+	}
+	Shader* state_additive() const {
+		return m_state_additive;
+	}
 };
 
 #endif

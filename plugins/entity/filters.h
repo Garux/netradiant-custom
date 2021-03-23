@@ -32,7 +32,7 @@ class Entity;
 class EntityFilter
 {
 public:
-virtual bool filter( const Entity& entity ) const = 0;
+	virtual bool filter( const Entity& entity ) const = 0;
 };
 
 bool entity_filtered( Entity& entity );
@@ -40,36 +40,36 @@ void add_entity_filter( EntityFilter& filter, int mask, bool invert = false );
 
 class ClassnameFilter : public Filterable
 {
-scene::Node& m_node;
+	scene::Node& m_node;
 public:
-Entity& m_entity;
+	Entity& m_entity;
 
-ClassnameFilter( Entity& entity, scene::Node& node ) : m_node( node ), m_entity( entity ){
-}
-~ClassnameFilter(){
-}
-
-void instanceAttach(){
-	GlobalFilterSystem().registerFilterable( *this );
-}
-void instanceDetach(){
-	GlobalFilterSystem().unregisterFilterable( *this );
-}
-
-void updateFiltered(){
-	if ( entity_filtered( m_entity ) ) {
-		m_node.enable( scene::Node::eFiltered );
+	ClassnameFilter( Entity& entity, scene::Node& node ) : m_node( node ), m_entity( entity ){
 	}
-	else
-	{
-		m_node.disable( scene::Node::eFiltered );
+	~ClassnameFilter(){
 	}
-}
 
-void classnameChanged( const char* value ){
-	updateFiltered();
-}
-typedef MemberCaller1<ClassnameFilter, const char*, &ClassnameFilter::classnameChanged> ClassnameChangedCaller;
+	void instanceAttach(){
+		GlobalFilterSystem().registerFilterable( *this );
+	}
+	void instanceDetach(){
+		GlobalFilterSystem().unregisterFilterable( *this );
+	}
+
+	void updateFiltered(){
+		if ( entity_filtered( m_entity ) ) {
+			m_node.enable( scene::Node::eFiltered );
+		}
+		else
+		{
+			m_node.disable( scene::Node::eFiltered );
+		}
+	}
+
+	void classnameChanged( const char* value ){
+		updateFiltered();
+	}
+	typedef MemberCaller1<ClassnameFilter, const char*, &ClassnameFilter::classnameChanged> ClassnameChangedCaller;
 };
 
 #endif

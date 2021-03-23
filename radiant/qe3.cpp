@@ -140,7 +140,9 @@ bool ConfirmModified( const char* title ){
 		return true;
 	}
 
-	EMessageBoxReturn result = gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), "The current map has changed since it was last saved.\nDo you want to save the current map before continuing?", title, eMB_YESNOCANCEL, eMB_ICONQUESTION );
+	EMessageBoxReturn result = gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),
+	                                           "The current map has changed since it was last saved.\nDo you want to save the current map before continuing?",
+	                                           title, eMB_YESNOCANCEL, eMB_ICONQUESTION );
 	if ( result == eIDCANCEL ) {
 		return false;
 	}
@@ -188,42 +190,42 @@ void bsp_shutdown(){
 
 class ArrayCommandListener : public CommandListener
 {
-GPtrArray* m_array;
+	GPtrArray* m_array;
 public:
-ArrayCommandListener(){
-	m_array = g_ptr_array_new();
-}
-~ArrayCommandListener(){
-	g_ptr_array_free( m_array, TRUE );
-}
+	ArrayCommandListener(){
+		m_array = g_ptr_array_new();
+	}
+	~ArrayCommandListener(){
+		g_ptr_array_free( m_array, TRUE );
+	}
 
-void execute( const char* command ){
-	g_ptr_array_add( m_array, g_strdup( command ) );
-}
+	void execute( const char* command ){
+		g_ptr_array_add( m_array, g_strdup( command ) );
+	}
 
-GPtrArray* array() const {
-	return m_array;
-}
+	GPtrArray* array() const {
+		return m_array;
+	}
 };
 
 class BatchCommandListener : public CommandListener
 {
-TextOutputStream& m_file;
-std::size_t m_commandCount;
-const char* m_outputRedirect;
+	TextOutputStream& m_file;
+	std::size_t m_commandCount;
+	const char* m_outputRedirect;
 public:
-BatchCommandListener( TextOutputStream& file, const char* outputRedirect ) : m_file( file ), m_commandCount( 0 ), m_outputRedirect( outputRedirect ){
-}
-
-void execute( const char* command ){
-	m_file << command;
-	if( m_outputRedirect ){
-		m_file << ( m_commandCount == 0? " > " : " >> " );
-		m_file << "\"" << m_outputRedirect << "\"";
+	BatchCommandListener( TextOutputStream& file, const char* outputRedirect ) : m_file( file ), m_commandCount( 0 ), m_outputRedirect( outputRedirect ){
 	}
-	m_file << "\n";
-	++m_commandCount;
-}
+
+	void execute( const char* command ){
+		m_file << command;
+		if( m_outputRedirect ){
+			m_file << ( m_commandCount == 0? " > " : " >> " );
+			m_file << "\"" << m_outputRedirect << "\"";
+		}
+		m_file << "\n";
+		++m_commandCount;
+	}
 };
 
 bool Region_cameraValid(){

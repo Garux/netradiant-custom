@@ -33,13 +33,13 @@
 class DEPair
 {
 public:
-DEPair();
-virtual ~DEPair();
+	DEPair();
+	virtual ~DEPair();
 
-void Build( const char* pKey, const char* pValue );
+	void Build( const char* pKey, const char* pValue );
 
-Str key;
-Str value;
+	Str key;
+	Str value;
 };
 
 //typedef CList<DEPair*, DEPair*> DEPairList;

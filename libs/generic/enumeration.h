@@ -35,13 +35,13 @@
 template<typename Enumeration>
 class EnumeratedValue : public Enumeration
 {
-typename Enumeration::Value m_value;
+	typename Enumeration::Value m_value;
 public:
-explicit EnumeratedValue( typename Enumeration::Value value ) : m_value( value ){
-}
-typename Enumeration::Value get() const {
-	return m_value;
-}
+	explicit EnumeratedValue( typename Enumeration::Value value ) : m_value( value ){
+	}
+	typename Enumeration::Value get() const {
+		return m_value;
+	}
 };
 
 template<typename Enumeration>

@@ -135,7 +135,7 @@ int FindMetaTriangle( metaTriangle_t *src, bspDrawVert_t *a, bspDrawVert_t *b, b
 	if ( planeNum >= 0 ) {
 		/* because of precision issues with small triangles, try to use the specified plane */
 		src->planeNum = planeNum;
-		src->plane = mapplanes[ planeNum ].plane; 
+		src->plane = mapplanes[ planeNum ].plane;
 	}
 	else
 	{
@@ -159,7 +159,7 @@ int FindMetaTriangle( metaTriangle_t *src, bspDrawVert_t *a, bspDrawVert_t *b, b
 
 	/* ydnar 2002-10-04: set lightmap axis if not already set */
 	if ( !( src->si->compileFlags & C_VERTEXLIT ) &&
-		 src->lightmapAxis == g_vector3_identity ) {
+	     src->lightmapAxis == g_vector3_identity ) {
 		/* the shader can specify an explicit lightmap axis */
 		if ( src->si->lightmapAxis != g_vector3_identity ) {
 			src->lightmapAxis = src->si->lightmapAxis;
@@ -217,9 +217,9 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
 
 	/* only handle certain types of surfaces */
 	if ( ds->type != ESurfaceType::Face &&
-		 ds->type != ESurfaceType::Meta &&
-		 ds->type != ESurfaceType::ForcedMeta &&
-		 ds->type != ESurfaceType::Decal ) {
+	     ds->type != ESurfaceType::Meta &&
+	     ds->type != ESurfaceType::ForcedMeta &&
+	     ds->type != ESurfaceType::Decal ) {
 		return;
 	}
 
@@ -233,8 +233,8 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
 		{
 			/* sanity check the indexes */
 			if ( ds->indexes[ i ] == ds->indexes[ i + 1 ] ||
-				 ds->indexes[ i ] == ds->indexes[ i + 2 ] ||
-				 ds->indexes[ i + 1 ] == ds->indexes[ i + 2 ] ) {
+			     ds->indexes[ i ] == ds->indexes[ i + 2 ] ||
+			     ds->indexes[ i + 1 ] == ds->indexes[ i + 2 ] ) {
 				//%	Sys_Printf( "%d! ", ds->numVerts );
 				continue;
 			}
@@ -688,8 +688,8 @@ void StripFaceSurface( mapDrawSurface_t *ds ){
 
 				/* compare */
 				if ( v1[ 0 ] < v2[ 0 ] ||
-					 ( v1[ 0 ] == v2[ 0 ] && v1[ 1 ] < v2[ 1 ] ) ||
-					 ( v1[ 0 ] == v2[ 0 ] && v1[ 1 ] == v2[ 1 ] && v1[ 2 ] < v2[ 2 ] ) ) {
+				     ( v1[ 0 ] == v2[ 0 ] && v1[ 1 ] < v2[ 1 ] ) ||
+				     ( v1[ 0 ] == v2[ 0 ] && v1[ 1 ] == v2[ 1 ] && v1[ 2 ] < v2[ 2 ] ) ) {
 					least = i;
 				}
 			}
@@ -1404,8 +1404,8 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 
 	/* check lightmap bounds overflow (after at least 1 triangle has been added) */
 	if ( !( ds->shaderInfo->compileFlags & C_VERTEXLIT ) &&
-		 ds->numIndexes > 0 && vector3_length( ds->lightmapAxis ) != 0.0f &&
-		 ( !VectorCompare( ds->minmax.mins, minmax.mins ) || !VectorCompare( ds->minmax.maxs, minmax.maxs ) ) ) {
+	     ds->numIndexes > 0 && vector3_length( ds->lightmapAxis ) != 0.0f &&
+	     ( !VectorCompare( ds->minmax.mins, minmax.mins ) || !VectorCompare( ds->minmax.maxs, minmax.maxs ) ) ) {
 		/* set maximum size before lightmap scaling (normally 2032 units) */
 		/* 2004-02-24: scale lightmap test size by 2 to catch larger brush faces */
 		/* 2004-04-11: reverting to actual lightmap size */
@@ -1450,8 +1450,8 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	{
 		/* 2002-03-11 (birthday!): rotate the triangle 3x to find an existing triangle */
 		if ( ( ai == ds->indexes[ i ] && bi == ds->indexes[ i + 1 ] && ci == ds->indexes[ i + 2 ] ) ||
-			 ( bi == ds->indexes[ i ] && ci == ds->indexes[ i + 1 ] && ai == ds->indexes[ i + 2 ] ) ||
-			 ( ci == ds->indexes[ i ] && ai == ds->indexes[ i + 1 ] && bi == ds->indexes[ i + 2 ] ) ) {
+		     ( bi == ds->indexes[ i ] && ci == ds->indexes[ i + 1 ] && ai == ds->indexes[ i + 2 ] ) ||
+		     ( ci == ds->indexes[ i ] && ai == ds->indexes[ i + 1 ] && bi == ds->indexes[ i + 2 ] ) ) {
 			/* triangle already present */
 			memcpy( ds, &old, sizeof( *ds ) );
 			tri->si = NULL;
@@ -1460,13 +1460,13 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 
 		/* rotate the triangle 3x to find an inverse triangle (error case) */
 		if ( ( ai == ds->indexes[ i ] && bi == ds->indexes[ i + 2 ] && ci == ds->indexes[ i + 1 ] ) ||
-			 ( bi == ds->indexes[ i ] && ci == ds->indexes[ i + 2 ] && ai == ds->indexes[ i + 1 ] ) ||
-			 ( ci == ds->indexes[ i ] && ai == ds->indexes[ i + 2 ] && bi == ds->indexes[ i + 1 ] ) ) {
+		     ( bi == ds->indexes[ i ] && ci == ds->indexes[ i + 2 ] && ai == ds->indexes[ i + 1 ] ) ||
+		     ( ci == ds->indexes[ i ] && ai == ds->indexes[ i + 2 ] && bi == ds->indexes[ i + 1 ] ) ) {
 			/* warn about it */
 			Sys_Warning( "Flipped triangle: (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f)\n",
-						ds->verts[ ai ].xyz[ 0 ], ds->verts[ ai ].xyz[ 1 ], ds->verts[ ai ].xyz[ 2 ],
-						ds->verts[ bi ].xyz[ 0 ], ds->verts[ bi ].xyz[ 1 ], ds->verts[ bi ].xyz[ 2 ],
-						ds->verts[ ci ].xyz[ 0 ], ds->verts[ ci ].xyz[ 1 ], ds->verts[ ci ].xyz[ 2 ] );
+			             ds->verts[ ai ].xyz[ 0 ], ds->verts[ ai ].xyz[ 1 ], ds->verts[ ai ].xyz[ 2 ],
+			             ds->verts[ bi ].xyz[ 0 ], ds->verts[ bi ].xyz[ 1 ], ds->verts[ bi ].xyz[ 2 ],
+			             ds->verts[ ci ].xyz[ 0 ], ds->verts[ ci ].xyz[ 1 ], ds->verts[ ci ].xyz[ 2 ] );
 
 			/* reverse triangle already present */
 			memcpy( ds, &old, sizeof( *ds ) );
@@ -1494,9 +1494,9 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 
 	/* sanity check the indexes */
 	if ( ds->numIndexes >= 3 &&
-		 ( ds->indexes[ ds->numIndexes - 3 ] == ds->indexes[ ds->numIndexes - 2 ] ||
-		   ds->indexes[ ds->numIndexes - 3 ] == ds->indexes[ ds->numIndexes - 1 ] ||
-		   ds->indexes[ ds->numIndexes - 2 ] == ds->indexes[ ds->numIndexes - 1 ] ) ) {
+	     ( ds->indexes[ ds->numIndexes - 3 ] == ds->indexes[ ds->numIndexes - 2 ] ||
+	       ds->indexes[ ds->numIndexes - 3 ] == ds->indexes[ ds->numIndexes - 1 ] ||
+	       ds->indexes[ ds->numIndexes - 2 ] == ds->indexes[ ds->numIndexes - 1 ] ) ) {
 		Sys_Printf( "DEG:%d! ", ds->numVerts );
 	}
 

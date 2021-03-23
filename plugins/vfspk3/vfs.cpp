@@ -158,48 +158,48 @@ inline void pathlist_prepend_unique( GSList*& pathlist, char* path ){
 
 class DirectoryListVisitor : public Archive::Visitor
 {
-GSList*& m_matches;
-const char* m_directory;
+	GSList*& m_matches;
+	const char* m_directory;
 public:
-DirectoryListVisitor( GSList*& matches, const char* directory )
-	: m_matches( matches ), m_directory( directory )
-{}
-void visit( const char* name ){
-	const char* subname = path_make_relative( name, m_directory );
-	if ( subname != name ) {
-		if ( subname[0] == '/' ) {
-			++subname;
+	DirectoryListVisitor( GSList*& matches, const char* directory )
+		: m_matches( matches ), m_directory( directory )
+	{}
+	void visit( const char* name ){
+		const char* subname = path_make_relative( name, m_directory );
+		if ( subname != name ) {
+			if ( subname[0] == '/' ) {
+				++subname;
+			}
+			char* dir = g_strdup( subname );
+			char* last_char = dir + strlen( dir );
+			if ( last_char != dir && *( --last_char ) == '/' ) {
+				*last_char = '\0';
+			}
+			pathlist_prepend_unique( m_matches, dir );
 		}
-		char* dir = g_strdup( subname );
-		char* last_char = dir + strlen( dir );
-		if ( last_char != dir && *( --last_char ) == '/' ) {
-			*last_char = '\0';
-		}
-		pathlist_prepend_unique( m_matches, dir );
 	}
-}
 };
 
 class FileListVisitor : public Archive::Visitor
 {
-GSList*& m_matches;
-const char* m_directory;
-const char* m_extension;
+	GSList*& m_matches;
+	const char* m_directory;
+	const char* m_extension;
 public:
-FileListVisitor( GSList*& matches, const char* directory, const char* extension )
-	: m_matches( matches ), m_directory( directory ), m_extension( extension )
-{}
-void visit( const char* name ){
-	const char* subname = path_make_relative( name, m_directory );
-	if ( subname != name ) {
-		if ( subname[0] == '/' ) {
-			++subname;
-		}
-		if ( m_extension[0] == '*' || extension_equal( path_get_extension( subname ), m_extension ) ) {
-			pathlist_prepend_unique( m_matches, g_strdup( subname ) );
+	FileListVisitor( GSList*& matches, const char* directory, const char* extension )
+		: m_matches( matches ), m_directory( directory ), m_extension( extension )
+	{}
+	void visit( const char* name ){
+		const char* subname = path_make_relative( name, m_directory );
+		if ( subname != name ) {
+			if ( subname[0] == '/' ) {
+				++subname;
+			}
+			if ( m_extension[0] == '*' || extension_equal( path_get_extension( subname ), m_extension ) ) {
+				pathlist_prepend_unique( m_matches, g_strdup( subname ) );
+			}
 		}
 	}
-}
 };
 
 static GSList* GetListInternal( const char *refdir, const char *ext, bool directories, std::size_t depth ){
@@ -269,9 +269,9 @@ static int string_compare_nocase_upper( const char* a, const char* b ){
 class PakLess
 {
 public:
-bool operator()( const CopiedString& self, const CopiedString& other ) const {
-	return string_compare_nocase_upper( self.c_str(), other.c_str() ) > 0;
-}
+	bool operator()( const CopiedString& self, const CopiedString& other ) const {
+		return string_compare_nocase_upper( self.c_str(), other.c_str() ) > 0;
+	}
 };
 
 typedef std::set<CopiedString, PakLess> Archives;
@@ -474,7 +474,7 @@ int GetFileCount( const char *filename, int flag ){
 	for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
 	{
 		if ( ( ( *i ).is_pakfile && ( flag & VFS_SEARCH_PAK ) != 0 )
-			 || ( !( *i ).is_pakfile && ( flag & VFS_SEARCH_DIR ) != 0 ) ) {
+		  || ( !( *i ).is_pakfile && ( flag & VFS_SEARCH_DIR ) != 0 ) ) {
 			if ( ( *i ).archive->containsFile( fixed ) ) {
 				++count;
 			}
@@ -583,113 +583,113 @@ const char* FindPath( const char* absolute ){
 class Quake3FileSystem : public VirtualFileSystem
 {
 public:
-void initDirectory( const char *path ){
-	InitDirectory( path, FileSystemQ3API_getArchiveModules() );
-}
-void initialise(){
-	globalOutputStream() << "filesystem initialised\n";
-	g_observers.realise();
-}
-void shutdown(){
-	g_observers.unrealise();
-	globalOutputStream() << "filesystem shutdown\n";
-	Shutdown();
-}
-
-int getFileCount( const char *filename, int flags ){
-	return GetFileCount( filename, flags );
-}
-ArchiveFile* openFile( const char* filename ){
-	return OpenFile( filename );
-}
-ArchiveTextFile* openTextFile( const char* filename ){
-	return OpenTextFile( filename );
-}
-std::size_t loadFile( const char *filename, void **buffer ){
-	return LoadFile( filename, buffer, 0 );
-}
-void freeFile( void *p ){
-	FreeFile( p );
-}
-
-void forEachDirectory( const char* basedir, const FileNameCallback& callback, std::size_t depth ){
-	GSList* list = GetDirList( basedir, depth );
-
-	for ( GSList* i = list; i != 0; i = g_slist_next( i ) )
-	{
-		callback( reinterpret_cast<const char*>( ( *i ).data ) );
+	void initDirectory( const char *path ){
+		InitDirectory( path, FileSystemQ3API_getArchiveModules() );
+	}
+	void initialise(){
+		globalOutputStream() << "filesystem initialised\n";
+		g_observers.realise();
+	}
+	void shutdown(){
+		g_observers.unrealise();
+		globalOutputStream() << "filesystem shutdown\n";
+		Shutdown();
 	}
 
-	ClearFileDirList( &list );
-}
-void forEachFile( const char* basedir, const char* extension, const FileNameCallback& callback, std::size_t depth ){
-	GSList* list = GetFileList( basedir, extension, depth );
-
-	for ( GSList* i = list; i != 0; i = g_slist_next( i ) )
-	{
-		const char* name = reinterpret_cast<const char*>( ( *i ).data );
-		if ( extension_equal( path_get_extension( name ), extension ) ) {
-			callback( name );
-		}
+	int getFileCount( const char *filename, int flags ){
+		return GetFileCount( filename, flags );
+	}
+	ArchiveFile* openFile( const char* filename ){
+		return OpenFile( filename );
+	}
+	ArchiveTextFile* openTextFile( const char* filename ){
+		return OpenTextFile( filename );
+	}
+	std::size_t loadFile( const char *filename, void **buffer ){
+		return LoadFile( filename, buffer, 0 );
+	}
+	void freeFile( void *p ){
+		FreeFile( p );
 	}
 
-	ClearFileDirList( &list );
-}
-GSList* getDirList( const char *basedir ){
-	return GetDirList( basedir, 1 );
-}
-GSList* getFileList( const char *basedir, const char *extension ){
-	return GetFileList( basedir, extension, 1 );
-}
-void clearFileDirList( GSList **lst ){
-	ClearFileDirList( lst );
-}
+	void forEachDirectory( const char* basedir, const FileNameCallback& callback, std::size_t depth ){
+		GSList* list = GetDirList( basedir, depth );
 
-const char* findFile( const char *name ){
-	return FindFile( name );
-}
-const char* findRoot( const char *name ){
-	return FindPath( name );
-}
-
-void attach( ModuleObserver& observer ){
-	g_observers.attach( observer );
-}
-void detach( ModuleObserver& observer ){
-	g_observers.detach( observer );
-}
-
-Archive* getArchive( const char* archiveName, bool pakonly ){
-	for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
-	{
-		if ( pakonly && !( *i ).is_pakfile ) {
-			continue;
+		for ( GSList* i = list; i != 0; i = g_slist_next( i ) )
+		{
+			callback( reinterpret_cast<const char*>( ( *i ).data ) );
 		}
 
-		if ( path_equal( ( *i ).name.c_str(), archiveName ) ) {
-			return ( *i ).archive;
-		}
+		ClearFileDirList( &list );
 	}
-	return 0;
-}
-void forEachArchive( const ArchiveNameCallback& callback, bool pakonly, bool reverse ){
-	if ( reverse ) {
-		g_archives.reverse();
-	}
+	void forEachFile( const char* basedir, const char* extension, const FileNameCallback& callback, std::size_t depth ){
+		GSList* list = GetFileList( basedir, extension, depth );
 
-	for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
-	{
-		if ( pakonly && !( *i ).is_pakfile ) {
-			continue;
+		for ( GSList* i = list; i != 0; i = g_slist_next( i ) )
+		{
+			const char* name = reinterpret_cast<const char*>( ( *i ).data );
+			if ( extension_equal( path_get_extension( name ), extension ) ) {
+				callback( name );
+			}
 		}
 
-		callback( ( *i ).name.c_str() );
+		ClearFileDirList( &list );
+	}
+	GSList* getDirList( const char *basedir ){
+		return GetDirList( basedir, 1 );
+	}
+	GSList* getFileList( const char *basedir, const char *extension ){
+		return GetFileList( basedir, extension, 1 );
+	}
+	void clearFileDirList( GSList **lst ){
+		ClearFileDirList( lst );
 	}
 
-	if ( reverse ) {
-		g_archives.reverse();
+	const char* findFile( const char *name ){
+		return FindFile( name );
 	}
-}
+	const char* findRoot( const char *name ){
+		return FindPath( name );
+	}
+
+	void attach( ModuleObserver& observer ){
+		g_observers.attach( observer );
+	}
+	void detach( ModuleObserver& observer ){
+		g_observers.detach( observer );
+	}
+
+	Archive* getArchive( const char* archiveName, bool pakonly ){
+		for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
+		{
+			if ( pakonly && !( *i ).is_pakfile ) {
+				continue;
+			}
+
+			if ( path_equal( ( *i ).name.c_str(), archiveName ) ) {
+				return ( *i ).archive;
+			}
+		}
+		return 0;
+	}
+	void forEachArchive( const ArchiveNameCallback& callback, bool pakonly, bool reverse ){
+		if ( reverse ) {
+			g_archives.reverse();
+		}
+
+		for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
+		{
+			if ( pakonly && !( *i ).is_pakfile ) {
+				continue;
+			}
+
+			callback( ( *i ).name.c_str() );
+		}
+
+		if ( reverse ) {
+			g_archives.reverse();
+		}
+	}
 };
 
 Quake3FileSystem g_Quake3FileSystem;

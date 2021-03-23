@@ -58,8 +58,8 @@ Image* LoadPNGBuff( unsigned char* fbuffer ){
 	// http://www.libpng.org/pub/png/libpng-manual.html
 
 	png_structp png_ptr = png_create_read_struct
-							  ( PNG_LIBPNG_VER_STRING, (png_voidp)NULL,
-							  user_error_fn, user_warning_fn );
+	                      ( PNG_LIBPNG_VER_STRING, (png_voidp)NULL,
+	                        user_error_fn, user_warning_fn );
 	if ( !png_ptr ) {
 		globalErrorStream() << "libpng error: png_create_read_struct\n";
 		return 0;
@@ -67,16 +67,14 @@ Image* LoadPNGBuff( unsigned char* fbuffer ){
 
 	png_infop info_ptr = png_create_info_struct( png_ptr );
 	if ( !info_ptr ) {
-		png_destroy_read_struct( &png_ptr,
-								 (png_infopp)NULL, (png_infopp)NULL );
+		png_destroy_read_struct( &png_ptr, (png_infopp)NULL, (png_infopp)NULL );
 		globalErrorStream() << "libpng error: png_create_info_struct (info_ptr)\n";
 		return 0;
 	}
 
 	png_infop end_info = png_create_info_struct( png_ptr );
 	if ( !end_info ) {
-		png_destroy_read_struct( &png_ptr, &info_ptr,
-								 (png_infopp)NULL );
+		png_destroy_read_struct( &png_ptr, &info_ptr, (png_infopp)NULL );
 		globalErrorStream() << "libpng error: png_create_info_struct (end_info)\n";
 		return 0;
 	}
@@ -85,8 +83,7 @@ Image* LoadPNGBuff( unsigned char* fbuffer ){
 	png_set_read_fn( png_ptr, ( png_voidp ) & p_fbuffer, ( png_rw_ptr ) & user_read_data );
 
 	if ( setjmp( png_jmpbuf(png_ptr) ) ) {
-		png_destroy_read_struct( &png_ptr, &info_ptr,
-								 &end_info );
+		png_destroy_read_struct( &png_ptr, &info_ptr, &end_info );
 		return 0;
 	}
 
@@ -121,11 +118,11 @@ Image* LoadPNGBuff( unsigned char* fbuffer ){
 
 		if ( png_get_bKGD( png_ptr, info_ptr, &image_background ) ) {
 			png_set_background( png_ptr, image_background,
-								PNG_BACKGROUND_GAMMA_FILE, 1, 1.0 );
+			                    PNG_BACKGROUND_GAMMA_FILE, 1, 1.0 );
 		}
 		else{
 			png_set_background( png_ptr, &my_background,
-								PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0 );
+			                    PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0 );
 		}
 
 		// Add alpha byte after each RGB triplet
@@ -181,17 +178,17 @@ class ImageDependencies : public GlobalFileSystemModuleRef
 
 class ImagePNGAPI
 {
-_QERPlugImageTable m_imagepng;
+	_QERPlugImageTable m_imagepng;
 public:
-typedef _QERPlugImageTable Type;
-STRING_CONSTANT( Name, "png" );
+	typedef _QERPlugImageTable Type;
+	STRING_CONSTANT( Name, "png" );
 
-ImagePNGAPI(){
-	m_imagepng.loadImage = LoadPNG;
-}
-_QERPlugImageTable* getTable(){
-	return &m_imagepng;
-}
+	ImagePNGAPI(){
+		m_imagepng.loadImage = LoadPNG;
+	}
+	_QERPlugImageTable* getTable(){
+		return &m_imagepng;
+	}
 };
 
 typedef SingletonModule<ImagePNGAPI, ImageDependencies> ImagePNGModule;

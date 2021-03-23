@@ -50,28 +50,28 @@ inline const char* MRU_GetText( std::size_t index ){
 
 class EscapedMnemonic
 {
-StringBuffer m_buffer;
+	StringBuffer m_buffer;
 public:
-EscapedMnemonic( std::size_t capacity ) : m_buffer( capacity ){
-	m_buffer.push_back( '_' );
-}
-const char* c_str() const {
-	return m_buffer.c_str();
-}
-void push_back( char c ){ // not escaped
-	m_buffer.push_back( c );
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	for ( const char* end = buffer + length; buffer != end; ++buffer )
-	{
-		if ( *buffer == '_' ) {
-			m_buffer.push_back( '_' );
-		}
-
-		m_buffer.push_back( *buffer );
+	EscapedMnemonic( std::size_t capacity ) : m_buffer( capacity ){
+		m_buffer.push_back( '_' );
 	}
-	return length;
-}
+	const char* c_str() const {
+		return m_buffer.c_str();
+	}
+	void push_back( char c ){ // not escaped
+		m_buffer.push_back( c );
+	}
+	std::size_t write( const char* buffer, std::size_t length ){
+		for ( const char* end = buffer + length; buffer != end; ++buffer )
+		{
+			if ( *buffer == '_' ) {
+				m_buffer.push_back( '_' );
+			}
+
+			m_buffer.push_back( *buffer );
+		}
+		return length;
+	}
 };
 
 template<typename T>
@@ -171,16 +171,16 @@ void MRU_Activate( std::size_t index ){
 
 class LoadMRU
 {
-std::size_t m_number;
+	std::size_t m_number;
 public:
-LoadMRU( std::size_t number )
-	: m_number( number ){
-}
-void load(){
-	if ( ConfirmModified( "Open Map" ) ) {
-		MRU_Activate( m_number - 1 );
+	LoadMRU( std::size_t number )
+		: m_number( number ){
 	}
-}
+	void load(){
+		if ( ConfirmModified( "Open Map" ) ) {
+			MRU_Activate( m_number - 1 );
+		}
+	}
 };
 
 typedef MemberCaller<LoadMRU, &LoadMRU::load> LoadMRUCaller;
@@ -216,7 +216,7 @@ void MRU_constructMenu( GtkMenu* menu ){
 		gtk_widget_hide( GTK_WIDGET( item ) );
 		MRU_AddWidget( item, 3 );
 	}
-		{
+	{
 		GtkMenuItem* item = create_menu_item_with_mnemonic( menu, "_5", LoadMRUCaller( g_load_mru5 ) );
 		gtk_widget_hide( GTK_WIDGET( item ) );
 		MRU_AddWidget( item, 4 );
@@ -231,7 +231,7 @@ void MRU_constructMenu( GtkMenu* menu ){
 		gtk_widget_hide( GTK_WIDGET( item ) );
 		MRU_AddWidget( item, 6 );
 	}
-		{
+	{
 		GtkMenuItem* item = create_menu_item_with_mnemonic( menu, "_8", LoadMRUCaller( g_load_mru8 ) );
 		gtk_widget_hide( GTK_WIDGET( item ) );
 		MRU_AddWidget( item, 7 );

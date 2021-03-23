@@ -141,21 +141,21 @@ layout_globals_t g_layout_globals;
 // VFS
 class VFSModuleObserver : public ModuleObserver
 {
-std::size_t m_unrealised;
+	std::size_t m_unrealised;
 public:
-VFSModuleObserver() : m_unrealised( 1 ){
-}
-void realise(){
-	if ( --m_unrealised == 0 ) {
-		QE_InitVFS();
-		GlobalFileSystem().initialise();
+	VFSModuleObserver() : m_unrealised( 1 ){
 	}
-}
-void unrealise(){
-	if ( ++m_unrealised == 1 ) {
-		GlobalFileSystem().shutdown();
+	void realise(){
+		if ( --m_unrealised == 0 ) {
+			QE_InitVFS();
+			GlobalFileSystem().initialise();
+		}
 	}
-}
+	void unrealise(){
+		if ( ++m_unrealised == 1 ) {
+			GlobalFileSystem().shutdown();
+		}
+	}
 };
 
 VFSModuleObserver g_VFSModuleObserver;
@@ -271,21 +271,21 @@ void Radiant_detachHomePathsObserver( ModuleObserver& observer ){
 
 class HomePathsModuleObserver : public ModuleObserver
 {
-std::size_t m_unrealised;
+	std::size_t m_unrealised;
 public:
-HomePathsModuleObserver() : m_unrealised( 1 ){
-}
-void realise(){
-	if ( --m_unrealised == 0 ) {
-		HomePaths_Realise();
-		g_homePathObservers.realise();
+	HomePathsModuleObserver() : m_unrealised( 1 ){
 	}
-}
-void unrealise(){
-	if ( ++m_unrealised == 1 ) {
-		g_homePathObservers.unrealise();
+	void realise(){
+		if ( --m_unrealised == 0 ) {
+			HomePaths_Realise();
+			g_homePathObservers.realise();
+		}
 	}
-}
+	void unrealise(){
+		if ( ++m_unrealised == 1 ) {
+			g_homePathObservers.unrealise();
+		}
+	}
 };
 
 HomePathsModuleObserver g_HomePathsModuleObserver;
@@ -414,17 +414,17 @@ const char* GameToolsPath_get(){
 
 void Paths_constructPreferences( PreferencesPage& page ){
 	page.appendPathEntry( "Engine Path", true,
-						  StringImportCallback( EnginePathImportCaller( g_strEnginePath ) ),
-						  StringExportCallback( StringExportCaller( g_strEnginePath ) )
-						  );
+	                      StringImportCallback( EnginePathImportCaller( g_strEnginePath ) ),
+	                      StringExportCallback( StringExportCaller( g_strEnginePath ) )
+	                    );
 }
 void Paths_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Paths", "Path Settings" ) );
 	Paths_constructPreferences( page );
 	page.appendPathEntry( "Extra Resource Path", true,
-						  StringImportCallback( EnginePathImportCaller( g_strExtraResourcePath ) ),
-						  StringExportCallback( StringExportCaller( g_strExtraResourcePath ) )
-						  );
+	                      StringImportCallback( EnginePathImportCaller( g_strExtraResourcePath ) ),
+	                      StringExportCallback( StringExportCaller( g_strExtraResourcePath ) )
+	                    );
 
 }
 void Paths_registerPreferencesPage(){
@@ -435,35 +435,35 @@ void Paths_registerPreferencesPage(){
 class PathsDialog : public Dialog
 {
 public:
-GtkWindow* BuildDialog(){
-	GtkFrame* frame = create_dialog_frame( "Path settings", GTK_SHADOW_ETCHED_IN );
+	GtkWindow* BuildDialog(){
+		GtkFrame* frame = create_dialog_frame( "Path settings", GTK_SHADOW_ETCHED_IN );
 
-	GtkVBox* vbox2 = create_dialog_vbox( 0, 4 );
-	gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox2 ) );
+		GtkVBox* vbox2 = create_dialog_vbox( 0, 4 );
+		gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox2 ) );
 
-	const char* engine;
+		const char* engine;
 #if defined( WIN32 )
-	engine = g_pGameDescription->getRequiredKeyValue( "engine_win32" );
+		engine = g_pGameDescription->getRequiredKeyValue( "engine_win32" );
 #elif defined( __linux__ ) || defined ( __FreeBSD__ )
-	engine = g_pGameDescription->getRequiredKeyValue( "engine_linux" );
+		engine = g_pGameDescription->getRequiredKeyValue( "engine_linux" );
 #elif defined( __APPLE__ )
-	engine = g_pGameDescription->getRequiredKeyValue( "engine_macos" );
+		engine = g_pGameDescription->getRequiredKeyValue( "engine_macos" );
 #else
 #error "unsupported platform"
 #endif
-	StringOutputStream text( 256 );
-	text << "Select directory, where game executable sits (typically \"" << engine << "\")\n";
-	GtkLabel* label = GTK_LABEL( gtk_label_new( text.c_str() ) );
-	gtk_widget_show( GTK_WIDGET( label ) );
-	gtk_container_add( GTK_CONTAINER( vbox2 ), GTK_WIDGET( label ) );
+		StringOutputStream text( 256 );
+		text << "Select directory, where game executable sits (typically \"" << engine << "\")\n";
+		GtkLabel* label = GTK_LABEL( gtk_label_new( text.c_str() ) );
+		gtk_widget_show( GTK_WIDGET( label ) );
+		gtk_container_add( GTK_CONTAINER( vbox2 ), GTK_WIDGET( label ) );
 
-	{
-		PreferencesPage preferencesPage( *this, GTK_WIDGET( vbox2 ) );
-		Paths_constructPreferences( preferencesPage );
+		{
+			PreferencesPage preferencesPage( *this, GTK_WIDGET( vbox2 ) );
+			Paths_constructPreferences( preferencesPage );
+		}
+
+		return create_simple_modal_dialog_window( "Engine Path Configuration", m_modal, GTK_WIDGET( frame ) );
 	}
-
-	return create_simple_modal_dialog_window( "Engine Path Configuration", m_modal, GTK_WIDGET( frame ) );
-}
 };
 
 PathsDialog g_PathsDialog;
@@ -538,29 +538,29 @@ void gamemode_set( const char* gamemode ){
 
 class CLoadModule
 {
-const char* m_path;
+	const char* m_path;
 public:
-CLoadModule( const char* path ) : m_path( path ){
-}
-void operator()( const char* name ) const {
-	char fullname[1024];
-	ASSERT_MESSAGE( strlen( m_path ) + strlen( name ) < 1024, "" );
-	strcpy( fullname, m_path );
-	strcat( fullname, name );
-	globalOutputStream() << "Found '" << fullname << "'\n";
-	GlobalModuleServer_loadModule( fullname );
-}
+	CLoadModule( const char* path ) : m_path( path ){
+	}
+	void operator()( const char* name ) const {
+		char fullname[1024];
+		ASSERT_MESSAGE( strlen( m_path ) + strlen( name ) < 1024, "" );
+		strcpy( fullname, m_path );
+		strcat( fullname, name );
+		globalOutputStream() << "Found '" << fullname << "'\n";
+		GlobalModuleServer_loadModule( fullname );
+	}
 };
 
 const char* const c_library_extension =
 #if defined( WIN32 )
-	"dll"
+    "dll"
 #elif defined ( __APPLE__ )
-	"dylib"
+    "dylib"
 #elif defined( __linux__ ) || defined ( __FreeBSD__ )
-	"so"
+    "so"
 #endif
-;
+    ;
 
 void Radiant_loadModules( const char* path ){
 	Directory_forEach( path, MatchFileExtension<CLoadModule>( c_library_extension, CLoadModule( path ) ) );
@@ -591,19 +591,19 @@ void SetWorldspawnColour( const Vector3& colour ){
 
 class WorldspawnColourEntityClassObserver : public ModuleObserver
 {
-std::size_t m_unrealised;
+	std::size_t m_unrealised;
 public:
-WorldspawnColourEntityClassObserver() : m_unrealised( 1 ){
-}
-void realise(){
-	if ( --m_unrealised == 0 ) {
-		SetWorldspawnColour( g_xywindow_globals.color_brushes );
+	WorldspawnColourEntityClassObserver() : m_unrealised( 1 ){
 	}
-}
-void unrealise(){
-	if ( ++m_unrealised == 1 ) {
+	void realise(){
+		if ( --m_unrealised == 0 ) {
+			SetWorldspawnColour( g_xywindow_globals.color_brushes );
+		}
 	}
-}
+	void unrealise(){
+		if ( ++m_unrealised == 1 ) {
+		}
+	}
 };
 
 WorldspawnColourEntityClassObserver g_WorldspawnColourEntityClassObserver;
@@ -674,8 +674,8 @@ void Radiant_Restart(){
 	mapname << "\"" << Map_Name( g_map ) << "\"";
 
 	char *argv[] = { string_clone( environment_get_app_filepath() ),
-						Map_Unnamed( g_map )? NULL : string_clone( mapname.c_str() ),
-						NULL };
+	                 Map_Unnamed( g_map )? NULL : string_clone( mapname.c_str() ),
+	                 NULL };
 #ifdef WIN32
 	const int status = !_spawnv( P_NOWAIT, argv[0], argv );
 #else
@@ -888,18 +888,18 @@ typedef Callback1<const Vector3&> SetColourCallback;
 
 class ChooseColour
 {
-GetColourCallback m_get;
-SetColourCallback m_set;
+	GetColourCallback m_get;
+	SetColourCallback m_set;
 public:
-ChooseColour( const GetColourCallback& get, const SetColourCallback& set )
-	: m_get( get ), m_set( set ){
-}
-void operator()(){
-	Vector3 colour;
-	m_get( colour );
-	color_dialog( GTK_WIDGET( MainFrame_getWindow() ), colour );
-	m_set( colour );
-}
+	ChooseColour( const GetColourCallback& get, const SetColourCallback& set )
+		: m_get( get ), m_set( set ){
+	}
+	void operator()(){
+		Vector3 colour;
+		m_get( colour );
+		color_dialog( GTK_WIDGET( MainFrame_getWindow() ), colour );
+		m_set( colour );
+	}
 };
 
 
@@ -957,33 +957,33 @@ typedef FreeCaller1<const Vector3&, TextureBrowserColour_set> TextureBrowserColo
 class ColoursMenu
 {
 public:
-ChooseColour m_textureback;
-ChooseColour m_xyback;
-ChooseColour m_gridmajor;
-ChooseColour m_gridminor;
-ChooseColour m_gridtext;
-ChooseColour m_gridblock;
-ChooseColour m_cameraback;
-ChooseColour m_brush;
-ChooseColour m_selectedbrush;
-ChooseColour m_selectedbrush3d;
-ChooseColour m_clipper;
-ChooseColour m_viewname;
+	ChooseColour m_textureback;
+	ChooseColour m_xyback;
+	ChooseColour m_gridmajor;
+	ChooseColour m_gridminor;
+	ChooseColour m_gridtext;
+	ChooseColour m_gridblock;
+	ChooseColour m_cameraback;
+	ChooseColour m_brush;
+	ChooseColour m_selectedbrush;
+	ChooseColour m_selectedbrush3d;
+	ChooseColour m_clipper;
+	ChooseColour m_viewname;
 
-ColoursMenu() :
-	m_textureback( TextureBrowserColourGetCaller(), TextureBrowserColourSetCaller() ),
-	m_xyback( ColourGetCaller( g_xywindow_globals.color_gridback ), ColourSetCaller( g_xywindow_globals.color_gridback ) ),
-	m_gridmajor( ColourGetCaller( g_xywindow_globals.color_gridmajor ), ColourSetCaller( g_xywindow_globals.color_gridmajor ) ),
-	m_gridminor( ColourGetCaller( g_xywindow_globals.color_gridminor ), ColourSetCaller( g_xywindow_globals.color_gridminor ) ),
-	m_gridtext( ColourGetCaller( g_xywindow_globals.color_gridtext ), ColourSetCaller( g_xywindow_globals.color_gridtext ) ),
-	m_gridblock( ColourGetCaller( g_xywindow_globals.color_gridblock ), ColourSetCaller( g_xywindow_globals.color_gridblock ) ),
-	m_cameraback( ColourGetCaller( g_camwindow_globals.color_cameraback ), ColourSetCaller( g_camwindow_globals.color_cameraback ) ),
-	m_brush( ColourGetCaller( g_xywindow_globals.color_brushes ), BrushColourSetCaller() ),
-	m_selectedbrush( ColourGetCaller( g_xywindow_globals.color_selbrushes ), SelectedBrushColourSetCaller() ),
-	m_selectedbrush3d( ColourGetCaller( g_camwindow_globals.color_selbrushes3d ), SelectedBrush3dColourSetCaller() ),
-	m_clipper( ColourGetCaller( g_xywindow_globals.color_clipper ), ClipperColourSetCaller() ),
-	m_viewname( ColourGetCaller( g_xywindow_globals.color_viewname ), ColourSetCaller( g_xywindow_globals.color_viewname ) ){
-}
+	ColoursMenu() :
+		m_textureback( TextureBrowserColourGetCaller(), TextureBrowserColourSetCaller() ),
+		m_xyback( ColourGetCaller( g_xywindow_globals.color_gridback ), ColourSetCaller( g_xywindow_globals.color_gridback ) ),
+		m_gridmajor( ColourGetCaller( g_xywindow_globals.color_gridmajor ), ColourSetCaller( g_xywindow_globals.color_gridmajor ) ),
+		m_gridminor( ColourGetCaller( g_xywindow_globals.color_gridminor ), ColourSetCaller( g_xywindow_globals.color_gridminor ) ),
+		m_gridtext( ColourGetCaller( g_xywindow_globals.color_gridtext ), ColourSetCaller( g_xywindow_globals.color_gridtext ) ),
+		m_gridblock( ColourGetCaller( g_xywindow_globals.color_gridblock ), ColourSetCaller( g_xywindow_globals.color_gridblock ) ),
+		m_cameraback( ColourGetCaller( g_camwindow_globals.color_cameraback ), ColourSetCaller( g_camwindow_globals.color_cameraback ) ),
+		m_brush( ColourGetCaller( g_xywindow_globals.color_brushes ), BrushColourSetCaller() ),
+		m_selectedbrush( ColourGetCaller( g_xywindow_globals.color_selbrushes ), SelectedBrushColourSetCaller() ),
+		m_selectedbrush3d( ColourGetCaller( g_camwindow_globals.color_selbrushes3d ), SelectedBrush3dColourSetCaller() ),
+		m_clipper( ColourGetCaller( g_xywindow_globals.color_clipper ), ClipperColourSetCaller() ),
+		m_viewname( ColourGetCaller( g_xywindow_globals.color_viewname ), ColourSetCaller( g_xywindow_globals.color_viewname ) ){
+	}
 };
 
 ColoursMenu g_ColoursMenu;
@@ -1109,26 +1109,26 @@ void SelectionSystem_DefaultMode(){
 
 bool EdgeMode(){
 	return GlobalSelectionSystem().Mode() == SelectionSystem::eComponent
-		   && GlobalSelectionSystem().ComponentMode() == SelectionSystem::eEdge;
+	    && GlobalSelectionSystem().ComponentMode() == SelectionSystem::eEdge;
 }
 
 bool VertexMode(){
 	return GlobalSelectionSystem().Mode() == SelectionSystem::eComponent
-		   && GlobalSelectionSystem().ComponentMode() == SelectionSystem::eVertex;
+	    && GlobalSelectionSystem().ComponentMode() == SelectionSystem::eVertex;
 }
 
 bool FaceMode(){
 	return GlobalSelectionSystem().Mode() == SelectionSystem::eComponent
-		   && GlobalSelectionSystem().ComponentMode() == SelectionSystem::eFace;
+	    && GlobalSelectionSystem().ComponentMode() == SelectionSystem::eFace;
 }
 
 template<bool( *BoolFunction ) ( )>
 class BoolFunctionExport
 {
 public:
-static void apply( const BoolImportCallback& importCallback ){
-	importCallback( BoolFunction() );
-}
+	static void apply( const BoolImportCallback& importCallback ){
+		importCallback( BoolFunction() );
+	}
 };
 
 typedef FreeCaller1<const BoolImportCallback&, &BoolFunctionExport<EdgeMode>::apply> EdgeModeApplyCaller;
@@ -1154,7 +1154,7 @@ void ComponentModeChanged(){
 
 void ComponentMode_SelectionChanged( const Selectable& selectable ){
 	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent
-		 && GlobalSelectionSystem().countSelected() == 0 ) {
+	  && GlobalSelectionSystem().countSelected() == 0 ) {
 		SelectionSystem_DefaultMode();
 		ComponentModeChanged();
 	}
@@ -1235,51 +1235,51 @@ void SelectFaceMode(){
 
 class CloneSelected : public scene::Graph::Walker
 {
-const bool m_makeUnique;
-const scene::Node* m_world;
+	const bool m_makeUnique;
+	const scene::Node* m_world;
 public:
-CloneSelected( bool makeUnique ) : m_makeUnique( makeUnique ), m_world( Map_FindWorldspawn( g_map ) ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.size() == 1 ) {
+	CloneSelected( bool makeUnique ) : m_makeUnique( makeUnique ), m_world( Map_FindWorldspawn( g_map ) ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.size() == 1 ) {
+			return true;
+		}
+
+		if ( path.top().get_pointer() == m_world ) { // ignore worldspawn, but keep checking children
+			return true;
+		}
+
+		if ( !path.top().get().isRoot() ) {
+			if ( Instance_isSelected( instance ) ) {
+				return false;
+			}
+			if( m_makeUnique && instance.childSelected() ){ /* clone group entity primitives to new group entity */
+				NodeSmartReference clone( Node_Clone_Selected( path.top() ) );
+				Map_gatherNamespaced( clone );
+				Node_getTraversable( path.parent().get() )->insert( clone );
+				return false;
+			}
+		}
+
 		return true;
 	}
-
-	if ( path.top().get_pointer() == m_world ) { // ignore worldspawn, but keep checking children
-		return true;
-	}
-
-	if ( !path.top().get().isRoot() ) {
-		if ( Instance_isSelected( instance ) ) {
-			return false;
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.size() == 1 ) {
+			return;
 		}
-		if( m_makeUnique && instance.childSelected() ){ /* clone group entity primitives to new group entity */
-			NodeSmartReference clone( Node_Clone_Selected( path.top() ) );
-			Map_gatherNamespaced( clone );
-			Node_getTraversable( path.parent().get() )->insert( clone );
-			return false;
+
+		if ( path.top().get_pointer() == m_world ) { // ignore worldspawn
+			return;
 		}
-	}
 
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.size() == 1 ) {
-		return;
-	}
-
-	if ( path.top().get_pointer() == m_world ) { // ignore worldspawn
-		return;
-	}
-
-	if ( !path.top().get().isRoot() ) {
-		if ( Instance_isSelected( instance ) ) {
-			NodeSmartReference clone( Node_Clone( path.top() ) );
-			Map_gatherNamespaced( clone );
-			Node_getTraversable( path.parent().get() )->insert( clone );
+		if ( !path.top().get().isRoot() ) {
+			if ( Instance_isSelected( instance ) ) {
+				NodeSmartReference clone( Node_Clone( path.top() ) );
+				Map_gatherNamespaced( clone );
+				Node_getTraversable( path.parent().get() )->insert( clone );
+			}
 		}
 	}
-}
 };
 
 void Scene_Clone_Selected( scene::Graph& graph, bool makeUnique ){
@@ -1739,21 +1739,21 @@ void Texdef_ShiftDown(){
 
 class SnappableSnapToGridSelected : public scene::Graph::Walker
 {
-float m_snap;
+	float m_snap;
 public:
-SnappableSnapToGridSelected( float snap )
-	: m_snap( snap ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Snappable* snappable = Node_getSnappable( path.top() );
-		if ( snappable != 0
-			 && Instance_isSelected( instance ) ) {
-			snappable->snapto( m_snap );
-		}
+	SnappableSnapToGridSelected( float snap )
+		: m_snap( snap ){
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.top().get().visible() ) {
+			Snappable* snappable = Node_getSnappable( path.top() );
+			if ( snappable != 0
+			  && Instance_isSelected( instance ) ) {
+				snappable->snapto( m_snap );
+			}
+		}
+		return true;
+	}
 };
 
 void Scene_SnapToGrid_Selected( scene::Graph& graph, float snap ){
@@ -1762,21 +1762,21 @@ void Scene_SnapToGrid_Selected( scene::Graph& graph, float snap ){
 
 class ComponentSnappableSnapToGridSelected : public scene::Graph::Walker
 {
-float m_snap;
+	float m_snap;
 public:
-ComponentSnappableSnapToGridSelected( float snap )
-	: m_snap( snap ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		ComponentSnappable* componentSnappable = Instance_getComponentSnappable( instance );
-		if ( componentSnappable != 0
-			 && Instance_isSelected( instance ) ) {
-			componentSnappable->snapComponents( m_snap );
-		}
+	ComponentSnappableSnapToGridSelected( float snap )
+		: m_snap( snap ){
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.top().get().visible() ) {
+			ComponentSnappable* componentSnappable = Instance_getComponentSnappable( instance );
+			if ( componentSnappable != 0
+			  && Instance_isSelected( instance ) ) {
+				componentSnappable->snapComponents( m_snap );
+			}
+		}
+		return true;
+	}
 };
 
 void Scene_SnapToGrid_Component_Selected( scene::Graph& graph, float snap ){
@@ -1832,8 +1832,8 @@ void window_realize_remove_decoration( GtkWidget* widget, gpointer data ){
 class WaitDialog
 {
 public:
-GtkWindow* m_window;
-GtkLabel* m_label;
+	GtkWindow* m_window;
+	GtkLabel* m_label;
 };
 
 WaitDialog create_wait_dialog( const char* title, const char* text, bool modal ){
@@ -1919,7 +1919,7 @@ void ScreenUpdates_Disable( const char* message, const char* title ){
 		bool isActiveApp = MainFrame_isActiveApp();
 
 		g_wait = create_wait_dialog( title, message,
-				!XYWnd::m_mnuDrop || !gtk_widget_get_visible( GTK_WIDGET( XYWnd::m_mnuDrop ) ) ); //hack: avoid hiding entity menu, clicked with ctrl, by tex/model loading popup
+		        !XYWnd::m_mnuDrop || !gtk_widget_get_visible( GTK_WIDGET( XYWnd::m_mnuDrop ) ) ); //hack: avoid hiding entity menu, clicked with ctrl, by tex/model loading popup
 
 		if ( isActiveApp ) {
 			gtk_widget_show( GTK_WIDGET( g_wait.m_window ) );
@@ -2671,7 +2671,7 @@ GtkWidget* create_main_statusbar( GtkWidget *pStatusLabel[c_status__count] ){
 		else{
 			GtkLabel* label = create_main_statusbar_label();
 			if( i == c_status_grid )
-				 gtk_widget_set_tooltip_markup( GTK_WIDGET( frame ), " <b>G</b>: <u>G</u>rid size\n <b>F</b>: map <u>F</u>ormat\n <b>C</b>: camera <u>C</u>lip distance \n <b>L</b>: texture <u>L</u>ock" );
+				gtk_widget_set_tooltip_markup( GTK_WIDGET( frame ), " <b>G</b>: <u>G</u>rid size\n <b>F</b>: map <u>F</u>ormat\n <b>C</b>: camera <u>C</u>lip distance \n <b>L</b>: texture <u>L</u>ock" );
 			else
 				gtk_label_set_ellipsize( label, i == c_status_texture? PANGO_ELLIPSIZE_START : PANGO_ELLIPSIZE_END );
 			gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( label ) );
@@ -2689,35 +2689,35 @@ WidgetFocusPrinter g_mainframeWidgetFocusPrinter( "mainframe" );
 
 class WindowFocusPrinter
 {
-const char* m_name;
+	const char* m_name;
 
-static gboolean frame_event( GtkWidget *widget, GdkEvent* event, WindowFocusPrinter* self ){
-	globalOutputStream() << self->m_name << " frame_event\n";
-	return FALSE;
-}
-static gboolean keys_changed( GtkWidget *widget, WindowFocusPrinter* self ){
-	globalOutputStream() << self->m_name << " keys_changed\n";
-	return FALSE;
-}
-static gboolean notify( GtkWindow* window, gpointer dummy, WindowFocusPrinter* self ){
-	if ( gtk_window_is_active( window ) ) {
-		globalOutputStream() << self->m_name << " takes toplevel focus\n";
+	static gboolean frame_event( GtkWidget *widget, GdkEvent* event, WindowFocusPrinter* self ){
+		globalOutputStream() << self->m_name << " frame_event\n";
+		return FALSE;
 	}
-	else
-	{
-		globalOutputStream() << self->m_name << " loses toplevel focus\n";
+	static gboolean keys_changed( GtkWidget *widget, WindowFocusPrinter* self ){
+		globalOutputStream() << self->m_name << " keys_changed\n";
+		return FALSE;
 	}
-	return FALSE;
-}
+	static gboolean notify( GtkWindow* window, gpointer dummy, WindowFocusPrinter* self ){
+		if ( gtk_window_is_active( window ) ) {
+			globalOutputStream() << self->m_name << " takes toplevel focus\n";
+		}
+		else
+		{
+			globalOutputStream() << self->m_name << " loses toplevel focus\n";
+		}
+		return FALSE;
+	}
 public:
-WindowFocusPrinter( const char* name ) : m_name( name ){
-}
-void connect( GtkWindow* toplevel_window ){
-	g_signal_connect( G_OBJECT( toplevel_window ), "notify::has_toplevel_focus", G_CALLBACK( notify ), this );
-	g_signal_connect( G_OBJECT( toplevel_window ), "notify::is_active", G_CALLBACK( notify ), this );
-	g_signal_connect( G_OBJECT( toplevel_window ), "keys_changed", G_CALLBACK( keys_changed ), this );
-	g_signal_connect( G_OBJECT( toplevel_window ), "frame_event", G_CALLBACK( frame_event ), this );
-}
+	WindowFocusPrinter( const char* name ) : m_name( name ){
+	}
+	void connect( GtkWindow* toplevel_window ){
+		g_signal_connect( G_OBJECT( toplevel_window ), "notify::has_toplevel_focus", G_CALLBACK( notify ), this );
+		g_signal_connect( G_OBJECT( toplevel_window ), "notify::is_active", G_CALLBACK( notify ), this );
+		g_signal_connect( G_OBJECT( toplevel_window ), "keys_changed", G_CALLBACK( keys_changed ), this );
+		g_signal_connect( G_OBJECT( toplevel_window ), "frame_event", G_CALLBACK( frame_event ), this );
+	}
 };
 
 WindowFocusPrinter g_mainframeFocusPrinter( "mainframe" );
@@ -2726,17 +2726,17 @@ WindowFocusPrinter g_mainframeFocusPrinter( "mainframe" );
 
 class MainWindowActive
 {
-static gboolean notify( GtkWindow* window, gpointer dummy, MainWindowActive* self ){
-	if ( g_wait.m_window != 0 && gtk_window_is_active( window ) && !gtk_widget_get_visible( GTK_WIDGET( g_wait.m_window ) ) ) {
-		gtk_widget_show( GTK_WIDGET( g_wait.m_window ) );
-	}
+	static gboolean notify( GtkWindow* window, gpointer dummy, MainWindowActive* self ){
+		if ( g_wait.m_window != 0 && gtk_window_is_active( window ) && !gtk_widget_get_visible( GTK_WIDGET( g_wait.m_window ) ) ) {
+			gtk_widget_show( GTK_WIDGET( g_wait.m_window ) );
+		}
 
-	return FALSE;
-}
+		return FALSE;
+	}
 public:
-void connect( GtkWindow* toplevel_window ){
-	g_signal_connect( G_OBJECT( toplevel_window ), "notify::is-active", G_CALLBACK( notify ), this );
-}
+	void connect( GtkWindow* toplevel_window ){
+		g_signal_connect( G_OBJECT( toplevel_window ), "notify::is-active", G_CALLBACK( notify ), this );
+	}
 };
 
 MainWindowActive g_MainWindowActive;
@@ -3316,7 +3316,7 @@ void MainFrame::Create(){
 	EverySecondTimer_enable();
 
 	if ( g_layout_globals.nState & GDK_WINDOW_STATE_MAXIMIZED ||
-		g_layout_globals.nState & GDK_WINDOW_STATE_ICONIFIED ) {
+	     g_layout_globals.nState & GDK_WINDOW_STATE_ICONIFIED ) {
 		gtk_window_maximize( window );
 	}
 	if ( g_layout_globals.nState & GDK_WINDOW_STATE_FULLSCREEN ) {
@@ -3443,9 +3443,9 @@ void MainFrame::SetGridStatus(){
 	StringOutputStream status( 64 );
 	const char* lock = ( GridStatus_getTextureLockEnabled() ) ? "ON   " : "OFF  ";
 	status << ( GetSnapGridSize() > 0 ? "G:" : "g:" ) << GridStatus_getGridSize()
-		   << "  F:" << GridStatus_getTexdefTypeIdLabel()
-		   << "  C:" << GridStatus_getFarClipDistance()
-		   << "  L:" << lock;
+	       << "  F:" << GridStatus_getTexdefTypeIdLabel()
+	       << "  C:" << GridStatus_getFarClipDistance()
+	       << "  L:" << lock;
 	SetStatusText( c_status_grid, status.c_str() );
 }
 
@@ -3500,44 +3500,44 @@ void Layout_constructPreferences( PreferencesPage& page ){
 	{
 		const char* layouts[] = { "window1.png", "window2.png", "window3.png", "window4.png" };
 		page.appendRadioIcons(
-			"Window Layout",
-			STRING_ARRAY_RANGE( layouts ),
-			LatchedImportCaller( g_Layout_viewStyle ),
-			IntExportCaller( g_Layout_viewStyle.m_latched )
-			);
+		    "Window Layout",
+		    STRING_ARRAY_RANGE( layouts ),
+		    LatchedImportCaller( g_Layout_viewStyle ),
+		    IntExportCaller( g_Layout_viewStyle.m_latched )
+		);
 	}
 	page.appendCheckBox(
-		"", "Detachable Menus",
-		LatchedImportCaller( g_Layout_enableDetachableMenus ),
-		BoolExportCaller( g_Layout_enableDetachableMenus.m_latched )
-		);
+	    "", "Detachable Menus",
+	    LatchedImportCaller( g_Layout_enableDetachableMenus ),
+	    BoolExportCaller( g_Layout_enableDetachableMenus.m_latched )
+	);
 	page.appendCheckBox(
-		"", "Main Toolbar",
-		LatchedImportCaller( g_Layout_enableMainToolbar ),
-		BoolExportCaller( g_Layout_enableMainToolbar.m_latched )
-		);
+	    "", "Main Toolbar",
+	    LatchedImportCaller( g_Layout_enableMainToolbar ),
+	    BoolExportCaller( g_Layout_enableMainToolbar.m_latched )
+	);
 	if ( !string_empty( g_pGameDescription->getKeyValue( "no_patch" ) ) ) {
 		page.appendCheckBox(
-			"", "Patch Toolbar",
-			LatchedImportCaller( g_Layout_enablePatchToolbar ),
-			BoolExportCaller( g_Layout_enablePatchToolbar.m_latched )
-			);
+		    "", "Patch Toolbar",
+		    LatchedImportCaller( g_Layout_enablePatchToolbar ),
+		    BoolExportCaller( g_Layout_enablePatchToolbar.m_latched )
+		);
 	}
 	page.appendCheckBox(
-		"", "Plugin Toolbar",
-		LatchedImportCaller( g_Layout_enablePluginToolbar ),
-		BoolExportCaller( g_Layout_enablePluginToolbar.m_latched )
-		);
+	    "", "Plugin Toolbar",
+	    LatchedImportCaller( g_Layout_enablePluginToolbar ),
+	    BoolExportCaller( g_Layout_enablePluginToolbar.m_latched )
+	);
 	page.appendCheckBox(
-		"", "Filter Toolbar",
-		LatchedImportCaller( g_Layout_enableFilterToolbar ),
-		BoolExportCaller( g_Layout_enableFilterToolbar.m_latched )
-		);
+	    "", "Filter Toolbar",
+	    LatchedImportCaller( g_Layout_enableFilterToolbar ),
+	    BoolExportCaller( g_Layout_enableFilterToolbar.m_latched )
+	);
 	page.appendCheckBox(
-		"", "Single Scrollable Toolbar",
-		LatchedImportCaller( g_Layout_SingleToolbar ),
-		BoolExportCaller( g_Layout_SingleToolbar.m_latched )
-		);
+	    "", "Single Scrollable Toolbar",
+	    LatchedImportCaller( g_Layout_SingleToolbar ),
+	    BoolExportCaller( g_Layout_SingleToolbar.m_latched )
+	);
 }
 
 void Layout_constructPage( PreferenceGroup& group ){
@@ -3726,15 +3726,15 @@ void MainFrame_Construct(){
 		g_strEnginePath_was_empty_1st_start = true;
 		const char* ENGINEPATH_ATTRIBUTE =
 #if defined( WIN32 )
-			"enginepath_win32"
+		    "enginepath_win32"
 #elif defined( __APPLE__ )
-			"enginepath_macos"
+		    "enginepath_macos"
 #elif defined( __linux__ ) || defined ( __FreeBSD__ )
-			"enginepath_linux"
+		    "enginepath_linux"
 #else
 #error "unknown platform"
 #endif
-		;
+		    ;
 		g_strEnginePath = StringOutputStream( 256 )( DirectoryCleaned( g_pGameDescription->getRequiredKeyValue( ENGINEPATH_ATTRIBUTE ) ) ).c_str();
 	}
 

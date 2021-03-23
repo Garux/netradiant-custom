@@ -91,14 +91,14 @@ Vector3 testMatrixMultiplied1( const Vector3& a, const Matrix4& b ){
 
 Vector3 testMatrixMultiplied2( const Vector3& a, const Matrix4& b ){
 	return vector3_for_expression(
-			   point_multiplied(
-				   vector_added(
-					   vector3_identity( a ),
-					   vector3_literal( Vector3( 1, 0, 0 ) )
-					   ),
-				   matrix4_identity( b )
-				   )
-			   );
+	           point_multiplied(
+	               vector_added(
+	                   vector3_identity( a ),
+	                   vector3_literal( Vector3( 1, 0, 0 ) )
+	               ),
+	               matrix4_identity( b )
+	           )
+	       );
 }
 
 Matrix4 testMatrix4Multiplied1( const Matrix4& a, const Matrix4& b ){
@@ -107,11 +107,11 @@ Matrix4 testMatrix4Multiplied1( const Matrix4& a, const Matrix4& b ){
 
 Matrix4 testMatrix4Multiplied2( const Matrix4& a, const Matrix4& b ){
 	return matrix4_for_expression(
-			   matrix4_multiplied(
-				   matrix4_identity( a ),
-				   matrix4_identity( b )
-				   )
-			   );
+	           matrix4_multiplied(
+	               matrix4_identity( a ),
+	               matrix4_identity( b )
+	           )
+	       );
 }
 
 Matrix4 testMatrix4AffineMultiplied1( const Matrix4& a, const Matrix4& b ){
@@ -120,11 +120,11 @@ Matrix4 testMatrix4AffineMultiplied1( const Matrix4& a, const Matrix4& b ){
 
 Matrix4 testMatrix4AffineMultiplied2( const Matrix4& a, const Matrix4& b ){
 	return matrix4_affine_for_expression(
-			   matrix4_multiplied(
-				   matrix4_identity( a ),
-				   matrix4_identity( b )
-				   )
-			   );
+	           matrix4_multiplied(
+	               matrix4_identity( a ),
+	               matrix4_identity( b )
+	           )
+	       );
 }
 
 Matrix4 testMatrix4MultipliedConstant1( const Matrix4& a ){
@@ -133,11 +133,11 @@ Matrix4 testMatrix4MultipliedConstant1( const Matrix4& a ){
 
 Matrix4 testMatrix4MultipliedConstant2( const Matrix4& a ){
 	return matrix4_for_expression(
-			   matrix4_multiplied(
-				   matrix4_identity( a ),
-				   matrix4_identity( g_matrix4_identity )
-				   )
-			   );
+	           matrix4_multiplied(
+	               matrix4_identity( a ),
+	               matrix4_identity( g_matrix4_identity )
+	           )
+	       );
 }
 Matrix4 testMatrix4Transposed1( const Matrix4& a ){
 	return matrix4_transposed( a );
@@ -153,57 +153,57 @@ Vector3 testMulti1( const Matrix4& a, const Vector3& b, const Vector3& c ){
 
 Vector3 testMulti2( const Matrix4& a, const Vector3& b, const Vector3& c ){
 	return vector3_for_expression(
-			   vector_added(
-				   point_multiplied(
-					   vector3_identity( b ),
-					   matrix_transposed( matrix4_identity( a ) )
-					   ),
-				   vector3_identity( c )
-				   )
-			   );
+	           vector_added(
+	               point_multiplied(
+	                   vector3_identity( b ),
+	                   matrix_transposed( matrix4_identity( a ) )
+	               ),
+	               vector3_identity( c )
+	           )
+	       );
 }
 
 template<typename Value, typename First, typename Second>
 class TestBinaryFunction
 {
-typedef Value ( *Function )( const First&, const Second& );
-Function m_function;
+	typedef Value ( *Function )( const First&, const Second& );
+	Function m_function;
 public:
 
-TestBinaryFunction( Function function ) : m_function( function ){
-}
-Value run( const First& first, const Second& second ) const {
-	return m_function( first, second );
-}
+	TestBinaryFunction( Function function ) : m_function( function ){
+	}
+	Value run( const First& first, const Second& second ) const {
+		return m_function( first, second );
+	}
 };
 
 template<typename Value, typename First>
 class TestUnaryFunction
 {
-typedef Value ( *Function )( const First& );
-Function m_function;
+	typedef Value ( *Function )( const First& );
+	Function m_function;
 public:
 
-TestUnaryFunction( Function function ) : m_function( function ){
-}
-Value run( const First& first ) const {
-	return m_function( first );
-}
+	TestUnaryFunction( Function function ) : m_function( function ){
+	}
+	Value run( const First& first ) const {
+		return m_function( first );
+	}
 };
 
 class TestAll
 {
 public:
-TestAll(){
-	Vector3 result1 = TestBinaryFunction<Vector3, Vector3, Vector3>( testAdded1 ).run( Vector3( 0, 0, 0 ), Vector3( 1, 1, 1 ) );
-	Vector3 result2 = TestBinaryFunction<Vector3, Vector3, Vector3>( testAdded2 ).run( Vector3( 0, 0, 0 ), Vector3( 1, 1, 1 ) );
-	Vector3 result3 = TestBinaryFunction<Vector3, Vector3, Vector3>( testMultiplied1 ).run( Vector3( 1, 2, 3 ), Vector3( 2, 1, 0.5f ) );
-	Vector3 result4 = TestBinaryFunction<Vector3, Vector3, Vector3>( testMultiplied2 ).run( Vector3( 1, 2, 3 ), Vector3( 2, 1, 0.5f ) );
-	Vector3 result5 = TestBinaryFunction<Vector3, Vector3, double>( testScaled1 ).run( Vector3( 1, 2, 3 ), 2.0 );
-	Vector3 result6 = TestBinaryFunction<Vector3, Vector3, double>( testScaled2 ).run( Vector3( 1, 2, 3 ), 2.0 );
-	Vector3 result7 = TestBinaryFunction<Vector3, Vector3, Matrix4>( testMatrixMultiplied1 ).run( Vector3( 1, 2, 3 ), matrix4_rotation_for_x_degrees( 90 ) );
-	Vector3 result8 = TestBinaryFunction<Vector3, Vector3, Matrix4>( testMatrixMultiplied2 ).run( Vector3( 1, 2, 3 ), matrix4_rotation_for_x_degrees( 90 ) );
-	Vector3 result9 = TestUnaryFunction<Vector3, Vector3>( testNormalised1 ).run( Vector3( 1, 2, 3 ) );
-	Vector3 result10 = TestUnaryFunction<Vector3, Vector3>( testNormalised2 ).run( Vector3( 1, 2, 3 ) );
-}
+	TestAll(){
+		Vector3 result1 = TestBinaryFunction<Vector3, Vector3, Vector3>( testAdded1 ).run( Vector3( 0, 0, 0 ), Vector3( 1, 1, 1 ) );
+		Vector3 result2 = TestBinaryFunction<Vector3, Vector3, Vector3>( testAdded2 ).run( Vector3( 0, 0, 0 ), Vector3( 1, 1, 1 ) );
+		Vector3 result3 = TestBinaryFunction<Vector3, Vector3, Vector3>( testMultiplied1 ).run( Vector3( 1, 2, 3 ), Vector3( 2, 1, 0.5f ) );
+		Vector3 result4 = TestBinaryFunction<Vector3, Vector3, Vector3>( testMultiplied2 ).run( Vector3( 1, 2, 3 ), Vector3( 2, 1, 0.5f ) );
+		Vector3 result5 = TestBinaryFunction<Vector3, Vector3, double>( testScaled1 ).run( Vector3( 1, 2, 3 ), 2.0 );
+		Vector3 result6 = TestBinaryFunction<Vector3, Vector3, double>( testScaled2 ).run( Vector3( 1, 2, 3 ), 2.0 );
+		Vector3 result7 = TestBinaryFunction<Vector3, Vector3, Matrix4>( testMatrixMultiplied1 ).run( Vector3( 1, 2, 3 ), matrix4_rotation_for_x_degrees( 90 ) );
+		Vector3 result8 = TestBinaryFunction<Vector3, Vector3, Matrix4>( testMatrixMultiplied2 ).run( Vector3( 1, 2, 3 ), matrix4_rotation_for_x_degrees( 90 ) );
+		Vector3 result9 = TestUnaryFunction<Vector3, Vector3>( testNormalised1 ).run( Vector3( 1, 2, 3 ) );
+		Vector3 result10 = TestUnaryFunction<Vector3, Vector3>( testNormalised2 ).run( Vector3( 1, 2, 3 ) );
+	}
 } g_testAll;

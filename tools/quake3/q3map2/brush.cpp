@@ -265,14 +265,18 @@ void SnapWeldVectorAccu( const DoubleVector3& a, const DoubleVector3& b, DoubleV
 			if ( ad < SNAP_EPSILON ) {
 				out[i] = ai;
 			}
-			else{out[i] = a[i]; }
+			else{
+				out[i] = a[i];
+			}
 		}
 		else
 		{
 			if ( bd < SNAP_EPSILON ) {
 				out[i] = bi;
 			}
-			else{out[i] = b[i]; }
+			else{
+				out[i] = b[i];
+			}
 		}
 	}
 }
@@ -780,9 +784,9 @@ node_t *AllocNode( void ){
 #define EDGE_LENGTH 0.2
 bool WindingIsTiny( winding_t *w ){
 /*
-    if (WindingArea (w) < 1)
-        return true;
-    return false;
+	if (WindingArea (w) < 1)
+		return true;
+	return false;
  */
 	int i, j;
 	int edges = 0;
@@ -952,7 +956,7 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 			continue;
 		}
 		ClipWindingEpsilonStrict( w, plane->plane,
-								  0 /*PLANESIDE_EPSILON*/, &cw[0], &cw[1] ); /* strict, in parallel case we get the face back because it also is the midwinding */
+		                          0 /*PLANESIDE_EPSILON*/, &cw[0], &cw[1] ); /* strict, in parallel case we get the face back because it also is the midwinding */
 		for ( j = 0 ; j < 2 ; j++ )
 		{
 			if ( !cw[j] ) {

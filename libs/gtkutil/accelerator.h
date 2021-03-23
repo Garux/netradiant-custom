@@ -110,29 +110,29 @@ void global_accel_group_disconnect( const Accelerator& accelerator, const Callba
 class Command
 {
 public:
-Callback m_callback;
-const Accelerator& m_accelerator;
-Command( const Callback& callback, const Accelerator& accelerator ) : m_callback( callback ), m_accelerator( accelerator ){
-}
+	Callback m_callback;
+	const Accelerator& m_accelerator;
+	Command( const Callback& callback, const Accelerator& accelerator ) : m_callback( callback ), m_accelerator( accelerator ){
+	}
 };
 
 class Toggle
 {
 public:
-Command m_command;
-BoolExportCallback m_exportCallback;
-Toggle( const Callback& callback, const Accelerator& accelerator, const BoolExportCallback& exportCallback ) : m_command( callback, accelerator ), m_exportCallback( exportCallback ){
-}
+	Command m_command;
+	BoolExportCallback m_exportCallback;
+	Toggle( const Callback& callback, const Accelerator& accelerator, const BoolExportCallback& exportCallback ) : m_command( callback, accelerator ), m_exportCallback( exportCallback ){
+	}
 };
 
 class KeyEvent
 {
 public:
-const Accelerator& m_accelerator;
-Callback m_keyDown;
-Callback m_keyUp;
-KeyEvent( const Accelerator& accelerator, const Callback& keyDown, const Callback& keyUp ) : m_accelerator( accelerator ), m_keyDown( keyDown ), m_keyUp( keyUp ){
-}
+	const Accelerator& m_accelerator;
+	Callback m_keyDown;
+	Callback m_keyUp;
+	KeyEvent( const Accelerator& accelerator, const Callback& keyDown, const Callback& keyUp ) : m_accelerator( accelerator ), m_keyDown( keyDown ), m_keyUp( keyUp ){
+	}
 };
 
 

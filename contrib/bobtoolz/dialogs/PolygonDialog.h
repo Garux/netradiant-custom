@@ -33,19 +33,19 @@ class CPolygonDialog : public CDialog
 {
 // Construction
 public:
-BOOL GetChkBool( int nID );
-void EnableBorderEdit( BOOL bEnable );
-void EnableBordered( BOOL bEnable );
-CPolygonDialog( CWnd* pParent = NULL );     // standard constructor
+	BOOL GetChkBool( int nID );
+	void EnableBorderEdit( BOOL bEnable );
+	void EnableBordered( BOOL bEnable );
+	CPolygonDialog( CWnd* pParent = NULL );     // standard constructor
 
 // Dialog Data
 //{{AFX_DATA(CPolygonDialog)
-enum { IDD = IDD_POLYGON_DIALOG };
-UINT m_nSideCount;
-BOOL m_bInverse;
-BOOL m_bBorder;
-UINT m_nBorderSize;
-BOOL m_bAlignTop;
+	enum { IDD = IDD_POLYGON_DIALOG };
+	UINT m_nSideCount;
+	BOOL m_bInverse;
+	BOOL m_bBorder;
+	UINT m_nBorderSize;
+	BOOL m_bAlignTop;
 //}}AFX_DATA
 
 
@@ -53,7 +53,7 @@ BOOL m_bAlignTop;
 // ClassWizard generated virtual function overrides
 //{{AFX_VIRTUAL(CPolygonDialog)
 protected:
-virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
+	virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
 //}}AFX_VIRTUAL
 
 // Implementation
@@ -61,11 +61,11 @@ protected:
 
 // Generated message map functions
 //{{AFX_MSG(CPolygonDialog)
-virtual BOOL OnInitDialog();
-afx_msg void OnBorderChkClicked();
-afx_msg void OnInverseChkClickrd();
+	virtual BOOL OnInitDialog();
+	afx_msg void OnBorderChkClicked();
+	afx_msg void OnInverseChkClickrd();
 //}}AFX_MSG
-DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP()
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -46,7 +46,7 @@ inline char* write_unsigned_nonzero_decimal_backward( char* ptr, unsigned int de
 	return ptr;
 }
 
-  #if defined ( _WIN64 ) || defined ( __LP64__ )
+#if defined ( _WIN64 ) || defined ( __LP64__ )
 inline char* write_size_t_nonzero_decimal_backward( char* ptr, size_t decimal ){
 	for (; decimal != 0; decimal /= 10 )
 	{
@@ -54,7 +54,7 @@ inline char* write_size_t_nonzero_decimal_backward( char* ptr, size_t decimal ){
 	}
 	return ptr;
 }
-  #endif
+#endif
 
 inline char* write_signed_nonzero_decimal_backward( char* ptr, int decimal, bool show_positive ){
 	const bool negative = decimal < 0 ;
@@ -76,7 +76,7 @@ inline char* write_unsigned_nonzero_decimal_backward( char* ptr, unsigned int de
 	return ptr;
 }
 
-  #if defined ( _WIN64 ) || defined ( __LP64__ )
+#if defined ( _WIN64 ) || defined ( __LP64__ )
 inline char* write_size_t_nonzero_decimal_backward( char* ptr, size_t decimal, bool show_positive ){
 	ptr = write_size_t_nonzero_decimal_backward( ptr, decimal );
 	if ( show_positive ) {
@@ -84,7 +84,7 @@ inline char* write_size_t_nonzero_decimal_backward( char* ptr, size_t decimal, b
 	}
 	return ptr;
 }
-  #endif
+#endif
 
 inline char* write_signed_decimal_backward( char* ptr, int decimal, bool show_positive ){
 	if ( decimal == 0 ) {
@@ -108,7 +108,7 @@ inline char* write_unsigned_decimal_backward( char* ptr, unsigned int decimal, b
 	return ptr;
 }
 
-  #if defined ( _WIN64 ) || defined ( __LP64__ )
+#if defined ( _WIN64 ) || defined ( __LP64__ )
 inline char* write_size_t_decimal_backward( char* ptr, size_t decimal, bool show_positive ){
 	if ( decimal == 0 ) {
 		*--ptr = '0';
@@ -119,7 +119,7 @@ inline char* write_size_t_decimal_backward( char* ptr, size_t decimal, bool show
 	}
 	return ptr;
 }
-  #endif
+#endif
 }
 
 
@@ -214,9 +214,9 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 class HexChar
 {
 public:
-char m_value;
-HexChar( char value ) : m_value( value ){
-}
+	char m_value;
+	HexChar( char value ) : m_value( value ){
+	}
 };
 
 /// \brief Writes a single character \p c to \p ostream in hexadecimal form.
@@ -231,12 +231,12 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 class FloatFormat
 {
 public:
-double m_f;
-int m_width;
-int m_precision;
-FloatFormat( double f, int width, int precision )
-	: m_f( f ), m_width( width ), m_precision( precision ){
-}
+	double m_f;
+	int m_width;
+	int m_precision;
+	FloatFormat( double f, int width, int precision )
+		: m_f( f ), m_width( width ), m_precision( precision ){
+	}
 };
 
 /// \brief Writes a floating point value to \p ostream with a specific width and precision.
@@ -252,9 +252,9 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 class Decimal
 {
 public:
-double m_f;
-Decimal( double f ) : m_f( f ){
-}
+	double m_f;
+	Decimal( double f ) : m_f( f ){
+	}
 };
 
 /// \brief Writes a floating point value to \p ostream in decimal form with trailing zeros removed.
@@ -290,10 +290,10 @@ template<typename Type>
 class Quoted
 {
 public:
-const Type& m_type;
-Quoted( const Type& type )
-	: m_type( type ){
-}
+	const Type& m_type;
+	Quoted( const Type& type )
+		: m_type( type ){
+	}
 };
 
 template<typename Type>
@@ -311,9 +311,9 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 class LowerCase
 {
 public:
-const char* m_string;
-LowerCase( const char* string ) : m_string( string ){
-}
+	const char* m_string;
+	LowerCase( const char* string ) : m_string( string ){
+	}
 };
 
 /// \brief Writes a string to \p ostream converted to lower-case.
@@ -331,140 +331,140 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 template<typename TextInputStreamType, int SIZE = 1024>
 class SingleCharacterInputStream
 {
-TextInputStreamType& m_inputStream;
-char m_buffer[SIZE];
-char* m_cur;
-char* m_end;
+	TextInputStreamType& m_inputStream;
+	char m_buffer[SIZE];
+	char* m_cur;
+	char* m_end;
 
-bool fillBuffer(){
-	m_end = m_buffer + m_inputStream.read( m_buffer, SIZE );
-	m_cur = m_buffer;
-	return m_cur != m_end;
-}
+	bool fillBuffer(){
+		m_end = m_buffer + m_inputStream.read( m_buffer, SIZE );
+		m_cur = m_buffer;
+		return m_cur != m_end;
+	}
 public:
 
-SingleCharacterInputStream( TextInputStreamType& inputStream ) : m_inputStream( inputStream ), m_cur( m_buffer ), m_end( m_buffer ){
-}
-bool readChar( char& c ){
-	if ( m_cur == m_end && !fillBuffer() ) {
-		return false;
+	SingleCharacterInputStream( TextInputStreamType& inputStream ) : m_inputStream( inputStream ), m_cur( m_buffer ), m_end( m_buffer ){
 	}
+	bool readChar( char& c ){
+		if ( m_cur == m_end && !fillBuffer() ) {
+			return false;
+		}
 
-	c = *m_cur++;
-	return true;
-}
+		c = *m_cur++;
+		return true;
+	}
 };
 
 /// doublefuffered to be able to read forward for map format (valve220) detection
 template<typename TextInputStreamType, int SIZE = 1024>
 class SingleCharacterInputStreamDoubleBuffered
 {
-TextInputStreamType& m_inputStream;
-char m_bu[SIZE];
-char* m_buffer;
-char* m_cur;
-char* m_end;
+	TextInputStreamType& m_inputStream;
+	char m_bu[SIZE];
+	char* m_buffer;
+	char* m_cur;
+	char* m_end;
 
-char m_bu2[SIZE];
-char* m_buffer2;
-char* m_end2;
+	char m_bu2[SIZE];
+	char* m_buffer2;
+	char* m_end2;
 
-bool fillBuffer(){
-	std::swap( m_buffer, m_buffer2 );
-	m_cur = m_buffer;
-	m_end = m_end2;
-	m_end2 = m_buffer2 + m_inputStream.read( m_buffer2, SIZE );
-	return m_cur != m_end;
-}
+	bool fillBuffer(){
+		std::swap( m_buffer, m_buffer2 );
+		m_cur = m_buffer;
+		m_end = m_end2;
+		m_end2 = m_buffer2 + m_inputStream.read( m_buffer2, SIZE );
+		return m_cur != m_end;
+	}
 public:
 
-SingleCharacterInputStreamDoubleBuffered( TextInputStreamType& inputStream ) : m_inputStream( inputStream ), m_buffer( m_bu ), m_cur( m_buffer ), m_end( m_buffer ), m_buffer2( m_bu2 ){
-	m_end2 = m_buffer2 + m_inputStream.read( m_buffer2, SIZE );
-}
-bool readChar( char& c ){
-	if ( m_cur == m_end && !fillBuffer() ) {
-		return false;
+	SingleCharacterInputStreamDoubleBuffered( TextInputStreamType& inputStream ) : m_inputStream( inputStream ), m_buffer( m_bu ), m_cur( m_buffer ), m_end( m_buffer ), m_buffer2( m_bu2 ){
+		m_end2 = m_buffer2 + m_inputStream.read( m_buffer2, SIZE );
 	}
+	bool readChar( char& c ){
+		if ( m_cur == m_end && !fillBuffer() ) {
+			return false;
+		}
 
-	c = *m_cur++;
-	return true;
-}
-bool bufferContains( const char* str ) const{
-	return ( std::search( m_cur, m_end, str, str + strlen( str ) ) != m_end ) ||
-			( std::search( m_buffer2, m_end2, str, str + strlen( str ) ) != m_end2 );
-}
+		c = *m_cur++;
+		return true;
+	}
+	bool bufferContains( const char* str ) const{
+		return ( std::search( m_cur, m_end, str, str + strlen( str ) ) != m_end ) ||
+		       ( std::search( m_buffer2, m_end2, str, str + strlen( str ) ) != m_end2 );
+	}
 };
 
 
 /// \brief A wrapper for a TextOutputStream, optimised for writing a single character at a time.
 class SingleCharacterOutputStream : public TextOutputStream
 {
-enum unnamed0 { m_bufsize = 1024 };
-TextOutputStream& m_ostream;
-char m_buffer[m_bufsize];
-char* m_pos;
-const char* m_end;
+	enum unnamed0 { m_bufsize = 1024 };
+	TextOutputStream& m_ostream;
+	char m_buffer[m_bufsize];
+	char* m_pos;
+	const char* m_end;
 
-const char* end() const {
-	return m_end;
-}
-void reset(){
-	m_pos = m_buffer;
-}
-void flush(){
-	m_ostream.write( m_buffer, m_pos - m_buffer );
-	reset();
-}
+	const char* end() const {
+		return m_end;
+	}
+	void reset(){
+		m_pos = m_buffer;
+	}
+	void flush(){
+		m_ostream.write( m_buffer, m_pos - m_buffer );
+		reset();
+	}
 public:
-SingleCharacterOutputStream( TextOutputStream& ostream ) : m_ostream( ostream ), m_pos( m_buffer ), m_end( m_buffer + m_bufsize ){
-}
-~SingleCharacterOutputStream(){
-	flush();
-}
-void write( const char c ){
-	if ( m_pos == end() ) {
+	SingleCharacterOutputStream( TextOutputStream& ostream ) : m_ostream( ostream ), m_pos( m_buffer ), m_end( m_buffer + m_bufsize ){
+	}
+	~SingleCharacterOutputStream(){
 		flush();
 	}
-	*m_pos++ = c;
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	const char*const end = buffer + length;
-	for ( const char* p = buffer; p != end; ++p )
-	{
-		write( *p );
+	void write( const char c ){
+		if ( m_pos == end() ) {
+			flush();
+		}
+		*m_pos++ = c;
 	}
-	return length;
-}
+	std::size_t write( const char* buffer, std::size_t length ){
+		const char*const end = buffer + length;
+		for ( const char* p = buffer; p != end; ++p )
+		{
+			write( *p );
+		}
+		return length;
+	}
 };
 
 /// \brief A wrapper for a TextOutputStream, optimised for writing a few characters at a time.
 template<typename TextOutputStreamType, int SIZE = 1024>
 class BufferedTextOutputStream : public TextOutputStream
 {
-TextOutputStreamType outputStream;
-char m_buffer[SIZE];
-char* m_cur;
+	TextOutputStreamType outputStream;
+	char m_buffer[SIZE];
+	char* m_cur;
 
 public:
-BufferedTextOutputStream( TextOutputStreamType& outputStream ) : outputStream( outputStream ), m_cur( m_buffer ){
-}
-~BufferedTextOutputStream(){
-	outputStream.write( m_buffer, m_cur - m_buffer );
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	std::size_t remaining = length;
-	for (;; )
-	{
-		std::size_t n = std::min( remaining, std::size_t( ( m_buffer + SIZE ) - m_cur ) );
-		m_cur = std::copy( buffer, buffer + n, m_cur );
-		remaining -= n;
-		if ( remaining == 0 ) {
-			return 0;
-		}
-		outputStream.write( m_buffer, SIZE );
-		m_cur = m_buffer;
+	BufferedTextOutputStream( TextOutputStreamType& outputStream ) : outputStream( outputStream ), m_cur( m_buffer ){
 	}
-}
+	~BufferedTextOutputStream(){
+		outputStream.write( m_buffer, m_cur - m_buffer );
+	}
+	std::size_t write( const char* buffer, std::size_t length ){
+		std::size_t remaining = length;
+		for (;; )
+		{
+			std::size_t n = std::min( remaining, std::size_t( ( m_buffer + SIZE ) - m_cur ) );
+			m_cur = std::copy( buffer, buffer + n, m_cur );
+			remaining -= n;
+			if ( remaining == 0 ) {
+				return 0;
+			}
+			outputStream.write( m_buffer, SIZE );
+			m_cur = m_buffer;
+		}
+	}
 };
 
 #endif

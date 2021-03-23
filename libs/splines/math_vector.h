@@ -126,59 +126,61 @@ static inline double idSqrt( double x ) {
 class idVec3 {
 public:
 #ifndef FAT_VEC3
-float x,y,z;
+	float x,y,z;
 #else
-float x,y,z,dist;
+	float x,y,z,dist;
 #endif
 
 #ifndef FAT_VEC3
-idVec3() {};
+	idVec3() {};
 #else
-idVec3() {dist = 0.0f; };
+	idVec3() {
+		dist = 0.0f;
+	};
 #endif
-idVec3( const float x, const float y, const float z );
+	idVec3( const float x, const float y, const float z );
 
-operator float *();
+	operator float *();
 
-float operator[]( const int index ) const;
-float           &operator[]( const int index );
+	float operator[]( const int index ) const;
+	float           &operator[]( const int index );
 
-void            set( const float x, const float y, const float z );
+	void            set( const float x, const float y, const float z );
 
-idVec3 operator-() const;
+	idVec3 operator-() const;
 
-idVec3          &operator=( const idVec3 &a );
+	idVec3          &operator=( const idVec3 &a );
 
-float operator*( const idVec3 &a ) const;
-idVec3 operator*( const float a ) const;
-friend idVec3 operator*( float a, idVec3 b );
+	float operator*( const idVec3 &a ) const;
+	idVec3 operator*( const float a ) const;
+	friend idVec3 operator*( float a, idVec3 b );
 
-idVec3 operator+( const idVec3 &a ) const;
-idVec3 operator-( const idVec3 &a ) const;
+	idVec3 operator+( const idVec3 &a ) const;
+	idVec3 operator-( const idVec3 &a ) const;
 
-idVec3          &operator+=( const idVec3 &a );
-idVec3          &operator-=( const idVec3 &a );
-idVec3          &operator*=( const float a );
+	idVec3          &operator+=( const idVec3 &a );
+	idVec3          &operator-=( const idVec3 &a );
+	idVec3          &operator*=( const float a );
 
-int operator==( const idVec3 &a ) const;
-int operator!=( const idVec3 &a ) const;
+	int operator==( const idVec3 &a ) const;
+	int operator!=( const idVec3 &a ) const;
 
-idVec3          Cross( const idVec3 &a ) const;
-idVec3          &Cross( const idVec3 &a, const idVec3 &b );
+	idVec3          Cross( const idVec3 &a ) const;
+	idVec3          &Cross( const idVec3 &a, const idVec3 &b );
 
-float           Length( void ) const;
-float           Normalize( void );
+	float           Length( void ) const;
+	float           Normalize( void );
 
-void            Zero( void );
-void            Snap( void );
-void            SnapTowards( const idVec3 &to );
+	void            Zero( void );
+	void            Snap( void );
+	void            SnapTowards( const idVec3 &to );
 
-float           toYaw( void );
-float           toPitch( void );
-angles_t        toAngles( void );
-friend idVec3   LerpVector( const idVec3 &w1, const idVec3 &w2, const float t );
+	float           toYaw( void );
+	float           toPitch( void );
+	angles_t        toAngles( void );
+	friend idVec3   LerpVector( const idVec3 &w1, const idVec3 &w2, const float t );
 
-char            *string( void );
+	char            *string( void );
 };
 
 extern idVec3 vec_zero;
@@ -381,20 +383,20 @@ ID_INLINE void idVec3::SnapTowards( const idVec3 &to ) {
 
 class Bounds {
 public:
-idVec3 b[2];
+	idVec3 b[2];
 
-Bounds();
-Bounds( const idVec3 &mins, const idVec3 &maxs );
+	Bounds();
+	Bounds( const idVec3 &mins, const idVec3 &maxs );
 
-void    Clear();
-void    Zero();
-float   Radius();           // radius from origin, not from center
-idVec3  Center();
-void    AddPoint( const idVec3 &v );
-void    AddBounds( const Bounds &bb );
-bool    IsCleared();
-bool    ContainsPoint( const idVec3 &p );
-bool    IntersectsBounds( const Bounds &b2 );       // touching is NOT intersecting
+	void    Clear();
+	void    Zero();
+	float   Radius();           // radius from origin, not from center
+	idVec3  Center();
+	void    AddPoint( const idVec3 &v );
+	void    AddBounds( const Bounds &bb );
+	bool    IsCleared();
+	bool    ContainsPoint( const idVec3 &p );
+	bool    IntersectsBounds( const Bounds &b2 );       // touching is NOT intersecting
 };
 
 extern Bounds boundsZero;
@@ -408,7 +410,7 @@ ID_INLINE bool Bounds::IsCleared() {
 
 ID_INLINE bool Bounds::ContainsPoint( const idVec3 &p ) {
 	if ( p[0] < b[0][0] || p[1] < b[0][1] || p[2] < b[0][2]
-		 || p[0] > b[1][0] || p[1] > b[1][1] || p[2] > b[1][2] ) {
+	  || p[0] > b[1][0] || p[1] > b[1][1] || p[2] > b[1][2] ) {
 		return false;
 	}
 	return true;
@@ -416,7 +418,7 @@ ID_INLINE bool Bounds::ContainsPoint( const idVec3 &p ) {
 
 ID_INLINE bool Bounds::IntersectsBounds( const Bounds &b2 ) {
 	if ( b2.b[1][0] < b[0][0] || b2.b[1][1] < b[0][1] || b2.b[1][2] < b[0][2]
-		 || b2.b[0][0] > b[1][0] || b2.b[0][1] > b[1][1] || b2.b[0][2] > b[1][2] ) {
+	  || b2.b[0][0] > b[1][0] || b2.b[0][1] > b[1][1] || b2.b[0][2] > b[1][2] ) {
 		return false;
 	}
 	return true;
@@ -438,7 +440,7 @@ ID_INLINE void Bounds::Clear() {
 
 ID_INLINE void Bounds::Zero() {
 	b[0][0] = b[0][1] = b[0][2] =
-							b[1][0] = b[1][1] = b[1][2] = 0;
+	b[1][0] = b[1][1] = b[1][2] = 0;
 }
 
 ID_INLINE void Bounds::AddPoint( const idVec3 &v ) {
@@ -508,12 +510,12 @@ ID_INLINE float Bounds::Radius() {
 
 class idVec2 {
 public:
-float x;
-float y;
+	float x;
+	float y;
 
-operator float *();
-float operator[]( int index ) const;
-float           &operator[]( int index );
+	operator float *();
+	float operator[]( int index ) const;
+	float &operator[]( int index );
 };
 
 ID_INLINE float idVec2::operator[]( int index ) const {
@@ -531,14 +533,14 @@ ID_INLINE idVec2::operator float *( void ) {
 class idVec4 : public idVec3 {
 public:
 #ifndef FAT_VEC3
-float dist;
+	float dist;
 #endif
-idVec4();
-~idVec4() {};
+	idVec4();
+	~idVec4() {};
 
-idVec4( float x, float y, float z, float dist );
-float operator[]( int index ) const;
-float           &operator[]( int index );
+	idVec4( float x, float y, float z, float dist );
+	float operator[]( int index ) const;
+	float &operator[]( int index );
 };
 
 ID_INLINE idVec4::idVec4() {}
@@ -560,10 +562,10 @@ ID_INLINE float& idVec4::operator[]( int index ) {
 
 class idVec5_t : public idVec3 {
 public:
-float s;
-float t;
-float operator[]( int index ) const;
-float           &operator[]( int index );
+	float s;
+	float t;
+	float operator[]( int index ) const;
+	float           &operator[]( int index );
 };
 
 

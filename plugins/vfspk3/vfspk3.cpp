@@ -32,33 +32,33 @@
 
 class FileSystemDependencies : public GlobalRadiantModuleRef
 {
-ArchiveModulesRef m_archive_modules;
+	ArchiveModulesRef m_archive_modules;
 public:
-FileSystemDependencies() :
-	m_archive_modules( GlobalRadiant().getRequiredGameDescriptionKeyValue( "archivetypes" ) ){
-}
-ArchiveModules& getArchiveModules(){
-	return m_archive_modules.get();
-}
+	FileSystemDependencies() :
+		m_archive_modules( GlobalRadiant().getRequiredGameDescriptionKeyValue( "archivetypes" ) ){
+	}
+	ArchiveModules& getArchiveModules(){
+		return m_archive_modules.get();
+	}
 };
 
 class FileSystemQ3API
 {
-VirtualFileSystem* m_filesystemq3;
+	VirtualFileSystem* m_filesystemq3;
 public:
-typedef VirtualFileSystem Type;
-STRING_CONSTANT( Name, "*" );
+	typedef VirtualFileSystem Type;
+	STRING_CONSTANT( Name, "*" );
 
-FileSystemQ3API(){
-	FileSystem_Init();
-	m_filesystemq3 = &GetFileSystem();
-}
-~FileSystemQ3API(){
-	FileSystem_Shutdown();
-}
-VirtualFileSystem* getTable(){
-	return m_filesystemq3;
-}
+	FileSystemQ3API(){
+		FileSystem_Init();
+		m_filesystemq3 = &GetFileSystem();
+	}
+	~FileSystemQ3API(){
+		FileSystem_Shutdown();
+	}
+	VirtualFileSystem* getTable(){
+		return m_filesystemq3;
+	}
 };
 
 typedef SingletonModule<FileSystemQ3API, FileSystemDependencies> FileSystemQ3Module;

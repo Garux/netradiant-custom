@@ -38,46 +38,46 @@ class angles_t;
 
 class mat3_t {
 public:
-idVec3 mat[ 3 ];
+	idVec3 mat[ 3 ];
 
-mat3_t();
-mat3_t( float src[ 3 ][ 3 ] );
-mat3_t( idVec3 const &x, idVec3 const &y, idVec3 const &z );
-mat3_t( const float xx, const float xy, const float xz, const float yx, const float yy, const float yz, const float zx, const float zy, const float zz );
+	mat3_t();
+	mat3_t( float src[ 3 ][ 3 ] );
+	mat3_t( idVec3 const &x, idVec3 const &y, idVec3 const &z );
+	mat3_t( const float xx, const float xy, const float xz, const float yx, const float yy, const float yz, const float zx, const float zy, const float zz );
 
-friend void     toMatrix( quat_t const &src, mat3_t &dst );
-friend void     toMatrix( angles_t const &src, mat3_t &dst );
-friend void     toMatrix( idVec3 const &src, mat3_t &dst );
+	friend void     toMatrix( quat_t const &src, mat3_t &dst );
+	friend void     toMatrix( angles_t const &src, mat3_t &dst );
+	friend void     toMatrix( idVec3 const &src, mat3_t &dst );
 
-idVec3 operator[]( int index ) const;
-idVec3          &operator[]( int index );
+	idVec3 operator[]( int index ) const;
+	idVec3          &operator[]( int index );
 
-idVec3 operator*( const idVec3 &vec ) const;
-mat3_t operator*( const mat3_t &a ) const;
-mat3_t operator*( float a ) const;
-mat3_t operator+( mat3_t const &a ) const;
-mat3_t operator-( mat3_t const &a ) const;
+	idVec3 operator*( const idVec3 &vec ) const;
+	mat3_t operator*( const mat3_t &a ) const;
+	mat3_t operator*( float a ) const;
+	mat3_t operator+( mat3_t const &a ) const;
+	mat3_t operator-( mat3_t const &a ) const;
 
-friend idVec3 operator*( const idVec3 &vec, const mat3_t &mat );
-friend mat3_t operator*( float a, mat3_t const &b );
+	friend idVec3 operator*( const idVec3 &vec, const mat3_t &mat );
+	friend mat3_t operator*( float a, mat3_t const &b );
 
-mat3_t          &operator*=( float a );
-mat3_t          &operator+=( mat3_t const &a );
-mat3_t          &operator-=( mat3_t const &a );
+	mat3_t          &operator*=( float a );
+	mat3_t          &operator+=( mat3_t const &a );
+	mat3_t          &operator-=( mat3_t const &a );
 
-void            Clear( void );
+	void            Clear( void );
 
-void            ProjectVector( const idVec3 &src, idVec3 &dst ) const;
-void            UnprojectVector( const idVec3 &src, idVec3 &dst ) const;
+	void            ProjectVector( const idVec3 &src, idVec3 &dst ) const;
+	void            UnprojectVector( const idVec3 &src, idVec3 &dst ) const;
 
-void            OrthoNormalize( void );
-void            Transpose( mat3_t &matrix );
-void            Transpose( void );
-mat3_t          Inverse( void ) const;
-void            Identity( void );
+	void            OrthoNormalize( void );
+	void            Transpose( mat3_t &matrix );
+	void            Transpose( void );
+	mat3_t          Inverse( void ) const;
+	void            Identity( void );
 
-friend void     InverseMultiply( const mat3_t &inv, const mat3_t &b, mat3_t &dst );
-friend mat3_t   SkewSymmetric( idVec3 const &src );
+	friend void     InverseMultiply( const mat3_t &inv, const mat3_t &b, mat3_t &dst );
+	friend mat3_t   SkewSymmetric( idVec3 const &src );
 };
 
 ID_INLINE mat3_t::mat3_t() {
@@ -116,57 +116,57 @@ ID_INLINE idVec3& mat3_t::operator[]( int index ) {
 
 ID_INLINE idVec3 mat3_t::operator*( const idVec3 &vec ) const {
 	return idVec3(
-			   mat[ 0 ].x * vec.x + mat[ 1 ].x * vec.y + mat[ 2 ].x * vec.z,
-			   mat[ 0 ].y * vec.x + mat[ 1 ].y * vec.y + mat[ 2 ].y * vec.z,
-			   mat[ 0 ].z * vec.x + mat[ 1 ].z * vec.y + mat[ 2 ].z * vec.z );
+	           mat[ 0 ].x * vec.x + mat[ 1 ].x * vec.y + mat[ 2 ].x * vec.z,
+	           mat[ 0 ].y * vec.x + mat[ 1 ].y * vec.y + mat[ 2 ].y * vec.z,
+	           mat[ 0 ].z * vec.x + mat[ 1 ].z * vec.y + mat[ 2 ].z * vec.z );
 }
 
 ID_INLINE mat3_t mat3_t::operator*( const mat3_t &a ) const {
 	return mat3_t(
-			   mat[0].x * a[0].x + mat[0].y * a[1].x + mat[0].z * a[2].x,
-			   mat[0].x * a[0].y + mat[0].y * a[1].y + mat[0].z * a[2].y,
-			   mat[0].x * a[0].z + mat[0].y * a[1].z + mat[0].z * a[2].z,
-			   mat[1].x * a[0].x + mat[1].y * a[1].x + mat[1].z * a[2].x,
-			   mat[1].x * a[0].y + mat[1].y * a[1].y + mat[1].z * a[2].y,
-			   mat[1].x * a[0].z + mat[1].y * a[1].z + mat[1].z * a[2].z,
-			   mat[2].x * a[0].x + mat[2].y * a[1].x + mat[2].z * a[2].x,
-			   mat[2].x * a[0].y + mat[2].y * a[1].y + mat[2].z * a[2].y,
-			   mat[2].x * a[0].z + mat[2].y * a[1].z + mat[2].z * a[2].z );
+	           mat[0].x * a[0].x + mat[0].y * a[1].x + mat[0].z * a[2].x,
+	           mat[0].x * a[0].y + mat[0].y * a[1].y + mat[0].z * a[2].y,
+	           mat[0].x * a[0].z + mat[0].y * a[1].z + mat[0].z * a[2].z,
+	           mat[1].x * a[0].x + mat[1].y * a[1].x + mat[1].z * a[2].x,
+	           mat[1].x * a[0].y + mat[1].y * a[1].y + mat[1].z * a[2].y,
+	           mat[1].x * a[0].z + mat[1].y * a[1].z + mat[1].z * a[2].z,
+	           mat[2].x * a[0].x + mat[2].y * a[1].x + mat[2].z * a[2].x,
+	           mat[2].x * a[0].y + mat[2].y * a[1].y + mat[2].z * a[2].y,
+	           mat[2].x * a[0].z + mat[2].y * a[1].z + mat[2].z * a[2].z );
 }
 
 ID_INLINE mat3_t mat3_t::operator*( float a ) const {
 	return mat3_t(
-			   mat[0].x * a, mat[0].y * a, mat[0].z * a,
-			   mat[1].x * a, mat[1].y * a, mat[1].z * a,
-			   mat[2].x * a, mat[2].y * a, mat[2].z * a );
+	           mat[0].x * a, mat[0].y * a, mat[0].z * a,
+	           mat[1].x * a, mat[1].y * a, mat[1].z * a,
+	           mat[2].x * a, mat[2].y * a, mat[2].z * a );
 }
 
 ID_INLINE mat3_t mat3_t::operator+( mat3_t const &a ) const {
 	return mat3_t(
-			   mat[0].x + a[0].x, mat[0].y + a[0].y, mat[0].z + a[0].z,
-			   mat[1].x + a[1].x, mat[1].y + a[1].y, mat[1].z + a[1].z,
-			   mat[2].x + a[2].x, mat[2].y + a[2].y, mat[2].z + a[2].z );
+	           mat[0].x + a[0].x, mat[0].y + a[0].y, mat[0].z + a[0].z,
+	           mat[1].x + a[1].x, mat[1].y + a[1].y, mat[1].z + a[1].z,
+	           mat[2].x + a[2].x, mat[2].y + a[2].y, mat[2].z + a[2].z );
 }
 
 ID_INLINE mat3_t mat3_t::operator-( mat3_t const &a ) const {
 	return mat3_t(
-			   mat[0].x - a[0].x, mat[0].y - a[0].y, mat[0].z - a[0].z,
-			   mat[1].x - a[1].x, mat[1].y - a[1].y, mat[1].z - a[1].z,
-			   mat[2].x - a[2].x, mat[2].y - a[2].y, mat[2].z - a[2].z );
+	           mat[0].x - a[0].x, mat[0].y - a[0].y, mat[0].z - a[0].z,
+	           mat[1].x - a[1].x, mat[1].y - a[1].y, mat[1].z - a[1].z,
+	           mat[2].x - a[2].x, mat[2].y - a[2].y, mat[2].z - a[2].z );
 }
 
 ID_INLINE idVec3 operator*( const idVec3 &vec, const mat3_t &mat ) {
 	return idVec3(
-			   mat[ 0 ].x * vec.x + mat[ 1 ].x * vec.y + mat[ 2 ].x * vec.z,
-			   mat[ 0 ].y * vec.x + mat[ 1 ].y * vec.y + mat[ 2 ].y * vec.z,
-			   mat[ 0 ].z * vec.x + mat[ 1 ].z * vec.y + mat[ 2 ].z * vec.z );
+	           mat[ 0 ].x * vec.x + mat[ 1 ].x * vec.y + mat[ 2 ].x * vec.z,
+	           mat[ 0 ].y * vec.x + mat[ 1 ].y * vec.y + mat[ 2 ].y * vec.z,
+	           mat[ 0 ].z * vec.x + mat[ 1 ].z * vec.y + mat[ 2 ].z * vec.z );
 }
 
 ID_INLINE mat3_t operator*( float a, mat3_t const &b ) {
 	return mat3_t(
-			   b[0].x * a, b[0].y * a, b[0].z * a,
-			   b[1].x * a, b[1].y * a, b[1].z * a,
-			   b[2].x * a, b[2].y * a, b[2].z * a );
+	           b[0].x * a, b[0].y * a, b[0].z * a,
+	           b[1].x * a, b[1].y * a, b[1].z * a,
+	           b[2].x * a, b[2].y * a, b[2].z * a );
 }
 
 ID_INLINE mat3_t &mat3_t::operator*=( float a ) {

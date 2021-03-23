@@ -35,8 +35,8 @@ typedef int fileHandle_t;
 
 extern "C" {
 // command buffer
-void Cbuf_AddText( const char *text );
-void Cbuf_Execute( void );
+	void Cbuf_AddText( const char *text );
+	void Cbuf_Execute( void );
 
 // common
 #ifndef CDECL
@@ -47,20 +47,20 @@ void Cbuf_Execute( void );
 #endif
 #endif
 
-void CDECL Com_Error( int level, const char *error, ... );
-void CDECL Com_Printf( const char *msg, ... );
-void CDECL Com_DPrintf( const char *msg, ... );
-void *Com_Allocate( int bytes );
-void Com_Dealloc( void *ptr );
+	void CDECL Com_Error( int level, const char *error, ... );
+	void CDECL Com_Printf( const char *msg, ... );
+	void CDECL Com_DPrintf( const char *msg, ... );
+	void *Com_Allocate( int bytes );
+	void Com_Dealloc( void *ptr );
 
 // filesystem
-int FS_Read( void *buffer, int len, fileHandle_t f );
-int FS_Write( const void *buffer, int len, fileHandle_t h );
-int FS_ReadFile( const char *qpath, void **buffer );
-void FS_FreeFile( void *buffer );
-int FS_FOpenFileRead( const char *filename, fileHandle_t *file, bool uniqueFILE );
-fileHandle_t FS_FOpenFileWrite( const char *filename );
-void FS_FCloseFile( fileHandle_t f );
+	int FS_Read( void *buffer, int len, fileHandle_t f );
+	int FS_Write( const void *buffer, int len, fileHandle_t h );
+	int FS_ReadFile( const char *qpath, void **buffer );
+	void FS_FreeFile( void *buffer );
+	int FS_FOpenFileRead( const char *filename, fileHandle_t *file, bool uniqueFILE );
+	fileHandle_t FS_FOpenFileWrite( const char *filename );
+	void FS_FCloseFile( fileHandle_t f );
 }
 
 // vectors

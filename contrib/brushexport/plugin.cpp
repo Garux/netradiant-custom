@@ -69,10 +69,11 @@ const char* getCommandTitleList(){
 
 void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush ){
 	if ( string_equal( command, "About" ) ) {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_mainwnd ), "Brushexport plugin v 2.0 by namespace (www.codecreator.net)\n"
-																  "Enjoy!\n\nSend feedback to spam@codecreator.net", "About me...",
-										 eMB_OK,
-										 eMB_ICONDEFAULT );
+		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_mainwnd ),
+		                                 "Brushexport plugin v 2.0 by namespace (www.codecreator.net)\n"
+		                                 "Enjoy!\n\nSend feedback to spam@codecreator.net", "About me...",
+		                                 eMB_OK,
+		                                 eMB_ICONDEFAULT );
 	}
 	else if ( string_equal( command, "Export .obj" ) ) {
 		CreateWindow();
@@ -89,28 +90,28 @@ class BrushExportDependencies :
 	public GlobalSelectionModuleRef
 {
 public:
-BrushExportDependencies( void )
-	: GlobalBrushModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ) )
-{}
+	BrushExportDependencies( void )
+		: GlobalBrushModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ) )
+	{}
 };
 
 class BrushExportModule : public TypeSystemRef
 {
-_QERPluginTable m_plugin;
+	_QERPluginTable m_plugin;
 public:
-typedef _QERPluginTable Type;
-STRING_CONSTANT( Name, "brushexport2" );
+	typedef _QERPluginTable Type;
+	STRING_CONSTANT( Name, "brushexport2" );
 
-BrushExportModule(){
-	m_plugin.m_pfnQERPlug_Init = &BrushExport::init;
-	m_plugin.m_pfnQERPlug_GetName = &BrushExport::getName;
-	m_plugin.m_pfnQERPlug_GetCommandList = &BrushExport::getCommandList;
-	m_plugin.m_pfnQERPlug_GetCommandTitleList = &BrushExport::getCommandTitleList;
-	m_plugin.m_pfnQERPlug_Dispatch = &BrushExport::dispatch;
-}
-_QERPluginTable* getTable(){
-	return &m_plugin;
-}
+	BrushExportModule(){
+		m_plugin.m_pfnQERPlug_Init = &BrushExport::init;
+		m_plugin.m_pfnQERPlug_GetName = &BrushExport::getName;
+		m_plugin.m_pfnQERPlug_GetCommandList = &BrushExport::getCommandList;
+		m_plugin.m_pfnQERPlug_GetCommandTitleList = &BrushExport::getCommandTitleList;
+		m_plugin.m_pfnQERPlug_Dispatch = &BrushExport::dispatch;
+	}
+	_QERPluginTable* getTable(){
+		return &m_plugin;
+	}
 };
 
 typedef SingletonModule<BrushExportModule, BrushExportDependencies> SingletonBrushExportModule;

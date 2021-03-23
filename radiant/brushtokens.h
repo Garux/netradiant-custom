@@ -161,151 +161,151 @@ inline bool FaceShader_importTokens( FaceShader& faceShader, Tokeniser& tokenise
 
 class Doom3FaceTokenImporter
 {
-Face& m_face;
+	Face& m_face;
 public:
-Doom3FaceTokenImporter( Face& face ) : m_face( face ){
-}
-bool importTokens( Tokeniser& tokeniser ){
-	RETURN_FALSE_IF_FAIL( FacePlane_Doom3_importTokens( m_face.getPlane(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceTexdef_BP_importTokens( m_face.getTexdef(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceShader_Doom3_importTokens( m_face.getShader(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	Doom3FaceTokenImporter( Face& face ) : m_face( face ){
+	}
+	bool importTokens( Tokeniser& tokeniser ){
+		RETURN_FALSE_IF_FAIL( FacePlane_Doom3_importTokens( m_face.getPlane(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceTexdef_BP_importTokens( m_face.getTexdef(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceShader_Doom3_importTokens( m_face.getShader(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
 
-	m_face.getTexdef().m_projectionInitialised = true;
-	m_face.getTexdef().m_scaleApplied = true;
+		m_face.getTexdef().m_projectionInitialised = true;
+		m_face.getTexdef().m_scaleApplied = true;
 
-	return true;
-}
+		return true;
+	}
 };
 
 class Quake4FaceTokenImporter
 {
-Face& m_face;
+	Face& m_face;
 public:
-Quake4FaceTokenImporter( Face& face ) : m_face( face ){
-}
-bool importTokens( Tokeniser& tokeniser ){
-	RETURN_FALSE_IF_FAIL( FacePlane_Doom3_importTokens( m_face.getPlane(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceTexdef_BP_importTokens( m_face.getTexdef(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceShader_Doom3_importTokens( m_face.getShader(), tokeniser ) );
+	Quake4FaceTokenImporter( Face& face ) : m_face( face ){
+	}
+	bool importTokens( Tokeniser& tokeniser ){
+		RETURN_FALSE_IF_FAIL( FacePlane_Doom3_importTokens( m_face.getPlane(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceTexdef_BP_importTokens( m_face.getTexdef(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceShader_Doom3_importTokens( m_face.getShader(), tokeniser ) );
 
-	m_face.getTexdef().m_projectionInitialised = true;
-	m_face.getTexdef().m_scaleApplied = true;
+		m_face.getTexdef().m_projectionInitialised = true;
+		m_face.getTexdef().m_scaleApplied = true;
 
-	return true;
-}
+		return true;
+	}
 };
 
 class Quake2FaceTokenImporter
 {
-Face& m_face;
+	Face& m_face;
 public:
-Quake2FaceTokenImporter( Face& face ) : m_face( face ){
-}
-bool importTokens( Tokeniser& tokeniser ){
-	RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceTexdef_importTokens( m_face.getTexdef(), tokeniser ) );
-	if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) {
-		m_face.getShader().m_flags.m_specified = true;
-		RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	Quake2FaceTokenImporter( Face& face ) : m_face( face ){
 	}
-	m_face.getTexdef().m_scaleApplied = true;
-	return true;
-}
+	bool importTokens( Tokeniser& tokeniser ){
+		RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceTexdef_importTokens( m_face.getTexdef(), tokeniser ) );
+		if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) {
+			m_face.getShader().m_flags.m_specified = true;
+			RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+		}
+		m_face.getTexdef().m_scaleApplied = true;
+		return true;
+	}
 };
 
 class Quake3FaceTokenImporter
 {
-Face& m_face;
+	Face& m_face;
 public:
-Quake3FaceTokenImporter( Face& face ) : m_face( face ){
-}
-bool importTokens( Tokeniser& tokeniser ){
-	RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceTexdef_importTokens( m_face.getTexdef(), tokeniser ) );
-	if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///optional for more flexibility
-		RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	Quake3FaceTokenImporter( Face& face ) : m_face( face ){
 	}
-	m_face.getTexdef().m_scaleApplied = true;
-	return true;
-}
+	bool importTokens( Tokeniser& tokeniser ){
+		RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceTexdef_importTokens( m_face.getTexdef(), tokeniser ) );
+		if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///optional for more flexibility
+			RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+		}
+		m_face.getTexdef().m_scaleApplied = true;
+		return true;
+	}
 };
 
 class Quake3BPFaceTokenImporter
 {
-Face& m_face;
+	Face& m_face;
 public:
-Quake3BPFaceTokenImporter( Face& face ) : m_face( face ){
-}
-bool importTokens( Tokeniser& tokeniser ){
-	RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceTexdef_BP_importTokens( m_face.getTexdef(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
-	if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///optional for more flexibility
-		RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	Quake3BPFaceTokenImporter( Face& face ) : m_face( face ){
 	}
+	bool importTokens( Tokeniser& tokeniser ){
+		RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceTexdef_BP_importTokens( m_face.getTexdef(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
+		if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///optional for more flexibility
+			RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+		}
 
-	m_face.getTexdef().m_projectionInitialised = true;
-	m_face.getTexdef().m_scaleApplied = true;
+		m_face.getTexdef().m_projectionInitialised = true;
+		m_face.getTexdef().m_scaleApplied = true;
 
-	return true;
-}
+		return true;
+	}
 };
 
 class QuakeFaceTokenImporter
 {
-Face& m_face;
+	Face& m_face;
 public:
-QuakeFaceTokenImporter( Face& face ) : m_face( face ){
-}
-bool importTokens( Tokeniser& tokeniser ){
-	RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceTexdef_importTokens( m_face.getTexdef(), tokeniser ) );
-	if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///try to load for more flexibility
-		RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	QuakeFaceTokenImporter( Face& face ) : m_face( face ){
 	}
-	m_face.getTexdef().m_scaleApplied = true;
-	return true;
-}
+	bool importTokens( Tokeniser& tokeniser ){
+		RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceTexdef_importTokens( m_face.getTexdef(), tokeniser ) );
+		if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///try to load for more flexibility
+			RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+		}
+		m_face.getTexdef().m_scaleApplied = true;
+		return true;
+	}
 };
 
 class Valve220FaceTokenImporter
 {
-Face& m_face;
+	Face& m_face;
 public:
-Valve220FaceTokenImporter( Face& face ) : m_face( face ){
-}
-bool importTokens( Tokeniser& tokeniser ){
-	RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceTexdef_Valve220_importTokens( m_face.getTexdef(), tokeniser ) );
-	if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///try to load for more flexibility
-		RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	Valve220FaceTokenImporter( Face& face ) : m_face( face ){
 	}
-	m_face.getTexdef().m_scaleApplied = true;
-	return true;
-}
+	bool importTokens( Tokeniser& tokeniser ){
+		RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceTexdef_Valve220_importTokens( m_face.getTexdef(), tokeniser ) );
+		if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///try to load for more flexibility
+			RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+		}
+		m_face.getTexdef().m_scaleApplied = true;
+		return true;
+	}
 };
 
 class Quake3Valve220FaceTokenImporter
 {
-Face& m_face;
+	Face& m_face;
 public:
-Quake3Valve220FaceTokenImporter( Face& face ) : m_face( face ){
-}
-bool importTokens( Tokeniser& tokeniser ){
-	RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceTexdef_Valve220_importTokens( m_face.getTexdef(), tokeniser ) );
-	if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///optional for more flexibility
-		RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	Quake3Valve220FaceTokenImporter( Face& face ) : m_face( face ){
 	}
-	m_face.getTexdef().m_scaleApplied = true;
-	return true;
-}
+	bool importTokens( Tokeniser& tokeniser ){
+		RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
+		RETURN_FALSE_IF_FAIL( FaceTexdef_Valve220_importTokens( m_face.getTexdef(), tokeniser ) );
+		if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///optional for more flexibility
+			RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+		}
+		m_face.getTexdef().m_scaleApplied = true;
+		return true;
+	}
 };
 
 
@@ -417,317 +417,317 @@ inline void FaceShader_Doom3_exportTokens( const FaceShader& faceShader, TokenWr
 
 class Doom3FaceTokenExporter
 {
-const Face& m_face;
+	const Face& m_face;
 public:
-Doom3FaceTokenExporter( const Face& face ) : m_face( face ){
-}
-void exportTokens( TokenWriter& writer ) const {
-	FacePlane_Doom3_exportTokens( m_face.getPlane(), writer );
-	FaceTexdef_BP_exportTokens( m_face.getTexdef(), writer );
-	FaceShader_Doom3_exportTokens( m_face.getShader(), writer );
-	FaceShader_ContentsFlagsValue_exportTokens( m_face.getShader(), writer );
-	writer.nextLine();
-}
+	Doom3FaceTokenExporter( const Face& face ) : m_face( face ){
+	}
+	void exportTokens( TokenWriter& writer ) const {
+		FacePlane_Doom3_exportTokens( m_face.getPlane(), writer );
+		FaceTexdef_BP_exportTokens( m_face.getTexdef(), writer );
+		FaceShader_Doom3_exportTokens( m_face.getShader(), writer );
+		FaceShader_ContentsFlagsValue_exportTokens( m_face.getShader(), writer );
+		writer.nextLine();
+	}
 };
 
 class Quake4FaceTokenExporter
 {
-const Face& m_face;
+	const Face& m_face;
 public:
-Quake4FaceTokenExporter( const Face& face ) : m_face( face ){
-}
-void exportTokens( TokenWriter& writer ) const {
-	FacePlane_Doom3_exportTokens( m_face.getPlane(), writer );
-	FaceTexdef_BP_exportTokens( m_face.getTexdef(), writer );
-	FaceShader_Doom3_exportTokens( m_face.getShader(), writer );
-	writer.nextLine();
-}
+	Quake4FaceTokenExporter( const Face& face ) : m_face( face ){
+	}
+	void exportTokens( TokenWriter& writer ) const {
+		FacePlane_Doom3_exportTokens( m_face.getPlane(), writer );
+		FaceTexdef_BP_exportTokens( m_face.getTexdef(), writer );
+		FaceShader_Doom3_exportTokens( m_face.getShader(), writer );
+		writer.nextLine();
+	}
 };
 
 class Quake2FaceTokenExporter
 {
-const Face& m_face;
+	const Face& m_face;
 public:
-Quake2FaceTokenExporter( const Face& face ) : m_face( face ){
-}
-void exportTokens( TokenWriter& writer ) const {
-	FacePlane_exportTokens( m_face.getPlane(), writer );
-	FaceShader_exportTokens( m_face.getShader(), writer );
-	FaceTexdef_exportTokens( m_face.getTexdef(), writer );
-	if ( m_face.getShader().m_flags.m_specified || m_face.isDetail() ) {
-		FaceShader_ContentsFlagsValue_exportTokens( m_face.getShader(), writer );
+	Quake2FaceTokenExporter( const Face& face ) : m_face( face ){
 	}
-	writer.nextLine();
-}
+	void exportTokens( TokenWriter& writer ) const {
+		FacePlane_exportTokens( m_face.getPlane(), writer );
+		FaceShader_exportTokens( m_face.getShader(), writer );
+		FaceTexdef_exportTokens( m_face.getTexdef(), writer );
+		if ( m_face.getShader().m_flags.m_specified || m_face.isDetail() ) {
+			FaceShader_ContentsFlagsValue_exportTokens( m_face.getShader(), writer );
+		}
+		writer.nextLine();
+	}
 };
 
 class Quake3FaceTokenExporter
 {
-const Face& m_face;
+	const Face& m_face;
 public:
-Quake3FaceTokenExporter( const Face& face ) : m_face( face ){
-}
-void exportTokens( TokenWriter& writer ) const {
-	FacePlane_exportTokens( m_face.getPlane(), writer );
-	FaceShader_exportTokens( m_face.getShader(), writer );
-	FaceTexdef_exportTokens( m_face.getTexdef(), writer );
-	FaceShader_ContentsFlagsValue_exportTokens( m_face.getShader(), writer );
-	writer.nextLine();
-}
+	Quake3FaceTokenExporter( const Face& face ) : m_face( face ){
+	}
+	void exportTokens( TokenWriter& writer ) const {
+		FacePlane_exportTokens( m_face.getPlane(), writer );
+		FaceShader_exportTokens( m_face.getShader(), writer );
+		FaceTexdef_exportTokens( m_face.getTexdef(), writer );
+		FaceShader_ContentsFlagsValue_exportTokens( m_face.getShader(), writer );
+		writer.nextLine();
+	}
 };
 
 class Quake3BPFaceTokenExporter
 {
-const Face& m_face;
+	const Face& m_face;
 public:
-Quake3BPFaceTokenExporter( const Face& face ) : m_face( face ){
-}
-void exportTokens( TokenWriter& writer ) const {
-	FacePlane_exportTokens( m_face.getPlane(), writer );
-	FaceTexdef_BP_exportTokens( m_face.getTexdef(), writer );
-	FaceShader_exportTokens( m_face.getShader(), writer );
-	FaceShader_ContentsFlagsValue_exportTokens( m_face.getShader(), writer );
-	writer.nextLine();
-}
+	Quake3BPFaceTokenExporter( const Face& face ) : m_face( face ){
+	}
+	void exportTokens( TokenWriter& writer ) const {
+		FacePlane_exportTokens( m_face.getPlane(), writer );
+		FaceTexdef_BP_exportTokens( m_face.getTexdef(), writer );
+		FaceShader_exportTokens( m_face.getShader(), writer );
+		FaceShader_ContentsFlagsValue_exportTokens( m_face.getShader(), writer );
+		writer.nextLine();
+	}
 };
 
 class QuakeFaceTokenExporter
 {
-const Face& m_face;
+	const Face& m_face;
 public:
-QuakeFaceTokenExporter( const Face& face ) : m_face( face ){
-}
-void exportTokens( TokenWriter& writer ) const {
-	FacePlane_exportTokens( m_face.getPlane(), writer );
-	FaceShader_exportTokens( m_face.getShader(), writer );
-	FaceTexdef_exportTokens( m_face.getTexdef(), writer );
-	writer.nextLine();
-}
+	QuakeFaceTokenExporter( const Face& face ) : m_face( face ){
+	}
+	void exportTokens( TokenWriter& writer ) const {
+		FacePlane_exportTokens( m_face.getPlane(), writer );
+		FaceShader_exportTokens( m_face.getShader(), writer );
+		FaceTexdef_exportTokens( m_face.getTexdef(), writer );
+		writer.nextLine();
+	}
 };
 
 class Valve220FaceTokenExporter
 {
-const Face& m_face;
+	const Face& m_face;
 public:
-Valve220FaceTokenExporter( const Face& face ) : m_face( face ){
-}
-void exportTokens( TokenWriter& writer ) const {
-	FacePlane_exportTokens( m_face.getPlane(), writer );
-	FaceShader_exportTokens( m_face.getShader(), writer );
-	FaceTexdef_Valve220_exportTokens( m_face.getTexdef(), writer );
-	writer.nextLine();
-}
+	Valve220FaceTokenExporter( const Face& face ) : m_face( face ){
+	}
+	void exportTokens( TokenWriter& writer ) const {
+		FacePlane_exportTokens( m_face.getPlane(), writer );
+		FaceShader_exportTokens( m_face.getShader(), writer );
+		FaceTexdef_Valve220_exportTokens( m_face.getTexdef(), writer );
+		writer.nextLine();
+	}
 };
 
 class Quake3Valve220FaceTokenExporter
 {
-const Face& m_face;
+	const Face& m_face;
 public:
-Quake3Valve220FaceTokenExporter( const Face& face ) : m_face( face ){
-}
-void exportTokens( TokenWriter& writer ) const {
-	FacePlane_exportTokens( m_face.getPlane(), writer );
-	FaceShader_exportTokens( m_face.getShader(), writer );
-	FaceTexdef_Valve220_exportTokens( m_face.getTexdef(), writer );
-	FaceShader_ContentsFlagsValue_exportTokens( m_face.getShader(), writer );
-	writer.nextLine();
-}
+	Quake3Valve220FaceTokenExporter( const Face& face ) : m_face( face ){
+	}
+	void exportTokens( TokenWriter& writer ) const {
+		FacePlane_exportTokens( m_face.getPlane(), writer );
+		FaceShader_exportTokens( m_face.getShader(), writer );
+		FaceTexdef_Valve220_exportTokens( m_face.getTexdef(), writer );
+		FaceShader_ContentsFlagsValue_exportTokens( m_face.getShader(), writer );
+		writer.nextLine();
+	}
 };
 
 
 class BrushTokenImporter : public MapImporter
 {
-Brush& m_brush;
+	Brush& m_brush;
 
 public:
-BrushTokenImporter( Brush& brush ) : m_brush( brush ){
-}
-bool importTokens( Tokeniser& tokeniser ){
-	if ( Brush::m_type == eBrushTypeQuake3BP || Brush::m_type == eBrushTypeDoom3 || Brush::m_type == eBrushTypeQuake4 ) {
-		tokeniser.nextLine();
-		RETURN_FALSE_IF_FAIL( Tokeniser_parseToken( tokeniser, "{" ) );
+	BrushTokenImporter( Brush& brush ) : m_brush( brush ){
 	}
-	while ( 1 )
-	{
-		// check for end of brush
-		tokeniser.nextLine();
-		const char* token = tokeniser.getToken();
-		if ( string_equal( token, "}" ) ) {
-			break;
+	bool importTokens( Tokeniser& tokeniser ){
+		if ( Brush::m_type == eBrushTypeQuake3BP || Brush::m_type == eBrushTypeDoom3 || Brush::m_type == eBrushTypeQuake4 ) {
+			tokeniser.nextLine();
+			RETURN_FALSE_IF_FAIL( Tokeniser_parseToken( tokeniser, "{" ) );
+		}
+		while ( 1 )
+		{
+			// check for end of brush
+			tokeniser.nextLine();
+			const char* token = tokeniser.getToken();
+			if ( string_equal( token, "}" ) ) {
+				break;
+			}
+
+			tokeniser.ungetToken();
+
+			m_brush.push_back( FaceSmartPointer( new Face( &m_brush ) ) );
+
+			//!todo BP support
+			tokeniser.nextLine();
+
+			Face& face = *m_brush.back();
+
+			switch ( Brush::m_type )
+			{
+			case eBrushTypeDoom3:
+				{
+					Doom3FaceTokenImporter importer( face );
+					RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
+				}
+				break;
+			case eBrushTypeQuake4:
+				{
+					Quake4FaceTokenImporter importer( face );
+					RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
+				}
+				break;
+			case eBrushTypeQuake2:
+				{
+					Quake2FaceTokenImporter importer( face );
+					RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
+				}
+				break;
+			case eBrushTypeQuake3:
+				{
+					Quake3FaceTokenImporter importer( face );
+					RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
+				}
+				break;
+			case eBrushTypeQuake3BP:
+				{
+					Quake3BPFaceTokenImporter importer( face );
+					RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
+				}
+				break;
+			case eBrushTypeQuake:
+				{
+					QuakeFaceTokenImporter importer( face );
+					RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
+				}
+				break;
+			case eBrushTypeValve220:
+				{
+					Valve220FaceTokenImporter importer( face );
+					RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
+				}
+				break;
+			case eBrushTypeQuake3Valve220:
+				{
+					Quake3Valve220FaceTokenImporter importer( face );
+					RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
+				}
+				break;
+			}
+			face.planeChanged();
+		}
+		if ( Brush::m_type == eBrushTypeQuake3BP || Brush::m_type == eBrushTypeDoom3 || Brush::m_type == eBrushTypeQuake4 ) {
+			tokeniser.nextLine();
+			RETURN_FALSE_IF_FAIL( Tokeniser_parseToken( tokeniser, "}" ) );
 		}
 
-		tokeniser.ungetToken();
+		m_brush.planeChanged();
+		m_brush.shaderChanged();
 
-		m_brush.push_back( FaceSmartPointer( new Face( &m_brush ) ) );
-
-		//!todo BP support
-		tokeniser.nextLine();
-
-		Face& face = *m_brush.back();
-
-		switch ( Brush::m_type )
-		{
-		case eBrushTypeDoom3:
-		{
-			Doom3FaceTokenImporter importer( face );
-			RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
-		}
-		break;
-		case eBrushTypeQuake4:
-		{
-			Quake4FaceTokenImporter importer( face );
-			RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
-		}
-		break;
-		case eBrushTypeQuake2:
-		{
-			Quake2FaceTokenImporter importer( face );
-			RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
-		}
-		break;
-		case eBrushTypeQuake3:
-		{
-			Quake3FaceTokenImporter importer( face );
-			RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
-		}
-		break;
-		case eBrushTypeQuake3BP:
-		{
-			Quake3BPFaceTokenImporter importer( face );
-			RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
-		}
-		break;
-		case eBrushTypeQuake:
-		{
-			QuakeFaceTokenImporter importer( face );
-			RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
-		}
-		break;
-		case eBrushTypeValve220:
-		{
-			Valve220FaceTokenImporter importer( face );
-			RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
-		}
-		break;
-		case eBrushTypeQuake3Valve220:
-		{
-			Quake3Valve220FaceTokenImporter importer( face );
-			RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
-		}
-		break;
-		}
-		face.planeChanged();
+		return true;
 	}
-	if ( Brush::m_type == eBrushTypeQuake3BP || Brush::m_type == eBrushTypeDoom3 || Brush::m_type == eBrushTypeQuake4 ) {
-		tokeniser.nextLine();
-		RETURN_FALSE_IF_FAIL( Tokeniser_parseToken( tokeniser, "}" ) );
-	}
-
-	m_brush.planeChanged();
-	m_brush.shaderChanged();
-
-	return true;
-}
 };
 
 
 class BrushTokenExporter : public MapExporter
 {
-const Brush& m_brush;
+	const Brush& m_brush;
 
 public:
-BrushTokenExporter( const Brush& brush ) : m_brush( brush ){
-}
-void exportTokens( TokenWriter& writer ) const {
-	m_brush.evaluateBRep(); // ensure b-rep is up-to-date, so that non-contributing faces can be identified.
-
-	if ( !m_brush.hasContributingFaces() ) {
-		return;
+	BrushTokenExporter( const Brush& brush ) : m_brush( brush ){
 	}
+	void exportTokens( TokenWriter& writer ) const {
+		m_brush.evaluateBRep(); // ensure b-rep is up-to-date, so that non-contributing faces can be identified.
 
-	writer.writeToken( "{" );
-	writer.nextLine();
+		if ( !m_brush.hasContributingFaces() ) {
+			return;
+		}
 
-	if ( Brush::m_type == eBrushTypeQuake3BP ) {
-		writer.writeToken( "brushDef" );
-		writer.nextLine();
 		writer.writeToken( "{" );
 		writer.nextLine();
-	}
-	else if ( Brush::m_type == eBrushTypeDoom3 || Brush::m_type == eBrushTypeQuake4 ) {
-		writer.writeToken( "brushDef3" );
-		writer.nextLine();
-		writer.writeToken( "{" );
-		writer.nextLine();
-	}
 
-	for ( Brush::const_iterator i = m_brush.begin(); i != m_brush.end(); ++i )
-	{
-		const Face& face = *( *i );
+		if ( Brush::m_type == eBrushTypeQuake3BP ) {
+			writer.writeToken( "brushDef" );
+			writer.nextLine();
+			writer.writeToken( "{" );
+			writer.nextLine();
+		}
+		else if ( Brush::m_type == eBrushTypeDoom3 || Brush::m_type == eBrushTypeQuake4 ) {
+			writer.writeToken( "brushDef3" );
+			writer.nextLine();
+			writer.writeToken( "{" );
+			writer.nextLine();
+		}
 
-		if ( face.contributes() ) {
-			switch ( Brush::m_type )
-			{
-			case eBrushTypeDoom3:
-			{
-				Doom3FaceTokenExporter exporter( face );
-				exporter.exportTokens( writer );
-			}
-			break;
-			case eBrushTypeQuake4:
-			{
-				Quake4FaceTokenExporter exporter( face );
-				exporter.exportTokens( writer );
-			}
-			break;
-			case eBrushTypeQuake2:
-			{
-				Quake2FaceTokenExporter exporter( face );
-				exporter.exportTokens( writer );
-			}
-			break;
-			case eBrushTypeQuake3:
-			{
-				Quake3FaceTokenExporter exporter( face );
-				exporter.exportTokens( writer );
-			}
-			break;
-			case eBrushTypeQuake3BP:
-			{
-				Quake3BPFaceTokenExporter exporter( face );
-				exporter.exportTokens( writer );
-			}
-			break;
-			case eBrushTypeQuake:
-			{
-				QuakeFaceTokenExporter exporter( face );
-				exporter.exportTokens( writer );
-			}
-			break;
-			case eBrushTypeValve220:
-			{
-				Valve220FaceTokenExporter exporter( face );
-				exporter.exportTokens( writer );
-			}
-			break;
-			case eBrushTypeQuake3Valve220:
-			{
-				Quake3Valve220FaceTokenExporter exporter( face );
-				exporter.exportTokens( writer );
-			}
-			break;
+		for ( Brush::const_iterator i = m_brush.begin(); i != m_brush.end(); ++i )
+		{
+			const Face& face = *( *i );
+
+			if ( face.contributes() ) {
+				switch ( Brush::m_type )
+				{
+				case eBrushTypeDoom3:
+					{
+						Doom3FaceTokenExporter exporter( face );
+						exporter.exportTokens( writer );
+					}
+					break;
+				case eBrushTypeQuake4:
+					{
+						Quake4FaceTokenExporter exporter( face );
+						exporter.exportTokens( writer );
+					}
+					break;
+				case eBrushTypeQuake2:
+					{
+						Quake2FaceTokenExporter exporter( face );
+						exporter.exportTokens( writer );
+					}
+					break;
+				case eBrushTypeQuake3:
+					{
+						Quake3FaceTokenExporter exporter( face );
+						exporter.exportTokens( writer );
+					}
+					break;
+				case eBrushTypeQuake3BP:
+					{
+						Quake3BPFaceTokenExporter exporter( face );
+						exporter.exportTokens( writer );
+					}
+					break;
+				case eBrushTypeQuake:
+					{
+						QuakeFaceTokenExporter exporter( face );
+						exporter.exportTokens( writer );
+					}
+					break;
+				case eBrushTypeValve220:
+					{
+						Valve220FaceTokenExporter exporter( face );
+						exporter.exportTokens( writer );
+					}
+					break;
+				case eBrushTypeQuake3Valve220:
+					{
+						Quake3Valve220FaceTokenExporter exporter( face );
+						exporter.exportTokens( writer );
+					}
+					break;
+				}
 			}
 		}
-	}
 
-	if ( Brush::m_type == eBrushTypeQuake3BP || Brush::m_type == eBrushTypeDoom3 || Brush::m_type == eBrushTypeQuake4 ) {
+		if ( Brush::m_type == eBrushTypeQuake3BP || Brush::m_type == eBrushTypeDoom3 || Brush::m_type == eBrushTypeQuake4 ) {
+			writer.writeToken( "}" );
+			writer.nextLine();
+		}
+
 		writer.writeToken( "}" );
 		writer.nextLine();
 	}
-
-	writer.writeToken( "}" );
-	writer.nextLine();
-}
 };
 
 

@@ -43,31 +43,31 @@ class DWinding;
 class DPlane
 {
 public:
-DPlane( const vec3_t va, const vec3_t vb, const vec3_t vc, const char* textureName, bool bDetail );
-void ScaleTexture();
-DWinding* BaseWindingForPlane();
+	DPlane( const vec3_t va, const vec3_t vb, const vec3_t vc, const char* textureName, bool bDetail );
+	void ScaleTexture();
+	DWinding* BaseWindingForPlane();
 
-void Rebuild();
+	void Rebuild();
 
-bool AddToBrush( scene::Node& brush );
-bool operator !=( DPlane& other );
-bool operator ==( DPlane& other );
+	bool AddToBrush( scene::Node& brush );
+	bool operator !=( DPlane& other );
+	bool operator ==( DPlane& other );
 
-bool IsRedundant( std::list<DPoint*>& pointList );
-bool PlaneIntersection( DPlane* pl1, DPlane* pl2, vec3_t out );;
+	bool IsRedundant( std::list<DPoint*>& pointList );
+	bool PlaneIntersection( DPlane* pl1, DPlane* pl2, vec3_t out );;
 
-vec_t DistanceToPoint( vec3_t pnt );
+	vec_t DistanceToPoint( vec3_t pnt );
 
-DPlane( const vec3_t va, const vec3_t vb, const vec3_t vc, const _QERFaceData* texData );
-DPlane() { }
-virtual ~DPlane();
+	DPlane( const vec3_t va, const vec3_t vb, const vec3_t vc, const _QERFaceData* texData );
+	DPlane() { }
+	virtual ~DPlane();
 
-bool m_bChkOk;
-_QERFaceData texInfo;
-CopiedString m_shader;
-vec3_t points[3];           // djbob:do we really need these any more?
-vec3_t normal;
-float _d;
+	bool m_bChkOk;
+	_QERFaceData texInfo;
+	CopiedString m_shader;
+	vec3_t points[3];           // djbob:do we really need these any more?
+	vec3_t normal;
+	float _d;
 };
 
 //typedef CList<DPlane*, DPlane*> DPlaneList;

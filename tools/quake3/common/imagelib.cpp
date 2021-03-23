@@ -226,7 +226,7 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
 
 	if ( formtype != ILBMID && formtype != PBMID ) {
 		Error( "Unrecognized form type: %c%c%c%c\n", formtype & 0xff
-			   ,( formtype >> 8 ) & 0xff,( formtype >> 16 ) & 0xff,( formtype >> 24 ) & 0xff );
+		       ,( formtype >> 8 ) & 0xff,( formtype >> 16 ) & 0xff,( formtype >> 24 ) & 0xff );
 	}
 
 	LBM_P += 4;
@@ -271,7 +271,7 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
 				{
 					if ( bmhd.compression == cm_rle1 ) {
 						body_p = LBMRLEDecompress( (byte *)body_p
-												   , pic_p, bmhd.w );
+						                           , pic_p, bmhd.w );
 					}
 					else if ( bmhd.compression == cm_none ) {
 						memcpy( pic_p,body_p,bmhd.w );
@@ -317,7 +317,7 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
    ==============
  */
 void WriteLBMfile( const char *filename, byte *data,
-				   int width, int height, byte *palette ){
+                   int width, int height, byte *palette ){
 	byte    *lbm, *lbmptr;
 	int    *formlength, *bmhdlength, *cmaplength, *bodylength;
 	int length;
@@ -492,11 +492,11 @@ void LoadPCX( const char *filename, byte **pic, byte **palette, int *width, int 
 	pcx->palette_type = LittleShort( pcx->palette_type );
 
 	if ( pcx->manufacturer != 0x0a
-		 || pcx->version != 5
-		 || pcx->encoding != 1
-		 || pcx->bits_per_pixel != 8
-		 || pcx->xmax >= 640
-		 || pcx->ymax >= 480 ) {
+	     || pcx->version != 5
+	     || pcx->encoding != 1
+	     || pcx->bits_per_pixel != 8
+	     || pcx->xmax >= 640
+	     || pcx->ymax >= 480 ) {
 		Error( "Bad pcx file %s", filename );
 	}
 
@@ -562,7 +562,7 @@ void LoadPCX( const char *filename, byte **pic, byte **palette, int *width, int 
    ==============
  */
 void WritePCXfile( const char *filename, byte *data,
-				   int width, int height, byte *palette ){
+                   int width, int height, byte *palette ){
 	int i, j, length;
 	pcx_t   *pcx;
 	byte        *pack;
@@ -848,7 +848,7 @@ void Load256Image( const char *name, byte **pixels, byte **palette, int *width, 
    ==============
  */
 void Save256Image( const char *name, byte *pixels, byte *palette,
-				   int width, int height ){
+                   int width, int height ){
 	const char *ext = path_get_extension( name );
 
 	if ( striEqual( ext, "lbm" ) ) {

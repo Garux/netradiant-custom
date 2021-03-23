@@ -190,15 +190,15 @@ void INISetInt( const char *key, int val, const char *comment /* = NULL */ ){
 static const char *PLUGIN_NAME = "Portal Viewer";
 // commands in the menu
 static const char *PLUGIN_COMMANDS =
-	Q3R_CMD_ABOUT ";"
-	Q3R_CMD_SPLITTER ";"
-	Q3R_CMD_OPTIONS ";"
-	Q3R_CMD_SPLITTER ";"
-	Q3R_CMD_SHOW_2D ";"
-	Q3R_CMD_SHOW_3D ";"
-	Q3R_CMD_SPLITTER ";"
-	Q3R_CMD_RELEASE ";"
-	Q3R_CMD_LOAD;
+    Q3R_CMD_ABOUT ";"
+    Q3R_CMD_SPLITTER ";"
+    Q3R_CMD_OPTIONS ";"
+    Q3R_CMD_SPLITTER ";"
+    Q3R_CMD_SHOW_2D ";"
+    Q3R_CMD_SHOW_3D ";"
+    Q3R_CMD_SPLITTER ";"
+    Q3R_CMD_RELEASE ";"
+    Q3R_CMD_LOAD;
 
 
 GtkWidget *g_pRadiantWnd = NULL;
@@ -293,26 +293,26 @@ class PrtViewPluginDependencies :
 
 class PrtViewPluginModule
 {
-_QERPluginTable m_plugin;
+	_QERPluginTable m_plugin;
 public:
-typedef _QERPluginTable Type;
-STRING_CONSTANT( Name, "prtview" );
+	typedef _QERPluginTable Type;
+	STRING_CONSTANT( Name, "prtview" );
 
-PrtViewPluginModule(){
-	m_plugin.m_pfnQERPlug_Init = QERPlug_Init;
-	m_plugin.m_pfnQERPlug_GetName = QERPlug_GetName;
-	m_plugin.m_pfnQERPlug_GetCommandList = QERPlug_GetCommandList;
-	m_plugin.m_pfnQERPlug_GetCommandTitleList = QERPlug_GetCommandTitleList;
-	m_plugin.m_pfnQERPlug_Dispatch = QERPlug_Dispatch;
+	PrtViewPluginModule(){
+		m_plugin.m_pfnQERPlug_Init = QERPlug_Init;
+		m_plugin.m_pfnQERPlug_GetName = QERPlug_GetName;
+		m_plugin.m_pfnQERPlug_GetCommandList = QERPlug_GetCommandList;
+		m_plugin.m_pfnQERPlug_GetCommandTitleList = QERPlug_GetCommandTitleList;
+		m_plugin.m_pfnQERPlug_Dispatch = QERPlug_Dispatch;
 
-	PrtView_construct();
-}
-~PrtViewPluginModule(){
-	PrtView_destroy();
-}
-_QERPluginTable* getTable(){
-	return &m_plugin;
-}
+		PrtView_construct();
+	}
+	~PrtViewPluginModule(){
+		PrtView_destroy();
+	}
+	_QERPluginTable* getTable(){
+		return &m_plugin;
+	}
 };
 
 typedef SingletonModule<PrtViewPluginModule, PrtViewPluginDependencies> SingletonPrtViewPluginModule;

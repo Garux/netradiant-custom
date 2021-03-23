@@ -160,8 +160,8 @@ int MapPatches(){
 		for ( j = 1; j < NV; j += 2 )
 		{
 			xyz[i][j].pp[k3] = ( 16 * xyz[i][j].p[k3] - xyz[i - 1][j - 1].p[k3] - 2 * xyz[i][j - 1].p[k3]
-								 - xyz[i + 1][j - 1].p[k3] - 2 * xyz[i - 1][j].p[k3] - 2 * xyz[i + 1][j].p[k3]
-								 - xyz[i - 1][j + 1].p[k3] - 2 * xyz[i][j + 1].p[k3] - xyz[i + 1][j + 1].p[k3] ) / 4;
+			                     - xyz[i + 1][j - 1].p[k3] - 2 * xyz[i - 1][j].p[k3] - 2 * xyz[i + 1][j].p[k3]
+			                     - xyz[i - 1][j + 1].p[k3] - 2 * xyz[i][j + 1].p[k3] - xyz[i + 1][j + 1].p[k3] ) / 4;
 		}
 	}
 
@@ -389,7 +389,7 @@ void MapBrushes(){
 			XYZtoV( &v[3],&brush.face[0].v[1] );
 			XYZtoV( &v[4],&brush.face[0].v[2] );
 			strcpy( brush.face[0].texture,
-					( strlen( Texture[Game][1] ) ? Texture[Game][1] : Texture[Game][0] ) );
+			        ( strlen( Texture[Game][1] ) ? Texture[Game][1] : Texture[Game][0] ) );
 			brush.face[0].Shift[0] = (float)TexOffset[0];
 			brush.face[0].Shift[1] = (float)TexOffset[1];
 			brush.face[0].Rotate   = 0.;
@@ -403,7 +403,7 @@ void MapBrushes(){
 			XYZtoV( &v[4],&brush.face[1].v[1] );
 			XYZtoV( &v[5],&brush.face[1].v[2] );
 			strcpy( brush.face[1].texture,
-					( strlen( Texture[Game][1] ) ? Texture[Game][1] : Texture[Game][0] ) );
+			        ( strlen( Texture[Game][1] ) ? Texture[Game][1] : Texture[Game][0] ) );
 			brush.face[1].Shift[0] = (float)TexOffset[0];
 			brush.face[1].Shift[1] = (float)TexOffset[1];
 			brush.face[1].Rotate   = 0.;
@@ -417,7 +417,7 @@ void MapBrushes(){
 			XYZtoV( &v[5],&brush.face[2].v[1] );
 			XYZtoV( &v[3],&brush.face[2].v[2] );
 			strcpy( brush.face[2].texture,
-					( strlen( Texture[Game][1] ) ? Texture[Game][1] : Texture[Game][0] ) );
+			        ( strlen( Texture[Game][1] ) ? Texture[Game][1] : Texture[Game][0] ) );
 			brush.face[2].Shift[0] = (float)TexOffset[0];
 			brush.face[2].Shift[1] = (float)TexOffset[1];
 			brush.face[2].Rotate   = 0.;
@@ -452,7 +452,7 @@ void MapBrushes(){
 			XYZtoV( &v[5],&brush.face[3].v[1] );
 			XYZtoV( &v[4],&brush.face[3].v[2] );
 			strcpy( brush.face[3].texture,
-					( Plane == PLANE_XZ0 || Plane == PLANE_XZ1 ? surft : sidetext ) );
+			        ( Plane == PLANE_XZ0 || Plane == PLANE_XZ1 ? surft : sidetext ) );
 			brush.face[3].Shift[0] = (float)TexOffset[0];
 			brush.face[3].Shift[1] = (float)TexOffset[1];
 			brush.face[3].Rotate   = 0.;
@@ -487,7 +487,7 @@ void MapBrushes(){
 			XYZtoV( &v[1],&brush.face[4].v[1] );
 			XYZtoV( &v[2],&brush.face[4].v[2] );
 			strcpy( brush.face[4].texture,
-					( Plane == PLANE_XZ0 || Plane == PLANE_XZ1 ? sidetext : surft ) );
+			        ( Plane == PLANE_XZ0 || Plane == PLANE_XZ1 ? sidetext : surft ) );
 			brush.face[4].Shift[0] = (float)TexOffset[0];
 			brush.face[4].Shift[1] = (float)TexOffset[1];
 			brush.face[4].Rotate   = 0.;
@@ -557,7 +557,7 @@ void MapBrushes(){
 			XYZtoV( &v[3],&brush.face[0].v[1] );
 			XYZtoV( &v[4],&brush.face[0].v[2] );
 			strcpy( brush.face[0].texture,
-					( strlen( Texture[Game][1] ) ? Texture[Game][1] : Texture[Game][0] ) );
+			        ( strlen( Texture[Game][1] ) ? Texture[Game][1] : Texture[Game][0] ) );
 			brush.face[0].Shift[0] = (float)TexOffset[0];
 			brush.face[0].Shift[1] = (float)TexOffset[1];
 			brush.face[0].Rotate   = 0.;
@@ -571,7 +571,7 @@ void MapBrushes(){
 			XYZtoV( &v[4],&brush.face[1].v[1] );
 			XYZtoV( &v[5],&brush.face[1].v[2] );
 			strcpy( brush.face[1].texture,
-					( strlen( Texture[Game][1] ) ? Texture[Game][1] : Texture[Game][0] ) );
+			        ( strlen( Texture[Game][1] ) ? Texture[Game][1] : Texture[Game][0] ) );
 			brush.face[1].Shift[0] = (float)TexOffset[0];
 			brush.face[1].Shift[1] = (float)TexOffset[1];
 			brush.face[1].Rotate   = 0.;
@@ -585,7 +585,7 @@ void MapBrushes(){
 			XYZtoV( &v[5],&brush.face[2].v[1] );
 			XYZtoV( &v[3],&brush.face[2].v[2] );
 			strcpy( brush.face[2].texture,
-					( strlen( Texture[Game][1] ) ? Texture[Game][1] : Texture[Game][0] ) );
+			        ( strlen( Texture[Game][1] ) ? Texture[Game][1] : Texture[Game][0] ) );
 			brush.face[2].Shift[0] = (float)TexOffset[0];
 			brush.face[2].Shift[1] = (float)TexOffset[1];
 			brush.face[2].Rotate   = 0.;
@@ -619,7 +619,7 @@ void MapBrushes(){
 			XYZtoV( &v[5],&brush.face[3].v[1] );
 			XYZtoV( &v[4],&brush.face[3].v[2] );
 			strcpy( brush.face[3].texture,
-					( Plane == PLANE_XZ0 || Plane == PLANE_XZ1 ? surft : sidetext ) );
+			        ( Plane == PLANE_XZ0 || Plane == PLANE_XZ1 ? surft : sidetext ) );
 			brush.face[3].Shift[0] = (float)TexOffset[0];
 			brush.face[3].Shift[1] = (float)TexOffset[1];
 			brush.face[3].Rotate   = 0.;
@@ -653,7 +653,7 @@ void MapBrushes(){
 			XYZtoV( &v[1],&brush.face[4].v[1] );
 			XYZtoV( &v[2],&brush.face[4].v[2] );
 			strcpy( brush.face[4].texture,
-					( Plane == PLANE_XZ0 || Plane == PLANE_XZ1 ? sidetext : surft ) );
+			        ( Plane == PLANE_XZ0 || Plane == PLANE_XZ1 ? sidetext : surft ) );
 			brush.face[4].Shift[0] = (float)TexOffset[0];
 			brush.face[4].Shift[1] = (float)TexOffset[1];
 			brush.face[4].Rotate   = 0.;
@@ -1410,14 +1410,14 @@ void GenerateXYZ(){
 								}
 								else if ( rate < 0. ) {
 									delta = ( 1 + rate ) * 0.5 * ( cos( dr * PI ) + 1.0 ) -
-											rate*pow( ( 1. - dr ),2 );
+									        rate*pow( ( 1. - dr ),2 );
 								}
 								else if ( rate == 0. ) {
 									delta = 0.5 * ( cos( dr * PI ) + 1.0 );
 								}
 								else if ( rate <= 1. ) {
 									delta = ( 1. - rate ) * 0.5 * ( cos( dr * PI ) + 1.0 ) +
-											rate * ( 1. - pow( dr,2 ) );
+									        rate * ( 1. - pow( dr,2 ) );
 								}
 								else
 								{
@@ -1648,20 +1648,20 @@ void GenerateXYZ(){
 		}
 	}
 /*
-   sprintf(CSV,"csv%03d.csv",Decimate);
-   f = fopen(CSV,"w");
-   for(i=0; i<gNumNodes; i++)
-   {
-    if(gNode[i].used)
-      fprintf(f,"%g,%g,%g\n",gNode[i].p[0],gNode[i].p[1],gNode[i].p[2]);
-   }
-   fclose(f);
+	sprintf(CSV,"csv%03d.csv",Decimate);
+	f = fopen(CSV,"w");
+	for(i=0; i<gNumNodes; i++)
+	{
+		if(gNode[i].used)
+			fprintf(f,"%g,%g,%g\n",gNode[i].p[0],gNode[i].p[1],gNode[i].p[2]);
+	}
+	fclose(f);
  */
 	for ( i = 0; i < gNumTris; i++ )
 		PlaneFromPoints( gNode[gTri[i].v[0]].p,
-						 gNode[gTri[i].v[1]].p,
-						 gNode[gTri[i].v[2]].p,
-						 &gTri[i].plane );
+		                 gNode[gTri[i].v[1]].p,
+		                 gNode[gTri[i].v[2]].p,
+		                 &gTri[i].plane );
 
 	// Hydra: snap-to-grid begin
 	if ( SnapToGrid > 0 ) {
@@ -1750,8 +1750,8 @@ void SubdividePlasma( int i0,int j0,int i1,int j1 ){
 	if ( i1 > i0 + 1 ) {
 		if ( !xyz[i][j0].done ) {
 			xyz[i][j0].pp[2] = xyz[i0][j0].pp[2] +
-							   ( xyz[i1][j0].pp[2] - xyz[i0][j0].pp[2] ) * (double)( i - i0 ) / (double)( i1 - i0 ) +
-							   ( (double)( i - i0 ) ) * ( -Roughness / 2. + Roughness * ( (double)rand() / (double)RAND_MAX ) );
+			                   ( xyz[i1][j0].pp[2] - xyz[i0][j0].pp[2] ) * (double)( i - i0 ) / (double)( i1 - i0 ) +
+			                   ( (double)( i - i0 ) ) * ( -Roughness / 2. + Roughness * ( (double)rand() / (double)RAND_MAX ) );
 			xyz[i][j0].done = 1;
 		}
 		else{
@@ -1759,8 +1759,8 @@ void SubdividePlasma( int i0,int j0,int i1,int j1 ){
 		}
 		if ( ( j1 > j0 ) && ( !xyz[i][j1].done ) ) {
 			xyz[i][j1].pp[2] = xyz[i0][j1].pp[2] +
-							   ( xyz[i1][j1].pp[2] - xyz[i0][j1].pp[2] ) * (double)( i - i0 ) / (double)( i1 - i0 ) +
-							   ( (double)( i - i0 ) ) * ( -Roughness / 2. + Roughness * ( (double)rand() / (double)RAND_MAX ) );
+			                   ( xyz[i1][j1].pp[2] - xyz[i0][j1].pp[2] ) * (double)( i - i0 ) / (double)( i1 - i0 ) +
+			                   ( (double)( i - i0 ) ) * ( -Roughness / 2. + Roughness * ( (double)rand() / (double)RAND_MAX ) );
 			xyz[i][j1].done = 1;
 		}
 		else{
@@ -1770,8 +1770,8 @@ void SubdividePlasma( int i0,int j0,int i1,int j1 ){
 	if ( j1 > j0 + 1 ) {
 		if ( !xyz[i0][j].done ) {
 			xyz[i0][j].pp[2] = xyz[i0][j0].pp[2] +
-							   ( xyz[i0][j1].pp[2] - xyz[i0][j0].pp[2] ) * (double)( j - j0 ) / (double)( j1 - j0 ) +
-							   ( (double)( j - j0 ) ) * ( -Roughness / 2. + Roughness * ( (double)rand() / (double)RAND_MAX ) );
+			                   ( xyz[i0][j1].pp[2] - xyz[i0][j0].pp[2] ) * (double)( j - j0 ) / (double)( j1 - j0 ) +
+			                   ( (double)( j - j0 ) ) * ( -Roughness / 2. + Roughness * ( (double)rand() / (double)RAND_MAX ) );
 			xyz[i0][j].done = 1;
 		}
 		else{
@@ -1779,8 +1779,8 @@ void SubdividePlasma( int i0,int j0,int i1,int j1 ){
 		}
 		if ( ( i1 > i0 ) && ( !xyz[i1][j].done ) ) {
 			xyz[i1][j].pp[2] = xyz[i1][j0].pp[2] +
-							   ( xyz[i1][j1].pp[2] - xyz[i1][j0].pp[2] ) * (double)( j - j0 ) / (double)( j1 - j0 ) +
-							   ( (double)( j - j0 ) ) * ( -Roughness / 2. + Roughness * ( (double)rand() / (double)RAND_MAX ) );
+			                   ( xyz[i1][j1].pp[2] - xyz[i1][j0].pp[2] ) * (double)( j - j0 ) / (double)( j1 - j0 ) +
+			                   ( (double)( j - j0 ) ) * ( -Roughness / 2. + Roughness * ( (double)rand() / (double)RAND_MAX ) );
 			xyz[i1][j].done = 1;
 		}
 		else{
@@ -1790,11 +1790,11 @@ void SubdividePlasma( int i0,int j0,int i1,int j1 ){
 	if ( ( i1 > i0 + 1 ) && ( j1 > j0 + 1 ) ) {
 		if ( !xyz[i][j].done ) {
 			z1 = xyz[i0][j].pp[2] +
-				 ( xyz[i1][j].pp[2] - xyz[i0][j].pp[2] ) * (double)( i - i0 ) / (double)( i1 - i0 );
+			     ( xyz[i1][j].pp[2] - xyz[i0][j].pp[2] ) * (double)( i - i0 ) / (double)( i1 - i0 );
 			z2 = xyz[i][j0].pp[2] +
-				 ( xyz[i][j1].pp[2] - xyz[i][j0].pp[2] ) * (double)( j - j0 ) / (double)( j1 - j0 );
+			     ( xyz[i][j1].pp[2] - xyz[i][j0].pp[2] ) * (double)( j - j0 ) / (double)( j1 - j0 );
 			xyz[i][j].pp[2] = ( z1 + z2 ) / 2. +
-							  ( (double)( i - i0 ) ) * ( -Roughness / 2. + Roughness * ( (double)rand() / (double)RAND_MAX ) );
+			                  ( (double)( i - i0 ) ) * ( -Roughness / 2. + Roughness * ( (double)rand() / (double)RAND_MAX ) );
 			xyz[i][j].done = 1;
 		}
 		else{
@@ -1966,18 +1966,18 @@ int TriangleFromPoint( double x, double y ){
 	for ( j = 0, tri = -1; j < gNumTris && tri == -1; j++ )
 	{
 		if ( side( x,y,
-				   gNode[gTri[j].v[0]].p[0],gNode[gTri[j].v[0]].p[1],
-				   gNode[gTri[j].v[1]].p[0],gNode[gTri[j].v[1]].p[1] ) < 0. ) {
+		           gNode[gTri[j].v[0]].p[0],gNode[gTri[j].v[0]].p[1],
+		           gNode[gTri[j].v[1]].p[0],gNode[gTri[j].v[1]].p[1] ) < 0. ) {
 			continue;
 		}
 		if ( side( x,y,
-				   gNode[gTri[j].v[1]].p[0],gNode[gTri[j].v[1]].p[1],
-				   gNode[gTri[j].v[2]].p[0],gNode[gTri[j].v[2]].p[1] ) < 0. ) {
+		           gNode[gTri[j].v[1]].p[0],gNode[gTri[j].v[1]].p[1],
+		           gNode[gTri[j].v[2]].p[0],gNode[gTri[j].v[2]].p[1] ) < 0. ) {
 			continue;
 		}
 		if ( side( x,y,
-				   gNode[gTri[j].v[2]].p[0],gNode[gTri[j].v[2]].p[1],
-				   gNode[gTri[j].v[0]].p[0],gNode[gTri[j].v[0]].p[1] ) < 0. ) {
+		           gNode[gTri[j].v[2]].p[0],gNode[gTri[j].v[2]].p[1],
+		           gNode[gTri[j].v[0]].p[0],gNode[gTri[j].v[0]].p[1] ) < 0. ) {
 			continue;
 		}
 		tri = j;
@@ -2007,9 +2007,9 @@ int PlayerStartZ( double x, double y ){
 	for ( k = 0; k < 5; k++ )
 	{
 		zt = ( gTri[t[k]].plane.dist -
-			   gTri[t[k]].plane.normal[0] * x -
-			   gTri[t[k]].plane.normal[1] * y   ) /
-			 gTri[t[k]].plane.normal[2];
+		       gTri[t[k]].plane.normal[0] * x -
+		       gTri[t[k]].plane.normal[1] * y ) /
+		       gTri[t[k]].plane.normal[2];
 		z = max( z,zt );
 	}
 	return (int)( AtLeast( z,2. ) - PlayerBox[Game].z[0] );

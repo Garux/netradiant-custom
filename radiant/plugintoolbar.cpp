@@ -110,18 +110,18 @@ GtkToolbar* g_plugin_toolbar = 0;
 void PluginToolbar_populate(){
 	class AddToolbarItemVisitor : public ToolbarModules::Visitor
 	{
-	GtkToolbar* m_toolbar;
-public:
-	AddToolbarItemVisitor( GtkToolbar* toolbar )
-		: m_toolbar( toolbar ){
-	}
-	void visit( const char* name, const _QERPlugToolbarTable& table ) const {
-		const std::size_t count = table.m_pfnToolbarButtonCount();
-		for ( std::size_t i = 0; i < count; ++i )
-		{
-			PlugInToolbar_AddButton( m_toolbar, table.m_pfnGetToolbarButton( i ) );
+		GtkToolbar* m_toolbar;
+	public:
+		AddToolbarItemVisitor( GtkToolbar* toolbar )
+			: m_toolbar( toolbar ){
 		}
-	}
+		void visit( const char* name, const _QERPlugToolbarTable& table ) const {
+			const std::size_t count = table.m_pfnToolbarButtonCount();
+			for ( std::size_t i = 0; i < count; ++i )
+			{
+				PlugInToolbar_AddButton( m_toolbar, table.m_pfnGetToolbarButton( i ) );
+			}
+		}
 
 	} visitor( g_plugin_toolbar );
 

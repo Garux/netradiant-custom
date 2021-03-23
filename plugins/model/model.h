@@ -22,7 +22,9 @@
 #if !defined( INCLUDED_MODEL_H )
 #define INCLUDED_MODEL_H
 
-namespace scene { class Node; }
+namespace scene {
+class Node;
+}
 class ArchiveFile;
 typedef struct picoModule_s picoModule_t;
 scene::Node& loadPicoModel( const picoModule_t* module, ArchiveFile& file );

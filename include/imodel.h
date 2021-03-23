@@ -34,9 +34,9 @@ class ArchiveFile;
 class ModelLoader
 {
 public:
-INTEGER_CONSTANT( Version, 1 );
-STRING_CONSTANT( Name, "model" );
-virtual scene::Node& loadModel( ArchiveFile& file ) = 0;
+	INTEGER_CONSTANT( Version, 1 );
+	STRING_CONSTANT( Name, "model" );
+	virtual scene::Node& loadModel( ArchiveFile& file ) = 0;
 };
 
 template<typename Type>

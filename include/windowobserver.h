@@ -79,13 +79,13 @@ typedef Vector2 WindowVector;
 class WindowObserver
 {
 public:
-virtual void release() = 0;
-virtual void onSizeChanged( int width, int height ) = 0;
-virtual void onMouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ) = 0;
-virtual void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ) = 0;
-virtual void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ) = 0;
-virtual void onModifierDown( ModifierFlags modifier ) = 0;
-virtual void onModifierUp( ModifierFlags modifier ) = 0;
+	virtual void release() = 0;
+	virtual void onSizeChanged( int width, int height ) = 0;
+	virtual void onMouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ) = 0;
+	virtual void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ) = 0;
+	virtual void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ) = 0;
+	virtual void onModifierDown( ModifierFlags modifier ) = 0;
+	virtual void onModifierUp( ModifierFlags modifier ) = 0;
 };
 
 #endif

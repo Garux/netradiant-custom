@@ -30,109 +30,109 @@
 template<typename Type>
 class ModulesMap : public Modules<Type>
 {
-typedef std::map<CopiedString, Module*> modules_t;
-modules_t m_modules;
+	typedef std::map<CopiedString, Module*> modules_t;
+	modules_t m_modules;
 public:
-~ModulesMap(){
-	for ( modules_t::iterator i = m_modules.begin(); i != m_modules.end(); ++i )
-	{
-		( *i ).second->release();
+	~ModulesMap(){
+		for ( modules_t::iterator i = m_modules.begin(); i != m_modules.end(); ++i )
+		{
+			( *i ).second->release();
+		}
 	}
-}
 
-typedef modules_t::const_iterator iterator;
+	typedef modules_t::const_iterator iterator;
 
-iterator begin() const {
-	return m_modules.begin();
-}
-iterator end() const {
-	return m_modules.end();
-}
-
-void insert( const char* name, Module& module ){
-	module.capture();
-	if ( globalModuleServer().getError() ) {
-		module.release();
-		globalModuleServer().setError( false );
+	iterator begin() const {
+		return m_modules.begin();
 	}
-	else
-	{
-		m_modules.insert( modules_t::value_type( name, &module ) );
+	iterator end() const {
+		return m_modules.end();
 	}
-}
 
-Type* find( const char* name ){
-	modules_t::iterator i = m_modules.find( name );
-	if ( i != m_modules.end() ) {
-		return static_cast<Type*>( Module_getTable( *( *i ).second ) );
+	void insert( const char* name, Module& module ){
+		module.capture();
+		if ( globalModuleServer().getError() ) {
+			module.release();
+			globalModuleServer().setError( false );
+		}
+		else
+		{
+			m_modules.insert( modules_t::value_type( name, &module ) );
+		}
 	}
-	return 0;
-}
 
-Type* findModule( const char* name ){
-	return find( name );
-}
-void foreachModule( const typename Modules<Type>::Visitor& visitor ){
-	for ( modules_t::iterator i = m_modules.begin(); i != m_modules.end(); ++i )
-	{
-		visitor.visit( ( *i ).first.c_str(), *static_cast<const Type*>( Module_getTable( *( *i ).second ) ) );
+	Type* find( const char* name ){
+		modules_t::iterator i = m_modules.find( name );
+		if ( i != m_modules.end() ) {
+			return static_cast<Type*>( Module_getTable( *( *i ).second ) );
+		}
+		return 0;
 	}
-}
+
+	Type* findModule( const char* name ){
+		return find( name );
+	}
+	void foreachModule( const typename Modules<Type>::Visitor& visitor ){
+		for ( modules_t::iterator i = m_modules.begin(); i != m_modules.end(); ++i )
+		{
+			visitor.visit( ( *i ).first.c_str(), *static_cast<const Type*>( Module_getTable( *( *i ).second ) ) );
+		}
+	}
 };
 
 template<typename Type>
 class InsertModules : public ModuleServer::Visitor
 {
-ModulesMap<Type>& m_modules;
+	ModulesMap<Type>& m_modules;
 public:
-InsertModules( ModulesMap<Type>& modules )
-	: m_modules( modules ){
-}
-void visit( const char* name, Module& module ) const {
-	m_modules.insert( name, module );
-}
+	InsertModules( ModulesMap<Type>& modules )
+		: m_modules( modules ){
+	}
+	void visit( const char* name, Module& module ) const {
+		m_modules.insert( name, module );
+	}
 };
 
 template<typename Type>
 class ModulesRef
 {
-ModulesMap<Type> m_modules;
+	ModulesMap<Type> m_modules;
 public:
-ModulesRef( const char* names ){
-	if ( !globalModuleServer().getError() ) {
-		if ( string_equal( names, "*" ) ) {
-			InsertModules<Type> visitor( m_modules );
-			globalModuleServer().foreachModule( typename Type::Name(), typename Type::Version(), visitor );
-		}
-		else
-		{
-			StringTokeniser tokeniser( names );
-			for (;; )
+	ModulesRef( const char* names ){
+		if ( !globalModuleServer().getError() ) {
+			if ( string_equal( names, "*" ) ) {
+				InsertModules<Type> visitor( m_modules );
+				globalModuleServer().foreachModule( typename Type::Name(), typename Type::Version(), visitor );
+			}
+			else
 			{
-				const char* name = tokeniser.getToken();
-				if ( string_empty( name ) ) {
-					break;
-				}
-				Module* module = globalModuleServer().findModule( typename Type::Name(), typename Type::Version(), name );
-				if ( module == 0 ) {
-					globalErrorStream() << "ModulesRef::initialise: type=" << makeQuoted( typename Type::Name() ) << " version=" << makeQuoted( typename Type::Version() ) << " name=" << makeQuoted( name ) << " - not found\n";
-					// do not fail on missing image or model plugin, they can be optional
-					if ( !string_equal( typename Type::Name(), "image" ) && !string_equal( typename Type::Name(), "model" ) ){
-						globalModuleServer().setError( true );
+				StringTokeniser tokeniser( names );
+				for (;; )
+				{
+					const char* name = tokeniser.getToken();
+					if ( string_empty( name ) ) {
 						break;
 					}
-				}
-				else
-				{
-					m_modules.insert( name, *module );
+					Module* module = globalModuleServer().findModule( typename Type::Name(), typename Type::Version(), name );
+					if ( module == 0 ) {
+						globalErrorStream() << "ModulesRef::initialise: type=" << makeQuoted( typename Type::Name() ) << " version=" << makeQuoted( typename Type::Version() ) << " name=" << makeQuoted( name ) << " - not found\n";
+						// do not fail on missing image or model plugin, they can be optional
+						if ( !string_equal( typename Type::Name(), "image" ) && !string_equal( typename Type::Name(), "model" ) ){
+							globalModuleServer().setError( true );
+							break;
+						}
+					}
+					else
+					{
+						m_modules.insert( name, *module );
+					}
 				}
 			}
 		}
 	}
-}
-ModulesMap<Type>& get(){
-	return m_modules;
-}
+	ModulesMap<Type>& get(){
+		return m_modules;
+	}
 };
 
 #endif

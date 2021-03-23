@@ -31,13 +31,13 @@
 class AABB
 {
 public:
-Vector3 origin, extents;
+	Vector3 origin, extents;
 
-AABB() : origin( 0, 0, 0 ), extents( -1,-1,-1 ){
-}
-AABB( const Vector3& origin_, const Vector3& extents_ ) :
-	origin( origin_ ), extents( extents_ ){
-}
+	AABB() : origin( 0, 0, 0 ), extents( -1,-1,-1 ){
+	}
+	AABB( const Vector3& origin_, const Vector3& extents_ ) :
+		origin( origin_ ), extents( extents_ ){
+	}
 };
 
 const float c_aabb_max = FLT_MAX;
@@ -52,11 +52,11 @@ inline bool origin_valid( float f ){
 
 inline bool aabb_valid( const AABB& aabb ){
 	return origin_valid( aabb.origin[0] )
-		   && origin_valid( aabb.origin[1] )
-		   && origin_valid( aabb.origin[2] )
-		   && extents_valid( aabb.extents[0] )
-		   && extents_valid( aabb.extents[1] )
-		   && extents_valid( aabb.extents[2] );
+	    && origin_valid( aabb.origin[1] )
+	    && origin_valid( aabb.origin[2] )
+	    && extents_valid( aabb.extents[0] )
+	    && extents_valid( aabb.extents[1] )
+	    && extents_valid( aabb.extents[2] );
 }
 
 inline AABB aabb_for_minmax( const Vector3& min, const Vector3& max ){
@@ -70,29 +70,29 @@ template<typename Index>
 class AABBExtend
 {
 public:
-static void apply( AABB& aabb, const Vector3& point ){
-	float displacement = point[Index::VALUE] - aabb.origin[Index::VALUE];
-	float half_difference = static_cast<float>( 0.5 * ( fabs( displacement ) - aabb.extents[Index::VALUE] ) );
-	if ( half_difference > 0.0f ) {
-		aabb.origin[Index::VALUE] += ( displacement >= 0.0f ) ? half_difference : -half_difference;
-		aabb.extents[Index::VALUE] += half_difference;
-	}
-}
-static void apply( AABB& aabb, const AABB& other ){
-	float displacement = other.origin[Index::VALUE] - aabb.origin[Index::VALUE];
-	float difference = other.extents[Index::VALUE] - aabb.extents[Index::VALUE];
-	if ( fabs( displacement ) > fabs( difference ) ) {
-		float half_difference = static_cast<float>( 0.5 * ( fabs( displacement ) + difference ) );
+	static void apply( AABB& aabb, const Vector3& point ){
+		float displacement = point[Index::VALUE] - aabb.origin[Index::VALUE];
+		float half_difference = static_cast<float>( 0.5 * ( fabs( displacement ) - aabb.extents[Index::VALUE] ) );
 		if ( half_difference > 0.0f ) {
 			aabb.origin[Index::VALUE] += ( displacement >= 0.0f ) ? half_difference : -half_difference;
 			aabb.extents[Index::VALUE] += half_difference;
 		}
 	}
-	else if ( difference > 0.0f ) {
-		aabb.origin[Index::VALUE] = other.origin[Index::VALUE];
-		aabb.extents[Index::VALUE] = other.extents[Index::VALUE];
+	static void apply( AABB& aabb, const AABB& other ){
+		float displacement = other.origin[Index::VALUE] - aabb.origin[Index::VALUE];
+		float difference = other.extents[Index::VALUE] - aabb.extents[Index::VALUE];
+		if ( fabs( displacement ) > fabs( difference ) ) {
+			float half_difference = static_cast<float>( 0.5 * ( fabs( displacement ) + difference ) );
+			if ( half_difference > 0.0f ) {
+				aabb.origin[Index::VALUE] += ( displacement >= 0.0f ) ? half_difference : -half_difference;
+				aabb.extents[Index::VALUE] += half_difference;
+			}
+		}
+		else if ( difference > 0.0f ) {
+			aabb.origin[Index::VALUE] = other.origin[Index::VALUE];
+			aabb.extents[Index::VALUE] = other.extents[Index::VALUE];
+		}
 	}
-}
 };
 
 inline void aabb_extend_by_point( AABB& aabb, const Vector3& point ){
@@ -114,13 +114,13 @@ inline void aabb_extend_by_point_safe( AABB& aabb, const Vector3& point ){
 
 class AABBExtendByPoint
 {
-AABB& m_aabb;
+	AABB& m_aabb;
 public:
-AABBExtendByPoint( AABB& aabb ) : m_aabb( aabb ){
-}
-void operator()( const Vector3& point ) const {
-	aabb_extend_by_point_safe( m_aabb, point );
-}
+	AABBExtendByPoint( AABB& aabb ) : m_aabb( aabb ){
+	}
+	void operator()( const Vector3& point ) const {
+		aabb_extend_by_point_safe( m_aabb, point );
+	}
 };
 
 inline void aabb_extend_by_aabb( AABB& aabb, const AABB& other ){
@@ -152,8 +152,8 @@ inline bool aabb_intersects_point_dimension( const AABB& aabb, const Vector3& po
 
 inline bool aabb_intersects_point( const AABB& aabb, const Vector3& point ){
 	return aabb_intersects_point_dimension< IntegralConstant<0> >( aabb, point )
-		   && aabb_intersects_point_dimension< IntegralConstant<1> >( aabb, point )
-		   && aabb_intersects_point_dimension< IntegralConstant<2> >( aabb, point );
+	    && aabb_intersects_point_dimension< IntegralConstant<1> >( aabb, point )
+	    && aabb_intersects_point_dimension< IntegralConstant<2> >( aabb, point );
 }
 
 template<typename Index>
@@ -163,16 +163,16 @@ inline bool aabb_intersects_aabb_dimension( const AABB& aabb, const AABB& other 
 
 inline bool aabb_intersects_aabb( const AABB& aabb, const AABB& other ){
 	return aabb_intersects_aabb_dimension< IntegralConstant<0> >( aabb, other )
-		   && aabb_intersects_aabb_dimension< IntegralConstant<1> >( aabb, other )
-		   && aabb_intersects_aabb_dimension< IntegralConstant<2> >( aabb, other );
+	    && aabb_intersects_aabb_dimension< IntegralConstant<1> >( aabb, other )
+	    && aabb_intersects_aabb_dimension< IntegralConstant<2> >( aabb, other );
 }
 
 inline unsigned int aabb_classify_plane( const AABB& aabb, const Plane3& plane ){
 	double distance_origin = vector3_dot( plane.normal(), aabb.origin ) + plane.dist();
 
-	if ( fabs( distance_origin ) < ( fabs( plane.a * aabb.extents[0] )
-									 + fabs( plane.b * aabb.extents[1] )
-									 + fabs( plane.c * aabb.extents[2] ) ) ) {
+	if ( fabs( distance_origin ) < (   fabs( plane.a * aabb.extents[0] )
+	                                 + fabs( plane.b * aabb.extents[1] )
+	                                 + fabs( plane.c * aabb.extents[2] ) ) ) {
 		return 1; // partially inside
 	}
 	else if ( distance_origin < 0 ) {
@@ -184,9 +184,9 @@ inline unsigned int aabb_classify_plane( const AABB& aabb, const Plane3& plane )
 inline unsigned int aabb_oriented_classify_plane( const AABB& aabb, const Matrix4& transform, const Plane3& plane ){
 	double distance_origin = vector3_dot( plane.normal(), aabb.origin ) + plane.dist();
 
-	if ( fabs( distance_origin ) < ( fabs( aabb.extents[0] * vector3_dot( plane.normal(), vector4_to_vector3( transform.x() ) ) )
-									 + fabs( aabb.extents[1] * vector3_dot( plane.normal(), vector4_to_vector3( transform.y() ) ) )
-									 + fabs( aabb.extents[2] * vector3_dot( plane.normal(), vector4_to_vector3( transform.z() ) ) ) ) ) {
+	if ( fabs( distance_origin ) < (   fabs( aabb.extents[0] * vector3_dot( plane.normal(), vector4_to_vector3( transform.x() ) ) )
+	                                 + fabs( aabb.extents[1] * vector3_dot( plane.normal(), vector4_to_vector3( transform.y() ) ) )
+	                                 + fabs( aabb.extents[2] * vector3_dot( plane.normal(), vector4_to_vector3( transform.z() ) ) ) ) ) {
 		return 1; // partially inside
 	}
 	else if ( distance_origin < 0 ) {
@@ -268,19 +268,19 @@ const float aabb_texcoord_botright[2] = { 1, 1 };
 
 inline AABB aabb_for_oriented_aabb( const AABB& aabb, const Matrix4& transform ){
 	return AABB(
-			   matrix4_transformed_point( transform, aabb.origin ),
-			   Vector3(
-				   static_cast<float>( fabs( transform[0]  * aabb.extents[0] )
-									   + fabs( transform[4]  * aabb.extents[1] )
-									   + fabs( transform[8]  * aabb.extents[2] ) ),
-				   static_cast<float>( fabs( transform[1]  * aabb.extents[0] )
-									   + fabs( transform[5]  * aabb.extents[1] )
-									   + fabs( transform[9]  * aabb.extents[2] ) ),
-				   static_cast<float>( fabs( transform[2]  * aabb.extents[0] )
-									   + fabs( transform[6]  * aabb.extents[1] )
-									   + fabs( transform[10] * aabb.extents[2] ) )
-				   )
-			   );
+	           matrix4_transformed_point( transform, aabb.origin ),
+	           Vector3(
+	               static_cast<float>(   fabs( transform[0]  * aabb.extents[0] )
+	                                   + fabs( transform[4]  * aabb.extents[1] )
+	                                   + fabs( transform[8]  * aabb.extents[2] ) ),
+	               static_cast<float>(   fabs( transform[1]  * aabb.extents[0] )
+	                                   + fabs( transform[5]  * aabb.extents[1] )
+	                                   + fabs( transform[9]  * aabb.extents[2] ) ),
+	               static_cast<float>(   fabs( transform[2]  * aabb.extents[0] )
+	                                   + fabs( transform[6]  * aabb.extents[1] )
+	                                   + fabs( transform[10] * aabb.extents[2] ) )
+	           )
+	       );
 }
 
 inline AABB aabb_for_oriented_aabb_safe( const AABB& aabb, const Matrix4& transform ){

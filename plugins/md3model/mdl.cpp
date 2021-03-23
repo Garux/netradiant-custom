@@ -58,53 +58,53 @@ void istream_read_mdlHeader( PointerInputStream& inputStream, mdlHeader_t& heade
 
 inline ArbitraryMeshVertex MDLVertex_construct( const mdlHeader_t& header, const mdlXyzNormal_t& xyz, const mdlSt_t& st, bool facesfront ){
 	return ArbitraryMeshVertex(
-			   Vertex3f(
-				   xyz.v[0] * header.scale[0] + header.scale_origin[0],
-				   xyz.v[1] * header.scale[1] + header.scale_origin[1],
-				   xyz.v[2] * header.scale[2] + header.scale_origin[2]
-				   ),
-			   Normal3f(
-				   g_mdl_normals[xyz.lightnormalindex][0],
-				   g_mdl_normals[xyz.lightnormalindex][1],
-				   g_mdl_normals[xyz.lightnormalindex][2]
-				   ),
-			   TexCoord2f(
-				   ( (float)st.s / header.skinwidth ) + ( ( st.onseam == MDL_ONSEAM && !facesfront ) ? 0.5f : 0.0f ),
-				   (float)st.t / header.skinheight
-				   )
-			   );
+	           Vertex3f(
+	               xyz.v[0] * header.scale[0] + header.scale_origin[0],
+	               xyz.v[1] * header.scale[1] + header.scale_origin[1],
+	               xyz.v[2] * header.scale[2] + header.scale_origin[2]
+	           ),
+	           Normal3f(
+	               g_mdl_normals[xyz.lightnormalindex][0],
+	               g_mdl_normals[xyz.lightnormalindex][1],
+	               g_mdl_normals[xyz.lightnormalindex][2]
+	           ),
+	           TexCoord2f(
+	               ( (float)st.s / header.skinwidth ) + ( ( st.onseam == MDL_ONSEAM && !facesfront ) ? 0.5f : 0.0f ),
+	               (float)st.t / header.skinheight
+	           )
+	       );
 }
 
 class mdlVertex_t
 {
 public:
-inline mdlVertex_t( int vertindex, int facesfront )
-	: m_vertindex( vertindex ), m_facesfront( facesfront )
-{}
-inline bool operator<( const mdlVertex_t& other ) const {
-	if ( m_facesfront < other.m_facesfront ) {
-		return true;
-	}
-	if ( other.m_facesfront < m_facesfront ) {
+	inline mdlVertex_t( int vertindex, int facesfront )
+		: m_vertindex( vertindex ), m_facesfront( facesfront )
+	{}
+	inline bool operator<( const mdlVertex_t& other ) const {
+		if ( m_facesfront < other.m_facesfront ) {
+			return true;
+		}
+		if ( other.m_facesfront < m_facesfront ) {
+			return false;
+		}
+
+		if ( m_vertindex < other.m_vertindex ) {
+			return true;
+		}
+		if ( other.m_vertindex < m_vertindex ) {
+			return false;
+		}
+
 		return false;
 	}
-
-	if ( m_vertindex < other.m_vertindex ) {
-		return true;
-	}
-	if ( other.m_vertindex < m_vertindex ) {
-		return false;
+	inline bool operator==( const mdlVertex_t& other ) const {
+		return m_vertindex == other.m_vertindex
+		    && m_facesfront == other.m_facesfront;
 	}
 
-	return false;
-}
-inline bool operator==( const mdlVertex_t& other ) const {
-	return m_vertindex == other.m_vertindex
-		   && m_facesfront == other.m_facesfront;
-}
-
-int m_vertindex;
-int m_facesfront;
+	int m_vertindex;
+	int m_facesfront;
 };
 
 typedef const mdlTriangle_t* mdlTriangleIterator;

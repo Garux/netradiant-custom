@@ -213,7 +213,7 @@ void error_redirect( const gchar *domain, GLogLevelFlags log_level, const gchar 
 #ifndef _DEBUG
 	if ( is_fatal )
 #endif
-	ERROR_MESSAGE( "GTK+ error: " << buf );
+		ERROR_MESSAGE( "GTK+ error: " << buf );
 }
 
 #if defined ( _DEBUG ) && defined ( WIN32 ) && defined ( _MSC_VER )
@@ -228,95 +228,95 @@ void crt_init(){
 
 class Lock
 {
-bool m_locked;
+	bool m_locked;
 public:
-Lock() : m_locked( false ){
-}
-void lock(){
-	m_locked = true;
-}
-void unlock(){
-	m_locked = false;
-}
-bool locked() const {
-	return m_locked;
-}
+	Lock() : m_locked( false ){
+	}
+	void lock(){
+		m_locked = true;
+	}
+	void unlock(){
+		m_locked = false;
+	}
+	bool locked() const {
+		return m_locked;
+	}
 };
 
 class ScopedLock
 {
-Lock& m_lock;
+	Lock& m_lock;
 public:
-ScopedLock( Lock& lock ) : m_lock( lock ){
-	m_lock.lock();
-}
-~ScopedLock(){
-	m_lock.unlock();
-}
+	ScopedLock( Lock& lock ) : m_lock( lock ){
+		m_lock.lock();
+	}
+	~ScopedLock(){
+		m_lock.unlock();
+	}
 };
 
 class LineLimitedTextOutputStream : public TextOutputStream
 {
-TextOutputStream& outputStream;
-std::size_t count;
+	TextOutputStream& outputStream;
+	std::size_t count;
 public:
-LineLimitedTextOutputStream( TextOutputStream& outputStream, std::size_t count )
-	: outputStream( outputStream ), count( count ){
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	if ( count != 0 ) {
-		const char* p = buffer;
-		const char* end = buffer + length;
-		for (;; )
-		{
-			p = std::find( p, end, '\n' );
-			if ( p == end ) {
-				break;
-			}
-			++p;
-			if ( --count == 0 ) {
-				length = p - buffer;
-				break;
-			}
-		}
-		outputStream.write( buffer, length );
+	LineLimitedTextOutputStream( TextOutputStream& outputStream, std::size_t count )
+		: outputStream( outputStream ), count( count ){
 	}
-	return length;
-}
+	std::size_t write( const char* buffer, std::size_t length ){
+		if ( count != 0 ) {
+			const char* p = buffer;
+			const char* end = buffer + length;
+			for (;; )
+			{
+				p = std::find( p, end, '\n' );
+				if ( p == end ) {
+					break;
+				}
+				++p;
+				if ( --count == 0 ) {
+					length = p - buffer;
+					break;
+				}
+			}
+			outputStream.write( buffer, length );
+		}
+		return length;
+	}
 };
 
 class PopupDebugMessageHandler : public DebugMessageHandler
 {
-StringOutputStream m_buffer;
-Lock m_lock;
+	StringOutputStream m_buffer;
+	Lock m_lock;
 public:
-TextOutputStream& getOutputStream(){
-	if ( !m_lock.locked() ) {
-		return m_buffer;
+	TextOutputStream& getOutputStream(){
+		if ( !m_lock.locked() ) {
+			return m_buffer;
+		}
+		return globalErrorStream();
 	}
-	return globalErrorStream();
-}
-bool handleMessage(){
-	getOutputStream() << "----------------\n";
-	LineLimitedTextOutputStream outputStream( getOutputStream(), 24 );
-	write_stack_trace( outputStream );
-	getOutputStream() << "----------------\n";
-	globalErrorStream() << m_buffer.c_str();
-	if ( !m_lock.locked() ) {
-		ScopedLock lock( m_lock );
+	bool handleMessage(){
+		getOutputStream() << "----------------\n";
+		LineLimitedTextOutputStream outputStream( getOutputStream(), 24 );
+		write_stack_trace( outputStream );
+		getOutputStream() << "----------------\n";
+		globalErrorStream() << m_buffer.c_str();
+		if ( !m_lock.locked() ) {
+			ScopedLock lock( m_lock );
 #if defined _DEBUG
-		m_buffer << "Break into the debugger?\n";
-		bool handled = gtk_MessageBox( 0, m_buffer.c_str(), "Radiant - Runtime Error", eMB_YESNO, eMB_ICONERROR ) == eIDNO;
-		m_buffer.clear();
-		return handled;
+			m_buffer << "Break into the debugger?\n";
+			bool handled = gtk_MessageBox( 0, m_buffer.c_str(), "Radiant - Runtime Error", eMB_YESNO, eMB_ICONERROR ) == eIDNO;
+			m_buffer.clear();
+			return handled;
 #else
-		m_buffer << "Please report this error to the developers\n";
-		gtk_MessageBox( 0, m_buffer.c_str(), "Radiant - Runtime Error", eMB_OK, eMB_ICONERROR );
-		m_buffer.clear();
+			m_buffer << "Please report this error to the developers\n";
+			gtk_MessageBox( 0, m_buffer.c_str(), "Radiant - Runtime Error", eMB_OK, eMB_ICONERROR );
+			m_buffer.clear();
 #endif
+		}
+		return true;
 	}
-	return true;
-}
 };
 
 typedef Static<PopupDebugMessageHandler> GlobalPopupDebugMessageHandler;
@@ -405,8 +405,8 @@ bool check_version(){
 	if ( !bVerIsGood ) {
 		StringOutputStream msg( 256 );
 		msg << "This editor binary (" RADIANT_VERSION ") doesn't match what the latest setup has configured in this directory\n"
-													  "Make sure you run the right/latest editor binary you installed\n"
-			<< AppPath_get();
+		       "Make sure you run the right/latest editor binary you installed\n"
+		    << AppPath_get();
 		gtk_MessageBox( 0, msg.c_str(), "Radiant", eMB_OK, eMB_ICONDEFAULT );
 	}
 	return bVerIsGood;
@@ -442,8 +442,8 @@ void create_global_pid(){
 #if !defined( _DEBUG )
 		StringOutputStream msg( 256 );
 		msg << "Radiant failed to start properly the last time it was run.\n"
-			   "The failure may be related to current global preferences.\n"
-			   "Do you want to reset global preferences to defaults?";
+		       "The failure may be related to current global preferences.\n"
+		       "Do you want to reset global preferences to defaults?";
 
 		if ( gtk_MessageBox( 0, msg.c_str(), "Radiant - Startup Failure", eMB_YESNO, eMB_ICONQUESTION ) == eIDYES ) {
 			g_GamesDialog.Reset();
@@ -501,8 +501,8 @@ void create_local_pid(){
 #if !defined( _DEBUG )
 		StringOutputStream msg;
 		msg << "Radiant failed to start properly the last time it was run.\n"
-			   "The failure may be caused by current preferences.\n"
-			   "Do you want to reset all preferences to defaults?";
+		       "The failure may be caused by current preferences.\n"
+		       "Do you want to reset all preferences to defaults?";
 
 		if ( gtk_MessageBox( 0, msg.c_str(), "Radiant - Startup Failure", eMB_YESNO, eMB_ICONQUESTION ) == eIDYES ) {
 			Preferences_Reset();
@@ -564,7 +564,7 @@ void fontconfig_workaround(){
 
 	TextFileOutputStream file( path.c_str() );
 	if ( !file.failed() ) {
-			file << "<?xml version=\"1.0\"?>\n\
+		file << "<?xml version=\"1.0\"?>\n\
 <!DOCTYPE fontconfig SYSTEM \"fonts.dtd\">\n\
 <fontconfig>\n\
 	<its:rules xmlns:its=\"http://www.w3.org/2005/11/its\" version=\"1.0\">\n\
@@ -614,15 +614,15 @@ int main( int argc, char* argv[] ){
 
 	// redirect Gtk warnings to the console
 	g_log_set_handler( "Gdk", (GLogLevelFlags)( G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
-												G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
+	                                            G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
 	g_log_set_handler( "Gtk", (GLogLevelFlags)( G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
-												G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
+	                                            G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
 	g_log_set_handler( "GtkGLExt", (GLogLevelFlags)( G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
-													 G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
+	                                                 G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
 	g_log_set_handler( "GLib", (GLogLevelFlags)( G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
-												 G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
+	                                             G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
 	g_log_set_handler( 0, (GLogLevelFlags)( G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
-											G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
+	                                        G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
 
 	GlobalDebugMessageHandler::instance().setHandler( GlobalPopupDebugMessageHandler::instance() );
 

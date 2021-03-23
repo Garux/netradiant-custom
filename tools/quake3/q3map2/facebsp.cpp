@@ -281,7 +281,7 @@ void BuildFaceTree_r( node_t *node, face_t *list ){
 		/* switch on side */
 		if ( side == eSideCross ) {
 			ClipWindingEpsilonStrict( split->w, plane.plane, CLIP_EPSILON * 2,
-									  &frontWinding, &backWinding ); /* strict; if no winding is left, we have a "virtually identical" plane and don't want to split by it */
+			                          &frontWinding, &backWinding ); /* strict; if no winding is left, we have a "virtually identical" plane and don't want to split by it */
 			if ( frontWinding ) {
 				newFace = AllocBspFace();
 				newFace->w = frontWinding;

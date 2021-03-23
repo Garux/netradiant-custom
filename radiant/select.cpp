@@ -59,34 +59,34 @@ select_workzone_t g_select_workzone;
  */
 class CollectSelectedBrushesBounds : public SelectionSystem::Visitor
 {
-AABB* m_bounds;     // array of AABBs
-Unsigned m_max;     // max AABB-elements in array
-Unsigned& m_count;  // count of valid AABBs stored in array
+	AABB* m_bounds;     // array of AABBs
+	Unsigned m_max;     // max AABB-elements in array
+	Unsigned& m_count;  // count of valid AABBs stored in array
 
 public:
-CollectSelectedBrushesBounds( AABB* bounds, Unsigned max, Unsigned& count )
-	: m_bounds( bounds ),
-	m_max( max ),
-	m_count( count ){
-	m_count = 0;
-}
-
-void visit( scene::Instance& instance ) const {
-	ASSERT_MESSAGE( m_count <= m_max, "Invalid m_count in CollectSelectedBrushesBounds" );
-
-	// stop if the array is already full
-	if ( m_count == m_max ) {
-		return;
+	CollectSelectedBrushesBounds( AABB* bounds, Unsigned max, Unsigned& count ) :
+		m_bounds( bounds ),
+		m_max( max ),
+		m_count( count ){
+		m_count = 0;
 	}
 
-	if ( Instance_isSelected( instance ) ) {
-		// brushes only
-		if ( Instance_getBrush( instance ) != 0 ) {
-			m_bounds[m_count] = instance.worldAABB();
-			++m_count;
+	void visit( scene::Instance& instance ) const {
+		ASSERT_MESSAGE( m_count <= m_max, "Invalid m_count in CollectSelectedBrushesBounds" );
+
+		// stop if the array is already full
+		if ( m_count == m_max ) {
+			return;
+		}
+
+		if ( Instance_isSelected( instance ) ) {
+			// brushes only
+			if ( Instance_getBrush( instance ) != 0 ) {
+				m_bounds[m_count] = instance.worldAABB();
+				++m_count;
+			}
 		}
 	}
-}
 };
 
 /**
@@ -96,82 +96,81 @@ void visit( scene::Instance& instance ) const {
 template<class TSelectionPolicy>
 class SelectByBounds : public scene::Graph::Walker
 {
-AABB* m_aabbs;             // selection aabbs
-Unsigned m_count;          // number of aabbs in m_aabbs
-TSelectionPolicy policy;   // type that contains a custom intersection method aabb<->aabb
+	AABB* m_aabbs;             // selection aabbs
+	Unsigned m_count;          // number of aabbs in m_aabbs
+	TSelectionPolicy policy;   // type that contains a custom intersection method aabb<->aabb
 
 public:
-SelectByBounds( AABB* aabbs, Unsigned count )
-	: m_aabbs( aabbs ),
-	m_count( count ){
-}
+	SelectByBounds( AABB* aabbs, Unsigned count ) :
+		m_aabbs( aabbs ),
+		m_count( count ){
+	}
 
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if( path.top().get().visible() ){
-		Selectable* selectable = Instance_getSelectable( instance );
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if( path.top().get().visible() ){
+			Selectable* selectable = Instance_getSelectable( instance );
 
-		// ignore worldspawn
-		Entity* entity = Node_getEntity( path.top() );
-		if ( entity ) {
-			if ( string_equal( entity->getKeyValue( "classname" ), "worldspawn" ) ) {
-				return true;
+			// ignore worldspawn
+			Entity* entity = Node_getEntity( path.top() );
+			if ( entity ) {
+				if ( string_equal( entity->getKeyValue( "classname" ), "worldspawn" ) ) {
+					return true;
+				}
 			}
-		}
 
-		if ( ( path.size() > 1 ) &&
-			( !path.top().get().isRoot() ) &&
-			( selectable != 0 ) &&
-			( !node_is_group( path.top() ) )
-			) {
-			for ( Unsigned i = 0; i < m_count; ++i )
-			{
-				if ( policy.Evaluate( m_aabbs[i], instance ) ) {
-					selectable->setSelected( true );
+			if ( path.size() > 1
+			  && !path.top().get().isRoot()
+			  && selectable != 0
+			  && !node_is_group( path.top() ) ) {
+				for ( Unsigned i = 0; i < m_count; ++i )
+				{
+					if ( policy.Evaluate( m_aabbs[i], instance ) ) {
+						selectable->setSelected( true );
+					}
 				}
 			}
 		}
+		else{
+			return false;
+		}
+
+		return true;
 	}
-	else{
-		return false;
-	}
 
-	return true;
-}
+	/**
+	   Performs selection operation on the global scenegraph.
+	   If delete_bounds_src is true, then the objects which were
+	   used as source for the selection aabbs will be deleted.
+	 */
+	static void DoSelection( bool delete_bounds_src = true ){
+		if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ) {
+			// we may not need all AABBs since not all selected objects have to be brushes
+			const Unsigned max = (Unsigned)GlobalSelectionSystem().countSelected();
+			AABB* aabbs = new AABB[max];
 
-/**
-   Performs selection operation on the global scenegraph.
-   If delete_bounds_src is true, then the objects which were
-   used as source for the selection aabbs will be deleted.
- */
-static void DoSelection( bool delete_bounds_src = true ){
-	if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ) {
-		// we may not need all AABBs since not all selected objects have to be brushes
-		const Unsigned max = (Unsigned)GlobalSelectionSystem().countSelected();
-		AABB* aabbs = new AABB[max];
+			Unsigned count;
+			CollectSelectedBrushesBounds collector( aabbs, max, count );
+			GlobalSelectionSystem().foreachSelected( collector );
 
-		Unsigned count;
-		CollectSelectedBrushesBounds collector( aabbs, max, count );
-		GlobalSelectionSystem().foreachSelected( collector );
+			// nothing usable in selection
+			if ( !count ) {
+				delete[] aabbs;
+				return;
+			}
 
-		// nothing usable in selection
-		if ( !count ) {
+			// delete selected objects
+			if ( delete_bounds_src ) { // see deleteSelection
+				UndoableCommand undo( "deleteSelected" );
+				Select_Delete();
+			}
+
+			// select objects with bounds
+			GlobalSceneGraph().traverse( SelectByBounds<TSelectionPolicy>( aabbs, count ) );
+
+			SceneChangeNotify();
 			delete[] aabbs;
-			return;
 		}
-
-		// delete selected objects
-		if ( delete_bounds_src ) { // see deleteSelection
-			UndoableCommand undo( "deleteSelected" );
-			Select_Delete();
-		}
-
-		// select objects with bounds
-		GlobalSceneGraph().traverse( SelectByBounds<TSelectionPolicy>( aabbs, count ) );
-
-		SceneChangeNotify();
-		delete[] aabbs;
 	}
-}
 };
 
 /**
@@ -181,16 +180,16 @@ static void DoSelection( bool delete_bounds_src = true ){
 class SelectionPolicy_Touching
 {
 public:
-bool Evaluate( const AABB& box, scene::Instance& instance ) const {
-	const AABB& other( instance.worldAABB() );
-	for ( Unsigned i = 0; i < 3; ++i )
-	{
-		if ( fabsf( box.origin[i] - other.origin[i] ) > ( box.extents[i] + other.extents[i] ) ) {
-			return false;
+	bool Evaluate( const AABB& box, scene::Instance& instance ) const {
+		const AABB& other( instance.worldAABB() );
+		for ( Unsigned i = 0; i < 3; ++i )
+		{
+			if ( fabsf( box.origin[i] - other.origin[i] ) > ( box.extents[i] + other.extents[i] ) ) {
+				return false;
+			}
 		}
+		return true;
 	}
-	return true;
-}
 };
 
 /**
@@ -200,62 +199,62 @@ bool Evaluate( const AABB& box, scene::Instance& instance ) const {
 class SelectionPolicy_Inside
 {
 public:
-bool Evaluate( const AABB& box, scene::Instance& instance ) const {
-	const AABB& other( instance.worldAABB() );
-	for ( Unsigned i = 0; i < 3; ++i )
-	{
-		if ( fabsf( box.origin[i] - other.origin[i] ) > ( box.extents[i] - other.extents[i] ) ) {
-			return false;
+	bool Evaluate( const AABB& box, scene::Instance& instance ) const {
+		const AABB& other( instance.worldAABB() );
+		for ( Unsigned i = 0; i < 3; ++i )
+		{
+			if ( fabsf( box.origin[i] - other.origin[i] ) > ( box.extents[i] - other.extents[i] ) ) {
+				return false;
+			}
 		}
+		return true;
 	}
-	return true;
-}
 };
 
 class DeleteSelected : public scene::Graph::Walker
 {
-mutable bool m_remove;
-mutable bool m_removedChild;
+	mutable bool m_remove;
+	mutable bool m_removedChild;
 public:
-DeleteSelected()
-	: m_remove( false ), m_removedChild( false ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	m_removedChild = false;
-
-	if ( Instance_isSelected( instance )
-		 && path.size() > 1
-		 && !path.top().get().isRoot() ) {
-		m_remove = true;
-
-		return false; // dont traverse into child elements
+	DeleteSelected()
+		: m_remove( false ), m_removedChild( false ){
 	}
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-
-	if ( m_removedChild ) {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		m_removedChild = false;
 
-		// delete empty entities
-		Entity* entity = Node_getEntity( path.top() );
-		if ( entity != 0
-			 && path.top().get_pointer() != Map_FindWorldspawn( g_map )
-			 && Node_getTraversable( path.top() )->empty() ) {
+		if ( Instance_isSelected( instance )
+		     && path.size() > 1
+		     && !path.top().get().isRoot() ) {
+			m_remove = true;
+
+			return false; // dont traverse into child elements
+		}
+		return true;
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+
+		if ( m_removedChild ) {
+			m_removedChild = false;
+
+			// delete empty entities
+			Entity* entity = Node_getEntity( path.top() );
+			if ( entity != 0
+			     && path.top().get_pointer() != Map_FindWorldspawn( g_map )
+			     && Node_getTraversable( path.top() )->empty() ) {
+				Path_deleteTop( path );
+			}
+		}
+
+		// node should be removed
+		if ( m_remove ) {
+			if ( Node_isEntity( path.parent() ) ) {
+				m_removedChild = true;
+			}
+
+			m_remove = false;
 			Path_deleteTop( path );
 		}
 	}
-
-	// node should be removed
-	if ( m_remove ) {
-		if ( Node_isEntity( path.parent() ) ) {
-			m_removedChild = true;
-		}
-
-		m_remove = false;
-		Path_deleteTop( path );
-	}
-}
 };
 
 void Scene_DeleteSelected( scene::Graph& graph ){
@@ -269,54 +268,54 @@ void Select_Delete( void ){
 
 class InvertSelectionWalker : public scene::Graph::Walker
 {
-SelectionSystem::EMode m_mode;
-SelectionSystem::EComponentMode m_compmode;
-mutable Selectable* m_selectable;
+	SelectionSystem::EMode m_mode;
+	SelectionSystem::EComponentMode m_compmode;
+	mutable Selectable* m_selectable;
 public:
-InvertSelectionWalker( SelectionSystem::EMode mode, SelectionSystem::EComponentMode compmode )
-	: m_mode( mode ), m_compmode( compmode ), m_selectable( 0 ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if( !path.top().get().visible() ){
-		m_selectable = 0;
-		return false;
+	InvertSelectionWalker( SelectionSystem::EMode mode, SelectionSystem::EComponentMode compmode )
+		: m_mode( mode ), m_compmode( compmode ), m_selectable( 0 ){
 	}
-	Selectable* selectable = Instance_getSelectable( instance );
-	if ( selectable ) {
-		switch ( m_mode )
-		{
-		case SelectionSystem::eEntity:
-			if ( Node_isEntity( path.top() ) != 0 ) {
-				m_selectable = path.top().get().visible() ? selectable : 0;
-			}
-			break;
-		case SelectionSystem::ePrimitive:
-			m_selectable = path.top().get().visible() ? selectable : 0;
-			break;
-		case SelectionSystem::eComponent:
-			BrushInstance* brushinstance = Instance_getBrush( instance );
-			if( brushinstance != 0 ){
-				if( brushinstance->isSelected() )
-					brushinstance->invertComponentSelection( m_compmode );
-			}
-			else{
-				PatchInstance* patchinstance = Instance_getPatch( instance );
-				if( patchinstance != 0 && m_compmode == SelectionSystem::eVertex ){
-					if( patchinstance->isSelected() )
-						patchinstance->invertComponentSelection();
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if( !path.top().get().visible() ){
+			m_selectable = 0;
+			return false;
+		}
+		Selectable* selectable = Instance_getSelectable( instance );
+		if ( selectable ) {
+			switch ( m_mode )
+			{
+			case SelectionSystem::eEntity:
+				if ( Node_isEntity( path.top() ) != 0 ) {
+					m_selectable = path.top().get().visible() ? selectable : 0;
 				}
+				break;
+			case SelectionSystem::ePrimitive:
+				m_selectable = path.top().get().visible() ? selectable : 0;
+				break;
+			case SelectionSystem::eComponent:
+				BrushInstance* brushinstance = Instance_getBrush( instance );
+				if( brushinstance != 0 ){
+					if( brushinstance->isSelected() )
+						brushinstance->invertComponentSelection( m_compmode );
+				}
+				else{
+					PatchInstance* patchinstance = Instance_getPatch( instance );
+					if( patchinstance != 0 && m_compmode == SelectionSystem::eVertex ){
+						if( patchinstance->isSelected() )
+							patchinstance->invertComponentSelection();
+					}
+				}
+				break;
 			}
-			break;
+		}
+		return true;
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		if ( m_selectable != 0 ) {
+			m_selectable->setSelected( !m_selectable->isSelected() );
+			m_selectable = 0;
 		}
 	}
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	if ( m_selectable != 0 ) {
-		m_selectable->setSelected( !m_selectable->isSelected() );
-		m_selectable = 0;
-	}
-}
 };
 
 void Scene_Invert_Selection( scene::Graph& graph ){
@@ -331,90 +330,90 @@ void Select_Invert(){
 //interesting printings
 class ExpandSelectionToEntitiesWalker_dbg : public scene::Graph::Walker
 {
-mutable std::size_t m_depth;
-const scene::Node* m_world;
+	mutable std::size_t m_depth;
+	const scene::Node* m_world;
 public:
-ExpandSelectionToEntitiesWalker_dbg() : m_depth( 0 ), m_world( Map_FindWorldspawn( g_map ) ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	++m_depth;
-	globalOutputStream() << "pre depth_" << m_depth;
-	globalOutputStream() << " path.size()_" << path.size();
-	if ( path.top().get_pointer() == m_world )
-		globalOutputStream() << " worldspawn";
-	if( path.top().get().isRoot() )
-		globalOutputStream() << " path.top().get().isRoot()";
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0 ){
-		globalOutputStream() << " entity!=0";
-		if( entity->isContainer() ){
-			globalOutputStream() << " entity->isContainer()";
-		}
-		globalOutputStream() << " classname_" << entity->getKeyValue( "classname" );
+	ExpandSelectionToEntitiesWalker_dbg() : m_depth( 0 ), m_world( Map_FindWorldspawn( g_map ) ){
 	}
-	globalOutputStream() << "\n";
-//	globalOutputStream() << "" <<  ;
-//	globalOutputStream() << "" <<  ;
-//	globalOutputStream() << "" <<  ;
-//	globalOutputStream() << "" <<  ;
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	globalOutputStream() << "post depth_" << m_depth;
-	globalOutputStream() << " path.size()_" << path.size();
-	if ( path.top().get_pointer() == m_world )
-		globalOutputStream() << " worldspawn";
-	if( path.top().get().isRoot() )
-		globalOutputStream() << " path.top().get().isRoot()";
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0 ){
-		globalOutputStream() << " entity!=0";
-		if( entity->isContainer() ){
-			globalOutputStream() << " entity->isContainer()";
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		++m_depth;
+		globalOutputStream() << "pre depth_" << m_depth;
+		globalOutputStream() << " path.size()_" << path.size();
+		if ( path.top().get_pointer() == m_world )
+			globalOutputStream() << " worldspawn";
+		if( path.top().get().isRoot() )
+			globalOutputStream() << " path.top().get().isRoot()";
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 ){
+			globalOutputStream() << " entity!=0";
+			if( entity->isContainer() ){
+				globalOutputStream() << " entity->isContainer()";
+			}
+			globalOutputStream() << " classname_" << entity->getKeyValue( "classname" );
 		}
-		globalOutputStream() << " classname_" << entity->getKeyValue( "classname" );
+		globalOutputStream() << "\n";
+//	globalOutputStream() << "" <<  ;
+//	globalOutputStream() << "" <<  ;
+//	globalOutputStream() << "" <<  ;
+//	globalOutputStream() << "" <<  ;
+		return true;
 	}
-	globalOutputStream() << "\n";
-	--m_depth;
-}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		globalOutputStream() << "post depth_" << m_depth;
+		globalOutputStream() << " path.size()_" << path.size();
+		if ( path.top().get_pointer() == m_world )
+			globalOutputStream() << " worldspawn";
+		if( path.top().get().isRoot() )
+			globalOutputStream() << " path.top().get().isRoot()";
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 ){
+			globalOutputStream() << " entity!=0";
+			if( entity->isContainer() ){
+				globalOutputStream() << " entity->isContainer()";
+			}
+			globalOutputStream() << " classname_" << entity->getKeyValue( "classname" );
+		}
+		globalOutputStream() << "\n";
+		--m_depth;
+	}
 };
 #endif
 
 class ExpandSelectionToPrimitivesWalker : public scene::Graph::Walker
 {
-mutable std::size_t m_depth;
-const scene::Node* m_world;
+	mutable std::size_t m_depth;
+	const scene::Node* m_world;
 public:
-ExpandSelectionToPrimitivesWalker() : m_depth( 0 ), m_world( Map_FindWorldspawn( g_map ) ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	++m_depth;
+	ExpandSelectionToPrimitivesWalker() : m_depth( 0 ), m_world( Map_FindWorldspawn( g_map ) ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		++m_depth;
 
-	if( !path.top().get().visible() )
-		return false;
+		if( !path.top().get().visible() )
+			return false;
 
-//	if ( path.top().get_pointer() == m_world ) // ignore worldspawn
-//		return false;
+//		if ( path.top().get_pointer() == m_world ) // ignore worldspawn
+//			return false;
 
-	if ( m_depth == 2 ) { // entity depth
-		// traverse and select children if any one is selected
-		bool beselected = false;
-		const bool isContainer = Node_getEntity( path.top() )->isContainer();
-		if ( instance.childSelected() || instance.isSelected() ) {
-			beselected = true;
-			Instance_setSelected( instance, !isContainer );
+		if ( m_depth == 2 ) { // entity depth
+			// traverse and select children if any one is selected
+			bool beselected = false;
+			const bool isContainer = Node_getEntity( path.top() )->isContainer();
+			if ( instance.childSelected() || instance.isSelected() ) {
+				beselected = true;
+				Instance_setSelected( instance, !isContainer );
+			}
+			return isContainer && beselected;
 		}
-		return isContainer && beselected;
+		else if ( m_depth == 3 ) { // primitive depth
+			Instance_setSelected( instance, true );
+			return false;
+		}
+		return true;
 	}
-	else if ( m_depth == 3 ) { // primitive depth
-		Instance_setSelected( instance, true );
-		return false;
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		--m_depth;
 	}
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	--m_depth;
-}
 };
 
 void Scene_ExpandSelectionToPrimitives(){
@@ -423,40 +422,40 @@ void Scene_ExpandSelectionToPrimitives(){
 
 class ExpandSelectionToEntitiesWalker : public scene::Graph::Walker
 {
-mutable std::size_t m_depth;
-const scene::Node* m_world;
+	mutable std::size_t m_depth;
+	const scene::Node* m_world;
 public:
-ExpandSelectionToEntitiesWalker() : m_depth( 0 ), m_world( Map_FindWorldspawn( g_map ) ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	++m_depth;
+	ExpandSelectionToEntitiesWalker() : m_depth( 0 ), m_world( Map_FindWorldspawn( g_map ) ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		++m_depth;
 
-	if( !path.top().get().visible() )
-		return false;
+		if( !path.top().get().visible() )
+			return false;
 
-//	if ( path.top().get_pointer() == m_world ) // ignore worldspawn
-//		return false;
+//		if ( path.top().get_pointer() == m_world ) // ignore worldspawn
+//			return false;
 
-	if ( m_depth == 2 ) { // entity depth
-		// traverse and select children if any one is selected
-		bool beselected = false;
-		if ( instance.childSelected() || instance.isSelected() ) {
-			beselected = true;
-			if( path.top().get_pointer() != m_world ){ //avoid selecting world node
-				Instance_setSelected( instance, true );
+		if ( m_depth == 2 ) { // entity depth
+			// traverse and select children if any one is selected
+			bool beselected = false;
+			if ( instance.childSelected() || instance.isSelected() ) {
+				beselected = true;
+				if( path.top().get_pointer() != m_world ){ //avoid selecting world node
+					Instance_setSelected( instance, true );
+				}
 			}
+			return Node_getEntity( path.top() )->isContainer() && beselected;
 		}
-		return Node_getEntity( path.top() )->isContainer() && beselected;
+		else if ( m_depth == 3 ) { // primitive depth
+			Instance_setSelected( instance, true );
+			return false;
+		}
+		return true;
 	}
-	else if ( m_depth == 3 ) { // primitive depth
-		Instance_setSelected( instance, true );
-		return false;
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		--m_depth;
 	}
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	--m_depth;
-}
 };
 
 void Scene_ExpandSelectionToEntities(){
@@ -728,36 +727,36 @@ bool propertyvalues_contain( const PropertyValues& propertyvalues, const char *s
 template<typename EntityMatcher>
 class EntityFindByPropertyValueWalker : public scene::Graph::Walker
 {
-const EntityMatcher& m_entityMatcher;
-const scene::Node* m_world;
+	const EntityMatcher& m_entityMatcher;
+	const scene::Node* m_world;
 public:
-EntityFindByPropertyValueWalker( const EntityMatcher& entityMatcher )
-	: m_entityMatcher( entityMatcher ), m_world( Map_FindWorldspawn( g_map ) ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if( !path.top().get().visible() ){
-		return false;
+	EntityFindByPropertyValueWalker( const EntityMatcher& entityMatcher )
+		: m_entityMatcher( entityMatcher ), m_world( Map_FindWorldspawn( g_map ) ){
 	}
-	// ignore worldspawn
-	if ( path.top().get_pointer() == m_world ) {
-		return false;
-	}
-
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0 ){
-		if( m_entityMatcher( entity ) ) {
-			Instance_getSelectable( instance )->setSelected( true );
-			return true;
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if( !path.top().get().visible() ){
+			return false;
 		}
-		return false;
+		// ignore worldspawn
+		if ( path.top().get_pointer() == m_world ) {
+			return false;
+		}
+
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 ){
+			if( m_entityMatcher( entity ) ) {
+				Instance_getSelectable( instance )->setSelected( true );
+				return true;
+			}
+			return false;
+		}
+		else if( path.size() > 2 && !path.top().get().isRoot() ){
+			Selectable* selectable = Instance_getSelectable( instance );
+			if( selectable != 0 )
+				selectable->setSelected( true );
+		}
+		return true;
 	}
-	else if( path.size() > 2 && !path.top().get().isRoot() ){
-		Selectable* selectable = Instance_getSelectable( instance );
-		if( selectable != 0 )
-			selectable->setSelected( true );
-	}
-	return true;
-}
 };
 
 template<typename EntityMatcher>
@@ -773,27 +772,27 @@ void Scene_EntitySelectByPropertyValues( scene::Graph& graph, const char *prop, 
 
 class EntityGetSelectedPropertyValuesWalker : public scene::Graph::Walker
 {
-PropertyValues& m_propertyvalues;
-const char *m_prop;
-const scene::Node* m_world;
+	PropertyValues& m_propertyvalues;
+	const char *m_prop;
+	const scene::Node* m_world;
 public:
-EntityGetSelectedPropertyValuesWalker( const char *prop, PropertyValues& propertyvalues )
-	: m_propertyvalues( propertyvalues ), m_prop( prop ), m_world( Map_FindWorldspawn( g_map ) ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0 ){
-		if( path.top().get_pointer() != m_world ){
-			if ( Instance_isSelected( instance ) || instance.childSelected() ) {
-				if ( !propertyvalues_contain( m_propertyvalues, entity->getKeyValue( m_prop ) ) ) {
-					m_propertyvalues.push_back( entity->getKeyValue( m_prop ) );
+	EntityGetSelectedPropertyValuesWalker( const char *prop, PropertyValues& propertyvalues )
+		: m_propertyvalues( propertyvalues ), m_prop( prop ), m_world( Map_FindWorldspawn( g_map ) ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 ){
+			if( path.top().get_pointer() != m_world ){
+				if ( Instance_isSelected( instance ) || instance.childSelected() ) {
+					if ( !propertyvalues_contain( m_propertyvalues, entity->getKeyValue( m_prop ) ) ) {
+						m_propertyvalues.push_back( entity->getKeyValue( m_prop ) );
+					}
 				}
 			}
+			return false;
 		}
-		return false;
+		return true;
 	}
-	return true;
-}
 };
 /*
 class EntityGetSelectedPropertyValuesWalker : public scene::Graph::Walker
@@ -960,18 +959,18 @@ ToggleItem g_hidden_item( g_hidden_caller );
 
 class HideSelectedWalker : public scene::Graph::Walker
 {
-bool m_hide;
+	bool m_hide;
 public:
-HideSelectedWalker( bool hide )
-	: m_hide( hide ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( Instance_isSelected( instance ) ) {
-		g_nodes_be_hidden = m_hide;
-		hide_node( path.top(), m_hide );
+	HideSelectedWalker( bool hide )
+		: m_hide( hide ){
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( Instance_isSelected( instance ) ) {
+			g_nodes_be_hidden = m_hide;
+			hide_node( path.top(), m_hide );
+		}
+		return true;
+	}
 };
 
 void Scene_Hide_Selected( bool hide ){
@@ -994,15 +993,15 @@ void HideSelected(){
 
 class HideAllWalker : public scene::Graph::Walker
 {
-bool m_hide;
+	bool m_hide;
 public:
-HideAllWalker( bool hide )
-	: m_hide( hide ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	hide_node( path.top(), m_hide );
-	return true;
-}
+	HideAllWalker( bool hide )
+		: m_hide( hide ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		hide_node( path.top(), m_hide );
+		return true;
+	}
 };
 
 void Scene_Hide_All( bool hide ){
@@ -1186,12 +1185,12 @@ inline Quaternion quaternion_for_euler_xyz_degrees( const Vector3& eulerXYZ ){
 	return quaternion_for_matrix4_rotation( matrix4_rotation_for_euler_xyz_degrees( eulerXYZ ) );
 #elif 0
 	return quaternion_multiplied_by_quaternion(
-			   quaternion_multiplied_by_quaternion(
-				   quaternion_for_z( degrees_to_radians( eulerXYZ[2] ) ),
-				   quaternion_for_y( degrees_to_radians( eulerXYZ[1] ) )
-				   ),
-			   quaternion_for_x( degrees_to_radians( eulerXYZ[0] ) )
-			   );
+	           quaternion_multiplied_by_quaternion(
+	               quaternion_for_z( degrees_to_radians( eulerXYZ[2] ) ),
+	               quaternion_for_y( degrees_to_radians( eulerXYZ[1] ) )
+	           ),
+	           quaternion_for_x( degrees_to_radians( eulerXYZ[0] ) )
+	       );
 #elif 1
 	double cx = cos( degrees_to_radians( eulerXYZ[0] * 0.5 ) );
 	double sx = sin( degrees_to_radians( eulerXYZ[0] * 0.5 ) );
@@ -1201,11 +1200,11 @@ inline Quaternion quaternion_for_euler_xyz_degrees( const Vector3& eulerXYZ ){
 	double sz = sin( degrees_to_radians( eulerXYZ[2] * 0.5 ) );
 
 	return Quaternion(
-			   cz * cy * sx - sz * sy * cx,
-			   cz * sy * cx + sz * cy * sx,
-			   sz * cy * cx - cz * sy * sx,
-			   cz * cy * cx + sz * sy * sx
-			   );
+	           cz * cy * sx - sz * sy * cx,
+	           cz * sy * cx + sz * cy * sx,
+	           sz * cy * cx - cz * sy * sx,
+	           cz * cy * cx + sz * sy * sx
+	       );
 #endif
 }
 
@@ -1280,30 +1279,30 @@ void DoRotateDlg(){
 					GtkWidget* label = gtk_label_new( "  X  " );
 					gtk_widget_show( label );
 					gtk_table_attach( table, label, 0, 1, 0, 1,
-									  (GtkAttachOptions) ( 0 ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( 0 ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
 					GtkWidget* label = gtk_label_new( "  Y  " );
 					gtk_widget_show( label );
 					gtk_table_attach( table, label, 0, 1, 1, 2,
-									  (GtkAttachOptions) ( 0 ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( 0 ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
 					GtkWidget* label = gtk_label_new( "  Z  " );
 					gtk_widget_show( label );
 					gtk_table_attach( table, label, 0, 1, 2, 3,
-									  (GtkAttachOptions) ( 0 ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( 0 ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
 					GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 0, -359, 359, 1, 10, 0 ) );
 					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 2 ) );
 					gtk_widget_show( GTK_WIDGET( spin ) );
 					gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 0, 1,
-									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_set_size_request( GTK_WIDGET( spin ), 64, -1 );
 					gtk_spin_button_set_wrap( spin, TRUE );
 
@@ -1316,8 +1315,8 @@ void DoRotateDlg(){
 					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 2 ) );
 					gtk_widget_show( GTK_WIDGET( spin ) );
 					gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 1, 2,
-									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_set_size_request( GTK_WIDGET( spin ), 64, -1 );
 					gtk_spin_button_set_wrap( spin, TRUE );
 
@@ -1328,8 +1327,8 @@ void DoRotateDlg(){
 					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 2 ) );
 					gtk_widget_show( GTK_WIDGET( spin ) );
 					gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 2, 3,
-									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_set_size_request( GTK_WIDGET( spin ), 64, -1 );
 					gtk_spin_button_set_wrap( spin, TRUE );
 
@@ -1434,30 +1433,30 @@ void DoScaleDlg(){
 					GtkWidget* label = gtk_label_new( "  X  " );
 					gtk_widget_show( label );
 					gtk_table_attach( table, label, 0, 1, 0, 1,
-									  (GtkAttachOptions) ( 0 ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( 0 ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
 					GtkWidget* label = gtk_label_new( "  Y  " );
 					gtk_widget_show( label );
 					gtk_table_attach( table, label, 0, 1, 1, 2,
-									  (GtkAttachOptions) ( 0 ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( 0 ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
 					GtkWidget* label = gtk_label_new( "  Z  " );
 					gtk_widget_show( label );
 					gtk_table_attach( table, label, 0, 1, 2, 3,
-									  (GtkAttachOptions) ( 0 ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( 0 ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
 					GtkWidget* entry = gtk_entry_new();
 					gtk_entry_set_text( GTK_ENTRY( entry ), "1.0" );
 					gtk_widget_show( entry );
 					gtk_table_attach( table, entry, 1, 2, 0, 1,
-									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 					g_scale_dialog.x = entry;
 				}
@@ -1466,8 +1465,8 @@ void DoScaleDlg(){
 					gtk_entry_set_text( GTK_ENTRY( entry ), "1.0" );
 					gtk_widget_show( entry );
 					gtk_table_attach( table, entry, 1, 2, 1, 2,
-									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 					g_scale_dialog.y = entry;
 				}
@@ -1476,8 +1475,8 @@ void DoScaleDlg(){
 					gtk_entry_set_text( GTK_ENTRY( entry ), "1.0" );
 					gtk_widget_show( entry );
 					gtk_table_attach( table, entry, 1, 2, 2, 3,
-									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 					g_scale_dialog.z = entry;
 				}
@@ -1510,28 +1509,28 @@ void DoScaleDlg(){
 
 class EntityGetSelectedPropertyValuesWalker_nonEmpty : public scene::Graph::Walker
 {
-PropertyValues& m_propertyvalues;
-const char *m_prop;
-const scene::Node* m_world;
+	PropertyValues& m_propertyvalues;
+	const char *m_prop;
+	const scene::Node* m_world;
 public:
-EntityGetSelectedPropertyValuesWalker_nonEmpty( const char *prop, PropertyValues& propertyvalues )
-	: m_propertyvalues( propertyvalues ), m_prop( prop ), m_world( Map_FindWorldspawn( g_map ) ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0 ){
-		if( path.top().get_pointer() != m_world ){
-			if ( Instance_isSelected( instance ) || instance.childSelected() ) {
-				const char* keyvalue = entity->getKeyValue( m_prop );
-				if ( !string_empty( keyvalue ) && !propertyvalues_contain( m_propertyvalues, keyvalue ) ) {
-					m_propertyvalues.push_back( keyvalue );
+	EntityGetSelectedPropertyValuesWalker_nonEmpty( const char *prop, PropertyValues& propertyvalues )
+		: m_propertyvalues( propertyvalues ), m_prop( prop ), m_world( Map_FindWorldspawn( g_map ) ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 ){
+			if( path.top().get_pointer() != m_world ){
+				if ( Instance_isSelected( instance ) || instance.childSelected() ) {
+					const char* keyvalue = entity->getKeyValue( m_prop );
+					if ( !string_empty( keyvalue ) && !propertyvalues_contain( m_propertyvalues, keyvalue ) ) {
+						m_propertyvalues.push_back( keyvalue );
+					}
 				}
 			}
+			return false;
 		}
-		return false;
+		return true;
 	}
-	return true;
-}
 };
 
 void Scene_EntityGetPropertyValues_nonEmpty( scene::Graph& graph, const char *prop, PropertyValues& propertyvalues ){

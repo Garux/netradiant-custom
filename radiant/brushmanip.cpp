@@ -418,58 +418,58 @@ void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds,
 	switch ( type )
 	{
 	case eBrushCuboid:
-	{
-		UndoableCommand undo( "brushCuboid" );
+		{
+			UndoableCommand undo( "brushCuboid" );
 
-		Brush_ConstructCuboid( brush, bounds, shader, projection );
-	}
-	break;
+			Brush_ConstructCuboid( brush, bounds, shader, projection );
+		}
+		break;
 	case eBrushPrism:
-	{
-		const int axis = GlobalXYWnd_getCurrentViewType();
-		StringOutputStream command;
-		command << c_brushPrism_name << " -sides " << Unsigned( sides ) << " -axis " << axis;
-		UndoableCommand undo( command.c_str() );
+		{
+			const int axis = GlobalXYWnd_getCurrentViewType();
+			StringOutputStream command;
+			command << c_brushPrism_name << " -sides " << Unsigned( sides ) << " -axis " << axis;
+			UndoableCommand undo( command.c_str() );
 
-		Brush_ConstructPrism( brush, bounds, sides, axis, shader, projection );
-	}
-	break;
+			Brush_ConstructPrism( brush, bounds, sides, axis, shader, projection );
+		}
+		break;
 	case eBrushCone:
-	{
-		StringOutputStream command;
-		command << c_brushCone_name << " -sides " << Unsigned( sides );
-		UndoableCommand undo( command.c_str() );
+		{
+			StringOutputStream command;
+			command << c_brushCone_name << " -sides " << Unsigned( sides );
+			UndoableCommand undo( command.c_str() );
 
-		Brush_ConstructCone( brush, bounds, sides, shader, projection );
-	}
-	break;
+			Brush_ConstructCone( brush, bounds, sides, shader, projection );
+		}
+		break;
 	case eBrushSphere:
-	{
-		StringOutputStream command;
-		command << c_brushSphere_name << " -sides " << Unsigned( sides );
-		UndoableCommand undo( command.c_str() );
+		{
+			StringOutputStream command;
+			command << c_brushSphere_name << " -sides " << Unsigned( sides );
+			UndoableCommand undo( command.c_str() );
 
-		Brush_ConstructSphere( brush, bounds, sides, shader, projection );
-	}
-	break;
+			Brush_ConstructSphere( brush, bounds, sides, shader, projection );
+		}
+		break;
 	case eBrushRock:
-	{
-		StringOutputStream command;
-		command << c_brushRock_name << " -sides " << Unsigned( sides );
-		UndoableCommand undo( command.c_str() );
+		{
+			StringOutputStream command;
+			command << c_brushRock_name << " -sides " << Unsigned( sides );
+			UndoableCommand undo( command.c_str() );
 
-		Brush_ConstructRock( brush, bounds, sides, shader, projection );
-	}
-	break;
+			Brush_ConstructRock( brush, bounds, sides, shader, projection );
+		}
+		break;
 	case eBrushIcosahedron:
-	{
-		StringOutputStream command;
-		command << "brushIcosahedron" << " -subdivisions " << Unsigned( sides );
-		UndoableCommand undo( command.c_str() );
+		{
+			StringOutputStream command;
+			command << "brushIcosahedron" << " -subdivisions " << Unsigned( sides );
+			UndoableCommand undo( command.c_str() );
 
-		icosahedron::Brush_ConstructIcosahedron( brush, bounds, sides, option, shader, projection );
-	}
-	break;
+			icosahedron::Brush_ConstructIcosahedron( brush, bounds, sides, option, shader, projection );
+		}
+		break;
 	}
 }
 
@@ -505,15 +505,15 @@ void ConstructRegionBrushes( scene::Node* brushes[6], const Vector3& region_mins
 
 class FaceSetTexdef
 {
-const TextureProjection& m_projection;
-const bool m_setBasis;
-const bool m_resetBasis;
+	const TextureProjection& m_projection;
+	const bool m_setBasis;
+	const bool m_resetBasis;
 public:
-FaceSetTexdef( const TextureProjection& projection, bool setBasis, bool resetBasis ) : m_projection( projection ), m_setBasis( setBasis ), m_resetBasis( resetBasis ){
-}
-void operator()( Face& face ) const {
-	face.SetTexdef( m_projection, m_setBasis, m_resetBasis );
-}
+	FaceSetTexdef( const TextureProjection& projection, bool setBasis, bool resetBasis ) : m_projection( projection ), m_setBasis( setBasis ), m_resetBasis( resetBasis ){
+	}
+	void operator()( Face& face ) const {
+		face.SetTexdef( m_projection, m_setBasis, m_resetBasis );
+	}
 };
 
 void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const TextureProjection& projection, bool setBasis, bool resetBasis ){
@@ -528,18 +528,18 @@ void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const Texture
 
 class FaceSetTexdef_
 {
-const float* m_hShift;
-const float* m_vShift;
-const float* m_hScale;
-const float* m_vScale;
-const float* m_rotation;
+	const float* m_hShift;
+	const float* m_vShift;
+	const float* m_hScale;
+	const float* m_vScale;
+	const float* m_rotation;
 public:
-FaceSetTexdef_( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ) :
-	m_hShift( hShift ), m_vShift( vShift ), m_hScale( hScale ), m_vScale( vScale ), m_rotation( rotation ) {
-}
-void operator()( Face& face ) const {
-	face.SetTexdef( m_hShift, m_vShift, m_hScale, m_vScale, m_rotation );
-}
+	FaceSetTexdef_( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ) :
+		m_hShift( hShift ), m_vShift( vShift ), m_hScale( hScale ), m_vScale( vScale ), m_rotation( rotation ) {
+	}
+	void operator()( Face& face ) const {
+		face.SetTexdef( m_hShift, m_vShift, m_hScale, m_vScale, m_rotation );
+	}
 };
 
 void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
@@ -555,13 +555,13 @@ void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const float* 
 
 class FaceSetFlags
 {
-const ContentsFlagsValue& m_flags;
+	const ContentsFlagsValue& m_flags;
 public:
-FaceSetFlags( const ContentsFlagsValue& flags ) : m_flags( flags ){
-}
-void operator()( Face& face ) const {
-	face.SetFlags( m_flags );
-}
+	FaceSetFlags( const ContentsFlagsValue& flags ) : m_flags( flags ){
+	}
+	void operator()( Face& face ) const {
+		face.SetFlags( m_flags );
+	}
 };
 
 void Scene_BrushSetFlags_Selected( scene::Graph& graph, const ContentsFlagsValue& flags ){
@@ -576,13 +576,13 @@ void Scene_BrushSetFlags_Component_Selected( scene::Graph& graph, const Contents
 
 class FaceShiftTexdef
 {
-float m_s, m_t;
+	float m_s, m_t;
 public:
-FaceShiftTexdef( float s, float t ) : m_s( s ), m_t( t ){
-}
-void operator()( Face& face ) const {
-	face.ShiftTexdef( m_s, m_t );
-}
+	FaceShiftTexdef( float s, float t ) : m_s( s ), m_t( t ){
+	}
+	void operator()( Face& face ) const {
+		face.ShiftTexdef( m_s, m_t );
+	}
 };
 
 void Scene_BrushShiftTexdef_Selected( scene::Graph& graph, float s, float t ){
@@ -597,13 +597,13 @@ void Scene_BrushShiftTexdef_Component_Selected( scene::Graph& graph, float s, fl
 
 class FaceScaleTexdef
 {
-float m_s, m_t;
+	float m_s, m_t;
 public:
-FaceScaleTexdef( float s, float t ) : m_s( s ), m_t( t ){
-}
-void operator()( Face& face ) const {
-	face.ScaleTexdef( m_s, m_t );
-}
+	FaceScaleTexdef( float s, float t ) : m_s( s ), m_t( t ){
+	}
+	void operator()( Face& face ) const {
+		face.ScaleTexdef( m_s, m_t );
+	}
 };
 
 void Scene_BrushScaleTexdef_Selected( scene::Graph& graph, float s, float t ){
@@ -618,13 +618,13 @@ void Scene_BrushScaleTexdef_Component_Selected( scene::Graph& graph, float s, fl
 
 class FaceRotateTexdef
 {
-float m_angle;
+	float m_angle;
 public:
-FaceRotateTexdef( float angle ) : m_angle( angle ){
-}
-void operator()( Face& face ) const {
-	face.RotateTexdef( m_angle );
-}
+	FaceRotateTexdef( float angle ) : m_angle( angle ){
+	}
+	void operator()( Face& face ) const {
+		face.RotateTexdef( m_angle );
+	}
 };
 
 void Scene_BrushRotateTexdef_Selected( scene::Graph& graph, float angle ){
@@ -640,12 +640,12 @@ void Scene_BrushRotateTexdef_Component_Selected( scene::Graph& graph, float angl
 
 class FaceSetShader
 {
-const char* m_name;
+	const char* m_name;
 public:
-FaceSetShader( const char* name ) : m_name( name ) {}
-void operator()( Face& face ) const {
-	face.SetShader( m_name );
-}
+	FaceSetShader( const char* name ) : m_name( name ) {}
+	void operator()( Face& face ) const {
+		face.SetShader( m_name );
+	}
 };
 
 void Scene_BrushSetShader_Selected( scene::Graph& graph, const char* name ){
@@ -660,13 +660,13 @@ void Scene_BrushSetShader_Component_Selected( scene::Graph& graph, const char* n
 
 class FaceSetDetail
 {
-bool m_detail;
+	bool m_detail;
 public:
-FaceSetDetail( bool detail ) : m_detail( detail ){
-}
-void operator()( Face& face ) const {
-	face.setDetail( m_detail );
-}
+	FaceSetDetail( bool detail ) : m_detail( detail ){
+	}
+	void operator()( Face& face ) const {
+		face.setDetail( m_detail );
+	}
 };
 
 void Scene_BrushSetDetail_Selected( scene::Graph& graph, bool detail ){
@@ -684,28 +684,28 @@ bool Face_FindReplaceShader( Face& face, const char* find, const char* replace )
 
 class FaceFindReplaceShader
 {
-const char* m_find;
-const char* m_replace;
+	const char* m_find;
+	const char* m_replace;
 public:
-FaceFindReplaceShader( const char* find, const char* replace ) : m_find( find ), m_replace( replace ){
-}
-void operator()( Face& face ) const {
-	Face_FindReplaceShader( face, m_find, m_replace );
-}
+	FaceFindReplaceShader( const char* find, const char* replace ) : m_find( find ), m_replace( replace ){
+	}
+	void operator()( Face& face ) const {
+		Face_FindReplaceShader( face, m_find, m_replace );
+	}
 };
 
 class FaceSelectByShader
 {
-const char* m_name;
+	const char* m_name;
 public:
-FaceSelectByShader( const char* name )
-	: m_name( name ){
-}
-void operator()( FaceInstance& face ) const {
-	if ( shader_equal( face.getFace().GetShader(), m_name ) ) {
-		face.setSelected( SelectionSystem::eFace, true );
+	FaceSelectByShader( const char* name )
+		: m_name( name ){
 	}
-}
+	void operator()( FaceInstance& face ) const {
+		if ( shader_equal( face.getFace().GetShader(), m_name ) ) {
+			face.setSelected( SelectionSystem::eFace, true );
+		}
+	}
 };
 
 void Scene_BrushFacesSelectByShader( scene::Graph& graph, const char* name ){
@@ -724,13 +724,11 @@ void Scene_BrushFindReplaceShader( scene::Graph& graph, const char* find, const 
 
 void Scene_BrushFindReplaceShader_Selected( scene::Graph& graph, const char* find, const char* replace ){
 	if ( !replace ) {
-		Scene_ForEachSelectedBrush_ForEachFaceInstance( graph,
-														FaceSelectByShader( find ) );
+		Scene_ForEachSelectedBrush_ForEachFaceInstance( graph, FaceSelectByShader( find ) );
 	}
 	else
 	{
-		Scene_ForEachSelectedBrush_ForEachFace( graph,
-												FaceFindReplaceShader( find, replace ) );
+		Scene_ForEachSelectedBrush_ForEachFace( graph, FaceFindReplaceShader( find, replace ) );
 	}
 }
 
@@ -738,8 +736,7 @@ void Scene_BrushFindReplaceShader_Selected( scene::Graph& graph, const char* fin
 // d1223m: dont even know what they are...
 void Scene_BrushFindReplaceShader_Component_Selected( scene::Graph& graph, const char* find, const char* replace ){
 	if ( !replace ) {
-		Scene_ForEachSelectedBrush_ForEachFaceInstance( graph,
-														FaceSelectByShader( find ) );
+		Scene_ForEachSelectedBrush_ForEachFaceInstance( graph, FaceSelectByShader( find ) );
 	}
 	else
 	{
@@ -795,14 +792,14 @@ void Scene_BrushProjectTexture_Component_Selected( scene::Graph& graph, const Te
 
 class FaceFitTexture
 {
-const float m_s_repeat, m_t_repeat;
-const bool m_only_dimension;
+	const float m_s_repeat, m_t_repeat;
+	const bool m_only_dimension;
 public:
-FaceFitTexture( float s_repeat, float t_repeat, bool only_dimension ) : m_s_repeat( s_repeat ), m_t_repeat( t_repeat ), m_only_dimension( only_dimension ) {
-}
-void operator()( Face& face ) const {
-	face.FitTexture( m_s_repeat, m_t_repeat, m_only_dimension );
-}
+	FaceFitTexture( float s_repeat, float t_repeat, bool only_dimension ) : m_s_repeat( s_repeat ), m_t_repeat( t_repeat ), m_only_dimension( only_dimension ) {
+	}
+	void operator()( Face& face ) const {
+		face.FitTexture( m_s_repeat, m_t_repeat, m_only_dimension );
+	}
 };
 
 void Scene_BrushFitTexture_Selected( scene::Graph& graph, float s_repeat, float t_repeat, bool only_dimension ){
@@ -853,8 +850,8 @@ void Scene_BrushResize_Cuboid( scene::Node*& node, const AABB& bounds ){
 	Brush* brush = Node_getBrush( *node );
 	if ( brush != 0 ) {
 		const char* shader = g_brush_always_caulk?
-								GetCaulkShader()
-								: TextureBrowser_GetSelectedShader();
+		                     GetCaulkShader()
+		                     : TextureBrowser_GetSelectedShader();
 		Brush_ConstructCuboid( *brush, bounds, shader, TextureTransform_getDefault() );
 		SceneChangeNotify();
 	}
@@ -878,23 +875,23 @@ bool Brush_hasShader( const Brush& brush, const char* name ){
 
 class BrushSelectByShaderWalker : public scene::Graph::Walker
 {
-const char* m_name;
+	const char* m_name;
 public:
-BrushSelectByShaderWalker( const char* name )
-	: m_name( name ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Brush* brush = Node_getBrush( path.top() );
-		if ( brush != 0 && Brush_hasShader( *brush, m_name ) ) {
-			Instance_getSelectable( instance )->setSelected( true );
+	BrushSelectByShaderWalker( const char* name )
+		: m_name( name ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.top().get().visible() ) {
+			Brush* brush = Node_getBrush( path.top() );
+			if ( brush != 0 && Brush_hasShader( *brush, m_name ) ) {
+				Instance_getSelectable( instance )->setSelected( true );
+			}
 		}
+		else{
+			return false;
+		}
+		return true;
 	}
-	else{
-		return false;
-	}
-	return true;
-}
 };
 
 void Scene_BrushSelectByShader( scene::Graph& graph, const char* name ){
@@ -907,18 +904,18 @@ void Scene_BrushSelectByShader_Component( scene::Graph& graph, const char* name 
 
 class FaceGetTexdef
 {
-TextureProjection& m_projection;
-mutable bool m_done;
+	TextureProjection& m_projection;
+	mutable bool m_done;
 public:
-FaceGetTexdef( TextureProjection& projection )
-	: m_projection( projection ), m_done( false ){
-}
-void operator()( Face& face ) const {
-	if ( !m_done ) {
-		m_done = true;
-		face.GetTexdef( m_projection );
+	FaceGetTexdef( TextureProjection& projection )
+		: m_projection( projection ), m_done( false ){
 	}
-}
+	void operator()( Face& face ) const {
+		if ( !m_done ) {
+			m_done = true;
+			face.GetTexdef( m_projection );
+		}
+	}
 };
 
 
@@ -949,18 +946,18 @@ void Scene_BrushGetShaderSize_Component_Selected( scene::Graph& graph, size_t& w
 
 class FaceGetFlags
 {
-ContentsFlagsValue& m_flags;
-mutable bool m_done;
+	ContentsFlagsValue& m_flags;
+	mutable bool m_done;
 public:
-FaceGetFlags( ContentsFlagsValue& flags )
-	: m_flags( flags ), m_done( false ){
-}
-void operator()( Face& face ) const {
-	if ( !m_done ) {
-		m_done = true;
-		face.GetFlags( m_flags );
+	FaceGetFlags( ContentsFlagsValue& flags )
+		: m_flags( flags ), m_done( false ){
 	}
-}
+	void operator()( Face& face ) const {
+		if ( !m_done ) {
+			m_done = true;
+			face.GetFlags( m_flags );
+		}
+	}
 };
 
 
@@ -991,18 +988,18 @@ void Scene_BrushGetFlags_Component_Selected( scene::Graph& graph, ContentsFlagsV
 
 class FaceGetShader
 {
-CopiedString& m_shader;
-mutable bool m_done;
+	CopiedString& m_shader;
+	mutable bool m_done;
 public:
-FaceGetShader( CopiedString& shader )
-	: m_shader( shader ), m_done( false ){
-}
-void operator()( Face& face ) const {
-	if ( !m_done ) {
-		m_done = true;
-		m_shader = face.GetShader();
+	FaceGetShader( CopiedString& shader )
+		: m_shader( shader ), m_done( false ){
 	}
-}
+	void operator()( Face& face ) const {
+		if ( !m_done ) {
+			m_done = true;
+			m_shader = face.GetShader();
+		}
+	}
 };
 
 void Scene_BrushGetShader_Selected( scene::Graph& graph, CopiedString& shader ){
@@ -1033,104 +1030,104 @@ void Scene_BrushGetShader_Component_Selected( scene::Graph& graph, CopiedString&
 
 class filter_face_shader : public FaceFilter
 {
-const char* m_shader;
+	const char* m_shader;
 public:
-filter_face_shader( const char* shader ) : m_shader( shader ){
-}
-bool filter( const Face& face ) const {
-	return shader_equal( face.GetShader(), m_shader );
-}
+	filter_face_shader( const char* shader ) : m_shader( shader ){
+	}
+	bool filter( const Face& face ) const {
+		return shader_equal( face.GetShader(), m_shader );
+	}
 };
 
 class filter_face_shader_prefix : public FaceFilter
 {
-const char* m_prefix;
+	const char* m_prefix;
 public:
-filter_face_shader_prefix( const char* prefix ) : m_prefix( prefix ){
-}
-bool filter( const Face& face ) const {
-	return shader_equal_n( face.GetShader(), m_prefix, strlen( m_prefix ) );
-}
+	filter_face_shader_prefix( const char* prefix ) : m_prefix( prefix ){
+	}
+	bool filter( const Face& face ) const {
+		return shader_equal_n( face.GetShader(), m_prefix, strlen( m_prefix ) );
+	}
 };
 
 class filter_face_flags : public FaceFilter
 {
-int m_flags;
+	int m_flags;
 public:
-filter_face_flags( int flags ) : m_flags( flags ){
-}
-bool filter( const Face& face ) const {
-	return ( face.getShader().shaderFlags() & m_flags ) != 0;
-}
+	filter_face_flags( int flags ) : m_flags( flags ){
+	}
+	bool filter( const Face& face ) const {
+		return ( face.getShader().shaderFlags() & m_flags ) != 0;
+	}
 };
 
 class filter_face_contents : public FaceFilter
 {
-int m_contents;
+	int m_contents;
 public:
-filter_face_contents( int contents ) : m_contents( contents ){
-}
-bool filter( const Face& face ) const {
-	return ( face.getShader().m_flags.m_contentFlags & m_contents ) != 0;
-}
+	filter_face_contents( int contents ) : m_contents( contents ){
+	}
+	bool filter( const Face& face ) const {
+		return ( face.getShader().m_flags.m_contentFlags & m_contents ) != 0;
+	}
 };
 
 
 
 class FaceFilterAny
 {
-FaceFilter* m_filter;
-bool& m_filtered;
+	FaceFilter* m_filter;
+	bool& m_filtered;
 public:
-FaceFilterAny( FaceFilter* filter, bool& filtered ) : m_filter( filter ), m_filtered( filtered ){
-	m_filtered = false;
-}
-void operator()( Face& face ) const {
-	if ( m_filter->filter( face ) ) {
-		m_filtered = true;
+	FaceFilterAny( FaceFilter* filter, bool& filtered ) : m_filter( filter ), m_filtered( filtered ){
+		m_filtered = false;
 	}
-}
+	void operator()( Face& face ) const {
+		if ( m_filter->filter( face ) ) {
+			m_filtered = true;
+		}
+	}
 };
 
 class filter_brush_any_face : public BrushFilter
 {
-FaceFilter* m_filter;
+	FaceFilter* m_filter;
 public:
-filter_brush_any_face( FaceFilter* filter ) : m_filter( filter ){
-}
-bool filter( const Brush& brush ) const {
-	bool filtered;
-	Brush_forEachFace( brush, FaceFilterAny( m_filter, filtered ) );
-	return filtered;
-}
+	filter_brush_any_face( FaceFilter* filter ) : m_filter( filter ){
+	}
+	bool filter( const Brush& brush ) const {
+		bool filtered;
+		Brush_forEachFace( brush, FaceFilterAny( m_filter, filtered ) );
+		return filtered;
+	}
 };
 
 class FaceFilterAll
 {
-FaceFilter* m_filter;
-bool& m_filtered;
+	FaceFilter* m_filter;
+	bool& m_filtered;
 public:
-FaceFilterAll( FaceFilter* filter, bool& filtered ) : m_filter( filter ), m_filtered( filtered ){
-	m_filtered = true;
-}
-void operator()( Face& face ) const {
-	if ( !m_filter->filter( face ) ) {
-		m_filtered = false;
+	FaceFilterAll( FaceFilter* filter, bool& filtered ) : m_filter( filter ), m_filtered( filtered ){
+		m_filtered = true;
 	}
-}
+	void operator()( Face& face ) const {
+		if ( !m_filter->filter( face ) ) {
+			m_filtered = false;
+		}
+	}
 };
 
 class filter_brush_all_faces : public BrushFilter
 {
-FaceFilter* m_filter;
+	FaceFilter* m_filter;
 public:
-filter_brush_all_faces( FaceFilter* filter ) : m_filter( filter ){
-}
-bool filter( const Brush& brush ) const {
-	bool filtered;
-	Brush_forEachFace( brush, FaceFilterAll( m_filter, filtered ) );
-	return filtered;
-}
+	filter_brush_all_faces( FaceFilter* filter ) : m_filter( filter ){
+	}
+	bool filter( const Brush& brush ) const {
+		bool filtered;
+		Brush_forEachFace( brush, FaceFilterAll( m_filter, filtered ) );
+		return filtered;
+	}
 };
 
 
@@ -1246,10 +1243,10 @@ void normalquantisation_draw(){
 		for ( std::size_t j = 0; j <= c_quantise_normal; ++j )
 		{
 			Normal3f vertex( normal3f_normalised( Normal3f(
-													  static_cast<float>( c_quantise_normal - j - i ),
-													  static_cast<float>( i ),
-													  static_cast<float>( j )
-													  ) ) );
+			        static_cast<float>( c_quantise_normal - j - i ),
+			        static_cast<float>( i ),
+			        static_cast<float>( j )
+			                                      ) ) );
 			VectorScale( normal3f_to_array( vertex ), 64.f, normal3f_to_array( vertex ) );
 			glVertex3fv( normal3f_to_array( vertex ) );
 			vertex.x = -vertex.x;
@@ -1262,115 +1259,115 @@ void normalquantisation_draw(){
 class RenderableNormalQuantisation : public OpenGLRenderable
 {
 public:
-void render( RenderStateFlags state ) const {
-	normalquantisation_draw();
-}
+	void render( RenderStateFlags state ) const {
+		normalquantisation_draw();
+	}
 };
 
 const float g_test_quantise_normal = 1.f / static_cast<float>( 1 << 3 );
 
 class TestNormalQuantisation
 {
-void check_normal( const Normal3f& normal, const Normal3f& other ){
-	spherical_t spherical = spherical_from_normal3f( normal );
-	double longditude = RAD2DEG( spherical.longditude );
-	double latitude = RAD2DEG( spherical.latitude );
-	double x = cos( spherical.longditude ) * sin( spherical.latitude );
-	double y = sin( spherical.longditude ) * sin( spherical.latitude );
-	double z = cos( spherical.latitude );
+	void check_normal( const Normal3f& normal, const Normal3f& other ){
+		spherical_t spherical = spherical_from_normal3f( normal );
+		double longditude = RAD2DEG( spherical.longditude );
+		double latitude = RAD2DEG( spherical.latitude );
+		double x = cos( spherical.longditude ) * sin( spherical.latitude );
+		double y = sin( spherical.longditude ) * sin( spherical.latitude );
+		double z = cos( spherical.latitude );
 
-	ASSERT_MESSAGE( normal3f_dot( normal, other ) > 0.99, "bleh" );
-}
-
-void test_normal( const Normal3f& normal ){
-	Normal3f test = normal3f_from_spherical( spherical_from_normal3f( normal ) );
-	check_normal( normal, test );
-
-	EOctant octant = normal3f_classify_octant( normal );
-	Normal3f folded = normal3f_fold_octant( normal, octant );
-	ESextant sextant = normal3f_classify_sextant( folded );
-	folded = normal3f_fold_sextant( folded, sextant );
-
-	double scale = static_cast<float>( c_quantise_normal ) / ( folded.x + folded.y + folded.z );
-
-	double zbits = folded.z * scale;
-	double ybits = folded.y * scale;
-
-	std::size_t zbits_q = static_cast<std::size_t>( zbits );
-	std::size_t ybits_q = static_cast<std::size_t>( ybits );
-
-	ASSERT_MESSAGE( zbits_q <= ( c_quantise_normal / 8 ) * 3, "bleh" );
-	ASSERT_MESSAGE( ybits_q <= ( c_quantise_normal / 2 ), "bleh" );
-	ASSERT_MESSAGE( zbits_q + ( ( c_quantise_normal / 2 ) - ybits_q ) <= ( c_quantise_normal / 2 ), "bleh" );
-
-	std::size_t y_t = ( zbits_q < ( c_quantise_normal / 4 ) ) ? ybits_q : ( c_quantise_normal / 2 ) - ybits_q;
-	std::size_t z_t = ( zbits_q < ( c_quantise_normal / 4 ) ) ? zbits_q : ( c_quantise_normal / 2 ) - zbits_q;
-	std::size_t index = ( c_quantise_normal / 4 ) * y_t + z_t;
-	ASSERT_MESSAGE( index <= ( c_quantise_normal / 4 ) * ( c_quantise_normal / 2 ), "bleh" );
-
-	Normal3f tmp( c_quantise_normal - zbits_q - ybits_q, ybits_q, zbits_q );
-	tmp = normal3f_normalised( tmp );
-
-	Normal3f unfolded = normal3f_unfold_octant( normal3f_unfold_sextant( tmp, sextant ), octant );
-
-	check_normal( normal, unfolded );
-
-	double dot = normal3f_dot( normal, unfolded );
-	float length = VectorLength( normal3f_to_array( unfolded ) );
-	float inv_length = 1 / length;
-
-	Normal3f quantised = normal3f_quantised( normal );
-	check_normal( normal, quantised );
-}
-void test2( const Normal3f& normal, const Normal3f& other ){
-	if ( normal3f_quantised( normal ) != normal3f_quantised( other ) ) {
-		int bleh = 0;
+		ASSERT_MESSAGE( normal3f_dot( normal, other ) > 0.99, "bleh" );
 	}
-}
 
-static Normal3f normalise( float x, float y, float z ){
-	return normal3f_normalised( Normal3f( x, y, z ) );
-}
+	void test_normal( const Normal3f& normal ){
+		Normal3f test = normal3f_from_spherical( spherical_from_normal3f( normal ) );
+		check_normal( normal, test );
 
-float vec_rand(){
-	return static_cast<float>( rand() - ( RAND_MAX / 2 ) );
-}
+		EOctant octant = normal3f_classify_octant( normal );
+		Normal3f folded = normal3f_fold_octant( normal, octant );
+		ESextant sextant = normal3f_classify_sextant( folded );
+		folded = normal3f_fold_sextant( folded, sextant );
 
-Normal3f normal3f_rand(){
-	return normalise( vec_rand(), vec_rand(), vec_rand() );
-}
+		double scale = static_cast<float>( c_quantise_normal ) / ( folded.x + folded.y + folded.z );
+
+		double zbits = folded.z * scale;
+		double ybits = folded.y * scale;
+
+		std::size_t zbits_q = static_cast<std::size_t>( zbits );
+		std::size_t ybits_q = static_cast<std::size_t>( ybits );
+
+		ASSERT_MESSAGE( zbits_q <= ( c_quantise_normal / 8 ) * 3, "bleh" );
+		ASSERT_MESSAGE( ybits_q <= ( c_quantise_normal / 2 ), "bleh" );
+		ASSERT_MESSAGE( zbits_q + ( ( c_quantise_normal / 2 ) - ybits_q ) <= ( c_quantise_normal / 2 ), "bleh" );
+
+		std::size_t y_t = ( zbits_q < ( c_quantise_normal / 4 ) ) ? ybits_q : ( c_quantise_normal / 2 ) - ybits_q;
+		std::size_t z_t = ( zbits_q < ( c_quantise_normal / 4 ) ) ? zbits_q : ( c_quantise_normal / 2 ) - zbits_q;
+		std::size_t index = ( c_quantise_normal / 4 ) * y_t + z_t;
+		ASSERT_MESSAGE( index <= ( c_quantise_normal / 4 ) * ( c_quantise_normal / 2 ), "bleh" );
+
+		Normal3f tmp( c_quantise_normal - zbits_q - ybits_q, ybits_q, zbits_q );
+		tmp = normal3f_normalised( tmp );
+
+		Normal3f unfolded = normal3f_unfold_octant( normal3f_unfold_sextant( tmp, sextant ), octant );
+
+		check_normal( normal, unfolded );
+
+		double dot = normal3f_dot( normal, unfolded );
+		float length = VectorLength( normal3f_to_array( unfolded ) );
+		float inv_length = 1 / length;
+
+		Normal3f quantised = normal3f_quantised( normal );
+		check_normal( normal, quantised );
+	}
+	void test2( const Normal3f& normal, const Normal3f& other ){
+		if ( normal3f_quantised( normal ) != normal3f_quantised( other ) ) {
+			int bleh = 0;
+		}
+	}
+
+	static Normal3f normalise( float x, float y, float z ){
+		return normal3f_normalised( Normal3f( x, y, z ) );
+	}
+
+	float vec_rand(){
+		return static_cast<float>( rand() - ( RAND_MAX / 2 ) );
+	}
+
+	Normal3f normal3f_rand(){
+		return normalise( vec_rand(), vec_rand(), vec_rand() );
+	}
 
 public:
-TestNormalQuantisation(){
-	for ( int i = 4096; i > 0; --i )
-		test_normal( normal3f_rand() );
+	TestNormalQuantisation(){
+		for ( int i = 4096; i > 0; --i )
+			test_normal( normal3f_rand() );
 
-	test_normal( normalise( 1, 0, 0 ) );
-	test_normal( normalise( 0, 1, 0 ) );
-	test_normal( normalise( 0, 0, 1 ) );
-	test_normal( normalise( 1, 1, 0 ) );
-	test_normal( normalise( 1, 0, 1 ) );
-	test_normal( normalise( 0, 1, 1 ) );
+		test_normal( normalise( 1, 0, 0 ) );
+		test_normal( normalise( 0, 1, 0 ) );
+		test_normal( normalise( 0, 0, 1 ) );
+		test_normal( normalise( 1, 1, 0 ) );
+		test_normal( normalise( 1, 0, 1 ) );
+		test_normal( normalise( 0, 1, 1 ) );
 
-	test_normal( normalise( 10000, 10000, 10000 ) );
-	test_normal( normalise( 10000, 10000, 10001 ) );
-	test_normal( normalise( 10000, 10000, 10002 ) );
-	test_normal( normalise( 10000, 10000, 10010 ) );
-	test_normal( normalise( 10000, 10000, 10020 ) );
-	test_normal( normalise( 10000, 10000, 10030 ) );
-	test_normal( normalise( 10000, 10000, 10100 ) );
-	test_normal( normalise( 10000, 10000, 10101 ) );
-	test_normal( normalise( 10000, 10000, 10102 ) );
-	test_normal( normalise( 10000, 10000, 10200 ) );
-	test_normal( normalise( 10000, 10000, 10201 ) );
-	test_normal( normalise( 10000, 10000, 10202 ) );
-	test_normal( normalise( 10000, 10000, 10203 ) );
-	test_normal( normalise( 10000, 10000, 10300 ) );
+		test_normal( normalise( 10000, 10000, 10000 ) );
+		test_normal( normalise( 10000, 10000, 10001 ) );
+		test_normal( normalise( 10000, 10000, 10002 ) );
+		test_normal( normalise( 10000, 10000, 10010 ) );
+		test_normal( normalise( 10000, 10000, 10020 ) );
+		test_normal( normalise( 10000, 10000, 10030 ) );
+		test_normal( normalise( 10000, 10000, 10100 ) );
+		test_normal( normalise( 10000, 10000, 10101 ) );
+		test_normal( normalise( 10000, 10000, 10102 ) );
+		test_normal( normalise( 10000, 10000, 10200 ) );
+		test_normal( normalise( 10000, 10000, 10201 ) );
+		test_normal( normalise( 10000, 10000, 10202 ) );
+		test_normal( normalise( 10000, 10000, 10203 ) );
+		test_normal( normalise( 10000, 10000, 10300 ) );
 
 
-	test2( normalise( 10000, 10000, 10000 ), normalise( 10000, 10000, 10001 ) );
-	test2( normalise( 10000, 10000, 10001 ), normalise( 10000, 10001, 10000 ) );
-}
+		test2( normalise( 10000, 10000, 10000 ), normalise( 10000, 10000, 10001 ) );
+		test2( normalise( 10000, 10000, 10001 ), normalise( 10000, 10001, 10000 ) );
+	}
 };
 
 TestNormalQuantisation g_testNormalQuantisation;
@@ -1382,9 +1379,9 @@ TestNormalQuantisation g_testNormalQuantisation;
 class TestSelectableObserver : public observer_template<const Selectable&>
 {
 public:
-void notify( const Selectable& arguments ){
-	bool bleh = arguments.isSelected();
-}
+	void notify( const Selectable& arguments ){
+		bool bleh = arguments.isSelected();
+	}
 };
 
 inline void test_bleh(){
@@ -1398,9 +1395,9 @@ inline void test_bleh(){
 class TestBleh
 {
 public:
-TestBleh(){
-	test_bleh();
-}
+	TestBleh(){
+		test_bleh();
+	}
 };
 
 const TestBleh testbleh;
@@ -1411,37 +1408,37 @@ const TestBleh testbleh;
 class TestRefcountedString
 {
 public:
-TestRefcountedString(){
-	{
-		// copy construct
-		SmartString string1( "string1" );
-		SmartString string2( string1 );
-		SmartString string3( string2 );
+	TestRefcountedString(){
+		{
+			// copy construct
+			SmartString string1( "string1" );
+			SmartString string2( string1 );
+			SmartString string3( string2 );
+		}
+		{
+			// refcounted assignment
+			SmartString string1( "string1" );
+			SmartString string2( "string2" );
+			string1 = string2;
+		}
+		{
+			// copy assignment
+			SmartString string1( "string1" );
+			SmartString string2( "string2" );
+			string1 = string2.c_str();
+		}
+		{
+			// self-assignment
+			SmartString string1( "string1" );
+			string1 = string1;
+		}
+		{
+			// self-assignment via another reference
+			SmartString string1( "string1" );
+			SmartString string2( string1 );
+			string1 = string2;
+		}
 	}
-	{
-		// refcounted assignment
-		SmartString string1( "string1" );
-		SmartString string2( "string2" );
-		string1 = string2;
-	}
-	{
-		// copy assignment
-		SmartString string1( "string1" );
-		SmartString string2( "string2" );
-		string1 = string2.c_str();
-	}
-	{
-		// self-assignment
-		SmartString string1( "string1" );
-		string1 = string1;
-	}
-	{
-		// self-assignment via another reference
-		SmartString string1( "string1" );
-		SmartString string2( string1 );
-		string1 = string2;
-	}
-}
 };
 
 const TestRefcountedString g_testRefcountedString;
@@ -1460,15 +1457,15 @@ void Select_MakeStructural(){
 
 class BrushMakeSided
 {
-std::size_t m_count;
+	std::size_t m_count;
 public:
-BrushMakeSided( std::size_t count )
-	: m_count( count ){
-}
-void set(){
-	Scene_BrushConstructPrefab( GlobalSceneGraph(), eBrushPrism, m_count, false, TextureBrowser_GetSelectedShader() );
-}
-typedef MemberCaller<BrushMakeSided, &BrushMakeSided::set> SetCaller;
+	BrushMakeSided( std::size_t count )
+		: m_count( count ){
+	}
+	void set(){
+		Scene_BrushConstructPrefab( GlobalSceneGraph(), eBrushPrism, m_count, false, TextureBrowser_GetSelectedShader() );
+	}
+	typedef MemberCaller<BrushMakeSided, &BrushMakeSided::set> SetCaller;
 };
 
 
@@ -1483,15 +1480,15 @@ BrushMakeSided g_brushmakesided9( 9 );
 
 class BrushPrefab
 {
-EBrushPrefab m_type;
+	EBrushPrefab m_type;
 public:
-BrushPrefab( EBrushPrefab type )
-	: m_type( type ){
-}
-void set(){
-	DoSides( m_type, GlobalXYWnd_getCurrentViewType() );
-}
-typedef MemberCaller<BrushPrefab, &BrushPrefab::set> SetCaller;
+	BrushPrefab( EBrushPrefab type )
+		: m_type( type ){
+	}
+	void set(){
+		DoSides( m_type, GlobalXYWnd_getCurrentViewType() );
+	}
+	typedef MemberCaller<BrushPrefab, &BrushPrefab::set> SetCaller;
 };
 
 BrushPrefab g_brushprism( eBrushPrism );

@@ -34,16 +34,16 @@ class ModuleObserver;
 class Resource
 {
 public:
-virtual bool load() = 0;
-virtual bool save() = 0;
-virtual void flush() = 0;
-virtual void refresh() = 0;
-virtual scene::Node* getNode() = 0;
-virtual void setNode( scene::Node* node ) = 0;
-virtual void attach( ModuleObserver& observer ) = 0;
-virtual void detach( ModuleObserver& observer ) = 0;
-virtual void realise() = 0;
-virtual void unrealise() = 0;
+	virtual bool load() = 0;
+	virtual bool save() = 0;
+	virtual void flush() = 0;
+	virtual void refresh() = 0;
+	virtual scene::Node* getNode() = 0;
+	virtual void setNode( scene::Node* node ) = 0;
+	virtual void attach( ModuleObserver& observer ) = 0;
+	virtual void detach( ModuleObserver& observer ) = 0;
+	virtual void realise() = 0;
+	virtual void unrealise() = 0;
 };
 
 class EntityCreator;
@@ -51,13 +51,13 @@ class EntityCreator;
 class ReferenceCache
 {
 public:
-INTEGER_CONSTANT( Version, 1 );
-STRING_CONSTANT( Name, "reference" );
+	INTEGER_CONSTANT( Version, 1 );
+	STRING_CONSTANT( Name, "reference" );
 
-virtual Resource* capture( const char* path ) = 0;
-virtual void release( const char* path ) = 0;
+	virtual Resource* capture( const char* path ) = 0;
+	virtual void release( const char* path ) = 0;
 
-virtual void setEntityCreator( EntityCreator& entityCreator ) = 0;
+	virtual void setEntityCreator( EntityCreator& entityCreator ) = 0;
 };
 
 #include "modulesystem.h"

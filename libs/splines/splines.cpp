@@ -23,13 +23,13 @@
 #include "splines.h"
 
 extern "C" {
-int FS_Write( const void *buffer, int len, fileHandle_t h );
-int FS_ReadFile( const char *qpath, void **buffer );
-void FS_FreeFile( void *buffer );
-fileHandle_t FS_FOpenFileWrite( const char *filename );
-void FS_FCloseFile( fileHandle_t f );
-void Cbuf_AddText( const char *text );
-void Cbuf_Execute( void );
+	int FS_Write( const void *buffer, int len, fileHandle_t h );
+	int FS_ReadFile( const char *qpath, void **buffer );
+	void FS_FreeFile( void *buffer );
+	fileHandle_t FS_FOpenFileWrite( const char *filename );
+	void FS_FCloseFile( fileHandle_t f );
+	void Cbuf_AddText( const char *text );
+	void Cbuf_Execute( void );
 }
 
 float Q_fabs( float f ) {
@@ -48,39 +48,39 @@ float Q_fabs( float f ) {
 idCameraDef camera[MAX_CAMERAS];
 
 extern "C" {
-qboolean loadCamera( int camNum, const char *name ) {
-	if ( camNum < 0 || camNum >= MAX_CAMERAS ) {
+	qboolean loadCamera( int camNum, const char *name ) {
+		if ( camNum < 0 || camNum >= MAX_CAMERAS ) {
+			return qfalse;
+		}
+		camera[camNum].clear();
+		return (qboolean)camera[camNum].load( name );
+	}
+
+	qboolean getCameraInfo( int camNum, int time, float *origin, float *angles, float *fov ) {
+		idVec3 dir, org;
+		if ( camNum < 0 || camNum >= MAX_CAMERAS ) {
+			return qfalse;
+		}
+		org[0] = origin[0];
+		org[1] = origin[1];
+		org[2] = origin[2];
+		if ( camera[camNum].getCameraInfo( time, org, dir, fov ) ) {
+			origin[0] = org[0];
+			origin[1] = org[1];
+			origin[2] = org[2];
+			angles[1] = atan2( dir[1], dir[0] ) * 180 / 3.14159;
+			angles[0] = asin( dir[2] ) * 180 / 3.14159;
+			return qtrue;
+		}
 		return qfalse;
 	}
-	camera[camNum].clear();
-	return (qboolean)camera[camNum].load( name );
-}
 
-qboolean getCameraInfo( int camNum, int time, float *origin, float *angles, float *fov ) {
-	idVec3 dir, org;
-	if ( camNum < 0 || camNum >= MAX_CAMERAS ) {
-		return qfalse;
+	void startCamera( int camNum, int time ) {
+		if ( camNum < 0 || camNum >= MAX_CAMERAS ) {
+			return;
+		}
+		camera[camNum].startCamera( time );
 	}
-	org[0] = origin[0];
-	org[1] = origin[1];
-	org[2] = origin[2];
-	if ( camera[camNum].getCameraInfo( time, org, dir, fov ) ) {
-		origin[0] = org[0];
-		origin[1] = org[1];
-		origin[2] = org[2];
-		angles[1] = atan2( dir[1], dir[0] ) * 180 / 3.14159;
-		angles[0] = asin( dir[2] ) * 180 / 3.14159;
-		return qtrue;
-	}
-	return qfalse;
-}
-
-void startCamera( int camNum, int time ) {
-	if ( camNum < 0 || camNum >= MAX_CAMERAS ) {
-		return;
-	}
-	camera[camNum].startCamera( time );
-}
 
 }
 
@@ -359,10 +359,14 @@ void idSplineList::initPosition( long bt, long totalTime ) {
 
 float idSplineList::calcSpline( int step, float tension ) {
 	switch ( step ) {
-	case 0: return ( pow( 1 - tension, 3 ) ) / 6;
-	case 1: return ( 3 * pow( tension, 3 ) - 6 * pow( tension, 2 ) + 4 ) / 6;
-	case 2: return ( -3 * pow( tension, 3 ) + 3 * pow( tension, 2 ) + 3 * tension + 1 ) / 6;
-	case 3: return pow( tension, 3 ) / 6;
+	case 0:
+		return ( pow( 1 - tension, 3 ) ) / 6;
+	case 1:
+		return ( 3 * pow( tension, 3 ) - 6 * pow( tension, 2 ) + 4 ) / 6;
+	case 2:
+		return ( -3 * pow( tension, 3 ) + 3 * pow( tension, 2 ) + 3 * tension + 1 ) / 6;
+	case 3:
+		return pow( tension, 3 ) / 6;
 	}
 	return 0.0;
 }
@@ -500,31 +504,31 @@ void idCameraDef::getActiveSegmentInfo( int segment, idVec3 &origin, idVec3 &dir
 	getCameraInfo( d * totalTime * 1000, origin, direction, fov );
 #endif
 /*
-    if (!cameraSpline.validTime()) {
-        buildCamera();
-    }
-    origin = *cameraSpline.getSegmentPoint(segment);
+	if (!cameraSpline.validTime()) {
+		buildCamera();
+	}
+	origin = *cameraSpline.getSegmentPoint(segment);
 
 
-    idVec3 temp;
+	idVec3 temp;
 
-    int numTargets = getTargetSpline()->controlPoints.Num();
-    int count = cameraSpline.splineTime.Num();
-    if (numTargets == 0) {
-        // follow the path
-        if (cameraSpline.getActiveSegment() < count - 1) {
-            temp = *cameraSpline.splinePoints[cameraSpline.getActiveSegment()+1];
-        }
-    } else if (numTargets == 1) {
-        temp = *getTargetSpline()->controlPoints[0];
-    } else {
-        temp = *getTargetSpline()->getSegmentPoint(segment);
-    }
+	int numTargets = getTargetSpline()->controlPoints.Num();
+	int count = cameraSpline.splineTime.Num();
+	if (numTargets == 0) {
+		// follow the path
+		if (cameraSpline.getActiveSegment() < count - 1) {
+			temp = *cameraSpline.splinePoints[cameraSpline.getActiveSegment()+1];
+		}
+	} else if (numTargets == 1) {
+		temp = *getTargetSpline()->controlPoints[0];
+	} else {
+		temp = *getTargetSpline()->getSegmentPoint(segment);
+	}
 
-    temp -= origin;
-    temp.Normalize();
-    direction = temp;
- */
+	temp -= origin;
+	temp.Normalize();
+	direction = temp;
+*/
 }
 
 bool idCameraDef::getCameraInfo( long time, idVec3 &origin, idVec3 &direction, float *fv ) {
@@ -603,16 +607,16 @@ bool idCameraDef::getCameraInfo( long time, idVec3 &origin, idVec3 &direction, f
 	int numTargets = targetPositions.Num();
 	if ( numTargets == 0 ) {
 /*
-        // follow the path
-        if (cameraSpline.getActiveSegment() < count - 1) {
-            temp = *cameraSpline.splinePoints[cameraSpline.getActiveSegment()+1];
-            if (temp == origin) {
-                int index = cameraSpline.getActiveSegment() + 2;
-                while (temp == origin && index < count - 1) {
-                    temp = *cameraSpline.splinePoints[index++];
-                }
-            }
-        }
+		// follow the path
+		if (cameraSpline.getActiveSegment() < count - 1) {
+			temp = *cameraSpline.splinePoints[cameraSpline.getActiveSegment()+1];
+			if (temp == origin) {
+				int index = cameraSpline.getActiveSegment() + 2;
+				while (temp == origin && index < count - 1) {
+					temp = *cameraSpline.splinePoints[index++];
+				}
+			}
+		}
  */
 	}
 	else {
@@ -720,35 +724,35 @@ void idCameraDef::buildCamera() {
 		}
 		case idCameraEvent::EVENT_SPEED: {
 /*
-                // take the average delay between up to the next five segments
-                float adjust = atof(events[i]->getParam());
-                int index = events[i]->getSegment();
-                total = 0;
-                count = 0;
+			// take the average delay between up to the next five segments
+			float adjust = atof(events[i]->getParam());
+			int index = events[i]->getSegment();
+			total = 0;
+			count = 0;
 
-                // get total amount of time over the remainder of the segment
-                for (j = index; j < cameraSpline.numSegments() - 1; j++) {
-                    total += cameraSpline.getSegmentTime(j + 1) - cameraSpline.getSegmentTime(j);
-                    count++;
-                }
+			// get total amount of time over the remainder of the segment
+			for (j = index; j < cameraSpline.numSegments() - 1; j++) {
+				total += cameraSpline.getSegmentTime(j + 1) - cameraSpline.getSegmentTime(j);
+				count++;
+			}
 
-                // multiply that by the adjustment
-                double newTotal = total * adjust;
-                // what is the difference..
-                newTotal -= total;
-                totalTime += newTotal / 1000;
+			// multiply that by the adjustment
+			double newTotal = total * adjust;
+			// what is the difference..
+			newTotal -= total;
+			totalTime += newTotal / 1000;
 
-                // per segment difference
-                newTotal /= count;
-                int additive = newTotal;
+			// per segment difference
+			newTotal /= count;
+			int additive = newTotal;
 
-                // now propogate that difference out to each segment
-                for (j = index; j < cameraSpline.numSegments(); j++) {
-                    cameraSpline.addSegmentTime(j, additive);
-                    additive += newTotal;
-                }
-                break;
- */
+			// now propogate that difference out to each segment
+			for (j = index; j < cameraSpline.numSegments(); j++) {
+				cameraSpline.addSegmentTime(j, additive);
+				additive += newTotal;
+			}
+			break;
+*/
 		}
 		}
 	}

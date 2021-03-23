@@ -31,79 +31,79 @@
 
 class EModel : public ModuleObserver
 {
-ResourceReference m_resource;
-scene::Traversable& m_traverse;
-scene::Node* m_node;
-Callback m_modelChanged;
+	ResourceReference m_resource;
+	scene::Traversable& m_traverse;
+	scene::Node* m_node;
+	Callback m_modelChanged;
 
 public:
-EModel( scene::Traversable& traversable, const Callback& modelChanged )
-	: m_resource( "" ), m_traverse( traversable ), m_node( 0 ), m_modelChanged( modelChanged ){
-	m_resource.attach( *this );
-}
-~EModel(){
-	m_resource.detach( *this );
-}
-
-void realise(){
-	m_resource.get()->load();
-	m_node = m_resource.get()->getNode();
-	if ( m_node != 0 ) {
-		m_traverse.insert( *m_node );
+	EModel( scene::Traversable& traversable, const Callback& modelChanged )
+		: m_resource( "" ), m_traverse( traversable ), m_node( 0 ), m_modelChanged( modelChanged ){
+		m_resource.attach( *this );
 	}
-}
-void unrealise(){
-	if ( m_node != 0 ) {
-		m_traverse.erase( *m_node );
+	~EModel(){
+		m_resource.detach( *this );
 	}
-}
 
-void modelChanged( const char* value ){
-	StringOutputStream cleaned( string_length( value ) );
-	cleaned << PathCleaned( value );
-	m_resource.detach( *this );
-	m_resource.setName( cleaned.c_str() );
-	m_resource.attach( *this );
-	m_modelChanged();
-}
-typedef MemberCaller1<EModel, const char*, &EModel::modelChanged> ModelChangedCaller;
+	void realise(){
+		m_resource.get()->load();
+		m_node = m_resource.get()->getNode();
+		if ( m_node != 0 ) {
+			m_traverse.insert( *m_node );
+		}
+	}
+	void unrealise(){
+		if ( m_node != 0 ) {
+			m_traverse.erase( *m_node );
+		}
+	}
 
-const char* getName() const {
-	return m_resource.getName();
-}
-scene::Node* getNode() const {
-	return m_node;
-}
+	void modelChanged( const char* value ){
+		StringOutputStream cleaned( string_length( value ) );
+		cleaned << PathCleaned( value );
+		m_resource.detach( *this );
+		m_resource.setName( cleaned.c_str() );
+		m_resource.attach( *this );
+		m_modelChanged();
+	}
+	typedef MemberCaller1<EModel, const char*, &EModel::modelChanged> ModelChangedCaller;
+
+	const char* getName() const {
+		return m_resource.getName();
+	}
+	scene::Node* getNode() const {
+		return m_node;
+	}
 };
 
 class SingletonModel
 {
-TraversableNode m_traverse;
-EModel m_model;
+	TraversableNode m_traverse;
+	EModel m_model;
 public:
-SingletonModel()
-	: m_model( m_traverse, Callback() ){
-}
+	SingletonModel()
+		: m_model( m_traverse, Callback() ){
+	}
 
-void attach( scene::Traversable::Observer* observer ){
-	m_traverse.attach( observer );
-}
-void detach( scene::Traversable::Observer* observer ){
-	m_traverse.detach( observer );
-}
+	void attach( scene::Traversable::Observer* observer ){
+		m_traverse.attach( observer );
+	}
+	void detach( scene::Traversable::Observer* observer ){
+		m_traverse.detach( observer );
+	}
 
-scene::Traversable& getTraversable(){
-	return m_traverse;
-}
+	scene::Traversable& getTraversable(){
+		return m_traverse;
+	}
 
-void modelChanged( const char* value ){
-	m_model.modelChanged( value );
-}
-typedef MemberCaller1<SingletonModel, const char*, &SingletonModel::modelChanged> ModelChangedCaller;
+	void modelChanged( const char* value ){
+		m_model.modelChanged( value );
+	}
+	typedef MemberCaller1<SingletonModel, const char*, &SingletonModel::modelChanged> ModelChangedCaller;
 
-scene::Node* getNode() const {
-	return m_model.getNode();
-}
+	scene::Node* getNode() const {
+		return m_model.getNode();
+	}
 };
 
 #endif

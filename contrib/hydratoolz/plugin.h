@@ -48,11 +48,11 @@ class CSynapseClientHydraToolz : public CSynapseClient
 {
 public:
 // CSynapseClient API
-bool RequestAPI( APIDescriptor_t *pAPI );
-const char* GetInfo();
+	bool RequestAPI( APIDescriptor_t *pAPI );
+	const char* GetInfo();
 
-CSynapseClientHydraToolz() { }
-virtual ~CSynapseClientHydraToolz() { }
+	CSynapseClientHydraToolz() { }
+	virtual ~CSynapseClientHydraToolz() { }
 };
 
 #endif // _PLUGIN_H_

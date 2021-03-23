@@ -281,7 +281,7 @@ struct triangulateio {
 };
 
 void triangulate( char *, struct triangulateio *, struct triangulateio *,
-				  struct triangulateio * );
+                  struct triangulateio * );
 
 #ifdef __cplusplus
 }

@@ -67,16 +67,16 @@ void Error( const char *error, ... ){
 	if ( GetLastError() != 0 ) {
 		LPVOID lpMsgBuf;
 		FormatMessage(
-			FORMAT_MESSAGE_ALLOCATE_BUFFER |
-			FORMAT_MESSAGE_FROM_SYSTEM |
-			FORMAT_MESSAGE_IGNORE_INSERTS,
-			0,
-			GetLastError(),
-			MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), // Default language
-			(LPTSTR) &lpMsgBuf,
-			0,
-			0
-			);
+		    FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		    FORMAT_MESSAGE_FROM_SYSTEM |
+		    FORMAT_MESSAGE_IGNORE_INSERTS,
+		    0,
+		    GetLastError(),
+		    MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), // Default language
+		    (LPTSTR) &lpMsgBuf,
+		    0,
+		    0
+		);
 		strcat( text, "GetLastError: " );
 		/*
 		   Gtk will only crunch 0<=char<=127

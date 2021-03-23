@@ -28,57 +28,57 @@
 
 class XMLEntityOutputStream
 {
-SingleCharacterOutputStream m_ostream;
+	SingleCharacterOutputStream m_ostream;
 public:
-XMLEntityOutputStream( TextOutputStream& ostream )
-	: m_ostream( ostream ){
-}
-void write( const char c ){
-	m_ostream.write( c );
-}
-void writeEscaped( const char c ){
-	switch ( c )
-	{
-	case '<':
-		write( '&' );
-		write( 'l' );
-		write( 't' );
-		write( ';' );
-		break;
-	case '>':
-		write( '&' );
-		write( 'g' );
-		write( 't' );
-		write( ';' );
-		break;
-	case '"':
-		write( '&' );
-		write( 'q' );
-		write( 'u' );
-		write( 'o' );
-		write( 't' );
-		write( ';' );
-		break;
-	case '&':
-		write( '&' );
-		write( 'a' );
-		write( 'm' );
-		write( 'p' );
-		write( ';' );
-		break;
-	default:
-		write( c );
-		break;
+	XMLEntityOutputStream( TextOutputStream& ostream )
+		: m_ostream( ostream ){
 	}
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	const char*const end = buffer + length;
-	for ( const char* p = buffer; p != end; ++p )
-	{
-		writeEscaped( *p );
+	void write( const char c ){
+		m_ostream.write( c );
 	}
-	return length;
-}
+	void writeEscaped( const char c ){
+		switch ( c )
+		{
+		case '<':
+			write( '&' );
+			write( 'l' );
+			write( 't' );
+			write( ';' );
+			break;
+		case '>':
+			write( '&' );
+			write( 'g' );
+			write( 't' );
+			write( ';' );
+			break;
+		case '"':
+			write( '&' );
+			write( 'q' );
+			write( 'u' );
+			write( 'o' );
+			write( 't' );
+			write( ';' );
+			break;
+		case '&':
+			write( '&' );
+			write( 'a' );
+			write( 'm' );
+			write( 'p' );
+			write( ';' );
+			break;
+		default:
+			write( c );
+			break;
+		}
+	}
+	std::size_t write( const char* buffer, std::size_t length ){
+		const char*const end = buffer + length;
+		for ( const char* p = buffer; p != end; ++p )
+		{
+			writeEscaped( *p );
+		}
+		return length;
+	}
 };
 
 template<typename T>
@@ -89,89 +89,89 @@ inline XMLEntityOutputStream& operator<<( XMLEntityOutputStream& ostream, const 
 
 class XMLStreamWriter : public XMLImporter, public XMLAttrVisitor
 {
-class state_t
-{
-public:
-enum EState
-{
-	eStartElement,
-	eContent,
-};
-state_t()
-	: m_state( eStartElement )
-{}
-EState m_state;
-};
-
-XMLEntityOutputStream m_ostream;
-std::vector<state_t> m_elements;
-
-void write_cdata( const char* buffer, std::size_t length ){
-	m_ostream << StringRange( buffer, buffer + length );
-}
-void write_string( const char* string ){
-	m_ostream << string;
-}
-void write_quoted_string( const char* string ){
-	m_ostream.write( '"' );
-	m_ostream << string;
-	m_ostream.write( '"' );
-}
-public:
-XMLStreamWriter( TextOutputStream& ostream )
-	: m_ostream( ostream ){
-	m_elements.push_back( state_t() );
-	m_elements.back().m_state = state_t::eContent;
-	m_ostream.write( '<' );
-	m_ostream.write( '?' );
-	write_string( "xml" );
-	visit( "version", "1.0" );
-	m_ostream.write( '?' );
-	m_ostream.write( '>' );
-}
-
-void pushElement( const XMLElement& element ){
-	if ( m_elements.back().m_state == state_t::eStartElement ) {
-		m_elements.back().m_state = state_t::eContent;
-		m_ostream.write( '>' );
-	}
-
-	m_elements.push_back( state_t() );
-
-	m_ostream.write( '<' );
-	write_string( element.name() );
-	element.forEachAttribute( *this );
-}
-void popElement( const char* name ){
-	if ( m_elements.back().m_state == state_t::eStartElement ) {
-		m_ostream.write( '/' );
-		m_ostream.write( '>' );
-		m_elements.pop_back();
-	}
-	else
+	class state_t
 	{
-		m_ostream.write( '<' );
-		m_ostream.write( '/' );
-		write_string( name );
-		m_ostream.write( '>' );
-		m_elements.pop_back();
-	}
-}
-std::size_t write( const char* data, std::size_t length ){
-	if ( m_elements.back().m_state == state_t::eStartElement ) {
-		m_elements.back().m_state = state_t::eContent;
-		m_ostream.write( '>' );
-	}
-	write_cdata( data, length );
-	return length;
-}
+	public:
+		enum EState
+		{
+			eStartElement,
+			eContent,
+		};
+		state_t()
+			: m_state( eStartElement )
+		{}
+		EState m_state;
+	};
 
-void visit( const char* name, const char* value ){
-	m_ostream.write( ' ' );
-	write_string( name );
-	m_ostream.write( '=' );
-	write_quoted_string( value );
-}
+	XMLEntityOutputStream m_ostream;
+	std::vector<state_t> m_elements;
+
+	void write_cdata( const char* buffer, std::size_t length ){
+		m_ostream << StringRange( buffer, buffer + length );
+	}
+	void write_string( const char* string ){
+		m_ostream << string;
+	}
+	void write_quoted_string( const char* string ){
+		m_ostream.write( '"' );
+		m_ostream << string;
+		m_ostream.write( '"' );
+	}
+public:
+	XMLStreamWriter( TextOutputStream& ostream )
+		: m_ostream( ostream ){
+		m_elements.push_back( state_t() );
+		m_elements.back().m_state = state_t::eContent;
+		m_ostream.write( '<' );
+		m_ostream.write( '?' );
+		write_string( "xml" );
+		visit( "version", "1.0" );
+		m_ostream.write( '?' );
+		m_ostream.write( '>' );
+	}
+
+	void pushElement( const XMLElement& element ){
+		if ( m_elements.back().m_state == state_t::eStartElement ) {
+			m_elements.back().m_state = state_t::eContent;
+			m_ostream.write( '>' );
+		}
+
+		m_elements.push_back( state_t() );
+
+		m_ostream.write( '<' );
+		write_string( element.name() );
+		element.forEachAttribute( *this );
+	}
+	void popElement( const char* name ){
+		if ( m_elements.back().m_state == state_t::eStartElement ) {
+			m_ostream.write( '/' );
+			m_ostream.write( '>' );
+			m_elements.pop_back();
+		}
+		else
+		{
+			m_ostream.write( '<' );
+			m_ostream.write( '/' );
+			write_string( name );
+			m_ostream.write( '>' );
+			m_elements.pop_back();
+		}
+	}
+	std::size_t write( const char* data, std::size_t length ){
+		if ( m_elements.back().m_state == state_t::eStartElement ) {
+			m_elements.back().m_state = state_t::eContent;
+			m_ostream.write( '>' );
+		}
+		write_cdata( data, length );
+		return length;
+	}
+
+	void visit( const char* name, const char* value ){
+		m_ostream.write( ' ' );
+		write_string( name );
+		m_ostream.write( '=' );
+		write_quoted_string( value );
+	}
 };
 
 

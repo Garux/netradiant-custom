@@ -92,12 +92,12 @@ void Eclass_forEach( EntityClassVisitor& visitor ){
 class RadiantEclassCollector : public EntityClassCollector
 {
 public:
-void insert( EntityClass* eclass ){
-	Eclass_InsertAlphabetized( eclass );
-}
-void insert( const char* name, const ListAttributeType& list ){
-	g_listTypes.insert( ListAttributeTypes::value_type( name, list ) );
-}
+	void insert( EntityClass* eclass ){
+		Eclass_InsertAlphabetized( eclass );
+	}
+	void insert( const char* name, const ListAttributeType& list ){
+		g_listTypes.insert( ListAttributeTypes::value_type( name, list ) );
+	}
 };
 
 RadiantEclassCollector g_collector;
@@ -114,56 +114,56 @@ const ListAttributeType* EntityClass_findListType( const char* name ){
 class EntityClassFilterMode
 {
 public:
-bool filter_mp_sp;
-const char* mp_ignore_prefix;
-const char* sp_ignore_prefix;
+	bool filter_mp_sp;
+	const char* mp_ignore_prefix;
+	const char* sp_ignore_prefix;
 
-EntityClassFilterMode() :
-	filter_mp_sp( !string_empty( g_pGameDescription->getKeyValue( "eclass_filter_gamemode" ) ) ),
-	mp_ignore_prefix( g_pGameDescription->getKeyValue( "eclass_sp_prefix" ) ),
-	sp_ignore_prefix( g_pGameDescription->getKeyValue( "eclass_mp_prefix" ) ){
-	if ( string_empty( mp_ignore_prefix ) ) {
-		mp_ignore_prefix = "sp_";
+	EntityClassFilterMode() :
+		filter_mp_sp( !string_empty( g_pGameDescription->getKeyValue( "eclass_filter_gamemode" ) ) ),
+		mp_ignore_prefix( g_pGameDescription->getKeyValue( "eclass_sp_prefix" ) ),
+		sp_ignore_prefix( g_pGameDescription->getKeyValue( "eclass_mp_prefix" ) ){
+		if ( string_empty( mp_ignore_prefix ) ) {
+			mp_ignore_prefix = "sp_";
+		}
+		if ( string_empty( sp_ignore_prefix ) ) {
+			sp_ignore_prefix = "mp_";
+		}
 	}
-	if ( string_empty( sp_ignore_prefix ) ) {
-		sp_ignore_prefix = "mp_";
-	}
-}
 };
 
 class EntityClassesLoadFile
 {
-const EntityClassScanner& scanner;
-const char* m_directory;
+	const EntityClassScanner& scanner;
+	const char* m_directory;
 public:
-EntityClassesLoadFile( const EntityClassScanner& scanner, const char* directory ) : scanner( scanner ), m_directory( directory ){
-}
-void operator()( const char* name ) const {
-	EntityClassFilterMode filterMode;
-
-	if ( filterMode.filter_mp_sp ) {
-		if ( string_empty( GlobalRadiant().getGameMode() ) || string_equal( GlobalRadiant().getGameMode(), "sp" ) ) {
-			if ( string_equal_n( name, filterMode.sp_ignore_prefix, strlen( filterMode.sp_ignore_prefix ) ) ) {
-				globalOutputStream() << "Ignoring '" << name << "'\n";
-				return;
-			}
-		}
-		else
-		{
-			if ( string_equal_n( name, filterMode.mp_ignore_prefix, strlen( filterMode.mp_ignore_prefix ) ) ) {
-				globalOutputStream() << "Ignoring '" << name << "'\n";
-				return;
-			}
-		}
+	EntityClassesLoadFile( const EntityClassScanner& scanner, const char* directory ) : scanner( scanner ), m_directory( directory ){
 	}
+	void operator()( const char* name ) const {
+		EntityClassFilterMode filterMode;
 
-	// for a given name, we grab the first .def in the vfs
-	// this allows to override baseq3/scripts/entities.def for instance
-	StringOutputStream relPath( 256 );
-	relPath << m_directory << name;
+		if ( filterMode.filter_mp_sp ) {
+			if ( string_empty( GlobalRadiant().getGameMode() ) || string_equal( GlobalRadiant().getGameMode(), "sp" ) ) {
+				if ( string_equal_n( name, filterMode.sp_ignore_prefix, strlen( filterMode.sp_ignore_prefix ) ) ) {
+					globalOutputStream() << "Ignoring '" << name << "'\n";
+					return;
+				}
+			}
+			else
+			{
+				if ( string_equal_n( name, filterMode.mp_ignore_prefix, strlen( filterMode.mp_ignore_prefix ) ) ) {
+					globalOutputStream() << "Ignoring '" << name << "'\n";
+					return;
+				}
+			}
+		}
 
-	scanner.scanFile( g_collector, relPath.c_str() );
-}
+		// for a given name, we grab the first .def in the vfs
+		// this allows to override baseq3/scripts/entities.def for instance
+		StringOutputStream relPath( 256 );
+		relPath << m_directory << name;
+
+		scanner.scanFile( g_collector, relPath.c_str() );
+	}
 };
 
 struct PathLess
@@ -177,14 +177,14 @@ typedef std::map<CopiedString, const char*, PathLess> Paths;
 
 class PathsInsert
 {
-Paths& m_paths;
-const char* m_directory;
+	Paths& m_paths;
+	const char* m_directory;
 public:
-PathsInsert( Paths& paths, const char* directory ) : m_paths( paths ), m_directory( directory ){
-}
-void operator()( const char* name ) const {
-	m_paths.insert( Paths::value_type( name, m_directory ) );
-}
+	PathsInsert( Paths& paths, const char* directory ) : m_paths( paths ), m_directory( directory ){
+	}
+	void operator()( const char* name ) const {
+		m_paths.insert( Paths::value_type( name, m_directory ) );
+	}
 };
 
 
@@ -204,24 +204,24 @@ void EntityClassQuake3_Construct(){
 
 	class LoadEntityDefinitionsVisitor : public EClassModules::Visitor
 	{
-	const char* baseDirectory;
-	const char* gameDirectory;
-public:
-	LoadEntityDefinitionsVisitor( const char* baseDirectory, const char* gameDirectory )
-		: baseDirectory( baseDirectory ), gameDirectory( gameDirectory ){
-	}
-	void visit( const char* name, const EntityClassScanner& table ) const {
-		Paths paths;
-		EntityClassQuake3_constructDirectory( baseDirectory, table.getExtension(), paths );
-		if ( !string_equal( baseDirectory, gameDirectory ) ) {
-			EntityClassQuake3_constructDirectory( gameDirectory, table.getExtension(), paths );
+		const char* baseDirectory;
+		const char* gameDirectory;
+	public:
+		LoadEntityDefinitionsVisitor( const char* baseDirectory, const char* gameDirectory )
+			: baseDirectory( baseDirectory ), gameDirectory( gameDirectory ){
 		}
+		void visit( const char* name, const EntityClassScanner& table ) const {
+			Paths paths;
+			EntityClassQuake3_constructDirectory( baseDirectory, table.getExtension(), paths );
+			if ( !string_equal( baseDirectory, gameDirectory ) ) {
+				EntityClassQuake3_constructDirectory( gameDirectory, table.getExtension(), paths );
+			}
 
-		for ( Paths::iterator i = paths.begin(); i != paths.end(); ++i )
-		{
-			EntityClassesLoadFile( table, ( *i ).second ) ( ( *i ).first.c_str() );
+			for ( Paths::iterator i = paths.begin(); i != paths.end(); ++i )
+			{
+				EntityClassesLoadFile( table, ( *i ).second ) ( ( *i ).first.c_str() );
+			}
 		}
-	}
 	};
 
 	EntityClassManager_getEClassModules().foreachModule( LoadEntityDefinitionsVisitor( baseDirectory.c_str(), gameDirectory.c_str() ) );
@@ -245,31 +245,31 @@ EntityClass *Eclass_ForName( const char *name, bool has_brushes ){
 
 class EntityClassQuake3 : public ModuleObserver
 {
-std::size_t m_unrealised;
-ModuleObservers m_observers;
+	std::size_t m_unrealised;
+	ModuleObservers m_observers;
 public:
-EntityClassQuake3() : m_unrealised( 4 ){
-}
-void realise(){
-	if ( --m_unrealised == 0 ) {
-		//globalOutputStream() << "Entity Classes: realise\n";
-		EntityClassQuake3_Construct();
-		m_observers.realise();
+	EntityClassQuake3() : m_unrealised( 4 ){
 	}
-}
-void unrealise(){
-	if ( ++m_unrealised == 1 ) {
-		m_observers.unrealise();
-		//globalOutputStream() << "Entity Classes: unrealise\n";
-		Eclass_Clear();
+	void realise(){
+		if ( --m_unrealised == 0 ) {
+			//globalOutputStream() << "Entity Classes: realise\n";
+			EntityClassQuake3_Construct();
+			m_observers.realise();
+		}
 	}
-}
-void attach( ModuleObserver& observer ){
-	m_observers.attach( observer );
-}
-void detach( ModuleObserver& observer ){
-	m_observers.detach( observer );
-}
+	void unrealise(){
+		if ( ++m_unrealised == 1 ) {
+			m_observers.unrealise();
+			//globalOutputStream() << "Entity Classes: unrealise\n";
+			Eclass_Clear();
+		}
+	}
+	void attach( ModuleObserver& observer ){
+		m_observers.attach( observer );
+	}
+	void detach( ModuleObserver& observer ){
+		m_observers.detach( observer );
+	}
 };
 
 EntityClassQuake3 g_EntityClassQuake3;
@@ -308,48 +308,48 @@ class EntityClassQuake3Dependencies :
 	public GlobalFileSystemModuleRef,
 	public GlobalShaderCacheModuleRef
 {
-EClassModulesRef m_eclass_modules;
+	EClassModulesRef m_eclass_modules;
 public:
-EntityClassQuake3Dependencies() :
-	m_eclass_modules( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclasstype" ) ){
-}
-EClassModules& getEClassModules(){
-	return m_eclass_modules.get();
-}
+	EntityClassQuake3Dependencies() :
+		m_eclass_modules( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclasstype" ) ){
+	}
+	EClassModules& getEClassModules(){
+		return m_eclass_modules.get();
+	}
 };
 
 class EclassManagerAPI
 {
-EntityClassManager m_eclassmanager;
+	EntityClassManager m_eclassmanager;
 public:
-typedef EntityClassManager Type;
-STRING_CONSTANT( Name, "quake3" );
+	typedef EntityClassManager Type;
+	STRING_CONSTANT( Name, "quake3" );
 
-EclassManagerAPI(){
-	EntityClassQuake3_construct();
+	EclassManagerAPI(){
+		EntityClassQuake3_construct();
 
-	m_eclassmanager.findOrInsert = &Eclass_ForName;
-	m_eclassmanager.findListType = &EntityClass_findListType;
-	m_eclassmanager.forEach = &Eclass_forEach;
-	m_eclassmanager.attach = &EntityClass_attach;
-	m_eclassmanager.detach = &EntityClass_detach;
-	m_eclassmanager.realise = &EntityClass_realise;
-	m_eclassmanager.unrealise = &EntityClass_unrealise;
+		m_eclassmanager.findOrInsert = &Eclass_ForName;
+		m_eclassmanager.findListType = &EntityClass_findListType;
+		m_eclassmanager.forEach = &Eclass_forEach;
+		m_eclassmanager.attach = &EntityClass_attach;
+		m_eclassmanager.detach = &EntityClass_detach;
+		m_eclassmanager.realise = &EntityClass_realise;
+		m_eclassmanager.unrealise = &EntityClass_unrealise;
 
-	GlobalRadiant().attachGameToolsPathObserver( g_EntityClassQuake3 );
-	GlobalRadiant().attachGameModeObserver( g_EntityClassQuake3 );
-	GlobalRadiant().attachGameNameObserver( g_EntityClassQuake3 );
-}
-~EclassManagerAPI(){
-	GlobalRadiant().detachGameNameObserver( g_EntityClassQuake3 );
-	GlobalRadiant().detachGameModeObserver( g_EntityClassQuake3 );
-	GlobalRadiant().detachGameToolsPathObserver( g_EntityClassQuake3 );
+		GlobalRadiant().attachGameToolsPathObserver( g_EntityClassQuake3 );
+		GlobalRadiant().attachGameModeObserver( g_EntityClassQuake3 );
+		GlobalRadiant().attachGameNameObserver( g_EntityClassQuake3 );
+	}
+	~EclassManagerAPI(){
+		GlobalRadiant().detachGameNameObserver( g_EntityClassQuake3 );
+		GlobalRadiant().detachGameModeObserver( g_EntityClassQuake3 );
+		GlobalRadiant().detachGameToolsPathObserver( g_EntityClassQuake3 );
 
-	EntityClassQuake3_destroy();
-}
-EntityClassManager* getTable(){
-	return &m_eclassmanager;
-}
+		EntityClassQuake3_destroy();
+	}
+	EntityClassManager* getTable(){
+		return &m_eclassmanager;
+	}
 };
 
 #include "modulesystem/singletonmodule.h"

@@ -25,10 +25,10 @@ namespace
 {
 class Bleh
 {
-Array<int> m_array;
+	Array<int> m_array;
 public:
-Bleh() : m_array( 16 ){
-}
+	Bleh() : m_array( 16 ){
+	}
 };
 
 void testAutoArray(){

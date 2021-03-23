@@ -28,32 +28,32 @@
 class XMLAttrVisitor
 {
 public:
-virtual void visit( const char* name, const char* value ) = 0;
+	virtual void visit( const char* name, const char* value ) = 0;
 };
 
 class XMLElement
 {
 public:
-virtual const char* name() const = 0;
-virtual const char* attribute( const char* name ) const = 0;
-virtual void forEachAttribute( XMLAttrVisitor& visitor ) const = 0;
+	virtual const char* name() const = 0;
+	virtual const char* attribute( const char* name ) const = 0;
+	virtual void forEachAttribute( XMLAttrVisitor& visitor ) const = 0;
 };
 
 class XMLImporter : public TextOutputStream
 {
 public:
-STRING_CONSTANT( Name, "XMLImporter" );
+	STRING_CONSTANT( Name, "XMLImporter" );
 
-virtual void pushElement( const XMLElement& element ) = 0;
-virtual void popElement( const char* name ) = 0;
+	virtual void pushElement( const XMLElement& element ) = 0;
+	virtual void popElement( const char* name ) = 0;
 };
 
 class XMLExporter
 {
 public:
-STRING_CONSTANT( Name, "XMLExporter" );
+	STRING_CONSTANT( Name, "XMLExporter" );
 
-virtual void exportXML( XMLImporter& importer ) = 0;
+	virtual void exportXML( XMLImporter& importer ) = 0;
 };
 
 

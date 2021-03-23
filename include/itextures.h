@@ -29,16 +29,16 @@ struct qtexture_t;
 
 class LoadImageCallback
 {
-typedef Image* ( *LoadFunc )( void* environment, const char* name );
+	typedef Image* ( *LoadFunc )( void* environment, const char* name );
 public:
-void* m_environment;
-LoadFunc m_func;
+	void* m_environment;
+	LoadFunc m_func;
 
-LoadImageCallback( void* environment, LoadFunc func ) : m_environment( environment ), m_func( func ){
-}
-Image* loadImage( const char* name ) const {
-	return m_func( m_environment, name );
-}
+	LoadImageCallback( void* environment, LoadFunc func ) : m_environment( environment ), m_func( func ){
+	}
+	Image* loadImage( const char* name ) const {
+		return m_func( m_environment, name );
+	}
 };
 
 inline bool operator==( const LoadImageCallback& self, const LoadImageCallback& other ){
@@ -46,28 +46,28 @@ inline bool operator==( const LoadImageCallback& self, const LoadImageCallback& 
 }
 inline bool operator<( const LoadImageCallback& self, const LoadImageCallback& other ){
 	return self.m_environment < other.m_environment ||
-		   ( !( other.m_environment < self.m_environment ) && self.m_func < other.m_func );
+	       ( !( other.m_environment < self.m_environment ) && self.m_func < other.m_func );
 }
 
 class TexturesCacheObserver
 {
 public:
-virtual void unrealise() = 0;
-virtual void realise() = 0;
+	virtual void unrealise() = 0;
+	virtual void realise() = 0;
 };
 
 class TexturesCache
 {
 public:
-INTEGER_CONSTANT( Version, 1 );
-STRING_CONSTANT( Name, "textures" );
-virtual LoadImageCallback defaultLoader() const = 0;
-virtual Image* loadImage( const char* name ) = 0;
-virtual qtexture_t* capture( const char* name ) = 0;
-virtual qtexture_t* capture( const LoadImageCallback& load, const char* name ) = 0;
-virtual void release( qtexture_t* texture ) = 0;
-virtual void attach( TexturesCacheObserver& observer ) = 0;
-virtual void detach( TexturesCacheObserver& observer ) = 0;
+	INTEGER_CONSTANT( Version, 1 );
+	STRING_CONSTANT( Name, "textures" );
+	virtual LoadImageCallback defaultLoader() const = 0;
+	virtual Image* loadImage( const char* name ) = 0;
+	virtual qtexture_t* capture( const char* name ) = 0;
+	virtual qtexture_t* capture( const LoadImageCallback& load, const char* name ) = 0;
+	virtual void release( qtexture_t* texture ) = 0;
+	virtual void attach( TexturesCacheObserver& observer ) = 0;
+	virtual void detach( TexturesCacheObserver& observer ) = 0;
 };
 
 #include "modulesystem.h"

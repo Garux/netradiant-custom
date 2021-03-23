@@ -82,12 +82,12 @@ TRI       *gTri = (TRI *)NULL;
 
 int Game;
 bounding_box PlayerBox[NUMGAMES] = { {{-16., 16.}, {-16., 16.}, {-24., 32.}},    // Quake2
-									 {{-16., 16.}, {-16., 16.}, {-36., 36.}},    // Half-Life
-									 {{-16., 16.}, {-16., 16.}, {-32., 32.}},    // SiN
-									 {{-16., 16.}, {-16., 16.}, {-24., 32.}},    // Heretic2 (guess)
-									 {{-16., 16.}, {-16., 16.}, {-24., 32.}},    // KingPin (guess)
-									 {{-30., 30.}, {-30., 30.}, {-10.,160.}},    // Genesis3D (no idea)
-									 {{-16., 16.}, {-16., 16.}, {-24., 32.}}};   // Quake3 (not sure)
+                                     {{-16., 16.}, {-16., 16.}, {-36., 36.}},    // Half-Life
+                                     {{-16., 16.}, {-16., 16.}, {-32., 32.}},    // SiN
+                                     {{-16., 16.}, {-16., 16.}, {-24., 32.}},    // Heretic2 (guess)
+                                     {{-16., 16.}, {-16., 16.}, {-24., 32.}},    // KingPin (guess)
+                                     {{-30., 30.}, {-30., 30.}, {-10.,160.}},    // Genesis3D (no idea)
+                                     {{-16., 16.}, {-16., 16.}, {-24., 32.}}};   // Quake3 (not sure)
 //char      gszOutputDir[NUMGAMES][NAME_MAX];
 //char      gszTextureDir[NUMGAMES][NAME_MAX];
 char Texture[NUMGAMES][3][64];
@@ -110,25 +110,25 @@ bool GenSurfInit(){
 	strcpy( gszIni, g_FuncTable.m_pfnProfileGetDirectory() );
 	strcat( gszIni, "gensurf.ini" );
 
-/*if (g_FuncTable.m_pfnReadProjectKey != NULL)
-   {
-    char *basepath;
+/*	if (g_FuncTable.m_pfnReadProjectKey != NULL)
+	{
+		char *basepath;
 
-    basepath = g_FuncTable.m_pfnReadProjectKey("basepath");
-    if (basepath)
-    {
-      g_strdown (basepath);
-      if (strstr(basepath,"baseq3"))
-        Game = QUAKE3;
-      else if (strstr (basepath,"baseq2"))
-        Game = QUAKE2;
-      else // Gotta have a game, might as well be Quake3
-        Game = QUAKE3;
-    }
-    else
-      Game = QUAKE3;
-   }
-   else */
+		basepath = g_FuncTable.m_pfnReadProjectKey("basepath");
+		if (basepath)
+		{
+			g_strdown (basepath);
+			if (strstr(basepath,"baseq3"))
+				Game = QUAKE3;
+			else if (strstr (basepath,"baseq2"))
+				Game = QUAKE2;
+			else // Gotta have a game, might as well be Quake3
+				Game = QUAKE3;
+		}
+		else
+			Game = QUAKE3;
+	}
+	else */
 	Game = QUAKE3;
 
 
@@ -420,7 +420,7 @@ void UpdatePreview( bool DataChange ){
 
 void SaveSetup( GtkWidget *parent ){
 	const char *name = g_FuncTable.m_pfnFileDialog( parent, false, "Save GenSurf Settings",
-													g_FuncTable.m_pfnProfileGetDirectory() );
+	                                                g_FuncTable.m_pfnProfileGetDirectory() );
 
 	if ( name != NULL ) {
 		char key[32], text[32];
@@ -457,7 +457,7 @@ void OpenSetup( GtkWidget *parent, int UseDefaults ){
 	}
 	else{
 		name = g_FuncTable.m_pfnFileDialog( parent, true, "Open GenSurf Settings",
-											g_FuncTable.m_pfnProfileGetDirectory() );
+		                                    g_FuncTable.m_pfnProfileGetDirectory() );
 	}
 
 	if ( name != NULL ) {

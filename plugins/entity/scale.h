@@ -36,7 +36,7 @@ inline void default_scale( Vector3& scale ){
 inline void read_scale( Vector3& scalevec, const char* value ){
 	float scale;
 	if ( !string_parse_float( value, scale )
-		 || scale == 0 ) {
+	     || scale == 0 ) {
 		default_scale( scalevec );
 	}
 	else
@@ -46,9 +46,9 @@ inline void read_scale( Vector3& scalevec, const char* value ){
 }
 inline void read_scalevec( Vector3& scale, const char* value ){
 	if ( !string_parse_vector3( value, scale )
-		 || scale[0] == 0
-		 || scale[1] == 0
-		 || scale[2] == 0 ) {
+	     || scale[0] == 0
+	     || scale[1] == 0
+	     || scale[2] == 0 ) {
 		default_scale( scale );
 	}
 }
@@ -77,39 +77,39 @@ inline void write_scale( const Vector3& scale, Entity* entity ){
 
 inline Vector3 scale_scaled( const Vector3& scale, const Vector3& scaling ){
 	return matrix4_get_scale_vec3(
-			   matrix4_multiplied_by_matrix4(
-				   matrix4_scale_for_vec3( scale ),
-				   matrix4_scale_for_vec3( scaling )
-				   )
-			   );
+	           matrix4_multiplied_by_matrix4(
+	               matrix4_scale_for_vec3( scale ),
+	               matrix4_scale_for_vec3( scaling )
+	           )
+	       );
 }
 
 class ScaleKey
 {
-Callback m_scaleChanged;
+	Callback m_scaleChanged;
 public:
-Vector3 m_scale;
+	Vector3 m_scale;
 
 
-ScaleKey( const Callback& scaleChanged )
-	: m_scaleChanged( scaleChanged ), m_scale( SCALEKEY_IDENTITY ){
-}
+	ScaleKey( const Callback& scaleChanged )
+		: m_scaleChanged( scaleChanged ), m_scale( SCALEKEY_IDENTITY ){
+	}
 
-void uniformScaleChanged( const char* value ){
-	read_scale( m_scale, value );
-	m_scaleChanged();
-}
-typedef MemberCaller1<ScaleKey, const char*, &ScaleKey::uniformScaleChanged> UniformScaleChangedCaller;
+	void uniformScaleChanged( const char* value ){
+		read_scale( m_scale, value );
+		m_scaleChanged();
+	}
+	typedef MemberCaller1<ScaleKey, const char*, &ScaleKey::uniformScaleChanged> UniformScaleChangedCaller;
 
-void scaleChanged( const char* value ){
-	read_scalevec( m_scale, value );
-	m_scaleChanged();
-}
-typedef MemberCaller1<ScaleKey, const char*, &ScaleKey::scaleChanged> ScaleChangedCaller;
+	void scaleChanged( const char* value ){
+		read_scalevec( m_scale, value );
+		m_scaleChanged();
+	}
+	typedef MemberCaller1<ScaleKey, const char*, &ScaleKey::scaleChanged> ScaleChangedCaller;
 
-void write( Entity* entity ) const {
-	write_scale( m_scale, entity );
-}
+	void write( Entity* entity ) const {
+		write_scale( m_scale, entity );
+	}
 };
 
 

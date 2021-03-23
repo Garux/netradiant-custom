@@ -151,17 +151,17 @@ class CSynapseClientModel : public CSynapseClient
 {
 public:
 // CSynapseClient API
-bool RequestAPI( APIDescriptor_t *pAPI );
-const char* GetInfo();
-const char* GetName();
+	bool RequestAPI( APIDescriptor_t *pAPI );
+	const char* GetInfo();
+	const char* GetName();
 
-CSynapseClientModel() { }
-virtual ~CSynapseClientModel() { }
+	CSynapseClientModel() { }
+	virtual ~CSynapseClientModel() { }
 
-bool OnActivate(){
-	init_filetypes(); // see todo list above.
-	return true;
-}
+	bool OnActivate(){
+		init_filetypes(); // see todo list above.
+		return true;
+	}
 };
 
 CSynapseServer* g_pSynapseServer = NULL;

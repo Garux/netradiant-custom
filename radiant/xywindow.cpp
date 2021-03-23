@@ -242,8 +242,8 @@ inline unsigned int buttons_for_state( guint state ){
 void XYWnd::SetScale( float f ){
 	const float max_scale = 64.f;
 	const float min_scale = std::min( Width(), Height() )
-							/ ( ( 1.1f + ( 1.f - GetMaxGridCoord() / g_MaxWorldCoord ) ) // adaptive min scale factor: from 2.0375 with 4096 grid to 1.1 with 64*1024
-							* 2.f * GetMaxGridCoord() );
+	                        / ( ( 1.1f + ( 1.f - GetMaxGridCoord() / g_MaxWorldCoord ) ) // adaptive min scale factor: from 2.0375 with 4096 grid to 1.1 with 64*1024
+	                        * 2.f * GetMaxGridCoord() );
 	f = std::min( max_scale, std::max( min_scale, f ) );
 	if( !float_equal_epsilon( m_fScale, f, float_mid( m_fScale, f ) * 1e-5f ) ){
 		m_fScale = f;
@@ -289,7 +289,7 @@ void XYWnd::FocusOnBounds( const AABB& bounds ){
 	SetOrigin( bounds.origin );
 	NDIM1NDIM2( m_viewType )
 	SetScale( std::min( Width() / ( 3.f * std::max( 128.f, bounds.extents[ nDim1 ] ) ),
-						Height() / ( 3.f * std::max( 128.f, bounds.extents[ nDim2 ] ) ) ) );
+	                    Height() / ( 3.f * std::max( 128.f, bounds.extents[ nDim2 ] ) ) ) );
 
 }
 
@@ -526,10 +526,11 @@ void XYWnd::overlayDraw(){
 		glLoadIdentity();
 
 		// four view mode doesn't colorize
-		glColor3fv( vector3_to_array( ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit )? g_xywindow_globals.color_viewname
-																							: m_viewType == YZ? g_xywindow_globals.AxisColorX
-																							: m_viewType == XZ? g_xywindow_globals.AxisColorY
-																							: g_xywindow_globals.AxisColorZ ) );
+		glColor3fv( vector3_to_array( ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit )?
+		                                g_xywindow_globals.color_viewname
+		                              : m_viewType == YZ? g_xywindow_globals.AxisColorX
+		                              : m_viewType == XZ? g_xywindow_globals.AxisColorY
+		                              : g_xywindow_globals.AxisColorZ ) );
 		glBegin( GL_LINE_LOOP );
 		glVertex2f( 0.5, 0.5 );
 		glVertex2f( m_nWidth - 0.5, 0.5 );
@@ -980,67 +981,67 @@ void EntityClassMenu_addItem( GtkMenu* menu, const char* name ){
 
 class EntityClassMenuInserter : public EntityClassVisitor
 {
-typedef std::pair<GtkMenu*, CopiedString> MenuPair;
-typedef std::vector<MenuPair> MenuStack;
-MenuStack m_stack;
-CopiedString m_previous;
+	typedef std::pair<GtkMenu*, CopiedString> MenuPair;
+	typedef std::vector<MenuPair> MenuStack;
+	MenuStack m_stack;
+	CopiedString m_previous;
 public:
-EntityClassMenuInserter( GtkMenu* menu ){
-	m_stack.reserve( 2 );
-	m_stack.push_back( MenuPair( menu, "" ) );
-}
-~EntityClassMenuInserter(){
-	if ( !string_empty( m_previous.c_str() ) ) {
-		addItem( m_previous.c_str(), "" );
+	EntityClassMenuInserter( GtkMenu* menu ){
+		m_stack.reserve( 2 );
+		m_stack.push_back( MenuPair( menu, "" ) );
 	}
-}
-void visit( EntityClass* e ){
-	ASSERT_MESSAGE( !string_empty( e->name() ), "entity-class has no name" );
-	if ( !string_empty( m_previous.c_str() ) ) {
-		addItem( m_previous.c_str(), e->name() );
-	}
-	m_previous = e->name();
-}
-void pushMenu( const CopiedString& name ){
-	GtkMenuItem* item = GTK_MENU_ITEM( gtk_menu_item_new_with_label( name.c_str() ) );
-	gtk_widget_show( GTK_WIDGET( item ) );
-	container_add_widget( GTK_CONTAINER( m_stack.back().first ), GTK_WIDGET( item ) );
-
-	GtkMenu* submenu = GTK_MENU( gtk_menu_new() );
-	gtk_menu_item_set_submenu( item, GTK_WIDGET( submenu ) );
-
-	m_stack.push_back( MenuPair( submenu, name ) );
-}
-void popMenu(){
-	m_stack.pop_back();
-}
-void addItem( const char* name, const char* next ){
-	const char* underscore = strchr( name, '_' );
-
-	if ( underscore != 0 && underscore != name ) {
-		bool nextEqual = string_equal_n( name, next, ( underscore + 1 ) - name );
-		const char* parent = m_stack.back().second.c_str();
-
-		if ( !string_empty( parent )
-			 && string_length( parent ) == std::size_t( underscore - name )
-			 && string_equal_n( name, parent, underscore - name ) ) { // this is a child
+	~EntityClassMenuInserter(){
+		if ( !string_empty( m_previous.c_str() ) ) {
+			addItem( m_previous.c_str(), "" );
 		}
-		else if ( nextEqual ) {
-			if ( m_stack.size() == 2 ) {
+	}
+	void visit( EntityClass* e ){
+		ASSERT_MESSAGE( !string_empty( e->name() ), "entity-class has no name" );
+		if ( !string_empty( m_previous.c_str() ) ) {
+			addItem( m_previous.c_str(), e->name() );
+		}
+		m_previous = e->name();
+	}
+	void pushMenu( const CopiedString& name ){
+		GtkMenuItem* item = GTK_MENU_ITEM( gtk_menu_item_new_with_label( name.c_str() ) );
+		gtk_widget_show( GTK_WIDGET( item ) );
+		container_add_widget( GTK_CONTAINER( m_stack.back().first ), GTK_WIDGET( item ) );
+
+		GtkMenu* submenu = GTK_MENU( gtk_menu_new() );
+		gtk_menu_item_set_submenu( item, GTK_WIDGET( submenu ) );
+
+		m_stack.push_back( MenuPair( submenu, name ) );
+	}
+	void popMenu(){
+		m_stack.pop_back();
+	}
+	void addItem( const char* name, const char* next ){
+		const char* underscore = strchr( name, '_' );
+
+		if ( underscore != 0 && underscore != name ) {
+			bool nextEqual = string_equal_n( name, next, ( underscore + 1 ) - name );
+			const char* parent = m_stack.back().second.c_str();
+
+			if ( !string_empty( parent )
+			     && string_length( parent ) == std::size_t( underscore - name )
+			     && string_equal_n( name, parent, underscore - name ) ) { // this is a child
+			}
+			else if ( nextEqual ) {
+				if ( m_stack.size() == 2 ) {
+					popMenu();
+				}
+				pushMenu( CopiedString( StringRange( name, underscore ) ) );
+			}
+			else if ( m_stack.size() == 2 ) {
 				popMenu();
 			}
-			pushMenu( CopiedString( StringRange( name, underscore ) ) );
 		}
 		else if ( m_stack.size() == 2 ) {
 			popMenu();
 		}
-	}
-	else if ( m_stack.size() == 2 ) {
-		popMenu();
-	}
 
-	EntityClassMenu_addItem( m_stack.back().first, name );
-}
+		EntityClassMenu_addItem( m_stack.back().first, name );
+	}
 };
 
 void XYWnd::OnContextMenu(){
@@ -1244,8 +1245,8 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 		{
 			StringOutputStream status( 64 );
 			status << "x:: " << FloatFormat( m_mousePosition[0], 6, 1 )
-				<< "  y:: " << FloatFormat( m_mousePosition[1], 6, 1 )
-				<< "  z:: " << FloatFormat( m_mousePosition[2], 6, 1 );
+			       << "  y:: " << FloatFormat( m_mousePosition[1], 6, 1 )
+			       << "  z:: " << FloatFormat( m_mousePosition[2], 6, 1 );
 			g_pParentWnd->SetStatusText( c_status_position, status.c_str() );
 		}
 
@@ -1378,7 +1379,7 @@ void BackgroundImage::set( const VIEWTYPE viewtype ){
 	NDIM1NDIM2( viewtype )
 	if( !( bounds.extents[nDim1] > 0 && bounds.extents[nDim2] > 0 ) ){
 		gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), "Select some objects to get the bounding box for image.\n",
-						"No selection", eMB_OK, eMB_ICONERROR );
+		                "No selection", eMB_OK, eMB_ICONERROR );
 	}
 	else{
 		free_tex();
@@ -1748,10 +1749,10 @@ void XYWnd::DrawCameraIcon( const Vector3& origin, const Vector3& angles ){
 	const float x = origin[nDim1];
 	const float y = origin[nDim2];
 	const double a = ( m_viewType == XY )?
-						degrees_to_radians( angles[CAMERA_YAW] )
-						: ( m_viewType == YZ )?
-						degrees_to_radians( ( angles[CAMERA_YAW] > 180 ) ? ( 180.0f - angles[CAMERA_PITCH] ) : angles[CAMERA_PITCH] )
-						: degrees_to_radians( ( angles[CAMERA_YAW] < 270 && angles[CAMERA_YAW] > 90 ) ? ( 180.0f - angles[CAMERA_PITCH] ) : angles[CAMERA_PITCH] );
+	                 degrees_to_radians( angles[CAMERA_YAW] )
+	                 : ( m_viewType == YZ )?
+	                 degrees_to_radians( ( angles[CAMERA_YAW] > 180 ) ? ( 180.0f - angles[CAMERA_PITCH] ) : angles[CAMERA_PITCH] )
+	                 : degrees_to_radians( ( angles[CAMERA_YAW] < 270 && angles[CAMERA_YAW] > 90 ) ? ( 180.0f - angles[CAMERA_PITCH] ) : angles[CAMERA_PITCH] );
 
 	glColor3f( 0.0, 0.0, 1.0 );
 	glBegin( GL_LINE_STRIP );
@@ -1835,61 +1836,61 @@ void XYWnd::PaintSizeInfo( const int nDim1, const int nDim2 ){
 
 class XYRenderer : public Renderer
 {
-struct state_type
-{
-	state_type() :
-		m_highlight( 0 ),
-		m_state( 0 ){
-	}
-	unsigned int m_highlight;
-	Shader* m_state;
-};
-public:
-XYRenderer( RenderStateFlags globalstate, Shader* selected ) :
-	m_globalstate( globalstate ),
-	m_state_selected( selected ){
-	ASSERT_NOTNULL( selected );
-	m_state_stack.push_back( state_type() );
-}
-
-void SetState( Shader* state, EStyle style ){
-	ASSERT_NOTNULL( state );
-	if ( style == eWireframeOnly ) {
-		m_state_stack.back().m_state = state;
-	}
-}
-EStyle getStyle() const {
-	return eWireframeOnly;
-}
-void PushState(){
-	m_state_stack.push_back( m_state_stack.back() );
-}
-void PopState(){
-	ASSERT_MESSAGE( !m_state_stack.empty(), "popping empty stack" );
-	m_state_stack.pop_back();
-}
-void Highlight( EHighlightMode mode, bool bEnable = true ){
-	( bEnable )
-	? m_state_stack.back().m_highlight |= mode
-	: m_state_stack.back().m_highlight &= ~mode;
-}
-void addRenderable( const OpenGLRenderable& renderable, const Matrix4& localToWorld ){
-	if ( m_state_stack.back().m_highlight & ePrimitive ) {
-		m_state_selected->addRenderable( renderable, localToWorld );
-	}
-	else
+	struct state_type
 	{
-		m_state_stack.back().m_state->addRenderable( renderable, localToWorld );
+		state_type() :
+			m_highlight( 0 ),
+			m_state( 0 ){
+		}
+		unsigned int m_highlight;
+		Shader* m_state;
+	};
+public:
+	XYRenderer( RenderStateFlags globalstate, Shader* selected ) :
+		m_globalstate( globalstate ),
+		m_state_selected( selected ){
+		ASSERT_NOTNULL( selected );
+		m_state_stack.push_back( state_type() );
 	}
-}
 
-void render( const Matrix4& modelview, const Matrix4& projection ){
-	GlobalShaderCache().render( m_globalstate, modelview, projection );
-}
+	void SetState( Shader* state, EStyle style ){
+		ASSERT_NOTNULL( state );
+		if ( style == eWireframeOnly ) {
+			m_state_stack.back().m_state = state;
+		}
+	}
+	EStyle getStyle() const {
+		return eWireframeOnly;
+	}
+	void PushState(){
+		m_state_stack.push_back( m_state_stack.back() );
+	}
+	void PopState(){
+		ASSERT_MESSAGE( !m_state_stack.empty(), "popping empty stack" );
+		m_state_stack.pop_back();
+	}
+	void Highlight( EHighlightMode mode, bool bEnable = true ){
+		( bEnable )
+		? m_state_stack.back().m_highlight |= mode
+		: m_state_stack.back().m_highlight &= ~mode;
+	}
+	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& localToWorld ){
+		if ( m_state_stack.back().m_highlight & ePrimitive ) {
+			m_state_selected->addRenderable( renderable, localToWorld );
+		}
+		else
+		{
+			m_state_stack.back().m_state->addRenderable( renderable, localToWorld );
+		}
+	}
+
+	void render( const Matrix4& modelview, const Matrix4& projection ){
+		GlobalShaderCache().render( m_globalstate, modelview, projection );
+	}
 private:
-std::vector<state_type> m_state_stack;
-RenderStateFlags m_globalstate;
-Shader* m_state_selected;
+	std::vector<state_type> m_state_stack;
+	RenderStateFlags m_globalstate;
+	Shader* m_state_selected;
 };
 
 void XYWnd::updateProjection(){
@@ -1901,17 +1902,9 @@ void XYWnd::updateProjection(){
 	m_projection[13] = 0.0f;
 	m_projection[14] = -1.0f;
 
-	m_projection[1] =
-		m_projection[2] =
-			m_projection[3] =
-
-				m_projection[4] =
-					m_projection[6] =
-						m_projection[7] =
-
-							m_projection[8] =
-								m_projection[9] =
-									m_projection[11] = 0.0f;
+	m_projection[1] = m_projection[2] = m_projection[3] =
+	m_projection[4] = m_projection[6] = m_projection[7] =
+	m_projection[8] = m_projection[9] = m_projection[11] = 0.0f;
 
 	m_projection[15] = 1.0f;
 
@@ -2003,8 +1996,8 @@ void XYWnd::XY_Draw(){
 	//
 	glViewport( 0, 0, m_nWidth, m_nHeight );
 	glClearColor( g_xywindow_globals.color_gridback[0],
-				  g_xywindow_globals.color_gridback[1],
-				  g_xywindow_globals.color_gridback[2],0 );
+	              g_xywindow_globals.color_gridback[1],
+	              g_xywindow_globals.color_gridback[2], 0 );
 
 	glClear( GL_COLOR_BUFFER_BIT );
 
@@ -2153,8 +2146,8 @@ void XYWnd::OnEntityCreate( const char* item ){
 
 inline AABB GetCenterBbox(){
 	return ( GlobalSelectionSystem().countSelected() != 0 )?
-			GlobalSelectionSystem().getBoundsSelected() :
-			AABB( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Vector3( 128.f, 128.f, 128.f ) );
+	         GlobalSelectionSystem().getBoundsSelected() :
+	         AABB( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Vector3( 128.f, 128.f, 128.f ) );
 }
 
 void XYWnd_Centralize( XYWnd* xywnd ){
@@ -2241,22 +2234,22 @@ void XZ_Front_Shown_Construct( GtkWindow* parent ){
 
 class EntityClassMenu : public ModuleObserver
 {
-std::size_t m_unrealised;
+	std::size_t m_unrealised;
 public:
-EntityClassMenu() : m_unrealised( 1 ){
-}
-void realise(){
-	if ( --m_unrealised == 0 ) {
+	EntityClassMenu() : m_unrealised( 1 ){
 	}
-}
-void unrealise(){
-	if ( ++m_unrealised == 1 ) {
-		if ( XYWnd::m_mnuDrop != 0 ) {
-			gtk_widget_destroy( GTK_WIDGET( XYWnd::m_mnuDrop ) );
-			XYWnd::m_mnuDrop = 0;
+	void realise(){
+		if ( --m_unrealised == 0 ) {
 		}
 	}
-}
+	void unrealise(){
+		if ( ++m_unrealised == 1 ) {
+			if ( XYWnd::m_mnuDrop != 0 ) {
+				gtk_widget_destroy( GTK_WIDGET( XYWnd::m_mnuDrop ) );
+				XYWnd::m_mnuDrop = 0;
+			}
+		}
+	}
 };
 
 EntityClassMenu g_EntityClassMenu;
@@ -2463,11 +2456,11 @@ void Orthographic_constructPreferences( PreferencesPage& page ){
 		const char* samples[] = { "0", "2", "4", "8", "16", "32" };
 
 		page.appendCombo(
-			"MSAA",
-			STRING_ARRAY_RANGE( samples ),
-			IntImportCallback( MSAAImportCaller() ),
-			IntExportCallback( MSAAExportCaller() )
-			);
+		    "MSAA",
+		    STRING_ARRAY_RANGE( samples ),
+		    IntImportCallback( MSAAImportCaller() ),
+		    IntExportCallback( MSAAExportCaller() )
+		);
 	}
 }
 void Orthographic_constructPage( PreferenceGroup& group ){

@@ -47,7 +47,7 @@ typedef struct {
 
 	GtkWidget *cbRotation;
 	GtkWidget *editRotation;
-}dlg_texReset_t;
+} dlg_texReset_t;
 
 dlg_texReset_t dlgTexReset;
 
@@ -221,9 +221,9 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 	gtk_window_set_transient_for( GTK_WINDOW( window ), GTK_WINDOW( g_pRadiantWnd ) );
 	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	g_signal_connect( G_OBJECT( window ), "delete_event",
-						G_CALLBACK( dialog_delete_callback ), NULL );
+	                  G_CALLBACK( dialog_delete_callback ), NULL );
 	g_signal_connect( G_OBJECT( window ), "destroy",
-						G_CALLBACK( gtk_widget_destroy ), NULL );
+	                  G_CALLBACK( gtk_widget_destroy ), NULL );
 	gtk_window_set_title( GTK_WINDOW( window ), lpCaption );
 	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
@@ -251,7 +251,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		w = gtk_button_new_with_label( "Ok" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -261,7 +261,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		w = gtk_button_new_with_label( "Ok" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -269,7 +269,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		w = gtk_button_new_with_label( "Cancel" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 		gtk_widget_show( w );
 		ret = eIDCANCEL;
 	}
@@ -277,7 +277,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		w = gtk_button_new_with_label( "Yes" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
 		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -285,13 +285,13 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		w = gtk_button_new_with_label( "No" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
 		gtk_widget_show( w );
 
 		w = gtk_button_new_with_label( "Cancel" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 		gtk_widget_show( w );
 		ret = eIDCANCEL;
 	}
@@ -300,7 +300,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		w = gtk_button_new_with_label( "Yes" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
 		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -308,7 +308,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		w = gtk_button_new_with_label( "No" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
 		gtk_widget_show( w );
 		ret = eIDNO;
 	}
@@ -1355,33 +1355,33 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	g_signal_connect( G_OBJECT( dlgTexReset.cbTexChange ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbTexChange );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbTexChange, 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 	w = gtk_label_new( "Old Name: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	dlgTexReset.editTexOld = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editTexOld ), rs->textureName );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editTexOld, 2, 3, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( dlgTexReset.editTexOld );
 
 	w = gtk_label_new( "New Name: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	dlgTexReset.editTexNew = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editTexNew ), rs->textureName );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editTexNew, 2, 3, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( dlgTexReset.editTexNew );
 
 	// ---- /frame ----
@@ -1403,20 +1403,20 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	g_signal_connect( G_OBJECT( dlgTexReset.cbScaleHor ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbScaleHor );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbScaleHor, 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 	w = gtk_label_new( "New Horizontal Scale: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	dlgTexReset.editScaleHor = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editScaleHor ), "0.5" );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editScaleHor, 2, 3, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( dlgTexReset.editScaleHor );
 
 
@@ -1424,20 +1424,20 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	g_signal_connect( G_OBJECT( dlgTexReset.cbScaleVert ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbScaleVert );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbScaleVert, 0, 1, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 	w = gtk_label_new( "New Vertical Scale: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	dlgTexReset.editScaleVert = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editScaleVert ), "0.5" );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editScaleVert, 2, 3, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( dlgTexReset.editScaleVert );
 
 	// ---- /frame ----
@@ -1459,20 +1459,20 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	g_signal_connect( G_OBJECT( dlgTexReset.cbShiftHor ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbShiftHor );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbShiftHor, 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 	w = gtk_label_new( "New Horizontal Shift: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	dlgTexReset.editShiftHor = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editShiftHor ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editShiftHor, 2, 3, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( dlgTexReset.editShiftHor );
 
 
@@ -1480,20 +1480,20 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	g_signal_connect( G_OBJECT( dlgTexReset.cbShiftVert ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbShiftVert );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbShiftVert, 0, 1, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 	w = gtk_label_new( "New Vertical Shift: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	dlgTexReset.editShiftVert = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editShiftVert ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editShiftVert, 2, 3, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( dlgTexReset.editShiftVert );
 
 	// ---- /frame ----
@@ -1514,20 +1514,20 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	dlgTexReset.cbRotation = gtk_check_button_new_with_label( "Enabled" );
 	gtk_widget_show( dlgTexReset.cbRotation );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbRotation, 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 	w = gtk_label_new( "New Rotation Value: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	dlgTexReset.editRotation = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editRotation ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editRotation, 2, 3, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( dlgTexReset.editRotation );
 
 	// ---- /frame ----
@@ -1677,30 +1677,30 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	w = gtk_label_new( "X: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	radiusX = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( radiusX ), "100" );
 	gtk_table_attach( GTK_TABLE( table ), radiusX, 1, 2, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( radiusX );
 
 
 
 	w = gtk_label_new( "Y: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	radiusY = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( radiusY ), "100" );
 	gtk_table_attach( GTK_TABLE( table ), radiusY, 1, 2, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( radiusY );
 
 
@@ -1720,30 +1720,30 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	w = gtk_label_new( "Start: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	angleStart = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( angleStart ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), angleStart, 1, 2, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( angleStart );
 
 
 
 	w = gtk_label_new( "End: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	angleEnd = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( angleEnd ), "90" );
 	gtk_table_attach( GTK_TABLE( table ), angleEnd, 1, 2, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( angleEnd );
 
 
@@ -1762,30 +1762,30 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	w = gtk_label_new( "Start: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	heightStart = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( heightStart ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), heightStart, 1, 2, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( heightStart );
 
 
 
 	w = gtk_label_new( "End: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	heightEnd = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( heightEnd ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), heightEnd, 1, 2, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( heightEnd );
 
 
@@ -1805,15 +1805,15 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	w = gtk_label_new( "Number: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
 	numPoints = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( numPoints ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), numPoints, 1, 2, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( numPoints );
 
 

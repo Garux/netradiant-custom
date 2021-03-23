@@ -426,7 +426,7 @@ void bbox_update_radius( bbox_t* bbox );
 /*! Generate oriented bounding box from AABB and transformation matrix. */
 /*!\todo Remove need to specify eulerZYX/scale. */
 void bbox_for_oriented_aabb( bbox_t* bbox, const aabb_t* aabb,
-							 const m4x4_t matrix, const vec3_t eulerZYX, const vec3_t scale );
+                             const m4x4_t matrix, const vec3_t eulerZYX, const vec3_t scale );
 /*! Return 2 if bbox is behind plane, else return 1 if bbox intersects plane, else return 0. */
 int bbox_intersect_plane( const bbox_t* bbox, const vec_t* plane );
 

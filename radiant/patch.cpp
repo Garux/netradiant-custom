@@ -197,7 +197,8 @@ void Patch::setDims( std::size_t w, std::size_t h ){
 		h = MIN_PATCH_HEIGHT;
 	}
 
-	m_width = w; m_height = h;
+	m_width = w;
+	m_height = h;
 
 	if ( m_width * m_height != m_ctrl.size() ) {
 		m_ctrl.resize( m_width * m_height );
@@ -221,10 +222,10 @@ bool Patch::isValid() const {
 	for ( const_iterator i = m_ctrl.begin(); i != m_ctrl.end(); ++i )
 	{
 		if ( !float_valid( ( *i ).m_vertex.x() )
-			 || !float_valid( ( *i ).m_vertex.y() )
-			 || !float_valid( ( *i ).m_vertex.z() )
-			 || !float_valid( ( *i ).m_texcoord.x() )
-			 || !float_valid( ( *i ).m_texcoord.y() ) ) {
+		  || !float_valid( ( *i ).m_vertex.y() )
+		  || !float_valid( ( *i ).m_vertex.z() )
+		  || !float_valid( ( *i ).m_texcoord.x() )
+		  || !float_valid( ( *i ).m_texcoord.y() ) ) {
 			globalErrorStream() << "patch has invalid control points\n";
 			return false;
 		}
@@ -654,7 +655,13 @@ Vector3 Patch::Calculate_AvgNormal() const {
 
 inline int texture_axis( const Vector3& normal ){
 	// axis dominance order: Z, X, Y
-	return ( normal.x() >= normal.y() ) ? ( normal.x() > normal.z() ) ? 0 : 2 : ( normal.y() > normal.z() ) ? 1 : 2;
+	return ( normal.x() >= normal.y() )
+	       ? ( normal.x() > normal.z() )
+	         ? 0
+	         : 2
+	       : ( normal.y() > normal.z() )
+	         ? 1
+	         : 2;
 }
 
 void Patch::CapTexture(){
@@ -668,18 +675,18 @@ void Patch::CapTexture(){
 
 	{
 		Vector3 tmp( vector3_cross(
-						 vector3_subtracted( p2.m_vertex, m_ctrl[0].m_vertex ),
-						 vector3_subtracted( p3.m_vertex, m_ctrl[0].m_vertex )
-						 ) );
+		                 vector3_subtracted( p2.m_vertex, m_ctrl[0].m_vertex ),
+		                 vector3_subtracted( p3.m_vertex, m_ctrl[0].m_vertex )
+		             ) );
 		if ( !vector3_equal( tmp, g_vector3_identity ) ) {
 			vector3_add( normal, tmp );
 		}
 	}
 	{
 		Vector3 tmp( vector3_cross(
-						 vector3_subtracted( p1.m_vertex, p3.m_vertex ),
-						 vector3_subtracted( m_ctrl[0].m_vertex, p3.m_vertex )
-						 ) );
+		                 vector3_subtracted( p1.m_vertex, p3.m_vertex ),
+		                 vector3_subtracted( m_ctrl[0].m_vertex, p3.m_vertex )
+		             ) );
 		if ( !vector3_equal( tmp, g_vector3_identity ) ) {
 			vector3_add( normal, tmp );
 		}
@@ -1049,7 +1056,8 @@ void Patch::RemovePoints( EMatrixMajor mt, bool bFirst ){
 		for ( std::size_t h = 0; h != height; ++h, p2 += row_stride2, p1 += row_stride )
 		{
 			if ( h == pos ) {
-				p1 += 2 * row_stride2; h += 2;
+				p1 += 2 * row_stride2;
+				h += 2;
 			}
 			*p2 = *p1;
 		}
@@ -1076,107 +1084,107 @@ void Patch::ConstructSeam( EPatchCap eType, Vector3* p, std::size_t width ){
 	switch ( eType )
 	{
 	case eCapIBevel:
-	{
-		setDims( 3, 3 );
-		m_ctrl[0].m_vertex = p[0];
-		m_ctrl[1].m_vertex = p[1];
-		m_ctrl[2].m_vertex = p[1];
-		m_ctrl[3].m_vertex = p[1];
-		m_ctrl[4].m_vertex = p[1];
-		m_ctrl[5].m_vertex = p[1];
-		m_ctrl[6].m_vertex = p[2];
-		m_ctrl[7].m_vertex = p[1];
-		m_ctrl[8].m_vertex = p[1];
-	}
-	break;
+		{
+			setDims( 3, 3 );
+			m_ctrl[0].m_vertex = p[0];
+			m_ctrl[1].m_vertex = p[1];
+			m_ctrl[2].m_vertex = p[1];
+			m_ctrl[3].m_vertex = p[1];
+			m_ctrl[4].m_vertex = p[1];
+			m_ctrl[5].m_vertex = p[1];
+			m_ctrl[6].m_vertex = p[2];
+			m_ctrl[7].m_vertex = p[1];
+			m_ctrl[8].m_vertex = p[1];
+		}
+		break;
 	case eCapBevel:
-	{
-		setDims( 3, 3 );
-		Vector3 p3( vector3_added( p[2], vector3_subtracted( p[0], p[1] ) ) );
-		m_ctrl[0].m_vertex = p3;
-		m_ctrl[1].m_vertex = p3;
-		m_ctrl[2].m_vertex = p[2];
-		m_ctrl[3].m_vertex = p3;
-		m_ctrl[4].m_vertex = p3;
-		m_ctrl[5].m_vertex = p[1];
-		m_ctrl[6].m_vertex = p3;
-		m_ctrl[7].m_vertex = p3;
-		m_ctrl[8].m_vertex = p[0];
-	}
-	break;
+		{
+			setDims( 3, 3 );
+			Vector3 p3( vector3_added( p[2], vector3_subtracted( p[0], p[1] ) ) );
+			m_ctrl[0].m_vertex = p3;
+			m_ctrl[1].m_vertex = p3;
+			m_ctrl[2].m_vertex = p[2];
+			m_ctrl[3].m_vertex = p3;
+			m_ctrl[4].m_vertex = p3;
+			m_ctrl[5].m_vertex = p[1];
+			m_ctrl[6].m_vertex = p3;
+			m_ctrl[7].m_vertex = p3;
+			m_ctrl[8].m_vertex = p[0];
+		}
+		break;
 	case eCapEndCap:
-	{
-		Vector3 p5( vector3_mid( p[0], p[4] ) );
+		{
+			Vector3 p5( vector3_mid( p[0], p[4] ) );
 
-		setDims( 3, 3 );
-		m_ctrl[0].m_vertex = p[0];
-		m_ctrl[1].m_vertex = p5;
-		m_ctrl[2].m_vertex = p[4];
-		m_ctrl[3].m_vertex = p[1];
-		m_ctrl[4].m_vertex = p[2];
-		m_ctrl[5].m_vertex = p[3];
-		m_ctrl[6].m_vertex = p[2];
-		m_ctrl[7].m_vertex = p[2];
-		m_ctrl[8].m_vertex = p[2];
-	}
-	break;
+			setDims( 3, 3 );
+			m_ctrl[0].m_vertex = p[0];
+			m_ctrl[1].m_vertex = p5;
+			m_ctrl[2].m_vertex = p[4];
+			m_ctrl[3].m_vertex = p[1];
+			m_ctrl[4].m_vertex = p[2];
+			m_ctrl[5].m_vertex = p[3];
+			m_ctrl[6].m_vertex = p[2];
+			m_ctrl[7].m_vertex = p[2];
+			m_ctrl[8].m_vertex = p[2];
+		}
+		break;
 	case eCapIEndCap:
-	{
-		setDims( 5, 3 );
-		m_ctrl[0].m_vertex = p[4];
-		m_ctrl[1].m_vertex = p[3];
-		m_ctrl[2].m_vertex = p[2];
-		m_ctrl[3].m_vertex = p[1];
-		m_ctrl[4].m_vertex = p[0];
-		m_ctrl[5].m_vertex = p[3];
-		m_ctrl[6].m_vertex = p[3];
-		m_ctrl[7].m_vertex = p[2];
-		m_ctrl[8].m_vertex = p[1];
-		m_ctrl[9].m_vertex = p[1];
-		m_ctrl[10].m_vertex = p[3];
-		m_ctrl[11].m_vertex = p[3];
-		m_ctrl[12].m_vertex = p[2];
-		m_ctrl[13].m_vertex = p[1];
-		m_ctrl[14].m_vertex = p[1];
-	}
-	break;
+		{
+			setDims( 5, 3 );
+			m_ctrl[0].m_vertex = p[4];
+			m_ctrl[1].m_vertex = p[3];
+			m_ctrl[2].m_vertex = p[2];
+			m_ctrl[3].m_vertex = p[1];
+			m_ctrl[4].m_vertex = p[0];
+			m_ctrl[5].m_vertex = p[3];
+			m_ctrl[6].m_vertex = p[3];
+			m_ctrl[7].m_vertex = p[2];
+			m_ctrl[8].m_vertex = p[1];
+			m_ctrl[9].m_vertex = p[1];
+			m_ctrl[10].m_vertex = p[3];
+			m_ctrl[11].m_vertex = p[3];
+			m_ctrl[12].m_vertex = p[2];
+			m_ctrl[13].m_vertex = p[1];
+			m_ctrl[14].m_vertex = p[1];
+		}
+		break;
 	case eCapCylinder:
-	{
-		std::size_t mid = ( width - 1 ) >> 1;
-
-		bool degenerate = ( mid % 2 ) != 0;
-
-		std::size_t newHeight = mid + ( degenerate ? 2 : 1 );
-
-		setDims( 3, newHeight );
-
-		if ( degenerate ) {
-			++mid;
-			for ( std::size_t i = width; i != width + 2; ++i )
-			{
-				p[i] = p[width - 1];
-			}
-		}
-
 		{
-			PatchControl* pCtrl = m_ctrl.data();
-			for ( std::size_t i = 0; i != m_height; ++i, pCtrl += m_width )
-			{
-				pCtrl->m_vertex = p[i];
-			}
-		}
-		{
-			PatchControl* pCtrl = m_ctrl.data() + 2;
-			std::size_t h = m_height - 1;
-			for ( std::size_t i = 0; i != m_height; ++i, pCtrl += m_width )
-			{
-				pCtrl->m_vertex = p[h + ( h - i )];
-			}
-		}
+			std::size_t mid = ( width - 1 ) >> 1;
 
-		Redisperse( COL );
-	}
-	break;
+			bool degenerate = ( mid % 2 ) != 0;
+
+			std::size_t newHeight = mid + ( degenerate ? 2 : 1 );
+
+			setDims( 3, newHeight );
+
+			if ( degenerate ) {
+				++mid;
+				for ( std::size_t i = width; i != width + 2; ++i )
+				{
+					p[i] = p[width - 1];
+				}
+			}
+
+			{
+				PatchControl* pCtrl = m_ctrl.data();
+				for ( std::size_t i = 0; i != m_height; ++i, pCtrl += m_width )
+				{
+					pCtrl->m_vertex = p[i];
+				}
+			}
+			{
+				PatchControl* pCtrl = m_ctrl.data() + 2;
+				std::size_t h = m_height - 1;
+				for ( std::size_t i = 0; i != m_height; ++i, pCtrl += m_width )
+				{
+					pCtrl->m_vertex = p[h + ( h - i )];
+				}
+			}
+
+			Redisperse( COL );
+		}
+		break;
 	default:
 		ERROR_MESSAGE( "invalid patch-cap type" );
 		return;
@@ -1327,11 +1335,11 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		constructPlane( aabb, axis, width, height );
 	}
 	else if ( eType == eSqCylinder
-			  || eType == eCylinder
-			  || eType == eDenseCylinder
-			  || eType == eVeryDenseCylinder
-			  || eType == eCone
-			  || eType == eSphere ) {
+	       || eType == eCylinder
+	       || eType == eDenseCylinder
+	       || eType == eVeryDenseCylinder
+	       || eType == eCone
+	       || eType == eSphere ) {
 		unsigned char *pIndex;
 		unsigned char pCylIndex[] =
 		{
@@ -1350,7 +1358,8 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		PatchControl *pStart;
 		switch ( eType )
 		{
-		case eSqCylinder: setDims( 9, 3 );
+		case eSqCylinder:
+			setDims( 9, 3 );
 			pStart = m_ctrl.data();
 			break;
 		case eDenseCylinder:
@@ -1359,7 +1368,8 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			setDims( 9, 3 );
 			pStart = m_ctrl.data() + 1;
 			break;
-		case eCone: setDims( 9, 3 );
+		case eCone:
+			setDims( 9, 3 );
 			pStart = m_ctrl.data() + 1;
 			break;
 		case eSphere:
@@ -1387,33 +1397,33 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		switch ( eType )
 		{
 		case eSqCylinder:
-		{
-			PatchControl* pCtrl = m_ctrl.data();
-			for ( std::size_t h = 0; h < 3; h++, pCtrl += 9 )
 			{
-				pCtrl[8].m_vertex = pCtrl[0].m_vertex;
+				PatchControl* pCtrl = m_ctrl.data();
+				for ( std::size_t h = 0; h < 3; h++, pCtrl += 9 )
+				{
+					pCtrl[8].m_vertex = pCtrl[0].m_vertex;
+				}
 			}
-		}
-		break;
+			break;
 		case eDenseCylinder:
 		case eVeryDenseCylinder:
 		case eCylinder:
-		{
-			PatchControl* pCtrl = m_ctrl.data();
-			for ( std::size_t h = 0; h < 3; h++, pCtrl += 9 )
 			{
-				pCtrl[0].m_vertex = pCtrl[8].m_vertex;
+				PatchControl* pCtrl = m_ctrl.data();
+				for ( std::size_t h = 0; h < 3; h++, pCtrl += 9 )
+				{
+					pCtrl[0].m_vertex = pCtrl[8].m_vertex;
+				}
 			}
-		}
-		break;
+			break;
 		case eCone:
-		{
-			PatchControl* pCtrl = m_ctrl.data();
-			for ( std::size_t h = 0; h < 2; h++, pCtrl += 9 )
 			{
-				pCtrl[0].m_vertex = pCtrl[8].m_vertex;
+				PatchControl* pCtrl = m_ctrl.data();
+				for ( std::size_t h = 0; h < 2; h++, pCtrl += 9 )
+				{
+					pCtrl[0].m_vertex = pCtrl[8].m_vertex;
+				}
 			}
-		}
 			{
 				PatchControl* pCtrl = m_ctrl.data() + 9 * 2;
 				for ( std::size_t w = 0; w < 9; w++, pCtrl++ )
@@ -1425,13 +1435,13 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			}
 			break;
 		case eSphere:
-		{
-			PatchControl* pCtrl = m_ctrl.data() + 9;
-			for ( std::size_t h = 0; h < 3; h++, pCtrl += 9 )
 			{
-				pCtrl[0].m_vertex = pCtrl[8].m_vertex;
+				PatchControl* pCtrl = m_ctrl.data() + 9;
+				for ( std::size_t h = 0; h < 3; h++, pCtrl += 9 )
+				{
+					pCtrl[0].m_vertex = pCtrl[8].m_vertex;
+				}
 			}
-		}
 			{
 				PatchControl* pCtrl = m_ctrl.data();
 				for ( std::size_t w = 0; w < 9; w++, pCtrl++ )
@@ -1625,31 +1635,31 @@ void RenderablePatchSolid::RenderNormals() const {
 		{
 			{
 				Vector3 vNormal(
-					vector3_added(
-						vertex3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ),
-						vector3_scaled( normal3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->normal ), 8 )
-						)
-					);
+				    vector3_added(
+				        vertex3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ),
+				        vector3_scaled( normal3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->normal ), 8 )
+				    )
+				);
 				glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ) );
 				glVertex3fv( &vNormal[0] );
 			}
 			{
 				Vector3 vNormal(
-					vector3_added(
-						vertex3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ),
-						vector3_scaled( normal3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->tangent ), 8 )
-						)
-					);
+				    vector3_added(
+				        vertex3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ),
+				        vector3_scaled( normal3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->tangent ), 8 )
+				    )
+				);
 				glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ) );
 				glVertex3fv( &vNormal[0] );
 			}
 			{
 				Vector3 vNormal(
-					vector3_added(
-						vertex3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ),
-						vector3_scaled( normal3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->bitangent ), 8 )
-						)
-					);
+				    vector3_added(
+				        vertex3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ),
+				        vector3_scaled( normal3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->bitangent ), 8 )
+				    )
+				);
 				glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ) );
 				glVertex3fv( &vNormal[0] );
 			}
@@ -1911,12 +1921,12 @@ void Patch::TesselateSubMatrixFixed( ArbitraryMeshVertex* vertices, std::size_t 
 }
 
 void Patch::TesselateSubMatrix( const BezierCurveTree *BX, const BezierCurveTree *BY,
-								std::size_t offStartX, std::size_t offStartY,
-								std::size_t offEndX, std::size_t offEndY,
-								std::size_t nFlagsX, std::size_t nFlagsY,
-								Vector3& left, Vector3& mid, Vector3& right,
-								Vector2& texLeft, Vector2& texMid, Vector2& texRight,
-								bool bTranspose ){
+                                std::size_t offStartX, std::size_t offStartY,
+                                std::size_t offEndX, std::size_t offEndY,
+                                std::size_t nFlagsX, std::size_t nFlagsY,
+                                Vector3& left, Vector3& mid, Vector3& right,
+                                Vector2& texLeft, Vector2& texMid, Vector2& texRight,
+                                bool bTranspose ){
 	int newFlagsX, newFlagsY;
 
 	Vector3 tmp;
@@ -1928,25 +1938,25 @@ void Patch::TesselateSubMatrix( const BezierCurveTree *BX, const BezierCurveTree
 		// texcoords
 
 		BezierInterpolate2( texcoord_for_index( m_tess.m_vertices, offStartX + offStartY ),
-							texcoord_0_0,
-							texcoord_for_index( m_tess.m_vertices, BX->index + offStartY ),
-							texcoord_0_1,
-							texcoord_for_index( m_tess.m_vertices, offEndX + offStartY ) );
+		                    texcoord_0_0,
+		                    texcoord_for_index( m_tess.m_vertices, BX->index + offStartY ),
+		                    texcoord_0_1,
+		                    texcoord_for_index( m_tess.m_vertices, offEndX + offStartY ) );
 
 
 		BezierInterpolate2( texcoord_for_index( m_tess.m_vertices, offStartX + offEndY ),
-							texcoord_2_0,
-							texcoord_for_index( m_tess.m_vertices, BX->index + offEndY ),
-							texcoord_2_1,
-							texcoord_for_index( m_tess.m_vertices, offEndX + offEndY ) );
+		                    texcoord_2_0,
+		                    texcoord_for_index( m_tess.m_vertices, BX->index + offEndY ),
+		                    texcoord_2_1,
+		                    texcoord_for_index( m_tess.m_vertices, offEndX + offEndY ) );
 
 		texTmp = texMid;
 
 		BezierInterpolate2( texLeft,
-							texcoord_1_0,
-							texTmp,
-							texcoord_1_1,
-							texRight );
+		                    texcoord_1_0,
+		                    texTmp,
+		                    texcoord_1_1,
+		                    texRight );
 
 		if ( !BezierCurveTree_isLeaf( BY ) ) {
 			texcoord_for_index( m_tess.m_vertices, BX->index + BY->index ) = texTmp;
@@ -1974,26 +1984,26 @@ void Patch::TesselateSubMatrix( const BezierCurveTree *BX, const BezierCurveTree
 		// verts
 
 		BezierInterpolate3( vertex_for_index( m_tess.m_vertices, offStartX + offStartY ),
-							vertex_0_0,
-							vertex_for_index( m_tess.m_vertices, BX->index + offStartY ),
-							vertex_0_1,
-							vertex_for_index( m_tess.m_vertices, offEndX + offStartY ) );
+		                    vertex_0_0,
+		                    vertex_for_index( m_tess.m_vertices, BX->index + offStartY ),
+		                    vertex_0_1,
+		                    vertex_for_index( m_tess.m_vertices, offEndX + offStartY ) );
 
 
 		BezierInterpolate3( vertex_for_index( m_tess.m_vertices, offStartX + offEndY ),
-							vertex_2_0,
-							vertex_for_index( m_tess.m_vertices, BX->index + offEndY ),
-							vertex_2_1,
-							vertex_for_index( m_tess.m_vertices, offEndX + offEndY ) );
+		                    vertex_2_0,
+		                    vertex_for_index( m_tess.m_vertices, BX->index + offEndY ),
+		                    vertex_2_1,
+		                    vertex_for_index( m_tess.m_vertices, offEndX + offEndY ) );
 
 
 		tmp = mid;
 
 		BezierInterpolate3( left,
-							vertex_1_0,
-							tmp,
-							vertex_1_1,
-							right );
+		                    vertex_1_0,
+		                    tmp,
+		                    vertex_1_1,
+		                    right );
 
 		if ( !BezierCurveTree_isLeaf( BY ) ) {
 			vertex_for_index( m_tess.m_vertices, BX->index + BY->index ) = tmp;
@@ -2205,12 +2215,12 @@ void Patch::TesselateSubMatrix( const BezierCurveTree *BX, const BezierCurveTree
 			Vector2 stTemp( p2 );
 
 			TesselateSubMatrix( BY, BX->left,
-								offStartY, offStartX,
-								offEndY, BX->index,
-								newFlagsY, newFlagsX,
-								vertex_0_0, vertex_1_0, vertex_2_0,
-								texcoord_0_0, texcoord_1_0, texcoord_2_0,
-								!bTranspose );
+			                    offStartY, offStartX,
+			                    offEndY, BX->index,
+			                    newFlagsY, newFlagsX,
+			                    vertex_0_0, vertex_1_0, vertex_2_0,
+			                    texcoord_0_0, texcoord_1_0, texcoord_2_0,
+			                    !bTranspose );
 
 			newFlagsY = nTemp;
 			p = vTemp;
@@ -2218,37 +2228,38 @@ void Patch::TesselateSubMatrix( const BezierCurveTree *BX, const BezierCurveTree
 		}
 
 		if ( ( nFlagsY & DEGEN_2a ) && ( nFlagsY & DEGEN_2b ) ) {
-			newFlagsY |= DEGEN_2a; newFlagsY |= DEGEN_2b;
+			newFlagsY |= DEGEN_2a;
+			newFlagsY |= DEGEN_2b;
 		}
 
 		TesselateSubMatrix( BY, BX->right,
-							offStartY, BX->index,
-							offEndY, offEndX,
-							newFlagsY, newFlagsX,
-							vertex_0_1, vertex_1_1, vertex_2_1,
-							texcoord_0_1, texcoord_1_1, texcoord_2_1,
-							!bTranspose );
+		                    offStartY, BX->index,
+		                    offEndY, offEndX,
+		                    newFlagsY, newFlagsX,
+		                    vertex_0_1, vertex_1_1, vertex_2_1,
+		                    texcoord_0_1, texcoord_1_1, texcoord_2_1,
+		                    !bTranspose );
 	}
 	else
 	{
 		if ( !BezierCurveTree_isLeaf( BX->left ) ) {
 			TesselateSubMatrix( BX->left,  BY,
-								offStartX, offStartY,
-								BX->index, offEndY,
-								newFlagsX, newFlagsY,
-								left, vertex_1_0, tmp,
-								texLeft, texcoord_1_0, texTmp,
-								bTranspose );
+			                    offStartX, offStartY,
+			                    BX->index, offEndY,
+			                    newFlagsX, newFlagsY,
+			                    left, vertex_1_0, tmp,
+			                    texLeft, texcoord_1_0, texTmp,
+			                    bTranspose );
 		}
 
 		if ( !BezierCurveTree_isLeaf( BX->right ) ) {
 			TesselateSubMatrix( BX->right, BY,
-								BX->index, offStartY,
-								offEndX, offEndY,
-								newFlagsX, newFlagsY,
-								tmp, vertex_1_1, right,
-								texTmp, texcoord_1_1, texRight,
-								bTranspose );
+			                    BX->index, offStartY,
+			                    offEndX, offEndY,
+			                    newFlagsX, newFlagsY,
+			                    tmp, vertex_1_1, right,
+			                    texTmp, texcoord_1_1, texRight,
+			                    bTranspose );
 		}
 	}
 
@@ -2393,57 +2404,57 @@ inline void vertex_clear_normal( ArbitraryMeshVertex& vertex ){
 inline void tangents_remove_degenerate( Vector3 tangents[6], Vector2 textureTangents[6], unsigned int flags ){
 	if ( flags & DEGEN_0a ) {
 		const std::size_t i =
-			( flags & DEGEN_0b )
-			? ( flags & DEGEN_1a )
-			? ( flags & DEGEN_1b )
-			? ( flags & DEGEN_2a )
-			? 5
-			: 4
-			: 3
-			: 2
-			: 1;
+		    ( flags & DEGEN_0b )
+		    ? ( flags & DEGEN_1a )
+		      ? ( flags & DEGEN_1b )
+		        ? ( flags & DEGEN_2a )
+		          ? 5
+		          : 4
+		        : 3
+		      : 2
+		    : 1;
 		tangents[0] = tangents[i];
 		textureTangents[0] = textureTangents[i];
 	}
 	if ( flags & DEGEN_0b ) {
 		const std::size_t i =
-			( flags & DEGEN_0a )
-			? ( flags & DEGEN_1b )
-			? ( flags & DEGEN_1a )
-			? ( flags & DEGEN_2b )
-			? 4
-			: 5
-			: 2
-			: 3
-			: 0;
+		    ( flags & DEGEN_0a )
+		    ? ( flags & DEGEN_1b )
+		      ? ( flags & DEGEN_1a )
+		        ? ( flags & DEGEN_2b )
+		          ? 4
+		          : 5
+		        : 2
+		      : 3
+		    : 0;
 		tangents[1] = tangents[i];
 		textureTangents[1] = textureTangents[i];
 	}
 	if ( flags & DEGEN_2a ) {
 		const std::size_t i =
-			( flags & DEGEN_2b )
-			? ( flags & DEGEN_1a )
-			? ( flags & DEGEN_1b )
-			? ( flags & DEGEN_0a )
-			? 1
-			: 0
-			: 3
-			: 2
-			: 5;
+		    ( flags & DEGEN_2b )
+		    ? ( flags & DEGEN_1a )
+		      ? ( flags & DEGEN_1b )
+		        ? ( flags & DEGEN_0a )
+		          ? 1
+		          : 0
+		        : 3
+		      : 2
+		    : 5;
 		tangents[4] = tangents[i];
 		textureTangents[4] = textureTangents[i];
 	}
 	if ( flags & DEGEN_2b ) {
 		const std::size_t i =
-			( flags & DEGEN_2a )
-			? ( flags & DEGEN_1b )
-			? ( flags & DEGEN_1a )
-			? ( flags & DEGEN_0b )
-			? 0
-			: 1
-			: 2
-			: 3
-			: 4;
+		    ( flags & DEGEN_2a )
+		    ? ( flags & DEGEN_1b )
+		      ? ( flags & DEGEN_1a )
+		        ? ( flags & DEGEN_0b )
+		          ? 0
+		          : 1
+		        : 2
+		      : 3
+		    : 4;
 		tangents[5] = tangents[i];
 		textureTangents[5] = textureTangents[i];
 	}
@@ -2864,19 +2875,19 @@ void Patch::BuildVertexArray(){
 				{
 					if ( !leafX ) {
 						TesselateSubMatrix( m_tess.m_curveTreeU[i >> 1], m_tess.m_curveTreeV[j >> 1],
-											offStartX, offStartY, offEndX, offEndY, // array offsets
-											nFlagsX, nFlagsY,
-											subMatrix[1][0]->m_vertex, subMatrix[1][1]->m_vertex, subMatrix[1][2]->m_vertex,
-											subMatrix[1][0]->m_texcoord, subMatrix[1][1]->m_texcoord, subMatrix[1][2]->m_texcoord,
-											false );
+						                    offStartX, offStartY, offEndX, offEndY, // array offsets
+						                    nFlagsX, nFlagsY,
+						                    subMatrix[1][0]->m_vertex, subMatrix[1][1]->m_vertex, subMatrix[1][2]->m_vertex,
+						                    subMatrix[1][0]->m_texcoord, subMatrix[1][1]->m_texcoord, subMatrix[1][2]->m_texcoord,
+						                    false );
 					}
 					else if ( !leafY ) {
 						TesselateSubMatrix( m_tess.m_curveTreeV[j >> 1], m_tess.m_curveTreeU[i >> 1],
-											offStartY, offStartX, offEndY, offEndX, // array offsets
-											nFlagsY, nFlagsX,
-											subMatrix[0][1]->m_vertex, subMatrix[1][1]->m_vertex, subMatrix[2][1]->m_vertex,
-											subMatrix[0][1]->m_texcoord, subMatrix[1][1]->m_texcoord, subMatrix[2][1]->m_texcoord,
-											true );
+						                    offStartY, offStartX, offEndY, offEndX, // array offsets
+						                    nFlagsY, nFlagsX,
+						                    subMatrix[0][1]->m_vertex, subMatrix[1][1]->m_vertex, subMatrix[2][1]->m_vertex,
+						                    subMatrix[0][1]->m_texcoord, subMatrix[1][1]->m_texcoord, subMatrix[2][1]->m_texcoord,
+						                    true );
 					}
 				}
 
@@ -2905,7 +2916,7 @@ Vector3 getAverageNormal(const Vector3& normal1, const Vector3& normal2)
 
 	// Now calculate the length correction out of the angle
 	// of the two normals
-		/* float factor = cos(n1.angle(n2) * 0.5); */
+	/* float factor = cos(n1.angle(n2) * 0.5); */
 	float factor = (float) vector3_dot( normal1, normal2 );
 	if ( factor > 1.0 ) factor = 1;
 	if ( factor < -1.0 ) factor = -1;
@@ -2924,16 +2935,16 @@ Vector3 getAverageNormal(const Vector3& normal1, const Vector3& normal2)
 }
 
 void Patch::createThickenedOpposite(const Patch& sourcePatch,
-									const float thickness,
-									const int axis,
-									bool& no12,
-									bool& no34)
+                                    const float thickness,
+                                    const int axis,
+                                    bool& no12,
+                                    bool& no34)
 {
 	// Clone the dimensions from the other patch
 	setDims(sourcePatch.getWidth(), sourcePatch.getHeight());
 
 	// Also inherit the tesselation from the source patch
-		//setFixedSubdivisions(sourcePatch.subdivionsFixed(), sourcePatch.getSubdivisions());
+	//setFixedSubdivisions(sourcePatch.subdivionsFixed(), sourcePatch.getSubdivisions());
 
 	// Copy the shader from the source patch
 	SetShader(sourcePatch.GetShader());
@@ -2942,18 +2953,18 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 	Vector3 extrudeAxis(0,0,0);
 
 	switch (axis) {
-		case 0: // X-Axis
-			extrudeAxis = Vector3(1,0,0);
-			break;
-		case 1: // Y-Axis
-			extrudeAxis = Vector3(0,1,0);
-			break;
-		case 2: // Z-Axis
-			extrudeAxis = Vector3(0,0,1);
-			break;
-		default:
-			// Default value already set during initialisation
-			break;
+	case 0: // X-Axis
+		extrudeAxis = Vector3(1,0,0);
+		break;
+	case 1: // Y-Axis
+		extrudeAxis = Vector3(0,1,0);
+		break;
+	case 2: // Z-Axis
+		extrudeAxis = Vector3(0,0,1);
+		break;
+	default:
+		// Default value already set during initialisation
+		break;
 	}
 
 	//check if certain seams are required + cycling in normals calculation is needed
@@ -3037,7 +3048,7 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 
 					// Cull redundant tangents (parallel)
 					if ( vector3_length_squared( colTangent[1] + colTangent[0] ) == 0 ||
-						vector3_length_squared( colTangent[1] - colTangent[0] ) == 0 ){
+					     vector3_length_squared( colTangent[1] - colTangent[0] ) == 0 ){
 						colTangent[1] = Vector3(0,0,0);
 					}
 				}
@@ -3093,7 +3104,7 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 
 					// Cull redundant tangents (parallel)
 					if ( vector3_length_squared( rowTangent[1] + rowTangent[0] ) == 0 ||
-						vector3_length_squared( rowTangent[1] - rowTangent[0] ) == 0 ){
+					     vector3_length_squared( rowTangent[1] - rowTangent[0] ) == 0 ){
 						rowTangent[1] = Vector3(0,0,0);
 					}
 				}
@@ -3101,19 +3112,19 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 
 				//clean parallel pairs...
 				if ( vector3_length_squared( rowTangent[0] + colTangent[0] ) == 0 ||
-					vector3_length_squared( rowTangent[0] - colTangent[0] ) == 0 ){
+				     vector3_length_squared( rowTangent[0] - colTangent[0] ) == 0 ){
 					rowTangent[0] = Vector3(0,0,0);
 				}
 				if ( vector3_length_squared( rowTangent[1] + colTangent[1] ) == 0 ||
-					vector3_length_squared( rowTangent[1] - colTangent[1] ) == 0 ){
+				     vector3_length_squared( rowTangent[1] - colTangent[1] ) == 0 ){
 					rowTangent[1] = Vector3(0,0,0);
 				}
 				if ( vector3_length_squared( rowTangent[0] + colTangent[1] ) == 0 ||
-					vector3_length_squared( rowTangent[0] - colTangent[1] ) == 0 ){
+				     vector3_length_squared( rowTangent[0] - colTangent[1] ) == 0 ){
 					colTangent[1] = Vector3(0,0,0);
 				}
 				if ( vector3_length_squared( rowTangent[1] + colTangent[0] ) == 0 ||
-					vector3_length_squared( rowTangent[1] - colTangent[0] ) == 0 ){
+				     vector3_length_squared( rowTangent[1] - colTangent[0] ) == 0 ){
 					rowTangent[1] = Vector3(0,0,0);
 				}
 
@@ -3133,7 +3144,7 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 				else{
 					// If two column + two row tangents are available, take the length-corrected average
 					if ( ( fabs( colTangent[1][0] ) + fabs( colTangent[1][1] ) + fabs( colTangent[1][2] ) ) > 0 &&
-							( fabs( rowTangent[1][0] ) + fabs( rowTangent[1][1] ) + fabs( rowTangent[1][2] ) ) > 0 )
+					     ( fabs( rowTangent[1][0] ) + fabs( rowTangent[1][1] ) + fabs( rowTangent[1][2] ) ) > 0 )
 					{
 						// Two column normals to calculate
 						Vector3 normal1 = vector3_normalised( vector3_cross( rowTangent[0], colTangent[0] ) );
@@ -3213,8 +3224,8 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 }
 
 void Patch::createThickenedWall(const Patch& sourcePatch,
-								const Patch& targetPatch,
-								const int wallIndex)
+                                const Patch& targetPatch,
+                                const int wallIndex)
 {
 	// Copy the shader from the source patch
 	SetShader(sourcePatch.GetShader());
@@ -3240,34 +3251,34 @@ void Patch::createThickenedWall(const Patch& sourcePatch,
 	// Determine which of the four edges have to be connected
 	// and calculate the start, end & stepsize for the following loop
 	switch (wallIndex) {
-		case 0:
-			cols = sourceWidth;
-			start = 0;
-			end = sourceWidth - 1;
-			incr = 1;
-			//setFixedSubdivisions(sourceTesselationFixed, sourceTesselationX);
-			break;
-		case 1:
-			cols = sourceWidth;
-			start = sourceWidth * (sourceHeight-1);
-			end = sourceWidth*sourceHeight - 1;
-			incr = 1;
-			//setFixedSubdivisions(sourceTesselationFixed, sourceTesselationX);
-			break;
-		case 2:
-			cols = sourceHeight;
-			start = 0;
-			end = sourceWidth*(sourceHeight-1);
-			incr = sourceWidth;
-			//setFixedSubdivisions(sourceTesselationFixed, sourceTesselationY);
-			break;
-		case 3:
-			cols = sourceHeight;
-			start = sourceWidth - 1;
-			end = sourceWidth*sourceHeight - 1;
-			incr = sourceWidth;
-			//setFixedSubdivisions(sourceTesselationFixed, sourceTesselationY);
-			break;
+	case 0:
+		cols = sourceWidth;
+		start = 0;
+		end = sourceWidth - 1;
+		incr = 1;
+		//setFixedSubdivisions(sourceTesselationFixed, sourceTesselationX);
+		break;
+	case 1:
+		cols = sourceWidth;
+		start = sourceWidth * (sourceHeight-1);
+		end = sourceWidth*sourceHeight - 1;
+		incr = 1;
+		//setFixedSubdivisions(sourceTesselationFixed, sourceTesselationX);
+		break;
+	case 2:
+		cols = sourceHeight;
+		start = 0;
+		end = sourceWidth*(sourceHeight-1);
+		incr = sourceWidth;
+		//setFixedSubdivisions(sourceTesselationFixed, sourceTesselationY);
+		break;
+	case 3:
+		cols = sourceHeight;
+		start = sourceWidth - 1;
+		end = sourceWidth*sourceHeight - 1;
+		incr = sourceWidth;
+		//setFixedSubdivisions(sourceTesselationFixed, sourceTesselationY);
+		break;
 	}
 
 	setDims(cols, rows);
@@ -3302,21 +3313,21 @@ void Patch::createThickenedWall(const Patch& sourcePatch,
 
 class PatchFilterWrapper : public Filter
 {
-bool m_active;
-bool m_invert;
-PatchFilter& m_filter;
+	bool m_active;
+	bool m_invert;
+	PatchFilter& m_filter;
 public:
-PatchFilterWrapper( PatchFilter& filter, bool invert ) : m_invert( invert ), m_filter( filter ){
-}
-void setActive( bool active ){
-	m_active = active;
-}
-bool active(){
-	return m_active;
-}
-bool filter( const Patch& patch ){
-	return m_invert ^ m_filter.filter( patch );
-}
+	PatchFilterWrapper( PatchFilter& filter, bool invert ) : m_invert( invert ), m_filter( filter ){
+	}
+	void setActive( bool active ){
+		m_active = active;
+	}
+	bool active(){
+		return m_active;
+	}
+	bool filter( const Patch& patch ){
+		return m_invert ^ m_filter.filter( patch );
+	}
 };
 
 

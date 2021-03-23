@@ -243,7 +243,7 @@ int DBrush::RemoveRedundantPlanes(){
 
 	if ( pointList.size() == 0 ) { // if points may not have been built, build them
 /*		if(BuildPoints() == 0)	// just let the planes die if they are all bad
-            return cnt;*/
+			return cnt;*/
 		BuildPoints();
 	}
 
@@ -704,13 +704,13 @@ void DBrush::SaveToFile( FILE *pFile ){
 		char buffer[512];
 
 		sprintf( buffer, "( %.0f %.0f %.0f ) ( %.0f %.0f %.0f ) ( %.0f %.0f %.0f ) %s %.0f %.0f %f %f %.0f 0 0 0\n",
-				 ( *pp )->points[0][0], ( *pp )->points[0][1], ( *pp )->points[0][2],
-				 ( *pp )->points[1][0], ( *pp )->points[1][1], ( *pp )->points[1][2],
-				 ( *pp )->points[2][0], ( *pp )->points[2][1], ( *pp )->points[2][2],
-				 ( *pp )->m_shader.c_str(),
-				 ( *pp )->texInfo.m_texdef.shift[0], ( *pp )->texInfo.m_texdef.shift[1],
-				 ( *pp )->texInfo.m_texdef.scale[0], ( *pp )->texInfo.m_texdef.scale[0],
-				 ( *pp )->texInfo.m_texdef.rotate );
+		         ( *pp )->points[0][0], ( *pp )->points[0][1], ( *pp )->points[0][2],
+		         ( *pp )->points[1][0], ( *pp )->points[1][1], ( *pp )->points[1][2],
+		         ( *pp )->points[2][0], ( *pp )->points[2][1], ( *pp )->points[2][2],
+		         ( *pp )->m_shader.c_str(),
+		         ( *pp )->texInfo.m_texdef.shift[0], ( *pp )->texInfo.m_texdef.shift[1],
+		         ( *pp )->texInfo.m_texdef.scale[0], ( *pp )->texInfo.m_texdef.scale[0],
+		         ( *pp )->texInfo.m_texdef.rotate );
 
 		fprintf( pFile, "%s", buffer );
 	}
@@ -740,7 +740,7 @@ void DBrush::RotateAboutCentre( vec3_t vRotation ){
 }
 
 bool DBrush::ResetTextures( const char* textureName, float fScale[2],    float fShift[2],    int rotation, const char* newTextureName,
-							int bResetTextureName,   int bResetScale[2], int bResetShift[2], int bResetRotation ){
+                            int bResetTextureName,   int bResetScale[2], int bResetShift[2], int bResetRotation ){
 	if ( textureName ) {
 		bool changed = false;
 		for ( std::list<DPlane *>::const_iterator resetPlane = faceList.begin(); resetPlane != faceList.end(); resetPlane++ )

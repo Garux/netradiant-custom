@@ -39,31 +39,31 @@ inline void billboard_viewplaneOriented( Matrix4& rotation, const Matrix4& world
 	Matrix4 screen2world( matrix4_full_inverse( world2screen ) );
 
 	Vector3 near_(
-		vector4_projected(
-			matrix4_transformed_vector4(
-				screen2world,
-				Vector4( 0, 0, -1, 1 )
-				)
-			)
-		);
+	    vector4_projected(
+	        matrix4_transformed_vector4(
+	            screen2world,
+	            Vector4( 0, 0, -1, 1 )
+	        )
+	    )
+	);
 
 	Vector3 far_(
-		vector4_projected(
-			matrix4_transformed_vector4(
-				screen2world,
-				Vector4( 0, 0, 1, 1 )
-				)
-			)
-		);
+	    vector4_projected(
+	        matrix4_transformed_vector4(
+	            screen2world,
+	            Vector4( 0, 0, 1, 1 )
+	        )
+	    )
+	);
 
 	Vector3 up(
-		vector4_projected(
-			matrix4_transformed_vector4(
-				screen2world,
-				Vector4( 0, 1, -1, 1 )
-				)
-			)
-		);
+	    vector4_projected(
+	        matrix4_transformed_vector4(
+	            screen2world,
+	            Vector4( 0, 1, -1, 1 )
+	        )
+	    )
+	);
 
 	rotation = g_matrix4_identity;
 	vector4_to_vector3( rotation.y() ) = vector3_normalised( vector3_subtracted( up, near_ ) );
@@ -84,31 +84,31 @@ inline void billboard_viewpointOriented( Matrix4& rotation, const Matrix4& world
 	vector4_to_vector3( rotation.y() ) = vector3_cross( vector4_to_vector3( rotation.z() ), vector4_to_vector3( rotation.x() ) );
 #else
 	Vector3 near_(
-		vector4_projected(
-			matrix4_transformed_vector4(
-				screen2world,
-				Vector4( world2screen[12] / world2screen[15], world2screen[13] / world2screen[15], -1, 1 )
-				)
-			)
-		);
+	    vector4_projected(
+	        matrix4_transformed_vector4(
+	            screen2world,
+	            Vector4( world2screen[12] / world2screen[15], world2screen[13] / world2screen[15], -1, 1 )
+	        )
+	    )
+	);
 
 	Vector3 far_(
-		vector4_projected(
-			matrix4_transformed_vector4(
-				screen2world,
-				Vector4( world2screen[12] / world2screen[15], world2screen[13] / world2screen[15], 1, 1 )
-				)
-			)
-		);
+	    vector4_projected(
+	        matrix4_transformed_vector4(
+	            screen2world,
+	            Vector4( world2screen[12] / world2screen[15], world2screen[13] / world2screen[15], 1, 1 )
+	        )
+	    )
+	);
 
 	Vector3 up(
-		vector4_projected(
-			matrix4_transformed_vector4(
-				screen2world,
-				Vector4( world2screen[12] / world2screen[15], world2screen[13] / world2screen[15] + 1, -1, 1 )
-				)
-			)
-		);
+	    vector4_projected(
+	        matrix4_transformed_vector4(
+	            screen2world,
+	            Vector4( world2screen[12] / world2screen[15], world2screen[13] / world2screen[15] + 1, -1, 1 )
+	        )
+	    )
+	);
 
 	rotation = g_matrix4_identity;
 	vector4_to_vector3( rotation.y() ) = vector3_normalised( vector3_subtracted( up, near_ ) );
@@ -232,51 +232,51 @@ class Shader;
 
 class RenderablePivot : public OpenGLRenderable
 {
-VertexBuffer<PointVertex> m_vertices;
+	VertexBuffer<PointVertex> m_vertices;
 public:
-mutable Matrix4 m_localToWorld;
-typedef Static<Shader*, RenderablePivot> StaticShader;
-static Shader* getShader(){
-	return StaticShader::instance();
-}
-
-RenderablePivot( std::size_t size = 16 ){
-	m_vertices.reserve( 6 );
-
-	m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 0 ), g_colour_x ) );
-	m_vertices.push_back( PointVertex( Vertex3f( size, 0, 0 ), g_colour_x ) );
-
-	m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 0 ), g_colour_y ) );
-	m_vertices.push_back( PointVertex( Vertex3f( 0, size, 0 ), g_colour_y ) );
-
-	m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 0 ), g_colour_z ) );
-	m_vertices.push_back( PointVertex( Vertex3f( 0, 0, size ), g_colour_z ) );
-}
-
-void render( RenderStateFlags state ) const {
-	if ( m_vertices.size() == 0 ) {
-		return;
+	mutable Matrix4 m_localToWorld;
+	typedef Static<Shader*, RenderablePivot> StaticShader;
+	static Shader* getShader(){
+		return StaticShader::instance();
 	}
-	if ( m_vertices.data() == 0 ) {
-		return;
+
+	RenderablePivot( std::size_t size = 16 ){
+		m_vertices.reserve( 6 );
+
+		m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 0 ), g_colour_x ) );
+		m_vertices.push_back( PointVertex( Vertex3f( size, 0, 0 ), g_colour_x ) );
+
+		m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 0 ), g_colour_y ) );
+		m_vertices.push_back( PointVertex( Vertex3f( 0, size, 0 ), g_colour_y ) );
+
+		m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 0 ), g_colour_z ) );
+		m_vertices.push_back( PointVertex( Vertex3f( 0, 0, size ), g_colour_z ) );
 	}
-	glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
-	glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices.data()->colour );
-	glDrawArrays( GL_LINES, 0, m_vertices.size() );
-}
 
-void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld ) const {
-	renderer.PushState();
+	void render( RenderStateFlags state ) const {
+		if ( m_vertices.size() == 0 ) {
+			return;
+		}
+		if ( m_vertices.data() == 0 ) {
+			return;
+		}
+		glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
+		glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices.data()->colour );
+		glDrawArrays( GL_LINES, 0, m_vertices.size() );
+	}
 
-	Pivot2World_worldSpace( m_localToWorld, localToWorld, volume.GetModelview(), volume.GetProjection(), volume.GetViewport() );
+	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld ) const {
+		renderer.PushState();
 
-	renderer.Highlight( Renderer::ePrimitive, false );
-	renderer.SetState( getShader(), Renderer::eWireframeOnly );
-	renderer.SetState( getShader(), Renderer::eFullMaterials );
-	renderer.addRenderable( *this, m_localToWorld );
+		Pivot2World_worldSpace( m_localToWorld, localToWorld, volume.GetModelview(), volume.GetProjection(), volume.GetViewport() );
 
-	renderer.PopState();
-}
+		renderer.Highlight( Renderer::ePrimitive, false );
+		renderer.SetState( getShader(), Renderer::eWireframeOnly );
+		renderer.SetState( getShader(), Renderer::eFullMaterials );
+		renderer.addRenderable( *this, m_localToWorld );
+
+		renderer.PopState();
+	}
 };
 
 

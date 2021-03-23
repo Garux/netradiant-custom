@@ -51,91 +51,91 @@ const int c_status__count = 7;
 class MainFrame
 {
 public:
-enum EViewStyle
-{
-	eRegular = 0,
-	eFloating = 1,
-	eSplit = 2,
-	eRegularLeft = 3,
-};
+	enum EViewStyle
+	{
+		eRegular = 0,
+		eFloating = 1,
+		eSplit = 2,
+		eRegularLeft = 3,
+	};
 
-MainFrame();
-~MainFrame();
+	MainFrame();
+	~MainFrame();
 
-GtkWindow* m_window;
-
-private:
-
-void Create();
-void SaveWindowInfo();
-void Shutdown();
-
-public:
-GtkWidget* m_vSplit;
-GtkWidget* m_hSplit;
-GtkWidget* m_vSplit2;
+	GtkWindow* m_window;
 
 private:
 
-XYWnd* m_pXYWnd;
-XYWnd* m_pYZWnd;
-XYWnd* m_pXZWnd;
-CamWnd* m_pCamWnd;
-ZWnd* m_pZWnd;
-XYWnd* m_pActiveXY;
+	void Create();
+	void SaveWindowInfo();
+	void Shutdown();
 
-CopiedString m_status[c_status__count];
-GtkWidget *m_statusLabel[c_status__count];
+public:
+	GtkWidget* m_vSplit;
+	GtkWidget* m_hSplit;
+	GtkWidget* m_vSplit2;
+
+private:
+
+	XYWnd* m_pXYWnd;
+	XYWnd* m_pYZWnd;
+	XYWnd* m_pXZWnd;
+	CamWnd* m_pCamWnd;
+	ZWnd* m_pZWnd;
+	XYWnd* m_pActiveXY;
+
+	CopiedString m_status[c_status__count];
+	GtkWidget *m_statusLabel[c_status__count];
 
 
-EViewStyle m_nCurrentStyle;
-WindowPositionTracker m_position_tracker;
+	EViewStyle m_nCurrentStyle;
+	WindowPositionTracker m_position_tracker;
 
-IdleDraw m_idleRedrawStatusText;
+	IdleDraw m_idleRedrawStatusText;
 
 public:
 
-void SetStatusText( int status_n, const char* status );
-void UpdateStatusText();
-void RedrawStatusText();
-typedef MemberCaller<MainFrame, &MainFrame::RedrawStatusText> RedrawStatusTextCaller;
+	void SetStatusText( int status_n, const char* status );
+	void UpdateStatusText();
+	void RedrawStatusText();
+	typedef MemberCaller<MainFrame, &MainFrame::RedrawStatusText> RedrawStatusTextCaller;
 
-void SetGridStatus();
-typedef MemberCaller<MainFrame, &MainFrame::SetGridStatus> SetGridStatusCaller;
+	void SetGridStatus();
+	typedef MemberCaller<MainFrame, &MainFrame::SetGridStatus> SetGridStatusCaller;
 
-void SetActiveXY( XYWnd* p );
-XYWnd* ActiveXY(){
-	return m_pActiveXY;
-}
-XYWnd* GetXYWnd(){
-	return m_pXYWnd;
-}
-XYWnd* GetXZWnd(){
-	return m_pXZWnd;
-}
-XYWnd* GetYZWnd(){
-	return m_pYZWnd;
-}
-ZWnd* GetZWnd(){
-	return m_pZWnd;
-}
-CamWnd* GetCamWnd(){
-	return m_pCamWnd;
-}
+	void SetActiveXY( XYWnd* p );
+	XYWnd* ActiveXY(){
+		return m_pActiveXY;
+	}
+	XYWnd* GetXYWnd(){
+		return m_pXYWnd;
+	}
+	XYWnd* GetXZWnd(){
+		return m_pXZWnd;
+	}
+	XYWnd* GetYZWnd(){
+		return m_pYZWnd;
+	}
+	ZWnd* GetZWnd(){
+		return m_pZWnd;
+	}
+	CamWnd* GetCamWnd(){
+		return m_pCamWnd;
+	}
 
-template<typename Functor>
-void forEachXYWnd( const Functor& functor ){
-	for( XYWnd* xywnd : { GetXYWnd(), GetXZWnd(), GetYZWnd() } )
-		if( xywnd )
-			functor( xywnd );
-}
+	template<typename Functor>
+	void forEachXYWnd( const Functor& functor ){
+		for( XYWnd* xywnd : { GetXYWnd(), GetXZWnd(), GetYZWnd() } )
+			if( xywnd )
+				functor( xywnd );
+	}
 
-EViewStyle CurrentStyle(){
-	return m_nCurrentStyle;
-}
-bool FloatingGroupDialog(){
-	return CurrentStyle() == eFloating || CurrentStyle() == eSplit;
-}
+	EViewStyle CurrentStyle(){
+		return m_nCurrentStyle;
+	}
+	bool FloatingGroupDialog(){
+		return CurrentStyle() == eFloating || CurrentStyle() == eSplit;
+	}
 };
 
 extern MainFrame* g_pParentWnd;
@@ -162,12 +162,12 @@ void ScreenUpdates_process();
 class ScopeDisableScreenUpdates
 {
 public:
-ScopeDisableScreenUpdates( const char* message, const char* title ){
-	ScreenUpdates_Disable( message, title );
-}
-~ScopeDisableScreenUpdates(){
-	ScreenUpdates_Enable();
-}
+	ScopeDisableScreenUpdates( const char* message, const char* title ){
+		ScreenUpdates_Disable( message, title );
+	}
+	~ScopeDisableScreenUpdates(){
+		ScreenUpdates_Enable();
+	}
 };
 
 

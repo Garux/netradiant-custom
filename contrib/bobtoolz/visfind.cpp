@@ -49,8 +49,7 @@ int bsp_leafnumfororigin( vec3_t origin ){
 				node = &dnodes[node->children[0]];
 			}
 		}
-		else
-		if ( node->children[1] < 0 ) {
+		else if ( node->children[1] < 0 ) {
 			return -( node->children[1] + 1 );
 		}
 		else{
@@ -191,11 +190,11 @@ DMetaSurfaces *CreateTrace( dleaf_t *leaf, int c, vis_header *header, byte *visd
 				vec3_t clr;
 				do {
 					VectorSet( clr,
-								( rand() % 256 ) / 255.f,
-								( rand() % 256 ) / 255.f,
-								( rand() % 256 ) / 255.f );
-				}while( ( clr[0] + clr[2] < clr[1] * 1.5f ) ||	//too green
-						( clr[0] < .3 && clr[1] < .3 && clr[2] < .3 ) ); //too dark
+					           ( rand() % 256 ) / 255.f,
+					           ( rand() % 256 ) / 255.f,
+					           ( rand() % 256 ) / 255.f );
+				} while( ( clr[0] + clr[2] < clr[1] * 1.5f ) ||	//too green
+				         ( clr[0] < .3 && clr[1] < .3 && clr[2] < .3 ) ); //too dark
 
 				AddCluster( pointlist, cl, repeatlist, clr );
 			}

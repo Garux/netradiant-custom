@@ -55,14 +55,14 @@ inline bool filter_active( int mask ){
 class FilterWrapper
 {
 public:
-FilterWrapper( Filter& filter, int mask ) : m_filter( filter ), m_mask( mask ){
-}
-void update(){
-	m_filter.setActive( filter_active( m_mask ) );
-}
+	FilterWrapper( Filter& filter, int mask ) : m_filter( filter ), m_mask( mask ){
+	}
+	void update(){
+		m_filter.setActive( filter_active( m_mask ) );
+	}
 private:
-Filter& m_filter;
-int m_mask;
+	Filter& m_filter;
+	int m_mask;
 };
 
 typedef std::list<FilterWrapper> Filters;
@@ -91,19 +91,19 @@ void UpdateFilters(){
 class BasicFilterSystem : public FilterSystem
 {
 public:
-void addFilter( Filter& filter, int mask ){
-	g_filters.push_back( FilterWrapper( filter, mask ) );
-	g_filters.back().update();
-}
-void registerFilterable( Filterable& filterable ){
-	filterable.updateFiltered();
-	const bool inserted = g_filterables.insert( &filterable ).second;
-	ASSERT_MESSAGE( inserted, "filterable already registered" );
-}
-void unregisterFilterable( Filterable& filterable ){
-	const bool erased = g_filterables.erase( &filterable );
-	ASSERT_MESSAGE( erased, "filterable not registered" );
-}
+	void addFilter( Filter& filter, int mask ){
+		g_filters.push_back( FilterWrapper( filter, mask ) );
+		g_filters.back().update();
+	}
+	void registerFilterable( Filterable& filterable ){
+		filterable.updateFiltered();
+		const bool inserted = g_filterables.insert( &filterable ).second;
+		ASSERT_MESSAGE( inserted, "filterable already registered" );
+	}
+	void unregisterFilterable( Filterable& filterable ){
+		const bool erased = g_filterables.erase( &filterable );
+		ASSERT_MESSAGE( erased, "filterable not registered" );
+	}
 };
 
 BasicFilterSystem g_FilterSystem;
@@ -119,29 +119,29 @@ void PerformFiltering(){
 
 class ToggleFilterFlag
 {
-const unsigned int m_mask;
+	const unsigned int m_mask;
 public:
-ToggleItem m_item;
+	ToggleItem m_item;
 
-ToggleFilterFlag( unsigned int mask ) : m_mask( mask ), m_item( ActiveCaller( *this ) ){
-}
-ToggleFilterFlag( const ToggleFilterFlag& other ) : m_mask( other.m_mask ), m_item( ActiveCaller( *this ) ){
-}
-void active( const BoolImportCallback& importCallback ){
-	importCallback( ( g_filters_globals.exclude & m_mask ) != 0 );
-}
-typedef MemberCaller1<ToggleFilterFlag, const BoolImportCallback&, &ToggleFilterFlag::active> ActiveCaller;
-void toggle(){
-	g_filters_globals.exclude ^= m_mask;
-	m_item.update();
-	PerformFiltering();
-}
-void reset(){
-	g_filters_globals.exclude = 0;
-	m_item.update();
-	PerformFiltering();
-}
-typedef MemberCaller<ToggleFilterFlag, &ToggleFilterFlag::toggle> ToggleCaller;
+	ToggleFilterFlag( unsigned int mask ) : m_mask( mask ), m_item( ActiveCaller( *this ) ){
+	}
+	ToggleFilterFlag( const ToggleFilterFlag& other ) : m_mask( other.m_mask ), m_item( ActiveCaller( *this ) ){
+	}
+	void active( const BoolImportCallback& importCallback ){
+		importCallback( ( g_filters_globals.exclude & m_mask ) != 0 );
+	}
+	typedef MemberCaller1<ToggleFilterFlag, const BoolImportCallback&, &ToggleFilterFlag::active> ActiveCaller;
+	void toggle(){
+		g_filters_globals.exclude ^= m_mask;
+		m_item.update();
+		PerformFiltering();
+	}
+	void reset(){
+		g_filters_globals.exclude = 0;
+		m_item.update();
+		PerformFiltering();
+	}
+	typedef MemberCaller<ToggleFilterFlag, &ToggleFilterFlag::toggle> ToggleCaller;
 };
 
 
@@ -269,22 +269,22 @@ void DestroyFilters(){
 
 class FilterAPI
 {
-FilterSystem* m_filter;
+	FilterSystem* m_filter;
 public:
-typedef FilterSystem Type;
-STRING_CONSTANT( Name, "*" );
+	typedef FilterSystem Type;
+	STRING_CONSTANT( Name, "*" );
 
-FilterAPI(){
-	ConstructFilters();
+	FilterAPI(){
+		ConstructFilters();
 
-	m_filter = &GetFilterSystem();
-}
-~FilterAPI(){
-	DestroyFilters();
-}
-FilterSystem* getTable(){
-	return m_filter;
-}
+		m_filter = &GetFilterSystem();
+	}
+	~FilterAPI(){
+		DestroyFilters();
+	}
+	FilterSystem* getTable(){
+		return m_filter;
+	}
 };
 
 typedef SingletonModule<FilterAPI> FilterModule;

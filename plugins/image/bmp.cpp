@@ -52,57 +52,57 @@ typedef struct
 
 class ReadPixel8
 {
-PaletteEntry* m_palette;
+	PaletteEntry* m_palette;
 public:
-ReadPixel8( PaletteEntry* palette ) : m_palette( palette ){
-}
-void operator()( PointerInputStream& inputStream, byte*& pixbuf ) const {
-	byte palIndex;
-	inputStream.read( &palIndex, 1 );
-	*pixbuf++ = m_palette[palIndex][2];
-	*pixbuf++ = m_palette[palIndex][1];
-	*pixbuf++ = m_palette[palIndex][0];
-	*pixbuf++ = 0xff;
-}
+	ReadPixel8( PaletteEntry* palette ) : m_palette( palette ){
+	}
+	void operator()( PointerInputStream& inputStream, byte*& pixbuf ) const {
+		byte palIndex;
+		inputStream.read( &palIndex, 1 );
+		*pixbuf++ = m_palette[palIndex][2];
+		*pixbuf++ = m_palette[palIndex][1];
+		*pixbuf++ = m_palette[palIndex][0];
+		*pixbuf++ = 0xff;
+	}
 };
 
 class ReadPixel16
 {
 public:
-void operator()( PointerInputStream& inputStream, byte*& pixbuf ) const {
-	unsigned short shortPixel;
-	inputStream.read( reinterpret_cast<byte*>( &shortPixel ), sizeof( unsigned short ) ); //!\todo Is this endian safe?
-	*pixbuf++ = static_cast<byte>( shortPixel & ( 31 << 10 ) ) >> 7;
-	*pixbuf++ = static_cast<byte>( shortPixel & ( 31 << 5 ) ) >> 2;
-	*pixbuf++ = static_cast<byte>( shortPixel & ( 31 ) ) << 3;
-	*pixbuf++ = 0xff;
-}
+	void operator()( PointerInputStream& inputStream, byte*& pixbuf ) const {
+		unsigned short shortPixel;
+		inputStream.read( reinterpret_cast<byte*>( &shortPixel ), sizeof( unsigned short ) ); //!\todo Is this endian safe?
+		*pixbuf++ = static_cast<byte>( shortPixel & ( 31 << 10 ) ) >> 7;
+		*pixbuf++ = static_cast<byte>( shortPixel & ( 31 << 5 ) ) >> 2;
+		*pixbuf++ = static_cast<byte>( shortPixel & ( 31 ) ) << 3;
+		*pixbuf++ = 0xff;
+	}
 };
 
 class ReadPixel24
 {
 public:
-void operator()( PointerInputStream& inputStream, byte*& pixbuf ) const {
-	byte bgr[3];
-	inputStream.read( bgr, 3 );
-	*pixbuf++ = bgr[2];
-	*pixbuf++ = bgr[1];
-	*pixbuf++ = bgr[0];
-	*pixbuf++ = 255;
-}
+	void operator()( PointerInputStream& inputStream, byte*& pixbuf ) const {
+		byte bgr[3];
+		inputStream.read( bgr, 3 );
+		*pixbuf++ = bgr[2];
+		*pixbuf++ = bgr[1];
+		*pixbuf++ = bgr[0];
+		*pixbuf++ = 255;
+	}
 };
 
 class ReadPixel32
 {
 public:
-void operator()( PointerInputStream& inputStream, byte*& pixbuf ) const {
-	byte bgra[4];
-	inputStream.read( bgra, 4 );
-	*pixbuf++ = bgra[2];
-	*pixbuf++ = bgra[1];
-	*pixbuf++ = bgra[0];
-	*pixbuf++ = bgra[3];
-}
+	void operator()( PointerInputStream& inputStream, byte*& pixbuf ) const {
+		byte bgra[4];
+		inputStream.read( bgra, 4 );
+		*pixbuf++ = bgra[2];
+		*pixbuf++ = bgra[1];
+		*pixbuf++ = bgra[0];
+		*pixbuf++ = bgra[3];
+	}
 };
 
 template<typename ReadPixel>

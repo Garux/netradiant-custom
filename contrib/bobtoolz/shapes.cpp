@@ -92,8 +92,8 @@ void AddFaceWithTexture( scene::Node& brush, vec3_t va, vec3_t vb, vec3_t vc, co
 }
 
 void AddFaceWithTextureScaled( scene::Node& brush, vec3_t va, vec3_t vb, vec3_t vc,
-							   const char* texture, bool bVertScale, bool bHorScale,
-							   float minX, float minY, float maxX, float maxY ){
+                               const char* texture, bool bVertScale, bool bHorScale,
+                               float minX, float minY, float maxX, float maxY ){
 	qtexture_t* pqtTexInfo;
 
 	// TTimo: there used to be a call to pfnHasShader here
@@ -454,10 +454,10 @@ void Build_StairStep( vec3_t min, vec3_t max, const char* mainTexture, const cha
 //-----------------------------------------------------------------------------------
 
 void BuildDoorsX2( vec3_t min, vec3_t max,
-				   bool bSclMainHor, bool bSclMainVert,
-				   bool bSclTrimHor, bool bSclTrimVert,
-				   const char* mainTexture, const char* trimTexture,
-				   int direction ){
+                   bool bSclMainHor, bool bSclMainVert,
+                   bool bSclTrimHor, bool bSclTrimVert,
+                   const char* mainTexture, const char* trimTexture,
+                   int direction ){
 	int xy;
 	if ( direction == 0 ) {
 		xy = 0;
@@ -523,43 +523,43 @@ void BuildDoorsX2( vec3_t min, vec3_t max,
 
 	if ( direction == 0 ) {
 		AddFaceWithTextureScaled( newBrush1, v1, v7, v2, mainTexture, bSclMainVert, bSclMainHor,
-								  min[0], min[2], max[0], max[2] );
+		                          min[0], min[2], max[0], max[2] );
 		AddFaceWithTextureScaled( newBrush1, v5, v6, v3, mainTexture, bSclMainVert, bSclMainHor,
-								  max[0], min[2], min[0], max[2] );
+		                          max[0], min[2], min[0], max[2] );
 
 
 		AddFaceWithTextureScaled( newBrush2, v1, v7, v2, mainTexture, bSclMainVert, bSclMainHor,
-								  min[0], min[2], max[0], max[2] );
+		                          min[0], min[2], max[0], max[2] );
 		AddFaceWithTextureScaled( newBrush2, v5, v6, v3, mainTexture, bSclMainVert, bSclMainHor,
-								  max[0], min[2], min[0], max[2] ); // flip max/min to reverse tex dir
+		                          max[0], min[2], min[0], max[2] ); // flip max/min to reverse tex dir
 
 
 
 		AddFaceWithTextureScaled( newBrush1, ve_3, ve_2, ve_1, trimTexture, bSclTrimVert, bSclTrimHor,
-								  min[1], min[2], max[1], max[2] );
+		                          min[1], min[2], max[1], max[2] );
 
 		AddFaceWithTextureScaled( newBrush2, ve_1, ve_2, ve_3, trimTexture, bSclTrimVert, bSclTrimHor,
-								  max[1], min[2], min[1], max[2] );
+		                          max[1], min[2], min[1], max[2] );
 	}
 	else
 	{
 		AddFaceWithTextureScaled( newBrush1, v1, v3, v6, mainTexture, bSclMainVert, bSclMainHor,
-								  min[1], min[2], max[1], max[2] );
+		                          min[1], min[2], max[1], max[2] );
 		AddFaceWithTextureScaled( newBrush1, v5, v2, v7, mainTexture, bSclMainVert, bSclMainHor,
-								  max[1], min[2], min[1], max[2] );
+		                          max[1], min[2], min[1], max[2] );
 
 
 		AddFaceWithTextureScaled( newBrush2, v1, v3, v6, mainTexture, bSclMainVert, bSclMainHor,
-								  min[1], min[2], max[1], max[2] );
+		                          min[1], min[2], max[1], max[2] );
 		AddFaceWithTextureScaled( newBrush2, v5, v2, v7, mainTexture, bSclMainVert, bSclMainHor,
-								  max[1], min[2], min[1], max[2] ); // flip max/min to reverse tex dir
+		                          max[1], min[2], min[1], max[2] ); // flip max/min to reverse tex dir
 
 
 		AddFaceWithTextureScaled( newBrush1, ve_1, ve_2, ve_3, trimTexture, bSclTrimVert, bSclTrimHor,
-								  min[0], min[2], max[0], max[2] );
+		                          min[0], min[2], max[0], max[2] );
 
 		AddFaceWithTextureScaled( newBrush2, ve_3, ve_2, ve_1, trimTexture, bSclTrimVert, bSclTrimHor,
-								  max[0], min[2], min[0], max[2] );
+		                          max[0], min[2], min[0], max[2] );
 	}
 
 	//----------------------------------
@@ -604,8 +604,8 @@ void MakeBevel( vec3_t vMin, vec3_t vMax ){
 	GlobalPatchCreator().Patch_setShader( patch, "textures/common/caulk" );
 	PatchControlMatrix matrix = GlobalPatchCreator().Patch_getControlPoints( patch );
 	vec3_t x_3, y_3, z_3;
-	x_3[0] = vMin[0];   x_3[1] = vMin[0];               x_3[2] = vMax[0];
-	y_3[0] = vMin[1];   y_3[1] = vMax[1];               y_3[2] = vMax[1];
+	x_3[0] = vMin[0];   x_3[1] = vMin[0];                   x_3[2] = vMax[0];
+	y_3[0] = vMin[1];   y_3[1] = vMax[1];                   y_3[2] = vMax[1];
 	z_3[0] = vMin[2];   z_3[1] = ( vMax[2] + vMin[2] ) / 2; z_3[2] = vMax[2];
 	/*
 	   x_3[0] = 0;		x_3[1] = 0;		x_3[2] = 64;

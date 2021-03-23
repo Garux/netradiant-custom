@@ -47,79 +47,79 @@ class _QERFaceData;
 class DEntity
 {
 public:
-void RemoveFromRadiant();
-scene::Node* QER_Entity;
-int m_nID;
+	void RemoveFromRadiant();
+	scene::Node* QER_Entity;
+	int m_nID;
 
 //	Constrcution/Destruction
-DEntity( const char* classname = "worldspawn", int ID = -1 );   // sets classname
-virtual ~DEntity();
+	DEntity( const char* classname = "worldspawn", int ID = -1 );   // sets classname
+	virtual ~DEntity();
 //	---------------------------------------------
 
 //	epair functions........
-void LoadEPairList( Entity* epl );
-void AddEPair( const char* key, const char* value );
-void ClearEPairs();
-DEPair* FindEPairByKey( const char* keyname );
+	void LoadEPairList( Entity* epl );
+	void AddEPair( const char* key, const char* value );
+	void ClearEPairs();
+	DEPair* FindEPairByKey( const char* keyname );
 //	---------------------------------------------
 
 //	random functions........
-bool ResetTextures( const char* textureName, float fScale[2], float fShift[2], int rotation, const char* newTextureName, int bResetTextureName, int bResetScale[2], int bResetShift[2], int bResetRotation, bool rebuild );
-void SaveToFile( FILE* pFile );
-void SetClassname( const char* classname );
-int GetIDMax();
+	bool ResetTextures( const char* textureName, float fScale[2], float fShift[2], int rotation, const char* newTextureName, int bResetTextureName, int bResetScale[2], int bResetShift[2], int bResetRotation, bool rebuild );
+	void SaveToFile( FILE* pFile );
+	void SetClassname( const char* classname );
+	int GetIDMax();
 
-void BuildInRadiant( bool allowDestruction );
-void ResetChecks( std::list<Str>* exclusionList );
-void RemoveNonCheckBrushes( std::list<Str>* exclusionList, bool useDetail );
+	void BuildInRadiant( bool allowDestruction );
+	void ResetChecks( std::list<Str>* exclusionList );
+	void RemoveNonCheckBrushes( std::list<Str>* exclusionList, bool useDetail );
 
-DPlane* AddFaceToBrush( vec3_t va, vec3_t vb, vec3_t vc, _QERFaceData* faceData, int ID );      // slow, try not to use much
-int GetBrushCount( void );
-DBrush* FindBrushByPointer( scene::Node& brush );
+	DPlane* AddFaceToBrush( vec3_t va, vec3_t vb, vec3_t vc, _QERFaceData* faceData, int ID );      // slow, try not to use much
+	int GetBrushCount( void );
+	DBrush* FindBrushByPointer( scene::Node& brush );
 //	---------------------------------------------
 
 
 //	bool list functions
-void SelectBrushes( bool* selectList );
-bool* BuildDuplicateList();
-bool* BuildIntersectList();
+	void SelectBrushes( bool* selectList );
+	bool* BuildDuplicateList();
+	bool* BuildIntersectList();
 //	---------------------------------------------
 
 
 //	brush operations
-void ClearBrushes();        // clears brush list and frees memory for brushes
+	void ClearBrushes();        // clears brush list and frees memory for brushes
 
-DBrush* GetBrushForID( int ID );
-DBrush* NewBrush( int ID = -1 );
+	DBrush* GetBrushForID( int ID );
+	DBrush* NewBrush( int ID = -1 );
 //	---------------------------------------------
 
 //	patch operations
-void ClearPatches();
+	void ClearPatches();
 
-DPatch* NewPatch();
+	DPatch* NewPatch();
 //	---------------------------------------------
 
 //	vars
-std::list<DEPair*> epairList;
-std::list<DBrush*> brushList;
+	std::list<DEPair*> epairList;
+	std::list<DBrush*> brushList;
 // new patches, wahey!!!
-std::list<DPatch*> patchList;
-Str m_Classname;
+	std::list<DPatch*> patchList;
+	Str m_Classname;
 //	---------------------------------------------
 
 
-int FixBrushes();
+	int FixBrushes();
 
-bool LoadFromEntity( scene::Node& ent, bool bLoadPatches = false );
-void LoadSelectedBrushes();
-void LoadSelectedPatches();
+	bool LoadFromEntity( scene::Node& ent, bool bLoadPatches = false );
+	void LoadSelectedBrushes();
+	void LoadSelectedPatches();
 
-bool LoadFromPrt( char* filename );
+	bool LoadFromPrt( char* filename );
 //	---------------------------------------------
-void SpawnString( const char* key, const char* defaultstring, const char** out );
-void SpawnInt( const char* key, const char* defaultstring, int* out );
-void SpawnFloat( const char* key, const char* defaultstring, float* out );
-void SpawnVector( const char* key, const char* defaultstring, vec_t* out );
+	void SpawnString( const char* key, const char* defaultstring, const char** out );
+	void SpawnInt( const char* key, const char* defaultstring, int* out );
+	void SpawnFloat( const char* key, const char* defaultstring, float* out );
+	void SpawnVector( const char* key, const char* defaultstring, vec_t* out );
 };
 
 #endif // !defined(AFX_DENTITY_H__35B2C523_F0A7_11D4_ACF7_004095A18133__INCLUDED_)

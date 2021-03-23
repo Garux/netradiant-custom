@@ -48,26 +48,26 @@
 class GroupDlg
 {
 public:
-GtkWidget* m_pNotebook;
-GtkWindow* m_window;
+	GtkWidget* m_pNotebook;
+	GtkWindow* m_window;
 
-GroupDlg();
-void Create( GtkWindow* parent );
+	GroupDlg();
+	void Create( GtkWindow* parent );
 
-void Show(){
-	/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
-	GtkWidget* glwidget = GTK_WIDGET( g_object_get_data( G_OBJECT( m_window ), "glwidget" ) );
-	if ( glwidget ){
-		gtk_widget_hide( glwidget );
-		gtk_widget_show( glwidget );
+	void Show(){
+		/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
+		GtkWidget* glwidget = GTK_WIDGET( g_object_get_data( G_OBJECT( m_window ), "glwidget" ) );
+		if ( glwidget ){
+			gtk_widget_hide( glwidget );
+			gtk_widget_show( glwidget );
+		}
+		gtk_widget_show( GTK_WIDGET( m_window ) );
 	}
-	gtk_widget_show( GTK_WIDGET( m_window ) );
-}
-void Hide(){
-	gtk_widget_hide( GTK_WIDGET( m_window ) );
-}
+	void Hide(){
+		gtk_widget_hide( GTK_WIDGET( m_window ) );
+	}
 
-WindowPositionTracker m_position_tracker;
+	WindowPositionTracker m_position_tracker;
 };
 
 namespace

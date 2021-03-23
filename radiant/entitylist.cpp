@@ -49,40 +49,40 @@ typedef struct _GtkTreeView GtkTreeView;
 class EntityList
 {
 public:
-enum EDirty
-{
-	eDefault,
-	eSelection,
-	eInsertRemove,
-};
+	enum EDirty
+	{
+		eDefault,
+		eSelection,
+		eInsertRemove,
+	};
 
-EDirty m_dirty;
+	EDirty m_dirty;
 
-IdleDraw m_idleDraw;
-WindowPositionTracker m_positionTracker;
+	IdleDraw m_idleDraw;
+	WindowPositionTracker m_positionTracker;
 
-GtkWindow* m_window;
-GtkWidget* m_check;
-GtkTreeView* m_tree_view;
-GraphTreeModel* m_tree_model;
-bool m_selection_disabled;
+	GtkWindow* m_window;
+	GtkWidget* m_check;
+	GtkTreeView* m_tree_view;
+	GraphTreeModel* m_tree_model;
+	bool m_selection_disabled;
 
-bool m_search_from_start;
-scene::Node* m_search_focus_node;
+	bool m_search_from_start;
+	scene::Node* m_search_focus_node;
 
-EntityList() :
-	m_dirty( EntityList::eDefault ),
-	m_idleDraw( RedrawEntityListCaller() ),
-	m_window( 0 ),
-	m_selection_disabled( false ),
-	m_search_from_start( false ),
-	m_search_focus_node( 0 ){
+	EntityList() :
+		m_dirty( EntityList::eDefault ),
+		m_idleDraw( RedrawEntityListCaller() ),
+		m_window( 0 ),
+		m_selection_disabled( false ),
+		m_search_from_start( false ),
+		m_search_focus_node( 0 ){
 		m_positionTracker.setPosition( WindowPosition( -1, -1, 350, 500 ) );
-}
+	}
 
-bool visible() const {
-	return gtk_widget_get_visible( GTK_WIDGET( m_window ) );
-}
+	bool visible() const {
+		return gtk_widget_get_visible( GTK_WIDGET( m_window ) );
+	}
 };
 
 namespace
@@ -103,8 +103,8 @@ inline Nameable* Node_getNameable( scene::Node& node ){
 const char* node_get_name( scene::Node& node ){
 	Nameable* nameable = Node_getNameable( node );
 	return ( nameable != 0 )
-		   ? nameable->name()
-		   : "node";
+	       ? nameable->name()
+	       : "node";
 }
 
 template<typename value_type>
@@ -293,7 +293,11 @@ static gboolean tree_view_search_equal_func( GtkTreeModel* model, gint column, c
 	scene::Node* node;
 	gtk_tree_model_get( model, iter, column, (gpointer*)&node, -1 );
 	/* return FALSE means match */
-	return ( node && !node->isRoot() )? *(bool*)search_from_start? !string_equal_prefix_nocase( node_get_name( *node ), key ) : !string_in_string_nocase( node_get_name( *node ), key ) : TRUE;
+	return ( node && !node->isRoot() )
+	       ? *(bool*)search_from_start
+	         ? !string_equal_prefix_nocase( node_get_name( *node ), key )
+	         : !string_in_string_nocase( node_get_name( *node ), key )
+	       : TRUE;
 }
 
 void searchEntrySetModeIcon( GtkEntry* entry, bool search_from_start ){
@@ -480,7 +484,7 @@ void EntityList_constructWindow( GtkWindow* main_window ){
 				getEntityList().m_check = check;
 				g_signal_connect( G_OBJECT( check ), "clicked", G_CALLBACK( entitylist_focusSelected ), 0 );
 			}
-			{//search entry
+			{	//search entry
 				GtkWidget* entry = gtk_entry_new();
 				gtk_box_pack_start( GTK_BOX( hbox ), entry, TRUE, TRUE, 8 );
 				searchEntrySetModeIcon( GTK_ENTRY( entry ), getEntityList().m_search_from_start );
@@ -518,30 +522,30 @@ scene::Node* nullNode = 0;
 
 class NullSelectedInstance : public scene::Instance, public Selectable
 {
-class TypeCasts
-{
-InstanceTypeCastTable m_casts;
-public:
-TypeCasts(){
-	InstanceStaticCast<NullSelectedInstance, Selectable>::install( m_casts );
-}
-InstanceTypeCastTable& get(){
-	return m_casts;
-}
-};
+	class TypeCasts
+	{
+		InstanceTypeCastTable m_casts;
+	public:
+		TypeCasts(){
+			InstanceStaticCast<NullSelectedInstance, Selectable>::install( m_casts );
+		}
+		InstanceTypeCastTable& get(){
+			return m_casts;
+		}
+	};
 
 public:
-typedef LazyStatic<TypeCasts> StaticTypeCasts;
+	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-NullSelectedInstance() : Instance( scene::Path( makeReference( *nullNode ) ), 0, this, StaticTypeCasts::instance().get() ){
-}
+	NullSelectedInstance() : Instance( scene::Path( makeReference( *nullNode ) ), 0, this, StaticTypeCasts::instance().get() ){
+	}
 
-void setSelected( bool select ){
-	ERROR_MESSAGE( "error" );
-}
-bool isSelected() const {
-	return true;
-}
+	void setSelected( bool select ){
+		ERROR_MESSAGE( "error" );
+	}
+	bool isSelected() const {
+		return true;
+	}
 };
 
 typedef LazyStatic<NullSelectedInstance> StaticNullSelectedInstance;

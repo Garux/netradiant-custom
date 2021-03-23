@@ -61,10 +61,10 @@ Image* LoadM32Buff( byte* buffer ){
 	PointerInputStream inputStream( buffer );
 
 	inputStream.seek( 4 // version
-					  + M32_NAME_LENGTH // name
-					  + M32_NAME_LENGTH // altname
-					  + M32_NAME_LENGTH // animname
-					  + M32_NAME_LENGTH ); // damagename
+	                  + M32_NAME_LENGTH // name
+	                  + M32_NAME_LENGTH // altname
+	                  + M32_NAME_LENGTH // animname
+	                  + M32_NAME_LENGTH ); // damagename
 	int w = istream_read_uint32_le( inputStream );
 	inputStream.seek( 4 * ( M32_MIPMAP_COUNT - 1 ) ); // remaining widths
 	int h = istream_read_uint32_le( inputStream );

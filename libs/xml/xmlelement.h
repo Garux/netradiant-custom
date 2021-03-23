@@ -31,69 +31,69 @@
 /// copied and must stay valid for the lifetime of the instance.
 class StaticElement : public XMLElement
 {
-typedef std::map<const char*, const char*, RawStringLess> attrs_t;
+	typedef std::map<const char*, const char*, RawStringLess> attrs_t;
 public:
-StaticElement( const char* name )
-	: m_name( name ){
-}
-void insertAttribute( const char* name, const char* value ){
-	m_attrs.insert( attrs_t::value_type( name, value ) );
-}
-const char* name() const {
-	return m_name;
-}
-const char* attribute( const char* name ) const {
-	attrs_t::const_iterator i = m_attrs.find( name );
-	if ( i != m_attrs.end() ) {
-		return i->second;
+	StaticElement( const char* name )
+		: m_name( name ){
 	}
-	else{
-		return "";
+	void insertAttribute( const char* name, const char* value ){
+		m_attrs.insert( attrs_t::value_type( name, value ) );
 	}
-}
-void forEachAttribute( XMLAttrVisitor& visitor ) const {
-	for ( attrs_t::const_iterator i = m_attrs.begin(); i != m_attrs.end(); ++i )
-	{
-		visitor.visit( i->first, i->second );
+	const char* name() const {
+		return m_name;
 	}
-}
+	const char* attribute( const char* name ) const {
+		attrs_t::const_iterator i = m_attrs.find( name );
+		if ( i != m_attrs.end() ) {
+			return i->second;
+		}
+		else{
+			return "";
+		}
+	}
+	void forEachAttribute( XMLAttrVisitor& visitor ) const {
+		for ( attrs_t::const_iterator i = m_attrs.begin(); i != m_attrs.end(); ++i )
+		{
+			visitor.visit( i->first, i->second );
+		}
+	}
 private:
-const char* m_name;
-attrs_t m_attrs;
+	const char* m_name;
+	attrs_t m_attrs;
 };
 
 ///\brief All string pointers passed to an instance of this class are copied.
 class DynamicElement : public XMLElement
 {
-typedef std::map<CopiedString, CopiedString> attrs_t;
+	typedef std::map<CopiedString, CopiedString> attrs_t;
 public:
-DynamicElement( const char* name )
-	: m_name( name ){
-}
-void insertAttribute( const char* name, const char* value ){
-	m_attrs.insert( attrs_t::value_type( name, value ) );
-}
-const char* name() const {
-	return m_name.c_str();
-}
-const char* attribute( const char* name ) const {
-	attrs_t::const_iterator i = m_attrs.find( name );
-	if ( i != m_attrs.end() ) {
-		return i->second.c_str();
+	DynamicElement( const char* name )
+		: m_name( name ){
 	}
-	else{
-		return "";
+	void insertAttribute( const char* name, const char* value ){
+		m_attrs.insert( attrs_t::value_type( name, value ) );
 	}
-}
-void forEachAttribute( XMLAttrVisitor& visitor ) const {
-	for ( attrs_t::const_iterator i = m_attrs.begin(); i != m_attrs.end(); ++i )
-	{
-		visitor.visit( i->first.c_str(), i->second.c_str() );
+	const char* name() const {
+		return m_name.c_str();
 	}
-}
+	const char* attribute( const char* name ) const {
+		attrs_t::const_iterator i = m_attrs.find( name );
+		if ( i != m_attrs.end() ) {
+			return i->second.c_str();
+		}
+		else{
+			return "";
+		}
+	}
+	void forEachAttribute( XMLAttrVisitor& visitor ) const {
+		for ( attrs_t::const_iterator i = m_attrs.begin(); i != m_attrs.end(); ++i )
+		{
+			visitor.visit( i->first.c_str(), i->second.c_str() );
+		}
+	}
 private:
-CopiedString m_name;
-attrs_t m_attrs;
+	CopiedString m_name;
+	attrs_t m_attrs;
 };
 
 #endif

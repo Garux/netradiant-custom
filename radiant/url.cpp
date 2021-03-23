@@ -37,7 +37,7 @@ bool open_url( const char* url ){
 bool open_url( const char* url ){
 	char command[2 * PATH_MAX];
 	snprintf( command, sizeof( command ),
-			  "xdg-open \"%s\" &", url );
+	          "xdg-open \"%s\" &", url );
 	return system( command ) == 0;
 }
 #endif

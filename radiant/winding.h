@@ -46,12 +46,12 @@ inline bool projectionaxis_better( float axis, float other ){
 /// \brief Texture axis precedence: Z > X > Y
 inline ProjectionAxis projectionaxis_for_normal( const Vector3& normal ){
 	return ( projectionaxis_better( normal[eProjectionAxisY], normal[eProjectionAxisX] ) )
-		   ? ( projectionaxis_better( normal[eProjectionAxisY], normal[eProjectionAxisZ] ) )
-		   ? eProjectionAxisY
-		   : eProjectionAxisZ
-		   : ( projectionaxis_better( normal[eProjectionAxisX], normal[eProjectionAxisZ] ) )
-		   ? eProjectionAxisX
-		   : eProjectionAxisZ;
+	       ? ( projectionaxis_better( normal[eProjectionAxisY], normal[eProjectionAxisZ] ) )
+	         ? eProjectionAxisY
+	         : eProjectionAxisZ
+	       : ( projectionaxis_better( normal[eProjectionAxisX], normal[eProjectionAxisZ] ) )
+	         ? eProjectionAxisX
+	         : eProjectionAxisZ;
 }
 
 
@@ -86,11 +86,11 @@ const std::size_t c_brush_maxFaces = 1024;
 class WindingVertex
 {
 public:
-Vector3 vertex;
-Vector2 texcoord;
-Vector3 tangent;
-Vector3 bitangent;
-std::size_t adjacent;
+	Vector3 vertex;
+	Vector2 texcoord;
+	Vector3 tangent;
+	Vector3 bitangent;
+	std::size_t adjacent;
 };
 
 
@@ -152,13 +152,13 @@ struct Winding
 class FixedWindingVertex
 {
 public:
-DoubleVector3 vertex;
-DoubleRay edge;
-std::size_t adjacent;
+	DoubleVector3 vertex;
+	DoubleRay edge;
+	std::size_t adjacent;
 
-FixedWindingVertex( const DoubleVector3& vertex_, const DoubleRay& edge_, std::size_t adjacent_ )
-	: vertex( vertex_ ), edge( edge_ ), adjacent( adjacent_ ){
-}
+	FixedWindingVertex( const DoubleVector3& vertex_, const DoubleRay& edge_, std::size_t adjacent_ )
+		: vertex( vertex_ ), edge( edge_ ), adjacent( adjacent_ ){
+	}
 };
 
 struct FixedWinding

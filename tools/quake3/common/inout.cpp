@@ -250,8 +250,8 @@ void set_console_colour_for_flag( int flag ){
 	if( curFlag != flag ){
 		curFlag = flag;
 		SetConsoleTextAttribute( hConsole, flag == SYS_WRN ? FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY
-											: flag == SYS_ERR ? FOREGROUND_RED | FOREGROUND_INTENSITY
-											: colour_saved );
+		                                 : flag == SYS_ERR ? FOREGROUND_RED | FOREGROUND_INTENSITY
+		                                 : colour_saved );
 	}
 #endif
 }

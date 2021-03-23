@@ -218,15 +218,15 @@ DBrush* DEntity::GetBrushForID( int ID ){
 template<typename Functor>
 class BrushSelectedVisitor : public SelectionSystem::Visitor
 {
-const Functor& m_functor;
+	const Functor& m_functor;
 public:
-BrushSelectedVisitor( const Functor& functor ) : m_functor( functor ){
-}
-void visit( scene::Instance& instance ) const {
-	if ( Node_isBrush( instance.path().top() ) ) {
-		m_functor( instance );
+	BrushSelectedVisitor( const Functor& functor ) : m_functor( functor ){
 	}
-}
+	void visit( scene::Instance& instance ) const {
+		if ( Node_isBrush( instance.path().top() ) ) {
+			m_functor( instance );
+		}
+	}
 };
 
 template<typename Functor>
@@ -251,15 +251,15 @@ void DEntity::LoadSelectedBrushes(){
 template<typename Functor>
 class PatchSelectedVisitor : public SelectionSystem::Visitor
 {
-const Functor& m_functor;
+	const Functor& m_functor;
 public:
-PatchSelectedVisitor( const Functor& functor ) : m_functor( functor ){
-}
-void visit( scene::Instance& instance ) const {
-	if ( Node_isPatch( instance.path().top() ) ) {
-		m_functor( instance );
+	PatchSelectedVisitor( const Functor& functor ) : m_functor( functor ){
 	}
-}
+	void visit( scene::Instance& instance ) const {
+		if ( Node_isPatch( instance.path().top() ) ) {
+			m_functor( instance );
+		}
+	}
 };
 
 template<typename Functor>
@@ -375,29 +375,29 @@ bool DEntity::LoadFromEntity( scene::Node& ent, bool bLoadPatches ) {
 	if ( Node_getTraversable( ent ) ) {
 		class load_brushes_t : public scene::Traversable::Walker
 		{
-		DEntity* m_entity;
-		mutable int m_count;
-public:
-		load_brushes_t( DEntity* entity )
-			: m_entity( entity ), m_count( 0 ){
-		}
-		bool pre( scene::Node& node ) const {
-			scene::Path path( NodeReference( GlobalSceneGraph().root() ) );
-			path.push( NodeReference( *m_entity->QER_Entity ) );
-			path.push( NodeReference( node ) );
-			scene::Instance* instance = GlobalSceneGraph().find( path );
-			ASSERT_MESSAGE( instance != 0, "" );
+			DEntity* m_entity;
+			mutable int m_count;
+		public:
+			load_brushes_t( DEntity* entity )
+				: m_entity( entity ), m_count( 0 ){
+			}
+			bool pre( scene::Node& node ) const {
+				scene::Path path( NodeReference( GlobalSceneGraph().root() ) );
+				path.push( NodeReference( *m_entity->QER_Entity ) );
+				path.push( NodeReference( node ) );
+				scene::Instance* instance = GlobalSceneGraph().find( path );
+				ASSERT_MESSAGE( instance != 0, "" );
 
-			if ( Node_isPatch( node ) ) {
-				DPatch* loadPatch = m_entity->NewPatch();
-				loadPatch->LoadFromPatch( *instance );
+				if ( Node_isPatch( node ) ) {
+					DPatch* loadPatch = m_entity->NewPatch();
+					loadPatch->LoadFromPatch( *instance );
+				}
+				else if ( Node_isBrush( node ) ) {
+					DBrush* loadBrush = m_entity->NewBrush( m_count++ );
+					loadBrush->LoadFromBrush( *instance, true );
+				}
+				return false;
 			}
-			else if ( Node_isBrush( node ) ) {
-				DBrush* loadBrush = m_entity->NewBrush( m_count++ );
-				loadBrush->LoadFromBrush( *instance, true );
-			}
-			return false;
-		}
 		} load_brushes( this );
 
 		Node_getTraversable( ent )->traverse( load_brushes );
@@ -543,19 +543,19 @@ void DEntity::AddEPair( const char *key, const char *value ) {
 void DEntity::LoadEPairList( Entity *epl ){
 	class load_epairs_t : public Entity::Visitor
 	{
-	DEntity* m_entity;
-public:
-	load_epairs_t( DEntity* entity )
-		: m_entity( entity ){
-	}
-	void visit( const char* key, const char* value ){
-		if ( strcmp( key, "classname" ) == 0 ) {
-			m_entity->SetClassname( value );
+		DEntity* m_entity;
+	public:
+		load_epairs_t( DEntity* entity )
+			: m_entity( entity ){
 		}
-		else{
-			m_entity->AddEPair( key, value );
+		void visit( const char* key, const char* value ){
+			if ( strcmp( key, "classname" ) == 0 ) {
+				m_entity->SetClassname( value );
+			}
+			else{
+				m_entity->AddEPair( key, value );
+			}
 		}
-	}
 
 	} load_epairs( this );
 
@@ -563,13 +563,13 @@ public:
 }
 
 bool DEntity::ResetTextures( const char* textureName, float fScale[2],     float fShift[2],    int rotation, const char* newTextureName,
-							 int bResetTextureName,    int bResetScale[2], int bResetShift[2], int bResetRotation, bool rebuild ){
+                             int bResetTextureName,    int bResetScale[2], int bResetShift[2], int bResetRotation, bool rebuild ){
 	bool reset = false;
 
 	for ( std::list<DBrush *>::const_iterator resetBrush = brushList.begin(); resetBrush != brushList.end(); resetBrush++ )
 	{
 		bool tmp = ( *resetBrush )->ResetTextures( textureName,        fScale,       fShift,       rotation, newTextureName,
-												   bResetTextureName,  bResetScale,  bResetShift,  bResetRotation );
+		                                           bResetTextureName,  bResetScale,  bResetShift,  bResetRotation );
 
 		if ( tmp ) {
 			reset = true;

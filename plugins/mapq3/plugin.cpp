@@ -47,92 +47,92 @@ class MapDoom3Dependencies :
 	public GlobalSceneGraphModuleRef,
 	public GlobalBrushModuleRef
 {
-PatchModuleRef m_patchDef2Doom3Module;
-PatchModuleRef m_patchDoom3Module;
+	PatchModuleRef m_patchDef2Doom3Module;
+	PatchModuleRef m_patchDoom3Module;
 public:
-MapDoom3Dependencies() :
-	GlobalEntityClassManagerModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclass" ) ),
-	GlobalBrushModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ) ),
-	m_patchDef2Doom3Module( "def2doom3" ),
-	m_patchDoom3Module( "doom3" ){
-}
-BrushCreator& getBrushDoom3(){
-	return GlobalBrushCreator();
-}
-PatchCreator& getPatchDoom3(){
-	return *m_patchDoom3Module.getTable();
-}
-PatchCreator& getPatchDef2Doom3(){
-	return *m_patchDef2Doom3Module.getTable();
-}
+	MapDoom3Dependencies() :
+		GlobalEntityClassManagerModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclass" ) ),
+		GlobalBrushModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ) ),
+		m_patchDef2Doom3Module( "def2doom3" ),
+		m_patchDoom3Module( "doom3" ){
+	}
+	BrushCreator& getBrushDoom3(){
+		return GlobalBrushCreator();
+	}
+	PatchCreator& getPatchDoom3(){
+		return *m_patchDoom3Module.getTable();
+	}
+	PatchCreator& getPatchDef2Doom3(){
+		return *m_patchDef2Doom3Module.getTable();
+	}
 };
 
 class MapDoom3API final : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
-MapDoom3Dependencies& m_dependencies;
+	MapDoom3Dependencies& m_dependencies;
 public:
-typedef MapFormat Type;
-STRING_CONSTANT( Name, "mapdoom3" );
-INTEGER_CONSTANT( MapVersion, 2 );
+	typedef MapFormat Type;
+	STRING_CONSTANT( Name, "mapdoom3" );
+	INTEGER_CONSTANT( MapVersion, 2 );
 
-MapDoom3API( MapDoom3Dependencies& dependencies ) : m_dependencies( dependencies ){
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "doom3 maps", "*.map" ) );
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "doom3 region", "*.reg" ) );
-}
-MapFormat* getTable(){
-	return this;
-}
-
-scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
-	const char* primitive = tokeniser.getToken();
-	if ( primitive != 0 ) {
-		if ( string_equal( primitive, "patchDef3" ) ) {
-			return m_dependencies.getPatchDoom3().createPatch();
-		}
-		else if ( string_equal( primitive, "patchDef2" ) ) {
-			return m_dependencies.getPatchDef2Doom3().createPatch();
-		}
-		else if ( string_equal( primitive, "brushDef3" ) ) {
-			return m_dependencies.getBrushDoom3().createBrush();
-		}
+	MapDoom3API( MapDoom3Dependencies& dependencies ) : m_dependencies( dependencies ){
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "doom3 maps", "*.map" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "doom3 region", "*.reg" ) );
+	}
+	MapFormat* getTable(){
+		return this;
 	}
 
-	Tokeniser_unexpectedError( tokeniser, primitive, "#doom3-primitive" );
-	return g_nullNode;
-}
-void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-	Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
-	tokeniser.nextLine();
-	if ( !Tokeniser_parseToken( tokeniser, "Version" ) ) {
-		return;
+	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
+		const char* primitive = tokeniser.getToken();
+		if ( primitive != 0 ) {
+			if ( string_equal( primitive, "patchDef3" ) ) {
+				return m_dependencies.getPatchDoom3().createPatch();
+			}
+			else if ( string_equal( primitive, "patchDef2" ) ) {
+				return m_dependencies.getPatchDef2Doom3().createPatch();
+			}
+			else if ( string_equal( primitive, "brushDef3" ) ) {
+				return m_dependencies.getBrushDoom3().createBrush();
+			}
+		}
+
+		Tokeniser_unexpectedError( tokeniser, primitive, "#doom3-primitive" );
+		return g_nullNode;
 	}
-	int version;
-	if ( !Tokeniser_getInteger( tokeniser, version ) ) {
-		return;
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		tokeniser.nextLine();
+		if ( !Tokeniser_parseToken( tokeniser, "Version" ) ) {
+			return;
+		}
+		int version;
+		if ( !Tokeniser_getInteger( tokeniser, version ) ) {
+			return;
+		}
+		if ( version != MapVersion() ) {
+			globalErrorStream() << "Doom 3 map version " << MapVersion() << " supported, version is " << version << "\n";
+			return;
+		}
+		tokeniser.nextLine();
+		Map_Read( root, tokeniser, entityTable, *this );
+		tokeniser.release();
 	}
-	if ( version != MapVersion() ) {
-		globalErrorStream() << "Doom 3 map version " << MapVersion() << " supported, version is " << version << "\n";
-		return;
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
+		writer.writeToken( "Version" );
+		writer.writeInteger( MapVersion() );
+		writer.nextLine();
+		Map_Write( root, traverse, writer, false );
+		writer.release();
 	}
-	tokeniser.nextLine();
-	Map_Read( root, tokeniser, entityTable, *this );
-	tokeniser.release();
-}
-void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
-	TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
-	writer.writeToken( "Version" );
-	writer.writeInteger( MapVersion() );
-	writer.nextLine();
-	Map_Write( root, traverse, writer, false );
-	writer.release();
-}
 };
 
 typedef SingletonModule<
-	MapDoom3API,
-	MapDoom3Dependencies,
-	DependenciesAPIConstructor<MapDoom3API, MapDoom3Dependencies>
-	>
+MapDoom3API,
+MapDoom3Dependencies,
+DependenciesAPIConstructor<MapDoom3API, MapDoom3Dependencies>
+>
 MapDoom3Module;
 
 MapDoom3Module g_MapDoom3Module;
@@ -140,70 +140,70 @@ MapDoom3Module g_MapDoom3Module;
 
 class MapQuake4API final : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
-MapDoom3Dependencies& m_dependencies;
+	MapDoom3Dependencies& m_dependencies;
 public:
-typedef MapFormat Type;
-STRING_CONSTANT( Name, "mapquake4" );
-INTEGER_CONSTANT( MapVersion, 3 );
+	typedef MapFormat Type;
+	STRING_CONSTANT( Name, "mapquake4" );
+	INTEGER_CONSTANT( MapVersion, 3 );
 
-MapQuake4API( MapDoom3Dependencies& dependencies ) : m_dependencies( dependencies ){
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake4 maps", "*.map" ) );
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake4 region", "*.reg" ) );
-}
-MapFormat* getTable(){
-	return this;
-}
-
-scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
-	const char* primitive = tokeniser.getToken();
-	if ( primitive != 0 ) {
-		if ( string_equal( primitive, "patchDef3" ) ) {
-			return m_dependencies.getPatchDoom3().createPatch();
-		}
-		else if ( string_equal( primitive, "patchDef2" ) ) {
-			return m_dependencies.getPatchDef2Doom3().createPatch();
-		}
-		else if ( string_equal( primitive, "brushDef3" ) ) {
-			return m_dependencies.getBrushDoom3().createBrush();
-		}
+	MapQuake4API( MapDoom3Dependencies& dependencies ) : m_dependencies( dependencies ){
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake4 maps", "*.map" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake4 region", "*.reg" ) );
+	}
+	MapFormat* getTable(){
+		return this;
 	}
 
-	Tokeniser_unexpectedError( tokeniser, primitive, "#quake4-primitive" );
-	return g_nullNode;
-}
-void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-	Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
-	tokeniser.nextLine();
-	if ( !Tokeniser_parseToken( tokeniser, "Version" ) ) {
-		return;
+	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
+		const char* primitive = tokeniser.getToken();
+		if ( primitive != 0 ) {
+			if ( string_equal( primitive, "patchDef3" ) ) {
+				return m_dependencies.getPatchDoom3().createPatch();
+			}
+			else if ( string_equal( primitive, "patchDef2" ) ) {
+				return m_dependencies.getPatchDef2Doom3().createPatch();
+			}
+			else if ( string_equal( primitive, "brushDef3" ) ) {
+				return m_dependencies.getBrushDoom3().createBrush();
+			}
+		}
+
+		Tokeniser_unexpectedError( tokeniser, primitive, "#quake4-primitive" );
+		return g_nullNode;
 	}
-	int version;
-	if ( !Tokeniser_getInteger( tokeniser, version ) ) {
-		return;
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		tokeniser.nextLine();
+		if ( !Tokeniser_parseToken( tokeniser, "Version" ) ) {
+			return;
+		}
+		int version;
+		if ( !Tokeniser_getInteger( tokeniser, version ) ) {
+			return;
+		}
+		if ( version != MapVersion() ) {
+			globalErrorStream() << "Quake 4 map version " << MapVersion() << " supported, version is " << version << "\n";
+			return;
+		}
+		tokeniser.nextLine();
+		Map_Read( root, tokeniser, entityTable, *this );
+		tokeniser.release();
 	}
-	if ( version != MapVersion() ) {
-		globalErrorStream() << "Quake 4 map version " << MapVersion() << " supported, version is " << version << "\n";
-		return;
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
+		writer.writeToken( "Version" );
+		writer.writeInteger( MapVersion() );
+		writer.nextLine();
+		Map_Write( root, traverse, writer, false );
+		writer.release();
 	}
-	tokeniser.nextLine();
-	Map_Read( root, tokeniser, entityTable, *this );
-	tokeniser.release();
-}
-void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
-	TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
-	writer.writeToken( "Version" );
-	writer.writeInteger( MapVersion() );
-	writer.nextLine();
-	Map_Write( root, traverse, writer, false );
-	writer.release();
-}
 };
 
 typedef SingletonModule<
-	MapQuake4API,
-	MapDoom3Dependencies,
-	DependenciesAPIConstructor<MapQuake4API, MapDoom3Dependencies>
-	>
+MapQuake4API,
+MapDoom3Dependencies,
+DependenciesAPIConstructor<MapQuake4API, MapDoom3Dependencies>
+>
 MapQuake4Module;
 
 MapQuake4Module g_MapQuake4Module;
@@ -219,88 +219,88 @@ class MapDependencies :
 	public GlobalSceneGraphModuleRef
 {
 public:
-MapDependencies() :
-	GlobalBrushModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ) ),
-	GlobalPatchModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "patchtypes" ) ),
-	GlobalEntityClassManagerModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclass" ) ){
-}
+	MapDependencies() :
+		GlobalBrushModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ) ),
+		GlobalPatchModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "patchtypes" ) ),
+		GlobalEntityClassManagerModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclass" ) ){
+	}
 };
 
 class MapQ3API final : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
-mutable bool m_formatDetected;
+	mutable bool m_formatDetected;
 public:
-typedef MapFormat Type;
-STRING_CONSTANT( Name, "mapq3" );
+	typedef MapFormat Type;
+	STRING_CONSTANT( Name, "mapq3" );
 
-MapQ3API(){
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake3 maps", "*.map", true, true, true ) );
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake3 region", "*.reg", true, true, true ) );
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake3 compiled maps", "*.bsp", false, true, false ) );
-}
-MapFormat* getTable(){
-	return this;
-}
-
-scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
-	const char* primitive = tokeniser.getToken();
-	if ( primitive != 0 ) {
-		if ( string_equal( primitive, "patchDef2" ) ) {
-			return GlobalPatchModule::getTable().createPatch();
-		}
-		if( !m_formatDetected ){
-			EBrushType detectedFormat;
-			if ( string_equal( primitive, "brushDef" ) ) {
-				detectedFormat = eBrushTypeQuake3BP;
-				globalWarningStream() << "detectedFormat = eBrushTypeQuake3BP\n";
-			}
-			else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
-				detectedFormat = eBrushTypeQuake3Valve220;
-				globalWarningStream() << "detectedFormat = eBrushTypeQuake3Valve220\n";
-			}
-			else if ( string_equal( primitive, "(" ) ) {
-				detectedFormat = eBrushTypeQuake3;
-				globalWarningStream() << "detectedFormat = eBrushTypeQuake3\n";
-			}
-			else{
-				globalErrorStream() << "Format is not detected\n";
-				Tokeniser_unexpectedError( tokeniser, primitive, "#different-brush-format" );
-				return g_nullNode;
-			}
-			m_formatDetected = true;
-			if( detectedFormat != GlobalBrushCreator().getFormat() ){
-				GlobalBrushCreator().toggleFormat( detectedFormat );
-			}
-		}
-
-		switch ( GlobalBrushCreator().getFormat() )
-		{
-		case eBrushTypeQuake3:
-		case eBrushTypeQuake3Valve220:
-			tokeniser.ungetToken(); // (
-									// fall through
-		case eBrushTypeQuake3BP:
-			return GlobalBrushCreator().createBrush();
-		default:
-			break;
-		}
+	MapQ3API(){
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake3 maps", "*.map", true, true, true ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake3 region", "*.reg", true, true, true ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake3 compiled maps", "*.bsp", false, true, false ) );
+	}
+	MapFormat* getTable(){
+		return this;
 	}
 
-	Tokeniser_unexpectedError( tokeniser, primitive, "#quake3-primitive" );
-	return g_nullNode;
-}
+	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
+		const char* primitive = tokeniser.getToken();
+		if ( primitive != 0 ) {
+			if ( string_equal( primitive, "patchDef2" ) ) {
+				return GlobalPatchModule::getTable().createPatch();
+			}
+			if( !m_formatDetected ){
+				EBrushType detectedFormat;
+				if ( string_equal( primitive, "brushDef" ) ) {
+					detectedFormat = eBrushTypeQuake3BP;
+					globalWarningStream() << "detectedFormat = eBrushTypeQuake3BP\n";
+				}
+				else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
+					detectedFormat = eBrushTypeQuake3Valve220;
+					globalWarningStream() << "detectedFormat = eBrushTypeQuake3Valve220\n";
+				}
+				else if ( string_equal( primitive, "(" ) ) {
+					detectedFormat = eBrushTypeQuake3;
+					globalWarningStream() << "detectedFormat = eBrushTypeQuake3\n";
+				}
+				else{
+					globalErrorStream() << "Format is not detected\n";
+					Tokeniser_unexpectedError( tokeniser, primitive, "#different-brush-format" );
+					return g_nullNode;
+				}
+				m_formatDetected = true;
+				if( detectedFormat != GlobalBrushCreator().getFormat() ){
+					GlobalBrushCreator().toggleFormat( detectedFormat );
+				}
+			}
 
-void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-	Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
-	m_formatDetected = false;
-	Map_Read( root, tokeniser, entityTable, *this );
-	tokeniser.release();
-}
-void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
-	TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
-	Map_Write( root, traverse, writer, false );
-	writer.release();
-}
+			switch ( GlobalBrushCreator().getFormat() )
+			{
+			case eBrushTypeQuake3:
+			case eBrushTypeQuake3Valve220:
+				tokeniser.ungetToken(); // (
+			// fall through
+			case eBrushTypeQuake3BP:
+				return GlobalBrushCreator().createBrush();
+			default:
+				break;
+			}
+		}
+
+		Tokeniser_unexpectedError( tokeniser, primitive, "#quake3-primitive" );
+		return g_nullNode;
+	}
+
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		m_formatDetected = false;
+		Map_Read( root, tokeniser, entityTable, *this );
+		tokeniser.release();
+	}
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
+		Map_Write( root, traverse, writer, false );
+		writer.release();
+	}
 };
 
 typedef SingletonModule<MapQ3API, MapDependencies> MapQ3Module;
@@ -310,74 +310,74 @@ MapQ3Module g_MapQ3Module;
 
 class MapQ1API final : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
-mutable bool m_formatDetected;
+	mutable bool m_formatDetected;
 public:
-typedef MapFormat Type;
-STRING_CONSTANT( Name, "mapq1" );
+	typedef MapFormat Type;
+	STRING_CONSTANT( Name, "mapq1" );
 
-MapQ1API(){
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake maps", "*.map" ) );
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake region", "*.reg" ) );
-}
-MapFormat* getTable(){
-	return this;
-}
-
-scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
-	const char* primitive = tokeniser.getToken();
-	if ( primitive != 0 ) {
-		if( !m_formatDetected ){
-			EBrushType detectedFormat;
-			if ( string_equal( primitive, "brushDef" ) ) {
-				detectedFormat = eBrushTypeQuake3BP;
-				globalWarningStream() << "detectedFormat = eBrushTypeQuake3BP\n";
-			}
-			else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
-				detectedFormat = eBrushTypeValve220;
-				globalWarningStream() << "detectedFormat = eBrushTypeValve220\n";
-			}
-			else if ( string_equal( primitive, "(" ) ) {
-				detectedFormat = eBrushTypeQuake;
-				globalWarningStream() << "detectedFormat = eBrushTypeQuake\n";
-			}
-			else{
-				globalErrorStream() << "Format is not detected\n";
-				Tokeniser_unexpectedError( tokeniser, primitive, "#different-brush-format" );
-				return g_nullNode;
-			}
-			m_formatDetected = true;
-			if( detectedFormat != GlobalBrushCreator().getFormat() ){
-				GlobalBrushCreator().toggleFormat( detectedFormat );
-			}
-		}
-
-		switch ( GlobalBrushCreator().getFormat() )
-		{
-		case eBrushTypeQuake:
-		case eBrushTypeValve220:
-			tokeniser.ungetToken(); // (
-									// fall through
-		case eBrushTypeQuake3BP:
-			return GlobalBrushCreator().createBrush();
-		default:
-			break;
-		}
+	MapQ1API(){
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake maps", "*.map" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake region", "*.reg" ) );
+	}
+	MapFormat* getTable(){
+		return this;
 	}
 
-	Tokeniser_unexpectedError( tokeniser, primitive, "#quake-primitive" );
-	return g_nullNode;
-}
-void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-	Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
-	m_formatDetected = false;
-	Map_Read( root, tokeniser, entityTable, *this );
-	tokeniser.release();
-}
-void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
-	TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
-	Map_Write( root, traverse, writer, true );
-	writer.release();
-}
+	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
+		const char* primitive = tokeniser.getToken();
+		if ( primitive != 0 ) {
+			if( !m_formatDetected ){
+				EBrushType detectedFormat;
+				if ( string_equal( primitive, "brushDef" ) ) {
+					detectedFormat = eBrushTypeQuake3BP;
+					globalWarningStream() << "detectedFormat = eBrushTypeQuake3BP\n";
+				}
+				else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
+					detectedFormat = eBrushTypeValve220;
+					globalWarningStream() << "detectedFormat = eBrushTypeValve220\n";
+				}
+				else if ( string_equal( primitive, "(" ) ) {
+					detectedFormat = eBrushTypeQuake;
+					globalWarningStream() << "detectedFormat = eBrushTypeQuake\n";
+				}
+				else{
+					globalErrorStream() << "Format is not detected\n";
+					Tokeniser_unexpectedError( tokeniser, primitive, "#different-brush-format" );
+					return g_nullNode;
+				}
+				m_formatDetected = true;
+				if( detectedFormat != GlobalBrushCreator().getFormat() ){
+					GlobalBrushCreator().toggleFormat( detectedFormat );
+				}
+			}
+
+			switch ( GlobalBrushCreator().getFormat() )
+			{
+			case eBrushTypeQuake:
+			case eBrushTypeValve220:
+				tokeniser.ungetToken(); // (
+			// fall through
+			case eBrushTypeQuake3BP:
+				return GlobalBrushCreator().createBrush();
+			default:
+				break;
+			}
+		}
+
+		Tokeniser_unexpectedError( tokeniser, primitive, "#quake-primitive" );
+		return g_nullNode;
+	}
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		m_formatDetected = false;
+		Map_Read( root, tokeniser, entityTable, *this );
+		tokeniser.release();
+	}
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
+		Map_Write( root, traverse, writer, true );
+		writer.release();
+	}
 };
 
 typedef SingletonModule<MapQ1API, MapDependencies> MapQ1Module;
@@ -388,39 +388,39 @@ MapQ1Module g_MapQ1Module;
 class MapHalfLifeAPI final : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
 public:
-typedef MapFormat Type;
-STRING_CONSTANT( Name, "maphl" );
+	typedef MapFormat Type;
+	STRING_CONSTANT( Name, "maphl" );
 
-MapHalfLifeAPI(){
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "half-life maps", "*.map" ) );
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "half-life region", "*.reg" ) );
-}
-MapFormat* getTable(){
-	return this;
-}
-
-scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
-	const char* primitive = tokeniser.getToken();
-	if ( primitive != 0 ) {
-		if ( string_equal( primitive, "(" ) ) {
-			tokeniser.ungetToken(); // (
-			return GlobalBrushCreator().createBrush();
-		}
+	MapHalfLifeAPI(){
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "half-life maps", "*.map" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "half-life region", "*.reg" ) );
+	}
+	MapFormat* getTable(){
+		return this;
 	}
 
-	Tokeniser_unexpectedError( tokeniser, primitive, "#halflife-primitive" );
-	return g_nullNode;
-}
-void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-	Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
-	Map_Read( root, tokeniser, entityTable, *this );
-	tokeniser.release();
-}
-void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
-	TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
-	Map_Write( root, traverse, writer, true );
-	writer.release();
-}
+	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
+		const char* primitive = tokeniser.getToken();
+		if ( primitive != 0 ) {
+			if ( string_equal( primitive, "(" ) ) {
+				tokeniser.ungetToken(); // (
+				return GlobalBrushCreator().createBrush();
+			}
+		}
+
+		Tokeniser_unexpectedError( tokeniser, primitive, "#halflife-primitive" );
+		return g_nullNode;
+	}
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		Map_Read( root, tokeniser, entityTable, *this );
+		tokeniser.release();
+	}
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
+		Map_Write( root, traverse, writer, true );
+		writer.release();
+	}
 };
 
 typedef SingletonModule<MapHalfLifeAPI, MapDependencies> MapHalfLifeModule;
@@ -430,73 +430,73 @@ MapHalfLifeModule g_MapHalfLifeModule;
 
 class MapQ2API final : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
-mutable bool m_formatDetected;
+	mutable bool m_formatDetected;
 public:
-typedef MapFormat Type;
-STRING_CONSTANT( Name, "mapq2" );
+	typedef MapFormat Type;
+	STRING_CONSTANT( Name, "mapq2" );
 
-MapQ2API(){
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake2 maps", "*.map" ) );
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake2 region", "*.reg" ) );
-}
-MapFormat* getTable(){
-	return this;
-}
-scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
-	const char* primitive = tokeniser.getToken();
-	if ( primitive != 0 ) {
-		if( !m_formatDetected ){
-			EBrushType detectedFormat;
-			if ( string_equal( primitive, "brushDef" ) ) {
-				detectedFormat = eBrushTypeQuake3BP;
-				globalWarningStream() << "detectedFormat = eBrushTypeQuake3BP\n";
-			}
-			else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
-				detectedFormat = eBrushTypeQuake3Valve220;
-				globalWarningStream() << "detectedFormat = eBrushTypeQuake3Valve220\n";
-			}
-			else if ( string_equal( primitive, "(" ) ) {
-				detectedFormat = eBrushTypeQuake2;
-				globalWarningStream() << "detectedFormat = eBrushTypeQuake2\n";
-			}
-			else{
-				globalErrorStream() << "Format is not detected\n";
-				Tokeniser_unexpectedError( tokeniser, primitive, "#different-brush-format" );
-				return g_nullNode;
-			}
-			m_formatDetected = true;
-			if( detectedFormat != GlobalBrushCreator().getFormat() ){
-				GlobalBrushCreator().toggleFormat( detectedFormat );
-			}
-		}
-
-		switch ( GlobalBrushCreator().getFormat() )
-		{
-		case eBrushTypeQuake2:
-		case eBrushTypeQuake3Valve220:
-			tokeniser.ungetToken(); // (
-									// fall through
-		case eBrushTypeQuake3BP:
-			return GlobalBrushCreator().createBrush();
-		default:
-			break;
-		}
+	MapQ2API(){
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake2 maps", "*.map" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake2 region", "*.reg" ) );
 	}
+	MapFormat* getTable(){
+		return this;
+	}
+	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
+		const char* primitive = tokeniser.getToken();
+		if ( primitive != 0 ) {
+			if( !m_formatDetected ){
+				EBrushType detectedFormat;
+				if ( string_equal( primitive, "brushDef" ) ) {
+					detectedFormat = eBrushTypeQuake3BP;
+					globalWarningStream() << "detectedFormat = eBrushTypeQuake3BP\n";
+				}
+				else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
+					detectedFormat = eBrushTypeQuake3Valve220;
+					globalWarningStream() << "detectedFormat = eBrushTypeQuake3Valve220\n";
+				}
+				else if ( string_equal( primitive, "(" ) ) {
+					detectedFormat = eBrushTypeQuake2;
+					globalWarningStream() << "detectedFormat = eBrushTypeQuake2\n";
+				}
+				else{
+					globalErrorStream() << "Format is not detected\n";
+					Tokeniser_unexpectedError( tokeniser, primitive, "#different-brush-format" );
+					return g_nullNode;
+				}
+				m_formatDetected = true;
+				if( detectedFormat != GlobalBrushCreator().getFormat() ){
+					GlobalBrushCreator().toggleFormat( detectedFormat );
+				}
+			}
 
-	Tokeniser_unexpectedError( tokeniser, primitive, "#quake2-primitive" );
-	return g_nullNode;
-}
-void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-	Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
-	m_formatDetected = false;
-	Map_Read( root, tokeniser, entityTable, *this );
-	tokeniser.release();
-}
-void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
-	TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
-	Map_Write( root, traverse, writer, true );
-	writer.release();
-}
+			switch ( GlobalBrushCreator().getFormat() )
+			{
+			case eBrushTypeQuake2:
+			case eBrushTypeQuake3Valve220:
+				tokeniser.ungetToken(); // (
+			// fall through
+			case eBrushTypeQuake3BP:
+				return GlobalBrushCreator().createBrush();
+			default:
+				break;
+			}
+		}
+
+		Tokeniser_unexpectedError( tokeniser, primitive, "#quake2-primitive" );
+		return g_nullNode;
+	}
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		m_formatDetected = false;
+		Map_Read( root, tokeniser, entityTable, *this );
+		tokeniser.release();
+	}
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
+		Map_Write( root, traverse, writer, true );
+		writer.release();
+	}
 };
 
 typedef SingletonModule<MapQ2API, MapDependencies> MapQ2Module;
@@ -520,22 +520,22 @@ typedef ArrayConstRange<VMFBlock> VMFBlockArrayRange;
 class VMFBlock
 {
 public:
-const char* m_name;
-VMFBlockArrayRange m_children;
-typedef const VMFBlock Value;
+	const char* m_name;
+	VMFBlockArrayRange m_children;
+	typedef const VMFBlock Value;
 
-VMFBlock( const char* name, VMFBlockArrayRange children = VMFBlockArrayRange( 0, 0 ) ) : m_name( name ), m_children( children ){
-}
-const char* name() const {
-	return m_name;
-}
-typedef Value* const_iterator;
-const_iterator begin() const {
-	return m_children.first;
-}
-const_iterator end() const {
-	return m_children.last;
-}
+	VMFBlock( const char* name, VMFBlockArrayRange children = VMFBlockArrayRange( 0, 0 ) ) : m_name( name ), m_children( children ){
+	}
+	const char* name() const {
+		return m_name;
+	}
+	typedef Value* const_iterator;
+	const_iterator begin() const {
+		return m_children.first;
+	}
+	const_iterator end() const {
+		return m_children.last;
+	}
 };
 
 const VMFBlock c_vmfNormals( "normals" );
@@ -573,9 +573,9 @@ const VMFBlock c_vmfRoot( "", ARRAY_RANGE( c_vmfRootChildren ) );
 class VMFInit
 {
 public:
-VMFInit(){
-	c_vmfVisGroup.m_children = VMFBlockArrayRange( &c_vmfVisGroup, &c_vmfVisGroup + 1 );
-}
+	VMFInit(){
+		c_vmfVisGroup.m_children = VMFBlockArrayRange( &c_vmfVisGroup, &c_vmfVisGroup + 1 );
+	}
 };
 
 VMFInit g_VMFInit;
@@ -635,24 +635,24 @@ void VMF_Read( scene::Node& root, Tokeniser& tokeniser, EntityCreator& entityTab
 class MapVMFAPI final : public TypeSystemRef, public MapFormat
 {
 public:
-typedef MapFormat Type;
-STRING_CONSTANT( Name, "mapvmf" );
+	typedef MapFormat Type;
+	STRING_CONSTANT( Name, "mapvmf" );
 
-MapVMFAPI(){
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "vmf maps", "*.vmf" ) );
-	GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "vmf region", "*.reg" ) );
-}
-MapFormat* getTable(){
-	return this;
-}
+	MapVMFAPI(){
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "vmf maps", "*.vmf" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "vmf region", "*.reg" ) );
+	}
+	MapFormat* getTable(){
+		return this;
+	}
 
-void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-	Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
-	VMF_Read( root, tokeniser, entityTable );
-	tokeniser.release();
-}
-void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
-}
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		VMF_Read( root, tokeniser, entityTable );
+		tokeniser.release();
+	}
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+	}
 };
 
 typedef SingletonModule<MapVMFAPI, MapDependencies> MapVMFModule;

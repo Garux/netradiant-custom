@@ -206,45 +206,45 @@ void CPortals::Load(){
 	switch ( format )
 	{
 	case PRT1:
-	{
-		GETLINE; //leafs count https://github.com/kduske/TrenchBroom/issues/1157 //clusters in q3
-		sscanf( buf, "%u", &node_count );
-		GETLINE; //portals count
-		sscanf( buf, "%u", &portal_count );
-	}
-	break;
+		{
+			GETLINE; //leafs count https://github.com/kduske/TrenchBroom/issues/1157 //clusters in q3
+			sscanf( buf, "%u", &node_count );
+			GETLINE; //portals count
+			sscanf( buf, "%u", &portal_count );
+		}
+		break;
 	case PRT2:
-	{
-		GETLINE; //leafs count
-		sscanf( buf, "%u", &node_count );
-		GETLINE; //clusters count
-		GETLINE; //portals count
-		sscanf( buf, "%u", &portal_count );
+		{
+			GETLINE; //leafs count
+			sscanf( buf, "%u", &node_count );
+			GETLINE; //clusters count
+			GETLINE; //portals count
+			sscanf( buf, "%u", &portal_count );
 
-	}
-	break;
+		}
+		break;
 	case PRT1AM:
-	{
-		GETLINE; //clusters count
-		GETLINE; //portals count
-		sscanf( buf, "%u", &portal_count );
-		GETLINE; //leafs count
-		sscanf( buf, "%u", &node_count );
-	}
-	break;
+		{
+			GETLINE; //clusters count
+			GETLINE; //portals count
+			sscanf( buf, "%u", &portal_count );
+			GETLINE; //leafs count
+			sscanf( buf, "%u", &node_count );
+		}
+		break;
 	}
 
 /*
-    if(node_count > 0xFFFF)
-    {
-        fclose(in);
+	if(node_count > 0xFFFF)
+	{
+		fclose(in);
 
-        node_count = 0;
+		node_count = 0;
 
-        globalErrorStream() << "  ERROR - Extreme number of nodes, aborting.\n";
+		globalErrorStream() << "  ERROR - Extreme number of nodes, aborting.\n";
 
-        return;
-    }
+		return;
+	}
  */
 
 	if ( portal_count > 0xFFFF ) {
@@ -478,11 +478,11 @@ void CPortalsDrawWireframe::render( RenderStateFlags state ) const {
 CubicClipVolume calculateCubicClipVolume( const Matrix4& viewproj ){
 	CubicClipVolume clip;
 	clip.cam = vector4_projected(
-		matrix4_transformed_vector4(
-			matrix4_full_inverse( viewproj ),
-			Vector4( 0, 0, -1, 1 )
-			)
-		);
+	               matrix4_transformed_vector4(
+	                   matrix4_full_inverse( viewproj ),
+	                   Vector4( 0, 0, -1, 1 )
+	               )
+	           );
 	clip.min[0] = clip.cam[0] + ( portals.clip_range * 64.0f );
 	clip.min[1] = clip.cam[1] + ( portals.clip_range * 64.0f );
 	clip.min[2] = clip.cam[2] + ( portals.clip_range * 64.0f );
@@ -568,7 +568,7 @@ void CPortalsDrawSolid::render( RenderStateFlags state ) const {
 			}
 
 			glColor4f( portals.portal[portals.portal_sort[n]].fp_color_random[0], portals.portal[portals.portal_sort[n]].fp_color_random[1],
-					   portals.portal[portals.portal_sort[n]].fp_color_random[2], trans );
+			           portals.portal[portals.portal_sort[n]].fp_color_random[2], trans );
 
 			glBegin( GL_POLYGON );
 
@@ -608,7 +608,7 @@ void CPortalsDrawSolid::render( RenderStateFlags state ) const {
 			}
 
 			glColor4f( portals.portal[n].fp_color_random[0], portals.portal[n].fp_color_random[1],
-					   portals.portal[n].fp_color_random[2], trans );
+			           portals.portal[n].fp_color_random[2], trans );
 
 			glBegin( GL_POLYGON );
 

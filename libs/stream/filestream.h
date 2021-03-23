@@ -49,38 +49,38 @@ inline int whence_for_seekdir( SeekableStream::seekdir direction ){
 /// - Implements SeekableInputStream.
 class FileInputStream : public SeekableInputStream
 {
-std::FILE* m_file;
+	std::FILE* m_file;
 public:
-FileInputStream( const char* name ){
-	m_file = name[0] == '\0' ? 0 : fopen( name, "rb" );
-}
-~FileInputStream(){
-	if ( !failed() ) {
-		fclose( m_file );
+	FileInputStream( const char* name ){
+		m_file = name[0] == '\0' ? 0 : fopen( name, "rb" );
 	}
-}
+	~FileInputStream(){
+		if ( !failed() ) {
+			fclose( m_file );
+		}
+	}
 
-bool failed() const {
-	return m_file == 0;
-}
+	bool failed() const {
+		return m_file == 0;
+	}
 
-size_type read( byte_type* buffer, size_type length ){
-	return fread( buffer, 1, length, m_file );
-}
+	size_type read( byte_type* buffer, size_type length ){
+		return fread( buffer, 1, length, m_file );
+	}
 
-size_type seek( size_type position ){
-	return fseek( m_file, static_cast<long>( position ), SEEK_SET );
-}
-size_type seek( offset_type offset, seekdir direction ){
-	return fseek( m_file, offset, FileStreamDetail::whence_for_seekdir( direction ) );
-}
-size_type tell() const {
-	return ftell( m_file );
-}
+	size_type seek( size_type position ){
+		return fseek( m_file, static_cast<long>( position ), SEEK_SET );
+	}
+	size_type seek( offset_type offset, seekdir direction ){
+		return fseek( m_file, offset, FileStreamDetail::whence_for_seekdir( direction ) );
+	}
+	size_type tell() const {
+		return ftell( m_file );
+	}
 
-std::FILE* file(){
-	return m_file;
-}
+	std::FILE* file(){
+		return m_file;
+	}
 };
 
 /// \brief A wrapper around a FileInputStream limiting access.
@@ -89,21 +89,21 @@ std::FILE* file(){
 /// - Provides input starting at an offset in the file for a limited range.
 class SubFileInputStream : public InputStream
 {
-FileInputStream& m_istream;
-size_type m_remaining;
+	FileInputStream& m_istream;
+	size_type m_remaining;
 public:
-typedef FileInputStream::position_type position_type;
+	typedef FileInputStream::position_type position_type;
 
-SubFileInputStream( FileInputStream& istream, position_type offset, size_type size )
-	: m_istream( istream ), m_remaining( size ){
-	m_istream.seek( offset );
-}
+	SubFileInputStream( FileInputStream& istream, position_type offset, size_type size )
+		: m_istream( istream ), m_remaining( size ){
+		m_istream.seek( offset );
+	}
 
-size_type read( byte_type* buffer, size_type length ){
-	size_type result = m_istream.read( buffer, std::min( length, m_remaining ) );
-	m_remaining -= result;
-	return result;
-}
+	size_type read( byte_type* buffer, size_type length ){
+		size_type result = m_istream.read( buffer, std::min( length, m_remaining ) );
+		m_remaining -= result;
+		return result;
+	}
 };
 
 
@@ -113,34 +113,34 @@ size_type read( byte_type* buffer, size_type length ){
 /// - Implements SeekableInputStream.
 class FileOutputStream : public SeekableOutputStream
 {
-std::FILE* m_file;
+	std::FILE* m_file;
 public:
-FileOutputStream( const char* name ){
-	m_file = name[0] == '\0' ? 0 : fopen( name, "wb" );
-}
-~FileOutputStream(){
-	if ( !failed() ) {
-		fclose( m_file );
+	FileOutputStream( const char* name ){
+		m_file = name[0] == '\0' ? 0 : fopen( name, "wb" );
 	}
-}
+	~FileOutputStream(){
+		if ( !failed() ) {
+			fclose( m_file );
+		}
+	}
 
-bool failed() const {
-	return m_file == 0;
-}
+	bool failed() const {
+		return m_file == 0;
+	}
 
-size_type write( const byte_type* buffer, size_type length ){
-	return fwrite( buffer, 1, length, m_file );
-}
+	size_type write( const byte_type* buffer, size_type length ){
+		return fwrite( buffer, 1, length, m_file );
+	}
 
-size_type seek( size_type position ){
-	return fseek( m_file, static_cast<long>( position ), SEEK_SET );
-}
-size_type seek( offset_type offset, seekdir direction ){
-	return fseek( m_file, offset, FileStreamDetail::whence_for_seekdir( direction ) );
-}
-size_type tell() const {
-	return ftell( m_file );
-}
+	size_type seek( size_type position ){
+		return fseek( m_file, static_cast<long>( position ), SEEK_SET );
+	}
+	size_type seek( offset_type offset, seekdir direction ){
+		return fseek( m_file, offset, FileStreamDetail::whence_for_seekdir( direction ) );
+	}
+	size_type tell() const {
+		return ftell( m_file );
+	}
 };
 
 inline bool file_copy( const char* source, const char* target ){

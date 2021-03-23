@@ -65,9 +65,9 @@ bool PlaneEqual( const plane_t& p, const Plane3f& plane ){
 	// consistent with the true meaning of "epsilon", and also because other
 	// parts of the code uses this inequality.
 	if ( ( p.dist() == plane.dist() || fabs( p.dist() - plane.dist() ) < de ) &&
-		 ( p.normal()[0] == plane.normal()[0] || fabs( p.normal()[0] - plane.normal()[0] ) < ne ) &&
-		 ( p.normal()[1] == plane.normal()[1] || fabs( p.normal()[1] - plane.normal()[1] ) < ne ) &&
-		 ( p.normal()[2] == plane.normal()[2] || fabs( p.normal()[2] - plane.normal()[2] ) < ne ) ) {
+	     ( p.normal()[0] == plane.normal()[0] || fabs( p.normal()[0] - plane.normal()[0] ) < ne ) &&
+	     ( p.normal()[1] == plane.normal()[1] || fabs( p.normal()[1] - plane.normal()[1] ) < ne ) &&
+	     ( p.normal()[2] == plane.normal()[2] || fabs( p.normal()[2] - plane.normal()[2] ) < ne ) ) {
 		return true;
 	}
 
@@ -611,7 +611,7 @@ void AddBrushBevels( void ){
 				}
 				#else
 				if ( ( dir > 0 && mapplanes[ s->planenum ].normal()[ axis ] == 1.0f ) ||
-					 ( dir < 0 && mapplanes[ s->planenum ].normal()[ axis ] == -1.0f ) ) {
+				     ( dir < 0 && mapplanes[ s->planenum ].normal()[ axis ] == -1.0f ) ) {
 					break;
 				}
 				#endif
@@ -818,11 +818,11 @@ brush_t *FinishBrush( bool noCollapseGroups ){
 	   after the entire entity is parsed, the planenums and texinfos will be adjusted for the origin brush */
 	if ( buildBrush->compileFlags & C_ORIGIN ) {
 		Sys_Printf( "Entity %i (%s), Brush %i: origin brush detected\n",
-					mapEnt->mapEntityNum, mapEnt->classname(), entitySourceBrushes );
+		            mapEnt->mapEntityNum, mapEnt->classname(), entitySourceBrushes );
 
 		if ( entities.size() == 1 ) {
 			Sys_FPrintf( SYS_WRN, "Entity %i, Brush %i: origin brushes not allowed in world\n",
-						mapEnt->mapEntityNum, entitySourceBrushes );
+			             mapEnt->mapEntityNum, entitySourceBrushes );
 			return NULL;
 		}
 
@@ -872,8 +872,8 @@ brush_t *FinishBrush( bool noCollapseGroups ){
 
 	/* link colorMod volume brushes to the entity directly */
 	if ( b->contentShader != NULL &&
-		 b->contentShader->colorMod != NULL &&
-		 b->contentShader->colorMod->type == EColorMod::Volume ) {
+	     b->contentShader->colorMod != NULL &&
+	     b->contentShader->colorMod->type == EColorMod::Volume ) {
 		b->nextColorModBrush = mapEnt->colorModBrushes;
 		mapEnt->colorModBrushes = b;
 	}
@@ -1597,8 +1597,8 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	/* conformance check */
 	if ( !strEqual( token, "{" ) ) {
 		Sys_Warning( "ParseEntity: { not found, found %s on line %d - last entity was at: <%4.2f, %4.2f, %4.2f>...\n"
-					"Continuing to process map, but resulting BSP may be invalid.\n",
-					token, scriptline, entities.back().origin[ 0 ], entities.back().origin[ 1 ], entities.back().origin[ 2 ] );
+		             "Continuing to process map, but resulting BSP may be invalid.\n",
+		             token, scriptline, entities.back().origin[ 0 ], entities.back().origin[ 1 ], entities.back().origin[ 2 ] );
 		return false;
 	}
 
@@ -1617,7 +1617,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 		/* get initial token */
 		if ( !GetToken( true ) ) {
 			Sys_Warning( "ParseEntity: EOF without closing brace\n"
-						"Continuing to process map, but resulting BSP may be invalid.\n" );
+			             "Continuing to process map, but resulting BSP may be invalid.\n" );
 			return false;
 		}
 
@@ -1699,7 +1699,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	shaderInfo_t *celShader;
 	const char *value;
 	if( mapEnt->read_keyvalue( value, "_celshader" ) ||
-		entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
+	    entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
 		celShader = ShaderInfoForShader( String64()( "textures/", value ) );
 		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt->mapEntityNum, classname, celShader->shader.c_str() );
 	}
@@ -1842,8 +1842,8 @@ void LoadMapFile( char *filename, bool onlyLights, bool noCollapseGroups ){
 		Sys_FPrintf( SYS_VRB, "%9d planes\n", nummapplanes );
 		Sys_Printf( "%9d areaportals\n", c_areaportals );
 		Sys_Printf( "Size: %5.0f, %5.0f, %5.0f to %5.0f, %5.0f, %5.0f\n",
-					g_mapMinmax.mins[0], g_mapMinmax.mins[1], g_mapMinmax.mins[2],
-					g_mapMinmax.maxs[0], g_mapMinmax.maxs[1], g_mapMinmax.maxs[2] );
+		            g_mapMinmax.mins[0], g_mapMinmax.mins[1], g_mapMinmax.mins[2],
+		            g_mapMinmax.maxs[0], g_mapMinmax.maxs[1], g_mapMinmax.maxs[2] );
 
 		/* write bogus map */
 		if ( fakemap ) {

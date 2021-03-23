@@ -563,12 +563,12 @@ int ScaleBSPMain( int argc, char **argv ){
 					//   b->xyz -> ob
 					//   c->xyz -> oc
 					ExtrapolateTexcoords(
-						&oa[0], &oa[3],
-						&ob[0], &ob[3],
-						&oc[0], &oc[3],
-						a->xyz, a->st,
-						b->xyz, b->st,
-						c->xyz, c->st );
+					    &oa[0], &oa[3],
+					    &ob[0], &ob[3],
+					    &oc[0], &oc[3],
+					    a->xyz, a->st,
+					    b->xyz, b->st,
+					    c->xyz, c->st );
 				}
 				break;
 			}

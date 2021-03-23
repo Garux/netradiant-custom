@@ -22,7 +22,9 @@
 #if !defined( INCLUDED_MD3_H )
 #define INCLUDED_MD3_H
 
-namespace scene { class Node; }
+namespace scene {
+class Node;
+}
 class ArchiveFile;
 scene::Node& loadMD3Model( ArchiveFile& file );
 

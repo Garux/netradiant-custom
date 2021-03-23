@@ -19,4 +19,4 @@
  * you want returned.
  */
 GtkWidget*  lookup_widget( GtkWidget       *widget,
-						   const gchar     *widget_name );
+                           const gchar     *widget_name );

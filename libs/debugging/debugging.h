@@ -50,49 +50,49 @@
 class DebugMessageHandler
 {
 public:
-virtual TextOutputStream& getOutputStream() = 0;
-virtual bool handleMessage() = 0;
+	virtual TextOutputStream& getOutputStream() = 0;
+	virtual bool handleMessage() = 0;
 };
 
 class NullDebugMessageHandler : public NullOutputStream, public DebugMessageHandler
 {
 public:
-virtual TextOutputStream& getOutputStream(){
-	return *this;
-}
-virtual bool handleMessage(){
-	return false;
-}
+	virtual TextOutputStream& getOutputStream(){
+		return *this;
+	}
+	virtual bool handleMessage(){
+		return false;
+	}
 };
 
 class DefaultDebugMessageHandler : public DebugMessageHandler
 {
 public:
-virtual TextOutputStream& getOutputStream(){
-	return globalErrorStream();
-}
-virtual bool handleMessage(){
+	virtual TextOutputStream& getOutputStream(){
+		return globalErrorStream();
+	}
+	virtual bool handleMessage(){
 #if defined( _DEBUG )
-	return false; // send debug-break
+		return false; // send debug-break
 #else
-	return true;
+		return true;
 #endif
-}
+	}
 };
 
 class DebugMessageHandlerRef : public DefaultDebugMessageHandler
 {
-DebugMessageHandler* m_handler;
+	DebugMessageHandler* m_handler;
 public:
-DebugMessageHandlerRef()
-	: m_handler( this ){
-}
-void setHandler( DebugMessageHandler& handler ){
-	m_handler = &handler;
-}
-DebugMessageHandler& getHandler(){
-	return *m_handler;
-}
+	DebugMessageHandlerRef()
+		: m_handler( this ){
+	}
+	void setHandler( DebugMessageHandler& handler ){
+		m_handler = &handler;
+	}
+	DebugMessageHandler& getHandler(){
+		return *m_handler;
+	}
 };
 
 typedef Static<DebugMessageHandlerRef> GlobalDebugMessageHandler;

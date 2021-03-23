@@ -99,9 +99,9 @@ void PrintMesh( mesh_t *m ) {
 	for ( i = 0 ; i < m->height ; i++ ) {
 		for ( j = 0 ; j < m->width ; j++ ) {
 			Sys_Printf( "(%5.2f %5.2f %5.2f) "
-						, m->verts[i * m->width + j].xyz[0]
-						, m->verts[i * m->width + j].xyz[1]
-						, m->verts[i * m->width + j].xyz[2] );
+			            , m->verts[i * m->width + j].xyz[0]
+			            , m->verts[i * m->width + j].xyz[1]
+			            , m->verts[i * m->width + j].xyz[2] );
 		}
 		Sys_Printf( "\n" );
 	}
@@ -349,7 +349,7 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 
 			// if the span length is too long, force a subdivision
 			if ( vector3_length( prevxyz ) > minLength
-				 || vector3_length( nextxyz ) > minLength ) {
+			  || vector3_length( nextxyz ) > minLength ) {
 				break;
 			}
 
@@ -398,7 +398,7 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 
 			// if the span length is too long, force a subdivision
 			if ( vector3_length( prevxyz ) > minLength
-				 || vector3_length( nextxyz ) > minLength ) {
+			  || vector3_length( nextxyz ) > minLength ) {
 				break;
 			}
 			// see if this midpoint is off far enough to subdivide

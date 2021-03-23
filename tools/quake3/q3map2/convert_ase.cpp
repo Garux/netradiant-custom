@@ -123,7 +123,7 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
 		c = bspDrawIndexes[ i + ds->firstIndex + 1 ];
 		b = bspDrawIndexes[ i + ds->firstIndex + 2 ];
 		fprintf( f, "\t\t\t*MESH_FACE\t%d\tA:\t%d\tB:\t%d\tC:\t%d\tAB:\t1\tBC:\t1\tCA:\t1\t*MESH_SMOOTHING\t0\t*MESH_MTLID\t0\r\n",
-				 face, a, b, c );
+		         face, a, b, c );
 	}
 	fprintf( f, "\t\t}\r\n" );
 

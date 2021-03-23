@@ -50,74 +50,74 @@ struct filetype_pair_t
 
 class FileTypeList : public IFileTypeList
 {
-struct filetype_copy_t
-{
-	filetype_copy_t( const filetype_pair_t& other )
-		: m_moduleName( other.m_moduleName ), m_name( other.m_type.name ), m_pattern( other.m_type.pattern ){
-	}
-	CopiedString m_moduleName;
-	CopiedString m_name;
-	CopiedString m_pattern;
-};
+	struct filetype_copy_t
+	{
+		filetype_copy_t( const filetype_pair_t& other )
+			: m_moduleName( other.m_moduleName ), m_name( other.m_type.name ), m_pattern( other.m_type.pattern ){
+		}
+		CopiedString m_moduleName;
+		CopiedString m_name;
+		CopiedString m_pattern;
+	};
 
-typedef std::list<filetype_copy_t> Types;
-Types m_types;
+	typedef std::list<filetype_copy_t> Types;
+	Types m_types;
 public:
 
-typedef Types::const_iterator const_iterator;
-const_iterator begin() const {
-	return m_types.begin();
-}
-const_iterator end() const {
-	return m_types.end();
-}
+	typedef Types::const_iterator const_iterator;
+	const_iterator begin() const {
+		return m_types.begin();
+	}
+	const_iterator end() const {
+		return m_types.end();
+	}
 
-std::size_t size() const {
-	return m_types.size();
-}
+	std::size_t size() const {
+		return m_types.size();
+	}
 
-void addType( const char* moduleName, filetype_t type ){
-	m_types.push_back( filetype_pair_t( moduleName, type ) );
-}
+	void addType( const char* moduleName, filetype_t type ){
+		m_types.push_back( filetype_pair_t( moduleName, type ) );
+	}
 };
 
 
 class GTKMasks
 {
-const FileTypeList& m_types;
+	const FileTypeList& m_types;
 public:
-std::vector<CopiedString> m_filters;
-std::vector<CopiedString> m_masks;
+	std::vector<CopiedString> m_filters;
+	std::vector<CopiedString> m_masks;
 
-GTKMasks( const FileTypeList& types ) : m_types( types ){
-	m_masks.reserve( m_types.size() );
-	for ( FileTypeList::const_iterator i = m_types.begin(); i != m_types.end(); ++i )
-	{
-		std::size_t len = strlen( ( *i ).m_name.c_str() ) + strlen( ( *i ).m_pattern.c_str() ) + 3;
-		StringOutputStream buffer( len + 1 ); // length + null char
+	GTKMasks( const FileTypeList& types ) : m_types( types ){
+		m_masks.reserve( m_types.size() );
+		for ( FileTypeList::const_iterator i = m_types.begin(); i != m_types.end(); ++i )
+		{
+			std::size_t len = strlen( ( *i ).m_name.c_str() ) + strlen( ( *i ).m_pattern.c_str() ) + 3;
+			StringOutputStream buffer( len + 1 ); // length + null char
 
-		buffer << ( *i ).m_name.c_str() << " <" << ( *i ).m_pattern.c_str() << ">";
+			buffer << ( *i ).m_name.c_str() << " <" << ( *i ).m_pattern.c_str() << ">";
 
-		m_masks.push_back( buffer.c_str() );
-	}
+			m_masks.push_back( buffer.c_str() );
+		}
 
-	m_filters.reserve( m_types.size() );
-	for ( FileTypeList::const_iterator i = m_types.begin(); i != m_types.end(); ++i )
-	{
-		m_filters.push_back( ( *i ).m_pattern );
-	}
-}
-
-filetype_pair_t GetTypeForGTKMask( const char *mask ) const {
-	std::vector<CopiedString>::const_iterator j = m_masks.begin();
-	for ( FileTypeList::const_iterator i = m_types.begin(); i != m_types.end(); ++i, ++j )
-	{
-		if ( string_equal( ( *j ).c_str(), mask ) ) {
-			return filetype_pair_t( ( *i ).m_moduleName.c_str(), filetype_t( ( *i ).m_name.c_str(), ( *i ).m_pattern.c_str() ) );
+		m_filters.reserve( m_types.size() );
+		for ( FileTypeList::const_iterator i = m_types.begin(); i != m_types.end(); ++i )
+		{
+			m_filters.push_back( ( *i ).m_pattern );
 		}
 	}
-	return filetype_pair_t();
-}
+
+	filetype_pair_t GetTypeForGTKMask( const char *mask ) const {
+		std::vector<CopiedString>::const_iterator j = m_masks.begin();
+		for ( FileTypeList::const_iterator i = m_types.begin(); i != m_types.end(); ++i, ++j )
+		{
+			if ( string_equal( ( *j ).c_str(), mask ) ) {
+				return filetype_pair_t( ( *i ).m_moduleName.c_str(), filetype_t( ( *i ).m_name.c_str(), ( *i ).m_pattern.c_str() ) );
+			}
+		}
+		return filetype_pair_t();
+	}
 
 };
 
@@ -140,20 +140,20 @@ const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, c
 	GtkWidget* dialog;
 	if ( open ) {
 		dialog = gtk_file_chooser_dialog_new( title,
-											  GTK_WINDOW( parent ),
-											  GTK_FILE_CHOOSER_ACTION_OPEN,
-											  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-											  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-											  NULL );
+		                                      GTK_WINDOW( parent ),
+		                                      GTK_FILE_CHOOSER_ACTION_OPEN,
+		                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		                                      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+		                                      NULL );
 	}
 	else
 	{
 		dialog = gtk_file_chooser_dialog_new( title,
-											  GTK_WINDOW( parent ),
-											  GTK_FILE_CHOOSER_ACTION_SAVE,
-											  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-											  GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-											  NULL );
+		                                      GTK_WINDOW( parent ),
+		                                      GTK_FILE_CHOOSER_ACTION_SAVE,
+		                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		                                      GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+		                                      NULL );
 		gtk_file_chooser_set_current_name( GTK_FILE_CHOOSER( dialog ), "unnamed" );
 	}
 
@@ -213,7 +213,7 @@ const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, c
 				filetype_t type;
 				GtkFileFilter* filter = gtk_file_chooser_get_filter( GTK_FILE_CHOOSER( dialog ) );
 				if ( filter != 0 // no filter set? some file-chooser implementations may allow the user to set no filter, which we treat as 'all files'
-									&& !string_equal( gtk_file_filter_get_name( filter ), "All supported formats" ) )
+				     && !string_equal( gtk_file_filter_get_name( filter ), "All supported formats" ) )
 					type = masks.GetTypeForGTKMask( gtk_file_filter_get_name( filter ) ).m_type;
 				else
 					type = masks.GetTypeForGTKMask( ( *masks.m_masks.begin() ).c_str() ).m_type;
@@ -257,11 +257,11 @@ const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, c
 
 char* dir_dialog( GtkWidget* parent, const char* title, const char* path ){
 	GtkWidget* dialog = gtk_file_chooser_dialog_new( title,
-													 GTK_WINDOW( parent ),
-													 GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-													 GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-													 GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-													 NULL );
+	                                                 GTK_WINDOW( parent ),
+	                                                 GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+	                                                 GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+	                                                 GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+	                                                 NULL );
 
 	gtk_window_set_modal( GTK_WINDOW( dialog ), TRUE );
 	gtk_window_set_position( GTK_WINDOW( dialog ), GTK_WIN_POS_CENTER_ON_PARENT );
@@ -286,9 +286,9 @@ const char* file_dialog( GtkWidget* parent, bool open, const char* title, const 
 		const char* file = file_dialog_show( parent, open, title, path, pattern, want_load, want_import, want_save );
 
 		if ( open
-			 || file == 0
-			 || !file_exists( file )
-			 || gtk_MessageBox( parent, "The file specified already exists.\nDo you want to replace it?", title, eMB_NOYES, eMB_ICONQUESTION ) == eIDYES ) {
+		  || file == 0
+		  || !file_exists( file )
+		  || gtk_MessageBox( parent, "The file specified already exists.\nDo you want to replace it?", title, eMB_NOYES, eMB_ICONQUESTION ) == eIDYES ) {
 			return file;
 		}
 	}

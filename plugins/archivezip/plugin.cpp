@@ -31,17 +31,17 @@
 
 class ArchiveZipAPI
 {
-_QERArchiveTable m_archivezip;
+	_QERArchiveTable m_archivezip;
 public:
-typedef _QERArchiveTable Type;
-STRING_CONSTANT( Name, "pk3" );
+	typedef _QERArchiveTable Type;
+	STRING_CONSTANT( Name, "pk3" );
 
-ArchiveZipAPI(){
-	m_archivezip.m_pfnOpenArchive = &OpenArchive;
-}
-_QERArchiveTable* getTable(){
-	return &m_archivezip;
-}
+	ArchiveZipAPI(){
+		m_archivezip.m_pfnOpenArchive = &OpenArchive;
+	}
+	_QERArchiveTable* getTable(){
+		return &m_archivezip;
+	}
 };
 
 typedef SingletonModule<ArchiveZipAPI> ArchiveZipModule;
@@ -51,17 +51,17 @@ ArchiveZipModule g_ArchiveZipModule;
 
 class ArchivePK4API
 {
-_QERArchiveTable m_archivepk4;
+	_QERArchiveTable m_archivepk4;
 public:
-typedef _QERArchiveTable Type;
-STRING_CONSTANT( Name, "pk4" );
+	typedef _QERArchiveTable Type;
+	STRING_CONSTANT( Name, "pk4" );
 
-ArchivePK4API(){
-	m_archivepk4.m_pfnOpenArchive = &OpenArchive;
-}
-_QERArchiveTable* getTable(){
-	return &m_archivepk4;
-}
+	ArchivePK4API(){
+		m_archivepk4.m_pfnOpenArchive = &OpenArchive;
+	}
+	_QERArchiveTable* getTable(){
+		return &m_archivepk4;
+	}
 };
 
 typedef SingletonModule<ArchivePK4API> ArchivePK4Module;

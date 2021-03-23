@@ -31,20 +31,20 @@
 template<typename Type>
 class Reference
 {
-Type* m_contained;
+	Type* m_contained;
 public:
-explicit Reference( Type& contained ) : m_contained( &contained ){
-}
-operator Type&() const
-{
-	return *m_contained;
-}
-Type& get() const {
-	return *m_contained;
-}
-Type* get_pointer() const {
-	return m_contained;
-}
+	explicit Reference( Type& contained ) : m_contained( &contained ){
+	}
+	operator Type&() const
+	{
+		return *m_contained;
+	}
+	Type& get() const {
+		return *m_contained;
+	}
+	Type* get_pointer() const {
+		return m_contained;
+	}
 };
 
 template<typename Type>
@@ -68,20 +68,20 @@ inline Reference<Type> makeReference( Type& value ){
 template<typename Type>
 class ConstReference
 {
-const Type* m_contained;
+	const Type* m_contained;
 public:
-explicit ConstReference( const Type& contained ) : m_contained( &contained ){
-}
-operator const Type&() const
-{
-	return *m_contained;
-}
-const Type& get() const {
-	return *m_contained;
-}
-const Type* get_pointer() const {
-	return m_contained;
-}
+	explicit ConstReference( const Type& contained ) : m_contained( &contained ){
+	}
+	operator const Type&() const
+	{
+		return *m_contained;
+	}
+	const Type& get() const {
+		return *m_contained;
+	}
+	const Type* get_pointer() const {
+		return m_contained;
+	}
 };
 
 template<typename Type>

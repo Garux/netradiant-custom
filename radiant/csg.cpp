@@ -206,10 +206,10 @@ public:
 					for( std::size_t index = 0; index < winding.numpoints; ++index ){
 						const std::size_t next = Winding_next( winding, index );
 						m_out.back()->addPlane( winding[index].vertex,
-												winding[next].vertex,
-												winding[next].vertex + face.getPlane().plane3().normal() * m_settings.m_offset,
-												TextureBrowser_GetSelectedShader(),
-												projection );
+						                        winding[next].vertex,
+						                        winding[next].vertex + face.getPlane().plane3().normal() * m_settings.m_offset,
+						                        TextureBrowser_GetSelectedShader(),
+						                        projection );
 					}
 				}
 			}
@@ -247,24 +247,24 @@ void brush_extrudeDiag( const Brush& brush0, const Brush& brush2, brush_vector_t
 							double bestdot = -1;
 							for( std::size_t index2 = 0; index2 < winding2.numpoints; ++index2 ){
 								const double dot = vector3_dot(
-												vector3_normalised(
-													vector3_cross(
-														winding0[index0].vertex - winding0[next].vertex,
-														winding0[index0].vertex - winding2[index2].vertex
-													)
-												),
-												normal
-											);
+								                       vector3_normalised(
+								                           vector3_cross(
+								                               winding0[index0].vertex - winding0[next].vertex,
+								                               winding0[index0].vertex - winding2[index2].vertex
+								                           )
+								                       ),
+								                       normal
+								                   );
 								if( dot > bestdot ) {
 									bestdot = dot;
 									BestPoint = winding2[index2].vertex;
 								}
 							}
 							m_out.back()->addPlane( winding0[swap? next : index0].vertex,
-													winding0[swap? index0 : next].vertex,
-													BestPoint,
-													shader,
-													projection );
+							                        winding0[swap? index0 : next].vertex,
+							                        BestPoint,
+							                        shader,
+							                        projection );
 						}
 					};
 					//insert side planes from each winding perspective, as their form may change after brush expansion
@@ -288,10 +288,10 @@ void brush_extrudeDiag( const Brush& brush0, const Brush& brush2, brush_vector_t
 							}
 						}
 						m_out.back()->addPlane( winding0[index0].vertex,
-												winding0[next].vertex,
-												BestPoint,
-												shader,
-												projection );
+						                        winding0[next].vertex,
+						                        BestPoint,
+						                        shader,
+						                        projection );
 					}
 				}
 			}
@@ -325,7 +325,7 @@ public:
 		if( path.top().get().visible() ) {
 			Brush* brush = Node_getBrush( path.top() );
 			if( brush != 0
-					&& ( Instance_isSelected( instance ) || Instance_isSelectedComponents( instance ) ) ) {
+			 && ( Instance_isSelected( instance ) || Instance_isSelectedComponents( instance ) ) ) {
 				m_settings.excludeFaces( *Instance_getBrush( instance ) );
 				brush_vector_t out;
 
@@ -374,21 +374,21 @@ typedef std::list<Brush*> brushlist_t;
 
 class BrushGatherSelected : public scene::Graph::Walker
 {
-brush_vector_t& m_brushlist;
+	brush_vector_t& m_brushlist;
 public:
-BrushGatherSelected( brush_vector_t& brushlist )
-	: m_brushlist( brushlist ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Brush* brush = Node_getBrush( path.top() );
-		if ( brush != 0
-			 && Instance_isSelected( instance ) ) {
-			m_brushlist.push_back( brush );
-		}
+	BrushGatherSelected( brush_vector_t& brushlist )
+		: m_brushlist( brushlist ){
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.top().get().visible() ) {
+			Brush* brush = Node_getBrush( path.top() );
+			if ( brush != 0
+			  && Instance_isSelected( instance ) ) {
+				m_brushlist.push_back( brush );
+			}
+		}
+		return true;
+	}
 };
 /*
 class BrushDeleteSelected : public scene::Graph::Walker
@@ -413,44 +413,44 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 
 class BrushDeleteSelected : public scene::Graph::Walker
 {
-scene::Node* m_keepNode;
-mutable bool m_eraseParent;
+	scene::Node* m_keepNode;
+	mutable bool m_eraseParent;
 public:
-BrushDeleteSelected( scene::Node* keepNode ): m_keepNode( keepNode ), m_eraseParent( false ){
-}
-BrushDeleteSelected(): m_keepNode( NULL ), m_eraseParent( false ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	//globalOutputStream() << path.size() << "\n";
-	if ( path.top().get().visible() ) {
-		Brush* brush = Node_getBrush( path.top() );
-		if ( brush != 0
-			 && Instance_isSelected( instance )
-			 && path.size() > 1
-			 && path.top().get_pointer() != m_keepNode ) {
-			scene::Node& parent = path.parent();
-			Path_deleteTop( path );
-			if( Node_getTraversable( parent )->empty() ){
-				m_eraseParent = true;
-				//globalOutputStream() << "Empty node?!.\n";
+	BrushDeleteSelected( scene::Node* keepNode ): m_keepNode( keepNode ), m_eraseParent( false ){
+	}
+	BrushDeleteSelected(): m_keepNode( NULL ), m_eraseParent( false ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		return true;
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		//globalOutputStream() << path.size() << "\n";
+		if ( path.top().get().visible() ) {
+			Brush* brush = Node_getBrush( path.top() );
+			if ( brush != 0
+			  && Instance_isSelected( instance )
+			  && path.size() > 1
+			  && path.top().get_pointer() != m_keepNode ) {
+				scene::Node& parent = path.parent();
+				Path_deleteTop( path );
+				if( Node_getTraversable( parent )->empty() ){
+					m_eraseParent = true;
+					//globalOutputStream() << "Empty node?!.\n";
+				}
+				return;
 			}
-			return;
+		}
+		if( m_eraseParent && !Node_isPrimitive( path.top() ) && path.size() > 1 ){
+			//globalOutputStream() << "about to Delete empty node!.\n";
+			m_eraseParent = false;
+			Entity* entity = Node_getEntity( path.top() );
+			if ( entity != 0 && path.top().get_pointer() != Map_FindWorldspawn( g_map )
+			  && Node_getTraversable( path.top() )->empty() && path.top().get_pointer() != m_keepNode ) {
+				//globalOutputStream() << "now Deleting empty node!.\n";
+				Path_deleteTop( path );
+			}
 		}
 	}
-	if( m_eraseParent && !Node_isPrimitive( path.top() ) && path.size() > 1 ){
-		//globalOutputStream() << "about to Delete empty node!.\n";
-		m_eraseParent = false;
-		Entity* entity = Node_getEntity( path.top() );
-		if ( entity != 0 && path.top().get_pointer() != Map_FindWorldspawn( g_map )
-			&& Node_getTraversable( path.top() )->empty() && path.top().get_pointer() != m_keepNode ) {
-			//globalOutputStream() << "now Deleting empty node!.\n";
-			Path_deleteTop( path );
-		}
-	}
-}
 };
 
 
@@ -458,28 +458,28 @@ template<typename Type>
 class RemoveReference
 {
 public:
-typedef Type type;
+	typedef Type type;
 };
 
 template<typename Type>
 class RemoveReference<Type&>
 {
 public:
-typedef Type type;
+	typedef Type type;
 };
 
 template<typename Functor>
 class Dereference
 {
-const Functor& functor;
+	const Functor& functor;
 public:
-typedef typename RemoveReference<typename Functor::first_argument_type>::type* first_argument_type;
-typedef typename Functor::result_type result_type;
-Dereference( const Functor& functor ) : functor( functor ){
-}
-result_type operator()( first_argument_type firstArgument ) const {
-	return functor( *firstArgument );
-}
+	typedef typename RemoveReference<typename Functor::first_argument_type>::type* first_argument_type;
+	typedef typename Functor::result_type result_type;
+	Dereference( const Functor& functor ) : functor( functor ){
+	}
+	result_type operator()( first_argument_type firstArgument ) const {
+		return functor( *firstArgument );
+	}
 };
 
 template<typename Functor>
@@ -499,35 +499,35 @@ Face* Brush_findIf( const Brush& brush, const Predicate& predicate ){
 template<typename Caller>
 class BindArguments1
 {
-typedef typename Caller::second_argument_type FirstBound;
-FirstBound firstBound;
+	typedef typename Caller::second_argument_type FirstBound;
+	FirstBound firstBound;
 public:
-typedef typename Caller::result_type result_type;
-typedef typename Caller::first_argument_type first_argument_type;
-BindArguments1( FirstBound firstBound )
-	: firstBound( firstBound ){
-}
-result_type operator()( first_argument_type firstArgument ) const {
-	return Caller::call( firstArgument, firstBound );
-}
+	typedef typename Caller::result_type result_type;
+	typedef typename Caller::first_argument_type first_argument_type;
+	BindArguments1( FirstBound firstBound )
+		: firstBound( firstBound ){
+	}
+	result_type operator()( first_argument_type firstArgument ) const {
+		return Caller::call( firstArgument, firstBound );
+	}
 };
 
 template<typename Caller>
 class BindArguments2
 {
-typedef typename Caller::second_argument_type FirstBound;
-typedef typename Caller::third_argument_type SecondBound;
-FirstBound firstBound;
-SecondBound secondBound;
+	typedef typename Caller::second_argument_type FirstBound;
+	typedef typename Caller::third_argument_type SecondBound;
+	FirstBound firstBound;
+	SecondBound secondBound;
 public:
-typedef typename Caller::result_type result_type;
-typedef typename Caller::first_argument_type first_argument_type;
-BindArguments2( FirstBound firstBound, SecondBound secondBound )
-	: firstBound( firstBound ), secondBound( secondBound ){
-}
-result_type operator()( first_argument_type firstArgument ) const {
-	return Caller::call( firstArgument, firstBound, secondBound );
-}
+	typedef typename Caller::result_type result_type;
+	typedef typename Caller::first_argument_type first_argument_type;
+	BindArguments2( FirstBound firstBound, SecondBound secondBound )
+		: firstBound( firstBound ), secondBound( secondBound ){
+	}
+	result_type operator()( first_argument_type firstArgument ) const {
+		return Caller::call( firstArgument, firstBound, secondBound );
+	}
 };
 
 template<typename Caller, typename FirstBound, typename SecondBound>
@@ -583,7 +583,7 @@ bool Brush_subtract( const Brush& brush, const Brush& other, brush_vector_t& ret
 			if ( ( *i )->contributes() ) {
 				brushsplit_t split = Brush_classifyPlane( back, ( *i )->plane3() );
 				if ( split.counts[ePlaneFront] != 0
-					 && split.counts[ePlaneBack] != 0 ) {
+				  && split.counts[ePlaneBack] != 0 ) {
 					fragments.push_back( new Brush( back ) );
 					Face* newFace = fragments.back()->addFace( *( *i ) );
 					if ( newFace != 0 ) {
@@ -608,87 +608,87 @@ bool Brush_subtract( const Brush& brush, const Brush& other, brush_vector_t& ret
 
 class SubtractBrushesFromUnselected : public scene::Graph::Walker
 {
-const brush_vector_t& m_brushlist;
-std::size_t& m_before;
-std::size_t& m_after;
-mutable bool m_eraseParent;
+	const brush_vector_t& m_brushlist;
+	std::size_t& m_before;
+	std::size_t& m_after;
+	mutable bool m_eraseParent;
 public:
-SubtractBrushesFromUnselected( const brush_vector_t& brushlist, std::size_t& before, std::size_t& after )
-	: m_brushlist( brushlist ), m_before( before ), m_after( after ), m_eraseParent( false ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		return true;
+	SubtractBrushesFromUnselected( const brush_vector_t& brushlist, std::size_t& before, std::size_t& after )
+		: m_brushlist( brushlist ), m_before( before ), m_after( after ), m_eraseParent( false ){
 	}
-	return false;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Brush* brush = Node_getBrush( path.top() );
-		if ( brush != 0
-			 && !Instance_isSelected( instance ) ) {
-			brush_vector_t buffer[2];
-			bool swap = false;
-			Brush* original = new Brush( *brush );
-			buffer[static_cast<std::size_t>( swap )].push_back( original );
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.top().get().visible() ) {
+			return true;
+		}
+		return false;
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.top().get().visible() ) {
+			Brush* brush = Node_getBrush( path.top() );
+			if ( brush != 0
+			  && !Instance_isSelected( instance ) ) {
+				brush_vector_t buffer[2];
+				bool swap = false;
+				Brush* original = new Brush( *brush );
+				buffer[static_cast<std::size_t>( swap )].push_back( original );
 
-			{
-				for ( brush_vector_t::const_iterator i( m_brushlist.begin() ); i != m_brushlist.end(); ++i )
 				{
-					for ( brush_vector_t::iterator j( buffer[static_cast<std::size_t>( swap )].begin() ); j != buffer[static_cast<std::size_t>( swap )].end(); ++j )
+					for ( brush_vector_t::const_iterator i( m_brushlist.begin() ); i != m_brushlist.end(); ++i )
 					{
-						if ( Brush_subtract( *( *j ), *( *i ), buffer[static_cast<std::size_t>( !swap )] ) ) {
-							delete ( *j );
-						}
-						else
+						for ( brush_vector_t::iterator j( buffer[static_cast<std::size_t>( swap )].begin() ); j != buffer[static_cast<std::size_t>( swap )].end(); ++j )
 						{
-							buffer[static_cast<std::size_t>( !swap )].push_back( ( *j ) );
+							if ( Brush_subtract( *( *j ), *( *i ), buffer[static_cast<std::size_t>( !swap )] ) ) {
+								delete ( *j );
+							}
+							else
+							{
+								buffer[static_cast<std::size_t>( !swap )].push_back( ( *j ) );
+							}
+						}
+						buffer[static_cast<std::size_t>( swap )].clear();
+						swap = !swap;
+					}
+				}
+
+				brush_vector_t& out = buffer[static_cast<std::size_t>( swap )];
+
+				if ( out.size() == 1 && out.back() == original ) {
+					delete original;
+				}
+				else
+				{
+					++m_before;
+					for ( brush_vector_t::const_iterator i = out.begin(); i != out.end(); ++i )
+					{
+						++m_after;
+						( *i )->removeEmptyFaces();
+						if ( !( *i )->empty() ) {
+							NodeSmartReference node( ( new BrushNode() )->node() );
+							Node_getBrush( node )->copy( *( *i ) );
+							delete ( *i );
+							Node_getTraversable( path.parent() )->insert( node );
+						}
+						else{
+							delete ( *i );
 						}
 					}
-					buffer[static_cast<std::size_t>( swap )].clear();
-					swap = !swap;
-				}
-			}
-
-			brush_vector_t& out = buffer[static_cast<std::size_t>( swap )];
-
-			if ( out.size() == 1 && out.back() == original ) {
-				delete original;
-			}
-			else
-			{
-				++m_before;
-				for ( brush_vector_t::const_iterator i = out.begin(); i != out.end(); ++i )
-				{
-					++m_after;
-					( *i )->removeEmptyFaces();
-					if ( !( *i )->empty() ) {
-						NodeSmartReference node( ( new BrushNode() )->node() );
-						Node_getBrush( node )->copy( *( *i ) );
-						delete ( *i );
-						Node_getTraversable( path.parent() )->insert( node );
-					}
-					else{
-						delete ( *i );
+					scene::Node& parent = path.parent();
+					Path_deleteTop( path );
+					if( Node_getTraversable( parent )->empty() ){
+						m_eraseParent = true;
 					}
 				}
-				scene::Node& parent = path.parent();
+			}
+		}
+		if( m_eraseParent && !Node_isPrimitive( path.top() ) && path.size() > 1 ){
+			m_eraseParent = false;
+			Entity* entity = Node_getEntity( path.top() );
+			if ( entity != 0 && path.top().get_pointer() != Map_FindWorldspawn( g_map )
+			  && Node_getTraversable( path.top() )->empty() ) {
 				Path_deleteTop( path );
-				if( Node_getTraversable( parent )->empty() ){
-					m_eraseParent = true;
-				}
 			}
 		}
 	}
-	if( m_eraseParent && !Node_isPrimitive( path.top() ) && path.size() > 1 ){
-		m_eraseParent = false;
-		Entity* entity = Node_getEntity( path.top() );
-		if ( entity != 0 && path.top().get_pointer() != Map_FindWorldspawn( g_map )
-			&& Node_getTraversable( path.top() )->empty() ) {
-			Path_deleteTop( path );
-		}
-	}
-}
 };
 
 void CSG_Subtract(){
@@ -709,8 +709,8 @@ void CSG_Subtract(){
 		std::size_t after = 0;
 		GlobalSceneGraph().traverse( SubtractBrushesFromUnselected( selected_brushes, before, after ) );
 		globalOutputStream() << "CSG Subtract: Result: "
-							 << Unsigned( after ) << " fragment" << ( after == 1 ? "" : "s" )
-							 << " from " << Unsigned( before ) << " brush" << ( before == 1 ? "" : "es" ) << ".\n";
+		                     << Unsigned( after ) << " fragment" << ( after == 1 ? "" : "s" )
+		                     << " from " << Unsigned( before ) << " brush" << ( before == 1 ? "" : "es" ) << ".\n";
 
 		SceneChangeNotify();
 	}
@@ -719,59 +719,59 @@ void CSG_Subtract(){
 #include "clippertool.h"
 class BrushSplitByPlaneSelected : public scene::Graph::Walker
 {
-const ClipperPoints m_points;
-const Plane3 m_plane; /* plane to insert */
-const char* m_shader;
-const TextureProjection& m_projection;
-const bool m_split; /* split or clip */
+	const ClipperPoints m_points;
+	const Plane3 m_plane; /* plane to insert */
+	const char* m_shader;
+	const TextureProjection& m_projection;
+	const bool m_split; /* split or clip */
 public:
-mutable bool m_gj;
-BrushSplitByPlaneSelected( const ClipperPoints& points, bool flip, const char* shader, const TextureProjection& projection, bool split )
-	: m_points( flip? ClipperPoints( points[0], points[2], points[1], points._count ) : points ),
+	mutable bool m_gj;
+	BrushSplitByPlaneSelected( const ClipperPoints& points, bool flip, const char* shader, const TextureProjection& projection, bool split ) :
+		m_points( flip? ClipperPoints( points[0], points[2], points[1], points._count ) : points ),
 		m_plane( plane3_for_points( m_points[0], m_points[1], m_points[2] ) ),
 		m_shader( shader ), m_projection( projection ), m_split( split ), m_gj( false ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Brush* brush = Node_getBrush( path.top() );
-		if ( brush != 0
-			 && Instance_isSelected( instance ) ) {
-			const brushsplit_t split = Brush_classifyPlane( *brush, m_plane );
-			if ( split.counts[ePlaneBack] && split.counts[ePlaneFront] ) {
-				// the plane intersects this brush
-				m_gj = true;
-				if ( m_split ) {
-					NodeSmartReference node( ( new BrushNode() )->node() );
-					Brush* fragment = Node_getBrush( node );
-					fragment->copy( *brush );
-					fragment->addPlane( m_points[0], m_points[2], m_points[1], m_shader, m_projection );
-					fragment->removeEmptyFaces();
-					ASSERT_MESSAGE( !fragment->empty(), "brush left with no faces after split" );
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		return true;
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.top().get().visible() ) {
+			Brush* brush = Node_getBrush( path.top() );
+			if ( brush != 0
+			  && Instance_isSelected( instance ) ) {
+				const brushsplit_t split = Brush_classifyPlane( *brush, m_plane );
+				if ( split.counts[ePlaneBack] && split.counts[ePlaneFront] ) {
+					// the plane intersects this brush
+					m_gj = true;
+					if ( m_split ) {
+						NodeSmartReference node( ( new BrushNode() )->node() );
+						Brush* fragment = Node_getBrush( node );
+						fragment->copy( *brush );
+						fragment->addPlane( m_points[0], m_points[2], m_points[1], m_shader, m_projection );
+						fragment->removeEmptyFaces();
+						ASSERT_MESSAGE( !fragment->empty(), "brush left with no faces after split" );
 
-					Node_getTraversable( path.parent() )->insert( node );
-					{
-						scene::Path fragmentPath = path;
-						fragmentPath.top() = makeReference( node.get() );
-						selectPath( fragmentPath, true );
+						Node_getTraversable( path.parent() )->insert( node );
+						{
+							scene::Path fragmentPath = path;
+							fragmentPath.top() = makeReference( node.get() );
+							selectPath( fragmentPath, true );
+						}
 					}
-				}
 
-				brush->addPlane( m_points[0], m_points[1], m_points[2], m_shader, m_projection );
-				brush->removeEmptyFaces();
-				ASSERT_MESSAGE( !brush->empty(), "brush left with no faces after split" );
-			}
-			else
-			// the plane does not intersect this brush and the brush is in front of the plane
-			if ( !m_split && split.counts[ePlaneFront] != 0 ) {
-				m_gj = true;
-				Path_deleteTop( path );
+					brush->addPlane( m_points[0], m_points[1], m_points[2], m_shader, m_projection );
+					brush->removeEmptyFaces();
+					ASSERT_MESSAGE( !brush->empty(), "brush left with no faces after split" );
+				}
+				else
+					// the plane does not intersect this brush and the brush is in front of the plane
+					if ( !m_split && split.counts[ePlaneFront] != 0 ) {
+						m_gj = true;
+						Path_deleteTop( path );
+					}
 			}
 		}
 	}
-}
 };
 
 void CSG_WrapMerge( const ClipperPoints& clipperPoints );
@@ -791,21 +791,25 @@ void Scene_BrushSplitByPlane( scene::Graph& graph, const ClipperPoints& points, 
 
 class BrushInstanceSetClipPlane : public scene::Graph::Walker
 {
-const Plane3 m_plane;
+	const Plane3 m_plane;
 public:
-BrushInstanceSetClipPlane( const ClipperPoints& points, bool flip )
-	: m_plane( points._count < 2? Plane3( 0, 0, 0, 0 ) : flip? plane3_for_points( points[0], points[2], points[1] ) : plane3_for_points( points[0], points[1], points[2] ) ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	BrushInstance* brush = Instance_getBrush( instance );
-	if ( brush != 0
-		 && path.top().get().visible()
-		 && brush->isSelected() ) {
-		BrushInstance& brushInstance = *brush;
-		brushInstance.setClipPlane( m_plane );
+	BrushInstanceSetClipPlane( const ClipperPoints& points, bool flip )
+		: m_plane( points._count < 2
+		           ? Plane3( 0, 0, 0, 0 )
+		           : flip
+		             ? plane3_for_points( points[0], points[2], points[1] )
+		             : plane3_for_points( points[0], points[1], points[2] ) ){
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		BrushInstance* brush = Instance_getBrush( instance );
+		if ( brush != 0
+		     && path.top().get().visible()
+		     && brush->isSelected() ) {
+			BrushInstance& brushInstance = *brush;
+			brushInstance.setClipPlane( m_plane );
+		}
+		return true;
+	}
 };
 
 void Scene_BrushSetClipPlane( scene::Graph& graph, const ClipperPoints& points, bool flip ){
@@ -1001,22 +1005,22 @@ public:
 
 class Scene_gatherSelectedComponents : public scene::Graph::Walker
 {
-MergeVertices& m_mergeVertices;
-const Vector3Callback m_callback;
+	MergeVertices& m_mergeVertices;
+	const Vector3Callback m_callback;
 public:
-Scene_gatherSelectedComponents( MergeVertices& mergeVertices )
-	: m_mergeVertices( mergeVertices ), m_callback( [this]( const Vector3& value ){ m_mergeVertices.insert( value ); } ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		ComponentEditable* componentEditable = Instance_getComponentEditable( instance );
-		if ( componentEditable ) {
-			componentEditable->gatherSelectedComponents( m_callback );
-		}
-		return true;
+	Scene_gatherSelectedComponents( MergeVertices& mergeVertices )
+		: m_mergeVertices( mergeVertices ), m_callback( [this]( const Vector3& value ){ m_mergeVertices.insert( value ); } ){
 	}
-	return false;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.top().get().visible() ) {
+			ComponentEditable* componentEditable = Instance_getComponentEditable( instance );
+			if ( componentEditable ) {
+				componentEditable->gatherSelectedComponents( m_callback );
+			}
+			return true;
+		}
+		return false;
+	}
 };
 
 class MergePlane
@@ -1084,8 +1088,8 @@ void CSG_build_hull( const MergeVertices& mergeVertices, MergePlanes& mergePlane
 		pointCloud.reserve( mergeVertices.size() );
 		for( std::size_t i = 0; i < mergeVertices.size(); ++i ){
 			pointCloud.push_back( quickhull::Vector3<double>( static_cast<double>( mergeVertices[i].x() ),
-															static_cast<double>( mergeVertices[i].y() ),
-															static_cast<double>( mergeVertices[i].z() ) ) );
+			                                                  static_cast<double>( mergeVertices[i].y() ),
+			                                                  static_cast<double>( mergeVertices[i].z() ) ) );
 		}
 		auto hull = quickhull.getConvexHull( pointCloud, true, true );
 		const auto& indexBuffer = hull.getIndexBuffer();
@@ -1482,8 +1486,8 @@ void CSG_Tool(){
 					//gtk_widget_show( label );
 					GtkWidget* button = gtk_button_new_with_label( "Grid->" );
 					gtk_table_attach( table, button, 0, 1, 0, 1,
-									  (GtkAttachOptions) ( 0 ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( 0 ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_show( button );
 					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_grid2spin ), &g_csgtool_dialog );
 				}
@@ -1493,8 +1497,8 @@ void CSG_Tool(){
 					gtk_widget_show( GTK_WIDGET( spin ) );
 					gtk_widget_set_tooltip_text( GTK_WIDGET( spin ), "Thickness" );
 					gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 0, 1,
-									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_set_size_request( GTK_WIDGET( spin ), 64, -1 );
 					gtk_spin_button_set_numeric( spin, TRUE );
 
@@ -1517,17 +1521,17 @@ void CSG_Tool(){
 					gtk_widget_show( radCam );
 
 					gtk_table_attach( table, radFaces, 2, 3, 0, 1,
-									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									(GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_table_attach( table, radPlusFaces, 3, 4, 0, 1,
-									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									(GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_table_attach( table, radProj, 4, 5, 0, 1,
-									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									(GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_table_attach( table, radCam, 5, 6, 0, 1,
-									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									(GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 					g_csgtool_dialog.radFaces = GTK_TOGGLE_BUTTON( radFaces );
 					g_csgtool_dialog.radPlusFaces = GTK_TOGGLE_BUTTON( radPlusFaces );
@@ -1539,8 +1543,8 @@ void CSG_Tool(){
 					button_set_icon( GTK_BUTTON( button ), "f-caulk.png" );
 					gtk_button_set_relief( GTK_BUTTON( button ), GTK_RELIEF_NONE );
 					gtk_table_attach( table, button, 6, 7, 0, 1,
-									  (GtkAttachOptions) ( GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_set_tooltip_text( button, "Caulk some faces" );
 					gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( button ), TRUE );
 					gtk_widget_show( button );
@@ -1551,8 +1555,8 @@ void CSG_Tool(){
 					button_set_icon( GTK_BUTTON( button ), "csgtool_removeinner.png" );
 					gtk_button_set_relief( GTK_BUTTON( button ), GTK_RELIEF_NONE );
 					gtk_table_attach( table, button, 7, 8, 0, 1,
-									  (GtkAttachOptions) ( GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_set_tooltip_text( button, "Remove inner brush" );
 					gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( button ), TRUE );
 					gtk_widget_show( button );
@@ -1562,15 +1566,15 @@ void CSG_Tool(){
 					GtkWidget* sep = gtk_hseparator_new();
 					gtk_widget_show( sep );
 					gtk_table_attach( table, sep, 0, 8, 1, 2,
-									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									(GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
 					GtkWidget* button = gtk_button_new();
 					button_set_icon( GTK_BUTTON( button ), "csgtool_shrink.png" );
 					gtk_table_attach( table, button, 0, 1, 2, 3,
-									  (GtkAttachOptions) ( GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_set_tooltip_text( button, "Shrink brush" );
 					gtk_widget_show( button );
 					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_BrushShrink ), &g_csgtool_dialog );
@@ -1579,8 +1583,8 @@ void CSG_Tool(){
 					GtkWidget* button = gtk_button_new();
 					button_set_icon( GTK_BUTTON( button ), "csgtool_expand.png" );
 					gtk_table_attach( table, button, 1, 2, 2, 3,
-									  (GtkAttachOptions) ( GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_set_tooltip_text( button, "Expand brush" );
 					gtk_widget_show( button );
 					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_BrushExpand ), &g_csgtool_dialog );
@@ -1589,8 +1593,8 @@ void CSG_Tool(){
 					GtkWidget* button = gtk_button_new();
 					button_set_icon( GTK_BUTTON( button ), "csgtool_diagonal.png" );
 					gtk_table_attach( table, button, 3, 4, 2, 3,
-									  (GtkAttachOptions) ( GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_set_tooltip_text( button, "Hollow::diagonal joints" );
 					gtk_widget_show( button );
 					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowDiag ), &g_csgtool_dialog );
@@ -1599,8 +1603,8 @@ void CSG_Tool(){
 					GtkWidget* button = gtk_button_new();
 					button_set_icon( GTK_BUTTON( button ), "csgtool_wrap.png" );
 					gtk_table_attach( table, button, 4, 5, 2, 3,
-									  (GtkAttachOptions) ( GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_set_tooltip_text( button, "Hollow::wrap" );
 					gtk_widget_show( button );
 					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowWrap ), &g_csgtool_dialog );
@@ -1609,8 +1613,8 @@ void CSG_Tool(){
 					GtkWidget* button = gtk_button_new();
 					button_set_icon( GTK_BUTTON( button ), "csgtool_extrude.png" );
 					gtk_table_attach( table, button, 5, 6, 2, 3,
-									  (GtkAttachOptions) ( GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_set_tooltip_text( button, "Hollow::extrude faces" );
 					gtk_widget_show( button );
 					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowExtrude ), &g_csgtool_dialog );
@@ -1619,8 +1623,8 @@ void CSG_Tool(){
 					GtkWidget* button = gtk_button_new();
 					button_set_icon( GTK_BUTTON( button ), "csgtool_pull.png" );
 					gtk_table_attach( table, button, 6, 7, 2, 3,
-									  (GtkAttachOptions) ( GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_widget_set_tooltip_text( button, "Hollow::pull faces" );
 					gtk_widget_show( button );
 					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowPull ), &g_csgtool_dialog );

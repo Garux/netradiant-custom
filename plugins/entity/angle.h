@@ -59,24 +59,24 @@ inline void write_angle( float angle, Entity* entity ){
 
 class AngleKey
 {
-Callback m_angleChanged;
+	Callback m_angleChanged;
 public:
-float m_angle;
+	float m_angle;
 
 
-AngleKey( const Callback& angleChanged )
-	: m_angleChanged( angleChanged ), m_angle( ANGLEKEY_IDENTITY ){
-}
+	AngleKey( const Callback& angleChanged )
+		: m_angleChanged( angleChanged ), m_angle( ANGLEKEY_IDENTITY ){
+	}
 
-void angleChanged( const char* value ){
-	read_angle( m_angle, value );
-	m_angleChanged();
-}
-typedef MemberCaller1<AngleKey, const char*, &AngleKey::angleChanged> AngleChangedCaller;
+	void angleChanged( const char* value ){
+		read_angle( m_angle, value );
+		m_angleChanged();
+	}
+	typedef MemberCaller1<AngleKey, const char*, &AngleKey::angleChanged> AngleChangedCaller;
 
-void write( Entity* entity ) const {
-	write_angle( m_angle, entity );
-}
+	void write( Entity* entity ) const {
+		write_angle( m_angle, entity );
+	}
 };
 
 inline float float_snapped_to_zero( float value ){
@@ -85,13 +85,13 @@ inline float float_snapped_to_zero( float value ){
 
 inline float angle_rotated( float angle, const Quaternion& rotation ){
 	return float_snapped_to_zero(
-			matrix4_get_rotation_euler_xyz_degrees(
-				matrix4_multiplied_by_matrix4(
-					matrix4_rotation_for_quaternion_quantised( rotation ),
-					matrix4_rotation_for_z_degrees( angle )
-				)
-			).z()
-		);
+	           matrix4_get_rotation_euler_xyz_degrees(
+	               matrix4_multiplied_by_matrix4(
+	                   matrix4_rotation_for_quaternion_quantised( rotation ),
+	                   matrix4_rotation_for_z_degrees( angle )
+	               )
+	           ).z()
+	       );
 }
 
 #endif

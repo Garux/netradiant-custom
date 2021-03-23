@@ -107,22 +107,22 @@ void DPatch::BuildInRadiant( scene::Node* entity ){
 			CopyDrawVert( &points[x][y], &pm->ctrl[x][y] );
 
 /*	if(entity)
-    {
-   //		strcpy(pm->d_texture->name, texture);
+	{
+	//	strcpy(pm->d_texture->name, texture);
 
-        brush_t* brush = (brush_t*)g_FuncTable.m_pfnCreateBrushHandle();
-        brush->patchBrush = true;
-        brush->pPatch = pm;
+		brush_t* brush = (brush_t*)g_FuncTable.m_pfnCreateBrushHandle();
+		brush->patchBrush = true;
+		brush->pPatch = pm;
 
-        pm->pSymbiot = brush;
-        pm->bSelected = false;
-        pm->bOverlay = false;	// bleh, f*cks up, just have to wait for a proper function
-        pm->bDirty = true;		// or get my own patch out....
-        pm->nListID = -1;
+		pm->pSymbiot = brush;
+		pm->bSelected = false;
+		pm->bOverlay = false;	// bleh, f*cks up, just have to wait for a proper function
+		pm->bDirty = true;		// or get my own patch out....
+		pm->nListID = -1;
 
-        g_FuncTable.m_pfnCommitBrushHandleToEntity(brush, entity);
-    }
-    else*/                                                                                                                                                                                                                                                                                                                                                                                                                                                                // patch to entity just plain dont work atm
+		g_FuncTable.m_pfnCommitBrushHandleToEntity(brush, entity);
+	}
+	else*/              // patch to entity just plain dont work atm
 
 	if ( entity ) {
 		g_FuncTable.m_pfnCommitPatchHandleToEntity( nIndex, pm, texture, entity );
@@ -189,7 +189,7 @@ bool DPatch::ResetTextures( const char *oldTextureName, const char *newTextureNa
 }
 
 void Build1dArray( vec3_t* array, drawVert_t points[MAX_PATCH_WIDTH][MAX_PATCH_HEIGHT],
-				   int startX, int startY, int number, bool horizontal, bool inverse ){
+                   int startX, int startY, int number, bool horizontal, bool inverse ){
 	int x = startX, y = startY, i, step;
 
 	if ( inverse ) {

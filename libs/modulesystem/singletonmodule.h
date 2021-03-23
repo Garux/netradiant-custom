@@ -32,32 +32,32 @@ template<typename API, typename Dependencies>
 class DefaultAPIConstructor
 {
 public:
-const char* getName(){
-	return typename API::Name();
-}
+	const char* getName(){
+		return typename API::Name();
+	}
 
-API* constructAPI( Dependencies& dependencies ){
-	return new API;
-}
-void destroyAPI( API* api ){
-	delete api;
-}
+	API* constructAPI( Dependencies& dependencies ){
+		return new API;
+	}
+	void destroyAPI( API* api ){
+		delete api;
+	}
 };
 
 template<typename API, typename Dependencies>
 class DependenciesAPIConstructor
 {
 public:
-const char* getName(){
-	return typename API::Name();
-}
+	const char* getName(){
+		return typename API::Name();
+	}
 
-API* constructAPI( Dependencies& dependencies ){
-	return new API( dependencies );
-}
-void destroyAPI( API* api ){
-	delete api;
-}
+	API* constructAPI( Dependencies& dependencies ){
+		return new API( dependencies );
+	}
+	void destroyAPI( API* api ){
+		delete api;
+	}
 };
 
 class NullDependencies
@@ -68,63 +68,63 @@ class NullDependencies
 template<typename API, typename Dependencies = NullDependencies, typename APIConstructor = DefaultAPIConstructor<API, Dependencies> >
 class SingletonModule : public APIConstructor, public Module, public ModuleRegisterable
 {
-Dependencies* m_dependencies;
-API* m_api;
-std::size_t m_refcount;
-bool m_dependencyCheck;
-bool m_cycleCheck;
+	Dependencies* m_dependencies;
+	API* m_api;
+	std::size_t m_refcount;
+	bool m_dependencyCheck;
+	bool m_cycleCheck;
 public:
-typedef typename API::Type Type;
+	typedef typename API::Type Type;
 
-SingletonModule()
-	: m_dependencies( 0 ), m_api( 0 ), m_refcount( 0 ), m_dependencyCheck( false ), m_cycleCheck( false ){
-}
-explicit SingletonModule( const APIConstructor& constructor )
-	: APIConstructor( constructor ), m_dependencies( 0 ), m_api( 0 ), m_refcount( 0 ), m_dependencyCheck( false ), m_cycleCheck( false ){
-}
-~SingletonModule(){
-	ASSERT_MESSAGE( m_refcount == 0, "module still referenced at shutdown" );
-}
-
-void selfRegister(){
-	globalModuleServer().registerModule( typename Type::Name(), typename Type::Version(), APIConstructor::getName(), *this );
-}
-
-Dependencies& getDependencies(){
-	return *m_dependencies;
-}
-void* getTable(){
-	if ( m_api != 0 ) {
-		return m_api->getTable();
+	SingletonModule()
+		: m_dependencies( 0 ), m_api( 0 ), m_refcount( 0 ), m_dependencyCheck( false ), m_cycleCheck( false ){
 	}
-	return 0;
-}
-void capture(){
-	if ( ++m_refcount == 1 ) {
-		globalOutputStream() << "Module Initialising: '" << typename Type::Name() << "' '" << APIConstructor::getName() << "'\n";
-		m_dependencies = new Dependencies();
-		m_dependencyCheck = !globalModuleServer().getError();
-		if ( m_dependencyCheck ) {
-			m_api = APIConstructor::constructAPI( *m_dependencies );
-			globalOutputStream() << "Module Ready: '" << typename Type::Name() << "' '" << APIConstructor::getName() << "'\n";
-		}
-		else
-		{
-			globalErrorStream() << "Module Dependencies Failed: '" << typename Type::Name() << "' '" << APIConstructor::getName() << "'\n";
-		}
-		m_cycleCheck = true;
+	explicit SingletonModule( const APIConstructor& constructor )
+		: APIConstructor( constructor ), m_dependencies( 0 ), m_api( 0 ), m_refcount( 0 ), m_dependencyCheck( false ), m_cycleCheck( false ){
+	}
+	~SingletonModule(){
+		ASSERT_MESSAGE( m_refcount == 0, "module still referenced at shutdown" );
 	}
 
-	ASSERT_MESSAGE( m_cycleCheck, "cyclic dependency detected" );
-}
-void release(){
-	if ( --m_refcount == 0 ) {
-		if ( m_dependencyCheck ) {
-			APIConstructor::destroyAPI( m_api );
-		}
-		delete m_dependencies;
+	void selfRegister(){
+		globalModuleServer().registerModule( typename Type::Name(), typename Type::Version(), APIConstructor::getName(), *this );
 	}
-}
+
+	Dependencies& getDependencies(){
+		return *m_dependencies;
+	}
+	void* getTable(){
+		if ( m_api != 0 ) {
+			return m_api->getTable();
+		}
+		return 0;
+	}
+	void capture(){
+		if ( ++m_refcount == 1 ) {
+			globalOutputStream() << "Module Initialising: '" << typename Type::Name() << "' '" << APIConstructor::getName() << "'\n";
+			m_dependencies = new Dependencies();
+			m_dependencyCheck = !globalModuleServer().getError();
+			if ( m_dependencyCheck ) {
+				m_api = APIConstructor::constructAPI( *m_dependencies );
+				globalOutputStream() << "Module Ready: '" << typename Type::Name() << "' '" << APIConstructor::getName() << "'\n";
+			}
+			else
+			{
+				globalErrorStream() << "Module Dependencies Failed: '" << typename Type::Name() << "' '" << APIConstructor::getName() << "'\n";
+			}
+			m_cycleCheck = true;
+		}
+
+		ASSERT_MESSAGE( m_cycleCheck, "cyclic dependency detected" );
+	}
+	void release(){
+		if ( --m_refcount == 0 ) {
+			if ( m_dependencyCheck ) {
+				APIConstructor::destroyAPI( m_api );
+			}
+			delete m_dependencies;
+		}
+	}
 };
 
 

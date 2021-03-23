@@ -82,106 +82,106 @@
 
 class NameObserver
 {
-UniqueNames& m_names;
-CopiedString m_name;
+	UniqueNames& m_names;
+	CopiedString m_name;
 
-void construct(){
-	if ( !empty() ) {
-		//globalOutputStream() << "construct " << makeQuoted(c_str()) << "\n";
-		m_names.insert( name_read( c_str() ) );
+	void construct(){
+		if ( !empty() ) {
+			//globalOutputStream() << "construct " << makeQuoted(c_str()) << "\n";
+			m_names.insert( name_read( c_str() ) );
+		}
 	}
-}
-void destroy(){
-	if ( !empty() ) {
-		//globalOutputStream() << "destroy " << makeQuoted(c_str()) << "\n";
-		m_names.erase( name_read( c_str() ) );
+	void destroy(){
+		if ( !empty() ) {
+			//globalOutputStream() << "destroy " << makeQuoted(c_str()) << "\n";
+			m_names.erase( name_read( c_str() ) );
+		}
 	}
-}
 
-NameObserver& operator=( const NameObserver& other );
+	NameObserver& operator=( const NameObserver& other );
 public:
-NameObserver( UniqueNames& names ) : m_names( names ){
-	construct();
-}
-NameObserver( const NameObserver& other ) : m_names( other.m_names ), m_name( other.m_name ){
-	construct();
-}
-~NameObserver(){
-	destroy();
-}
-bool empty() const {
-	return string_empty( c_str() );
-}
-const char* c_str() const {
-	return m_name.c_str();
-}
-void nameChanged( const char* name ){
-	destroy();
-	m_name = name;
-	construct();
-}
-typedef MemberCaller1<NameObserver, const char*, &NameObserver::nameChanged> NameChangedCaller;
+	NameObserver( UniqueNames& names ) : m_names( names ){
+		construct();
+	}
+	NameObserver( const NameObserver& other ) : m_names( other.m_names ), m_name( other.m_name ){
+		construct();
+	}
+	~NameObserver(){
+		destroy();
+	}
+	bool empty() const {
+		return string_empty( c_str() );
+	}
+	const char* c_str() const {
+		return m_name.c_str();
+	}
+	void nameChanged( const char* name ){
+		destroy();
+		m_name = name;
+		construct();
+	}
+	typedef MemberCaller1<NameObserver, const char*, &NameObserver::nameChanged> NameChangedCaller;
 };
 
 class BasicNamespace : public Namespace
 {
-typedef std::map<NameCallback, NameObserver> Names;
-Names m_names;
-UniqueNames m_uniqueNames;
+	typedef std::map<NameCallback, NameObserver> Names;
+	Names m_names;
+	UniqueNames m_uniqueNames;
 public:
-~BasicNamespace(){
-	ASSERT_MESSAGE( m_names.empty(), "namespace: names still registered at shutdown" );
-}
-void attach( const NameCallback& setName, const NameCallbackCallback& attachObserver ){
-	std::pair<Names::iterator, bool> result = m_names.insert( Names::value_type( setName, m_uniqueNames ) );
-	ASSERT_MESSAGE( result.second, "cannot attach name" );
-	attachObserver( NameObserver::NameChangedCaller( ( *result.first ).second ) );
-	//globalOutputStream() << "attach: " << reinterpret_cast<const unsigned int&>(setName) << "\n";
-}
-void detach( const NameCallback& setName, const NameCallbackCallback& detachObserver ){
-	Names::iterator i = m_names.find( setName );
-	ASSERT_MESSAGE( i != m_names.end(), "cannot detach name" );
-	//globalOutputStream() << "detach: " << reinterpret_cast<const unsigned int&>(setName) << "\n";
-	detachObserver( NameObserver::NameChangedCaller( ( *i ).second ) );
-	m_names.erase( i );
-}
-
-void makeUnique( const char* name, const NameCallback& setName ) const {
-	char buffer[1024];
-	name_write( buffer, m_uniqueNames.make_unique( name_read( name ) ) );
-	setName( buffer );
-}
-
-void mergeNames( const BasicNamespace& other ) const {
-	typedef std::list<NameCallback> SetNameCallbacks;
-	typedef std::map<CopiedString, SetNameCallbacks> NameGroups;
-	NameGroups groups;
-
-	UniqueNames uniqueNames( other.m_uniqueNames );
-
-	for ( Names::const_iterator i = m_names.begin(); i != m_names.end(); ++i )
-	{
-		groups[( *i ).second.c_str()].push_back( ( *i ).first );
+	~BasicNamespace(){
+		ASSERT_MESSAGE( m_names.empty(), "namespace: names still registered at shutdown" );
+	}
+	void attach( const NameCallback& setName, const NameCallbackCallback& attachObserver ){
+		std::pair<Names::iterator, bool> result = m_names.insert( Names::value_type( setName, m_uniqueNames ) );
+		ASSERT_MESSAGE( result.second, "cannot attach name" );
+		attachObserver( NameObserver::NameChangedCaller( ( *result.first ).second ) );
+		//globalOutputStream() << "attach: " << reinterpret_cast<const unsigned int&>(setName) << "\n";
+	}
+	void detach( const NameCallback& setName, const NameCallbackCallback& detachObserver ){
+		Names::iterator i = m_names.find( setName );
+		ASSERT_MESSAGE( i != m_names.end(), "cannot detach name" );
+		//globalOutputStream() << "detach: " << reinterpret_cast<const unsigned int&>(setName) << "\n";
+		detachObserver( NameObserver::NameChangedCaller( ( *i ).second ) );
+		m_names.erase( i );
 	}
 
-	for ( NameGroups::iterator i = groups.begin(); i != groups.end(); ++i )
-	{
-		name_t uniqueName( uniqueNames.make_unique( name_read( ( *i ).first.c_str() ) ) );
-		uniqueNames.insert( uniqueName );
-
+	void makeUnique( const char* name, const NameCallback& setName ) const {
 		char buffer[1024];
-		name_write( buffer, uniqueName );
+		name_write( buffer, m_uniqueNames.make_unique( name_read( name ) ) );
+		setName( buffer );
+	}
 
-		//globalOutputStream() << "renaming " << makeQuoted((*i).first.c_str()) << " to " << makeQuoted(buffer) << "\n";
+	void mergeNames( const BasicNamespace& other ) const {
+		typedef std::list<NameCallback> SetNameCallbacks;
+		typedef std::map<CopiedString, SetNameCallbacks> NameGroups;
+		NameGroups groups;
 
-		SetNameCallbacks& setNameCallbacks = ( *i ).second;
+		UniqueNames uniqueNames( other.m_uniqueNames );
 
-		for ( SetNameCallbacks::const_iterator j = setNameCallbacks.begin(); j != setNameCallbacks.end(); ++j )
+		for ( Names::const_iterator i = m_names.begin(); i != m_names.end(); ++i )
 		{
-			( *j )( buffer );
+			groups[( *i ).second.c_str()].push_back( ( *i ).first );
+		}
+
+		for ( NameGroups::iterator i = groups.begin(); i != groups.end(); ++i )
+		{
+			name_t uniqueName( uniqueNames.make_unique( name_read( ( *i ).first.c_str() ) ) );
+			uniqueNames.insert( uniqueName );
+
+			char buffer[1024];
+			name_write( buffer, uniqueName );
+
+			//globalOutputStream() << "renaming " << makeQuoted((*i).first.c_str()) << " to " << makeQuoted(buffer) << "\n";
+
+			SetNameCallbacks& setNameCallbacks = ( *i ).second;
+
+			for ( SetNameCallbacks::const_iterator j = setNameCallbacks.begin(); j != setNameCallbacks.end(); ++j )
+			{
+				( *j )( buffer );
+			}
 		}
 	}
-}
 };
 
 BasicNamespace g_defaultNamespace;
@@ -189,17 +189,17 @@ BasicNamespace g_cloneNamespace;
 
 class NamespaceAPI
 {
-Namespace* m_namespace;
+	Namespace* m_namespace;
 public:
-typedef Namespace Type;
-STRING_CONSTANT( Name, "*" );
+	typedef Namespace Type;
+	STRING_CONSTANT( Name, "*" );
 
-NamespaceAPI(){
-	m_namespace = &g_defaultNamespace;
-}
-Namespace* getTable(){
-	return m_namespace;
-}
+	NamespaceAPI(){
+		m_namespace = &g_defaultNamespace;
+	}
+	Namespace* getTable(){
+		return m_namespace;
+	}
 };
 
 typedef SingletonModule<NamespaceAPI> NamespaceModule;
@@ -223,10 +223,10 @@ void Node_gatherNamespaced( scene::Node& node ){
 class GatherNamespaced : public scene::Traversable::Walker
 {
 public:
-bool pre( scene::Node& node ) const {
-	Node_gatherNamespaced( node );
-	return true;
-}
+	bool pre( scene::Node& node ) const {
+		Node_gatherNamespaced( node );
+		return true;
+	}
 };
 
 void Map_gatherNamespaced( scene::Node& root ){
@@ -251,23 +251,23 @@ void Map_mergeClonedNames( bool makeUnique /*= true*/ ){
 
 class WorldNode
 {
-scene::Node* m_node;
+	scene::Node* m_node;
 public:
-WorldNode()
-	: m_node( 0 ){
-}
-void set( scene::Node* node ){
-	if ( m_node != 0 ) {
-		m_node->DecRef();
+	WorldNode()
+		: m_node( 0 ){
 	}
-	m_node = node;
-	if ( m_node != 0 ) {
-		m_node->IncRef();
+	void set( scene::Node* node ){
+		if ( m_node != 0 ) {
+			m_node->DecRef();
+		}
+		m_node = node;
+		if ( m_node != 0 ) {
+			m_node->IncRef();
+		}
 	}
-}
-scene::Node* get() const {
-	return m_node;
-}
+	scene::Node* get() const {
+		return m_node;
+	}
 };
 
 class Map;
@@ -279,52 +279,52 @@ void Map_SetWorldspawn( Map& map, scene::Node* node );
 class Map : public ModuleObserver
 {
 public:
-CopiedString m_name;
-Resource* m_resource;
-bool m_valid;
+	CopiedString m_name;
+	Resource* m_resource;
+	bool m_valid;
 
-bool m_modified;
-void ( *m_modified_changed )( const Map& );
+	bool m_modified;
+	void ( *m_modified_changed )( const Map& );
 
-Signal0 m_mapValidCallbacks;
+	Signal0 m_mapValidCallbacks;
 
-WorldNode m_world_node;   // "classname" "worldspawn" !
+	WorldNode m_world_node;   // "classname" "worldspawn" !
 
-Map() : m_resource( 0 ), m_valid( false ), m_modified_changed( Map_UpdateTitle ){
-}
+	Map() : m_resource( 0 ), m_valid( false ), m_modified_changed( Map_UpdateTitle ){
+	}
 
-void realise(){
-	if ( m_resource != 0 ) {
-		if ( Map_Unnamed( *this ) ) {
-			g_map.m_resource->setNode( NewMapRoot( "" ).get_pointer() );
-			MapFile* map = Node_getMapFile( *g_map.m_resource->getNode() );
-			if ( map != 0 ) {
-				map->save();
+	void realise(){
+		if ( m_resource != 0 ) {
+			if ( Map_Unnamed( *this ) ) {
+				g_map.m_resource->setNode( NewMapRoot( "" ).get_pointer() );
+				MapFile* map = Node_getMapFile( *g_map.m_resource->getNode() );
+				if ( map != 0 ) {
+					map->save();
+				}
 			}
+			else
+			{
+				m_resource->load();
+			}
+
+			GlobalSceneGraph().insert_root( *m_resource->getNode() );
+
+			AutoSave_clear();
+
+			Map_SetValid( g_map, true );
 		}
-		else
-		{
-			m_resource->load();
+	}
+	void unrealise(){
+		if ( m_resource != 0 ) {
+			Map_SetValid( g_map, false );
+			Map_SetWorldspawn( g_map, 0 );
+
+
+			GlobalUndoSystem().clear();
+
+			GlobalSceneGraph().erase_root();
 		}
-
-		GlobalSceneGraph().insert_root( *m_resource->getNode() );
-
-		AutoSave_clear();
-
-		Map_SetValid( g_map, true );
 	}
-}
-void unrealise(){
-	if ( m_resource != 0 ) {
-		Map_SetValid( g_map, false );
-		Map_SetWorldspawn( g_map, 0 );
-
-
-		GlobalUndoSystem().clear();
-
-		GlobalSceneGraph().erase_root();
-	}
-}
 };
 
 Map g_map;
@@ -422,22 +422,22 @@ void Map_Free(){
 
 class EntityFindByClassname : public scene::Graph::Walker
 {
-const char* m_name;
-Entity*& m_entity;
+	const char* m_name;
+	Entity*& m_entity;
 public:
-EntityFindByClassname( const char* name, Entity*& entity ) : m_name( name ), m_entity( entity ){
-	m_entity = 0;
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( m_entity == 0 ) {
-		Entity* entity = Node_getEntity( path.top() );
-		if ( entity != 0
-			 && string_equal( m_name, entity->getKeyValue( "classname" ) ) ) {
-			m_entity = entity;
-		}
+	EntityFindByClassname( const char* name, Entity*& entity ) : m_name( name ), m_entity( entity ){
+		m_entity = 0;
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( m_entity == 0 ) {
+			Entity* entity = Node_getEntity( path.top() );
+			if ( entity != 0
+			  && string_equal( m_name, entity->getKeyValue( "classname" ) ) ) {
+				m_entity = entity;
+			}
+		}
+		return true;
+	}
 };
 
 Entity* Scene_FindEntityByClass( const char* name ){
@@ -512,14 +512,14 @@ inline bool node_is_worldspawn( scene::Node& node ){
 class entity_updateworldspawn : public scene::Traversable::Walker
 {
 public:
-bool pre( scene::Node& node ) const {
-	if ( node_is_worldspawn( node ) ) {
-		if ( Map_GetWorldspawn( g_map ) == 0 ) {
-			Map_SetWorldspawn( g_map, &node );
+	bool pre( scene::Node& node ) const {
+		if ( node_is_worldspawn( node ) ) {
+			if ( Map_GetWorldspawn( g_map ) == 0 ) {
+				Map_SetWorldspawn( g_map, &node );
+			}
 		}
+		return false;
 	}
-	return false;
-}
 };
 
 scene::Node* Map_FindWorldspawn( Map& map ){
@@ -533,16 +533,16 @@ scene::Node* Map_FindWorldspawn( Map& map ){
 
 class CollectAllWalker : public scene::Traversable::Walker
 {
-scene::Node& m_root;
-UnsortedNodeSet& m_nodes;
+	scene::Node& m_root;
+	UnsortedNodeSet& m_nodes;
 public:
-CollectAllWalker( scene::Node& root, UnsortedNodeSet& nodes ) : m_root( root ), m_nodes( nodes ){
-}
-bool pre( scene::Node& node ) const {
-	m_nodes.insert( NodeSmartReference( node ) );
-	Node_getTraversable( m_root )->erase( node );
-	return false;
-}
+	CollectAllWalker( scene::Node& root, UnsortedNodeSet& nodes ) : m_root( root ), m_nodes( nodes ){
+	}
+	bool pre( scene::Node& node ) const {
+		m_nodes.insert( NodeSmartReference( node ) );
+		Node_getTraversable( m_root )->erase( node );
+		return false;
+	}
 };
 
 void Node_insertChildFirst( scene::Node& parent, scene::Node& child ){
@@ -576,95 +576,95 @@ scene::Node& Map_FindOrInsertWorldspawn( Map& map ){
 
 class MapMergeAll : public scene::Traversable::Walker
 {
-mutable scene::Path m_path;
+	mutable scene::Path m_path;
 public:
-MapMergeAll( const scene::Path& root )
-	: m_path( root ){
-}
-bool pre( scene::Node& node ) const {
-	Node_getTraversable( m_path.top() )->insert( node );
-	m_path.push( makeReference( node ) );
-	selectPath( m_path, true );
-	return false;
-}
-void post( scene::Node& node ) const {
-	m_path.pop();
-}
+	MapMergeAll( const scene::Path& root )
+		: m_path( root ){
+	}
+	bool pre( scene::Node& node ) const {
+		Node_getTraversable( m_path.top() )->insert( node );
+		m_path.push( makeReference( node ) );
+		selectPath( m_path, true );
+		return false;
+	}
+	void post( scene::Node& node ) const {
+		m_path.pop();
+	}
 };
 
 class MapMergeEntities : public scene::Traversable::Walker
 {
-mutable scene::Path m_path;
+	mutable scene::Path m_path;
 public:
-MapMergeEntities( const scene::Path& root )
-	: m_path( root ){
-}
-bool pre( scene::Node& node ) const {
-	if ( node_is_worldspawn( node ) ) {
-		scene::Node* world_node = Map_FindWorldspawn( g_map );
-		if ( world_node == 0 ) {
-			Map_SetWorldspawn( g_map, &node );
-			Node_getTraversable( m_path.top().get() )->insert( node );
+	MapMergeEntities( const scene::Path& root )
+		: m_path( root ){
+	}
+	bool pre( scene::Node& node ) const {
+		if ( node_is_worldspawn( node ) ) {
+			scene::Node* world_node = Map_FindWorldspawn( g_map );
+			if ( world_node == 0 ) {
+				Map_SetWorldspawn( g_map, &node );
+				Node_getTraversable( m_path.top().get() )->insert( node );
+				m_path.push( makeReference( node ) );
+				Node_getTraversable( node )->traverse( SelectChildren( m_path ) );
+			}
+			else
+			{
+				m_path.push( makeReference( *world_node ) );
+				Node_getTraversable( node )->traverse( MapMergeAll( m_path ) );
+			}
+		}
+		else
+		{
+			Node_getTraversable( m_path.top() )->insert( node );
 			m_path.push( makeReference( node ) );
-			Node_getTraversable( node )->traverse( SelectChildren( m_path ) );
+			if ( node_is_group( node ) ) {
+				Node_getTraversable( node )->traverse( SelectChildren( m_path ) );
+			}
+			else
+			{
+				selectPath( m_path, true );
+			}
 		}
-		else
-		{
-			m_path.push( makeReference( *world_node ) );
-			Node_getTraversable( node )->traverse( MapMergeAll( m_path ) );
-		}
+		return false;
 	}
-	else
-	{
-		Node_getTraversable( m_path.top() )->insert( node );
-		m_path.push( makeReference( node ) );
-		if ( node_is_group( node ) ) {
-			Node_getTraversable( node )->traverse( SelectChildren( m_path ) );
-		}
-		else
-		{
-			selectPath( m_path, true );
-		}
+	void post( scene::Node& node ) const {
+		m_path.pop();
 	}
-	return false;
-}
-void post( scene::Node& node ) const {
-	m_path.pop();
-}
 };
 
 class BasicContainer : public scene::Node::Symbiot
 {
-class TypeCasts
-{
-NodeTypeCastTable m_casts;
+	class TypeCasts
+	{
+		NodeTypeCastTable m_casts;
+	public:
+		TypeCasts(){
+			NodeContainedCast<BasicContainer, scene::Traversable>::install( m_casts );
+		}
+		NodeTypeCastTable& get(){
+			return m_casts;
+		}
+	};
+
+	scene::Node m_node;
+	TraversableNodeSet m_traverse;
 public:
-TypeCasts(){
-	NodeContainedCast<BasicContainer, scene::Traversable>::install( m_casts );
-}
-NodeTypeCastTable& get(){
-	return m_casts;
-}
-};
 
-scene::Node m_node;
-TraversableNodeSet m_traverse;
-public:
+	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-typedef LazyStatic<TypeCasts> StaticTypeCasts;
+	scene::Traversable& get( NullType<scene::Traversable>){
+		return m_traverse;
+	}
 
-scene::Traversable& get( NullType<scene::Traversable>){
-	return m_traverse;
-}
-
-BasicContainer() : m_node( this, this, StaticTypeCasts::instance().get() ){
-}
-void release(){
-	delete this;
-}
-scene::Node& node(){
-	return m_node;
-}
+	BasicContainer() : m_node( this, this, StaticTypeCasts::instance().get() ){
+	}
+	void release(){
+		delete this;
+	}
+	scene::Node& node(){
+		return m_node;
+	}
 };
 
 /// Merges the map graph rooted at \p node into the global scene-graph.
@@ -733,31 +733,31 @@ inline scene::Node& node_clone( scene::Node& node ){
 
 class CloneAll : public scene::Traversable::Walker
 {
-mutable scene::Path m_path;
+	mutable scene::Path m_path;
 public:
-CloneAll( scene::Node& root )
-	: m_path( makeReference( root ) ){
-}
-bool pre( scene::Node& node ) const {
-	if ( node.isRoot() ) {
-		return false;
+	CloneAll( scene::Node& root )
+		: m_path( makeReference( root ) ){
 	}
+	bool pre( scene::Node& node ) const {
+		if ( node.isRoot() ) {
+			return false;
+		}
 
-	m_path.push( makeReference( node_clone( node ) ) );
-	m_path.top().get().IncRef();
+		m_path.push( makeReference( node_clone( node ) ) );
+		m_path.top().get().IncRef();
 
-	return true;
-}
-void post( scene::Node& node ) const {
-	if ( node.isRoot() ) {
-		return;
+		return true;
 	}
+	void post( scene::Node& node ) const {
+		if ( node.isRoot() ) {
+			return;
+		}
 
-	Node_getTraversable( m_path.parent() )->insert( m_path.top() );
+		Node_getTraversable( m_path.parent() )->insert( m_path.top() );
 
-	m_path.top().get().DecRef();
-	m_path.pop();
-}
+		m_path.top().get().DecRef();
+		m_path.pop();
+	}
 };
 
 scene::Node& Node_Clone( scene::Node& node ){
@@ -773,35 +773,35 @@ bool Node_instanceSelected( scene::Node& node );
 
 class CloneAllSelected : public scene::Traversable::Walker
 {
-mutable scene::Path m_path;
+	mutable scene::Path m_path;
 public:
-CloneAllSelected( scene::Node& root )
-	: m_path( makeReference( root ) ){
-}
-bool pre( scene::Node& node ) const {
-	if ( node.isRoot() ) {
-		return false;
+	CloneAllSelected( scene::Node& root )
+		: m_path( makeReference( root ) ){
 	}
+	bool pre( scene::Node& node ) const {
+		if ( node.isRoot() ) {
+			return false;
+		}
 
-	if( Node_instanceSelected( node ) ){
-		m_path.push( makeReference( node_clone( node ) ) );
-		m_path.top().get().IncRef();
+		if( Node_instanceSelected( node ) ){
+			m_path.push( makeReference( node_clone( node ) ) );
+			m_path.top().get().IncRef();
+		}
+
+		return true;
 	}
+	void post( scene::Node& node ) const {
+		if ( node.isRoot() ) {
+			return;
+		}
 
-	return true;
-}
-void post( scene::Node& node ) const {
-	if ( node.isRoot() ) {
-		return;
+		if( Node_instanceSelected( node ) ){
+			Node_getTraversable( m_path.parent() )->insert( m_path.top() );
+
+			m_path.top().get().DecRef();
+			m_path.pop();
+		}
 	}
-
-	if( Node_instanceSelected( node ) ){
-		Node_getTraversable( m_path.parent() )->insert( m_path.top() );
-
-		m_path.top().get().DecRef();
-		m_path.pop();
-	}
-}
 };
 
 scene::Node& Node_Clone_Selected( scene::Node& node ){
@@ -818,22 +818,24 @@ typedef std::map<CopiedString, std::size_t> EntityBreakdown;
 
 class EntityBreakdownWalker : public scene::Graph::Walker
 {
-EntityBreakdown& m_entitymap;
+	EntityBreakdown& m_entitymap;
 public:
-EntityBreakdownWalker( EntityBreakdown& entitymap )
-	: m_entitymap( entitymap ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0 ) {
-		const EntityClass& eclass = entity->getEntityClass();
-		if ( m_entitymap.find( eclass.name() ) == m_entitymap.end() ) {
-			m_entitymap[eclass.name()] = 1;
-		}
-		else{ ++m_entitymap[eclass.name()]; }
+	EntityBreakdownWalker( EntityBreakdown& entitymap )
+		: m_entitymap( entitymap ){
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 ) {
+			const EntityClass& eclass = entity->getEntityClass();
+			if ( m_entitymap.find( eclass.name() ) == m_entitymap.end() ) {
+				m_entitymap[eclass.name()] = 1;
+			}
+			else{
+				++m_entitymap[eclass.name()];
+			}
+		}
+		return true;
+	}
 };
 
 void Scene_EntityBreakdown( EntityBreakdown& entitymap ){
@@ -842,33 +844,33 @@ void Scene_EntityBreakdown( EntityBreakdown& entitymap ){
 
 class CountStuffWalker : public scene::Graph::Walker
 {
-int& m_ents_ingame;
-int& m_groupents;
-int& m_groupents_ingame;
+	int& m_ents_ingame;
+	int& m_groupents;
+	int& m_groupents_ingame;
 public:
-CountStuffWalker( int& ents_ingame, int& groupents, int& groupents_ingame )
-	: m_ents_ingame( ents_ingame ), m_groupents( groupents ), m_groupents_ingame( groupents_ingame ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0 ){
-		if( entity->isContainer() ){
-			++m_groupents;
-			if( !string_equal_nocase( "func_group", entity->getKeyValue( "classname" ) ) &&
-				!string_equal_nocase( "_decal", entity->getKeyValue( "classname" ) ) &&
-				!string_equal_nocase_n( "func_detail", entity->getKeyValue( "classname" ), 11 ) ){
-				++m_groupents_ingame;
+	CountStuffWalker( int& ents_ingame, int& groupents, int& groupents_ingame )
+		: m_ents_ingame( ents_ingame ), m_groupents( groupents ), m_groupents_ingame( groupents_ingame ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 ){
+			if( entity->isContainer() ){
+				++m_groupents;
+				if( !string_equal_nocase( "func_group", entity->getKeyValue( "classname" ) ) &&
+				    !string_equal_nocase( "_decal", entity->getKeyValue( "classname" ) ) &&
+				    !string_equal_nocase_n( "func_detail", entity->getKeyValue( "classname" ), 11 ) ){
+					++m_groupents_ingame;
+					++m_ents_ingame;
+				}
+				return true;
+			}
+			if( !string_equal_nocase_n( "light", entity->getKeyValue( "classname" ), 5 ) &&
+			    !string_equal_nocase( "misc_model", entity->getKeyValue( "classname" ) ) ){
 				++m_ents_ingame;
 			}
-			return true;
 		}
-		if( !string_equal_nocase_n( "light", entity->getKeyValue( "classname" ), 5 ) &&
-			!string_equal_nocase( "misc_model", entity->getKeyValue( "classname" ) ) ){
-			++m_ents_ingame;
-		}
+		return true;
 	}
-	return true;
-}
 };
 
 void Scene_CountStuff( int& ents_ingame, int& groupents, int& groupents_ingame ){
@@ -908,16 +910,16 @@ void DoMapInfo(){
 					GtkWidget* label = gtk_label_new( "Total Brushes:" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 0, 1,
-									  (GtkAttachOptions) ( GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 				}
 				{
 					GtkWidget* label = gtk_label_new( "" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 1, 2, 0, 1,
-									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 3, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 3, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 					w_brushes = label;
 				}
@@ -925,16 +927,16 @@ void DoMapInfo(){
 					GtkWidget* label = gtk_label_new( "Total Patches:" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 0, 1,
-									  (GtkAttachOptions) ( GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 				}
 				{
 					GtkWidget* label = gtk_label_new( "" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 3, 4, 0, 1,
-									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 3, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 3, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 					w_patches = label;
 				}
@@ -942,16 +944,16 @@ void DoMapInfo(){
 					GtkWidget* label = gtk_label_new( "Total Entities:" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 1, 2,
-									  (GtkAttachOptions) ( GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 				}
 				{
 					GtkWidget* label = gtk_label_new( "" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 1, 2, 1, 2,
-									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 3, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 3, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 					w_ents = label;
 				}
@@ -959,16 +961,16 @@ void DoMapInfo(){
 					GtkWidget* label = gtk_label_new( "Ingame Entities:" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 1, 2,
-									  (GtkAttachOptions) ( GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 				}
 				{
 					GtkWidget* label = gtk_label_new( "" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 3, 4, 1, 2,
-									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 3, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 3, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 					w_ents_ingame = label;
 				}
@@ -976,16 +978,16 @@ void DoMapInfo(){
 					GtkWidget* label = gtk_label_new( "Group Entities:" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 2, 3,
-									  (GtkAttachOptions) ( GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 				}
 				{
 					GtkWidget* label = gtk_label_new( "" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 1, 2, 2, 3,
-									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 3, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 3, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 					w_groupents = label;
 				}
@@ -993,16 +995,16 @@ void DoMapInfo(){
 					GtkWidget* label = gtk_label_new( "Ingame Group Entities:" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 2, 3,
-									  (GtkAttachOptions) ( GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 				}
 				{
 					GtkWidget* label = gtk_label_new( "" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 3, 4, 2, 3,
-									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 3, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 3, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 					w_groupents_ingame = label;
 				}
@@ -1121,17 +1123,17 @@ void DoMapInfo(){
 
 class ScopeTimer
 {
-Timer m_timer;
-const char* m_message;
+	Timer m_timer;
+	const char* m_message;
 public:
-ScopeTimer( const char* message )
-	: m_message( message ){
-	m_timer.start();
-}
-~ScopeTimer(){
-	double elapsed_time = m_timer.elapsed_msec() / 1000.f;
-	globalOutputStream() << m_message << " timer: " << FloatFormat( elapsed_time, 5, 2 ) << " second(s) elapsed\n";
-}
+	ScopeTimer( const char* message )
+		: m_message( message ){
+		m_timer.start();
+	}
+	~ScopeTimer(){
+		double elapsed_time = m_timer.elapsed_msec() / 1000.f;
+		globalOutputStream() << m_message << " timer: " << FloatFormat( elapsed_time, 5, 2 ) << " second(s) elapsed\n";
+	}
 };
 
 /*
@@ -1172,52 +1174,52 @@ void Map_LoadFile( const char *filename ){
 class Excluder
 {
 public:
-virtual bool excluded( scene::Node& node ) const = 0;
+	virtual bool excluded( scene::Node& node ) const = 0;
 };
 
 class ExcludeWalker : public scene::Traversable::Walker
 {
-const scene::Traversable::Walker& m_walker;
-const Excluder* m_exclude;
-mutable bool m_skip;
+	const scene::Traversable::Walker& m_walker;
+	const Excluder* m_exclude;
+	mutable bool m_skip;
 public:
-ExcludeWalker( const scene::Traversable::Walker& walker, const Excluder& exclude )
-	: m_walker( walker ), m_exclude( &exclude ), m_skip( false ){
-}
-bool pre( scene::Node& node ) const {
-	if ( m_exclude->excluded( node ) || node.isRoot() ) {
-		m_skip = true;
-		return false;
+	ExcludeWalker( const scene::Traversable::Walker& walker, const Excluder& exclude )
+		: m_walker( walker ), m_exclude( &exclude ), m_skip( false ){
 	}
-	else
-	{
-		m_walker.pre( node );
+	bool pre( scene::Node& node ) const {
+		if ( m_exclude->excluded( node ) || node.isRoot() ) {
+			m_skip = true;
+			return false;
+		}
+		else
+		{
+			m_walker.pre( node );
+		}
+		return true;
 	}
-	return true;
-}
-void post( scene::Node& node ) const {
-	if ( m_skip ) {
-		m_skip = false;
+	void post( scene::Node& node ) const {
+		if ( m_skip ) {
+			m_skip = false;
+		}
+		else
+		{
+			m_walker.post( node );
+		}
 	}
-	else
-	{
-		m_walker.post( node );
-	}
-}
 };
 
 class AnyInstanceSelected : public scene::Instantiable::Visitor
 {
-bool& m_selected;
+	bool& m_selected;
 public:
-AnyInstanceSelected( bool& selected ) : m_selected( selected ){
-	m_selected = false;
-}
-void visit( scene::Instance& instance ) const {
-	if ( Instance_isSelected( instance ) ) {
-		m_selected = true;
+	AnyInstanceSelected( bool& selected ) : m_selected( selected ){
+		m_selected = false;
 	}
-}
+	void visit( scene::Instance& instance ) const {
+		if ( Instance_isSelected( instance ) ) {
+			m_selected = true;
+		}
+	}
 };
 
 bool Node_instanceSelected( scene::Node& node ){
@@ -1230,23 +1232,23 @@ bool Node_instanceSelected( scene::Node& node ){
 
 class SelectedDescendantWalker : public scene::Traversable::Walker
 {
-bool& m_selected;
+	bool& m_selected;
 public:
-SelectedDescendantWalker( bool& selected ) : m_selected( selected ){
-	m_selected = false;
-}
-
-bool pre( scene::Node& node ) const {
-	if ( node.isRoot() ) {
-		return false;
+	SelectedDescendantWalker( bool& selected ) : m_selected( selected ){
+		m_selected = false;
 	}
 
-	if ( Node_instanceSelected( node ) ) {
-		m_selected = true;
-	}
+	bool pre( scene::Node& node ) const {
+		if ( node.isRoot() ) {
+			return false;
+		}
 
-	return true;
-}
+		if ( Node_instanceSelected( node ) ) {
+			m_selected = true;
+		}
+
+		return true;
+	}
 };
 
 bool Node_selectedDescendant( scene::Node& node ){
@@ -1258,52 +1260,52 @@ bool Node_selectedDescendant( scene::Node& node ){
 class SelectionExcluder : public Excluder
 {
 public:
-bool excluded( scene::Node& node ) const {
-	return !Node_selectedDescendant( node );
-}
+	bool excluded( scene::Node& node ) const {
+		return !Node_selectedDescendant( node );
+	}
 };
 
 class IncludeSelectedWalker : public scene::Traversable::Walker
 {
-const scene::Traversable::Walker& m_walker;
-mutable std::size_t m_selected;
-mutable bool m_skip;
+	const scene::Traversable::Walker& m_walker;
+	mutable std::size_t m_selected;
+	mutable bool m_skip;
 
-bool selectedParent() const {
-	return m_selected != 0;
-}
+	bool selectedParent() const {
+		return m_selected != 0;
+	}
 public:
-IncludeSelectedWalker( const scene::Traversable::Walker& walker )
-	: m_walker( walker ), m_selected( 0 ), m_skip( false ){
-}
-bool pre( scene::Node& node ) const {
-	// include node if:
-	// node is not a 'root' AND ( node is selected OR any child of node is selected OR any parent of node is selected )
-	if ( !node.isRoot() && ( Node_selectedDescendant( node ) || selectedParent() ) ) {
-		if ( Node_instanceSelected( node ) ) {
-			++m_selected;
+	IncludeSelectedWalker( const scene::Traversable::Walker& walker )
+		: m_walker( walker ), m_selected( 0 ), m_skip( false ){
+	}
+	bool pre( scene::Node& node ) const {
+		// include node if:
+		// node is not a 'root' AND ( node is selected OR any child of node is selected OR any parent of node is selected )
+		if ( !node.isRoot() && ( Node_selectedDescendant( node ) || selectedParent() ) ) {
+			if ( Node_instanceSelected( node ) ) {
+				++m_selected;
+			}
+			m_walker.pre( node );
+			return true;
 		}
-		m_walker.pre( node );
-		return true;
-	}
-	else
-	{
-		m_skip = true;
-		return false;
-	}
-}
-void post( scene::Node& node ) const {
-	if ( m_skip ) {
-		m_skip = false;
-	}
-	else
-	{
-		if ( Node_instanceSelected( node ) ) {
-			--m_selected;
+		else
+		{
+			m_skip = true;
+			return false;
 		}
-		m_walker.post( node );
 	}
-}
+	void post( scene::Node& node ) const {
+		if ( m_skip ) {
+			m_skip = false;
+		}
+		else
+		{
+			if ( Node_instanceSelected( node ) ) {
+				--m_selected;
+			}
+			m_walker.post( node );
+		}
+	}
 };
 
 void Map_Traverse_Selected( scene::Node& root, const scene::Traversable::Walker& walker ){
@@ -1331,9 +1333,9 @@ void Map_Traverse( scene::Node& root, const scene::Traversable::Walker& walker )
 class RegionExcluder : public Excluder
 {
 public:
-bool excluded( scene::Node& node ) const {
-	return node.excluded();
-}
+	bool excluded( scene::Node& node ) const {
+		return node.excluded();
+	}
 };
 
 void Map_Traverse_Region( scene::Node& root, const scene::Traversable::Walker& walker ){
@@ -1515,16 +1517,16 @@ inline void exclude_node( scene::Node& node, bool exclude ){
 
 class ExcludeAllWalker : public scene::Graph::Walker
 {
-bool m_exclude;
+	bool m_exclude;
 public:
-ExcludeAllWalker( bool exclude )
-	: m_exclude( exclude ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	exclude_node( path.top(), m_exclude );
+	ExcludeAllWalker( bool exclude )
+		: m_exclude( exclude ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		exclude_node( path.top(), m_exclude );
 
-	return true;
-}
+		return true;
+	}
 };
 
 void Scene_Exclude_All( bool exclude ){
@@ -1533,16 +1535,16 @@ void Scene_Exclude_All( bool exclude ){
 
 class ExcludeSelectedWalker : public scene::Graph::Walker
 {
-bool m_exclude;
+	bool m_exclude;
 public:
-ExcludeSelectedWalker( bool exclude )
-	: m_exclude( exclude ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if( !path.top().get().isRoot() ) /* don't touch model node: disabling one will disable all instances! */
-		exclude_node( path.top(), ( instance.isSelected() || instance.childSelected() || instance.parentSelected() ) == m_exclude );
-	return true;
-}
+	ExcludeSelectedWalker( bool exclude )
+		: m_exclude( exclude ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if( !path.top().get().isRoot() ) /* don't touch model node: disabling one will disable all instances! */
+			exclude_node( path.top(), ( instance.isSelected() || instance.childSelected() || instance.parentSelected() ) == m_exclude );
+		return true;
+	}
 };
 
 void Scene_Exclude_Selected( bool exclude ){
@@ -1551,21 +1553,21 @@ void Scene_Exclude_Selected( bool exclude ){
 
 class ExcludeRegionedWalker : public scene::Graph::Walker
 {
-const bool m_exclude;
-const AABB m_region = aabb_for_minmax( g_region_mins, g_region_maxs );
+	const bool m_exclude;
+	const AABB m_region = aabb_for_minmax( g_region_mins, g_region_maxs );
 public:
-ExcludeRegionedWalker( bool exclude )
-	: m_exclude( exclude ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if( !path.top().get().isRoot() ){ /* don't touch model node: disabling one will disable all its instances! */
-		const bool exclude = m_exclude == aabb_intersects_aabb( instance.worldAABB(), m_region );
-		exclude_node( path.top(), exclude );
-		if( exclude )
-			Instance_setSelected( instance, false );
+	ExcludeRegionedWalker( bool exclude )
+		: m_exclude( exclude ){
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if( !path.top().get().isRoot() ){ /* don't touch model node: disabling one will disable all its instances! */
+			const bool exclude = m_exclude == aabb_intersects_aabb( instance.worldAABB(), m_region );
+			exclude_node( path.top(), exclude );
+			if( exclude )
+				Instance_setSelected( instance, false );
+		}
+		return true;
+	}
 };
 
 void Scene_Exclude_Region( bool exclude ){
@@ -1805,27 +1807,27 @@ class ParentSelectedBrushesToEntityWalker : public scene::Graph::Walker
 	scene::Node* m_world;
 	mutable bool m_emptyOldParent;
 public:
-ParentSelectedBrushesToEntityWalker( scene::Node& parent ) : m_parent( parent ), m_world( Map_FindWorldspawn( g_map ) ), m_emptyOldParent( false ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	return path.top().get_pointer() != &m_parent; /* skip traverse of target node */
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	if ( Node_isPrimitive( path.top() ) ){
-		if ( Instance_isSelected( instance ) ){
-			NodeSmartReference node( path.top().get() );
-			scene::Traversable* parent_traversable = Node_getTraversable( path.parent() );
-			parent_traversable->erase( node );
-			Node_getTraversable( m_parent )->insert( node );
-			m_emptyOldParent = parent_traversable->empty();
+	ParentSelectedBrushesToEntityWalker( scene::Node& parent ) : m_parent( parent ), m_world( Map_FindWorldspawn( g_map ) ), m_emptyOldParent( false ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		return path.top().get_pointer() != &m_parent; /* skip traverse of target node */
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		if ( Node_isPrimitive( path.top() ) ){
+			if ( Instance_isSelected( instance ) ){
+				NodeSmartReference node( path.top().get() );
+				scene::Traversable* parent_traversable = Node_getTraversable( path.parent() );
+				parent_traversable->erase( node );
+				Node_getTraversable( m_parent )->insert( node );
+				m_emptyOldParent = parent_traversable->empty();
+			}
+		}
+		else if ( m_emptyOldParent ){
+			m_emptyOldParent = false;
+			if ( Node_isEntity( path.top() ) && path.top().get_pointer() != m_world	&& Node_getTraversable( path.top() )->empty() ) /* delete empty entity left */
+				Path_deleteTop( path );
 		}
 	}
-	else if ( m_emptyOldParent ){
-		m_emptyOldParent = false;
-		if ( Node_isEntity( path.top() ) && path.top().get_pointer() != m_world	&& Node_getTraversable( path.top() )->empty() ) /* delete empty entity left */
-			Path_deleteTop( path );
-	}
-}
 };
 
 void Scene_parentSelectedBrushesToEntity( scene::Graph& graph, scene::Node& parent ){
@@ -1838,25 +1840,25 @@ void Scene_parentSubgraphSelectedBrushesToEntity( scene::Graph& graph, scene::No
 
 class CountSelectedBrushes : public scene::Graph::Walker
 {
-std::size_t& m_count;
-mutable std::size_t m_depth;
+	std::size_t& m_count;
+	mutable std::size_t m_depth;
 public:
-CountSelectedBrushes( std::size_t& count ) : m_count( count ), m_depth( 0 ){
-	m_count = 0;
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( ++m_depth != 1 && path.top().get().isRoot() ) {
-		return false;
+	CountSelectedBrushes( std::size_t& count ) : m_count( count ), m_depth( 0 ){
+		m_count = 0;
 	}
-	if ( Instance_isSelected( instance )
-		 && Node_isPrimitive( path.top() ) ) {
-		++m_count;
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( ++m_depth != 1 && path.top().get().isRoot() ) {
+			return false;
+		}
+		if ( Instance_isSelected( instance )
+		  && Node_isPrimitive( path.top() ) ) {
+			++m_count;
+		}
+		return true;
 	}
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	--m_depth;
-}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		--m_depth;
+	}
 };
 
 std::size_t Scene_countSelectedBrushes( scene::Graph& graph ){
@@ -1936,15 +1938,15 @@ void Scene_parentSelected(){
 	if ( GlobalSelectionSystem().countSelected() > 1 ) {
 		class ParentSelectedBrushesToEntityWalker : public SelectionSystem::Visitor
 		{
-		const scene::Path& m_parent;
-public:
-		ParentSelectedBrushesToEntityWalker( const scene::Path& parent ) : m_parent( parent ){
-		}
-		void visit( scene::Instance& instance ) const {
-			if ( &m_parent != &instance.path() ) {
-				Path_parent( m_parent, instance.path() );
+			const scene::Path& m_parent;
+		public:
+			ParentSelectedBrushesToEntityWalker( const scene::Path& parent ) : m_parent( parent ){
 			}
-		}
+			void visit( scene::Instance& instance ) const {
+				if ( &m_parent != &instance.path() ) {
+					Path_parent( m_parent, instance.path() );
+				}
+			}
 		};
 
 		ParentSelectedBrushesToEntityWalker visitor( GlobalSelectionSystem().ultimateSelected().path() );
@@ -2088,34 +2090,34 @@ void RegionSelected(){
 
 class BrushFindByIndexWalker : public scene::Traversable::Walker
 {
-mutable std::size_t m_index;
-scene::Path& m_path;
+	mutable std::size_t m_index;
+	scene::Path& m_path;
 public:
-BrushFindByIndexWalker( std::size_t index, scene::Path& path )
-	: m_index( index ), m_path( path ){
-}
-bool pre( scene::Node& node ) const {
-	if ( Node_isPrimitive( node ) && m_index-- == 0 ) {
-		m_path.push( makeReference( node ) );
+	BrushFindByIndexWalker( std::size_t index, scene::Path& path )
+		: m_index( index ), m_path( path ){
 	}
-	return false;
-}
+	bool pre( scene::Node& node ) const {
+		if ( Node_isPrimitive( node ) && m_index-- == 0 ) {
+			m_path.push( makeReference( node ) );
+		}
+		return false;
+	}
 };
 
 class EntityFindByIndexWalker : public scene::Traversable::Walker
 {
-mutable std::size_t m_index;
-scene::Path& m_path;
+	mutable std::size_t m_index;
+	scene::Path& m_path;
 public:
-EntityFindByIndexWalker( std::size_t index, scene::Path& path )
-	: m_index( index ), m_path( path ){
-}
-bool pre( scene::Node& node ) const {
-	if ( Node_isEntity( node ) && m_index-- == 0 ) {
-		m_path.push( makeReference( node ) );
+	EntityFindByIndexWalker( std::size_t index, scene::Path& path )
+		: m_index( index ), m_path( path ){
 	}
-	return false;
-}
+	bool pre( scene::Node& node ) const {
+		if ( Node_isEntity( node ) && m_index-- == 0 ) {
+			m_path.push( makeReference( node ) );
+		}
+		return false;
+	}
 };
 
 void Scene_FindEntityBrush( std::size_t entity, std::size_t brush, scene::Path& path ){
@@ -2154,44 +2156,44 @@ void SelectBrush( int entitynum, int brushnum ){
 
 class BrushFindIndexWalker : public scene::Traversable::Walker
 {
-mutable const scene::Node* m_node;
-std::size_t& m_count;
+	mutable const scene::Node* m_node;
+	std::size_t& m_count;
 public:
-BrushFindIndexWalker( const scene::Node& node, std::size_t& count )
-	: m_node( &node ), m_count( count ){
-}
-bool pre( scene::Node& node ) const {
-	if ( Node_isPrimitive( node ) ) {
-		if ( m_node == &node ) {
-			m_node = 0;
-		}
-		if ( m_node ) {
-			++m_count;
-		}
+	BrushFindIndexWalker( const scene::Node& node, std::size_t& count )
+		: m_node( &node ), m_count( count ){
 	}
-	return true;
-}
+	bool pre( scene::Node& node ) const {
+		if ( Node_isPrimitive( node ) ) {
+			if ( m_node == &node ) {
+				m_node = 0;
+			}
+			if ( m_node ) {
+				++m_count;
+			}
+		}
+		return true;
+	}
 };
 
 class EntityFindIndexWalker : public scene::Traversable::Walker
 {
-mutable const scene::Node* m_node;
-std::size_t& m_count;
+	mutable const scene::Node* m_node;
+	std::size_t& m_count;
 public:
-EntityFindIndexWalker( const scene::Node& node, std::size_t& count )
-	: m_node( &node ), m_count( count ){
-}
-bool pre( scene::Node& node ) const {
-	if ( Node_isEntity( node ) ) {
-		if ( m_node == &node ) {
-			m_node = 0;
-		}
-		if ( m_node ) {
-			++m_count;
-		}
+	EntityFindIndexWalker( const scene::Node& node, std::size_t& count )
+		: m_node( &node ), m_count( count ){
 	}
-	return true;
-}
+	bool pre( scene::Node& node ) const {
+		if ( Node_isEntity( node ) ) {
+			if ( m_node == &node ) {
+				m_node = 0;
+			}
+			if ( m_node ) {
+				++m_count;
+			}
+		}
+		return true;
+	}
 };
 
 static void GetSelectionIndex( int *ent, int *brush ){
@@ -2243,22 +2245,22 @@ void DoFind(){
 				GtkWidget* label = gtk_label_new( "Entity number" );
 				gtk_widget_show( label );
 				gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 0, 1,
-								  (GtkAttachOptions) ( 0 ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( 0 ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 			}
 			{
 				GtkWidget* label = gtk_label_new( "Brush number" );
 				gtk_widget_show( label );
 				gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 1, 2,
-								  (GtkAttachOptions) ( 0 ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( 0 ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 			}
 			{
 				GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
 				gtk_widget_show( GTK_WIDGET( entry ) );
 				gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 0, 1,
-								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_widget_grab_focus( GTK_WIDGET( entry ) );
 				entity = entry;
 			}
@@ -2266,8 +2268,8 @@ void DoFind(){
 				GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
 				gtk_widget_show( GTK_WIDGET( entry ) );
 				gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 1, 2,
-								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 				brush = entry;
 			}
@@ -2326,7 +2328,7 @@ void map_autocaulk_selected(){
 				if( path.size() == 2 ){
 					Entity* entity = Node_getEntity( path.top() );
 					if( entity != 0 && entity->isContainer() && string_equal_nocase_n( entity->getEntityClass().name(), "trigger_", 8 )
-							&& ( instance.childSelected() || instance.isSelected() ) )
+					 && ( instance.childSelected() || instance.isSelected() ) )
 						m_trigger = &instance;
 					else
 						return false;
@@ -2353,7 +2355,7 @@ void map_autocaulk_selected(){
 	StringOutputStream filename( 256 );
 	filename << PathExtensionless( g_map.m_name.c_str() ) << "_ac.map";
 
-	{// write .map
+	{	// write .map
 		const Vector3 spawn( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ) );
 		Vector3 mins, maxs;
 		Select_GetBounds( mins, maxs );
@@ -2373,7 +2375,7 @@ void map_autocaulk_selected(){
 
 		// all brushes to the worldspawn
 		file << "{\n"
-				"\"classname\" \"worldspawn\"";
+		        "\"classname\" \"worldspawn\"";
 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( file );
 		class WriteBrushesWalker : public scene::Traversable::Walker
 		{
@@ -2405,9 +2407,9 @@ void map_autocaulk_selected(){
 		file << "\n}\n";
 		// spawn
 		file << "{\n"
-				"\"classname\" \"info_player_start\"\n"
-				"\"origin\" \"" << spawn[0] << " " << spawn[1] << " " << spawn[2] << "\"\n"
-				"}\n";
+		        "\"classname\" \"info_player_start\"\n"
+		        "\"origin\" \"" << spawn[0] << " " << spawn[1] << " " << spawn[2] << "\"\n"
+		        "}\n";
 		// point entities
 		const MapFormat& format = MapFormat_forFile( filename.c_str() );
 		auto traverse_selected_point_entities = []( scene::Node& root, const scene::Traversable::Walker& walker ){
@@ -2446,22 +2448,22 @@ void map_autocaulk_selected(){
 		writer.release();
 	}
 
-	{ // compile
+	{	// compile
 		StringOutputStream str( 256 );
 		str << AppPath_get() << "q3map2." << RADIANT_EXECUTABLE
-							<< " -game quake3"
-							<< " -fs_basepath \"" << EnginePath_get()
-							<< "\" -fs_homepath \"" << g_qeglobals.m_userEnginePath.c_str()
-							<< "\" -fs_game " << gamename_get()
-							<< " -autocaulk -fulldetail"
-							<< " \"" << filename.c_str() << "\"";
+		    << " -game quake3"
+		    << " -fs_basepath \"" << EnginePath_get()
+		    << "\" -fs_homepath \"" << g_qeglobals.m_userEnginePath.c_str()
+		    << "\" -fs_game " << gamename_get()
+		    << " -autocaulk -fulldetail"
+		    << " \"" << filename.c_str() << "\"";
 		// run
 		Q_Exec( NULL, str.c_str(), NULL, false, true );
 	}
 
 	typedef std::map<std::size_t, CopiedString> CaulkMap;
 	CaulkMap map;
-	{ // load
+	{	// load
 		filename.clear();
 		filename << PathExtensionless( g_map.m_name.c_str() ) << "_ac.caulk";
 
@@ -2489,7 +2491,7 @@ void map_autocaulk_selected(){
 		tokeniser.release();
 	}
 
-	{ // apply
+	{	// apply
 		class CaulkBrushesWalker : public scene::Traversable::Walker
 		{
 			const CaulkMap& m_map;
@@ -2569,26 +2571,26 @@ void Map_constructPreferences( PreferencesPage& page ){
 
 class MapEntityClasses : public ModuleObserver
 {
-std::size_t m_unrealised;
+	std::size_t m_unrealised;
 public:
-MapEntityClasses() : m_unrealised( 1 ){
-}
-void realise(){
-	if ( --m_unrealised == 0 ) {
-		if ( g_map.m_resource != 0 ) {
-			ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Loading Map" );
-			g_map.m_resource->realise();
+	MapEntityClasses() : m_unrealised( 1 ){
+	}
+	void realise(){
+		if ( --m_unrealised == 0 ) {
+			if ( g_map.m_resource != 0 ) {
+				ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Loading Map" );
+				g_map.m_resource->realise();
+			}
 		}
 	}
-}
-void unrealise(){
-	if ( ++m_unrealised == 1 ) {
-		if ( g_map.m_resource != 0 ) {
-			g_map.m_resource->flush();
-			g_map.m_resource->unrealise();
+	void unrealise(){
+		if ( ++m_unrealised == 1 ) {
+			if ( g_map.m_resource != 0 ) {
+				g_map.m_resource->flush();
+				g_map.m_resource->unrealise();
+			}
 		}
 	}
-}
 };
 
 MapEntityClasses g_MapEntityClasses;
@@ -2596,24 +2598,24 @@ MapEntityClasses g_MapEntityClasses;
 
 class MapModuleObserver : public ModuleObserver
 {
-std::size_t m_unrealised;
+	std::size_t m_unrealised;
 public:
-MapModuleObserver() : m_unrealised( 1 ){
-}
-void realise(){
-	if ( --m_unrealised == 0 ) {
-		ASSERT_MESSAGE( !string_empty( g_qeglobals.m_userGamePath.c_str() ), "maps_directory: user-game-path is empty" );
-		StringOutputStream buffer( 256 );
-		buffer << g_qeglobals.m_userGamePath.c_str() << "maps/";
-		Q_mkdir( buffer.c_str() );
-		g_mapsPath = buffer.c_str();
+	MapModuleObserver() : m_unrealised( 1 ){
 	}
-}
-void unrealise(){
-	if ( ++m_unrealised == 1 ) {
-		g_mapsPath = "";
+	void realise(){
+		if ( --m_unrealised == 0 ) {
+			ASSERT_MESSAGE( !string_empty( g_qeglobals.m_userGamePath.c_str() ), "maps_directory: user-game-path is empty" );
+			StringOutputStream buffer( 256 );
+			buffer << g_qeglobals.m_userGamePath.c_str() << "maps/";
+			Q_mkdir( buffer.c_str() );
+			g_mapsPath = buffer.c_str();
+		}
 	}
-}
+	void unrealise(){
+		if ( ++m_unrealised == 1 ) {
+			g_mapsPath = "";
+		}
+	}
 };
 
 MapModuleObserver g_MapModuleObserver;

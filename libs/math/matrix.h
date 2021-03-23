@@ -37,190 +37,190 @@
 
 class Matrix4
 {
-float m_elements[16];
+	float m_elements[16];
 public:
 
-Matrix4(){
-}
-Matrix4( float xx_, float xy_, float xz_, float xw_,
-		 float yx_, float yy_, float yz_, float yw_,
-		 float zx_, float zy_, float zz_, float zw_,
-		 float tx_, float ty_, float tz_, float tw_ ){
-	xx() = xx_;
-	xy() = xy_;
-	xz() = xz_;
-	xw() = xw_;
-	yx() = yx_;
-	yy() = yy_;
-	yz() = yz_;
-	yw() = yw_;
-	zx() = zx_;
-	zy() = zy_;
-	zz() = zz_;
-	zw() = zw_;
-	tx() = tx_;
-	ty() = ty_;
-	tz() = tz_;
-	tw() = tw_;
-}
+	Matrix4(){
+	}
+	Matrix4( float xx_, float xy_, float xz_, float xw_,
+	         float yx_, float yy_, float yz_, float yw_,
+	         float zx_, float zy_, float zz_, float zw_,
+	         float tx_, float ty_, float tz_, float tw_ ){
+		xx() = xx_;
+		xy() = xy_;
+		xz() = xz_;
+		xw() = xw_;
+		yx() = yx_;
+		yy() = yy_;
+		yz() = yz_;
+		yw() = yw_;
+		zx() = zx_;
+		zy() = zy_;
+		zz() = zz_;
+		zw() = zw_;
+		tx() = tx_;
+		ty() = ty_;
+		tz() = tz_;
+		tw() = tw_;
+	}
 
-float& xx(){
-	return m_elements[0];
-}
-const float& xx() const {
-	return m_elements[0];
-}
-float& xy(){
-	return m_elements[1];
-}
-const float& xy() const {
-	return m_elements[1];
-}
-float& xz(){
-	return m_elements[2];
-}
-const float& xz() const {
-	return m_elements[2];
-}
-float& xw(){
-	return m_elements[3];
-}
-const float& xw() const {
-	return m_elements[3];
-}
-float& yx(){
-	return m_elements[4];
-}
-const float& yx() const {
-	return m_elements[4];
-}
-float& yy(){
-	return m_elements[5];
-}
-const float& yy() const {
-	return m_elements[5];
-}
-float& yz(){
-	return m_elements[6];
-}
-const float& yz() const {
-	return m_elements[6];
-}
-float& yw(){
-	return m_elements[7];
-}
-const float& yw() const {
-	return m_elements[7];
-}
-float& zx(){
-	return m_elements[8];
-}
-const float& zx() const {
-	return m_elements[8];
-}
-float& zy(){
-	return m_elements[9];
-}
-const float& zy() const {
-	return m_elements[9];
-}
-float& zz(){
-	return m_elements[10];
-}
-const float& zz() const {
-	return m_elements[10];
-}
-float& zw(){
-	return m_elements[11];
-}
-const float& zw() const {
-	return m_elements[11];
-}
-float& tx(){
-	return m_elements[12];
-}
-const float& tx() const {
-	return m_elements[12];
-}
-float& ty(){
-	return m_elements[13];
-}
-const float& ty() const {
-	return m_elements[13];
-}
-float& tz(){
-	return m_elements[14];
-}
-const float& tz() const {
-	return m_elements[14];
-}
-float& tw(){
-	return m_elements[15];
-}
-const float& tw() const {
-	return m_elements[15];
-}
+	float& xx(){
+		return m_elements[0];
+	}
+	const float& xx() const {
+		return m_elements[0];
+	}
+	float& xy(){
+		return m_elements[1];
+	}
+	const float& xy() const {
+		return m_elements[1];
+	}
+	float& xz(){
+		return m_elements[2];
+	}
+	const float& xz() const {
+		return m_elements[2];
+	}
+	float& xw(){
+		return m_elements[3];
+	}
+	const float& xw() const {
+		return m_elements[3];
+	}
+	float& yx(){
+		return m_elements[4];
+	}
+	const float& yx() const {
+		return m_elements[4];
+	}
+	float& yy(){
+		return m_elements[5];
+	}
+	const float& yy() const {
+		return m_elements[5];
+	}
+	float& yz(){
+		return m_elements[6];
+	}
+	const float& yz() const {
+		return m_elements[6];
+	}
+	float& yw(){
+		return m_elements[7];
+	}
+	const float& yw() const {
+		return m_elements[7];
+	}
+	float& zx(){
+		return m_elements[8];
+	}
+	const float& zx() const {
+		return m_elements[8];
+	}
+	float& zy(){
+		return m_elements[9];
+	}
+	const float& zy() const {
+		return m_elements[9];
+	}
+	float& zz(){
+		return m_elements[10];
+	}
+	const float& zz() const {
+		return m_elements[10];
+	}
+	float& zw(){
+		return m_elements[11];
+	}
+	const float& zw() const {
+		return m_elements[11];
+	}
+	float& tx(){
+		return m_elements[12];
+	}
+	const float& tx() const {
+		return m_elements[12];
+	}
+	float& ty(){
+		return m_elements[13];
+	}
+	const float& ty() const {
+		return m_elements[13];
+	}
+	float& tz(){
+		return m_elements[14];
+	}
+	const float& tz() const {
+		return m_elements[14];
+	}
+	float& tw(){
+		return m_elements[15];
+	}
+	const float& tw() const {
+		return m_elements[15];
+	}
 
-Vector4& x(){
-	return reinterpret_cast<Vector4&>( xx() );
-}
-const Vector4& x() const {
-	return reinterpret_cast<const Vector4&>( xx() );
-}
-Vector4& y(){
-	return reinterpret_cast<Vector4&>( yx() );
-}
-const Vector4& y() const {
-	return reinterpret_cast<const Vector4&>( yx() );
-}
-Vector4& z(){
-	return reinterpret_cast<Vector4&>( zx() );
-}
-const Vector4& z() const {
-	return reinterpret_cast<const Vector4&>( zx() );
-}
-Vector4& t(){
-	return reinterpret_cast<Vector4&>( tx() );
-}
-const Vector4& t() const {
-	return reinterpret_cast<const Vector4&>( tx() );
-}
+	Vector4& x(){
+		return reinterpret_cast<Vector4&>( xx() );
+	}
+	const Vector4& x() const {
+		return reinterpret_cast<const Vector4&>( xx() );
+	}
+	Vector4& y(){
+		return reinterpret_cast<Vector4&>( yx() );
+	}
+	const Vector4& y() const {
+		return reinterpret_cast<const Vector4&>( yx() );
+	}
+	Vector4& z(){
+		return reinterpret_cast<Vector4&>( zx() );
+	}
+	const Vector4& z() const {
+		return reinterpret_cast<const Vector4&>( zx() );
+	}
+	Vector4& t(){
+		return reinterpret_cast<Vector4&>( tx() );
+	}
+	const Vector4& t() const {
+		return reinterpret_cast<const Vector4&>( tx() );
+	}
 
-const float& index( std::size_t i ) const {
-	return m_elements[i];
-}
-float& index( std::size_t i ){
-	return m_elements[i];
-}
-const float& operator[]( std::size_t i ) const {
-	return m_elements[i];
-}
-float& operator[]( std::size_t i ){
-	return m_elements[i];
-}
-const float& index( std::size_t r, std::size_t c ) const {
-	return m_elements[( r << 2 ) + c];
-}
-float& index( std::size_t r, std::size_t c ){
-	return m_elements[( r << 2 ) + c];
-}
+	const float& index( std::size_t i ) const {
+		return m_elements[i];
+	}
+	float& index( std::size_t i ){
+		return m_elements[i];
+	}
+	const float& operator[]( std::size_t i ) const {
+		return m_elements[i];
+	}
+	float& operator[]( std::size_t i ){
+		return m_elements[i];
+	}
+	const float& index( std::size_t r, std::size_t c ) const {
+		return m_elements[( r << 2 ) + c];
+	}
+	float& index( std::size_t r, std::size_t c ){
+		return m_elements[( r << 2 ) + c];
+	}
 };
 
 /// \brief The 4x4 identity matrix.
 const Matrix4 g_matrix4_identity(
-	1, 0, 0, 0,
-	0, 1, 0, 0,
-	0, 0, 1, 0,
-	0, 0, 0, 1
-	);
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1
+);
 
 
 /// \brief Returns true if \p self and \p other are exactly element-wise equal.
 inline bool operator==( const Matrix4& self, const Matrix4& other ){
 	return self.xx() == other.xx() && self.xy() == other.xy() && self.xz() == other.xz() && self.xw() == other.xw()
-		   && self.yx() == other.yx() && self.yy() == other.yy() && self.yz() == other.yz() && self.yw() == other.yw()
-		   && self.zx() == other.zx() && self.zy() == other.zy() && self.zz() == other.zz() && self.zw() == other.zw()
-		   && self.tx() == other.tx() && self.ty() == other.ty() && self.tz() == other.tz() && self.tw() == other.tw();
+	    && self.yx() == other.yx() && self.yy() == other.yy() && self.yz() == other.yz() && self.yw() == other.yw()
+	    && self.zx() == other.zx() && self.zy() == other.zy() && self.zz() == other.zz() && self.zw() == other.zw()
+	    && self.tx() == other.tx() && self.ty() == other.ty() && self.tz() == other.tz() && self.tw() == other.tw();
 }
 
 /// \brief Returns true if \p self and \p other are exactly element-wise equal.
@@ -231,38 +231,38 @@ inline bool matrix4_equal( const Matrix4& self, const Matrix4& other ){
 /// \brief Returns true if \p self and \p other are element-wise equal within \p epsilon.
 inline bool matrix4_equal_epsilon( const Matrix4& self, const Matrix4& other, float epsilon ){
 	return float_equal_epsilon( self.xx(), other.xx(), epsilon )
-		   && float_equal_epsilon( self.xy(), other.xy(), epsilon )
-		   && float_equal_epsilon( self.xz(), other.xz(), epsilon )
-		   && float_equal_epsilon( self.xw(), other.xw(), epsilon )
-		   && float_equal_epsilon( self.yx(), other.yx(), epsilon )
-		   && float_equal_epsilon( self.yy(), other.yy(), epsilon )
-		   && float_equal_epsilon( self.yz(), other.yz(), epsilon )
-		   && float_equal_epsilon( self.yw(), other.yw(), epsilon )
-		   && float_equal_epsilon( self.zx(), other.zx(), epsilon )
-		   && float_equal_epsilon( self.zy(), other.zy(), epsilon )
-		   && float_equal_epsilon( self.zz(), other.zz(), epsilon )
-		   && float_equal_epsilon( self.zw(), other.zw(), epsilon )
-		   && float_equal_epsilon( self.tx(), other.tx(), epsilon )
-		   && float_equal_epsilon( self.ty(), other.ty(), epsilon )
-		   && float_equal_epsilon( self.tz(), other.tz(), epsilon )
-		   && float_equal_epsilon( self.tw(), other.tw(), epsilon );
+	    && float_equal_epsilon( self.xy(), other.xy(), epsilon )
+	    && float_equal_epsilon( self.xz(), other.xz(), epsilon )
+	    && float_equal_epsilon( self.xw(), other.xw(), epsilon )
+	    && float_equal_epsilon( self.yx(), other.yx(), epsilon )
+	    && float_equal_epsilon( self.yy(), other.yy(), epsilon )
+	    && float_equal_epsilon( self.yz(), other.yz(), epsilon )
+	    && float_equal_epsilon( self.yw(), other.yw(), epsilon )
+	    && float_equal_epsilon( self.zx(), other.zx(), epsilon )
+	    && float_equal_epsilon( self.zy(), other.zy(), epsilon )
+	    && float_equal_epsilon( self.zz(), other.zz(), epsilon )
+	    && float_equal_epsilon( self.zw(), other.zw(), epsilon )
+	    && float_equal_epsilon( self.tx(), other.tx(), epsilon )
+	    && float_equal_epsilon( self.ty(), other.ty(), epsilon )
+	    && float_equal_epsilon( self.tz(), other.tz(), epsilon )
+	    && float_equal_epsilon( self.tw(), other.tw(), epsilon );
 }
 
 /// \brief Returns true if \p self and \p other are exactly element-wise equal.
 /// \p self and \p other must be affine.
 inline bool matrix4_affine_equal( const Matrix4& self, const Matrix4& other ){
 	return self[0] == other[0]
-		   && self[1] == other[1]
-		   && self[2] == other[2]
-		   && self[4] == other[4]
-		   && self[5] == other[5]
-		   && self[6] == other[6]
-		   && self[8] == other[8]
-		   && self[9] == other[9]
-		   && self[10] == other[10]
-		   && self[12] == other[12]
-		   && self[13] == other[13]
-		   && self[14] == other[14];
+	    && self[1] == other[1]
+	    && self[2] == other[2]
+	    && self[4] == other[4]
+	    && self[5] == other[5]
+	    && self[6] == other[6]
+	    && self[8] == other[8]
+	    && self[9] == other[9]
+	    && self[10] == other[10]
+	    && self[12] == other[12]
+	    && self[13] == other[13]
+	    && self[14] == other[14];
 }
 
 enum Matrix4Handedness
@@ -274,12 +274,12 @@ enum Matrix4Handedness
 /// \brief Returns MATRIX4_RIGHTHANDED if \p self is right-handed, else returns MATRIX4_LEFTHANDED.
 inline Matrix4Handedness matrix4_handedness( const Matrix4& self ){
 	return (
-			   vector3_dot(
-				   vector3_cross( vector4_to_vector3( self.x() ), vector4_to_vector3( self.y() ) ),
-				   vector4_to_vector3( self.z() )
-				   )
-			   < 0.0
-			   ) ? MATRIX4_LEFTHANDED : MATRIX4_RIGHTHANDED;
+	           vector3_dot(
+	               vector3_cross( vector4_to_vector3( self.x() ), vector4_to_vector3( self.y() ) ),
+	               vector4_to_vector3( self.z() )
+	           )
+	           < 0.0
+	       ) ? MATRIX4_LEFTHANDED : MATRIX4_RIGHTHANDED;
 }
 
 
@@ -289,23 +289,23 @@ inline Matrix4Handedness matrix4_handedness( const Matrix4& self ){
 /// \brief Returns \p self post-multiplied by \p other.
 inline Matrix4 matrix4_multiplied_by_matrix4( const Matrix4& self, const Matrix4& other ){
 	return Matrix4(
-			   other[0] * self[0] + other[1] * self[4] + other[2] * self[8] + other[3] * self[12],
-			   other[0] * self[1] + other[1] * self[5] + other[2] * self[9] + other[3] * self[13],
-			   other[0] * self[2] + other[1] * self[6] + other[2] * self[10] + other[3] * self[14],
-			   other[0] * self[3] + other[1] * self[7] + other[2] * self[11] + other[3] * self[15],
-			   other[4] * self[0] + other[5] * self[4] + other[6] * self[8] + other[7] * self[12],
-			   other[4] * self[1] + other[5] * self[5] + other[6] * self[9] + other[7] * self[13],
-			   other[4] * self[2] + other[5] * self[6] + other[6] * self[10] + other[7] * self[14],
-			   other[4] * self[3] + other[5] * self[7] + other[6] * self[11] + other[7] * self[15],
-			   other[8] * self[0] + other[9] * self[4] + other[10] * self[8] + other[11] * self[12],
-			   other[8] * self[1] + other[9] * self[5] + other[10] * self[9] + other[11] * self[13],
-			   other[8] * self[2] + other[9] * self[6] + other[10] * self[10] + other[11] * self[14],
-			   other[8] * self[3] + other[9] * self[7] + other[10] * self[11] + other[11] * self[15],
-			   other[12] * self[0] + other[13] * self[4] + other[14] * self[8] + other[15] * self[12],
-			   other[12] * self[1] + other[13] * self[5] + other[14] * self[9] + other[15] * self[13],
-			   other[12] * self[2] + other[13] * self[6] + other[14] * self[10] + other[15] * self[14],
-			   other[12] * self[3] + other[13] * self[7] + other[14] * self[11] + other[15] * self[15]
-			   );
+	           other[0] * self[0] + other[1] * self[4] + other[2] * self[8] + other[3] * self[12],
+	           other[0] * self[1] + other[1] * self[5] + other[2] * self[9] + other[3] * self[13],
+	           other[0] * self[2] + other[1] * self[6] + other[2] * self[10] + other[3] * self[14],
+	           other[0] * self[3] + other[1] * self[7] + other[2] * self[11] + other[3] * self[15],
+	           other[4] * self[0] + other[5] * self[4] + other[6] * self[8] + other[7] * self[12],
+	           other[4] * self[1] + other[5] * self[5] + other[6] * self[9] + other[7] * self[13],
+	           other[4] * self[2] + other[5] * self[6] + other[6] * self[10] + other[7] * self[14],
+	           other[4] * self[3] + other[5] * self[7] + other[6] * self[11] + other[7] * self[15],
+	           other[8] * self[0] + other[9] * self[4] + other[10] * self[8] + other[11] * self[12],
+	           other[8] * self[1] + other[9] * self[5] + other[10] * self[9] + other[11] * self[13],
+	           other[8] * self[2] + other[9] * self[6] + other[10] * self[10] + other[11] * self[14],
+	           other[8] * self[3] + other[9] * self[7] + other[10] * self[11] + other[11] * self[15],
+	           other[12] * self[0] + other[13] * self[4] + other[14] * self[8] + other[15] * self[12],
+	           other[12] * self[1] + other[13] * self[5] + other[14] * self[9] + other[15] * self[13],
+	           other[12] * self[2] + other[13] * self[6] + other[14] * self[10] + other[15] * self[14],
+	           other[12] * self[3] + other[13] * self[7] + other[14] * self[11] + other[15] * self[15]
+	       );
 }
 
 /// \brief Post-multiplies \p self by \p other in-place.
@@ -333,23 +333,23 @@ inline bool matrix4_is_affine( const Matrix4& transform ){
 /// \p self and \p other must be affine.
 inline Matrix4 matrix4_affine_multiplied_by_matrix4( const Matrix4& self, const Matrix4& other ){
 	return Matrix4(
-			   other[0] * self[0] + other[1] * self[4] + other[2] * self[8],
-			   other[0] * self[1] + other[1] * self[5] + other[2] * self[9],
-			   other[0] * self[2] + other[1] * self[6] + other[2] * self[10],
-			   0,
-			   other[4] * self[0] + other[5] * self[4] + other[6] * self[8],
-			   other[4] * self[1] + other[5] * self[5] + other[6] * self[9],
-			   other[4] * self[2] + other[5] * self[6] + other[6] * self[10],
-			   0,
-			   other[8] * self[0] + other[9] * self[4] + other[10] * self[8],
-			   other[8] * self[1] + other[9] * self[5] + other[10] * self[9],
-			   other[8] * self[2] + other[9] * self[6] + other[10] * self[10],
-			   0,
-			   other[12] * self[0] + other[13] * self[4] + other[14] * self[8] + self[12],
-			   other[12] * self[1] + other[13] * self[5] + other[14] * self[9] + self[13],
-			   other[12] * self[2] + other[13] * self[6] + other[14] * self[10] + self[14],
-			   1
-			   );
+	           other[0] * self[0] + other[1] * self[4] + other[2] * self[8],
+	           other[0] * self[1] + other[1] * self[5] + other[2] * self[9],
+	           other[0] * self[2] + other[1] * self[6] + other[2] * self[10],
+	           0,
+	           other[4] * self[0] + other[5] * self[4] + other[6] * self[8],
+	           other[4] * self[1] + other[5] * self[5] + other[6] * self[9],
+	           other[4] * self[2] + other[5] * self[6] + other[6] * self[10],
+	           0,
+	           other[8] * self[0] + other[9] * self[4] + other[10] * self[8],
+	           other[8] * self[1] + other[9] * self[5] + other[10] * self[9],
+	           other[8] * self[2] + other[9] * self[6] + other[10] * self[10],
+	           0,
+	           other[12] * self[0] + other[13] * self[4] + other[14] * self[8] + self[12],
+	           other[12] * self[1] + other[13] * self[5] + other[14] * self[9] + self[13],
+	           other[12] * self[2] + other[13] * self[6] + other[14] * self[10] + self[14],
+	           1
+	       );
 }
 
 /// \brief Post-multiplies \p self by \p other in-place.
@@ -374,10 +374,10 @@ inline void matrix4_affine_premultiply_by_matrix4( Matrix4& self, const Matrix4&
 template<typename Element>
 inline BasicVector3<Element> matrix4_transformed_point( const Matrix4& self, const BasicVector3<Element>& point ){
 	return BasicVector3<Element>(
-			   static_cast<Element>( point[0] * self[0]  + point[1] * self[4]  + point[2] * self[8]  + self[12] ),
-			   static_cast<Element>( point[0] * self[1]  + point[1] * self[5]  + point[2] * self[9]  + self[13] ),
-			   static_cast<Element>( point[0] * self[2]  + point[1] * self[6]  + point[2] * self[10] + self[14] )
-			   );
+	           static_cast<Element>( point[0] * self[0]  + point[1] * self[4]  + point[2] * self[8]  + self[12] ),
+	           static_cast<Element>( point[0] * self[1]  + point[1] * self[5]  + point[2] * self[9]  + self[13] ),
+	           static_cast<Element>( point[0] * self[2]  + point[1] * self[6]  + point[2] * self[10] + self[14] )
+	       );
 }
 
 /// \brief Transforms \p point by \p self in-place.
@@ -390,10 +390,10 @@ inline void matrix4_transform_point( const Matrix4& self, BasicVector3<Element>&
 template<typename Element>
 inline BasicVector3<Element> matrix4_transformed_direction( const Matrix4& self, const BasicVector3<Element>& direction ){
 	return BasicVector3<Element>(
-			   static_cast<Element>( direction[0] * self[0]  + direction[1] * self[4]  + direction[2] * self[8]  ),
-			   static_cast<Element>( direction[0] * self[1]  + direction[1] * self[5]  + direction[2] * self[9]  ),
-			   static_cast<Element>( direction[0] * self[2]  + direction[1] * self[6]  + direction[2] * self[10] )
-			   );
+	           static_cast<Element>( direction[0] * self[0]  + direction[1] * self[4]  + direction[2] * self[8]  ),
+	           static_cast<Element>( direction[0] * self[1]  + direction[1] * self[5]  + direction[2] * self[9]  ),
+	           static_cast<Element>( direction[0] * self[2]  + direction[1] * self[6]  + direction[2] * self[10] )
+	       );
 }
 
 /// \brief Transforms \p direction by \p self in-place.
@@ -406,11 +406,11 @@ inline void matrix4_transform_direction( const Matrix4& self, BasicVector3<Eleme
 template<typename Element>
 inline BasicVector4<Element> matrix4_transformed_vector4( const Matrix4& self, const BasicVector4<Element>& vector4 ){
 	return BasicVector4<Element>(
-			   static_cast<Element>( vector4[0] * self[0]  + vector4[1] * self[4]  + vector4[2] * self[8]  + vector4[3] * self[12] ),
-			   static_cast<Element>( vector4[0] * self[1]  + vector4[1] * self[5]  + vector4[2] * self[9]  + vector4[3] * self[13] ),
-			   static_cast<Element>( vector4[0] * self[2]  + vector4[1] * self[6]  + vector4[2] * self[10] + vector4[3] * self[14] ),
-			   static_cast<Element>( vector4[0] * self[3]  + vector4[1] * self[7]  + vector4[2] * self[11] + vector4[3] * self[15] )
-			   );
+	           static_cast<Element>( vector4[0] * self[0]  + vector4[1] * self[4]  + vector4[2] * self[8]  + vector4[3] * self[12] ),
+	           static_cast<Element>( vector4[0] * self[1]  + vector4[1] * self[5]  + vector4[2] * self[9]  + vector4[3] * self[13] ),
+	           static_cast<Element>( vector4[0] * self[2]  + vector4[1] * self[6]  + vector4[2] * self[10] + vector4[3] * self[14] ),
+	           static_cast<Element>( vector4[0] * self[3]  + vector4[1] * self[7]  + vector4[2] * self[11] + vector4[3] * self[15] )
+	       );
 }
 
 /// \brief Transforms \p vector4 by \p self in-place.
@@ -433,23 +433,23 @@ inline void matrix4_transpose( Matrix4& self ){
 /// \brief Returns \p self transposed.
 inline Matrix4 matrix4_transposed( const Matrix4& self ){
 	return Matrix4(
-			   self.xx(),
-			   self.yx(),
-			   self.zx(),
-			   self.tx(),
-			   self.xy(),
-			   self.yy(),
-			   self.zy(),
-			   self.ty(),
-			   self.xz(),
-			   self.yz(),
-			   self.zz(),
-			   self.tz(),
-			   self.xw(),
-			   self.yw(),
-			   self.zw(),
-			   self.tw()
-			   );
+	           self.xx(),
+	           self.yx(),
+	           self.zx(),
+	           self.tx(),
+	           self.xy(),
+	           self.yy(),
+	           self.zy(),
+	           self.ty(),
+	           self.xz(),
+	           self.yz(),
+	           self.zz(),
+	           self.tz(),
+	           self.xw(),
+	           self.yw(),
+	           self.zw(),
+	           self.tw()
+	       );
 }
 
 
@@ -460,9 +460,9 @@ inline Matrix4 matrix4_affine_inverse( const Matrix4& self ){
 
 	// determinant of rotation submatrix
 	double det
-		= self[0] * ( self[5] * self[10] - self[9] * self[6] )
-		  - self[1] * ( self[4] * self[10] - self[8] * self[6] )
-		  + self[2] * ( self[4] * self[9] - self[8] * self[5] );
+	      = self[0] * ( self[5] * self[10] - self[9] * self[6] )
+	      - self[1] * ( self[4] * self[10] - self[8] * self[6] )
+	      + self[2] * ( self[4] * self[9] - self[8] * self[5] );
 
 	// throw exception here if (det*det < 1e-25)
 
@@ -484,14 +484,14 @@ inline Matrix4 matrix4_affine_inverse( const Matrix4& self ){
 
 	// multiply translation part by rotation
 	result[12] = -( self[12] * result[0] +
-					self[13] * result[4] +
-					self[14] * result[8] );
+	                self[13] * result[4] +
+	                self[14] * result[8] );
 	result[13] = -( self[12] * result[1] +
-					self[13] * result[5] +
-					self[14] * result[9] );
+	                self[13] * result[5] +
+	                self[14] * result[9] );
 	result[14] = -( self[12] * result[2] +
-					self[13] * result[6] +
-					self[14] * result[10] );
+	                self[13] * result[6] +
+	                self[14] * result[10] );
 	result[15] = 1;
 
 	return result;
@@ -513,9 +513,9 @@ template<typename Row, typename Col>
 class Matrix4Index
 {
 public:
-typedef IntegralConstant<Row::VALUE> r;
-typedef IntegralConstant<Col::VALUE> c;
-typedef IntegralConstant<( r::VALUE * 4 ) + c::VALUE> i;
+	typedef IntegralConstant<Row::VALUE> r;
+	typedef IntegralConstant<Col::VALUE> c;
+	typedef IntegralConstant<( r::VALUE * 4 ) + c::VALUE> i;
 };
 
 /// \brief A functor which returns the cofactor of a 3x3 submatrix obtained by ignoring a given row and column of a 4x4 matrix.
@@ -525,20 +525,20 @@ template<typename Row, typename Col>
 class Matrix4Cofactor
 {
 public:
-typedef typename Matrix4Index<typename Row::x, typename Col::x>::i xx;
-typedef typename Matrix4Index<typename Row::x, typename Col::y>::i xy;
-typedef typename Matrix4Index<typename Row::x, typename Col::z>::i xz;
-typedef typename Matrix4Index<typename Row::y, typename Col::x>::i yx;
-typedef typename Matrix4Index<typename Row::y, typename Col::y>::i yy;
-typedef typename Matrix4Index<typename Row::y, typename Col::z>::i yz;
-typedef typename Matrix4Index<typename Row::z, typename Col::x>::i zx;
-typedef typename Matrix4Index<typename Row::z, typename Col::y>::i zy;
-typedef typename Matrix4Index<typename Row::z, typename Col::z>::i zz;
-static double apply( const Matrix4& self ){
-	return self[xx::VALUE] * ( self[yy::VALUE] * self[zz::VALUE] - self[zy::VALUE] * self[yz::VALUE] )
-		   - self[xy::VALUE] * ( self[yx::VALUE] * self[zz::VALUE] - self[zx::VALUE] * self[yz::VALUE] )
-		   + self[xz::VALUE] * ( self[yx::VALUE] * self[zy::VALUE] - self[zx::VALUE] * self[yy::VALUE] );
-}
+	typedef typename Matrix4Index<typename Row::x, typename Col::x>::i xx;
+	typedef typename Matrix4Index<typename Row::x, typename Col::y>::i xy;
+	typedef typename Matrix4Index<typename Row::x, typename Col::z>::i xz;
+	typedef typename Matrix4Index<typename Row::y, typename Col::x>::i yx;
+	typedef typename Matrix4Index<typename Row::y, typename Col::y>::i yy;
+	typedef typename Matrix4Index<typename Row::y, typename Col::z>::i yz;
+	typedef typename Matrix4Index<typename Row::z, typename Col::x>::i zx;
+	typedef typename Matrix4Index<typename Row::z, typename Col::y>::i zy;
+	typedef typename Matrix4Index<typename Row::z, typename Col::z>::i zz;
+	static double apply( const Matrix4& self ){
+		return self[xx::VALUE] * ( self[yy::VALUE] * self[zz::VALUE] - self[zy::VALUE] * self[yz::VALUE] )
+		     - self[xy::VALUE] * ( self[yx::VALUE] * self[zz::VALUE] - self[zx::VALUE] * self[yz::VALUE] )
+		     + self[xz::VALUE] * ( self[yx::VALUE] * self[zy::VALUE] - self[zx::VALUE] * self[yy::VALUE] );
+	}
 };
 
 /// \brief The cofactor element indices for a 4x4 matrix row or column.
@@ -547,17 +547,17 @@ template<int Element>
 class Cofactor4
 {
 public:
-typedef IntegralConstant<( Element <= 0 ) ? 1 : 0> x;
-typedef IntegralConstant<( Element <= 1 ) ? 2 : 1> y;
-typedef IntegralConstant<( Element <= 2 ) ? 3 : 2> z;
+	typedef IntegralConstant<( Element <= 0 ) ? 1 : 0> x;
+	typedef IntegralConstant<( Element <= 1 ) ? 2 : 1> y;
+	typedef IntegralConstant<( Element <= 2 ) ? 3 : 2> z;
 };
 
 /// \brief Returns the determinant of \p self.
 inline double matrix4_determinant( const Matrix4& self ){
 	return self.xx() * Matrix4Cofactor< Cofactor4<0>, Cofactor4<0> >::apply( self )
-		   - self.xy() * Matrix4Cofactor< Cofactor4<0>, Cofactor4<1> >::apply( self )
-		   + self.xz() * Matrix4Cofactor< Cofactor4<0>, Cofactor4<2> >::apply( self )
-		   - self.xw() * Matrix4Cofactor< Cofactor4<0>, Cofactor4<3> >::apply( self );
+	     - self.xy() * Matrix4Cofactor< Cofactor4<0>, Cofactor4<1> >::apply( self )
+	     + self.xz() * Matrix4Cofactor< Cofactor4<0>, Cofactor4<2> >::apply( self )
+	     - self.xw() * Matrix4Cofactor< Cofactor4<0>, Cofactor4<3> >::apply( self );
 }
 
 /// \brief Returns the inverse of \p self using the Adjoint method.
@@ -566,23 +566,23 @@ inline Matrix4 matrix4_full_inverse( const Matrix4& self ){
 	double determinant = 1.0 / matrix4_determinant( self );
 
 	return Matrix4(
-			   static_cast<float>( Matrix4Cofactor< Cofactor4<0>, Cofactor4<0> >::apply( self ) * determinant ),
-			   static_cast<float>( -Matrix4Cofactor< Cofactor4<1>, Cofactor4<0> >::apply( self ) * determinant ),
-			   static_cast<float>( Matrix4Cofactor< Cofactor4<2>, Cofactor4<0> >::apply( self ) * determinant ),
-			   static_cast<float>( -Matrix4Cofactor< Cofactor4<3>, Cofactor4<0> >::apply( self ) * determinant ),
-			   static_cast<float>( -Matrix4Cofactor< Cofactor4<0>, Cofactor4<1> >::apply( self ) * determinant ),
-			   static_cast<float>( Matrix4Cofactor< Cofactor4<1>, Cofactor4<1> >::apply( self ) * determinant ),
-			   static_cast<float>( -Matrix4Cofactor< Cofactor4<2>, Cofactor4<1> >::apply( self ) * determinant ),
-			   static_cast<float>( Matrix4Cofactor< Cofactor4<3>, Cofactor4<1> >::apply( self ) * determinant ),
-			   static_cast<float>( Matrix4Cofactor< Cofactor4<0>, Cofactor4<2> >::apply( self ) * determinant ),
-			   static_cast<float>( -Matrix4Cofactor< Cofactor4<1>, Cofactor4<2> >::apply( self ) * determinant ),
-			   static_cast<float>( Matrix4Cofactor< Cofactor4<2>, Cofactor4<2> >::apply( self ) * determinant ),
-			   static_cast<float>( -Matrix4Cofactor< Cofactor4<3>, Cofactor4<2> >::apply( self ) * determinant ),
-			   static_cast<float>( -Matrix4Cofactor< Cofactor4<0>, Cofactor4<3> >::apply( self ) * determinant ),
-			   static_cast<float>( Matrix4Cofactor< Cofactor4<1>, Cofactor4<3> >::apply( self ) * determinant ),
-			   static_cast<float>( -Matrix4Cofactor< Cofactor4<2>, Cofactor4<3> >::apply( self ) * determinant ),
-			   static_cast<float>( Matrix4Cofactor< Cofactor4<3>, Cofactor4<3> >::apply( self ) * determinant )
-			   );
+	           static_cast<float>(  Matrix4Cofactor< Cofactor4<0>, Cofactor4<0> >::apply( self ) * determinant ),
+	           static_cast<float>( -Matrix4Cofactor< Cofactor4<1>, Cofactor4<0> >::apply( self ) * determinant ),
+	           static_cast<float>(  Matrix4Cofactor< Cofactor4<2>, Cofactor4<0> >::apply( self ) * determinant ),
+	           static_cast<float>( -Matrix4Cofactor< Cofactor4<3>, Cofactor4<0> >::apply( self ) * determinant ),
+	           static_cast<float>( -Matrix4Cofactor< Cofactor4<0>, Cofactor4<1> >::apply( self ) * determinant ),
+	           static_cast<float>(  Matrix4Cofactor< Cofactor4<1>, Cofactor4<1> >::apply( self ) * determinant ),
+	           static_cast<float>( -Matrix4Cofactor< Cofactor4<2>, Cofactor4<1> >::apply( self ) * determinant ),
+	           static_cast<float>(  Matrix4Cofactor< Cofactor4<3>, Cofactor4<1> >::apply( self ) * determinant ),
+	           static_cast<float>(  Matrix4Cofactor< Cofactor4<0>, Cofactor4<2> >::apply( self ) * determinant ),
+	           static_cast<float>( -Matrix4Cofactor< Cofactor4<1>, Cofactor4<2> >::apply( self ) * determinant ),
+	           static_cast<float>(  Matrix4Cofactor< Cofactor4<2>, Cofactor4<2> >::apply( self ) * determinant ),
+	           static_cast<float>( -Matrix4Cofactor< Cofactor4<3>, Cofactor4<2> >::apply( self ) * determinant ),
+	           static_cast<float>( -Matrix4Cofactor< Cofactor4<0>, Cofactor4<3> >::apply( self ) * determinant ),
+	           static_cast<float>(  Matrix4Cofactor< Cofactor4<1>, Cofactor4<3> >::apply( self ) * determinant ),
+	           static_cast<float>( -Matrix4Cofactor< Cofactor4<2>, Cofactor4<3> >::apply( self ) * determinant ),
+	           static_cast<float>(  Matrix4Cofactor< Cofactor4<3>, Cofactor4<3> >::apply( self ) * determinant )
+	       );
 }
 
 /// \brief Inverts \p self in-place using the Adjoint method.
@@ -606,11 +606,11 @@ inline BasicVector3<Element> matrix4_transformed_normal( const Matrix4& matrix, 
 /// \brief Constructs a pure-translation matrix from \p translation.
 inline Matrix4 matrix4_translation_for_vec3( const Vector3& translation ){
 	return Matrix4(
-			   1, 0, 0, 0,
-			   0, 1, 0, 0,
-			   0, 0, 1, 0,
-			   translation[0], translation[1], translation[2], 1
-			   );
+	           1, 0, 0, 0,
+	           0, 1, 0, 0,
+	           0, 0, 1, 0,
+	           translation[0], translation[1], translation[2], 1
+	       );
 }
 
 /// \brief Returns the translation part of \p self.
@@ -642,19 +642,19 @@ inline float angle_modulate_degrees_range( float angle ){
 /// \brief Returns \p euler angles converted from radians to degrees.
 inline Vector3 euler_radians_to_degrees( const Vector3& euler ){
 	return Vector3(
-			   static_cast<float>( radians_to_degrees( euler.x() ) ),
-			   static_cast<float>( radians_to_degrees( euler.y() ) ),
-			   static_cast<float>( radians_to_degrees( euler.z() ) )
-			   );
+	           static_cast<float>( radians_to_degrees( euler.x() ) ),
+	           static_cast<float>( radians_to_degrees( euler.y() ) ),
+	           static_cast<float>( radians_to_degrees( euler.z() ) )
+	       );
 }
 
 /// \brief Returns \p euler angles converted from degrees to radians.
 inline Vector3 euler_degrees_to_radians( const Vector3& euler ){
 	return Vector3(
-			   static_cast<float>( degrees_to_radians( euler.x() ) ),
-			   static_cast<float>( degrees_to_radians( euler.y() ) ),
-			   static_cast<float>( degrees_to_radians( euler.z() ) )
-			   );
+	           static_cast<float>( degrees_to_radians( euler.x() ) ),
+	           static_cast<float>( degrees_to_radians( euler.y() ) ),
+	           static_cast<float>( degrees_to_radians( euler.z() ) )
+	       );
 }
 
 
@@ -662,11 +662,11 @@ inline Vector3 euler_degrees_to_radians( const Vector3& euler ){
 /// \brief Constructs a pure-rotation matrix about the x axis from sin \p s and cosine \p c of an angle.
 inline Matrix4 matrix4_rotation_for_sincos_x( float s, float c ){
 	return Matrix4(
-			   1, 0, 0, 0,
-			   0, c, s, 0,
-			   0,-s, c, 0,
-			   0, 0, 0, 1
-			   );
+	           1, 0, 0, 0,
+	           0, c, s, 0,
+	           0,-s, c, 0,
+	           0, 0, 0, 1
+	       );
 }
 
 /// \brief Constructs a pure-rotation matrix about the x axis from an angle in radians.
@@ -682,11 +682,11 @@ inline Matrix4 matrix4_rotation_for_x_degrees( float x ){
 /// \brief Constructs a pure-rotation matrix about the y axis from sin \p s and cosine \p c of an angle.
 inline Matrix4 matrix4_rotation_for_sincos_y( float s, float c ){
 	return Matrix4(
-			   c, 0,-s, 0,
-			   0, 1, 0, 0,
-			   s, 0, c, 0,
-			   0, 0, 0, 1
-			   );
+	           c, 0,-s, 0,
+	           0, 1, 0, 0,
+	           s, 0, c, 0,
+	           0, 0, 0, 1
+	       );
 }
 
 /// \brief Constructs a pure-rotation matrix about the y axis from an angle in radians.
@@ -702,11 +702,11 @@ inline Matrix4 matrix4_rotation_for_y_degrees( float y ){
 /// \brief Constructs a pure-rotation matrix about the z axis from sin \p s and cosine \p c of an angle.
 inline Matrix4 matrix4_rotation_for_sincos_z( float s, float c ){
 	return Matrix4(
-			   c, s, 0, 0,
-			   -s, c, 0, 0,
-			   0, 0, 1, 0,
-			   0, 0, 0, 1
-			   );
+	           c, s, 0, 0,
+	           -s, c, 0, 0,
+	           0, 0, 1, 0,
+	           0, 0, 0, 1
+	       );
 }
 
 /// \brief Constructs a pure-rotation matrix about the z axis from an angle in radians.
@@ -753,33 +753,33 @@ inline Matrix4 matrix4_rotation_for_euler_xyz( const Vector3& euler ){
 	double sz = sin( euler[2] );
 
 	return Matrix4(
-			   static_cast<float>( cy * cz ),
-			   static_cast<float>( cy * sz ),
-			   static_cast<float>( -sy ),
-			   0,
-			   static_cast<float>( sx * sy * cz + cx * -sz ),
-			   static_cast<float>( sx * sy * sz + cx * cz ),
-			   static_cast<float>( sx * cy ),
-			   0,
-			   static_cast<float>( cx * sy * cz + sx * sz ),
-			   static_cast<float>( cx * sy * sz + -sx * cz ),
-			   static_cast<float>( cx * cy ),
-			   0,
-			   0,
-			   0,
-			   0,
-			   1
-			   );
+	           static_cast<float>( cy * cz ),
+	           static_cast<float>( cy * sz ),
+	           static_cast<float>( -sy ),
+	           0,
+	           static_cast<float>( sx * sy * cz + cx * -sz ),
+	           static_cast<float>( sx * sy * sz + cx * cz ),
+	           static_cast<float>( sx * cy ),
+	           0,
+	           static_cast<float>( cx * sy * cz + sx * sz ),
+	           static_cast<float>( cx * sy * sz + -sx * cz ),
+	           static_cast<float>( cx * cy ),
+	           0,
+	           0,
+	           0,
+	           0,
+	           1
+	       );
 
 #else
 
 	return matrix4_premultiply_by_matrix4(
-			   matrix4_premultiply_by_matrix4(
-				   matrix4_rotation_for_x( euler[0] ),
-				   matrix4_rotation_for_y( euler[1] )
-				   ),
-			   matrix4_rotation_for_z( euler[2] )
-			   );
+	           matrix4_premultiply_by_matrix4(
+	               matrix4_rotation_for_x( euler[0] ),
+	               matrix4_rotation_for_y( euler[1] )
+	           ),
+	           matrix4_rotation_for_z( euler[2] )
+	       );
 
 #endif
 }
@@ -799,12 +799,12 @@ inline void matrix4_rotate_by_euler_xyz_degrees( Matrix4& self, const Vector3& e
 /// \brief Constructs a pure-rotation matrix from a set of euler angles (radians) in the order (y, z, x).
 inline Matrix4 matrix4_rotation_for_euler_yzx( const Vector3& euler ){
 	return matrix4_premultiplied_by_matrix4(
-			   matrix4_premultiplied_by_matrix4(
-				   matrix4_rotation_for_y( euler[1] ),
-				   matrix4_rotation_for_z( euler[2] )
-				   ),
-			   matrix4_rotation_for_x( euler[0] )
-			   );
+	           matrix4_premultiplied_by_matrix4(
+	               matrix4_rotation_for_y( euler[1] ),
+	               matrix4_rotation_for_z( euler[2] )
+	           ),
+	           matrix4_rotation_for_x( euler[0] )
+	       );
 }
 
 /// \brief Constructs a pure-rotation matrix from a set of euler angles (degrees) in the order (y, z, x).
@@ -815,12 +815,12 @@ inline Matrix4 matrix4_rotation_for_euler_yzx_degrees( const Vector3& euler ){
 /// \brief Constructs a pure-rotation matrix from a set of euler angles (radians) in the order (x, z, y).
 inline Matrix4 matrix4_rotation_for_euler_xzy( const Vector3& euler ){
 	return matrix4_premultiplied_by_matrix4(
-			   matrix4_premultiplied_by_matrix4(
-				   matrix4_rotation_for_x( euler[0] ),
-				   matrix4_rotation_for_z( euler[2] )
-				   ),
-			   matrix4_rotation_for_y( euler[1] )
-			   );
+	           matrix4_premultiplied_by_matrix4(
+	               matrix4_rotation_for_x( euler[0] ),
+	               matrix4_rotation_for_z( euler[2] )
+	           ),
+	           matrix4_rotation_for_y( euler[1] )
+	       );
 }
 
 /// \brief Constructs a pure-rotation matrix from a set of euler angles (degrees) in the order (x, z, y).
@@ -845,33 +845,33 @@ inline Matrix4 matrix4_rotation_for_euler_yxz( const Vector3& euler ){
 	double sz = sin( euler[2] );
 
 	return Matrix4(
-			   static_cast<float>( cy * cz + sx * sy * -sz ),
-			   static_cast<float>( cy * sz + sx * sy * cz ),
-			   static_cast<float>( -cx * sy ),
-			   0,
-			   static_cast<float>( cx * -sz ),
-			   static_cast<float>( cx * cz ),
-			   static_cast<float>( sx ),
-			   0,
-			   static_cast<float>( sy * cz + -sx * cy * -sz ),
-			   static_cast<float>( sy * sz + -sx * cy * cz ),
-			   static_cast<float>( cx * cy ),
-			   0,
-			   0,
-			   0,
-			   0,
-			   1
-			   );
+	           static_cast<float>( cy * cz + sx * sy * -sz ),
+	           static_cast<float>( cy * sz + sx * sy * cz ),
+	           static_cast<float>( -cx * sy ),
+	           0,
+	           static_cast<float>( cx * -sz ),
+	           static_cast<float>( cx * cz ),
+	           static_cast<float>( sx ),
+	           0,
+	           static_cast<float>( sy * cz + -sx * cy * -sz ),
+	           static_cast<float>( sy * sz + -sx * cy * cz ),
+	           static_cast<float>( cx * cy ),
+	           0,
+	           0,
+	           0,
+	           0,
+	           1
+	       );
 
 #else
 
 	return matrix4_premultiply_by_matrix4(
-			   matrix4_premultiply_by_matrix4(
-				   matrix4_rotation_for_y( euler[1] ),
-				   matrix4_rotation_for_x( euler[0] )
-				   ),
-			   matrix4_rotation_for_z( euler[2] )
-			   );
+	           matrix4_premultiply_by_matrix4(
+	               matrix4_rotation_for_y( euler[1] ),
+	               matrix4_rotation_for_x( euler[0] )
+	           ),
+	           matrix4_rotation_for_z( euler[2] )
+	       );
 
 #endif
 }
@@ -897,12 +897,12 @@ inline void matrix4_rotate_by_euler_yxz_degrees( Matrix4& self, const Vector3& e
 inline Matrix4 matrix4_rotation_for_euler_zxy( const Vector3& euler ){
 #if 1
 	return matrix4_premultiplied_by_matrix4(
-			   matrix4_premultiplied_by_matrix4(
-				   matrix4_rotation_for_z( euler[2] ),
-				   matrix4_rotation_for_x( euler[0] )
-				   ),
-			   matrix4_rotation_for_y( euler[1] )
-			   );
+	           matrix4_premultiplied_by_matrix4(
+	               matrix4_rotation_for_z( euler[2] ),
+	               matrix4_rotation_for_x( euler[0] )
+	           ),
+	           matrix4_rotation_for_y( euler[1] )
+	       );
 #else
 	double cx = cos( euler[0] );
 	double sx = sin( euler[0] );
@@ -912,23 +912,23 @@ inline Matrix4 matrix4_rotation_for_euler_zxy( const Vector3& euler ){
 	double sz = sin( euler[2] );
 
 	return Matrix4(
-			   static_cast<float>( cz * cy + sz * sx * sy ),
-			   static_cast<float>( sz * cx ),
-			   static_cast<float>( cz * -sy + sz * sx * cy ),
-			   0,
-			   static_cast<float>( -sz * cy + cz * sx * sy ),
-			   static_cast<float>( cz * cx ),
-			   static_cast<float>( -sz * -sy + cz * cx * cy ),
-			   0,
-			   static_cast<float>( cx * sy ),
-			   static_cast<float>( -sx ),
-			   static_cast<float>( cx * cy ),
-			   0,
-			   0,
-			   0,
-			   0,
-			   1
-			   );
+	           static_cast<float>( cz * cy + sz * sx * sy ),
+	           static_cast<float>( sz * cx ),
+	           static_cast<float>( cz * -sy + sz * sx * cy ),
+	           0,
+	           static_cast<float>( -sz * cy + cz * sx * sy ),
+	           static_cast<float>( cz * cx ),
+	           static_cast<float>( -sz * -sy + cz * cx * cy ),
+	           0,
+	           static_cast<float>( cx * sy ),
+	           static_cast<float>( -sx ),
+	           static_cast<float>( cx * cy ),
+	           0,
+	           0,
+	           0,
+	           0,
+	           1
+	       );
 #endif
 }
 
@@ -961,33 +961,33 @@ inline Matrix4 matrix4_rotation_for_euler_zyx( const Vector3& euler ){
 	double sz = sin( euler[2] );
 
 	return Matrix4(
-			   static_cast<float>( cy * cz ),
-			   static_cast<float>( sx * sy * cz + cx * sz ),
-			   static_cast<float>( cx * -sy * cz + sx * sz ),
-			   0,
-			   static_cast<float>( cy * -sz ),
-			   static_cast<float>( sx * sy * -sz + cx * cz ),
-			   static_cast<float>( cx * -sy * -sz + sx * cz ),
-			   0,
-			   static_cast<float>( sy ),
-			   static_cast<float>( -sx * cy ),
-			   static_cast<float>( cx * cy ),
-			   0,
-			   0,
-			   0,
-			   0,
-			   1
-			   );
+	           static_cast<float>( cy * cz ),
+	           static_cast<float>( sx * sy * cz + cx * sz ),
+	           static_cast<float>( cx * -sy * cz + sx * sz ),
+	           0,
+	           static_cast<float>( cy * -sz ),
+	           static_cast<float>( sx * sy * -sz + cx * cz ),
+	           static_cast<float>( cx * -sy * -sz + sx * cz ),
+	           0,
+	           static_cast<float>( sy ),
+	           static_cast<float>( -sx * cy ),
+	           static_cast<float>( cx * cy ),
+	           0,
+	           0,
+	           0,
+	           0,
+	           1
+	       );
 
 #else
 
 	return matrix4_premultiply_by_matrix4(
-			   matrix4_premultiply_by_matrix4(
-				   matrix4_rotation_for_z( euler[2] ),
-				   matrix4_rotation_for_y( euler[1] )
-				   ),
-			   matrix4_rotation_for_x( euler[0] )
-			   );
+	           matrix4_premultiply_by_matrix4(
+	               matrix4_rotation_for_z( euler[2] ),
+	               matrix4_rotation_for_y( euler[1] )
+	           ),
+	           matrix4_rotation_for_x( euler[0] )
+	       );
 
 #endif
 }
@@ -1006,18 +1006,18 @@ inline Vector3 matrix4_get_rotation_euler_xyz( const Matrix4& self ){
 
 	if ( fabs( ca ) > 0.005 ) { // Gimbal lock?
 		return Vector3(
-				   static_cast<float>( atan2( self[6] / ca, self[10] / ca ) ),
-				   static_cast<float>( a ),
-				   static_cast<float>( atan2( self[1] / ca, self[0] / ca ) )
-				   );
+		           static_cast<float>( atan2( self[6] / ca, self[10] / ca ) ),
+		           static_cast<float>( a ),
+		           static_cast<float>( atan2( self[1] / ca, self[0] / ca ) )
+		       );
 	}
 	else // Gimbal lock has occurred
 	{
 		return Vector3(
-				   static_cast<float>( atan2( -self[9], self[5] ) ),
-				   static_cast<float>( a ),
-				   0
-				   );
+		           static_cast<float>( atan2( -self[9], self[5] ) ),
+		           static_cast<float>( a ),
+		           0
+		       );
 	}
 }
 
@@ -1034,18 +1034,18 @@ inline Vector3 matrix4_get_rotation_euler_yxz( const Matrix4& self ){
 
 	if ( fabs( ca ) > 0.005 ) { // Gimbal lock?
 		return Vector3(
-				   static_cast<float>( a ),
-				   static_cast<float>( atan2( -self[2] / ca, self[10] / ca ) ),
-				   static_cast<float>( atan2( -self[4] / ca, self[5] / ca ) )
-				   );
+		           static_cast<float>( a ),
+		           static_cast<float>( atan2( -self[2] / ca, self[10] / ca ) ),
+		           static_cast<float>( atan2( -self[4] / ca, self[5] / ca ) )
+		       );
 	}
 	else // Gimbal lock has occurred
 	{
 		return Vector3(
-				   static_cast<float>( a ),
-				   static_cast<float>( atan2( self[8], self[0] ) ),
-				   0
-				   );
+		           static_cast<float>( a ),
+		           static_cast<float>( atan2( self[8], self[0] ) ),
+		           0
+		       );
 	}
 }
 
@@ -1062,18 +1062,18 @@ inline Vector3 matrix4_get_rotation_euler_zxy( const Matrix4& self ){
 
 	if ( fabs( ca ) > 0.005 ) { // Gimbal lock?
 		return Vector3(
-				   static_cast<float>( a ),
-				   static_cast<float>( atan2( self[8] / ca, self[10] / ca ) ),
-				   static_cast<float>( atan2( self[1] / ca, self[5] / ca ) )
-				   );
+		           static_cast<float>( a ),
+		           static_cast<float>( atan2( self[8] / ca, self[10] / ca ) ),
+		           static_cast<float>( atan2( self[1] / ca, self[5] / ca ) )
+		       );
 	}
 	else // Gimbal lock has occurred
 	{
 		return Vector3(
-				   static_cast<float>( a ),
-				   0,
-				   static_cast<float>( atan2( -self[4], self[0] ) )
-				   );
+		           static_cast<float>( a ),
+		           0,
+		           static_cast<float>( atan2( -self[4], self[0] ) )
+		       );
 	}
 }
 
@@ -1090,18 +1090,18 @@ inline Vector3 matrix4_get_rotation_euler_zyx( const Matrix4& self ){
 
 	if ( fabs( ca ) > 0.005 ) { // Gimbal lock?
 		return Vector3(
-				   static_cast<float>( atan2( -self[9] / ca, self[10] / ca ) ),
-				   static_cast<float>( a ),
-				   static_cast<float>( atan2( -self[4] / ca, self[0] / ca ) )
-				   );
+		           static_cast<float>( atan2( -self[9] / ca, self[10] / ca ) ),
+		           static_cast<float>( a ),
+		           static_cast<float>( atan2( -self[4] / ca, self[0] / ca ) )
+		       );
 	}
 	else // Gimbal lock has occurred
 	{
 		return Vector3(
-				   0,
-				   static_cast<float>( a ),
-				   static_cast<float>( atan2( self[1], self[5] ) )
-				   );
+		           0,
+		           static_cast<float>( a ),
+		           static_cast<float>( atan2( self[1], self[5] ) )
+		       );
 	}
 }
 
@@ -1122,21 +1122,21 @@ inline void matrix4_pivoted_rotate_by_euler_xyz_degrees( Matrix4& self, const Ve
 /// \brief Constructs a pure-scale matrix from \p scale.
 inline Matrix4 matrix4_scale_for_vec3( const Vector3& scale ){
 	return Matrix4(
-			   scale[0], 0, 0, 0,
-			   0, scale[1], 0, 0,
-			   0, 0, scale[2], 0,
-			   0, 0, 0,        1
-			   );
+	           scale[0], 0, 0, 0,
+	           0, scale[1], 0, 0,
+	           0, 0, scale[2], 0,
+	           0, 0, 0,        1
+	       );
 }
 
 /// \brief Calculates and returns the (x, y, z) scale values that produce the scale component of \p self.
 /// \p self must be affine and orthogonal to produce a meaningful result.
 inline Vector3 matrix4_get_scale_vec3( const Matrix4& self ){
 	return Vector3(
-			   static_cast<float>( vector3_length( vector4_to_vector3( self.x() ) ) ),
-			   static_cast<float>( vector3_length( vector4_to_vector3( self.y() ) ) ),
-			   static_cast<float>( vector3_length( vector4_to_vector3( self.z() ) ) )
-			   );
+	           static_cast<float>( vector3_length( vector4_to_vector3( self.x() ) ) ),
+	           static_cast<float>( vector3_length( vector4_to_vector3( self.y() ) ) ),
+	           static_cast<float>( vector3_length( vector4_to_vector3( self.z() ) ) )
+	       );
 }
 
 /// \brief Scales \p self by \p scale.

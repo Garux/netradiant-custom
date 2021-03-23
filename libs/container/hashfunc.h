@@ -44,49 +44,49 @@ inline ub4 ub1x4_as_ub4_nocase( const ub1 bytes[4] ){
 class ub1_default_traits
 {
 public:
-static ub1 as_ub1( ub1 byte ){
-	return byte;
-}
+	static ub1 as_ub1( ub1 byte ){
+		return byte;
+	}
 };
 
 class ub1_nocase_traits
 {
 public:
-static ub1 as_ub1( ub1 byte ){
-	return ub1_as_ub1_nocase( byte );
-}
+	static ub1 as_ub1( ub1 byte ){
+		return ub1_as_ub1_nocase( byte );
+	}
 };
 
 class ub1x4_default_traits
 {
 public:
-static ub4 as_ub4( const ub1 bytes[4] ){
-	return *reinterpret_cast<const ub4*>( bytes );
-}
+	static ub4 as_ub4( const ub1 bytes[4] ){
+		return *reinterpret_cast<const ub4*>( bytes );
+	}
 };
 
 class ub1x4_nocase_traits
 {
 public:
-static ub4 as_ub4( const ub1 bytes[4] ){
-	return ub1x4_as_ub4_nocase( bytes );
-}
+	static ub4 as_ub4( const ub1 bytes[4] ){
+		return ub1x4_as_ub4_nocase( bytes );
+	}
 };
 
 class ub4_default_traits
 {
 public:
-static ub4 as_ub4( ub4 i ){
-	return i;
-}
+	static ub4 as_ub4( ub4 i ){
+		return i;
+	}
 };
 
 class ub4_nocase_traits
 {
 public:
-static ub4 as_ub4( ub4 i ){
-	return ub1x4_as_ub4_nocase( reinterpret_cast<const ub1*>( &i ) );
-}
+	static ub4 as_ub4( ub4 i ){
+		return ub1x4_as_ub4_nocase( reinterpret_cast<const ub1*>( &i ) );
+	}
 };
 
 // lookup2.c
@@ -176,12 +176,12 @@ static ub4 as_ub4( ub4 i ){
 
 template<typename UB1Traits, typename UB4x1Traits>
 inline ub4 hash(
-	const ub1 *k,    /* the key */
-	ub4 length, /* the length of the key */
-	ub4 initval, /* the previous hash, or an arbitrary value */
-	const UB1Traits& ub1traits,
-	const UB4x1Traits& ub4x1traits
-	){
+    const ub1 *k,    /* the key */
+    ub4 length, /* the length of the key */
+    ub4 initval, /* the previous hash, or an arbitrary value */
+    const UB1Traits& ub1traits,
+    const UB4x1Traits& ub4x1traits
+){
 	ub4 a,b,c,len;
 
 	/* Set up the internal state */
@@ -196,7 +196,8 @@ inline ub4 hash(
 		b += ( k[4] + ( ( ub4 ) UB1Traits::as_ub1( k[5] ) << 8 ) + ( ( ub4 ) UB1Traits::as_ub1( k[6] ) << 16 ) + ( ( ub4 ) UB1Traits::as_ub1( k[7] ) << 24 ) );
 		c += ( k[8] + ( ( ub4 ) UB1Traits::as_ub1( k[9] ) << 8 ) + ( ( ub4 ) UB1Traits::as_ub1( k[10] ) << 16 ) + ( ( ub4 ) UB1Traits::as_ub1( k[11] ) << 24 ) );
 		mix( a,b,c );
-		k += 12; len -= 12;
+		k += 12;
+		len -= 12;
 	}
 
 	/*------------------------------------- handle the last 11 bytes */
@@ -235,11 +236,11 @@ inline ub4 hash(
  */
 template<typename UB4Traits>
 inline ub4 hash2(
-	const ub4 *k,    /* the key */
-	ub4 length, /* the length of the key, in ub4s */
-	ub4 initval, /* the previous hash, or an arbitrary value */
-	const UB4Traits& ub4traits
-	){
+    const ub4 *k,    /* the key */
+    ub4 length, /* the length of the key, in ub4s */
+    ub4 initval, /* the previous hash, or an arbitrary value */
+    const UB4Traits& ub4traits
+){
 	ub4 a,b,c,len;
 
 	/* Set up the internal state */
@@ -254,7 +255,8 @@ inline ub4 hash2(
 		b += UB4Traits::as_ub4( k[1] );
 		c += UB4Traits::as_ub4( k[2] );
 		mix( a,b,c );
-		k += 3; len -= 3;
+		k += 3;
+		len -= 3;
 	}
 
 	/*-------------------------------------- handle the last 2 ub4's */
@@ -340,51 +342,51 @@ inline std::size_t string_length_ub4( const char* string ){
 template<typename UB4Traits = ub4_default_traits>
 class HashKey
 {
-Array<ub4> m_key;
-hash_t m_hash;
+	Array<ub4> m_key;
+	hash_t m_hash;
 
-void copy( const HashKey& other ){
-	std::copy( other.m_key.begin(), other.m_key.end(), m_key.begin() );
-	m_hash = other.m_hash;
-}
-void copy( const char* string ){
-	strncpy( reinterpret_cast<char*>( m_key.data() ), string, m_key.size() );
-	for ( Array<ub4>::iterator i = m_key.begin(); i != m_key.end(); ++i )
-	{
-		*i = UB4Traits::as_ub4( *i );
+	void copy( const HashKey& other ){
+		std::copy( other.m_key.begin(), other.m_key.end(), m_key.begin() );
+		m_hash = other.m_hash;
 	}
-	m_hash = hash_ub4( m_key.data(), m_key.size(), ub4_default_traits() );
-}
-bool equal( const HashKey& other ) const {
-	return m_hash == other.m_hash && m_key.size() == other.m_key.size()
-		   && std::equal( m_key.begin(), m_key.end(), other.m_key.begin() );
-}
+	void copy( const char* string ){
+		strncpy( reinterpret_cast<char*>( m_key.data() ), string, m_key.size() );
+		for ( Array<ub4>::iterator i = m_key.begin(); i != m_key.end(); ++i )
+		{
+			*i = UB4Traits::as_ub4( *i );
+		}
+		m_hash = hash_ub4( m_key.data(), m_key.size(), ub4_default_traits() );
+	}
+	bool equal( const HashKey& other ) const {
+		return m_hash == other.m_hash && m_key.size() == other.m_key.size()
+		       && std::equal( m_key.begin(), m_key.end(), other.m_key.begin() );
+	}
 
 public:
-HashKey( const HashKey& other ) : m_key( other.m_key.size() ){
-	copy( other );
-}
-HashKey( const char* string ) : m_key( string_length_ub4( string ) ){
-	copy( string );
-}
-HashKey& operator=( const char* string ){
-	m_key.resize( string_length_ub4( string ) );
-	copy( string );
-	return *this;
-}
-bool operator==( const HashKey& other ) const {
-	return equal( other );
-}
-bool operator!=( const HashKey& other ) const {
-	return !equal( other );
-}
-hash_t hash() const {
-	return m_hash;
-}
+	HashKey( const HashKey& other ) : m_key( other.m_key.size() ){
+		copy( other );
+	}
+	HashKey( const char* string ) : m_key( string_length_ub4( string ) ){
+		copy( string );
+	}
+	HashKey& operator=( const char* string ){
+		m_key.resize( string_length_ub4( string ) );
+		copy( string );
+		return *this;
+	}
+	bool operator==( const HashKey& other ) const {
+		return equal( other );
+	}
+	bool operator!=( const HashKey& other ) const {
+		return !equal( other );
+	}
+	hash_t hash() const {
+		return m_hash;
+	}
 #if 0
-const char* c_str() const {
-	return reinterpret_cast<const char*>( m_key.data() );
-}
+	const char* c_str() const {
+		return reinterpret_cast<const char*>( m_key.data() );
+	}
 #endif
 };
 

@@ -80,9 +80,9 @@ inline Element float_squared( const Element& f ){
 class MD5Joint
 {
 public:
-int parent;
-Vector3 position;
-Vector4 rotation;
+	int parent;
+	Vector3 position;
+	Vector4 rotation;
 };
 
 typedef Array<MD5Joint> MD5Joints;
@@ -90,11 +90,11 @@ typedef Array<MD5Joint> MD5Joints;
 class MD5Vert
 {
 public:
-std::size_t index;
-float u;
-float v;
-std::size_t weight_index;
-std::size_t weight_count;
+	std::size_t index;
+	float u;
+	float v;
+	std::size_t weight_index;
+	std::size_t weight_count;
 };
 
 typedef Array<MD5Vert> MD5Verts;
@@ -102,10 +102,10 @@ typedef Array<MD5Vert> MD5Verts;
 class MD5Tri
 {
 public:
-std::size_t index;
-std::size_t a;
-std::size_t b;
-std::size_t c;
+	std::size_t index;
+	std::size_t a;
+	std::size_t b;
+	std::size_t c;
 };
 
 typedef Array<MD5Tri> MD5Tris;
@@ -113,10 +113,10 @@ typedef Array<MD5Tri> MD5Tris;
 class MD5Weight
 {
 public:
-std::size_t index;
-std::size_t joint;
-float t;
-Vector3 v;
+	std::size_t index;
+	std::size_t joint;
+	float t;
+	Vector3 v;
 };
 
 typedef Array<MD5Weight> MD5Weights;
@@ -127,7 +127,7 @@ typedef Array<MD5Component> MD5Components;
 class MD5Frame
 {
 public:
-MD5Components m_components;
+	MD5Components m_components;
 };
 
 typedef Array<MD5Weight> MD5Weights;
@@ -399,11 +399,11 @@ bool MD5Model_parse( Model& model, Tokeniser& tokeniser ){
 			ArbitraryMeshVertex& b = surface.vertices()[*( j + 1 )];
 			ArbitraryMeshVertex& c = surface.vertices()[*( j + 2 )];
 			Vector3 weightedNormal(
-				vector3_cross(
-					reinterpret_cast<const Vector3&>( c.vertex ) - reinterpret_cast<const Vector3&>( a.vertex ),
-					reinterpret_cast<const Vector3&>( b.vertex ) - reinterpret_cast<const Vector3&>( a.vertex )
-					)
-				);
+			    vector3_cross(
+			        reinterpret_cast<const Vector3&>( c.vertex ) - reinterpret_cast<const Vector3&>( a.vertex ),
+			        reinterpret_cast<const Vector3&>( b.vertex ) - reinterpret_cast<const Vector3&>( a.vertex )
+			    )
+			);
 			reinterpret_cast<Vector3&>( a.normal ) += weightedNormal;
 			reinterpret_cast<Vector3&>( b.normal ) += weightedNormal;
 			reinterpret_cast<Vector3&>( c.normal ) += weightedNormal;

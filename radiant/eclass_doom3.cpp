@@ -41,13 +41,13 @@
 
 class RawString
 {
-const char* m_value;
+	const char* m_value;
 public:
-RawString( const char* value ) : m_value( value ){
-}
-const char* c_str() const {
-	return m_value;
-}
+	RawString( const char* value ) : m_value( value ){
+	}
+	const char* c_str() const {
+		return m_value;
+	}
 };
 
 inline bool operator<( const RawString& self, const RawString& other ){
@@ -152,14 +152,14 @@ bool EntityClassDoom3_parseUnknown( Tokeniser& tokeniser ){
 class Model
 {
 public:
-bool m_resolved;
-CopiedString m_mesh;
-CopiedString m_skin;
-CopiedString m_parent;
-typedef std::map<CopiedString, CopiedString> Anims;
-Anims m_anims;
-Model() : m_resolved( false ){
-}
+	bool m_resolved;
+	CopiedString m_mesh;
+	CopiedString m_skin;
+	CopiedString m_parent;
+	typedef std::map<CopiedString, CopiedString> Anims;
+	Anims m_anims;
+	Model() : m_resolved( false ){
+	}
 };
 
 typedef std::map<CopiedString, Model> Models;
@@ -403,14 +403,14 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 			currentString = &usage;
 		}
 		else if ( string_equal( key, "editor_rotatable" )
-				  || string_equal( key, "editor_showangle" )
-				  || string_equal( key, "editor_showangles" ) // typo? in prey movables.def
-				  || string_equal( key, "editor_mover" )
-				  || string_equal( key, "editor_model" )
-				  || string_equal( key, "editor_material" )
-				  || string_equal( key, "editor_combatnode" )
-				  || ( !string_empty( last ) && string_equal( first.c_str(), "editor_gui" ) )
-				  || string_equal_n( key, "editor_copy", 11 ) ) {
+		       || string_equal( key, "editor_showangle" )
+		       || string_equal( key, "editor_showangles" ) // typo? in prey movables.def
+		       || string_equal( key, "editor_mover" )
+		       || string_equal( key, "editor_model" )
+		       || string_equal( key, "editor_material" )
+		       || string_equal( key, "editor_combatnode" )
+		       || ( !string_empty( last ) && string_equal( first.c_str(), "editor_gui" ) )
+		       || string_equal_n( key, "editor_copy", 11 ) ) {
 			PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser ) );
 		}
 		else if ( !string_empty( last ) && ( string_equal( first.c_str(), "editor_var" ) || string_equal( first.c_str(), "editor_string" ) ) ) {
@@ -492,10 +492,10 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 		// end quake4-specific keys
 		// begin ignore prey (unknown/unused?) entity keys
 		else if ( string_equal( key, "editor_light" )
-				  || string_equal( key, "editor_def def_debrisspawner" )
-				  || string_equal( key, "editor_def def_drop" )
-				  || string_equal( key, "editor_def def_guihand" )
-				  || string_equal( key, "editor_def def_mine" ) ) {
+		       || string_equal( key, "editor_def def_debrisspawner" )
+		       || string_equal( key, "editor_def def_drop" )
+		       || string_equal( key, "editor_def def_guihand" )
+		       || string_equal( key, "editor_def def_mine" ) ) {
 			//const char* value =
 			PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser ) );
 		}
@@ -636,7 +636,7 @@ EntityClass* EntityClassDoom3_findOrInsert( const char *name, bool has_brushes )
 	EntityClasses::iterator i = g_EntityClassDoom3_classes.find( name );
 	if ( i != g_EntityClassDoom3_classes.end()
 	     //&& string_equal((*i).first, name)
-		 ) {
+	   ) {
 		return ( *i ).second;
 	}
 
@@ -683,73 +683,73 @@ void EntityClass_resolveInheritance( EntityClass* derivedClass ){
 
 class EntityClassDoom3 : public ModuleObserver
 {
-std::size_t m_unrealised;
-ModuleObservers m_observers;
+	std::size_t m_unrealised;
+	ModuleObservers m_observers;
 public:
-EntityClassDoom3() : m_unrealised( 2 ){
-}
-void realise(){
-	if ( --m_unrealised == 0 ) {
-		globalOutputStream() << "searching vfs directory " << makeQuoted( "def" ) << " for *.def\n";
-		GlobalFileSystem().forEachFile( "def/", "def", FreeCaller1<const char*, EntityClassDoom3_loadFile>() );
+	EntityClassDoom3() : m_unrealised( 2 ){
+	}
+	void realise(){
+		if ( --m_unrealised == 0 ) {
+			globalOutputStream() << "searching vfs directory " << makeQuoted( "def" ) << " for *.def\n";
+			GlobalFileSystem().forEachFile( "def/", "def", FreeCaller1<const char*, EntityClassDoom3_loadFile>() );
 
-		{
-			for ( Models::iterator i = g_models.begin(); i != g_models.end(); ++i )
 			{
-				Model_resolveInheritance( ( *i ).first.c_str(), ( *i ).second );
-			}
-		}
-		{
-			for ( EntityClasses::iterator i = g_EntityClassDoom3_classes.begin(); i != g_EntityClassDoom3_classes.end(); ++i )
-			{
-				EntityClass_resolveInheritance( ( *i ).second );
-				if ( !string_empty( ( *i ).second->m_modelpath.c_str() ) ) {
-					Models::iterator j = g_models.find( ( *i ).second->m_modelpath );
-					if ( j != g_models.end() ) {
-						( *i ).second->m_modelpath = ( *j ).second.m_mesh;
-						( *i ).second->m_skin = ( *j ).second.m_skin;
-					}
-				}
-				eclass_capture_state( ( *i ).second );
-
-				StringOutputStream usage( 256 );
-
-				usage << "-------- NOTES --------\n";
-
-				if ( !string_empty( ( *i ).second->m_comments.c_str() ) ) {
-					usage << ( *i ).second->m_comments.c_str() << "\n";
-				}
-
-				usage << "\n-------- KEYS --------\n";
-
-				for ( EntityClassAttributes::iterator j = ( *i ).second->m_attributes.begin(); j != ( *i ).second->m_attributes.end(); ++j )
+				for ( Models::iterator i = g_models.begin(); i != g_models.end(); ++i )
 				{
-					const char* name = EntityClassAttributePair_getName( *j );
-					const char* description = EntityClassAttributePair_getDescription( *j );
-					if ( !string_equal( name, description ) ) {
-						usage << EntityClassAttributePair_getName( *j ) << " : " << EntityClassAttributePair_getDescription( *j ) << "\n";
-					}
+					Model_resolveInheritance( ( *i ).first.c_str(), ( *i ).second );
 				}
-
-				( *i ).second->m_comments = usage.c_str();
 			}
-		}
+			{
+				for ( EntityClasses::iterator i = g_EntityClassDoom3_classes.begin(); i != g_EntityClassDoom3_classes.end(); ++i )
+				{
+					EntityClass_resolveInheritance( ( *i ).second );
+					if ( !string_empty( ( *i ).second->m_modelpath.c_str() ) ) {
+						Models::iterator j = g_models.find( ( *i ).second->m_modelpath );
+						if ( j != g_models.end() ) {
+							( *i ).second->m_modelpath = ( *j ).second.m_mesh;
+							( *i ).second->m_skin = ( *j ).second.m_skin;
+						}
+					}
+					eclass_capture_state( ( *i ).second );
 
-		m_observers.realise();
+					StringOutputStream usage( 256 );
+
+					usage << "-------- NOTES --------\n";
+
+					if ( !string_empty( ( *i ).second->m_comments.c_str() ) ) {
+						usage << ( *i ).second->m_comments.c_str() << "\n";
+					}
+
+					usage << "\n-------- KEYS --------\n";
+
+					for ( EntityClassAttributes::iterator j = ( *i ).second->m_attributes.begin(); j != ( *i ).second->m_attributes.end(); ++j )
+					{
+						const char* name = EntityClassAttributePair_getName( *j );
+						const char* description = EntityClassAttributePair_getDescription( *j );
+						if ( !string_equal( name, description ) ) {
+							usage << EntityClassAttributePair_getName( *j ) << " : " << EntityClassAttributePair_getDescription( *j ) << "\n";
+						}
+					}
+
+					( *i ).second->m_comments = usage.c_str();
+				}
+			}
+
+			m_observers.realise();
+		}
 	}
-}
-void unrealise(){
-	if ( ++m_unrealised == 1 ) {
-		m_observers.unrealise();
-		EntityClassDoom3_clear();
+	void unrealise(){
+		if ( ++m_unrealised == 1 ) {
+			m_observers.unrealise();
+			EntityClassDoom3_clear();
+		}
 	}
-}
-void attach( ModuleObserver& observer ){
-	m_observers.attach( observer );
-}
-void detach( ModuleObserver& observer ){
-	m_observers.detach( observer );
-}
+	void attach( ModuleObserver& observer ){
+		m_observers.attach( observer );
+	}
+	void detach( ModuleObserver& observer ){
+		m_observers.detach( observer );
+	}
 };
 
 EntityClassDoom3 g_EntityClassDoom3;
@@ -791,28 +791,28 @@ class EntityClassDoom3Dependencies : public GlobalFileSystemModuleRef, public Gl
 
 class EntityClassDoom3API
 {
-EntityClassManager m_eclassmanager;
+	EntityClassManager m_eclassmanager;
 public:
-typedef EntityClassManager Type;
-STRING_CONSTANT( Name, "doom3" );
+	typedef EntityClassManager Type;
+	STRING_CONSTANT( Name, "doom3" );
 
-EntityClassDoom3API(){
-	EntityClassDoom3_construct();
+	EntityClassDoom3API(){
+		EntityClassDoom3_construct();
 
-	m_eclassmanager.findOrInsert = &EntityClassDoom3_findOrInsert;
-	m_eclassmanager.findListType = &EntityClassDoom3_findListType;
-	m_eclassmanager.forEach = &EntityClassDoom3_forEach;
-	m_eclassmanager.attach = &EntityClassDoom3_attach;
-	m_eclassmanager.detach = &EntityClassDoom3_detach;
-	m_eclassmanager.realise = &EntityClassDoom3_realise;
-	m_eclassmanager.unrealise = &EntityClassDoom3_unrealise;
-}
-~EntityClassDoom3API(){
-	EntityClassDoom3_destroy();
-}
-EntityClassManager* getTable(){
-	return &m_eclassmanager;
-}
+		m_eclassmanager.findOrInsert = &EntityClassDoom3_findOrInsert;
+		m_eclassmanager.findListType = &EntityClassDoom3_findListType;
+		m_eclassmanager.forEach = &EntityClassDoom3_forEach;
+		m_eclassmanager.attach = &EntityClassDoom3_attach;
+		m_eclassmanager.detach = &EntityClassDoom3_detach;
+		m_eclassmanager.realise = &EntityClassDoom3_realise;
+		m_eclassmanager.unrealise = &EntityClassDoom3_unrealise;
+	}
+	~EntityClassDoom3API(){
+		EntityClassDoom3_destroy();
+	}
+	EntityClassManager* getTable(){
+		return &m_eclassmanager;
+	}
 };
 
 #include "modulesystem/singletonmodule.h"

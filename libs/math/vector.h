@@ -126,9 +126,9 @@ inline Element float_mod( const Element& self, const ModulusElement& modulus ){
 template<typename Element, typename OtherElement>
 inline BasicVector2<Element> vector2_added( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
 	return BasicVector2<Element>(
-			   Element( self.x() + other.x() ),
-			   Element( self.y() + other.y() )
-			   );
+	           Element( self.x() + other.x() ),
+	           Element( self.y() + other.y() )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector2<Element> operator+( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
@@ -148,9 +148,9 @@ inline void operator+=( BasicVector2<Element>& self, const BasicVector2<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector2<Element> vector2_subtracted( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
 	return BasicVector2<Element>(
-			   Element( self.x() - other.x() ),
-			   Element( self.y() - other.y() )
-			   );
+	           Element( self.x() - other.x() ),
+	           Element( self.y() - other.y() )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector2<Element> operator-( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
@@ -170,9 +170,9 @@ inline void operator-=( BasicVector2<Element>& self, const BasicVector2<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector2<Element> vector2_scaled( const BasicVector2<Element>& self, OtherElement other ){
 	return BasicVector2<Element>(
-			   Element( self.x() * other ),
-			   Element( self.y() * other )
-			   );
+	           Element( self.x() * other ),
+	           Element( self.y() * other )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector2<Element> operator*( const BasicVector2<Element>& self, OtherElement other ){
@@ -192,9 +192,9 @@ inline void operator*=( BasicVector2<Element>& self, OtherElement other ){
 template<typename Element, typename OtherElement>
 inline BasicVector2<Element> vector2_scaled( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
 	return BasicVector2<Element>(
-			   Element( self.x() * other.x() ),
-			   Element( self.y() * other.y() )
-			   );
+	           Element( self.x() * other.x() ),
+	           Element( self.y() * other.y() )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector2<Element> operator*( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
@@ -213,9 +213,9 @@ inline void operator*=( BasicVector2<Element>& self, const BasicVector2<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector2<Element> vector2_divided( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
 	return BasicVector2<Element>(
-			   Element( self.x() / other.x() ),
-			   Element( self.y() / other.y() )
-			   );
+	           Element( self.x() / other.x() ),
+	           Element( self.y() / other.y() )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector2<Element> operator/( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
@@ -235,9 +235,9 @@ inline void operator/=( BasicVector2<Element>& self, const BasicVector2<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector2<Element> vector2_divided( const BasicVector2<Element>& self, OtherElement other ){
 	return BasicVector2<Element>(
-			   Element( self.x() / other ),
-			   Element( self.y() / other )
-			   );
+	           Element( self.x() / other ),
+	           Element( self.y() / other )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector2<Element> operator/( const BasicVector2<Element>& self, OtherElement other ){
@@ -326,8 +326,8 @@ inline bool operator!=( const BasicVector3<Element>& self, const BasicVector3<Ot
 template<typename Element, typename OtherElement, typename Epsilon>
 inline bool vector3_equal_epsilon( const BasicVector3<Element>& self, const BasicVector3<OtherElement>& other, Epsilon epsilon ){
 	return float_equal_epsilon( self.x(), other.x(), epsilon )
-		   && float_equal_epsilon( self.y(), other.y(), epsilon )
-		   && float_equal_epsilon( self.z(), other.z(), epsilon );
+	    && float_equal_epsilon( self.y(), other.y(), epsilon )
+	    && float_equal_epsilon( self.z(), other.z(), epsilon );
 }
 
 
@@ -335,10 +335,10 @@ inline bool vector3_equal_epsilon( const BasicVector3<Element>& self, const Basi
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> vector3_added( const BasicVector3<Element>& self, const BasicVector3<OtherElement>& other ){
 	return BasicVector3<Element>(
-			   Element( self.x() + other.x() ),
-			   Element( self.y() + other.y() ),
-			   Element( self.z() + other.z() )
-			   );
+	           Element( self.x() + other.x() ),
+	           Element( self.y() + other.y() ),
+	           Element( self.z() + other.z() )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> operator+( const BasicVector3<Element>& self, const BasicVector3<OtherElement>& other ){
@@ -358,10 +358,10 @@ inline void operator+=( BasicVector3<Element>& self, const BasicVector3<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> vector3_subtracted( const BasicVector3<Element>& self, const BasicVector3<OtherElement>& other ){
 	return BasicVector3<Element>(
-			   Element( self.x() - other.x() ),
-			   Element( self.y() - other.y() ),
-			   Element( self.z() - other.z() )
-			   );
+	           Element( self.x() - other.x() ),
+	           Element( self.y() - other.y() ),
+	           Element( self.z() - other.z() )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> operator-( const BasicVector3<Element>& self, const BasicVector3<OtherElement>& other ){
@@ -381,10 +381,10 @@ inline void operator-=( BasicVector3<Element>& self, const BasicVector3<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> vector3_scaled( const BasicVector3<Element>& self, const BasicVector3<OtherElement>& other ){
 	return BasicVector3<Element>(
-			   Element( self.x() * other.x() ),
-			   Element( self.y() * other.y() ),
-			   Element( self.z() * other.z() )
-			   );
+	           Element( self.x() * other.x() ),
+	           Element( self.y() * other.y() ),
+	           Element( self.z() * other.z() )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> operator*( const BasicVector3<Element>& self, const BasicVector3<OtherElement>& other ){
@@ -404,10 +404,10 @@ inline void operator*=( BasicVector3<Element>& self, const BasicVector3<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> vector3_scaled( const BasicVector3<Element>& self, const OtherElement& scale ){
 	return BasicVector3<Element>(
-			   Element( self.x() * scale ),
-			   Element( self.y() * scale ),
-			   Element( self.z() * scale )
-			   );
+	           Element( self.x() * scale ),
+	           Element( self.y() * scale ),
+	           Element( self.z() * scale )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> operator*( const BasicVector3<Element>& self, const OtherElement& scale ){
@@ -427,10 +427,10 @@ inline void operator*=( BasicVector3<Element>& self, const OtherElement& scale )
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> vector3_divided( const BasicVector3<Element>& self, const BasicVector3<OtherElement>& other ){
 	return BasicVector3<Element>(
-			   Element( self.x() / other.x() ),
-			   Element( self.y() / other.y() ),
-			   Element( self.z() / other.z() )
-			   );
+	           Element( self.x() / other.x() ),
+	           Element( self.y() / other.y() ),
+	           Element( self.z() / other.z() )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> operator/( const BasicVector3<Element>& self, const BasicVector3<OtherElement>& other ){
@@ -450,10 +450,10 @@ inline void operator/=( BasicVector3<Element>& self, const BasicVector3<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> vector3_divided( const BasicVector3<Element>& self, const OtherElement& divisor ){
 	return BasicVector3<Element>(
-			   Element( self.x() / divisor ),
-			   Element( self.y() / divisor ),
-			   Element( self.z() / divisor )
-			   );
+	           Element( self.x() / divisor ),
+	           Element( self.y() / divisor ),
+	           Element( self.z() / divisor )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> operator/( const BasicVector3<Element>& self, const OtherElement& divisor ){
@@ -483,10 +483,10 @@ inline BasicVector3<Element> vector3_mid( const BasicVector3<Element>& begin, co
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> vector3_cross( const BasicVector3<Element>& self, const BasicVector3<OtherElement>& other ){
 	return BasicVector3<Element>(
-			   Element( self.y() * other.z() - self.z() * other.y() ),
-			   Element( self.z() * other.x() - self.x() * other.z() ),
-			   Element( self.x() * other.y() - self.y() * other.x() )
-			   );
+	           Element( self.y() * other.z() - self.z() * other.y() ),
+	           Element( self.z() * other.x() - self.x() * other.z() ),
+	           Element( self.x() * other.y() - self.y() * other.x() )
+	       );
 }
 
 template<typename Element>
@@ -527,10 +527,10 @@ inline void vector3_normalise( BasicVector3<Element>& self ){
 template<typename Element>
 inline BasicVector3<Element> vector3_snapped( const BasicVector3<Element>& self ){
 	return BasicVector3<Element>(
-			   Element( float_to_integer( self.x() ) ),
-			   Element( float_to_integer( self.y() ) ),
-			   Element( float_to_integer( self.z() ) )
-			   );
+	           Element( float_to_integer( self.x() ) ),
+	           Element( float_to_integer( self.y() ) ),
+	           Element( float_to_integer( self.z() ) )
+	       );
 }
 template<typename Element>
 inline void vector3_snap( BasicVector3<Element>& self ){
@@ -539,10 +539,10 @@ inline void vector3_snap( BasicVector3<Element>& self ){
 template<typename Element, typename OtherElement>
 inline BasicVector3<Element> vector3_snapped( const BasicVector3<Element>& self, const OtherElement& snap ){
 	return BasicVector3<Element>(
-			   Element( float_snapped( self.x(), snap ) ),
-			   Element( float_snapped( self.y(), snap ) ),
-			   Element( float_snapped( self.z(), snap ) )
-			   );
+	           Element( float_snapped( self.x(), snap ) ),
+	           Element( float_snapped( self.y(), snap ) ),
+	           Element( float_snapped( self.z(), snap ) )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline void vector3_snap( BasicVector3<Element>& self, const OtherElement& snap ){
@@ -551,10 +551,10 @@ inline void vector3_snap( BasicVector3<Element>& self, const OtherElement& snap 
 
 inline Vector3 vector3_for_spherical( double theta, double phi ){
 	return Vector3(
-			   static_cast<float>( cos( theta ) * cos( phi ) ),
-			   static_cast<float>( sin( theta ) * cos( phi ) ),
-			   static_cast<float>( sin( phi ) )
-			   );
+	           static_cast<float>( cos( theta ) * cos( phi ) ),
+	           static_cast<float>( sin( theta ) * cos( phi ) ),
+	           static_cast<float>( sin( phi ) )
+	       );
 }
 
 template<typename Element>
@@ -588,19 +588,19 @@ inline bool operator!=( const BasicVector4<Element>& self, const BasicVector4<Ot
 template<typename Element, typename OtherElement>
 inline bool vector4_equal_epsilon( const BasicVector4<Element>& self, const BasicVector4<OtherElement>& other, Element epsilon ){
 	return float_equal_epsilon( self.x(), other.x(), epsilon )
-		   && float_equal_epsilon( self.y(), other.y(), epsilon )
-		   && float_equal_epsilon( self.z(), other.z(), epsilon )
-		   && float_equal_epsilon( self.w(), other.w(), epsilon );
+	    && float_equal_epsilon( self.y(), other.y(), epsilon )
+	    && float_equal_epsilon( self.z(), other.z(), epsilon )
+	    && float_equal_epsilon( self.w(), other.w(), epsilon );
 }
 
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> vector4_added( const BasicVector4<Element>& self, const BasicVector4<OtherElement>& other ){
 	return BasicVector4<Element>(
-			   float(self.x() + other.x() ),
-			   float(self.y() + other.y() ),
-			   float(self.z() + other.z() ),
-			   float(self.w() + other.w() )
-			   );
+	           float(self.x() + other.x() ),
+	           float(self.y() + other.y() ),
+	           float(self.z() + other.z() ),
+	           float(self.w() + other.w() )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> operator+( const BasicVector4<Element>& self, const BasicVector4<OtherElement>& other ){
@@ -621,11 +621,11 @@ inline void operator+=( BasicVector4<Element>& self, const BasicVector4<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> vector4_subtracted( const BasicVector4<Element>& self, const BasicVector4<OtherElement>& other ){
 	return BasicVector4<Element>(
-			   float(self.x() - other.x() ),
-			   float(self.y() - other.y() ),
-			   float(self.z() - other.z() ),
-			   float(self.w() - other.w() )
-			   );
+	           float(self.x() - other.x() ),
+	           float(self.y() - other.y() ),
+	           float(self.z() - other.z() ),
+	           float(self.w() - other.w() )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> operator-( const BasicVector4<Element>& self, const BasicVector4<OtherElement>& other ){
@@ -646,11 +646,11 @@ inline void operator-=( BasicVector4<Element>& self, const BasicVector4<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> vector4_scaled( const BasicVector4<Element>& self, const BasicVector4<OtherElement>& other ){
 	return BasicVector4<Element>(
-			   float(self.x() * other.x() ),
-			   float(self.y() * other.y() ),
-			   float(self.z() * other.z() ),
-			   float(self.w() * other.w() )
-			   );
+	           float(self.x() * other.x() ),
+	           float(self.y() * other.y() ),
+	           float(self.z() * other.z() ),
+	           float(self.w() * other.w() )
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> operator*( const BasicVector4<Element>& self, const BasicVector4<OtherElement>& other ){
@@ -671,11 +671,11 @@ inline void operator*=( BasicVector4<Element>& self, const BasicVector4<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> vector4_scaled( const BasicVector4<Element>& self, OtherElement scale ){
 	return BasicVector4<Element>(
-			   float(self.x() * scale),
-			   float(self.y() * scale),
-			   float(self.z() * scale),
-			   float(self.w() * scale)
-			   );
+	           float(self.x() * scale),
+	           float(self.y() * scale),
+	           float(self.z() * scale),
+	           float(self.w() * scale)
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> operator*( const BasicVector4<Element>& self, OtherElement scale ){
@@ -696,11 +696,11 @@ inline void operator*=( BasicVector4<Element>& self, OtherElement scale ){
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> vector4_divided( const BasicVector4<Element>& self, OtherElement divisor ){
 	return BasicVector4<Element>(
-			   float(self.x() / divisor),
-			   float(self.y() / divisor),
-			   float(self.z() / divisor),
-			   float(self.w() / divisor)
-			   );
+	           float(self.x() / divisor),
+	           float(self.y() / divisor),
+	           float(self.z() / divisor),
+	           float(self.w() / divisor)
+	       );
 }
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> operator/( const BasicVector4<Element>& self, OtherElement divisor ){

@@ -73,33 +73,33 @@ void Patch_Destroy(){
 class CommonPatchCreator : public PatchCreator
 {
 public:
-void Patch_undoSave( scene::Node& patch ) const {
-	Node_getPatch( patch )->undoSave();
-}
-void Patch_resize( scene::Node& patch, std::size_t width, std::size_t height ) const {
-	Node_getPatch( patch )->setDims( width, height );
-}
-PatchControlMatrix Patch_getControlPoints( scene::Node& node ) const {
-	Patch& patch = *Node_getPatch( node );
-	return PatchControlMatrix( patch.getHeight(), patch.getWidth(), patch.getControlPoints().data() );
-}
-void Patch_controlPointsChanged( scene::Node& patch ) const {
-	return Node_getPatch( patch )->controlPointsChanged();
-}
-const char* Patch_getShader( scene::Node& patch ) const {
-	return Node_getPatch( patch )->GetShader();
-}
-void Patch_setShader( scene::Node& patch, const char* shader ) const {
-	Node_getPatch( patch )->SetShader( shader );
-}
+	void Patch_undoSave( scene::Node& patch ) const {
+		Node_getPatch( patch )->undoSave();
+	}
+	void Patch_resize( scene::Node& patch, std::size_t width, std::size_t height ) const {
+		Node_getPatch( patch )->setDims( width, height );
+	}
+	PatchControlMatrix Patch_getControlPoints( scene::Node& node ) const {
+		Patch& patch = *Node_getPatch( node );
+		return PatchControlMatrix( patch.getHeight(), patch.getWidth(), patch.getControlPoints().data() );
+	}
+	void Patch_controlPointsChanged( scene::Node& patch ) const {
+		return Node_getPatch( patch )->controlPointsChanged();
+	}
+	const char* Patch_getShader( scene::Node& patch ) const {
+		return Node_getPatch( patch )->GetShader();
+	}
+	void Patch_setShader( scene::Node& patch, const char* shader ) const {
+		Node_getPatch( patch )->SetShader( shader );
+	}
 };
 
 class Quake3PatchCreator : public CommonPatchCreator
 {
 public:
-scene::Node& createPatch(){
-	return ( new PatchNodeQuake3() )->node();
-}
+	scene::Node& createPatch(){
+		return ( new PatchNodeQuake3() )->node();
+	}
 };
 
 Quake3PatchCreator g_Quake3PatchCreator;
@@ -111,9 +111,9 @@ PatchCreator& GetQuake3PatchCreator(){
 class Doom3PatchCreator : public CommonPatchCreator
 {
 public:
-scene::Node& createPatch(){
-	return ( new PatchNodeDoom3( true ) )->node();
-}
+	scene::Node& createPatch(){
+		return ( new PatchNodeDoom3( true ) )->node();
+	}
 };
 
 Doom3PatchCreator g_Doom3PatchCreator;
@@ -125,9 +125,9 @@ PatchCreator& GetDoom3PatchCreator(){
 class Doom3PatchDef2Creator : public CommonPatchCreator
 {
 public:
-scene::Node& createPatch(){
-	return ( new PatchNodeDoom3() )->node();
-}
+	scene::Node& createPatch(){
+		return ( new PatchNodeDoom3() )->node();
+	}
 };
 
 Doom3PatchDef2Creator g_Doom3PatchDef2Creator;
@@ -152,23 +152,23 @@ class PatchDependencies :
 
 class PatchQuake3API : public TypeSystemRef
 {
-PatchCreator* m_patchquake3;
+	PatchCreator* m_patchquake3;
 public:
-typedef PatchCreator Type;
-STRING_CONSTANT( Name, "quake3" );
+	typedef PatchCreator Type;
+	STRING_CONSTANT( Name, "quake3" );
 
-PatchQuake3API(){
-	Patch_Construct( ePatchTypeQuake3 );
+	PatchQuake3API(){
+		Patch_Construct( ePatchTypeQuake3 );
 
-	m_patchquake3 = &GetQuake3PatchCreator();
-	g_patchCreator = m_patchquake3;
-}
-~PatchQuake3API(){
-	Patch_Destroy();
-}
-PatchCreator* getTable(){
-	return m_patchquake3;
-}
+		m_patchquake3 = &GetQuake3PatchCreator();
+		g_patchCreator = m_patchquake3;
+	}
+	~PatchQuake3API(){
+		Patch_Destroy();
+	}
+	PatchCreator* getTable(){
+		return m_patchquake3;
+	}
 };
 
 typedef SingletonModule<PatchQuake3API, PatchDependencies> PatchQuake3Module;
@@ -179,22 +179,22 @@ StaticRegisterModule staticRegisterPatchQuake3( StaticPatchQuake3Module::instanc
 
 class PatchDoom3API : public TypeSystemRef
 {
-PatchCreator* m_patchdoom3;
+	PatchCreator* m_patchdoom3;
 public:
-typedef PatchCreator Type;
-STRING_CONSTANT( Name, "doom3" );
+	typedef PatchCreator Type;
+	STRING_CONSTANT( Name, "doom3" );
 
-PatchDoom3API(){
-	Patch_Construct( ePatchTypeDoom3 );
+	PatchDoom3API(){
+		Patch_Construct( ePatchTypeDoom3 );
 
-	m_patchdoom3 = &GetDoom3PatchCreator();
-}
-~PatchDoom3API(){
-	Patch_Destroy();
-}
-PatchCreator* getTable(){
-	return m_patchdoom3;
-}
+		m_patchdoom3 = &GetDoom3PatchCreator();
+	}
+	~PatchDoom3API(){
+		Patch_Destroy();
+	}
+	PatchCreator* getTable(){
+		return m_patchdoom3;
+	}
 };
 
 typedef SingletonModule<PatchDoom3API, PatchDependencies> PatchDoom3Module;
@@ -204,23 +204,23 @@ StaticRegisterModule staticRegisterPatchDoom3( StaticPatchDoom3Module::instance(
 
 class PatchDef2Doom3API : public TypeSystemRef
 {
-PatchCreator* m_patchdef2doom3;
+	PatchCreator* m_patchdef2doom3;
 public:
-typedef PatchCreator Type;
-STRING_CONSTANT( Name, "def2doom3" );
+	typedef PatchCreator Type;
+	STRING_CONSTANT( Name, "def2doom3" );
 
-PatchDef2Doom3API(){
-	Patch_Construct( ePatchTypeDoom3 );
+	PatchDef2Doom3API(){
+		Patch_Construct( ePatchTypeDoom3 );
 
-	m_patchdef2doom3 = &GetDoom3PatchDef2Creator();
-	g_patchCreator = m_patchdef2doom3;
-}
-~PatchDef2Doom3API(){
-	Patch_Destroy();
-}
-PatchCreator* getTable(){
-	return m_patchdef2doom3;
-}
+		m_patchdef2doom3 = &GetDoom3PatchDef2Creator();
+		g_patchCreator = m_patchdef2doom3;
+	}
+	~PatchDef2Doom3API(){
+		Patch_Destroy();
+	}
+	PatchCreator* getTable(){
+		return m_patchdef2doom3;
+	}
 };
 
 typedef SingletonModule<PatchDef2Doom3API, PatchDependencies> PatchDef2Doom3Module;

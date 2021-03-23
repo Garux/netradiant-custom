@@ -37,31 +37,31 @@ bool Map_Valid( const Map& map );
 
 class DeferredDraw
 {
-Callback m_draw;
-bool m_defer;
-bool m_deferred;
+	Callback m_draw;
+	bool m_defer;
+	bool m_deferred;
 public:
-DeferredDraw( const Callback& draw ) : m_draw( draw ), m_defer( false ), m_deferred( false ){
-}
-void defer(){
-	m_defer = true;
-}
-void draw(){
-	if ( m_defer ) {
-		m_deferred = true;
+	DeferredDraw( const Callback& draw ) : m_draw( draw ), m_defer( false ), m_deferred( false ){
 	}
-	else
-	{
-		m_draw();
+	void defer(){
+		m_defer = true;
 	}
-}
-void flush(){
-	if ( m_defer && m_deferred ) {
-		m_draw();
+	void draw(){
+		if ( m_defer ) {
+			m_deferred = true;
+		}
+		else
+		{
+			m_draw();
+		}
 	}
-	m_deferred = false;
-	m_defer = false;
-}
+	void flush(){
+		if ( m_defer && m_deferred ) {
+			m_draw();
+		}
+		m_deferred = false;
+		m_defer = false;
+	}
 };
 
 inline void DeferredDraw_onMapValidChanged( DeferredDraw& self ){

@@ -165,9 +165,9 @@ static void MiniMapRandomlySupersampled( int y ){
 		{
 			RandomVector2f( uv );
 			thisval = MiniMapSample(
-				xmin + ( uv[0] + 0.5 ) * dx, /* exaggerated random pattern for better results */
-				ymin + ( uv[1] + 0.5 ) * dy  /* exaggerated random pattern for better results */
-				);
+			              xmin + ( uv[0] + 0.5 ) * dx, /* exaggerated random pattern for better results */
+			              ymin + ( uv[1] + 0.5 ) * dy  /* exaggerated random pattern for better results */
+			          );
 			val += thisval;
 		}
 		val /= minimap.samples * minimap.size[2];
@@ -190,9 +190,9 @@ static void MiniMapSupersampled( int y ){
 		for ( i = 0; i < minimap.samples; ++i )
 		{
 			float thisval = MiniMapSample(
-				xmin + minimap.sample_offsets[2 * i + 0] * dx,
-				ymin + minimap.sample_offsets[2 * i + 1] * dy
-				);
+			                    xmin + minimap.sample_offsets[2 * i + 0] * dx,
+			                    ymin + minimap.sample_offsets[2 * i + 1] * dy
+			                );
 			val += thisval;
 		}
 		val /= minimap.samples * minimap.size[2];

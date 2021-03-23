@@ -111,10 +111,10 @@ static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDr
 		c = bspDrawIndexes[ i + ds->firstIndex + 1 ];
 		b = bspDrawIndexes[ i + ds->firstIndex + 2 ];
 		fprintf( f, "f %d/%d/%d %d/%d/%d %d/%d/%d\r\n",
-				 a + objVertexCount + 1, a + objVertexCount + 1, a + objVertexCount + 1,
-				 b + objVertexCount + 1, b + objVertexCount + 1, b + objVertexCount + 1,
-				 c + objVertexCount + 1, c + objVertexCount + 1, c + objVertexCount + 1
-				 );
+		         a + objVertexCount + 1, a + objVertexCount + 1, a + objVertexCount + 1,
+		         b + objVertexCount + 1, b + objVertexCount + 1, b + objVertexCount + 1,
+		         c + objVertexCount + 1, c + objVertexCount + 1, c + objVertexCount + 1
+		       );
 	}
 
 	objVertexCount += ds->numVerts;
@@ -242,8 +242,8 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 		if ( !GetToken( true ) )
 			break;
 		if ( !strEqual( token, "{" ) )
-				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
-					shaderfile, scriptline, token, g_strLoadedFileLocation );
+			Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
+			       shaderfile, scriptline, token, g_strLoadedFileLocation );
 		while ( 1 )
 		{
 			/* get the next token */
@@ -271,7 +271,7 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 							int lmindex;
 							int okcount = 0;
 							if( sscanf( token + strlen( token ) - ( strlen( EXTERNAL_LIGHTMAP ) + 1 ), "/" EXTERNAL_LIGHTMAP "%n", &lmindex, &okcount )
-													&& okcount == ( strlen( EXTERNAL_LIGHTMAP ) + 1 ) ){
+							    && okcount == ( strlen( EXTERNAL_LIGHTMAP ) + 1 ) ){
 								for ( int i = 0; i < numBSPShaders; ++i ){ // find bspShaders[i]<->lmindex pair
 									if( strEqual( bspShaders[i].shader, shadername ) ){
 										lmIndices[i] = lmindex;

@@ -55,81 +55,81 @@ void Pointfile_Parse( CPointfile& pointfile );
 
 class CPointfile : public ISAXHandler, public Renderable, public OpenGLRenderable
 {
-enum
-{
-	MAX_POINTFILE = 8192,
-};
-Vector3 s_pointvecs[MAX_POINTFILE];
-std::size_t s_num_points;
-int m_displaylist;
-static Shader* m_renderstate;
-StringOutputStream m_characters;
+	enum
+	{
+		MAX_POINTFILE = 8192,
+	};
+	Vector3 s_pointvecs[MAX_POINTFILE];
+	std::size_t s_num_points;
+	int m_displaylist;
+	static Shader* m_renderstate;
+	StringOutputStream m_characters;
 public:
-CPointfile(){
-}
-~CPointfile(){
-}
-void Init();
-void PushPoint( const Vector3& v );
-void GenerateDisplayList();
+	CPointfile(){
+	}
+	~CPointfile(){
+	}
+	void Init();
+	void PushPoint( const Vector3& v );
+	void GenerateDisplayList();
 // SAX interface
-void Release(){
-	// blank because not heap-allocated
-}
-void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs );
-void saxEndElement( message_info_t *ctx, const xmlChar *name );
-void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
-const char* getName();
+	void Release(){
+		// blank because not heap-allocated
+	}
+	void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs );
+	void saxEndElement( message_info_t *ctx, const xmlChar *name );
+	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
+	const char* getName();
 
-typedef const Vector3* const_iterator;
+	typedef const Vector3* const_iterator;
 
-const_iterator begin() const {
-	return &s_pointvecs[0];
-}
-const_iterator end() const {
-	return &s_pointvecs[s_num_points];
-}
+	const_iterator begin() const {
+		return &s_pointvecs[0];
+	}
+	const_iterator end() const {
+		return &s_pointvecs[s_num_points];
+	}
 
-bool shown() const {
-	return m_displaylist != 0;
-}
-void show( bool show ){
-	if ( show && !shown() ) {
-		Pointfile_Parse( *this );
-		if( s_num_points > 0 ){
-			GenerateDisplayList();
+	bool shown() const {
+		return m_displaylist != 0;
+	}
+	void show( bool show ){
+		if ( show && !shown() ) {
+			Pointfile_Parse( *this );
+			if( s_num_points > 0 ){
+				GenerateDisplayList();
+				SceneChangeNotify();
+			}
+		}
+		else if ( !show && shown() ) {
+			glDeleteLists( m_displaylist, 1 );
+			m_displaylist = 0;
 			SceneChangeNotify();
 		}
 	}
-	else if ( !show && shown() ) {
-		glDeleteLists( m_displaylist, 1 );
-		m_displaylist = 0;
-		SceneChangeNotify();
+
+	void render( RenderStateFlags state ) const {
+		glCallList( m_displaylist );
 	}
-}
 
-void render( RenderStateFlags state ) const {
-	glCallList( m_displaylist );
-}
-
-void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
-	if ( shown() ) {
-		renderer.SetState( m_renderstate, Renderer::eWireframeOnly );
-		renderer.SetState( m_renderstate, Renderer::eFullMaterials );
-		renderer.addRenderable( *this, g_matrix4_identity );
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
+		if ( shown() ) {
+			renderer.SetState( m_renderstate, Renderer::eWireframeOnly );
+			renderer.SetState( m_renderstate, Renderer::eFullMaterials );
+			renderer.addRenderable( *this, g_matrix4_identity );
+		}
 	}
-}
-void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
-	renderSolid( renderer, volume );
-}
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
+		renderSolid( renderer, volume );
+	}
 
-static void constructStatic(){
-	m_renderstate = GlobalShaderCache().capture( "$POINTFILE" );
-}
+	static void constructStatic(){
+		m_renderstate = GlobalShaderCache().capture( "$POINTFILE" );
+	}
 
-static void destroyStatic(){
-	GlobalShaderCache().release( "$POINTFILE" );
-}
+	static void destroyStatic(){
+		GlobalShaderCache().release( "$POINTFILE" );
+	}
 };
 
 Shader* CPointfile::m_renderstate = 0;

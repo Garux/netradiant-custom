@@ -51,7 +51,7 @@ int EmitShader( const char *shader, int *contentFlags, int *surfaceFlags ){
 	/* try to find an existing shader */
 	for ( i = 0; i < numBSPShaders; i++ )
 	{
-			/* ydnar: handle custom surface/content flags */
+		/* ydnar: handle custom surface/content flags */
 		if ( surfaceFlags != NULL && bspShaders[ i ].surfaceFlags != *surfaceFlags ) {
 			continue;
 		}

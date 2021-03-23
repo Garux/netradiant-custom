@@ -57,10 +57,10 @@ GtkEntry* DialogEntry_new(){
 class DialogEntryRow
 {
 public:
-DialogEntryRow( GtkWidget* row, GtkEntry* entry ) : m_row( row ), m_entry( entry ){
-}
-GtkWidget* m_row;
-GtkEntry* m_entry;
+	DialogEntryRow( GtkWidget* row, GtkEntry* entry ) : m_row( row ), m_entry( entry ){
+	}
+	GtkWidget* m_row;
+	GtkEntry* m_entry;
 };
 
 DialogEntryRow DialogEntryRow_new( const char* name ){
@@ -91,10 +91,10 @@ GtkSpinButton* DialogSpinner_new( double value, double lower, double upper, int 
 class DialogSpinnerRow
 {
 public:
-DialogSpinnerRow( GtkWidget* row, GtkSpinButton* spin ) : m_row( row ), m_spin( spin ){
-}
-GtkWidget* m_row;
-GtkSpinButton* m_spin;
+	DialogSpinnerRow( GtkWidget* row, GtkSpinButton* spin ) : m_row( row ), m_spin( spin ){
+	}
+	GtkWidget* m_row;
+	GtkSpinButton* m_spin;
 };
 
 DialogSpinnerRow DialogSpinnerRow_new( const char* name, double value, double lower, double upper, int fraction ){
@@ -110,19 +110,19 @@ DialogSpinnerRow DialogSpinnerRow_new( const char* name, double value, double lo
 
 
 template<
-	typename Type_,
-	typename Other_,
-	void( *Import ) ( Type_&, Other_ ),
-	void( *Export ) ( Type_&, const Callback1<Other_>& )
-	>
+    typename Type_,
+    typename Other_,
+    void( *Import ) ( Type_&, Other_ ),
+    void( *Export ) ( Type_&, const Callback1<Other_>& )
+    >
 class ImportExport
 {
 public:
-typedef Type_ Type;
-typedef Other_ Other;
+	typedef Type_ Type;
+	typedef Other_ Other;
 
-typedef ReferenceCaller1<Type, Other, Import> ImportCaller;
-typedef ReferenceCaller1<Type, const Callback1<Other>&, Export> ExportCaller;
+	typedef ReferenceCaller1<Type, Other, Import> ImportCaller;
+	typedef ReferenceCaller1<Type, const Callback1<Other>&, Export> ExportCaller;
 };
 
 typedef ImportExport<bool, bool, BoolImport, BoolExport> BoolImportExport;
@@ -238,70 +238,70 @@ template<typename FirstArgument>
 class CallbackDialogData final : public DLG_DATA
 {
 public:
-typedef Callback1<FirstArgument> ImportCallback;
-typedef Callback1<const ImportCallback&> ExportCallback;
+	typedef Callback1<FirstArgument> ImportCallback;
+	typedef Callback1<const ImportCallback&> ExportCallback;
 
 private:
-ImportCallback m_importWidget;
-ExportCallback m_exportWidget;
-ImportCallback m_importViewer;
-ExportCallback m_exportViewer;
+	ImportCallback m_importWidget;
+	ExportCallback m_exportWidget;
+	ImportCallback m_importViewer;
+	ExportCallback m_exportViewer;
 
 public:
-CallbackDialogData( const ImportCallback& importWidget, const ExportCallback& exportWidget, const ImportCallback& importViewer, const ExportCallback& exportViewer )
-	: m_importWidget( importWidget ), m_exportWidget( exportWidget ), m_importViewer( importViewer ), m_exportViewer( exportViewer ){
-}
-void release(){
-	delete this;
-}
-void importData() const {
-	m_exportViewer( m_importWidget );
-}
-void exportData() const {
-	m_exportWidget( m_importViewer );
-}
+	CallbackDialogData( const ImportCallback& importWidget, const ExportCallback& exportWidget, const ImportCallback& importViewer, const ExportCallback& exportViewer )
+		: m_importWidget( importWidget ), m_exportWidget( exportWidget ), m_importViewer( importViewer ), m_exportViewer( exportViewer ){
+	}
+	void release(){
+		delete this;
+	}
+	void importData() const {
+		m_exportViewer( m_importWidget );
+	}
+	void exportData() const {
+		m_exportWidget( m_importViewer );
+	}
 };
 
 template<typename Widget, typename Viewer>
 class AddData
 {
-DialogDataList& m_data;
+	DialogDataList& m_data;
 public:
-AddData( DialogDataList& data ) : m_data( data ){
-}
-void apply( typename Widget::Type& widget, typename Viewer::Type& viewer ) const {
-	m_data.push_back(
-		new CallbackDialogData<typename Widget::Other>(
-			typename Widget::ImportCaller( widget ),
-			typename Widget::ExportCaller( widget ),
-			typename Viewer::ImportCaller( viewer ),
-			typename Viewer::ExportCaller( viewer )
-			)
+	AddData( DialogDataList& data ) : m_data( data ){
+	}
+	void apply( typename Widget::Type& widget, typename Viewer::Type& viewer ) const {
+		m_data.push_back(
+		    new CallbackDialogData<typename Widget::Other>(
+		        typename Widget::ImportCaller( widget ),
+		        typename Widget::ExportCaller( widget ),
+		        typename Viewer::ImportCaller( viewer ),
+		        typename Viewer::ExportCaller( viewer )
+		    )
 		);
-}
+	}
 };
 
 template<typename Widget>
 class AddCustomData
 {
-DialogDataList& m_data;
+	DialogDataList& m_data;
 public:
-AddCustomData( DialogDataList& data ) : m_data( data ){
-}
-void apply(
-	typename Widget::Type& widget,
-	const Callback1<typename Widget::Other>& importViewer,
-	const Callback1<const Callback1<typename Widget::Other>&>& exportViewer
+	AddCustomData( DialogDataList& data ) : m_data( data ){
+	}
+	void apply(
+	    typename Widget::Type& widget,
+	    const Callback1<typename Widget::Other>& importViewer,
+	    const Callback1<const Callback1<typename Widget::Other>&>& exportViewer
 	) const {
-	m_data.push_back(
-		new CallbackDialogData<typename Widget::Other>(
-			typename Widget::ImportCaller( widget ),
-			typename Widget::ExportCaller( widget ),
-			importViewer,
-			exportViewer
-			)
+		m_data.push_back(
+		    new CallbackDialogData<typename Widget::Other>(
+		        typename Widget::ImportCaller( widget ),
+		        typename Widget::ExportCaller( widget ),
+		        importViewer,
+		        exportViewer
+		    )
 		);
-}
+	}
 };
 
 // =============================================================================
@@ -588,14 +588,14 @@ void Dialog::addRadioIcons( GtkWidget* vbox, const char* name, StringArrayRange 
 		GtkImage* image = new_local_image( *icon );
 		gtk_widget_show( GTK_WIDGET( image ) );
 		gtk_table_attach( GTK_TABLE( table ), GTK_WIDGET( image ), pos, pos + 1, 0, 1,
-						  (GtkAttachOptions) ( 0 ),
-						  (GtkAttachOptions) ( 0 ), 0, 0 );
+		                  (GtkAttachOptions) ( 0 ),
+		                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 		radio = gtk_radio_button_new_from_widget( GTK_RADIO_BUTTON( radio ) );
 		gtk_widget_show( radio );
 		gtk_table_attach( GTK_TABLE( table ), radio, pos, pos + 1, 1, 2,
-						  (GtkAttachOptions) ( 0 ),
-						  (GtkAttachOptions) ( 0 ), 0, 0 );
+		                  (GtkAttachOptions) ( 0 ),
+		                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	}
 
 	AddIntRadioData( *GTK_RADIO_BUTTON( radio ), importViewer, exportViewer );

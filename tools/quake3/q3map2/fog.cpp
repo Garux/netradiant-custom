@@ -640,7 +640,7 @@ int FogForBounds( const MinMax& minmax, float epsilon ){
 		}
 		const Vector3 overlap( std::max( 1.f, std::min( minmax.maxs[0], fogMinmax.maxs[0] ) - std::max( minmax.mins[0], fogMinmax.mins[0] ) ),
 		                       std::max( 1.f, std::min( minmax.maxs[1], fogMinmax.maxs[1] ) - std::max( minmax.mins[1], fogMinmax.mins[1] ) ),
-							   std::max( 1.f, std::min( minmax.maxs[2], fogMinmax.maxs[2] ) - std::max( minmax.mins[2], fogMinmax.mins[2] ) ) );
+		                       std::max( 1.f, std::min( minmax.maxs[2], fogMinmax.maxs[2] ) - std::max( minmax.mins[2], fogMinmax.mins[2] ) ) );
 
 		/* get volume */
 		const float volume = overlap[0] * overlap[1] * overlap[2];

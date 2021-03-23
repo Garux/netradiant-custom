@@ -87,9 +87,9 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	g_signal_connect( G_OBJECT( window ), "delete_event",
-						G_CALLBACK( dialog_delete_callback ), NULL );
+	                  G_CALLBACK( dialog_delete_callback ), NULL );
 	g_signal_connect( G_OBJECT( window ), "destroy",
-						G_CALLBACK( gtk_widget_destroy ), NULL );
+	                  G_CALLBACK( gtk_widget_destroy ), NULL );
 	gtk_window_set_title( GTK_WINDOW( window ), lpCaption );
 	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
@@ -117,7 +117,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "Ok" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
 		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -127,7 +127,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "Ok" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
 		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -135,7 +135,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "Cancel" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
 		gtk_widget_show( w );
 		ret = IDCANCEL;
 	}
@@ -143,7 +143,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "Yes" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDYES ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDYES ) );
 		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -151,13 +151,13 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "No" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDNO ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDNO ) );
 		gtk_widget_show( w );
 
 		w = gtk_button_new_with_label( "Cancel" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
 		gtk_widget_show( w );
 		ret = IDCANCEL;
 	}
@@ -166,7 +166,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "Yes" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDYES ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDYES ) );
 		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -174,7 +174,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		w = gtk_button_new_with_label( "No" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		g_signal_connect( G_OBJECT( w ), "clicked",
-							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDNO ) );
+		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDNO ) );
 		gtk_widget_show( w );
 		ret = IDNO;
 	}
@@ -223,7 +223,7 @@ void ExtractFileName( const char *path, char *dest ){
 // back up until a \ or the start
 //
 	while ( src != path && *( src - 1 ) != '/'
-			&& *( src - 1 ) != '\\' )
+	        && *( src - 1 ) != '\\' )
 		src--;
 
 	while ( *src )
@@ -242,7 +242,8 @@ void ConvertDOSToUnixName( char *dst, const char *src ){
 		else{
 			*dst = *src;
 		}
-		dst++; src++;
+		dst++;
+		src++;
 	}
 	*dst = 0;
 }
@@ -454,7 +455,7 @@ const char *PLUGIN_NAME = "Q3 Texture Tools";
 const char *PLUGIN_COMMANDS = "About...;Create/Update WAD keypair";
 
 const char *PLUGIN_ABOUT = "HydraToolz for GTKRadiant\n\n"
-						   "By Hydra!";
+                           "By Hydra!";
 
 extern "C" void* WINAPI QERPlug_GetFuncTable(){
 	return &g_FuncTable;

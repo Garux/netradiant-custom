@@ -28,30 +28,30 @@
 template< class type >
 class idList {
 private:
-int m_num;
-int m_size;
-int m_granularity;
-type        *m_list;
+	int m_num;
+	int m_size;
+	int m_granularity;
+	type        *m_list;
 
 public:
-idList( int granularity = 16 );
-~idList<type>();
-void        Clear( void );
-int         Num( void );
-void        SetNum( int num );
-void        SetGranularity( int granularity );
-void        Condense( void );
-int         Size( void );
-void        Resize( int size );
-type operator[]( int index ) const;
-type        &operator[]( int index );
-int         Append( type const & obj );
-int         AddUnique( type const & obj );
-type        *Find( type const & obj, int *index = NULL );
-bool        RemoveIndex( int index );
-bool        Remove( type const & obj );
-typedef int cmp_t ( const void *, const void * );
-void        Sort( cmp_t *compare );
+	idList( int granularity = 16 );
+	~idList<type>();
+	void        Clear( void );
+	int         Num( void );
+	void        SetNum( int num );
+	void        SetGranularity( int granularity );
+	void        Condense( void );
+	int         Size( void );
+	void        Resize( int size );
+	type operator[]( int index ) const;
+	type        &operator[]( int index );
+	int         Append( type const & obj );
+	int         AddUnique( type const & obj );
+	type        *Find( type const & obj, int *index = NULL );
+	bool        RemoveIndex( int index );
+	bool        Remove( type const & obj );
+	typedef int cmp_t ( const void *, const void * );
+	void        Sort( cmp_t *compare );
 };
 
 /*

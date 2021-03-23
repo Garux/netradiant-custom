@@ -180,11 +180,11 @@ void Clipper_constructPreferences( PreferencesPage& page ){
 	{
 		const char* dowhat[] = { "Clip    ", "Split", };
 		page.appendRadio(
-			"On DoubleClick do: ",
-			STRING_ARRAY_RANGE( dowhat ),
-			IntImportCaller( g_clipper_doubleclicked_split ),
-			IntExportCaller( g_clipper_doubleclicked_split )
-			);
+		    "On DoubleClick do: ",
+		    STRING_ARRAY_RANGE( dowhat ),
+		    IntImportCaller( g_clipper_doubleclicked_split ),
+		    IntExportCaller( g_clipper_doubleclicked_split )
+		);
 	}
 }
 void Clipper_constructPage( PreferenceGroup& group ){

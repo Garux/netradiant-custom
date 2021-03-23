@@ -196,12 +196,12 @@ unsigned int MDCSurface_read( Surface& surface, const byte* buffer ){
 			istream_read_mdcSt( stStream, mdcSt );
 
 			surface.vertices().push_back(
-				ArbitraryMeshVertex(
-					Vertex3f( mdcXyzNormal.xyz[0] * MDC_XYZ_SCALE, mdcXyzNormal.xyz[1] * MDC_XYZ_SCALE, mdcXyzNormal.xyz[2] * MDC_XYZ_SCALE ),
-					DecodeNormal( reinterpret_cast<byte*>( &mdcXyzNormal.normal ) ),
-					TexCoord2f( mdcSt.st[0], mdcSt.st[1] )
-					)
-				);
+			    ArbitraryMeshVertex(
+			        Vertex3f( mdcXyzNormal.xyz[0] * MDC_XYZ_SCALE, mdcXyzNormal.xyz[1] * MDC_XYZ_SCALE, mdcXyzNormal.xyz[2] * MDC_XYZ_SCALE ),
+			        DecodeNormal( reinterpret_cast<byte*>( &mdcXyzNormal.normal ) ),
+			        TexCoord2f( mdcSt.st[0], mdcSt.st[1] )
+			    )
+			);
 		}
 	}
 

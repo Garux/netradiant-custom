@@ -183,8 +183,8 @@ bool Preferences_Save_Safe( PreferenceDictionary& preferences, const char* filen
 	*( tmpName.end() - 1 ) = '\0';
 
 	return Preferences_Save( preferences, tmpName.data() )
-		   && ( !file_exists( filename ) || file_remove( filename ) )
-		   && file_move( tmpName.data(), filename );
+	       && ( !file_exists( filename ) || file_remove( filename ) )
+	       && file_move( tmpName.data(), filename );
 }
 
 
@@ -242,8 +242,8 @@ void CGameDialog::DoGameDialog(){
 
 CGameDescription* CGameDialog::GameDescriptionForComboItem(){
 	return ( m_nComboSelect >= 0 && m_nComboSelect < static_cast<int>( mGames.size() ) )?
-			*std::next( mGames.begin(), m_nComboSelect )
-			: 0; // not found
+	       *std::next( mGames.begin(), m_nComboSelect )
+	       : 0; // not found
 }
 
 void CGameDialog::GameFileAssign( int value ){
@@ -283,13 +283,13 @@ void CGameDialog::CreateGlobalFrame( PreferencesPage& page, bool global ){
 		games.push_back( ( *i )->getRequiredKeyValue( "name" ) );
 	}
 	page.appendCombo(
-		"Select the game",
-		StringArrayRange( &( *games.begin() ), &( *games.end() ) ),
-		global?
-			IntImportCallback( MemberCaller1<CGameDialog, int, &CGameDialog::GameFileAssign>( *this ) ):
-			IntImportCallback( MemberCaller1<CGameDialog, int, &CGameDialog::GameFileImport>( *this ) ),
-		ConstMemberCaller1<CGameDialog, const IntImportCallback&, &CGameDialog::GameFileExport>( *this )
-		);
+	    "Select the game",
+	    StringArrayRange( &( *games.begin() ), &( *games.end() ) ),
+	    global?
+	    IntImportCallback( MemberCaller1<CGameDialog, int, &CGameDialog::GameFileAssign>( *this ) ):
+	    IntImportCallback( MemberCaller1<CGameDialog, int, &CGameDialog::GameFileImport>( *this ) ),
+	    ConstMemberCaller1<CGameDialog, const IntImportCallback&, &CGameDialog::GameFileExport>( *this )
+	);
 	page.appendCheckBox( "Startup", "Show Global Preferences", m_bGamePrompt );
 }
 
@@ -310,29 +310,29 @@ GtkWindow* CGameDialog::BuildDialog(){
 
 class LoadGameFile
 {
-std::list<CGameDescription*>& mGames;
-const char* mPath;
+	std::list<CGameDescription*>& mGames;
+	const char* mPath;
 public:
-LoadGameFile( std::list<CGameDescription*>& games, const char* path ) : mGames( games ), mPath( path ){
-}
-void operator()( const char* name ) const {
-	if ( !extension_equal( path_get_extension( name ), "game" ) ) {
-		return;
+	LoadGameFile( std::list<CGameDescription*>& games, const char* path ) : mGames( games ), mPath( path ){
 	}
-	StringOutputStream strPath( 256 );
-	strPath << mPath << name;
-	globalOutputStream() << strPath.c_str() << '\n';
+	void operator()( const char* name ) const {
+		if ( !extension_equal( path_get_extension( name ), "game" ) ) {
+			return;
+		}
+		StringOutputStream strPath( 256 );
+		strPath << mPath << name;
+		globalOutputStream() << strPath.c_str() << '\n';
 
-	xmlDocPtr pDoc = xmlParseFile( strPath.c_str() );
-	if ( pDoc ) {
-		mGames.push_back( new CGameDescription( pDoc, name ) );
-		xmlFreeDoc( pDoc );
+		xmlDocPtr pDoc = xmlParseFile( strPath.c_str() );
+		if ( pDoc ) {
+			mGames.push_back( new CGameDescription( pDoc, name ) );
+			xmlFreeDoc( pDoc );
+		}
+		else
+		{
+			globalErrorStream() << "XML parser failed on '" << strPath.c_str() << "'\n";
+		}
 	}
-	else
-	{
-		globalErrorStream() << "XML parser failed on '" << strPath.c_str() << "'\n";
-	}
-}
 };
 
 void CGameDialog::ScanForGames(){
@@ -444,9 +444,10 @@ CGameDialog g_GamesDialog;
 
 static void OnButtonClean( GtkWidget *widget, gpointer data ){
 	// make sure this is what the user wants
-	if ( gtk_MessageBox( GTK_WIDGET( g_Preferences.GetWidget() ), "This will close Radiant and clean the corresponding registry entries.\n"
-																  "Next time you start Radiant it will be good as new. Do you wish to continue?",
-						 "Reset Registry", eMB_YESNO, eMB_ICONASTERISK ) == eIDYES ) {
+	if ( gtk_MessageBox( GTK_WIDGET( g_Preferences.GetWidget() ),
+	                     "This will close Radiant and clean the corresponding registry entries.\n"
+	                     "Next time you start Radiant it will be good as new. Do you wish to continue?",
+	                     "Reset Registry", eMB_YESNO, eMB_ICONASTERISK ) == eIDYES ) {
 		PrefsDlg *dlg = (PrefsDlg*)data;
 		dlg->EndModal( eIDCANCEL );
 
@@ -632,22 +633,22 @@ GtkWidget* PreferencePages_addPage( GtkWidget* notebook, const char* name ){
 
 class PreferenceTreeGroup : public PreferenceGroup
 {
-Dialog& m_dialog;
-GtkWidget* m_notebook;
-GtkTreeStore* m_store;
-GtkTreeIter m_group;
+	Dialog& m_dialog;
+	GtkWidget* m_notebook;
+	GtkTreeStore* m_store;
+	GtkTreeIter m_group;
 public:
-PreferenceTreeGroup( Dialog& dialog, GtkWidget* notebook, GtkTreeStore* store, GtkTreeIter group ) :
-	m_dialog( dialog ),
-	m_notebook( notebook ),
-	m_store( store ),
-	m_group( group ){
-}
-PreferencesPage createPage( const char* treeName, const char* frameName ){
-	GtkWidget* page = PreferencePages_addPage( m_notebook, frameName );
-	PreferenceTree_appendPage( m_store, &m_group, treeName, page );
-	return PreferencesPage( m_dialog, getVBox( page ) );
-}
+	PreferenceTreeGroup( Dialog& dialog, GtkWidget* notebook, GtkTreeStore* store, GtkTreeIter group ) :
+		m_dialog( dialog ),
+		m_notebook( notebook ),
+		m_store( store ),
+		m_group( group ){
+	}
+	PreferencesPage createPage( const char* treeName, const char* frameName ){
+		GtkWidget* page = PreferencePages_addPage( m_notebook, frameName );
+		PreferenceTree_appendPage( m_store, &m_group, treeName, page );
+		return PreferencesPage( m_dialog, getVBox( page ) );
+	}
 };
 
 #include <gdk/gdkkeysyms.h>
@@ -839,17 +840,17 @@ PreferenceSystem& GetPreferenceSystem(){
 
 class PreferenceSystemAPI
 {
-PreferenceSystem* m_preferencesystem;
+	PreferenceSystem* m_preferencesystem;
 public:
-typedef PreferenceSystem Type;
-STRING_CONSTANT( Name, "*" );
+	typedef PreferenceSystem Type;
+	STRING_CONSTANT( Name, "*" );
 
-PreferenceSystemAPI(){
-	m_preferencesystem = &GetPreferenceSystem();
-}
-PreferenceSystem* getTable(){
-	return m_preferencesystem;
-}
+	PreferenceSystemAPI(){
+		m_preferencesystem = &GetPreferenceSystem();
+	}
+	PreferenceSystem* getTable(){
+		return m_preferencesystem;
+	}
 };
 
 #include "modulesystem/singletonmodule.h"

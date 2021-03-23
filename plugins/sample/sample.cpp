@@ -56,21 +56,21 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 
 class SamplePluginModule : public TypeSystemRef
 {
-_QERPluginTable m_plugin;
+	_QERPluginTable m_plugin;
 public:
-typedef _QERPluginTable Type;
-STRING_CONSTANT( Name, "sample" );
+	typedef _QERPluginTable Type;
+	STRING_CONSTANT( Name, "sample" );
 
-SamplePluginModule(){
-	m_plugin.m_pfnQERPlug_Init = &Sample::init;
-	m_plugin.m_pfnQERPlug_GetName = &Sample::getName;
-	m_plugin.m_pfnQERPlug_GetCommandList = &Sample::getCommandList;
-	m_plugin.m_pfnQERPlug_GetCommandTitleList = &Sample::getCommandTitleList;
-	m_plugin.m_pfnQERPlug_Dispatch = &Sample::dispatch;
-}
-_QERPluginTable* getTable(){
-	return &m_plugin;
-}
+	SamplePluginModule(){
+		m_plugin.m_pfnQERPlug_Init = &Sample::init;
+		m_plugin.m_pfnQERPlug_GetName = &Sample::getName;
+		m_plugin.m_pfnQERPlug_GetCommandList = &Sample::getCommandList;
+		m_plugin.m_pfnQERPlug_GetCommandTitleList = &Sample::getCommandTitleList;
+		m_plugin.m_pfnQERPlug_Dispatch = &Sample::dispatch;
+	}
+	_QERPluginTable* getTable(){
+		return &m_plugin;
+	}
 };
 
 typedef SingletonModule<SamplePluginModule> SingletonSamplePluginModule;

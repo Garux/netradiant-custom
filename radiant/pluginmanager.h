@@ -34,28 +34,28 @@ typedef struct _GtkWidget GtkWidget;
 class IPlugIn
 {
 public:
-IPlugIn() { }
-virtual ~IPlugIn() { }
+	IPlugIn() { }
+	virtual ~IPlugIn() { }
 
-virtual const char* getMenuName() = 0;
-virtual std::size_t getCommandCount() = 0;
-virtual const char* getCommand( std::size_t ) = 0;
-virtual const char* getCommandTitle( std::size_t ) = 0;
-virtual const char* getGlobalCommand( std::size_t ) = 0;
+	virtual const char* getMenuName() = 0;
+	virtual std::size_t getCommandCount() = 0;
+	virtual const char* getCommand( std::size_t ) = 0;
+	virtual const char* getCommandTitle( std::size_t ) = 0;
+	virtual const char* getGlobalCommand( std::size_t ) = 0;
 };
 
 class PluginsVisitor
 {
 public:
-virtual void visit( IPlugIn& plugin ) = 0;
+	virtual void visit( IPlugIn& plugin ) = 0;
 };
 
 class CPlugInManager
 {
 public:
-void Init( GtkWidget* main_window );
-void constructMenu( PluginsVisitor& menu );
-void Shutdown();
+	void Init( GtkWidget* main_window );
+	void constructMenu( PluginsVisitor& menu );
+	void Shutdown();
 };
 
 CPlugInManager& GetPlugInMgr();
@@ -71,8 +71,8 @@ inline bool plugin_menu_separator( const char* text ){
 }
 inline bool plugin_menu_special( const char* text ){
 	return plugin_menu_separator( text )
-			|| plugin_submenu_in( text )
-			|| plugin_submenu_out( text );
+	       || plugin_submenu_in( text )
+	       || plugin_submenu_out( text );
 }
 
 #endif

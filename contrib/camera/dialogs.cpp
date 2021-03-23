@@ -327,9 +327,12 @@ static void RefreshEventList( void ){
 		for ( i = 0; i < GetCurrentCam()->GetCam()->numEvents(); i++ ) {
 			char rowbuf[3][128], *row[3];
 			// FIXME: sort by time?
-			sprintf( rowbuf[0], "%li", GetCurrentCam()->GetCam()->getEvent( i )->getTime() );                 row[0] = rowbuf[0];
-			strncpy( rowbuf[1], GetCurrentCam()->GetCam()->getEvent( i )->typeStr(), sizeof( rowbuf[0] ) );     row[1] = rowbuf[1];
-			strncpy( rowbuf[2], GetCurrentCam()->GetCam()->getEvent( i )->getParam(), sizeof( rowbuf[1] ) );    row[2] = rowbuf[2];
+			sprintf( rowbuf[0], "%li", GetCurrentCam()->GetCam()->getEvent( i )->getTime() );
+			row[0] = rowbuf[0];
+			strncpy( rowbuf[1], GetCurrentCam()->GetCam()->getEvent( i )->typeStr(), sizeof( rowbuf[0] ) );
+			row[1] = rowbuf[1];
+			strncpy( rowbuf[2], GetCurrentCam()->GetCam()->getEvent( i )->getParam(), sizeof( rowbuf[1] ) );
+			row[2] = rowbuf[2];
 			gtk_clist_append( GTK_CLIST( g_pEventsList ), row );
 		}
 
@@ -1015,8 +1018,8 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	vbox = gtk_vbox_new( FALSE, 5 );
 	gtk_widget_show( vbox );
 	gtk_table_attach( GTK_TABLE( table ), vbox, 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
 
 	// -------------------------- //
 
@@ -1065,8 +1068,8 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	frame = gtk_frame_new( "Path and Target editing" );
 	gtk_widget_show( frame );
 	gtk_table_attach( GTK_TABLE( table ), frame, 0, 1, 1, 2,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
 
 	vbox = gtk_vbox_new( FALSE, 5 );
 	gtk_container_add( GTK_CONTAINER( frame ), vbox );
@@ -1157,8 +1160,8 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	frame = gtk_frame_new( "Time" );
 	gtk_widget_show( frame );
 	gtk_table_attach( GTK_TABLE( table ), frame, 0, 1, 2, 3,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
 
 	vbox = gtk_vbox_new( FALSE, 5 );
 	gtk_container_add( GTK_CONTAINER( frame ), vbox );

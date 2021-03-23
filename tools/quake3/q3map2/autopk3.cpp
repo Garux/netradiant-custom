@@ -89,9 +89,9 @@ static inline void tex2list( StrList* texlist, StrList* EXtex, StrList* rEXtex )
 
 	/* exclude */
 	if( !StrList_find( texlist, token ) &&
-		!StrList_find( EXtex, token ) &&
-		( rEXtex == NULL ||
-		!StrList_find( rEXtex, token ) ) ){
+	    !StrList_find( EXtex, token ) &&
+	    ( rEXtex == NULL ||
+	      !StrList_find( rEXtex, token ) ) ){
 		StrList_append( texlist, token );
 	}
 	strcat( token, ".tga" ); // default extension for repacked shader text
@@ -383,7 +383,7 @@ int pk3BSPMain( int argc, char **argv ){
 	}
 
 	//Parse Shader Files
-	 /* hack */
+	/* hack */
 	endofscript = true;
 
 	for ( i = 0; i < pk3Shaderfiles->n; ++i ){
@@ -430,8 +430,8 @@ int pk3BSPMain( int argc, char **argv ){
 				break;
 			}
 			if ( !strEqual( token, "{" ) ) {
-					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
-						scriptFile, scriptline, token, g_strLoadedFileLocation );
+				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
+				       scriptFile, scriptline, token, g_strLoadedFileLocation );
 			}
 
 			while ( 1 )
@@ -481,8 +481,8 @@ int pk3BSPMain( int argc, char **argv ){
 				break;
 			}
 			if ( !strEqual( token, "{" ) ) {
-					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
-						scriptFile, scriptline, token, g_strLoadedFileLocation );
+				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
+				       scriptFile, scriptline, token, g_strLoadedFileLocation );
 			}
 
 			bool hasmap = false;
@@ -523,7 +523,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 						/* digest any images */
 						if ( striEqual( token, "map" ) ||
-							striEqual( token, "clampMap" ) ) {
+						     striEqual( token, "clampMap" ) ) {
 							hasmap = true;
 							/* get an image */
 							GetToken( false );
@@ -532,7 +532,7 @@ int pk3BSPMain( int argc, char **argv ){
 							}
 						}
 						else if ( striEqual( token, "animMap" ) ||
-							striEqual( token, "clampAnimMap" ) ) {
+						          striEqual( token, "clampAnimMap" ) ) {
 							hasmap = true;
 							GetToken( false );// skip num
 							while ( TokenAvailable() ){
@@ -548,7 +548,7 @@ int pk3BSPMain( int argc, char **argv ){
 								strcpy( token, stream( "video/", token ) );
 							}
 							if( !StrList_find( pk3Videos, token ) &&
-								!StrList_find( ExVideos, token ) )
+							    !StrList_find( ExVideos, token ) )
 								StrList_append( pk3Videos, token );
 						}
 					}
@@ -618,7 +618,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 
 
-/* exclude stuff */
+	/* exclude stuff */
 //wanted shaders from excluded .shaders
 	Sys_Printf( "\n" );
 	for ( i = 0; i < pk3Shaders->n; ++i ){
@@ -639,7 +639,7 @@ int pk3BSPMain( int argc, char **argv ){
 		if ( !strEmpty( pk3Shaders->s[i] ) ){
 			FixDOSName( pk3Shaders->s[i] );
 			if( StrList_find( pk3Textures, pk3Shaders->s[i] ) ||
-				StrList_find( ExTextures, pk3Shaders->s[i] ) )
+			    StrList_find( ExTextures, pk3Shaders->s[i] ) )
 				strClear( pk3Shaders->s[i] );
 		}
 	}
@@ -780,7 +780,7 @@ int repackBSPMain( int argc, char **argv ){
 		}
 	}
 
-/* load exclusions file */
+	/* load exclusions file */
 	StrList* ExTextures = StrList_allocate( 4096 );
 	StrList* ExShaders = StrList_allocate( 4096 );
 	StrList* ExShaderfiles = StrList_allocate( 4096 );
@@ -819,7 +819,7 @@ int repackBSPMain( int argc, char **argv ){
 	}
 
 
-/* load repack.exclude */
+	/* load repack.exclude */
 	StrList* rExTextures = StrList_allocate( 65536 );
 	StrList* rExShaders = StrList_allocate( 32768 );
 	StrList* rExShaderfiles = StrList_allocate( 4096 );
@@ -890,7 +890,7 @@ int repackBSPMain( int argc, char **argv ){
 	/* extract input file name */
 	const CopiedString nameOFrepack( PathFilename( source ) );
 
-/* load bsps */
+	/* load bsps */
 	StrList* pk3Shaders = StrList_allocate( 65536 );
 	StrList* pk3Sounds = StrList_allocate( 4096 );
 	StrList* pk3Shaderfiles = StrList_allocate( 4096 );
@@ -1136,7 +1136,7 @@ int repackBSPMain( int argc, char **argv ){
 	Sys_Printf( "\t\nParsing shaders....\n\n" );
 	StringOutputStream shaderText( 4096 );
 	StringOutputStream allShaders( 1048576 );
-	 /* hack */
+	/* hack */
 	endofscript = true;
 
 	for ( i = 0; i < pk3Shaderfiles->n; ++i ){
@@ -1181,8 +1181,8 @@ int repackBSPMain( int argc, char **argv ){
 				break;
 			}
 			if ( !strEqual( token, "{" ) ) {
-					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
-						scriptFile, scriptline, token, g_strLoadedFileLocation );
+				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
+				       scriptFile, scriptline, token, g_strLoadedFileLocation );
 			}
 			shaderText << "\n{";
 			bool hasmap = false;
@@ -1226,7 +1226,7 @@ int repackBSPMain( int argc, char **argv ){
 
 						/* digest any images */
 						if ( striEqual( token, "map" ) ||
-							striEqual( token, "clampMap" ) ) {
+						     striEqual( token, "clampMap" ) ) {
 							shaderText << "\n\t\t" << token;
 							hasmap = true;
 
@@ -1238,7 +1238,7 @@ int repackBSPMain( int argc, char **argv ){
 							shaderText << " " << token;
 						}
 						else if ( striEqual( token, "animMap" ) ||
-							striEqual( token, "clampAnimMap" ) ) {
+						          striEqual( token, "clampAnimMap" ) ) {
 							shaderText << "\n\t\t" << token;
 							hasmap = true;
 
@@ -1261,8 +1261,8 @@ int repackBSPMain( int argc, char **argv ){
 								strcpy( token, stream( "video/", token ) );
 							}
 							if( !StrList_find( pk3Videos, token ) &&
-								!StrList_find( ExVideos, token ) &&
-								!StrList_find( rExVideos, token ) )
+							    !StrList_find( ExVideos, token ) &&
+							    !StrList_find( rExVideos, token ) )
 								StrList_append( pk3Videos, token );
 						}
 						else if ( striEqual( token, "mapComp" ) || striEqual( token, "mapNoComp" ) || striEqual( token, "animmapcomp" ) || striEqual( token, "animmapnocomp" ) ){
@@ -1356,10 +1356,10 @@ int repackBSPMain( int argc, char **argv ){
 			}
 		}
 	}
-/* TODO: RTCW's mapComp, mapNoComp, animmapcomp, animmapnocomp; nocompress?; ET's implicitmap, implicitblend, implicitmask */
+	/* TODO: RTCW's mapComp, mapNoComp, animmapcomp, animmapnocomp; nocompress?; ET's implicitmap, implicitblend, implicitmask */
 
 
-/* exclude stuff */
+	/* exclude stuff */
 
 //pure textures (shader ones are done)
 	for ( i = 0; i < pk3Shaders->n; ++i ){
@@ -1377,8 +1377,8 @@ int repackBSPMain( int argc, char **argv ){
 			}
 			if ( !strEmpty( pk3Shaders->s[i] ) ){
 				if( StrList_find( pk3Textures, pk3Shaders->s[i] ) ||
-					StrList_find( ExTextures, pk3Shaders->s[i] ) ||
-					StrList_find( rExTextures, pk3Shaders->s[i] ) )
+				    StrList_find( ExTextures, pk3Shaders->s[i] ) ||
+				    StrList_find( rExTextures, pk3Shaders->s[i] ) )
 					strClear( pk3Shaders->s[i] );
 			}
 		}
@@ -1387,7 +1387,7 @@ int repackBSPMain( int argc, char **argv ){
 //snds
 	for ( i = 0; i < pk3Sounds->n; ++i ){
 		if( StrList_find( ExSounds, pk3Sounds->s[i] ) ||
-			StrList_find( rExSounds, pk3Sounds->s[i] ) )
+		    StrList_find( rExSounds, pk3Sounds->s[i] ) )
 			strClear( pk3Sounds->s[i] );
 	}
 

@@ -37,14 +37,14 @@ class CAutoCaulkStartDialog : public CDialog
 {
 // Construction
 public:
-CAutoCaulkStartDialog( CWnd* pParent = NULL );     // standard constructor
+	CAutoCaulkStartDialog( CWnd* pParent = NULL );     // standard constructor
 
 // Dialog Data
 //{{AFX_DATA(CAutoCaulkStartDialog)
-enum { IDD = IDD_AUTOCAULKSTART_DIALOG };
-BOOL m_bAllowDestruction;
-CString m_Warning1;
-int m_nMode;
+	enum { IDD = IDD_AUTOCAULKSTART_DIALOG };
+	BOOL m_bAllowDestruction;
+	CString m_Warning1;
+	int m_nMode;
 //}}AFX_DATA
 
 
@@ -52,7 +52,7 @@ int m_nMode;
 // ClassWizard generated virtual function overrides
 //{{AFX_VIRTUAL(CAutoCaulkStartDialog)
 protected:
-virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
+	virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
 //}}AFX_VIRTUAL
 
 // Implementation
@@ -62,7 +62,7 @@ protected:
 //{{AFX_MSG(CAutoCaulkStartDialog)
 // NOTE: the ClassWizard will add member functions here
 //}}AFX_MSG
-DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP()
 };
 
 //{{AFX_INSERT_LOCATION}}

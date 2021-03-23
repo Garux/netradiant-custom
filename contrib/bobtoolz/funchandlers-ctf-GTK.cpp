@@ -103,20 +103,20 @@ void DoCTFColourChanger(){
 
 void DoSwapLights(){
 /*	DMap world;
-    world.LoadAll();
+	world.LoadAll();
 
-    for(list<DEntity*>::const_iterator loopEnt = world.entityList.begin(); loopEnt != world.entityList.end(); loopEnt++)
-    {
-        DEntity* e = (*loopEnt);
-        DEPair* epLightColour = e->FindEPairByKey("_color");
-        if(epLightColour)
-        {
-            float r, g, b;
-            sscanf(epLightColour->value, "%f %f %f", &r, &g, &b);
-            sprintf(epLightColour->value, "%f %f %f", b, g, r);
-            DMap::RebuildEntity(e);
-        }
-    }*/
+	for(list<DEntity*>::const_iterator loopEnt = world.entityList.begin(); loopEnt != world.entityList.end(); loopEnt++)
+	{
+		DEntity* e = (*loopEnt);
+		DEPair* epLightColour = e->FindEPairByKey("_color");
+		if(epLightColour)
+		{
+			float r, g, b;
+			sscanf(epLightColour->value, "%f %f %f", &r, &g, &b);
+			sprintf(epLightColour->value, "%f %f %f", b, g, r);
+			DMap::RebuildEntity(e);
+		}
+	}*/
 
 	int cnt = g_FuncTable.m_pfnGetEntityCount();
 

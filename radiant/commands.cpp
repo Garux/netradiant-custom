@@ -243,18 +243,18 @@ class VerifyAcceleratorNotTaken
 public:
 	bool allow;
 	VerifyAcceleratorNotTaken( const char *name, const Accelerator &accelerator, GtkWidget *w, GtkTreeModel *m ) :
-								commandName( name ), newAccel( accelerator ), widget( w ), model( m ), allow( true ){
+		commandName( name ), newAccel( accelerator ), widget( w ), model( m ), allow( true ){
 	}
 	void operator()( const char* name, Accelerator& accelerator ){
 		if ( !allow
-			|| accelerator.key == 0
-			|| !strcmp( name, commandName ) ) {
+		  || accelerator.key == 0
+		  || !strcmp( name, commandName ) ) {
 			return;
 		}
 		if ( accelerator == newAccel ) {
 			StringOutputStream msg;
 			msg << "The command " << name << " is already assigned to the key " << accelerator << ".\n\n"
-				<< "Do you want to unassign " << name << " first?";
+			    << "Do you want to unassign " << name << " first?";
 			EMessageBoxReturn r = gtk_MessageBox( widget, msg.c_str(), "Key already used", eMB_YESNOCANCEL );
 			if ( r == eIDYES ) {
 				// clear the ACTUAL accelerator too!
@@ -549,36 +549,36 @@ void SaveCommandMap( const char* path ){
 
 class ReadCommandMap
 {
-const char* m_filename;
-std::size_t m_count;
+	const char* m_filename;
+	std::size_t m_count;
 public:
-ReadCommandMap( const char* filename ) : m_filename( filename ), m_count( 0 ){
-}
-void operator()( const char* name, Accelerator& accelerator ){
-	char value[1024];
-	if ( read_var( m_filename, "Commands", name, value ) ) {
-		if ( string_empty( value ) ) {
-			accelerator = accelerator_null();
-			return;
-		}
+	ReadCommandMap( const char* filename ) : m_filename( filename ), m_count( 0 ){
+	}
+	void operator()( const char* name, Accelerator& accelerator ){
+		char value[1024];
+		if ( read_var( m_filename, "Commands", name, value ) ) {
+			if ( string_empty( value ) ) {
+				accelerator = accelerator_null();
+				return;
+			}
 
-		guint key;
-		GdkModifierType modifiers;
-		gtk_accelerator_parse( value, &key, &modifiers );
-		accelerator = Accelerator( key, modifiers );
+			guint key;
+			GdkModifierType modifiers;
+			gtk_accelerator_parse( value, &key, &modifiers );
+			accelerator = Accelerator( key, modifiers );
 
-		if ( accelerator.key != 0 ) {
-			++m_count;
-		}
-		else
-		{
-			globalWarningStream() << "WARNING: failed to parse user command " << makeQuoted( name ) << ": unknown key " << makeQuoted( value ) << "\n";
+			if ( accelerator.key != 0 ) {
+				++m_count;
+			}
+			else
+			{
+				globalWarningStream() << "WARNING: failed to parse user command " << makeQuoted( name ) << ": unknown key " << makeQuoted( value ) << "\n";
+			}
 		}
 	}
-}
-std::size_t count() const {
-	return m_count;
-}
+	std::size_t count() const {
+		return m_count;
+	}
 };
 
 void LoadCommandMap( const char* path ){

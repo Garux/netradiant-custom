@@ -48,8 +48,8 @@ char* GetFilename( char* buffer, const char* filename );
 char* GetGameFilename( char* buffer, const char* filename );
 
 float Determinant3x3( float a1, float a2, float a3,
-					  float b1, float b2, float b3,
-					  float c1, float c2, float c3 );
+                      float b1, float b2, float b3,
+                      float c1, float c2, float c3 );
 
 bool GetEntityCentre( const char* entity, vec3_t centre );
 void MakeNormal( const vec_t* va, const vec_t* vb, const vec_t* vc, vec_t* out );

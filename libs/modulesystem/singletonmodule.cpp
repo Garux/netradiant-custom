@@ -25,18 +25,18 @@
 class NullType
 {
 public:
-INTEGER_CONSTANT( Version, 1 );
-STRING_CONSTANT( Name, "" );
+	INTEGER_CONSTANT( Version, 1 );
+	STRING_CONSTANT( Name, "" );
 };
 
 class NullModule
 {
 public:
-typedef NullType Type;
-STRING_CONSTANT( Name, "" );
-void* getTable(){
-	return NULL;
-}
+	typedef NullType Type;
+	STRING_CONSTANT( Name, "" );
+	void* getTable(){
+		return NULL;
+	}
 };
 
 void TEST_SINGLETONMODULE(){

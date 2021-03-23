@@ -275,11 +275,11 @@ void DoorBuilder( vec3_t vMin, vec3_t vMax ){
 		g_FuncTable.m_pfnDeleteBrushHandle( brush );
 
 		BuildDoorsX2( vMin, vMax,
-					  doorDlg.m_bSclMainHor, doorDlg.m_bSclMainVert,
-					  doorDlg.m_bSclTrimHor, doorDlg.m_bSclTrimVert,
-					  (LPCTSTR)doorDlg.m_fbTextureName,
-					  (LPCTSTR)doorDlg.m_trimTextureName,
-					  doorDlg.m_doorDirection );
+		              doorDlg.m_bSclMainHor, doorDlg.m_bSclMainVert,
+		              doorDlg.m_bSclTrimHor, doorDlg.m_bSclTrimVert,
+		              (LPCTSTR)doorDlg.m_fbTextureName,
+		              (LPCTSTR)doorDlg.m_trimTextureName,
+		              doorDlg.m_doorDirection );
 	}
 
 	g_FuncTable.m_pfnReleaseSelectedBrushHandles();

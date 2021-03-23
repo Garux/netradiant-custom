@@ -38,80 +38,80 @@ void Widget_connectToggleDependency( GtkWidget* self, GtkWidget* toggleButton );
 
 class PreferencesPage
 {
-Dialog& m_dialog;
-GtkWidget* m_vbox;
+	Dialog& m_dialog;
+	GtkWidget* m_vbox;
 public:
-PreferencesPage( Dialog& dialog, GtkWidget* vbox ) : m_dialog( dialog ), m_vbox( vbox ){
-}
-GtkWidget* appendCheckBox( const char* name, const char* flag, bool& data ){
-	return m_dialog.addCheckBox( m_vbox, name, flag, data );
-}
-GtkWidget* appendCheckBox( const char* name, const char* flag, const BoolImportCallback& importCallback, const BoolExportCallback& exportCallback ){
-	return m_dialog.addCheckBox( m_vbox, name, flag, importCallback, exportCallback );
-}
-void appendCombo( const char* name, StringArrayRange values, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
-	m_dialog.addCombo( m_vbox, name, values, importCallback, exportCallback );
-}
-void appendCombo( const char* name, int& data, StringArrayRange values ){
-	m_dialog.addCombo( m_vbox, name, data, values );
-}
-void appendSlider( const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
-	m_dialog.addSlider( m_vbox, name, data, draw_value, low, high, value, lower, upper, step_increment, page_increment );
-}
-void appendSlider( const char* name, float& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
-	m_dialog.addSlider( m_vbox, name, data, draw_value, low, high, value, lower, upper, step_increment, page_increment );
-}
-void appendRadio( const char* name, StringArrayRange names, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
-	m_dialog.addRadio( m_vbox, name, names, importCallback, exportCallback );
-}
-void appendRadio( const char* name, int& data, StringArrayRange names ){
-	m_dialog.addRadio( m_vbox, name, data, names );
-}
-void appendRadioIcons( const char* name, StringArrayRange icons, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
-	m_dialog.addRadioIcons( m_vbox, name, icons, importCallback, exportCallback );
-}
-void appendRadioIcons( const char* name, int& data, StringArrayRange icons ){
-	m_dialog.addRadioIcons( m_vbox, name, data, icons );
-}
-GtkWidget* appendEntry( const char* name, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
-	return m_dialog.addIntEntry( m_vbox, name, importCallback, exportCallback );
-}
-GtkWidget* appendEntry( const char* name, int& data ){
-	return m_dialog.addEntry( m_vbox, name, data );
-}
-GtkWidget* appendEntry( const char* name, const SizeImportCallback& importCallback, const SizeExportCallback& exportCallback ){
-	return m_dialog.addSizeEntry( m_vbox, name, importCallback, exportCallback );
-}
-GtkWidget* appendEntry( const char* name, std::size_t& data ){
-	return m_dialog.addEntry( m_vbox, name, data );
-}
-GtkWidget* appendEntry( const char* name, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback ){
-	return m_dialog.addFloatEntry( m_vbox, name, importCallback, exportCallback );
-}
-GtkWidget* appendEntry( const char* name, float& data ){
-	return m_dialog.addEntry( m_vbox, name, data );
-}
-GtkWidget* appendEntry( const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
-	return m_dialog.addTextEntry( m_vbox, name, importCallback, exportCallback );
-}
-GtkWidget* appendEntry( const char* name, CopiedString& data ){
-	return m_dialog.addEntry( m_vbox, name, data );
-}
-GtkWidget* appendPathEntry( const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
-	return m_dialog.addPathEntry( m_vbox, name, browse_directory, importCallback, exportCallback );
-}
-GtkWidget* appendPathEntry( const char* name, CopiedString& data, bool directory ){
-	return m_dialog.addPathEntry( m_vbox, name, data, directory );
-}
-GtkWidget* appendSpinner( const char* name, int& data, double value, double lower, double upper ){
-	return m_dialog.addSpinner( m_vbox, name, data, value, lower, upper );
-}
-GtkWidget* appendSpinner( const char* name, double value, double lower, double upper, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
-	return m_dialog.addSpinner( m_vbox, name, value, lower, upper, importCallback, exportCallback );
-}
-GtkWidget* appendSpinner( const char* name, double value, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback ){
-	return m_dialog.addSpinner( m_vbox, name, value, lower, upper, importCallback, exportCallback );
-}
+	PreferencesPage( Dialog& dialog, GtkWidget* vbox ) : m_dialog( dialog ), m_vbox( vbox ){
+	}
+	GtkWidget* appendCheckBox( const char* name, const char* flag, bool& data ){
+		return m_dialog.addCheckBox( m_vbox, name, flag, data );
+	}
+	GtkWidget* appendCheckBox( const char* name, const char* flag, const BoolImportCallback& importCallback, const BoolExportCallback& exportCallback ){
+		return m_dialog.addCheckBox( m_vbox, name, flag, importCallback, exportCallback );
+	}
+	void appendCombo( const char* name, StringArrayRange values, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
+		m_dialog.addCombo( m_vbox, name, values, importCallback, exportCallback );
+	}
+	void appendCombo( const char* name, int& data, StringArrayRange values ){
+		m_dialog.addCombo( m_vbox, name, data, values );
+	}
+	void appendSlider( const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
+		m_dialog.addSlider( m_vbox, name, data, draw_value, low, high, value, lower, upper, step_increment, page_increment );
+	}
+	void appendSlider( const char* name, float& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
+		m_dialog.addSlider( m_vbox, name, data, draw_value, low, high, value, lower, upper, step_increment, page_increment );
+	}
+	void appendRadio( const char* name, StringArrayRange names, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
+		m_dialog.addRadio( m_vbox, name, names, importCallback, exportCallback );
+	}
+	void appendRadio( const char* name, int& data, StringArrayRange names ){
+		m_dialog.addRadio( m_vbox, name, data, names );
+	}
+	void appendRadioIcons( const char* name, StringArrayRange icons, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
+		m_dialog.addRadioIcons( m_vbox, name, icons, importCallback, exportCallback );
+	}
+	void appendRadioIcons( const char* name, int& data, StringArrayRange icons ){
+		m_dialog.addRadioIcons( m_vbox, name, data, icons );
+	}
+	GtkWidget* appendEntry( const char* name, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
+		return m_dialog.addIntEntry( m_vbox, name, importCallback, exportCallback );
+	}
+	GtkWidget* appendEntry( const char* name, int& data ){
+		return m_dialog.addEntry( m_vbox, name, data );
+	}
+	GtkWidget* appendEntry( const char* name, const SizeImportCallback& importCallback, const SizeExportCallback& exportCallback ){
+		return m_dialog.addSizeEntry( m_vbox, name, importCallback, exportCallback );
+	}
+	GtkWidget* appendEntry( const char* name, std::size_t& data ){
+		return m_dialog.addEntry( m_vbox, name, data );
+	}
+	GtkWidget* appendEntry( const char* name, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback ){
+		return m_dialog.addFloatEntry( m_vbox, name, importCallback, exportCallback );
+	}
+	GtkWidget* appendEntry( const char* name, float& data ){
+		return m_dialog.addEntry( m_vbox, name, data );
+	}
+	GtkWidget* appendEntry( const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
+		return m_dialog.addTextEntry( m_vbox, name, importCallback, exportCallback );
+	}
+	GtkWidget* appendEntry( const char* name, CopiedString& data ){
+		return m_dialog.addEntry( m_vbox, name, data );
+	}
+	GtkWidget* appendPathEntry( const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
+		return m_dialog.addPathEntry( m_vbox, name, browse_directory, importCallback, exportCallback );
+	}
+	GtkWidget* appendPathEntry( const char* name, CopiedString& data, bool directory ){
+		return m_dialog.addPathEntry( m_vbox, name, data, directory );
+	}
+	GtkWidget* appendSpinner( const char* name, int& data, double value, double lower, double upper ){
+		return m_dialog.addSpinner( m_vbox, name, data, value, lower, upper );
+	}
+	GtkWidget* appendSpinner( const char* name, double value, double lower, double upper, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
+		return m_dialog.addSpinner( m_vbox, name, value, lower, upper, importCallback, exportCallback );
+	}
+	GtkWidget* appendSpinner( const char* name, double value, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback ){
+		return m_dialog.addSpinner( m_vbox, name, value, lower, upper, importCallback, exportCallback );
+	}
 };
 
 typedef Callback1<PreferencesPage&> PreferencesPageCallback;
@@ -119,7 +119,7 @@ typedef Callback1<PreferencesPage&> PreferencesPageCallback;
 class PreferenceGroup
 {
 public:
-virtual PreferencesPage createPage( const char* treeName, const char* frameName ) = 0;
+	virtual PreferencesPage createPage( const char* treeName, const char* frameName ) = 0;
 };
 
 typedef Callback1<PreferenceGroup&> PreferenceGroupCallback;
@@ -139,21 +139,21 @@ template<typename Value>
 class LatchedValue
 {
 public:
-Value m_value;
-Value m_latched;
-const char* m_description;
+	Value m_value;
+	Value m_latched;
+	const char* m_description;
 
-LatchedValue( Value value, const char* description ) : m_value( value ), m_latched( value ), m_description( description ){
-}
-void assign( Value value ){ // assign during initialization
-	m_value = m_latched = value;
-}
-void import( Value value ){ // import during runtime
-	m_latched = value;
-	if ( m_latched != m_value ) {
-		PreferencesDialog_restartRequired( m_description );
+	LatchedValue( Value value, const char* description ) : m_value( value ), m_latched( value ), m_description( description ){
 	}
-}
+	void assign( Value value ){ // assign during initialization
+		m_value = m_latched = value;
+	}
+	void import( Value value ){ // import during runtime
+		m_latched = value;
+		if ( m_latched != m_value ) {
+			PreferencesDialog_restartRequired( m_description );
+		}
+	}
 };
 
 typedef LatchedValue<bool> LatchedBool;
@@ -183,34 +183,34 @@ inline R LatchedImportCaller( LatchedValue<T>& latchedValue ){
  */
 class CGameDescription
 {
-typedef std::map<CopiedString, CopiedString> GameDescription;
+	typedef std::map<CopiedString, CopiedString> GameDescription;
 
 public:
-CopiedString mGameFile;   ///< the .game file that describes this game
-GameDescription m_gameDescription;
+	CopiedString mGameFile;   ///< the .game file that describes this game
+	GameDescription m_gameDescription;
 
-CopiedString mGameToolsPath;   ///< the explicit path to the game-dependent modules
-CopiedString mGameType;   ///< the type of the engine
+	CopiedString mGameToolsPath;   ///< the explicit path to the game-dependent modules
+	CopiedString mGameType;   ///< the type of the engine
 
-const char* getKeyValue( const char* key ) const {
-	GameDescription::const_iterator i = m_gameDescription.find( key );
-	if ( i != m_gameDescription.end() ) {
-		return ( *i ).second.c_str();
+	const char* getKeyValue( const char* key ) const {
+		GameDescription::const_iterator i = m_gameDescription.find( key );
+		if ( i != m_gameDescription.end() ) {
+			return ( *i ).second.c_str();
+		}
+		return "";
 	}
-	return "";
-}
-const char* getRequiredKeyValue( const char* key ) const {
-	GameDescription::const_iterator i = m_gameDescription.find( key );
-	if ( i != m_gameDescription.end() ) {
-		return ( *i ).second.c_str();
+	const char* getRequiredKeyValue( const char* key ) const {
+		GameDescription::const_iterator i = m_gameDescription.find( key );
+		if ( i != m_gameDescription.end() ) {
+			return ( *i ).second.c_str();
+		}
+		ERROR_MESSAGE( "game attribute " << makeQuoted( key ) << " not found in " << makeQuoted( mGameFile.c_str() ) );
+		return "";
 	}
-	ERROR_MESSAGE( "game attribute " << makeQuoted( key ) << " not found in " << makeQuoted( mGameFile.c_str() ) );
-	return "";
-}
 
-CGameDescription( xmlDocPtr pDoc, const CopiedString &GameFile );
+	CGameDescription( xmlDocPtr pDoc, const CopiedString &GameFile );
 
-void Dump();
+	void Dump();
 };
 
 extern CGameDescription *g_pGameDescription;
@@ -226,110 +226,110 @@ class CGameDialog : public Dialog
 {
 protected:
 
-mutable int m_nComboSelect;   ///< intermediate int value for combo in dialog box
+	mutable int m_nComboSelect;   ///< intermediate int value for combo in dialog box
 
 public:
 
-/*!
-   those settings are saved in the global prefs file
-   I'm too lazy to wrap behind protected access, not sure this needs to be public
-   NOTE: those are preference settings. if you change them it is likely that you would
-   have to restart the editor for them to take effect
- */
-/*@{*/
-/*!
-   what game has been selected
-   this is the name of the .game file
- */
-LatchedValue<CopiedString> m_sGameFile;
-/*!
-   prompt which game to load on startup
- */
-bool m_bGamePrompt;
-/*!
-   log console to radiant.log
-   m_bForceLogConsole is an obscure forced latching situation
- */
-bool m_bForceLogConsole;
-/*@}*/
+	/*!
+	   those settings are saved in the global prefs file
+	   I'm too lazy to wrap behind protected access, not sure this needs to be public
+	   NOTE: those are preference settings. if you change them it is likely that you would
+	   have to restart the editor for them to take effect
+	 */
+	/*@{*/
+	/*!
+	   what game has been selected
+	   this is the name of the .game file
+	 */
+	LatchedValue<CopiedString> m_sGameFile;
+	/*!
+	   prompt which game to load on startup
+	 */
+	bool m_bGamePrompt;
+	/*!
+	   log console to radiant.log
+	   m_bForceLogConsole is an obscure forced latching situation
+	 */
+	bool m_bForceLogConsole;
+	/*@}*/
 
-/*!
-   the list of game descriptions we scanned from the game/ dir
- */
-std::list<CGameDescription*> mGames;
+	/*!
+	   the list of game descriptions we scanned from the game/ dir
+	 */
+	std::list<CGameDescription*> mGames;
 
-CGameDialog() :
-	m_sGameFile( "", "Selected Game" ),
-	m_bGamePrompt( false ),
-	m_bForceLogConsole( false ){
-}
-virtual ~CGameDialog();
+	CGameDialog() :
+		m_sGameFile( "", "Selected Game" ),
+		m_bGamePrompt( false ),
+		m_bForceLogConsole( false ){
+	}
+	virtual ~CGameDialog();
 
-void AddPacksURL( StringOutputStream &s );
+	void AddPacksURL( StringOutputStream &s );
 
-/*!
-   intialize the game dialog, called at CPrefsDlg::Init
-   will scan for games, load prefs, and do game selection dialog if needed
- */
-void Init();
+	/*!
+	   intialize the game dialog, called at CPrefsDlg::Init
+	   will scan for games, load prefs, and do game selection dialog if needed
+	 */
+	void Init();
 
-/*!
-   reset the global settings by removing the file
- */
-void Reset();
+	/*!
+	   reset the global settings by removing the file
+	 */
+	void Reset();
 
-/*!
-   run the dialog UI for the list of games
- */
-void DoGameDialog();
+	/*!
+	   run the dialog UI for the list of games
+	 */
+	void DoGameDialog();
 
-/*!
-   Dialog API
-   this is only called when the dialog is built at startup for main engine select
- */
-GtkWindow* BuildDialog();
+	/*!
+	   Dialog API
+	   this is only called when the dialog is built at startup for main engine select
+	 */
+	GtkWindow* BuildDialog();
 
-void GameFileAssign( int value );
-void GameFileImport( int value );
-void GameFileExport( const IntImportCallback& importCallback ) const;
+	void GameFileAssign( int value );
+	void GameFileImport( int value );
+	void GameFileExport( const IntImportCallback& importCallback ) const;
 
-/*!
-   construction of the dialog frame
-   this is the part to be re-used in prefs dialog
-   for the standalone dialog, we include this in a modal box
-   for prefs, we hook the frame in the main notebook
-   build the frame on-demand (only once)
- */
+	/*!
+	   construction of the dialog frame
+	   this is the part to be re-used in prefs dialog
+	   for the standalone dialog, we include this in a modal box
+	   for prefs, we hook the frame in the main notebook
+	   build the frame on-demand (only once)
+	 */
 /// \brief \p global controls if to use LatchedValue assignment callback (global settings dialog) or import (preferences dialog).
-void CreateGlobalFrame( PreferencesPage& page, bool global );
+	void CreateGlobalFrame( PreferencesPage& page, bool global );
 
-/*!
-   global preferences subsystem
-   XML-based this time, hopefully this will generalize to other prefs
-   LoadPrefs has hardcoded defaults
-   NOTE: it may not be strictly 'CGameDialog' to put the global prefs here
-   could have named the class differently I guess
- */
-/*@{*/
-void LoadPrefs();   ///< load from file into variables
-void SavePrefs();   ///< save pref variables to file
-/*@}*/
+	/*!
+	   global preferences subsystem
+	   XML-based this time, hopefully this will generalize to other prefs
+	   LoadPrefs has hardcoded defaults
+	   NOTE: it may not be strictly 'CGameDialog' to put the global prefs here
+	   could have named the class differently I guess
+	 */
+	/*@{*/
+	void LoadPrefs();   ///< load from file into variables
+	void SavePrefs();   ///< save pref variables to file
+	/*@}*/
 
 private:
-/*!
-   scan for .game files, load them
- */
-void ScanForGames();
+	/*!
+	   scan for .game files, load them
+	 */
+	void ScanForGames();
 
-/*!
-   inits g_Preferences.m_global_rc_path
- */
-void InitGlobalPrefPath();
+	/*!
+	   inits g_Preferences.m_global_rc_path
+	 */
+	void InitGlobalPrefPath();
 
-/*!
-   uses m_nComboItem to find the right mGames
- */
-CGameDescription *GameDescriptionForComboItem();
+	/*!
+	   uses m_nComboItem to find the right mGames
+	 */
+	CGameDescription *GameDescriptionForComboItem();
 };
 
 /*!
@@ -342,47 +342,47 @@ class PrefsDlg : public Dialog
 {
 public:
 
-GtkWidget *m_notebook;
-GtkWidget *m_treeview;
+	GtkWidget *m_notebook;
+	GtkWidget *m_treeview;
 
-virtual ~PrefsDlg(){
-	g_string_free( m_rc_path, true );
-	g_string_free( m_inipath, true );
-}
+	virtual ~PrefsDlg(){
+		g_string_free( m_rc_path, true );
+		g_string_free( m_inipath, true );
+	}
 
-/*!
-   path for global settings
-   win32: AppPath
-   linux: ~/.radiant/[version]/
- */
-GString *m_global_rc_path;
+	/*!
+	   path for global settings
+	   win32: AppPath
+	   linux: ~/.radiant/[version]/
+	 */
+	GString *m_global_rc_path;
 
-/*!
-   path to per-game settings
-   used for various game dependant storage
-   win32: GameToolsPath
-   linux: ~/.radiant/[version]/[gamename]/
- */
-GString *m_rc_path;
+	/*!
+	   path to per-game settings
+	   used for various game dependant storage
+	   win32: GameToolsPath
+	   linux: ~/.radiant/[version]/[gamename]/
+	 */
+	GString *m_rc_path;
 
-/*!
-   holds per-game settings
-   m_rc_path+"local.pref"
-   \todo FIXME at some point this should become XML property bag code too
- */
-GString *m_inipath;
+	/*!
+	   holds per-game settings
+	   m_rc_path+"local.pref"
+	   \todo FIXME at some point this should become XML property bag code too
+	 */
+	GString *m_inipath;
 
 // initialize the above paths
-void Init();
+	void Init();
 
-/*! Utility function for swapping notebook pages for tree list selections */
-void showPrefPage( GtkWidget* prefpage );
+	/*! Utility function for swapping notebook pages for tree list selections */
+	void showPrefPage( GtkWidget* prefpage );
 
 protected:
 
-/*! Dialog API */
-GtkWindow* BuildDialog();
-void PostModal( EMessageBoxReturn code );
+	/*! Dialog API */
+	GtkWindow* BuildDialog();
+	void PostModal( EMessageBoxReturn code );
 };
 
 extern PrefsDlg g_Preferences;

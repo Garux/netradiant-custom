@@ -255,12 +255,12 @@ GtkTable* DialogRow_new( const char* name, GtkWidget* widget ){
 	gtk_table_set_row_spacings( table, 0 );
 
 	gtk_table_attach( table, GTK_WIDGET( DialogLabel_new( name ) ), 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 	gtk_table_attach( table, widget, 1, 3, 0, 1,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 	return table;
 }

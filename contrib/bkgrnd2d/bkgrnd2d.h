@@ -30,55 +30,60 @@
 
 class CBackgroundImage {
 private:
-qtexture_t *m_tex;
-VIEWTYPE m_vt;
+	qtexture_t *m_tex;
+	VIEWTYPE m_vt;
 
 // which components of a vec3_t correspond to x and y in the image
-unsigned m_ix,m_iy;
+	unsigned m_ix,m_iy;
 
 public:
-CBackgroundImage( VIEWTYPE vt );
+	CBackgroundImage( VIEWTYPE vt );
 //  ~CBackgroundImage();
 
-float m_alpha;     // vertex alpha
-bool m_bActive;
+	float m_alpha;     // vertex alpha
+	bool m_bActive;
 
 // x and y axis are in relation to the screen, not world, making rendering
 // the same for each view type. Whoever sets them is responsible for
 // shuffling.
 // units are world units.
 // TODO should be private
-float m_xmin,m_ymin,m_xmax,m_ymax;
+	float m_xmin,m_ymin,m_xmax,m_ymax;
 
 // load file, create new tex, cleanup old tex, set new tex
-bool Load( const char *filename );
-void Cleanup();     // free texture, free tex, set make tex NULL
-bool SetExtentsMM();     // set extents by ET mapcoordsmaxs/mapcoordsmins
-bool SetExtentsSel();     // set extents by selection
-void Render();
-bool Valid() { return ( m_tex && ( m_xmin != m_xmax ) && ( m_ymin != m_ymax ) ); }
+	bool Load( const char *filename );
+	void Cleanup();     // free texture, free tex, set make tex NULL
+	bool SetExtentsMM();     // set extents by ET mapcoordsmaxs/mapcoordsmins
+	bool SetExtentsSel();     // set extents by selection
+	void Render();
+	bool Valid() {
+		return ( m_tex && ( m_xmin != m_xmax ) && ( m_ymin != m_ymax ) );
+	}
 };
 
 class CBackgroundRender : public IGL2DWindow {
 public:
 
-CBackgroundRender();
-virtual ~CBackgroundRender();
+	CBackgroundRender();
+	virtual ~CBackgroundRender();
 
 protected:
-int refCount;
+	int refCount;
 
 public:
 
 // IGL2DWindow IGL3DWindow interface
-void IncRef() { refCount++; }
-void DecRef() {
-	refCount--; if ( refCount <= 0 ) {
-		delete this;
+	void IncRef() {
+		refCount++;
 	}
-}
-void Draw2D( VIEWTYPE vt );
-void Register();
+	void DecRef() {
+		refCount--;
+		if ( refCount <= 0 ) {
+			delete this;
+		}
+	}
+	void Draw2D( VIEWTYPE vt );
+	void Register();
 };
 
 extern CBackgroundImage backgroundXY,backgroundXZ,backgroundYZ;

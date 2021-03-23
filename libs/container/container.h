@@ -31,29 +31,29 @@
 template<typename Type>
 class Single
 {
-Type* m_value;
+	Type* m_value;
 public:
-Single() : m_value( 0 ){
-}
-bool empty(){
-	return m_value == 0;
-}
-Type* insert( const Type& other ){
-	m_value = new Type( other );
-	return m_value;
-}
-void clear(){
-	delete m_value;
-	m_value = 0;
-}
-Type& get(){
-	//ASSERT_MESSAGE(!empty(), "Single: must be initialised before being accessed");
-	return *m_value;
-}
-const Type& get() const {
-	//ASSERT_MESSAGE(!empty(), "Single: must be initialised before being accessed");
-	return *m_value;
-}
+	Single() : m_value( 0 ){
+	}
+	bool empty(){
+		return m_value == 0;
+	}
+	Type* insert( const Type& other ){
+		m_value = new Type( other );
+		return m_value;
+	}
+	void clear(){
+		delete m_value;
+		m_value = 0;
+	}
+	Type& get(){
+		//ASSERT_MESSAGE(!empty(), "Single: must be initialised before being accessed");
+		return *m_value;
+	}
+	const Type& get() const {
+		//ASSERT_MESSAGE(!empty(), "Single: must be initialised before being accessed");
+		return *m_value;
+	}
 };
 
 
@@ -63,106 +63,106 @@ const Type& get() const {
 template<typename Value>
 class UnsortedSet
 {
-typedef typename std::list<Value> Values;
-Values m_values;
+	typedef typename std::list<Value> Values;
+	Values m_values;
 public:
-typedef typename Values::iterator iterator;
-typedef typename Values::const_iterator const_iterator;
-typedef typename Values::reverse_iterator reverse_iterator;
-typedef typename Values::const_reverse_iterator const_reverse_iterator;
+	typedef typename Values::iterator iterator;
+	typedef typename Values::const_iterator const_iterator;
+	typedef typename Values::reverse_iterator reverse_iterator;
+	typedef typename Values::const_reverse_iterator const_reverse_iterator;
 private:
-struct Compare{
-	using is_transparent = void;
+	struct Compare{
+		using is_transparent = void;
 
-	bool operator()( const const_iterator& one, const const_iterator& other ) const {
-		return *one < *other;
+		bool operator()( const const_iterator& one, const const_iterator& other ) const {
+			return *one < *other;
+		}
+		bool operator()( const Value& va, const const_iterator& it ) const {
+			return va < *it;
+		}
+		bool operator()( const const_iterator& it, const Value& va ) const {
+			return *it < va;
+		}
+	};
+	std::set<const_iterator, Compare> m_set; // store sorted iterators for fast lookup
+	void init_set(){ // only load set, when lookup is needed
+		if( m_set.empty() )
+			for( const_iterator it = begin(); it != end(); ++it )
+				m_set.emplace( it );
 	}
-	bool operator()( const Value& va, const const_iterator& it ) const {
-		return va < *it;
-	}
-	bool operator()( const const_iterator& it, const Value& va ) const {
-		return *it < va;
-	}
-};
-std::set<const_iterator, Compare> m_set; // store sorted iterators for fast lookup
-void init_set(){ // only load set, when lookup is needed
-	if( m_set.empty() )
-		for( const_iterator it = begin(); it != end(); ++it )
-			m_set.emplace( it );
-}
 public:
 
-UnsortedSet() = default;
-UnsortedSet( const UnsortedSet& other ) : m_values( other.m_values ), m_set(){
-}
-UnsortedSet( UnsortedSet&& ) noexcept = default;
-UnsortedSet& operator=( const UnsortedSet& other ){
-	m_values = other.m_values;
-	m_set.clear();
-	return *this;
-}
-UnsortedSet& operator=( UnsortedSet&& ) noexcept = default;
+	UnsortedSet() = default;
+	UnsortedSet( const UnsortedSet& other ) : m_values( other.m_values ), m_set(){
+	}
+	UnsortedSet( UnsortedSet&& ) noexcept = default;
+	UnsortedSet& operator=( const UnsortedSet& other ){
+		m_values = other.m_values;
+		m_set.clear();
+		return *this;
+	}
+	UnsortedSet& operator=( UnsortedSet&& ) noexcept = default;
 
-iterator begin(){
-	return m_values.begin();
-}
-const_iterator begin() const {
-	return m_values.begin();
-}
-iterator end(){
-	return m_values.end();
-}
-const_iterator end() const {
-	return m_values.end();
-}
-reverse_iterator rbegin(){
-	return m_values.rbegin();
-}
-const_reverse_iterator rbegin() const {
-	return m_values.rbegin();
-}
-reverse_iterator rend(){
-	return m_values.rend();
-}
-const_reverse_iterator rend() const {
-	return m_values.rend();
-}
+	iterator begin(){
+		return m_values.begin();
+	}
+	const_iterator begin() const {
+		return m_values.begin();
+	}
+	iterator end(){
+		return m_values.end();
+	}
+	const_iterator end() const {
+		return m_values.end();
+	}
+	reverse_iterator rbegin(){
+		return m_values.rbegin();
+	}
+	const_reverse_iterator rbegin() const {
+		return m_values.rbegin();
+	}
+	reverse_iterator rend(){
+		return m_values.rend();
+	}
+	const_reverse_iterator rend() const {
+		return m_values.rend();
+	}
 
-bool empty() const {
-	return m_values.empty();
-}
-std::size_t size() const {
-	return m_values.size();
-}
-void clear(){
-	m_values.clear();
-	m_set.clear();
-}
+	bool empty() const {
+		return m_values.empty();
+	}
+	std::size_t size() const {
+		return m_values.size();
+	}
+	void clear(){
+		m_values.clear();
+		m_set.clear();
+	}
 
-void swap( UnsortedSet& other ){
-	std::swap( m_values, other.m_values );
-	std::swap( m_set, other.m_set );
-}
+	void swap( UnsortedSet& other ){
+		std::swap( m_values, other.m_values );
+		std::swap( m_set, other.m_set );
+	}
 
-iterator insert( const Value& value ){
-	init_set();
-	m_values.push_back( value );
-	const bool inserted = m_set.emplace( --end() ).second;
-	ASSERT_MESSAGE( inserted, "UnsortedSet::insert: already added" );
-	return --end();
-}
-void erase( const Value& value ){
-	init_set();
-	const auto it = m_set.find( value );
-	ASSERT_MESSAGE( it != m_set.cend(), "UnsortedSet::erase: not found" );
-	m_values.erase( *it );
-	m_set.erase( it );
-}
-const_iterator find( const Value& value ){
-	init_set();
-	const auto it = m_set.find( value );
-	return it == m_set.cend()? end() : *it;
-}
+	iterator insert( const Value& value ){
+		init_set();
+		m_values.push_back( value );
+		const bool inserted = m_set.emplace( --end() ).second;
+		ASSERT_MESSAGE( inserted, "UnsortedSet::insert: already added" );
+		return --end();
+	}
+	void erase( const Value& value ){
+		init_set();
+		const auto it = m_set.find( value );
+		ASSERT_MESSAGE( it != m_set.cend(), "UnsortedSet::erase: not found" );
+		m_values.erase( *it );
+		m_set.erase( it );
+	}
+	const_iterator find( const Value& value ){
+		init_set();
+		const auto it = m_set.find( value );
+		return it == m_set.cend()? end() : *it;
+	}
 };
 
 namespace std
@@ -181,143 +181,143 @@ inline void swap( UnsortedSet<Value>& self, UnsortedSet<Value>& other ){
 template<typename Key, typename Value>
 class UnsortedMap
 {
-typedef typename std::list< std::pair<Key, Value> > Values;
-Values m_values;
+	typedef typename std::list< std::pair<Key, Value> > Values;
+	Values m_values;
 public:
-typedef typename Values::value_type value_type;
-typedef typename Values::iterator iterator;
-typedef typename Values::const_iterator const_iterator;
+	typedef typename Values::value_type value_type;
+	typedef typename Values::iterator iterator;
+	typedef typename Values::const_iterator const_iterator;
 
-iterator begin(){
-	return m_values.begin();
-}
-const_iterator begin() const {
-	return m_values.begin();
-}
-iterator end(){
-	return m_values.end();
-}
-const_iterator end() const {
-	return m_values.end();
-}
+	iterator begin(){
+		return m_values.begin();
+	}
+	const_iterator begin() const {
+		return m_values.begin();
+	}
+	iterator end(){
+		return m_values.end();
+	}
+	const_iterator end() const {
+		return m_values.end();
+	}
 
-bool empty() const {
-	return m_values.empty();
-}
-std::size_t size() const {
-	return m_values.size();
-}
-void clear(){
-	m_values.clear();
-}
+	bool empty() const {
+		return m_values.empty();
+	}
+	std::size_t size() const {
+		return m_values.size();
+	}
+	void clear(){
+		m_values.clear();
+	}
 
-iterator insert( const value_type& value ){
-	ASSERT_MESSAGE( find( value.first ) == end(), "UnsortedMap::insert: already added" );
-	m_values.push_back( value );
-	return --m_values.end();
-}
-void erase( const Key& key ){
-	iterator i = find( key );
-	ASSERT_MESSAGE( i != end(), "UnsortedMap::erase: not found" );
-	erase( i );
-}
-void erase( iterator i ){
-	m_values.erase( i );
-}
-iterator find( const Key& key ){
-	for ( iterator i = m_values.begin(); i != m_values.end(); ++i )
-	{
-		if ( ( *i ).first == key ) {
-			return i;
+	iterator insert( const value_type& value ){
+		ASSERT_MESSAGE( find( value.first ) == end(), "UnsortedMap::insert: already added" );
+		m_values.push_back( value );
+		return --m_values.end();
+	}
+	void erase( const Key& key ){
+		iterator i = find( key );
+		ASSERT_MESSAGE( i != end(), "UnsortedMap::erase: not found" );
+		erase( i );
+	}
+	void erase( iterator i ){
+		m_values.erase( i );
+	}
+	iterator find( const Key& key ){
+		for ( iterator i = m_values.begin(); i != m_values.end(); ++i )
+		{
+			if ( ( *i ).first == key ) {
+				return i;
+			}
 		}
+		return m_values.end();
 	}
-	return m_values.end();
-}
-const_iterator find( const Key& key ) const {
-	for ( const_iterator i = m_values.begin(); i != m_values.end(); ++i )
-	{
-		if ( ( *i ).first == key ) {
-			return i;
+	const_iterator find( const Key& key ) const {
+		for ( const_iterator i = m_values.begin(); i != m_values.end(); ++i )
+		{
+			if ( ( *i ).first == key ) {
+				return i;
+			}
 		}
-	}
-	return m_values.end();
-}
-
-Value& operator[]( const Key& key ){
-	iterator i = find( key );
-	if ( i != end() ) {
-		return ( *i ).second;
+		return m_values.end();
 	}
 
-	m_values.push_back( Values::value_type( key, Value() ) );
-	return m_values.back().second;
-}
+	Value& operator[]( const Key& key ){
+		iterator i = find( key );
+		if ( i != end() ) {
+			return ( *i ).second;
+		}
+
+		m_values.push_back( Values::value_type( key, Value() ) );
+		return m_values.back().second;
+	}
 };
 
 /// An adaptor to assert when duplicate values are added, or non-existent values removed from a std::set.
 template<typename Value>
 class UniqueSet
 {
-typedef std::set<Value> Values;
-Values m_values;
+	typedef std::set<Value> Values;
+	Values m_values;
 public:
-typedef typename Values::iterator iterator;
-typedef typename Values::const_iterator const_iterator;
-typedef typename Values::reverse_iterator reverse_iterator;
-typedef typename Values::const_reverse_iterator const_reverse_iterator;
+	typedef typename Values::iterator iterator;
+	typedef typename Values::const_iterator const_iterator;
+	typedef typename Values::reverse_iterator reverse_iterator;
+	typedef typename Values::const_reverse_iterator const_reverse_iterator;
 
 
-iterator begin(){
-	return m_values.begin();
-}
-const_iterator begin() const {
-	return m_values.begin();
-}
-iterator end(){
-	return m_values.end();
-}
-const_iterator end() const {
-	return m_values.end();
-}
-reverse_iterator rbegin(){
-	return m_values.rbegin();
-}
-const_reverse_iterator rbegin() const {
-	return m_values.rbegin();
-}
-reverse_iterator rend(){
-	return m_values.rend();
-}
-const_reverse_iterator rend() const {
-	return m_values.rend();
-}
+	iterator begin(){
+		return m_values.begin();
+	}
+	const_iterator begin() const {
+		return m_values.begin();
+	}
+	iterator end(){
+		return m_values.end();
+	}
+	const_iterator end() const {
+		return m_values.end();
+	}
+	reverse_iterator rbegin(){
+		return m_values.rbegin();
+	}
+	const_reverse_iterator rbegin() const {
+		return m_values.rbegin();
+	}
+	reverse_iterator rend(){
+		return m_values.rend();
+	}
+	const_reverse_iterator rend() const {
+		return m_values.rend();
+	}
 
-bool empty() const {
-	return m_values.empty();
-}
-std::size_t size() const {
-	return m_values.size();
-}
-void clear(){
-	m_values.clear();
-}
+	bool empty() const {
+		return m_values.empty();
+	}
+	std::size_t size() const {
+		return m_values.size();
+	}
+	void clear(){
+		m_values.clear();
+	}
 
-void swap( UniqueSet& other ){
-	std::swap( m_values, other.m_values );
-}
-iterator insert( const Value& value ){
-	std::pair<iterator, bool> result = m_values.insert( value );
-	ASSERT_MESSAGE( result.second, "UniqueSet::insert: already added" );
-	return result.first;
-}
-void erase( const Value& value ){
-	iterator i = find( value );
-	ASSERT_MESSAGE( i != end(), "UniqueSet::erase: not found" );
-	m_values.erase( i );
-}
-iterator find( const Value& value ){
-	return m_values.find( value );
-}
+	void swap( UniqueSet& other ){
+		std::swap( m_values, other.m_values );
+	}
+	iterator insert( const Value& value ){
+		std::pair<iterator, bool> result = m_values.insert( value );
+		ASSERT_MESSAGE( result.second, "UniqueSet::insert: already added" );
+		return result.first;
+	}
+	void erase( const Value& value ){
+		iterator i = find( value );
+		ASSERT_MESSAGE( i != end(), "UniqueSet::erase: not found" );
+		m_values.erase( i );
+	}
+	iterator find( const Value& value ){
+		return m_values.find( value );
+	}
 };
 
 namespace std
@@ -333,38 +333,38 @@ inline void swap( UniqueSet<Value>& self, UniqueSet<Value>& other ){
 template<typename Type>
 class ReferencePair
 {
-Type* m_first;
-Type* m_second;
+	Type* m_first;
+	Type* m_second;
 public:
-ReferencePair() : m_first( 0 ), m_second( 0 ){
-}
-void attach( Type& t ){
-	ASSERT_MESSAGE( m_first == 0 || m_second == 0, "ReferencePair::insert: pointer already exists" );
-	if ( m_first == 0 ) {
-		m_first = &t;
+	ReferencePair() : m_first( 0 ), m_second( 0 ){
 	}
-	else if ( m_second == 0 ) {
-		m_second = &t;
+	void attach( Type& t ){
+		ASSERT_MESSAGE( m_first == 0 || m_second == 0, "ReferencePair::insert: pointer already exists" );
+		if ( m_first == 0 ) {
+			m_first = &t;
+		}
+		else if ( m_second == 0 ) {
+			m_second = &t;
+		}
 	}
-}
-void detach( Type& t ){
-	ASSERT_MESSAGE( m_first == &t || m_second == &t, "ReferencePair::erase: pointer not found" );
-	if ( m_first == &t ) {
-		m_first = 0;
+	void detach( Type& t ){
+		ASSERT_MESSAGE( m_first == &t || m_second == &t, "ReferencePair::erase: pointer not found" );
+		if ( m_first == &t ) {
+			m_first = 0;
+		}
+		else if ( m_second == &t ) {
+			m_second = 0;
+		}
 	}
-	else if ( m_second == &t ) {
-		m_second = 0;
+	template<typename Functor>
+	void forEach( const Functor& functor ){
+		if ( m_second != 0 ) {
+			functor( *m_second );
+		}
+		if ( m_first != 0 ) {
+			functor( *m_first );
+		}
 	}
-}
-template<typename Functor>
-void forEach( const Functor& functor ){
-	if ( m_second != 0 ) {
-		functor( *m_second );
-	}
-	if ( m_first != 0 ) {
-		functor( *m_first );
-	}
-}
 };
 
 

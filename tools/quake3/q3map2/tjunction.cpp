@@ -206,7 +206,7 @@ void AddSurfaceEdges( mapDrawSurface_t *ds ){
 	{
 		/* save the edge number in the lightmap field so we don't need to look it up again */
 		ds->verts[i].lightmap[ 0 ][ 0 ] =
-			AddEdge( ds->verts[ i ], ds->verts[ ( i + 1 ) % ds->numVerts ], false );
+		    AddEdge( ds->verts[ i ], ds->verts[ ( i + 1 ) % ds->numVerts ], false );
 	}
 }
 
@@ -366,9 +366,8 @@ void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
 				}
 			}
 
-			if (
-				( start < end && p->intercept > start + ON_EPSILON ) ||
-				( start > end && p->intercept < start - ON_EPSILON ) ) {
+			if ( ( start < end && p->intercept > start + ON_EPSILON ) ||
+			     ( start > end && p->intercept < start - ON_EPSILON ) ) {
 				// insert this point
 				if ( numVerts == MAX_SURFACE_VERTS ) {
 					Error( "MAX_SURFACE_VERTS" );
@@ -445,18 +444,18 @@ void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
 		c_cant++;
 
 /*
-        memset ( &verts[numVerts], 0, sizeof( verts[numVerts] ) );
-        for ( i = 0 ; i < numVerts ; i++ ) {
-            for ( j = 0 ; j < 10 ; j++ ) {
-                verts[numVerts].xyz[j] += verts[i].xyz[j];
-            }
-        }
-        for ( j = 0 ; j < 10 ; j++ ) {
-            verts[numVerts].xyz[j] /= numVerts;
-        }
+		memset ( &verts[numVerts], 0, sizeof( verts[numVerts] ) );
+		for ( i = 0 ; i < numVerts ; i++ ) {
+			for ( j = 0 ; j < 10 ; j++ ) {
+				verts[numVerts].xyz[j] += verts[i].xyz[j];
+			}
+		}
+		for ( j = 0 ; j < 10 ; j++ ) {
+			verts[numVerts].xyz[j] /= numVerts;
+		}
 
-        i = numVerts;
-        numVerts++;
+		i = numVerts;
+		numVerts++;
  */
 	}
 	else {
@@ -617,7 +616,7 @@ void FixTJunctions( entity_t *ent ){
 	std::sort( originalEdges, originalEdges + numOriginalEdges, []( const originalEdge_t& a, const originalEdge_t& b ){
 		return a.length < b.length;
 	} );
-	
+
 	// add the non-axial edges, longest first
 	// this gives the most accurate edge description
 	for ( i = 0 ; i < numOriginalEdges ; i++ ) {

@@ -435,40 +435,40 @@ void PrintBSPFileSizes( void ) {
 	}
 
 	Sys_Printf( "%6i models       %7i\n"
-				,nummodels, (int)( nummodels * sizeof( dmodel_t ) ) );
+	            ,nummodels, (int)( nummodels * sizeof( dmodel_t ) ) );
 	Sys_Printf( "%6i shaders      %7i\n"
-				,numShaders, (int)( numShaders * sizeof( dshader_t ) ) );
+	            ,numShaders, (int)( numShaders * sizeof( dshader_t ) ) );
 	Sys_Printf( "%6i brushes      %7i\n"
-				,numbrushes, (int)( numbrushes * sizeof( dbrush_t ) ) );
+	            ,numbrushes, (int)( numbrushes * sizeof( dbrush_t ) ) );
 	Sys_Printf( "%6i brushsides   %7i\n"
-				,numbrushsides, (int)( numbrushsides * sizeof( dbrushside_t ) ) );
+	            ,numbrushsides, (int)( numbrushsides * sizeof( dbrushside_t ) ) );
 	Sys_Printf( "%6i fogs         %7i\n"
-				,numFogs, (int)( numFogs * sizeof( dfog_t ) ) );
+	            ,numFogs, (int)( numFogs * sizeof( dfog_t ) ) );
 	Sys_Printf( "%6i planes       %7i\n"
-				,numplanes, (int)( numplanes * sizeof( dplane_t ) ) );
+	            ,numplanes, (int)( numplanes * sizeof( dplane_t ) ) );
 	Sys_Printf( "%6i entdata      %7i\n", num_entities, entdatasize );
 
 	Sys_Printf( "\n" );
 
 	Sys_Printf( "%6i nodes        %7i\n"
-				,numnodes, (int)( numnodes * sizeof( dnode_t ) ) );
+	            ,numnodes, (int)( numnodes * sizeof( dnode_t ) ) );
 	Sys_Printf( "%6i leafs        %7i\n"
-				,numleafs, (int)( numleafs * sizeof( dleaf_t ) ) );
+	            ,numleafs, (int)( numleafs * sizeof( dleaf_t ) ) );
 	Sys_Printf( "%6i leafsurfaces %7i\n"
-				,numleafsurfaces, (int)( numleafsurfaces * sizeof( dleafsurfaces[0] ) ) );
+	            ,numleafsurfaces, (int)( numleafsurfaces * sizeof( dleafsurfaces[0] ) ) );
 	Sys_Printf( "%6i leafbrushes  %7i\n"
-				,numleafbrushes, (int)( numleafbrushes * sizeof( dleafbrushes[0] ) ) );
+	            ,numleafbrushes, (int)( numleafbrushes * sizeof( dleafbrushes[0] ) ) );
 	Sys_Printf( "%6i drawverts    %7i\n"
-				,numDrawVerts, (int)( numDrawVerts * sizeof( drawVerts[0] ) ) );
+	            ,numDrawVerts, (int)( numDrawVerts * sizeof( drawVerts[0] ) ) );
 	Sys_Printf( "%6i drawindexes  %7i\n"
-				,numDrawIndexes, (int)( numDrawIndexes * sizeof( drawIndexes[0] ) ) );
+	            ,numDrawIndexes, (int)( numDrawIndexes * sizeof( drawIndexes[0] ) ) );
 	Sys_Printf( "%6i drawsurfaces %7i\n"
-				,numDrawSurfaces, (int)( numDrawSurfaces * sizeof( drawSurfaces[0] ) ) );
+	            ,numDrawSurfaces, (int)( numDrawSurfaces * sizeof( drawSurfaces[0] ) ) );
 
 	Sys_Printf( "%6i lightmaps    %7i\n"
-				,numLightBytes / ( LIGHTMAP_WIDTH * LIGHTMAP_HEIGHT * 3 ), numLightBytes );
+	            ,numLightBytes / ( LIGHTMAP_WIDTH * LIGHTMAP_HEIGHT * 3 ), numLightBytes );
 	Sys_Printf( "       visibility   %7i\n"
-				, numVisBytes );
+	            , numVisBytes );
 }
 
 

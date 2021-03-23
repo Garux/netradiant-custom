@@ -33,13 +33,13 @@
 class Tokeniser
 {
 public:
-virtual void release() = 0;
-virtual void nextLine() = 0;
-virtual const char* getToken() = 0;
-virtual void ungetToken() = 0;
-virtual std::size_t getLine() const = 0;
-virtual std::size_t getColumn() const = 0;
-virtual bool bufferContains( const char* str ) = 0;
+	virtual void release() = 0;
+	virtual void nextLine() = 0;
+	virtual const char* getToken() = 0;
+	virtual void ungetToken() = 0;
+	virtual std::size_t getLine() const = 0;
+	virtual std::size_t getColumn() const = 0;
+	virtual bool bufferContains( const char* str ) = 0;
 };
 
 class TextInputStream;
@@ -47,13 +47,13 @@ class TextInputStream;
 class TokenWriter
 {
 public:
-virtual void release() = 0;
-virtual void nextLine() = 0;
-virtual void writeToken( const char* token ) = 0;
-virtual void writeString( const char* string ) = 0;
-virtual void writeInteger( int i ) = 0;
-virtual void writeUnsigned( std::size_t i ) = 0;
-virtual void writeFloat( double f ) = 0;
+	virtual void release() = 0;
+	virtual void nextLine() = 0;
+	virtual void writeToken( const char* token ) = 0;
+	virtual void writeString( const char* string ) = 0;
+	virtual void writeInteger( int i ) = 0;
+	virtual void writeUnsigned( std::size_t i ) = 0;
+	virtual void writeFloat( double f ) = 0;
 };
 
 class TextOutputStream;

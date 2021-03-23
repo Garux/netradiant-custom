@@ -140,7 +140,9 @@ void gamedetect(){
 #else
 			if ( gamedetect_check_game( "nexuiz.game", "data/common-spog.pk3", "nexuiz-linux-glx.sh", buf, p - buf ) )
 #endif
-			{ return; }
+			{
+				return;
+			}
 
 			// try to detect Q2World installs
 			if ( gamedetect_check_game( "q2w.game", "default/quake2world.version", NULL, buf, p - buf ) ) {
@@ -213,11 +215,11 @@ void cmdMap(){
 
 const char* LINK_NAME =
 #if defined ( __linux__ )
-	"/proc/self/exe"
+    "/proc/self/exe"
 #else // FreeBSD and OSX
-	"/proc/curproc/file"
+    "/proc/curproc/file"
 #endif
-;
+    ;
 
 /// brief Returns the filename of the executable belonging to the current process, or empty string, if not found.
 const char* getexename( char *buf ){
@@ -243,7 +245,7 @@ void environment_init( int argc, char* argv[] ){
 	struct passwd *pw;
 	seteuid( getuid() );
 	if ( geteuid() == 0 && ( loginname = getlogin() ) != 0 &&
-		 ( pw = getpwnam( loginname ) ) != 0 ) {
+	     ( pw = getpwnam( loginname ) ) != 0 ) {
 		setuid( pw->pw_uid );
 	}
 
@@ -287,7 +289,7 @@ void environment_init( int argc, char* argv[] ){
 		StringOutputStream home( 256 );
 		if ( !appdata || string_empty( appdata ) ) {
 			ERROR_MESSAGE( "Application Data folder not available.\n"
-						   "Radiant will use C:\\ for user preferences.\n" );
+			               "Radiant will use C:\\ for user preferences.\n" );
 			home << "C:";
 		}
 		else

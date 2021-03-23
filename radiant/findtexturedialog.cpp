@@ -47,30 +47,30 @@
 class FindTextureDialog : public Dialog
 {
 public:
-WindowPositionTracker m_position_tracker;
-static void setReplaceStr( const char* name );
-static void setFindStr( const char* name );
-static bool isOpen();
-static void show();
-typedef FreeCaller<&FindTextureDialog::show> ShowCaller;
-static void updateTextures( const char* name );
+	WindowPositionTracker m_position_tracker;
+	static void setReplaceStr( const char* name );
+	static void setFindStr( const char* name );
+	static bool isOpen();
+	static void show();
+	typedef FreeCaller<&FindTextureDialog::show> ShowCaller;
+	static void updateTextures( const char* name );
 
-FindTextureDialog();
-virtual ~FindTextureDialog();
-GtkWindow* BuildDialog();
+	FindTextureDialog();
+	virtual ~FindTextureDialog();
+	GtkWindow* BuildDialog();
 
-void constructWindow( GtkWindow* parent ){
-	m_parent = parent;
-	Create();
-}
-void destroyWindow(){
-	Destroy();
-}
+	void constructWindow( GtkWindow* parent ){
+		m_parent = parent;
+		Create();
+	}
+	void destroyWindow(){
+		Destroy();
+	}
 
 
-bool m_bSelectedOnly;
-CopiedString m_strFind;
-CopiedString m_strReplace;
+	bool m_bSelectedOnly;
+	CopiedString m_strFind;
+	CopiedString m_strReplace;
 };
 
 FindTextureDialog g_FindTextureDialog;
@@ -153,25 +153,25 @@ GtkWindow* FindTextureDialog::BuildDialog(){
 	label = gtk_label_new( "Find:" );
 	gtk_widget_show( label );
 	gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 0, 1,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 
 	label = gtk_label_new( "Replace:*" );
 	gtk_widget_set_tooltip_text( label, "Empty = search mode" );
 	gtk_widget_show( label );
 	gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 1, 2,
-					  (GtkAttachOptions) ( GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 
 	entry = gtk_entry_new();
 	gtk_widget_show( entry );
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 0, 1,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	g_signal_connect( G_OBJECT( entry ), "focus_in_event",
-					  G_CALLBACK( find_focus_in ), 0 );
+	                  G_CALLBACK( find_focus_in ), 0 );
 	AddDialogData( *GTK_ENTRY( entry ), m_strFind );
 	GlobalTextureEntryCompletion::instance().connect( GTK_ENTRY( entry ) );
 
@@ -179,10 +179,10 @@ GtkWindow* FindTextureDialog::BuildDialog(){
 	gtk_widget_set_tooltip_text( entry, "Empty = search mode" );
 	gtk_widget_show( entry );
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 1, 2,
-					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					  (GtkAttachOptions) ( 0 ), 0, 0 );
+	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+	                  (GtkAttachOptions) ( 0 ), 0, 0 );
 	g_signal_connect( G_OBJECT( entry ), "focus_in_event",
-					  G_CALLBACK( replace_focus_in ), 0 );
+	                  G_CALLBACK( replace_focus_in ), 0 );
 	AddDialogData( *GTK_ENTRY( entry ), m_strReplace );
 	GlobalTextureEntryCompletion::instance().connect( GTK_ENTRY( entry ) );
 
@@ -199,14 +199,14 @@ GtkWindow* FindTextureDialog::BuildDialog(){
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
-					  G_CALLBACK( OnApply ), 0 );
+	                  G_CALLBACK( OnApply ), 0 );
 	gtk_widget_set_size_request( button, 60, -1 );
 
 	button = gtk_button_new_with_label( "Close" );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
-					  G_CALLBACK( OnClose ), 0 );
+	                  G_CALLBACK( OnClose ), 0 );
 	gtk_widget_set_size_request( button, 60, -1 );
 
 	return dlg;

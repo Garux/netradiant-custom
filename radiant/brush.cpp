@@ -57,36 +57,36 @@ struct SListNode
 class ProximalVertex
 {
 public:
-const SListNode* m_vertices;
+	const SListNode* m_vertices;
 
-ProximalVertex( const SListNode* next )
-	: m_vertices( next ){
-}
+	ProximalVertex( const SListNode* next )
+		: m_vertices( next ){
+	}
 
-bool operator<( const ProximalVertex& other ) const {
-	if ( !( operator==( other ) ) ) {
-		return m_vertices < other.m_vertices;
-	}
-	return false;
-}
-bool operator==( const ProximalVertex& other ) const {
-	const SListNode* v = m_vertices;
-	std::size_t DEBUG_LOOP = 0;
-	do
-	{
-		if ( v == other.m_vertices ) {
-			return true;
+	bool operator<( const ProximalVertex& other ) const {
+		if ( !( operator==( other ) ) ) {
+			return m_vertices < other.m_vertices;
 		}
-		v = v->m_next;
-		//ASSERT_MESSAGE(DEBUG_LOOP < c_brush_maxFaces, "infinite loop");
-		if ( !( DEBUG_LOOP < c_brush_maxFaces ) ) {
-			break;
-		}
-		++DEBUG_LOOP;
+		return false;
 	}
-	while ( v != m_vertices );
-	return false;
-}
+	bool operator==( const ProximalVertex& other ) const {
+		const SListNode* v = m_vertices;
+		std::size_t DEBUG_LOOP = 0;
+		do
+		{
+			if ( v == other.m_vertices ) {
+				return true;
+			}
+			v = v->m_next;
+			//ASSERT_MESSAGE(DEBUG_LOOP < c_brush_maxFaces, "infinite loop");
+			if ( !( DEBUG_LOOP < c_brush_maxFaces ) ) {
+				break;
+			}
+			++DEBUG_LOOP;
+		}
+		while ( v != m_vertices );
+		return false;
+	}
 };
 
 typedef Array<SListNode> ProximalVertexArray;
@@ -320,23 +320,23 @@ void Brush::buildBRep(){
 
 class FaceFilterWrapper : public Filter
 {
-FaceFilter& m_filter;
-bool m_active;
-bool m_invert;
+	FaceFilter& m_filter;
+	bool m_active;
+	bool m_invert;
 public:
-FaceFilterWrapper( FaceFilter& filter, bool invert ) :
-	m_filter( filter ),
-	m_invert( invert ){
-}
-void setActive( bool active ){
-	m_active = active;
-}
-bool active(){
-	return m_active;
-}
-bool filter( const Face& face ){
-	return m_invert ^ m_filter.filter( face );
-}
+	FaceFilterWrapper( FaceFilter& filter, bool invert ) :
+		m_filter( filter ),
+		m_invert( invert ){
+	}
+	void setActive( bool active ){
+		m_active = active;
+	}
+	bool active(){
+		return m_active;
+	}
+	bool filter( const Face& face ){
+		return m_invert ^ m_filter.filter( face );
+	}
 };
 
 
@@ -361,21 +361,21 @@ bool face_filtered( Face& face ){
 
 class BrushFilterWrapper : public Filter
 {
-bool m_active;
-bool m_invert;
-BrushFilter& m_filter;
+	bool m_active;
+	bool m_invert;
+	BrushFilter& m_filter;
 public:
-BrushFilterWrapper( BrushFilter& filter, bool invert ) : m_invert( invert ), m_filter( filter ){
-}
-void setActive( bool active ){
-	m_active = active;
-}
-bool active(){
-	return m_active;
-}
-bool filter( const Brush& brush ){
-	return m_invert ^ m_filter.filter( brush );
-}
+	BrushFilterWrapper( BrushFilter& filter, bool invert ) : m_invert( invert ), m_filter( filter ){
+	}
+	void setActive( bool active ){
+		m_active = active;
+	}
+	bool active(){
+		return m_active;
+	}
+	bool filter( const Brush& brush ){
+		return m_invert ^ m_filter.filter( brush );
+	}
 };
 
 
@@ -406,8 +406,8 @@ public:
 	const Brush::VertexModeVertex* const m_v[3];
 	bool m_transformed;
 	VertexModePlane( const Plane3& plane, const Face* face,
-					const Brush::VertexModeVertex* v1, const Brush::VertexModeVertex* v2, const Brush::VertexModeVertex* v3,
-					bool transformed ) : m_plane( plane ), m_face( face ), m_v{ v1, v2, v3 }, m_transformed( transformed ){
+	                 const Brush::VertexModeVertex* v1, const Brush::VertexModeVertex* v2, const Brush::VertexModeVertex* v3,
+	                 bool transformed ) : m_plane( plane ), m_face( face ), m_v{ v1, v2, v3 }, m_transformed( transformed ){
 	}
 };
 
@@ -449,7 +449,7 @@ const Face* vertex_mode_find_common_face( const Brush::VertexModeVertex& v1, con
 	const Face* face = 0;
 	for( const auto& i : v1.m_faces ){
 		if( std::find( v2.m_faces.begin(), v2.m_faces.end(), i ) != v2.m_faces.end()
-			&& std::find( v3.m_faces.begin(), v3.m_faces.end(), i ) != v3.m_faces.end() ){
+		 && std::find( v3.m_faces.begin(), v3.m_faces.end(), i ) != v3.m_faces.end() ){
 			face = i;
 			break;
 		}
@@ -464,8 +464,8 @@ void Brush::vertexModeBuildHull( bool allTransformed /*= false*/ ){
 	pointCloud.reserve( m_vertexModeVertices.size() );
 	for( auto& i : m_vertexModeVertices ){
 		pointCloud.push_back( quickhull::Vector3<double>( static_cast<double>( i.m_vertexTransformed.x() ),
-														static_cast<double>( i.m_vertexTransformed.y() ),
-														static_cast<double>( i.m_vertexTransformed.z() ) ) );
+		                                                  static_cast<double>( i.m_vertexTransformed.y() ),
+		                                                  static_cast<double>( i.m_vertexTransformed.z() ) ) );
 	}
 	auto hull = quickhull.getConvexHull( pointCloud, true, true );
 	const auto& indexBuffer = hull.getIndexBuffer();
@@ -509,8 +509,8 @@ void Brush::vertexModeBuildHull( bool allTransformed /*= false*/ ){
 					Matrix4 local2tex;
 					Texdef_Construct_local2tex( face.getTexdef().m_projection, face.getShader().width(), face.getShader().height(), face.getPlane().plane3().normal(), local2tex );
 					const DoubleVector3 st[3]{ matrix4_transformed_point( local2tex, i.m_v[0]->m_vertex ),
-												matrix4_transformed_point( local2tex, i.m_v[1]->m_vertex ),
-												matrix4_transformed_point( local2tex, i.m_v[2]->m_vertex ) };
+					                           matrix4_transformed_point( local2tex, i.m_v[1]->m_vertex ),
+					                           matrix4_transformed_point( local2tex, i.m_v[2]->m_vertex ) };
 					const DoubleVector3 points[3]{ i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed };
 					Texdef_from_ST( projection, points, st, face.getShader().width(), face.getShader().height() );
 				}

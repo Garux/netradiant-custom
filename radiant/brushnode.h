@@ -32,111 +32,111 @@ class BrushNode :
 	public scene::Instantiable,
 	public scene::Cloneable
 {
-class TypeCasts
-{
-NodeTypeCastTable m_casts;
+	class TypeCasts
+	{
+		NodeTypeCastTable m_casts;
+	public:
+		TypeCasts(){
+			NodeStaticCast<BrushNode, scene::Instantiable>::install( m_casts );
+			NodeStaticCast<BrushNode, scene::Cloneable>::install( m_casts );
+			NodeContainedCast<BrushNode, Snappable>::install( m_casts );
+			NodeContainedCast<BrushNode, TransformNode>::install( m_casts );
+			NodeContainedCast<BrushNode, Brush>::install( m_casts );
+			NodeContainedCast<BrushNode, XMLImporter>::install( m_casts );
+			NodeContainedCast<BrushNode, XMLExporter>::install( m_casts );
+			NodeContainedCast<BrushNode, MapImporter>::install( m_casts );
+			NodeContainedCast<BrushNode, MapExporter>::install( m_casts );
+			NodeContainedCast<BrushNode, Nameable>::install( m_casts );
+			NodeContainedCast<BrushNode, BrushDoom3>::install( m_casts );
+		}
+		NodeTypeCastTable& get(){
+			return m_casts;
+		}
+	};
+
+
+	scene::Node m_node;
+	InstanceSet m_instances;
+	Brush m_brush;
+	BrushTokenImporter m_mapImporter;
+	BrushTokenExporter m_mapExporter;
+	BrushXMLImporter m_xmlImporter;
+	BrushXMLExporter m_xmlExporter;
+
 public:
-TypeCasts(){
-	NodeStaticCast<BrushNode, scene::Instantiable>::install( m_casts );
-	NodeStaticCast<BrushNode, scene::Cloneable>::install( m_casts );
-	NodeContainedCast<BrushNode, Snappable>::install( m_casts );
-	NodeContainedCast<BrushNode, TransformNode>::install( m_casts );
-	NodeContainedCast<BrushNode, Brush>::install( m_casts );
-	NodeContainedCast<BrushNode, XMLImporter>::install( m_casts );
-	NodeContainedCast<BrushNode, XMLExporter>::install( m_casts );
-	NodeContainedCast<BrushNode, MapImporter>::install( m_casts );
-	NodeContainedCast<BrushNode, MapExporter>::install( m_casts );
-	NodeContainedCast<BrushNode, Nameable>::install( m_casts );
-	NodeContainedCast<BrushNode, BrushDoom3>::install( m_casts );
-}
-NodeTypeCastTable& get(){
-	return m_casts;
-}
-};
 
+	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-scene::Node m_node;
-InstanceSet m_instances;
-Brush m_brush;
-BrushTokenImporter m_mapImporter;
-BrushTokenExporter m_mapExporter;
-BrushXMLImporter m_xmlImporter;
-BrushXMLExporter m_xmlExporter;
+	Snappable& get( NullType<Snappable>){
+		return m_brush;
+	}
+	TransformNode& get( NullType<TransformNode>){
+		return m_brush;
+	}
+	Brush& get( NullType<Brush>){
+		return m_brush;
+	}
+	XMLImporter& get( NullType<XMLImporter>){
+		return m_xmlImporter;
+	}
+	XMLExporter& get( NullType<XMLExporter>){
+		return m_xmlExporter;
+	}
+	MapImporter& get( NullType<MapImporter>){
+		return m_mapImporter;
+	}
+	MapExporter& get( NullType<MapExporter>){
+		return m_mapExporter;
+	}
+	Nameable& get( NullType<Nameable>){
+		return m_brush;
+	}
+	BrushDoom3& get( NullType<BrushDoom3>){
+		return m_brush;
+	}
 
-public:
+	BrushNode() :
+		m_node( this, this, StaticTypeCasts::instance().get() ),
+		m_brush( m_node, InstanceSetEvaluateTransform<BrushInstance>::Caller( m_instances ), InstanceSet::BoundsChangedCaller( m_instances ) ),
+		m_mapImporter( m_brush ),
+		m_mapExporter( m_brush ),
+		m_xmlImporter( m_brush ),
+		m_xmlExporter( m_brush ){
+	}
+	BrushNode( const BrushNode& other ) :
+		scene::Node::Symbiot( other ),
+		scene::Instantiable( other ),
+		scene::Cloneable( other ),
+		m_node( this, this, StaticTypeCasts::instance().get() ),
+		m_brush( other.m_brush, m_node, InstanceSetEvaluateTransform<BrushInstance>::Caller( m_instances ), InstanceSet::BoundsChangedCaller( m_instances ) ),
+		m_mapImporter( m_brush ),
+		m_mapExporter( m_brush ),
+		m_xmlImporter( m_brush ),
+		m_xmlExporter( m_brush ){
+	}
+	void release(){
+		delete this;
+	}
+	scene::Node& node(){
+		return m_node;
+	}
 
-typedef LazyStatic<TypeCasts> StaticTypeCasts;
+	scene::Node& clone() const {
+		return ( new BrushNode( *this ) )->node();
+	}
 
-Snappable& get( NullType<Snappable>){
-	return m_brush;
-}
-TransformNode& get( NullType<TransformNode>){
-	return m_brush;
-}
-Brush& get( NullType<Brush>){
-	return m_brush;
-}
-XMLImporter& get( NullType<XMLImporter>){
-	return m_xmlImporter;
-}
-XMLExporter& get( NullType<XMLExporter>){
-	return m_xmlExporter;
-}
-MapImporter& get( NullType<MapImporter>){
-	return m_mapImporter;
-}
-MapExporter& get( NullType<MapExporter>){
-	return m_mapExporter;
-}
-Nameable& get( NullType<Nameable>){
-	return m_brush;
-}
-BrushDoom3& get( NullType<BrushDoom3>){
-	return m_brush;
-}
-
-BrushNode() :
-	m_node( this, this, StaticTypeCasts::instance().get() ),
-	m_brush( m_node, InstanceSetEvaluateTransform<BrushInstance>::Caller( m_instances ), InstanceSet::BoundsChangedCaller( m_instances ) ),
-	m_mapImporter( m_brush ),
-	m_mapExporter( m_brush ),
-	m_xmlImporter( m_brush ),
-	m_xmlExporter( m_brush ){
-}
-BrushNode( const BrushNode& other ) :
-	scene::Node::Symbiot( other ),
-	scene::Instantiable( other ),
-	scene::Cloneable( other ),
-	m_node( this, this, StaticTypeCasts::instance().get() ),
-	m_brush( other.m_brush, m_node, InstanceSetEvaluateTransform<BrushInstance>::Caller( m_instances ), InstanceSet::BoundsChangedCaller( m_instances ) ),
-	m_mapImporter( m_brush ),
-	m_mapExporter( m_brush ),
-	m_xmlImporter( m_brush ),
-	m_xmlExporter( m_brush ){
-}
-void release(){
-	delete this;
-}
-scene::Node& node(){
-	return m_node;
-}
-
-scene::Node& clone() const {
-	return ( new BrushNode( *this ) )->node();
-}
-
-scene::Instance* create( const scene::Path& path, scene::Instance* parent ){
-	return new BrushInstance( path, parent, m_brush );
-}
-void forEachInstance( const scene::Instantiable::Visitor& visitor ){
-	m_instances.forEachInstance( visitor );
-}
-void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ){
-	m_instances.insert( observer, path, instance );
-}
-scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ){
-	return m_instances.erase( observer, path );
-}
+	scene::Instance* create( const scene::Path& path, scene::Instance* parent ){
+		return new BrushInstance( path, parent, m_brush );
+	}
+	void forEachInstance( const scene::Instantiable::Visitor& visitor ){
+		m_instances.forEachInstance( visitor );
+	}
+	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ){
+		m_instances.insert( observer, path, instance );
+	}
+	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ){
+		return m_instances.erase( observer, path );
+	}
 };
 
 inline Brush* Node_getBrush( scene::Node& node ){

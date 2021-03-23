@@ -29,8 +29,8 @@
 class Version
 {
 public:
-int major;
-int minor;
+	int major;
+	int minor;
 };
 
 inline bool operator<( const Version& version, const Version& other ){
@@ -45,7 +45,7 @@ TextOutputStreamType& ostream_write( TextOutputStreamType& outputStream, const V
 /// \brief Returns true if \p version (code) is compatible with \p other (data).
 inline bool version_compatible( const Version& version, const Version& other ){
 	return version.major == other.major // different major-versions are always incompatible
-		   && !( version.minor < other.minor ); // data minor-version is incompatible if greater than code minor-version
+	    && !( version.minor < other.minor ); // data minor-version is incompatible if greater than code minor-version
 }
 
 inline int string_range_parse_unsigned_decimal_integer( const char* first, const char* last ){

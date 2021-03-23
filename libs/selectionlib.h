@@ -29,92 +29,92 @@
 
 class SelectableBool : public Selectable
 {
-bool m_selected;
+	bool m_selected;
 public:
-SelectableBool()
-	: m_selected( false )
-{}
+	SelectableBool()
+		: m_selected( false )
+	{}
 
-void setSelected( bool select = true ){
-	m_selected = select;
-}
-bool isSelected() const {
-	return m_selected;
-}
+	void setSelected( bool select = true ){
+		m_selected = select;
+	}
+	bool isSelected() const {
+		return m_selected;
+	}
 };
 
 class ObservedSelectable : public Selectable
 {
-SelectionChangeCallback m_onchanged;
-bool m_selected;
+	SelectionChangeCallback m_onchanged;
+	bool m_selected;
 public:
-ObservedSelectable( const SelectionChangeCallback& onchanged ) : m_onchanged( onchanged ), m_selected( false ){
-}
-ObservedSelectable( const ObservedSelectable& other ) : Selectable( other ), m_onchanged( other.m_onchanged ), m_selected( false ){
-	setSelected( other.isSelected() );
-}
-ObservedSelectable& operator=( const ObservedSelectable& other ){
-	setSelected( other.isSelected() );
-	return *this;
-}
-~ObservedSelectable(){
-	setSelected( false );
-}
-
-void setSelected( bool select ){
-	if ( select ^ m_selected ) {
-		m_selected = select;
-
-		m_onchanged( *this );
+	ObservedSelectable( const SelectionChangeCallback& onchanged ) : m_onchanged( onchanged ), m_selected( false ){
 	}
-}
-bool isSelected() const {
-	return m_selected;
-}
+	ObservedSelectable( const ObservedSelectable& other ) : Selectable( other ), m_onchanged( other.m_onchanged ), m_selected( false ){
+		setSelected( other.isSelected() );
+	}
+	ObservedSelectable& operator=( const ObservedSelectable& other ){
+		setSelected( other.isSelected() );
+		return *this;
+	}
+	~ObservedSelectable(){
+		setSelected( false );
+	}
+
+	void setSelected( bool select ){
+		if ( select ^ m_selected ) {
+			m_selected = select;
+
+			m_onchanged( *this );
+		}
+	}
+	bool isSelected() const {
+		return m_selected;
+	}
 };
 
 class SelectableInstance : public scene::Instance
 {
-class TypeCasts
-{
-InstanceTypeCastTable m_casts;
+	class TypeCasts
+	{
+		InstanceTypeCastTable m_casts;
+	public:
+		TypeCasts(){
+			InstanceContainedCast<SelectableInstance, Selectable>::install( m_casts );
+		}
+		InstanceTypeCastTable& get(){
+			return m_casts;
+		}
+	};
+
+	ObservedSelectable m_selectable;
 public:
-TypeCasts(){
-	InstanceContainedCast<SelectableInstance, Selectable>::install( m_casts );
-}
-InstanceTypeCastTable& get(){
-	return m_casts;
-}
-};
 
-ObservedSelectable m_selectable;
-public:
+	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-typedef LazyStatic<TypeCasts> StaticTypeCasts;
+	SelectableInstance( const scene::Path& path, scene::Instance* parent, void* instance = 0, InstanceTypeCastTable& casts = StaticTypeCasts::instance().get() ) :
+		Instance( path, parent, instance != 0 ? instance : this, casts ),
+		m_selectable( SelectedChangedCaller( *this ) ){
+	}
 
-SelectableInstance( const scene::Path& path, scene::Instance* parent, void* instance = 0, InstanceTypeCastTable& casts = StaticTypeCasts::instance().get() ) :
-	Instance( path, parent, instance != 0 ? instance : this, casts ),
-	m_selectable( SelectedChangedCaller( *this ) ){
-}
+	Selectable& get( NullType<Selectable>){
+		return m_selectable;
+	}
 
-Selectable& get( NullType<Selectable>){
-	return m_selectable;
-}
+	Selectable& getSelectable(){
+		return m_selectable;
+	}
+	const Selectable& getSelectable() const {
+		return m_selectable;
+	}
 
-Selectable& getSelectable(){
-	return m_selectable;
-}
-const Selectable& getSelectable() const {
-	return m_selectable;
-}
+	void selectedChanged( const Selectable& selectable ){
+		GlobalSelectionSystem().getObserver ( SelectionSystem::ePrimitive )( selectable );
+		GlobalSelectionSystem().onSelectedChanged( *this, selectable );
 
-void selectedChanged( const Selectable& selectable ){
-	GlobalSelectionSystem().getObserver ( SelectionSystem::ePrimitive )( selectable );
-	GlobalSelectionSystem().onSelectedChanged( *this, selectable );
-
-	Instance::selectedChanged();
-}
-typedef MemberCaller1<SelectableInstance, const Selectable&, &SelectableInstance::selectedChanged> SelectedChangedCaller;
+		Instance::selectedChanged();
+	}
+	typedef MemberCaller1<SelectableInstance, const Selectable&, &SelectableInstance::selectedChanged> SelectedChangedCaller;
 };
 
 
@@ -125,68 +125,68 @@ typedef MemberCaller1<SelectableInstance, const Selectable&, &SelectableInstance
 template<typename Selected>
 class SelectionList
 {
-typedef std::list<Selected*> List;
-List m_selection;
+	typedef std::list<Selected*> List;
+	List m_selection;
 public:
-typedef typename List::iterator iterator;
-typedef typename List::const_iterator const_iterator;
+	typedef typename List::iterator iterator;
+	typedef typename List::const_iterator const_iterator;
 private:
-struct Compare{
-	using is_transparent = void;
+	struct Compare{
+		using is_transparent = void;
 
-	bool operator()( const const_iterator& one, const const_iterator& other ) const {
-		return *one < *other;
-	}
-	bool operator()( const Selected* va, const const_iterator& it ) const {
-		return va < *it;
-	}
-	bool operator()( const const_iterator& it, const Selected* va ) const {
-		return *it < va;
-	}
-};
-std::multiset<const_iterator, Compare> m_set;
+		bool operator()( const const_iterator& one, const const_iterator& other ) const {
+			return *one < *other;
+		}
+		bool operator()( const Selected* va, const const_iterator& it ) const {
+			return va < *it;
+		}
+		bool operator()( const const_iterator& it, const Selected* va ) const {
+			return *it < va;
+		}
+	};
+	std::multiset<const_iterator, Compare> m_set;
 public:
 
-SelectionList() = default;
-SelectionList( const SelectionList& ) = delete;
-SelectionList( SelectionList&& ) noexcept = delete;
-SelectionList& operator=( const SelectionList& ) = delete;
-SelectionList& operator=( SelectionList&& ) noexcept = delete;
+	SelectionList() = default;
+	SelectionList( const SelectionList& ) = delete;
+	SelectionList( SelectionList&& ) noexcept = delete;
+	SelectionList& operator=( const SelectionList& ) = delete;
+	SelectionList& operator=( SelectionList&& ) noexcept = delete;
 
-iterator begin(){
-	return m_selection.begin();
-}
-const_iterator begin() const {
-	return m_selection.begin();
-}
-iterator end(){
-	return m_selection.end();
-}
-const_iterator end() const {
-	return m_selection.end();
-}
-bool empty() const {
-	return m_selection.empty();
-}
-std::size_t size() const {
-	return m_selection.size();
-}
-Selected& back(){
-	return *m_selection.back();
-}
-Selected& back() const {
-	return *m_selection.back();
-}
-void append( Selected& selected ){
-	m_selection.push_back( &selected );
-	m_set.emplace( --end() );
-}
-void erase( Selected& selected ){
-	const auto it = m_set.find( &selected );
-	ASSERT_MESSAGE( it != m_set.cend(), "selection-tracking error" );
-	m_selection.erase( *it );
-	m_set.erase( it );
-}
+	iterator begin(){
+		return m_selection.begin();
+	}
+	const_iterator begin() const {
+		return m_selection.begin();
+	}
+	iterator end(){
+		return m_selection.end();
+	}
+	const_iterator end() const {
+		return m_selection.end();
+	}
+	bool empty() const {
+		return m_selection.empty();
+	}
+	std::size_t size() const {
+		return m_selection.size();
+	}
+	Selected& back(){
+		return *m_selection.back();
+	}
+	Selected& back() const {
+		return *m_selection.back();
+	}
+	void append( Selected& selected ){
+		m_selection.push_back( &selected );
+		m_set.emplace( --end() );
+	}
+	void erase( Selected& selected ){
+		const auto it = m_set.find( &selected );
+		ASSERT_MESSAGE( it != m_set.cend(), "selection-tracking error" );
+		m_selection.erase( *it );
+		m_set.erase( it );
+	}
 };
 
 

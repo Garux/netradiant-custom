@@ -168,7 +168,7 @@ Vector3 WindingCenter( const winding_t *w ){
 
 	for ( int i = 0 ; i < w->numpoints ; i++ )
 		center += w->p[i];
-	
+
 	return center / w->numpoints;
 }
 
@@ -427,7 +427,7 @@ winding_t   *ReverseWinding( const winding_t *w ){
    =============
  */
 void    ClipWindingEpsilonStrict( winding_t *in, const Plane3f& plane,
-								  float epsilon, winding_t **front, winding_t **back ){
+                                  float epsilon, winding_t **front, winding_t **back ){
 	float dists[MAX_POINTS_ON_WINDING + 4];
 	EPlaneSide sides[MAX_POINTS_ON_WINDING + 4];
 	int counts[3];
@@ -507,7 +507,7 @@ void    ClipWindingEpsilonStrict( winding_t *in, const Plane3f& plane,
 		const double dot = dists[i] / ( dists[i] - dists[i + 1] );
 		Vector3 mid;
 		for ( j = 0 ; j < 3 ; j++ )
-		{   // avoid round off error when possible
+		{	// avoid round off error when possible
 			if ( plane.normal()[j] == 1 ) {
 				mid[j] = plane.dist();
 			}
@@ -534,7 +534,7 @@ void    ClipWindingEpsilonStrict( winding_t *in, const Plane3f& plane,
 }
 
 void    ClipWindingEpsilon( winding_t *in, const Plane3f& plane,
-							float epsilon, winding_t **front, winding_t **back ){
+                            float epsilon, winding_t **front, winding_t **back ){
 	ClipWindingEpsilonStrict( in, plane, epsilon, front, back );
 	/* apparently most code expects that in the winding-on-plane case, the back winding is the original winding */
 	if ( !*front && !*back ) {
@@ -676,7 +676,9 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, const Plane3f& plane, float
 			else if ( plane.normal()[j] == -1 ) {
 				mid[j] = -plane.dist();
 			}
-			else{mid[j] = p1[j] + ( w * ( p2[j] - p1[j] ) ); }
+			else{
+				mid[j] = p1[j] + ( w * ( p2[j] - p1[j] ) );
+			}
 		}
 		if ( f->numpoints >= MAX_POINTS_ON_WINDING ) {
 			Error( "ChopWindingInPlaceAccu: MAX_POINTS_ON_WINDING" );
@@ -769,7 +771,7 @@ void ChopWindingInPlace( winding_t **inout, const Plane3f& plane, float epsilon 
 		const double dot = dists[i] / ( dists[i] - dists[i + 1] );
 		Vector3 mid;
 		for ( j = 0 ; j < 3 ; j++ )
-		{   // avoid round off error when possible
+		{	// avoid round off error when possible
 			if ( plane.normal()[j] == 1 ) {
 				mid[j] = plane.dist();
 			}

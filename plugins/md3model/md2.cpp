@@ -170,21 +170,21 @@ void istream_read_md2Header( PointerInputStream& inputStream, md2Header_t& heade
 
 ArbitraryMeshVertex MD2Vertex_construct( const md2Header_t* pHeader, const md2Frame_t* pFrame, const md2XyzNormal_t* xyz, const md2St_t* st ){
 	return ArbitraryMeshVertex(
-			   Vertex3f(
-				   xyz->v[0] * pFrame->scale[0] + pFrame->translate[0],
-				   xyz->v[1] * pFrame->scale[1] + pFrame->translate[1],
-				   xyz->v[2] * pFrame->scale[2] + pFrame->translate[2]
-				   ),
-			   Normal3f(
-				   g_mdl_normals[xyz->lightnormalindex][0],
-				   g_mdl_normals[xyz->lightnormalindex][1],
-				   g_mdl_normals[xyz->lightnormalindex][2]
-				   ),
-			   TexCoord2f(
-				   (float)st->s / pHeader->skinwidth,
-				   (float)st->t / pHeader->skinheight
-				   )
-			   );
+	           Vertex3f(
+	               xyz->v[0] * pFrame->scale[0] + pFrame->translate[0],
+	               xyz->v[1] * pFrame->scale[1] + pFrame->translate[1],
+	               xyz->v[2] * pFrame->scale[2] + pFrame->translate[2]
+	           ),
+	           Normal3f(
+	               g_mdl_normals[xyz->lightnormalindex][0],
+	               g_mdl_normals[xyz->lightnormalindex][1],
+	               g_mdl_normals[xyz->lightnormalindex][2]
+	           ),
+	           TexCoord2f(
+	               (float)st->s / pHeader->skinwidth,
+	               (float)st->t / pHeader->skinheight
+	           )
+	       );
 }
 
 void MD2Surface_read( Model& model, const byte* buffer, ArchiveFile& file ){

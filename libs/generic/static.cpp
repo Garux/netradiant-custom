@@ -30,9 +30,9 @@ namespace ExampleStatic
 class MyClass
 {
 public:
-int value;
-MyClass() : value( 3 ){
-}
+	int value;
+	MyClass() : value( 3 ){
+	}
 };
 
 typedef Static<MyClass> StaticMyClass;
@@ -41,9 +41,9 @@ typedef Static<MyClass> StaticMyClass;
 class DynamicInitialisation
 {
 public:
-DynamicInitialisation(){
-	// StaticMyClass::instance() may be invalid here because construction order is undefined
-}
+	DynamicInitialisation(){
+		// StaticMyClass::instance() may be invalid here because construction order is undefined
+	}
 };
 
 DynamicInitialisation g_dynamicInitialisation;
@@ -61,9 +61,9 @@ namespace ExampleLazyStatic
 class MyClass
 {
 public:
-int value;
-MyClass() : value( 3 ){
-}
+	int value;
+	MyClass() : value( 3 ){
+	}
 // destructor will never be called
 };
 
@@ -73,9 +73,9 @@ typedef LazyStatic<MyClass> StaticMyClass;
 class DynamicInitialisation
 {
 public:
-DynamicInitialisation(){
-	int bar = StaticMyClass::instance().value;
-}
+	DynamicInitialisation(){
+		int bar = StaticMyClass::instance().value;
+	}
 };
 
 DynamicInitialisation g_dynamicInitialisation;
@@ -93,9 +93,9 @@ namespace ExampleSmartStatic
 class MyClass
 {
 public:
-int value;
-MyClass() : value( 3 ){
-}
+	int value;
+	MyClass() : value( 3 ){
+	}
 };
 
 typedef CountedStatic<MyClass> StaticMyClass;
@@ -104,13 +104,13 @@ typedef CountedStatic<MyClass> StaticMyClass;
 class DynamicInitialisation
 {
 public:
-DynamicInitialisation(){
-	// StaticMyClass::instance() is invalid before the ref is constructed
-	SmartStatic<MyClass> ref;
-	int bar = ref.instance().value;
+	DynamicInitialisation(){
+		// StaticMyClass::instance() is invalid before the ref is constructed
+		SmartStatic<MyClass> ref;
+		int bar = ref.instance().value;
 
-	SmartStatic<MyClass> ref2;   // any number of instances are allowed.
-}
+		SmartStatic<MyClass> ref2;   // any number of instances are allowed.
+	}
 };
 
 DynamicInitialisation g_dynamicInitialisation;

@@ -85,22 +85,22 @@ mapcoord_setting_packet msp;
 //  **************************
 class EntityFindByClassname : public scene::Graph::Walker
 {
-const char* m_name;
-Entity*& m_entity;
+	const char* m_name;
+	Entity*& m_entity;
 public:
-EntityFindByClassname( const char* name, Entity*& entity ) : m_name( name ), m_entity( entity ){
-	m_entity = 0;
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( m_entity == 0 ) {
-		Entity* entity = Node_getEntity( path.top() );
-		if ( entity != 0
-			 && string_equal( m_name, entity->getKeyValue( "classname" ) ) ) {
-			m_entity = entity;
-		}
+	EntityFindByClassname( const char* name, Entity*& entity ) : m_name( name ), m_entity( entity ){
+		m_entity = 0;
 	}
-	return true;
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( m_entity == 0 ) {
+			Entity* entity = Node_getEntity( path.top() );
+			if ( entity != 0
+			     && string_equal( m_name, entity->getKeyValue( "classname" ) ) ) {
+				m_entity = entity;
+			}
+		}
+		return true;
+	}
 };
 
 Entity* Scene_FindEntityByClass( const char* name ){
@@ -174,9 +174,9 @@ class SunPlugPluginDependencies :
 	public GlobalEntityModuleRef    // to access and modify the entities
 {
 public:
-SunPlugPluginDependencies() :
-	GlobalEntityModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ) ){ //,
-}
+	SunPlugPluginDependencies() :
+		GlobalEntityModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ) ){ //,
+	}
 };
 
 //  *************************
@@ -219,21 +219,21 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 
 class SunPlugModule : public TypeSystemRef
 {
-_QERPluginTable m_plugin;
+	_QERPluginTable m_plugin;
 public:
-typedef _QERPluginTable Type;
-STRING_CONSTANT( Name, "SunPlug" );
+	typedef _QERPluginTable Type;
+	STRING_CONSTANT( Name, "SunPlug" );
 
-SunPlugModule(){
-	m_plugin.m_pfnQERPlug_Init = &SunPlug::init;
-	m_plugin.m_pfnQERPlug_GetName = &SunPlug::getName;
-	m_plugin.m_pfnQERPlug_GetCommandList = &SunPlug::getCommandList;
-	m_plugin.m_pfnQERPlug_GetCommandTitleList = &SunPlug::getCommandTitleList;
-	m_plugin.m_pfnQERPlug_Dispatch = &SunPlug::dispatch;
-}
-_QERPluginTable* getTable(){
-	return &m_plugin;
-}
+	SunPlugModule(){
+		m_plugin.m_pfnQERPlug_Init = &SunPlug::init;
+		m_plugin.m_pfnQERPlug_GetName = &SunPlug::getName;
+		m_plugin.m_pfnQERPlug_GetCommandList = &SunPlug::getCommandList;
+		m_plugin.m_pfnQERPlug_GetCommandTitleList = &SunPlug::getCommandTitleList;
+		m_plugin.m_pfnQERPlug_Dispatch = &SunPlug::dispatch;
+	}
+	_QERPluginTable* getTable(){
+		return &m_plugin;
+	}
 };
 
 typedef SingletonModule<SunPlugModule, SunPlugPluginDependencies> SingletonSunPlugModule;

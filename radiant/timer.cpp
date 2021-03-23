@@ -29,19 +29,19 @@
 MillisecondTime MillisecondTime::current(){
 	static class Cached
 	{
-	LONGLONG m_frequency;
-	LONGLONG m_base;
-public:
-	Cached(){
-		QueryPerformanceFrequency( (LARGE_INTEGER *) &m_frequency );
-		QueryPerformanceCounter( (LARGE_INTEGER *) &m_base );
-	}
-	LONGLONG frequency(){
-		return m_frequency;
-	}
-	LONGLONG base(){
-		return m_base;
-	}
+		LONGLONG m_frequency;
+		LONGLONG m_base;
+	public:
+		Cached(){
+			QueryPerformanceFrequency( (LARGE_INTEGER *) &m_frequency );
+			QueryPerformanceCounter( (LARGE_INTEGER *) &m_base );
+		}
+		LONGLONG frequency(){
+			return m_frequency;
+		}
+		LONGLONG base(){
+			return m_base;
+		}
 	} cached;
 
 	if ( cached.frequency() > 0 ) {
@@ -70,14 +70,14 @@ public:
 MillisecondTime MillisecondTime::current(){
 	static class Cached
 	{
-	time_t m_base;
-public:
-	Cached(){
-		time( &m_base );
-	}
-	time_t base(){
-		return m_base;
-	}
+		time_t m_base;
+	public:
+		Cached(){
+			time( &m_base );
+		}
+		time_t base(){
+			return m_base;
+		}
 	} cached;
 
 	timeval time;

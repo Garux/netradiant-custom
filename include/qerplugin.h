@@ -81,7 +81,7 @@ typedef char* ( *PFN_QERAPP_DIRDIALOG )( GtkWidget *parent, const char* title /*
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
 typedef bool ( *PFN_QERAPP_COLORDIALOG )( GtkWidget *parent, Vector3& color,
-										  const char* title /* = "Choose Color"*/ );
+                                          const char* title /* = "Choose Color"*/ );
 
 // load a .bmp file and create a GtkImage widget from it
 // NOTE: 'filename' is relative to <radiant_path>/plugins/bitmaps/

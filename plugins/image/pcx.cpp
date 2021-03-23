@@ -111,9 +111,9 @@ void LoadPCXBuff( byte* buffer, std::size_t len, byte **pic, byte **palette, int
 
 
 	if ( pcx.manufacturer != 0x0a
-		 || pcx.version != 5
-		 || pcx.encoding != 1
-		 || pcx.bits_per_pixel != 8 ) {
+	  || pcx.version != 5
+	  || pcx.encoding != 1
+	  || pcx.bits_per_pixel != 8 ) {
 		return;
 	}
 

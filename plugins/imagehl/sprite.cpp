@@ -127,7 +127,7 @@ Image* LoadIDSPBuff( byte *buffer ){
 	version = header->version;
 	if ( version != 1 && version != 2 ) {
 		globalWarningStream() << "WARNING: IDSP file has wrong version number "
-							   "(" << version << " should be 1 or 2)\n";
+		                         "(" << version << " should be 1 or 2)\n";
 		return 0;
 	}
 

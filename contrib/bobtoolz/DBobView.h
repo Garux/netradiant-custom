@@ -41,58 +41,58 @@ class Shader;
 
 class DBobView : public Renderable, public OpenGLRenderable, public Entity::Observer
 {
-Shader* m_shader_line;
-Shader* m_shader_box;
+	Shader* m_shader_line;
+	Shader* m_shader_box;
 public:
-DBobView();
-virtual ~DBobView();
+	DBobView();
+	virtual ~DBobView();
 
 protected:
-vec3_t* path;
+	vec3_t* path;
 public:
-bool m_bShowExtra;
-int boundingShow;
-DListener* eyes;
-float fVarGravity;
-float fMultiplier;
-int nPathCount;
+	bool m_bShowExtra;
+	int boundingShow;
+	DListener* eyes;
+	float fVarGravity;
+	float fMultiplier;
+	int nPathCount;
 
-Entity* trigger;
-Entity* target;
+	Entity* trigger;
+	Entity* target;
 
-bool UpdatePath();
-char entTarget[256];
-char entTrigger[256];
-void Begin( const char*, const char*, float, int, float, bool, bool );
-bool CalculateTrajectory( vec3_t, vec3_t, float, int, float );
+	bool UpdatePath();
+	char entTarget[256];
+	char entTrigger[256];
+	void Begin( const char*, const char*, float, int, float, bool, bool );
+	bool CalculateTrajectory( vec3_t, vec3_t, float, int, float );
 
-void SetPath( vec3_t* pPath );
+	void SetPath( vec3_t* pPath );
 
-void render( RenderStateFlags state ) const;
-void renderSolid( Renderer& renderer, const VolumeTest& volume ) const;
-void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const;
+	void render( RenderStateFlags state ) const;
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const;
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const;
 
-void constructShaders();
-void destroyShaders();
+	void constructShaders();
+	void destroyShaders();
 
-void valueChanged( const char* value ){
-	UpdatePath();
-}
-typedef MemberCaller1<DBobView, const char*, &DBobView::valueChanged> ValueChangedCaller;
-void insert( const char* key, EntityKeyValue& value ){
-	value.attach( ValueChangedCaller( *this ) );
-}
-void erase( const char* key, EntityKeyValue& value ){
-	value.detach( ValueChangedCaller( *this ) );
-}
-void clear(){
-	if ( trigger != 0 ) {
-		trigger->detach( *this );
-		target->detach( *this );
-		trigger = 0;
-		target = 0;
+	void valueChanged( const char* value ){
+		UpdatePath();
 	}
-}
+	typedef MemberCaller1<DBobView, const char*, &DBobView::valueChanged> ValueChangedCaller;
+	void insert( const char* key, EntityKeyValue& value ){
+		value.attach( ValueChangedCaller( *this ) );
+	}
+	void erase( const char* key, EntityKeyValue& value ){
+		value.detach( ValueChangedCaller( *this ) );
+	}
+	void clear(){
+		if ( trigger != 0 ) {
+			trigger->detach( *this );
+			target->detach( *this );
+			trigger = 0;
+			target = 0;
+		}
+	}
 };
 
 class Entity;

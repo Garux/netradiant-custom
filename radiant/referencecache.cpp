@@ -119,7 +119,7 @@ bool file_saveBackup( const char* path ){
 		backup << StringRange( path, path_get_extension( path ) ) << "bak";
 
 		return ( !file_exists( backup.c_str() ) || file_remove( backup.c_str() ) ) // remove backup
-			   && file_move( path, backup.c_str() ); // rename current to backup
+		       && file_move( path, backup.c_str() ); // rename current to backup
 	}
 
 	globalErrorStream() << "map path is not writeable: " << makeQuoted( path ) << "\n";
@@ -152,9 +152,9 @@ NodeSmartReference g_nullModel( g_nullNode );
 class NullModelLoader : public ModelLoader
 {
 public:
-scene::Node& loadModel( ArchiveFile& file ){
-	return g_nullModel;
-}
+	scene::Node& loadModel( ArchiveFile& file ){
+		return g_nullModel;
+	}
 };
 
 namespace
@@ -312,10 +312,10 @@ bool g_realised = false;
 // name may be absolute or relative
 const char* rootPath( const char* name ){
 	return GlobalFileSystem().findRoot(
-			   path_is_absolute( name )
-			   ? name
-			   : GlobalFileSystem().findFile( name )
-			   );
+	           path_is_absolute( name )
+	           ? name
+	           : GlobalFileSystem().findFile( name )
+	       );
 }
 }
 
@@ -368,10 +368,10 @@ struct ModelResource : public Resource
 			ModelCache::iterator i = ModelCache_find( m_path.c_str(), m_name.c_str() );
 			if ( i == g_modelCache.end() ) {
 				i = ModelCache_insert(
-					m_path.c_str(),
-					m_name.c_str(),
-					Model_load( m_loader, m_path.c_str(), m_name.c_str(), m_type.c_str() )
-					);
+				        m_path.c_str(),
+				        m_name.c_str(),
+				        Model_load( m_loader, m_path.c_str(), m_name.c_str(), m_type.c_str() )
+				    );
 			}
 
 			setModel( ( *i ).value );
@@ -494,8 +494,8 @@ struct ModelResource : public Resource
 	}
 	bool isModified() const {
 		return ( ( !string_empty( m_path.c_str() ) // had or has an absolute path
-				   && m_modified != modified() ) // AND disk timestamp changed
-				 || !path_equal( rootPath( m_originalName.c_str() ), m_path.c_str() ) ); // OR absolute vfs-root changed
+		           && m_modified != modified() ) // AND disk timestamp changed
+		         || !path_equal( rootPath( m_originalName.c_str() ), m_path.c_str() ) ); // OR absolute vfs-root changed
 	}
 	void refresh(){
 		if ( isModified() ) {
@@ -508,117 +508,117 @@ struct ModelResource : public Resource
 
 class HashtableReferenceCache : public ReferenceCache, public ModuleObserver
 {
-typedef HashedCache<CopiedString, ModelResource, PathHash, PathEqual> ModelReferences;
-ModelReferences m_references;
-std::size_t m_unrealised;
+	typedef HashedCache<CopiedString, ModelResource, PathHash, PathEqual> ModelReferences;
+	ModelReferences m_references;
+	std::size_t m_unrealised;
 
-class ModelReferencesSnapshot
-{
-ModelReferences& m_references;
-typedef std::list<ModelReferences::iterator> Iterators;
-Iterators m_iterators;
-public:
-typedef Iterators::iterator iterator;
-ModelReferencesSnapshot( ModelReferences& references ) : m_references( references ){
-	for ( ModelReferences::iterator i = m_references.begin(); i != m_references.end(); ++i )
+	class ModelReferencesSnapshot
 	{
-		m_references.capture( i );
-		m_iterators.push_back( i );
-	}
-}
-~ModelReferencesSnapshot(){
-	for ( Iterators::iterator i = m_iterators.begin(); i != m_iterators.end(); ++i )
-	{
-		m_references.release( *i );
-	}
-}
-iterator begin(){
-	return m_iterators.begin();
-}
-iterator end(){
-	return m_iterators.end();
-}
-};
-
-public:
-
-typedef ModelReferences::iterator iterator;
-
-HashtableReferenceCache() : m_unrealised( 1 ){
-}
-
-iterator begin(){
-	return m_references.begin();
-}
-iterator end(){
-	return m_references.end();
-}
-
-void clear(){
-	m_references.clear();
-}
-
-Resource* capture( const char* path ){
-	//globalOutputStream() << "capture: \"" << path << "\"\n";
-	return m_references.capture( CopiedString( path ) ).get();
-}
-void release( const char* path ){
-	m_references.release( CopiedString( path ) );
-	//globalOutputStream() << "release: \"" << path << "\"\n";
-}
-
-void setEntityCreator( EntityCreator& entityCreator ){
-	g_entityCreator = &entityCreator;
-}
-
-bool realised() const {
-	return m_unrealised == 0;
-}
-void realise(){
-	ASSERT_MESSAGE( m_unrealised != 0, "HashtableReferenceCache::realise: already realised" );
-	if ( --m_unrealised == 0 ) {
-		g_realised = true;
-
-		{
-			ModelReferencesSnapshot snapshot( m_references );
-			for ( ModelReferencesSnapshot::iterator i = snapshot.begin(); i != snapshot.end(); ++i )
+		ModelReferences& m_references;
+		typedef std::list<ModelReferences::iterator> Iterators;
+		Iterators m_iterators;
+	public:
+		typedef Iterators::iterator iterator;
+		ModelReferencesSnapshot( ModelReferences& references ) : m_references( references ){
+			for ( ModelReferences::iterator i = m_references.begin(); i != m_references.end(); ++i )
 			{
-				ModelReferences::value_type& value = *( *i );
-				if ( value.value.count() != 1 ) {
-					value.value.get()->realise();
+				m_references.capture( i );
+				m_iterators.push_back( i );
+			}
+		}
+		~ModelReferencesSnapshot(){
+			for ( Iterators::iterator i = m_iterators.begin(); i != m_iterators.end(); ++i )
+			{
+				m_references.release( *i );
+			}
+		}
+		iterator begin(){
+			return m_iterators.begin();
+		}
+		iterator end(){
+			return m_iterators.end();
+		}
+	};
+
+public:
+
+	typedef ModelReferences::iterator iterator;
+
+	HashtableReferenceCache() : m_unrealised( 1 ){
+	}
+
+	iterator begin(){
+		return m_references.begin();
+	}
+	iterator end(){
+		return m_references.end();
+	}
+
+	void clear(){
+		m_references.clear();
+	}
+
+	Resource* capture( const char* path ){
+		//globalOutputStream() << "capture: \"" << path << "\"\n";
+		return m_references.capture( CopiedString( path ) ).get();
+	}
+	void release( const char* path ){
+		m_references.release( CopiedString( path ) );
+		//globalOutputStream() << "release: \"" << path << "\"\n";
+	}
+
+	void setEntityCreator( EntityCreator& entityCreator ){
+		g_entityCreator = &entityCreator;
+	}
+
+	bool realised() const {
+		return m_unrealised == 0;
+	}
+	void realise(){
+		ASSERT_MESSAGE( m_unrealised != 0, "HashtableReferenceCache::realise: already realised" );
+		if ( --m_unrealised == 0 ) {
+			g_realised = true;
+
+			{
+				ModelReferencesSnapshot snapshot( m_references );
+				for ( ModelReferencesSnapshot::iterator i = snapshot.begin(); i != snapshot.end(); ++i )
+				{
+					ModelReferences::value_type& value = *( *i );
+					if ( value.value.count() != 1 ) {
+						value.value.get()->realise();
+					}
 				}
 			}
 		}
 	}
-}
-void unrealise(){
-	if ( ++m_unrealised == 1 ) {
-		g_realised = false;
+	void unrealise(){
+		if ( ++m_unrealised == 1 ) {
+			g_realised = false;
 
-		{
-			ModelReferencesSnapshot snapshot( m_references );
-			for ( ModelReferencesSnapshot::iterator i = snapshot.begin(); i != snapshot.end(); ++i )
 			{
-				ModelReferences::value_type& value = *( *i );
-				if ( value.value.count() != 1 ) {
-					value.value.get()->unrealise();
+				ModelReferencesSnapshot snapshot( m_references );
+				for ( ModelReferencesSnapshot::iterator i = snapshot.begin(); i != snapshot.end(); ++i )
+				{
+					ModelReferences::value_type& value = *( *i );
+					if ( value.value.count() != 1 ) {
+						value.value.get()->unrealise();
+					}
 				}
 			}
-		}
 
-		ModelCache_clear();
-	}
-}
-void refresh(){
-	ModelReferencesSnapshot snapshot( m_references );
-	for ( ModelReferencesSnapshot::iterator i = snapshot.begin(); i != snapshot.end(); ++i )
-	{
-		ModelResource* resource = ( *( *i ) ).value.get();
-		if ( !resource->isMap() ) {
-			resource->refresh();
+			ModelCache_clear();
 		}
 	}
-}
+	void refresh(){
+		ModelReferencesSnapshot snapshot( m_references );
+		for ( ModelReferencesSnapshot::iterator i = snapshot.begin(); i != snapshot.end(); ++i )
+		{
+			ModelResource* resource = ( *( *i ) ).value.get();
+			if ( !resource->isMap() ) {
+				resource->refresh();
+			}
+		}
+	}
 };
 
 namespace
@@ -630,8 +630,8 @@ HashtableReferenceCache g_referenceCache;
 class ResourceVisitor
 {
 public:
-virtual void visit( const char* name, const char* path, const
-					};
+	virtual void visit( const char* name, const char* path, const
+};
 #endif
 
 void SaveReferences(){
@@ -683,44 +683,44 @@ class ReferenceDependencies :
 	public GlobalFileSystemModuleRef,
 	public GlobalFiletypesModuleRef
 {
-ModelModulesRef m_model_modules;
-MapModulesRef m_map_modules;
+	ModelModulesRef m_model_modules;
+	MapModulesRef m_map_modules;
 public:
-ReferenceDependencies() :
-	m_model_modules( GlobalRadiant().getRequiredGameDescriptionKeyValue( "modeltypes" ) ),
-	m_map_modules( GlobalRadiant().getRequiredGameDescriptionKeyValue( "maptypes" ) )
-{
-}
-ModelModules& getModelModules(){
-	return m_model_modules.get();
-}
-MapModules& getMapModules(){
-	return m_map_modules.get();
-}
+	ReferenceDependencies() :
+		m_model_modules( GlobalRadiant().getRequiredGameDescriptionKeyValue( "modeltypes" ) ),
+		m_map_modules( GlobalRadiant().getRequiredGameDescriptionKeyValue( "maptypes" ) )
+	{
+	}
+	ModelModules& getModelModules(){
+		return m_model_modules.get();
+	}
+	MapModules& getMapModules(){
+		return m_map_modules.get();
+	}
 };
 
 class ReferenceAPI : public TypeSystemRef
 {
-ReferenceCache* m_reference;
+	ReferenceCache* m_reference;
 public:
-typedef ReferenceCache Type;
-STRING_CONSTANT( Name, "*" );
+	typedef ReferenceCache Type;
+	STRING_CONSTANT( Name, "*" );
 
-ReferenceAPI(){
-	g_nullModel = NewNullModel();
+	ReferenceAPI(){
+		g_nullModel = NewNullModel();
 
-	GlobalFileSystem().attach( g_referenceCache );
+		GlobalFileSystem().attach( g_referenceCache );
 
-	m_reference = &GetReferenceCache();
-}
-~ReferenceAPI(){
-	GlobalFileSystem().detach( g_referenceCache );
+		m_reference = &GetReferenceCache();
+	}
+	~ReferenceAPI(){
+		GlobalFileSystem().detach( g_referenceCache );
 
-	g_nullModel = g_nullNode;
-}
-ReferenceCache* getTable(){
-	return m_reference;
-}
+		g_nullModel = g_nullNode;
+	}
+	ReferenceCache* getTable(){
+		return m_reference;
+	}
 };
 
 typedef SingletonModule<ReferenceAPI, ReferenceDependencies> ReferenceModule;

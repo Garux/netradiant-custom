@@ -31,10 +31,10 @@ typedef Callback1<const StringImportCallback&> StringExportCallback;
 class PreferenceSystem
 {
 public:
-INTEGER_CONSTANT( Version, 1 );
-STRING_CONSTANT( Name, "preferences" );
+	INTEGER_CONSTANT( Version, 1 );
+	STRING_CONSTANT( Name, "preferences" );
 
-virtual void registerPreference( const char* name, const StringImportCallback& importer, const StringExportCallback& exporter ) = 0;
+	virtual void registerPreference( const char* name, const StringImportCallback& importer, const StringExportCallback& exporter ) = 0;
 };
 
 #include "modulesystem.h"

@@ -45,9 +45,9 @@ class ListAttributeType;
 class EntityClassCollector
 {
 public:
-virtual void insert( EntityClass* eclass ) = 0;
-virtual void insert( const char* name, const ListAttributeType& list ){
-}
+	virtual void insert( EntityClass* eclass ) = 0;
+	virtual void insert( const char* name, const ListAttributeType& list ){
+	}
 };
 
 struct EntityClassScanner
@@ -81,7 +81,7 @@ typedef ModulesRef<EntityClassScanner> EClassModulesRef;
 class EntityClassVisitor
 {
 public:
-virtual void visit( EntityClass* eclass ) = 0;
+	virtual void visit( EntityClass* eclass ) = 0;
 };
 
 class ModuleObserver;

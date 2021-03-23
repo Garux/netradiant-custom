@@ -83,19 +83,19 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 /// Obtain the global instance with globalCharacterSet().
 class CharacterSet
 {
-const char* m_charSet;
+	const char* m_charSet;
 public:
-CharacterSet(){
-	if ( g_get_charset( &m_charSet ) ) {
-		m_charSet = 0;
+	CharacterSet(){
+		if ( g_get_charset( &m_charSet ) ) {
+			m_charSet = 0;
+		}
 	}
-}
-bool isUTF8() const {
-	return m_charSet == 0;
-}
-const char* get() const {
-	return m_charSet;
-}
+	bool isUTF8() const {
+		return m_charSet == 0;
+	}
+	const char* get() const {
+		return m_charSet;
+	}
 };
 
 typedef LazyStatic<CharacterSet> GlobalCharacterSet;
@@ -109,12 +109,12 @@ inline CharacterSet& globalCharacterSet(){
 class UTF8CharacterToExtendedASCII
 {
 public:
-UTF8Character m_utf8;
-char m_c;
-UTF8CharacterToExtendedASCII() : m_c( '\0' ){
-}
-UTF8CharacterToExtendedASCII( const UTF8Character& utf8, char c ) : m_utf8( utf8 ), m_c( c ){
-}
+	UTF8Character m_utf8;
+	char m_c;
+	UTF8CharacterToExtendedASCII() : m_c( '\0' ){
+	}
+	UTF8CharacterToExtendedASCII( const UTF8Character& utf8, char c ) : m_utf8( utf8 ), m_c( c ){
+	}
 };
 
 inline bool operator<( const UTF8CharacterToExtendedASCII& self, const UTF8CharacterToExtendedASCII& other ){
@@ -135,60 +135,60 @@ inline char extended_ascii_for_index( std::size_t i ){
 /// Obtain the global instance with globalExtendedASCIICharacterSet().
 class ExtendedASCIICharacterSet
 {
-typedef char UTF8CharBuffer[6];
-UTF8CharBuffer m_converted[128];
-UTF8Character m_decodeMap[128];
-UTF8CharacterToExtendedASCII m_encodeMap[128];
+	typedef char UTF8CharBuffer[6];
+	UTF8CharBuffer m_converted[128];
+	UTF8Character m_decodeMap[128];
+	UTF8CharacterToExtendedASCII m_encodeMap[128];
 public:
-ExtendedASCIICharacterSet(){
-	if ( !globalCharacterSet().isUTF8() ) {
-		GIConv descriptor = g_iconv_open( "UTF-8", globalCharacterSet().get() );
-		for ( std::size_t i = 1; i < 128; ++i )
-		{
-			char c = extended_ascii_for_index( i );
-			char* inbuf = &c;
-			std::size_t inbytesleft = 1;
-			char* outbuf = m_converted[i];
-			std::size_t outbytesleft = 6;
-			if ( g_iconv( descriptor, &inbuf, &inbytesleft, &outbuf, &outbytesleft ) != (size_t)( -1 ) ) {
-				UTF8Character utf8( m_converted[i] );
-				m_decodeMap[i] = utf8;
-				m_encodeMap[i] = UTF8CharacterToExtendedASCII( utf8, c );
+	ExtendedASCIICharacterSet(){
+		if ( !globalCharacterSet().isUTF8() ) {
+			GIConv descriptor = g_iconv_open( "UTF-8", globalCharacterSet().get() );
+			for ( std::size_t i = 1; i < 128; ++i )
+			{
+				char c = extended_ascii_for_index( i );
+				char* inbuf = &c;
+				std::size_t inbytesleft = 1;
+				char* outbuf = m_converted[i];
+				std::size_t outbytesleft = 6;
+				if ( g_iconv( descriptor, &inbuf, &inbytesleft, &outbuf, &outbytesleft ) != (size_t)( -1 ) ) {
+					UTF8Character utf8( m_converted[i] );
+					m_decodeMap[i] = utf8;
+					m_encodeMap[i] = UTF8CharacterToExtendedASCII( utf8, c );
+				}
 			}
+			g_iconv_close( descriptor );
+			std::sort( m_encodeMap, m_encodeMap + 128 );
 		}
-		g_iconv_close( descriptor );
-		std::sort( m_encodeMap, m_encodeMap + 128 );
 	}
-}
 /// \brief Prints the (up to) 128 characters in the current extended-ascii character set.
 /// Useful for debugging.
-void print() const {
-	globalOutputStream() << "UTF-8 conversion required from charset: " << globalCharacterSet().get() << "\n";
-	for ( std::size_t i = 1; i < 128; ++i )
-	{
-		if ( m_decodeMap[i].buffer != 0 ) {
-			globalOutputStream() << extended_ascii_for_index( i ) << " = " << m_decodeMap[i] << "\n";
+	void print() const {
+		globalOutputStream() << "UTF-8 conversion required from charset: " << globalCharacterSet().get() << "\n";
+		for ( std::size_t i = 1; i < 128; ++i )
+		{
+			if ( m_decodeMap[i].buffer != 0 ) {
+				globalOutputStream() << extended_ascii_for_index( i ) << " = " << m_decodeMap[i] << "\n";
+			}
 		}
 	}
-}
 /// \brief Returns \p c decoded from extended-ascii to UTF-8.
 /// \p c must be an extended-ascii character.
-const UTF8Character& decode( char c ) const {
-	ASSERT_MESSAGE( !globalCharacterSet().isUTF8(), "locale is utf8, no conversion required" );
-	ASSERT_MESSAGE( !char_is_ascii( c ), "decode: ascii character" );
-	ASSERT_MESSAGE( m_decodeMap[extended_ascii_to_index( c )].buffer != 0, "decode: invalid character: " << HexChar( c ) );
-	return m_decodeMap[extended_ascii_to_index( c )];
-}
+	const UTF8Character& decode( char c ) const {
+		ASSERT_MESSAGE( !globalCharacterSet().isUTF8(), "locale is utf8, no conversion required" );
+		ASSERT_MESSAGE( !char_is_ascii( c ), "decode: ascii character" );
+		ASSERT_MESSAGE( m_decodeMap[extended_ascii_to_index( c )].buffer != 0, "decode: invalid character: " << HexChar( c ) );
+		return m_decodeMap[extended_ascii_to_index( c )];
+	}
 /// \brief Returns \p c encoded to extended-ascii from UTF-8.
 /// \p c must map to an extended-ascii character.
-char encode( const UTF8Character& c ) const {
-	ASSERT_MESSAGE( !globalCharacterSet().isUTF8(), "locale is utf8, no conversion required" );
-	ASSERT_MESSAGE( !char_is_ascii( *c.buffer ), "encode: ascii character" );
-	std::pair<const UTF8CharacterToExtendedASCII*, const UTF8CharacterToExtendedASCII*> range
-		= std::equal_range( m_encodeMap, m_encodeMap + 128, UTF8CharacterToExtendedASCII( c, 0 ) );
-	ASSERT_MESSAGE( range.first != range.second, "encode: invalid character: " << c );
-	return ( *range.first ).m_c;
-}
+	char encode( const UTF8Character& c ) const {
+		ASSERT_MESSAGE( !globalCharacterSet().isUTF8(), "locale is utf8, no conversion required" );
+		ASSERT_MESSAGE( !char_is_ascii( *c.buffer ), "encode: ascii character" );
+		std::pair<const UTF8CharacterToExtendedASCII*, const UTF8CharacterToExtendedASCII*> range
+		    = std::equal_range( m_encodeMap, m_encodeMap + 128, UTF8CharacterToExtendedASCII( c, 0 ) );
+		ASSERT_MESSAGE( range.first != range.second, "encode: invalid character: " << c );
+		return ( *range.first ).m_c;
+	}
 };
 
 typedef LazyStatic<ExtendedASCIICharacterSet> GlobalExtendedASCIICharacterSet;
@@ -201,11 +201,11 @@ inline ExtendedASCIICharacterSet& globalExtendedASCIICharacterSet(){
 class ConvertUTF8ToLocale
 {
 public:
-StringRange m_range;
-ConvertUTF8ToLocale( const char* string ) : m_range( StringRange( string, string + strlen( string ) ) ){
-}
-ConvertUTF8ToLocale( const StringRange& range ) : m_range( range ){
-}
+	StringRange m_range;
+	ConvertUTF8ToLocale( const char* string ) : m_range( StringRange( string, string + strlen( string ) ) ){
+	}
+	ConvertUTF8ToLocale( const StringRange& range ) : m_range( range ){
+	}
 };
 
 /// \brief Writes \p convert to \p ostream after encoding each character to extended-ascii from UTF-8.
@@ -234,11 +234,11 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 class ConvertLocaleToUTF8
 {
 public:
-StringRange m_range;
-ConvertLocaleToUTF8( const char* string ) : m_range( StringRange( string, string + strlen( string ) ) ){
-}
-ConvertLocaleToUTF8( const StringRange& range ) : m_range( range ){
-}
+	StringRange m_range;
+	ConvertLocaleToUTF8( const char* string ) : m_range( StringRange( string, string + strlen( string ) ) ){
+	}
+	ConvertLocaleToUTF8( const StringRange& range ) : m_range( range ){
+	}
 };
 
 /// \brief Writes \p convert to \p ostream after decoding each character from extended-ascii to UTF-8.

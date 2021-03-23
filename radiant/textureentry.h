@@ -36,79 +36,79 @@
 template<typename StringList>
 class EntryCompletion
 {
-GtkListStore* m_store;
-bool m_invalid;
+	GtkListStore* m_store;
+	bool m_invalid;
 public:
-EntryCompletion() : m_store( 0 ), m_invalid( true ){
-}
-
-static gboolean focus_in( GtkEntry* entry, GdkEventFocus *event, EntryCompletion* self ){
-	self->update();
-	return FALSE;
-}
-
-void connect( GtkEntry* entry ){
-	if ( m_store == 0 ) {
-		m_store = gtk_list_store_new( 1, G_TYPE_STRING );
-
-		fill();
-
-		StringList().connect( InvalidateCaller( *this ) );
+	EntryCompletion() : m_store( 0 ), m_invalid( true ){
 	}
 
-	GtkEntryCompletion* completion = gtk_entry_completion_new();
-	gtk_entry_set_completion( entry, completion );
-	gtk_entry_completion_set_model( completion, GTK_TREE_MODEL( m_store ) );
-	gtk_entry_completion_set_text_column( completion, 0 );
-	g_signal_connect( G_OBJECT( entry ), "focus_in_event", G_CALLBACK( focus_in ), this );
-}
-
-void append( const char* string ){
-	GtkTreeIter iter;
-	gtk_list_store_append( m_store, &iter );
-	gtk_list_store_set( m_store, &iter, 0, string, -1 );
-}
-typedef MemberCaller1<EntryCompletion, const char*, &EntryCompletion::append> AppendCaller;
-
-void fill(){
-	StringList().forEach( AppendCaller( *this ) );
-	m_invalid = false;
-}
-
-void clear(){
-	gtk_list_store_clear( m_store );
-}
-
-void update(){
-	if( m_invalid ){
-		clear();
-		fill();
+	static gboolean focus_in( GtkEntry* entry, GdkEventFocus *event, EntryCompletion* self ){
+		self->update();
+		return FALSE;
 	}
-}
 
-void invalidate(){
-	m_invalid = true;
-}
-typedef MemberCaller<EntryCompletion, &EntryCompletion::invalidate> InvalidateCaller;
+	void connect( GtkEntry* entry ){
+		if ( m_store == 0 ) {
+			m_store = gtk_list_store_new( 1, G_TYPE_STRING );
+
+			fill();
+
+			StringList().connect( InvalidateCaller( *this ) );
+		}
+
+		GtkEntryCompletion* completion = gtk_entry_completion_new();
+		gtk_entry_set_completion( entry, completion );
+		gtk_entry_completion_set_model( completion, GTK_TREE_MODEL( m_store ) );
+		gtk_entry_completion_set_text_column( completion, 0 );
+		g_signal_connect( G_OBJECT( entry ), "focus_in_event", G_CALLBACK( focus_in ), this );
+	}
+
+	void append( const char* string ){
+		GtkTreeIter iter;
+		gtk_list_store_append( m_store, &iter );
+		gtk_list_store_set( m_store, &iter, 0, string, -1 );
+	}
+	typedef MemberCaller1<EntryCompletion, const char*, &EntryCompletion::append> AppendCaller;
+
+	void fill(){
+		StringList().forEach( AppendCaller( *this ) );
+		m_invalid = false;
+	}
+
+	void clear(){
+		gtk_list_store_clear( m_store );
+	}
+
+	void update(){
+		if( m_invalid ){
+			clear();
+			fill();
+		}
+	}
+
+	void invalidate(){
+		m_invalid = true;
+	}
+	typedef MemberCaller<EntryCompletion, &EntryCompletion::invalidate> InvalidateCaller;
 };
 
 /* loaded ( shaders + textures ) */
 class TextureNameList
 {
 public:
-void forEach( const ShaderNameCallback& callback ) const {
-	for ( QERApp_ActiveShaders_IteratorBegin(); !QERApp_ActiveShaders_IteratorAtEnd(); QERApp_ActiveShaders_IteratorIncrement() )
-	{
-		const IShader *shader = QERApp_ActiveShaders_IteratorCurrent();
+	void forEach( const ShaderNameCallback& callback ) const {
+		for ( QERApp_ActiveShaders_IteratorBegin(); !QERApp_ActiveShaders_IteratorAtEnd(); QERApp_ActiveShaders_IteratorIncrement() )
+		{
+			const IShader *shader = QERApp_ActiveShaders_IteratorCurrent();
 
-		if ( shader_equal_prefix( shader->getName(), "textures/" ) ) {
-			callback( shader->getName() + 9 );
+			if ( shader_equal_prefix( shader->getName(), "textures/" ) ) {
+				callback( shader->getName() + 9 );
+			}
 		}
 	}
-}
-void connect( const SignalHandler& update ) const {
-	TextureBrowser_addActiveShadersChangedCallback( update );
-}
+	void connect( const SignalHandler& update ) const {
+		TextureBrowser_addActiveShadersChangedCallback( update );
+	}
 };
 
 typedef Static< EntryCompletion<TextureNameList> > GlobalTextureEntryCompletion;
@@ -117,12 +117,12 @@ typedef Static< EntryCompletion<TextureNameList> > GlobalTextureEntryCompletion;
 class AllShadersNameList
 {
 public:
-void forEach( const ShaderNameCallback& callback ) const {
-	GlobalShaderSystem().foreachShaderName( callback );
-}
-void connect( const SignalHandler& update ) const {
-	TextureBrowser_addActiveShadersChangedCallback( update );
-}
+	void forEach( const ShaderNameCallback& callback ) const {
+		GlobalShaderSystem().foreachShaderName( callback );
+	}
+	void connect( const SignalHandler& update ) const {
+		TextureBrowser_addActiveShadersChangedCallback( update );
+	}
 };
 
 typedef Static< EntryCompletion<AllShadersNameList> > GlobalAllShadersEntryCompletion;
@@ -131,12 +131,12 @@ typedef Static< EntryCompletion<AllShadersNameList> > GlobalAllShadersEntryCompl
 class ShaderList
 {
 public:
-void forEach( const ShaderNameCallback& callback ) const {
-	GlobalShaderSystem().foreachShaderName( callback );
-}
-void connect( const SignalHandler& update ) const {
-	TextureBrowser_addShadersRealiseCallback( update );
-}
+	void forEach( const ShaderNameCallback& callback ) const {
+		GlobalShaderSystem().foreachShaderName( callback );
+	}
+	void connect( const SignalHandler& update ) const {
+		TextureBrowser_addShadersRealiseCallback( update );
+	}
 };
 
 typedef Static< EntryCompletion<ShaderList> > GlobalShaderEntryCompletion;

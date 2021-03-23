@@ -31,323 +31,324 @@
 // local must be a pure rotation
 inline Vector3 translation_to_local( const Vector3& translation, const Matrix4& local ){
 	return matrix4_get_translation_vec3(
-			   matrix4_multiplied_by_matrix4(
-				   matrix4_translated_by_vec3( matrix4_transposed( local ), translation ),
-				   local
-				   )
-			   );
+	           matrix4_multiplied_by_matrix4(
+	               matrix4_translated_by_vec3( matrix4_transposed( local ), translation ),
+	               local
+	           )
+	       );
 }
 
 // local must be a pure rotation
 inline Vector3 translation_from_local( const Vector3& translation, const Matrix4& local ){
 	return matrix4_get_translation_vec3(
-			   matrix4_multiplied_by_matrix4(
-				   matrix4_translated_by_vec3( local, translation ),
-				   matrix4_transposed( local )
-				   )
-			   );
+	           matrix4_multiplied_by_matrix4(
+	               matrix4_translated_by_vec3( local, translation ),
+	               matrix4_transposed( local )
+	           )
+	       );
 }
 
 
 class DragPlanes
 {
-ObservedSelectable m_selectables[6];
+	ObservedSelectable m_selectables[6];
 public:
-mutable AABB m_bounds;
-DragPlanes( const SelectionChangeCallback& onchanged ) : m_selectables{ ObservedSelectable( onchanged ),
-																		ObservedSelectable( onchanged ),
-																		ObservedSelectable( onchanged ),
-																		ObservedSelectable( onchanged ),
-																		ObservedSelectable( onchanged ),
-																		ObservedSelectable( onchanged ) }{
-}
-bool isSelected() const {
-	for ( std::size_t i = 0; i < 6; ++i )
-		if( m_selectables[i].isSelected() )
-			return true;
-	return false;
-}
-void setSelected( bool selected ){
-	for ( std::size_t i = 0; i < 6; ++i )
-		m_selectables[i].setSelected( selected );
-}
-void selectPlanes( const AABB& aabb, Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback, const Matrix4& rotation = g_matrix4_identity ){
-	Vector3 corners[8];
-	aabb_corners_oriented( aabb, rotation, corners );
-
-	Plane3 planes[6];
-	aabb_planes_oriented( aabb, rotation, planes );
-
-	const std::size_t indices[24] = {
-		2, 1, 5, 6, //+x //right
-		3, 7, 4, 0, //-x //left
-		1, 0, 4, 5, //+y //front
-		3, 2, 6, 7, //-y //back
-		0, 1, 2, 3, //+z //top
-		7, 6, 5, 4, //-z //bottom
-	};
-
-	const Vector3 viewdir( test.getVolume().getViewDir() );
-	double bestDot = 1;
-	ObservedSelectable* selectable = 0;
-	ObservedSelectable* selectable2 = 0;
-
-	for ( std::size_t i = 0; i < 6; ++i ){
-		const std::size_t index = i * 4;
-		const Vector3 centroid = vector3_mid( corners[indices[index]], corners[indices[index + 2]] );
-		const Vector3 projected = vector4_projected( matrix4_transformed_vector4( test.getVolume().GetViewMatrix(), Vector4( centroid, 1 ) ) );
-		const Vector3 closest_point = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, projected[2], 1 ) ) );
-		if ( vector3_dot( planes[i].normal(), closest_point - corners[indices[index]] ) > 0
-			&& vector3_dot( planes[i].normal(), closest_point - corners[indices[index + 1]] ) > 0
-			&& vector3_dot( planes[i].normal(), closest_point - corners[indices[index + 2]] ) > 0
-			&& vector3_dot( planes[i].normal(), closest_point - corners[indices[index + 3]] ) > 0 ) {
-			const double dot = fabs( vector3_dot( planes[i].normal(), viewdir ) );
-			const double diff = bestDot - dot;
-			if( diff > 0.03 ){
-				bestDot = dot;
-				selectable = &m_selectables[i];
-				selectable2 = 0;
-			}
-			else if( fabs( diff ) <= 0.03 ){
-				selectable2 = &m_selectables[i];
-			}
-		}
+	mutable AABB m_bounds;
+	DragPlanes( const SelectionChangeCallback& onchanged ) :
+		m_selectables{ ObservedSelectable( onchanged ),
+		               ObservedSelectable( onchanged ),
+		               ObservedSelectable( onchanged ),
+		               ObservedSelectable( onchanged ),
+		               ObservedSelectable( onchanged ),
+		               ObservedSelectable( onchanged ) }{
 	}
-	if( test.getVolume().fill() ) // select only plane in camera
-		selectable2 = 0;
-	for ( std::size_t i = 0; i < 6; ++i )
-		if( &m_selectables[i] == selectable || &m_selectables[i] == selectable2 ){
-			Selector_add( selector, m_selectables[i] );
-			selectedPlaneCallback( planes[i] );
-		}
-	m_bounds = aabb;
-}
-void selectReversedPlanes( const AABB& aabb, Selector& selector, const SelectedPlanes& selectedPlanes, const Matrix4& rotation = g_matrix4_identity ){
-	Plane3 planes[6];
-	aabb_planes_oriented( aabb, rotation, planes );
-	for ( std::size_t i = 0; i < 6; ++i )
-		if ( selectedPlanes.contains( plane3_flipped( planes[i] ) ) )
-			Selector_add( selector, m_selectables[i] );
-}
-
-void bestPlaneDirect( const AABB& aabb, SelectionTest& test, Plane3& plane, SelectionIntersection& intersection, const Matrix4& rotation = g_matrix4_identity ) const {
-	AABB aabb_ = aabb;
-	for( std::size_t i = 0; i < 3; ++i ) /* make sides of flat patches more selectable */
-		if( aabb_.extents[i] < 1 )
-			aabb_.extents[i] = 4;
-
-	Vector3 corners[8];
-	aabb_corners_oriented( aabb_, rotation, corners );
-
-	Plane3 planes[6];
-	aabb_planes_oriented( aabb_, rotation, planes );
-
-	const IndexPointer::index_type indices[24] = {
-		2, 1, 5, 6, //+x //right
-		3, 7, 4, 0, //-x //left
-		1, 0, 4, 5, //+y //front
-		3, 2, 6, 7, //-y //back
-		0, 1, 2, 3, //+z //top
-		7, 6, 5, 4, //-z //bottom
-	};
-
-	for ( std::size_t i = 0; i < 6; ++i ){
-		const std::size_t index = i * 4;
-		SelectionIntersection intersection_new;
-		test.TestQuads( VertexPointer( reinterpret_cast<VertexPointer::pointer>( corners ), sizeof( Vector3 ) ), IndexPointer( &indices[index], 4 ), intersection_new );
-		if( SelectionIntersection_closer( intersection_new, intersection ) ){
-			intersection = intersection_new;
-			plane = planes[i];
-		}
+	bool isSelected() const {
+		for ( std::size_t i = 0; i < 6; ++i )
+			if( m_selectables[i].isSelected() )
+				return true;
+		return false;
 	}
-	m_bounds = aabb;
-}
-void bestPlaneIndirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Matrix4& rotation = g_matrix4_identity ) const {
-	Vector3 corners[8];
-	aabb_corners_oriented( aabb, rotation, corners );
+	void setSelected( bool selected ){
+		for ( std::size_t i = 0; i < 6; ++i )
+			m_selectables[i].setSelected( selected );
+	}
+	void selectPlanes( const AABB& aabb, Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback, const Matrix4& rotation = g_matrix4_identity ){
+		Vector3 corners[8];
+		aabb_corners_oriented( aabb, rotation, corners );
 
-	Plane3 planes[6];
-	aabb_planes_oriented( aabb, rotation, planes );
-/*
-	const std::size_t indices[24] = {
-		2, 1, 5, 6, //+x //right
-		3, 7, 4, 0, //-x //left
-		1, 0, 4, 5, //+y //front
-		3, 2, 6, 7, //-y //back
-		0, 1, 2, 3, //+z //top
-		7, 6, 5, 4, //-z //bottom
-	};
-*/
-/*
+		Plane3 planes[6];
+		aabb_planes_oriented( aabb, rotation, planes );
 
-        0 ----- 1
-        /|    /|
-       / |   / |
-      /  |  /  |
-    3 ----- 2  |
-     |  4|_|___|5
-     |  /  |   /
-     | /   |  /
-     |/    | /
-    7|_____|/6
+		const std::size_t indices[24] = {
+			2, 1, 5, 6, //+x //right
+			3, 7, 4, 0, //-x //left
+			1, 0, 4, 5, //+y //front
+			3, 2, 6, 7, //-y //back
+			0, 1, 2, 3, //+z //top
+			7, 6, 5, 4, //-z //bottom
+		};
 
- */
+		const Vector3 viewdir( test.getVolume().getViewDir() );
+		double bestDot = 1;
+		ObservedSelectable* selectable = 0;
+		ObservedSelectable* selectable2 = 0;
 
-	const std::size_t edges[24] = {
-		0, 1, // x
-		3, 2,
-		7, 6,
-		4, 5,
-		2, 1, // y
-		3, 0,
-		6, 5,
-		7, 4,
-		4, 0, // z
-		5, 1,
-		6, 2,
-		7, 3,
-	};
+		for ( std::size_t i = 0; i < 6; ++i ){
+			const std::size_t index = i * 4;
+			const Vector3 centroid = vector3_mid( corners[indices[index]], corners[indices[index + 2]] );
+			const Vector3 projected = vector4_projected( matrix4_transformed_vector4( test.getVolume().GetViewMatrix(), Vector4( centroid, 1 ) ) );
+			const Vector3 closest_point = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, projected[2], 1 ) ) );
+			if ( vector3_dot( planes[i].normal(), closest_point - corners[indices[index]] ) > 0
+			  && vector3_dot( planes[i].normal(), closest_point - corners[indices[index + 1]] ) > 0
+			  && vector3_dot( planes[i].normal(), closest_point - corners[indices[index + 2]] ) > 0
+			  && vector3_dot( planes[i].normal(), closest_point - corners[indices[index + 3]] ) > 0 ) {
+				const double dot = fabs( vector3_dot( planes[i].normal(), viewdir ) );
+				const double diff = bestDot - dot;
+				if( diff > 0.03 ){
+					bestDot = dot;
+					selectable = &m_selectables[i];
+					selectable2 = 0;
+				}
+				else if( fabs( diff ) <= 0.03 ){
+					selectable2 = &m_selectables[i];
+				}
+			}
+		}
+		if( test.getVolume().fill() ) // select only plane in camera
+			selectable2 = 0;
+		for ( std::size_t i = 0; i < 6; ++i )
+			if( &m_selectables[i] == selectable || &m_selectables[i] == selectable2 ){
+				Selector_add( selector, m_selectables[i] );
+				selectedPlaneCallback( planes[i] );
+			}
+		m_bounds = aabb;
+	}
+	void selectReversedPlanes( const AABB& aabb, Selector& selector, const SelectedPlanes& selectedPlanes, const Matrix4& rotation = g_matrix4_identity ){
+		Plane3 planes[6];
+		aabb_planes_oriented( aabb, rotation, planes );
+		for ( std::size_t i = 0; i < 6; ++i )
+			if ( selectedPlanes.contains( plane3_flipped( planes[i] ) ) )
+				Selector_add( selector, m_selectables[i] );
+	}
 
-	const std::size_t adjacent_planes[24] = {
-		4, 2,
-		4, 3,
-		5, 3,
-		5, 2,
-		4, 0,
-		4, 1,
-		5, 0,
-		5, 1,
-		1, 2,
-		2, 0,
-		0, 3,
-		3, 1,
-	};
+	void bestPlaneDirect( const AABB& aabb, SelectionTest& test, Plane3& plane, SelectionIntersection& intersection, const Matrix4& rotation = g_matrix4_identity ) const {
+		AABB aabb_ = aabb;
+		for( std::size_t i = 0; i < 3; ++i ) /* make sides of flat patches more selectable */
+			if( aabb_.extents[i] < 1 )
+				aabb_.extents[i] = 4;
 
-	float dot = 1;
-	const bool some_extent_zero = aabb.extents[0] == 0 || aabb.extents[1] == 0 || aabb.extents[2] == 0;
-	for ( std::size_t i = 0; i < 24; ++++i ){
-		Line line( corners[edges[i]], corners[edges[i + 1]] );
-		if( aabb.extents[i / 8] != 0.f && matrix4_clip_line_by_nearplane( test.getVolume().GetViewMatrix(), line ) == 2 ){
-			const Vector3 intersection_new = line_closest_point( line, g_vector3_identity );
-			const float dist_new = vector3_length_squared( intersection_new );
-			const float dot_new = fabs( vector3_dot( vector3_normalised( intersection_new ), vector3_normalised( line.end - line.start ) ) );
-			//effective epsilon is rather big: optimized 32 bit build is using doubles implicitly (floats might be straightly checked for equality); same code in brush.h is cool with way smaller epsilon
-			if( dist - dist_new > 1e-2f // new dist noticeably smaller
-					|| ( float_equal_epsilon( dist_new, dist, 1e-2f ) && dot_new < dot ) ){ // or ambiguous case. Resolve it by dot comparison
-				const Plane3& plane1 = planes[adjacent_planes[i]];
-				const Plane3& plane2 = planes[adjacent_planes[i + 1]];
+		Vector3 corners[8];
+		aabb_corners_oriented( aabb_, rotation, corners );
 
-				auto assign_plane = [&plane, &intersection, intersection_new, &dist, dist_new, &dot, dot_new]( const Plane3& plane_new ){
+		Plane3 planes[6];
+		aabb_planes_oriented( aabb_, rotation, planes );
+
+		const IndexPointer::index_type indices[24] = {
+			2, 1, 5, 6, //+x //right
+			3, 7, 4, 0, //-x //left
+			1, 0, 4, 5, //+y //front
+			3, 2, 6, 7, //-y //back
+			0, 1, 2, 3, //+z //top
+			7, 6, 5, 4, //-z //bottom
+		};
+
+		for ( std::size_t i = 0; i < 6; ++i ){
+			const std::size_t index = i * 4;
+			SelectionIntersection intersection_new;
+			test.TestQuads( VertexPointer( reinterpret_cast<VertexPointer::pointer>( corners ), sizeof( Vector3 ) ), IndexPointer( &indices[index], 4 ), intersection_new );
+			if( SelectionIntersection_closer( intersection_new, intersection ) ){
+				intersection = intersection_new;
+				plane = planes[i];
+			}
+		}
+		m_bounds = aabb;
+	}
+	void bestPlaneIndirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Matrix4& rotation = g_matrix4_identity ) const {
+		Vector3 corners[8];
+		aabb_corners_oriented( aabb, rotation, corners );
+
+		Plane3 planes[6];
+		aabb_planes_oriented( aabb, rotation, planes );
+	/*
+		const std::size_t indices[24] = {
+			2, 1, 5, 6, //+x //right
+			3, 7, 4, 0, //-x //left
+			1, 0, 4, 5, //+y //front
+			3, 2, 6, 7, //-y //back
+			0, 1, 2, 3, //+z //top
+			7, 6, 5, 4, //-z //bottom
+		};
+	*/
+	/*
+
+	        0 ----- 1
+	        /|    /|
+	       / |   / |
+	      /  |  /  |
+	    3 ----- 2  |
+	     |  4|_|___|5
+	     |  /  |   /
+	     | /   |  /
+	     |/    | /
+	    7|_____|/6
+
+	*/
+
+		const std::size_t edges[24] = {
+			0, 1, // x
+			3, 2,
+			7, 6,
+			4, 5,
+			2, 1, // y
+			3, 0,
+			6, 5,
+			7, 4,
+			4, 0, // z
+			5, 1,
+			6, 2,
+			7, 3,
+		};
+
+		const std::size_t adjacent_planes[24] = {
+			4, 2,
+			4, 3,
+			5, 3,
+			5, 2,
+			4, 0,
+			4, 1,
+			5, 0,
+			5, 1,
+			1, 2,
+			2, 0,
+			0, 3,
+			3, 1,
+		};
+
+		float dot = 1;
+		const bool some_extent_zero = aabb.extents[0] == 0 || aabb.extents[1] == 0 || aabb.extents[2] == 0;
+		for ( std::size_t i = 0; i < 24; ++++i ){
+			Line line( corners[edges[i]], corners[edges[i + 1]] );
+			if( aabb.extents[i / 8] != 0.f && matrix4_clip_line_by_nearplane( test.getVolume().GetViewMatrix(), line ) == 2 ){
+				const Vector3 intersection_new = line_closest_point( line, g_vector3_identity );
+				const float dist_new = vector3_length_squared( intersection_new );
+				const float dot_new = fabs( vector3_dot( vector3_normalised( intersection_new ), vector3_normalised( line.end - line.start ) ) );
+				//effective epsilon is rather big: optimized 32 bit build is using doubles implicitly (floats might be straightly checked for equality); same code in brush.h is cool with way smaller epsilon
+				if( dist - dist_new > 1e-2f // new dist noticeably smaller
+				 || ( float_equal_epsilon( dist_new, dist, 1e-2f ) && dot_new < dot ) ){ // or ambiguous case. Resolve it by dot comparison
+					const Plane3& plane1 = planes[adjacent_planes[i]];
+					const Plane3& plane2 = planes[adjacent_planes[i + 1]];
+
+					auto assign_plane = [&plane, &intersection, intersection_new, &dist, dist_new, &dot, dot_new]( const Plane3& plane_new ){
 						plane = plane_new;
 						intersection = intersection_new;
 						dist = dist_new;
 						dot = dot_new;
-				};
+					};
 
-				if( test.getVolume().fill() ){
-					if( plane3_distance_to_point( plane1, test.getVolume().getViewer() ) <= 0 ){
-						if( aabb.extents[adjacent_planes[i] / 2] == 0 ) /* select the other, if zero bound */
-							assign_plane( plane2 );
-						else
-							assign_plane( plane1 );
+					if( test.getVolume().fill() ){
+						if( plane3_distance_to_point( plane1, test.getVolume().getViewer() ) <= 0 ){
+							if( aabb.extents[adjacent_planes[i] / 2] == 0 ) /* select the other, if zero bound */
+								assign_plane( plane2 );
+							else
+								assign_plane( plane1 );
+						}
+						else if( plane3_distance_to_point( plane2, test.getVolume().getViewer() ) <= 0 ){
+							if( aabb.extents[adjacent_planes[i + 1] / 2] == 0 ) /* select the other, if zero bound */
+								assign_plane( plane1 );
+							else
+								assign_plane( plane2 );
+						}
 					}
-					else if( plane3_distance_to_point( plane2, test.getVolume().getViewer() ) <= 0 ){
-						if( aabb.extents[adjacent_planes[i + 1] / 2] == 0 ) /* select the other, if zero bound */
-							assign_plane( plane1 );
-						else
-							assign_plane( plane2 );
-					}
-				}
-				else if( some_extent_zero || fabs( vector3_length_squared( line.end - line.start ) ) > 1e-3 ){
-					if( fabs( vector3_dot( plane1.normal(), test.getVolume().getViewDir() ) ) < fabs( vector3_dot( plane2.normal(), test.getVolume().getViewDir() ) ) ){
-						if( aabb.extents[adjacent_planes[i] / 2] == 0 ) /* select the other, if zero bound */
-							assign_plane( plane2 );
-						else
-							assign_plane( plane1 );
-					}
-					else{
-						if( aabb.extents[adjacent_planes[i + 1] / 2] == 0 ) /* select the other, if zero bound */
-							assign_plane( plane1 );
-						else
-							assign_plane( plane2 );
-					}
+					else if( some_extent_zero || fabs( vector3_length_squared( line.end - line.start ) ) > 1e-3 ){
+						if( fabs( vector3_dot( plane1.normal(), test.getVolume().getViewDir() ) ) < fabs( vector3_dot( plane2.normal(), test.getVolume().getViewDir() ) ) ){
+							if( aabb.extents[adjacent_planes[i] / 2] == 0 ) /* select the other, if zero bound */
+								assign_plane( plane2 );
+							else
+								assign_plane( plane1 );
+						}
+						else{
+							if( aabb.extents[adjacent_planes[i + 1] / 2] == 0 ) /* select the other, if zero bound */
+								assign_plane( plane1 );
+							else
+								assign_plane( plane2 );
+						}
 
+					}
 				}
 			}
 		}
+		m_bounds = aabb;
 	}
-	m_bounds = aabb;
-}
-void selectByPlane( const AABB& aabb, const Plane3& plane, const Matrix4& rotation = g_matrix4_identity ){
-	Plane3 planes[6];
-	aabb_planes_oriented( aabb, rotation, planes );
+	void selectByPlane( const AABB& aabb, const Plane3& plane, const Matrix4& rotation = g_matrix4_identity ){
+		Plane3 planes[6];
+		aabb_planes_oriented( aabb, rotation, planes );
 
-	for ( std::size_t i = 0; i < 6; ++i ){
-		if( plane3_equal( plane, planes[i] ) || plane3_equal( plane, plane3_flipped( planes[i] ) ) ){
-			m_selectables[i].setSelected( true );
-			return;
+		for ( std::size_t i = 0; i < 6; ++i ){
+			if( plane3_equal( plane, planes[i] ) || plane3_equal( plane, plane3_flipped( planes[i] ) ) ){
+				m_selectables[i].setSelected( true );
+				return;
+			}
 		}
 	}
-}
-void gatherPolygonsByPlane( const AABB& aabb, const Plane3& plane, std::vector<std::vector<Vector3>>& polygons, const Matrix4& rotation = g_matrix4_identity ) const {
-	Vector3 corners[8];
-	aabb_corners_oriented( aabb, rotation, corners );
+	void gatherPolygonsByPlane( const AABB& aabb, const Plane3& plane, std::vector<std::vector<Vector3>>& polygons, const Matrix4& rotation = g_matrix4_identity ) const {
+		Vector3 corners[8];
+		aabb_corners_oriented( aabb, rotation, corners );
 
-	Plane3 planes[6];
-	aabb_planes_oriented( aabb, rotation, planes );
+		Plane3 planes[6];
+		aabb_planes_oriented( aabb, rotation, planes );
 
-	const std::size_t indices[24] = {
-		2, 1, 5, 6, //+x //right
-		3, 7, 4, 0, //-x //left
-		1, 0, 4, 5, //+y //front
-		3, 2, 6, 7, //-y //back
-		0, 1, 2, 3, //+z //top
-		7, 6, 5, 4, //-z //bottom
-	};
+		const std::size_t indices[24] = {
+			2, 1, 5, 6, //+x //right
+			3, 7, 4, 0, //-x //left
+			1, 0, 4, 5, //+y //front
+			3, 2, 6, 7, //-y //back
+			0, 1, 2, 3, //+z //top
+			7, 6, 5, 4, //-z //bottom
+		};
 
-	for ( std::size_t i = 0; i < 6; ++i ){
-		if( plane3_equal( plane, planes[i] ) || plane3_equal( plane, plane3_flipped( planes[i] ) ) ){
-			const std::size_t index = i * 4;
-			polygons.emplace_back( std::initializer_list<Vector3>( { corners[indices[index]],
-																	corners[indices[index + 1]],
-																	corners[indices[index + 2]],
-																	corners[indices[index + 3]] } ) );
-			return;
+		for ( std::size_t i = 0; i < 6; ++i ){
+			if( plane3_equal( plane, planes[i] ) || plane3_equal( plane, plane3_flipped( planes[i] ) ) ){
+				const std::size_t index = i * 4;
+				polygons.emplace_back( std::initializer_list<Vector3>( { corners[indices[index]],
+				                                                         corners[indices[index + 1]],
+				                                                         corners[indices[index + 2]],
+				                                                         corners[indices[index + 3]] } ) );
+				return;
+			}
 		}
+
 	}
 
-}
-
-AABB evaluateResize( const Vector3& translation ) const {
-	Vector3 min = m_bounds.origin - m_bounds.extents;
-	Vector3 max = m_bounds.origin + m_bounds.extents;
-	for ( std::size_t i = 0; i < 3; ++i )
-		if ( m_bounds.extents[i] != 0 ){
-			if ( m_selectables[i * 2].isSelected() )
-				max[i] += translation[i];
-			if ( m_selectables[i * 2 + 1].isSelected() )
-				min[i] += translation[i];
-		}
-	return AABB( vector3_mid( min, max ), vector3_scaled( vector3_subtracted( max, min ), 0.5 ) );
-}
-AABB evaluateResize( const Vector3& translation, const Matrix4& rotation ) const {
-	AABB aabb( evaluateResize( translation_to_local( translation, rotation ) ) );
-	aabb.origin = m_bounds.origin + translation_from_local( aabb.origin - m_bounds.origin, rotation );
-	return aabb;
-}
-Matrix4 evaluateTransform( const Vector3& translation ) const {
-	AABB aabb( evaluateResize( translation ) );
-	Vector3 scale(
-		m_bounds.extents[0] != 0 ? aabb.extents[0] / m_bounds.extents[0] : 1,
-		m_bounds.extents[1] != 0 ? aabb.extents[1] / m_bounds.extents[1] : 1,
-		m_bounds.extents[2] != 0 ? aabb.extents[2] / m_bounds.extents[2] : 1
+	AABB evaluateResize( const Vector3& translation ) const {
+		Vector3 min = m_bounds.origin - m_bounds.extents;
+		Vector3 max = m_bounds.origin + m_bounds.extents;
+		for ( std::size_t i = 0; i < 3; ++i )
+			if ( m_bounds.extents[i] != 0 ){
+				if ( m_selectables[i * 2].isSelected() )
+					max[i] += translation[i];
+				if ( m_selectables[i * 2 + 1].isSelected() )
+					min[i] += translation[i];
+			}
+		return AABB( vector3_mid( min, max ), vector3_scaled( vector3_subtracted( max, min ), 0.5 ) );
+	}
+	AABB evaluateResize( const Vector3& translation, const Matrix4& rotation ) const {
+		AABB aabb( evaluateResize( translation_to_local( translation, rotation ) ) );
+		aabb.origin = m_bounds.origin + translation_from_local( aabb.origin - m_bounds.origin, rotation );
+		return aabb;
+	}
+	Matrix4 evaluateTransform( const Vector3& translation ) const {
+		AABB aabb( evaluateResize( translation ) );
+		Vector3 scale(
+		    m_bounds.extents[0] != 0 ? aabb.extents[0] / m_bounds.extents[0] : 1,
+		    m_bounds.extents[1] != 0 ? aabb.extents[1] / m_bounds.extents[1] : 1,
+		    m_bounds.extents[2] != 0 ? aabb.extents[2] / m_bounds.extents[2] : 1
 		);
 
-	Matrix4 matrix( matrix4_translation_for_vec3( aabb.origin - m_bounds.origin ) );
-	matrix4_pivoted_scale_by_vec3( matrix, scale, m_bounds.origin );
+		Matrix4 matrix( matrix4_translation_for_vec3( aabb.origin - m_bounds.origin ) );
+		matrix4_pivoted_scale_by_vec3( matrix, scale, m_bounds.origin );
 
-	return matrix;
-}
+		return matrix;
+	}
 };
 
 

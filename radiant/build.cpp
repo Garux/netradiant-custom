@@ -55,116 +55,116 @@ const char* build_get_variable( const char* name ){
 class Evaluatable
 {
 public:
-virtual ~Evaluatable(){}
-virtual void evaluate( StringBuffer& output ) = 0;
-virtual void exportXML( XMLImporter& importer ) = 0;
+	virtual ~Evaluatable(){}
+	virtual void evaluate( StringBuffer& output ) = 0;
+	virtual void exportXML( XMLImporter& importer ) = 0;
 };
 
 class VariableString : public Evaluatable
 {
-CopiedString m_string;
+	CopiedString m_string;
 public:
-VariableString() : m_string(){
-}
-VariableString( const char* string ) : m_string( string ){
-}
-const char* c_str() const {
-	return m_string.c_str();
-}
-void setString( const char* string ){
-	m_string = string;
-}
-void evaluate( StringBuffer& output ){
-	StringBuffer variable;
-	bool in_variable = false;
-	for ( const char* i = m_string.c_str(); *i != '\0'; ++i )
-	{
-		if ( !in_variable ) {
-			switch ( *i )
-			{
-			case '[':
-				in_variable = true;
-				break;
-			default:
-				output.push_back( *i );
-				break;
-			}
-		}
-		else
+	VariableString() : m_string(){
+	}
+	VariableString( const char* string ) : m_string( string ){
+	}
+	const char* c_str() const {
+		return m_string.c_str();
+	}
+	void setString( const char* string ){
+		m_string = string;
+	}
+	void evaluate( StringBuffer& output ){
+		StringBuffer variable;
+		bool in_variable = false;
+		for ( const char* i = m_string.c_str(); *i != '\0'; ++i )
 		{
-			switch ( *i )
+			if ( !in_variable ) {
+				switch ( *i )
+				{
+				case '[':
+					in_variable = true;
+					break;
+				default:
+					output.push_back( *i );
+					break;
+				}
+			}
+			else
 			{
-			case ']':
-				in_variable = false;
-				output.push_string( build_get_variable( variable.c_str() ) );
-				variable.clear();
-				break;
-			default:
-				variable.push_back( *i );
-				break;
+				switch ( *i )
+				{
+				case ']':
+					in_variable = false;
+					output.push_string( build_get_variable( variable.c_str() ) );
+					variable.clear();
+					break;
+				default:
+					variable.push_back( *i );
+					break;
+				}
 			}
 		}
 	}
-}
-void exportXML( XMLImporter& importer ){
-	importer << c_str();
-}
+	void exportXML( XMLImporter& importer ){
+		importer << c_str();
+	}
 };
 
 class Conditional : public Evaluatable
 {
-VariableString* m_test;
+	VariableString* m_test;
 public:
-Evaluatable* m_result;
-Conditional( VariableString* test ) : m_test( test ){
-}
-~Conditional(){
-	delete m_test;
-	delete m_result;
-}
-void evaluate( StringBuffer& output ){
-	StringBuffer buffer;
-	m_test->evaluate( buffer );
-	if ( !string_empty( buffer.c_str() ) ) {
-		m_result->evaluate( output );
+	Evaluatable* m_result;
+	Conditional( VariableString* test ) : m_test( test ){
 	}
-}
-void exportXML( XMLImporter& importer ){
-	StaticElement conditionElement( "cond" );
-	conditionElement.insertAttribute( "value", m_test->c_str() );
-	importer.pushElement( conditionElement );
-	m_result->exportXML( importer );
-	importer.popElement( conditionElement.name() );
-}
+	~Conditional(){
+		delete m_test;
+		delete m_result;
+	}
+	void evaluate( StringBuffer& output ){
+		StringBuffer buffer;
+		m_test->evaluate( buffer );
+		if ( !string_empty( buffer.c_str() ) ) {
+			m_result->evaluate( output );
+		}
+	}
+	void exportXML( XMLImporter& importer ){
+		StaticElement conditionElement( "cond" );
+		conditionElement.insertAttribute( "value", m_test->c_str() );
+		importer.pushElement( conditionElement );
+		m_result->exportXML( importer );
+		importer.popElement( conditionElement.name() );
+	}
 };
 
 typedef std::vector<Evaluatable*> Evaluatables;
 
 class Tool : public Evaluatable
 {
-Evaluatables m_evaluatables;
+	Evaluatables m_evaluatables;
 public:
-~Tool(){
-	for ( Evaluatables::iterator i = m_evaluatables.begin(); i != m_evaluatables.end(); ++i )
-	{
-		delete ( *i );
+	~Tool(){
+		for ( Evaluatables::iterator i = m_evaluatables.begin(); i != m_evaluatables.end(); ++i )
+		{
+			delete ( *i );
+		}
 	}
-}
-void push_back( Evaluatable* evaluatable ){
-	m_evaluatables.push_back( evaluatable );
-}
-void evaluate( StringBuffer& output ){
-	for ( Evaluatables::iterator i = m_evaluatables.begin(); i != m_evaluatables.end(); ++i )
-	{
-		( *i )->evaluate( output );
+	void push_back( Evaluatable* evaluatable ){
+		m_evaluatables.push_back( evaluatable );
 	}
-}
-void exportXML( XMLImporter& importer ){
-	for ( Evaluatables::iterator i = m_evaluatables.begin(); i != m_evaluatables.end(); ++i )
-	{
-		( *i )->exportXML( importer );
+	void evaluate( StringBuffer& output ){
+		for ( Evaluatables::iterator i = m_evaluatables.begin(); i != m_evaluatables.end(); ++i )
+		{
+			( *i )->evaluate( output );
+		}
 	}
-}
+	void exportXML( XMLImporter& importer ){
+		for ( Evaluatables::iterator i = m_evaluatables.begin(); i != m_evaluatables.end(); ++i )
+		{
+			( *i )->exportXML( importer );
+		}
+	}
 };
 
 #include "xml/ixml.h"
@@ -172,95 +172,95 @@ void exportXML( XMLImporter& importer ){
 class XMLElementParser : public TextOutputStream
 {
 public:
-virtual XMLElementParser& pushElement( const XMLElement& element ) = 0;
-virtual void popElement( const char* name ) = 0;
+	virtual XMLElementParser& pushElement( const XMLElement& element ) = 0;
+	virtual void popElement( const char* name ) = 0;
 };
 
 class VariableStringXMLConstructor final : public XMLElementParser
 {
-StringBuffer m_buffer;
-VariableString& m_variableString;
+	StringBuffer m_buffer;
+	VariableString& m_variableString;
 public:
-VariableStringXMLConstructor( VariableString& variableString ) : m_variableString( variableString ){
-}
-~VariableStringXMLConstructor(){
-	m_variableString.setString( m_buffer.c_str() );
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	m_buffer.push_range( buffer, buffer + length );
-	return length;
-}
-XMLElementParser& pushElement( const XMLElement& element ){
-	ERROR_MESSAGE( "parse error: invalid element \"" << element.name() << "\"" );
-	return *this;
-}
-void popElement( const char* name ){
-}
+	VariableStringXMLConstructor( VariableString& variableString ) : m_variableString( variableString ){
+	}
+	~VariableStringXMLConstructor(){
+		m_variableString.setString( m_buffer.c_str() );
+	}
+	std::size_t write( const char* buffer, std::size_t length ){
+		m_buffer.push_range( buffer, buffer + length );
+		return length;
+	}
+	XMLElementParser& pushElement( const XMLElement& element ){
+		ERROR_MESSAGE( "parse error: invalid element \"" << element.name() << "\"" );
+		return *this;
+	}
+	void popElement( const char* name ){
+	}
 };
 
 class ConditionalXMLConstructor final : public XMLElementParser
 {
-StringBuffer m_buffer;
-Conditional& m_conditional;
+	StringBuffer m_buffer;
+	Conditional& m_conditional;
 public:
-ConditionalXMLConstructor( Conditional& conditional ) : m_conditional( conditional ){
-}
-~ConditionalXMLConstructor(){
-	m_conditional.m_result = new VariableString( m_buffer.c_str() );
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	m_buffer.push_range( buffer, buffer + length );
-	return length;
-}
-XMLElementParser& pushElement( const XMLElement& element ){
-	ERROR_MESSAGE( "parse error: invalid element \"" << element.name() << "\"" );
-	return *this;
-}
-void popElement( const char* name ){
-}
+	ConditionalXMLConstructor( Conditional& conditional ) : m_conditional( conditional ){
+	}
+	~ConditionalXMLConstructor(){
+		m_conditional.m_result = new VariableString( m_buffer.c_str() );
+	}
+	std::size_t write( const char* buffer, std::size_t length ){
+		m_buffer.push_range( buffer, buffer + length );
+		return length;
+	}
+	XMLElementParser& pushElement( const XMLElement& element ){
+		ERROR_MESSAGE( "parse error: invalid element \"" << element.name() << "\"" );
+		return *this;
+	}
+	void popElement( const char* name ){
+	}
 };
 
 class ToolXMLConstructor final : public XMLElementParser
 {
-StringBuffer m_buffer;
-Tool& m_tool;
-ConditionalXMLConstructor* m_conditional;
+	StringBuffer m_buffer;
+	Tool& m_tool;
+	ConditionalXMLConstructor* m_conditional;
 public:
-ToolXMLConstructor( Tool& tool ) : m_tool( tool ){
-}
-~ToolXMLConstructor(){
-	flush();
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	m_buffer.push_range( buffer, buffer + length );
-	return length;
-}
-XMLElementParser& pushElement( const XMLElement& element ){
-	if ( string_equal( element.name(), "cond" ) ) {
+	ToolXMLConstructor( Tool& tool ) : m_tool( tool ){
+	}
+	~ToolXMLConstructor(){
 		flush();
-		Conditional* conditional = new Conditional( new VariableString( element.attribute( "value" ) ) );
-		m_tool.push_back( conditional );
-		m_conditional = new ConditionalXMLConstructor( *conditional );
-		return *m_conditional;
 	}
-	else
-	{
-		ERROR_MESSAGE( "parse error: invalid element \"" << element.name() << "\"" );
-		return *this;
+	std::size_t write( const char* buffer, std::size_t length ){
+		m_buffer.push_range( buffer, buffer + length );
+		return length;
 	}
-}
-void popElement( const char* name ){
-	if ( string_equal( name, "cond" ) ) {
-		delete m_conditional;
+	XMLElementParser& pushElement( const XMLElement& element ){
+		if ( string_equal( element.name(), "cond" ) ) {
+			flush();
+			Conditional* conditional = new Conditional( new VariableString( element.attribute( "value" ) ) );
+			m_tool.push_back( conditional );
+			m_conditional = new ConditionalXMLConstructor( *conditional );
+			return *m_conditional;
+		}
+		else
+		{
+			ERROR_MESSAGE( "parse error: invalid element \"" << element.name() << "\"" );
+			return *this;
+		}
 	}
-}
+	void popElement( const char* name ){
+		if ( string_equal( name, "cond" ) ) {
+			delete m_conditional;
+		}
+	}
 
-void flush(){
-	if ( !m_buffer.empty() ) {
-		m_tool.push_back( new VariableString( m_buffer.c_str() ) );
-		m_buffer.clear();
+	void flush(){
+		if ( !m_buffer.empty() ) {
+			m_tool.push_back( new VariableString( m_buffer.c_str() ) );
+			m_buffer.clear();
+		}
 	}
-}
 };
 
 typedef VariableString BuildCommand;
@@ -268,29 +268,29 @@ typedef std::list<BuildCommand> Build;
 
 class BuildXMLConstructor final : public XMLElementParser
 {
-VariableStringXMLConstructor* m_variableString;
-Build& m_build;
+	VariableStringXMLConstructor* m_variableString;
+	Build& m_build;
 public:
-BuildXMLConstructor( Build& build ) : m_build( build ){
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	return length;
-}
-XMLElementParser& pushElement( const XMLElement& element ){
-	if ( string_equal( element.name(), "command" ) ) {
-		m_build.push_back( BuildCommand() );
-		m_variableString = new VariableStringXMLConstructor( m_build.back() );
-		return *m_variableString;
+	BuildXMLConstructor( Build& build ) : m_build( build ){
 	}
-	else
-	{
-		ERROR_MESSAGE( "parse error: invalid element" );
-		return *this;
+	std::size_t write( const char* buffer, std::size_t length ){
+		return length;
 	}
-}
-void popElement( const char* name ){
-	delete m_variableString;
-}
+	XMLElementParser& pushElement( const XMLElement& element ){
+		if ( string_equal( element.name(), "command" ) ) {
+			m_build.push_back( BuildCommand() );
+			m_variableString = new VariableStringXMLConstructor( m_build.back() );
+			return *m_variableString;
+		}
+		else
+		{
+			ERROR_MESSAGE( "parse error: invalid element" );
+			return *this;
+		}
+	}
+	void popElement( const char* name ){
+		delete m_variableString;
+	}
 };
 
 typedef std::pair<CopiedString, Build> BuildPair;
@@ -311,13 +311,13 @@ static bool is_separator( const BuildPair &p ){
 
 class BuildPairEqual
 {
-const char* m_name;
+	const char* m_name;
 public:
-BuildPairEqual( const char* name ) : m_name( name ){
-}
-bool operator()( const BuildPair& self ) const {
-	return string_equal( self.first.c_str(), m_name );
-}
+	BuildPairEqual( const char* name ) : m_name( name ){
+	}
+	bool operator()( const BuildPair& self ) const {
+		return string_equal( self.first.c_str(), m_name );
+	}
 };
 
 typedef std::list<BuildPair> Project;
@@ -354,101 +354,101 @@ typedef std::map<CopiedString, Tool> Tools;
 
 class ProjectXMLConstructor : public XMLElementParser
 {
-ToolXMLConstructor* m_tool;
-BuildXMLConstructor* m_build;
-Project& m_project;
-Tools& m_tools;
+	ToolXMLConstructor* m_tool;
+	BuildXMLConstructor* m_build;
+	Project& m_project;
+	Tools& m_tools;
 public:
-ProjectXMLConstructor( Project& project, Tools& tools ) : m_project( project ), m_tools( tools ){
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	return length;
-}
-XMLElementParser& pushElement( const XMLElement& element ){
-	if ( string_equal( element.name(), "var" ) ) {
-		Tools::iterator i = m_tools.insert( Tools::value_type( element.attribute( "name" ), Tool() ) ).first;
-		m_tool = new ToolXMLConstructor( ( *i ).second );
-		return *m_tool;
+	ProjectXMLConstructor( Project& project, Tools& tools ) : m_project( project ), m_tools( tools ){
 	}
-	else if ( string_equal( element.name(), "build" ) ) {
-		m_project.push_back( Project::value_type( element.attribute( "name" ), Build() ) );
-		m_build = new BuildXMLConstructor( m_project.back().second );
-		return *m_build;
+	std::size_t write( const char* buffer, std::size_t length ){
+		return length;
 	}
-	else if ( string_equal( element.name(), "separator" ) ) {
-		m_project.push_back( Project::value_type( SEPARATOR_STRING, Build() ) );
-		return *this;
+	XMLElementParser& pushElement( const XMLElement& element ){
+		if ( string_equal( element.name(), "var" ) ) {
+			Tools::iterator i = m_tools.insert( Tools::value_type( element.attribute( "name" ), Tool() ) ).first;
+			m_tool = new ToolXMLConstructor( ( *i ).second );
+			return *m_tool;
+		}
+		else if ( string_equal( element.name(), "build" ) ) {
+			m_project.push_back( Project::value_type( element.attribute( "name" ), Build() ) );
+			m_build = new BuildXMLConstructor( m_project.back().second );
+			return *m_build;
+		}
+		else if ( string_equal( element.name(), "separator" ) ) {
+			m_project.push_back( Project::value_type( SEPARATOR_STRING, Build() ) );
+			return *this;
+		}
+		else
+		{
+			ERROR_MESSAGE( "parse error: invalid element" );
+			return *this;
+		}
 	}
-	else
-	{
-		ERROR_MESSAGE( "parse error: invalid element" );
-		return *this;
+	void popElement( const char* name ){
+		if ( string_equal( name, "var" ) ) {
+			delete m_tool;
+		}
+		else if ( string_equal( name, "build" ) ) {
+			delete m_build;
+		}
 	}
-}
-void popElement( const char* name ){
-	if ( string_equal( name, "var" ) ) {
-		delete m_tool;
-	}
-	else if ( string_equal( name, "build" ) ) {
-		delete m_build;
-	}
-}
 };
 
 class SkipAllParser : public XMLElementParser
 {
 public:
-std::size_t write( const char* buffer, std::size_t length ){
-	return length;
-}
-XMLElementParser& pushElement( const XMLElement& element ){
-	return *this;
-}
-void popElement( const char* name ){
-}
+	std::size_t write( const char* buffer, std::size_t length ){
+		return length;
+	}
+	XMLElementParser& pushElement( const XMLElement& element ){
+		return *this;
+	}
+	void popElement( const char* name ){
+	}
 };
 
 class RootXMLConstructor : public XMLElementParser
 {
-CopiedString m_elementName;
-XMLElementParser& m_parser;
-SkipAllParser m_skip;
-Version m_version;
-bool m_compatible;
+	CopiedString m_elementName;
+	XMLElementParser& m_parser;
+	SkipAllParser m_skip;
+	Version m_version;
+	bool m_compatible;
 public:
-RootXMLConstructor( const char* elementName, XMLElementParser& parser, const char* version ) :
-	m_elementName( elementName ),
-	m_parser( parser ),
-	m_version( version_parse( version ) ),
-	m_compatible( false ){
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	return length;
-}
-XMLElementParser& pushElement( const XMLElement& element ){
-	if ( string_equal( element.name(), m_elementName.c_str() ) ) {
-		Version dataVersion( version_parse( element.attribute( "version" ) ) );
-		if ( version_compatible( m_version, dataVersion ) ) {
-			m_compatible = true;
-			return m_parser;
+	RootXMLConstructor( const char* elementName, XMLElementParser& parser, const char* version ) :
+		m_elementName( elementName ),
+		m_parser( parser ),
+		m_version( version_parse( version ) ),
+		m_compatible( false ){
+	}
+	std::size_t write( const char* buffer, std::size_t length ){
+		return length;
+	}
+	XMLElementParser& pushElement( const XMLElement& element ){
+		if ( string_equal( element.name(), m_elementName.c_str() ) ) {
+			Version dataVersion( version_parse( element.attribute( "version" ) ) );
+			if ( version_compatible( m_version, dataVersion ) ) {
+				m_compatible = true;
+				return m_parser;
+			}
+			else
+			{
+				return m_skip;
+			}
 		}
 		else
 		{
-			return m_skip;
+			//ERROR_MESSAGE("parse error: invalid element \"" << element.name() << "\"");
+			return *this;
 		}
 	}
-	else
-	{
-		//ERROR_MESSAGE("parse error: invalid element \"" << element.name() << "\"");
-		return *this;
+	void popElement( const char* name ){
 	}
-}
-void popElement( const char* name ){
-}
 
-bool versionCompatible() const {
-	return m_compatible;
-}
+	bool versionCompatible() const {
+		return m_compatible;
+	}
 };
 
 namespace
@@ -510,21 +510,21 @@ typedef std::vector<XMLElementParser*> XMLElementStack;
 
 class XMLParser : public XMLImporter
 {
-XMLElementStack m_stack;
+	XMLElementStack m_stack;
 public:
-XMLParser( XMLElementParser& parser ){
-	m_stack.push_back( &parser );
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	return m_stack.back()->write( buffer, length );
-}
-void pushElement( const XMLElement& element ){
-	m_stack.push_back( &m_stack.back()->pushElement( element ) );
-}
-void popElement( const char* name ){
-	m_stack.pop_back();
-	m_stack.back()->popElement( name );
-}
+	XMLParser( XMLElementParser& parser ){
+		m_stack.push_back( &parser );
+	}
+	std::size_t write( const char* buffer, std::size_t length ){
+		return m_stack.back()->write( buffer, length );
+	}
+	void pushElement( const XMLElement& element ){
+		m_stack.push_back( &m_stack.back()->pushElement( element ) );
+	}
+	void popElement( const char* name ){
+		m_stack.pop_back();
+		m_stack.back()->popElement( name );
+	}
 };
 
 #include "stream/textfilestream.h"
@@ -558,66 +558,66 @@ void build_commands_clear(){
 
 class BuildXMLExporter
 {
-Build& m_build;
+	Build& m_build;
 public:
-BuildXMLExporter( Build& build ) : m_build( build ){
-}
-void exportXML( XMLImporter& importer ){
-	importer << "\n";
-	for ( Build::iterator i = m_build.begin(); i != m_build.end(); ++i )
-	{
-		StaticElement commandElement( "command" );
-		importer.pushElement( commandElement );
-		( *i ).exportXML( importer );
-		importer.popElement( commandElement.name() );
-		importer << "\n";
+	BuildXMLExporter( Build& build ) : m_build( build ){
 	}
-}
+	void exportXML( XMLImporter& importer ){
+		importer << "\n";
+		for ( Build::iterator i = m_build.begin(); i != m_build.end(); ++i )
+		{
+			StaticElement commandElement( "command" );
+			importer.pushElement( commandElement );
+			( *i ).exportXML( importer );
+			importer.popElement( commandElement.name() );
+			importer << "\n";
+		}
+	}
 };
 
 class ProjectXMLExporter
 {
-Project& m_project;
-Tools& m_tools;
+	Project& m_project;
+	Tools& m_tools;
 public:
-ProjectXMLExporter( Project& project, Tools& tools ) : m_project( project ), m_tools( tools ){
-}
-void exportXML( XMLImporter& importer ){
-	StaticElement projectElement( "project" );
-	projectElement.insertAttribute( "version", BUILDMENU_VERSION );
-	importer.pushElement( projectElement );
-	importer << "\n";
-
-	for ( Tools::iterator i = m_tools.begin(); i != m_tools.end(); ++i )
-	{
-		StaticElement toolElement( "var" );
-		toolElement.insertAttribute( "name", ( *i ).first.c_str() );
-		importer.pushElement( toolElement );
-		( *i ).second.exportXML( importer );
-		importer.popElement( toolElement.name() );
+	ProjectXMLExporter( Project& project, Tools& tools ) : m_project( project ), m_tools( tools ){
+	}
+	void exportXML( XMLImporter& importer ){
+		StaticElement projectElement( "project" );
+		projectElement.insertAttribute( "version", BUILDMENU_VERSION );
+		importer.pushElement( projectElement );
 		importer << "\n";
-	}
-	for ( Project::iterator i = m_project.begin(); i != m_project.end(); ++i )
-	{
-		if ( is_separator( *i ) ) {
-			StaticElement buildElement( "separator" );
-			importer.pushElement( buildElement );
-			importer.popElement( buildElement.name() );
-			importer << "\n";
-		}
-		else
+
+		for ( Tools::iterator i = m_tools.begin(); i != m_tools.end(); ++i )
 		{
-			StaticElement buildElement( "build" );
-			buildElement.insertAttribute( "name", ( *i ).first.c_str() );
-			importer.pushElement( buildElement );
-			BuildXMLExporter buildExporter( ( *i ).second );
-			buildExporter.exportXML( importer );
-			importer.popElement( buildElement.name() );
+			StaticElement toolElement( "var" );
+			toolElement.insertAttribute( "name", ( *i ).first.c_str() );
+			importer.pushElement( toolElement );
+			( *i ).second.exportXML( importer );
+			importer.popElement( toolElement.name() );
 			importer << "\n";
 		}
+		for ( Project::iterator i = m_project.begin(); i != m_project.end(); ++i )
+		{
+			if ( is_separator( *i ) ) {
+				StaticElement buildElement( "separator" );
+				importer.pushElement( buildElement );
+				importer.popElement( buildElement.name() );
+				importer << "\n";
+			}
+			else
+			{
+				StaticElement buildElement( "build" );
+				buildElement.insertAttribute( "name", ( *i ).first.c_str() );
+				importer.pushElement( buildElement );
+				BuildXMLExporter buildExporter( ( *i ).second );
+				buildExporter.exportXML( importer );
+				importer.popElement( buildElement.name() );
+				importer << "\n";
+			}
+		}
+		importer.popElement( projectElement.name() );
 	}
-	importer.popElement( projectElement.name() );
-}
 };
 
 #include "xml/xmlwriter.h"
@@ -678,12 +678,12 @@ static void project_cell_editing_started( GtkCellRenderer* cell, GtkCellEditable
 class ProjectList
 {
 public:
-Project& m_project;
-GtkListStore* m_store;
-GtkWidget* m_buildView;
-bool m_changed;
-ProjectList( Project& project ) : m_project( project ), m_changed( false ){
-}
+	Project& m_project;
+	GtkListStore* m_store;
+	GtkWidget* m_buildView;
+	bool m_changed;
+	ProjectList( Project& project ) : m_project( project ), m_changed( false ){
+	}
 };
 
 gboolean project_cell_edited( GtkCellRendererText* cell, gchar* path_string, gchar* new_text, ProjectList* projectList ){
@@ -735,11 +735,11 @@ inline bool event_is_del( const GdkEventKey* event ){
 }
 inline bool event_is_copy( const GdkEventKey* event ){
 	return ( accelerator_for_event_key( event ) == Accelerator( 'C', GDK_CONTROL_MASK ) )
-		|| ( accelerator_for_event_key( event ) == Accelerator( GDK_KEY_Insert, GDK_CONTROL_MASK ) );
+	    || ( accelerator_for_event_key( event ) == Accelerator( GDK_KEY_Insert, GDK_CONTROL_MASK ) );
 }
 inline bool event_is_paste( const GdkEventKey* event ){
 	return ( accelerator_for_event_key( event ) == Accelerator( 'V', GDK_CONTROL_MASK ) )
-		|| ( accelerator_for_event_key( event ) == Accelerator( GDK_KEY_Insert, GDK_SHIFT_MASK ) );
+	    || ( accelerator_for_event_key( event ) == Accelerator( GDK_KEY_Insert, GDK_SHIFT_MASK ) );
 }
 
 gboolean project_key_press( GtkWidget* widget, GdkEventKey* event, ProjectList* projectList ){
@@ -904,8 +904,8 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 		{
 			GtkVBox* vbox = create_dialog_vbox( 4 );
 			gtk_table_attach( table1, GTK_WIDGET( vbox ), 1, 2, 0, 1,
-							  (GtkAttachOptions) ( GTK_FILL ),
-							  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
+			                  (GtkAttachOptions) ( GTK_FILL ),
+			                  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
 			{
 				GtkButton* button = create_dialog_button( "OK", G_CALLBACK( dialog_button_ok ), &modal );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
@@ -923,8 +923,8 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 		{
 			GtkFrame* frame = create_dialog_frame( "Build menu" );
 			gtk_table_attach( table1, GTK_WIDGET( frame ), 0, 1, 0, 1,
-							  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-							  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
+			                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+			                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
 			{
 				GtkScrolledWindow* scr = create_scrolled_window( GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC, 4 );
 				gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( scr ) );
@@ -962,8 +962,8 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 		{
 			GtkFrame* frame = create_dialog_frame( "Commandline" );
 			gtk_table_attach( table1, GTK_WIDGET( frame ), 0, 1, 1, 2,
-							  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-							  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
+			                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+			                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
 			{
 				GtkScrolledWindow* scr = create_scrolled_window( GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC, 4 );
 				gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( scr ) );
@@ -1004,8 +1004,8 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 			GtkWidget* expander = gtk_expander_new_with_mnemonic( "build variables" );
 			gtk_widget_show( expander );
 			gtk_table_attach( table1, expander, 0, 2, 2, 3,
-							  (GtkAttachOptions) ( GTK_FILL ),
-							  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
+			                  (GtkAttachOptions) ( GTK_FILL ),
+			                  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
 
 			bsp_init();
 			for ( Tools::iterator i = g_build_tools.begin(); i != g_build_tools.end(); ++i ){
@@ -1081,17 +1081,17 @@ CopiedString g_lastExecutedBuild;
 
 class BuildMenuItem
 {
-const char* m_name;
+	const char* m_name;
 public:
-GtkMenuItem* m_item;
-BuildMenuItem( const char* name, GtkMenuItem* item )
-	: m_name( name ), m_item( item ){
-}
-void run(){
-	g_lastExecutedBuild = m_name;
-	RunBSP( m_name );
-}
-typedef MemberCaller<BuildMenuItem, &BuildMenuItem::run> RunCaller;
+	GtkMenuItem* m_item;
+	BuildMenuItem( const char* name, GtkMenuItem* item )
+		: m_name( name ), m_item( item ){
+	}
+	void run(){
+		g_lastExecutedBuild = m_name;
+		RunBSP( m_name );
+	}
+	typedef MemberCaller<BuildMenuItem, &BuildMenuItem::run> RunCaller;
 };
 
 typedef std::list<BuildMenuItem> BuildMenuItems;

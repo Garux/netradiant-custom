@@ -115,17 +115,17 @@ bool Q_Exec( const char *cmd, char *cmdline, const char *execdir, bool bCreateCo
 	}
 
 	if ( CreateProcess(
-			 pCmd,
-			 pCmdline,
-			 NULL,
-			 NULL,
-			 FALSE,
-			 dwCreationFlags,
-			 NULL,
-			 execdir,
-			 &startupinfo,
-			 &ProcessInformation
-			 ) ) {
+	         pCmd,
+	         pCmdline,
+	         NULL,
+	         NULL,
+	         FALSE,
+	         dwCreationFlags,
+	         NULL,
+	         execdir,
+	         &startupinfo,
+	         &ProcessInformation
+	     ) ) {
 		if ( waitfor ) {
 			WaitForSingleObject( ProcessInformation.hProcess, INFINITE );
 		}

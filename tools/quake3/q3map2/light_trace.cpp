@@ -128,9 +128,9 @@ static int AddTraceInfo( traceInfo_t *ti ){
 	for ( num = firstTraceInfo; num < numTraceInfos; num++ )
 	{
 		if ( traceInfos[ num ].si == ti->si &&
-			 traceInfos[ num ].surfaceNum == ti->surfaceNum &&
-			 traceInfos[ num ].castShadows == ti->castShadows &&
-			 traceInfos[ num ].skipGrid == ti->skipGrid ) {
+		     traceInfos[ num ].surfaceNum == ti->surfaceNum &&
+		     traceInfos[ num ].castShadows == ti->castShadows &&
+		     traceInfos[ num ].skipGrid == ti->skipGrid ) {
 			return num;
 		}
 	}
@@ -230,8 +230,8 @@ static int AddTraceTriangle( traceTriangle_t *tt ){
 	}
 
 	/* find vectors for two edges sharing the first vert */
-	 tt->edge1 = tt->v[ 1 ].xyz - tt->v[ 0 ].xyz;
-	 tt->edge2 = tt->v[ 2 ].xyz - tt->v[ 0 ].xyz;
+	tt->edge1 = tt->v[ 1 ].xyz - tt->v[ 0 ].xyz;
+	tt->edge2 = tt->v[ 2 ].xyz - tt->v[ 0 ].xyz;
 
 	/* add the triangle */
 	memcpy( &traceTriangles[ num ], tt, sizeof( *traceTriangles ) );
@@ -856,7 +856,7 @@ static void PopulateWithBSPModel( bspModel_t *model, const Matrix4& transform ){
 
 		/* some surfaces in the bsp might have been tagged as nodraw, with a bogus shader */
 		if ( ( bspShaders[ ds->shaderNum ].contentFlags & noDrawContentFlags ) ||
-			 ( bspShaders[ ds->shaderNum ].surfaceFlags & noDrawSurfaceFlags ) ) {
+		     ( bspShaders[ ds->shaderNum ].surfaceFlags & noDrawSurfaceFlags ) ) {
 			continue;
 		}
 
@@ -865,8 +865,8 @@ static void PopulateWithBSPModel( bspModel_t *model, const Matrix4& transform ){
 			continue;
 		}
 		if ( ( info->si->compileFlags & C_TRANSLUCENT ) &&
-			 !( info->si->compileFlags & C_ALPHASHADOW ) &&
-			 !( info->si->compileFlags & C_LIGHTFILTER ) ) {
+		    !( info->si->compileFlags & C_ALPHASHADOW ) &&
+		    !( info->si->compileFlags & C_LIGHTFILTER ) ) {
 			continue;
 		}
 
@@ -1042,8 +1042,8 @@ static void PopulateWithPicoModel( int castShadows, picoModel_t *model, const Ma
 			continue;
 		}
 		if ( ( ti.si->compileFlags & C_TRANSLUCENT ) &&
-			 !( ti.si->compileFlags & C_ALPHASHADOW ) &&
-			 !( ti.si->compileFlags & C_LIGHTFILTER ) ) {
+		    !( ti.si->compileFlags & C_ALPHASHADOW ) &&
+		    !( ti.si->compileFlags & C_LIGHTFILTER ) ) {
 			continue;
 		}
 
@@ -1119,7 +1119,7 @@ static void PopulateTraceNodes( void ){
 		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 		Vector3 angles( 0 );
 		if ( !e->read_keyvalue( value, "angles" ) ||
-			3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
+		     3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
 			e->read_keyvalue( angles[ 2 ], "angle" );
 
 		/* set transform matrix (thanks spog) */
@@ -1152,11 +1152,8 @@ static void PopulateTraceNodes( void ){
 
 		/* external model */
 		default:
-			{
-				model = LoadModel( value, e->intForKey( "_frame", "frame" ) );
-				if ( model == NULL ) {
-					continue;
-				}
+			model = LoadModel( value, e->intForKey( "_frame", "frame" ) );
+			if ( model != NULL ) {
 				PopulateWithPicoModel( castShadows, model, transform );
 			}
 			continue;
@@ -1271,7 +1268,7 @@ void SetupTraceNodes( void ){
 			tw = &traceWindings[ i ];
 			for ( j = 0; j < tw->numVerts + 1; j++ )
 				fprintf( file, "%f %f %f\n",
-						 tw->v[ j % tw->numVerts ].xyz[ 0 ], tw->v[ j % tw->numVerts ].xyz[ 1 ], tw->v[ j % tw->numVerts ].xyz[ 2 ] );
+				         tw->v[ j % tw->numVerts ].xyz[ 0 ], tw->v[ j % tw->numVerts ].xyz[ 1 ], tw->v[ j % tw->numVerts ].xyz[ 2 ] );
 		}
 
 		/* close it */
@@ -1403,7 +1400,7 @@ bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 
 	/* most surfaces are completely opaque */
 	if ( !( si->compileFlags & ( C_ALPHASHADOW | C_LIGHTFILTER ) ) ||
-		 si->lightImage == NULL || si->lightImage->pixels == NULL ) {
+	     si->lightImage == NULL || si->lightImage->pixels == NULL ) {
 		trace->hit = trace->origin + trace->direction * depth;
 		trace->color.set( 0 );
 		trace->opaque = true;
@@ -1415,7 +1412,7 @@ bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 
 	/* try to avoid double shadows near triangle seams */
 	if ( u < -ASLF_EPSILON || u > ( 1.0f + ASLF_EPSILON ) ||
-		 v < -ASLF_EPSILON || ( u + v ) > ( 1.0f + ASLF_EPSILON ) ) {
+	     v < -ASLF_EPSILON || ( u + v ) > ( 1.0f + ASLF_EPSILON ) ) {
 		return false;
 	}
 
@@ -1665,8 +1662,8 @@ void TraceLine( trace_t *trace ){
 
 	/* testall means trace through sky */
 	if ( trace->testAll && trace->numTestNodes < MAX_TRACE_TEST_NODES &&
-		 trace->compileFlags & C_SKY &&
-		 ( trace->numSurfaces == 0 || surfaceInfos[ trace->surfaces[ 0 ] ].childSurfaceNum < 0 ) ) {
+	     trace->compileFlags & C_SKY &&
+	     ( trace->numSurfaces == 0 || surfaceInfos[ trace->surfaces[ 0 ] ].childSurfaceNum < 0 ) ) {
 		//%	trace->testNodes[ trace->numTestNodes++ ] = skyboxNodeNum;
 		TraceLine_r( skyboxNodeNum, trace->origin, trace->end, trace );
 	}

@@ -50,9 +50,9 @@ class ShaderPlugPluginDependencies : public GlobalRadiantModuleRef,
 	public GlobalShadersModuleRef
 {
 public:
-ShaderPlugPluginDependencies() :
-	GlobalShadersModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "shaders" ) ){
-}
+	ShaderPlugPluginDependencies() :
+		GlobalShadersModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "shaders" ) ){
+	}
 };
 
 namespace Shaderplug
@@ -81,11 +81,12 @@ const char* getCommandTitleList(){
 }
 void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush ){
 	if ( string_equal( command, "About" ) ) {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ), "Shaderplug (1.0)\n\n"
-																 "by Shaderman (shaderman@gmx.net)",
-										 "About",
-										 eMB_OK,
-										 eMB_ICONDEFAULT );
+		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ),
+		                                 "Shaderplug (1.0)\n\n"
+		                                 "by Shaderman (shaderman@gmx.net)",
+		                                 "About",
+		                                 eMB_OK,
+		                                 eMB_ICONDEFAULT );
 	}
 	if ( string_equal( command, "Create tag file" ) ) {
 		CreateTagFile();
@@ -182,9 +183,9 @@ void CreateTagFile(){
 
 		if ( file_exists( tagFile ) ) {
 			EMessageBoxReturn result = GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ),
-																		"WARNING! A tag file already exists! Overwrite it?", "Overwrite tag file?",
-																		eMB_NOYES,
-																		eMB_ICONWARNING );
+			                                                            "WARNING! A tag file already exists! Overwrite it?", "Overwrite tag file?",
+			                                                            eMB_NOYES,
+			                                                            eMB_ICONWARNING );
 
 			if ( result == eIDYES ) {
 				TagBuilder.SaveXmlDoc( tagFile );
@@ -198,32 +199,32 @@ void CreateTagFile(){
 	}
 	else {
 		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ),
-										 "No shaders or textures found. No XML tag file created!\n"
-										 "",
-										 "ERROR",
-										 eMB_OK,
-										 eMB_ICONERROR );
+		                                 "No shaders or textures found. No XML tag file created!\n"
+		                                 "",
+		                                 "ERROR",
+		                                 eMB_OK,
+		                                 eMB_ICONERROR );
 	}
 }
 } // namespace
 
 class ShaderPluginModule
 {
-_QERPluginTable m_plugin;
+	_QERPluginTable m_plugin;
 public:
-typedef _QERPluginTable Type;
-STRING_CONSTANT( Name, "ShaderPlug" );
+	typedef _QERPluginTable Type;
+	STRING_CONSTANT( Name, "ShaderPlug" );
 
-ShaderPluginModule(){
-	m_plugin.m_pfnQERPlug_Init = &Shaderplug::init;
-	m_plugin.m_pfnQERPlug_GetName = &Shaderplug::getName;
-	m_plugin.m_pfnQERPlug_GetCommandList = &Shaderplug::getCommandList;
-	m_plugin.m_pfnQERPlug_GetCommandTitleList = &Shaderplug::getCommandTitleList;
-	m_plugin.m_pfnQERPlug_Dispatch = &Shaderplug::dispatch;
-}
-_QERPluginTable* getTable(){
-	return &m_plugin;
-}
+	ShaderPluginModule(){
+		m_plugin.m_pfnQERPlug_Init = &Shaderplug::init;
+		m_plugin.m_pfnQERPlug_GetName = &Shaderplug::getName;
+		m_plugin.m_pfnQERPlug_GetCommandList = &Shaderplug::getCommandList;
+		m_plugin.m_pfnQERPlug_GetCommandTitleList = &Shaderplug::getCommandTitleList;
+		m_plugin.m_pfnQERPlug_Dispatch = &Shaderplug::dispatch;
+	}
+	_QERPluginTable* getTable(){
+		return &m_plugin;
+	}
 };
 
 typedef SingletonModule<ShaderPluginModule, ShaderPlugPluginDependencies> SingletonShaderPluginModule;

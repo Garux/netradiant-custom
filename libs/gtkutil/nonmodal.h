@@ -46,114 +46,114 @@ inline void widget_connect_escape_clear_focus_widget( GtkWidget* widget ){
 
 class NonModalEntry
 {
-bool m_editing;
-Callback m_apply;
-Callback m_cancel;
+	bool m_editing;
+	Callback m_apply;
+	Callback m_cancel;
 
-static gboolean focus_in( GtkEntry* entry, GdkEventFocus *event, NonModalEntry* self ){
-	self->m_editing = false;
-	return FALSE;
-}
-
-static gboolean focus_out( GtkEntry* entry, GdkEventFocus *event, NonModalEntry* self ){
-	if ( self->m_editing && gtk_widget_get_visible( GTK_WIDGET( entry ) ) ) {
-		self->m_apply();
-	}
-	self->m_editing = false;
-	return FALSE;
-}
-
-static gboolean changed( GtkEntry* entry, NonModalEntry* self ){
-	self->m_editing = true;
-	return FALSE;
-}
-
-static gboolean enter( GtkEntry* entry, GdkEventKey* event, NonModalEntry* self ){
-	if ( event->keyval == GDK_KEY_Return ) {
-		self->m_apply();
+	static gboolean focus_in( GtkEntry* entry, GdkEventFocus *event, NonModalEntry* self ){
 		self->m_editing = false;
-		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( entry ) ) ), NULL );
-		return TRUE;
+		return FALSE;
 	}
-	return FALSE;
-}
 
-static gboolean escape( GtkEntry* entry, GdkEventKey* event, NonModalEntry* self ){
-	if ( event->keyval == GDK_KEY_Escape ) {
-		self->m_cancel();
+	static gboolean focus_out( GtkEntry* entry, GdkEventFocus *event, NonModalEntry* self ){
+		if ( self->m_editing && gtk_widget_get_visible( GTK_WIDGET( entry ) ) ) {
+			self->m_apply();
+		}
 		self->m_editing = false;
-		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( entry ) ) ), NULL );
-		return TRUE;
+		return FALSE;
 	}
-	return FALSE;
-}
+
+	static gboolean changed( GtkEntry* entry, NonModalEntry* self ){
+		self->m_editing = true;
+		return FALSE;
+	}
+
+	static gboolean enter( GtkEntry* entry, GdkEventKey* event, NonModalEntry* self ){
+		if ( event->keyval == GDK_KEY_Return ) {
+			self->m_apply();
+			self->m_editing = false;
+			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( entry ) ) ), NULL );
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	static gboolean escape( GtkEntry* entry, GdkEventKey* event, NonModalEntry* self ){
+		if ( event->keyval == GDK_KEY_Escape ) {
+			self->m_cancel();
+			self->m_editing = false;
+			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( entry ) ) ), NULL );
+			return TRUE;
+		}
+		return FALSE;
+	}
 
 public:
-NonModalEntry( const Callback& apply, const Callback& cancel ) : m_editing( false ), m_apply( apply ), m_cancel( cancel ){
-}
-void connect( GtkEntry* entry ){
-	g_signal_connect( G_OBJECT( entry ), "focus_in_event", G_CALLBACK( focus_in ), this );
-	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( focus_out ), this );
-	g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( enter ), this );
-	g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( escape ), this );
-	g_signal_connect( G_OBJECT( entry ), "changed", G_CALLBACK( changed ), this );
-}
+	NonModalEntry( const Callback& apply, const Callback& cancel ) : m_editing( false ), m_apply( apply ), m_cancel( cancel ){
+	}
+	void connect( GtkEntry* entry ){
+		g_signal_connect( G_OBJECT( entry ), "focus_in_event", G_CALLBACK( focus_in ), this );
+		g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( focus_out ), this );
+		g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( enter ), this );
+		g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( escape ), this );
+		g_signal_connect( G_OBJECT( entry ), "changed", G_CALLBACK( changed ), this );
+	}
 };
 
 
 class NonModalSpinner
 {
-Callback m_apply;
-Callback m_cancel;
+	Callback m_apply;
+	Callback m_cancel;
 
-static gboolean changed( GtkSpinButton* spin, NonModalSpinner* self ){
-	self->m_apply();
-	return FALSE;
-}
-
-static gboolean enter( GtkSpinButton* spin, GdkEventKey* event, NonModalSpinner* self ){
-	if ( event->keyval == GDK_KEY_Return ) {
-		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( spin ) ) ), NULL );
-		return TRUE;
+	static gboolean changed( GtkSpinButton* spin, NonModalSpinner* self ){
+		self->m_apply();
+		return FALSE;
 	}
-	return FALSE;
-}
 
-static gboolean escape( GtkSpinButton* spin, GdkEventKey* event, NonModalSpinner* self ){
-	if ( event->keyval == GDK_KEY_Escape ) {
-		self->m_cancel();
-		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( spin ) ) ), NULL );
-		return TRUE;
+	static gboolean enter( GtkSpinButton* spin, GdkEventKey* event, NonModalSpinner* self ){
+		if ( event->keyval == GDK_KEY_Return ) {
+			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( spin ) ) ), NULL );
+			return TRUE;
+		}
+		return FALSE;
 	}
-	return FALSE;
-}
+
+	static gboolean escape( GtkSpinButton* spin, GdkEventKey* event, NonModalSpinner* self ){
+		if ( event->keyval == GDK_KEY_Escape ) {
+			self->m_cancel();
+			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( spin ) ) ), NULL );
+			return TRUE;
+		}
+		return FALSE;
+	}
 
 public:
-NonModalSpinner( const Callback& apply, const Callback& cancel ) : m_apply( apply ), m_cancel( cancel ){
-}
-void connect( GtkSpinButton* spin ){
-	guint handler = g_signal_connect( G_OBJECT( gtk_spin_button_get_adjustment( spin ) ), "value_changed", G_CALLBACK( changed ), this );
-	g_object_set_data( G_OBJECT( spin ), "handler", gint_to_pointer( handler ) );
-	g_signal_connect( G_OBJECT( spin ), "key_press_event", G_CALLBACK( enter ), this );
-	g_signal_connect( G_OBJECT( spin ), "key_press_event", G_CALLBACK( escape ), this );
-}
+	NonModalSpinner( const Callback& apply, const Callback& cancel ) : m_apply( apply ), m_cancel( cancel ){
+	}
+	void connect( GtkSpinButton* spin ){
+		guint handler = g_signal_connect( G_OBJECT( gtk_spin_button_get_adjustment( spin ) ), "value_changed", G_CALLBACK( changed ), this );
+		g_object_set_data( G_OBJECT( spin ), "handler", gint_to_pointer( handler ) );
+		g_signal_connect( G_OBJECT( spin ), "key_press_event", G_CALLBACK( enter ), this );
+		g_signal_connect( G_OBJECT( spin ), "key_press_event", G_CALLBACK( escape ), this );
+	}
 };
 
 
 class NonModalRadio
 {
-Callback m_changed;
+	Callback m_changed;
 
 public:
-NonModalRadio( const Callback& changed ) : m_changed( changed ){
-}
-void connect( GtkRadioButton* radio ){
-	GSList* group = gtk_radio_button_get_group( radio );
-	for (; group != 0; group = g_slist_next( group ) )
-	{
-		toggle_button_connect_callback( GTK_TOGGLE_BUTTON( group->data ), m_changed );
+	NonModalRadio( const Callback& changed ) : m_changed( changed ){
 	}
-}
+	void connect( GtkRadioButton* radio ){
+		GSList* group = gtk_radio_button_get_group( radio );
+		for (; group != 0; group = g_slist_next( group ) )
+		{
+			toggle_button_connect_callback( GTK_TOGGLE_BUTTON( group->data ), m_changed );
+		}
+	}
 };
 
 

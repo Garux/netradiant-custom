@@ -39,17 +39,17 @@ void Entity_ExportTokens( const Entity& entity, TokenWriter& writer ){
 
 	class WriteKeyValue : public Entity::Visitor
 	{
-	TokenWriter& m_writer;
-public:
-	WriteKeyValue( TokenWriter& writer )
-		: m_writer( writer ){
-	}
+		TokenWriter& m_writer;
+	public:
+		WriteKeyValue( TokenWriter& writer )
+			: m_writer( writer ){
+		}
 
-	void visit( const char* key, const char* value ){
-		m_writer.writeString( key );
-		m_writer.writeString( value );
-		m_writer.nextLine();
-	}
+		void visit( const char* key, const char* value ){
+			m_writer.writeString( key );
+			m_writer.writeString( value );
+			m_writer.nextLine();
+		}
 
 	} visitor( writer );
 
@@ -58,57 +58,57 @@ public:
 
 class WriteTokensWalker : public scene::Traversable::Walker
 {
-mutable Stack<bool> m_stack;
-TokenWriter& m_writer;
-bool m_ignorePatches;
+	mutable Stack<bool> m_stack;
+	TokenWriter& m_writer;
+	bool m_ignorePatches;
 public:
-WriteTokensWalker( TokenWriter& writer, bool ignorePatches )
-	: m_writer( writer ), m_ignorePatches( ignorePatches ){
-}
-bool pre( scene::Node& node ) const {
-	m_stack.push( false );
-
-	Entity* entity = Node_getEntity( node );
-	if ( entity != 0 ) {
-		if( entity->isContainer() && Node_getTraversable( node )->empty() && !string_equal( entity->getKeyValue( "classname" ), "worldspawn" )
-			&& string_empty( entity->getKeyValue( "origin" ) ) ){
-			globalErrorStream() << "discarding empty group entity: # = " << g_count_entities << "; classname = " << entity->getKeyValue( "classname" ) << "\n";
-			return false;
-		}
-		m_writer.writeToken( "//" );
-		m_writer.writeToken( "entity" );
-		m_writer.writeUnsigned( g_count_entities++ );
-		m_writer.nextLine();
-
-		m_writer.writeToken( "{" );
-		m_writer.nextLine();
-		m_stack.top() = true;
-
-		Entity_ExportTokens( *entity, m_writer );
+	WriteTokensWalker( TokenWriter& writer, bool ignorePatches )
+		: m_writer( writer ), m_ignorePatches( ignorePatches ){
 	}
-	else
-	{
-		MapExporter* exporter = Node_getMapExporter( node );
-		if ( exporter != 0
-			 && !( m_ignorePatches && Node_isPatch( node ) ) ) {
+	bool pre( scene::Node& node ) const {
+		m_stack.push( false );
+
+		Entity* entity = Node_getEntity( node );
+		if ( entity != 0 ) {
+			if( entity->isContainer() && Node_getTraversable( node )->empty() && !string_equal( entity->getKeyValue( "classname" ), "worldspawn" )
+			 && string_empty( entity->getKeyValue( "origin" ) ) ){
+				globalErrorStream() << "discarding empty group entity: # = " << g_count_entities << "; classname = " << entity->getKeyValue( "classname" ) << "\n";
+				return false;
+			}
 			m_writer.writeToken( "//" );
-			m_writer.writeToken( "brush" );
-			m_writer.writeUnsigned( g_count_brushes++ );
+			m_writer.writeToken( "entity" );
+			m_writer.writeUnsigned( g_count_entities++ );
 			m_writer.nextLine();
 
-			exporter->exportTokens( m_writer );
-		}
-	}
+			m_writer.writeToken( "{" );
+			m_writer.nextLine();
+			m_stack.top() = true;
 
-	return true;
-}
-void post( scene::Node& node ) const {
-	if ( m_stack.top() ) {
-		m_writer.writeToken( "}" );
-		m_writer.nextLine();
+			Entity_ExportTokens( *entity, m_writer );
+		}
+		else
+		{
+			MapExporter* exporter = Node_getMapExporter( node );
+			if ( exporter != 0
+			  && !( m_ignorePatches && Node_isPatch( node ) ) ) {
+				m_writer.writeToken( "//" );
+				m_writer.writeToken( "brush" );
+				m_writer.writeUnsigned( g_count_brushes++ );
+				m_writer.nextLine();
+
+				exporter->exportTokens( m_writer );
+			}
+		}
+
+		return true;
 	}
-	m_stack.pop();
-}
+	void post( scene::Node& node ) const {
+		if ( m_stack.top() ) {
+			m_writer.writeToken( "}" );
+			m_writer.nextLine();
+		}
+		m_stack.pop();
+	}
 };
 
 void Map_Write( scene::Node& root, GraphTraversalFunc traverse, TokenWriter& writer, bool ignorePatches ){

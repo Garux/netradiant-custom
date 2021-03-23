@@ -50,10 +50,10 @@ int g_iActiveTarget = -1;
 int g_iPreviewRunning = 0;              // 0: no preview 1: start preview 2: preview in progress
 
 static const char *PLUGIN_ABOUT = "Camera v1.0 for NetRadiant\n"
-								  "by Arnout van Meer (rr2do2@splashdamage.com)\n\n"
-								  "This product contains software technology\n"
-								  "from id Software, Inc. ('id Technology').\n"
-								  "id Technology (c) 2001, 2002 id Software, Inc.";
+                                  "by Arnout van Meer (rr2do2@splashdamage.com)\n\n"
+                                  "This product contains software technology\n"
+                                  "from id Software, Inc. ('id Technology').\n"
+                                  "id Technology (c) 2001, 2002 id Software, Inc.";
 
 
 #include "iplugin.h"
@@ -131,21 +131,21 @@ unsigned int ToolbarButtonCount(){
 class CameraInspectorButton : public IToolbarButton
 {
 public:
-virtual const char* getImage() const {
-	return "camera_insp.png";
-}
-virtual const char* getText() const {
-	return "Inspector";
-}
-virtual const char* getTooltip() const {
-	return "Camera Inspector";
-}
-virtual void activate() const {
-	DoCameraInspector();
-}
-virtual EType getType() const {
-	return eButton;
-}
+	virtual const char* getImage() const {
+		return "camera_insp.png";
+	}
+	virtual const char* getText() const {
+		return "Inspector";
+	}
+	virtual const char* getTooltip() const {
+		return "Camera Inspector";
+	}
+	virtual void activate() const {
+		DoCameraInspector();
+	}
+	virtual EType getType() const {
+		return eButton;
+	}
 };
 
 CameraInspectorButton g_camerainspectorbutton;
@@ -169,11 +169,11 @@ class CameraSynapseClient : public CSynapseClient
 {
 public:
 // CSynapseClient API
-bool RequestAPI( APIDescriptor_t *pAPI );
-const char* GetInfo();
+	bool RequestAPI( APIDescriptor_t *pAPI );
+	const char* GetInfo();
 
-CameraSynapseClient() { }
-virtual ~CameraSynapseClient() { }
+	CameraSynapseClient() { }
+	virtual ~CameraSynapseClient() { }
 };
 
 CSynapseServer* g_pSynapseServer = NULL;

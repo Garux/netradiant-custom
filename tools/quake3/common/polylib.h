@@ -48,9 +48,9 @@ winding_t   *AllocWinding( int points );
 float   WindingArea( const winding_t *w );
 Vector3 WindingCenter( const winding_t *w );
 void    ClipWindingEpsilon( winding_t *in, const Plane3f& plane,
-							float epsilon, winding_t **front, winding_t **back );
+                            float epsilon, winding_t **front, winding_t **back );
 void    ClipWindingEpsilonStrict( winding_t *in, const Plane3f& plane,
-								  float epsilon, winding_t **front, winding_t **back );
+                                  float epsilon, winding_t **front, winding_t **back );
 winding_t   *ChopWinding( winding_t *in, const Plane3f& plane );
 winding_t   *CopyWinding( const winding_t *w );
 winding_t   *ReverseWinding( const winding_t *w );

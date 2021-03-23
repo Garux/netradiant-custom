@@ -309,7 +309,7 @@ static void motion( GtkWidget *widget, GdkEventMotion *event, gpointer data ){
 
 	g_GLTable.m_pfn_qglEnable( GL_SCISSOR_TEST );
 	g_GLTable.m_pfn_qglScissor( rcCoord.left, rcCoord.bottom, rcCoord.right - rcCoord.left,
-								rcCoord.top - rcCoord.bottom );
+	                            rcCoord.top - rcCoord.bottom );
 	g_GLTable.m_pfn_qglClear( GL_COLOR_BUFFER_BIT );
 
 	if ( PtInRect( &rcGrid,pt ) ) {
@@ -431,7 +431,7 @@ void CreateViewWindow(){
 	g_signal_connect( G_OBJECT( g_pPreviewWidget ), "expose_event", G_CALLBACK( expose ), NULL );
 	g_signal_connect( G_OBJECT( g_pPreviewWidget ), "motion_notify_event", G_CALLBACK( motion ), NULL );
 	g_signal_connect( G_OBJECT( g_pPreviewWidget ), "button_press_event",
-						G_CALLBACK( button_press ), NULL );
+	                  G_CALLBACK( button_press ), NULL );
 
 	gtk_widget_show( g_pPreviewWidget );
 	gtk_container_add( GTK_CONTAINER( frame ), g_pPreviewWidget );
@@ -559,9 +559,9 @@ void DrawPreview( Rect rc ){
 				uv[2][1].p[k] = ( 4 * xyz[i + 2][j + 1].p[k] - xyz[i + 2][j  ].p[k] - xyz[i + 2][j + 2].p[k] ) / 2;
 				uv[1][2].p[k] = ( 4 * xyz[i + 1][j + 2].p[k] - xyz[i  ][j + 2].p[k] - xyz[i + 2][j + 2].p[k] ) / 2;
 				uv[1][1].p[k] = ( 16 * xyz[i + 1][j + 1].p[k] -
-								  xyz[i  ][j  ].p[k] - 2 * xyz[i + 1][j  ].p[k] -  xyz[i + 2][j  ].p[k] -
-								  2 * xyz[i  ][j + 1].p[k]                        - 2 * xyz[i + 2][j + 1].p[k] -
-								  xyz[i  ][j + 2].p[k] - 2 * xyz[i + 1][j + 2].p[k] -  xyz[i + 2][j + 2].p[k]   ) / 4;
+				                  xyz[i  ][j  ].p[k] - 2 * xyz[i + 1][j  ].p[k] -  xyz[i + 2][j  ].p[k] -
+				                  2 * xyz[i  ][j + 1].p[k]                        - 2 * xyz[i + 2][j + 1].p[k] -
+				                  xyz[i  ][j + 2].p[k] - 2 * xyz[i + 1][j + 2].p[k] -  xyz[i + 2][j + 2].p[k]   ) / 4;
 
 				for ( ii = 0; ii <= SUBDIVS; ii++ )
 				{
@@ -1149,10 +1149,10 @@ void Scale( Rect rc,XYZ xyz,Point *pt ){
 #ifdef ISOMETRIC
 
 	pt[0].x = X0 + (int)( SF * ( ( xyz.p[0] - XLo ) * COSXA +
-								 ( YHi - xyz.p[1] ) * COSYA   ) );
+	                             ( YHi - xyz.p[1] ) * COSYA   ) );
 	pt[0].y = Y0 + (int)( SF * (  ZHi - xyz.p[2] +
-								  ( YHi - xyz.p[1] ) * SINYA +
-								  ( XHi - xyz.p[0] ) * SINXA   ) );
+	                              ( YHi - xyz.p[1] ) * SINYA +
+	                              ( XHi - xyz.p[0] ) * SINXA   ) );
 #else
 	pt[0].x = X0 + (int)( SF * ( xyz.pp[0] - Hlo ) );
 	pt[0].y = Y0 - (int)( SF * ( Vhi - xyz.pp[1] ) );

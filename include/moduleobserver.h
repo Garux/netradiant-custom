@@ -25,8 +25,8 @@
 class ModuleObserver
 {
 public:
-virtual void unrealise() = 0;
-virtual void realise() = 0;
+	virtual void unrealise() = 0;
+	virtual void realise() = 0;
 };
 
 #endif

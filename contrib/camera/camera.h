@@ -89,66 +89,66 @@ extern "C" qboolean loadCamera( int camNum, const char *name );
 
 class CCamera {
 public:
-CCamera( int i ) {
-	cam = &camera[i];
-	camnum = i;
-	Init();
-}
-~CCamera();
-
-void Init() {
-	next = prev = NULL;
-	fileName[0] = '\0';
-	hasbeensaved = 0;
-}
-
-idCameraDef *GetCam() {
-	return( cam );
-}
-int GetCamNum() {
-	return( camnum );
-}
-
-char *GetFileName() {
-	return( fileName );
-}
-void SetFileName( const char *name, bool save ) {
-	strcpy( fileName, name );
-	if ( save ) {
-		hasbeensaved = 1;
+	CCamera( int i ) {
+		cam = &camera[i];
+		camnum = i;
+		Init();
 	}
-}
+	~CCamera();
 
-CCamera *GetNext() {
-	return( next );
-}
-
-CCamera *GetPrev() {
-	return( prev );
-}
-
-void SetNext( CCamera *camera ) {
-	next = camera;
-}
-void SetPrev( CCamera *camera ) {
-	prev = camera;
-}
-
-int HasBeenSaved() {
-	return( hasbeensaved );
-}
-void HasBeenModified() {
-	if ( hasbeensaved ) {
-		hasbeensaved = 2;
+	void Init() {
+		next = prev = NULL;
+		fileName[0] = '\0';
+		hasbeensaved = 0;
 	}
-}
+
+	idCameraDef *GetCam() {
+		return( cam );
+	}
+	int GetCamNum() {
+		return( camnum );
+	}
+
+	char *GetFileName() {
+		return( fileName );
+	}
+	void SetFileName( const char *name, bool save ) {
+		strcpy( fileName, name );
+		if ( save ) {
+			hasbeensaved = 1;
+		}
+	}
+
+	CCamera *GetNext() {
+		return( next );
+	}
+
+	CCamera *GetPrev() {
+		return( prev );
+	}
+
+	void SetNext( CCamera *camera ) {
+		next = camera;
+	}
+	void SetPrev( CCamera *camera ) {
+		prev = camera;
+	}
+
+	int HasBeenSaved() {
+		return( hasbeensaved );
+	}
+	void HasBeenModified() {
+		if ( hasbeensaved ) {
+			hasbeensaved = 2;
+		}
+	}
 
 protected:
-idCameraDef *cam;
-int camnum;
-CCamera *next, *prev;
-char fileName[PATH_MAX];
-int hasbeensaved;       // 0:never saved 1:saved 2:saved, but modified
+	idCameraDef *cam;
+	int camnum;
+	CCamera *next, *prev;
+	char fileName[PATH_MAX];
+	int hasbeensaved;       // 0:never saved 1:saved 2:saved, but modified
 };
 
 CCamera *AllocCam();

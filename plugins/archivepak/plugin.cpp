@@ -30,17 +30,17 @@
 
 class ArchivePakAPI
 {
-_QERArchiveTable m_archivepak;
+	_QERArchiveTable m_archivepak;
 public:
-typedef _QERArchiveTable Type;
-STRING_CONSTANT( Name, "pak" );
+	typedef _QERArchiveTable Type;
+	STRING_CONSTANT( Name, "pak" );
 
-ArchivePakAPI(){
-	m_archivepak.m_pfnOpenArchive = &OpenArchive;
-}
-_QERArchiveTable* getTable(){
-	return &m_archivepak;
-}
+	ArchivePakAPI(){
+		m_archivepak.m_pfnOpenArchive = &OpenArchive;
+	}
+	_QERArchiveTable* getTable(){
+		return &m_archivepak;
+	}
 };
 
 typedef SingletonModule<ArchivePakAPI> ArchivePakModule;

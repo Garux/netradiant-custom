@@ -162,9 +162,9 @@ template<std::size_t BYTES>
 class TargaDecodePixel
 {
 public:
-void operator()( PointerInputStream& istream, RGBAPixel& pixel ) const {
-	istream_read_pixel<BYTES>( istream, pixel );
-}
+	void operator()( PointerInputStream& istream, RGBAPixel& pixel ) const {
+		istream_read_pixel<BYTES>( istream, pixel );
+	}
 };
 
 template<typename Flip, std::size_t BYTES>
@@ -193,33 +193,33 @@ inline TargaPacketSize targa_packet_size( const TargaPacket& packet ){
 template<typename PixelReadFunctor>
 class TargaDecodePixelRLE
 {
-TargaPacketSize m_packetSize;
-RGBAPixel m_pixel;
-TargaPacket m_packet;
-const PixelReadFunctor& m_pixelRead;
+	TargaPacketSize m_packetSize;
+	RGBAPixel m_pixel;
+	TargaPacket m_packet;
+	const PixelReadFunctor& m_pixelRead;
 public:
-TargaDecodePixelRLE( const PixelReadFunctor& pixelRead ) : m_packetSize( 0 ), m_pixelRead( pixelRead ){
-}
-void operator()( PointerInputStream& istream, RGBAPixel& pixel ){
-	if ( m_packetSize == 0 ) {
-		targa_packet_read_istream( m_packet, istream );
-		m_packetSize = targa_packet_size( m_packet );
+	TargaDecodePixelRLE( const PixelReadFunctor& pixelRead ) : m_packetSize( 0 ), m_pixelRead( pixelRead ){
+	}
+	void operator()( PointerInputStream& istream, RGBAPixel& pixel ){
+		if ( m_packetSize == 0 ) {
+			targa_packet_read_istream( m_packet, istream );
+			m_packetSize = targa_packet_size( m_packet );
+
+			if ( targa_packet_is_rle( m_packet ) ) {
+				m_pixelRead( istream, m_pixel );
+			}
+		}
 
 		if ( targa_packet_is_rle( m_packet ) ) {
-			m_pixelRead( istream, m_pixel );
+			pixel = m_pixel;
 		}
-	}
+		else
+		{
+			m_pixelRead( istream, pixel );
+		}
 
-	if ( targa_packet_is_rle( m_packet ) ) {
-		pixel = m_pixel;
+		--m_packetSize;
 	}
-	else
-	{
-		m_pixelRead( istream, pixel );
-	}
-
-	--m_packetSize;
-}
 };
 
 template<typename Flip, std::size_t BYTES>
@@ -368,11 +368,11 @@ Image* LoadTGABuff( const byte* buffer ){
 	targa_header_read_istream( targa_header, istream );
 
 	if ( targa_header.image_type != 1 &&
-		targa_header.image_type != 2 &&
-		targa_header.image_type != 3 &&
-		targa_header.image_type != 9 &&
-		targa_header.image_type != 10 &&
-		targa_header.image_type != 11 ) {
+	     targa_header.image_type != 2 &&
+	     targa_header.image_type != 3 &&
+	     targa_header.image_type != 9 &&
+	     targa_header.image_type != 10 &&
+	     targa_header.image_type != 11 ) {
 		globalErrorStream() << "LoadTGA: TGA type " << targa_header.image_type << " not supported\n";
 		globalErrorStream() << "LoadTGA: Only uncompressed types: 1 (paletted), 2 (RGB), 3 (gray) and compressed: 9 (paletted), 10 (RGB), 11 (gray) of TGA images supported\n";
 		return 0;
@@ -390,26 +390,26 @@ Image* LoadTGABuff( const byte* buffer ){
 	}
 
 	if ( ( ( targa_header.image_type == 2 || targa_header.image_type == 10 ) && targa_header.pixel_size != 32 && targa_header.pixel_size != 24 ) ||
-		( ( targa_header.image_type == 3 || targa_header.image_type == 11 ) && targa_header.pixel_size != 8 ) ||
-		( ( targa_header.image_type == 1 || targa_header.image_type == 9 ) && targa_header.pixel_size != 8 ) ) {
+	     ( ( targa_header.image_type == 3 || targa_header.image_type == 11 ) && targa_header.pixel_size != 8 ) ||
+	     ( ( targa_header.image_type == 1 || targa_header.image_type == 9 ) && targa_header.pixel_size != 8 ) ) {
 		globalErrorStream() << "LoadTGA: Only 32, 24 or 8 bit images supported\n";
 		return 0;
 	}
 
 	if ( !bitfield_enabled( targa_header.attributes, TGA_FLIP_HORIZONTAL )
-		 && !bitfield_enabled( targa_header.attributes, TGA_FLIP_VERTICAL ) ) {
+	     && !bitfield_enabled( targa_header.attributes, TGA_FLIP_VERTICAL ) ) {
 		return Targa_decodeImageData( targa_header, istream, Flip00() );
 	}
 	if ( !bitfield_enabled( targa_header.attributes, TGA_FLIP_HORIZONTAL )
-		 && bitfield_enabled( targa_header.attributes, TGA_FLIP_VERTICAL ) ) {
+	     && bitfield_enabled( targa_header.attributes, TGA_FLIP_VERTICAL ) ) {
 		return Targa_decodeImageData( targa_header, istream, Flip01() );
 	}
 	if ( bitfield_enabled( targa_header.attributes, TGA_FLIP_HORIZONTAL )
-		 && !bitfield_enabled( targa_header.attributes, TGA_FLIP_VERTICAL ) ) {
+	     && !bitfield_enabled( targa_header.attributes, TGA_FLIP_VERTICAL ) ) {
 		return Targa_decodeImageData( targa_header, istream, Flip10() );
 	}
 	if ( bitfield_enabled( targa_header.attributes, TGA_FLIP_HORIZONTAL )
-		 && bitfield_enabled( targa_header.attributes, TGA_FLIP_VERTICAL ) ) {
+	     && bitfield_enabled( targa_header.attributes, TGA_FLIP_VERTICAL ) ) {
 		return Targa_decodeImageData( targa_header, istream, Flip11() );
 	}
 

@@ -277,50 +277,50 @@ inline const char* string_in_string_nocase( const char* haystack, const char* ne
 /// \brief A re-entrant string tokeniser similar to strchr.
 class StringTokeniser
 {
-bool istoken( char c ) const {
-	if ( strchr( m_delimiters, c ) != 0 ) {
-		return false;
-	}
-	return true;
-}
-const char* advance(){
-	const char* token = m_pos;
-	bool intoken = true;
-	while ( !string_empty( m_pos ) )
-	{
-		if ( !istoken( *m_pos ) ) {
-			*m_pos = '\0';
-			intoken = false;
+	bool istoken( char c ) const {
+		if ( strchr( m_delimiters, c ) != 0 ) {
+			return false;
 		}
-		else if ( !intoken ) {
-			return token;
-		}
-		++m_pos;
+		return true;
 	}
-	return token;
-}
-std::size_t m_length;
-char* m_string;
-char* m_pos;
-const char* m_delimiters;
+	const char* advance(){
+		const char* token = m_pos;
+		bool intoken = true;
+		while ( !string_empty( m_pos ) )
+		{
+			if ( !istoken( *m_pos ) ) {
+				*m_pos = '\0';
+				intoken = false;
+			}
+			else if ( !intoken ) {
+				return token;
+			}
+			++m_pos;
+		}
+		return token;
+	}
+	std::size_t m_length;
+	char* m_string;
+	char* m_pos;
+	const char* m_delimiters;
 public:
-StringTokeniser( const char* string, const char* delimiters = " \n\r\t\v" ) :
-	m_length( string_length( string ) ),
-	m_string( string_copy( string_new( m_length ), string ) ),
-	m_pos( m_string ),
-	m_delimiters( delimiters ){
-	while ( !string_empty( m_pos ) && !istoken( *m_pos ) )
-	{
-		++m_pos;
+	StringTokeniser( const char* string, const char* delimiters = " \n\r\t\v" ) :
+		m_length( string_length( string ) ),
+		m_string( string_copy( string_new( m_length ), string ) ),
+		m_pos( m_string ),
+		m_delimiters( delimiters ){
+		while ( !string_empty( m_pos ) && !istoken( *m_pos ) )
+		{
+			++m_pos;
+		}
 	}
-}
-~StringTokeniser(){
-	string_release( m_string, m_length );
-}
+	~StringTokeniser(){
+		string_release( m_string, m_length );
+	}
 /// \brief Returns the next token or "" if there are no more tokens available.
-const char* getToken(){
-	return advance();
-}
+	const char* getToken(){
+		return advance();
+	}
 };
 
 /// \brief A non-mutable c-style string.
@@ -335,42 +335,42 @@ class String : public Buffer
 {
 public:
 
-String()
-	: Buffer(){
-}
-String( const char* string )
-	: Buffer( string ){
-}
-String( StringRange range )
-	: Buffer( range ){
-}
-String( const String& other )
-	: Buffer( other ){
-}
+	String()
+		: Buffer(){
+	}
+	String( const char* string )
+		: Buffer( string ){
+	}
+	String( StringRange range )
+		: Buffer( range ){
+	}
+	String( const String& other )
+		: Buffer( other ){
+	}
 
-String& operator=( const String& other ){
-	String temp( other );
-	temp.swap( *this );
-	return *this;
-}
-String& operator=( const char* string ){
-	String temp( string );
-	temp.swap( *this );
-	return *this;
-}
-String& operator=( StringRange range ){
-	String temp( range );
-	temp.swap( *this );
-	return *this;
-}
+	String& operator=( const String& other ){
+		String temp( other );
+		temp.swap( *this );
+		return *this;
+	}
+	String& operator=( const char* string ){
+		String temp( string );
+		temp.swap( *this );
+		return *this;
+	}
+	String& operator=( StringRange range ){
+		String temp( range );
+		temp.swap( *this );
+		return *this;
+	}
 
-void swap( String& other ){
-	Buffer::swap( other );
-}
+	void swap( String& other ){
+		Buffer::swap( other );
+	}
 
-bool empty() const {
-	return string_empty( Buffer::c_str() );
-}
+	bool empty() const {
+		return string_empty( Buffer::c_str() );
+	}
 };
 
 template<typename Buffer>
@@ -418,44 +418,44 @@ inline void swap( String<Buffer>& self, String<Buffer>& other ){
 template<typename Allocator>
 class CopiedBuffer : private Allocator
 {
-char* m_string;
+	char* m_string;
 
-char* copy_range( StringRange range ){
-	return string_clone_range( range, static_cast<Allocator&>( *this ) );
-}
-char* copy( const char* other ){
-	return string_clone( other, static_cast<Allocator&>( *this ) );
-}
-void destroy( char* string ){
-	string_release( string, string_length( string ), static_cast<Allocator&>( *this ) );
-}
+	char* copy_range( StringRange range ){
+		return string_clone_range( range, static_cast<Allocator&>( *this ) );
+	}
+	char* copy( const char* other ){
+		return string_clone( other, static_cast<Allocator&>( *this ) );
+	}
+	void destroy( char* string ){
+		string_release( string, string_length( string ), static_cast<Allocator&>( *this ) );
+	}
 
 protected:
-~CopiedBuffer(){
-	destroy( m_string );
-}
+	~CopiedBuffer(){
+		destroy( m_string );
+	}
 public:
-CopiedBuffer()
-	: m_string( copy( "" ) ){
-}
-explicit CopiedBuffer( const Allocator& allocator )
-	: Allocator( allocator ), m_string( copy( "" ) ){
-}
-CopiedBuffer( const CopiedBuffer& other )
-	: Allocator( other ), m_string( copy( other.m_string ) ){
-}
-CopiedBuffer( const char* string, const Allocator& allocator = Allocator() )
-	: Allocator( allocator ), m_string( copy( string ) ){
-}
-CopiedBuffer( StringRange range, const Allocator& allocator = Allocator() )
-	: Allocator( allocator ), m_string( copy_range( range ) ){
-}
-const char* c_str() const {
-	return m_string;
-}
-void swap( CopiedBuffer& other ){
-	string_swap( m_string, other.m_string );
-}
+	CopiedBuffer()
+		: m_string( copy( "" ) ){
+	}
+	explicit CopiedBuffer( const Allocator& allocator )
+		: Allocator( allocator ), m_string( copy( "" ) ){
+	}
+	CopiedBuffer( const CopiedBuffer& other )
+		: Allocator( other ), m_string( copy( other.m_string ) ){
+	}
+	CopiedBuffer( const char* string, const Allocator& allocator = Allocator() )
+		: Allocator( allocator ), m_string( copy( string ) ){
+	}
+	CopiedBuffer( StringRange range, const Allocator& allocator = Allocator() )
+		: Allocator( allocator ), m_string( copy_range( range ) ){
+	}
+	const char* c_str() const {
+		return m_string;
+	}
+	void swap( CopiedBuffer& other ){
+		string_swap( m_string, other.m_string );
+	}
 };
 
 /// \brief A non-mutable string which uses copy-by-value for assignment.
@@ -466,65 +466,65 @@ typedef String< CopiedBuffer< DefaultAllocator<char> > > CopiedString;
 template<typename Allocator>
 class SmartBuffer : private Allocator
 {
-char* m_buffer;
+	char* m_buffer;
 
-char* copy_range( StringRange range ){
-	char* buffer = Allocator::allocate( sizeof( std::size_t ) + ( range.last - range.first ) + 1 );
-	strncpy( buffer + sizeof( std::size_t ), range.first, range.last - range.first );
-	buffer[sizeof( std::size_t ) + ( range.last - range.first )] = '\0';
-	*reinterpret_cast<std::size_t*>( buffer ) = 0;
-	return buffer;
-}
-char* copy( const char* string ){
-	char* buffer = Allocator::allocate( sizeof( std::size_t ) + string_length( string ) + 1 );
-	strcpy( buffer + sizeof( std::size_t ), string );
-	*reinterpret_cast<std::size_t*>( buffer ) = 0;
-	return buffer;
-}
-void destroy( char* buffer ){
-	Allocator::deallocate( buffer, sizeof( std::size_t ) + string_length( c_str() ) + 1 );
-}
-
-void incref( char* buffer ){
-	++( *reinterpret_cast<std::size_t*>( buffer ) );
-}
-void decref( char* buffer ){
-	if ( --( *reinterpret_cast<std::size_t*>( buffer ) ) == 0 ) {
-		destroy( buffer );
+	char* copy_range( StringRange range ){
+		char* buffer = Allocator::allocate( sizeof( std::size_t ) + ( range.last - range.first ) + 1 );
+		strncpy( buffer + sizeof( std::size_t ), range.first, range.last - range.first );
+		buffer[sizeof( std::size_t ) + ( range.last - range.first )] = '\0';
+		*reinterpret_cast<std::size_t*>( buffer ) = 0;
+		return buffer;
 	}
-}
+	char* copy( const char* string ){
+		char* buffer = Allocator::allocate( sizeof( std::size_t ) + string_length( string ) + 1 );
+		strcpy( buffer + sizeof( std::size_t ), string );
+		*reinterpret_cast<std::size_t*>( buffer ) = 0;
+		return buffer;
+	}
+	void destroy( char* buffer ){
+		Allocator::deallocate( buffer, sizeof( std::size_t ) + string_length( c_str() ) + 1 );
+	}
+
+	void incref( char* buffer ){
+		++( *reinterpret_cast<std::size_t*>( buffer ) );
+	}
+	void decref( char* buffer ){
+		if ( --( *reinterpret_cast<std::size_t*>( buffer ) ) == 0 ) {
+			destroy( buffer );
+		}
+	}
 
 protected:
-~SmartBuffer(){
-	decref( m_buffer );
-}
+	~SmartBuffer(){
+		decref( m_buffer );
+	}
 public:
-SmartBuffer()
-	: m_buffer( copy( "" ) ){
-	incref( m_buffer );
-}
-explicit SmartBuffer( const Allocator& allocator )
-	: Allocator( allocator ), m_buffer( copy( "" ) ){
-	incref( m_buffer );
-}
-SmartBuffer( const SmartBuffer& other )
-	: Allocator( other ), m_buffer( other.m_buffer ){
-	incref( m_buffer );
-}
-SmartBuffer( const char* string, const Allocator& allocator = Allocator() )
-	: Allocator( allocator ), m_buffer( copy( string ) ){
-	incref( m_buffer );
-}
-SmartBuffer( StringRange range, const Allocator& allocator = Allocator() )
-	: Allocator( allocator ), m_buffer( copy_range( range ) ){
-	incref( m_buffer );
-}
-const char* c_str() const {
-	return m_buffer + sizeof( std::size_t );
-}
-void swap( SmartBuffer& other ){
-	string_swap( m_buffer, other.m_buffer );
-}
+	SmartBuffer()
+		: m_buffer( copy( "" ) ){
+		incref( m_buffer );
+	}
+	explicit SmartBuffer( const Allocator& allocator )
+		: Allocator( allocator ), m_buffer( copy( "" ) ){
+		incref( m_buffer );
+	}
+	SmartBuffer( const SmartBuffer& other )
+		: Allocator( other ), m_buffer( other.m_buffer ){
+		incref( m_buffer );
+	}
+	SmartBuffer( const char* string, const Allocator& allocator = Allocator() )
+		: Allocator( allocator ), m_buffer( copy( string ) ){
+		incref( m_buffer );
+	}
+	SmartBuffer( StringRange range, const Allocator& allocator = Allocator() )
+		: Allocator( allocator ), m_buffer( copy_range( range ) ){
+		incref( m_buffer );
+	}
+	const char* c_str() const {
+		return m_buffer + sizeof( std::size_t );
+	}
+	void swap( SmartBuffer& other ){
+		string_swap( m_buffer, other.m_buffer );
+	}
 };
 
 /// \brief A non-mutable string which uses copy-by-reference for assignment of SmartString.
@@ -533,9 +533,9 @@ typedef String< SmartBuffer< DefaultAllocator<char> > > SmartString;
 class StringEqualNoCase
 {
 public:
-bool operator()( const CopiedString& key, const CopiedString& other ) const {
-	return string_equal_nocase( key.c_str(), other.c_str() );
-}
+	bool operator()( const CopiedString& key, const CopiedString& other ) const {
+		return string_equal_nocase( key.c_str(), other.c_str() );
+	}
 };
 
 struct StringLessNoCase

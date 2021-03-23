@@ -102,8 +102,8 @@ picoModel_t *FindModel( const char *name, int frame ){
 	for ( i = 0; i < MAX_MODELS; i++ )
 	{
 		if ( picoModels[ i ] != NULL &&
-			 strEqual( PicoGetModelName( picoModels[ i ] ), name ) &&
-			 PicoGetModelFrameNum( picoModels[ i ] ) == frame ) {
+		     strEqual( PicoGetModelName( picoModels[ i ] ), name ) &&
+		     PicoGetModelFrameNum( picoModels[ i ] ) == frame ) {
 			return picoModels[ i ];
 		}
 	}
@@ -475,26 +475,26 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 
 		/* ydnar: giant hack land: generate clipping brushes for model triangles */
 		if ( ( si->clipModel && !( spf ) ) ||	//default CLIPMODEL
-			( ( spawnFlags & 8090 ) == 2 ) ||	//default CLIPMODEL
-			( spf == 8 ) ||		//EXTRUDE_FACE_NORMALS
-			( spf == 16 )   ||	//EXTRUDE_TERRAIN
-			( spf == 128 )  ||	//EXTRUDE_VERTEX_NORMALS
-			( spf == 256 )  ||	//PYRAMIDAL_CLIP
-			( spf == 512 )  ||	//EXTRUDE_DOWNWARDS
-			( spf == 1024 ) ||	//EXTRUDE_UPWARDS
-			( spf == 4096 ) ||	//default CLIPMODEL + AXIAL_BACKPLANE
-			( spf == 264 )  ||	//EXTRUDE_FACE_NORMALS+PYRAMIDAL_CLIP (extrude 45)
-			( spf == 2064 ) ||	//EXTRUDE_TERRAIN+MAX_EXTRUDE
-			( spf == 4112 ) ||	//EXTRUDE_TERRAIN+AXIAL_BACKPLANE
-			( spf == 384 )  ||	//EXTRUDE_VERTEX_NORMALS + PYRAMIDAL_CLIP - vertex normals + don't check for sides, sticking outwards
-			( spf == 4352 ) ||	//PYRAMIDAL_CLIP+AXIAL_BACKPLANE
-			( spf == 1536 ) ||	//EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS
-			( spf == 2560 ) ||	//EXTRUDE_DOWNWARDS+MAX_EXTRUDE
-			( spf == 4608 ) ||	//EXTRUDE_DOWNWARDS+AXIAL_BACKPLANE
-			( spf == 3584 ) ||	//EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS+MAX_EXTRUDE
-			( spf == 5632 ) ||	//EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS+AXIAL_BACKPLANE
-			( spf == 3072 ) ||	//EXTRUDE_UPWARDS+MAX_EXTRUDE
-			( spf == 5120 ) ){	//EXTRUDE_UPWARDS+AXIAL_BACKPLANE
+		     ( ( spawnFlags & 8090 ) == 2 ) ||	//default CLIPMODEL
+		     ( spf == 8 ) ||		//EXTRUDE_FACE_NORMALS
+		     ( spf == 16 )   ||	//EXTRUDE_TERRAIN
+		     ( spf == 128 )  ||	//EXTRUDE_VERTEX_NORMALS
+		     ( spf == 256 )  ||	//PYRAMIDAL_CLIP
+		     ( spf == 512 )  ||	//EXTRUDE_DOWNWARDS
+		     ( spf == 1024 ) ||	//EXTRUDE_UPWARDS
+		     ( spf == 4096 ) ||	//default CLIPMODEL + AXIAL_BACKPLANE
+		     ( spf == 264 )  ||	//EXTRUDE_FACE_NORMALS+PYRAMIDAL_CLIP (extrude 45)
+		     ( spf == 2064 ) ||	//EXTRUDE_TERRAIN+MAX_EXTRUDE
+		     ( spf == 4112 ) ||	//EXTRUDE_TERRAIN+AXIAL_BACKPLANE
+		     ( spf == 384 )  ||	//EXTRUDE_VERTEX_NORMALS + PYRAMIDAL_CLIP - vertex normals + don't check for sides, sticking outwards
+		     ( spf == 4352 ) ||	//PYRAMIDAL_CLIP+AXIAL_BACKPLANE
+		     ( spf == 1536 ) ||	//EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS
+		     ( spf == 2560 ) ||	//EXTRUDE_DOWNWARDS+MAX_EXTRUDE
+		     ( spf == 4608 ) ||	//EXTRUDE_DOWNWARDS+AXIAL_BACKPLANE
+		     ( spf == 3584 ) ||	//EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS+MAX_EXTRUDE
+		     ( spf == 5632 ) ||	//EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS+AXIAL_BACKPLANE
+		     ( spf == 3072 ) ||	//EXTRUDE_UPWARDS+MAX_EXTRUDE
+		     ( spf == 5120 ) ){	//EXTRUDE_UPWARDS+AXIAL_BACKPLANE
 			Vector3 points[ 4 ], cnt, bestNormal, nrm, Vnorm[3], Enorm[3];
 			Plane3f plane, reverse, p[3];
 			double normalEpsilon_save;
@@ -654,7 +654,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 						const double lengthsSquared = vector3_length_squared( d1 ) * vector3_length_squared( d2 );
 						if ( lengthsSquared == 0 || fabs( vector3_length_squared( normaL ) / lengthsSquared ) < 1e-8 ) {
 							Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped: points on line\n",
-							points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
+							             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
 							continue;
 						}
 					}
@@ -712,7 +712,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 								currdist = reverse.dist() - vector3_dot( reverse.normal(), points[ (j+2)%3 ] );
 								currangle = vector3_dot( reverse.normal(), plane.normal() );
 								if ( ( ( currdist > 0.1 ) && ( currdist < bestdist ) && ( currangle < 0 ) ) ||
-									( ( currangle >= 0 ) && ( currangle <= bestangle ) ) ){
+								     ( ( currangle >= 0 ) && ( currangle <= bestangle ) ) ){
 									bestangle = currangle;
 									if ( currangle < 0 ) bestdist = currdist;
 									p[j] = reverse;
@@ -758,19 +758,19 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 					}
 
 
-					else if ( ( spf == 16 ) ||	//EXTRUDE_TERRAIN
-						( spf == 512 ) ||	//EXTRUDE_DOWNWARDS
-						( spf == 1024 ) ||	//EXTRUDE_UPWARDS
-						( spf == 4096 ) ||	//default CLIPMODEL + AXIAL_BACKPLANE
-						( spf == 2064 ) ||	//EXTRUDE_TERRAIN+MAX_EXTRUDE
-						( spf == 4112 ) ||	//EXTRUDE_TERRAIN+AXIAL_BACKPLANE
-						( spf == 1536 ) ||	//EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS
-						( spf == 2560 ) ||	//EXTRUDE_DOWNWARDS+MAX_EXTRUDE
-						( spf == 4608 ) ||	//EXTRUDE_DOWNWARDS+AXIAL_BACKPLANE
-						( spf == 3584 ) ||	//EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS+MAX_EXTRUDE
-						( spf == 5632 ) ||	//EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS+AXIAL_BACKPLANE
-						( spf == 3072 ) ||	//EXTRUDE_UPWARDS+MAX_EXTRUDE
-						( spf == 5120 ) ){	//EXTRUDE_UPWARDS+AXIAL_BACKPLANE
+					else if ( ( spf == 16 ) ||      //EXTRUDE_TERRAIN
+					          ( spf == 512 ) ||     //EXTRUDE_DOWNWARDS
+					          ( spf == 1024 ) ||    //EXTRUDE_UPWARDS
+					          ( spf == 4096 ) ||    //default CLIPMODEL + AXIAL_BACKPLANE
+					          ( spf == 2064 ) ||    //EXTRUDE_TERRAIN+MAX_EXTRUDE
+					          ( spf == 4112 ) ||    //EXTRUDE_TERRAIN+AXIAL_BACKPLANE
+					          ( spf == 1536 ) ||    //EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS
+					          ( spf == 2560 ) ||    //EXTRUDE_DOWNWARDS+MAX_EXTRUDE
+					          ( spf == 4608 ) ||    //EXTRUDE_DOWNWARDS+AXIAL_BACKPLANE
+					          ( spf == 3584 ) ||    //EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS+MAX_EXTRUDE
+					          ( spf == 5632 ) ||    //EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS+AXIAL_BACKPLANE
+					          ( spf == 3072 ) ||    //EXTRUDE_UPWARDS+MAX_EXTRUDE
+					          ( spf == 5120 ) ){    //EXTRUDE_UPWARDS+AXIAL_BACKPLANE
 
 						if ( spawnFlags & 16 ){ //autodirection
 							bestNormal = avgDirection;
@@ -953,8 +953,8 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 					}
 
 
-					else if ( ( spf == 128 ) ||	//EXTRUDE_VERTEX_NORMALS
-						( spf == 384 ) ){ 		//EXTRUDE_VERTEX_NORMALS + PYRAMIDAL_CLIP - vertex normals + don't check for sides, sticking outwards
+					else if ( ( spf == 128 ) || //EXTRUDE_VERTEX_NORMALS
+					          ( spf == 384 ) ){ //EXTRUDE_VERTEX_NORMALS + PYRAMIDAL_CLIP - vertex normals + don't check for sides, sticking outwards
 						/* get vertex normals */
 						for ( j = 0; j < 3; j++ )
 						{
@@ -1106,19 +1106,19 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 
 						/* make 3 more planes */
 						if( PlaneFromPoints( p[0], points[ 2 ], points[ 1 ], cnt ) &&
-							PlaneFromPoints( p[1], points[ 1 ], points[ 0 ], cnt ) &&
-							PlaneFromPoints( p[2], points[ 0 ], points[ 2 ], cnt ) ) {
+						    PlaneFromPoints( p[1], points[ 1 ], points[ 0 ], cnt ) &&
+						    PlaneFromPoints( p[2], points[ 0 ], points[ 2 ], cnt ) ) {
 
 							//check for dangerous planes
 							while( (( p[0].a != 0.0 || p[0].b != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].b ) < 0.00025) ||
-								   (( p[0].a != 0.0 || p[0].c != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].c ) < 0.00025) ||
-								   (( p[0].c != 0.0 || p[0].b != 0.0 ) && fabs( p[0].c ) < 0.00025 && fabs( p[0].b ) < 0.00025) ||
-								   (( p[1].a != 0.0 || p[1].b != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].b ) < 0.00025) ||
-								   (( p[1].a != 0.0 || p[1].c != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].c ) < 0.00025) ||
-								   (( p[1].c != 0.0 || p[1].b != 0.0 ) && fabs( p[1].c ) < 0.00025 && fabs( p[1].b ) < 0.00025) ||
-								   (( p[2].a != 0.0 || p[2].b != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].b ) < 0.00025) ||
-								   (( p[2].a != 0.0 || p[2].c != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].c ) < 0.00025) ||
-								   (( p[2].c != 0.0 || p[2].b != 0.0 ) && fabs( p[2].c ) < 0.00025 && fabs( p[2].b ) < 0.00025) ) {
+							       (( p[0].a != 0.0 || p[0].c != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].c ) < 0.00025) ||
+							       (( p[0].c != 0.0 || p[0].b != 0.0 ) && fabs( p[0].c ) < 0.00025 && fabs( p[0].b ) < 0.00025) ||
+							       (( p[1].a != 0.0 || p[1].b != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].b ) < 0.00025) ||
+							       (( p[1].a != 0.0 || p[1].c != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].c ) < 0.00025) ||
+							       (( p[1].c != 0.0 || p[1].b != 0.0 ) && fabs( p[1].c ) < 0.00025 && fabs( p[1].b ) < 0.00025) ||
+							       (( p[2].a != 0.0 || p[2].b != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].b ) < 0.00025) ||
+							       (( p[2].a != 0.0 || p[2].c != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].c ) < 0.00025) ||
+							       (( p[2].c != 0.0 || p[2].b != 0.0 ) && fabs( p[2].c ) < 0.00025 && fabs( p[2].b ) < 0.00025) ) {
 								cnt -= plane.normal() * 0.1f;
 								//	Sys_Printf( "shifting pyramid point\n" );
 								PlaneFromPoints( p[0], points[ 2 ], points[ 1 ], cnt );
@@ -1159,7 +1159,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 						else
 						{
 							Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
-							points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
+							             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
 							free( buildBrush );
 							continue;
 						}
@@ -1168,7 +1168,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 
 					else if ( ( si->clipModel && !( spf ) ) || ( ( spawnFlags & 8090 ) == 2 ) ){	//default CLIPMODEL
 
-						default_CLIPMODEL:
+default_CLIPMODEL:
 						// axial normal
 						bestNormal = plane.normal();
 						for ( j = 0; j < 3; j++ ){
@@ -1235,7 +1235,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 					}
 					else{
 						Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
-						points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
+						             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
 						free( buildBrush );
 					}
 				}
@@ -1325,7 +1325,7 @@ void AddTriangleModels( entity_t *eparent ){
 		const char *value;
 		Vector3 angles( 0 );
 		if ( !e->read_keyvalue( value, "angles" ) ||
-			3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
+		     3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
 			e->read_keyvalue( angles[ 2 ], "angle" );
 
 		/* set transform matrix (thanks spog) */
@@ -1374,7 +1374,7 @@ void AddTriangleModels( entity_t *eparent ){
 		/* ydnar: cel shader support */
 		shaderInfo_t *celShader;
 		if( e->read_keyvalue( value, "_celshader" ) ||
-			entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
+		    entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
 			celShader = ShaderInfoForShader( String64()( "textures/", value ) );
 		}
 		else{

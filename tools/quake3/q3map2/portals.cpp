@@ -68,7 +68,7 @@ bool PortalPassable( portal_t *p ){
 
 	/* this should never happen */
 	if ( p->nodes[ 0 ]->planenum != PLANENUM_LEAF ||
-		 p->nodes[ 1 ]->planenum != PLANENUM_LEAF ) {
+	     p->nodes[ 1 ]->planenum != PLANENUM_LEAF ) {
 		Error( "Portal_EntityFlood: not a leaf" );
 	}
 
@@ -162,8 +162,8 @@ void PrintPortal( portal_t *p ){
 
 	w = p->winding;
 	for ( i = 0 ; i < w->numpoints ; i++ )
-		Sys_Printf( "(%5.0f,%5.0f,%5.0f)\n",w->p[i][0]
-					, w->p[i][1], w->p[i][2] );
+		Sys_Printf( "(%5.0f,%5.0f,%5.0f)\n", w->p[i][0]
+		            , w->p[i][1], w->p[i][2] );
 }
 
 /*
@@ -257,7 +257,7 @@ winding_t   *BaseWindingForNode( node_t *node ){
 			ChopWindingInPlace( &w, plane.plane, BASE_WINDING_EPSILON );
 		}
 		else
-		{   // take back
+		{	// take back
 			ChopWindingInPlace( &w, plane3_flipped( plane.plane ), BASE_WINDING_EPSILON );
 		}
 		node = n;
@@ -369,7 +369,7 @@ void SplitNodePortals( node_t *node ){
 // cut the portal into two portals, one on each side of the cut plane
 //
 		ClipWindingEpsilon( p->winding, plane.plane,
-							SPLIT_WINDING_EPSILON, &frontwinding, &backwinding ); /* not strict, we want to always keep one of them even if coplanar */
+		                    SPLIT_WINDING_EPSILON, &frontwinding, &backwinding ); /* not strict, we want to always keep one of them even if coplanar */
 
 		if ( frontwinding && WindingIsTiny( frontwinding ) ) {
 			if ( !f->tinyportals ) {
@@ -475,12 +475,12 @@ void MakeTreePortals_r( node_t *node ){
 	CalcNodeBounds( node );
 	if ( !node->minmax.valid() ) {
 		Sys_Warning( "node without a volume\n"
-						"node has %d tiny portals\n"
-						"node reference point %1.2f %1.2f %1.2f\n",
-					node->tinyportals,
-					node->referencepoint[0],
-					node->referencepoint[1],
-					node->referencepoint[2] );
+		             "node has %d tiny portals\n"
+		             "node reference point %1.2f %1.2f %1.2f\n",
+		             node->tinyportals,
+		             node->referencepoint[0],
+		             node->referencepoint[1],
+		             node->referencepoint[2] );
 	}
 
 	if ( !c_worldMinmax.surrounds( node->minmax ) ) {
@@ -639,7 +639,7 @@ EFloodEntities FloodEntities( tree_t *tree ){
 			/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 			Vector3 angles( 0 );
 			if ( !e.read_keyvalue( value, "angles" ) ||
-				3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
+			     3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
 				e.read_keyvalue( angles[ 2 ], "angle" );
 
 			/* set transform matrix (thanks spog) */

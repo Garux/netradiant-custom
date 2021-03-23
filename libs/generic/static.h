@@ -42,11 +42,11 @@ class Null
 template<typename Type, typename Context = Null>
 class Static
 {
-static Type m_instance;
+	static Type m_instance;
 public:
-static Type& instance(){
-	return m_instance;
-}
+	static Type& instance(){
+		return m_instance;
+	}
 };
 
 template<typename Type, typename Context>
@@ -65,14 +65,14 @@ Type Static<Type, Context>::m_instance;
 template<typename Type, typename Context = Null>
 class LazyStatic
 {
-static Type* m_instance;   // this will be initialised to 0 by the CRT, according to the c++ standard
+	static Type* m_instance;   // this will be initialised to 0 by the CRT, according to the c++ standard
 public:
-static Type& instance(){
-	if ( m_instance == 0 ) {
-		m_instance = new Type; // allocate using 'new' to get the correct alignment
+	static Type& instance(){
+		if ( m_instance == 0 ) {
+			m_instance = new Type; // allocate using 'new' to get the correct alignment
+		}
+		return *m_instance;
 	}
-	return *m_instance;
-}
 };
 
 template<typename Type, typename Context>
@@ -89,22 +89,22 @@ Type * LazyStatic<Type, Context>::m_instance;
 template<typename Type, typename Context = Null>
 class CountedStatic
 {
-static std::size_t m_refcount;   // this will be initialised to 0 by the CRT, according to the c++ standard
-static Type* m_instance;
+	static std::size_t m_refcount;   // this will be initialised to 0 by the CRT, according to the c++ standard
+	static Type* m_instance;
 public:
-static Type& instance(){
-	return *m_instance;
-}
-static void capture(){
-	if ( ++m_refcount == 1 ) {
-		m_instance = new Type; // allocate using 'new' to get the correct alignment
+	static Type& instance(){
+		return *m_instance;
 	}
-}
-static void release(){
-	if ( --m_refcount == 0 ) {
-		delete m_instance;
+	static void capture(){
+		if ( ++m_refcount == 1 ) {
+			m_instance = new Type; // allocate using 'new' to get the correct alignment
+		}
 	}
-}
+	static void release(){
+		if ( --m_refcount == 0 ) {
+			delete m_instance;
+		}
+	}
 };
 
 template<typename Type, typename Context>
@@ -125,15 +125,15 @@ template<typename Type, typename Context = Null>
 class SmartStatic
 {
 public:
-SmartStatic(){
-	CountedStatic<Type, Context>::capture();
-}
-~SmartStatic(){
-	CountedStatic<Type, Context>::release();
-}
-Type& instance(){
-	return CountedStatic<Type, Context>::instance();
-}
+	SmartStatic(){
+		CountedStatic<Type, Context>::capture();
+	}
+	~SmartStatic(){
+		CountedStatic<Type, Context>::release();
+	}
+	Type& instance(){
+		return CountedStatic<Type, Context>::instance();
+	}
 };
 
 

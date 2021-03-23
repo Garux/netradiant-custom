@@ -33,12 +33,12 @@ class CIntersectInfoDialog : public CDialog
 {
 // Construction
 public:
-CIntersectInfoDialog( CWnd* pParent = NULL );     // standard constructor
+	CIntersectInfoDialog( CWnd* pParent = NULL );     // standard constructor
 
 // Dialog Data
 //{{AFX_DATA(CIntersectInfoDialog)
-enum { IDD = IDD_INTERSECT_INFO_DIALOG };
-CProgressCtrl m_prog1;
+	enum { IDD = IDD_INTERSECT_INFO_DIALOG };
+	CProgressCtrl m_prog1;
 //}}AFX_DATA
 
 
@@ -46,7 +46,7 @@ CProgressCtrl m_prog1;
 // ClassWizard generated virtual function overrides
 //{{AFX_VIRTUAL(CIntersectInfoDialog)
 protected:
-virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
+	virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
 //}}AFX_VIRTUAL
 
 // Implementation
@@ -56,7 +56,7 @@ protected:
 //{{AFX_MSG(CIntersectInfoDialog)
 // NOTE: the ClassWizard will add member functions here
 //}}AFX_MSG
-DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP()
 };
 
 //{{AFX_INSERT_LOCATION}}

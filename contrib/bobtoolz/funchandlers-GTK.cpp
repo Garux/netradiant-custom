@@ -224,14 +224,14 @@ void DoResetTextures(){
 		DEntity world;
 		world.LoadSelectedBrushes();
 		world.ResetTextures( texName,              rs.fScale,      rs.fShift,      rs.rotation, rs.newTextureName,
-							 rs.bResetTextureName, rs.bResetScale, rs.bResetShift, rs.bResetRotation, true );
+		                     rs.bResetTextureName, rs.bResetScale, rs.bResetShift, rs.bResetRotation, true );
 	}
 	else
 	{
 		DMap world;
 		world.LoadAll( true );
 		world.ResetTextures( texName,              rs.fScale,      rs.fShift,      rs.rotation, rs.newTextureName,
-							 rs.bResetTextureName, rs.bResetScale, rs.bResetShift, rs.bResetRotation );
+		                     rs.bResetTextureName, rs.bResetScale, rs.bResetShift, rs.bResetRotation );
 	}
 }
 
@@ -350,10 +350,10 @@ void DoBuildDoors(){
 		}
 
 		BuildDoorsX2( vMin, vMax,
-					  rs.bScaleMainH, rs.bScaleMainV,
-					  rs.bScaleTrimH, rs.bScaleTrimV,
-					  rs.mainTexture, rs.trimTexture,
-					  rs.nOrientation ); // shapes.cpp
+		              rs.bScaleMainH, rs.bScaleMainV,
+		              rs.bScaleTrimH, rs.bScaleTrimV,
+		              rs.mainTexture, rs.trimTexture,
+		              rs.nOrientation ); // shapes.cpp
 	}
 }
 
@@ -483,7 +483,7 @@ void DoMergePatches(){
 			Path_deleteTop( patches[1]->path() );
 			Entity* entity = Node_getEntity( parent.path().top() );
 			if ( entity != 0
-				&& Node_getTraversable( parent.path().top() )->empty() ) {
+			     && Node_getTraversable( parent.path().top() )->empty() ) {
 				Path_deleteTop( parent.path() );
 			}
 

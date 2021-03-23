@@ -49,27 +49,27 @@
 class IDataStream : public InputStream, public OutputStream
 {
 public:
-typedef int offset_type;
-typedef std::size_t position_type;
+	typedef int offset_type;
+	typedef std::size_t position_type;
 
-virtual void IncRef() = 0;    ///< Increment the number of references to this object
-virtual void DecRef() = 0;   ///< Decrement the reference count
+	virtual void IncRef() = 0;    ///< Increment the number of references to this object
+	virtual void DecRef() = 0;   ///< Decrement the reference count
 
-virtual position_type GetPosition() const = 0;
-virtual int Seek( offset_type lOff, int nFrom ) = 0;
+	virtual position_type GetPosition() const = 0;
+	virtual int Seek( offset_type lOff, int nFrom ) = 0;
 
-virtual void SetLength( size_type nNewLen ) = 0;
-virtual size_type GetLength() const = 0;
+	virtual void SetLength( size_type nNewLen ) = 0;
+	virtual size_type GetLength() const = 0;
 
-virtual char* ReadString( char* pBuf, size_type nMax ) = 0;
-virtual int GetChar() = 0;
+	virtual char* ReadString( char* pBuf, size_type nMax ) = 0;
+	virtual int GetChar() = 0;
 
-virtual int PutChar( int c ) = 0;
-virtual void printf( const char*, ... ) = 0; ///< completely matches the usual printf behaviour
+	virtual int PutChar( int c ) = 0;
+	virtual void printf( const char*, ... ) = 0; ///< completely matches the usual printf behaviour
 
-virtual void Abort() = 0;
-virtual void Flush() = 0;
-virtual void Close() = 0;
+	virtual void Abort() = 0;
+	virtual void Flush() = 0;
+	virtual void Close() = 0;
 };
 
 #include <stdio.h>
@@ -77,90 +77,98 @@ virtual void Close() = 0;
 class MemStream : public IDataStream
 {
 public:
-MemStream();
-MemStream( size_type nLen );
-virtual ~MemStream();
+	MemStream();
+	MemStream( size_type nLen );
+	virtual ~MemStream();
 
-int refCount;
-void IncRef() { refCount++; }
-void DecRef() {
-	refCount--; if ( refCount <= 0 ) {
-		delete this;
+	int refCount;
+	void IncRef() {
+		refCount++;
 	}
-}
+	void DecRef() {
+		refCount--;
+		if ( refCount <= 0 ) {
+			delete this;
+		}
+	}
 
 protected:
 // MemFile specific:
-size_type m_nGrowBytes;
-size_type m_nPosition;
-size_type m_nBufferSize;
-size_type m_nFileSize;
-unsigned char* m_pBuffer;
-bool m_bAutoDelete;
-void GrowFile( size_type nNewLen );
+	size_type m_nGrowBytes;
+	size_type m_nPosition;
+	size_type m_nBufferSize;
+	size_type m_nFileSize;
+	unsigned char* m_pBuffer;
+	bool m_bAutoDelete;
+	void GrowFile( size_type nNewLen );
 
 public:
-position_type GetPosition() const;
-int Seek( offset_type lOff, int nFrom );
-void SetLength( size_type nNewLen );
-size_type GetLength() const;
+	position_type GetPosition() const;
+	int Seek( offset_type lOff, int nFrom );
+	void SetLength( size_type nNewLen );
+	size_type GetLength() const;
 
-unsigned char* GetBuffer() const
-{ return m_pBuffer; }
+	unsigned char* GetBuffer() const
+	{
+		return m_pBuffer;
+	}
 
-size_type read( byte_type* buffer, size_type length );
-size_type write( const byte_type* buffer, size_type length );
+	size_type read( byte_type* buffer, size_type length );
+	size_type write( const byte_type* buffer, size_type length );
 
-char* ReadString( char* pBuf, size_type nMax );
-int GetChar();
+	char* ReadString( char* pBuf, size_type nMax );
+	int GetChar();
 
-int PutChar( int c );
-void printf( const char*, ... ); ///< \todo implement on MemStream
+	int PutChar( int c );
+	void printf( const char*, ... ); ///< \todo implement on MemStream
 
-void Abort();
-void Flush();
-void Close();
-bool Open( const char *filename, const char *mode );
+	void Abort();
+	void Flush();
+	void Close();
+	bool Open( const char *filename, const char *mode );
 };
 
 class FileStream : public IDataStream
 {
 public:
-FileStream();
-virtual ~FileStream();
+	FileStream();
+	virtual ~FileStream();
 
-int refCount;
-void IncRef() { refCount++; }
-void DecRef() {
-	refCount--; if ( refCount <= 0 ) {
-		delete this;
+	int refCount;
+	void IncRef() {
+		refCount++;
 	}
-}
+	void DecRef() {
+		refCount--;
+		if ( refCount <= 0 ) {
+			delete this;
+		}
+	}
 
 protected:
 // DiscFile specific:
-FILE* m_hFile;
-bool m_bCloseOnDelete;
+	FILE* m_hFile;
+	bool m_bCloseOnDelete;
 
 public:
-position_type GetPosition() const;
-int Seek( offset_type lOff, int nFrom );
-void SetLength( size_type nNewLen );
-size_type GetLength() const;
+	position_type GetPosition() const;
+	int Seek( offset_type lOff, int nFrom );
+	void SetLength( size_type nNewLen );
+	size_type GetLength() const;
 
-size_type read( byte_type* buffer, size_type length );
-size_type write( const byte_type* buffer, size_type length );
+	size_type read( byte_type* buffer, size_type length );
+	size_type write( const byte_type* buffer, size_type length );
 
-char* ReadString( char* pBuf, size_type nMax );
-int GetChar();
+	char* ReadString( char* pBuf, size_type nMax );
+	int GetChar();
 
-int PutChar( int c );
-void printf( const char*, ... ); ///< completely matches the usual printf behaviour
+	int PutChar( int c );
+	void printf( const char*, ... ); ///< completely matches the usual printf behaviour
 
-void Abort();
-void Flush();
-void Close();
-bool Open( const char *filename, const char *mode );
+	void Abort();
+	void Flush();
+	void Close();
+	bool Open( const char *filename, const char *mode );
 };
 
 #endif

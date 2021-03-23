@@ -41,7 +41,7 @@ char *idStr::__tolower
 char *idStr::tolower
 #endif
 (
-	char *s1
+    char *s1
 ){
 	char *s;
 
@@ -62,7 +62,7 @@ char *idStr::__toupper
 char *idStr::toupper
 #endif
 (
-	char *s1
+    char *s1
 ){
 	char *s;
 
@@ -78,9 +78,9 @@ char *idStr::toupper
 
 int idStr::icmpn
 (
-	const char *s1,
-	const char *s2,
-	int n
+    const char *s1,
+    const char *s2,
+    int n
 ){
 	int c1;
 	int c2;
@@ -122,8 +122,8 @@ int idStr::icmpn
 
 int idStr::icmp
 (
-	const char *s1,
-	const char *s2
+    const char *s1,
+    const char *s2
 ){
 	int c1;
 	int c2;
@@ -160,9 +160,9 @@ int idStr::icmp
 
 int idStr::cmpn
 (
-	const char *s1,
-	const char *s2,
-	int n
+    const char *s1,
+    const char *s2,
+    int n
 ){
 	int c1;
 	int c2;
@@ -194,8 +194,8 @@ int idStr::cmpn
 
 int idStr::cmp
 (
-	const char *s1,
-	const char *s2
+    const char *s1,
+    const char *s2
 ){
 	int c1;
 	int c2;
@@ -229,7 +229,7 @@ int idStr::cmp
  */
 bool idStr::isNumeric
 (
-	const char *str
+    const char *str
 ){
 	int len;
 	int i;
@@ -257,8 +257,8 @@ bool idStr::isNumeric
 
 idStr operator+
 (
-	const idStr& a,
-	const float b
+    const idStr& a,
+    const float b
 ){
 	char text[ 20 ];
 
@@ -272,8 +272,8 @@ idStr operator+
 
 idStr operator+
 (
-	const idStr& a,
-	const int b
+    const idStr& a,
+    const int b
 ){
 	char text[ 20 ];
 
@@ -287,8 +287,8 @@ idStr operator+
 
 idStr operator+
 (
-	const idStr& a,
-	const unsigned b
+    const idStr& a,
+    const unsigned b
 ){
 	char text[ 20 ];
 
@@ -302,7 +302,7 @@ idStr operator+
 
 idStr& idStr::operator+=
 (
-	const float a
+    const float a
 ){
 	char text[ 20 ];
 
@@ -314,7 +314,7 @@ idStr& idStr::operator+=
 
 idStr& idStr::operator+=
 (
-	const int a
+    const int a
 ){
 	char text[ 20 ];
 
@@ -326,7 +326,7 @@ idStr& idStr::operator+=
 
 idStr& idStr::operator+=
 (
-	const unsigned a
+    const unsigned a
 ){
 	char text[ 20 ];
 
@@ -338,7 +338,7 @@ idStr& idStr::operator+=
 
 void idStr::CapLength
 (
-	int newlen
+    int newlen
 ){
 	assert( m_data );
 
@@ -354,7 +354,7 @@ void idStr::CapLength
 
 void idStr::EnsureDataWritable
 (
-	void
+    void
 ){
 	assert( m_data );
 	strdata *olddata;
@@ -421,7 +421,7 @@ void idStr::EnsureAlloced( int amount, bool keepold ) {
 
 void idStr::BackSlashesToSlashes
 (
-	void
+    void
 ){
 	int i;
 
@@ -437,10 +437,10 @@ void idStr::BackSlashesToSlashes
 
 void idStr::snprintf
 (
-	char *dst,
-	int size,
-	const char *fmt,
-	...
+    char *dst,
+    int size,
+    const char *fmt,
+    ...
 ){
 	char buffer[0x10000];
 	int len;
@@ -472,7 +472,7 @@ void idStr::snprintf
  */
 void TestStringClass
 (
-	void
+    void
 ){
 	char ch;                            // ch == ?
 	idStr   *t;                         // t == ?

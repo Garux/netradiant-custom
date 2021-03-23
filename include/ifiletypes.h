@@ -27,34 +27,34 @@
 class filetype_t
 {
 public:
-filetype_t()
-	: name( "" ), pattern( "" ){
-}
-filetype_t( const char* _name, const char* _pattern, bool _can_load = true, bool _can_import = true, bool _can_save = true )
-	: name( _name ), pattern( _pattern ), can_load( _can_load ), can_import( _can_import ), can_save( _can_save ){
-}
-const char* name;
-const char* pattern;
-bool can_load;
-bool can_import;
-bool can_save;
+	filetype_t()
+		: name( "" ), pattern( "" ){
+	}
+	filetype_t( const char* _name, const char* _pattern, bool _can_load = true, bool _can_import = true, bool _can_save = true )
+		: name( _name ), pattern( _pattern ), can_load( _can_load ), can_import( _can_import ), can_save( _can_save ){
+	}
+	const char* name;
+	const char* pattern;
+	bool can_load;
+	bool can_import;
+	bool can_save;
 };
 
 
 class IFileTypeList
 {
 public:
-virtual void addType( const char* moduleName, filetype_t type ) = 0;
+	virtual void addType( const char* moduleName, filetype_t type ) = 0;
 };
 
 class IFileTypeRegistry
 {
 public:
-INTEGER_CONSTANT( Version, 1 );
-STRING_CONSTANT( Name, "filetypes" );
+	INTEGER_CONSTANT( Version, 1 );
+	STRING_CONSTANT( Name, "filetypes" );
 
-virtual void addType( const char* moduleType, const char* moduleName, filetype_t type ) = 0;
-virtual void getTypeList( const char* moduleType, IFileTypeList* typelist, bool want_load = false, bool want_import = false, bool want_save = false ) = 0;
+	virtual void addType( const char* moduleType, const char* moduleName, filetype_t type ) = 0;
+	virtual void getTypeList( const char* moduleType, IFileTypeList* typelist, bool want_load = false, bool want_import = false, bool want_save = false ) = 0;
 };
 
 #include "modulesystem.h"

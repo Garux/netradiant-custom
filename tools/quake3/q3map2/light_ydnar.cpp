@@ -1008,9 +1008,9 @@ void MapRawLightmap( int rawLightmapNum ){
 				#if 0
 			if ( lm->plane ) {
 				Sys_Printf( "Planar patch: [%1.3f %1.3f %1.3f] [%1.3f %1.3f %1.3f] [%1.3f %1.3f %1.3f]\n",
-							lm->plane[ 0 ], lm->plane[ 1 ], lm->plane[ 2 ],
-							lm->vecs[ 0 ][ 0 ], lm->vecs[ 0 ][ 1 ], lm->vecs[ 0 ][ 2 ],
-							lm->vecs[ 1 ][ 0 ], lm->vecs[ 1 ][ 1 ], lm->vecs[ 1 ][ 2 ] );
+				            lm->plane[ 0 ], lm->plane[ 1 ], lm->plane[ 2 ],
+				            lm->vecs[ 0 ][ 0 ], lm->vecs[ 0 ][ 1 ], lm->vecs[ 0 ][ 2 ],
+				            lm->vecs[ 1 ][ 0 ], lm->vecs[ 1 ][ 1 ], lm->vecs[ 1 ][ 2 ] );
 			}
 				#endif
 
@@ -1258,11 +1258,11 @@ void MapRawLightmap( int rawLightmapNum ){
 
 			/* report bogus origin */
 			Sys_Printf( "%6d [%2d,%2d] (%4d): XYZ(%+4.1f %+4.1f %+4.1f) LO(%+4.1f %+4.1f %+4.1f) HI(%+4.1f %+4.1f %+4.1f) <%3.0f>\n",
-						rawLightmapNum, x, y, cluster,
-						origin[ 0 ], origin[ 1 ], origin[ 2 ],
-						minmax.mins[ 0 ], minmax.mins[ 1 ], minmax.mins[ 2 ],
-						minmax.maxs[ 0 ], minmax.maxs[ 1 ], minmax.maxs[ 2 ],
-						luxel.count );
+			            rawLightmapNum, x, y, cluster,
+			            origin[ 0 ], origin[ 1 ], origin[ 2 ],
+			            minmax.mins[ 0 ], minmax.mins[ 1 ], minmax.mins[ 2 ],
+			            minmax.maxs[ 0 ], minmax.maxs[ 1 ], minmax.maxs[ 2 ],
+			            luxel.count );
 		}
 	}
 	#endif
@@ -1721,8 +1721,8 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, const Vector
 
 	/* subsample further? */
 	if ( ( lightLuxel.count + 1.0f ) < lightSamples &&
-		 ( total[ 0 ] > 4.0f || total[ 1 ] > 4.0f || total[ 2 ] > 4.0f ) &&
-		 lighted != 0 && lighted != mapped ) {
+	     ( total[ 0 ] > 4.0f || total[ 1 ] > 4.0f || total[ 2 ] > 4.0f ) &&
+	     lighted != 0 && lighted != mapped ) {
 		for ( b = 0; b < 4; b++ )
 		{
 			if ( cluster[ b ] < 0 ) {
@@ -2009,7 +2009,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
 			{
 				if ( lm->styles[ lightmapNum ] == trace.light->style ||
-					 lm->styles[ lightmapNum ] == LS_NONE ) {
+				     lm->styles[ lightmapNum ] == LS_NONE ) {
 					break;
 				}
 			}
@@ -2430,9 +2430,9 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				filterColor = false;
 				filterDir = false;
 				if ( cluster < 0 ||
-					( lm->splotchFix && ( luxel.value[ 0 ] <= ambientColor[ 0 ]
-					                   || luxel.value[ 1 ] <= ambientColor[ 1 ]
-					                   || luxel.value[ 2 ] <= ambientColor[ 2 ] ) ) ) {
+				     ( lm->splotchFix && ( luxel.value[ 0 ] <= ambientColor[ 0 ]
+				                        || luxel.value[ 1 ] <= ambientColor[ 1 ]
+				                        || luxel.value[ 2 ] <= ambientColor[ 2 ] ) ) ) {
 					filterColor = true;
 				}
 
@@ -2467,7 +2467,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 
 						/* ignore unmapped/unlit luxels */
 						if ( lm->getSuperCluster( sx, sy ) < 0 || luxel2.count == 0.0f ||
-							 ( lm->splotchFix && VectorCompare( luxel2.value, ambientColor ) ) ) {
+						     ( lm->splotchFix && VectorCompare( luxel2.value, ambientColor ) ) ) {
 							continue;
 						}
 
@@ -2738,7 +2738,6 @@ void IlluminateVertexes( int num ){
 									colors[ lightmapNum ] += floodColor;
 
 									/* store */
-									
 									getRadVertexLuxel( lightmapNum, ds->firstVert + i ) = colors[ lightmapNum ];
 								}
 

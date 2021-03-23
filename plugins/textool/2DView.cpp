@@ -98,8 +98,10 @@ bool C2DView::OnRButtonDown( int x, int y ){
 		m_xPosMove = x; // horizontal position of cursor
 		m_yPosMove = y; // vertical position of cursor
 		// store
-		m_MinsMove[0] = m_Mins[0]; m_MinsMove[1] = m_Mins[1];
-		m_MaxsMove[0] = m_Maxs[0]; m_MaxsMove[1] = m_Maxs[1];
+		m_MinsMove[0] = m_Mins[0];
+		m_MinsMove[1] = m_Mins[1];
+		m_MaxsMove[0] = m_Maxs[0];
+		m_MaxsMove[1] = m_Maxs[1];
 		ViewState = View_Move;
 		// set popup to true
 		m_bPopup = true;

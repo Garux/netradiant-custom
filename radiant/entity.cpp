@@ -63,110 +63,110 @@ entity_globals_t g_entity_globals;
 
 class EntitySetKeyValueSelected : public scene::Graph::Walker
 {
-const char* m_key;
-const char* m_value;
+	const char* m_key;
+	const char* m_value;
 public:
-EntitySetKeyValueSelected( const char* key, const char* value )
-	: m_key( key ), m_value( value ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0
-		 && ( instance.childSelected() || Instance_isSelected( instance ) ) ) {
-		entity->setKeyValue( m_key, m_value );
+	EntitySetKeyValueSelected( const char* key, const char* value )
+		: m_key( key ), m_value( value ){
 	}
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		return true;
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0
+		     && ( instance.childSelected() || Instance_isSelected( instance ) ) ) {
+			entity->setKeyValue( m_key, m_value );
+		}
+	}
 };
 
 class EntitySetClassnameSelected : public scene::Graph::Walker
 {
-const char* m_classname;
-scene::Node* m_world;
-const bool m_2world;
+	const char* m_classname;
+	scene::Node* m_world;
+	const bool m_2world;
 public:
-EntitySetClassnameSelected( const char* classname )
-	: m_classname( classname ), m_world( Map_FindWorldspawn( g_map ) ), m_2world( m_world && string_equal( m_classname, "worldspawn" ) ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0 && ( instance.childSelected() || Instance_isSelected( instance ) ) ) {
-		if( path.top().get_pointer() == m_world ){ /* do not want to convert whole worldspawn entity */
-			if( instance.childSelected() && !m_2world ){ /* create an entity from world brushes instead */
-				EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( m_classname, true );
-				if( entityClass->fixedsize )
-					return;
+	EntitySetClassnameSelected( const char* classname )
+		: m_classname( classname ), m_world( Map_FindWorldspawn( g_map ) ), m_2world( m_world && string_equal( m_classname, "worldspawn" ) ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		return true;
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 && ( instance.childSelected() || Instance_isSelected( instance ) ) ) {
+			if( path.top().get_pointer() == m_world ){ /* do not want to convert whole worldspawn entity */
+				if( instance.childSelected() && !m_2world ){ /* create an entity from world brushes instead */
+					EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( m_classname, true );
+					if( entityClass->fixedsize )
+						return;
 
-				//is important to have retexturing here; if doing in the end, undo doesn't succeed; //don't do this extra now, as it requires retexturing, working for subgraph
-//				if ( string_compare_nocase_n( m_classname, "trigger_", 8 ) == 0 ){
-//					Scene_PatchSetShader_Selected( GlobalSceneGraph(), GetCommonShader( "trigger" ).c_str() );
-//					Scene_BrushSetShader_Selected( GlobalSceneGraph(), GetCommonShader( "trigger" ).c_str() );
-//				}
+					//is important to have retexturing here; if doing in the end, undo doesn't succeed; //don't do this extra now, as it requires retexturing, working for subgraph
+//					if ( string_compare_nocase_n( m_classname, "trigger_", 8 ) == 0 ){
+//						Scene_PatchSetShader_Selected( GlobalSceneGraph(), GetCommonShader( "trigger" ).c_str() );
+//						Scene_BrushSetShader_Selected( GlobalSceneGraph(), GetCommonShader( "trigger" ).c_str() );
+//					}
 
-				NodeSmartReference node( GlobalEntityCreator().createEntity( entityClass ) );
-				Node_getTraversable( GlobalSceneGraph().root() )->insert( node );
+					NodeSmartReference node( GlobalEntityCreator().createEntity( entityClass ) );
+					Node_getTraversable( GlobalSceneGraph().root() )->insert( node );
 
-				scene::Path entitypath( makeReference( GlobalSceneGraph().root() ) );
-				entitypath.push( makeReference( node.get() ) );
-				scene::Instance& entityInstance = findInstance( entitypath );
+					scene::Path entitypath( makeReference( GlobalSceneGraph().root() ) );
+					entitypath.push( makeReference( node.get() ) );
+					scene::Instance& entityInstance = findInstance( entitypath );
 
-				if ( g_pGameDescription->mGameType == "doom3" ) {
-					Node_getEntity( node )->setKeyValue( "model", Node_getEntity( node )->getKeyValue( "name" ) );
+					if ( g_pGameDescription->mGameType == "doom3" ) {
+						Node_getEntity( node )->setKeyValue( "model", Node_getEntity( node )->getKeyValue( "name" ) );
+					}
+
+					//Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), node );
+					Scene_parentSubgraphSelectedBrushesToEntity( GlobalSceneGraph(), node, path );
+					Scene_forEachChildSelectable( SelectableSetSelected( true ), entityInstance.path() );
 				}
-
-				//Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), node );
-				Scene_parentSubgraphSelectedBrushesToEntity( GlobalSceneGraph(), node, path );
-				Scene_forEachChildSelectable( SelectableSetSelected( true ), entityInstance.path() );
+				return;
 			}
-			return;
-		}
-		else if( m_2world ){ /* ungroupSelectedEntities */ //condition is skipped with world = 0, so code next to this may create multiple worldspawns; todo handle this very special case?
-			if( node_is_group( path.top() ) ){
-				parentBrushes( path.top(), *m_world );
-				Path_deleteTop( path );
+			else if( m_2world ){ /* ungroupSelectedEntities */ //condition is skipped with world = 0, so code next to this may create multiple worldspawns; todo handle this very special case?
+				if( node_is_group( path.top() ) ){
+					parentBrushes( path.top(), *m_world );
+					Path_deleteTop( path );
+				}
+				return;
 			}
-			return;
-		}
 
-		EntityClass* eclass = GlobalEntityClassManager().findOrInsert( m_classname, node_is_group( path.top() ) );
-		NodeSmartReference node( GlobalEntityCreator().createEntity( eclass ) );
+			EntityClass* eclass = GlobalEntityClassManager().findOrInsert( m_classname, node_is_group( path.top() ) );
+			NodeSmartReference node( GlobalEntityCreator().createEntity( eclass ) );
 
-		if( entity->isContainer() && eclass->fixedsize ){ /* group entity to point one */
-			char value[64];
-			sprintf( value, "%g %g %g", instance.worldAABB().origin[0], instance.worldAABB().origin[1], instance.worldAABB().origin[2] );
-			entity->setKeyValue( "origin", value );
-		}
+			if( entity->isContainer() && eclass->fixedsize ){ /* group entity to point one */
+				char value[64];
+				sprintf( value, "%g %g %g", instance.worldAABB().origin[0], instance.worldAABB().origin[1], instance.worldAABB().origin[2] );
+				entity->setKeyValue( "origin", value );
+			}
 
-		EntityCopyingVisitor visitor( *Node_getEntity( node ) );
+			EntityCopyingVisitor visitor( *Node_getEntity( node ) );
 //		entity->forEachKeyValue( visitor );
 
-		NodeSmartReference child( path.top().get() );
-		NodeSmartReference parent( path.parent().get() );
+			NodeSmartReference child( path.top().get() );
+			NodeSmartReference parent( path.parent().get() );
 //		Node_getTraversable( parent )->erase( child );
-		if ( Node_getTraversable( child ) != 0 && node_is_group( node ) ) { /* group entity to group one */
-			parentBrushes( child, node );
-		}
-		Node_getTraversable( parent )->insert( node );
-
-		entity->forEachKeyValue( visitor ); /* must do this after inserting node, otherwise problem: targeted + having model + not loaded b4 new entities aren't selectable normally + rendered only while 0 0 0 is rendered */
-
-		if( !entity->isContainer() && !eclass->fixedsize ){ /* point entity to group one */
-			AABB bounds( g_vector3_identity, Vector3( 16, 16, 16 ) );
-			if ( !string_parse_vector3( entity->getKeyValue( "origin" ), bounds.origin ) ) {
-				bounds.origin = g_vector3_identity;
+			if ( Node_getTraversable( child ) != 0 && node_is_group( node ) ) { /* group entity to group one */
+				parentBrushes( child, node );
 			}
-			Brush_ConstructPlacehoderCuboid( node.get(), bounds );
-			Node_getEntity( node )->setKeyValue( "origin", "" );
-		}
+			Node_getTraversable( parent )->insert( node );
 
-		Node_getTraversable( parent )->erase( child );
+			entity->forEachKeyValue( visitor ); /* must do this after inserting node, otherwise problem: targeted + having model + not loaded b4 new entities aren't selectable normally + rendered only while 0 0 0 is rendered */
+
+			if( !entity->isContainer() && !eclass->fixedsize ){ /* point entity to group one */
+				AABB bounds( g_vector3_identity, Vector3( 16, 16, 16 ) );
+				if ( !string_parse_vector3( entity->getKeyValue( "origin" ), bounds.origin ) ) {
+					bounds.origin = g_vector3_identity;
+				}
+				Brush_ConstructPlacehoderCuboid( node.get(), bounds );
+				Node_getEntity( node )->setKeyValue( "origin", "" );
+			}
+
+			Node_getTraversable( parent )->erase( child );
+		}
 	}
-}
 };
 
 void Scene_EntitySetKeyValue_Selected( const char* key, const char* value ){
@@ -207,7 +207,7 @@ void Entity_ungroupSelected(){
 	}
 
 	if ( Node_isEntity( path.top() )
-		 && node_is_group( path.top() ) ) {
+	  && node_is_group( path.top() ) ) {
 		if ( &world != path.top().get_pointer() ) {
 			parentBrushes( path.top(), world );
 			Path_deleteTop( path );
@@ -220,62 +220,62 @@ void Entity_ungroupSelected(){
 class EntityFindSelected : public scene::Graph::Walker
 {
 public:
-mutable const scene::Path *groupPath;
-mutable scene::Instance *groupInstance;
-EntityFindSelected() : groupPath( 0 ), groupInstance( 0 ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0
-		 && Instance_isSelected( instance )
-		 && node_is_group( path.top() )
-		 && !groupPath ) {
-		groupPath = &path;
-		groupInstance = &instance;
+	mutable const scene::Path *groupPath;
+	mutable scene::Instance *groupInstance;
+	EntityFindSelected() : groupPath( 0 ), groupInstance( 0 ){
 	}
-}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		return true;
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0
+		  && Instance_isSelected( instance )
+		  && node_is_group( path.top() )
+		  && !groupPath ) {
+			groupPath = &path;
+			groupInstance = &instance;
+		}
+	}
 };
 
 class EntityGroupSelected : public scene::Graph::Walker
 {
-NodeSmartReference group, worldspawn;
+	NodeSmartReference group, worldspawn;
 //typedef std::pair<NodeSmartReference, NodeSmartReference> DeletionPair;
 //Stack<DeletionPair> deleteme;
 public:
-EntityGroupSelected( const scene::Path &p ) : group( p.top().get() ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	if ( Instance_isSelected( instance ) ) {
-		Entity* entity = Node_getEntity( path.top() );
-		if ( entity == 0 && Node_isPrimitive( path.top() ) ) {
-			NodeSmartReference child( path.top().get() );
-			NodeSmartReference parent( path.parent().get() );
+	EntityGroupSelected( const scene::Path &p ) : group( p.top().get() ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		return true;
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		if ( Instance_isSelected( instance ) ) {
+			Entity* entity = Node_getEntity( path.top() );
+			if ( entity == 0 && Node_isPrimitive( path.top() ) ) {
+				NodeSmartReference child( path.top().get() );
+				NodeSmartReference parent( path.parent().get() );
 
-			if ( path.size() >= 3 && parent != worldspawn ) {
-				NodeSmartReference parentparent( path[path.size() - 3].get() );
+				if ( path.size() >= 3 && parent != worldspawn ) {
+					NodeSmartReference parentparent( path[path.size() - 3].get() );
 
-				Node_getTraversable( parent )->erase( child );
-				Node_getTraversable( group )->insert( child );
+					Node_getTraversable( parent )->erase( child );
+					Node_getTraversable( group )->insert( child );
 
-				if ( Node_getTraversable( parent )->empty() ) {
-					//deleteme.push(DeletionPair(parentparent, parent));
-					Node_getTraversable( parentparent )->erase( parent );
+					if ( Node_getTraversable( parent )->empty() ) {
+						//deleteme.push(DeletionPair(parentparent, parent));
+						Node_getTraversable( parentparent )->erase( parent );
+					}
 				}
-			}
-			else
-			{
-				Node_getTraversable( parent )->erase( child );
-				Node_getTraversable( group )->insert( child );
+				else
+				{
+					Node_getTraversable( parent )->erase( child );
+					Node_getTraversable( group )->insert( child );
+				}
 			}
 		}
 	}
-}
 };
 /// moves selected primitives to entity, whose entityNode is selected or to worldspawn, if none
 void Entity_moveSelectedPrimitives(){
@@ -329,10 +329,10 @@ void Entity_moveSelectedPrimitivesToFirst(){
 void Entity_connectSelected(){
 	if ( GlobalSelectionSystem().countSelected() == 2 ) {
 		GlobalEntityCreator().connectEntities(
-			GlobalSelectionSystem().penultimateSelected().path(),
-			GlobalSelectionSystem().ultimateSelected().path(),
-			0
-			);
+		    GlobalSelectionSystem().penultimateSelected().path(),
+		    GlobalSelectionSystem().ultimateSelected().path(),
+		    0
+		);
 	}
 	else
 	{
@@ -343,10 +343,10 @@ void Entity_connectSelected(){
 void Entity_killconnectSelected(){
 	if ( GlobalSelectionSystem().countSelected() == 2 ) {
 		GlobalEntityCreator().connectEntities(
-			GlobalSelectionSystem().penultimateSelected().path(),
-			GlobalSelectionSystem().ultimateSelected().path(),
-			1
-			);
+		    GlobalSelectionSystem().penultimateSelected().path(),
+		    GlobalSelectionSystem().ultimateSelected().path(),
+		    1
+		);
 	}
 	else
 	{
@@ -405,7 +405,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 	EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( name, true );
 
 	const bool isModel = entityClass->miscmodel_is
-				   || ( GlobalSelectionSystem().countSelected() == 0 && classname_equal( name, "func_static" ) && g_pGameDescription->mGameType == "doom3" );
+	                     || ( GlobalSelectionSystem().countSelected() == 0 && classname_equal( name, "func_static" ) && g_pGameDescription->mGameType == "doom3" );
 
 	const bool brushesSelected = Scene_countSelectedBrushes( GlobalSceneGraph() ) != 0;
 
@@ -464,8 +464,8 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 	if ( g_pGameDescription->mGameType == "hl" ) {
 		// FIXME - Hydra: really we need a combined light AND color dialog for halflife.
 		if ( string_equal_nocase( name, "light" )
-			 || string_equal_nocase( name, "light_environment" )
-			 || string_equal_nocase( name, "light_spot" ) ) {
+		  || string_equal_nocase( name, "light_environment" )
+		  || string_equal_nocase( name, "light_spot" ) ) {
 			int intensity = g_iLastLightIntensity;
 
 			if ( DoLightIntensityDlg( &intensity ) == eIDOK ) {
@@ -541,8 +541,8 @@ void Entity_normalizeColor(){
 
 					char buffer[128];
 					sprintf( buffer, "%g %g %g", g_entity_globals.color_entity[0],
-							 g_entity_globals.color_entity[1],
-							 g_entity_globals.color_entity[2] );
+					                             g_entity_globals.color_entity[1],
+					                             g_entity_globals.color_entity[2] );
 
 					StringOutputStream command( 256 );
 					command << "entityNormalizeColour " << buffer;
@@ -574,8 +574,8 @@ void Entity_setColour(){
 			if ( color_dialog( GTK_WIDGET( MainFrame_getWindow() ), g_entity_globals.color_entity ) ) {
 				char buffer[128];
 				sprintf( buffer, "%g %g %g", g_entity_globals.color_entity[0],
-						 g_entity_globals.color_entity[1],
-						 g_entity_globals.color_entity[2] );
+				                             g_entity_globals.color_entity[1],
+				                             g_entity_globals.color_entity[2] );
 
 				StringOutputStream command( 256 );
 				command << "entitySetColour " << buffer;
@@ -673,16 +673,16 @@ typedef ReferenceCaller1<EntityCreator, const BoolImportCallback&, ShowTargetNam
 
 void Entity_constructPreferences( PreferencesPage& page ){
 	page.appendSpinner(	"Names Display Distance (3D)", 512.0, 0.0, 200500.0,
-		IntImportCallback( ShowNamesDistImportCaller( GlobalEntityCreator() ) ),
-		IntExportCallback( ShowNamesDistExportCaller( GlobalEntityCreator() ) )
-		);
+	                    IntImportCallback( ShowNamesDistImportCaller( GlobalEntityCreator() ) ),
+	                    IntExportCallback( ShowNamesDistExportCaller( GlobalEntityCreator() ) )
+	                  );
 	page.appendSpinner(	"Names Display Ratio (2D)", 64.0, 0.0, 100500.0,
-		IntImportCallback( ShowNamesRatioImportCaller( GlobalEntityCreator() ) ),
-		IntExportCallback( ShowNamesRatioExportCaller( GlobalEntityCreator() ) )
-		);
+	                    IntImportCallback( ShowNamesRatioImportCaller( GlobalEntityCreator() ) ),
+	                    IntExportCallback( ShowNamesRatioExportCaller( GlobalEntityCreator() ) )
+	                  );
 	page.appendCheckBox( "Entity Names", "= Targetnames",
-		BoolImportCallback( ShowTargetNamesImportCaller( GlobalEntityCreator() ) ),
-		BoolExportCallback( ShowTargetNamesExportCaller( GlobalEntityCreator() ) ) );
+	                     BoolImportCallback( ShowTargetNamesImportCaller( GlobalEntityCreator() ) ),
+	                     BoolExportCallback( ShowTargetNamesExportCaller( GlobalEntityCreator() ) ) );
 }
 void Entity_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Entities", "Entity Display Preferences" ) );

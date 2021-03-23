@@ -35,26 +35,26 @@
 template<typename Enumeration>
 class BitFieldValue : public Enumeration
 {
-unsigned m_value;
+	unsigned m_value;
 protected:
-explicit BitFieldValue( unsigned value ) : m_value( value ){
-}
+	explicit BitFieldValue( unsigned value ) : m_value( value ){
+	}
 public:
-BitFieldValue() : m_value( 0 ){
-}
-explicit BitFieldValue( typename Enumeration::Value value ) : m_value( 1 << value ){
-}
-unsigned get() const {
-	return m_value;
-}
+	BitFieldValue() : m_value( 0 ){
+	}
+	explicit BitFieldValue( typename Enumeration::Value value ) : m_value( 1 << value ){
+	}
+	unsigned get() const {
+		return m_value;
+	}
 };
 
 template<typename Enumeration>
 class BitFieldValueUnsafe : public BitFieldValue<Enumeration>
 {
 public:
-explicit BitFieldValueUnsafe( unsigned value ) : BitFieldValue<Enumeration>( value ){
-}
+	explicit BitFieldValueUnsafe( unsigned value ) : BitFieldValue<Enumeration>( value ){
+	}
 };
 
 template<typename Enumeration>

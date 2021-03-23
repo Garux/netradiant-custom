@@ -51,63 +51,63 @@ class Instance;
 class DBrush
 {
 public:
-DPlane* AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, const char* textureName, bool bDetail );
-void SaveToFile( FILE* pFile );
+	DPlane* AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, const char* textureName, bool bDetail );
+	void SaveToFile( FILE* pFile );
 
-void Rotate( vec3_t vOrigin, vec3_t vRotation );
-void RotateAboutCentre( vec3_t vRotation );
+	void Rotate( vec3_t vOrigin, vec3_t vRotation );
+	void RotateAboutCentre( vec3_t vRotation );
 
-DPlane* HasPlaneInverted( DPlane* chkPlane );
-DPlane* HasPlane( DPlane* chkPlane );
-DPlane* AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, const _QERFaceData* texData );
+	DPlane* HasPlaneInverted( DPlane* chkPlane );
+	DPlane* HasPlane( DPlane* chkPlane );
+	DPlane* AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, const _QERFaceData* texData );
 
-bool ResetTextures( const char* textureName, float fScale[2], float fShift[2], int rotation, const char* newTextureName, int bResetTextureName, int bResetScale[2], int bResetShift[2], int bResetRotation );
-bool IsDetail();
-bool HasTexture( const char* textureName );
-bool IntersectsWith( DBrush *chkBrush );
-bool IntersectsWith( DPlane* p1, DPlane* p2, vec3_t v );
-bool IsCutByPlane( DPlane* cuttingPlane );
-bool GetBounds( vec3_t min, vec3_t max );
-bool HasPoint( vec3_t pnt );
-bool BBoxCollision( DBrush* chkBrush );
-bool BBoxTouch( DBrush* chkBrush );
+	bool ResetTextures( const char* textureName, float fScale[2], float fShift[2], int rotation, const char* newTextureName, int bResetTextureName, int bResetScale[2], int bResetShift[2], int bResetRotation );
+	bool IsDetail();
+	bool HasTexture( const char* textureName );
+	bool IntersectsWith( DBrush *chkBrush );
+	bool IntersectsWith( DPlane* p1, DPlane* p2, vec3_t v );
+	bool IsCutByPlane( DPlane* cuttingPlane );
+	bool GetBounds( vec3_t min, vec3_t max );
+	bool HasPoint( vec3_t pnt );
+	bool BBoxCollision( DBrush* chkBrush );
+	bool BBoxTouch( DBrush* chkBrush );
 
-int BuildPoints();
-void BuildBounds();
-void BuildFromWinding( DWinding* w );
-scene::Node* BuildInRadiant( bool allowDestruction, int* changeCnt, scene::Node* entity = NULL );
+	int BuildPoints();
+	void BuildBounds();
+	void BuildFromWinding( DWinding* w );
+	scene::Node* BuildInRadiant( bool allowDestruction, int* changeCnt, scene::Node* entity = NULL );
 
-void ResetChecks( std::list<Str>* exclusionList );
+	void ResetChecks( std::list<Str>* exclusionList );
 
-void ClearFaces();
-void ClearPoints();
+	void ClearFaces();
+	void ClearPoints();
 
-int RemoveRedundantPlanes( void );
-void RemovePlane( DPlane* plane );
-int PointPosition( vec3_t pnt );
+	int RemoveRedundantPlanes( void );
+	void RemovePlane( DPlane* plane );
+	int PointPosition( vec3_t pnt );
 
 
-void CutByPlane( DPlane* cutPlane, DBrush** newBrush1, DBrush** newBrush2 );
+	void CutByPlane( DPlane* cutPlane, DBrush** newBrush1, DBrush** newBrush2 );
 
-void LoadFromBrush( scene::Instance& brush, bool textured );
-void AddPoint( vec3_t pnt );
+	void LoadFromBrush( scene::Instance& brush, bool textured );
+	void AddPoint( vec3_t pnt );
 
-DPlane* FindPlaneWithClosestNormal( vec_t* normal );
-int FindPointsForPlane( DPlane* plane, DPoint** pnts, int maxpnts );
+	DPlane* FindPlaneWithClosestNormal( vec_t* normal );
+	int FindPointsForPlane( DPlane* plane, DPoint** pnts, int maxpnts );
 
-DBrush( int ID = -1 );
-virtual ~DBrush();
+	DBrush( int ID = -1 );
+	virtual ~DBrush();
 
-bool operator==( DBrush* other );
+	bool operator==( DBrush* other );
 
 //	members
-scene::Node* QER_entity;
-scene::Node* QER_brush;
-std::list<DPlane*> faceList;
-std::list<DPoint*> pointList;
-int m_nBrushID;
-vec3_t bbox_min, bbox_max;
-bool bBoundsBuilt;
+	scene::Node* QER_entity;
+	scene::Node* QER_brush;
+	std::list<DPlane*> faceList;
+	std::list<DPoint*> pointList;
+	int m_nBrushID;
+	vec3_t bbox_min, bbox_max;
+	bool bBoundsBuilt;
 };
 
 //typedef CList<DBrush*, DBrush*> DBrushList;

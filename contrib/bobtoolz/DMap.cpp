@@ -116,19 +116,19 @@ void DMap::LoadAll( bool bLoadPatches ){
 
 	class load_entities_t : public scene::Traversable::Walker
 	{
-	DMap* m_map;
-	bool m_bLoadPatches;
-public:
-	load_entities_t( DMap* map, bool bLoadPatches )
-		: m_map( map ), m_bLoadPatches( bLoadPatches ){
-	}
-	bool pre( scene::Node& node ) const {
-		if ( Node_isEntity( node ) ) {
-			DEntity* loadEntity = m_map->AddEntity( "", 0 );
-			loadEntity->LoadFromEntity( node, m_bLoadPatches );
+		DMap* m_map;
+		bool m_bLoadPatches;
+	public:
+		load_entities_t( DMap* map, bool bLoadPatches )
+			: m_map( map ), m_bLoadPatches( bLoadPatches ){
 		}
-		return false;
-	}
+		bool pre( scene::Node& node ) const {
+			if ( Node_isEntity( node ) ) {
+				DEntity* loadEntity = m_map->AddEntity( "", 0 );
+				loadEntity->LoadFromEntity( node, m_bLoadPatches );
+			}
+			return false;
+		}
 	} load_entities( this, bLoadPatches );
 
 	Node_getTraversable( GlobalSceneGraph().root() )->traverse( load_entities );
@@ -145,17 +145,17 @@ int DMap::FixBrushes(){
 }
 
 void DMap::ResetTextures( const char* textureName, float fScale[2],      float fShift[2],      int rotation, const char* newTextureName,
-						  int bResetTextureName,  int bResetScale[2],  int bResetShift[2],  int bResetRotation ){
+                          int bResetTextureName,  int bResetScale[2],  int bResetShift[2],  int bResetRotation ){
 	for ( std::list<DEntity *>::const_iterator texEntity = entityList.begin(); texEntity != entityList.end(); texEntity++ )
 	{
 		if ( string_equal_nocase( "worldspawn", ( *texEntity )->m_Classname ) ) {
 			( *texEntity )->ResetTextures( textureName,        fScale,       fShift,       rotation, newTextureName,
-										   bResetTextureName,  bResetScale,  bResetShift,  bResetRotation, true );
+			                               bResetTextureName,  bResetScale,  bResetShift,  bResetRotation, true );
 		}
 		else
 		{
 			if ( ( *texEntity )->ResetTextures( textureName,        fScale,       fShift,       rotation, newTextureName,
-												bResetTextureName,  bResetScale,  bResetShift,  bResetRotation, false ) ) {
+			                                    bResetTextureName,  bResetScale,  bResetShift,  bResetRotation, false ) ) {
 				RebuildEntity( *texEntity );
 			}
 		}

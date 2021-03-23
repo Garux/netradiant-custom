@@ -372,23 +372,23 @@ template<typename FirstArgument, typename Caller, typename FirstConversion>
 class ImportConvert1
 {
 public:
-static void thunk( void* environment, FirstArgument firstArgument ){
-	Caller::thunk( environment, FirstConversion( firstArgument ) );
-}
+	static void thunk( void* environment, FirstArgument firstArgument ){
+		Caller::thunk( environment, FirstConversion( firstArgument ) );
+	}
 };
 
 
 class CopiedStringFromString
 {
-CopiedString m_value;
+	CopiedString m_value;
 public:
-CopiedStringFromString( const char* string ){
-	CopiedString_importString( m_value, string );
-}
-operator CopiedString() const
-{
-	return m_value;
-}
+	CopiedStringFromString( const char* string ){
+		CopiedString_importString( m_value, string );
+	}
+	operator CopiedString() const
+	{
+		return m_value;
+	}
 };
 
 inline void CopiedString_toString( const StringImportCallback& self, CopiedString value ){
@@ -410,15 +410,15 @@ inline StringExportCallback makeCopiedStringStringExportCallback( const Caller& 
 
 class BoolFromString
 {
-bool m_value;
+	bool m_value;
 public:
-BoolFromString( const char* string ){
-	Bool_importString( m_value, string );
-}
-operator bool() const
-{
-	return m_value;
-}
+	BoolFromString( const char* string ){
+		Bool_importString( m_value, string );
+	}
+	operator bool() const
+	{
+		return m_value;
+	}
 };
 
 inline void Bool_toString( const StringImportCallback& self, bool value ){
@@ -440,15 +440,15 @@ inline StringExportCallback makeBoolStringExportCallback( const Caller& caller )
 
 class IntFromString
 {
-int m_value;
+	int m_value;
 public:
-IntFromString( const char* string ){
-	Int_importString( m_value, string );
-}
-operator int() const
-{
-	return m_value;
-}
+	IntFromString( const char* string ){
+		Int_importString( m_value, string );
+	}
+	operator int() const
+	{
+		return m_value;
+	}
 };
 
 inline void Int_toString( const StringImportCallback& self, int value ){
@@ -471,15 +471,15 @@ inline StringExportCallback makeIntStringExportCallback( const Caller& caller ){
 
 class SizeFromString
 {
-std::size_t m_value;
+	std::size_t m_value;
 public:
-SizeFromString( const char* string ){
-	Size_importString( m_value, string );
-}
-operator std::size_t() const
-{
-	return m_value;
-}
+	SizeFromString( const char* string ){
+		Size_importString( m_value, string );
+	}
+	operator std::size_t() const
+	{
+		return m_value;
+	}
 };
 
 inline void Size_toString( const StringImportCallback& self, std::size_t value ){

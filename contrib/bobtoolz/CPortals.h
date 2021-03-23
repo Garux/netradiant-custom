@@ -19,29 +19,29 @@
 
 class CBspPoint {
 public:
-float p[3];
+	float p[3];
 };
 
 class CBspPortal {
 public:
-CBspPortal();
-~CBspPortal();
+	CBspPortal();
+	~CBspPortal();
 
-unsigned point_count;
-CBspPoint *point;
-bool Build( char *def, unsigned int pointCnt, bool bInverse );
+	unsigned point_count;
+	CBspPoint *point;
+	bool Build( char *def, unsigned int pointCnt, bool bInverse );
 };
 
 
 class CBspNode {
 public:
-CBspPortal *portal;
-unsigned int portal_count;
+	CBspPortal *portal;
+	unsigned int portal_count;
 
-bool AddPortal( char* def, unsigned int pointCnt, bool bInverse );
-unsigned int portal_next;
-CBspNode();
-~CBspNode();
+	bool AddPortal( char* def, unsigned int pointCnt, bool bInverse );
+	unsigned int portal_next;
+	CBspNode();
+	~CBspNode();
 };
 
 
@@ -50,14 +50,14 @@ CBspNode();
 class CPortals {
 public:
 
-CPortals();
-~CPortals();
+	CPortals();
+	~CPortals();
 
-void Load();     // use filename in fn
-void Purge();
+	void Load();     // use filename in fn
+	void Purge();
 
-char fn[NAME_MAX];
-CBspNode *node;
+	char fn[NAME_MAX];
+	CBspNode *node;
 
-unsigned int node_count;
+	unsigned int node_count;
 };

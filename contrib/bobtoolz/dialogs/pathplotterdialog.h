@@ -33,16 +33,16 @@ class CPathPlotterDialog : public CDialog
 {
 // Construction
 public:
-CPathPlotterDialog( CWnd* pParent = NULL );     // standard constructor
+	CPathPlotterDialog( CWnd* pParent = NULL );     // standard constructor
 
 // Dialog Data
 //{{AFX_DATA(CPathPlotterDialog)
-enum { IDD = IDD_PATHPLOTTER_DIALOG };
-float m_fGravity;
-float m_fMultiplier;
-BOOL m_bNoUpdate;
-int m_nPoints;
-BOOL m_bShowExtra;
+	enum { IDD = IDD_PATHPLOTTER_DIALOG };
+	float m_fGravity;
+	float m_fMultiplier;
+	BOOL m_bNoUpdate;
+	int m_nPoints;
+	BOOL m_bShowExtra;
 //}}AFX_DATA
 
 
@@ -50,7 +50,7 @@ BOOL m_bShowExtra;
 // ClassWizard generated virtual function overrides
 //{{AFX_VIRTUAL(CPathPlotterDialog)
 protected:
-virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
+	virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
 //}}AFX_VIRTUAL
 
 // Implementation
@@ -58,10 +58,10 @@ protected:
 
 // Generated message map functions
 //{{AFX_MSG(CPathPlotterDialog)
-afx_msg void OnYes();
-afx_msg void OnNo();
+	afx_msg void OnYes();
+	afx_msg void OnNo();
 //}}AFX_MSG
-DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP()
 };
 
 //{{AFX_INSERT_LOCATION}}

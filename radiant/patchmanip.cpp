@@ -74,17 +74,17 @@ void Scene_PatchConstructPrefab( scene::Graph& graph, const AABB aabb, const cha
 
 void Patch_makeCaps( Patch& patch, scene::Instance& instance, EPatchCap type, const char* shader ){
 	if ( ( type == eCapEndCap || type == eCapIEndCap )
-		 && patch.getWidth() != 5 ) {
+	     && patch.getWidth() != 5 ) {
 		globalErrorStream() << "cannot create end-cap - patch width != 5\n";
 		return;
 	}
 	if ( ( type == eCapBevel || type == eCapIBevel )
-		 && patch.getWidth() != 3 && patch.getWidth() != 5 ) {
+	     && patch.getWidth() != 3 && patch.getWidth() != 5 ) {
 		globalErrorStream() << "cannot create bevel-cap - patch width != 3\n";
 		return;
 	}
 	if ( type == eCapCylinder
-		 && patch.getWidth() != 9 ) {
+	     && patch.getWidth() != 9 ) {
 		globalErrorStream() << "cannot create cylinder-cap - patch width != 9\n";
 		return;
 	}
@@ -121,13 +121,13 @@ typedef std::vector<scene::Instance*> InstanceVector;
 
 class PatchStoreInstance
 {
-InstanceVector& m_instances;
+	InstanceVector& m_instances;
 public:
-PatchStoreInstance( InstanceVector& instances ) : m_instances( instances ){
-}
-void operator()( PatchInstance& patch ) const {
-	m_instances.push_back( &patch );
-}
+	PatchStoreInstance( InstanceVector& instances ) : m_instances( instances ){
+	}
+	void operator()( PatchInstance& patch ) const {
+		m_instances.push_back( &patch );
+	}
 };
 
 enum ECapDialog {
@@ -201,68 +201,68 @@ void Scene_PatchDeform( scene::Graph& graph, const int deform, const int axis )
 
 void Patch_thicken( Patch& patch, scene::Instance& instance, const float thickness, bool seams, const int axis ){
 
-		// Create a new patch node
-		NodeSmartReference node( g_patchCreator->createPatch() );
-		// Insert the node into worldspawn
-		Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( node );
+	// Create a new patch node
+	NodeSmartReference node( g_patchCreator->createPatch() );
+	// Insert the node into worldspawn
+	Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( node );
 
-		// Retrieve the contained patch from the node
-		Patch* targetPatch = Node_getPatch( node );
+	// Retrieve the contained patch from the node
+	Patch* targetPatch = Node_getPatch( node );
 
-		// Create the opposite patch with the given thickness = distance
-		bool no12 = true;
-		bool no34 = true;
-		targetPatch->createThickenedOpposite( patch, thickness, axis, no12, no34 );
+	// Create the opposite patch with the given thickness = distance
+	bool no12 = true;
+	bool no34 = true;
+	targetPatch->createThickenedOpposite( patch, thickness, axis, no12, no34 );
 
-		// Now select the newly created patches
-		{
-			scene::Path patchpath( makeReference( GlobalSceneGraph().root() ) );
-			patchpath.push( makeReference( *Map_GetWorldspawn( g_map ) ) );
-			patchpath.push( makeReference( node.get() ) );
-			Instance_getSelectable( *GlobalSceneGraph().find( patchpath ) )->setSelected( true );
+	// Now select the newly created patches
+	{
+		scene::Path patchpath( makeReference( GlobalSceneGraph().root() ) );
+		patchpath.push( makeReference( *Map_GetWorldspawn( g_map ) ) );
+		patchpath.push( makeReference( node.get() ) );
+		Instance_getSelectable( *GlobalSceneGraph().find( patchpath ) )->setSelected( true );
+	}
+
+	if( seams && thickness != 0.0f){
+		int i = 0;
+		if ( no12 ){
+			i = 2;
 		}
+		int iend = 4;
+		if ( no34 ){
+			iend = 2;
+		}
+		// Now create the four walls
+		for ( ; i < iend; i++ ){
+			// Allocate new patch
+			NodeSmartReference node = NodeSmartReference( g_patchCreator->createPatch() );
+			// Insert each node into worldspawn
+			Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( node );
 
-		if( seams && thickness != 0.0f){
-			int i = 0;
-			if ( no12 ){
-				i = 2;
+			// Retrieve the contained patch from the node
+			Patch* wallPatch = Node_getPatch( node );
+
+			// Create the wall patch by passing i as wallIndex
+			wallPatch->createThickenedWall( patch, *targetPatch, i );
+
+			if( ( wallPatch->localAABB().extents[0] <= 0.00005 && wallPatch->localAABB().extents[1] <= 0.00005 ) ||
+			    ( wallPatch->localAABB().extents[1] <= 0.00005 && wallPatch->localAABB().extents[2] <= 0.00005 ) ||
+			    ( wallPatch->localAABB().extents[0] <= 0.00005 && wallPatch->localAABB().extents[2] <= 0.00005 ) ){
+				//globalOutputStream() << "Thicken: Discarding degenerate patch.\n";
+				Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->erase( node );
 			}
-			int iend = 4;
-			if ( no34 ){
-				iend = 2;
-			}
-			// Now create the four walls
-			for ( ; i < iend; i++ ){
-				// Allocate new patch
-				NodeSmartReference node = NodeSmartReference( g_patchCreator->createPatch() );
-				// Insert each node into worldspawn
-				Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( node );
-
-				// Retrieve the contained patch from the node
-				Patch* wallPatch = Node_getPatch( node );
-
-				// Create the wall patch by passing i as wallIndex
-				wallPatch->createThickenedWall( patch, *targetPatch, i );
-
-				if( ( wallPatch->localAABB().extents[0] <= 0.00005 && wallPatch->localAABB().extents[1] <= 0.00005 ) ||
-					( wallPatch->localAABB().extents[1] <= 0.00005 && wallPatch->localAABB().extents[2] <= 0.00005 ) ||
-					( wallPatch->localAABB().extents[0] <= 0.00005 && wallPatch->localAABB().extents[2] <= 0.00005 ) ){
-					//globalOutputStream() << "Thicken: Discarding degenerate patch.\n";
-					Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->erase( node );
-				}
-				else
+			else
 				// Now select the newly created patches
-				{
-					scene::Path patchpath( makeReference( GlobalSceneGraph().root() ) );
-					patchpath.push( makeReference( *Map_GetWorldspawn(g_map) ) );
-					patchpath.push( makeReference( node.get() ) );
-					Instance_getSelectable( *GlobalSceneGraph().find( patchpath ) )->setSelected( true );
-				}
+			{
+				scene::Path patchpath( makeReference( GlobalSceneGraph().root() ) );
+				patchpath.push( makeReference( *Map_GetWorldspawn(g_map) ) );
+				patchpath.push( makeReference( node.get() ) );
+				Instance_getSelectable( *GlobalSceneGraph().find( patchpath ) )->setSelected( true );
 			}
 		}
+	}
 
-		// Invert the target patch so that it faces the opposite direction
-		targetPatch->InvertMatrix();
+	// Invert the target patch so that it faces the opposite direction
+	targetPatch->InvertMatrix();
 }
 
 void Scene_PatchThicken( scene::Graph& graph, const int thickness, bool seams, const int axis )
@@ -290,10 +290,10 @@ Patch* Scene_GetUltimateSelectedVisiblePatch(){
 class PatchCapTexture
 {
 public:
-void operator()( Patch& patch ) const {
-	//patch.ProjectTexture( Patch::m_CycleCapIndex );
-	patch.CapTexture();
-}
+	void operator()( Patch& patch ) const {
+		//patch.ProjectTexture( Patch::m_CycleCapIndex );
+		patch.CapTexture();
+	}
 };
 
 void Scene_PatchCapTexture_Selected( scene::Graph& graph ){
@@ -338,13 +338,13 @@ void Scene_PatchProjectTexture_Selected( scene::Graph& graph, const TextureProje
 
 class PatchFlipTexture
 {
-int m_axis;
+	int m_axis;
 public:
-PatchFlipTexture( int axis ) : m_axis( axis ){
-}
-void operator()( Patch& patch ) const {
-	patch.FlipTexture( m_axis );
-}
+	PatchFlipTexture( int axis ) : m_axis( axis ){
+	}
+	void operator()( Patch& patch ) const {
+		patch.FlipTexture( m_axis );
+	}
 };
 
 void Scene_PatchFlipTexture_Selected( scene::Graph& graph, int axis ){
@@ -354,9 +354,9 @@ void Scene_PatchFlipTexture_Selected( scene::Graph& graph, int axis ){
 class PatchNaturalTexture
 {
 public:
-void operator()( Patch& patch ) const {
-	patch.NaturalTexture();
-}
+	void operator()( Patch& patch ) const {
+		patch.NaturalTexture();
+	}
 };
 
 void Scene_PatchNaturalTexture_Selected( scene::Graph& graph ){
@@ -367,13 +367,13 @@ void Scene_PatchNaturalTexture_Selected( scene::Graph& graph ){
 
 class PatchInsertRemove
 {
-bool m_insert, m_column, m_first;
+	bool m_insert, m_column, m_first;
 public:
-PatchInsertRemove( bool insert, bool column, bool first ) : m_insert( insert ), m_column( column ), m_first( first ){
-}
-void operator()( Patch& patch ) const {
-	patch.InsertRemove( m_insert, m_column, m_first );
-}
+	PatchInsertRemove( bool insert, bool column, bool first ) : m_insert( insert ), m_column( column ), m_first( first ){
+	}
+	void operator()( Patch& patch ) const {
+		patch.InsertRemove( m_insert, m_column, m_first );
+	}
 };
 
 void Scene_PatchInsertRemove_Selected( scene::Graph& graph, bool bInsert, bool bColumn, bool bFirst ){
@@ -383,9 +383,9 @@ void Scene_PatchInsertRemove_Selected( scene::Graph& graph, bool bInsert, bool b
 class PatchInvertMatrix
 {
 public:
-void operator()( Patch& patch ) const {
-	patch.InvertMatrix();
-}
+	void operator()( Patch& patch ) const {
+		patch.InvertMatrix();
+	}
 };
 
 void Scene_PatchInvert_Selected( scene::Graph& graph ){
@@ -394,13 +394,13 @@ void Scene_PatchInvert_Selected( scene::Graph& graph ){
 
 class PatchRedisperse
 {
-EMatrixMajor m_major;
+	EMatrixMajor m_major;
 public:
-PatchRedisperse( EMatrixMajor major ) : m_major( major ){
-}
-void operator()( Patch& patch ) const {
-	patch.Redisperse( m_major );
-}
+	PatchRedisperse( EMatrixMajor major ) : m_major( major ){
+	}
+	void operator()( Patch& patch ) const {
+		patch.Redisperse( m_major );
+	}
 };
 
 void Scene_PatchRedisperse_Selected( scene::Graph& graph, EMatrixMajor major ){
@@ -409,13 +409,13 @@ void Scene_PatchRedisperse_Selected( scene::Graph& graph, EMatrixMajor major ){
 
 class PatchSmooth
 {
-EMatrixMajor m_major;
+	EMatrixMajor m_major;
 public:
-PatchSmooth( EMatrixMajor major ) : m_major( major ){
-}
-void operator()( Patch& patch ) const {
-	patch.Smooth( m_major );
-}
+	PatchSmooth( EMatrixMajor major ) : m_major( major ){
+	}
+	void operator()( Patch& patch ) const {
+		patch.Smooth( m_major );
+	}
 };
 
 void Scene_PatchSmooth_Selected( scene::Graph& graph, EMatrixMajor major ){
@@ -425,9 +425,9 @@ void Scene_PatchSmooth_Selected( scene::Graph& graph, EMatrixMajor major ){
 class PatchTransposeMatrix
 {
 public:
-void operator()( Patch& patch ) const {
-	patch.TransposeMatrix();
-}
+	void operator()( Patch& patch ) const {
+		patch.TransposeMatrix();
+	}
 };
 
 void Scene_PatchTranspose_Selected( scene::Graph& graph ){
@@ -436,14 +436,14 @@ void Scene_PatchTranspose_Selected( scene::Graph& graph ){
 
 class PatchSetShader
 {
-const char* m_name;
+	const char* m_name;
 public:
-PatchSetShader( const char* name )
-	: m_name( name ){
-}
-void operator()( Patch& patch ) const {
-	patch.SetShader( m_name );
-}
+	PatchSetShader( const char* name )
+		: m_name( name ){
+	}
+	void operator()( Patch& patch ) const {
+		patch.SetShader( m_name );
+	}
 };
 
 void Scene_PatchSetShader_Selected( scene::Graph& graph, const char* name ){
@@ -460,16 +460,16 @@ void Scene_PatchGetShader_Selected( scene::Graph& graph, CopiedString& name ){
 
 class PatchSelectByShader
 {
-const char* m_name;
+	const char* m_name;
 public:
-inline PatchSelectByShader( const char* name )
-	: m_name( name ){
-}
-void operator()( PatchInstance& patch ) const {
-	if ( shader_equal( patch.getPatch().GetShader(), m_name ) ) {
-		patch.setSelected( true );
+	inline PatchSelectByShader( const char* name )
+		: m_name( name ){
 	}
-}
+	void operator()( PatchInstance& patch ) const {
+		if ( shader_equal( patch.getPatch().GetShader(), m_name ) ) {
+			patch.setSelected( true );
+		}
+	}
 };
 
 void Scene_PatchSelectByShader( scene::Graph& graph, const char* name ){
@@ -479,16 +479,16 @@ void Scene_PatchSelectByShader( scene::Graph& graph, const char* name ){
 
 class PatchFindReplaceShader
 {
-const char* m_find;
-const char* m_replace;
+	const char* m_find;
+	const char* m_replace;
 public:
-PatchFindReplaceShader( const char* find, const char* replace ) : m_find( find ), m_replace( replace ){
-}
-void operator()( Patch& patch ) const {
-	if ( shader_equal( patch.GetShader(), m_find ) ) {
-		patch.SetShader( m_replace );
+	PatchFindReplaceShader( const char* find, const char* replace ) : m_find( find ), m_replace( replace ){
 	}
-}
+	void operator()( Patch& patch ) const {
+		if ( shader_equal( patch.GetShader(), m_find ) ) {
+			patch.SetShader( m_replace );
+		}
+	}
 };
 
 void Scene_PatchFindReplaceShader( scene::Graph& graph, const char* find, const char* replace ){
@@ -772,31 +772,31 @@ void Patch_Thicken(){
 class filter_patch_all : public PatchFilter
 {
 public:
-bool filter( const Patch& patch ) const {
-	return true;
-}
+	bool filter( const Patch& patch ) const {
+		return true;
+	}
 };
 
 class filter_patch_shader : public PatchFilter
 {
-const char* m_shader;
+	const char* m_shader;
 public:
-filter_patch_shader( const char* shader ) : m_shader( shader ){
-}
-bool filter( const Patch& patch ) const {
-	return shader_equal( patch.GetShader(), m_shader );
-}
+	filter_patch_shader( const char* shader ) : m_shader( shader ){
+	}
+	bool filter( const Patch& patch ) const {
+		return shader_equal( patch.GetShader(), m_shader );
+	}
 };
 
 class filter_patch_flags : public PatchFilter
 {
-int m_flags;
+	int m_flags;
 public:
-filter_patch_flags( int flags ) : m_flags( flags ){
-}
-bool filter( const Patch& patch ) const {
-	return ( patch.getShaderFlags() & m_flags ) != 0;
-}
+	filter_patch_flags( int flags ) : m_flags( flags ){
+	}
+	bool filter( const Patch& patch ) const {
+		return ( patch.getShaderFlags() & m_flags ) != 0;
+	}
 };
 
 
@@ -997,16 +997,16 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 				GtkLabel* label = GTK_LABEL( gtk_label_new( "Width:" ) );
 				gtk_widget_show( GTK_WIDGET( label ) );
 				gtk_table_attach( table, GTK_WIDGET( label ), 0, 1, 0, 1,
-								  (GtkAttachOptions) ( GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 			}
 			{
 				GtkLabel* label = GTK_LABEL( gtk_label_new( "Height:" ) );
 				gtk_widget_show( GTK_WIDGET( label ) );
 				gtk_table_attach( table, GTK_WIDGET( label ), 0, 1, 1, 2,
-								  (GtkAttachOptions) ( GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 			}
 
@@ -1031,8 +1031,8 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 #undef D_ITEM
 				gtk_widget_show( GTK_WIDGET( combo ) );
 				gtk_table_attach( table, GTK_WIDGET( combo ), 1, 2, 0, 1,
-								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 				width = GTK_COMBO_BOX( combo );
 			}
@@ -1057,8 +1057,8 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 #undef D_ITEM
 				gtk_widget_show( GTK_WIDGET( combo ) );
 				gtk_table_attach( table, GTK_WIDGET( combo ), 1, 2, 1, 2,
-								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 
 				height = GTK_COMBO_BOX( combo );
 			}
@@ -1069,8 +1069,8 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 				gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( _redisperseCheckBox ), FALSE );
 				gtk_widget_show( _redisperseCheckBox );
 				gtk_table_attach( table, _redisperseCheckBox, 0, 2, 2, 3,
-								(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-								(GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				redisperseCheckBox = _redisperseCheckBox;
 			}
 
@@ -1116,7 +1116,7 @@ void DoPatchDeformDlg(){
 	ModalDialog dialog;
 	GtkWidget* deformW;
 
-    GtkWidget* rndY;
+	GtkWidget* rndY;
 	GtkWidget* rndX;
 
 	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Patch deform", G_CALLBACK( dialog_delete_callback ), &dialog );
@@ -1134,8 +1134,8 @@ void DoPatchDeformDlg(){
 				GtkLabel* label = GTK_LABEL( gtk_label_new( "Max deform:" ) );
 				gtk_widget_show( GTK_WIDGET( label ) );
 				gtk_table_attach( table, GTK_WIDGET( label ), 0, 1, 0, 1,
-								  (GtkAttachOptions) ( GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 			}
 //			{
@@ -1153,8 +1153,8 @@ void DoPatchDeformDlg(){
 				GtkWidget* spin = gtk_spin_button_new( adj, 1, 0 );
 				gtk_widget_show( spin );
 				gtk_table_attach( table, spin, 1, 2, 0, 1,
-								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_widget_set_size_request( spin, 64, -1 );
 				gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( spin ), TRUE );
 
@@ -1172,8 +1172,8 @@ void DoPatchDeformDlg(){
 
 				GtkHBox* _hbox = create_dialog_hbox( 4, 4 );
 				gtk_table_attach( table, GTK_WIDGET( _hbox ), 0, 2, 1, 2,
-								  (GtkAttachOptions) ( GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_box_pack_start( GTK_BOX( _hbox ), GTK_WIDGET( _rndX ), TRUE, TRUE, 0 );
 				gtk_box_pack_start( GTK_BOX( _hbox ), GTK_WIDGET( _rndY ), TRUE, TRUE, 0 );
 				gtk_box_pack_start( GTK_BOX( _hbox ), GTK_WIDGET( _rndZ ), TRUE, TRUE, 0 );
@@ -1253,36 +1253,36 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 					GtkImage* image = new_local_image( "cap_bevel.png" );
 					gtk_widget_show( GTK_WIDGET( image ) );
 					gtk_table_attach( table, GTK_WIDGET( image ), 0, 1, 0, 1,
-									  (GtkAttachOptions) ( GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
 					GtkImage* image = new_local_image( "cap_endcap.png" );
 					gtk_widget_show( GTK_WIDGET( image ) );
 					gtk_table_attach( table, GTK_WIDGET( image ), 0, 1, 1, 2,
-									  (GtkAttachOptions) ( GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
 					GtkImage* image = new_local_image( "cap_ibevel.png" );
 					gtk_widget_show( GTK_WIDGET( image ) );
 					gtk_table_attach( table, GTK_WIDGET( image ), 0, 1, 2, 3,
-									  (GtkAttachOptions) ( GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
 					GtkImage* image = new_local_image( "cap_iendcap.png" );
 					gtk_widget_show( GTK_WIDGET( image ) );
 					gtk_table_attach( table, GTK_WIDGET( image ), 0, 1, 3, 4,
-									  (GtkAttachOptions) ( GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
 					GtkImage* image = new_local_image( "cap_cylinder.png" );
 					gtk_widget_show( GTK_WIDGET( image ) );
 					gtk_table_attach( table, GTK_WIDGET( image ), 0, 1, 4, 5,
-									  (GtkAttachOptions) ( GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 
 				GtkRadioButton* group = 0;
@@ -1290,8 +1290,8 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 					GtkWidget* button = gtk_radio_button_new_with_label_from_widget( group, "Bevel" );
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 0, 1,
-									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					group = GTK_RADIO_BUTTON( button );
 					bevel = button;
 				}
@@ -1299,32 +1299,32 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 					GtkWidget* button = gtk_radio_button_new_with_label_from_widget( group, "Endcap" );
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 1, 2,
-									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					endcap = button;
 				}
 				{
 					GtkWidget* button = gtk_radio_button_new_with_label_from_widget( group, "Inverted Bevel" );
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 2, 3,
-									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					ibevel = button;
 				}
 				{
 					GtkWidget* button = gtk_radio_button_new_with_label_from_widget( group, "Inverted Endcap" );
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 3, 4,
-									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					iendcap = button;
 				}
 				{
 					GtkWidget* button = gtk_radio_button_new_with_label_from_widget( group, "Cylinder" );
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 4, 5,
-									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					                  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+					                  (GtkAttachOptions) ( 0 ), 0, 0 );
 					cylinder = button;
 				}
 			}
@@ -1398,8 +1398,8 @@ void DoPatchThickenDlg(){
 				GtkLabel* label = GTK_LABEL( gtk_label_new( "Thickness:" ) );
 				gtk_widget_show( GTK_WIDGET( label ) );
 				gtk_table_attach( table, GTK_WIDGET( label ), 0, 1, 0, 1,
-								  (GtkAttachOptions) ( GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 			}
 //			{
@@ -1418,8 +1418,8 @@ void DoPatchThickenDlg(){
 				GtkWidget* spin = gtk_spin_button_new( adj, 1, 0 );
 				gtk_widget_show( spin );
 				gtk_table_attach( table, spin, 1, 2, 0, 1,
-								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_widget_set_size_request( spin, 48, -1 );
 				gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( spin ), TRUE );
 
@@ -1431,8 +1431,8 @@ void DoPatchThickenDlg(){
 				gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( _seamsCheckBox ), TRUE );
 				gtk_widget_show( _seamsCheckBox );
 				gtk_table_attach( table, _seamsCheckBox, 2, 4, 0, 1,
-								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				seamsW = _seamsCheckBox;
 
 			}
@@ -1450,17 +1450,17 @@ void DoPatchThickenDlg(){
 
 				// Pack the buttons into the table
 				gtk_table_attach( table, _radNormals, 0, 1, 1, 2,
-								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_table_attach( table, _radX, 1, 2, 1, 2,
-								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_table_attach( table, _radY, 2, 3, 1, 2,
-								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_table_attach( table, _radZ, 3, 4, 1, 2,
-								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				radX = _radX;
 				radY = _radY;
 				radZ = _radZ;

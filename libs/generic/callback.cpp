@@ -29,17 +29,17 @@ namespace ExampleMemberCaller
 class Integer
 {
 public:
-int value;
+	int value;
 
-void printValue() const {
-	// print this->value here;
-}
+	void printValue() const {
+		// print this->value here;
+	}
 
-void setValue(){
-	value = 3;
-}
+	void setValue(){
+		value = 3;
+	}
 // a typedef to make things more readable
-typedef MemberCaller<Integer, &Integer::setValue> SetValueCaller;
+	typedef MemberCaller<Integer, &Integer::setValue> SetValueCaller;
 };
 
 void example(){
@@ -120,34 +120,34 @@ class A4
 class Test
 {
 public:
-void test0(){
-}
-typedef Member<Test, void, &Test::test0> Test0;
-typedef MemberCaller<Test, &Test::test0> Test0Caller;
-void test0const() const {
-}
-typedef ConstMember<Test, void, &Test::test0const> Test0Const;
-typedef ConstMemberCaller<Test, &Test::test0const> Test0ConstCaller;
-void test1( A1 ){
-}
-typedef Member1<Test, A1, void, &Test::test1> Test1;
-typedef MemberCaller1<Test, A1, &Test::test1> Test1Caller;
-void test1const( A1 ) const {
-}
-typedef ConstMember1<Test, A1, void, &Test::test1const> Test1Const;
-typedef ConstMemberCaller1<Test, A1, &Test::test1const> Test1ConstCaller;
-void test2( A1, A2 ){
-}
-typedef Member2<Test, A1, A2, void, &Test::test2> Test2;
-void test2const( A1, A2 ) const {
-}
-typedef ConstMember2<Test, A1, A2, void, &Test::test2const> Test2Const;
-void test3( A1, A2, A3 ){
-}
-typedef Member3<Test, A1, A2, A3, void, &Test::test3> Test3;
-void test3const( A1, A2, A3 ) const {
-}
-typedef ConstMember3<Test, A1, A2, A3, void, &Test::test3const> Test3Const;
+	void test0(){
+	}
+	typedef Member<Test, void, &Test::test0> Test0;
+	typedef MemberCaller<Test, &Test::test0> Test0Caller;
+	void test0const() const {
+	}
+	typedef ConstMember<Test, void, &Test::test0const> Test0Const;
+	typedef ConstMemberCaller<Test, &Test::test0const> Test0ConstCaller;
+	void test1( A1 ){
+	}
+	typedef Member1<Test, A1, void, &Test::test1> Test1;
+	typedef MemberCaller1<Test, A1, &Test::test1> Test1Caller;
+	void test1const( A1 ) const {
+	}
+	typedef ConstMember1<Test, A1, void, &Test::test1const> Test1Const;
+	typedef ConstMemberCaller1<Test, A1, &Test::test1const> Test1ConstCaller;
+	void test2( A1, A2 ){
+	}
+	typedef Member2<Test, A1, A2, void, &Test::test2> Test2;
+	void test2const( A1, A2 ) const {
+	}
+	typedef ConstMember2<Test, A1, A2, void, &Test::test2const> Test2Const;
+	void test3( A1, A2, A3 ){
+	}
+	typedef Member3<Test, A1, A2, A3, void, &Test::test3> Test3;
+	void test3const( A1, A2, A3 ) const {
+	}
+	typedef ConstMember3<Test, A1, A2, A3, void, &Test::test3const> Test3Const;
 };
 
 void test0free(){

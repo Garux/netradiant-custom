@@ -57,9 +57,9 @@ void DoAboutDlg(){
 	gtk_window_set_modal( GTK_WINDOW( dlg ), TRUE );
 	gtk_window_set_title( GTK_WINDOW( dlg ), "About Portal Viewer" );
 	g_signal_connect( G_OBJECT( dlg ), "delete_event",
-						G_CALLBACK( dialog_delete_callback ), NULL );
+	                  G_CALLBACK( dialog_delete_callback ), NULL );
 	g_signal_connect( G_OBJECT( dlg ), "destroy",
-						G_CALLBACK( gtk_widget_destroy ), NULL );
+	                  G_CALLBACK( gtk_widget_destroy ), NULL );
 	g_object_set_data( G_OBJECT( dlg ), "loop", &loop );
 	g_object_set_data( G_OBJECT( dlg ), "ret", &ret );
 
@@ -69,11 +69,11 @@ void DoAboutDlg(){
 	gtk_container_set_border_width( GTK_CONTAINER( hbox ), 10 );
 
 	label = gtk_label_new( "Version 1.000\n\n"
-						   "Gtk port by Leonardo Zide\nleo@lokigames.com\n\n"
-						   "Written by Geoffrey DeWan\ngdewan@prairienet.org\n\n"
-						   "Built against NetRadiant " RADIANT_VERSION "\n"
-						   __DATE__
-						   );
+	                       "Gtk port by Leonardo Zide\nleo@lokigames.com\n\n"
+	                       "Written by Geoffrey DeWan\ngdewan@prairienet.org\n\n"
+	                       "Built against NetRadiant " RADIANT_VERSION "\n"
+	                       __DATE__
+	                     );
 	gtk_widget_show( label );
 	gtk_box_pack_start( GTK_BOX( hbox ), label, TRUE, TRUE, 0 );
 	gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT );
@@ -86,7 +86,7 @@ void DoAboutDlg(){
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
-						G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
+	                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
 	gtk_widget_set_size_request( button, 60, -1 );
 
 	gtk_widget_show( dlg );

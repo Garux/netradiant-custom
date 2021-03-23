@@ -58,19 +58,19 @@ const BlendFactor BLEND_SRC_ALPHA_SATURATE = 10;
 class BlendFunc
 {
 public:
-BlendFunc( BlendFactor src, BlendFactor dst ) : m_src( src ), m_dst( dst ){
-}
-BlendFactor m_src;
-BlendFactor m_dst;
+	BlendFunc( BlendFactor src, BlendFactor dst ) : m_src( src ), m_dst( dst ){
+	}
+	BlendFactor m_src;
+	BlendFactor m_dst;
 };
 
 class ShaderLayer
 {
 public:
-virtual qtexture_t* texture() const = 0;
-virtual BlendFunc blendFunc() const = 0;
-virtual bool clampToBorder() const = 0;
-virtual float alphaTest() const = 0;
+	virtual qtexture_t* texture() const = 0;
+	virtual BlendFunc blendFunc() const = 0;
+	virtual bool clampToBorder() const = 0;
+	virtual float alphaTest() const = 0;
 };
 
 typedef Callback1<const ShaderLayer&> ShaderLayerCallback;
@@ -79,51 +79,51 @@ typedef Callback1<const ShaderLayer&> ShaderLayerCallback;
 class IShader
 {
 public:
-enum EAlphaFunc
-{
-	eAlways,
-	eEqual,
-	eLess,
-	eGreater,
-	eLEqual,
-	eGEqual,
-};
-enum ECull
-{
-	eCullNone,
-	eCullBack,
-};
+	enum EAlphaFunc
+	{
+		eAlways,
+		eEqual,
+		eLess,
+		eGreater,
+		eLEqual,
+		eGEqual,
+	};
+	enum ECull
+	{
+		eCullNone,
+		eCullBack,
+	};
 // Increment the number of references to this object
-virtual void IncRef() = 0;
+	virtual void IncRef() = 0;
 // Decrement the reference count
-virtual void DecRef() = 0;
+	virtual void DecRef() = 0;
 // get/set the qtexture_t* Radiant uses to represent this shader object
-virtual qtexture_t* getTexture() const = 0;
-virtual qtexture_t* getDiffuse() const = 0;
-virtual qtexture_t* getBump() const = 0;
-virtual qtexture_t* getSpecular() const = 0;
+	virtual qtexture_t* getTexture() const = 0;
+	virtual qtexture_t* getDiffuse() const = 0;
+	virtual qtexture_t* getBump() const = 0;
+	virtual qtexture_t* getSpecular() const = 0;
 // get shader name
-virtual const char* getName() const = 0;
-virtual bool IsInUse() const = 0;
-virtual void SetInUse( bool bInUse ) = 0;
+	virtual const char* getName() const = 0;
+	virtual bool IsInUse() const = 0;
+	virtual void SetInUse( bool bInUse ) = 0;
 // get the editor flags (QER_NOCARVE QER_TRANS)
-virtual int getFlags() const = 0;
+	virtual int getFlags() const = 0;
 // get the transparency value
-virtual float getTrans() const = 0;
+	virtual float getTrans() const = 0;
 // test if it's a true shader, or a default shader created to wrap around a texture
-virtual bool IsDefault() const = 0;
+	virtual bool IsDefault() const = 0;
 // get the alphaFunc
-virtual void getAlphaFunc( EAlphaFunc *func, float *ref ) = 0;
-virtual BlendFunc getBlendFunc() const = 0;
+	virtual void getAlphaFunc( EAlphaFunc *func, float *ref ) = 0;
+	virtual BlendFunc getBlendFunc() const = 0;
 // get the cull type
-virtual ECull getCull() = 0;
+	virtual ECull getCull() = 0;
 // get shader file name (ie the file where this one is defined)
-virtual const char* getShaderFileName() const = 0;
+	virtual const char* getShaderFileName() const = 0;
 
-virtual const ShaderLayer* firstLayer() const = 0;
-virtual void forEachLayer( const ShaderLayerCallback& layer ) const = 0;
+	virtual const ShaderLayer* firstLayer() const = 0;
+	virtual void forEachLayer( const ShaderLayerCallback& layer ) const = 0;
 
-virtual qtexture_t* lightFalloffImage() const = 0;
+	virtual qtexture_t* lightFalloffImage() const = 0;
 };
 
 typedef struct _GSList GSList;
@@ -134,34 +134,34 @@ class ModuleObserver;
 class ShaderSystem
 {
 public:
-INTEGER_CONSTANT( Version, 1 );
-STRING_CONSTANT( Name, "shaders" );
+	INTEGER_CONSTANT( Version, 1 );
+	STRING_CONSTANT( Name, "shaders" );
 // NOTE: shader and texture names used must be full path.
 // Shaders usable as textures have prefix equal to getTexturePrefix()
 
-virtual void realise() = 0;
-virtual void unrealise() = 0;
-virtual void refresh() = 0;
+	virtual void realise() = 0;
+	virtual void unrealise() = 0;
+	virtual void refresh() = 0;
 // activate the shader for a given name and return it
 // will return the default shader if name is not found
-virtual IShader* getShaderForName( const char* name ) = 0;
+	virtual IShader* getShaderForName( const char* name ) = 0;
 
-virtual void foreachShaderName( const ShaderNameCallback& callback ) = 0;
+	virtual void foreachShaderName( const ShaderNameCallback& callback ) = 0;
 
 // iterate over the list of active shaders
-virtual void beginActiveShadersIterator() = 0;
-virtual bool endActiveShadersIterator() = 0;
-virtual IShader* dereferenceActiveShadersIterator() = 0;
-virtual void incrementActiveShadersIterator() = 0;
+	virtual void beginActiveShadersIterator() = 0;
+	virtual bool endActiveShadersIterator() = 0;
+	virtual IShader* dereferenceActiveShadersIterator() = 0;
+	virtual void incrementActiveShadersIterator() = 0;
 
-virtual void setActiveShadersChangedNotify( const Callback& notify ) = 0;
+	virtual void setActiveShadersChangedNotify( const Callback& notify ) = 0;
 
-virtual void attach( ModuleObserver& observer ) = 0;
-virtual void detach( ModuleObserver& observer ) = 0;
+	virtual void attach( ModuleObserver& observer ) = 0;
+	virtual void detach( ModuleObserver& observer ) = 0;
 
-virtual void setLightingEnabled( bool enabled ) = 0;
+	virtual void setLightingEnabled( bool enabled ) = 0;
 
-virtual const char* getTexturePrefix() const = 0;
+	virtual const char* getTexturePrefix() const = 0;
 };
 
 #include "modulesystem.h"

@@ -346,23 +346,23 @@ GtkWidget* create_rc_window() {
 
 
 	g_signal_connect( (gpointer)main_window, "delete_event",
-					  G_CALLBACK( on_main_window_delete_event ),
-					  NULL );
+	                  G_CALLBACK( on_main_window_delete_event ),
+	                  NULL );
 	g_signal_connect( (gpointer)main_use_default_font_radio, "toggled",
-					  G_CALLBACK( on_main_use_default_font_radio_toggled ),
-					  NULL );
+	                  G_CALLBACK( on_main_use_default_font_radio_toggled ),
+	                  NULL );
 	g_signal_connect( (gpointer)main_font_selector_button, "font_set",
-					  G_CALLBACK( on_main_font_selector_button_font_set ),
-					  NULL );
+	                  G_CALLBACK( on_main_font_selector_button_font_set ),
+	                  NULL );
 	g_signal_connect( (gpointer)main_cancel_button, "clicked",
-					  G_CALLBACK( on_main_cancel_button_clicked ),
-					  NULL );
+	                  G_CALLBACK( on_main_cancel_button_clicked ),
+	                  NULL );
 	g_signal_connect( (gpointer)main_reset_button, "clicked",
-					  G_CALLBACK( on_main_reset_button_clicked ),
-					  NULL );
+	                  G_CALLBACK( on_main_reset_button_clicked ),
+	                  NULL );
 	g_signal_connect( (gpointer)main_ok_button, "clicked",
-					  G_CALLBACK( on_main_ok_button_clicked ),
-					  NULL );
+	                  G_CALLBACK( on_main_ok_button_clicked ),
+	                  NULL );
 
 	/* Store pointers to all widgets, for use by lookup_widget(). */
 	GLADE_HOOKUP_OBJECT_NO_REF( main_window, main_window, "main_window" );
@@ -526,9 +526,9 @@ static void populate_with_themes( GtkWidget* w ) {
 	gtk_tree_view_set_model( treeview, GTK_TREE_MODEL( store ) );
 
 	GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes(
-									"Theme", gtk_cell_renderer_text_new(),
-									"text", 0,
-									NULL );
+	                                "Theme", gtk_cell_renderer_text_new(),
+	                                "text", 0,
+	                                NULL );
 	gtk_tree_view_column_set_sizing( column, GTK_TREE_VIEW_COLUMN_GROW_ONLY );
 	gtk_tree_view_append_column( GTK_TREE_VIEW( treeview ), column );
 
@@ -561,7 +561,7 @@ static void populate_with_themes( GtkWidget* w ) {
 	}
 
 	g_signal_connect( G_OBJECT( selection ), "changed",
-					  G_CALLBACK( themelist_selection_changed_cb ), NULL );
+	                  G_CALLBACK( themelist_selection_changed_cb ), NULL );
 
 	g_object_unref( G_OBJECT( store ) );
 

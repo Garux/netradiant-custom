@@ -33,12 +33,12 @@ class CBrushCheckDialog : public CDialog
 {
 // Construction
 public:
-CBrushCheckDialog( CWnd* pParent = NULL );     // standard constructor
+	CBrushCheckDialog( CWnd* pParent = NULL );     // standard constructor
 
 // Dialog Data
 //{{AFX_DATA(CBrushCheckDialog)
-enum { IDD = IDD_BRUSHCHECKER_DIALOG };
-CProgressCtrl m_prog1;
+	enum { IDD = IDD_BRUSHCHECKER_DIALOG };
+	CProgressCtrl m_prog1;
 //}}AFX_DATA
 
 
@@ -46,7 +46,7 @@ CProgressCtrl m_prog1;
 // ClassWizard generated virtual function overrides
 //{{AFX_VIRTUAL(CBrushCheckDialog)
 protected:
-virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
+	virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
 //}}AFX_VIRTUAL
 
 // Implementation
@@ -56,7 +56,7 @@ protected:
 //{{AFX_MSG(CBrushCheckDialog)
 // NOTE: the ClassWizard will add member functions here
 //}}AFX_MSG
-DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP()
 };
 
 //{{AFX_INSERT_LOCATION}}

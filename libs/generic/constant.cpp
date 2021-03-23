@@ -29,8 +29,8 @@ class Bleh
 {
 public:
 
-STRING_CONSTANT( Name, "Bleh" );
-INTEGER_CONSTANT( Version, 1 );
+	STRING_CONSTANT( Name, "Bleh" );
+	INTEGER_CONSTANT( Version, 1 );
 };
 
 int version = Bleh::Version();

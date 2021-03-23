@@ -447,47 +447,47 @@ void PrintBSPFileSizes( void ){
 
 	/* print various and sundry bits */
 	Sys_Printf( "%9d models        %9d\n",
-				numBSPModels, (int) ( numBSPModels * sizeof( bspModel_t ) ) );
+	            numBSPModels, (int) ( numBSPModels * sizeof( bspModel_t ) ) );
 	Sys_Printf( "%9d shaders       %9d\n",
-				numBSPShaders, (int) ( numBSPShaders * sizeof( bspShader_t ) ) );
+	            numBSPShaders, (int) ( numBSPShaders * sizeof( bspShader_t ) ) );
 	Sys_Printf( "%9d brushes       %9d\n",
-				numBSPBrushes, (int) ( numBSPBrushes * sizeof( bspBrush_t ) ) );
+	            numBSPBrushes, (int) ( numBSPBrushes * sizeof( bspBrush_t ) ) );
 	Sys_Printf( "%9d brushsides    %9d *\n",
-				numBSPBrushSides, (int) ( numBSPBrushSides * sizeof( bspBrushSide_t ) ) );
+	            numBSPBrushSides, (int) ( numBSPBrushSides * sizeof( bspBrushSide_t ) ) );
 	Sys_Printf( "%9d fogs          %9d\n",
-				numBSPFogs, (int) ( numBSPFogs * sizeof( bspFog_t ) ) );
+	            numBSPFogs, (int) ( numBSPFogs * sizeof( bspFog_t ) ) );
 	Sys_Printf( "%9d planes        %9d\n",
-				numBSPPlanes, (int) ( numBSPPlanes * sizeof( bspPlane_t ) ) );
+	            numBSPPlanes, (int) ( numBSPPlanes * sizeof( bspPlane_t ) ) );
 	Sys_Printf( "%9zu entdata       %9d\n",
-				entities.size(), bspEntDataSize );
+	            entities.size(), bspEntDataSize );
 	Sys_Printf( "\n" );
 
 	Sys_Printf( "%9d nodes         %9d\n",
-				numBSPNodes, (int) ( numBSPNodes * sizeof( bspNode_t ) ) );
+	            numBSPNodes, (int) ( numBSPNodes * sizeof( bspNode_t ) ) );
 	Sys_Printf( "%9d leafs         %9d\n",
-				numBSPLeafs, (int) ( numBSPLeafs * sizeof( bspLeaf_t ) ) );
+	            numBSPLeafs, (int) ( numBSPLeafs * sizeof( bspLeaf_t ) ) );
 	Sys_Printf( "%9d leafsurfaces  %9d\n",
-				numBSPLeafSurfaces, (int) ( numBSPLeafSurfaces * sizeof( *bspLeafSurfaces ) ) );
+	            numBSPLeafSurfaces, (int) ( numBSPLeafSurfaces * sizeof( *bspLeafSurfaces ) ) );
 	Sys_Printf( "%9d leafbrushes   %9d\n",
-				numBSPLeafBrushes, (int) ( numBSPLeafBrushes * sizeof( *bspLeafBrushes ) ) );
+	            numBSPLeafBrushes, (int) ( numBSPLeafBrushes * sizeof( *bspLeafBrushes ) ) );
 	Sys_Printf( "\n" );
 
 	Sys_Printf( "%9d drawsurfaces  %9d *\n",
-				numBSPDrawSurfaces, (int) ( numBSPDrawSurfaces * sizeof( *bspDrawSurfaces ) ) );
+	            numBSPDrawSurfaces, (int) ( numBSPDrawSurfaces * sizeof( *bspDrawSurfaces ) ) );
 	Sys_Printf( "%9d patchsurfaces       \n",
-				patchCount );
+	            patchCount );
 	Sys_Printf( "%9d drawverts     %9d *\n",
-				numBSPDrawVerts, (int) ( numBSPDrawVerts * sizeof( *bspDrawVerts ) ) );
+	            numBSPDrawVerts, (int) ( numBSPDrawVerts * sizeof( *bspDrawVerts ) ) );
 	Sys_Printf( "%9d drawindexes   %9d\n",
-				numBSPDrawIndexes, (int) ( numBSPDrawIndexes * sizeof( *bspDrawIndexes ) ) );
+	            numBSPDrawIndexes, (int) ( numBSPDrawIndexes * sizeof( *bspDrawIndexes ) ) );
 	Sys_Printf( "\n" );
 
 	Sys_Printf( "%9d lightmaps     %9d\n",
-				numBSPLightBytes / ( game->lightmapSize * game->lightmapSize * 3 ), numBSPLightBytes );
+	            numBSPLightBytes / ( game->lightmapSize * game->lightmapSize * 3 ), numBSPLightBytes );
 	Sys_Printf( "%9d lightgrid     %9d *\n",
-				numBSPGridPoints, (int) ( numBSPGridPoints * sizeof( *bspGridPoints ) ) );
+	            numBSPGridPoints, (int) ( numBSPGridPoints * sizeof( *bspGridPoints ) ) );
 	Sys_Printf( "          visibility    %9d\n",
-				numBSPVisBytes );
+	            numBSPVisBytes );
 }
 
 
@@ -647,8 +647,8 @@ void UnparseEntities( void ){
 		/* ydnar: certain entities get stripped from bsp file */
 		const char *classname = e.classname();
 		if ( striEqual( classname, "misc_model" ) ||
-			 striEqual( classname, "_decal" ) ||
-			 striEqual( classname, "_skybox" ) ) {
+		     striEqual( classname, "_decal" ) ||
+		     striEqual( classname, "_skybox" ) ) {
 			continue;
 		}
 

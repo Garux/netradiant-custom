@@ -57,9 +57,9 @@ void write_stack_trace( TextOutputStream& outputStream ){
 class Address
 {
 public:
-void* m_value;
-Address( void* value ) : m_value( value ){
-}
+	void* m_value;
+	Address( void* value ) : m_value( value ){
+	}
 };
 
 /// \brief Writes an address \p p to \p ostream in hexadecimal form.
@@ -74,9 +74,9 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 class Offset
 {
 public:
-void* m_value;
-Offset( void* value ) : m_value( value ){
-}
+	void* m_value;
+	Offset( void* value ) : m_value( value ){
+	}
 };
 
 /// \brief Writes an address \p p to \p ostream in hexadecimal form.
@@ -112,16 +112,16 @@ void write_symbol( PSYMBOL_INFO pSym, STACKFRAME64& sf, TextOutputStream& output
 
 		DWORD basicType;
 		if ( SymGetTypeInfo( GetCurrentProcess(), pSym->ModBase, pSym->TypeIndex,
-							 TI_GET_BASETYPE, &basicType ) ) {
+		                     TI_GET_BASETYPE, &basicType ) ) {
 			int bleh = 0;
 		}
 		else
 		{
 			DWORD typeId;
 			if ( SymGetTypeInfo( GetCurrentProcess(), pSym->ModBase, pSym->TypeIndex,
-								 TI_GET_TYPEID, &typeId ) ) {
+			                     TI_GET_TYPEID, &typeId ) ) {
 				if ( SymGetTypeInfo( GetCurrentProcess(), pSym->ModBase, pSym->TypeIndex,
-									 TI_GET_BASETYPE, &basicType ) ) {
+				                     TI_GET_BASETYPE, &basicType ) ) {
 					int bleh = 0;
 				}
 				else
@@ -132,7 +132,7 @@ void write_symbol( PSYMBOL_INFO pSym, STACKFRAME64& sf, TextOutputStream& output
 
 					WCHAR* name;
 					if ( SymGetTypeInfo( GetCurrentProcess(), pSym->ModBase, typeId,
-										 TI_GET_SYMNAME, &name ) ) {
+					                     TI_GET_SYMNAME, &name ) ) {
 						outputStream << name << " ";
 						LocalFree( name );
 						int bleh = 0;
@@ -163,9 +163,9 @@ void write_symbol( PSYMBOL_INFO pSym, STACKFRAME64& sf, TextOutputStream& output
 
 BOOL CALLBACK
 EnumerateSymbolsCallback(
-	PSYMBOL_INFO pSymInfo,
-	ULONG SymbolSize,
-	PVOID UserContext ){
+    PSYMBOL_INFO pSymInfo,
+    ULONG SymbolSize,
+    PVOID UserContext ){
 	write_symbol( pSymInfo, ( (EnumerateSymbolsContext*)UserContext )->sf, ( (EnumerateSymbolsContext*)UserContext )->outputStream, ( (EnumerateSymbolsContext*)UserContext )->count );
 
 
@@ -214,14 +214,14 @@ void write_stack_trace( PCONTEXT pContext, TextOutputStream& outputStream ){
 	{
 		// Get the next stack frame
 		if ( !StackWalk64( dwMachineType,
-						   m_hProcess,
-						   GetCurrentThread(),
-						   &sf,
-						   &context,
-						   0,
-						   SymFunctionTableAccess64,
-						   SymGetModuleBase64,
-						   0 ) ) {
+		                   m_hProcess,
+		                   GetCurrentThread(),
+		                   &sf,
+		                   &context,
+		                   0,
+		                   SymFunctionTableAccess64,
+		                   SymGetModuleBase64,
+		                   0 ) ) {
 			break;
 		}
 
@@ -236,7 +236,7 @@ void write_stack_trace( PCONTEXT pContext, TextOutputStream& outputStream ){
 		pSymbol->MaxNameLen = max_sym_name;
 
 		DWORD64 symDisplacement = 0; // Displacement of the input address,
-		                             // relative to the start of the symbol
+		// relative to the start of the symbol
 
 		IMAGEHLP_MODULE64 module = { sizeof( IMAGEHLP_MODULE64 ) };
 		if ( SymGetModuleInfo64( m_hProcess, sf.AddrPC.Offset, &module ) ) {
@@ -265,7 +265,7 @@ void write_stack_trace( PCONTEXT pContext, TextOutputStream& outputStream ){
 				IMAGEHLP_LINE64 lineInfo = { sizeof( IMAGEHLP_LINE64 ) };
 				DWORD dwLineDisplacement;
 				if ( SymGetLineFromAddr64( m_hProcess, sf.AddrPC.Offset,
-										   &dwLineDisplacement, &lineInfo ) ) {
+				                           &dwLineDisplacement, &lineInfo ) ) {
 					outputStream << " " << lineInfo.FileName << " line " << Unsigned( lineInfo.LineNumber );
 				}
 			}
@@ -284,7 +284,10 @@ void write_stack_trace( PCONTEXT pContext, TextOutputStream& outputStream ){
 }
 
 void write_stack_trace( TextOutputStream& outputStream ){
-	__try { RaiseException( 0,0,0,0 ); } __except( write_stack_trace( ( GetExceptionInformation() )->ContextRecord, outputStream ), EXCEPTION_CONTINUE_EXECUTION ) {
+	__try {
+		RaiseException( 0,0,0,0 );
+	}
+	__except( write_stack_trace( ( GetExceptionInformation() )->ContextRecord, outputStream ), EXCEPTION_CONTINUE_EXECUTION ) {
 	}
 }
 

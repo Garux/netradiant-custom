@@ -208,7 +208,7 @@ void vfsInitDirectory( const char *path ){
 
 // lists all .shader files
 void vfsListShaderFiles( StrList* list, void pushStringCallback( StrList* list, const char* string ) ){
-/* search in dirs */
+	/* search in dirs */
 	for ( int i = 0; i < g_numDirs; i++ ){
 		GDir *dir = g_dir_open( StringOutputStream( 256 )( g_strDirs[ i ], "scripts/" ), 0, NULL );
 
@@ -470,9 +470,9 @@ bool vfsPackFile( const char *filename, const char *packname, const int compLeve
 		else{
 			mz_bool success = MZ_TRUE;
 			success &= mz_zip_add_mem_to_archive_file_in_place_with_time( packname, filename, bufferptr, i, 0, 0, compLevel, file->zipinfo.cur_file_info.dosDate );
-				if ( !success ){
-					Error( "Failed creating zip archive \"%s\"!\n", packname );
-				}
+			if ( !success ){
+				Error( "Failed creating zip archive \"%s\"!\n", packname );
+			}
 			free( bufferptr );
 			return true;
 		}

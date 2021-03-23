@@ -32,12 +32,12 @@
 class Line
 {
 public:
-Vector3 start, end;
+	Vector3 start, end;
 
-Line(){
-}
-Line( const Vector3& start_, const Vector3& end_ ) : start( start_ ), end( end_ ){
-}
+	Line(){
+	}
+	Line( const Vector3& start_, const Vector3& end_ ) : start( start_ ), end( end_ ){
+	}
 };
 
 inline Vector3 line_closest_point( const Line& line, const Vector3& point ){
@@ -61,13 +61,13 @@ inline Vector3 line_closest_point( const Line& line, const Vector3& point ){
 class Segment
 {
 public:
-Vector3 origin, extents;
+	Vector3 origin, extents;
 
-Segment(){
-}
-Segment( const Vector3& origin_, const Vector3& extents_ ) :
-	origin( origin_ ), extents( extents_ ){
-}
+	Segment(){
+	}
+	Segment( const Vector3& origin_, const Vector3& extents_ ) :
+		origin( origin_ ), extents( extents_ ){
+	}
 };
 
 
@@ -95,13 +95,13 @@ template<typename T>
 class BasicRay
 {
 public:
-BasicVector3<T> origin, direction;
+	BasicVector3<T> origin, direction;
 
-BasicRay(){
-}
-BasicRay( const BasicVector3<T>& origin_, const BasicVector3<T>& direction_ ) :
-	origin( origin_ ), direction( direction_ ){
-}
+	BasicRay(){
+	}
+	BasicRay( const BasicVector3<T>& origin_, const BasicVector3<T>& direction_ ) :
+		origin( origin_ ), direction( direction_ ){
+	}
 };
 
 typedef BasicRay<float> Ray;
@@ -120,20 +120,20 @@ inline void ray_transform( Ray& ray, const Matrix4& matrix ){
 // closest-point-on-line
 inline double ray_squared_distance_to_point( const Ray& ray, const Vector3& point ){
 	return vector3_length_squared(
-			   vector3_subtracted(
-				   point,
-				   vector3_added(
-					   ray.origin,
-					   vector3_scaled(
-						   ray.direction,
-						   vector3_dot(
-							   vector3_subtracted( point, ray.origin ),
-							   ray.direction
-							   )
-						   )
-					   )
-				   )
-			   );
+	           vector3_subtracted(
+	               point,
+	               vector3_added(
+	                   ray.origin,
+	                   vector3_scaled(
+	                       ray.direction,
+	                       vector3_dot(
+	                           vector3_subtracted( point, ray.origin ),
+	                           ray.direction
+	                       )
+	                   )
+	               )
+	           )
+	       );
 }
 
 inline double ray_distance_to_plane( const Ray& ray, const Plane3& plane ){
@@ -144,10 +144,10 @@ inline double ray_distance_to_plane( const Ray& ray, const Plane3& plane ){
 template<typename T>
 inline BasicVector3<T> ray_intersect_plane( const BasicRay<T>& ray, const Plane3& plane ){
 	return ray.origin + vector3_scaled(
-			   ray.direction,
-			   -plane3_distance_to_point( plane, ray.origin )
-			   / vector3_dot( ray.direction, plane.normal() )
-			   );
+	           ray.direction,
+	           -plane3_distance_to_point( plane, ray.origin )
+	           / vector3_dot( ray.direction, plane.normal() )
+	       );
 }
 
 /// \brief Returns the infinite line that is the intersection of \p plane and \p other.

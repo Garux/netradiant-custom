@@ -33,20 +33,20 @@ class CTextureResetDialog : public CDialog
 {
 // Construction
 public:
-CTextureResetDialog( CWnd* pParent = NULL );     // standard constructor
+	CTextureResetDialog( CWnd* pParent = NULL );     // standard constructor
 
 // Dialog Data
 //{{AFX_DATA(CTextureResetDialog)
-enum { IDD = IDD_TEXTURE_RESET_DIALOG };
-BOOL m_bAllTextures;
-CString m_TextureName;
-int m_nRotation;
-float m_fScaleHorizontal;
-float m_fScaleVertical;
-int m_nShiftHorizontal;
-int m_nShiftVertical;
-BOOL m_bOnlyTexture;
-CString m_NewTextureName;
+	enum { IDD = IDD_TEXTURE_RESET_DIALOG };
+	BOOL m_bAllTextures;
+	CString m_TextureName;
+	int m_nRotation;
+	float m_fScaleHorizontal;
+	float m_fScaleVertical;
+	int m_nShiftHorizontal;
+	int m_nShiftVertical;
+	BOOL m_bOnlyTexture;
+	CString m_NewTextureName;
 //}}AFX_DATA
 
 
@@ -54,7 +54,7 @@ CString m_NewTextureName;
 // ClassWizard generated virtual function overrides
 //{{AFX_VIRTUAL(CTextureResetDialog)
 protected:
-virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
+	virtual void DoDataExchange( CDataExchange* pDX );      // DDX/DDV support
 //}}AFX_VIRTUAL
 
 // Implementation
@@ -64,7 +64,7 @@ protected:
 //{{AFX_MSG(CTextureResetDialog)
 // NOTE: the ClassWizard will add member functions here
 //}}AFX_MSG
-DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP()
 };
 
 //{{AFX_INSERT_LOCATION}}

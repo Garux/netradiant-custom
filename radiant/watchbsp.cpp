@@ -85,7 +85,7 @@ private:
 // a flag we have set to true when using an external BSP plugin
 // the resulting code with that is a bit dirty, cleaner solution would be to seperate the succession of commands from the listening loop
 // (in two seperate classes probably)
-bool m_bBSPPlugin;
+	bool m_bBSPPlugin;
 
 // EIdle: we are not listening
 //   DoMonitoringLoop will change state to EBeginStep
@@ -93,69 +93,71 @@ bool m_bBSPPlugin;
 //   incoming connection will change state to EWatching
 // EWatching: we have a connection, monitor it
 //   connection closed will see if we start a new step (EBeginStep) or launch Quake3 and end (EIdle)
-enum EWatchBSPState { EIdle, EBeginStep, EWatching } m_eState;
-socket_t *m_pListenSocket;
-socket_t *m_pInSocket;
-netmessage_t msg;
-GPtrArray *m_pCmd;
+	enum EWatchBSPState { EIdle, EBeginStep, EWatching } m_eState;
+	socket_t *m_pListenSocket;
+	socket_t *m_pInSocket;
+	netmessage_t msg;
+	GPtrArray *m_pCmd;
 // used to timeout EBeginStep
-GTimer    *m_pTimer;
-std::size_t m_iCurrentStep;
+	GTimer    *m_pTimer;
+	std::size_t m_iCurrentStep;
 // name of the map so we can run the engine
-char    *m_sBSPName;
+	char    *m_sBSPName;
 // buffer we use in push mode to receive data directly from the network
-xmlParserInputBufferPtr m_xmlInputBuffer;
-xmlParserCtxtPtr m_xmlParserCtxt;
+	xmlParserInputBufferPtr m_xmlInputBuffer;
+	xmlParserCtxtPtr m_xmlParserCtxt;
 // call this to switch the set listening mode
-bool SetupListening();
+	bool SetupListening();
 // start a new EBeginStep
-void DoEBeginStep();
+	void DoEBeginStep();
 // the xml and sax parser state
-char m_xmlBuf[MAX_NETMESSAGE];
-bool m_bNeedCtxtInit;
-message_info_t m_message_info;
+	char m_xmlBuf[MAX_NETMESSAGE];
+	bool m_bNeedCtxtInit;
+	message_info_t m_message_info;
 
 public:
-CWatchBSP(){
-	m_pCmd = 0;
-	m_bBSPPlugin = false;
-	m_pListenSocket = NULL;
-	m_pInSocket = NULL;
-	m_eState = EIdle;
-	m_pTimer = g_timer_new();
-	m_sBSPName = NULL;
-	m_xmlInputBuffer = NULL;
-	m_bNeedCtxtInit = true;
-}
-virtual ~CWatchBSP(){
-	EndMonitoringLoop();
-	Net_Shutdown();
+	CWatchBSP(){
+		m_pCmd = 0;
+		m_bBSPPlugin = false;
+		m_pListenSocket = NULL;
+		m_pInSocket = NULL;
+		m_eState = EIdle;
+		m_pTimer = g_timer_new();
+		m_sBSPName = NULL;
+		m_xmlInputBuffer = NULL;
+		m_bNeedCtxtInit = true;
+	}
+	virtual ~CWatchBSP(){
+		EndMonitoringLoop();
+		Net_Shutdown();
 
-	g_timer_destroy( m_pTimer );
-}
+		g_timer_destroy( m_pTimer );
+	}
 
-bool HasBSPPlugin() const
-{ return m_bBSPPlugin; }
+	bool HasBSPPlugin() const
+	{
+		return m_bBSPPlugin;
+	}
 
 // called regularly to keep listening
-void RoutineProcessing();
+	void RoutineProcessing();
 // start a monitoring loop with the following steps
-void DoMonitoringLoop( GPtrArray *pCmd, const char *sBSPName );
-void EndMonitoringLoop(){
-	Reset();
-	if ( m_sBSPName ) {
-		string_release( m_sBSPName, string_length( m_sBSPName ) );
-		m_sBSPName = 0;
+	void DoMonitoringLoop( GPtrArray *pCmd, const char *sBSPName );
+	void EndMonitoringLoop(){
+		Reset();
+		if ( m_sBSPName ) {
+			string_release( m_sBSPName, string_length( m_sBSPName ) );
+			m_sBSPName = 0;
+		}
+		if ( m_pCmd ) {
+			g_ptr_array_free( m_pCmd, TRUE );
+			m_pCmd = 0;
+		}
 	}
-	if ( m_pCmd ) {
-		g_ptr_array_free( m_pCmd, TRUE );
-		m_pCmd = 0;
-	}
-}
 // close everything - may be called from the outside to abort the process
-void Reset();
+	void Reset();
 // start a listening loop for an external process, possibly a BSP plugin
-void ExternalListen();
+	void ExternalListen();
 };
 
 CWatchBSP* g_pWatchBSP;
@@ -263,15 +265,15 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 				if ( !attrs[0] || !attrs[1] || ( strcmp( reinterpret_cast<const char*>( attrs[0] ), "version" ) != 0 ) ) {
 					message_flush( data );
 					globalErrorStream() << "No stream version given in the feedback stream, this is an old q3map version.\n"
-										   "Please turn off monitored compiling if you still wish to use this q3map executable\n";
+					                       "Please turn off monitored compiling if you still wish to use this q3map executable\n";
 					abortStream( data );
 					return;
 				}
 				else if ( strcmp( reinterpret_cast<const char*>( attrs[1] ), Q3MAP_STREAM_VERSION ) != 0 ) {
 					message_flush( data );
 					globalErrorStream() <<
-					"This version of Radiant reads version " Q3MAP_STREAM_VERSION " debug streams, I got an incoming connection with version " << reinterpret_cast<const char*>( attrs[1] ) << "\n"
-																																															   "Please make sure your versions of Radiant and q3map are matching.\n";
+					    "This version of Radiant reads version " Q3MAP_STREAM_VERSION " debug streams, I got an incoming connection with version " << reinterpret_cast<const char*>( attrs[1] ) << "\n"
+					    "Please make sure your versions of Radiant and q3map are matching.\n";
 					abortStream( data );
 					return;
 				}
@@ -361,29 +363,29 @@ static void saxEndElement( message_info_t *data, const xmlChar *name ){
 
 class MessageOutputStream : public TextOutputStream
 {
-message_info_t* m_data;
+	message_info_t* m_data;
 public:
-MessageOutputStream( message_info_t* data ) : m_data( data ){
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	if ( m_data->pGeometry != 0 ) {
-		m_data->pGeometry->saxCharacters( m_data, reinterpret_cast<const xmlChar*>( buffer ), int(length) );
+	MessageOutputStream( message_info_t* data ) : m_data( data ){
 	}
-	else
-	{
-		if ( m_data->ignore_depth == 0 ) {
-			// output the message using the level
-			message_print( m_data, buffer, length );
-			// if this message has error level flag, we mark the depth to stop the compilation when we get out
-			// we don't set the msg level if we don't stop on leak
-			if ( m_data->msg_level == 3 ) {
-				m_data->stop_depth = m_data->recurse - 1;
+	std::size_t write( const char* buffer, std::size_t length ){
+		if ( m_data->pGeometry != 0 ) {
+			m_data->pGeometry->saxCharacters( m_data, reinterpret_cast<const xmlChar*>( buffer ), int(length) );
+		}
+		else
+		{
+			if ( m_data->ignore_depth == 0 ) {
+				// output the message using the level
+				message_print( m_data, buffer, length );
+				// if this message has error level flag, we mark the depth to stop the compilation when we get out
+				// we don't set the msg level if we don't stop on leak
+				if ( m_data->msg_level == 3 ) {
+					m_data->stop_depth = m_data->recurse - 1;
+				}
 			}
 		}
-	}
 
-	return length;
-}
+		return length;
+	}
 };
 
 template<typename T>
@@ -526,7 +528,7 @@ void CWatchBSP::DoEBeginStep(){
 
 	if ( !m_bBSPPlugin ) {
 		globalOutputStream() << "=== running build command ===\n"
-							 << static_cast<const char*>( g_ptr_array_index( m_pCmd, m_iCurrentStep ) ) << "\n";
+		                     << static_cast<const char*>( g_ptr_array_index( m_pCmd, m_iCurrentStep ) ) << "\n";
 
 		if ( !Q_Exec( NULL, (char *)g_ptr_array_index( m_pCmd, m_iCurrentStep ), NULL, true, false ) ) {
 			StringOutputStream msg( 256 );
@@ -563,20 +565,20 @@ void CWatchBSP::DoEBeginStep(){
 class RunEngineConfiguration
 {
 public:
-const char* executable;
-const char* mp_executable;
-bool do_sp_mp;
+	const char* executable;
+	const char* mp_executable;
+	bool do_sp_mp;
 
-RunEngineConfiguration() :
-	executable( g_pGameDescription->getRequiredKeyValue( ENGINE_ATTRIBUTE ) ),
-	mp_executable( g_pGameDescription->getKeyValue( MP_ENGINE_ATTRIBUTE ) ){
-	do_sp_mp = !string_empty( mp_executable );
-}
+	RunEngineConfiguration() :
+		executable( g_pGameDescription->getRequiredKeyValue( ENGINE_ATTRIBUTE ) ),
+		mp_executable( g_pGameDescription->getKeyValue( MP_ENGINE_ATTRIBUTE ) ){
+		do_sp_mp = !string_empty( mp_executable );
+	}
 };
 
 inline void GlobalGameDescription_string_write_mapparameter( StringOutputStream& string, const char* mapname ){
 	if ( g_pGameDescription->mGameType == "q2"
-		 || g_pGameDescription->mGameType == "heretic2" ) {
+	  || g_pGameDescription->mGameType == "heretic2" ) {
 		string << ". +exec radiant.cfg +map " << mapname;
 	}
 	else
@@ -643,112 +645,112 @@ void CWatchBSP::RoutineProcessing(){
 		}
 		break;
 	case EWatching:
-	{
+		{
 #ifdef _DEBUG
-		// some debug checks
-		if ( !m_pInSocket ) {
-			globalErrorStream() << "ERROR: m_pInSocket == NULL in CWatchBSP::RoutineProcessing EWatching state\n";
-			return;
-		}
-#endif
-
-		int ret = Net_Wait( m_pInSocket, 0, 0 );
-		if ( ret == -1 ) {
-			globalErrorStream() << "SOCKET_ERROR in CWatchBSP::RoutineProcessing\n";
-			globalErrorStream() << "Terminating the connection.\n";
-			EndMonitoringLoop();
-			return;
-		}
-
-		if ( ret == 1 ) {
-			// the socket has been identified, there's something (message or disconnection)
-			// see if there's anything in input
-			ret = Net_Receive( m_pInSocket, &msg );
-			if ( ret > 0 ) {
-				//        unsigned int size = msg.size; //++timo just a check
-				strcpy( m_xmlBuf, NMSG_ReadString( &msg ) );
-				if ( m_bNeedCtxtInit ) {
-					m_xmlParserCtxt = NULL;
-					m_xmlParserCtxt = xmlCreatePushParserCtxt( &saxParser, &m_message_info, m_xmlBuf, static_cast<int>( strlen( m_xmlBuf ) ), NULL );
-
-					if ( m_xmlParserCtxt == NULL ) {
-						globalErrorStream() << "Failed to create the XML parser (incoming stream began with: " << m_xmlBuf << ")\n";
-						EndMonitoringLoop();
-					}
-					m_bNeedCtxtInit = false;
-				}
-				else
-				{
-					xmlParseChunk( m_xmlParserCtxt, m_xmlBuf, static_cast<int>( strlen( m_xmlBuf ) ), 0 );
-				}
+			// some debug checks
+			if ( !m_pInSocket ) {
+				globalErrorStream() << "ERROR: m_pInSocket == NULL in CWatchBSP::RoutineProcessing EWatching state\n";
+				return;
 			}
-			else
-			{
-				message_flush( &m_message_info );
-				// error or connection closed/reset
-				// NOTE: if we get an error down the XML stream we don't reach here
-				Net_Disconnect( m_pInSocket );
-				m_pInSocket = NULL;
-				globalOutputStream() << "Connection closed.\n";
-#if 0
-				if ( m_bBSPPlugin ) {
-					EndMonitoringLoop();
-					// let the BSP plugin know that the job is done
-					g_BSPFrontendTable.m_pfnEndListen( 0 );
-					return;
-				}
 #endif
-				// move to next step or finish
-				m_iCurrentStep++;
-				if ( m_iCurrentStep < m_pCmd->len ) {
-					DoEBeginStep();
+
+			int ret = Net_Wait( m_pInSocket, 0, 0 );
+			if ( ret == -1 ) {
+				globalErrorStream() << "SOCKET_ERROR in CWatchBSP::RoutineProcessing\n";
+				globalErrorStream() << "Terminating the connection.\n";
+				EndMonitoringLoop();
+				return;
+			}
+
+			if ( ret == 1 ) {
+				// the socket has been identified, there's something (message or disconnection)
+				// see if there's anything in input
+				ret = Net_Receive( m_pInSocket, &msg );
+				if ( ret > 0 ) {
+					//        unsigned int size = msg.size; //++timo just a check
+					strcpy( m_xmlBuf, NMSG_ReadString( &msg ) );
+					if ( m_bNeedCtxtInit ) {
+						m_xmlParserCtxt = NULL;
+						m_xmlParserCtxt = xmlCreatePushParserCtxt( &saxParser, &m_message_info, m_xmlBuf, static_cast<int>( strlen( m_xmlBuf ) ), NULL );
+
+						if ( m_xmlParserCtxt == NULL ) {
+							globalErrorStream() << "Failed to create the XML parser (incoming stream began with: " << m_xmlBuf << ")\n";
+							EndMonitoringLoop();
+						}
+						m_bNeedCtxtInit = false;
+					}
+					else
+					{
+						xmlParseChunk( m_xmlParserCtxt, m_xmlBuf, static_cast<int>( strlen( m_xmlBuf ) ), 0 );
+					}
 				}
 				else
 				{
-					// launch the engine .. OMG
-					if ( g_WatchBSP_RunQuake ) {
-						globalOutputStream() << "Running engine...\n";
-						StringOutputStream cmd( 256 );
-						// build the command line
-						cmd << EnginePath_get();
-						// this is game dependant
+					message_flush( &m_message_info );
+					// error or connection closed/reset
+					// NOTE: if we get an error down the XML stream we don't reach here
+					Net_Disconnect( m_pInSocket );
+					m_pInSocket = NULL;
+					globalOutputStream() << "Connection closed.\n";
+#if 0
+					if ( m_bBSPPlugin ) {
+						EndMonitoringLoop();
+						// let the BSP plugin know that the job is done
+						g_BSPFrontendTable.m_pfnEndListen( 0 );
+						return;
+					}
+#endif
+					// move to next step or finish
+					m_iCurrentStep++;
+					if ( m_iCurrentStep < m_pCmd->len ) {
+						DoEBeginStep();
+					}
+					else
+					{
+						// launch the engine .. OMG
+						if ( g_WatchBSP_RunQuake ) {
+							globalOutputStream() << "Running engine...\n";
+							StringOutputStream cmd( 256 );
+							// build the command line
+							cmd << EnginePath_get();
+							// this is game dependant
 
-						RunEngineConfiguration engineConfig;
+							RunEngineConfiguration engineConfig;
 
-						if ( engineConfig.do_sp_mp ) {
-							if ( string_equal( gamemode_get(), "mp" ) ) {
-								cmd << engineConfig.mp_executable;
+							if ( engineConfig.do_sp_mp ) {
+								if ( string_equal( gamemode_get(), "mp" ) ) {
+									cmd << engineConfig.mp_executable;
+								}
+								else
+								{
+									cmd << engineConfig.executable;
+								}
 							}
 							else
 							{
 								cmd << engineConfig.executable;
 							}
+
+							StringOutputStream cmdline;
+
+							GlobalGameDescription_string_write_mapparameter( cmdline, m_sBSPName );
+
+							globalOutputStream() << cmd.c_str() << " " << cmdline.c_str() << "\n";
+
+							// execute now
+							if ( !Q_Exec( cmd.c_str(), (char *)cmdline.c_str(), EnginePath_get(), false, false ) ) {
+								StringOutputStream msg;
+								msg << "Failed to execute the following command: " << cmd.c_str() << cmdline.c_str();
+								globalOutputStream() << msg.c_str();
+								gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),  msg.c_str(), "Build monitoring", eMB_OK, eMB_ICONERROR );
+							}
 						}
-						else
-						{
-							cmd << engineConfig.executable;
-						}
-
-						StringOutputStream cmdline;
-
-						GlobalGameDescription_string_write_mapparameter( cmdline, m_sBSPName );
-
-						globalOutputStream() << cmd.c_str() << " " << cmdline.c_str() << "\n";
-
-						// execute now
-						if ( !Q_Exec( cmd.c_str(), (char *)cmdline.c_str(), EnginePath_get(), false, false ) ) {
-							StringOutputStream msg;
-							msg << "Failed to execute the following command: " << cmd.c_str() << cmdline.c_str();
-							globalOutputStream() << msg.c_str();
-							gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),  msg.c_str(), "Build monitoring", eMB_OK, eMB_ICONERROR );
-						}
+						EndMonitoringLoop();
 					}
-					EndMonitoringLoop();
 				}
 			}
 		}
-	}
-	break;
+		break;
 	default:
 		break;
 	}

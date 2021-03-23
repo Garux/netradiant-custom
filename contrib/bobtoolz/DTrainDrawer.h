@@ -59,30 +59,30 @@ typedef struct {
 class DTrainDrawer : public Renderable, public OpenGLRenderable
 {
 private:
-std::list<splinePoint_t*> m_splineList;
-std::list<controlPoint_t*> m_pointList;
+	std::list<splinePoint_t*> m_splineList;
+	std::list<controlPoint_t*> m_pointList;
 
-bool m_bDisplay;
-Shader* m_shader_wireframe;
-Shader* m_shader_solid;
+	bool m_bDisplay;
+	Shader* m_shader_wireframe;
+	Shader* m_shader_solid;
 public:
 
-DTrainDrawer();
-virtual ~DTrainDrawer( void );
+	DTrainDrawer();
+	virtual ~DTrainDrawer( void );
 
-void render( RenderStateFlags state ) const;
-void renderSolid( Renderer& renderer, const VolumeTest& volume ) const;
-void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const;
+	void render( RenderStateFlags state ) const;
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const;
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const;
 
-void constructShaders();
-void destroyShaders();
+	void constructShaders();
+	void destroyShaders();
 
-void ClearSplines();
-void ClearPoints();
-void BuildPaths();
-void AddControlPoint( const char* name, vec_t* origin );
-splinePoint_t* AddSplinePoint( const char* name, const char* target, vec_t* origin );
-controlPoint_t* FindControlPoint( const char* name );
+	void ClearSplines();
+	void ClearPoints();
+	void BuildPaths();
+	void AddControlPoint( const char* name, vec_t* origin );
+	splinePoint_t* AddSplinePoint( const char* name, const char* target, vec_t* origin );
+	controlPoint_t* FindControlPoint( const char* name );
 };
 
 #endif // !defined(AFX_TRAINDRAWER_H__6E36062A_EF0B_11D4_ACF7_004095A18133__INCLUDED_)

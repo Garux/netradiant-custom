@@ -63,11 +63,11 @@ void Sys_LogFile( bool enable ){
 			time_t localtime;
 			time( &localtime );
 			globalOutputStream() << "Today is: " << ctime( &localtime )
-								 << "This is NetRadiant '" RADIANT_VERSION "' compiled " __DATE__ "\n" RADIANT_ABOUTMSG "\n";
+			                     << "This is NetRadiant '" RADIANT_VERSION "' compiled " __DATE__ "\n" RADIANT_ABOUTMSG "\n";
 		}
 		else{
 			gtk_MessageBox( 0, "Failed to create log file, check write permissions in Radiant directory.\n",
-							"Console logging", eMB_OK, eMB_ICONERROR );
+			                "Console logging", eMB_OK, eMB_ICONERROR );
 		}
 	}
 	else if ( !enable && g_hLogFile != 0 ) {
@@ -143,20 +143,20 @@ GtkWidget* Console_constructWindow( GtkWindow* toplevel ){
 
 class GtkTextBufferOutputStream : public TextOutputStream
 {
-GtkTextBuffer* textBuffer;
-GtkTextIter* iter;
-GtkTextTag* tag;
+	GtkTextBuffer* textBuffer;
+	GtkTextIter* iter;
+	GtkTextTag* tag;
 public:
-GtkTextBufferOutputStream( GtkTextBuffer* textBuffer, GtkTextIter* iter, GtkTextTag* tag ) : textBuffer( textBuffer ), iter( iter ), tag( tag ){
-}
-std::size_t
+	GtkTextBufferOutputStream( GtkTextBuffer* textBuffer, GtkTextIter* iter, GtkTextTag* tag ) : textBuffer( textBuffer ), iter( iter ), tag( tag ){
+	}
+	std::size_t
 #ifdef __GNUC__
 //__attribute__((optimize("O0")))
 #endif
-write( const char* buffer, std::size_t length ){
-	gtk_text_buffer_insert_with_tags( textBuffer, iter, buffer, gint( length ), tag, NULL );
-	return length;
-}
+	write( const char* buffer, std::size_t length ){
+		gtk_text_buffer_insert_with_tags( textBuffer, iter, buffer, gint( length ), tag, NULL );
+		return length;
+	}
 };
 
 //#pragma GCC pop_options
@@ -237,25 +237,25 @@ std::size_t Sys_Print( int level, const char* buf, std::size_t length ){
 class SysPrintOutputStream : public TextOutputStream
 {
 public:
-std::size_t write( const char* buffer, std::size_t length ){
-	return Sys_Print( SYS_STD, buffer, length );
-}
+	std::size_t write( const char* buffer, std::size_t length ){
+		return Sys_Print( SYS_STD, buffer, length );
+	}
 };
 
 class SysPrintErrorStream : public TextOutputStream
 {
 public:
-std::size_t write( const char* buffer, std::size_t length ){
-	return Sys_Print( SYS_ERR, buffer, length );
-}
+	std::size_t write( const char* buffer, std::size_t length ){
+		return Sys_Print( SYS_ERR, buffer, length );
+	}
 };
 
 class SysPrintWarningStream : public TextOutputStream
 {
 public:
-std::size_t write( const char* buffer, std::size_t length ){
-	return Sys_Print( SYS_WRN, buffer, length );
-}
+	std::size_t write( const char* buffer, std::size_t length ){
+		return Sys_Print( SYS_WRN, buffer, length );
+	}
 };
 
 SysPrintOutputStream g_outputStream;
