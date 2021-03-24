@@ -81,9 +81,6 @@ class ToggleShown
 {
 	bool m_shownDeferred;
 
-	ToggleShown( const ToggleShown& other ); // NOT COPYABLE
-	ToggleShown& operator=( const ToggleShown& other ); // NOT ASSIGNABLE
-
 	static gboolean notify_visible( GtkWidget* widget, gpointer dummy, ToggleShown* self ){
 		/* destroy = notify::visible with visible = 0, thus let's filter it out  */
 		if( gtk_main_level() > 0 ){ //== 0 at destroy time
@@ -102,6 +99,9 @@ class ToggleShown
 public:
 	GtkWidget* m_widget;
 	ToggleItem m_item;
+
+	ToggleShown( const ToggleShown& other ) = delete; // NOT COPYABLE
+	ToggleShown& operator=( const ToggleShown& other ) = delete; // NOT ASSIGNABLE
 
 	ToggleShown( bool shown )
 		: m_shownDeferred( shown ), m_widget( 0 ), m_item( ActiveCaller( *this ) ){

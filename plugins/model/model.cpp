@@ -453,9 +453,6 @@ class PicoModelInstance :
 	};
 	typedef Array<Remap> SurfaceRemaps;
 	SurfaceRemaps m_skins;
-
-	PicoModelInstance( const PicoModelInstance& );
-	PicoModelInstance operator=( const PicoModelInstance& );
 public:
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
@@ -507,6 +504,9 @@ public:
 		destroyRemaps();
 		constructRemaps();
 	}
+
+	PicoModelInstance( const PicoModelInstance& ) = delete; // not copyable
+	PicoModelInstance operator=( const PicoModelInstance& ) = delete; // not assignable
 
 	PicoModelInstance( const scene::Path& path, scene::Instance* parent, PicoModel& picomodel ) :
 		Instance( path, parent, this, StaticTypeCasts::instance().get() ),

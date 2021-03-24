@@ -120,11 +120,11 @@ void setGridPower( GridPower power );
 class GridMenuItem
 {
 	GridPower m_id;
-
-	GridMenuItem( const GridMenuItem& other ); // NOT COPYABLE
-	GridMenuItem& operator=( const GridMenuItem& other ); // NOT ASSIGNABLE
 public:
 	ToggleItem m_item;
+
+	GridMenuItem( const GridMenuItem& other ) = delete; // NOT COPYABLE
+	GridMenuItem& operator=( const GridMenuItem& other ) = delete; // NOT ASSIGNABLE
 
 	GridMenuItem( GridPower id ) : m_id( id ), m_item( ExportCaller( *this ) ){
 	}

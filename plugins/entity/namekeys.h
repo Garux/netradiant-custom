@@ -55,8 +55,6 @@ class NameKeys : public Entity::Observer, public Namespaced
 	Namespace* m_namespace;
 	EntityKeyValues& m_entity;
 	KeyIsNameFunc m_keyIsName;
-	NameKeys( const NameKeys& other );
-	NameKeys& operator=( const NameKeys& other );
 
 	typedef std::map<CopiedString, EntityKeyValue*> KeyValues;
 	KeyValues m_keyValues;
@@ -86,6 +84,9 @@ class NameKeys : public Entity::Observer, public Namespaced
 		}
 	}
 public:
+	NameKeys( const NameKeys& other ) = delete; // not copyable
+	NameKeys& operator=( const NameKeys& other ) = delete; // not assignable
+
 	NameKeys( EntityKeyValues& entity ) : m_namespace( 0 ), m_entity( entity ), m_keyIsName( Static<KeyIsName>::instance().m_keyIsName ){
 		m_entity.attach( *this );
 	}

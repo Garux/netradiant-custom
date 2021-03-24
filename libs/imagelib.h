@@ -34,11 +34,12 @@ struct RGBAPixel
 
 class RGBAImage : public Image
 {
-	RGBAImage( const RGBAImage& other );
-	RGBAImage& operator=( const RGBAImage& other );
 public:
 	RGBAPixel* pixels;
 	unsigned int width, height;
+
+	RGBAImage( const RGBAImage& other ) = delete; // not copyable
+	RGBAImage& operator=( const RGBAImage& other ) = delete; // not assignable
 
 	RGBAImage( unsigned int _width, unsigned int _height )
 		: pixels( new RGBAPixel[_width * _height] ), width( _width ), height( _height ){

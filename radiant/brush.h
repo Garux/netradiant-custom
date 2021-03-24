@@ -378,7 +378,7 @@ public:
 		releaseShader();
 	}
 // copy-construction not supported
-	FaceShader( const FaceShader& other );
+	FaceShader( const FaceShader& other ) = delete;
 
 	void instanceAttach(){
 		m_instanced = true;
@@ -487,10 +487,6 @@ public:
 
 class FaceTexdef : public FaceShaderObserver
 {
-// not copyable
-	FaceTexdef( const FaceTexdef& other );
-// not assignable
-	FaceTexdef& operator=( const FaceTexdef& other );
 public:
 	class SavedState
 	{
@@ -510,6 +506,11 @@ public:
 	TextureProjection m_projection;
 	bool m_projectionInitialised;
 	bool m_scaleApplied;
+
+// not copyable
+	FaceTexdef( const FaceTexdef& other ) = delete;
+// not assignable
+	FaceTexdef& operator=( const FaceTexdef& other ) = delete;
 
 	FaceTexdef(
 	    FaceShader& shader,
@@ -958,12 +959,12 @@ private:
 	UndoObserver* m_undoable_observer;
 	MapFile* m_map;
 
-// assignment not supported
-	Face& operator=( const Face& other );
-// copy-construction not supported
-	Face( const Face& other );
-
 public:
+
+// assignment not supported
+	Face& operator=( const Face& other ) = delete;
+// copy-construction not supported
+	Face( const Face& other ) = delete;
 
 	Face( FaceObserver* observer ) :
 		m_refcount( 0 ),
@@ -1704,7 +1705,7 @@ public:
 	}
 
 // assignment not supported
-	Brush& operator=( const Brush& other );
+	Brush& operator=( const Brush& other ) = delete;
 
 	void setDoom3GroupOrigin( const Vector3& origin ){
 		//globalOutputStream() << "func_static origin before: " << m_funcStaticOrigin << " after: " << origin << "\n";
@@ -3425,9 +3426,6 @@ class BrushInstance :
 	const LightList* m_lightList;
 
 	BrushTransformModifier m_transform;
-
-	BrushInstance( const BrushInstance& other ); // NOT COPYABLE
-	BrushInstance& operator=( const BrushInstance& other ); // NOT ASSIGNABLE
 public:
 	static Counter* m_counter;
 
@@ -3439,6 +3437,9 @@ public:
 	typedef MemberCaller<BrushInstance, &BrushInstance::lightsChanged> LightsChangedCaller;
 
 	STRING_CONSTANT( Name, "BrushInstance" );
+
+	BrushInstance( const BrushInstance& other ) = delete; // NOT COPYABLE
+	BrushInstance& operator=( const BrushInstance& other ) = delete; // NOT ASSIGNABLE
 
 	BrushInstance( const scene::Path& path, scene::Instance* parent, Brush& brush ) :
 		Instance( path, parent, this, StaticTypeCasts::instance().get() ),

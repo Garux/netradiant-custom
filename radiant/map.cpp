@@ -97,8 +97,6 @@ class NameObserver
 			m_names.erase( name_read( c_str() ) );
 		}
 	}
-
-	NameObserver& operator=( const NameObserver& other );
 public:
 	NameObserver( UniqueNames& names ) : m_names( names ){
 		construct();
@@ -106,6 +104,7 @@ public:
 	NameObserver( const NameObserver& other ) : m_names( other.m_names ), m_name( other.m_name ){
 		construct();
 	}
+	NameObserver& operator=( const NameObserver& other ) = delete; // not assignable
 	~NameObserver(){
 		destroy();
 	}

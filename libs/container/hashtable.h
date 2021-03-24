@@ -289,10 +289,10 @@ private:
 	void size_decrement(){
 		--m_size;
 	}
-
-	HashTable( const HashTable& other );
-	HashTable& operator=( const HashTable& other );
 public:
+	HashTable( const HashTable& other ) = delete; // not copyable
+	HashTable& operator=( const HashTable& other ) = delete; // not assignable
+
 	HashTable() : m_bucketCount( 0 ), m_buckets( 0 ), m_size( 0 ){
 		initialise();
 	}

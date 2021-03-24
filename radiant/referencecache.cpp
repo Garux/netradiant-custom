@@ -351,9 +351,9 @@ struct ModelResource : public Resource
 		ASSERT_MESSAGE( !realised(), "ModelResource::~ModelResource: resource reference still realised: " << makeQuoted( m_name.c_str() ) );
 	}
 	// NOT COPYABLE
-	ModelResource( const ModelResource& );
+	ModelResource( const ModelResource& ) = delete;
 	// NOT ASSIGNABLE
-	ModelResource& operator=( const ModelResource& );
+	ModelResource& operator=( const ModelResource& ) = delete;
 
 	void setModel( const NodeSmartReference& model ){
 		m_model = model;

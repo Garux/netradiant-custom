@@ -40,9 +40,6 @@ class ModelSkinKey : public ModuleObserver
 	ModelSkin* m_skin;
 	Callback m_skinChangedCallback;
 
-	ModelSkinKey( const ModelSkinKey& );
-	ModelSkinKey operator=( const ModelSkinKey& );
-
 	void construct(){
 		m_skin = &GlobalModelSkinCache().capture( m_name.c_str() );
 		m_skin->attach( *this );
@@ -53,6 +50,9 @@ class ModelSkinKey : public ModuleObserver
 	}
 
 public:
+	ModelSkinKey( const ModelSkinKey& ) = delete; // not copyable
+	ModelSkinKey operator=( const ModelSkinKey& ) = delete; // not assignable
+
 	ModelSkinKey( const Callback& skinChangedCallback ) : m_skinChangedCallback( skinChangedCallback ){
 		construct();
 	}
