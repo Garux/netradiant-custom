@@ -31,92 +31,20 @@
 
 
 template<int I, int Degree>
-struct BernsteinPolynomial
-{
-	static double apply( double t ){
-		return 1; // general case not implemented
-	}
-};
+double BernsteinPolynomial( double t ){
+	     if constexpr( I == 0 && Degree == 0 ) return 1;
+	else if constexpr( I == 0 && Degree == 1 ) return 1 - t;
+	else if constexpr( I == 1 && Degree == 1 ) return t;
+	else if constexpr( I == 0 && Degree == 2 ) return ( 1 - t ) * ( 1 - t );
+	else if constexpr( I == 1 && Degree == 2 ) return 2 * ( 1 - t ) * t;
+	else if constexpr( I == 2 && Degree == 2 ) return t * t;
+	else if constexpr( I == 0 && Degree == 3 ) return ( 1 - t ) * ( 1 - t ) * ( 1 - t );
+	else if constexpr( I == 1 && Degree == 3 ) return 3 * ( 1 - t ) * ( 1 - t ) * t;
+	else if constexpr( I == 2 && Degree == 3 ) return 3 * ( 1 - t ) * t * t;
+	else if constexpr( I == 3 && Degree == 3 ) return t * t * t;
+	else 0 = 1; // general case not implemented
+}
 
-template<>
-struct BernsteinPolynomial<0, 0>
-{
-	static double apply( double t ){
-		return 1;
-	}
-};
-
-template<>
-struct BernsteinPolynomial<0, 1>
-{
-	static double apply( double t ){
-		return 1 - t;
-	}
-};
-
-template<>
-struct BernsteinPolynomial<1, 1>
-{
-	static double apply( double t ){
-		return t;
-	}
-};
-
-template<>
-struct BernsteinPolynomial<0, 2>
-{
-	static double apply( double t ){
-		return ( 1 - t ) * ( 1 - t );
-	}
-};
-
-template<>
-struct BernsteinPolynomial<1, 2>
-{
-	static double apply( double t ){
-		return 2 * ( 1 - t ) * t;
-	}
-};
-
-template<>
-struct BernsteinPolynomial<2, 2>
-{
-	static double apply( double t ){
-		return t * t;
-	}
-};
-
-template<>
-struct BernsteinPolynomial<0, 3>
-{
-	static double apply( double t ){
-		return ( 1 - t ) * ( 1 - t ) * ( 1 - t );
-	}
-};
-
-template<>
-struct BernsteinPolynomial<1, 3>
-{
-	static double apply( double t ){
-		return 3 * ( 1 - t ) * ( 1 - t ) * t;
-	}
-};
-
-template<>
-struct BernsteinPolynomial<2, 3>
-{
-	static double apply( double t ){
-		return 3 * ( 1 - t ) * t * t;
-	}
-};
-
-template<>
-struct BernsteinPolynomial<3, 3>
-{
-	static double apply( double t ){
-		return t * t * t;
-	}
-};
 
 typedef Array<Vector3> ControlPoints;
 
@@ -125,22 +53,22 @@ inline Vector3 CubicBezier_evaluate( const Vector3* firstPoint, double t ){
 	double denominator = 0;
 
 	{
-		double weight = BernsteinPolynomial<0, 3>::apply( t );
+		double weight = BernsteinPolynomial<0, 3>( t );
 		result += vector3_scaled( *firstPoint++, weight );
 		denominator += weight;
 	}
 	{
-		double weight = BernsteinPolynomial<1, 3>::apply( t );
+		double weight = BernsteinPolynomial<1, 3>( t );
 		result += vector3_scaled( *firstPoint++, weight );
 		denominator += weight;
 	}
 	{
-		double weight = BernsteinPolynomial<2, 3>::apply( t );
+		double weight = BernsteinPolynomial<2, 3>( t );
 		result += vector3_scaled( *firstPoint++, weight );
 		denominator += weight;
 	}
 	{
-		double weight = BernsteinPolynomial<3, 3>::apply( t );
+		double weight = BernsteinPolynomial<3, 3>( t );
 		result += vector3_scaled( *firstPoint++, weight );
 		denominator += weight;
 	}
