@@ -76,8 +76,8 @@ public:
 	INTEGER_CONSTANT( MapVersion, 2 );
 
 	MapDoom3API( MapDoom3Dependencies& dependencies ) : m_dependencies( dependencies ){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "doom3 maps", "*.map" ) );
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "doom3 region", "*.reg" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "doom3 maps", "*.map" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "doom3 region", "*.reg" ) );
 	}
 	MapFormat* getTable(){
 		return this;
@@ -110,8 +110,8 @@ public:
 		if ( !Tokeniser_getInteger( tokeniser, version ) ) {
 			return;
 		}
-		if ( version != MapVersion() ) {
-			globalErrorStream() << "Doom 3 map version " << MapVersion() << " supported, version is " << version << "\n";
+		if ( version != MapVersion ) {
+			globalErrorStream() << "Doom 3 map version " << MapVersion << " supported, version is " << version << "\n";
 			return;
 		}
 		tokeniser.nextLine();
@@ -121,7 +121,7 @@ public:
 	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
 		writer.writeToken( "Version" );
-		writer.writeInteger( MapVersion() );
+		writer.writeInteger( MapVersion );
 		writer.nextLine();
 		Map_Write( root, traverse, writer, false );
 		writer.release();
@@ -147,8 +147,8 @@ public:
 	INTEGER_CONSTANT( MapVersion, 3 );
 
 	MapQuake4API( MapDoom3Dependencies& dependencies ) : m_dependencies( dependencies ){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake4 maps", "*.map" ) );
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake4 region", "*.reg" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "quake4 maps", "*.map" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "quake4 region", "*.reg" ) );
 	}
 	MapFormat* getTable(){
 		return this;
@@ -181,8 +181,8 @@ public:
 		if ( !Tokeniser_getInteger( tokeniser, version ) ) {
 			return;
 		}
-		if ( version != MapVersion() ) {
-			globalErrorStream() << "Quake 4 map version " << MapVersion() << " supported, version is " << version << "\n";
+		if ( version != MapVersion ) {
+			globalErrorStream() << "Quake 4 map version " << MapVersion << " supported, version is " << version << "\n";
 			return;
 		}
 		tokeniser.nextLine();
@@ -192,7 +192,7 @@ public:
 	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
 		writer.writeToken( "Version" );
-		writer.writeInteger( MapVersion() );
+		writer.writeInteger( MapVersion );
 		writer.nextLine();
 		Map_Write( root, traverse, writer, false );
 		writer.release();
@@ -234,9 +234,9 @@ public:
 	STRING_CONSTANT( Name, "mapq3" );
 
 	MapQ3API(){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake3 maps", "*.map", true, true, true ) );
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake3 region", "*.reg", true, true, true ) );
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake3 compiled maps", "*.bsp", false, true, false ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "quake3 maps", "*.map", true, true, true ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "quake3 region", "*.reg", true, true, true ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "quake3 compiled maps", "*.bsp", false, true, false ) );
 	}
 	MapFormat* getTable(){
 		return this;
@@ -316,8 +316,8 @@ public:
 	STRING_CONSTANT( Name, "mapq1" );
 
 	MapQ1API(){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake maps", "*.map" ) );
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake region", "*.reg" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "quake maps", "*.map" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "quake region", "*.reg" ) );
 	}
 	MapFormat* getTable(){
 		return this;
@@ -392,8 +392,8 @@ public:
 	STRING_CONSTANT( Name, "maphl" );
 
 	MapHalfLifeAPI(){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "half-life maps", "*.map" ) );
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "half-life region", "*.reg" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "half-life maps", "*.map" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "half-life region", "*.reg" ) );
 	}
 	MapFormat* getTable(){
 		return this;
@@ -436,8 +436,8 @@ public:
 	STRING_CONSTANT( Name, "mapq2" );
 
 	MapQ2API(){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake2 maps", "*.map" ) );
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "quake2 region", "*.reg" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "quake2 maps", "*.map" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "quake2 region", "*.reg" ) );
 	}
 	MapFormat* getTable(){
 		return this;
@@ -639,8 +639,8 @@ public:
 	STRING_CONSTANT( Name, "mapvmf" );
 
 	MapVMFAPI(){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "vmf maps", "*.vmf" ) );
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "vmf region", "*.reg" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "vmf maps", "*.vmf" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "vmf region", "*.reg" ) );
 	}
 	MapFormat* getTable(){
 		return this;

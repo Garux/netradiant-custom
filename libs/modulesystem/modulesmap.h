@@ -102,7 +102,7 @@ public:
 		if ( !globalModuleServer().getError() ) {
 			if ( string_equal( names, "*" ) ) {
 				InsertModules<Type> visitor( m_modules );
-				globalModuleServer().foreachModule( typename Type::Name(), typename Type::Version(), visitor );
+				globalModuleServer().foreachModule( Type::Name, Type::Version, visitor );
 			}
 			else
 			{
@@ -113,11 +113,11 @@ public:
 					if ( string_empty( name ) ) {
 						break;
 					}
-					Module* module = globalModuleServer().findModule( typename Type::Name(), typename Type::Version(), name );
+					Module* module = globalModuleServer().findModule( Type::Name, Type::Version, name );
 					if ( module == 0 ) {
-						globalErrorStream() << "ModulesRef::initialise: type=" << makeQuoted( typename Type::Name() ) << " version=" << makeQuoted( typename Type::Version() ) << " name=" << makeQuoted( name ) << " - not found\n";
+						globalErrorStream() << "ModulesRef::initialise: type=" << makeQuoted( Type::Name ) << " version=" << makeQuoted( Type::Version ) << " name=" << makeQuoted( name ) << " - not found\n";
 						// do not fail on missing image or model plugin, they can be optional
-						if ( !string_equal( typename Type::Name(), "image" ) && !string_equal( typename Type::Name(), "model" ) ){
+						if ( !string_equal( Type::Name, "image" ) && !string_equal( Type::Name, "model" ) ){
 							globalModuleServer().setError( true );
 							break;
 						}

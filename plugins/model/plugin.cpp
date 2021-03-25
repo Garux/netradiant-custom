@@ -124,7 +124,7 @@ public:
 		m_modelLoader( module ){
 		StringOutputStream filter( 128 );
 		filter << "*." << extension;
-		GlobalFiletypesModule::getTable().addType( Type::Name(), extension, filetype_t( module->displayName, filter.c_str() ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, extension, filetype_t( module->displayName, filter.c_str() ) );
 	}
 	ModelLoader* getTable(){
 		return &m_modelLoader;

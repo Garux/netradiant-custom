@@ -604,7 +604,7 @@ const char* misc_model_dialog( GtkWidget* parent, const char* filepath ){
 		}
 	}
 
-	const char *filename = file_dialog( parent, true, "Choose Model", buffer.c_str(), ModelLoader::Name() );
+	const char *filename = file_dialog( parent, true, "Choose Model", buffer.c_str(), ModelLoader::Name );
 	if ( filename != 0 ) {
 		// use VFS to get the correct relative path
 		const char* relative = path_make_relative( filename, GlobalFileSystem().findRoot( filename ) );

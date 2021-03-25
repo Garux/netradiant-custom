@@ -254,8 +254,8 @@ public:
 		m_undoables.erase( undoable );
 	}
 	void setLevels( std::size_t levels ){
-		if ( levels > static_cast<unsigned>( MAX_UNDO_LEVELS() ) ) {
-			levels = MAX_UNDO_LEVELS();
+		if ( levels > static_cast<unsigned>( MAX_UNDO_LEVELS ) ) {
+			levels = MAX_UNDO_LEVELS;
 		}
 
 		while ( m_undo_stack.size() > levels )

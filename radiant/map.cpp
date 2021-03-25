@@ -352,7 +352,7 @@ bool Map_Unnamed( const Map& map ){
 }
 
 inline const MapFormat& MapFormat_forFile( const char* filename ){
-	const char* moduleName = findModuleName( GetFileTypeRegistry(), MapFormat::Name(), path_get_extension( filename ) );
+	const char* moduleName = findModuleName( GetFileTypeRegistry(), MapFormat::Name, path_get_extension( filename ) );
 	MapFormat* format = Radiant_getMapModules().findModule( moduleName );
 	ASSERT_MESSAGE( format != 0, "map format not found for file " << makeQuoted( filename ) );
 	return *format;
@@ -1974,17 +1974,17 @@ const char* getMapsPath(){
 
 const char* map_open( const char* title ){
 	const char* path = Map_Unnamed( g_map )? getMapsPath() : g_map.m_name.c_str();
-	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), true, title, path, MapFormat::Name(), true, false, false );
+	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), true, title, path, MapFormat::Name, true, false, false );
 }
 
 const char* map_import( const char* title ){
 	const char* path = Map_Unnamed( g_map )? getMapsPath() : g_map.m_name.c_str();
-	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), true, title, path, MapFormat::Name(), false, true, false );
+	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), true, title, path, MapFormat::Name, false, true, false );
 }
 
 const char* map_save( const char* title ){
 	const char* path = Map_Unnamed( g_map )? getMapsPath() : g_map.m_name.c_str();
-	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), false, title, path, MapFormat::Name(), false, false, true );
+	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), false, title, path, MapFormat::Name, false, false, true );
 }
 
 void OpenMap(){

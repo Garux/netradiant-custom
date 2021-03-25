@@ -70,7 +70,7 @@ public:
 	STRING_CONSTANT( Name, "md3" );
 
 	ModelMD3API(){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "md3 models", "*.md3" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "md3 models", "*.md3" ) );
 	}
 	ModelLoader* getTable(){
 		return &m_modelmd3;
@@ -99,7 +99,7 @@ public:
 	STRING_CONSTANT( Name, "md2" );
 
 	ModelMD2API(){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "md2 models", "*.md2" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "md2 models", "*.md2" ) );
 	}
 	ModelLoader* getTable(){
 		return &m_modelmd2;
@@ -126,7 +126,7 @@ public:
 	STRING_CONSTANT( Name, "mdl" );
 
 	ModelMDLAPI(){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "mdl models", "*.mdl" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "mdl models", "*.mdl" ) );
 	}
 	ModelLoader* getTable(){
 		return &m_modelmdl;
@@ -153,7 +153,7 @@ public:
 	STRING_CONSTANT( Name, "mdc" );
 
 	ModelMDCAPI(){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "mdc models", "*.mdc" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "mdc models", "*.mdc" ) );
 	}
 	ModelLoader* getTable(){
 		return &m_modelmdc;
@@ -205,7 +205,7 @@ public:
 	STRING_CONSTANT( Name, "md5mesh" );
 
 	ModelMD5API(){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "md5 meshes", "*.md5mesh" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "md5 meshes", "*.md5mesh" ) );
 	}
 	ModelLoader* getTable(){
 		return &m_modelmd5;

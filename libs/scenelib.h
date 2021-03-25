@@ -98,17 +98,16 @@ class NodeType : public StaticTypeSystemInitialiser
 {
 	TypeId m_typeId;
 public:
-	typedef typename Type::Name Name;
 	NodeType() : m_typeId( NODETYPEID_NONE ){
 		StaticTypeSystemInitialiser::instance().addInitialiser( InitialiseCaller( *this ) );
 	}
 	void initialise(){
-		m_typeId = GlobalSceneGraph().getNodeTypeId( Name() );
+		m_typeId = GlobalSceneGraph().getNodeTypeId( Type::Name );
 	}
 	typedef MemberCaller<NodeType<Type>, &NodeType<Type>::initialise> InitialiseCaller;
 	TypeId getTypeId(){
 #if defined( _DEBUG )
-		ASSERT_MESSAGE( m_typeId != NODETYPEID_NONE, "node-type " << makeQuoted( Name() ) << " used before being initialised" );
+		ASSERT_MESSAGE( m_typeId != NODETYPEID_NONE, "node-type " << makeQuoted( Name ) << " used before being initialised" );
 #endif
 		return m_typeId;
 	}
@@ -433,17 +432,16 @@ class InstanceType : public StaticTypeSystemInitialiser
 {
 	TypeId m_typeId;
 public:
-	typedef typename Type::Name Name;
 	InstanceType() : m_typeId( INSTANCETYPEID_NONE ){
 		StaticTypeSystemInitialiser::instance().addInitialiser( InitialiseCaller( *this ) );
 	}
 	void initialise(){
-		m_typeId = GlobalSceneGraph().getInstanceTypeId( Name() );
+		m_typeId = GlobalSceneGraph().getInstanceTypeId( Type::Name );
 	}
 	typedef MemberCaller<InstanceType<Type>, &InstanceType<Type>::initialise> InitialiseCaller;
 	TypeId getTypeId(){
 #if defined( _DEBUG )
-		ASSERT_MESSAGE( m_typeId != INSTANCETYPEID_NONE, "instance-type " << makeQuoted( Name() ) << " used before being initialised" );
+		ASSERT_MESSAGE( m_typeId != INSTANCETYPEID_NONE, "instance-type " << makeQuoted( Type::Name ) << " used before being initialised" );
 #endif
 		return m_typeId;
 	}

@@ -33,7 +33,7 @@ class DefaultAPIConstructor
 {
 public:
 	const char* getName(){
-		return typename API::Name();
+		return API::Name;
 	}
 
 	API* constructAPI( Dependencies& dependencies ){
@@ -49,7 +49,7 @@ class DependenciesAPIConstructor
 {
 public:
 	const char* getName(){
-		return typename API::Name();
+		return API::Name;
 	}
 
 	API* constructAPI( Dependencies& dependencies ){
@@ -87,7 +87,7 @@ public:
 	}
 
 	void selfRegister(){
-		globalModuleServer().registerModule( typename Type::Name(), typename Type::Version(), APIConstructor::getName(), *this );
+		globalModuleServer().registerModule( Type::Name, Type::Version, APIConstructor::getName(), *this );
 	}
 
 	Dependencies& getDependencies(){
@@ -101,16 +101,16 @@ public:
 	}
 	void capture(){
 		if ( ++m_refcount == 1 ) {
-			globalOutputStream() << "Module Initialising: '" << typename Type::Name() << "' '" << APIConstructor::getName() << "'\n";
+			globalOutputStream() << "Module Initialising: '" << Type::Name << "' '" << APIConstructor::getName() << "'\n";
 			m_dependencies = new Dependencies();
 			m_dependencyCheck = !globalModuleServer().getError();
 			if ( m_dependencyCheck ) {
 				m_api = APIConstructor::constructAPI( *m_dependencies );
-				globalOutputStream() << "Module Ready: '" << typename Type::Name() << "' '" << APIConstructor::getName() << "'\n";
+				globalOutputStream() << "Module Ready: '" << Type::Name << "' '" << APIConstructor::getName() << "'\n";
 			}
 			else
 			{
-				globalErrorStream() << "Module Dependencies Failed: '" << typename Type::Name() << "' '" << APIConstructor::getName() << "'\n";
+				globalErrorStream() << "Module Dependencies Failed: '" << Type::Name << "' '" << APIConstructor::getName() << "'\n";
 			}
 			m_cycleCheck = true;
 		}

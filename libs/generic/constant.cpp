@@ -33,8 +33,8 @@ public:
 	INTEGER_CONSTANT( Version, 1 );
 };
 
-int version = Bleh::Version();
-const char* name = Bleh::Name();
+int version = Bleh::Version;
+const char* name = Bleh::Name;
 }
 
 #endif

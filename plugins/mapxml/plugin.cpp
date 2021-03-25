@@ -68,7 +68,7 @@ public:
 	STRING_CONSTANT( Name, "xmldoom3" );
 
 	MapXMLAPI(){
-		GlobalFiletypesModule::getTable().addType( Type::Name(), Name(), filetype_t( "xml doom3 maps", "*.xmap" ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, Name, filetype_t( "xml doom3 maps", "*.xmap" ) );
 	}
 	MapFormat* getTable(){
 		return this;

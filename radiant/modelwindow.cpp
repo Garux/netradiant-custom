@@ -1231,7 +1231,7 @@ void ModelBrowser_constructTree(){
 			m_modelExtensions.emplace( moduleName );
 		}
 	} typelist;
-	GlobalFiletypes().getTypeList( ModelLoader::Name(), &typelist, true, false, false );
+	GlobalFiletypes().getTypeList( ModelLoader::Name, &typelist, true, false, false );
 
 	ModelFolders modelFolders( g_ModelBrowser.m_prefFoldersToLoad.c_str() );
 

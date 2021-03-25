@@ -130,10 +130,10 @@ class ModuleRef
 public:
 	ModuleRef( const char* name ) : m_table( 0 ){
 		if ( !globalModuleServer().getError() ) {
-			m_module = globalModuleServer().findModule( typename Type::Name(), typename Type::Version(), name );
+			m_module = globalModuleServer().findModule( Type::Name, Type::Version, name );
 			if ( m_module == 0 ) {
 				globalModuleServer().setError( true );
-				globalErrorStream() << "ModuleRef::initialise: type=" << makeQuoted( typename Type::Name() ) << " version=" << makeQuoted( typename Type::Version() ) << " name=" << makeQuoted( name ) << " - not found\n";
+				globalErrorStream() << "ModuleRef::initialise: type=" << makeQuoted( Type::Name ) << " version=" << makeQuoted( Type::Version ) << " name=" << makeQuoted( name ) << " - not found\n";
 			}
 			else
 			{
@@ -151,7 +151,7 @@ public:
 	}
 	Type* getTable(){
 #if defined( _DEBUG )
-		ASSERT_MESSAGE( m_table != 0, "ModuleRef::getTable: type=" << makeQuoted( typename Type::Name() ) << " version=" << makeQuoted( typename Type::Version() ) << " - module-reference used without being initialised" );
+		ASSERT_MESSAGE( m_table != 0, "ModuleRef::getTable: type=" << makeQuoted( Type::Name ) << " version=" << makeQuoted( Type::Version ) << " - module-reference used without being initialised" );
 #endif
 		return m_table;
 	}
@@ -173,16 +173,16 @@ public:
 	}
 
 	void initialise( const char* name ){
-		m_module = globalModuleServer().findModule( typename Type::Name(), typename Type::Version(), name );
+		m_module = globalModuleServer().findModule( Type::Name, Type::Version, name );
 		if ( m_module == 0 ) {
 			globalModuleServer().setError( true );
-			globalErrorStream() << "SingletonModuleRef::initialise: type=" << makeQuoted( typename Type::Name() ) << " version=" << makeQuoted( typename Type::Version() ) << " name=" << makeQuoted( name ) << " - not found\n";
+			globalErrorStream() << "SingletonModuleRef::initialise: type=" << makeQuoted( Type::Name ) << " version=" << makeQuoted( Type::Version ) << " name=" << makeQuoted( name ) << " - not found\n";
 		}
 	}
 
 	Type* getTable(){
 #if defined( _DEBUG )
-		ASSERT_MESSAGE( m_table != 0, "SingletonModuleRef::getTable: type=" << makeQuoted( typename Type::Name() ) << " version=" << makeQuoted( typename Type::Version() ) << " - module-reference used without being initialised" );
+		ASSERT_MESSAGE( m_table != 0, "SingletonModuleRef::getTable: type=" << makeQuoted( Type::Name ) << " version=" << makeQuoted( Type::Version ) << " - module-reference used without being initialised" );
 #endif
 		return m_table;
 	}

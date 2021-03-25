@@ -25,25 +25,7 @@
 /// \file
 /// \brief Language extensions for constants that are guaranteed to be evaluated at compile-time.
 
-/// \brief A compile-time-constant as a type.
-template<typename Type>
-struct ConstantWrapper
-{
-	typedef typename Type::Value Value;
-	operator Value() const
-	{
-		return Type::evaluate();
-	}
-};
-template<typename TextOutputStreamType,  typename Type>
-inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const ConstantWrapper<Type>& c ){
-	return ostream_write( ostream, typename Type::Value( c ) );
-}
-
-#define TYPE_CONSTANT( name, value, type ) struct name ## _CONSTANT_ { typedef type Value; static Value evaluate() { return value; } }; typedef ConstantWrapper<name ## _CONSTANT_> name
-#define STRING_CONSTANT( name, value ) TYPE_CONSTANT ( name, value, const char* )
-#define INTEGER_CONSTANT( name, value ) TYPE_CONSTANT ( name, value, int )
-
-STRING_CONSTANT( EmptyString, "" );
+#define STRING_CONSTANT( name, value ) static constexpr const char* name = value
+#define INTEGER_CONSTANT( name, value ) static constexpr int name = value
 
 #endif
