@@ -501,55 +501,41 @@ inline void matrix4_affine_invert( Matrix4& self ){
 	self = matrix4_affine_inverse( self );
 }
 
-/// \brief A compile-time-constant integer.
-template<int VALUE_>
-struct IntegralConstant
-{
-	enum unnamed_ { VALUE = VALUE_ };
-};
-
-/// \brief A compile-time-constant row/column index into a 4x4 matrix.
-template<typename Row, typename Col>
-class Matrix4Index
-{
-public:
-	typedef IntegralConstant<Row::VALUE> r;
-	typedef IntegralConstant<Col::VALUE> c;
-	typedef IntegralConstant<( r::VALUE * 4 ) + c::VALUE> i;
-};
-
 /// \brief A functor which returns the cofactor of a 3x3 submatrix obtained by ignoring a given row and column of a 4x4 matrix.
 /// \param Row Defines the compile-time-constant integers x, y and z with values corresponding to the indices of the three rows to use.
 /// \param Col Defines the compile-time-constant integers x, y and z with values corresponding to the indices of the three columns to use.
 template<typename Row, typename Col>
 class Matrix4Cofactor
 {
+	static constexpr size_t Matrix4Index( size_t row, size_t col ){
+		return ( row * 4 ) + col;
+	}
 public:
-	typedef typename Matrix4Index<typename Row::x, typename Col::x>::i xx;
-	typedef typename Matrix4Index<typename Row::x, typename Col::y>::i xy;
-	typedef typename Matrix4Index<typename Row::x, typename Col::z>::i xz;
-	typedef typename Matrix4Index<typename Row::y, typename Col::x>::i yx;
-	typedef typename Matrix4Index<typename Row::y, typename Col::y>::i yy;
-	typedef typename Matrix4Index<typename Row::y, typename Col::z>::i yz;
-	typedef typename Matrix4Index<typename Row::z, typename Col::x>::i zx;
-	typedef typename Matrix4Index<typename Row::z, typename Col::y>::i zy;
-	typedef typename Matrix4Index<typename Row::z, typename Col::z>::i zz;
+	static constexpr size_t xx = Matrix4Index( Row::x,  Col::x );
+	static constexpr size_t xy = Matrix4Index( Row::x,  Col::y );
+	static constexpr size_t xz = Matrix4Index( Row::x,  Col::z );
+	static constexpr size_t yx = Matrix4Index( Row::y,  Col::x );
+	static constexpr size_t yy = Matrix4Index( Row::y,  Col::y );
+	static constexpr size_t yz = Matrix4Index( Row::y,  Col::z );
+	static constexpr size_t zx = Matrix4Index( Row::z,  Col::x );
+	static constexpr size_t zy = Matrix4Index( Row::z,  Col::y );
+	static constexpr size_t zz = Matrix4Index( Row::z,  Col::z );
 	static double apply( const Matrix4& self ){
-		return self[xx::VALUE] * ( self[yy::VALUE] * self[zz::VALUE] - self[zy::VALUE] * self[yz::VALUE] )
-		     - self[xy::VALUE] * ( self[yx::VALUE] * self[zz::VALUE] - self[zx::VALUE] * self[yz::VALUE] )
-		     + self[xz::VALUE] * ( self[yx::VALUE] * self[zy::VALUE] - self[zx::VALUE] * self[yy::VALUE] );
+		return self[xx] * ( self[yy] * self[zz] - self[zy] * self[yz] )
+		     - self[xy] * ( self[yx] * self[zz] - self[zx] * self[yz] )
+		     + self[xz] * ( self[yx] * self[zy] - self[zx] * self[yy] );
 	}
 };
 
 /// \brief The cofactor element indices for a 4x4 matrix row or column.
 /// \param Element The index of the element to ignore.
-template<int Element>
+template<size_t Element>
 class Cofactor4
 {
 public:
-	typedef IntegralConstant<( Element <= 0 ) ? 1 : 0> x;
-	typedef IntegralConstant<( Element <= 1 ) ? 2 : 1> y;
-	typedef IntegralConstant<( Element <= 2 ) ? 3 : 2> z;
+	static constexpr size_t x = ( Element <= 0 ) ? 1 : 0;
+	static constexpr size_t y = ( Element <= 1 ) ? 2 : 1;
+	static constexpr size_t z = ( Element <= 2 ) ? 3 : 2;
 };
 
 /// \brief Returns the determinant of \p self.

@@ -64,27 +64,27 @@ const ClipResult c_CLIP_LT_Z = 0x10; // 010000
 const ClipResult c_CLIP_GT_Z = 0x20; // 100000
 const ClipResult c_CLIP_FAIL = 0x3F; // 111111
 
-template<typename Index>
+template<size_t Index>
 class Vector4ClipLT
 {
 public:
 	static bool compare( const Vector4& self ){
-		return self[Index::VALUE] < self[3];
+		return self[Index] < self[3];
 	}
 	static double scale( const Vector4& self, const Vector4& other ){
-		return ( self[Index::VALUE] - self[3] ) / ( other[3] - other[Index::VALUE] );
+		return ( self[Index] - self[3] ) / ( other[3] - other[Index] );
 	}
 };
 
-template<typename Index>
+template<size_t Index>
 class Vector4ClipGT
 {
 public:
 	static bool compare( const Vector4& self ){
-		return self[Index::VALUE] > -self[3];
+		return self[Index] > -self[3];
 	}
 	static double scale( const Vector4& self, const Vector4& other ){
-		return ( self[Index::VALUE] + self[3] ) / ( -other[3] - other[Index::VALUE] );
+		return ( self[Index] + self[3] ) / ( -other[3] - other[Index] );
 	}
 };
 
@@ -131,12 +131,12 @@ public:
 	}
 };
 
-#define CLIP_X_LT_W( p ) ( Vector4ClipLT< IntegralConstant<0> >::compare( p ) )
-#define CLIP_X_GT_W( p ) ( Vector4ClipGT< IntegralConstant<0> >::compare( p ) )
-#define CLIP_Y_LT_W( p ) ( Vector4ClipLT< IntegralConstant<1> >::compare( p ) )
-#define CLIP_Y_GT_W( p ) ( Vector4ClipGT< IntegralConstant<1> >::compare( p ) )
-#define CLIP_Z_LT_W( p ) ( Vector4ClipLT< IntegralConstant<2> >::compare( p ) )
-#define CLIP_Z_GT_W( p ) ( Vector4ClipGT< IntegralConstant<2> >::compare( p ) )
+#define CLIP_X_LT_W( p ) ( Vector4ClipLT< 0 >::compare( p ) )
+#define CLIP_X_GT_W( p ) ( Vector4ClipGT< 0 >::compare( p ) )
+#define CLIP_Y_LT_W( p ) ( Vector4ClipLT< 1 >::compare( p ) )
+#define CLIP_Y_GT_W( p ) ( Vector4ClipGT< 1 >::compare( p ) )
+#define CLIP_Z_LT_W( p ) ( Vector4ClipLT< 2 >::compare( p ) )
+#define CLIP_Z_GT_W( p ) ( Vector4ClipGT< 2 >::compare( p ) )
 
 inline ClipResult homogenous_clip_point( const Vector4& clipped ){
 	ClipResult result = c_CLIP_FAIL;
@@ -177,12 +177,12 @@ inline ClipResult matrix4_clip_point( const Matrix4& self, const Vector3& point,
 inline std::size_t homogenous_clip_triangle( Vector4 clipped[9] ){
 	Vector4 buffer[9];
 	std::size_t count = 3;
-	count = Vector4ClipPolygon< Vector4ClipLT< IntegralConstant<0> > >::apply( clipped, clipped + count, buffer );
-	count = Vector4ClipPolygon< Vector4ClipGT< IntegralConstant<0> > >::apply( buffer, buffer + count, clipped );
-	count = Vector4ClipPolygon< Vector4ClipLT< IntegralConstant<1> > >::apply( clipped, clipped + count, buffer );
-	count = Vector4ClipPolygon< Vector4ClipGT< IntegralConstant<1> > >::apply( buffer, buffer + count, clipped );
-	count = Vector4ClipPolygon< Vector4ClipLT< IntegralConstant<2> > >::apply( clipped, clipped + count, buffer );
-	return Vector4ClipPolygon< Vector4ClipGT< IntegralConstant<2> > >::apply( buffer, buffer + count, clipped );
+	count = Vector4ClipPolygon< Vector4ClipLT< 0 > >::apply( clipped, clipped + count, buffer );
+	count = Vector4ClipPolygon< Vector4ClipGT< 0 > >::apply( buffer, buffer + count, clipped );
+	count = Vector4ClipPolygon< Vector4ClipLT< 1 > >::apply( clipped, clipped + count, buffer );
+	count = Vector4ClipPolygon< Vector4ClipGT< 1 > >::apply( buffer, buffer + count, clipped );
+	count = Vector4ClipPolygon< Vector4ClipLT< 2 > >::apply( clipped, clipped + count, buffer );
+	return Vector4ClipPolygon< Vector4ClipGT< 2 > >::apply( buffer, buffer + count, clipped );
 }
 
 /// \brief Transforms and clips the triangle formed by \p p0, \p p1, \p p2 by the canonical matrix \p self.

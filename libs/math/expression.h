@@ -24,6 +24,13 @@
 
 #include <math/matrix.h>
 
+/// \brief A compile-time-constant integer.
+template<int VALUE_>
+struct IntegralConstant
+{
+	enum unnamed_ { VALUE = VALUE_ };
+};
+
 template<typename Value>
 class Literal
 {

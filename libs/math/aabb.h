@@ -66,39 +66,39 @@ inline AABB aabb_for_minmax( const Vector3& min, const Vector3& max ){
 	return aabb;
 }
 
-template<typename Index>
+template<size_t Index>
 class AABBExtend
 {
 public:
 	static void apply( AABB& aabb, const Vector3& point ){
-		float displacement = point[Index::VALUE] - aabb.origin[Index::VALUE];
-		float half_difference = static_cast<float>( 0.5 * ( fabs( displacement ) - aabb.extents[Index::VALUE] ) );
+		float displacement = point[Index] - aabb.origin[Index];
+		float half_difference = static_cast<float>( 0.5 * ( fabs( displacement ) - aabb.extents[Index] ) );
 		if ( half_difference > 0.0f ) {
-			aabb.origin[Index::VALUE] += ( displacement >= 0.0f ) ? half_difference : -half_difference;
-			aabb.extents[Index::VALUE] += half_difference;
+			aabb.origin[Index] += ( displacement >= 0.0f ) ? half_difference : -half_difference;
+			aabb.extents[Index] += half_difference;
 		}
 	}
 	static void apply( AABB& aabb, const AABB& other ){
-		float displacement = other.origin[Index::VALUE] - aabb.origin[Index::VALUE];
-		float difference = other.extents[Index::VALUE] - aabb.extents[Index::VALUE];
+		float displacement = other.origin[Index] - aabb.origin[Index];
+		float difference = other.extents[Index] - aabb.extents[Index];
 		if ( fabs( displacement ) > fabs( difference ) ) {
 			float half_difference = static_cast<float>( 0.5 * ( fabs( displacement ) + difference ) );
 			if ( half_difference > 0.0f ) {
-				aabb.origin[Index::VALUE] += ( displacement >= 0.0f ) ? half_difference : -half_difference;
-				aabb.extents[Index::VALUE] += half_difference;
+				aabb.origin[Index] += ( displacement >= 0.0f ) ? half_difference : -half_difference;
+				aabb.extents[Index] += half_difference;
 			}
 		}
 		else if ( difference > 0.0f ) {
-			aabb.origin[Index::VALUE] = other.origin[Index::VALUE];
-			aabb.extents[Index::VALUE] = other.extents[Index::VALUE];
+			aabb.origin[Index] = other.origin[Index];
+			aabb.extents[Index] = other.extents[Index];
 		}
 	}
 };
 
 inline void aabb_extend_by_point( AABB& aabb, const Vector3& point ){
-	AABBExtend< IntegralConstant<0> >::apply( aabb, point );
-	AABBExtend< IntegralConstant<1> >::apply( aabb, point );
-	AABBExtend< IntegralConstant<2> >::apply( aabb, point );
+	AABBExtend< 0 >::apply( aabb, point );
+	AABBExtend< 1 >::apply( aabb, point );
+	AABBExtend< 2 >::apply( aabb, point );
 }
 
 inline void aabb_extend_by_point_safe( AABB& aabb, const Vector3& point ){
@@ -124,9 +124,9 @@ public:
 };
 
 inline void aabb_extend_by_aabb( AABB& aabb, const AABB& other ){
-	AABBExtend< IntegralConstant<0> >::apply( aabb, other );
-	AABBExtend< IntegralConstant<1> >::apply( aabb, other );
-	AABBExtend< IntegralConstant<2> >::apply( aabb, other );
+	AABBExtend< 0 >::apply( aabb, other );
+	AABBExtend< 1 >::apply( aabb, other );
+	AABBExtend< 2 >::apply( aabb, other );
 }
 
 inline void aabb_extend_by_aabb_safe( AABB& aabb, const AABB& other ){
@@ -145,26 +145,26 @@ inline void aabb_extend_by_vec3( AABB& aabb, const Vector3& extension ){
 
 
 
-template<typename Index>
+template<size_t Index>
 inline bool aabb_intersects_point_dimension( const AABB& aabb, const Vector3& point ){
-	return fabs( point[Index::VALUE] - aabb.origin[Index::VALUE] ) < aabb.extents[Index::VALUE];
+	return fabs( point[Index] - aabb.origin[Index] ) < aabb.extents[Index];
 }
 
 inline bool aabb_intersects_point( const AABB& aabb, const Vector3& point ){
-	return aabb_intersects_point_dimension< IntegralConstant<0> >( aabb, point )
-	    && aabb_intersects_point_dimension< IntegralConstant<1> >( aabb, point )
-	    && aabb_intersects_point_dimension< IntegralConstant<2> >( aabb, point );
+	return aabb_intersects_point_dimension< 0 >( aabb, point )
+	    && aabb_intersects_point_dimension< 1 >( aabb, point )
+	    && aabb_intersects_point_dimension< 2 >( aabb, point );
 }
 
-template<typename Index>
+template<size_t Index>
 inline bool aabb_intersects_aabb_dimension( const AABB& aabb, const AABB& other ){
-	return fabs( other.origin[Index::VALUE] - aabb.origin[Index::VALUE] ) < ( aabb.extents[Index::VALUE] + other.extents[Index::VALUE] );
+	return fabs( other.origin[Index] - aabb.origin[Index] ) < ( aabb.extents[Index] + other.extents[Index] );
 }
 
 inline bool aabb_intersects_aabb( const AABB& aabb, const AABB& other ){
-	return aabb_intersects_aabb_dimension< IntegralConstant<0> >( aabb, other )
-	    && aabb_intersects_aabb_dimension< IntegralConstant<1> >( aabb, other )
-	    && aabb_intersects_aabb_dimension< IntegralConstant<2> >( aabb, other );
+	return aabb_intersects_aabb_dimension< 0 >( aabb, other )
+	    && aabb_intersects_aabb_dimension< 1 >( aabb, other )
+	    && aabb_intersects_aabb_dimension< 2 >( aabb, other );
 }
 
 inline unsigned int aabb_classify_plane( const AABB& aabb, const Plane3& plane ){

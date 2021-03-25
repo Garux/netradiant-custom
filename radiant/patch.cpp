@@ -1789,19 +1789,19 @@ inline PatchControl QuadraticBezier_evaluate( const PatchControl* firstPoint, do
 	double denominator = 0;
 
 	{
-		double weight = BernsteinPolynomial<Zero, Two>::apply( t );
+		double weight = BernsteinPolynomial<0, 2>::apply( t );
 		vector3_add( result.m_vertex, vector3_scaled( firstPoint[0].m_vertex, weight ) );
 		vector2_add( result.m_texcoord, vector2_scaled( firstPoint[0].m_texcoord, weight ) );
 		denominator += weight;
 	}
 	{
-		double weight = BernsteinPolynomial<One, Two>::apply( t );
+		double weight = BernsteinPolynomial<1, 2>::apply( t );
 		vector3_add( result.m_vertex, vector3_scaled( firstPoint[1].m_vertex, weight ) );
 		vector2_add( result.m_texcoord, vector2_scaled( firstPoint[1].m_texcoord, weight ) );
 		denominator += weight;
 	}
 	{
-		double weight = BernsteinPolynomial<Two, Two>::apply( t );
+		double weight = BernsteinPolynomial<2, 2>::apply( t );
 		vector3_add( result.m_vertex, vector3_scaled( firstPoint[2].m_vertex, weight ) );
 		vector2_add( result.m_texcoord, vector2_scaled( firstPoint[2].m_texcoord, weight ) );
 		denominator += weight;

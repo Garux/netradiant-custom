@@ -30,7 +30,7 @@
 #include <math/matrix.h>
 
 
-template<typename I, typename Degree>
+template<int I, int Degree>
 struct BernsteinPolynomial
 {
 	static double apply( double t ){
@@ -38,14 +38,8 @@ struct BernsteinPolynomial
 	}
 };
 
-typedef IntegralConstant<0> Zero;
-typedef IntegralConstant<1> One;
-typedef IntegralConstant<2> Two;
-typedef IntegralConstant<3> Three;
-typedef IntegralConstant<4> Four;
-
 template<>
-struct BernsteinPolynomial<Zero, Zero>
+struct BernsteinPolynomial<0, 0>
 {
 	static double apply( double t ){
 		return 1;
@@ -53,7 +47,7 @@ struct BernsteinPolynomial<Zero, Zero>
 };
 
 template<>
-struct BernsteinPolynomial<Zero, One>
+struct BernsteinPolynomial<0, 1>
 {
 	static double apply( double t ){
 		return 1 - t;
@@ -61,7 +55,7 @@ struct BernsteinPolynomial<Zero, One>
 };
 
 template<>
-struct BernsteinPolynomial<One, One>
+struct BernsteinPolynomial<1, 1>
 {
 	static double apply( double t ){
 		return t;
@@ -69,7 +63,7 @@ struct BernsteinPolynomial<One, One>
 };
 
 template<>
-struct BernsteinPolynomial<Zero, Two>
+struct BernsteinPolynomial<0, 2>
 {
 	static double apply( double t ){
 		return ( 1 - t ) * ( 1 - t );
@@ -77,7 +71,7 @@ struct BernsteinPolynomial<Zero, Two>
 };
 
 template<>
-struct BernsteinPolynomial<One, Two>
+struct BernsteinPolynomial<1, 2>
 {
 	static double apply( double t ){
 		return 2 * ( 1 - t ) * t;
@@ -85,7 +79,7 @@ struct BernsteinPolynomial<One, Two>
 };
 
 template<>
-struct BernsteinPolynomial<Two, Two>
+struct BernsteinPolynomial<2, 2>
 {
 	static double apply( double t ){
 		return t * t;
@@ -93,7 +87,7 @@ struct BernsteinPolynomial<Two, Two>
 };
 
 template<>
-struct BernsteinPolynomial<Zero, Three>
+struct BernsteinPolynomial<0, 3>
 {
 	static double apply( double t ){
 		return ( 1 - t ) * ( 1 - t ) * ( 1 - t );
@@ -101,7 +95,7 @@ struct BernsteinPolynomial<Zero, Three>
 };
 
 template<>
-struct BernsteinPolynomial<One, Three>
+struct BernsteinPolynomial<1, 3>
 {
 	static double apply( double t ){
 		return 3 * ( 1 - t ) * ( 1 - t ) * t;
@@ -109,7 +103,7 @@ struct BernsteinPolynomial<One, Three>
 };
 
 template<>
-struct BernsteinPolynomial<Two, Three>
+struct BernsteinPolynomial<2, 3>
 {
 	static double apply( double t ){
 		return 3 * ( 1 - t ) * t * t;
@@ -117,7 +111,7 @@ struct BernsteinPolynomial<Two, Three>
 };
 
 template<>
-struct BernsteinPolynomial<Three, Three>
+struct BernsteinPolynomial<3, 3>
 {
 	static double apply( double t ){
 		return t * t * t;
@@ -131,22 +125,22 @@ inline Vector3 CubicBezier_evaluate( const Vector3* firstPoint, double t ){
 	double denominator = 0;
 
 	{
-		double weight = BernsteinPolynomial<Zero, Three>::apply( t );
+		double weight = BernsteinPolynomial<0, 3>::apply( t );
 		result += vector3_scaled( *firstPoint++, weight );
 		denominator += weight;
 	}
 	{
-		double weight = BernsteinPolynomial<One, Three>::apply( t );
+		double weight = BernsteinPolynomial<1, 3>::apply( t );
 		result += vector3_scaled( *firstPoint++, weight );
 		denominator += weight;
 	}
 	{
-		double weight = BernsteinPolynomial<Two, Three>::apply( t );
+		double weight = BernsteinPolynomial<2, 3>::apply( t );
 		result += vector3_scaled( *firstPoint++, weight );
 		denominator += weight;
 	}
 	{
-		double weight = BernsteinPolynomial<Three, Three>::apply( t );
+		double weight = BernsteinPolynomial<3, 3>::apply( t );
 		result += vector3_scaled( *firstPoint++, weight );
 		denominator += weight;
 	}
