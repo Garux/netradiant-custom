@@ -76,6 +76,9 @@ LIBS_PANGOFT2      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) pa
 CPPFLAGS_GTKGLEXT  ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --cflags $(STDERR_TO_DEVNULL))
 LIBS_GTKGLEXT      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --libs-only-L $(STDERR_TO_DEVNULL)) \
                       $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_ASSIMP    ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) assimp --cflags $(STDERR_TO_DEVNULL))
+LIBS_ASSIMP        ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) assimp --libs-only-L $(STDERR_TO_DEVNULL)) \
+                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) assimp --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_GL        ?=
 LIBS_GL            ?= -lGL # -lopengl32 on Win32
 CPPFLAGS_DL        ?=
@@ -382,6 +385,7 @@ dependencies-check:
 	checkheader libgtk2.0-dev gtk/gtkdialog.h gtk_dialog_run "$(CPPFLAGS_GTK)" "$(LIBS_GTK)"; \
 	checkheader libpango1.0-dev pango/pangoft2.h pango_ft2_font_map_new "$(CPPFLAGS_PANGOFT2)" "$(LIBS_PANGOFT2)"; \
 	checkheader libgtkglext1-dev gtk/gtkglwidget.h gtk_widget_get_gl_context "$(CPPFLAGS_GTKGLEXT)" "$(LIBS_GTKGLEXT)"; \
+	checkheader assimp-dev assimp/Importer.hpp Assimp::Importer::SetIOHandler "$(CPPFLAGS_ASSIMP)" "$(LIBS_ASSIMP)"; \
 	[ "$(OS)" != "Win32" ] && checkheader libc6-dev dlfcn.h dlopen "$(CPPFLAGS_DL)" "$(LIBS_DL)"; \
 	checkheader zlib1g-dev zlib.h zlibVersion "$(CPPFLAGS_ZLIB)" "$(LIBS_ZLIB)"; \
 	[ "$$failed" = "0" ] && $(ECHO) All required libraries have been found!
@@ -899,7 +903,8 @@ $(INSTALLDIR)/modules/md3model.$(DLL): \
 	plugins/md3model/mdl.o \
 	plugins/md3model/plugin.o \
 
-$(INSTALLDIR)/modules/model.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/model.$(DLL): LIBS_EXTRA := $(LIBS_ASSIMP)
+$(INSTALLDIR)/modules/model.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_ASSIMP) -Ilibs -Iinclude
 $(INSTALLDIR)/modules/model.$(DLL): \
 	plugins/model/model.o \
 	plugins/model/plugin.o \
