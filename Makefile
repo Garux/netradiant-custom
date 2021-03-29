@@ -76,9 +76,6 @@ LIBS_PANGOFT2      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) pa
 CPPFLAGS_GTKGLEXT  ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --cflags $(STDERR_TO_DEVNULL))
 LIBS_GTKGLEXT      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --libs-only-L $(STDERR_TO_DEVNULL)) \
                       $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --libs-only-l $(STDERR_TO_DEVNULL))
-CPPFLAGS_ASSIMP    ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) assimp --cflags $(STDERR_TO_DEVNULL))
-LIBS_ASSIMP        ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) assimp --libs-only-L $(STDERR_TO_DEVNULL)) \
-                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) assimp --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_GL        ?=
 LIBS_GL            ?= -lGL # -lopengl32 on Win32
 CPPFLAGS_DL        ?=
@@ -385,7 +382,6 @@ dependencies-check:
 	checkheader libgtk2.0-dev gtk/gtkdialog.h gtk_dialog_run "$(CPPFLAGS_GTK)" "$(LIBS_GTK)"; \
 	checkheader libpango1.0-dev pango/pangoft2.h pango_ft2_font_map_new "$(CPPFLAGS_PANGOFT2)" "$(LIBS_PANGOFT2)"; \
 	checkheader libgtkglext1-dev gtk/gtkglwidget.h gtk_widget_get_gl_context "$(CPPFLAGS_GTKGLEXT)" "$(LIBS_GTKGLEXT)"; \
-	checkheader assimp-dev assimp/Importer.hpp Assimp::Importer::SetIOHandler "$(CPPFLAGS_ASSIMP)" "$(LIBS_ASSIMP)"; \
 	[ "$(OS)" != "Win32" ] && checkheader libc6-dev dlfcn.h dlopen "$(CPPFLAGS_DL)" "$(LIBS_DL)"; \
 	checkheader zlib1g-dev zlib.h zlibVersion "$(CPPFLAGS_ZLIB)" "$(LIBS_ZLIB)"; \
 	[ "$$failed" = "0" ] && $(ECHO) All required libraries have been found!
@@ -394,6 +390,7 @@ endif
 
 .PHONY: binaries
 binaries: \
+	binaries-assimp \
 	binaries-tools \
 	binaries-radiant \
 
@@ -402,6 +399,10 @@ binaries-radiant: \
 	binaries-radiant-modules \
 	binaries-radiant-plugins \
 	binaries-radiant-core \
+
+.PHONY: binaries-assimp
+binaries-assimp: \
+	$(INSTALLDIR)/assimp_.$(DLL) \
 
 .PHONY: binaries-radiant-modules
 binaries-radiant-modules: \
@@ -628,6 +629,189 @@ libpicomodel.$(A): \
 	libs/picomodel/pm_ms3d.o \
 	libs/picomodel/pm_obj.o \
 	libs/picomodel/pm_terrain.o \
+
+$(INSTALLDIR)/assimp_.$(DLL): LIBS_EXTRA := $(LIBS_ZLIB)
+$(INSTALLDIR)/assimp_.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_ZLIB) -Ilibs/assimp/include -Ilibs/assimp/code -Ilibs/assimp/contrib/pugixml/src -Ilibs/assimp/contrib/unzip -Ilibs/assimp -Ilibs/assimp/contrib/openddlparser/include -Ilibs/assimp/contrib/rapidjson/include -Ilibs/assimp/contrib -DASSIMP_BUILD_DLL_EXPORT -DASSIMP_BUILD_NO_C4D_IMPORTER -DASSIMP_BUILD_NO_EXPORT -DASSIMP_BUILD_NO_IFC_IMPORTER -DASSIMP_BUILD_NO_OWN_ZLIB -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 -DMINIZ_USE_UNALIGNED_LOADS_AND_STORES=0 -DOPENDDLPARSER_BUILD -DRAPIDJSON_HAS_STDSTRING=1 -DRAPIDJSON_NOMEMBERITERATORCLASS -DWIN32_LEAN_AND_MEAN -Dassimp_EXPORTS -fvisibility=hidden -Wno-long-long -Wa,-mbig-obj -fexceptions -frtti
+$(INSTALLDIR)/assimp_.$(DLL): \
+	libs/assimp/code/Common/Assimp.o \
+	libs/assimp/code/CApi/CInterfaceIOWrapper.o \
+	libs/assimp/code/Common/BaseImporter.o \
+	libs/assimp/code/Common/BaseProcess.o \
+	libs/assimp/code/Common/PostStepRegistry.o \
+	libs/assimp/code/Common/ImporterRegistry.o \
+	libs/assimp/code/Common/DefaultIOStream.o \
+	libs/assimp/code/Common/DefaultIOSystem.o \
+	libs/assimp/code/Common/ZipArchiveIOSystem.o \
+	libs/assimp/code/Common/Importer.o \
+	libs/assimp/code/Common/SGSpatialSort.o \
+	libs/assimp/code/Common/VertexTriangleAdjacency.o \
+	libs/assimp/code/Common/SpatialSort.o \
+	libs/assimp/code/Common/SceneCombiner.o \
+	libs/assimp/code/Common/ScenePreprocessor.o \
+	libs/assimp/code/Common/SkeletonMeshBuilder.o \
+	libs/assimp/code/Common/StandardShapes.o \
+	libs/assimp/code/Common/TargetAnimation.o \
+	libs/assimp/code/Common/RemoveComments.o \
+	libs/assimp/code/Common/Subdivision.o \
+	libs/assimp/code/Common/scene.o \
+	libs/assimp/code/Common/Bitmap.o \
+	libs/assimp/code/Common/Version.o \
+	libs/assimp/code/Common/CreateAnimMesh.o \
+	libs/assimp/code/Common/simd.o \
+	libs/assimp/code/Common/material.o \
+	libs/assimp/code/Common/AssertHandler.o \
+	libs/assimp/code/Common/Exceptional.o \
+	libs/assimp/code/Common/DefaultLogger.o \
+	libs/assimp/code/PostProcessing/CalcTangentsProcess.o \
+	libs/assimp/code/PostProcessing/ComputeUVMappingProcess.o \
+	libs/assimp/code/PostProcessing/ConvertToLHProcess.o \
+	libs/assimp/code/PostProcessing/EmbedTexturesProcess.o \
+	libs/assimp/code/PostProcessing/FindDegenerates.o \
+	libs/assimp/code/PostProcessing/FindInstancesProcess.o \
+	libs/assimp/code/PostProcessing/FindInvalidDataProcess.o \
+	libs/assimp/code/PostProcessing/FixNormalsStep.o \
+	libs/assimp/code/PostProcessing/DropFaceNormalsProcess.o \
+	libs/assimp/code/PostProcessing/GenFaceNormalsProcess.o \
+	libs/assimp/code/PostProcessing/GenVertexNormalsProcess.o \
+	libs/assimp/code/PostProcessing/PretransformVertices.o \
+	libs/assimp/code/PostProcessing/ImproveCacheLocality.o \
+	libs/assimp/code/PostProcessing/JoinVerticesProcess.o \
+	libs/assimp/code/PostProcessing/LimitBoneWeightsProcess.o \
+	libs/assimp/code/PostProcessing/RemoveRedundantMaterials.o \
+	libs/assimp/code/PostProcessing/RemoveVCProcess.o \
+	libs/assimp/code/PostProcessing/SortByPTypeProcess.o \
+	libs/assimp/code/PostProcessing/SplitLargeMeshes.o \
+	libs/assimp/code/PostProcessing/TextureTransform.o \
+	libs/assimp/code/PostProcessing/TriangulateProcess.o \
+	libs/assimp/code/PostProcessing/ValidateDataStructure.o \
+	libs/assimp/code/PostProcessing/OptimizeGraph.o \
+	libs/assimp/code/PostProcessing/OptimizeMeshes.o \
+	libs/assimp/code/PostProcessing/DeboneProcess.o \
+	libs/assimp/code/PostProcessing/ProcessHelper.o \
+	libs/assimp/code/PostProcessing/MakeVerboseFormat.o \
+	libs/assimp/code/PostProcessing/ScaleProcess.o \
+	libs/assimp/code/PostProcessing/ArmaturePopulate.o \
+	libs/assimp/code/PostProcessing/GenBoundingBoxesProcess.o \
+	libs/assimp/code/PostProcessing/SplitByBoneCountProcess.o \
+	libs/assimp/code/Material/MaterialSystem.o \
+	libs/assimp/code/AssetLib/STEPParser/STEPFileReader.o \
+	libs/assimp/code/AssetLib/STEPParser/STEPFileEncoding.o \
+	libs/assimp/code/AssetLib/AMF/AMFImporter.o \
+	libs/assimp/code/AssetLib/AMF/AMFImporter_Geometry.o \
+	libs/assimp/code/AssetLib/AMF/AMFImporter_Material.o \
+	libs/assimp/code/AssetLib/AMF/AMFImporter_Postprocess.o \
+	libs/assimp/code/AssetLib/3DS/3DSConverter.o \
+	libs/assimp/code/AssetLib/3DS/3DSLoader.o \
+	libs/assimp/code/AssetLib/AC/ACLoader.o \
+	libs/assimp/code/AssetLib/ASE/ASELoader.o \
+	libs/assimp/code/AssetLib/ASE/ASEParser.o \
+	libs/assimp/code/AssetLib/Assbin/AssbinLoader.o \
+	libs/assimp/code/AssetLib/B3D/B3DImporter.o \
+	libs/assimp/code/AssetLib/BVH/BVHLoader.o \
+	libs/assimp/code/AssetLib/Collada/ColladaHelper.o \
+	libs/assimp/code/AssetLib/Collada/ColladaLoader.o \
+	libs/assimp/code/AssetLib/Collada/ColladaParser.o \
+	libs/assimp/code/AssetLib/DXF/DXFLoader.o \
+	libs/assimp/code/AssetLib/CSM/CSMLoader.o \
+	libs/assimp/code/AssetLib/HMP/HMPLoader.o \
+	libs/assimp/code/AssetLib/Irr/IRRMeshLoader.o \
+	libs/assimp/code/AssetLib/Irr/IRRShared.o \
+	libs/assimp/code/AssetLib/Irr/IRRLoader.o \
+	libs/assimp/code/AssetLib/LWO/LWOAnimation.o \
+	libs/assimp/code/AssetLib/LWO/LWOBLoader.o \
+	libs/assimp/code/AssetLib/LWO/LWOLoader.o \
+	libs/assimp/code/AssetLib/LWO/LWOMaterial.o \
+	libs/assimp/code/AssetLib/LWS/LWSLoader.o \
+	libs/assimp/code/AssetLib/M3D/M3DImporter.o \
+	libs/assimp/code/AssetLib/M3D/M3DWrapper.o \
+	libs/assimp/code/AssetLib/MD2/MD2Loader.o \
+	libs/assimp/code/AssetLib/MD3/MD3Loader.o \
+	libs/assimp/code/AssetLib/MD5/MD5Loader.o \
+	libs/assimp/code/AssetLib/MD5/MD5Parser.o \
+	libs/assimp/code/AssetLib/MDC/MDCLoader.o \
+	libs/assimp/code/AssetLib/MDL/MDLLoader.o \
+	libs/assimp/code/AssetLib/MDL/MDLMaterialLoader.o \
+	libs/assimp/code/AssetLib/MDL/HalfLife/HL1MDLLoader.o \
+	libs/assimp/code/AssetLib/MDL/HalfLife/UniqueNameGenerator.o \
+	libs/assimp/code/AssetLib/NFF/NFFLoader.o \
+	libs/assimp/code/AssetLib/NDO/NDOLoader.o \
+	libs/assimp/code/AssetLib/OFF/OFFLoader.o \
+	libs/assimp/code/AssetLib/Obj/ObjFileImporter.o \
+	libs/assimp/code/AssetLib/Obj/ObjFileMtlImporter.o \
+	libs/assimp/code/AssetLib/Obj/ObjFileParser.o \
+	libs/assimp/code/AssetLib/Ogre/OgreImporter.o \
+	libs/assimp/code/AssetLib/Ogre/OgreStructs.o \
+	libs/assimp/code/AssetLib/Ogre/OgreBinarySerializer.o \
+	libs/assimp/code/AssetLib/Ogre/OgreXmlSerializer.o \
+	libs/assimp/code/AssetLib/Ogre/OgreMaterial.o \
+	libs/assimp/code/AssetLib/OpenGEX/OpenGEXImporter.o \
+	libs/assimp/code/AssetLib/Ply/PlyLoader.o \
+	libs/assimp/code/AssetLib/Ply/PlyParser.o \
+	libs/assimp/code/AssetLib/MS3D/MS3DLoader.o \
+	libs/assimp/code/AssetLib/COB/COBLoader.o \
+	libs/assimp/code/AssetLib/Blender/BlenderLoader.o \
+	libs/assimp/code/AssetLib/Blender/BlenderDNA.o \
+	libs/assimp/code/AssetLib/Blender/BlenderScene.o \
+	libs/assimp/code/AssetLib/Blender/BlenderModifier.o \
+	libs/assimp/code/AssetLib/Blender/BlenderBMesh.o \
+	libs/assimp/code/AssetLib/Blender/BlenderTessellator.o \
+	libs/assimp/code/AssetLib/Blender/BlenderCustomData.o \
+	libs/assimp/code/AssetLib/XGL/XGLLoader.o \
+	libs/assimp/code/AssetLib/FBX/FBXImporter.o \
+	libs/assimp/code/AssetLib/FBX/FBXParser.o \
+	libs/assimp/code/AssetLib/FBX/FBXTokenizer.o \
+	libs/assimp/code/AssetLib/FBX/FBXConverter.o \
+	libs/assimp/code/AssetLib/FBX/FBXUtil.o \
+	libs/assimp/code/AssetLib/FBX/FBXDocument.o \
+	libs/assimp/code/AssetLib/FBX/FBXProperties.o \
+	libs/assimp/code/AssetLib/FBX/FBXMeshGeometry.o \
+	libs/assimp/code/AssetLib/FBX/FBXMaterial.o \
+	libs/assimp/code/AssetLib/FBX/FBXModel.o \
+	libs/assimp/code/AssetLib/FBX/FBXAnimation.o \
+	libs/assimp/code/AssetLib/FBX/FBXNodeAttribute.o \
+	libs/assimp/code/AssetLib/FBX/FBXDeformer.o \
+	libs/assimp/code/AssetLib/FBX/FBXBinaryTokenizer.o \
+	libs/assimp/code/AssetLib/FBX/FBXDocumentUtil.o \
+	libs/assimp/code/AssetLib/Q3D/Q3DLoader.o \
+	libs/assimp/code/AssetLib/Q3BSP/Q3BSPFileParser.o \
+	libs/assimp/code/AssetLib/Q3BSP/Q3BSPFileImporter.o \
+	libs/assimp/code/AssetLib/Raw/RawLoader.o \
+	libs/assimp/code/AssetLib/SIB/SIBImporter.o \
+	libs/assimp/code/AssetLib/SMD/SMDLoader.o \
+	libs/assimp/code/AssetLib/STL/STLLoader.o \
+	libs/assimp/code/AssetLib/Terragen/TerragenLoader.o \
+	libs/assimp/code/AssetLib/Unreal/UnrealLoader.o \
+	libs/assimp/code/AssetLib/X/XFileImporter.o \
+	libs/assimp/code/AssetLib/X/XFileParser.o \
+	libs/assimp/code/AssetLib/X3D/X3DImporter.o \
+	libs/assimp/code/AssetLib/glTF/glTFCommon.o \
+	libs/assimp/code/AssetLib/glTF/glTFImporter.o \
+	libs/assimp/code/AssetLib/glTF2/glTF2Importer.o \
+	libs/assimp/code/AssetLib/3MF/D3MFImporter.o \
+	libs/assimp/code/AssetLib/3MF/D3MFOpcPackage.o \
+	libs/assimp/code/AssetLib/MMD/MMDImporter.o \
+	libs/assimp/code/AssetLib/MMD/MMDPmxParser.o \
+	libs/assimp/contrib/unzip/crypt.o \
+	libs/assimp/contrib/unzip/ioapi.o \
+	libs/assimp/contrib/unzip/unzip.o \
+	libs/assimp/contrib/poly2tri/poly2tri/common/shapes.cc \
+	libs/assimp/contrib/poly2tri/poly2tri/sweep/advancing_front.cc \
+	libs/assimp/contrib/poly2tri/poly2tri/sweep/cdt.cc \
+	libs/assimp/contrib/poly2tri/poly2tri/sweep/sweep.cc \
+	libs/assimp/contrib/poly2tri/poly2tri/sweep/sweep_context.cc \
+	libs/assimp/contrib/clipper/clipper.o \
+	libs/assimp/contrib/openddlparser/code/OpenDDLParser.o \
+	libs/assimp/contrib/openddlparser/code/DDLNode.o \
+	libs/assimp/contrib/openddlparser/code/OpenDDLCommon.o \
+	libs/assimp/contrib/openddlparser/code/OpenDDLExport.o \
+	libs/assimp/contrib/openddlparser/code/Value.o \
+	libs/assimp/contrib/openddlparser/code/OpenDDLStream.o \
+	libs/assimp/contrib/Open3DGC/o3dgcArithmeticCodec.o \
+	libs/assimp/contrib/Open3DGC/o3dgcDynamicVectorDecoder.o \
+	libs/assimp/contrib/Open3DGC/o3dgcDynamicVectorEncoder.o \
+	libs/assimp/contrib/Open3DGC/o3dgcTools.o \
+	libs/assimp/contrib/Open3DGC/o3dgcTriangleFans.o \
+	libs/assimp/contrib/zip/src/zip.o \
 
 libddslib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libddslib.$(A): \
@@ -903,12 +1087,11 @@ $(INSTALLDIR)/modules/md3model.$(DLL): \
 	plugins/md3model/mdl.o \
 	plugins/md3model/plugin.o \
 
-$(INSTALLDIR)/modules/model.$(DLL): LIBS_EXTRA := $(LIBS_ASSIMP)
-$(INSTALLDIR)/modules/model.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_ASSIMP) -Ilibs -Iinclude
+$(INSTALLDIR)/modules/model.$(DLL): LIBS_EXTRA := -lassimp_ -L$(INSTALLDIR)
+$(INSTALLDIR)/modules/model.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude -Ilibs/assimp/include
 $(INSTALLDIR)/modules/model.$(DLL): \
 	plugins/model/model.o \
 	plugins/model/plugin.o \
-	libpicomodel.$(A) \
 
 $(INSTALLDIR)/modules/shaders.$(DLL): LIBS_EXTRA := $(LIBS_GLIB)
 $(INSTALLDIR)/modules/shaders.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) -Ilibs -Iinclude
