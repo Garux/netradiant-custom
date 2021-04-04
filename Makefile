@@ -117,11 +117,11 @@ LIBS_COMMON =
 CXXFLAGS_COMMON = -std=c++17 -Wreorder -fno-exceptions -fno-rtti
 
 ifeq ($(BUILD),debug)
-ifeq ($(findstring $(CFLAGS),-g),)
+ifeq ($(findstring -g,$(CFLAGS)),)
 	CFLAGS_COMMON += -g
 	# only add -g if no -g flag is in $(CFLAGS)
 endif
-ifeq ($(findstring $(CFLAGS),-O),)
+ifeq ($(findstring -O,$(CFLAGS)),)
 	CFLAGS_COMMON += -O
 	# only add -O if no -O flag is in $(CFLAGS)
 endif
@@ -130,7 +130,7 @@ endif
 else
 
 ifeq ($(BUILD),extradebug)
-ifeq ($(findstring $(CFLAGS),-g),)
+ifeq ($(findstring -g,$(CFLAGS)),)
 	CFLAGS_COMMON += -g3
 	# only add -g3 if no -g flag is in $(CFLAGS)
 endif
@@ -139,7 +139,7 @@ endif
 else
 
 ifeq ($(BUILD),extradebug_quicker)
-ifeq ($(findstring $(CFLAGS),-g),)
+ifeq ($(findstring -g,$(CFLAGS)),)
 	CFLAGS_COMMON += -g3
 	# only add -g3 if no -g flag is in $(CFLAGS)
 endif
@@ -148,11 +148,11 @@ endif
 else
 
 ifeq ($(BUILD),profile)
-ifeq ($(findstring $(CFLAGS),-g),)
+ifeq ($(findstring -g,$(CFLAGS)),)
 	CFLAGS_COMMON += -g
 	# only add -g if no -g flag is in $(CFLAGS)
 endif
-ifeq ($(findstring $(CFLAGS),-O),)
+ifeq ($(findstring -O,$(CFLAGS)),)
 	CFLAGS_COMMON += -O
 	# only add -O if no -O flag is in $(CFLAGS)
 endif
@@ -162,7 +162,7 @@ endif
 else
 
 ifeq ($(BUILD),release)
-ifeq ($(findstring $(CFLAGS),-O),)
+ifeq ($(findstring -O,$(CFLAGS)),)
 	CFLAGS_COMMON += -O3
 	# only add -O3 if no -O flag is in $(CFLAGS)
 endif
@@ -171,7 +171,7 @@ endif
 else
 
 ifeq ($(BUILD),native)
-ifeq ($(findstring $(CFLAGS),-O),)
+ifeq ($(findstring -O,$(CFLAGS)),)
 	CFLAGS_COMMON += -O3
 	# only add -O3 if no -O flag is in $(CFLAGS)
 endif
@@ -295,7 +295,7 @@ all: \
 	install-dll \
 
 .PHONY: dependencies-check
-ifeq ($(findstring $(DEPENDENCIES_CHECK),off),off)
+ifeq ($(findstring off,$(DEPENDENCIES_CHECK)),off)
 dependencies-check:
 	@$(ECHO) dependencies checking disabled, good luck...
 else
@@ -515,10 +515,10 @@ ifeq ($(OS),Win32)
 	$(WINDRES) $< $@
 endif
 
-%.o: %.cpp $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),) | dependencies-check
+%.o: %.cpp $(if $(findstring yes,$(DEPEND_ON_MAKEFILE)),$(wildcard Makefile*),) | dependencies-check
 	$(CXX) $< $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(CPPFLAGS_COMMON) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@
 
-%.o: %.c $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),) | dependencies-check
+%.o: %.c $(if $(findstring yes,$(DEPEND_ON_MAKEFILE)),$(wildcard Makefile*),) | dependencies-check
 	$(CC) $< $(CFLAGS) $(CFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(CPPFLAGS_COMMON) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@
 
 ifeq ($(OS),Win32)
@@ -589,7 +589,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	libfilematch.$(A) \
 	libl_net.$(A) \
 	libpicomodel.$(A) \
-	$(if $(findstring $(OS),Win32),icons/q3map2.o,) \
+	$(if $(findstring Win32,$(OS)),icons/q3map2.o,) \
 
 libmathlib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libmathlib.$(A): \
@@ -602,7 +602,7 @@ libmathlib.$(A): \
 libl_net.$(A): CPPFLAGS_EXTRA := -Ilibs
 libl_net.$(A): \
 	libs/l_net/l_net.o \
-	$(if $(findstring $(OS),Win32),libs/l_net/l_net_wins.o,libs/l_net/l_net_berkley.o) \
+	$(if $(findstring Win32,$(OS)),libs/l_net/l_net_wins.o,libs/l_net/l_net_berkley.o) \
 
 libpicomodel.$(A): CPPFLAGS_EXTRA := -Ilibs
 libpicomodel.$(A): \
@@ -844,7 +844,7 @@ $(INSTALLDIR)/q3data.$(EXE): \
 	libfilematch.$(A) \
 	libl_net.$(A) \
 	libmathlib.$(A) \
-	$(if $(findstring $(OS),Win32),icons/q3data.o,) \
+	$(if $(findstring Win32,$(OS)),icons/q3data.o,) \
 
 $(INSTALLDIR)/radiant.$(EXE): LDFLAGS_EXTRA := $(MWINDOWS)
 $(INSTALLDIR)/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT) $(LIBS_ZLIB) $(LIBS_PANGOFT2)
@@ -892,7 +892,7 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/main.o \
 	radiant/map.o \
 	radiant/modelwindow.o \
-	$(if $(findstring $(OS),Win32),radiant/multimon.o,) \
+	$(if $(findstring Win32,$(OS)),radiant/multimon.o,) \
 	radiant/mru.o \
 	radiant/nullmodel.o \
 	radiant/parse.o \
@@ -939,7 +939,7 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	libprofile.$(A) \
 	libquickhull.$(A) \
 	libxmllib.$(A) \
-	$(if $(findstring $(OS),Win32),icons/radiant.o,) \
+	$(if $(findstring Win32,$(OS)),icons/radiant.o,) \
 
 libfilematch.$(A): CPPFLAGS_EXTRA := -Ilibs
 libfilematch.$(A): \
@@ -1189,7 +1189,7 @@ $(INSTALLDIR)/qdata3.$(EXE): \
 	tools/quake2/qdata/tables.o \
 	tools/quake2/qdata/video.o \
 	libl_net.$(A) \
-	$(if $(findstring $(OS),Win32),icons/qdata3.o,) \
+	$(if $(findstring Win32,$(OS)),icons/qdata3.o,) \
 
 $(INSTALLDIR)/q2map.$(EXE): LIBS_EXTRA := $(LIBS_XML)
 $(INSTALLDIR)/q2map.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
@@ -1227,7 +1227,7 @@ $(INSTALLDIR)/q2map.$(EXE): \
 	tools/quake2/q2map/tree.o \
 	tools/quake2/q2map/writebsp.o \
 	libl_net.$(A) \
-	$(if $(findstring $(OS),Win32),icons/q2map.o,) \
+	$(if $(findstring Win32,$(OS)),icons/q2map.o,) \
 
 $(INSTALLDIR)/plugins/ufoaiplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
 $(INSTALLDIR)/plugins/ufoaiplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
@@ -1295,7 +1295,7 @@ $(INSTALLDIR)/heretic2/h2data.$(EXE): \
 	tools/quake2/qdata_heretic2/tmix.o \
 	tools/quake2/qdata_heretic2/video.o \
 	libl_net.$(A) \
-	$(if $(findstring $(OS),Win32),icons/h2data.o,) \
+	$(if $(findstring Win32,$(OS)),icons/h2data.o,) \
 
 $(INSTALLDIR)/mbspc.$(EXE): CPPFLAGS_EXTRA := -Wstrict-prototypes -DNDEBUG -DBSPC -DBSPCINCLUDE -Ilibs
 $(INSTALLDIR)/mbspc.$(EXE): \
