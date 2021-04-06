@@ -601,9 +601,32 @@ public:
 	}
 	void realise(){
 		if ( --m_unrealised == 0 ) {
-			StringOutputStream filename( 256 );
-			filename << GlobalRadiant().getGameToolsPath() << GlobalRadiant().getGameName() << "/halflife.fgd";
-			EntityClassFGD_loadFile( filename.c_str() );
+
+			{
+				const auto baseDirectory = StringOutputStream( 256 )( GlobalRadiant().getGameToolsPath(), GlobalRadiant().getRequiredGameDescriptionKeyValue( "basegame" ), '/' );
+				const auto gameDirectory = StringOutputStream( 256 )( GlobalRadiant().getGameToolsPath(), GlobalRadiant().getGameName(), '/' );
+
+				const auto pathLess = []( const CopiedString& one, const CopiedString& other ){
+					return path_less( one.c_str(), other.c_str() );
+				};
+				std::map<CopiedString, const char*, decltype( pathLess )> name_path( pathLess );
+
+				const auto constructDirectory = [&name_path]( const char* directory, const char* extension ){
+					globalOutputStream() << "EntityClass: searching " << makeQuoted( directory ) << " for *." << extension << '\n';
+					Directory_forEach( directory, matchFileExtension( extension, [directory, &name_path]( const char *name ){
+						name_path.emplace( name, directory );
+					} ) );
+				};
+
+				constructDirectory( baseDirectory, "fgd" );
+				if ( !string_equal( baseDirectory, gameDirectory ) ) {
+					constructDirectory( gameDirectory, "fgd" );
+				}
+
+				for( const auto& [ name, path ] : name_path ){
+					EntityClassFGD_loadFile( StringOutputStream()( path, name.c_str() ) );
+				}
+			}
 
 			{
 				for ( EntityClasses::iterator i = g_EntityClassFGD_classes.begin(); i != g_EntityClassFGD_classes.end(); ++i )
