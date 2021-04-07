@@ -184,7 +184,6 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 		// hl2 below
 		else if ( string_equal( property, "sphere" )
 		       || string_equal( property, "sweptplayerhull" )
-		       || string_equal( property, "studio" )
 		       || string_equal( property, "studioprop" )
 		       || string_equal( property, "lightprop" )
 		       || string_equal( property, "lightcone" )
@@ -192,6 +191,17 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "(" ), PARSE_ERROR );
 			if ( string_equal( tokeniser.getToken(), ")" ) ) {
 				tokeniser.ungetToken();
+			}
+			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ")" ), PARSE_ERROR );
+		}
+		else if ( string_equal( property, "studio" ) ) {
+			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "(" ), PARSE_ERROR );
+			const char *token = tokeniser.getToken();
+			if ( string_equal( token, ")" ) ) {
+				tokeniser.ungetToken();
+			}
+			else{
+				entityClass->m_modelpath = token;
 			}
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ")" ), PARSE_ERROR );
 		}
@@ -225,6 +235,21 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ")" ), PARSE_ERROR );
 		}
 		else if ( string_equal( property, "halfgridsnap" ) ) {
+		}
+		else if ( string_equal( property, "flags" ) ) {
+			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "(" ), PARSE_ERROR );
+			for (;; )
+			{
+				const char* base = tokeniser.getToken();
+				if ( string_equal( base, ")" ) ) {
+					break;
+				}
+				else if ( !string_equal( base, "," ) ) {
+					if( string_equal_nocase( base, "Angle" ) ){
+						entityClass->has_angles = true;
+					}
+				}
+			}
 		}
 		else
 		{
