@@ -51,6 +51,7 @@ ListAttributeTypes g_listTypesFGD;
 
 
 void EntityClassFGD_clear(){
+	g_EntityClassFGD_classes.clear();
 	for ( BaseClasses::iterator i = g_EntityClassFGD_bases.begin(); i != g_EntityClassFGD_bases.end(); ++i )
 	{
 		( *i ).second->free( ( *i ).second );
