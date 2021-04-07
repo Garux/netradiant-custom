@@ -238,6 +238,16 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 		ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ":" ), PARSE_ERROR );
 
 		EntityClassFGD_parseSplitString( tokeniser, entityClass->m_comments );
+
+		const char* urlSeparator = tokeniser.getToken();
+		if ( string_equal( urlSeparator, ":" ) ) {
+			CopiedString tmp;
+			EntityClassFGD_parseSplitString( tokeniser, tmp );
+		}
+		else
+		{
+			tokeniser.ungetToken();
+		}
 	}
 
 	tokeniser.nextLine();
@@ -378,6 +388,15 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 					ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ":" ), PARSE_ERROR );
 					const char* name = tokeniser.getToken();
 					listType.push_back( name, tmp.c_str() );
+
+					const char* descriptionSeparator = tokeniser.getToken();
+					if ( string_equal( descriptionSeparator, ":" ) ) {
+						EntityClassFGD_parseSplitString( tokeniser, tmp );
+					}
+					else
+					{
+						tokeniser.ungetToken();
+					}
 				}
 				tokeniser.nextLine();
 			}
