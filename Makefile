@@ -166,7 +166,7 @@ ifeq ($(findstring -O,$(CFLAGS)),)
 	CFLAGS_COMMON += -O3
 	# only add -O3 if no -O flag is in $(CFLAGS)
 endif
-	CPPFLAGS_COMMON +=
+	CPPFLAGS_COMMON += -DNDEBUG
 	LDFLAGS_COMMON += -s
 else
 
@@ -176,7 +176,7 @@ ifeq ($(findstring -O,$(CFLAGS)),)
 	# only add -O3 if no -O flag is in $(CFLAGS)
 endif
 	CFLAGS_COMMON += -march=native -mtune=native
-	CPPFLAGS_COMMON +=
+	CPPFLAGS_COMMON += -DNDEBUG
 	LDFLAGS_COMMON += -s
 else
 
