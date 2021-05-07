@@ -250,7 +250,7 @@ void MDCImporter::InternReadFile(
 
     // get the number of valid surfaces
     BE_NCONST MDC::Surface *pcSurface, *pcSurface2;
-    pcSurface = pcSurface2 = new (mBuffer + pcHeader->ulOffsetSurfaces) MDC::Surface;
+    pcSurface = pcSurface2 = reinterpret_cast<BE_NCONST MDC::Surface *>(mBuffer + pcHeader->ulOffsetSurfaces);
     unsigned int iNumShaders = 0;
     for (unsigned int i = 0; i < pcHeader->ulNumSurfaces; ++i) {
         // validate the surface header
@@ -260,7 +260,7 @@ void MDCImporter::InternReadFile(
             ++pScene->mNumMeshes;
         }
         iNumShaders += pcSurface2->ulNumShaders;
-        pcSurface2 = new ((int8_t *)pcSurface2 + pcSurface2->ulOffsetEnd) MDC::Surface;
+        pcSurface2 = reinterpret_cast<BE_NCONST MDC::Surface *>((BE_NCONST int8_t *)pcSurface2 + pcSurface2->ulOffsetEnd);
     }
     aszShaders.reserve(iNumShaders);
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
@@ -405,7 +405,7 @@ void MDCImporter::InternReadFile(
             pcFaceCur->mIndices[2] = iOutIndex + 0;
         }
 
-        pcSurface = new ((int8_t *)pcSurface + pcSurface->ulOffsetEnd) MDC::Surface;
+        pcSurface = reinterpret_cast<BE_NCONST MDC::Surface *>((BE_NCONST int8_t *)pcSurface + pcSurface->ulOffsetEnd);
     }
 
     // create a flat node graph with a root node and one child for each surface
@@ -465,6 +465,13 @@ void MDCImporter::InternReadFile(
             pcMat->AddProperty(&path, AI_MATKEY_TEXTURE_DIFFUSE(0));
         }
     }
+
+    // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
+    pScene->mRootNode->mTransformation = aiMatrix4x4(
+            1.f, 0.f, 0.f, 0.f,
+            0.f, 0.f, 1.f, 0.f,
+            0.f, -1.f, 0.f, 0.f,
+            0.f, 0.f, 0.f, 1.f);
 }
 
 #endif // !! ASSIMP_BUILD_NO_MDC_IMPORTER

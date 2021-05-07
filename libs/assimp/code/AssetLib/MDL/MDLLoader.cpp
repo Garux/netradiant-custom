@@ -199,6 +199,7 @@ void MDLImporter::InternReadFile(const std::string &pFile,
         const uint32_t iMagicWord = *((uint32_t *)mBuffer);
 
         // Determine the file subtype and call the appropriate member function
+        bool is_half_life = false;
 
         // Original Quake1 format
         if (AI_MDL_MAGIC_NUMBER_BE == iMagicWord || AI_MDL_MAGIC_NUMBER_LE == iMagicWord) {
@@ -240,6 +241,7 @@ void MDLImporter::InternReadFile(const std::string &pFile,
         else if (AI_MDL_MAGIC_NUMBER_BE_HL2a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2a == iMagicWord ||
                  AI_MDL_MAGIC_NUMBER_BE_HL2b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2b == iMagicWord) {
             iGSFileVersion = 0;
+            is_half_life = true;
 
             HalfLife::HalfLifeMDLBaseHeader *pHeader = (HalfLife::HalfLifeMDLBaseHeader *)mBuffer;
             if (pHeader->version == AI_MDL_HL1_VERSION) {
@@ -255,9 +257,19 @@ void MDLImporter::InternReadFile(const std::string &pFile,
                                     ". Magic word (", std::string((char *)&iMagicWord, 4), ") is not known");
         }
 
-        // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
-        pScene->mRootNode->mTransformation = aiMatrix4x4(1.f, 0.f, 0.f, 0.f,
-                0.f, 0.f, 1.f, 0.f, 0.f, -1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+        if (is_half_life){
+            // Now rotate the whole scene 90 degrees around the z and x axes to convert to internal coordinate system
+            pScene->mRootNode->mTransformation = aiMatrix4x4(
+                    0.f, -1.f, 0.f, 0.f,
+                    0.f, 0.f, 1.f, 0.f,
+                    -1.f, 0.f, 0.f, 0.f,
+                    0.f, 0.f, 0.f, 1.f);
+        }
+        else {
+            // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
+            pScene->mRootNode->mTransformation = aiMatrix4x4(1.f, 0.f, 0.f, 0.f,
+                    0.f, 0.f, 1.f, 0.f, 0.f, -1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+        }
 
         DeleteBufferAndCleanup();
     } catch (...) {
@@ -428,7 +440,7 @@ void MDLImporter::InternReadFile_Quake1() {
     } else {
         // get the first frame in the group
         BE_NCONST MDL::GroupFrame *pcFrames2 = (BE_NCONST MDL::GroupFrame *)pcFrames;
-        pcFirstFrame = &(pcFrames2->frames[0]);
+        pcFirstFrame = (MDL::SimpleFrame *)( &pcFrames2->time + pcFrames2->numframes );
     }
     BE_NCONST MDL::Vertex *pcVertices = (BE_NCONST MDL::Vertex *)((pcFirstFrame->name) + sizeof(pcFirstFrame->name));
     VALIDATE_FILE_SIZE((const unsigned char *)(pcVertices + pcHeader->num_verts));
@@ -708,6 +720,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
 
                 // read the normal vector from the precalculated normal table
                 MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex, pcMesh->mNormals[iCurrent]);
+                pcMesh->mNormals[iCurrent] *= -1;
                 // pcMesh->mNormals[iCurrent].y *= -1.0f;
 
                 // read texture coordinates
@@ -763,6 +776,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
 
                 // read the normal vector from the precalculated normal table
                 MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex, pcMesh->mNormals[iCurrent]);
+                pcMesh->mNormals[iCurrent] *= -1;
                 // pcMesh->mNormals[iCurrent].y *= -1.0f;
 
                 // read texture coordinates
@@ -1844,7 +1858,7 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
                 for (unsigned int c = 0; c < 3; ++c) {
                     const uint32_t iIndex = oldFace.mIndices[c];
                     pcMesh->mVertices[iCurrent] = groupData.vPositions[iIndex];
-                    pcMesh->mNormals[iCurrent] = groupData.vNormals[iIndex];
+                    pcMesh->mNormals[iCurrent] = -groupData.vNormals[iIndex];
 
                     if (!groupData.vTextureCoords1.empty()) {
 
