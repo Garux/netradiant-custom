@@ -31,86 +31,261 @@
 /* dependencies */
 #include "q3map2.h"
 
+#include "model.h"
+
+#include "assimp/Importer.hpp"
+#include "assimp/importerdesc.h"
+#include "assimp/Logger.hpp"
+#include "assimp/DefaultLogger.hpp"
+#include "assimp/IOSystem.hpp"
+#include "assimp/MemoryIOWrapper.h"
+#include "assimp/postprocess.h"
+#include "assimp/scene.h"
+#include "assimp/mesh.h"
+
+#include <map>
 
 
-/*
-   PicoPrintFunc()
-   callback for picomodel.lib
- */
-
-void PicoPrintFunc( int level, const char *str ){
-	if ( str == NULL ) {
-		return;
+class AssLogger : public Assimp::Logger
+{
+public:
+	void OnDebug( const char* message ) override {
+#ifdef _DEBUG
+		Sys_Printf( "%s\n", message );
+#endif
 	}
-	switch ( level )
-	{
-	case PICO_NORMAL:
-		Sys_Printf( "%s\n", str );
-		break;
-
-	case PICO_VERBOSE:
-		Sys_FPrintf( SYS_VRB, "%s\n", str );
-		break;
-
-	case PICO_WARNING:
-		Sys_Warning( "%s\n", str );
-		break;
-
-	case PICO_ERROR:
-		Sys_FPrintf( SYS_WRN, "ERROR: %s\n", str ); /* let it be a warning, since radiant stops monitoring on error message flag */
-		break;
-
-	case PICO_FATAL:
-		Error( "ERROR: %s\n", str );
-		break;
+	void OnVerboseDebug( const char *message ) override {
+#ifdef _DEBUG
+		Sys_FPrintf( SYS_VRB, "%s\n", message );
+#endif
 	}
-}
-
-
-
-/*
-   PicoLoadFileFunc()
-   callback for picomodel.lib
- */
-
-void PicoLoadFileFunc( const char *name, byte **buffer, int *bufSize ){
-	*bufSize = vfsLoadFile( name, (void**) buffer, 0 );
-}
-
-
-
-/*
-   FindModel() - ydnar
-   finds an existing picoModel and returns a pointer to the picoModel_t struct or NULL if not found
- */
-
-picoModel_t *FindModel( const char *name, int frame ){
-	int i;
-
-
-	/* init */
-	if ( numPicoModels <= 0 ) {
-		memset( picoModels, 0, sizeof( picoModels ) );
+	void OnInfo( const char* message ) override {
+#ifdef _DEBUG
+		Sys_Printf( "%s\n", message );
+#endif
+	}
+	void OnWarn( const char* message ) override {
+		Sys_Warning( "%s\n", message );
+	}
+	void OnError( const char* message ) override {
+		Sys_FPrintf( SYS_WRN, "ERROR: %s\n", message ); /* let it be a warning, since radiant stops monitoring on error message flag */
 	}
 
-	/* dummy check */
-	if ( strEmptyOrNull( name ) ) {
-		return NULL;
+	bool attachStream( Assimp::LogStream *pStream, unsigned int severity ) override {
+		return false;
+	}
+	bool detachStream( Assimp::LogStream *pStream, unsigned int severity ) override {
+		return false;
+	}
+};
+
+
+class AssIOSystem : public Assimp::IOSystem
+{
+public:
+	// -------------------------------------------------------------------
+	/** @brief Tests for the existence of a file at the given path.
+	 *
+	 * @param pFile Path to the file
+	 * @return true if there is a file with this path, else false.
+	 */
+	bool Exists( const char* pFile ) const override {
+		return vfsGetFileCount( pFile ) != 0;
 	}
 
-	/* search list */
-	for ( i = 0; i < MAX_MODELS; i++ )
-	{
-		if ( picoModels[ i ] != NULL &&
-		     strEqual( PicoGetModelName( picoModels[ i ] ), name ) &&
-		     PicoGetModelFrameNum( picoModels[ i ] ) == frame ) {
-			return picoModels[ i ];
+	// -------------------------------------------------------------------
+	/** @brief Returns the system specific directory separator
+	 *  @return System specific directory separator
+	 */
+	char getOsSeparator() const override {
+		return '/';
+	}
+
+	// -------------------------------------------------------------------
+	/** @brief Open a new file with a given path.
+	 *
+	 *  When the access to the file is finished, call Close() to release
+	 *  all associated resources (or the virtual dtor of the IOStream).
+	 *
+	 *  @param pFile Path to the file
+	 *  @param pMode Desired file I/O mode. Required are: "wb", "w", "wt",
+	 *         "rb", "r", "rt".
+	 *
+	 *  @return New IOStream interface allowing the lib to access
+	 *         the underlying file.
+	 *  @note When implementing this class to provide custom IO handling,
+	 *  you probably have to supply an own implementation of IOStream as well.
+	 */
+	Assimp::IOStream* Open( const char* pFile, const char* pMode = "rb" ) override {
+		const uint8_t *boo;
+		const int size = vfsLoadFile( pFile, (void**) &boo, 0 );
+		if ( size >= 0 ) {
+			return new Assimp::MemoryIOStream( boo, size, true );
 		}
+		return nullptr;
 	}
 
-	/* no matching picoModel found */
-	return NULL;
+	// -------------------------------------------------------------------
+	/** @brief Closes the given file and releases all resources
+	 *    associated with it.
+	 *  @param pFile The file instance previously created by Open().
+	 */
+	void Close( Assimp::IOStream* pFile ) override {
+		delete pFile;
+	}
+
+	// -------------------------------------------------------------------
+	/** @brief CReates an new directory at the given path.
+	 *  @param  path    [in] The path to create.
+	 *  @return True, when a directory was created. False if the directory
+	 *           cannot be created.
+	 */
+	bool CreateDirectory( const std::string &path ) override {
+		Error( "AssIOSystem::CreateDirectory" );
+		return false;
+	}
+
+	// -------------------------------------------------------------------
+	/** @brief Will change the current directory to the given path.
+	 *  @param path     [in] The path to change to.
+	 *  @return True, when the directory has changed successfully.
+	 */
+	bool ChangeDirectory( const std::string &path ) override {
+		Error( "AssIOSystem::ChangeDirectory" );
+		return false;
+	}
+
+	bool DeleteFile( const std::string &file ) override {
+		Error( "AssIOSystem::DeleteFile" );
+		return false;
+	}
+
+private:
+};
+
+static Assimp::Importer *s_assImporter = nullptr;
+
+void assimp_init(){
+	s_assImporter = new Assimp::Importer();
+
+	s_assImporter->SetPropertyBool( AI_CONFIG_PP_PTV_ADD_ROOT_TRANSFORMATION, true );
+	s_assImporter->SetPropertyInteger( AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE );
+	s_assImporter->SetPropertyString( AI_CONFIG_IMPORT_MDL_COLORMAP, "gfx/palette.lmp" ); // Q1 palette, default is fine too
+	s_assImporter->SetPropertyBool( AI_CONFIG_IMPORT_MD3_LOAD_SHADERS, false );
+	s_assImporter->SetPropertyString( AI_CONFIG_IMPORT_MD3_SHADER_SRC, "scripts/" );
+	s_assImporter->SetPropertyBool( AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART, false );
+	s_assImporter->SetPropertyInteger( AI_CONFIG_PP_RVC_FLAGS, aiComponent_TANGENTS_AND_BITANGENTS ); // varying tangents prevent aiProcess_JoinIdenticalVertices
+
+	Assimp::DefaultLogger::set( new AssLogger );
+
+	s_assImporter->SetIOHandler( new AssIOSystem );
 }
+
+struct ModelNameFrame
+{
+	CopiedString m_name;
+	int m_frame;
+	bool operator<( const ModelNameFrame& other ) const {
+		const int cmp = string_compare_nocase( m_name.c_str(), other.m_name.c_str() );
+		return cmp != 0? cmp < 0 : m_frame < other.m_frame;
+	}
+};
+struct AssModel
+{
+	struct AssModelMesh : public AssMeshWalker
+	{
+		const aiMesh *m_mesh;
+		CopiedString m_shader;
+
+		AssModelMesh( const aiScene *scene, const aiMesh *mesh, const char *rootPath ) : m_mesh( mesh ){
+			aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+
+			aiString matname = material->GetName();
+#ifdef _DEBUG
+						Sys_Printf( "matname: %s\n", matname.C_Str() );
+#endif
+			aiString texname;
+			if( aiReturn_SUCCESS == material->Get( AI_MATKEY_TEXTURE_DIFFUSE(0), texname )
+			 && texname.length != 0 ){
+#ifdef _DEBUG
+							Sys_Printf( "texname: %s\n", texname.C_Str() );
+#endif
+				m_shader = StringOutputStream()( PathCleaned( PathExtensionless( texname.C_Str() ) ) );
+
+			}
+			else{
+				m_shader = StringOutputStream()( PathCleaned( PathExtensionless( matname.C_Str() ) ) );
+			}
+
+			const CopiedString oldShader( m_shader );
+			if( strchr( m_shader.c_str(), '/' ) == nullptr ){ /* texture is likely in the folder, where model is */
+				m_shader = StringOutputStream()( rootPath, m_shader.c_str() );
+			}
+			else{
+				const char *name = m_shader.c_str();
+				if( name[0] == '/' || ( name[0] != '\0' && name[1] == ':' ) || strstr( name, ".." ) ){ /* absolute path or with .. */
+					const char* p;
+					if( ( p = string_in_string_nocase( name, "/models/" ) )
+					 || ( p = string_in_string_nocase( name, "/textures/" ) ) ){
+						m_shader = p + 1;
+					}
+					else{
+						m_shader = StringOutputStream()( rootPath, path_get_filename_start( name ) );
+					}
+				}
+			}
+
+			if( oldShader != m_shader )
+				Sys_FPrintf( SYS_VRB, "substituting: %s -> %s\n", oldShader.c_str(), m_shader.c_str() );
+		}
+
+		void forEachFace( std::function<void( const Vector3 ( &xyz )[3], const Vector2 ( &st )[3])> visitor ) const override {
+			for ( size_t t = 0; t < m_mesh->mNumFaces; ++t ){
+				const aiFace& face = m_mesh->mFaces[t];
+				// if( face.mNumIndices == 3 )
+				Vector3 xyz[3];
+				Vector2 st[3];
+				for( size_t n = 0; n < 3; ++n ){
+					const auto i = face.mIndices[n];
+					xyz[n] = { m_mesh->mVertices[i].x, m_mesh->mVertices[i].y, m_mesh->mVertices[i].z };
+					if( m_mesh->HasTextureCoords( 0 ) )
+						st[n] = { m_mesh->mTextureCoords[0][i].x, m_mesh->mTextureCoords[0][i].y };
+					else
+						st[n] = { 0, 0 };
+				}
+				visitor( xyz, st );
+			}
+		}
+		const char *getShaderName() const override {
+			return m_shader.c_str();
+		}
+	};
+
+	aiScene *m_scene;
+	std::vector<AssModelMesh> m_meshes;
+
+	AssModel( aiScene *scene, const char *modelname ) : m_scene( scene ){
+		m_meshes.reserve( scene->mNumMeshes );
+		const auto rootPath = StringOutputStream()( PathCleaned( PathFilenameless( modelname ) ) );
+		const auto traverse = [&]( const auto& self, const aiNode* node ) -> void {
+			for( size_t n = 0; n < node->mNumMeshes; ++n ){
+				const aiMesh *mesh = scene->mMeshes[node->mMeshes[n]];
+				if( mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE ){
+					m_meshes.emplace_back( scene, mesh, rootPath );
+				}
+			}
+
+			// traverse all children
+			for ( size_t n = 0; n < node->mNumChildren; ++n ){
+				self( self, node->mChildren[n] );
+			}
+		};
+
+		traverse( traverse, scene->mRootNode );
+	}
+};
+
+static std::map<ModelNameFrame, AssModel> s_assModels;
 
 
 
@@ -119,83 +294,62 @@ picoModel_t *FindModel( const char *name, int frame ){
    loads a picoModel and returns a pointer to the picoModel_t struct or NULL if not found
  */
 
-picoModel_t *LoadModel( const char *name, int frame ){
-	int i;
-	picoModel_t     *model, **pm;
-
-
-	/* init */
-	if ( numPicoModels <= 0 ) {
-		memset( picoModels, 0, sizeof( picoModels ) );
-	}
-
+AssModel *LoadModel( const char *name, int frame ){
 	/* dummy check */
 	if ( strEmptyOrNull( name ) ) {
-		return NULL;
+		return nullptr;
 	}
 
 	/* try to find existing picoModel */
-	model = FindModel( name, frame );
-	if ( model != NULL ) {
-		return model;
+	auto it = s_assModels.find( ModelNameFrame{ name, frame } );
+	if( it != s_assModels.end() ){
+		return &it->second;
 	}
 
-	/* none found, so find first non-null picoModel */
-	pm = NULL;
-	for ( i = 0; i < MAX_MODELS; i++ )
-	{
-		if ( picoModels[ i ] == NULL ) {
-			pm = &picoModels[ i ];
-			break;
-		}
+	unsigned flags = //aiProcessPreset_TargetRealtime_Fast
+	            //    | aiProcess_FixInfacingNormals
+	                 aiProcess_GenNormals
+	               | aiProcess_JoinIdenticalVertices
+	               | aiProcess_Triangulate
+	               | aiProcess_GenUVCoords
+	               | aiProcess_SortByPType
+	               | aiProcess_FindDegenerates
+	               | aiProcess_FindInvalidData
+	               | aiProcess_ValidateDataStructure
+	               | aiProcess_FlipUVs
+	               | aiProcess_FlipWindingOrder
+	               | aiProcess_PreTransformVertices
+	               | aiProcess_RemoveComponent
+	               | aiProcess_SplitLargeMeshes;
+	// rotate the whole scene 90 degrees around the x axis to convert assimp's Y = UP to Quakes's Z = UP
+	s_assImporter->SetPropertyMatrix( AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION, aiMatrix4x4( 1, 0, 0, 0,
+	                                                                                     0, 0, -1, 0,
+	                                                                                     0, 1, 0, 0,
+	                                                                                     0, 0, 0, 1 ) ); // aiMatrix4x4::RotationX( c_half_pi )
+
+	s_assImporter->SetPropertyInteger( AI_CONFIG_PP_SLM_VERTEX_LIMIT, maxSurfaceVerts ); // TODO this optimal and with respect to lightmapped/not
+	s_assImporter->SetPropertyInteger( AI_CONFIG_IMPORT_GLOBAL_KEYFRAME, frame );
+
+	const aiScene *scene = s_assImporter->ReadFile( name, flags );
+
+	if( scene != nullptr ){
+		if( scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE )
+			Sys_Warning( "AI_SCENE_FLAGS_INCOMPLETE\n" );
+		return &s_assModels.emplace( ModelNameFrame{ name, frame }, AssModel( s_assImporter->GetOrphanedScene(), name ) ).first->second;
 	}
-
-	/* too many picoModels? */
-	if ( pm == NULL ) {
-		Error( "MAX_MODELS (%d) exceeded, there are too many model files referenced by the map.", MAX_MODELS );
+	else{
+		return nullptr; // TODO /* if loading failed, make a bogus model to silence the rest of the warnings */
 	}
+}
 
-	/* attempt to parse model */
-	*pm = PicoLoadModel( name, frame );
-
-	/* if loading failed, make a bogus model to silence the rest of the warnings */
-	if ( *pm == NULL ) {
-		/* allocate a new model */
-		*pm = PicoNewModel();
-		if ( *pm == NULL ) {
-			return NULL;
-		}
-
-		/* set data */
-		PicoSetModelName( *pm, name );
-		PicoSetModelFrameNum( *pm, frame );
-	}
-
-	/* debug code */
-	#if 0
-	{
-		int numSurfaces, numVertexes;
-		picoSurface_t   *ps;
-
-
-		Sys_Printf( "Model %s\n", name );
-		numSurfaces = PicoGetModelNumSurfaces( *pm );
-		for ( i = 0; i < numSurfaces; i++ )
-		{
-			ps = PicoGetModelSurface( *pm, i );
-			numVertexes = PicoGetSurfaceNumVertexes( ps );
-			Sys_Printf( "Surface %d has %d vertexes\n", i, numVertexes );
-		}
-	}
-	#endif
-
-	/* set count */
-	if ( *pm != NULL ) {
-		numPicoModels++;
-	}
-
-	/* return the picoModel */
-	return *pm;
+std::vector<const AssMeshWalker*> LoadModelWalker( const char *name, int frame ){
+	AssModel *model = LoadModel( name, frame );
+	std::vector<const AssMeshWalker*> vector;
+	if( model != nullptr )
+		std::for_each( model->m_meshes.begin(), model->m_meshes.end(), [&vector]( const auto& val ){
+			vector.push_back( &val );
+		} );
+	return vector;
 }
 
 
@@ -206,15 +360,12 @@ picoModel_t *LoadModel( const char *name, int frame ){
  */
 
 void InsertModel( const char *name, int skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth ){
-	int i, j, s, k, numSurfaces;
+	int i, j, k;
 	const Matrix4 nTransform( matrix4_for_normal_transform( transform ) );
-	picoModel_t         *model;
-	picoSurface_t       *surface;
+	AssModel            *model;
 	shaderInfo_t        *si;
 	mapDrawSurface_t    *ds;
 	const char          *picoShaderName;
-	byte                *color;
-	picoIndex_t         *indexes;
 	char                *skinfilecontent;
 	int skinfilesize;
 	char                *skinfileptr, *skinfilenextptr;
@@ -305,39 +456,28 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 	}
 
 	/* each surface on the model will become a new map drawsurface */
-	numSurfaces = PicoGetModelNumSurfaces( model );
 	//%	Sys_FPrintf( SYS_VRB, "Model %s has %d surfaces\n", name, numSurfaces );
-	for ( s = 0; s < numSurfaces; s++ )
+	for ( const auto& surface : model->m_meshes )
 	{
-		/* get surface */
-		surface = PicoGetModelSurface( model, s );
-		if ( surface == NULL ) {
-			continue;
-		}
-
+		const aiMesh *mesh = surface.m_mesh;
 		/* only handle triangle surfaces initially (fixme: support patches) */
-		if ( PicoGetSurfaceType( surface ) != PICO_TRIANGLES ) {
-			continue;
-		}
 
 		/* get shader name */
-		if ( !( picoShaderName = PicoGetShaderName( PicoGetSurfaceShader( surface ) ) ) ) {
-			picoShaderName = "";
-		}
+		picoShaderName = surface.m_shader.c_str();
 
 		/* handle .skin file */
 		if ( !skins.empty() ) {
 			picoShaderName = NULL;
 			for( const auto& skin : skins )
 			{
-				if ( striEqual( surface->name, skin.from ) ) {
-					Sys_FPrintf( SYS_VRB, "Skin file: mapping %s to %s\n", surface->name, skin.to );
+				if ( striEqual( surface.m_shader.c_str(), skin.from ) ) {
+					Sys_FPrintf( SYS_VRB, "Skin file: mapping %s to %s\n", surface.m_shader.c_str(), skin.to );
 					picoShaderName = skin.to;
 					break;
 				}
 			}
 			if ( picoShaderName == NULL ) {
-				Sys_FPrintf( SYS_VRB, "Skin file: not mapping %s\n", surface->name );
+				Sys_FPrintf( SYS_VRB, "Skin file: not mapping %s\n", surface.m_shader.c_str() );
 				continue;
 			}
 		}
@@ -393,7 +533,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 
 		/* fix the surface's normals (jal: conditioned by shader info) */
 		if ( !( spawnFlags & 64 ) && ( shadeAngle == 0.0f || ds->type != ESurfaceType::ForcedMeta ) ) {
-			PicoFixSurfaceNormals( surface );
+			// PicoFixSurfaceNormals( surface );
 		}
 
 		/* set sample size */
@@ -412,12 +552,12 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 		}
 
 		/* set particulars */
-		ds->numVerts = PicoGetSurfaceNumVertexes( surface );
+		ds->numVerts = mesh->mNumVertices;
 		ds->verts = safe_calloc( ds->numVerts * sizeof( ds->verts[ 0 ] ) );
 
-		ds->numIndexes = PicoGetSurfaceNumIndexes( surface );
+		ds->numIndexes = mesh->mNumFaces * 3;
 		ds->indexes = safe_calloc( ds->numIndexes * sizeof( ds->indexes[ 0 ] ) );
-
+// Sys_Printf( "verts %i idx %i\n", ds->numVerts, ds->numIndexes );
 		/* copy vertexes */
 		for ( i = 0; i < ds->numVerts; i++ )
 		{
@@ -425,12 +565,14 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 			bspDrawVert_t& dv = ds->verts[ i ];
 
 			/* xyz and normal */
-			dv.xyz = vector3_from_array( PicoGetSurfaceXYZ( surface, i ) );
+			dv.xyz = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
 			matrix4_transform_point( transform, dv.xyz );
 
-			dv.normal = vector3_from_array( PicoGetSurfaceNormal( surface, i ) );
-			matrix4_transform_direction( nTransform, dv.normal );
-			VectorNormalize( dv.normal );
+			if( mesh->HasNormals() ){
+				dv.normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+				matrix4_transform_direction( nTransform, dv.normal );
+				VectorNormalize( dv.normal );
+			}
 
 			/* ydnar: tek-fu celshading support for flat shaded shit */
 			if ( flat ) {
@@ -447,28 +589,41 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 			/* normal texture coordinates */
 			else
 			{
-				dv.st = vector2_from_array( PicoGetSurfaceST( surface, 0, i ) );
+				if( mesh->HasTextureCoords( 0 ) )
+					dv.st = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
 			}
 
 			/* set lightmap/color bits */
-			color = PicoGetSurfaceColor( surface, 0, i );
-			for ( j = 0; j < MAX_LIGHTMAPS; j++ )
 			{
-				dv.lightmap[ j ] = { 0, 0 };
-				if ( spawnFlags & 32 ) { // spawnflag 32: model color -> alpha hack
-					dv.color[ j ] = { 255, 255, 255, color_to_byte( RGBTOGRAY( color ) ) };
-				}
-				else
+				const aiColor4D color = mesh->HasVertexColors( 0 )? mesh->mColors[0][i] : aiColor4D( 1 );
+				for ( j = 0; j < MAX_LIGHTMAPS; j++ )
 				{
-					dv.color[ j ] = { color[0], color[1], color[2], color[3] };
+					dv.lightmap[ j ] = { 0, 0 };
+					if ( spawnFlags & 32 ) { // spawnflag 32: model color -> alpha hack
+						dv.color[ j ] = { 255, 255, 255, color_to_byte( RGBTOGRAY( color ) * 255 ) };
+					}
+					else
+					{
+						dv.color[ j ] = { color_to_byte( color[0] * 255 ),
+						                  color_to_byte( color[1] * 255 ),
+						                  color_to_byte( color[2] * 255 ),
+						                  color_to_byte( color[3] * 255 ) };
+					}
 				}
 			}
 		}
 
 		/* copy indexes */
-		indexes = PicoGetSurfaceIndexes( surface, 0 );
-		for ( i = 0; i < ds->numIndexes; i++ )
-			ds->indexes[ i ] = indexes[ i ];
+		{
+			size_t idCopied = 0;
+			for ( size_t t = 0; t < mesh->mNumFaces; ++t ){
+				const aiFace& face = mesh->mFaces[t];
+				// if( face.mNumIndices == 3 )
+				for ( size_t i = 0; i < 3; i++ ){
+					ds->indexes[idCopied++] = face.mIndices[i];
+				}
+			}
+		}
 
 		/* set cel shader */
 		ds->celShader = celShader;

@@ -145,12 +145,7 @@ int main( int argc, char **argv ){
 	}
 
 	/* init model library */
-	PicoInit();
-	PicoSetMallocFunc( malloc );
-	PicoSetFreeFunc( free );
-	PicoSetPrintFunc( PicoPrintFunc );
-	PicoSetLoadFileFunc( PicoLoadFileFunc );
-	PicoSetFreeFileFunc( free );
+	assimp_init();
 
 	/* set number of threads */
 	ThreadSetDefault();

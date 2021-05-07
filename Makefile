@@ -390,7 +390,6 @@ endif
 
 .PHONY: binaries
 binaries: \
-	binaries-assimp \
 	binaries-tools \
 	binaries-radiant \
 
@@ -399,10 +398,6 @@ binaries-radiant: \
 	binaries-radiant-modules \
 	binaries-radiant-plugins \
 	binaries-radiant-core \
-
-.PHONY: binaries-assimp
-binaries-assimp: \
-	$(INSTALLDIR)/assimp_.$(DLL) \
 
 .PHONY: binaries-radiant-modules
 binaries-radiant-modules: \
@@ -416,8 +411,7 @@ binaries-radiant-modules: \
 	$(INSTALLDIR)/modules/imageq2.$(DLL) \
 	$(INSTALLDIR)/modules/mapq3.$(DLL) \
 	$(INSTALLDIR)/modules/mapxml.$(DLL) \
-	$(INSTALLDIR)/modules/md3model.$(DLL) \
-	$(INSTALLDIR)/modules/model.$(DLL) \
+	$(INSTALLDIR)/modules/assmodel.$(DLL) \
 	$(INSTALLDIR)/modules/shaders.$(DLL) \
 	$(INSTALLDIR)/modules/vfspk3.$(DLL) \
 
@@ -528,8 +522,11 @@ else
 $(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA := -Wl,--stack,4194304
 endif
 endif
-$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB)
-$(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) $(CPPFLAGS_JPEG) -Itools/quake3/common -Ilibs -Iinclude
+ifneq ($(OS),Win32)
+$(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA += -Wl,-rpath '-Wl,$$ORIGIN'
+endif
+$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB) -lassimp_ -L$(INSTALLDIR)
+$(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) $(CPPFLAGS_JPEG) -Itools/quake3/common -Ilibs -Iinclude -Ilibs/assimp/include
 $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
 	tools/quake3/common/imagelib.o \
@@ -588,7 +585,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	libddslib.$(A) \
 	libfilematch.$(A) \
 	libl_net.$(A) \
-	libpicomodel.$(A) \
+	$(INSTALLDIR)/libassimp_.$(DLL) \
 	$(if $(findstring Win32,$(OS)),icons/q3map2.o,) \
 
 libmathlib.$(A): CPPFLAGS_EXTRA := -Ilibs
@@ -630,9 +627,9 @@ libpicomodel.$(A): \
 	libs/picomodel/pm_obj.o \
 	libs/picomodel/pm_terrain.o \
 
-$(INSTALLDIR)/assimp_.$(DLL): LIBS_EXTRA := $(LIBS_ZLIB)
-$(INSTALLDIR)/assimp_.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_ZLIB) -Ilibs/assimp/include -Ilibs/assimp/code -Ilibs/assimp/contrib/pugixml/src -Ilibs/assimp/contrib/unzip -Ilibs/assimp -Ilibs/assimp/contrib/openddlparser/include -Ilibs/assimp/contrib/rapidjson/include -Ilibs/assimp/contrib -DASSIMP_BUILD_DLL_EXPORT -DASSIMP_BUILD_NO_C4D_IMPORTER -DASSIMP_BUILD_NO_EXPORT -DASSIMP_BUILD_NO_IFC_IMPORTER -DASSIMP_BUILD_NO_OWN_ZLIB -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 -DMINIZ_USE_UNALIGNED_LOADS_AND_STORES=0 -DOPENDDLPARSER_BUILD -DRAPIDJSON_HAS_STDSTRING=1 -DRAPIDJSON_NOMEMBERITERATORCLASS -DWIN32_LEAN_AND_MEAN -Dassimp_EXPORTS -fvisibility=hidden -Wno-long-long -Wa,-mbig-obj -fexceptions -frtti
-$(INSTALLDIR)/assimp_.$(DLL): \
+$(INSTALLDIR)/libassimp_.$(DLL): LIBS_EXTRA := $(LIBS_ZLIB)
+$(INSTALLDIR)/libassimp_.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_ZLIB) -Ilibs/assimp/include -Ilibs/assimp/code -Ilibs/assimp/contrib/pugixml/src -Ilibs/assimp/contrib/unzip -Ilibs/assimp -Ilibs/assimp/contrib/openddlparser/include -Ilibs/assimp/contrib/rapidjson/include -Ilibs/assimp/contrib -DASSIMP_BUILD_DLL_EXPORT -DASSIMP_BUILD_NO_C4D_IMPORTER -DASSIMP_BUILD_NO_EXPORT -DASSIMP_BUILD_NO_IFC_IMPORTER -DASSIMP_BUILD_NO_OWN_ZLIB -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 -DMINIZ_USE_UNALIGNED_LOADS_AND_STORES=0 -DOPENDDLPARSER_BUILD -DRAPIDJSON_HAS_STDSTRING=1 -DRAPIDJSON_NOMEMBERITERATORCLASS -DWIN32_LEAN_AND_MEAN -Dassimp_EXPORTS -fvisibility=hidden -Wno-long-long -fexceptions -frtti
+$(INSTALLDIR)/libassimp_.$(DLL): \
 	libs/assimp/code/Common/Assimp.o \
 	libs/assimp/code/CApi/CInterfaceIOWrapper.o \
 	libs/assimp/code/Common/BaseImporter.o \
@@ -1077,21 +1074,16 @@ $(INSTALLDIR)/modules/mapxml.$(DLL): \
 	plugins/mapxml/xmlparse.o \
 	plugins/mapxml/xmlwrite.o \
 
-$(INSTALLDIR)/modules/md3model.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
-$(INSTALLDIR)/modules/md3model.$(DLL): \
-	plugins/md3model/md2.o \
-	plugins/md3model/md3.o \
-	plugins/md3model/md5.o \
-	plugins/md3model/mdc.o \
-	plugins/md3model/mdlimage.o \
-	plugins/md3model/mdl.o \
-	plugins/md3model/plugin.o \
-
-$(INSTALLDIR)/modules/model.$(DLL): LIBS_EXTRA := -lassimp_ -L$(INSTALLDIR)
-$(INSTALLDIR)/modules/model.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude -Ilibs/assimp/include
-$(INSTALLDIR)/modules/model.$(DLL): \
-	plugins/model/model.o \
-	plugins/model/plugin.o \
+ifneq ($(OS),Win32)
+$(INSTALLDIR)/modules/assmodel.$(DLL): LDFLAGS_EXTRA := -Wl,-rpath '-Wl,$$ORIGIN/..'
+endif
+$(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := -lassimp_ -L$(INSTALLDIR)
+$(INSTALLDIR)/modules/assmodel.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude -Ilibs/assimp/include
+$(INSTALLDIR)/modules/assmodel.$(DLL): \
+	plugins/assmodel/mdlimage.o \
+	plugins/assmodel/model.o \
+	plugins/assmodel/plugin.o \
+	$(INSTALLDIR)/libassimp_.$(DLL) \
 
 $(INSTALLDIR)/modules/shaders.$(DLL): LIBS_EXTRA := $(LIBS_GLIB)
 $(INSTALLDIR)/modules/shaders.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) -Ilibs -Iinclude

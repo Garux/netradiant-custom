@@ -989,50 +989,28 @@ static void PopulateWithBSPModel( bspModel_t *model, const Matrix4& transform ){
 	}
 }
 
-
+#include "model.h"
 
 /*
    PopulateWithPicoModel() - ydnar
    filters a picomodel's surfaces into the raytracing tree
  */
 
-static void PopulateWithPicoModel( int castShadows, picoModel_t *model, const Matrix4& transform ){
-	int i, j, k, numSurfaces, numIndexes;
-	picoSurface_t       *surface;
-	picoShader_t        *shader;
-	picoIndex_t         *indexes;
+static void PopulateWithPicoModel( int castShadows, const std::vector<const AssMeshWalker*>& model, const Matrix4& transform ){
 	traceInfo_t ti;
 	traceWinding_t tw;
 
 
 	/* dummy check */
-	if ( model == NULL ) {
+	if ( model.empty() ) {
 		return;
 	}
 
-	/* get info */
-	numSurfaces = PicoGetModelNumSurfaces( model );
-
 	/* walk the list of surfaces in this model and fill out the info structs */
-	for ( i = 0; i < numSurfaces; i++ )
+	for ( const auto mesh : model )
 	{
-		/* get surface */
-		surface = PicoGetModelSurface( model, i );
-		if ( surface == NULL ) {
-			continue;
-		}
-
-		/* only handle triangle surfaces initially (fixme: support patches) */
-		if ( PicoGetSurfaceType( surface ) != PICO_TRIANGLES ) {
-			continue;
-		}
-
 		/* get shader (fixme: support shader remapping) */
-		shader = PicoGetSurfaceShader( surface );
-		if ( shader == NULL ) {
-			continue;
-		}
-		ti.si = ShaderInfoForShaderNull( PicoGetShaderName( shader ) );
+		ti.si = ShaderInfoForShaderNull( mesh->getShaderName() );
 		if ( ti.si == NULL ) {
 			continue;
 		}
@@ -1057,21 +1035,14 @@ static void PopulateWithPicoModel( int castShadows, picoModel_t *model, const Ma
 		tw.infoNum = AddTraceInfo( &ti );
 		tw.numVerts = 3;
 
-		/* get info */
-		numIndexes = PicoGetSurfaceNumIndexes( surface );
-		indexes = PicoGetSurfaceIndexes( surface, 0 );
-
 		/* walk the triangle list */
-		for ( j = 0; j < numIndexes; j += 3, indexes += 3 )
-		{
-			for ( k = 0; k < 3; k++ )
-			{
-				tw.v[ k ].xyz = vector3_from_array( PicoGetSurfaceXYZ( surface, indexes[ k ] ) );
-				tw.v[ k ].st = vector2_from_array( PicoGetSurfaceST( surface, 0, indexes[ k ] ) );
-				matrix4_transform_point( transform, tw.v[ k ].xyz );
+		mesh->forEachFace( [&tw, &transform]( const Vector3 ( &xyz )[3], const Vector2 ( &st )[3] ){
+			for( size_t i = 0; i < 3; ++i ){
+				tw.v[ i ].xyz = matrix4_transformed_point( transform, xyz[ i ] );
+				tw.v[ i ].st = st[ i ];
 			}
 			FilterTraceWindingIntoNodes_r( &tw, headNodeNum );
-		}
+		} );
 	}
 }
 
@@ -1085,7 +1056,6 @@ static void PopulateWithPicoModel( int castShadows, picoModel_t *model, const Ma
 static void PopulateTraceNodes( void ){
 	int m;
 	const char      *value;
-	picoModel_t     *model;
 
 
 	/* add worldspawn triangles */
@@ -1152,10 +1122,7 @@ static void PopulateTraceNodes( void ){
 
 		/* external model */
 		default:
-			model = LoadModel( value, e->intForKey( "_frame", "frame" ) );
-			if ( model != NULL ) {
-				PopulateWithPicoModel( castShadows, model, transform );
-			}
+			PopulateWithPicoModel( castShadows, LoadModelWalker( value, e->intForKey( "_frame", "frame" ) ), transform );
 			continue;
 		}
 
@@ -1180,11 +1147,7 @@ static void PopulateTraceNodes( void ){
 
 		/* external model */
 		default:
-			model = LoadModel( value, e->intForKey( "_frame2" ) );
-			if ( model == NULL ) {
-				continue;
-			}
-			PopulateWithPicoModel( castShadows, model, transform );
+			PopulateWithPicoModel( castShadows, LoadModelWalker( value, e->intForKey( "_frame2" ) ), transform );
 			continue;
 		}
 	}

@@ -107,7 +107,7 @@ public:
 	typedef MemberCaller<NodeType<Type>, &NodeType<Type>::initialise> InitialiseCaller;
 	TypeId getTypeId(){
 #if defined( _DEBUG )
-		ASSERT_MESSAGE( m_typeId != NODETYPEID_NONE, "node-type " << makeQuoted( Name ) << " used before being initialised" );
+		ASSERT_MESSAGE( m_typeId != NODETYPEID_NONE, "node-type " << makeQuoted( Type::Name ) << " used before being initialised" );
 #endif
 		return m_typeId;
 	}

@@ -72,8 +72,6 @@
 #include "md5lib.h"
 #include "ddslib.h"
 
-#include "picomodel.h"
-
 #include "scriplib.h"
 #include "polylib.h"
 #include "imagelib.h"
@@ -114,8 +112,6 @@
 
 #define MAX_IMAGES              2048
 #define DEFAULT_IMAGE           "*default"
-
-#define MAX_MODELS              2048
 
 #define DEF_BACKSPLASH_FRACTION 0.05f   /* 5% backsplash by default */
 #define DEF_BACKSPLASH_DISTANCE 23
@@ -1689,10 +1685,7 @@ tree_t                      *FaceBSP( face_t *list );
 
 
 /* model.c */
-void                        PicoPrintFunc( int level, const char *str );
-void                        PicoLoadFileFunc( const char *name, byte **buffer, int *bufSize );
-picoModel_t                 *FindModel( const char *name, int frame );
-picoModel_t                 *LoadModel( const char *name, int frame );
+void                        assimp_init();
 void                        InsertModel( const char *name, int skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth );
 void                        AddTriangleModels( entity_t *e );
 
@@ -2000,9 +1993,6 @@ Q_EXTERN game_t             *game Q_ASSIGN( &games[ 0 ] );
 /* general */
 Q_EXTERN int numImages Q_ASSIGN( 0 );
 Q_EXTERN image_t images[ MAX_IMAGES ];
-
-Q_EXTERN int numPicoModels Q_ASSIGN( 0 );
-Q_EXTERN picoModel_t        *picoModels[ MAX_MODELS ];
 
 Q_EXTERN shaderInfo_t       *shaderInfo Q_ASSIGN( NULL );
 Q_EXTERN int numShaderInfo Q_ASSIGN( 0 );
