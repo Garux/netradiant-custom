@@ -857,7 +857,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 		/* round the xyz to a given precision and translate by origin */
 		for ( i = 0 ; i < 3 ; i++ )
 			dv->xyz[ i ] = SNAP_INT_TO_FLOAT * floor( dv->xyz[ i ] * SNAP_FLOAT_TO_INT + 0.5 );
-		vTranslated = dv->xyz + e->origin;
+		vTranslated = dv->xyz + e->originbrush_origin;
 
 		/* ydnar: tek-fu celshading support for flat shaded shit */
 		if ( flat ) {
