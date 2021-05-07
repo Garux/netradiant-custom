@@ -178,12 +178,12 @@ public:
 					renderer.PushState();
 					renderer.Highlight( Renderer::ePrimitive );
 					renderer.SetState( m_entity.getEntityClass().m_state_fill, Renderer::eFullMaterials );
-					renderer.addRenderable( m_arrow, localToWorld );
+					renderer.addRenderable( m_arrow, g_matrix4_identity );
 					renderer.PopState();
 				}
 				else{
 					renderer.SetState( m_entity.getEntityClass().m_state_fill, Renderer::eFullMaterials );
-					renderer.addRenderable( m_arrow, localToWorld );
+					renderer.addRenderable( m_arrow, g_matrix4_identity );
 				}
 			}
 		}
@@ -205,11 +205,11 @@ public:
 				if( selected || childSelected ){
 					renderer.PushState();
 					renderer.Highlight( Renderer::ePrimitive );
-					renderer.addRenderable( m_arrow, localToWorld );
+					renderer.addRenderable( m_arrow, g_matrix4_identity );
 					renderer.PopState();
 				}
 				else{
-					renderer.addRenderable( m_arrow, localToWorld );
+					renderer.addRenderable( m_arrow, g_matrix4_identity );
 				}
 			}
 		}
