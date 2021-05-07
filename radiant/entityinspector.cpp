@@ -323,7 +323,7 @@ const char* browse_sound( GtkWidget* parent, const char* filepath ){
 		}
 	}
 
-	const char* filename = file_dialog( parent, true, "Open Wav File", buffer.c_str(), "sound" );
+	const char* filename = file_dialog( parent, true, "Open Sound File", buffer.c_str(), "sound" );
 	if ( filename != 0 ) {
 		const char* relative = path_make_relative( filename, GlobalFileSystem().findRoot( filename ) );
 		if ( relative == filename ) {

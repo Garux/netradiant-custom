@@ -221,13 +221,31 @@ public:
 	}
 };
 
+#include "stream/stringstream.h"
+void SoundTypes_register(){
+	const char *names = GlobalRadiant().getGameDescriptionKeyValue( "soundtypes" );
+	if( string_empty( names ) ){
+		names = "wav";
+	}
+	else if( string_equal( names, "*" ) ){
+		names = "wav ogg mp3";
+	}
+
+	StringTokeniser tokeniser( names );
+	const char* name;
+	while( !string_empty( name = tokeniser.getToken() ) )
+	{
+		GlobalFiletypes().addType( "sound", name, filetype_t( StringOutputStream()( name, " sound files" ), StringOutputStream()( "*.", name ) ) );
+	}
+}
+
 class Radiant : public TypeSystemRef
 {
 public:
 	Radiant(){
 		Preferences_Init();
 
-		GlobalFiletypes().addType( "sound", "wav", filetype_t( "PCM sound files", "*.wav" ) );
+		SoundTypes_register();
 
 		Selection_construct();
 		HomePaths_Construct();
