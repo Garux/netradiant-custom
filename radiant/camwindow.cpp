@@ -95,7 +95,7 @@ struct camwindow_globals_private_t
 		m_nScrollMoveSpeed( 100 ),
 		m_bZoomToPointer( true ),
 		m_strafeSpeed( 1.f ),
-		m_angleSpeed( 9.f ),
+		m_angleSpeed( 3.f ),
 		m_bCamInverseMouse( false ),
 		m_bCamDiscrete( true ),
 		m_bCubicClipping( false ),
