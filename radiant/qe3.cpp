@@ -163,6 +163,8 @@ void bsp_init(){
 	build_set_variable( "ExecutableType", RADIANT_EXECUTABLE );
 	build_set_variable( "EnginePath", EnginePath_get() );
 	build_set_variable( "UserEnginePath", g_qeglobals.m_userEnginePath.c_str() );
+	build_set_variable( "ExtraResoucePath", string_empty( ExtraResourcePath_get() )? ""
+	                                       : StringOutputStream()( " -fs_pakpath ", makeQuoted( ExtraResourcePath_get() ) ) );
 	build_set_variable( "MonitorAddress", ( g_WatchBSP_Enabled ) ? RADIANT_MONITOR_ADDRESS : "" );
 	build_set_variable( "GameName", gamename_get() );
 
