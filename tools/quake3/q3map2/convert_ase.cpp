@@ -93,27 +93,6 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
 	}
 	fprintf( f, "\t\t}\r\n" );
 
-	/* export vertex normals */
-	fprintf( f, "\t\t*MESH_NORMALS\t{\r\n" );
-	for ( i = 0; i < ds->numIndexes; i += 3 )
-	{
-		face = ( i / 3 );
-		a = bspDrawIndexes[ i + ds->firstIndex ];
-		b = bspDrawIndexes[ i + ds->firstIndex + 1 ];
-		c = bspDrawIndexes[ i + ds->firstIndex + 2 ];
-		Vector3 normal = bspDrawVerts[ a ].normal + bspDrawVerts[ b ].normal + bspDrawVerts[ c ].normal;
-		if ( VectorNormalize( normal ) != 0 ) {
-			fprintf( f, "\t\t\t*MESH_FACENORMAL\t%d\t%f\t%f\t%f\r\n", face, normal[ 0 ], normal[ 1 ], normal[ 2 ] );
-		}
-	}
-	for ( i = 0; i < ds->numVerts; i++ )
-	{
-		v = i + ds->firstVert;
-		dv = &bspDrawVerts[ v ];
-		fprintf( f, "\t\t\t*MESH_VERTEXNORMAL\t%d\t%f\t%f\t%f\r\n", i, dv->normal[ 0 ], dv->normal[ 1 ], dv->normal[ 2 ] );
-	}
-	fprintf( f, "\t\t}\r\n" );
-
 	/* export faces */
 	fprintf( f, "\t\t*MESH_FACE_LIST\t{\r\n" );
 	for ( i = 0; i < ds->numIndexes; i += 3 )
@@ -153,6 +132,23 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
 		c = bspDrawIndexes[ i + ds->firstIndex + 1 ];
 		b = bspDrawIndexes[ i + ds->firstIndex + 2 ];
 		fprintf( f, "\t\t\t*MESH_TFACE\t%d\t%d\t%d\t%d\r\n", face, a, b, c );
+	}
+	fprintf( f, "\t\t}\r\n" );
+
+	/* export vertex normals */
+	fprintf( f, "\t\t*MESH_NORMALS\t{\r\n" );
+	for ( i = 0; i < ds->numIndexes; i += 3 )
+	{
+		face = ( i / 3 );
+		a = bspDrawIndexes[ i + ds->firstIndex ];
+		b = bspDrawIndexes[ i + ds->firstIndex + 1 ];
+		c = bspDrawIndexes[ i + ds->firstIndex + 2 ];
+		const Vector3 normal = VectorNormalized( bspDrawVerts[ a ].normal + bspDrawVerts[ b ].normal + bspDrawVerts[ c ].normal );
+		fprintf( f, "\t\t\t*MESH_FACENORMAL\t%d\t%f\t%f\t%f\r\n", face, normal[ 0 ], normal[ 1 ], normal[ 2 ] );
+		for( const auto idx : { a, b, c } ){
+			dv = &bspDrawVerts[ idx ];
+			fprintf( f, "\t\t\t\t*MESH_VERTEXNORMAL\t%d\t%f\t%f\t%f\r\n", idx, dv->normal[ 0 ], dv->normal[ 1 ], dv->normal[ 2 ] );
+		}
 	}
 	fprintf( f, "\t\t}\r\n" );
 

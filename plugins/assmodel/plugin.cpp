@@ -366,7 +366,7 @@ ___q3map2
 ?support non vertex anim frames
 	test failed model loading
 ?is PicoFixSurfaceNormals needed?
-shaderlab_terrain.ase great error spam
+shaderlab_terrain.ase great error spam, table2.ase
 	split to smaller meshes
 aiProcess_SplitLargeMeshes is inefficient
 	handle nodes transformations; or aiProcess_PreTransformVertices -> applies them (but also removes animations)
