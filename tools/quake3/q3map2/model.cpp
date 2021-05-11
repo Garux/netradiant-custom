@@ -362,6 +362,7 @@ std::vector<const AssMeshWalker*> LoadModelWalker( const char *name, int frame )
 void InsertModel( const char *name, int skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth ){
 	int i, j, k;
 	const Matrix4 nTransform( matrix4_for_normal_transform( transform ) );
+	const bool transform_lefthanded = MATRIX4_LEFTHANDED == matrix4_handedness( transform );
 	AssModel            *model;
 	shaderInfo_t        *si;
 	mapDrawSurface_t    *ds;
@@ -621,6 +622,9 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 				// if( face.mNumIndices == 3 )
 				for ( size_t i = 0; i < 3; i++ ){
 					ds->indexes[idCopied++] = face.mIndices[i];
+				}
+				if( transform_lefthanded ){
+					std::swap( ds->indexes[idCopied - 1], ds->indexes[idCopied - 2] );
 				}
 			}
 		}

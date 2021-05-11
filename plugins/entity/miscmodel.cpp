@@ -311,12 +311,27 @@ public:
 	}
 	void scale( const Vector3& scaling ){
 		//m_scale = scale_scaled( m_scale, scaling );
-
+#if 1
+		const Matrix4 rot = matrix4_rotation_for_euler_xyz_degrees( m_anglesKey.m_angles );
+		m_scale = matrix4_get_scale_vec3_signed(
+		              matrix4_multiplied_by_matrix4(
+		                  matrix4_affine_inverse( rot ),
+		                  matrix4_multiplied_by_matrix4(
+		                      matrix4_scale_for_vec3( scaling ),
+		                      matrix4_multiplied_by_matrix4(
+		                          rot,
+		                          matrix4_scale_for_vec3( m_scale )
+		                      )
+		                  )
+		              )
+		          );
+#else
 		Matrix4 mat( matrix4_scale_for_vec3( scaling ) );
 		matrix4_multiply_by_matrix4( mat, matrix4_rotation_for_euler_xyz_degrees( m_anglesKey.m_angles ) );
 		matrix4_scale_by_vec3( mat, m_scale );
 
 		m_scale = matrix4_get_scale_vec3( mat );
+#endif
 		//m_angles = angles_snapped_to_zero( matrix4_get_rotation_euler_xyz_degrees( mat ) );
 	}
 	void snapto( float snap ){

@@ -1125,6 +1125,17 @@ inline Vector3 matrix4_get_scale_vec3( const Matrix4& self ){
 	       );
 }
 
+/// \brief Calculates and returns signed (x, y, z) scale values that produce the scale component of \p self.
+/// \p self must be affine and orthogonal to produce a meaningful result.
+/// \p self must not contain rotation to produce meaningful signs.
+inline Vector3 matrix4_get_scale_vec3_signed( const Matrix4& self ){
+	return Vector3(
+	           static_cast<float>( std::copysign( vector3_length( self.x().vec3() ), vector3_dot( self.x().vec3(), g_vector3_axis_x ) ) ),
+	           static_cast<float>( std::copysign( vector3_length( self.y().vec3() ), vector3_dot( self.y().vec3(), g_vector3_axis_y ) ) ),
+	           static_cast<float>( std::copysign( vector3_length( self.z().vec3() ), vector3_dot( self.z().vec3(), g_vector3_axis_z ) ) )
+	       );
+}
+
 /// \brief Scales \p self by \p scale.
 inline void matrix4_scale_by_vec3( Matrix4& self, const Vector3& scale ){
 	matrix4_multiply_by_matrix4( self, matrix4_scale_for_vec3( scale ) );
