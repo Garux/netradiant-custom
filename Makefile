@@ -585,8 +585,8 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	libddslib.$(A) \
 	libfilematch.$(A) \
 	libl_net.$(A) \
-	$(INSTALLDIR)/libassimp_.$(DLL) \
 	$(if $(findstring Win32,$(OS)),icons/q3map2.o,) \
+	| $(INSTALLDIR)/libassimp_.$(DLL) \
 
 libmathlib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libmathlib.$(A): \
@@ -1083,7 +1083,7 @@ $(INSTALLDIR)/modules/assmodel.$(DLL): \
 	plugins/assmodel/mdlimage.o \
 	plugins/assmodel/model.o \
 	plugins/assmodel/plugin.o \
-	$(INSTALLDIR)/libassimp_.$(DLL) \
+	| $(INSTALLDIR)/libassimp_.$(DLL) \
 
 $(INSTALLDIR)/modules/shaders.$(DLL): LIBS_EXTRA := $(LIBS_GLIB)
 $(INSTALLDIR)/modules/shaders.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) -Ilibs -Iinclude
