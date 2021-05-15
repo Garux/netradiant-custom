@@ -43,7 +43,7 @@
 
 #include "targetable.h"
 #include "origin.h"
-#include "angle.h"
+#include "angles.h"
 #include "rotation.h"
 #include "model.h"
 #include "filters.h"
@@ -67,8 +67,8 @@ class EclassModel :
 
 	OriginKey m_originKey;
 	Vector3 m_origin;
-	AngleKey m_angleKey;
-	float m_angle;
+	AnglesKey m_anglesKey;
+	Vector3 m_angles;
 	RotationKey m_rotationKey;
 	Float9 m_rotation;
 	SingletonModel m_model;
@@ -100,7 +100,12 @@ class EclassModel :
 		}
 		else
 		{
-			m_keyObservers.insert( "angle", AngleKey::AngleChangedCaller( m_angleKey ) );
+			if( m_entity.getEntityClass().has_direction_key )
+				m_keyObservers.insert( "angle", AnglesKey::GroupAngleChangedCaller( m_anglesKey ) );
+			else
+				m_keyObservers.insert( "angle", AnglesKey::AngleChangedCaller( m_anglesKey ) );
+			if( m_entity.getEntityClass().has_angles_key )
+				m_keyObservers.insert( "angles", AnglesKey::AnglesChangedCaller( m_anglesKey ) );
 		}
 		m_keyObservers.insert( "origin", OriginKey::OriginChangedCaller( m_originKey ) );
 	}
@@ -111,17 +116,14 @@ public:
 #endif
 
 	void updateTransform(){
-		m_transform.localToParent() = g_matrix4_identity;
-		matrix4_translate_by_vec3( m_transform.localToParent(), m_origin );
-
-		m_translation = m_transform.localToParent();
+		m_translation = m_transform.localToParent() = matrix4_translation_for_vec3( m_origin );
 
 		if ( g_gameType == eGameTypeDoom3 ) {
 			matrix4_multiply_by_matrix4( m_transform.localToParent(), rotation_toMatrix( m_rotation ) );
 		}
 		else
 		{
-			matrix4_multiply_by_matrix4( m_transform.localToParent(), matrix4_rotation_for_z_degrees( m_angle ) );
+			matrix4_multiply_by_matrix4( m_transform.localToParent(), matrix4_rotation_for_euler_xyz_degrees( m_angles ) );
 		}
 
 		m_transformChanged();
@@ -133,11 +135,11 @@ public:
 		updateTransform();
 	}
 	typedef MemberCaller<EclassModel, &EclassModel::originChanged> OriginChangedCaller;
-	void angleChanged(){
-		m_angle = m_angleKey.m_angle;
+	void anglesChanged(){
+		m_angles = m_anglesKey.m_angles;
 		updateTransform();
 	}
-	typedef MemberCaller<EclassModel, &EclassModel::angleChanged> AngleChangedCaller;
+	typedef MemberCaller<EclassModel, &EclassModel::anglesChanged> AnglesChangedCaller;
 	void rotationChanged(){
 		rotation_assign( m_rotation, m_rotationKey.m_rotation );
 		updateTransform();
@@ -158,8 +160,8 @@ public:
 		m_entity( eclass ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_origin( ORIGINKEY_IDENTITY ),
-		m_angleKey( AngleChangedCaller( *this ) ),
-		m_angle( ANGLEKEY_IDENTITY ),
+		m_anglesKey( AnglesChangedCaller( *this ) ),
+		m_angles( ANGLESKEY_IDENTITY ),
 		m_rotationKey( RotationChangedCaller( *this ) ),
 		m_filter( m_entity, node ),
 		m_named( m_entity ),
@@ -176,8 +178,8 @@ public:
 		m_entity( other.m_entity ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_origin( ORIGINKEY_IDENTITY ),
-		m_angleKey( AngleChangedCaller( *this ) ),
-		m_angle( ANGLEKEY_IDENTITY ),
+		m_anglesKey( AnglesChangedCaller( *this ) ),
+		m_angles( ANGLESKEY_IDENTITY ),
 		m_rotationKey( RotationChangedCaller( *this ) ),
 		m_filter( m_entity, node ),
 		m_named( m_entity ),
@@ -271,7 +273,9 @@ public:
 		}
 		else
 		{
-			m_angle = angle_rotated( m_angle, rotation );
+			m_angles = angles_rotated( m_angles, rotation );
+			if( !m_entity.getEntityClass().has_angles_key ) // yaw angle only
+				m_angles[0] = m_angles[1] = 0;
 		}
 	}
 	void snapto( float snap ){
@@ -285,7 +289,7 @@ public:
 		}
 		else
 		{
-			m_angle = m_angleKey.m_angle;
+			m_angles = m_anglesKey.m_angles;
 		}
 	}
 	void freezeTransform(){
@@ -295,10 +299,10 @@ public:
 			rotation_assign( m_rotationKey.m_rotation, m_rotation );
 			m_rotationKey.write( &m_entity );
 		}
-		else if( m_angleKey.m_angle != m_angle )
+		else if( m_anglesKey.m_angles != m_angles )
 		{
-			m_angleKey.m_angle = m_angle;
-			m_angleKey.write( &m_entity );
+			m_anglesKey.m_angles = m_angles;
+			m_anglesKey.write( &m_entity );
 		}
 	}
 	void transformChanged(){

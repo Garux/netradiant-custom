@@ -99,7 +99,7 @@ inline Matrix4 matrix4_rotation_for_euler_xyz_degrees_quantised( const Vector3& 
 }
 
 inline Vector3 angles_snapped_to_zero( const Vector3& angles ){
-	float epsilon = ( fabs( angles[0] ) > 0.001f || fabs( angles[1] ) > 0.001f || fabs( angles[2] ) > 0.001f ) ? 5e-5 : 1e-6;
+	const float epsilon = ( fabs( angles[0] ) > 0.001f || fabs( angles[1] ) > 0.001f || fabs( angles[2] ) > 0.001f ) ? 5e-5 : 1e-6;
 	return Vector3( fabs( angles[0] ) < epsilon ? 0.f : angles[0],
 	                fabs( angles[1] ) < epsilon ? 0.f : angles[1],
 	                fabs( angles[2] ) < epsilon ? 0.f : angles[2]

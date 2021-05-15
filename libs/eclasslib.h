@@ -115,6 +115,8 @@ public:
 	bool miscmodel_is;			// also definable via model attribute presence in xml .ent definition
 	CopiedString m_miscmodel_key;
 	bool has_angles;			// definable via "angle"/"angles"/"direction" attribute presence in xml .ent definition, only affects rendering of group entities angles arrow now
+	bool has_angles_key;		// definable via "angles" attribute presence in xml .ent definition, enables angles support for EclassModel (only angle by default)
+	bool has_direction_key;		// definable via "direction" attribute presence in xml .ent definition, enables -1/-2 angle support for EclassModel, GenericEntity
 	Vector3 mins;
 	Vector3 maxs;
 
@@ -261,6 +263,8 @@ inline EntityClass* Eclass_Alloc(){
 	e->miscmodel_is = false;
 	e->m_miscmodel_key = "model";
 	e->has_angles = false;
+	e->has_angles_key = false;
+	e->has_direction_key = false;
 	memset( e->flagnames, 0, MAX_FLAGS * 32 );
 	memset( e->flagAttributes, 0, MAX_FLAGS * sizeof( EntityClassAttribute* ) );
 

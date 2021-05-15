@@ -89,7 +89,10 @@ class GenericEntity :
 
 		m_keyObservers.insert( "classname", ClassnameFilter::ClassnameChangedCaller( m_filter ) );
 		m_keyObservers.insert( Static<KeyIsName>::instance().m_nameKey, NamedEntity::IdentifierChangedCaller( m_named ) );
-		m_keyObservers.insert( "angle", AnglesKey::AngleChangedCaller( m_anglesKey ) );
+		if( m_entity.getEntityClass().has_direction_key )
+			m_keyObservers.insert( "angle", AnglesKey::GroupAngleChangedCaller( m_anglesKey ) );
+		else
+			m_keyObservers.insert( "angle", AnglesKey::AngleChangedCaller( m_anglesKey ) );
 		m_keyObservers.insert( "angles", AnglesKey::AnglesChangedCaller( m_anglesKey ) );
 		m_keyObservers.insert( "origin", OriginKey::OriginChangedCaller( m_originKey ) );
 	}

@@ -220,6 +220,11 @@ public:
 		}
 		else if( string_equal( type, "angle" ) || string_equal( type, "angles" ) || string_equal( type, "direction" ) ){
 			entityClass->has_angles = true;
+
+			if( string_equal( type, "angles" ) )
+				entityClass->has_angles_key = true;
+			else if( string_equal( type, "direction" ) )
+				entityClass->has_direction_key = true;
 		}
 
 		m_comment << key;
