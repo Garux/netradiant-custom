@@ -498,7 +498,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 		}
 	}
 
-	if ( isModel ) {
+	if ( isModel && string_empty( EntityClass_valueForKey( *entityClass, entityClass->miscmodel_key() ) ) ) { // handle set default model key value : no dialog needed
 		const char* model = misc_model_dialog( GTK_WIDGET( MainFrame_getWindow() ) );
 		if ( model != 0 ) {
 			entity->setKeyValue( entityClass->miscmodel_key(), model );

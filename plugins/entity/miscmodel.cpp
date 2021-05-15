@@ -247,6 +247,13 @@ public:
 			m_entity.instanceAttach( path_find_mapfile( path.begin(), path.end() ) );
 			m_entity.attach( m_keyObservers );
 			m_entity.attach( m_remapKeysObserver );
+			{ // handle set default model key value
+				const EntityClass& eclass = m_entity.getEntityClass();
+				const char *key = eclass.miscmodel_key();
+				const char *model = EntityClass_valueForKey( eclass, key );
+				if( !string_empty( model ) && model == m_entity.getKeyValue( key ) ) // default found = no key set
+					m_model.modelChanged( model );
+			}
 		}
 	}
 	void instanceDetach( const scene::Path& path ){
