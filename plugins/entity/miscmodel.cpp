@@ -162,8 +162,8 @@ class MiscModel :
 		m_keyObservers.insert( Static<KeyIsName>::instance().m_nameKey, NamedEntity::IdentifierChangedCaller( m_named ) );
 		m_keyObservers.insert( m_entity.getEntityClass().miscmodel_key(), SingletonModel::ModelChangedCaller( m_model ) );
 		m_keyObservers.insert( "origin", OriginKey::OriginChangedCaller( m_originKey ) );
-		m_keyObservers.insert( "angle", AnglesKey::AngleChangedCaller( m_anglesKey ) );
-		m_keyObservers.insert( "angles", AnglesKey::AnglesChangedCaller( m_anglesKey ) );
+		m_keyObservers.insert( "angle", m_anglesKey.getAngleChangedCallback() );
+		m_keyObservers.insert( "angles", m_anglesKey.getAnglesChangedCallback() );
 		m_keyObservers.insert( "modelscale", ScaleKey::UniformScaleChangedCaller( m_scaleKey ) );
 		m_keyObservers.insert( "modelscale_vec", ScaleKey::ScaleChangedCaller( m_scaleKey ) );
 	}
@@ -210,9 +210,9 @@ public:
 		m_remapKeysObserver( SkinChangedCaller( *this ) ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_origin( ORIGINKEY_IDENTITY ),
-		m_anglesKey( AnglesChangedCaller( *this ) ),
+		m_anglesKey( AnglesChangedCaller( *this ), m_entity ),
 		m_angles( ANGLESKEY_IDENTITY ),
-		m_scaleKey( ScaleChangedCaller( *this ) ),
+		m_scaleKey( ScaleChangedCaller( *this ), m_entity ),
 		m_scale( SCALEKEY_IDENTITY ),
 		m_filter( m_entity, node ),
 		m_named( m_entity ),
@@ -227,9 +227,9 @@ public:
 		m_remapKeysObserver( SkinChangedCaller( *this ) ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_origin( ORIGINKEY_IDENTITY ),
-		m_anglesKey( AnglesChangedCaller( *this ) ),
+		m_anglesKey( AnglesChangedCaller( *this ), m_entity ),
 		m_angles( ANGLESKEY_IDENTITY ),
-		m_scaleKey( ScaleChangedCaller( *this ) ),
+		m_scaleKey( ScaleChangedCaller( *this ), m_entity ),
 		m_scale( SCALEKEY_IDENTITY ),
 		m_filter( m_entity, node ),
 		m_named( m_entity ),

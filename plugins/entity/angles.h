@@ -53,6 +53,14 @@ inline void read_angle( Vector3& angles, const char* value ){
 		normalise_angles( angles );
 	}
 }
+inline void read_group_angle( Vector3& angles, const char* value ){
+	if( string_equal( value, "-1" ) )
+		angles = Vector3( 0, -90, 0 );
+	else if( string_equal( value, "-2" ) )
+		angles = Vector3( 0, 90, 0 );
+	else
+		read_angle( angles, value );
+}
 inline void read_angles( Vector3& angles, const char* value ){
 	if ( !string_parse_vector3( value, angles ) ) {
 		default_angles( angles );
@@ -131,36 +139,48 @@ inline Vector3 angles_rotated_for_rotated_pivot( const Vector3& angles, const Qu
 class AnglesKey
 {
 	Callback m_anglesChanged;
+	KeyObserver m_angleCB;
+	KeyObserver m_anglesCB;
+	const Entity& m_entity;
 public:
 	Vector3 m_angles;
 
 
-	AnglesKey( const Callback& anglesChanged )
-		: m_anglesChanged( anglesChanged ), m_angles( ANGLESKEY_IDENTITY ){
+	AnglesKey( const Callback& anglesChanged, const Entity& entity )
+		: m_anglesChanged( anglesChanged ), m_angleCB(), m_anglesCB(), m_entity( entity ), m_angles( ANGLESKEY_IDENTITY ){
 	}
 
 	void angleChanged( const char* value ){
-		read_angle( m_angles, value );
-		m_anglesChanged();
+		if( !m_entity.hasKeyValue( "angles" ) || m_anglesCB == KeyObserver() ){ // no "angles" set or supported
+			read_angle( m_angles, value );
+			m_anglesChanged();
+		}
 	}
-	typedef MemberCaller1<AnglesKey, const char*, &AnglesKey::angleChanged> AngleChangedCaller;
+	KeyObserver getAngleChangedCallback(){
+		return m_angleCB = MemberCaller1<AnglesKey, const char*, &AnglesKey::angleChanged>( *this );
+	}
 
 	void groupAngleChanged( const char* value ){
-		if( strlen( value ) == 2 && value[0] == '-' && value[1] == '1' )
-			m_angles = Vector3( 0, -90, 0 );
-		else if( strlen( value ) == 2 && value[0] == '-' && value[1] == '2' )
-			m_angles = Vector3( 0, 90, 0 );
-		else
-			read_angle( m_angles, value );
-		m_anglesChanged();
+		if( !m_entity.hasKeyValue( "angles" ) || m_anglesCB == KeyObserver() ){ // no "angles" set or supported
+			read_group_angle( m_angles, value );
+			m_anglesChanged();
+		}
 	}
-	typedef MemberCaller1<AnglesKey, const char*, &AnglesKey::groupAngleChanged> GroupAngleChangedCaller;
+	KeyObserver getGroupAngleChangedCallback(){
+		return m_angleCB = MemberCaller1<AnglesKey, const char*, &AnglesKey::groupAngleChanged>( *this );
+	}
 
 	void anglesChanged( const char* value ){
-		read_angles( m_angles, value );
-		m_anglesChanged();
+		if( m_entity.hasKeyValue( "angles" ) ){ // check actual key presence, as this may be notified by default value on key removal
+			read_angles( m_angles, value );
+			m_anglesChanged();
+		}
+		else // "angles" key removed // improvable: also do this on invalid "angles" key
+			m_angleCB( m_entity.getKeyValue( "angle" ) );
 	}
-	typedef MemberCaller1<AnglesKey, const char*, &AnglesKey::anglesChanged> AnglesChangedCaller;
+	KeyObserver getAnglesChangedCallback(){
+		return m_anglesCB = MemberCaller1<AnglesKey, const char*, &AnglesKey::anglesChanged>( *this );
+	}
 
 	void write( Entity* entity ) const {
 		write_angles( m_angles, entity );

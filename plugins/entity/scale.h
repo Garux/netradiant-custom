@@ -87,22 +87,28 @@ inline Vector3 scale_scaled( const Vector3& scale, const Vector3& scaling ){
 class ScaleKey
 {
 	Callback m_scaleChanged;
+	const Entity& m_entity;
 public:
 	Vector3 m_scale;
 
 
-	ScaleKey( const Callback& scaleChanged )
-		: m_scaleChanged( scaleChanged ), m_scale( SCALEKEY_IDENTITY ){
+	ScaleKey( const Callback& scaleChanged, const Entity& entity )
+		: m_scaleChanged( scaleChanged ), m_entity( entity ), m_scale( SCALEKEY_IDENTITY ){
 	}
 
 	void uniformScaleChanged( const char* value ){
-		read_scale( m_scale, value );
-		m_scaleChanged();
+		if( !m_entity.hasKeyValue( "modelscale_vec" ) ){
+			read_scale( m_scale, value );
+			m_scaleChanged();
+		}
 	}
 	typedef MemberCaller1<ScaleKey, const char*, &ScaleKey::uniformScaleChanged> UniformScaleChangedCaller;
 
 	void scaleChanged( const char* value ){
-		read_scalevec( m_scale, value );
+		if( m_entity.hasKeyValue( "modelscale_vec" ) ) // check actual key presence, as this may be notified by default value on key removal
+			read_scalevec( m_scale, value );
+		else // "modelscale_vec" removed // improvable: also do this on invalid "modelscale_vec" key
+			read_scale( m_scale, m_entity.getKeyValue( "modelscale" ) );
 		m_scaleChanged();
 	}
 	typedef MemberCaller1<ScaleKey, const char*, &ScaleKey::scaleChanged> ScaleChangedCaller;

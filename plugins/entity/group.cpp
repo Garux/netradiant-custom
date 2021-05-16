@@ -84,8 +84,8 @@ class Group
 		m_keyObservers.insert( "classname", ClassnameFilter::ClassnameChangedCaller( m_filter ) );
 		m_keyObservers.insert( Static<KeyIsName>::instance().m_nameKey, NamedEntity::IdentifierChangedCaller( m_named ) );
 		m_keyObservers.insert( "origin", OriginKey::OriginChangedCaller( m_originKey ) );
-		m_keyObservers.insert( "angle", AnglesKey::GroupAngleChangedCaller( m_anglesKey ) );
-		m_keyObservers.insert( "angles", AnglesKey::AnglesChangedCaller( m_anglesKey ) );
+		m_keyObservers.insert( "angle", m_anglesKey.getGroupAngleChangedCallback() );
+		m_keyObservers.insert( "angles", m_anglesKey.getAnglesChangedCallback() );
 		updateAnglesDraw();
 	}
 
@@ -99,7 +99,7 @@ public:
 		m_origin( ORIGINKEY_IDENTITY ),
 		m_name_origin( g_vector3_identity ),
 		m_renderName( m_named, m_name_origin, EXCLUDE_NAME ),
-		m_anglesKey( UpdateAnglesDrawCaller( *this ) ),
+		m_anglesKey( UpdateAnglesDrawCaller( *this ), m_entity ),
 		m_arrow( m_name_origin, m_anglesKey.m_angles ),
 		m_transformChanged( transformChanged ),
 		m_evaluateTransform( evaluateTransform ){
@@ -114,7 +114,7 @@ public:
 		m_origin( ORIGINKEY_IDENTITY ),
 		m_name_origin( g_vector3_identity ),
 		m_renderName( m_named, m_name_origin, EXCLUDE_NAME ),
-		m_anglesKey( UpdateAnglesDrawCaller( *this ) ),
+		m_anglesKey( UpdateAnglesDrawCaller( *this ), m_entity ),
 		m_arrow( m_name_origin, m_anglesKey.m_angles ),
 		m_transformChanged( transformChanged ),
 		m_evaluateTransform( evaluateTransform ){

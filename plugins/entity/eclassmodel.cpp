@@ -101,11 +101,11 @@ class EclassModel :
 		else
 		{
 			if( m_entity.getEntityClass().has_direction_key )
-				m_keyObservers.insert( "angle", AnglesKey::GroupAngleChangedCaller( m_anglesKey ) );
+				m_keyObservers.insert( "angle", m_anglesKey.getGroupAngleChangedCallback() );
 			else
-				m_keyObservers.insert( "angle", AnglesKey::AngleChangedCaller( m_anglesKey ) );
+				m_keyObservers.insert( "angle", m_anglesKey.getAngleChangedCallback() );
 			if( m_entity.getEntityClass().has_angles_key )
-				m_keyObservers.insert( "angles", AnglesKey::AnglesChangedCaller( m_anglesKey ) );
+				m_keyObservers.insert( "angles", m_anglesKey.getAnglesChangedCallback() );
 		}
 		m_keyObservers.insert( "origin", OriginKey::OriginChangedCaller( m_originKey ) );
 	}
@@ -160,7 +160,7 @@ public:
 		m_entity( eclass ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_origin( ORIGINKEY_IDENTITY ),
-		m_anglesKey( AnglesChangedCaller( *this ) ),
+		m_anglesKey( AnglesChangedCaller( *this ), m_entity ),
 		m_angles( ANGLESKEY_IDENTITY ),
 		m_rotationKey( RotationChangedCaller( *this ) ),
 		m_filter( m_entity, node ),
@@ -178,7 +178,7 @@ public:
 		m_entity( other.m_entity ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_origin( ORIGINKEY_IDENTITY ),
-		m_anglesKey( AnglesChangedCaller( *this ) ),
+		m_anglesKey( AnglesChangedCaller( *this ), m_entity ),
 		m_angles( ANGLESKEY_IDENTITY ),
 		m_rotationKey( RotationChangedCaller( *this ) ),
 		m_filter( m_entity, node ),
