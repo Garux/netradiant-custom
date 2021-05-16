@@ -543,7 +543,7 @@ public:
 	}
 	typedef MemberCaller1<EntityKeyValues, const KeyValues&, &EntityKeyValues::importState> UndoImportCaller;
 
-	void attach( Observer& observer ){
+	void attach( Observer& observer ) override {
 		ASSERT_MESSAGE( !m_observerMutex, "observer cannot be attached during iteration" );
 		m_observers.insert( &observer );
 		for ( KeyValues::const_iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
@@ -551,7 +551,7 @@ public:
 			observer.insert( ( *i ).first.c_str(), *( *i ).second );
 		}
 	}
-	void detach( Observer& observer ){
+	void detach( Observer& observer ) override {
 		ASSERT_MESSAGE( !m_observerMutex, "observer cannot be detached during iteration" );
 		m_observers.erase( &observer );
 		for ( KeyValues::const_iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
@@ -593,17 +593,20 @@ public:
 	}
 
 	// entity
-	EntityClass& getEntityClass() const {
+	EntityClass& getEntityClass() const override {
 		return *m_eclass;
 	}
-	void forEachKeyValue( Visitor& visitor ) const {
+	const char* getClassName() const override {
+		return m_eclass->name();
+	}
+	void forEachKeyValue( Visitor& visitor ) const override {
 		for ( KeyValues::const_iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
 		{
 			visitor.visit( ( *i ).first.c_str(), ( *i ).second->c_str() );
 		}
 	}
-	void setKeyValue( const char* key, const char* value ){
-		if ( value[0] == '\0'
+	void setKeyValue( const char* key, const char* value ) override {
+		if ( string_empty( value )
 		     /*|| string_equal(EntityClass_valueForKey(*m_eclass, key), value)*/ ) { // don't delete values equal to default
 			erase( key );
 		}
@@ -613,16 +616,20 @@ public:
 		}
 		m_entityKeyValueChanged();
 	}
-	const char* getKeyValue( const char* key ) const {
+	const char* getKeyValue( const char* key ) const override {
 		KeyValues::const_iterator i = m_keyValues.find( key );
 		if ( i != m_keyValues.end() ) {
 			return ( *i ).second->c_str();
 		}
 
-		return EntityClass_valueForKey( *m_eclass, key );
+		// return EntityClass_valueForKey( *m_eclass, key );
+		return "";
+	}
+	bool hasKeyValue( const char* key ) const override {
+		return m_keyValues.find( key ) != m_keyValues.end();
 	}
 
-	bool isContainer() const {
+	bool isContainer() const override {
 		return m_isContainer;
 	}
 };

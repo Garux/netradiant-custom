@@ -431,7 +431,7 @@ public:
 		if ( m_entity == 0 ) {
 			Entity* entity = Node_getEntity( path.top() );
 			if ( entity != 0
-			  && string_equal( m_name, entity->getKeyValue( "classname" ) ) ) {
+			  && string_equal( m_name, entity->getClassName() ) ) {
 				m_entity = entity;
 			}
 		}
@@ -489,9 +489,8 @@ void FocusViews( const Vector3& point, float angle ){
 void Map_StartPosition(){
 	Entity* entity = Scene_FindPlayerStart();
 
-	if ( entity ) {
-		Vector3 origin;
-		string_parse_vector3( entity->getKeyValue( "origin" ), origin );
+	Vector3 origin;
+	if ( entity != nullptr && string_parse_vector3( entity->getKeyValue( "origin" ), origin ) ) {
 		FocusViews( origin, string_read_float( entity->getKeyValue( "angle" ) ) );
 	}
 	else
@@ -503,7 +502,7 @@ void Map_StartPosition(){
 
 inline bool node_is_worldspawn( scene::Node& node ){
 	Entity* entity = Node_getEntity( node );
-	return entity != 0 && string_equal( entity->getKeyValue( "classname" ), "worldspawn" );
+	return entity != 0 && string_equal( entity->getClassName(), "worldspawn" );
 }
 
 
@@ -825,13 +824,7 @@ public:
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0 ) {
-			const EntityClass& eclass = entity->getEntityClass();
-			if ( m_entitymap.find( eclass.name() ) == m_entitymap.end() ) {
-				m_entitymap[eclass.name()] = 1;
-			}
-			else{
-				++m_entitymap[eclass.name()];
-			}
+			++m_entitymap[entity->getClassName()];
 		}
 		return true;
 	}
@@ -853,18 +846,19 @@ public:
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0 ){
+			const char* classname = entity->getClassName();
 			if( entity->isContainer() ){
 				++m_groupents;
-				if( !string_equal_nocase( "func_group", entity->getKeyValue( "classname" ) ) &&
-				    !string_equal_nocase( "_decal", entity->getKeyValue( "classname" ) ) &&
-				    !string_equal_nocase_n( "func_detail", entity->getKeyValue( "classname" ), 11 ) ){
+				if( !string_equal_nocase( "func_group", classname ) &&
+				    !string_equal_nocase( "_decal", classname ) &&
+				    !string_equal_nocase_n( "func_detail", classname, 11 ) ){
 					++m_groupents_ingame;
 					++m_ents_ingame;
 				}
 				return true;
 			}
-			if( !string_equal_nocase_n( "light", entity->getKeyValue( "classname" ), 5 ) &&
-			    !string_equal_nocase( "misc_model", entity->getKeyValue( "classname" ) ) ){
+			if( !string_equal_nocase_n( "light", classname, 5 ) &&
+			    !string_equal_nocase( "misc_model", classname ) ){
 				++m_ents_ingame;
 			}
 		}
@@ -2326,7 +2320,7 @@ void map_autocaulk_selected(){
 			bool pre( const scene::Path& path, scene::Instance& instance ) const {
 				if( path.size() == 2 ){
 					Entity* entity = Node_getEntity( path.top() );
-					if( entity != 0 && entity->isContainer() && string_equal_nocase_n( entity->getEntityClass().name(), "trigger_", 8 )
+					if( entity != 0 && entity->isContainer() && string_equal_nocase_n( entity->getClassName(), "trigger_", 8 )
 					 && ( instance.childSelected() || instance.isSelected() ) )
 						m_trigger = &instance;
 					else

@@ -95,7 +95,7 @@ public:
 		if ( m_entity == 0 ) {
 			Entity* entity = Node_getEntity( path.top() );
 			if ( entity != 0
-			     && string_equal( m_name, entity->getKeyValue( "classname" ) ) ) {
+			     && string_equal( m_name, entity->getClassName() ) ) {
 				m_entity = entity;
 			}
 		}

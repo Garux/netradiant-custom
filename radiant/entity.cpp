@@ -311,7 +311,7 @@ void Entity_moveSelectedPrimitives( bool toLast ){
 
 	if ( Node_isEntity( node ) && node_is_group( node ) ) {
 		StringOutputStream command;
-		command << "movePrimitivesToEntity " << makeQuoted( Node_getEntity( node )->getEntityClass().name() );
+		command << "movePrimitivesToEntity " << makeQuoted( Node_getEntity( node )->getClassName() );
 		UndoableCommand undo( command.c_str() );
 		Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), node );
 	}

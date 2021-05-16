@@ -212,7 +212,7 @@ public:
 		: pFile( pFile ), exclusionList( exclusionList ){
 	}
 	void operator()( scene::Instance& instance ) const {
-		const char* classname = Node_getEntity( instance.path().top() )->getKeyValue( "classname" );
+		const char* classname = Node_getEntity( instance.path().top() )->getClassName();
 
 		if ( !strcmp( classname, "worldspawn" ) ) {
 			world.LoadFromEntity( instance.path().top(), false );

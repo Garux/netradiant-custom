@@ -1062,7 +1062,7 @@ void EntityClassList_selectEntityClass( EntityClass* eclass ){
 	{
 		char* text;
 		gtk_tree_model_get( model, &iter, 0, &text, -1 );
-		if ( strcmp( text, eclass->name() ) == 0 ) {
+		if ( string_equal( text, eclass->name() ) ) {
 			GtkTreeView* view = g_entityClassList;
 			GtkTreePath* path = gtk_tree_model_get_path( model, &iter );
 			gtk_tree_selection_select_path( gtk_tree_view_get_selection( view ), path );
@@ -1295,7 +1295,7 @@ void EntityInspector_applyKeyValue(){
 		return;
 	}
 
-	if ( strcmp( key.c_str(), "classname" ) == 0 ) {
+	if ( string_equal( key.c_str(), "classname" ) ) {
 		Scene_EntitySetClassname_Selected( value.c_str() );
 	}
 	else
@@ -1309,7 +1309,7 @@ void EntityInspector_clearKeyValue(){
 	StringOutputStream key( 64 );
 	key << gtk_entry_get_text( g_entityKeyEntry );
 
-	if ( strcmp( key.c_str(), "classname" ) != 0 ) {
+	if ( !string_equal( key.c_str(), "classname" ) ) {
 		StringOutputStream command;
 		command << "entityDeleteKey -key " << key.c_str();
 		UndoableCommand undo( command.c_str() );

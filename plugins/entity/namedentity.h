@@ -59,12 +59,12 @@ public:
 	}
 	const char* name() const {
 		if ( string_empty( m_name.c_str() ) ) {
-			return m_entity.getEntityClass().name();
+			return m_entity.getClassName();
 		}
 		return m_name.c_str();
 	}
 	const char* classname() const {
-		return m_entity.getEntityClass().name();
+		return m_entity.getClassName();
 	}
 	const Colour3& color() const {
 		return m_entity.getEntityClass().color;
@@ -78,7 +78,7 @@ public:
 
 	void identifierChanged( const char* value ){
 		if ( string_empty( value ) ) {
-			m_changed.changed( m_entity.getEntityClass().name() );
+			m_changed.changed( m_entity.getClassName() );
 		}
 		else
 		{

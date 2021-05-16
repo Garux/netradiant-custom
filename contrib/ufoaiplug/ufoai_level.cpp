@@ -43,7 +43,7 @@ public:
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		if ( m_entity == 0 ) {
 			Entity* entity = Node_getEntity( path.top() );
-			if ( entity != 0 && string_equal( m_name, entity->getKeyValue( "classname" ) ) ) {
+			if ( entity != 0 && string_equal( m_name, entity->getClassName() ) ) {
 				m_entity = entity;
 			}
 		}
@@ -73,13 +73,9 @@ public:
 	EntityFindFlags( const char *classname, const char *flag, int *count ) : m_classname( classname ), m_flag( flag ), m_count( count ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
-		const char *str;
 		Entity* entity = Node_getEntity( path.top() );
-		if ( entity != 0 && string_equal( m_classname, entity->getKeyValue( "classname" ) ) ) {
-			str = entity->getKeyValue( m_flag );
-			if ( string_empty( str ) ) {
-				( *m_count )++;
-			}
+		if ( entity != 0 && string_equal( m_classname, entity->getClassName() ) && !entity->hasKeyValue( m_flag ) ) {
+			( *m_count )++;
 		}
 		return true;
 	}
@@ -99,15 +95,14 @@ public:
 	EntityFindTeams( const char *classname, int *count, int *team ) : m_classname( classname ), m_count( count ), m_team( team ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
-		const char *str;
 		Entity* entity = Node_getEntity( path.top() );
-		if ( entity != 0 && string_equal( m_classname, entity->getKeyValue( "classname" ) ) ) {
+		if ( entity != 0 && string_equal( m_classname, entity->getClassName() ) ) {
 			if ( m_count ) {
 				( *m_count )++;
 			}
 			// now get the highest teamnum
 			if ( m_team ) {
-				str = entity->getKeyValue( "team" );
+				const char *str = entity->getKeyValue( "team" );
 				if ( !string_empty( str ) ) {
 					if ( atoi( str ) > *m_team ) {
 						( *m_team ) = atoi( str );
@@ -147,18 +142,18 @@ void assign_default_values_to_worldspawn( bool override, const char **returnMsg 
 	*message = '\0';
 	*str = '\0';
 
-	if ( override || string_empty( worldspawn->getKeyValue( "maxlevel" ) ) ) {
+	if ( override || !worldspawn->hasKeyValue( "maxlevel" ) ) {
 		// TODO: Get highest brush - a level has 64 units
 		worldspawn->setKeyValue( "maxlevel", "5" );
-		snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Set maxlevel to: %s", worldspawn->getKeyValue( "maxlevel" ) );
+		snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Set maxlevel to: %s", "5" );
 	}
 
-	if ( override || string_empty( worldspawn->getKeyValue( "maxteams" ) ) ) {
+	if ( override || !worldspawn->hasKeyValue( "maxteams" ) ) {
 		get_team_count( "info_player_start", &count, &teams );
 		if ( teams ) {
 			snprintf( str, sizeof( str ) - 1, "%i", teams );
 			worldspawn->setKeyValue( "maxteams", str );
-			snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Set maxteams to: %s", worldspawn->getKeyValue( "maxteams" ) );
+			snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Set maxteams to: %s", str );
 		}
 		if ( count < 16 ) {
 			snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "You should at least place 16 info_player_start" );
@@ -236,7 +231,7 @@ void check_map_values( const char **returnMsg ){
 	}
 
 	// check maxlevel
-	if ( string_empty( worldspawn->getKeyValue( "maxlevel" ) ) ) {
+	if ( !worldspawn->hasKeyValue( "maxlevel" ) ) {
 		strncat( message, "Worldspawn: No maxlevel defined\n", sizeof( message ) - 1 );
 	}
 	else if ( atoi( worldspawn->getKeyValue( "maxlevel" ) ) > 8 ) {

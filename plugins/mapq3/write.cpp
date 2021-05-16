@@ -70,9 +70,9 @@ public:
 
 		Entity* entity = Node_getEntity( node );
 		if ( entity != 0 ) {
-			if( entity->isContainer() && Node_getTraversable( node )->empty() && !string_equal( entity->getKeyValue( "classname" ), "worldspawn" )
-			 && string_empty( entity->getKeyValue( "origin" ) ) ){
-				globalErrorStream() << "discarding empty group entity: # = " << g_count_entities << "; classname = " << entity->getKeyValue( "classname" ) << "\n";
+			if( entity->isContainer() && Node_getTraversable( node )->empty() && !string_equal( entity->getClassName(), "worldspawn" )
+			 && !entity->hasKeyValue( "origin" ) ){
+				globalErrorStream() << "discarding empty group entity: # = " << g_count_entities << "; classname = " << entity->getClassName() << "\n";
 				return false;
 			}
 			m_writer.writeToken( "//" );

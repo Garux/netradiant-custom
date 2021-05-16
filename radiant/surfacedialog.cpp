@@ -1611,7 +1611,7 @@ void Light_setTexture( Entity& entity, const char* shader, const FaceTexture& cl
 		/* copypaste of write_intensity() from entity plugin */
 		char value[64];
 		sprintf( value, "%g", clipboard.m_light );
-		if( !string_empty( entity.getKeyValue( "_light" ) ) ) //primaryIntensity //if set or default is set in .ent
+		if( entity.hasKeyValue( "_light" ) ) //primaryIntensity //if set
 			entity.setKeyValue( "_light", value );
 		else //secondaryIntensity
 			entity.setKeyValue( "light", value ); //otherwise default to "light", which is understood by both q3 and q1
@@ -1664,7 +1664,7 @@ public:
 		}
 	}
 };
-#include "eclasslib.h"
+
 class BrushGetClosestFaceVisibleWalker : public scene::Graph::Walker
 {
 	SelectionTest& m_test;
@@ -1700,7 +1700,7 @@ public:
 						return true;
 					}
 					Entity* entity = Node_getEntity( path.top() );
-					if( entity != 0 && string_equal_n( entity->getEntityClass().name(), "light", 5 ) ){
+					if( entity != 0 && string_equal_n( entity->getClassName(), "light", 5 ) ){
 						m_texturable.setTexture = makeCallback4( LightSetTexture(), *entity );
 						m_texturable.getTexture = makeCallback2( LightGetTexture(), *entity );
 					}

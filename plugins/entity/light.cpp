@@ -689,7 +689,7 @@ void light_draw( const AABB& aabb_light, RenderStateFlags state ){
 inline void write_intensity( const float intensity, Entity* entity ){
 	char value[64];
 	sprintf( value, "%g", intensity );
-	if( !string_empty( entity->getKeyValue( "_light" ) ) ) //primaryIntensity //if set or default is set in .ent
+	if( entity->hasKeyValue( "_light" ) ) //primaryIntensity //if set
 		entity->setKeyValue( "_light", value );
 	else //secondaryIntensity
 		entity->setKeyValue( "light", value ); //otherwise default to "light", which is understood by both q3 and q1
@@ -1443,7 +1443,7 @@ public:
 
 		if( selected ){
 			if ( g_lightType != LIGHTTYPE_DOOM3 ) {
-				if ( g_lightRadii && string_empty( m_entity.getKeyValue( "target" ) ) ) {
+				if ( g_lightRadii && !m_entity.hasKeyValue( "target" ) ) {
 					if ( renderer.getStyle() == Renderer::eFullMaterials ) {
 						renderer.SetState( m_colour.state_additive(), Renderer::eFullMaterials );
 						renderer.Highlight( Renderer::ePrimitive, false );

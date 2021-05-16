@@ -204,8 +204,7 @@ public:
 					if ( i != 0 ) {
 						key << i;
 					}
-					const char* value = e1->getKeyValue( key.c_str() );
-					if ( string_empty( value ) ) {
+					if ( !e1->hasKeyValue( key.c_str() ) ) {
 						e1->setKeyValue( key.c_str(), e2->getKeyValue( "name" ) );
 						break;
 					}
@@ -224,7 +223,7 @@ public:
 				}
 				else
 				{
-					const char* type = e2->getKeyValue( "classname" );
+					const char* type = e2->getClassName();
 					if ( string_empty( type ) ) {
 						type = "t";
 					}
@@ -247,7 +246,7 @@ public:
 						connector.connect( value );
 					}
 					else{
-						const char* type = e2->getKeyValue( "classname" );
+						const char* type = e2->getClassName();
 						if ( string_empty( type ) ) {
 							type = "t";
 						}
@@ -329,7 +328,7 @@ public:
 	filter_entity_classname( const char* classname ) : m_classname( classname ){
 	}
 	bool filter( const Entity& entity ) const {
-		return string_equal( entity.getKeyValue( "classname" ), m_classname );
+		return string_equal( entity.getClassName(), m_classname );
 	}
 };
 
@@ -341,7 +340,7 @@ public:
 	filter_entity_classgroup( const char* classgroup ) : m_classgroup( classgroup ), m_length( string_length( m_classgroup ) ){
 	}
 	bool filter( const Entity& entity ) const {
-		return string_equal_n( entity.getKeyValue( "classname" ), m_classgroup, m_length );
+		return string_equal_n( entity.getClassName(), m_classgroup, m_length );
 	}
 };
 
@@ -364,7 +363,7 @@ class filter_entity_doom3model : public EntityFilter
 {
 public:
 	bool filter( const Entity& entity ) const {
-		return string_equal( entity.getKeyValue( "classname" ), "func_static" )
+		return string_equal( entity.getClassName(), "func_static" )
 		    && !string_equal( entity.getKeyValue( "model" ), entity.getKeyValue( "name" ) );
 	}
 };
@@ -377,7 +376,7 @@ class filter_entity_not_func_detail : public EntityFilter
 public:
 	bool filter( const Entity& entity ) const {
 		return entity.isContainer()
-		    && !string_equal_n( entity.getKeyValue( "classname" ), "func_detail", 11 );
+		    && !string_equal_n( entity.getClassName(), "func_detail", 11 );
 	}
 };
 
@@ -387,7 +386,7 @@ class filter_entity_world : public EntityFilter
 {
 public:
 	bool filter( const Entity& entity ) const {
-		const char* value = entity.getKeyValue( "classname" );
+		const char* value = entity.getClassName();
 		return string_equal( value, "worldspawn" )
 		    || string_equal( value, "func_group" )
 		    || string_equal_n( value, "func_detail", 11 );
@@ -402,7 +401,7 @@ public:
 	bool filter( const Entity& entity ) const {
 		return !entity.isContainer()
 		    && !entity.getEntityClass().miscmodel_is
-		    && !string_equal_prefix( entity.getEntityClass().name(), "light" );
+		    && !string_equal_prefix( entity.getClassName(), "light" );
 	}
 };
 

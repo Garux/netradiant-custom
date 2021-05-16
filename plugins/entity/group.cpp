@@ -72,7 +72,7 @@ class Group
 	RenderableArrow m_arrow;
 	bool m_anglesDraw;
 	void updateAnglesDraw(){
-		m_anglesDraw = m_entity.getEntityClass().has_angles || !string_empty( m_entity.getKeyValue( "angle" ) ) || !string_empty( m_entity.getKeyValue( "angles" ) );
+		m_anglesDraw = m_entity.getEntityClass().has_angles || m_entity.hasKeyValue( "angle" ) || m_entity.hasKeyValue( "angles" );
 		SceneChangeNotify();
 	}
 	typedef MemberCaller<Group, &Group::updateAnglesDraw> UpdateAnglesDrawCaller;

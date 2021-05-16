@@ -65,7 +65,7 @@ public:
 		int spawnflagsInt;
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0 ) {
-			if ( string_equal( m_name, entity->getKeyValue( "classname" ) ) ) {
+			if ( string_equal( m_name, entity->getClassName() ) ) {
 				const char *spawnflags = entity->getKeyValue( "spawnflags" );
 				globalOutputStream() << "spawnflags for " << m_name << ": " << spawnflags << ".\n";
 

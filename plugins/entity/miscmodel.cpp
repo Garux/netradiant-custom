@@ -251,7 +251,7 @@ public:
 				const EntityClass& eclass = m_entity.getEntityClass();
 				const char *key = eclass.miscmodel_key();
 				const char *model = EntityClass_valueForKey( eclass, key );
-				if( !string_empty( model ) && model == m_entity.getKeyValue( key ) ) // default found = no key set
+				if( !string_empty( model ) && !m_entity.hasKeyValue( key ) )
 					m_model.modelChanged( model );
 			}
 		}

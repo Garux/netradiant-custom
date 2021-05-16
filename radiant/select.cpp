@@ -112,10 +112,8 @@ public:
 
 			// ignore worldspawn
 			Entity* entity = Node_getEntity( path.top() );
-			if ( entity ) {
-				if ( string_equal( entity->getKeyValue( "classname" ), "worldspawn" ) ) {
-					return true;
-				}
+			if ( entity != nullptr && string_equal( entity->getClassName(), "worldspawn" ) ) {
+				return true;
 			}
 
 			if ( path.size() > 1
@@ -873,7 +871,7 @@ void Select_EntitiesByKeyValue( const char* key, const char* value ){
 	else if( key != nullptr ){
 		if( !string_empty( key ) ){
 			Scene_EntitySelectByPropertyValues( GlobalSceneGraph(), [key]( const Entity* entity )->bool{
-				return !string_empty( entity->getKeyValue( key ) );
+				return entity->hasKeyValue( key );
 			} );
 		}
 	}

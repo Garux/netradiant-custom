@@ -159,7 +159,7 @@ public:
 	}
 	void popElement( const char* name ){
 		ASSERT_MESSAGE( string_equal( name, "entity" ), PARSE_ERROR );
-		NodeSmartReference entity( m_entityTable.createEntity( GlobalEntityClassManager().findOrInsert( Node_getEntity( node() )->getKeyValue( "classname" ), node_is_group( node() ) ) ) );
+		NodeSmartReference entity( m_entityTable.createEntity( GlobalEntityClassManager().findOrInsert( Node_getEntity( node() )->getClassName(), node_is_group( node() ) ) ) );
 
 		{
 			EntityCopyingVisitor visitor( *Node_getEntity( entity ) );
