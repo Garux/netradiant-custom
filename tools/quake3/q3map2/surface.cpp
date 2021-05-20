@@ -469,7 +469,7 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 		   ----------------------------------------------------------------- */
 
 		if ( ds->type != ESurfaceType::Patch && ds->type != ESurfaceType::Face ) {
-			if ( ds->numVerts > SHADER_MAX_VERTEXES ) {
+			if ( ds->numVerts > maxSurfaceVerts ) {
 				ds->type = ESurfaceType::ForcedMeta;
 			}
 		}

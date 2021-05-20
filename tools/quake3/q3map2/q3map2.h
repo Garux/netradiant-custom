@@ -121,9 +121,6 @@
 #define MAX_SHADER_INFO         8192
 #define MAX_CUST_SURFACEPARMS   256
 
-#define SHADER_MAX_VERTEXES     1000
-#define SHADER_MAX_INDEXES      ( 6 * SHADER_MAX_VERTEXES )
-
 #define MAX_JITTERS             256
 
 
