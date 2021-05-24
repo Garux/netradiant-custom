@@ -1,6 +1,6 @@
 Put PrtView.dll in the Q3Radiant plugins directory.
 
-This program is pretty self explanitary, but point needs to
+This program is pretty self explanatory, but point needs to
 be mentioned.  In the configuration menu for 3D view options,
 the lines and polygons flags are tri-state.  In the third state,
 the lines or polygons will only be drawn if the have the

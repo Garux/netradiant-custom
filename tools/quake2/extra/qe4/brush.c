@@ -556,7 +556,7 @@ void DrawBrushEntityName (brush_t *b)
 	int		i;
 
 	if (!b->owner)
-		return;		// during contruction
+		return;		// during construction
 
 	if (b->owner == world_entity)
 		return;
@@ -1120,7 +1120,7 @@ brush_t *Brush_Clone (brush_t *b)
 Brush_Ray
 
 Itersects a ray with a brush
-Returns the face hit and the distance along the ray the intersection occured at
+Returns the face hit and the distance along the ray the intersection occurred at
 Returns NULL and 0 if not hit at all
 ==============
 */
@@ -1173,7 +1173,7 @@ face_t *Brush_Ray (vec3_t origin, vec3_t dir, brush_t *b, float *dist)
 void	Brush_AddToList (brush_t *b, brush_t *list)
 {
 	if (b->next || b->prev)
-		Error ("Brush_RemoveFromList: allready linked");
+		Error ("Brush_RemoveFromList: already linked");
 	b->next = list->next;
 	list->next->prev = b;
 	list->next = b;
@@ -1262,7 +1262,7 @@ void Brush_SelectFaceForDragging (brush_t *b, face_t *f, qboolean shear)
 	for (i=0 ; i<3 ; i++)
 		c += AddPlanept (f->planepts[i]);
 	if (c == 0)
-		return;		// allready completely added
+		return;		// already completely added
 
 	// select all points on this plane in all brushes the selection
 	for (b2=selected_brushes.next ; b2 != &selected_brushes ; b2 = b2->next)

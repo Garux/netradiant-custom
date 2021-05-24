@@ -66,7 +66,7 @@ typedef struct foundfile_s
 
 //set the correct path seperators
 void ConvertPath(char *path);
-//append a path seperator to the given path not exceeding the length
+//append a path separator to the given path not exceeding the length
 void AppendPathSeperator(char *path, int length);
 //find a file in a pak file
 qboolean FindFileInPak(char *pakfile, char *filename, foundfile_t *file);

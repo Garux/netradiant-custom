@@ -10,7 +10,7 @@ Added:
 (16.05.01)
 	Impemented a little feature that highligths the q3map bug that is causing problems for autocaulk, (see readme)
 (01.04.01)
-	Added DPatch class to implement patches, however radiant does not (currently) support adding patches to an entity via a plugin, so, its actually redundant atm, i was adding this to fix the patches being removed from entities probelm with dealing with entities outside of the worldspawn.
+	Added DPatch class to implement patches, however radiant does not (currently) support adding patches to an entity via a plugin, so, its actually redundant atm, i was adding this to fix the patches being removed from entities problem with dealing with entities outside of the worldspawn.
 	
 Changes:
 (02.04.01)

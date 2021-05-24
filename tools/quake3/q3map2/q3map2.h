@@ -195,7 +195,7 @@ enum class EBrushType
 /* vis */
 #define VIS_HEADER_SIZE         8
 
-#define SEPERATORCACHE          /* seperator caching helps a bit */
+#define SEPERATORCACHE          /* separator caching helps a bit */
 
 #define PORTALFILE              "PRT1"
 
@@ -2408,7 +2408,7 @@ Q_EXTERN int numBSPLightmaps Q_ASSIGN( 0 );
 Q_EXTERN int numExtLightmaps Q_ASSIGN( 0 );
 Q_EXTERN outLightmap_t      *outLightmaps Q_ASSIGN( NULL );
 
-/* vortex: per surface floodlight statictics */
+/* vortex: per surface floodlight statistics */
 Q_EXTERN int numSurfacesFloodlighten Q_ASSIGN( 0 );
 
 /* grid points */

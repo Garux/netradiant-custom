@@ -178,7 +178,7 @@ inline R LatchedImportCaller( LatchedValue<T>& latchedValue ){
    support for a new game)
 
    what we do now is fully generate the information for this during the setup. We might want to
-   generate a piece that just says "the game pack is there", but put the rest of the config somwhere
+   generate a piece that just says "the game pack is there", but put the rest of the config somewhere
    else (i.e. not generated, copied over during setup .. for instance in the game tools directory)
  */
 class CGameDescription
@@ -268,7 +268,7 @@ public:
 	void AddPacksURL( StringOutputStream &s );
 
 	/*!
-	   intialize the game dialog, called at CPrefsDlg::Init
+	   initialize the game dialog, called at CPrefsDlg::Init
 	   will scan for games, load prefs, and do game selection dialog if needed
 	 */
 	void Init();

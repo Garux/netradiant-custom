@@ -179,7 +179,7 @@ void RemoveExt( char *name ){
 }
 
 /****************************************************/
-/* Misc calcualtions								*/
+/* Misc calculations								*/
 /****************************************************/
 
 int TotalArea(){

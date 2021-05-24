@@ -622,7 +622,7 @@ extern	int			cvar_modifiedFlags;
 FILESYSTEM
 
 No stdio calls should be used by any part of the game, because
-we need to deal with all sorts of directory and seperator char
+we need to deal with all sorts of directory and separator char
 issues.
 ==============================================================
 */
@@ -700,7 +700,7 @@ void	FS_FCloseFile( fileHandle_t f );
 int		FS_ReadFile( const char *qpath, void **buffer );
 // returns the length of the file
 // a null buffer will just return the file length without loading
-// as a quick check for existance. -1 length == not present
+// as a quick check for existence. -1 length == not present
 // A 0 byte will always be appended at the end, so string ops are safe.
 // the buffer should be considered read-only, because it may be cached
 // for other uses.

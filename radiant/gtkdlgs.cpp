@@ -705,7 +705,7 @@ EMessageBoxReturn DoTextureLayout( float *fx, float *fy ){
 	sprintf( buf, "%f", last_used_texture_layout_scale_y );
 	gtk_entry_set_text( y, buf );
 
-	// Set focus after intializing the values
+	// Set focus after initializing the values
 	gtk_widget_grab_focus( GTK_WIDGET( x ) );
 
 	EMessageBoxReturn ret = modal_dialog_show( window, dialog );

@@ -1010,7 +1010,7 @@ gboolean ModelBrowser_button_press( GtkWidget* widget, GdkEventButton* event, Mo
 	else if ( event->type == GDK_2BUTTON_PRESS && event->button == 1 && modelBrowser->m_currentFolder != nullptr && modelBrowser->m_currentModelId >= 0 ) {
 		UndoableCommand undo( "insertModel" );
 		// todo
-		// GlobalEntityClassManager() seach for "misc_model"
+		// GlobalEntityClassManager() search for "misc_model"
 		// otherwise search for entityClass->miscmodel_is
 		// otherwise go with GlobalEntityClassManager().findOrInsert( "misc_model", false );
 		EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( "misc_model", false );

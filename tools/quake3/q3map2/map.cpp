@@ -594,7 +594,7 @@ void AddBrushBevels( void ){
 	order = 0;
 	for ( axis = 0; axis < 3; axis++ ) {
 		for ( dir = -1; dir <= 1; dir += 2, order++ ) {
-			// see if the plane is allready present
+			// see if the plane is already present
 			for ( i = 0, s = buildBrush->sides; i < buildBrush->numsides; i++, s++ )
 			{
 				/* ydnar: testing disabling of mre code */
@@ -727,7 +727,7 @@ void AddBrushBevels( void ){
 					// behind this plane, it is a proper edge bevel
 					for ( k = 0; k < buildBrush->numsides; k++ ) {
 
-						// if this plane has allready been used, skip it
+						// if this plane has already been used, skip it
 						if ( PlaneEqual( mapplanes[buildBrush->sides[k].planenum], plane ) ) {
 							if( buildBrush->sides[k].bevel ){ /* handle bevel surfaceflags */
 								buildBrush->sides[k].surfaceFlags |= ( s->surfaceFlags & surfaceFlagsMask );
@@ -1003,7 +1003,7 @@ void QuakeTextureVecs( const plane_t& plane, float shift[ 2 ], float rotate, flo
    added exclusive brush primitive parsing
    Timo - 08/08/99
    support for old brush format back in
-   NOTE: it would be "cleaner" to have seperate functions to parse between old and new brushes
+   NOTE: it would be "cleaner" to have separate functions to parse between old and new brushes
  */
 
 static void ParseRawBrush( bool onlyLights ){

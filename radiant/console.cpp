@@ -220,7 +220,7 @@ std::size_t Sys_Print( int level, const char* buf, std::size_t length ){
 				}
 			}
 
-			// update console widget immediatly if we're doing something time-consuming
+			// update console widget immediately if we're doing something time-consuming
 			if ( contains_newline ) {
 				gtk_text_view_scroll_mark_onscreen( GTK_TEXT_VIEW( g_console ), end );
 

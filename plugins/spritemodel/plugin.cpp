@@ -43,7 +43,7 @@
 
     Implemented as a model module, without any ISelect stuff.
 
-    For an entity to use an image (instead of a model) you just update the entity defintion file so that the eclass_t's modelpath is filled in with a relative path and filename of an image file.
+    For an entity to use an image (instead of a model) you just update the entity definition file so that the eclass_t's modelpath is filled in with a relative path and filename of an image file.
 
     e.g:
 
@@ -73,7 +73,7 @@
     ===============
 
     v0.1 - 27/May/2002
-      - Created an inital implementation of a sprite model plugin.
+      - Created an initial implementation of a sprite model plugin.
         According to the powers that be, it seems creating a model
         plugin is hackish.
         It works ok, but there is no way to attach models (sprites if you will)

@@ -319,7 +319,7 @@ void ReleaseTexture( char *name ){
    ===============
    Cmd_Maps
 
-   Only relevent for release and pak files.
+   Only relevant for release and pak files.
    Releases the .bsp files for the maps, and scans all of the files to
    build a list of all textures used, which are then released.
    ===============
@@ -430,7 +430,7 @@ void ParseScript( void ){
 		else if ( !strcmp( token, "$fm_frame" ) ) {
 			MODELCMD_Frame( MODEL_FM );
 		}
-		else if ( !strcmp( token, "$fm_skeletal_frame" ) ) { // left in for compadibility with qdt already using fm_skeletal_frame
+		else if ( !strcmp( token, "$fm_skeletal_frame" ) ) { // left in for compatibility with qdt already using fm_skeletal_frame
 			MODELCMD_Frame( MODEL_FM );
 		}
 		else if ( !strcmp( token, "$fm_skin" ) ) {

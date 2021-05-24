@@ -357,7 +357,7 @@ qtexture_t *Texture_LoadTexture (miptex_t *qtex)
 ===============
 Texture_CreateSolid
 
-Create a single pixel texture of the apropriate color
+Create a single pixel texture of the appropriate color
 ===============
 */
 qtexture_t *Texture_CreateSolid (char *name)
@@ -1064,7 +1064,7 @@ LONG WINAPI WTex_WndProc (
 ==================
 CreateTextureWindow
 
-We need to create a seperate window for the textures
+We need to create a separate window for the textures
 in the inspector window, because we can't share
 gl and gdi drawing in a single window
 ==================

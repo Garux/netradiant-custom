@@ -225,7 +225,7 @@ void TriEdge_r (triangulation_t *trian, triedge_t *e)
 	triangle_t	*nt;
 
 	if (e->tri)
-		return;		// allready connected by someone
+		return;		// already connected by someone
 
 	// find the point with the best angle
 	p0 = trian->points[e->p0]->origin;
@@ -998,7 +998,7 @@ skipadd: ;
 AddSampleToPatch
 
 Take the sample's collected light and
-add it back into the apropriate patch
+add it back into the appropriate patch
 for the radiosity pass.
 
 The sample is added to all patches that might include

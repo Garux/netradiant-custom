@@ -329,7 +329,7 @@ WORD i,j;
 //
 //  Comments:
 //      Used when used open a file, using MRU, and when an error
-//         occured (by example, when file was deleted)
+//         occurred (by example, when file was deleted)
 //
 //  History:    Date       Author       Comment
 //              09/24/94   G. Vollant   Created

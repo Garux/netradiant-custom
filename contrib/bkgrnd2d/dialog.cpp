@@ -250,7 +250,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	g_signal_connect( G_OBJECT( w ), "value-changed",
 	                  G_CALLBACK( alpha_adjust_callback ), ( gpointer ) this );
 	gtk_box_pack_start( GTK_BOX( hbox ),w, TRUE, TRUE, 5 );
-	gtk_widget_set_tooltip_text( w, "Set image transparancy" );
+	gtk_widget_set_tooltip_text( w, "Set image transparency" );
 	gtk_widget_show( w );
 
 	gtk_widget_show( hbox );

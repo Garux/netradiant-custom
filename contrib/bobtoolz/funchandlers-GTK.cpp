@@ -384,7 +384,7 @@ void DoPathPlotter(){
 	if ( entity != 0 )
 		DBobView_setEntity( *entity, rs.fMultiplier, rs.nPoints, rs.fGravity, rs.bNoUpdate, rs.bShowExtra );
 	else
-		globalErrorStream() << "bobToolz PathPlotter: No trigger_push entitity selected, select 1 only (Use list to select it).\n";
+		globalErrorStream() << "bobToolz PathPlotter: No trigger_push entity selected, select 1 only (Use list to select it).\n";
 	return;
 }
 

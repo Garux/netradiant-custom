@@ -183,7 +183,7 @@ int aabb_intersect_ray( const aabb_t *aabb, const ray_t *ray, vec3_t intersectio
 	const float *direction = ray->direction;
 
 	/* Find candidate planes; this loop can be avoided if
-	   rays cast all from the eye(assume perpsective view) */
+	   rays cast all from the eye(assume perspective view) */
 	for ( i = 0; i < NUMDIM; i++ )
 	{
 		if ( origin[i] < ( aabb->origin[i] - aabb->extents[i] ) ) {

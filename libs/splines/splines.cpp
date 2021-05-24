@@ -746,7 +746,7 @@ void idCameraDef::buildCamera() {
 			newTotal /= count;
 			int additive = newTotal;
 
-			// now propogate that difference out to each segment
+			// now propagate that difference out to each segment
 			for (j = index; j < cameraSpline.numSegments(); j++) {
 				cameraSpline.addSegmentTime(j, additive);
 				additive += newTotal;
@@ -1048,7 +1048,7 @@ const idVec3 *idInterpolatedPosition::getPosition( long t ) {
 		percent = 0.0;
 	}
 
-	// the following line does a straigt calc on percentage of time
+	// the following line does a straight calc on percentage of time
 	// float percent = (float)(startTime + time - t) / time;
 
 	idVec3 v1 = startPos;

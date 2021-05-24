@@ -83,8 +83,8 @@ class CWatchBSP
 {
 private:
 // a flag we have set to true when using an external BSP plugin
-// the resulting code with that is a bit dirty, cleaner solution would be to seperate the succession of commands from the listening loop
-// (in two seperate classes probably)
+// the resulting code with that is a bit dirty, cleaner solution would be to separate the succession of commands from the listening loop
+// (in two separate classes probably)
 	bool m_bBSPPlugin;
 
 // EIdle: we are not listening
@@ -166,7 +166,7 @@ CWatchBSP* g_pWatchBSP;
 // true: trigger the BSP steps one by one and monitor them through the network
 // false: create a BAT / .sh file and execute it. don't bother monitoring it.
 bool g_WatchBSP_Enabled = true;
-// do we stop the compilation process if we come accross a leak?
+// do we stop the compilation process if we come across a leak?
 bool g_WatchBSP_LeakStop = true;
 bool g_WatchBSP_RunQuake = false;
 bool g_WatchBSP0_DumpLog = false;

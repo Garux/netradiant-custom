@@ -140,7 +140,7 @@ typedef struct
 } dplane_t;
 
 
-// contents flags are seperate bits
+// contents flags are separate bits
 // a given brush can contribute multiple content bits
 // multiple brushes can be in a single leaf
 
@@ -188,7 +188,7 @@ typedef struct texinfo_s
 	float		vecs[2][4];		// [s/t][xyz offset]
 	int			miptex;
 	int			flags;			// miptex flags + overrides
-	int			value;			// light emition, etc
+	int			value;			// light emission, etc
 } texinfo_t;
 
 #define	TEX_SPECIAL		1		// sky or slime, no lightmap or 256 subdivision

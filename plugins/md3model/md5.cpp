@@ -180,7 +180,7 @@ bool MD5Anim_parse( Tokeniser& tokeniser ){
 	MD5_RETURN_FALSE_IF_FAIL( MD5_parseSize( tokeniser, numAnimatedComponents ) );
 	tokeniser.nextLine();
 
-	// parse heirarchy
+	// parse hierarchy
 	MD5_RETURN_FALSE_IF_FAIL( MD5_parseToken( tokeniser, "hierarchy" ) );
 	MD5_RETURN_FALSE_IF_FAIL( MD5_parseToken( tokeniser, "{" ) );
 	tokeniser.nextLine();

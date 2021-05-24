@@ -124,7 +124,7 @@ void Error( const char *error, ... ){
 	}
 #endif
 
-	strcat( text, "An unrecoverable error has occured.\n" );
+	strcat( text, "An unrecoverable error has occurred.\n" );
 
 	ERROR_MESSAGE( text );
 

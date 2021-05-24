@@ -652,7 +652,7 @@ typedef ReferenceCaller1<TextureBrowser, bool, TextureBrowser_importShowScrollba
    relies on texture_directory global for the directory to use
    1) Load the shaders for the given directory
    2) Scan the remaining texture, load them and assign them a default shader (the "noshader" shader)
-   NOTE: when writing a texture plugin, or some texture extensions, this function may need to be overriden, and made
+   NOTE: when writing a texture plugin, or some texture extensions, this function may need to be overridden, and made
    available through the IShaders interface
    NOTE: for texture window layout:
    all shaders are stored with alphabetical order after load

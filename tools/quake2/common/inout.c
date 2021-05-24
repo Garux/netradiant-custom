@@ -267,7 +267,7 @@ void FPrintf( int flag, char *buf ){
 		return;
 	}
 
-	// ouput an XML file of the run
+	// output an XML file of the run
 	// use the DOM interface to build a tree
 	/*
 	   <message level='flag'>

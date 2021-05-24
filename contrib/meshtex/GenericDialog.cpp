@@ -146,7 +146,7 @@ GenericDialog::Hide()
 }
 
 /**
- * Default handler for Apply logic. This method should be overriden by
+ * Default handler for Apply logic. This method should be overridden by
  * subclass implementations that need to execute some logic when OK or Apply
  * is clicked. The return value should be the success of that logic. A
  * successful OK will cause the window to be hidden.

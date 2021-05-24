@@ -1075,7 +1075,7 @@ void FMFinishModel( void ){
 	// finish writing header file
 	H_printf( "\n" );
 
-	// scale_up is usefull to allow step distances to be adjusted
+	// scale_up is useful to allow step distances to be adjusted
 	H_printf( "#define MODEL_SCALE\t\t%f\n", scale_up );
 
 	// mesh nodes

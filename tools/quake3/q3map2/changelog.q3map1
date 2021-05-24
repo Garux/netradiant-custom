@@ -70,7 +70,7 @@ Date		Version					Notes
 									vlight to crash.
 
 2001-12-27	1.2 (ydnar 13) Alpha	- Fixed broken PVS check.
-									- Cheap now supresses sun
+									- Cheap now suppresses sun
 									Sun trace skipped if
 									sample is "cheapened."
 									- Experimental -smooth
@@ -272,7 +272,7 @@ Date		Version					Notes
 
 2002-02-26	2.0.0-a10 thru a11		Adjacent coplanar surfaces now
 									will share lightmaps. This prevents
-									most wierd edge cases with filter
+									most weird edge cases with filter
 									and speeds things up a bit. Patches
 									too.
 

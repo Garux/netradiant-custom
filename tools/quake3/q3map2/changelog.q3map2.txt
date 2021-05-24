@@ -200,7 +200,7 @@ Q3Map2 Version History + Changelog (Reverse Chronological Order)
 2.5.5
 
 - New: -scale N.N mode to scale the BSP
-- New: -light -lomem switch to supress trace BSP optimization. This
+- New: -light -lomem switch to suppress trace BSP optimization. This
   feature trades lighting performance for decreased memory usage
 - New: Added negative light support (note: will not darken below _minlight value)
   might screw up radiosity, haven't tested much. Should work with entity
@@ -210,7 +210,7 @@ Q3Map2 Version History + Changelog (Reverse Chronological Order)
   RTCW, ET, EF. Only works with lightmapped surfaces, use with care
 - Fixed long standing terrain texturing bug, should produce exact desired
   results all of the time now. May require fixing alphamaps that were
-  kludged together to accomodate this bug on existing maps
+  kludged together to accommodate this bug on existing maps
 - Fixed bug (huh, wtf) causing misc_model surfaces to not be fogged
 - Fixed bug where fog brushes wouldn't fog surfaces if a global map fog
   shader was present
@@ -535,7 +535,7 @@ TODO
 
 Known issues:
 - Lightmap projection and surface merging on large ASE models sometimes flakes
-- Surface to brush surfaceparm propogation doesn't work properly with large
+- Surface to brush surfaceparm propagation doesn't work properly with large
   metasurfaces: http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=654
 
 
@@ -553,7 +553,7 @@ Known issues:
   Note: This only matters in SOF2/JK2 now. Make a light targetted (a spotlight)
   to get it to aim the correct direction, otherwise it defaults to pointing 
   downward. You cannot have omnidirectional flares
-- Lightgrid size is automatically increased to accomodate large maps. The
+- Lightgrid size is automatically increased to accommodate large maps. The
   MAX_MAP_LIGHTGRID error will never happen again
 
 

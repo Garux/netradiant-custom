@@ -798,7 +798,7 @@ void BrushPrimitFaceToFace( face_t *face ){
 // the general algorithm is the same for both lockings, it's only the geometric transformation part that changes
 // so I wanted to keep it in a single function
 // if there are more linear transformations that need the locking, going to a C++ or code pointer solution would be best
-// (but right now I want to keep brush_primit.cpp striclty C)
+// (but right now I want to keep brush_primit.cpp strictly C)
 
 bool txlock_bRotation;
 
@@ -819,7 +819,7 @@ void TextureLockTransformation_BrushPrimit( face_t *f ){
 
 	Vector3 rOrig,rvecS,rvecT;   // geometric transformation of (0,0) (1,0) (0,1) { initial plane axis base }
 	Vector3 rNormal,rtexS,rtexT; // axis base for the transformed plane
-	Vector3 lOrig,lvecS,lvecT;  // [2] are not used ( but usefull for debugging )
+	Vector3 lOrig,lvecS,lvecT;  // [2] are not used ( but useful for debugging )
 	Vector3 M[3];
 	float det;
 	Vector3 D[2];
@@ -831,7 +831,7 @@ void TextureLockTransformation_BrushPrimit( face_t *f ){
 	// compute coordinates of (0,0) (1,0) (0,1) ( expressed in initial plane axis base ) after transformation
 	// (0,0) (1,0) (0,1) ( expressed in initial plane axis base ) <-> (0,0,0) texS texT ( expressed world axis base )
 	// input: Orig, texS, texT (and the global locking params)
-	// ouput: rOrig, rvecS, rvecT, rNormal
+	// output: rOrig, rvecS, rvecT, rNormal
 	if ( txlock_bRotation ) {
 		// rotation vector
 		VectorSet( vRotate, 0.0f, 0.0f, 0.0f );

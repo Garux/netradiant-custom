@@ -176,7 +176,7 @@ typedef struct aas_edge_s
 //edge index, negative if vertexes are reversed
 typedef int aas_edgeindex_t;
 
-//a face bounds a convex area, often it will also seperate two convex areas
+//a face bounds a convex area, often it will also separate two convex areas
 typedef struct aas_face_s
 {
 	int planenum;						//number of the plane this face is in

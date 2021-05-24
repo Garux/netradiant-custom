@@ -296,7 +296,7 @@ void Cmd_Colormap (void)
 			*lump_p++ = c;
 	}
 
-// 66% transparancy table
+// 66% transparency table
 	for (l=0;l<255;l++)
 	{
 		for (c=0 ; c<255 ; c++)

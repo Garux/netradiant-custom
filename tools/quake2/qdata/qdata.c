@@ -329,7 +329,7 @@ void ReleaseTexture( char *name ){
    ===============
    Cmd_Maps
 
-   Only relevent for release and pak files.
+   Only relevant for release and pak files.
    Releases the .bsp files for the maps, and scans all of the files to
    build a list of all textures used, which are then released.
    ===============

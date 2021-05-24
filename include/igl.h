@@ -2088,7 +2088,7 @@ typedef unsigned int GLhandleARB;
 #include "gtkutil/glfont.h"
 
 /// \brief A module which wraps a runtime-binding of the standard OpenGL functions.
-/// Provides convenience functions for querying availabiliy of extensions, rendering text and error-checking.
+/// Provides convenience functions for querying availability of extensions, rendering text and error-checking.
 struct OpenGLBinding
 {
 	INTEGER_CONSTANT( Version, 2 );

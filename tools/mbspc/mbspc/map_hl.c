@@ -1026,7 +1026,7 @@ void HL_CreateMapBrushes(entity_t *mapent, int modelnum)
 
 	//create brushes from the model BSP tree
 	brushlist = HL_CreateBrushesFromBSP(modelnum);
-	//texture the brushes and split them when necesary
+	//texture the brushes and split them when necessary
 	brushlist = HL_TextureBrushes(brushlist, modelnum);
 	//fix the contents textures of all brushes
 	HL_FixContentsTextures(brushlist);

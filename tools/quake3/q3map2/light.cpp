@@ -208,7 +208,7 @@ void CreateEntityLights( void ){
 	const entity_t  *e, *e2;
 
 
-	/* go throught entity list and find lights */
+	/* go through entity list and find lights */
 	for ( std::size_t i = 0; i < entities.size(); ++i )
 	{
 		/* get entity */
@@ -493,7 +493,7 @@ void CreateSurfaceLights( void ){
 	clipWork_t cw;
 
 
-	/* get sun shader supressor */
+	/* get sun shader suppressor */
 	const bool nss = entities[ 0 ].boolForKey( "_noshadersun" );
 
 	/* walk the list of surfaces */

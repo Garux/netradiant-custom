@@ -147,7 +147,7 @@ void CSG_Subtract (void)
 				|| b->maxs[i] <= s->mins[i] + ON_EPSILON)
 					break;
 			if (i != 3)
-				continue;	// definately don't touch
+				continue;	// definitely don't touch
 
 			frag = s;
 			for (f = b->brush_faces ; f && frag ; f=f->next)

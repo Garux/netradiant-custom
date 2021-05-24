@@ -131,7 +131,7 @@ public:
 	}
 
 	/** need to reapply pos on every hiding to keep wnd pos after hide+show (flickering between two positions, if doing on showing)
-	this stuff is weird: some wnds, like entity list, keep pos on hide/show... untill you resize them -)
+	this stuff is weird: some wnds, like entity list, keep pos on hide/show... until you resize them -)
 	some, like floating xy/cam/groupdialog do not; if you remove glwidget from floating xy - it does xD
 	if you gtk_window_set_position( window, GTK_WIN_POS_CENTER_ALWAYS ), they do keep it, except of random centering after resizing (ms windows)
 	but this option doesn't sound healthy;

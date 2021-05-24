@@ -464,7 +464,7 @@ void idStr::snprintf
    TestStringClass
 
    This is a fairly rigorous test of the idStr class's functionality.
-   Because of the fairly global and subtle ramifications of a bug occuring
+   Because of the fairly global and subtle ramifications of a bug occurring
    in this class, it should be run after any changes to the class.
    Add more tests as functionality is changed.  Tests should include
    any possible bounds violation and NULL data tests.

@@ -528,12 +528,12 @@ public:
 	}
 
 	void addScale(){
-		ASSERT_MESSAGE( !m_scaleApplied, "texture scale aready added" );
+		ASSERT_MESSAGE( !m_scaleApplied, "texture scale already added" );
 		m_scaleApplied = true;
 		m_projection.m_brushprimit_texdef.addScale( m_shader.width(), m_shader.height() );
 	}
 	void removeScale(){
-		ASSERT_MESSAGE( m_scaleApplied, "texture scale aready removed" );
+		ASSERT_MESSAGE( m_scaleApplied, "texture scale already removed" );
 		m_scaleApplied = false;
 		m_projection.m_brushprimit_texdef.removeScale( m_shader.width(), m_shader.height() );
 	}

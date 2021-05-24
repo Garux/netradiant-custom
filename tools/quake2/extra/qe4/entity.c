@@ -336,7 +336,7 @@ Entity_Create
 Creates a new entity out of the selected_brushes list.
 If the entity class is fixed size, the brushes are only
 used to find a midpoint.  Otherwise, the brushes have
-their ownershi[ transfered to the new entity.
+their ownershi[ transferred to the new entity.
 ============
 */
 entity_t	*Entity_Create (eclass_t *c)
@@ -420,7 +420,7 @@ Entity_LinkBrush
 void Entity_LinkBrush (entity_t *e, brush_t *b)
 {
 	if (b->oprev || b->onext)
-		Error ("Entity_LinkBrush: Allready linked");
+		Error ("Entity_LinkBrush: Already linked");
 	b->owner = e;
 
 	b->onext = e->brushes.onext;

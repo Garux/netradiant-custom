@@ -217,7 +217,7 @@ class ScriptTokeniser final : public Tokeniser
 			pop();
 			if ( state() == Tokenise( &ScriptTokeniser::tokeniseToken ) ) {
 				pop();
-				m_emit = true; // emit token immediatly preceding comment
+				m_emit = true; // emit token immediately preceding comment
 			}
 		}
 		return true;
@@ -236,7 +236,7 @@ class ScriptTokeniser final : public Tokeniser
 			pop();
 			if ( state() == Tokenise( &ScriptTokeniser::tokeniseToken ) ) {
 				pop();
-				m_emit = true; // emit token immediatly preceding comment
+				m_emit = true; // emit token immediately preceding comment
 			}
 			break; // dont emit comment
 		case '*':

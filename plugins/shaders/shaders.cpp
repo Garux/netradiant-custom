@@ -1520,7 +1520,7 @@ GSList* Shaders_getShaderFileList(){
 /*
    ==================
    DumpUnreferencedShaders
-   usefull function: dumps the list of .shader files that are not referenced to the console
+   useful function: dumps the list of .shader files that are not referenced to the console
    ==================
  */
 void IfFound_dumpUnreferencedShader( bool& bFound, const char* filename ){

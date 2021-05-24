@@ -291,7 +291,7 @@ void MakeTransfers( int i ){
 
 		//
 		// normalize all transfers so all of the light
-		// is transfered to the surroundings
+		// is transferred to the surroundings
 		//
 		t = patch->transfers;
 		itotal = 0;

@@ -336,7 +336,7 @@ winding_t *BaseWindingForPlane( const Plane3f& plane ){
 
 	// LordHavoc: this has to use *2 because otherwise some created points may
 	// be inside the world (think of a diagonal case), and any brush with such
-	// points should be removed, failure to detect such cases is disasterous
+	// points should be removed, failure to detect such cases is disastrous
 	vup *= MAX_WORLD_COORD * 2;
 	vright *= MAX_WORLD_COORD * 2;
 

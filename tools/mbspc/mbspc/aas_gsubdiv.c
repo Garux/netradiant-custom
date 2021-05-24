@@ -372,7 +372,7 @@ int AAS_FindBestAreaSplitPlane(tmp_area_t *tmparea, vec3_t normal, float *dist)
 			//only split between gaps and ground
 			if (!(((face1->faceflags & FACE_GROUND) && AAS_GapFace(face2, side2)) ||
 					((face2->faceflags & FACE_GROUND) && AAS_GapFace(face1, side1)))) continue;
-			//find a plane seperating the windings of the faces
+			//find a plane separating the windings of the faces
 			if (!FindPlaneSeperatingWindings(face1->winding, face2->winding, invgravity,
 														tmpnormal, &tmpdist)) continue;
 #ifdef AW_DEBUG

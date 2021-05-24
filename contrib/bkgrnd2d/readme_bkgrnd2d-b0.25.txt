@@ -56,7 +56,7 @@ Usage:
 
 - Use the toggle buttons to show or hide the loaded images. The buttons will
   press or unpress whenever you click them, but an image will only be
-  displayed once you have successfully loaded a file and set its size/postion.
+  displayed once you have successfully loaded a file and set its size/position.
 
 - Set the opacity of the image using the slider in the configuration dialog.
   
@@ -117,7 +117,7 @@ TODO:
 - render under the grid instead of blending
 - mac/*nix support
 - remember/save/restore settings
-- texture options independant of radiant prefs
+- texture options independent of radiant prefs
 - clean up icky code
 
 Changes from 0.1

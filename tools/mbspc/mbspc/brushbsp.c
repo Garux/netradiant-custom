@@ -808,7 +808,7 @@ int TestBrushToPlanenum (bspbrush_t *brush, int planenum,
 } //end of the function TestBrushToPlanenum
 //===========================================================================
 // Returns true if the winding would be crunched out of
-// existance by the vertex snapping.
+// existence by the vertex snapping.
 //
 // Parameter:			-
 // Returns:				-
@@ -1000,9 +1000,9 @@ side_t *SelectSplitSide (bspbrush_t *brushes, node_t *node)
 				if (!side->winding)
 					continue;	// nothing visible, so it can't split
 				if (side->texinfo == TEXINFO_NODE)
-					continue;	// allready a node splitter
+					continue;	// already a node splitter
 				if (side->flags & SFL_TESTED)
-					continue;	// we allready have metrics for this plane
+					continue;	// we already have metrics for this plane
 //				if (side->surf & SURF_SKIP)
 //					continue;	// skip surfaces are never chosen
 
@@ -1058,7 +1058,7 @@ side_t *SelectSplitSide (bspbrush_t *brushes, node_t *node)
 					value = -9999999;
 
 				// save off the side test so we don't need
-				// to recalculate it when we actually seperate
+				// to recalculate it when we actually separate
 				// the brushes
 				if (value > bestvalue)
 				{
@@ -1370,7 +1370,7 @@ void SplitBrushList (bspbrush_t *brushes,
 
 		newbrush = CopyBrush (brush);
 
-		// if the planenum is actualy a part of the brush
+		// if the planenum is actually a part of the brush
 		// find the plane and flag it as used so it won't be tried
 		// as a splitter again
 		if (sides & PSIDE_FACING)

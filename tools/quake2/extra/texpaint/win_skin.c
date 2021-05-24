@@ -247,7 +247,7 @@ void SetSizes (int width, int height)
 			height2<<=1;
 	}
 
-	// compatability shit for auto sizing of old skins
+	// compatibility shit for auto sizing of old skins
 	if (skin_width != 320 || skin_height != 200)
 	{
 		skinwidth = skin_width;

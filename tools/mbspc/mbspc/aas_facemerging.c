@@ -149,7 +149,7 @@ void AAS_MergeAreaFaces(void)
 			for (face2 = face1->next[side1]; face2; face2 = face2->next[side2])
 			{
 				side2 = face2->frontarea != tmparea;
-				//if succesfully merged
+				//if successfully merged
 				if (AAS_TryMergeFaces(face1, face2))
 				{
 					//start over again after merging two faces

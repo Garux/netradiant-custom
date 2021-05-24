@@ -2362,7 +2362,7 @@ void map_autocaulk_selected(){
 
 		TextFileOutputStream file( filename.c_str() );
 		if ( file.failed() ) {
-			globalErrorStream() << "writting " << filename.c_str() << " failure\n";
+			globalErrorStream() << "writing " << filename.c_str() << " failure\n";
 			return;
 		}
 

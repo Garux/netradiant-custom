@@ -97,7 +97,7 @@ Actually deluxemaps being converted to tangentspace in StoreLigtmaps phase. "-de
 
 - added "EmitMetaStats" printing in the end of BSP stage to show full meta statistics, not only for world. So all "_patchMeta 1" surfaces will be in it.
 
-- added gametype-controlled structure fields for "-deluxe", "-subdivisions", "-nostyles", "-patchshadows". New "dq" (deluxequake), "prophecy" and "darkplaces" games uses them. Additionaly added "-nodeluxe", "-nopatchshadows", "-styles" to negate positive defaults. 
+- added gametype-controlled structure fields for "-deluxe", "-subdivisions", "-nostyles", "-patchshadows". New "dq" (deluxequake), "prophecy" and "darkplaces" games uses them. Additionally added "-nodeluxe", "-nopatchshadows", "-styles" to negate positive defaults. 
 
 - Floodligting code is changed to handle custom surfaces. And "q3map_floodlight <red> <green> <blue> <distance> <brightness> <low_quality>" shader keyword was added. Per-surfaces floodlight code does not intersect with global floodlight done by -floodlight of _floodlight worldspawn key, their effects get summarized. This is good way to light up surfacelight surfaces, such as water.
 

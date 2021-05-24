@@ -135,7 +135,7 @@ GtkMenuItem* create_plugins_menu(){
 #if 0
 	create_menu_item_with_mnemonic( menu, "Refresh", FreeCaller<Restart>() );
 
-	// NOTE: the seperator is used when doing a refresh of the list, everything past the seperator is removed
+	// NOTE: the separator is used when doing a refresh of the list, everything past the separator is removed
 	g_plugins_menu_separator = menu_separator( menu );
 #endif
 

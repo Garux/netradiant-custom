@@ -106,7 +106,7 @@ int EmitShader( const char *shader, int *contentFlags, int *surfaceFlags ){
 
 /*
    EmitPlanes()
-   there is no oportunity to discard planes, because all of the original
+   there is no opportunity to discard planes, because all of the original
    brushes will be saved in the map
  */
 

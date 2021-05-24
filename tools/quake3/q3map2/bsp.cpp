@@ -477,7 +477,7 @@ void ProcessWorldModel( void ){
 		}
 	}
 
-	/* add references to the final drawsurfs in the apropriate clusters */
+	/* add references to the final drawsurfs in the appropriate clusters */
 	FilterDrawsurfsIntoTree( e, tree );
 
 	/* match drawsurfaces back to original brushsides (sof2) */
@@ -561,7 +561,7 @@ void ProcessSubModel( void ){
 	FixMetaTJunctions();
 	MergeMetaTriangles();
 
-	/* add references to the final drawsurfs in the apropriate clusters */
+	/* add references to the final drawsurfs in the appropriate clusters */
 	FilterDrawsurfsIntoTree( e, tree );
 
 	/* match drawsurfaces back to original brushsides (sof2) */

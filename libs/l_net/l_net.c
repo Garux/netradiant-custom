@@ -104,7 +104,7 @@ int Net_Send( socket_t *sock, netmessage_t *msg ){
 	return WINS_Write( sock->socket, msg->data, msg->size, NULL );
 } //end of the function Net_SendSocketReliable
 //===========================================================================
-// returns the number of bytes recieved
+// returns the number of bytes received
 // -1 on error
 //
 // Parameter:				-

@@ -363,8 +363,8 @@ void MapCoordinator(){
 
 		globalOutputStream() << "SunPlug: calculating optimal coordinates\n"; // write to console that we are calculating the coordinates
 		GetOptimalCoordinates( &levelBoundingBox ); // calculate optimal mapcoords with the dimensions of the level bounding box
-		globalOutputStream() << "SunPlug: adviced mapcoordsmins=" << minX << " " << maxY << "\n"; // console info about mapcoordsmins
-		globalOutputStream() << "SunPlug: adviced mapcoordsmaxs=" << maxX << " " << minY << "\n"; // console info about mapcoordsmaxs
+		globalOutputStream() << "SunPlug: advised mapcoordsmins=" << minX << " " << maxY << "\n"; // console info about mapcoordsmins
+		globalOutputStream() << "SunPlug: advised mapcoordsmaxs=" << maxX << " " << minY << "\n"; // console info about mapcoordsmaxs
 
 		spinner_adj_MinX = (GtkAdjustment *)gtk_adjustment_new( map_minX, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of minimum x value
 		spinner_adj_MinY = (GtkAdjustment *)gtk_adjustment_new( map_minY, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of minimum y value

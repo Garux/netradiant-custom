@@ -77,7 +77,7 @@ void Map_SaveBetween (void)
 		{
 			for (e2=between_entities.next ; e2 != &between_entities ; e2=e2->next)
 				if (e2 == e)
-					goto next;	// allready got the entity
+					goto next;	// already got the entity
 			// move the entity over
 			e->prev->next = e->next;
 			e->next->prev = e->prev;

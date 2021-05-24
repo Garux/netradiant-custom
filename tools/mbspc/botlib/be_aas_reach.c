@@ -1423,7 +1423,7 @@ int AAS_Reachability_Step_Barrier_WaterJump_WalkOffLedge(int area1num, int area2
 		//if there IS water the sv_maxwaterjump height below the bestend point
 		if (aasworld.areasettings[AAS_PointAreaNum(testpoint)].areaflags & AREA_LIQUID)
 		{
-			//don't create rediculous water jump reachabilities from areas very far below
+			//don't create ridiculous water jump reachabilities from areas very far below
 			//the water surface
 			if (water_bestdist < aassettings.phys_maxwaterjump + 24)
 			{

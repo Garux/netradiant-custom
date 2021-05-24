@@ -59,7 +59,7 @@
 
 #define BOGUS_RANGE 8192
 
-#define TEXINFO_NODE        -1      // side is allready on a node
+#define TEXINFO_NODE        -1      // side is already on a node
 
 typedef struct plane_s
 {
@@ -88,7 +88,7 @@ typedef struct side_s
 	int contents;               // from miptex
 	int surf;                   // from miptex
 	qboolean visible;           // choose visble planes first
-	qboolean tested;            // this plane allready checked as a split
+	qboolean tested;            // this plane already checked as a split
 	qboolean bevel;             // don't ever use for bsp splitting
 } side_t;
 

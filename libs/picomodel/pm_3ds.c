@@ -299,7 +299,7 @@ static int GetMeshVertices( T3dsLoaderPers *pers ){
 		printf( "Vertex: x: %f y: %f z: %f\n",v[0],v[1],v[2] );
 #endif
 	}
-	/* success (no errors occured) */
+	/* success (no errors occurred) */
 	return 1;
 }
 
@@ -334,7 +334,7 @@ static int GetMeshFaces( T3dsLoaderPers *pers ){
 		printf( "Face: a: %d b: %d c: %d (%d)\n",face.a,face.b,face.c,face.visible );
 #endif
 	}
-	/* success (no errors occured) */
+	/* success (no errors occurred) */
 	return 1;
 }
 
@@ -367,7 +367,7 @@ static int GetMeshTexCoords( T3dsLoaderPers *pers ){
 		printf( "u: %f v: %f\n",uv[0],uv[1] );
 #endif
 	}
-	/* success (no errors occured) */
+	/* success (no errors occurred) */
 	return 1;
 }
 
@@ -460,7 +460,7 @@ static int GetMeshShader( T3dsLoaderPers *pers ){
 	{
 		GetWord( pers );
 	}
-	/* success (no errors occured) */
+	/* success (no errors occurred) */
 	return 1;
 }
 
@@ -483,7 +483,7 @@ static int GetDiffuseColor( T3dsLoaderPers *pers ){
 #ifdef DEBUG_PM_3DS
 	printf( "GetDiffuseColor: %d %d %d\n",color[0],color[1],color[2] );
 #endif
-	/* success (no errors occured) */
+	/* success (no errors occurred) */
 	return 1;
 }
 
@@ -729,7 +729,7 @@ static picoModel_t *_3ds_load( PM_PARAMS_LOAD ){
 	strncpy( basename, _pico_nopath( fileName ), sizeof( basename ) - 1 );
 	_pico_setfext( basename, NULL );
 
-	/* initialize persistant vars (formerly static) */
+	/* initialize persistent vars (formerly static) */
 	pers.model    =  model;
 	pers.bufptr   = (picoByte_t *)_pico_alloc( bufSize );
 	memcpy( pers.bufptr, buffer, bufSize );

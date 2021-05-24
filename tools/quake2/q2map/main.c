@@ -158,7 +158,7 @@ int BSPInfo(){
 
 /*
    ScaleBSPMain()
-   amaze and confuse your enemies with wierd scaled maps!
+   amaze and confuse your enemies with weird scaled maps!
  */
 /*
    int ScaleBSPMain( int argc, char **argv )

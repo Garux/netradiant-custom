@@ -301,7 +301,7 @@ inline void NormalToLatLong( const Vector3& normal, byte bytes[2] ) {
 		const int b = radians_to_degrees( acos( normal[2] ) ) * ( 255.0 / 360.0 );
 
 		bytes[0] = b & 0xff;   // longitude
-		bytes[1] = a & 0xff;   // lattitude
+		bytes[1] = a & 0xff;   // latitude
 	}
 }
 

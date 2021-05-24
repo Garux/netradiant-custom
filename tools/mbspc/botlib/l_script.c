@@ -171,7 +171,7 @@ char *PunctuationFromNum(script_t *script, int num)
 	{
 		if (script->punctuations[i].n == num) return script->punctuations[i].p;
 	} //end for
-	return "unkown punctuation";
+	return "unknown punctuation";
 } //end of the function PunctuationFromNum
 //===========================================================================
 //
@@ -357,7 +357,7 @@ int PS_ReadEscapeCharacter(script_t *script, char *ch)
 	script->script_p++;
 	//store the escape character
 	*ch = c;
-	//succesfully read escape character
+	//successfully read escape character
 	return 1;
 } //end of the function PS_ReadEscapeCharacter
 //============================================================================
@@ -367,7 +367,7 @@ int PS_ReadEscapeCharacter(script_t *script, char *ch)
 //
 // Parameter:				script		: script to read from
 //								token			: buffer to store the string
-// Returns:					true when a string was read succesfully
+// Returns:					true when a string was read successfully
 // Changes Globals:		-
 //============================================================================
 int PS_ReadString(script_t *script, token_t *token, int quote)
@@ -411,7 +411,7 @@ int PS_ReadString(script_t *script, token_t *token, int quote)
 			//
 			tmpscript_p = script->script_p;
 			tmpline = script->line;
-			//read unusefull stuff between possible two following strings
+			//read unuseful stuff between possible two following strings
 			if (!PS_ReadWhiteSpace(script))
 			{
 				script->script_p = tmpscript_p;
@@ -774,7 +774,7 @@ int PS_ReadPrimitive(script_t *script, token_t *token)
 	token->string[len] = 0;
 	//copy the token into the script structure
 	Com_Memcpy(&script->token, token, sizeof(token_t));
-	//primitive reading successfull
+	//primitive reading successful
 	return 1;
 } //end of the function PS_ReadPrimitive
 //============================================================================
@@ -801,7 +801,7 @@ int PS_ReadToken(script_t *script, token_t *token)
 	//start of the white space
 	script->whitespace_p = script->script_p;
 	token->whitespace_p = script->script_p;
-	//read unusefull stuff
+	//read unuseful stuff
 	if (!PS_ReadWhiteSpace(script)) return 0;
 	//end of the white space
 	script->endwhitespace_p = script->script_p;
@@ -848,7 +848,7 @@ int PS_ReadToken(script_t *script, token_t *token)
 	} //end if
 	//copy the token into the script structure
 	Com_Memcpy(&script->token, token, sizeof(token_t));
-	//succesfully read a token
+	//successfully read a token
 	return 1;
 } //end of the function PS_ReadToken
 //============================================================================

@@ -188,7 +188,7 @@ _QERFaceData g_SelectedFaceData;
 // g_pSelectedFaceWindings gets allocated with MAX_POINTS_ON_WINDING at plugin startup ( QERPlug_Init )
 winding_t               *g_pSelectedFaceWinding = NULL;
 const float g_ViewportRatio = 1.2f;
-// usefull class to manage the 2D view
+// useful class to manage the 2D view
 C2DView g_2DView;
 // control points to move the polygon
 CControlPointsManagerBFace g_ControlPointsBFace;

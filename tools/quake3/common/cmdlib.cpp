@@ -21,7 +21,7 @@
 
 // cmdlib.c
 // TTimo 09/30/2000
-// from an intial copy of common/cmdlib.c
+// from an initial copy of common/cmdlib.c
 // stripped out the Sys_Printf Sys_Printf stuff
 
 // SPoG 05/27/2001
@@ -485,7 +485,7 @@ int    LoadFile( const char *filename, void **bufferptr ){
    ==============
    LoadFileBlock
    -
-   rounds up memory allocation to 4K boundry
+   rounds up memory allocation to 4K boundary
    -
    ==============
  */

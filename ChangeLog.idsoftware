@@ -21,7 +21,7 @@ that we distribute with the binaries. (see changelog)
 - Fixed another texcompression bug
 
 25/04/2007
-- Fixed texcompression beeing disabled after each restart
+- Fixed texcompression being disabled after each restart
 - Fixed gtk-searchpopup in treeviews
 
 15/04/2007
@@ -1055,7 +1055,7 @@ SPoG
 07/09/2004
 Michael Schlueter
 - Removed unused source files - qsysprintf, gtkfilesel.
-- Changed linux exectuable-path resolution to use '/proc/self/exe'.
+- Changed linux executable-path resolution to use '/proc/self/exe'.
 - Changed 'file exists, overwrite?' prompt to default to 'no'.
 
 06/09/2004
@@ -1430,7 +1430,7 @@ Nurail
 30/04/2004
 SPoG
 - Changed texture window not to auto-scroll when selecting faces.
-- Changed surface inspector to apply shader seperately from shift/scale/rotate.
+- Changed surface inspector to apply shader separately from shift/scale/rotate.
 - Changed selected face tracking to use separate selection list.
 
 26/04/2004
@@ -1544,7 +1544,7 @@ SPoG
 - Removed modal buttons from Surface Inspector.
 - Changed Surface Inspector keys:
   - Escape: revert not-yet-committed values to previous state.
-  - Enter: commit not-yet-committed values immediatly.
+  - Enter: commit not-yet-committed values immediately.
 - Changed Surface Inspector to update when selection changes.
 
 31/01/2004
@@ -2601,7 +2601,7 @@ SPoG - spog_branch - experimental - work-in-progress
 - added scene graph traversals to replace all traversals of 'active_brushes',
   'selected_brushes', 'filtered_brushes' and 'entities' linked-lists.
 - added view module: view-volume-culling system acting on the scene graph,
-  uses scene heirarchy to minimise culling tests per frame.
+  uses scene hierarchy to minimise culling tests per frame.
 - added opengl-state module: sorts opengl-state objects (shaders) to minimise
   opengl state changes during rendering.
 - added renderer module: culls objects outside the view volume,
@@ -2665,7 +2665,7 @@ from the code conventions:
   All headers that describe synapse APIs should start with an i: ishader.h igl.h 
 
   The few files in include/ that don't start with a lowercase i are specific files for build control and configuration.
-  Regular developement never creates non i-prefixed files in include/
+  Regular development never creates non i-prefixed files in include/
   
 the merge with IDataStream goes like this (note the corrected class names):
 class IInputStream
@@ -2728,7 +2728,7 @@ SPoG
   Added method to check if a file exists quickly.
   Added method to traverse the filesystem with control on start-dir and depth of recursion.
 - Defined implementation requirements for IArchive.
-  An archive contains a heirarchy of directories and files, and may contain empty directories.
+  An archive contains a hierarchy of directories and files, and may contain empty directories.
   An archive can be traversed in directory order.
   Directories can be distinguished from files during a traversal.
   Directory paths will always end with a separator.
@@ -2815,8 +2815,8 @@ TTimo
 28/11/2003
 ydnar
 - full SCC purge of the vs.net project files (for real this time)
-- added seperate Q3Map2 build targets
-- added seperate Q3Map2 post-build Python script
+- added separate Q3Map2 build targets
+- added separate Q3Map2 post-build Python script
 - _skybox entity support
 - _skybox and _decal in entities.def (Q3)
 
@@ -2916,7 +2916,7 @@ Some jpegs get garbaged alpha channel
   14/10/2003
   TTimo
   - http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=879
-    fixed hellish dlclose issue only occuring with holy builds
+    fixed hellish dlclose issue only occurring with holy builds
 
   -- released 1.3.12 win32
 -- end merge
@@ -3065,8 +3065,8 @@ Nurail
 Nurail & TTimo
 - http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=856
   a surface inspector module to customize per-game API
-  removing DO_SURFACEPLUGIN define (enabled implicitely)
-  removing bSurfacePropertiesPlugin (true implicitely)
+  removing DO_SURFACEPLUGIN define (enabled implicitly)
+  removing bSurfacePropertiesPlugin (true implicitly)
   remove SI_SetActiveInRadiant, it's always on by default
   why was USE_UNDOTABLE_DEFINE taken out? - put back in
   removed DBG_PLUGIN define and related code, that stuff is from way back and no longer relevant
@@ -3655,7 +3655,7 @@ SPoG
 - Removed or #ifdef'd non-functional code from model module.
 - Added support for misc_gamemodel and model_static to entity module.
 - Cleaned up entity module's on-epair-changed API.
-- Moved light-entity-specific code to a seperate file in entity module.
+- Moved light-entity-specific code to a separate file in entity module.
 - Cleaned up file dialog interface - specify file-type-lists with a string.
 
 22/12/2002
@@ -3689,7 +3689,7 @@ TTimo
 TTimo
 - having the linux version compile and start again. took out numerous elements while merging, built a list of TODO stuff
   the main thing to do being to bring the win32 build back up too, then to go through TODO list and fix stuff
-  until the win32 version runs too, I check this in to a seperate branch merge-1_2_10-post
+  until the win32 version runs too, I check this in to a separate branch merge-1_2_10-post
 - There is quite a massive update in mainframe.cpp switch case for all events.
   Looks like it's just a reordering of stuff, but it looks bad in the diffs.
 - added m_MapReg pattern
@@ -3883,7 +3883,7 @@ TTimo
     		mouse AngleSpeed setting was getting clobbered. fixed and upped the max values
   		- http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=623
     		applied a fix, rolls back the values when the compression formats are not supported
-    		fix ain't very clean, if we have to deal with extensions some more, we need to deal with the settings persistance better
+    		fix ain't very clean, if we have to deal with extensions some more, we need to deal with the settings persistence better
   		- http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=624
     		updated the setup code for town_*.shader (both in full setup and update)
     		updated files in WolfPack
@@ -3942,7 +3942,7 @@ TTimo
 	  		cons -- gcc=<gcc-name>
 				read gcc version and configure accordingly
 				changed _NO_STLPORT to Q_NO_STLPORT
-				independant BASE_CFLAGS and BASE_CXXFLAGS
+				independent BASE_CFLAGS and BASE_CXXFLAGS
 				correcting usage of CC/CXX for c/cpp source and linking
 				fixed missing -lz in vfspk3.so
 				changed the way we build curry.so, works from the GtkRadiant tree now
@@ -3952,7 +3952,7 @@ TTimo
 		04/11/2002
   		TTimo
   		- http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=638
-    		.qe4 version 4, udpated q3's .qe4 template, update setup to put q3map2 in the right place
+    		.qe4 version 4, updated q3's .qe4 template, update setup to put q3map2 in the right place
 			bumped version to 1.2.11-test for test setups
 
 		03/11/2002
@@ -4036,12 +4036,12 @@ TTimo
       		Note: This only matters in SOF2/JK2 now. Make a light targetted (a spotlight)
       		to get it to aim the correct direction, otherwise it defaults to pointing 
       		downward. You cannot have omnidirectional flares
-    		- Lightgrid size is automatically increased to accomodate large maps. The
+    		- Lightgrid size is automatically increased to accommodate large maps. The
       		MAX_MAP_LIGHTGRID error will never happen again
   		- Update PicoModel to 0.8.7 sources
     		- ASE support
 			- Alias|Wavefront OBJ support
-			- <modelname>.remap shader remapping suport
+			- <modelname>.remap shader remapping support
   		- http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=655
     		handle grayscale jpegs gracefully
   		- mathlib: fixed VectorClear(), got rid of braces
@@ -4171,12 +4171,12 @@ TTimo
       		ESelectedPatches.
 	      		+ Changed the horizontal and vertical tc shift spin control to have a 
       		limit of 8192.
-	      		+ Moved SPoG's implementation of redisperse cols to a seperate function 
+	      		+ Moved SPoG's implementation of redisperse cols to a separate function 
       		and reinstated the old code.
 	      		+ Added 'Paste to Camera', shortcut Alt+V, which pastes the contents of 
       		the clipboard to the current camera origin.
 	      		+ Added centerview functionality to 4 window mode. Ctrl+tab will focus 
-      		on the selection, or if non existant, on the camera.
+      		on the selection, or if non existent, on the camera.
 
       		11-09-2002
 			    		Arnout <rr2do2@splashdamage.com>
@@ -4461,7 +4461,7 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
   TTimo
   - spritemodels in build system
   - applying HL setup patch (att 270, bug 197)
-    - the templating went one filename seperator too far, causing all *.fgl to be modified .. 
+    - the templating went one filename separator too far, causing all *.fgl to be modified .. 
       fixed so that we only have the relevant changes
     - modules added to main Executable Files, TODO for later will need to identify what is HL specific
     - .game generation: don't want enginename yet, gamename is ok
@@ -4560,7 +4560,7 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
   
   27/5/2002
     Hydra
-    - Created an inital implementation of a sprite model plugin.
+    - Created an initial implementation of a sprite model plugin.
       According to the powers that be, it seems creating a model
       plugin is hackish.
       It works ok, but there is no way to attach models (sprites if you will)
@@ -5072,7 +5072,7 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
   TTimo
   - patching in Hydra's code for Half-Life, builds and runs on Linux, need to quickfix on win32 now
   - build system on Linux: some things are still hardcoded into the core, you need a different core
-    for Q3/RTCW or HL for now. do ./cons -- halflife to build HL mode (build trees are seperate)
+    for Q3/RTCW or HL for now. do ./cons -- halflife to build HL mode (build trees are separate)
   - there is no media / install procedure yet, but a zip with what you may need for install is available:
     http://zerowing.idsoftware.com/stuff/HL-media-0329.zip
   - cvs added all the new files
@@ -5134,7 +5134,7 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
 
   - Fixed incorrect line numbers being reported when script files had // comments in them
   - Removed EClass_Create from the EClass manager _EClassManagerTable
-  - Replaced all occurences of "textures/radiant/notex" in shaders.cpp with a define.
+  - Replaced all occurrences of "textures/radiant/notex" in shaders.cpp with a define.
   - Fixed a crash in shaders.cpp when there was no default texture.
   - Fixed a possible issue with g_bCancel_Map_LoadFile
   - Added a crash fix for uninitialised patchMesh_t->pSymbiot
@@ -5299,7 +5299,7 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
   +++ radiant/select.h    25 Mar 2002 11:39:27 -0000
       - cleanup interface for entity selection-grouping/ungrouping utlities
   +++ radiant/undo.cpp    25 Mar 2002 11:39:29 -0000
-      - removed workaround for wierd entity_clone behaviour (changed in entity module)
+      - removed workaround for weird entity_clone behaviour (changed in entity module)
       - avoid using Entity_FreeEpairs (not exposed by entity module)
   +++ radiant/xywindow.cpp        25 Mar 2002 11:39:35 -0000
       - const fixes
@@ -5565,7 +5565,7 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
   - http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=308
     added preference to allow 'paint drag-select' brushes/faces in 3d camera view
   - http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=389
-    added preference to strafe camera foward/back in 3d view while freelook is active
+    added preference to strafe camera forward/back in 3d view while freelook is active
 
   ETG & RR2DO2
   - http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=388
@@ -5633,7 +5633,7 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
     New entity keys:
     - "_lightmapscale" key for brush entities (worldspawn, func_*). This lets a mapper scale the lightmap samplesize per-entity. For large constructions, 2.0 or 3.0 is a fine value, and keeps BSP size down and compile times low. For those areas you want to have high-detail shadows, make a func_group and use a value of 0.25 or so. It will scale the samplesize value for the surface's shader (default 16) or the -samplesize argument.
     - "modelscale" and "modelscale_vec" keys for misc_models (1.0 = default). This was for proper RTCW support and is available for Quake 3 maps as well. Lets you scale up map models in the world, getting around the MD3 size limitation. The next build of GtkRadiant has SPoG's code to support this in-editor so you can see what effect a scale has.
-    - Flare surfaces are now supressed from the BSP. They serve no purpose other than add to the vert & surfacecount in a BSP. These surfaces were created silently when a shader has "light 1" or "q3map_flareshader X." Use the new -flares switch when BSPing your map to have them emitted.
+    - Flare surfaces are now suppressed from the BSP. They serve no purpose other than add to the vert & surfacecount in a BSP. These surfaces were created silently when a shader has "light 1" or "q3map_flareshader X." Use the new -flares switch when BSPing your map to have them emitted.
 
     Changes:
     - GtkRadiant 1.2.4-nightly version increment.
@@ -5737,7 +5737,7 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
   added modelscale key check to misc_model entity in md3/entity module
   added angle key check to eclassmodel class in md3/entity module
   fixed bugs in BP writing and reading in map module
-  TTimo (commited as SPoG)
+  TTimo (committed as SPoG)
   - fixing permissions on cvsreport and doxygen stuff, upgraded dot
 
 23/1/2002
@@ -5940,7 +5940,7 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
   TTimo
   - merge gameselect branch back into trunk
   the IS setup scripts have been updated for the new paths layout
-  developement environment needs to be updated to copy binaries to the right places for debug
+  development environment needs to be updated to copy binaries to the right places for debug
   it is recommended to run a 1.2.1 setup on win32 prior to compile and install debug bins
   - updated the setup to be more templated for inclusion/non inclusion of game packs on demand
 
@@ -6102,7 +6102,7 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
   since we check for .pid even before we know where the GameTools path is
 
   on linux, we need to sanitize the ~/.q3a dir usage. Switch to ~/.radiant, use the version tag
-  to maintain things independant, and use the game name to isolate per-game settings?
+  to maintain things independent, and use the game name to isolate per-game settings?
   ~/.radiant/1.2.0-nightly/quake3/radiant.ini (.pid, .log)
   ~/.radiant/1.2.0-nightly/wolf/..
 
@@ -6116,7 +6116,7 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
   - replaced setup/win32/setup.sh by setup/win32/setup.pl
   same functionality level + abiliy to generate back a template from a work version
   - major rework on the IS scripts, basics of multiple games support installer
-  clean seperation between editor core and game pack
+  clean separation between editor core and game pack
   design doc and analysis of custom setup generation, setup script UI requierements
   see setup/win32/TODO for more details
 
@@ -6459,14 +6459,14 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
 
 10/09/2001
   TTimo
-  - patched contrib plugins, using seperate build scheme
+  - patched contrib plugins, using separate build scheme
   - fixed textool issues, compiles again
 
 09/09/2001
   TTimo
   - sub-menu cascading
   http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=178
-  - udpated the Q3Radiant manual with some new GtkRadiant stuff
+  - updated the Q3Radiant manual with some new GtkRadiant stuff
   - updated the FAQ with 1.1.1 known issues
   Gef
   - http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=174
@@ -6664,7 +6664,7 @@ END -- merging release-1_2_9 -> merge-post-1_2_10 into trunk - END
 around 15/08/2001
   TTimo
   quakecon fixes: switched to long filenames in project and misc_model dialogs,
-    removed all occurences of win32 conversion to old 8.3 filenames
+    removed all occurrences of win32 conversion to old 8.3 filenames
   NOTE: this might raise some bugs and issues, but it's the way to go for the future,
     already fixes more issues than it creates
 
@@ -6787,7 +6787,7 @@ around 15/08/2001
 
 30/05/2001
   TTimo
-  - added libxml2 as an external dependency. libxml2 should be installed as a seperate
+  - added libxml2 as an external dependency. libxml2 should be installed as a separate
   directory on win32. dynamic linking now instead of static previously.
   - cleaned up q3map win32 project file, removed opengl dependency
   (the drawflag command line is inoperant now .. I don't think it was used anyway?)
@@ -6865,12 +6865,12 @@ around 15/08/2001
   - STL in GtkRadiant or a plugin must now use STLPort
   a custom configured version of STLPort is available at http://zerowing.idsoftware.com/STLPort
   still need to write some guidelines about it
-  bascially, we are using STL: iostreams disabled, no namespace, no threading, no exceptions
+  basically, we are using STL: iostreams disabled, no namespace, no threading, no exceptions
 
 30/05/2001
   TTimo
-  - removed libxml2 from tree, use a seperate libxml2/ directory next to GtkRadiant/ for win32
-  libxml2 will be distributed seperately as an archive based on official release (same as win32 Gtk SDK)
+  - removed libxml2 from tree, use a separate libxml2/ directory next to GtkRadiant/ for win32
+  libxml2 will be distributed separately as an archive based on official release (same as win32 Gtk SDK)
   (check on zerowing for the latest archive)
   libxml2 is now used as dynamic shared object on win32, makes sense since many module will rely on it
   - cleaned q3map, removed GL dependencies
@@ -7991,7 +7991,7 @@ around 15/08/2001
 14/08/2000 TTimo
 	- using profile.cpp code to read shortcut keys files
 	- moved DevDocs/changelog.txt to data/changelog.txt
-		(data/ should be used for user-side stuff and DevDocs/ for developpers)
+		(data/ should be used for user-side stuff and DevDocs/ for developers)
 	- added data/quickstart.txt with a beginning of info about the main differences
 		between Q3Radiant 202 and GtkRadiant. to be used as a doc later.
 

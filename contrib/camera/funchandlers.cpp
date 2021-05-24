@@ -137,7 +137,7 @@ void DoLoadCamera(){
 			else {
 				char error[PATH_MAX + 64];
 				FreeCam( cam );
-				sprintf( error, "An error occured during the loading of \'%s\'", fullpathtofile );
+				sprintf( error, "An error occurred during the loading of \'%s\'", fullpathtofile );
 				g_FuncTable.m_pfnMessageBox( (GtkWidget *)g_pRadiantWnd, error, "Load error", eMB_OK );
 			}
 

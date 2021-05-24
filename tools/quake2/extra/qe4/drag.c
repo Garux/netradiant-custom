@@ -365,7 +365,7 @@ void MoveSelection (vec3_t move)
 				break;
 		}
 
-		// if any of the brushes were crushed out of existance
+		// if any of the brushes were crushed out of existence
 		// calcel the entire move
 		if (b != &selected_brushes)
 		{

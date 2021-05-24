@@ -305,7 +305,7 @@ void FinishModel (void)
 	// finish writing header file
 	H_printf("\n");
 
-	// scale_up is usefull to allow step distances to be adjusted
+	// scale_up is useful to allow step distances to be adjusted
 	H_printf("#define MODEL_SCALE\t\t%f\n", scale_up);
 
 	fclose (headerouthandle);
@@ -787,7 +787,7 @@ char	*FindFrameFile (char *frame)
 	char	*s;
 
 	if (strstr (frame, "."))
-		return frame;		// allready in dot format
+		return frame;		// already in dot format
 
 	// split 'run1' into 'run' and '1'
 	s = frame + strlen(frame)-1;

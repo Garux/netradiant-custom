@@ -111,7 +111,7 @@ const char  *FindFrameFile( const char *frame ){
 	const char  *s;
 
 	if ( strchr( frame, '.' ) ) {
-		return frame;       // allready in dot format
+		return frame;       // already in dot format
 
 	}
 	// split 'run1' into 'run' and '1'

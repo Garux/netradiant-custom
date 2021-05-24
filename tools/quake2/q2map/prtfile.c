@@ -82,7 +82,7 @@ void WritePortalFile_r( node_t *node ){
 			// sometimes planes get turned around when they are very near
 			// the changeover point between different axis.  interpret the
 			// plane the same way vis will, and flip the side orders if needed
-			// FIXME: is this still relevent?
+			// FIXME: is this still relevant?
 			WindingPlane( w, normal, &dist );
 			if ( DotProduct( p->plane.normal, normal ) < 0.99 ) { // backwards...
 				fprintf( pf,"%i %i %i ",w->numpoints, p->nodes[1]->cluster, p->nodes[0]->cluster );

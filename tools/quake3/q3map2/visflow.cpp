@@ -45,7 +45,7 @@
    for p2 = all other portals in leaf
     get sperating planes
     for all portals that might be seen by p2
-        mark as unseen if not present in seperating plane
+        mark as unseen if not present in separating plane
     flood fill a new mightsee
     save as passagemightsee
 
@@ -109,7 +109,7 @@ void FreeStackWinding( fixedWinding_t *w, pstack_t *stack ){
 
 	}
 	if ( stack->freewindings[i] ) {
-		Error( "FreeStackWinding: allready free" );
+		Error( "FreeStackWinding: already free" );
 	}
 	stack->freewindings[i] = 1;
 }
@@ -226,7 +226,7 @@ fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, const visP
 
    Source, pass, and target are an ordering of portals.
 
-   Generates seperating planes canidates by taking two points from source and one
+   Generates separating planes canidates by taking two points from source and one
    point from pass, and clips target by them.
 
    If target is totally clipped away, that portal can not be seen through.
@@ -259,7 +259,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 			}
 
 			//
-			// find out which side of the generated seperating plane has the
+			// find out which side of the generated separating plane has the
 			// source portal
 			//
 #if 1
@@ -296,7 +296,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 #if 1
 			//
 			// if all of the pass portal points are now on the positive side,
-			// this is the seperating plane
+			// this is the separating plane
 			//
 			counts[0] = counts[1] = counts[2] = 0;
 			for ( k = 0 ; k < pass->numpoints ; k++ )
@@ -316,11 +316,11 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 				}
 			}
 			if ( k != pass->numpoints ) {
-				continue;   // points on negative side, not a seperating plane
+				continue;   // points on negative side, not a separating plane
 
 			}
 			if ( !counts[0] ) {
-				continue;   // planar with seperating plane
+				continue;   // planar with separating plane
 			}
 #else
 			k = ( j + 1 ) % pass->numpoints;
@@ -349,17 +349,17 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 #endif
 			//MrE: fast check first
 			d = plane3_distance_to_point( plane, stack->portal->origin );
-			//if completely at the back of the seperator plane
+			//if completely at the back of the separator plane
 			if ( d < -stack->portal->radius ) {
 				return NULL;
 			}
-			//if completely on the front of the seperator plane
+			//if completely on the front of the separator plane
 			if ( d > stack->portal->radius ) {
 				break;
 			}
 
 			//
-			// clip target by the seperating plane
+			// clip target by the separating plane
 			//
 			target = VisChopWinding( target, stack, plane );
 			if ( !target ) {
@@ -442,7 +442,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 			continue;   // can't possibly see it
 		}
 
-		// if the portal can't see anything we haven't allready seen, skip it
+		// if the portal can't see anything we haven't already seen, skip it
 		if ( p->status == EVStatus::Done ) {
 			test = (long *)p->portalvis;
 		}
@@ -1144,7 +1144,7 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, 
 			}
 
 			//
-			// find out which side of the generated seperating plane has the
+			// find out which side of the generated separating plane has the
 			// source portal
 			//
 #if 1
@@ -1181,7 +1181,7 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, 
 #if 1
 			//
 			// if all of the pass portal points are now on the positive side,
-			// this is the seperating plane
+			// this is the separating plane
 			//
 			counts[0] = counts[1] = counts[2] = 0;
 			for ( k = 0 ; k < pass->numpoints ; k++ )
@@ -1201,11 +1201,11 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, 
 				}
 			}
 			if ( k != pass->numpoints ) {
-				continue;   // points on negative side, not a seperating plane
+				continue;   // points on negative side, not a separating plane
 
 			}
 			if ( !counts[0] ) {
-				continue;   // planar with seperating plane
+				continue;   // planar with separating plane
 			}
 #else
 			k = ( j + 1 ) % pass->numpoints;
@@ -1305,19 +1305,19 @@ void CreatePassages( int portalnum ){
 			}
 			for ( k = 0; k < numseperators; k++ )
 			{
-				//if completely at the back of the seperator plane
+				//if completely at the back of the separator plane
 				if ( plane3_distance_to_point( seperators[k], p->origin ) < -p->radius + ON_EPSILON ) {
 					break;
 				}
 				w = p->winding;
 				for ( n = 0; n < w->numpoints; n++ )
 				{
-					//if at the front of the seperator
+					//if at the front of the separator
 					if ( plane3_distance_to_point( seperators[k], w->points[n] ) > ON_EPSILON ) {
 						break;
 					}
 				}
-				//if no points are at the front of the seperator
+				//if no points are at the front of the separator
 				if ( n >= w->numpoints ) {
 					break;
 				}
@@ -1430,7 +1430,7 @@ void PassageMemory( void ){
 
 
    for a portal to be visible to a passage, it must be on the front of
-   all seperating planes, and both portals must be behind the new portal
+   all separating planes, and both portals must be behind the new portal
 
    ===============================================================================
  */

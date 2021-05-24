@@ -1,4 +1,4 @@
-// Requries parts of the q3 tools source to compile
+// Requires parts of the q3 tools source to compile
 // Date: Oct 5, 2001
 // Written by: Brad Whitehead (whiteheb@gamerstv.net)
 

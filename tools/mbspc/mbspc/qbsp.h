@@ -62,7 +62,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define CLIP_EPSILON		0.1
 #define MAX_MAP_BOUNDS		65535
 #define BOGUS_RANGE			(MAX_MAP_BOUNDS+128)	//somewhere outside the map
-#define TEXINFO_NODE		-1		//side is allready on a node
+#define TEXINFO_NODE		-1		//side is already on a node
 #define PLANENUM_LEAF		-1		//used for leaf nodes
 #define MAXEDGES			20		//maximum number of face edges
 #define MAX_NODE_BRUSHES	8		//maximum brushes in a node

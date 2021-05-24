@@ -778,7 +778,7 @@ node_t *AllocNode( void ){
    WindingIsTiny
 
    Returns true if the winding would be crunched out of
-   existance by the vertex snapping.
+   existence by the vertex snapping.
    ================
  */
 #define EDGE_LENGTH 0.2

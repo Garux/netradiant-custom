@@ -272,7 +272,7 @@ namespace quickhull {
 			sphereTest();
 			testVector3();
 			testHalfEdgeOutput();
-			std::cout << "QuickHull tests succesfully passed." << std::endl;
+			std::cout << "QuickHull tests successfully passed." << std::endl;
 		}
 		
 	}

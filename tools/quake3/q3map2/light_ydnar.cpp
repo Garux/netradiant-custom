@@ -1589,7 +1589,7 @@ static bool SubmapRawLuxel( const rawLightmap_t *lm, int x, int y, float bx, flo
 	Vector3 originVecs[ 2 ];
 
 
-	/* calulate x vector */
+	/* calculate x vector */
 	if ( ( x < ( lm->sw - 1 ) && bx >= 0.0f ) || ( x == 0 && bx <= 0.0f ) ) {
 		origin = &lm->getSuperOrigin( x, y );
 		//%	normal = SUPER_NORMAL( x, y );
@@ -1610,7 +1610,7 @@ static bool SubmapRawLuxel( const rawLightmap_t *lm, int x, int y, float bx, flo
 	originVecs[ 0 ] = *origin2 - *origin;
 	//%	VectorSubtract( normal2, normal, normalVecs[ 0 ] );
 
-	/* calulate y vector */
+	/* calculate y vector */
 	if ( ( y < ( lm->sh - 1 ) && bx >= 0.0f ) || ( y == 0 && bx <= 0.0f ) ) {
 		origin = &lm->getSuperOrigin( x, y );
 		//%	normal = SUPER_NORMAL( x, y );

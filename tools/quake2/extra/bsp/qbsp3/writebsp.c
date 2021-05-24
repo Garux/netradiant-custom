@@ -39,7 +39,7 @@ int		planeused[MAX_MAP_PLANES];
 ============
 EmitPlanes
 
-There is no oportunity to discard planes, because all of the original
+There is no opportunity to discard planes, because all of the original
 brushes will be saved in the map.
 ============
 */

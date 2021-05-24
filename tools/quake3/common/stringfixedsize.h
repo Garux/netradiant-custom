@@ -27,7 +27,7 @@
 #include "cmdlib.h"
 
 
-/// \brief A TextOutputStream which writes to a null terminated fixed lenght char array.
+/// \brief A TextOutputStream which writes to a null terminated fixed length char array.
 /// Similar to std::stringstream.
 template<std::size_t SIZE>
 class StringFixedSize : public TextOutputStream

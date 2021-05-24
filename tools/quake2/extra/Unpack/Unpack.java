@@ -159,7 +159,7 @@ class Unpack {
 					readLump.readFully(buffer);
 
 					// quake uses forward slashes, but java requires
-					// they only by the host's seperator, which
+					// they only by the host's separator, which
 					// varies from win to unix
 					fixedString = new StringBuffer (args[2] + File.separator + nameString);
 					for (index = 0 ; index < fixedString.length() ; index++) {

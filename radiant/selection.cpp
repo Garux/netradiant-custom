@@ -527,7 +527,7 @@ private:
 	Vector3 m_axis;
 	Scalable& m_scalable;
 
-	Vector3 m_choosen_extent;
+	Vector3 m_chosen_extent;
 	AABB m_bounds;
 
 public:
@@ -537,7 +537,7 @@ public:
 	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
 		m_start = point_on_axis( m_axis, device2manip, x, y );
 
-		m_choosen_extent = Vector3(
+		m_chosen_extent = Vector3(
 		                       std::max( bounds.origin[0] + bounds.extents[0] - transform_origin[0], - bounds.origin[0] + bounds.extents[0] + transform_origin[0] ),
 		                       std::max( bounds.origin[1] + bounds.extents[1] - transform_origin[1], - bounds.origin[1] + bounds.extents[1] + transform_origin[1] ),
 		                       std::max( bounds.origin[2] + bounds.extents[2] - transform_origin[2], - bounds.origin[2] + bounds.extents[2] + transform_origin[2] )
@@ -568,8 +568,8 @@ public:
 		);
 		/* try bbox way */
 		for( std::size_t i = 0; i < 3; i++ ){
-			if( m_choosen_extent[i] > 0.0625f && m_axis[i] != 0.f ){ //epsilon to prevent super high scale for set of models, having really small extent, formed by origins
-				scale[i] = ( m_choosen_extent[i] + delta[i] ) / m_choosen_extent[i];
+			if( m_chosen_extent[i] > 0.0625f && m_axis[i] != 0.f ){ //epsilon to prevent super high scale for set of models, having really small extent, formed by origins
+				scale[i] = ( m_chosen_extent[i] + delta[i] ) / m_chosen_extent[i];
 				if( snapbbox ){
 					const float snappdwidth = float_snapped( scale[i] * m_bounds.extents[i] * 2.f, GetSnapGridSize() );
 					scale[i] = snappdwidth / ( m_bounds.extents[i] * 2.f );
@@ -600,7 +600,7 @@ private:
 	Vector3 m_axis2;
 	Scalable& m_scalable;
 
-	Vector3 m_choosen_extent;
+	Vector3 m_chosen_extent;
 	AABB m_bounds;
 
 public:
@@ -610,7 +610,7 @@ public:
 	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
 		m_start = point_on_plane( device2manip, x, y );
 
-		m_choosen_extent = Vector3(
+		m_chosen_extent = Vector3(
 		                       std::max( bounds.origin[0] + bounds.extents[0] - transform_origin[0], -( bounds.origin[0] - bounds.extents[0] - transform_origin[0] ) ),
 		                       std::max( bounds.origin[1] + bounds.extents[1] - transform_origin[1], -( bounds.origin[1] - bounds.extents[1] - transform_origin[1] ) ),
 		                       std::max( bounds.origin[2] + bounds.extents[2] - transform_origin[2], -( bounds.origin[2] - bounds.extents[2] - transform_origin[2] ) )
@@ -645,8 +645,8 @@ public:
 
 		//globalOutputStream() << "m_start: " << m_start << "   start: " << start << "   delta: " << delta <<"\n";
 		for( std::size_t i = 0; i < 3; i++ ){
-			if( m_choosen_extent[i] > 0.0625f && start[i] != 0.f ){
-				scale[i] = ( m_choosen_extent[i] + delta[i] ) / m_choosen_extent[i];
+			if( m_chosen_extent[i] > 0.0625f && start[i] != 0.f ){
+				scale[i] = ( m_chosen_extent[i] + delta[i] ) / m_chosen_extent[i];
 				if( snapbbox ){
 					const float snappdwidth = float_snapped( scale[i] * m_bounds.extents[i] * 2.f, GetSnapGridSize() );
 					scale[i] = snappdwidth / ( m_bounds.extents[i] * 2.f );

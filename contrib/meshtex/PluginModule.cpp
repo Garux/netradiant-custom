@@ -130,9 +130,9 @@ PluginModule::QERPluginGetCommandTitleList()
  * Invoke a plugin command.
  *
  * @param command      The command token.
- * @param vMin         3-element float vector definining min corner of
+ * @param vMin         3-element float vector defining min corner of
  *                     selection.
- * @param vMax         3-element float vector definining max corner of
+ * @param vMax         3-element float vector defining max corner of
  *                     selection.
  * @param bSingleBrush Dummy arg; ignored.
  */

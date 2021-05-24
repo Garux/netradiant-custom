@@ -60,7 +60,7 @@ void CalcTextureReflectivity (void)
 
 	for (i=0 ; i<numtexinfo ; i++)
 	{
-		// see if an earlier texinfo allready got the value
+		// see if an earlier texinfo already got the value
 		for (j=0 ; j<i ; j++)
 		{
 			if (!strcmp (texinfo[i].texture, texinfo[j].texture))
@@ -165,7 +165,7 @@ void BaseLightForFace (dface_t *f, vec3_t color)
 	texinfo_t	*tx;
 
 	//
-	// check for light emited by texture
+	// check for light emitted by texture
 	//
 	tx = &texinfo[f->texinfo];
 	if (!(tx->flags & SURF_LIGHT) || tx->value == 0)
@@ -321,7 +321,7 @@ void MakePatches (void)
 		}
 	}
 
-	qprintf ("%i sqaure feet\n", (int)(totalarea/64));
+	qprintf ("%i square feet\n", (int)(totalarea/64));
 }
 
 /*

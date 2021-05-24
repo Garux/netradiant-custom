@@ -290,7 +290,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 			rv[ 1 ] = &rw->verts[ v ];
 			rv[ 2 ] = &rw->verts[ v + 1 ];
 
-			/* this code is embarassing (really should just rasterize the triangle) */
+			/* this code is embarrassing (really should just rasterize the triangle) */
 			for ( i = 1; i < SAMPLE_GRANULARITY && samples < MAX_SAMPLES; i++ )
 			{
 				for ( j = 1; j < SAMPLE_GRANULARITY && samples < MAX_SAMPLES; j++ )

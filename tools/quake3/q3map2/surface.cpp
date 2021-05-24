@@ -3008,7 +3008,7 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceModel_t& mo
 				/* translate */
 				matrix4_translate_by_vec3( transform, origin );
 
-				/* tranform into axis space */
+				/* transform into axis space */
 				matrix4_multiply_by_matrix4( transform, temp );
 			}
 
@@ -3281,7 +3281,7 @@ static void VolumeColorMods( entity_t *e, mapDrawSurface_t *ds ){
 /*
    FilterDrawsurfsIntoTree()
    upon completion, all drawsurfs that actually generate a reference
-   will have been emited to the bspfile arrays, and the references
+   will have been emitted to the bspfile arrays, and the references
    will have valid final indexes
  */
 
@@ -3500,5 +3500,5 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 	for ( std::size_t i = 0; i < ARRAY_SIZE( numSurfacesByType ); i++ )
 		Sys_FPrintf( SYS_VRB, "%9d %s surfaces\n", numSurfacesByType[ i ], surfaceTypeName( static_cast<ESurfaceType>( i ) ) );
 
-	Sys_FPrintf( SYS_VRB, "%9d redundant indexes supressed, saving %d Kbytes\n", numRedundantIndexes, ( numRedundantIndexes * 4 / 1024 ) );
+	Sys_FPrintf( SYS_VRB, "%9d redundant indexes suppressed, saving %d Kbytes\n", numRedundantIndexes, ( numRedundantIndexes * 4 / 1024 ) );
 }

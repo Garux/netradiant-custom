@@ -364,7 +364,7 @@ bool XmlTagBuilder::AddShaderTag( const char* shader, const char* content, NodeT
 int XmlTagBuilder::RenameShaderTag( const char* oldtag, CopiedString newtag ){
 	/* Replaces tag node contents
 
-	   char* oldtag - the <tag></tag> node content that sould be changed
+	   char* oldtag - the <tag></tag> node content that should be changed
 	   char* newtag - the new <tag></tag> node content
 
 	   returns the number of renamed shaders

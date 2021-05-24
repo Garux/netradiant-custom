@@ -152,7 +152,7 @@ void PrintTree_r( node_t *node, int depth ){
 /*
    =========================================================
 
-   NODES THAT DON'T SEPERATE DIFFERENT CONTENTS CAN BE PRUNED
+   NODES THAT DON'T SEPARATE DIFFERENT CONTENTS CAN BE PRUNED
 
    =========================================================
  */
@@ -176,7 +176,7 @@ void PruneNodes_r( node_t *node ){
 	if ( ( node->children[0]->contents & CONTENTS_SOLID )
 		 && ( node->children[1]->contents & CONTENTS_SOLID ) ) {
 		if ( node->faces ) {
-			Error( "node->faces seperating CONTENTS_SOLID" );
+			Error( "node->faces separating CONTENTS_SOLID" );
 		}
 		if ( node->children[0]->faces || node->children[1]->faces ) {
 			Error( "!node->faces with children" );

@@ -623,7 +623,7 @@ int    LoadFile( const char *filename, void **bufferptr ){
    ==============
    LoadFileBlock
    -
-   rounds up memory allocation to 4K boundry
+   rounds up memory allocation to 4K boundary
    -
    ==============
  */

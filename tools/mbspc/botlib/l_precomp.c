@@ -1313,7 +1313,7 @@ define_t *PC_DefineFromString(char *string)
 #endif //DEFINEHASHING
 	//
 	FreeScript(script);
-	//if the define was created succesfully
+	//if the define was created successfully
 	if (res > 0) return def;
 	//free the define is created
 	if (src.defines) PC_FreeDefine(def);
@@ -2909,7 +2909,7 @@ void PC_UnreadToken(source_t *source, token_t *token)
 void PC_SetIncludePath(source_t *source, char *path)
 {
 	strncpy(source->includepath, path, MAX_PATH);
-	//add trailing path seperator
+	//add trailing path separator
 	if (source->includepath[strlen(source->includepath)-1] != '\\' &&
 		source->includepath[strlen(source->includepath)-1] != '/')
 	{
