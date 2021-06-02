@@ -110,7 +110,7 @@
 	"scripts",          /* shader directory */
 	65535,              /* max lightmapped surface verts */
 	65535,              /* max surface verts */
-	393210,             /* max surface indexes */
+	65535,             /* max surface indexes */
 	false,              /* flares */
 	"flareshader",      /* default flare shader */
 	false,              /* wolf lighting model? */

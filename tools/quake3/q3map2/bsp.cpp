@@ -698,11 +698,13 @@ int BSPMain( int argc, char **argv ){
 	strClear( tempSource );
 
 	/* set standard game flags */
+	maxLMSurfaceVerts = game->maxLMSurfaceVerts;
 	maxSurfaceVerts = game->maxSurfaceVerts;
 	maxSurfaceIndexes = game->maxSurfaceIndexes;
 	emitFlares = game->emitFlares;
 	texturesRGB = game->texturesRGB;
 	colorsRGB = game->colorsRGB;
+	keepLights = game->keepLights;
 
 	/* process arguments */
 	for ( i = 1; i < ( argc - 1 ); i++ )
