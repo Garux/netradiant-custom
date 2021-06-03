@@ -454,9 +454,9 @@ struct game_t
 	const char          *homeBasePath;                  /* home sub-dir on unix */
 	const char          *magic;                         /* magic word for figuring out base path */
 	const char          *shaderPath;                    /* shader directory */
-	unsigned int maxLMSurfaceVerts;                     /* default maximum meta surface verts */
-	unsigned int maxSurfaceVerts;                       /* default maximum surface verts */
-	unsigned int maxSurfaceIndexes;                     /* default maximum surface indexes (tris * 3) */
+	int maxLMSurfaceVerts;                              /* default maximum meta surface verts */
+	int maxSurfaceVerts;                                /* default maximum surface verts */
+	int maxSurfaceIndexes;                              /* default maximum surface indexes (tris * 3) */
 	bool emitFlares;                                    /* when true, emit flare surfaces */
 	const char          *flareShader;                   /* default flare shader (MUST BE SET) */
 	bool wolfLight;                                     /* when true, lights work like wolf q3map  */
@@ -2030,9 +2030,9 @@ Q_EXTERN bool nocmdline Q_ASSIGN( false );
 
 Q_EXTERN int patchSubdivisions Q_ASSIGN( 8 );                       /* ydnar: -patchmeta subdivisions */
 
-Q_EXTERN unsigned int maxLMSurfaceVerts Q_ASSIGN( 64 );             /* ydnar */
-Q_EXTERN unsigned int maxSurfaceVerts Q_ASSIGN( 999 );              /* ydnar */
-Q_EXTERN unsigned int maxSurfaceIndexes Q_ASSIGN( 6000 );           /* ydnar */
+Q_EXTERN int maxLMSurfaceVerts Q_ASSIGN( 64 );                      /* ydnar */
+Q_EXTERN int maxSurfaceVerts Q_ASSIGN( 999 );                       /* ydnar */
+Q_EXTERN int maxSurfaceIndexes Q_ASSIGN( 6000 );                    /* ydnar */
 Q_EXTERN float npDegrees Q_ASSIGN( 0.0f );                          /* ydnar: nonplanar degrees */
 Q_EXTERN int bevelSnap Q_ASSIGN( 0 );                               /* ydnar: bevel plane snap */
 Q_EXTERN int texRange Q_ASSIGN( 0 );
