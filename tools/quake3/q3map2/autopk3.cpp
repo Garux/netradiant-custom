@@ -247,7 +247,7 @@ int pk3BSPMain( int argc, char **argv ){
 	/* extract map name */
 	const CopiedString nameOFmap( PathFilename( source ) );
 
-	bool drawsurfSHs[numBSPShaders] = { 0 };
+	std::vector<bool> drawsurfSHs( numBSPShaders, false );
 
 	for ( i = 0; i < numBSPDrawSurfaces; ++i ){
 		drawsurfSHs[ bspDrawSurfaces[i].shaderNum ] = true;
@@ -919,7 +919,7 @@ int repackBSPMain( int argc, char **argv ){
 		/* extract map name */
 		const CopiedString nameOFmap( PathFilename( source ) );
 
-		bool drawsurfSHs[numBSPShaders] = { 0 };
+		std::vector<bool> drawsurfSHs( numBSPShaders, false );
 
 		for ( i = 0; i < numBSPDrawSurfaces; ++i ){
 			drawsurfSHs[ bspDrawSurfaces[i].shaderNum ] = true;
