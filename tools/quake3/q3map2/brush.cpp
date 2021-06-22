@@ -85,7 +85,7 @@ int CountBrushList( brush_t *brushes ){
  */
 
 brush_t *AllocBrush( int numSides ){
-	return safe_calloc( offsetof( brush_t, sides[numSides] ) );
+	return safe_calloc( offsetof_array( brush_t, sides, numSides ) );
 }
 
 
@@ -112,7 +112,7 @@ void FreeBrush( brush_t *b ){
 		}
 
 	/* ydnar: overwrite it */
-	memset( b, 0xFE, offsetof( brush_t, sides[b->numsides] ) );
+	memset( b, 0xFE, offsetof_array( brush_t, sides, b->numsides ) );
 	*( (unsigned int*) b ) = 0xFEFEFEFE;
 
 	/* free it */
@@ -148,7 +148,7 @@ void FreeBrushList( brush_t *brushes ){
 brush_t *CopyBrush( const brush_t *brush ){
 	/* copy brush */
 	brush_t *newBrush = AllocBrush( brush->numsides );
-	memcpy( newBrush, brush, offsetof( brush_t, sides[brush->numsides] ) );
+	memcpy( newBrush, brush, offsetof_array( brush_t, sides, brush->numsides ) );
 
 	/* ydnar: nuke linked list */
 	newBrush->next = NULL;

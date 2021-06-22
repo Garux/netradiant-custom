@@ -39,7 +39,7 @@ struct StrList
 };
 
 static inline StrList* StrList_allocate( size_t strNum ){
-	StrList* ret = safe_calloc( offsetof( StrList, s[strNum] ) );
+	StrList* ret = safe_calloc( offsetof_array( StrList, s, strNum ) );
 	ret->n = 0;
 	ret->max = strNum;
 	return ret;

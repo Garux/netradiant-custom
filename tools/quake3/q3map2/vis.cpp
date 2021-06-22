@@ -48,11 +48,11 @@ visPlane_t PlaneFromWinding( const fixedWinding_t *w ){
    ydnar: altered this a bit to reconcile multiply-defined winding_t
  */
 
-fixedWinding_t *NewFixedWinding( int points ){
-	if ( points > MAX_POINTS_ON_WINDING ) {
-		Error( "NewWinding: %i points", points );
+fixedWinding_t *NewFixedWinding( int numpoints ){
+	if ( numpoints > MAX_POINTS_ON_WINDING ) {
+		Error( "NewWinding: %i points", numpoints );
 	}
-	return safe_calloc( offsetof( fixedWinding_t, points[points] ) );
+	return safe_calloc( offsetof_array( fixedWinding_t, points, numpoints ) );
 }
 
 

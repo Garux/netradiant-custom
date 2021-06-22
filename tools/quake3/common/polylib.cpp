@@ -45,7 +45,7 @@ winding_t   *AllocWinding( int points ){
 	if ( points >= MAX_POINTS_ON_WINDING ) {
 		Error( "AllocWinding failed: MAX_POINTS_ON_WINDING exceeded" );
 	}
-	return safe_calloc( offsetof( winding_t, p[points] ) );
+	return safe_calloc( offsetof_array( winding_t, p, points ) );
 }
 
 /*
@@ -57,7 +57,7 @@ winding_accu_t *AllocWindingAccu( int points ){
 	if ( points >= MAX_POINTS_ON_WINDING ) {
 		Error( "AllocWindingAccu failed: MAX_POINTS_ON_WINDING exceeded" );
 	}
-	return safe_calloc( offsetof( winding_accu_t, p[points] ) );
+	return safe_calloc( offsetof_array( winding_accu_t, p, points ) );
 }
 
 /*
@@ -362,7 +362,7 @@ winding_t   *CopyWinding( const winding_t *w ){
 	if ( !w ) {
 		Error( "CopyWinding: winding is NULL" );
 	}
-	return void_ptr( memcpy( AllocWinding( w->numpoints ), w, offsetof( winding_t, p[w->numpoints] ) ) );
+	return void_ptr( memcpy( AllocWinding( w->numpoints ), w, offsetof_array( winding_t, p, w->numpoints ) ) );
 }
 
 /*
@@ -375,7 +375,7 @@ winding_accu_t *CopyWindingAccuIncreaseSizeAndFreeOld( winding_accu_t *w ){
 		Error( "CopyWindingAccuIncreaseSizeAndFreeOld: winding is NULL" );
 	}
 
-	winding_accu_t *c = void_ptr( memcpy( AllocWindingAccu( w->numpoints + 1 ), w, offsetof( winding_accu_t, p[w->numpoints] ) ) );
+	winding_accu_t *c = void_ptr( memcpy( AllocWindingAccu( w->numpoints + 1 ), w, offsetof_array( winding_accu_t, p, w->numpoints ) ) );
 	FreeWindingAccu( w );
 	return c;
 }

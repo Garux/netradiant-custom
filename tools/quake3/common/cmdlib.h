@@ -89,6 +89,8 @@ void_ptr safe_calloc_info( size_t size, const char* info );
 #define safe_calloc_info( size, info ) calloc( 1, size )
 #endif /* SAFE_MALLOC */
 
+#define offsetof_array( TYPE, ARRAY_MEMBER, ARRAY_SIZE ) ( offsetof( TYPE, ARRAY_MEMBER[0] ) + sizeof( TYPE::ARRAY_MEMBER[0] ) * ARRAY_SIZE )
+
 
 static inline bool strEmpty( const char* string ){
 	return *string == '\0';
