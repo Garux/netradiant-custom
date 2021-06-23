@@ -143,8 +143,7 @@ public:
 		matrix4_transform_vector4( volume.GetViewport(), position );
 //			globalOutputStream() << position << " Viewport\n";
 //			globalOutputStream() << volume.GetViewport()[0] << " " << volume.GetViewport()[5] << " Viewport size\n";
-		m_label.screenPos.x() = position.x();
-		m_label.screenPos.y() = position.y();
+		m_label.screenPos = position.vec3().vec2();
 //			globalOutputStream() << m_label.screenPos << "\n";
 
 		renderer.PushState();

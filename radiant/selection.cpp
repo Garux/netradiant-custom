@@ -5850,8 +5850,7 @@ private:
 			const Matrix4 uvTransform = transform_local2object( matrix4_affine_inverse( transform ), m_faceLocal2tex, m_faceTex2local );
 			for( std::size_t i = 0; i < m_patchCtrl.size(); ++i ){
 				const Vector3 uv = matrix4_transformed_point( uvTransform, Vector3( m_patchCtrl[i].m_texcoord ) );
-				m_patch->getControlPointsTransformed()[i].m_texcoord.x() = uv.x();
-				m_patch->getControlPointsTransformed()[i].m_texcoord.y() = uv.y();
+				m_patch->getControlPointsTransformed()[i].m_texcoord = uv.vec2();
 			}
 //			m_patch->controlPointsChanged();
 			m_patch->UpdateCachedData();
@@ -6461,8 +6460,7 @@ public:
 				const Matrix4 translation = matrix4_translation_for_vec3( result );
 				for( std::size_t i : indices ){
 					const Vector3 uv = matrix4_transformed_point( translation, Vector3( m_patchCtrl[i].m_texcoord ) );
-					m_patch->getControlPointsTransformed()[i].m_texcoord.x() = uv.x();
-					m_patch->getControlPointsTransformed()[i].m_texcoord.y() = uv.y();
+					m_patch->getControlPointsTransformed()[i].m_texcoord = uv.vec2();
 					m_patchRenderPoints.m_points[i].vertex = vertex3f_for_vector3( uv );
 				}
 

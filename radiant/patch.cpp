@@ -1239,9 +1239,7 @@ void Patch::ProjectTexture( TextureProjection projection, const Vector3& normal 
 
 	for ( PatchControlIter i = m_ctrl.data(); i != m_ctrl.data() + m_ctrl.size(); ++i )
 	{
-		Vector3 texcoord = matrix4_transformed_point( local2tex, ( *i ).m_vertex );
-		( *i ).m_texcoord[0] = texcoord[0];
-		( *i ).m_texcoord[1] = texcoord[1];
+		( *i ).m_texcoord = matrix4_transformed_point( local2tex, ( *i ).m_vertex ).vec2();
 	}
 
 	controlPointsChanged();
@@ -1256,9 +1254,7 @@ void Patch::ProjectTexture( const texdef_t& texdef, const Vector3* direction ){
 
 	for ( PatchControlIter i = m_ctrl.data(); i != m_ctrl.data() + m_ctrl.size(); ++i )
 	{
-		Vector3 texcoord = matrix4_transformed_point( local2tex, ( *i ).m_vertex );
-		( *i ).m_texcoord[0] = texcoord[0];
-		( *i ).m_texcoord[1] = texcoord[1];
+		( *i ).m_texcoord = matrix4_transformed_point( local2tex, ( *i ).m_vertex ).vec2();
 	}
 
 	controlPointsChanged();

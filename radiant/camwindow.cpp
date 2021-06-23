@@ -782,8 +782,7 @@ public:
 			for( std::size_t i = 0; i < 3; ++i ){
 				if( points[i].w() > 0.005f ){
 					updateTex( i, bounds.extents[i] );
-					m_labels[i].screenPos.x() = points[i].x();
-					m_labels[i].screenPos.y() = points[i].y();
+					m_labels[i].screenPos = points[i].vec3().vec2();
 					renderer.addRenderable( m_labels[i], g_matrix4_identity );
 				}
 			}

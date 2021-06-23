@@ -312,9 +312,7 @@ void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::si
 
 	for ( Winding::iterator i = w.begin(); i != w.end(); ++i )
 	{
-		Vector3 texcoord = matrix4_transformed_point( local2tex, ( *i ).vertex );
-		( *i ).texcoord[0] = texcoord[0];
-		( *i ).texcoord[1] = texcoord[1];
+		( *i ).texcoord = matrix4_transformed_point( local2tex, ( *i ).vertex ).vec2();
 
 		( *i ).tangent = tangent;
 		( *i ).bitangent = bitangent;

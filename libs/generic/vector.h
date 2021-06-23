@@ -108,6 +108,13 @@ public:
 		return m_elements;
 	}
 
+	BasicVector2<Element>& vec2(){
+		return reinterpret_cast<BasicVector2<Element>&>( x() );
+	}
+	const BasicVector2<Element>& vec2() const {
+		return reinterpret_cast<const BasicVector2<Element>&>( x() );
+	}
+
 	void set( const Element value ){
 		x() = y() = z() = value;
 	}
