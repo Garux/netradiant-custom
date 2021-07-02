@@ -814,10 +814,10 @@ private:
 #include "grid.h"
 class RenderableCamWorkzone : public OpenGLRenderable
 {
-	mutable Array<Vector3> m_verticesarr[3];
-	mutable Array<GLboolean> m_edgearr[3];
-	mutable Array<Colour4b> m_colorarr0[3];
-	mutable Array<Colour4b> m_colorarr1[3];
+	mutable std::array<Vector3, 9999> m_verticesarr[3];
+	mutable std::array<GLboolean, 9999> m_edgearr[3];
+	mutable std::array<Colour4b, 9999> m_colorarr0[3];
+	mutable std::array<Colour4b, 9999> m_colorarr1[3];
 public:
 	void render( RenderStateFlags state ) const {
 		glEnableClientState( GL_EDGE_FLAG_ARRAY );
@@ -842,35 +842,34 @@ public:
 				}
 			}
 
-			const float grid = GetGridSize();
-			const std::size_t approx_count = ( std::max( 0.f, bounds.extents[i] ) + offset ) * 4 / grid + 8;
-
-			Array<Vector3>& verticesarr( m_verticesarr[i] );
-			Array<GLboolean>& edgearr( m_edgearr[i] );
-			Array<Colour4b>& colorarr0( m_colorarr0[i] );
-			Array<Colour4b>& colorarr1( m_colorarr1[i] );
-			if( verticesarr.size() < approx_count ){
-				verticesarr.resize( approx_count );
-				edgearr.resize( approx_count );
-				colorarr0.resize( approx_count );
-				colorarr1.resize( approx_count );
+			float grid = GetGridSize();
+			std::size_t approx_count = ( std::max( 0.f, bounds.extents[i] ) + offset ) * 4 / grid + 8;
+			if( approx_count > m_verticesarr->size() ){ // prevent overlow
+				approx_count = m_verticesarr->size();
+				grid = ( std::max( 0.f, bounds.extents[i] ) + offset ) * 4 / ( approx_count - 8 ); // adjust grid accordingly
+				grid = std::exp2( std::ceil( std::log2( grid ) ) ); // round to next PoT
 			}
 
+			auto& verticesarr( m_verticesarr[i] );
+			auto& edgearr( m_edgearr[i] );
+			auto& colorarr0( m_colorarr0[i] );
+			auto& colorarr1( m_colorarr1[i] );
+
 			float coord = float_snapped( bounds.origin[i] - std::max( 0.f, bounds.extents[i] ) - offset, grid );
-//		const float coord_end = float_snapped( bounds.origin[i] + std::max( 0.f, bounds.extents[i] ) + offset, grid ) + 0.1f;
+//			const float coord_end = float_snapped( bounds.origin[i] + std::max( 0.f, bounds.extents[i] ) + offset, grid ) + 0.1f;
 			const bool start0 = float_snapped( coord, grid * 2 ) == coord;
 			std::size_t count = 0;
 
 			for( ; count < approx_count - 4; count += 4 ){
 				verticesarr[count][i] =
 				verticesarr[count + 1][i] = coord;
-				const float alpha = std::max( 0.f, std::min( 1.f, ( offset + bounds.extents[i] - std::fabs( coord - bounds.origin[i] ) ) / offset ) );
+				const float alpha = std::clamp( ( offset + bounds.extents[i] - std::fabs( coord - bounds.origin[i] ) ) / offset, 0.f, 1.f );
 				colorarr0[count] = colorarr0[count + 1] = Colour4b( 255, 0, 0, alpha * 255 );
 				colorarr1[count] = colorarr1[count + 1] = Colour4b( 255, 255, 255, alpha * 255 );
 				coord += grid;
 				verticesarr[count + 2][i] =
 				verticesarr[count + 3][i] = coord;
-				const float alpha2 = std::max( 0.f, std::min( 1.f, ( offset + bounds.extents[i] - std::fabs( coord - bounds.origin[i] ) ) / offset ) );
+				const float alpha2 = std::clamp( ( offset + bounds.extents[i] - std::fabs( coord - bounds.origin[i] ) ) / offset, 0.f, 1.f );
 				colorarr0[count + 2] = colorarr0[count + 3] = Colour4b( 255, 0, 0, alpha2 * 255 );
 				colorarr1[count + 2] = colorarr1[count + 3] = Colour4b( 255, 255, 255, alpha2 * 255 );
 				coord += grid;
