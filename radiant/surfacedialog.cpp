@@ -1489,6 +1489,32 @@ bool pastemode_if_setShader( EPasteMode mode, bool alt ){
 }
 
 
+class PatchData
+{
+	size_t m_width = 0;
+	size_t m_height = 0;
+	typedef Array<PatchControl> PatchControlArray;
+	PatchControlArray m_ctrl;
+public:
+	void copy( const Patch& patch ){
+		m_width = patch.getWidth();
+		m_height = patch.getHeight();
+		m_ctrl = patch.getControlPoints();
+	}
+	size_t getWidth() const {
+		return m_width;
+	}
+	size_t getHeight() const {
+		return m_height;
+	}
+	const PatchControl& ctrlAt( size_t row, size_t col ) const {
+		return m_ctrl[row * m_width + col];
+	}
+	const PatchControl *data() const {
+		return m_ctrl.data();
+	}
+};
+
 class FaceTexture
 {
 public:
@@ -1496,13 +1522,21 @@ public:
 	ContentsFlagsValue m_flags;
 
 	Plane3 m_plane;
+	Winding m_winding;
 	std::size_t m_width;
 	std::size_t m_height;
+
+	PatchData m_patch;
 
 	float m_light;
 	Vector3 m_colour;
 
-	FaceTexture() : m_plane( 0, 0, 1, 0 ), m_width( 64 ), m_height( 64 ), m_light( 300 ), m_colour( 1, 1, 1 ) {
+	enum ePasteSource{
+		eBrush,
+		ePatch
+	} m_pasteSource;
+
+	FaceTexture() : m_plane( 0, 0, 1, 0 ), m_width( 64 ), m_height( 64 ), m_light( 300 ), m_colour( 1, 1, 1 ), m_pasteSource( eBrush ) {
 		m_projection.m_basis_s = Vector3( 0.7071067811865, 0.7071067811865, 0 );
 		m_projection.m_basis_t = Vector3( -0.4082482904639, 0.4082482904639, -0.4082482904639 * 2.0 );
 	}
@@ -1522,6 +1556,247 @@ void TextureClipboard_textureSelected( const char* shader ){
 }
 
 
+class PatchEdgeIter
+{
+protected:
+	const PatchControl* const m_ctrl;
+	const int m_width;
+	const int m_height;
+	int m_row;
+	int m_col;
+	const PatchControl& ctrlAt( size_t row, size_t col ) const {
+		return m_ctrl[row * m_width + col];
+	}
+public:
+	PatchEdgeIter( const PatchData& patch ) : m_ctrl( patch.data() ), m_width( patch.getWidth() ), m_height( patch.getHeight() ){
+	}
+	PatchEdgeIter( const PatchEdgeIter& other ) = default;
+	virtual ~PatchEdgeIter(){};
+	virtual std::unique_ptr<PatchEdgeIter> clone() const = 0;
+	const PatchControl& operator*() const {
+		return ctrlAt( m_row, m_col );
+	}
+	operator bool() const {
+		return m_row >=0 && m_row < m_height && m_col >=0 && m_col < m_width;
+	}
+	virtual void operator++() = 0;
+	void operator+=( size_t inc ){
+		while( inc-- )
+			operator++();
+	}
+	std::unique_ptr<PatchEdgeIter> operator+( size_t inc ) const {
+		std::unique_ptr<PatchEdgeIter> it = clone();
+		*it += inc;
+		return it;
+	}
+	virtual std::unique_ptr<PatchEdgeIter> getCrossIter() const = 0;
+};
+
+class PatchRowBackIter : public PatchEdgeIter
+{
+public:
+	PatchRowBackIter( const PatchData& patch, size_t row ) : PatchEdgeIter( patch ){
+		m_row = row;
+		m_col = m_width - 1;
+	}
+	PatchRowBackIter( const PatchEdgeIter& base ) : PatchEdgeIter( base ){}
+	std::unique_ptr<PatchEdgeIter> clone() const override {
+		return std::unique_ptr<PatchEdgeIter>( new PatchRowBackIter( *this ) );
+	}
+	void operator++() override {
+		--m_col;
+	}
+	std::unique_ptr<PatchEdgeIter> getCrossIter() const override;
+};
+class PatchRowForwardIter : public PatchEdgeIter
+{
+public:
+	PatchRowForwardIter( const PatchData& patch, size_t row ) : PatchEdgeIter( patch ){
+		m_row = row;
+		m_col = 0;
+	}
+	PatchRowForwardIter( const PatchEdgeIter& base ) : PatchEdgeIter( base ){}
+	std::unique_ptr<PatchEdgeIter> clone() const override {
+		return std::unique_ptr<PatchEdgeIter>( new PatchRowForwardIter( *this ) );
+	}
+	void operator++() override {
+		++m_col;
+	}
+	std::unique_ptr<PatchEdgeIter> getCrossIter() const override;
+};
+class PatchColBackIter : public PatchEdgeIter
+{
+public:
+	PatchColBackIter( const PatchData& patch, size_t col ) : PatchEdgeIter( patch ){
+		m_row = m_height - 1;
+		m_col = col;
+	}
+	PatchColBackIter( const PatchEdgeIter& base ) : PatchEdgeIter( base ){}
+	std::unique_ptr<PatchEdgeIter> clone() const override {
+		return std::unique_ptr<PatchEdgeIter>( new PatchColBackIter( *this ) );
+	}
+	void operator++() override {
+		--m_row;
+	}
+	std::unique_ptr<PatchEdgeIter> getCrossIter() const override {
+		return std::unique_ptr<PatchEdgeIter>( new PatchRowBackIter( *this ) );
+	}
+};
+class PatchColForwardIter : public PatchEdgeIter
+{
+public:
+	PatchColForwardIter( const PatchData& patch, size_t col ) : PatchEdgeIter( patch ){
+		m_row = 0;
+		m_col = col;
+	}
+	PatchColForwardIter( const PatchEdgeIter& base ) : PatchEdgeIter( base ){}
+	std::unique_ptr<PatchEdgeIter> clone() const override {
+		return std::unique_ptr<PatchEdgeIter>( new PatchColForwardIter( *this ) );
+	}
+	void operator++() override {
+		++m_row;
+	}
+	std::unique_ptr<PatchEdgeIter> getCrossIter() const override {
+		return std::unique_ptr<PatchEdgeIter>( new PatchRowForwardIter( *this ) );
+	}
+};
+
+std::unique_ptr<PatchEdgeIter> PatchRowBackIter::getCrossIter() const {
+	return std::unique_ptr<PatchEdgeIter>( new PatchColForwardIter( *this ) );
+}
+
+std::unique_ptr<PatchEdgeIter> PatchRowForwardIter::getCrossIter() const {
+	return std::unique_ptr<PatchEdgeIter>( new PatchColBackIter( *this ) );
+}
+
+// returns 0 or 3 CW points
+static std::vector<const PatchControl*> Patch_getClosestTriangle( const PatchData& patch, const Winding& w ){
+	/*
+	// height = 3
+	col  0  1  2  3  4
+	    10 11 12 13 14  // row 2
+	     5  6  7  8  9  // row 1
+	     0  1  2  3  4  // row 0 // width = 5
+	*/
+
+	const auto triangle_ok = []( const PatchControl& p0, const PatchControl& p1, const PatchControl& p2 ){
+		return vector3_length_squared( vector3_cross( p1.m_vertex - p0.m_vertex, p2.m_vertex - p0.m_vertex ) ) > 1.0;
+	};
+
+	const double eps = .25;
+
+	const auto line_close = [eps]( const Line& line, const PatchControl& p ){
+		return vector3_length_squared( line_closest_point( line, p.m_vertex ) - p.m_vertex ) < eps;
+	};
+
+	for ( std::size_t i = w.numpoints - 1, j = 0; j < w.numpoints; i = j, ++j ){
+		const Line line( w[i].vertex, w[j].vertex );
+
+		for( auto& iter : {
+			std::unique_ptr<PatchEdgeIter>( new PatchRowBackIter( patch, 0 ) ),
+			std::unique_ptr<PatchEdgeIter>( new PatchRowForwardIter( patch, patch.getHeight() - 1 ) ),
+			std::unique_ptr<PatchEdgeIter>( new PatchColBackIter( patch, patch.getWidth() - 1 ) ),
+			std::unique_ptr<PatchEdgeIter>( new PatchColForwardIter( patch, 0 ) ) } )
+		{
+			for( const std::unique_ptr<PatchEdgeIter>& i0 = iter; *i0; *i0 += 2 ){
+				const PatchControl& p0 = **i0;
+				if( line_close( line, p0 ) ){
+					for( std::unique_ptr<PatchEdgeIter> i1 = *i0 + size_t{ 2 }; *i1; *i1 += 2 ){
+						const PatchControl& p1 = **i1;
+						if( line_close( line, p1 )
+						 && vector3_length_squared( p1.m_vertex - p0.m_vertex ) > eps ){
+							for( std::unique_ptr<PatchEdgeIter> i2 = *i0->getCrossIter() + size_t{ 1 }, i22 = *i1->getCrossIter() + size_t{ 1 }; *i2 && *i22; ++*i2, ++*i22 ){
+								for( const PatchControl& p2 : { **i2, **i22 } ){
+									if( triangle_ok( p0, p1, p2 ) ){
+										return { &p0, &p1, &p2 };
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+/*
+		const size_t W = patch.getWidth();
+		const size_t H = patch.getHeight();
+		for( size_t c = 0; c < W - 2; ++++c ){
+			const PatchControl& p0 = patch.ctrlAt( 0, c );
+			if( line_close( line, p0 ) ){
+				for( size_t c2 = c + 2; c2 < W; ++++c2 ){
+					const PatchControl& p1 = patch.ctrlAt( 0, c2 );
+					if( line_close( line, p1 )
+					 && vector3_length_squared( p1.m_vertex - p0.m_vertex ) > eps ){
+						for( size_t r = 1; r < H; ++r ){
+							for( const PatchControl& p2 : { patch.ctrlAt( r, c ), patch.ctrlAt( r, c2 ) } ){
+								if( triangle_ok( p0, p1, p2 ) ){
+									return { &p0, &p2, &p1 };
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		for( size_t c = 0; c < W - 2; ++++c ){
+			const PatchControl& p0 = patch.ctrlAt( H - 1, c );
+			if( line_close( line, p0 ) ){
+				for( size_t c2 = c + 2; c2 < W; ++++c2 ){
+					const PatchControl& p1 = patch.ctrlAt( H - 1, c2 );
+					if( line_close( line, p1 )
+					 && vector3_length_squared( p1.m_vertex - p0.m_vertex ) > eps ){
+						for( size_t r = 1; r < H; ++r ){
+							for( const PatchControl& p2 : { patch.ctrlAt( H - 1 - r, c ), patch.ctrlAt( H - 1 - r, c2 ) } ){
+								if( triangle_ok( p0, p1, p2 ) ){
+									return { &p0, &p1, &p2 };
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		for( size_t r = 0; r < H - 2; ++++r ){
+			const PatchControl& p0 = patch.ctrlAt( r, 0 );
+			if( line_close( line, p0 ) ){
+				for( size_t r2 = r + 2; r2 < H; ++++r2 ){
+					const PatchControl& p1 = patch.ctrlAt( r2, 0 );
+					if( line_close( line, p1 )
+					 && vector3_length_squared( p1.m_vertex - p0.m_vertex ) > eps ){
+						for( size_t c = 1; c < W; ++c ){
+							for( const PatchControl& p2 : { patch.ctrlAt( r, c ), patch.ctrlAt( r2, c ) } ){
+								if( triangle_ok( p0, p1, p2 ) ){
+									return { &p0, &p1, &p2 };
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		for( size_t r = 0; r < H - 2; ++++r ){
+			const PatchControl& p0 = patch.ctrlAt( r, W - 1 );
+			if( line_close( line, p0 ) ){
+				for( size_t r2 = r + 2; r2 < H; ++++r2 ){
+					const PatchControl& p1 = patch.ctrlAt( r2, W - 1 );
+					if( line_close( line, p1 )
+					 && vector3_length_squared( p1.m_vertex - p0.m_vertex ) > eps ){
+						for( size_t c = 1; c < W; ++c ){
+							for( const PatchControl& p2 : { patch.ctrlAt( r, W - 1 - c ), patch.ctrlAt( r2, W - 1 - c ) } ){
+								if( triangle_ok( p0, p1, p2 ) ){
+									return { &p0, &p2, &p1 };
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+*/
+	}
+	return {};
+}
+
 
 void Face_getTexture( Face& face, CopiedString& shader, FaceTexture& clipboard ){
 	shader = face.GetShader();
@@ -1530,10 +1805,13 @@ void Face_getTexture( Face& face, CopiedString& shader, FaceTexture& clipboard )
 	clipboard.m_flags = face.getShader().m_flags;
 
 	clipboard.m_plane = face.getPlane().plane3();
+	clipboard.m_winding = face.getWinding();
 	clipboard.m_width = face.getShader().width();
 	clipboard.m_height = face.getShader().height();
 
 	clipboard.m_colour = face.getShader().state()->getTexture().color;
+
+	clipboard.m_pasteSource = FaceTexture::eBrush;
 }
 typedef Function3<Face&, CopiedString&, FaceTexture&, void, Face_getTexture> FaceGetTexture;
 
@@ -1549,26 +1827,57 @@ void Face_setTexture( Face& face, const char* shader, const FaceTexture& clipboa
 		face.ProjectTexture( clipboard.m_projection, clipboard.m_plane.normal() );
 	}
 	else if( mode == ePasteSeamless ){
-		DoubleRay line = plane3_intersect_plane3( clipboard.m_plane, face.getPlane().plane3() );
-		if( vector3_length_squared( line.direction ) == 0 ){
-			face.ProjectTexture( clipboard.m_projection, clipboard.m_plane.normal() );
-			return;
+		if( clipboard.m_pasteSource == FaceTexture::eBrush ){
+			DoubleRay line = plane3_intersect_plane3( clipboard.m_plane, face.getPlane().plane3() );
+			if( vector3_length_squared( line.direction ) <= 1e-10 ){
+				face.ProjectTexture( clipboard.m_projection, clipboard.m_plane.normal() );
+				return;
+			}
+
+			const Quaternion rotation = quaternion_for_unit_vectors( clipboard.m_plane.normal(), face.getPlane().plane3().normal() );
+//			globalOutputStream() << "rotation: " << rotation.x() << " " << rotation.y() << " " << rotation.z() << " " << rotation.w() << " " << "\n";
+			Matrix4 transform = g_matrix4_identity;
+			matrix4_pivoted_rotate_by_quaternion( transform, rotation, line.origin );
+
+			TextureProjection proj = clipboard.m_projection;
+			proj.m_brushprimit_texdef.addScale( clipboard.m_width, clipboard.m_height );
+			Texdef_transformLocked( proj, clipboard.m_width, clipboard.m_height, clipboard.m_plane, transform, line.origin );
+			proj.m_brushprimit_texdef.removeScale( clipboard.m_width, clipboard.m_height );
+
+			face.SetTexdef( proj );
+
+			CopiedString dummy;
+			Face_getTexture( face, dummy, g_faceTextureClipboard );
+		}
+		else if( clipboard.m_pasteSource == FaceTexture::ePatch ){
+			const auto pc = Patch_getClosestTriangle( clipboard.m_patch, face.getWinding() );
+			// todo in patch->brush, brush->patch shall we apply texture, if alignment part fails?
+			if( pc.empty() )
+				return;
+			DoubleVector3 vertices[3]{ pc[0]->m_vertex, pc[1]->m_vertex, pc[2]->m_vertex };
+			const DoubleVector3 sts[3]{ DoubleVector3( pc[0]->m_texcoord ),
+		                                DoubleVector3( pc[1]->m_texcoord ),
+		                                DoubleVector3( pc[2]->m_texcoord ) };
+			{ // rotate patch points to face plane
+				const Plane3 plane = plane3_for_points( vertices );
+				const DoubleRay line = plane3_intersect_plane3( face.getPlane().plane3(), plane );
+				if( vector3_length_squared( line.direction ) > 1e-10 ){
+					const Quaternion rotation = quaternion_for_unit_vectors( plane.normal(), face.getPlane().plane3().normal() );
+					Matrix4 rot( g_matrix4_identity );
+					matrix4_pivoted_rotate_by_quaternion( rot, rotation, line.origin );
+					for( auto& v : vertices )
+						matrix4_transform_point( rot, v );
+				}
+			}
+			TextureProjection proj;
+			Texdef_from_ST( proj, vertices, sts, clipboard.m_width, clipboard.m_height );
+			proj.m_brushprimit_texdef.removeScale( clipboard.m_width, clipboard.m_height );
+			face.SetTexdef( proj );
+
+			CopiedString dummy;
+			Face_getTexture( face, dummy, g_faceTextureClipboard );
 		}
 
-		const Quaternion rotation = quaternion_for_unit_vectors( clipboard.m_plane.normal(), face.getPlane().plane3().normal() );
-//		globalOutputStream() << "rotation: " << rotation.x() << " " << rotation.y() << " " << rotation.z() << " " << rotation.w() << " " << "\n";
-		Matrix4 transform = g_matrix4_identity;
-		matrix4_pivoted_rotate_by_quaternion( transform, rotation, line.origin );
-
-		TextureProjection proj = clipboard.m_projection;
-		proj.m_brushprimit_texdef.addScale( clipboard.m_width, clipboard.m_height );
-		Texdef_transformLocked( proj, clipboard.m_width, clipboard.m_height, clipboard.m_plane, transform, line.origin );
-		proj.m_brushprimit_texdef.removeScale( clipboard.m_width, clipboard.m_height );
-
-		face.SetTexdef( proj );
-
-		g_faceTextureClipboard.m_plane = face.getPlane().plane3();
-		g_faceTextureClipboard.m_projection = proj;
 	}
 }
 typedef Function5<Face&, const char*, const FaceTexture&, EPasteMode, bool, void, Face_setTexture> FaceSetTexture;
@@ -1582,6 +1891,10 @@ void Patch_getTexture( Patch& patch, CopiedString& shader, FaceTexture& clipboar
 	clipboard.m_height = patch.getShader()->getTexture().height;
 
 	clipboard.m_colour = patch.getShader()->getTexture().color;
+
+	clipboard.m_patch.copy( patch );
+
+	clipboard.m_pasteSource = FaceTexture::ePatch;
 }
 typedef Function3<Patch&, CopiedString&, FaceTexture&, void, Patch_getTexture> PatchGetTexture;
 
@@ -1590,6 +1903,56 @@ void Patch_setTexture( Patch& patch, const char* shader, const FaceTexture& clip
 		patch.SetShader( shader );
 	if( mode == ePasteProject )
 		patch.ProjectTexture( clipboard.m_projection, clipboard.m_plane.normal() );
+	else if( mode == ePasteSeamless ){
+		PatchData patchData;
+		patchData.copy( patch );
+		const auto pc = Patch_getClosestTriangle( patchData, clipboard.m_winding );
+
+		if( pc.empty() )
+			return;
+
+		DoubleVector3 vertices[3]{ pc[0]->m_vertex, pc[1]->m_vertex, pc[2]->m_vertex };
+		const DoubleVector3 sts[3]{ DoubleVector3( pc[0]->m_texcoord ),
+		                            DoubleVector3( pc[1]->m_texcoord ),
+		                            DoubleVector3( pc[2]->m_texcoord ) };
+		Matrix4 local2tex0; // face tex projection
+		{
+			TextureProjection proj0( clipboard.m_projection );
+			proj0.m_brushprimit_texdef.addScale( clipboard.m_width, clipboard.m_height );
+			Texdef_Construct_local2tex( proj0, clipboard.m_width, clipboard.m_height, clipboard.m_plane.normal(), local2tex0 );
+		}
+
+		{ // rotate patch points to face plane
+			const Plane3 plane = plane3_for_points( vertices );
+			const DoubleRay line = plane3_intersect_plane3( clipboard.m_plane, plane );
+			if( vector3_length_squared( line.direction ) > 1e-10 ){
+				const Quaternion rotation = quaternion_for_unit_vectors( plane.normal(), clipboard.m_plane.normal() );
+				Matrix4 rot( g_matrix4_identity );
+				matrix4_pivoted_rotate_by_quaternion( rot, rotation, line.origin );
+				for( auto& v : vertices )
+					matrix4_transform_point( rot, v );
+			}
+		}
+
+		Matrix4 local2tex; // patch BP tex projection
+		Texdef_Construct_local2tex_from_ST( vertices, sts, local2tex );
+		Matrix4 tex2local = matrix4_affine_inverse( local2tex );
+		tex2local.t().vec3() += tex2local.z().vec3() * clipboard.m_plane.dist(); // adjust t() so that st->world points get to the plane
+
+		const Matrix4 mat = matrix4_multiplied_by_matrix4( local2tex0, tex2local ); // unproject st->world, project to new st
+		patch.undoSave();
+		for( auto& p : patch ){
+			p.m_texcoord = matrix4_transformed_point( mat, Vector3( p.m_texcoord ) ).vec2();
+		}
+		patch.controlPointsChanged();
+
+		// Patch_getTexture
+		g_faceTextureClipboard.m_width = patch.getShader()->getTexture().width;
+		g_faceTextureClipboard.m_height = patch.getShader()->getTexture().height;
+		g_faceTextureClipboard.m_colour = patch.getShader()->getTexture().color;
+		g_faceTextureClipboard.m_patch.copy( patch );
+		g_faceTextureClipboard.m_pasteSource = FaceTexture::ePatch;
+	}
 }
 typedef Function5<Patch&, const char*, const FaceTexture&, EPasteMode, bool, void, Patch_setTexture> PatchSetTexture;
 

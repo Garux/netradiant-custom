@@ -39,7 +39,7 @@
                                     focus on texture in texture browser, fill find/replace dialog entries
                alt + m3/drag        paste texture name (to pointed and selected stuff)
              shift + m3/drag        paste texture name, alignment, light power
-              ctrl + m3/drag        paste texture seamlessly between brush faces, light color
+              ctrl + m3/drag        paste texture seamlessly between brush faces, patches, light color
       ctrl + shift + m3/drag        project texture from copied brush face, paste light power, color
   alt + ctrl/shift/
        /ctrl+shift + m3/drag        respective texture alignment paste w/o texture name
