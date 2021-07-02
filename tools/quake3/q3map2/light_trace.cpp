@@ -1276,9 +1276,9 @@ bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 		return false;
 	}
 
-	/* receive shadows from worldspawn group only */
+	/* worldspawn group only receives shadows from positive groups */
 	if ( trace->recvShadows == 1 ) {
-		if ( ti->castShadows != 1 ) {
+		if ( ti->castShadows <= 0 ) {
 			return false;
 		}
 	}
