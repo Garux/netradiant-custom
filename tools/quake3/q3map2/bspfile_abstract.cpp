@@ -60,34 +60,40 @@ void IncDrawVerts(){
 		numBSPDrawVertsBuffer = 1024;
 
 		bspDrawVerts = safe_malloc_info( sizeof( bspDrawVert_t ) * numBSPDrawVertsBuffer, "IncDrawVerts" );
-
+		bspDrawVertsExt = safe_malloc_info(sizeof(bspDrawVertExt_t) * numBSPDrawVertsBuffer, "IncDrawVertsExt");
 	}
 	else if ( numBSPDrawVerts > numBSPDrawVertsBuffer ) {
 		bspDrawVert_t *newBspDrawVerts;
+		bspDrawVertExt_t *newBspDrawVertsExt;
 
 		numBSPDrawVertsBuffer *= 3; // multiply by 1.5
 		numBSPDrawVertsBuffer /= 2;
 
 		newBspDrawVerts = void_ptr( realloc( bspDrawVerts, sizeof( bspDrawVert_t ) * numBSPDrawVertsBuffer ) );
+		newBspDrawVertsExt = void_ptr( realloc( bspDrawVertsExt, sizeof( bspDrawVertExt_t ) * numBSPDrawVertsBuffer ) );
 
-		if ( !newBspDrawVerts ) {
+		if ( !newBspDrawVerts || !newBspDrawVertsExt ) {
 			free (bspDrawVerts);
 			Error( "realloc() failed (IncDrawVerts)" );
 		}
 
 		bspDrawVerts = newBspDrawVerts;
+		bspDrawVertsExt = newBspDrawVertsExt;
 	}
 
 	memset( bspDrawVerts + ( numBSPDrawVerts - 1 ), 0, sizeof( bspDrawVert_t ) );
+	memset( bspDrawVertsExt + (numBSPDrawVerts - 1), 0, sizeof(bspDrawVertExt_t) );
 }
 
 void SetDrawVerts( int n ){
 	free( bspDrawVerts );
+	free( bspDrawVertsExt );
 
 	numBSPDrawVerts =
 	numBSPDrawVertsBuffer = n;
 
 	bspDrawVerts = safe_calloc_info( sizeof( bspDrawVert_t ) * numBSPDrawVertsBuffer, "IncDrawVerts" );
+	bspDrawVertsExt = safe_calloc_info( sizeof( bspDrawVertExt_t ) * numBSPDrawVertsBuffer, "IncDrawVertsExt" );
 }
 
 int numBSPDrawSurfacesBuffer = 0;
@@ -110,6 +116,7 @@ void SetDrawSurfaces( int n ){
 
 void BSPFilesCleanup(){
 	free( bspDrawVerts );
+	free( bspDrawVertsExt );
 	free( bspDrawSurfaces );
 	free( bspLightBytes );
 	free( bspGridPoints );

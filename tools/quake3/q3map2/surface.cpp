@@ -2191,9 +2191,14 @@ void EmitDrawVerts( mapDrawSurface_t *ds, bspDrawSurface_t *out ){
 		/* allocate a new vert */
 		IncDrawVerts();
 		dv = &bspDrawVerts[ numBSPDrawVerts - 1 ];
+		bspDrawVertExt_t *tangents = &bspDrawVertsExt[ numBSPDrawVerts - 1 ];
 
 		/* copy it */
 		memcpy( dv, &ds->verts[ i ], sizeof( *dv ) );
+		if (ds->vertTangents != NULL)
+			*tangents = ds->vertTangents[i];
+		else
+			memset(tangents, 0, sizeof(*tangents));
 
 		/* offset? */
 		if ( offset != 0.0f ) {

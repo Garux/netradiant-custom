@@ -365,6 +365,13 @@ struct bspDrawVert_t
 };
 
 
+struct bspDrawVertExt_t
+{
+	Vector3 tangent;
+	float biTangentSign;
+};
+
+
 enum bspSurfaceType_t
 {
 	MST_BAD,
@@ -920,6 +927,7 @@ struct mapDrawSurface_t
 
 	int numVerts;                           /* vertexes and triangles */
 	bspDrawVert_t       *verts;
+	bspDrawVertExt_t    *vertTangents;      /* vertex tangents for proper normal mapping */
 	int numIndexes;
 	int                 *indexes;
 
@@ -2501,6 +2509,7 @@ Q_EXTERN byte bspVisBytes[ MAX_MAP_VISIBILITY ];
 
 Q_EXTERN int numBSPDrawVerts Q_ASSIGN( 0 );
 Q_EXTERN bspDrawVert_t          *bspDrawVerts Q_ASSIGN( NULL );
+Q_EXTERN bspDrawVertExt_t       *bspDrawVertsExt Q_ASSIGN( NULL );
 
 Q_EXTERN int numBSPDrawIndexes Q_ASSIGN( 0 );
 Q_EXTERN int allocatedBSPDrawIndexes Q_ASSIGN( 0 );

@@ -396,6 +396,22 @@ void EndBSPFile( bool do_write ){
 		auto path = StringOutputStream( 256 )( source, ".bsp" );
 		Sys_Printf( "Writing %s\n", path.c_str() );
 		WriteBSPFile( path );
+
+		{ /* write tangent space info */
+			/* note it */
+			Sys_Printf("--- WriteTangentSpaceFile ---\n");
+
+			/* open the file */
+			const auto path = StringOutputStream( 256 )( source, ".tspace" );
+			Sys_Printf( "Writing %s\n", path.c_str() );
+			Sys_Printf("Vertices %i\n", numBSPDrawVerts);
+
+			FILE *tf = SafeOpenWrite( path );
+			SafeWrite(tf, bspDrawVertsExt, sizeof( *bspDrawVertsExt ) * numBSPDrawVerts );
+
+			/* close the file */
+			fclose(tf);
+		}
 	}
 }
 

@@ -33,6 +33,8 @@
 
 #include "model.h"
 
+#include "mikktspace/mikktspace.h"
+
 #include "assimp/Importer.hpp"
 #include "assimp/importerdesc.h"
 #include "assimp/Logger.hpp"
@@ -45,6 +47,84 @@
 
 #include <map>
 
+
+struct BspMeshData
+{
+	int numSurfaces;
+	bspDrawVert_t *vertices;
+	bspDrawVertExt_t *tangents;
+	int *indices;
+
+	static int GetNumFaces(const SMikkTSpaceContext * pContext)
+	{
+		BspMeshData *meshData = (BspMeshData *)pContext->m_pUserData;
+		return meshData->numSurfaces;
+	}
+
+	static int GetNumVertices(const SMikkTSpaceContext * pContext, const int iFace)
+	{
+		// TODO: fix this when quads are supported for model loading
+		return 3;
+	}
+
+	static void GetPosition(const SMikkTSpaceContext * pContext, float *fvPosOut, const int iFace, const int iVert)
+	{
+		BspMeshData *meshData = (BspMeshData *)pContext->m_pUserData;
+		int index = meshData->indices[iFace * 3 + iVert];
+		VectorCopy(meshData->vertices[index].xyz, fvPosOut);
+	}
+
+	static void GetNormalSurface(const SMikkTSpaceContext * pContext, float *fvNormOut, const int iFace, const int iVert)
+	{
+		BspMeshData *meshData = (BspMeshData *)pContext->m_pUserData;
+		int index = meshData->indices[iFace * 3 + iVert];
+		VectorCopy(meshData->vertices[index].normal, fvNormOut);
+	}
+
+	static void GetTexCoord(const SMikkTSpaceContext * pContext, float *fvTexcOut, const int iFace, const int iVert)
+	{
+		BspMeshData *meshData = (BspMeshData *)pContext->m_pUserData;
+		int index = meshData->indices[iFace * 3 + iVert];
+		(fvTexcOut)[0] = (meshData->vertices[index].st)[0];
+		(fvTexcOut)[1] = (meshData->vertices[index].st)[1];
+	}
+
+	static void SetTSpaceBasic(const SMikkTSpaceContext * pContext, const float *fvTangent, const float fSign, const int iFace, const int iVert)
+	{
+		BspMeshData *meshData = (BspMeshData *)pContext->m_pUserData;
+		int index = meshData->indices[iFace * 3 + iVert];
+
+		meshData->tangents[index].tangent[0]	= fvTangent[0];
+		meshData->tangents[index].tangent[1]	= fvTangent[1];
+		meshData->tangents[index].tangent[2]	= fvTangent[2];
+		meshData->tangents[index].biTangentSign = -fSign; // flip bitangent because id tech 3 renders with frontface culling instead of backface culling
+	}
+
+	static void CalcMikkTSpace(int numSurfaces, bspDrawVert_t *vertices, bspDrawVertExt_t *tangents, int *indices)
+	{
+		SMikkTSpaceInterface tangentSpaceInterface;
+
+		tangentSpaceInterface.m_getNumFaces = GetNumFaces;
+		tangentSpaceInterface.m_getNumVerticesOfFace = GetNumVertices;
+		tangentSpaceInterface.m_getPosition = GetPosition;
+		tangentSpaceInterface.m_getNormal = GetNormalSurface;
+		tangentSpaceInterface.m_getTexCoord = GetTexCoord;
+		tangentSpaceInterface.m_setTSpaceBasic = SetTSpaceBasic;
+		tangentSpaceInterface.m_setTSpace = NULL;
+
+		BspMeshData meshData;
+		meshData.numSurfaces = numSurfaces;
+		meshData.vertices = vertices;
+		meshData.tangents = tangents;
+		meshData.indices = indices;
+
+		SMikkTSpaceContext modelContext;
+		modelContext.m_pUserData = &meshData;
+		modelContext.m_pInterface = &tangentSpaceInterface;
+
+		genTangSpaceDefault(&modelContext);
+	}
+};
 
 class AssLogger : public Assimp::Logger
 {
@@ -567,12 +647,9 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 
 			/* xyz and normal */
 			dv.xyz = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
-			matrix4_transform_point( transform, dv.xyz );
 
 			if( mesh->HasNormals() ){
 				dv.normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
-				matrix4_transform_direction( nTransform, dv.normal );
-				VectorNormalize( dv.normal );
 			}
 
 			/* ydnar: tek-fu celshading support for flat shaded shit */
@@ -582,9 +659,11 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 
 			/* ydnar: gs mods: added support for explicit shader texcoord generation */
 			else if ( si->tcGen ) {
+				/* need to transform the vertex position to get the correct result */
+				const Vector3 pos_ = matrix4_transformed_point( transform, dv.xyz );
 				/* project the texture */
-				dv.st[ 0 ] = vector3_dot( si->vecs[ 0 ], dv.xyz );
-				dv.st[ 1 ] = vector3_dot( si->vecs[ 1 ], dv.xyz );
+				dv.st[ 0 ] = vector3_dot( si->vecs[ 0 ], pos_ );
+				dv.st[ 1 ] = vector3_dot( si->vecs[ 1 ], pos_ );
 			}
 
 			/* normal texture coordinates */
@@ -627,6 +706,24 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 					std::swap( ds->indexes[idCopied - 1], ds->indexes[idCopied - 2] );
 				}
 			}
+		}
+
+		/* compute tangent space before transforming vertices */
+		ds->vertTangents = safe_calloc(ds->numVerts * sizeof(ds->vertTangents[0]));
+		BspMeshData::CalcMikkTSpace(ds->numIndexes / 3, ds->verts, ds->vertTangents, ds->indexes);
+
+		/* transform vertices */
+		for (i = 0; i < ds->numVerts; i++)
+		{
+			/* get vertex */
+			bspDrawVert_t& dv = ds->verts[ i ];
+
+			/* transform vertex */
+			matrix4_transform_point( transform, dv.xyz );
+			matrix4_transform_direction( nTransform, dv.normal );
+			VectorNormalize( dv.normal );
+			matrix4_transform_direction( nTransform, ds->vertTangents[i].tangent );
+			VectorNormalize( ds->vertTangents[i].tangent );
 		}
 
 		/* set cel shader */
