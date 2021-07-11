@@ -260,14 +260,14 @@ public:
 /// \brief Writes a floating point value to \p ostream in decimal form with trailing zeros removed.
 template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const Decimal& decimal ){
-	const int bufferSize = 22;
+	const std::size_t bufferSize = 22;
 	char buf[bufferSize];
-	std::size_t length = snprintf( buf, bufferSize, "%10.10lf", decimal.m_f );
+	const std::size_t length = snprintf( buf, bufferSize, "%10.10lf", decimal.m_f );
 	const char* first = buf;
 	for (; *first == ' '; ++first )
 	{
 	}
-	const char* last = buf + length - 1;
+	const char* last = buf + std::min( length, bufferSize - 1 ) - 1;
 	for (; *last == '0'; --last )
 	{
 	}
