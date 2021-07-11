@@ -575,7 +575,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 			rs->bInverse = gtk_toggle_button_get_active( (GtkToggleButton*)check2 ) ? true : false;
 			rs->bAlignTop = gtk_toggle_button_get_active( (GtkToggleButton*)check3 ) ? true : false;
 
-			if ( !ValidateTextIntRange( gtk_entry_get_text( GTK_ENTRY( text1 ) ), 3, 32, "Number Of Sides", &rs->nSides ) ) {
+			if ( !ValidateTextIntRange( gtk_entry_get_text( GTK_ENTRY( text1 ) ), 3, 128, "Number Of Sides", &rs->nSides ) ) {
 				dialogError = TRUE;
 			}
 
