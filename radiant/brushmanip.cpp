@@ -80,7 +80,7 @@ inline float max_extent( const Vector3& extents ){
 	return std::max( std::max( extents[0], extents[1] ), extents[2] );
 }
 
-inline float max_extent_2d( const Vector3& extents, int axis ){
+inline float max_extent_2d( const Vector3& extents, size_t axis ){
 	switch ( axis )
 	{
 	case 0:
@@ -96,7 +96,7 @@ const std::size_t c_brushPrism_minSides = 3;
 const std::size_t c_brushPrism_maxSides = c_brush_maxFaces - 2;
 const char* const c_brushPrism_name = "brushPrism";
 
-void Brush_ConstructPrism( Brush& brush, const AABB& bounds, std::size_t sides, int axis, const char* shader, const TextureProjection& projection ){
+void Brush_ConstructPrism( Brush& brush, const AABB& bounds, std::size_t sides, size_t axis, const char* shader, const TextureProjection& projection ){
 	if ( sides < c_brushPrism_minSides ) {
 		globalErrorStream() << c_brushPrism_name << ": sides " << Unsigned( sides ) << ": too few sides, minimum is " << Unsigned( c_brushPrism_minSides ) << "\n";
 		return;
@@ -109,58 +109,54 @@ void Brush_ConstructPrism( Brush& brush, const AABB& bounds, std::size_t sides, 
 	brush.clear();
 	brush.reserve( sides + 2 );
 
-	Vector3 mins( vector3_subtracted( bounds.origin, bounds.extents ) );
-	Vector3 maxs( vector3_added( bounds.origin, bounds.extents ) );
+	const Vector3 mins( bounds.origin - bounds.extents );
+	const Vector3 maxs( bounds.origin + bounds.extents );
 
-	float radius = max_extent_2d( bounds.extents, axis );
+	const float radius = max_extent_2d( bounds.extents, axis );
 	const Vector3& mid = bounds.origin;
+	const size_t x = ( axis + 1 ) % 3, y = ( axis + 2 ) % 3, z = axis;
 	Vector3 planepts[3];
 
-	planepts[2][( axis + 1 ) % 3] = mins[( axis + 1 ) % 3];
-	planepts[2][( axis + 2 ) % 3] = mins[( axis + 2 ) % 3];
-	planepts[2][axis] = maxs[axis];
-	planepts[1][( axis + 1 ) % 3] = maxs[( axis + 1 ) % 3];
-	planepts[1][( axis + 2 ) % 3] = mins[( axis + 2 ) % 3];
-	planepts[1][axis] = maxs[axis];
-	planepts[0][( axis + 1 ) % 3] = maxs[( axis + 1 ) % 3];
-	planepts[0][( axis + 2 ) % 3] = maxs[( axis + 2 ) % 3];
-	planepts[0][axis] = maxs[axis];
+	planepts[2][x] = mins[x];
+	planepts[2][y] = mins[y];
+	planepts[2][z] = maxs[z];
+	planepts[1][x] = maxs[x];
+	planepts[1][y] = mins[y];
+	planepts[1][z] = maxs[z];
+	planepts[0][x] = maxs[x];
+	planepts[0][y] = maxs[y];
+	planepts[0][z] = maxs[z];
 
 	brush.addPlane( planepts[0], planepts[1], planepts[2], shader, projection );
 
-	planepts[0][( axis + 1 ) % 3] = mins[( axis + 1 ) % 3];
-	planepts[0][( axis + 2 ) % 3] = mins[( axis + 2 ) % 3];
-	planepts[0][axis] = mins[axis];
-	planepts[1][( axis + 1 ) % 3] = maxs[( axis + 1 ) % 3];
-	planepts[1][( axis + 2 ) % 3] = mins[( axis + 2 ) % 3];
-	planepts[1][axis] = mins[axis];
-	planepts[2][( axis + 1 ) % 3] = maxs[( axis + 1 ) % 3];
-	planepts[2][( axis + 2 ) % 3] = maxs[( axis + 2 ) % 3];
-	planepts[2][axis] = mins[axis];
+	planepts[0][x] = mins[x];
+	planepts[0][y] = mins[y];
+	planepts[0][z] = mins[z];
+	planepts[1][x] = maxs[x];
+	planepts[1][y] = mins[y];
+	planepts[1][z] = mins[z];
+	planepts[2][x] = maxs[x];
+	planepts[2][y] = maxs[y];
+	planepts[2][z] = mins[z];
 
 	brush.addPlane( planepts[0], planepts[1], planepts[2], shader, projection );
 
 	for ( std::size_t i = 0 ; i < sides ; ++i )
 	{
-		double sv = sin( i * 3.14159265 * 2 / sides );
-		double cv = cos( i * 3.14159265 * 2 / sides );
+		const double sv = sin( i * c_2pi / sides );
+		const double cv = cos( i * c_2pi / sides );
 
-//		planepts[0][( axis + 1 ) % 3] = static_cast<float>( floor( mid[( axis + 1 ) % 3] + radius * cv + 0.5 ) );
-//		planepts[0][( axis + 2 ) % 3] = static_cast<float>( floor( mid[( axis + 2 ) % 3] + radius * sv + 0.5 ) );
-		planepts[0][( axis + 1 ) % 3] = static_cast<float>( mid[( axis + 1 ) % 3] + radius * cv );
-		planepts[0][( axis + 2 ) % 3] = static_cast<float>( mid[( axis + 2 ) % 3] + radius * sv );
-		planepts[0][axis] = mins[axis];
+		planepts[0][x] = mid[x] + radius * cv;
+		planepts[0][y] = mid[y] + radius * sv;
+		planepts[0][z] = mins[z];
 
-		planepts[1][( axis + 1 ) % 3] = planepts[0][( axis + 1 ) % 3];
-		planepts[1][( axis + 2 ) % 3] = planepts[0][( axis + 2 ) % 3];
-		planepts[1][axis] = maxs[axis];
+		planepts[1][x] = planepts[0][x];
+		planepts[1][y] = planepts[0][y];
+		planepts[1][z] = maxs[z];
 
-//		planepts[2][( axis + 1 ) % 3] = static_cast<float>( floor( planepts[0][( axis + 1 ) % 3] - radius * sv + 0.5 ) );
-//		planepts[2][( axis + 2 ) % 3] = static_cast<float>( floor( planepts[0][( axis + 2 ) % 3] + radius * cv + 0.5 ) );
-		planepts[2][( axis + 1 ) % 3] = static_cast<float>( planepts[0][( axis + 1 ) % 3] - radius * sv );
-		planepts[2][( axis + 2 ) % 3] = static_cast<float>( planepts[0][( axis + 2 ) % 3] + radius * cv );
-		planepts[2][axis] = maxs[axis];
-		//globalOutputStream() << planepts[0] << "   " << planepts[2] << "  #" << i << "   sin " << sv << "  cos " << cv << "\n";
+		planepts[2][x] = planepts[0][x] - radius * sv;
+		planepts[2][y] = planepts[0][y] + radius * cv;
+		planepts[2][z] = maxs[z];
 
 		brush.addPlane( planepts[0], planepts[1], planepts[2], shader, projection );
 	}
@@ -426,9 +422,9 @@ void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds,
 		break;
 	case eBrushPrism:
 		{
-			const int axis = GlobalXYWnd_getCurrentViewType();
+			const size_t axis = GlobalXYWnd_getCurrentViewType();
 			StringOutputStream command;
-			command << c_brushPrism_name << " -sides " << Unsigned( sides ) << " -axis " << axis;
+			command << c_brushPrism_name << " -sides " << Unsigned( sides ) << " -axis " << Unsigned( axis );
 			UndoableCommand undo( command.c_str() );
 
 			Brush_ConstructPrism( brush, bounds, sides, axis, shader, projection );
