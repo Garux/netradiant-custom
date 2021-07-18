@@ -397,6 +397,15 @@ image_t *ImageLoad( const char *filename ){
 					}
 					#endif
 				}
+				else
+				{
+					/* attempt to load ktx */
+					path_set_extension( name, ".ktx" );
+					size = vfsLoadFile( name, (void**) &buffer, 0 );
+					if ( size > 0 ) {
+						LoadKTXBufferFirstImage( buffer, size, &image->pixels, &image->width, &image->height );
+					}
+				}
 			}
 		}
 	}

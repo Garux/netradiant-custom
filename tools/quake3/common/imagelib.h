@@ -43,3 +43,5 @@ void WriteTGAGray( const char *filename, byte *data, int width, int height );
 int LoadJPGBuff( void *src_buffer, int src_size, unsigned char **pic, int *width, int *height );
 
 void Load32BitImage( const char *name, unsigned **pixels, int *width, int *height );
+
+void LoadKTXBufferFirstImage( const byte *buffer, size_t bufSize, byte **pic, int *picWidth, int *picHeight );
