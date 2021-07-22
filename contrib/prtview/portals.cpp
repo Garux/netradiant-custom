@@ -30,7 +30,7 @@
 
 #include "prtview.h"
 
-#define LINE_BUF 1000
+#define LINE_BUF 4096
 
 CPortals portals;
 CPortalsRender render;
