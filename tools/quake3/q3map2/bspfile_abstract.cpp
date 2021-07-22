@@ -436,11 +436,14 @@ void PrintBSPFileSizes( void ){
 	if ( entities.empty() ) {
 		ParseEntities();
 	}
-	int patchCount = 0;
-	bspDrawSurface_t *s;
-	for ( s = bspDrawSurfaces; s != bspDrawSurfaces + numBSPDrawSurfaces; ++s ){
+	int patchCount = 0, planarCount = 0, trisoupCount = 0;
+	for ( const bspDrawSurface_t *s = bspDrawSurfaces; s != bspDrawSurfaces + numBSPDrawSurfaces; ++s ){
 		if ( s->surfaceType == MST_PATCH )
 			++patchCount;
+		else if ( s->surfaceType == MST_PLANAR )
+			++planarCount;
+		else if ( s->surfaceType == MST_TRIANGLE_SOUP )
+			++trisoupCount;
 	}
 	/* note that this is abstracted */
 	Sys_Printf( "Abstracted BSP file components (*actual sizes may differ)\n" );
@@ -474,8 +477,12 @@ void PrintBSPFileSizes( void ){
 
 	Sys_Printf( "%9d drawsurfaces  %9d *\n",
 	            numBSPDrawSurfaces, (int) ( numBSPDrawSurfaces * sizeof( *bspDrawSurfaces ) ) );
-	Sys_Printf( "%9d patchsurfaces       \n",
+	Sys_Printf( "%9d   patch surfaces\n",
 	            patchCount );
+	Sys_Printf( "%9d   planar surfaces\n",
+	            planarCount );
+	Sys_Printf( "%9d   trisoup surfaces\n",
+	            trisoupCount );
 	Sys_Printf( "%9d drawverts     %9d *\n",
 	            numBSPDrawVerts, (int) ( numBSPDrawVerts * sizeof( *bspDrawVerts ) ) );
 	Sys_Printf( "%9d drawindexes   %9d\n",
