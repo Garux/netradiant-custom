@@ -42,6 +42,10 @@ public:
 	Plane3___( const BasicVector3<Element>& normal, double dist )
 		: a( normal.x() ), b( normal.y() ), c( normal.z() ), d( dist ){
 	}
+	template<typename Element>
+	explicit Plane3___( const Plane3___<Element>& other )
+		: a( other.a ), b( other.b ), c( other.c ), d( other.d ){
+	}
 
 	BasicVector3<T>& normal(){
 		return reinterpret_cast<BasicVector3<T>&>( *this );

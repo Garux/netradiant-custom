@@ -242,7 +242,7 @@ void SnapWeldVector( const Vector3& a, const Vector3& b, Vector3& out ){
    instead of averaging.
    ==================
  */
-void SnapWeldVectorAccu( const DoubleVector3& a, const DoubleVector3& b, DoubleVector3& out ){
+DoubleVector3 SnapWeldVectorAccu( const DoubleVector3& a, const DoubleVector3& b ){
 	// I'm just preserving what I think was the intended logic of the original
 	// SnapWeldVector().  I'm not actually sure where this function should even
 	// be used.  I'd like to know which kinds of problems this function addresses.
@@ -251,15 +251,14 @@ void SnapWeldVectorAccu( const DoubleVector3& a, const DoubleVector3& b, DoubleV
 	// So what is natural about snapping to the nearest integer?  Maybe we should
 	// be snapping to the nearest 1/8 unit instead?
 
-	int i;
-	double ai, bi, ad, bd;
+	DoubleVector3 out;
 
-	for ( i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; i++ )
 	{
-		ai = std::rint( a[i] );
-		bi = std::rint( b[i] );
-		ad = fabs( ai - a[i] );
-		bd = fabs( bi - b[i] );
+		const double ai = std::rint( a[i] );
+		const double bi = std::rint( b[i] );
+		const double ad = fabs( ai - a[i] );
+		const double bd = fabs( bi - b[i] );
 
 		if ( ad < bd ) {
 			if ( ad < SNAP_EPSILON ) {
@@ -279,6 +278,8 @@ void SnapWeldVectorAccu( const DoubleVector3& a, const DoubleVector3& b, DoubleV
 			}
 		}
 	}
+
+	return out;
 }
 
 /*
@@ -353,35 +354,28 @@ bool FixWinding( winding_t *w ){
    ==================
  */
 bool FixWindingAccu( winding_accu_t *w ){
-	int i, j, k;
-	bool done, altered;
-
 	if ( w == NULL ) {
 		Error( "FixWindingAccu: NULL argument" );
 	}
 
-	altered = false;
+	bool altered = false;
 
 	while ( true )
 	{
 		if ( w->numpoints < 2 ) {
 			break;                   // Don't remove the only remaining point.
 		}
-		done = true;
-		for ( i = 0; i < w->numpoints; i++ )
+		bool done = true;
+		for ( int i = w->numpoints - 1, j = 0; j < w->numpoints; i = j, ++j )
 		{
-			j = ( ( ( i + 1 ) == w->numpoints ) ? 0 : ( i + 1 ) );
-
-			DoubleVector3 vec = w->p[i] - w->p[j];
-			if ( vector3_length( vec ) < DEGENERATE_EPSILON ) {
+			if ( vector3_length( w->p[i] - w->p[j] ) < DEGENERATE_EPSILON ) {
 				// TODO: I think the "snap weld vector" was written before
 				// some of the math precision fixes, and its purpose was
 				// probably to address math accuracy issues.  We can think
 				// about changing the logic here.  Maybe once plane distance
 				// gets 64 bits, we can look at it then.
-				SnapWeldVectorAccu( w->p[i], w->p[j], vec );
-				w->p[i] = vec;
-				for ( k = j + 1; k < w->numpoints; k++ )
+				w->p[i] = SnapWeldVectorAccu( w->p[i], w->p[j] );
+				for ( int k = j + 1; k < w->numpoints; k++ )
 				{
 					w->p[k - 1] = w->p[k];
 				}
@@ -413,47 +407,39 @@ bool FixWindingAccu( winding_accu_t *w ){
  */
 
 bool CreateBrushWindings( brush_t *brush ){
-	int i, j;
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
 	winding_accu_t  *w;
 #else
 	winding_t   *w;
 #endif
-	side_t      *side;
-	plane_t     *plane;
-
-
 	/* walk the list of brush sides */
-	for ( i = 0; i < brush->numsides; i++ )
+	for ( int i = 0; i < brush->numsides; i++ )
 	{
 		/* get side and plane */
-		side = &brush->sides[ i ];
-		plane = &mapplanes[ side->planenum ];
+		side_t& side = brush->sides[ i ];
+		const plane_t& plane = mapplanes[ side.planenum ];
 
 		/* make huge winding */
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-		w = BaseWindingForPlaneAccu( ( side->plane.normal() != g_vector3_identity )? side->plane : Plane3( plane->normal(), plane->dist() ) );
+		w = BaseWindingForPlaneAccu( ( side.plane.normal() != g_vector3_identity )? side.plane : Plane3( plane.plane ) );
 #else
-		w = BaseWindingForPlane( plane->plane );
+		w = BaseWindingForPlane( plane.plane );
 #endif
 
 		/* walk the list of brush sides */
-		for ( j = 0; j < brush->numsides && w != NULL; j++ )
+		for ( int j = 0; j < brush->numsides && w != NULL; j++ )
 		{
-			if ( i == j ) {
+			const side_t& cside = brush->sides[ j ];
+			const plane_t& cplane = mapplanes[ cside.planenum ^ 1 ];
+			if ( i == j
+			|| cside.planenum == ( side.planenum ^ 1 ) /* back side clipaway */
+			|| cside.bevel ) {
 				continue;
 			}
-			if ( brush->sides[ j ].planenum == ( brush->sides[ i ].planenum ^ 1 ) ) {
-				continue;       /* back side clipaway */
-			}
-			if ( brush->sides[ j ].bevel ) {
-				continue;
-			}
-			plane = &mapplanes[ brush->sides[ j ].planenum ^ 1 ];
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-			ChopWindingInPlaceAccu( &w, ( brush->sides[ j ].plane.normal() != g_vector3_identity )? plane3_flipped( brush->sides[ j ].plane ) : Plane3( plane->normal(), plane->dist() ), 0 );
+			ChopWindingInPlaceAccu( &w, ( cside.plane.normal() != g_vector3_identity )? plane3_flipped( cside.plane ) : Plane3( cplane.plane ), 0 );
 #else
-			ChopWindingInPlace( &w, plane->plane, 0 ); // CLIP_EPSILON );
+			ChopWindingInPlace( &w, cplane.plane, 0 ); // CLIP_EPSILON );
 #endif
 
 			/* ydnar: fix broken windings that would generate trifans */
@@ -476,12 +462,12 @@ bool CreateBrushWindings( brush_t *brush ){
 				w = NULL;
 			}
 		}
-		side->winding = ( w ? CopyWindingAccuToRegular( w ) : NULL );
+		side.winding = ( w ? CopyWindingAccuToRegular( w ) : NULL );
 		if ( w ) {
 			FreeWindingAccu( w );
 		}
 #else
-		side->winding = w;
+		side.winding = w;
 #endif
 	}
 

@@ -449,7 +449,7 @@ int MapPlaneFromPoints( DoubleVector3 p[3] ){
 	// if the plane is 2^16 units away from the origin (the "epsilon" approaches
 	// 0.01 in that case).
 	const Vector3 points[3] = { p[0], p[1], p[2] };
-	return FindFloatPlane( Plane3f( plane.normal(), plane.dist() ), 3, points );
+	return FindFloatPlane( Plane3f( plane ), 3, points );
 #else
 	Plane3f plane;
 	PlaneFromPoints( plane, p );
