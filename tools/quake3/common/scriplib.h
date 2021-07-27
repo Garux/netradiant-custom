@@ -44,7 +44,8 @@ bool TokenAvailable( void );
 
 void MatchToken( const char *match );
 
-void Parse1DMatrix( int x, float *m );
+template<typename T>
+void Parse1DMatrix( int x, T *m );
 void Parse2DMatrix( int y, int x, float *m );
 void Parse3DMatrix( int z, int y, int x, float *m );
 

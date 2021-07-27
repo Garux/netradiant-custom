@@ -441,14 +441,15 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
    takes 3 points and finds the plane they lie in
  */
 
-int MapPlaneFromPoints( Vector3 p[3] ){
+int MapPlaneFromPoints( DoubleVector3 p[3] ){
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
 	Plane3 plane;
-	PlaneFromPoints( plane, DoubleVector3( p[0] ), DoubleVector3( p[1] ), DoubleVector3( p[2] ) );
+	PlaneFromPoints( plane, p );
 	// TODO: A 32 bit float for the plane distance isn't enough resolution
 	// if the plane is 2^16 units away from the origin (the "epsilon" approaches
 	// 0.01 in that case).
-	return FindFloatPlane( Plane3f( plane.normal(), plane.dist() ), 3, p );
+	const Vector3 points[3] = { p[0], p[1], p[2] };
+	return FindFloatPlane( Plane3f( plane.normal(), plane.dist() ), 3, points );
 #else
 	Plane3f plane;
 	PlaneFromPoints( plane, p );
@@ -1008,7 +1009,7 @@ void QuakeTextureVecs( const plane_t& plane, float shift[ 2 ], float rotate, flo
 
 static void ParseRawBrush( bool onlyLights ){
 	side_t          *side;
-	Vector3 planePoints[ 3 ];
+	DoubleVector3 planePoints[ 3 ];
 	int planenum;
 	shaderInfo_t    *si;
 	float shift[ 2 ];
@@ -1172,6 +1173,7 @@ static void ParseRawBrush( bool onlyLights ){
 		/* find the plane number */
 		planenum = MapPlaneFromPoints( planePoints );
 		side->planenum = planenum;
+		PlaneFromPoints( side->plane, planePoints );
 
 		/* bp: get the texture mapping for this texturedef / plane combination */
 		if ( g_brushType == EBrushType::Quake ) {
@@ -1382,6 +1384,7 @@ void AdjustBrushesForOrigin( entity_t *ent ){
 
 			/* find a new plane */
 			s->planenum = FindFloatPlane( mapplanes[ s->planenum ].normal(), newdist, 0, NULL );
+			s->plane.dist() = -plane3_distance_to_point( s->plane, ent->originbrush_origin );
 		}
 
 		/* rebuild brush windings (ydnar: just offsetting the winding above should be fine) */

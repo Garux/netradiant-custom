@@ -738,6 +738,7 @@ struct side_t
 	Vector3 texMat[ 2 ];                    /* brush primitive texture matrix */
 	Vector4 vecs[ 2 ];                      /* old-style texture coordinate mapping */
 
+	Plane3 plane;                           /* optional plane in double precision for building windings */
 	winding_t           *winding;
 	winding_t           *visibleHull;       /* convex hull of all visible fragments */
 

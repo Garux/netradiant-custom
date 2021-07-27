@@ -177,7 +177,7 @@ Vector3 WindingCenter( const winding_t *w ){
    BaseWindingForPlaneAccu
    =================
  */
-winding_accu_t *BaseWindingForPlaneAccu( const Plane3f& inplane ){
+winding_accu_t *BaseWindingForPlaneAccu( const Plane3& plane ){
 	// The goal in this function is to replicate the behavior of the original BaseWindingForPlane()
 	// function (see below) but at the same time increasing accuracy substantially.
 
@@ -194,7 +194,6 @@ winding_accu_t *BaseWindingForPlaneAccu( const Plane3f& inplane ){
 	int x, i;
 	float max, v;
 	DoubleVector3 vright, vup, org;
-	const Plane3 plane( inplane.normal(), inplane.dist() );
 	winding_accu_t  *w;
 
 	// One of the components of normal must have a magnitiude greater than this value,
@@ -554,7 +553,7 @@ void    ClipWindingEpsilon( winding_t *in, const Plane3f& plane,
    ChopWindingInPlaceAccu
    =============
  */
-void ChopWindingInPlaceAccu( winding_accu_t **inout, const Plane3f& plane, float crudeEpsilon ){
+void ChopWindingInPlaceAccu( winding_accu_t **inout, const Plane3& plane, float crudeEpsilon ){
 	winding_accu_t  *in;
 	int counts[3];
 	int i, j;

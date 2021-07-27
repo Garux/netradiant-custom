@@ -81,7 +81,7 @@ struct winding_accu_t
 	DoubleVector3 p[];
 };
 
-winding_accu_t  *BaseWindingForPlaneAccu( const Plane3f& plane );
-void    ChopWindingInPlaceAccu( winding_accu_t **w, const Plane3f& plane, float epsilon );
+winding_accu_t  *BaseWindingForPlaneAccu( const Plane3& plane );
+void    ChopWindingInPlaceAccu( winding_accu_t **w, const Plane3& plane, float epsilon );
 winding_t   *CopyWindingAccuToRegular( const winding_accu_t *w );
 void    FreeWindingAccu( winding_accu_t *w );

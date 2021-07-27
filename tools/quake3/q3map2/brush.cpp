@@ -432,7 +432,7 @@ bool CreateBrushWindings( brush_t *brush ){
 
 		/* make huge winding */
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-		w = BaseWindingForPlaneAccu( plane->plane );
+		w = BaseWindingForPlaneAccu( ( side->plane.normal() != g_vector3_identity )? side->plane : Plane3( plane->normal(), plane->dist() ) );
 #else
 		w = BaseWindingForPlane( plane->plane );
 #endif
@@ -451,7 +451,7 @@ bool CreateBrushWindings( brush_t *brush ){
 			}
 			plane = &mapplanes[ brush->sides[ j ].planenum ^ 1 ];
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-			ChopWindingInPlaceAccu( &w, plane->plane, 0 );
+			ChopWindingInPlaceAccu( &w, ( brush->sides[ j ].plane.normal() != g_vector3_identity )? plane3_flipped( brush->sides[ j ].plane ) : Plane3( plane->normal(), plane->dist() ), 0 );
 #else
 			ChopWindingInPlace( &w, plane->plane, 0 ); // CLIP_EPSILON );
 #endif

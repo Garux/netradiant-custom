@@ -364,7 +364,8 @@ void MatchToken( const char *match ) {
 }
 
 
-void Parse1DMatrix( int x, float *m ) {
+template<typename T>
+void Parse1DMatrix( int x, T *m ) {
 	int i;
 
 	MatchToken( "(" );
@@ -376,6 +377,8 @@ void Parse1DMatrix( int x, float *m ) {
 
 	MatchToken( ")" );
 }
+template void Parse1DMatrix<float>( int x, float *m );
+template void Parse1DMatrix<double>( int x, double *m );
 
 void Parse2DMatrix( int y, int x, float *m ) {
 	int i;
