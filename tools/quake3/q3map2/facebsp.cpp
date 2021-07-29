@@ -363,24 +363,21 @@ void BuildFaceTree_r( node_t *node, face_t *list ){
    ================
  */
 tree_t *FaceBSP( face_t *list ) {
-	tree_t      *tree;
-	face_t  *face;
-
 	Sys_FPrintf( SYS_VRB, "--- FaceBSP ---\n" );
 
-	tree = AllocTree();
+	tree_t *tree = AllocTree();
 
 	int count = 0;
-	for ( face = list; face != NULL; face = face->next )
+	for ( const face_t *face = list; face != NULL; face = face->next )
 	{
 		WindingExtendBounds( face->w, tree->minmax );
 		count++;
 	}
 	Sys_FPrintf( SYS_VRB, "%9d faces\n", count );
 
-	for ( int i = 0; i < nummapplanes; i++ )
+	for ( plane_t& plane : mapplanes )
 	{
-		mapplanes[ i ].counter = 0;
+		plane.counter = 0;
 	}
 
 	tree->headnode = AllocNode();

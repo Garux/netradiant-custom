@@ -707,9 +707,6 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 			/* walk triangle list */
 			for ( i = 0; i < ds->numIndexes; i += 3 )
 			{
-				/* overflow hack */
-				AUTOEXPAND_BY_REALLOC( mapplanes, ( nummapplanes + 64 ) << 1, allocatedmapplanes, 1024 );
-
 				/* make points */
 				for ( j = 0; j < 3; j++ )
 				{

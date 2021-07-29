@@ -2104,9 +2104,7 @@ Q_EXTERN std::size_t mapEntityNum Q_ASSIGN( 0 );
 
 Q_EXTERN int entitySourceBrushes;
 
-Q_EXTERN plane_t            *mapplanes Q_ASSIGN( NULL );  /* mapplanes[ num ^ 1 ] will always be the mirror or mapplanes[ num ] */
-Q_EXTERN int nummapplanes Q_ASSIGN( 0 );                    /* nummapplanes will always be even */
-Q_EXTERN int allocatedmapplanes Q_ASSIGN( 0 );
+Q_EXTERN std::vector<plane_t> mapplanes;       /* mapplanes[ num ^ 1 ] will always be the mirror or mapplanes[ num ] */ /* nummapplanes will always be even */
 Q_EXTERN int numMapPatches;
 Q_EXTERN MinMax g_mapMinmax;
 

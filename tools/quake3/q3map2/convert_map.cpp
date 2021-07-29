@@ -55,7 +55,7 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 	float thisarea;
 	bspDrawVert_t *vert[3];
 	winding_t *polygon;
-	plane_t *buildPlane = &mapplanes[buildSide->planenum];
+	const plane_t& buildPlane = mapplanes[buildSide->planenum];
 	int matches = 0;
 
 	// first, start out with NULLs
@@ -76,9 +76,9 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 			vert[1] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 1]];
 			vert[2] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 2]];
 			if ( s->surfaceType == MST_PLANAR && VectorCompare( vert[0]->normal, vert[1]->normal ) && VectorCompare( vert[1]->normal, vert[2]->normal ) ) {
-				if ( vector3_length( vert[0]->normal - buildPlane->normal() ) >= normalEpsilon
-				  || vector3_length( vert[1]->normal - buildPlane->normal() ) >= normalEpsilon
-				  || vector3_length( vert[2]->normal - buildPlane->normal() ) >= normalEpsilon ) {
+				if ( vector3_length( vert[0]->normal - buildPlane.normal() ) >= normalEpsilon
+				  || vector3_length( vert[1]->normal - buildPlane.normal() ) >= normalEpsilon
+				  || vector3_length( vert[2]->normal - buildPlane.normal() ) >= normalEpsilon ) {
 					continue;
 				}
 			}
@@ -88,14 +88,14 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 				// models, there is no better way
 				Plane3f plane;
 				PlaneFromPoints( plane, vert[0]->xyz, vert[1]->xyz, vert[2]->xyz );
-				if ( vector3_length( plane.normal() - buildPlane->normal() ) >= normalEpsilon ) {
+				if ( vector3_length( plane.normal() - buildPlane.normal() ) >= normalEpsilon ) {
 					continue;
 				}
 			}
 			// fixme? better distance epsilon
-			if ( abs( plane3_distance_to_point( buildPlane->plane, vert[0]->xyz ) ) > 1
-			  || abs( plane3_distance_to_point( buildPlane->plane, vert[1]->xyz ) ) > 1
-			  || abs( plane3_distance_to_point( buildPlane->plane, vert[2]->xyz ) ) > 1 ) {
+			if ( abs( plane3_distance_to_point( buildPlane.plane, vert[0]->xyz ) ) > 1
+			  || abs( plane3_distance_to_point( buildPlane.plane, vert[1]->xyz ) ) > 1
+			  || abs( plane3_distance_to_point( buildPlane.plane, vert[2]->xyz ) ) > 1 ) {
 				continue;
 			}
 			// Okay. Correct surface type, correct shader, correct plane. Let's start with the business...
@@ -108,7 +108,7 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 				const Vector3& v1 = vert[( i + 1 ) % 3]->xyz;
 				const Vector3& v2 = vert[( i + 2 ) % 3]->xyz;
 				// we now need to generate the plane spanned by normal and (v2 - v1).
-				Plane3f plane( vector3_cross( v2 - v1, buildPlane->normal() ), 0 );
+				Plane3f plane( vector3_cross( v2 - v1, buildPlane.normal() ), 0 );
 				plane.dist() = vector3_dot( v1, plane.normal() );
 				ChopWindingInPlace( &polygon, plane, distanceEpsilon );
 				if ( !polygon ) {
@@ -876,13 +876,13 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, const Vector
 
 
 	/* convert bsp planes to map planes */
-	nummapplanes = numBSPPlanes;
-	AUTOEXPAND_BY_REALLOC( mapplanes, nummapplanes, allocatedmapplanes, 1024 );
+	mapplanes.resize( numBSPPlanes );
 	for ( i = 0; i < numBSPPlanes; i++ )
 	{
-		mapplanes[ i ].plane = bspPlanes[ i ];
-		mapplanes[ i ].type = PlaneTypeForNormal( mapplanes[ i ].normal() );
-		mapplanes[ i ].hash_chain = 0;
+		plane_t& plane = mapplanes[i];
+		plane.plane = bspPlanes[ i ];
+		plane.type = PlaneTypeForNormal( plane.normal() );
+		plane.hash_chain = 0;
 	}
 
 	/* allocate a build brush */

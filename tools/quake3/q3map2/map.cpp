@@ -81,14 +81,11 @@ bool PlaneEqual( const plane_t& p, const Plane3f& plane ){
    AddPlaneToHash()
  */
 
-void AddPlaneToHash( plane_t *p ){
-	int hash;
+void AddPlaneToHash( plane_t& p ){
+	const int hash = ( PLANE_HASHES - 1 ) & (int) fabs( p.dist() );
 
-
-	hash = ( PLANE_HASHES - 1 ) & (int) fabs( p->dist() );
-
-	p->hash_chain = planehash[hash];
-	planehash[hash] = p - mapplanes + 1;
+	p.hash_chain = planehash[hash];
+	planehash[hash] = &p - mapplanes.data() + 1;
 }
 
 /*
@@ -104,30 +101,28 @@ int CreateNewFloatPlane( const Plane3f& plane ){
 	}
 
 	// create a new plane
-	AUTOEXPAND_BY_REALLOC( mapplanes, nummapplanes + 1, allocatedmapplanes, 1024 );
-
-	plane_t *p = &mapplanes[nummapplanes];
-	p->plane = plane;
-	( p + 1 )->plane = plane3_flipped( plane );
-	p->type = ( p + 1 )->type = PlaneTypeForNormal( p->normal() );
-
-	nummapplanes += 2;
+	mapplanes.resize( mapplanes.size() + 2 );
+	plane_t& p = *( mapplanes.end() - 2 );
+	plane_t& p2 = *( mapplanes.end() - 1 );
+	p.plane = plane;
+	p2.plane = plane3_flipped( plane );
+	p.type = p2.type = PlaneTypeForNormal( p.normal() );
 
 	// always put axial planes facing positive first
-	if ( p->type < ePlaneNonAxial ) {
-		if ( p->normal()[0] < 0 || p->normal()[1] < 0 || p->normal()[2] < 0 ) {
+	if ( p.type < ePlaneNonAxial ) {
+		if ( p.normal()[0] < 0 || p.normal()[1] < 0 || p.normal()[2] < 0 ) {
 			// flip order
-			std::swap( *p, *( p + 1 ) );
+			std::swap( p, p2 );
 
 			AddPlaneToHash( p );
-			AddPlaneToHash( p + 1 );
-			return nummapplanes - 1;
+			AddPlaneToHash( p2 );
+			return mapplanes.size() - 1;
 		}
 	}
 
 	AddPlaneToHash( p );
-	AddPlaneToHash( p + 1 );
-	return nummapplanes - 2;
+	AddPlaneToHash( p2 );
+	return mapplanes.size() - 2;
 }
 
 
@@ -338,28 +333,25 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 #ifdef USE_HASHING
 
 {
-	int i, j, hash, h;
-	int pidx;
 	Plane3f plane( inplane );
-
 #if Q3MAP2_EXPERIMENTAL_SNAP_PLANE_FIX
 	SnapPlaneImproved( plane, numPoints, points );
 #else
 	SnapPlane( plane );
 #endif
 	/* hash the plane */
-	hash = ( PLANE_HASHES - 1 ) & (int) fabs( plane.dist() );
+	const int hash = ( PLANE_HASHES - 1 ) & (int) fabs( plane.dist() );
 
 	/* search the border bins as well */
-	for ( i = -1; i <= 1; i++ )
+	for ( int i = -1; i <= 1; i++ )
 	{
-		h = ( hash + i ) & ( PLANE_HASHES - 1 );
-		for ( pidx = planehash[ h ] - 1; pidx != -1; pidx = mapplanes[pidx].hash_chain - 1 )
+		const int h = ( hash + i ) & ( PLANE_HASHES - 1 );
+		for ( int pidx = planehash[ h ] - 1; pidx != -1; pidx = mapplanes[pidx].hash_chain - 1 )
 		{
-			plane_t *p = &mapplanes[pidx];
+			const plane_t& p = mapplanes[pidx];
 
 			/* do standard plane compare */
-			if ( !PlaneEqual( *p, plane ) ) {
+			if ( !PlaneEqual( p, plane ) ) {
 				continue;
 			}
 
@@ -367,6 +359,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 			//%	return p - mapplanes;
 
 			/* ydnar: test supplied points against this plane */
+			int j;
 			for ( j = 0; j < numPoints; j++ )
 			{
 				// NOTE: When dist approaches 2^16, the resolution of 32 bit floating
@@ -374,7 +367,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 				// very small when world coordinates extend to 2^16.  Making the
 				// dot product here in 64 bit land will not really help the situation
 				// because the error will already be carried in dist.
-				const double d = fabs( plane3_distance_to_point( p->plane, points[ j ] ) );
+				const double d = fabs( plane3_distance_to_point( p.plane, points[ j ] ) );
 				if ( d != 0.0 && d >= distanceEpsilon ) {
 					break; // Point is too far from plane.
 				}
@@ -382,7 +375,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 
 			/* found a matching plane */
 			if ( j >= numPoints ) {
-				return p - mapplanes;
+				return pidx;
 			}
 		}
 	}
@@ -1842,7 +1835,7 @@ void LoadMapFile( char *filename, bool onlyLights, bool noCollapseGroups ){
 		Sys_FPrintf( SYS_VRB, "%9d boxbevels\n", c_boxbevels );
 		Sys_FPrintf( SYS_VRB, "%9d edgebevels\n", c_edgebevels );
 		Sys_FPrintf( SYS_VRB, "%9zu entities\n", entities.size() );
-		Sys_FPrintf( SYS_VRB, "%9d planes\n", nummapplanes );
+		Sys_FPrintf( SYS_VRB, "%9zu planes\n", mapplanes.size() );
 		Sys_Printf( "%9d areaportals\n", c_areaportals );
 		Sys_Printf( "Size: %5.0f, %5.0f, %5.0f to %5.0f, %5.0f, %5.0f\n",
 		            g_mapMinmax.mins[0], g_mapMinmax.mins[1], g_mapMinmax.mins[2],

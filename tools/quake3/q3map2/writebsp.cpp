@@ -112,11 +112,10 @@ int EmitShader( const char *shader, int *contentFlags, int *surfaceFlags ){
 
 void EmitPlanes( void ){
 	/* walk plane list */
-	plane_t *mp = mapplanes;
-	for ( int i = 0; i < nummapplanes; i++, mp++ )
+	for ( size_t i = 0; i < mapplanes.size(); ++i )
 	{
 		AUTOEXPAND_BY_REALLOC_BSP( Planes, 1024 );
-		bspPlanes[ numBSPPlanes ] = mp->plane;
+		bspPlanes[ numBSPPlanes ] = mapplanes[i].plane;
 		numBSPPlanes++;
 	}
 

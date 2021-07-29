@@ -117,11 +117,7 @@ void FreeTree( tree_t *tree ){
 //===============================================================
 
 void PrintTree_r( node_t *node, int depth ){
-	int i;
-	plane_t *plane;
-	brush_t *bb;
-
-	for ( i = 0 ; i < depth ; i++ )
+	for ( int i = 0; i < depth; i++ )
 		Sys_Printf( "  " );
 	if ( node->planenum == PLANENUM_LEAF ) {
 		if ( !node->brushlist ) {
@@ -129,17 +125,17 @@ void PrintTree_r( node_t *node, int depth ){
 		}
 		else
 		{
-			for ( bb = node->brushlist ; bb ; bb = bb->next )
+			for ( const brush_t *bb = node->brushlist; bb; bb = bb->next )
 				Sys_Printf( "%d ", bb->original->brushNum );
 			Sys_Printf( "\n" );
 		}
 		return;
 	}
 
-	plane = &mapplanes[node->planenum];
+	const plane_t& plane = mapplanes[node->planenum];
 	Sys_Printf( "#%d (%5.2f %5.2f %5.2f):%5.2f\n", node->planenum,
-	            plane->normal()[0], plane->normal()[1], plane->normal()[2],
-	            plane->dist() );
+	            plane.normal()[0], plane.normal()[1], plane.normal()[2],
+	            plane.dist() );
 	PrintTree_r( node->children[0], depth + 1 );
 	PrintTree_r( node->children[1], depth + 1 );
 }
