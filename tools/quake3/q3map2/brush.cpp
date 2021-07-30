@@ -353,33 +353,25 @@ bool FixWinding( winding_t *w ){
    if the some of the winding's points are close together.
    ==================
  */
-bool FixWindingAccu( winding_accu_t *w ){
-	if ( w == NULL ) {
-		Error( "FixWindingAccu: NULL argument" );
-	}
-
+bool FixWindingAccu( winding_accu_t& w ){
 	bool altered = false;
 
 	while ( true )
 	{
-		if ( w->numpoints < 2 ) {
+		if ( w.size() < 2 ) {
 			break;                   // Don't remove the only remaining point.
 		}
 		bool done = true;
-		for ( int i = w->numpoints - 1, j = 0; j < w->numpoints; i = j, ++j )
+		for ( winding_accu_t::iterator i = w.end() - 1, j = w.begin(); j != w.end(); i = j, ++j )
 		{
-			if ( vector3_length( w->p[i] - w->p[j] ) < DEGENERATE_EPSILON ) {
+			if ( vector3_length( *i - *j ) < DEGENERATE_EPSILON ) {
 				// TODO: I think the "snap weld vector" was written before
 				// some of the math precision fixes, and its purpose was
 				// probably to address math accuracy issues.  We can think
 				// about changing the logic here.  Maybe once plane distance
 				// gets 64 bits, we can look at it then.
-				w->p[i] = SnapWeldVectorAccu( w->p[i], w->p[j] );
-				for ( int k = j + 1; k < w->numpoints; k++ )
-				{
-					w->p[k - 1] = w->p[k];
-				}
-				w->numpoints--;
+				*i = SnapWeldVectorAccu( *i, *j );
+				w.erase( j );
 				altered = true;
 				// The only way to finish off fixing the winding consistently and
 				// accurately is by fixing the winding all over again.  For example,
@@ -407,11 +399,6 @@ bool FixWindingAccu( winding_accu_t *w ){
  */
 
 bool CreateBrushWindings( brush_t *brush ){
-#if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-	winding_accu_t  *w;
-#else
-	winding_t   *w;
-#endif
 	/* walk the list of brush sides */
 	for ( int i = 0; i < brush->numsides; i++ )
 	{
@@ -421,13 +408,13 @@ bool CreateBrushWindings( brush_t *brush ){
 
 		/* make huge winding */
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-		w = BaseWindingForPlaneAccu( ( side.plane.normal() != g_vector3_identity )? side.plane : Plane3( plane.plane ) );
+		winding_accu_t w = BaseWindingForPlaneAccu( ( side.plane.normal() != g_vector3_identity )? side.plane : Plane3( plane.plane ) );
 #else
-		w = BaseWindingForPlane( plane.plane );
+		winding_t *w = BaseWindingForPlane( plane.plane );
 #endif
 
 		/* walk the list of brush sides */
-		for ( int j = 0; j < brush->numsides && w != NULL; j++ )
+		for ( int j = 0; j < brush->numsides && !w.empty(); j++ )
 		{
 			const side_t& cside = brush->sides[ j ];
 			const plane_t& cplane = mapplanes[ cside.planenum ^ 1 ];
@@ -437,7 +424,7 @@ bool CreateBrushWindings( brush_t *brush ){
 				continue;
 			}
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-			ChopWindingInPlaceAccu( &w, ( cside.plane.normal() != g_vector3_identity )? plane3_flipped( cside.plane ) : Plane3( cplane.plane ), 0 );
+			ChopWindingInPlaceAccu( w, ( cside.plane.normal() != g_vector3_identity )? plane3_flipped( cside.plane ) : Plane3( cplane.plane ), 0 );
 #else
 			ChopWindingInPlace( &w, cplane.plane, 0 ); // CLIP_EPSILON );
 #endif
@@ -455,17 +442,8 @@ bool CreateBrushWindings( brush_t *brush ){
 
 		/* set side winding */
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-		if ( w != NULL ) {
-			FixWindingAccu( w );
-			if ( w->numpoints < 3 ) {
-				FreeWindingAccu( w );
-				w = NULL;
-			}
-		}
-		side.winding = ( w ? CopyWindingAccuToRegular( w ) : NULL );
-		if ( w ) {
-			FreeWindingAccu( w );
-		}
+		FixWindingAccu( w );
+		side.winding = ( w.size() >= 3 ? CopyWindingAccuToRegular( w ) : NULL );
 #else
 		side.winding = w;
 #endif

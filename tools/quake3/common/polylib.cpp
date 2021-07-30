@@ -50,18 +50,6 @@ winding_t   *AllocWinding( int points ){
 
 /*
    =============
-   AllocWindingAccu
-   =============
- */
-winding_accu_t *AllocWindingAccu( int points ){
-	if ( points >= MAX_POINTS_ON_WINDING ) {
-		Error( "AllocWindingAccu failed: MAX_POINTS_ON_WINDING exceeded" );
-	}
-	return safe_calloc( offsetof_array( winding_accu_t, p, points ) );
-}
-
-/*
-   =============
    FreeWinding
    =============
  */
@@ -74,24 +62,6 @@ void FreeWinding( winding_t *w ){
 		Error( "FreeWinding: freed a freed winding" );
 	}
 	*(unsigned *)w = 0xdeaddead;
-
-	free( w );
-}
-
-/*
-   =============
-   FreeWindingAccu
-   =============
- */
-void FreeWindingAccu( winding_accu_t *w ){
-	if ( !w ) {
-		Error( "FreeWindingAccu: winding is NULL" );
-	}
-
-	if ( *( (unsigned *) w ) == 0xdeaddead ) {
-		Error( "FreeWindingAccu: freed a freed winding" );
-	}
-	*( (unsigned *) w ) = 0xdeaddead;
 
 	free( w );
 }
@@ -177,7 +147,7 @@ Vector3 WindingCenter( const winding_t *w ){
    BaseWindingForPlaneAccu
    =================
  */
-winding_accu_t *BaseWindingForPlaneAccu( const Plane3& plane ){
+winding_accu_t BaseWindingForPlaneAccu( const Plane3& plane ){
 	// The goal in this function is to replicate the behavior of the original BaseWindingForPlane()
 	// function (see below) but at the same time increasing accuracy substantially.
 
@@ -194,7 +164,6 @@ winding_accu_t *BaseWindingForPlaneAccu( const Plane3& plane ){
 	int x, i;
 	float max, v;
 	DoubleVector3 vright, vup, org;
-	winding_accu_t  *w;
 
 	// One of the components of normal must have a magnitiude greater than this value,
 	// otherwise normal is not a unit vector.  This is a little bit of inexpensive
@@ -265,16 +234,12 @@ winding_accu_t *BaseWindingForPlaneAccu( const Plane3& plane ){
 	// outside the world.  sqrt(262144^2 + 262144^2)/2 = 185363, which is greater than
 	// 113512.
 
-	w = AllocWindingAccu( 4 );
-
-	w->p[0] = org - vright + vup;
-	w->p[1] = org + vright + vup;
-	w->p[2] = org + vright - vup;
-	w->p[3] = org - vright - vup;
-
-	w->numpoints = 4;
-
-	return w;
+	return winding_accu_t{
+	org - vright + vup,
+	org + vright + vup,
+	org + vright - vup,
+	org - vright - vup
+	};
 }
 
 /*
@@ -366,37 +331,15 @@ winding_t   *CopyWinding( const winding_t *w ){
 
 /*
    ==================
-   CopyWindingAccuIncreaseSizeAndFreeOld
-   ==================
- */
-winding_accu_t *CopyWindingAccuIncreaseSizeAndFreeOld( winding_accu_t *w ){
-	if ( !w ) {
-		Error( "CopyWindingAccuIncreaseSizeAndFreeOld: winding is NULL" );
-	}
-
-	winding_accu_t *c = void_ptr( memcpy( AllocWindingAccu( w->numpoints + 1 ), w, offsetof_array( winding_accu_t, p, w->numpoints ) ) );
-	FreeWindingAccu( w );
-	return c;
-}
-
-/*
-   ==================
    CopyWindingAccuToRegular
    ==================
  */
-winding_t   *CopyWindingAccuToRegular( const winding_accu_t *w ){
-	int i;
-	winding_t   *c;
-
-	if ( !w ) {
-		Error( "CopyWindingAccuToRegular: winding is NULL" );
-	}
-
-	c = AllocWinding( w->numpoints );
-	c->numpoints = w->numpoints;
-	for ( i = 0; i < c->numpoints; i++ )
+winding_t   *CopyWindingAccuToRegular( const winding_accu_t& w ){
+	winding_t *c = AllocWinding( w.size() );
+	c->numpoints = w.size();
+	for ( int i = 0; i < c->numpoints; i++ )
 	{
-		c->p[i] = w->p[i];
+		c->p[i] = w[i];
 	}
 	return c;
 }
@@ -553,15 +496,11 @@ void    ClipWindingEpsilon( winding_t *in, const Plane3f& plane,
    ChopWindingInPlaceAccu
    =============
  */
-void ChopWindingInPlaceAccu( winding_accu_t **inout, const Plane3& plane, float crudeEpsilon ){
-	winding_accu_t  *in;
-	int counts[3];
-	int i, j;
+void ChopWindingInPlaceAccu( winding_accu_t& inout, const Plane3& plane, float crudeEpsilon ){
+	size_t counts[3] = { 0 };
+	size_t i, j;
 	double dists[MAX_POINTS_ON_WINDING + 1];
 	EPlaneSide sides[MAX_POINTS_ON_WINDING + 1];
-	int maxpts;
-	winding_accu_t  *f;
-	double w;
 
 	// We require at least a very small epsilon.  It's a good idea for several reasons.
 	// First, we will be dividing by a potentially very small distance below.  We don't
@@ -598,12 +537,9 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, const Plane3& plane, float 
 	static const double smallestEpsilonAllowed = ( (double) VEC_SMALLEST_EPSILON_AROUND_ONE ) * 0.5;
 	const double fineEpsilon = std::max( smallestEpsilonAllowed, (double) crudeEpsilon );
 
-	in = *inout;
-	counts[0] = counts[1] = counts[2] = 0;
-
-	for ( i = 0; i < in->numpoints; i++ )
+	for ( i = 0; i < inout.size(); i++ )
 	{
-		dists[i] = plane3_distance_to_point( plane, in->p[i] );
+		dists[i] = plane3_distance_to_point( plane, inout[i] );
 		if ( dists[i] > fineEpsilon ) {
 			sides[i] = eSideFront;
 		}
@@ -622,8 +558,7 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, const Plane3& plane, float 
 	// that we never get a case where two nearly equal planes result in 2 NULL windings
 	// due to the 'if' statement below.  TODO: Investigate this.
 	if ( !counts[eSideFront] ) {
-		FreeWindingAccu( in );
-		*inout = NULL;
+		inout.clear();
 		return;
 	}
 	if ( !counts[eSideBack] ) {
@@ -633,24 +568,18 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, const Plane3& plane, float 
 	// NOTE: The least number of points that a winding can have at this point is 2.
 	// In that case, one point is SIDE_FRONT and the other is SIDE_BACK.
 
-	maxpts = counts[eSideFront] + 2; // We dynamically expand if this is too small.
-	f = AllocWindingAccu( maxpts );
+	winding_accu_t f;
+	f.reserve( counts[eSideFront] + 2 );
 
-	for ( i = 0; i < in->numpoints; i++ )
+	for ( i = 0; i < inout.size(); i++ )
 	{
-		const DoubleVector3& p1 = in->p[i];
+		const DoubleVector3& p1 = inout[i];
 
 		if ( sides[i] == eSideOn || sides[i] == eSideFront ) {
-			if ( f->numpoints >= MAX_POINTS_ON_WINDING ) {
+			if ( f.size() >= MAX_POINTS_ON_WINDING ) {
 				Error( "ChopWindingInPlaceAccu: MAX_POINTS_ON_WINDING" );
 			}
-			if ( f->numpoints >= maxpts ) { // This will probably never happen.
-				Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: estimate on chopped winding size incorrect (no problem)\n" );
-				f = CopyWindingAccuIncreaseSizeAndFreeOld( f );
-				maxpts++;
-			}
-			f->p[f->numpoints] = p1;
-			f->numpoints++;
+			f.push_back( p1 );
 			if ( sides[i] == eSideOn ) {
 				continue;
 			}
@@ -660,11 +589,11 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, const Plane3& plane, float 
 		}
 
 		// Generate a split point.
-		const DoubleVector3& p2 = in->p[( ( i + 1 ) == in->numpoints ) ? 0 : ( i + 1 )];
+		const DoubleVector3& p2 = inout[( ( i + 1 ) == inout.size() ) ? 0 : ( i + 1 )];
 
 		// The divisor's absolute value is greater than the dividend's absolute value.
 		// w is in the range (0,1).
-		w = dists[i] / ( dists[i] - dists[i + 1] );
+		const double w = dists[i] / ( dists[i] - dists[i + 1] );
 		DoubleVector3 mid;
 		for ( j = 0; j < 3; j++ )
 		{
@@ -679,20 +608,13 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, const Plane3& plane, float 
 				mid[j] = p1[j] + ( w * ( p2[j] - p1[j] ) );
 			}
 		}
-		if ( f->numpoints >= MAX_POINTS_ON_WINDING ) {
+		if ( f.size() >= MAX_POINTS_ON_WINDING ) {
 			Error( "ChopWindingInPlaceAccu: MAX_POINTS_ON_WINDING" );
 		}
-		if ( f->numpoints >= maxpts ) { // This will probably never happen.
-			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: estimate on chopped winding size incorrect (no problem)\n" );
-			f = CopyWindingAccuIncreaseSizeAndFreeOld( f );
-			maxpts++;
-		}
-		f->p[f->numpoints] = mid;
-		f->numpoints++;
+		f.push_back( mid );
 	}
 
-	FreeWindingAccu( in );
-	*inout = f;
+	inout.swap( f );
 }
 
 /*
