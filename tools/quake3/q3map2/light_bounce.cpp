@@ -389,7 +389,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 	float dist, area, value;
 	Vector3 normal, color, gradient;
 	light_t         *light, *splash;
-	winding_t       *w, *splash_w;
+	winding_t       *w;
 
 
 	/* dummy check */
@@ -447,11 +447,10 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 
 	/* create a regular winding and an average normal */
 	w = AllocWinding( rw->numVerts );
-	w->numpoints = rw->numVerts;
 	normal.set( 0 );
 	for ( i = 0; i < rw->numVerts; i++ )
 	{
-		w->p[ i ] = rw->verts[ i ].xyz;
+		w->push_back( rw->verts[ i ].xyz );
 		normal += rw->verts[ i ].normal;
 	}
 	normal /= rw->numVerts;
@@ -582,11 +581,9 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 			}
 
 			/* create a regular winding */
-			splash_w = AllocWinding( rw->numVerts );
-			splash_w->numpoints = rw->numVerts;
+			splash->w = AllocWinding( rw->numVerts );
 			for ( i = 0; i < rw->numVerts; i++ )
-				splash_w->p[ i ] = rw->verts[rw->numVerts - 1 - i].xyz + normal * si->backsplashDistance;
-			splash->w = splash_w;
+				splash->w->push_back( rw->verts[rw->numVerts - 1 - i].xyz + normal * si->backsplashDistance );
 
 			splash->origin = normal * si->backsplashDistance + light->origin;
 			splash->normal = -normal;
@@ -610,7 +607,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 		}
 
 		/* set origin */
-		light->origin = WindingCenter( w );
+		light->origin = WindingCenter( *w );
 
 		/* nudge it off the plane a bit */
 		light->normal = normal;

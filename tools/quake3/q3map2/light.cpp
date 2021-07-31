@@ -637,17 +637,17 @@ void SetEntityOrigins( void ){
 
 #define ONE_OVER_2PI    0.159154942f    //% (1.0f / (2.0f * 3.141592657f))
 
-float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, const winding_t *w ){
-	int i, j;
+float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, const winding_t& w ){
 	Vector3 dirs[ MAX_POINTS_ON_WINDING ];
 	float total;
 	float angle, facing;
 
 
 	/* this is expensive */
-	for ( i = 0; i < w->numpoints; i++ )
+	size_t i;
+	for ( i = 0; i < w.size(); i++ )
 	{
-		dirs[ i ] = w->p[ i ] - point;
+		dirs[ i ] = w[ i ] - point;
 		VectorFastNormalize( dirs[ i ] );
 	}
 
@@ -656,10 +656,10 @@ float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, con
 
 	/* calculcate relative area */
 	total = 0.0f;
-	for ( i = 0; i < w->numpoints; i++ )
+	for ( i = 0; i < w.size(); i++ )
 	{
 		/* get a triangle */
-		j = i + 1;
+		const size_t j = i + 1;
 
 		/* get the angle */
 		/* roundoff can cause slight creep, which gives an IND from acos, thus clamp */
@@ -811,7 +811,7 @@ int LightContributionToSample( trace_t *trace ){
 		else
 		{
 			/* calculate the contribution */
-			factor = PointToPolygonFormFactor( pushedOrigin, trace->normal, light->w );
+			factor = PointToPolygonFormFactor( pushedOrigin, trace->normal, *light->w );
 			if ( factor == 0.0f ) {
 				return 0;
 			}
@@ -1258,7 +1258,7 @@ bool LightContributionToPoint( trace_t *trace ){
 		}
 
 		/* calculate the contribution (ydnar 2002-10-21: [bug 642] bad normal calc) */
-		factor = PointToPolygonFormFactor( pushedOrigin, trace->direction, light->w );
+		factor = PointToPolygonFormFactor( pushedOrigin, trace->direction, *light->w );
 		if ( factor == 0.0f ) {
 			return false;
 		}

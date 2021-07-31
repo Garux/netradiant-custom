@@ -180,7 +180,7 @@ bool BoundBrush( brush_t *brush ){
 	{
 		const winding_t *w = brush->sides[ i ].winding;
 		if ( w != NULL ) {
-			WindingExtendBounds( w, brush->minmax );
+			WindingExtendBounds( *w, brush->minmax );
 		}
 	}
 
@@ -198,17 +198,15 @@ bool BoundBrush( brush_t *brush ){
 
 #define SNAP_EPSILON    0.01
 
-void SnapWeldVector( const Vector3& a, const Vector3& b, Vector3& out ){
-	int i;
-	float ai, bi, outi;
-
+Vector3 SnapWeldVector( const Vector3& a, const Vector3& b ){
+	Vector3 out;
 
 	/* do each element */
-	for ( i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; i++ )
 	{
 		/* round to integer */
-		ai = std::rint( a[ i ] );
-		bi = std::rint( b[ i ] );
+		const float ai = std::rint( a[ i ] );
+		const float bi = std::rint( b[ i ] );
 
 		/* prefer exact integer */
 		if ( ai == a[ i ] ) {
@@ -227,11 +225,13 @@ void SnapWeldVector( const Vector3& a, const Vector3& b, Vector3& out ){
 		}
 
 		/* snap */
-		outi = std::rint( out[ i ] );
+		const float outi = std::rint( out[ i ] );
 		if ( fabs( outi - out[ i ] ) <= SNAP_EPSILON ) {
 			out[ i ] = outi;
 		}
 	}
+
+	return out;
 }
 
 /*
@@ -292,9 +292,6 @@ DoubleVector3 SnapWeldVectorAccu( const DoubleVector3& a, const DoubleVector3& b
 
 bool FixWinding( winding_t *w ){
 	bool valid = true;
-	int i, j, k;
-	Vector3 vec;
-
 
 	/* dummy check */
 	if ( !w ) {
@@ -302,38 +299,30 @@ bool FixWinding( winding_t *w ){
 	}
 
 	/* check all verts */
-	for ( i = 0; i < w->numpoints; i++ )
+	for ( winding_t::iterator i = w->end() - 1, j = w->begin(); j != w->end(); i = j, ++j )
 	{
 		/* don't remove points if winding is a triangle */
-		if ( w->numpoints == 3 ) {
+		if ( w->size() == 3 ) {
 			return valid;
 		}
 
-		/* get second point index */
-		j = ( i + 1 ) % w->numpoints;
-
 		/* degenerate edge? */
-		if ( vector3_length( w->p[ i ] - w->p[ j ] ) < DEGENERATE_EPSILON ) {
+		if ( vector3_length( *i - *j ) < DEGENERATE_EPSILON ) {
 			valid = false;
 			//Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: Degenerate winding edge found, fixing...\n" );
 
 			/* create an average point (ydnar 2002-01-26: using nearest-integer weld preference) */
-			SnapWeldVector( w->p[ i ], w->p[ j ], vec );
-			w->p[ i ] = vec;
+			*i = SnapWeldVector( *i, *j );
 			//VectorAdd( w->p[ i ], w->p[ j ], vec );
 			//VectorScale( vec, 0.5, w->p[ i ] );
 
 			/* move the remaining verts */
-			for ( k = i + 2; k < w->numpoints; k++ )
-			{
-				w->p[ k - 1 ] = w->p[ k ];
-			}
-			w->numpoints--;
+			w->erase( j );
 		}
 	}
 
 	/* one last check and return */
-	if ( w->numpoints < 3 ) {
+	if ( w->size() < 3 ) {
 		valid = false;
 	}
 	return valid;
@@ -426,7 +415,7 @@ bool CreateBrushWindings( brush_t *brush ){
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
 			ChopWindingInPlaceAccu( w, ( cside.plane.normal() != g_vector3_identity )? plane3_flipped( cside.plane ) : Plane3( cplane.plane ), 0 );
 #else
-			ChopWindingInPlace( &w, cplane.plane, 0 ); // CLIP_EPSILON );
+			ChopWindingInPlace( w, cplane.plane, 0 ); // CLIP_EPSILON );
 #endif
 
 			/* ydnar: fix broken windings that would generate trifans */
@@ -513,7 +502,7 @@ float BrushVolume( brush_t *brush ){
 	if ( !w ) {
 		return 0;
 	}
-	corner = w->p[0];
+	corner = ( *w )[0];
 
 	// make tetrahedrons to all other faces
 
@@ -524,7 +513,7 @@ float BrushVolume( brush_t *brush ){
 		if ( !w ) {
 			continue;
 		}
-		volume += -plane3_distance_to_point( mapplanes[brush->sides[i].planenum].plane, corner ) * WindingArea( w );
+		volume += -plane3_distance_to_point( mapplanes[brush->sides[i].planenum].plane, corner ) * WindingArea( *w );
 	}
 
 	volume /= 3;
@@ -541,8 +530,6 @@ float BrushVolume( brush_t *brush ){
 void WriteBSPBrushMap( const char *name, brush_t *list ){
 	side_t      *s;
 	int i;
-	winding_t   *w;
-
 
 	/* note it */
 	Sys_Printf( "Writing %s\n", name );
@@ -552,18 +539,19 @@ void WriteBSPBrushMap( const char *name, brush_t *list ){
 
 	fprintf( f, "{\n\"classname\" \"worldspawn\"\n" );
 
-	for ( ; list ; list = list->next )
+	for ( ; list; list = list->next )
 	{
 		fprintf( f, "{\n" );
-		for ( i = 0,s = list->sides ; i < list->numsides ; i++,s++ )
+		for ( i = 0, s = list->sides; i < list->numsides; i++, s++ )
 		{
 			// TODO: See if we can use a smaller winding to prevent resolution loss.
 			// Is WriteBSPBrushMap() used only to decompile maps?
-			w = BaseWindingForPlane( mapplanes[s->planenum].plane );
+			winding_t *w = BaseWindingForPlane( mapplanes[s->planenum].plane );
+			const winding_t& wr = *w;
 
-			fprintf( f, "( %i %i %i ) ", (int)w->p[0][0], (int)w->p[0][1], (int)w->p[0][2] );
-			fprintf( f, "( %i %i %i ) ", (int)w->p[1][0], (int)w->p[1][1], (int)w->p[1][2] );
-			fprintf( f, "( %i %i %i ) ", (int)w->p[2][0], (int)w->p[2][1], (int)w->p[2][2] );
+			fprintf( f, "( %i %i %i ) ", (int)wr[0][0], (int)wr[0][1], (int)wr[0][2] );
+			fprintf( f, "( %i %i %i ) ", (int)wr[1][0], (int)wr[1][1], (int)wr[1][2] );
+			fprintf( f, "( %i %i %i ) ", (int)wr[2][0], (int)wr[2][1], (int)wr[2][2] );
 
 			fprintf( f, "notexture 0 0 0 1 1\n" );
 			FreeWinding( w );
@@ -746,19 +734,17 @@ node_t *AllocNode( void ){
    ================
  */
 #define EDGE_LENGTH 0.2
-bool WindingIsTiny( winding_t *w ){
+bool WindingIsTiny( const winding_t& w ){
 /*
 	if (WindingArea (w) < 1)
 		return true;
 	return false;
  */
-	int i, j;
 	int edges = 0;
 
-	for ( i = 0 ; i < w->numpoints ; i++ )
+	for ( size_t i = w.size() - 1, j = 0; j < w.size(); i = j, ++j )
 	{
-		j = ( i == w->numpoints - 1 )? 0 : i + 1;
-		if ( vector3_length( w->p[j] - w->p[i] ) > EDGE_LENGTH ) {
+		if ( vector3_length( w[j] - w[i] ) > EDGE_LENGTH ) {
 			if ( ++edges == 3 ) {
 				return false;
 			}
@@ -775,9 +761,9 @@ bool WindingIsTiny( winding_t *w ){
    from basewinding for plane
    ================
  */
-bool WindingIsHuge( winding_t *w ){
-	for ( int i = 0; i < w->numpoints; i++ )
-		if ( !c_worldMinmax.test( w->p[i] ) )
+bool WindingIsHuge( const winding_t& w ){
+	for ( const Vector3& p : w )
+		if ( !c_worldMinmax.test( p ) )
 			return true;
 	return false;
 }
@@ -791,29 +777,23 @@ bool WindingIsHuge( winding_t *w ){
    ==================
  */
 int BrushMostlyOnSide( brush_t *brush, plane_t *plane ){
-	int i, j;
-	winding_t   *w;
-	float max;
-	int side;
-
-	max = 0;
-	side = PSIDE_FRONT;
-	for ( i = 0 ; i < brush->numsides ; i++ )
+	float max = 0;
+	int side = PSIDE_FRONT;
+	for ( int i = 0 ; i < brush->numsides ; i++ )
 	{
-		w = brush->sides[i].winding;
-		if ( !w ) {
-			continue;
-		}
-		for ( j = 0 ; j < w->numpoints ; j++ )
-		{
-			const double d = plane3_distance_to_point( plane->plane, w->p[j] );
-			if ( d > max ) {
-				max = d;
-				side = PSIDE_FRONT;
-			}
-			if ( -d > max ) {
-				max = -d;
-				side = PSIDE_BACK;
+		winding_t *w = brush->sides[i].winding;
+		if ( w ) {
+			for ( const Vector3& p : *w )
+			{
+				const double d = plane3_distance_to_point( plane->plane, p );
+				if ( d > max ) {
+					max = d;
+					side = PSIDE_FRONT;
+				}
+				if ( -d > max ) {
+					max = -d;
+					side = PSIDE_BACK;
+				}
 			}
 		}
 	}
@@ -848,9 +828,9 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 		if ( !w ) {
 			continue;
 		}
-		for ( j = 0 ; j < w->numpoints ; j++ )
+		for ( const Vector3& p : *w )
 		{
-			const float d = plane3_distance_to_point( plane->plane, w->p[j] );
+			const float d = plane3_distance_to_point( plane->plane, p );
 			if ( d > 0 ) {
 				value_maximize( d_front, d );
 			}
@@ -877,10 +857,10 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 	for ( i = 0 ; i < brush->numsides && w ; i++ )
 	{
 		plane2 = &mapplanes[brush->sides[i].planenum ^ 1];
-		ChopWindingInPlace( &w, plane2->plane, 0 ); // PLANESIDE_EPSILON);
+		ChopWindingInPlace( w, plane2->plane, 0 ); // PLANESIDE_EPSILON);
 	}
 
-	if ( !w || WindingIsTiny( w ) ) { // the brush isn't really split
+	if ( !w || WindingIsTiny( *w ) ) { // the brush isn't really split
 		int side;
 
 		side = BrushMostlyOnSide( brush, plane );
@@ -893,7 +873,7 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 		return;
 	}
 
-	if ( WindingIsHuge( w ) ) {
+	if ( WindingIsHuge( *w ) ) {
 		Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: huge winding\n" );
 	}
 
@@ -919,8 +899,8 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 		if ( !w ) {
 			continue;
 		}
-		ClipWindingEpsilonStrict( w, plane->plane,
-		                          0 /*PLANESIDE_EPSILON*/, &cw[0], &cw[1] ); /* strict, in parallel case we get the face back because it also is the midwinding */
+		ClipWindingEpsilonStrict( *w, plane->plane,
+		                          0 /*PLANESIDE_EPSILON*/, cw[0], cw[1] ); /* strict, in parallel case we get the face back because it also is the midwinding */
 		for ( j = 0 ; j < 2 ; j++ )
 		{
 			if ( !cw[j] ) {

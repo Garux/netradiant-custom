@@ -126,7 +126,7 @@ static void SelectSplitPlaneNum( node_t *node, face_t *list, int *splitPlaneNum,
 				//check->checked = true;	// won't need to test this plane again
 				continue;
 			}
-			const EPlaneSide side = WindingOnPlaneSide( check->w, plane.plane );
+			const EPlaneSide side = WindingOnPlaneSide( *check->w, plane.plane );
 			if ( side == eSideCross ) {
 				splits++;
 			}
@@ -142,7 +142,7 @@ static void SelectSplitPlaneNum( node_t *node, face_t *list, int *splitPlaneNum,
 			// from 27
 
 			//Bigger is better
-			sizeBias = WindingArea( split->w );
+			sizeBias = WindingArea( *split->w );
 
 			//Base score = 20000 perfectly balanced
 			value = 20000 - ( abs( front - back ) );
@@ -276,12 +276,12 @@ void BuildFaceTree_r( node_t *node, face_t *list ){
 #endif
 
 		/* determine which side the face falls on */
-		const EPlaneSide side = WindingOnPlaneSide( split->w, plane.plane );
+		const EPlaneSide side = WindingOnPlaneSide( *split->w, plane.plane );
 
 		/* switch on side */
 		if ( side == eSideCross ) {
-			ClipWindingEpsilonStrict( split->w, plane.plane, CLIP_EPSILON * 2,
-			                          &frontWinding, &backWinding ); /* strict; if no winding is left, we have a "virtually identical" plane and don't want to split by it */
+			ClipWindingEpsilonStrict( *split->w, plane.plane, CLIP_EPSILON * 2,
+			                          frontWinding, backWinding ); /* strict; if no winding is left, we have a "virtually identical" plane and don't want to split by it */
 			if ( frontWinding ) {
 				newFace = AllocBspFace();
 				newFace->w = frontWinding;
@@ -370,7 +370,7 @@ tree_t *FaceBSP( face_t *list ) {
 	int count = 0;
 	for ( const face_t *face = list; face != NULL; face = face->next )
 	{
-		WindingExtendBounds( face->w, tree->minmax );
+		WindingExtendBounds( *face->w, tree->minmax );
 		count++;
 	}
 	Sys_FPrintf( SYS_VRB, "%9d faces\n", count );

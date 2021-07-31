@@ -349,9 +349,8 @@ winding_t *WindingFromDrawSurf( mapDrawSurface_t *ds ){
 	}
 
 	w = AllocWinding( ds->numVerts );
-	w->numpoints = ds->numVerts;
-	for ( i = 0 ; i < ds->numVerts ; i++ ) {
-		w->p[i] = ds->verts[i].xyz;
+	for ( i = 0; i < ds->numVerts; i++ ) {
+		w->push_back( ds->verts[i].xyz );
 	}
 	return w;
 }
@@ -400,7 +399,7 @@ bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 		}
 
 		/* general case */
-		ClipWindingEpsilonStrict( w, plane.plane, ON_EPSILON, &front, &back ); /* strict; if plane is "almost identical" to face, both ways to continue can be wrong, so we better not fog it */
+		ClipWindingEpsilonStrict( *w, plane.plane, ON_EPSILON, front, back ); /* strict; if plane is "almost identical" to face, both ways to continue can be wrong, so we better not fog it */
 		FreeWinding( w );
 
 		if ( back == NULL ) {
@@ -428,7 +427,7 @@ bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 	s = ds->sideRef->side;
 	for ( i = 0; i < numOutside; i++ )
 	{
-		newds = DrawSurfaceForSide( e, ds->mapBrush, s, outside[ i ] );
+		newds = DrawSurfaceForSide( e, ds->mapBrush, s, *outside[ i ] );
 		newds->fogNum = ds->fogNum;
 		FreeWinding( outside[ i ] );
 	}
@@ -438,7 +437,7 @@ bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 	          the right thing and uses the original surface's brush side */
 
 	/* build a drawsurf for it */
-	newds = DrawSurfaceForSide( e, ds->mapBrush, s, w );
+	newds = DrawSurfaceForSide( e, ds->mapBrush, s, *w );
 	if ( newds == NULL ) {
 		return false;
 	}

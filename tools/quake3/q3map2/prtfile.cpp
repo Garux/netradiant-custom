@@ -97,7 +97,7 @@ void CountVisportals_r( node_t *node ){
    =================
  */
 void WritePortalFile_r( node_t *node ){
-	int i, s, flags;
+	int s, flags;
 	portal_t    *p;
 	winding_t   *w;
 
@@ -130,11 +130,11 @@ void WritePortalFile_r( node_t *node ){
 			// the changeover point between different axis.  interpret the
 			// plane the same way vis will, and flip the side orders if needed
 			// FIXME: is this still relevant?
-			if ( vector3_dot( p->plane.normal(), WindingPlane( w ).normal() ) < 0.99 ) { // backwards...
-				fprintf( pf, "%i %i %i ", w->numpoints, p->nodes[1]->cluster, p->nodes[0]->cluster );
+			if ( vector3_dot( p->plane.normal(), WindingPlane( *w ).normal() ) < 0.99 ) { // backwards...
+				fprintf( pf, "%zu %i %i ", w->size(), p->nodes[1]->cluster, p->nodes[0]->cluster );
 			}
 			else{
-				fprintf( pf, "%i %i %i ", w->numpoints, p->nodes[0]->cluster, p->nodes[1]->cluster );
+				fprintf( pf, "%zu %i %i ", w->size(), p->nodes[0]->cluster, p->nodes[1]->cluster );
 			}
 
 			flags = 0;
@@ -152,12 +152,12 @@ void WritePortalFile_r( node_t *node ){
 			fprintf( pf, "%d ", flags );
 
 			/* write the winding */
-			for ( i = 0 ; i < w->numpoints ; i++ )
+			for ( const Vector3 point : *w )
 			{
 				fprintf( pf, "(" );
-				WriteFloat( pf, w->p[i][0] );
-				WriteFloat( pf, w->p[i][1] );
-				WriteFloat( pf, w->p[i][2] );
+				WriteFloat( pf, point.x() );
+				WriteFloat( pf, point.y() );
+				WriteFloat( pf, point.z() );
 				fprintf( pf, ") " );
 			}
 			fprintf( pf, "\n" );
@@ -206,7 +206,7 @@ void CountSolidFaces_r( node_t *node ){
    =================
  */
 void WriteFaceFile_r( node_t *node ){
-	int i, s;
+	int s;
 	portal_t    *p;
 	winding_t   *w;
 
@@ -235,26 +235,26 @@ void WriteFaceFile_r( node_t *node ){
 			// write out to the file
 
 			if ( p->nodes[0] == node ) {
-				fprintf( pf, "%i %i ", w->numpoints, p->nodes[0]->cluster );
-				for ( i = 0 ; i < w->numpoints ; i++ )
+				fprintf( pf, "%zu %i ", w->size(), p->nodes[0]->cluster );
+				for ( const Vector3& point : *w )
 				{
 					fprintf( pf, "(" );
-					WriteFloat( pf, w->p[i][0] );
-					WriteFloat( pf, w->p[i][1] );
-					WriteFloat( pf, w->p[i][2] );
+					WriteFloat( pf, point.x() );
+					WriteFloat( pf, point.y() );
+					WriteFloat( pf, point.z() );
 					fprintf( pf, ") " );
 				}
 				fprintf( pf, "\n" );
 			}
 			else
 			{
-				fprintf( pf, "%i %i ", w->numpoints, p->nodes[1]->cluster );
-				for ( i = w->numpoints - 1; i >= 0; i-- )
+				fprintf( pf, "%zu %i ", w->size(), p->nodes[1]->cluster );
+				for ( winding_t::const_reverse_iterator point = w->crbegin(); point != w->crend(); ++point )
 				{
 					fprintf( pf, "(" );
-					WriteFloat( pf, w->p[i][0] );
-					WriteFloat( pf, w->p[i][1] );
-					WriteFloat( pf, w->p[i][2] );
+					WriteFloat( pf, point->x() );
+					WriteFloat( pf, point->y() );
+					WriteFloat( pf, point->z() );
 					fprintf( pf, ") " );
 				}
 				fprintf( pf, "\n" );

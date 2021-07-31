@@ -54,7 +54,6 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 	float best = 0;
 	float thisarea;
 	bspDrawVert_t *vert[3];
-	winding_t *polygon;
 	const plane_t& buildPlane = mapplanes[buildSide->planenum];
 	int matches = 0;
 
@@ -99,7 +98,7 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 				continue;
 			}
 			// Okay. Correct surface type, correct shader, correct plane. Let's start with the business...
-			polygon = CopyWinding( buildSide->winding );
+			winding_t *polygon = CopyWinding( buildSide->winding );
 			for ( i = 0; i < 3; ++i )
 			{
 				// 0: 1, 2
@@ -110,12 +109,12 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 				// we now need to generate the plane spanned by normal and (v2 - v1).
 				Plane3f plane( vector3_cross( v2 - v1, buildPlane.normal() ), 0 );
 				plane.dist() = vector3_dot( v1, plane.normal() );
-				ChopWindingInPlace( &polygon, plane, distanceEpsilon );
+				ChopWindingInPlace( polygon, plane, distanceEpsilon );
 				if ( !polygon ) {
 					goto exwinding;
 				}
 			}
-			thisarea = WindingArea( polygon );
+			thisarea = WindingArea( *polygon );
 			if ( thisarea > 0 ) {
 				++matches;
 			}
@@ -465,12 +464,9 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 
 		/* recheck and fix winding points, fails occur somehow */
 		int match = 0;
-		for ( j = 0; j < buildSide->winding->numpoints; j++ ){
-			if ( fabs( plane3_distance_to_point( buildPlane.plane, buildSide->winding->p[ j ] ) ) >= distanceEpsilon ) {
-				continue;
-			}
-			else{
-				pts[ match ] = buildSide->winding->p[ j ];
+		for ( const Vector3& p : ( *buildSide->winding ) ){
+			if ( fabs( plane3_distance_to_point( buildPlane.plane, p ) ) < distanceEpsilon ) {
+				pts[ match ] = p;
 				match++;
 				/* got 3 fine points? */
 				if( match > 2 )

@@ -513,7 +513,7 @@ bool FixBrokenSurface( mapDrawSurface_t *ds ){
 
 			/* create an average drawvert */
 			/* ydnar 2002-01-26: added nearest-integer welding preference */
-			SnapWeldVector( dv1->xyz, dv2->xyz, avg.xyz );
+			avg.xyz = SnapWeldVector( dv1->xyz, dv2->xyz );
 			avg.normal = VectorNormalized( dv1->normal + dv2->normal );
 			avg.st = vector2_mid( dv1->st, dv2->st );
 

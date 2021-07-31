@@ -651,8 +651,8 @@ void AddBrushBevels( void ){
 						if ( !w ) {
 							continue;
 						}
-						for ( k = 0; k < w->numpoints; k++ ) {
-							if ( fabs( plane.dist() - w->p[k][axis] ) < .1f ) {
+						for ( const Vector3& po : *w ) {
+							if ( fabs( plane.dist() - po[axis] ) < .1f ) {
 								s->surfaceFlags |= ( s2->surfaceFlags & surfaceFlagsMask );
 								break;
 							}
@@ -686,9 +686,9 @@ void AddBrushBevels( void ){
 		if ( !w ) {
 			continue;
 		}
-		for ( j = 0; j < w->numpoints; j++ ) {
-			k = ( j + 1 ) % w->numpoints;
-			vec = w->p[j] - w->p[k];
+		for ( j = 0; j < w->size(); j++ ) {
+			k = ( j + 1 ) % w->size();
+			vec = ( *w )[j] - ( *w )[k];
 			if ( VectorNormalize( vec ) < 0.5f ) {
 				continue;
 			}
@@ -715,7 +715,7 @@ void AddBrushBevels( void ){
 					if ( VectorNormalize( plane.normal() ) < 0.5f ) {
 						continue;
 					}
-					plane.dist() = vector3_dot( w->p[j], plane.normal() );
+					plane.dist() = vector3_dot( ( *w )[j], plane.normal() );
 
 					// if all the points on all the sides are
 					// behind this plane, it is a proper edge bevel
@@ -734,15 +734,15 @@ void AddBrushBevels( void ){
 							continue;
 						}
 						minBack = 0.0f;
-						for ( l = 0; l < w2->numpoints; l++ ) {
-							d = plane3_distance_to_point( plane, w2->p[l] );
+						for ( l = 0; l < w2->size(); l++ ) {
+							d = plane3_distance_to_point( plane, ( *w2 )[l] );
 							if ( d > 0.1f ) {
 								break;  // point in front
 							}
 							value_minimize( minBack, d );
 						}
 						// if some point was at the front
-						if ( l != w2->numpoints ) {
+						if ( l != w2->size() ) {
 							break;
 						}
 
@@ -768,7 +768,7 @@ void AddBrushBevels( void ){
 					buildBrush->numsides++;
 					memset( s2, 0, sizeof( *s2 ) );
 
-					s2->planenum = FindFloatPlane( plane, 1, &w->p[ j ] );
+					s2->planenum = FindFloatPlane( plane, 1, &( *w )[ j ] );
 					s2->contentFlags = buildBrush->sides[0].contentFlags;
 					s2->surfaceFlags = ( s->surfaceFlags & surfaceFlagsMask ); /* handle bevel surfaceflags */
 					s2->bevel = true;

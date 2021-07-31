@@ -97,7 +97,7 @@ xmlNodePtr LeakFile( tree_t *tree ){
 			}
 		}
 		node = nextnode;
-		mid = WindingCenter( nextportal->winding );
+		mid = WindingCenter( *nextportal->winding );
 		fprintf( linefile, "%f %f %f\n", mid[0], mid[1], mid[2] );
 		point = xml_NodeForVec( mid );
 		xmlAddChild( xml_node, point );

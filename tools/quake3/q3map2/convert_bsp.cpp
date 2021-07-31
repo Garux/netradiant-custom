@@ -788,7 +788,7 @@ void PseudoCompileBSP( bool need_tree ){
 					continue;
 				}
 				/* save this winding as a visible surface */
-				DrawSurfaceForSide( entity, brush, side, side->winding );
+				DrawSurfaceForSide( entity, brush, side, *side->winding );
 			}
 		}
 

@@ -156,14 +156,9 @@ void RemovePortalFromNode( portal_t *portal, node_t *l ){
 
 //============================================================================
 
-void PrintPortal( portal_t *p ){
-	int i;
-	winding_t   *w;
-
-	w = p->winding;
-	for ( i = 0 ; i < w->numpoints ; i++ )
-		Sys_Printf( "(%5.0f,%5.0f,%5.0f)\n", w->p[i][0]
-		            , w->p[i][1], w->p[i][2] );
+void PrintPortal( const portal_t *p ){
+	for ( const Vector3& point : ( *p->winding ) )
+		Sys_Printf( "(%5.0f,%5.0f,%5.0f)\n", point[0], point[1], point[2] );
 }
 
 /*
@@ -226,7 +221,7 @@ void MakeHeadnodePortals( tree_t *tree ){
 			if ( j == i ) {
 				continue;
 			}
-			ChopWindingInPlace( &portals[i]->winding, bplanes[j].plane, ON_EPSILON );
+			ChopWindingInPlace( portals[i]->winding, bplanes[j].plane, ON_EPSILON );
 		}
 	}
 }
@@ -254,11 +249,11 @@ winding_t   *BaseWindingForNode( node_t *node ){
 		const plane_t& plane = mapplanes[n->planenum];
 
 		if ( n->children[0] == node ) { // take front
-			ChopWindingInPlace( &w, plane.plane, BASE_WINDING_EPSILON );
+			ChopWindingInPlace( w, plane.plane, BASE_WINDING_EPSILON );
 		}
 		else
 		{	// take back
-			ChopWindingInPlace( &w, plane3_flipped( plane.plane ), BASE_WINDING_EPSILON );
+			ChopWindingInPlace( w, plane3_flipped( plane.plane ), BASE_WINDING_EPSILON );
 		}
 		node = n;
 		n = n->parent;
@@ -289,11 +284,11 @@ void MakeNodePortal( node_t *node ){
 	{
 		if ( p->nodes[0] == node ) {
 			side = 0;
-			ChopWindingInPlace( &w, p->plane.plane, CLIP_EPSILON );
+			ChopWindingInPlace( w, p->plane.plane, CLIP_EPSILON );
 		}
 		else if ( p->nodes[1] == node ) {
 			side = 1;
-			ChopWindingInPlace( &w, plane3_flipped( p->plane.plane ), CLIP_EPSILON );
+			ChopWindingInPlace( w, plane3_flipped( p->plane.plane ), CLIP_EPSILON );
 		}
 		else{
 			Error( "CutNodePortals_r: mislinked portal" );
@@ -315,7 +310,7 @@ void MakeNodePortal( node_t *node ){
 	}
 	#endif
 
-	if ( WindingIsTiny( w ) ) {
+	if ( WindingIsTiny( *w ) ) {
 		c_tinyportals++;
 		FreeWinding( w );
 		return;
@@ -368,16 +363,16 @@ void SplitNodePortals( node_t *node ){
 //
 // cut the portal into two portals, one on each side of the cut plane
 //
-		ClipWindingEpsilon( p->winding, plane.plane,
-		                    SPLIT_WINDING_EPSILON, &frontwinding, &backwinding ); /* not strict, we want to always keep one of them even if coplanar */
+		ClipWindingEpsilon( *p->winding, plane.plane,
+		                    SPLIT_WINDING_EPSILON, frontwinding, backwinding ); /* not strict, we want to always keep one of them even if coplanar */
 
-		if ( frontwinding && WindingIsTiny( frontwinding ) ) {
+		if ( frontwinding && WindingIsTiny( *frontwinding ) ) {
 			if ( !f->tinyportals ) {
-				f->referencepoint = frontwinding->p[0];
+				f->referencepoint = ( *frontwinding )[0];
 			}
 			f->tinyportals++;
 			if ( !other_node->tinyportals ) {
-				other_node->referencepoint = frontwinding->p[0];
+				other_node->referencepoint = ( *frontwinding )[0];
 			}
 			other_node->tinyportals++;
 
@@ -386,13 +381,13 @@ void SplitNodePortals( node_t *node ){
 			c_tinyportals++;
 		}
 
-		if ( backwinding && WindingIsTiny( backwinding ) ) {
+		if ( backwinding && WindingIsTiny( *backwinding ) ) {
 			if ( !b->tinyportals ) {
-				b->referencepoint = backwinding->p[0];
+				b->referencepoint = ( *backwinding )[0];
 			}
 			b->tinyportals++;
 			if ( !other_node->tinyportals ) {
-				other_node->referencepoint = backwinding->p[0];
+				other_node->referencepoint = ( *backwinding )[0];
 			}
 			other_node->tinyportals++;
 
@@ -462,7 +457,7 @@ void CalcNodeBounds( node_t *node ){
 	for ( p = node->portals ; p ; p = p->next[s] )
 	{
 		s = ( p->nodes[1] == node );
-		WindingExtendBounds( p->winding, node->minmax );
+		WindingExtendBounds( *p->winding, node->minmax );
 	}
 }
 
@@ -485,7 +480,7 @@ void MakeTreePortals_r( node_t *node ){
 
 	if ( !c_worldMinmax.surrounds( node->minmax ) ) {
 		if ( node->portals && node->portals->winding ) {
-			xml_Winding( "WARNING: Node With Unbounded Volume", node->portals->winding->p, node->portals->winding->numpoints, false );
+			xml_Winding( "WARNING: Node With Unbounded Volume", node->portals->winding->data(), node->portals->winding->size(), false );
 		}
 	}
 	if ( node->planenum == PLANENUM_LEAF ) {

@@ -1559,7 +1559,7 @@ void                        FreeBrush( brush_t *brushes );
 void                        FreeBrushList( brush_t *brushes );
 brush_t                     *CopyBrush( const brush_t *brush );
 bool                        BoundBrush( brush_t *brush );
-void                        SnapWeldVector( const Vector3& a, const Vector3& b, Vector3& out );
+Vector3                     SnapWeldVector( const Vector3& a, const Vector3& b );
 bool                        CreateBrushWindings( brush_t *brush );
 brush_t                     *BrushFromBounds( const Vector3& mins, const Vector3& maxs );
 float                       BrushVolume( brush_t *brush );
@@ -1568,7 +1568,7 @@ void                        WriteBSPBrushMap( const char *name, brush_t *list );
 void                        FilterDetailBrushesIntoTree( entity_t *e, tree_t *tree );
 void                        FilterStructuralBrushesIntoTree( entity_t *e, tree_t *tree );
 
-bool                        WindingIsTiny( winding_t *w );
+bool                        WindingIsTiny( const winding_t& w );
 
 void                        SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back );
 
@@ -1703,7 +1703,7 @@ mapDrawSurface_t            *MakeCelSurface( mapDrawSurface_t *src, shaderInfo_t
 bool                        IsTriangleDegenerate( bspDrawVert_t *points, int a, int b, int c );
 void                        ClearSurface( mapDrawSurface_t *ds );
 void                        AddEntitySurfaceModels( entity_t *e );
-mapDrawSurface_t            *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, winding_t *w );
+mapDrawSurface_t            *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, const winding_t& w );
 mapDrawSurface_t            *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh );
 mapDrawSurface_t            *DrawSurfaceForFlare( int entNum, const Vector3& origin, const Vector3& normal, const Vector3& color, const char *flareShader, int lightStyle );
 mapDrawSurface_t            *DrawSurfaceForShader( const char *shader );
@@ -1779,7 +1779,7 @@ void                        PassagePortalFlow( int portalnum );
 
 
 /* light.c  */
-float                       PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, const winding_t *w );
+float                       PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, const winding_t& w );
 int                         LightContributionToSample( trace_t *trace );
 void                        LightingAtSample( trace_t * trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ] );
 bool                        LightContributionToPoint( trace_t *trace );

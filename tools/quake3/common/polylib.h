@@ -23,11 +23,7 @@
 
 #include "qmath.h"
 
-struct winding_t
-{
-	int numpoints;
-	Vector3 p[];
-};
+using winding_t = std::vector<Vector3>;
 
 #define MAX_POINTS_ON_WINDING   512
 
@@ -45,29 +41,29 @@ enum EPlaneSide
 };
 
 winding_t   *AllocWinding( int points );
-float   WindingArea( const winding_t *w );
-Vector3 WindingCenter( const winding_t *w );
-void    ClipWindingEpsilon( winding_t *in, const Plane3f& plane,
-                            float epsilon, winding_t **front, winding_t **back );
-void    ClipWindingEpsilonStrict( winding_t *in, const Plane3f& plane,
-                                  float epsilon, winding_t **front, winding_t **back );
+float   WindingArea( const winding_t& w );
+Vector3 WindingCenter( const winding_t& w );
+void    ClipWindingEpsilon( const winding_t& in, const Plane3f& plane,
+                            float epsilon, winding_t *&front, winding_t *&back );
+void    ClipWindingEpsilonStrict( const winding_t& in, const Plane3f& plane,
+                                  float epsilon, winding_t *&front, winding_t *&back );
 winding_t   *ChopWinding( winding_t *in, const Plane3f& plane );
 winding_t   *CopyWinding( const winding_t *w );
-winding_t   *ReverseWinding( const winding_t *w );
+winding_t   *ReverseWinding( const winding_t& w );
 winding_t   *BaseWindingForPlane( const Plane3f& plane );
-void    CheckWinding( winding_t *w );
-Plane3f WindingPlane( const winding_t *w );
-void    RemoveColinearPoints( winding_t *w );
-EPlaneSide     WindingOnPlaneSide( const winding_t *w, const Plane3f& plane );
+void    CheckWinding( const winding_t& w );
+Plane3f WindingPlane( const winding_t& w );
+void    RemoveColinearPoints( winding_t& w );
+EPlaneSide     WindingOnPlaneSide( const winding_t& w, const Plane3f& plane );
 void    FreeWinding( winding_t *w );
-void WindingExtendBounds( const winding_t *w, MinMax& minmax );
+void WindingExtendBounds( const winding_t& w, MinMax& minmax );
 
-void    AddWindingToConvexHull( winding_t *w, winding_t **hull, const Vector3& normal );
+void    AddWindingToConvexHull( const winding_t& w, winding_t *&hull, const Vector3& normal );
 
-void    ChopWindingInPlace( winding_t **w, const Plane3f& plane, float epsilon );
+void    ChopWindingInPlace( winding_t *&w, const Plane3f& plane, float epsilon );
 // frees the original if clipped
 
-void pw( winding_t *w );
+void pw( const winding_t& w );
 
 
 ///////////////////////////////////////////////////////////////////////////////////////

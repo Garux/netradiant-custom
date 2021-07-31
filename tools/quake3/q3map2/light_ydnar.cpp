@@ -3433,7 +3433,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 						for ( radius = 100.0f; radius < MAX_WORLD_COORD * 8.0f; radius += 10.0f )
 						{
 							const Vector3 origin = light->origin + light->normal * radius;
-							const float factor = std::abs( PointToPolygonFormFactor( origin, dir, light->w ) );
+							const float factor = std::abs( PointToPolygonFormFactor( origin, dir, *light->w ) );
 							if ( ( factor * light->add ) <= light->falloffTolerance ) {
 								light->envelope = radius;
 								break;
