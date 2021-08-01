@@ -86,7 +86,7 @@ xmlNodePtr LeakFile( tree_t *tree ){
 
 		// find the best portal exit
 		next = node->occupied;
-		for ( p = node->portals ; p ; p = p->next[!s] )
+		for ( p = node->portals; p; p = p->next[!s] )
 		{
 			s = ( p->nodes[0] == node );
 			if ( p->nodes[s]->occupied

@@ -221,7 +221,7 @@ int EmitDrawNode_r( node_t *node ){
 	//
 	// recursively output the other nodes
 	//
-	for ( i = 0 ; i < 2 ; i++ )
+	for ( i = 0; i < 2; i++ )
 	{
 		if ( node->children[i]->planenum == PLANENUM_LEAF ) {
 			n->children[i] = -( numBSPLeafs + 1 );

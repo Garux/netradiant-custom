@@ -854,7 +854,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, const 
 		}
 
 		/* round the xyz to a given precision and translate by origin */
-		for ( size_t i = 0 ; i < 3 ; i++ )
+		for ( size_t i = 0; i < 3; i++ )
 			dv->xyz[ i ] = SNAP_INT_TO_FLOAT * floor( dv->xyz[ i ] * SNAP_FLOAT_TO_INT + 0.5 );
 		vTranslated = dv->xyz + e->originbrush_origin;
 
@@ -1473,7 +1473,7 @@ bool SideInBrush( side_t *side, brush_t *b ){
 void CullSides( entity_t *e ){
 	int numPoints;
 	int i, j, k, l, first, second, dir;
-	winding_t   *w1, *w2;
+	const winding_t   *w1, *w2;
 	brush_t *b1, *b2;
 	side_t      *side1, *side2;
 

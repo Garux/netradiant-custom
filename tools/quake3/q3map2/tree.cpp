@@ -68,7 +68,7 @@ void FreeTreePortals_r( node_t *node ){
 	}
 
 	// free portals
-	for ( p = node->portals ; p ; p = nextp )
+	for ( p = node->portals; p; p = nextp )
 	{
 		s = ( p->nodes[1] == node );
 		nextp = p->next[s];

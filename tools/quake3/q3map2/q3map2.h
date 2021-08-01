@@ -1610,7 +1610,7 @@ void                        MakeHeadnodePortals( tree_t *tree );
 void                        MakeNodePortal( node_t *node );
 void                        SplitNodePortals( node_t *node );
 
-bool                        PortalPassable( portal_t *p );
+bool                        PortalPassable( const portal_t *p );
 
 enum class EFloodEntities
 {

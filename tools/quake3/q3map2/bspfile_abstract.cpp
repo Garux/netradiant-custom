@@ -155,7 +155,7 @@ void SwapBSPFile( void ){
 	SwapBlock( (int*) bspModels, numBSPModels * sizeof( bspModels[ 0 ] ) );
 
 	/* shaders (don't swap the name) */
-	for ( i = 0; i < numBSPShaders ; i++ )
+	for ( i = 0; i < numBSPShaders; i++ )
 	{
 		if ( doingBSP ){
 			si = ShaderInfoForShader( bspShaders[ i ].shader );
@@ -377,7 +377,7 @@ void PartialLoadBSPFile( const char *filename ){
 	int i;
 
 	/* shaders (don't swap the name) */
-	for ( i = 0; i < numBSPShaders ; i++ )
+	for ( i = 0; i < numBSPShaders; i++ )
 	{
 		bspShaders[ i ].contentFlags = LittleLong( bspShaders[ i ].contentFlags );
 		bspShaders[ i ].surfaceFlags = LittleLong( bspShaders[ i ].surfaceFlags );

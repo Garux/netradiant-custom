@@ -61,8 +61,6 @@ void WriteFloat( FILE *f, float v ){
 
 void CountVisportals_r( node_t *node ){
 	int s;
-	portal_t    *p;
-	winding_t   *w;
 
 	// decision node
 	if ( node->planenum != PLANENUM_LEAF ) {
@@ -75,9 +73,9 @@ void CountVisportals_r( node_t *node ){
 		return;
 	}
 
-	for ( p = node->portals ; p ; p = p->next[s] )
+	for ( const portal_t *p = node->portals; p; p = p->next[s] )
 	{
-		w = p->winding;
+		const winding_t *w = p->winding;
 		s = ( p->nodes[1] == node );
 		if ( w && p->nodes[0] == node ) {
 			if ( !PortalPassable( p ) ) {
@@ -98,8 +96,6 @@ void CountVisportals_r( node_t *node ){
  */
 void WritePortalFile_r( node_t *node ){
 	int s, flags;
-	portal_t    *p;
-	winding_t   *w;
 
 	// decision node
 	if ( node->planenum != PLANENUM_LEAF ) {
@@ -112,9 +108,9 @@ void WritePortalFile_r( node_t *node ){
 		return;
 	}
 
-	for ( p = node->portals ; p ; p = p->next[s] )
+	for (const portal_t *p = node->portals; p; p = p->next[s] )
 	{
-		w = p->winding;
+		const winding_t *w = p->winding;
 		s = ( p->nodes[1] == node );
 		if ( w && p->nodes[0] == node ) {
 			if ( !PortalPassable( p ) ) {
@@ -168,8 +164,6 @@ void WritePortalFile_r( node_t *node ){
 
 void CountSolidFaces_r( node_t *node ){
 	int s;
-	portal_t    *p;
-	winding_t   *w;
 
 	// decision node
 	if ( node->planenum != PLANENUM_LEAF ) {
@@ -182,9 +176,9 @@ void CountSolidFaces_r( node_t *node ){
 		return;
 	}
 
-	for ( p = node->portals ; p ; p = p->next[s] )
+	for ( const portal_t *p = node->portals; p; p = p->next[s] )
 	{
-		w = p->winding;
+		const winding_t *w = p->winding;
 		s = ( p->nodes[1] == node );
 		if ( w ) {
 			if ( PortalPassable( p ) ) {
@@ -207,8 +201,6 @@ void CountSolidFaces_r( node_t *node ){
  */
 void WriteFaceFile_r( node_t *node ){
 	int s;
-	portal_t    *p;
-	winding_t   *w;
 
 	// decision node
 	if ( node->planenum != PLANENUM_LEAF ) {
@@ -221,9 +213,9 @@ void WriteFaceFile_r( node_t *node ){
 		return;
 	}
 
-	for ( p = node->portals ; p ; p = p->next[s] )
+	for ( const portal_t *p = node->portals; p; p = p->next[s] )
 	{
-		w = p->winding;
+		const winding_t *w = p->winding;
 		s = ( p->nodes[1] == node );
 		if ( w ) {
 			if ( PortalPassable( p ) ) {
@@ -312,7 +304,7 @@ void NumberLeafs_r( node_t *node, int c ){
 
 #if 0
 	// count the portals
-	for ( p = node->portals ; p ; )
+	for ( p = node->portals; p; )
 	{
 		if ( p->nodes[0] == node ) {      // only write out from first leaf
 			if ( PortalPassable( p ) ) {

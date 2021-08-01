@@ -60,7 +60,7 @@ void FreePortal( portal_t *p ){
    returns true if the portal has non-opaque leafs on both sides
  */
 
-bool PortalPassable( portal_t *p ){
+bool PortalPassable( const portal_t *p ){
 	/* is this to global outside leaf? */
 	if ( !p->onnode ) {
 		return false;
@@ -454,7 +454,7 @@ void CalcNodeBounds( node_t *node ){
 
 	// calc mins/maxs for both leafs and nodes
 	node->minmax.clear();
-	for ( p = node->portals ; p ; p = p->next[s] )
+	for ( p = node->portals; p; p = p->next[s] )
 	{
 		s = ( p->nodes[1] == node );
 		WindingExtendBounds( *p->winding, node->minmax );

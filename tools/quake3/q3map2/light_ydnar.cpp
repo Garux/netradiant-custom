@@ -3573,7 +3573,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 				/* delete the light */
 				numCulledLights++;
 				*owner = light->next;
-				free( light->w );
+				FreeWinding( light->w );
 				free( light );
 				continue;
 			}

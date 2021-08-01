@@ -573,10 +573,10 @@ void SetBrushContents( brush_t *b ){
 
 void AddBrushBevels( void ){
 	int axis, dir;
-	int i, j, k, l, order;
+	int i, k, order;
 	side_t sidetemp;
 	side_t      *s, *s2;
-	winding_t   *w, *w2;
+	const winding_t   *w, *w2;
 	Plane3f plane;
 	Vector3 vec, vec2;
 	float d, minBack;
@@ -645,7 +645,7 @@ void AddBrushBevels( void ){
 				s->contentFlags = buildBrush->sides[ 0 ].contentFlags;
 				/* handle bevel surfaceflags for topmost one only: assuming that only walkable ones are meaningful */
 				if( axis == 2 && dir == 1 ){
-					for ( j = 0; j < buildBrush->numsides; j++ ) {
+					for ( int j = 0; j < buildBrush->numsides; j++ ) {
 						s2 = buildBrush->sides + j;
 						w = s2->winding;
 						if ( !w ) {
@@ -686,7 +686,7 @@ void AddBrushBevels( void ){
 		if ( !w ) {
 			continue;
 		}
-		for ( j = 0; j < w->size(); j++ ) {
+		for ( size_t j = 0; j < w->size(); j++ ) {
 			k = ( j + 1 ) % w->size();
 			vec = ( *w )[j] - ( *w )[k];
 			if ( VectorNormalize( vec ) < 0.5f ) {
@@ -734,15 +734,17 @@ void AddBrushBevels( void ){
 							continue;
 						}
 						minBack = 0.0f;
-						for ( l = 0; l < w2->size(); l++ ) {
-							d = plane3_distance_to_point( plane, ( *w2 )[l] );
+						bool point_in_front = false;
+						for ( const Vector3& point : *w2 ) {
+							d = plane3_distance_to_point( plane, point );
 							if ( d > 0.1f ) {
+								point_in_front = true;
 								break;  // point in front
 							}
 							value_minimize( minBack, d );
 						}
 						// if some point was at the front
-						if ( l != w2->size() ) {
+						if ( point_in_front ) {
 							break;
 						}
 

@@ -481,7 +481,7 @@ brush_t *BrushFromBounds( const Vector3& mins, const Vector3& maxs ){
  */
 float BrushVolume( brush_t *brush ){
 	int i;
-	winding_t   *w;
+	const winding_t   *w;
 	Vector3 corner;
 	float volume;
 
