@@ -725,7 +725,7 @@ void PseudoCompileBSP( bool need_tree ){
 	int models;
 	char modelValue[16];
 	entity_t *entity;
-	face_t *faces;
+	facelist_t faces;
 	tree_t *tree;
 	node_t *node;
 	brush_t *brush;

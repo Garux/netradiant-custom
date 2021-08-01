@@ -285,7 +285,7 @@ static void FixBrushSides( entity_t *e ){
 void ProcessWorldModel( void ){
 	entity_t    *e;
 	tree_t      *tree;
-	face_t      *faces;
+	facelist_t   faces;
 	xmlNodePtr polyline, leaknode;
 	char level[ 2 ];
 	const char  *value;

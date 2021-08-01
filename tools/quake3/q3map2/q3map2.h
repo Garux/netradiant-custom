@@ -85,6 +85,7 @@
 #include "stream/stringstream.h"
 #include "bitflags.h"
 #include <list>
+#include <forward_list>
 #include "qmath.h"
 
 #include <stddef.h>
@@ -699,13 +700,13 @@ struct shaderInfo_t
 
 struct face_t
 {
-	face_t              *next;
 	int planenum;
 	int priority;
 	//bool			checked;
 	int compileFlags;
-	winding_t           *w;
+	winding_t           w;
 };
+using facelist_t = std::forward_list<face_t>;
 
 
 struct plane_t
@@ -1620,7 +1621,6 @@ enum class EFloodEntities
 EFloodEntities              FloodEntities( tree_t *tree );
 void                        FillOutside( node_t *headnode );
 void                        FloodAreas( tree_t *tree );
-face_t                      *VisibleFaces( entity_t *e, tree_t *tree );
 void                        FreePortal( portal_t *p );
 
 void                        MakeTreePortals( tree_t *tree );
@@ -1677,9 +1677,9 @@ void                        CreateMapFogs( void );
 
 
 /* facebsp.c */
-face_t                      *MakeStructuralBSPFaceList( brush_t *list );
-face_t                      *MakeVisibleBSPFaceList( brush_t *list );
-tree_t                      *FaceBSP( face_t *list );
+facelist_t                  MakeStructuralBSPFaceList( const brush_t *list );
+facelist_t                  MakeVisibleBSPFaceList( const brush_t *list );
+tree_t                      *FaceBSP( facelist_t& list );
 
 
 /* model.c */
