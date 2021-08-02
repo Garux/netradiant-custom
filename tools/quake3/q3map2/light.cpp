@@ -1662,9 +1662,8 @@ void SetupGrid( void ){
 		gridSize[ i ] = std::max( 8.0, floor( gridSize[ i ] ) );
 
 	/* ydnar: increase gridSize until grid count is smaller than max allowed */
-	numRawGridPoints = MAX_MAP_LIGHTGRID + 1;
 	j = 0;
-	while ( numRawGridPoints > MAX_MAP_LIGHTGRID )
+	while ( true )
 	{
 		/* get world bounds */
 		for ( i = 0; i < 3; i++ )
@@ -1674,12 +1673,16 @@ void SetupGrid( void ){
 			gridBounds[ i ] = ( max - gridMins[ i ] ) / gridSize[ i ] + 1;
 		}
 
-		/* set grid size */
-		numRawGridPoints = gridBounds[ 0 ] * gridBounds[ 1 ] * gridBounds[ 2 ];
+		const int64_t num = int64_t( gridBounds[ 0 ] ) * gridBounds[ 1 ] * gridBounds[ 2 ]; // int64_t prevents reachable int32_t overflow : cube( 131072 / 8 ) = 4398046511104
 
 		/* increase grid size a bit */
-		if ( numRawGridPoints > MAX_MAP_LIGHTGRID ) {
+		if ( num > MAX_MAP_LIGHTGRID ) {
 			gridSize[ j++ % 3 ] += 16.0f;
+		}
+		else{
+			/* set grid size */
+			numRawGridPoints = num;
+			break;
 		}
 	}
 
