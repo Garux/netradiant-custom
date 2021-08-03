@@ -3339,7 +3339,6 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 	Sys_FPrintf( SYS_VRB, "--- SetupEnvelopes%s ---\n", fastFlag ? " (fast)" : "" );
 
 	/* count lights */
-	numLights = 0;
 	numCulledLights = 0;
 	for( decltype( lights )::iterator light = lights.begin(); light != lights.end(); )
 	{
@@ -3574,9 +3573,6 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 		/* square envelope */
 		light->envelope2 = ( light->envelope * light->envelope );
 
-		/* increment light count */
-		numLights++;
-
 		/* set next light */
 		++light;
 	}
@@ -3589,7 +3585,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 	}
 
 	/* emit some statistics */
-	Sys_Printf( "%9d total lights\n", numLights );
+	Sys_Printf( "%9zu total lights\n", lights.size() );
 	Sys_Printf( "%9d culled lights\n", numCulledLights );
 }
 
@@ -3605,16 +3601,11 @@ void CreateTraceLightsForBounds( const MinMax& minmax, const Vector3 *normal, in
 	float length;
 
 
-	/* potential pre-setup  */
-	if ( numLights == 0 ) {
-		SetupEnvelopes( false, fast );
-	}
-
 	/* debug code */
 	//% Sys_Printf( "CTWLFB: (%4.1f %4.1f %4.1f) (%4.1f %4.1f %4.1f)\n", minmax.mins[ 0 ], minmax.mins[ 1 ], minmax.mins[ 2 ], minmax.maxs[ 0 ], minmax.maxs[ 1 ], minmax.maxs[ 2 ] );
 
 	/* allocate the light list */
-	trace->lights = safe_malloc( sizeof( light_t* ) * ( numLights + 1 ) );
+	trace->lights = safe_malloc( sizeof( light_t* ) * ( lights.size() + 1 ) );
 	trace->numLights = 0;
 
 	/* calculate spherical bounds */

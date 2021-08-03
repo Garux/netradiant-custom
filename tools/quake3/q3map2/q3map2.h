@@ -1795,7 +1795,6 @@ bool                        RadSampleImage( byte * pixels, int width, int height
 void                        RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw );
 void                        RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw );
 void                        RadCreateDiffuseLights( void );
-void                        RadFreeLights();
 
 
 /* light_ydnar.c */
@@ -2355,7 +2354,6 @@ Q_EXTERN float subdivideThreshold Q_ASSIGN( DEFAULT_SUBDIVIDE_THRESHOLD );
 Q_EXTERN int numOpaqueBrushes, maxOpaqueBrush;
 Q_EXTERN byte               *opaqueBrushes;
 
-Q_EXTERN int numLights;
 Q_EXTERN int numCulledLights;
 
 Q_EXTERN int gridBoundsCulled;

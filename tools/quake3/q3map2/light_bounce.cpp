@@ -32,19 +32,7 @@
 #include "q3map2.h"
 
 
-
 /* functions */
-
-/*
-   RadFreeLights()
-   deletes any existing lights, freeing up memory for the next bounce
- */
-
-void RadFreeLights( void ){
-	lights.clear();
-	numLights = 0;
-}
-
 
 
 /*

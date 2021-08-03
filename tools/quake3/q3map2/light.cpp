@@ -1854,13 +1854,14 @@ void LightWorld( bool fastAllocate ){
 		ambientColor.set( 0 );
 		floodlighty = false;
 
+		/* delete any existing lights, freeing up memory for the next bounce */
+		lights.clear();
 		/* generate diffuse lights */
-		RadFreeLights();
 		RadCreateDiffuseLights();
 
 		/* setup light envelopes */
 		SetupEnvelopes( false, fastbounce );
-		if ( numLights == 0 ) {
+		if ( lights.empty() ) {
 			Sys_Printf( "No diffuse light to calculate, ending radiosity.\n" );
 			break;
 		}
