@@ -1241,19 +1241,17 @@ struct LightFlags : BitFlags<std::uint32_t, LightFlags>
 /* ydnar: new light struct with flags */
 struct light_t
 {
-	light_t             *next;
-
 	ELightType type;
 	LightFlags flags;                   /* ydnar: condensed all the booleans into one flags int */
 	shaderInfo_t        *si;
 
-	Vector3 origin;
-	Vector3 normal;                     /* for surfaces, spotlights, and suns */
+	Vector3 origin{ 0 };
+	Vector3 normal{ 0 };                /* for surfaces, spotlights, and suns */
 	float dist;                         /* plane location along normal */
 
 	float photons;
 	int style;
-	Vector3 color;
+	Vector3 color{ 0 };
 	float radiusByDist;                 /* for spotlights */
 	float fade;                         /* ydnar: from wolf, for linear lights */
 	float angleScale;                   /* ydnar: stolen from vlight for K */
@@ -1265,7 +1263,7 @@ struct light_t
 	MinMax minmax;                      /* ydnar: pvs envelope */
 	int cluster;                        /* ydnar: cluster light falls into */
 
-	winding_t           *w;
+	winding_t           w;
 
 	float falloffTolerance;             /* ydnar: minimum attenuation threshold */
 	float filterRadius;                 /* ydnar: lightmap filter radius in world units, 0 == default */
@@ -1282,7 +1280,7 @@ struct trace_t
 	int                 *surfaces;
 
 	int numLights;
-	light_t             **lights;
+	const light_t       **lights;
 
 	bool twoSided;
 
@@ -1292,7 +1290,7 @@ struct trace_t
 	float inhibitRadius;                /* sphere in which occluding geometry is ignored */
 
 	/* per-light input */
-	light_t             *light;
+	const light_t             *light;
 	Vector3 end;
 
 	/* calculated input */
@@ -2327,7 +2325,7 @@ Q_EXTERN float linearScale Q_ASSIGN( 1.0f / 8000.0f );
 Q_EXTERN bool shadersAsBitmap Q_ASSIGN( false );
 Q_EXTERN bool lightmapsAsTexcoord Q_ASSIGN( false );
 
-Q_EXTERN light_t            *lights;
+Q_EXTERN std::list<light_t> lights;
 Q_EXTERN int numPointLights;
 Q_EXTERN int numSpotLights;
 Q_EXTERN int numSunLights;

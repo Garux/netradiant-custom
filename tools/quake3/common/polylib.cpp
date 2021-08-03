@@ -49,6 +49,15 @@ winding_t   *AllocWinding( int points ){
 	return w;
 }
 
+winding_t   AllocWinding_( int points ){
+	if ( points >= MAX_POINTS_ON_WINDING ) {
+		Error( "AllocWinding failed: MAX_POINTS_ON_WINDING exceeded" );
+	}
+	winding_t w;
+	w.reserve( points );
+	return w;
+}
+
 /*
    =============
    FreeWinding

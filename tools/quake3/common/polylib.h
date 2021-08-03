@@ -41,6 +41,7 @@ enum EPlaneSide
 };
 
 winding_t   *AllocWinding( int points );
+winding_t   AllocWinding_( int points );
 float   WindingArea( const winding_t& w );
 Vector3 WindingCenter( const winding_t& w );
 void    ClipWindingEpsilon( const winding_t& in, const Plane3f& plane,

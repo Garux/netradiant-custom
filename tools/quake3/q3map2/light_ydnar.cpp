@@ -3326,14 +3326,12 @@ bool ChopBounds( MinMax& minmax, const Vector3& origin, const Vector3& normal ){
 
 void SetupEnvelopes( bool forGrid, bool fastFlag ){
 	int i, x, y, z, x1, y1, z1;
-	light_t     *light, *light2, **owner;
 	bspLeaf_t   *leaf;
 	float radius, intensity;
-	light_t     *buckets[ 256 ];
 
 
 	/* early out for weird cases where there are no lights */
-	if ( lights == NULL ) {
+	if ( lights.empty() ) {
 		return;
 	}
 
@@ -3343,12 +3341,8 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 	/* count lights */
 	numLights = 0;
 	numCulledLights = 0;
-	owner = &lights;
-	while ( *owner != NULL )
+	for( decltype( lights )::iterator light = lights.begin(); light != lights.end(); )
 	{
-		/* get light */
-		light = *owner;
-
 		/* handle negative lights */
 		if ( light->photons < 0.0f || light->add < 0.0f ) {
 			light->photons *= -1.0f;
@@ -3423,7 +3417,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 				light->envelope = 0;
 
 				/* handle area lights */
-				if ( exactPointToPolygon && light->type == ELightType::Area && light->w != NULL ) {
+				if ( exactPointToPolygon && light->type == ELightType::Area && !light->w.empty() ) {
 					light->envelope = MAX_WORLD_COORD * 8.0f;
 
 					/* check for fast mode */
@@ -3433,7 +3427,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 						for ( radius = 100.0f; radius < MAX_WORLD_COORD * 8.0f; radius += 10.0f )
 						{
 							const Vector3 origin = light->origin + light->normal * radius;
-							const float factor = std::abs( PointToPolygonFormFactor( origin, dir, *light->w ) );
+							const float factor = std::abs( PointToPolygonFormFactor( origin, dir, light->w ) );
 							if ( ( factor * light->add ) <= light->falloffTolerance ) {
 								light->envelope = radius;
 								break;
@@ -3572,9 +3566,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 
 				/* delete the light */
 				numCulledLights++;
-				*owner = light->next;
-				FreeWinding( light->w );
-				free( light );
+				light = lights.erase( light );
 				continue;
 			}
 		}
@@ -3586,38 +3578,14 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 		numLights++;
 
 		/* set next light */
-		owner = &( ( **owner ).next );
+		++light;
 	}
 
-	/* bucket sort lights by style */
-	memset( buckets, 0, sizeof( buckets ) );
-	light2 = NULL;
-	for ( light = lights; light != NULL; light = light2 )
-	{
-		/* get next light */
-		light2 = light->next;
-
-		/* filter into correct bucket */
-		light->next = buckets[ light->style ];
-		buckets[ light->style ] = light;
-
-		/* if any styled light is present, automatically set nocollapse */
-		if ( light->style != LS_NORMAL ) {
-			noCollapse = true;
-		}
-	}
-
-	/* filter back into light list */
-	lights = NULL;
-	for ( i = 255; i >= 0; i-- )
-	{
-		light2 = NULL;
-		for ( light = buckets[ i ]; light != NULL; light = light2 )
-		{
-			light2 = light->next;
-			light->next = lights;
-			lights = light;
-		}
+	/* sort lights by style */
+	lights.sort( []( const light_t& a, const light_t& b ){ return a.style < b.style; } );
+	/* if any styled light is present, automatically set nocollapse */
+	if ( !lights.empty() && lights.back().style != LS_NORMAL ) {
+		noCollapse = true;
 	}
 
 	/* emit some statistics */
@@ -3634,7 +3602,6 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 
 void CreateTraceLightsForBounds( const MinMax& minmax, const Vector3 *normal, int numClusters, int *clusters, LightFlags flags, trace_t *trace ){
 	int i;
-	light_t     *light;
 	float length;
 
 
@@ -3666,21 +3633,21 @@ void CreateTraceLightsForBounds( const MinMax& minmax, const Vector3 *normal, in
 
 	/* test each light and see if it reaches the sphere */
 	/* note: the attenuation code MUST match LightingAtSample() */
-	for ( light = lights; light; light = light->next )
+	for ( const light_t& light : lights )
 	{
 		/* check zero sized envelope */
-		if ( light->envelope <= 0 ) {
+		if ( light.envelope <= 0 ) {
 			lightsEnvelopeCulled++;
 			continue;
 		}
 
 		/* check flags */
-		if ( !( light->flags & flags ) ) {
+		if ( !( light.flags & flags ) ) {
 			continue;
 		}
 
 		/* sunlight skips all this nonsense */
-		if ( light->type != ELightType::Sun ) {
+		if ( light.type != ELightType::Sun ) {
 			/* sun only? */
 			if ( sunOnly ) {
 				continue;
@@ -3690,7 +3657,7 @@ void CreateTraceLightsForBounds( const MinMax& minmax, const Vector3 *normal, in
 			if ( numClusters > 0 && clusters != NULL ) {
 				for ( i = 0; i < numClusters; i++ )
 				{
-					if ( ClusterVisible( light->cluster, clusters[ i ] ) ) {
+					if ( ClusterVisible( light.cluster, clusters[ i ] ) ) {
 						break;
 					}
 				}
@@ -3703,14 +3670,14 @@ void CreateTraceLightsForBounds( const MinMax& minmax, const Vector3 *normal, in
 			}
 
 			/* if the light's bounding sphere intersects with the bounding sphere then this light needs to be tested */
-			if ( vector3_length( light->origin - origin ) - light->envelope - radius > 0 ) {
+			if ( vector3_length( light.origin - origin ) - light.envelope - radius > 0 ) {
 				lightsEnvelopeCulled++;
 				continue;
 			}
 
 			/* check bounding box against light's pvs envelope (note: this code never eliminated any lights, so disabling it) */
 			#if 0
-			if( !minmax.test( light->minmax ) ){
+			if( !minmax.test( light.minmax ) ){
 				lightsBoundsCulled++;
 				continue;
 			}
@@ -3720,20 +3687,20 @@ void CreateTraceLightsForBounds( const MinMax& minmax, const Vector3 *normal, in
 		/* planar surfaces (except twosided surfaces) have a couple more checks */
 		if ( length > 0.0f && !trace->twoSided ) {
 			/* lights coplanar with a surface won't light it */
-			if ( !( light->flags & LightFlags::Twosided ) && vector3_dot( light->normal, *normal ) > 0.999f ) {
+			if ( !( light.flags & LightFlags::Twosided ) && vector3_dot( light.normal, *normal ) > 0.999f ) {
 				lightsPlaneCulled++;
 				continue;
 			}
 
 			/* check to see if light is behind the plane */
-			if ( vector3_dot( light->origin, *normal ) - vector3_dot( origin, *normal ) < -1.0f ) {
+			if ( vector3_dot( light.origin, *normal ) - vector3_dot( origin, *normal ) < -1.0f ) {
 				lightsPlaneCulled++;
 				continue;
 			}
 		}
 
 		/* add this light */
-		trace->lights[ trace->numLights++ ] = light;
+		trace->lights[ trace->numLights++ ] = &light;
 	}
 
 	/* make last night null */

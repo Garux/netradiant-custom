@@ -42,7 +42,6 @@ static void CreateSunLight( sun_t *sun ){
 	int i;
 	float photons, d, angle, elevation, da, de;
 	Vector3 direction;
-	light_t     *light;
 
 
 	/* dummy check */
@@ -98,28 +97,26 @@ static void CreateSunLight( sun_t *sun ){
 
 		/* create a light */
 		numSunLights++;
-		light = safe_calloc( sizeof( *light ) );
-		light->next = lights;
-		lights = light;
+		light_t& light = lights.emplace_front();
 
 		/* initialize the light */
-		light->flags = LightFlags::DefaultSun;
-		light->type = ELightType::Sun;
-		light->fade = 1.0f;
-		light->falloffTolerance = falloffTolerance;
-		light->filterRadius = sun->filterRadius / sun->numSamples;
-		light->style = noStyles ? LS_NORMAL : sun->style;
+		light.flags = LightFlags::DefaultSun;
+		light.type = ELightType::Sun;
+		light.fade = 1.0f;
+		light.falloffTolerance = falloffTolerance;
+		light.filterRadius = sun->filterRadius / sun->numSamples;
+		light.style = noStyles ? LS_NORMAL : sun->style;
 
 		/* set the light's position out to infinity */
-		light->origin = direction * ( MAX_WORLD_COORD * 8.0f );    /* MAX_WORLD_COORD * 2.0f */
+		light.origin = direction * ( MAX_WORLD_COORD * 8.0f );    /* MAX_WORLD_COORD * 2.0f */
 
 		/* set the facing to be the inverse of the sun direction */
-		light->normal = -direction;
-		light->dist = vector3_dot( light->origin, light->normal );
+		light.normal = -direction;
+		light.dist = vector3_dot( light.origin, light.normal );
 
 		/* set color and photons */
-		light->color = sun->color;
-		light->photons = photons * skyScale;
+		light.color = sun->color;
+		light.photons = photons * skyScale;
 	}
 
 	/* another sun? */
@@ -203,22 +200,17 @@ static void CreateSkyLights( const Vector3& color, float value, int iterations, 
  */
 
 void CreateEntityLights( void ){
-	int j;
-	light_t         *light, *light2;
-	const entity_t  *e, *e2;
-
-
 	/* go through entity list and find lights */
 	for ( std::size_t i = 0; i < entities.size(); ++i )
 	{
 		/* get entity */
-		e = &entities[ i ];
+		const entity_t& e = entities[ i ];
 		/* ydnar: check for lightJunior */
 		bool junior;
-		if ( e->classname_is( "lightJunior" ) ) {
+		if ( e.classname_is( "lightJunior" ) ) {
 			junior = true;
 		}
-		else if ( e->classname_prefixed( "light" ) ) {
+		else if ( e.classname_prefixed( "light" ) ) {
 			junior = false;
 		}
 		else{
@@ -226,18 +218,16 @@ void CreateEntityLights( void ){
 		}
 
 		/* lights with target names (and therefore styles) are only parsed from BSP */
-		if ( !strEmpty( e->valueForKey( "targetname" ) ) && i >= numBSPEntities ) {
+		if ( !strEmpty( e.valueForKey( "targetname" ) ) && i >= numBSPEntities ) {
 			continue;
 		}
 
 		/* create a light */
 		numPointLights++;
-		light = safe_calloc( sizeof( *light ) );
-		light->next = lights;
-		lights = light;
+		light_t& light = lights.emplace_front();
 
 		/* handle spawnflags */
-		const int spawnflags = e->intForKey( "spawnflags" );
+		const int spawnflags = e.intForKey( "spawnflags" );
 
 		LightFlags flags;
 		/* ydnar: quake 3+ light behavior */
@@ -304,88 +294,88 @@ void CreateEntityLights( void ){
 		}
 
 		/* store the flags */
-		light->flags = flags;
+		light.flags = flags;
 
 		/* ydnar: set fade key (from wolf) */
-		light->fade = 1.0f;
-		if ( light->flags & LightFlags::AttenLinear ) {
-			light->fade = e->floatForKey( "fade" );
-			if ( light->fade == 0.0f ) {
-				light->fade = 1.0f;
+		light.fade = 1.0f;
+		if ( light.flags & LightFlags::AttenLinear ) {
+			light.fade = e.floatForKey( "fade" );
+			if ( light.fade == 0.0f ) {
+				light.fade = 1.0f;
 			}
 		}
 
 		/* ydnar: set angle scaling (from vlight) */
-		light->angleScale = e->floatForKey( "_anglescale" );
-		if ( light->angleScale != 0.0f ) {
-			light->flags |= LightFlags::AttenAngle;
+		light.angleScale = e.floatForKey( "_anglescale" );
+		if ( light.angleScale != 0.0f ) {
+			light.flags |= LightFlags::AttenAngle;
 		}
 
 		/* set origin */
-		light->origin = e->vectorForKey( "origin" );
-		e->read_keyvalue( light->style, "_style", "style" );
-		if ( light->style < LS_NORMAL || light->style >= LS_NONE ) {
-			Error( "Invalid lightstyle (%d) on entity %zu", light->style, i );
+		light.origin = e.vectorForKey( "origin" );
+		e.read_keyvalue( light.style, "_style", "style" );
+		if ( light.style < LS_NORMAL || light.style >= LS_NONE ) {
+			Error( "Invalid lightstyle (%d) on entity %zu", light.style, i );
 		}
 
 		/* set light intensity */
 		float intensity = 300.f;
-		e->read_keyvalue( intensity, "_light", "light" );
+		e.read_keyvalue( intensity, "_light", "light" );
 		if ( intensity == 0.0f ) {
 			intensity = 300.0f;
 		}
 
 		{	/* ydnar: set light scale (sof2) */
 			float scale;
-			if( e->read_keyvalue( scale, "scale" ) && scale != 0.f )
+			if( e.read_keyvalue( scale, "scale" ) && scale != 0.f )
 				intensity *= scale;
 		}
 
 		/* ydnar: get deviance and samples */
-		const float deviance = std::max( 0.f, e->floatForKey( "_deviance", "_deviation", "_jitter" ) );
-		const int numSamples = std::max( 1, e->intForKey( "_samples" ) );
+		const float deviance = std::max( 0.f, e.floatForKey( "_deviance", "_deviation", "_jitter" ) );
+		const int numSamples = std::max( 1, e.intForKey( "_samples" ) );
 
 		intensity /= numSamples;
 
 		{	/* ydnar: get filter radius */
-			light->filterRadius = std::max( 0.f, e->floatForKey( "_filterradius", "_filteradius", "_filter" ) );
+			light.filterRadius = std::max( 0.f, e.floatForKey( "_filterradius", "_filteradius", "_filter" ) );
 		}
 
 		/* set light color */
-		if ( e->read_keyvalue( light->color, "_color" ) ) {
+		if ( e.read_keyvalue( light.color, "_color" ) ) {
 			if ( colorsRGB ) {
-				light->color[0] = Image_LinearFloatFromsRGBFloat( light->color[0] );
-				light->color[1] = Image_LinearFloatFromsRGBFloat( light->color[1] );
-				light->color[2] = Image_LinearFloatFromsRGBFloat( light->color[2] );
+				light.color[0] = Image_LinearFloatFromsRGBFloat( light.color[0] );
+				light.color[1] = Image_LinearFloatFromsRGBFloat( light.color[1] );
+				light.color[2] = Image_LinearFloatFromsRGBFloat( light.color[2] );
 			}
-			if ( !( light->flags & LightFlags::Unnormalized ) ) {
-				ColorNormalize( light->color );
+			if ( !( light.flags & LightFlags::Unnormalized ) ) {
+				ColorNormalize( light.color );
 			}
 		}
 		else{
-			light->color.set( 1 );
+			light.color.set( 1 );
 		}
 
 
-		if( !e->read_keyvalue( light->extraDist, "_extradist" ) )
-			light->extraDist = extraDist;
+		if( !e.read_keyvalue( light.extraDist, "_extradist" ) )
+			light.extraDist = extraDist;
 
-		light->photons = intensity;
+		light.photons = intensity;
 
-		light->type = ELightType::Point;
+		light.type = ELightType::Point;
 
 		/* set falloff threshold */
-		light->falloffTolerance = falloffTolerance / numSamples;
+		light.falloffTolerance = falloffTolerance / numSamples;
 
 		/* lights with a target will be spotlights */
 		const char *target;
-		if ( e->read_keyvalue( target, "target" ) ) {
+		if ( e.read_keyvalue( target, "target" ) ) {
 			/* get target */
-			e2 = FindTargetEntity( target );
+			const entity_t *e2 = FindTargetEntity( target );
 			if ( e2 == NULL ) {
 				Sys_Warning( "light at (%i %i %i) has missing target\n",
-				             (int) light->origin[ 0 ], (int) light->origin[ 1 ], (int) light->origin[ 2 ] );
-				light->photons *= pointScale;
+				             (int) light.origin[ 0 ], (int) light.origin[ 1 ], (int) light.origin[ 2 ] );
+				light.photons *= pointScale;
 			}
 			else
 			{
@@ -394,72 +384,65 @@ void CreateEntityLights( void ){
 				numSpotLights++;
 
 				/* make a spotlight */
-				light->normal = e2->vectorForKey( "origin" ) - light->origin;
-				float dist = VectorNormalize( light->normal );
-				float radius = e->floatForKey( "radius" );
+				light.normal = e2->vectorForKey( "origin" ) - light.origin;
+				float dist = VectorNormalize( light.normal );
+				float radius = e.floatForKey( "radius" );
 				if ( !radius ) {
 					radius = 64;
 				}
 				if ( !dist ) {
 					dist = 64;
 				}
-				light->radiusByDist = ( radius + 16 ) / dist;
-				light->type = ELightType::Spot;
+				light.radiusByDist = ( radius + 16 ) / dist;
+				light.type = ELightType::Spot;
 
 				/* ydnar: wolf mods: spotlights always use nonlinear + angle attenuation */
-				light->flags &= ~LightFlags::AttenLinear;
-				light->flags |= LightFlags::AttenAngle;
-				light->fade = 1.0f;
+				light.flags &= ~LightFlags::AttenLinear;
+				light.flags |= LightFlags::AttenAngle;
+				light.fade = 1.0f;
 
 				/* ydnar: is this a sun? */
-				if ( e->boolForKey( "_sun" ) ) {
+				if ( e.boolForKey( "_sun" ) ) {
 					/* not a spot light */
 					numSpotLights--;
 
-					/* unlink this light */
-					lights = light->next;
-
 					/* make a sun */
 					sun_t sun;
-					sun.direction = -light->normal;
-					sun.color = light->color;
+					sun.direction = -light.normal;
+					sun.color = light.color;
 					sun.photons = intensity;
 					sun.deviance = degrees_to_radians( deviance );
 					sun.numSamples = numSamples;
-					sun.style = noStyles ? LS_NORMAL : light->style;
+					sun.style = noStyles ? LS_NORMAL : light.style;
 					sun.next = NULL;
+
+					/* free original light before sun insertion */
+					lights.pop_front();
 
 					/* make a sun light */
 					CreateSunLight( &sun );
-
-					/* free original light */
-					free( light );
-					light = NULL;
 
 					/* skip the rest of this love story */
 					continue;
 				}
 				else
 				{
-					light->photons *= spotScale;
+					light.photons *= spotScale;
 				}
 			}
 		}
 		else{
-			light->photons *= pointScale;
+			light.photons *= pointScale;
 		}
 
 		/* jitter the light */
-		for ( j = 1; j < numSamples; j++ )
+		for ( int j = 1; j < numSamples; j++ )
 		{
 			/* create a light */
-			light2 = safe_malloc( sizeof( *light ) );
-			memcpy( light2, light, sizeof( *light ) );
-			light2->next = lights;
-			lights = light2;
+			light_t& light2 = lights.emplace_front( light );
 
 			/* add to counts */
-			if ( light->type == ELightType::Spot ) {
+			if ( light.type == ELightType::Spot ) {
 				numSpotLights++;
 			}
 			else{
@@ -467,9 +450,9 @@ void CreateEntityLights( void ){
 			}
 
 			/* jitter it */
-			light2->origin[ 0 ] = light->origin[ 0 ] + ( Random() * 2.0f - 1.0f ) * deviance;
-			light2->origin[ 1 ] = light->origin[ 1 ] + ( Random() * 2.0f - 1.0f ) * deviance;
-			light2->origin[ 2 ] = light->origin[ 2 ] + ( Random() * 2.0f - 1.0f ) * deviance;
+			light2.origin[ 0 ] = light.origin[ 0 ] + ( Random() * 2.0f - 1.0f ) * deviance;
+			light2.origin[ 1 ] = light.origin[ 1 ] + ( Random() * 2.0f - 1.0f ) * deviance;
+			light2.origin[ 2 ] = light.origin[ 2 ] + ( Random() * 2.0f - 1.0f ) * deviance;
 		}
 	}
 }
@@ -488,7 +471,6 @@ void CreateSurfaceLights( void ){
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info;
 	shaderInfo_t        *si;
-	light_t             *light;
 	float subdivide;
 	clipWork_t cw;
 
@@ -526,20 +508,18 @@ void CreateSurfaceLights( void ){
 		/* autosprite shaders become point lights */
 		if ( si->autosprite ) {
 			/* create a light */
-			light = safe_calloc( sizeof( *light ) );
-			light->next = lights;
-			lights = light;
+			light_t& light = lights.emplace_front();
 
 			/* set it up */
-			light->flags = LightFlags::DefaultQ3A;
-			light->type = ELightType::Point;
-			light->photons = si->value * pointScale;
-			light->fade = 1.0f;
-			light->si = si;
-			light->origin = info->minmax.origin();
-			light->color = si->color;
-			light->falloffTolerance = falloffTolerance;
-			light->style = si->lightStyle;
+			light.flags = LightFlags::DefaultQ3A;
+			light.type = ELightType::Point;
+			light.photons = si->value * pointScale;
+			light.fade = 1.0f;
+			light.si = si;
+			light.origin = info->minmax.origin();
+			light.color = si->color;
+			light.falloffTolerance = falloffTolerance;
+			light.style = si->lightStyle;
 
 			/* add to point light count and continue */
 			numPointLights++;
@@ -693,7 +673,6 @@ float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, con
  */
 
 int LightContributionToSample( trace_t *trace ){
-	light_t         *light;
 	float angle;
 	float add;
 	float dist;
@@ -703,7 +682,7 @@ int LightContributionToSample( trace_t *trace ){
 	bool doAddDeluxe = true;
 
 	/* get light */
-	light = trace->light;
+	const light_t *light = trace->light;
 
 	/* clear color */
 	trace->forceSubsampling = 0.0f; /* to make sure */
@@ -811,7 +790,7 @@ int LightContributionToSample( trace_t *trace ){
 		else
 		{
 			/* calculate the contribution */
-			factor = PointToPolygonFormFactor( pushedOrigin, trace->normal, *light->w );
+			factor = PointToPolygonFormFactor( pushedOrigin, trace->normal, light->w );
 			if ( factor == 0.0f ) {
 				return 0;
 			}
@@ -1176,12 +1155,10 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&c
  */
 
 bool LightContributionToPoint( trace_t *trace ){
-	light_t     *light;
 	float add, dist;
 
-
 	/* get light */
-	light = trace->light;
+	const light_t *light = trace->light;
 
 	/* clear color */
 	trace->color.set( 0 );
@@ -1258,7 +1235,7 @@ bool LightContributionToPoint( trace_t *trace ){
 		}
 
 		/* calculate the contribution (ydnar 2002-10-21: [bug 642] bad normal calc) */
-		factor = PointToPolygonFormFactor( pushedOrigin, trace->direction, *light->w );
+		factor = PointToPolygonFormFactor( pushedOrigin, trace->direction, light->w );
 		if ( factor == 0.0f ) {
 			return false;
 		}
@@ -1447,8 +1424,9 @@ void TraceGrid( int num ){
 
 	/* trace to all the lights, find the major light direction, and divide the
 	   total light between that along the direction and the remaining in the ambient */
-	for ( trace.light = lights; trace.light != NULL; trace.light = trace.light->next )
+	for ( const light_t& light : lights )
 	{
+		trace.light = &light;
 		float addSize;
 
 
