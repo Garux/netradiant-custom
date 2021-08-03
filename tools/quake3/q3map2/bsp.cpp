@@ -581,7 +581,6 @@ void ProcessSubModel( void ){
 
 void ProcessModels( void ){
 	bool oldVerbose;
-	entity_t    *entity;
 
 
 	/* preserve -v setting */
@@ -597,8 +596,8 @@ void ProcessModels( void ){
 	for ( mapEntityNum = 0; mapEntityNum < entities.size(); mapEntityNum++ )
 	{
 		/* get entity */
-		entity = &entities[ mapEntityNum ];
-		if ( entity->brushes == NULL && entity->patches == NULL ) {
+		const entity_t& entity = entities[ mapEntityNum ];
+		if ( entity.brushes == NULL && entity.patches == NULL ) {
 			continue;
 		}
 

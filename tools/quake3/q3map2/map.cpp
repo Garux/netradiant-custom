@@ -789,16 +789,16 @@ void AddBrushBevels( void ){
    and links it to the current entity
  */
 
-static void MergeOrigin( entity_t *ent, const Vector3& origin ){
+static void MergeOrigin( entity_t& ent, const Vector3& origin ){
 	char string[128];
 
 	/* we have not parsed the brush completely yet... */
-	ent->origin = ent->vectorForKey( "origin" ) + origin - ent->originbrush_origin;
+	ent.origin = ent.vectorForKey( "origin" ) + origin - ent.originbrush_origin;
 
-	ent->originbrush_origin = origin;
+	ent.originbrush_origin = origin;
 
-	sprintf( string, "%f %f %f", ent->origin[0], ent->origin[1], ent->origin[2] );
-	ent->setKeyValue( "origin", string );
+	sprintf( string, "%f %f %f", ent.origin[0], ent.origin[1], ent.origin[2] );
+	ent.setKeyValue( "origin", string );
 }
 
 brush_t *FinishBrush( bool noCollapseGroups ){
@@ -822,7 +822,7 @@ brush_t *FinishBrush( bool noCollapseGroups ){
 			return NULL;
 		}
 
-		MergeOrigin( &entities.back(), buildBrush->minmax.origin() );
+		MergeOrigin( entities.back(), buildBrush->minmax.origin() );
 
 		/* don't keep this brush */
 		return NULL;
@@ -1602,8 +1602,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 
 	/* setup */
 	entitySourceBrushes = 0;
-	entities.emplace_back();
-	mapEnt = &entities.back();
+	mapEnt = &entities.emplace_back();
 
 	/* ydnar: true entity numbering */
 	mapEnt->mapEntityNum = numMapEntities;

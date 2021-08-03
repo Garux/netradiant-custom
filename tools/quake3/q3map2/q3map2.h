@@ -991,13 +991,13 @@ struct epair_t
 
 struct entity_t
 {
-	Vector3 origin;
+	Vector3 origin{ 0 };
 	brush_t             *brushes, *lastBrush, *colorModBrushes;
 	parseMesh_t         *patches;
 	int mapEntityNum, firstDrawSurf;
 	int firstBrush, numBrushes;                     /* only valid during BSP compile */
 	std::list<epair_t> epairs;
-	Vector3 originbrush_origin;
+	Vector3 originbrush_origin{ 0 };
 
 	void setKeyValue( const char *key, const char *value );
 	const char *valueForKey( const char *key ) const;

@@ -557,8 +557,7 @@ bool ParseEntity( void ){
 	}
 
 	/* create new entity */
-	entities.emplace_back();
-	mapEnt = &entities.back();
+	mapEnt = &entities.emplace_back();
 
 	/* parse */
 	while ( 1 )

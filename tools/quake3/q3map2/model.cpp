@@ -1430,27 +1430,27 @@ void AddTriangleModels( entity_t *eparent ){
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* get entity */
-		entity_t *e = &entities[ i ];
+		const entity_t& e = entities[ i ];
 
 		/* convert misc_models into raw geometry */
-		if ( !e->classname_is( "misc_model" ) ) {
+		if ( !e.classname_is( "misc_model" ) ) {
 			continue;
 		}
 
 		/* ydnar: added support for md3 models on non-worldspawn models */
-		if ( !strEqual( e->valueForKey( "target" ), targetName ) ) {
+		if ( !strEqual( e.valueForKey( "target" ), targetName ) ) {
 			continue;
 		}
 
 		/* get model name */
 		const char *model;
-		if ( !e->read_keyvalue( model, "model" ) ) {
-			Sys_Warning( "entity#%d misc_model without a model key\n", e->mapEntityNum );
+		if ( !e.read_keyvalue( model, "model" ) ) {
+			Sys_Warning( "entity#%d misc_model without a model key\n", e.mapEntityNum );
 			continue;
 		}
 
 		/* get model frame */
-		const int frame = e->intForKey( "_frame", "frame" );
+		const int frame = e.intForKey( "_frame", "frame" );
 
 		int castShadows, recvShadows;
 		if ( eparent == &entities[0] ) {    /* worldspawn (and func_groups) default to cast/recv shadows in worldspawn group */
@@ -1463,26 +1463,26 @@ void AddTriangleModels( entity_t *eparent ){
 		}
 
 		/* get explicit shadow flags */
-		GetEntityShadowFlags( e, eparent, &castShadows, &recvShadows );
+		GetEntityShadowFlags( &e, eparent, &castShadows, &recvShadows );
 
 		/* get spawnflags */
-		const int spawnFlags = e->intForKey( "spawnflags" );
+		const int spawnFlags = e.intForKey( "spawnflags" );
 
 		/* get origin */
-		const Vector3 origin = e->vectorForKey( "origin" ) - eparent->origin;    /* offset by parent */
+		const Vector3 origin = e.vectorForKey( "origin" ) - eparent->origin;    /* offset by parent */
 
 		/* get scale */
 		Vector3 scale( 1 );
-		if( !e->read_keyvalue( scale, "modelscale_vec" ) )
-			if( e->read_keyvalue( scale[0], "modelscale" ) )
+		if( !e.read_keyvalue( scale, "modelscale_vec" ) )
+			if( e.read_keyvalue( scale[0], "modelscale" ) )
 				scale[1] = scale[2] = scale[0];
 
 		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 		const char *value;
 		Vector3 angles( 0 );
-		if ( !e->read_keyvalue( value, "angles" ) ||
+		if ( !e.read_keyvalue( value, "angles" ) ||
 		     3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
-			e->read_keyvalue( angles[ 2 ], "angle" );
+			e.read_keyvalue( angles[ 2 ], "angle" );
 
 		/* set transform matrix (thanks spog) */
 		Matrix4 transform( g_matrix4_identity );
@@ -1490,7 +1490,7 @@ void AddTriangleModels( entity_t *eparent ){
 
 		/* get shader remappings */
 		std::list<remap_t> remaps;
-		for ( const auto& ep : e->epairs )
+		for ( const auto& ep : e.epairs )
 		{
 			/* look for keys prefixed with "_remap" */
 			if ( striEqualPrefix( ep.key.c_str(), "_remap" ) ) {
@@ -1529,7 +1529,7 @@ void AddTriangleModels( entity_t *eparent ){
 
 		/* ydnar: cel shader support */
 		shaderInfo_t *celShader;
-		if( e->read_keyvalue( value, "_celshader" ) ||
+		if( e.read_keyvalue( value, "_celshader" ) ||
 		    entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
 			celShader = ShaderInfoForShader( String64()( "textures/", value ) );
 		}
@@ -1538,25 +1538,25 @@ void AddTriangleModels( entity_t *eparent ){
 		}
 
 		/* jal : entity based _samplesize */
-		const int lightmapSampleSize = std::max( 0, e->intForKey( "_lightmapsamplesize", "_samplesize", "_ss" ) );
+		const int lightmapSampleSize = std::max( 0, e.intForKey( "_lightmapsamplesize", "_samplesize", "_ss" ) );
 		if ( lightmapSampleSize != 0 )
 			Sys_Printf( "misc_model has lightmap sample size of %.d\n", lightmapSampleSize );
 
 		/* get lightmap scale */
-		const float lightmapScale = std::max( 0.f, e->floatForKey( "lightmapscale", "_lightmapscale", "_ls" ) );
+		const float lightmapScale = std::max( 0.f, e.floatForKey( "lightmapscale", "_lightmapscale", "_ls" ) );
 		if ( lightmapScale != 0 )
 			Sys_Printf( "misc_model has lightmap scale of %.4f\n", lightmapScale );
 
 		/* jal : entity based _shadeangle */
-		const float shadeAngle = std::max( 0.f, e->floatForKey( "_shadeangle",
+		const float shadeAngle = std::max( 0.f, e.floatForKey( "_shadeangle",
 		                                        "_smoothnormals", "_sn", "_sa", "_smooth" ) ); /* vortex' aliases */
 		if ( shadeAngle != 0 )
 			Sys_Printf( "misc_model has shading angle of %.4f\n", shadeAngle );
 
-		const int skin = e->intForKey( "_skin", "skin" );
+		const int skin = e.intForKey( "_skin", "skin" );
 
 		float clipDepth = clipDepthGlobal;
-		if ( e->read_keyvalue( clipDepth, "_clipdepth" ) )
+		if ( e.read_keyvalue( clipDepth, "_clipdepth" ) )
 			Sys_Printf( "misc_model %s has autoclip depth of %.3f\n", model, clipDepth );
 
 

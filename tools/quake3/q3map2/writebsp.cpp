@@ -271,7 +271,6 @@ void SetModelNumbers( void ){
 
 void SetLightStyles( void ){
 	int j, numStyles;
-	entity_t    *e;
 	char value[ 10 ];
 	char lightTargets[ MAX_SWITCHED_LIGHTS ][ 64 ];
 	int lightStyles[ MAX_SWITCHED_LIGHTS ];
@@ -288,16 +287,16 @@ void SetLightStyles( void ){
 	numStyles = 0;
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
-		e = &entities[ i ];
+		entity_t& e = entities[ i ];
 
-		if ( !e->classname_prefixed( "light" ) ) {
+		if ( !e.classname_prefixed( "light" ) ) {
 			continue;
 		}
 		const char *t;
-		if ( !e->read_keyvalue( t, "targetname" ) ) {
+		if ( !e.read_keyvalue( t, "targetname" ) ) {
 			/* ydnar: strip the light from the BSP file */
 			if ( !keepLights ) {
-				e->epairs.clear();
+				e.epairs.clear();
 				numStrippedLights++;
 			}
 
@@ -306,7 +305,7 @@ void SetLightStyles( void ){
 		}
 
 		/* get existing style */
-		const int style = e->intForKey( "style" );
+		const int style = e.intForKey( "style" );
 		if ( style < LS_NORMAL || style > LS_NONE ) {
 			Error( "Invalid lightstyle (%d) on entity %zu", style, i );
 		}
@@ -329,12 +328,12 @@ void SetLightStyles( void ){
 
 		/* set explicit style */
 		sprintf( value, "%d", 32 + j );
-		e->setKeyValue( "style", value );
+		e.setKeyValue( "style", value );
 
 		/* set old style */
 		if ( style != LS_NORMAL ) {
 			sprintf( value, "%d", style );
-			e->setKeyValue( "switch_style", value );
+			e.setKeyValue( "switch_style", value );
 		}
 	}
 
