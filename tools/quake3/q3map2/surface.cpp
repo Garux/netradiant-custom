@@ -761,12 +761,13 @@ shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im
 /*
    DrawSurfaceForSide()
    creates a SURF_FACE drawsurface from a given brush side and winding
+   stores references to given brush and side
  */
 
 const double SNAP_FLOAT_TO_INT = 8.0;
 const double SNAP_INT_TO_FLOAT = ( 1.0 / SNAP_FLOAT_TO_INT );
 
-mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, const winding_t& w ){
+mapDrawSurface_t *DrawSurfaceForSide( const entity_t *e, const brush_t& b, const side_t& s, const winding_t& w ){
 	mapDrawSurface_t    *ds;
 	shaderInfo_t        *si, *parent;
 	bspDrawVert_t       *dv;
@@ -779,7 +780,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, const 
 
 
 	/* ydnar: don't make a drawsurf for culled sides */
-	if ( s->culled ) {
+	if ( s.culled ) {
 		return NULL;
 	}
 
@@ -789,24 +790,24 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, const 
 	}
 
 	/* get shader */
-	si = s->shaderInfo;
+	si = s.shaderInfo;
 
 	/* ydnar: gs mods: check for indexed shader */
-	if ( si->indexed && b->im != NULL ) {
+	if ( si->indexed && b.im != NULL ) {
 		/* indexed */
 		indexed = true;
 
 		/* get shader indexes for each point */
 		for ( size_t i = 0; i < w.size(); i++ )
 		{
-			shaderIndexes[ i ] = GetShaderIndexForPoint( b->im, b->eMinmax, w[ i ] );
-			offsets[ i ] = b->im->offsets[ shaderIndexes[ i ] ];
+			shaderIndexes[ i ] = GetShaderIndexForPoint( b.im, b.eMinmax, w[ i ] );
+			offsets[ i ] = b.im->offsets[ shaderIndexes[ i ] ];
 			//%	Sys_Printf( "%f ", offsets[ i ] );
 		}
 
 		/* get matching shader and set alpha */
 		parent = si;
-		si = GetIndexedShader( parent, b->im, w.size(), shaderIndexes );
+		si = GetIndexedShader( parent, b.im, w.size(), shaderIndexes );
 	}
 	else{
 		indexed = false;
@@ -821,25 +822,25 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, const 
 
 	/* ydnar: gs mods */
 	ds = AllocDrawSurface( ESurfaceType::Face );
-	ds->entityNum = b->entityNum;
-	ds->castShadows = b->castShadows;
-	ds->recvShadows = b->recvShadows;
+	ds->entityNum = b.entityNum;
+	ds->castShadows = b.castShadows;
+	ds->recvShadows = b.recvShadows;
 
 	ds->planar = true;
-	ds->planeNum = s->planenum;
-	ds->lightmapVecs[ 2 ] = mapplanes[ s->planenum ].normal();
+	ds->planeNum = s.planenum;
+	ds->lightmapVecs[ 2 ] = mapplanes[ s.planenum ].normal();
 
 	ds->shaderInfo = si;
-	ds->mapBrush = b;
-	ds->sideRef = AllocSideRef( s, NULL );
+	ds->mapBrush = &b;
+	ds->sideRef = AllocSideRef( &s, NULL );
 	ds->fogNum = -1;
-	ds->sampleSize = b->lightmapSampleSize;
-	ds->lightmapScale = b->lightmapScale;
+	ds->sampleSize = b.lightmapSampleSize;
+	ds->lightmapScale = b.lightmapScale;
 	ds->numVerts = w.size();
 	ds->verts = safe_calloc( ds->numVerts * sizeof( *ds->verts ) );
 
 	/* compute s/t coordinates from brush primitive texture matrix (compute axis base) */
-	ComputeAxisBase( mapplanes[ s->planenum ].normal(), texX, texY );
+	ComputeAxisBase( mapplanes[ s.planenum ].normal(), texX, texY );
 
 	/* create the vertexes */
 	for ( size_t j = 0; j < w.size(); j++ )
@@ -874,21 +875,21 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, const 
 			/* calculate texture s/t from brush primitive texture matrix */
 			x = vector3_dot( vTranslated, texX );
 			y = vector3_dot( vTranslated, texY );
-			dv->st[ 0 ] = s->texMat[ 0 ][ 0 ] * x + s->texMat[ 0 ][ 1 ] * y + s->texMat[ 0 ][ 2 ];
-			dv->st[ 1 ] = s->texMat[ 1 ][ 0 ] * x + s->texMat[ 1 ][ 1 ] * y + s->texMat[ 1 ][ 2 ];
+			dv->st[ 0 ] = s.texMat[ 0 ][ 0 ] * x + s.texMat[ 0 ][ 1 ] * y + s.texMat[ 0 ][ 2 ];
+			dv->st[ 1 ] = s.texMat[ 1 ][ 0 ] * x + s.texMat[ 1 ][ 1 ] * y + s.texMat[ 1 ][ 2 ];
 		}
 
 		/* old quake-style or valve 220 texturing */
 		else {
 			/* nearest-axial projection */
-			dv->st[ 0 ] = s->vecs[ 0 ][ 3 ] + vector3_dot( s->vecs[ 0 ].vec3(), vTranslated );
-			dv->st[ 1 ] = s->vecs[ 1 ][ 3 ] + vector3_dot( s->vecs[ 1 ].vec3(), vTranslated );
+			dv->st[ 0 ] = s.vecs[ 0 ][ 3 ] + vector3_dot( s.vecs[ 0 ].vec3(), vTranslated );
+			dv->st[ 1 ] = s.vecs[ 1 ][ 3 ] + vector3_dot( s.vecs[ 1 ].vec3(), vTranslated );
 			dv->st[ 0 ] /= si->shaderWidth;
 			dv->st[ 1 ] /= si->shaderHeight;
 		}
 
 		/* copy normal */
-		dv->normal = mapplanes[ s->planenum ].normal();
+		dv->normal = mapplanes[ s.planenum ].normal();
 
 		/* ydnar: set color */
 		for ( int k = 0; k < MAX_LIGHTMAPS; k++ )
@@ -902,11 +903,11 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, const 
 	}
 
 	/* set cel shader */
-	ds->celShader = b->celShader;
+	ds->celShader = b.celShader;
 
 	/* set shade angle */
-	if ( b->shadeAngleDegrees > 0.0f ) {
-		ds->shadeAngleDegrees = b->shadeAngleDegrees;
+	if ( b.shadeAngleDegrees > 0.0f ) {
+		ds->shadeAngleDegrees = b.shadeAngleDegrees;
 	}
 
 	/* ydnar: gs mods: moved st biasing elsewhere */
@@ -1202,25 +1203,24 @@ static void AddSurfaceFlare( mapDrawSurface_t *ds, const Vector3& entityOrigin )
    subdivides a face surface until it is smaller than the specified size (subdivisions)
  */
 
-static void SubdivideFace_r( entity_t *e, brush_t *brush, side_t *side, const winding_t *w, int fogNum, float subdivisions ){
+static void SubdivideFace_r( entity_t *e, const brush_t& brush, const side_t& side, winding_t& w, int fogNum, float subdivisions ){
 	int axis;
 	MinMax bounds;
 	const float epsilon = 0.1;
 	int subFloor, subCeil;
-	winding_t           *frontWinding, *backWinding;
 	mapDrawSurface_t    *ds;
 
 
 	/* dummy check */
-	if ( w == NULL ) {
+	if ( w.empty() ) {
 		return;
 	}
-	if ( w->size() < 3 ) {
-		Error( "SubdivideFace_r: Bad w->numpoints (%zu < 3)", w->size() );
+	if ( w.size() < 3 ) {
+		Error( "SubdivideFace_r: Bad w->numpoints (%zu < 3)", w.size() );
 	}
 
 	/* determine surface bounds */
-	WindingExtendBounds( *w, bounds );
+	WindingExtendBounds( w, bounds );
 
 	/* split the face */
 	for ( axis = 0; axis < 3; axis++ )
@@ -1239,14 +1239,14 @@ static void SubdivideFace_r( entity_t *e, brush_t *brush, side_t *side, const wi
 		/* subdivide if necessary */
 		if ( ( subCeil - subFloor ) > subdivisions ) {
 			/* clip the winding */
-			ClipWindingEpsilon( *w, plane, epsilon, frontWinding, backWinding ); /* not strict; we assume we always keep a winding */
+			auto [frontWinding, backWinding] = ClipWindingEpsilon( w, plane, epsilon ); /* not strict; we assume we always keep a winding */
 
 			/* the clip may not produce two polygons if it was epsilon close */
-			if ( frontWinding == NULL ) {
-				w = backWinding;
+			if ( frontWinding.empty() ) {
+				w.swap( backWinding );
 			}
-			else if ( backWinding == NULL ) {
-				w = frontWinding;
+			else if ( backWinding.empty() ) {
+				w.swap( frontWinding );
 			}
 			else
 			{
@@ -1258,7 +1258,7 @@ static void SubdivideFace_r( entity_t *e, brush_t *brush, side_t *side, const wi
 	}
 
 	/* create a face surface */
-	ds = DrawSurfaceForSide( e, brush, side, *w );
+	ds = DrawSurfaceForSide( e, brush, side, w );
 
 	/* set correct fog num */
 	ds->fogNum = fogNum;
@@ -1272,13 +1272,9 @@ static void SubdivideFace_r( entity_t *e, brush_t *brush, side_t *side, const wi
    ydnar: and subdivide surfaces that exceed specified texture coordinate range
  */
 
-void SubdivideFaceSurfaces( entity_t *e, tree_t *tree ){
+void SubdivideFaceSurfaces( entity_t *e ){
 	int i, j, numBaseDrawSurfs, fogNum;
 	mapDrawSurface_t    *ds;
-	brush_t             *brush;
-	side_t              *side;
-	shaderInfo_t        *si;
-	winding_t           *w;
 	float range, size, subdivisions, s2;
 
 
@@ -1298,11 +1294,11 @@ void SubdivideFaceSurfaces( entity_t *e, tree_t *tree ){
 		}
 
 		/* get bits */
-		brush = ds->mapBrush;
-		side = ds->sideRef->side;
+		const brush_t *brush = ds->mapBrush;
+		const side_t& side = *ds->sideRef->side;
 
 		/* check subdivision for shader */
-		si = side->shaderInfo;
+		const shaderInfo_t *si = side.shaderInfo;
 		if ( si == NULL ) {
 			continue;
 		}
@@ -1347,11 +1343,11 @@ void SubdivideFaceSurfaces( entity_t *e, tree_t *tree ){
 		fogNum = ds->fogNum;
 
 		/* make a winding and free the surface */
-		w = WindingFromDrawSurf( ds );
+		winding_t w = WindingFromDrawSurf( ds );
 		ClearSurface( ds );
 
 		/* subdivide it */
-		SubdivideFace_r( e, brush, side, w, fogNum, subdivisions );
+		SubdivideFace_r( e, *brush, side, w, fogNum, subdivisions );
 	}
 }
 
@@ -1365,46 +1361,40 @@ void SubdivideFaceSurfaces( entity_t *e, tree_t *tree ){
    ====================
  */
 
-void ClipSideIntoTree_r( winding_t *w, side_t *side, node_t *node ){
-	winding_t       *front, *back;
-
-	if ( !w ) {
+void ClipSideIntoTree_r( const winding_t& w, side_t& side, const node_t *node ){
+	if ( w.empty() ) {
 		return;
 	}
 
 	if ( node->planenum != PLANENUM_LEAF ) {
-		if ( side->planenum == node->planenum ) {
+		if ( side.planenum == node->planenum ) {
 			ClipSideIntoTree_r( w, side, node->children[0] );
 			return;
 		}
-		if ( side->planenum == ( node->planenum ^ 1 ) ) {
+		if ( side.planenum == ( node->planenum ^ 1 ) ) {
 			ClipSideIntoTree_r( w, side, node->children[1] );
 			return;
 		}
 
 		const Plane3f& plane = mapplanes[ node->planenum ].plane;
-		ClipWindingEpsilonStrict( *w, plane,
-		                          ON_EPSILON, front, back ); /* strict, we handle the "winding disappeared" case */
-		if ( !front && !back ) {
+		auto [front, back] = ClipWindingEpsilonStrict( w, plane, ON_EPSILON ); /* strict, we handle the "winding disappeared" case */
+		if ( front.empty() && back.empty() ) {
 			/* in doubt, register it in both nodes */
-			front = CopyWinding( w );
-			back = CopyWinding( w );
+			ClipSideIntoTree_r( w, side, node->children[0] );
+			ClipSideIntoTree_r( w, side, node->children[1] );
 		}
-		FreeWinding( w );
-
-		ClipSideIntoTree_r( front, side, node->children[0] );
-		ClipSideIntoTree_r( back, side, node->children[1] );
+		else{
+			ClipSideIntoTree_r( front, side, node->children[0] );
+			ClipSideIntoTree_r( back, side, node->children[1] );
+		}
 
 		return;
 	}
 
 	// if opaque leaf, don't add
 	if ( !node->opaque ) {
-		AddWindingToConvexHull( *w, side->visibleHull, mapplanes[ side->planenum ].normal() );
+		AddWindingToConvexHull( w, side.visibleHull, mapplanes[ side.planenum ].normal() );
 	}
-
-	FreeWinding( w );
-	return;
 }
 
 
@@ -1422,44 +1412,42 @@ static int g_numHiddenFaces, g_numCoinFaces;
    determines if a brushside lies inside another brush
  */
 
-bool SideInBrush( side_t *side, brush_t *b ){
+bool SideInBrush( side_t& side, const brush_t& b ){
 	/* ignore sides w/o windings or shaders */
-	if ( side->winding == NULL || side->shaderInfo == NULL ) {
+	if ( side.winding.empty() || side.shaderInfo == NULL ) {
 		return true;
 	}
 
 	/* ignore culled sides and translucent brushes */
-	if ( side->culled || ( b->compileFlags & C_TRANSLUCENT ) ) {
+	if ( side.culled || ( b.compileFlags & C_TRANSLUCENT ) ) {
 		return false;
 	}
 
 	/* side iterator */
-	for ( int i = 0; i < b->numsides; i++ )
+	for ( const side_t& bside : b.sides )
 	{
 		/* fail if any sides are caulk */
-		if ( b->sides[ i ].compileFlags & C_NODRAW ) {
+		if ( bside.compileFlags & C_NODRAW ) {
 			return false;
 		}
 
 		/* check if side's winding is on or behind the plane */
-		const Plane3f& plane = mapplanes[ b->sides[ i ].planenum ].plane;
-		const EPlaneSide s = WindingOnPlaneSide( *side->winding, plane );
+		const Plane3f& plane = mapplanes[ bside.planenum ].plane;
+		const EPlaneSide s = WindingOnPlaneSide( side.winding, plane );
 		if ( s == eSideFront || s == eSideCross ) {
 			return false;
 		}
-		if( s == eSideOn && b->sides[ i ].culled && vector3_dot( mapplanes[ side->planenum ].normal(), plane.normal() ) > 0 ) /* don't cull by freshly culled with matching plane */
+		if( s == eSideOn && bside.culled && vector3_dot( mapplanes[ side.planenum ].normal(), plane.normal() ) > 0 ) /* don't cull by freshly culled with matching plane */
 			return false;
 	}
 
 	/* don't cull autosprite or polygonoffset surfaces */
-	if ( side->shaderInfo ) {
-		if ( side->shaderInfo->autosprite || side->shaderInfo->polygonOffset ) {
-			return false;
-		}
+	if ( side.shaderInfo->autosprite || side.shaderInfo->polygonOffset ) {
+		return false;
 	}
 
 	/* inside */
-	side->culled = true;
+	side.culled = true;
 	g_numHiddenFaces++;
 	return true;
 }
@@ -1471,11 +1459,7 @@ bool SideInBrush( side_t *side, brush_t *b ){
  */
 
 void CullSides( entity_t *e ){
-	int numPoints;
-	int i, j, k, l, first, second, dir;
-	const winding_t   *w1, *w2;
-	brush_t *b1, *b2;
-	side_t      *side1, *side2;
+	int k, l, first, second, dir;
 
 
 	/* note it */
@@ -1485,18 +1469,18 @@ void CullSides( entity_t *e ){
 	g_numCoinFaces = 0;
 
 	/* brush interator 1 */
-	for ( b1 = e->brushes; b1; b1 = b1->next )
+	for ( brushlist_t::iterator b1 = e->brushes.begin(); b1 != e->brushes.end(); ++b1 )
 	{
 		/* sides check */
-		if ( b1->numsides < 1 ) {
+		if ( b1->sides.empty() ) {
 			continue;
 		}
 
 		/* brush iterator 2 */
-		for ( b2 = b1->next; b2; b2 = b2->next )
+		for ( brushlist_t::iterator b2 = std::next( b1 ); b2 != e->brushes.end(); ++b2 )
 		{
 			/* sides check */
-			if ( b2->numsides < 1 ) {
+			if ( b2->sides.empty() ) {
 				continue;
 			}
 
@@ -1511,56 +1495,52 @@ void CullSides( entity_t *e ){
 			}
 
 			/* cull inside sides */
-			for ( i = 0; i < b1->numsides; i++ )
-				SideInBrush( &b1->sides[ i ], b2 );
-			for ( i = 0; i < b2->numsides; i++ )
-				SideInBrush( &b2->sides[ i ], b1 );
+			for ( side_t& side : b1->sides )
+				SideInBrush( side, *b2 );
+			for ( side_t& side : b2->sides )
+				SideInBrush( side, *b1 );
 
 			/* side iterator 1 */
-			for ( i = 0; i < b1->numsides; i++ )
+			for ( side_t& side1 : b1->sides )
 			{
 				/* winding check */
-				side1 = &b1->sides[ i ];
-				w1 = side1->winding;
-				if ( w1 == NULL ) {
+				winding_t& w1 = side1.winding;
+				if ( w1.empty() ) {
 					continue;
 				}
-				numPoints = w1->size();
-				if ( side1->shaderInfo == NULL ) {
+				const int numPoints = w1.size();
+				if ( side1.shaderInfo == NULL ) {
 					continue;
 				}
 
 				/* side iterator 2 */
-				for ( j = 0; j < b2->numsides; j++ )
+				for ( side_t& side2 : b2->sides )
 				{
 					/* winding check */
-					side2 = &b2->sides[ j ];
-					w2 = side2->winding;
-					if ( w2 == NULL ) {
+					winding_t& w2 = side2.winding;
+					if ( w2.empty() ) {
 						continue;
 					}
-					if ( side2->shaderInfo == NULL ) {
+					if ( side2.shaderInfo == NULL ) {
 						continue;
 					}
-					if ( w1->size() != w2->size() ) {
+					if ( w1.size() != w2.size() ) {
 						continue;
 					}
-					if ( side1->culled && side2->culled ) {
+					if ( side1.culled && side2.culled ) {
 						continue;
 					}
 
 					/* compare planes */
-					if ( ( side1->planenum & ~0x00000001 ) != ( side2->planenum & ~0x00000001 ) ) {
+					if ( ( side1.planenum & ~0x00000001 ) != ( side2.planenum & ~0x00000001 ) ) {
 						continue;
 					}
 
 					/* get autosprite and polygonoffset status */
-					if ( side1->shaderInfo &&
-					     ( side1->shaderInfo->autosprite || side1->shaderInfo->polygonOffset ) ) {
+					if ( side1.shaderInfo->autosprite || side1.shaderInfo->polygonOffset ) {
 						continue;
 					}
-					if ( side2->shaderInfo &&
-					     ( side2->shaderInfo->autosprite || side2->shaderInfo->polygonOffset ) ) {
+					if ( side2.shaderInfo->autosprite || side2.shaderInfo->polygonOffset ) {
 						continue;
 					}
 
@@ -1568,7 +1548,7 @@ void CullSides( entity_t *e ){
 					first = -1;
 					for ( k = 0; k < numPoints; k++ )
 					{
-						if ( VectorCompare( ( *w1 )[ 0 ], ( *w2 )[ k ] ) ) {
+						if ( VectorCompare( w1[ 0 ], w2[ k ] ) ) {
 							first = k;
 							break;
 						}
@@ -1586,7 +1566,7 @@ void CullSides( entity_t *e ){
 					else{
 						second = 0;
 					}
-					if ( vector3_equal_epsilon( ( *w1 )[ 1 ], ( *w2 )[ second ], CULL_EPSILON ) ) {
+					if ( vector3_equal_epsilon( w1[ 1 ], w2[ second ], CULL_EPSILON ) ) {
 						dir = 1;
 					}
 					else
@@ -1597,7 +1577,7 @@ void CullSides( entity_t *e ){
 						else{
 							second = numPoints - 1;
 						}
-						if ( vector3_equal_epsilon( ( *w1 )[ 1 ], ( *w2 )[ second ], CULL_EPSILON ) ) {
+						if ( vector3_equal_epsilon( w1[ 1 ], w2[ second ], CULL_EPSILON ) ) {
 							dir = -1;
 						}
 					}
@@ -1609,7 +1589,7 @@ void CullSides( entity_t *e ){
 					l = first;
 					for ( k = 0; k < numPoints; k++ )
 					{
-						if ( !vector3_equal_epsilon( ( *w1 )[ k ], ( *w2 )[ l ], CULL_EPSILON ) ) {
+						if ( !vector3_equal_epsilon( w1[ k ], w2[ l ], CULL_EPSILON ) ) {
 							k = 100000;
 						}
 
@@ -1626,18 +1606,18 @@ void CullSides( entity_t *e ){
 					}
 
 					/* cull face 1 */
-					if ( !side2->culled && !( side2->compileFlags & C_TRANSLUCENT ) && !( side2->compileFlags & C_NODRAW ) ) {
-						side1->culled = true;
+					if ( !side2.culled && !( side2.compileFlags & C_TRANSLUCENT ) && !( side2.compileFlags & C_NODRAW ) ) {
+						side1.culled = true;
 						g_numCoinFaces++;
 					}
 
-					if ( side1->planenum == side2->planenum && side1->culled ) {
+					if ( side1.planenum == side2.planenum && side1.culled ) {
 						continue;
 					}
 
 					/* cull face 2 */
-					if ( !side1->culled && !( side1->compileFlags & C_TRANSLUCENT ) && !( side1->compileFlags & C_NODRAW ) ) {
-						side2->culled = true;
+					if ( !side1.culled && !( side1.compileFlags & C_TRANSLUCENT ) && !( side1.compileFlags & C_NODRAW ) ) {
+						side2.culled = true;
 						g_numCoinFaces++;
 					}
 
@@ -1665,14 +1645,7 @@ void CullSides( entity_t *e ){
    to be trimmed off automatically.
  */
 
-void ClipSidesIntoTree( entity_t *e, tree_t *tree ){
-	brush_t     *b;
-	int i;
-	winding_t       *w;
-	side_t          *side, *newSide;
-	shaderInfo_t    *si;
-
-
+void ClipSidesIntoTree( entity_t *e, const tree_t& tree ){
 	/* ydnar: cull brush sides */
 	CullSides( e );
 
@@ -1680,30 +1653,25 @@ void ClipSidesIntoTree( entity_t *e, tree_t *tree ){
 	Sys_FPrintf( SYS_VRB, "--- ClipSidesIntoTree ---\n" );
 
 	/* walk the brush list */
-	for ( b = e->brushes; b; b = b->next )
+	for ( brush_t& b : e->brushes )
 	{
 		/* walk the brush sides */
-		for ( i = 0; i < b->numsides; i++ )
+		for ( side_t& side : b.sides )
 		{
-			/* get side */
-			side = &b->sides[ i ];
-			if ( side->winding == NULL ) {
+			if ( side.winding.empty() ) {
 				continue;
 			}
 
-			/* copy the winding */
-			w = CopyWinding( side->winding );
-			side->visibleHull = NULL;
-			ClipSideIntoTree_r( w, side, tree->headnode );
+			side.visibleHull.clear();
+			ClipSideIntoTree_r( side.winding, side, tree.headnode );
 
 			/* anything left? */
-			w = side->visibleHull;
-			if ( w == NULL ) {
+			if ( side.visibleHull.empty() ) {
 				continue;
 			}
 
 			/* shader? */
-			si = side->shaderInfo;
+			const shaderInfo_t *si = side.shaderInfo;
 			if ( si == NULL ) {
 				continue;
 			}
@@ -1715,27 +1683,21 @@ void ClipSidesIntoTree( entity_t *e, tree_t *tree ){
 			}
 
 			/* always use the original winding for autosprites and noclip faces */
-			if ( si->autosprite || si->noClip ) {
-				w = side->winding;
-			}
+			const winding_t& w = ( si->autosprite || si->noClip )? side.winding : side.visibleHull;
 
 			/* save this winding as a visible surface */
-			DrawSurfaceForSide( e, b, side, *w );
+			DrawSurfaceForSide( e, b, side, w );
 
 			/* make a back side for fog */
-			if ( !( si->compileFlags & C_FOG ) ) {
-				continue;
+			if ( si->compileFlags & C_FOG ) {
+				/* duplicate the up-facing side */
+				side_t& newSide = *new side_t( side );
+				newSide.visibleHull = ReverseWinding( w );
+				newSide.planenum ^= 1;
+
+				/* save this winding as a visible surface */
+				DrawSurfaceForSide( e, b, newSide, newSide.visibleHull ); // references new side by sideref, leak!
 			}
-
-			/* duplicate the up-facing side */
-			w = ReverseWinding( *w );
-			newSide = safe_malloc( sizeof( *side ) );
-			*newSide = *side;
-			newSide->visibleHull = w;
-			newSide->planenum ^= 1;
-
-			/* save this winding as a visible surface */
-			DrawSurfaceForSide( e, b, newSide, *w );
 		}
 	}
 }
@@ -1910,14 +1872,11 @@ int FilterPointConvexHullIntoTree_r( Vector3 *points[], const int npoints, mapDr
    filters a winding from a drawsurface into the tree
  */
 
-int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node ){
+int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t *ds, node_t *node ){
 	int refs = 0;
-	winding_t       *fat, *front, *back;
-	shaderInfo_t    *si;
-
 
 	/* get shaderinfo */
-	si = ds->shaderInfo;
+	const shaderInfo_t *si = ds->shaderInfo;
 
 	/* ydnar: is this the head node? */
 	if ( node->parent == NULL && si != NULL && si->minmax.valid() ) {
@@ -1929,17 +1888,16 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node ){
 
 		/* 'fatten' the winding by the shader mins/maxs (parsed from vertexDeform move) */
 		/* note this winding is completely invalid (concave, nonplanar, etc) */
-		fat = AllocWinding( w->size() * 3 + 3 );
-		fat->resize( w->size() * 3 + 3 );
-		for ( size_t i = 0; i < w->size(); i++ )
+		winding_t fat( w.size() * 3 + 3 );
+		for ( size_t i = 0; i < w.size(); i++ )
 		{
-			( *fat )[ i ] = ( *w )[ i ];
-			( *fat )[ i + ( w->size() + 1 ) ] = ( *w )[ i ] + si->minmax.mins;
-			( *fat )[ i + ( w->size() + 1 ) * 2 ] = ( *w )[ i ] + si->minmax.maxs;
+			fat[ i ] = w[ i ];
+			fat[ i + ( w.size() + 1 ) ] = w[ i ] + si->minmax.mins;
+			fat[ i + ( w.size() + 1 ) * 2 ] = w[ i ] + si->minmax.maxs;
 		}
-		( *fat )[ w->size() ] = ( *w )[ 0 ];
-		( *fat )[ w->size() * 2 ] = ( *w )[ 0 ] + si->minmax.mins;
-		( *fat )[ w->size() * 3 ] = ( *w )[ 0 ] + si->minmax.maxs;
+		fat[ w.size() ] = w[ 0 ];
+		fat[ w.size() * 2 ] = w[ 0 ] + si->minmax.mins;
+		fat[ w.size() * 3 ] = w[ 0 ] + si->minmax.maxs;
 
 		/*
 		 * note: this winding is STILL not suitable for ClipWindingEpsilon, and
@@ -1949,8 +1907,7 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node ){
 		 * it worse
 		 */
 
-		FreeWinding( w );
-		w = fat;
+		w.swap( fat );
 	}
 
 	/* is this a decision node? */
@@ -1989,23 +1946,23 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node ){
 		}
 
 		/* clip the winding by this plane */
-		ClipWindingEpsilonStrict( *w, plane1, ON_EPSILON, front, back ); /* strict; we handle the "winding disappeared" case */
+		auto [front, back] = ClipWindingEpsilonStrict( w, plane1, ON_EPSILON ); /* strict; we handle the "winding disappeared" case */
 
 		/* filter by this plane */
 		refs = 0;
-		if ( front == NULL && back == NULL ) {
+		if ( front.empty() && back.empty() ) {
 			/* same plane, this is an ugly hack */
 			/* but better too many than too few refs */
-			refs += FilterWindingIntoTree_r( CopyWinding( w ), ds, node->children[ 0 ] );
-			refs += FilterWindingIntoTree_r( CopyWinding( w ), ds, node->children[ 1 ] );
+			winding_t wcopy( w );
+			refs += FilterWindingIntoTree_r( wcopy, ds, node->children[ 0 ] );
+			refs += FilterWindingIntoTree_r( w, ds, node->children[ 1 ] );
 		}
-		if ( front != NULL ) {
+		if ( !front.empty() ) {
 			refs += FilterWindingIntoTree_r( front, ds, node->children[ 0 ] );
 		}
-		if ( back != NULL ) {
+		if ( !back.empty() ) {
 			refs += FilterWindingIntoTree_r( back, ds, node->children[ 1 ] );
 		}
-		FreeWinding( w );
 
 		/* return */
 		return refs;
@@ -2022,14 +1979,10 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node ){
    filters a planar winding face drawsurface into the bsp tree
  */
 
-int FilterFaceIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
-	winding_t   *w;
-	int refs = 0;
-
-
+int FilterFaceIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
 	/* make a winding and filter it into the tree */
-	w = WindingFromDrawSurf( ds );
-	refs = FilterWindingIntoTree_r( w, ds, tree->headnode );
+	winding_t w = WindingFromDrawSurf( ds );
+	int refs = FilterWindingIntoTree_r( w, ds, tree.headnode );
 
 	/* return */
 	return refs;
@@ -2044,7 +1997,7 @@ int FilterFaceIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
 
 #define FILTER_SUBDIVISION      8
 
-static int FilterPatchIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
+static int FilterPatchIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
 	int x, y, refs = 0;
 
 	for ( y = 0; y + 2 < ds->patchHeight; y += 2 )
@@ -2060,7 +2013,7 @@ static int FilterPatchIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
 			points[6] = &ds->verts[( y + 2 ) * ds->patchWidth + ( x + 0 )].xyz;
 			points[7] = &ds->verts[( y + 2 ) * ds->patchWidth + ( x + 1 )].xyz;
 			points[8] = &ds->verts[( y + 2 ) * ds->patchWidth + ( x + 2 )].xyz;
-			refs += FilterPointConvexHullIntoTree_r( points, 9, ds, tree->headnode );
+			refs += FilterPointConvexHullIntoTree_r( points, 9, ds, tree.headnode );
 		}
 
 	return refs;
@@ -2073,9 +2026,8 @@ static int FilterPatchIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
    filters a triangle surface (meta, model) into the bsp
  */
 
-static int FilterTrianglesIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
+static int FilterTrianglesIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
 	int i, refs;
-	winding_t   *w;
 
 
 	/* ydnar: gs mods: this was creating bogus triangles before */
@@ -2090,16 +2042,16 @@ static int FilterTrianglesIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
 		}
 
 		/* make a triangle winding and filter it into the tree */
-		w = AllocWinding( 3 );
-		w->push_back( ds->verts[ ds->indexes[ i ] ].xyz );
-		w->push_back( ds->verts[ ds->indexes[ i + 1 ] ].xyz );
-		w->push_back( ds->verts[ ds->indexes[ i + 2 ] ].xyz );
-		refs += FilterWindingIntoTree_r( w, ds, tree->headnode );
+		winding_t w{
+			ds->verts[ ds->indexes[ i ] ].xyz,
+			ds->verts[ ds->indexes[ i + 1 ] ].xyz,
+			ds->verts[ ds->indexes[ i + 2 ] ].xyz };
+		refs += FilterWindingIntoTree_r( w, ds, tree.headnode );
 	}
 
 	/* use point filtering as well */
 	for ( i = 0; i < ds->numVerts; i++ )
-		refs += FilterPointIntoTree_r( ds->verts[ i ].xyz, ds, tree->headnode );
+		refs += FilterPointIntoTree_r( ds->verts[ i ].xyz, ds, tree.headnode );
 
 	return refs;
 }
@@ -2111,10 +2063,9 @@ static int FilterTrianglesIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
    filters a foliage surface (wolf et/splash damage)
  */
 
-static int FilterFoliageIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
+static int FilterFoliageIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
 	int f, i, refs;
 	bspDrawVert_t   *instance;
-	winding_t       *w;
 
 
 	/* walk origin list */
@@ -2135,17 +2086,17 @@ static int FilterFoliageIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
 			}
 
 			/* make a triangle winding and filter it into the tree */
-			w = AllocWinding( 3 );
-			w->push_back( instance->xyz + ds->verts[ ds->indexes[ i ] ].xyz );
-			w->push_back( instance->xyz + ds->verts[ ds->indexes[ i + 1 ] ].xyz );
-			w->push_back( instance->xyz + ds->verts[ ds->indexes[ i + 2 ] ].xyz );
-			refs += FilterWindingIntoTree_r( w, ds, tree->headnode );
+			winding_t w{
+				instance->xyz + ds->verts[ ds->indexes[ i ] ].xyz,
+				instance->xyz + ds->verts[ ds->indexes[ i + 1 ] ].xyz,
+				instance->xyz + ds->verts[ ds->indexes[ i + 2 ] ].xyz };
+			refs += FilterWindingIntoTree_r( w, ds, tree.headnode );
 		}
 
 		/* use point filtering as well */
 		for ( i = 0; i < ( ds->numVerts - ds->numFoliageInstances ); i++ )
 		{
-			refs += FilterPointIntoTree_r( instance->xyz + ds->verts[ i ].xyz, ds, tree->headnode );
+			refs += FilterPointIntoTree_r( instance->xyz + ds->verts[ i ].xyz, ds, tree.headnode );
 		}
 	}
 
@@ -2158,8 +2109,8 @@ static int FilterFoliageIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
    FilterFlareIntoTree()
    simple point filtering for flare surfaces
  */
-static int FilterFlareSurfIntoTree( mapDrawSurface_t *ds, tree_t *tree ){
-	return FilterPointIntoTree_r( ds->lightmapOrigin, ds, tree->headnode );
+static int FilterFlareSurfIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
+	return FilterPointIntoTree_r( ds->lightmapOrigin, ds, tree.headnode );
 }
 
 
@@ -2741,10 +2692,9 @@ static void EmitFaceSurface( mapDrawSurface_t *ds ){
    generates drawsurfaces for passable portals in the bsp
  */
 
-static void MakeDebugPortalSurfs_r( node_t *node, shaderInfo_t *si ){
+static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t *si ){
 	int i, k, c, s;
-	portal_t            *p;
-	winding_t           *w;
+	const portal_t      *p;
 	mapDrawSurface_t    *ds;
 	bspDrawVert_t       *dv;
 
@@ -2765,30 +2715,29 @@ static void MakeDebugPortalSurfs_r( node_t *node, shaderInfo_t *si ){
 	for ( c = 0, p = node->portals; p != NULL; c++, p = p->next[ s ] )
 	{
 		/* get winding and side even/odd */
-		w = p->winding;
+		const winding_t& w = p->winding;
 		s = ( p->nodes[ 1 ] == node );
 
 		/* is this a valid portal for this leaf? */
-		if ( w && p->nodes[ 0 ] == node ) {
+		if ( !w.empty() && p->nodes[ 0 ] == node ) {
 			/* is this portal passable? */
 			if ( !PortalPassable( p ) ) {
 				continue;
 			}
 
 			/* check max points */
-			if ( w->size() > 64 ) {
-				Error( "MakePortalSurfs_r: w->numpoints = %zu", w->size() );
+			if ( w.size() > 64 ) {
+				Error( "MakePortalSurfs_r: w->numpoints = %zu", w.size() );
 			}
 
 			/* allocate a drawsurface */
 			ds = AllocDrawSurface( ESurfaceType::Face );
 			ds->shaderInfo = si;
 			ds->planar = true;
-			ds->sideRef = AllocSideRef( p->side, NULL );
 			ds->planeNum = FindFloatPlane( p->plane.plane, 0, NULL );
 			ds->lightmapVecs[ 2 ] = p->plane.normal();
 			ds->fogNum = -1;
-			ds->numVerts = w->size();
+			ds->numVerts = w.size();
 			ds->verts = safe_calloc( ds->numVerts * sizeof( *ds->verts ) );
 
 			/* walk the winding */
@@ -2798,7 +2747,7 @@ static void MakeDebugPortalSurfs_r( node_t *node, shaderInfo_t *si ){
 				dv = ds->verts + i;
 
 				/* set it */
-				dv->xyz = ( *w )[ i ];
+				dv->xyz = w[ i ];
 				dv->normal = p->plane.normal();
 				dv->st = { 0, 0 };
 				for ( k = 0; k < MAX_LIGHTMAPS; k++ )
@@ -2818,7 +2767,7 @@ static void MakeDebugPortalSurfs_r( node_t *node, shaderInfo_t *si ){
    generates drawsurfaces for passable portals in the bsp
  */
 
-void MakeDebugPortalSurfs( tree_t *tree ){
+void MakeDebugPortalSurfs( const tree_t& tree ){
 	shaderInfo_t    *si;
 
 
@@ -2829,7 +2778,7 @@ void MakeDebugPortalSurfs( tree_t *tree ){
 	si = ShaderInfoForShader( "debugportals" );
 
 	/* walk the tree */
-	MakeDebugPortalSurfs_r( tree->headnode, si );
+	MakeDebugPortalSurfs_r( tree.headnode, si );
 }
 
 
@@ -2839,7 +2788,7 @@ void MakeDebugPortalSurfs( tree_t *tree ){
    generates drawsurfaces for a foghull (this MUST use a sky shader)
  */
 
-void MakeFogHullSurfs( entity_t *e, tree_t *tree, const char *shader ){
+void MakeFogHullSurfs( entity_t *e, const char *shader ){
 	shaderInfo_t        *si;
 	mapDrawSurface_t    *ds;
 	int indexes[] =
@@ -3231,17 +3180,8 @@ void AddEntitySurfaceModels( entity_t *e ){
  */
 
 static void VolumeColorMods( entity_t *e, mapDrawSurface_t *ds ){
-	int i, j;
-	brush_t     *b;
-
-
-	/* early out */
-	if ( e->colorModBrushes == NULL ) {
-		return;
-	}
-
 	/* iterate brushes */
-	for ( b = e->colorModBrushes; b != NULL; b = b->nextColorModBrush )
+	for ( const brush_t *b : e->colorModBrushes )
 	{
 		/* worldspawn alpha brushes affect all, grouped ones only affect original entity */
 		if ( b->entityNum != 0 && b->entityNum != ds->entityNum ) {
@@ -3254,10 +3194,11 @@ static void VolumeColorMods( entity_t *e, mapDrawSurface_t *ds ){
 		}
 
 		/* iterate verts */
-		for ( i = 0; i < ds->numVerts; i++ )
+		for ( int i = 0; i < ds->numVerts; i++ )
 		{
 			/* iterate planes */
-			for ( j = 0; j < b->numsides; j++ )
+			size_t j;
+			for ( j = 0; j < b->sides.size(); j++ )
 			{
 				/* point-plane test */
 				if ( plane3_distance_to_point( mapplanes[ b->sides[ j ].planenum ].plane, ds->verts[ i ].xyz ) > 1.0f ) {
@@ -3266,7 +3207,7 @@ static void VolumeColorMods( entity_t *e, mapDrawSurface_t *ds ){
 			}
 
 			/* apply colormods */
-			if ( j == b->numsides ) {
+			if ( j == b->sides.size() ) {
 				ColorMod( b->contentShader->colorMod, 1, &ds->verts[ i ] );
 			}
 		}
@@ -3282,7 +3223,7 @@ static void VolumeColorMods( entity_t *e, mapDrawSurface_t *ds ){
    will have valid final indexes
  */
 
-void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
+void FilterDrawsurfsIntoTree( entity_t *e, tree_t& tree ){
 	int i, j;
 	mapDrawSurface_t    *ds;
 	shaderInfo_t        *si;
@@ -3311,7 +3252,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 
 		/* ydnar: skybox surfaces are special */
 		if ( ds->skybox ) {
-			refs = AddReferenceToTree_r( ds, tree->headnode, true );
+			refs = AddReferenceToTree_r( ds, tree.headnode, true );
 			ds->skybox = false;
 			sb = true;
 		}
@@ -3421,7 +3362,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 		/* handle foghull surfaces */
 		case ESurfaceType::Foghull:
 			if ( refs == 0 ) {
-				refs = AddReferenceToTree_r( ds, tree->headnode, false );
+				refs = AddReferenceToTree_r( ds, tree.headnode, false );
 			}
 			if ( refs > 0 ) {
 				EmitTriangleSurface( ds );

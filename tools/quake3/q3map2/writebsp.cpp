@@ -38,7 +38,7 @@
    emits a bsp shader entry
  */
 
-int EmitShader( const char *shader, int *contentFlags, int *surfaceFlags ){
+int EmitShader( const char *shader, const int *contentFlags, const int *surfaceFlags ){
 	int i;
 	shaderInfo_t    *si;
 
@@ -132,7 +132,6 @@ void EmitPlanes( void ){
 
 void EmitLeaf( node_t *node ){
 	bspLeaf_t       *leaf_p;
-	brush_t         *b;
 	drawSurfRef_t   *dsr;
 
 
@@ -153,18 +152,18 @@ void EmitLeaf( node_t *node ){
 
 	/* emit leaf brushes */
 	leaf_p->firstBSPLeafBrush = numBSPLeafBrushes;
-	for ( b = node->brushlist; b; b = b->next )
+	for ( const brush_t& b : node->brushlist )
 	{
 		/* something is corrupting brushes */
-		if ( (size_t) b < 256 ) {
-			Sys_Warning( "Node brush list corrupted (0x%08X)\n", b );
-			break;
-		}
+		// if ( (size_t) b < 256 ) {
+		// 	Sys_Warning( "Node brush list corrupted (0x%08X)\n", b );
+		// 	break;
+		// }
 		//%	if( b->guard != 0xDEADBEEF )
 		//%		Sys_Printf( "Brush %6d: 0x%08X Guard: 0x%08X Next: 0x%08X Original: 0x%08X Sides: %d\n", b->brushNum, b, b, b->next, b->original, b->numsides );
 
 		AUTOEXPAND_BY_REALLOC_BSP( LeafBrushes, 1024 );
-		bspLeafBrushes[ numBSPLeafBrushes ] = b->original->outputNum;
+		bspLeafBrushes[ numBSPLeafBrushes ] = b.original->outputNum;
 		numBSPLeafBrushes++;
 	}
 
@@ -247,12 +246,10 @@ int EmitDrawNode_r( node_t *node ){
    ============
  */
 void SetModelNumbers( void ){
-	int models;
-	char value[16];
-
-	models = 1;
+	int models = 1;
 	for ( std::size_t i = 1; i < entities.size(); ++i ) {
-		if ( entities[i].brushes || entities[i].patches ) {
+		if ( !entities[i].brushes.empty() || entities[i].patches ) {
+			char value[16];
 			sprintf( value, "*%i", models );
 			models++;
 			entities[i].setKeyValue( "model", value );
@@ -404,9 +401,7 @@ void EndBSPFile( bool do_write ){
    writes the brush list to the bsp
  */
 
-void EmitBrushes( brush_t *brushes, int *firstBrush, int *numBrushes ){
-	int j;
-	brush_t         *b;
+void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
 	bspBrush_t      *db;
 	bspBrushSide_t  *cp;
 
@@ -420,45 +415,45 @@ void EmitBrushes( brush_t *brushes, int *firstBrush, int *numBrushes ){
 	}
 
 	/* walk list of brushes */
-	for ( b = brushes; b != NULL; b = b->next )
+	for ( brush_t& b : brushes )
 	{
 		/* check limits */
 		AUTOEXPAND_BY_REALLOC_BSP( Brushes, 1024 );
 
 		/* get bsp brush */
-		b->outputNum = numBSPBrushes;
+		b.outputNum = numBSPBrushes;
 		db = &bspBrushes[ numBSPBrushes ];
 		numBSPBrushes++;
 		if ( numBrushes != NULL ) {
 			( *numBrushes )++;
 		}
 
-		db->shaderNum = EmitShader( b->contentShader->shader, &b->contentShader->contentFlags, &b->contentShader->surfaceFlags );
+		db->shaderNum = EmitShader( b.contentShader->shader, &b.contentShader->contentFlags, &b.contentShader->surfaceFlags );
 		db->firstSide = numBSPBrushSides;
 
 		/* walk sides */
 		db->numSides = 0;
-		for ( j = 0; j < b->numsides; j++ )
+		for ( side_t& side : b.sides )
 		{
 			/* set output number to bogus initially */
-			b->sides[ j ].outputNum = -1;
+			side.outputNum = -1;
 
 			/* check count */
 			AUTOEXPAND_BY_REALLOC_BSP( BrushSides, 1024 );
 
 			/* emit side */
-			b->sides[ j ].outputNum = numBSPBrushSides;
+			side.outputNum = numBSPBrushSides;
 			cp = &bspBrushSides[ numBSPBrushSides ];
 			db->numSides++;
 			numBSPBrushSides++;
-			cp->planeNum = b->sides[ j ].planenum;
+			cp->planeNum = side.planenum;
 
 			/* emit shader */
-			if ( b->sides[ j ].shaderInfo ) {
-				cp->shaderNum = EmitShader( b->sides[ j ].shaderInfo->shader, &b->sides[ j ].shaderInfo->contentFlags, &b->sides[ j ].shaderInfo->surfaceFlags );
+			if ( side.shaderInfo ) {
+				cp->shaderNum = EmitShader( side.shaderInfo->shader, &side.shaderInfo->contentFlags, &side.shaderInfo->surfaceFlags );
 			}
-			else if( b->sides[ j ].bevel ) { /* emit surfaceFlags for bevels to get correct physics at walkable brush edges and vertices */
-				cp->shaderNum = EmitShader( NULL, NULL, &b->sides[ j ].surfaceFlags );
+			else if( side.bevel ) { /* emit surfaceFlags for bevels to get correct physics at walkable brush edges and vertices */
+				cp->shaderNum = EmitShader( NULL, NULL, &side.surfaceFlags );
 			}
 			else{
 				cp->shaderNum = EmitShader( NULL, NULL, NULL );
@@ -507,7 +502,7 @@ void EmitFogs( void ){
 			/* find visible side */
 			for ( j = 0; j < 6; j++ )
 			{
-				if ( mapFogs[ i ].brush->sides[ j ].visibleHull != NULL ) {
+				if ( !mapFogs[ i ].brush->sides[ j ].visibleHull.empty() ) {
 					Sys_Printf( "Fog %d has visible side %d\n", i, j );
 					bspFogs[ i ].visibleSide = j;
 					break;
@@ -536,17 +531,17 @@ void BeginModel( void ){
 	const entity_t& e = entities[ mapEntityNum ];
 
 	/* bound the brushes */
-	for ( const brush_t *b = e.brushes; b; b = b->next )
+	for ( const brush_t& b : e.brushes )
 	{
 		/* ignore non-real brushes (origin, etc) */
-		if ( b->numsides == 0 ) {
+		if ( b.sides.empty() ) {
 			continue;
 		}
-		minmax.extend( b->minmax );
+		minmax.extend( b.minmax );
 
 		/* ydnar: lightgrid bounds */
-		if ( b->compileFlags & C_LIGHTGRID ) {
-			lgMinmax.extend( b->minmax );
+		if ( b.compileFlags & C_LIGHTGRID ) {
+			lgMinmax.extend( b.minmax );
 		}
 	}
 

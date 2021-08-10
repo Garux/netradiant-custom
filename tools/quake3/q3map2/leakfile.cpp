@@ -54,14 +54,14 @@
    TTimo: builds a polyline xml node
    =============
  */
-xmlNodePtr LeakFile( tree_t *tree ){
+xmlNodePtr LeakFile( const tree_t& tree ){
 	Vector3 mid;
 	FILE    *linefile;
-	node_t  *node;
+	const node_t  *node;
 	int count;
 	xmlNodePtr xml_node, point;
 
-	if ( !tree->outside_node.occupied ) {
+	if ( !tree.outside_node.occupied ) {
 		return NULL;
 	}
 
@@ -76,12 +76,12 @@ xmlNodePtr LeakFile( tree_t *tree ){
 	xml_node = xmlNewNode( NULL, (const xmlChar*)"polyline" );
 
 	count = 0;
-	node = &tree->outside_node;
+	node = &tree.outside_node;
 	while ( node->occupied > 1 )
 	{
 		int next;
-		portal_t    *p, *nextportal = NULL;
-		node_t      *nextnode = NULL;
+		const portal_t    *p, *nextportal = NULL;
+		const node_t      *nextnode = NULL;
 		int s;
 
 		// find the best portal exit
@@ -97,7 +97,7 @@ xmlNodePtr LeakFile( tree_t *tree ){
 			}
 		}
 		node = nextnode;
-		mid = WindingCenter( *nextportal->winding );
+		mid = WindingCenter( nextportal->winding );
 		fprintf( linefile, "%f %f %f\n", mid[0], mid[1], mid[2] );
 		point = xml_NodeForVec( mid );
 		xmlAddChild( xml_node, point );

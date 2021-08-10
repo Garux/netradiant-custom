@@ -739,9 +739,9 @@ struct side_t
 	Vector3 texMat[ 2 ];                    /* brush primitive texture matrix */
 	Vector4 vecs[ 2 ];                      /* old-style texture coordinate mapping */
 
-	Plane3 plane;                           /* optional plane in double precision for building windings */
-	winding_t           *winding;
-	winding_t           *visibleHull;       /* convex hull of all visible fragments */
+	Plane3 plane{ 0, 0, 0, 0 };             /* optional plane in double precision for building windings */
+	winding_t           winding;
+	winding_t           visibleHull;        /* convex hull of all visible fragments */
 
 	shaderInfo_t        *shaderInfo;
 
@@ -759,7 +759,7 @@ struct side_t
 struct sideRef_t
 {
 	sideRef_t           *next;
-	side_t              *side;
+	const side_t        *side;
 };
 
 
@@ -775,8 +775,6 @@ struct indexMap_t
 
 struct brush_t
 {
-	brush_t             *next;
-	brush_t             *nextColorModBrush; /* ydnar: colorMod volume brushes go here */
 	brush_t             *original;          /* chopped up brushes will reference the originals */
 
 	int entityNum, brushNum;                /* editor numbering */
@@ -804,16 +802,16 @@ struct brush_t
 	int portalareas[ 2 ];
 
 	MinMax minmax;
-	int numsides;
 
-	side_t sides[];                         /* variably sized */
+	std::vector<side_t> sides;
 };
+using brushlist_t = std::list<brush_t>;
 
 
 struct fog_t
 {
 	shaderInfo_t        *si;
-	brush_t             *brush;
+	const brush_t       *brush;
 	int visibleSide;                        /* the brush side that ray tests need to clip against (-1 == none) */
 };
 
@@ -914,7 +912,7 @@ struct mapDrawSurface_t
 
 	shaderInfo_t        *shaderInfo;
 	shaderInfo_t        *celShader;
-	brush_t             *mapBrush;
+	const brush_t       *mapBrush;
 	parseMesh_t         *mapMesh;
 	sideRef_t           *sideRef;
 
@@ -974,7 +972,7 @@ struct drawSurfRef_t
 struct metaTriangle_t
 {
 	shaderInfo_t        *si;
-	side_t              *side;
+	const side_t        *side;
 	int entityNum, surfaceNum, planeNum, fogNum, sampleSize, castShadows, recvShadows;
 	float shadeAngleDegrees;
 	Plane3f plane;
@@ -992,7 +990,8 @@ struct epair_t
 struct entity_t
 {
 	Vector3 origin{ 0 };
-	brush_t             *brushes, *lastBrush, *colorModBrushes;
+	brushlist_t brushes;
+	std::vector<brush_t*>  colorModBrushes;
 	parseMesh_t         *patches;
 	int mapEntityNum, firstDrawSurf;
 	int firstBrush, numBrushes;                     /* only valid during BSP compile */
@@ -1059,10 +1058,8 @@ struct node_t
 	int planenum;                       /* -1 = leaf node */
 	node_t              *parent;
 	MinMax minmax;                      /* valid after portalization */
-	brush_t             *volume;        /* one for each leaf/node */
 
 	/* nodes only */
-	side_t              *side;          /* the side that created the node */
 	node_t              *children[ 2 ];
 	int compileFlags;                   /* ydnar: hint, antiportal */
 	int tinyportals;
@@ -1075,7 +1072,7 @@ struct node_t
 	bool sky;                           /* ydnar: a sky leaf */
 	int cluster;                        /* for portalfile writing */
 	int area;                           /* for areaportals */
-	brush_t             *brushlist;     /* fragments of all brushes in this leaf */
+	brushlist_t          brushlist;     /* fragments of all brushes in this leaf */
 	drawSurfRef_t       *drawSurfReferences;
 
 	int occupied;                       /* 1 or greater can reach entity */
@@ -1093,11 +1090,10 @@ struct portal_t
 	node_t              *onnode;        /* NULL = outside box */
 	node_t              *nodes[ 2 ];    /* [ 0 ] = front side of plane */
 	portal_t            *next[ 2 ];
-	winding_t           *winding;
+	winding_t            winding;
 
 	bool sidefound;                     /* false if ->side hasn't been checked */
 	int compileFlags;                   /* from original face that caused the split */
-	side_t              *side;          /* NULL = non-visible */
 };
 
 
@@ -1551,28 +1547,20 @@ int                         ConvertBSPToOBJ( char *bspName );
 
 
 /* brush.c */
-sideRef_t                   *AllocSideRef( side_t *side, sideRef_t *next );
-int                         CountBrushList( brush_t *brushes );
-brush_t                     *AllocBrush( int numsides );
-void                        FreeBrush( brush_t *brushes );
-void                        FreeBrushList( brush_t *brushes );
-brush_t                     *CopyBrush( const brush_t *brush );
-bool                        BoundBrush( brush_t *brush );
+sideRef_t                   *AllocSideRef( const side_t *side, sideRef_t *next );
+bool                        BoundBrush( brush_t& brush );
 Vector3                     SnapWeldVector( const Vector3& a, const Vector3& b );
-bool                        CreateBrushWindings( brush_t *brush );
-brush_t                     *BrushFromBounds( const Vector3& mins, const Vector3& maxs );
-float                       BrushVolume( brush_t *brush );
-void                        WriteBSPBrushMap( const char *name, brush_t *list );
+bool                        CreateBrushWindings( brush_t& brush );
+brush_t                     BrushFromBounds( const Vector3& mins, const Vector3& maxs );
+float                       BrushVolume( const brush_t& brush );
+void                        WriteBSPBrushMap( const char *name, const brushlist_t& list );
 
-void                        FilterDetailBrushesIntoTree( entity_t *e, tree_t *tree );
-void                        FilterStructuralBrushesIntoTree( entity_t *e, tree_t *tree );
+void                        FilterDetailBrushesIntoTree( entity_t *e, tree_t& tree );
+void                        FilterStructuralBrushesIntoTree( entity_t *e, tree_t& tree );
 
 bool                        WindingIsTiny( const winding_t& w );
 
-void                        SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back );
-
-tree_t                      *AllocTree( void );
-node_t                      *AllocNode( void );
+std::pair<brush_t*, brush_t*> SplitBrush( const brush_t& brush, int planenum );
 
 
 /* mesh.c */
@@ -1600,11 +1588,10 @@ inline int                  FindFloatPlane( const Vector3& normal, float dist, i
 }
 bool                        PlaneEqual( const plane_t& p, const Plane3f& plane );
 void                        AddBrushBevels( void );
-brush_t                     *FinishBrush( bool noCollapseGroups );
 
 
 /* portals.c */
-void                        MakeHeadnodePortals( tree_t *tree );
+void                        MakeHeadnodePortals( tree_t& tree );
 void                        MakeNodePortal( node_t *node );
 void                        SplitNodePortals( node_t *node );
 
@@ -1616,32 +1603,33 @@ enum class EFloodEntities
 	Good,
 	Empty
 };
-EFloodEntities              FloodEntities( tree_t *tree );
+EFloodEntities              FloodEntities( tree_t& tree );
 void                        FillOutside( node_t *headnode );
-void                        FloodAreas( tree_t *tree );
-void                        FreePortal( portal_t *p );
+void                        FloodAreas( tree_t& tree );
+inline portal_t             *AllocPortal( void ){ return new portal_t(); }
+inline void                 FreePortal( portal_t *p ){ delete p; }
 
-void                        MakeTreePortals( tree_t *tree );
+void                        MakeTreePortals( tree_t& tree );
 
 
 /* leakfile.c */
-xmlNodePtr                  LeakFile( tree_t *tree );
+xmlNodePtr                  LeakFile( const tree_t& tree );
 
 
 /* prtfile.c */
-void                        NumberClusters( tree_t *tree );
-void                        WritePortalFile( tree_t *tree );
+void                        NumberClusters( tree_t& tree );
+void                        WritePortalFile( const tree_t& tree );
 
 
 /* writebsp.c */
 void                        SetModelNumbers( void );
 void                        SetLightStyles( void );
 
-int                         EmitShader( const char *shader, int *contentFlags, int *surfaceFlags );
+int                         EmitShader( const char *shader, const int *contentFlags, const int *surfaceFlags );
 
 void                        BeginBSPFile( void );
 void                        EndBSPFile( bool do_write );
-void                        EmitBrushes( brush_t *brushes, int *firstBrush, int *numBrushes );
+void                        EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes );
 void                        EmitFogs( void );
 
 void                        BeginModel( void );
@@ -1649,10 +1637,11 @@ void                        EndModel( entity_t *e, node_t *headnode );
 
 
 /* tree.c */
-void                        FreeTree( tree_t *tree );
+void                        FreeTree( tree_t& tree );
 void                        FreeTree_r( node_t *node );
-void                        PrintTree_r( node_t *node, int depth );
+void                        PrintTree_r( const node_t *node, int depth );
 void                        FreeTreePortals_r( node_t *node );
+inline node_t               *AllocNode(){ return new node_t(); }
 
 
 /* patch.c */
@@ -1667,7 +1656,7 @@ void                        FixTJunctions( entity_t *e );
 
 
 /* fog.c */
-winding_t                   *WindingFromDrawSurf( mapDrawSurface_t *ds );
+winding_t                   WindingFromDrawSurf( const mapDrawSurface_t *ds );
 void                        FogDrawSurfaces( entity_t *e );
 int                         FogForPoint( const Vector3& point, float epsilon );
 int                         FogForBounds( const MinMax& minmax, float epsilon );
@@ -1675,9 +1664,9 @@ void                        CreateMapFogs( void );
 
 
 /* facebsp.c */
-facelist_t                  MakeStructuralBSPFaceList( const brush_t *list );
-facelist_t                  MakeVisibleBSPFaceList( const brush_t *list );
-tree_t                      *FaceBSP( facelist_t& list );
+facelist_t                  MakeStructuralBSPFaceList( const brushlist_t& list );
+facelist_t                  MakeVisibleBSPFaceList( const brushlist_t& list );
+tree_t                      FaceBSP( facelist_t& list );
 
 
 /* model.c */
@@ -1701,17 +1690,17 @@ mapDrawSurface_t            *MakeCelSurface( mapDrawSurface_t *src, shaderInfo_t
 bool                        IsTriangleDegenerate( bspDrawVert_t *points, int a, int b, int c );
 void                        ClearSurface( mapDrawSurface_t *ds );
 void                        AddEntitySurfaceModels( entity_t *e );
-mapDrawSurface_t            *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, const winding_t& w );
+mapDrawSurface_t            *DrawSurfaceForSide( const entity_t *e, const brush_t& b, const side_t& s, const winding_t& w );
 mapDrawSurface_t            *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh );
 mapDrawSurface_t            *DrawSurfaceForFlare( int entNum, const Vector3& origin, const Vector3& normal, const Vector3& color, const char *flareShader, int lightStyle );
 mapDrawSurface_t            *DrawSurfaceForShader( const char *shader );
-void                        ClipSidesIntoTree( entity_t *e, tree_t *tree );
-void                        MakeDebugPortalSurfs( tree_t *tree );
-void                        MakeFogHullSurfs( entity_t *e, tree_t *tree, const char *shader );
-void                        SubdivideFaceSurfaces( entity_t *e, tree_t *tree );
+void                        ClipSidesIntoTree( entity_t *e, const tree_t& tree );
+void                        MakeDebugPortalSurfs( const tree_t& tree );
+void                        MakeFogHullSurfs( entity_t *e, const char *shader );
+void                        SubdivideFaceSurfaces( entity_t *e );
 void                        AddEntitySurfaceModels( entity_t *e );
 int                         AddSurfaceModels( mapDrawSurface_t *ds );
-void                        FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree );
+void                        FilterDrawsurfsIntoTree( entity_t *e, tree_t& tree );
 void                        EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds );
 void                        EmitTriangleSurface( mapDrawSurface_t *ds );
 
@@ -2112,7 +2101,7 @@ Q_EXTERN int numMapFogs Q_ASSIGN( 0 );
 Q_EXTERN fog_t mapFogs[ MAX_MAP_FOGS ];
 
 Q_EXTERN entity_t           *mapEnt;
-Q_EXTERN brush_t            *buildBrush;
+Q_EXTERN brush_t            buildBrush;
 Q_EXTERN EBrushType g_brushType Q_ASSIGN( EBrushType::Undefined );
 
 Q_EXTERN int numStrippedLights Q_ASSIGN( 0 );

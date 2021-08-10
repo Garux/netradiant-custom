@@ -468,7 +468,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 	light.si = si;
 	light.fade = 1.0f;
 	/* create a regular winding */
-	light.w = AllocWinding_( rw->numVerts );
+	light.w = AllocWinding( rw->numVerts );
 	for ( i = 0; i < rw->numVerts; i++ )
 	{
 		light.w.push_back( rw->verts[ i ].xyz );
@@ -548,7 +548,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 			}
 
 			/* create a regular winding */
-			splash.w = AllocWinding_( rw->numVerts );
+			splash.w = AllocWinding( rw->numVerts );
 			for ( i = 0; i < rw->numVerts; i++ )
 				splash.w.push_back( rw->verts[rw->numVerts - 1 - i].xyz + normal * si->backsplashDistance );
 

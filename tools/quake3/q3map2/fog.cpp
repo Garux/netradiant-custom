@@ -244,9 +244,8 @@ void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, mesh_t 
    chops a patch up by a fog brush
  */
 
-bool ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
+bool ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, const brush_t *b ){
 	int i, j;
-	side_t      *s;
 	mesh_t      *outside[MAX_BRUSH_SIDES];
 	int numOutside;
 	mesh_t      *m, *front, *back;
@@ -259,8 +258,7 @@ bool ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 	// some messy patch clipping issues
 
 	for ( i = 4 ; i <= 5 ; i++ ) {
-		s = &b->sides[ i ];
-		const plane_t& plane = mapplanes[ s->planenum ];
+		const plane_t& plane = mapplanes[ b->sides[ i ].planenum ];
 
 		SplitMeshByPlane( m, plane.plane, &front, &back );
 
@@ -331,26 +329,23 @@ bool ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
    creates a winding from a surface's verts
  */
 
-winding_t *WindingFromDrawSurf( mapDrawSurface_t *ds ){
-	winding_t   *w;
-	int i;
-
+winding_t WindingFromDrawSurf( const mapDrawSurface_t *ds ){
 	// we use the first point of the surface, maybe something more clever would be useful
 	// (actually send the whole draw surface would be cool?)
 	if ( ds->numVerts >= MAX_POINTS_ON_WINDING ) {
 		const int max = std::min( ds->numVerts, 256 );
 		Vector3 p[256];
 
-		for ( i = 0; i < max; i++ ) {
+		for ( int i = 0; i < max; i++ ) {
 			p[i] = ds->verts[i].xyz;
 		}
 
 		xml_Winding( "WindingFromDrawSurf failed: MAX_POINTS_ON_WINDING exceeded", p, max, true );
 	}
 
-	w = AllocWinding( ds->numVerts );
-	for ( i = 0; i < ds->numVerts; i++ ) {
-		w->push_back( ds->verts[i].xyz );
+	winding_t w = AllocWinding( ds->numVerts );
+	for ( int i = 0; i < ds->numVerts; i++ ) {
+		w.push_back( ds->verts[i].xyz );
 	}
 	return w;
 }
@@ -362,13 +357,8 @@ winding_t *WindingFromDrawSurf( mapDrawSurface_t *ds ){
    chops up a face drawsurface by a fog brush, with a potential fragment left inside
  */
 
-bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
-	int i, j;
-	side_t              *s;
-	winding_t           *w;
-	winding_t           *front, *back;
-	winding_t           *outside[ MAX_BRUSH_SIDES ];
-	int numOutside;
+bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, const brush_t *b ){
+	std::list<winding_t> outside;
 	mapDrawSurface_t    *newds;
 
 
@@ -378,58 +368,51 @@ bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 	}
 
 	/* initial setup */
-	w = WindingFromDrawSurf( ds );
-	numOutside = 0;
+	winding_t w = WindingFromDrawSurf( ds );
 
 	/* chop by each brush side */
-	for ( i = 0; i < b->numsides; i++ )
+	for ( const side_t& side : b->sides )
 	{
-		/* get brush side and plane */
-		s = &b->sides[ i ];
-		const plane_t& plane = mapplanes[ s->planenum ];
+		/* get brush plane */
+		const plane_t& plane = mapplanes[ side.planenum ];
 
 		/* handle coplanar outfacing (don't fog) */
-		if ( ds->sideRef->side->planenum == s->planenum ) {
+		if ( ds->sideRef->side->planenum == side.planenum ) {
 			return false;
 		}
 
 		/* handle coplanar infacing (keep inside) */
-		if ( ( ds->sideRef->side->planenum ^ 1 ) == s->planenum ) {
+		if ( ( ds->sideRef->side->planenum ^ 1 ) == side.planenum ) {
 			continue;
 		}
 
 		/* general case */
-		ClipWindingEpsilonStrict( *w, plane.plane, ON_EPSILON, front, back ); /* strict; if plane is "almost identical" to face, both ways to continue can be wrong, so we better not fog it */
-		FreeWinding( w );
+		auto [front, back] = ClipWindingEpsilonStrict( w, plane.plane, ON_EPSILON ); /* strict; if plane is "almost identical" to face, both ways to continue can be wrong, so we better not fog it */
 
-		if ( back == NULL ) {
+		if ( back.empty() ) {
 			/* nothing actually contained inside */
-			for ( j = 0; j < numOutside; j++ )
-				FreeWinding( outside[ j ] );
 			return false;
 		}
 
-		if ( front != NULL ) {
-			if ( numOutside == MAX_BRUSH_SIDES ) {
+		if ( !front.empty() ) {
+			if ( outside.size() == MAX_BRUSH_SIDES ) {
 				Error( "MAX_BRUSH_SIDES" );
 			}
-			outside[ numOutside ] = front;
-			numOutside++;
+			outside.push_back( std::move( front ) );
 		}
 
-		w = back;
+		w.swap( back );
 	}
 
 	/* fixme: celshaded surface fragment errata */
 
 	/* all of outside fragments become separate drawsurfs */
-	numFogFragments += numOutside;
-	s = ds->sideRef->side;
-	for ( i = 0; i < numOutside; i++ )
+	numFogFragments += outside.size();
+	const side_t *s = ds->sideRef->side;
+	for ( const winding_t& wi : outside )
 	{
-		newds = DrawSurfaceForSide( e, ds->mapBrush, s, *outside[ i ] );
+		newds = DrawSurfaceForSide( e, *ds->mapBrush, *s, wi );
 		newds->fogNum = ds->fogNum;
-		FreeWinding( outside[ i ] );
 	}
 
 	/* ydnar: the old code neglected to snap to 0.125 for the fragment
@@ -437,7 +420,7 @@ bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 	          the right thing and uses the original surface's brush side */
 
 	/* build a drawsurf for it */
-	newds = DrawSurfaceForSide( e, ds->mapBrush, s, *w );
+	newds = DrawSurfaceForSide( e, *ds->mapBrush, *s, w );
 	if ( newds == NULL ) {
 		return false;
 	}
@@ -562,16 +545,11 @@ void FogDrawSurfaces( entity_t *e ){
  */
 
 int FogForPoint( const Vector3& point, float epsilon ){
-	int fogNum, i, j;
-	bool inside;
-	brush_t         *brush;
-
-
 	/* start with bogus fog num */
-	fogNum = defaultFogNum;
+	int fogNum = defaultFogNum;
 
 	/* walk the list of fog volumes */
-	for ( i = 0; i < numMapFogs; i++ )
+	for ( int i = 0; i < numMapFogs; i++ )
 	{
 		/* sof2: global fog doesn't reference a brush */
 		if ( mapFogs[ i ].brush == NULL ) {
@@ -579,15 +557,13 @@ int FogForPoint( const Vector3& point, float epsilon ){
 			continue;
 		}
 
-		/* get fog brush */
-		brush = mapFogs[ i ].brush;
-
 		/* check point against all planes */
-		inside = true;
-		for ( j = 0; j < brush->numsides && inside; j++ )
+		bool inside = true;
+		for ( const side_t& side : mapFogs[ i ].brush->sides )
 		{
-			if ( plane3_distance_to_point( mapplanes[ brush->sides[ j ].planenum ].plane, point ) > epsilon ) {
+			if ( plane3_distance_to_point( mapplanes[ side.planenum ].plane, point ) > epsilon ) {
 				inside = false;
+				break;
 			}
 		}
 
@@ -628,7 +604,7 @@ int FogForBounds( const MinMax& minmax, float epsilon ){
 		}
 
 		/* get fog brush */
-		brush_t *brush = mapFogs[ i ].brush;
+		const brush_t *brush = mapFogs[ i ].brush;
 
 		/* get bounds */
 		const MinMax fogMinmax( brush->minmax.mins - Vector3( epsilon ),
@@ -663,11 +639,6 @@ int FogForBounds( const MinMax& minmax, float epsilon ){
  */
 
 void CreateMapFogs( void ){
-	int j;
-	brush_t     *brush;
-	fog_t       *fog;
-
-
 	/* skip? */
 	if ( nofog ) {
 		return;
@@ -680,10 +651,10 @@ void CreateMapFogs( void ){
 	for ( const auto& e : entities )
 	{
 		/* walk entity brushes */
-		for ( brush = e.brushes; brush != NULL; brush = brush->next )
+		for ( const brush_t& brush : e.brushes )
 		{
 			/* ignore non-fog brushes */
-			if ( !brush->contentShader->fogParms ) {
+			if ( !brush.contentShader->fogParms ) {
 				continue;
 			}
 
@@ -693,21 +664,21 @@ void CreateMapFogs( void ){
 			}
 
 			/* set up fog */
-			fog = &mapFogs[ numMapFogs++ ];
-			fog->si = brush->contentShader;
-			fog->brush = brush;
-			fog->visibleSide = -1;
+			fog_t& fog = mapFogs[ numMapFogs++ ];
+			fog.si = brush.contentShader;
+			fog.brush = &brush;
+			fog.visibleSide = -1;
 
 			/* if shader specifies an explicit direction, then find a matching brush side with an opposed normal */
-			if ( vector3_length( fog->si->fogDir ) ) {
+			if ( vector3_length( fog.si->fogDir ) ) {
 				/* flip it */
-				const Vector3 invFogDir = -fog->si->fogDir;
+				const Vector3 invFogDir = -fog.si->fogDir;
 
 				/* find the brush side */
-				for ( j = 0; j < brush->numsides; j++ )
+				for ( size_t j = 0; j < brush.sides.size(); ++j )
 				{
-					if ( VectorCompare( invFogDir, mapplanes[ brush->sides[ j ].planenum ].normal() ) ) {
-						fog->visibleSide = j;
+					if ( VectorCompare( invFogDir, mapplanes[ brush.sides[ j ].planenum ].normal() ) ) {
+						fog.visibleSide = j;
 						//%	Sys_Printf( "Brush num: %d Side num: %d\n", fog->brushNum, fog->visibleSide );
 						break;
 					}
@@ -728,20 +699,20 @@ void CreateMapFogs( void ){
 		Sys_FPrintf( SYS_VRB, "Map has global fog shader %s\n", globalFog );
 
 		/* set up fog */
-		fog = &mapFogs[ numMapFogs++ ];
-		fog->si = ShaderInfoForShaderNull( globalFog );
-		if ( fog->si == NULL ) {
+		fog_t& fog = mapFogs[ numMapFogs++ ];
+		fog.si = ShaderInfoForShaderNull( globalFog );
+		if ( fog.si == NULL ) {
 			Error( "Invalid shader \"%s\" referenced trying to add global fog", globalFog );
 		}
-		fog->brush = NULL;
-		fog->visibleSide = -1;
+		fog.brush = NULL;
+		fog.visibleSide = -1;
 
 		/* set as default fog */
 		defaultFogNum = numMapFogs - 1;
 
 		/* mark all worldspawn brushes as fogged */
-		for ( brush = entities[ 0 ].brushes; brush != NULL; brush = brush->next )
-			ApplySurfaceParm( "fog", &brush->contentFlags, NULL, &brush->compileFlags );
+		for ( brush_t& brush : entities[ 0 ].brushes )
+			ApplySurfaceParm( "fog", &brush.contentFlags, NULL, &brush.compileFlags );
 	}
 
 	/* emit some stats */

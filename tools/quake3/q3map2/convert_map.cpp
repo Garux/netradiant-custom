@@ -47,14 +47,14 @@ static float Det3x3( float a00, float a01, float a02,
 	    +   a02 * ( a10 * a21 - a11 * a20 );
 }
 
-void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *bestVert[3] ){
+void GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, bspDrawVert_t *bestVert[3] ){
 	bspDrawSurface_t *s;
 	int i;
 	int t;
 	float best = 0;
 	float thisarea;
 	bspDrawVert_t *vert[3];
-	const plane_t& buildPlane = mapplanes[buildSide->planenum];
+	const plane_t& buildPlane = mapplanes[buildSide.planenum];
 	int matches = 0;
 
 	// first, start out with NULLs
@@ -66,7 +66,7 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 		if ( s->surfaceType != MST_PLANAR && s->surfaceType != MST_TRIANGLE_SOUP ) {
 			continue;
 		}
-		if ( !strEqual( buildSide->shaderInfo->shader, bspShaders[s->shaderNum].shader ) ) {
+		if ( !strEqual( buildSide.shaderInfo->shader, bspShaders[s->shaderNum].shader ) ) {
 			continue;
 		}
 		for ( t = 0; t + 3 <= s->numIndexes; t += 3 )
@@ -98,7 +98,7 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 				continue;
 			}
 			// Okay. Correct surface type, correct shader, correct plane. Let's start with the business...
-			winding_t *polygon = CopyWinding( buildSide->winding );
+			winding_t polygon( buildSide.winding );
 			for ( i = 0; i < 3; ++i )
 			{
 				// 0: 1, 2
@@ -110,11 +110,11 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 				Plane3f plane( vector3_cross( v2 - v1, buildPlane.normal() ), 0 );
 				plane.dist() = vector3_dot( v1, plane.normal() );
 				ChopWindingInPlace( polygon, plane, distanceEpsilon );
-				if ( !polygon ) {
+				if ( polygon.empty() ) {
 					goto exwinding;
 				}
 			}
-			thisarea = WindingArea( *polygon );
+			thisarea = WindingArea( polygon );
 			if ( thisarea > 0 ) {
 				++matches;
 			}
@@ -124,13 +124,12 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 				bestVert[1] = vert[1];
 				bestVert[2] = vert[2];
 			}
-			FreeWinding( polygon );
 exwinding:
 			;
 		}
 	}
-	//if(!striEqualPrefix(buildSide->shaderInfo->shader, "textures/common/"))
-	//	fprintf(stderr, "brushside with %s: %d matches (%f area)\n", buildSide->shaderInfo->shader, matches, best);
+	//if(!striEqualPrefix(buildSide.shaderInfo->shader, "textures/common/"))
+	//	fprintf(stderr, "brushside with %s: %d matches (%f area)\n", buildSide.shaderInfo->shader, matches, best);
 }
 
 #define FRAC( x ) ( ( x ) - floor( x ) )
@@ -195,43 +194,26 @@ static void ConvertOriginBrush( FILE *f, int num, const Vector3& origin, bool br
 }
 
 static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, const Vector3& origin, bool brushPrimitives ){
-	int i;
-	bspBrushSide_t  *side;
-	side_t          *buildSide;
-	bspShader_t     *shader;
-	const char            *texture;
-	plane_t         *buildPlane;
-	Vector3 pts[ 3 ];
-
-
 	/* clear out build brush */
-	for ( i = 0; i < buildBrush->numsides; i++ )
-	{
-		buildSide = &buildBrush->sides[ i ];
-		if ( buildSide->winding != NULL ) {
-			FreeWinding( buildSide->winding );
-			buildSide->winding = NULL;
-		}
-	}
-	buildBrush->numsides = 0;
+	buildBrush.sides.clear();
 
 	bool modelclip = false;
 	/* try to guess if thats model clip */
 	if ( force ){
 		int notNoShader = 0;
 		modelclip = true;
-		for ( i = 0; i < brush->numSides; i++ )
+		for ( int i = 0; i < brush->numSides; i++ )
 		{
 			/* get side */
-			side = &bspBrushSides[ brush->firstSide + i ];
+			const bspBrushSide_t& side = bspBrushSides[ brush->firstSide + i ];
 
 			/* get shader */
-			if ( side->shaderNum < 0 || side->shaderNum >= numBSPShaders ) {
+			if ( side.shaderNum < 0 || side.shaderNum >= numBSPShaders ) {
 				continue;
 			}
-			shader = &bspShaders[ side->shaderNum ];
+			const bspShader_t& shader = bspShaders[ side.shaderNum ];
 			//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
-			if( !striEqual( shader->shader, "noshader" ) ){
+			if( !striEqual( shader.shader, "noshader" ) ){
 				notNoShader++;
 			}
 			if( notNoShader > 1 ){
@@ -242,28 +224,26 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, const Vector3
 	}
 
 	/* iterate through bsp brush sides */
-	for ( i = 0; i < brush->numSides; i++ )
+	for ( int i = 0; i < brush->numSides; i++ )
 	{
 		/* get side */
-		side = &bspBrushSides[ brush->firstSide + i ];
+		const bspBrushSide_t& side = bspBrushSides[ brush->firstSide + i ];
 
 		/* get shader */
-		if ( side->shaderNum < 0 || side->shaderNum >= numBSPShaders ) {
+		if ( side.shaderNum < 0 || side.shaderNum >= numBSPShaders ) {
 			continue;
 		}
-		shader = &bspShaders[ side->shaderNum ];
+		const bspShader_t& shader = bspShaders[ side.shaderNum ];
 		//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
-		if( striEqual( shader->shader, "default" ) || ( striEqual( shader->shader, "noshader" ) && !modelclip ) )
+		if( striEqual( shader.shader, "default" ) || ( striEqual( shader.shader, "noshader" ) && !modelclip ) )
 			continue;
 
 		/* add build side */
-		buildSide = &buildBrush->sides[ buildBrush->numsides ];
-		buildBrush->numsides++;
+		buildBrush.sides.emplace_back();
 
 		/* tag it */
-		buildSide->shaderInfo = ShaderInfoForShader( shader->shader );
-		buildSide->planenum = side->planeNum;
-		buildSide->winding = NULL;
+		buildBrush.sides.back().shaderInfo = ShaderInfoForShader( shader.shader );
+		buildBrush.sides.back().planenum = side.planeNum;
 	}
 
 	if ( !CreateBrushWindings( buildBrush ) ) {
@@ -280,31 +260,26 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, const Vector3
 	}
 
 	/* iterate through build brush sides */
-	for ( i = 0; i < buildBrush->numsides; i++ )
+	for ( side_t& buildSide : buildBrush.sides )
 	{
-		/* get build side */
-		buildSide = &buildBrush->sides[ i ];
-
 		/* get plane */
-		buildPlane = &mapplanes[ buildSide->planenum ];
+		const plane_t& buildPlane = mapplanes[ buildSide.planenum ];
 
 		/* dummy check */
-		if ( buildSide->shaderInfo == NULL || buildSide->winding == NULL ) {
+		if ( buildSide.shaderInfo == NULL || buildSide.winding.empty() ) {
 			continue;
 		}
 
 		/* get texture name */
-		if ( striEqualPrefix( buildSide->shaderInfo->shader, "textures/" ) ) {
-			texture = buildSide->shaderInfo->shader + 9;
-		}
-		else{
-			texture = buildSide->shaderInfo->shader;
-		}
+		const char *texture = striEqualPrefix( buildSide.shaderInfo->shader, "textures/" )
+		                      ? buildSide.shaderInfo->shader + 9
+		                      : buildSide.shaderInfo->shader;
 
+		Vector3 pts[ 3 ];
 		{
 			Vector3 vecs[ 2 ];
-			MakeNormalVectors( buildPlane->normal(), vecs[ 0 ], vecs[ 1 ] );
-			pts[ 0 ] = buildPlane->normal() * buildPlane->dist() + origin;
+			MakeNormalVectors( buildPlane.normal(), vecs[ 0 ], vecs[ 1 ] );
+			pts[ 0 ] = buildPlane.normal() * buildPlane.dist() + origin;
 			pts[ 1 ] = pts[ 0 ] + vecs[ 0 ] * 256.0f;
 			pts[ 2 ] = pts[ 0 ] + vecs[ 1 ] * 256.0f;
 		}
@@ -343,43 +318,26 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, const Vector3
 }
 
 static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& origin, bool brushPrimitives ){
-	int i, j;
-	bspBrushSide_t  *side;
-	side_t          *buildSide;
-	bspShader_t     *shader;
-	const char      *texture;
-	Vector3 pts[ 3 ];
-	bspDrawVert_t   *vert[3];
-
-
 	/* clear out build brush */
-	for ( i = 0; i < buildBrush->numsides; i++ )
-	{
-		buildSide = &buildBrush->sides[ i ];
-		if ( buildSide->winding != NULL ) {
-			FreeWinding( buildSide->winding );
-			buildSide->winding = NULL;
-		}
-	}
-	buildBrush->numsides = 0;
+	buildBrush.sides.clear();
 
 	bool modelclip = false;
 	/* try to guess if thats model clip */
 	if ( force ){
 		int notNoShader = 0;
 		modelclip = true;
-		for ( i = 0; i < brush->numSides; i++ )
+		for ( int i = 0; i < brush->numSides; i++ )
 		{
 			/* get side */
-			side = &bspBrushSides[ brush->firstSide + i ];
+			const bspBrushSide_t& side = bspBrushSides[ brush->firstSide + i ];
 
 			/* get shader */
-			if ( side->shaderNum < 0 || side->shaderNum >= numBSPShaders ) {
+			if ( side.shaderNum < 0 || side.shaderNum >= numBSPShaders ) {
 				continue;
 			}
-			shader = &bspShaders[ side->shaderNum ];
+			const bspShader_t& shader = bspShaders[ side.shaderNum ];
 			//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
-			if( !striEqual( shader->shader, "noshader" ) ){
+			if( !striEqual( shader.shader, "noshader" ) ){
 				notNoShader++;
 			}
 			if( notNoShader > 1 ){
@@ -390,28 +348,26 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 	}
 
 	/* iterate through bsp brush sides */
-	for ( i = 0; i < brush->numSides; i++ )
+	for ( int i = 0; i < brush->numSides; i++ )
 	{
 		/* get side */
-		side = &bspBrushSides[ brush->firstSide + i ];
+		const bspBrushSide_t& side = bspBrushSides[ brush->firstSide + i ];
 
 		/* get shader */
-		if ( side->shaderNum < 0 || side->shaderNum >= numBSPShaders ) {
+		if ( side.shaderNum < 0 || side.shaderNum >= numBSPShaders ) {
 			continue;
 		}
-		shader = &bspShaders[ side->shaderNum ];
+		const bspShader_t& shader = bspShaders[ side.shaderNum ];
 		//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
-		if( striEqual( shader->shader, "default" ) || ( striEqual( shader->shader, "noshader" ) && !modelclip ) )
+		if( striEqual( shader.shader, "default" ) || ( striEqual( shader.shader, "noshader" ) && !modelclip ) )
 			continue;
 
 		/* add build side */
-		buildSide = &buildBrush->sides[ buildBrush->numsides ];
-		buildBrush->numsides++;
+		buildBrush.sides.emplace_back();
 
 		/* tag it */
-		buildSide->shaderInfo = ShaderInfoForShader( shader->shader );
-		buildSide->planenum = side->planeNum;
-		buildSide->winding = NULL;
+		buildBrush.sides.back().shaderInfo = ShaderInfoForShader( shader.shader );
+		buildBrush.sides.back().planenum = side.planeNum;
 	}
 
 	/* make brush windings */
@@ -429,42 +385,38 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 	}
 
 	/* iterate through build brush sides */
-	for ( i = 0; i < buildBrush->numsides; i++ )
+	for ( side_t& buildSide : buildBrush.sides )
 	{
-		/* get build side */
-		buildSide = &buildBrush->sides[ i ];
-
 		/* get plane */
-		const plane_t& buildPlane = mapplanes[ buildSide->planenum ];
+		const plane_t& buildPlane = mapplanes[ buildSide.planenum ];
 
 		/* dummy check */
-		if ( buildSide->shaderInfo == NULL || buildSide->winding == NULL ) {
+		if ( buildSide.shaderInfo == NULL || buildSide.winding.empty() ) {
 			continue;
 		}
 
 		// st-texcoords -> texMat block
 		// start out with dummy
-		buildSide->texMat[0] = { 1 / 32.0, 0, 0 };
-		buildSide->texMat[1] = { 0, 1 / 32.0, 0 };
+		buildSide.texMat[0] = { 1 / 32.0, 0, 0 };
+		buildSide.texMat[1] = { 0, 1 / 32.0, 0 };
 
 		// find surface for this side (by brute force)
 		// surface format:
 		//   - meshverts point in pairs of three into verts
 		//   - (triangles)
-		//   - find the triangle that has most in common with our side
+		//   - find the triangle that has most in common with our
+		bspDrawVert_t   *vert[3];
 		GetBestSurfaceTriangleMatchForBrushside( buildSide, vert );
 
 		/* get texture name */
-		if ( striEqualPrefix( buildSide->shaderInfo->shader, "textures/" ) ) {
-			texture = buildSide->shaderInfo->shader + 9;
-		}
-		else{
-			texture = buildSide->shaderInfo->shader;
-		}
+		const char *texture = striEqualPrefix( buildSide.shaderInfo->shader, "textures/" )
+		                      ? buildSide.shaderInfo->shader + 9
+		                      : buildSide.shaderInfo->shader;
 
+		Vector3 pts[ 3 ];
 		/* recheck and fix winding points, fails occur somehow */
 		int match = 0;
-		for ( const Vector3& p : ( *buildSide->winding ) ){
+		for ( const Vector3& p : buildSide.winding ){
 			if ( fabs( plane3_distance_to_point( buildPlane.plane, p ) ) < distanceEpsilon ) {
 				pts[ match ] = p;
 				match++;
@@ -476,8 +428,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 
 		if( match > 2 ){
 			//Sys_Printf( "pointsKK " );
-			Plane3f testplane;
-			if ( PlaneFromPoints( testplane, pts ) ){
+			if ( Plane3f testplane; PlaneFromPoints( testplane, pts ) ){
 				if( !PlaneEqual( buildPlane, testplane ) ){
 					//Sys_Printf( "1: %f %f %f %f\n2: %f %f %f %f\n", buildPlane->normal[0], buildPlane->normal[1], buildPlane->normal[2], buildPlane->dist, testplane[0], testplane[1], testplane[2], testplane[3] );
 					match--;
@@ -493,8 +444,8 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 		if( match > 2 ){
 			//Sys_Printf( "ok " );
 			/* offset by origin */
-			for ( j = 0; j < 3; j++ )
-				pts[ j ] += origin;
+			for ( Vector3& pt : pts )
+				pt += origin;
 		}
 		else{
 			Vector3 vecs[ 2 ];
@@ -552,7 +503,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 						         xyJ[0], xyJ[1], stJ[i],
 						         xyK[0], xyK[1], stK[i]
 						     );
-						buildSide->texMat[i] = { D0 / D, D1 / D, D2 / D };
+						buildSide.texMat[i] = { D0 / D, D1 / D, D2 / D };
 					}
 				}
 				else{
@@ -572,8 +523,8 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 				         pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
 				         pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
 				         pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
-				         buildSide->texMat[0][0], buildSide->texMat[0][1], FRAC( buildSide->texMat[0][2] ),
-				         buildSide->texMat[1][0], buildSide->texMat[1][1], FRAC( buildSide->texMat[1][2] ),
+				         buildSide.texMat[0][0], buildSide.texMat[0][1], FRAC( buildSide.texMat[0][2] ),
+				         buildSide.texMat[1][0], buildSide.texMat[1][1], FRAC( buildSide.texMat[1][2] ),
 				         texture,
 				         0
 				       );
@@ -609,12 +560,12 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 					tv = 2;
 				}
 
-				stI[0] = vert[0]->st[0] * buildSide->shaderInfo->shaderWidth;
-				stI[1] = vert[0]->st[1] * buildSide->shaderInfo->shaderHeight;
-				stJ[0] = vert[1]->st[0] * buildSide->shaderInfo->shaderWidth;
-				stJ[1] = vert[1]->st[1] * buildSide->shaderInfo->shaderHeight;
-				stK[0] = vert[2]->st[0] * buildSide->shaderInfo->shaderWidth;
-				stK[1] = vert[2]->st[1] * buildSide->shaderInfo->shaderHeight;
+				stI[0] = vert[0]->st[0] * buildSide.shaderInfo->shaderWidth;
+				stI[1] = vert[0]->st[1] * buildSide.shaderInfo->shaderHeight;
+				stJ[0] = vert[1]->st[0] * buildSide.shaderInfo->shaderWidth;
+				stJ[1] = vert[1]->st[1] * buildSide.shaderInfo->shaderHeight;
+				stK[0] = vert[2]->st[0] * buildSide.shaderInfo->shaderWidth;
+				stK[1] = vert[2]->st[1] * buildSide.shaderInfo->shaderHeight;
 
 				D = Det3x3(
 				        vert[0]->xyz[sv], vert[0]->xyz[tv], 1,
@@ -664,8 +615,8 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 				scale[0] = 1.0 / sqrt( sts[0][0] * sts[0][0] + sts[0][1] * sts[0][1] );
 				scale[1] = 1.0 / sqrt( sts[1][0] * sts[1][0] + sts[1][1] * sts[1][1] );
 				rotate = radians_to_degrees( atan2( sts[0][1] * vecs[0][sv] - sts[1][0] * vecs[1][tv], sts[0][0] * vecs[0][sv] + sts[1][1] * vecs[1][tv] ) );
-				shift[0] = buildSide->shaderInfo->shaderWidth * FRAC( sts[0][2] / buildSide->shaderInfo->shaderWidth );
-				shift[1] = buildSide->shaderInfo->shaderHeight * FRAC( sts[1][2] / buildSide->shaderInfo->shaderHeight );
+				shift[0] = buildSide.shaderInfo->shaderWidth * FRAC( sts[0][2] / buildSide.shaderInfo->shaderWidth );
+				shift[1] = buildSide.shaderInfo->shaderHeight * FRAC( sts[1][2] / buildSide.shaderInfo->shaderHeight );
 
 				/* print brush side */
 				/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
@@ -681,11 +632,11 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 		}
 		else
 		{
-			if ( !striEqualPrefix( buildSide->shaderInfo->shader, "textures/common/" )
-			  && !striEqualPrefix( buildSide->shaderInfo->shader, "textures/system/" )
-			  &&        !strEqual( buildSide->shaderInfo->shader, "noshader" )
-			  &&        !strEqual( buildSide->shaderInfo->shader, "default" ) ) {
-				//fprintf( stderr, "no matching triangle for brushside using %s (hopefully nobody can see this side anyway)\n", buildSide->shaderInfo->shader );
+			if ( !striEqualPrefix( buildSide.shaderInfo->shader, "textures/common/" )
+			  && !striEqualPrefix( buildSide.shaderInfo->shader, "textures/system/" )
+			  &&        !strEqual( buildSide.shaderInfo->shader, "noshader" )
+			  &&        !strEqual( buildSide.shaderInfo->shader, "default" ) ) {
+				//fprintf( stderr, "no matching triangle for brushside using %s (hopefully nobody can see this side anyway)\n", buildSide.shaderInfo->shader );
 				texture = "common/WTF";
 			}
 
@@ -882,9 +833,9 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, const Vector
 	}
 
 	/* allocate a build brush */
-	buildBrush = AllocBrush( 512 );
-	buildBrush->entityNum = 0;
-	buildBrush->original = buildBrush;
+	buildBrush.sides.reserve( MAX_BUILD_SIDES );
+	buildBrush.entityNum = 0;
+	buildBrush.original = &buildBrush;
 
 	if ( origin != g_vector3_identity ) {
 		ConvertOriginBrush( f, -1, origin, brushPrimitives );
@@ -902,9 +853,6 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, const Vector
 			ConvertBrush( f, num, brush, origin, brushPrimitives );
 		}
 	}
-
-	/* free the build brush */
-	free( buildBrush );
 
 	/* go through each drawsurf in the model */
 	for ( i = 0; i < model->numBSPSurfaces; i++ )

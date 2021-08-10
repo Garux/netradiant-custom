@@ -726,10 +726,7 @@ void PseudoCompileBSP( bool need_tree ){
 	char modelValue[16];
 	entity_t *entity;
 	facelist_t faces;
-	tree_t *tree;
-	node_t *node;
-	brush_t *brush;
-	side_t *side;
+	tree_t tree{};
 
 	SetDrawSurfacesBuffer();
 	mapDrawSurfs = safe_calloc( sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
@@ -741,7 +738,7 @@ void PseudoCompileBSP( bool need_tree ){
 	{
 		/* get entity */
 		entity = &entities[ mapEntityNum ];
-		if ( entity->brushes == NULL && entity->patches == NULL ) {
+		if ( entity->brushes.empty() && entity->patches == NULL ) {
 			continue;
 		}
 
@@ -762,33 +759,28 @@ void PseudoCompileBSP( bool need_tree ){
 		if ( mapEntityNum == 0 && need_tree ) {
 			faces = MakeStructuralBSPFaceList( entities[0].brushes );
 			tree = FaceBSP( faces );
-			node = tree->headnode;
 		}
 		else
 		{
-			node = AllocNode();
-			node->planenum = PLANENUM_LEAF;
-			tree = AllocTree();
-			tree->headnode = node;
+			tree.headnode = AllocNode();
+			tree.headnode->planenum = PLANENUM_LEAF;
 		}
 
 		/* a minimized ClipSidesIntoTree */
-		for ( brush = entity->brushes; brush; brush = brush->next )
+		for ( const brush_t& brush : entity->brushes )
 		{
 			/* walk the brush sides */
-			for ( int j = 0; j < brush->numsides; j++ )
+			for ( const side_t& side : brush.sides )
 			{
-				/* get side */
-				side = &brush->sides[ j ];
-				if ( side->winding == NULL ) {
+				if ( side.winding.empty() ) {
 					continue;
 				}
 				/* shader? */
-				if ( side->shaderInfo == NULL ) {
+				if ( side.shaderInfo == NULL ) {
 					continue;
 				}
 				/* save this winding as a visible surface */
-				DrawSurfaceForSide( entity, brush, side, *side->winding );
+				DrawSurfaceForSide( entity, brush, side, side.winding );
 			}
 		}
 
@@ -805,7 +797,7 @@ void PseudoCompileBSP( bool need_tree ){
 		FilterDetailBrushesIntoTree( entity, tree );
 
 		EmitBrushes( entity->brushes, &entity->firstBrush, &entity->numBrushes );
-		EndModel( entity, node );
+		EndModel( entity, tree.headnode );
 	}
 	EndBSPFile( false );
 }

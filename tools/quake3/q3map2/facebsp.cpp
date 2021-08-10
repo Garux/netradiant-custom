@@ -42,7 +42,7 @@ int c_faceLeafs;
    finds the best split plane for this node
  */
 
-static void SelectSplitPlaneNum( node_t *node, const facelist_t& list, int *splitPlaneNum, int *compileFlags ){
+static void SelectSplitPlaneNum( const node_t *node, const facelist_t& list, int *splitPlaneNum, int *compileFlags ){
 	//int frontC,backC,splitsC,facingC;
 
 
@@ -217,21 +217,17 @@ void BuildFaceTree_r( node_t *node, facelist_t& list ){
 
 		/* switch on side */
 		if ( side == eSideCross ) {
-			winding_t   *frontWinding, *backWinding;
-			ClipWindingEpsilonStrict( split.w, plane.plane, CLIP_EPSILON * 2,
-			                          frontWinding, backWinding ); /* strict; if no winding is left, we have a "virtually identical" plane and don't want to split by it */
-			if ( frontWinding ) {
+			auto [frontWinding, backWinding] = ClipWindingEpsilonStrict( split.w, plane.plane, CLIP_EPSILON * 2 ); /* strict; if no winding is left, we have a "virtually identical" plane and don't want to split by it */
+			if ( !frontWinding.empty() ) {
 				face_t& newFace = childLists[0].emplace_front();
-				newFace.w.swap( *frontWinding );
-				FreeWinding( frontWinding );
+				newFace.w.swap( frontWinding );
 				newFace.planenum = split.planenum;
 				newFace.priority = split.priority;
 				newFace.compileFlags = split.compileFlags;
 			}
-			if ( backWinding ) {
+			if ( !backWinding.empty() ) {
 				face_t& newFace = childLists[1].emplace_front();
-				newFace.w.swap( *backWinding );
-				FreeWinding( backWinding );
+				newFace.w.swap( backWinding );
 				newFace.planenum = split.planenum;
 				newFace.priority = split.priority;
 				newFace.compileFlags = split.compileFlags;
@@ -299,15 +295,15 @@ void BuildFaceTree_r( node_t *node, facelist_t& list ){
    List will be freed before returning
    ================
  */
-tree_t *FaceBSP( facelist_t& list ) {
+tree_t FaceBSP( facelist_t& list ) {
 	Sys_FPrintf( SYS_VRB, "--- FaceBSP ---\n" );
 
-	tree_t *tree = AllocTree();
+	tree_t tree{};
 
 	int count = 0;
 	for ( const face_t& face : list )
 	{
-		WindingExtendBounds( face.w, tree->minmax );
+		WindingExtendBounds( face.w, tree.minmax );
 		count++;
 	}
 	Sys_FPrintf( SYS_VRB, "%9d faces\n", count );
@@ -317,11 +313,11 @@ tree_t *FaceBSP( facelist_t& list ) {
 		plane.counter = 0;
 	}
 
-	tree->headnode = AllocNode();
-	tree->headnode->minmax = tree->minmax;
+	tree.headnode = AllocNode();
+	tree.headnode->minmax = tree.minmax;
 	c_faceLeafs = 0;
 
-	BuildFaceTree_r( tree->headnode, list );
+	BuildFaceTree_r( tree.headnode, list );
 
 	Sys_FPrintf( SYS_VRB, "%9d leafs\n", c_faceLeafs );
 
@@ -335,21 +331,20 @@ tree_t *FaceBSP( facelist_t& list ) {
    get structural brush faces
  */
 
-facelist_t MakeStructuralBSPFaceList( const brush_t *list ){
+facelist_t MakeStructuralBSPFaceList( const brushlist_t& list ){
 	facelist_t flist;
 
-	for ( const brush_t *b = list; b != NULL; b = b->next )
+	for ( const brush_t &b : list )
 	{
-		if ( !deepBSP && b->detail ) {
+		if ( !deepBSP && b.detail ) {
 			continue;
 		}
 
-		for ( int i = 0; i < b->numsides; i++ )
+		for ( const side_t& s : b.sides )
 		{
-			/* get side and winding */
-			const side_t& s = b->sides[ i ];
-			const winding_t *w = s.winding;
-			if ( w == NULL ) {
+			/* get winding */
+			const winding_t& w = s.winding;
+			if ( w.empty() ) {
 				continue;
 			}
 
@@ -360,10 +355,10 @@ facelist_t MakeStructuralBSPFaceList( const brush_t *list ){
 
 			/* allocate a face */
 			face_t& f = flist.emplace_front();
-			f.w = *w;
+			f.w = w;
 			f.planenum = s.planenum & ~1;
 			f.compileFlags = s.compileFlags;  /* ydnar */
-			if ( b->detail ) {
+			if ( b.detail ) {
 				f.compileFlags |= C_DETAIL;
 			}
 
@@ -394,21 +389,20 @@ facelist_t MakeStructuralBSPFaceList( const brush_t *list ){
    get visible brush faces
  */
 
-facelist_t MakeVisibleBSPFaceList( const brush_t *list ){
+facelist_t MakeVisibleBSPFaceList( const brushlist_t& list ){
 	facelist_t flist;
 
-	for ( const brush_t *b = list; b != NULL; b = b->next )
+	for ( const brush_t& b : list )
 	{
-		if ( !deepBSP && b->detail ) {
+		if ( !deepBSP && b.detail ) {
 			continue;
 		}
 
-		for ( int i = 0; i < b->numsides; i++ )
+		for ( const side_t& s : b.sides )
 		{
-			/* get side and winding */
-			const side_t& s = b->sides[ i ];
-			const winding_t *w = s.visibleHull;
-			if ( w == NULL ) {
+			/* get winding */
+			const winding_t& w = s.visibleHull;
+			if ( w.empty() ) {
 				continue;
 			}
 
@@ -419,10 +413,10 @@ facelist_t MakeVisibleBSPFaceList( const brush_t *list ){
 
 			/* allocate a face */
 			face_t& f = flist.emplace_front();
-			f.w = *w;
+			f.w = w;
 			f.planenum = s.planenum & ~1;
 			f.compileFlags = s.compileFlags;  /* ydnar */
-			if ( b->detail ) {
+			if ( b.detail ) {
 				f.compileFlags |= C_DETAIL;
 			}
 

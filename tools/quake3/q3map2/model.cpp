@@ -718,13 +718,12 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 				if ( PlaneFromPoints( plane, points ) ) {
 
 					/* build a brush */
-					buildBrush = AllocBrush( 48 );
-					buildBrush->entityNum = mapEntityNum;
-					buildBrush->original = buildBrush;
-					buildBrush->contentShader = si;
-					buildBrush->compileFlags = si->compileFlags;
-					buildBrush->contentFlags = si->contentFlags;
-					buildBrush->detail = true;
+					buildBrush.sides.reserve( MAX_BUILD_SIDES );
+					buildBrush.entityNum = mapEntityNum;
+					buildBrush.contentShader = si;
+					buildBrush.compileFlags = si->compileFlags;
+					buildBrush.contentFlags = si->contentFlags;
+					buildBrush.detail = true;
 
 					//snap points before using them for further calculations
 					//precision suffers a lot, when two of normal values are under .00025 (often no collision, knocking up effect in ioq3)
@@ -893,24 +892,25 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 						}
 #endif
 						/* set up brush sides */
-						buildBrush->numsides = 4;
-						buildBrush->sides[ 0 ].shaderInfo = si;
-						buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
-						for ( j = 1; j < buildBrush->numsides; j++ ) {
+						buildBrush.sides.clear(); // clear, so resize() will value-initialize elements
+						buildBrush.sides.resize( 4 );
+						buildBrush.sides[ 0 ].shaderInfo = si;
+						buildBrush.sides[ 0 ].surfaceFlags = si->surfaceFlags;
+						for ( j = 1; j < 4; j++ ) {
 							if ( debugClip ) {
-								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
-								buildBrush->sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
+								buildBrush.sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
+								buildBrush.sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
 							}
 							else {
-								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+								buildBrush.sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 							}
 						}
 						points[3] = points[0]; // for cyclic usage
 
-						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
-						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
-						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
-						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+						buildBrush.sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+						buildBrush.sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
+						buildBrush.sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
+						buildBrush.sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
 					}
 
 
@@ -1033,25 +1033,26 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 						}
 #endif
 						/* set up brush sides */
-						buildBrush->numsides = 5;
-						buildBrush->sides[ 0 ].shaderInfo = si;
-						buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
-						for ( j = 1; j < buildBrush->numsides; j++ ) {
+						buildBrush.sides.clear(); // clear, so resize() will value-initialize elements
+						buildBrush.sides.resize( 5 );
+						buildBrush.sides[ 0 ].shaderInfo = si;
+						buildBrush.sides[ 0 ].surfaceFlags = si->surfaceFlags;
+						for ( j = 1; j < 5; j++ ) {
 							if ( debugClip ) {
-								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
-								buildBrush->sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
+								buildBrush.sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
+								buildBrush.sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
 							}
 							else {
-								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+								buildBrush.sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 							}
 						}
 						points[3] = points[0]; // for cyclic usage
 
-						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
-						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
-						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
-						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
-						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
+						buildBrush.sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+						buildBrush.sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
+						buildBrush.sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
+						buildBrush.sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+						buildBrush.sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
 					}
 
 
@@ -1087,25 +1088,26 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 						reverse.dist() += clipDepth;
 
 						/* set up brush sides */
-						buildBrush->numsides = 5;
-						buildBrush->sides[ 0 ].shaderInfo = si;
-						buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
-						for ( j = 1; j < buildBrush->numsides; j++ ) {
+						buildBrush.sides.clear(); // clear, so resize() will value-initialize elements
+						buildBrush.sides.resize( 5 );
+						buildBrush.sides[ 0 ].shaderInfo = si;
+						buildBrush.sides[ 0 ].surfaceFlags = si->surfaceFlags;
+						for ( j = 1; j < 5; j++ ) {
 							if ( debugClip ) {
-								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
-								buildBrush->sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
+								buildBrush.sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
+								buildBrush.sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
 							}
 							else {
-								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+								buildBrush.sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 							}
 						}
 						points[3] = points[0]; // for cyclic usage
 
-						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
-						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
-						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
-						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
-						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
+						buildBrush.sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+						buildBrush.sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
+						buildBrush.sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
+						buildBrush.sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+						buildBrush.sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
 					}
 
 
@@ -1166,25 +1168,26 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 						reverse.dist() += clipDepth;
 
 						/* set up brush sides */
-						buildBrush->numsides = 5;
-						buildBrush->sides[ 0 ].shaderInfo = si;
-						buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
-						for ( j = 1; j < buildBrush->numsides; j++ ) {
+						buildBrush.sides.clear(); // clear, so resize() will value-initialize elements
+						buildBrush.sides.resize( 5 );
+						buildBrush.sides[ 0 ].shaderInfo = si;
+						buildBrush.sides[ 0 ].surfaceFlags = si->surfaceFlags;
+						for ( j = 1; j < 5; j++ ) {
 							if ( debugClip ) {
-								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
-								buildBrush->sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
+								buildBrush.sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
+								buildBrush.sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
 							}
 							else {
-								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+								buildBrush.sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 							}
 						}
 						points[3] = points[0]; // for cyclic usage
 
-						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
-						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
-						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
-						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
-						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
+						buildBrush.sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+						buildBrush.sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
+						buildBrush.sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
+						buildBrush.sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+						buildBrush.sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
 					}
 
 
@@ -1230,25 +1233,26 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 						}
 #endif
 						/* set up brush sides */
-						buildBrush->numsides = 5;
-						buildBrush->sides[ 0 ].shaderInfo = si;
-						buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
-						for ( j = 1; j < buildBrush->numsides; j++ ) {
+						buildBrush.sides.clear(); // clear, so resize() will value-initialize elements
+						buildBrush.sides.resize( 5 );
+						buildBrush.sides[ 0 ].shaderInfo = si;
+						buildBrush.sides[ 0 ].surfaceFlags = si->surfaceFlags;
+						for ( j = 1; j < 5; j++ ) {
 							if ( debugClip ) {
-								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
-								buildBrush->sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
+								buildBrush.sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
+								buildBrush.sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
 							}
 							else {
-								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+								buildBrush.sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 							}
 						}
 						points[3] = points[0]; // for cyclic usage
 
-						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
-						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
-						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
-						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
-						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
+						buildBrush.sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+						buildBrush.sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
+						buildBrush.sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
+						buildBrush.sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+						buildBrush.sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
 					}
 
 
@@ -1293,30 +1297,30 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 							}
 #endif
 							/* set up brush sides */
-							buildBrush->numsides = 4;
-							buildBrush->sides[ 0 ].shaderInfo = si;
-							buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
-							for ( j = 1; j < buildBrush->numsides; j++ ) {
+							buildBrush.sides.clear(); // clear, so resize() will value-initialize elements
+							buildBrush.sides.resize( 4 );
+							buildBrush.sides[ 0 ].shaderInfo = si;
+							buildBrush.sides[ 0 ].surfaceFlags = si->surfaceFlags;
+							for ( j = 1; j < 4; j++ ) {
 								if ( debugClip ) {
-									buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
-									buildBrush->sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
+									buildBrush.sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
+									buildBrush.sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
 								}
 								else {
-									buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+									buildBrush.sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 								}
 							}
 							points[3] = points[0]; // for cyclic usage
 
-							buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
-							buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 1 ] ); // p[0] contains points[1] and points[2]
-							buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 0 ] ); // p[1] contains points[0] and points[1]
-							buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+							buildBrush.sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+							buildBrush.sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 1 ] ); // p[0] contains points[1] and points[2]
+							buildBrush.sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 0 ] ); // p[1] contains points[0] and points[1]
+							buildBrush.sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
 						}
 						else
 						{
 							Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
 							             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
-							free( buildBrush );
 							continue;
 						}
 					}
@@ -1359,25 +1363,26 @@ default_CLIPMODEL:
 						}
 #endif
 						/* set up brush sides */
-						buildBrush->numsides = 5;
-						buildBrush->sides[ 0 ].shaderInfo = si;
-						buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
-						for ( j = 1; j < buildBrush->numsides; j++ ) {
+						buildBrush.sides.clear(); // clear, so resize() will value-initialize elements
+						buildBrush.sides.resize( 5 );
+						buildBrush.sides[ 0 ].shaderInfo = si;
+						buildBrush.sides[ 0 ].surfaceFlags = si->surfaceFlags;
+						for ( j = 1; j < 5; j++ ) {
 							if ( debugClip ) {
-								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
-								buildBrush->sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
+								buildBrush.sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
+								buildBrush.sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
 							}
 							else {
-								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+								buildBrush.sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 							}
 						}
 						points[3] = points[0]; // for cyclic usage
 
-						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
-						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
-						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
-						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
-						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
+						buildBrush.sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+						buildBrush.sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
+						buildBrush.sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
+						buildBrush.sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+						buildBrush.sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
 					}
 
 
@@ -1385,14 +1390,13 @@ default_CLIPMODEL:
 					if ( CreateBrushWindings( buildBrush ) ) {
 						AddBrushBevels();
 						//%	EmitBrushes( buildBrush, NULL, NULL );
-						buildBrush->next = entities[ mapEntityNum ].brushes;
-						entities[ mapEntityNum ].brushes = buildBrush;
+						brush_t& newBrush = entities[ mapEntityNum ].brushes.emplace_front( buildBrush );
+						newBrush.original = &newBrush;
 						entities[ mapEntityNum ].numBrushes++;
 					}
 					else{
 						Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
 						             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
-						free( buildBrush );
 					}
 				}
 			}

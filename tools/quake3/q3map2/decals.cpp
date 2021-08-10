@@ -493,33 +493,29 @@ void ProcessDecals( void ){
    projects a decal onto a winding
  */
 
-static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds, winding_t *w ){
+static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds, winding_t& w ){
 	int i, j;
-	winding_t           *front, *back;
 	mapDrawSurface_t    *ds2;
 	bspDrawVert_t       *dv;
 	Plane3f plane;
 
 
 	/* dummy check */
-	if ( w->size() < 3 ) {
-		FreeWinding( w );
+	if ( w.size() < 3 ) {
 		return;
 	}
 
 	/* offset by entity origin */
-	for ( Vector3& p : *w )
+	for ( Vector3& p : w )
 		p += entityOrigin;
 
 	/* make a plane from the winding */
-	if ( !PlaneFromPoints( plane, w->data() ) ) {
-		FreeWinding( w );
+	if ( !PlaneFromPoints( plane, w.data() ) ) {
 		return;
 	}
 
 	/* backface check */
 	if ( vector3_dot( dp->planes[ 0 ].normal(), plane.normal() ) < -0.0001f ) {
-		FreeWinding( w );
 		return;
 	}
 
@@ -527,25 +523,20 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	for ( i = 0; i < dp->numPlanes; i++ )
 	{
 		/* chop winding by the plane */
-		ClipWindingEpsilonStrict( *w, dp->planes[ i ], 0.0625f, front, back ); /* strict, if identical plane we don't want to keep it */
-		FreeWinding( w );
+		auto [front, back] = ClipWindingEpsilonStrict( w, dp->planes[ i ], 0.0625f ); /* strict, if identical plane we don't want to keep it */
 
 		/* lose the front fragment */
-		if ( front != NULL ) {
-			FreeWinding( front );
-		}
-
 		/* if nothing left in back, then bail */
-		if ( back == NULL ) {
+		if ( back.empty() ) {
 			return;
 		}
 
 		/* reset winding */
-		w = back;
+		w.swap( back );
 	}
 
 	/* nothing left? */
-	if ( w == NULL || w->size() < 3 ) {
+	if ( w.size() < 3 ) {
 		return;
 	}
 
@@ -563,7 +554,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	ds2->fogNum = ds->fogNum;   /* why was this -1? */
 	ds2->lightmapScale = ds->lightmapScale;
 	ds2->shadeAngleDegrees = ds->shadeAngleDegrees;
-	ds2->numVerts = w->size();
+	ds2->numVerts = w.size();
 	ds2->verts = safe_calloc( ds2->numVerts * sizeof( *ds2->verts ) );
 
 	/* set vertexes */
@@ -573,12 +564,12 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 		dv = &ds2->verts[ i ];
 
 		/* set alpha */
-		const float d = plane3_distance_to_point( dp->planes[ 0 ], ( *w )[ i ] );
-		const float d2 = plane3_distance_to_point( dp->planes[ 1 ], ( *w )[ i ] );
+		const float d = plane3_distance_to_point( dp->planes[ 0 ], w[ i ] );
+		const float d2 = plane3_distance_to_point( dp->planes[ 1 ], w[ i ] );
 		const float alpha = 255.0f * d2 / ( d + d2 );
 
 		/* set misc */
-		dv->xyz = ( *w )[ i ] - entityOrigin;
+		dv->xyz = w[ i ] - entityOrigin;
 		dv->normal = plane.normal();
 		dv->st[ 0 ] = vector3_dot( dv->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
 		dv->st[ 1 ] = vector3_dot( dv->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
@@ -614,7 +605,7 @@ static void ProjectDecalOntoFace( decalProjector_t *dp, mapDrawSurface_t *ds ){
 	}
 
 	/* generate decal */
-	winding_t *w = WindingFromDrawSurf( ds );
+	winding_t w = WindingFromDrawSurf( ds );
 	ProjectDecalOntoWinding( dp, ds, w );
 }
 
@@ -628,7 +619,6 @@ static void ProjectDecalOntoFace( decalProjector_t *dp, mapDrawSurface_t *ds ){
 static void ProjectDecalOntoPatch( decalProjector_t *dp, mapDrawSurface_t *ds ){
 	int x, y, pw[ 5 ], r, iterations;
 	mesh_t src, *mesh, *subdivided;
-	winding_t   *w;
 
 
 	/* backface check */
@@ -668,18 +658,18 @@ static void ProjectDecalOntoPatch( decalProjector_t *dp, mapDrawSurface_t *ds ){
 			r = ( x + y ) & 1;
 
 			/* generate decal for first triangle */
-			w = AllocWinding( 3 );
-			w->push_back( mesh->verts[ pw[ r + 0 ] ].xyz );
-			w->push_back( mesh->verts[ pw[ r + 1 ] ].xyz );
-			w->push_back( mesh->verts[ pw[ r + 2 ] ].xyz );
+			winding_t w{
+				mesh->verts[ pw[ r + 0 ] ].xyz,
+				mesh->verts[ pw[ r + 1 ] ].xyz,
+				mesh->verts[ pw[ r + 2 ] ].xyz };
 			ProjectDecalOntoWinding( dp, ds, w );
 
 			/* generate decal for second triangle */
-			w = AllocWinding( 3 );
-			w->push_back( mesh->verts[ pw[ r + 0 ] ].xyz );
-			w->push_back( mesh->verts[ pw[ r + 2 ] ].xyz );
-			w->push_back( mesh->verts[ pw[ r + 3 ] ].xyz );
-			ProjectDecalOntoWinding( dp, ds, w );
+			winding_t w2{
+				mesh->verts[ pw[ r + 0 ] ].xyz,
+				mesh->verts[ pw[ r + 2 ] ].xyz,
+				mesh->verts[ pw[ r + 3 ] ].xyz };
+			ProjectDecalOntoWinding( dp, ds, w2 );
 		}
 	}
 
@@ -714,10 +704,10 @@ static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *d
 	for ( int i = 0; i < ds->numIndexes; i += 3 )
 	{
 		/* generate decal */
-		winding_t *w = AllocWinding( 3 );
-		w->push_back( ds->verts[ ds->indexes[ i ] ].xyz );
-		w->push_back( ds->verts[ ds->indexes[ i + 1 ] ].xyz );
-		w->push_back( ds->verts[ ds->indexes[ i + 2 ] ].xyz );
+		winding_t w{
+			ds->verts[ ds->indexes[ i ] ].xyz,
+			ds->verts[ ds->indexes[ i + 1 ] ].xyz,
+			ds->verts[ ds->indexes[ i + 2 ] ].xyz };
 		ProjectDecalOntoWinding( dp, ds, w );
 	}
 }

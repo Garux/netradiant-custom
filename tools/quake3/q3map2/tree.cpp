@@ -91,15 +91,8 @@ void FreeTree_r( node_t *node ){
 		FreeTree_r( node->children[1] );
 	}
 
-	// free bspbrushes
-	FreeBrushList( node->brushlist );
-
 	// free the node
-	if ( node->volume ) {
-		FreeBrush( node->volume );
-	}
-
-	free( node );
+	delete node;
 }
 
 
@@ -108,25 +101,24 @@ void FreeTree_r( node_t *node ){
    FreeTree
    =============
  */
-void FreeTree( tree_t *tree ){
-	FreeTreePortals_r( tree->headnode );
-	FreeTree_r( tree->headnode );
-	free( tree );
+void FreeTree( tree_t& tree ){
+	FreeTreePortals_r( tree.headnode );
+	FreeTree_r( tree.headnode );
 }
 
 //===============================================================
 
-void PrintTree_r( node_t *node, int depth ){
+void PrintTree_r( const node_t *node, int depth ){
 	for ( int i = 0; i < depth; i++ )
 		Sys_Printf( "  " );
 	if ( node->planenum == PLANENUM_LEAF ) {
-		if ( !node->brushlist ) {
+		if ( node->brushlist.empty() ) {
 			Sys_Printf( "NULL\n" );
 		}
 		else
 		{
-			for ( const brush_t *bb = node->brushlist; bb; bb = bb->next )
-				Sys_Printf( "%d ", bb->original->brushNum );
+			for ( const brush_t& bb : node->brushlist )
+				Sys_Printf( "%d ", bb.original->brushNum );
 			Sys_Printf( "\n" );
 		}
 		return;

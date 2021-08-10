@@ -47,11 +47,11 @@ static void autocaulk_write(){
 	int flava = 8;
 	ApplySurfaceParm( "lava", &flava, NULL, NULL );
 
-	for ( brush_t* b = entities[0].brushes; b; b = b->next ) {
-		fprintf( file, "%i ", b->brushNum );
-		shaderInfo_t* contentShader = b->contentShader;
-		for( int i = 0; i < b->numsides; ++i ){
-			if( b->sides[i].visibleHull || ( b->sides[i].compileFlags & C_NODRAW ) ){
+	for ( const brush_t& b : entities[0].brushes ) {
+		fprintf( file, "%i ", b.brushNum );
+		const shaderInfo_t* contentShader = b.contentShader;
+		for( const side_t& side : b.sides ){
+			if( !side.visibleHull.empty() || ( side.compileFlags & C_NODRAW ) ){
 				fprintf( file, "-" );
 			}
 			else if( contentShader->compileFlags & C_LIQUID ){
@@ -62,7 +62,7 @@ static void autocaulk_write(){
 				else
 					fprintf( file, "w" );
 			}
-			else if( b->compileFlags & C_TRANSLUCENT ){
+			else if( b.compileFlags & C_TRANSLUCENT ){
 				if( contentShader->compileFlags & C_SOLID )
 					fprintf( file, "N" );
 				else
@@ -170,7 +170,7 @@ static void SetCloneModelNumbers( void ){
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* only entities with brushes or patches get a model number */
-		if ( entities[ i ].brushes == NULL && entities[ i ].patches == NULL ) {
+		if ( entities[ i ].brushes.empty() && entities[ i ].patches == NULL ) {
 			continue;
 		}
 
@@ -190,7 +190,7 @@ static void SetCloneModelNumbers( void ){
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* only entities with brushes or patches get a model number */
-		if ( entities[ i ].brushes == NULL && entities[ i ].patches == NULL ) {
+		if ( entities[ i ].brushes.empty() && entities[ i ].patches == NULL ) {
 			continue;
 		}
 
@@ -220,7 +220,7 @@ static void SetCloneModelNumbers( void ){
 				entities[ i ].setKeyValue( "model", modelValue );
 
 				/* nuke the brushes/patches for this entity (fixme: leak!) */
-				entities[ i ].brushes = NULL;
+				brushlist_t *leak = new brushlist_t( std::move( entities[ i ].brushes ) ); // are brushes referenced elsewhere, so we do not nuke them really?
 				entities[ i ].patches = NULL;
 			}
 		}
@@ -284,8 +284,6 @@ static void FixBrushSides( entity_t *e ){
 
 void ProcessWorldModel( void ){
 	entity_t    *e;
-	tree_t      *tree;
-	facelist_t   faces;
 	xmlNodePtr polyline, leaknode;
 	char level[ 2 ];
 	const char  *value;
@@ -321,8 +319,8 @@ void ProcessWorldModel( void ){
 	}
 
 	/* build an initial bsp tree using all of the sides of all of the structural brushes */
-	faces = MakeStructuralBSPFaceList( entities[ 0 ].brushes );
-	tree = FaceBSP( faces );
+	facelist_t faces = MakeStructuralBSPFaceList( entities[ 0 ].brushes );
+	tree_t tree = FaceBSP( faces );
 	MakeTreePortals( tree );
 	FilterStructuralBrushesIntoTree( e, tree );
 
@@ -353,7 +351,7 @@ void ProcessWorldModel( void ){
 
 	if ( leakStatus != EFloodEntities::Empty ) { /* if no entities exist, this would accidentally the whole map, and that IS bad */
 		/* rebuild a better bsp tree using only the sides that are visible from the inside */
-		FillOutside( tree->headnode );
+		FillOutside( tree.headnode );
 
 		/* chop the sides to the convex hull of their visible fragments, giving us the smallest polygons */
 		ClipSidesIntoTree( e, tree );
@@ -372,7 +370,7 @@ void ProcessWorldModel( void ){
 
 		/* flood again to discard portals in the void (also required for _skybox) */
 		FloodEntities( tree );
-		FillOutside( tree->headnode );
+		FillOutside( tree.headnode );
 	}
 
 	/* save out information for visibility processing */
@@ -405,7 +403,7 @@ void ProcessWorldModel( void ){
 
 	/* subdivide each drawsurf as required by shader tesselation */
 	if ( !nosubdivide ) {
-		SubdivideFaceSurfaces( e, tree );
+		SubdivideFaceSurfaces( e );
 	}
 
 	/* add in any vertexes required to fix t-junctions */
@@ -433,7 +431,7 @@ void ProcessWorldModel( void ){
 	/* ydnar: fog hull */
 	if ( entities[ 0 ].read_keyvalue( value, "_foghull" ) ) {
 		const auto shader = String64()( "textures/", value );
-		MakeFogHullSurfs( e, tree, shader );
+		MakeFogHullSurfs( e, shader );
 	}
 
 	/* ydnar: bug 645: do flares for lights */
@@ -484,7 +482,7 @@ void ProcessWorldModel( void ){
 	FixBrushSides( e );
 
 	/* finish */
-	EndModel( e, tree->headnode );
+	EndModel( e, tree.headnode );
 	FreeTree( tree );
 }
 
@@ -496,15 +494,9 @@ void ProcessWorldModel( void ){
  */
 
 void ProcessSubModel( void ){
-	entity_t    *e;
-	tree_t      *tree;
-	brush_t     *b, *bc;
-	node_t      *node;
-
-
 	/* start a brush model */
 	BeginModel();
-	e = &entities[ mapEntityNum ];
+	entity_t *e = &entities[ mapEntityNum ];
 	e->firstDrawSurf = numMapDrawSurfs;
 
 	/* ydnar: gs mods */
@@ -514,10 +506,9 @@ void ProcessSubModel( void ){
 	PatchMapDrawSurfs( e );
 
 	/* allocate a tree */
-	node = AllocNode();
-	node->planenum = PLANENUM_LEAF;
-	tree = AllocTree();
-	tree->headnode = node;
+	tree_t tree{};
+	tree.headnode = AllocNode();
+	tree.headnode->planenum = PLANENUM_LEAF;
 
 	/* add the sides to the tree */
 	ClipSidesIntoTree( e, tree );
@@ -532,16 +523,11 @@ void ProcessSubModel( void ){
 	EmitBrushes( e->brushes, &e->firstBrush, &e->numBrushes );
 
 	/* just put all the brushes in headnode */
-	for ( b = e->brushes; b; b = b->next )
-	{
-		bc = CopyBrush( b );
-		bc->next = node->brushlist;
-		node->brushlist = bc;
-	}
+	tree.headnode->brushlist = e->brushes;
 
 	/* subdivide each drawsurf as required by shader tesselation */
 	if ( !nosubdivide ) {
-		SubdivideFaceSurfaces( e, tree );
+		SubdivideFaceSurfaces( e );
 	}
 
 	/* add in any vertexes required to fix t-junctions */
@@ -568,7 +554,7 @@ void ProcessSubModel( void ){
 	FixBrushSides( e );
 
 	/* finish */
-	EndModel( e, node );
+	EndModel( e, tree.headnode );
 	FreeTree( tree );
 }
 
@@ -597,7 +583,7 @@ void ProcessModels( void ){
 	{
 		/* get entity */
 		const entity_t& entity = entities[ mapEntityNum ];
-		if ( entity.brushes == NULL && entity.patches == NULL ) {
+		if ( entity.brushes.empty() && entity.patches == NULL ) {
 			continue;
 		}
 
