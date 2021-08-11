@@ -664,7 +664,7 @@ void AddBrushBevels( void ){
 	// test the non-axial plane edges
 	for ( size_t i = 6; i < sides.size(); ++i ) {
 		for ( size_t j = 0; j < sides[i].winding.size(); j++ ) {
-			Vector3 vec = sides[i].winding[j] - sides[i].winding[( ( j + 1 ) == sides[i].winding.size() )? 0 : ( j + 1 )];
+			Vector3 vec = sides[i].winding[j] - sides[i].winding[winding_next( sides[i].winding, j )];
 			if ( VectorNormalize( vec ) < 0.5f ) {
 				continue;
 			}

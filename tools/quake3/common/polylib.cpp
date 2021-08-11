@@ -55,14 +55,13 @@ winding_t   AllocWinding( int points ){
    ============
  */
 void    RemoveColinearPoints( winding_t& w ){
-	winding_t p;
-	p.reserve( w.size() );
+	winding_t p = AllocWinding( w.size() );
 
-	for ( size_t i = 0 ; i < w.size() ; i++ )
+	for ( size_t i = 0; i < w.size(); i++ )
 	{
-		const size_t j = ( i + 1 ) % w.size();
-		const size_t k = ( i + w.size() - 1 ) % w.size();
-		if ( vector3_dot( VectorNormalized( w[j] - w[i] ), VectorNormalized( w[j] - w[k] ) ) < 0.999 ) {
+		const size_t j = winding_next( w, i );
+		const size_t k = winding_next( w, j );
+		if ( vector3_dot( VectorNormalized( w[k] - w[j] ), VectorNormalized( w[k] - w[i] ) ) < 0.999 ) {
 			p.push_back( w[i] );
 		}
 	}
@@ -377,7 +376,7 @@ std::pair<winding_t, winding_t>    ClipWindingEpsilonStrict( const winding_t& in
 		}
 
 		// generate a split point
-		const Vector3& p2 = in[( i + 1 ) % in.size()];
+		const Vector3& p2 = in[winding_next( in, i )];
 		const double dot = dists[i] / ( dists[i] - dists[i + 1] );
 		Vector3 mid;
 		for ( j = 0; j < 3; j++ )
@@ -586,8 +585,7 @@ void ChopWindingInPlace( winding_t& inout, const Plane3f& plane, float epsilon )
 
 	}
 
-	winding_t f;
-	f.reserve( in.size() + 4 ); // cant use counts[0]+2 because of fp grouping errors
+	winding_t f = AllocWinding( in.size() + 4 ); // cant use counts[0]+2 because of fp grouping errors
 
 	for ( i = 0; i < in.size(); i++ )
 	{
@@ -607,7 +605,7 @@ void ChopWindingInPlace( winding_t& inout, const Plane3f& plane, float epsilon )
 		}
 
 		// generate a split point
-		const Vector3& p2 = in[( i + 1 ) % in.size()];
+		const Vector3& p2 = in[winding_next( in, i )];
 
 		const double dot = dists[i] / ( dists[i] - dists[i + 1] );
 		Vector3 mid;
@@ -668,7 +666,7 @@ void CheckWinding( const winding_t& w ){
 		}
 
 		// check the edge isnt degenerate
-		const Vector3& p2 = w[( i + 1 == w.size() )? 0 : i + 1];
+		const Vector3& p2 = w[winding_next( w, i )];
 		const Vector3 dir = p2 - p1;
 
 		if ( vector3_length( dir ) < ON_EPSILON ) {
@@ -750,16 +748,19 @@ void    AddWindingToConvexHull( const winding_t& w, winding_t& hull, const Vecto
 		hull = w;
 		return;
 	}
+	if( hull.size() > MAX_HULL_POINTS )
+		Error( "MAX_HULL_POINTS" );
 
 	numHullPoints = hull.size();
-	memcpy( hullPoints, hull.data(), numHullPoints * sizeof( Vector3 ) );
+	memcpy( hullPoints, hull.data(), numHullPoints * sizeof( *hullPoints ) );
 
 	for ( const Vector3 &p : w ) {
+		const auto wrap = [numHullPoints]( int id ){
+			return id >= numHullPoints? id - numHullPoints : id;
+		};
 		// calculate hull side vectors
 		for ( j = 0; j < numHullPoints; j++ ) {
-			k = ( j + 1 ) % numHullPoints;
-
-			hullDirs[j] = vector3_cross( normal, VectorNormalized( hullPoints[k] - hullPoints[j] ) );
+			hullDirs[j] = vector3_cross( normal, VectorNormalized( hullPoints[wrap( j + 1 )] - hullPoints[j] ) );
 		}
 
 		outside = false;
@@ -778,7 +779,7 @@ void    AddWindingToConvexHull( const winding_t& w, winding_t& hull, const Vecto
 
 		// find the back side to front side transition
 		for ( j = 0; j < numHullPoints; j++ ) {
-			if ( !hullSide[ j % numHullPoints ] && hullSide[ ( j + 1 ) % numHullPoints ] ) {
+			if ( !hullSide[ j ] && hullSide[ wrap( j + 1 ) ] ) {
 				break;
 			}
 		}
@@ -791,17 +792,17 @@ void    AddWindingToConvexHull( const winding_t& w, winding_t& hull, const Vecto
 		numNew = 1;
 
 		// copy over all points that aren't double fronts
-		j = ( j + 1 ) % numHullPoints;
+		j = wrap( j + 1 );
 		for ( k = 0; k < numHullPoints; k++ ) {
-			if ( hullSide[ ( j + k ) % numHullPoints ] && hullSide[ ( j + k + 1 ) % numHullPoints ] ) {
+			if ( hullSide[ wrap( j + k ) ] && hullSide[ wrap( j + k + 1 ) ] ) {
 				continue;
 			}
-			newHullPoints[numNew] = hullPoints[ ( j + k + 1 ) % numHullPoints ];
+			newHullPoints[numNew] = hullPoints[ wrap( j + k + 1 ) ];
 			numNew++;
 		}
 
 		numHullPoints = numNew;
-		memcpy( hullPoints, newHullPoints, numHullPoints * sizeof( Vector3 ) );
+		memcpy( hullPoints, newHullPoints, numHullPoints * sizeof( *hullPoints ) );
 	}
 
 	hull = winding_t( hullPoints, hullPoints + numHullPoints );

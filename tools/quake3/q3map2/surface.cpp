@@ -1558,14 +1558,8 @@ void CullSides( entity_t *e ){
 					}
 
 					/* find second common point (regardless of winding order) */
-					second = -1;
+					second = ( ( first + 1 ) < numPoints )? ( first + 1 ) : 0;
 					dir = 0;
-					if ( ( first + 1 ) < numPoints ) {
-						second = first + 1;
-					}
-					else{
-						second = 0;
-					}
 					if ( vector3_equal_epsilon( w1[ 1 ], w2[ second ], CULL_EPSILON ) ) {
 						dir = 1;
 					}

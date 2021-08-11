@@ -191,7 +191,7 @@ bool FixWinding( winding_t& w ){
 	/* check all verts */
 	for ( winding_t::iterator i = w.begin(); i != w.end(); )
 	{
-		winding_t::iterator j = ( std::next( i ) == w.end() )? w.begin() : std::next( i );
+		winding_t::iterator j = winding_next( w, i );
 		/* don't remove points if winding is a triangle */
 		if ( w.size() == 3 ) {
 			return valid;
@@ -566,10 +566,8 @@ void FilterStructuralBrushesIntoTree( entity_t *e, tree_t& tree ) {
 #define EDGE_LENGTH 0.2
 bool WindingIsTiny( const winding_t& w ){
 /*
-	if (WindingArea (w) < 1)
-		return true;
-	return false;
- */
+	return WindingArea( w ) < 1;
+*/
 	int edges = 0;
 
 	for ( size_t i = w.size() - 1, j = 0; j < w.size(); i = j, ++j )

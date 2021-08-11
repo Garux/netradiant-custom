@@ -25,6 +25,15 @@
 
 using winding_t = std::vector<Vector3>;
 
+// index < w.size()
+inline size_t winding_next( const winding_t& w, size_t index ){
+	return ++index == w.size()? 0 : index;
+}
+// it < w.end()
+inline winding_t::iterator winding_next( winding_t& w, winding_t::iterator it ){
+	return ++it == w.end()? w.begin() : it;
+}
+
 #define MAX_POINTS_ON_WINDING   512
 
 // you can define on_epsilon in the makefile as tighter
