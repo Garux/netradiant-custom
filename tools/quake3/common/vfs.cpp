@@ -206,33 +206,41 @@ void vfsInitDirectory( const char *path ){
 }
 
 
-// lists all .shader files
-void vfsListShaderFiles( StrList* list, void pushStringCallback( StrList* list, const char* string ) ){
+// lists all unique .shader files with extension and w/o path
+std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath ){
+	std::vector<CopiedString> list;
+	const auto insert = [&list]( const char *name ){
+		for( const CopiedString& str : list )
+			if( striEqual( str.c_str(), name ) )
+				return;
+		list.emplace_back( name );
+	};
 	/* search in dirs */
 	for ( int i = 0; i < g_numDirs; i++ ){
-		GDir *dir = g_dir_open( StringOutputStream( 256 )( g_strDirs[ i ], "scripts/" ), 0, NULL );
+		GDir *dir = g_dir_open( StringOutputStream( 256 )( g_strDirs[ i ], shaderPath, "/" ), 0, NULL );
 
 		if ( dir != NULL ) {
 			const char* name;
 			while ( ( name = g_dir_read_name( dir ) ) )
 			{
 				if ( striEqual( path_get_filename_base_end( name ), ".shader" ) ) {
-					pushStringCallback( list, name );
+					insert( name );
 				}
 			}
 			g_dir_close( dir );
 		}
 	}
 	/* search in packs */
-	GSList *lst;
-
-	for ( lst = g_pakFiles; lst != NULL; lst = g_slist_next( lst ) )
+	for ( GSList *lst = g_pakFiles; lst != NULL; lst = g_slist_next( lst ) )
 	{
 		VFS_PAKFILE* file = (VFS_PAKFILE*)lst->data;
-		if ( striEqual( path_get_filename_base_end( file->name ), ".shader" ) ) {
-			pushStringCallback( list, path_get_filename_start( file->name ) );
+		if ( striEqual( path_get_filename_base_end( file->name ), ".shader" )
+		  && strniEqual( file->name, shaderPath, path_get_last_separator( file->name ) - file->name ) ) {
+			insert( path_get_filename_start( file->name ) );
 		}
 	}
+
+	return list;
 }
 
 // frees all memory that we allocated

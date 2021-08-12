@@ -64,11 +64,6 @@ static inline int StrList_find( const StrList* list, const char* string ){
 	return 0;
 }
 
-void pushStringCallback( StrList* list, const char* string ){
-	if( !StrList_find( list, string ) )
-		StrList_append( list, string );
-}
-
 
 /*
 	Check if newcoming texture is unique and not excluded
@@ -256,7 +251,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 	StrList* pk3Shaders = StrList_allocate( 1024 );
 	StrList* pk3Sounds = StrList_allocate( 1024 );
-	StrList* pk3Shaderfiles = StrList_allocate( 1024 );
+	std::vector<CopiedString> pk3Shaderfiles;
 	StrList* pk3Textures = StrList_allocate( 1024 );
 	StrList* pk3Videos = StrList_allocate( 1024 );
 
@@ -325,12 +320,12 @@ int pk3BSPMain( int argc, char **argv ){
 		}
 	}
 
-	vfsListShaderFiles( pk3Shaderfiles, pushStringCallback );
+	pk3Shaderfiles = vfsListShaderFiles( game->shaderPath );
 
 	if( dbg ){
-		Sys_Printf( "\n\tSchroider fileses.....%i\n", pk3Shaderfiles->n );
-		for ( i = 0; i < pk3Shaderfiles->n; ++i ){
-			Sys_Printf( "%s\n", pk3Shaderfiles->s[i] );
+		Sys_Printf( "\n\tSchroider fileses.....%zu\n", pk3Shaderfiles.size() );
+		for ( const CopiedString& file : pk3Shaderfiles ){
+			Sys_Printf( "%s\n", file.c_str() );
 		}
 	}
 
@@ -386,7 +381,7 @@ int pk3BSPMain( int argc, char **argv ){
 	/* hack */
 	endofscript = true;
 
-	for ( i = 0; i < pk3Shaderfiles->n; ++i ){
+	for ( CopiedString& file : pk3Shaderfiles ){
 		bool wantShader = false, wantShaderFile = false, ShaderFileExcluded = false;
 		int shader, found;
 		char* reasonShader = NULL;
@@ -394,13 +389,13 @@ int pk3BSPMain( int argc, char **argv ){
 
 		/* load the shader */
 		char scriptFile[128];
-		sprintf( scriptFile, "%s/%s", game->shaderPath, pk3Shaderfiles->s[i] );
+		sprintf( scriptFile, "%s/%s", game->shaderPath, file.c_str() );
 		SilentLoadScriptFile( scriptFile, 0 );
 		if( dbg )
-			Sys_Printf( "\n\tentering %s\n", pk3Shaderfiles->s[i] );
+			Sys_Printf( "\n\tentering %s\n", file.c_str() );
 
 		/* do wanna le shader file? */
-		if( ( found = StrList_find( ExShaderfiles, pk3Shaderfiles->s[i] ) ) ){
+		if( ( found = StrList_find( ExShaderfiles, file.c_str() ) ) ){
 			ShaderFileExcluded = true;
 			reasonShaderFile = ExShaderfiles->s[found - 1];
 		}
@@ -600,7 +595,7 @@ int pk3BSPMain( int argc, char **argv ){
 							ExReasonShaderFile[ shader ] = reasonShaderFile;
 						}
 						else{
-							ExReasonShaderFile[ shader ] = copystring( pk3Shaderfiles->s[i] );
+							ExReasonShaderFile[ shader ] = copystring( file.c_str() );
 						}
 						ExReasonShader[ shader ] = reasonShader;
 					}
@@ -612,7 +607,7 @@ int pk3BSPMain( int argc, char **argv ){
 			}
 		}
 		if ( !wantShaderFile ){
-			strClear( pk3Shaderfiles->s[i] );
+			file = "";
 		}
 	}
 
@@ -685,9 +680,9 @@ int pk3BSPMain( int argc, char **argv ){
 
 	Sys_Printf( "\n\tShaizers....\n" );
 
-	for ( i = 0; i < pk3Shaderfiles->n; ++i ){
-		if ( !strEmpty( pk3Shaderfiles->s[i] ) ){
-			stream( game->shaderPath, "/", pk3Shaderfiles->s[i] );
+	for ( CopiedString& file : pk3Shaderfiles ){
+		if ( !file.empty() ){
+			stream( game->shaderPath, "/", file.c_str() );
 			if ( !packResource( stream, packname, compLevel ) ){
 				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
 				packFAIL = true;
@@ -893,7 +888,7 @@ int repackBSPMain( int argc, char **argv ){
 	/* load bsps */
 	StrList* pk3Shaders = StrList_allocate( 65536 );
 	StrList* pk3Sounds = StrList_allocate( 4096 );
-	StrList* pk3Shaderfiles = StrList_allocate( 4096 );
+	std::vector<CopiedString> pk3Shaderfiles;
 	StrList* pk3Textures = StrList_allocate( 65536 );
 	StrList* pk3Videos = StrList_allocate( 1024 );
 
@@ -1110,12 +1105,12 @@ int repackBSPMain( int argc, char **argv ){
 
 
 
-	vfsListShaderFiles( pk3Shaderfiles, pushStringCallback );
+	pk3Shaderfiles = vfsListShaderFiles( game->shaderPath );
 
 	if( dbg ){
-		Sys_Printf( "\n\tSchroider fileses.....%i\n", pk3Shaderfiles->n );
-		for ( i = 0; i < pk3Shaderfiles->n; ++i ){
-			Sys_Printf( "%s\n", pk3Shaderfiles->s[i] );
+		Sys_Printf( "\n\tSchroider fileses.....%zu\n", pk3Shaderfiles.size() );
+		for ( const CopiedString& file : pk3Shaderfiles ){
+			Sys_Printf( "%s\n", file.c_str() );
 		}
 	}
 
@@ -1139,15 +1134,15 @@ int repackBSPMain( int argc, char **argv ){
 	/* hack */
 	endofscript = true;
 
-	for ( i = 0; i < pk3Shaderfiles->n; ++i ){
+	for ( const CopiedString& file : pk3Shaderfiles ){
 		bool wantShader = false;
 		int shader, found;
 
 		/* load the shader */
 		char scriptFile[128];
-		sprintf( scriptFile, "%s/%s", game->shaderPath, pk3Shaderfiles->s[i] );
+		sprintf( scriptFile, "%s/%s", game->shaderPath, file.c_str() );
 		if ( dbg )
-			Sys_Printf( "\n\tentering %s\n", pk3Shaderfiles->s[i] );
+			Sys_Printf( "\n\tentering %s\n", file.c_str() );
 		SilentLoadScriptFile( scriptFile, 0 );
 
 		/* tokenize it */
@@ -1166,7 +1161,7 @@ int repackBSPMain( int argc, char **argv ){
 			shaderText << token;
 
 			if ( strchr( token, '\\') != NULL  ){
-				Sys_FPrintf( SYS_WRN, "WARNING1: %s : %s : shader name with backslash\n", pk3Shaderfiles->s[i], token );
+				Sys_FPrintf( SYS_WRN, "WARNING1: %s : %s : shader name with backslash\n", file.c_str(), token );
 			}
 
 			/* do wanna le shader? */

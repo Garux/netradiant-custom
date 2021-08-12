@@ -1979,31 +1979,6 @@ static void ParseCustomInfoParms( void ){
 
 
 
-#define MAX_SHADER_FILES    1024
-
-struct StrList
-{
-	int n;
-	char* s[MAX_SHADER_FILES];
-};
-
-void pushShaderCallback( StrList* list, const char* string ){
-	char* shader = copystring( string );
-	strClear( shader + strlen( shader ) - strlen( ".shader" ) );
-	/* check for duplicate entries */
-	for ( int i = 0; i < list->n; i++ )
-		if ( striEqual( list->s[ i ], shader ) ){
-			free( shader );
-			return;
-		}
-
-	/* test limit */
-	if ( list->n >= MAX_SHADER_FILES )
-		Error( "MAX_SHADER_FILES (%d) reached!", (int) MAX_SHADER_FILES );
-
-	/* new shader file */
-	list->s[ list->n++ ] = shader;
-}
 
 /*
    LoadShaderInfo()
@@ -2013,9 +1988,7 @@ void pushShaderCallback( StrList* list, const char* string ){
  */
 
 void LoadShaderInfo( void ){
-	int i, j, count;
-	char filename[ 1024 ];
-	StrList shaderFiles = { .n = 0 };
+	std::vector<CopiedString> shaderFiles;
 
 
 	/* rr2do2: parse custom infoparms first */
@@ -2024,48 +1997,44 @@ void LoadShaderInfo( void ){
 	}
 
 	/* we can pile up several shader files, the one in baseq3 and ones in the mod dir or other spots */
-	sprintf( filename, "%s/shaderlist.txt", game->shaderPath );
-	count = vfsGetFileCount( filename );
+	const auto filename = StringOutputStream( 64 )( game->shaderPath, "/shaderlist.txt" );
+	const int count = vfsGetFileCount( filename );
 
 	/* load them all */
-	for ( i = 0; i < count; i++ )
+	for ( int i = 0; i < count; i++ )
 	{
 		/* load shader list */
-		sprintf( filename, "%s/shaderlist.txt", game->shaderPath );
 		LoadScriptFile( filename, i );
 
 		/* parse it */
 		while ( GetToken( true ) )
 		{
 			/* check for duplicate entries */
-			for ( j = 0; j < shaderFiles.n; j++ )
-				if ( strEqual( shaderFiles.s[ j ], token ) ) {
-					break;
-				}
+			const auto contains = [&shaderFiles]( const char *file ){
+				for( const CopiedString& str : shaderFiles )
+					if( striEqual( str.c_str(), file ) )
+						return true;
+				return false;
+			};
 
-			/* test limit */
-			if ( j >= MAX_SHADER_FILES ) {
-				Error( "MAX_SHADER_FILES (%d) reached, trim your shaderlist.txt!", (int) MAX_SHADER_FILES );
-			}
-
+			if( !striEqual( path_get_extension( token ), "shader" ) )
+				strcatQ( token, ".shader", sizeof( token ) );
 			/* new shader file */
-			if ( j == shaderFiles.n ) {
-				shaderFiles.s[ shaderFiles.n++ ] = copystring( token );
+			if ( !contains( token ) ) {
+				shaderFiles.emplace_back( token );
 			}
 		}
 	}
 
-	if( shaderFiles.n == 0 ){
+	if( shaderFiles.empty() ){
 		Sys_Printf( "%s", "No shaderlist.txt found: loading all shaders\n" );
-		vfsListShaderFiles( &shaderFiles, pushShaderCallback );
+		shaderFiles = vfsListShaderFiles( game->shaderPath );
 	}
 
 	/* parse the shader files */
-	for ( i = 0; i < shaderFiles.n; i++ )
+	for ( const CopiedString& file : shaderFiles )
 	{
-		sprintf( filename, "%s/%s.shader", game->shaderPath, shaderFiles.s[ i ] );
-		ParseShaderFile( filename );
-		free( shaderFiles.s[ i ] );
+		ParseShaderFile( StringOutputStream( 64 )( game->shaderPath, '/', file.c_str() ) );
 	}
 
 	/* emit some statistics */

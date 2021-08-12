@@ -56,8 +56,7 @@ void vfsInitDirectory( const char *path );
 void vfsShutdown();
 int vfsGetFileCount( const char *filename );
 int vfsLoadFile( const char *filename, void **buffer, int index );
-struct StrList;
-void vfsListShaderFiles( StrList* list, void pushStringCallback( StrList* list, const char* string ) );
+std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath );
 bool vfsPackFile( const char *filename, const char *packname, const int compLevel );
 bool vfsPackFile_Absolute_Path( const char *filepath, const char *filename, const char *packname, const int compLevel );
 
