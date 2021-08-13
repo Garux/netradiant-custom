@@ -54,26 +54,36 @@
 
 #include "stream/stringstream.h"
 #include "stream/textstream.h"
+#include <forward_list>
+
+struct VFS_PAK
+{
+	unzFile zipfile;
+	const CopiedString unzFilePath;
+	VFS_PAK( unzFile zipfile, const char *unzFilePath ) : zipfile( zipfile ), unzFilePath( unzFilePath ) {};
+	~VFS_PAK(){
+		unzClose( zipfile );
+	}
+};
 
 struct VFS_PAKFILE
 {
-	char* unzFilePath;
-	char*   name;
-	unz_s zipinfo;
-	unzFile zipfile;
-	guint32 size;
+	const CopiedString   name;
+	const unz_s zipinfo;
+	VFS_PAK& pak;
+	const guint32 size;
 };
 
 // =============================================================================
 // Global variables
 
-static GSList*  g_unzFiles;
-static GSList*  g_pakFiles;
+static std::forward_list<VFS_PAK>  g_paks;
+static std::forward_list<VFS_PAKFILE>  g_pakFiles;
 static char g_strDirs[VFS_MAXDIRS][PATH_MAX + 1];
 static int g_numDirs;
 char g_strForbiddenDirs[VFS_MAXDIRS][PATH_MAX + 1];
 int g_numForbiddenDirs = 0;
-static gboolean g_bUsePak = TRUE;
+static constexpr bool g_bUsePak = true;
 char g_strLoadedFileLocation[1024];
 
 // =============================================================================
@@ -93,15 +103,13 @@ static void vfsInitPakFile( const char *filename ){
 		return;
 	}
 
-	g_unzFiles = g_slist_append( g_unzFiles, uf );
+	VFS_PAK& pak = g_paks.emplace_front( uf, filename );
 
 	err = unzGetGlobalInfo( uf,&gi );
 	if ( err != UNZ_OK ) {
 		return;
 	}
 	unzGoToFirstFile( uf );
-
-	char* unzFilePath = strdup( filename );
 
 	for ( i = 0; i < gi.number_entry; i++ )
 	{
@@ -113,17 +121,15 @@ static void vfsInitPakFile( const char *filename ){
 			break;
 		}
 
-		VFS_PAKFILE* file = safe_malloc( sizeof( VFS_PAKFILE ) );
-		g_pakFiles = g_slist_append( g_pakFiles, file );
-
 		FixDOSName( filename_inzip );
 		strLower( filename_inzip );
 
-		file->name = strdup( filename_inzip );
-		file->size = file_info.uncompressed_size;
-		file->zipfile = uf;
-		file->unzFilePath = unzFilePath;
-		memcpy( &file->zipinfo, uf, sizeof( unz_s ) );
+		g_pakFiles.emplace_front( VFS_PAKFILE{
+			filename_inzip,
+			*(unz_s*)uf,
+			pak,
+			file_info.uncompressed_size
+		} );
 
 		if ( ( i + 1 ) < gi.number_entry ) {
 			err = unzGoToNextFile( uf );
@@ -139,7 +145,6 @@ static void vfsInitPakFile( const char *filename ){
 
 // reads all pak files from a dir
 void vfsInitDirectory( const char *path ){
-	char filename[PATH_MAX];
 	GDir *dir;
 	int j;
 
@@ -171,6 +176,7 @@ void vfsInitDirectory( const char *path ){
 		dir = g_dir_open( path, 0, NULL );
 
 		if ( dir != NULL ) {
+			std::vector<StringOutputStream> paks;
 			const char* name;
 			while ( ( name = g_dir_read_name( dir ) ) )
 			{
@@ -187,8 +193,7 @@ void vfsInitDirectory( const char *path ){
 				const char *ext = path_get_filename_base_end( name );
 
 				if ( striEqual( ext, ".pk3" ) ) {
-					sprintf( filename, "%s/%s", path, name );
-					vfsInitPakFile( filename );
+					paks.push_back( StringOutputStream( 256 )( path, '/', name ) );
 				}
 				else if ( striEqual( ext, ".pk3dir" ) ) {
 					if ( g_numDirs == VFS_MAXDIRS ) {
@@ -201,6 +206,17 @@ void vfsInitDirectory( const char *path ){
 				}
 			}
 			g_dir_close( dir );
+
+			// sort paks in ascending order
+			// pakFiles are then prepended to the list, reversing the order
+			// thus later (zzz) pak content have priority over earlier, just like in engine
+			std::sort( paks.begin(), paks.end(),
+			[]( const char* a, const char* b ){
+				return string_compare_nocase_upper( a, b ) < 0;
+			} );
+			for( const char* pak : paks ){
+				vfsInitPakFile( pak );
+			}
 		}
 	}
 }
@@ -231,12 +247,12 @@ std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath ){
 		}
 	}
 	/* search in packs */
-	for ( GSList *lst = g_pakFiles; lst != NULL; lst = g_slist_next( lst ) )
+	for ( const VFS_PAKFILE& file : g_pakFiles )
 	{
-		VFS_PAKFILE* file = (VFS_PAKFILE*)lst->data;
-		if ( striEqual( path_get_filename_base_end( file->name ), ".shader" )
-		  && strniEqual( file->name, shaderPath, path_get_last_separator( file->name ) - file->name ) ) {
-			insert( path_get_filename_start( file->name ) );
+		const char *name = file.name.c_str();
+		if ( striEqual( path_get_filename_base_end( name ), ".shader" )
+		  && strniEqual( name, shaderPath, path_get_last_separator( name ) - name ) ) {
+			insert( path_get_filename_start( name ) );
 		}
 	}
 
@@ -245,37 +261,22 @@ std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath ){
 
 // frees all memory that we allocated
 void vfsShutdown(){
-	while ( g_unzFiles )
-	{
-		unzClose( (unzFile)g_unzFiles->data );
-		g_unzFiles = g_slist_remove( g_unzFiles, g_unzFiles->data );
-	}
-
-	while ( g_pakFiles )
-	{
-		VFS_PAKFILE* file = (VFS_PAKFILE*)g_pakFiles->data;
-		free( file->unzFilePath );
-		free( file->name );
-		free( file );
-		g_pakFiles = g_slist_remove( g_pakFiles, file );
-	}
+	g_paks.clear();
+	g_pakFiles.clear();
 }
 
 // return the number of files that match
 int vfsGetFileCount( const char *filename ){
 	int i, count = 0;
 	char fixed[NAME_MAX], tmp[NAME_MAX];
-	GSList *lst;
 
 	strcpy( fixed, filename );
 	FixDOSName( fixed );
 	strLower( fixed );
 
-	for ( lst = g_pakFiles; lst != NULL; lst = g_slist_next( lst ) )
+	for ( const VFS_PAKFILE& file : g_pakFiles )
 	{
-		VFS_PAKFILE* file = (VFS_PAKFILE*)lst->data;
-
-		if ( strEqual( file->name, fixed ) ) {
+		if ( strEqual( file.name.c_str(), fixed ) ) {
 			count++;
 		}
 	}
@@ -296,7 +297,6 @@ int vfsGetFileCount( const char *filename ){
 int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 	int i, count = 0;
 	char tmp[NAME_MAX], fixed[NAME_MAX];
-	GSList *lst;
 
 	// filename is a full path
 	if ( index == -1 ) {
@@ -365,34 +365,33 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 		}
 	}
 
-	for ( lst = g_pakFiles; lst != NULL; lst = g_slist_next( lst ) )
+	for ( const VFS_PAKFILE& file : g_pakFiles )
 	{
-		VFS_PAKFILE* file = (VFS_PAKFILE*)lst->data;
-
-		if ( !strEqual( file->name, fixed ) ) {
+		if ( !strEqual( file.name.c_str(), fixed ) ) {
 			continue;
 		}
 
 		if ( count == index ) {
-			snprintf( g_strLoadedFileLocation, sizeof( g_strLoadedFileLocation ), "%s :: %s", file->unzFilePath, filename );
+			snprintf( g_strLoadedFileLocation, sizeof( g_strLoadedFileLocation ), "%s :: %s", file.pak.unzFilePath.c_str(), filename );
 
-			memcpy( file->zipfile, &file->zipinfo, sizeof( unz_s ) );
+			unzFile zipfile = file.pak.zipfile;
+			*(unz_s*)zipfile = file.zipinfo;
 
-			if ( unzOpenCurrentFile( file->zipfile ) != UNZ_OK ) {
+			if ( unzOpenCurrentFile( zipfile ) != UNZ_OK ) {
 				return -1;
 			}
 
-			*bufferptr = safe_malloc( file->size + 1 );
+			*bufferptr = safe_malloc( file.size + 1 );
 			// we need to end the buffer with a 0
-			( (char*) ( *bufferptr ) )[file->size] = 0;
+			( (char*) ( *bufferptr ) )[file.size] = 0;
 
-			i = unzReadCurrentFile( file->zipfile, *bufferptr, file->size );
-			unzCloseCurrentFile( file->zipfile );
+			i = unzReadCurrentFile( zipfile, *bufferptr, file.size );
+			unzCloseCurrentFile( zipfile );
 			if ( i < 0 ) {
 				return -1;
 			}
 			else{
-				return file->size;
+				return file.size;
 			}
 		}
 
@@ -408,7 +407,6 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 bool vfsPackFile( const char *filename, const char *packname, const int compLevel ){
 	int i;
 	char tmp[NAME_MAX], fixed[NAME_MAX];
-	GSList *lst;
 
 	byte *bufferptr = NULL;
 	strcpy( fixed, filename );
@@ -452,32 +450,31 @@ bool vfsPackFile( const char *filename, const char *packname, const int compLeve
 		}
 	}
 
-	for ( lst = g_pakFiles; lst != NULL; lst = g_slist_next( lst ) )
+	for ( const VFS_PAKFILE& file : g_pakFiles )
 	{
-		VFS_PAKFILE* file = (VFS_PAKFILE*)lst->data;
-
-		if ( !strEqual( file->name, fixed ) ) {
+		if ( !strEqual( file.name.c_str(), fixed ) ) {
 			continue;
 		}
 
-		memcpy( file->zipfile, &file->zipinfo, sizeof( unz_s ) );
+		unzFile zipfile = file.pak.zipfile;
+		*(unz_s*)zipfile = file.zipinfo;
 
-		if ( unzOpenCurrentFile( file->zipfile ) != UNZ_OK ) {
+		if ( unzOpenCurrentFile( zipfile ) != UNZ_OK ) {
 			return false;
 		}
 
-		bufferptr = safe_malloc( file->size + 1 );
+		bufferptr = safe_malloc( file.size + 1 );
 		// we need to end the buffer with a 0
-		bufferptr[file->size] = 0;
+		bufferptr[file.size] = 0;
 
-		i = unzReadCurrentFile( file->zipfile, bufferptr, file->size );
-		unzCloseCurrentFile( file->zipfile );
+		i = unzReadCurrentFile( zipfile, bufferptr, file.size );
+		unzCloseCurrentFile( zipfile );
 		if ( i < 0 ) {
 			return false;
 		}
 		else{
 			mz_bool success = MZ_TRUE;
-			success &= mz_zip_add_mem_to_archive_file_in_place_with_time( packname, filename, bufferptr, i, 0, 0, compLevel, file->zipinfo.cur_file_info.dosDate );
+			success &= mz_zip_add_mem_to_archive_file_in_place_with_time( packname, filename, bufferptr, i, 0, 0, compLevel, file.zipinfo.cur_file_info.dosDate );
 			if ( !success ){
 				Error( "Failed creating zip archive \"%s\"!\n", packname );
 			}

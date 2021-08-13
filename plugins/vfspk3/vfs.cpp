@@ -92,7 +92,7 @@ static char g_strDirs[VFS_MAXDIRS][PATH_MAX + 1];
 static int g_numDirs;
 static char g_strForbiddenDirs[VFS_MAXDIRS][PATH_MAX + 1];
 static int g_numForbiddenDirs = 0;
-static bool g_bUsePak = true;
+static constexpr bool g_bUsePak = true;
 
 ModuleObservers g_observers;
 
@@ -226,37 +226,6 @@ static GSList* GetListInternal( const char *refdir, const char *ext, bool direct
 	files = g_slist_reverse( files );
 
 	return files;
-}
-
-inline int ascii_to_upper( int c ){
-	if ( c >= 'a' && c <= 'z' ) {
-		return c - ( 'a' - 'A' );
-	}
-	return c;
-}
-
-/*!
-   This behaves identically to stricmp(a,b), except that ASCII chars
-   [\]^`_ come AFTER alphabet chars instead of before. This is because
-   it converts all alphabet chars to uppercase before comparison,
-   while stricmp converts them to lowercase.
- */
-static int string_compare_nocase_upper( const char* a, const char* b ){
-	for (;; )
-	{
-		int c1 = ascii_to_upper( *a++ );
-		int c2 = ascii_to_upper( *b++ );
-
-		if ( c1 < c2 ) {
-			return -1; // a < b
-		}
-		if ( c1 > c2 ) {
-			return 1; // a > b
-		}
-		if ( c1 == 0 ) {
-			return 0; // a == b
-		}
-	}
 }
 
 // Arnout: note - sort pakfiles in reverse order. This ensures that

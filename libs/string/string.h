@@ -129,6 +129,27 @@ inline bool string_greater_nocase( const char* string, const char* other ){
 	return string_compare_nocase( string, other ) > 0;
 }
 
+/*!
+   This behaves identically to stricmp(a,b), except that ASCII chars
+   [\]^`_ come AFTER alphabet chars instead of before. This is because
+   it converts all alphabet chars to uppercase before comparison,
+   while stricmp converts them to lowercase.
+ */
+inline int string_compare_nocase_upper( const char* a, const char* b ){
+	for (;; )
+	{
+		const int c1 = std::toupper( *a++ );
+		const int c2 = std::toupper( *b++ );
+
+		if ( c1 < c2 )
+			return -1; // a < b
+		if ( c1 > c2 )
+			return 1; // a > b
+		if ( c1 == 0 )
+			return 0; // a == b
+	}
+}
+
 /// \brief Returns the number of non-null characters in \p string.
 /// O(n)
 inline std::size_t string_length( const char* string ){
