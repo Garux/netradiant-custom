@@ -439,24 +439,24 @@ void WriteBSPBrushMap( const char *name, const brushlist_t& list ){
    adds brush reference to any intersecting bsp leafnode
  */
 
-int FilterBrushIntoTree_r( brush_t* b, node_t *node ){
+int FilterBrushIntoTree_r( brush_t&& b, node_t *node ){
 	/* dummy check */
-	if ( b == NULL ) {
+	if ( b.sides.empty() ) {
 		return 0;
 	}
 
 	/* add it to the leaf list */
 	if ( node->planenum == PLANENUM_LEAF ) {
 		/* something somewhere is hammering brushlist */
-		node->brushlist.push_front( std::move( *b ) );
+		node->brushlist.push_front( std::move( b ) );
 
 		/* classify the leaf by the structural brush */
-		if ( !b->detail ) {
-			if ( b->opaque ) {
+		if ( !b.detail ) {
+			if ( b.opaque ) {
 				node->opaque = true;
 				node->areaportal = false;
 			}
-			else if ( b->compileFlags & C_AREAPORTAL ) {
+			else if ( b.compileFlags & C_AREAPORTAL ) {
 				if ( !node->opaque ) {
 					node->areaportal = true;
 				}
@@ -467,12 +467,11 @@ int FilterBrushIntoTree_r( brush_t* b, node_t *node ){
 	}
 
 	/* split it by the node plane */
-	auto [front, back] = SplitBrush( *b, node->planenum );
-	delete b;
+	auto [front, back] = SplitBrush( b, node->planenum );
 
 	int c = 0;
-	c += FilterBrushIntoTree_r( front, node->children[ 0 ] );
-	c += FilterBrushIntoTree_r( back, node->children[ 1 ] );
+	c += FilterBrushIntoTree_r( std::move( front ), node->children[ 0 ] );
+	c += FilterBrushIntoTree_r( std::move( back ), node->children[ 1 ] );
 
 	return c;
 }
@@ -500,7 +499,7 @@ void FilterDetailBrushesIntoTree( entity_t *e, tree_t& tree ){
 			continue;
 		}
 		c_unique++;
-		const int r = FilterBrushIntoTree_r( new brush_t( b ), tree.headnode );
+		const int r = FilterBrushIntoTree_r( brush_t( b ), tree.headnode );
 		c_clusters += r;
 
 		/* mark all sides as visible so drawsurfs are created */
@@ -536,7 +535,7 @@ void FilterStructuralBrushesIntoTree( entity_t *e, tree_t& tree ) {
 			continue;
 		}
 		c_unique++;
-		const int r = FilterBrushIntoTree_r( new brush_t( b ), tree.headnode );
+		const int r = FilterBrushIntoTree_r( brush_t( b ), tree.headnode );
 		c_clusters += r;
 
 		// mark all sides as visible so drawsurfs are created
@@ -632,7 +631,7 @@ int BrushMostlyOnSide( const brush_t& brush, const Plane3f& plane ){
    generates two new brushes, leaving the original unchanged
  */
 
-std::pair<brush_t*, brush_t*> SplitBrush( const brush_t& brush, int planenum ){
+std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenum ){
 	const Plane3f& plane = mapplanes[planenum].plane;
 
 	// check all points
@@ -653,12 +652,12 @@ std::pair<brush_t*, brush_t*> SplitBrush( const brush_t& brush, int planenum ){
 
 	if ( d_front < 0.1 ) { // PLANESIDE_EPSILON)
 		// only on back
-		return { {}, new brush_t( brush ) };
+		return { {}, brush };
 	}
 
 	if ( d_back > -0.1 ) { // PLANESIDE_EPSILON)
 		// only on front
-		return { new brush_t( brush ), {} };
+		return { brush, {} };
 	}
 
 	// create a new winding from the split plane
@@ -673,10 +672,10 @@ std::pair<brush_t*, brush_t*> SplitBrush( const brush_t& brush, int planenum ){
 	if ( midwinding.empty() || WindingIsTiny( midwinding ) ) { // the brush isn't really split
 		const int side = BrushMostlyOnSide( brush, plane );
 		if ( side == PSIDE_BACK ) {
-			return { {}, new brush_t( brush ) };
+			return { {}, brush };
 		}
 		else { // side == PSIDE_FRONT
-			return { new brush_t( brush ), {} };
+			return { brush, {} };
 		}
 	}
 
@@ -685,11 +684,10 @@ std::pair<brush_t*, brush_t*> SplitBrush( const brush_t& brush, int planenum ){
 	}
 
 	// split it for real
-	brush_t     *b[2];
+	brush_t     b[2]{ brush, brush };
 	for ( int i = 0; i < 2; i++ )
 	{
-		b[i] = new brush_t( brush );
-		b[i]->sides.clear();
+		b[i].sides.clear();
 	}
 
 	// split all the current windings
@@ -703,7 +701,7 @@ std::pair<brush_t*, brush_t*> SplitBrush( const brush_t& brush, int planenum ){
 			for ( int i = 0; i < 2; i++ )
 			{
 				if ( !cw[i].empty() ) {
-					side_t& cs = b[i]->sides.emplace_back( side );
+					side_t& cs = b[i].sides.emplace_back( side );
 					cs.winding.swap( cw[i] );
 				}
 			}
@@ -714,29 +712,26 @@ std::pair<brush_t*, brush_t*> SplitBrush( const brush_t& brush, int planenum ){
 	// see if we have valid polygons on both sides
 	for ( int i = 0; i < 2; i++ )
 	{
-		if ( b[i]->sides.size() < 3 || !BoundBrush( *b[i] ) ) {
-			if ( b[i]->sides.size() >= 3 ) {
+		if ( b[i].sides.size() < 3 || !BoundBrush( b[i] ) ) {
+			if ( b[i].sides.size() >= 3 ) {
 				Sys_FPrintf( SYS_WRN | SYS_VRBflag, "bogus brush after clip\n" );
 			}
-			delete b[i];
-			b[i] = NULL;
+			b[i].sides.clear();
 		}
 	}
 
-	if ( b[0] == nullptr || b[1] == nullptr ) {
-		if ( b[0] == nullptr && b[1] == nullptr ) {
+	if ( b[0].sides.empty() || b[1].sides.empty() ) {
+		if ( b[0].sides.empty() && b[1].sides.empty() ) {
 			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "split removed brush\n" );
 		}
 		else{
 			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "split not on both sides\n" );
 		}
-		if ( b[0] != nullptr ) {
-			delete b[0];
-			return { new brush_t( brush ), {} };
+		if ( !b[0].sides.empty() ) {
+			return { brush, {} };
 		}
-		else if ( b[1] != nullptr ) {
-			delete b[1];
-			return { {}, new brush_t( brush ) };
+		else if ( !b[1].sides.empty() ) {
+			return { {}, brush };
 		}
 		return{};
 	}
@@ -744,7 +739,7 @@ std::pair<brush_t*, brush_t*> SplitBrush( const brush_t& brush, int planenum ){
 	// add the midwinding to both sides
 	for ( int i = 0; i < 2; i++ )
 	{
-		side_t& cs = b[i]->sides.emplace_back();
+		side_t& cs = b[i].sides.emplace_back();
 
 		cs.planenum = planenum ^ i ^ 1;
 		cs.shaderInfo = NULL;
@@ -758,12 +753,11 @@ std::pair<brush_t*, brush_t*> SplitBrush( const brush_t& brush, int planenum ){
 
 	for ( int i = 0; i < 2; i++ )
 	{
-		if ( BrushVolume( *b[i] ) < 1.0 ) {
-			delete b[i];
-			b[i] = NULL;
+		if ( BrushVolume( b[i] ) < 1.0 ) {
+			b[i].sides.clear();
 			//			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "tiny volume after clip\n" );
 		}
 	}
 
-	return{ b[0], b[1] };
+	return{ std::move( b[0] ), std::move( b[1] ) };
 }

@@ -400,7 +400,7 @@ std::pair<winding_t, winding_t>    ClipWindingEpsilonStrict( const winding_t& in
 		Error( "ClipWinding: MAX_POINTS_ON_WINDING" );
 	}
 
-	return { front, back };
+	return { std::move( front ), std::move( back ) };
 }
 
 std::pair<winding_t, winding_t>    ClipWindingEpsilon( const winding_t& in, const Plane3f& plane, float epsilon ){
@@ -409,7 +409,7 @@ std::pair<winding_t, winding_t>    ClipWindingEpsilon( const winding_t& in, cons
 	if ( front.empty() && back.empty() ) {
 		back = in;
 	}
-	return { front, back };
+	return { std::move( front ), std::move( back ) };
 }
 
 

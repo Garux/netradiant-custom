@@ -1560,7 +1560,7 @@ void                        FilterStructuralBrushesIntoTree( entity_t *e, tree_t
 
 bool                        WindingIsTiny( const winding_t& w );
 
-std::pair<brush_t*, brush_t*> SplitBrush( const brush_t& brush, int planenum );
+std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenum );
 
 
 /* mesh.c */
