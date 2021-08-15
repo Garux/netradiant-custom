@@ -293,7 +293,7 @@ void Q3_BSPBrushToMapBrush(q3_dbrush_t *bspbrush, entity_t *mapent)
 		return;
 	} //end if
 
-	// allow detail brushes to be removed 
+	// allow detail brushes to be removed
 	if (nodetail && (b->contents & CONTENTS_DETAIL) )
 	{
 		b->numsides = 0;
@@ -621,9 +621,9 @@ void Q3_LoadMapFromBSP(struct quakefile_s *qf)
 		brushmodelnumbers[i] = -1;
 
 	nummapbrushsides = 0;
-	num_entities = 0;
 
-	Q3_ParseEntities();
+	if( num_entities == 0 ) // load, unless already loaded by Q3_PrintBSPFileSizes()
+		Q3_ParseEntities();
 	//
 	for (i = 0; i < num_entities; i++)
 	{
