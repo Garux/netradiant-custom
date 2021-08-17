@@ -368,10 +368,17 @@ public:
 	String( const String& other )
 		: Buffer( other ){
 	}
+	String( String&& other ) noexcept {
+		swap( other );
+	}
 
 	String& operator=( const String& other ){
 		String temp( other );
 		temp.swap( *this );
+		return *this;
+	}
+	String& operator=( String&& other ) noexcept {
+		swap( other );
 		return *this;
 	}
 	String& operator=( const char* string ){
