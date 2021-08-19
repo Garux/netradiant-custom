@@ -138,12 +138,7 @@ static void InitPakFile( ArchiveModules& archiveModules, const char *filename ){
 	const _QERArchiveTable* table = GetArchiveTable( archiveModules, path_get_extension( filename ) );
 
 	if ( table != 0 ) {
-		archive_entry_t entry;
-		entry.name = filename;
-
-		entry.archive = table->m_pfnOpenArchive( filename );
-		entry.is_pakfile = true;
-		g_archives.push_back( entry );
+		g_archives.push_back( archive_entry_t{ filename, table->m_pfnOpenArchive( filename ), true } );
 		globalOutputStream() << "  pak file: " << filename << "\n";
 	}
 }
@@ -205,18 +200,18 @@ static StrList GetListInternal( const char *refdir, const char *ext, bool direct
 	ASSERT_MESSAGE( refdir[strlen( refdir ) - 1] == '/', "search path does not end in '/'" );
 
 	if ( directories ) {
-		for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
+		for ( archive_entry_t& arch : g_archives )
 		{
 			DirectoryListVisitor visitor( files, refdir );
-			( *i ).archive->forEachFile( Archive::VisitorFunc( visitor, Archive::eDirectories, depth ), refdir );
+			arch.archive->forEachFile( Archive::VisitorFunc( visitor, Archive::eDirectories, depth ), refdir );
 		}
 	}
 	else
 	{
-		for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
+		for ( archive_entry_t& arch : g_archives )
 		{
 			FileListVisitor visitor( files, refdir, ext );
-			( *i ).archive->forEachFile( Archive::VisitorFunc( visitor, Archive::eFiles, depth ), refdir );
+			arch.archive->forEachFile( Archive::VisitorFunc( visitor, Archive::eFiles, depth ), refdir );
 		}
 	}
 
@@ -293,11 +288,7 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 	g_numDirs++;
 
 	{
-		archive_entry_t entry;
-		entry.name = path;
-		entry.archive = OpenArchive( path );
-		entry.is_pakfile = false;
-		g_archives.push_back( entry );
+		g_archives.push_back( archive_entry_t{ path, OpenArchive( path ), false } );
 	}
 
 	if ( g_bUsePak ) {
@@ -357,11 +348,7 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 					g_numDirs++;
 
 					{
-						archive_entry_t entry;
-						entry.name = g_strDirs[g_numDirs - 1];
-						entry.archive = OpenArchive( g_strDirs[g_numDirs - 1] );
-						entry.is_pakfile = false;
-						g_archives.push_back( entry );
+						g_archives.push_back( archive_entry_t{ g_strDirs[g_numDirs - 1], OpenArchive( g_strDirs[g_numDirs - 1] ), false } );
 					}
 				}
 
@@ -410,9 +397,9 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 // FIXME TTimo this should be improved so that we can shutdown and restart the VFS without exiting Radiant?
 //   (for instance when modifying the project settings)
 void Shutdown(){
-	for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
+	for ( archive_entry_t& arch : g_archives )
 	{
-		( *i ).archive->release();
+		arch.archive->release();
 	}
 	g_archives.clear();
 
@@ -435,11 +422,11 @@ int GetFileCount( const char *filename, int flag ){
 		flag = VFS_SEARCH_PAK | VFS_SEARCH_DIR;
 	}
 
-	for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
+	for ( archive_entry_t& arch : g_archives )
 	{
-		if ( ( ( *i ).is_pakfile && ( flag & VFS_SEARCH_PAK ) != 0 )
-		  || ( !( *i ).is_pakfile && ( flag & VFS_SEARCH_DIR ) != 0 ) ) {
-			if ( ( *i ).archive->containsFile( fixed ) ) {
+		if ( ( arch.is_pakfile && ( flag & VFS_SEARCH_PAK ) != 0 )
+		  || ( !arch.is_pakfile && ( flag & VFS_SEARCH_DIR ) != 0 ) ) {
+			if ( arch.archive->containsFile( fixed ) ) {
 				++count;
 			}
 		}
@@ -450,9 +437,9 @@ int GetFileCount( const char *filename, int flag ){
 
 ArchiveFile* OpenFile( const char* filename ){
 	ASSERT_MESSAGE( strchr( filename, '\\' ) == 0, "path contains invalid separator '\\': \"" << filename << "\"" );
-	for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
+	for ( archive_entry_t& arch : g_archives )
 	{
-		ArchiveFile* file = ( *i ).archive->openFile( filename );
+		ArchiveFile* file = arch.archive->openFile( filename );
 		if ( file != 0 ) {
 			return file;
 		}
@@ -463,9 +450,9 @@ ArchiveFile* OpenFile( const char* filename ){
 
 ArchiveTextFile* OpenTextFile( const char* filename ){
 	ASSERT_MESSAGE( strchr( filename, '\\' ) == 0, "path contains invalid separator '\\': \"" << filename << "\"" );
-	for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
+	for ( archive_entry_t& arch : g_archives )
 	{
-		ArchiveTextFile* file = ( *i ).archive->openTextFile( filename );
+		ArchiveTextFile* file = arch.archive->openTextFile( filename );
 		if ( file != 0 ) {
 			return file;
 		}
@@ -511,10 +498,10 @@ StrList GetDirList( const char *dir, std::size_t depth ){
 }
 
 const char* FindFile( const char* relative ){
-	for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
+	for ( const archive_entry_t& arch : g_archives )
 	{
-		if ( ( *i ).archive->containsFile( relative ) ) {
-			return ( *i ).name.c_str();
+		if ( arch.archive->containsFile( relative ) ) {
+			return arch.name.c_str();
 		}
 	}
 
@@ -523,11 +510,11 @@ const char* FindFile( const char* relative ){
 
 const char* FindPath( const char* absolute ){
 	const char *best = "";
-	for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
+	for ( const archive_entry_t& arch : g_archives )
 	{
-		if ( string_length( ( *i ).name.c_str() ) > string_length( best ) ) {
-			if ( path_equal_n( absolute, ( *i ).name.c_str(), string_length( ( *i ).name.c_str() ) ) ) {
-				best = ( *i ).name.c_str();
+		if ( string_length( arch.name.c_str() ) > string_length( best ) ) {
+			if ( path_equal_n( absolute, arch.name.c_str(), string_length( arch.name.c_str() ) ) ) {
+				best = arch.name.c_str();
 			}
 		}
 	}
@@ -610,14 +597,14 @@ public:
 	}
 
 	Archive* getArchive( const char* archiveName, bool pakonly ){
-		for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
+		for ( archive_entry_t& arch : g_archives )
 		{
-			if ( pakonly && !( *i ).is_pakfile ) {
+			if ( pakonly && !arch.is_pakfile ) {
 				continue;
 			}
 
-			if ( path_equal( ( *i ).name.c_str(), archiveName ) ) {
-				return ( *i ).archive;
+			if ( path_equal( arch.name.c_str(), archiveName ) ) {
+				return arch.archive;
 			}
 		}
 		return 0;
@@ -627,13 +614,13 @@ public:
 			g_archives.reverse();
 		}
 
-		for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
+		for ( const archive_entry_t& arch : g_archives )
 		{
-			if ( pakonly && !( *i ).is_pakfile ) {
+			if ( pakonly && !arch.is_pakfile ) {
 				continue;
 			}
 
-			callback( ( *i ).name.c_str() );
+			callback( arch.name.c_str() );
 		}
 
 		if ( reverse ) {
