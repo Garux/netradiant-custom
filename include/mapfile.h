@@ -27,13 +27,7 @@
 #include "iscenegraph.h"
 #include "generic/callbackfwd.h"
 
-#ifdef __GNUC__
-#define VARIABLE_IS_NOT_USED __attribute__ ((unused))
-#else
-#define VARIABLE_IS_NOT_USED
-#endif
-
-const std::size_t VARIABLE_IS_NOT_USED MAPFILE_MAX_CHANGES = std::numeric_limits<std::size_t>::max();
+const std::size_t MAPFILE_MAX_CHANGES = std::numeric_limits<std::size_t>::max();
 
 class MapFile
 {
