@@ -1511,11 +1511,7 @@ IShader *Shader_ForName( const char *name ){
 
 // the list of scripts/*.shader files we need to work with
 // those are listed in shaderlist file
-GSList *l_shaderfiles = 0;
-
-GSList* Shaders_getShaderFileList(){
-	return l_shaderfiles;
-}
+std::vector<CopiedString> l_shaderfiles;
 
 /*
    ==================
@@ -1526,9 +1522,9 @@ GSList* Shaders_getShaderFileList(){
 void IfFound_dumpUnreferencedShader( bool& bFound, const char* filename ){
 	bool listed = false;
 
-	for ( GSList* sh = l_shaderfiles; sh != 0; sh = g_slist_next( sh ) )
+	for ( const CopiedString& sh : l_shaderfiles )
 	{
-		if ( !strcmp( (char*)sh->data, filename ) ) {
+		if ( !strcmp( sh.c_str(), filename ) ) {
 			listed = true;
 			break;
 		}
@@ -1552,17 +1548,17 @@ void DumpUnreferencedShaders(){
 void ShaderList_addShaderFile( const char* dirstring ){
 	bool found = false;
 
-	for ( GSList* tmp = l_shaderfiles; tmp != 0; tmp = tmp->next )
+	for ( const CopiedString& sh : l_shaderfiles )
 	{
-		if ( string_equal_nocase( dirstring, (char*)tmp->data ) ) {
+		if ( string_equal_nocase( dirstring, sh.c_str() ) ) {
 			found = true;
-			globalOutputStream() << "duplicate entry \"" << (char*)tmp->data << "\" in shaderlist.txt\n";
+			globalOutputStream() << "duplicate entry \"" << sh.c_str() << "\" in shaderlist.txt\n";
 			break;
 		}
 	}
 
 	if ( !found ) {
-		l_shaderfiles = g_slist_append( l_shaderfiles, strdup( dirstring ) );
+		l_shaderfiles.emplace_back( dirstring );
 	}
 }
 
@@ -1595,14 +1591,6 @@ void BuildShaderList( TextInputStream& shaderlist ){
 		shaderFile.clear();
 	}
 	tokeniser.release();
-}
-
-void FreeShaderList(){
-	while ( l_shaderfiles != 0 )
-	{
-		free( l_shaderfiles->data );
-		l_shaderfiles = g_slist_remove( l_shaderfiles, l_shaderfiles->data );
-	}
 }
 
 void ShaderList_addFromArchive( const char *archivename ){
@@ -1673,7 +1661,7 @@ void Shaders_Load(){
 			}
 
 			GlobalFileSystem().forEachArchive( AddShaderListFromArchiveCaller(), false, true );
-			if( l_shaderfiles != nullptr ){
+			if( !l_shaderfiles.empty() ){
 				DumpUnreferencedShaders();
 			}
 			else{
@@ -1686,14 +1674,12 @@ void Shaders_Load(){
 			GlobalFileSystem().forEachFile( path.c_str(), g_shadersExtension, AddShaderFileCaller(), 0 );
 		}
 
-		GSList *lst = l_shaderfiles;
 		StringOutputStream shadername( 256 );
-		while ( lst )
+		for( const CopiedString& sh : l_shaderfiles )
 		{
-			shadername << path.c_str() << reinterpret_cast<const char*>( lst->data );
+			shadername << path.c_str() << sh.c_str();
 			LoadShaderFile( shadername.c_str() );
 			shadername.clear();
-			lst = lst->next;
 		}
 	}
 
@@ -1702,7 +1688,7 @@ void Shaders_Load(){
 
 void Shaders_Free(){
 	FreeShaders();
-	FreeShaderList();
+	l_shaderfiles.clear();
 	g_shaderFilenames.clear();
 }
 

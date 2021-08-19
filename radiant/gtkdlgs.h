@@ -35,7 +35,7 @@
 #include "string/string.h"
 
 EMessageBoxReturn DoLightIntensityDlg( int *intensity );
-EMessageBoxReturn DoShaderTagDlg( CopiedString *tag, const char* title );
+EMessageBoxReturn DoShaderTagDlg( CopiedString& tag, const char* title );
 EMessageBoxReturn DoShaderInfoDlg( const char* name, const char* filename, const char* title );
 EMessageBoxReturn DoTextureLayout( float *fx, float *fy );
 void DoShaderView( const char *shaderFileName, const char *shaderName, bool external_editor );

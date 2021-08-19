@@ -930,7 +930,7 @@ EMessageBoxReturn DoLightIntensityDlg( int *intensity ){
 // =============================================================================
 // Add new shader tag dialog
 
-EMessageBoxReturn DoShaderTagDlg( CopiedString* tag, const char* title ){
+EMessageBoxReturn DoShaderTagDlg( CopiedString& tag, const char* title ){
 	ModalDialog dialog;
 	GtkEntry* textentry;
 	ModalDialogButton ok_button( dialog, eIDOK );
@@ -983,7 +983,7 @@ EMessageBoxReturn DoShaderTagDlg( CopiedString* tag, const char* title ){
 
 	EMessageBoxReturn ret = modal_dialog_show( window, dialog );
 	if ( ret == eIDOK ) {
-		*tag = gtk_entry_get_text( textentry );
+		tag = gtk_entry_get_text( textentry );
 	}
 
 	gtk_widget_destroy( GTK_WIDGET( window ) );

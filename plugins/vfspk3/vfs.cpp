@@ -85,7 +85,7 @@ struct archive_entry_t
 
 #include <list>
 
-typedef std::list<archive_entry_t> archives_t;
+using archives_t = std::list<archive_entry_t>;
 
 static archives_t g_archives;
 static char g_strDirs[VFS_MAXDIRS][PATH_MAX + 1];
@@ -95,6 +95,8 @@ static int g_numForbiddenDirs = 0;
 static constexpr bool g_bUsePak = true;
 
 ModuleObservers g_observers;
+
+using StrList = std::vector<CopiedString>;
 
 // =============================================================================
 // Static functions
@@ -146,22 +148,18 @@ static void InitPakFile( ArchiveModules& archiveModules, const char *filename ){
 	}
 }
 
-inline void pathlist_prepend_unique( GSList*& pathlist, char* path ){
-	if ( g_slist_find_custom( pathlist, path, (GCompareFunc)path_compare ) == 0 ) {
-		pathlist = g_slist_prepend( pathlist, path );
-	}
-	else
-	{
-		g_free( path );
-	}
+inline void pathlist_append_unique( StrList& pathlist, CopiedString path ){
+	if( pathlist.cend() == std::find_if( pathlist.cbegin(), pathlist.cend(),
+	[&path]( const CopiedString& str ){ return path_compare( str.c_str(), path.c_str() ) == 0; } ) )
+		pathlist.emplace_back( std::move( path ) );
 }
 
 class DirectoryListVisitor : public Archive::Visitor
 {
-	GSList*& m_matches;
+	StrList& m_matches;
 	const char* m_directory;
 public:
-	DirectoryListVisitor( GSList*& matches, const char* directory )
+	DirectoryListVisitor( StrList& matches, const char* directory )
 		: m_matches( matches ), m_directory( directory )
 	{}
 	void visit( const char* name ){
@@ -170,23 +168,22 @@ public:
 			if ( subname[0] == '/' ) {
 				++subname;
 			}
-			char* dir = g_strdup( subname );
-			char* last_char = dir + strlen( dir );
-			if ( last_char != dir && *( --last_char ) == '/' ) {
-				*last_char = '\0';
+			const char* last_char = subname + strlen( subname );
+			if ( last_char != subname && *( last_char - 1 ) == '/' ) {
+				--last_char;
 			}
-			pathlist_prepend_unique( m_matches, dir );
+			pathlist_append_unique( m_matches, StringRange( subname, last_char ) );
 		}
 	}
 };
 
 class FileListVisitor : public Archive::Visitor
 {
-	GSList*& m_matches;
+	StrList& m_matches;
 	const char* m_directory;
 	const char* m_extension;
 public:
-	FileListVisitor( GSList*& matches, const char* directory, const char* extension )
+	FileListVisitor( StrList& matches, const char* directory, const char* extension )
 		: m_matches( matches ), m_directory( directory ), m_extension( extension )
 	{}
 	void visit( const char* name ){
@@ -196,14 +193,14 @@ public:
 				++subname;
 			}
 			if ( m_extension[0] == '*' || extension_equal( path_get_extension( subname ), m_extension ) ) {
-				pathlist_prepend_unique( m_matches, g_strdup( subname ) );
+				pathlist_append_unique( m_matches, subname );
 			}
 		}
 	}
 };
 
-static GSList* GetListInternal( const char *refdir, const char *ext, bool directories, std::size_t depth ){
-	GSList* files = 0;
+static StrList GetListInternal( const char *refdir, const char *ext, bool directories, std::size_t depth ){
+	StrList files;
 
 	ASSERT_MESSAGE( refdir[strlen( refdir ) - 1] == '/', "search path does not end in '/'" );
 
@@ -222,8 +219,6 @@ static GSList* GetListInternal( const char *refdir, const char *ext, bool direct
 			( *i ).archive->forEachFile( Archive::VisitorFunc( visitor, Archive::eFiles, depth ), refdir );
 		}
 	}
-
-	files = g_slist_reverse( files );
 
 	return files;
 }
@@ -507,20 +502,12 @@ void FreeFile( void *p ){
 	free( p );
 }
 
-GSList* GetFileList( const char *dir, const char *ext, std::size_t depth ){
+StrList GetFileList( const char *dir, const char *ext, std::size_t depth ){
 	return GetListInternal( dir, ext, false, depth );
 }
 
-GSList* GetDirList( const char *dir, std::size_t depth ){
+StrList GetDirList( const char *dir, std::size_t depth ){
 	return GetListInternal( dir, 0, true, depth );
-}
-
-void ClearFileDirList( GSList **lst ){
-	while ( *lst )
-	{
-		g_free( ( *lst )->data );
-		*lst = g_slist_remove( *lst, ( *lst )->data );
-	}
 }
 
 const char* FindFile( const char* relative ){
@@ -582,36 +569,30 @@ public:
 	}
 
 	void forEachDirectory( const char* basedir, const FileNameCallback& callback, std::size_t depth ){
-		GSList* list = GetDirList( basedir, depth );
+		StrList list = GetDirList( basedir, depth );
 
-		for ( GSList* i = list; i != 0; i = g_slist_next( i ) )
+		for ( const CopiedString& str : list )
 		{
-			callback( reinterpret_cast<const char*>( ( *i ).data ) );
+			callback( str.c_str() );
 		}
-
-		ClearFileDirList( &list );
 	}
 	void forEachFile( const char* basedir, const char* extension, const FileNameCallback& callback, std::size_t depth ){
-		GSList* list = GetFileList( basedir, extension, depth );
+		StrList list = GetFileList( basedir, extension, depth );
 
-		for ( GSList* i = list; i != 0; i = g_slist_next( i ) )
+		for ( const CopiedString& str : list )
 		{
-			const char* name = reinterpret_cast<const char*>( ( *i ).data );
-			if ( extension_equal( path_get_extension( name ), extension ) ) {
-				callback( name );
-			}
+			callback( str.c_str() );
 		}
-
-		ClearFileDirList( &list );
 	}
-	GSList* getDirList( const char *basedir ){
+	/// \brief Returns a list containing the relative names of all the directories under \p basedir.
+	/// \deprecated Deprecated - use \c forEachDirectory.
+	StrList getDirList( const char *basedir ){
 		return GetDirList( basedir, 1 );
 	}
-	GSList* getFileList( const char *basedir, const char *extension ){
+	/// \brief Returns a list containing the relative names of the files under \p basedir (\p extension can be "*" for all files).
+	/// \deprecated Deprecated - use \c forEachFile.
+	StrList getFileList( const char *basedir, const char *extension ){
 		return GetFileList( basedir, extension, 1 );
-	}
-	void clearFileDirList( GSList **lst ){
-		ClearFileDirList( lst );
 	}
 
 	const char* findFile( const char *name ){

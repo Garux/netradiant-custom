@@ -126,7 +126,6 @@ public:
 	virtual qtexture_t* lightFalloffImage() const = 0;
 };
 
-typedef struct _GSList GSList;
 typedef Callback1<const char*> ShaderNameCallback;
 
 class ModuleObserver;

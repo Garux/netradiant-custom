@@ -23,7 +23,7 @@
 
 #include "patch.h"
 
-#include <glib.h>
+#include <forward_list>
 #include "preferences.h"
 #include "brush_primit.h"
 #include "signal/signal.h"
@@ -77,10 +77,10 @@ std::size_t BezierCurveTree_Setup( BezierCurveTree *pCurve, std::size_t index, s
 	return index;
 }
 
-bool BezierCurve_IsCurved( BezierCurve *pCurve ){
-	Vector3 vTemp( vector3_subtracted( pCurve->right, pCurve->left ) );
-	Vector3 v1( vector3_subtracted( pCurve->crd, pCurve->left ) );
-	Vector3 v2( vector3_subtracted( pCurve->right, pCurve->crd ) );
+bool BezierCurve_IsCurved( const BezierCurve& curve ){
+	Vector3 vTemp( vector3_subtracted( curve.right, curve.left ) );
+	Vector3 v1( vector3_subtracted( curve.crd, curve.left ) );
+	Vector3 v2( vector3_subtracted( curve.right, curve.crd ) );
 
 	if ( vector3_equal( v1, g_vector3_identity ) || vector3_equal( vTemp, v1 ) ) { // return 0 if 1->2 == 0 or 1->2 == 1->3
 		return false;
@@ -110,58 +110,40 @@ bool BezierCurve_IsCurved( BezierCurve *pCurve ){
 	return false;
 }
 
-void BezierInterpolate( BezierCurve *pCurve ){
-	pCurve->left = vector3_mid( pCurve->left, pCurve->crd );
-	pCurve->right = vector3_mid( pCurve->crd, pCurve->right );
-	pCurve->crd = vector3_mid( pCurve->left, pCurve->right );
+void BezierInterpolate( BezierCurve& curve ){
+	curve.left = vector3_mid( curve.left, curve.crd );
+	curve.right = vector3_mid( curve.crd, curve.right );
+	curve.crd = vector3_mid( curve.left, curve.right );
 }
 
 const std::size_t PATCH_MAX_SUBDIVISION_DEPTH = 16;
 
-void BezierCurveTree_FromCurveList( BezierCurveTree *pTree, GSList *pCurveList, std::size_t depth = 0 ){
-	GSList *pLeftList = 0;
-	GSList *pRightList = 0;
-	BezierCurve *pCurve, *pLeftCurve, *pRightCurve;
+void BezierCurveTree_FromCurveList( BezierCurveTree *pTree, std::forward_list<BezierCurve>& curveList, std::size_t depth = 0 ){
+	std::forward_list<BezierCurve> leftList;
+	std::forward_list<BezierCurve> rightList;
 	bool bSplit = false;
 
-	for ( GSList *l = pCurveList; l; l = l->next )
+	for ( BezierCurve& curve : curveList )
 	{
-		pCurve = (BezierCurve *)( l->data );
-		if ( bSplit || BezierCurve_IsCurved( pCurve ) ) {
+		if ( bSplit || BezierCurve_IsCurved( curve ) ) {
 			bSplit = true;
-			pLeftCurve = new BezierCurve;
-			pRightCurve = new BezierCurve;
-			pLeftCurve->left = pCurve->left;
-			pRightCurve->right = pCurve->right;
-			BezierInterpolate( pCurve );
-			pLeftCurve->crd = pCurve->left;
-			pRightCurve->crd = pCurve->right;
-			pLeftCurve->right = pCurve->crd;
-			pRightCurve->left = pCurve->crd;
-
-			pLeftList = g_slist_prepend( pLeftList, pLeftCurve );
-			pRightList = g_slist_prepend( pRightList, pRightCurve );
+			BezierCurve& leftCurve = leftList.emplace_front();
+			BezierCurve& rightCurve = rightList.emplace_front();
+			leftCurve.left = curve.left;
+			rightCurve.right = curve.right;
+			BezierInterpolate( curve );
+			leftCurve.crd = curve.left;
+			rightCurve.crd = curve.right;
+			leftCurve.right = curve.crd;
+			rightCurve.left = curve.crd;
 		}
 	}
 
-	if ( pLeftList != 0 && pRightList != 0 && depth != PATCH_MAX_SUBDIVISION_DEPTH ) {
+	if ( !leftList.empty() && !rightList.empty() && depth != PATCH_MAX_SUBDIVISION_DEPTH ) {
 		pTree->left = new BezierCurveTree;
 		pTree->right = new BezierCurveTree;
-		BezierCurveTree_FromCurveList( pTree->left, pLeftList, depth + 1 );
-		BezierCurveTree_FromCurveList( pTree->right, pRightList, depth + 1 );
-
-		for ( GSList* l = pLeftList; l != 0; l = g_slist_next( l ) )
-		{
-			delete (BezierCurve*)l->data;
-		}
-
-		for ( GSList* l = pRightList; l != 0; l = g_slist_next( l ) )
-		{
-			delete (BezierCurve*)l->data;
-		}
-
-		g_slist_free( pLeftList );
-		g_slist_free( pRightList );
+		BezierCurveTree_FromCurveList( pTree->left, leftList, depth + 1 );
+		BezierCurveTree_FromCurveList( pTree->right, rightList, depth + 1 );
 	}
 	else
 	{
@@ -2314,7 +2296,7 @@ void Patch::BuildTesselationCurves( EMatrixMajor major ){
 		for ( std::size_t i = 0; i != length; ++i )
 		{
 			PatchControl* p1 = m_ctrlTransformed.data() + ( i * 2 * strideU );
-			GSList* pCurveList = 0;
+			std::forward_list<BezierCurve> curveList;
 			for ( std::size_t j = 0; j < cross; j += 2 )
 			{
 				PatchControl* p2 = p1 + strideV;
@@ -2322,11 +2304,10 @@ void Patch::BuildTesselationCurves( EMatrixMajor major ){
 
 				// directly taken from one row of control points
 				{
-					BezierCurve* pCurve = new BezierCurve;
-					pCurve->crd = ( p1 + strideU )->m_vertex;
-					pCurve->left = p1->m_vertex;
-					pCurve->right = ( p1 + ( strideU << 1 ) )->m_vertex;
-					pCurveList = g_slist_prepend( pCurveList, pCurve );
+					BezierCurve& curve = curveList.emplace_front();
+					curve.crd = ( p1 + strideU )->m_vertex;
+					curve.left = p1->m_vertex;
+					curve.right = ( p1 + ( strideU << 1 ) )->m_vertex;
 				}
 
 				if ( j + 2 >= cross ) {
@@ -2335,27 +2316,21 @@ void Patch::BuildTesselationCurves( EMatrixMajor major ){
 
 				// interpolated from three columns of control points
 				{
-					BezierCurve* pCurve = new BezierCurve;
-					pCurve->crd = vector3_mid( ( p1 + strideU )->m_vertex, ( p3 + strideU )->m_vertex );
-					pCurve->left = vector3_mid( p1->m_vertex, p3->m_vertex );
-					pCurve->right = vector3_mid( ( p1 + ( strideU << 1 ) )->m_vertex, ( p3 + ( strideU << 1 ) )->m_vertex );
+					BezierCurve& curve = curveList.emplace_front();
+					curve.crd = vector3_mid( ( p1 + strideU )->m_vertex, ( p3 + strideU )->m_vertex );
+					curve.left = vector3_mid( p1->m_vertex, p3->m_vertex );
+					curve.right = vector3_mid( ( p1 + ( strideU << 1 ) )->m_vertex, ( p3 + ( strideU << 1 ) )->m_vertex );
 
-					pCurve->crd = vector3_mid( pCurve->crd, ( p2 + strideU )->m_vertex );
-					pCurve->left = vector3_mid( pCurve->left, p2->m_vertex );
-					pCurve->right = vector3_mid( pCurve->right, ( p2 + ( strideU << 1 ) )->m_vertex );
-					pCurveList = g_slist_prepend( pCurveList, pCurve );
+					curve.crd = vector3_mid( curve.crd, ( p2 + strideU )->m_vertex );
+					curve.left = vector3_mid( curve.left, p2->m_vertex );
+					curve.right = vector3_mid( curve.right, ( p2 + ( strideU << 1 ) )->m_vertex );
 				}
 
 				p1 = p3;
 			}
 
 			pCurveTree[i] = new BezierCurveTree;
-			BezierCurveTree_FromCurveList( pCurveTree[i], pCurveList );
-			for ( GSList* l = pCurveList; l != 0; l = g_slist_next( l ) )
-			{
-				delete static_cast<BezierCurve*>( ( *l ).data );
-			}
-			g_slist_free( pCurveList );
+			BezierCurveTree_FromCurveList( pCurveTree[i], curveList );
 
 			// set up array indices for binary tree
 			// accumulate subarray width

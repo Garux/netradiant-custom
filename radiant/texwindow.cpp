@@ -1738,40 +1738,38 @@ GtkMenuItem* TextureBrowser_constructTagsMenu( GtkMenu* menu ){
 	return textures_menu_item;
 }
 
-gboolean TextureBrowser_tagMoveHelper( GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, GSList** selected ){
+gboolean TextureBrowser_tagMoveHelper( GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, std::vector<GtkTreeRowReference*>* selected ){
 	g_assert( selected != NULL );
 
 	GtkTreeRowReference* rowref = gtk_tree_row_reference_new( model, path );
-	*selected = g_slist_append( *selected, rowref );
+	selected->push_back( rowref );
 
 	return FALSE;
 }
 
 void TextureBrowser_assignTags(){
-	GSList* selected = NULL;
-	GSList* node;
-	gchar* tag_assigned;
+	std::vector<GtkTreeRowReference*> selected;
 
 	GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( g_TextureBrowser.m_available_tree ) );
 
 	gtk_tree_selection_selected_foreach( selection, (GtkTreeSelectionForeachFunc)TextureBrowser_tagMoveHelper, &selected );
 
-	if ( selected != NULL ) {
-		for ( node = selected; node != NULL; node = node->next )
+	if ( !selected.empty() ) {
+		for ( GtkTreeRowReference* ref : selected )
 		{
-			GtkTreePath* path = gtk_tree_row_reference_get_path( (GtkTreeRowReference*)node->data );
+			GtkTreePath* path = gtk_tree_row_reference_get_path( ref );
 
 			if ( path ) {
 				GtkTreeIter iter;
 
 				if ( gtk_tree_model_get_iter( GTK_TREE_MODEL( g_TextureBrowser.m_available_store ), &iter, path ) ) {
+					gchar* tag_assigned;
 					gtk_tree_model_get( GTK_TREE_MODEL( g_TextureBrowser.m_available_store ), &iter, TAG_COLUMN, &tag_assigned, -1 );
 					if ( !TagBuilder.CheckShaderTag( g_TextureBrowser.shader.c_str() ) ) {
 						// create a custom shader/texture entry
 						IShader* ishader = QERApp_Shader_ForName( g_TextureBrowser.shader.c_str() );
-						CopiedString filename = ishader->getShaderFileName();
 
-						if ( filename.empty() ) {
+						if ( ishader->IsDefault() ) {
 							// it's a texture
 							TagBuilder.AddShaderNode( g_TextureBrowser.shader.c_str(), CUSTOM, TEXTURE );
 						}
@@ -1792,26 +1790,24 @@ void TextureBrowser_assignTags(){
 			}
 		}
 
-		g_slist_foreach( selected, (GFunc)gtk_tree_row_reference_free, NULL );
+		std::for_each( selected.begin(), selected.end(), gtk_tree_row_reference_free );
 
 		// Save changes
 		TagBuilder.SaveXmlDoc();
 	}
-	g_slist_free( selected );
 }
 
 void TextureBrowser_removeTags(){
-	GSList* selected = NULL;
-	GSList* node;
+	std::vector<GtkTreeRowReference*> selected;
 
 	GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( g_TextureBrowser.m_assigned_tree ) );
 
 	gtk_tree_selection_selected_foreach( selection, (GtkTreeSelectionForeachFunc)TextureBrowser_tagMoveHelper, &selected );
 
-	if ( selected != NULL ) {
-		for ( node = selected; node != NULL; node = node->next )
+	if ( !selected.empty() ) {
+		for ( GtkTreeRowReference* ref : selected )
 		{
-			GtkTreePath* path = gtk_tree_row_reference_get_path( (GtkTreeRowReference*)node->data );
+			GtkTreePath* path = gtk_tree_row_reference_get_path( ref );
 
 			if ( path ) {
 				GtkTreeIter iter;
@@ -1826,7 +1822,7 @@ void TextureBrowser_removeTags(){
 			}
 		}
 
-		g_slist_foreach( selected, (GFunc)gtk_tree_row_reference_free, NULL );
+		std::for_each( selected.begin(), selected.end(), gtk_tree_row_reference_free );
 
 		// Update the "available tags list"
 		BuildStoreAvailableTags( g_TextureBrowser.m_available_store, g_TextureBrowser.m_assigned_store, g_TextureBrowser.m_all_tags, &g_TextureBrowser );
@@ -1834,7 +1830,6 @@ void TextureBrowser_removeTags(){
 		// Save changes
 		TagBuilder.SaveXmlDoc();
 	}
-	g_slist_free( selected );
 }
 
 void TextureBrowser_buildTagList(){
@@ -1851,8 +1846,7 @@ void TextureBrowser_buildTagList(){
 }
 
 void TextureBrowser_searchTags(){
-	GSList* selected = NULL;
-	GSList* node;
+	std::vector<GtkTreeRowReference*> selected;
 	char buffer[256];
 	char tags_searched[256];
 
@@ -1860,13 +1854,13 @@ void TextureBrowser_searchTags(){
 
 	gtk_tree_selection_selected_foreach( selection, (GtkTreeSelectionForeachFunc)TextureBrowser_tagMoveHelper, &selected );
 
-	if ( selected != NULL ) {
+	if ( !selected.empty() ) {
 		strcpy( buffer, "/root/*/*[tag='" );
 		strcpy( tags_searched, "[TAGS] " );
 
-		for ( node = selected; node != NULL; node = node->next )
+		for ( auto it = selected.begin(); it != selected.end(); ++it )
 		{
-			GtkTreePath* path = gtk_tree_row_reference_get_path( (GtkTreeRowReference*)node->data );
+			GtkTreePath* path = gtk_tree_row_reference_get_path( *it );
 
 			if ( path ) {
 				GtkTreeIter iter;
@@ -1878,7 +1872,7 @@ void TextureBrowser_searchTags(){
 					strcat( buffer, tag );
 					strcat( tags_searched, tag );
 					g_free( tag );
-					if ( node != g_slist_last( node ) ) {
+					if ( it + 1 != selected.end() ) {
 						strcat( buffer, "' and tag='" );
 						strcat( tags_searched, ", " );
 					}
@@ -1888,7 +1882,7 @@ void TextureBrowser_searchTags(){
 
 		strcat( buffer, "']" );
 
-		g_slist_foreach( selected, (GFunc)gtk_tree_row_reference_free, NULL );
+		std::for_each( selected.begin(), selected.end(), gtk_tree_row_reference_free );
 
 		g_TextureBrowser.m_found_shaders.clear(); // delete old list
 		TagBuilder.TagSearch( buffer, g_TextureBrowser.m_found_shaders );
@@ -1919,7 +1913,6 @@ void TextureBrowser_searchTags(){
 		TextureBrowser_heightChanged( g_TextureBrowser );
 		TextureBrowser_updateTitle();
 	}
-	g_slist_free( selected );
 }
 
 void TextureBrowser_toggleSearchButton(){
@@ -2319,12 +2312,12 @@ void TextureBrowser_setBackgroundColour( TextureBrowser& textureBrowser, const V
 	TextureBrowser_queueDraw( textureBrowser );
 }
 
-void TextureBrowser_selectionHelper( GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, GSList** selected ){
+void TextureBrowser_selectionHelper( GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, std::vector<gchar*>* selected ){
 	g_assert( selected != NULL );
 
 	gchar* name;
 	gtk_tree_model_get( model, iter, TAG_COLUMN, &name, -1 );
-	*selected = g_slist_append( *selected, name );
+	selected->push_back( name );
 }
 
 void TextureBrowser_shaderInfo(){
@@ -2339,7 +2332,7 @@ void TextureBrowser_shaderInfo(){
 void TextureBrowser_addTag(){
 	CopiedString tag;
 
-	EMessageBoxReturn result = DoShaderTagDlg( &tag, "Add shader tag" );
+	EMessageBoxReturn result = DoShaderTagDlg( tag, "Add shader tag" );
 
 	if ( result == eIDOK && !tag.empty() ) {
 		GtkTreeIter iter, iter2;
@@ -2364,18 +2357,18 @@ void TextureBrowser_renameTag(){
 	   rows (which always contains a single row).
 	 */
 
-	GSList* selected = NULL;
+	std::vector<gchar*> selected;
 
 	GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ) );
 	gtk_tree_selection_selected_foreach( selection, GtkTreeSelectionForeachFunc( TextureBrowser_selectionHelper ), &selected );
 
-	if ( g_slist_length( selected ) == 1 ) { // we only rename a single tag
+	if ( selected.size() == 1 ) { // we only rename a single tag
 		CopiedString newTag;
-		EMessageBoxReturn result = DoShaderTagDlg( &newTag, "Rename shader tag" );
+		EMessageBoxReturn result = DoShaderTagDlg( newTag, "Rename shader tag" );
 
 		if ( result == eIDOK && !newTag.empty() ) {
 			GtkTreeIter iterList;
-			gchar* oldTag = (char*)selected->data;
+			gchar* oldTag = selected.front();
 
 			bool row = gtk_tree_model_get_iter_first( GTK_TREE_MODEL( g_TextureBrowser.m_all_tags_list ), &iterList ) != 0;
 
@@ -2405,22 +2398,22 @@ void TextureBrowser_renameTag(){
 		gtk_MessageBox( GTK_WIDGET( g_TextureBrowser.m_parent ), "Select a single tag for renaming." );
 	}
 
-	g_slist_free_full( selected, g_free );
+	std::for_each( selected.begin(), selected.end(), g_free );
 }
 
 void TextureBrowser_deleteTag(){
-	GSList* selected = NULL;
+	std::vector<gchar*> selected;
 
 	GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ) );
 	gtk_tree_selection_selected_foreach( selection, GtkTreeSelectionForeachFunc( TextureBrowser_selectionHelper ), &selected );
 
-	if ( g_slist_length( selected ) == 1 ) { // we only delete a single tag
+	if ( selected.size() == 1 ) { // we only delete a single tag
 		EMessageBoxReturn result = gtk_MessageBox( GTK_WIDGET( g_TextureBrowser.m_parent ), "Are you sure you want to delete the selected tag?", "Delete Tag", eMB_YESNO, eMB_ICONQUESTION );
 
 		if ( result == eIDYES ) {
 			GtkTreeIter iterSelected;
 
-			gchar* tagSelected = (char*)selected->data;
+			gchar* tagSelected = selected.front();
 
 			bool row = gtk_tree_model_get_iter_first( GTK_TREE_MODEL( g_TextureBrowser.m_all_tags_list ), &iterSelected ) != 0;
 
@@ -2449,7 +2442,7 @@ void TextureBrowser_deleteTag(){
 		gtk_MessageBox( GTK_WIDGET( g_TextureBrowser.m_parent ), "Select a single tag for deletion." );
 	}
 
-	g_slist_free_full( selected, g_free );
+	std::for_each( selected.begin(), selected.end(), g_free );
 }
 
 void TextureBrowser_copyTag(){
