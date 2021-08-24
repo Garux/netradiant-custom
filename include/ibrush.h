@@ -31,6 +31,8 @@ enum EBrushType
 {
 	eBrushTypeQuake,
 	eBrushTypeQuake2,
+	eBrushTypeQuake2BP,
+	eBrushTypeQuake2Valve220,
 	eBrushTypeQuake3,
 	eBrushTypeQuake3BP,
 	eBrushTypeQuake3Valve220,

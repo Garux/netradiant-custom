@@ -279,7 +279,7 @@ public:
 	FaceXMLExporter( const Face& face ) : m_face( face ){
 	}
 	void exportXML( XMLImporter& importer ){
-		bool bAlternateTexdef = ( Face::m_type == eBrushTypeQuake3BP || Face::m_type == eBrushTypeDoom3 || Face::m_type == eBrushTypeQuake4 );
+		bool bAlternateTexdef = ( Face::m_type == eBrushTypeQuake3BP || Face::m_type == eBrushTypeQuake2BP || Face::m_type == eBrushTypeDoom3 || Face::m_type == eBrushTypeQuake4 );
 
 		// write shader
 		{

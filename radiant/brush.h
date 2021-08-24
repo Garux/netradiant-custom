@@ -888,10 +888,12 @@ inline TexdefTypeId BrushType_getTexdefType( EBrushType type ){
 	switch ( type )
 	{
 	case eBrushTypeQuake3BP:
+	case eBrushTypeQuake2BP:
 	case eBrushTypeDoom3:
 	case eBrushTypeQuake4:
 		return TEXDEFTYPEID_BRUSHPRIMITIVES;
 	case eBrushTypeValve220:
+	case eBrushTypeQuake2Valve220:
 	case eBrushTypeQuake3Valve220:
 		return TEXDEFTYPEID_VALVE;
 	default:

@@ -448,12 +448,12 @@ public:
 			if( !m_formatDetected ){
 				EBrushType detectedFormat;
 				if ( string_equal( primitive, "brushDef" ) ) {
-					detectedFormat = eBrushTypeQuake3BP;
-					globalWarningStream() << "detectedFormat = eBrushTypeQuake3BP\n";
+					detectedFormat = eBrushTypeQuake2BP;
+					globalWarningStream() << "detectedFormat = eBrushTypeQuake2BP\n";
 				}
 				else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
-					detectedFormat = eBrushTypeQuake3Valve220;
-					globalWarningStream() << "detectedFormat = eBrushTypeQuake3Valve220\n";
+					detectedFormat = eBrushTypeQuake2Valve220;
+					globalWarningStream() << "detectedFormat = eBrushTypeQuake2Valve220\n";
 				}
 				else if ( string_equal( primitive, "(" ) ) {
 					detectedFormat = eBrushTypeQuake2;
@@ -473,10 +473,10 @@ public:
 			switch ( GlobalBrushCreator().getFormat() )
 			{
 			case eBrushTypeQuake2:
-			case eBrushTypeQuake3Valve220:
+			case eBrushTypeQuake2Valve220:
 				tokeniser.ungetToken(); // (
 			// fall through
-			case eBrushTypeQuake3BP:
+			case eBrushTypeQuake2BP:
 				return GlobalBrushCreator().createBrush();
 			default:
 				break;
