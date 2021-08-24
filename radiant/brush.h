@@ -1267,6 +1267,7 @@ public:
 		undoSave();
 		m_shader.setFlags( flags );
 		m_observer->shaderChanged();
+		Brush_textureChanged();
 		updateFiltered();
 	}
 

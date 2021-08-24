@@ -611,6 +611,11 @@ static gboolean OnBtnFaceFitHeightOnly( GtkWidget *widget, GdkEventButton *event
 	return FALSE;
 }
 
+static void OnBtnUnsetFlags( GtkWidget *widget, gpointer data ){
+	UndoableCommand undo( "flagsUnSetSelected" );
+	Select_SetFlags( ContentsFlagsValue( 0, 0, 0, false ) );
+}
+
 
 typedef const char* FlagName;
 
@@ -1199,17 +1204,28 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				gtk_widget_show( GTK_WIDGET( frame ) );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 				{
-					GtkVBox* vbox3 = GTK_VBOX( gtk_vbox_new( FALSE, 4 ) );
-					gtk_container_set_border_width( GTK_CONTAINER( vbox3 ), 4 );
-					gtk_widget_show( GTK_WIDGET( vbox3 ) );
-					gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox3 ) );
+					GtkVBox* hbox3 = GTK_VBOX( gtk_hbox_new( FALSE, 4 ) );
+					gtk_container_set_border_width( GTK_CONTAINER( hbox3 ), 4 );
+					gtk_widget_show( GTK_WIDGET( hbox3 ) );
+					gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( hbox3 ) );
 
 					{
 						GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
 						gtk_widget_show( GTK_WIDGET( entry ) );
-						gtk_box_pack_start( GTK_BOX( vbox3 ), GTK_WIDGET( entry ), TRUE, TRUE, 0 );
+						gtk_box_pack_start( GTK_BOX( hbox3 ), GTK_WIDGET( entry ), TRUE, TRUE, 0 );
 						m_valueEntryWidget = entry;
 						m_valueEntry.connect( entry );
+					}
+					{
+						GtkWidget* button = gtk_button_new_with_label( "Unset" );
+						gtk_widget_set_tooltip_text( button, "Unset flags" );
+						gtk_widget_show( button );
+						gtk_box_pack_start( GTK_BOX( hbox3 ), button, TRUE, TRUE, 0 );
+						g_signal_connect( G_OBJECT( button ), "clicked",
+						                  G_CALLBACK( OnBtnUnsetFlags ), 0 );
+						GtkRequisition req;
+						gtk_widget_size_request( button, &req );
+						gtk_widget_set_size_request( button, 60, req.height * 3 / 4 );
 					}
 				}
 			}
