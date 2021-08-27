@@ -942,10 +942,6 @@ struct mapDrawSurface_t
 	/* ydnar: shadow group support */
 	int castShadows, recvShadows;
 
-	/* ydnar: texture coordinate range monitoring for hardware with limited texcoord precision (in texel space) */
-	Vector2 bias;
-	int texMins[ 2 ], texMaxs[ 2 ], texRange[ 2 ];
-
 	/* ydnar: for patches */
 	float longestCurve;
 	int maxIterations;
@@ -1680,7 +1676,6 @@ mapDrawSurface_t            *AllocDrawSurface( ESurfaceType type );
 void                        FinishSurface( mapDrawSurface_t *ds );
 void                        StripFaceSurface( mapDrawSurface_t *ds );
 void                        MaxAreaFaceSurface( mapDrawSurface_t *ds );
-bool                        CalcSurfaceTextureRange( mapDrawSurface_t *ds );
 Vector3                     CalcLightmapAxis( const Vector3& normal );
 void                        ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds );
 void                        ClassifyEntitySurfaces( entity_t *e );
@@ -2022,7 +2017,6 @@ Q_EXTERN int maxSurfaceVerts Q_ASSIGN( 999 );                       /* ydnar */
 Q_EXTERN int maxSurfaceIndexes Q_ASSIGN( 6000 );                    /* ydnar */
 Q_EXTERN float npDegrees Q_ASSIGN( 0.0f );                          /* ydnar: nonplanar degrees */
 Q_EXTERN int bevelSnap Q_ASSIGN( 0 );                               /* ydnar: bevel plane snap */
-Q_EXTERN int texRange Q_ASSIGN( 0 );
 Q_EXTERN bool flat Q_ASSIGN( false );
 Q_EXTERN bool meta Q_ASSIGN( false );
 Q_EXTERN bool patchMeta Q_ASSIGN( false );

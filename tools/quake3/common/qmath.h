@@ -27,15 +27,13 @@ struct MinMax___
 {
 	BasicVector3<T> mins;
 	BasicVector3<T> maxs;
-	MinMax___(){
-		clear();
+	MinMax___() : mins( std::numeric_limits<T>::max() ), maxs( std::numeric_limits<T>::lowest() ) {
 	}
 	template<typename U>
 	MinMax___( const BasicVector3<U>& min, const BasicVector3<U>& max ) : mins( min ), maxs( max ){
 	}
 	void clear(){
-		mins.x() = mins.y() = mins.z() = std::numeric_limits<T>::max();
-		maxs.x() = maxs.y() = maxs.z() = std::numeric_limits<T>::lowest();
+		*this = MinMax___();
 	}
 	bool valid() const {
 		return mins.x() < maxs.x() && mins.y() < maxs.y() && mins.z() < maxs.z();

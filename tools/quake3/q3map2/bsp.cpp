@@ -802,11 +802,6 @@ int BSPMain( int argc, char **argv ){
 			}
 			i++;
 		}
-		else if ( striEqual( argv[ i ],  "-texrange" ) ) {
-			texRange = std::max( 0, atoi( argv[ i + 1 ] ) );
-			i++;
-			Sys_Printf( "Limiting per-surface texture range to %d texels\n", texRange );
-		}
 		else if ( striEqual( argv[ i ], "-nohint" ) ) {
 			Sys_Printf( "Hint brushes disabled\n" );
 			noHint = true;

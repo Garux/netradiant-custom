@@ -133,11 +133,10 @@ mapDrawSurface_t *CloneSurface( mapDrawSurface_t *src, shaderInfo_t *si ){
 	}
 
 	/* copy indexes */
-	if ( ds->numIndexes <= 0 ) {
-		return ds;
+	if ( ds->numIndexes > 0 ) {
+		ds->indexes = safe_malloc( ds->numIndexes * sizeof( *ds->indexes ) );
+		memcpy( ds->indexes, src->indexes, ds->numIndexes * sizeof( *ds->indexes ) );
 	}
-	ds->indexes = safe_malloc( ds->numIndexes * sizeof( *ds->indexes ) );
-	memcpy( ds->indexes, src->indexes, ds->numIndexes * sizeof( *ds->indexes ) );
 
 	/* return the surface */
 	return ds;
@@ -316,25 +315,12 @@ void TidyEntitySurfaces( entity_t *e ){
 
 
 
-/*
-   CalcSurfaceTextureRange() - ydnar
-   calculates the clamped texture range for a given surface, returns true if it's within [-texRange,texRange]
- */
-
-bool CalcSurfaceTextureRange( mapDrawSurface_t *ds ){
-	int i, j, v, size[ 2 ];
-
-
-	/* try to early out */
-	if ( ds->numVerts <= 0 ) {
-		return true;
-	}
-
+static Vector2 CalcSurfaceTextureBias( const mapDrawSurface_t *ds ){
 	/* walk the verts and determine min/max st values */
-	Vector2 mins( 999999, 999999 ), maxs( -999999, -999999 );
-	for ( i = 0; i < ds->numVerts; i++ )
+	Vector2 mins( 999999, 999999 ), maxs( -999999, -999999 ), bias;
+	for ( int i = 0; i < ds->numVerts; i++ )
 	{
-		for ( j = 0; j < 2; j++ )
+		for ( int j = 0; j < 2; j++ )
 		{
 			value_minimize( mins[ j ], ds->verts[ i ].st[ j ] );
 			value_maximize( maxs[ j ], ds->verts[ i ].st[ j ] );
@@ -342,45 +328,10 @@ bool CalcSurfaceTextureRange( mapDrawSurface_t *ds ){
 	}
 
 	/* clamp to integer range and calculate surface bias values */
-	for ( j = 0; j < 2; j++ )
-		ds->bias[ j ] = -floor( 0.5f * ( mins[ j ] + maxs[ j ] ) );
+	for ( int i = 0; i < 2; i++ )
+		bias[ i ] = floor( 0.5f * ( mins[ i ] + maxs[ i ] ) );
 
-	/* find biased texture coordinate mins/maxs */
-	size[ 0 ] = ds->shaderInfo->shaderWidth;
-	size[ 1 ] = ds->shaderInfo->shaderHeight;
-	ds->texMins[ 0 ] = 999999;
-	ds->texMins[ 1 ] = 999999;
-	ds->texMaxs[ 0 ] = -999999;
-	ds->texMaxs[ 1 ] = -999999;
-	for ( i = 0; i < ds->numVerts; i++ )
-	{
-		for ( j = 0; j < 2; j++ )
-		{
-			v = ( ds->verts[ i ].st[ j ] + ds->bias[ j ] ) * size[ j ];
-			value_minimize( ds->texMins[ j ], v );
-			value_maximize( ds->texMaxs[ j ], v );
-		}
-	}
-
-	/* calc ranges */
-	for ( j = 0; j < 2; j++ )
-		ds->texRange[ j ] = ( ds->texMaxs[ j ] - ds->texMins[ j ] );
-
-	/* if range is zero, then assume unlimited precision */
-	if ( texRange == 0 ) {
-		return true;
-	}
-
-	/* within range? */
-	for ( j = 0; j < 2; j++ )
-	{
-		if ( ds->texMins[ j ] < -texRange || ds->texMaxs[ j ] > texRange ) {
-			return false;
-		}
-	}
-
-	/* within range */
-	return true;
+	return bias;
 }
 
 
@@ -1273,20 +1224,15 @@ static void SubdivideFace_r( entity_t *e, const brush_t& brush, const side_t& si
  */
 
 void SubdivideFaceSurfaces( entity_t *e ){
-	int i, j, numBaseDrawSurfs, fogNum;
-	mapDrawSurface_t    *ds;
-	float range, size, subdivisions, s2;
-
-
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- SubdivideFaceSurfaces ---\n" );
 
 	/* walk the list of surfaces */
-	numBaseDrawSurfs = numMapDrawSurfs;
-	for ( i = e->firstDrawSurf; i < numBaseDrawSurfs; i++ )
+	const int numBaseDrawSurfs = numMapDrawSurfs;
+	for ( int i = e->firstDrawSurf; i < numBaseDrawSurfs; i++ )
 	{
 		/* get surface */
-		ds = &mapDrawSurfs[ i ];
+		mapDrawSurface_t *ds = &mapDrawSurfs[ i ];
 
 		/* only subdivide brush sides */
 		if ( ds->type != ESurfaceType::Face || ds->mapBrush == NULL || ds->sideRef == NULL || ds->sideRef->side == NULL ) {
@@ -1308,39 +1254,14 @@ void SubdivideFaceSurfaces( entity_t *e ){
 			continue;
 		}
 
-		/* do texture coordinate range check */
-		ClassifySurfaces( 1, ds );
-		if ( !CalcSurfaceTextureRange( ds ) ) {
-			/* calculate subdivisions texture range (this code is shit) */
-			range = std::max( ds->texRange[ 0 ], ds->texRange[ 1 ] );
-			size = ds->minmax.maxs[ 0 ] - ds->minmax.mins[ 0 ];
-			for ( j = 1; j < 3; j++ )
-				value_maximize( size, ds->minmax.maxs[ j ] - ds->minmax.mins[ j ] );
-			subdivisions = ( size / range ) * texRange;
-			subdivisions = ceil( subdivisions / 2 ) * 2;
-			for ( j = 1; j < 8; j++ )
-			{
-				s2 = ceil( (float) texRange / j );
-				if ( fabs( subdivisions - s2 ) <= 4.0 ) {
-					subdivisions = s2;
-					break;
-				}
-			}
-		}
-		else{
-			subdivisions = si->subdivisions;
-		}
-
 		/* get subdivisions from shader */
-		if ( si->subdivisions > 0 ) {
-			value_minimize( subdivisions, si->subdivisions );
-		}
+		const float subdivisions = si->subdivisions;
 		if ( subdivisions < 1.0f ) {
 			continue;
 		}
 
 		/* preserve fog num */
-		fogNum = ds->fogNum;
+		const int fogNum = ds->fogNum;
 
 		/* make a winding and free the surface */
 		winding_t w = WindingFromDrawSurf( ds );
@@ -2843,18 +2764,18 @@ void MakeFogHullSurfs( entity_t *e, const char *shader ){
  */
 
 void BiasSurfaceTextures( mapDrawSurface_t *ds ){
-	/* calculate the surface texture bias */
-	CalcSurfaceTextureRange( ds );
-
 	/* don't bias globaltextured shaders */
 	if ( ds->shaderInfo->globalTexture ) {
 		return;
 	}
 
+	/* calculate the surface texture bias */
+	const Vector2 bias = CalcSurfaceTextureBias( ds );
+
 	/* bias the texture coordinates */
 	for ( int i = 0; i < ds->numVerts; i++ )
 	{
-		ds->verts[ i ].st += ds->bias;
+		ds->verts[ i ].st -= bias;
 	}
 }
 

@@ -33,13 +33,7 @@
 
 
 
-#define LIGHTMAP_EXCEEDED   -1
-#define S_EXCEEDED          -2
-#define T_EXCEEDED          -3
-#define ST_EXCEEDED         -4
-#define UNSUITABLE_TRIANGLE -10
 #define VERTS_EXCEEDED      -1000
-#define INDEXES_EXCEEDED    -2000
 
 #define GROW_META_VERTS     1024
 #define GROW_META_TRIANGLES 1024
@@ -1318,17 +1312,9 @@ int AddMetaVertToSurface( mapDrawSurface_t *ds, bspDrawVert_t *dv1, int *coincid
 #define ADEQUATE_SCORE          ( metaAdequateScore >= 0 ? metaAdequateScore : DEFAULT_ADEQUATE_SCORE )
 #define GOOD_SCORE          ( metaGoodScore     >= 0 ? metaGoodScore     : DEFAULT_GOOD_SCORE )
 
-static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, bool testAdd ){
-	int i, score, coincident, ai, bi, ci, oldTexRange[ 2 ];
-	float lmMax;
-	bool inTexRange;
-	mapDrawSurface_t old;
+static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, MinMax& texMinMax, bool testAdd ){
+	int i, score, coincident, ai, bi, ci;
 
-
-	/* overflow check */
-	if ( ds->numIndexes >= maxSurfaceIndexes ) {
-		return 0;
-	}
 
 	/* test the triangle */
 	if ( ds->entityNum != tri->entityNum ) { /* ydnar: added 2002-07-06 */
@@ -1379,7 +1365,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	}
 
 	/* preserve old drawsurface if this fails */
-	memcpy( &old, ds, sizeof( *ds ) );
+	mapDrawSurface_t old( *ds );
 
 	/* attempt to add the verts */
 	coincident = 0;
@@ -1404,12 +1390,12 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 
 	/* check lightmap bounds overflow (after at least 1 triangle has been added) */
 	if ( !( ds->shaderInfo->compileFlags & C_VERTEXLIT ) &&
-	     ds->numIndexes > 0 && vector3_length( ds->lightmapAxis ) != 0.0f &&
+	     ds->numIndexes > 0 && ds->lightmapAxis != g_vector3_identity &&
 	     ( !VectorCompare( ds->minmax.mins, minmax.mins ) || !VectorCompare( ds->minmax.maxs, minmax.maxs ) ) ) {
 		/* set maximum size before lightmap scaling (normally 2032 units) */
 		/* 2004-02-24: scale lightmap test size by 2 to catch larger brush faces */
 		/* 2004-04-11: reverting to actual lightmap size */
-		lmMax = ( ds->sampleSize * ( ds->shaderInfo->lmCustomWidth - 1 ) );
+		const float lmMax = ( ds->sampleSize * ( ds->shaderInfo->lmCustomWidth - 1 ) );
 		for ( i = 0; i < 3; i++ )
 		{
 			if ( ( minmax.maxs[ i ] - minmax.mins[ i ] ) > lmMax ) {
@@ -1420,28 +1406,33 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	}
 
 	/* check texture range overflow */
-	oldTexRange[ 0 ] = ds->texRange[ 0 ];
-	oldTexRange[ 1 ] = ds->texRange[ 1 ];
-	inTexRange = CalcSurfaceTextureRange( ds );
+	MinMax newTexMinMax( texMinMax );
+	{
+		newTexMinMax.extend( Vector3( metaVerts[ tri->indexes[ 0 ] ].st ) );
+		newTexMinMax.extend( Vector3( metaVerts[ tri->indexes[ 1 ] ].st ) );
+		newTexMinMax.extend( Vector3( metaVerts[ tri->indexes[ 2 ] ].st ) );
+		if( texMinMax.surrounds( newTexMinMax ) ){
+			score += 4 * ST_SCORE;
+		}
+		else{
+			const Vector2 wh( ds->shaderInfo->shaderWidth, ds->shaderInfo->shaderHeight );
+			BasicVector2<int> oldTexRange( ( texMinMax.maxs - texMinMax.mins ).vec2() * wh );
+			BasicVector2<int> newTexRange( ( newTexMinMax.maxs - newTexMinMax.mins ).vec2() * wh );
+			/* score texture range */
+			if ( newTexRange[ 0 ] <= oldTexRange[ 0 ] ) {
+				score += ST_SCORE2;
+			}
+			else if ( oldTexRange[ 1 ] > oldTexRange[ 0 ] ) {
+				score += ST_SCORE;
+			}
 
-	if ( !inTexRange && ds->numIndexes > 0 ) {
-		memcpy( ds, &old, sizeof( *ds ) );
-		return UNSUITABLE_TRIANGLE;
-	}
-
-	/* score texture range */
-	if ( ds->texRange[ 0 ] <= oldTexRange[ 0 ] ) {
-		score += ST_SCORE2;
-	}
-	else if ( ds->texRange[ 0 ] > oldTexRange[ 0 ] && oldTexRange[ 1 ] > oldTexRange[ 0 ] ) {
-		score += ST_SCORE;
-	}
-
-	if ( ds->texRange[ 1 ] <= oldTexRange[ 1 ] ) {
-		score += ST_SCORE2;
-	}
-	else if ( ds->texRange[ 1 ] > oldTexRange[ 1 ] && oldTexRange[ 0 ] > oldTexRange[ 1 ] ) {
-		score += ST_SCORE;
+			if ( newTexRange[ 1 ] <= oldTexRange[ 1 ] ) {
+				score += ST_SCORE2;
+			}
+			else if ( oldTexRange[ 0 ] > oldTexRange[ 1 ] ) {
+				score += ST_SCORE;
+			}
+		}
 	}
 
 
@@ -1475,21 +1466,15 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 		}
 	}
 
-	/* add the triangle indexes */
-	if ( ds->numIndexes < maxSurfaceIndexes ) {
-		ds->indexes[ ds->numIndexes++ ] = ai;
-	}
-	if ( ds->numIndexes < maxSurfaceIndexes ) {
-		ds->indexes[ ds->numIndexes++ ] = bi;
-	}
-	if ( ds->numIndexes < maxSurfaceIndexes ) {
-		ds->indexes[ ds->numIndexes++ ] = ci;
-	}
-
 	/* check index overflow */
-	if ( ds->numIndexes >= maxSurfaceIndexes  ) {
+	if ( ds->numIndexes + 3 > maxSurfaceIndexes  ) {
 		memcpy( ds, &old, sizeof( *ds ) );
 		return 0;
+	}
+	else{ /* add the triangle indexes */
+		ds->indexes[ ds->numIndexes++ ] = ai;
+		ds->indexes[ ds->numIndexes++ ] = bi;
+		ds->indexes[ ds->numIndexes++ ] = ci;
 	}
 
 	/* sanity check the indexes */
@@ -1506,15 +1491,16 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	}
 	else
 	{
-		/* copy bounds back to surface */
+		/* store new bounds */
 		ds->minmax = minmax;
+		texMinMax = newTexMinMax;
 
 		/* mark triangle as used */
 		tri->si = NULL;
-	}
 
-	/* add a side reference */
-	ds->sideRef = AllocSideRef( tri->side, ds->sideRef );
+		/* add a side reference */
+		ds->sideRef = AllocSideRef( tri->side, ds->sideRef );
+	}
 
 	/* return to sender */
 	return score;
@@ -1571,13 +1557,10 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 
 		ds->minmax.clear();
 
-		/* clear verts/indexes */
-		memset( verts, 0, sizeof( *verts ) * maxSurfaceVerts );
-		memset( indexes, 0, sizeof( *indexes ) * maxSurfaceIndexes );
-
+		MinMax texMinMax;
 
 		/* add the first triangle */
-		if ( AddMetaTriangleToSurface( ds, seed, false ) ) {
+		if ( AddMetaTriangleToSurface( ds, seed, texMinMax, false ) ) {
 			( *numAdded )++;
 		}
 
@@ -1610,14 +1593,14 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 				}
 
 				/* score this triangle */
-				score = AddMetaTriangleToSurface( ds, test, true );
+				score = AddMetaTriangleToSurface( ds, test, texMinMax, true );
 				if ( score > bestScore ) {
 					best = j;
 					bestScore = score;
 
 					/* if we have a score over a certain threshold, just use it */
 					if ( bestScore >= GOOD_SCORE ) {
-						if ( AddMetaTriangleToSurface( ds, &possibles[ best ], false ) ) {
+						if ( AddMetaTriangleToSurface( ds, &possibles[ best ], texMinMax, false ) ) {
 							( *numAdded )++;
 						}
 
@@ -1631,7 +1614,7 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 
 			/* add best candidate */
 			if ( best >= 0 && bestScore > ADEQUATE_SCORE ) {
-				if ( AddMetaTriangleToSurface( ds, &possibles[ best ], false ) ) {
+				if ( AddMetaTriangleToSurface( ds, &possibles[ best ], texMinMax, false ) ) {
 					( *numAdded )++;
 				}
 

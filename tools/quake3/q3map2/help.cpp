@@ -135,7 +135,6 @@ void HelpBsp()
 		{"-sRGBcolor", "Treat shader and light entity colors as sRGB colorspace"},
 		{"-sRGBtex", "Treat textures as sRGB colorspace"},
 		{"-tempname <filename.map>", "Read the MAP file from the given file name"},
-		{"-texrange <N>", "Limit per-surface texture range to the given number of units, and subdivide surfaces like with `q3map_tessSize` if this is not met"},
 		{"-verboseentities", "Enable `-v` only for map entities, not for the world"},
 	};
 	HelpOptions("BSP Stage", 0, 80, bsp, std::size(bsp));
