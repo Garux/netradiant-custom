@@ -1336,10 +1336,10 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 
 	/* planar surfaces will only merge with triangles in the same plane */
 	if ( npDegrees == 0.0f && !ds->shaderInfo->nonplanar && ds->planeNum >= 0 ) {
-		if ( !VectorCompare( mapplanes[ ds->planeNum ].normal(), tri->plane.normal() ) || mapplanes[ ds->planeNum ].dist() != tri->plane.dist() ) {
+		if ( tri->planeNum >= 0 && tri->planeNum != ds->planeNum ) {
 			return 0;
 		}
-		if ( tri->planeNum >= 0 && tri->planeNum != ds->planeNum ) {
+		if ( !VectorCompare( mapplanes[ ds->planeNum ].normal(), tri->plane.normal() ) || mapplanes[ ds->planeNum ].dist() != tri->plane.dist() ) {
 			return 0;
 		}
 	}
