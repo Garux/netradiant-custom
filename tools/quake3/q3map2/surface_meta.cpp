@@ -119,7 +119,7 @@ static int AddMetaTriangle( void ){
    otherwise adds it and returns the index to the metatriangle
  */
 
-int FindMetaTriangle( metaTriangle_t *src, bspDrawVert_t *a, bspDrawVert_t *b, bspDrawVert_t *c, int planeNum ){
+static int FindMetaTriangle( metaTriangle_t *src, bspDrawVert_t *a, bspDrawVert_t *b, bspDrawVert_t *c, int planeNum ){
 	int triIndex;
 
 	/* detect degenerate triangles fixme: do something proper here */
@@ -1330,15 +1330,6 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 
 
 	/* test the triangle */
-	if ( ds->entityNum != tri->entityNum ) { /* ydnar: added 2002-07-06 */
-		return 0;
-	}
-	if ( ds->castShadows != tri->castShadows || ds->recvShadows != tri->recvShadows ) {
-		return 0;
-	}
-	if ( ds->shaderInfo != tri->si || ds->fogNum != tri->fogNum || ds->sampleSize != tri->sampleSize ) {
-		return 0;
-	}
 	#if 0
 	if ( !( ds->shaderInfo->compileFlags & C_VERTEXLIT ) &&
 	     //% !VectorCompare( ds->lightmapAxis, tri->lightmapAxis ) )
@@ -1532,21 +1523,13 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
    creates map drawsurface(s) from the list of possibles
  */
 
-static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles, int *fOld, int *numAdded ){
-	int i, j, f, best, score, bestScore;
-	metaTriangle_t      *seed, *test;
-	mapDrawSurface_t    *ds;
-	bspDrawVert_t       *verts;
-	int                 *indexes;
-	bool added;
-
-
+static void MetaTrianglesToSurface( metaTriangle_t *begin, metaTriangle_t *end, int *fOld, int *numAdded ){
 	/* allocate arrays */
-	verts = safe_malloc( sizeof( *verts ) * maxSurfaceVerts );
-	indexes = safe_malloc( sizeof( *indexes ) * maxSurfaceIndexes );
+	bspDrawVert_t *verts = safe_malloc( sizeof( *verts ) * maxSurfaceVerts );
+	int *indexes = safe_malloc( sizeof( *indexes ) * maxSurfaceIndexes );
 
 	/* walk the list of triangles */
-	for ( i = 0, seed = possibles; i < numPossibles; i++, seed++ )
+	for ( metaTriangle_t *seed = begin; seed != end; ++seed )
 	{
 		/* skip this triangle if it has already been merged */
 		if ( seed->si == NULL ) {
@@ -1558,7 +1541,7 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 		   ----------------------------------------------------------------- */
 
 		/* start a new drawsurface */
-		ds = AllocDrawSurface( ESurfaceType::Meta );
+		mapDrawSurface_t *ds = AllocDrawSurface( ESurfaceType::Meta );
 		ds->entityNum = seed->entityNum;
 		ds->surfaceNum = seed->surfaceNum;
 		ds->castShadows = seed->castShadows;
@@ -1590,23 +1573,21 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 		   ----------------------------------------------------------------- */
 
 		/* progressively walk the list until no more triangles can be added */
-		added = true;
-		while ( added )
+		for( bool added = true; added; )
 		{
 			/* print pacifier */
-			f = 10 * *numAdded / numMetaTriangles;
-			if ( f > *fOld ) {
+			if ( const int f = 10 * *numAdded / numMetaTriangles; f > *fOld ) {
 				*fOld = f;
 				Sys_FPrintf( SYS_VRB, "%d...", f );
 			}
 
 			/* reset best score */
-			best = -1;
-			bestScore = 0;
+			metaTriangle_t *best = nullptr;
+			int bestScore = 0;
 			added = false;
 
 			/* walk the list of possible candidates for merging */
-			for ( j = i + 1, test = &possibles[ j ]; j < numPossibles; j++, test++ )
+			for ( metaTriangle_t *test = seed + 1; test != end; ++test )
 			{
 				/* skip this triangle if it has already been merged */
 				if ( test->si == NULL ) {
@@ -1614,19 +1595,19 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 				}
 
 				/* score this triangle */
-				score = AddMetaTriangleToSurface( ds, test, texMinMax, sorted_indices, true );
+				const int score = AddMetaTriangleToSurface( ds, test, texMinMax, sorted_indices, true );
 				if ( score > bestScore ) {
-					best = j;
+					best = test;
 					bestScore = score;
 
 					/* if we have a score over a certain threshold, just use it */
 					if ( bestScore >= GOOD_SCORE ) {
-						if ( AddMetaTriangleToSurface( ds, &possibles[ best ], texMinMax, sorted_indices, false ) ) {
+						if ( AddMetaTriangleToSurface( ds, best, texMinMax, sorted_indices, false ) ) {
 							( *numAdded )++;
 						}
 
 						/* reset */
-						best = -1;
+						best = nullptr;
 						bestScore = 0;
 						added = true;
 					}
@@ -1634,8 +1615,8 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 			}
 
 			/* add best candidate */
-			if ( best >= 0 && bestScore > ADEQUATE_SCORE ) {
-				if ( AddMetaTriangleToSurface( ds, &possibles[ best ], texMinMax, sorted_indices, false ) ) {
+			if ( best != nullptr && bestScore > ADEQUATE_SCORE ) {
+				if ( AddMetaTriangleToSurface( ds, best, texMinMax, sorted_indices, false ) ) {
 					( *numAdded )++;
 				}
 
@@ -1669,23 +1650,52 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
    compare functor for std::sort()
  */
 
+template<bool sort_spatially>
 struct CompareMetaTriangles
 {
 	bool operator()( const metaTriangle_t& a, const metaTriangle_t& b ) const {
 		/* shader first */
 		if ( a.si < b.si ) {
-			return false;
+			return true;
 		}
 		else if ( a.si > b.si ) {
-			return true;
+			return false;
 		}
 
 		/* then fog */
 		else if ( a.fogNum < b.fogNum ) {
-			return false;
+			return true;
 		}
 		else if ( a.fogNum > b.fogNum ) {
+			return false;
+		}
+
+		else if ( a.entityNum < b.entityNum ) { /* ydnar: added 2002-07-06 */
 			return true;
+		}
+		else if ( a.entityNum > b.entityNum ) {
+			return false;
+		}
+
+		else if ( a.castShadows < b.castShadows ) {
+			return true;
+		}
+		else if ( a.castShadows > b.castShadows ) {
+			return false;
+		}
+
+		else if ( a.recvShadows < b.recvShadows ) {
+			return true;
+		}
+		else if ( a.recvShadows > b.recvShadows ) {
+			return false;
+		}
+
+		else if ( a.sampleSize < b.sampleSize ) {
+			return true;
+		}
+		else if ( a.sampleSize > b.sampleSize ) {
+			return false;
 		}
 
 		/* then plane */
@@ -1693,59 +1703,68 @@ struct CompareMetaTriangles
 		else if ( npDegrees == 0.0f && !a.si->nonplanar &&
 				  a.planeNum >= 0 && a.planeNum >= 0 ) {
 			if ( a.plane.dist() < b.plane.dist() ) {
-				return false;
+				return true;
 			}
 			else if ( a.plane.dist() > b.plane.dist() ) {
-				return true;
+				return false;
 			}
 			else if ( a.plane.normal()[ 0 ] < b.plane.normal()[ 0 ] ) {
-				return false;
+				return true;
 			}
 			else if ( a.plane.normal()[ 0 ] > b.plane.normal()[ 0 ] ) {
-				return true;
+				return false;
 			}
 			else if ( a.plane.normal()[ 1 ] < b.plane.normal()[ 1 ] ) {
-				return false;
+				return true;
 			}
 			else if ( a.plane.normal()[ 1 ] > b.plane.normal()[ 1 ] ) {
-				return true;
-			}
-			else if ( a.plane.normal()[ 2 ] < b.plane.normal()[ 2 ] ) {
 				return false;
 			}
-			else if ( a.plane.normal()[ 2 ] > b.plane.normal()[ 2 ] ) {
+			else if ( a.plane.normal()[ 2 ] < b.plane.normal()[ 2 ] ) {
 				return true;
+			}
+			else if ( a.plane.normal()[ 2 ] > b.plane.normal()[ 2 ] ) {
+				return false;
 			}
 		}
 		#endif
 
 		/* then position in world */
-
-		/* find mins */
-		Vector3 aMins( 999999 );
-		Vector3 bMins( 999999 );
-		for ( int i = 0; i < 3; i++ )
-		{
-			const int av = a.indexes[ i ];
-			const int bv = b.indexes[ i ];
-			for ( int j = 0; j < 3; j++ )
-			{
-				value_minimize( aMins[ j ], metaVerts[ av ].xyz[ j ] );
-				value_minimize( bMins[ j ], metaVerts[ bv ].xyz[ j ] );
-			}
-		}
-
-		/* test it */
-		for ( int i = 0; i < 3; i++ )
-		{
-			if ( aMins[ i ] < bMins[ i ] ) {
-				return false;
-			}
-			else if ( aMins[ i ] > bMins[ i ] ) {
+		if constexpr ( sort_spatially ){
+#if 0
+			if ( a.min < b.min ) {
 				return true;
 			}
-		}
+			else if ( a.min > b.min ) {
+				return false;
+			}
+#else
+			/* find mins */
+			Vector3 aMins( 999999 );
+			Vector3 bMins( 999999 );
+			for ( int i = 0; i < 3; i++ )
+			{
+				const int av = a.indexes[ i ];
+				const int bv = b.indexes[ i ];
+				for ( int j = 0; j < 3; j++ )
+				{
+					value_minimize( aMins[ j ], metaVerts[ av ].xyz[ j ] );
+					value_minimize( bMins[ j ], metaVerts[ bv ].xyz[ j ] );
+				}
+			}
 
+			/* test it */
+			for ( int i = 0; i < 3; i++ )
+			{
+				if ( aMins[ i ] < bMins[ i ] ) {
+					return true;
+				}
+				else if ( aMins[ i ] > bMins[ i ] ) {
+					return false;
+				}
+			}
+#endif
+		}
 		/* functionally equivalent */
 		return false;
 	}
@@ -1759,10 +1778,6 @@ struct CompareMetaTriangles
  */
 
 void MergeMetaTriangles( void ){
-	int i, j, fOld, start, numAdded;
-	metaTriangle_t      *head, *end;
-
-
 	/* only do this if there are meta triangles */
 	if ( numMetaTriangles <= 0 ) {
 		return;
@@ -1772,47 +1787,36 @@ void MergeMetaTriangles( void ){
 	Sys_FPrintf( SYS_VRB, "--- MergeMetaTriangles ---\n" );
 
 	/* sort the triangles by shader major, fognum minor */
-	std::sort( metaTriangles, metaTriangles + numMetaTriangles, CompareMetaTriangles() );
+	metaTriangle_t *metaTrianglesEnd = metaTriangles + numMetaTriangles;
+	for( metaTriangle_t *it = metaTriangles; it != metaTrianglesEnd; ++it ){
+		it->min = std::numeric_limits<float>::max();
+		it->max = std::numeric_limits<float>::lowest();
+		for( int i = 0; i < 3; ++i ){
+			const float dist = plane3_distance_to_point( c_spatial_sort_plane, metaVerts[it->indexes[i]].xyz );
+			value_minimize( it->min, dist );
+			value_maximize( it->max, dist );
+		}
+	}
+	std::sort( metaTriangles, metaTrianglesEnd, CompareMetaTriangles<true>() );
 
 	/* init pacifier */
-	fOld = -1;
-	start = I_FloatTime();
-	numAdded = 0;
+	int fOld = -1;
+	int start = I_FloatTime();
+	int numAdded = 0;
 
 	/* merge */
-	for ( i = 0, j = 0; i < numMetaTriangles; i = j )
-	{
-		/* get head of list */
-		head = &metaTriangles[ i ];
-
-		/* skip this triangle if it has already been merged */
-		if ( head->si == NULL ) {
-			continue;
-		}
-
-		/* find end */
-		if ( j <= i ) {
-			for ( j = i + 1; j < numMetaTriangles; j++ )
-			{
-				/* get end of list */
-				end = &metaTriangles[ j ];
-				if ( head->si != end->si || head->fogNum != end->fogNum ) {
-					break;
-				}
-			}
-		}
-
+	metaTriangle_t *begin, *end = metaTriangles;
+	while( end != metaTrianglesEnd ){
+		std::tie( begin, end ) = std::equal_range( end, metaTrianglesEnd, *end, CompareMetaTriangles<false>() );
 		/* try to merge this list of possible merge candidates */
-		MetaTrianglesToSurface( ( j - i ), head, &fOld, &numAdded );
+		MetaTrianglesToSurface( begin, end, &fOld, &numAdded );
 	}
 
 	/* clear meta triangle list */
 	ClearMetaTriangles();
 
 	/* print time */
-	if ( i ) {
-		Sys_FPrintf( SYS_VRB, " (%d)\n", (int) ( I_FloatTime() - start ) );
-	}
+	Sys_FPrintf( SYS_VRB, " (%d)\n", (int) ( I_FloatTime() - start ) );
 
 	/* emit some stats */
 	Sys_FPrintf( SYS_VRB, "%9d surfaces merged\n", numMergedSurfaces );

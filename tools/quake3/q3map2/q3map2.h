@@ -974,6 +974,7 @@ struct metaTriangle_t
 	Plane3f plane;
 	Vector3 lightmapAxis;
 	int indexes[ 3 ];
+	float min, max;
 };
 
 
@@ -1710,7 +1711,6 @@ void                        Foliage( mapDrawSurface_t *src );
 
 /* ydnar: surface_meta.c */
 void                        ClearMetaTriangles( void );
-int                         FindMetaTriangle( metaTriangle_t *src, bspDrawVert_t *a, bspDrawVert_t *b, bspDrawVert_t *c, int planeNum );
 void                        MakeEntityMetaTriangles( entity_t *e );
 void                        FixMetaTJunctions( void );
 void                        SmoothMetaTriangles( void );
