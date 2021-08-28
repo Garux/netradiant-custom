@@ -30,7 +30,11 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include <set>
 
+
+const Plane3f c_spatial_sort_plane( 0.786868, 0.316861, 0.529564, 0 );
+const float c_spatial_EQUAL_EPSILON = EQUAL_EPSILON * 2;
 
 
 #define VERTS_EXCEEDED      -1000
@@ -1237,28 +1241,38 @@ void SmoothMetaTriangles( void ){
 
 
 
+struct SpatialIndex
+{
+	const float m_dist;
+	const int m_index; // index of bspDrawVert_t in mapDrawSurface_t::verts array
+	SpatialIndex( const Vector3& point, int index ) : m_dist( plane3_distance_to_point( c_spatial_sort_plane, point ) ), m_index( index ){}
+	bool operator<( const SpatialIndex& other ) const {
+		return m_dist < other.m_dist - c_spatial_EQUAL_EPSILON;
+	}
+
+};
+
+using Sorted_indices = std::multiset<SpatialIndex>;
+
+
 /*
    AddMetaVertToSurface()
    adds a drawvert to a surface unless an existing vert matching already exists
    returns the index of that vert (or < 0 on failure)
  */
 
-int AddMetaVertToSurface( mapDrawSurface_t *ds, bspDrawVert_t *dv1, int *coincident ){
-	int i;
-	bspDrawVert_t   *dv2;
-
-
+int AddMetaVertToSurface( mapDrawSurface_t *ds, const bspDrawVert_t& dv1, const Sorted_indices& sorted_indices, int *coincident ){
 	/* go through the verts and find a suitable candidate */
-	for ( i = 0; i < ds->numVerts; i++ )
-	{
+	const auto [begin, end] = sorted_indices.equal_range( SpatialIndex( dv1.xyz, 0 ) );
+	for( auto it = begin; it != end; ++it ){
 		/* get test vert */
-		dv2 = &ds->verts[ i ];
+		const bspDrawVert_t& dv2 = ds->verts[ it->m_index ];
 
 		/* compare xyz and normal */
-		if ( !VectorCompare( dv1->xyz, dv2->xyz ) ) {
+		if ( !VectorCompare( dv1.xyz, dv2.xyz ) ) {
 			continue;
 		}
-		if ( !VectorCompare( dv1->normal, dv2->normal ) ) {
+		if ( !VectorCompare( dv1.normal, dv2.normal ) ) {
 			continue;
 		}
 
@@ -1266,16 +1280,16 @@ int AddMetaVertToSurface( mapDrawSurface_t *ds, bspDrawVert_t *dv1, int *coincid
 		( *coincident )++;
 
 		/* compare texture coordinates and color */
-		if ( dv1->st[ 0 ] != dv2->st[ 0 ] || dv1->st[ 1 ] != dv2->st[ 1 ] ) {
+		if ( dv1.st[ 0 ] != dv2.st[ 0 ] || dv1.st[ 1 ] != dv2.st[ 1 ] ) {
 			continue;
 		}
-		if ( dv1->color[ 0 ].alpha() != dv2->color[ 0 ].alpha() ) {
+		if ( dv1.color[ 0 ].alpha() != dv2.color[ 0 ].alpha() ) {
 			continue;
 		}
 
 		/* found a winner */
 		numMergedVerts++;
-		return i;
+		return it->m_index;
 	}
 
 	/* overflow check */
@@ -1284,8 +1298,7 @@ int AddMetaVertToSurface( mapDrawSurface_t *ds, bspDrawVert_t *dv1, int *coincid
 	}
 
 	/* made it this far, add the vert and return */
-	dv2 = &ds->verts[ ds->numVerts++ ];
-	*dv2 = *dv1;
+	ds->verts[ ds->numVerts++ ] = dv1;
 	return ( ds->numVerts - 1 );
 }
 
@@ -1301,18 +1314,18 @@ int AddMetaVertToSurface( mapDrawSurface_t *ds, bspDrawVert_t *dv1, int *coincid
 #define AXIS_SCORE          100000
 #define AXIS_MIN            100000
 #define VERT_SCORE          10000
-#define SURFACE_SCORE           1000
+#define SURFACE_SCORE       1000
 #define ST_SCORE            50
 #define ST_SCORE2           ( 2 * ( ST_SCORE ) )
 
-#define DEFAULT_ADEQUATE_SCORE      ( (AXIS_MIN) +1 * ( VERT_SCORE ) )
-#define DEFAULT_GOOD_SCORE      ( (AXIS_MIN) +2 * (VERT_SCORE)                   +4 * ( ST_SCORE ) )
-#define         PERFECT_SCORE       ( (AXIS_MIN) +3 * ( VERT_SCORE ) + (SURFACE_SCORE) +4 * ( ST_SCORE ) )
+#define DEFAULT_ADEQUATE_SCORE  ( (AXIS_MIN) + 1 * (VERT_SCORE) )
+#define DEFAULT_GOOD_SCORE      ( (AXIS_MIN) + 2 * (VERT_SCORE) + 4 * (ST_SCORE) )
+#define PERFECT_SCORE           ( (AXIS_MIN) + 3 * (VERT_SCORE) + (SURFACE_SCORE) + 4 * (ST_SCORE) )
 
 #define ADEQUATE_SCORE          ( metaAdequateScore >= 0 ? metaAdequateScore : DEFAULT_ADEQUATE_SCORE )
-#define GOOD_SCORE          ( metaGoodScore     >= 0 ? metaGoodScore     : DEFAULT_GOOD_SCORE )
+#define GOOD_SCORE              ( metaGoodScore     >= 0 ? metaGoodScore     : DEFAULT_GOOD_SCORE )
 
-static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, MinMax& texMinMax, bool testAdd ){
+static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, MinMax& texMinMax, Sorted_indices& sorted_indices, bool testAdd ){
 	int i, score, coincident, ai, bi, ci;
 
 
@@ -1368,10 +1381,11 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	mapDrawSurface_t old( *ds );
 
 	/* attempt to add the verts */
+	const int numVerts_original = ds->numVerts;
 	coincident = 0;
-	ai = AddMetaVertToSurface( ds, &metaVerts[ tri->indexes[ 0 ] ], &coincident );
-	bi = AddMetaVertToSurface( ds, &metaVerts[ tri->indexes[ 1 ] ], &coincident );
-	ci = AddMetaVertToSurface( ds, &metaVerts[ tri->indexes[ 2 ] ], &coincident );
+	ai = AddMetaVertToSurface( ds, metaVerts[ tri->indexes[ 0 ] ], sorted_indices, &coincident );
+	bi = AddMetaVertToSurface( ds, metaVerts[ tri->indexes[ 1 ] ], sorted_indices, &coincident );
+	ci = AddMetaVertToSurface( ds, metaVerts[ tri->indexes[ 2 ] ], sorted_indices, &coincident );
 
 	/* check vertex underflow */
 	if ( ai < 0 || bi < 0 || ci < 0 ) {
@@ -1500,6 +1514,11 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 
 		/* add a side reference */
 		ds->sideRef = AllocSideRef( tri->side, ds->sideRef );
+
+		for( const auto id : { ai, bi, ci } ){
+			if( id >= numVerts_original )
+				sorted_indices.insert( SpatialIndex( ds->verts[id].xyz, id ) );
+		}
 	}
 
 	/* return to sender */
@@ -1559,8 +1578,10 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 
 		MinMax texMinMax;
 
+		Sorted_indices sorted_indices;
+
 		/* add the first triangle */
-		if ( AddMetaTriangleToSurface( ds, seed, texMinMax, false ) ) {
+		if ( AddMetaTriangleToSurface( ds, seed, texMinMax, sorted_indices, false ) ) {
 			( *numAdded )++;
 		}
 
@@ -1593,14 +1614,14 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 				}
 
 				/* score this triangle */
-				score = AddMetaTriangleToSurface( ds, test, texMinMax, true );
+				score = AddMetaTriangleToSurface( ds, test, texMinMax, sorted_indices, true );
 				if ( score > bestScore ) {
 					best = j;
 					bestScore = score;
 
 					/* if we have a score over a certain threshold, just use it */
 					if ( bestScore >= GOOD_SCORE ) {
-						if ( AddMetaTriangleToSurface( ds, &possibles[ best ], texMinMax, false ) ) {
+						if ( AddMetaTriangleToSurface( ds, &possibles[ best ], texMinMax, sorted_indices, false ) ) {
 							( *numAdded )++;
 						}
 
@@ -1614,7 +1635,7 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 
 			/* add best candidate */
 			if ( best >= 0 && bestScore > ADEQUATE_SCORE ) {
-				if ( AddMetaTriangleToSurface( ds, &possibles[ best ], texMinMax, false ) ) {
+				if ( AddMetaTriangleToSurface( ds, &possibles[ best ], texMinMax, sorted_indices, false ) ) {
 					( *numAdded )++;
 				}
 
