@@ -964,20 +964,6 @@ struct drawSurfRef_t
 };
 
 
-/* ydnar: metasurfaces are constructed from lists of metatriangles so they can be merged in the best way */
-struct metaTriangle_t
-{
-	shaderInfo_t        *si;
-	const side_t        *side;
-	int entityNum, surfaceNum, planeNum, fogNum, sampleSize, castShadows, recvShadows;
-	float shadeAngleDegrees;
-	Plane3f plane;
-	Vector3 lightmapAxis;
-	int indexes[ 3 ];
-	float min, max;
-};
-
-
 struct epair_t
 {
 	CopiedString key, value;

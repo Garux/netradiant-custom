@@ -30,11 +30,36 @@
 
 /* dependencies */
 #include "q3map2.h"
-#include <set>
+#include <map>
 
 
 const Plane3f c_spatial_sort_plane( 0.786868, 0.316861, 0.529564, 0 );
 const float c_spatial_EQUAL_EPSILON = EQUAL_EPSILON * 2;
+
+struct MinMax1D
+{
+	float min, max;
+	MinMax1D() : min( std::numeric_limits<float>::max() ), max( std::numeric_limits<float>::lowest() ){}
+	void extend( float val ){
+		value_minimize( min, val );
+		value_maximize( max, val );
+	}
+};
+
+/* ydnar: metasurfaces are constructed from lists of metatriangles so they can be merged in the best way */
+struct metaTriangle_t
+{
+	shaderInfo_t        *si;
+	const side_t        *side;
+	int entityNum, surfaceNum, planeNum, fogNum, sampleSize, castShadows, recvShadows;
+	float shadeAngleDegrees;
+	Plane3f plane;
+	Vector3 lightmapAxis;
+	int indexes[ 3 ];
+	MinMax1D minmax;
+};
+
+
 
 
 #define VERTS_EXCEEDED      -1000
@@ -1241,18 +1266,9 @@ void SmoothMetaTriangles( void ){
 
 
 
-struct SpatialIndex
-{
-	const float m_dist;
-	const int m_index; // index of bspDrawVert_t in mapDrawSurface_t::verts array
-	SpatialIndex( const Vector3& point, int index ) : m_dist( plane3_distance_to_point( c_spatial_sort_plane, point ) ), m_index( index ){}
-	bool operator<( const SpatialIndex& other ) const {
-		return m_dist < other.m_dist - c_spatial_EQUAL_EPSILON;
-	}
-
-};
-
-using Sorted_indices = std::multiset<SpatialIndex>;
+using Sorted_indices = std::multimap
+<float, // plane3_distance_to_point( c_spatial_sort_plane, point )
+int>;   // index of bspDrawVert_t in mapDrawSurface_t::verts array
 
 
 /*
@@ -1263,10 +1279,11 @@ using Sorted_indices = std::multiset<SpatialIndex>;
 
 int AddMetaVertToSurface( mapDrawSurface_t *ds, const bspDrawVert_t& dv1, const Sorted_indices& sorted_indices, int *coincident ){
 	/* go through the verts and find a suitable candidate */
-	const auto [begin, end] = sorted_indices.equal_range( SpatialIndex( dv1.xyz, 0 ) );
+	const auto begin = sorted_indices.lower_bound( plane3_distance_to_point( c_spatial_sort_plane, dv1.xyz ) - c_spatial_EQUAL_EPSILON );
+	const auto end = sorted_indices.upper_bound( plane3_distance_to_point( c_spatial_sort_plane, dv1.xyz ) + c_spatial_EQUAL_EPSILON );
 	for( auto it = begin; it != end; ++it ){
 		/* get test vert */
-		const bspDrawVert_t& dv2 = ds->verts[ it->m_index ];
+		const bspDrawVert_t& dv2 = ds->verts[ it->second ];
 
 		/* compare xyz and normal */
 		if ( !VectorCompare( dv1.xyz, dv2.xyz ) ) {
@@ -1289,7 +1306,7 @@ int AddMetaVertToSurface( mapDrawSurface_t *ds, const bspDrawVert_t& dv1, const 
 
 		/* found a winner */
 		numMergedVerts++;
-		return it->m_index;
+		return it->second;
 	}
 
 	/* overflow check */
@@ -1508,7 +1525,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 
 		for( const auto id : { ai, bi, ci } ){
 			if( id >= numVerts_original )
-				sorted_indices.insert( SpatialIndex( ds->verts[id].xyz, id ) );
+				sorted_indices.emplace( plane3_distance_to_point( c_spatial_sort_plane, ds->verts[id].xyz ), id );
 		}
 	}
 
@@ -1563,10 +1580,25 @@ static void MetaTrianglesToSurface( metaTriangle_t *begin, metaTriangle_t *end, 
 
 		Sorted_indices sorted_indices;
 
+		/*
+			strategy:
+			triangles are sorted by spatial minmax.min
+			DEFAULT_ADEQUATE_SCORE implies at least single vertex coincident with ones of surface
+			thus we only check range of triangles, whose min is epsilon-entrant to surface's spatial max
+		*/
+		auto expand_range = [range_max = std::numeric_limits<float>::lowest(), end]( metaTriangle_t *triangle ) mutable {
+			value_maximize( range_max, triangle->minmax.max );
+			return std::upper_bound( triangle + 1, end, range_max + c_spatial_EQUAL_EPSILON,
+			[]( const float max, const metaTriangle_t& tri ){
+				return max < tri.minmax.min;
+			} );
+		};
+
 		/* add the first triangle */
 		if ( AddMetaTriangleToSurface( ds, seed, texMinMax, sorted_indices, false ) ) {
 			( *numAdded )++;
 		}
+		metaTriangle_t *testend = expand_range( seed );
 
 		/* -----------------------------------------------------------------
 		   add triangles
@@ -1587,7 +1619,7 @@ static void MetaTrianglesToSurface( metaTriangle_t *begin, metaTriangle_t *end, 
 			added = false;
 
 			/* walk the list of possible candidates for merging */
-			for ( metaTriangle_t *test = seed + 1; test != end; ++test )
+			for ( metaTriangle_t *test = seed + 1; test < testend; ++test )
 			{
 				/* skip this triangle if it has already been merged */
 				if ( test->si == NULL ) {
@@ -1604,6 +1636,7 @@ static void MetaTrianglesToSurface( metaTriangle_t *begin, metaTriangle_t *end, 
 					if ( bestScore >= GOOD_SCORE ) {
 						if ( AddMetaTriangleToSurface( ds, best, texMinMax, sorted_indices, false ) ) {
 							( *numAdded )++;
+							testend = expand_range( best );
 						}
 
 						/* reset */
@@ -1618,6 +1651,7 @@ static void MetaTrianglesToSurface( metaTriangle_t *begin, metaTriangle_t *end, 
 			if ( best != nullptr && bestScore > ADEQUATE_SCORE ) {
 				if ( AddMetaTriangleToSurface( ds, best, texMinMax, sorted_indices, false ) ) {
 					( *numAdded )++;
+					testend = expand_range( best );
 				}
 
 				/* reset */
@@ -1731,13 +1765,8 @@ struct CompareMetaTriangles
 
 		/* then position in world */
 		if constexpr ( sort_spatially ){
-#if 0
-			if ( a.min < b.min ) {
-				return true;
-			}
-			else if ( a.min > b.min ) {
-				return false;
-			}
+#if 1
+			return a.minmax.min < b.minmax.min;
 #else
 			/* find mins */
 			Vector3 aMins( 999999 );
@@ -1789,12 +1818,8 @@ void MergeMetaTriangles( void ){
 	/* sort the triangles by shader major, fognum minor */
 	metaTriangle_t *metaTrianglesEnd = metaTriangles + numMetaTriangles;
 	for( metaTriangle_t *it = metaTriangles; it != metaTrianglesEnd; ++it ){
-		it->min = std::numeric_limits<float>::max();
-		it->max = std::numeric_limits<float>::lowest();
 		for( int i = 0; i < 3; ++i ){
-			const float dist = plane3_distance_to_point( c_spatial_sort_plane, metaVerts[it->indexes[i]].xyz );
-			value_minimize( it->min, dist );
-			value_maximize( it->max, dist );
+			it->minmax.extend( plane3_distance_to_point( c_spatial_sort_plane, metaVerts[it->indexes[i]].xyz ) );
 		}
 	}
 	std::sort( metaTriangles, metaTrianglesEnd, CompareMetaTriangles<true>() );
