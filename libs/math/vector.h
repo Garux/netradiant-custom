@@ -124,6 +124,25 @@ inline Element float_mod( const Element& self, const ModulusElement& modulus ){
 
 
 template<typename Element, typename OtherElement>
+inline bool vector2_equal( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
+	return self.x() == other.x() && self.y() == other.y();
+}
+template<typename Element, typename OtherElement>
+inline bool operator==( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
+	return vector2_equal( self, other );
+}
+template<typename Element, typename OtherElement>
+inline bool operator!=( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
+	return !vector2_equal( self, other );
+}
+
+template<typename Element, typename OtherElement, typename Epsilon>
+inline bool vector2_equal_epsilon( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other, Epsilon epsilon ){
+	return float_equal_epsilon( self.x(), other.x(), epsilon )
+	    && float_equal_epsilon( self.y(), other.y(), epsilon );
+}
+
+template<typename Element, typename OtherElement>
 inline BasicVector2<Element> vector2_added( const BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
 	return BasicVector2<Element>(
 	           Element( self.x() + other.x() ),

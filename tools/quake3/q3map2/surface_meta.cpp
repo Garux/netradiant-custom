@@ -1297,7 +1297,7 @@ int AddMetaVertToSurface( mapDrawSurface_t *ds, const bspDrawVert_t& dv1, const 
 		( *coincident )++;
 
 		/* compare texture coordinates and color */
-		if ( dv1.st[ 0 ] != dv2.st[ 0 ] || dv1.st[ 1 ] != dv2.st[ 1 ] ) {
+		if ( !vector2_equal_epsilon( dv1.st, dv2.st, 1e-4f ) ) {
 			continue;
 		}
 		if ( dv1.color[ 0 ].alpha() != dv2.color[ 0 ].alpha() ) {
