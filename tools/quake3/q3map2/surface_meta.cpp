@@ -1634,15 +1634,8 @@ static void MetaTrianglesToSurface( metaTriangle_t *begin, metaTriangle_t *end, 
 
 					/* if we have a score over a certain threshold, just use it */
 					if ( bestScore >= GOOD_SCORE ) {
-						if ( AddMetaTriangleToSurface( ds, best, texMinMax, sorted_indices, false ) ) {
-							( *numAdded )++;
-							testend = expand_range( best );
-						}
-
-						/* reset */
-						best = nullptr;
-						bestScore = 0;
-						added = true;
+						/* don't keep "we're on the right track, yay!" run, but restart loop; produces fewer and more quality surfaces */
+						break;
 					}
 				}
 			}
