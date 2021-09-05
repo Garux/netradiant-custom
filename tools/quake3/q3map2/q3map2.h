@@ -2018,7 +2018,6 @@ Q_EXTERN bool lightmapFill Q_ASSIGN( false );
 Q_EXTERN bool lightmapPink Q_ASSIGN( false );
 Q_EXTERN int metaAdequateScore Q_ASSIGN( -1 );
 Q_EXTERN int metaGoodScore Q_ASSIGN( -1 );
-Q_EXTERN float metaMaxBBoxDistance Q_ASSIGN( -1 );
 Q_EXTERN bool noob Q_ASSIGN( false );
 
 #if Q3MAP2_EXPERIMENTAL_SNAP_NORMAL_FIX

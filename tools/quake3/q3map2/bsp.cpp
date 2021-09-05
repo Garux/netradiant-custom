@@ -838,16 +838,6 @@ int BSPMain( int argc, char **argv ){
 				Sys_Printf( "Setting GOOD meta score to %d (see surface_meta.c)\n", metaGoodScore );
 			}
 		}
-		else if ( striEqual( argv[ i ], "-metamaxbboxdistance" ) ) {
-			metaMaxBBoxDistance = atof( argv[ i + 1 ] );
-			if ( metaMaxBBoxDistance < 0 ) {
-				metaMaxBBoxDistance = -1;
-			}
-			i++;
-			if ( metaMaxBBoxDistance >= 0 ) {
-				Sys_Printf( "Setting meta maximum bounding box distance to %f\n", metaMaxBBoxDistance );
-			}
-		}
 		else if ( striEqual( argv[ i ], "-patchmeta" ) ) {
 			Sys_Printf( "Creating meta surfaces from patches\n" );
 			patchMeta = true;

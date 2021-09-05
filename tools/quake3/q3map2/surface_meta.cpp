@@ -1382,15 +1382,6 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, const metaTriangle_t&
 		}
 	}
 
-
-
-	if ( metaMaxBBoxDistance >= 0 && ds->numIndexes > 0 ) {
-		if( !ds->minmax.test( tri.m_vertices[ 0 ]->xyz, metaMaxBBoxDistance )
-		 && !ds->minmax.test( tri.m_vertices[ 1 ]->xyz, metaMaxBBoxDistance )
-		 && !ds->minmax.test( tri.m_vertices[ 2 ]->xyz, metaMaxBBoxDistance ) )
-			return 0;
-	}
-
 	/* set initial score */
 	score = tri.surfaceNum == ds->surfaceNum ? SURFACE_SCORE : 0;
 

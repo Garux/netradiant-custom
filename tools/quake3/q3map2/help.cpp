@@ -107,7 +107,6 @@ void HelpBsp()
 		{"-meta", "Combine adjacent triangles of the same texture to surfaces (ALWAYS USE THIS)"},
 		{"-metaadequatescore <N>", "Adequate score for adding triangles to meta surfaces"},
 		{"-metagoodscore <N>", "Good score for adding triangles to meta surfaces"},
-		{"-metamaxbboxdistance <F>", "Maximum bounding box distance for meta surfaces"},
 		{"-minsamplesize <N>", "Sets minimum lightmap resolution in luxels/qu"},
 		{"-mi <N>", "Sets the maximum number of indexes per surface"},
 		{"-mv <N>", "Sets the maximum number of vertices of a lightmapped surface"},
