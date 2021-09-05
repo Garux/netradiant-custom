@@ -1294,7 +1294,7 @@ int>;   // index of bspDrawVert_t in mapDrawSurface_t::verts array
    returns the index of that vert (or < 0 on failure)
  */
 
-int AddMetaVertToSurface( mapDrawSurface_t *ds, const bspDrawVert_t& dv1, const Sorted_indices& sorted_indices, int *coincident ){
+int AddMetaVertToSurface( mapDrawSurface_t *ds, const bspDrawVert_t& dv1, const Sorted_indices& sorted_indices, int *coincident, BasicVector2<int>& stdiff ){
 	/* go through the verts and find a suitable candidate */
 	const auto begin = sorted_indices.lower_bound( spatial_distance( dv1.xyz ) - c_spatial_EQUAL_EPSILON );
 	const auto end = sorted_indices.upper_bound( spatial_distance( dv1.xyz ) + c_spatial_EQUAL_EPSILON );
@@ -1314,10 +1314,15 @@ int AddMetaVertToSurface( mapDrawSurface_t *ds, const bspDrawVert_t& dv1, const 
 		( *coincident )++;
 
 		/* compare texture coordinates and color */
-		if ( !vector2_equal_epsilon( dv1.st, dv2.st, 1e-4f ) ) {
+		if ( dv1.color[ 0 ].alpha() != dv2.color[ 0 ].alpha() ) {
 			continue;
 		}
-		if ( dv1.color[ 0 ].alpha() != dv2.color[ 0 ].alpha() ) {
+		if ( !vector2_equal_epsilon( dv1.st, dv2.st, 1e-4f ) ) {
+			const Vector2 diff = dv1.st - dv2.st;
+			const BasicVector2<int> idiff( float_to_integer( diff.x() ), float_to_integer( diff.y() ) );
+			if( vector2_equal_epsilon( diff, idiff, 1e-4f ) ){
+				stdiff = idiff;
+			}
 			continue;
 		}
 
@@ -1406,11 +1411,33 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, const metaTriangle_t&
 	mapDrawSurface_t old( *ds );
 
 	/* attempt to add the verts */
+	BasicVector2<int> stdiff[3]{ { 0, 0 }, { 0, 0 }, { 0, 0 } };
 	const int numVerts_original = ds->numVerts;
 	coincident = 0;
-	ai = AddMetaVertToSurface( ds, *tri.m_vertices[ 0 ], sorted_indices, &coincident );
-	bi = AddMetaVertToSurface( ds, *tri.m_vertices[ 1 ], sorted_indices, &coincident );
-	ci = AddMetaVertToSurface( ds, *tri.m_vertices[ 2 ], sorted_indices, &coincident );
+	ai = AddMetaVertToSurface( ds, *tri.m_vertices[ 0 ], sorted_indices, &coincident, stdiff[0] );
+	bi = AddMetaVertToSurface( ds, *tri.m_vertices[ 1 ], sorted_indices, &coincident, stdiff[1] );
+	ci = AddMetaVertToSurface( ds, *tri.m_vertices[ 2 ], sorted_indices, &coincident, stdiff[2] );
+
+	{
+		const BasicVector2<int> identity( 0, 0 );
+		BasicVector2<int> beststdiff( 0, 0 );
+		for( auto&& di : stdiff )
+			if( di != identity )
+				beststdiff = di;
+		if( beststdiff != identity ){
+			if( ( stdiff[0] == identity || stdiff[0] == beststdiff )
+			&& ( stdiff[1] == identity || stdiff[1] == beststdiff )
+			&& ( stdiff[2] == identity || stdiff[2] == beststdiff ) ){
+				metaVertex_t verts[3]{ *tri.m_vertices[ 0 ], *tri.m_vertices[ 1 ], *tri.m_vertices[ 2 ] };
+				for( auto&& ve : verts )
+					ve.st -= beststdiff;
+				ds->numVerts = numVerts_original;
+				ai = AddMetaVertToSurface( ds, verts[ 0 ], sorted_indices, &coincident, stdiff[0] );
+				bi = AddMetaVertToSurface( ds, verts[ 1 ], sorted_indices, &coincident, stdiff[1] );
+				ci = AddMetaVertToSurface( ds, verts[ 2 ], sorted_indices, &coincident, stdiff[2] );
+			}
+		}
+	}
 
 	/* check vertex underflow */
 	if ( ai < 0 || bi < 0 || ci < 0 ) {
