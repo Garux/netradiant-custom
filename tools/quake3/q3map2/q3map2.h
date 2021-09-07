@@ -249,7 +249,9 @@ enum class EBrushType
 
 /* ok to increase these at the expense of more memory */
 #define MAX_MAP_AREAS           0x100       /* MAX_MAP_AREA_BYTES in q_shared must match! */
-#define	MAX_MAP_FOGS			0x100			//& 0x100	/* RBSP (32 - world fog - goggles) */
+#define MAX_MAP_FOGS            0x100       /* technically unlimited in engine, but drawsurf sorting code only has 5 bits for fogs */
+#define MAX_IBSP_FOGS           31          /* (2^5 - world fog) */
+#define MAX_RBSP_FOGS           30          /* (2^5 - world fog - goggles) */
 #define MAX_MAP_LEAFS           0x20000
 #define MAX_MAP_PORTALS         0x20000
 #define MAX_MAP_LIGHTING        0x800000
@@ -257,7 +259,7 @@ enum class EBrushType
 #define MAX_MAP_VISCLUSTERS     0x4000 // <= MAX_MAP_LEAFS
 #define MAX_MAP_VISIBILITY      ( VIS_HEADER_SIZE + MAX_MAP_VISCLUSTERS * ( ( ( MAX_MAP_VISCLUSTERS + 63 ) & ~63 ) >> 3 ) )
 
-#define	MAX_MAP_DRAW_SURFS		0x20000
+#define MAX_MAP_DRAW_SURFS      0x20000
 
 #define MAX_MAP_ADVERTISEMENTS  30
 
