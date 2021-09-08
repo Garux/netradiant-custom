@@ -752,7 +752,6 @@ struct side_t
 	int compileFlags;                       /* from shaderInfo */
 	int value;                              /* from shaderInfo */
 
-	bool visible;                           /* choose visible planes first */
 	bool bevel;                             /* don't ever use for bsp splitting, and don't bother making windings for it */
 	bool culled;                            /* ydnar: face culling */
 };

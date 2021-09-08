@@ -499,18 +499,7 @@ void FilterDetailBrushesIntoTree( entity_t *e, tree_t& tree ){
 			continue;
 		}
 		c_unique++;
-		const int r = FilterBrushIntoTree_r( brush_t( b ), tree.headnode );
-		c_clusters += r;
-
-		/* mark all sides as visible so drawsurfs are created */
-		if ( r ) {
-			for ( side_t& side : b.sides )
-			{
-				if ( !side.winding.empty() ) {
-					side.visible = true;
-				}
-			}
-		}
+		c_clusters += FilterBrushIntoTree_r( brush_t( b ), tree.headnode );
 	}
 
 	/* emit some statistics */
@@ -535,17 +524,7 @@ void FilterStructuralBrushesIntoTree( entity_t *e, tree_t& tree ) {
 			continue;
 		}
 		c_unique++;
-		const int r = FilterBrushIntoTree_r( brush_t( b ), tree.headnode );
-		c_clusters += r;
-
-		// mark all sides as visible so drawsurfs are created
-		if ( r ) {
-			for ( side_t& side : b.sides ) {
-				if ( !side.winding.empty() ) {
-					side.visible = true;
-				}
-			}
-		}
+		c_clusters += FilterBrushIntoTree_r( brush_t( b ), tree.headnode );
 	}
 
 	/* emit some statistics */
