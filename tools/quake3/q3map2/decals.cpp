@@ -597,9 +597,7 @@ static void ProjectDecalOntoFace( decalProjector_t *dp, mapDrawSurface_t *ds ){
 
 	/* backface check */
 	if ( ds->planar ) {
-		Plane3f plane = mapplanes[ ds->planeNum ].plane;
-		plane.dist() += vector3_dot( plane.normal(), entityOrigin );
-		if ( vector3_dot( dp->planes[ 0 ].normal(), plane.normal() ) < -0.0001f ) {
+		if ( vector3_dot( dp->planes[ 0 ].normal(), mapplanes[ ds->planeNum ].normal() ) < -0.0001f ) {
 			return;
 		}
 	}
@@ -623,9 +621,7 @@ static void ProjectDecalOntoPatch( decalProjector_t *dp, mapDrawSurface_t *ds ){
 
 	/* backface check */
 	if ( ds->planar ) {
-		Plane3f plane = mapplanes[ ds->planeNum ].plane;
-		plane.dist() += vector3_dot( plane.normal(), entityOrigin );
-		if ( vector3_dot( dp->planes[ 0 ].normal(), plane.normal() ) < -0.0001f ) {
+		if ( vector3_dot( dp->planes[ 0 ].normal(), mapplanes[ ds->planeNum ].normal() ) < -0.0001f ) {
 			return;
 		}
 	}
@@ -693,9 +689,7 @@ static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *d
 
 	/* backface check */
 	if ( ds->planar ) {
-		Plane3f plane = mapplanes[ ds->planeNum ].plane;
-		plane.dist() += vector3_dot( plane.normal(), entityOrigin );
-		if ( vector3_dot( dp->planes[ 0 ].normal(), plane.normal() ) < -0.0001f ) {
+		if ( vector3_dot( dp->planes[ 0 ].normal(), mapplanes[ ds->planeNum ].normal() ) < -0.0001f ) {
 			return;
 		}
 	}
