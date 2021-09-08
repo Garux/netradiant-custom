@@ -470,14 +470,11 @@ void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
  */
 
 void EmitFogs( void ){
-	int i, j;
-
-
 	/* setup */
 	numBSPFogs = numMapFogs;
 
 	/* walk list */
-	for ( i = 0; i < numMapFogs; i++ )
+	for ( int i = 0; i < numMapFogs; i++ )
 	{
 		/* set shader */
 		// copy and clear the rest of memory
@@ -500,7 +497,7 @@ void EmitFogs( void ){
 			}
 
 			/* find visible side */
-			for ( j = 0; j < 6; j++ )
+			for ( int j = 6; j-- > 0; ) // prioritize +Z (index 5) then -Z (index 4) in ambiguous case; fogged pit is assumed as most likely case
 			{
 				if ( !mapFogs[ i ].brush->sides[ j ].visibleHull.empty() ) {
 					Sys_Printf( "Fog %d has visible side %d\n", i, j );
