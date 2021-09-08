@@ -697,7 +697,7 @@ shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im
 		si->vecs[ 0 ] = parent->vecs[ 0 ];
 		si->vecs[ 1 ] = parent->vecs[ 1 ];
 	}
-	if ( vector3_length( parent->lightmapAxis ) != 0.0f && vector3_length( si->lightmapAxis ) == 0.0f ) {
+	if ( parent->lightmapAxis != g_vector3_identity && si->lightmapAxis == g_vector3_identity ) {
 		/* set lightmap projection axis */
 		si->lightmapAxis = parent->lightmapAxis;
 	}
@@ -2505,7 +2505,7 @@ void EmitTriangleSurface( mapDrawSurface_t *ds ){
 
 	/* ydnar: gs mods: handle lightmapped terrain (force to planar type) */
 	//%	else if( vector3_length( ds->lightmapAxis ) <= 0.0f || ds->type == ESurfaceType::Triangles || ds->type == ESurfaceType::Foghull || debugSurfaces )
-	else if ( ( vector3_length( ds->lightmapAxis ) <= 0.0f && !ds->planar ) ||
+	else if ( ( ds->lightmapAxis == g_vector3_identity && !ds->planar ) ||
 	          ds->type == ESurfaceType::Triangles ||
 	          ds->type == ESurfaceType::Foghull ||
 	          ds->numVerts > maxLMSurfaceVerts ||
