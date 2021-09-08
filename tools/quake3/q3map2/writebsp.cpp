@@ -476,33 +476,47 @@ void EmitFogs( void ){
 	/* walk list */
 	for ( int i = 0; i < numMapFogs; i++ )
 	{
+		const fog_t& fog = mapFogs[i];
+		bspFog_t& bspFog = bspFogs[i];
 		/* set shader */
 		// copy and clear the rest of memory
-		strncpy( bspFogs[ i ].shader, mapFogs[ i ].si->shader, sizeof( bspFogs[ i ].shader ) );
+		strncpy( bspFog.shader, fog.si->shader, sizeof( bspFog.shader ) );
 
 		/* global fog doesn't have an associated brush */
-		if ( mapFogs[ i ].brush == NULL ) {
-			bspFogs[ i ].brushNum = -1;
-			bspFogs[ i ].visibleSide = -1;
+		if ( fog.brush == NULL ) {
+			bspFog.brushNum = -1;
+			bspFog.visibleSide = -1;
 		}
 		else
 		{
 			/* set brush */
-			bspFogs[ i ].brushNum = mapFogs[ i ].brush->outputNum;
+			bspFog.brushNum = fog.brush->outputNum;
+			bspFog.visibleSide = -1; // default to something sensible, not just zero index
 
 			/* try to use forced visible side */
-			if ( mapFogs[ i ].visibleSide >= 0 ) {
-				bspFogs[ i ].visibleSide = mapFogs[ i ].visibleSide;
+			if ( fog.visibleSide >= 0 ) {
+				bspFog.visibleSide = fog.visibleSide;
 				continue;
 			}
 
-			/* find visible side */
+			/* find visible axial side */
 			for ( int j = 6; j-- > 0; ) // prioritize +Z (index 5) then -Z (index 4) in ambiguous case; fogged pit is assumed as most likely case
 			{
-				if ( !mapFogs[ i ].brush->sides[ j ].visibleHull.empty() ) {
+				if ( !fog.brush->sides[ j ].visibleHull.empty() ) {
 					Sys_Printf( "Fog %d has visible side %d\n", i, j );
-					bspFogs[ i ].visibleSide = j;
+					bspFog.visibleSide = j;
 					break;
+				}
+			}
+			/* try other sides */
+			if( bspFog.visibleSide < 0 ){
+				for ( size_t j = 6; j < fog.brush->sides.size(); ++j )
+				{
+					if ( !fog.brush->sides[ j ].visibleHull.empty() ) {
+						Sys_Printf( "Fog %d has visible side %d\n", i, j );
+						bspFog.visibleSide = j;
+						break;
+					}
 				}
 			}
 		}

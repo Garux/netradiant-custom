@@ -670,17 +670,17 @@ void CreateMapFogs( void ){
 			fog.visibleSide = -1;
 
 			/* if shader specifies an explicit direction, then find a matching brush side with an opposed normal */
-			if ( vector3_length( fog.si->fogDir ) ) {
-				/* flip it */
-				const Vector3 invFogDir = -fog.si->fogDir;
-
+			if ( fog.si->fogDir != g_vector3_identity ) {
+				double bestDot = 0;
 				/* find the brush side */
 				for ( size_t j = 0; j < brush.sides.size(); ++j )
 				{
-					if ( VectorCompare( invFogDir, mapplanes[ brush.sides[ j ].planenum ].normal() ) ) {
-						fog.visibleSide = j;
-						//%	Sys_Printf( "Brush num: %d Side num: %d\n", fog->brushNum, fog->visibleSide );
-						break;
+					if( !brush.sides[ j ].bevel ){
+						const double dot = vector3_dot( fog.si->fogDir, mapplanes[ brush.sides[ j ].planenum ].normal() );
+						if( dot < bestDot ){
+							bestDot = dot;
+							fog.visibleSide = j;
+						}
 					}
 				}
 			}
