@@ -195,7 +195,7 @@ void LokiInitPaths( char *argv0 ){
    returns NULL if no match found
  */
 
-game_t *GetGame( char *arg ){
+const game_t *GetGame( char *arg ){
 	/* dummy check */
 	if ( strEmptyOrNull( arg ) ) {
 		return NULL;
@@ -214,13 +214,10 @@ game_t *GetGame( char *arg ){
 	}
 
 	/* test it */
-	int i = 0;
-	while ( games[ i ].arg != NULL )
+	for( const game_t& game : g_games )
 	{
-		if ( striEqual( arg, games[ i ].arg ) ) {
-			return &games[ i ];
-		}
-		i++;
+		if ( striEqual( arg, game.arg ) )
+			return &game;
 	}
 
 	/* no matching game */
@@ -371,7 +368,7 @@ void InitPaths( int *argc, char **argv ){
 	LokiInitPaths( argv[ 0 ] );
 
 	/* set game to default (q3a) */
-	game = &games[ 0 ];
+	game = &g_games[ 0 ];
 	numBasePaths = 0;
 	numGamePaths = 0;
 
@@ -393,7 +390,7 @@ void InitPaths( int *argc, char **argv ){
 			argv[ i - 1 ] = NULL;
 			game = GetGame( argv[ i ] );
 			if ( game == NULL ) {
-				game = &games[ 0 ];
+				game = &g_games[ 0 ];
 			}
 			argv[ i ] = NULL;
 		}

@@ -405,8 +405,8 @@ void HelpCommon()
 
 void HelpGames(){
 	Sys_Printf( "Available games:\n" );
-	for( game_t *game = games; game->arg != NULL; ++game )
-		Sys_Printf( "  %s\n", game->arg );
+	for( const game_t& game : g_games )
+		Sys_Printf( "  %s\n", game.arg );
 }
 
 void HelpMain(const char* arg)

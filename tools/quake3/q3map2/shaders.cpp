@@ -216,8 +216,7 @@ void TCModRotate( tcMod_t& mod, float euler ){
  */
 
 bool ApplySurfaceParm( const char *name, int *contentFlags, int *surfaceFlags, int *compileFlags ){
-	int i, fake;
-	surfaceParm_t   *sp;
+	int fake;
 
 
 	/* dummy check */
@@ -235,42 +234,38 @@ bool ApplySurfaceParm( const char *name, int *contentFlags, int *surfaceFlags, i
 	}
 
 	/* walk the current game's surfaceparms */
-	sp = game->surfaceParms;
-	while ( sp->name != NULL )
+	for( const surfaceParm_t& sp : game->surfaceParms )
 	{
 		/* match? */
-		if ( striEqual( name, sp->name ) ) {
+		if ( striEqual( name, sp.name ) ) {
 			/* clear and set flags */
-			*contentFlags &= ~( sp->contentFlagsClear );
-			*contentFlags |= sp->contentFlags;
-			*surfaceFlags &= ~( sp->surfaceFlagsClear );
-			*surfaceFlags |= sp->surfaceFlags;
-			*compileFlags &= ~( sp->compileFlagsClear );
-			*compileFlags |= sp->compileFlags;
+			*contentFlags &= ~( sp.contentFlagsClear );
+			*contentFlags |= sp.contentFlags;
+			*surfaceFlags &= ~( sp.surfaceFlagsClear );
+			*surfaceFlags |= sp.surfaceFlags;
+			*compileFlags &= ~( sp.compileFlagsClear );
+			*compileFlags |= sp.compileFlags;
 
 			/* return ok */
 			return true;
 		}
-
-		/* next */
-		sp++;
 	}
 
 	/* check custom info parms */
-	for ( i = 0; i < numCustSurfaceParms; i++ )
+	for ( int i = 0; i < numCustSurfaceParms; i++ )
 	{
 		/* get surfaceparm */
-		sp = &custSurfaceParms[ i ];
+		const surfaceParm_t& sp = custSurfaceParms[ i ];
 
 		/* match? */
-		if ( striEqual( name, sp->name ) ) {
+		if ( striEqual( name, sp.name ) ) {
 			/* clear and set flags */
-			*contentFlags &= ~( sp->contentFlagsClear );
-			*contentFlags |= sp->contentFlags;
-			*surfaceFlags &= ~( sp->surfaceFlagsClear );
-			*surfaceFlags |= sp->surfaceFlags;
-			*compileFlags &= ~( sp->compileFlagsClear );
-			*compileFlags |= sp->compileFlags;
+			*contentFlags &= ~( sp.contentFlagsClear );
+			*contentFlags |= sp.contentFlags;
+			*surfaceFlags &= ~( sp.surfaceFlagsClear );
+			*surfaceFlags |= sp.surfaceFlags;
+			*compileFlags &= ~( sp.compileFlagsClear );
+			*compileFlags |= sp.compileFlags;
 
 			/* return ok */
 			return true;

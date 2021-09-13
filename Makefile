@@ -554,6 +554,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/exportents.o \
 	tools/quake3/q3map2/facebsp.o \
 	tools/quake3/q3map2/fog.o \
+	tools/quake3/q3map2/games.o \
 	tools/quake3/q3map2/help.o \
 	tools/quake3/q3map2/image.o \
 	tools/quake3/q3map2/leakfile.o \

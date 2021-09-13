@@ -810,7 +810,7 @@ void PseudoCompileBSP( bool need_tree ){
 int ConvertBSPMain( int argc, char **argv ){
 	int i;
 	int ( *convertFunc )( char * );
-	game_t  *convertGame;
+	const game_t  *convertGame;
 	bool map_allowed, force_bsp, force_map;
 
 

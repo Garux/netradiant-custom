@@ -92,6 +92,7 @@
 #include <stdlib.h>
 
 #include "maxworld.h"
+#include "games.h"
 
 
 /* -------------------------------------------------------------------------------
@@ -135,28 +136,6 @@
 #endif
 
 
-/* ydnar: compiler flags, because games have widely varying content/surface flags */
-#define C_SOLID                 0x00000001
-#define C_TRANSLUCENT           0x00000002
-#define C_STRUCTURAL            0x00000004
-#define C_HINT                  0x00000008
-#define C_NODRAW                0x00000010
-#define C_LIGHTGRID             0x00000020
-#define C_ALPHASHADOW           0x00000040
-#define C_LIGHTFILTER           0x00000080
-#define C_VERTEXLIT             0x00000100
-#define C_LIQUID                0x00000200
-#define C_FOG                   0x00000400
-#define C_SKY                   0x00000800
-#define C_ORIGIN                0x00001000
-#define C_AREAPORTAL            0x00002000
-#define C_ANTIPORTAL            0x00004000  /* like hint, but doesn't generate portals */
-#define C_SKIP                  0x00008000  /* like hint, but skips this face (doesn't split bsp) */
-#define C_NOMARKS               0x00010000  /* no decals */
-#define C_OB                    0x00020000  /* skip -noob for this */
-#define C_DETAIL                0x08000000  /* THIS MUST BE THE SAME AS IN RADIANT! */
-
-
 /* shadow flags */
 #define WORLDSPAWN_CAST_SHADOWS 1
 #define WORLDSPAWN_RECV_SHADOWS 1
@@ -178,7 +157,7 @@
 #define HINT_PRIORITY           1000        /* ydnar: force hint splits first and antiportal/areaportal splits last */
 #define ANTIPORTAL_PRIORITY     -1000
 #define AREAPORTAL_PRIORITY     -1000
-#define DETAIL_PRIORITY     -3000
+#define DETAIL_PRIORITY         -3000
 
 #define PSIDE_FRONT             1
 #define PSIDE_BACK              2
@@ -270,9 +249,6 @@ enum class EBrushType
 #define LIGHTMAP_WIDTH          128
 #define LIGHTMAP_HEIGHT         128
 
-
-
-typedef void ( *bspFunc )( const char * );
 
 
 struct bspLump_t
@@ -432,66 +408,6 @@ struct bspAdvertisement_t
 
 /* ydnar: for q3map_tcMod */
 typedef Vector3 tcMod_t[ 3 ];
-
-
-/* ydnar: for multiple game support */
-struct surfaceParm_t
-{
-	const char  *name;
-	int contentFlags, contentFlagsClear;
-	int surfaceFlags, surfaceFlagsClear;
-	int compileFlags, compileFlagsClear;
-};
-
-enum class EMiniMapMode
-{
-	Gray,
-	Black,
-	White
-};
-
-struct game_t
-{
-	const char          *arg;                           /* -game matches this */
-	const char          *gamePath;                      /* main game data dir */
-	const char          *homeBasePath;                  /* home sub-dir on unix */
-	const char          *magic;                         /* magic word for figuring out base path */
-	const char          *shaderPath;                    /* shader directory */
-	int maxLMSurfaceVerts;                              /* default maximum meta surface verts */
-	int maxSurfaceVerts;                                /* default maximum surface verts */
-	int maxSurfaceIndexes;                              /* default maximum surface indexes (tris * 3) */
-	bool emitFlares;                                    /* when true, emit flare surfaces */
-	const char          *flareShader;                   /* default flare shader (MUST BE SET) */
-	bool wolfLight;                                     /* when true, lights work like wolf q3map  */
-	int lightmapSize;                                   /* bsp lightmap width/height */
-	float lightmapGamma;                                /* default lightmap gamma */
-	bool lightmapsRGB;                                  /* default lightmap sRGB mode */
-	bool texturesRGB;                                   /* default texture sRGB mode */
-	bool colorsRGB;                                     /* default color sRGB mode */
-	float lightmapExposure;                             /* default lightmap exposure */
-	float lightmapCompensate;                           /* default lightmap compensate value */
-	float gridScale;                                    /* vortex: default lightgrid scale (affects both directional and ambient spectres) */
-	float gridAmbientScale;                             /* vortex: default lightgrid ambient spectre scale */
-	bool lightAngleHL;                                  /* jal: use half-lambert curve for light angle attenuation */
-	bool noStyles;                                      /* use lightstyles hack or not */
-	bool keepLights;                                    /* keep light entities on bsp */
-	int patchSubdivisions;                              /* default patch subdivisions tolerance */
-	bool patchShadows;                                  /* patch casting enabled */
-	bool deluxeMap;                                     /* compile deluxemaps */
-	int deluxeMode;                                     /* deluxemap mode (0 - modelspace, 1 - tangentspace with renormalization, 2 - tangentspace without renormalization) */
-	int miniMapSize;                                    /* minimap size */
-	float miniMapSharpen;                               /* minimap sharpening coefficient */
-	float miniMapBorder;                                /* minimap border amount */
-	bool miniMapKeepAspect;                             /* minimap keep aspect ratio by letterboxing */
-	EMiniMapMode miniMapMode;                           /* minimap mode */
-	const char          *miniMapNameFormat;             /* minimap name format */
-	const char          *bspIdent;                      /* 4-letter bsp file prefix */
-	int bspVersion;                                     /* bsp version to use */
-	bool lumpSwap;                                      /* cod-style len/ofs order */
-	bspFunc load, write;                                /* load/write function pointers */
-	surfaceParm_t surfaceParms[ 128 ];                  /* surfaceparm array */
-	int brushBevelsSurfaceFlagsMask;                    /* apply only these surfaceflags to bevels to reduce extra bsp shaders amount; applying them to get correct physics at walkable brush edges and vertices */
-};
 
 
 struct image_t
@@ -1499,7 +1415,7 @@ void                        HelpMain(const char* arg);
 void                        HelpGames();
 
 /* path_init.c */
-game_t                      *GetGame( char *arg );
+const game_t                *GetGame( char *arg );
 void                        InitPaths( int *argc, char **argv );
 
 
@@ -1878,19 +1794,6 @@ void                        InjectCommandLine( char **argv, int beginArgs, int e
 
 
 
-/* bspfile_ibsp.c */
-void                        LoadIBSPFile( const char *filename );
-void                        WriteIBSPFile( const char *filename );
-void						PartialLoadIBSPFile( const char *filename );
-
-
-
-/* bspfile_rbsp.c */
-void                        LoadRBSPFile( const char *filename );
-void                        WriteRBSPFile( const char *filename );
-
-
-
 /* -------------------------------------------------------------------------------
 
    bsp/general global variables
@@ -1905,55 +1808,6 @@ void                        WriteRBSPFile( const char *filename );
 	#define Q_ASSIGN( a )
 #endif
 
-/* game support */
-Q_EXTERN game_t games[]
-#ifndef MAIN_C
-;
-#else
-	=
-	{
-	#include "game_quake3.h"
-	,
-	#include "game_quakelive.h" /* must be after game_quake3.h as they share defines! */
-	,
-	#include "game_nexuiz.h" /* must be after game_quake3.h as they share defines! */
-	,
-	#include "game_xonotic.h" /* must be after game_quake3.h as they share defines! */
-	,
-	#include "game_tremulous.h" /*LinuxManMikeC: must be after game_quake3.h, depends on #define's set in it */
-	,
-	#include "game_unvanquished.h"
-	,
-	#include "game_tenebrae.h"
-	,
-	#include "game_wolf.h"
-	,
-	#include "game_wolfet.h" /* must be after game_wolf.h as they share defines! */
-	,
-	#include "game_etut.h"
-	,
-	#include "game_ef.h"
-	,
-	#include "game_sof2.h"
-	,
-	#include "game_jk2.h"   /* must be after game_sof2.h as they share defines! */
-	,
-	#include "game_ja.h"    /* must be after game_jk2.h as they share defines! */
-	,
-	#include "game_qfusion.h"   /* qfusion game */
-	,
-	#include "game_reaction.h" /* must be after game_quake3.h */
-	,
-	#include "game_darkplaces.h"    /* vortex: darkplaces q1 engine */
-	,
-	#include "game_dq.h"    /* vortex: deluxe quake game ( darkplaces q1 engine) */
-	,
-	#include "game_prophecy.h"  /* vortex: prophecy game ( darkplaces q1 engine) */
-	,
-	#include "game__null.h" /* null game (must be last item) */
-	};
-#endif
-Q_EXTERN game_t             *game Q_ASSIGN( &games[ 0 ] );
 
 
 /* general */

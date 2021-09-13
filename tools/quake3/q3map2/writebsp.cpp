@@ -523,10 +523,12 @@ void EmitFogs( void ){
 	}
 
 	/* warn about overflow */
-	if( game->write == WriteIBSPFile && numMapFogs > MAX_IBSP_FOGS )
+	if( strEqual( game->bspIdent, "RBSP" ) ){
+		if( numMapFogs > MAX_RBSP_FOGS )
+			Sys_Warning( "MAX_RBSP_FOGS (%i) exceeded (%i). Visual inconsistencies are expected.\n", MAX_RBSP_FOGS, numMapFogs );
+	}
+	else if( numMapFogs > MAX_IBSP_FOGS )
 		Sys_Warning( "MAX_IBSP_FOGS (%i) exceeded (%i). Visual inconsistencies are expected.\n", MAX_IBSP_FOGS, numMapFogs );
-	if( game->write == WriteRBSPFile && numMapFogs > MAX_RBSP_FOGS )
-		Sys_Warning( "MAX_RBSP_FOGS (%i) exceeded (%i). Visual inconsistencies are expected.\n", MAX_RBSP_FOGS, numMapFogs );
 }
 
 
