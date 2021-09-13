@@ -173,7 +173,7 @@ int main( int argc, char **argv ){
 
 	/* set game options */
 	if ( !patchSubdivisions ) {
-		patchSubdivisions = game->patchSubdivisions;
+		patchSubdivisions = g_game->patchSubdivisions;
 	}
 
 	/* check if we have enough options left to attempt something */

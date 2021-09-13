@@ -925,7 +925,7 @@ int ConvertBSPMain( int argc, char **argv ){
 	/* bsp format convert? */
 	if ( convertGame != NULL ) {
 		/* set global game */
-		game = convertGame;
+		g_game = convertGame;
 
 		/* write bsp */
 		path_set_extension( source, "_c.bsp" );

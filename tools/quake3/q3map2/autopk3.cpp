@@ -320,7 +320,7 @@ int pk3BSPMain( int argc, char **argv ){
 		}
 	}
 
-	pk3Shaderfiles = vfsListShaderFiles( game->shaderPath );
+	pk3Shaderfiles = vfsListShaderFiles( g_game->shaderPath );
 
 	if( dbg ){
 		Sys_Printf( "\n\tSchroider fileses.....%zu\n", pk3Shaderfiles.size() );
@@ -342,7 +342,7 @@ int pk3BSPMain( int argc, char **argv ){
 	char* ExReasonShaderFile[4096] = { NULL };
 
 	{
-		parseEXfile( stream( game->arg, ".exclude" ), ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
+		parseEXfile( stream( g_game->arg, ".exclude" ), ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
 
 		for ( i = 0; i < ExTextures->n; ++i ){
 			if( !StrList_find( ExShaders, ExTextures->s[i] ) )
@@ -389,7 +389,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 		/* load the shader */
 		char scriptFile[128];
-		sprintf( scriptFile, "%s/%s", game->shaderPath, file.c_str() );
+		sprintf( scriptFile, "%s/%s", g_game->shaderPath, file.c_str() );
 		SilentLoadScriptFile( scriptFile, 0 );
 		if( dbg )
 			Sys_Printf( "\n\tentering %s\n", file.c_str() );
@@ -682,7 +682,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 	for ( CopiedString& file : pk3Shaderfiles ){
 		if ( !file.empty() ){
-			stream( game->shaderPath, "/", file.c_str() );
+			stream( g_game->shaderPath, "/", file.c_str() );
 			if ( !packResource( stream, packname, compLevel ) ){
 				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
 				packFAIL = true;
@@ -784,7 +784,7 @@ int repackBSPMain( int argc, char **argv ){
 	StrList* ExPureTextures = StrList_allocate( 4096 );
 
 	{
-		parseEXfile( stream( game->arg, ".exclude" ), ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
+		parseEXfile( stream( g_game->arg, ".exclude" ), ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
 
 		for ( i = 0; i < ExTextures->n; ++i ){
 			if( !StrList_find( ExShaders, ExTextures->s[i] ) )
@@ -1105,7 +1105,7 @@ int repackBSPMain( int argc, char **argv ){
 
 
 
-	pk3Shaderfiles = vfsListShaderFiles( game->shaderPath );
+	pk3Shaderfiles = vfsListShaderFiles( g_game->shaderPath );
 
 	if( dbg ){
 		Sys_Printf( "\n\tSchroider fileses.....%zu\n", pk3Shaderfiles.size() );
@@ -1140,7 +1140,7 @@ int repackBSPMain( int argc, char **argv ){
 
 		/* load the shader */
 		char scriptFile[128];
-		sprintf( scriptFile, "%s/%s", game->shaderPath, file.c_str() );
+		sprintf( scriptFile, "%s/%s", g_game->shaderPath, file.c_str() );
 		if ( dbg )
 			Sys_Printf( "\n\tentering %s\n", file.c_str() );
 		SilentLoadScriptFile( scriptFile, 0 );

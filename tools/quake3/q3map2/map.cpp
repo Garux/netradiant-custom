@@ -567,7 +567,7 @@ void SetBrushContents( brush_t& b ){
  */
 
 void AddBrushBevels( void ){
-	const int surfaceFlagsMask = game->brushBevelsSurfaceFlagsMask;
+	const int surfaceFlagsMask = g_game->brushBevelsSurfaceFlagsMask;
 	auto& sides = buildBrush.sides;
 
 	//

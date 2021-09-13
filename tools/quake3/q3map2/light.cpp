@@ -1928,7 +1928,7 @@ int LightMain( int argc, char **argv ){
 	Sys_Printf( "--- ProcessGameSpecific ---\n" );
 
 	/* set standard game flags */
-	wolfLight = game->wolfLight;
+	wolfLight = g_game->wolfLight;
 	if ( wolfLight ) {
 		Sys_Printf( " lightning model: wolf\n" );
 	}
@@ -1936,13 +1936,13 @@ int LightMain( int argc, char **argv ){
 		Sys_Printf( " lightning model: quake3\n" );
 	}
 
-	lmCustomSizeW = lmCustomSizeH = game->lightmapSize;
+	lmCustomSizeW = lmCustomSizeH = g_game->lightmapSize;
 	Sys_Printf( " lightmap size: %d x %d pixels\n", lmCustomSizeW, lmCustomSizeH );
 
-	lightmapGamma = game->lightmapGamma;
+	lightmapGamma = g_game->lightmapGamma;
 	Sys_Printf( " lightning gamma: %f\n", lightmapGamma );
 
-	lightmapsRGB = game->lightmapsRGB;
+	lightmapsRGB = g_game->lightmapsRGB;
 	if ( lightmapsRGB ) {
 		Sys_Printf( " lightmap colorspace: sRGB\n" );
 	}
@@ -1950,7 +1950,7 @@ int LightMain( int argc, char **argv ){
 		Sys_Printf( " lightmap colorspace: linear\n" );
 	}
 
-	texturesRGB = game->texturesRGB;
+	texturesRGB = g_game->texturesRGB;
 	if ( texturesRGB ) {
 		Sys_Printf( " texture colorspace: sRGB\n" );
 	}
@@ -1958,7 +1958,7 @@ int LightMain( int argc, char **argv ){
 		Sys_Printf( " texture colorspace: linear\n" );
 	}
 
-	colorsRGB = game->colorsRGB;
+	colorsRGB = g_game->colorsRGB;
 	if ( colorsRGB ) {
 		Sys_Printf( " _color colorspace: sRGB\n" );
 	}
@@ -1966,24 +1966,24 @@ int LightMain( int argc, char **argv ){
 		Sys_Printf( " _color colorspace: linear\n" );
 	}
 
-	lightmapCompensate = game->lightmapCompensate;
+	lightmapCompensate = g_game->lightmapCompensate;
 	Sys_Printf( " lightning compensation: %f\n", lightmapCompensate );
 
-	lightmapExposure = game->lightmapExposure;
+	lightmapExposure = g_game->lightmapExposure;
 	Sys_Printf( " lightning exposure: %f\n", lightmapExposure );
 
-	gridScale = game->gridScale;
+	gridScale = g_game->gridScale;
 	Sys_Printf( " lightgrid scale: %f\n", gridScale );
 
-	gridAmbientScale = game->gridAmbientScale;
+	gridAmbientScale = g_game->gridAmbientScale;
 	Sys_Printf( " lightgrid ambient scale: %f\n", gridAmbientScale );
 
-	lightAngleHL = game->lightAngleHL;
+	lightAngleHL = g_game->lightAngleHL;
 	if ( lightAngleHL ) {
 		Sys_Printf( " half lambert light angle attenuation enabled \n" );
 	}
 
-	noStyles = game->noStyles;
+	noStyles = g_game->noStyles;
 	if ( noStyles ) {
 		Sys_Printf( " shader lightstyles hack: disabled\n" );
 	}
@@ -1991,7 +1991,7 @@ int LightMain( int argc, char **argv ){
 		Sys_Printf( " shader lightstyles hack: enabled\n" );
 	}
 
-	patchShadows = game->patchShadows;
+	patchShadows = g_game->patchShadows;
 	if ( patchShadows ) {
 		Sys_Printf( " patch shadows: enabled\n" );
 	}
@@ -1999,8 +1999,8 @@ int LightMain( int argc, char **argv ){
 		Sys_Printf( " patch shadows: disabled\n" );
 	}
 
-	deluxemap = game->deluxeMap;
-	deluxemode = game->deluxeMode;
+	deluxemap = g_game->deluxeMap;
+	deluxemode = g_game->deluxeMode;
 	if ( deluxemap ) {
 		if ( deluxemode ) {
 			Sys_Printf( " deluxemapping: enabled with tangentspace deluxemaps\n" );
@@ -2339,12 +2339,12 @@ int LightMain( int argc, char **argv ){
 			if ( ( ( lmCustomSizeW - 1 ) & lmCustomSizeW ) || lmCustomSizeW < 2 ||
 			     ( ( lmCustomSizeH - 1 ) & lmCustomSizeH ) || lmCustomSizeH < 2 ) {
 				Sys_Warning( "Lightmap size must be a power of 2, greater or equal to 2 pixels.\n" );
-				lmCustomSizeW = lmCustomSizeH = game->lightmapSize;
+				lmCustomSizeW = lmCustomSizeH = g_game->lightmapSize;
 			}
 			Sys_Printf( "Default lightmap size set to %d x %d pixels\n", lmCustomSizeW, lmCustomSizeH );
 
 			/* enable external lightmaps */
-			if ( lmCustomSizeW != game->lightmapSize || lmCustomSizeH != game->lightmapSize ) {
+			if ( lmCustomSizeW != g_game->lightmapSize || lmCustomSizeH != g_game->lightmapSize ) {
 				/* -lightmapsize might just require -external for native external lms, but it has already been used in existing batches alone,
 				so brand new switch here for external lms, referenced by shaders hack/behavior */
 				externalLightmaps = !extlmhack;
@@ -2412,7 +2412,7 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( striEqual( argv[ i ], "-lightmapsearchpower" ) ) {
-			lightmapMergeSize = ( game->lightmapSize << atoi( argv[i + 1] ) );
+			lightmapMergeSize = ( g_game->lightmapSize << atoi( argv[i + 1] ) );
 			++i;
 			Sys_Printf( "Restricted lightmap searching enabled - optimize for lightmap merge power %d (size %d)\n", atoi( argv[i] ), lightmapMergeSize );
 		}

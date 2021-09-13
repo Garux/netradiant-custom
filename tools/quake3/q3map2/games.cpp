@@ -941,4 +941,4 @@ const std::vector<game_t> g_games = { game_quake3(),
 									  game_jk2(),
 									  game_ja(),
 									};
-const game_t *game = &g_games[0];
+const game_t *g_game = &g_games[0];

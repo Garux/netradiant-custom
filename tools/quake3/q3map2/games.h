@@ -117,4 +117,4 @@ struct game_t
 };
 
 extern const std::vector<game_t> g_games;
-extern const game_t *game;
+extern const game_t *g_game;

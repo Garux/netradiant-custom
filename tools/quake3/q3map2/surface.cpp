@@ -1070,7 +1070,7 @@ mapDrawSurface_t *DrawSurfaceForFlare( int entNum, const Vector3& origin, const 
 		ds->shaderInfo = ShaderInfoForShader( flareShader );
 	}
 	else{
-		ds->shaderInfo = ShaderInfoForShader( game->flareShader );
+		ds->shaderInfo = ShaderInfoForShader( g_game->flareShader );
 	}
 	ds->lightmapOrigin = origin;
 	ds->lightmapVecs[ 2 ] = normal;

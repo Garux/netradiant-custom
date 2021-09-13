@@ -349,12 +349,12 @@ void AddLump( FILE *file, bspHeader_t *header, int lumpNum, const void *data, in
 
 void LoadBSPFile( const char *filename ){
 	/* dummy check */
-	if ( game == NULL || game->load == NULL ) {
+	if ( g_game == NULL || g_game->load == NULL ) {
 		Error( "LoadBSPFile: unsupported BSP file format" );
 	}
 
 	/* load it, then byte swap the in-memory version */
-	game->load( filename );
+	g_game->load( filename );
 	SwapBSPFile();
 }
 
@@ -366,12 +366,12 @@ void LoadBSPFile( const char *filename ){
 
 void PartialLoadBSPFile( const char *filename ){
 	/* dummy check */
-	if ( game == NULL || game->load == NULL ) {
+	if ( g_game == NULL || g_game->load == NULL ) {
 		Error( "LoadBSPFile: unsupported BSP file format" );
 	}
 
 	/* load it, then byte swap the in-memory version */
-	//game->load( filename );
+	//g_game->load( filename );
 	PartialLoadIBSPFile( filename );
 
 	/* PartialSwapBSPFile() */
@@ -407,7 +407,7 @@ void WriteBSPFile( const char *filename ){
 
 
 	/* dummy check */
-	if ( game == NULL || game->write == NULL ) {
+	if ( g_game == NULL || g_game->write == NULL ) {
 		Error( "WriteBSPFile: unsupported BSP file format" );
 	}
 
@@ -417,7 +417,7 @@ void WriteBSPFile( const char *filename ){
 
 	/* byteswap, write the bsp, then swap back so it can be manipulated further */
 	SwapBSPFile();
-	game->write( tempname );
+	g_game->write( tempname );
 	SwapBSPFile();
 
 	/* replace existing bsp file */
@@ -491,7 +491,7 @@ void PrintBSPFileSizes( void ){
 	Sys_Printf( "\n" );
 
 	Sys_Printf( "%9d lightmaps     %9d\n",
-	            numBSPLightBytes / ( game->lightmapSize * game->lightmapSize * 3 ), numBSPLightBytes );
+	            numBSPLightBytes / ( g_game->lightmapSize * g_game->lightmapSize * 3 ), numBSPLightBytes );
 	Sys_Printf( "%9d lightgrid     %9d *\n",
 	            numBSPGridPoints, (int) ( numBSPGridPoints * sizeof( *bspGridPoints ) ) );
 	Sys_Printf( "          visibility    %9d\n",
@@ -839,7 +839,7 @@ void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castS
 	}
 
 	/* vortex: game-specific default entity keys */
-	if ( striEqual( game->magic, "dq" ) || striEqual( game->magic, "prophecy" ) ) {
+	if ( striEqual( g_game->magic, "dq" ) || striEqual( g_game->magic, "prophecy" ) ) {
 		/* vortex: deluxe quake default shadow flags */
 		if ( ent->classname_is( "func_wall" ) ) {
 			if ( recvShadows != NULL ) {

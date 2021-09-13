@@ -215,11 +215,11 @@ void LoadRBSPFile( const char *filename ){
 	SwapBlock( (int*) ( (byte*) header + sizeof( int ) ), sizeof( *header ) - sizeof( int ) );
 
 	/* make sure it matches the format we're trying to load */
-	if ( !force && *( (int*) header->ident ) != *( (const int*) game->bspIdent ) ) {
-		Error( "%s is not a %s file", filename, game->bspIdent );
+	if ( !force && *( (int*) header->ident ) != *( (const int*) g_game->bspIdent ) ) {
+		Error( "%s is not a %s file", filename, g_game->bspIdent );
 	}
-	if ( !force && header->version != game->bspVersion ) {
-		Error( "%s is version %d, not %d", filename, header->version, game->bspVersion );
+	if ( !force && header->version != g_game->bspVersion ) {
+		Error( "%s is version %d, not %d", filename, header->version, g_game->bspVersion );
 	}
 
 	/* load/convert lumps */
@@ -289,8 +289,8 @@ void WriteRBSPFile( const char *filename ){
 	//%	Swapfile();
 
 	/* set up header */
-	*( (int*) (bspHeader_t*) header->ident ) = *( (const int*) game->bspIdent );
-	header->version = LittleLong( game->bspVersion );
+	*( (int*) (bspHeader_t*) header->ident ) = *( (const int*) g_game->bspIdent );
+	header->version = LittleLong( g_game->bspVersion );
 
 	/* write initial header */
 	file = SafeOpenWrite( filename );

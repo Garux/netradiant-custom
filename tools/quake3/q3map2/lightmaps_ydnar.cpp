@@ -129,12 +129,12 @@ void ExportLightmaps( void ){
 	Q_mkdir( dirname );
 
 	/* iterate through the lightmaps */
-	for ( i = 0, lightmap = bspLightBytes; lightmap < ( bspLightBytes + numBSPLightBytes ); i++, lightmap += ( game->lightmapSize * game->lightmapSize * 3 ) )
+	for ( i = 0, lightmap = bspLightBytes; lightmap < ( bspLightBytes + numBSPLightBytes ); i++, lightmap += ( g_game->lightmapSize * g_game->lightmapSize * 3 ) )
 	{
 		/* write a tga image out */
 		sprintf( filename, "%s/lightmap_%04d.tga", dirname, i );
 		Sys_Printf( "Writing %s\n", filename );
-		WriteTGA24( filename, lightmap, game->lightmapSize, game->lightmapSize, false );
+		WriteTGA24( filename, lightmap, g_game->lightmapSize, g_game->lightmapSize, false );
 	}
 }
 
@@ -210,7 +210,7 @@ int ImportLightmapsMain( int argc, char **argv ){
 	Q_mkdir( dirname );
 
 	/* iterate through the lightmaps */
-	for ( i = 0, lightmap = bspLightBytes; lightmap < ( bspLightBytes + numBSPLightBytes ); i++, lightmap += ( game->lightmapSize * game->lightmapSize * 3 ) )
+	for ( i = 0, lightmap = bspLightBytes; lightmap < ( bspLightBytes + numBSPLightBytes ); i++, lightmap += ( g_game->lightmapSize * g_game->lightmapSize * 3 ) )
 	{
 		/* read a tga image */
 		sprintf( filename, "%s/lightmap_%04d.tga", dirname, i );
@@ -232,17 +232,17 @@ int ImportLightmapsMain( int argc, char **argv ){
 			Sys_Warning( "Unable to load image %s\n", filename );
 			continue;
 		}
-		if ( width != game->lightmapSize || height != game->lightmapSize ) {
+		if ( width != g_game->lightmapSize || height != g_game->lightmapSize ) {
 			Sys_Warning( "Image %s is not the right size (%d, %d) != (%d, %d)\n",
-			             filename, width, height, game->lightmapSize, game->lightmapSize );
+			             filename, width, height, g_game->lightmapSize, g_game->lightmapSize );
 		}
 
 		/* copy the pixels */
 		in = pixels;
-		for ( y = 1; y <= game->lightmapSize; y++ )
+		for ( y = 1; y <= g_game->lightmapSize; y++ )
 		{
-			out = lightmap + ( ( game->lightmapSize - y ) * game->lightmapSize * 3 );
-			for ( x = 0; x < game->lightmapSize; x++, in += 4, out += 3 )
+			out = lightmap + ( ( g_game->lightmapSize - y ) * g_game->lightmapSize * 3 );
+			for ( x = 0; x < g_game->lightmapSize; x++, in += 4, out += 3 )
 				VectorCopy( in, out );
 		}
 
@@ -1826,7 +1826,7 @@ static void SetupOutLightmap( rawLightmap_t *lm, outLightmap_t *olm ){
 	}
 
 	/* is this a "normal" bsp-stored lightmap? */
-	if ( ( lm->customWidth == game->lightmapSize && lm->customHeight == game->lightmapSize ) || externalLightmaps ) {
+	if ( ( lm->customWidth == g_game->lightmapSize && lm->customHeight == g_game->lightmapSize ) || externalLightmaps ) {
 		olm->lightmapNum = numBSPLightmaps;
 		numBSPLightmaps++;
 
@@ -2071,7 +2071,7 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 		}
 
 		/* if this is a style-using lightmap, it must be exported */
-		if ( lightmapNum > 0 && game->load != LoadRBSPFile ) {
+		if ( lightmapNum > 0 && g_game->load != LoadRBSPFile ) {
 			olm->extLightmapNum = 0;
 		}
 
@@ -2976,7 +2976,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 
 	/* count the bsp lightmaps and allocate space */
 	free( bspLightBytes );
-	const size_t gameLmSize = game->lightmapSize * game->lightmapSize * sizeof( Vector3b );
+	const size_t gameLmSize = g_game->lightmapSize * g_game->lightmapSize * sizeof( Vector3b );
 	if ( numBSPLightmaps == 0 || externalLightmaps ) {
 		numBSPLightBytes = 0;
 		bspLightBytes = NULL;
@@ -3200,7 +3200,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 		}
 
 		/* surfaces with styled lightmaps and a style marker get a custom generated shader (fixme: make this work with external lightmaps) */
-		if ( olm != NULL && lm != NULL && lm->styles[ 1 ] != LS_NONE && game->load != LoadRBSPFile ) { //%	info->si->styleMarker > 0 )
+		if ( olm != NULL && lm != NULL && lm->styles[ 1 ] != LS_NONE && g_game->load != LoadRBSPFile ) { //%	info->si->styleMarker > 0 )
 			char key[ 32 ], styleStage[ 512 ], styleStages[ 4096 ], rgbGen[ 128 ], alphaGen[ 128 ];
 
 
@@ -3321,7 +3321,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 
 		/* devise a custom shader for this surface (fixme: make this work with light styles) */
 		else if ( olm != NULL && lm != NULL && !externalLightmaps &&
-		          ( olm->customWidth != game->lightmapSize || olm->customHeight != game->lightmapSize ) ) {
+		          ( olm->customWidth != g_game->lightmapSize || olm->customHeight != g_game->lightmapSize ) ) {
 			/* get output lightmap */
 			olm = &outLightmaps[ lm->outLightmapNums[ 0 ] ];
 

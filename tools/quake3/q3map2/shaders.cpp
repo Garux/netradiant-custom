@@ -234,7 +234,7 @@ bool ApplySurfaceParm( const char *name, int *contentFlags, int *surfaceFlags, i
 	}
 
 	/* walk the current game's surfaceparms */
-	for( const surfaceParm_t& sp : game->surfaceParms )
+	for( const surfaceParm_t& sp : g_game->surfaceParms )
 	{
 		/* match? */
 		if ( striEqual( name, sp.name ) ) {
@@ -295,7 +295,7 @@ void BeginMapShaderFile( const char *mapFile ){
 	mapName( PathFilename( mapFile ) );
 
 	/* append ../scripts/q3map2_<mapname>.shader */
-	mapShaderFile = StringOutputStream( 256 )( PathFilenameless( mapFile ), "../", game->shaderPath, "/q3map2_", mapName.c_str(), ".shader" );
+	mapShaderFile = StringOutputStream( 256 )( PathFilenameless( mapFile ), "../", g_game->shaderPath, "/q3map2_", mapName.c_str(), ".shader" );
 	Sys_FPrintf( SYS_VRB, "Map has shader script %s\n", mapShaderFile.c_str() );
 
 	/* remove it */
@@ -1113,7 +1113,7 @@ static void ParseShaderFile( const char *filename ){
 			/* light <value> (old-style flare specification) */
 			else if ( striEqual( token, "light" ) ) {
 				GetTokenAppend( shaderText, false );
-				si->flareShader = game->flareShader;
+				si->flareShader = g_game->flareShader;
 			}
 
 			/* ydnar: damageShader <shader> <health> (sof2 mods) */
@@ -1992,7 +1992,7 @@ void LoadShaderInfo( void ){
 	}
 
 	/* we can pile up several shader files, the one in baseq3 and ones in the mod dir or other spots */
-	const auto filename = StringOutputStream( 64 )( game->shaderPath, "/shaderlist.txt" );
+	const auto filename = StringOutputStream( 64 )( g_game->shaderPath, "/shaderlist.txt" );
 	const int count = vfsGetFileCount( filename );
 
 	/* load them all */
@@ -2023,13 +2023,13 @@ void LoadShaderInfo( void ){
 
 	if( shaderFiles.empty() ){
 		Sys_Printf( "%s", "No shaderlist.txt found: loading all shaders\n" );
-		shaderFiles = vfsListShaderFiles( game->shaderPath );
+		shaderFiles = vfsListShaderFiles( g_game->shaderPath );
 	}
 
 	/* parse the shader files */
 	for ( const CopiedString& file : shaderFiles )
 	{
-		ParseShaderFile( StringOutputStream( 64 )( game->shaderPath, '/', file.c_str() ) );
+		ParseShaderFile( StringOutputStream( 64 )( g_game->shaderPath, '/', file.c_str() ) );
 	}
 
 	/* emit some statistics */

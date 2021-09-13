@@ -523,7 +523,7 @@ void EmitFogs( void ){
 	}
 
 	/* warn about overflow */
-	if( strEqual( game->bspIdent, "RBSP" ) ){
+	if( strEqual( g_game->bspIdent, "RBSP" ) ){
 		if( numMapFogs > MAX_RBSP_FOGS )
 			Sys_Warning( "MAX_RBSP_FOGS (%i) exceeded (%i). Visual inconsistencies are expected.\n", MAX_RBSP_FOGS, numMapFogs );
 	}

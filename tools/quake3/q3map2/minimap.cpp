@@ -483,11 +483,11 @@ int MiniMapBSPMain( int argc, char **argv ){
 	Vector3 maxs = minimap.model->minmax.maxs;
 
 	strClear( minimapFilename );
-	minimapSharpen = game->miniMapSharpen;
-	minimap.width = minimap.height = game->miniMapSize;
-	border = game->miniMapBorder;
-	keepaspect = game->miniMapKeepAspect;
-	mode = game->miniMapMode;
+	minimapSharpen = g_game->miniMapSharpen;
+	minimap.width = minimap.height = g_game->miniMapSize;
+	border = g_game->miniMapBorder;
+	keepaspect = g_game->miniMapKeepAspect;
+	mode = g_game->miniMapMode;
 
 	autolevel = false;
 	minimap.samples = 1;
@@ -594,7 +594,7 @@ int MiniMapBSPMain( int argc, char **argv ){
 	if ( strEmpty( minimapFilename ) ) {
 		ExtractFileBase( source, basename );
 		ExtractFilePath( source, path );
-		sprintf( relativeMinimapFilename, game->miniMapNameFormat, basename );
+		sprintf( relativeMinimapFilename, g_game->miniMapNameFormat, basename );
 		MergeRelativePath( minimapFilename, path, relativeMinimapFilename );
 		Sys_Printf( "Output file name automatically set to %s\n", minimapFilename );
 	}

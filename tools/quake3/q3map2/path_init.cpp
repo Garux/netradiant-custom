@@ -368,7 +368,7 @@ void InitPaths( int *argc, char **argv ){
 	LokiInitPaths( argv[ 0 ] );
 
 	/* set game to default (q3a) */
-	game = &g_games[ 0 ];
+	g_game = &g_games[ 0 ];
 	numBasePaths = 0;
 	numGamePaths = 0;
 
@@ -388,9 +388,9 @@ void InitPaths( int *argc, char **argv ){
 				Error( "Out of arguments: No game specified after %s", argv[ i - 1 ] );
 			}
 			argv[ i - 1 ] = NULL;
-			game = GetGame( argv[ i ] );
-			if ( game == NULL ) {
-				game = &g_games[ 0 ];
+			g_game = GetGame( argv[ i ] );
+			if ( g_game == NULL ) {
+				g_game = &g_games[ 0 ];
 			}
 			argv[ i ] = NULL;
 		}
@@ -485,7 +485,7 @@ void InitPaths( int *argc, char **argv ){
 	*argc = k;
 
 	/* add standard game path */
-	AddGamePath( game->gamePath );
+	AddGamePath( g_game->gamePath );
 
 	/* if there is no base path set, figure it out */
 	if ( numBasePaths == 0 ) {
@@ -495,9 +495,9 @@ void InitPaths( int *argc, char **argv ){
 			/* extract the arg */
 			strcpy( temp, argv[ i ] );
 			FixDOSName( temp );
-			Sys_FPrintf( SYS_VRB, "Searching for \"%s\" in \"%s\" (%d)...\n", game->magic, temp, i );
+			Sys_FPrintf( SYS_VRB, "Searching for \"%s\" in \"%s\" (%d)...\n", g_game->magic, temp, i );
 			/* check for the game's magic word */
-			char* found = strIstr( temp, game->magic );
+			char* found = strIstr( temp, g_game->magic );
 			if( found ){
 				/* now find the next slash and nuke everything after it */
 				found = strchr( found, '/' );
@@ -524,7 +524,7 @@ void InitPaths( int *argc, char **argv ){
 		AddHomeBasePath( homeBasePath );
 	}
 	else{
-		AddHomeBasePath( game->homeBasePath );
+		AddHomeBasePath( g_game->homeBasePath );
 	}
 
 	/* initialize vfs paths */

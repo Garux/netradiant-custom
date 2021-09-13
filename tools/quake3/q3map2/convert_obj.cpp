@@ -205,7 +205,7 @@ static void ConvertLightmapToMTL( FILE *f, const char *base, int lightmapNum ){
 
 int Convert_CountLightmaps( const char* dirname ){
 	int lightmapCount;
-	//FIXME numBSPLightmaps is 0, must be bspLightBytes / ( game->lightmapSize * game->lightmapSize * 3 )
+	//FIXME numBSPLightmaps is 0, must be bspLightBytes / ( g_game->lightmapSize * g_game->lightmapSize * 3 )
 	for ( lightmapCount = 0; lightmapCount < numBSPLightmaps; lightmapCount++ )
 		;
 	for ( ; ; lightmapCount++ )
@@ -226,7 +226,7 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 		lmIndices[i] = -1;
 
 	char shaderfile[256];
-	sprintf( shaderfile, "%s/q3map2_%s.shader", game->shaderPath, base );
+	sprintf( shaderfile, "%s/q3map2_%s.shader", g_game->shaderPath, base );
 	LoadScriptFile( shaderfile, 0 );
 	/* tokenize it */
 	while ( 1 )
