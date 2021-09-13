@@ -1904,12 +1904,7 @@ Q_EXTERN double distanceEpsilon Q_ASSIGN( 0.01 );
 /* bsp */
 Q_EXTERN int numMapEntities Q_ASSIGN( 0 );
 
-Q_EXTERN int blockSize[ 3 ]                                 /* should be the same as in radiant */
-#ifndef MAIN_C
-;
-#else
-	= { 1024, 1024, 1024 };
-#endif
+inline int blockSize[ 3 ] = { 1024, 1024, 1024 };                          /* should be the same as in radiant */
 
 Q_EXTERN char EnginePath[ 1024 ];
 
@@ -1956,26 +1951,21 @@ Q_EXTERN int numRedundantIndexes;
 
 Q_EXTERN int numSurfaceModels Q_ASSIGN( 0 );
 
-Q_EXTERN Vector3b debugColors[ 12 ]
-#ifndef MAIN_C
-;
-#else
-	=
+inline const Vector3b debugColors[ 12 ] =
 	{
-	{ 255, 0, 0 },
-	{ 192, 128, 128 },
-	{ 255, 255, 0 },
-	{ 192, 192, 128 },
-	{ 0, 255, 255 },
-	{ 128, 192, 192 },
-	{ 0, 0, 255 },
-	{ 128, 128, 192 },
-	{ 255, 0, 255 },
-	{ 192, 128, 192 },
-	{ 0, 255, 0 },
-	{ 128, 192, 128 }
+		{ 255, 0, 0 },
+		{ 192, 128, 128 },
+		{ 255, 255, 0 },
+		{ 192, 192, 128 },
+		{ 0, 255, 255 },
+		{ 128, 192, 192 },
+		{ 0, 0, 255 },
+		{ 128, 128, 192 },
+		{ 255, 0, 255 },
+		{ 192, 128, 192 },
+		{ 0, 255, 0 },
+		{ 128, 192, 128 }
 	};
-#endif
 
 Q_EXTERN int skyboxArea Q_ASSIGN( -1 );
 Q_EXTERN Matrix4 skyboxTransform;
@@ -2251,12 +2241,7 @@ Q_EXTERN int numVertsIlluminated Q_ASSIGN( 0 );
 /* lightgrid */
 Q_EXTERN Vector3 gridMins;
 Q_EXTERN int gridBounds[ 3 ];
-Q_EXTERN Vector3 gridSize
-#ifndef MAIN_C
-;
-#else
-	= { 64, 64, 128 };
-#endif
+inline Vector3 gridSize = { 64, 64, 128 };
 
 
 
