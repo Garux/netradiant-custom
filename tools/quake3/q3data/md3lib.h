@@ -19,9 +19,6 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <stdio.h>
-#include "../common/cmdlib.h"
-#include "mathlib.h"
 #include "../common/qfiles.h"
 
 void MD3_Dump( const char *filename );

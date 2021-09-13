@@ -69,6 +69,7 @@
 #include "version.h"            /* ttimo: might want to guard that if built outside of the GtkRadiant tree */
 
 #include "cmdlib.h"
+#include "qstringops.h"
 #include "md5lib.h"
 #include "ddslib.h"
 
@@ -77,6 +78,7 @@
 #include "imagelib.h"
 #include "qthreads.h"
 #include "inout.h"
+#include "inout_xml.h"
 #include "vfs.h"
 #include "png.h"
 #include "md4.h"
@@ -1513,7 +1515,7 @@ void                        MakeTreePortals( tree_t& tree );
 
 
 /* leakfile.c */
-xmlNodePtr                  LeakFile( const tree_t& tree );
+void                        Leak_feedback( const tree_t& tree );
 
 
 /* prtfile.c */

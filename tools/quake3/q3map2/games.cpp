@@ -29,7 +29,8 @@
 #include "games.h"
 #include "bspfile_ibsp.h"
 #include "bspfile_rbsp.h"
-#include "cmdlib.h"
+#include "qstringops.h"
+#include "inout.h"
 
 struct game_default : game_t
 {

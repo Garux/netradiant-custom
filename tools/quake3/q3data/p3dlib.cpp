@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "../common/cmdlib.h"
+#include "../common/qstringops.h"
 
 #define MAX_POLYSETS 64
 

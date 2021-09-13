@@ -30,6 +30,7 @@
 
 #include "cmdlib.h"
 #include "inout.h"
+#include "qstringops.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -45,7 +46,6 @@
 #define BASEDIRNAME "quake"     // assumed to have a 2 or 3 following
 
 #ifdef SAFE_MALLOC
-// FIXME switch to -std=c99 or above to use proper %zu format specifier for size_t
 void_ptr safe_malloc( size_t size ){
 	void *p = malloc( size );
 	if ( !p ) {
@@ -322,63 +322,6 @@ int FileTime( const char *path ){
 	return buf.st_mtime;
 }
 
-
-
-//http://stackoverflow.com/questions/27303062/strstr-function-like-that-ignores-upper-or-lower-case
-//chux: Somewhat tricky to match the corner cases of strstr() with inputs like "x","", "","x", "",""
-const char *strIstr( const char* haystack, const char* needle ) {
-	do {
-		const char* h = haystack;
-		const char* n = needle;
-		while ( tolower( (unsigned char)*h ) == tolower( (unsigned char)*n ) && *n != '\0' ) {
-			h++;
-			n++;
-		}
-		if ( *n == '\0' ) {
-			return haystack;
-		}
-	} while ( *haystack++ );
-	return NULL;
-}
-
-char *strIstr( char* haystack, const char* needle ) {
-	return const_cast<char*>( strIstr( const_cast<const char*>( haystack ), needle ) );
-}
-
-/*
- * Copy src to string dst of size size. At most size-1 characters
- * will be copied. Always NUL terminates (unless size == 0).
- * Returns strlen(src); if retval >= size, truncation occurred.
- */
-size_t strcpyQ( char* dest, const char* src, const size_t dest_size ) {
-	const size_t src_len = strlen( src );
-	if( src_len < dest_size )
-		memcpy( dest, src, src_len + 1 );
-	else if( dest_size != 0 ){
-		memcpy( dest, src, dest_size - 1 );
-		dest[dest_size - 1] = '\0';
-	}
-	return src_len;
-}
-
-size_t strcatQ( char* dest, const char* src, const size_t dest_size ) {
-	const size_t dest_len = strlen( dest );
-	return dest_len + strcpyQ( dest + dest_len, src, dest_size > dest_len? dest_size - dest_len : 0 );
-}
-
-size_t strncatQ( char* dest, const char* src, const size_t dest_size, const size_t src_len ) {
-	const size_t dest_len = strlen( dest );
-	const size_t ds_len = dest_len + src_len;
-	if( ds_len < dest_size ){
-		memcpy( dest + dest_len, src, src_len );
-		dest[ds_len] = '\0';
-	}
-	else if( dest_len < dest_size ){
-		memcpy( dest + dest_len, src, dest_size - dest_len - 1 );
-		dest[dest_size - 1] = '\0';
-	}
-	return ds_len;
-}
 
 
 /*

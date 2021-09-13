@@ -284,8 +284,6 @@ static void FixBrushSides( entity_t *e ){
 
 void ProcessWorldModel( void ){
 	entity_t    *e;
-	xmlNodePtr polyline, leaknode;
-	char level[ 2 ];
 	const char  *value;
 
 	/* sets integer blockSize from worldspawn "_blocksize" key if it exists */
@@ -332,17 +330,7 @@ void ProcessWorldModel( void ){
 
 	const bool leaked = ( leakStatus != EFloodEntities::Good );
 	if( leaked ){
-		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "**********************\n" );
-		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "******* leaked *******\n" );
-		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "**********************\n" );
-		polyline = LeakFile( tree );
-		leaknode = xmlNewNode( NULL, (const xmlChar*)"message" );
-		xmlNodeAddContent( leaknode, (const xmlChar*)"MAP LEAKED\n" );
-		xmlAddChild( leaknode, polyline );
-		level[0] = (int) '0' + SYS_ERR;
-		level[1] = 0;
-		xmlSetProp( leaknode, (const xmlChar*)"level", (const xmlChar*)level );
-		xml_SendNode( leaknode );
+		Leak_feedback( tree );
 		if ( leaktest ) {
 			Sys_FPrintf( SYS_WRN, "--- MAP LEAKED, ABORTING LEAKTEST ---\n" );
 			exit( 0 );

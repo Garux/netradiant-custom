@@ -91,68 +91,6 @@ void_ptr safe_calloc_info( size_t size, const char* info );
 
 #define offsetof_array( TYPE, ARRAY_MEMBER, ARRAY_SIZE ) ( offsetof( TYPE, ARRAY_MEMBER[0] ) + sizeof( TYPE::ARRAY_MEMBER[0] ) * ARRAY_SIZE )
 
-
-static inline bool strEmpty( const char* string ){
-	return *string == '\0';
-}
-static inline bool strEmptyOrNull( const char* string ){
-	return string == NULL || *string == '\0';
-}
-static inline void strClear( char* string ){
-	*string = '\0';
-}
-static inline char *strLower( char *string ){
-	for( char *in = string; *in; ++in )
-		*in = tolower( *in );
-	return string;
-}
-static inline char *copystring( const char *src ){	// version of strdup() with safe_malloc()
-	const size_t size = strlen( src ) + 1;
-	return void_ptr( memcpy( safe_malloc( size ), src, size ) );
-}
-const char* strIstr( const char* haystack, const char* needle );
-      char* strIstr(       char* haystack, const char* needle );
-#ifdef WIN32
-	#define Q_stricmp           stricmp
-	#define Q_strnicmp          strnicmp
-#else
-	#define Q_stricmp           strcasecmp
-	#define Q_strnicmp          strncasecmp
-#endif
-static inline bool strEqual( const char* string, const char* other ){
-	return strcmp( string, other ) == 0;
-}
-static inline bool strnEqual( const char* string, const char* other, size_t n ){
-	return strncmp( string, other, n ) == 0;
-}
-static inline bool striEqual( const char* string, const char* other ){
-	return Q_stricmp( string, other ) == 0;
-}
-static inline bool strniEqual( const char* string, const char* other, size_t n ){
-	return Q_strnicmp( string, other, n ) == 0;
-}
-
-static inline bool strEqualPrefix( const char* string, const char* prefix ){
-	return strnEqual( string, prefix, strlen( prefix ) );
-}
-static inline bool striEqualPrefix( const char* string, const char* prefix ){
-	return strniEqual( string, prefix, strlen( prefix ) );
-}
-static inline bool strEqualSuffix( const char* string, const char* suffix ){
-	const size_t stringLength = strlen( string );
-	const size_t suffixLength = strlen( suffix );
-	return ( suffixLength > stringLength )? false : strnEqual( string + stringLength - suffixLength, suffix, suffixLength );
-}
-static inline bool striEqualSuffix( const char* string, const char* suffix ){
-	const size_t stringLength = strlen( string );
-	const size_t suffixLength = strlen( suffix );
-	return ( suffixLength > stringLength )? false : strniEqual( string + stringLength - suffixLength, suffix, suffixLength );
-}
-/* strlcpy, strlcat versions */
-size_t strcpyQ( char* dest, const char* src, const size_t dest_size );
-size_t strcatQ( char* dest, const char* src, const size_t dest_size );
-size_t strncatQ( char* dest, const char* src, const size_t dest_size, const size_t src_len );
-
 void Q_getwd( char *out );
 
 int Q_filelength( FILE *f );
@@ -170,12 +108,6 @@ void ExpandWildcards( int *argc, char ***argv );
 
 
 double I_FloatTime( void );
-
-[[ noreturn ]] void Error( const char *error, ... );
-#define ENSURE( condition ) \
-	(void) \
-	( (!!( condition )) || \
-	(Error( "%s:%u:%s: Condition '%s' failed.", __FILE__, __LINE__, __func__, #condition ), 0) )
 
 FILE    *SafeOpenWrite( const char *filename, const char *mode = "wb" );
 FILE    *SafeOpenRead( const char *filename, const char *mode = "rb" );

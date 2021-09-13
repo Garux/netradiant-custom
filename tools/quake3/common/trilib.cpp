@@ -25,6 +25,8 @@
 
 #include <stdio.h>
 #include "cmdlib.h"
+#include "inout.h"
+#include "qstringops.h"
 #include "mathlib.h"
 #include "polyset.h"
 #include "trilib.h"

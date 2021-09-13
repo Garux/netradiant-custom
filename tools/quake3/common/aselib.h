@@ -20,8 +20,6 @@
  */
 
 
-#include "cmdlib.h"
-#include "mathlib.h"
 #include "polyset.h"
 
 void        ASE_Load( const char *filename, bool verbose, bool meshanims );

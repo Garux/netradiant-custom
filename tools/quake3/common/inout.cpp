@@ -54,7 +54,6 @@ bool verbose = false;
 // possibly written to disk at the end of the run
 //++timo FIXME: need to be global, required when creating nodes?
 xmlDocPtr doc;
-xmlNodePtr tree;
 
 // some useful stuff
 xmlNodePtr xml_NodeForVec( const Vector3& v ){

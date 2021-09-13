@@ -27,6 +27,8 @@
 // This file must be identical in the quake and utils directories
 //
 
+#include "mathlib.h"
+
 // surface geometry should not exceed these limits
 #define SHADER_MAX_VERTEXES 1000
 #define SHADER_MAX_INDEXES  ( 6 * SHADER_MAX_VERTEXES )

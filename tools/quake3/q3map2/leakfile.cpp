@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "libxml/tree.h"
 
 
 
@@ -116,4 +117,19 @@ xmlNodePtr LeakFile( const tree_t& tree ){
 	xml_Select( "Entity leaked", node->occupant->mapEntityNum, 0, false );
 
 	return xml_node;
+}
+
+void Leak_feedback( const tree_t& tree ){
+	Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "**********************\n" );
+	Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "******* leaked *******\n" );
+	Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "**********************\n" );
+	xmlNodePtr polyline = LeakFile( tree );
+	xmlNodePtr leaknode = xmlNewNode( NULL, (const xmlChar*)"message" );
+	xmlNodeAddContent( leaknode, (const xmlChar*)"MAP LEAKED\n" );
+	xmlAddChild( leaknode, polyline );
+	char level[ 2 ];
+	level[0] = (int) '0' + SYS_ERR;
+	level[1] = 0;
+	xmlSetProp( leaknode, (const xmlChar*)"level", (const xmlChar*)level );
+	xml_SendNode( leaknode );
 }

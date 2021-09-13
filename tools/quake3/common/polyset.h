@@ -25,6 +25,8 @@
 #define POLYSET_MAXTRIANGLES    4096
 #define POLYSET_MAXPOLYSETS     64
 
+#include "mathlib.h"
+
 typedef float st_t[2];
 typedef float rgb_t[3];
 

@@ -29,6 +29,8 @@
 #include <sys/stat.h>
 
 #include "../common/cmdlib.h"
+#include "../common/inout.h"
+#include "../common/qstringops.h"
 #include "scriplib.h"
 #include "mathlib.h"
 #include "polyset.h"

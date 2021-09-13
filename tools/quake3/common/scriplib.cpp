@@ -23,6 +23,7 @@
 
 #include "cmdlib.h"
 #include "inout.h"
+#include "qstringops.h"
 #include "scriplib.h"
 #include "vfs.h"
 

@@ -21,6 +21,7 @@
 
 
 #include "cmdlib.h"
+#include "qstringops.h"
 #include "mathlib.h"
 #include "inout.h"
 #include "bspfile.h"

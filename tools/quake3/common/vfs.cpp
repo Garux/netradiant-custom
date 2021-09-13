@@ -46,6 +46,7 @@
 #include <sys/stat.h>
 
 #include "cmdlib.h"
+#include "qstringops.h"
 #include "filematch.h"
 #include "inout.h"
 #include "vfs.h"

@@ -21,7 +21,9 @@
 
 
 #include "aselib.h"
+#include "cmdlib.h"
 #include "inout.h"
+#include "qstringops.h"
 
 #include <assert.h>
 #include <stdio.h>
