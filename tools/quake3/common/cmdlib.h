@@ -171,11 +171,11 @@ void ExpandWildcards( int *argc, char ***argv );
 
 double I_FloatTime( void );
 
-void    Error( const char *error, ... )
-#ifdef __GNUC__
-__attribute__( ( noreturn ) )
-#endif
-;
+[[ noreturn ]] void Error( const char *error, ... );
+#define ENSURE( condition ) \
+	(void) \
+	( (!!( condition )) || \
+	(Error( "%s:%u:%s: Condition '%s' failed.", __FILE__, __LINE__, __func__, #condition ), 0) )
 
 FILE    *SafeOpenWrite( const char *filename, const char *mode = "wb" );
 FILE    *SafeOpenRead( const char *filename, const char *mode = "rb" );

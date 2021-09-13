@@ -29,6 +29,7 @@
 #include "games.h"
 #include "bspfile_ibsp.h"
 #include "bspfile_rbsp.h"
+#include "cmdlib.h"
 
 struct game_default : game_t
 {
@@ -521,6 +522,7 @@ struct game_ef : game_default
 		homeBasePath = ".ef";
 		magic = "elite";
 		/* overwrite "ladder" entry; note: magic number */
+		ENSURE( strEqual( surfaceParms[31].name, "ladder" ) );
 		surfaceParms[31] =
 		{ "ladder",         E_CONT_LADDER,              Q_CONT_SOLID,               Q_SURF_LADDER,              0,                          C_DETAIL | C_TRANSLUCENT,   C_SOLID };
 		surfaceParms.insert( surfaceParms.end(), {
