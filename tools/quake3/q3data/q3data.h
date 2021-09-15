@@ -31,6 +31,7 @@
 #include "../common/cmdlib.h"
 #include "../common/inout.h"
 #include "../common/qstringops.h"
+#include "../common/qpathops.h"
 #include "scriplib.h"
 #include "mathlib.h"
 #include "polyset.h"

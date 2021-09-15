@@ -21,38 +21,12 @@
 
 // cmdlib.h
 
-#ifndef __CMDLIB__
-#define __CMDLIB__
+#pragma once
 
 #include "bytebool.h"
 
-#ifdef _MSC_VER
-#pragma warning(disable : 4244)     // MIPS
-#pragma warning(disable : 4136)     // X86
-#pragma warning(disable : 4051)     // ALPHA
-
-#pragma warning(disable : 4018)     // signed/unsigned mismatch
-#pragma warning(disable : 4305)     // truncate from double to float
-
-#pragma check_stack(off)
-
-#endif
-
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <ctype.h>
-#include <time.h>
-#include <stdarg.h>
-
-#include "os/path.h"
-
-#ifdef _MSC_VER
-
-#pragma intrinsic( memset, memcpy )
-
-#endif
 
 
 #ifdef PATH_MAX
@@ -60,7 +34,6 @@
 #else
 #define MAX_OS_PATH     4096
 #endif
-#define MEM_BLOCKSIZE 4096
 
 #define SAFE_MALLOC
 #ifdef SAFE_MALLOC
@@ -115,30 +88,10 @@ void    SafeRead( FILE *f, void *buffer, int count );
 void    SafeWrite( FILE *f, const void *buffer, int count );
 
 int     LoadFile( const char *filename, void **bufferptr );
-int   LoadFileBlock( const char *filename, void **bufferptr );
 int     TryLoadFile( const char *filename, void **bufferptr );
 void    SaveFile( const char *filename, const void *buffer, int count );
 bool    FileExists( const char *filename );
 
-
-const char* path_get_last_separator( const char* path );
-      char* path_get_last_separator(       char* path );
-void path_add_slash( char *path );
-void path_set_extension( char *path, const char *extension );
-void    DefaultExtension( char *path, const char *extension );
-void    DefaultPath( char *path, const char *basepath );
-void    StripFilename( char *path );
-void    StripExtension( char *path );
-
-static inline void FixDOSName( char *src ){
-	for ( ; *src; ++src )
-		if ( *src == '\\' )
-			*src = '/';
-}
-
-void    ExtractFilePath( const char *path, char *dest );		// file directory with trailing slash
-void    ExtractFileBase( const char *path, char *dest );		// file name w/o extension
-void    ExtractFileExtension( const char *path, char *dest );
 
 int     ParseNum( const char *str );
 
@@ -159,13 +112,3 @@ void    QCopyFile( const char *from, const char *to );
 
 // sleep for the given amount of milliseconds
 void Sys_Sleep( int n );
-
-// for compression routines
-typedef struct
-{
-	void    *data;
-	int count, width, height;
-} cblock_t;
-
-
-#endif

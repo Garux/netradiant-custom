@@ -22,6 +22,7 @@
 #include "md3lib.h"
 #include "inout.h"
 #include "../common/cmdlib.h"
+#include <cstring>
 
 /*
 ** MD3_ComputeTagFromTri

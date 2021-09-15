@@ -21,6 +21,7 @@
 
 
 #include <stddef.h>
+#include <cstring>
 
 #include "cmdlib.h"
 #include "inout.h"

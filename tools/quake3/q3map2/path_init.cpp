@@ -401,11 +401,7 @@ void InitPaths( int *argc, char **argv ){
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
 			argv[ i - 1 ] = NULL;
-			if ( g_numForbiddenDirs < VFS_MAXDIRS ) {
-				strncpy( g_strForbiddenDirs[g_numForbiddenDirs], argv[i], PATH_MAX );
-				g_strForbiddenDirs[g_numForbiddenDirs][PATH_MAX] = 0;
-				++g_numForbiddenDirs;
-			}
+			g_strForbiddenDirs.emplace_back( argv[i] );
 			argv[ i ] = NULL;
 		}
 

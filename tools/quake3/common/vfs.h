@@ -28,29 +28,7 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _VFS_H_
-#define _VFS_H_
-
-// to get PATH_MAX
-#include <stdio.h>
-#if defined ( __linux__ ) || defined ( __APPLE__ )
-#include <dirent.h>
-#include <unistd.h>
-#include <limits.h>
-#else
-#include <wtypes.h>
-#include <io.h>
-
-#ifndef R_OK
-#define R_OK 04
-#endif
-
-//#define S_ISDIR( mode ) ( mode & _S_IFDIR )
-#define PATH_MAX 260
-#endif
-#include <glib.h>
-
-#define VFS_MAXDIRS 64
+#pragma once
 
 void vfsInitDirectory( const char *path );
 void vfsShutdown();
@@ -60,8 +38,5 @@ std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath );
 bool vfsPackFile( const char *filename, const char *packname, const int compLevel );
 bool vfsPackFile_Absolute_Path( const char *filepath, const char *filename, const char *packname, const int compLevel );
 
-extern char g_strForbiddenDirs[VFS_MAXDIRS][PATH_MAX + 1];
-extern int g_numForbiddenDirs;
+extern std::vector<CopiedString> g_strForbiddenDirs;
 extern char g_strLoadedFileLocation[1024];
-
-#endif // _VFS_H_

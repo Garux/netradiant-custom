@@ -70,6 +70,7 @@
 
 #include "cmdlib.h"
 #include "qstringops.h"
+#include "qpathops.h"
 #include "md5lib.h"
 #include "ddslib.h"
 

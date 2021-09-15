@@ -24,6 +24,7 @@
 #include "inout.h"
 #include "cmdlib.h"
 #include "qstringops.h"
+#include "qpathops.h"
 #include "etclib.h"
 #include "imagelib.h"
 #include "vfs.h"

@@ -31,8 +31,10 @@
 #include "cmdlib.h"
 #include "inout.h"
 #include "qstringops.h"
+#include "qpathops.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #ifdef WIN32
 #include <direct.h>
@@ -426,35 +428,6 @@ int    LoadFile( const char *filename, void **bufferptr ){
 
 /*
    ==============
-   LoadFileBlock
-   -
-   rounds up memory allocation to 4K boundary
-   -
-   ==============
- */
-int    LoadFileBlock( const char *filename, void **bufferptr ){
-	FILE    *f;
-	int length, nBlock, nAllocSize;
-	void    *buffer;
-
-	f = SafeOpenRead( filename );
-	length = Q_filelength( f );
-	nAllocSize = length;
-	nBlock = nAllocSize % MEM_BLOCKSIZE;
-	if ( nBlock > 0 ) {
-		nAllocSize += MEM_BLOCKSIZE - nBlock;
-	}
-	buffer = safe_calloc( nAllocSize + 1 );
-	SafeRead( f, buffer, length );
-	fclose( f );
-
-	*bufferptr = buffer;
-	return length;
-}
-
-
-/*
-   ==============
    TryLoadFile
 
    Allows failure
@@ -493,86 +466,6 @@ void    SaveFile( const char *filename, const void *buffer, int count ){
 	f = SafeOpenWrite( filename );
 	SafeWrite( f, buffer, count );
 	fclose( f );
-}
-
-
-/*
-   ====================
-   Extract file parts
-   ====================
- */
-
-/// \brief Returns a pointer to the last slash or to terminating null character if not found.
-const char* path_get_last_separator( const char* path ){
-	const char *end = path + strlen( path );
-	const char *src = end;
-
-	while ( src != path ){
-		if( path_separator( *--src ) )
-			return src;
-	}
-	return end;
-}
-
-char* path_get_last_separator( char* path ){
-	return const_cast<char*>( path_get_last_separator( const_cast<const char*>( path ) ) );
-}
-
-/// \brief Appends trailing slash, unless \p path is empty or already has slash.
-void path_add_slash( char *path ){
-	char* end = path + strlen( path );
-	if ( end != path && !path_separator( end[-1] ) )
-		strcat( end, "/" );
-}
-
-/// \brief Appends or replaces .EXT part of \p path with \p extension.
-void path_set_extension( char *path, const char *extension ){
-	strcpy( path_get_filename_base_end( path ), extension );
-}
-
-//
-// if path doesnt have a .EXT, append extension
-// (extension should include the .)
-//
-void DefaultExtension( char *path, const char *extension ){
-	char* ext = path_get_filename_base_end( path );
-	if( strEmpty( ext ) )
-		strcpy( ext, extension );
-}
-
-
-void DefaultPath( char *path, const char *basepath ){
-	if( !path_is_absolute( path ) ){
-		char* temp = strdup( path );
-		sprintf( path, "%s%s", basepath, temp );
-		free( temp );
-	}
-}
-
-
-void    StripFilename( char *path ){
-	strClear( path_get_filename_start( path ) );
-}
-
-void    StripExtension( char *path ){
-	strClear( path_get_filename_base_end( path ) );
-}
-
-
-// NOTE: includes the slash, otherwise
-// backing to an empty path will be wrong when appending a slash
-void ExtractFilePath( const char *path, char *dest ){
-	strcpyQ( dest, path, path_get_filename_start( path ) - path + 1 ); // +1 for '\0'
-}
-
-void ExtractFileBase( const char *path, char *dest ){
-	const char* start = path_get_filename_start( path );
-	const char* end = path_get_filename_base_end( start );
-	strcpyQ( dest, start, end - start + 1 ); // +1 for '\0'
-}
-
-void ExtractFileExtension( const char *path, char *dest ){
-	strcpy( dest, path_get_extension( path ) );
 }
 
 

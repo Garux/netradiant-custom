@@ -30,6 +30,7 @@
 #include "inout.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <algorithm>
 #include "generic/vector.h"
 
 #ifdef WIN32

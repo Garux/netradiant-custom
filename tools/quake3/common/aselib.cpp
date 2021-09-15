@@ -24,6 +24,7 @@
 #include "cmdlib.h"
 #include "inout.h"
 #include "qstringops.h"
+#include "qpathops.h"
 
 #include <assert.h>
 #include <stdio.h>

@@ -20,6 +20,7 @@
  */
 
 #include <assert.h>
+#include <time.h>
 #include "q3data.h"
 
 static int s_resample_width = 256;
@@ -38,6 +39,13 @@ static const int CIN_SIGNATURE = ( 'C' << 24 ) | ( 'I' << 16 ) | ( 'N' << 8 ) | 
 static byte *s_soundtrack;
 static char s_base[32];
 static char s_output_base[32];
+
+// for compression routines
+typedef struct
+{
+	void    *data;
+	int count, width, height;
+} cblock_t;
 
 /*
    ===============================================================================
