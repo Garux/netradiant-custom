@@ -108,7 +108,8 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 	<li><strong><code>-connect</code> address:</strong> Talk to a NetRadiant instance using a specific XML based protocol</li>
 		<li><strong><code>-force</code>:</strong> Allow reading some broken/unsupported BSP files e.g. when decompiling, may also crash</li>
 		<li><strong><code>-fs_basepath</code> path:</strong> Sets the given path as main directory of the game (can be used more than once to look in multiple paths)</li>
-		<li><strong><code>-fs_game</code> gamename:</strong> Sets a different game directory name (default for Q3A: baseq3)</li>
+		<li><strong><code>-fs_game</code> gamename:</strong> Sets extra game directory name to additionally load mod's resources from at higher priority (by default for Q3A 'baseq3' is loaded, -fs_game cpma will also load 'cpma'; can be used more than once)</li>
+		<li><strong><code>-fs_basegame</code> gamename:</strong> Overrides default game directory name (e.g. Q3A uses 'baseq3', OpenArena 'baseoa', so -game quake3 -fs_basegame baseoa for OA )</li>
 		<li><strong><code>-fs_homebase</code> dir:</strong> Specifies where the user home directory name is on Linux (default for Q3A: .q3a)</li>
 		<li><strong><code>-game</code> gamename:</strong> Load settings for the given game (default: quake3)</li>
 		<li><strong><code>-subdivisions</code> F:</strong> multiplier for patch subdivisions quality</li>

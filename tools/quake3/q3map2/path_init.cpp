@@ -359,6 +359,7 @@ void AddPakPath( char *path ){
 void InitPaths( int *argc, char **argv ){
 	int i, j, k;
 	char temp[ MAX_OS_PATH ];
+	const char *baseGame = nullptr;
 
 
 	/* note it */
@@ -425,6 +426,16 @@ void InitPaths( int *argc, char **argv ){
 			argv[ i ] = NULL;
 		}
 
+		/* -fs_basegame */
+		else if ( striEqual( argv[ i ], "-fs_basegame" ) ) {
+			if ( ++i >= *argc || !argv[ i ] ) {
+				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
+			}
+			argv[ i - 1 ] = NULL;
+			baseGame = argv[ i ];
+			argv[ i ] = NULL;
+		}
+
 		/* -fs_home */
 		else if ( striEqual( argv[ i ], "-fs_home" ) ) {
 			if ( ++i >= *argc || !argv[ i ] ) {
@@ -481,7 +492,7 @@ void InitPaths( int *argc, char **argv ){
 	*argc = k;
 
 	/* add standard game path */
-	AddGamePath( g_game->gamePath );
+	AddGamePath( baseGame == nullptr? g_game->gamePath : baseGame );
 
 	/* if there is no base path set, figure it out */
 	if ( numBasePaths == 0 ) {
