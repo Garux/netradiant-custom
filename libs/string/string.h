@@ -490,6 +490,14 @@ public:
 typedef String< CopiedBuffer< DefaultAllocator<char> > > CopiedString;
 
 
+/// \brief Writes CopiedString \p string to \p ostream.
+template<typename TextOutputStreamType>
+inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const CopiedString& string ){
+	ostream.write( string.c_str(), strlen( string.c_str() ) );
+	return ostream;
+}
+
+
 /// \brief A non-mutable string buffer which uses reference-counting to avoid unnecessary allocations.
 template<typename Allocator>
 class SmartBuffer : private Allocator

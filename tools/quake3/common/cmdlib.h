@@ -29,12 +29,6 @@
 #include <stdlib.h>
 
 
-#ifdef PATH_MAX
-#define MAX_OS_PATH     PATH_MAX
-#else
-#define MAX_OS_PATH     4096
-#endif
-
 #define SAFE_MALLOC
 #ifdef SAFE_MALLOC
 

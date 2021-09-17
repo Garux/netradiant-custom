@@ -646,9 +646,9 @@ int pk3BSPMain( int argc, char **argv ){
 	}
 
 	/* make a pack */
-	auto packname = StringOutputStream( 256 )( EnginePath, "/", nameOFmap.c_str(), "_autopacked.pk3" );
+	auto packname = StringOutputStream( 256 )( g_enginePath, nameOFmap.c_str(), "_autopacked.pk3" );
 	remove( packname );
-	auto packFailName = StringOutputStream( 256 )( EnginePath, "/", nameOFmap.c_str(), "_FAILEDpack.pk3" );
+	auto packFailName = StringOutputStream( 256 )( g_enginePath, nameOFmap.c_str(), "_FAILEDpack.pk3" );
 	remove( packFailName );
 
 	Sys_Printf( "\n--- ZipZip ---\n" );
@@ -1387,14 +1387,14 @@ int repackBSPMain( int argc, char **argv ){
 	}
 
 	/* write shader */
-	stream( EnginePath, "/", nameOFrepack.c_str(), "_strippedBYrepacker.shader" );
+	stream( g_enginePath, nameOFrepack.c_str(), "_strippedBYrepacker.shader" );
 	FILE *f = fopen( stream, "wb" );
 	fwrite( allShaders, sizeof( char ), allShaders.end() - allShaders.begin(), f );
 	fclose( f );
 	Sys_Printf( "Shaders saved to %s\n", stream.c_str() );
 
 	/* make a pack */
-	stream( EnginePath, "/", nameOFrepack.c_str(), "_repacked.pk3" );
+	stream( g_enginePath, nameOFrepack.c_str(), "_repacked.pk3" );
 	remove( stream );
 
 	Sys_Printf( "\n--- ZipZip ---\n" );

@@ -32,24 +32,6 @@
 #include "q3map2.h"
 
 
-
-/* path support */
-#define MAX_BASE_PATHS  10
-#define MAX_GAME_PATHS  10
-#define MAX_PAK_PATHS  200
-
-const char              *homePath;
-char installPath[ MAX_OS_PATH ];
-
-int numBasePaths;
-char                    *basePaths[ MAX_BASE_PATHS ];
-int numGamePaths;
-char                    *gamePaths[ MAX_GAME_PATHS ];
-int numPakPaths;
-char                    *pakPaths[ MAX_PAK_PATHS ];
-const char              *homeBasePath = NULL;
-
-
 /*
    some of this code is based off the original q3map port from loki
    and finds various paths. moved here from bsp.c for clarity.
@@ -60,31 +42,27 @@ const char              *homeBasePath = NULL;
    gets the user's home dir (for ~/.q3a)
  */
 
-char *LokiGetHomeDir( void ){
+CopiedString LokiGetHomeDir( void ){
 	#ifndef Q_UNIX
-	return NULL;
+	return "";
 	#else
-	static char	buf[ 4096 ];
-	struct passwd   pw, *pwp;
-	char            *home;
-	static char homeBuf[MAX_OS_PATH];
-
-
 	/* get the home environment variable */
-	home = getenv( "HOME" );
+	const char *home = getenv( "HOME" );
 
 	/* look up home dir in password database */
 	if( home == NULL )
 	{
+		struct passwd   pw, *pwp;
+		char buf[ 4096 ];
 		if ( getpwuid_r( getuid(), &pw, buf, sizeof( buf ), &pwp ) == 0 ) {
 			return pw.pw_dir;
 		}
 	}
 	else{
-		snprintf( homeBuf, sizeof( homeBuf ), "%s/.", home );
+		return StringOutputStream( 256 )( home, "/." ).c_str();
 	}
 	/* return it */
-	return homeBuf;
+	return "";
 	#endif
 }
 
@@ -95,29 +73,23 @@ char *LokiGetHomeDir( void ){
    initializes some paths on linux/os x
  */
 
-void LokiInitPaths( char *argv0 ){
-	if ( homePath == NULL ) {
+void LokiInitPaths( const char *argv0, CopiedString& homePath, CopiedString& installPath ){
+	if ( homePath.empty() ) {
 		/* get home dir */
 		homePath = LokiGetHomeDir();
-		if ( homePath == NULL ) {
+		if ( homePath.empty() ) {
 			homePath = ".";
 		}
 	}
 
 	#ifndef Q_UNIX
 	/* this is kinda crap, but hey */
-	strcpy( installPath, "../" );
+	installPath = "../";
 	#else
-	char temp[ MAX_OS_PATH ];
-	char        *path;
-	char        *last;
-	bool found;
-
-
-	path = getenv( "PATH" );
+	const char *path = getenv( "PATH" );
+	auto temp = StringOutputStream( 256 )( argv0 );
 
 	/* do some path divining */
-	strcpyQ( temp, argv0, sizeof( temp ) );
 	if ( strEmpty( path_get_last_separator( temp ) ) && path != NULL ) {
 
 		/*
@@ -138,14 +110,14 @@ void LokiInitPaths( char *argv0 ){
 		   so it will use "/opt/radiant/" as installPath, which will be expanded later to "/opt/radiant/baseq3" to find paks.
 		*/
 
-		found = false;
-		last = path;
+		bool found = false;
+		const char *last = path;
 
 		/* go through each : segment of path */
 		while ( !strEmpty( last ) && !found )
 		{
 			/* null out temp */
-			strClear( temp );
+			temp.clear();
 
 			/* find next chunk */
 			last = strchr( path, ':' );
@@ -155,17 +127,16 @@ void LokiInitPaths( char *argv0 ){
 
 			/* found home dir candidate */
 			if ( *path == '~' ) {
-				strcpyQ( temp, homePath, sizeof( temp ) );
+				temp( homePath );
 				path++;
 			}
 
 
 			/* concatenate */
 			if ( last > ( path + 1 ) ) {
-				strncatQ( temp, path, sizeof( temp ), ( last - path ) );
-				strcatQ( temp, "/", sizeof( temp ) );
+				temp << StringRange( path, last ) << '/';
 			}
-			strcatQ( temp, argv0, sizeof( temp ) );
+			temp << argv0;
 
 			/* verify the path */
 			if ( access( temp, X_OK ) == 0 ) {
@@ -176,13 +147,15 @@ void LokiInitPaths( char *argv0 ){
 	}
 
 	/* flake */
-	if ( realpath( temp, installPath ) ) {
+	if ( char *real = realpath( temp, nullptr ); real != nullptr ) {
 		/*
 		   if "q3map2" is "/opt/radiant/tools/q3map2",
 		   installPath is "/opt/radiant"
 		*/
-		strClear( path_get_last_separator( installPath ) );
-		strClear( path_get_last_separator( installPath ) );
+		strClear( path_get_last_separator( real ) );
+		strClear( path_get_last_separator( real ) );
+		installPath = real;
+		free( real );
 	}
 	#endif
 }
@@ -227,24 +200,32 @@ const game_t *GetGame( char *arg ){
 }
 
 
+inline bool is_unique( const std::vector<CopiedString>& list, const char *string ){
+	for( const auto& str : list )
+		if( striEqual( str.c_str(), string ) )
+			return false;
+	return true;
+}
+
+inline void insert_unique( std::vector<CopiedString>& list, const char *string ){
+	if( is_unique( list, string ) )
+		list.emplace_back( string );
+}
+
 
 /*
    AddBasePath() - ydnar
    adds a base path to the list
  */
 
-void AddBasePath( char *path ){
+void AddBasePath( std::vector<CopiedString>& basePaths, const char *path ){
 	/* dummy check */
-	if ( strEmptyOrNull( path ) || numBasePaths >= MAX_BASE_PATHS ) {
-		return;
+	if ( !strEmptyOrNull( path ) ) {
+		/* add it to the list */
+		insert_unique( basePaths, StringOutputStream( 256 )( DirectoryCleaned( path ) ) );
+		if ( g_enginePath.empty() )
+			g_enginePath = basePaths.back();
 	}
-
-	/* add it to the list */
-	basePaths[ numBasePaths ] = copystring( path );
-	FixDOSName( basePaths[ numBasePaths ] );
-	if ( strEmpty( EnginePath ) )
-		strcpy( EnginePath, basePaths[ numBasePaths ] );
-	numBasePaths++;
 }
 
 
@@ -254,98 +235,42 @@ void AddBasePath( char *path ){
    adds a base path to the beginning of the list, prefixed by ~/
  */
 
-void AddHomeBasePath( const char *path ){
-	int i;
-	char temp[ MAX_OS_PATH ];
-
-	if ( homePath == NULL ) {
+void AddHomeBasePath( std::vector<CopiedString>& basePaths, const char *homePath, const char *homeBasePath ){
+	if ( strEmpty( homePath ) ) {
 		return;
 	}
 
 	/* dummy check */
-	if ( strEmptyOrNull( path ) ) {
+	if ( strEmptyOrNull( homeBasePath ) ) {
 		return;
 	}
 
+	StringOutputStream str( 256 );
+
 	/* strip leading dot, if homePath does not end in /. */
-	if ( strEqual( path, "." ) ) {
+	if ( strEqual( homeBasePath, "." ) ) {
 		/* -fs_homebase . means that -fs_home is to be used as is */
-		strcpy( temp, homePath );
+		str( homePath );
 	}
 	else if ( strEqualSuffix( homePath, "/." ) ) {
 		/* concatenate home dir and path */ /* remove trailing /. of homePath */
-		sprintf( temp, "%.*s/%s", (int)strlen( homePath ) - 2, homePath, path );
+		str( StringRange( homePath, homePath + strlen( homePath ) - 1 ), homeBasePath );
 	}
 	else
 	{
 		/* remove leading . of path */
-		if ( path[0] == '.' ) {
-			++path;
+		if ( homeBasePath[0] == '.' ) {
+			++homeBasePath;
 		}
 
 		/* concatenate home dir and path */
-		sprintf( temp, "%s/%s", homePath, path );
+		str( homePath, '/', homeBasePath );
 	}
 
-	/* make a hole */
-	for ( i = ( MAX_BASE_PATHS - 2 ); i >= 0; i-- )
-		basePaths[ i + 1 ] = basePaths[ i ];
-
-	/* add it to the list */
-	basePaths[ 0 ] = copystring( temp );
-	FixDOSName( basePaths[ 0 ] );
-	numBasePaths++;
-}
-
-
-
-/*
-   AddGamePath() - ydnar
-   adds a game path to the list
- */
-
-void AddGamePath( const char *path ){
-	int i;
-
-	/* dummy check */
-	if ( strEmptyOrNull( path ) || numGamePaths >= MAX_GAME_PATHS ) {
-		return;
-	}
-
-	/* add it to the list */
-	gamePaths[ numGamePaths ] = copystring( path );
-	FixDOSName( gamePaths[ numGamePaths ] );
-	numGamePaths++;
-
-	/* don't add it if it's already there */
-	for ( i = 0; i < numGamePaths - 1; i++ )
-	{
-		if ( strEqual( gamePaths[i], gamePaths[numGamePaths - 1] ) ) {
-			free( gamePaths[numGamePaths - 1] );
-			gamePaths[numGamePaths - 1] = NULL;
-			numGamePaths--;
-			break;
-		}
-	}
-
-}
-
-
-/*
-   AddPakPath()
-   adds a pak path to the list
- */
-
-void AddPakPath( char *path ){
-	/* dummy check */
-	if ( strEmptyOrNull( path ) || numPakPaths >= MAX_PAK_PATHS ) {
-		return;
-	}
-
-	/* add it to the list */
-	pakPaths[ numPakPaths ] = copystring( path );
-	FixDOSName( pakPaths[ numPakPaths ] );
-	numPakPaths++;
+	/* add it to the beginning of the list */
+	const auto clean = StringOutputStream( 256 )( DirectoryCleaned( str ) );
+	if( is_unique( basePaths, clean ) )
+		basePaths.emplace( basePaths.cbegin(), clean );
 }
 
 
@@ -357,23 +282,27 @@ void AddPakPath( char *path ){
  */
 
 void InitPaths( int *argc, char **argv ){
+	std::vector<CopiedString> basePaths;
+	std::vector<CopiedString> gamePaths;
+	std::vector<CopiedString> pakPaths;
+
+	CopiedString homePath;
+	CopiedString installPath;
+	const char *homeBasePath = nullptr;
+
 	int i, j, k;
-	char temp[ MAX_OS_PATH ];
 	const char *baseGame = nullptr;
+	StringOutputStream stream( 256 );
 
 
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- InitPaths ---\n" );
 
 	/* get the install path for backup */
-	LokiInitPaths( argv[ 0 ] );
+	LokiInitPaths( argv[ 0 ], homePath, installPath );
 
 	/* set game to default (q3a) */
 	g_game = &g_games[ 0 ];
-	numBasePaths = 0;
-	numGamePaths = 0;
-
-	strClear( EnginePath );
 
 	/* parse through the arguments and extract those relevant to paths */
 	for ( i = 0; i < *argc; i++ )
@@ -385,96 +314,87 @@ void InitPaths( int *argc, char **argv ){
 
 		/* -game */
 		if ( striEqual( argv[ i ], "-game" ) ) {
-			if ( ++i >= *argc || !argv[ i ] ) {
+			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
 				Error( "Out of arguments: No game specified after %s", argv[ i - 1 ] );
 			}
-			argv[ i - 1 ] = NULL;
 			g_game = GetGame( argv[ i ] );
 			if ( g_game == NULL ) {
 				g_game = &g_games[ 0 ];
 			}
-			argv[ i ] = NULL;
+			argv[ i - 1 ] = argv[ i ] = NULL;
 		}
 
 		/* -fs_forbiddenpath */
 		else if ( striEqual( argv[ i ], "-fs_forbiddenpath" ) ) {
-			if ( ++i >= *argc || !argv[ i ] ) {
+			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
-			argv[ i - 1 ] = NULL;
 			g_strForbiddenDirs.emplace_back( argv[i] );
-			argv[ i ] = NULL;
+			argv[ i - 1 ] = argv[ i ] = NULL;
 		}
 
 		/* -fs_basepath */
 		else if ( striEqual( argv[ i ], "-fs_basepath" ) ) {
-			if ( ++i >= *argc || !argv[ i ] ) {
+			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
-			argv[ i - 1 ] = NULL;
-			AddBasePath( argv[ i ] );
-			argv[ i ] = NULL;
+			AddBasePath( basePaths, argv[ i ] );
+			argv[ i - 1 ] = argv[ i ] = NULL;
 		}
 
 		/* -fs_game */
 		else if ( striEqual( argv[ i ], "-fs_game" ) ) {
-			if ( ++i >= *argc || !argv[ i ] ) {
+			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
-			argv[ i - 1 ] = NULL;
-			AddGamePath( argv[ i ] );
-			argv[ i ] = NULL;
+			insert_unique( gamePaths, stream( DirectoryCleaned( argv[i] ) ) );
+			argv[ i - 1 ] = argv[ i ] = NULL;
 		}
 
 		/* -fs_basegame */
 		else if ( striEqual( argv[ i ], "-fs_basegame" ) ) {
-			if ( ++i >= *argc || !argv[ i ] ) {
+			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
-			argv[ i - 1 ] = NULL;
 			baseGame = argv[ i ];
-			argv[ i ] = NULL;
+			argv[ i - 1 ] = argv[ i ] = NULL;
 		}
 
 		/* -fs_home */
 		else if ( striEqual( argv[ i ], "-fs_home" ) ) {
-			if ( ++i >= *argc || !argv[ i ] ) {
+			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
-			argv[ i - 1 ] = NULL;
 			homePath = argv[i];
-			argv[ i ] = NULL;
+			argv[ i - 1 ] = argv[ i ] = NULL;
 		}
 
 		/* -fs_homebase */
 		else if ( striEqual( argv[ i ], "-fs_homebase" ) ) {
-			if ( ++i >= *argc || !argv[ i ] ) {
+			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
-			argv[ i - 1 ] = NULL;
 			homeBasePath = argv[i];
-			argv[ i ] = NULL;
+			argv[ i - 1 ] = argv[ i ] = NULL;
 		}
 
 		/* -fs_homepath - sets both of them */
 		else if ( striEqual( argv[ i ], "-fs_homepath" ) ) {
-			if ( ++i >= *argc || !argv[ i ] ) {
+			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
-			argv[ i - 1 ] = NULL;
 			homePath = argv[i];
 			homeBasePath = ".";
-			argv[ i ] = NULL;
+			argv[ i - 1 ] = argv[ i ] = NULL;
 		}
 
 		/* -fs_pakpath */
 		else if ( striEqual( argv[ i ], "-fs_pakpath" ) ) {
-			if ( ++i >= *argc || !argv[ i ] ) {
+			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
-			argv[ i - 1 ] = NULL;
-			AddPakPath( argv[ i ] );
-			argv[ i ] = NULL;
+			insert_unique( pakPaths, stream( DirectoryCleaned( argv[i] ) ) );
+			argv[ i - 1 ] = argv[ i ] = NULL;
 		}
 
 	}
@@ -492,72 +412,59 @@ void InitPaths( int *argc, char **argv ){
 	*argc = k;
 
 	/* add standard game path */
-	AddGamePath( baseGame == nullptr? g_game->gamePath : baseGame );
+	insert_unique( gamePaths, stream( DirectoryCleaned( baseGame == nullptr? g_game->gamePath : baseGame ) ) );
 
 	/* if there is no base path set, figure it out */
-	if ( numBasePaths == 0 ) {
+	if ( basePaths.empty() ) {
 		/* this is another crappy replacement for SetQdirFromPath() */
-		for ( i = 0; i < *argc && numBasePaths == 0; i++ )
+		for ( i = 0; i < *argc && basePaths.empty(); i++ )
 		{
 			/* extract the arg */
-			strcpy( temp, argv[ i ] );
-			FixDOSName( temp );
-			Sys_FPrintf( SYS_VRB, "Searching for \"%s\" in \"%s\" (%d)...\n", g_game->magic, temp, i );
+			stream( DirectoryCleaned( argv[ i ] ) );
+			Sys_FPrintf( SYS_VRB, "Searching for \"%s\" in \"%s\" (%d)...\n", g_game->magic, stream.c_str(), i );
 			/* check for the game's magic word */
-			char* found = strIstr( temp, g_game->magic );
+			char* found = strIstr( stream.c_str(), g_game->magic );
 			if( found ){
 				/* now find the next slash and nuke everything after it */
 				found = strchr( found, '/' );
 				if( found )
 					strClear( found );
 				/* add this as a base path */
-				AddBasePath( temp );
+				AddBasePath( basePaths, stream.c_str() );
 			}
 		}
 
 		/* add install path */
-		if ( numBasePaths == 0 ) {
-			AddBasePath( installPath );
+		if ( basePaths.empty() ) {
+			AddBasePath( basePaths, installPath.c_str() );
 		}
 
 		/* check again */
-		if ( numBasePaths == 0 ) {
+		if ( basePaths.empty() ) {
 			Error( "Failed to find a valid base path." );
 		}
 	}
 
 	/* this only affects unix */
-	if ( homeBasePath != NULL ) {
-		AddHomeBasePath( homeBasePath );
-	}
-	else{
-		AddHomeBasePath( g_game->homeBasePath );
-	}
+	AddHomeBasePath( basePaths, homePath.c_str(), homeBasePath != nullptr? homeBasePath : g_game->homeBasePath );
 
 	/* initialize vfs paths */
-	value_minimize( numBasePaths, MAX_BASE_PATHS );
-	value_minimize( numGamePaths, MAX_GAME_PATHS );
-
 	/* walk the list of game paths */
-	for ( j = 0; j < numGamePaths; j++ )
+	for ( const auto& gamePath : gamePaths )
 	{
 		/* walk the list of base paths */
-		for ( i = 0; i < numBasePaths; i++ )
+		for ( const auto& basePath : basePaths )
 		{
 			/* create a full path and initialize it */
-			sprintf( temp, "%s/%s/", basePaths[ i ], gamePaths[ j ] );
-			vfsInitDirectory( temp );
+			vfsInitDirectory( stream( basePath, gamePath ) );
 		}
 	}
 
-	/* initialize vfs paths */
-	value_minimize( numPakPaths, MAX_PAK_PATHS );
-
 	/* walk the list of pak paths */
-	for ( i = 0; i < numPakPaths; i++ )
+	for ( const auto& pakPath : pakPaths )
 	{
 		/* initialize this pak path */
-		vfsInitDirectory( pakPaths[ i ] );
+		vfsInitDirectory( pakPath.c_str() );
 	}
 
 	/* done */

@@ -1909,7 +1909,7 @@ Q_EXTERN int numMapEntities Q_ASSIGN( 0 );
 
 inline int blockSize[ 3 ] = { 1024, 1024, 1024 };                          /* should be the same as in radiant */
 
-Q_EXTERN char EnginePath[ 1024 ];
+Q_EXTERN CopiedString g_enginePath;
 
 Q_EXTERN char name[ 1024 ];
 Q_EXTERN char source[ 1024 ];
