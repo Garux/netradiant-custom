@@ -1149,7 +1149,7 @@ void Map_LoadFile( const char *filename ){
 	}
 
 	globalOutputStream() << "--- LoadMapFile ---\n";
-	globalOutputStream() << g_map.m_name.c_str() << "\n";
+	globalOutputStream() << g_map.m_name << "\n";
 
 	globalOutputStream() << Unsigned( g_brushCount.get() + g_patchCount.get() ) << " primitives\n";
 	globalOutputStream() << Unsigned( g_entityCount.get() ) << " entities\n";
@@ -2446,7 +2446,7 @@ void map_autocaulk_selected(){
 		str << AppPath_get() << "q3map2." << RADIANT_EXECUTABLE
 		    << " -game quake3"
 		    << " -fs_basepath \"" << EnginePath_get()
-		    << "\" -fs_homepath \"" << g_qeglobals.m_userEnginePath.c_str()
+		    << "\" -fs_homepath \"" << g_qeglobals.m_userEnginePath
 		    << "\" -fs_game " << gamename_get()
 		    << " -autocaulk -fulldetail"
 		    << " \"" << filename.c_str() << "\"";
@@ -2597,9 +2597,9 @@ public:
 	}
 	void realise(){
 		if ( --m_unrealised == 0 ) {
-			ASSERT_MESSAGE( !string_empty( g_qeglobals.m_userGamePath.c_str() ), "maps_directory: user-game-path is empty" );
+			ASSERT_MESSAGE( !g_qeglobals.m_userGamePath.empty(), "maps_directory: user-game-path is empty" );
 			StringOutputStream buffer( 256 );
-			buffer << g_qeglobals.m_userGamePath.c_str() << "maps/";
+			buffer << g_qeglobals.m_userGamePath << "maps/";
 			Q_mkdir( buffer.c_str() );
 			g_mapsPath = buffer.c_str();
 		}

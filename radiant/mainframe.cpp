@@ -252,10 +252,10 @@ void HomePaths_Realise(){
 
 	{
 		StringOutputStream path( 256 );
-		path << g_qeglobals.m_userEnginePath.c_str() << gamename_get() << '/';
+		path << g_qeglobals.m_userEnginePath << gamename_get() << '/';
 		g_qeglobals.m_userGamePath = path.c_str();
 	}
-	ASSERT_MESSAGE( !string_empty( g_qeglobals.m_userGamePath.c_str() ), "HomePaths_Realise: user-game-path is empty" );
+	ASSERT_MESSAGE( !g_qeglobals.m_userGamePath.empty(), "HomePaths_Realise: user-game-path is empty" );
 	Q_mkdir( g_qeglobals.m_userGamePath.c_str() );
 }
 
@@ -382,7 +382,7 @@ const char* LocalRcPath_get(){
 	static CopiedString rc_path;
 	if ( rc_path.empty() ) {
 		StringOutputStream stream( 256 );
-		stream << GlobalRadiant().getSettingsPath() << g_pGameDescription->mGameFile.c_str() << "/";
+		stream << GlobalRadiant().getSettingsPath() << g_pGameDescription->mGameFile << "/";
 		rc_path = stream.c_str();
 	}
 	return rc_path.c_str();
@@ -499,11 +499,10 @@ const char* basegame_get(){
 }
 
 const char* gamename_get(){
-	const char* gamename = g_gamename.c_str();
-	if ( string_empty( gamename ) ) {
+	if ( g_gamename.empty() ) {
 		return basegame_get();
 	}
-	return gamename;
+	return g_gamename.c_str();
 }
 
 void gamename_set( const char* gamename ){
@@ -2971,14 +2970,14 @@ gboolean toolbar_redirect_scroll( GtkWidget* widget, GdkEventScroll* event, gpoi
 
 void user_shortcuts_init(){
 	StringOutputStream path( 256 );
-	path << SettingsPath_get() << g_pGameDescription->mGameFile.c_str() << '/';
+	path << SettingsPath_get() << g_pGameDescription->mGameFile << '/';
 	LoadCommandMap( path.c_str() );
 	SaveCommandMap( path.c_str() );
 }
 
 void user_shortcuts_save(){
 	StringOutputStream path( 256 );
-	path << SettingsPath_get() << g_pGameDescription->mGameFile.c_str() << '/';
+	path << SettingsPath_get() << g_pGameDescription->mGameFile << '/';
 	SaveCommandMap( path.c_str() );
 }
 

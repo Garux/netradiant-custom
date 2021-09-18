@@ -77,6 +77,6 @@ GtkImage* new_image( const char* filename ){
 
 GtkImage* new_local_image( const char* filename ){
 	StringOutputStream fullPath( 256 );
-	fullPath << g_bitmapsPath.c_str() << filename;
-	return new_image( fullPath.c_str() );
+	fullPath << g_bitmapsPath << filename;
+	return new_image( fullPath );
 }

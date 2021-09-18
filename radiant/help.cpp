@@ -119,7 +119,7 @@ void create_game_help_menu( GtkMenu *menu ){
 
 #if 1
 	filename.clear();
-	filename << g_pGameDescription->mGameToolsPath.c_str() << "game.xlink";
+	filename << g_pGameDescription->mGameToolsPath << "game.xlink";
 	process_xlink( filename.c_str(), g_pGameDescription->getRequiredKeyValue( "name" ), g_pGameDescription->mGameToolsPath.c_str(), menu );
 #else
 	for ( std::list<CGameDescription *>::iterator iGame = g_GamesDialog.mGames.begin(); iGame != g_GamesDialog.mGames.end(); ++iGame )

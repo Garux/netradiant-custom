@@ -458,7 +458,7 @@ bool parseShaderParameters( Tokeniser& tokeniser, ShaderParameters& params ){
 bool ShaderTemplate::parseTemplate( Tokeniser& tokeniser ){
 	m_Name = tokeniser.getToken();
 	if ( !parseShaderParameters( tokeniser, m_params ) ) {
-		globalErrorStream() << "shader template: " << makeQuoted( m_Name.c_str() ) << ": parameter parse failed\n";
+		globalErrorStream() << "shader template: " << makeQuoted( m_Name ) << ": parameter parse failed\n";
 		return false;
 	}
 
@@ -502,7 +502,7 @@ bool ShaderTemplate::parseDoom3( Tokeniser& tokeniser ){
 				else if ( currentLayer.m_type == LAYER_SPECULARMAP ) {
 					m_specular = currentLayer.m_texture;
 				}
-				else if ( !string_empty( currentLayer.m_texture.c_str() ) ) {
+				else if ( !currentLayer.m_texture.empty() ) {
 					m_layers.push_back( MapLayerTemplate(
 					                        currentLayer.m_texture.c_str(),
 					                        currentLayer.m_blendFunc,
@@ -664,7 +664,7 @@ bool ShaderTemplate::parseDoom3( Tokeniser& tokeniser ){
 		}
 	}
 
-	if ( string_empty( m_textureName.c_str() ) ) {
+	if ( m_textureName.empty() ) {
 		m_textureName = m_diffuse;
 	}
 
@@ -706,18 +706,18 @@ bool parseTemplateInstance( Tokeniser& tokeniser, const char* filename ){
 	const char* templateName = tokeniser.getToken();
 	ShaderTemplate* shaderTemplate = findTemplate( templateName );
 	if ( shaderTemplate == 0 ) {
-		globalErrorStream() << "shader instance: " << makeQuoted( name.c_str() ) << ": shader template not found: " << makeQuoted( templateName ) << "\n";
+		globalErrorStream() << "shader instance: " << makeQuoted( name ) << ": shader template not found: " << makeQuoted( templateName ) << "\n";
 	}
 
 	ShaderArguments args;
 	if ( !parseShaderParameters( tokeniser, args ) ) {
-		globalErrorStream() << "shader instance: " << makeQuoted( name.c_str() ) << ": argument parse failed\n";
+		globalErrorStream() << "shader instance: " << makeQuoted( name ) << ": argument parse failed\n";
 		return false;
 	}
 
 	if ( shaderTemplate != 0 ) {
 		if ( !g_shaderDefinitions.insert( ShaderDefinitionMap::value_type( name, ShaderDefinition( shaderTemplate, args, filename ) ) ).second ) {
-			globalErrorStream() << "shader instance: " << makeQuoted( name.c_str() ) << ": already exists, second definition ignored\n";
+			globalErrorStream() << "shader instance: " << makeQuoted( name ) << ": already exists, second definition ignored\n";
 		}
 	}
 	return true;
@@ -1092,7 +1092,7 @@ public:
 	}
 
 	qtexture_t* lightFalloffImage() const {
-		if ( !string_empty( m_template.m_lightFalloffImage.c_str() ) ) {
+		if ( !m_template.m_lightFalloffImage.empty() ) {
 			return m_pLightFalloffImage;
 		}
 		return 0;
@@ -1146,7 +1146,7 @@ void FreeShaders(){
 
 bool ShaderTemplate::parseQuake3( Tokeniser& tokeniser ){
 	// name of the qtexture_t we'll use to represent this shader (this one has the "textures\" before)
-	m_textureName = m_Name.c_str();
+	m_textureName = m_Name;
 
 	tokeniser.nextLine();
 
@@ -1552,7 +1552,7 @@ void ShaderList_addShaderFile( const char* dirstring ){
 	{
 		if ( string_equal_nocase( dirstring, sh.c_str() ) ) {
 			found = true;
-			globalOutputStream() << "duplicate entry \"" << sh.c_str() << "\" in shaderlist.txt\n";
+			globalOutputStream() << "duplicate entry \"" << sh << "\" in shaderlist.txt\n";
 			break;
 		}
 	}
@@ -1677,7 +1677,7 @@ void Shaders_Load(){
 		StringOutputStream shadername( 256 );
 		for( const CopiedString& sh : l_shaderfiles )
 		{
-			shadername << path.c_str() << sh.c_str();
+			shadername << path.c_str() << sh;
 			LoadShaderFile( shadername.c_str() );
 			shadername.clear();
 		}

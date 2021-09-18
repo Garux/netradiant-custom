@@ -1962,7 +1962,7 @@ void TextureBrowser_checkTagFile(){
 	else
 	{
 		// load default tagfile
-		auto default_filename = StringOutputStream( 256 )( g_pGameDescription->mGameToolsPath.c_str(), SHADERTAG_FILE );
+		auto default_filename = StringOutputStream( 256 )( g_pGameDescription->mGameToolsPath, SHADERTAG_FILE );
 
 		if ( file_exists( default_filename ) ) {
 			g_TextureBrowser.m_tags = TagBuilder.OpenXmlDoc( default_filename, rc_filename );
@@ -2452,7 +2452,7 @@ void TextureBrowser_copyTag(){
 
 void TextureBrowser_pasteTag(){
 	IShader* ishader = QERApp_Shader_ForName( g_TextureBrowser.shader.c_str() );
-	CopiedString shader = g_TextureBrowser.shader.c_str();
+	const CopiedString shader = g_TextureBrowser.shader;
 
 	if ( !TagBuilder.CheckShaderTag( shader.c_str() ) ) {
 		CopiedString shaderFile = ishader->getShaderFileName();
@@ -2593,8 +2593,8 @@ void TextureBrowser_filter_searchFromStart(){
 void TextureBrowser_exportTitle( const StringImportCallback& importer ){
 	StringOutputStream buffer( 64 );
 	buffer << "Textures: ";
-	if ( !string_empty( g_TextureBrowser_currentDirectory.c_str() ) ) {
-		buffer << g_TextureBrowser_currentDirectory.c_str();
+	if ( !g_TextureBrowser_currentDirectory.empty() ) {
+		buffer << g_TextureBrowser_currentDirectory;
 	}
 	else
 	{

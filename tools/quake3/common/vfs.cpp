@@ -195,10 +195,10 @@ void vfsInitDirectory( const char *path ){
 				const char *ext = path_get_filename_base_end( name );
 
 				if ( striEqual( ext, ".pk3" ) ) {
-					paks.push_back( StringOutputStream( 256 )( pathCleaned.c_str(), name ) );
+					paks.push_back( StringOutputStream( 256 )( pathCleaned, name ) );
 				}
 				else if ( striEqual( ext, ".pk3dir" ) ) {
-					g_strDirs.emplace_back( StringOutputStream( 256 )( pathCleaned.c_str(), name, '/' ) );
+					g_strDirs.emplace_back( StringOutputStream( 256 )( pathCleaned, name, '/' ) );
 				}
 			}
 			g_dir_close( dir );
@@ -229,7 +229,7 @@ std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath ){
 	};
 	/* search in dirs */
 	for ( const auto& strdir : g_strDirs ){
-		GDir *dir = g_dir_open( StringOutputStream( 256 )( strdir.c_str(), shaderPath, "/" ), 0, NULL );
+		GDir *dir = g_dir_open( StringOutputStream( 256 )( strdir, shaderPath, "/" ), 0, NULL );
 
 		if ( dir != NULL ) {
 			const char* name;

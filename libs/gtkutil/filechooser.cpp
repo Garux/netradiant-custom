@@ -96,7 +96,7 @@ public:
 			std::size_t len = strlen( ( *i ).m_name.c_str() ) + strlen( ( *i ).m_pattern.c_str() ) + 3;
 			StringOutputStream buffer( len + 1 ); // length + null char
 
-			buffer << ( *i ).m_name.c_str() << " <" << ( *i ).m_pattern.c_str() << ">";
+			buffer << ( *i ).m_name << " <" << ( *i ).m_pattern << ">";
 
 			m_masks.push_back( buffer.c_str() );
 		}

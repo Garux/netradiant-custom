@@ -595,12 +595,12 @@ const char* misc_model_dialog( GtkWidget* parent, const char* filepath ){
 			buffer << root << filepath;
 	}
 	if( buffer.empty() ){
-		buffer << g_qeglobals.m_userGamePath.c_str() << "models/";
+		buffer << g_qeglobals.m_userGamePath << "models/";
 
 		if ( !file_readable( buffer.c_str() ) ) {
 			// just go to fsmain
 			buffer.clear();
-			buffer << g_qeglobals.m_userGamePath.c_str();
+			buffer << g_qeglobals.m_userGamePath;
 		}
 	}
 

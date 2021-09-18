@@ -348,7 +348,7 @@ struct ModelResource : public Resource
 		if ( realised() ) {
 			unrealise();
 		}
-		ASSERT_MESSAGE( !realised(), "ModelResource::~ModelResource: resource reference still realised: " << makeQuoted( m_name.c_str() ) );
+		ASSERT_MESSAGE( !realised(), "ModelResource::~ModelResource: resource reference still realised: " << makeQuoted( m_name ) );
 	}
 	// NOT COPYABLE
 	ModelResource( const ModelResource& ) = delete;
@@ -475,8 +475,8 @@ struct ModelResource : public Resource
 	}
 	std::time_t modified() const {
 		StringOutputStream fullpath( 256 );
-		fullpath << m_path.c_str() << m_name.c_str();
-		return file_modified( fullpath.c_str() );
+		fullpath << m_path << m_name;
+		return file_modified( fullpath );
 	}
 	void mapSave(){
 		m_modified = modified();

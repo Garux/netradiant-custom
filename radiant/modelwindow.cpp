@@ -1032,7 +1032,7 @@ gboolean ModelBrowser_button_press( GtkWidget* widget, GdkEventButton* event, Mo
 		Instance_setSelected( instance, true );
 
 		StringOutputStream sstream( 128 );
-		sstream << modelBrowser->m_currentFolderPath.c_str() << std::next( modelBrowser->m_currentFolder->m_files.begin(), modelBrowser->m_currentModelId )->c_str();
+		sstream << modelBrowser->m_currentFolderPath << std::next( modelBrowser->m_currentFolder->m_files.begin(), modelBrowser->m_currentModelId )->c_str();
 		Node_getEntity( node )->setKeyValue( entityClass->miscmodel_key(), sstream.c_str() );
 	}
 	return FALSE;
@@ -1045,7 +1045,7 @@ gboolean ModelBrowser_button_release( GtkWidget* widget, GdkEventButton* event, 
 		}
 		if ( event->button == 1 && modelBrowser->m_move_amount < 16 && modelBrowser->m_currentFolder != nullptr && modelBrowser->m_currentModelId >= 0 ) { // assign model to selected entity nodes
 			StringOutputStream sstream( 128 );
-			sstream << modelBrowser->m_currentFolderPath.c_str() << std::next( modelBrowser->m_currentFolder->m_files.begin(), modelBrowser->m_currentModelId )->c_str();
+			sstream << modelBrowser->m_currentFolderPath << std::next( modelBrowser->m_currentFolder->m_files.begin(), modelBrowser->m_currentModelId )->c_str();
 			class EntityVisitor : public SelectionSystem::Visitor
 			{
 				const char* m_filePath;
@@ -1100,7 +1100,7 @@ static void TreeView_onRowActivated( GtkTreeView* treeview, GtkTreePath* path, G
 		{
 			for( const CopiedString& filename : g_ModelBrowser.m_currentFolder->m_files ){
 				sstream.clear();
-				sstream << g_ModelBrowser.m_currentFolderPath.c_str() << filename.c_str();
+				sstream << g_ModelBrowser.m_currentFolderPath << filename;
 				ModelNode *modelNode = new ModelNode;
 				modelNode->setModel( sstream.c_str() );
 				NodeSmartReference node( modelNode->node() );

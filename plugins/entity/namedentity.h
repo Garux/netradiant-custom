@@ -58,7 +58,7 @@ public:
 	NamedEntity( EntityKeyValues& entity ) : m_entity( entity ){
 	}
 	const char* name() const {
-		if ( string_empty( m_name.c_str() ) ) {
+		if ( m_name.empty() ) {
 			return m_entity.getClassName();
 		}
 		return m_name.c_str();

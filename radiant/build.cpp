@@ -769,7 +769,7 @@ gboolean project_key_press( GtkWidget* widget, GdkEventKey* event, ProjectList* 
 			else if ( event_is_copy( event ) && x != project.end() ) {
 				g_buildpair_copied = ( *x );
 			}
-			else if ( event_is_paste( event ) && string_not_empty( g_buildpair_copied.first.c_str() ) ) {
+			else if ( event_is_paste( event ) && !g_buildpair_copied.first.empty() ) {
 				projectList->m_changed = true;
 				project.insert( x, g_buildpair_copied );
 				Build_refreshMenu( g_bsp_menu );
@@ -1020,7 +1020,7 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 			}
 			StringOutputStream stream;
 			for( Variables::iterator i = g_build_variables.begin(); i != g_build_variables.end(); ++i ){
-				stream << "[" << ( *i ).first.c_str() << "] = " << ( *i ).second.c_str() << "\n";
+				stream << "[" << ( *i ).first << "] = " << ( *i ).second << "\n";
 			}
 			build_clear_variables();
 
@@ -1144,7 +1144,7 @@ const char* g_buildMenuFullPah(){
 
 	static StringOutputStream buffer( 256 );
 	buffer.clear();
-	buffer << SettingsPath_get() << g_pGameDescription->mGameFile.c_str() << "/" << g_buildMenu.c_str();
+	buffer << SettingsPath_get() << g_pGameDescription->mGameFile << "/" << g_buildMenu;
 	return buffer.c_str();
 }
 }

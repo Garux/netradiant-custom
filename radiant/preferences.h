@@ -204,7 +204,7 @@ public:
 		if ( i != m_gameDescription.end() ) {
 			return ( *i ).second.c_str();
 		}
-		ERROR_MESSAGE( "game attribute " << makeQuoted( key ) << " not found in " << makeQuoted( mGameFile.c_str() ) );
+		ERROR_MESSAGE( "game attribute " << makeQuoted( key ) << " not found in " << makeQuoted( mGameFile ) );
 		return "";
 	}
 

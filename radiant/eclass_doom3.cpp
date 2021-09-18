@@ -170,10 +170,10 @@ void Model_resolveInheritance( const char* name, Model& model ){
 	if ( model.m_resolved == false ) {
 		model.m_resolved = true;
 
-		if ( !string_empty( model.m_parent.c_str() ) ) {
+		if ( !model.m_parent.empty() ) {
 			Models::iterator i = g_models.find( model.m_parent );
 			if ( i == g_models.end() ) {
-				globalErrorStream() << "model " << name << " inherits unknown model " << model.m_parent.c_str() << "\n";
+				globalErrorStream() << "model " << name << " inherits unknown model " << model.m_parent << "\n";
 			}
 			else
 			{
@@ -512,7 +512,7 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 			const char* value;
 			PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseString( tokeniser, value ) );
 			if ( string_equal( value, "}" ) ) { // hack for quake4 powerups.def bug
-				globalErrorStream() << "entityDef " << makeQuoted( entityClass.name() ) << " key " << makeQuoted( tmp.c_str() ) << " has no value\n";
+				globalErrorStream() << "entityDef " << makeQuoted( entityClass.name() ) << " key " << makeQuoted( tmp ) << " has no value\n";
 				break;
 			}
 			else
@@ -604,7 +604,7 @@ bool EntityClassDoom3_parse( TextInputStream& inputStream, const char* filename 
 		}
 		CopiedString tmp( blockType );
 		if ( !EntityClassDoom3_parseBlock( tokeniser, tmp.c_str() ) ) {
-			globalErrorStream() << GlobalFileSystem().findFile( filename ) << filename << ":" << (unsigned int)tokeniser.getLine() << ": " << tmp.c_str() << " parse failed, skipping rest of file\n";
+			globalErrorStream() << GlobalFileSystem().findFile( filename ) << filename << ":" << (unsigned int)tokeniser.getLine() << ": " << tmp << " parse failed, skipping rest of file\n";
 			return false;
 		}
 	}
@@ -656,7 +656,7 @@ void EntityClass_resolveInheritance( EntityClass* derivedClass ){
 		derivedClass->inheritanceResolved = true;
 		EntityClasses::iterator i = g_EntityClassDoom3_classes.find( derivedClass->m_parent.front().c_str() );
 		if ( i == g_EntityClassDoom3_classes.end() ) {
-			globalErrorStream() << "failed to find entityDef " << makeQuoted( derivedClass->m_parent.front().c_str() ) << " inherited by "  << makeQuoted( derivedClass->name() ) << "\n";
+			globalErrorStream() << "failed to find entityDef " << makeQuoted( derivedClass->m_parent.front() ) << " inherited by "  << makeQuoted( derivedClass->name() ) << "\n";
 		}
 		else
 		{
@@ -703,7 +703,7 @@ public:
 				for ( EntityClasses::iterator i = g_EntityClassDoom3_classes.begin(); i != g_EntityClassDoom3_classes.end(); ++i )
 				{
 					EntityClass_resolveInheritance( ( *i ).second );
-					if ( !string_empty( ( *i ).second->m_modelpath.c_str() ) ) {
+					if ( !( *i ).second->m_modelpath.empty() ) {
 						Models::iterator j = g_models.find( ( *i ).second->m_modelpath );
 						if ( j != g_models.end() ) {
 							( *i ).second->m_modelpath = ( *j ).second.m_mesh;
@@ -716,8 +716,8 @@ public:
 
 					usage << "-------- NOTES --------\n";
 
-					if ( !string_empty( ( *i ).second->m_comments.c_str() ) ) {
-						usage << ( *i ).second->m_comments.c_str() << "\n";
+					if ( !( *i ).second->m_comments.empty() ) {
+						usage << ( *i ).second->m_comments << "\n";
 					}
 
 					usage << "\n-------- KEYS --------\n";

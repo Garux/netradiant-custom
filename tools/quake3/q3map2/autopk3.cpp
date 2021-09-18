@@ -646,9 +646,9 @@ int pk3BSPMain( int argc, char **argv ){
 	}
 
 	/* make a pack */
-	auto packname = StringOutputStream( 256 )( g_enginePath, nameOFmap.c_str(), "_autopacked.pk3" );
+	auto packname = StringOutputStream( 256 )( g_enginePath, nameOFmap, "_autopacked.pk3" );
 	remove( packname );
-	auto packFailName = StringOutputStream( 256 )( g_enginePath, nameOFmap.c_str(), "_FAILEDpack.pk3" );
+	auto packFailName = StringOutputStream( 256 )( g_enginePath, nameOFmap, "_FAILEDpack.pk3" );
 	remove( packFailName );
 
 	Sys_Printf( "\n--- ZipZip ---\n" );
@@ -712,7 +712,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 	Sys_Printf( "\n\t.bsp and stuff\n" );
 
-	stream( "maps/", nameOFmap.c_str(), ".bsp" );
+	stream( "maps/", nameOFmap, ".bsp" );
 	//if ( vfsPackFile( stream, packname, compLevel ) ){
 	if ( vfsPackFile_Absolute_Path( source, stream, packname, compLevel ) ){
 		Sys_Printf( "++%s\n", stream.c_str() );
@@ -722,15 +722,15 @@ int pk3BSPMain( int argc, char **argv ){
 		packFAIL = true;
 	}
 
-	stream( "maps/", nameOFmap.c_str(), ".aas" );
+	stream( "maps/", nameOFmap, ".aas" );
 	if ( !packResource( stream, packname, compLevel ) )
 		Sys_Printf( "  ~fail  %s\n", stream.c_str() );
 
-	stream( "scripts/", nameOFmap.c_str(), ".arena" );
+	stream( "scripts/", nameOFmap, ".arena" );
 	if ( !packResource( stream, packname, compLevel ) )
 		Sys_Printf( "  ~fail  %s\n", stream.c_str() );
 
-	stream( "scripts/", nameOFmap.c_str(), ".defi" );
+	stream( "scripts/", nameOFmap, ".defi" );
 	if ( !packResource( stream, packname, compLevel ) )
 		Sys_Printf( "  ~fail  %s\n", stream.c_str() );
 
@@ -1387,14 +1387,14 @@ int repackBSPMain( int argc, char **argv ){
 	}
 
 	/* write shader */
-	stream( g_enginePath, nameOFrepack.c_str(), "_strippedBYrepacker.shader" );
+	stream( g_enginePath, nameOFrepack, "_strippedBYrepacker.shader" );
 	FILE *f = fopen( stream, "wb" );
 	fwrite( allShaders, sizeof( char ), allShaders.end() - allShaders.begin(), f );
 	fclose( f );
 	Sys_Printf( "Shaders saved to %s\n", stream.c_str() );
 
 	/* make a pack */
-	stream( g_enginePath, nameOFrepack.c_str(), "_repacked.pk3" );
+	stream( g_enginePath, nameOFrepack, "_repacked.pk3" );
 	remove( stream );
 
 	Sys_Printf( "\n--- ZipZip ---\n" );

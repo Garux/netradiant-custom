@@ -314,12 +314,12 @@ const char* browse_sound( GtkWidget* parent, const char* filepath ){
 			buffer << root << filepath;
 	}
 	if( buffer.empty() ){
-		buffer << g_qeglobals.m_userGamePath.c_str() << "sound/";
+		buffer << g_qeglobals.m_userGamePath << "sound/";
 
 		if ( !file_readable( buffer.c_str() ) ) {
 			// just go to fsmain
 			buffer.clear();
-			buffer << g_qeglobals.m_userGamePath.c_str();
+			buffer << g_qeglobals.m_userGamePath;
 		}
 	}
 
@@ -1221,9 +1221,9 @@ void EntityInspector_updateKeyValues(){
 		GtkTreeIter iter;
 		gtk_list_store_append( store, &iter );
 		StringOutputStream key( 64 );
-		key << ( *i ).first.c_str();
+		key << ( *i ).first;
 		StringOutputStream value( 64 );
-		value << ( *i ).second.c_str();
+		value << ( *i ).second;
 		gtk_list_store_set( store, &iter, 0, key.c_str(), 1, value.c_str(), -1 );
 	}
 

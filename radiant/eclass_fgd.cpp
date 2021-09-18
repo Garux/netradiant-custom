@@ -395,7 +395,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 			tokeniser.nextLine();
 
 			StringOutputStream listTypeName( 64 );
-			listTypeName << entityClass->name() << "_" << attribute.m_name.c_str();
+			listTypeName << entityClass->name() << "_" << attribute.m_name;
 			attribute.m_type = listTypeName.c_str();
 
 			ListAttributeType& listType = g_listTypesFGD[listTypeName.c_str()];
@@ -429,7 +429,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 			for ( ListAttributeType::const_iterator i = listType.begin(); i != listType.end(); ++i )
 			{
 				if ( string_equal( attribute.m_value.c_str(), ( *i ).first.c_str() ) ) {
-					attribute.m_value = ( *i ).second.c_str();
+					attribute.m_value = ( *i ).second;
 				}
 			}
 
@@ -504,7 +504,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 		}
 		else
 		{
-			ERROR_MESSAGE( "unknown key type: " << makeQuoted( type.c_str() ) );
+			ERROR_MESSAGE( "unknown key type: " << makeQuoted( type ) );
 		}
 		tokeniser.nextLine();
 	}
@@ -669,7 +669,7 @@ public:
 				}
 
 				for( const auto& [ name, path ] : name_path ){
-					EntityClassFGD_loadFile( StringOutputStream()( path, name.c_str() ) );
+					EntityClassFGD_loadFile( StringOutputStream()( path, name ) );
 				}
 			}
 
@@ -677,7 +677,7 @@ public:
 				for ( EntityClasses::iterator i = g_EntityClassFGD_classes.begin(); i != g_EntityClassFGD_classes.end(); ++i )
 				{
 					EntityClassFGD_resolveInheritance( ( *i ).second );
-					if ( ( *i ).second->fixedsize && string_empty( ( *i ).second->m_modelpath.c_str() ) ) {
+					if ( ( *i ).second->fixedsize && ( *i ).second->m_modelpath.empty() ) {
 						if ( !( *i ).second->sizeSpecified ) {
 							globalErrorStream() << "size not specified for entity class: " << makeQuoted( ( *i ).second->name() ) << '\n';
 						}

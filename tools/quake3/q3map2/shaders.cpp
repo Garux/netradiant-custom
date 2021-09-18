@@ -2029,7 +2029,7 @@ void LoadShaderInfo( void ){
 	/* parse the shader files */
 	for ( const CopiedString& file : shaderFiles )
 	{
-		ParseShaderFile( StringOutputStream( 64 )( g_game->shaderPath, '/', file.c_str() ) );
+		ParseShaderFile( StringOutputStream( 64 )( g_game->shaderPath, '/', file ) );
 	}
 
 	/* emit some statistics */

@@ -186,7 +186,7 @@ const char* environment_get_app_filepath(){
 
 bool portable_app_setup(){
 	StringOutputStream confdir( 256 );
-	confdir << app_path.c_str() << "settings/";
+	confdir << app_path << "settings/";
 	if ( file_exists( confdir.c_str() ) ) {
 		home_path = confdir.c_str();
 		return true;

@@ -63,7 +63,7 @@ void GlobalShortcuts_register( const char* name, int type ){
 void GlobalShortcuts_reportUnregistered(){
 	for ( auto& pair : g_shortcuts )
 		if ( pair.second.accelerator.key != 0 && pair.second.type == 0 )
-			globalWarningStream() << "shortcut not registered: " << pair.first.c_str() << "\n";
+			globalWarningStream() << "shortcut not registered: " << pair.first << "\n";
 }
 
 typedef std::map<CopiedString, Command> Commands;

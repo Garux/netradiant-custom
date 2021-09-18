@@ -607,7 +607,7 @@ void VMF_parseBlock( Tokeniser& tokeniser, const VMFBlock& block ){
 		tokeniser.nextLine();
 		if ( string_equal( value, "{" ) ) {
 			VMFBlock::const_iterator i = VMFBlock_find( block, tmp.c_str() );
-			ASSERT_MESSAGE( i != block.end(), "error parsing vmf block " << makeQuoted( block.name() ) << ": unknown block: " << makeQuoted( tmp.c_str() ) );
+			ASSERT_MESSAGE( i != block.end(), "error parsing vmf block " << makeQuoted( block.name() ) << ": unknown block: " << makeQuoted( tmp ) );
 			if ( string_equal( tmp.c_str(), "solid" ) ) {
 				++g_vmf_brushes;
 			}

@@ -219,7 +219,7 @@ struct AssModel
 
 			const CopiedString oldShader( m_shader );
 			if( strchr( m_shader.c_str(), '/' ) == nullptr ){ /* texture is likely in the folder, where model is */
-				m_shader = StringOutputStream()( rootPath, m_shader.c_str() );
+				m_shader = StringOutputStream()( rootPath, m_shader );
 			}
 			else{
 				const char *name = m_shader.c_str();

@@ -354,7 +354,7 @@ void paths_init(){
 	// (for now I had to create symlinks)
 	{
 		StringOutputStream path( 256 );
-		path << g_strAppPath.c_str() << "bitmaps/";
+		path << g_strAppPath << "bitmaps/";
 		BitmapsPath_set( path.c_str() );
 	}
 
@@ -486,7 +486,7 @@ void remove_global_pid(){
  */
 void create_local_pid(){
 	StringOutputStream g_pidGameFile( 256 ); ///< the game-specific .pid file
-	g_pidGameFile << SettingsPath_get() << g_pGameDescription->mGameFile.c_str() << "/radiant-game.pid";
+	g_pidGameFile << SettingsPath_get() << g_pGameDescription->mGameFile << "/radiant-game.pid";
 
 	FILE *pid = fopen( g_pidGameFile.c_str(), "r" );
 	if ( pid != 0 ) {
@@ -535,7 +535,7 @@ void create_local_pid(){
  */
 void remove_local_pid(){
 	StringOutputStream g_pidGameFile( 256 );
-	g_pidGameFile << SettingsPath_get() << g_pGameDescription->mGameFile.c_str() << "/radiant-game.pid";
+	g_pidGameFile << SettingsPath_get() << g_pGameDescription->mGameFile << "/radiant-game.pid";
 	remove( g_pidGameFile.c_str() );
 }
 

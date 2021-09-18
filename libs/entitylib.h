@@ -356,7 +356,7 @@ public:
 		m_observers.erase( observer );
 	}
 	const char* c_str() const {
-		if ( string_empty( m_string.c_str() ) ) {
+		if ( m_string.empty() ) {
 			return m_empty;
 		}
 		return m_string.c_str();

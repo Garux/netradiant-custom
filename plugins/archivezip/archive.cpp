@@ -161,7 +161,7 @@ class ZipArchive final : public Archive
 		{
 			ZipFileSystem::entry_type& file = m_filesystem[filename.data()];
 			if ( !file.is_directory() ) {
-				globalWarningStream() << "Warning: zip archive " << makeQuoted( m_name.c_str() ) << " contains duplicated file: " << makeQuoted( filename.data() ) << "\n";
+				globalWarningStream() << "Warning: zip archive " << makeQuoted( m_name ) << " contains duplicated file: " << makeQuoted( filename.data() ) << "\n";
 			}
 			else
 			{
@@ -225,7 +225,7 @@ public:
 			zip_file_header file_header;
 			istream_read_zip_file_header( m_istream, file_header );
 			if ( file_header.z_magic != zip_file_header_magic ) {
-				globalErrorStream() << "error reading zip file " << makeQuoted( m_name.c_str() );
+				globalErrorStream() << "error reading zip file " << makeQuoted( m_name );
 				return 0;
 			}
 
@@ -248,7 +248,7 @@ public:
 			zip_file_header file_header;
 			istream_read_zip_file_header( m_istream, file_header );
 			if ( file_header.z_magic != zip_file_header_magic ) {
-				globalErrorStream() << "error reading zip file " << makeQuoted( m_name.c_str() );
+				globalErrorStream() << "error reading zip file " << makeQuoted( m_name );
 				return 0;
 			}
 

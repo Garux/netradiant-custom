@@ -308,7 +308,7 @@ public:
 		else
 		{
 			Operation* operation = m_undo_stack.back();
-			globalOutputStream() << "Undo: " << operation->m_command.c_str() << "\n";
+			globalOutputStream() << "Undo: " << operation->m_command << "\n";
 
 			startRedo();
 			trackersUndo();
@@ -324,7 +324,7 @@ public:
 		else
 		{
 			Operation* operation = m_redo_stack.back();
-			globalOutputStream() << "Redo: " << operation->m_command.c_str() << "\n";
+			globalOutputStream() << "Redo: " << operation->m_command << "\n";
 
 			startUndo();
 			trackersRedo();

@@ -93,11 +93,11 @@ CGameDescription::CGameDescription( xmlDocPtr pDoc, const CopiedString& gameFile
 
 	{
 		StringOutputStream path( 256 );
-		path << AppPath_get() << gameFile.c_str() << "/";
+		path << AppPath_get() << gameFile << "/";
 		mGameToolsPath = path.c_str();
 	}
 
-	ASSERT_MESSAGE( file_exists( mGameToolsPath.c_str() ), "game directory not found: " << makeQuoted( mGameToolsPath.c_str() ) );
+	ASSERT_MESSAGE( file_exists( mGameToolsPath.c_str() ), "game directory not found: " << makeQuoted( mGameToolsPath ) );
 
 	mGameFile = gameFile;
 
@@ -116,10 +116,10 @@ CGameDescription::CGameDescription( xmlDocPtr pDoc, const CopiedString& gameFile
 }
 
 void CGameDescription::Dump(){
-	globalOutputStream() << "game description file: " << makeQuoted( mGameFile.c_str() ) << "\n";
+	globalOutputStream() << "game description file: " << makeQuoted( mGameFile ) << "\n";
 	for ( GameDescription::iterator i = m_gameDescription.begin(); i != m_gameDescription.end(); ++i )
 	{
-		globalOutputStream() << ( *i ).first.c_str() << " = " << makeQuoted( ( *i ).second.c_str() ) << "\n";
+		globalOutputStream() << ( *i ).first << " = " << makeQuoted( ( *i ).second ) << "\n";
 	}
 }
 

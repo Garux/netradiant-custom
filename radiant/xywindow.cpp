@@ -1344,12 +1344,12 @@ void BackgroundImage::render( const VIEWTYPE viewtype ){
 const char* BackgroundImage::background_image_dialog(){
 	StringOutputStream buffer( 1024 );
 
-	buffer << g_qeglobals.m_userGamePath.c_str() << "textures/";
+	buffer << g_qeglobals.m_userGamePath << "textures/";
 
 	if ( !file_readable( buffer.c_str() ) ) {
 		// just go to fsmain
 		buffer.clear();
-		buffer << g_qeglobals.m_userGamePath.c_str();
+		buffer << g_qeglobals.m_userGamePath;
 	}
 
 	const char *filename = file_dialog( GTK_WIDGET( MainFrame_getWindow() ), true, "Background Image", buffer.c_str() );

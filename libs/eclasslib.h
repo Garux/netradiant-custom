@@ -87,14 +87,14 @@ typedef std::list<EntityClassAttributePair> EntityClassAttributes;
 typedef std::list<CopiedString> StringList;
 
 inline const char* EntityClassAttributePair_getName( const EntityClassAttributePair& attributePair ){
-	if ( !string_empty( attributePair.second.m_name.c_str() ) ) {
+	if ( !attributePair.second.m_name.empty() ) {
 		return attributePair.second.m_name.c_str();
 	}
 	return attributePair.first.c_str();
 }
 
 inline const char* EntityClassAttributePair_getDescription( const EntityClassAttributePair& attributePair ){
-	if ( !string_empty( attributePair.second.m_description.c_str() ) ) {
+	if ( !attributePair.second.m_description.empty() ) {
 		return attributePair.second.m_description.c_str();
 	}
 	return EntityClassAttributePair_getName( attributePair );

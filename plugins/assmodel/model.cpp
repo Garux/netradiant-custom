@@ -249,7 +249,7 @@ private:
 
 			const CopiedString oldShader( m_shader );
 			if( strchr( m_shader.c_str(), '/' ) == nullptr ){ /* texture is likely in the folder, where model is */
-				m_shader = StringOutputStream()( scene.m_rootPath, m_shader.c_str() );
+				m_shader = StringOutputStream()( scene.m_rootPath, m_shader );
 			}
 			else{
 				const char *name = m_shader.c_str();
@@ -266,7 +266,7 @@ private:
 			}
 
 			if( oldShader != m_shader )
-				globalOutputStream() << "substituting: " << oldShader.c_str() << " -> " << m_shader.c_str() << "\n";
+				globalOutputStream() << "substituting: " << oldShader << " -> " << m_shader << "\n";
 		}
 
 		m_vertices.resize( mesh->mNumVertices );
