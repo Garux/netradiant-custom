@@ -19,12 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_AUTOPK3_H )
-#define INCLUDED_AUTOPK3_H
+#pragma once
 
-extern char g_q3map2path[1024];
-
-int pk3BSPMain( int argc, char **argv );
-int repackBSPMain( int argc, char **argv );
-
-#endif
+int pk3BSPMain( Args& args );
+int repackBSPMain( Args& args );

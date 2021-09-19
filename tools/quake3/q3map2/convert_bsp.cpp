@@ -43,29 +43,20 @@ static void AAS_DData( unsigned char *data, int size ){
    resets an aas checksum to match the given BSP
  */
 
-int FixAAS( int argc, char **argv ){
+int FixAAS( Args& args ){
 	int length, checksum;
 	void        *buffer;
-	FILE        *file;
 	char aas[ 1024 ];
-	const char **ext;
-	const char  *exts[] =
-	{
-		".aas",
-		"_b0.aas",
-		"_b1.aas",
-		NULL
-	};
 
 
 	/* arg checking */
-	if ( argc < 2 ) {
+	if ( args.empty() ) {
 		Sys_Printf( "Usage: q3map2 -fixaas [-v] <mapname>\n" );
 		return 0;
 	}
 
 	/* do some path mangling */
-	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
+	strcpy( source, ExpandArg( args.takeBack() ) );
 	path_set_extension( source, ".bsp" );
 
 	/* note it */
@@ -81,17 +72,15 @@ int FixAAS( int argc, char **argv ){
 	AAS_DData( (unsigned char *) &checksum, 4 );
 
 	/* write checksum to aas */
-	ext = exts;
-	while ( *ext )
+	for( auto&& ext : { ".aas", "_b0.aas", "_b1.aas" } )
 	{
 		/* mangle name */
 		strcpy( aas, source );
-		path_set_extension( aas, *ext );
+		path_set_extension( aas, ext );
 		Sys_Printf( "Trying %s\n", aas );
-		ext++;
 
 		/* fix it */
-		file = fopen( aas, "r+b" );
+		FILE *file = fopen( aas, "r+b" );
 		if ( !file ) {
 			continue;
 		}
@@ -126,7 +115,7 @@ struct abspLumpTest_t
 	const char     *name;
 };
 
-int AnalyzeBSP( int argc, char **argv ){
+int AnalyzeBSP( Args& args ){
 	abspHeader_t            *header;
 	int size, i, version, offset, length, lumpInt, count;
 	char ident[ 5 ];
@@ -155,23 +144,19 @@ int AnalyzeBSP( int argc, char **argv ){
 
 
 	/* arg checking */
-	if ( argc < 2 ) {
+	if ( args.empty() ) {
 		Sys_Printf( "Usage: q3map2 -analyze [-lumpswap] [-v] <mapname>\n" );
 		return 0;
 	}
 
 	/* process arguments */
-	for ( i = 1; i < ( argc - 1 ); i++ )
-	{
-		/* -format map|ase|... */
-		if ( striEqual( argv[ i ], "-lumpswap" ) ) {
-			Sys_Printf( "Swapped lump structs enabled\n" );
-			lumpSwap = true;
-		}
+	while ( args.takeArg( "-lumpswap" ) ) {
+		Sys_Printf( "Swapped lump structs enabled\n" );
+		lumpSwap = true;
 	}
 
 	/* clean up map name */
-	strcpy( source, ExpandArg( argv[ i ] ) );
+	strcpy( source, ExpandArg( args.takeBack() ) );
 	Sys_Printf( "Loading %s\n", source );
 
 	/* load the file */
@@ -273,34 +258,29 @@ int AnalyzeBSP( int argc, char **argv ){
    emits statistics about the bsp file
  */
 
-int BSPInfo( int count, char **fileNames ){
-	int i;
+int BSPInfo( Args& args ){
 	char source[ 1024 ];
-	int size;
-	FILE        *f;
 
 
 	/* dummy check */
-	if ( count < 1 ) {
+	if ( args.empty() ) {
 		Sys_Printf( "No files to dump info for.\n" );
 		return -1;
 	}
 
 	/* walk file list */
-	for ( i = 0; i < count; i++ )
+	while ( !args.empty() )
 	{
 		Sys_Printf( "---------------------------------\n" );
 
 		/* mangle filename and get size */
-		strcpy( source, fileNames[ i ] );
+		const char *fileName = args.takeFront();
+		strcpy( source, fileName );
 		path_set_extension( source, ".bsp" );
-		f = fopen( source, "rb" );
-		if ( f ) {
+		int size = 0;
+		if ( FILE *f = fopen( source, "rb" ); f != nullptr ) {
 			size = Q_filelength( f );
 			fclose( f );
-		}
-		else{
-			size = 0;
 		}
 
 		/* load the bsp file and print lump sizes */
@@ -317,8 +297,7 @@ int BSPInfo( int count, char **fileNames ){
 		Sys_Printf( "---------------------------------\n" );
 	}
 
-	/* return count */
-	return i;
+	return 0;
 }
 
 
@@ -394,7 +373,7 @@ static void ExtrapolateTexcoords( const float *axyz, const float *ast,
    amaze and confuse your enemies with weird scaled maps!
  */
 
-int ScaleBSPMain( int argc, char **argv ){
+int ScaleBSPMain( Args& args ){
 	int i, j;
 	float f, a;
 	Vector3 scale;
@@ -407,34 +386,30 @@ int ScaleBSPMain( int argc, char **argv ){
 
 
 	/* arg checking */
-	if ( argc < 3 ) {
+	if ( args.size() < 2 ) {
 		Sys_Printf( "Usage: q3map2 [-v] -scale [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
 		return 0;
 	}
 
 	texscale = false;
-	for ( i = 1; i < argc - 2; ++i )
+	const char *fileName = args.takeBack();
+	const auto argsToInject = args.getVector();
 	{
-		if ( striEqual( argv[i], "-tex" ) ) {
+		if ( args.takeArg( "-tex" ) ) {
 			texscale = true;
 		}
-		else if ( striEqual( argv[i], "-spawn_ref" ) ) {
-			spawn_ref = atof( argv[i + 1] );
-			++i;
-		}
-		else{
-			break;
+		if ( args.takeArg( "-spawn_ref" ) ) {
+			spawn_ref = atof( args.takeNext() );
 		}
 	}
 
 	/* get scale */
-	// if(argc-2 >= i) // always true
-	scale[2] = scale[1] = scale[0] = atof( argv[ argc - 2 ] );
-	if ( argc - 3 >= i ) {
-		scale[1] = scale[0] = atof( argv[ argc - 3 ] );
+	scale[2] = scale[1] = scale[0] = atof( args.takeBack() );
+	if ( !args.empty() ) {
+		scale[1] = scale[0] = atof( args.takeBack() );
 	}
-	if ( argc - 4 >= i ) {
-		scale[0] = atof( argv[ argc - 4 ] );
+	if ( !args.empty() ) {
+		scale[0] = atof( args.takeBack() );
 	}
 
 	uniform = ( ( scale[0] == scale[1] ) && ( scale[1] == scale[2] ) );
@@ -446,7 +421,7 @@ int ScaleBSPMain( int argc, char **argv ){
 	}
 
 	/* do some path mangling */
-	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
+	strcpy( source, ExpandArg( fileName ) );
 	path_set_extension( source, ".bsp" );
 
 	/* load the bsp */
@@ -463,11 +438,11 @@ int ScaleBSPMain( int argc, char **argv ){
 	{
 		/* scale origin */
 		if ( e.read_keyvalue( vec, "origin" ) ) {
-			if ( entities[i].classname_prefixed( "info_player_" ) ) {
+			if ( e.classname_prefixed( "info_player_" ) ) {
 				vec[2] += spawn_ref;
 			}
 			vec *= scale;
-			if ( entities[i].classname_prefixed( "info_player_" ) ) {
+			if ( e.classname_prefixed( "info_player_" ) ) {
 				vec[2] -= spawn_ref;
 			}
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
@@ -602,7 +577,7 @@ int ScaleBSPMain( int argc, char **argv ){
 	entities[ 0 ].setKeyValue( "gridsize", str );
 
 	/* inject command line parameters */
-	InjectCommandLine( argv, 0, argc - 1 );
+	InjectCommandLine( "-scale", argsToInject );
 
 	/* write the bsp */
 	UnparseEntities();
@@ -620,7 +595,7 @@ int ScaleBSPMain( int argc, char **argv ){
    shifts a map: for testing physics with huge coordinates
  */
 
-int ShiftBSPMain( int argc, char **argv ){
+int ShiftBSPMain( Args& args ){
 	int i;
 	Vector3 shift;
 	Vector3 vec;
@@ -628,23 +603,26 @@ int ShiftBSPMain( int argc, char **argv ){
 
 
 	/* arg checking */
-	if ( argc < 3 ) {
+	if ( args.size() < 2 ) {
 		Sys_Printf( "Usage: q3map2 [-v] -shift <value> <mapname>\n" );
 		return 0;
 	}
 
+	const char *fileName = args.takeBack();
+	const auto argsToInject = args.getVector();
+
 	/* get shift */
-	shift[2] = shift[1] = shift[0] = atof( argv[ argc - 2 ] );
-	if ( argc - 3 >= 1 ) {
-		shift[1] = shift[0] = atof( argv[ argc - 3 ] );
+	shift[2] = shift[1] = shift[0] = atof( args.takeBack() );
+	if ( !args.empty() ) {
+		shift[1] = shift[0] = atof( args.takeBack() );
 	}
-	if ( argc - 4 >= 1 ) {
-		shift[0] = atof( argv[ argc - 4 ] );
+	if ( !args.empty() ) {
+		shift[0] = atof( args.takeBack() );
 	}
 
 
 	/* do some path mangling */
-	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
+	strcpy( source, ExpandArg( fileName ) );
 	path_set_extension( source, ".bsp" );
 
 	/* load the bsp */
@@ -704,7 +682,7 @@ int ShiftBSPMain( int argc, char **argv ){
 	// fixme: engine says 'light grid mismatch', unless translation is multiple of grid size
 
 	/* inject command line parameters */
-	InjectCommandLine( argv, 0, argc - 1 );
+	InjectCommandLine( "-shift", argsToInject );
 
 	/* write the bsp */
 	UnparseEntities();
@@ -807,8 +785,7 @@ void PseudoCompileBSP( bool need_tree ){
    main argument processing function for bsp conversion
  */
 
-int ConvertBSPMain( int argc, char **argv ){
-	int i;
+int ConvertBSPMain( Args& args ){
 	int ( *convertFunc )( char * );
 	const game_t  *convertGame;
 	bool map_allowed, force_bsp, force_map;
@@ -822,76 +799,74 @@ int ConvertBSPMain( int argc, char **argv ){
 	force_map = false;
 
 	/* arg checking */
-	if ( argc < 2 ) {
+	if ( args.empty() ) {
 		Sys_Printf( "Usage: q3map2 -convert [-format <ase|obj|map_bp|map>] [-shadersasbitmap|-lightmapsastexcoord|-deluxemapsastexcoord] [-readbsp|-readmap [-meta|-patchmeta]] [-v] <mapname>\n" );
 		return 0;
 	}
 
 	/* process arguments */
-	for ( i = 1; i < ( argc - 1 ); i++ )
+	const char *fileName = args.takeBack();
 	{
 		/* -format map|ase|... */
-		if ( striEqual( argv[ i ], "-format" ) ) {
-			i++;
-			if ( striEqual( argv[ i ], "ase" ) ) {
+		while ( args.takeArg( "-format" ) ) {
+			const char *fmt = args.takeNext();
+			if ( striEqual( fmt, "ase" ) ) {
 				convertFunc = ConvertBSPToASE;
 				map_allowed = false;
 			}
-			else if ( striEqual( argv[ i ], "obj" ) ) {
+			else if ( striEqual( fmt, "obj" ) ) {
 				convertFunc = ConvertBSPToOBJ;
 				map_allowed = false;
 			}
-			else if ( striEqual( argv[ i ], "map_bp" ) ) {
+			else if ( striEqual( fmt, "map_bp" ) ) {
 				convertFunc = ConvertBSPToMap_BP;
 				map_allowed = true;
 			}
-			else if ( striEqual( argv[ i ], "map" ) ) {
+			else if ( striEqual( fmt, "map" ) ) {
 				convertFunc = ConvertBSPToMap;
 				map_allowed = true;
 			}
 			else
 			{
-				convertGame = GetGame( argv[ i ] );
+				convertGame = GetGame( fmt );
 				map_allowed = false;
 				if ( convertGame == NULL ) {
-					Sys_Printf( "Unknown conversion format \"%s\". Defaulting to ASE.\n", argv[ i ] );
+					Sys_Printf( "Unknown conversion format \"%s\". Defaulting to ASE.\n", fmt );
 				}
 			}
 		}
-		else if ( striEqual( argv[ i ], "-ne" ) ) {
-			normalEpsilon = atof( argv[ i + 1 ] );
-			i++;
+		while ( args.takeArg( "-ne" ) ) {
+			normalEpsilon = atof( args.takeNext() );
 			Sys_Printf( "Normal epsilon set to %lf\n", normalEpsilon );
 		}
-		else if ( striEqual( argv[ i ], "-de" ) ) {
-			distanceEpsilon = atof( argv[ i + 1 ] );
-			i++;
+		while ( args.takeArg( "-de" ) ) {
+			distanceEpsilon = atof( args.takeNext() );
 			Sys_Printf( "Distance epsilon set to %lf\n", distanceEpsilon );
 		}
-		else if ( striEqual( argv[ i ], "-shaderasbitmap" ) || striEqual( argv[ i ], "-shadersasbitmap" ) ) {
+		while ( args.takeArg( "-shaderasbitmap", "-shadersasbitmap" ) ) {
 			shadersAsBitmap = true;
 		}
-		else if ( striEqual( argv[ i ], "-lightmapastexcoord" ) || striEqual( argv[ i ], "-lightmapsastexcoord" ) ) {
+		while ( args.takeArg( "-lightmapastexcoord", "-lightmapsastexcoord" ) ) {
 			lightmapsAsTexcoord = true;
 		}
-		else if ( striEqual( argv[ i ], "-deluxemapastexcoord" ) || striEqual( argv[ i ], "-deluxemapsastexcoord" ) ) {
+		while ( args.takeArg( "-deluxemapastexcoord", "-deluxemapsastexcoord" ) ) {
 			lightmapsAsTexcoord = true;
 			deluxemap = true;
 		}
-		else if ( striEqual( argv[ i ], "-readbsp" ) ) {
+		while ( args.takeArg( "-readbsp" ) ) {
 			force_bsp = true;
 		}
-		else if ( striEqual( argv[ i ], "-readmap" ) ) {
+		while ( args.takeArg( "-readmap" ) ) {
 			force_map = true;
 		}
-		else if ( striEqual( argv[ i ], "-meta" ) ) {
+		while ( args.takeArg( "-meta" ) ) {
 			meta = true;
 		}
-		else if ( striEqual( argv[ i ], "-patchmeta" ) ) {
+		while ( args.takeArg( "-patchmeta" ) ) {
 			meta = true;
 			patchMeta = true;
 		}
-		else if ( striEqual( argv[ i ], "-fast" ) ) {
+		while ( args.takeArg( "-fast" ) ) {
 			fast = true;
 		}
 	}
@@ -899,7 +874,7 @@ int ConvertBSPMain( int argc, char **argv ){
 	LoadShaderInfo();
 
 	/* clean up map name */
-	strcpy( source, ExpandArg( argv[i] ) );
+	strcpy( source, ExpandArg( fileName ) );
 
 	if ( !map_allowed && !force_map ) {
 		force_bsp = true;

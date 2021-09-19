@@ -72,15 +72,15 @@ void ExportEntities( void ){
    exports the entities to a text file (.ent)
  */
 
-int ExportEntitiesMain( int argc, char **argv ){
+int ExportEntitiesMain( Args& args ){
 	/* arg checking */
-	if ( argc < 2 ) {
+	if ( args.empty() ) {
 		Sys_Printf( "Usage: q3map2 -exportents [-v] <mapname>\n" );
 		return 0;
 	}
 
 	/* do some path mangling */
-	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
+	strcpy( source, ExpandArg( args.takeBack() ) );
 	path_set_extension( source, ".bsp" );
 
 	/* load the bsp */

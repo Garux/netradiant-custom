@@ -1022,75 +1022,74 @@ void LoadPortals( char *name ){
    VisMain
    ===========
  */
-int VisMain( int argc, char **argv ){
+int VisMain( Args& args ){
 	char portalfile[1024];
-	int i;
 
 
 	/* note it */
 	Sys_Printf( "--- Vis ---\n" );
 
 	/* process arguments */
-	for ( i = 1 ; i < ( argc - 1 ) ; i++ )
+	if ( args.empty() ) {
+		Error( "usage: vis [-threads #] [-level 0-4] [-fast] [-v] bspfile" );
+	}
+	const char *fileName = args.takeBack();
+	const auto argsToInject = args.getVector();
 	{
-		if ( striEqual( argv[i], "-fast" ) ) {
+		while ( args.takeArg( "-fast" ) ) {
 			Sys_Printf( "fastvis = true\n" );
 			fastvis = true;
 		}
-		else if ( striEqual( argv[i], "-merge" ) ) {
+		while ( args.takeArg( "-merge" ) ) {
 			Sys_Printf( "merge = true\n" );
 			mergevis = true;
 		}
-		else if ( striEqual( argv[i], "-mergeportals" ) ) {
+		while ( args.takeArg( "-mergeportals" ) ) {
 			Sys_Printf( "mergeportals = true\n" );
 			mergevisportals = true;
 		}
-		else if ( striEqual( argv[i], "-nopassage" ) ) {
+		while ( args.takeArg( "-nopassage" ) ) {
 			Sys_Printf( "nopassage = true\n" );
 			noPassageVis = true;
 		}
-		else if ( striEqual( argv[i], "-passageOnly" ) ) {
+		while ( args.takeArg( "-passageOnly" ) ) {
 			Sys_Printf( "passageOnly = true\n" );
 			passageVisOnly = true;
 		}
-		else if ( striEqual( argv[i], "-nosort" ) ) {
+		while ( args.takeArg( "-nosort" ) ) {
 			Sys_Printf( "nosort = true\n" );
 			nosort = true;
 		}
-		else if ( striEqual( argv[i], "-saveprt" ) ) {
+		while ( args.takeArg( "-saveprt" ) ) {
 			Sys_Printf( "saveprt = true\n" );
 			saveprt = true;
 		}
-		else if ( striEqual( argv[ i ], "-v" ) ) {
+		while ( args.takeArg( "-v" ) ) {
 			debugCluster = true;
 			Sys_Printf( "Extra verbose mode enabled\n" );
 		}
 		/* ydnar: -hint to merge all but hint portals */
-		else if ( striEqual( argv[ i ], "-hint" ) ) {
+		while ( args.takeArg( "-hint" ) ) {
 			Sys_Printf( "hint = true\n" );
 			hint = true;
 			mergevis = true;
 		}
 
-		else
+		while( !args.empty() )
 		{
-			Sys_Warning( "Unknown option \"%s\"\n", argv[ i ] );
+			Sys_Warning( "Unknown option \"%s\"\n", args.takeFront() );
 		}
-	}
-
-	if ( i != argc - 1 ) {
-		Error( "usage: vis [-threads #] [-level 0-4] [-fast] [-v] bspfile" );
 	}
 
 
 	/* load the bsp */
-	strcpy( source, ExpandArg( argv[ i ] ) );
+	strcpy( source, ExpandArg( fileName ) );
 	path_set_extension( source, ".bsp" );
 	Sys_Printf( "Loading %s\n", source );
 	LoadBSPFile( source );
 
 	/* load the portal file */
-	strcpy( portalfile, ExpandArg( argv[ i ] ) );
+	strcpy( portalfile, ExpandArg( fileName ) );
 	path_set_extension( portalfile, ".prt" );
 	Sys_Printf( "Loading %s\n", portalfile );
 	LoadPortals( portalfile );
@@ -1105,7 +1104,7 @@ int VisMain( int argc, char **argv ){
 	ParseEntities();
 
 	/* inject command line parameters */
-	InjectCommandLine( argv, 0, argc - 1 );
+	InjectCommandLine( "-vis", argsToInject );
 	UnparseEntities();
 
 	if ( mergevis ) {

@@ -449,7 +449,7 @@ void MergeRelativePath( char *out, const char *absolute, const char *relative ){
 	strcpy( out + ( endpos - absolute + 1 ), relative );
 }
 
-int MiniMapBSPMain( int argc, char **argv ){
+int MiniMapBSPMain( Args& args ){
 	char minimapFilename[1024];
 	char basename[1024];
 	char path[1024];
@@ -460,18 +460,18 @@ int MiniMapBSPMain( int argc, char **argv ){
 	byte *data4b, *p;
 	float *q;
 	int x, y;
-	int i;
 	EMiniMapMode mode;
 	bool keepaspect;
 
 	/* arg checking */
-	if ( argc < 2 ) {
+	if ( args.empty() ) {
 		Sys_Printf( "Usage: q3map2 [-v] -minimap [-size n] [-sharpen f] [-samples n | -random n] [-o filename.tga] [-minmax Xmin Ymin Zmin Xmax Ymax Zmax] <mapname>\n" );
 		return 0;
 	}
 
 	/* load the BSP first */
-	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
+	const char *fileName = args.takeBack();
+	strcpy( source, ExpandArg( fileName ) );
 	path_set_extension( source, ".bsp" );
 	Sys_Printf( "Loading %s\n", source );
 	//BeginMapShaderFile( source ); //do not delete q3map2_*.shader on minimap generation
@@ -497,93 +497,82 @@ int MiniMapBSPMain( int argc, char **argv ){
 	minimap.contrast = 1.0;
 
 	/* process arguments */
-	for ( i = 1; i < ( argc - 1 ); i++ )
 	{
-		if ( striEqual( argv[ i ],  "-size" ) ) {
-			minimap.width = minimap.height = atoi( argv[i + 1] );
-			i++;
+		while( args.takeArg( "-size" ) ) {
+			minimap.width = minimap.height = atoi( args.takeNext() );
 			Sys_Printf( "Image size set to %i\n", minimap.width );
 		}
-		else if ( striEqual( argv[ i ],  "-sharpen" ) ) {
-			minimapSharpen = atof( argv[i + 1] );
-			i++;
+		while( args.takeArg( "-sharpen" ) ) {
+			minimapSharpen = atof( args.takeNext() );
 			Sys_Printf( "Sharpening coefficient set to %f\n", minimapSharpen );
 		}
-		else if ( striEqual( argv[ i ],  "-samples" ) ) {
-			minimap.samples = atoi( argv[i + 1] );
-			i++;
+		while( args.takeArg( "-samples" ) ) {
+			minimap.samples = atoi( args.takeNext() );
 			Sys_Printf( "Samples set to %i\n", minimap.samples );
 			free( minimap.sample_offsets );
 			minimap.sample_offsets = safe_malloc( 2 * sizeof( *minimap.sample_offsets ) * minimap.samples );
 			MiniMapMakeSampleOffsets();
 		}
-		else if ( striEqual( argv[ i ],  "-random" ) ) {
-			minimap.samples = atoi( argv[i + 1] );
-			i++;
+		while( args.takeArg( "-random" ) ) {
+			minimap.samples = atoi( args.takeNext() );
 			Sys_Printf( "Random samples set to %i\n", minimap.samples );
 			free( minimap.sample_offsets );
 			minimap.sample_offsets = NULL;
 		}
-		else if ( striEqual( argv[ i ],  "-border" ) ) {
-			border = atof( argv[i + 1] );
-			i++;
+		while( args.takeArg( "-border" ) ) {
+			border = atof( args.takeNext() );
 			Sys_Printf( "Border set to %f\n", border );
 		}
-		else if ( striEqual( argv[ i ],  "-keepaspect" ) ) {
+		while( args.takeArg( "-keepaspect" ) ) {
 			keepaspect = true;
 			Sys_Printf( "Keeping aspect ratio by letterboxing\n", border );
 		}
-		else if ( striEqual( argv[ i ],  "-nokeepaspect" ) ) {
+		while( args.takeArg( "-nokeepaspect" ) ) {
 			keepaspect = false;
 			Sys_Printf( "Not keeping aspect ratio\n", border );
 		}
-		else if ( striEqual( argv[ i ],  "-o" ) ) {
-			strcpy( minimapFilename, argv[i + 1] );
-			i++;
+		while( args.takeArg( "-o" ) ) {
+			strcpy( minimapFilename, args.takeNext() );
 			Sys_Printf( "Output file name set to %s\n", minimapFilename );
 		}
-		else if ( striEqual( argv[ i ],  "-minmax" ) && i < ( argc - 7 ) ) {
-			mins[0] = atof( argv[i + 1] );
-			mins[1] = atof( argv[i + 2] );
-			mins[2] = atof( argv[i + 3] );
-			maxs[0] = atof( argv[i + 4] );
-			maxs[1] = atof( argv[i + 5] );
-			maxs[2] = atof( argv[i + 6] );
-			i += 6;
+		while( args.takeArg( "-minmax" ) ) {
+			mins[0] = atof( args.takeNext() );
+			mins[1] = atof( args.takeNext() );
+			mins[2] = atof( args.takeNext() );
+			maxs[0] = atof( args.takeNext() );
+			maxs[1] = atof( args.takeNext() );
+			maxs[2] = atof( args.takeNext() );
 			Sys_Printf( "Map mins/maxs overridden\n" );
 		}
-		else if ( striEqual( argv[ i ],  "-gray" ) ) {
+		while( args.takeArg( "-gray" ) ) {
 			mode = EMiniMapMode::Gray;
 			Sys_Printf( "Writing as white-on-black image\n" );
 		}
-		else if ( striEqual( argv[ i ],  "-black" ) ) {
+		while( args.takeArg( "-black" ) ) {
 			mode = EMiniMapMode::Black;
 			Sys_Printf( "Writing as black alpha image\n" );
 		}
-		else if ( striEqual( argv[ i ],  "-white" ) ) {
+		while( args.takeArg( "-white" ) ) {
 			mode = EMiniMapMode::White;
 			Sys_Printf( "Writing as white alpha image\n" );
 		}
-		else if ( striEqual( argv[ i ],  "-boost" ) && i < ( argc - 2 ) ) {
-			minimap.boost = atof( argv[i + 1] );
-			i++;
+		while( args.takeArg( "-boost" ) ) {
+			minimap.boost = atof( args.takeNext() );
 			Sys_Printf( "Contrast boost set to %f\n", minimap.boost );
 		}
-		else if ( striEqual( argv[ i ],  "-brightness" ) && i < ( argc - 2 ) ) {
-			minimap.brightness = atof( argv[i + 1] );
-			i++;
+		while( args.takeArg( "-brightness" ) ) {
+			minimap.brightness = atof( args.takeNext() );
 			Sys_Printf( "Brightness set to %f\n", minimap.brightness );
 		}
-		else if ( striEqual( argv[ i ],  "-contrast" ) && i < ( argc - 2 ) ) {
-			minimap.contrast = atof( argv[i + 1] );
-			i++;
+		while( args.takeArg( "-contrast" ) ) {
+			minimap.contrast = atof( args.takeNext() );
 			Sys_Printf( "Contrast set to %f\n", minimap.contrast );
 		}
-		else if ( striEqual( argv[ i ],  "-autolevel" ) ) {
+		while( args.takeArg( "-autolevel" ) ) {
 			autolevel = true;
 			Sys_Printf( "Auto level enabled\n", border );
 		}
-		else if ( striEqual( argv[ i ],  "-noautolevel" ) ) {
+		while( args.takeArg( "-noautolevel" ) ) {
 			autolevel = false;
 			Sys_Printf( "Auto level disabled\n", border );
 		}

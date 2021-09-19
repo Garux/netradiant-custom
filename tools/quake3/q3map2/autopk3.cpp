@@ -129,15 +129,12 @@ static inline void parseEXblock( StrList* list, const char *exName ){
 }
 
 static void parseEXfile( const char* filename, StrList* ExTextures, StrList* ExShaders, StrList* ExShaderfiles, StrList* ExSounds, StrList* ExVideos ){
-	char exName[ 1024 ];
-	ExtractFilePath( g_q3map2path, exName );
-	strcat( exName, filename );
-	Sys_Printf( "Loading %s\n", exName );
+	Sys_Printf( "Loading %s\n", filename );
 
 	byte *buffer;
-	const int size = TryLoadFile( exName, (void**) &buffer );
+	const int size = TryLoadFile( filename, (void**) &buffer );
 	if ( size < 0 ) {
-		Sys_Warning( "Unable to load exclusions file %s.\n", exName );
+		Sys_Warning( "Unable to load exclusions file %s.\n", filename );
 	}
 	else{
 		/* parse the file */
@@ -153,22 +150,22 @@ static void parseEXfile( const char* filename, StrList* ExTextures, StrList* ExS
 
 			/* blocks */
 			if ( striEqual( token, "textures" ) ){
-				parseEXblock( ExTextures, exName );
+				parseEXblock( ExTextures, filename );
 			}
 			else if ( striEqual( token, "shaders" ) ){
-				parseEXblock( ExShaders, exName );
+				parseEXblock( ExShaders, filename );
 			}
 			else if ( striEqual( token, "shaderfiles" ) ){
-				parseEXblock( ExShaderfiles, exName );
+				parseEXblock( ExShaderfiles, filename );
 			}
 			else if ( striEqual( token, "sounds" ) ){
-				parseEXblock( ExSounds, exName );
+				parseEXblock( ExSounds, filename );
 			}
 			else if ( striEqual( token, "videos" ) ){
-				parseEXblock( ExVideos, exName );
+				parseEXblock( ExVideos, filename );
 			}
 			else{
-				Error( "ReadExclusionsFile: %s, line %d: unknown block name!\nValid ones are: textures, shaders, shaderfiles, sounds, videos.", exName, scriptline );
+				Error( "ReadExclusionsFile: %s, line %d: unknown block name!\nValid ones are: textures, shaders, shaderfiles, sounds, videos.", filename, scriptline );
 			}
 		}
 
@@ -200,34 +197,32 @@ static bool packTexture( const char* texname, const char* packname, const int co
 
 
 
-char g_q3map2path[1024];
-
 /*
    pk3BSPMain()
    map autopackager, works for Q3 type of shaders and ents
  */
 
-int pk3BSPMain( int argc, char **argv ){
+int pk3BSPMain( Args& args ){
 	int i, compLevel = 10;
 	bool dbg = false, png = false, packFAIL = false;
 
 	/* process arguments */
-	for ( i = 1; i < ( argc - 1 ); ++i ){
-		if ( striEqual( argv[ i ],  "-dbg" ) ) {
+	const char *fileName = args.takeBack();
+	{
+		if ( args.takeArg( "-dbg" ) ) {
 			dbg = true;
 		}
-		else if ( striEqual( argv[ i ],  "-png" ) ) {
+		if ( args.takeArg( "-png" ) ) {
 			png = true;
 		}
-		else if ( striEqual( argv[ i ],  "-complevel" ) ) {
-			compLevel = std::clamp( atoi( argv[ i + 1 ] ), -1, 10 );
-			i++;
+		if ( args.takeArg( "-complevel" ) ) {
+			compLevel = std::clamp( atoi( args.takeNext() ), -1, 10 );
 			Sys_Printf( "Compression level set to %i\n", compLevel );
 		}
 	}
 
 	/* do some path mangling */
-	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
+	strcpy( source, ExpandArg( fileName ) );
 	path_set_extension( source, ".bsp" );
 
 	/* load the bsp */
@@ -342,7 +337,7 @@ int pk3BSPMain( int argc, char **argv ){
 	char* ExReasonShaderFile[4096] = { NULL };
 
 	{
-		parseEXfile( stream( g_game->arg, ".exclude" ), ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
+		parseEXfile( stream( PathFilenameless( args.getArg0() ), g_game->arg, ".exclude" ), ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
 
 		for ( i = 0; i < ExTextures->n; ++i ){
 			if( !StrList_find( ExShaders, ExTextures->s[i] ) )
@@ -752,25 +747,25 @@ int pk3BSPMain( int argc, char **argv ){
    works for Q3 type of shaders and ents
  */
 
-int repackBSPMain( int argc, char **argv ){
+int repackBSPMain( Args& args ){
 	int i, j, compLevel = 0;
 	bool dbg = false, png = false, analyze = false;
 	char str[ 1024 ];
 	StringOutputStream stream( 256 );
 	/* process arguments */
-	for ( i = 1; i < ( argc - 1 ); ++i ){
-		if ( striEqual( argv[ i ],  "-dbg" ) ) {
+	const char *fileName = args.takeBack();
+	{
+		if ( args.takeArg( "-dbg" ) ) {
 			dbg = true;
 		}
-		else if ( striEqual( argv[ i ],  "-png" ) ) {
+		if ( args.takeArg( "-png" ) ) {
 			png = true;
 		}
-		else if ( striEqual( argv[ i ],  "-analyze" ) ) { // only analyze bsps and exit
+		if ( args.takeArg( "-analyze" ) ) { // only analyze bsps and exit
 			analyze = true;
 		}
-		else if ( striEqual( argv[ i ],  "-complevel" ) ) {
-			compLevel = std::clamp( atoi( argv[ i + 1 ] ), -1, 10 );
-			i++;
+		if ( args.takeArg( "-complevel" ) ) {
+			compLevel = std::clamp( atoi( args.takeNext() ), -1, 10 );
 			Sys_Printf( "Compression level set to %i\n", compLevel );
 		}
 	}
@@ -784,7 +779,7 @@ int repackBSPMain( int argc, char **argv ){
 	StrList* ExPureTextures = StrList_allocate( 4096 );
 
 	{
-		parseEXfile( stream( g_game->arg, ".exclude" ), ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
+		parseEXfile( stream( PathFilenameless( args.getArg0() ), g_game->arg, ".exclude" ), ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
 
 		for ( i = 0; i < ExTextures->n; ++i ){
 			if( !StrList_find( ExShaders, ExTextures->s[i] ) )
@@ -821,7 +816,7 @@ int repackBSPMain( int argc, char **argv ){
 	StrList* rExSounds = StrList_allocate( 8192 );
 	StrList* rExVideos = StrList_allocate( 4096 );
 
-	parseEXfile( "repack.exclude", rExTextures, rExShaders, rExShaderfiles, rExSounds, rExVideos );
+	parseEXfile( stream( PathFilenameless( args.getArg0() ), "repack.exclude" ), rExTextures, rExShaders, rExShaderfiles, rExSounds, rExVideos );
 
 	if( dbg ){
 		Sys_Printf( "\n\trExTextures....%i\n", rExTextures->n );
@@ -848,7 +843,7 @@ int repackBSPMain( int argc, char **argv ){
 	char (*bspList)[1024] = safe_malloc( bspListSize * sizeof( bspList[0] ) );
 
 	/* do some path mangling */
-	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
+	strcpy( source, ExpandArg( fileName ) );
 	if ( striEqual( path_get_filename_base_end( source ), ".bsp" ) ){
 		strcpy( bspList[bspListN], source );
 		bspListN++;

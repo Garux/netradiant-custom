@@ -1403,6 +1403,81 @@ struct surfaceInfo_t
 	int firstSurfaceCluster, numSurfaceClusters;
 };
 
+
+class Args
+{
+private:
+	const char *m_arg0;
+	std::vector<const char*> m_args;
+	std::vector<const char*>::const_iterator m_next;
+	const char *m_current;
+public:
+	Args( int argc, char **argv ){
+		ENSURE( argc > 0 );
+		m_arg0 = argv[0];
+		m_args = { argv + 1, argv + argc };
+	}
+	const char *getArg0() const {
+		return m_arg0;
+	}
+	std::vector<const char*> getVector(){
+		return m_args;
+	}
+	template<typename ...Args>
+	bool takeArg( Args... args ){
+		const std::array<const char*, sizeof...(Args)> array = { args ... };
+		for( auto&& arg : array )
+			for( auto it = m_args.cbegin(); it != m_args.cend(); ++it )
+				if( striEqual( *it, arg ) ){
+					m_current = *it;
+					m_next = m_args.erase( it );
+					return true;
+				}
+		return false;
+	}
+	/* next three are only valid after takeArg() == true */
+	const char *takeNext(){
+		if( m_next == m_args.cend() )
+			Error( "Out of arguments: No parameters specified after %s", m_current );
+		const char *ret = *m_next;
+		m_next = m_args.erase( m_next );
+		return ret;
+	}
+	bool nextAvailable() const {
+		return( m_next != m_args.cend() );
+	}
+	const char *next() const {
+		return *m_next;
+	}
+	/* --- */
+	size_t size() const {
+		return m_args.size();
+	}
+	bool empty() const {
+		return size() == 0;
+	}
+	bool takeFront( const char *arg ){
+		if( !m_args.empty() && striEqual( m_args.front(), arg ) ){
+			m_args.erase( m_args.cbegin() );
+			return true;
+		}
+		return false;
+	}
+	const char *takeFront(){
+		ENSURE( !m_args.empty() );
+		const char *ret = m_args.front();
+		m_args.erase( m_args.cbegin() );
+		return ret;
+	}
+	const char *takeBack(){
+		ENSURE( !m_args.empty() );
+		const char *ret = m_args.back();
+		m_args.pop_back();
+		return ret;
+	}
+};
+
+
 /* -------------------------------------------------------------------------------
 
    prototypes
@@ -1418,24 +1493,24 @@ void                        HelpMain(const char* arg);
 void                        HelpGames();
 
 /* path_init.c */
-const game_t                *GetGame( char *arg );
-void                        InitPaths( int *argc, char **argv );
+const game_t                *GetGame( const char *arg );
+void                        InitPaths( Args& args );
 
 
 /* bsp.c */
-int                         BSPMain( int argc, char **argv );
+int                         BSPMain( Args& args );
 
 
 /* minimap.c */
-int                         MiniMapBSPMain( int argc, char **argv );
+int                         MiniMapBSPMain( Args& args );
 
 /* convert_bsp.c */
-int                         FixAAS( int argc, char **argv );
-int                         AnalyzeBSP( int argc, char **argv );
-int                         BSPInfo( int count, char **fileNames );
-int                         ScaleBSPMain( int argc, char **argv );
-int                         ShiftBSPMain( int argc, char **argv );
-int                         ConvertBSPMain( int argc, char **argv );
+int                         FixAAS( Args& args );
+int                         AnalyzeBSP( Args& args );
+int                         BSPInfo( Args& args );
+int                         ScaleBSPMain( Args& args );
+int                         ShiftBSPMain( Args& args );
+int                         ConvertBSPMain( Args& args );
 
 /* convert_map.c */
 int                         ConvertBSPToMap( char *bspName );
@@ -1652,7 +1727,7 @@ std::array<Vector3, 2>      TextureAxisFromPlane( const plane_t& plane );
 
 /* vis.c */
 fixedWinding_t              *NewFixedWinding( int points );
-int                         VisMain( int argc, char **argv );
+int                         VisMain( Args& args );
 
 /* visflow.c */
 int                         CountBits( byte *bits, int numbits );
@@ -1671,7 +1746,7 @@ float                       PointToPolygonFormFactor( const Vector3& point, cons
 int                         LightContributionToSample( trace_t *trace );
 void                        LightingAtSample( trace_t * trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ] );
 bool                        LightContributionToPoint( trace_t *trace );
-int                         LightMain( int argc, char **argv );
+int                         LightMain( Args& args );
 
 
 /* light_trace.c */
@@ -1724,8 +1799,8 @@ void                        CreateTraceLightsForSurface( int num, trace_t *trace
 /* lightmaps_ydnar.c */
 void                        ExportLightmaps( void );
 
-int                         ExportLightmapsMain( int argc, char **argv );
-int                         ImportLightmapsMain( int argc, char **argv );
+int                         ExportLightmapsMain( Args& args );
+int                         ImportLightmapsMain( Args& args );
 
 void                        SetupSurfaceLightmaps( void );
 void                        StitchSurfaceLightmaps( void );
@@ -1734,7 +1809,7 @@ void                        StoreSurfaceLightmaps( bool fastAllocate );
 
 /* exportents.c */
 void                        ExportEntities( void );
-int                         ExportEntitiesMain( int argc, char **argv );
+int                         ExportEntitiesMain( Args& args );
 
 
 /* image.c */
@@ -1793,7 +1868,7 @@ void                        PrintEntity( const entity_t *ent );
 
 entity_t                    *FindTargetEntity( const char *target );
 void                        GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castShadows, int *recvShadows );
-void                        InjectCommandLine( char **argv, int beginArgs, int endArgs );
+void                        InjectCommandLine( const char *stage, const std::vector<const char *>& args );
 
 
 
@@ -1852,7 +1927,6 @@ Q_EXTERN bool skyFixHack Q_ASSIGN( false );                    /* ydnar */
 Q_EXTERN bool bspAlternateSplitWeights Q_ASSIGN( false );                      /* 27 */
 Q_EXTERN bool deepBSP Q_ASSIGN( false );                   /* div0 */
 Q_EXTERN bool maxAreaFaceSurface Q_ASSIGN( false );                    /* divVerent */
-Q_EXTERN bool nocmdline Q_ASSIGN( false );
 
 Q_EXTERN int patchSubdivisions Q_ASSIGN( 8 );                       /* ydnar: -patchmeta subdivisions */
 
@@ -2070,7 +2144,7 @@ Q_EXTERN bool exportLightmaps Q_ASSIGN( false );
 Q_EXTERN bool externalLightmaps Q_ASSIGN( false );
 Q_EXTERN int lmCustomSizeW Q_ASSIGN( LIGHTMAP_WIDTH );
 Q_EXTERN int lmCustomSizeH Q_ASSIGN( LIGHTMAP_WIDTH );
-Q_EXTERN char *             lmCustomDir Q_ASSIGN( NULL );
+Q_EXTERN const char *       lmCustomDir Q_ASSIGN( NULL );
 Q_EXTERN int lmLimitSize Q_ASSIGN( 0 );
 
 Q_EXTERN bool dirty Q_ASSIGN( false );

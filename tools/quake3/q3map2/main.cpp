@@ -59,7 +59,7 @@ static void ExitQ3Map( void ){
  */
 
 int main( int argc, char **argv ){
-	int i, r;
+	int r;
 	double start, end;
 
 #ifdef WIN32
@@ -78,70 +78,40 @@ int main( int argc, char **argv ){
 	/* set exit call */
 	atexit( ExitQ3Map );
 
+	Args args( argc, argv );
+
 	/* read general options first */
-	for ( i = 1; i < argc; i++ )
 	{
 		/* -help */
-		if ( striEqual( argv[ i ], "-h" ) || striEqual( argv[ i ], "--help" )
-		     || striEqual( argv[ i ], "-help" ) ) {
-			HelpMain( ( i + 1 < argc ) ? argv[ i + 1 ] : NULL );
+		if ( args.takeArg( "-h", "--help", "-help" ) ) {
+			HelpMain( args.nextAvailable()? args.takeNext() : nullptr );
 			return 0;
 		}
 
 		/* -connect */
-		if ( striEqual( argv[ i ], "-connect" ) ) {
-			if ( ++i >= argc || !argv[ i ] ) {
-				Error( "Out of arguments: No address specified after %s", argv[ i - 1 ] );
-			}
-			argv[ i - 1 ] = NULL;
-			Broadcast_Setup( argv[ i ] );
-			argv[ i ] = NULL;
+		if ( args.takeArg( "-connect" ) ) {
+			Broadcast_Setup( args.takeNext() );
 		}
 
 		/* verbose */
-		else if ( striEqual( argv[ i ], "-v" ) ) {
-			if ( !verbose ) {
-				verbose = true;
-				argv[ i ] = NULL;
-			}
+		if ( args.takeArg( "-v" ) ) { // test just once: leave other possible -v for -vis
+			verbose = true;
 		}
 
 		/* force */
-		else if ( striEqual( argv[ i ], "-force" ) ) {
+		while ( args.takeArg( "-force" ) ) {
 			force = true;
-			argv[ i ] = NULL;
 		}
 
 		/* patch subdivisions */
-		else if ( striEqual( argv[ i ], "-subdivisions" ) ) {
-			if ( ++i >= argc || !argv[ i ] ) {
-				Error( "Out of arguments: No value specified after %s", argv[ i - 1 ] );
-			}
-			argv[ i - 1 ] = NULL;
-			patchSubdivisions = atoi( argv[ i ] );
-			argv[ i ] = NULL;
-			if ( patchSubdivisions <= 0 ) {
-				patchSubdivisions = 1;
-			}
+		while ( args.takeArg( "-subdivisions" ) ) {
+			patchSubdivisions = std::max( atoi( args.takeNext() ), 1 );
 		}
 
 		/* threads */
-		else if ( striEqual( argv[ i ], "-threads" ) ) {
-			if ( ++i >= argc || !argv[ i ] ) {
-				Error( "Out of arguments: No value specified after %s", argv[ i - 1 ] );
-			}
-			argv[ i - 1 ] = NULL;
-			numthreads = atoi( argv[ i ] );
-			argv[ i ] = NULL;
+		while ( args.takeArg( "-threads" ) ) {
+			numthreads = atoi( args.takeNext() );
 		}
-
-		else if( striEqual( argv[ i ], "-nocmdline" ) )
-		{
-			Sys_Printf( "noCmdLine\n" );
-			nocmdline = true;
-			argv[ i ] = NULL;
-		}
-
 	}
 
 	/* init model library */
@@ -151,7 +121,7 @@ int main( int argc, char **argv ){
 	ThreadSetDefault();
 
 	/* generate sinusoid jitter table */
-	for ( i = 0; i < MAX_JITTERS; i++ )
+	for ( int i = 0; i < MAX_JITTERS; i++ )
 	{
 		jitters[ i ] = sin( i * 139.54152147 );
 		//%	Sys_Printf( "Jitter %4d: %f\n", i, jitters[ i ] );
@@ -164,12 +134,10 @@ int main( int argc, char **argv ){
 	Sys_Printf( "Q3Map (ydnar) - v" Q3MAP_VERSION "\n" );
 	Sys_Printf( "NetRadiant    - v" RADIANT_VERSION " " __DATE__ " " __TIME__ "\n" );
 	Sys_Printf( "%s\n", Q3MAP_MOTD );
-	Sys_Printf( "%s\n", argv[0] );
-
-	strcpy( g_q3map2path, argv[0] ); // fuer autopk3 functions
+	Sys_Printf( "%s\n", args.getArg0() );
 
 	/* ydnar: new path initialization */
-	InitPaths( &argc, argv );
+	InitPaths( args );
 
 	/* set game options */
 	if ( !patchSubdivisions ) {
@@ -177,90 +145,83 @@ int main( int argc, char **argv ){
 	}
 
 	/* check if we have enough options left to attempt something */
-	if ( argc < 2 ) {
-		Error( "Usage: %s [general options] [options] mapfile\n%s -help for help", argv[ 0 ], argv[ 0 ] );
+	if ( args.empty() ) {
+		Error( "Usage: %s [general options] [options] mapfile\n%s -help for help", args.getArg0(), args.getArg0() );
 	}
 
 	/* fixaas */
-	if ( striEqual( argv[ 1 ], "-fixaas" ) ) {
-		r = FixAAS( argc - 1, argv + 1 );
+	if ( args.takeFront( "-fixaas" ) ) {
+		r = FixAAS( args );
 	}
 
 	/* analyze */
-	else if ( striEqual( argv[ 1 ], "-analyze" ) ) {
-		r = AnalyzeBSP( argc - 1, argv + 1 );
+	else if ( args.takeFront( "-analyze" ) ) {
+		r = AnalyzeBSP( args );
 	}
 
 	/* info */
-	else if ( striEqual( argv[ 1 ], "-info" ) ) {
-		r = BSPInfo( argc - 2, argv + 2 );
+	else if ( args.takeFront( "-info" ) ) {
+		r = BSPInfo( args );
 	}
 
 	/* vis */
-	else if ( striEqual( argv[ 1 ], "-vis" ) ) {
-		r = VisMain( argc - 1, argv + 1 );
+	else if ( args.takeFront( "-vis" ) ) {
+		r = VisMain( args );
 	}
 
 	/* light */
-	else if ( striEqual( argv[ 1 ], "-light" ) ) {
-		r = LightMain( argc - 1, argv + 1 );
-	}
-
-	/* vlight */
-	else if ( striEqual( argv[ 1 ], "-vlight" ) ) {
-		Sys_Warning( "VLight is no longer supported, defaulting to -light -fast instead\n\n" );
-		argv[ 1 ] = "-fast";    /* eek a hack */
-		r = LightMain( argc, argv );
+	else if ( args.takeFront( "-light" ) ) {
+		r = LightMain( args );
 	}
 
 	/* QBall: export entities */
-	else if ( striEqual( argv[ 1 ], "-exportents" ) ) {
-		r = ExportEntitiesMain( argc - 1, argv + 1 );
+	else if ( args.takeFront( "-exportents" ) ) {
+		r = ExportEntitiesMain( args );
 	}
 
 	/* ydnar: lightmap export */
-	else if ( striEqual( argv[ 1 ], "-export" ) ) {
-		r = ExportLightmapsMain( argc - 1, argv + 1 );
+	else if ( args.takeFront( "-export" ) ) {
+		r = ExportLightmapsMain( args );
 	}
 
 	/* ydnar: lightmap import */
-	else if ( striEqual( argv[ 1 ], "-import" ) ) {
-		r = ImportLightmapsMain( argc - 1, argv + 1 );
+	else if ( args.takeFront( "-import" ) ) {
+		r = ImportLightmapsMain( args );
 	}
 
 	/* ydnar: bsp scaling */
-	else if ( striEqual( argv[ 1 ], "-scale" ) ) {
-		r = ScaleBSPMain( argc - 1, argv + 1 );
+	else if ( args.takeFront( "-scale" ) ) {
+		r = ScaleBSPMain( args );
 	}
 
 	/* bsp shifting */
-	else if ( striEqual( argv[ 1 ], "-shift" ) ) {
-		r = ShiftBSPMain( argc - 1, argv + 1 );
+	else if ( args.takeFront( "-shift" ) ) {
+		r = ShiftBSPMain( args );
 	}
 
 	/* autopacking */
-	else if ( striEqual( argv[ 1 ], "-pk3" ) ) {
-		r = pk3BSPMain( argc - 1, argv + 1 );
+	else if ( args.takeFront( "-pk3" ) ) {
+		r = pk3BSPMain( args );
 	}
 
 	/* repacker */
-	else if ( striEqual( argv[ 1 ], "-repack" ) ) {
-		r = repackBSPMain( argc - 1, argv + 1 );
+	else if ( args.takeFront( "-repack" ) ) {
+		r = repackBSPMain( args );
 	}
 
 	/* ydnar: bsp conversion */
-	else if ( striEqual( argv[ 1 ], "-convert" ) ) {
-		r = ConvertBSPMain( argc - 1, argv + 1 );
+	else if ( args.takeFront( "-convert" ) ) {
+		r = ConvertBSPMain( args );
 	}
 
 	/* div0: minimap */
-	else if ( striEqual( argv[ 1 ], "-minimap" ) ) {
-		r = MiniMapBSPMain( argc - 1, argv + 1 );
+	else if ( args.takeFront( "-minimap" ) ) {
+		r = MiniMapBSPMain( args );
 	}
 
 	/* ydnar: otherwise create a bsp */
 	else{
-		r = BSPMain( argc, argv );
+		r = BSPMain( args );
 	}
 
 	/* emit time */

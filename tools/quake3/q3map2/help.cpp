@@ -160,7 +160,6 @@ void HelpLight()
 {
 	struct HelpOption light[] = {
 		{"-light [options] <filename.map>", "Switch that enters this stage"},
-		{"-vlight [options] <filename.map>", "Deprecated alias for `-light -fast` ... filename.map"},
 		{"-approx <N>", "Vertex light approximation tolerance (never use in conjunction with deluxemapping)"},
 		{"-areascale <F, `-area` F>", "Scaling factor for area lights (surfacelight)"},
 		{"-border", "Add a red border to lightmaps for debugging"},

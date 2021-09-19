@@ -649,15 +649,12 @@ void OnlyEnts( void ){
    handles creation of a bsp from a map file
  */
 
-int BSPMain( int argc, char **argv ){
-	int i;
+int BSPMain( Args& args ){
 	char tempSource[ 1024 ];
 	bool onlyents = false;
 
-	if ( argc >= 2 && striEqual( argv[ 1 ], "-bsp" ) ) {
+	if ( args.takeFront( "-bsp" ) ) {
 		Sys_Printf( "-bsp argument unnecessary\n" );
-		argv++;
-		argc--;
 	}
 
 	/* note it */
@@ -680,244 +677,228 @@ int BSPMain( int argc, char **argv ){
 	keepLights = g_game->keepLights;
 
 	/* process arguments */
-	for ( i = 1; i < ( argc - 1 ); i++ )
+	/* fixme: print more useful usage here */
+	if ( args.empty() ) {
+		Error( "usage: q3map2 [options] mapfile" );
+	}
+
+	const char *fileName = args.takeBack();
+	auto argsToInject = args.getVector();
 	{
-		if ( striEqual( argv[ i ], "-onlyents" ) ) {
+		while ( args.takeArg( "-onlyents" ) ) {
 			Sys_Printf( "Running entity-only compile\n" );
 			onlyents = true;
 		}
-		else if ( striEqual( argv[ i ], "-tempname" ) ) {
-			strcpy( tempSource, argv[ ++i ] );
+		while ( args.takeArg( "-tempname" ) ) {
+			strcpy( tempSource, args.takeNext() );
 		}
-		else if ( striEqual( argv[ i ],  "-nowater" ) ) {
+		while ( args.takeArg( "-nowater" ) ) {
 			Sys_Printf( "Disabling water\n" );
 			nowater = true;
 		}
-		else if ( striEqual( argv[ i ], "-keeplights" ) ) {
+		while ( args.takeArg( "-keeplights" ) ) {
 			keepLights = true;
 			Sys_Printf( "Leaving light entities on map after compile\n" );
 		}
-		else if ( striEqual( argv[ i ],  "-nodetail" ) ) {
+		while ( args.takeArg( "-nodetail" ) ) {
 			Sys_Printf( "Ignoring detail brushes\n" ) ;
 			nodetail = true;
 		}
-		else if ( striEqual( argv[ i ],  "-fulldetail" ) ) {
+		while ( args.takeArg( "-fulldetail" ) ) {
 			Sys_Printf( "Turning detail brushes into structural brushes\n" );
 			fulldetail = true;
 		}
-		else if ( striEqual( argv[ i ],  "-nofog" ) ) {
+		while ( args.takeArg( "-nofog" ) ) {
 			Sys_Printf( "Fog volumes disabled\n" );
 			nofog = true;
 		}
-		else if ( striEqual( argv[ i ],  "-nosubdivide" ) ) {
+		while ( args.takeArg( "-nosubdivide" ) ) {
 			Sys_Printf( "Disabling brush face subdivision\n" );
 			nosubdivide = true;
 		}
-		else if ( striEqual( argv[ i ],  "-leaktest" ) ) {
+		while ( args.takeArg( "-leaktest" ) ) {
 			Sys_Printf( "Leaktest enabled\n" );
 			leaktest = true;
 		}
-		else if ( striEqual( argv[ i ],  "-verboseentities" ) ) {
+		while ( args.takeArg( "-verboseentities" ) ) {
 			Sys_Printf( "Verbose entities enabled\n" );
 			verboseEntities = true;
 		}
-		else if ( striEqual( argv[ i ], "-nocurves" ) ) {
+		while ( args.takeArg( "-nocurves" ) ) {
 			Sys_Printf( "Ignoring curved surfaces (patches)\n" );
 			noCurveBrushes = true;
 		}
-		else if ( striEqual( argv[ i ], "-notjunc" ) ) {
+		while ( args.takeArg( "-notjunc" ) ) {
 			Sys_Printf( "T-junction fixing disabled\n" );
 			notjunc = true;
 		}
-		else if ( striEqual( argv[ i ], "-fakemap" ) ) {
+		while ( args.takeArg( "-fakemap" ) ) {
 			Sys_Printf( "Generating fakemap.map\n" );
 			fakemap = true;
 		}
-		else if ( striEqual( argv[ i ],  "-samplesize" ) ) {
-			sampleSize = std::max( 1, atoi( argv[ i + 1 ] ) );
-			i++;
+		while ( args.takeArg( "-samplesize" ) ) {
+			sampleSize = std::max( 1, atoi( args.takeNext() ) );
 			Sys_Printf( "Lightmap sample size set to %dx%d units\n", sampleSize, sampleSize );
 		}
-		else if ( striEqual( argv[ i ], "-minsamplesize" ) ) {
-			minSampleSize = std::max( 1, atoi( argv[ i + 1 ] ) );
-			i++;
+		while ( args.takeArg( "-minsamplesize" ) ) {
+			minSampleSize = std::max( 1, atoi( args.takeNext() ) );
 			Sys_Printf( "Minimum lightmap sample size set to %dx%d units\n", minSampleSize, minSampleSize );
 		}
-		else if ( striEqual( argv[ i ],  "-custinfoparms" ) ) {
+		while ( args.takeArg( "-custinfoparms" ) ) {
 			Sys_Printf( "Custom info parms enabled\n" );
 			useCustomInfoParms = true;
 		}
 
 		/* sof2 args */
-		else if ( striEqual( argv[ i ], "-rename" ) ) {
+		while ( args.takeArg( "-rename" ) ) {
 			Sys_Printf( "Appending _bsp suffix to misc_model shaders (SOF2)\n" );
 			renameModelShaders = true;
 		}
 
 		/* ydnar args */
-		else if ( striEqual( argv[ i ],  "-ne" ) ) {
-			normalEpsilon = atof( argv[ i + 1 ] );
-			i++;
+		while ( args.takeArg( "-ne" ) ) {
+			normalEpsilon = atof( args.takeNext() );
 			Sys_Printf( "Normal epsilon set to %f\n", normalEpsilon );
 		}
-		else if ( striEqual( argv[ i ],  "-de" ) ) {
-			distanceEpsilon = atof( argv[ i + 1 ] );
-			i++;
+		while ( args.takeArg( "-de" ) ) {
+			distanceEpsilon = atof( args.takeNext() );
 			Sys_Printf( "Distance epsilon set to %f\n", distanceEpsilon );
 		}
-		else if ( striEqual( argv[ i ],  "-mv" ) ) {
-			maxLMSurfaceVerts = std::max( 3, atoi( argv[ i + 1 ] ) );
+		while ( args.takeArg( "-mv" ) ) {
+			maxLMSurfaceVerts = std::max( 3, atoi( args.takeNext() ) );
 			value_maximize( maxSurfaceVerts, maxLMSurfaceVerts );
-			i++;
 			Sys_Printf( "Maximum lightmapped surface vertex count set to %d\n", maxLMSurfaceVerts );
 		}
-		else if ( striEqual( argv[ i ],  "-mi" ) ) {
-			maxSurfaceIndexes = std::max( 3, atoi( argv[ i + 1 ] ) );
+		while ( args.takeArg( "-mi" ) ) {
+			maxSurfaceIndexes = std::max( 3, atoi( args.takeNext() ) );
 			Sys_Printf( "Maximum per-surface index count set to %d\n", maxSurfaceIndexes );
-			i++;
 		}
-		else if ( striEqual( argv[ i ], "-np" ) ) {
-			npDegrees = std::max( 0.0, atof( argv[ i + 1 ] ) );
+		while ( args.takeArg( "-np" ) ) {
+			npDegrees = std::max( 0.0, atof( args.takeNext() ) );
 			if ( npDegrees > 0.0f ) {
 				Sys_Printf( "Forcing nonplanar surfaces with a breaking angle of %f degrees\n", npDegrees );
 			}
-			i++;
 		}
-		else if ( striEqual( argv[ i ],  "-snap" ) ) {
-			bevelSnap = std::max( 0, atoi( argv[ i + 1 ] ) );
+		while ( args.takeArg( "-snap" ) ) {
+			bevelSnap = std::max( 0, atoi( args.takeNext() ) );
 			if ( bevelSnap > 0 ) {
 				Sys_Printf( "Snapping brush bevel planes to %d units\n", bevelSnap );
 			}
-			i++;
 		}
-		else if ( striEqual( argv[ i ], "-nohint" ) ) {
+		while ( args.takeArg( "-nohint" ) ) {
 			Sys_Printf( "Hint brushes disabled\n" );
 			noHint = true;
 		}
-		else if ( striEqual( argv[ i ], "-flat" ) ) {
+		while ( args.takeArg( "-flat" ) ) {
 			Sys_Printf( "Flatshading enabled\n" );
 			flat = true;
 		}
-		else if ( striEqual( argv[ i ], "-celshader" ) ) {
-			++i;
-			if ( !strEmpty( argv[ i ] ) ) {
-				globalCelShader( "textures/", argv[ i ] );
-			}
-			else{
-				globalCelShader.clear();
-			}
+		while ( args.takeArg( "-celshader" ) ) {
+			globalCelShader( "textures/", args.takeNext() );
 			Sys_Printf( "Global cel shader set to \"%s\"\n", globalCelShader.c_str() );
 		}
-		else if ( striEqual( argv[ i ], "-meta" ) ) {
+		while ( args.takeArg( "-meta" ) ) {
 			Sys_Printf( "Creating meta surfaces from brush faces\n" );
 			meta = true;
 		}
-		else if ( striEqual( argv[ i ], "-metaadequatescore" ) ) {
-			metaAdequateScore = std::max( -1, atoi( argv[ i + 1 ] ) );
-			i++;
+		while ( args.takeArg( "-metaadequatescore" ) ) {
+			metaAdequateScore = std::max( -1, atoi( args.takeNext() ) );
 			if ( metaAdequateScore >= 0 ) {
 				Sys_Printf( "Setting ADEQUATE meta score to %d (see surface_meta.c)\n", metaAdequateScore );
 			}
 		}
-		else if ( striEqual( argv[ i ], "-metagoodscore" ) ) {
-			metaGoodScore = std::max( -1, atoi( argv[ i + 1 ] ) );
-			i++;
+		while ( args.takeArg( "-metagoodscore" ) ) {
+			metaGoodScore = std::max( -1, atoi( args.takeNext() ) );
 			if ( metaGoodScore >= 0 ) {
 				Sys_Printf( "Setting GOOD meta score to %d (see surface_meta.c)\n", metaGoodScore );
 			}
 		}
-		else if ( striEqual( argv[ i ], "-patchmeta" ) ) {
+		while ( args.takeArg( "-patchmeta" ) ) {
 			Sys_Printf( "Creating meta surfaces from patches\n" );
 			patchMeta = true;
 		}
-		else if ( striEqual( argv[ i ], "-flares" ) ) {
+		while ( args.takeArg( "-flares" ) ) {
 			Sys_Printf( "Flare surfaces enabled\n" );
 			emitFlares = true;
 		}
-		else if ( striEqual( argv[ i ], "-noflares" ) ) {
+		while ( args.takeArg( "-noflares" ) ) {
 			Sys_Printf( "Flare surfaces disabled\n" );
 			emitFlares = false;
 		}
-		else if ( striEqual( argv[ i ], "-skyfix" ) ) {
+		while ( args.takeArg( "-skyfix" ) ) {
 			Sys_Printf( "GL_CLAMP sky fix/hack/workaround enabled\n" );
 			skyFixHack = true;
 		}
-		else if ( striEqual( argv[ i ], "-debugsurfaces" ) ) {
+		while ( args.takeArg( "-debugsurfaces" ) ) {
 			Sys_Printf( "emitting debug surfaces\n" );
 			debugSurfaces = true;
 		}
-		else if ( striEqual( argv[ i ], "-debuginset" ) ) {
+		while ( args.takeArg( "-debuginset" ) ) {
 			Sys_Printf( "Debug surface triangle insetting enabled\n" );
 			debugInset = true;
 		}
-		else if ( striEqual( argv[ i ], "-debugportals" ) ) {
+		while ( args.takeArg( "-debugportals" ) ) {
 			Sys_Printf( "Debug portal surfaces enabled\n" );
 			debugPortals = true;
 		}
-		else if ( striEqual( argv[ i ], "-debugclip" ) ) {
+		while ( args.takeArg( "-debugclip" ) ) {
 			Sys_Printf( "Debug model clip enabled\n" );
 			debugClip = true;
 		}
-		else if ( striEqual( argv[ i ],  "-clipdepth" ) ) {
-			clipDepthGlobal = atof( argv[ i + 1 ] );
-			i++;
+		while ( args.takeArg(  "-clipdepth" ) ) {
+			clipDepthGlobal = atof( args.takeNext() );
 			Sys_Printf( "Model autoclip thickness set to %.3f\n", clipDepthGlobal );
 		}
-		else if ( striEqual( argv[ i ], "-sRGBtex" ) ) {
+		while ( args.takeArg( "-sRGBtex" ) ) {
 			texturesRGB = true;
 			Sys_Printf( "Textures are in sRGB\n" );
 		}
-		else if ( striEqual( argv[ i ], "-nosRGBtex" ) ) {
+		while ( args.takeArg( "-nosRGBtex" ) ) {
 			texturesRGB = false;
 			Sys_Printf( "Textures are linear\n" );
 		}
-		else if ( striEqual( argv[ i ], "-sRGBcolor" ) ) {
+		while ( args.takeArg( "-sRGBcolor" ) ) {
 			colorsRGB = true;
 			Sys_Printf( "Colors are in sRGB\n" );
 		}
-		else if ( striEqual( argv[ i ], "-nosRGBcolor" ) ) {
+		while ( args.takeArg( "-nosRGBcolor" ) ) {
 			colorsRGB = false;
 			Sys_Printf( "Colors are linear\n" );
 		}
-		else if ( striEqual( argv[ i ], "-nosRGB" ) ) {
+		while ( args.takeArg( "-nosRGB" ) ) {
 			texturesRGB = false;
 			Sys_Printf( "Textures are linear\n" );
 			colorsRGB = false;
 			Sys_Printf( "Colors are linear\n" );
 		}
-		else if ( striEqual( argv[ i ], "-altsplit" ) ) {
+		while ( args.takeArg( "-altsplit" ) ) {
 			Sys_Printf( "Alternate BSP splitting (by 27) enabled\n" );
 			bspAlternateSplitWeights = true;
 		}
-		else if ( striEqual( argv[ i ], "-deep" ) ) {
+		while ( args.takeArg( "-deep" ) ) {
 			Sys_Printf( "Deep BSP tree generation enabled\n" );
 			deepBSP = true;
 		}
-		else if ( striEqual( argv[ i ], "-maxarea" ) ) {
+		while ( args.takeArg( "-maxarea" ) ) {
 			Sys_Printf( "Max Area face surface generation enabled\n" );
 			maxAreaFaceSurface = true;
 		}
-		else if ( striEqual( argv[ i ], "-noob" ) ) {
+		while ( args.takeArg( "-noob" ) ) {
 			Sys_Printf( "No oBs!\n" );
 			noob = true;
 		}
-		else if ( striEqual( argv[ i ], "-autocaulk" ) ) {
+		while ( args.takeArg( "-autocaulk" ) ) {
 			Sys_Printf( "\trunning in autocaulk mode\n" );
 			g_autocaulk = true;
 		}
-		else
+		while( !args.empty() )
 		{
-			Sys_Warning( "Unknown option \"%s\"\n", argv[ i ] );
+			Sys_Warning( "Unknown option \"%s\"\n", args.takeFront() );
 		}
 	}
 
-	/* fixme: print more useful usage here */
-	if ( i != ( argc - 1 ) ) {
-		Error( "usage: q3map2 [options] mapfile" );
-	}
-
 	/* copy source name */
-	strcpy( source, ExpandArg( argv[ i ] ) );
+	strcpy( source, ExpandArg( fileName ) );
 	StripExtension( source );
 
 	/* ydnar: set default sample size */
@@ -929,7 +910,7 @@ int BSPMain( int argc, char **argv ){
 	//%	remove( StringOutputStream( 256 )( source, ".srf" ) );	/* ydnar */
 
 	/* expand mapname */
-	strcpy( name, ExpandArg( argv[ i ] ) );
+	strcpy( name, ExpandArg( fileName ) );
 	if ( !striEqual( path_get_filename_base_end( name ), ".reg" ) ) { /* not .reg */
 		/* if we are doing a full map, delete the last saved region map */
 		remove( StringOutputStream( 256 )( source, ".reg" ) );
@@ -956,7 +937,7 @@ int BSPMain( int argc, char **argv ){
 	}
 
 	/* div0: inject command line parameters */
-	InjectCommandLine( argv, 1, argc - 1 );
+	InjectCommandLine( "-bsp", argsToInject );
 
 	/* ydnar: decal setup */
 	ProcessDecals();

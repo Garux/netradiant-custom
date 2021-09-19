@@ -145,15 +145,15 @@ void ExportLightmaps( void ){
    exports the lightmaps as a list of numbered tga images
  */
 
-int ExportLightmapsMain( int argc, char **argv ){
+int ExportLightmapsMain( Args& args ){
 	/* arg checking */
-	if ( argc < 2 ) {
+	if ( args.empty() ) {
 		Sys_Printf( "Usage: q3map2 -export [-v] <mapname>\n" );
 		return 0;
 	}
 
 	/* do some path mangling */
-	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
+	strcpy( source, ExpandArg( args.takeBack() ) );
 	path_set_extension( source, ".bsp" );
 
 	/* load the bsp */
@@ -174,20 +174,20 @@ int ExportLightmapsMain( int argc, char **argv ){
    imports the lightmaps from a list of numbered tga images
  */
 
-int ImportLightmapsMain( int argc, char **argv ){
+int ImportLightmapsMain( Args& args ){
 	int i, x, y, len, width, height;
 	char dirname[ 1024 ], filename[ 1024 ];
 	byte        *lightmap, *buffer, *pixels, *in, *out;
 
 
 	/* arg checking */
-	if ( argc < 2 ) {
+	if ( args.empty() ) {
 		Sys_Printf( "Usage: q3map2 -import [-v] <mapname>\n" );
 		return 0;
 	}
 
 	/* do some path mangling */
-	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
+	strcpy( source, ExpandArg( args.takeBack() ) );
 	path_set_extension( source, ".bsp" );
 
 	/* load the bsp */

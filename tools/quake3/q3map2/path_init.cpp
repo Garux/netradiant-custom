@@ -168,7 +168,7 @@ void LokiInitPaths( const char *argv0, CopiedString& homePath, CopiedString& ins
    returns NULL if no match found
  */
 
-const game_t *GetGame( char *arg ){
+const game_t *GetGame( const char *arg ){
 	/* dummy check */
 	if ( strEmptyOrNull( arg ) ) {
 		return NULL;
@@ -281,7 +281,7 @@ void AddHomeBasePath( std::vector<CopiedString>& basePaths, const char *homePath
    will remove any arguments it uses
  */
 
-void InitPaths( int *argc, char **argv ){
+void InitPaths( Args& args ){
 	std::vector<CopiedString> basePaths;
 	std::vector<CopiedString> gamePaths;
 	std::vector<CopiedString> pakPaths;
@@ -290,7 +290,6 @@ void InitPaths( int *argc, char **argv ){
 	CopiedString installPath;
 	const char *homeBasePath = nullptr;
 
-	int i, j, k;
 	const char *baseGame = nullptr;
 	StringOutputStream stream( 256 );
 
@@ -299,117 +298,63 @@ void InitPaths( int *argc, char **argv ){
 	Sys_FPrintf( SYS_VRB, "--- InitPaths ---\n" );
 
 	/* get the install path for backup */
-	LokiInitPaths( argv[ 0 ], homePath, installPath );
+	LokiInitPaths( args.getArg0(), homePath, installPath );
 
 	/* set game to default (q3a) */
 	g_game = &g_games[ 0 ];
 
 	/* parse through the arguments and extract those relevant to paths */
-	for ( i = 0; i < *argc; i++ )
 	{
-		/* check for null */
-		if ( argv[ i ] == NULL ) {
-			continue;
-		}
-
 		/* -game */
-		if ( striEqual( argv[ i ], "-game" ) ) {
-			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
-				Error( "Out of arguments: No game specified after %s", argv[ i - 1 ] );
-			}
-			g_game = GetGame( argv[ i ] );
+		while ( args.takeArg( "-game" ) ) {
+			g_game = GetGame( args.takeNext() );
 			if ( g_game == NULL ) {
 				g_game = &g_games[ 0 ];
 			}
-			argv[ i - 1 ] = argv[ i ] = NULL;
 		}
 
 		/* -fs_forbiddenpath */
-		else if ( striEqual( argv[ i ], "-fs_forbiddenpath" ) ) {
-			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
-				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
-			}
-			g_strForbiddenDirs.emplace_back( argv[i] );
-			argv[ i - 1 ] = argv[ i ] = NULL;
+		while ( args.takeArg( "-fs_forbiddenpath" ) ) {
+			g_strForbiddenDirs.emplace_back( args.takeNext() );
 		}
 
 		/* -fs_basepath */
-		else if ( striEqual( argv[ i ], "-fs_basepath" ) ) {
-			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
-				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
-			}
-			AddBasePath( basePaths, argv[ i ] );
-			argv[ i - 1 ] = argv[ i ] = NULL;
+		while ( args.takeArg( "-fs_basepath" ) ) {
+			AddBasePath( basePaths, args.takeNext() );
 		}
 
 		/* -fs_game */
-		else if ( striEqual( argv[ i ], "-fs_game" ) ) {
-			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
-				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
-			}
-			insert_unique( gamePaths, stream( DirectoryCleaned( argv[i] ) ) );
-			argv[ i - 1 ] = argv[ i ] = NULL;
+		while ( args.takeArg( "-fs_game" ) ) {
+			insert_unique( gamePaths, stream( DirectoryCleaned( args.takeNext() ) ) );
 		}
 
 		/* -fs_basegame */
-		else if ( striEqual( argv[ i ], "-fs_basegame" ) ) {
-			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
-				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
-			}
-			baseGame = argv[ i ];
-			argv[ i - 1 ] = argv[ i ] = NULL;
+		while ( args.takeArg( "-fs_basegame" ) ) {
+			baseGame = args.takeNext();
 		}
 
 		/* -fs_home */
-		else if ( striEqual( argv[ i ], "-fs_home" ) ) {
-			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
-				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
-			}
-			homePath = argv[i];
-			argv[ i - 1 ] = argv[ i ] = NULL;
+		while ( args.takeArg( "-fs_home" ) ) {
+			homePath = args.takeNext();
 		}
 
 		/* -fs_homebase */
-		else if ( striEqual( argv[ i ], "-fs_homebase" ) ) {
-			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
-				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
-			}
-			homeBasePath = argv[i];
-			argv[ i - 1 ] = argv[ i ] = NULL;
+		while ( args.takeArg( "-fs_homebase" ) ) {
+			homeBasePath = args.takeNext();
 		}
 
 		/* -fs_homepath - sets both of them */
-		else if ( striEqual( argv[ i ], "-fs_homepath" ) ) {
-			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
-				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
-			}
-			homePath = argv[i];
+		while ( args.takeArg( "-fs_homepath" ) ) {
+			homePath = args.takeNext();
 			homeBasePath = ".";
-			argv[ i - 1 ] = argv[ i ] = NULL;
 		}
 
 		/* -fs_pakpath */
-		else if ( striEqual( argv[ i ], "-fs_pakpath" ) ) {
-			if ( ++i >= *argc || strEmptyOrNull( argv[ i ] ) ) {
-				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
-			}
-			insert_unique( pakPaths, stream( DirectoryCleaned( argv[i] ) ) );
-			argv[ i - 1 ] = argv[ i ] = NULL;
+		while ( args.takeArg( "-fs_pakpath" ) ) {
+			insert_unique( pakPaths, stream( DirectoryCleaned( args.takeNext() ) ) );
 		}
 
 	}
-
-	/* remove processed arguments */
-	for ( i = 0, j = 0, k = 0; i < *argc && j < *argc; i++, j++ )
-	{
-		for ( ; j < *argc && argv[ j ] == NULL; j++ ){
-		}
-		argv[ i ] = argv[ j ];
-		if ( argv[ i ] != NULL ) {
-			k++;
-		}
-	}
-	*argc = k;
 
 	/* add standard game path */
 	insert_unique( gamePaths, stream( DirectoryCleaned( baseGame == nullptr? g_game->gamePath : baseGame ) ) );
@@ -417,11 +362,13 @@ void InitPaths( int *argc, char **argv ){
 	/* if there is no base path set, figure it out */
 	if ( basePaths.empty() ) {
 		/* this is another crappy replacement for SetQdirFromPath() */
-		for ( i = 0; i < *argc && basePaths.empty(); i++ )
+		auto argv = args.getVector();
+		argv.insert( argv.cbegin(), args.getArg0() );
+		for ( auto&& arg : argv )
 		{
 			/* extract the arg */
-			stream( DirectoryCleaned( argv[ i ] ) );
-			Sys_FPrintf( SYS_VRB, "Searching for \"%s\" in \"%s\" (%d)...\n", g_game->magic, stream.c_str(), i );
+			stream( DirectoryCleaned( arg ) );
+			Sys_FPrintf( SYS_VRB, "Searching for \"%s\" in \"%s\"...\n", g_game->magic, stream.c_str() );
 			/* check for the game's magic word */
 			char* found = strIstr( stream.c_str(), g_game->magic );
 			if( found ){
@@ -431,6 +378,8 @@ void InitPaths( int *argc, char **argv ){
 					strClear( found );
 				/* add this as a base path */
 				AddBasePath( basePaths, stream.c_str() );
+				if( !basePaths.empty() )
+					break;
 			}
 		}
 

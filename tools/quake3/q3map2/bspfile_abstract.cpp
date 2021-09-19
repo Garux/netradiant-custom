@@ -595,41 +595,21 @@ void ParseEntities( void ){
 /*
  * must be called before UnparseEntities
  */
-void InjectCommandLine( char **argv, int beginArgs, int endArgs ){
-	char newCommandLine[1024];
-	const char *inpos;
-	char *outpos = newCommandLine;
-	char *sentinel = newCommandLine + sizeof( newCommandLine ) - 1;
-	int i;
+void InjectCommandLine( const char *stage, const std::vector<const char *>& args ){
+	auto str = StringOutputStream( 256 )( entities[ 0 ].valueForKey( "_q3map2_cmdline" ) ); // read previousCommandLine
+	if( !str.empty() )
+		str << "; ";
 
-	if ( nocmdline ){
-		return;
-	}
-	if ( entities[ 0 ].read_keyvalue( inpos, "_q3map2_cmdline" ) ) { // read previousCommandLine
-		while ( outpos != sentinel && *inpos )
-			*outpos++ = *inpos++;
-		if ( outpos != sentinel ) {
-			*outpos++ = ';';
-		}
-		if ( outpos != sentinel ) {
-			*outpos++ = ' ';
-		}
+	str << stage;
+
+	for ( const char *c : args ) {
+		str << ' ';
+		for( ; !strEmpty( c ); ++c )
+			if ( *c != '\\' && *c != '"' && *c != ';' && (unsigned char) *c >= ' ' )
+				str << *c;
 	}
 
-	for ( i = beginArgs; i < endArgs; ++i )
-	{
-		if ( outpos != sentinel && i != beginArgs ) {
-			*outpos++ = ' ';
-		}
-		inpos = argv[i];
-		while ( outpos != sentinel && *inpos )
-			if ( *inpos != '\\' && *inpos != '"' && *inpos != ';' && (unsigned char) *inpos >= ' ' ) {
-				*outpos++ = *inpos++;
-			}
-	}
-
-	*outpos = 0;
-	entities[0].setKeyValue( "_q3map2_cmdline", newCommandLine );
+	entities[0].setKeyValue( "_q3map2_cmdline", str );
 	entities[0].setKeyValue( "_q3map2_version", Q3MAP_VERSION );
 }
 
