@@ -548,8 +548,9 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/bsp.o \
 	tools/quake3/q3map2/convert_ase.o \
 	tools/quake3/q3map2/convert_bsp.o \
-	tools/quake3/q3map2/convert_obj.o \
+	tools/quake3/q3map2/convert_json.o \
 	tools/quake3/q3map2/convert_map.o \
+	tools/quake3/q3map2/convert_obj.o \
 	tools/quake3/q3map2/decals.o \
 	tools/quake3/q3map2/exportents.o \
 	tools/quake3/q3map2/facebsp.o \

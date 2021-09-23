@@ -214,6 +214,11 @@ int main( int argc, char **argv ){
 		r = ConvertBSPMain( args );
 	}
 
+	/* json export/import */
+	else if ( args.takeFront( "-json" ) ) {
+		r = ConvertJsonMain( args );
+	}
+
 	/* div0: minimap */
 	else if ( args.takeFront( "-minimap" ) ) {
 		r = MiniMapBSPMain( args );
