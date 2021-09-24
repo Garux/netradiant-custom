@@ -230,7 +230,7 @@ static void write_json( const char *directory ){
 	}
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& lb : Span( bspLeafBrushes, numBSPLeafBrushes ) ){
+		for_indexed( const auto& lb : bspLeafBrushes ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "Num", lb, all );
 			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "LeafBrush#", i ).c_str(), all ), value, all );
@@ -441,13 +441,10 @@ static void read_json( const char *directory ){
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "LeafBrushes.json" ) );
-		static std::vector<int> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspLeafBrushes.emplace_back();
 			item = obj.value["Num"].GetInt();
 		}
-		bspLeafBrushes = items.data();
-		numBSPLeafBrushes = items.size();
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "Brushes.json" ) );

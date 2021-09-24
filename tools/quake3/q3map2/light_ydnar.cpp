@@ -3135,7 +3135,6 @@ int ClusterForPoint( const Vector3& point ){
 int ClusterForPointExt( const Vector3& point, float epsilon ){
 	int i, j, b, leafNum, cluster;
 	bool inside;
-	int             *brushes, numBSPBrushes;
 	bspBrush_t      *brush;
 
 
@@ -3153,8 +3152,8 @@ int ClusterForPointExt( const Vector3& point, float epsilon ){
 	}
 
 	/* transparent leaf, so check point against all brushes in the leaf */
-	brushes = &bspLeafBrushes[ leaf.firstBSPLeafBrush ];
-	numBSPBrushes = leaf.numBSPLeafBrushes;
+	const int *brushes = &bspLeafBrushes[ leaf.firstBSPLeafBrush ];
+	const int numBSPBrushes = leaf.numBSPLeafBrushes;
 	for ( i = 0; i < numBSPBrushes; i++ )
 	{
 		/* get parts */
@@ -3229,7 +3228,6 @@ int ClusterForPointExtFilter( const Vector3& point, float epsilon, int numCluste
 int ShaderForPointInLeaf( const Vector3& point, int leafNum, float epsilon, int wantContentFlags, int wantSurfaceFlags, int *contentFlags, int *surfaceFlags ){
 	int i, j;
 	bool inside;
-	int             *brushes, numBSPBrushes;
 	bspBrush_t      *brush;
 	bspBrushSide_t  *side;
 	int allSurfaceFlags, allContentFlags;
@@ -3246,8 +3244,8 @@ int ShaderForPointInLeaf( const Vector3& point, int leafNum, float epsilon, int 
 	const bspLeaf_t& leaf = bspLeafs[ leafNum ];
 
 	/* transparent leaf, so check point against all brushes in the leaf */
-	brushes = &bspLeafBrushes[ leaf.firstBSPLeafBrush ];
-	numBSPBrushes = leaf.numBSPLeafBrushes;
+	const int *brushes = &bspLeafBrushes[ leaf.firstBSPLeafBrush ];
+	const int numBSPBrushes = leaf.numBSPLeafBrushes;
 	for ( i = 0; i < numBSPBrushes; i++ )
 	{
 		/* get parts */

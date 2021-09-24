@@ -129,23 +129,13 @@ void EmitLeaf( node_t *node ){
 	leaf.minmax.mins = node->minmax.mins;
 
 	/* emit leaf brushes */
-	leaf.firstBSPLeafBrush = numBSPLeafBrushes;
+	leaf.firstBSPLeafBrush = bspLeafBrushes.size();
 	for ( const brush_t& b : node->brushlist )
 	{
-		/* something is corrupting brushes */
-		// if ( (size_t) b < 256 ) {
-		// 	Sys_Warning( "Node brush list corrupted (0x%08X)\n", b );
-		// 	break;
-		// }
-		//%	if( b->guard != 0xDEADBEEF )
-		//%		Sys_Printf( "Brush %6d: 0x%08X Guard: 0x%08X Next: 0x%08X Original: 0x%08X Sides: %d\n", b->brushNum, b, b, b->next, b->original, b->numsides );
-
-		AUTOEXPAND_BY_REALLOC_BSP( LeafBrushes, 1024 );
-		bspLeafBrushes[ numBSPLeafBrushes ] = b.original->outputNum;
-		numBSPLeafBrushes++;
+		bspLeafBrushes.push_back( b.original->outputNum );
 	}
 
-	leaf.numBSPLeafBrushes = numBSPLeafBrushes - leaf.firstBSPLeafBrush;
+	leaf.numBSPLeafBrushes = bspLeafBrushes.size() - leaf.firstBSPLeafBrush;
 
 	/* emit leaf surfaces */
 	if ( node->opaque ) {
@@ -322,7 +312,7 @@ void BeginBSPFile( void ){
 	bspNodes.clear();
 	numBSPBrushSides = 0;
 	bspLeafSurfaces.clear();
-	numBSPLeafBrushes = 0;
+	bspLeafBrushes.clear();
 
 	/* leave leaf 0 as an error, because leafs are referenced as negative number nodes */
 	bspLeafs.resize( 1 );
