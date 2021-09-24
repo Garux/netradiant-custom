@@ -816,7 +816,7 @@ static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, const Vector3&
    exports a bsp model to a map file
  */
 
-static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, const Vector3& origin, bool brushPrimitives ){
+static void ConvertModel( FILE *f, const bspModel_t& model, const Vector3& origin, bool brushPrimitives ){
 	int i, num;
 	bspBrush_t          *brush;
 	bspDrawSurface_t    *ds;
@@ -842,9 +842,9 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, const Vector
 	}
 
 	/* go through each brush in the model */
-	for ( i = 0; i < model->numBSPBrushes; i++ )
+	for ( i = 0; i < model.numBSPBrushes; i++ )
 	{
-		num = i + model->firstBSPBrush;
+		num = i + model.firstBSPBrush;
 		brush = &bspBrushes[ num ];
 		if( fast ){
 			ConvertBrushFast( f, num, brush, origin, brushPrimitives );
@@ -855,9 +855,9 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, const Vector
 	}
 
 	/* go through each drawsurf in the model */
-	for ( i = 0; i < model->numBSPSurfaces; i++ )
+	for ( i = 0; i < model.numBSPSurfaces; i++ )
 	{
-		num = i + model->firstBSPSurface;
+		num = i + model.firstBSPSurface;
 		ds = &bspDrawSurfaces[ num ];
 
 		/* we only love patches */
@@ -908,7 +908,6 @@ static void ConvertEPairs( FILE *f, entity_t *e, bool skip_origin ){
 int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 	int modelNum;
 	FILE            *f;
-	bspModel_t      *model;
 	entity_t        *e;
 	const char      *value;
 
@@ -956,11 +955,8 @@ int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 
 		/* only handle bsp models */
 		if ( modelNum >= 0 ) {
-			/* get model */
-			model = &bspModels[ modelNum ];
-
 			/* convert model */
-			ConvertModel( f, model, modelNum, e->vectorForKey( "origin" ), brushPrimitives );
+			ConvertModel( f, bspModels[ modelNum ], e->vectorForKey( "origin" ), brushPrimitives );
 		}
 
 		/* end entity */

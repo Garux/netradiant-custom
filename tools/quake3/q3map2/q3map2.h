@@ -2334,9 +2334,7 @@ inline Vector3 gridSize = { 64, 64, 128 };
 Q_EXTERN std::size_t numBSPEntities Q_ASSIGN( 0 );
 Q_EXTERN std::vector<entity_t> entities;
 
-Q_EXTERN int numBSPModels Q_ASSIGN( 0 );
-Q_EXTERN int allocatedBSPModels Q_ASSIGN( 0 );
-Q_EXTERN bspModel_t*        bspModels Q_ASSIGN( NULL );
+Q_EXTERN std::vector<bspModel_t> bspModels;
 
 Q_EXTERN int numBSPShaders Q_ASSIGN( 0 );
 Q_EXTERN int allocatedBSPShaders Q_ASSIGN( 0 );

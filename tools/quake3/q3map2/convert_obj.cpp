@@ -44,7 +44,7 @@ int lastLightmap = -1;
 int objVertexCount = 0;
 int objLastShaderNum = -1;
 
-static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const int* lmIndices ){
+static void ConvertSurfaceToOBJ( FILE *f, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const int* lmIndices ){
 	int i, v, a, b, c;
 	bspDrawVert_t   *dv;
 
@@ -127,17 +127,14 @@ static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDr
    exports a bsp model to an ase chunk
  */
 
-static void ConvertModelToOBJ( FILE *f, bspModel_t *model, int modelNum, const Vector3& origin, const int* lmIndices ){
-	int i, s;
-	bspDrawSurface_t    *ds;
-
+static void ConvertModelToOBJ( FILE *f, int modelNum, const Vector3& origin, const int* lmIndices ){
+	const bspModel_t& model = bspModels[ modelNum ];
 
 	/* go through each drawsurf in the model */
-	for ( i = 0; i < model->numBSPSurfaces; i++ )
+	for ( int i = 0; i < model.numBSPSurfaces; i++ )
 	{
-		s = i + model->firstBSPSurface;
-		ds = &bspDrawSurfaces[ s ];
-		ConvertSurfaceToOBJ( f, model, modelNum, ds, s, origin, lmIndices );
+		const int s = model.firstBSPSurface + i;
+		ConvertSurfaceToOBJ( f, modelNum, &bspDrawSurfaces[ s ], s, origin, lmIndices );
 	}
 }
 
@@ -299,7 +296,6 @@ int ConvertBSPToOBJ( char *bspName ){
 	int modelNum;
 	FILE            *f, *fmtl;
 	bspShader_t     *shader;
-	bspModel_t      *model;
 	entity_t        *e;
 	const char      *key;
 	int lmIndices[ numBSPShaders ];
@@ -355,10 +351,9 @@ int ConvertBSPToOBJ( char *bspName ){
 			}
 			modelNum = atoi( key + 1 );
 		}
-		model = &bspModels[ modelNum ];
 
 		/* convert model */
-		ConvertModelToOBJ( f, model, modelNum, e->vectorForKey( "origin" ), lmIndices );
+		ConvertModelToOBJ( f, modelNum, e->vectorForKey( "origin" ), lmIndices );
 	}
 
 	if ( lightmapsAsTexcoord ) {

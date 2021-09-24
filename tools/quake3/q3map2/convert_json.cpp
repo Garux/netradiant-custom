@@ -155,7 +155,7 @@ static void write_json( const char *directory ){
 	}
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& model : Span( bspModels, numBSPModels ) ){
+		for_indexed( const auto& model : bspModels ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			{
 				rapidjson::Value minmax( rapidjson::kObjectType );
@@ -390,9 +390,8 @@ static void read_json( const char *directory ){
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "models.json" ) );
-		static std::vector<bspModel_t> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspModels.emplace_back();
 			value_to( obj.value["minmax"].GetObj().operator[]("mins"), item.minmax.mins );
 			value_to( obj.value["minmax"].GetObj().operator[]("maxs"), item.minmax.maxs );
 			item.firstBSPSurface = obj.value["firstBSPSurface"].GetInt();
@@ -400,8 +399,6 @@ static void read_json( const char *directory ){
 			item.firstBSPBrush = obj.value["firstBSPBrush"].GetInt();
 			item.numBSPBrushes = obj.value["numBSPBrushes"].GetInt();
 		}
-		bspModels = items.data();
-		numBSPModels = items.size();
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "planes.json" ) );

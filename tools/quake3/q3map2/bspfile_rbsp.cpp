@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "bspfile_abstract.h"
 
 
 
@@ -225,7 +226,7 @@ void LoadRBSPFile( const char *filename ){
 	/* load/convert lumps */
 	numBSPShaders = CopyLump_Allocate( (bspHeader_t*) header, LUMP_SHADERS, (void **) &bspShaders, sizeof( bspShader_t ), &allocatedBSPShaders );
 
-	numBSPModels = CopyLump_Allocate( (bspHeader_t*) header, LUMP_MODELS, (void **) &bspModels, sizeof( bspModel_t ), &allocatedBSPModels );
+	CopyLump( (bspHeader_t*) header, LUMP_MODELS, bspModels );
 
 	numBSPPlanes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_PLANES, (void **) &bspPlanes, sizeof( bspPlane_t ), &allocatedBSPPlanes );
 
@@ -311,7 +312,7 @@ void WriteRBSPFile( const char *filename ){
 	AddLump( file, (bspHeader_t*) header, LUMP_BRUSHSIDES, bspBrushSides, numBSPBrushSides * sizeof( bspBrushSides[ 0 ] ) );
 	AddLump( file, (bspHeader_t*) header, LUMP_LEAFSURFACES, bspLeafSurfaces, numBSPLeafSurfaces * sizeof( bspLeafSurfaces[ 0 ] ) );
 	AddLump( file, (bspHeader_t*) header, LUMP_LEAFBRUSHES, bspLeafBrushes, numBSPLeafBrushes * sizeof( bspLeafBrushes[ 0 ] ) );
-	AddLump( file, (bspHeader_t*) header, LUMP_MODELS, bspModels, numBSPModels * sizeof( bspModel_t ) );
+	AddLump( file, header->lumps[LUMP_MODELS], bspModels );
 	AddLump( file, (bspHeader_t*) header, LUMP_DRAWVERTS, bspDrawVerts, numBSPDrawVerts * sizeof( bspDrawVerts[ 0 ] ) );
 	AddLump( file, (bspHeader_t*) header, LUMP_SURFACES, bspDrawSurfaces, numBSPDrawSurfaces * sizeof( bspDrawSurfaces[ 0 ] ) );
 	AddLump( file, (bspHeader_t*) header, LUMP_VISIBILITY, bspVisBytes, numBSPVisBytes );

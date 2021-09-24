@@ -90,11 +90,6 @@ static void autocaulk_write(){
  */
 
 static void ProcessAdvertisements( void ) {
-	const char*         modelKey;
-	int modelNum;
-	bspModel_t*         adModel;
-	bspDrawSurface_t*   adSurface;
-
 	Sys_FPrintf( SYS_VRB, "--- ProcessAdvertisements ---\n" );
 
 	for ( const auto& e : entities ) {
@@ -102,7 +97,7 @@ static void ProcessAdvertisements( void ) {
 		/* is an advertisement? */
 		if ( e.classname_is( "advertisement" ) ) {
 
-			modelKey = e.valueForKey( "model" );
+			const char* modelKey = e.valueForKey( "model" );
 
 			if ( strlen( modelKey ) > MAX_QPATH - 1 ) {
 				Error( "Model Key for entity exceeds ad struct string length." );
@@ -112,27 +107,25 @@ static void ProcessAdvertisements( void ) {
 					bspAds[numBSPAds].cellId = e.intForKey( "cellId" );
 					strncpy( bspAds[numBSPAds].model, modelKey, sizeof( bspAds[numBSPAds].model ) );
 
-					modelKey++;
-					modelNum = atoi( modelKey );
-					adModel = &bspModels[modelNum];
+					const bspModel_t& adModel = bspModels[atoi( modelKey + 1 )];
 
-					if ( adModel->numBSPSurfaces != 1 ) {
+					if ( adModel.numBSPSurfaces != 1 ) {
 						Error( "Ad cell id %d has more than one surface.", bspAds[numBSPAds].cellId );
 					}
 
-					adSurface = &bspDrawSurfaces[adModel->firstBSPSurface];
+					const bspDrawSurface_t& adSurface = bspDrawSurfaces[adModel.firstBSPSurface];
 
 					// store the normal for use at run time.. all ad verts are assumed to
 					// have identical normals (because they should be a simple rectangle)
 					// so just use the first vert's normal
-					bspAds[numBSPAds].normal = bspDrawVerts[adSurface->firstVert].normal;
+					bspAds[numBSPAds].normal = bspDrawVerts[adSurface.firstVert].normal;
 
 					// store the ad quad for quick use at run time
-					if ( adSurface->surfaceType == MST_PATCH ) {
-						int v0 = adSurface->firstVert + adSurface->patchHeight - 1;
-						int v1 = adSurface->firstVert + adSurface->numVerts - 1;
-						int v2 = adSurface->firstVert + adSurface->numVerts - adSurface->patchWidth;
-						int v3 = adSurface->firstVert;
+					if ( adSurface.surfaceType == MST_PATCH ) {
+						int v0 = adSurface.firstVert + adSurface.patchHeight - 1;
+						int v1 = adSurface.firstVert + adSurface.numVerts - 1;
+						int v2 = adSurface.firstVert + adSurface.numVerts - adSurface.patchWidth;
+						int v3 = adSurface.firstVert;
 						bspAds[numBSPAds].rect[0] = bspDrawVerts[v0].xyz;
 						bspAds[numBSPAds].rect[1] = bspDrawVerts[v1].xyz;
 						bspAds[numBSPAds].rect[2] = bspDrawVerts[v2].xyz;
@@ -576,7 +569,7 @@ void ProcessModels( void ){
 		}
 
 		/* process the model */
-		Sys_FPrintf( SYS_VRB, "############### model %i ###############\n", numBSPModels );
+		Sys_FPrintf( SYS_VRB, "############### model %zu ###############\n", bspModels.size() );
 		if ( mapEntityNum == 0 ) {
 			ProcessWorldModel();
 		}
@@ -591,7 +584,7 @@ void ProcessModels( void ){
 	/* restore -v setting */
 	verbose = oldVerbose;
 
-	Sys_FPrintf( SYS_VRB, "%9i bspModels in total\n", numBSPModels );
+	Sys_FPrintf( SYS_VRB, "%9zu bspModels in total\n", bspModels.size() );
 
 	/* write fogs */
 	EmitFogs();

@@ -478,10 +478,10 @@ int ScaleBSPMain( Args& args ){
 	}
 
 	/* scale models */
-	for ( i = 0; i < numBSPModels; i++ )
+	for ( auto& model : bspModels )
 	{
-		bspModels[ i ].minmax.mins *= scale;
-		bspModels[ i ].minmax.maxs *= scale;
+		model.minmax.mins *= scale;
+		model.minmax.maxs *= scale;
 	}
 
 	/* scale nodes */
@@ -647,10 +647,10 @@ int ShiftBSPMain( Args& args ){
 	}
 
 	/* shift models */
-	for ( i = 0; i < numBSPModels; i++ )
+	for ( auto& model : bspModels )
 	{
-		bspModels[ i ].minmax.mins += shift;
-		bspModels[ i ].minmax.maxs += shift;
+		model.minmax.mins += shift;
+		model.minmax.maxs += shift;
 	}
 
 	/* shift nodes */
@@ -726,7 +726,7 @@ void PseudoCompileBSP( bool need_tree ){
 		}
 
 		/* process the model */
-		Sys_FPrintf( SYS_VRB, "############### model %i ###############\n", numBSPModels );
+		Sys_FPrintf( SYS_VRB, "############### model %zu ###############\n", bspModels.size() );
 		BeginModel();
 
 		entity->firstDrawSurf = numMapDrawSurfs;

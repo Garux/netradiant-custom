@@ -1025,8 +1025,6 @@ int repackBSPMain( Args& args ){
 			free( bspModels );
 			bspModels = NULL;
 			Sys_Printf( "freed bspModels\n" );
-			//numBSPModels = 0;
-			//allocatedBSPModels = 0;
 		}
 		if ( bspShaders != 0 ) {
 			Sys_Printf( "freed bspShaders\n" );

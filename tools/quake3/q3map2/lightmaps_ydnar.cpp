@@ -961,16 +961,13 @@ void SetupSurfaceLightmaps( void ){
 	sortSurfaces = safe_calloc( numBSPDrawSurfaces * sizeof( int ) );
 
 	/* walk each model in the bsp */
-	for ( i = 0; i < numBSPModels; i++ )
+	for ( const bspModel_t& model : bspModels )
 	{
-		/* get model */
-		model = &bspModels[ i ];
-
 		/* walk the list of surfaces in this model and fill out the info structs */
-		for ( j = 0; j < model->numBSPSurfaces; j++ )
+		for ( j = 0; j < model.numBSPSurfaces; j++ )
 		{
 			/* make surface index */
-			num = model->firstBSPSurface + j;
+			num = model.firstBSPSurface + j;
 
 			/* copy index to sort list */
 			sortSurfaces[ num ] = num;

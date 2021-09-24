@@ -141,6 +141,19 @@ void SwapBlock( int *block, int size ){
 		block[ i ] = LittleLong( block[ i ] );
 }
 
+/*
+   SwapBlock()
+   if all values are 32 bits, this can be used to swap everything
+ */
+template<typename T>
+void SwapBlock( std::vector<T>& block ){
+	const size_t size = ( sizeof( T ) * block.size() ) >> 2; // get size in integers
+	/* swap */
+	int *intptr = reinterpret_cast<int *>( block.data() );
+	for ( size_t i = 0; i < size; ++i )
+		intptr[ i ] = LittleLong( intptr[ i ] );
+}
+
 
 
 /*
@@ -153,7 +166,7 @@ void SwapBSPFile( void ){
 	shaderInfo_t    *si;
 
 	/* models */
-	SwapBlock( (int*) bspModels, numBSPModels * sizeof( bspModels[ 0 ] ) );
+	SwapBlock( bspModels );
 
 	/* shaders (don't swap the name) */
 	for ( i = 0; i < numBSPShaders; i++ )
@@ -337,7 +350,7 @@ void AddLump( FILE *file, bspHeader_t *header, int lumpNum, const void *data, in
 	SafeWrite( file, data, length );
 
 	/* write padding zeros */
-	SafeWrite( file, (const byte[3]){ 0, 0, 0 }, ( ( length + 3 ) & ~3 ) - length );
+	SafeWrite( file, std::array<byte, 3>{}.data(), ( ( length + 3 ) & ~3 ) - length );
 }
 
 
@@ -450,8 +463,8 @@ void PrintBSPFileSizes( void ){
 	Sys_Printf( "Abstracted BSP file components (*actual sizes may differ)\n" );
 
 	/* print various and sundry bits */
-	Sys_Printf( "%9d models        %9d\n",
-	            numBSPModels, (int) ( numBSPModels * sizeof( bspModel_t ) ) );
+	Sys_Printf( "%9zu models        %9zu\n",
+	            bspModels.size(), bspModels.size() * sizeof( bspModels[0] ) );
 	Sys_Printf( "%9d shaders       %9d\n",
 	            numBSPShaders, (int) ( numBSPShaders * sizeof( bspShader_t ) ) );
 	Sys_Printf( "%9d brushes       %9d\n",

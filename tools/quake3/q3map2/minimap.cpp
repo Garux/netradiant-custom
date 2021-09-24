@@ -35,7 +35,7 @@
 
 struct minimap_t
 {
-	bspModel_t *model;
+	const bspModel_t *model;
 	int width;
 	int height;
 	int samples;

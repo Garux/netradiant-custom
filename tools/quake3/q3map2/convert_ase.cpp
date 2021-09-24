@@ -41,7 +41,7 @@
 
 int numLightmapsASE = 0;
 
-static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const int* lmIndices ){
+static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const int* lmIndices ){
 	int i, v, face, a, b, c;
 	bspDrawVert_t   *dv;
 	char name[ 1024 ];
@@ -181,17 +181,14 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
    exports a bsp model to an ase chunk
  */
 
-static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, const Vector3& origin, const int* lmIndices ){
-	int i, s;
-	bspDrawSurface_t    *ds;
-
+static void ConvertModel( FILE *f, int modelNum, const Vector3& origin, const int* lmIndices ){
+	const bspModel_t& model = bspModels[ modelNum ];
 
 	/* go through each drawsurf in the model */
-	for ( i = 0; i < model->numBSPSurfaces; i++ )
+	for ( int i = 0; i < model.numBSPSurfaces; i++ )
 	{
-		s = i + model->firstBSPSurface;
-		ds = &bspDrawSurfaces[ s ];
-		ConvertSurface( f, model, modelNum, ds, s, origin, lmIndices );
+		const int s = model.firstBSPSurface + i;
+		ConvertSurface( f, modelNum, &bspDrawSurfaces[ s ], s, origin, lmIndices );
 	}
 }
 
@@ -328,7 +325,6 @@ int ConvertBSPToASE( char *bspName ){
 	int modelNum;
 	FILE            *f;
 	bspShader_t     *shader;
-	bspModel_t      *model;
 	entity_t        *e;
 	int lmIndices[ numBSPShaders ];
 
@@ -394,10 +390,9 @@ int ConvertBSPToASE( char *bspName ){
 			}
 			modelNum = atoi( key + 1 );
 		}
-		model = &bspModels[ modelNum ];
 
 		/* convert model */
-		ConvertModel( f, model, modelNum, e->vectorForKey( "origin" ), lmIndices );
+		ConvertModel( f, modelNum, e->vectorForKey( "origin" ), lmIndices );
 	}
 
 	/* close the file and return */

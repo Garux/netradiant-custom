@@ -561,10 +561,6 @@ void CreateSurfaceLights( void ){
 
 void SetEntityOrigins( void ){
 	int j, k, f;
-	const char          *key;
-	int modelnum;
-	bspModel_t          *dm;
-	bspDrawSurface_t    *ds;
 
 
 	/* ydnar: copy drawverts into private storage for nefarious purposes */
@@ -575,12 +571,12 @@ void SetEntityOrigins( void ){
 	for ( const auto& e : entities )
 	{
 		/* get entity and model */
-		key = e.valueForKey( "model" );
+		const char *key = e.valueForKey( "model" );
 		if ( key[ 0 ] != '*' ) {
 			continue;
 		}
-		modelnum = atoi( key + 1 );
-		dm = &bspModels[ modelnum ];
+		const int modelnum = atoi( key + 1 );
+		const bspModel_t& dm = bspModels[ modelnum ];
 
 		/* get entity origin */
 		Vector3 origin( 0 );
@@ -589,15 +585,15 @@ void SetEntityOrigins( void ){
 		}
 
 		/* set origin for all surfaces for this model */
-		for ( j = 0; j < dm->numBSPSurfaces; j++ )
+		for ( j = 0; j < dm.numBSPSurfaces; j++ )
 		{
 			/* get drawsurf */
-			ds = &bspDrawSurfaces[ dm->firstBSPSurface + j ];
+			const bspDrawSurface_t& ds = bspDrawSurfaces[ dm.firstBSPSurface + j ];
 
 			/* set its verts */
-			for ( k = 0; k < ds->numVerts; k++ )
+			for ( k = 0; k < ds.numVerts; k++ )
 			{
-				f = ds->firstVert + k;
+				f = ds.firstVert + k;
 				yDrawVerts[ f ].xyz = origin + bspDrawVerts[ f ].xyz;
 			}
 		}

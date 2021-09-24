@@ -2066,8 +2066,8 @@ void EmitDrawVerts( mapDrawSurface_t *ds, bspDrawSurface_t *out ){
 		/* expand model bounds
 		   necessary because of misc_model surfaces on entities
 		   note: does not happen on worldspawn as its bounds is only used for determining lightgrid bounds */
-		if ( numBSPModels > 0 ) {
-			bspModels[ numBSPModels ].minmax.extend( dv->xyz );
+		if ( bspModels.size() > 1 ) {
+			bspModels.back().minmax.extend( dv->xyz );
 		}
 
 		/* debug color? */

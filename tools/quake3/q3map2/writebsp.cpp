@@ -347,7 +347,7 @@ void SetLightStyles( void ){
 
 void BeginBSPFile( void ){
 	/* these values may actually be initialized if the file existed when loaded, so clear them explicitly */
-	numBSPModels = 0;
+	bspModels.clear();
 	numBSPNodes = 0;
 	numBSPBrushSides = 0;
 	numBSPLeafSurfaces = 0;
@@ -542,11 +542,8 @@ void BeginModel( void ){
 	MinMax minmax;
 	MinMax lgMinmax;          /* ydnar: lightgrid mins/maxs */
 
-	/* test limits */
-	AUTOEXPAND_BY_REALLOC_BSP( Models, 256 );
-
 	/* get model and entity */
-	bspModel_t *mod = &bspModels[ numBSPModels ];
+	bspModel_t& mod = bspModels.emplace_back();
 	const entity_t& e = entities[ mapEntityNum ];
 
 	/* bound the brushes */
@@ -574,12 +571,12 @@ void BeginModel( void ){
 	/* ydnar: lightgrid mins/maxs */
 	if ( lgMinmax.valid() ) {
 		/* use lightgrid bounds */
-		mod->minmax = lgMinmax;
+		mod.minmax = lgMinmax;
 	}
 	else
 	{
 		/* use brush/patch bounds */
-		mod->minmax = minmax;
+		mod.minmax = minmax;
 	}
 
 	/* note size */
@@ -588,8 +585,8 @@ void BeginModel( void ){
 		Sys_FPrintf( SYS_VRB, "Lightgrid bounds: { %f %f %f } { %f %f %f }\n", lgMinmax.mins[0], lgMinmax.mins[1], lgMinmax.mins[2], lgMinmax.maxs[0], lgMinmax.maxs[1], lgMinmax.maxs[2] );
 
 	/* set firsts */
-	mod->firstBSPSurface = numBSPDrawSurfaces;
-	mod->firstBSPBrush = numBSPBrushes;
+	mod.firstBSPSurface = numBSPDrawSurfaces;
+	mod.firstBSPBrush = numBSPBrushes;
 }
 
 
@@ -601,21 +598,15 @@ void BeginModel( void ){
  */
 
 void EndModel( entity_t *e, node_t *headnode ){
-	bspModel_t  *mod;
-
-
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- EndModel ---\n" );
 
 	/* emit the bsp */
-	mod = &bspModels[ numBSPModels ];
+	bspModel_t& mod = bspModels.back();
 	EmitDrawNode_r( headnode );
 
 	/* set surfaces and brushes */
-	mod->numBSPSurfaces = numBSPDrawSurfaces - mod->firstBSPSurface;
-	mod->firstBSPBrush = e->firstBrush;
-	mod->numBSPBrushes = e->numBrushes;
-
-	/* increment model count */
-	numBSPModels++;
+	mod.numBSPSurfaces = numBSPDrawSurfaces - mod.firstBSPSurface;
+	mod.firstBSPBrush = e->firstBrush;
+	mod.numBSPBrushes = e->numBrushes;
 }

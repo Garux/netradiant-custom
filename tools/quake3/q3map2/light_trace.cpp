@@ -818,7 +818,7 @@ static int TriangulateTraceNode_r( int nodeNum ){
    filters a bsp model's surfaces into the raytracing tree
  */
 
-static void PopulateWithBSPModel( bspModel_t *model, const Matrix4& transform ){
+static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transform ){
 	int i, j, x, y, pw[ 5 ], r, nodeNum;
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info;
@@ -829,17 +829,12 @@ static void PopulateWithBSPModel( bspModel_t *model, const Matrix4& transform ){
 	traceWinding_t tw;
 
 
-	/* dummy check */
-	if ( model == NULL ) {
-		return;
-	}
-
 	/* walk the list of surfaces in this model and fill out the info structs */
-	for ( i = 0; i < model->numBSPSurfaces; i++ )
+	for ( i = 0; i < model.numBSPSurfaces; i++ )
 	{
 		/* get surface and info */
-		ds = &bspDrawSurfaces[ model->firstBSPSurface + i ];
-		info = &surfaceInfos[ model->firstBSPSurface + i ];
+		ds = &bspDrawSurfaces[ model.firstBSPSurface + i ];
+		info = &surfaceInfos[ model.firstBSPSurface + i ];
 		if ( info->si == NULL ) {
 			continue;
 		}
@@ -873,7 +868,7 @@ static void PopulateWithBSPModel( bspModel_t *model, const Matrix4& transform ){
 		/* setup trace info */
 		ti.si = info->si;
 		ti.castShadows = info->castShadows;
-		ti.surfaceNum = model->firstBSPBrush + i;
+		ti.surfaceNum = model.firstBSPBrush + i;
 		ti.skipGrid = ( ds->surfaceType == MST_PATCH );
 
 		/* choose which node (normal or skybox) */
@@ -1054,13 +1049,13 @@ static void PopulateWithPicoModel( int castShadows, const std::vector<const AssM
  */
 
 static void PopulateTraceNodes( void ){
-	int m;
+	size_t m;
 	const char      *value;
 
 
 	/* add worldspawn triangles */
 	Matrix4 transform( g_matrix4_identity );
-	PopulateWithBSPModel( &bspModels[ 0 ], transform );
+	PopulateWithBSPModel( bspModels[ 0 ], transform );
 
 	/* walk each entity list */
 	for ( std::size_t i = 1; i < entities.size(); ++i )
@@ -1114,10 +1109,10 @@ static void PopulateTraceNodes( void ){
 		/* bsp model */
 		case '*':
 			m = atoi( &value[ 1 ] );
-			if ( m <= 0 || m >= numBSPModels ) {
+			if ( m <= 0 || m >= bspModels.size() ) {
 				continue;
 			}
-			PopulateWithBSPModel( &bspModels[ m ], transform );
+			PopulateWithBSPModel( bspModels[ m ], transform );
 			break;
 
 		/* external model */
@@ -1139,10 +1134,10 @@ static void PopulateTraceNodes( void ){
 		/* bsp model */
 		case '*':
 			m = atoi( &value[ 1 ] );
-			if ( m <= 0 || m >= numBSPModels ) {
+			if ( m <= 0 || m >= bspModels.size() ) {
 				continue;
 			}
-			PopulateWithBSPModel( &bspModels[ m ], transform );
+			PopulateWithBSPModel( bspModels[ m ], transform );
 			break;
 
 		/* external model */
