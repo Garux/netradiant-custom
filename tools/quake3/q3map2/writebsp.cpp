@@ -153,15 +153,13 @@ void EmitLeaf( node_t *node ){
 	}
 
 	/* add the drawSurfRef_t drawsurfs */
-	leaf.firstBSPLeafSurface = numBSPLeafSurfaces;
+	leaf.firstBSPLeafSurface = bspLeafSurfaces.size();
 	for ( const drawSurfRef_t *dsr = node->drawSurfReferences; dsr; dsr = dsr->nextRef )
 	{
-		AUTOEXPAND_BY_REALLOC_BSP( LeafSurfaces, 1024 );
-		bspLeafSurfaces[ numBSPLeafSurfaces ] = dsr->outputNum;
-		numBSPLeafSurfaces++;
+		bspLeafSurfaces.push_back( dsr->outputNum );
 	}
 
-	leaf.numBSPLeafSurfaces = numBSPLeafSurfaces - leaf.firstBSPLeafSurface;
+	leaf.numBSPLeafSurfaces = bspLeafSurfaces.size() - leaf.firstBSPLeafSurface;
 }
 
 
@@ -323,7 +321,7 @@ void BeginBSPFile( void ){
 	bspModels.clear();
 	bspNodes.clear();
 	numBSPBrushSides = 0;
-	numBSPLeafSurfaces = 0;
+	bspLeafSurfaces.clear();
 	numBSPLeafBrushes = 0;
 
 	/* leave leaf 0 as an error, because leafs are referenced as negative number nodes */

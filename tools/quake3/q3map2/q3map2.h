@@ -2346,9 +2346,7 @@ Q_EXTERN std::vector<bspPlane_t> bspPlanes;
 
 Q_EXTERN std::vector<bspNode_t> bspNodes;
 
-Q_EXTERN int numBSPLeafSurfaces Q_ASSIGN( 0 );
-Q_EXTERN int allocatedBSPLeafSurfaces Q_ASSIGN( 0 );
-Q_EXTERN int*               bspLeafSurfaces Q_ASSIGN( NULL );
+Q_EXTERN std::vector<int> bspLeafSurfaces;
 
 Q_EXTERN int numBSPLeafBrushes Q_ASSIGN( 0 );
 Q_EXTERN int allocatedBSPLeafBrushes Q_ASSIGN( 0 );

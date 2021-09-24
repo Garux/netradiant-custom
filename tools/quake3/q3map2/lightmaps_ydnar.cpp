@@ -947,7 +947,7 @@ void SetupSurfaceLightmaps( void ){
 
 	/* allocate a list of surface clusters */
 	numSurfaceClusters = 0;
-	maxSurfaceClusters = numBSPLeafSurfaces;
+	maxSurfaceClusters = bspLeafSurfaces.size();
 	surfaceClusters = safe_calloc( maxSurfaceClusters * sizeof( *surfaceClusters ) );
 
 	/* allocate a list for per-surface info */
