@@ -171,10 +171,6 @@ void EmitLeaf( node_t *node ){
  */
 
 int EmitDrawNode_r( node_t *node ){
-	bspNode_t   *n;
-	int i, n0;
-
-
 	/* check for leafnode */
 	if ( node->planenum == PLANENUM_LEAF ) {
 		EmitLeaf( node );
@@ -182,38 +178,37 @@ int EmitDrawNode_r( node_t *node ){
 	}
 
 	/* emit a node */
-	AUTOEXPAND_BY_REALLOC_BSP( Nodes, 1024 );
-	n0 = numBSPNodes;
-	n = &bspNodes[ n0 ];
-	numBSPNodes++;
+	const int id = bspNodes.size();
+	{
+		bspNode_t& bnode = bspNodes.emplace_back();
 
-	n->minmax.mins = node->minmax.mins;
-	n->minmax.maxs = node->minmax.maxs;
+		bnode.minmax.mins = node->minmax.mins;
+		bnode.minmax.maxs = node->minmax.maxs;
 
-	if ( node->planenum & 1 ) {
-		Error( "WriteDrawNodes_r: odd planenum" );
+		if ( node->planenum & 1 ) {
+			Error( "WriteDrawNodes_r: odd planenum" );
+		}
+		bnode.planeNum = node->planenum;
 	}
-	n->planeNum = node->planenum;
 
 	//
 	// recursively output the other nodes
 	//
-	for ( i = 0; i < 2; i++ )
+	for ( int i = 0; i < 2; i++ )
 	{
+		// reference node by id, as it may be reallocated
 		if ( node->children[i]->planenum == PLANENUM_LEAF ) {
-			n->children[i] = -int( bspLeafs.size() + 1 );
+			bspNodes[id].children[i] = -int( bspLeafs.size() + 1 );
 			EmitLeaf( node->children[i] );
 		}
 		else
 		{
-			n->children[i] = numBSPNodes;
+			bspNodes[id].children[i] = bspNodes.size();
 			EmitDrawNode_r( node->children[i] );
-			// n may have become invalid here, so...
-			n = &bspNodes[ n0 ];
 		}
 	}
 
-	return n - bspNodes;
+	return id;
 }
 
 
@@ -326,7 +321,7 @@ void SetLightStyles( void ){
 void BeginBSPFile( void ){
 	/* these values may actually be initialized if the file existed when loaded, so clear them explicitly */
 	bspModels.clear();
-	numBSPNodes = 0;
+	bspNodes.clear();
 	numBSPBrushSides = 0;
 	numBSPLeafSurfaces = 0;
 	numBSPLeafBrushes = 0;

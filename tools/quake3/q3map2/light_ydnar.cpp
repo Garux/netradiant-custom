@@ -3320,7 +3320,6 @@ bool ChopBounds( MinMax& minmax, const Vector3& origin, const Vector3& normal ){
 #define LIGHT_NUDGE     2.0f
 
 void SetupEnvelopes( bool forGrid, bool fastFlag ){
-	int i, x, y, z, x1, y1, z1;
 	float radius, intensity;
 
 
@@ -3361,18 +3360,18 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 			/* invalid cluster? */
 			if ( light->cluster < 0 ) {
 				/* nudge the sample point around a bit */
-				for ( x = 0; x < 4; x++ )
+				for ( int x = 0; x < 4; x++ )
 				{
 					/* two's complement 0, 1, -1, 2, -2, etc */
-					x1 = ( ( x >> 1 ) ^ ( x & 1 ? -1 : 0 ) ) + ( x & 1 );
+					const int x1 = ( ( x >> 1 ) ^ ( x & 1 ? -1 : 0 ) ) + ( x & 1 );
 
-					for ( y = 0; y < 4; y++ )
+					for ( int y = 0; y < 4; y++ )
 					{
-						y1 = ( ( y >> 1 ) ^ ( y & 1 ? -1 : 0 ) ) + ( y & 1 );
+						const int y1 = ( ( y >> 1 ) ^ ( y & 1 ? -1 : 0 ) ) + ( y & 1 );
 
-						for ( z = 0; z < 4; z++ )
+						for ( int z = 0; z < 4; z++ )
 						{
-							z1 = ( ( z >> 1 ) ^ ( z & 1 ? -1 : 0 ) ) + ( z & 1 );
+							const int z1 = ( ( z >> 1 ) ^ ( z & 1 ? -1 : 0 ) ) + ( z & 1 );
 
 							/* nudge origin */
 							const Vector3 origin = light->origin + Vector3( x1, y1, z1 ) * LIGHT_NUDGE;

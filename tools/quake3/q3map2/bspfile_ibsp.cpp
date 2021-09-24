@@ -441,7 +441,7 @@ void LoadIBSPFile( const char *filename ){
 
 	CopyLump( (bspHeader_t*) header, LUMP_LEAFS, bspLeafs );
 
-	numBSPNodes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_NODES, (void **) &bspNodes, sizeof( bspNode_t ), &allocatedBSPNodes );
+	CopyLump( (bspHeader_t*) header, LUMP_NODES, bspNodes );
 
 	numBSPLeafSurfaces = CopyLump_Allocate( (bspHeader_t*) header, LUMP_LEAFSURFACES, (void **) &bspLeafSurfaces, sizeof( bspLeafSurfaces[ 0 ] ), &allocatedBSPLeafSurfaces );
 
@@ -554,7 +554,7 @@ void WriteIBSPFile( const char *filename ){
 	AddLump( file, header->lumps[LUMP_SHADERS], bspShaders );
 	AddLump( file, header->lumps[LUMP_PLANES], bspPlanes );
 	AddLump( file, header->lumps[LUMP_LEAFS], bspLeafs );
-	AddLump( file, (bspHeader_t*) header, LUMP_NODES, bspNodes, numBSPNodes * sizeof( bspNode_t ) );
+	AddLump( file, header->lumps[LUMP_NODES], bspNodes );
 	AddLump( file, (bspHeader_t*) header, LUMP_BRUSHES, bspBrushes, numBSPBrushes * sizeof( bspBrush_t ) );
 	AddBrushSidesLump( file, header );
 	AddLump( file, (bspHeader_t*) header, LUMP_LEAFSURFACES, bspLeafSurfaces, numBSPLeafSurfaces * sizeof( bspLeafSurfaces[ 0 ] ) );

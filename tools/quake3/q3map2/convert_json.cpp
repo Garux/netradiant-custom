@@ -205,7 +205,7 @@ static void write_json( const char *directory ){
 	}
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& node : Span( bspNodes, numBSPNodes ) ){
+		for_indexed( const auto& node : bspNodes ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "planeNum", node.planeNum, all );
 			value.AddMember( "children", value_for_array( node.children, all ), all );
@@ -423,17 +423,14 @@ static void read_json( const char *directory ){
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "nodes.json" ) );
-		static std::vector<bspNode_t> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspNodes.emplace_back();
 			item.planeNum = obj.value["planeNum"].GetInt();
 			item.children[0] = obj.value["children"].operator[]( 0 ).GetInt();
 			item.children[1] = obj.value["children"].operator[]( 1 ).GetInt();
 			value_to( obj.value["minmax"].GetObj().operator[]("mins"), item.minmax.mins );
 			value_to( obj.value["minmax"].GetObj().operator[]("maxs"), item.minmax.maxs );
 		}
-		bspNodes = items.data();
-		numBSPNodes = items.size();
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "LeafSurfaces.json" ) );

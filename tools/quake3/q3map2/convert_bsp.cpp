@@ -485,10 +485,10 @@ int ScaleBSPMain( Args& args ){
 	}
 
 	/* scale nodes */
-	for ( i = 0; i < numBSPNodes; i++ )
+	for ( bspNode_t& node : bspNodes )
 	{
-		bspNodes[ i ].minmax.mins *= scale;
-		bspNodes[ i ].minmax.maxs *= scale;
+		node.minmax.mins *= scale;
+		node.minmax.maxs *= scale;
 	}
 
 	/* scale leafs */
@@ -654,10 +654,10 @@ int ShiftBSPMain( Args& args ){
 	}
 
 	/* shift nodes */
-	for ( i = 0; i < numBSPNodes; i++ )
+	for ( bspNode_t& node : bspNodes )
 	{
-		bspNodes[ i ].minmax.mins += shift;
-		bspNodes[ i ].minmax.maxs += shift;
+		node.minmax.mins += shift;
+		node.minmax.maxs += shift;
 	}
 
 	/* shift leafs */
