@@ -208,7 +208,7 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, const Vector3
 			const bspBrushSide_t& side = bspBrushSides[ brush->firstSide + i ];
 
 			/* get shader */
-			if ( side.shaderNum < 0 || side.shaderNum >= numBSPShaders ) {
+			if ( side.shaderNum < 0 || side.shaderNum >= int( bspShaders.size() ) ) {
 				continue;
 			}
 			const bspShader_t& shader = bspShaders[ side.shaderNum ];
@@ -230,7 +230,7 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, const Vector3
 		const bspBrushSide_t& side = bspBrushSides[ brush->firstSide + i ];
 
 		/* get shader */
-		if ( side.shaderNum < 0 || side.shaderNum >= numBSPShaders ) {
+		if ( side.shaderNum < 0 || side.shaderNum >= int( bspShaders.size() ) ) {
 			continue;
 		}
 		const bspShader_t& shader = bspShaders[ side.shaderNum ];
@@ -332,7 +332,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 			const bspBrushSide_t& side = bspBrushSides[ brush->firstSide + i ];
 
 			/* get shader */
-			if ( side.shaderNum < 0 || side.shaderNum >= numBSPShaders ) {
+			if ( side.shaderNum < 0 || side.shaderNum >= int( bspShaders.size() ) ) {
 				continue;
 			}
 			const bspShader_t& shader = bspShaders[ side.shaderNum ];
@@ -354,7 +354,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 		const bspBrushSide_t& side = bspBrushSides[ brush->firstSide + i ];
 
 		/* get shader */
-		if ( side.shaderNum < 0 || side.shaderNum >= numBSPShaders ) {
+		if ( side.shaderNum < 0 || side.shaderNum >= int( bspShaders.size() ) ) {
 			continue;
 		}
 		const bspShader_t& shader = bspShaders[ side.shaderNum ];
@@ -681,7 +681,7 @@ for ( i = 0; i < brush->numSides; i++ )
 	side = &bspBrushSides[ brush->firstSide + i ];
 
 	/* get shader */
-	if ( side->shaderNum < 0 || side->shaderNum >= numBSPShaders ) {
+	if ( side->shaderNum < 0 || side->shaderNum >= int( bspShaders.size() ) ) {
 		continue;
 	}
 	shader = &bspShaders[ side->shaderNum ];
@@ -758,7 +758,7 @@ static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, const Vector3&
 	}
 
 	/* get shader */
-	if ( ds->shaderNum < 0 || ds->shaderNum >= numBSPShaders ) {
+	if ( ds->shaderNum < 0 || ds->shaderNum >= int( bspShaders.size() ) ) {
 		return;
 	}
 	shader = &bspShaders[ ds->shaderNum ];

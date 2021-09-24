@@ -237,7 +237,7 @@ int pk3BSPMain( Args& args ){
 	/* extract map name */
 	const CopiedString nameOFmap( PathFilename( source ) );
 
-	std::vector<bool> drawsurfSHs( numBSPShaders, false );
+	std::vector<bool> drawsurfSHs( bspShaders.size(), false );
 
 	for ( i = 0; i < numBSPDrawSurfaces; ++i ){
 		drawsurfSHs[ bspDrawSurfaces[i].shaderNum ] = true;
@@ -250,7 +250,7 @@ int pk3BSPMain( Args& args ){
 	StrList* pk3Textures = StrList_allocate( 1024 );
 	StrList* pk3Videos = StrList_allocate( 1024 );
 
-	for ( i = 0; i < numBSPShaders; ++i ){
+	for ( size_t i = 0; i < bspShaders.size(); ++i ){
 		if ( drawsurfSHs[i] && !( bspShaders[i].surfaceFlags & 0x80 /* Q_SURF_NORAW */ ) ){
 			res2list( pk3Shaders, bspShaders[i].shader );
 			//Sys_Printf( "%s\n", bspShaders[i].shader );
@@ -909,13 +909,13 @@ int repackBSPMain( Args& args ){
 		/* extract map name */
 		const CopiedString nameOFmap( PathFilename( source ) );
 
-		std::vector<bool> drawsurfSHs( numBSPShaders, false );
+		std::vector<bool> drawsurfSHs( bspShaders.size(), false );
 
 		for ( i = 0; i < numBSPDrawSurfaces; ++i ){
 			drawsurfSHs[ bspDrawSurfaces[i].shaderNum ] = true;
 		}
 
-		for ( i = 0; i < numBSPShaders; ++i ){
+		for ( size_t i = 0; i < bspShaders.size(); ++i ){
 			if ( drawsurfSHs[i] && !( bspShaders[i].surfaceFlags & 0x80 /* Q_SURF_NORAW */ ) ){
 				res2list( pk3Shaders, bspShaders[i].shader );
 			}
@@ -976,122 +976,23 @@ int repackBSPMain( Args& args ){
 		for ( i = pk3SoundsNold; i < pk3Sounds->n; ++i ){
 			Sys_Printf( "%s\n", pk3Sounds->s[i] );
 		}
-		/* free bsp data */
-/*
-		if ( bspDrawVerts != 0 ) {
-			free( bspDrawVerts );
-			bspDrawVerts = NULL;
-			//numBSPDrawVerts = 0;
-			Sys_Printf( "freed BSPDrawVerts\n" );
-		}
-		if ( bspDrawSurfaces != 0 ) {
-			Sys_Printf( "freed bspDrawSurfaces\n" );
-		}
-*/		free( bspDrawSurfaces );
+		/* free partially loaded bsp data */
+		free( bspDrawSurfaces );
 		bspDrawSurfaces = NULL;
 		numBSPDrawSurfaces = 0;
-/*		if ( bspLightBytes != 0 ) {
-			free( bspLightBytes );
-			bspLightBytes = NULL;
-			//numBSPLightBytes = 0;
-			Sys_Printf( "freed BSPLightBytes\n" );
-		}
-		if ( bspGridPoints != 0 ) {
-			free( bspGridPoints );
-			bspGridPoints = NULL;
-			//numBSPGridPoints = 0;
-			Sys_Printf( "freed BSPGridPoints\n" );
-		}
-		if ( bspPlanes != 0 ) {
-			free( bspPlanes );
-			bspPlanes = NULL;
-			Sys_Printf( "freed bspPlanes\n" );
-			//numBSPPlanes = 0;
-			//allocatedBSPPlanes = 0;
-		}
-		if ( bspBrushes != 0 ) {
-			free( bspBrushes );
-			bspBrushes = NULL;
-			Sys_Printf( "freed bspBrushes\n" );
-			//numBSPBrushes = 0;
-			//allocatedBSPBrushes = 0;
-		}
-*/		{
-			entities.clear();
-			//Sys_Printf( "freed entities\n" );
-			numBSPEntities = 0;
-		}
-/*		if ( bspModels != 0 ) {
-			free( bspModels );
-			bspModels = NULL;
-			Sys_Printf( "freed bspModels\n" );
-		}
-		if ( bspShaders != 0 ) {
-			Sys_Printf( "freed bspShaders\n" );
-		}
-*/		free( bspShaders );
-		bspShaders = NULL;
-		numBSPShaders = 0;
-		allocatedBSPShaders = 0;
-/*		if ( bspEntData != 0 ) {
-			Sys_Printf( "freed bspEntData\n" );
-		}
-*/		free( bspEntData );
+
+		entities.clear();
+		numBSPEntities = 0;
+
+		bspShaders.clear();
+
+		free( bspEntData );
 		bspEntData = NULL;
 		bspEntDataSize = 0;
 		allocatedBSPEntData = 0;
-/*		if ( bspNodes != 0 ) {
-			free( bspNodes );
-			bspNodes = NULL;
-			Sys_Printf( "freed bspNodes\n" );
-			//numBSPNodes = 0;
-			//allocatedBSPNodes = 0;
-		}
-		if ( bspDrawIndexes != 0 ) {
-			free( bspDrawIndexes );
-			bspDrawIndexes = NULL;
-			Sys_Printf( "freed bspDrawIndexes\n" );
-			//numBSPDrawIndexes = 0;
-			//allocatedBSPDrawIndexes = 0;
-		}
-		if ( bspLeafSurfaces != 0 ) {
-			free( bspLeafSurfaces );
-			bspLeafSurfaces = NULL;
-			Sys_Printf( "freed bspLeafSurfaces\n" );
-			//numBSPLeafSurfaces = 0;
-			//allocatedBSPLeafSurfaces = 0;
-		}
-		if ( bspLeafBrushes != 0 ) {
-			free( bspLeafBrushes );
-			bspLeafBrushes = NULL;
-			Sys_Printf( "freed bspLeafBrushes\n" );
-			//numBSPLeafBrushes = 0;
-			//allocatedBSPLeafBrushes = 0;
-		}
-		if ( bspBrushSides != 0 ) {
-			free( bspBrushSides );
-			bspBrushSides = NULL;
-			Sys_Printf( "freed bspBrushSides\n" );
-			numBSPBrushSides = 0;
-			allocatedBSPBrushSides = 0;
-		}
-		if ( numBSPFogs != 0 ) {
-			Sys_Printf( "freed numBSPFogs\n" );
-		}
-*/		numBSPFogs = 0;
-/*		if ( numBSPAds != 0 ) {
-			Sys_Printf( "freed numBSPAds\n" );
-			numBSPAds = 0;
-		}
-		if ( numBSPLeafs != 0 ) {
-			Sys_Printf( "freed numBSPLeafs\n" );
-			numBSPLeafs = 0;
-		}
-		if ( numBSPVisBytes != 0 ) {
-			Sys_Printf( "freed numBSPVisBytes\n" );
-			numBSPVisBytes = 0;
-		}
-*/	}
+
+		numBSPFogs = 0;
+	}
 
 	if( analyze )
 		return 0;

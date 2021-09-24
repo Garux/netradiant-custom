@@ -41,7 +41,7 @@
 
 int numLightmapsASE = 0;
 
-static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const int* lmIndices ){
+static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const std::vector<int>& lmIndices ){
 	int i, v, face, a, b, c;
 	bspDrawVert_t   *dv;
 	char name[ 1024 ];
@@ -181,7 +181,7 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
    exports a bsp model to an ase chunk
  */
 
-static void ConvertModel( FILE *f, int modelNum, const Vector3& origin, const int* lmIndices ){
+static void ConvertModel( FILE *f, int modelNum, const Vector3& origin, const std::vector<int>& lmIndices ){
 	const bspModel_t& model = bspModels[ modelNum ];
 
 	/* go through each drawsurf in the model */
@@ -238,13 +238,13 @@ static void ConvertModel( FILE *f, int modelNum, const Vector3& origin, const in
     }
  */
 
-static void ConvertShader( FILE *f, bspShader_t *shader, int shaderNum ){
+static void ConvertShader( FILE *f, const bspShader_t& shader ){
 	shaderInfo_t    *si;
 	char            *c, filename[ 1024 ];
 
 
 	/* get shader */
-	si = ShaderInfoForShader( shader->shader );
+	si = ShaderInfoForShader( shader.shader );
 	if ( si == NULL ) {
 		Sys_Warning( "NULL shader in BSP\n" );
 		return;
@@ -263,21 +263,21 @@ static void ConvertShader( FILE *f, bspShader_t *shader, int shaderNum ){
 		}
 
 	/* print shader info */
-	fprintf( f, "\t*MATERIAL\t%d\t{\r\n", shaderNum );
-	fprintf( f, "\t\t*MATERIAL_NAME\t\"%s\"\r\n", shader->shader );
+	fprintf( f, "\t*MATERIAL\t%d\t{\r\n", int( &shader - bspShaders.data() ) );
+	fprintf( f, "\t\t*MATERIAL_NAME\t\"%s\"\r\n", shader.shader );
 	fprintf( f, "\t\t*MATERIAL_CLASS\t\"Standard\"\r\n" );
 	fprintf( f, "\t\t*MATERIAL_DIFFUSE\t%f\t%f\t%f\r\n", si->color[ 0 ], si->color[ 1 ], si->color[ 2 ] );
 	fprintf( f, "\t\t*MATERIAL_SHADING Phong\r\n" );
 
 	/* print map info */
 	fprintf( f, "\t\t*MAP_DIFFUSE\t{\r\n" );
-	fprintf( f, "\t\t\t*MAP_NAME\t\"%s\"\r\n", shader->shader );
+	fprintf( f, "\t\t\t*MAP_NAME\t\"%s\"\r\n", shader.shader );
 	fprintf( f, "\t\t\t*MAP_CLASS\t\"Bitmap\"\r\n" );
 	fprintf( f, "\t\t\t*MAP_SUBNO\t1\r\n" );
 	fprintf( f, "\t\t\t*MAP_AMOUNT\t1.0\r\n" );
 	fprintf( f, "\t\t\t*MAP_TYPE\tScreen\r\n" );
 	if ( shadersAsBitmap ) {
-		fprintf( f, "\t\t\t*BITMAP\t\"%s\"\r\n", shader->shader );
+		fprintf( f, "\t\t\t*BITMAP\t\"%s\"\r\n", shader.shader );
 	}
 	else{
 		fprintf( f, "\t\t\t*BITMAP\t\"..\\%s\"\r\n", filename );
@@ -324,9 +324,8 @@ static void ConvertLightmap( FILE *f, const char *base, int lightmapNum ){
 int ConvertBSPToASE( char *bspName ){
 	int modelNum;
 	FILE            *f;
-	bspShader_t     *shader;
 	entity_t        *e;
-	int lmIndices[ numBSPShaders ];
+	std::vector<int> lmIndices( bspShaders.size(), -1 );
 
 
 	/* note it */
@@ -365,11 +364,10 @@ int ConvertBSPToASE( char *bspName ){
 	}
 	else
 	{
-		fprintf( f, "\t*MATERIAL_COUNT\t%d\r\n", numBSPShaders );
-		for ( int i = 0; i < numBSPShaders; i++ )
+		fprintf( f, "\t*MATERIAL_COUNT\t%zu\r\n", bspShaders.size() );
+		for ( const bspShader_t& shader : bspShaders )
 		{
-			shader = &bspShaders[ i ];
-			ConvertShader( f, shader, i );
+			ConvertShader( f, shader );
 		}
 	}
 	fprintf( f, "}\r\n" );

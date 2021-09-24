@@ -44,7 +44,7 @@ int lastLightmap = -1;
 int objVertexCount = 0;
 int objLastShaderNum = -1;
 
-static void ConvertSurfaceToOBJ( FILE *f, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const int* lmIndices ){
+static void ConvertSurfaceToOBJ( FILE *f, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const std::vector<int>& lmIndices ){
 	int i, v, a, b, c;
 	bspDrawVert_t   *dv;
 
@@ -127,7 +127,7 @@ static void ConvertSurfaceToOBJ( FILE *f, int modelNum, bspDrawSurface_t *ds, in
    exports a bsp model to an ase chunk
  */
 
-static void ConvertModelToOBJ( FILE *f, int modelNum, const Vector3& origin, const int* lmIndices ){
+static void ConvertModelToOBJ( FILE *f, int modelNum, const Vector3& origin, const std::vector<int>& lmIndices ){
 	const bspModel_t& model = bspModels[ modelNum ];
 
 	/* go through each drawsurf in the model */
@@ -145,13 +145,13 @@ static void ConvertModelToOBJ( FILE *f, int modelNum, const Vector3& origin, con
    exports a bsp shader to an ase chunk
  */
 
-static void ConvertShaderToMTL( FILE *f, bspShader_t *shader, int shaderNum ){
+static void ConvertShaderToMTL( FILE *f, const bspShader_t& shader ){
 	shaderInfo_t    *si;
 	char filename[ 1024 ];
 
 
 	/* get shader */
-	si = ShaderInfoForShader( shader->shader );
+	si = ShaderInfoForShader( shader.shader );
 	if ( si == NULL ) {
 		Sys_Warning( "NULL shader in BSP\n" );
 		return;
@@ -172,10 +172,10 @@ static void ConvertShaderToMTL( FILE *f, bspShader_t *shader, int shaderNum ){
 	*/
 
 	/* print shader info */
-	fprintf( f, "newmtl %s\r\n", shader->shader );
+	fprintf( f, "newmtl %s\r\n", shader.shader );
 	fprintf( f, "Kd %f %f %f\r\n", si->color[ 0 ], si->color[ 1 ], si->color[ 2 ] );
 	if ( shadersAsBitmap ) {
-		fprintf( f, "map_Kd %s\r\n", shader->shader );
+		fprintf( f, "map_Kd %s\r\n", shader.shader );
 	}
 	else{
 		/* blender hates this, so let's not do it
@@ -218,10 +218,7 @@ int Convert_CountLightmaps( const char* dirname ){
 }
 
 /* manage external lms, possibly referenced by q3map2_%mapname%.shader */
-void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
-	for( int i = 0; i < numBSPShaders; ++i ) // initialize
-		lmIndices[i] = -1;
-
+void Convert_ReferenceLightmaps( const char* base, std::vector<int>& lmIndices ){
 	char shaderfile[256];
 	sprintf( shaderfile, "%s/q3map2_%s.shader", g_game->shaderPath, base );
 	LoadScriptFile( shaderfile, 0 );
@@ -269,7 +266,7 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 							int okcount = 0;
 							if( sscanf( token + strlen( token ) - ( strlen( EXTERNAL_LIGHTMAP ) + 1 ), "/" EXTERNAL_LIGHTMAP "%n", &lmindex, &okcount )
 							    && okcount == ( strlen( EXTERNAL_LIGHTMAP ) + 1 ) ){
-								for ( int i = 0; i < numBSPShaders; ++i ){ // find bspShaders[i]<->lmindex pair
+								for ( size_t i = 0; i < bspShaders.size(); ++i ){ // find bspShaders[i]<->lmindex pair
 									if( strEqual( bspShaders[i].shader, shadername ) ){
 										lmIndices[i] = lmindex;
 										break;
@@ -295,10 +292,9 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 int ConvertBSPToOBJ( char *bspName ){
 	int modelNum;
 	FILE            *f, *fmtl;
-	bspShader_t     *shader;
 	entity_t        *e;
 	const char      *key;
-	int lmIndices[ numBSPShaders ];
+	std::vector<int> lmIndices( bspShaders.size(), -1 );
 
 
 	/* note it */
@@ -328,10 +324,9 @@ int ConvertBSPToOBJ( char *bspName ){
 	}
 	else
 	{
-		for ( int i = 0; i < numBSPShaders; i++ )
+		for ( const bspShader_t& shader : bspShaders )
 		{
-			shader = &bspShaders[ i ];
-			ConvertShaderToMTL( fmtl, shader, i );
+			ConvertShaderToMTL( fmtl, shader );
 		}
 	}
 

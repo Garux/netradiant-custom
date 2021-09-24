@@ -144,7 +144,7 @@ static void write_json( const char *directory ){
 
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& shader : Span( bspShaders, numBSPShaders ) ){
+		for_indexed( const auto& shader : bspShaders ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "shader", rapidjson::StringRef( shader.shader ), all );
 			value.AddMember( "surfaceFlags", shader.surfaceFlags, all ); ///////!!!!!!! decompose bits?
@@ -378,15 +378,12 @@ inline rapidjson::Document load_json( const char *fileName ){
 static void read_json( const char *directory ){
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "shaders.json" ) );
-		static std::vector<bspShader_t> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspShaders.emplace_back();
 			strcpy( item.shader, obj.value["shader"].GetString() );
 			item.surfaceFlags = obj.value["surfaceFlags"].GetInt();
 			item.contentFlags = obj.value["contentFlags"].GetInt();
 		}
-		bspShaders = items.data();
-		numBSPShaders = items.size();
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "models.json" ) );

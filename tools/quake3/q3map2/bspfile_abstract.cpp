@@ -169,18 +169,18 @@ void SwapBSPFile( void ){
 	SwapBlock( bspModels );
 
 	/* shaders (don't swap the name) */
-	for ( i = 0; i < numBSPShaders; i++ )
+	for ( bspShader_t& shader : bspShaders )
 	{
 		if ( doingBSP ){
-			si = ShaderInfoForShader( bspShaders[ i ].shader );
+			si = ShaderInfoForShader( shader.shader );
 			if ( !strEmptyOrNull( si->remapShader ) ) {
 				// copy and clear the rest of memory // check for overflow by String64
 				const auto remap = String64()( si->remapShader );
-				strncpy( bspShaders[ i ].shader, remap, sizeof( bspShaders[ i ].shader ) );
+				strncpy( shader.shader, remap, sizeof( shader.shader ) );
 			}
 		}
-		bspShaders[ i ].contentFlags = LittleLong( bspShaders[ i ].contentFlags );
-		bspShaders[ i ].surfaceFlags = LittleLong( bspShaders[ i ].surfaceFlags );
+		shader.contentFlags = LittleLong( shader.contentFlags );
+		shader.surfaceFlags = LittleLong( shader.surfaceFlags );
 	}
 
 	/* planes */
@@ -388,13 +388,12 @@ void PartialLoadBSPFile( const char *filename ){
 	PartialLoadIBSPFile( filename );
 
 	/* PartialSwapBSPFile() */
-	int i;
 
 	/* shaders (don't swap the name) */
-	for ( i = 0; i < numBSPShaders; i++ )
+	for ( bspShader_t& shader : bspShaders )
 	{
-		bspShaders[ i ].contentFlags = LittleLong( bspShaders[ i ].contentFlags );
-		bspShaders[ i ].surfaceFlags = LittleLong( bspShaders[ i ].surfaceFlags );
+		shader.contentFlags = LittleLong( shader.contentFlags );
+		shader.surfaceFlags = LittleLong( shader.surfaceFlags );
 	}
 
 	/* drawsurfs */
@@ -402,7 +401,7 @@ void PartialLoadBSPFile( const char *filename ){
 	SwapBlock( (int*) bspDrawSurfaces, numBSPDrawSurfaces * sizeof( bspDrawSurfaces[ 0 ] ) );
 
 	/* fogs */
-	for ( i = 0; i < numBSPFogs; i++ )
+	for ( int i = 0; i < numBSPFogs; i++ )
 	{
 		bspFogs[ i ].brushNum = LittleLong( bspFogs[ i ].brushNum );
 		bspFogs[ i ].visibleSide = LittleLong( bspFogs[ i ].visibleSide );
@@ -465,8 +464,8 @@ void PrintBSPFileSizes( void ){
 	/* print various and sundry bits */
 	Sys_Printf( "%9zu models        %9zu\n",
 	            bspModels.size(), bspModels.size() * sizeof( bspModels[0] ) );
-	Sys_Printf( "%9d shaders       %9d\n",
-	            numBSPShaders, (int) ( numBSPShaders * sizeof( bspShader_t ) ) );
+	Sys_Printf( "%9zu shaders       %9zu\n",
+	            bspShaders.size(), bspShaders.size() * sizeof( bspShaders[0] ) );
 	Sys_Printf( "%9d brushes       %9d\n",
 	            numBSPBrushes, (int) ( numBSPBrushes * sizeof( bspBrush_t ) ) );
 	Sys_Printf( "%9d brushsides    %9d *\n",

@@ -23,6 +23,6 @@
 #define INCLUDED_CONVERT_OBJ_H
 
 int Convert_CountLightmaps( const char* dirname );
-void Convert_ReferenceLightmaps( const char* base, int* lmIndices );
+void Convert_ReferenceLightmaps( const char* base, std::vector<int>& lmIndices );
 
 #endif

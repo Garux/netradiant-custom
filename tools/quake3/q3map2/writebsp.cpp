@@ -39,7 +39,6 @@
  */
 
 int EmitShader( const char *shader, const int *contentFlags, const int *surfaceFlags ){
-	int i;
 	shaderInfo_t    *si;
 
 
@@ -49,7 +48,7 @@ int EmitShader( const char *shader, const int *contentFlags, const int *surfaceF
 	}
 
 	/* try to find an existing shader */
-	for ( i = 0; i < numBSPShaders; i++ )
+	for ( size_t i = 0; i < bspShaders.size(); ++i )
 	{
 		/* ydnar: handle custom surface/content flags */
 		if ( surfaceFlags != NULL && bspShaders[ i ].surfaceFlags != *surfaceFlags ) {
@@ -70,27 +69,17 @@ int EmitShader( const char *shader, const int *contentFlags, const int *surfaceF
 		}
 	}
 
-	// i == numBSPShaders
-
 	/* get shaderinfo */
 	si = ShaderInfoForShader( shader );
 
 	/* emit a new shader */
-	AUTOEXPAND_BY_REALLOC_BSP( Shaders, 1024 );
+	const int i = bspShaders.size(); // store index
+	bspShader_t& bspShader = bspShaders.emplace_back();
 
-	numBSPShaders++;
-	// copy and clear the rest of memory
-	strncpy( bspShaders[ i ].shader, si->shader, sizeof( bspShaders[ i ].shader ) );
-	bspShaders[ i ].surfaceFlags = si->surfaceFlags;
-	bspShaders[ i ].contentFlags = si->contentFlags;
-
+	strcpy( bspShader.shader, si->shader );
 	/* handle custom content/surface flags */
-	if ( surfaceFlags != NULL ) {
-		bspShaders[ i ].surfaceFlags = *surfaceFlags;
-	}
-	if ( contentFlags != NULL ) {
-		bspShaders[ i ].contentFlags = *contentFlags;
-	}
+	bspShader.surfaceFlags = ( surfaceFlags != NULL )? *surfaceFlags : si->surfaceFlags;
+	bspShader.contentFlags = ( contentFlags != NULL )? *contentFlags : si->contentFlags;
 
 	/* recursively emit any damage shaders */
 	if ( !strEmptyOrNull( si->damageShader ) ) {
@@ -98,7 +87,7 @@ int EmitShader( const char *shader, const int *contentFlags, const int *surfaceF
 		EmitShader( si->damageShader, NULL, NULL );
 	}
 
-	/* return it */
+	/* return index */
 	return i;
 }
 

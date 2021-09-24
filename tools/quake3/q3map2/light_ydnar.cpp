@@ -2942,7 +2942,6 @@ void SetupBrushesFlags( int mask_any, int test_any, int mask_all, int test_all )
 	int compileFlags, allCompileFlags;
 	bspBrush_t      *brush;
 	bspBrushSide_t  *side;
-	bspShader_t     *shader;
 	shaderInfo_t    *si;
 
 
@@ -2972,10 +2971,9 @@ void SetupBrushesFlags( int mask_any, int test_any, int mask_all, int test_all )
 		{
 			/* do bsp shader calculations */
 			side = &bspBrushSides[ brush->firstSide + j ];
-			shader = &bspShaders[ side->shaderNum ];
 
 			/* get shader info */
-			si = ShaderInfoForShaderNull( shader->shader );
+			si = ShaderInfoForShaderNull( bspShaders[ side->shaderNum ].shader );
 			if ( si == NULL ) {
 				continue;
 			}
@@ -3236,7 +3234,6 @@ int ShaderForPointInLeaf( const Vector3& point, int leafNum, float epsilon, int 
 	bspLeaf_t           *leaf;
 	bspBrush_t      *brush;
 	bspBrushSide_t  *side;
-	bspShader_t     *shader;
 	int allSurfaceFlags, allContentFlags;
 
 
@@ -3271,9 +3268,9 @@ int ShaderForPointInLeaf( const Vector3& point, int leafNum, float epsilon, int 
 			}
 			else
 			{
-				shader = &bspShaders[ side->shaderNum ];
-				allSurfaceFlags |= shader->surfaceFlags;
-				allContentFlags |= shader->contentFlags;
+				const bspShader_t& shader = bspShaders[ side->shaderNum ];
+				allSurfaceFlags |= shader.surfaceFlags;
+				allContentFlags |= shader.contentFlags;
 			}
 		}
 

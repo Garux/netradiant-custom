@@ -926,7 +926,6 @@ struct CompareSurfaceInfo
 
 void SetupSurfaceLightmaps( void ){
 	int i, j, k, s,num, num2;
-	bspModel_t          *model;
 	bspLeaf_t           *leaf;
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info, *info2;

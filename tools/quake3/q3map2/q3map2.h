@@ -2336,9 +2336,7 @@ Q_EXTERN std::vector<entity_t> entities;
 
 Q_EXTERN std::vector<bspModel_t> bspModels;
 
-Q_EXTERN int numBSPShaders Q_ASSIGN( 0 );
-Q_EXTERN int allocatedBSPShaders Q_ASSIGN( 0 );
-Q_EXTERN bspShader_t*       bspShaders Q_ASSIGN( 0 );
+Q_EXTERN std::vector<bspShader_t> bspShaders;
 
 Q_EXTERN int bspEntDataSize Q_ASSIGN( 0 );
 Q_EXTERN int allocatedBSPEntData Q_ASSIGN( 0 );
