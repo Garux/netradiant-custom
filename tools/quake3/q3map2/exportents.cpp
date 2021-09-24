@@ -50,7 +50,7 @@ void ExportEntities( void ){
 	Sys_FPrintf( SYS_VRB, "--- ExportEntities ---\n" );
 
 	/* sanity check */
-	if ( bspEntData == NULL || bspEntDataSize == 0 ) {
+	if ( bspEntData.empty() ) {
 		Sys_Warning( "No BSP entity data. aborting...\n" );
 		return;
 	}
@@ -58,10 +58,10 @@ void ExportEntities( void ){
 	/* write it */
 	auto filename = StringOutputStream( 256 )( PathExtensionless( source ), ".ent" );
 	Sys_Printf( "Writing %s\n", filename.c_str() );
-	Sys_FPrintf( SYS_VRB, "(%d bytes)\n", bspEntDataSize );
+	Sys_FPrintf( SYS_VRB, "(%zu bytes)\n", bspEntData.size() );
 	FILE *file = SafeOpenWrite( filename, "wt" );
 
-	fprintf( file, "%s\n", bspEntData );
+	fprintf( file, "%s\n", bspEntData.data() );
 	fclose( file );
 }
 

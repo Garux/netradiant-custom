@@ -260,7 +260,7 @@ void LoadRBSPFile( const char *filename ){
 	bspLightBytes = safe_malloc( numBSPLightBytes );
 	CopyLump( (bspHeader_t*) header, LUMP_LIGHTMAPS, bspLightBytes, 1 );
 
-	bspEntDataSize = CopyLump_Allocate( (bspHeader_t*) header, LUMP_ENTITIES, (void **) &bspEntData, 1, &allocatedBSPEntData );
+	CopyLump( (bspHeader_t*) header, LUMP_ENTITIES, bspEntData );
 
 	CopyLightGridLumps( header );
 
@@ -318,7 +318,7 @@ void WriteRBSPFile( const char *filename ){
 	AddLump( file, (bspHeader_t*) header, LUMP_VISIBILITY, bspVisBytes, numBSPVisBytes );
 	AddLump( file, (bspHeader_t*) header, LUMP_LIGHTMAPS, bspLightBytes, numBSPLightBytes );
 	AddLightGridLumps( file, header );
-	AddLump( file, (bspHeader_t*) header, LUMP_ENTITIES, bspEntData, bspEntDataSize );
+	AddLump( file, header->lumps[LUMP_ENTITIES], bspEntData );
 	AddLump( file, (bspHeader_t*) header, LUMP_FOGS, bspFogs, numBSPFogs * sizeof( bspFog_t ) );
 	AddLump( file, (bspHeader_t*) header, LUMP_DRAWINDEXES, bspDrawIndexes, numBSPDrawIndexes * sizeof( bspDrawIndexes[ 0 ] ) );
 

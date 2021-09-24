@@ -474,8 +474,8 @@ void PrintBSPFileSizes( void ){
 	            numBSPFogs, (int) ( numBSPFogs * sizeof( bspFog_t ) ) );
 	Sys_Printf( "%9d planes        %9d\n",
 	            numBSPPlanes, (int) ( numBSPPlanes * sizeof( bspPlane_t ) ) );
-	Sys_Printf( "%9zu entdata       %9d\n",
-	            entities.size(), bspEntDataSize );
+	Sys_Printf( "%9zu entdata       %9zu\n",
+	            entities.size(), bspEntData.size() );
 	Sys_Printf( "\n" );
 
 	Sys_Printf( "%9d nodes         %9d\n",
@@ -597,7 +597,7 @@ bool ParseEntity( void ){
 
 void ParseEntities( void ){
 	entities.clear();
-	ParseFromMemory( bspEntData, bspEntDataSize );
+	ParseFromMemory( bspEntData.data(), bspEntData.size() );
 	while ( ParseEntity() ) ;
 
 	/* ydnar: set number of bsp entities in case a map is loaded on top */
@@ -666,9 +666,7 @@ void UnparseEntities( void ){
 	}
 
 	/* save out */
-	bspEntDataSize = data.end() - data.begin() + 1;
-	AUTOEXPAND_BY_REALLOC( bspEntData, bspEntDataSize, allocatedBSPEntData, 1024 );
-	strcpy( bspEntData, data );
+	bspEntData = { data.begin(), data.end() + 1 }; // include '\0'
 }
 
 

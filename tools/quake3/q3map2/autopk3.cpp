@@ -986,10 +986,7 @@ int repackBSPMain( Args& args ){
 
 		bspShaders.clear();
 
-		free( bspEntData );
-		bspEntData = NULL;
-		bspEntDataSize = 0;
-		allocatedBSPEntData = 0;
+		bspEntData.clear();
 
 		numBSPFogs = 0;
 	}
