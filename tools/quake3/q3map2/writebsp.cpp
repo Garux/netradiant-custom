@@ -100,16 +100,15 @@ int EmitShader( const char *shader, const int *contentFlags, const int *surfaceF
  */
 
 void EmitPlanes( void ){
+	bspPlanes.reserve( mapplanes.size() );
 	/* walk plane list */
-	for ( size_t i = 0; i < mapplanes.size(); ++i )
+	for ( const plane_t& plane : mapplanes )
 	{
-		AUTOEXPAND_BY_REALLOC_BSP( Planes, 1024 );
-		bspPlanes[ numBSPPlanes ] = mapplanes[i].plane;
-		numBSPPlanes++;
+		bspPlanes.push_back( plane.plane );
 	}
 
 	/* emit some statistics */
-	Sys_FPrintf( SYS_VRB, "%9d BSP planes\n", numBSPPlanes );
+	Sys_FPrintf( SYS_VRB, "%9zu BSP planes\n", bspPlanes.size() );
 }
 
 

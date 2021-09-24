@@ -173,7 +173,7 @@ static void write_json( const char *directory ){
 	}
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& plane : Span( bspPlanes, numBSPPlanes ) ){
+		for_indexed( const auto& plane : bspPlanes ){
 			rapidjson::Value value( rapidjson::kArrayType );
 			value.PushBack( plane.a, all );
 			value.PushBack( plane.b, all );
@@ -399,16 +399,13 @@ static void read_json( const char *directory ){
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "planes.json" ) );
-		static std::vector<bspPlane_t> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspPlanes.emplace_back();
 			item.a = obj.value[0].GetFloat();
 			item.b = obj.value[1].GetFloat();
 			item.c = obj.value[2].GetFloat();
 			item.d = obj.value[3].GetFloat();
 		}
-		bspPlanes = items.data();
-		numBSPPlanes = items.size();
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "leafs.json" ) );

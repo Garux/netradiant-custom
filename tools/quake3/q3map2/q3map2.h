@@ -2342,9 +2342,7 @@ Q_EXTERN std::vector<char> bspEntData;
 
 Q_EXTERN std::vector<bspLeaf_t> bspLeafs; // MAX_MAP_LEAFS
 
-Q_EXTERN int numBSPPlanes Q_ASSIGN( 0 );
-Q_EXTERN int allocatedBSPPlanes Q_ASSIGN( 0 );
-Q_EXTERN bspPlane_t         *bspPlanes;
+Q_EXTERN std::vector<bspPlane_t> bspPlanes;
 
 Q_EXTERN int numBSPNodes Q_ASSIGN( 0 );
 Q_EXTERN int allocatedBSPNodes Q_ASSIGN( 0 );

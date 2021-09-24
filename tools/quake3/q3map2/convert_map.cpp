@@ -823,8 +823,8 @@ static void ConvertModel( FILE *f, const bspModel_t& model, const Vector3& origi
 
 
 	/* convert bsp planes to map planes */
-	mapplanes.resize( numBSPPlanes );
-	for ( i = 0; i < numBSPPlanes; i++ )
+	mapplanes.resize( bspPlanes.size() );
+	for ( size_t i = 0; i < bspPlanes.size(); ++i )
 	{
 		plane_t& plane = mapplanes[i];
 		plane.plane = bspPlanes[ i ];

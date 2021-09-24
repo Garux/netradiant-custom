@@ -184,7 +184,7 @@ void SwapBSPFile( void ){
 	}
 
 	/* planes */
-	SwapBlock( (int*) bspPlanes, numBSPPlanes * sizeof( bspPlanes[ 0 ] ) );
+	SwapBlock( bspPlanes );
 
 	/* nodes */
 	SwapBlock( (int*) bspNodes, numBSPNodes * sizeof( bspNodes[ 0 ] ) );
@@ -472,8 +472,8 @@ void PrintBSPFileSizes( void ){
 	            numBSPBrushSides, (int) ( numBSPBrushSides * sizeof( bspBrushSide_t ) ) );
 	Sys_Printf( "%9d fogs          %9d\n",
 	            numBSPFogs, (int) ( numBSPFogs * sizeof( bspFog_t ) ) );
-	Sys_Printf( "%9d planes        %9d\n",
-	            numBSPPlanes, (int) ( numBSPPlanes * sizeof( bspPlane_t ) ) );
+	Sys_Printf( "%9zu planes        %9zu\n",
+	            bspPlanes.size(), bspPlanes.size() * sizeof( bspPlanes[0] ) );
 	Sys_Printf( "%9zu entdata       %9zu\n",
 	            entities.size(), bspEntData.size() );
 	Sys_Printf( "\n" );

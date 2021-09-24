@@ -228,7 +228,7 @@ void LoadRBSPFile( const char *filename ){
 
 	CopyLump( (bspHeader_t*) header, LUMP_MODELS, bspModels );
 
-	numBSPPlanes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_PLANES, (void **) &bspPlanes, sizeof( bspPlane_t ), &allocatedBSPPlanes );
+	CopyLump( (bspHeader_t*) header, LUMP_PLANES, bspPlanes );
 
 	CopyLump( (bspHeader_t*) header, LUMP_LEAFS, bspLeafs );
 
@@ -305,7 +305,7 @@ void WriteRBSPFile( const char *filename ){
 
 	/* add lumps */
 	AddLump( file, header->lumps[LUMP_SHADERS], bspShaders );
-	AddLump( file, (bspHeader_t*) header, LUMP_PLANES, bspPlanes, numBSPPlanes * sizeof( bspPlane_t ) );
+	AddLump( file, header->lumps[LUMP_PLANES], bspPlanes );
 	AddLump( file, header->lumps[LUMP_LEAFS], bspLeafs );
 	AddLump( file, (bspHeader_t*) header, LUMP_NODES, bspNodes, numBSPNodes * sizeof( bspNode_t ) );
 	AddLump( file, (bspHeader_t*) header, LUMP_BRUSHES, bspBrushes, numBSPBrushes * sizeof( bspBrush_t ) );

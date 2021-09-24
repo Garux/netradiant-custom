@@ -552,19 +552,19 @@ int ScaleBSPMain( Args& args ){
 
 	/* scale planes */
 	if ( uniform ) {
-		for ( i = 0; i < numBSPPlanes; i++ )
+		for ( bspPlane_t& plane : bspPlanes )
 		{
-			bspPlanes[ i ].dist() *= scale[0];
+			plane.dist() *= scale[0];
 		}
 	}
 	else
 	{
-		for ( i = 0; i < numBSPPlanes; i++ )
+		for ( bspPlane_t& plane : bspPlanes )
 		{
-			bspPlanes[i].normal() /= scale;
-			const double len = vector3_length( bspPlanes[i].normal() );
-			bspPlanes[i].normal() /= len;
-			bspPlanes[i].dist() /= len;
+			plane.normal() /= scale;
+			const double len = vector3_length( plane.normal() );
+			plane.normal() /= len;
+			plane.dist() /= len;
 		}
 	}
 
@@ -674,9 +674,9 @@ int ShiftBSPMain( Args& args ){
 	}
 
 	/* shift planes */
-	for ( i = 0; i < numBSPPlanes; i++ )
+	for ( bspPlane_t& plane : bspPlanes )
 	{
-		bspPlanes[i].dist() = vector3_dot( bspPlanes[i].normal(), bspPlanes[i].normal() * bspPlanes[i].dist() + shift );
+		plane.dist() = vector3_dot( plane.normal(), plane.normal() * plane.dist() + shift );
 	}
 
 	// fixme: engine says 'light grid mismatch', unless translation is multiple of grid size
