@@ -107,7 +107,7 @@ static float MiniMapSample( float x, float y ){
 	for ( int i = 0; i < minimap.model->numBSPBrushes; ++i )
 	{
 		const int bi = minimap.model->firstBSPBrush + i;
-		if ( opaqueBrushes[bi >> 3] & ( 1 << ( bi & 7 ) ) ) {
+		if ( opaqueBrushes[bi] ) {
 			const bspBrush_t& b = bspBrushes[bi];
 
 			// sort out mins/maxs of the brush

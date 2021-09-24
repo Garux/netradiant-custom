@@ -2244,8 +2244,8 @@ Q_EXTERN float maxLight Q_ASSIGN( 255.f );
 /* ydnar: light optimization */
 Q_EXTERN float subdivideThreshold Q_ASSIGN( DEFAULT_SUBDIVIDE_THRESHOLD );
 
-Q_EXTERN int numOpaqueBrushes, maxOpaqueBrush;
-Q_EXTERN byte               *opaqueBrushes;
+Q_EXTERN int maxOpaqueBrush;
+Q_EXTERN std::vector<std::uint8_t> opaqueBrushes;
 
 Q_EXTERN int numCulledLights;
 

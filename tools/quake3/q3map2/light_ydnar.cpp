@@ -2944,14 +2944,9 @@ void SetupBrushesFlags( int mask_any, int test_any, int mask_all, int test_all )
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- SetupBrushes ---\n" );
 
-	/* allocate */
-	if ( opaqueBrushes == NULL ) {
-		opaqueBrushes = safe_malloc( bspBrushes.size() / 8 + 1 );
-	}
-
 	/* clear */
-	memset( opaqueBrushes, 0, bspBrushes.size() / 8 + 1 );
-	numOpaqueBrushes = 0;
+	opaqueBrushes = decltype( opaqueBrushes )( bspBrushes.size(), false );
+	int numOpaqueBrushes = 0;
 
 	/* walk the list of worldspawn brushes */
 	for ( int i = 0; i < bspModels[ 0 ].numBSPBrushes; i++ )
@@ -2981,7 +2976,7 @@ void SetupBrushesFlags( int mask_any, int test_any, int mask_all, int test_all )
 
 		/* determine if this brush is opaque to light */
 		if ( ( compileFlags & mask_any ) == test_any && ( allCompileFlags & mask_all ) == test_all ) {
-			opaqueBrushes[ b >> 3 ] |= ( 1 << ( b & 7 ) );
+			opaqueBrushes[ b ] = true;
 			numOpaqueBrushes++;
 			maxOpaqueBrush = i;
 		}
@@ -3152,11 +3147,11 @@ int ClusterForPointExt( const Vector3& point, float epsilon ){
 		if ( b > maxOpaqueBrush ) {
 			continue;
 		}
-		const bspBrush_t& brush = bspBrushes[ b ];
-		if ( !( opaqueBrushes[ b >> 3 ] & ( 1 << ( b & 7 ) ) ) ) {
+		if ( !opaqueBrushes[ b ] ) {
 			continue;
 		}
 
+		const bspBrush_t& brush = bspBrushes[ b ];
 		/* check point against all planes */
 		bool inside = true;
 		for ( int j = 0; j < brush.numSides && inside; j++ )
