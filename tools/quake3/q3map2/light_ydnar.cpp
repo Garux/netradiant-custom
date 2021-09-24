@@ -3136,7 +3136,6 @@ int ClusterForPointExt( const Vector3& point, float epsilon ){
 	int i, j, b, leafNum, cluster;
 	bool inside;
 	int             *brushes, numBSPBrushes;
-	bspLeaf_t       *leaf;
 	bspBrush_t      *brush;
 
 
@@ -3145,17 +3144,17 @@ int ClusterForPointExt( const Vector3& point, float epsilon ){
 	if ( leafNum < 0 ) {
 		return -1;
 	}
-	leaf = &bspLeafs[ leafNum ];
+	const bspLeaf_t& leaf = bspLeafs[ leafNum ];
 
 	/* get the cluster */
-	cluster = leaf->cluster;
+	cluster = leaf.cluster;
 	if ( cluster < 0 ) {
 		return -1;
 	}
 
 	/* transparent leaf, so check point against all brushes in the leaf */
-	brushes = &bspLeafBrushes[ leaf->firstBSPLeafBrush ];
-	numBSPBrushes = leaf->numBSPLeafBrushes;
+	brushes = &bspLeafBrushes[ leaf.firstBSPLeafBrush ];
+	numBSPBrushes = leaf.numBSPLeafBrushes;
 	for ( i = 0; i < numBSPBrushes; i++ )
 	{
 		/* get parts */
@@ -3231,7 +3230,6 @@ int ShaderForPointInLeaf( const Vector3& point, int leafNum, float epsilon, int 
 	int i, j;
 	bool inside;
 	int             *brushes, numBSPBrushes;
-	bspLeaf_t           *leaf;
 	bspBrush_t      *brush;
 	bspBrushSide_t  *side;
 	int allSurfaceFlags, allContentFlags;
@@ -3245,11 +3243,11 @@ int ShaderForPointInLeaf( const Vector3& point, int leafNum, float epsilon, int 
 	if ( leafNum < 0 ) {
 		return -1;
 	}
-	leaf = &bspLeafs[ leafNum ];
+	const bspLeaf_t& leaf = bspLeafs[ leafNum ];
 
 	/* transparent leaf, so check point against all brushes in the leaf */
-	brushes = &bspLeafBrushes[ leaf->firstBSPLeafBrush ];
-	numBSPBrushes = leaf->numBSPLeafBrushes;
+	brushes = &bspLeafBrushes[ leaf.firstBSPLeafBrush ];
+	numBSPBrushes = leaf.numBSPLeafBrushes;
 	for ( i = 0; i < numBSPBrushes; i++ )
 	{
 		/* get parts */
@@ -3323,7 +3321,6 @@ bool ChopBounds( MinMax& minmax, const Vector3& origin, const Vector3& normal ){
 
 void SetupEnvelopes( bool forGrid, bool fastFlag ){
 	int i, x, y, z, x1, y1, z1;
-	bspLeaf_t   *leaf;
 	float radius, intensity;
 
 
@@ -3492,21 +3489,18 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 					MinMax minmax;
 
 					/* check all leaves */
-					for ( i = 0; i < numBSPLeafs; i++ )
+					for ( const bspLeaf_t& leaf : bspLeafs )
 					{
-						/* get test leaf */
-						leaf = &bspLeafs[ i ];
-
 						/* in pvs? */
-						if ( leaf->cluster < 0 ) {
+						if ( leaf.cluster < 0 ) {
 							continue;
 						}
-						if ( !ClusterVisible( light->cluster, leaf->cluster ) ) { /* ydnar: thanks Arnout for exposing my stupid error (this never failed before) */
+						if ( !ClusterVisible( light->cluster, leaf.cluster ) ) { /* ydnar: thanks Arnout for exposing my stupid error (this never failed before) */
 							continue;
 						}
 
 						/* add this leafs bbox to the bounds */
-						minmax.extend( leaf->minmax );
+						minmax.extend( leaf.minmax );
 					}
 
 					/* test to see if bounds encompass light */

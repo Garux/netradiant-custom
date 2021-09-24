@@ -185,7 +185,7 @@ static void write_json( const char *directory ){
 	}
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& leaf : Span( bspLeafs, numBSPLeafs ) ){
+		for_indexed( const auto& leaf : bspLeafs ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "cluster", leaf.cluster, all );
 			value.AddMember( "area", leaf.area, all );
@@ -412,9 +412,8 @@ static void read_json( const char *directory ){
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "leafs.json" ) );
-		static std::vector<bspLeaf_t> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspLeafs.emplace_back();
 			item.cluster = obj.value["cluster"].GetInt();
 			item.area = obj.value["area"].GetInt();
 			value_to( obj.value["minmax"].GetObj().operator[]("mins"), item.minmax.mins );
@@ -424,8 +423,6 @@ static void read_json( const char *directory ){
 			item.firstBSPLeafBrush = obj.value["firstBSPLeafBrush"].GetInt();
 			item.numBSPLeafBrushes = obj.value["numBSPLeafBrushes"].GetInt();
 		}
-		std::copy( items.begin(), items.end(), bspLeafs );
-		numBSPLeafs = items.size();
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "nodes.json" ) );

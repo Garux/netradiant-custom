@@ -2340,8 +2340,7 @@ Q_EXTERN std::vector<bspShader_t> bspShaders;
 
 Q_EXTERN std::vector<char> bspEntData;
 
-Q_EXTERN int numBSPLeafs Q_ASSIGN( 0 );
-Q_EXTERN bspLeaf_t bspLeafs[ MAX_MAP_LEAFS ];
+Q_EXTERN std::vector<bspLeaf_t> bspLeafs; // MAX_MAP_LEAFS
 
 Q_EXTERN int numBSPPlanes Q_ASSIGN( 0 );
 Q_EXTERN int allocatedBSPPlanes Q_ASSIGN( 0 );

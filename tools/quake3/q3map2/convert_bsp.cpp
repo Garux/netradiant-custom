@@ -492,10 +492,10 @@ int ScaleBSPMain( Args& args ){
 	}
 
 	/* scale leafs */
-	for ( i = 0; i < numBSPLeafs; i++ )
+	for ( bspLeaf_t& leaf : bspLeafs )
 	{
-		bspLeafs[ i ].minmax.mins *= scale;
-		bspLeafs[ i ].minmax.maxs *= scale;
+		leaf.minmax.mins *= scale;
+		leaf.minmax.maxs *= scale;
 	}
 
 	if ( texscale ) {
@@ -661,10 +661,10 @@ int ShiftBSPMain( Args& args ){
 	}
 
 	/* shift leafs */
-	for ( i = 0; i < numBSPLeafs; i++ )
+	for ( bspLeaf_t& leaf : bspLeafs )
 	{
-		bspLeafs[ i ].minmax.mins += shift;
-		bspLeafs[ i ].minmax.maxs += shift;
+		leaf.minmax.mins += shift;
+		leaf.minmax.maxs += shift;
 	}
 
 	/* shift drawverts */

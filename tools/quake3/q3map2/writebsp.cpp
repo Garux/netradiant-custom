@@ -120,27 +120,17 @@ void EmitPlanes( void ){
  */
 
 void EmitLeaf( node_t *node ){
-	bspLeaf_t       *leaf_p;
-	drawSurfRef_t   *dsr;
+	bspLeaf_t& leaf = bspLeafs.emplace_back();
 
-
-	/* check limits */
-	if ( numBSPLeafs >= MAX_MAP_LEAFS ) {
-		Error( "MAX_MAP_LEAFS" );
-	}
-
-	leaf_p = &bspLeafs[numBSPLeafs];
-	numBSPLeafs++;
-
-	leaf_p->cluster = node->cluster;
-	leaf_p->area = node->area;
+	leaf.cluster = node->cluster;
+	leaf.area = node->area;
 
 	/* emit bounding box */
-	leaf_p->minmax.maxs = node->minmax.maxs;
-	leaf_p->minmax.mins = node->minmax.mins;
+	leaf.minmax.maxs = node->minmax.maxs;
+	leaf.minmax.mins = node->minmax.mins;
 
 	/* emit leaf brushes */
-	leaf_p->firstBSPLeafBrush = numBSPLeafBrushes;
+	leaf.firstBSPLeafBrush = numBSPLeafBrushes;
 	for ( const brush_t& b : node->brushlist )
 	{
 		/* something is corrupting brushes */
@@ -156,7 +146,7 @@ void EmitLeaf( node_t *node ){
 		numBSPLeafBrushes++;
 	}
 
-	leaf_p->numBSPLeafBrushes = numBSPLeafBrushes - leaf_p->firstBSPLeafBrush;
+	leaf.numBSPLeafBrushes = numBSPLeafBrushes - leaf.firstBSPLeafBrush;
 
 	/* emit leaf surfaces */
 	if ( node->opaque ) {
@@ -164,15 +154,15 @@ void EmitLeaf( node_t *node ){
 	}
 
 	/* add the drawSurfRef_t drawsurfs */
-	leaf_p->firstBSPLeafSurface = numBSPLeafSurfaces;
-	for ( dsr = node->drawSurfReferences; dsr; dsr = dsr->nextRef )
+	leaf.firstBSPLeafSurface = numBSPLeafSurfaces;
+	for ( const drawSurfRef_t *dsr = node->drawSurfReferences; dsr; dsr = dsr->nextRef )
 	{
 		AUTOEXPAND_BY_REALLOC_BSP( LeafSurfaces, 1024 );
 		bspLeafSurfaces[ numBSPLeafSurfaces ] = dsr->outputNum;
 		numBSPLeafSurfaces++;
 	}
 
-	leaf_p->numBSPLeafSurfaces = numBSPLeafSurfaces - leaf_p->firstBSPLeafSurface;
+	leaf.numBSPLeafSurfaces = numBSPLeafSurfaces - leaf.firstBSPLeafSurface;
 }
 
 
@@ -189,7 +179,7 @@ int EmitDrawNode_r( node_t *node ){
 	/* check for leafnode */
 	if ( node->planenum == PLANENUM_LEAF ) {
 		EmitLeaf( node );
-		return -numBSPLeafs;
+		return -int( bspLeafs.size() );
 	}
 
 	/* emit a node */
@@ -212,7 +202,7 @@ int EmitDrawNode_r( node_t *node ){
 	for ( i = 0; i < 2; i++ )
 	{
 		if ( node->children[i]->planenum == PLANENUM_LEAF ) {
-			n->children[i] = -( numBSPLeafs + 1 );
+			n->children[i] = -int( bspLeafs.size() + 1 );
 			EmitLeaf( node->children[i] );
 		}
 		else
@@ -343,7 +333,7 @@ void BeginBSPFile( void ){
 	numBSPLeafBrushes = 0;
 
 	/* leave leaf 0 as an error, because leafs are referenced as negative number nodes */
-	numBSPLeafs = 1;
+	bspLeafs.resize( 1 );
 
 
 	/* ydnar: gs mods: set the first 6 drawindexes to 0 1 2 2 1 3 for triangles and quads */

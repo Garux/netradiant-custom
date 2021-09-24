@@ -190,7 +190,7 @@ void SwapBSPFile( void ){
 	SwapBlock( (int*) bspNodes, numBSPNodes * sizeof( bspNodes[ 0 ] ) );
 
 	/* leafs */
-	SwapBlock( (int*) bspLeafs, numBSPLeafs * sizeof( bspLeafs[ 0 ] ) );
+	SwapBlock( bspLeafs );
 
 	/* leaffaces */
 	SwapBlock( (int*) bspLeafSurfaces, numBSPLeafSurfaces * sizeof( bspLeafSurfaces[ 0 ] ) );
@@ -480,8 +480,8 @@ void PrintBSPFileSizes( void ){
 
 	Sys_Printf( "%9d nodes         %9d\n",
 	            numBSPNodes, (int) ( numBSPNodes * sizeof( bspNode_t ) ) );
-	Sys_Printf( "%9d leafs         %9d\n",
-	            numBSPLeafs, (int) ( numBSPLeafs * sizeof( bspLeaf_t ) ) );
+	Sys_Printf( "%9zu leafs         %9zu\n",
+	            bspLeafs.size(), bspLeafs.size() * sizeof( bspLeafs[0] ) );
 	Sys_Printf( "%9d leafsurfaces  %9d\n",
 	            numBSPLeafSurfaces, (int) ( numBSPLeafSurfaces * sizeof( *bspLeafSurfaces ) ) );
 	Sys_Printf( "%9d leafbrushes   %9d\n",
