@@ -2938,11 +2938,7 @@ void IlluminateVertexes( int num ){
  */
 
 void SetupBrushesFlags( int mask_any, int test_any, int mask_all, int test_all ){
-	int i, j, b;
 	int compileFlags, allCompileFlags;
-	bspBrush_t      *brush;
-	bspBrushSide_t  *side;
-	shaderInfo_t    *si;
 
 
 	/* note it */
@@ -2950,30 +2946,30 @@ void SetupBrushesFlags( int mask_any, int test_any, int mask_all, int test_all )
 
 	/* allocate */
 	if ( opaqueBrushes == NULL ) {
-		opaqueBrushes = safe_malloc( numBSPBrushes / 8 + 1 );
+		opaqueBrushes = safe_malloc( bspBrushes.size() / 8 + 1 );
 	}
 
 	/* clear */
-	memset( opaqueBrushes, 0, numBSPBrushes / 8 + 1 );
+	memset( opaqueBrushes, 0, bspBrushes.size() / 8 + 1 );
 	numOpaqueBrushes = 0;
 
 	/* walk the list of worldspawn brushes */
-	for ( i = 0; i < bspModels[ 0 ].numBSPBrushes; i++ )
+	for ( int i = 0; i < bspModels[ 0 ].numBSPBrushes; i++ )
 	{
 		/* get brush */
-		b = bspModels[ 0 ].firstBSPBrush + i;
-		brush = &bspBrushes[ b ];
+		const int b = bspModels[ 0 ].firstBSPBrush + i;
+		const bspBrush_t& brush = bspBrushes[ b ];
 
 		/* check all sides */
 		compileFlags = 0;
 		allCompileFlags = ~( 0 );
-		for ( j = 0; j < brush->numSides; j++ )
+		for ( int j = 0; j < brush.numSides; j++ )
 		{
 			/* do bsp shader calculations */
-			side = &bspBrushSides[ brush->firstSide + j ];
+			const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + j ];
 
 			/* get shader info */
-			si = ShaderInfoForShaderNull( bspShaders[ side->shaderNum ].shader );
+			const shaderInfo_t *si = ShaderInfoForShaderNull( bspShaders[ side.shaderNum ].shader );
 			if ( si == NULL ) {
 				continue;
 			}
@@ -3133,20 +3129,15 @@ int ClusterForPoint( const Vector3& point ){
  */
 
 int ClusterForPointExt( const Vector3& point, float epsilon ){
-	int i, j, b, leafNum, cluster;
-	bool inside;
-	bspBrush_t      *brush;
-
-
 	/* get leaf for point */
-	leafNum = PointInLeafNum( point );
+	const int leafNum = PointInLeafNum( point );
 	if ( leafNum < 0 ) {
 		return -1;
 	}
 	const bspLeaf_t& leaf = bspLeafs[ leafNum ];
 
 	/* get the cluster */
-	cluster = leaf.cluster;
+	const int cluster = leaf.cluster;
 	if ( cluster < 0 ) {
 		return -1;
 	}
@@ -3154,23 +3145,23 @@ int ClusterForPointExt( const Vector3& point, float epsilon ){
 	/* transparent leaf, so check point against all brushes in the leaf */
 	const int *brushes = &bspLeafBrushes[ leaf.firstBSPLeafBrush ];
 	const int numBSPBrushes = leaf.numBSPLeafBrushes;
-	for ( i = 0; i < numBSPBrushes; i++ )
+	for ( int i = 0; i < numBSPBrushes; i++ )
 	{
 		/* get parts */
-		b = brushes[ i ];
+		const int b = brushes[ i ];
 		if ( b > maxOpaqueBrush ) {
 			continue;
 		}
-		brush = &bspBrushes[ b ];
+		const bspBrush_t& brush = bspBrushes[ b ];
 		if ( !( opaqueBrushes[ b >> 3 ] & ( 1 << ( b & 7 ) ) ) ) {
 			continue;
 		}
 
 		/* check point against all planes */
-		inside = true;
-		for ( j = 0; j < brush->numSides && inside; j++ )
+		bool inside = true;
+		for ( int j = 0; j < brush.numSides && inside; j++ )
 		{
-			const bspPlane_t& plane = bspPlanes[ bspBrushSides[ brush->firstSide + j ].planeNum ];
+			const bspPlane_t& plane = bspPlanes[ bspBrushSides[ brush.firstSide + j ].planeNum ];
 			if ( plane3_distance_to_point( plane, point ) > epsilon ) {
 				inside = false;
 			}
@@ -3226,10 +3217,6 @@ int ClusterForPointExtFilter( const Vector3& point, float epsilon, int numCluste
  */
 
 int ShaderForPointInLeaf( const Vector3& point, int leafNum, float epsilon, int wantContentFlags, int wantSurfaceFlags, int *contentFlags, int *surfaceFlags ){
-	int i, j;
-	bool inside;
-	bspBrush_t      *brush;
-	bspBrushSide_t  *side;
 	int allSurfaceFlags, allContentFlags;
 
 
@@ -3246,25 +3233,25 @@ int ShaderForPointInLeaf( const Vector3& point, int leafNum, float epsilon, int 
 	/* transparent leaf, so check point against all brushes in the leaf */
 	const int *brushes = &bspLeafBrushes[ leaf.firstBSPLeafBrush ];
 	const int numBSPBrushes = leaf.numBSPLeafBrushes;
-	for ( i = 0; i < numBSPBrushes; i++ )
+	for ( int i = 0; i < numBSPBrushes; i++ )
 	{
 		/* get parts */
-		brush = &bspBrushes[ brushes[ i ] ];
+		const bspBrush_t& brush = bspBrushes[ brushes[ i ] ];
 
 		/* check point against all planes */
-		inside = true;
+		bool inside = true;
 		allSurfaceFlags = 0;
 		allContentFlags = 0;
-		for ( j = 0; j < brush->numSides && inside; j++ )
+		for ( int j = 0; j < brush.numSides && inside; j++ )
 		{
-			side = &bspBrushSides[ brush->firstSide + j ];
-			const bspPlane_t& plane = bspPlanes[ side->planeNum ];
+			const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + j ];
+			const bspPlane_t& plane = bspPlanes[ side.planeNum ];
 			if ( plane3_distance_to_point( plane, point ) > epsilon ) {
 				inside = false;
 			}
 			else
 			{
-				const bspShader_t& shader = bspShaders[ side->shaderNum ];
+				const bspShader_t& shader = bspShaders[ side.shaderNum ];
 				allSurfaceFlags |= shader.surfaceFlags;
 				allContentFlags |= shader.contentFlags;
 			}
@@ -3283,7 +3270,7 @@ int ShaderForPointInLeaf( const Vector3& point, int leafNum, float epsilon, int 
 			/* store the cumulative flags and return the brush shader (which is mostly useless) */
 			*surfaceFlags = allSurfaceFlags;
 			*contentFlags = allContentFlags;
-			return brush->shaderNum;
+			return brush.shaderNum;
 		}
 	}
 

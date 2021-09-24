@@ -193,7 +193,7 @@ static void ConvertOriginBrush( FILE *f, int num, const Vector3& origin, bool br
 	fprintf( f, "\t}\n\n" );
 }
 
-static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, const Vector3& origin, bool brushPrimitives ){
+static void ConvertBrushFast( FILE *f, int num, const bspBrush_t& brush, const Vector3& origin, bool brushPrimitives ){
 	/* clear out build brush */
 	buildBrush.sides.clear();
 
@@ -202,10 +202,10 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, const Vector3
 	if ( force ){
 		int notNoShader = 0;
 		modelclip = true;
-		for ( int i = 0; i < brush->numSides; i++ )
+		for ( int i = 0; i < brush.numSides; i++ )
 		{
 			/* get side */
-			const bspBrushSide_t& side = bspBrushSides[ brush->firstSide + i ];
+			const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + i ];
 
 			/* get shader */
 			if ( side.shaderNum < 0 || side.shaderNum >= int( bspShaders.size() ) ) {
@@ -224,10 +224,10 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, const Vector3
 	}
 
 	/* iterate through bsp brush sides */
-	for ( int i = 0; i < brush->numSides; i++ )
+	for ( int i = 0; i < brush.numSides; i++ )
 	{
 		/* get side */
-		const bspBrushSide_t& side = bspBrushSides[ brush->firstSide + i ];
+		const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + i ];
 
 		/* get shader */
 		if ( side.shaderNum < 0 || side.shaderNum >= int( bspShaders.size() ) ) {
@@ -317,7 +317,7 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, const Vector3
 	fprintf( f, "\t}\n\n" );
 }
 
-static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& origin, bool brushPrimitives ){
+static void ConvertBrush( FILE *f, int num, const bspBrush_t& brush, const Vector3& origin, bool brushPrimitives ){
 	/* clear out build brush */
 	buildBrush.sides.clear();
 
@@ -326,10 +326,10 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 	if ( force ){
 		int notNoShader = 0;
 		modelclip = true;
-		for ( int i = 0; i < brush->numSides; i++ )
+		for ( int i = 0; i < brush.numSides; i++ )
 		{
 			/* get side */
-			const bspBrushSide_t& side = bspBrushSides[ brush->firstSide + i ];
+			const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + i ];
 
 			/* get shader */
 			if ( side.shaderNum < 0 || side.shaderNum >= int( bspShaders.size() ) ) {
@@ -348,10 +348,10 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 	}
 
 	/* iterate through bsp brush sides */
-	for ( int i = 0; i < brush->numSides; i++ )
+	for ( int i = 0; i < brush.numSides; i++ )
 	{
 		/* get side */
-		const bspBrushSide_t& side = bspBrushSides[ brush->firstSide + i ];
+		const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + i ];
 
 		/* get shader */
 		if ( side.shaderNum < 0 || side.shaderNum >= int( bspShaders.size() ) ) {
@@ -745,7 +745,7 @@ for ( i = 0; i < brush->numSides; i++ )
 
  */
 
-static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, const Vector3& origin ){
+static void ConvertPatch( FILE *f, int num, const bspDrawSurface_t& ds, const Vector3& origin ){
 	int x, y;
 	bspShader_t     *shader;
 	const char      *texture;
@@ -753,15 +753,15 @@ static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, const Vector3&
 
 
 	/* only patches */
-	if ( ds->surfaceType != MST_PATCH ) {
+	if ( ds.surfaceType != MST_PATCH ) {
 		return;
 	}
 
 	/* get shader */
-	if ( ds->shaderNum < 0 || ds->shaderNum >= int( bspShaders.size() ) ) {
+	if ( ds.shaderNum < 0 || ds.shaderNum >= int( bspShaders.size() ) ) {
 		return;
 	}
-	shader = &bspShaders[ ds->shaderNum ];
+	shader = &bspShaders[ ds.shaderNum ];
 
 	/* get texture name */
 	if ( striEqualPrefix( shader->shader, "textures/" ) ) {
@@ -777,20 +777,20 @@ static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, const Vector3&
 	fprintf( f, "\t\tpatchDef2\n" );
 	fprintf( f, "\t\t{\n" );
 	fprintf( f, "\t\t\t%s\n", texture );
-	fprintf( f, "\t\t\t( %d %d 0 0 0 )\n", ds->patchWidth, ds->patchHeight );
+	fprintf( f, "\t\t\t( %d %d 0 0 0 )\n", ds.patchWidth, ds.patchHeight );
 	fprintf( f, "\t\t\t(\n" );
 
 	/* iterate through the verts */
-	for ( x = 0; x < ds->patchWidth; x++ )
+	for ( x = 0; x < ds.patchWidth; x++ )
 	{
 		/* start row */
 		fprintf( f, "\t\t\t\t(" );
 
 		/* iterate through the row */
-		for ( y = 0; y < ds->patchHeight; y++ )
+		for ( y = 0; y < ds.patchHeight; y++ )
 		{
 			/* get vert */
-			dv = &bspDrawVerts[ ds->firstVert + ( y * ds->patchWidth ) + x ];
+			dv = &bspDrawVerts[ ds.firstVert + ( y * ds.patchWidth ) + x ];
 
 			/* offset it */
 			const Vector3 xyz = dv->xyz + origin;
@@ -817,11 +817,6 @@ static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, const Vector3&
  */
 
 static void ConvertModel( FILE *f, const bspModel_t& model, const Vector3& origin, bool brushPrimitives ){
-	int i, num;
-	bspBrush_t          *brush;
-	bspDrawSurface_t    *ds;
-
-
 	/* convert bsp planes to map planes */
 	mapplanes.resize( bspPlanes.size() );
 	for ( size_t i = 0; i < bspPlanes.size(); ++i )
@@ -842,26 +837,25 @@ static void ConvertModel( FILE *f, const bspModel_t& model, const Vector3& origi
 	}
 
 	/* go through each brush in the model */
-	for ( i = 0; i < model.numBSPBrushes; i++ )
+	for ( int i = 0; i < model.numBSPBrushes; i++ )
 	{
-		num = i + model.firstBSPBrush;
-		brush = &bspBrushes[ num ];
+		const int num = i + model.firstBSPBrush;
 		if( fast ){
-			ConvertBrushFast( f, num, brush, origin, brushPrimitives );
+			ConvertBrushFast( f, num, bspBrushes[ num ], origin, brushPrimitives );
 		}
 		else{
-			ConvertBrush( f, num, brush, origin, brushPrimitives );
+			ConvertBrush( f, num, bspBrushes[ num ], origin, brushPrimitives );
 		}
 	}
 
 	/* go through each drawsurf in the model */
-	for ( i = 0; i < model.numBSPSurfaces; i++ )
+	for ( int i = 0; i < model.numBSPSurfaces; i++ )
 	{
-		num = i + model.firstBSPSurface;
-		ds = &bspDrawSurfaces[ num ];
+		const int num = i + model.firstBSPSurface;
+		const bspDrawSurface_t& ds = bspDrawSurfaces[ num ];
 
 		/* we only love patches */
-		if ( ds->surfaceType == MST_PATCH ) {
+		if ( ds.surfaceType == MST_PATCH ) {
 			ConvertPatch( f, num, ds, origin );
 		}
 	}

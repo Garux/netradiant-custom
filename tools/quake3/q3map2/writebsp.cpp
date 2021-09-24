@@ -363,13 +363,9 @@ void EndBSPFile( bool do_write ){
  */
 
 void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
-	bspBrush_t      *db;
-	bspBrushSide_t  *cp;
-
-
 	/* set initial brush */
 	if ( firstBrush != NULL ) {
-		*firstBrush = numBSPBrushes;
+		*firstBrush = bspBrushes.size();
 	}
 	if ( numBrushes != NULL ) {
 		*numBrushes = 0;
@@ -378,22 +374,18 @@ void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
 	/* walk list of brushes */
 	for ( brush_t& b : brushes )
 	{
-		/* check limits */
-		AUTOEXPAND_BY_REALLOC_BSP( Brushes, 1024 );
-
 		/* get bsp brush */
-		b.outputNum = numBSPBrushes;
-		db = &bspBrushes[ numBSPBrushes ];
-		numBSPBrushes++;
+		b.outputNum = bspBrushes.size();
+		bspBrush_t& db = bspBrushes.emplace_back();
 		if ( numBrushes != NULL ) {
 			( *numBrushes )++;
 		}
 
-		db->shaderNum = EmitShader( b.contentShader->shader, &b.contentShader->contentFlags, &b.contentShader->surfaceFlags );
-		db->firstSide = numBSPBrushSides;
+		db.shaderNum = EmitShader( b.contentShader->shader, &b.contentShader->contentFlags, &b.contentShader->surfaceFlags );
+		db.firstSide = numBSPBrushSides;
 
 		/* walk sides */
-		db->numSides = 0;
+		db.numSides = 0;
 		for ( side_t& side : b.sides )
 		{
 			/* set output number to bogus initially */
@@ -404,20 +396,20 @@ void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
 
 			/* emit side */
 			side.outputNum = numBSPBrushSides;
-			cp = &bspBrushSides[ numBSPBrushSides ];
-			db->numSides++;
+			bspBrushSide_t& cp = bspBrushSides[ numBSPBrushSides ];
+			db.numSides++;
 			numBSPBrushSides++;
-			cp->planeNum = side.planenum;
+			cp.planeNum = side.planenum;
 
 			/* emit shader */
 			if ( side.shaderInfo ) {
-				cp->shaderNum = EmitShader( side.shaderInfo->shader, &side.shaderInfo->contentFlags, &side.shaderInfo->surfaceFlags );
+				cp.shaderNum = EmitShader( side.shaderInfo->shader, &side.shaderInfo->contentFlags, &side.shaderInfo->surfaceFlags );
 			}
 			else if( side.bevel ) { /* emit surfaceFlags for bevels to get correct physics at walkable brush edges and vertices */
-				cp->shaderNum = EmitShader( NULL, NULL, &side.surfaceFlags );
+				cp.shaderNum = EmitShader( NULL, NULL, &side.surfaceFlags );
 			}
 			else{
-				cp->shaderNum = EmitShader( NULL, NULL, NULL );
+				cp.shaderNum = EmitShader( NULL, NULL, NULL );
 			}
 		}
 	}
@@ -547,7 +539,7 @@ void BeginModel( void ){
 
 	/* set firsts */
 	mod.firstBSPSurface = numBSPDrawSurfaces;
-	mod.firstBSPBrush = numBSPBrushes;
+	mod.firstBSPBrush = bspBrushes.size();
 }
 
 

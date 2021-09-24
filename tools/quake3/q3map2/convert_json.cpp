@@ -239,7 +239,7 @@ static void write_json( const char *directory ){
 	}
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& brush : Span( bspBrushes, numBSPBrushes ) ){
+		for_indexed( const auto& brush : bspBrushes ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "firstSide", brush.firstSide, all );
 			value.AddMember( "numSides", brush.numSides, all );
@@ -448,15 +448,12 @@ static void read_json( const char *directory ){
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "Brushes.json" ) );
-		static std::vector<bspBrush_t> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspBrushes.emplace_back();
 			item.firstSide = obj.value["firstSide"].GetInt();
 			item.numSides = obj.value["numSides"].GetInt();
 			item.shaderNum = obj.value["shaderNum"].GetInt();
 		}
-		bspBrushes = items.data();
-		numBSPBrushes = items.size();
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "BrushSides.json" ) );

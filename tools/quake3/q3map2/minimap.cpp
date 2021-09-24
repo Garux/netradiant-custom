@@ -50,12 +50,12 @@ struct minimap_t
 
 static minimap_t minimap;
 
-bool BrushIntersectionWithLine( bspBrush_t *brush, const Vector3& start, const Vector3& dir, float *t_in, float *t_out ){
+bool BrushIntersectionWithLine( const bspBrush_t& brush, const Vector3& start, const Vector3& dir, float *t_in, float *t_out ){
 	int i;
 	bool in = false, out = false;
-	bspBrushSide_t *sides = &bspBrushSides[brush->firstSide];
+	bspBrushSide_t *sides = &bspBrushSides[brush.firstSide];
 
-	for ( i = 0; i < brush->numSides; ++i )
+	for ( i = 0; i < brush.numSides; ++i )
 	{
 		const bspPlane_t& p = bspPlanes[sides[i].planeNum];
 		float sn = vector3_dot( start, p.normal() );
@@ -95,11 +95,8 @@ bool BrushIntersectionWithLine( bspBrush_t *brush, const Vector3& start, const V
 }
 
 static float MiniMapSample( float x, float y ){
-	int i, bi;
 	float t0, t1;
 	float samp;
-	bspBrush_t *b;
-	bspBrushSide_t *s;
 	int cnt;
 
 	const Vector3 org( x, y, 0 );
@@ -107,14 +104,14 @@ static float MiniMapSample( float x, float y ){
 
 	cnt = 0;
 	samp = 0;
-	for ( i = 0; i < minimap.model->numBSPBrushes; ++i )
+	for ( int i = 0; i < minimap.model->numBSPBrushes; ++i )
 	{
-		bi = minimap.model->firstBSPBrush + i;
+		const int bi = minimap.model->firstBSPBrush + i;
 		if ( opaqueBrushes[bi >> 3] & ( 1 << ( bi & 7 ) ) ) {
-			b = &bspBrushes[bi];
+			const bspBrush_t& b = bspBrushes[bi];
 
 			// sort out mins/maxs of the brush
-			s = &bspBrushSides[b->firstSide];
+			const bspBrushSide_t *s = &bspBrushSides[b.firstSide];
 			if ( x < -bspPlanes[s[0].planeNum].dist() ) {
 				continue;
 			}

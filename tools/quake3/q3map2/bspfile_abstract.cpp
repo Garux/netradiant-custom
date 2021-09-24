@@ -199,7 +199,7 @@ void SwapBSPFile( void ){
 	SwapBlock( bspLeafBrushes );
 
 	// brushes
-	SwapBlock( (int*) bspBrushes, numBSPBrushes * sizeof( bspBrushes[ 0 ] ) );
+	SwapBlock( bspBrushes );
 
 	// brushsides
 	SwapBlock( (int*) bspBrushSides, numBSPBrushSides * sizeof( bspBrushSides[ 0 ] ) );
@@ -466,8 +466,8 @@ void PrintBSPFileSizes( void ){
 	            bspModels.size(), bspModels.size() * sizeof( bspModels[0] ) );
 	Sys_Printf( "%9zu shaders       %9zu\n",
 	            bspShaders.size(), bspShaders.size() * sizeof( bspShaders[0] ) );
-	Sys_Printf( "%9d brushes       %9d\n",
-	            numBSPBrushes, (int) ( numBSPBrushes * sizeof( bspBrush_t ) ) );
+	Sys_Printf( "%9zu brushes       %9zu\n",
+	            bspBrushes.size(), bspBrushes.size() * sizeof( bspBrushes[0] ) );
 	Sys_Printf( "%9d brushsides    %9d *\n",
 	            numBSPBrushSides, (int) ( numBSPBrushSides * sizeof( bspBrushSide_t ) ) );
 	Sys_Printf( "%9d fogs          %9d\n",
