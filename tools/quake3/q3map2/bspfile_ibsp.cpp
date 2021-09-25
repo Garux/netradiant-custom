@@ -422,9 +422,7 @@ void LoadIBSPFile( const char *filename ){
 
 	numBSPVisBytes = CopyLump( (bspHeader_t*) header, LUMP_VISIBILITY, bspVisBytes, 1 ); // TODO fix overflow
 
-	numBSPLightBytes = GetLumpElements( (bspHeader_t*) header, LUMP_LIGHTMAPS, 1 ); // TODO change to CopyLump_Allocate
-	bspLightBytes = safe_malloc( numBSPLightBytes );
-	CopyLump( (bspHeader_t*) header, LUMP_LIGHTMAPS, bspLightBytes, 1 );
+	CopyLump( (bspHeader_t*) header, LUMP_LIGHTMAPS, bspLightBytes );
 
 	CopyLump( (bspHeader_t*) header, LUMP_ENTITIES, bspEntData );
 
@@ -524,7 +522,7 @@ void WriteIBSPFile( const char *filename ){
 	AddDrawVertsLump( file, header );
 	AddDrawSurfacesLump( file, header );
 	AddLump( file, (bspHeader_t*) header, LUMP_VISIBILITY, bspVisBytes, numBSPVisBytes );
-	AddLump( file, (bspHeader_t*) header, LUMP_LIGHTMAPS, bspLightBytes, numBSPLightBytes );
+	AddLump( file, header->lumps[LUMP_LIGHTMAPS], bspLightBytes );
 	AddLightGridLumps( file, header );
 	AddLump( file, header->lumps[LUMP_ENTITIES], bspEntData );
 	AddLump( file, (bspHeader_t*) header, LUMP_FOGS, bspFogs, numBSPFogs * sizeof( bspFog_t ) );

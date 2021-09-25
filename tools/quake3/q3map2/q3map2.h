@@ -2354,8 +2354,7 @@ Q_EXTERN std::vector<bspBrush_t> bspBrushes;
 
 Q_EXTERN std::vector<bspBrushSide_t> bspBrushSides;
 
-Q_EXTERN int numBSPLightBytes Q_ASSIGN( 0 );
-Q_EXTERN byte               *bspLightBytes Q_ASSIGN( NULL );
+Q_EXTERN std::vector<byte> bspLightBytes;
 
 Q_EXTERN int numBSPGridPoints Q_ASSIGN( 0 );
 Q_EXTERN bspGridPoint_t     *bspGridPoints Q_ASSIGN( NULL );

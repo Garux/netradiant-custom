@@ -120,7 +120,7 @@ void ExportLightmaps( void ){
 	StripExtension( dirname );
 
 	/* sanity check */
-	if ( bspLightBytes == NULL ) {
+	if ( bspLightBytes.empty() ) {
 		Sys_Warning( "No BSP lightmap data\n" );
 		return;
 	}
@@ -129,7 +129,7 @@ void ExportLightmaps( void ){
 	Q_mkdir( dirname );
 
 	/* iterate through the lightmaps */
-	for ( i = 0, lightmap = bspLightBytes; lightmap < ( bspLightBytes + numBSPLightBytes ); i++, lightmap += ( g_game->lightmapSize * g_game->lightmapSize * 3 ) )
+	for ( i = 0, lightmap = bspLightBytes.data(); lightmap < ( bspLightBytes.data() + bspLightBytes.size() ); i++, lightmap += ( g_game->lightmapSize * g_game->lightmapSize * 3 ) )
 	{
 		/* write a tga image out */
 		sprintf( filename, "%s/lightmap_%04d.tga", dirname, i );
@@ -202,7 +202,7 @@ int ImportLightmapsMain( Args& args ){
 	StripExtension( dirname );
 
 	/* sanity check */
-	if ( bspLightBytes == NULL ) {
+	if ( bspLightBytes.empty() ) {
 		Error( "No lightmap data" );
 	}
 
@@ -210,7 +210,7 @@ int ImportLightmapsMain( Args& args ){
 	Q_mkdir( dirname );
 
 	/* iterate through the lightmaps */
-	for ( i = 0, lightmap = bspLightBytes; lightmap < ( bspLightBytes + numBSPLightBytes ); i++, lightmap += ( g_game->lightmapSize * g_game->lightmapSize * 3 ) )
+	for ( i = 0, lightmap = bspLightBytes.data(); lightmap < ( bspLightBytes.data() + bspLightBytes.size() ); i++, lightmap += ( g_game->lightmapSize * g_game->lightmapSize * 3 ) )
 	{
 		/* read a tga image */
 		sprintf( filename, "%s/lightmap_%04d.tga", dirname, i );
@@ -2967,16 +2967,13 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	timer_start = I_FloatTime();
 
 	/* count the bsp lightmaps and allocate space */
-	free( bspLightBytes );
 	const size_t gameLmSize = g_game->lightmapSize * g_game->lightmapSize * sizeof( Vector3b );
 	if ( numBSPLightmaps == 0 || externalLightmaps ) {
-		numBSPLightBytes = 0;
-		bspLightBytes = NULL;
+		bspLightBytes.clear();
 	}
 	else
 	{
-		numBSPLightBytes = numBSPLightmaps * gameLmSize;
-		bspLightBytes = safe_calloc( numBSPLightBytes );
+		bspLightBytes = decltype( bspLightBytes )( numBSPLightmaps * gameLmSize, 0 );
 	}
 
 	/* walk the list of output lightmaps */
@@ -3000,12 +2997,12 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 		/* is this a valid bsp lightmap? */
 		if ( olm->lightmapNum >= 0 && !externalLightmaps ) {
 			/* copy lighting data */
-			lb = bspLightBytes + ( olm->lightmapNum * gameLmSize );
+			lb = bspLightBytes.data() + ( olm->lightmapNum * gameLmSize );
 			memcpy( lb, olm->bspLightBytes, gameLmSize );
 
 			/* copy direction data */
 			if ( deluxemap ) {
-				lb = bspLightBytes + ( ( olm->lightmapNum + 1 ) * gameLmSize );
+				lb = bspLightBytes.data() + ( ( olm->lightmapNum + 1 ) * gameLmSize );
 				memcpy( lb, olm->bspDirBytes, gameLmSize );
 			}
 		}
@@ -3345,7 +3342,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	Sys_Printf( "done.\n" );
 
 	/* calc num stored */
-	numStored = numBSPLightBytes / 3;
+	numStored = bspLightBytes.size() / 3;
 	efficiency = ( numStored <= 0 )
 	             ? 0
 	             : (float) numUsed / (float) numStored;
