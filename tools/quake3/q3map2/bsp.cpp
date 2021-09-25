@@ -228,41 +228,35 @@ static void SetCloneModelNumbers( void ){
  */
 
 static void FixBrushSides( entity_t *e ){
-	int i;
-	mapDrawSurface_t    *ds;
-	sideRef_t           *sideRef;
-	bspBrushSide_t      *side;
-
-
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- FixBrushSides ---\n" );
 
 	/* walk list of drawsurfaces */
-	for ( i = e->firstDrawSurf; i < numMapDrawSurfs; i++ )
+	for ( int i = e->firstDrawSurf; i < numMapDrawSurfs; i++ )
 	{
 		/* get surface and try to early out */
-		ds = &mapDrawSurfs[ i ];
-		if ( ds->outputNum < 0 ) {
+		const mapDrawSurface_t& ds = mapDrawSurfs[ i ];
+		if ( ds.outputNum < 0 ) {
 			continue;
 		}
 
 		/* walk sideref list */
-		for ( sideRef = ds->sideRef; sideRef != NULL; sideRef = sideRef->next )
+		for ( const sideRef_t *sideRef = ds.sideRef; sideRef != NULL; sideRef = sideRef->next )
 		{
 			/* get bsp brush side */
 			if ( sideRef->side == NULL || sideRef->side->outputNum < 0 ) {
 				continue;
 			}
-			side = &bspBrushSides[ sideRef->side->outputNum ];
+			bspBrushSide_t& side = bspBrushSides[ sideRef->side->outputNum ];
 
 			/* set drawsurface */
-			side->surfaceNum = ds->outputNum;
-			//%	Sys_FPrintf( SYS_VRB, "DS: %7d Side: %7d     ", ds->outputNum, sideRef->side->outputNum );
+			side.surfaceNum = ds.outputNum;
+			//%	Sys_FPrintf( SYS_VRB, "DS: %7d Side: %7d     ", ds.outputNum, sideRef->side->outputNum );
 
 			/* set shader */
-			if ( !strEqual( bspShaders[ side->shaderNum ].shader, ds->shaderInfo->shader ) ) {
-				//%	Sys_FPrintf( SYS_VRB, "Remapping %s to %s\n", bspShaders[ side->shaderNum ].shader, ds->shaderInfo->shader );
-				side->shaderNum = EmitShader( ds->shaderInfo->shader, &ds->shaderInfo->contentFlags, &ds->shaderInfo->surfaceFlags );
+			if ( !strEqual( bspShaders[ side.shaderNum ].shader, ds.shaderInfo->shader ) ) {
+				//%	Sys_FPrintf( SYS_VRB, "Remapping %s to %s\n", bspShaders[ side.shaderNum ].shader, ds.shaderInfo->shader );
+				side.shaderNum = EmitShader( ds.shaderInfo->shader, &ds.shaderInfo->contentFlags, &ds.shaderInfo->surfaceFlags );
 			}
 		}
 	}

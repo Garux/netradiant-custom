@@ -250,7 +250,7 @@ static void write_json( const char *directory ){
 	}
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& side : Span( bspBrushSides, numBSPBrushSides ) ){
+		for_indexed( const auto& side : bspBrushSides ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "planeNum", side.planeNum, all );
 			value.AddMember( "shaderNum", side.shaderNum, all );
@@ -457,15 +457,12 @@ static void read_json( const char *directory ){
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "BrushSides.json" ) );
-		static std::vector<bspBrushSide_t> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspBrushSides.emplace_back();
 			item.planeNum = obj.value["planeNum"].GetInt();
 			item.shaderNum = obj.value["shaderNum"].GetInt();
 			item.surfaceNum = obj.value["surfaceNum"].GetInt();
 		}
-		bspBrushSides = items.data();
-		numBSPBrushSides = items.size();
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "DrawVert.json" ) );

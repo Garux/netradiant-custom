@@ -55,18 +55,17 @@ void AddLump( FILE *file, bspLump_t& lump, const std::vector<T>& data ){
    CopyLump()
    copies a bsp file lump into a destination buffer
  */
-template<typename T>
-void CopyLump( bspHeader_t *header, int lump, std::vector<T>& data ){
+template<typename DstT, typename SrcT = DstT>
+void CopyLump( bspHeader_t *header, int lump, std::vector<DstT>& data ){
 	/* get lump length and offset */
 	const int length = header->lumps[ lump ].length;
 	const int offset = header->lumps[ lump ].offset;
-	const int size = sizeof( T );
 
 	/* handle erroneous cases */
 	if ( length == 0 ) {
 		return;
 	}
-	if ( length % size ) {
+	if ( length % sizeof( SrcT ) ) {
 		if ( force ) {
 			Sys_Warning( "CopyLump: odd lump size (%d) in lump %d\n", length, lump );
 			return;
@@ -77,5 +76,5 @@ void CopyLump( bspHeader_t *header, int lump, std::vector<T>& data ){
 	}
 
 	/* copy block of memory and return */
-	data = { ( T* )( (byte*) header + offset ), ( T* )( (byte*) header + offset + length ) };
+	data = { ( SrcT* )( (byte*) header + offset ), ( SrcT* )( (byte*) header + offset + length ) };
 }

@@ -310,7 +310,7 @@ void BeginBSPFile( void ){
 	/* these values may actually be initialized if the file existed when loaded, so clear them explicitly */
 	bspModels.clear();
 	bspNodes.clear();
-	numBSPBrushSides = 0;
+	bspBrushSides.clear();
 	bspLeafSurfaces.clear();
 	bspLeafBrushes.clear();
 
@@ -382,7 +382,7 @@ void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
 		}
 
 		db.shaderNum = EmitShader( b.contentShader->shader, &b.contentShader->contentFlags, &b.contentShader->surfaceFlags );
-		db.firstSide = numBSPBrushSides;
+		db.firstSide = bspBrushSides.size();
 
 		/* walk sides */
 		db.numSides = 0;
@@ -391,14 +391,10 @@ void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
 			/* set output number to bogus initially */
 			side.outputNum = -1;
 
-			/* check count */
-			AUTOEXPAND_BY_REALLOC_BSP( BrushSides, 1024 );
-
 			/* emit side */
-			side.outputNum = numBSPBrushSides;
-			bspBrushSide_t& cp = bspBrushSides[ numBSPBrushSides ];
+			side.outputNum = bspBrushSides.size();
+			bspBrushSide_t& cp = bspBrushSides.emplace_back();
 			db.numSides++;
-			numBSPBrushSides++;
 			cp.planeNum = side.planenum;
 
 			/* emit shader */

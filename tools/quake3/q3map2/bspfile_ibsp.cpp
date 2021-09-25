@@ -80,52 +80,13 @@ struct ibspBrushSide_t
 {
 	int planeNum;
 	int shaderNum;
+	ibspBrushSide_t( const bspBrushSide_t& other ) :
+		planeNum( other.planeNum ),
+		shaderNum( other.shaderNum ){}
+	operator bspBrushSide_t() const {
+		return { planeNum, shaderNum, -1 };
+	}
 };
-
-
-static void CopyBrushSidesLump( ibspHeader_t *header ){
-	const ibspBrushSide_t *in = GetLump( (bspHeader_t*) header, LUMP_BRUSHSIDES );
-	/* get count */
-	numBSPBrushSides = GetLumpElements( (bspHeader_t*) header, LUMP_BRUSHSIDES, sizeof( *in ) );
-	/* copy */
-	AUTOEXPAND_BY_REALLOC_BSP( BrushSides, 1024 );
-	for ( int i = 0; i < numBSPBrushSides; ++i, ++in )
-	{
-		bspBrushSide_t *out = &bspBrushSides[i];
-		out->planeNum = in->planeNum;
-		out->shaderNum = in->shaderNum;
-		out->surfaceNum = -1;
-	}
-}
-
-
-static void AddBrushSidesLump( FILE *file, ibspHeader_t *header ){
-	int i, size;
-	bspBrushSide_t  *in;
-	ibspBrushSide_t *buffer, *out;
-
-
-	/* allocate output buffer */
-	size = numBSPBrushSides * sizeof( *buffer );
-	buffer = safe_calloc( size );
-
-	/* convert */
-	in = bspBrushSides;
-	out = buffer;
-	for ( i = 0; i < numBSPBrushSides; i++ )
-	{
-		out->planeNum = in->planeNum;
-		out->shaderNum = in->shaderNum;
-		in++;
-		out++;
-	}
-
-	/* write lump */
-	AddLump( file, (bspHeader_t*) header, LUMP_BRUSHSIDES, buffer, size );
-
-	/* free buffer */
-	free( buffer );
-}
 
 
 
@@ -449,7 +410,7 @@ void LoadIBSPFile( const char *filename ){
 
 	CopyLump( (bspHeader_t*) header, LUMP_BRUSHES, bspBrushes );
 
-	CopyBrushSidesLump( header );
+	CopyLump<bspBrushSide_t, ibspBrushSide_t>( (bspHeader_t*) header, LUMP_BRUSHSIDES, bspBrushSides );
 
 	CopyDrawVertsLump( header );
 
@@ -556,7 +517,7 @@ void WriteIBSPFile( const char *filename ){
 	AddLump( file, header->lumps[LUMP_LEAFS], bspLeafs );
 	AddLump( file, header->lumps[LUMP_NODES], bspNodes );
 	AddLump( file, header->lumps[LUMP_BRUSHES], bspBrushes );
-	AddBrushSidesLump( file, header );
+	AddLump( file, header->lumps[LUMP_BRUSHSIDES], std::vector<ibspBrushSide_t>( bspBrushSides.begin(), bspBrushSides.end() ) );
 	AddLump( file, header->lumps[LUMP_LEAFSURFACES], bspLeafSurfaces );
 	AddLump( file, header->lumps[LUMP_LEAFBRUSHES], bspLeafBrushes );
 	AddLump( file, header->lumps[LUMP_MODELS], bspModels );

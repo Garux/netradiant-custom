@@ -2352,9 +2352,7 @@ Q_EXTERN std::vector<int> bspLeafBrushes;
 
 Q_EXTERN std::vector<bspBrush_t> bspBrushes;
 
-Q_EXTERN int numBSPBrushSides Q_ASSIGN( 0 );
-Q_EXTERN int allocatedBSPBrushSides Q_ASSIGN( 0 );
-Q_EXTERN bspBrushSide_t*    bspBrushSides Q_ASSIGN( NULL );
+Q_EXTERN std::vector<bspBrushSide_t> bspBrushSides;
 
 Q_EXTERN int numBSPLightBytes Q_ASSIGN( 0 );
 Q_EXTERN byte               *bspLightBytes Q_ASSIGN( NULL );
