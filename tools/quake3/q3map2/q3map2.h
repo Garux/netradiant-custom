@@ -2360,9 +2360,7 @@ Q_EXTERN std::vector<byte> bspVisBytes; // MAX_MAP_VISIBILITY
 
 Q_EXTERN std::vector<bspDrawVert_t> bspDrawVerts;
 
-Q_EXTERN int numBSPDrawIndexes Q_ASSIGN( 0 );
-Q_EXTERN int allocatedBSPDrawIndexes Q_ASSIGN( 0 );
-Q_EXTERN int                *bspDrawIndexes Q_ASSIGN( NULL );
+Q_EXTERN std::vector<int> bspDrawIndexes;
 
 Q_EXTERN int numBSPDrawSurfaces Q_ASSIGN( 0 );
 Q_EXTERN bspDrawSurface_t   *bspDrawSurfaces Q_ASSIGN( NULL );

@@ -189,7 +189,7 @@ void SwapBSPFile( void ){
 	}
 
 	/* drawindexes */
-	SwapBlock( (int*) bspDrawIndexes, numBSPDrawIndexes * sizeof( bspDrawIndexes[0] ) );
+	SwapBlock( bspDrawIndexes );
 
 	/* drawsurfs */
 	/* note: rbsp files (and hence q3map2 abstract bsp) have byte lightstyles index arrays, this follows sof2map convention */
@@ -460,8 +460,8 @@ void PrintBSPFileSizes( void ){
 	            trisoupCount );
 	Sys_Printf( "%9zu drawverts     %9zu *\n",
 	            bspDrawVerts.size(), bspDrawVerts.size() * sizeof( bspDrawVerts[0] ) );
-	Sys_Printf( "%9d drawindexes   %9d\n",
-	            numBSPDrawIndexes, (int) ( numBSPDrawIndexes * sizeof( *bspDrawIndexes ) ) );
+	Sys_Printf( "%9zu drawindexes   %9zu\n",
+	            bspDrawIndexes.size(), bspDrawIndexes.size() * sizeof( bspDrawIndexes[0] ) );
 	Sys_Printf( "\n" );
 
 	Sys_Printf( "%9zu lightmaps     %9zu\n",

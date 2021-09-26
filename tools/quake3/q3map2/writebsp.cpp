@@ -317,16 +317,8 @@ void BeginBSPFile( void ){
 	/* leave leaf 0 as an error, because leafs are referenced as negative number nodes */
 	bspLeafs.resize( 1 );
 
-
 	/* ydnar: gs mods: set the first 6 drawindexes to 0 1 2 2 1 3 for triangles and quads */
-	numBSPDrawIndexes = 6;
-	AUTOEXPAND_BY_REALLOC_BSP( DrawIndexes, 1024 );
-	bspDrawIndexes[ 0 ] = 0;
-	bspDrawIndexes[ 1 ] = 1;
-	bspDrawIndexes[ 2 ] = 2;
-	bspDrawIndexes[ 3 ] = 0;
-	bspDrawIndexes[ 4 ] = 2;
-	bspDrawIndexes[ 5 ] = 3;
+	bspDrawIndexes = { 0, 1, 2, 0, 2, 3 };
 }
 
 

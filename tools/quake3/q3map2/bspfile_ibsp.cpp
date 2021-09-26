@@ -319,7 +319,7 @@ void LoadIBSPFile( const char *filename ){
 
 	numBSPFogs = CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs, sizeof( bspFog_t ) ); // TODO fix overflow
 
-	numBSPDrawIndexes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_DRAWINDEXES, (void **) &bspDrawIndexes, sizeof( bspDrawIndexes[ 0 ] ), &allocatedBSPDrawIndexes );
+	CopyLump( (bspHeader_t*) header, LUMP_DRAWINDEXES, bspDrawIndexes );
 
 	CopyLump( (bspHeader_t*) header, LUMP_VISIBILITY, bspVisBytes );
 
@@ -427,7 +427,7 @@ void WriteIBSPFile( const char *filename ){
 	AddLump( file, header->lumps[LUMP_LIGHTGRID], std::vector<ibspGridPoint_t>( bspGridPoints.begin(), bspGridPoints.end() ) );
 	AddLump( file, header->lumps[LUMP_ENTITIES], bspEntData );
 	AddLump( file, (bspHeader_t*) header, LUMP_FOGS, bspFogs, numBSPFogs * sizeof( bspFog_t ) );
-	AddLump( file, (bspHeader_t*) header, LUMP_DRAWINDEXES, bspDrawIndexes, numBSPDrawIndexes * sizeof( bspDrawIndexes[ 0 ] ) );
+	AddLump( file, header->lumps[LUMP_DRAWINDEXES], bspDrawIndexes );
 
 	/* advertisements */
 	AddLump( file, (bspHeader_t*) header, LUMP_ADVERTISEMENTS, bspAds, numBSPAds * sizeof( bspAdvertisement_t ) );

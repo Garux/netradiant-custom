@@ -822,8 +822,8 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 	int i, j, x, y, pw[ 5 ], r, nodeNum;
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info;
-	bspDrawVert_t       *verts;
-	int                 *indexes;
+	const bspDrawVert_t *verts;
+	const int           *indexes;
 	mesh_t srcMesh, *mesh, *subdivided;
 	traceInfo_t ti;
 	traceWinding_t tw;

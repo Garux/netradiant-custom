@@ -2076,8 +2076,9 @@ void EmitDrawVerts( const mapDrawSurface_t *ds, bspDrawSurface_t *out ){
    returns numIndexes + 1 if the search failed
  */
 
-int FindDrawIndexes( int numIndexes, int *indexes ){
+int FindDrawIndexes( int numIndexes, const int *indexes ){
 	int i, j, numTestIndexes;
+	const int numBSPDrawIndexes = bspDrawIndexes.size();
 
 
 	/* dummy check */
@@ -2144,34 +2145,27 @@ int FindDrawIndexes( int numIndexes, int *indexes ){
    attempts to find an existing run of drawindexes before adding new ones
  */
 
-void EmitDrawIndexes( mapDrawSurface_t *ds, bspDrawSurface_t *out ){
-	int i;
-
-
+void EmitDrawIndexes( const mapDrawSurface_t *ds, bspDrawSurface_t *out ){
 	/* attempt to use redundant indexing */
 	out->firstIndex = FindDrawIndexes( ds->numIndexes, ds->indexes );
 	out->numIndexes = ds->numIndexes;
-	if ( out->firstIndex == numBSPDrawIndexes ) {
+	if ( out->firstIndex == int( bspDrawIndexes.size() ) ) {
 		/* copy new unique indexes */
-		for ( i = 0; i < ds->numIndexes; i++ )
+		for ( int i = 0; i < ds->numIndexes; i++ )
 		{
-			AUTOEXPAND_BY_REALLOC_BSP( DrawIndexes, 1024 );
-			bspDrawIndexes[ numBSPDrawIndexes ] = ds->indexes[ i ];
+			auto& index = bspDrawIndexes.emplace_back( ds->indexes[ i ] );
 
 			/* validate the index */
 			if ( ds->type != ESurfaceType::Patch ) {
-				if ( bspDrawIndexes[ numBSPDrawIndexes ] < 0 || bspDrawIndexes[ numBSPDrawIndexes ] >= ds->numVerts ) {
+				if ( index < 0 || index >= ds->numVerts ) {
 					Sys_Warning( "%d %s has invalid index %d (%d)\n",
 					             numBSPDrawSurfaces,
 					             ds->shaderInfo->shader.c_str(),
-					             bspDrawIndexes[ numBSPDrawIndexes ],
+					             index,
 					             i );
-					bspDrawIndexes[ numBSPDrawIndexes ] = 0;
+					index = 0;
 				}
 			}
-
-			/* increment index count */
-			numBSPDrawIndexes++;
 		}
 	}
 }

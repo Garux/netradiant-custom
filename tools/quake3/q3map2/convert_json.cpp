@@ -311,7 +311,7 @@ static void write_json( const char *directory ){
 	}
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& index : Span( bspDrawIndexes, numBSPDrawIndexes ) ){
+		for_indexed( const auto& index : bspDrawIndexes ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "Num", index, all );
 			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "DrawIndex#", i ).c_str(), all ), value, all );
@@ -516,13 +516,10 @@ static void read_json( const char *directory ){
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "DrawIndexes.json" ) );
-		static std::vector<int> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspDrawIndexes.emplace_back();
 			item = obj.value["Num"].GetInt();
 		}
-		bspDrawIndexes = items.data();
-		numBSPDrawIndexes = items.size();
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "VisBytes.json" ) );

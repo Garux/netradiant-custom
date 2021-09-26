@@ -42,7 +42,6 @@
 int numLightmapsASE = 0;
 
 static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const std::vector<int>& lmIndices ){
-	int i, face, a, b, c;
 	char name[ 1024 ];
 
 
@@ -84,7 +83,7 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
 
 	/* export vertex xyz */
 	fprintf( f, "\t\t*MESH_VERTEX_LIST\t{\r\n" );
-	for ( i = 0; i < ds->numVerts; i++ )
+	for ( int i = 0; i < ds->numVerts; i++ )
 	{
 		const bspDrawVert_t& dv = bspDrawVerts[ ds->firstVert + i ];
 		fprintf( f, "\t\t\t*MESH_VERTEX\t%d\t%f\t%f\t%f\r\n", i, dv.xyz[ 0 ], dv.xyz[ 1 ], dv.xyz[ 2 ] );
@@ -93,12 +92,12 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
 
 	/* export faces */
 	fprintf( f, "\t\t*MESH_FACE_LIST\t{\r\n" );
-	for ( i = 0; i < ds->numIndexes; i += 3 )
+	for ( int i = 0; i < ds->numIndexes; i += 3 )
 	{
-		face = ( i / 3 );
-		a = bspDrawIndexes[ i + ds->firstIndex ];
-		c = bspDrawIndexes[ i + ds->firstIndex + 1 ];
-		b = bspDrawIndexes[ i + ds->firstIndex + 2 ];
+		const int face = ( i / 3 );
+		const int a = bspDrawIndexes[ i + ds->firstIndex ];
+		const int c = bspDrawIndexes[ i + ds->firstIndex + 1 ];
+		const int b = bspDrawIndexes[ i + ds->firstIndex + 2 ];
 		fprintf( f, "\t\t\t*MESH_FACE\t%d\tA:\t%d\tB:\t%d\tC:\t%d\tAB:\t1\tBC:\t1\tCA:\t1\t*MESH_SMOOTHING\t0\t*MESH_MTLID\t0\r\n",
 		         face, a, b, c );
 	}
@@ -107,7 +106,7 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
 	/* export vertex st */
 	fprintf( f, "\t\t*MESH_NUMTVERTEX\t%d\r\n", ds->numVerts );
 	fprintf( f, "\t\t*MESH_TVERTLIST\t{\r\n" );
-	for ( i = 0; i < ds->numVerts; i++ )
+	for ( int i = 0; i < ds->numVerts; i++ )
 	{
 		const bspDrawVert_t& dv = bspDrawVerts[ ds->firstVert + i ];
 		if ( lightmapsAsTexcoord ) {
@@ -122,24 +121,24 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
 	/* export texture faces */
 	fprintf( f, "\t\t*MESH_NUMTVFACES\t%d\r\n", ds->numIndexes / 3 );
 	fprintf( f, "\t\t*MESH_TFACELIST\t{\r\n" );
-	for ( i = 0; i < ds->numIndexes; i += 3 )
+	for ( int i = 0; i < ds->numIndexes; i += 3 )
 	{
-		face = ( i / 3 );
-		a = bspDrawIndexes[ i + ds->firstIndex ];
-		c = bspDrawIndexes[ i + ds->firstIndex + 1 ];
-		b = bspDrawIndexes[ i + ds->firstIndex + 2 ];
+		const int face = ( i / 3 );
+		const int a = bspDrawIndexes[ i + ds->firstIndex ];
+		const int c = bspDrawIndexes[ i + ds->firstIndex + 1 ];
+		const int b = bspDrawIndexes[ i + ds->firstIndex + 2 ];
 		fprintf( f, "\t\t\t*MESH_TFACE\t%d\t%d\t%d\t%d\r\n", face, a, b, c );
 	}
 	fprintf( f, "\t\t}\r\n" );
 
 	/* export vertex normals */
 	fprintf( f, "\t\t*MESH_NORMALS\t{\r\n" );
-	for ( i = 0; i < ds->numIndexes; i += 3 )
+	for ( int i = 0; i < ds->numIndexes; i += 3 )
 	{
-		face = ( i / 3 );
-		a = bspDrawIndexes[ i + ds->firstIndex ];
-		b = bspDrawIndexes[ i + ds->firstIndex + 1 ];
-		c = bspDrawIndexes[ i + ds->firstIndex + 2 ];
+		const int face = ( i / 3 );
+		const int a = bspDrawIndexes[ i + ds->firstIndex ];
+		const int b = bspDrawIndexes[ i + ds->firstIndex + 1 ];
+		const int c = bspDrawIndexes[ i + ds->firstIndex + 2 ];
 		const Vector3 normal = VectorNormalized( bspDrawVerts[ a ].normal + bspDrawVerts[ b ].normal + bspDrawVerts[ c ].normal );
 		fprintf( f, "\t\t\t*MESH_FACENORMAL\t%d\t%f\t%f\t%f\r\n", face, normal[ 0 ], normal[ 1 ], normal[ 2 ] );
 		for( const auto idx : { a, b, c } ){
