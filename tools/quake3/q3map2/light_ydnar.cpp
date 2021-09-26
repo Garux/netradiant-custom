@@ -2997,10 +2997,6 @@ void SetupBrushes( void ){
  */
 
 bool ClusterVisible( int a, int b ){
-	int leafBytes;
-	byte        *pvs;
-
-
 	/* dummy check */
 	if ( a < 0 || b < 0 ) {
 		return false;
@@ -3012,20 +3008,17 @@ bool ClusterVisible( int a, int b ){
 	}
 
 	/* not vised? */
-	if ( numBSPVisBytes <= 8 ) {
+	if ( bspVisBytes.size() <= 8 ) {
 		return true;
 	}
 
 	/* get pvs data */
 	/* portalClusters = ((int *) bspVisBytes)[ 0 ]; */
-	leafBytes = ( (int*) bspVisBytes )[ 1 ];
-	pvs = bspVisBytes + VIS_HEADER_SIZE + ( a * leafBytes );
+	const int leafBytes = ( (int*) bspVisBytes.data() )[ 1 ];
+	const byte *pvs = bspVisBytes.data() + VIS_HEADER_SIZE + ( a * leafBytes );
 
 	/* check */
-	if ( ( pvs[ b >> 3 ] & ( 1 << ( b & 7 ) ) ) ) {
-		return true;
-	}
-	return false;
+	return ( pvs[ b >> 3 ] & ( 1 << ( b & 7 ) ) );
 }
 
 

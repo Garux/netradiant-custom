@@ -363,7 +363,7 @@ void LoadIBSPFile( const char *filename ){
 
 	numBSPDrawIndexes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_DRAWINDEXES, (void **) &bspDrawIndexes, sizeof( bspDrawIndexes[ 0 ] ), &allocatedBSPDrawIndexes );
 
-	numBSPVisBytes = CopyLump( (bspHeader_t*) header, LUMP_VISIBILITY, bspVisBytes, 1 ); // TODO fix overflow
+	CopyLump( (bspHeader_t*) header, LUMP_VISIBILITY, bspVisBytes );
 
 	CopyLump( (bspHeader_t*) header, LUMP_LIGHTMAPS, bspLightBytes );
 
@@ -464,7 +464,7 @@ void WriteIBSPFile( const char *filename ){
 	AddLump( file, header->lumps[LUMP_MODELS], bspModels );
 	AddDrawVertsLump( file, header );
 	AddDrawSurfacesLump( file, header );
-	AddLump( file, (bspHeader_t*) header, LUMP_VISIBILITY, bspVisBytes, numBSPVisBytes );
+	AddLump( file, header->lumps[LUMP_VISIBILITY], bspVisBytes );
 	AddLump( file, header->lumps[LUMP_LIGHTMAPS], bspLightBytes );
 	AddLump( file, header->lumps[LUMP_LIGHTGRID], std::vector<ibspGridPoint_t>( bspGridPoints.begin(), bspGridPoints.end() ) );
 	AddLump( file, header->lumps[LUMP_ENTITIES], bspEntData );

@@ -2358,8 +2358,7 @@ Q_EXTERN std::vector<byte> bspLightBytes;
 
 Q_EXTERN std::vector<bspGridPoint_t> bspGridPoints;
 
-Q_EXTERN int numBSPVisBytes Q_ASSIGN( 0 );
-Q_EXTERN byte bspVisBytes[ MAX_MAP_VISIBILITY ];
+Q_EXTERN std::vector<byte> bspVisBytes; // MAX_MAP_VISIBILITY
 
 Q_EXTERN int numBSPDrawVerts Q_ASSIGN( 0 );
 Q_EXTERN bspDrawVert_t          *bspDrawVerts Q_ASSIGN( NULL );

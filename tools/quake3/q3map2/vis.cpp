@@ -186,7 +186,7 @@ void ClusterMerge( int leafnum ){
 	//Sys_FPrintf( SYS_VRB, "cluster %4i : %4i visible\n", leafnum, numvis );
 	++clustersizehistogram[numvis];
 
-	memcpy( bspVisBytes + VIS_HEADER_SIZE + leafnum * leafbytes, uncompressed, leafbytes );
+	memcpy( bspVisBytes.data() + VIS_HEADER_SIZE + leafnum * leafbytes, uncompressed, leafbytes );
 }
 
 /*
@@ -886,14 +886,14 @@ void LoadPortals( char *name ){
 	for ( i = 0; i < portalclusters; i++ )
 		leafs[i].merged = -1;
 
-	numBSPVisBytes = VIS_HEADER_SIZE + portalclusters * leafbytes;
+	bspVisBytes.resize( VIS_HEADER_SIZE + portalclusters * leafbytes );
 
-	if ( numBSPVisBytes > MAX_MAP_VISIBILITY ) {
+	if ( bspVisBytes.size() > MAX_MAP_VISIBILITY ) {
 		Error( "MAX_MAP_VISIBILITY exceeded" );
 	}
 
-	( (int *)bspVisBytes )[0] = portalclusters;
-	( (int *)bspVisBytes )[1] = leafbytes;
+	( (int *)bspVisBytes.data() )[0] = portalclusters;
+	( (int *)bspVisBytes.data() )[1] = leafbytes;
 
 	for ( i = 0, p = portals ; i < numportals ; i++ )
 	{
@@ -1118,7 +1118,7 @@ int VisMain( Args& args ){
 	CountActivePortals();
 	/* WritePortals( "maps/hints.prs" );*/
 
-	Sys_Printf( "visdatasize:%i\n", numBSPVisBytes );
+	Sys_Printf( "visdatasize:%zu\n", bspVisBytes.size() );
 
 	CalcVis();
 

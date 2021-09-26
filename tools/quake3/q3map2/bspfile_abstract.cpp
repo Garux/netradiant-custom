@@ -205,8 +205,8 @@ void SwapBSPFile( void ){
 	SwapBlock( bspBrushSides );
 
 	// vis
-	( (int*) &bspVisBytes )[ 0 ] = LittleLong( ( (int*) &bspVisBytes )[ 0 ] );
-	( (int*) &bspVisBytes )[ 1 ] = LittleLong( ( (int*) &bspVisBytes )[ 1 ] );
+	( (int*) bspVisBytes.data() )[ 0 ] = LittleLong( ( (int*) bspVisBytes.data() )[ 0 ] );
+	( (int*) bspVisBytes.data() )[ 1 ] = LittleLong( ( (int*) bspVisBytes.data() )[ 1 ] );
 
 	/* drawverts (don't swap colors) */
 	for ( i = 0; i < numBSPDrawVerts; i++ )
@@ -506,8 +506,8 @@ void PrintBSPFileSizes( void ){
 	            bspLightBytes.size() / ( g_game->lightmapSize * g_game->lightmapSize * 3 ), bspLightBytes.size() );
 	Sys_Printf( "%9zu lightgrid     %9zu *\n",
 	            bspGridPoints.size(), bspGridPoints.size() * sizeof( bspGridPoints[0] ) );
-	Sys_Printf( "          visibility    %9d\n",
-	            numBSPVisBytes );
+	Sys_Printf( "          visibility    %9zu\n",
+	            bspVisBytes.size() );
 }
 
 
