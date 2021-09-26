@@ -352,7 +352,7 @@ static void write_json( const char *directory ){
 	}
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& point : Span( bspGridPoints, numBSPGridPoints ) ){
+		for_indexed( const auto& point : bspGridPoints ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "ambient", value_for( point.ambient, all ), all );
 			value.AddMember( "directed", value_for( point.directed, all ), all );
@@ -558,16 +558,13 @@ static void read_json( const char *directory ){
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "GridPoints.json" ) );
-		static std::vector<bspGridPoint_t> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspGridPoints.emplace_back();
 			value_to( obj.value["ambient"], item.ambient );
 			value_to( obj.value["directed"], item.directed );
 			value_to_array( obj.value["styles"], item.styles );
 			value_to_array( obj.value["latLong"], item.latLong );
 		}
-		bspGridPoints = items.data();
-		numBSPGridPoints = items.size();
 	}
 }
 

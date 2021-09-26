@@ -82,84 +82,62 @@ struct rbspHeader_t
 
 
 static void CopyLightGridLumps( rbspHeader_t *header ){
-	int i;
-	unsigned short  *inArray;
-	bspGridPoint_t  *in, *out;
+	std::vector<bspGridPoint_t> gridPoints;
+	std::vector<unsigned short> gridArray;
+	CopyLump( (bspHeader_t*) header, LUMP_LIGHTGRID, gridPoints );
+	CopyLump( (bspHeader_t*) header, LUMP_LIGHTARRAY, gridArray );
 
+	bspGridPoints.clear();
+	bspGridPoints.reserve( gridArray.size() );
 
-	/* get count */
-	numBSPGridPoints = GetLumpElements( (bspHeader_t*) header, LUMP_LIGHTARRAY, sizeof( *inArray ) );
-
-	/* allocate buffer */
-	bspGridPoints = safe_calloc( numBSPGridPoints * sizeof( *bspGridPoints ) );
-
-	/* copy */
-	inArray = GetLump( (bspHeader_t*) header, LUMP_LIGHTARRAY );
-	in = GetLump( (bspHeader_t*) header, LUMP_LIGHTGRID );
-	out = bspGridPoints;
-	for ( i = 0; i < numBSPGridPoints; i++ )
-	{
-		memcpy( out, &in[ *inArray ], sizeof( *in ) );
-		inArray++;
-		out++;
-	}
+	for( const auto id : gridArray )
+		bspGridPoints.push_back( gridPoints[ id ] );
 }
 
 
 static void AddLightGridLumps( FILE *file, rbspHeader_t *header ){
-	int i, j, k, c, d;
-	int numGridPoints, maxGridPoints;
-	bspGridPoint_t  *gridPoints, *in, *out;
-	int numGridArray;
-	unsigned short  *gridArray;
-	bool bad;
-
-
 	/* allocate temporary buffers */
-	maxGridPoints = std::min( numBSPGridPoints, MAX_MAP_GRID );
-	gridPoints = safe_malloc( maxGridPoints * sizeof( *gridPoints ) );
-	gridArray = safe_malloc( numBSPGridPoints * sizeof( *gridArray ) );
-
-	/* zero out */
-	numGridPoints = 0;
-	numGridArray = numBSPGridPoints;
+	const size_t maxGridPoints = std::min( bspGridPoints.size(), size_t( MAX_MAP_GRID ) );
+	std::vector<bspGridPoint_t> gridPoints;
+	std::vector<unsigned short> gridArray( bspGridPoints.size() );
 
 	/* for each bsp grid point, find an approximate twin */
-	Sys_Printf( "Storing lightgrid: %d points\n", numBSPGridPoints );
-	for ( i = 0; i < numGridArray; i++ )
+	Sys_Printf( "Storing lightgrid: %zu points\n", bspGridPoints.size() );
+	for ( size_t i = 0; i < gridArray.size(); ++i )
 	{
 		/* get points */
-		in = &bspGridPoints[ i ];
+		const bspGridPoint_t& in = bspGridPoints[ i ];
 
 		/* walk existing list */
-		for ( j = 0; j < numGridPoints; j++ )
+		size_t j;
+		for ( j = 0; j < gridPoints.size(); ++j )
 		{
 			/* get point */
-			out = &gridPoints[ j ];
+			const bspGridPoint_t& out = gridPoints[ j ];
 
 			/* compare styles */
-			if ( memcmp( in->styles, out->styles, MAX_LIGHTMAPS ) ) {
+			if ( memcmp( in.styles, out.styles, MAX_LIGHTMAPS ) ) {
 				continue;
 			}
 
 			/* compare direction */
-			d = abs( in->latLong[ 0 ] - out->latLong[ 0 ] );
-			if ( d < ( 255 - LG_EPSILON ) && d > LG_EPSILON ) {
+			if ( const int d = abs( in.latLong[ 0 ] - out.latLong[ 0 ] );
+				d < ( 255 - LG_EPSILON ) && d > LG_EPSILON ) {
 				continue;
 			}
-			d = abs( in->latLong[ 1 ] - out->latLong[ 1 ] );
-			if ( d < 255 - LG_EPSILON && d > LG_EPSILON ) {
+			if ( const int d = abs( in.latLong[ 1 ] - out.latLong[ 1 ] );
+				d < 255 - LG_EPSILON && d > LG_EPSILON ) {
 				continue;
 			}
 
 			/* compare light */
-			bad = false;
-			for ( k = 0; ( k < MAX_LIGHTMAPS && !bad ); k++ )
+			bool bad = false;
+			for ( int k = 0; ( k < MAX_LIGHTMAPS && !bad ); k++ )
 			{
-				for ( c = 0; c < 3; c++ )
+				for ( int c = 0; c < 3; c++ )
 				{
-					if ( abs( (int) in->ambient[ k ][ c ] - (int) out->ambient[ k ][ c ] ) > LG_EPSILON ||
-					     abs( (int) in->directed[ k ][ c ] - (int) out->directed[ k ][ c ] ) > LG_EPSILON ) {
+					if ( abs( (int) in.ambient[ k ][ c ] - (int) out.ambient[ k ][ c ] ) > LG_EPSILON ||
+					     abs( (int) in.directed[ k ][ c ] - (int) out.directed[ k ][ c ] ) > LG_EPSILON ) {
 						bad = true;
 						break;
 					}
@@ -179,23 +157,18 @@ static void AddLightGridLumps( FILE *file, rbspHeader_t *header ){
 		gridArray[ i ] = (unsigned short) j;
 
 		/* if no sample found, add a new one */
-		if ( j >= numGridPoints && numGridPoints < maxGridPoints ) {
-			out = &gridPoints[ numGridPoints++ ];
-			memcpy( out, in, sizeof( *in ) );
+		if ( j >= gridPoints.size() && gridPoints.size() < maxGridPoints ) {
+			gridPoints.push_back( in );
 		}
 	}
 
 	/* swap array */
-	for ( i = 0; i < numGridArray; i++ )
-		gridArray[ i ] = LittleShort( gridArray[ i ] );
+	for ( auto&& a : gridArray )
+		a = LittleShort( a );
 
 	/* write lumps */
-	AddLump( file, (bspHeader_t*) header, LUMP_LIGHTGRID, gridPoints, ( numGridPoints * sizeof( *gridPoints ) ) );
-	AddLump( file, (bspHeader_t*) header, LUMP_LIGHTARRAY, gridArray, ( numGridArray * sizeof( *gridArray ) ) );
-
-	/* free buffers */
-	free( gridPoints );
-	free( gridArray );
+	AddLump( file, header->lumps[LUMP_LIGHTGRID], gridPoints );
+	AddLump( file, header->lumps[LUMP_LIGHTARRAY], gridArray );
 }
 
 

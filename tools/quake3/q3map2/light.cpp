@@ -1670,14 +1670,11 @@ void SetupGrid( void ){
 		Sys_FPrintf( SYS_VRB, "Storing adjusted grid size\n" );
 	}
 
-	/* 2nd variable. fixme: is this silly? */
-	numBSPGridPoints = numRawGridPoints;
-
 	/* allocate lightgrid */
 	rawGridPoints = safe_calloc( numRawGridPoints * sizeof( *rawGridPoints ) );
 
-	free( bspGridPoints );
-	bspGridPoints = safe_calloc( numBSPGridPoints * sizeof( *bspGridPoints ) );
+	bspGridPoints.resize( numRawGridPoints );
+	memset( bspGridPoints.data(), 0, bspGridPoints.size() * sizeof( bspGridPoints[0] ) );
 
 	/* clear lightgrid */
 	for ( i = 0; i < numRawGridPoints; i++ )
@@ -1779,8 +1776,8 @@ void LightWorld( bool fastAllocate ){
 		inGrid = true;
 		RunThreadsOnIndividual( numRawGridPoints, true, TraceGrid );
 		inGrid = false;
-		Sys_Printf( "%d x %d x %d = %d grid\n",
-		            gridBounds[ 0 ], gridBounds[ 1 ], gridBounds[ 2 ], numBSPGridPoints );
+		Sys_Printf( "%d x %d x %d = %zu grid\n",
+		            gridBounds[ 0 ], gridBounds[ 1 ], gridBounds[ 2 ], bspGridPoints.size() );
 
 		/* ydnar: emit statistics on light culling */
 		Sys_FPrintf( SYS_VRB, "%9d grid points envelope culled\n", gridEnvelopeCulled );

@@ -296,79 +296,22 @@ struct ibspGridPoint_t
 	Vector3b ambient;
 	Vector3b directed;
 	byte latLong[ 2 ];
+	ibspGridPoint_t( const bspGridPoint_t& other ) :
+		ambient( other.ambient[0] ),
+		directed( other.directed[0] ),
+		latLong{ other.latLong[0], other.latLong[1] } {}
+	operator bspGridPoint_t() const {
+		static_assert( MAX_LIGHTMAPS == 4 );
+		return {
+			{ ambient, ambient, ambient, ambient },
+			{ directed, directed, directed, directed },
+			{ LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
+			{ latLong[0], latLong[1] }
+		};
+	}
 };
 
 
-static void CopyLightGridLumps( ibspHeader_t *header ){
-	int i, j;
-	ibspGridPoint_t *in;
-	bspGridPoint_t  *out;
-
-
-	/* get count */
-	numBSPGridPoints = GetLumpElements( (bspHeader_t*) header, LUMP_LIGHTGRID, sizeof( *in ) );
-
-	/* allocate buffer */
-	bspGridPoints = safe_calloc( numBSPGridPoints * sizeof( *bspGridPoints ) );
-
-	/* copy */
-	in = GetLump( (bspHeader_t*) header, LUMP_LIGHTGRID );
-	out = bspGridPoints;
-	for ( i = 0; i < numBSPGridPoints; i++ )
-	{
-		for ( j = 0; j < MAX_LIGHTMAPS; j++ )
-		{
-			out->ambient[ j ] = in->ambient;
-			out->directed[ j ] = in->directed;
-			out->styles[ j ] = LS_NONE;
-		}
-
-		out->styles[ 0 ] = LS_NORMAL;
-
-		out->latLong[ 0 ] = in->latLong[ 0 ];
-		out->latLong[ 1 ] = in->latLong[ 1 ];
-
-		in++;
-		out++;
-	}
-}
-
-
-static void AddLightGridLumps( FILE *file, ibspHeader_t *header ){
-	int i;
-	bspGridPoint_t  *in;
-	ibspGridPoint_t *buffer, *out;
-
-
-	/* dummy check */
-	if ( bspGridPoints == NULL ) {
-		return;
-	}
-
-	/* allocate temporary buffer */
-	buffer = safe_malloc( numBSPGridPoints * sizeof( *out ) );
-
-	/* convert */
-	in = bspGridPoints;
-	out = buffer;
-	for ( i = 0; i < numBSPGridPoints; i++ )
-	{
-		out->ambient = in->ambient[ 0 ];
-		out->directed = in->directed[ 0 ];
-
-		out->latLong[ 0 ] = in->latLong[ 0 ];
-		out->latLong[ 1 ] = in->latLong[ 1 ];
-
-		in++;
-		out++;
-	}
-
-	/* write lumps */
-	AddLump( file, (bspHeader_t*) header, LUMP_LIGHTGRID, buffer, ( numBSPGridPoints * sizeof( *out ) ) );
-
-	/* free buffer (ydnar 2002-10-22: [bug 641] thanks Rap70r! */
-	free( buffer );
-}
 
 /*
    LoadIBSPFile()
@@ -426,7 +369,7 @@ void LoadIBSPFile( const char *filename ){
 
 	CopyLump( (bspHeader_t*) header, LUMP_ENTITIES, bspEntData );
 
-	CopyLightGridLumps( header );
+	CopyLump<bspGridPoint_t, ibspGridPoint_t>( (bspHeader_t*) header, LUMP_LIGHTGRID, bspGridPoints );
 
 	/* advertisements */
 	if ( header->version == 47 && strEqual( g_game->arg, "quakelive" ) ) { // quake live's bsp version minus wolf, et, etut
@@ -523,7 +466,7 @@ void WriteIBSPFile( const char *filename ){
 	AddDrawSurfacesLump( file, header );
 	AddLump( file, (bspHeader_t*) header, LUMP_VISIBILITY, bspVisBytes, numBSPVisBytes );
 	AddLump( file, header->lumps[LUMP_LIGHTMAPS], bspLightBytes );
-	AddLightGridLumps( file, header );
+	AddLump( file, header->lumps[LUMP_LIGHTGRID], std::vector<ibspGridPoint_t>( bspGridPoints.begin(), bspGridPoints.end() ) );
 	AddLump( file, header->lumps[LUMP_ENTITIES], bspEntData );
 	AddLump( file, (bspHeader_t*) header, LUMP_FOGS, bspFogs, numBSPFogs * sizeof( bspFog_t ) );
 	AddLump( file, (bspHeader_t*) header, LUMP_DRAWINDEXES, bspDrawIndexes, numBSPDrawIndexes * sizeof( bspDrawIndexes[ 0 ] ) );

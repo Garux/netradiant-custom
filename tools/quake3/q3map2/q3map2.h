@@ -360,9 +360,9 @@ enum bspSurfaceType_t
 
 struct bspGridPoint_t
 {
-	Vector3b ambient[ MAX_LIGHTMAPS ];
-	Vector3b directed[ MAX_LIGHTMAPS ];
-	byte styles[ MAX_LIGHTMAPS ];
+	Vector3b ambient[ MAX_LIGHTMAPS ];    /* RBSP - array */
+	Vector3b directed[ MAX_LIGHTMAPS ];   /* RBSP - array */
+	byte styles[ MAX_LIGHTMAPS ];         /* RBSP - whole */
 	byte latLong[ 2 ];
 };
 
@@ -2356,8 +2356,7 @@ Q_EXTERN std::vector<bspBrushSide_t> bspBrushSides;
 
 Q_EXTERN std::vector<byte> bspLightBytes;
 
-Q_EXTERN int numBSPGridPoints Q_ASSIGN( 0 );
-Q_EXTERN bspGridPoint_t     *bspGridPoints Q_ASSIGN( NULL );
+Q_EXTERN std::vector<bspGridPoint_t> bspGridPoints;
 
 Q_EXTERN int numBSPVisBytes Q_ASSIGN( 0 );
 Q_EXTERN byte bspVisBytes[ MAX_MAP_VISIBILITY ];

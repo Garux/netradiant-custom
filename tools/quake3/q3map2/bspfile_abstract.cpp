@@ -113,7 +113,7 @@ void BSPFilesCleanup(){
 	free( bspDrawVerts );
 	free( bspDrawSurfaces );
 	bspLightBytes.clear();
-	free( bspGridPoints );
+	bspGridPoints.clear();
 }
 
 
@@ -504,8 +504,8 @@ void PrintBSPFileSizes( void ){
 
 	Sys_Printf( "%9zu lightmaps     %9zu\n",
 	            bspLightBytes.size() / ( g_game->lightmapSize * g_game->lightmapSize * 3 ), bspLightBytes.size() );
-	Sys_Printf( "%9d lightgrid     %9d *\n",
-	            numBSPGridPoints, (int) ( numBSPGridPoints * sizeof( *bspGridPoints ) ) );
+	Sys_Printf( "%9zu lightgrid     %9zu *\n",
+	            bspGridPoints.size(), bspGridPoints.size() * sizeof( bspGridPoints[0] ) );
 	Sys_Printf( "          visibility    %9d\n",
 	            numBSPVisBytes );
 }
