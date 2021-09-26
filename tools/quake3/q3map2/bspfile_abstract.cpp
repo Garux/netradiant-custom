@@ -53,44 +53,6 @@
 
 /* FIXME: remove the functions below that handle memory management of bsp file chunks */
 
-int numBSPDrawVertsBuffer = 0;
-void IncDrawVerts(){
-	numBSPDrawVerts++;
-
-	if ( bspDrawVerts == 0 ) {
-		numBSPDrawVertsBuffer = 1024;
-
-		bspDrawVerts = safe_malloc_info( sizeof( bspDrawVert_t ) * numBSPDrawVertsBuffer, "IncDrawVerts" );
-
-	}
-	else if ( numBSPDrawVerts > numBSPDrawVertsBuffer ) {
-		bspDrawVert_t *newBspDrawVerts;
-
-		numBSPDrawVertsBuffer *= 3; // multiply by 1.5
-		numBSPDrawVertsBuffer /= 2;
-
-		newBspDrawVerts = void_ptr( realloc( bspDrawVerts, sizeof( bspDrawVert_t ) * numBSPDrawVertsBuffer ) );
-
-		if ( !newBspDrawVerts ) {
-			free (bspDrawVerts);
-			Error( "realloc() failed (IncDrawVerts)" );
-		}
-
-		bspDrawVerts = newBspDrawVerts;
-	}
-
-	memset( bspDrawVerts + ( numBSPDrawVerts - 1 ), 0, sizeof( bspDrawVert_t ) );
-}
-
-void SetDrawVerts( int n ){
-	free( bspDrawVerts );
-
-	numBSPDrawVerts =
-	numBSPDrawVertsBuffer = n;
-
-	bspDrawVerts = safe_calloc_info( sizeof( bspDrawVert_t ) * numBSPDrawVertsBuffer, "IncDrawVerts" );
-}
-
 int numBSPDrawSurfacesBuffer = 0;
 void SetDrawSurfacesBuffer(){
 	free( bspDrawSurfaces );
@@ -110,7 +72,7 @@ void SetDrawSurfaces( int n ){
 }
 
 void BSPFilesCleanup(){
-	free( bspDrawVerts );
+	bspDrawVerts.clear();
 	free( bspDrawSurfaces );
 	bspLightBytes.clear();
 	bspGridPoints.clear();
@@ -209,20 +171,20 @@ void SwapBSPFile( void ){
 	( (int*) bspVisBytes.data() )[ 1 ] = LittleLong( ( (int*) bspVisBytes.data() )[ 1 ] );
 
 	/* drawverts (don't swap colors) */
-	for ( i = 0; i < numBSPDrawVerts; i++ )
+	for ( bspDrawVert_t& v : bspDrawVerts )
 	{
-		bspDrawVerts[ i ].xyz[ 0 ] = LittleFloat( bspDrawVerts[ i ].xyz[ 0 ] );
-		bspDrawVerts[ i ].xyz[ 1 ] = LittleFloat( bspDrawVerts[ i ].xyz[ 1 ] );
-		bspDrawVerts[ i ].xyz[ 2 ] = LittleFloat( bspDrawVerts[ i ].xyz[ 2 ] );
-		bspDrawVerts[ i ].normal[ 0 ] = LittleFloat( bspDrawVerts[ i ].normal[ 0 ] );
-		bspDrawVerts[ i ].normal[ 1 ] = LittleFloat( bspDrawVerts[ i ].normal[ 1 ] );
-		bspDrawVerts[ i ].normal[ 2 ] = LittleFloat( bspDrawVerts[ i ].normal[ 2 ] );
-		bspDrawVerts[ i ].st[ 0 ] = LittleFloat( bspDrawVerts[ i ].st[ 0 ] );
-		bspDrawVerts[ i ].st[ 1 ] = LittleFloat( bspDrawVerts[ i ].st[ 1 ] );
-		for ( j = 0; j < MAX_LIGHTMAPS; j++ )
+		v.xyz[ 0 ] = LittleFloat( v.xyz[ 0 ] );
+		v.xyz[ 1 ] = LittleFloat( v.xyz[ 1 ] );
+		v.xyz[ 2 ] = LittleFloat( v.xyz[ 2 ] );
+		v.normal[ 0 ] = LittleFloat( v.normal[ 0 ] );
+		v.normal[ 1 ] = LittleFloat( v.normal[ 1 ] );
+		v.normal[ 2 ] = LittleFloat( v.normal[ 2 ] );
+		v.st[ 0 ] = LittleFloat( v.st[ 0 ] );
+		v.st[ 1 ] = LittleFloat( v.st[ 1 ] );
+		for ( Vector2& lm : v.lightmap )
 		{
-			bspDrawVerts[ i ].lightmap[ j ][ 0 ] = LittleFloat( bspDrawVerts[ i ].lightmap[ j ][ 0 ] );
-			bspDrawVerts[ i ].lightmap[ j ][ 1 ] = LittleFloat( bspDrawVerts[ i ].lightmap[ j ][ 1 ] );
+			lm[ 0 ] = LittleFloat( lm[ 0 ] );
+			lm[ 1 ] = LittleFloat( lm[ 1 ] );
 		}
 	}
 
@@ -496,8 +458,8 @@ void PrintBSPFileSizes( void ){
 	            planarCount );
 	Sys_Printf( "%9d   trisoup surfaces\n",
 	            trisoupCount );
-	Sys_Printf( "%9d drawverts     %9d *\n",
-	            numBSPDrawVerts, (int) ( numBSPDrawVerts * sizeof( *bspDrawVerts ) ) );
+	Sys_Printf( "%9zu drawverts     %9zu *\n",
+	            bspDrawVerts.size(), bspDrawVerts.size() * sizeof( bspDrawVerts[0] ) );
 	Sys_Printf( "%9d drawindexes   %9d\n",
 	            numBSPDrawIndexes, (int) ( numBSPDrawIndexes * sizeof( *bspDrawIndexes ) ) );
 	Sys_Printf( "\n" );

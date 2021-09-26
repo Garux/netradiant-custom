@@ -161,6 +161,7 @@ void SmoothNormals( void ){
 	float shadeAngle, defaultShadeAngle, maxShadeAngle;
 	int indexes[ MAX_SAMPLES ];
 	Vector3 votes[ MAX_SAMPLES ];
+	const int numBSPDrawVerts = bspDrawVerts.size();
 
 
 	/* allocate shade angle table */

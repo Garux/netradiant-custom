@@ -564,8 +564,8 @@ void SetEntityOrigins( void ){
 
 
 	/* ydnar: copy drawverts into private storage for nefarious purposes */
-	yDrawVerts = safe_malloc( numBSPDrawVerts * sizeof( bspDrawVert_t ) );
-	memcpy( yDrawVerts, bspDrawVerts, numBSPDrawVerts * sizeof( bspDrawVert_t ) );
+	yDrawVerts = safe_malloc( bspDrawVerts.size() * sizeof( bspDrawVert_t ) );
+	memcpy( yDrawVerts, bspDrawVerts.data(), bspDrawVerts.size() * sizeof( bspDrawVert_t ) );
 
 	/* set the entity origins */
 	for ( const auto& e : entities )

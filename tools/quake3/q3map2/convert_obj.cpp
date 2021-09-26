@@ -45,8 +45,7 @@ int objVertexCount = 0;
 int objLastShaderNum = -1;
 
 static void ConvertSurfaceToOBJ( FILE *f, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const std::vector<int>& lmIndices ){
-	int i, v, a, b, c;
-	bspDrawVert_t   *dv;
+	int i, a, b, c;
 
 	/* ignore patches for now */
 	if ( ds->surfaceType != MST_PLANAR && ds->surfaceType != MST_TRIANGLE_SOUP ) {
@@ -91,16 +90,15 @@ static void ConvertSurfaceToOBJ( FILE *f, int modelNum, bspDrawSurface_t *ds, in
 	/* export vertex */
 	for ( i = 0; i < ds->numVerts; i++ )
 	{
-		v = i + ds->firstVert;
-		dv = &bspDrawVerts[ v ];
+		const bspDrawVert_t& dv = bspDrawVerts[ ds->firstVert + i ];
 		fprintf( f, "# vertex %d\r\n", i + objVertexCount + 1 );
-		fprintf( f, "v %f %f %f\r\n", dv->xyz[ 0 ], dv->xyz[ 2 ], -dv->xyz[ 1 ] );
-		fprintf( f, "vn %f %f %f\r\n", dv->normal[ 0 ], dv->normal[ 2 ], -dv->normal[ 1 ] );
+		fprintf( f, "v %f %f %f\r\n", dv.xyz[ 0 ], dv.xyz[ 2 ], -dv.xyz[ 1 ] );
+		fprintf( f, "vn %f %f %f\r\n", dv.normal[ 0 ], dv.normal[ 2 ], -dv.normal[ 1 ] );
 		if ( lightmapsAsTexcoord ) {
-			fprintf( f, "vt %f %f\r\n", dv->lightmap[0][0], ( 1.0 - dv->lightmap[0][1] ) ); // dv->lightmap[0][1] internal, ( 1.0 - dv->lightmap[0][1] ) external
+			fprintf( f, "vt %f %f\r\n", dv.lightmap[0][0], ( 1.0 - dv.lightmap[0][1] ) ); // dv.lightmap[0][1] internal, ( 1.0 - dv.lightmap[0][1] ) external
 		}
 		else{
-			fprintf( f, "vt %f %f\r\n", dv->st[ 0 ], ( 1.0 - dv->st[ 1 ] ) );
+			fprintf( f, "vt %f %f\r\n", dv.st[ 0 ], ( 1.0 - dv.st[ 1 ] ) );
 		}
 	}
 

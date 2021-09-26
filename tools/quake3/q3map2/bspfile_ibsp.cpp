@@ -228,65 +228,23 @@ struct ibspDrawVert_t
 	Vector2 lightmap;
 	Vector3 normal;
 	Color4b color;
+	ibspDrawVert_t( const bspDrawVert_t& other ) :
+		xyz( other.xyz ),
+		st( other.st ),
+		lightmap( other.lightmap[0] ),
+		normal( other.normal ),
+		color( other.color[0] ) {}
+	operator bspDrawVert_t() {
+		static_assert( MAX_LIGHTMAPS == 4 );
+		return {
+			xyz,
+			st,
+			{ lightmap, Vector2( 0, 0 ), Vector2( 0, 0 ), Vector2( 0, 0 ) },
+			normal,
+			{ color, Color4b( 0, 0, 0, 0 ), Color4b( 0, 0, 0, 0 ), Color4b( 0, 0, 0, 0 ) }
+		};
+	}
 };
-
-
-static void CopyDrawVertsLump( ibspHeader_t *header ){
-	int i;
-	ibspDrawVert_t  *in;
-	bspDrawVert_t   *out;
-
-
-	/* get count */
-	numBSPDrawVerts = GetLumpElements( (bspHeader_t*) header, LUMP_DRAWVERTS, sizeof( *in ) );
-	SetDrawVerts( numBSPDrawVerts );
-
-	/* copy */
-	in = GetLump( (bspHeader_t*) header, LUMP_DRAWVERTS );
-	out = bspDrawVerts;
-	for ( i = 0; i < numBSPDrawVerts; i++ )
-	{
-		out->xyz = in->xyz;
-		out->st = in->st;
-		out->lightmap[ 0 ] = in->lightmap;
-		out->normal = in->normal;
-		out->color[ 0 ] = in->color;
-		in++;
-		out++;
-	}
-}
-
-
-static void AddDrawVertsLump( FILE *file, ibspHeader_t *header ){
-	int i, size;
-	bspDrawVert_t   *in;
-	ibspDrawVert_t  *buffer, *out;
-
-
-	/* allocate output buffer */
-	size = numBSPDrawVerts * sizeof( *buffer );
-	buffer = safe_calloc( size );
-
-	/* convert */
-	in = bspDrawVerts;
-	out = buffer;
-	for ( i = 0; i < numBSPDrawVerts; i++ )
-	{
-		out->xyz = in->xyz;
-		out->st = in->st;
-		out->lightmap = in->lightmap[ 0 ];
-		out->normal = in->normal;
-		out->color = in->color[ 0 ];
-		in++;
-		out++;
-	}
-
-	/* write lump */
-	AddLump( file, (bspHeader_t*) header, LUMP_DRAWVERTS, buffer, size );
-
-	/* free buffer */
-	free( buffer );
-}
 
 
 
@@ -355,7 +313,7 @@ void LoadIBSPFile( const char *filename ){
 
 	CopyLump<bspBrushSide_t, ibspBrushSide_t>( (bspHeader_t*) header, LUMP_BRUSHSIDES, bspBrushSides );
 
-	CopyDrawVertsLump( header );
+	CopyLump<bspDrawVert_t, ibspDrawVert_t>( (bspHeader_t*) header, LUMP_DRAWVERTS, bspDrawVerts );
 
 	CopyDrawSurfacesLump( header );
 
@@ -462,7 +420,7 @@ void WriteIBSPFile( const char *filename ){
 	AddLump( file, header->lumps[LUMP_LEAFSURFACES], bspLeafSurfaces );
 	AddLump( file, header->lumps[LUMP_LEAFBRUSHES], bspLeafBrushes );
 	AddLump( file, header->lumps[LUMP_MODELS], bspModels );
-	AddDrawVertsLump( file, header );
+	AddLump( file, header->lumps[LUMP_DRAWVERTS], std::vector<ibspDrawVert_t>( bspDrawVerts.begin(), bspDrawVerts.end() ) );
 	AddDrawSurfacesLump( file, header );
 	AddLump( file, header->lumps[LUMP_VISIBILITY], bspVisBytes );
 	AddLump( file, header->lumps[LUMP_LIGHTMAPS], bspLightBytes );

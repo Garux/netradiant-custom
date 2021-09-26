@@ -2035,45 +2035,34 @@ static int FilterFlareSurfIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
    emits bsp drawverts from a map drawsurface
  */
 
-void EmitDrawVerts( mapDrawSurface_t *ds, bspDrawSurface_t *out ){
-	int i, k;
-	bspDrawVert_t   *dv;
-	shaderInfo_t    *si;
-	float offset;
-
-
+void EmitDrawVerts( const mapDrawSurface_t *ds, bspDrawSurface_t *out ){
 	/* get stuff */
-	si = ds->shaderInfo;
-	offset = si->offset;
+	const float offset = ds->shaderInfo->offset;
 
 	/* copy the verts */
-	out->firstVert = numBSPDrawVerts;
+	out->firstVert = bspDrawVerts.size();
 	out->numVerts = ds->numVerts;
-	for ( i = 0; i < ds->numVerts; i++ )
+	for ( int i = 0; i < ds->numVerts; i++ )
 	{
-		/* allocate a new vert */
-		IncDrawVerts();
-		dv = &bspDrawVerts[ numBSPDrawVerts - 1 ];
-
-		/* copy it */
-		memcpy( dv, &ds->verts[ i ], sizeof( *dv ) );
+		/* allocate a new vert */ /* copy it */
+		bspDrawVert_t& dv = bspDrawVerts.emplace_back( ds->verts[ i ] );
 
 		/* offset? */
 		if ( offset != 0.0f ) {
-			dv->xyz += dv->normal * offset;
+			dv.xyz += dv.normal * offset;
 		}
 
 		/* expand model bounds
 		   necessary because of misc_model surfaces on entities
 		   note: does not happen on worldspawn as its bounds is only used for determining lightgrid bounds */
 		if ( bspModels.size() > 1 ) {
-			bspModels.back().minmax.extend( dv->xyz );
+			bspModels.back().minmax.extend( dv.xyz );
 		}
 
 		/* debug color? */
 		if ( debugSurfaces ) {
-			for ( k = 0; k < MAX_LIGHTMAPS; k++ )
-				dv->color[ k ].rgb() = debugColors[ ( ds - mapDrawSurfs ) % 12 ];
+			for ( int k = 0; k < MAX_LIGHTMAPS; k++ )
+				dv.color[ k ].rgb() = debugColors[ ( ds - mapDrawSurfs ) % 12 ];
 		}
 	}
 }

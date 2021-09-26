@@ -1149,8 +1149,8 @@ void SetupSurfaceLightmaps( void ){
 	/* allocate vertex luxel storage */
 	for ( k = 0; k < MAX_LIGHTMAPS; k++ )
 	{
-		vertexLuxels[ k ] = safe_calloc( numBSPDrawVerts * sizeof( *vertexLuxels[ 0 ] ) );
-		radVertexLuxels[ k ] = safe_calloc( numBSPDrawVerts * sizeof( *radVertexLuxels[ 0 ] ) );
+		vertexLuxels[ k ] = safe_calloc( bspDrawVerts.size() * sizeof( *vertexLuxels[ 0 ] ) );
+		radVertexLuxels[ k ] = safe_calloc( bspDrawVerts.size() * sizeof( *radVertexLuxels[ 0 ] ) );
 	}
 
 	/* emit some stats */

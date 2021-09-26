@@ -47,13 +47,13 @@ static float Det3x3( float a00, float a01, float a02,
 	    +   a02 * ( a10 * a21 - a11 * a20 );
 }
 
-void GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, bspDrawVert_t *bestVert[3] ){
+void GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, const bspDrawVert_t *bestVert[3] ){
 	bspDrawSurface_t *s;
 	int i;
 	int t;
 	float best = 0;
 	float thisarea;
-	bspDrawVert_t *vert[3];
+	const bspDrawVert_t *vert[3];
 	const plane_t& buildPlane = mapplanes[buildSide.planenum];
 	int matches = 0;
 
@@ -405,7 +405,7 @@ static void ConvertBrush( FILE *f, int num, const bspBrush_t& brush, const Vecto
 		//   - meshverts point in pairs of three into verts
 		//   - (triangles)
 		//   - find the triangle that has most in common with our
-		bspDrawVert_t   *vert[3];
+		const bspDrawVert_t   *vert[3];
 		GetBestSurfaceTriangleMatchForBrushside( buildSide, vert );
 
 		/* get texture name */
@@ -746,12 +746,6 @@ for ( i = 0; i < brush->numSides; i++ )
  */
 
 static void ConvertPatch( FILE *f, int num, const bspDrawSurface_t& ds, const Vector3& origin ){
-	int x, y;
-	bspShader_t     *shader;
-	const char      *texture;
-	bspDrawVert_t   *dv;
-
-
 	/* only patches */
 	if ( ds.surfaceType != MST_PATCH ) {
 		return;
@@ -761,14 +755,15 @@ static void ConvertPatch( FILE *f, int num, const bspDrawSurface_t& ds, const Ve
 	if ( ds.shaderNum < 0 || ds.shaderNum >= int( bspShaders.size() ) ) {
 		return;
 	}
-	shader = &bspShaders[ ds.shaderNum ];
 
 	/* get texture name */
-	if ( striEqualPrefix( shader->shader, "textures/" ) ) {
-		texture = shader->shader + 9;
+	const char      *texture;
+	if ( const bspShader_t& shader = bspShaders[ ds.shaderNum ];
+		striEqualPrefix( shader.shader, "textures/" ) ) {
+		texture = shader.shader + 9;
 	}
 	else{
-		texture = shader->shader;
+		texture = shader.shader;
 	}
 
 	/* start patch */
@@ -781,22 +776,22 @@ static void ConvertPatch( FILE *f, int num, const bspDrawSurface_t& ds, const Ve
 	fprintf( f, "\t\t\t(\n" );
 
 	/* iterate through the verts */
-	for ( x = 0; x < ds.patchWidth; x++ )
+	for ( int x = 0; x < ds.patchWidth; x++ )
 	{
 		/* start row */
 		fprintf( f, "\t\t\t\t(" );
 
 		/* iterate through the row */
-		for ( y = 0; y < ds.patchHeight; y++ )
+		for ( int y = 0; y < ds.patchHeight; y++ )
 		{
 			/* get vert */
-			dv = &bspDrawVerts[ ds.firstVert + ( y * ds.patchWidth ) + x ];
+			const bspDrawVert_t& dv = bspDrawVerts[ ds.firstVert + ( y * ds.patchWidth ) + x ];
 
 			/* offset it */
-			const Vector3 xyz = dv->xyz + origin;
+			const Vector3 xyz = dv.xyz + origin;
 
 			/* print vertex */
-			fprintf( f, " ( %f %f %f %f %f )", xyz[ 0 ], xyz[ 1 ], xyz[ 2 ], dv->st[ 0 ], dv->st[ 1 ] );
+			fprintf( f, " ( %f %f %f %f %f )", xyz[ 0 ], xyz[ 1 ], xyz[ 2 ], dv.st[ 0 ], dv.st[ 1 ] );
 		}
 
 		/* end row */

@@ -42,8 +42,7 @@
 int numLightmapsASE = 0;
 
 static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const std::vector<int>& lmIndices ){
-	int i, v, face, a, b, c;
-	bspDrawVert_t   *dv;
+	int i, face, a, b, c;
 	char name[ 1024 ];
 
 
@@ -87,9 +86,8 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
 	fprintf( f, "\t\t*MESH_VERTEX_LIST\t{\r\n" );
 	for ( i = 0; i < ds->numVerts; i++ )
 	{
-		v = i + ds->firstVert;
-		dv = &bspDrawVerts[ v ];
-		fprintf( f, "\t\t\t*MESH_VERTEX\t%d\t%f\t%f\t%f\r\n", i, dv->xyz[ 0 ], dv->xyz[ 1 ], dv->xyz[ 2 ] );
+		const bspDrawVert_t& dv = bspDrawVerts[ ds->firstVert + i ];
+		fprintf( f, "\t\t\t*MESH_VERTEX\t%d\t%f\t%f\t%f\r\n", i, dv.xyz[ 0 ], dv.xyz[ 1 ], dv.xyz[ 2 ] );
 	}
 	fprintf( f, "\t\t}\r\n" );
 
@@ -111,13 +109,12 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
 	fprintf( f, "\t\t*MESH_TVERTLIST\t{\r\n" );
 	for ( i = 0; i < ds->numVerts; i++ )
 	{
-		v = i + ds->firstVert;
-		dv = &bspDrawVerts[ v ];
+		const bspDrawVert_t& dv = bspDrawVerts[ ds->firstVert + i ];
 		if ( lightmapsAsTexcoord ) {
-			fprintf( f, "\t\t\t*MESH_TVERT\t%d\t%f\t%f\t%f\r\n", i, dv->lightmap[0][0], ( 1.0 - dv->lightmap[0][1] ), 1.0f ); // dv->lightmap[0][1] internal, ( 1.0 - dv->lightmap[0][1] ) external
+			fprintf( f, "\t\t\t*MESH_TVERT\t%d\t%f\t%f\t%f\r\n", i, dv.lightmap[0][0], ( 1.0 - dv.lightmap[0][1] ), 1.0f ); // dv.lightmap[0][1] internal, ( 1.0 - dv.lightmap[0][1] ) external
 		}
 		else{
-			fprintf( f, "\t\t\t*MESH_TVERT\t%d\t%f\t%f\t%f\r\n", i, dv->st[ 0 ], ( 1.0 - dv->st[ 1 ] ), 1.0f );
+			fprintf( f, "\t\t\t*MESH_TVERT\t%d\t%f\t%f\t%f\r\n", i, dv.st[ 0 ], ( 1.0 - dv.st[ 1 ] ), 1.0f );
 		}
 	}
 	fprintf( f, "\t\t}\r\n" );
@@ -146,8 +143,8 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
 		const Vector3 normal = VectorNormalized( bspDrawVerts[ a ].normal + bspDrawVerts[ b ].normal + bspDrawVerts[ c ].normal );
 		fprintf( f, "\t\t\t*MESH_FACENORMAL\t%d\t%f\t%f\t%f\r\n", face, normal[ 0 ], normal[ 1 ], normal[ 2 ] );
 		for( const auto idx : { a, b, c } ){
-			dv = &bspDrawVerts[ idx ];
-			fprintf( f, "\t\t\t\t*MESH_VERTEXNORMAL\t%d\t%f\t%f\t%f\r\n", idx, dv->normal[ 0 ], dv->normal[ 1 ], dv->normal[ 2 ] );
+			const bspDrawVert_t& dv = bspDrawVerts[ idx ];
+			fprintf( f, "\t\t\t\t*MESH_VERTEXNORMAL\t%d\t%f\t%f\t%f\r\n", idx, dv.normal[ 0 ], dv.normal[ 1 ], dv.normal[ 2 ] );
 		}
 	}
 	fprintf( f, "\t\t}\r\n" );

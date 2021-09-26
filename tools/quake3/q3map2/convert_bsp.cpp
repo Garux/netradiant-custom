@@ -500,8 +500,8 @@ int ScaleBSPMain( Args& args ){
 
 	if ( texscale ) {
 		Sys_Printf( "Using texture unlocking (and probably breaking texture alignment a lot)\n" );
-		old_xyzst = safe_malloc( sizeof( *old_xyzst ) * numBSPDrawVerts * 5 );
-		for ( i = 0; i < numBSPDrawVerts; i++ )
+		old_xyzst = safe_malloc( sizeof( *old_xyzst ) * bspDrawVerts.size() * 5 );
+		for ( size_t i = 0; i < bspDrawVerts.size(); i++ )
 		{
 			old_xyzst[5 * i + 0] = bspDrawVerts[i].xyz[0];
 			old_xyzst[5 * i + 1] = bspDrawVerts[i].xyz[1];
@@ -512,11 +512,11 @@ int ScaleBSPMain( Args& args ){
 	}
 
 	/* scale drawverts */
-	for ( i = 0; i < numBSPDrawVerts; i++ )
+	for ( bspDrawVert_t& vert : bspDrawVerts )
 	{
-		bspDrawVerts[i].xyz *= scale;
-		bspDrawVerts[i].normal /= scale;
-		VectorNormalize( bspDrawVerts[i].normal );
+		vert.xyz *= scale;
+		vert.normal /= scale;
+		VectorNormalize( vert.normal );
 	}
 
 	if ( texscale ) {
@@ -530,9 +530,11 @@ int ScaleBSPMain( Args& args ){
 				}
 				for ( j = bspDrawSurfaces[i].firstIndex; j < bspDrawSurfaces[i].firstIndex + bspDrawSurfaces[i].numIndexes; j += 3 )
 				{
-					int ia = bspDrawIndexes[j] + bspDrawSurfaces[i].firstVert, ib = bspDrawIndexes[j + 1] + bspDrawSurfaces[i].firstVert, ic = bspDrawIndexes[j + 2] + bspDrawSurfaces[i].firstVert;
-					bspDrawVert_t *a = &bspDrawVerts[ia], *b = &bspDrawVerts[ib], *c = &bspDrawVerts[ic];
-					float *oa = &old_xyzst[ia * 5], *ob = &old_xyzst[ib * 5], *oc = &old_xyzst[ic * 5];
+					const int ia = bspDrawIndexes[j] + bspDrawSurfaces[i].firstVert,
+					          ib = bspDrawIndexes[j + 1] + bspDrawSurfaces[i].firstVert,
+							  ic = bspDrawIndexes[j + 2] + bspDrawSurfaces[i].firstVert;
+					bspDrawVert_t &a = bspDrawVerts[ia], &b = bspDrawVerts[ib], &c = bspDrawVerts[ic];
+					const float *oa = &old_xyzst[ia * 5], *ob = &old_xyzst[ib * 5], *oc = &old_xyzst[ic * 5];
 					// extrapolate:
 					//   a->xyz -> oa
 					//   b->xyz -> ob
@@ -541,9 +543,9 @@ int ScaleBSPMain( Args& args ){
 					    &oa[0], &oa[3],
 					    &ob[0], &ob[3],
 					    &oc[0], &oc[3],
-					    a->xyz, a->st,
-					    b->xyz, b->st,
-					    c->xyz, c->st );
+					    a.xyz, a.st,
+					    b.xyz, b.st,
+					    c.xyz, c.st );
 				}
 				break;
 			}
@@ -596,7 +598,6 @@ int ScaleBSPMain( Args& args ){
  */
 
 int ShiftBSPMain( Args& args ){
-	int i;
 	Vector3 shift;
 	Vector3 vec;
 	char str[ 1024 ];
@@ -668,9 +669,9 @@ int ShiftBSPMain( Args& args ){
 	}
 
 	/* shift drawverts */
-	for ( i = 0; i < numBSPDrawVerts; i++ )
+	for ( bspDrawVert_t& vert : bspDrawVerts )
 	{
-		bspDrawVerts[i].xyz += shift;
+		vert.xyz += shift;
 	}
 
 	/* shift planes */

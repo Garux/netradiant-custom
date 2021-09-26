@@ -122,10 +122,10 @@ static void ProcessAdvertisements( void ) {
 
 					// store the ad quad for quick use at run time
 					if ( adSurface.surfaceType == MST_PATCH ) {
-						int v0 = adSurface.firstVert + adSurface.patchHeight - 1;
-						int v1 = adSurface.firstVert + adSurface.numVerts - 1;
-						int v2 = adSurface.firstVert + adSurface.numVerts - adSurface.patchWidth;
-						int v3 = adSurface.firstVert;
+						const int v0 = adSurface.firstVert + adSurface.patchHeight - 1;
+						const int v1 = adSurface.firstVert + adSurface.numVerts - 1;
+						const int v2 = adSurface.firstVert + adSurface.numVerts - adSurface.patchWidth;
+						const int v3 = adSurface.firstVert;
 						bspAds[numBSPAds].rect[0] = bspDrawVerts[v0].xyz;
 						bspAds[numBSPAds].rect[1] = bspDrawVerts[v1].xyz;
 						bspAds[numBSPAds].rect[2] = bspDrawVerts[v2].xyz;

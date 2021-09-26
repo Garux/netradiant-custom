@@ -261,7 +261,7 @@ static void write_json( const char *directory ){
 	}
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& vert : Span( bspDrawVerts, numBSPDrawVerts ) ){
+		for_indexed( const auto& vert : bspDrawVerts ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "xyz", value_for( vert.xyz, all ), all );
 			value.AddMember( "st", value_for( vert.st, all ), all );
@@ -466,17 +466,14 @@ static void read_json( const char *directory ){
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "DrawVert.json" ) );
-		static std::vector<bspDrawVert_t> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspDrawVerts.emplace_back();
 			value_to( obj.value["xyz"], item.xyz );
 			value_to( obj.value["st"], item.st );
 			value_to( obj.value["lightmap"], item.lightmap );
 			value_to( obj.value["normal"], item.normal );
 			value_to( obj.value["color"], item.color );
 		}
-		bspDrawVerts = items.data();
-		numBSPDrawVerts = items.size();
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "DrawSurfaces.json" ) );

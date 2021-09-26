@@ -1845,8 +1845,6 @@ shaderInfo_t                *ShaderInfoForShaderNull( const char *shader );
 
 /* bspfile_abstract.c */
 void                        SetGridPoints( int n );
-void                        SetDrawVerts( int n );
-void                        IncDrawVerts();
 void                        SetDrawSurfaces( int n );
 void                        SetDrawSurfacesBuffer();
 void                        BSPFilesCleanup();
@@ -2360,8 +2358,7 @@ Q_EXTERN std::vector<bspGridPoint_t> bspGridPoints;
 
 Q_EXTERN std::vector<byte> bspVisBytes; // MAX_MAP_VISIBILITY
 
-Q_EXTERN int numBSPDrawVerts Q_ASSIGN( 0 );
-Q_EXTERN bspDrawVert_t          *bspDrawVerts Q_ASSIGN( NULL );
+Q_EXTERN std::vector<bspDrawVert_t> bspDrawVerts;
 
 Q_EXTERN int numBSPDrawIndexes Q_ASSIGN( 0 );
 Q_EXTERN int allocatedBSPDrawIndexes Q_ASSIGN( 0 );
