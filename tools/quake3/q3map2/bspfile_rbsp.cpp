@@ -217,9 +217,7 @@ void LoadRBSPFile( const char *filename ){
 
 	CopyLump( (bspHeader_t*) header, LUMP_DRAWVERTS, bspDrawVerts );
 
-	numBSPDrawSurfaces = GetLumpElements( (bspHeader_t*) header, LUMP_SURFACES, sizeof( bspDrawSurfaces[ 0 ] ) );
-	SetDrawSurfaces( numBSPDrawSurfaces );
-	CopyLump( (bspHeader_t*) header, LUMP_SURFACES, bspDrawSurfaces, sizeof( bspDrawSurfaces[ 0 ] ) );
+	CopyLump( (bspHeader_t*) header, LUMP_SURFACES, bspDrawSurfaces );
 
 	numBSPFogs = CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs, sizeof( bspFogs[ 0 ] ) );
 
@@ -283,7 +281,7 @@ void WriteRBSPFile( const char *filename ){
 	AddLump( file, header->lumps[LUMP_LEAFBRUSHES], bspLeafBrushes );
 	AddLump( file, header->lumps[LUMP_MODELS], bspModels );
 	AddLump( file, header->lumps[LUMP_DRAWVERTS], bspDrawVerts );
-	AddLump( file, (bspHeader_t*) header, LUMP_SURFACES, bspDrawSurfaces, numBSPDrawSurfaces * sizeof( bspDrawSurfaces[ 0 ] ) );
+	AddLump( file, header->lumps[LUMP_SURFACES], bspDrawSurfaces );
 	AddLump( file, header->lumps[LUMP_VISIBILITY], bspVisBytes );
 	AddLump( file, header->lumps[LUMP_LIGHTMAPS], bspLightBytes );
 	AddLightGridLumps( file, header );

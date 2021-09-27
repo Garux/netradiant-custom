@@ -44,14 +44,16 @@ int lastLightmap = -1;
 int objVertexCount = 0;
 int objLastShaderNum = -1;
 
-static void ConvertSurfaceToOBJ( FILE *f, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const std::vector<int>& lmIndices ){
+static void ConvertSurfaceToOBJ( FILE *f, int modelNum, int surfaceNum, const Vector3& origin, const std::vector<int>& lmIndices ){
+	const bspDrawSurface_t& ds = bspDrawSurfaces[ surfaceNum ];
+
 	/* ignore patches for now */
-	if ( ds->surfaceType != MST_PLANAR && ds->surfaceType != MST_TRIANGLE_SOUP ) {
+	if ( ds.surfaceType != MST_PLANAR && ds.surfaceType != MST_TRIANGLE_SOUP ) {
 		return;
 	}
 
-	fprintf( f, "g mat%dmodel%dsurf%d\r\n", ds->shaderNum, modelNum, surfaceNum );
-	switch ( ds->surfaceType )
+	fprintf( f, "g mat%dmodel%dsurf%d\r\n", ds.shaderNum, modelNum, surfaceNum );
+	switch ( ds.surfaceType )
 	{
 	case MST_PLANAR:
 		fprintf( f, "# SURFACETYPE MST_PLANAR\r\n" );
@@ -63,7 +65,7 @@ static void ConvertSurfaceToOBJ( FILE *f, int modelNum, bspDrawSurface_t *ds, in
 
 	/* export shader */
 	if ( lightmapsAsTexcoord ) {
-		const int lmNum = ds->lightmapNum[0] >= 0? ds->lightmapNum[0]: lmIndices[ds->shaderNum] >= 0? lmIndices[ds->shaderNum] : ds->lightmapNum[0];
+		const int lmNum = ds.lightmapNum[0] >= 0? ds.lightmapNum[0]: lmIndices[ds.shaderNum] >= 0? lmIndices[ds.shaderNum] : ds.lightmapNum[0];
 		if ( objLastShaderNum != lmNum ) {
 			fprintf( f, "usemtl lm_%04d\r\n", lmNum + deluxemap );
 			objLastShaderNum = lmNum + deluxemap;
@@ -79,16 +81,16 @@ static void ConvertSurfaceToOBJ( FILE *f, int modelNum, bspDrawSurface_t *ds, in
 	}
 	else
 	{
-		if ( objLastShaderNum != ds->shaderNum ) {
-			fprintf( f, "usemtl %s\r\n", bspShaders[ds->shaderNum].shader );
-			objLastShaderNum = ds->shaderNum;
+		if ( objLastShaderNum != ds.shaderNum ) {
+			fprintf( f, "usemtl %s\r\n", bspShaders[ds.shaderNum].shader );
+			objLastShaderNum = ds.shaderNum;
 		}
 	}
 
 	/* export vertex */
-	for ( int i = 0; i < ds->numVerts; i++ )
+	for ( int i = 0; i < ds.numVerts; i++ )
 	{
-		const bspDrawVert_t& dv = bspDrawVerts[ ds->firstVert + i ];
+		const bspDrawVert_t& dv = bspDrawVerts[ ds.firstVert + i ];
 		fprintf( f, "# vertex %d\r\n", i + objVertexCount + 1 );
 		fprintf( f, "v %f %f %f\r\n", dv.xyz[ 0 ], dv.xyz[ 2 ], -dv.xyz[ 1 ] );
 		fprintf( f, "vn %f %f %f\r\n", dv.normal[ 0 ], dv.normal[ 2 ], -dv.normal[ 1 ] );
@@ -101,11 +103,11 @@ static void ConvertSurfaceToOBJ( FILE *f, int modelNum, bspDrawSurface_t *ds, in
 	}
 
 	/* export faces */
-	for ( int i = 0; i < ds->numIndexes; i += 3 )
+	for ( int i = 0; i < ds.numIndexes; i += 3 )
 	{
-		const int a = bspDrawIndexes[ i + ds->firstIndex ];
-		const int c = bspDrawIndexes[ i + ds->firstIndex + 1 ];
-		const int b = bspDrawIndexes[ i + ds->firstIndex + 2 ];
+		const int a = bspDrawIndexes[ i + ds.firstIndex ];
+		const int c = bspDrawIndexes[ i + ds.firstIndex + 1 ];
+		const int b = bspDrawIndexes[ i + ds.firstIndex + 2 ];
 		fprintf( f, "f %d/%d/%d %d/%d/%d %d/%d/%d\r\n",
 		         a + objVertexCount + 1, a + objVertexCount + 1, a + objVertexCount + 1,
 		         b + objVertexCount + 1, b + objVertexCount + 1, b + objVertexCount + 1,
@@ -113,7 +115,7 @@ static void ConvertSurfaceToOBJ( FILE *f, int modelNum, bspDrawSurface_t *ds, in
 		       );
 	}
 
-	objVertexCount += ds->numVerts;
+	objVertexCount += ds.numVerts;
 }
 
 
@@ -129,8 +131,7 @@ static void ConvertModelToOBJ( FILE *f, int modelNum, const Vector3& origin, con
 	/* go through each drawsurf in the model */
 	for ( int i = 0; i < model.numBSPSurfaces; i++ )
 	{
-		const int s = model.firstBSPSurface + i;
-		ConvertSurfaceToOBJ( f, modelNum, &bspDrawSurfaces[ s ], s, origin, lmIndices );
+		ConvertSurfaceToOBJ( f, modelNum, model.firstBSPSurface + i, origin, lmIndices );
 	}
 }
 

@@ -63,7 +63,7 @@ struct traceVert_t
 
 struct traceInfo_t
 {
-	shaderInfo_t                *si;
+	const shaderInfo_t          *si;
 	int surfaceNum, castShadows;
 	bool skipGrid;
 };
@@ -1261,8 +1261,8 @@ bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	float det, invDet, depth;
 	float u, v, w, s, t;
 	int is, it;
-	byte            *pixel;
-	shaderInfo_t    *si;
+	const byte            *pixel;
+	const shaderInfo_t    *si;
 
 
 	/* don't double-trace against sky */

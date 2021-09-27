@@ -274,7 +274,7 @@ static void write_json( const char *directory ){
 	}
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& surf : Span( bspDrawSurfaces, numBSPDrawSurfaces ) ){
+		for_indexed( const auto& surf : bspDrawSurfaces ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "shaderNum", surf.shaderNum, all );
 			value.AddMember( "fogNum", surf.fogNum, all );
@@ -477,9 +477,8 @@ static void read_json( const char *directory ){
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "DrawSurfaces.json" ) );
-		static std::vector<bspDrawSurface_t> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspDrawSurfaces.emplace_back();
 			item.shaderNum = obj.value["shaderNum"].GetInt();
 			item.fogNum = obj.value["fogNum"].GetInt();
 			item.surfaceType = obj.value["surfaceType"].GetInt();
@@ -499,8 +498,6 @@ static void read_json( const char *directory ){
 			item.patchWidth = obj.value["patchWidth"].GetInt();
 			item.patchHeight = obj.value["patchHeight"].GetInt();
 		}
-		bspDrawSurfaces = items.data();
-		numBSPDrawSurfaces = items.size();
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "fogs.json" ) );

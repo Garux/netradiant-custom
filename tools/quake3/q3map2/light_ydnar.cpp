@@ -157,7 +157,7 @@ Vector3b ColorToBytes( const Vector3& color, float scale ){
 #define EQUAL_NORMAL_EPSILON    0.01f
 
 void SmoothNormals( void ){
-	int i, j, k, f, fOld, start;
+	int fOld, start;
 	float shadeAngle, defaultShadeAngle, maxShadeAngle;
 	int indexes[ MAX_SAMPLES ];
 	Vector3 votes[ MAX_SAMPLES ];
@@ -176,7 +176,7 @@ void SmoothNormals( void ){
 
 	/* run through every surface and flag verts belonging to non-lightmapped surfaces
 	   and set per-vertex smoothing angle */
-	for ( i = 0; i < numBSPDrawSurfaces; i++ )
+	for ( size_t i = 0; i < bspDrawSurfaces.size(); ++i )
 	{
 		/* get drawsurf */
 		bspDrawSurface_t& ds = bspDrawSurfaces[ i ];
@@ -192,9 +192,9 @@ void SmoothNormals( void ){
 		value_maximize( maxShadeAngle, shadeAngle );
 
 		/* flag its verts */
-		for ( j = 0; j < ds.numVerts; j++ )
+		for ( int j = 0; j < ds.numVerts; j++ )
 		{
-			f = ds.firstVert + j;
+			const int f = ds.firstVert + j;
 			shadeAngles[ f ] = shadeAngle;
 			if ( ds.surfaceType == MST_TRIANGLE_SOUP ) {
 				smoothed[ f ] = true;
@@ -218,11 +218,10 @@ void SmoothNormals( void ){
 	start = I_FloatTime();
 
 	/* go through the list of vertexes */
-	for ( i = 0; i < numBSPDrawVerts; i++ )
+	for ( int i = 0; i < numBSPDrawVerts; i++ )
 	{
 		/* print pacifier */
-		f = 10 * i / numBSPDrawVerts;
-		if ( f != fOld ) {
+		if ( const int f = 10 * i / numBSPDrawVerts; f != fOld ) {
 			fOld = f;
 			Sys_Printf( "%i...", f );
 		}
@@ -238,7 +237,7 @@ void SmoothNormals( void ){
 		int numVotes = 0;
 
 		/* build a table of coincident vertexes */
-		for ( j = i; j < numBSPDrawVerts && numVerts < MAX_SAMPLES; j++ )
+		for ( int j = i; j < numBSPDrawVerts && numVerts < MAX_SAMPLES; j++ )
 		{
 			/* already smoothed? */
 			if ( smoothed[ j ] ) {
@@ -268,6 +267,7 @@ void SmoothNormals( void ){
 			smoothed[ j ] = true;
 
 			/* see if this normal has already been voted */
+			int k;
 			for ( k = 0; k < numVotes; k++ )
 			{
 				if ( vector3_equal_epsilon( bspDrawVerts[ j ].normal, votes[ k ], EQUAL_NORMAL_EPSILON ) ) {
@@ -291,7 +291,7 @@ void SmoothNormals( void ){
 		/* average normal */
 		if ( VectorNormalize( average ) != 0 ) {
 			/* smooth */
-			for ( j = 0; j < numVerts; j++ )
+			for ( int j = 0; j < numVerts; j++ )
 				yDrawVerts[ indexes[ j ] ].normal = average;
 		}
 	}
@@ -375,7 +375,7 @@ static bool CalcTangentVectors( int numVerts, bspDrawVert_t **dv, Vector3 *stv, 
    perterbs the normal by the shader's normalmap in tangent space
  */
 
-static void PerturbNormal( bspDrawVert_t *dv, shaderInfo_t *si, Vector3& pNormal, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ] ){
+static void PerturbNormal( bspDrawVert_t *dv, const shaderInfo_t *si, Vector3& pNormal, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ] ){
 	/* passthrough */
 	pNormal = dv->normal;
 
@@ -408,7 +408,7 @@ static void PerturbNormal( bspDrawVert_t *dv, shaderInfo_t *si, Vector3& pNormal
 static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv, const Plane3f* plane, float pass, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ], const Vector3 worldverts[ 3 ] ){
 	int i, numClusters, *clusters, pointCluster;
 	float           lightmapSampleOffset;
-	shaderInfo_t    *si;
+	const shaderInfo_t    *si;
 	Vector3 pNormal;
 	Vector3 vecs[ 3 ];
 	Vector3 nudged;
@@ -3676,35 +3676,29 @@ void FreeTraceLights( trace_t *trace ){
  */
 
 void CreateTraceLightsForSurface( int num, trace_t *trace ){
-	int i;
-	bspDrawVert_t       *dv;
-	bspDrawSurface_t    *ds;
-	surfaceInfo_t       *info;
-
-
 	/* dummy check */
 	if ( num < 0 ) {
 		return;
 	}
 
 	/* get drawsurface and info */
-	ds = &bspDrawSurfaces[ num ];
-	info = &surfaceInfos[ num ];
+	const bspDrawSurface_t& ds = bspDrawSurfaces[ num ];
+	const surfaceInfo_t& info = surfaceInfos[ num ];
 
 	/* get the mins/maxs for the dsurf */
 	MinMax minmax;
-	Vector3 normal = bspDrawVerts[ ds->firstVert ].normal;
-	for ( i = 0; i < ds->numVerts; i++ )
+	Vector3 normal = bspDrawVerts[ ds.firstVert ].normal;
+	for ( int i = 0; i < ds.numVerts; i++ )
 	{
-		dv = &yDrawVerts[ ds->firstVert + i ];
-		minmax.extend( dv->xyz );
-		if ( !VectorCompare( dv->normal, normal ) ) {
+		const bspDrawVert_t& dv = yDrawVerts[ ds.firstVert + i ];
+		minmax.extend( dv.xyz );
+		if ( !VectorCompare( dv.normal, normal ) ) {
 			normal.set( 0 );
 		}
 	}
 
 	/* create the lights for the bounding box */
-	CreateTraceLightsForBounds( minmax, &normal, info->numSurfaceClusters, &surfaceClusters[ info->firstSurfaceCluster ], LightFlags::Surfaces, trace );
+	CreateTraceLightsForBounds( minmax, &normal, info.numSurfaceClusters, &surfaceClusters[ info.firstSurfaceCluster ], LightFlags::Surfaces, trace );
 }
 
 /////////////////////////////////////////////////////////////

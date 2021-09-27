@@ -930,6 +930,7 @@ void SetupSurfaceLightmaps( void ){
 	surfaceInfo_t       *info, *info2;
 	rawLightmap_t       *lm;
 	bool added;
+	const int numBSPDrawSurfaces = bspDrawSurfaces.size();
 
 
 	/* note it */
@@ -1068,7 +1069,6 @@ void SetupSurfaceLightmaps( void ){
 	{
 		/* get info and attempt early out */
 		num = sortSurfaces[ i ];
-		ds = &bspDrawSurfaces[ num ];
 		info = &surfaceInfos[ num ];
 		if ( !info->hasLightmap || info->lm != NULL || info->parentSurfaceNum >= 0 ) {
 			continue;
@@ -2343,7 +2343,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	outLightmap_t       *olm;
 	bspDrawVert_t       *dv, *ydv, *dvParent;
 	char dirname[ 1024 ], filename[ 1024 ];
-	shaderInfo_t        *csi;
+	const shaderInfo_t  *csi;
 	char lightmapName[ 128 ];
 	const char              *rgbGenValues[ 256 ] = {0};
 	const char              *alphaGenValues[ 256 ] = {0};
@@ -3064,7 +3064,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	timer_start = I_FloatTime();
 
 	/* walk the list of surfaces */
-	for ( i = 0; i < numBSPDrawSurfaces; i++ )
+	for ( size_t i = 0; i < bspDrawSurfaces.size(); ++i )
 	{
 		/* get the surface and info */
 		ds = &bspDrawSurfaces[ i ];

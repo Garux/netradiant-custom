@@ -467,11 +467,6 @@ void CreateEntityLights( void ){
 #define APPROX_BOUNCE   1.0f
 
 void CreateSurfaceLights( void ){
-	int i;
-	bspDrawSurface_t    *ds;
-	surfaceInfo_t       *info;
-	shaderInfo_t        *si;
-	float subdivide;
 	clipWork_t cw;
 
 
@@ -479,25 +474,25 @@ void CreateSurfaceLights( void ){
 	const bool nss = entities[ 0 ].boolForKey( "_noshadersun" );
 
 	/* walk the list of surfaces */
-	for ( i = 0; i < numBSPDrawSurfaces; i++ )
+	for ( size_t i = 0; i < bspDrawSurfaces.size(); i++ )
 	{
 		/* get surface and other bits */
-		ds = &bspDrawSurfaces[ i ];
-		info = &surfaceInfos[ i ];
-		si = info->si;
+		bspDrawSurface_t *ds = &bspDrawSurfaces[ i ];
+		surfaceInfo_t *info = &surfaceInfos[ i ];
+		const shaderInfo_t *si = info->si;
 
 		/* sunlight? */
 		if ( si->sun != NULL && !nss ) {
 			Sys_FPrintf( SYS_VRB, "Sun: %s\n", si->shader.c_str() );
 			CreateSunLight( si->sun );
-			si->sun = NULL; /* FIXME: leak! */
+			const_cast<shaderInfo_t*>( si )->sun = NULL; /* FIXME: leak! */
 		}
 
 		/* sky light? */
 		if ( si->skyLightValue > 0.0f ) {
 			Sys_FPrintf( SYS_VRB, "Sky: %s\n", si->shader.c_str() );
 			CreateSkyLights( si->color, si->skyLightValue, si->skyLightIterations, si->lightFilterRadius, si->lightStyle );
-			si->skyLightValue = 0.0f;   /* FIXME: hack! */
+			const_cast<shaderInfo_t*>( si )->skyLightValue = 0.0f;   /* FIXME: hack! */
 		}
 
 		/* try to early out */
@@ -527,12 +522,7 @@ void CreateSurfaceLights( void ){
 		}
 
 		/* get subdivision amount */
-		if ( si->lightSubdivide > 0 ) {
-			subdivide = si->lightSubdivide;
-		}
-		else{
-			subdivide = defaultLightSubdivide;
-		}
+		const float subdivide = si->lightSubdivide > 0? si->lightSubdivide : defaultLightSubdivide;
 
 		/* switch on type */
 		switch ( ds->surfaceType )
@@ -1819,7 +1809,7 @@ void LightWorld( bool fastAllocate ){
 	StitchSurfaceLightmaps();
 
 	Sys_Printf( "--- IlluminateVertexes ---\n" );
-	RunThreadsOnIndividual( numBSPDrawSurfaces, true, IlluminateVertexes );
+	RunThreadsOnIndividual( bspDrawSurfaces.size(), true, IlluminateVertexes );
 	Sys_Printf( "%9d vertexes illuminated\n", numVertsIlluminated );
 
 	/* ydnar: emit statistics on light culling */
@@ -1886,7 +1876,7 @@ void LightWorld( bool fastAllocate ){
 		StitchSurfaceLightmaps();
 
 		Sys_Printf( "--- IlluminateVertexes ---\n" );
-		RunThreadsOnIndividual( numBSPDrawSurfaces, true, IlluminateVertexes );
+		RunThreadsOnIndividual( bspDrawSurfaces.size(), true, IlluminateVertexes );
 		Sys_Printf( "%9d vertexes illuminated\n", numVertsIlluminated );
 
 		/* ydnar: emit statistics on light culling */

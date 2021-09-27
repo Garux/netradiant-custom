@@ -1633,6 +1633,7 @@ void ClipSidesIntoTree( entity_t *e, const tree_t& tree ){
 
 int AddReferenceToLeaf( mapDrawSurface_t *ds, node_t *node ){
 	drawSurfRef_t   *dsr;
+	const int numBSPDrawSurfaces = bspDrawSurfaces.size();
 
 
 	/* dummy check */
@@ -2035,13 +2036,13 @@ static int FilterFlareSurfIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
    emits bsp drawverts from a map drawsurface
  */
 
-void EmitDrawVerts( const mapDrawSurface_t *ds, bspDrawSurface_t *out ){
+void EmitDrawVerts( const mapDrawSurface_t *ds, bspDrawSurface_t& out ){
 	/* get stuff */
 	const float offset = ds->shaderInfo->offset;
 
 	/* copy the verts */
-	out->firstVert = bspDrawVerts.size();
-	out->numVerts = ds->numVerts;
+	out.firstVert = bspDrawVerts.size();
+	out.numVerts = ds->numVerts;
 	for ( int i = 0; i < ds->numVerts; i++ )
 	{
 		/* allocate a new vert */ /* copy it */
@@ -2145,11 +2146,11 @@ int FindDrawIndexes( int numIndexes, const int *indexes ){
    attempts to find an existing run of drawindexes before adding new ones
  */
 
-void EmitDrawIndexes( const mapDrawSurface_t *ds, bspDrawSurface_t *out ){
+void EmitDrawIndexes( const mapDrawSurface_t *ds, bspDrawSurface_t& out ){
 	/* attempt to use redundant indexing */
-	out->firstIndex = FindDrawIndexes( ds->numIndexes, ds->indexes );
-	out->numIndexes = ds->numIndexes;
-	if ( out->firstIndex == int( bspDrawIndexes.size() ) ) {
+	out.firstIndex = FindDrawIndexes( ds->numIndexes, ds->indexes );
+	out.numIndexes = ds->numIndexes;
+	if ( out.firstIndex == int( bspDrawIndexes.size() ) ) {
 		/* copy new unique indexes */
 		for ( int i = 0; i < ds->numIndexes; i++ )
 		{
@@ -2158,8 +2159,8 @@ void EmitDrawIndexes( const mapDrawSurface_t *ds, bspDrawSurface_t *out ){
 			/* validate the index */
 			if ( ds->type != ESurfaceType::Patch ) {
 				if ( index < 0 || index >= ds->numVerts ) {
-					Sys_Warning( "%d %s has invalid index %d (%d)\n",
-					             numBSPDrawSurfaces,
+					Sys_Warning( "%zu %s has invalid index %d (%d)\n",
+					             bspDrawSurfaces.size() - 1,
 					             ds->shaderInfo->shader.c_str(),
 					             index,
 					             i );
@@ -2179,45 +2180,34 @@ void EmitDrawIndexes( const mapDrawSurface_t *ds, bspDrawSurface_t *out ){
  */
 
 void EmitFlareSurface( mapDrawSurface_t *ds ){
-	int i;
-	bspDrawSurface_t        *out;
-
-
 	/* ydnar: nuking useless flare drawsurfaces */
 	if ( !emitFlares && ds->type != ESurfaceType::Shader ) {
 		return;
 	}
 
-	/* limit check */
-	if ( numBSPDrawSurfaces == MAX_MAP_DRAW_SURFS ) {
-		Error( "MAX_MAP_DRAW_SURFS" );
-	}
-
 	/* allocate a new surface */
-	out = &bspDrawSurfaces[ numBSPDrawSurfaces ];
-	ds->outputNum = numBSPDrawSurfaces;
-	numBSPDrawSurfaces++;
-	memset( out, 0, sizeof( *out ) );
+	bspDrawSurface_t& out = bspDrawSurfaces.emplace_back();
+	ds->outputNum = bspDrawSurfaces.size() - 1;
 
 	/* set it up */
-	out->surfaceType = MST_FLARE;
-	out->shaderNum = EmitShader( ds->shaderInfo->shader, &ds->shaderInfo->contentFlags, &ds->shaderInfo->surfaceFlags );
-	out->fogNum = ds->fogNum;
+	out.surfaceType = MST_FLARE;
+	out.shaderNum = EmitShader( ds->shaderInfo->shader, &ds->shaderInfo->contentFlags, &ds->shaderInfo->surfaceFlags );
+	out.fogNum = ds->fogNum;
 
 	/* RBSP */
-	for ( i = 0; i < MAX_LIGHTMAPS; i++ )
+	for ( int i = 0; i < MAX_LIGHTMAPS; i++ )
 	{
-		out->lightmapNum[ i ] = -3;
-		out->lightmapStyles[ i ] = LS_NONE;
-		out->vertexStyles[ i ] = LS_NONE;
+		out.lightmapNum[ i ] = -3;
+		out.lightmapStyles[ i ] = LS_NONE;
+		out.vertexStyles[ i ] = LS_NONE;
 	}
-	out->lightmapStyles[ 0 ] = ds->lightStyle;
-	out->vertexStyles[ 0 ] = ds->lightStyle;
+	out.lightmapStyles[ 0 ] = ds->lightStyle;
+	out.vertexStyles[ 0 ] = ds->lightStyle;
 
-	out->lightmapOrigin = ds->lightmapOrigin;          /* origin */
-	out->lightmapVecs[ 0 ] = ds->lightmapVecs[ 0 ];    /* color */
-	out->lightmapVecs[ 1 ] = ds->lightmapVecs[ 1 ];
-	out->lightmapVecs[ 2 ] = ds->lightmapVecs[ 2 ];    /* normal */
+	out.lightmapOrigin = ds->lightmapOrigin;          /* origin */
+	out.lightmapVecs[ 0 ] = ds->lightmapVecs[ 0 ];    /* color */
+	out.lightmapVecs[ 1 ] = ds->lightmapVecs[ 1 ];
+	out.lightmapVecs[ 2 ] = ds->lightmapVecs[ 2 ];    /* normal */
 
 	/* add to count */
 	numSurfacesByType[ static_cast<std::size_t>( ds->type ) ]++;
@@ -2230,7 +2220,6 @@ void EmitFlareSurface( mapDrawSurface_t *ds ){
 
 void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	int i, j;
-	bspDrawSurface_t    *out;
 	int surfaceFlags, contentFlags;
 
 	/* vortex: _patchMeta support */
@@ -2262,18 +2251,13 @@ void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	}
 
 	/* allocate a new surface */
-	if ( numBSPDrawSurfaces == MAX_MAP_DRAW_SURFS ) {
-		Error( "MAX_MAP_DRAW_SURFS" );
-	}
-	out = &bspDrawSurfaces[ numBSPDrawSurfaces ];
-	ds->outputNum = numBSPDrawSurfaces;
-	numBSPDrawSurfaces++;
-	memset( out, 0, sizeof( *out ) );
+	bspDrawSurface_t& out = bspDrawSurfaces.emplace_back();
+	ds->outputNum = bspDrawSurfaces.size() - 1;
 
 	/* set it up */
-	out->surfaceType = MST_PATCH;
+	out.surfaceType = MST_PATCH;
 	if ( debugSurfaces ) {
-		out->shaderNum = EmitShader( "debugsurfaces", NULL, NULL );
+		out.shaderNum = EmitShader( "debugsurfaces", NULL, NULL );
 	}
 	else if ( patchMeta || forcePatchMeta ) {
 		/* patch meta requires that we have nodraw patches for collision */
@@ -2288,34 +2272,34 @@ void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 		ds->sampleSize = 0;
 
 		/* emit the new fake shader */
-		out->shaderNum = EmitShader( ds->shaderInfo->shader, &contentFlags, &surfaceFlags );
+		out.shaderNum = EmitShader( ds->shaderInfo->shader, &contentFlags, &surfaceFlags );
 	}
 	else{
-		out->shaderNum = EmitShader( ds->shaderInfo->shader, &ds->shaderInfo->contentFlags, &ds->shaderInfo->surfaceFlags );
+		out.shaderNum = EmitShader( ds->shaderInfo->shader, &ds->shaderInfo->contentFlags, &ds->shaderInfo->surfaceFlags );
 	}
-	out->patchWidth = ds->patchWidth;
-	out->patchHeight = ds->patchHeight;
-	out->fogNum = ds->fogNum;
+	out.patchWidth = ds->patchWidth;
+	out.patchHeight = ds->patchHeight;
+	out.fogNum = ds->fogNum;
 
 	/* RBSP */
 	for ( i = 0; i < MAX_LIGHTMAPS; i++ )
 	{
-		out->lightmapNum[ i ] = -3;
-		out->lightmapStyles[ i ] = LS_NONE;
-		out->vertexStyles[ i ] = LS_NONE;
+		out.lightmapNum[ i ] = -3;
+		out.lightmapStyles[ i ] = LS_NONE;
+		out.vertexStyles[ i ] = LS_NONE;
 	}
-	out->lightmapStyles[ 0 ] = LS_NORMAL;
-	out->vertexStyles[ 0 ] = LS_NORMAL;
+	out.lightmapStyles[ 0 ] = LS_NORMAL;
+	out.vertexStyles[ 0 ] = LS_NORMAL;
 
 	/* ydnar: gs mods: previously, the lod bounds were stored in lightmapVecs[ 0 ] and [ 1 ], moved to bounds[ 0 ] and [ 1 ] */
-	out->lightmapOrigin = ds->lightmapOrigin;
-	out->lightmapVecs[ 0 ] = ds->bounds.mins;
-	out->lightmapVecs[ 1 ] = ds->bounds.maxs;
-	out->lightmapVecs[ 2 ] = ds->lightmapVecs[ 2 ];
+	out.lightmapOrigin = ds->lightmapOrigin;
+	out.lightmapVecs[ 0 ] = ds->bounds.mins;
+	out.lightmapVecs[ 1 ] = ds->bounds.maxs;
+	out.lightmapVecs[ 2 ] = ds->lightmapVecs[ 2 ];
 
 	/* ydnar: gs mods: clear out the plane normal */
 	if ( !ds->planar ) {
-		out->lightmapVecs[ 2 ].set( 0 );
+		out.lightmapVecs[ 2 ].set( 0 );
 	}
 
 	/* emit the verts and indexes */
@@ -2452,7 +2436,6 @@ static void OptimizeTriangleSurface( mapDrawSurface_t *ds ){
 
 void EmitTriangleSurface( mapDrawSurface_t *ds ){
 	int i, temp;
-	bspDrawSurface_t        *out;
 
 	/* invert the surface if necessary */
 	if ( ds->backSide || ds->shaderInfo->invert ) {
@@ -2473,17 +2456,12 @@ void EmitTriangleSurface( mapDrawSurface_t *ds ){
 	}
 
 	/* allocate a new surface */
-	if ( numBSPDrawSurfaces == MAX_MAP_DRAW_SURFS ) {
-		Error( "MAX_MAP_DRAW_SURFS" );
-	}
-	out = &bspDrawSurfaces[ numBSPDrawSurfaces ];
-	ds->outputNum = numBSPDrawSurfaces;
-	numBSPDrawSurfaces++;
-	memset( out, 0, sizeof( *out ) );
+	bspDrawSurface_t& out = bspDrawSurfaces.emplace_back();
+	ds->outputNum = bspDrawSurfaces.size() - 1;
 
 	/* ydnar/sd: handle wolf et foliage surfaces */
 	if ( ds->type == ESurfaceType::Foliage ) {
-		out->surfaceType = MST_FOLIAGE;
+		out.surfaceType = MST_FOLIAGE;
 	}
 
 	/* ydnar: gs mods: handle lightmapped terrain (force to planar type) */
@@ -2493,24 +2471,24 @@ void EmitTriangleSurface( mapDrawSurface_t *ds ){
 	          ds->type == ESurfaceType::Foghull ||
 	          ds->numVerts > maxLMSurfaceVerts ||
 	          debugSurfaces ) {
-		out->surfaceType = MST_TRIANGLE_SOUP;
+		out.surfaceType = MST_TRIANGLE_SOUP;
 	}
 
 	/* set to a planar face */
 	else{
-		out->surfaceType = MST_PLANAR;
+		out.surfaceType = MST_PLANAR;
 	}
 
 	/* set it up */
 	if ( debugSurfaces ) {
-		out->shaderNum = EmitShader( "debugsurfaces", NULL, NULL );
+		out.shaderNum = EmitShader( "debugsurfaces", NULL, NULL );
 	}
 	else{
-		out->shaderNum = EmitShader( ds->shaderInfo->shader, &ds->shaderInfo->contentFlags, &ds->shaderInfo->surfaceFlags );
+		out.shaderNum = EmitShader( ds->shaderInfo->shader, &ds->shaderInfo->contentFlags, &ds->shaderInfo->surfaceFlags );
 	}
-	out->patchWidth = ds->patchWidth;
-	out->patchHeight = ds->patchHeight;
-	out->fogNum = ds->fogNum;
+	out.patchWidth = ds->patchWidth;
+	out.patchHeight = ds->patchHeight;
+	out.fogNum = ds->fogNum;
 
 	/* debug inset (push each triangle vertex towards the center of each triangle it is on */
 	if ( debugInset ) {
@@ -2537,22 +2515,22 @@ void EmitTriangleSurface( mapDrawSurface_t *ds ){
 	/* RBSP */
 	for ( i = 0; i < MAX_LIGHTMAPS; i++ )
 	{
-		out->lightmapNum[ i ] = -3;
-		out->lightmapStyles[ i ] = LS_NONE;
-		out->vertexStyles[ i ] = LS_NONE;
+		out.lightmapNum[ i ] = -3;
+		out.lightmapStyles[ i ] = LS_NONE;
+		out.vertexStyles[ i ] = LS_NONE;
 	}
-	out->lightmapStyles[ 0 ] = LS_NORMAL;
-	out->vertexStyles[ 0 ] = LS_NORMAL;
+	out.lightmapStyles[ 0 ] = LS_NORMAL;
+	out.vertexStyles[ 0 ] = LS_NORMAL;
 
 	/* lightmap vectors (lod bounds for patches */
-	out->lightmapOrigin = ds->lightmapOrigin;
-	out->lightmapVecs[ 0 ] = ds->lightmapVecs[ 0 ];
-	out->lightmapVecs[ 1 ] = ds->lightmapVecs[ 1 ];
-	out->lightmapVecs[ 2 ] = ds->lightmapVecs[ 2 ];
+	out.lightmapOrigin = ds->lightmapOrigin;
+	out.lightmapVecs[ 0 ] = ds->lightmapVecs[ 0 ];
+	out.lightmapVecs[ 1 ] = ds->lightmapVecs[ 1 ];
+	out.lightmapVecs[ 2 ] = ds->lightmapVecs[ 2 ];
 
 	/* ydnar: gs mods: clear out the plane normal */
 	if ( !ds->planar ) {
-		out->lightmapVecs[ 2 ].set( 0 );
+		out.lightmapVecs[ 2 ].set( 0 );
 	}
 
 	/* optimize the surface's triangles */
@@ -3302,18 +3280,17 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t& tree ){
 			numRefs += refs;
 
 			/* emit extra surface data */
-			SetSurfaceExtra( ds, numBSPDrawSurfaces - 1 );
+			SetSurfaceExtra( *ds );
 			//%	Sys_FPrintf( SYS_VRB, "%d verts %d indexes\n", ds->numVerts, ds->numIndexes );
 
 			/* one last sanity check */
 			{
-				bspDrawSurface_t    *out;
-				out = &bspDrawSurfaces[ numBSPDrawSurfaces - 1 ];
-				if ( out->numVerts == 3 && out->numIndexes > 3 ) {
+				const bspDrawSurface_t& out = bspDrawSurfaces.back();
+				if ( out.numVerts == 3 && out.numIndexes > 3 ) {
 					Sys_Printf( "\n" );
-					Sys_Warning( "Potentially bad %s surface (%d: %d, %d)\n     %s\n",
+					Sys_Warning( "Potentially bad %s surface (%zu: %d, %d)\n     %s\n",
 					             surfaceTypeName( ds->type ),
-					             numBSPDrawSurfaces - 1, out->numVerts, out->numIndexes, si->shader.c_str() );
+					             bspDrawSurfaces.size(), out.numVerts, out.numIndexes, si->shader.c_str() );
 				}
 			}
 
@@ -3327,7 +3304,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t& tree ){
 
 	/* emit some statistics */
 	Sys_FPrintf( SYS_VRB, "%9d references\n", numRefs );
-	Sys_FPrintf( SYS_VRB, "%9d (%d) emitted drawsurfs\n", numSurfs, numBSPDrawSurfaces );
+	Sys_FPrintf( SYS_VRB, "%9d (%zu) emitted drawsurfs\n", numSurfs, bspDrawSurfaces.size() );
 	Sys_FPrintf( SYS_VRB, "%9d stripped face surfaces\n", numStripSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d fanned face surfaces\n", numFanSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d maxarea'd face surfaces\n", numMaxAreaSurfaces );

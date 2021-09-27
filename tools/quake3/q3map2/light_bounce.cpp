@@ -165,7 +165,7 @@ float Modulo1IfNegative( float f ){
    returns false if pixels are bad
  */
 
-bool RadSampleImage( byte *pixels, int width, int height, const Vector2& st, Color4f& color ){
+bool RadSampleImage( const byte *pixels, int width, int height, const Vector2& st, Color4f& color ){
 	int x, y;
 
 	/* clear color first */
@@ -207,7 +207,7 @@ bool RadSampleImage( byte *pixels, int width, int height, const Vector2& st, Col
 #define MAX_SAMPLES         150
 #define SAMPLE_GRANULARITY  6
 
-static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm, shaderInfo_t *si, radWinding_t *rw, Vector3& average, Vector3& gradient, int *style ){
+static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm, const shaderInfo_t *si, radWinding_t *rw, Vector3& average, Vector3& gradient, int *style ){
 	int i, j, k, l, v, samples;
 	Vector3 color;
 	MinMax minmax;
@@ -359,7 +359,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 
 
 
-static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm, shaderInfo_t *si,
+static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm, const shaderInfo_t *si,
                                       float scale, float subdivide, radWinding_t *rw, clipWork_t *cw ){
 	int i, style = 0;
 	float dist, area, value;
@@ -602,7 +602,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
    creates unbounced diffuse lights for triangle soup (misc_models, etc)
  */
 
-void RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw ){
+void RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, const shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw ){
 	int i, j, k, v;
 	bspDrawSurface_t    *ds;
 	radWinding_t rw;
@@ -646,7 +646,7 @@ void RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, shaderIn
 
 #define PLANAR_EPSILON  0.1f
 
-void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw ){
+void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw ){
 	int i, x, y, v, t, pw[ 5 ], r;
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info;
@@ -791,7 +791,7 @@ void RadLight( int num ){
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info;
 	rawLightmap_t       *lm;
-	shaderInfo_t        *si;
+	const shaderInfo_t  *si;
 	clipWork_t cw;
 
 
@@ -869,7 +869,7 @@ void RadCreateDiffuseLights( void ){
 	numPatchDiffuseLights = 0;
 
 	/* hit every surface (threaded) */
-	RunThreadsOnIndividual( numBSPDrawSurfaces, true, RadLight );
+	RunThreadsOnIndividual( bspDrawSurfaces.size(), true, RadLight );
 
 	/* dump the lights generated to a file */
 	if ( dump ) {

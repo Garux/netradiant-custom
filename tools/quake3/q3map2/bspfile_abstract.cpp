@@ -51,38 +51,6 @@
 
 
 
-/* FIXME: remove the functions below that handle memory management of bsp file chunks */
-
-int numBSPDrawSurfacesBuffer = 0;
-void SetDrawSurfacesBuffer(){
-	free( bspDrawSurfaces );
-
-	numBSPDrawSurfacesBuffer = MAX_MAP_DRAW_SURFS;
-
-	bspDrawSurfaces = safe_calloc_info( sizeof( bspDrawSurface_t ) * numBSPDrawSurfacesBuffer, "IncDrawSurfaces" );
-}
-
-void SetDrawSurfaces( int n ){
-	free( bspDrawSurfaces );
-
-	numBSPDrawSurfaces =
-	numBSPDrawSurfacesBuffer = n;
-
-	bspDrawSurfaces = safe_calloc_info( sizeof( bspDrawSurface_t ) * numBSPDrawSurfacesBuffer, "IncDrawSurfaces" );
-}
-
-void BSPFilesCleanup(){
-	bspDrawVerts.clear();
-	free( bspDrawSurfaces );
-	bspLightBytes.clear();
-	bspGridPoints.clear();
-}
-
-
-
-
-
-
 /*
    SwapBlock()
    if all values are 32 bits, this can be used to swap everything
@@ -193,7 +161,7 @@ void SwapBSPFile( void ){
 
 	/* drawsurfs */
 	/* note: rbsp files (and hence q3map2 abstract bsp) have byte lightstyles index arrays, this follows sof2map convention */
-	SwapBlock( (int*) bspDrawSurfaces, numBSPDrawSurfaces * sizeof( bspDrawSurfaces[ 0 ] ) );
+	SwapBlock( bspDrawSurfaces );
 
 	/* fogs */
 	for ( i = 0; i < numBSPFogs; i++ )
@@ -348,26 +316,7 @@ void PartialLoadBSPFile( const char *filename ){
 	/* load it, then byte swap the in-memory version */
 	//g_game->load( filename );
 	PartialLoadIBSPFile( filename );
-
-	/* PartialSwapBSPFile() */
-
-	/* shaders (don't swap the name) */
-	for ( bspShader_t& shader : bspShaders )
-	{
-		shader.contentFlags = LittleLong( shader.contentFlags );
-		shader.surfaceFlags = LittleLong( shader.surfaceFlags );
-	}
-
-	/* drawsurfs */
-	/* note: rbsp files (and hence q3map2 abstract bsp) have byte lightstyles index arrays, this follows sof2map convention */
-	SwapBlock( (int*) bspDrawSurfaces, numBSPDrawSurfaces * sizeof( bspDrawSurfaces[ 0 ] ) );
-
-	/* fogs */
-	for ( int i = 0; i < numBSPFogs; i++ )
-	{
-		bspFogs[ i ].brushNum = LittleLong( bspFogs[ i ].brushNum );
-		bspFogs[ i ].visibleSide = LittleLong( bspFogs[ i ].visibleSide );
-	}
+	SwapBSPFile();
 }
 
 /*
@@ -412,12 +361,12 @@ void PrintBSPFileSizes( void ){
 		ParseEntities();
 	}
 	int patchCount = 0, planarCount = 0, trisoupCount = 0;
-	for ( const bspDrawSurface_t *s = bspDrawSurfaces; s != bspDrawSurfaces + numBSPDrawSurfaces; ++s ){
-		if ( s->surfaceType == MST_PATCH )
+	for ( const bspDrawSurface_t& s : bspDrawSurfaces ){
+		if ( s.surfaceType == MST_PATCH )
 			++patchCount;
-		else if ( s->surfaceType == MST_PLANAR )
+		else if ( s.surfaceType == MST_PLANAR )
 			++planarCount;
-		else if ( s->surfaceType == MST_TRIANGLE_SOUP )
+		else if ( s.surfaceType == MST_TRIANGLE_SOUP )
 			++trisoupCount;
 	}
 	/* note that this is abstracted */
@@ -450,8 +399,8 @@ void PrintBSPFileSizes( void ){
 	            bspLeafBrushes.size(), bspLeafBrushes.size() * sizeof( bspLeafBrushes[0] ) );
 	Sys_Printf( "\n" );
 
-	Sys_Printf( "%9d drawsurfaces  %9d *\n",
-	            numBSPDrawSurfaces, (int) ( numBSPDrawSurfaces * sizeof( *bspDrawSurfaces ) ) );
+	Sys_Printf( "%9zu drawsurfaces  %9zu *\n",
+	            bspDrawSurfaces.size(), bspDrawSurfaces.size() * sizeof( bspDrawSurfaces[0] ) );
 	Sys_Printf( "%9d   patch surfaces\n",
 	            patchCount );
 	Sys_Printf( "%9d   planar surfaces\n",

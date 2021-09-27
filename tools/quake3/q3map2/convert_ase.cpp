@@ -41,17 +41,17 @@
 
 int numLightmapsASE = 0;
 
-static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const std::vector<int>& lmIndices ){
+static void ConvertSurface( FILE *f, int modelNum, int surfaceNum, const Vector3& origin, const std::vector<int>& lmIndices ){
 	char name[ 1024 ];
-
+	const bspDrawSurface_t& ds = bspDrawSurfaces[ surfaceNum ];
 
 	/* ignore patches for now */
-	if ( ds->surfaceType != MST_PLANAR && ds->surfaceType != MST_TRIANGLE_SOUP ) {
+	if ( ds.surfaceType != MST_PLANAR && ds.surfaceType != MST_TRIANGLE_SOUP ) {
 		return;
 	}
 
 	/* print object header for each dsurf */
-	sprintf( name, "mat%dmodel%dsurf%d", ds->shaderNum, modelNum, surfaceNum );
+	sprintf( name, "mat%dmodel%dsurf%d", ds.shaderNum, modelNum, surfaceNum );
 	fprintf( f, "*GEOMOBJECT\t{\r\n" );
 	fprintf( f, "\t*NODE_NAME\t\"%s\"\r\n", name );
 	fprintf( f, "\t*NODE_TM\t{\r\n" );
@@ -69,9 +69,9 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
 	/* print mesh header */
 	fprintf( f, "\t*MESH\t{\r\n" );
 	fprintf( f, "\t\t*TIMEVALUE\t0\r\n" );
-	fprintf( f, "\t\t*MESH_NUMVERTEX\t%d\r\n", ds->numVerts );
-	fprintf( f, "\t\t*MESH_NUMFACES\t%d\r\n", ds->numIndexes / 3 );
-	switch ( ds->surfaceType )
+	fprintf( f, "\t\t*MESH_NUMVERTEX\t%d\r\n", ds.numVerts );
+	fprintf( f, "\t\t*MESH_NUMFACES\t%d\r\n", ds.numIndexes / 3 );
+	switch ( ds.surfaceType )
 	{
 	case MST_PLANAR:
 		fprintf( f, "\t\t*COMMENT\t\"SURFACETYPE\tMST_PLANAR\"\r\n" );
@@ -83,32 +83,32 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
 
 	/* export vertex xyz */
 	fprintf( f, "\t\t*MESH_VERTEX_LIST\t{\r\n" );
-	for ( int i = 0; i < ds->numVerts; i++ )
+	for ( int i = 0; i < ds.numVerts; i++ )
 	{
-		const bspDrawVert_t& dv = bspDrawVerts[ ds->firstVert + i ];
+		const bspDrawVert_t& dv = bspDrawVerts[ ds.firstVert + i ];
 		fprintf( f, "\t\t\t*MESH_VERTEX\t%d\t%f\t%f\t%f\r\n", i, dv.xyz[ 0 ], dv.xyz[ 1 ], dv.xyz[ 2 ] );
 	}
 	fprintf( f, "\t\t}\r\n" );
 
 	/* export faces */
 	fprintf( f, "\t\t*MESH_FACE_LIST\t{\r\n" );
-	for ( int i = 0; i < ds->numIndexes; i += 3 )
+	for ( int i = 0; i < ds.numIndexes; i += 3 )
 	{
 		const int face = ( i / 3 );
-		const int a = bspDrawIndexes[ i + ds->firstIndex ];
-		const int c = bspDrawIndexes[ i + ds->firstIndex + 1 ];
-		const int b = bspDrawIndexes[ i + ds->firstIndex + 2 ];
+		const int a = bspDrawIndexes[ i + ds.firstIndex ];
+		const int c = bspDrawIndexes[ i + ds.firstIndex + 1 ];
+		const int b = bspDrawIndexes[ i + ds.firstIndex + 2 ];
 		fprintf( f, "\t\t\t*MESH_FACE\t%d\tA:\t%d\tB:\t%d\tC:\t%d\tAB:\t1\tBC:\t1\tCA:\t1\t*MESH_SMOOTHING\t0\t*MESH_MTLID\t0\r\n",
 		         face, a, b, c );
 	}
 	fprintf( f, "\t\t}\r\n" );
 
 	/* export vertex st */
-	fprintf( f, "\t\t*MESH_NUMTVERTEX\t%d\r\n", ds->numVerts );
+	fprintf( f, "\t\t*MESH_NUMTVERTEX\t%d\r\n", ds.numVerts );
 	fprintf( f, "\t\t*MESH_TVERTLIST\t{\r\n" );
-	for ( int i = 0; i < ds->numVerts; i++ )
+	for ( int i = 0; i < ds.numVerts; i++ )
 	{
-		const bspDrawVert_t& dv = bspDrawVerts[ ds->firstVert + i ];
+		const bspDrawVert_t& dv = bspDrawVerts[ ds.firstVert + i ];
 		if ( lightmapsAsTexcoord ) {
 			fprintf( f, "\t\t\t*MESH_TVERT\t%d\t%f\t%f\t%f\r\n", i, dv.lightmap[0][0], ( 1.0 - dv.lightmap[0][1] ), 1.0f ); // dv.lightmap[0][1] internal, ( 1.0 - dv.lightmap[0][1] ) external
 		}
@@ -119,26 +119,26 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
 	fprintf( f, "\t\t}\r\n" );
 
 	/* export texture faces */
-	fprintf( f, "\t\t*MESH_NUMTVFACES\t%d\r\n", ds->numIndexes / 3 );
+	fprintf( f, "\t\t*MESH_NUMTVFACES\t%d\r\n", ds.numIndexes / 3 );
 	fprintf( f, "\t\t*MESH_TFACELIST\t{\r\n" );
-	for ( int i = 0; i < ds->numIndexes; i += 3 )
+	for ( int i = 0; i < ds.numIndexes; i += 3 )
 	{
 		const int face = ( i / 3 );
-		const int a = bspDrawIndexes[ i + ds->firstIndex ];
-		const int c = bspDrawIndexes[ i + ds->firstIndex + 1 ];
-		const int b = bspDrawIndexes[ i + ds->firstIndex + 2 ];
+		const int a = bspDrawIndexes[ i + ds.firstIndex ];
+		const int c = bspDrawIndexes[ i + ds.firstIndex + 1 ];
+		const int b = bspDrawIndexes[ i + ds.firstIndex + 2 ];
 		fprintf( f, "\t\t\t*MESH_TFACE\t%d\t%d\t%d\t%d\r\n", face, a, b, c );
 	}
 	fprintf( f, "\t\t}\r\n" );
 
 	/* export vertex normals */
 	fprintf( f, "\t\t*MESH_NORMALS\t{\r\n" );
-	for ( int i = 0; i < ds->numIndexes; i += 3 )
+	for ( int i = 0; i < ds.numIndexes; i += 3 )
 	{
 		const int face = ( i / 3 );
-		const int a = bspDrawIndexes[ i + ds->firstIndex ];
-		const int b = bspDrawIndexes[ i + ds->firstIndex + 1 ];
-		const int c = bspDrawIndexes[ i + ds->firstIndex + 2 ];
+		const int a = bspDrawIndexes[ i + ds.firstIndex ];
+		const int b = bspDrawIndexes[ i + ds.firstIndex + 1 ];
+		const int c = bspDrawIndexes[ i + ds.firstIndex + 2 ];
 		const Vector3 normal = VectorNormalized( bspDrawVerts[ a ].normal + bspDrawVerts[ b ].normal + bspDrawVerts[ c ].normal );
 		fprintf( f, "\t\t\t*MESH_FACENORMAL\t%d\t%f\t%f\t%f\r\n", face, normal[ 0 ], normal[ 1 ], normal[ 2 ] );
 		for( const auto idx : { a, b, c } ){
@@ -156,7 +156,7 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
 	fprintf( f, "\t*PROP_CASTSHADOW\t1\r\n" );
 	fprintf( f, "\t*PROP_RECVSHADOW\t1\r\n" );
 	if ( lightmapsAsTexcoord ) {
-		const int lmNum = ds->lightmapNum[0] >= 0? ds->lightmapNum[0]: lmIndices[ds->shaderNum] >= 0? lmIndices[ds->shaderNum] : ds->lightmapNum[0];
+		const int lmNum = ds.lightmapNum[0] >= 0? ds.lightmapNum[0]: lmIndices[ds.shaderNum] >= 0? lmIndices[ds.shaderNum] : ds.lightmapNum[0];
 		if ( lmNum >= 0 && lmNum + (int)deluxemap < numLightmapsASE ) {
 			fprintf( f, "\t*MATERIAL_REF\t%d\r\n", lmNum + deluxemap );
 		}
@@ -165,7 +165,7 @@ static void ConvertSurface( FILE *f, int modelNum, bspDrawSurface_t *ds, int sur
 		}
 	}
 	else{
-		fprintf( f, "\t*MATERIAL_REF\t%d\r\n", ds->shaderNum );
+		fprintf( f, "\t*MATERIAL_REF\t%d\r\n", ds.shaderNum );
 	}
 	fprintf( f, "}\r\n" );
 }
@@ -183,8 +183,7 @@ static void ConvertModel( FILE *f, int modelNum, const Vector3& origin, const st
 	/* go through each drawsurf in the model */
 	for ( int i = 0; i < model.numBSPSurfaces; i++ )
 	{
-		const int s = model.firstBSPSurface + i;
-		ConvertSurface( f, modelNum, &bspDrawSurfaces[ s ], s, origin, lmIndices );
+		ConvertSurface( f, modelNum, model.firstBSPSurface + i, origin, lmIndices );
 	}
 }
 

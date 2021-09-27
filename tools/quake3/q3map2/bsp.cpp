@@ -648,7 +648,6 @@ int BSPMain( Args& args ){
 	Sys_Printf( "--- BSP ---\n" );
 
 	doingBSP = true;
-	SetDrawSurfacesBuffer();
 	mapDrawSurfs = safe_calloc( sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
 	numMapDrawSurfs = 0;
 

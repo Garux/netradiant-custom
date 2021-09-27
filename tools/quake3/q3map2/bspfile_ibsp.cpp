@@ -112,111 +112,47 @@ struct ibspDrawSurface_t
 
 	int patchWidth;
 	int patchHeight;
+	ibspDrawSurface_t( const bspDrawSurface_t& other ) :
+		shaderNum( other.shaderNum ),
+		fogNum( other.fogNum ),
+		surfaceType( other.surfaceType ),
+		firstVert( other.firstVert ),
+		numVerts( other.numVerts ),
+		firstIndex( other.firstIndex ),
+		numIndexes( other.numIndexes ),
+		lightmapNum( other.lightmapNum[0] ),
+		lightmapX( other.lightmapX[0] ),
+		lightmapY( other.lightmapY[0] ),
+		lightmapWidth( other.lightmapWidth ),
+		lightmapHeight( other.lightmapHeight ),
+		lightmapOrigin( other.lightmapOrigin ),
+		lightmapVecs{ other.lightmapVecs[0], other.lightmapVecs[1], other.lightmapVecs[2] },
+		patchWidth( other.patchWidth ),
+		patchHeight( other.patchHeight ) {}
+	operator bspDrawSurface_t() const {
+		static_assert( MAX_LIGHTMAPS == 4 );
+		return{
+			shaderNum,
+			fogNum,
+			surfaceType,
+			firstVert,
+			numVerts,
+			firstIndex,
+			numIndexes,
+			{ LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
+			{ LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
+			{ lightmapNum, -3, -3, -3 },
+			{ lightmapX, 0, 0, 0 },
+			{ lightmapY, 0, 0, 0 },
+			lightmapWidth,
+			lightmapHeight,
+			lightmapOrigin,
+			{ lightmapVecs[0], lightmapVecs[1], lightmapVecs[2] },
+			patchWidth,
+			patchHeight
+		};
+	}
 };
-
-
-static void CopyDrawSurfacesLump( ibspHeader_t *header ){
-	int i, j;
-	ibspDrawSurface_t   *in;
-	bspDrawSurface_t    *out;
-
-
-	/* get count */
-	numBSPDrawSurfaces = GetLumpElements( (bspHeader_t*) header, LUMP_SURFACES, sizeof( *in ) );
-	SetDrawSurfaces( numBSPDrawSurfaces );
-
-	/* copy */
-	in = GetLump( (bspHeader_t*) header, LUMP_SURFACES );
-	out = bspDrawSurfaces;
-	for ( i = 0; i < numBSPDrawSurfaces; i++ )
-	{
-		out->shaderNum = in->shaderNum;
-		out->fogNum = in->fogNum;
-		out->surfaceType = in->surfaceType;
-		out->firstVert = in->firstVert;
-		out->numVerts = in->numVerts;
-		out->firstIndex = in->firstIndex;
-		out->numIndexes = in->numIndexes;
-
-		out->lightmapStyles[ 0 ] = LS_NORMAL;
-		out->vertexStyles[ 0 ] = LS_NORMAL;
-		out->lightmapNum[ 0 ] = in->lightmapNum;
-		out->lightmapX[ 0 ] = in->lightmapX;
-		out->lightmapY[ 0 ] = in->lightmapY;
-
-		for ( j = 1; j < MAX_LIGHTMAPS; j++ )
-		{
-			out->lightmapStyles[ j ] = LS_NONE;
-			out->vertexStyles[ j ] = LS_NONE;
-			out->lightmapNum[ j ] = -3;
-			out->lightmapX[ j ] = 0;
-			out->lightmapY[ j ] = 0;
-		}
-
-		out->lightmapWidth = in->lightmapWidth;
-		out->lightmapHeight = in->lightmapHeight;
-
-		out->lightmapOrigin = in->lightmapOrigin;
-		out->lightmapVecs[ 0 ] = in->lightmapVecs[ 0 ];
-		out->lightmapVecs[ 1 ] = in->lightmapVecs[ 1 ];
-		out->lightmapVecs[ 2 ] = in->lightmapVecs[ 2 ];
-
-		out->patchWidth = in->patchWidth;
-		out->patchHeight = in->patchHeight;
-
-		in++;
-		out++;
-	}
-}
-
-
-static void AddDrawSurfacesLump( FILE *file, ibspHeader_t *header ){
-	int i, size;
-	bspDrawSurface_t    *in;
-	ibspDrawSurface_t   *buffer, *out;
-
-
-	/* allocate output buffer */
-	size = numBSPDrawSurfaces * sizeof( *buffer );
-	buffer = safe_calloc( size );
-
-	/* convert */
-	in = bspDrawSurfaces;
-	out = buffer;
-	for ( i = 0; i < numBSPDrawSurfaces; i++ )
-	{
-		out->shaderNum = in->shaderNum;
-		out->fogNum = in->fogNum;
-		out->surfaceType = in->surfaceType;
-		out->firstVert = in->firstVert;
-		out->numVerts = in->numVerts;
-		out->firstIndex = in->firstIndex;
-		out->numIndexes = in->numIndexes;
-
-		out->lightmapNum = in->lightmapNum[ 0 ];
-		out->lightmapX = in->lightmapX[ 0 ];
-		out->lightmapY = in->lightmapY[ 0 ];
-		out->lightmapWidth = in->lightmapWidth;
-		out->lightmapHeight = in->lightmapHeight;
-
-		out->lightmapOrigin = in->lightmapOrigin;
-		out->lightmapVecs[ 0 ] = in->lightmapVecs[ 0 ];
-		out->lightmapVecs[ 1 ] = in->lightmapVecs[ 1 ];
-		out->lightmapVecs[ 2 ] = in->lightmapVecs[ 2 ];
-
-		out->patchWidth = in->patchWidth;
-		out->patchHeight = in->patchHeight;
-
-		in++;
-		out++;
-	}
-
-	/* write lump */
-	AddLump( file, (bspHeader_t*) header, LUMP_SURFACES, buffer, size );
-
-	/* free buffer */
-	free( buffer );
-}
 
 
 
@@ -234,7 +170,7 @@ struct ibspDrawVert_t
 		lightmap( other.lightmap[0] ),
 		normal( other.normal ),
 		color( other.color[0] ) {}
-	operator bspDrawVert_t() {
+	operator bspDrawVert_t() const {
 		static_assert( MAX_LIGHTMAPS == 4 );
 		return {
 			xyz,
@@ -315,7 +251,7 @@ void LoadIBSPFile( const char *filename ){
 
 	CopyLump<bspDrawVert_t, ibspDrawVert_t>( (bspHeader_t*) header, LUMP_DRAWVERTS, bspDrawVerts );
 
-	CopyDrawSurfacesLump( header );
+	CopyLump<bspDrawSurface_t, ibspDrawSurface_t>( (bspHeader_t*) header, LUMP_SURFACES, bspDrawSurfaces );
 
 	numBSPFogs = CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs, sizeof( bspFog_t ) ); // TODO fix overflow
 
@@ -367,7 +303,7 @@ void PartialLoadIBSPFile( const char *filename ){
 	/* load/convert lumps */
 	CopyLump( (bspHeader_t*) header, LUMP_SHADERS, bspShaders );
 
-	CopyDrawSurfacesLump( header );
+	CopyLump<bspDrawSurface_t, ibspDrawSurface_t>( (bspHeader_t*) header, LUMP_SURFACES, bspDrawSurfaces );
 
 	numBSPFogs = CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs, sizeof( bspFog_t ) ); // TODO fix overflow
 
@@ -421,7 +357,7 @@ void WriteIBSPFile( const char *filename ){
 	AddLump( file, header->lumps[LUMP_LEAFBRUSHES], bspLeafBrushes );
 	AddLump( file, header->lumps[LUMP_MODELS], bspModels );
 	AddLump( file, header->lumps[LUMP_DRAWVERTS], std::vector<ibspDrawVert_t>( bspDrawVerts.begin(), bspDrawVerts.end() ) );
-	AddDrawSurfacesLump( file, header );
+	AddLump( file, header->lumps[LUMP_SURFACES], std::vector<ibspDrawSurface_t>( bspDrawSurfaces.begin(), bspDrawSurfaces.end() ) );
 	AddLump( file, header->lumps[LUMP_VISIBILITY], bspVisBytes );
 	AddLump( file, header->lumps[LUMP_LIGHTMAPS], bspLightBytes );
 	AddLump( file, header->lumps[LUMP_LIGHTGRID], std::vector<ibspGridPoint_t>( bspGridPoints.begin(), bspGridPoints.end() ) );

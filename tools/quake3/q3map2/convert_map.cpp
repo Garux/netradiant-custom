@@ -48,9 +48,6 @@ static float Det3x3( float a00, float a01, float a02,
 }
 
 void GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, const bspDrawVert_t *bestVert[3] ){
-	bspDrawSurface_t *s;
-	int i;
-	int t;
 	float best = 0;
 	float thisarea;
 	const bspDrawVert_t *vert[3];
@@ -61,20 +58,20 @@ void GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, const bsp
 	bestVert[0] = bestVert[1] = bestVert[2] = NULL;
 
 	// brute force through all surfaces
-	for ( s = bspDrawSurfaces; s != bspDrawSurfaces + numBSPDrawSurfaces; ++s )
+	for ( const bspDrawSurface_t& s : bspDrawSurfaces )
 	{
-		if ( s->surfaceType != MST_PLANAR && s->surfaceType != MST_TRIANGLE_SOUP ) {
+		if ( s.surfaceType != MST_PLANAR && s.surfaceType != MST_TRIANGLE_SOUP ) {
 			continue;
 		}
-		if ( !strEqual( buildSide.shaderInfo->shader, bspShaders[s->shaderNum].shader ) ) {
+		if ( !strEqual( buildSide.shaderInfo->shader, bspShaders[s.shaderNum].shader ) ) {
 			continue;
 		}
-		for ( t = 0; t + 3 <= s->numIndexes; t += 3 )
+		for ( int t = 0; t + 3 <= s.numIndexes; t += 3 )
 		{
-			vert[0] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 0]];
-			vert[1] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 1]];
-			vert[2] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 2]];
-			if ( s->surfaceType == MST_PLANAR && VectorCompare( vert[0]->normal, vert[1]->normal ) && VectorCompare( vert[1]->normal, vert[2]->normal ) ) {
+			vert[0] = &bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 0]];
+			vert[1] = &bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 1]];
+			vert[2] = &bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 2]];
+			if ( s.surfaceType == MST_PLANAR && VectorCompare( vert[0]->normal, vert[1]->normal ) && VectorCompare( vert[1]->normal, vert[2]->normal ) ) {
 				if ( vector3_length( vert[0]->normal - buildPlane.normal() ) >= normalEpsilon
 				  || vector3_length( vert[1]->normal - buildPlane.normal() ) >= normalEpsilon
 				  || vector3_length( vert[2]->normal - buildPlane.normal() ) >= normalEpsilon ) {
@@ -99,7 +96,7 @@ void GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, const bsp
 			}
 			// Okay. Correct surface type, correct shader, correct plane. Let's start with the business...
 			winding_t polygon( buildSide.winding );
-			for ( i = 0; i < 3; ++i )
+			for ( int i = 0; i < 3; ++i )
 			{
 				// 0: 1, 2
 				// 1: 2, 0

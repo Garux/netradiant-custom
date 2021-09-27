@@ -239,9 +239,9 @@ int pk3BSPMain( Args& args ){
 
 	std::vector<bool> drawsurfSHs( bspShaders.size(), false );
 
-	for ( i = 0; i < numBSPDrawSurfaces; ++i ){
-		drawsurfSHs[ bspDrawSurfaces[i].shaderNum ] = true;
-		//Sys_Printf( "%s\n", bspShaders[bspDrawSurfaces[i].shaderNum].shader );
+	for ( const bspDrawSurface_t& surf : bspDrawSurfaces ){
+		drawsurfSHs[ surf.shaderNum ] = true;
+		//Sys_Printf( "%s\n", bspShaders[surf.shaderNum].shader );
 	}
 
 	StrList* pk3Shaders = StrList_allocate( 1024 );
@@ -911,8 +911,8 @@ int repackBSPMain( Args& args ){
 
 		std::vector<bool> drawsurfSHs( bspShaders.size(), false );
 
-		for ( i = 0; i < numBSPDrawSurfaces; ++i ){
-			drawsurfSHs[ bspDrawSurfaces[i].shaderNum ] = true;
+		for ( const bspDrawSurface_t& surf : bspDrawSurfaces ){
+			drawsurfSHs[ surf.shaderNum ] = true;
 		}
 
 		for ( size_t i = 0; i < bspShaders.size(); ++i ){
@@ -977,9 +977,7 @@ int repackBSPMain( Args& args ){
 			Sys_Printf( "%s\n", pk3Sounds->s[i] );
 		}
 		/* free partially loaded bsp data */
-		free( bspDrawSurfaces );
-		bspDrawSurfaces = NULL;
-		numBSPDrawSurfaces = 0;
+		bspDrawSurfaces.clear();
 
 		entities.clear();
 		numBSPEntities = 0;

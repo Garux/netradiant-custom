@@ -386,7 +386,7 @@ void WriteMapShaderFile( void ){
    sets up a custom map shader
  */
 
-shaderInfo_t *CustomShader( shaderInfo_t *si, const char *find, char *replace ){
+const shaderInfo_t *CustomShader( const shaderInfo_t *si, const char *find, char *replace ){
 	shaderInfo_t    *csi;
 	char shader[ MAX_QPATH ];
 	char            *s;

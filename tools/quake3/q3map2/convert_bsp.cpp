@@ -374,7 +374,6 @@ static void ExtrapolateTexcoords( const float *axyz, const float *ast,
  */
 
 int ScaleBSPMain( Args& args ){
-	int i, j;
 	float f, a;
 	Vector3 scale;
 	Vector3 vec;
@@ -520,19 +519,19 @@ int ScaleBSPMain( Args& args ){
 	}
 
 	if ( texscale ) {
-		for ( i = 0; i < numBSPDrawSurfaces; i++ )
+		for ( const bspDrawSurface_t& surf : bspDrawSurfaces )
 		{
-			switch ( bspDrawSurfaces[i].surfaceType )
+			switch ( surf.surfaceType )
 			{
 			case MST_PLANAR:
-				if ( bspDrawSurfaces[i].numIndexes % 3 ) {
+				if ( surf.numIndexes % 3 ) {
 					Error( "Not a triangulation!" );
 				}
-				for ( j = bspDrawSurfaces[i].firstIndex; j < bspDrawSurfaces[i].firstIndex + bspDrawSurfaces[i].numIndexes; j += 3 )
+				for ( int j = surf.firstIndex; j < surf.firstIndex + surf.numIndexes; j += 3 )
 				{
-					const int ia = bspDrawIndexes[j] + bspDrawSurfaces[i].firstVert,
-					          ib = bspDrawIndexes[j + 1] + bspDrawSurfaces[i].firstVert,
-							  ic = bspDrawIndexes[j + 2] + bspDrawSurfaces[i].firstVert;
+					const int ia = bspDrawIndexes[j + 0] + surf.firstVert,
+					          ib = bspDrawIndexes[j + 1] + surf.firstVert,
+							  ic = bspDrawIndexes[j + 2] + surf.firstVert;
 					bspDrawVert_t &a = bspDrawVerts[ia], &b = bspDrawVerts[ib], &c = bspDrawVerts[ic];
 					const float *oa = &old_xyzst[ia * 5], *ob = &old_xyzst[ib * 5], *oc = &old_xyzst[ic * 5];
 					// extrapolate:
@@ -707,7 +706,6 @@ void PseudoCompileBSP( bool need_tree ){
 	facelist_t faces;
 	tree_t tree{};
 
-	SetDrawSurfacesBuffer();
 	mapDrawSurfs = safe_calloc( sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
 	numMapDrawSurfs = 0;
 

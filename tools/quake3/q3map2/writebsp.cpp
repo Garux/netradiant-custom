@@ -526,7 +526,7 @@ void BeginModel( void ){
 		Sys_FPrintf( SYS_VRB, "Lightgrid bounds: { %f %f %f } { %f %f %f }\n", lgMinmax.mins[0], lgMinmax.mins[1], lgMinmax.mins[2], lgMinmax.maxs[0], lgMinmax.maxs[1], lgMinmax.maxs[2] );
 
 	/* set firsts */
-	mod.firstBSPSurface = numBSPDrawSurfaces;
+	mod.firstBSPSurface = bspDrawSurfaces.size();
 	mod.firstBSPBrush = bspBrushes.size();
 }
 
@@ -547,7 +547,7 @@ void EndModel( entity_t *e, node_t *headnode ){
 	EmitDrawNode_r( headnode );
 
 	/* set surfaces and brushes */
-	mod.numBSPSurfaces = numBSPDrawSurfaces - mod.firstBSPSurface;
+	mod.numBSPSurfaces = bspDrawSurfaces.size() - mod.firstBSPSurface;
 	mod.firstBSPBrush = e->firstBrush;
 	mod.numBSPBrushes = e->numBrushes;
 }

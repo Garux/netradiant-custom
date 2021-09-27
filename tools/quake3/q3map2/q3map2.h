@@ -1142,7 +1142,7 @@ struct light_t
 {
 	ELightType type;
 	LightFlags flags;                   /* ydnar: condensed all the booleans into one flags int */
-	shaderInfo_t        *si;
+	const shaderInfo_t  *si;
 
 	Vector3 origin{ 0 };
 	Vector3 normal{ 0 };                /* for surfaces, spotlights, and suns */
@@ -1247,7 +1247,7 @@ struct outLightmap_t
 	int numLightmaps;
 	int freeLuxels;
 	int numShaders;
-	shaderInfo_t        *shaders[ MAX_LIGHTMAP_SHADERS ];
+	const shaderInfo_t  *shaders[ MAX_LIGHTMAP_SHADERS ];
 	byte                *lightBits;
 	Vector3b            *bspLightBytes;
 	Vector3b            *bspDirBytes;
@@ -1391,7 +1391,7 @@ struct rawGridPoint_t
 struct surfaceInfo_t
 {
 	int modelindex;
-	shaderInfo_t        *si;
+	const shaderInfo_t  *si;
 	rawLightmap_t       *lm;
 	int parentSurfaceNum, childSurfaceNum;
 	int entityNum, castShadows, recvShadows, sampleSize, patchIterations;
@@ -1705,9 +1705,9 @@ void                        EmitMetaStats(); // vortex: print meta statistics ev
 /* surface_extra.c */
 void                        SetDefaultSampleSize( int sampleSize );
 
-void                        SetSurfaceExtra( mapDrawSurface_t *ds, int num );
+void                        SetSurfaceExtra( const mapDrawSurface_t& ds );
 
-shaderInfo_t                *GetSurfaceExtraShaderInfo( int num );
+const shaderInfo_t          *GetSurfaceExtraShaderInfo( int num );
 int                         GetSurfaceExtraParentSurfaceNum( int num );
 int                         GetSurfaceExtraEntityNum( int num );
 int                         GetSurfaceExtraCastShadows( int num );
@@ -1759,9 +1759,9 @@ float                       SetupTrace( trace_t *trace );
 
 
 /* light_bounce.c */
-bool                        RadSampleImage( byte * pixels, int width, int height, const Vector2& st, Color4f& color );
-void                        RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw );
-void                        RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw );
+bool                        RadSampleImage( const byte * pixels, int width, int height, const Vector2& st, Color4f& color );
+void                        RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, const shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw );
+void                        RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw );
 void                        RadCreateDiffuseLights( void );
 
 
@@ -1835,7 +1835,7 @@ bool                        ApplySurfaceParm( const char *name, int *contentFlag
 
 void                        BeginMapShaderFile( const char *mapFile );
 void                        WriteMapShaderFile( void );
-shaderInfo_t                *CustomShader( shaderInfo_t *si, const char *find, char *replace );
+const shaderInfo_t          *CustomShader( const shaderInfo_t *si, const char *find, char *replace );
 void                        EmitVertexRemapShader( char *from, char *to );
 
 void                        LoadShaderInfo( void );
@@ -1844,11 +1844,6 @@ shaderInfo_t                *ShaderInfoForShaderNull( const char *shader );
 
 
 /* bspfile_abstract.c */
-void                        SetGridPoints( int n );
-void                        SetDrawSurfaces( int n );
-void                        SetDrawSurfacesBuffer();
-void                        BSPFilesCleanup();
-
 void                        SwapBlock( int *block, int size );
 
 int                         GetLumpElements( bspHeader_t *header, int lump, int size );
@@ -2362,8 +2357,7 @@ Q_EXTERN std::vector<bspDrawVert_t> bspDrawVerts;
 
 Q_EXTERN std::vector<int> bspDrawIndexes;
 
-Q_EXTERN int numBSPDrawSurfaces Q_ASSIGN( 0 );
-Q_EXTERN bspDrawSurface_t   *bspDrawSurfaces Q_ASSIGN( NULL );
+Q_EXTERN std::vector<bspDrawSurface_t> bspDrawSurfaces; // MAX_MAP_DRAW_SURFS
 
 Q_EXTERN int numBSPFogs Q_ASSIGN( 0 );
 Q_EXTERN bspFog_t bspFogs[ MAX_MAP_FOGS ];

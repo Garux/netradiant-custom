@@ -41,8 +41,8 @@
 
 struct surfaceExtra_t
 {
-	mapDrawSurface_t        *mds;
-	shaderInfo_t            *si;
+	const mapDrawSurface_t        *mds;
+	const shaderInfo_t            *si;
 	int parentSurfaceNum;
 	int entityNum;
 	int castShadows, recvShadows;
@@ -96,31 +96,23 @@ void SetDefaultSampleSize( int sampleSize ){
    stores extra (q3map2) data for the specific numbered drawsurface
  */
 
-void SetSurfaceExtra( mapDrawSurface_t *ds, int num ){
-	surfaceExtra_t  *se;
-
-
-	/* dummy check */
-	if ( ds == NULL || num < 0 ) {
-		return;
-	}
-
+void SetSurfaceExtra( const mapDrawSurface_t& ds ){
 	/* get a new extra */
-	se = AllocSurfaceExtra();
+	surfaceExtra_t *se = AllocSurfaceExtra();
 
 	/* copy out the relevant bits */
-	se->mds = ds;
-	se->si = ds->shaderInfo;
-	se->parentSurfaceNum = ds->parent != NULL ? ds->parent->outputNum : -1;
-	se->entityNum = ds->entityNum;
-	se->castShadows = ds->castShadows;
-	se->recvShadows = ds->recvShadows;
-	se->sampleSize = ds->sampleSize;
-	se->longestCurve = ds->longestCurve;
-	se->lightmapAxis = ds->lightmapAxis;
+	se->mds = &ds;
+	se->si = ds.shaderInfo;
+	se->parentSurfaceNum = ds.parent != NULL ? ds.parent->outputNum : -1;
+	se->entityNum = ds.entityNum;
+	se->castShadows = ds.castShadows;
+	se->recvShadows = ds.recvShadows;
+	se->sampleSize = ds.sampleSize;
+	se->longestCurve = ds.longestCurve;
+	se->lightmapAxis = ds.lightmapAxis;
 
 	/* debug code */
-	//%	Sys_FPrintf( SYS_VRB, "SetSurfaceExtra(): entityNum = %d\n", ds->entityNum );
+	//%	Sys_FPrintf( SYS_VRB, "SetSurfaceExtra(): entityNum = %d\n", ds.entityNum );
 }
 
 
@@ -138,7 +130,7 @@ static surfaceExtra_t *GetSurfaceExtra( int num ){
 }
 
 
-shaderInfo_t *GetSurfaceExtraShaderInfo( int num ){
+const shaderInfo_t *GetSurfaceExtraShaderInfo( int num ){
 	return GetSurfaceExtra( num )->si;
 }
 

@@ -47,7 +47,6 @@
 static void ExitQ3Map( void ){
 	/* flush xml send buffer, shut down connection */
 	Broadcast_Shutdown();
-	BSPFilesCleanup();
 	free( mapDrawSurfs );
 }
 
