@@ -95,7 +95,7 @@ static void CopyLightGridLumps( rbspHeader_t *header ){
 }
 
 
-static void AddLightGridLumps( FILE *file, rbspHeader_t *header ){
+static void AddLightGridLumps( FILE *file, rbspHeader_t& header ){
 	/* allocate temporary buffers */
 	const size_t maxGridPoints = std::min( bspGridPoints.size(), size_t( MAX_MAP_GRID ) );
 	std::vector<bspGridPoint_t> gridPoints;
@@ -167,8 +167,8 @@ static void AddLightGridLumps( FILE *file, rbspHeader_t *header ){
 		a = LittleShort( a );
 
 	/* write lumps */
-	AddLump( file, header->lumps[LUMP_LIGHTGRID], gridPoints );
-	AddLump( file, header->lumps[LUMP_LIGHTARRAY], gridArray );
+	AddLump( file, header.lumps[LUMP_LIGHTGRID], gridPoints );
+	AddLump( file, header.lumps[LUMP_LIGHTARRAY], gridArray );
 }
 
 
@@ -186,10 +186,10 @@ void LoadRBSPFile( const char *filename ){
 	LoadFile( filename, (void**) &header );
 
 	/* swap the header (except the first 4 bytes) */
-	SwapBlock( (int*) ( (byte*) header + sizeof( int ) ), sizeof( *header ) - sizeof( int ) );
+	SwapBlock( (int*) ( (byte*) header + 4 ), sizeof( *header ) - 4 );
 
 	/* make sure it matches the format we're trying to load */
-	if ( !force && *( (int*) header->ident ) != *( (const int*) g_game->bspIdent ) ) {
+	if ( !force && (const int&) header->ident != (const int&) g_game->bspIdent ) {
 		Error( "%s is not a %s file", filename, g_game->bspIdent );
 	}
 	if ( !force && header->version != g_game->bspVersion ) {
@@ -198,37 +198,21 @@ void LoadRBSPFile( const char *filename ){
 
 	/* load/convert lumps */
 	CopyLump( (bspHeader_t*) header, LUMP_SHADERS, bspShaders );
-
 	CopyLump( (bspHeader_t*) header, LUMP_MODELS, bspModels );
-
 	CopyLump( (bspHeader_t*) header, LUMP_PLANES, bspPlanes );
-
 	CopyLump( (bspHeader_t*) header, LUMP_LEAFS, bspLeafs );
-
 	CopyLump( (bspHeader_t*) header, LUMP_NODES, bspNodes );
-
 	CopyLump( (bspHeader_t*) header, LUMP_LEAFSURFACES, bspLeafSurfaces );
-
 	CopyLump( (bspHeader_t*) header, LUMP_LEAFBRUSHES, bspLeafBrushes );
-
 	CopyLump( (bspHeader_t*) header, LUMP_BRUSHES, bspBrushes );
-
 	CopyLump( (bspHeader_t*) header, LUMP_BRUSHSIDES, bspBrushSides );
-
 	CopyLump( (bspHeader_t*) header, LUMP_DRAWVERTS, bspDrawVerts );
-
 	CopyLump( (bspHeader_t*) header, LUMP_SURFACES, bspDrawSurfaces );
-
 	CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs );
-
 	CopyLump( (bspHeader_t*) header, LUMP_DRAWINDEXES, bspDrawIndexes );
-
 	CopyLump( (bspHeader_t*) header, LUMP_VISIBILITY, bspVisBytes );
-
 	CopyLump( (bspHeader_t*) header, LUMP_LIGHTMAPS, bspLightBytes );
-
 	CopyLump( (bspHeader_t*) header, LUMP_ENTITIES, bspEntData );
-
 	CopyLightGridLumps( header );
 
 	/* free the file buffer */
@@ -243,59 +227,52 @@ void LoadRBSPFile( const char *filename ){
  */
 
 void WriteRBSPFile( const char *filename ){
-	rbspHeader_t outheader, *header;
-	FILE            *file;
-	time_t t;
-	char marker[ 1024 ];
-	int size;
-
-
-	/* set header */
-	header = &outheader;
-	memset( header, 0, sizeof( *header ) );
+	rbspHeader_t header{};
 
 	//%	Swapfile();
 
 	/* set up header */
-	*( (int*) (bspHeader_t*) header->ident ) = *( (const int*) g_game->bspIdent );
-	header->version = LittleLong( g_game->bspVersion );
+	(int&) header.ident = (const int&) g_game->bspIdent;
+	header.version = LittleLong( g_game->bspVersion );
 
 	/* write initial header */
-	file = SafeOpenWrite( filename );
-	SafeWrite( file, (bspHeader_t*) header, sizeof( *header ) );    /* overwritten later */
+	FILE *file = SafeOpenWrite( filename );
+	SafeWrite( file, &header, sizeof( header ) );    /* overwritten later */
 
-	/* add marker lump */
-	time( &t );
-	/* asctime adds an implicit trailing \n */
-	sprintf( marker, "I LOVE MY Q3MAP2 %s on %s", Q3MAP_VERSION, asctime( localtime( &t ) ) );
-	AddLump( file, (bspHeader_t*) header, 0, marker, strlen( marker ) + 1 );
+	{ /* add marker lump */
+		time_t t;
+		time( &t );
+		/* asctime adds an implicit trailing \n */
+		const auto marker = StringOutputStream( 256 )( "I LOVE MY Q3MAP2 ", Q3MAP_VERSION, " on ", asctime( localtime( &t ) ) );
+		AddLump( file, header.lumps[0], std::vector<char>( marker.begin(), marker.end() + 1 ) );
+	}
 
 	/* add lumps */
-	AddLump( file, header->lumps[LUMP_SHADERS], bspShaders );
-	AddLump( file, header->lumps[LUMP_PLANES], bspPlanes );
-	AddLump( file, header->lumps[LUMP_LEAFS], bspLeafs );
-	AddLump( file, header->lumps[LUMP_NODES], bspNodes );
-	AddLump( file, header->lumps[LUMP_BRUSHES], bspBrushes );
-	AddLump( file, header->lumps[LUMP_BRUSHSIDES], bspBrushSides );
-	AddLump( file, header->lumps[LUMP_LEAFSURFACES], bspLeafSurfaces );
-	AddLump( file, header->lumps[LUMP_LEAFBRUSHES], bspLeafBrushes );
-	AddLump( file, header->lumps[LUMP_MODELS], bspModels );
-	AddLump( file, header->lumps[LUMP_DRAWVERTS], bspDrawVerts );
-	AddLump( file, header->lumps[LUMP_SURFACES], bspDrawSurfaces );
-	AddLump( file, header->lumps[LUMP_VISIBILITY], bspVisBytes );
-	AddLump( file, header->lumps[LUMP_LIGHTMAPS], bspLightBytes );
+	AddLump( file, header.lumps[LUMP_SHADERS], bspShaders );
+	AddLump( file, header.lumps[LUMP_PLANES], bspPlanes );
+	AddLump( file, header.lumps[LUMP_LEAFS], bspLeafs );
+	AddLump( file, header.lumps[LUMP_NODES], bspNodes );
+	AddLump( file, header.lumps[LUMP_BRUSHES], bspBrushes );
+	AddLump( file, header.lumps[LUMP_BRUSHSIDES], bspBrushSides );
+	AddLump( file, header.lumps[LUMP_LEAFSURFACES], bspLeafSurfaces );
+	AddLump( file, header.lumps[LUMP_LEAFBRUSHES], bspLeafBrushes );
+	AddLump( file, header.lumps[LUMP_MODELS], bspModels );
+	AddLump( file, header.lumps[LUMP_DRAWVERTS], bspDrawVerts );
+	AddLump( file, header.lumps[LUMP_SURFACES], bspDrawSurfaces );
+	AddLump( file, header.lumps[LUMP_VISIBILITY], bspVisBytes );
+	AddLump( file, header.lumps[LUMP_LIGHTMAPS], bspLightBytes );
 	AddLightGridLumps( file, header );
-	AddLump( file, header->lumps[LUMP_ENTITIES], bspEntData );
-	AddLump( file, header->lumps[LUMP_FOGS], bspFogs );
-	AddLump( file, header->lumps[LUMP_DRAWINDEXES], bspDrawIndexes );
+	AddLump( file, header.lumps[LUMP_ENTITIES], bspEntData );
+	AddLump( file, header.lumps[LUMP_FOGS], bspFogs );
+	AddLump( file, header.lumps[LUMP_DRAWINDEXES], bspDrawIndexes );
 
 	/* emit bsp size */
-	size = ftell( file );
+	const int size = ftell( file );
 	Sys_Printf( "Wrote %.1f MB (%d bytes)\n", (float) size / ( 1024 * 1024 ), size );
 
 	/* write the completed header */
 	fseek( file, 0, SEEK_SET );
-	SafeWrite( file, header, sizeof( *header ) );
+	SafeWrite( file, &header, sizeof( header ) );
 
 	/* close the file */
 	fclose( file );

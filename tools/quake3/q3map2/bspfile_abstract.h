@@ -62,12 +62,14 @@ void CopyLump( bspHeader_t *header, int lump, std::vector<DstT>& data ){
 	const int offset = header->lumps[ lump ].offset;
 
 	/* handle erroneous cases */
-	if ( length == 0 ) {
+	if ( length <= 0 ) {
+		data.clear();
 		return;
 	}
 	if ( length % sizeof( SrcT ) ) {
 		if ( force ) {
 			Sys_Warning( "CopyLump: odd lump size (%d) in lump %d\n", length, lump );
+			data.clear();
 			return;
 		}
 		else{

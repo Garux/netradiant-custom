@@ -29,9 +29,6 @@
 #include <stdlib.h>
 
 
-#define SAFE_MALLOC
-#ifdef SAFE_MALLOC
-
 class void_ptr
 {
 private:
@@ -46,15 +43,7 @@ public:
 };
 
 void_ptr safe_malloc( size_t size );
-void_ptr safe_malloc_info( size_t size, const char* info );
 void_ptr safe_calloc( size_t size );
-void_ptr safe_calloc_info( size_t size, const char* info );
-#else
-#define safe_malloc( size ) malloc( size )
-#define safe_malloc_info( size, info ) malloc( size )
-#define safe_calloc( size ) calloc( 1, size )
-#define safe_calloc_info( size, info ) calloc( 1, size )
-#endif /* SAFE_MALLOC */
 
 #define offsetof_array( TYPE, ARRAY_MEMBER, ARRAY_SIZE ) ( offsetof( TYPE, ARRAY_MEMBER[0] ) + sizeof( TYPE::ARRAY_MEMBER[0] ) * ARRAY_SIZE )
 

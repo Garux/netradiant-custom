@@ -3310,7 +3310,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t& tree ){
 	Sys_FPrintf( SYS_VRB, "%9d maxarea'd face surfaces\n", numMaxAreaSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d surface models generated\n", numSurfaceModels );
 	Sys_FPrintf( SYS_VRB, "%9d skybox surfaces generated\n", numSkyboxSurfaces );
-	for ( std::size_t i = 0; i < ARRAY_SIZE( numSurfacesByType ); i++ )
+	for ( std::size_t i = 0; i < std::size( numSurfacesByType ); ++i )
 		Sys_FPrintf( SYS_VRB, "%9d %s surfaces\n", numSurfacesByType[ i ], surfaceTypeName( static_cast<ESurfaceType>( i ) ) );
 
 	Sys_FPrintf( SYS_VRB, "%9d redundant indexes suppressed, saving %d Kbytes\n", numRedundantIndexes, ( numRedundantIndexes * 4 / 1024 ) );

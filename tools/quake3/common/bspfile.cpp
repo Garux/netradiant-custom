@@ -95,7 +95,7 @@ void SetLightBytes( int n ){
 		return;
 	}
 
-	lightBytes = safe_calloc_info( numLightBytes, "SetLightBytes" );
+	lightBytes = safe_calloc( numLightBytes );
 }
 
 void SetGridPoints( int n ){
@@ -107,7 +107,7 @@ void SetGridPoints( int n ){
 		return;
 	}
 
-	gridData = safe_calloc_info( numGridPoints * 8, "SetGridPoints" );
+	gridData = safe_calloc( numGridPoints * 8 );
 }
 
 void IncDrawVerts(){
@@ -116,7 +116,7 @@ void IncDrawVerts(){
 	if ( drawVerts == 0 ) {
 		numDrawVertsBuffer = MAX_MAP_DRAW_VERTS / 37;
 
-		drawVerts = safe_malloc_info( sizeof( drawVert_t ) * numDrawVertsBuffer, "IncDrawVerts" );
+		drawVerts = safe_malloc( sizeof( drawVert_t ) * numDrawVertsBuffer );
 
 	}
 	else if ( numDrawVerts > numDrawVertsBuffer ) {
@@ -143,7 +143,7 @@ void SetDrawVerts( int n ){
 	numDrawVerts =
 	numDrawVertsBuffer = n;
 
-	drawVerts = safe_calloc_info( sizeof( drawVert_t ) * numDrawVertsBuffer, "IncDrawVerts" );
+	drawVerts = safe_calloc( sizeof( drawVert_t ) * numDrawVertsBuffer );
 }
 
 void SetDrawSurfacesBuffer(){
@@ -151,7 +151,7 @@ void SetDrawSurfacesBuffer(){
 
 	numDrawSurfacesBuffer = MAX_MAP_DRAW_SURFS;
 
-	drawSurfaces = safe_calloc_info( sizeof( dsurface_t ) * numDrawSurfacesBuffer, "IncDrawSurfaces" );
+	drawSurfaces = safe_calloc( sizeof( dsurface_t ) * numDrawSurfacesBuffer );
 }
 
 void SetDrawSurfaces( int n ){
@@ -160,7 +160,7 @@ void SetDrawSurfaces( int n ){
 	numDrawSurfaces =
 	numDrawSurfacesBuffer = n;
 
-	drawSurfaces = safe_calloc_info( sizeof( dsurface_t ) * numDrawSurfacesBuffer, "IncDrawSurfaces" );
+	drawSurfaces = safe_calloc( sizeof( dsurface_t ) * numDrawSurfacesBuffer );
 }
 
 void BspFilesCleanup(){

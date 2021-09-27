@@ -1844,12 +1844,6 @@ shaderInfo_t                *ShaderInfoForShaderNull( const char *shader );
 /* bspfile_abstract.c */
 void                        SwapBlock( int *block, int size );
 
-int                         GetLumpElements( bspHeader_t *header, int lump, int size );
-void_ptr                    GetLump( bspHeader_t *header, int lump );
-int                         CopyLump( bspHeader_t *header, int lump, void *dest, int size );
-int                         CopyLump_Allocate( bspHeader_t *header, int lump, void **dest, int size, int *allocationVariable );
-void                        AddLump( FILE *file, bspHeader_t *header, int lumpNum, const void *data, int length );
-
 void                        LoadBSPFile( const char *filename );
 void                        PartialLoadBSPFile( const char *filename );
 void                        WriteBSPFile( const char *filename );
@@ -2380,8 +2374,6 @@ Q_EXTERN std::vector<bspAdvertisement_t> bspAds;
 		} \
 	} \
 	while ( 0 )
-
-#define AUTOEXPAND_BY_REALLOC_BSP( suffix, def ) AUTOEXPAND_BY_REALLOC( bsp ## suffix, numBSP ## suffix, allocatedBSP ## suffix, def )
 
 #define AUTOEXPAND_BY_REALLOC_ADD( ptr, used, allocated, add ) \
 	do \

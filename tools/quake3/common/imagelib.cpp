@@ -519,7 +519,7 @@ void LoadPCX( const char *filename, byte **pic, byte **palette, int *width, int 
 		return;
 	}
 
-	out = safe_malloc_info( ( pcx->ymax + 1 ) * ( pcx->xmax + 1 ), "LoadPCX" );
+	out = safe_malloc( ( pcx->ymax + 1 ) * ( pcx->xmax + 1 ) );
 
 	*pic = out;
 	pix = out;
@@ -1003,7 +1003,7 @@ void LoadTGABuffer( const byte *f, const byte *enddata, byte **pic, int *width, 
 		return;
 	}
 
-	image_rgba = safe_malloc_info( image_width * image_height * 4, "LoadTGABuffer" );
+	image_rgba = safe_malloc( image_width * image_height * 4 );
 
 	// If bit 5 of attributes isn't set, the image has been stored from bottom to top
 	if ( ( targa_header.attributes & 0x20 ) == 0 ) {
