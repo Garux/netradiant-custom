@@ -300,7 +300,7 @@ static void write_json( const char *directory ){
 	}
 	{
 		doc.RemoveAllMembers();
-		for_indexed( auto&& fog : Span( bspFogs, numBSPFogs ) ){
+		for_indexed( const auto& fog : bspFogs ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "shader", rapidjson::StringRef( fog.shader ), all );
 			value.AddMember( "brushNum", fog.brushNum, all );
@@ -501,15 +501,12 @@ static void read_json( const char *directory ){
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "fogs.json" ) );
-		static std::vector<bspFog_t> items;
 		for( auto&& obj : doc.GetObj() ){
-			auto&& item = items.emplace_back();
+			auto&& item = bspFogs.emplace_back();
 			strcpy( item.shader, obj.value["shader"].GetString() );
 			item.brushNum = obj.value["brushNum"].GetInt();
 			item.visibleSide = obj.value["visibleSide"].GetInt();
 		}
-		std::copy( items.begin(), items.end(), bspFogs );
-		numBSPFogs = items.size();
 	}
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "DrawIndexes.json" ) );

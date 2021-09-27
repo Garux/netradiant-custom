@@ -253,7 +253,7 @@ void LoadIBSPFile( const char *filename ){
 
 	CopyLump<bspDrawSurface_t, ibspDrawSurface_t>( (bspHeader_t*) header, LUMP_SURFACES, bspDrawSurfaces );
 
-	numBSPFogs = CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs, sizeof( bspFog_t ) ); // TODO fix overflow
+	CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs );
 
 	CopyLump( (bspHeader_t*) header, LUMP_DRAWINDEXES, bspDrawIndexes );
 
@@ -305,7 +305,7 @@ void PartialLoadIBSPFile( const char *filename ){
 
 	CopyLump<bspDrawSurface_t, ibspDrawSurface_t>( (bspHeader_t*) header, LUMP_SURFACES, bspDrawSurfaces );
 
-	numBSPFogs = CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs, sizeof( bspFog_t ) ); // TODO fix overflow
+	CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs );
 
 	CopyLump( (bspHeader_t*) header, LUMP_ENTITIES, bspEntData );
 
@@ -362,7 +362,7 @@ void WriteIBSPFile( const char *filename ){
 	AddLump( file, header->lumps[LUMP_LIGHTMAPS], bspLightBytes );
 	AddLump( file, header->lumps[LUMP_LIGHTGRID], std::vector<ibspGridPoint_t>( bspGridPoints.begin(), bspGridPoints.end() ) );
 	AddLump( file, header->lumps[LUMP_ENTITIES], bspEntData );
-	AddLump( file, (bspHeader_t*) header, LUMP_FOGS, bspFogs, numBSPFogs * sizeof( bspFog_t ) );
+	AddLump( file, header->lumps[LUMP_FOGS], bspFogs );
 	AddLump( file, header->lumps[LUMP_DRAWINDEXES], bspDrawIndexes );
 
 	/* advertisements */

@@ -164,10 +164,10 @@ void SwapBSPFile( void ){
 	SwapBlock( bspDrawSurfaces );
 
 	/* fogs */
-	for ( i = 0; i < numBSPFogs; i++ )
+	for ( bspFog_t& fog : bspFogs )
 	{
-		bspFogs[ i ].brushNum = LittleLong( bspFogs[ i ].brushNum );
-		bspFogs[ i ].visibleSide = LittleLong( bspFogs[ i ].visibleSide );
+		fog.brushNum = LittleLong( fog.brushNum );
+		fog.visibleSide = LittleLong( fog.visibleSide );
 	}
 
 	/* advertisements */
@@ -381,8 +381,8 @@ void PrintBSPFileSizes( void ){
 	            bspBrushes.size(), bspBrushes.size() * sizeof( bspBrushes[0] ) );
 	Sys_Printf( "%9zu brushsides    %9zu *\n",
 	            bspBrushSides.size(), bspBrushSides.size() * sizeof( bspBrushSides[0] ) );
-	Sys_Printf( "%9d fogs          %9d\n",
-	            numBSPFogs, (int) ( numBSPFogs * sizeof( bspFog_t ) ) );
+	Sys_Printf( "%9zu fogs          %9zu\n",
+	            bspFogs.size(), bspFogs.size() * sizeof( bspFogs[0] ) );
 	Sys_Printf( "%9zu planes        %9zu\n",
 	            bspPlanes.size(), bspPlanes.size() * sizeof( bspPlanes[0] ) );
 	Sys_Printf( "%9zu entdata       %9zu\n",

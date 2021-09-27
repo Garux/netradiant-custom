@@ -2359,8 +2359,7 @@ Q_EXTERN std::vector<int> bspDrawIndexes;
 
 Q_EXTERN std::vector<bspDrawSurface_t> bspDrawSurfaces; // MAX_MAP_DRAW_SURFS
 
-Q_EXTERN int numBSPFogs Q_ASSIGN( 0 );
-Q_EXTERN bspFog_t bspFogs[ MAX_MAP_FOGS ];
+Q_EXTERN std::vector<bspFog_t> bspFogs; // MAX_MAP_FOGS
 
 Q_EXTERN int numBSPAds Q_ASSIGN( 0 );
 Q_EXTERN bspAdvertisement_t bspAds[ MAX_MAP_ADVERTISEMENTS ];

@@ -411,17 +411,13 @@ void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
  */
 
 void EmitFogs( void ){
-	/* setup */
-	numBSPFogs = numMapFogs;
-
 	/* walk list */
 	for ( int i = 0; i < numMapFogs; i++ )
 	{
 		const fog_t& fog = mapFogs[i];
-		bspFog_t& bspFog = bspFogs[i];
+		bspFog_t& bspFog = bspFogs.emplace_back();
 		/* set shader */
-		// copy and clear the rest of memory
-		strncpy( bspFog.shader, fog.si->shader, sizeof( bspFog.shader ) );
+		strcpy( bspFog.shader, fog.si->shader );
 
 		/* global fog doesn't have an associated brush */
 		if ( fog.brush == NULL ) {

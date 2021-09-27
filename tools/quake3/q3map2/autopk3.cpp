@@ -296,8 +296,8 @@ int pk3BSPMain( Args& args ){
 		}
 	}
 
-	for( i = 0; i < numBSPFogs; ++i ){
-		res2list( pk3Shaders, bspFogs[i].shader );
+	for( const bspFog_t& fog : bspFogs ){
+		res2list( pk3Shaders, fog.shader );
 	}
 
 	//levelshot
@@ -959,8 +959,8 @@ int repackBSPMain( Args& args ){
 			}
 		}
 
-		for( i = 0; i < numBSPFogs; ++i ){
-			res2list( pk3Shaders, bspFogs[i].shader );
+		for( const bspFog_t& fog : bspFogs ){
+			res2list( pk3Shaders, fog.shader );
 		}
 
 		//levelshot
@@ -986,7 +986,7 @@ int repackBSPMain( Args& args ){
 
 		bspEntData.clear();
 
-		numBSPFogs = 0;
+		bspFogs.clear();
 	}
 
 	if( analyze )
