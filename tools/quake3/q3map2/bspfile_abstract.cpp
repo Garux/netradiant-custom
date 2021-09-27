@@ -132,8 +132,10 @@ void SwapBSPFile( void ){
 	SwapBlock( bspBrushSides );
 
 	// vis
-	( (int*) bspVisBytes.data() )[ 0 ] = LittleLong( ( (int*) bspVisBytes.data() )[ 0 ] );
-	( (int*) bspVisBytes.data() )[ 1 ] = LittleLong( ( (int*) bspVisBytes.data() )[ 1 ] );
+	if( !bspVisBytes.empty() ){
+		( (int*) bspVisBytes.data() )[ 0 ] = LittleLong( ( (int*) bspVisBytes.data() )[ 0 ] );
+		( (int*) bspVisBytes.data() )[ 1 ] = LittleLong( ( (int*) bspVisBytes.data() )[ 1 ] );
+	}
 
 	/* drawverts (don't swap colors) */
 	for ( bspDrawVert_t& v : bspDrawVerts )
