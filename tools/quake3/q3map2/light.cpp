@@ -550,12 +550,8 @@ void CreateSurfaceLights( void ){
  */
 
 void SetEntityOrigins( void ){
-	int j, k, f;
-
-
 	/* ydnar: copy drawverts into private storage for nefarious purposes */
-	yDrawVerts = safe_malloc( bspDrawVerts.size() * sizeof( bspDrawVert_t ) );
-	memcpy( yDrawVerts, bspDrawVerts.data(), bspDrawVerts.size() * sizeof( bspDrawVert_t ) );
+	yDrawVerts = bspDrawVerts;
 
 	/* set the entity origins */
 	for ( const auto& e : entities )
@@ -575,16 +571,15 @@ void SetEntityOrigins( void ){
 		}
 
 		/* set origin for all surfaces for this model */
-		for ( j = 0; j < dm.numBSPSurfaces; j++ )
+		for ( int j = 0; j < dm.numBSPSurfaces; j++ )
 		{
 			/* get drawsurf */
 			const bspDrawSurface_t& ds = bspDrawSurfaces[ dm.firstBSPSurface + j ];
 
 			/* set its verts */
-			for ( k = 0; k < ds.numVerts; k++ )
+			for ( int k = 0; k < ds.numVerts; k++ )
 			{
-				f = ds.firstVert + k;
-				yDrawVerts[ f ].xyz = origin + bspDrawVerts[ f ].xyz;
+				yDrawVerts[ ds.firstVert + k ].xyz += origin;
 			}
 		}
 	}

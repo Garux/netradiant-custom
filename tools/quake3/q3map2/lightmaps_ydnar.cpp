@@ -1673,7 +1673,7 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 		{
 		case MST_PLANAR:
 			/* get verts */
-			verts = yDrawVerts + ds->firstVert;
+			verts = &yDrawVerts[ ds->firstVert ];
 
 			/* map the triangles */
 			info->approximated = true;

@@ -2217,7 +2217,7 @@ Q_EXTERN int numTriangleDiffuseLights;
 Q_EXTERN int numPatchDiffuseLights;
 
 /* ydnar: general purpose extra copy of drawvert list */
-Q_EXTERN bspDrawVert_t      *yDrawVerts;
+Q_EXTERN std::vector<bspDrawVert_t> yDrawVerts;
 
 Q_EXTERN int defaultLightSubdivide Q_ASSIGN( 999 );
 

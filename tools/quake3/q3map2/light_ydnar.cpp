@@ -974,7 +974,7 @@ void MapRawLightmap( int rawLightmapNum ){
 		{
 		case MST_PLANAR:
 			/* get verts */
-			verts = yDrawVerts + ds->firstVert;
+			verts = &yDrawVerts[ ds->firstVert ];
 
 			/* map the triangles */
 			for ( mapNonAxial = 0; mapNonAxial < 2; mapNonAxial++ )
@@ -2600,7 +2600,7 @@ void IlluminateVertexes( int num ){
 		CreateTraceLightsForSurface( num, &trace );
 
 		/* setup */
-		verts = yDrawVerts + ds->firstVert;
+		verts = &yDrawVerts[ ds->firstVert ];
 		numAvg = 0;
 		memset( avgColors, 0, sizeof( avgColors ) );
 
@@ -2825,7 +2825,7 @@ void IlluminateVertexes( int num ){
 	maxRadius = std::max( lm->sw, lm->sh );
 
 	/* walk the surface verts */
-	verts = yDrawVerts + ds->firstVert;
+	verts = &yDrawVerts[ ds->firstVert ];
 	for ( i = 0; i < ds->numVerts; i++ )
 	{
 		/* do each lightmap */
