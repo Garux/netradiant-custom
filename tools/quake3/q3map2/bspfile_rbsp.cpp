@@ -189,7 +189,7 @@ void LoadRBSPFile( const char *filename ){
 	SwapBlock( (int*) ( (byte*) header + 4 ), sizeof( *header ) - 4 );
 
 	/* make sure it matches the format we're trying to load */
-	if ( !force && (const int&) header->ident != (const int&) g_game->bspIdent ) {
+	if ( !force && memcmp( header->ident, g_game->bspIdent, 4 ) ) {
 		Error( "%s is not a %s file", filename, g_game->bspIdent );
 	}
 	if ( !force && header->version != g_game->bspVersion ) {
@@ -232,7 +232,7 @@ void WriteRBSPFile( const char *filename ){
 	//%	Swapfile();
 
 	/* set up header */
-	(int&) header.ident = (const int&) g_game->bspIdent;
+	memcpy( header.ident, g_game->bspIdent, 4 );
 	header.version = LittleLong( g_game->bspVersion );
 
 	/* write initial header */
