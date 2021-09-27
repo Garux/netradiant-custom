@@ -92,9 +92,6 @@ void SwapBlock( std::vector<T>& block ){
  */
 
 void SwapBSPFile( void ){
-	int i, j;
-	shaderInfo_t    *si;
-
 	/* models */
 	SwapBlock( bspModels );
 
@@ -102,7 +99,7 @@ void SwapBSPFile( void ){
 	for ( bspShader_t& shader : bspShaders )
 	{
 		if ( doingBSP ){
-			si = ShaderInfoForShader( shader.shader );
+			const shaderInfo_t *si = ShaderInfoForShader( shader.shader );
 			if ( !strEmptyOrNull( si->remapShader ) ) {
 				// copy and clear the rest of memory // check for overflow by String64
 				const auto remap = String64()( si->remapShader );
@@ -171,21 +168,19 @@ void SwapBSPFile( void ){
 	}
 
 	/* advertisements */
-	for ( i = 0; i < numBSPAds; i++ )
+	for ( bspAdvertisement_t& ad : bspAds )
 	{
-		bspAds[ i ].cellId = LittleLong( bspAds[ i ].cellId );
-		bspAds[ i ].normal[ 0 ] = LittleFloat( bspAds[ i ].normal[ 0 ] );
-		bspAds[ i ].normal[ 1 ] = LittleFloat( bspAds[ i ].normal[ 1 ] );
-		bspAds[ i ].normal[ 2 ] = LittleFloat( bspAds[ i ].normal[ 2 ] );
+		ad.cellId = LittleLong( ad.cellId );
+		ad.normal[ 0 ] = LittleFloat( ad.normal[ 0 ] );
+		ad.normal[ 1 ] = LittleFloat( ad.normal[ 1 ] );
+		ad.normal[ 2 ] = LittleFloat( ad.normal[ 2 ] );
 
-		for ( j = 0; j < 4; j++ )
+		for ( Vector3& v : ad.rect )
 		{
-			bspAds[ i ].rect[j][ 0 ] = LittleFloat( bspAds[ i ].rect[j][ 0 ] );
-			bspAds[ i ].rect[j][ 1 ] = LittleFloat( bspAds[ i ].rect[j][ 1 ] );
-			bspAds[ i ].rect[j][ 2 ] = LittleFloat( bspAds[ i ].rect[j][ 2 ] );
+			v[ 0 ] = LittleFloat( v[ 0 ] );
+			v[ 1 ] = LittleFloat( v[ 1 ] );
+			v[ 2 ] = LittleFloat( v[ 2 ] );
 		}
-
-		//bspAds[ i ].model[ MAX_QPATH ];
 	}
 }
 

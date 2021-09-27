@@ -267,10 +267,10 @@ void LoadIBSPFile( const char *filename ){
 
 	/* advertisements */
 	if ( header->version == 47 && strEqual( g_game->arg, "quakelive" ) ) { // quake live's bsp version minus wolf, et, etut
-		numBSPAds = CopyLump( (bspHeader_t*) header, LUMP_ADVERTISEMENTS, bspAds, sizeof( bspAdvertisement_t ) );
+		CopyLump( (bspHeader_t*) header, LUMP_ADVERTISEMENTS, bspAds );
 	}
 	else{
-		numBSPAds = 0;
+		bspAds.clear();
 	}
 
 	/* free the file buffer */
@@ -366,7 +366,7 @@ void WriteIBSPFile( const char *filename ){
 	AddLump( file, header->lumps[LUMP_DRAWINDEXES], bspDrawIndexes );
 
 	/* advertisements */
-	AddLump( file, (bspHeader_t*) header, LUMP_ADVERTISEMENTS, bspAds, numBSPAds * sizeof( bspAdvertisement_t ) );
+	AddLump( file, header->lumps[LUMP_ADVERTISEMENTS], bspAds );
 
 	/* emit bsp size */
 	size = ftell( file );

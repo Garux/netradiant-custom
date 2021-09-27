@@ -243,8 +243,6 @@ enum class EBrushType
 
 #define MAX_MAP_DRAW_SURFS      0x20000
 
-#define MAX_MAP_ADVERTISEMENTS  30
-
 /* the editor uses these predefined yaw angles to orient entities up or down */
 #define ANGLE_UP                -1
 #define ANGLE_DOWN              -2
@@ -2361,8 +2359,7 @@ Q_EXTERN std::vector<bspDrawSurface_t> bspDrawSurfaces; // MAX_MAP_DRAW_SURFS
 
 Q_EXTERN std::vector<bspFog_t> bspFogs; // MAX_MAP_FOGS
 
-Q_EXTERN int numBSPAds Q_ASSIGN( 0 );
-Q_EXTERN bspAdvertisement_t bspAds[ MAX_MAP_ADVERTISEMENTS ];
+Q_EXTERN std::vector<bspAdvertisement_t> bspAds;
 
 #define AUTOEXPAND_BY_REALLOC( ptr, reqitem, allocated, def ) \
 	do \
