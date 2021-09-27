@@ -2227,8 +2227,6 @@ void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 
 	/* invert the surface if necessary */
 	if ( ds->backSide || ds->shaderInfo->invert ) {
-		bspDrawVert_t   *dv1, *dv2, temp;
-
 		/* walk the verts, flip the normal */
 		for ( i = 0; i < ds->numVerts; i++ )
 			vector3_negate( ds->verts[ i ].normal );
@@ -2238,11 +2236,8 @@ void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 		{
 			for ( i = 0; i < ( ds->patchWidth / 2 ); i++ )
 			{
-				dv1 = &ds->verts[ j * ds->patchWidth + i ];
-				dv2 = &ds->verts[ j * ds->patchWidth + ( ds->patchWidth - i - 1 ) ];
-				memcpy( &temp, dv1, sizeof( bspDrawVert_t ) );
-				memcpy( dv1, dv2, sizeof( bspDrawVert_t ) );
-				memcpy( dv2, &temp, sizeof( bspDrawVert_t ) );
+				std::swap( ds->verts[ j * ds->patchWidth + i ],
+				           ds->verts[ j * ds->patchWidth + ( ds->patchWidth - i - 1 ) ] );
 			}
 		}
 
