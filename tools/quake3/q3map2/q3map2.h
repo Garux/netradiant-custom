@@ -231,7 +231,7 @@ enum class EBrushType
 
 /* ok to increase these at the expense of more memory */
 #define MAX_MAP_AREAS           0x100       /* MAX_MAP_AREA_BYTES in q_shared must match! */
-#define MAX_MAP_FOGS            0x100       /* technically unlimited in engine, but drawsurf sorting code only has 5 bits for fogs */
+/* MAX_MAP_FOGS is technically unlimited in engine, but drawsurf sorting code only has 5 bits for fogs */
 #define MAX_IBSP_FOGS           31          /* (2^5 - world fog) */
 #define MAX_RBSP_FOGS           30          /* (2^5 - world fog - goggles) */
 #define MAX_MAP_LEAFS           0x20000
@@ -1991,8 +1991,7 @@ Q_EXTERN MinMax g_mapMinmax;
 inline const MinMax c_worldMinmax( Vector3( MIN_WORLD_COORD ), Vector3( MAX_WORLD_COORD ) );
 
 Q_EXTERN int defaultFogNum Q_ASSIGN( -1 );                  /* ydnar: cleaner fog handling */
-Q_EXTERN int numMapFogs Q_ASSIGN( 0 );
-Q_EXTERN fog_t mapFogs[ MAX_MAP_FOGS ];
+Q_EXTERN std::vector<fog_t> mapFogs;
 
 Q_EXTERN entity_t           *mapEnt;
 Q_EXTERN brush_t            buildBrush;
@@ -2351,7 +2350,7 @@ Q_EXTERN std::vector<int> bspDrawIndexes;
 
 Q_EXTERN std::vector<bspDrawSurface_t> bspDrawSurfaces; // MAX_MAP_DRAW_SURFS
 
-Q_EXTERN std::vector<bspFog_t> bspFogs; // MAX_MAP_FOGS
+Q_EXTERN std::vector<bspFog_t> bspFogs;
 
 Q_EXTERN std::vector<bspAdvertisement_t> bspAds;
 

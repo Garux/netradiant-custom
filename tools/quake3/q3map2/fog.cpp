@@ -444,9 +444,6 @@ bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, const brush_t *b
  */
 
 void FogDrawSurfaces( entity_t *e ){
-	int i, j, fogNum;
-	fog_t               *fog;
-	mapDrawSurface_t    *ds;
 	int fogged, numFogged;
 	int numBaseDrawSurfs;
 
@@ -459,17 +456,17 @@ void FogDrawSurfaces( entity_t *e ){
 	numFogFragments = 0;
 
 	/* walk fog list */
-	for ( fogNum = 0; fogNum < numMapFogs; fogNum++ )
+	for ( size_t fogNum = 0; fogNum < mapFogs.size(); ++fogNum )
 	{
 		/* get fog */
-		fog = &mapFogs[ fogNum ];
+		const fog_t& fog = mapFogs[ fogNum ];
 
 		/* clip each surface into this, but don't clip any of the resulting fragments to the same brush */
 		numBaseDrawSurfs = numMapDrawSurfs;
-		for ( i = 0; i < numBaseDrawSurfs; i++ )
+		for ( int i = 0; i < numBaseDrawSurfs; i++ )
 		{
 			/* get the drawsurface */
-			ds = &mapDrawSurfs[ i ];
+			mapDrawSurface_t *ds = &mapDrawSurfs[ i ];
 
 			/* no fog? */
 			if ( ds->shaderInfo->noFog ) {
@@ -477,7 +474,7 @@ void FogDrawSurfaces( entity_t *e ){
 			}
 
 			/* global fog doesn't have a brush */
-			if ( fog->brush == NULL ) {
+			if ( fog.brush == NULL ) {
 				/* don't re-fog already fogged surfaces */
 				if ( ds->fogNum >= 0 ) {
 					continue;
@@ -488,11 +485,11 @@ void FogDrawSurfaces( entity_t *e ){
 			{
 				/* find drawsurface bounds */
 				MinMax minmax;
-				for ( j = 0; j < ds->numVerts; j++ )
+				for ( int j = 0; j < ds->numVerts; j++ )
 					minmax.extend( ds->verts[ j ].xyz );
 
 				/* check against the fog brush */
-				if( !minmax.test( fog->brush->minmax ) ){
+				if( !minmax.test( fog.brush->minmax ) ){
 					continue; /* no intersection */
 				}
 
@@ -501,12 +498,12 @@ void FogDrawSurfaces( entity_t *e ){
 				{
 				/* handle brush faces */
 				case ESurfaceType::Face:
-					fogged = ChopFaceSurfaceByBrush( e, ds, fog->brush );
+					fogged = ChopFaceSurfaceByBrush( e, ds, fog.brush );
 					break;
 
 				/* handle patches */
 				case ESurfaceType::Patch:
-					fogged = ChopPatchSurfaceByBrush( e, ds, fog->brush );
+					fogged = ChopPatchSurfaceByBrush( e, ds, fog.brush );
 					break;
 
 				/* handle triangle surfaces (fixme: split triangle surfaces) */
@@ -549,7 +546,7 @@ int FogForPoint( const Vector3& point, float epsilon ){
 	int fogNum = defaultFogNum;
 
 	/* walk the list of fog volumes */
-	for ( int i = 0; i < numMapFogs; i++ )
+	for ( size_t i = 0; i < mapFogs.size(); ++i )
 	{
 		/* sof2: global fog doesn't reference a brush */
 		if ( mapFogs[ i ].brush == NULL ) {
@@ -586,7 +583,7 @@ int FogForPoint( const Vector3& point, float epsilon ){
  */
 
 int FogForBounds( const MinMax& minmax, float epsilon ){
-	int fogNum, i;
+	int fogNum;
 
 	/* start with bogus fog num */
 	fogNum = defaultFogNum;
@@ -595,7 +592,7 @@ int FogForBounds( const MinMax& minmax, float epsilon ){
 	float bestVolume = 0.0f;
 
 	/* walk the list of fog volumes */
-	for ( i = 0; i < numMapFogs; i++ )
+	for ( size_t i = 0; i < mapFogs.size(); ++i )
 	{
 		/* sof2: global fog doesn't reference a brush */
 		if ( mapFogs[ i ].brush == NULL ) {
@@ -658,13 +655,8 @@ void CreateMapFogs( void ){
 				continue;
 			}
 
-			/* test limit */
-			if ( numMapFogs >= MAX_MAP_FOGS ) {
-				Error( "Exceeded MAX_MAP_FOGS (%d)", MAX_MAP_FOGS );
-			}
-
 			/* set up fog */
-			fog_t& fog = mapFogs[ numMapFogs++ ];
+			fog_t& fog = mapFogs.emplace_back();
 			fog.si = brush.contentShader;
 			fog.brush = &brush;
 			fog.visibleSide = -1;
@@ -688,18 +680,12 @@ void CreateMapFogs( void ){
 	}
 
 	/* ydnar: global fog */
-	const char  *globalFog;
-	if ( entities[ 0 ].read_keyvalue( globalFog, "_fog", "fog" ) ) {
-		/* test limit */
-		if ( numMapFogs >= MAX_MAP_FOGS ) {
-			Error( "Exceeded MAX_MAP_FOGS (%d) trying to add global fog", MAX_MAP_FOGS );
-		}
-
+	if ( const char *globalFog; entities[ 0 ].read_keyvalue( globalFog, "_fog", "fog" ) ) {
 		/* note it */
 		Sys_FPrintf( SYS_VRB, "Map has global fog shader %s\n", globalFog );
 
 		/* set up fog */
-		fog_t& fog = mapFogs[ numMapFogs++ ];
+		fog_t& fog = mapFogs.emplace_back();
 		fog.si = ShaderInfoForShaderNull( globalFog );
 		if ( fog.si == NULL ) {
 			Error( "Invalid shader \"%s\" referenced trying to add global fog", globalFog );
@@ -708,7 +694,7 @@ void CreateMapFogs( void ){
 		fog.visibleSide = -1;
 
 		/* set as default fog */
-		defaultFogNum = numMapFogs - 1;
+		defaultFogNum = mapFogs.size() - 1;
 
 		/* mark all worldspawn brushes as fogged */
 		for ( brush_t& brush : entities[ 0 ].brushes )
@@ -716,5 +702,5 @@ void CreateMapFogs( void ){
 	}
 
 	/* emit some stats */
-	Sys_FPrintf( SYS_VRB, "%9d fogs\n", numMapFogs );
+	Sys_FPrintf( SYS_VRB, "%9zu fogs\n", mapFogs.size() );
 }

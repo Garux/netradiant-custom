@@ -412,7 +412,7 @@ void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
 
 void EmitFogs( void ){
 	/* walk list */
-	for ( int i = 0; i < numMapFogs; i++ )
+	for ( size_t i = 0; i < mapFogs.size(); ++i )
 	{
 		const fog_t& fog = mapFogs[i];
 		bspFog_t& bspFog = bspFogs.emplace_back();
@@ -437,10 +437,10 @@ void EmitFogs( void ){
 			}
 
 			/* find visible axial side */
-			for ( int j = 6; j-- > 0; ) // prioritize +Z (index 5) then -Z (index 4) in ambiguous case; fogged pit is assumed as most likely case
+			for ( size_t j = 6; j-- > 0; ) // prioritize +Z (index 5) then -Z (index 4) in ambiguous case; fogged pit is assumed as most likely case
 			{
 				if ( !fog.brush->sides[ j ].visibleHull.empty() ) {
-					Sys_Printf( "Fog %d has visible side %d\n", i, j );
+					Sys_Printf( "Fog %zu has visible side %zu\n", i, j );
 					bspFog.visibleSide = j;
 					break;
 				}
@@ -450,7 +450,7 @@ void EmitFogs( void ){
 				for ( size_t j = 6; j < fog.brush->sides.size(); ++j )
 				{
 					if ( !fog.brush->sides[ j ].visibleHull.empty() ) {
-						Sys_Printf( "Fog %d has visible side %d\n", i, j );
+						Sys_Printf( "Fog %zu has visible side %zu\n", i, j );
 						bspFog.visibleSide = j;
 						break;
 					}
@@ -461,11 +461,11 @@ void EmitFogs( void ){
 
 	/* warn about overflow */
 	if( strEqual( g_game->bspIdent, "RBSP" ) ){
-		if( numMapFogs > MAX_RBSP_FOGS )
-			Sys_Warning( "MAX_RBSP_FOGS (%i) exceeded (%i). Visual inconsistencies are expected.\n", MAX_RBSP_FOGS, numMapFogs );
+		if( mapFogs.size() > MAX_RBSP_FOGS )
+			Sys_Warning( "MAX_RBSP_FOGS (%i) exceeded (%zu). Visual inconsistencies are expected.\n", MAX_RBSP_FOGS, mapFogs.size() );
 	}
-	else if( numMapFogs > MAX_IBSP_FOGS )
-		Sys_Warning( "MAX_IBSP_FOGS (%i) exceeded (%i). Visual inconsistencies are expected.\n", MAX_IBSP_FOGS, numMapFogs );
+	else if( mapFogs.size() > MAX_IBSP_FOGS )
+		Sys_Warning( "MAX_IBSP_FOGS (%i) exceeded (%zu). Visual inconsistencies are expected.\n", MAX_IBSP_FOGS, mapFogs.size() );
 }
 
 
