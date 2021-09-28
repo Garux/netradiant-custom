@@ -39,6 +39,10 @@
 
 
 
+static void new_handler(){
+	Error( "Memory allocation failed, terminating" );
+}
+
 /*
    ExitQ3Map()
    cleanup routine
@@ -76,6 +80,9 @@ int main( int argc, char **argv ){
 
 	/* set exit call */
 	atexit( ExitQ3Map );
+
+	/* set allocation error callback */
+	std::set_new_handler( new_handler );
 
 	Args args( argc, argv );
 
