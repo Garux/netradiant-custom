@@ -2395,10 +2395,6 @@ int LightMain( Args& args ){
 			Sys_Printf( "Faster mode enabled\n" );
 		}
 
-//		while ( args.takeArg( "-fastallocate" ) ) {
-//			fastAllocate = true;
-//			Sys_Printf( "Fast allocation mode enabled\n" );
-//		}
 		while ( args.takeArg( "-slowallocate" ) ) {
 			fastAllocate = false;
 			Sys_Printf( "Slow allocation mode enabled\n" );
