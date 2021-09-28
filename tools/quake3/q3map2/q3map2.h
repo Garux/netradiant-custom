@@ -2284,8 +2284,7 @@ Q_EXTERN outLightmap_t      *outLightmaps Q_ASSIGN( NULL );
 Q_EXTERN int numSurfacesFloodlighten Q_ASSIGN( 0 );
 
 /* grid points */
-Q_EXTERN int numRawGridPoints Q_ASSIGN( 0 );
-Q_EXTERN rawGridPoint_t     *rawGridPoints Q_ASSIGN( NULL );
+Q_EXTERN std::vector<rawGridPoint_t> rawGridPoints;
 
 Q_EXTERN int numSurfsVertexLit Q_ASSIGN( 0 );
 Q_EXTERN int numSurfsVertexForced Q_ASSIGN( 0 );

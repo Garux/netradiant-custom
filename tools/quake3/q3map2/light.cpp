@@ -1603,10 +1603,6 @@ void TraceGrid( int num ){
  */
 
 void SetupGrid( void ){
-	int i, j;
-	char temp[ 64 ];
-
-
 	/* don't do this if not grid lighting */
 	if ( noGridLighting ) {
 		return;
@@ -1617,15 +1613,15 @@ void SetupGrid( void ){
 
 	/* quantize it */
 	const Vector3 oldGridSize = gridSize;
-	for ( i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; i++ )
 		gridSize[ i ] = std::max( 8.0, floor( gridSize[ i ] ) );
 
 	/* ydnar: increase gridSize until grid count is smaller than max allowed */
-	j = 0;
-	while ( true )
+	size_t numGridPoints;
+	for( int j = 0; ; )
 	{
 		/* get world bounds */
-		for ( i = 0; i < 3; i++ )
+		for ( int i = 0; i < 3; i++ )
 		{
 			gridMins[ i ] = gridSize[ i ] * ceil( bspModels[ 0 ].minmax.mins[ i ] / gridSize[ i ] );
 			const float max = gridSize[ i ] * floor( bspModels[ 0 ].minmax.maxs[ i ] / gridSize[ i ] );
@@ -1640,7 +1636,7 @@ void SetupGrid( void ){
 		}
 		else{
 			/* set grid size */
-			numRawGridPoints = num;
+			numGridPoints = num;
 			break;
 		}
 	}
@@ -1650,34 +1646,29 @@ void SetupGrid( void ){
 
 	/* different? */
 	if ( !VectorCompare( gridSize, oldGridSize ) ) {
+		char temp[ 64 ];
 		sprintf( temp, "%.0f %.0f %.0f", gridSize[ 0 ], gridSize[ 1 ], gridSize[ 2 ] );
 		entities[ 0 ].setKeyValue( "gridsize", (const char*) temp );
 		Sys_FPrintf( SYS_VRB, "Storing adjusted grid size\n" );
 	}
 
-	/* allocate lightgrid */
-	rawGridPoints = safe_calloc( numRawGridPoints * sizeof( *rawGridPoints ) );
-
-	bspGridPoints.resize( numRawGridPoints );
-	memset( bspGridPoints.data(), 0, bspGridPoints.size() * sizeof( bspGridPoints[0] ) );
-
-	/* clear lightgrid */
-	for ( i = 0; i < numRawGridPoints; i++ )
+	/* allocate and clear lightgrid */
 	{
-		for ( j = 0; j < MAX_LIGHTMAPS; j++ )
-			rawGridPoints[ i ].ambient[ j ] = ambientColor;
-
-		rawGridPoints[ i ].styles[ 0 ] = LS_NORMAL;
-		bspGridPoints[ i ].styles[ 0 ] = LS_NORMAL;
-		for ( j = 1; j < MAX_LIGHTMAPS; j++ )
-		{
-			rawGridPoints[ i ].styles[ j ] = LS_NONE;
-			bspGridPoints[ i ].styles[ j ] = LS_NONE;
-		}
+		static_assert( MAX_LIGHTMAPS == 4 );
+		rawGridPoints = decltype( rawGridPoints )( numGridPoints, rawGridPoint_t{
+			{ ambientColor, ambientColor, ambientColor, ambientColor },
+			{ g_vector3_identity, g_vector3_identity, g_vector3_identity, g_vector3_identity },
+			g_vector3_identity,
+			{ LS_NORMAL, LS_NONE, LS_NONE, LS_NONE } } );
+		bspGridPoints = decltype( bspGridPoints )( numGridPoints, bspGridPoint_t{
+			{ Vector3b( 0 ), Vector3b( 0 ), Vector3b( 0 ), Vector3b( 0 ) },
+			{ Vector3b( 0 ), Vector3b( 0 ), Vector3b( 0 ), Vector3b( 0 ) },
+			{ LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
+			{ 0, 0 } } );
 	}
 
 	/* note it */
-	Sys_Printf( "%9d grid points\n", numRawGridPoints );
+	Sys_Printf( "%9zu grid points\n", rawGridPoints.size() );
 }
 
 
@@ -1759,7 +1750,7 @@ void LightWorld( bool fastAllocate ){
 
 		Sys_Printf( "--- TraceGrid ---\n" );
 		inGrid = true;
-		RunThreadsOnIndividual( numRawGridPoints, true, TraceGrid );
+		RunThreadsOnIndividual( rawGridPoints.size(), true, TraceGrid );
 		inGrid = false;
 		Sys_Printf( "%d x %d x %d = %zu grid\n",
 		            gridBounds[ 0 ], gridBounds[ 1 ], gridBounds[ 2 ], bspGridPoints.size() );
@@ -1851,7 +1842,7 @@ void LightWorld( bool fastAllocate ){
 
 			Sys_Printf( "--- BounceGrid ---\n" );
 			inGrid = true;
-			RunThreadsOnIndividual( numRawGridPoints, true, TraceGrid );
+			RunThreadsOnIndividual( rawGridPoints.size(), true, TraceGrid );
 			inGrid = false;
 			Sys_FPrintf( SYS_VRB, "%9d grid points envelope culled\n", gridEnvelopeCulled );
 			Sys_FPrintf( SYS_VRB, "%9d grid points bounds culled\n", gridBoundsCulled );
