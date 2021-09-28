@@ -87,6 +87,7 @@ void HelpBsp()
 	const std::vector<HelpOption> options = {
 		{"-bsp [options] <filename.map>", "Switch that enters this stage"},
 		{"-altsplit", "Alternate BSP tree splitting weights (should give more fps)"},
+		{"-autocaulk", "Only output special .caulk file for use by radiant"},
 		{"-celshader <shadername>", "Sets a global cel shader name"},
 		{"-clipdepth <F>", "Model autoclip brushes thickness, default = 2"},
 		{"-custinfoparms", "Read scripts/custinfoparms.txt"},
@@ -218,6 +219,8 @@ void HelpLight()
 		{"-lightanglehl 0", "Disable half lambert light angle attenuation"},
 		{"-lightanglehl 1", "Enable half lambert light angle attenuation"},
 		{"-lightmapdir <directory>", "Directory to store external lightmaps (default: same as map name without extension)"},
+		{"-lightmapsearchblocksize <N>", "Restricted lightmap searching - block size"},
+		{"-lightmapsearchpower <N>", "Restricted lightmap searching - merge power"},
 		{"-lightmapsize <N>", "Size of lightmaps to generate (must be a power of two)"},
 		{"-lomem", "Low memory but slower lighting mode"},
 		{"-lowquality", "Low quality floodlight (appears to currently break floodlight)"},
