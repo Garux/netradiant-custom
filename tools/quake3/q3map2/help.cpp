@@ -426,6 +426,8 @@ void HelpJson()
 		{"-json [options] <filename.bsp>", "Export/import BSP to/from json text files for debugging and editing purposes"},
 		{"-unpack", "Unpack BSP to json"},
 		{"-pack", "Pack json to BSP"},
+		{"-useflagnames", "While packing, deduce surface/content flag values from their names in shaders.json (useful for conversion to a game with different flag values)"},
+		{"-skipflags", "While -useflagnames, skip unknown flag names"},
 	};
 
 	HelpOptions("BSP json export/import", 0, 80, options);

@@ -35,6 +35,8 @@
 #include "rapidjson/document.h"
 #include "rapidjson/prettywriter.h"
 
+#include <map>
+
 template<typename T>
 class Span
 {
@@ -147,8 +149,50 @@ static void write_json( const char *directory ){
 		for_indexed( const auto& shader : bspShaders ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "shader", rapidjson::StringRef( shader.shader ), all );
-			value.AddMember( "surfaceFlags", shader.surfaceFlags, all ); ///////!!!!!!! decompose bits?
-			value.AddMember( "contentFlags", shader.contentFlags, all );
+			{
+				int flags = shader.surfaceFlags;
+				std::map<uint32_t, const char*> map; // decompose flags
+				for( auto parm = g_game->surfaceParms.crbegin(); parm != g_game->surfaceParms.crend(); ++parm  ){ // find known flags // traverse backwards to try fatter material flags 1st
+					if( parm->surfaceFlags == ( flags & parm->surfaceFlags ) && parm->surfaceFlags != 0 ){
+						flags &= ~parm->surfaceFlags;
+						map.emplace( parm->surfaceFlags, parm->name );
+					}
+				}
+				for( int bit = 0; bit < 32; ++bit ){ // handle unknown flags
+					if( flags & ( 1 << bit ) ){
+						map.emplace( ( 1 << bit ), "?" );
+					}
+				}
+				rapidjson::Value fvalue( rapidjson::kObjectType );
+				for( auto&& [ flag, name ] : map ){ // save in hex format
+					char c[16];
+					sprintf( c, "%#.8x", flag );
+					fvalue.AddMember( rapidjson::StringRef( name ), rapidjson::Value( c, all ), all );
+				}
+				value.AddMember( "surfaceFlags", fvalue, all );
+			}
+			{
+				int flags = shader.contentFlags;
+				std::map<uint32_t, const char*> map; // decompose flags
+				for( auto parm = g_game->surfaceParms.crbegin(); parm != g_game->surfaceParms.crend(); ++parm  ){ // find known flags // traverse backwards to try fatter material flags 1st
+					if( parm->contentFlags == ( flags & parm->contentFlags ) && parm->contentFlags != 0 ){
+						flags &= ~parm->contentFlags;
+						map.emplace( parm->contentFlags, parm->name );
+					}
+				}
+				for( int bit = 0; bit < 32; ++bit ){ // handle unknown flags
+					if( flags & ( 1 << bit ) ){
+						map.emplace( ( 1 << bit ), "?" );
+					}
+				}
+				rapidjson::Value fvalue( rapidjson::kObjectType );
+				for( auto&& [ flag, name ] : map ){ // save in hex format
+					char c[16];
+					sprintf( c, "%#.8x", flag );
+					fvalue.AddMember( rapidjson::StringRef( name ), rapidjson::Value( c, all ), all );
+				}
+				value.AddMember( "contentFlags", fvalue, all );
+			}
 			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "shader#", i ).c_str(), all ), value, all );
 		}
 		write_doc( StringOutputStream( 256 )( directory, "shaders.json" ), doc );
@@ -375,14 +419,52 @@ inline rapidjson::Document load_json( const char *fileName ){
 	return doc;
 }
 
-static void read_json( const char *directory ){
+static void read_json( const char *directory, bool useFlagNames, bool skipUnknownFlags ){
 	{
 		const auto doc = load_json( StringOutputStream( 256 )( directory, "shaders.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspShaders.emplace_back();
 			strcpy( item.shader, obj.value["shader"].GetString() );
-			item.surfaceFlags = obj.value["surfaceFlags"].GetInt();
-			item.contentFlags = obj.value["contentFlags"].GetInt();
+			for( auto&& flag : obj.value["surfaceFlags"].GetObj() ){
+				auto name = flag.name.GetString();
+				auto value = flag.value.GetString();
+				if( useFlagNames ){
+					auto&& parms = g_game->surfaceParms;
+					auto found = std::find_if( parms.begin(), parms.end(), [name]( const auto& parm ){ return striEqual( parm.name, name ); } );
+					if( found != parms.end() ){
+						item.surfaceFlags |= found->surfaceFlags;
+					}
+					else if( skipUnknownFlags ){
+						Sys_Warning( "Flag name '%s' is unknown in shader '%s', skipping its value (%s)\n", name, item.shader, value );
+					}
+					else{
+						Sys_Warning( "Flag name '%s' is unknown in shader '%s', using its value (%s)\n", name, item.shader, value );
+						item.surfaceFlags |= strtoul( value, nullptr, 0 );
+					}
+				}
+				else
+					item.surfaceFlags |= strtoul( value, nullptr, 0 );
+			}
+			for( auto&& flag : obj.value["contentFlags"].GetObj() ){
+				auto name = flag.name.GetString();
+				auto value = flag.value.GetString();
+				if( useFlagNames ){
+					auto&& parms = g_game->surfaceParms;
+					auto found = std::find_if( parms.begin(), parms.end(), [name]( const auto& parm ){ return striEqual( parm.name, name ); } );
+					if( found != parms.end() ){
+						item.contentFlags |= found->contentFlags;
+					}
+					else if( skipUnknownFlags ){
+						Sys_Warning( "Flag name '%s' is unknown in shader '%s', skipping its value (%s)\n", name, item.shader, value );
+					}
+					else{
+						Sys_Warning( "Flag name '%s' is unknown in shader '%s', using its value (%s)\n", name, item.shader, value );
+						item.contentFlags |= strtoul( value, nullptr, 0 );
+					}
+				}
+				else
+					item.contentFlags |= strtoul( value, nullptr, 0 );
+			}
 		}
 	}
 	{
@@ -556,17 +638,27 @@ static void read_json( const char *directory ){
 int ConvertJsonMain( Args& args ){
 	/* arg checking */
 	if ( args.empty() ) {
-		Sys_Printf( "Usage: q3map2 -json <-unpack|-pack> [-v] <mapname>\n" );
+		Sys_Printf( "Usage: q3map2 -json <-unpack|-pack [-useflagnames[-skipflags]]> [-v] <mapname>\n" );
 		return 0;
 	}
 
 	bool doPack = false; // unpack by default
+	bool useFlagNames = false;
+	bool skipUnknownFlags = false;
 
 	/* process arguments */
 	const char *fileName = args.takeBack();
 	{
 		while ( args.takeArg( "-pack" ) ) {
 			doPack = true;
+		}
+		while ( args.takeArg( "-useflagnames" ) ) {
+			useFlagNames = true;
+			Sys_Printf( "Deducing surface/content flag values from their names in shaders.json\n" );
+		}
+		while ( args.takeArg( "-skipflags" ) ) {
+			skipUnknownFlags = true;
+			Sys_Printf( "Skipping unknown surface/content flag names\n" );
 		}
 	}
 
@@ -584,7 +676,7 @@ int ConvertJsonMain( Args& args ){
 	}
 	else{
 		/* write bsp */
-		read_json( StringOutputStream( 256 )( PathExtensionless( source ), '/' ) );
+		read_json( StringOutputStream( 256 )( PathExtensionless( source ), '/' ), useFlagNames, skipUnknownFlags );
 		UnparseEntities();
 		path_set_extension( source, "_json.bsp" );
 		Sys_Printf( "Writing %s\n", source );
