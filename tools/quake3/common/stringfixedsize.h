@@ -38,6 +38,13 @@ public:
 	StringFixedSize() {
 		clear();
 	}
+	explicit StringFixedSize( const char* string ){
+		operator()( string );
+	}
+	StringFixedSize( const StringFixedSize& ) = default;
+	StringFixedSize( StringFixedSize&& ) noexcept = default;
+	StringFixedSize& operator=( const StringFixedSize& ) = default;
+	StringFixedSize& operator=( StringFixedSize&& ) noexcept = default;
 	std::size_t write( const char* buffer, std::size_t length ) override {
 		if( m_length + length < SIZE ){
 			for( auto i = length; i != 0; --i )

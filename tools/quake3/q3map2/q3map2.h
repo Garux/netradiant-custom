@@ -948,7 +948,6 @@ private:
 	bool read_keyvalue_( int &int_value, std::initializer_list<const char*>&& keys ) const;
 	bool read_keyvalue_( float &float_value, std::initializer_list<const char*>&& keys ) const;
 	bool read_keyvalue_( Vector3& vector3_value, std::initializer_list<const char*>&& keys ) const;
-	bool read_keyvalue_( char (&string_value)[1024], std::initializer_list<const char*>&& keys ) const;
 	bool read_keyvalue_( const char *&string_ptr_value, std::initializer_list<const char*>&& keys ) const;
 };
 

@@ -29,46 +29,27 @@
 
 #include "q3map2.h"
 #include "autopk3.h"
+#include <map>
 
 
-struct StrList
-{
-	int n;
-	int max;
-	char s[][MAX_QPATH];
-};
+using StrList = std::vector<String64>;
 
-static inline StrList* StrList_allocate( size_t strNum ){
-	StrList* ret = safe_calloc( offsetof_array( StrList, s, strNum ) );
-	ret->n = 0;
-	ret->max = strNum;
-	return ret;
-}
-
-static inline void StrList_append( StrList* list, const char* string ){
-	if( list->n == list->max )
-		Error( "StrList overflow on item = %s", string );
-
-	const size_t size = sizeof( list->s[0] );
-	if( strcpyQ( list->s[list->n], string, size ) >= size )
-		Sys_FPrintf( SYS_WRN, "WARNING6: %s : string too long.\n", string ); // ( strlen( string ) > MAX_QPATH - 1 )
-
-	list->n++;
-}
-/* returns index + 1 for boolean use */
-static inline int StrList_find( const StrList* list, const char* string ){
-	for ( int i = 0; i < list->n; ++i ){
-		if ( striEqual( list->s[i], string ) )
-			return i + 1;
+inline const String64 *StrList_find( const StrList& list, const char* string ){
+	for ( auto&& s : list ){
+		if ( striEqual( s, string ) )
+			return &s;
 	}
-	return 0;
+	return nullptr;
+}
+inline String64 *StrList_find( StrList& list, const char* string ){
+	return const_cast<String64*>( StrList_find( const_cast<const StrList&>( list ), string ) );
 }
 
 
 /*
-	Check if newcoming texture is unique and not excluded
+	Append newcoming texture, if it is unique and not excluded
 */
-static inline void tex2list( StrList* texlist, StrList* EXtex, StrList* rEXtex ){
+static inline void tex2list( StrList& texlist, const StrList& EXtex, const StrList* rEXtex ){
 	if ( strEmpty( token ) )
 		return;
 	//StripExtension( token );
@@ -86,27 +67,159 @@ static inline void tex2list( StrList* texlist, StrList* EXtex, StrList* rEXtex )
 	if( !StrList_find( texlist, token ) &&
 	    !StrList_find( EXtex, token ) &&
 	    ( rEXtex == NULL ||
-	      !StrList_find( rEXtex, token ) ) ){
-		StrList_append( texlist, token );
+	      !StrList_find( *rEXtex, token ) ) ){
+		texlist.emplace_back( token );
 	}
-	strcat( token, ".tga" ); // default extension for repacked shader text
+	strcpy( dot, ".tga" ); // default extension for repacked shader text
 }
 
 
 /*
-	Check if newcoming res is unique
+	Append newcoming resource, if it is unique
 */
-static inline void res2list( StrList* list, const char* res ){
+inline void res2list( StrList& list, const char* res ){
 	while ( path_separator( *res ) ){ // kill prepended slashes
 		++res;
 	}
-	if ( strEmpty( res ) )
-		return;
-	if( !StrList_find( list, res ) )
-		StrList_append( list, res );
+	if( !strEmpty( res ) && !StrList_find( list, res ) )
+		list.emplace_back( res );
 }
 
-static inline void parseEXblock( StrList* list, const char *exName ){
+
+static void parseBspFile( const char *bspPath, StrList& outShaders, StrList& outSounds, bool print ){
+	const char *str_p;
+	StringOutputStream stream( 256 );
+	StrList pk3Shaders;
+	StrList pk3Sounds;
+
+
+	/* load the bsp */
+	Sys_Printf( "Loading %s\n", bspPath );
+	LoadBSPFile( bspPath );
+	ParseEntities();
+
+	{ /* add visible bspShaders */
+		std::vector<bool> drawsurfSHs( bspShaders.size(), false );
+
+		for ( const bspDrawSurface_t& surf : bspDrawSurfaces ){
+			drawsurfSHs[ surf.shaderNum ] = true;
+		}
+
+		for ( size_t i = 0; i < bspShaders.size(); ++i ){
+			if ( drawsurfSHs[i] && !( bspShaders[i].surfaceFlags & 0x80 /* Q_SURF_NORAW */ ) ){
+				res2list( pk3Shaders, bspShaders[i].shader );
+			}
+		}
+	}
+	/* Ent keys */
+	for ( const auto& ep : entities[0].epairs )
+	{
+		if ( striEqualPrefix( ep.key.c_str(), "vertexremapshader" ) ) {
+			char strbuf[ 1024 ];
+			if( 1 == sscanf( ep.value.c_str(), "%*[^;] %*[;] %s", strbuf ) ) // textures/remap/from;textures/remap/to
+				res2list( pk3Shaders, strbuf );
+		}
+	}
+
+	if ( entities[ 0 ].read_keyvalue( str_p, "music" ) ){
+		res2list( pk3Sounds, stream( PathDefaultExtension( PathCleaned( str_p ), ".wav" ) ) );
+	}
+
+	for ( const auto& e : entities )
+	{
+		if ( e.read_keyvalue( str_p, "noise" ) && str_p[0] != '*' ){
+			res2list( pk3Sounds, stream( PathDefaultExtension( PathCleaned( str_p ), ".wav" ) ) );
+		}
+		/* these 3 sound files are missing in vanilla bundle */
+		if ( e.classname_is( "func_plat" ) ){
+			res2list( pk3Sounds, "sound/movers/plats/pt1_strt.wav" );
+			res2list( pk3Sounds, "sound/movers/plats/pt1_end.wav" );
+		}
+		if ( e.classname_is( "target_push" ) ){
+			if ( !( e.intForKey( "spawnflags") & 1 ) ){
+				res2list( pk3Sounds, "sound/misc/windfly.wav" );
+			}
+		}
+		res2list( pk3Shaders, e.valueForKey( "targetShaderNewName" ) );
+
+		if ( e.read_keyvalue( str_p, "model2" ) ){
+			Sys_Warning( "unhandled model2 key of %s: %s\n", e.classname(), str_p );
+		}
+	}
+
+	for( const bspFog_t& fog : bspFogs ){
+		res2list( pk3Shaders, fog.shader );
+	}
+
+	//levelshot
+	res2list( pk3Shaders, stream( "levelshots/", PathFilename( bspPath ) ) );
+
+
+	if( print ){
+		Sys_Printf( "\n\tDrawsurface+ent calls....%zu\n", pk3Shaders.size() );
+		for ( const auto& s : pk3Shaders ){
+			Sys_Printf( "%s\n", s.c_str() );
+		}
+		Sys_Printf( "\n\tSounds....%zu\n", pk3Sounds.size() );
+		for ( const auto& s : pk3Sounds ){
+			Sys_Printf( "%s\n", s.c_str() );
+		}
+	}
+
+	/* merge to out lists */
+	for( const auto& s : pk3Shaders )
+		res2list( outShaders, s );
+	for( const auto& s : pk3Sounds )
+		res2list( outSounds, s );
+
+	/* free partially loaded bsp data */
+	bspDrawSurfaces.clear();
+
+	entities.clear();
+	numBSPEntities = 0;
+
+	bspShaders.clear();
+
+	bspEntData.clear();
+
+	bspFogs.clear();
+}
+
+
+
+struct Exclusions
+{
+	StrList textures;
+	StrList shaders;
+	StrList shaderfiles;
+	StrList sounds;
+	StrList videos;
+	StrList pureTextures;
+
+	void print() const {
+		Sys_Printf( "\n\tExTextures....%zu\n", textures.size() );
+		for ( const auto& s : textures )
+			Sys_Printf( "%s\n", s.c_str() );
+		Sys_Printf( "\n\tExPureTextures....%zu\n", pureTextures.size() );
+		for ( const auto& s : pureTextures )
+			Sys_Printf( "%s\n", s.c_str() );
+		Sys_Printf( "\n\tExShaders....%zu\n", shaders.size() );
+		for ( const auto& s : shaders )
+			Sys_Printf( "%s\n", s.c_str() );
+		Sys_Printf( "\n\tExShaderfiles....%zu\n", shaderfiles.size() );
+		for ( const auto& s : shaderfiles )
+			Sys_Printf( "%s\n", s.c_str() );
+		Sys_Printf( "\n\tExSounds....%zu\n", sounds.size() );
+		for ( const auto& s : sounds )
+			Sys_Printf( "%s\n", s.c_str() );
+		Sys_Printf( "\n\tExVideos....%zu\n", videos.size() );
+		for ( const auto& s : videos )
+			Sys_Printf( "%s\n", s.c_str() );
+
+	}
+};
+
+static inline void parseEXblock( StrList& list, const char *exName ){
 	if ( !GetToken( true ) || !strEqual( token, "{" ) ) {
 		Error( "ReadExclusionsFile: %s, line %d: { not found", exName, scriptline );
 	}
@@ -123,14 +236,15 @@ static inline void parseEXblock( StrList* list, const char *exName ){
 		}
 
 		/* add to list */
-		StrList_append( list, token );
+		list.emplace_back( token );
 	}
 	return;
 }
 
-static void parseEXfile( const char* filename, StrList* ExTextures, StrList* ExShaders, StrList* ExShaderfiles, StrList* ExSounds, StrList* ExVideos ){
+static const Exclusions parseEXfile( const char* filename ){
 	Sys_Printf( "Loading %s\n", filename );
 
+	Exclusions ex;
 	byte *buffer;
 	const int size = TryLoadFile( filename, (void**) &buffer );
 	if ( size < 0 ) {
@@ -150,19 +264,19 @@ static void parseEXfile( const char* filename, StrList* ExTextures, StrList* ExS
 
 			/* blocks */
 			if ( striEqual( token, "textures" ) ){
-				parseEXblock( ExTextures, filename );
+				parseEXblock( ex.textures, filename );
 			}
 			else if ( striEqual( token, "shaders" ) ){
-				parseEXblock( ExShaders, filename );
+				parseEXblock( ex.shaders, filename );
 			}
 			else if ( striEqual( token, "shaderfiles" ) ){
-				parseEXblock( ExShaderfiles, filename );
+				parseEXblock( ex.shaderfiles, filename );
 			}
 			else if ( striEqual( token, "sounds" ) ){
-				parseEXblock( ExSounds, filename );
+				parseEXblock( ex.sounds, filename );
 			}
 			else if ( striEqual( token, "videos" ) ){
-				parseEXblock( ExVideos, filename );
+				parseEXblock( ex.videos, filename );
 			}
 			else{
 				Error( "ReadExclusionsFile: %s, line %d: unknown block name!\nValid ones are: textures, shaders, shaderfiles, sounds, videos.", filename, scriptline );
@@ -171,7 +285,15 @@ static void parseEXfile( const char* filename, StrList* ExTextures, StrList* ExS
 
 		/* free the buffer */
 		free( buffer );
+
+		/* prepare ex.pureTextures */
+		for ( const auto& s : ex.textures ){
+			if( !StrList_find( ex.shaders, s ) )
+				ex.pureTextures.emplace_back( s );
+		}
 	}
+
+	return ex;
 }
 
 
@@ -203,8 +325,9 @@ static bool packTexture( const char* texname, const char* packname, const int co
  */
 
 int pk3BSPMain( Args& args ){
-	int i, compLevel = 10;
+	int compLevel = 9; // MZ_BEST_COMPRESSION; MZ_UBER_COMPRESSION : not zlib compatible, and may be very slow
 	bool dbg = false, png = false, packFAIL = false;
+	StringOutputStream stream( 256 );
 
 	/* process arguments */
 	const char *fileName = args.takeBack();
@@ -221,98 +344,25 @@ int pk3BSPMain( Args& args ){
 		}
 	}
 
-	/* do some path mangling */
-	strcpy( source, ExpandArg( fileName ) );
-	path_set_extension( source, ".bsp" );
+	/* extract pack name */
+	const CopiedString nameOFpack( PathFilename( fileName ) );
 
-	/* load the bsp */
-	Sys_Printf( "Loading %s\n", source );
-	LoadBSPFile( source );
-	ParseEntities();
+	std::vector<CopiedString> bspList; // absolute bsp paths
 
-
-	char str[ 1024 ];
-	StringOutputStream stream( 256 );
-
-	/* extract map name */
-	const CopiedString nameOFmap( PathFilename( source ) );
-
-	std::vector<bool> drawsurfSHs( bspShaders.size(), false );
-
-	for ( const bspDrawSurface_t& surf : bspDrawSurfaces ){
-		drawsurfSHs[ surf.shaderNum ] = true;
-		//Sys_Printf( "%s\n", bspShaders[surf.shaderNum].shader );
+	while( !args.empty() ){ // handle multiple bsps input
+		bspList.emplace_back( stream( PathExtensionless( ExpandArg( args.takeFront() ) ), ".bsp" ) );
 	}
+	bspList.emplace_back( stream( PathExtensionless( ExpandArg( fileName ) ), ".bsp" ) );
 
-	StrList* pk3Shaders = StrList_allocate( 1024 );
-	StrList* pk3Sounds = StrList_allocate( 1024 );
+	/* parse bsps */
+	StrList pk3Shaders;
+	StrList pk3Sounds;
 	std::vector<CopiedString> pk3Shaderfiles;
-	StrList* pk3Textures = StrList_allocate( 1024 );
-	StrList* pk3Videos = StrList_allocate( 1024 );
+	StrList pk3Textures;
+	StrList pk3Videos;
 
-	for ( size_t i = 0; i < bspShaders.size(); ++i ){
-		if ( drawsurfSHs[i] && !( bspShaders[i].surfaceFlags & 0x80 /* Q_SURF_NORAW */ ) ){
-			res2list( pk3Shaders, bspShaders[i].shader );
-			//Sys_Printf( "%s\n", bspShaders[i].shader );
-		}
-	}
-
-	/* Ent keys */
-	for ( const auto& ep : entities[0].epairs )
-	{
-		if ( striEqualPrefix( ep.key.c_str(), "vertexremapshader" ) ) {
-			if( 1 == sscanf( ep.value.c_str(), "%*[^;] %*[;] %s", str ) ) // textures/remap/from;textures/remap/to
-				res2list( pk3Shaders, str );
-		}
-	}
-
-	if ( entities[ 0 ].read_keyvalue( str, "music" ) ){
-		FixDOSName( str );
-		DefaultExtension( str, ".wav" );
-		res2list( pk3Sounds, str );
-	}
-
-	for ( const auto& e : entities )
-	{
-		if ( e.read_keyvalue( str, "noise" ) && str[0] != '*' ){
-			FixDOSName( str );
-			DefaultExtension( str, ".wav" );
-			res2list( pk3Sounds, str );
-		}
-
-		if ( e.classname_is( "func_plat" ) ){
-			res2list( pk3Sounds, "sound/movers/plats/pt1_strt.wav" );
-			res2list( pk3Sounds, "sound/movers/plats/pt1_end.wav" );
-		}
-		if ( e.classname_is( "target_push" ) ){
-			if ( !( e.intForKey( "spawnflags") & 1 ) ){
-				res2list( pk3Sounds, "sound/misc/windfly.wav" );
-			}
-		}
-		res2list( pk3Shaders, e.valueForKey( "targetShaderNewName" ) );
-
-		if ( e.read_keyvalue( str, "model2" ) ){
-			Sys_Warning( "unhandled model2 key of %s: %s\n", e.classname(), str );
-		}
-	}
-
-	for( const bspFog_t& fog : bspFogs ){
-		res2list( pk3Shaders, fog.shader );
-	}
-
-	//levelshot
-	res2list( pk3Shaders, stream( "levelshots/", nameOFmap.c_str() ) );
-
-
-	if( dbg ){
-		Sys_Printf( "\n\tDrawsurface+ent calls....%i\n", pk3Shaders->n );
-		for ( i = 0; i < pk3Shaders->n; ++i ){
-			Sys_Printf( "%s\n", pk3Shaders->s[i] );
-		}
-		Sys_Printf( "\n\tSounds....%i\n", pk3Sounds->n );
-		for ( i = 0; i < pk3Sounds->n; ++i ){
-			Sys_Printf( "%s\n", pk3Sounds->s[i] );
-		}
+	for( const auto& bsp : bspList ){
+		parseBspFile( bsp.c_str(), pk3Shaders, pk3Sounds, dbg );
 	}
 
 	pk3Shaderfiles = vfsListShaderFiles( g_game->shaderPath );
@@ -324,52 +374,19 @@ int pk3BSPMain( Args& args ){
 		}
 	}
 
-
 	/* load exclusions file */
-	StrList* ExTextures = StrList_allocate( 4096 );
-	StrList* ExShaders = StrList_allocate( 4096 );
-	StrList* ExShaderfiles = StrList_allocate( 4096 );
-	StrList* ExSounds = StrList_allocate( 4096 );
-	StrList* ExVideos = StrList_allocate( 4096 );
-	StrList* ExPureTextures = StrList_allocate( 4096 );
+	const Exclusions ex = parseEXfile( stream( PathFilenameless( args.getArg0() ), g_game->arg, ".exclude" ) );
+	/* key is pointer to pk3Shaders entry, thus latter shall not be reallocated! */
+	std::map<const String64*, CopiedString> ExReasonShader;
+	std::map<const String64*, CopiedString> ExReasonShaderFile;
 
-	char* ExReasonShader[4096] = { NULL };
-	char* ExReasonShaderFile[4096] = { NULL };
-
-	{
-		parseEXfile( stream( PathFilenameless( args.getArg0() ), g_game->arg, ".exclude" ), ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
-
-		for ( i = 0; i < ExTextures->n; ++i ){
-			if( !StrList_find( ExShaders, ExTextures->s[i] ) )
-				StrList_append( ExPureTextures, ExTextures->s[i] );
-		}
-	}
-
-	if( dbg ){
-		Sys_Printf( "\n\tExTextures....%i\n", ExTextures->n );
-		for ( i = 0; i < ExTextures->n; ++i )
-			Sys_Printf( "%s\n", ExTextures->s[i] );
-		Sys_Printf( "\n\tExPureTextures....%i\n", ExPureTextures->n );
-		for ( i = 0; i < ExPureTextures->n; ++i )
-			Sys_Printf( "%s\n", ExPureTextures->s[i] );
-		Sys_Printf( "\n\tExShaders....%i\n", ExShaders->n );
-		for ( i = 0; i < ExShaders->n; ++i )
-			Sys_Printf( "%s\n", ExShaders->s[i] );
-		Sys_Printf( "\n\tExShaderfiles....%i\n", ExShaderfiles->n );
-		for ( i = 0; i < ExShaderfiles->n; ++i )
-			Sys_Printf( "%s\n", ExShaderfiles->s[i] );
-		Sys_Printf( "\n\tExSounds....%i\n", ExSounds->n );
-		for ( i = 0; i < ExSounds->n; ++i )
-			Sys_Printf( "%s\n", ExSounds->s[i] );
-		Sys_Printf( "\n\tExVideos....%i\n", ExVideos->n );
-		for ( i = 0; i < ExVideos->n; ++i )
-			Sys_Printf( "%s\n", ExVideos->s[i] );
-	}
+	if( dbg )
+		ex.print();
 
 	/* can exclude pure textures right now, shouldn't create shaders for them anyway */
-	for ( i = 0; i < pk3Shaders->n; ++i ){
-		if( StrList_find( ExPureTextures, pk3Shaders->s[i] ) )
-			strClear( pk3Shaders->s[i] );
+	for ( auto& s : pk3Shaders ){
+		if( StrList_find( ex.pureTextures, s ) )
+			s.clear();
 	}
 
 	//Parse Shader Files
@@ -377,26 +394,20 @@ int pk3BSPMain( Args& args ){
 	endofscript = true;
 
 	for ( CopiedString& file : pk3Shaderfiles ){
-		bool wantShader = false, wantShaderFile = false, ShaderFileExcluded = false;
-		int shader, found;
-		char* reasonShader = NULL;
-		char* reasonShaderFile = NULL;
+		bool wantShaderFile = false;
+		const String64 *excludedByShader = nullptr;
+		/* do wanna le shader file? */
+		const bool excludedByShaderFile = StrList_find( ex.shaderfiles, file.c_str() );
 
 		/* load the shader */
-		char scriptFile[128];
-		sprintf( scriptFile, "%s/%s", g_game->shaderPath, file.c_str() );
+		const auto scriptFile = stream( g_game->shaderPath, '/', file );
 		SilentLoadScriptFile( scriptFile, 0 );
 		if( dbg )
 			Sys_Printf( "\n\tentering %s\n", file.c_str() );
 
-		/* do wanna le shader file? */
-		if( ( found = StrList_find( ExShaderfiles, file.c_str() ) ) ){
-			ShaderFileExcluded = true;
-			reasonShaderFile = ExShaderfiles->s[found - 1];
-		}
 		/* tokenize it */
 		/* check if shader file has to be excluded */
-		while ( !ShaderFileExcluded )
+		while ( !excludedByShader && !excludedByShaderFile )
 		{
 			/* test for end of file */
 			if ( !GetToken( true ) ) {
@@ -404,14 +415,8 @@ int pk3BSPMain( Args& args ){
 			}
 
 			/* does it contain restricted shaders/textures? */
-			if( ( found = StrList_find( ExShaders, token ) ) ){
-				ShaderFileExcluded = true;
-				reasonShader = ExShaders->s[found - 1];
-				break;
-			}
-			else if( ( found = StrList_find( ExPureTextures, token ) ) ){
-				ShaderFileExcluded = true;
-				reasonShader = ExPureTextures->s[found - 1];
+			if( ( excludedByShader = StrList_find( ex.shaders, token ) )
+			 || ( excludedByShader = StrList_find( ex.pureTextures, token ) ) ){
 				break;
 			}
 
@@ -421,7 +426,7 @@ int pk3BSPMain( Args& args ){
 			}
 			if ( !strEqual( token, "{" ) ) {
 				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
-				       scriptFile, scriptline, token, g_strLoadedFileLocation );
+				       scriptFile.c_str(), scriptline, token, g_strLoadedFileLocation );
 			}
 
 			while ( 1 )
@@ -457,14 +462,11 @@ int pk3BSPMain( Args& args ){
 				break;
 			}
 			//dump shader names
-			if( dbg ) Sys_Printf( "%s\n", token );
+			if( dbg )
+				Sys_Printf( "%s\n", token );
 
 			/* do wanna le shader? */
-			wantShader = false;
-			if( ( found = StrList_find( pk3Shaders, token ) ) ){
-				shader = found - 1;
-				wantShader = true;
-			}
+			String64 *wantShader = StrList_find( pk3Shaders, token );
 
 			/* handle { } section */
 			if ( !GetToken( true ) ) {
@@ -472,7 +474,7 @@ int pk3BSPMain( Args& args ){
 			}
 			if ( !strEqual( token, "{" ) ) {
 				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
-				       scriptFile, scriptline, token, g_strLoadedFileLocation );
+				       scriptFile.c_str(), scriptline, token, g_strLoadedFileLocation );
 			}
 
 			bool hasmap = false;
@@ -502,10 +504,10 @@ int pk3BSPMain( Args& args ){
 							break;
 						}
 						if ( strEqual( token, "{" ) ) {
-							Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", scriptFile, scriptline );
+							Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", scriptFile.c_str(), scriptline );
 						}
 						if ( striEqual( token, "mapComp" ) || striEqual( token, "mapNoComp" ) || striEqual( token, "animmapcomp" ) || striEqual( token, "animmapnocomp" ) ){
-							Sys_FPrintf( SYS_WRN, "WARNING7: %s : line %d : unsupported '%s' map directive\n", scriptFile, scriptline, token );
+							Sys_FPrintf( SYS_WRN, "WARNING7: %s : line %d : unsupported '%s' map directive\n", scriptFile.c_str(), scriptline, token );
 						}
 						/* skip the shader */
 						if ( !wantShader )
@@ -518,7 +520,7 @@ int pk3BSPMain( Args& args ){
 							/* get an image */
 							GetToken( false );
 							if ( token[ 0 ] != '*' && token[ 0 ] != '$' ) {
-								tex2list( pk3Textures, ExTextures, NULL );
+								tex2list( pk3Textures, ex.textures, NULL );
 							}
 						}
 						else if ( striEqual( token, "animMap" ) ||
@@ -527,7 +529,7 @@ int pk3BSPMain( Args& args ){
 							GetToken( false );// skip num
 							while ( TokenAvailable() ){
 								GetToken( false );
-								tex2list( pk3Textures, ExTextures, NULL );
+								tex2list( pk3Textures, ex.textures, NULL );
 							}
 						}
 						else if ( striEqual( token, "videoMap" ) ){
@@ -538,13 +540,13 @@ int pk3BSPMain( Args& args ){
 								strcpy( token, stream( "video/", token ) );
 							}
 							if( !StrList_find( pk3Videos, token ) &&
-							    !StrList_find( ExVideos, token ) )
-								StrList_append( pk3Videos, token );
+							    !StrList_find( ex.videos, token ) )
+								pk3Videos.emplace_back( token );
 						}
 					}
 				}
 				else if ( striEqualPrefix( token, "implicit" ) ){
-					Sys_FPrintf( SYS_WRN, "WARNING5: %s : line %d : unsupported %s shader\n", scriptFile, scriptline, token );
+					Sys_FPrintf( SYS_WRN, "WARNING5: %s : line %d : unsupported %s shader\n", scriptFile.c_str(), scriptline, token );
 				}
 				/* skip the shader */
 				else if ( !wantShader )
@@ -558,11 +560,10 @@ int pk3BSPMain( Args& args ){
 
 					/* ignore bogus paths */
 					if ( !strEqual( token, "-" ) && !striEqual( token, "full" ) ) {
-						const char skysides[6][3] = { "up", "dn", "lf", "rt", "bk", "ft" };
 						char* const skysidestring = token + strcatQ( token, "_@@.tga", sizeof( token ) ) - 6;
-						for( size_t side = 0; side < 6; ++side ){
-							memcpy( skysidestring, skysides[side], 2 );
-							tex2list( pk3Textures, ExTextures, NULL );
+						for( const auto side : { "up", "dn", "lf", "rt", "bk", "ft" } ){
+							memcpy( skysidestring, side, 2 );
+							tex2list( pk3Textures, ex.textures, NULL );
 						}
 					}
 					/* skip rest of line */
@@ -576,27 +577,24 @@ int pk3BSPMain( Args& args ){
 
 			//exclude shader
 			if ( wantShader ){
-				if( StrList_find( ExShaders, pk3Shaders->s[shader] ) ){
-					wantShader = false;
-					strClear( pk3Shaders->s[shader] );
+				if( StrList_find( ex.shaders, *wantShader ) ){
+					wantShader->clear();
+					wantShader = nullptr;
 				}
 				if ( wantShader && !hasmap ){
-					Sys_FPrintf( SYS_WRN, "WARNING8: %s : visible shader has no known maps\n", pk3Shaders->s[shader] );
-					wantShader = false;
+					Sys_FPrintf( SYS_WRN, "WARNING8: %s : visible shader has no known maps\n", wantShader->c_str() );
+					wantShader = nullptr;
 				}
 				if ( wantShader ){
-					if ( ShaderFileExcluded ){
-						if ( reasonShaderFile != NULL ){
-							ExReasonShaderFile[ shader ] = reasonShaderFile;
+					if ( excludedByShader || excludedByShaderFile ){
+						ExReasonShaderFile[ wantShader ] = file;
+						if( excludedByShader != nullptr ){
+							ExReasonShader[ wantShader ] = excludedByShader->c_str();
 						}
-						else{
-							ExReasonShaderFile[ shader ] = copystring( file.c_str() );
-						}
-						ExReasonShader[ shader ] = reasonShader;
 					}
 					else{
 						wantShaderFile = true;
-						strClear( pk3Shaders->s[shader] );
+						wantShader->clear();
 					}
 				}
 			}
@@ -611,62 +609,62 @@ int pk3BSPMain( Args& args ){
 	/* exclude stuff */
 //wanted shaders from excluded .shaders
 	Sys_Printf( "\n" );
-	for ( i = 0; i < pk3Shaders->n; ++i ){
-		if ( !strEmpty( pk3Shaders->s[i] ) && ( ExReasonShader[i] != NULL || ExReasonShaderFile[i] != NULL ) ){
-			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
+	for ( auto& s : pk3Shaders ){
+		if ( !s.empty() && ( ExReasonShader.count( &s ) || ExReasonShaderFile.count( &s ) ) ){
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", s.c_str() );
 			packFAIL = true;
-			if ( ExReasonShader[i] != NULL ){
-				Sys_Printf( "     reason: is located in %s,\n     containing restricted shader %s\n", ExReasonShaderFile[i], ExReasonShader[i] );
+			if ( ExReasonShader.count( &s ) ){
+				Sys_Printf( "     reason: is located in %s,\n     containing restricted shader %s\n", ExReasonShaderFile[&s].c_str(), ExReasonShader[&s].c_str() );
 			}
 			else{
-				Sys_Printf( "     reason: is located in restricted %s\n", ExReasonShaderFile[i] );
+				Sys_Printf( "     reason: is located in restricted %s\n", ExReasonShaderFile[&s].c_str() );
 			}
-			strClear( pk3Shaders->s[i] );
+			s.clear();
 		}
 	}
 //pure textures (shader ones are done)
-	for ( i = 0; i < pk3Shaders->n; ++i ){
-		if ( !strEmpty( pk3Shaders->s[i] ) ){
-			FixDOSName( pk3Shaders->s[i] );
-			if( StrList_find( pk3Textures, pk3Shaders->s[i] ) ||
-			    StrList_find( ExTextures, pk3Shaders->s[i] ) )
-				strClear( pk3Shaders->s[i] );
+	for ( auto& s : pk3Shaders ){
+		if ( !s.empty() ){
+			s = stream( PathCleaned( s ) );
+			if( StrList_find( pk3Textures, s ) ||
+			    StrList_find( ex.textures, s ) )
+				s.clear();
 		}
 	}
 
 //snds
-	for ( i = 0; i < pk3Sounds->n; ++i ){
-		if( StrList_find( ExSounds, pk3Sounds->s[i] ) )
-			strClear( pk3Sounds->s[i] );
+	for ( auto& s : pk3Sounds ){
+		if( StrList_find( ex.sounds, s ) )
+			s.clear();
 	}
 
 	/* make a pack */
-	auto packname = StringOutputStream( 256 )( g_enginePath, nameOFmap, "_autopacked.pk3" );
+	const auto packname = stream( g_enginePath, nameOFpack, "_autopacked.pk3" );
 	remove( packname );
-	auto packFailName = StringOutputStream( 256 )( g_enginePath, nameOFmap, "_FAILEDpack.pk3" );
+	const auto packFailName = stream( g_enginePath, nameOFpack, "_FAILEDpack.pk3" );
 	remove( packFailName );
 
 	Sys_Printf( "\n--- ZipZip ---\n" );
 
 	Sys_Printf( "\n\tShader referenced textures....\n" );
 
-	for ( i = 0; i < pk3Textures->n; ++i ){
-		if( !packTexture( pk3Textures->s[i], packname, compLevel, png ) ){
-			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Textures->s[i] );
+	for ( const auto& s : pk3Textures ){
+		if( !packTexture( s, packname, compLevel, png ) ){
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", s.c_str() );
 			packFAIL = true;
 		}
 	}
 
 	Sys_Printf( "\n\tPure textures....\n" );
 
-	for ( i = 0; i < pk3Shaders->n; ++i ){
-		if ( !strEmpty( pk3Shaders->s[i] ) ){
-			if( !packTexture( pk3Shaders->s[i], packname, compLevel, png ) ){
-				if ( i == pk3Shaders->n - 1 ){ //levelshot typically
-					Sys_Printf( "  ~fail  %s\n", pk3Shaders->s[i] );
+	for ( const auto& s : pk3Shaders ){
+		if ( !s.empty() ){
+			if( !packTexture( s, packname, compLevel, png ) ){
+				if ( &s == &pk3Shaders.back() ){ //levelshot typically
+					Sys_Printf( "  ~fail  %s\n", s.c_str() );
 				}
 				else{
-					Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
+					Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", s.c_str() );
 					packFAIL = true;
 				}
 			}
@@ -679,7 +677,7 @@ int pk3BSPMain( Args& args ){
 		if ( !file.empty() ){
 			stream( g_game->shaderPath, "/", file.c_str() );
 			if ( !packResource( stream, packname, compLevel ) ){
-				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
+				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", stream.c_str() );
 				packFAIL = true;
 			}
 		}
@@ -687,10 +685,10 @@ int pk3BSPMain( Args& args ){
 
 	Sys_Printf( "\n\tSounds....\n" );
 
-	for ( i = 0; i < pk3Sounds->n; ++i ){
-		if ( !strEmpty( pk3Sounds->s[i] ) ){
-			if ( !packResource( pk3Sounds->s[i], packname, compLevel ) ){
-				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Sounds->s[i] );
+	for ( const auto& s : pk3Sounds ){
+		if ( !s.empty() ){
+			if ( !packResource( s, packname, compLevel ) ){
+				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", s.c_str() );
 				packFAIL = true;
 			}
 		}
@@ -698,36 +696,39 @@ int pk3BSPMain( Args& args ){
 
 	Sys_Printf( "\n\tVideos....\n" );
 
-	for ( i = 0; i < pk3Videos->n; ++i ){
-		if ( !packResource( pk3Videos->s[i], packname, compLevel ) ){
-			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Videos->s[i] );
+	for ( const auto& s : pk3Videos ){
+		if ( !packResource( s, packname, compLevel ) ){
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", s.c_str() );
 			packFAIL = true;
 		}
 	}
 
 	Sys_Printf( "\n\t.bsp and stuff\n" );
 
-	stream( "maps/", nameOFmap, ".bsp" );
-	//if ( vfsPackFile( stream, packname, compLevel ) ){
-	if ( vfsPackFile_Absolute_Path( source, stream, packname, compLevel ) ){
-		Sys_Printf( "++%s\n", stream.c_str() );
+	for( const auto& bsp : bspList ){
+		const auto mapname = PathFilename( bsp.c_str() );
+		stream( "maps/", mapname, ".bsp" );
+		//if ( vfsPackFile( stream, packname, compLevel ) ){
+		if ( vfsPackFile_Absolute_Path( bsp.c_str(), stream, packname, compLevel ) ){
+			Sys_Printf( "++%s\n", stream.c_str() );
+		}
+		else{
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", stream.c_str() );
+			packFAIL = true;
+		}
+
+		stream( "maps/", mapname, ".aas" );
+		if ( !packResource( stream, packname, compLevel ) )
+			Sys_Printf( "  ~fail  %s\n", stream.c_str() );
+
+		stream( "scripts/", mapname, ".arena" );
+		if ( !packResource( stream, packname, compLevel ) )
+			Sys_Printf( "  ~fail  %s\n", stream.c_str() );
+
+		stream( "scripts/", mapname, ".defi" );
+		if ( !packResource( stream, packname, compLevel ) )
+			Sys_Printf( "  ~fail  %s\n", stream.c_str() );
 	}
-	else{
-		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", stream.c_str() );
-		packFAIL = true;
-	}
-
-	stream( "maps/", nameOFmap, ".aas" );
-	if ( !packResource( stream, packname, compLevel ) )
-		Sys_Printf( "  ~fail  %s\n", stream.c_str() );
-
-	stream( "scripts/", nameOFmap, ".arena" );
-	if ( !packResource( stream, packname, compLevel ) )
-		Sys_Printf( "  ~fail  %s\n", stream.c_str() );
-
-	stream( "scripts/", nameOFmap, ".defi" );
-	if ( !packResource( stream, packname, compLevel ) )
-		Sys_Printf( "  ~fail  %s\n", stream.c_str() );
 
 	if ( !packFAIL ){
 		Sys_Printf( "\nSaved to %s\n", packname.c_str() );
@@ -748,9 +749,8 @@ int pk3BSPMain( Args& args ){
  */
 
 int repackBSPMain( Args& args ){
-	int i, j, compLevel = 0;
+	int compLevel = 1; // MZ_BEST_SPEED
 	bool dbg = false, png = false, analyze = false;
-	char str[ 1024 ];
 	StringOutputStream stream( 256 );
 	/* process arguments */
 	const char *fileName = args.takeBack();
@@ -770,86 +770,34 @@ int repackBSPMain( Args& args ){
 		}
 	}
 
+	/* extract pack name */
+	const CopiedString nameOFpack( PathFilename( fileName ) );
+
 	/* load exclusions file */
-	StrList* ExTextures = StrList_allocate( 4096 );
-	StrList* ExShaders = StrList_allocate( 4096 );
-	StrList* ExShaderfiles = StrList_allocate( 4096 );
-	StrList* ExSounds = StrList_allocate( 4096 );
-	StrList* ExVideos = StrList_allocate( 4096 );
-	StrList* ExPureTextures = StrList_allocate( 4096 );
+	const Exclusions ex = parseEXfile( stream( PathFilenameless( args.getArg0() ), g_game->arg, ".exclude" ) );
 
-	{
-		parseEXfile( stream( PathFilenameless( args.getArg0() ), g_game->arg, ".exclude" ), ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
+	if( dbg )
+		ex.print();
 
-		for ( i = 0; i < ExTextures->n; ++i ){
-			if( !StrList_find( ExShaders, ExTextures->s[i] ) )
-				StrList_append( ExPureTextures, ExTextures->s[i] );
+	/* load repack.exclude */ /* rex.pureTextures & rex.shaderfiles wont be used */
+	const Exclusions rex = parseEXfile( stream( PathFilenameless( args.getArg0() ), "repack.exclude" ) );
+
+	if( dbg )
+		rex.print();
+
+
+	std::vector<CopiedString> bspList; // absolute bsp paths
+
+	if ( striEqual( path_get_filename_base_end( fileName ), ".bsp" ) ){
+		while( !args.empty() ){ // handle multiple bsps input
+			bspList.emplace_back( stream( PathExtensionless( ExpandArg( args.takeFront() ) ), ".bsp" ) );
 		}
-	}
-
-	if( dbg ){
-		Sys_Printf( "\n\tExTextures....%i\n", ExTextures->n );
-		for ( i = 0; i < ExTextures->n; ++i )
-			Sys_Printf( "%s\n", ExTextures->s[i] );
-		Sys_Printf( "\n\tExPureTextures....%i\n", ExPureTextures->n );
-		for ( i = 0; i < ExPureTextures->n; ++i )
-			Sys_Printf( "%s\n", ExPureTextures->s[i] );
-		Sys_Printf( "\n\tExShaders....%i\n", ExShaders->n );
-		for ( i = 0; i < ExShaders->n; ++i )
-			Sys_Printf( "%s\n", ExShaders->s[i] );
-		Sys_Printf( "\n\tExShaderfiles....%i\n", ExShaderfiles->n );
-		for ( i = 0; i < ExShaderfiles->n; ++i )
-			Sys_Printf( "%s\n", ExShaderfiles->s[i] );
-		Sys_Printf( "\n\tExSounds....%i\n", ExSounds->n );
-		for ( i = 0; i < ExSounds->n; ++i )
-			Sys_Printf( "%s\n", ExSounds->s[i] );
-		Sys_Printf( "\n\tExVideos....%i\n", ExVideos->n );
-		for ( i = 0; i < ExVideos->n; ++i )
-			Sys_Printf( "%s\n", ExVideos->s[i] );
-	}
-
-
-	/* load repack.exclude */
-	StrList* rExTextures = StrList_allocate( 65536 );
-	StrList* rExShaders = StrList_allocate( 32768 );
-	StrList* rExShaderfiles = StrList_allocate( 4096 );
-	StrList* rExSounds = StrList_allocate( 8192 );
-	StrList* rExVideos = StrList_allocate( 4096 );
-
-	parseEXfile( stream( PathFilenameless( args.getArg0() ), "repack.exclude" ), rExTextures, rExShaders, rExShaderfiles, rExSounds, rExVideos );
-
-	if( dbg ){
-		Sys_Printf( "\n\trExTextures....%i\n", rExTextures->n );
-		for ( i = 0; i < rExTextures->n; ++i )
-			Sys_Printf( "%s\n", rExTextures->s[i] );
-		Sys_Printf( "\n\trExShaders....%i\n", rExShaders->n );
-		for ( i = 0; i < rExShaders->n; ++i )
-			Sys_Printf( "%s\n", rExShaders->s[i] );
-		Sys_Printf( "\n\trExShaderfiles....%i\n", rExShaderfiles->n );
-		for ( i = 0; i < rExShaderfiles->n; ++i )
-			Sys_Printf( "%s\n", rExShaderfiles->s[i] );
-		Sys_Printf( "\n\trExSounds....%i\n", rExSounds->n );
-		for ( i = 0; i < rExSounds->n; ++i )
-			Sys_Printf( "%s\n", rExSounds->s[i] );
-		Sys_Printf( "\n\trExVideos....%i\n", rExVideos->n );
-		for ( i = 0; i < rExVideos->n; ++i )
-			Sys_Printf( "%s\n", rExVideos->s[i] );
-	}
-
-
-
-	int bspListN = 0;
-	const int bspListSize = 16384;
-	char (*bspList)[1024] = safe_malloc( bspListSize * sizeof( bspList[0] ) );
-
-	/* do some path mangling */
-	strcpy( source, ExpandArg( fileName ) );
-	if ( striEqual( path_get_filename_base_end( source ), ".bsp" ) ){
-		strcpy( bspList[bspListN], source );
-		bspListN++;
+		bspList.emplace_back( stream( PathExtensionless( ExpandArg( fileName ) ), ".bsp" ) );
 	}
 	else{
 		/* load bsps paths list */
+		/* do some path mangling */
+		strcpy( source, ExpandArg( fileName ) );
 		Sys_Printf( "Loading %s\n", source );
 		byte *buffer;
 		const int size = TryLoadFile( source, (void**) &buffer );
@@ -861,132 +809,25 @@ int repackBSPMain( Args& args ){
 		ParseFromMemory( (char *) buffer, size );
 
 		/* tokenize it */
-		while ( 1 )
+		while ( GetToken( true ) )
 		{
-			/* test for end of file */
-			if ( !GetToken( true ) ) {
-				break;
-			}
-			if( bspListSize == bspListN )
-				Error( "bspList overflow" );
-			strcpy( bspList[bspListN], token );
-			bspListN++;
+			bspList.emplace_back( stream( PathExtensionless( token ), ".bsp" ) );
 		}
 
 		/* free the buffer */
 		free( buffer );
 	}
 
-	/* extract input file name */
-	const CopiedString nameOFrepack( PathFilename( source ) );
-
-	/* load bsps */
-	StrList* pk3Shaders = StrList_allocate( 65536 );
-	StrList* pk3Sounds = StrList_allocate( 4096 );
+	/* parse bsps */
+	StrList pk3Shaders;
+	StrList pk3Sounds;
 	std::vector<CopiedString> pk3Shaderfiles;
-	StrList* pk3Textures = StrList_allocate( 65536 );
-	StrList* pk3Videos = StrList_allocate( 1024 );
+	StrList pk3Textures;
+	StrList pk3Videos;
 
 
-	for( j = 0; j < bspListN; ++j ){
-
-		if( analyze ){
-			pk3Sounds->n = 0;
-			pk3Shaders->n = 0;
-		}
-
-		int pk3SoundsNold = pk3Sounds->n;
-		int pk3ShadersNold = pk3Shaders->n;
-
-		strcpy( source, bspList[j] );
-		path_set_extension( source, ".bsp" );
-
-		/* load the bsp */
-		Sys_Printf( "\nLoading %s\n", source );
-		PartialLoadBSPFile( source );
-		ParseEntities();
-
-		/* extract map name */
-		const CopiedString nameOFmap( PathFilename( source ) );
-
-		std::vector<bool> drawsurfSHs( bspShaders.size(), false );
-
-		for ( const bspDrawSurface_t& surf : bspDrawSurfaces ){
-			drawsurfSHs[ surf.shaderNum ] = true;
-		}
-
-		for ( size_t i = 0; i < bspShaders.size(); ++i ){
-			if ( drawsurfSHs[i] && !( bspShaders[i].surfaceFlags & 0x80 /* Q_SURF_NORAW */ ) ){
-				res2list( pk3Shaders, bspShaders[i].shader );
-			}
-		}
-
-		/* Ent keys */
-		for ( const auto& ep : entities[0].epairs )
-		{
-			if ( striEqualPrefix( ep.key.c_str(), "vertexremapshader" ) ) {
-				if( 1 == sscanf( ep.value.c_str(), "%*[^;] %*[;] %s", str ) ) // textures/remap/from;textures/remap/to
-					res2list( pk3Shaders, str );
-			}
-		}
-		if ( entities[ 0 ].read_keyvalue( str, "music" ) ){
-			FixDOSName( str );
-			DefaultExtension( str, ".wav" );
-			res2list( pk3Sounds, str );
-		}
-
-		for ( const auto& e : entities )
-		{
-			if ( e.read_keyvalue( str, "noise" ) && str[0] != '*' ){
-				FixDOSName( str );
-				DefaultExtension( str, ".wav" );
-				res2list( pk3Sounds, str );
-			}
-
-			if ( e.classname_is( "func_plat" ) ){
-				res2list( pk3Sounds, "sound/movers/plats/pt1_strt.wav" );
-				res2list( pk3Sounds, "sound/movers/plats/pt1_end.wav" );
-			}
-			if ( e.classname_is( "target_push" ) ){
-				if ( !( e.intForKey( "spawnflags") & 1 ) ){
-					res2list( pk3Sounds, "sound/misc/windfly.wav" );
-				}
-			}
-			res2list( pk3Shaders, e.valueForKey( "targetShaderNewName" ) );
-
-			if ( e.read_keyvalue( str, "model2" ) ){
-				Sys_Warning( "unhandled model2 key of %s: %s\n", entities[i].classname(), str );
-			}
-		}
-
-		for( const bspFog_t& fog : bspFogs ){
-			res2list( pk3Shaders, fog.shader );
-		}
-
-		//levelshot
-		res2list( pk3Shaders, stream( "levelshots/", nameOFmap.c_str() ) );
-
-
-
-		Sys_Printf( "\n\t+Drawsurface+ent calls....%i\n", pk3Shaders->n - pk3ShadersNold );
-		for ( i = pk3ShadersNold; i < pk3Shaders->n; ++i ){
-			Sys_Printf( "%s\n", pk3Shaders->s[i] );
-		}
-		Sys_Printf( "\n\t+Sounds....%i\n", pk3Sounds->n - pk3SoundsNold );
-		for ( i = pk3SoundsNold; i < pk3Sounds->n; ++i ){
-			Sys_Printf( "%s\n", pk3Sounds->s[i] );
-		}
-		/* free partially loaded bsp data */
-		bspDrawSurfaces.clear();
-
-		entities.clear();
-		numBSPEntities = 0;
-
-		bspShaders.clear();
-
-		bspEntData.clear();
-
-		bspFogs.clear();
+	for( const auto& bsp : bspList ){
+		parseBspFile( stream( PathExtensionless( bsp.c_str() ), ".bsp" ), pk3Shaders, pk3Sounds, true );
 	}
 
 	if( analyze )
@@ -1006,14 +847,14 @@ int repackBSPMain( Args& args ){
 
 
 	/* can exclude pure *base* textures right now, shouldn't create shaders for them anyway */
-	for ( i = 0; i < pk3Shaders->n; ++i ){
-		if( StrList_find( ExPureTextures, pk3Shaders->s[i] ) )
-			strClear( pk3Shaders->s[i] );
+	for ( auto& s : pk3Shaders ){
+		if( StrList_find( ex.pureTextures, s ) )
+			s.clear();
 	}
 	/* can exclude repack.exclude shaders, assuming they got all their images */
-	for ( i = 0; i < pk3Shaders->n; ++i ){
-		if( StrList_find( rExShaders, pk3Shaders->s[i] ) )
-			strClear( pk3Shaders->s[i] );
+	for ( auto& s : pk3Shaders ){
+		if( StrList_find( rex.shaders, s ) )
+			s.clear();
 	}
 
 	//Parse Shader Files
@@ -1024,15 +865,11 @@ int repackBSPMain( Args& args ){
 	endofscript = true;
 
 	for ( const CopiedString& file : pk3Shaderfiles ){
-		bool wantShader = false;
-		int shader, found;
-
 		/* load the shader */
-		char scriptFile[128];
-		sprintf( scriptFile, "%s/%s", g_game->shaderPath, file.c_str() );
+		const auto scriptFile = stream( g_game->shaderPath, '/', file );
+		SilentLoadScriptFile( scriptFile, 0 );
 		if ( dbg )
 			Sys_Printf( "\n\tentering %s\n", file.c_str() );
-		SilentLoadScriptFile( scriptFile, 0 );
 
 		/* tokenize it */
 		while ( 1 )
@@ -1054,11 +891,7 @@ int repackBSPMain( Args& args ){
 			}
 
 			/* do wanna le shader? */
-			wantShader = false;
-			if( ( found = StrList_find( pk3Shaders, token ) ) ){
-				shader = found - 1;
-				wantShader = true;
-			}
+			String64 *wantShader = StrList_find( pk3Shaders, token );
 
 			/* handle { } section */
 			if ( !GetToken( true ) ) {
@@ -1066,7 +899,7 @@ int repackBSPMain( Args& args ){
 			}
 			if ( !strEqual( token, "{" ) ) {
 				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
-				       scriptFile, scriptline, token, g_strLoadedFileLocation );
+				       scriptFile.c_str(), scriptline, token, g_strLoadedFileLocation );
 			}
 			shaderText << "\n{";
 			bool hasmap = false;
@@ -1102,7 +935,7 @@ int repackBSPMain( Args& args ){
 						}
 						if ( strEqual( token, "{" ) ) {
 							shaderText << "\n\t{";
-							Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", scriptFile, scriptline );
+							Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", scriptFile.c_str(), scriptline );
 						}
 						/* skip the shader */
 						if ( !wantShader )
@@ -1117,7 +950,7 @@ int repackBSPMain( Args& args ){
 							/* get an image */
 							GetToken( false );
 							if ( token[ 0 ] != '*' && token[ 0 ] != '$' ) {
-								tex2list( pk3Textures, ExTextures, rExTextures );
+								tex2list( pk3Textures, ex.textures, &rex.textures );
 							}
 							shaderText << " " << token;
 						}
@@ -1130,7 +963,7 @@ int repackBSPMain( Args& args ){
 							shaderText << " " << token;
 							while ( TokenAvailable() ){
 								GetToken( false );
-								tex2list( pk3Textures, ExTextures, rExTextures );
+								tex2list( pk3Textures, ex.textures, &rex.textures );
 								shaderText << " " << token;
 							}
 							tokenready = true;
@@ -1145,12 +978,12 @@ int repackBSPMain( Args& args ){
 								strcpy( token, stream( "video/", token ) );
 							}
 							if( !StrList_find( pk3Videos, token ) &&
-							    !StrList_find( ExVideos, token ) &&
-							    !StrList_find( rExVideos, token ) )
-								StrList_append( pk3Videos, token );
+							    !StrList_find( ex.videos, token ) &&
+							    !StrList_find( rex.videos, token ) )
+								pk3Videos.emplace_back( token );
 						}
 						else if ( striEqual( token, "mapComp" ) || striEqual( token, "mapNoComp" ) || striEqual( token, "animmapcomp" ) || striEqual( token, "animmapnocomp" ) ){
-							Sys_FPrintf( SYS_WRN, "WARNING7: %s : %s shader\n", pk3Shaders->s[shader], token );
+							Sys_FPrintf( SYS_WRN, "WARNING7: %s : %s shader\n", wantShader->c_str(), token );
 							hasmap = true;
 							if ( line == scriptline ){
 								shaderText << " " << token;
@@ -1181,11 +1014,10 @@ int repackBSPMain( Args& args ){
 
 					/* ignore bogus paths */
 					if ( !strEqual( token, "-" ) && !striEqual( token, "full" ) ) {
-						const char skysides[6][3] = { "up", "dn", "lf", "rt", "bk", "ft" };
 						char* const skysidestring = token + strcatQ( token, "_@@.tga", sizeof( token ) ) - 6;
-						for( size_t side = 0; side < 6; ++side ){
-							memcpy( skysidestring, skysides[side], 2 );
-							tex2list( pk3Textures, ExTextures, rExTextures );
+						for( const auto side : { "up", "dn", "lf", "rt", "bk", "ft" } ){
+							memcpy( skysidestring, side, 2 );
+							tex2list( pk3Textures, ex.textures, &rex.textures );
 						}
 					}
 					/* skip rest of line */
@@ -1195,7 +1027,7 @@ int repackBSPMain( Args& args ){
 					shaderText << " " << token;
 				}
 				else if ( striEqualPrefix( token, "implicit" ) ){
-					Sys_FPrintf( SYS_WRN, "WARNING5: %s : %s shader\n", pk3Shaders->s[shader], token );
+					Sys_FPrintf( SYS_WRN, "WARNING5: %s : %s shader\n", wantShader->c_str(), token );
 					hasmap = true;
 					if ( line == scriptline ){
 						shaderText << " " << token;
@@ -1223,19 +1055,19 @@ int repackBSPMain( Args& args ){
 
 			//exclude shader
 			if ( wantShader ){
-				if( StrList_find( ExShaders, pk3Shaders->s[shader] ) ){
-					wantShader = false;
-					strClear( pk3Shaders->s[shader] );
+				if( StrList_find( ex.shaders, *wantShader ) ){
+					wantShader->clear();
+					wantShader = nullptr;
 				}
-				if( wantShader && StrList_find( rExTextures, pk3Shaders->s[shader] ) )
-					Sys_FPrintf( SYS_WRN, "WARNING3: %s : about to include shader for excluded texture\n", pk3Shaders->s[shader] );
+				if( wantShader && StrList_find( rex.textures, *wantShader ) )
+					Sys_FPrintf( SYS_WRN, "WARNING3: %s : about to include shader for excluded texture\n", wantShader->c_str() );
 				if ( wantShader && !hasmap ){
-					Sys_FPrintf( SYS_WRN, "WARNING8: %s : visible shader has no known maps\n", pk3Shaders->s[shader] );
-					wantShader = false;
+					Sys_FPrintf( SYS_WRN, "WARNING8: %s : visible shader has no known maps\n", wantShader->c_str() );
+					wantShader = nullptr;
 				}
 				if ( wantShader ){
 					allShaders << shaderText;
-					strClear( pk3Shaders->s[shader] );
+					wantShader->clear();
 				}
 			}
 		}
@@ -1246,81 +1078,81 @@ int repackBSPMain( Args& args ){
 	/* exclude stuff */
 
 //pure textures (shader ones are done)
-	for ( i = 0; i < pk3Shaders->n; ++i ){
-		if ( !strEmpty( pk3Shaders->s[i] ) ){
-			if ( strchr( pk3Shaders->s[i], '\\') != NULL  ){
-				Sys_FPrintf( SYS_WRN, "WARNING2: %s : bsp shader path with backslash\n", pk3Shaders->s[i] );
-				FixDOSName( pk3Shaders->s[i] );
+	for ( auto& s : pk3Shaders ){
+		if ( !s.empty() ){
+			if ( strchr( s, '\\') != NULL  ){
+				Sys_FPrintf( SYS_WRN, "WARNING2: %s : bsp shader path with backslash\n", s.c_str() );
+				s = stream( PathCleaned( s ) );
 				//what if theres properly slashed one in the list?
-				for ( j = 0; j < pk3Shaders->n; ++j ){
-					if ( striEqual( pk3Shaders->s[i], pk3Shaders->s[j] ) && ( i != j ) ){
-						strClear( pk3Shaders->s[i] );
+				for ( const auto& ss : pk3Shaders ){
+					if ( striEqual( s, ss ) && ( &s != &ss ) ){
+						s.clear();
 						break;
 					}
 				}
 			}
-			if ( !strEmpty( pk3Shaders->s[i] ) ){
-				if( StrList_find( pk3Textures, pk3Shaders->s[i] ) ||
-				    StrList_find( ExTextures, pk3Shaders->s[i] ) ||
-				    StrList_find( rExTextures, pk3Shaders->s[i] ) )
-					strClear( pk3Shaders->s[i] );
+			if ( !s.empty() ){
+				if( StrList_find( pk3Textures, s ) ||
+				    StrList_find( ex.textures, s ) ||
+				    StrList_find( rex.textures, s ) )
+					s.clear();
 			}
 		}
 	}
 
 //snds
-	for ( i = 0; i < pk3Sounds->n; ++i ){
-		if( StrList_find( ExSounds, pk3Sounds->s[i] ) ||
-		    StrList_find( rExSounds, pk3Sounds->s[i] ) )
-			strClear( pk3Sounds->s[i] );
+	for ( auto& s : pk3Sounds ){
+		if( StrList_find( ex.sounds, s ) ||
+		    StrList_find( rex.sounds, s ) )
+			s.clear();
 	}
 
 	/* write shader */
-	stream( g_enginePath, nameOFrepack, "_strippedBYrepacker.shader" );
+	stream( g_enginePath, nameOFpack, "_strippedBYrepacker.shader" );
 	FILE *f = fopen( stream, "wb" );
-	fwrite( allShaders, sizeof( char ), allShaders.end() - allShaders.begin(), f );
+	fwrite( allShaders.c_str(), sizeof( char ), allShaders.end() - allShaders.begin(), f );
 	fclose( f );
 	Sys_Printf( "Shaders saved to %s\n", stream.c_str() );
 
 	/* make a pack */
-	stream( g_enginePath, nameOFrepack, "_repacked.pk3" );
+	stream( g_enginePath, nameOFpack, "_repacked.pk3" );
 	remove( stream );
 
 	Sys_Printf( "\n--- ZipZip ---\n" );
 
 	Sys_Printf( "\n\tShader referenced textures....\n" );
 
-	for ( i = 0; i < pk3Textures->n; ++i ){
-		if( !packTexture( pk3Textures->s[i], stream, compLevel, png ) ){
-			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Textures->s[i] );
+	for ( const auto& s : pk3Textures ){
+		if( !packTexture( s, stream, compLevel, png ) ){
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", s.c_str() );
 		}
 	}
 
 	Sys_Printf( "\n\tPure textures....\n" );
 
-	for ( i = 0; i < pk3Shaders->n; ++i ){
-		if ( !strEmpty( pk3Shaders->s[i] ) ){
-			if( !packTexture( pk3Shaders->s[i], stream, compLevel, png ) ){
-				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
+	for ( const auto& s : pk3Shaders ){
+		if ( !s.empty() ){
+			if( !packTexture( s, stream, compLevel, png ) ){
+				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", s.c_str() );
 			}
 		}
 	}
 
 	Sys_Printf( "\n\tSounds....\n" );
 
-	for ( i = 0; i < pk3Sounds->n; ++i ){
-		if ( !strEmpty( pk3Sounds->s[i] ) ){
-			if ( !packResource( pk3Sounds->s[i], stream, compLevel ) ){
-				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Sounds->s[i] );
+	for ( const auto& s : pk3Sounds ){
+		if ( !s.empty() ){
+			if ( !packResource( s, stream, compLevel ) ){
+				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", s.c_str() );
 			}
 		}
 	}
 
 	Sys_Printf( "\n\tVideos....\n" );
 
-	for ( i = 0; i < pk3Videos->n; ++i ){
-		if ( !packResource( pk3Videos->s[i], stream, compLevel ) ){
-			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Videos->s[i] );
+	for ( const auto& s : pk3Videos ){
+		if ( !packResource( s, stream, compLevel ) ){
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", s.c_str() );
 		}
 	}
 

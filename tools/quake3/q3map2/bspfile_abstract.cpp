@@ -580,16 +580,6 @@ bool entity_t::read_keyvalue_( Vector3& vector3_value, std::initializer_list<con
 	}
 	return false;
 }
-bool entity_t::read_keyvalue_( char (&string_value)[1024], std::initializer_list<const char*>&& keys ) const {
-	for( const char* key : keys ){
-		const char* value = valueForKey( key );
-		if( !strEmpty( value ) ){
-			strcpy( string_value, value );
-			return true;
-		}
-	}
-	return false;
-}
 bool entity_t::read_keyvalue_( const char *&string_ptr_value, std::initializer_list<const char*>&& keys ) const {
 	for( const char* key : keys ){
 		const char* value = valueForKey( key );

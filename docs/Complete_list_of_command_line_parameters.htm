@@ -401,7 +401,7 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 
 	<h2 id="PK3-creation">PK3 creation<a href="#PK3-creation" class="wiki-anchor">&para;</a></h2>
 	<ul>
-		<li><strong><code>-pk3</code> ... filename.bsp:</strong> Creates a pk3 for the BSP (complete Q3 support). Using file 'gamename.exclude' to exclude vanilla game resources.</li>
+		<li><strong><code>-pk3</code> ... filename.bsp .. filenameN.bsp:</strong> Creates a pk3 for the BSP(s) (complete Q3 support). Using file 'gamename.exclude' to exclude vanilla game resources.</li>
 		<li><strong><code>-complevel</code> N:</strong> Set compression level (-1 .. 10); 0 = uncompressed, -1 = 6, 10 = ultra zlib incompatible preset</li>
 		<li><strong><code>-dbg</code>:</strong> Print wall of debug text, useful for .exclude file creation</li>
 		<li><strong><code>-png</code>:</strong> include png textures, at highest priority; taking tga, jpg by default</li>
@@ -410,7 +410,7 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 
 	<h2 id="Maps-repack-creation">Maps repack creation<a href="#Maps-repack-creation" class="wiki-anchor">&para;</a></h2>
 	<ul>
-		<li><strong><code>-repack</code> ... filename.bsp or filenames.txt:</strong> Creates repack of BSP(s) (complete Q3 support). Rips off only used shaders to new shader file. Using file 'gamename.exclude' to exclude vanilla game resources and 'repack.exclude' to exclude resources of existing repack.</li>
+		<li><strong><code>-repack</code> ... filename.bsp .. filenameN.bsp or filenames.txt:</strong> Creates repack of BSP(s) (complete Q3 support). Rips off only used shaders to new shader file. Using file 'gamename.exclude' to exclude vanilla game resources and 'repack.exclude' to exclude resources of existing repack.</li>
 		<li><strong><code>-analyze</code>:</strong> Only print bsp resource references and exit</li>
 		<li><strong><code>-complevel</code> N:</strong> Set compression level (-1 .. 10); 0 = uncompressed, -1 = 6, 10 = ultra zlib incompatible preset</li>
 		<li><strong><code>-dbg</code>:</strong> Print wall of debug text</li>

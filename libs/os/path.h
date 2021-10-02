@@ -280,4 +280,30 @@ TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const Direct
 }
 
 
+template<typename SRC>
+class PathDefaultExtension
+{
+public:
+	static_assert( std::is_same_v<SRC, PathCleaned> || std::is_same_v<SRC, const char*> );
+	const SRC& m_path;
+	const char* m_extension;
+	PathDefaultExtension( const SRC& path, const char* extension ) : m_path( path ), m_extension( extension ) {}
+};
+
+/// \brief Writes \p path to \p ostream and appends extension, if there is none.
+template<typename TextOutputStreamType, typename SRC>
+TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const PathDefaultExtension<SRC>& path ){
+	ostream << path.m_path;
+	if constexpr ( std::is_same_v<SRC, PathCleaned> ){
+		if( strEmpty( path_get_extension( path.m_path.m_path ) ) )
+			ostream << path.m_extension;
+	}
+	else if constexpr ( std::is_same_v<SRC, const char*> ){
+		if( strEmpty( path_get_extension( path.m_path ) ) )
+			ostream << path.m_extension;
+	}
+	return ostream;
+}
+
+
 #endif

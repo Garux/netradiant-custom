@@ -398,7 +398,7 @@ void HelpMinimap()
 void HelpPk3()
 {
 	const std::vector<HelpOption> options = {
-		{"-pk3 [options] <filename.bsp>", "Creates a pk3 for the BSP (complete Q3 support). Using file 'gamename.exclude' to exclude vanilla game resources."},
+		{"-pk3 [options] <filename.bsp .. filenameN.bsp>", "Creates a pk3 for the BSP(s) (complete Q3 support). Using file 'gamename.exclude' to exclude vanilla game resources."},
 		{"-complevel <N>", "Set compression level (-1 .. 10); 0 = uncompressed, -1 = 6, 10 = ultra zlib incompatible preset"},
 		{"-dbg", "Print wall of debug text, useful for .exclude file creation"},
 		{"-png", "include png textures, at highest priority; taking tga, jpg by default"},
@@ -410,7 +410,7 @@ void HelpPk3()
 void HelpRepack()
 {
 	const std::vector<HelpOption> options = {
-		{"-repack [options] <filename.bsp|filenames.txt>", "Creates repack of BSP(s) (complete Q3 support). Rips off only used shaders to new shader file. Using file 'gamename.exclude' to exclude vanilla game resources and 'repack.exclude' to exclude resources of existing repack."},
+		{"-repack [options] <filename.bsp .. filenameN.bsp|filenames.txt>", "Creates repack of BSP(s) (complete Q3 support). Rips off only used shaders to new shader file. Using file 'gamename.exclude' to exclude vanilla game resources and 'repack.exclude' to exclude resources of existing repack."},
 		{"-analyze", "Only print bsp resource references and exit"},
 		{"-complevel <N>", "Set compression level (-1 .. 10); 0 = uncompressed, -1 = 6, 10 = ultra zlib incompatible preset"},
 		{"-dbg", "Print wall of debug text"},
