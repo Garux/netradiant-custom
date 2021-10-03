@@ -185,6 +185,12 @@ inline bool extension_equal( const char* extension, const char* other ){
 	return string_equal_nocase( extension, other );
 }
 
+/// \brief Returns true if \p extension equals one of \p path. \p extension without period.
+/// O(n)
+inline bool path_extension_is( const char* path, const char* extension ){
+	return extension_equal( path_get_extension( path ), extension );
+}
+
 template<typename Functor>
 class MatchFileExtension
 {

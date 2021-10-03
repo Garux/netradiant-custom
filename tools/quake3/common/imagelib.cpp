@@ -820,9 +820,7 @@ void LoadBMP( const char *filename, byte **pic, byte **palette, int *width, int 
    ==============
  */
 void Load256Image( const char *name, byte **pixels, byte **palette, int *width, int *height ){
-	const char *ext = path_get_extension( name );
-
-	if ( striEqual( ext, "lbm" ) ) {
+	if ( path_extension_is( name, "lbm" ) ) {
 		LoadLBM( name, pixels, palette );
 		if ( width ) {
 			*width = bmhd.w;
@@ -831,10 +829,10 @@ void Load256Image( const char *name, byte **pixels, byte **palette, int *width, 
 			*height = bmhd.h;
 		}
 	}
-	else if ( striEqual( ext, "pcx" ) ) {
+	else if ( path_extension_is( name, "pcx" ) ) {
 		LoadPCX( name, pixels, palette, width, height );
 	}
-	else if ( striEqual( ext, "bmp" ) ) {
+	else if ( path_extension_is( name, "bmp" ) ) {
 		LoadBMP( name, pixels, palette, width, height );
 	}
 	else{
@@ -852,12 +850,11 @@ void Load256Image( const char *name, byte **pixels, byte **palette, int *width, 
  */
 void Save256Image( const char *name, byte *pixels, byte *palette,
                    int width, int height ){
-	const char *ext = path_get_extension( name );
 
-	if ( striEqual( ext, "lbm" ) ) {
+	if ( path_extension_is( name, "lbm" ) ) {
 		WriteLBMfile( name, pixels, width, height, palette );
 	}
-	else if ( striEqual( ext, "pcx" ) ) {
+	else if ( path_extension_is( name, "pcx" ) ) {
 		WritePCXfile( name, pixels, width, height, palette );
 	}
 	else{
@@ -1203,7 +1200,7 @@ void Load32BitImage( const char *name, unsigned **pixels,  int *width, int *heig
 	int i;
 	int v;
 
-	if ( striEqual( path_get_extension( name ), "tga" ) ) {
+	if ( path_extension_is( name, "tga" ) ) {
 		LoadTGA( name, (byte **)pixels, width, height );
 	}
 	else {

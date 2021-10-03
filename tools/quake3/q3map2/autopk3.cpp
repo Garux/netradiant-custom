@@ -788,7 +788,7 @@ int repackBSPMain( Args& args ){
 
 	std::vector<CopiedString> bspList; // absolute bsp paths
 
-	if ( striEqual( path_get_filename_base_end( fileName ), ".bsp" ) ){
+	if ( path_extension_is( fileName, "bsp" ) ){
 		while( !args.empty() ){ // handle multiple bsps input
 			bspList.emplace_back( stream( PathExtensionless( ExpandArg( args.takeFront() ) ), ".bsp" ) );
 		}

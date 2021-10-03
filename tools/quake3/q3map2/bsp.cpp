@@ -885,10 +885,10 @@ int BSPMain( Args& args ){
 
 	/* expand mapname */
 	strcpy( name, ExpandArg( fileName ) );
-	if ( !striEqual( path_get_filename_base_end( name ), ".reg" ) ) { /* not .reg */
+	if ( !path_extension_is( name, "reg" ) ) { /* not .reg */
 		/* if we are doing a full map, delete the last saved region map */
 		remove( StringOutputStream( 256 )( source, ".reg" ) );
-		if ( !onlyents || !striEqual( path_get_filename_base_end( name ), ".ent" ) ) {
+		if ( !onlyents || !path_extension_is( name, "ent" ) ) {
 			path_set_extension( name, ".map" );   /* .reg and .ent are ok too */
 		}
 	}

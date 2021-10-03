@@ -84,7 +84,7 @@ polyset_t *Polyset_LoadSets( const char *file, int *numpolysets, int maxTrisPerS
 	//
 	// load the frame
 	//
-	if ( striEqual( path_get_filename_base_end( file ), ".3ds" ) ) {
+	if ( path_extension_is( file, "3ds" ) ) {
 		_3DS_LoadPolysets( file, &psets, numpolysets, g_verbose );
 	}
 	else{

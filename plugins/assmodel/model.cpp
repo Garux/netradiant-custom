@@ -693,10 +693,9 @@ scene::Node& loadPicoModel( Assimp::Importer& importer, ArchiveFile& file ){
 	if( scene != nullptr ){
 		if( scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE )
 			globalWarningStream() << "AI_SCENE_FLAGS_INCOMPLETE\n";
-		const char *ext = path_get_extension( file.getName() );
 		const auto rootPath = StringOutputStream()( PathFilenameless( file.getName() ) );
 		const auto matName = StringOutputStream()( PathExtensionless( file.getName() ) );
-		return ( new PicoModelNode( AssScene{ scene, rootPath, string_equal_nocase( ext, "mdl" )? matName.c_str() : nullptr } ) )->node();
+		return ( new PicoModelNode( AssScene{ scene, rootPath, path_extension_is( file.getName(), "mdl" )? matName.c_str() : nullptr } ) )->node();
 	}
 	else{
 		return ( new PicoModelNode() )->node();

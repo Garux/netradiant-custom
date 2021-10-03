@@ -1580,7 +1580,7 @@ void BuildShaderList( TextInputStream& shaderlist ){
 	{
 		// each token should be a shader filename
 		shaderFile << token;
-		if( !string_equal_nocase( path_get_extension( token ), g_shadersExtension ) )
+		if( !path_extension_is( token, g_shadersExtension ) )
 			shaderFile << "." << g_shadersExtension;
 
 		ShaderList_addShaderFile( shaderFile.c_str() );

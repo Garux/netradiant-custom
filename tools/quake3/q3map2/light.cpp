@@ -2677,7 +2677,7 @@ int LightMain( Args& args ){
 	path_set_extension( source, ".bsp" );
 
 	strcpy( name, ExpandArg( fileName ) );
-	if ( !striEqual( path_get_filename_base_end( name ), ".reg" ) ) { /* not .reg */
+	if ( !path_extension_is( name, "reg" ) ) { /* not .reg */
 		path_set_extension( name, ".map" );
 	}
 

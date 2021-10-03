@@ -1192,7 +1192,7 @@ public:
 		: m_modelExtensions( modelExtensions ),	m_modelFS( modelFS ), m_modelFoldersMap( modelFoldersMap ){
 	}
 	void visit( const char* name ) override {
-		if( m_modelExtensions.find( path_get_extension( name ) ) != m_modelExtensions.end() && ( !m_avoid_pk3dir || !string_in_string_nocase( name, ".pk3dir/" ) ) ){
+		if( m_modelExtensions.count( path_get_extension( name ) ) && ( !m_avoid_pk3dir || !string_in_string_nocase( name, ".pk3dir/" ) ) ){
 			m_modelFS.insert( name );
 //%			globalOutputStream() << name << " name\n";
 		}

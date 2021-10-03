@@ -576,7 +576,7 @@ int main( int argc, char **argv ){
 		}
 		else if ( !strcmp( argv[i], "-dump" ) ) {
 			printf( "Dumping contents of: '%s'\n", argv[i + 1] );
-			if ( striEqual( path_get_filename_base_end( argv[i + 1] ), ".md3" ) ) {
+			if ( path_extension_is( argv[i + 1], "md3" ) ) {
 				MD3_Dump( argv[i + 1] );
 			}
 			else

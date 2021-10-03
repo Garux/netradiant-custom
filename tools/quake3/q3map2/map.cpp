@@ -1381,7 +1381,7 @@ void LoadEntityIndexMap( entity_t *e ){
 	Sys_FPrintf( SYS_VRB, "Entity %d (%s) has shader index map \"%s\"\n",  mapEnt->mapEntityNum, e->classname(), indexMapFilename );
 
 	/* handle tga image */
-	if ( striEqual( path_get_extension( indexMapFilename ), "tga" ) ) {
+	if ( path_extension_is( indexMapFilename, "tga" ) ) {
 		/* load it */
 		Load32BitImage( indexMapFilename, &pixels32, &w, &h );
 

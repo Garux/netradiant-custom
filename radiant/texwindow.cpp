@@ -91,7 +91,7 @@ bool string_equal_start( const char* string, StringRange start ){
 typedef std::set<CopiedString> TextureGroups;
 
 void TextureGroups_addWad( TextureGroups& groups, const char* archive ){
-	if ( extension_equal( path_get_extension( archive ), "wad" ) ) {
+	if ( path_extension_is( archive, "wad" ) ) {
 #if 1
 		groups.insert( archive );
 #else

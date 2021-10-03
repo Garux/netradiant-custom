@@ -1677,7 +1677,7 @@ bool Map_ImportFile( const char* filename ){
 
 	bool success = false;
 
-	if ( extension_equal( path_get_extension( filename ), "bsp" ) ) {
+	if ( path_extension_is( filename, "bsp" ) ) {
 		goto tryDecompile;
 	}
 
@@ -1713,37 +1713,25 @@ bool Map_ImportFile( const char* filename ){
 tryDecompile:
 
 	const char *type = GlobalRadiant().getGameDescriptionKeyValue( "q3map2_type" );
-	int n = string_length( path_get_extension( filename ) );
-	if ( n && ( extension_equal( path_get_extension( filename ), "bsp" ) || extension_equal( path_get_extension( filename ), "map" ) ) ) {
-		StringBuffer output;
-		output.push_string( AppPath_get() );
-		output.push_string( "q3map2." );
-		output.push_string( RADIANT_EXECUTABLE );
-		output.push_string( " -v -game " );
-		output.push_string( ( type && *type ) ? type : "quake3" );
-		output.push_string( " -fs_basepath \"" );
-		output.push_string( EnginePath_get() );
-		output.push_string( "\" -fs_homepath \"" );
-		output.push_string( g_qeglobals.m_userEnginePath.c_str() );
-		output.push_string( "\" -fs_game " );
-		output.push_string( gamename_get() );
-		output.push_string( " -convert -format " );
-		output.push_string( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ) == TEXDEFTYPEID_QUAKE ? "map" : "map_bp" );
-		if ( extension_equal( path_get_extension( filename ), "map" ) ) {
-			output.push_string( " -readmap " );
+	if ( path_extension_is( filename, "bsp" ) || path_extension_is( filename, "map" ) ) {
+		StringOutputStream str( 256 );
+		str << AppPath_get() << "q3map2." << RADIANT_EXECUTABLE;
+		str << " -v -game " << ( ( type && *type ) ? type : "quake3" );
+		str << " -fs_basepath " << makeQuoted( EnginePath_get() );
+		str << " -fs_homepath " << makeQuoted( g_qeglobals.m_userEnginePath.c_str() );
+		str << " -fs_game " << gamename_get();
+		str << " -convert -format " << ( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ) == TEXDEFTYPEID_QUAKE ? "map" : "map_bp" );
+		if ( path_extension_is( filename, "map" ) ) {
+			str << " -readmap ";
 		}
-		output.push_string( " \"" );
-		output.push_string( filename );
-		output.push_string( "\"" );
+		str << ' ' << makeQuoted( filename );
 
 		// run
-		Q_Exec( NULL, output.c_str(), NULL, false, true );
+		Q_Exec( NULL, str.c_str(), NULL, false, true );
 
 		// rebuild filename as "filenamewithoutext_converted.map"
-		output.clear();
-		output.push_range( filename, filename + string_length( filename ) - ( n + 1 ) );
-		output.push_string( "_converted.map" );
-		filename = output.c_str();
+		str( PathExtensionless( filename ), "_converted.map" );
+		filename = str.c_str();
 
 		EBrushType brush_type = GlobalBrushCreator().getFormat();
 		// open

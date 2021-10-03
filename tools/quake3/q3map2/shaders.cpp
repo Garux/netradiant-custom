@@ -2012,7 +2012,7 @@ void LoadShaderInfo( void ){
 				return false;
 			};
 
-			if( !striEqual( path_get_extension( token ), "shader" ) )
+			if( !path_extension_is( token , "shader" ) )
 				strcatQ( token, ".shader", sizeof( token ) );
 			/* new shader file */
 			if ( !contains( token ) ) {

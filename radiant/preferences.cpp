@@ -311,7 +311,7 @@ public:
 	LoadGameFile( std::list<CGameDescription*>& games, const char* path ) : mGames( games ), mPath( path ){
 	}
 	void operator()( const char* name ) const {
-		if ( !extension_equal( path_get_extension( name ), "game" ) ) {
+		if ( !path_extension_is( name, "game" ) ) {
 			return;
 		}
 		StringOutputStream strPath( 256 );

@@ -199,7 +199,7 @@ CopiedString g_openMapByCmd;
 
 void cmdMap(){
 	for ( int i = 1; i < g_argc; ++i )
-		if( extension_equal( path_get_extension( g_argv[i] ), "map" ) ){
+		if( path_extension_is( g_argv[i], "map" ) ){
 			g_openMapByCmd = StringOutputStream( 256 )( PathCleaned( g_argv[i] ) ).c_str();
 			return;
 		}

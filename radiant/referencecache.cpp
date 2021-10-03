@@ -115,11 +115,10 @@ bool MapResource_saveFile( const MapFormat& format, scene::Node& root, GraphTrav
 
 bool file_saveBackup( const char* path ){
 	if ( file_writeable( path ) ) {
-		StringOutputStream backup( 256 );
-		backup << StringRange( path, path_get_extension( path ) ) << "bak";
+		const auto backup = StringOutputStream( 256 )( PathExtensionless( path ), ".bak" );
 
-		return ( !file_exists( backup.c_str() ) || file_remove( backup.c_str() ) ) // remove backup
-		       && file_move( path, backup.c_str() ); // rename current to backup
+		return ( !file_exists( backup ) || file_remove( backup ) ) // remove backup
+		       && file_move( path, backup ); // rename current to backup
 	}
 
 	globalErrorStream() << "map path is not writeable: " << makeQuoted( path ) << "\n";

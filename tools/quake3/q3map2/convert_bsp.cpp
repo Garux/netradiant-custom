@@ -879,7 +879,7 @@ int ConvertBSPMain( Args& args ){
 		force_bsp = true;
 	}
 
-	if ( force_map || ( !force_bsp && striEqual( path_get_extension( source ), "map" ) && map_allowed ) ) {
+	if ( force_map || ( !force_bsp && path_extension_is( source, "map" ) && map_allowed ) ) {
 		if ( !map_allowed ) {
 			Sys_Warning( "the requested conversion should not be done from .map files. Compile a .bsp first.\n" );
 		}

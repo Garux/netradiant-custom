@@ -187,7 +187,7 @@ public:
 			if ( subname[0] == '/' ) {
 				++subname;
 			}
-			if ( m_extension[0] == '*' || extension_equal( path_get_extension( subname ), m_extension ) ) {
+			if ( m_extension[0] == '*' || path_extension_is( subname, m_extension ) ) {
 				pathlist_append_unique( m_matches, subname );
 			}
 		}
