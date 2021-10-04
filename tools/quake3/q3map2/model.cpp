@@ -418,7 +418,7 @@ static void make_brush_sides( const Plane3f plane, const Plane3f (&p)[3], const 
 		buildBrush.sides[4].planenum = FindFloatPlane( reverse, 0, NULL );
 }
 
-static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const mapDrawSurface_t *ds ){
+static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const mapDrawSurface_t *ds, const char *modelName ){
 	const int spf = ( spawnFlags & ( eClipFlags & ~eClipModel ) );
 
 	/* ydnar: giant hack land: generate clipping brushes for model triangles */
@@ -592,7 +592,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 					const double lengthsSquared = vector3_length_squared( d1 ) * vector3_length_squared( d2 );
 					if ( lengthsSquared == 0 || ( vector3_length_squared( normal ) / lengthsSquared ) < 1e-8 ) {
 						Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped: points on line\n",
-						             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
+						             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], modelName );
 						continue;
 					}
 				}
@@ -935,7 +935,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 					else
 					{
 						Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
-						             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
+						             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], modelName );
 						continue;
 					}
 				}
@@ -975,7 +975,7 @@ default_CLIPMODEL:
 				}
 				else{
 					Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
-					             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
+					             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], modelName );
 				}
 			}
 		}
@@ -1255,7 +1255,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 		/* set cel shader */
 		ds->celShader = celShader;
 
-		ClipModel( spawnFlags, clipDepth, si, ds );
+		ClipModel( spawnFlags, clipDepth, si, ds, name );
 	}
 }
 

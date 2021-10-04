@@ -1668,7 +1668,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
    loads a map file into a list of entities
  */
 
-void LoadMapFile( char *filename, bool onlyLights, bool noCollapseGroups ){
+void LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups ){
 	FILE        *file;
 	int oldNumEntities = 0;
 

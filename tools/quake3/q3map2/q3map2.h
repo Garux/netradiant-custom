@@ -1559,7 +1559,7 @@ void                        PutMeshOnCurve( mesh_t in );
 
 
 /* map.c */
-void                        LoadMapFile( char *filename, bool onlyLights, bool noCollapseGroups );
+void                        LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups );
 int                         FindFloatPlane( const Plane3f& plane, int numPoints, const Vector3 *points );
 inline int                  FindFloatPlane( const Vector3& normal, float dist, int numPoints, const Vector3 *points ){
 	return FindFloatPlane( Plane3f( normal, dist ), numPoints, points );
@@ -1972,7 +1972,6 @@ inline int blockSize[ 3 ] = { 1024, 1024, 1024 };                          /* sh
 
 Q_EXTERN CopiedString g_enginePath;
 
-Q_EXTERN char name[ 1024 ];
 Q_EXTERN char source[ 1024 ];
 
 Q_EXTERN int sampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_SAMPLE_SIZE );          /* lightmap sample size in units */

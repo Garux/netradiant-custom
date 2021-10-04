@@ -2676,11 +2676,6 @@ int LightMain( Args& args ){
 	strcpy( source, ExpandArg( fileName ) );
 	path_set_extension( source, ".bsp" );
 
-	strcpy( name, ExpandArg( fileName ) );
-	if ( !path_extension_is( name, "reg" ) ) { /* not .reg */
-		path_set_extension( name, ".map" );
-	}
-
 	/* ydnar: set default sample size */
 	SetDefaultSampleSize( sampleSize );
 
@@ -2705,7 +2700,11 @@ int LightMain( Args& args ){
 
 	/* load map file */
 	if ( !entities[ 0 ].boolForKey( "_keepLights" ) ) {
-		LoadMapFile( name, true, false );
+		char *mapFileName = ExpandArg( fileName );
+		if ( !path_extension_is( fileName, "reg" ) ) /* not .reg */
+			path_set_extension( mapFileName, ".map" );
+
+		LoadMapFile( CopiedString( mapFileName ).c_str(), true, false );
 	}
 
 	/* set the entity/model origins and init yDrawVerts */

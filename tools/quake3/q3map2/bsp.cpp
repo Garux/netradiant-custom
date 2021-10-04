@@ -582,7 +582,7 @@ void ProcessModels( void ){
    this is probably broken unless teamed with a radiant version that preserves entity order
  */
 
-void OnlyEnts( void ){
+void OnlyEnts( const char *filename ){
 	/* note it */
 	Sys_Printf( "--- OnlyEnts ---\n" );
 
@@ -597,7 +597,7 @@ void OnlyEnts( void ){
 	entities.clear();
 
 	LoadShaderInfo();
-	LoadMapFile( name, false, false );
+	LoadMapFile( filename, false, false );
 	SetModelNumbers();
 	SetLightStyles();
 
@@ -883,19 +883,20 @@ int BSPMain( Args& args ){
 	remove( StringOutputStream( 256 )( source, ".lin" ) );
 	//%	remove( StringOutputStream( 256 )( source, ".srf" ) );	/* ydnar */
 
-	/* expand mapname */
-	strcpy( name, ExpandArg( fileName ) );
-	if ( !path_extension_is( name, "reg" ) ) { /* not .reg */
-		/* if we are doing a full map, delete the last saved region map */
+	/* if we are doing a full map, delete the last saved region map */
+	if ( !path_extension_is( fileName, "reg" ) )
 		remove( StringOutputStream( 256 )( source, ".reg" ) );
-		if ( !onlyents || !path_extension_is( name, "ent" ) ) {
-			path_set_extension( name, ".map" );   /* .reg and .ent are ok too */
-		}
-	}
+
+	/* expand mapname */
+	StringOutputStream mapFileName( 256 );
+	if ( path_extension_is( fileName, "reg" ) || ( onlyents && path_extension_is( fileName, "ent" ) ) )
+		mapFileName << ExpandArg( fileName );
+	else
+		mapFileName << PathExtensionless( ExpandArg( fileName ) ) << ".map";
 
 	/* if onlyents, just grab the entites and resave */
 	if ( onlyents ) {
-		OnlyEnts();
+		OnlyEnts( mapFileName );
 		return 0;
 	}
 
@@ -907,7 +908,7 @@ int BSPMain( Args& args ){
 		LoadMapFile( tempSource, false, g_autocaulk );
 	}
 	else{
-		LoadMapFile( name, false, g_autocaulk );
+		LoadMapFile( mapFileName, false, g_autocaulk );
 	}
 
 	/* div0: inject command line parameters */
