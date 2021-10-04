@@ -448,9 +448,6 @@ void MergeRelativePath( char *out, const char *absolute, const char *relative ){
 
 int MiniMapBSPMain( Args& args ){
 	char minimapFilename[1024];
-	char basename[1024];
-	char path[1024];
-	char relativeMinimapFilename[1024];
 	bool autolevel;
 	float minimapSharpen;
 	float border;
@@ -578,14 +575,14 @@ int MiniMapBSPMain( Args& args ){
 	MiniMapMakeMinsMaxs( mins, maxs, border, keepaspect );
 
 	if ( strEmpty( minimapFilename ) ) {
-		ExtractFileBase( source, basename );
-		ExtractFilePath( source, path );
-		sprintf( relativeMinimapFilename, g_game->miniMapNameFormat, basename );
-		MergeRelativePath( minimapFilename, path, relativeMinimapFilename );
+		const CopiedString basename( PathFilename( source ) );
+		const CopiedString path( PathFilenameless( source ) );
+		char relativeMinimapFilename[1024];
+		sprintf( relativeMinimapFilename, g_game->miniMapNameFormat, basename.c_str() );
+		MergeRelativePath( minimapFilename, path.c_str(), relativeMinimapFilename );
 		Sys_Printf( "Output file name automatically set to %s\n", minimapFilename );
 	}
-	ExtractFilePath( minimapFilename, path );
-	Q_mkdir( path );
+	Q_mkdir( CopiedString( PathFilenameless( minimapFilename ) ).c_str() );
 
 	if ( minimapSharpen >= 0 ) {
 		minimap.sharpen_centermult = 8 * minimapSharpen + 1;

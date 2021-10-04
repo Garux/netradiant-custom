@@ -85,21 +85,3 @@ inline void FixDOSName( char *src ){
 		if ( *src == '\\' )
 			*src = '/';
 }
-
-// file directory with trailing slash
-// NOTE: includes the slash, otherwise
-// backing to an empty path will be wrong when appending a slash
-inline void ExtractFilePath( const char *path, char *dest ){
-	strcpyQ( dest, path, path_get_filename_start( path ) - path + 1 ); // +1 for '\0'
-}
-
-// file name w/o extension
-inline void ExtractFileBase( const char *path, char *dest ){
-	const char* start = path_get_filename_start( path );
-	const char* end = path_get_filename_base_end( start );
-	strcpyQ( dest, start, end - start + 1 ); // +1 for '\0'
-}
-
-inline void ExtractFileExtension( const char *path, char *dest ){
-	strcpy( dest, path_get_extension( path ) );
-}

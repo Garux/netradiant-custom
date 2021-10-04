@@ -32,6 +32,8 @@
 #include "inout.h"
 #include "qstringops.h"
 #include "qpathops.h"
+#include "stream/stringstream.h"
+#include "stream/textstream.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -78,33 +80,25 @@ char    *ex_argv[MAX_EX_ARGC];
 #include "io.h"
 void ExpandWildcards( int *argc, char ***argv ){
 	struct _finddata_t fileinfo;
-	int handle;
-	int i;
-	char filename[1024];
-	char filepath[1024];
-	char    *path;
 
 	ex_argc = 0;
-	for ( i = 0 ; i < *argc ; i++ )
+	for ( int i = 0 ; i < *argc ; i++ )
 	{
-		path = ( *argv )[i];
+		char *path = ( *argv )[i];
 		if ( path[0] == '-'
 		     || ( !strchr( path, '*' ) && !strchr( path, '?' ) ) ) {
 			ex_argv[ex_argc++] = path;
 			continue;
 		}
 
-		handle = _findfirst( path, &fileinfo );
+		const int handle = _findfirst( path, &fileinfo );
 		if ( handle == -1 ) {
 			return;
 		}
 
-		ExtractFilePath( path, filepath );
-
 		do
 		{
-			sprintf( filename, "%s%s", filepath, fileinfo.name );
-			ex_argv[ex_argc++] = copystring( filename );
+			ex_argv[ex_argc++] = copystring( StringOutputStream( 256 )( PathFilenameless( path ), fileinfo.name ) );
 		} while ( _findnext( handle, &fileinfo ) != -1 );
 
 		_findclose( handle );

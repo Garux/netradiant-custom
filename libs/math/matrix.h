@@ -1167,7 +1167,7 @@ inline void matrix4_pivoted_transform_by_euler_xyz_degrees( Matrix4& self, const
 
 template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const Matrix4& m ){
-	return ostream << m.x() << " " << m.y() << " " << m.z() << " " << m.t();
+	return ostream << m.x() << ' ' << m.y() << ' ' << m.z() << ' ' << m.t();
 }
 
 #endif
