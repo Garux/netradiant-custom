@@ -39,7 +39,8 @@
 struct script_t
 {
 	char filename[1024];
-	char    *buffer,*script_p,*end_p;
+	char    *buffer;
+	const char *script_p, *end_p;
 	int line;
 };
 

@@ -1844,7 +1844,7 @@ shaderInfo_t                *ShaderInfoForShaderNull( const char *shader );
 void                        SwapBlock( int *block, int size );
 
 void                        LoadBSPFile( const char *filename );
-void                        PartialLoadBSPFile( const char *filename );
+void                        LoadBSPFilePartially( const char *filename );
 void                        WriteBSPFile( const char *filename );
 void                        PrintBSPFileSizes( void );
 

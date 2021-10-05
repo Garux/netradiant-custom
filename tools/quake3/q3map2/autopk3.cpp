@@ -95,7 +95,7 @@ static void parseBspFile( const char *bspPath, StrList& outShaders, StrList& out
 
 	/* load the bsp */
 	Sys_Printf( "Loading %s\n", bspPath );
-	LoadBSPFile( bspPath );
+	LoadBSPFilePartially( bspPath );
 	ParseEntities();
 
 	{ /* add visible bspShaders */
@@ -171,18 +171,6 @@ static void parseBspFile( const char *bspPath, StrList& outShaders, StrList& out
 		res2list( outShaders, s );
 	for( const auto& s : pk3Sounds )
 		res2list( outSounds, s );
-
-	/* free partially loaded bsp data */
-	bspDrawSurfaces.clear();
-
-	entities.clear();
-	numBSPEntities = 0;
-
-	bspShaders.clear();
-
-	bspEntData.clear();
-
-	bspFogs.clear();
 }
 
 

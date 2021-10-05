@@ -262,11 +262,11 @@ void LoadIBSPFile( const char *filename ){
 }
 
 /*
-   PartialLoadIBSPFile()
-   loads a part of quake 3 bsp file, required by packer, into memory
+   LoadIBSPorRBSPFilePartially()
+   loads bsp file parts meaningful for autopacker
  */
 
-void PartialLoadIBSPFile( const char *filename ){
+void LoadIBSPorRBSPFilePartially( const char *filename ){
 	ibspHeader_t    *header;
 
 
@@ -286,7 +286,11 @@ void PartialLoadIBSPFile( const char *filename ){
 
 	/* load/convert lumps */
 	CopyLump( (bspHeader_t*) header, LUMP_SHADERS, bspShaders );
-	CopyLump<bspDrawSurface_t, ibspDrawSurface_t>( (bspHeader_t*) header, LUMP_SURFACES, bspDrawSurfaces );
+	if( g_game->load == LoadIBSPFile )
+		CopyLump<bspDrawSurface_t, ibspDrawSurface_t>( (bspHeader_t*) header, LUMP_SURFACES, bspDrawSurfaces );
+	else
+		CopyLump( (bspHeader_t*) header, LUMP_SURFACES, bspDrawSurfaces );
+
 	CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs );
 	CopyLump( (bspHeader_t*) header, LUMP_ENTITIES, bspEntData );
 

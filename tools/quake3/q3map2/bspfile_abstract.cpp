@@ -204,12 +204,11 @@ void LoadBSPFile( const char *filename ){
 }
 
 /*
-   PartialLoadBSPFile()
-   partially loads a bsp file into memory
-   for autopacker
+   LoadBSPFilePartially()
+   loads bsp file parts meaningful for autopacker
  */
 
-void PartialLoadBSPFile( const char *filename ){
+void LoadBSPFilePartially( const char *filename ){
 	/* dummy check */
 	if ( g_game == NULL || g_game->load == NULL ) {
 		Error( "LoadBSPFile: unsupported BSP file format" );
@@ -217,7 +216,7 @@ void PartialLoadBSPFile( const char *filename ){
 
 	/* load it, then byte swap the in-memory version */
 	//g_game->load( filename );
-	PartialLoadIBSPFile( filename );
+	LoadIBSPorRBSPFilePartially( filename );
 	SwapBSPFile();
 }
 
