@@ -231,7 +231,8 @@ textures/obsidian_video/intro
 	<dt>GL_ZERO</dt><dd>This is the value 0. When multiplied by the destination, all RGB data in the destination becomes zero (essentially black).</dd>
 	<dt>GL_SRC_COLOR</dt><dd>This is the value of color data currently in the source (which is the texture being manipulated here).</dd>
 	<dt>GL_ONE_MINUS_SRC_COLOR</dt><dd>This is the value of color data currently in source, but subtracted from one (i.e. inverted).</dd>
-	<dt>GL_SRC_ALPHA</dt><dd>The TGA file being used for the source data must have an alpha channel in addition to its RGB channels (four a total of four channels). The alpha channel is an 8-bit black and white only channel. An entirely white alpha channel will not darken the source.v GL_ONE_MINUS_SRC_ALPHA This is the same as GL_SRC_ALPHA except that the value in the alpha channel is inverted by subtracting it from one. (i.e. A=1.0 - SRC.A).</dd>
+	<dt>GL_SRC_ALPHA</dt><dd>The TGA file being used for the source data must have an alpha channel in addition to its RGB channels (for a total of four channels). The alpha channel is an 8-bit black and white only channel. An entirely white alpha channel will not darken the source.</dd>
+	<dt>GL_ONE_MINUS_SRC_ALPHA</dt><dd>This is the same as GL_SRC_ALPHA except that the value in the alpha channel is inverted by subtracting it from one. (i.e. A=1.0 - SRC.A)</dd>
 </dl>
 
 <h3>Doing the Math: The Final Result</h3>
