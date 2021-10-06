@@ -115,7 +115,6 @@
 // now checking it for strlen() < MAX_QPATH (so it's null terminated), though this check may be not enough/too much, depending on the use case
 #define MAX_QPATH               64
 
-#define MAX_IMAGES              2048
 #define DEFAULT_IMAGE           "*default"
 
 #define DEF_BACKSPLASH_FRACTION 0.05f   /* 5% backsplash by default */
@@ -413,10 +412,25 @@ typedef Vector3 tcMod_t[ 3 ];
 
 struct image_t
 {
-	char                *name, *filename;
-	int refCount;
+	CopiedString name;       // relative path w/o extension
+	CopiedString filename;   // relative path with extension
 	int width, height;
-	byte                *pixels;
+	byte *pixels = nullptr;
+
+	image_t() = default;
+	image_t( const image_t& ) = delete;
+	image_t( image_t&& other ) noexcept :
+		name( std::move( other.name ) ),
+		filename( std::move( other.filename ) ),
+		width( other.width ),
+		height( other.height ),
+		pixels( std::exchange( other.pixels, nullptr ) )
+	{}
+	image_t& operator=( const image_t& ) = delete;
+	image_t& operator=( image_t&& ) noexcept = delete;
+	~image_t(){
+		free( pixels );
+	}
 };
 
 
@@ -576,9 +590,9 @@ struct shaderInfo_t
 	EImplicitMap implicitMap;                           /* ydnar: enemy territory implicit shaders */
 	String64 implicitImagePath;
 
-	image_t             *shaderImage;
-	image_t             *lightImage;
-	image_t             *normalImage;
+	const image_t       *shaderImage;
+	const image_t       *lightImage;
+	const image_t       *normalImage;
 
 	float skyLightValue;                                /* ydnar */
 	int skyLightIterations;                             /* ydnar */
@@ -1813,9 +1827,7 @@ int                         ExportEntitiesMain( Args& args );
 
 
 /* image.c */
-void                        ImageFree( image_t *image );
-image_t                     *ImageFind( const char *name );
-image_t                     *ImageLoad( const char *filename );
+const image_t               *ImageLoad( const char *name );
 
 
 /* shaders.c */
@@ -1876,9 +1888,6 @@ void                        InjectCommandLine( const char *stage, const std::vec
 
 
 /* general */
-Q_EXTERN int numImages Q_ASSIGN( 0 );
-Q_EXTERN image_t images[ MAX_IMAGES ];
-
 Q_EXTERN shaderInfo_t       *shaderInfo Q_ASSIGN( NULL );
 Q_EXTERN int numShaderInfo Q_ASSIGN( 0 );
 

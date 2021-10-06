@@ -1127,7 +1127,7 @@ void LoadTGA( const char *name, byte **pixels, int *width, int *height ){
    WriteTGA
    ================
  */
-void WriteTGA( const char *filename, byte *data, int width, int height ) {
+void WriteTGA( const char *filename, const byte *data, int width, int height ) {
 	byte    *buffer;
 	int i;
 	int c;

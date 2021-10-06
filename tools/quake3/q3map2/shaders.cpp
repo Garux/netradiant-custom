@@ -747,7 +747,6 @@ static void LoadShaderImages( shaderInfo_t *si ){
 	/* if no light image, reuse shader image */
 	if ( si->lightImage == NULL ) {
 		si->lightImage = si->shaderImage;
-		si->lightImage->refCount++;
 	}
 
 	/* create default and average colors */
