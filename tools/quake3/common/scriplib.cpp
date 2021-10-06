@@ -27,6 +27,7 @@
 #include "qpathops.h"
 #include "scriplib.h"
 #include "vfs.h"
+#include <list>
 
 /*
    =============================================================================
@@ -38,19 +39,32 @@
 
 struct script_t
 {
-	char filename[1024];
+	CopiedString filename;
 	char    *buffer;
-	const char *script_p, *end_p;
+	const char *it, *end;
 	int line;
+	/* buffer is optional: != nullptr == own it  */
+	script_t( const char *filename, char *buffer, char *start, int size ) :
+		filename( filename ),
+		buffer( buffer ),
+		it( start ),
+		end( start + size ),
+		line( 1 )
+	{}
+	script_t() = delete;
+	script_t( const script_t& ) = delete;
+	script_t( script_t&& ) noexcept = delete;
+	script_t& operator=( const script_t& ) = delete;
+	script_t& operator=( script_t&& ) noexcept = delete;
+	~script_t(){
+		free( buffer );
+	}
 };
 
-#define MAX_INCLUDES    8
-script_t scriptstack[MAX_INCLUDES];
-script_t    *script;
-int scriptline;
+std::list<script_t> scriptstack;
 
+int scriptline;
 char token[MAXTOKEN];
-bool endofscript;
 bool tokenready;                     // only true if UnGetToken was just called
 
 /*
@@ -58,35 +72,23 @@ bool tokenready;                     // only true if UnGetToken was just called
    AddScriptToStack
    ==============
  */
-void AddScriptToStack( const char *filename, int index ){
-	int size;
+static void AddScriptToStack( const char *filename, int index, bool verbose ){
 	void* buffer;
-
-	script++;
-	if ( script == &scriptstack[MAX_INCLUDES] ) {
-		Error( "script file exceeded MAX_INCLUDES" );
-	}
-	strcpy( script->filename, ExpandPath( filename ) );
-
-	size = vfsLoadFile( script->filename, &buffer, index );
+	const int size = vfsLoadFile( filename, &buffer, index );
 
 	if ( size == -1 ) {
-		Sys_FPrintf( SYS_WRN, "Script file %s was not found\n", script->filename );
-		script--;
+		Sys_FPrintf( SYS_WRN, "Script file %s was not found\n", filename );
 	}
 	else
 	{
-		if ( index > 0 ) {
-			Sys_Printf( "entering %s (%d)\n", script->filename, index + 1 );
-		}
-		else{
-			Sys_Printf( "entering %s\n", script->filename );
+		if( verbose ){
+			if ( index > 0 )
+				Sys_Printf( "entering %s (%d)\n", filename, index + 1 );
+			else
+				Sys_Printf( "entering %s\n", filename );
 		}
 
-		script->buffer = void_ptr( buffer );
-		script->line = 1;
-		script->script_p = script->buffer;
-		script->end_p = script->buffer + size;
+		scriptstack.emplace_back( filename, void_ptr( buffer ), void_ptr( buffer ), size );
 	}
 }
 
@@ -96,40 +98,9 @@ void AddScriptToStack( const char *filename, int index ){
    LoadScriptFile
    ==============
  */
-void LoadScriptFile( const char *filename, int index ){
-	script = scriptstack;
-	AddScriptToStack( filename, index );
-
-	endofscript = false;
-	tokenready = false;
-}
-/* &unload current; for autopacker */
-void SilentLoadScriptFile( const char *filename, int index ){
-	int size;
-
-	if ( script->buffer != NULL && !endofscript ) {
-		free( script->buffer );
-		script->buffer = NULL;
-	}
-
-	script = scriptstack;
-
-	script++;
-	if ( script == &scriptstack[MAX_INCLUDES] ) {
-		Error( "script file exceeded MAX_INCLUDES" );
-	}
-	strcpy( script->filename, ExpandPath( filename ) );
-
-	size = vfsLoadFile( script->filename, (void **)&script->buffer, index );
-
-	if ( size == -1 ) {
-		Sys_FPrintf( SYS_WRN, "Script file %s was not found\n", script->filename );
-	}
-	script->line = 1;
-	script->script_p = script->buffer;
-	script->end_p = script->buffer + size;
-
-	endofscript = false;
+void LoadScriptFile( const char *filename, int index, bool verbose /* = true */ ){
+	scriptstack.clear();
+	AddScriptToStack( filename, index, verbose );
 	tokenready = false;
 }
 
@@ -139,19 +110,8 @@ void SilentLoadScriptFile( const char *filename, int index ){
    ==============
  */
 void ParseFromMemory( char *buffer, int size ){
-	script = scriptstack;
-	script++;
-	if ( script == &scriptstack[MAX_INCLUDES] ) {
-		Error( "script file exceeded MAX_INCLUDES" );
-	}
-	strcpy( script->filename, "memory buffer" );
-
-	script->buffer = buffer;
-	script->line = 1;
-	script->script_p = script->buffer;
-	script->end_p = script->buffer + size;
-
-	endofscript = false;
+	scriptstack.clear();
+	scriptstack.emplace_back( "memory buffer", nullptr, buffer, size );
 	tokenready = false;
 }
 
@@ -171,35 +131,26 @@ void ParseFromMemory( char *buffer, int size ){
    ==============
  */
 void UnGetToken( void ){
+	ENSURE( !tokenready && "Can't UnGetToken() twice in a row!" );
 	tokenready = true;
 }
 
 
-bool EndOfScript( bool crossline ){
+static bool EndOfScript( bool crossline ){
 	if ( !crossline ) {
 		Error( "Line %i is incomplete\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 	}
 
-	if ( strEqual( script->filename, "memory buffer" ) ) {
-		endofscript = true;
-		return false;
-	}
+	scriptstack.pop_back();
 
-	if ( script->buffer == NULL ) {
-		Sys_Warning( "Attempt to free already freed script buffer\n" );
+	if ( scriptstack.empty() ) {
+		return false;
 	}
 	else{
-		free( script->buffer );
+		scriptline = scriptstack.back().line;
+		Sys_Printf( "returning to %s\n", scriptstack.back().filename.c_str() );
+		return GetToken( crossline );
 	}
-	script->buffer = NULL;
-	if ( script == scriptstack + 1 ) {
-		endofscript = true;
-		return false;
-	}
-	script--;
-	scriptline = script->line;
-	Sys_Printf( "returning to %s\n", script->filename );
-	return GetToken( crossline );
 }
 
 /*
@@ -208,11 +159,8 @@ bool EndOfScript( bool crossline ){
    ==============
  */
 bool GetToken( bool crossline ){
-	char    *token_p;
-
-
 	/* ydnar: dummy testing */
-	if ( script == NULL || script->buffer == NULL ) {
+	if ( scriptstack.empty() ) {
 		return false;
 	}
 
@@ -221,7 +169,9 @@ bool GetToken( bool crossline ){
 		return true;
 	}
 
-	if ( ( script->script_p >= script->end_p ) || ( script->script_p == NULL ) ) {
+	script_t& script = scriptstack.back();
+
+	if ( script.it >= script.end ) {
 		return EndOfScript( crossline );
 	}
 
@@ -229,85 +179,85 @@ bool GetToken( bool crossline ){
 // skip space
 //
 skipspace:
-	while ( script->script_p < script->end_p && *script->script_p <= 32 )
+	while ( script.it < script.end && *script.it <= 32 )
 	{
-		if ( *script->script_p++ == '\n' ) {
+		if ( *script.it++ == '\n' ) {
 			if ( !crossline ) {
 				Error( "Line %i is incomplete\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 			}
-			script->line++;
-			scriptline = script->line;
+			script.line++;
+			scriptline = script.line;
 		}
 	}
 
-	if ( script->script_p >= script->end_p ) {
+	if ( script.it >= script.end ) {
 		return EndOfScript( crossline );
 	}
 
 	// ; # // comments
-	if ( *script->script_p == ';' || *script->script_p == '#'
-	     || ( script->script_p[0] == '/' && script->script_p[1] == '/' ) ) {
+	if ( *script.it == ';' || *script.it == '#'
+	     || ( script.it[0] == '/' && script.it[1] == '/' ) ) {
 		if ( !crossline ) {
 			Error( "Line %i is incomplete\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 		}
-		while ( *script->script_p++ != '\n' )
-			if ( script->script_p >= script->end_p ) {
+		while ( *script.it++ != '\n' )
+			if ( script.it >= script.end ) {
 				return EndOfScript( crossline );
 			}
-		script->line++;
-		scriptline = script->line;
+		script.line++;
+		scriptline = script.line;
 		goto skipspace;
 	}
 
 	// /* */ comments
-	if ( script->script_p[0] == '/' && script->script_p[1] == '*' ) {
+	if ( script.it[0] == '/' && script.it[1] == '*' ) {
 		if ( !crossline ) {
 			Error( "Line %i is incomplete\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 		}
-		script->script_p += 2;
-		while ( script->script_p[0] != '*' || script->script_p[1] != '/' )
+		script.it += 2;
+		while ( script.it[0] != '*' || script.it[1] != '/' )
 		{
-			if ( *script->script_p == '\n' ) {
-				script->line++;
-				scriptline = script->line;
+			if ( *script.it == '\n' ) {
+				script.line++;
+				scriptline = script.line;
 			}
-			script->script_p++;
-			if ( script->script_p >= script->end_p ) {
+			script.it++;
+			if ( script.it >= script.end ) {
 				return EndOfScript( crossline );
 			}
 		}
-		script->script_p += 2;
+		script.it += 2;
 		goto skipspace;
 	}
 
 //
 // copy token
 //
-	token_p = token;
+	char *token_p = token;
 
-	if ( *script->script_p == '"' ) {
+	if ( *script.it == '"' ) {
 		// quoted token
-		script->script_p++;
-		while ( *script->script_p != '"' )
+		script.it++;
+		while ( *script.it != '"' )
 		{
-			*token_p++ = *script->script_p++;
-			if ( script->script_p == script->end_p ) {
+			*token_p++ = *script.it++;
+			if ( script.it == script.end ) {
 				break;
 			}
-			if ( token_p == &token[MAXTOKEN] ) {
+			if ( token_p == token + MAXTOKEN ) {
 				Error( "Token too large on line %i\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 			}
 		}
-		script->script_p++;
+		script.it++;
 	}
 	else{   // regular token
-		while ( *script->script_p > 32 && *script->script_p != ';' )
+		while ( *script.it > 32 && *script.it != ';' )
 		{
-			*token_p++ = *script->script_p++;
-			if ( script->script_p == script->end_p ) {
+			*token_p++ = *script.it++;
+			if ( script.it == script.end ) {
 				break;
 			}
-			if ( token_p == &token[MAXTOKEN] ) {
+			if ( token_p == token + MAXTOKEN ) {
 				Error( "Token too large on line %i\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 			}
 		}
@@ -317,7 +267,7 @@ skipspace:
 
 	if ( strEqual( token, "$include" ) ) {
 		GetToken( false );
-		AddScriptToStack( token, 0 );
+		AddScriptToStack( token, 0, true );
 		return GetToken( crossline );
 	}
 
@@ -333,10 +283,8 @@ skipspace:
    ==============
  */
 bool TokenAvailable( void ) {
-	int oldLine;
-
 	/* save */
-	oldLine = scriptline;
+	const int oldLine = scriptline;
 
 	/* test */
 	if ( !GetToken( true ) ) {
@@ -362,7 +310,7 @@ void MatchToken( const char *match ) {
 	GetToken( true );
 
 	if ( !strEqual( token, match ) ) {
-		Error( "MatchToken( \"%s\" ) failed at line %i in file %s", match, scriptline, script->filename );
+		Error( "MatchToken( \"%s\" ) failed at line %i in file %s", match, scriptline, g_strLoadedFileLocation );
 	}
 }
 

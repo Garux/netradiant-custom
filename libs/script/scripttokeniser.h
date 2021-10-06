@@ -341,7 +341,7 @@ public:
 	std::size_t getColumn() const {
 		return m_scriptcolumn;
 	}
-	bool bufferContains( const char* str ){
+	bool bufferContains( const char* str ) const {
 		return m_istream.bufferContains( str );
 	}
 };

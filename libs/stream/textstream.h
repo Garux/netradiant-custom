@@ -389,7 +389,7 @@ public:
 		c = *m_cur++;
 		return true;
 	}
-	bool bufferContains( const char* str ) const{
+	bool bufferContains( const char* str ) const {
 		return ( std::search( m_cur, m_end, str, str + strlen( str ) ) != m_end ) ||
 		       ( std::search( m_buffer2, m_end2, str, str + strlen( str ) ) != m_end2 );
 	}

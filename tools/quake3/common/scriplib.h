@@ -19,23 +19,17 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-// scriplib.h
+#pragma once
 
-#ifndef __CMDLIB__
-#include "../common/cmdlib.h"
-#endif
+#include "cmdlib.h"
 
 #define MAXTOKEN    1024
 
 extern char token[MAXTOKEN];
-extern char    *scriptbuffer,*script_p,*scriptend_p;
-extern int grabbed;
 extern int scriptline;
-extern bool endofscript;
 
 
-void LoadScriptFile( const char *filename, int index );
-void SilentLoadScriptFile( const char *filename, int index );
+void LoadScriptFile( const char *filename, int index, bool verbose = true );
 void ParseFromMemory( char *buffer, int size );
 
 bool GetToken( bool crossline );

@@ -378,9 +378,6 @@ int pk3BSPMain( Args& args ){
 	}
 
 	//Parse Shader Files
-	/* hack */
-	endofscript = true;
-
 	for ( CopiedString& file : pk3Shaderfiles ){
 		bool wantShaderFile = false;
 		const String64 *excludedByShader = nullptr;
@@ -389,9 +386,7 @@ int pk3BSPMain( Args& args ){
 
 		/* load the shader */
 		const auto scriptFile = stream( g_game->shaderPath, '/', file );
-		SilentLoadScriptFile( scriptFile, 0 );
-		if( dbg )
-			Sys_Printf( "\n\tentering %s\n", file.c_str() );
+		LoadScriptFile( scriptFile, 0, dbg );
 
 		/* tokenize it */
 		/* check if shader file has to be excluded */
@@ -442,7 +437,7 @@ int pk3BSPMain( Args& args ){
 		}
 
 		/* tokenize it again */
-		SilentLoadScriptFile( scriptFile, 0 );
+		LoadScriptFile( scriptFile, 0, false );
 		while ( 1 )
 		{
 			/* test for end of file */
@@ -849,15 +844,11 @@ int repackBSPMain( Args& args ){
 	Sys_Printf( "\t\nParsing shaders....\n\n" );
 	StringOutputStream shaderText( 4096 );
 	StringOutputStream allShaders( 1048576 );
-	/* hack */
-	endofscript = true;
 
 	for ( const CopiedString& file : pk3Shaderfiles ){
 		/* load the shader */
 		const auto scriptFile = stream( g_game->shaderPath, '/', file );
-		SilentLoadScriptFile( scriptFile, 0 );
-		if ( dbg )
-			Sys_Printf( "\n\tentering %s\n", file.c_str() );
+		LoadScriptFile( scriptFile, 0, dbg );
 
 		/* tokenize it */
 		while ( 1 )

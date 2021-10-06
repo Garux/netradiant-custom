@@ -441,8 +441,7 @@ void ParseScript( void ){
 	{
 		do
 		{   // look for a line starting with a $ command
-			GetToken( true );
-			if ( endofscript ) {
+			if ( !GetToken( true ) ) {
 				return;
 			}
 			if ( token[0] == '$' ) {
