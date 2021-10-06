@@ -418,6 +418,13 @@ struct image_t
 	byte *pixels = nullptr;
 
 	image_t() = default;
+	image_t( const char *name, const char *filename, int width, int height, byte *pixels ) :
+		name( name ),
+		filename( filename ),
+		width( width ),
+		height(height ),
+		pixels( pixels )
+	{}
 	image_t( const image_t& ) = delete;
 	image_t( image_t&& other ) noexcept :
 		name( std::move( other.name ) ),
