@@ -305,13 +305,8 @@ void LoadSurfaceExtraFile( const char *path ){
 	ParseFromMemory( (char *) buffer, size );
 
 	/* tokenize it */
-	while ( 1 )
+	while ( GetToken( true ) ) /* test for end of file */
 	{
-		/* test for end of file */
-		if ( !GetToken( true ) ) {
-			break;
-		}
-
 		/* default? */
 		if ( striEqual( token, "default" ) ) {
 			se = &seDefault;
@@ -330,18 +325,11 @@ void LoadSurfaceExtraFile( const char *path ){
 		}
 
 		/* handle { } section */
-		if ( !GetToken( true ) || !strEqual( token, "{" ) ) {
+		if ( !( GetToken( true ) && strEqual( token, "{" ) ) ) {
 			Error( "ReadSurfaceExtraFile(): %s, line %d: { not found", srfPath, scriptline );
 		}
-		while ( 1 )
+		while ( GetToken( true ) && !strEqual( token, "}" ) )
 		{
-			if ( !GetToken( true ) ) {
-				break;
-			}
-			if ( strEqual( token, "}" ) ) {
-				break;
-			}
-
 			/* shader */
 			if ( striEqual( token, "shader" ) ) {
 				GetToken( false );

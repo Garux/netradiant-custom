@@ -29,6 +29,7 @@
 
 #include "q3map2.h"
 #include "autopk3.h"
+#include "shaders.h"
 #include <map>
 
 
@@ -208,17 +209,11 @@ struct Exclusions
 };
 
 static inline void parseEXblock( StrList& list, const char *exName ){
-	if ( !GetToken( true ) || !strEqual( token, "{" ) ) {
+	if ( !( GetToken( true ) && strEqual( token, "{" ) ) ) {
 		Error( "ReadExclusionsFile: %s, line %d: { not found", exName, scriptline );
 	}
-	while ( 1 )
+	while ( GetToken( true ) && !strEqual( token, "}" ) )
 	{
-		if ( !GetToken( true ) ) {
-			break;
-		}
-		if ( strEqual( token, "}" ) ) {
-			break;
-		}
 		if ( strEqual( token, "{" ) ) {
 			Error( "ReadExclusionsFile: %s, line %d: brace, opening twice in a row.", exName, scriptline );
 		}
@@ -243,13 +238,8 @@ static const Exclusions parseEXfile( const char* filename ){
 		ParseFromMemory( (char *) buffer, size );
 
 		/* tokenize it */
-		while ( 1 )
+		while ( GetToken( true ) ) /* test for end of file */
 		{
-			/* test for end of file */
-			if ( !GetToken( true ) ) {
-				break;
-			}
-
 			/* blocks */
 			if ( striEqual( token, "textures" ) ){
 				parseEXblock( ex.textures, filename );
@@ -386,50 +376,31 @@ int pk3BSPMain( Args& args ){
 
 		/* load the shader */
 		const auto scriptFile = stream( g_game->shaderPath, '/', file );
-		LoadScriptFile( scriptFile, 0, dbg );
 
-		/* tokenize it */
 		/* check if shader file has to be excluded */
-		while ( !excludedByShader && !excludedByShaderFile )
-		{
-			/* test for end of file */
-			if ( !GetToken( true ) ) {
-				break;
-			}
-
-			/* does it contain restricted shaders/textures? */
-			if( ( excludedByShader = StrList_find( ex.shaders, token ) )
-			 || ( excludedByShader = StrList_find( ex.pureTextures, token ) ) ){
-				break;
-			}
-
-			/* handle { } section */
-			if ( !GetToken( true ) ) {
-				break;
-			}
-			if ( !strEqual( token, "{" ) ) {
-				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
-				       scriptFile.c_str(), scriptline, token, g_strLoadedFileLocation );
-			}
-
-			while ( 1 )
+		if( !excludedByShaderFile ){
+			/* tokenize it */
+			LoadScriptFile( scriptFile, 0, false );
+			while ( GetToken( true ) )
 			{
-				/* get the next token */
-				if ( !GetToken( true ) ) {
+				/* does it contain restricted shaders/textures? */
+				if( ( excludedByShader = StrList_find( ex.shaders, token ) )
+				 || ( excludedByShader = StrList_find( ex.pureTextures, token ) ) ){
 					break;
 				}
-				if ( strEqual( token, "}" ) ) {
-					break;
+
+				/* handle { } section */
+				if ( !( GetToken( true ) && strEqual( token, "{" ) ) ) {
+					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
+					       scriptFile.c_str(), scriptline, token, g_strLoadedFileLocation );
 				}
-				/* parse stage directives */
-				if ( strEqual( token, "{" ) ) {
-					while ( 1 )
-					{
-						if ( !GetToken( true ) ) {
-							break;
-						}
-						if ( strEqual( token, "}" ) ) {
-							break;
+
+				while ( GetToken( true ) && !strEqual( token, "}" ) )
+				{
+					/* parse stage directives */
+					if ( strEqual( token, "{" ) ) {
+						while ( GetToken( true ) && !strEqual( token, "}" ) )
+						{
 						}
 					}
 				}
@@ -437,13 +408,9 @@ int pk3BSPMain( Args& args ){
 		}
 
 		/* tokenize it again */
-		LoadScriptFile( scriptFile, 0, false );
-		while ( 1 )
+		LoadScriptFile( scriptFile, 0, dbg );
+		while ( GetToken( true ) )
 		{
-			/* test for end of file */
-			if ( !GetToken( true ) ) {
-				break;
-			}
 			//dump shader names
 			if( dbg )
 				Sys_Printf( "%s\n", token );
@@ -452,25 +419,14 @@ int pk3BSPMain( Args& args ){
 			String64 *wantShader = StrList_find( pk3Shaders, token );
 
 			/* handle { } section */
-			if ( !GetToken( true ) ) {
-				break;
-			}
-			if ( !strEqual( token, "{" ) ) {
+			if ( !( GetToken( true ) && strEqual( token, "{" ) ) ) {
 				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
 				       scriptFile.c_str(), scriptline, token, g_strLoadedFileLocation );
 			}
 
 			bool hasmap = false;
-			while ( 1 )
+			while ( GetToken( true ) && !strEqual( token, "}" ) )
 			{
-				/* get the next token */
-				if ( !GetToken( true ) ) {
-					break;
-				}
-				if ( strEqual( token, "}" ) ) {
-					break;
-				}
-
 
 				/* -----------------------------------------------------------------
 				shader stages (passes)
@@ -478,14 +434,8 @@ int pk3BSPMain( Args& args ){
 
 				/* parse stage directives */
 				if ( strEqual( token, "{" ) ) {
-					while ( 1 )
+					while ( GetToken( true ) && !strEqual( token, "}" ) )
 					{
-						if ( !GetToken( true ) ) {
-							break;
-						}
-						if ( strEqual( token, "}" ) ) {
-							break;
-						}
 						if ( strEqual( token, "{" ) ) {
 							Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", scriptFile.c_str(), scriptline );
 						}
@@ -543,7 +493,7 @@ int pk3BSPMain( Args& args ){
 
 					/* ignore bogus paths */
 					if ( !strEqual( token, "-" ) && !striEqual( token, "full" ) ) {
-						char* const skysidestring = token + strcatQ( token, "_@@.tga", sizeof( token ) ) - 6;
+						char* const skysidestring = token + strcatQ( token, "_@@.tga", std::size( token ) ) - 6;
 						for( const auto side : { "up", "dn", "lf", "rt", "bk", "ft" } ){
 							memcpy( skysidestring, side, 2 );
 							tex2list( pk3Textures, ex.textures, NULL );
@@ -842,7 +792,7 @@ int repackBSPMain( Args& args ){
 
 	//Parse Shader Files
 	Sys_Printf( "\t\nParsing shaders....\n\n" );
-	StringOutputStream shaderText( 4096 );
+	ShaderTextCollector text;
 	StringOutputStream allShaders( 1048576 );
 
 	for ( const CopiedString& file : pk3Shaderfiles ){
@@ -851,19 +801,11 @@ int repackBSPMain( Args& args ){
 		LoadScriptFile( scriptFile, 0, dbg );
 
 		/* tokenize it */
-		while ( 1 )
+		while ( text.GetToken( true ) ) /* test for end of file */
 		{
-			int line = scriptline;
-			/* test for end of file */
-			if ( !GetToken( true ) ) {
-				break;
-			}
 			//dump shader names
 			if( dbg )
 				Sys_Printf( "%s\n", token );
-
-			shaderText.clear();
-			shaderText << token;
 
 			if ( strchr( token, '\\') != NULL  ){
 				Sys_FPrintf( SYS_WRN, "WARNING1: %s : %s : shader name with backslash\n", file.c_str(), token );
@@ -873,49 +815,19 @@ int repackBSPMain( Args& args ){
 			String64 *wantShader = StrList_find( pk3Shaders, token );
 
 			/* handle { } section */
-			if ( !GetToken( true ) ) {
-				break;
-			}
-			if ( !strEqual( token, "{" ) ) {
+			if ( !( text.GetToken( true ) && strEqual( token, "{" ) ) ) {
 				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
 				       scriptFile.c_str(), scriptline, token, g_strLoadedFileLocation );
 			}
-			shaderText << "\n{";
+
 			bool hasmap = false;
 
-			while ( 1 )
+			while ( text.GetToken( true ) && !strEqual( token, "}" ) )
 			{
-				line = scriptline;
-				/* get the next token */
-				if ( !GetToken( true ) ) {
-					break;
-				}
-				if ( strEqual( token, "}" ) ) {
-					shaderText << "\n}\n\n";
-					break;
-				}
 				/* parse stage directives */
 				if ( strEqual( token, "{" ) ) {
-					bool tokenready = false;
-					shaderText << "\n\t{";
-					while ( 1 )
+					while ( text.GetToken( true ) && !strEqual( token, "}" ) )
 					{
-						/* detour of TokenAvailable() '~' */
-						if ( tokenready )
-							tokenready = false;
-						else
-							line = scriptline;
-						if ( !GetToken( true ) ) {
-							break;
-						}
-						if ( strEqual( token, "}" ) ) {
-							shaderText << "\n\t}";
-							break;
-						}
-						if ( strEqual( token, "{" ) ) {
-							shaderText << "\n\t{";
-							Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", scriptFile.c_str(), scriptline );
-						}
 						/* skip the shader */
 						if ( !wantShader )
 							continue;
@@ -923,7 +835,6 @@ int repackBSPMain( Args& args ){
 						/* digest any images */
 						if ( striEqual( token, "map" ) ||
 						     striEqual( token, "clampMap" ) ) {
-							shaderText << "\n\t\t" << token;
 							hasmap = true;
 
 							/* get an image */
@@ -931,27 +842,21 @@ int repackBSPMain( Args& args ){
 							if ( token[ 0 ] != '*' && token[ 0 ] != '$' ) {
 								tex2list( pk3Textures, ex.textures, &rex.textures );
 							}
-							shaderText << " " << token;
+							text.tokenAppend(); // append token, modified by tex2list()
 						}
 						else if ( striEqual( token, "animMap" ) ||
 						          striEqual( token, "clampAnimMap" ) ) {
-							shaderText << "\n\t\t" << token;
 							hasmap = true;
 
-							GetToken( false );// skip num
-							shaderText << " " << token;
+							text.GetToken( false );// skip num
 							while ( TokenAvailable() ){
-								GetToken( false );
 								tex2list( pk3Textures, ex.textures, &rex.textures );
-								shaderText << " " << token;
+								text.GetToken( false ); // append token, modified by tex2list()
 							}
-							tokenready = true;
 						}
 						else if ( striEqual( token, "videoMap" ) ){
-							shaderText << "\n\t\t" << token;
 							hasmap = true;
-							GetToken( false );
-							shaderText << " " << token;
+							text.GetToken( false );
 							FixDOSName( token );
 							if ( strchr( token, '/' ) == NULL ){
 								strcpy( token, stream( "video/", token ) );
@@ -964,18 +869,6 @@ int repackBSPMain( Args& args ){
 						else if ( striEqual( token, "mapComp" ) || striEqual( token, "mapNoComp" ) || striEqual( token, "animmapcomp" ) || striEqual( token, "animmapnocomp" ) ){
 							Sys_FPrintf( SYS_WRN, "WARNING7: %s : %s shader\n", wantShader->c_str(), token );
 							hasmap = true;
-							if ( line == scriptline ){
-								shaderText << " " << token;
-							}
-							else{
-								shaderText << "\n\t\t" << token;
-							}
-						}
-						else if ( line == scriptline ){
-							shaderText << " " << token;
-						}
-						else{
-							shaderText << "\n\t\t" << token;
 						}
 					}
 				}
@@ -985,50 +878,28 @@ int repackBSPMain( Args& args ){
 
 				/* skyparms <outer image> <cloud height> <inner image> */
 				else if ( striEqual( token, "skyParms" ) ) {
-					shaderText << "\n\tskyParms ";
 					hasmap = true;
 					/* get image base */
-					GetToken( false );
-					shaderText << token;
+					text.GetToken( false );
 
 					/* ignore bogus paths */
 					if ( !strEqual( token, "-" ) && !striEqual( token, "full" ) ) {
-						char* const skysidestring = token + strcatQ( token, "_@@.tga", sizeof( token ) ) - 6;
+						char* const skysidestring = token + strcatQ( token, "_@@.tga", std::size( token ) ) - 6;
 						for( const auto side : { "up", "dn", "lf", "rt", "bk", "ft" } ){
 							memcpy( skysidestring, side, 2 );
 							tex2list( pk3Textures, ex.textures, &rex.textures );
 						}
 					}
 					/* skip rest of line */
-					GetToken( false );
-					shaderText << " " << token;
-					GetToken( false );
-					shaderText << " " << token;
+					text.GetToken( false );
+					text.GetToken( false );
 				}
 				else if ( striEqualPrefix( token, "implicit" ) ){
 					Sys_FPrintf( SYS_WRN, "WARNING5: %s : %s shader\n", wantShader->c_str(), token );
 					hasmap = true;
-					if ( line == scriptline ){
-						shaderText << " " << token;
-					}
-					else{
-						shaderText << "\n\t" << token;
-					}
 				}
 				else if ( striEqual( token, "fogparms" ) ){
 					hasmap = true;
-					if ( line == scriptline ){
-						shaderText << " " << token;
-					}
-					else{
-						shaderText << "\n\t" << token;
-					}
-				}
-				else if ( line == scriptline ){
-					shaderText << " " << token;
-				}
-				else{
-					shaderText << "\n\t" << token;
 				}
 			}
 
@@ -1045,10 +916,12 @@ int repackBSPMain( Args& args ){
 					wantShader = nullptr;
 				}
 				if ( wantShader ){
-					allShaders << shaderText;
+					allShaders << text.text << '\n';
 					wantShader->clear();
 				}
 			}
+			/* reset collector */
+			text.clear();
 		}
 	}
 	/* TODO: RTCW's mapComp, mapNoComp, animmapcomp, animmapnocomp; nocompress?; ET's implicitmap, implicitblend, implicitmask */

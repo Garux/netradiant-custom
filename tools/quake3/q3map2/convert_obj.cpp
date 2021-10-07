@@ -220,36 +220,21 @@ void Convert_ReferenceLightmaps( const char* base, std::vector<int>& lmIndices )
 	sprintf( shaderfile, "%s/q3map2_%s.shader", g_game->shaderPath, base );
 	LoadScriptFile( shaderfile, 0 );
 	/* tokenize it */
-	while ( 1 )
+	while ( GetToken( true ) ) /* test for end of file */
 	{
-		/* test for end of file */
-		if ( !GetToken( true ) )
-			break;
-
 		char shadername[256];
 		strcpy( shadername, token );
 
 		/* handle { } section */
-		if ( !GetToken( true ) )
-			break;
-		if ( !strEqual( token, "{" ) )
+		if ( !( GetToken( true ) && strEqual( token, "{" ) ) )
 			Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
 			       shaderfile, scriptline, token, g_strLoadedFileLocation );
-		while ( 1 )
+		while ( GetToken( true ) && !strEqual( token, "}" ) )
 		{
-			/* get the next token */
-			if ( !GetToken( true ) )
-				break;
-			if ( strEqual( token, "}" ) )
-				break;
 			/* parse stage directives */
 			if ( strEqual( token, "{" ) ) {
-				while ( 1 )
+				while ( GetToken( true ) && !strEqual( token, "}" ) )
 				{
-					if ( !GetToken( true ) )
-						break;
-					if ( strEqual( token, "}" ) )
-						break;
 					if ( strEqual( token, "{" ) )
 						Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", shaderfile, scriptline );
 

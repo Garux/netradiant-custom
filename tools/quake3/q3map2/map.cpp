@@ -967,25 +967,13 @@ static void ParseRawBrush( bool onlyLights ){
 	}
 
 	/* parse sides */
-	while ( 1 )
+	while ( GetToken( true ) && !strEqual( token, "}" ) )
 	{
-		if ( !GetToken( true ) ) {
-			break;
-		}
-		if ( strEqual( token, "}" ) ) {
-			break;
-		}
-
 		/* ttimo : bp: here we may have to jump over brush epairs (only used in editor) */
 		if ( g_brushType == EBrushType::Bp ) {
-			while ( 1 )
+			while ( !strEqual( token, "(" ) )
 			{
-				if ( !strEqual( token, "(" ) ) {
-					GetToken( false );
-				}
-				else{
-					break;
-				}
+				GetToken( false );
 				GetToken( true );
 			}
 		}

@@ -32,10 +32,20 @@ extern int scriptline;
 void LoadScriptFile( const char *filename, int index, bool verbose = true );
 void ParseFromMemory( char *buffer, int size );
 
+/// \param[in] crossline true: write next token to \c token or return false on EOF
+/// \param[in] crossline false: find next token on the current line or emit \c Error
 bool GetToken( bool crossline );
+
+/// \brief Signals that the current token was not used, and should be reported for the next \c GetToken().
+/// Only may be used once between the \c GetToken() calls.
 void UnGetToken( void );
+
+/// \brief
+/// \return true, if there is another token on the line.
 bool TokenAvailable( void );
 
+/// \brief Parses next token and emits \c Error, if it's not equal to \p match.
+/// Allowed to cross a line.
 void MatchToken( const char *match );
 
 template<typename T>
