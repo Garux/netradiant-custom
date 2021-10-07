@@ -459,13 +459,7 @@ binaries-h2data: \
 
 .PHONY: binaries-tools-quake3
 binaries-tools-quake3: \
-	binaries-q3data \
 	binaries-q3map2 \
-
-.PHONY: binaries-q3data
-binaries-q3data: \
-	$(INSTALLDIR)/q3data.$(EXE) \
-	$(INSTALLDIR)/q3data \
 
 .PHONY: binaries-q3map2
 binaries-q3map2: \
@@ -820,36 +814,6 @@ libddslib.$(A): \
 libetclib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libetclib.$(A): \
 	libs/etclib.o \
-
-$(INSTALLDIR)/q3data.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_ZLIB)
-$(INSTALLDIR)/q3data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_ZLIB) -Itools/quake3/common -Ilibs -Iinclude
-$(INSTALLDIR)/q3data.$(EXE): \
-	tools/quake3/common/aselib.o \
-	tools/quake3/common/bspfile.o \
-	tools/quake3/common/cmdlib.o \
-	tools/quake3/common/imagelib.o \
-	tools/quake3/common/inout.o \
-	tools/quake3/common/md4.o \
-	tools/quake3/common/scriplib.o \
-	tools/quake3/common/trilib.o \
-	tools/quake3/common/unzip.o \
-	tools/quake3/common/vfs.o \
-	tools/quake3/common/miniz.o \
-	tools/quake3/q3data/3dslib.o \
-	tools/quake3/q3data/compress.o \
-	tools/quake3/q3data/images.o \
-	tools/quake3/q3data/md3lib.o \
-	tools/quake3/q3data/models.o \
-	tools/quake3/q3data/p3dlib.o \
-	tools/quake3/q3data/polyset.o \
-	tools/quake3/q3data/q3data.o \
-	tools/quake3/q3data/stripper.o \
-	tools/quake3/q3data/video.o \
-	libfilematch.$(A) \
-	libetclib.$(A) \
-	libl_net.$(A) \
-	libmathlib.$(A) \
-	$(if $(findstring Win32,$(OS)),icons/q3data.o,) \
 
 $(INSTALLDIR)/radiant.$(EXE): LDFLAGS_EXTRA := $(MWINDOWS)
 $(INSTALLDIR)/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT) $(LIBS_ZLIB) $(LIBS_PANGOFT2)

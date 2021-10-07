@@ -50,17 +50,10 @@ void_ptr safe_calloc( size_t size );
 void Q_getwd( char *out );
 
 int Q_filelength( FILE *f );
-int FileTime( const char *path );
 
 void    Q_mkdir( const char *path );
 
-extern char qdir[1024];
-extern char gamedir[1024];
-extern char writedir[1024];
-void SetQdirFromPath( const char *path );
 char *ExpandArg( const char *path );    // from cmd line
-char *ExpandPath( const char *path );   // from scripts
-void ExpandWildcards( int *argc, char ***argv );
 
 
 double I_FloatTime( void );
@@ -76,8 +69,6 @@ void    SaveFile( const char *filename, const void *buffer, int count );
 bool    FileExists( const char *filename );
 
 
-int     ParseNum( const char *str );
-
 short   BigShort( short l );
 short   LittleShort( short l );
 int     BigLong( int l );
@@ -85,13 +76,6 @@ int     LittleLong( int l );
 float   BigFloat( float l );
 float   LittleFloat( float l );
 
-
-void CRC_Init( unsigned short *crcvalue );
-void CRC_ProcessByte( unsigned short *crcvalue, byte data );
-unsigned short CRC_Value( unsigned short crcvalue );
-
-void    CreatePath( const char *path );
-void    QCopyFile( const char *from, const char *to );
 
 // sleep for the given amount of milliseconds
 void Sys_Sleep( int n );

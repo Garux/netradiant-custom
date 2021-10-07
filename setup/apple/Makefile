@@ -64,7 +64,6 @@ bundle:
 	dylibbundler -b \
 		-x $(BINDIR)/radiant.x86_64 \
 		-x $(BINDIR)/q2map.x86_64 \
-		-x $(BINDIR)/q3data.x86_64 \
 		-x $(BINDIR)/q3map2.x86_64 \
 		-x $(BINDIR)/qdata3.x86_64 \
 		`find $(BINDIR)/modules -name "*.dylib" | xargs -I {} echo -x {}` \
