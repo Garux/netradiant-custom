@@ -211,13 +211,13 @@ skipspace:
 
 	// /* */ comments
 	if ( script.it[0] == '/' && script.it[1] == '*' ) {
-		if ( !crossline ) {
-			Error( "Line %i is incomplete\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
-		}
 		script.it += 2;
 		while ( script.it[0] != '*' || script.it[1] != '/' )
 		{
 			if ( *script.it == '\n' ) {
+				if ( !crossline ) {
+					Error( "Line %i is incomplete\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
+				}
 				script.line++;
 				scriptline = script.line;
 			}
