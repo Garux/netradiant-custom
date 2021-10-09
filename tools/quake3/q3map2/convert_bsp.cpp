@@ -301,16 +301,14 @@ int BSPInfo( Args& args ){
 }
 
 
-static void ExtrapolateTexcoords( const float *axyz, const float *ast,
-                                  const float *bxyz, const float *bst,
-                                  const float *cxyz, const float *cst,
-                                  const Vector3& axyz_new, Vector2& ast_out,
-                                  const Vector3& bxyz_new, Vector2& bst_out,
-                                  const Vector3& cxyz_new, Vector2& cst_out ){
-	Vector4 scoeffs, tcoeffs;
-	Matrix4 solvematrix;
+static void ExtrapolateTexcoords( const bspDrawVert_t& a,
+                                  const bspDrawVert_t& b,
+								  const bspDrawVert_t& c,
+								  bspDrawVert_t& anew,
+								  bspDrawVert_t& bnew,
+								  bspDrawVert_t& cnew ){
 
-	const Vector3 norm = vector3_cross( vector3_from_array( bxyz ) - vector3_from_array( axyz ), vector3_from_array( cxyz ) - vector3_from_array( axyz ) );
+	const Vector3 norm = vector3_cross( b.xyz - a.xyz, c.xyz - a.xyz );
 
 	// assume:
 	//   s = f(x, y, z)
@@ -324,22 +322,12 @@ static void ExtrapolateTexcoords( const float *axyz, const float *ast,
 	//   scoeffs * (cxyz, 1) == cst[0]
 	//   scoeffs * (norm, 0) == 0
 	// scoeffs * [axyz, 1 | bxyz, 1 | cxyz, 1 | norm, 0] = [ast[0], bst[0], cst[0], 0]
-	solvematrix[0] = axyz[0];
-	solvematrix[4] = axyz[1];
-	solvematrix[8] = axyz[2];
-	solvematrix[12] = 1;
-	solvematrix[1] = bxyz[0];
-	solvematrix[5] = bxyz[1];
-	solvematrix[9] = bxyz[2];
-	solvematrix[13] = 1;
-	solvematrix[2] = cxyz[0];
-	solvematrix[6] = cxyz[1];
-	solvematrix[10] = cxyz[2];
-	solvematrix[14] = 1;
-	solvematrix[3] = norm[0];
-	solvematrix[7] = norm[1];
-	solvematrix[11] = norm[2];
-	solvematrix[15] = 0;
+	Matrix4 solvematrix;
+	solvematrix.x() = { a.xyz, 1 };
+	solvematrix.y() = { b.xyz, 1 };
+	solvematrix.z() = { c.xyz, 1 };
+	solvematrix.t() = { norm, 0 };
+	matrix4_transpose( solvematrix );
 
 	const double md = matrix4_determinant( solvematrix );
 	if ( md * md < 1e-10 ) {
@@ -349,23 +337,14 @@ static void ExtrapolateTexcoords( const float *axyz, const float *ast,
 
 	matrix4_full_invert( solvematrix );
 
-	scoeffs[0] = ast[0];
-	scoeffs[1] = bst[0];
-	scoeffs[2] = cst[0];
-	scoeffs[3] = 0;
-	matrix4_transform_vector4( solvematrix, scoeffs );
-	tcoeffs[0] = ast[1];
-	tcoeffs[1] = bst[1];
-	tcoeffs[2] = cst[1];
-	tcoeffs[3] = 0;
-	matrix4_transform_vector4( solvematrix, tcoeffs );
-
-	ast_out[0] = scoeffs[0] * axyz_new[0] + scoeffs[1] * axyz_new[1] + scoeffs[2] * axyz_new[2] + scoeffs[3];
-	ast_out[1] = tcoeffs[0] * axyz_new[0] + tcoeffs[1] * axyz_new[1] + tcoeffs[2] * axyz_new[2] + tcoeffs[3];
-	bst_out[0] = scoeffs[0] * bxyz_new[0] + scoeffs[1] * bxyz_new[1] + scoeffs[2] * bxyz_new[2] + scoeffs[3];
-	bst_out[1] = tcoeffs[0] * bxyz_new[0] + tcoeffs[1] * bxyz_new[1] + tcoeffs[2] * bxyz_new[2] + tcoeffs[3];
-	cst_out[0] = scoeffs[0] * cxyz_new[0] + scoeffs[1] * cxyz_new[1] + scoeffs[2] * cxyz_new[2] + scoeffs[3];
-	cst_out[1] = tcoeffs[0] * cxyz_new[0] + tcoeffs[1] * cxyz_new[1] + tcoeffs[2] * cxyz_new[2] + tcoeffs[3];
+	Matrix4 stcoeffs( g_matrix4_identity );
+	stcoeffs.x() = { a.st[0], b.st[0], c.st[0], 0 };
+	stcoeffs.y() = { a.st[1], b.st[1], c.st[1], 0 };
+	matrix4_premultiply_by_matrix4( stcoeffs, solvematrix );
+	matrix4_transpose( stcoeffs );
+	anew.st = matrix4_transformed_point( stcoeffs, anew.xyz ).vec2();
+	bnew.st = matrix4_transformed_point( stcoeffs, bnew.xyz ).vec2();
+	cnew.st = matrix4_transformed_point( stcoeffs, cnew.xyz ).vec2();
 }
 
 /*
@@ -380,7 +359,7 @@ int ScaleBSPMain( Args& args ){
 	char str[ 1024 ];
 	int uniform, axis;
 	bool texscale;
-	float *old_xyzst = NULL;
+	std::vector<bspDrawVert_t> old_xyzst;
 	float spawn_ref = 0;
 
 
@@ -499,15 +478,7 @@ int ScaleBSPMain( Args& args ){
 
 	if ( texscale ) {
 		Sys_Printf( "Using texture unlocking (and probably breaking texture alignment a lot)\n" );
-		old_xyzst = safe_malloc( sizeof( *old_xyzst ) * bspDrawVerts.size() * 5 );
-		for ( size_t i = 0; i < bspDrawVerts.size(); i++ )
-		{
-			old_xyzst[5 * i + 0] = bspDrawVerts[i].xyz[0];
-			old_xyzst[5 * i + 1] = bspDrawVerts[i].xyz[1];
-			old_xyzst[5 * i + 2] = bspDrawVerts[i].xyz[2];
-			old_xyzst[5 * i + 3] = bspDrawVerts[i].st[0];
-			old_xyzst[5 * i + 4] = bspDrawVerts[i].st[1];
-		}
+		old_xyzst = bspDrawVerts;
 	}
 
 	/* scale drawverts */
@@ -532,19 +503,17 @@ int ScaleBSPMain( Args& args ){
 					const int ia = bspDrawIndexes[j + 0] + surf.firstVert,
 					          ib = bspDrawIndexes[j + 1] + surf.firstVert,
 							  ic = bspDrawIndexes[j + 2] + surf.firstVert;
-					bspDrawVert_t &a = bspDrawVerts[ia], &b = bspDrawVerts[ib], &c = bspDrawVerts[ic];
-					const float *oa = &old_xyzst[ia * 5], *ob = &old_xyzst[ib * 5], *oc = &old_xyzst[ic * 5];
 					// extrapolate:
 					//   a->xyz -> oa
 					//   b->xyz -> ob
 					//   c->xyz -> oc
 					ExtrapolateTexcoords(
-					    &oa[0], &oa[3],
-					    &ob[0], &ob[3],
-					    &oc[0], &oc[3],
-					    a.xyz, a.st,
-					    b.xyz, b.st,
-					    c.xyz, c.st );
+					    old_xyzst[ia],
+					    old_xyzst[ib],
+					    old_xyzst[ic],
+					    bspDrawVerts[ia],
+					    bspDrawVerts[ib],
+					    bspDrawVerts[ic] );
 				}
 				break;
 			}
