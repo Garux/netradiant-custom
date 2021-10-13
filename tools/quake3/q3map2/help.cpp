@@ -433,6 +433,17 @@ void HelpJson()
 	HelpOptions("BSP json export/import", 0, 80, options);
 }
 
+void HelpMergeBsp()
+{
+	const std::vector<HelpOption> options = {
+		{"-mergebsp [options] <mainBsp.bsp> <bspToinject.bsp>", "Inject latter BSP to former. Tree and vis data of the main one are preserved."},
+		{"-fixnames", "Make incoming BSP target/targetname names unique to not collide with existing names"},
+		{"-world", "Also merge worldspawn model (brushes as if they were detail, no BSP tree is affected) (only merges entities by default)"},
+	};
+
+	HelpOptions("BSP merge", 0, 80, options);
+}
+
 void HelpCommon()
 {
 	const std::vector<HelpOption> options = {
@@ -486,6 +497,7 @@ void HelpMain(const char* arg)
 		{"-pk3", "PK3 creation"},
 		{"-repack", "Maps repack creation"},
 		{"-json", "BSP json export/import"},
+		{"-mergebsp", "BSP merge"},
 	};
 	void(*help_funcs[])() = {
 		HelpBsp,
@@ -504,6 +516,7 @@ void HelpMain(const char* arg)
 		HelpPk3,
 		HelpRepack,
 		HelpJson,
+		HelpMergeBsp,
 	};
 
 	if ( !strEmptyOrNull( arg ) )

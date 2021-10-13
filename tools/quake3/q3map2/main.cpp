@@ -225,6 +225,11 @@ int main( int argc, char **argv ){
 		r = ConvertJsonMain( args );
 	}
 
+	/* merge two bsps */
+	else if ( args.takeFront( "-mergebsp" ) ) {
+		r = MergeBSPMain( args );
+	}
+
 	/* div0: minimap */
 	else if ( args.takeFront( "-minimap" ) ) {
 		r = MiniMapBSPMain( args );
