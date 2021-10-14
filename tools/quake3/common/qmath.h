@@ -263,14 +263,21 @@ inline void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<O
    ================
  */
 inline void MakeNormalVectors( const Vector3& forward, Vector3& right, Vector3& up ){
+#if 0
 	// this rotate and negate guarantees a vector
 	// not colinear with the original
+	//! fails with forward( -0.577350259 -0.577350259 0.577350259 )
+	//! colinear right( 0.577350259 0.577350259 -0.577350259 )
 	right[1] = -forward[0];
 	right[2] = forward[1];
 	right[0] = forward[2];
 
 	right = VectorNormalized( right - forward * vector3_dot( right, forward ) );
 	up = vector3_cross( right, forward );
+#else
+	right = VectorNormalized( vector3_cross( g_vector3_axes[ vector3_min_abs_component_index( forward ) ], forward ) );
+	up = vector3_cross( right, forward );
+#endif
 }
 
 
