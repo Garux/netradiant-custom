@@ -31,10 +31,8 @@
 
 class void_ptr
 {
-private:
 	void *ptr;
 public:
-	void_ptr() = delete;
 	void_ptr( void *p ) : ptr( p ) {}
 	template<typename T>
 	operator T*() const {

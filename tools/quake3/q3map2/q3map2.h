@@ -425,7 +425,6 @@ struct image_t
 		height(height ),
 		pixels( pixels )
 	{}
-	image_t( const image_t& ) = delete;
 	image_t( image_t&& other ) noexcept :
 		name( std::move( other.name ) ),
 		filename( std::move( other.filename ) ),
@@ -433,8 +432,6 @@ struct image_t
 		height( other.height ),
 		pixels( std::exchange( other.pixels, nullptr ) )
 	{}
-	image_t& operator=( const image_t& ) = delete;
-	image_t& operator=( image_t&& ) noexcept = delete;
 	~image_t(){
 		free( pixels );
 	}

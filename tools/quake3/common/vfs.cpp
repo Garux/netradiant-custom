@@ -77,6 +77,7 @@ struct VFS_PAK
 	unzFile zipfile;
 	const CopiedString unzFilePath;
 	VFS_PAK( unzFile zipfile, const char *unzFilePath ) : zipfile( zipfile ), unzFilePath( unzFilePath ) {};
+	VFS_PAK( VFS_PAK&& ) noexcept = delete;
 	~VFS_PAK(){
 		unzClose( zipfile );
 	}

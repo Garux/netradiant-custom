@@ -774,11 +774,7 @@ public:
 		m_instance.get().setChildSelectedChangedCallback( Callback() );
 		ASSERT_MESSAGE( empty(), "GraphTreeNode::~GraphTreeNode: memory leak" );
 	}
-	GraphTreeNode() = delete;
-	GraphTreeNode( const GraphTreeNode& ) = delete;
 	GraphTreeNode( GraphTreeNode&& ) noexcept = delete;
-	GraphTreeNode& operator=( const GraphTreeNode& ) = delete;
-	GraphTreeNode& operator=( GraphTreeNode&& ) noexcept = delete;
 
 	iterator begin(){
 		return m_childnodes.begin();

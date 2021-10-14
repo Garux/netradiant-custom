@@ -148,10 +148,7 @@ private:
 public:
 
 	SelectionList() = default;
-	SelectionList( const SelectionList& ) = delete;
 	SelectionList( SelectionList&& ) noexcept = delete;
-	SelectionList& operator=( const SelectionList& ) = delete;
-	SelectionList& operator=( SelectionList&& ) noexcept = delete;
 
 	iterator begin(){
 		return m_selection.begin();

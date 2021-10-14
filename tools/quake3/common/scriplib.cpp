@@ -51,11 +51,7 @@ struct script_t
 		end( start + size ),
 		line( 1 )
 	{}
-	script_t() = delete;
-	script_t( const script_t& ) = delete;
 	script_t( script_t&& ) noexcept = delete;
-	script_t& operator=( const script_t& ) = delete;
-	script_t& operator=( script_t&& ) noexcept = delete;
 	~script_t(){
 		free( buffer );
 	}

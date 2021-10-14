@@ -48,11 +48,6 @@ struct metaVertex_t : public bspDrawVert_t
 	std::list<metaVertex_t> *m_metaVertexGroup;  // reference to own group of vertices with equal .xyz position
 
 	metaVertex_t() = default;
-	metaVertex_t( const metaVertex_t& ) = default;
-	metaVertex_t( metaVertex_t&& ) noexcept = default;
-	metaVertex_t& operator=( const metaVertex_t& ) = default;
-	metaVertex_t& operator=( metaVertex_t&& ) noexcept = default;
-
 	metaVertex_t( const bspDrawVert_t& vert ) : bspDrawVert_t( vert ){}
 };
 
