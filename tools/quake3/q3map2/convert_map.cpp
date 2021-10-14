@@ -337,6 +337,20 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 		fprintf( f, "\t{\n" );
 	}
 
+	/* find out if brush is detail */ // note: this also flags structural transparent brushes as detail, e.g. hints
+	int contentFlag = 0;
+	for( const auto& leaf : bspLeafs ){
+		if( leaf.cluster >= 0 )
+			for( auto id = bspLeafBrushes.cbegin() + leaf.firstBSPLeafBrush, end = id + leaf.numBSPLeafBrushes; id != end; ++id ){
+				if( *id == bspBrushNum ){
+					contentFlag = C_DETAIL;
+					break;
+				}
+			}
+		if( contentFlag == C_DETAIL)
+			break;
+	}
+
 	/* iterate through build brush sides */
 	for ( side_t& buildSide : buildBrush.sides )
 	{
@@ -479,7 +493,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				         buildSide.texMat[0][0], buildSide.texMat[0][1], FRAC( buildSide.texMat[0][2] ),
 				         buildSide.texMat[1][0], buildSide.texMat[1][1], FRAC( buildSide.texMat[1][2] ),
 				         texture,
-				         0
+				         contentFlag
 				       );
 			}
 			else
@@ -579,7 +593,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				         pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
 				         texture,
 				         shift[0], shift[1], rotate, scale[0], scale[1],
-				         0
+				         contentFlag
 				       );
 			}
 		}
@@ -601,7 +615,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				         1.0f / 16.0f, 0.0f, 0.0f,
 				         0.0f, 1.0f / 16.0f, 0.0f,
 				         texture,
-				         0
+				         contentFlag
 				       );
 			}
 			else
@@ -612,7 +626,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				         pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
 				         texture,
 				         0.0f, 0.0f, 0.0f, 0.25f, 0.25f,
-				         0
+				         contentFlag
 				       );
 			}
 		}
