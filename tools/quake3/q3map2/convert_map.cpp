@@ -190,7 +190,7 @@ static void ConvertOriginBrush( FILE *f, int num, const Vector3& origin, bool br
 	fprintf( f, "\t}\n\n" );
 }
 
-static void ConvertBrushFast( FILE *f, int num, const bspBrush_t& brush, const Vector3& origin, bool brushPrimitives ){
+static void bspBrush_to_buildBrush( const bspBrush_t& brush ){
 	/* clear out build brush */
 	buildBrush.sides.clear();
 
@@ -242,6 +242,11 @@ static void ConvertBrushFast( FILE *f, int num, const bspBrush_t& brush, const V
 		buildBrush.sides.back().shaderInfo = ShaderInfoForShader( shader.shader );
 		buildBrush.sides.back().planenum = side.planeNum;
 	}
+}
+
+static void ConvertBrushFast( FILE *f, int bspBrushNum, const Vector3& origin, bool brushPrimitives ){
+
+	bspBrush_to_buildBrush( bspBrushes[bspBrushNum] );
 
 	if ( !CreateBrushWindings( buildBrush ) ) {
 		//Sys_Printf( "CreateBrushWindings failed\n" );
@@ -249,7 +254,7 @@ static void ConvertBrushFast( FILE *f, int num, const bspBrush_t& brush, const V
 	}
 
 	/* start brush */
-	fprintf( f, "\t// brush %d\n", num );
+	fprintf( f, "\t// brush %d\n", bspBrushNum );
 	fprintf( f, "\t{\n" );
 	if ( brushPrimitives ) {
 		fprintf( f, "\tbrushDef\n" );
@@ -314,58 +319,9 @@ static void ConvertBrushFast( FILE *f, int num, const bspBrush_t& brush, const V
 	fprintf( f, "\t}\n\n" );
 }
 
-static void ConvertBrush( FILE *f, int num, const bspBrush_t& brush, const Vector3& origin, bool brushPrimitives ){
-	/* clear out build brush */
-	buildBrush.sides.clear();
+static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool brushPrimitives ){
 
-	bool modelclip = false;
-	/* try to guess if thats model clip */
-	if ( force ){
-		int notNoShader = 0;
-		modelclip = true;
-		for ( int i = 0; i < brush.numSides; i++ )
-		{
-			/* get side */
-			const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + i ];
-
-			/* get shader */
-			if ( side.shaderNum < 0 || side.shaderNum >= int( bspShaders.size() ) ) {
-				continue;
-			}
-			const bspShader_t& shader = bspShaders[ side.shaderNum ];
-			//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
-			if( !striEqual( shader.shader, "noshader" ) ){
-				notNoShader++;
-			}
-			if( notNoShader > 1 ){
-				modelclip = false;
-				break;
-			}
-		}
-	}
-
-	/* iterate through bsp brush sides */
-	for ( int i = 0; i < brush.numSides; i++ )
-	{
-		/* get side */
-		const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + i ];
-
-		/* get shader */
-		if ( side.shaderNum < 0 || side.shaderNum >= int( bspShaders.size() ) ) {
-			continue;
-		}
-		const bspShader_t& shader = bspShaders[ side.shaderNum ];
-		//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
-		if( striEqual( shader.shader, "default" ) || ( striEqual( shader.shader, "noshader" ) && !modelclip ) )
-			continue;
-
-		/* add build side */
-		buildBrush.sides.emplace_back();
-
-		/* tag it */
-		buildBrush.sides.back().shaderInfo = ShaderInfoForShader( shader.shader );
-		buildBrush.sides.back().planenum = side.planeNum;
-	}
+	bspBrush_to_buildBrush( bspBrushes[bspBrushNum] );
 
 	/* make brush windings */
 	if ( !CreateBrushWindings( buildBrush ) ) {
@@ -374,7 +330,7 @@ static void ConvertBrush( FILE *f, int num, const bspBrush_t& brush, const Vecto
 	}
 
 	/* start brush */
-	fprintf( f, "\t// brush %d\n", num );
+	fprintf( f, "\t// brush %d\n", bspBrushNum );
 	fprintf( f, "\t{\n" );
 	if ( brushPrimitives ) {
 		fprintf( f, "\tbrushDef\n" );
@@ -809,21 +765,6 @@ static void ConvertPatch( FILE *f, int num, const bspDrawSurface_t& ds, const Ve
  */
 
 static void ConvertModel( FILE *f, const bspModel_t& model, const Vector3& origin, bool brushPrimitives ){
-	/* convert bsp planes to map planes */
-	mapplanes.resize( bspPlanes.size() );
-	for ( size_t i = 0; i < bspPlanes.size(); ++i )
-	{
-		plane_t& plane = mapplanes[i];
-		plane.plane = bspPlanes[ i ];
-		plane.type = PlaneTypeForNormal( plane.normal() );
-		plane.hash_chain = 0;
-	}
-
-	/* allocate a build brush */
-	buildBrush.sides.reserve( MAX_BUILD_SIDES );
-	buildBrush.entityNum = 0;
-	buildBrush.original = &buildBrush;
-
 	if ( origin != g_vector3_identity ) {
 		ConvertOriginBrush( f, -1, origin, brushPrimitives );
 	}
@@ -831,13 +772,10 @@ static void ConvertModel( FILE *f, const bspModel_t& model, const Vector3& origi
 	/* go through each brush in the model */
 	for ( int i = 0; i < model.numBSPBrushes; i++ )
 	{
-		const int num = i + model.firstBSPBrush;
-		if( fast ){
-			ConvertBrushFast( f, num, bspBrushes[ num ], origin, brushPrimitives );
-		}
-		else{
-			ConvertBrush( f, num, bspBrushes[ num ], origin, brushPrimitives );
-		}
+		if( fast )
+			ConvertBrushFast( f, model.firstBSPBrush + i, origin, brushPrimitives );
+		else
+			ConvertBrush( f, model.firstBSPBrush + i, origin, brushPrimitives );
 	}
 
 	/* go through each drawsurf in the model */
@@ -860,9 +798,9 @@ static void ConvertModel( FILE *f, const bspModel_t& model, const Vector3& origi
    exports entity key/value pairs to a map file
  */
 
-static void ConvertEPairs( FILE *f, entity_t *e, bool skip_origin ){
+static void ConvertEPairs( FILE *f, const entity_t& e, bool skip_origin ){
 	/* walk epairs */
-	for ( const auto& ep : e->epairs )
+	for ( const auto& ep : e.epairs )
 	{
 		/* ignore empty keys/values */
 		if ( ep.key.empty() || ep.value.empty() ) {
@@ -892,10 +830,23 @@ static void ConvertEPairs( FILE *f, entity_t *e, bool skip_origin ){
  */
 
 int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
-	int modelNum;
-	FILE            *f;
-	entity_t        *e;
-	const char      *value;
+	/* setup brush conversion prerequisites */
+	{
+		/* convert bsp planes to map planes */
+		mapplanes.resize( bspPlanes.size() );
+		for ( size_t i = 0; i < bspPlanes.size(); ++i )
+		{
+			plane_t& plane = mapplanes[i];
+			plane.plane = bspPlanes[ i ];
+			plane.type = PlaneTypeForNormal( plane.normal() );
+			plane.hash_chain = 0;
+		}
+
+		/* allocate a build brush */
+		buildBrush.sides.reserve( MAX_BUILD_SIDES );
+		buildBrush.entityNum = 0;
+		buildBrush.original = &buildBrush;
+	}
 
 	/* note it */
 	Sys_Printf( "--- Convert BSP to MAP ---\n" );
@@ -905,7 +856,7 @@ int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 	Sys_Printf( "writing %s\n", name.c_str() );
 
 	/* open it */
-	f = SafeOpenWrite( name );
+	FILE *f = SafeOpenWrite( name );
 
 	/* print header */
 	fprintf( f, "// Generated by Q3Map2 (ydnar) -convert -format map\n" );
@@ -914,19 +865,20 @@ int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 	for ( std::size_t i = 0; i < entities.size(); ++i )
 	{
 		/* get entity */
-		e = &entities[ i ];
+		const entity_t& e = entities[ i ];
 
 		/* start entity */
 		fprintf( f, "// entity %zu\n", i );
 		fprintf( f, "{\n" );
 
 		/* get model num */
+		int modelNum;
 		if ( i == 0 ) {
 			modelNum = 0;
 		}
 		else
 		{
-			value = e->valueForKey( "model" );
+			const char *value = e.valueForKey( "model" );
 			if ( value[ 0 ] == '*' ) {
 				modelNum = atoi( value + 1 );
 			}
@@ -942,7 +894,7 @@ int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 		/* only handle bsp models */
 		if ( modelNum >= 0 ) {
 			/* convert model */
-			ConvertModel( f, bspModels[ modelNum ], e->vectorForKey( "origin" ), brushPrimitives );
+			ConvertModel( f, bspModels[ modelNum ], e.vectorForKey( "origin" ), brushPrimitives );
 		}
 
 		/* end entity */
