@@ -213,11 +213,10 @@ struct ibspGridPoint_t
  */
 
 void LoadIBSPFile( const char *filename ){
-	ibspHeader_t    *header;
+	/* load the file */
+	MemBuffer file = LoadFile( filename );
 
-
-	/* load the file header */
-	LoadFile( filename, (void**) &header );
+	ibspHeader_t    *header = file.data();
 
 	/* swap the header (except the first 4 bytes) */
 	SwapBlock( (int*) ( (byte*) header + 4 ), sizeof( *header ) - 4 );
@@ -256,9 +255,6 @@ void LoadIBSPFile( const char *filename ){
 	else{
 		bspAds.clear();
 	}
-
-	/* free the file buffer */
-	free( header );
 }
 
 /*
@@ -267,11 +263,10 @@ void LoadIBSPFile( const char *filename ){
  */
 
 void LoadIBSPorRBSPFilePartially( const char *filename ){
-	ibspHeader_t    *header;
+	/* load the file */
+	MemBuffer file = LoadFile( filename );
 
-
-	/* load the file header */
-	LoadFile( filename, (void**) &header );
+	ibspHeader_t    *header = file.data();
 
 	/* swap the header (except the first 4 bytes) */
 	SwapBlock( (int*) ( (byte*) header + 4 ), sizeof( *header ) - 4 );
@@ -293,9 +288,6 @@ void LoadIBSPorRBSPFilePartially( const char *filename ){
 
 	CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs );
 	CopyLump( (bspHeader_t*) header, LUMP_ENTITIES, bspEntData );
-
-	/* free the file buffer */
-	free( header );
 }
 
 /*

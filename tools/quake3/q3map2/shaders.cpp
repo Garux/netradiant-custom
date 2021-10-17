@@ -874,7 +874,7 @@ static void ParseShaderFile( const char *filename ){
 	ShaderTextCollector text;
 
 	/* load the shader */
-	LoadScriptFile( filename, 0 );
+	LoadScriptFile( filename );
 
 	/* tokenize it */
 	while ( GetToken( true ) ) /* test for end of file */
@@ -1827,7 +1827,7 @@ static void ParseCustomInfoParms( void ){
 	}
 
 	/* load it */
-	LoadScriptFile( "scripts/custinfoparms.txt", 0 );
+	LoadScriptFile( "scripts/custinfoparms.txt" );
 
 	/* clear the array */
 	memset( custSurfaceParms, 0, sizeof( custSurfaceParms ) );

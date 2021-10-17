@@ -1657,20 +1657,15 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
  */
 
 void LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups ){
-	FILE        *file;
 	int oldNumEntities = 0;
 
 
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- LoadMapFile ---\n" );
-	Sys_Printf( "Loading %s\n", filename );
-
-	/* hack */
-	file = SafeOpenRead( filename );
-	fclose( file );
 
 	/* load the map file */
-	LoadScriptFile( filename, -1 );
+	if( !LoadScriptFile( filename, -1 ) )
+		Error( "" );
 
 	/* setup */
 	if ( onlyLights ) {

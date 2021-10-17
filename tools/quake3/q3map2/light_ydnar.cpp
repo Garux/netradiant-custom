@@ -1152,7 +1152,7 @@ void MapRawLightmap( int rawLightmapNum ){
 				/* divine a normal and origin from neighboring luxels */
 				fake.xyz.set( 0 );
 				fake.normal.set( 0 );
-				fake.lightmap[ 0 ] = { x, y };    //% 0.0001 + x; //% 0.0001 + y;
+				fake.lightmap[ 0 ] = Vector2( x, y );    //% 0.0001 + x; //% 0.0001 + y;
 				samples = 0.0f;
 				for ( sy = ( y - 1 ); sy <= ( y + 1 ); sy++ )
 				{
@@ -3750,7 +3750,7 @@ void SetupFloodLight( void ){
 
 		sscanf( value, "%lf %lf %lf %lf %lf %lf", &v1, &v2, &v3, &v4, &v5, &v6 );
 
-		floodlightRGB = { v1, v2, v3 };
+		floodlightRGB = Vector3( v1, v2, v3 );
 
 		if ( vector3_length( floodlightRGB ) == 0 ) {
 			floodlightRGB = { 0.94, 0.94, 1.0 };

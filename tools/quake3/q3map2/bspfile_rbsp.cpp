@@ -179,11 +179,10 @@ static void AddLightGridLumps( FILE *file, rbspHeader_t& header ){
  */
 
 void LoadRBSPFile( const char *filename ){
-	rbspHeader_t    *header;
+	/* load the file */
+	MemBuffer file = LoadFile( filename );
 
-
-	/* load the file header */
-	LoadFile( filename, (void**) &header );
+	rbspHeader_t    *header = file.data();
 
 	/* swap the header (except the first 4 bytes) */
 	SwapBlock( (int*) ( (byte*) header + 4 ), sizeof( *header ) - 4 );
@@ -214,9 +213,6 @@ void LoadRBSPFile( const char *filename ){
 	CopyLump( (bspHeader_t*) header, LUMP_LIGHTMAPS, bspLightBytes );
 	CopyLump( (bspHeader_t*) header, LUMP_ENTITIES, bspEntData );
 	CopyLightGridLumps( header );
-
-	/* free the file buffer */
-	free( header );
 }
 
 

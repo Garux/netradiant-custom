@@ -27,6 +27,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <utility>
 
 
 class void_ptr
@@ -37,6 +38,42 @@ public:
 	template<typename T>
 	operator T*() const {
 		return static_cast<T*>( ptr );
+	}
+};
+
+
+class MemBuffer
+{
+	byte *m_data;
+	size_t m_size;
+public:
+	MemBuffer() : m_data( nullptr ), m_size( 0 ) {}
+	explicit MemBuffer( size_t size ) : m_data( new byte[ size + 1 ] ), m_size( size ) {
+		m_data[m_size] = '\0';         // NOTE: when loading a file, you have to allocate one extra byte and set it to \0
+	}
+	MemBuffer( MemBuffer&& other ) noexcept : m_data( std::exchange( other.m_data, nullptr ) ), m_size( other.m_size ) {}
+	MemBuffer& operator=( MemBuffer&& other ) noexcept {
+		std::swap( m_data, other.m_data );
+		std::swap( m_size, other.m_size );
+		return *this;
+	}
+	~MemBuffer(){
+		delete[] m_data;
+	}
+	void_ptr data() const {
+		return m_data;
+	}
+	/// \return correct buffer size in bytes, if it's not empty. May be not used for validity check!
+	size_t size() const {
+		return m_size;
+	}
+	/// \return true, if there is managed buffer
+	operator bool() const {
+		return m_data != nullptr;
+	}
+	/// \brief Delegates the ownership. Obtained buffer must be deallocated by \c delete[]
+	void_ptr release(){
+		return std::exchange( m_data, nullptr );
 	}
 };
 
@@ -58,11 +95,11 @@ double I_FloatTime( void );
 
 FILE    *SafeOpenWrite( const char *filename, const char *mode = "wb" );
 FILE    *SafeOpenRead( const char *filename, const char *mode = "rb" );
-void    SafeRead( FILE *f, void *buffer, int count );
+void    SafeRead( FILE *f, MemBuffer& buffer );
 void    SafeWrite( FILE *f, const void *buffer, int count );
 
-int     LoadFile( const char *filename, void **bufferptr );
-int     TryLoadFile( const char *filename, void **bufferptr );
+/// \brief loads file from absolute \p filename path or emits \c Error
+MemBuffer LoadFile( const char *filename );
 void    SaveFile( const char *filename, const void *buffer, int count );
 bool    FileExists( const char *filename );
 

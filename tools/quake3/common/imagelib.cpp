@@ -194,7 +194,7 @@ byte  *LBMRLEDecompress( byte *source,byte *unpacked, int bpwidth ){
    =================
  */
 void LoadLBM( const char *filename, byte **picture, byte **palette ){
-	byte    *LBMbuffer, *picbuffer, *cmapbuffer;
+	byte    *picbuffer, *cmapbuffer;
 	int y;
 	byte    *LBM_P, *LBMEND_P;
 	byte    *pic_p;
@@ -210,13 +210,13 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
 //
 // load the LBM
 //
-	LoadFile( filename, (void **)&LBMbuffer );
+	MemBuffer file = LoadFile( filename );
 
 //
 // parse the LBM header
 //
-	LBM_P = LBMbuffer;
-	if ( *(int *)LBMbuffer != LittleLong( FORMID ) ) {
+	LBM_P = file.data();
+	if ( *(int *)LBM_P != LittleLong( FORMID ) ) {
 		Error( "No FORM ID at start of file!\n" );
 	}
 
@@ -295,8 +295,6 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
 
 		LBM_P += Align( chunklength );
 	}
-
-	free( LBMbuffer );
 
 	*picture = picbuffer;
 
@@ -469,20 +467,19 @@ void LoadPCX( const char *filename, byte **pic, byte **palette, int *width, int 
 	byte    *raw;
 	pcx_t   *pcx;
 	int x, y, lsize;
-	int len;
 	int dataByte, runLength;
 	byte    *out, *pix;
 
 
 	/* load the file */
-	len = vfsLoadFile( filename, (void **)&raw, 0 );
-	if ( len == -1 ) {
+	MemBuffer buffer = vfsLoadFile( filename );
+	if ( !buffer ) {
 		Error( "LoadPCX: Couldn't read %s", filename );
 	}
 
 
 	/* parse the PCX file */
-	pcx = (pcx_t *)raw;
+	pcx = buffer.data();
 	raw = &pcx->data;
 
 	pcx->xmin = LittleShort( pcx->xmin );
@@ -505,7 +502,7 @@ void LoadPCX( const char *filename, byte **pic, byte **palette, int *width, int 
 
 	if ( palette ) {
 		*palette = safe_malloc( 768 );
-		memcpy( *palette, (byte *)pcx + len - 768, 768 );
+		memcpy( *palette, (byte *)pcx + buffer.size() - 768, 768 );
 	}
 
 	if ( width ) {
@@ -551,10 +548,9 @@ void LoadPCX( const char *filename, byte **pic, byte **palette, int *width, int 
 	}
 
 	/* validity check */
-	if ( raw - (byte *) pcx > len ) {
+	if ( raw - (byte *) pcx > int( buffer.size() ) ) {
 		Error( "PCX file %s was malformed", filename );
 	}
-	free( pcx );
 }
 
 
@@ -693,10 +689,12 @@ void LoadBMP( const char *filename, byte **pic, byte **palette, int *width, int 
 	byte *in;
 	int len, pos = 0;
 
-	len = vfsLoadFile( filename, (void **)&in, 0 );
-	if ( len == -1 ) {
+	MemBuffer buffer = vfsLoadFile( filename );
+	if ( !buffer ) {
 		Error( "Couldn't read %s", filename );
 	}
+	in = buffer.data();
+	len = buffer.size();
 
 	i = bufLittleShort( in, len, &pos );
 	if ( i != 'B' + ( 'M' << 8 ) ) {
@@ -780,7 +778,6 @@ void LoadBMP( const char *filename, byte **pic, byte **palette, int *width, int 
 	}
 
 	if ( !pic ) {
-		free( in );
 		return;
 	}
 
@@ -798,8 +795,6 @@ void LoadBMP( const char *filename, byte **pic, byte **palette, int *width, int 
 		memcpy( out, in + pos, bcWidth * bcHeight );
 		pos += bcWidth * bcHeight;
 	}
-
-	free( in );
 }
 
 
@@ -890,18 +885,19 @@ void TargaError( TargaHeader *t, const char *message ){
    LoadTGABuffer
    =============
  */
-void LoadTGABuffer( const byte *f, const byte *enddata, byte **pic, int *width, int *height ){
+void LoadTGABuffer( const byte *f, const size_t dataSize, byte **pic, int *width, int *height ){
 	int x, y, row_inc, compressed, readpixelcount, red, green, blue, alpha, runlen, pindex, alphabits, image_width, image_height;
 	byte *pixbuf, *image_rgba;
 	const byte *fin;
 	unsigned char *p;
 	TargaHeader targa_header;
 	unsigned char palette[256 * 4];
+	const byte * const enddata = f + dataSize;
 
 	*pic = NULL;
 
 	// abort if it is too small to parse
-	if ( enddata - f < 19 ) {
+	if ( dataSize < 19 ) {
 		return;
 	}
 
@@ -1107,18 +1103,10 @@ void LoadTGABuffer( const byte *f, const byte *enddata, byte **pic, int *width, 
    =============
  */
 void LoadTGA( const char *name, byte **pixels, int *width, int *height ){
-	byte            *buffer;
-	int nLen;
-	//
-	// load the file
-	//
-	nLen = vfsLoadFile( name, (void **)&buffer, 0 );
-	if ( nLen == -1 ) {
+	if ( MemBuffer buffer = vfsLoadFile( name ) )
+		LoadTGABuffer( buffer.data(), buffer.size(), pixels, width, height );
+	else
 		Error( "Couldn't read %s", name );
-	}
-
-	LoadTGABuffer( buffer, buffer + nLen, pixels, width, height );
-
 }
 
 

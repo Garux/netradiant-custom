@@ -28,9 +28,11 @@
 extern char token[MAXTOKEN];
 extern int scriptline;
 
-
-void LoadScriptFile( const char *filename, int index, bool verbose = true );
-void ParseFromMemory( char *buffer, int size );
+/// \param[in] index -1: \p filename is absolute path
+/// \param[in] index >= 0: \p filename is relative path in VSF, Nth occurrence of file
+/// \return true on success
+bool LoadScriptFile( const char *filename, int index = 0, bool verbose = true );
+void ParseFromMemory( char *buffer, size_t size );
 
 /// \param[in] crossline true: write next token to \c token or return false on EOF
 /// \param[in] crossline false: find next token on the current line or emit \c Error

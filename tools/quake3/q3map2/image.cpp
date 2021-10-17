@@ -279,78 +279,52 @@ const image_t *ImageLoad( const char *name ){
 	byte *pixels = nullptr;
 	int width, height;
 	char filename[ 1024 ];
-	int size;
-	byte        *buffer = nullptr;
+	MemBuffer buffer;
 	bool alphaHack = false;
 
-	/* attempt to load tga */
-	sprintf( filename, "%s.tga", name ); // StripExtension( name ); already
-	size = vfsLoadFile( filename, (void**) &buffer, 0 );
-	if ( size > 0 ) {
-		LoadTGABuffer( buffer, buffer + size, &pixels, &width, &height );
-	}
-	else
+	/* attempt to load various formats */
+	if ( sprintf( filename, "%s.tga", name ); buffer = vfsLoadFile( filename ) ) // StripExtension( name ); already
 	{
-		/* attempt to load png */
-		path_set_extension( filename, ".png" );
-		size = vfsLoadFile( filename, (void**) &buffer, 0 );
-		if ( size > 0 ) {
-			LoadPNGBuffer( buffer, size, &pixels, &width, &height );
-		}
-		else
-		{
-			/* attempt to load jpg */
-			path_set_extension( filename, ".jpg" );
-			size = vfsLoadFile( filename, (void**) &buffer, 0 );
-			if ( size > 0 ) {
-				if ( LoadJPGBuff( buffer, size, &pixels, &width, &height ) == -1 && pixels != nullptr ) {
-					// On error, LoadJPGBuff might store a pointer to the error message in pixels
-					Sys_Warning( "LoadJPGBuff %s %s\n", filename, (unsigned char*) pixels );
-					pixels = nullptr;
-				}
-				alphaHack = true;
-			}
-			else
-			{
-				/* attempt to load dds */
-				path_set_extension( filename, ".dds" );
-				size = vfsLoadFile( filename, (void**) &buffer, 0 );
-				if ( size > 0 ) {
-					LoadDDSBuffer( buffer, size, &pixels, &width, &height );
-
-					/* debug code */
-					#if 0
-					{
-						ddsPF_t pf;
-						DDSGetInfo( (ddsBuffer_t*) buffer, nullptr, nullptr, &pf );
-						Sys_Printf( "pf = %d\n", pf );
-						if ( width > 0 ) {
-							path_set_extension( filename, "_converted.tga" );
-							WriteTGA( "C:\\games\\quake3\\baseq3\\textures\\rad\\dds_converted.tga", pixels, width, height );
-						}
-					}
-					#endif
-				}
-				else
-				{
-					/* attempt to load ktx */
-					path_set_extension( filename, ".ktx" );
-					size = vfsLoadFile( filename, (void**) &buffer, 0 );
-					if ( size > 0 ) {
-						LoadKTXBufferFirstImage( buffer, size, &pixels, &width, &height );
-					}
-				}
-			}
-		}
+		LoadTGABuffer( buffer.data(), buffer.size(), &pixels, &width, &height );
 	}
-
-	/* free file buffer */
-	free( buffer );
+	else if( path_set_extension( filename, ".png" ); buffer = vfsLoadFile( filename ) )
+	{
+		LoadPNGBuffer( buffer.data(), buffer.size(), &pixels, &width, &height );
+	}
+	else if( path_set_extension( filename, ".jpg" ); buffer = vfsLoadFile( filename ) )
+	{
+		if ( LoadJPGBuff( buffer.data(), buffer.size(), &pixels, &width, &height ) == -1 && pixels != nullptr ) {
+			// On error, LoadJPGBuff might store a pointer to the error message in pixels
+			Sys_Warning( "LoadJPGBuff %s %s\n", filename, (unsigned char*) pixels );
+			pixels = nullptr;
+		}
+		alphaHack = true;
+	}
+	else if( path_set_extension( filename, ".dds" ); buffer = vfsLoadFile( filename ) )
+	{
+		LoadDDSBuffer( buffer.data(), buffer.size(), &pixels, &width, &height );
+		/* debug code */
+		#if 0
+		{
+			ddsPF_t pf;
+			DDSGetInfo( (ddsBuffer_t*) buffer, nullptr, nullptr, &pf );
+			Sys_Printf( "pf = %d\n", pf );
+			if ( width > 0 ) {
+				path_set_extension( filename, "_converted.tga" );
+				WriteTGA( "C:\\games\\quake3\\baseq3\\textures\\rad\\dds_converted.tga", pixels, width, height );
+			}
+		}
+		#endif
+	}
+	else if( path_set_extension( filename, ".ktx" ); buffer = vfsLoadFile( filename ) )
+	{
+		LoadKTXBufferFirstImage( buffer.data(), buffer.size(), &pixels, &width, &height );
+	}
 
 	/* make sure everything's kosher */
-	if ( size <= 0 || width <= 0 || height <= 0 || pixels == nullptr ) {
-		//%	Sys_Printf( "size = %d  width = %d  height = %d  pixels = 0x%08x (%s)\n",
-		//%		size, width, height, pixels, filename );
+	if ( !buffer || width <= 0 || height <= 0 || pixels == nullptr ) {
+		//%	Sys_Printf( "size = %zu  width = %d  height = %d  pixels = 0x%08x (%s)\n",
+		//%		buffer.size(), width, height, pixels, filename );
 		return nullptr;
 	}
 
@@ -358,10 +332,8 @@ const image_t *ImageLoad( const char *name ){
 	image_t& image = *images.emplace_after( images.cbegin(), name, filename, width, height, pixels );
 
 	if ( alphaHack ) {
-		path_set_extension( filename, "_alpha.jpg" );
-		size = vfsLoadFile( (const char*) filename, (void**) &buffer, 0 );
-		if ( size > 0 ) {
-			if ( LoadJPGBuff( buffer, size, &pixels, &width, &height ) == -1 ) {
+		if ( path_set_extension( filename, "_alpha.jpg" ); buffer = vfsLoadFile( filename ) ) {
+			if ( LoadJPGBuff( buffer.data(), buffer.size(), &pixels, &width, &height ) == -1 ) {
 				if ( pixels ) {
 					// On error, LoadJPGBuff might store a pointer to the error message in pixels
 					Sys_Warning( "LoadJPGBuff %s %s\n", filename, (unsigned char*) pixels );
@@ -373,7 +345,6 @@ const image_t *ImageLoad( const char *name ){
 				}
 				free( pixels );
 			}
-			free( buffer );
 		}
 	}
 

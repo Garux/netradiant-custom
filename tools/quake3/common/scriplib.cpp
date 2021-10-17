@@ -28,6 +28,7 @@
 #include "scriplib.h"
 #include "vfs.h"
 #include <list>
+#include <errno.h>
 
 /*
    =============================================================================
@@ -39,22 +40,18 @@
 
 struct script_t
 {
-	CopiedString filename;
-	char    *buffer;
+	const CopiedString filename;
+	const MemBuffer buffer;
 	const char *it, *end;
 	int line;
-	/* buffer is optional: != nullptr == own it  */
-	script_t( const char *filename, char *buffer, char *start, int size ) :
+	script_t( const char *filename, MemBuffer&& buffer_ ) :
 		filename( filename ),
-		buffer( buffer ),
-		it( start ),
-		end( start + size ),
+		buffer( std::move( buffer_ ) ),
+		it( buffer.data() ),
+		end( it + buffer_.size() ),
 		line( 1 )
 	{}
 	script_t( script_t&& ) noexcept = delete;
-	~script_t(){
-		free( buffer );
-	}
 };
 
 std::list<script_t> scriptstack;
@@ -68,15 +65,8 @@ bool tokenready;                     // only true if UnGetToken was just called
    AddScriptToStack
    ==============
  */
-static void AddScriptToStack( const char *filename, int index, bool verbose ){
-	void* buffer;
-	const int size = vfsLoadFile( filename, &buffer, index );
-
-	if ( size == -1 ) {
-		Sys_FPrintf( SYS_WRN, "Script file %s was not found\n", filename );
-	}
-	else
-	{
+static bool AddScriptToStack( const char *filename, int index, bool verbose ){
+	if ( MemBuffer buffer = vfsLoadFile( filename, index ) ) {
 		if( verbose ){
 			if ( index > 0 )
 				Sys_Printf( "entering %s (%d)\n", filename, index + 1 );
@@ -84,7 +74,17 @@ static void AddScriptToStack( const char *filename, int index, bool verbose ){
 				Sys_Printf( "entering %s\n", filename );
 		}
 
-		scriptstack.emplace_back( filename, void_ptr( buffer ), void_ptr( buffer ), size );
+		scriptstack.emplace_back( filename, std::move( buffer ) );
+		return true;
+	}
+	else
+	{
+		if( index >= 0 )
+			Sys_FPrintf( SYS_WRN, "Script file %s was not found\n", filename );
+		else
+			Sys_FPrintf( SYS_WRN, "Script file %s was not found: %s\n", filename, strerror( errno ) );
+
+		return false;
 	}
 }
 
@@ -94,10 +94,10 @@ static void AddScriptToStack( const char *filename, int index, bool verbose ){
    LoadScriptFile
    ==============
  */
-void LoadScriptFile( const char *filename, int index, bool verbose /* = true */ ){
+bool LoadScriptFile( const char *filename, int index /* = 0 */, bool verbose /* = true */ ){
 	scriptstack.clear();
-	AddScriptToStack( filename, index, verbose );
 	tokenready = false;
+	return AddScriptToStack( filename, index, verbose );
 }
 
 /*
@@ -105,10 +105,12 @@ void LoadScriptFile( const char *filename, int index, bool verbose /* = true */ 
    ParseFromMemory
    ==============
  */
-void ParseFromMemory( char *buffer, int size ){
+void ParseFromMemory( char *buffer, size_t size ){
 	scriptstack.clear();
-	scriptstack.emplace_back( "memory buffer", nullptr, buffer, size );
 	tokenready = false;
+	MemBuffer bu( size );
+	memcpy( bu.data(), buffer, size );
+	scriptstack.emplace_back( "memory buffer", std::move( bu ) );
 }
 
 

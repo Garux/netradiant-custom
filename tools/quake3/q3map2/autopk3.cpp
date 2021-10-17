@@ -225,18 +225,8 @@ static inline void parseEXblock( StrList& list, const char *exName ){
 }
 
 static const Exclusions parseEXfile( const char* filename ){
-	Sys_Printf( "Loading %s\n", filename );
-
 	Exclusions ex;
-	byte *buffer;
-	const int size = TryLoadFile( filename, (void**) &buffer );
-	if ( size < 0 ) {
-		Sys_Warning( "Unable to load exclusions file %s.\n", filename );
-	}
-	else{
-		/* parse the file */
-		ParseFromMemory( (char *) buffer, size );
-
+	if ( LoadScriptFile( filename, -1 ) ) {
 		/* tokenize it */
 		while ( GetToken( true ) ) /* test for end of file */
 		{
@@ -261,14 +251,14 @@ static const Exclusions parseEXfile( const char* filename ){
 			}
 		}
 
-		/* free the buffer */
-		free( buffer );
-
 		/* prepare ex.pureTextures */
 		for ( const auto& s : ex.textures ){
 			if( !StrList_find( ex.shaders, s ) )
 				ex.pureTextures.emplace_back( s );
 		}
+	}
+	else{
+		Sys_Warning( "Unable to load exclusions file %s.\n", filename );
 	}
 
 	return ex;
@@ -731,24 +721,15 @@ int repackBSPMain( Args& args ){
 		/* load bsps paths list */
 		/* do some path mangling */
 		strcpy( source, ExpandArg( fileName ) );
-		Sys_Printf( "Loading %s\n", source );
-		byte *buffer;
-		const int size = TryLoadFile( source, (void**) &buffer );
-		if ( size <= 0 ) {
+		if ( !LoadScriptFile( source, -1 ) ) {
 			Error( "Unable to open bsps paths list file %s.\n", source );
 		}
-
-		/* parse the file */
-		ParseFromMemory( (char *) buffer, size );
 
 		/* tokenize it */
 		while ( GetToken( true ) )
 		{
 			bspList.emplace_back( stream( PathExtensionless( token ), ".bsp" ) );
 		}
-
-		/* free the buffer */
-		free( buffer );
 	}
 
 	/* parse bsps */
@@ -961,9 +942,7 @@ int repackBSPMain( Args& args ){
 
 	/* write shader */
 	stream( g_enginePath, nameOFpack, "_strippedBYrepacker.shader" );
-	FILE *f = fopen( stream, "wb" );
-	fwrite( allShaders.c_str(), sizeof( char ), allShaders.end() - allShaders.begin(), f );
-	fclose( f );
+	SaveFile( stream, allShaders.c_str(), allShaders.end() - allShaders.begin() );
 	Sys_Printf( "Shaders saved to %s\n", stream.c_str() );
 
 	/* make a pack */

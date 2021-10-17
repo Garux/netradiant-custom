@@ -410,11 +410,8 @@ static void write_json( const char *directory ){
 
 inline rapidjson::Document load_json( const char *fileName ){
 	Sys_Printf( "Loading %s\n", fileName );
-	void *buffer;
-	LoadFile( fileName, &buffer );
 	rapidjson::Document doc;
-	doc.Parse( (const char*)buffer );
-	free( buffer );
+	doc.Parse( (const char*)LoadFile( fileName ).data() );
 	ENSURE( !doc.HasParseError() );
 	return doc;
 }

@@ -280,33 +280,22 @@ void WriteSurfaceExtraFile( const char *path ){
  */
 
 void LoadSurfaceExtraFile( const char *path ){
-	char srfPath[ 1024 ];
-	surfaceExtra_t  *se;
-	int surfaceNum, size;
-	byte            *buffer;
-
-
 	/* dummy check */
 	if ( strEmptyOrNull( path ) ) {
 		return;
 	}
 
 	/* load the file */
-	strcpy( srfPath, path );
-	path_set_extension( srfPath, ".srf" );
-	Sys_Printf( "Loading %s\n", srfPath );
-	size = LoadFile( srfPath, (void**) &buffer );
-	if ( size <= 0 ) {
-		Sys_Warning( "Unable to find surface file %s, using defaults.\n", srfPath );
-		return;
-	}
+	auto srfPath = StringOutputStream( 256 )( PathExtensionless( path ), ".srf" );
 
 	/* parse the file */
-	ParseFromMemory( (char *) buffer, size );
+	if( !LoadScriptFile( srfPath, -1 ) )
+		Error( "" );
 
 	/* tokenize it */
 	while ( GetToken( true ) ) /* test for end of file */
 	{
+		surfaceExtra_t  *se;
 		/* default? */
 		if ( striEqual( token, "default" ) ) {
 			se = &seDefault;
@@ -315,9 +304,9 @@ void LoadSurfaceExtraFile( const char *path ){
 		/* surface number */
 		else
 		{
-			surfaceNum = atoi( token );
+			const int surfaceNum = atoi( token );
 			if ( surfaceNum < 0 || surfaceNum > MAX_MAP_DRAW_SURFS ) {
-				Error( "ReadSurfaceExtraFile(): %s, line %d: bogus surface num %d", srfPath, scriptline, surfaceNum );
+				Error( "ReadSurfaceExtraFile(): %s, line %d: bogus surface num %d", srfPath.c_str(), scriptline, surfaceNum );
 			}
 			while ( surfaceNum >= numSurfaceExtras )
 				se = AllocSurfaceExtra();
@@ -326,7 +315,7 @@ void LoadSurfaceExtraFile( const char *path ){
 
 		/* handle { } section */
 		if ( !( GetToken( true ) && strEqual( token, "{" ) ) ) {
-			Error( "ReadSurfaceExtraFile(): %s, line %d: { not found", srfPath, scriptline );
+			Error( "ReadSurfaceExtraFile(): %s, line %d: { not found", srfPath.c_str(), scriptline );
 		}
 		while ( GetToken( true ) && !strEqual( token, "}" ) )
 		{
@@ -382,7 +371,4 @@ void LoadSurfaceExtraFile( const char *path ){
 				GetToken( false );
 		}
 	}
-
-	/* free the buffer */
-	free( buffer );
 }

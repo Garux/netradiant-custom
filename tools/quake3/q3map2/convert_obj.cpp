@@ -218,7 +218,7 @@ int Convert_CountLightmaps( const char* dirname ){
 void Convert_ReferenceLightmaps( const char* base, std::vector<int>& lmIndices ){
 	char shaderfile[256];
 	sprintf( shaderfile, "%s/q3map2_%s.shader", g_game->shaderPath, base );
-	LoadScriptFile( shaderfile, 0 );
+	LoadScriptFile( shaderfile );
 	/* tokenize it */
 	while ( GetToken( true ) ) /* test for end of file */
 	{

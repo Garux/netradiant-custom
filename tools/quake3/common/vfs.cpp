@@ -255,7 +255,7 @@ int vfsGetFileCount( const char *filename ){
 
 	for ( const auto& dir : g_strDirs )
 	{
-		if ( access( StringOutputStream( 256 )( dir, filename ), R_OK ) == 0 ) {
+		if ( FileExists( StringOutputStream( 256 )( dir, filename ) ) ) {
 			++count;
 		}
 	}
@@ -264,33 +264,27 @@ int vfsGetFileCount( const char *filename ){
 }
 
 // NOTE: when loading a file, you have to allocate one extra byte and set it to \0
-int vfsLoadFile( const char *filename, void **bufferptr, int index ){
+MemBuffer vfsLoadFile( const char *filename, int index /* = 0 */ ){
 
-	const auto load_full_path = [bufferptr] ( const char *filename ) -> int
+	const auto load_full_path = [] ( const char *filename ) -> MemBuffer
 	{
 		strcpy( g_strLoadedFileLocation, filename );
 
+		MemBuffer buffer;
+
 		FILE *f = fopen( filename, "rb" );
-		if ( f == NULL ) {
-			return -1;
-		}
+		if ( f != NULL ) {
+			fseek( f, 0, SEEK_END );
+			buffer = MemBuffer( ftell( f ) );
+			rewind( f );
 
-		fseek( f, 0, SEEK_END );
-		const long len = ftell( f );
-		rewind( f );
-
-		*bufferptr = safe_malloc( len + 1 );
-
-		if ( fread( *bufferptr, 1, len, f ) != (size_t) len ) {
+			if ( fread( buffer.data(), 1, buffer.size(), f ) != buffer.size() ) {
+				 buffer = MemBuffer();
+			}
 			fclose( f );
-			return -1;
 		}
-		fclose( f );
 
-		// we need to end the buffer with a 0
-		( (char*) ( *bufferptr ) )[len] = 0;
-
-		return len;
+		return buffer;
 	};
 
 	// filename is a full path
@@ -301,13 +295,15 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 	for ( const auto& dir : g_strDirs )
 	{
 		const auto fullpath = StringOutputStream( 256 )( dir, filename );
-		if ( access( fullpath, R_OK ) == 0 && 0 == index-- ) {
+		if ( FileExists( fullpath ) && 0 == index-- ) {
 			return load_full_path( fullpath );
 		}
 	}
 
 	auto fixed = StringOutputStream( 64 )( PathCleaned( filename ) );
 	strLower( fixed.c_str() );
+
+	MemBuffer buffer;
 
 	for ( const VFS_PAKFILE& file : g_pakFiles )
 	{
@@ -318,26 +314,19 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 			unzFile zipfile = file.pak.zipfile;
 			*(unz_s*)zipfile = file.zipinfo;
 
-			if ( unzOpenCurrentFile( zipfile ) != UNZ_OK ) {
-				return -1;
-			}
+			if ( unzOpenCurrentFile( zipfile ) == UNZ_OK ) {
+				buffer = MemBuffer( file.size );
 
-			*bufferptr = safe_malloc( file.size + 1 );
-			// we need to end the buffer with a 0
-			( (char*) ( *bufferptr ) )[file.size] = 0;
-
-			const int size = unzReadCurrentFile( zipfile, *bufferptr, file.size );
-			unzCloseCurrentFile( zipfile );
-			if ( size < 0 ) {
-				return -1;
+				if ( unzReadCurrentFile( zipfile, buffer.data(), file.size ) < 0 ) {
+					buffer = MemBuffer();
+				}
+				unzCloseCurrentFile( zipfile );
 			}
-			else{
-				return file.size;
-			}
+			return buffer;
 		}
 	}
 
-	return -1;
+	return buffer;
 }
 
 
@@ -360,26 +349,19 @@ bool vfsPackFile( const char *filename, const char *packname, const int compLeve
 			unzFile zipfile = file.pak.zipfile;
 			*(unz_s*)zipfile = file.zipinfo;
 
-			if ( unzOpenCurrentFile( zipfile ) != UNZ_OK ) {
-				return false;
-			}
+			if ( unzOpenCurrentFile( zipfile ) == UNZ_OK ) {
+				MemBuffer buffer( file.size );
 
-			byte *bufferptr = safe_malloc( file.size + 1 );
-			// we need to end the buffer with a 0
-			bufferptr[file.size] = 0;
-
-			const int size = unzReadCurrentFile( zipfile, bufferptr, file.size );
-			unzCloseCurrentFile( zipfile );
-			if ( size < 0 ) {
-				return false;
-			}
-			else{
-				if ( !mz_zip_add_mem_to_archive_file_in_place_with_time( packname, filename, bufferptr, size, 0, 0, compLevel, file.zipinfo.cur_file_info.dosDate ) ){
-					Error( "Failed creating zip archive \"%s\"!\n", packname );
+				const int size = unzReadCurrentFile( zipfile, buffer.data(), file.size );
+				unzCloseCurrentFile( zipfile );
+				if ( size >= 0 ) {
+					if ( !mz_zip_add_mem_to_archive_file_in_place_with_time( packname, filename, buffer.data(), size, 0, 0, compLevel, file.zipinfo.cur_file_info.dosDate ) ){
+						Error( "Failed creating zip archive \"%s\"!\n", packname );
+					}
+					return true;
 				}
-				free( bufferptr );
-				return true;
 			}
+			return false;
 		}
 	}
 
@@ -387,8 +369,8 @@ bool vfsPackFile( const char *filename, const char *packname, const int compLeve
 }
 
 bool vfsPackFile_Absolute_Path( const char *filepath, const char *filename, const char *packname, const int compLevel ){
-	if ( access( filepath, R_OK ) == 0 ) {
-		if ( access( packname, R_OK ) == 0 ) {
+	if ( FileExists( filepath ) ) {
+		if ( FileExists( packname ) ) {
 			mz_zip_archive zip;
 			memset( &zip, 0, sizeof(zip) );
 

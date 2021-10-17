@@ -117,10 +117,8 @@ public:
 	 *  you probably have to supply an own implementation of IOStream as well.
 	 */
 	Assimp::IOStream* Open( const char* pFile, const char* pMode = "rb" ) override {
-		const uint8_t *boo;
-		const int size = vfsLoadFile( pFile, (void**) &boo, 0 );
-		if ( size >= 0 ) {
-			return new Assimp::MemoryIOStream( boo, size, true );
+		if ( MemBuffer boo = vfsLoadFile( pFile ) ) {
+			return new Assimp::MemoryIOStream( boo.release(), boo.size(), true );
 		}
 		return nullptr;
 	}
@@ -1011,19 +1009,18 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 	std::list<remap_t> skins;
 	{
 		auto skinfilename = StringOutputStream(99)( PathExtensionless( name ), '_', skin, ".skin" );
-		char                *skinfilecontent;
-		int skinfilesize = vfsLoadFile( skinfilename, (void**) &skinfilecontent, 0 );
-		if ( skinfilesize < 0 && skin != 0 ) {
+		MemBuffer skinfile = vfsLoadFile( skinfilename );
+		if ( skinfile && skin != 0 ) {
 			/* fallback to skin 0 if invalid */
 			skinfilename( PathExtensionless( name ), "_0.skin" );
-			skinfilesize = vfsLoadFile( skinfilename, (void**) &skinfilecontent, 0 );
-			if ( skinfilesize >= 0 ) {
+			skinfile = vfsLoadFile( skinfilename );
+			if ( skinfile ) {
 				Sys_Printf( "Skin %d of %s does not exist, using 0 instead\n", skin, name );
 			}
 		}
-		if ( skinfilesize >= 0 ) {
+		if ( skinfile ) {
 			Sys_Printf( "Using skin %d of %s\n", skin, name );
-			for ( char *skinfilenextptr, *skinfileptr = skinfilecontent; !strEmpty( skinfileptr ); skinfileptr = skinfilenextptr )
+			for ( char *skinfilenextptr, *skinfileptr = skinfile.data(); !strEmpty( skinfileptr ); skinfileptr = skinfilenextptr )
 			{
 				// for fscanf
 				char format[64];
@@ -1060,7 +1057,6 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 				/* invalid input line -> discard skin struct */
 				Sys_Printf( "Discarding skin directive in %s: %s\n", skinfilename.c_str(), skinfileptr );
 			}
-			free( skinfilecontent );
 		}
 	}
 

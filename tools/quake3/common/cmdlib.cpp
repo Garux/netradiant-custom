@@ -174,12 +174,9 @@ void Q_mkdir( const char *path ){
    ================
  */
 int Q_filelength( FILE *f ){
-	int pos;
-	int end;
-
-	pos = ftell( f );
+	const int pos = ftell( f );
 	fseek( f, 0, SEEK_END );
-	end = ftell( f );
+	const int end = ftell( f );
 	fseek( f, pos, SEEK_SET );
 
 	return end;
@@ -207,8 +204,8 @@ FILE *SafeOpenRead( const char *filename, const char *mode ){
 }
 
 
-void SafeRead( FILE *f, void *buffer, int count ){
-	if ( fread( buffer, 1, count, f ) != (size_t)count ) {
+void SafeRead( FILE *f, MemBuffer& buffer ){
+	if ( fread( buffer.data(), 1, buffer.size(), f ) != buffer.size() ) {
 		Error( "File read failure" );
 	}
 }
@@ -227,14 +224,7 @@ void SafeWrite( FILE *f, const void *buffer, int count ){
    ==============
  */
 bool    FileExists( const char *filename ){
-	FILE    *f;
-
-	f = fopen( filename, "r" );
-	if ( !f ) {
-		return false;
-	}
-	fclose( f );
-	return true;
+	return access( filename, R_OK ) == 0;
 }
 
 /*
@@ -242,49 +232,13 @@ bool    FileExists( const char *filename ){
    LoadFile
    ==============
  */
-int    LoadFile( const char *filename, void **bufferptr ){
-	FILE    *f;
-	int length;
-	void    *buffer;
-
-	f = SafeOpenRead( filename );
-	length = Q_filelength( f );
-	buffer = safe_malloc( length + 1 );
-	( (char *)buffer )[length] = 0;
-	SafeRead( f, buffer, length );
+MemBuffer LoadFile( const char *filename ){
+	FILE *f = SafeOpenRead( filename );
+	MemBuffer buffer( Q_filelength( f ) );
+	SafeRead( f, buffer );
 	fclose( f );
 
-	*bufferptr = buffer;
-	return length;
-}
-
-
-/*
-   ==============
-   TryLoadFile
-
-   Allows failure
-   ==============
- */
-int    TryLoadFile( const char *filename, void **bufferptr ){
-	FILE    *f;
-	int length;
-	void    *buffer;
-
-	*bufferptr = NULL;
-
-	f = fopen( filename, "rb" );
-	if ( !f ) {
-		return -1;
-	}
-	length = Q_filelength( f );
-	buffer = safe_malloc( length + 1 );
-	( (char *)buffer )[length] = 0;
-	SafeRead( f, buffer, length );
-	fclose( f );
-
-	*bufferptr = buffer;
-	return length;
+	return buffer;
 }
 
 
@@ -294,9 +248,7 @@ int    TryLoadFile( const char *filename, void **bufferptr ){
    ==============
  */
 void    SaveFile( const char *filename, const void *buffer, int count ){
-	FILE    *f;
-
-	f = SafeOpenWrite( filename );
+	FILE *f = SafeOpenWrite( filename );
 	SafeWrite( f, buffer, count );
 	fclose( f );
 }

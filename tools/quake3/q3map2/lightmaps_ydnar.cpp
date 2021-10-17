@@ -175,9 +175,9 @@ int ExportLightmapsMain( Args& args ){
  */
 
 int ImportLightmapsMain( Args& args ){
-	int i, x, y, len, width, height;
+	int i, x, y, width, height;
 	char dirname[ 1024 ], filename[ 1024 ];
-	byte        *lightmap, *buffer, *pixels, *in, *out;
+	byte        *lightmap, *pixels, *in, *out;
 
 
 	/* arg checking */
@@ -215,17 +215,15 @@ int ImportLightmapsMain( Args& args ){
 		/* read a tga image */
 		sprintf( filename, "%s/lightmap_%04d.tga", dirname, i );
 		Sys_Printf( "Loading %s\n", filename );
-		buffer = NULL;
-		len = vfsLoadFile( filename, (void**) &buffer, -1 );
-		if ( len < 0 ) {
+		MemBuffer buffer = vfsLoadFile( filename, -1 );
+		if ( !buffer ) {
 			Sys_Warning( "Unable to load image %s\n", filename );
 			continue;
 		}
 
 		/* parse file into an image */
 		pixels = NULL;
-		LoadTGABuffer( buffer, buffer + len, &pixels, &width, &height );
-		free( buffer );
+		LoadTGABuffer( buffer.data(), buffer.size(), &pixels, &width, &height );
 
 		/* sanity check it */
 		if ( pixels == NULL ) {

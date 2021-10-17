@@ -44,11 +44,6 @@ static void AAS_DData( unsigned char *data, int size ){
  */
 
 int FixAAS( Args& args ){
-	int length, checksum;
-	void        *buffer;
-	char aas[ 1024 ];
-
-
 	/* arg checking */
 	if ( args.empty() ) {
 		Sys_Printf( "Usage: q3map2 -fixaas [-v] <mapname>\n" );
@@ -64,17 +59,18 @@ int FixAAS( Args& args ){
 
 	/* load the bsp */
 	Sys_Printf( "Loading %s\n", source );
-	length = LoadFile( source, &buffer );
+	MemBuffer buffer = LoadFile( source );
 
 	/* create bsp checksum */
 	Sys_Printf( "Creating checksum...\n" );
-	checksum = LittleLong( (int)Com_BlockChecksum( buffer, length ) ); // md4 checksum for a block of data
+	int checksum = LittleLong( (int)Com_BlockChecksum( buffer.data(), buffer.size() ) ); // md4 checksum for a block of data
 	AAS_DData( (unsigned char *) &checksum, 4 );
 
 	/* write checksum to aas */
 	for( auto&& ext : { ".aas", "_b0.aas", "_b1.aas" } )
 	{
 		/* mangle name */
+		char aas[ 1024 ];
 		strcpy( aas, source );
 		path_set_extension( aas, ext );
 		Sys_Printf( "Trying %s\n", aas );
@@ -117,7 +113,7 @@ struct abspLumpTest_t
 
 int AnalyzeBSP( Args& args ){
 	abspHeader_t            *header;
-	int size, i, version, offset, length, lumpInt, count;
+	int i, version, offset, length, lumpInt, count;
 	char ident[ 5 ];
 	void                    *lump;
 	float lumpFloat;
@@ -160,11 +156,8 @@ int AnalyzeBSP( Args& args ){
 	Sys_Printf( "Loading %s\n", source );
 
 	/* load the file */
-	size = LoadFile( source, (void**) &header );
-	if ( size == 0 || header == NULL ) {
-		Sys_Printf( "Unable to load %s.\n", source );
-		return -1;
-	}
+	MemBuffer file = LoadFile( source );
+	header = file.data();
 
 	/* analyze ident/version */
 	memcpy( ident, header->ident, 4 );
@@ -238,14 +231,14 @@ int AnalyzeBSP( Args& args ){
 		Sys_Printf( "---------------------------------------\n" );
 
 		/* end of file */
-		if ( offset + length >= size ) {
+		if ( offset + length >= int( file.size() ) ) {
 			break;
 		}
 	}
 
 	/* last stats */
 	Sys_Printf( "Lump count:    %d\n", i + 1 );
-	Sys_Printf( "File size:     %d bytes\n", size );
+	Sys_Printf( "File size:     %zu bytes\n", file.size() );
 
 	/* return to caller */
 	return 0;
