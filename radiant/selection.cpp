@@ -4719,7 +4719,7 @@ public:
 			m_points[i].m_set = false;
 			m_points[i].setSelected( false ); ///?
 		}
-		if( initFromFace && !g_SelectedFaceInstances.empty() ){
+		if( initFromFace && !g_SelectedFaceInstances.empty() && g_SelectedFaceInstances.last().getFace().contributes() ){
 			const Winding& w = g_SelectedFaceInstances.last().getFace().getWinding();
 			for( std::size_t i = 0; i < 3; ++i ){
 				m_points[i].m_set = true;
