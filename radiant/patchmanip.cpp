@@ -1414,7 +1414,8 @@ void DoPatchThickenDlg(){
 //				thicknessW = entry;
 //			}
 			{
-				GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 16, -9999, 9999, 1, 10, 0 ) );
+				const float grid = std::max( GetGridSize(), 1.f );
+				GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( grid, -9999, 9999, grid, 16, 0 ) );
 				GtkWidget* spin = gtk_spin_button_new( adj, 1, 0 );
 				gtk_widget_show( spin );
 				gtk_table_attach( table, spin, 1, 2, 0, 1,
@@ -1422,6 +1423,8 @@ void DoPatchThickenDlg(){
 				                  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_widget_set_size_request( spin, 48, -1 );
 				gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( spin ), TRUE );
+
+				gtk_widget_grab_focus( spin );
 
 				thicknessW = spin;
 			}
@@ -1473,7 +1476,6 @@ void DoPatchThickenDlg(){
 				GtkButton* button = create_dialog_button( "OK", G_CALLBACK( dialog_button_ok ), &dialog );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
 				widget_make_default( GTK_WIDGET( button ) );
-				gtk_widget_grab_focus( GTK_WIDGET( button ) );
 				gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
 			}
 			{
