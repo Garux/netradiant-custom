@@ -169,9 +169,9 @@ void Scene_PatchDoCap_Selected( scene::Graph& graph, const char* shader ){
 
 		InstanceVector instances;
 		Scene_forEachVisibleSelectedPatchInstance( PatchStoreInstance( instances ) );
-		for ( InstanceVector::const_iterator i = instances.begin(); i != instances.end(); ++i )
+		for ( auto i : instances )
 		{
-			Patch_makeCaps( *Node_getPatch( ( *i )->path().top() ), *( *i ), eType, shader );
+			Patch_makeCaps( *Node_getPatch( i->path().top() ), *i, eType, shader );
 		}
 	}
 }
@@ -192,19 +192,25 @@ void Scene_PatchDeform( scene::Graph& graph, const int deform, const int axis )
 {
 	InstanceVector instances;
 	Scene_forEachVisibleSelectedPatchInstance( PatchStoreInstance( instances ) );
-	for ( InstanceVector::const_iterator i = instances.begin(); i != instances.end(); ++i )
+	for ( auto i : instances )
 	{
-		Patch_deform( *Node_getPatch( ( *i )->path().top() ), *( *i ), deform, axis );
+		Patch_deform( *Node_getPatch( i->path().top() ), *i, deform, axis );
 	}
 
 }
 
 void Patch_thicken( Patch& patch, scene::Instance& instance, const float thickness, bool seams, const int axis ){
 
+	const auto aabb_small = []( const AABB& aabb ){
+		return ( aabb.extents[0] < 0.01 && aabb.extents[1] < 0.01 ) ||
+		       ( aabb.extents[1] < 0.01 && aabb.extents[2] < 0.01 ) ||
+		       ( aabb.extents[0] < 0.01 && aabb.extents[2] < 0.01 );
+	};
+
 	// Create a new patch node
 	NodeSmartReference node( g_patchCreator->createPatch() );
-	// Insert the node into worldspawn
-	Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( node );
+	// Insert the node into original's entity
+	Node_getTraversable( instance.path().parent() )->insert( node );
 
 	// Retrieve the contained patch from the node
 	Patch* targetPatch = Node_getPatch( node );
@@ -214,29 +220,21 @@ void Patch_thicken( Patch& patch, scene::Instance& instance, const float thickne
 	bool no34 = true;
 	targetPatch->createThickenedOpposite( patch, thickness, axis, no12, no34 );
 
-	// Now select the newly created patches
-	{
-		scene::Path patchpath( makeReference( GlobalSceneGraph().root() ) );
-		patchpath.push( makeReference( *Map_GetWorldspawn( g_map ) ) );
-		patchpath.push( makeReference( node.get() ) );
-		Instance_getSelectable( *GlobalSceneGraph().find( patchpath ) )->setSelected( true );
+	{ // Now select the newly created patch
+		scene::Path path( instance.parent()->path() );
+		path.push( makeReference( node.get() ) );
+		selectPath( path, true );
 	}
 
-	if( seams && thickness != 0.0f){
-		int i = 0;
-		if ( no12 ){
-			i = 2;
-		}
-		int iend = 4;
-		if ( no34 ){
-			iend = 2;
-		}
+	if( seams && thickness != 0.0f ){
+		int i = no12? 2 : 0;
+		int iend = no34? 2 : 4;
 		// Now create the four walls
-		for ( ; i < iend; i++ ){
+		for ( ; i < iend; ++i ){
 			// Allocate new patch
 			NodeSmartReference node = NodeSmartReference( g_patchCreator->createPatch() );
 			// Insert each node into worldspawn
-			Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( node );
+			Node_getTraversable( instance.path().parent() )->insert( node );
 
 			// Retrieve the contained patch from the node
 			Patch* wallPatch = Node_getPatch( node );
@@ -244,34 +242,34 @@ void Patch_thicken( Patch& patch, scene::Instance& instance, const float thickne
 			// Create the wall patch by passing i as wallIndex
 			wallPatch->createThickenedWall( patch, *targetPatch, i );
 
-			if( ( wallPatch->localAABB().extents[0] <= 0.00005 && wallPatch->localAABB().extents[1] <= 0.00005 ) ||
-			    ( wallPatch->localAABB().extents[1] <= 0.00005 && wallPatch->localAABB().extents[2] <= 0.00005 ) ||
-			    ( wallPatch->localAABB().extents[0] <= 0.00005 && wallPatch->localAABB().extents[2] <= 0.00005 ) ){
+			if( aabb_small( wallPatch->localAABB() ) ){
 				//globalOutputStream() << "Thicken: Discarding degenerate patch.\n";
-				Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->erase( node );
+				Node_getTraversable( instance.path().parent() )->erase( node );
 			}
-			else
-				// Now select the newly created patches
-			{
-				scene::Path patchpath( makeReference( GlobalSceneGraph().root() ) );
-				patchpath.push( makeReference( *Map_GetWorldspawn(g_map) ) );
-				patchpath.push( makeReference( node.get() ) );
-				Instance_getSelectable( *GlobalSceneGraph().find( patchpath ) )->setSelected( true );
+			else { // Now select the newly created patch
+				scene::Path path( instance.parent()->path() );
+				path.push( makeReference( node.get() ) );
+				selectPath( path, true );
 			}
 		}
 	}
 
 	// Invert the target patch so that it faces the opposite direction
 	targetPatch->InvertMatrix();
+
+	if( aabb_small( targetPatch->localAABB() ) ){
+		//globalOutputStream() << "Thicken: Discarding degenerate patch.\n";
+		Node_getTraversable( instance.path().parent() )->erase( node );
+	}
 }
 
 void Scene_PatchThicken( scene::Graph& graph, const int thickness, bool seams, const int axis )
 {
 	InstanceVector instances;
 	Scene_forEachVisibleSelectedPatchInstance( PatchStoreInstance( instances ) );
-	for ( InstanceVector::const_iterator i = instances.begin(); i != instances.end(); ++i )
+	for ( auto i : instances )
 	{
-		Patch_thicken( *Node_getPatch( ( *i )->path().top() ), *( *i ), thickness, seams, axis );
+		Patch_thicken( *Node_getPatch( i->path().top() ), *i, thickness, seams, axis );
 	}
 
 }
