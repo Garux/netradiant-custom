@@ -390,10 +390,6 @@ void Map_SetWorldspawn( Map& map, scene::Node* node ){
 }
 
 
-void AddRegionBrushes( void );
-void RemoveRegionBrushes( void );
-
-
 /*
    ================
    Map_Free
@@ -1338,16 +1334,6 @@ void Map_Traverse_Region( scene::Node& root, const scene::Traversable::Walker& w
 	}
 }
 
-bool Map_SaveRegion( const char *filename ){
-	AddRegionBrushes();
-
-	bool success = MapResource_saveFile( MapFormat_forFile( filename ), GlobalSceneGraph().root(), Map_Traverse_Region, filename );
-
-	RemoveRegionBrushes();
-
-	return success;
-}
-
 
 void Map_RenameAbsolute( const char* absolute ){
 	Resource* resource = GlobalReferenceCache().capture( absolute );
@@ -1419,33 +1405,6 @@ void Map_New(){
 	GridStatus_changed();
 }
 
-extern void ConstructRegionBrushes( scene::Node * brushes[6], const Vector3 &region_mins, const Vector3 &region_maxs );
-
-void ConstructRegionStartpoint( scene::Node* startpoint, const Vector3& region_mins, const Vector3& region_maxs ){
-	/*!
-	   \todo we need to make sure that the player start IS inside the region and bail out if it's not
-	   the compiler will refuse to compile a map with a player_start somewhere in empty space..
-	   for now, let's just print an error
-	 */
-
-	Vector3 vOrig( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ) );
-
-	for ( int i = 0 ; i < 3 ; i++ )
-	{
-		if ( vOrig[i] > region_maxs[i] || vOrig[i] < region_mins[i] ) {
-			globalErrorStream() << "Camera is NOT in the region, it's likely that the region won't compile correctly\n";
-			break;
-		}
-	}
-
-	// write the info_playerstart
-	char sTmp[1024];
-	sprintf( sTmp, "%d %d %d", (int)vOrig[0], (int)vOrig[1], (int)vOrig[2] );
-	Node_getEntity( *startpoint )->setKeyValue( "origin", sTmp );
-	sprintf( sTmp, "%d", (int)Camera_getAngles( *g_pParentWnd->GetCamWnd() )[CAMERA_YAW] );
-	Node_getEntity( *startpoint )->setKeyValue( "angle", sTmp );
-}
-
 /*
    ===========================================================
 
@@ -1461,12 +1420,9 @@ ToggleItem g_region_item( g_region_caller );
 Vector3 g_region_mins;
 Vector3 g_region_maxs;
 void Region_defaultMinMax(){
-	g_region_maxs[0] = g_region_maxs[1] = g_region_maxs[2] = GetMaxGridCoord();
-	g_region_mins[0] = g_region_mins[1] = g_region_mins[2] = -GetMaxGridCoord();
+	g_region_maxs = Vector3( GetMaxGridCoord() );
+	g_region_mins = -g_region_maxs;
 }
-
-scene::Node* region_sides[6];
-scene::Node* region_startpoint = 0;
 
 /*
    ===========
@@ -1477,30 +1433,61 @@ scene::Node* region_startpoint = 0;
    with the new implementation we should be able to append them in a temporary manner to the data we pass to the map module
    ===========
  */
-void AddRegionBrushes( void ){
-	int i;
+extern void ConstructRegionBrushes( scene::Node * brushes[6], const Vector3 &region_mins, const Vector3 &region_maxs );
 
-	for ( i = 0; i < 6; i++ )
-	{
-		region_sides[i] = &GlobalBrushCreator().createBrush();
-		Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( NodeSmartReference( *region_sides[i] ) );
+class ScopeRegionBrushes
+{
+	scene::Node* m_brushes[6];
+	scene::Node* m_startpoint;
+
+	void ConstructRegionStartpoint( const Vector3& vOrig ){
+		// write the info_playerstart
+		char sTmp[1024];
+		sprintf( sTmp, "%d %d %d", (int)vOrig[0], (int)vOrig[1], (int)vOrig[2] );
+		Node_getEntity( *m_startpoint )->setKeyValue( "origin", sTmp );
+		sprintf( sTmp, "%d", (int)Camera_getAngles( *g_pParentWnd->GetCamWnd() )[CAMERA_YAW] );
+		Node_getEntity( *m_startpoint )->setKeyValue( "angle", sTmp );
 	}
+public:
+	ScopeRegionBrushes(){
+		for ( auto&& brush : m_brushes )
+		{
+			brush = &GlobalBrushCreator().createBrush();
+			Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( NodeSmartReference( *brush ) );
+		}
 
-	region_startpoint = &GlobalEntityCreator().createEntity( GlobalEntityClassManager().findOrInsert( "info_player_start", false ) );
+		m_startpoint = &GlobalEntityCreator().createEntity( GlobalEntityClassManager().findOrInsert( "info_player_start", false ) );
 
-	ConstructRegionBrushes( region_sides, g_region_mins, g_region_maxs );
-	ConstructRegionStartpoint( region_startpoint, g_region_mins, g_region_maxs );
+		/* adjust temp box: space may be too small, also help with lights and flat primitives */
+		const Vector3 min( g_region_mins - Vector3( 256, 256, 8 ) ), max( g_region_maxs + Vector3( 256, 256, 512 ) );
+		Vector3 spawn( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ) );
+		/* pull spawn point to the box, if needed */
+		for( size_t i = 0; i < 3; ++i )
+		{
+			spawn[i] = std::max( spawn[i], min[i] + 64 );
+			spawn[i] = std::min( spawn[i], max[i] - 64 );
+		}
 
-	Node_getTraversable( GlobalSceneGraph().root() )->insert( NodeSmartReference( *region_startpoint ) );
+		ConstructRegionBrushes( m_brushes, min, max );
+		ConstructRegionStartpoint( spawn );
+
+		Node_getTraversable( GlobalSceneGraph().root() )->insert( NodeSmartReference( *m_startpoint ) );
+	}
+	~ScopeRegionBrushes(){
+		for ( auto&& brush : m_brushes )
+		{
+			Node_getTraversable( *Map_GetWorldspawn( g_map ) )->erase( *brush );
+		}
+		Node_getTraversable( GlobalSceneGraph().root() )->erase( *m_startpoint );
+	}
+	ScopeRegionBrushes( ScopeRegionBrushes&& ) noexcept = delete;
+};
+
+bool Map_SaveRegion( const char *filename ){
+	ScopeRegionBrushes tmp;
+	return MapResource_saveFile( MapFormat_forFile( filename ), GlobalSceneGraph().root(), Map_Traverse_Region, filename );
 }
 
-void RemoveRegionBrushes( void ){
-	for ( std::size_t i = 0; i < 6; i++ )
-	{
-		Node_getTraversable( *Map_GetWorldspawn( g_map ) )->erase( *region_sides[i] );
-	}
-	Node_getTraversable( GlobalSceneGraph().root() )->erase( *region_startpoint );
-}
 
 inline void exclude_node( scene::Node& node, bool exclude ){
 	exclude
@@ -2340,8 +2327,8 @@ void map_autocaulk_selected(){
 		const Vector3 spawn( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ) );
 		Vector3 mins, maxs;
 		Select_GetBounds( mins, maxs );
-		mins -= Vector3( 1024, 1024, 1024 );
-		maxs += Vector3( 1024, 1024, 1024 );
+		mins -= Vector3( 1024 );
+		maxs += Vector3( 1024 );
 
 		if( !aabb_intersects_point( aabb_for_minmax( mins, maxs ), spawn ) ){
 			globalErrorStream() << "map_autocaulk_selected(): camera must be near selection!\n";
@@ -2433,11 +2420,11 @@ void map_autocaulk_selected(){
 		StringOutputStream str( 256 );
 		str << AppPath_get() << "q3map2." << RADIANT_EXECUTABLE
 		    << " -game quake3"
-		    << " -fs_basepath \"" << EnginePath_get()
-		    << "\" -fs_homepath \"" << g_qeglobals.m_userEnginePath
-		    << "\" -fs_game " << gamename_get()
-		    << " -autocaulk -fulldetail"
-		    << " \"" << filename.c_str() << "\"";
+		    << " -fs_basepath " << makeQuoted( EnginePath_get() )
+		    << " -fs_homepath " << makeQuoted( g_qeglobals.m_userEnginePath )
+		    << " -fs_game " << gamename_get()
+		    << " -autocaulk -fulldetail "
+		    << makeQuoted( filename.c_str() );
 		// run
 		Q_Exec( NULL, str.c_str(), NULL, false, true );
 	}

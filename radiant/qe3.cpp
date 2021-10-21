@@ -230,27 +230,8 @@ public:
 	}
 };
 
-bool Region_cameraValid(){
-	Vector3 vOrig( vector3_snapped( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ) ) );
-
-	for ( int i = 0 ; i < 3 ; i++ )
-	{
-		if ( vOrig[i] > g_region_maxs[i] || vOrig[i] < g_region_mins[i] ) {
-			return false;
-		}
-	}
-	return true;
-}
-
 
 void RunBSP( const char* name ){
-	// http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=503
-	// make sure we don't attempt to region compile a map with the camera outside the region
-	if ( g_region_active && !Region_cameraValid() ) {
-		globalErrorStream() << "The camera must be in the region to start a region compile.\n";
-		return;
-	}
-
 	if( !g_region_active )
 		SaveMap();
 

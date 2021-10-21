@@ -473,12 +473,12 @@ void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds,
 void ConstructRegionBrushes( scene::Node* brushes[6], const Vector3& region_mins, const Vector3& region_maxs ){
 	{
 		// set mins
-		Vector3 mins( region_mins[0] - 32, region_mins[1] - 32, region_mins[2] - 32 );
+		const Vector3 mins( region_mins - Vector3( 32 ) );
 
 		// vary maxs
 		for ( std::size_t i = 0; i < 3; i++ )
 		{
-			Vector3 maxs( region_maxs[0] + 32, region_maxs[1] + 32, region_maxs[2] + 32 );
+			Vector3 maxs( region_maxs + Vector3( 32 ) );
 			maxs[i] = region_mins[i];
 			Brush_ConstructCuboid( *Node_getBrush( *brushes[i] ), aabb_for_minmax( mins, maxs ), texdef_name_default(), TextureProjection() );
 		}
@@ -486,12 +486,12 @@ void ConstructRegionBrushes( scene::Node* brushes[6], const Vector3& region_mins
 
 	{
 		// set maxs
-		Vector3 maxs( region_maxs[0] + 32, region_maxs[1] + 32, region_maxs[2] + 32 );
+		const Vector3 maxs( region_maxs + Vector3( 32 ) );
 
 		// vary mins
 		for ( std::size_t i = 0; i < 3; i++ )
 		{
-			Vector3 mins( region_mins[0] - 32, region_mins[1] - 32, region_mins[2] - 32 );
+			Vector3 mins( region_mins - Vector3( 32 ) );
 			mins[i] = region_maxs[i];
 			Brush_ConstructCuboid( *Node_getBrush( *brushes[i + 3] ), aabb_for_minmax( mins, maxs ), texdef_name_default(), TextureProjection() );
 		}
