@@ -62,8 +62,8 @@ public:
 //DPatch* TransposePatch(DPatch* p1);
 //void DebugPrint();
 	void Invert();
-	DPatch* MergePatches( patch_merge_t merge_info, DPatch* p1, DPatch* p2 );
-	patch_merge_t IsMergable( DPatch* other );
+	DPatch* MergePatches( patch_merge_t merge_info, DPatch& p1, DPatch& p2 );
+	patch_merge_t IsMergable( const DPatch& other );
 	bool ResetTextures( const char *oldTextureName, const char *newTextureName );
 	scene::Node* QER_entity;
 	scene::Node* QER_brush;

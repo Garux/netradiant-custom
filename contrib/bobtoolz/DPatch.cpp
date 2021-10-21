@@ -188,7 +188,7 @@ bool DPatch::ResetTextures( const char *oldTextureName, const char *newTextureNa
 	return false;
 }
 
-void Build1dArray( vec3_t* array, drawVert_t points[MAX_PATCH_WIDTH][MAX_PATCH_HEIGHT],
+void Build1dArray( vec3_t* array, const drawVert_t points[MAX_PATCH_WIDTH][MAX_PATCH_HEIGHT],
                    int startX, int startY, int number, bool horizontal, bool inverse ){
 	int x = startX, y = startY, i, step;
 
@@ -232,7 +232,7 @@ bool Compare1dArrays( vec3_t* a1, vec3_t* a2, int size ){
 	return equal;
 }
 
-patch_merge_t DPatch::IsMergable( DPatch *other ){
+patch_merge_t DPatch::IsMergable( const DPatch& other ){
 	int i, j;
 	vec3_t p1Array[4][MAX_PATCH_HEIGHT];
 	vec3_t p2Array[4][MAX_PATCH_HEIGHT];
@@ -242,25 +242,25 @@ patch_merge_t DPatch::IsMergable( DPatch *other ){
 
 	patch_merge_t merge_info;
 
-	Build1dArray( p1Array[0], this->points, 0,               0,              this->width,    true,   false );
-	Build1dArray( p1Array[1], this->points, this->width - 1,   0,              this->height,   false,  false );
-	Build1dArray( p1Array[2], this->points, this->width - 1,   this->height - 1, this->width,    true,   true );
+	Build1dArray( p1Array[0], this->points, 0,               0,                this->width,    true,   false );
+	Build1dArray( p1Array[1], this->points, this->width - 1, 0,                this->height,   false,  false );
+	Build1dArray( p1Array[2], this->points, this->width - 1, this->height - 1, this->width,    true,   true );
 	Build1dArray( p1Array[3], this->points, 0,               this->height - 1, this->height,   false,  true );
 
-	Build1dArray( p2Array[0], other->points, 0,              0,                  other->width,   true,   false );
-	Build1dArray( p2Array[1], other->points, other->width - 1, 0,                  other->height,  false,  false );
-	Build1dArray( p2Array[2], other->points, other->width - 1, other->height - 1,    other->width,   true,   true );
-	Build1dArray( p2Array[3], other->points, 0,              other->height - 1,    other->height,  false,  true );
+	Build1dArray( p2Array[0], other.points, 0,               0,                other.width,   true,   false );
+	Build1dArray( p2Array[1], other.points, other.width - 1, 0,                other.height,  false,  false );
+	Build1dArray( p2Array[2], other.points, other.width - 1, other.height - 1, other.width,   true,   true );
+	Build1dArray( p2Array[3], other.points, 0,               other.height - 1, other.height,  false,  true );
 
 	p1ArraySizes[0] = this->width;
 	p1ArraySizes[1] = this->height;
 	p1ArraySizes[2] = this->width;
 	p1ArraySizes[3] = this->height;
 
-	p2ArraySizes[0] = other->width;
-	p2ArraySizes[1] = other->height;
-	p2ArraySizes[2] = other->width;
-	p2ArraySizes[3] = other->height;
+	p2ArraySizes[0] = other.width;
+	p2ArraySizes[1] = other.height;
+	p2ArraySizes[2] = other.width;
+	p2ArraySizes[3] = other.height;
 
 	for ( i = 0; i < 4; i++ )
 	{
@@ -281,10 +281,10 @@ patch_merge_t DPatch::IsMergable( DPatch *other ){
 	return merge_info;
 }
 
-DPatch* DPatch::MergePatches( patch_merge_t merge_info, DPatch *p1, DPatch *p2 ){
+DPatch* DPatch::MergePatches( patch_merge_t merge_info, DPatch& p1, DPatch& p2 ){
 	while ( merge_info.pos1 != 2 )
 	{
-		p1->Transpose();
+		p1.Transpose();
 		merge_info.pos1--;
 		if ( merge_info.pos1 < 0 ) {
 			merge_info.pos1 += 4;
@@ -293,14 +293,14 @@ DPatch* DPatch::MergePatches( patch_merge_t merge_info, DPatch *p1, DPatch *p2 )
 
 	while ( merge_info.pos2 != 0 )
 	{
-		p2->Transpose();
+		p2.Transpose();
 		merge_info.pos2--;
 		if ( merge_info.pos2 < 0 ) {
 			merge_info.pos2 += 3;
 		}
 	}
 
-	int newHeight = p1->height + p2->height - 1;
+	const int newHeight = p1.height + p2.height - 1;
 	if ( newHeight > MAX_PATCH_HEIGHT ) {
 		return 0;
 	}
@@ -308,16 +308,16 @@ DPatch* DPatch::MergePatches( patch_merge_t merge_info, DPatch *p1, DPatch *p2 )
 	DPatch* newPatch = new DPatch();
 
 	newPatch->height    = newHeight;
-	newPatch->width     = p1->width;
-	newPatch->SetTexture( p1->texture );
+	newPatch->width     = p1.width;
+	newPatch->SetTexture( p1.texture );
 
-	for ( int y = 0; y < p1->height; y++ )
-		for ( int x = 0; x < p1->width; x++ )
-			newPatch->points[x][y] = p1->points[x][y];
+	for ( int y = 0; y < p1.height; y++ )
+		for ( int x = 0; x < p1.width; x++ )
+			newPatch->points[x][y] = p1.points[x][y];
 
-	for ( int y = 1; y < p2->height; y++ )
-		for ( int x = 0; x < p2->width; x++ )
-			newPatch->points[x][( y + p1->height - 1 )] = p2->points[x][y];
+	for ( int y = 1; y < p2.height; y++ )
+		for ( int x = 0; x < p2.width; x++ )
+			newPatch->points[x][( y + p1.height - 1 )] = p2.points[x][y];
 
 //	newPatch->Invert();
 	return newPatch;
@@ -375,7 +375,7 @@ void DPatch::Invert(){
  */
 
 void DPatch::Transpose(){
-	int i, j, w;
+	int i, j;
 
 	if ( width > height ) {
 		for ( i = 0 ; i < height ; i++ )
@@ -413,9 +413,7 @@ void DPatch::Transpose(){
 		}
 	}
 
-	w = width;
-	width = height;
-	height = w;
+	std::swap( width, height );
 
 	Invert();
 }

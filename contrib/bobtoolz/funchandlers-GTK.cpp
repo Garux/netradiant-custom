@@ -425,76 +425,78 @@ void DoPitBuilder(){
 
 void DoMergePatches(){
 	UndoableCommand undo( "bobToolz.mergePatches" );
-	patch_merge_t merge_info;
-	DPatch mrgPatches[2];
-	int i;
 
-	// ensure we have something selected
-	if ( GlobalSelectionSystem().countSelected() != 2 ) {
-		globalErrorStream() << "bobToolz MergePatches: Invalid number of patches selected, choose 2 only.\n";
-		//DoMessageBox("Invalid number of patches selected, choose 2 only", "Error", eMB_OK);
+	class : public SelectionSystem::Visitor
+	{
+	public:
+		void visit( scene::Instance& instance ) const override {
+			if( Node_isPatch( instance.path().top() ) ){
+				mrg.emplace_back().patch.LoadFromPatch( instance );
+				mrg.back().instance = &instance;
+			}
+		}
+		struct data{
+			DPatch patch;
+			scene::Instance* instance;
+			bool merged;
+		};
+		mutable std::list<data> mrg;
+		mutable std::vector<scene::Instance*> instances_erase;
+	} patches;
+
+	GlobalSelectionSystem().foreachSelected( patches );
+
+	if( patches.mrg.size() < 2 ){
+		globalErrorStream() << "bobToolz MergePatches: Invalid number of patches selected, choose 2 or more.\n";
 		return;
 	}
 
-	scene::Instance* patches[2];
-	patches[0] = &GlobalSelectionSystem().ultimateSelected();
-	patches[1] = &GlobalSelectionSystem().penultimateSelected();
-
-	for ( i = 0; i < 2; i++ )
-	{
-		if ( !Node_isPatch( patches[i]->path().top() ) ) {
-			//DoMessageBox("No patches selected, select ONLY patches", "Error", eMB_OK);
-			globalErrorStream() << "bobToolz MergePatches: Invalid number of patches selected, choose ONLY 2 patches.\n";
-			return;
-		}
-
-		mrgPatches[i].LoadFromPatch( *patches[i] );
-	}
-
-	/*  mrgPatches[0].Transpose();
-	    mrgPatches[0].RemoveFromRadiant();
-	    mrgPatches[0].BuildInRadiant();*/
-
-	merge_info = mrgPatches[0].IsMergable( &mrgPatches[1] );
-
-	if ( merge_info.mergable ) {
-//		globalOutputStream() << merge_info.pos1 << " " <<  merge_info.pos2;
-		//Message removed, No tools give feedback on success.
-		//globalOutputStream() << "bobToolz MergePatches: Patches Mergable.\n";
-		DPatch* newPatch = mrgPatches[0].MergePatches( merge_info, &mrgPatches[0], &mrgPatches[1] );
-
-		/*                mrgPatches[0].RemoveFromRadiant();
-		   mrgPatches[0].BuildInRadiant();
-
-		   mrgPatches[1].RemoveFromRadiant();
-		   mrgPatches[1].BuildInRadiant();
-
-
-		   delete newPatch;*/
-
-		if ( !newPatch ) {
-			globalErrorStream() << "bobToolz.mergePatch: Merge result would exceed max patch rows.\n";
-		}
-		else
+	const auto try_merge_one = [&patches](){
+		for( auto one = patches.mrg.begin(); one != patches.mrg.end(); ++one )
 		{
-			newPatch->BuildInRadiant( patches[0]->path().parent().get_pointer() );
-
-			scene::Instance& parent = *( patches[1]->parent() );
-			Path_deleteTop( patches[0]->path() );
-			Path_deleteTop( patches[1]->path() );
-			Entity* entity = Node_getEntity( parent.path().top() );
-			if ( entity != 0
-			     && Node_getTraversable( parent.path().top() )->empty() ) {
-				Path_deleteTop( parent.path() );
+			for( auto two = std::next( one ); two != patches.mrg.end(); ++two )
+			{
+				patch_merge_t merge_info = one->patch.IsMergable( two->patch );
+				if( merge_info.mergable ){
+					DPatch* newPatch = one->patch.MergePatches( merge_info, one->patch, two->patch );
+					if( newPatch != nullptr ){
+						one->merged = true;
+						one->patch = *newPatch;
+						delete newPatch;
+						patches.instances_erase.push_back( two->instance );
+						patches.mrg.erase( two );
+						return true;
+					}
+				}
 			}
+		}
+		return false;
+	};
 
-			delete newPatch;
+	while( try_merge_one() ){}; /* merge one by one for the sake of holy laziness */
+
+	if( patches.instances_erase.empty() ){
+		globalErrorStream() << "bobToolz.mergePatch: The selected patches are not mergable.\n";
+		return;
+	}
+
+	for( auto&& mrg : patches.mrg )
+	{
+		if( mrg.merged ){
+			mrg.patch.BuildInRadiant( mrg.instance->path().parent().get_pointer() );
+			Path_deleteTop( mrg.instance->path() );
 		}
 	}
-	else
-	{
-		globalErrorStream() << "bobToolz.mergePatch: The selected patches are not mergable.\n";
 
+	for( auto instance : patches.instances_erase )
+	{
+		scene::Instance* parent = instance->parent();
+		Path_deleteTop( instance->path() );
+		/* don't leave empty entities */
+		if( Node_isEntity( parent->path().top() )
+		 && Node_getTraversable( parent->path().top() )->empty() ){
+			Path_deleteTop( parent->path() );
+		}
 	}
 }
 
