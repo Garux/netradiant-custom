@@ -19,9 +19,6 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ERROR_H )
-#define INCLUDED_ERROR_H
+#pragma once
 
 void Error( const char *error, ... );
-
-#endif

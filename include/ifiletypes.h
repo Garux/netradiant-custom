@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IFILETYPES_H )
-#define INCLUDED_IFILETYPES_H
+#pragma once
 
 #include "generic/constant.h"
 
@@ -70,7 +69,3 @@ typedef GlobalModuleRef<IFileTypeRegistry> GlobalFiletypesModuleRef;
 inline IFileTypeRegistry& GlobalFiletypes(){
 	return GlobalFiletypesModule::getTable();
 }
-
-
-
-#endif

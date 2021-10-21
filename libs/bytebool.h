@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __BYTEBOOL__
-#define __BYTEBOOL__
+#pragma once
 
 // defines boolean and byte types usable in both c and c++ code
 // this header is not really meant for direct inclusion,
@@ -31,5 +30,3 @@
 typedef bool qboolean;
 //typedef enum { qfalse, qtrue } qboolean;
 typedef unsigned char byte;
-
-#endif

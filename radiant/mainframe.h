@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MAINFRAME_H )
-#define INCLUDED_MAINFRAME_H
+#pragma once
 
 #include "gtkutil/window.h"
 #include "gtkutil/idledraw.h"
@@ -259,5 +258,3 @@ void XYWindowMouseDown_disconnect( MouseEventHandlerId id );
 extern GtkWidget* g_page_entity;
 
 void FocusAllViews();
-
-#endif

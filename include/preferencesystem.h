@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_PREFERENCESYSTEM_H )
-#define INCLUDED_PREFERENCESYSTEM_H
+#pragma once
 
 #include "generic/constant.h"
 #include "generic/callbackfwd.h"
@@ -50,6 +49,3 @@ typedef GlobalModuleRef<PreferenceSystem> GlobalPreferenceSystemModuleRef;
 inline PreferenceSystem& GlobalPreferenceSystem(){
 	return GlobalPreferenceSystemModule::getTable();
 }
-
-
-#endif

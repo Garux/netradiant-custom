@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IDENT_H )
-#define INCLUDED_IDENT_H
+#pragma once
 
 #include <string.h>
 
@@ -28,5 +27,3 @@
 inline bool ident_equal( const unsigned char* ident, const unsigned char* other ){
 	return ident[0] == other[0] && ident[1] == other[1] && ident[2] == other[2] && ident[3] == other[3];
 }
-
-#endif

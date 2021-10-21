@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ISELECTION_H )
-#define INCLUDED_ISELECTION_H
+#pragma once
 
 #include <cstddef>
 #include "generic/constant.h"
@@ -149,6 +148,3 @@ typedef GlobalModuleRef<SelectionSystem> GlobalSelectionModuleRef;
 inline SelectionSystem& GlobalSelectionSystem(){
 	return GlobalSelectionModule::getTable();
 }
-
-
-#endif

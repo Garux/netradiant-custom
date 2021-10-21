@@ -19,12 +19,9 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_BRUSHMODULE_H )
-#define INCLUDED_BRUSHMODULE_H
+#pragma once
 
 #include "ibrush.h"
 
 void Brush_clipperColourChanged();
 void Brush_unlatchPreferences();
-
-#endif

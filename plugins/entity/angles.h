@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ANGLES_H )
-#define INCLUDED_ANGLES_H
+#pragma once
 
 #include "ientity.h"
 
@@ -186,6 +185,3 @@ public:
 		write_angles( m_angles, entity );
 	}
 };
-
-
-#endif

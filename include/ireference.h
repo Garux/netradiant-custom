@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IREFERENCE_H )
-#define INCLUDED_IREFERENCE_H
+#pragma once
 
 #include "generic/constant.h"
 
@@ -73,5 +72,3 @@ typedef GlobalModuleRef<ReferenceCache> GlobalReferenceModuleRef;
 inline ReferenceCache& GlobalReferenceCache(){
 	return GlobalReferenceModule::getTable();
 }
-
-#endif

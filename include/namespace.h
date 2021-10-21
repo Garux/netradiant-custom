@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_NAMESPACE_H )
-#define INCLUDED_NAMESPACE_H
+#pragma once
 
 #include "generic/constant.h"
 #include "generic/callbackfwd.h"
@@ -59,4 +58,3 @@ typedef GlobalModuleRef<Namespace> GlobalNamespaceModuleRef;
 inline Namespace& GlobalNamespace(){
 	return GlobalNamespaceModule::getTable();
 }
-#endif

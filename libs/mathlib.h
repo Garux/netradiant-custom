@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __MATHLIB__
-#define __MATHLIB__
+#pragma once
 
 // mathlib.h
 #include <math.h>
@@ -495,5 +494,3 @@ vec_accu_t VectorNormalizeAccu( const vec3_accu_t in, vec3_accu_t out );
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* __MATHLIB__ */

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_POINTER_H )
-#define INCLUDED_GTKUTIL_POINTER_H
+#pragma once
 
 typedef int gint;
 typedef void* gpointer;
@@ -34,5 +33,3 @@ inline gint gpointer_to_int( gpointer p ){
 inline gpointer gint_to_pointer( gint i ){
 	return gpointer( std::size_t( i ) );
 }
-
-#endif

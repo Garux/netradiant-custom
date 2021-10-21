@@ -21,12 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined( AFX_DENTITY_H__35B2C523_F0A7_11D4_ACF7_004095A18133__INCLUDED_ )
-#define AFX_DENTITY_H__35B2C523_F0A7_11D4_ACF7_004095A18133__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include <list>
 #include "str.h"
@@ -121,5 +116,3 @@ public:
 	void SpawnFloat( const char* key, const char* defaultstring, float* out );
 	void SpawnVector( const char* key, const char* defaultstring, vec_t* out );
 };
-
-#endif // !defined(AFX_DENTITY_H__35B2C523_F0A7_11D4_ACF7_004095A18133__INCLUDED_)

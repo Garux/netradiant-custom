@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_OS_FILE_H )
-#define INCLUDED_OS_FILE_H
+#pragma once
 
 /// \file
 /// \brief OS file-system querying and manipulation.
@@ -144,7 +143,3 @@ inline FileTime file_modified( const char* path ){
 	}
 	return st.st_mtime;
 }
-
-
-
-#endif

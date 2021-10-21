@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_GLWIDGET_H )
-#define INCLUDED_GTKUTIL_GLWIDGET_H
+#pragma once
 
 typedef struct _GtkWidget GtkWidget;
 typedef int gint;
@@ -34,6 +33,3 @@ void glwidget_create_context( GtkWidget* widget );
 
 extern void ( *GLWidget_sharedContextCreated )();
 extern void ( *GLWidget_sharedContextDestroyed )();
-
-
-#endif

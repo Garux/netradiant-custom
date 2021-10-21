@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_WINDOWOBSERVERS_H )
-#define INCLUDED_WINDOWOBSERVERS_H
+#pragma once
 
 #include "windowobserver.h"
 
@@ -61,5 +60,3 @@ inline ModifierFlags modifiers_for_state( unsigned int state ){
 	}
 	return modifiers;
 }
-
-#endif

@@ -26,8 +26,7 @@
    please contact Id Software immediately at info@idsoftware.com.
  */
 
-#if !defined( INCLUDED_PREFERENCES_H )
-#define INCLUDED_PREFERENCES_H
+#pragma once
 
 #include "libxml/parser.h"
 #include "dialog.h"
@@ -409,6 +408,3 @@ void Preferences_Load();
 void Preferences_Save();
 
 void Preferences_Reset();
-
-
-#endif

@@ -19,11 +19,8 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_XMLPARSE_H )
-#define INCLUDED_XMLPARSE_H
+#pragma once
 
 #include "imap.h"
 
 void Map_Read( scene::Node& root, TextInputStream& in, EntityCreator& entityTable );
-
-#endif

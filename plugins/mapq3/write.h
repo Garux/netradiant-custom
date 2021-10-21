@@ -19,11 +19,8 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_WRITE_H )
-#define INCLUDED_WRITE_H
+#pragma once
 
 #include "imap.h"
 
 void Map_Write( scene::Node& root, GraphTraversalFunc traverse, TokenWriter& writer, bool ignorePatches );
-
-#endif

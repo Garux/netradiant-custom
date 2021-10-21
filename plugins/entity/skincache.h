@@ -19,10 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_SKINCACHE_H )
-#define INCLUDED_SKINCACHE_H
+#pragma once
 
 class ModuleServer;
 void Doom3ModelSkinCacheModule_selfRegister( ModuleServer& server );
-
-#endif

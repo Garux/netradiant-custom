@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_SCENELIB_H )
-#define INCLUDED_SCENELIB_H
+#pragma once
 
 #include "iscenegraph.h"
 #include "iselection.h"
@@ -968,6 +967,3 @@ typedef ConstReference<scene::Path> PathConstReference;
 
 #include "generic/referencecounted.h"
 typedef SmartReference<scene::Node, IncRefDecRefCounter<scene::Node> > NodeSmartReference;
-
-
-#endif

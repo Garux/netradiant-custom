@@ -17,6 +17,8 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#pragma once
+
 // TODO: implement all this stuff via DBrush class. started with DShape
 // TODO: Auto Face Scaling, no need to pass parms, calculated via brush.
 

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_NAMEKEYS_H )
-#define INCLUDED_NAMEKEYS_H
+#pragma once
 
 #include <stdio.h>
 #include <map>
@@ -130,5 +129,3 @@ inline bool keyIsNameQuake3( const char* key ){
 	    || string_equal( key, "killtarget" )
 	    || ( string_equal_n( key, "target", 6 ) && string_is_integer( key + 6 ) ); // Nexuiz
 }
-
-#endif

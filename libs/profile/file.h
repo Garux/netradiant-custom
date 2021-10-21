@@ -32,8 +32,7 @@
 //  file.h
 ////////////////////////////////////////////////////
 
-#if !defined( INCLUDED_PROFILE_FILE_H )
-#define INCLUDED_PROFILE_FILE_H
+#pragma once
 
 #include "idatastream.h"
 
@@ -170,5 +169,3 @@ public:
 	void Close();
 	bool Open( const char *filename, const char *mode );
 };
-
-#endif

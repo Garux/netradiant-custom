@@ -23,8 +23,7 @@
 /// \brief Entity Class definition loader API.
 
 
-#if !defined( INCLUDED_IECLASS_H )
-#define INCLUDED_IECLASS_H
+#pragma once
 
 #include "generic/constant.h"
 
@@ -112,5 +111,3 @@ typedef GlobalModuleRef<EntityClassManager> GlobalEntityClassManagerModuleRef;
 inline EntityClassManager& GlobalEntityClassManager(){
 	return GlobalEntityClassManagerModule::getTable();
 }
-
-#endif

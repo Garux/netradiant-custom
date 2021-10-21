@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MATH_VECTOR_H )
-#define INCLUDED_MATH_VECTOR_H
+#pragma once
 
 /// \file
 /// \brief Vector data types and related operations.
@@ -746,5 +745,3 @@ template<typename Element>
 inline BasicVector3<Element> vector4_projected( const BasicVector4<Element>& self ){
 	return vector3_scaled( vector4_to_vector3( self ), 1.0 / self[3] );
 }
-
-#endif

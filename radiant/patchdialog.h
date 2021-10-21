@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_PATCHDIALOG_H )
-#define INCLUDED_PATCHDIALOG_H
+#pragma once
 
 void PatchInspector_Construct();
 void PatchInspector_Destroy();
@@ -38,6 +37,3 @@ class Graph;
 void Scene_PatchTranslateTexture_Selected( scene::Graph& graph, float s, float t );
 void Scene_PatchRotateTexture_Selected( scene::Graph& graph, float angle );
 void Scene_PatchScaleTexture_Selected( scene::Graph& graph, float s, float t );
-
-
-#endif

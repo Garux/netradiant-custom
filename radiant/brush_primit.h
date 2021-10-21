@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_BRUSH_PRIMIT_H )
-#define INCLUDED_BRUSH_PRIMIT_H
+#pragma once
 
 #include "math/vector.h"
 #include "itexdef.h"
@@ -183,5 +182,3 @@ inline void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<O
 	texT[2] = -cos( RotY );
 #endif
 }
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_WAD_H )
-#define INCLUDED_WAD_H
+#pragma once
 
 #include "bytestreamutils.h"
 #include "idatastream.h"
@@ -72,5 +71,3 @@ inline void istream_read_lumpinfo( InputStream& istream, lumpinfo_t& lumpinfo ){
 	lumpinfo.pad2 = istream_read_byte( istream );
 	istream.read( reinterpret_cast<InputStream::byte_type*>( lumpinfo.name ), 16 );
 }
-
-#endif

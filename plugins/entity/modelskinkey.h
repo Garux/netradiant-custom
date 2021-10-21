@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MODELSKINKEY_H )
-#define INCLUDED_MODELSKINKEY_H
+#pragma once
 
 #include "modelskin.h"
 
@@ -93,5 +92,3 @@ inline void Node_modelSkinChanged( scene::Node& node ){
 	ASSERT_NOTNULL( instantiable );
 	instantiable->forEachInstance( InstanceSkinChanged() );
 }
-
-#endif

@@ -28,8 +28,7 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined( INCLUDED_GTKDLGS_H )
-#define INCLUDED_GTKDLGS_H
+#pragma once
 
 #include "qerplugin.h"
 #include "string/string.h"
@@ -49,6 +48,3 @@ void DoAbout();
 
 #include "string/stringfwd.h"
 extern CopiedString g_TextEditor_editorCommand;
-
-
-#endif

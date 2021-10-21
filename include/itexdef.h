@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_ITEXDEF_H )
-#define INCLUDED_ITEXDEF_H
+#pragma once
 
 class texdef_t
 {
@@ -37,5 +36,3 @@ public:
 		scale[1] = 1;
 	}
 };
-
-#endif

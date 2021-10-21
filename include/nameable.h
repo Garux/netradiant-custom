@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_NAMEABLE_H )
-#define INCLUDED_NAMEABLE_H
+#pragma once
 
 #include "generic/constant.h"
 #include "generic/callbackfwd.h"
@@ -36,6 +35,3 @@ public:
 	virtual void attach( const NameCallback& callback ) = 0;
 	virtual void detach( const NameCallback& callback ) = 0;
 };
-
-
-#endif

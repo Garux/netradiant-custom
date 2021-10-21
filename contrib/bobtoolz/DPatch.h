@@ -21,8 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined( AFX_DPATCH_H__26C6B083_CE5B_420B_836B_1DDA733C04CE__INCLUDED_ )
-#define AFX_DPATCH_H__26C6B083_CE5B_420B_836B_1DDA733C04CE__INCLUDED_
+#pragma once
 
 #include <list>
 #include <stdlib.h>
@@ -77,5 +76,3 @@ public:
 	virtual ~DPatch();
 
 };
-
-#endif // !defined(AFX_DPATCH_H__26C6B083_CE5B_420B_836B_1DDA733C04CE__INCLUDED_)

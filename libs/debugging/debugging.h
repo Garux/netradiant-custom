@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_DEBUGGING_DEBUGGING_H )
-#define INCLUDED_DEBUGGING_DEBUGGING_H
+#pragma once
 
 /// \file
 /// \brief Debugging macros for fatal error/assert messages.
@@ -123,7 +122,5 @@ inline DebugMessageHandler& globalDebugMessageHandler(){
 #define ASSERT_MESSAGE( condition, message )
 #define ERROR_MESSAGE( message )
 #define ASSERT_NOTNULL( ptr )
-
-#endif
 
 #endif

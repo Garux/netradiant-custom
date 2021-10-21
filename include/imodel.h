@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IMODEL_H )
-#define INCLUDED_IMODEL_H
+#pragma once
 
 #include "generic/constant.h"
 
@@ -46,5 +45,3 @@ typedef Modules<ModelLoader> ModelModules;
 template<typename Type>
 class ModulesRef;
 typedef ModulesRef<ModelLoader> ModelModulesRef;
-
-#endif /* _IMODEL_H_ */

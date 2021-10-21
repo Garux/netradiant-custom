@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GENERIC_CLOSURE_H )
-#define INCLUDED_GENERIC_CLOSURE_H
+#pragma once
 
 /// \file
 /// \brief Type-safe techniques for binding the first argument of an opaque callback.
@@ -668,6 +667,3 @@ typedef Callback1<const StringImportCallback&> StringExportCallback;
 
 typedef Callback1<std::size_t> SizeImportCallback;
 typedef Callback1<const SizeImportCallback&> SizeExportCallback;
-
-
-#endif

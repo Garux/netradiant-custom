@@ -21,6 +21,7 @@
 
 // piclib.h
 
+#pragma once
 
 void LoadLBM( const char *filename, byte **picture, byte **palette );
 void WriteLBMfile( const char *filename, byte *data, int width, int height

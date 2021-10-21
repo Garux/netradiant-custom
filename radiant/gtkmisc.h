@@ -28,8 +28,7 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined( INCLUDED_GTKMISC_H )
-#define INCLUDED_GTKMISC_H
+#pragma once
 
 void process_gui();
 
@@ -67,5 +66,3 @@ bool OpenGLFont_dialog( GtkWidget *parent, const char* font, CopiedString &newfo
 typedef struct _GtkEntry GtkEntry;
 void button_clicked_entry_browse_file( GtkWidget* widget, GtkEntry* entry );
 void button_clicked_entry_browse_directory( GtkWidget* widget, GtkEntry* entry );
-
-#endif

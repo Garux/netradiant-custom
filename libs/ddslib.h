@@ -36,11 +36,7 @@
    ----------------------------------------------------------------------------- */
 
 
-
-/* marker */
-#ifndef DDSLIB_H
-#define DDSLIB_H
-
+#pragma once
 
 
 /* dependencies */
@@ -244,7 +240,4 @@ int                     DDSDecompress( ddsBuffer_t *dds, unsigned char *pixels )
 
 #ifdef __cplusplus
 }
-#endif
-
-/* end marker */
 #endif

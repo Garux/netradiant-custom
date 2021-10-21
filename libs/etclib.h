@@ -14,8 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_ETCLIB_H
-#define INCLUDED_ETCLIB_H
+#pragma once
 
 #include "bytebool.h"
 
@@ -28,6 +27,4 @@ void ETC_DecodeETC1Block( const byte* in, byte* out, bool outRGBA );
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

@@ -29,12 +29,9 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined( INCLUDED_TEXMANIP_H )
-#define INCLUDED_TEXMANIP_H
+#pragma once
 
 typedef unsigned char byte;
 
 void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *outdata,  int outwidth, int outheight, int bytesperpixel );
 void GL_MipReduce( byte *in, byte *out, int width, int height, int destwidth, int destheight );
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IARCHIVE_H )
-#define INCLUDED_IARCHIVE_H
+#pragma once
 
 #include <cstddef>
 #include "generic/constant.h"
@@ -156,5 +155,3 @@ typedef Modules<_QERArchiveTable> ArchiveModules;
 template<typename Type>
 class ModulesRef;
 typedef ModulesRef<_QERArchiveTable> ArchiveModulesRef;
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_PAK_H )
-#define INCLUDED_PAK_H
+#pragma once
 
 struct pakheader_t
 {
@@ -35,5 +34,3 @@ struct pakentry_t
 	unsigned int offset; // Position of the entry in PACK file
 	unsigned int size;   // Size of the entry in PACK file
 };
-
-#endif

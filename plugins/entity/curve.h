@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_CURVE_H )
-#define INCLUDED_CURVE_H
+#pragma once
 
 #include "ientity.h"
 #include "selectable.h"
@@ -452,6 +451,3 @@ public:
 
 const char* const curve_Nurbs = "curve_Nurbs";
 const char* const curve_CatmullRomSpline = "curve_CatmullRomSpline";
-
-
-#endif

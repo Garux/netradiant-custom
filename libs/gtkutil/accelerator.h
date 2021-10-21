@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_ACCELERATOR_H )
-#define INCLUDED_GTKUTIL_ACCELERATOR_H
+#pragma once
 
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
@@ -142,5 +141,3 @@ typedef struct _GtkWidget GtkWidget;
 void PressedButtons_connect( PressedButtons& pressedButtons, GtkWidget* widget );
 
 extern PressedButtons g_pressedButtons;
-
-#endif

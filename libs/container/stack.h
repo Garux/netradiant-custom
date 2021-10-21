@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_CONTAINER_STACK_H )
-#define INCLUDED_CONTAINER_STACK_H
+#pragma once
 
 #include "memory/allocator.h"
 #include <algorithm>
@@ -207,5 +206,3 @@ inline void swap( Stack<Type>& self, Stack<Type>& other ){
 	self.swap( other );
 }
 }
-
-#endif

@@ -1,6 +1,5 @@
 
-#if !defined( INCLUDED_CALLBACKFWD_H )
-#define INCLUDED_CALLBACKFWD_H
+#pragma once
 
 template<typename Return>
 class Callback0;
@@ -14,5 +13,3 @@ class Callback2;
 
 template<typename FirstArgument, typename SecondArgument, typename ThirdArgument, typename Result = void>
 class Callback3;
-
-#endif

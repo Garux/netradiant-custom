@@ -19,10 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_BRUSH_EXPORT_H )
-#define INCLUDED_BRUSH_EXPORT_H
+#pragma once
 
 typedef struct _GtkWidget GtkWidget;
 extern GtkWidget *g_pRadiantWnd;
-
-#endif

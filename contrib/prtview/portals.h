@@ -17,8 +17,7 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _PORTALS_H_
-#define _PORTALS_H_
+#pragma once
 
 #include <glib.h>
 #include "irender.h"
@@ -157,6 +156,3 @@ void Portals_constructShaders();
 void Portals_destroyShaders();
 
 void Portals_shadersChanged();
-
-
-#endif // _PORTALS_H_

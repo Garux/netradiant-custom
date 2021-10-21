@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_TARGETABLE_H )
-#define INCLUDED_TARGETABLE_H
+#pragma once
 
 #include <set>
 #include <map>
@@ -448,5 +447,3 @@ public:
 };
 
 typedef Static<RenderableConnectionLines> StaticRenderableConnectionLines;
-
-#endif

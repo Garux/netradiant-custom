@@ -21,13 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined( AFX_TRAINDRAWER_H__6E36062A_EF0B_11D4_ACF7_004095A18133__INCLUDED_ )
-#define AFX_TRAINDRAWER_H__6E36062A_EF0B_11D4_ACF7_004095A18133__INCLUDED_
-
-#if _MSC_VER > 1000
-
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include <list>
 #include "mathlib.h"
@@ -84,5 +78,3 @@ public:
 	splinePoint_t* AddSplinePoint( const char* name, const char* target, vec_t* origin );
 	controlPoint_t* FindControlPoint( const char* name );
 };
-
-#endif // !defined(AFX_TRAINDRAWER_H__6E36062A_EF0B_11D4_ACF7_004095A18133__INCLUDED_)

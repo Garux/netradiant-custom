@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_RENDERER_H )
-#define INCLUDED_RENDERER_H
+#pragma once
 
 #include "irender.h"
 #include "renderable.h"
@@ -170,5 +169,3 @@ inline void Scene_Render( Renderer& renderer, const VolumeTest& volume ){
 	GlobalSceneGraph().traverse( ForEachVisible<RenderHighlighted>( volume, RenderHighlighted( renderer, volume ) ) );
 	GlobalShaderCache().forEachRenderable( RenderHighlighted::RenderCaller( RenderHighlighted( renderer, volume ) ) );
 }
-
-#endif

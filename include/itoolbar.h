@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IPLUGTOOLBAR_H )
-#define INCLUDED_IPLUGTOOLBAR_H
+#pragma once
 
 #include <cstddef>
 #include "generic/constant.h"
@@ -62,5 +61,3 @@ typedef Modules<_QERPlugToolbarTable> ToolbarModules;
 template<typename Type>
 class ModulesRef;
 typedef ModulesRef<_QERPlugToolbarTable> ToolbarModulesRef;
-
-#endif

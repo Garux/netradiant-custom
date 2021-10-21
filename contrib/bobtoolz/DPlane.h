@@ -21,8 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined( AFX_DPLANE_H__FC37C021_F0A1_11D4_ACF7_004095A18133__INCLUDED_ )
-#define AFX_DPLANE_H__FC37C021_F0A1_11D4_ACF7_004095A18133__INCLUDED_
+#pragma once
 
 #include <list>
 #include "ibrush.h"
@@ -33,10 +32,6 @@ class Brush;
 class DPoint;
 
 #define FACE_DETAIL 0x8000000
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
 
 class DWinding;
 
@@ -71,4 +66,3 @@ public:
 };
 
 //typedef CList<DPlane*, DPlane*> DPlaneList;
-#endif // !defined(AFX_DPLANE_H__FC37C021_F0A1_11D4_ACF7_004095A18133__INCLUDED_)

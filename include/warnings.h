@@ -19,12 +19,9 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_WARNINGS_H )
-#define INCLUDED_WARNINGS_H
+#pragma once
 
 #if _MSC_VER > 1000 && defined( WIN32 )
 #pragma warning(disable:4355) // 'this' : used in base member initializer list
 #pragma warning(disable:4503) // '[symbol]' : decorated name length exceeded, name was truncated
-#endif
-
 #endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_STREAM_FILESTREAM_H )
-#define INCLUDED_STREAM_FILESTREAM_H
+#pragma once
 
 #include "idatastream.h"
 #include <algorithm>
@@ -168,6 +167,3 @@ inline bool file_copy( const char* source, const char* target ){
 	}
 	return true;
 }
-
-
-#endif

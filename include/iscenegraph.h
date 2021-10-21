@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_ISCENEGRAPH_H )
-#define INCLUDED_ISCENEGRAPH_H
+#pragma once
 
 #include <cstddef>
 #include "generic/constant.h"
@@ -208,7 +207,3 @@ inline void AddSceneChangeCallback( const SignalHandler& handler ){
 inline void SceneChangeNotify(){
 	GlobalSceneGraph().sceneChanged();
 }
-
-
-
-#endif

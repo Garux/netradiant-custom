@@ -19,10 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_RENDERSTATE_H )
-#define INCLUDED_RENDERSTATE_H
+#pragma once
 
 void ShaderCache_setBumpEnabled( bool enabled );
 void ShaderCache_extensionsInitialised();
-
-#endif

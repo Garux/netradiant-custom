@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_TYPESYSTEM_H )
-#define INCLUDED_TYPESYSTEM_H
+#pragma once
 
 
 #include <list>
@@ -132,6 +131,3 @@ public:
 		return &reinterpret_cast<Type*>( p )->get( NullType<Contained>() );
 	}
 };
-
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MAPFILE_H )
-#define INCLUDED_MAPFILE_H
+#pragma once
 
 #include <limits>
 
@@ -66,7 +65,3 @@ inline MapFile* path_find_mapfile( Iterator first, Iterator last ){
 	ERROR_MESSAGE( "failed to find parent mapfile for path" );
 	return 0;
 }
-
-
-
-#endif

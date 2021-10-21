@@ -17,8 +17,7 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#if !defined( INCLUDED_MISC_H )
-#define INCLUDED_MISC_H
+#pragma once
 
 #include "mathlib.h"
 #include <list>
@@ -53,5 +52,3 @@ float Determinant3x3( float a1, float a2, float a3,
 
 bool GetEntityCentre( const char* entity, vec3_t centre );
 void MakeNormal( const vec_t* va, const vec_t* vb, const vec_t* vc, vec_t* out );
-
-#endif

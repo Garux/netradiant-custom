@@ -25,8 +25,7 @@
 // camera interface
 //
 
-#if !defined( INCLUDED_ICAMERA_H )
-#define INCLUDED_ICAMERA_H
+#pragma once
 
 #include "generic/constant.h"
 #include "generic/callbackfwd.h"
@@ -63,5 +62,3 @@ struct _QERCameraTable
 	PFN_SETCAMERA m_pfnSetCamera;
 	PFN_GETCAMWINDOWEXTENTS m_pfnGetCamWindowExtents;
 };
-
-#endif

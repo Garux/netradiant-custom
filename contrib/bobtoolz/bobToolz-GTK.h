@@ -1,7 +1,4 @@
 
-#if !defined(INCLUDED_BOBTOOLZGTK_H)
-#define INCLUDED_BOBTOOLZGTK_H
+#pragma once
 
 extern GtkWidget *g_pRadiantWnd;
-
-#endif

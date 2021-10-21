@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MAP_H )
-#define INCLUDED_MAP_H
+#pragma once
 
 #include "iscenegraph.h"
 #include "generic/callback.h"
@@ -162,5 +161,3 @@ void Map_mergeClonedNames( bool makeUnique = true );
 
 
 const char* getMapsPath();
-
-#endif

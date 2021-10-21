@@ -19,13 +19,10 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GENERIC_CONSTANT_H )
-#define INCLUDED_GENERIC_CONSTANT_H
+#pragma once
 
 /// \file
 /// \brief Language extensions for constants that are guaranteed to be evaluated at compile-time.
 
 #define STRING_CONSTANT( name, value ) static constexpr const char* name = value
 #define INTEGER_CONSTANT( name, value ) static constexpr int name = value
-
-#endif

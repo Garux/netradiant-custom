@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_MENU_H )
-#define INCLUDED_GTKUTIL_MENU_H
+#pragma once
 
 #include "generic/callbackfwd.h"
 
@@ -54,5 +53,3 @@ typedef struct _GtkCheckMenuItem GtkCheckMenuItem;
 void check_menu_item_set_active_no_signal( GtkCheckMenuItem* item, gboolean active );
 typedef struct _GtkRadioMenuItem GtkRadioMenuItem;
 void radio_menu_item_set_active_no_signal( GtkRadioMenuItem* item, gboolean active );
-
-#endif

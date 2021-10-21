@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_PATCHMANIP_H )
-#define INCLUDED_PATCHMANIP_H
+#pragma once
 
 #include "string/stringfwd.h"
 
@@ -66,5 +65,3 @@ void Patch_FlipTextureY();
 
 class PatchCreator;
 extern PatchCreator* g_patchCreator;
-
-#endif

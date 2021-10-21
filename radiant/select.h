@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_SELECT_H )
-#define INCLUDED_SELECT_H
+#pragma once
 
 #include "math/vector.h"
 
@@ -89,5 +88,3 @@ struct select_workzone_t
 };
 
 const select_workzone_t& Select_getWorkZone();
-
-#endif

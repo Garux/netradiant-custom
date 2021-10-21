@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_PLUGINAPI_H )
-#define INCLUDED_PLUGINAPI_H
+#pragma once
 
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
@@ -29,5 +28,3 @@ typedef BasicVector3<float> Vector3;
 void QERApp_GetCamera( Vector3& origin, Vector3& angles );
 void QERApp_SetCamera( const Vector3& origin, const Vector3& angles );
 void QERApp_GetCamWindowExtents( int *x, int *y, int *width, int *height );
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_PLUGINMANAGER_H )
-#define INCLUDED_PLUGINMANAGER_H
+#pragma once
 
 #include <cstddef>
 
@@ -74,5 +73,3 @@ inline bool plugin_menu_special( const char* text ){
 	       || plugin_submenu_in( text )
 	       || plugin_submenu_out( text );
 }
-
-#endif

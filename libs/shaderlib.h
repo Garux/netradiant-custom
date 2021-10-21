@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_SHADERLIB_H )
-#define INCLUDED_SHADERLIB_H
+#pragma once
 
 #include "string/string.h"
 #include "character.h"
@@ -79,6 +78,3 @@ inline bool texdef_name_valid( const char* name ){
 inline const char* texdef_name_default(){
 	return GlobalTexturePrefix_get();
 }
-
-
-#endif

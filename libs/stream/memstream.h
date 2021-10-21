@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_STREAM_MEMSTREAM_H )
-#define INCLUDED_STREAM_MEMSTREAM_H
+#pragma once
 
 #include "itextstream.h"
 #include <algorithm>
@@ -70,5 +69,3 @@ public:
 		return count;
 	}
 };
-
-#endif

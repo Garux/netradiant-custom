@@ -26,6 +26,8 @@
 // Based on MD3Model source code by SPoG
 //
 
+#pragma once
+
 #include "plugin.h"
 
 /*! i guess a description should go here... */

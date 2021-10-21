@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ECLASSMODEL_H )
-#define INCLUDED_ECLASSMODEL_H
+#pragma once
 
 namespace scene
 {
@@ -31,5 +30,3 @@ class EntityClass;
 scene::Node& New_EclassModel( EntityClass* eclass );
 
 #include "entity.h"
-
-#endif

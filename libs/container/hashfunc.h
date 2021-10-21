@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_CONTAINER_HASHFUNC_H )
-#define INCLUDED_CONTAINER_HASHFUNC_H
+#pragma once
 
 #include <cctype>
 #include "string/string.h"
@@ -398,7 +397,3 @@ struct HashKeyHasher
 		return key.hash();
 	}
 };
-
-
-
-#endif

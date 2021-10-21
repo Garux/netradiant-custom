@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MATH_CURVE_H )
-#define INCLUDED_MATH_CURVE_H
+#pragma once
 
 /// \file
 /// \brief Curve data types and related operations.
@@ -170,5 +169,3 @@ inline void KnotVector_openUniform( Knots& knots, std::size_t count, std::size_t
 		knots[i + equalKnots] = Knots::value_type( double(i + 1) * 1.0 / double(difference + 1) );
 	}
 }
-
-#endif

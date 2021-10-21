@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ISCRIPLIB_H )
-#define INCLUDED_ISCRIPLIB_H
+#pragma once
 
 /// \file iscriplib.h
 /// \brief Token input/output stream module.
@@ -81,5 +80,3 @@ typedef GlobalModuleRef<_QERScripLibTable> GlobalScripLibModuleRef;
 inline _QERScripLibTable& GlobalScriptLibrary(){
 	return GlobalScripLibModule::getTable();
 }
-
-#endif

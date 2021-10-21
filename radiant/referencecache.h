@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_REFERENCECACHE_H )
-#define INCLUDED_REFERENCECACHE_H
+#pragma once
 
 /// \brief Saves all open resource references if they differ from the version on disk.
 void SaveReferences();
@@ -38,5 +37,3 @@ class MapFormat;
 typedef void ( *GraphTraversalFunc )( scene::Node& root, const scene::Traversable::Walker& walker );
 
 bool MapResource_saveFile( const MapFormat& format, scene::Node& root, GraphTraversalFunc traverse, const char* filename );
-
-#endif

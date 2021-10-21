@@ -1,6 +1,5 @@
 
-#if !defined( INCLUDED_SOCKETS_H )
-#define INCLUDED_SOCKETS_H
+#pragma once
 
 #include "l_net/l_net.h"
 
@@ -10,5 +9,3 @@
 // 0: timeout
 // 1: ready
 int Net_Wait( socket_t *sock, long sec, long usec );
-
-#endif

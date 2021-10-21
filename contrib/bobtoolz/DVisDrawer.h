@@ -21,13 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined( AFX_VISDRAWER_H__6E36062A_EF0B_11D4_ACF7_004095A18133__INCLUDED_ )
-#define AFX_VISDRAWER_H__6E36062A_EF0B_11D4_ACF7_004095A18133__INCLUDED_
-
-#if _MSC_VER > 1000
-
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include <list>
 #include "renderable.h"
@@ -78,5 +72,3 @@ public:
 	void destroyShaders();
 
 };
-
-#endif // !defined(AFX_VISDRAWER_H__6E36062A_EF0B_11D4_ACF7_004095A18133__INCLUDED_)

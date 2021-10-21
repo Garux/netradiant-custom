@@ -1,6 +1,5 @@
 
-#if !defined( INCLUDED_SIGNALFWD_H )
-#define INCLUDED_SIGNALFWD_H
+#pragma once
 
 class SignalHandler;
 template<typename FirstArgument>
@@ -40,5 +39,3 @@ public:
 };
 
 typedef SignalFwd<SignalHandler>::handler_id_type SignalHandlerId;
-
-#endif

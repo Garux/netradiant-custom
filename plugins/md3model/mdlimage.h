@@ -19,12 +19,9 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MDLIMAGE_H )
-#define INCLUDED_MDLIMAGE_H
+#pragma once
 
 class Image;
 class ArchiveFile;
 
 Image* LoadMDLImage( ArchiveFile& file );
-
-#endif

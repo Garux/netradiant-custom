@@ -19,13 +19,10 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_MESSAGEBOX_H )
-#define INCLUDED_GTKUTIL_MESSAGEBOX_H
+#pragma once
 
 #include "qerplugin.h"
 
 typedef struct _GtkWidget GtkWidget;
 /// \brief Shows a modal message-box.
 EMessageBoxReturn gtk_MessageBox( GtkWidget *parent, const char* text, const char* title = "NetRadiant", EMessageBoxType type = eMB_OK, EMessageBoxIcon icon = eMB_ICONDEFAULT );
-
-#endif

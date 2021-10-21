@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ANGLE_H )
-#define INCLUDED_ANGLE_H
+#pragma once
 
 #include "ientity.h"
 
@@ -93,5 +92,3 @@ inline float angle_rotated( float angle, const Quaternion& rotation ){
 	           ).z()
 	       );
 }
-
-#endif

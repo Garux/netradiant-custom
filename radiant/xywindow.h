@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_XYWINDOW_H )
-#define INCLUDED_XYWINDOW_H
+#pragma once
 
 #include "math/matrix.h"
 #include "signal/signal.h"
@@ -317,5 +316,3 @@ void WXY_SetBackgroundImage();
 
 void XYShow_registerCommands();
 void XYWnd_registerShortcuts();
-
-#endif

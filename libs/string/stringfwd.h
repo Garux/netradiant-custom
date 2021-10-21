@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_STRING_STRINGFWD_H )
-#define INCLUDED_STRING_STRINGFWD_H
+#pragma once
 
 // forward-declaration of CopiedString
 
@@ -31,5 +30,3 @@ class CopiedBuffer;
 template<typename Buffer>
 class String;
 typedef String< CopiedBuffer< DefaultAllocator<char> > > CopiedString;
-
-#endif

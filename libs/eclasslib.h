@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_ECLASSLIB_H )
-#define INCLUDED_ECLASSLIB_H
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -339,5 +338,3 @@ inline EntityClass *EntityClass_Create_Default( const char *name, bool has_brush
 		return EClass_Create_FixedSize( name, Vector3( 0.0f, 0.5f, 0.0f ), smallbox[0], smallbox[1], "Not found in source." );
 	}
 }
-
-#endif

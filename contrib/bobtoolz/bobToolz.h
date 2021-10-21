@@ -20,12 +20,7 @@
 // plugin.h : main header file for the PLUGIN DLL
 //
 
-#if !defined( AFX_PLUGIN_H__3BA55F6A_1D27_11D3_BC7B_F7EFD9765E37__INCLUDED_ )
-#define AFX_PLUGIN_H__3BA55F6A_1D27_11D3_BC7B_F7EFD9765E37__INCLUDED_
-
-#if _MSC_VER >= 1000
 #pragma once
-#endif // _MSC_VER >= 1000
 
 #ifndef __AFXWIN_H__
 	#error include 'StdAfx.h' before including this file for PCH
@@ -60,5 +55,3 @@ public:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_PLUGIN_H__3BA55F6A_1D27_11D3_BC7B_F7EFD9765E37__INCLUDED_)

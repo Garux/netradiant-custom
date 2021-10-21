@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MODULEOBSERVERS_H )
-#define INCLUDED_MODULEOBSERVERS_H
+#pragma once
 
 #include "debugging/debugging.h"
 #include <set>
@@ -55,5 +54,3 @@ public:
 		}
 	}
 };
-
-#endif

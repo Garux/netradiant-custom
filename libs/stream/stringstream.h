@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_STREAM_STRINGSTREAM_H )
-#define INCLUDED_STREAM_STRINGSTREAM_H
+#pragma once
 
 #include "itextstream.h"
 #include "string/string.h"
@@ -154,6 +153,3 @@ template<typename T>
 inline StringOutputStream& operator<<( StringOutputStream& ostream, const T& t ){
 	return ostream_write( ostream, t );
 }
-
-
-#endif

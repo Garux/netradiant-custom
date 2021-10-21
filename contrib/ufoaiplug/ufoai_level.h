@@ -16,11 +16,8 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_UFOAI_LEVEL_H )
-#define INCLUDED_UFOAI_LEVEL_H
+#pragma once
 
 void assign_default_values_to_worldspawn( bool override, const char **returnMsg );
 void check_map_values( const char **returnMsg );
 void get_team_count( const char *classname, int *count, int *team );
-
-#endif

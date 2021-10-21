@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_CLIPPERTOOL_H )
-#define INCLUDED_CLIPPERTOOL_H
+#pragma once
 
 #include "generic/vector.h"
 
@@ -56,5 +55,3 @@ bool Clipper_get2pointsIn2d();
 void ClipperModeQuick();
 void Clipper_tryDoubleclick();
 void Clipper_tryDoubleclickedCut();
-
-#endif

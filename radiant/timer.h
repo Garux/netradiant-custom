@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_TIMER_H )
-#define INCLUDED_TIMER_H
+#pragma once
 
 #if 1
 
@@ -89,5 +88,3 @@ public:
 		return MillisecondTime::current().milliseconds_since( m_start );
 	}
 };
-
-#endif

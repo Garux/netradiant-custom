@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_QE3_H )
-#define INCLUDED_QE3_H
+#pragma once
 
 #include "string/string.h"
 
@@ -63,5 +62,3 @@ extern SimpleCounter g_patchCount;
 extern SimpleCounter g_entityCount;
 
 void bsp_init();
-
-#endif

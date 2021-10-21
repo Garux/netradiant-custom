@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IPLUGIN_H )
-#define INCLUDED_IPLUGIN_H
+#pragma once
 
 #include "generic/constant.h"
 
@@ -49,5 +48,3 @@ typedef Modules<_QERPluginTable> PluginModules;
 template<typename Type>
 class ModulesRef;
 typedef ModulesRef<_QERPluginTable> PluginModulesRef;
-
-#endif

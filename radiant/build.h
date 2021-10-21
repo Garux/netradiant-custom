@@ -18,8 +18,7 @@
    along with GtkRadiant; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#if !defined( INCLUDED_BUILD_H )
-#define INCLUDED_BUILD_H
+#pragma once
 
 void build_set_variable( const char* name, const char* value );
 void build_clear_variables();
@@ -41,5 +40,3 @@ void Build_constructMenu( GtkMenu* menu );
 extern GtkMenu* g_bsp_menu;
 
 void Build_runRecentExecutedBuild();
-
-#endif

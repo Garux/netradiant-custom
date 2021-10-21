@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_PARSE_H )
-#define INCLUDED_PARSE_H
+#pragma once
 
 #include "imap.h"
 
@@ -44,5 +43,3 @@ class Node;
 typedef SmartReference<scene::Node, IncRefDecRefCounter<scene::Node> > NodeSmartReference;
 
 extern NodeSmartReference g_nullNode;
-
-#endif

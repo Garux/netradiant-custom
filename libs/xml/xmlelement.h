@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_XML_XMLELEMENT_H )
-#define INCLUDED_XML_XMLELEMENT_H
+#pragma once
 
 #include "xml/ixml.h"
 #include "string/string.h"
@@ -95,5 +94,3 @@ private:
 	CopiedString m_name;
 	attrs_t m_attrs;
 };
-
-#endif

@@ -17,8 +17,7 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#if !defined( INCLUDED_PRTVIEW_H )
-#define INCLUDED_PRTVIEW_H
+#pragma once
 
 #define MSG_PREFIX "Portal Viewer plugin: "
 
@@ -33,6 +32,3 @@ extern GtkWidget *g_pRadiantWnd;
 
 #define IDOK                1
 #define IDCANCEL            2
-
-
-#endif

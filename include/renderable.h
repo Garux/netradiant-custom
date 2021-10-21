@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_RENDERABLE_H )
-#define INCLUDED_RENDERABLE_H
+#pragma once
 
 #include "generic/constant.h"
 
@@ -71,5 +70,3 @@ public:
 	virtual void viewChanged() const {
 	}
 };
-
-#endif

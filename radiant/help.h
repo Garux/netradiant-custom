@@ -19,10 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_HELP_H )
-#define INCLUDED_HELP_H
+#pragma once
 
 typedef struct _GtkMenu GtkMenu;
 void create_game_help_menu( GtkMenu *menu );
-
-#endif

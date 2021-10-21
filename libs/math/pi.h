@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MATH_PI_H )
-#define INCLUDED_MATH_PI_H
+#pragma once
 
 /// \file
 /// \brief Pi constants and degrees/radians conversion.
@@ -39,5 +38,3 @@ inline double radians_to_degrees( double radians ){
 inline double degrees_to_radians( double degrees ){
 	return degrees * c_DEG2RADMULT;
 }
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_VIEW_H )
-#define INCLUDED_VIEW_H
+#pragma once
 
 #include "cullable.h"
 #include "math/frustum.h"
@@ -196,5 +195,3 @@ public:
 		return m_frustum;
 	}
 };
-
-#endif

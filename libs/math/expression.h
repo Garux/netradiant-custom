@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_EXPRESSION_H )
-#define INCLUDED_EXPRESSION_H
+#pragma once
 
 #include <math/matrix.h>
 
@@ -555,5 +554,3 @@ template<typename First>
 inline MatrixTransposed<First> matrix_transposed( const First& first ){
 	return MatrixTransposed<First>( first );
 }
-
-#endif

@@ -33,10 +33,8 @@
    ----------------------------------------------------------------------------- */
 
 
+#pragma once
 
-/* marker */
-#ifndef PICOINTERNAL_H
-#define PICOINTERNAL_H
 
 #ifdef __cplusplus
 extern "C"
@@ -203,7 +201,4 @@ long            _pico_memstream_tell( picoMemStream_t *s );
 
 #ifdef __cplusplus
 }
-#endif
-
-/* end marker */
 #endif

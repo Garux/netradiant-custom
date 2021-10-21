@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MODULESYSTEM_H )
-#define INCLUDED_MODULESYSTEM_H
+#pragma once
 
 #include "generic/static.h"
 #include "debugging/debugging.h"
@@ -233,5 +232,3 @@ public:
 		return GlobalModule<Type>::getTable();
 	}
 };
-
-#endif

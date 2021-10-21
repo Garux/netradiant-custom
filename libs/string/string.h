@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_STRING_STRING_H )
-#define INCLUDED_STRING_STRING_H
+#pragma once
 
 /// \file
 /// C-style null-terminated-character-array string library.
@@ -601,5 +600,3 @@ struct RawStringLessNoCase
 		return string_less_nocase( x, y );
 	}
 };
-
-#endif

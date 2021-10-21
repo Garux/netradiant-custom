@@ -21,12 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined( AFX_DSHAPE_H__0B30B302_9D21_4C2D_836A_61F3C8D4244D__INCLUDED_ )
-#define AFX_DSHAPE_H__0B30B302_9D21_4C2D_836A_61F3C8D4244D__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include <stdlib.h>
 #include "mathlib.h"
@@ -59,5 +54,3 @@ private:
 
 	DMap m_Container;
 };
-
-#endif // !defined(AFX_DSHAPE_H__0B30B302_9D21_4C2D_836A_61F3C8D4244D__INCLUDED_)

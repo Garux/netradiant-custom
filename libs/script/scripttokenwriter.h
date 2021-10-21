@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_SCRIPT_SCRIPTTOKENWRITER_H )
-#define INCLUDED_SCRIPT_SCRIPTTOKENWRITER_H
+#pragma once
 
 #include "iscriplib.h"
 
@@ -73,5 +72,3 @@ private:
 inline TokenWriter& NewSimpleTokenWriter( TextOutputStream& ostream ){
 	return *( new SimpleTokenWriter( ostream ) );
 }
-
-#endif

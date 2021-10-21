@@ -1,6 +1,5 @@
 
-#if !defined( INCLUDED_SIGNAL_H )
-#define INCLUDED_SIGNAL_H
+#pragma once
 
 #include "isignal.h"
 #include "memory/allocator.h"
@@ -338,5 +337,3 @@ public:
 		invokeSignalHandlers( Base::begin(), Base::end(), Functor3Invoke<typename Base::handler_type>( a1, a2, a3 ) );
 	}
 };
-
-#endif

@@ -23,8 +23,7 @@
 //
 //
 
-#ifndef __QERPLUGIN_H__
-#define __QERPLUGIN_H__
+#pragma once
 
 #include "generic/constant.h"
 
@@ -179,5 +178,3 @@ typedef GlobalModuleRef<_QERFuncTable_1> GlobalRadiantModuleRef;
 inline _QERFuncTable_1& GlobalRadiant(){
 	return GlobalRadiantModule::getTable();
 }
-
-#endif

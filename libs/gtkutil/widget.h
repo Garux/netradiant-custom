@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_WIDGET_H )
-#define INCLUDED_GTKUTIL_WIDGET_H
+#pragma once
 
 #include <list>
 #include <gtk/gtk.h>
@@ -194,5 +193,3 @@ public:
 		g_signal_connect( G_OBJECT( widget ), "focus_out_event", G_CALLBACK( focus_out ), this );
 	}
 };
-
-#endif

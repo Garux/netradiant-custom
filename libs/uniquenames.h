@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_UNIQUENAMES_H )
-#define INCLUDED_UNIQUENAMES_H
+#pragma once
 
 #include "debugging/debugging.h"
 #include <map>
@@ -326,8 +325,5 @@ public:
 };
 
 const TestUniqueName g_testuniquename;
-
-#endif
-
 
 #endif

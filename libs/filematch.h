@@ -1,5 +1,4 @@
-#if !defined( INCLUDED_FILEMATCH_H )
-#define INCLUDED_FILEMATCH_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C"
@@ -11,6 +10,4 @@ int matchpattern_with_separator( const char *in, const char *pattern, int casein
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MEMORY_ALLOCATOR_H )
-#define INCLUDED_MEMORY_ALLOCATOR_H
+#pragma once
 
 #include <memory>
 #include <stddef.h>
@@ -287,5 +286,3 @@ class NamedDelete
 public:
 	typedef Delete<Type, NamedAllocator<Type> > type;
 };
-
-#endif

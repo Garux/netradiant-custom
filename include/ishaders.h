@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ISHADERS_H )
-#define INCLUDED_ISHADERS_H
+#pragma once
 
 #include "generic/constant.h"
 #include "generic/callbackfwd.h"
@@ -183,5 +182,3 @@ inline ShaderSystem& GlobalShaderSystem(){
 #define QERApp_ActiveShaders_IteratorAtEnd GlobalShaderSystem().endActiveShadersIterator
 #define QERApp_ActiveShaders_IteratorCurrent GlobalShaderSystem().dereferenceActiveShadersIterator
 #define QERApp_ActiveShaders_IteratorIncrement GlobalShaderSystem().incrementActiveShadersIterator
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IGLRENDER_H )
-#define INCLUDED_IGLRENDER_H
+#pragma once
 
 #include "igl.h"
 #include "generic/vector.h"
@@ -124,5 +123,3 @@ typedef GlobalModuleRef<OpenGLStateLibrary> GlobalOpenGLStateLibraryModuleRef;
 inline OpenGLStateLibrary& GlobalOpenGLStateLibrary(){
 	return GlobalOpenGLStateLibraryModule::getTable();
 }
-
-#endif

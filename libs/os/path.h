@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_OS_PATH_H )
-#define INCLUDED_OS_PATH_H
+#pragma once
 
 /// \file
 /// \brief OS file-system path comparison, decomposition and manipulation.
@@ -310,6 +309,3 @@ TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const PathDe
 	}
 	return ostream;
 }
-
-
-#endif

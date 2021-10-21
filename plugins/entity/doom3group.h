@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_STATIC_H )
-#define INCLUDED_STATIC_H
+#pragma once
 
 namespace scene
 {
@@ -31,5 +30,3 @@ class EntityClass;
 void Doom3Group_construct();
 void Doom3Group_destroy();
 scene::Node& New_Doom3Group( EntityClass* eclass );
-
-#endif

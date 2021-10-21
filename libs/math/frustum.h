@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MATH_FRUSTUM_H )
-#define INCLUDED_MATH_FRUSTUM_H
+#pragma once
 
 /// \file
 /// \brief View-frustum data types and related operations.
@@ -650,5 +649,3 @@ inline Vector4 viewer_from_viewproj( const Matrix4& viewproj ){
 	}
 	return viewer;
 }
-
-#endif

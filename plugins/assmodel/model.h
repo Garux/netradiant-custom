@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MODEL_H )
-#define INCLUDED_MODEL_H
+#pragma once
 
 namespace scene {
 class Node;
@@ -30,5 +29,3 @@ namespace Assimp{
 class Importer;
 }
 scene::Node& loadPicoModel( Assimp::Importer& importer, ArchiveFile& file );
-
-#endif

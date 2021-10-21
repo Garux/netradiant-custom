@@ -25,8 +25,7 @@
 // header for Pointfile stuff (adding a C++ class to wrap the pointfile thing in the SAX parser)
 //
 
-#if !defined( INCLUDED_POINTS_H )
-#define INCLUDED_POINTS_H
+#pragma once
 
 void Pointfile_Clear();
 void Pointfile_Delete( void );
@@ -36,5 +35,3 @@ void Pointfile_Destroy();
 
 class ISAXHandler;
 extern ISAXHandler& g_pointfile;
-
-#endif

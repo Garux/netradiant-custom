@@ -28,8 +28,7 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __STR__
-#define __STR__
+#pragma once
 
 //
 // class Str
@@ -500,7 +499,3 @@ inline bool ExtractPath_and_Filename( const char* pPath, Str& strPath, Str& strF
 	}
 	return true;
 }
-
-
-
-#endif

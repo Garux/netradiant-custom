@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_ENTRY_H )
-#define INCLUDED_GTKUTIL_ENTRY_H
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,5 +52,3 @@ inline int entry_get_int( GtkEntry* entry ){
 inline double entry_get_float( GtkEntry* entry ){
 	return atof( entry_get_string( entry ) );
 }
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_BYTESTREAMUTILS_H )
-#define INCLUDED_BYTESTREAMUTILS_H
+#pragma once
 
 #if defined( __GNUC__ )
 
@@ -151,5 +150,3 @@ inline typename InputStreamType::byte_type istream_read_byte( InputStreamType& i
 	istream.read( &b, sizeof( typename InputStreamType::byte_type ) );
 	return b;
 }
-
-#endif

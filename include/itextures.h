@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ITEXTURES_H )
-#define INCLUDED_ITEXTURES_H
+#pragma once
 
 #include "iimage.h"
 #include "generic/constant.h"
@@ -83,5 +82,3 @@ typedef GlobalModuleRef<TexturesCache> GlobalTexturesModuleRef;
 inline TexturesCache& GlobalTexturesCache(){
 	return GlobalTexturesModule::getTable();
 }
-
-#endif

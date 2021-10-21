@@ -28,12 +28,9 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined( INCLUDED_VFS_H )
-#define INCLUDED_VFS_H
+#pragma once
 
 void FileSystem_Init();
 void FileSystem_Shutdown();
 class VirtualFileSystem;
 VirtualFileSystem& GetFileSystem();
-
-#endif

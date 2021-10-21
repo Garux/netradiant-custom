@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_TREEMODEL_H )
-#define INCLUDED_TREEMODEL_H
+#pragma once
 
 struct GraphTreeModel;
 
@@ -33,5 +32,3 @@ class Instance;
 }
 void graph_tree_model_insert( GraphTreeModel* model, const scene::Instance& instance );
 void graph_tree_model_erase( GraphTreeModel* model, const scene::Instance& instance );
-
-#endif

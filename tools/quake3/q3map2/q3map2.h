@@ -27,11 +27,7 @@
    ------------------------------------------------------------------------------- */
 
 
-
-/* marker */
-#ifndef Q3MAP2_H
-#define Q3MAP2_H
-
+#pragma once
 
 
 /* version */
@@ -2400,6 +2396,3 @@ Q_EXTERN std::vector<bspAdvertisement_t> bspAds;
 
 #define Image_LinearFloatFromsRGBFloat( c ) ( ( ( c ) <= 0.04045f ) ? ( c ) * ( 1.0f / 12.92f ) : (float)pow( ( ( c ) + 0.055f ) * ( 1.0f / 1.055f ), 2.4f ) )
 #define Image_sRGBFloatFromLinearFloat( c ) ( ( ( c ) < 0.0031308f ) ? ( c ) * 12.92f : 1.055f * (float)pow( ( c ), 1.0f / 2.4f ) - 0.055f )
-
-/* end marker */
-#endif

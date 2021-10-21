@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_BUTTON_H )
-#define INCLUDED_GTKUTIL_BUTTON_H
+#pragma once
 
 #include "generic/callbackfwd.h"
 
@@ -45,5 +44,3 @@ void toggle_button_set_active_no_signal( GtkToggleToolButton* item, gboolean act
 void radio_button_set_active( GtkRadioButton* radio, int index );
 void radio_button_set_active_no_signal( GtkRadioButton* radio, int index );
 int radio_button_get_active( GtkRadioButton* radio );
-
-#endif

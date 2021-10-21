@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MRU_H )
-#define INCLUDED_MRU_H
+#pragma once
 
 void MRU_AddFile( const char *str );
 
@@ -29,5 +28,3 @@ void MRU_constructMenu( GtkMenu* menu );
 
 void MRU_Construct();
 void MRU_Destroy();
-
-#endif

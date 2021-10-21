@@ -21,12 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined( AFX_DWINDING_H__35B2C524_F0A7_11D4_ACF7_004095A18133__INCLUDED_ )
-#define AFX_DWINDING_H__35B2C524_F0A7_11D4_ACF7_004095A18133__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "mathlib.h"
 
@@ -66,5 +61,3 @@ public:
 #define MAX_POINTS_ON_WINDING   64
 
 #define ON_EPSILON  0.01
-
-#endif // !defined(AFX_DWINDING_H__35B2C524_F0A7_11D4_ACF7_004095A18133__INCLUDED_)

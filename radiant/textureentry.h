@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_TEXTUREENTRY_H )
-#define INCLUDED_TEXTUREENTRY_H
+#pragma once
 
 
 #include <gtk/gtk.h>
@@ -140,6 +139,3 @@ public:
 };
 
 typedef Static< EntryCompletion<ShaderList> > GlobalShaderEntryCompletion;
-
-
-#endif

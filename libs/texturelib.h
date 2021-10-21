@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_TEXTURELIB_H )
-#define INCLUDED_TEXTURELIB_H
+#pragma once
 
 #include "generic/vector.h"
 typedef Vector3 Colour3;
@@ -39,5 +38,3 @@ struct qtexture_t
 	Colour3 color; // for flat shade mode
 	int surfaceFlags, contentFlags, value;
 };
-
-#endif

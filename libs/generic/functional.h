@@ -1,6 +1,5 @@
 
-#if !defined( INCLUDED_FUNCTIONAL_H )
-#define INCLUDED_FUNCTIONAL_H
+#pragma once
 
 template<typename Object, typename R, R( Object::*member ) ( )>
 class Member
@@ -314,6 +313,3 @@ class TypeEqual<Other, True, False, Other>
 public:
 	typedef True type;
 };
-
-
-#endif

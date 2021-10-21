@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_PATCH_H )
-#define INCLUDED_PATCH_H
+#pragma once
 
 /// \file
 /// \brief The patch primitive.
@@ -1948,5 +1947,3 @@ template<typename Functor>
 inline void Scene_forEachVisiblePatchInstance( const Functor& functor ){
 	GlobalSceneGraph().traverse( PatchForEachInstanceWalker<Functor>( functor ) );
 }
-
-#endif

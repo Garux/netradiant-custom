@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_UNDOLIB_H )
-#define INCLUDED_UNDOLIB_H
+#pragma once
 
 #include "iundo.h"
 #include "mapfile.h"
@@ -137,5 +136,3 @@ public:
 		m_object = ( static_cast<const BasicUndoMemento<Copyable>*>( state ) )->get();
 	}
 };
-
-#endif

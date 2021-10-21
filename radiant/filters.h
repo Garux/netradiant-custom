@@ -19,10 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_FILTERS_H )
-#define INCLUDED_FILTERS_H
+#pragma once
 
 typedef struct _GtkMenu GtkMenu;
 void Filters_constructMenu( GtkMenu* menu_in_menu );
-
-#endif

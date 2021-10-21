@@ -1,6 +1,5 @@
 
-#if !defined( INCLUDED_POOLEDSTRING_H )
-#define INCLUDED_POOLEDSTRING_H
+#pragma once
 
 #include <map>
 #include "generic/static.h"
@@ -88,6 +87,3 @@ public:
 		return ( *m_i ).key;
 	}
 };
-
-
-#endif

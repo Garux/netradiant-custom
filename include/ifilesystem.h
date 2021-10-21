@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IFILESYSTEM_H )
-#define INCLUDED_IFILESYSTEM_H
+#pragma once
 
 #include <cstddef>
 #include "generic/constant.h"
@@ -114,5 +113,3 @@ inline int vfsLoadFile( const char* filename, void** buffer, int index = 0 ){
 inline void vfsFreeFile( void* p ){
 	GlobalFileSystem().freeFile( p );
 }
-
-#endif

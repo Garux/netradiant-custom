@@ -17,9 +17,6 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#if !defined( INCLUDED_LOADPORTALFILEDIALOG_H )
-#define INCLUDED_LOADPORTALFILEDIALOG_H
+#pragma once
 
 int DoLoadPortalFileDialog();
-
-#endif

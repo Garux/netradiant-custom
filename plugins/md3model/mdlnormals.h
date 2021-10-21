@@ -19,6 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#pragma once
 
 typedef const float mdlNormal_t[3];
 typedef const mdlNormal_t mdlNormals_t[162];

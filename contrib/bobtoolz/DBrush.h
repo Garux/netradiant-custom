@@ -21,12 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined( AFX_DBRUSH_H__35B2C522_F0A7_11D4_ACF7_004095A18133__INCLUDED_ )
-#define AFX_DBRUSH_H__35B2C522_F0A7_11D4_ACF7_004095A18133__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include <stdio.h>
 #include <list>
@@ -111,5 +106,3 @@ public:
 };
 
 //typedef CList<DBrush*, DBrush*> DBrushList;
-
-#endif // !defined(AFX_DBRUSH_H__35B2C522_F0A7_11D4_ACF7_004095A18133__INCLUDED_)

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_BRUSHXML_H )
-#define INCLUDED_BRUSHXML_H
+#pragma once
 
 #include "stream/stringstream.h"
 #include "xml/xmlelement.h"
@@ -418,6 +417,3 @@ public:
 		importer.popElement( brushElement.name() );
 	}
 };
-
-
-#endif

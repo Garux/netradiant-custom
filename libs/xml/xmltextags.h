@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_XMLTEXTAGS_H )
-#define INCLUDED_XMLTEXTAGS_H
+#pragma once
 
 #include <set>
 #include <string/string.h>
@@ -99,5 +98,3 @@ public:
 	void GetAllTags( std::set<CopiedString>& tags );
 	void TagSearch( const char* expression, std::set<CopiedString>& paths );
 };
-
-#endif

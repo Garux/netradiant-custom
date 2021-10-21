@@ -19,13 +19,10 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ENTITYINSPECTOR_H )
-#define INCLUDED_ENTITYINSPECTOR_H
+#pragma once
 
 typedef struct _GtkWidget GtkWidget;
 typedef struct _GtkWindow GtkWindow;
 GtkWidget* EntityInspector_constructWindow( GtkWindow* parent );
 void EntityInspector_construct();
 void EntityInspector_destroy();
-
-#endif

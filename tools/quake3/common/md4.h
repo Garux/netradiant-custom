@@ -25,8 +25,7 @@
         Boston, MA  02111-1307, USA
  */
 
-#ifndef _MDFOUR_H
-#define _MDFOUR_H
+#pragma once
 
 #include <cstdint>
 
@@ -42,5 +41,3 @@ void mdfour( unsigned char *out, unsigned char *in, int n );
 
 unsigned Com_BlockChecksum( void *buffer, int length );
 void Com_BlockFullChecksum( void *buffer, int len, unsigned char *outbuf );
-
-#endif  // _MDFOUR_H

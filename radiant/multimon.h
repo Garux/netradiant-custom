@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MULTIMON_H )
-#define INCLUDED_MULTIMON_H
+#pragma once
 
 struct WindowPosition;
 
@@ -45,6 +44,4 @@ inline void MultiMon_Construct(){
 }
 inline void MultiMon_Destroy(){
 }
-#endif
-
 #endif

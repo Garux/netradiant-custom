@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IENTITY_H )
-#define INCLUDED_IENTITY_H
+#pragma once
 
 #include "generic/constant.h"
 
@@ -157,5 +156,3 @@ typedef GlobalModuleRef<EntityCreator> GlobalEntityModuleRef;
 inline EntityCreator& GlobalEntityCreator(){
 	return GlobalEntityModule::getTable();
 }
-
-#endif

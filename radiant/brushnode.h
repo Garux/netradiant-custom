@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_BRUSHNODE_H )
-#define INCLUDED_BRUSHNODE_H
+#pragma once
 
 #include "instancelib.h"
 #include "brush.h"
@@ -142,5 +141,3 @@ public:
 inline Brush* Node_getBrush( scene::Node& node ){
 	return NodeTypeCast<Brush>::cast( node );
 }
-
-#endif

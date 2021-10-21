@@ -19,10 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_CONVERT_OBJ_H )
-#define INCLUDED_CONVERT_OBJ_H
+#pragma once
 
 int Convert_CountLightmaps( const char* dirname );
 void Convert_ReferenceLightmaps( const char* base, std::vector<int>& lmIndices );
-
-#endif

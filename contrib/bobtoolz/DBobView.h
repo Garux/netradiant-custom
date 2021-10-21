@@ -21,8 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined( AFX_BOBVIEW_H__6E36062A_EF0B_11D4_ACF7_004095A18133__INCLUDED_ )
-#define AFX_BOBVIEW_H__6E36062A_EF0B_11D4_ACF7_004095A18133__INCLUDED_
+#pragma once
 
 #include "ientity.h"
 #include "irender.h"
@@ -34,10 +33,6 @@ class Shader;
 
 #define BOUNDS_ALL  0
 #define BOUNDS_APEX 1
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
 
 class DBobView : public Renderable, public OpenGLRenderable, public Entity::Observer
 {
@@ -97,5 +92,3 @@ public:
 
 class Entity;
 void DBobView_setEntity( Entity& entity, float multiplier, int points, float varGravity, bool bNoUpdate, bool bShowExtra );
-
-#endif // !defined(AFX_BOBVIEW_H__6E36062A_EF0B_11D4_ACF7_004095A18133__INCLUDED_)

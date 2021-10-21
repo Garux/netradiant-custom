@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_CLIPBOARD_H )
-#define INCLUDED_GTKUTIL_CLIPBOARD_H
+#pragma once
 
 class TextOutputStream;
 typedef void ( *ClipboardCopyFunc )( TextOutputStream& );
@@ -29,5 +28,3 @@ void clipboard_copy( ClipboardCopyFunc copy );
 class TextInputStream;
 typedef void ( *ClipboardPasteFunc )( TextInputStream& );
 void clipboard_paste( ClipboardPasteFunc paste );
-
-#endif

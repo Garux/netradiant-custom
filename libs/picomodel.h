@@ -34,9 +34,7 @@
 
 
 
-/* marker */
-#ifndef PICOMODEL_H
-#define PICOMODEL_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C"
@@ -345,7 +343,4 @@ void PicoAddTriangleToModel( picoModel_t *model, picoVec3_t** xyz, picoVec3_t** 
 
 #ifdef __cplusplus
 }
-#endif
-
-/* end marker */
 #endif

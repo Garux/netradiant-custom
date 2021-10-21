@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MATH_QUATERNION_H )
-#define INCLUDED_MATH_QUATERNION_H
+#pragma once
 
 /// \file
 /// \brief Quaternion data types and related operations.
@@ -300,6 +299,3 @@ inline void matrix4_pivoted_rotate_by_axisangle( Matrix4& self, const Vector3& a
 	matrix4_rotate_by_axisangle( self, axis, angle );
 	matrix4_translate_by_vec3( self, vector3_negated( pivotpoint ) );
 }
-
-
-#endif

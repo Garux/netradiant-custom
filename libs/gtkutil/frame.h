@@ -19,11 +19,8 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_FRAME_H )
-#define INCLUDED_GTKUTIL_FRAME_H
+#pragma once
 
 typedef struct _GtkWidget GtkWidget;
 typedef struct _GtkFrame GtkFrame;
 GtkFrame* create_framed_widget( GtkWidget* widget );
-
-#endif

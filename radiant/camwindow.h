@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_CAMWINDOW_H )
-#define INCLUDED_CAMWINDOW_H
+#pragma once
 
 #include "math/vector.h"
 #include "signal/signalfwd.h"
@@ -89,5 +88,3 @@ void CamWnd_reconstructStatic();
 
 void CamWnd_Construct();
 void CamWnd_Destroy();
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MODEL_H )
-#define INCLUDED_MODEL_H
+#pragma once
 
 #include <vector>
 #include <functional>
@@ -34,5 +33,3 @@ public:
 };
 
 std::vector<const AssMeshWalker*> LoadModelWalker( const char *name, int frame );
-
-#endif

@@ -21,12 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined( AFX_DMAP_H__ACAE597A_D26D_49AD_AA69_EDE743DB54FA__INCLUDED_ )
-#define AFX_DMAP_H__ACAE597A_D26D_49AD_AA69_EDE743DB54FA__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include <list>
 
@@ -54,5 +49,3 @@ public:
 
 	int FixBrushes();
 };
-
-#endif // !defined(AFX_DMAP_H__ACAE597A_D26D_49AD_AA69_EDE743DB54FA__INCLUDED_)

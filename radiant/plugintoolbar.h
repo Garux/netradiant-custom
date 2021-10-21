@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_PLUGINTOOLBAR_H )
-#define INCLUDED_PLUGINTOOLBAR_H
+#pragma once
 
 typedef struct _GtkToolbar GtkToolbar;
 GtkToolbar* create_plugin_toolbar();
@@ -29,5 +28,3 @@ void PluginToolbar_clear();
 
 typedef struct _GtkImage GtkImage;
 GtkImage* new_plugin_image( const char* filename ); // filename is relative to plugin bitmaps path
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_BRUSH_H )
-#define INCLUDED_BRUSH_H
+#pragma once
 
 /// \file
 /// \brief The brush primitive.
@@ -4349,6 +4348,3 @@ inline const Functor& Scene_ForEachSelectedBrushFace( scene::Graph& graph, const
 	g_SelectedFaceInstances.foreach( FaceVisitorWrapper<Functor>( functor ) );
 	return functor;
 }
-
-
-#endif

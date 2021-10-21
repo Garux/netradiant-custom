@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_CLOSURE_H )
-#define INCLUDED_GTKUTIL_CLOSURE_H
+#pragma once
 
 #include <glib-object.h>
 #include "generic/callback.h"
@@ -66,5 +65,3 @@ inline void object_set_boolean_property( GObject* object, const char* property, 
 	g_value_set_boolean( &gvalue, value );
 	g_object_set_property( object, property, &gvalue );
 }
-
-#endif

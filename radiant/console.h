@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_CONSOLE_H )
-#define INCLUDED_CONSOLE_H
+#pragma once
 
 #include <cstddef>
 
@@ -43,6 +42,3 @@ GtkWidget* Console_constructWindow( GtkWindow* toplevel );
 // will open/close the log file based on the parameter
 void Sys_LogFile( bool enable );
 extern bool g_Console_enableLogging;
-
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef _PLUGIN_H_
-#define _PLUGIN_H_
+#pragma once
 
 #include "mathlib.h"
 #include <string.h>
@@ -54,5 +53,3 @@ public:
 	CSynapseClientHydraToolz() { }
 	virtual ~CSynapseClientHydraToolz() { }
 };
-
-#endif // _PLUGIN_H_

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_DIALOG_H )
-#define INCLUDED_GTKUTIL_DIALOG_H
+#pragma once
 
 #include "generic/callback.h"
 #include "generic/arrayrange.h"
@@ -113,6 +112,3 @@ public:
 GtkLabel* DialogLabel_new( const char* name );
 GtkTable* DialogRow_new( const char* name, GtkWidget* widget );
 void DialogVBox_packRow( GtkVBox* vbox, GtkWidget* row );
-
-
-#endif

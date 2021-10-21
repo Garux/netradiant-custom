@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_MAPLIB_H )
-#define INCLUDED_MAPLIB_H
+#pragma once
 
 #include "nameable.h"
 #include "mapfile.h"
@@ -233,6 +232,3 @@ inline void MapRoot_destroy(){
 inline NodeSmartReference NewMapRoot( const char* name ){
 	return NodeSmartReference( ( new MapRoot( name ) )->node() );
 }
-
-
-#endif

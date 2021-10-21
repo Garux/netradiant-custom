@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GENERIC_BITFIELD_H )
-#define INCLUDED_GENERIC_BITFIELD_H
+#pragma once
 
 /// \file
 /// \brief Type safe bitfield.
@@ -111,5 +110,3 @@ template<typename Enumeration>
 inline bool bitfield_enabled( BitFieldValue<Enumeration> bitfield, BitFieldValue<Enumeration> mask ){
 	return ( bitfield & mask ).get() != 0;
 }
-
-#endif

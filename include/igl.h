@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IGL_H )
-#define INCLUDED_IGL_H
+#pragma once
 
 #include <cstddef>
 #include <string.h>
@@ -2944,7 +2943,4 @@ inline OpenGLBinding& GlobalOpenGL(){
 #define GlobalOpenGL_debugAssertNoErrors() GlobalOpenGL().assertNoErrors( __FILE__, __LINE__ )
 #else
 #define GlobalOpenGL_debugAssertNoErrors()
-#endif
-
-
 #endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ENVIRONMENT_H )
-#define INCLUDED_ENVIRONMENT_H
+#pragma once
 
 void environment_init( int argc, char* argv[] );
 const char* environment_get_home_path();
@@ -32,5 +31,3 @@ extern const char** g_argv;
 
 #include "string/stringfwd.h"
 extern CopiedString g_openMapByCmd;
-
-#endif

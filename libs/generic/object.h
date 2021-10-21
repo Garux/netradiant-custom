@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GENERIC_OBJECT_H )
-#define INCLUDED_GENERIC_OBJECT_H
+#pragma once
 
 /// \file
 /// \brief Convenience functions (syntactic sugar) to wrap explicit constructor (aka in-place 'new') and destructor calls.
@@ -82,7 +81,3 @@ template<typename Type>
 inline void destructor( Type& object ){
 	object.~Type();
 }
-
-
-
-#endif

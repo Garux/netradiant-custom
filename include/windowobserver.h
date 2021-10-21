@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_WINDOWOBSERVER_H )
-#define INCLUDED_WINDOWOBSERVER_H
+#pragma once
 
 template<typename Enumeration> class BitFieldValue;
 struct ModifierEnumeration;
@@ -87,5 +86,3 @@ public:
 	virtual void onModifierDown( ModifierFlags modifier ) = 0;
 	virtual void onModifierUp( ModifierFlags modifier ) = 0;
 };
-
-#endif

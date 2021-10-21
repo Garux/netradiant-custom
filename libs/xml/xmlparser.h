@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_XML_XMLPARSER_H )
-#define INCLUDED_XML_XMLPARSER_H
+#pragma once
 
 #include <cstdio>
 #include <string.h>
@@ -213,7 +212,3 @@ public:
 private:
 	TextInputStream& m_istream;
 };
-
-
-
-#endif

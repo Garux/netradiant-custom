@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_COMMANDS_H )
-#define INCLUDED_COMMANDS_H
+#pragma once
 
 #include "gtkutil/accelerator.h"
 
@@ -43,6 +42,3 @@ void DoCommandListDlg();
 
 void LoadCommandMap( const char* path );
 void SaveCommandMap( const char* path );
-
-
-#endif

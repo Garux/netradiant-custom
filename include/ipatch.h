@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IPATCH_H )
-#define INCLUDED_IPATCH_H
+#pragma once
 
 #include "generic/constant.h"
 #include "generic/vector.h"
@@ -250,5 +249,3 @@ typedef GlobalModuleRef<PatchCreator> GlobalPatchModuleRef;
 inline PatchCreator& GlobalPatchCreator(){
 	return GlobalPatchModule::getTable();
 }
-
-#endif

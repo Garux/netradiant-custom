@@ -18,8 +18,4 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _PLUGIN_SUNPLUG_
-  #define _PLUGIN_SUNPLUG_
-
-
-#endif // _PLUGIN_SUNPLUG_
+#pragma once

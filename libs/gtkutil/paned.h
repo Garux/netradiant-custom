@@ -19,10 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_PANED_H )
-#define INCLUDED_GTKUTIL_PANED_H
+#pragma once
 
 typedef struct _GtkWidget GtkWidget;
 GtkWidget* create_split_views( GtkWidget* topleft, GtkWidget* botleft, GtkWidget* topright, GtkWidget* botright, GtkWidget*& vsplit1, GtkWidget*& vsplit2 );
-
-#endif

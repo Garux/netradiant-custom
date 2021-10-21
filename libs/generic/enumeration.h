@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GENERIC_ENUMERATION_H )
-#define INCLUDED_GENERIC_ENUMERATION_H
+#pragma once
 
 /// \file
 /// \brief Type safe enumeration.
@@ -52,5 +51,3 @@ template<typename Enumeration>
 inline bool operator!=( EnumeratedValue<Enumeration> self, EnumeratedValue<Enumeration> other ){
 	return !operator==( self, other );
 }
-
-#endif

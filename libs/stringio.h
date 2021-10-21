@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_STRINGIO_H )
-#define INCLUDED_STRINGIO_H
+#pragma once
 
 #include <stdlib.h>
 #include <cctype>
@@ -497,5 +496,3 @@ template<typename Caller>
 inline StringExportCallback makeSizeStringExportCallback( const Caller& caller ){
 	return StringExportCallback( caller.getEnvironment(), ImportConvert1<StringExportCallback::first_argument_type, Caller, SizeToString>::thunk );
 }
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_WINDING_H )
-#define INCLUDED_WINDING_H
+#pragma once
 
 #include "debugging/debugging.h"
 
@@ -276,5 +275,3 @@ inline void Winding_printConnectivity( Winding& winding ){
 		globalOutputStream() << "vertex: " << Unsigned( vertexIndex ) << " adjacent: " << Unsigned( ( *i ).adjacent ) << "\n";
 	}
 }
-
-#endif

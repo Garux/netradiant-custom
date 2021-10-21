@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IMAP_H )
-#define INCLUDED_IMAP_H
+#pragma once
 
 #include "generic/constant.h"
 
@@ -76,6 +75,3 @@ typedef Modules<MapFormat> MapModules;
 template<typename Type>
 class ModulesRef;
 typedef ModulesRef<MapFormat> MapModulesRef;
-
-
-#endif

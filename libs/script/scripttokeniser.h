@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_SCRIPT_SCRIPTTOKENISER_H )
-#define INCLUDED_SCRIPT_SCRIPTTOKENISER_H
+#pragma once
 
 #include "iscriplib.h"
 
@@ -354,5 +353,3 @@ inline Tokeniser& NewScriptTokeniser( TextInputStream& istream ){
 inline Tokeniser& NewSimpleTokeniser( TextInputStream& istream ){
 	return *( new ScriptTokeniser( istream, false ) );
 }
-
-#endif

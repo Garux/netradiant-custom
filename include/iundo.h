@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IUNDO_H )
-#define INCLUDED_IUNDO_H
+#pragma once
 
 /// \file
 /// \brief The undo-system interface. Uses the 'memento' pattern.
@@ -113,6 +112,3 @@ public:
 		GlobalUndoSystem().finish( m_command );
 	}
 };
-
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MDLFORMAT_H )
-#define INCLUDED_MDLFORMAT_H
+#pragma once
 
 typedef unsigned char byte;
 
@@ -114,5 +113,3 @@ typedef struct {
 typedef struct {
 	aliasskintype_t type;
 } mdlSkinType_t;
-
-#endif

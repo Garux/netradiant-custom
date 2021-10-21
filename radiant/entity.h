@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ENTITY_H )
-#define INCLUDED_ENTITY_H
+#pragma once
 
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
@@ -41,5 +40,3 @@ void Entity_registerShortcuts();
 
 void Entity_Construct();
 void Entity_Destroy();
-
-#endif

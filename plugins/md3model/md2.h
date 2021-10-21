@@ -19,14 +19,10 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MD2_H )
-#define INCLUDED_MD2_H
+#pragma once
 
 namespace scene {
 class Node;
 }
 class ArchiveFile;
 scene::Node& loadMD2Model( ArchiveFile& file );
-
-
-#endif

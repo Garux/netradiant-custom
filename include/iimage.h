@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IIMAGE_H )
-#define INCLUDED_IIMAGE_H
+#pragma once
 
 #include "generic/constant.h"
 
@@ -68,5 +67,3 @@ typedef Modules<_QERPlugImageTable> ImageModules;
 template<typename Type>
 class ModulesRef;
 typedef ModulesRef<_QERPlugImageTable> ImageModulesRef;
-
-#endif // _IIMAGE_H

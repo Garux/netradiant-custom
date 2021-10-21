@@ -28,8 +28,7 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined( INCLUDED_PROFILE_PROFILE_H )
-#define INCLUDED_PROFILE_PROFILE_H
+#pragma once
 
 // profile functions - kind of utility lib
 // they are kind of dumb, they expect to get the path to the .ini file or to the prefs directory when called
@@ -45,5 +44,3 @@ char* profile_load_string( const char *filename, const char *section, const char
 // used in the command map code
 bool read_var( const char *filename, const char *section, const char *key, char *value );
 bool save_var( const char *filename, const char *section, const char *key, const char *value );
-
-#endif

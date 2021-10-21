@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_XML_XMLWRITER_H )
-#define INCLUDED_XML_XMLWRITER_H
+#pragma once
 
 #include "convert.h"
 #include <vector>
@@ -173,6 +172,3 @@ public:
 		write_quoted_string( value );
 	}
 };
-
-
-#endif

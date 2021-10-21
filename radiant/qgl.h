@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_QGL_H )
-#define INCLUDED_QGL_H
+#pragma once
 
 struct OpenGLBinding;
 void QGL_sharedContextCreated( OpenGLBinding& table );
@@ -29,5 +28,3 @@ void QGL_sharedContextDestroyed( OpenGLBinding& table );
 bool QGL_ExtensionSupported( const char* extension );
 
 float QGL_maxTextureAnisotropy();
-
-#endif

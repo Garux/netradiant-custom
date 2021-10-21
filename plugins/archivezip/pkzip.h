@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_PKZIP_H )
-#define INCLUDED_PKZIP_H
+#pragma once
 
 #include "bytestreamutils.h"
 #include "idatastream.h"
@@ -253,5 +252,3 @@ inline SeekableStream::position_type pkzip_find_disk_trailer( SeekableInputStrea
 		return 0;
 	}
 }
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_BRUSHWRAPPER_H )
-#define INCLUDED_BRUSHWRAPPER_H
+#pragma once
 
 #include <cstddef>
 #include "string/stringfwd.h"
@@ -93,5 +92,3 @@ extern Callback g_texture_lock_status_changed;
 
 void BrushFilters_construct();
 void Brush_registerCommands();
-
-#endif

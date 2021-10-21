@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MD3NORMALS_H )
-#define INCLUDED_MD3NORMALS_H
+#pragma once
 
 #include "render.h"
 
@@ -37,5 +36,3 @@ inline Normal3f DecodeNormal( const byte bytes[2] ){
 	           static_cast<float>( cos( lng ) )
 	       );
 }
-
-#endif

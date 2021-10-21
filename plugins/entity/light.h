@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_LIGHT_H )
-#define INCLUDED_LIGHT_H
+#pragma once
 
 namespace scene
 {
@@ -37,5 +36,3 @@ enum LightType
 };
 void Light_Construct( LightType lightType );
 void Light_Destroy();
-
-#endif

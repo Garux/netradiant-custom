@@ -19,12 +19,9 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_TGA_H )
-#define INCLUDED_TGA_H
+#pragma once
 
 class Image;
 class ArchiveFile;
 
 Image* LoadTGA( ArchiveFile& file );
-
-#endif

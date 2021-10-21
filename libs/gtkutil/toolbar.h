@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_TOOLBAR_H )
-#define INCLUDED_GTKUTIL_TOOLBAR_H
+#pragma once
 
 #include "generic/callbackfwd.h"
 
@@ -38,5 +37,3 @@ GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* descripti
 GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Command& command );
 GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback );
 GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Toggle& toggle );
-
-#endif

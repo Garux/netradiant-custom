@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MODEL_H )
-#define INCLUDED_MODEL_H
+#pragma once
 
 #include "cullable.h"
 #include "renderable.h"
@@ -565,5 +564,3 @@ inline void Model_constructNull( Model& model ){
 
 	model.updateAABB();
 }
-
-#endif

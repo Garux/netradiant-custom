@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ENTITY_H )
-#define INCLUDED_ENTITY_H
+#pragma once
 
 class EntityCreator;
 EntityCreator& GetEntityCreator();
@@ -49,5 +48,3 @@ extern bool g_showAngles;
 extern bool g_lightRadii;
 
 extern bool g_stupidQuakeBug;
-
-#endif

@@ -16,8 +16,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_UFOAI_GTK_H )
-#define INCLUDED_UFOAI_GTK_H
+#pragma once
 
 #include "itoolbar.h"
 #include <gtk/gtk.h>
@@ -26,5 +25,3 @@ const IToolbarButton* GetToolbarButton( std::size_t index );
 const IToolbarButton* GetToolbarNoButton( std::size_t index );
 std::size_t ToolbarButtonCount( void );
 std::size_t ToolbarNoButtons( void );
-
-#endif

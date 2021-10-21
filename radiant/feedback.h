@@ -25,8 +25,7 @@
 // classes used for describing geometry information from q3map feedback
 //
 
-#ifndef __Q3MAP_FEEDBACK__
-#define __Q3MAP_FEEDBACK__
+#pragma once
 
 #include "math/vector.h"
 #include "stream/stringstream.h"
@@ -204,5 +203,3 @@ protected:
 extern CDbgDlg g_DbgDlg;
 
 void Feedback_draw2D( VIEWTYPE viewType );
-
-#endif

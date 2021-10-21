@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GRID_H )
-#define INCLUDED_GRID_H
+#pragma once
 
 #include "signal/signalfwd.h"
 
@@ -40,5 +39,3 @@ void Grid_registerShortcuts();
 
 void Grid_construct();
 void Grid_destroy();
-
-#endif

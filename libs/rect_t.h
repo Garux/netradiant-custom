@@ -1,5 +1,4 @@
-#if !defined( INCLUDED_RECT_T_H )
-#define INCLUDED_RECT_T_H
+#pragma once
 
 struct rect_t {
 	float min[2];
@@ -17,6 +16,3 @@ struct rect_t {
 		modifier = eSelect;
 	}
 };
-
-
-#endif

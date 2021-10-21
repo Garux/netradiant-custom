@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IRENDER_H )
-#define INCLUDED_IRENDER_H
+#pragma once
 
 #include "generic/constant.h"
 #include "generic/callbackfwd.h"
@@ -167,5 +166,3 @@ typedef GlobalModuleRef<ShaderCache> GlobalShaderCacheModuleRef;
 inline ShaderCache& GlobalShaderCache(){
 	return GlobalShaderCacheModule::getTable();
 }
-
-#endif

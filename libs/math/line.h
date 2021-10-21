@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MATH_LINE_H )
-#define INCLUDED_MATH_LINE_H
+#pragma once
 
 /// \file
 /// \brief Line data types and related operations.
@@ -177,5 +176,3 @@ inline DoubleRay plane3_intersect_plane3( const Plane3& plane, const Plane3& oth
 
 	return line;
 }
-
-#endif

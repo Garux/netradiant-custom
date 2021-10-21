@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_GLFONT_H )
-#define INCLUDED_GTKUTIL_GLFONT_H
+#pragma once
 
 typedef unsigned int GLuint;
 
@@ -38,5 +37,3 @@ public:
 
 GLFont *glfont_create( const char* font_string );
 // release with delete
-
-#endif

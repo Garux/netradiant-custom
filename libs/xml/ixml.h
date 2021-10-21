@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_XML_IXML_H )
-#define INCLUDED_XML_IXML_H
+#pragma once
 
 #include "itextstream.h"
 #include "generic/constant.h"
@@ -55,6 +54,3 @@ public:
 
 	virtual void exportXML( XMLImporter& importer ) = 0;
 };
-
-
-#endif

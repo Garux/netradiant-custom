@@ -21,12 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined( AFX_DPOINT_H__FC37C022_F0A1_11D4_ACF7_004095A18133__INCLUDED_ )
-#define AFX_DPOINT_H__FC37C022_F0A1_11D4_ACF7_004095A18133__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "mathlib.h"
 
@@ -43,5 +38,3 @@ public:
 };
 
 //typedef CList<DPoint*, DPoint*> DPointList;
-
-#endif // !defined(AFX_DPOINT_H__FC37C022_F0A1_11D4_ACF7_004095A18133__INCLUDED_)

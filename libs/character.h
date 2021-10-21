@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_CHARACTER_H )
-#define INCLUDED_CHARACTER_H
+#pragma once
 
 /// \file
 /// \brief Character encoding.
@@ -40,5 +39,3 @@ inline bool string_is_ascii( const char* string ){
 	}
 	return true;
 }
-
-#endif

@@ -1,3 +1,6 @@
+
+#pragma once
+
 typedef struct _GtkWidget GtkWidget;
 typedef struct _GtkButton GtkButton;
 

@@ -23,8 +23,7 @@
 // start of shared cmdlib stuff
 //
 
-#ifndef __CMDLIB__
-#define __CMDLIB__
+#pragma once
 
 #include <time.h>
 
@@ -94,7 +93,3 @@ inline bool Q_mkdir( const char* name ){
 inline double Sys_DoubleTime( void ){
 	return clock() / 1000.0;
 }
-
-
-
-#endif

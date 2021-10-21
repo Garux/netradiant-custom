@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_FILTERS_H )
-#define INCLUDED_FILTERS_H
+#pragma once
 
 #include "ifilter.h"
 
@@ -71,5 +70,3 @@ public:
 	}
 	typedef MemberCaller1<ClassnameFilter, const char*, &ClassnameFilter::classnameChanged> ClassnameChangedCaller;
 };
-
-#endif

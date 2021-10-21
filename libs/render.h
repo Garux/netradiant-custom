@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_RENDER_H )
-#define INCLUDED_RENDER_H
+#pragma once
 
 /// \file
 /// \brief High-level constructs for efficient OpenGL rendering.
@@ -1555,6 +1554,3 @@ protected:
 	}
 private:
 };
-
-
-#endif

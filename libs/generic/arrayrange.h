@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GENERIC_ARRAYRANGE_H )
-#define INCLUDED_GENERIC_ARRAYRANGE_H
+#pragma once
 
 /// \file
 /// \brief Macros for automatically converting a compile-time-sized array to a range.
@@ -66,5 +65,3 @@ typedef ArrayConstRange<const char*> StringArrayRange;
 #define STRING_ARRAY_RANGE( array ) ( StringArrayRange( array, ARRAY_END( array ) ) )
 
 typedef ArrayRange<const char> StringRange;
-
-#endif

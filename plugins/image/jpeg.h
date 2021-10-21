@@ -28,12 +28,9 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined ( INCLUDED_JPEG_H )
-#define INCLUDED_JPEG_H
+#pragma once
 
 class Image;
 class ArchiveFile;
 
 Image* LoadJPG( ArchiveFile& file );
-
-#endif

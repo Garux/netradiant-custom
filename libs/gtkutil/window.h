@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_WINDOW_H )
-#define INCLUDED_GTKUTIL_WINDOW_H
+#pragma once
 
 #include <gtk/gtk.h>
 
@@ -176,7 +175,3 @@ inline void WindowPositionTracker_exportString( const WindowPositionTracker& sel
 	WindowPosition_Write( self.getPosition(), importer );
 }
 typedef ConstReferenceCaller1<WindowPositionTracker, const StringImportCallback&, WindowPositionTracker_exportString> WindowPositionTrackerExportStringCaller;
-
-
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_CONTAINER_H )
-#define INCLUDED_GTKUTIL_CONTAINER_H
+#pragma once
 
 #include <gtk/gtk.h>
 
@@ -36,5 +35,3 @@ inline void container_remove( GtkWidget* item, gpointer data ){
 inline void container_remove_all( GtkContainer* container ){
 	gtk_container_foreach( container, container_remove, container );
 }
-
-#endif

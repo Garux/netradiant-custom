@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MATH_AABB_H )
-#define INCLUDED_MATH_AABB_H
+#pragma once
 
 /// \file
 /// \brief Axis-aligned bounding-box data types and related operations.
@@ -287,5 +286,3 @@ inline AABB aabb_for_oriented_aabb_safe( const AABB& aabb, const Matrix4& transf
 inline AABB aabb_infinite(){
 	return AABB( Vector3( 0, 0, 0 ), Vector3( c_aabb_max, c_aabb_max, c_aabb_max ) );
 }
-
-#endif

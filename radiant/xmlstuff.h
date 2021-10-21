@@ -34,8 +34,7 @@
 // header for xml stuff used in radiant
 //
 
-#ifndef __XMLSTUFF__
-#define __XMLSTUFF__
+#pragma once
 
 #include "libxml/parser.h"
 
@@ -82,5 +81,3 @@ public:
 	virtual void DropHighlight(){
 	}
 };
-
-#endif

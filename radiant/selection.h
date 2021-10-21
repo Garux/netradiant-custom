@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_SELECTION_H )
-#define INCLUDED_SELECTION_H
+#pragma once
 
 #include "windowobserver.h"
 #include "generic/callbackfwd.h"
@@ -44,5 +43,3 @@ template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
 
 void Scene_Intersect( const View& view, const float device_point[2], const float device_epsilon[2], Vector3& intersection );
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IDATASTREAM_H )
-#define INCLUDED_IDATASTREAM_H
+#pragma once
 
 #include <cstddef>
 
@@ -79,5 +78,3 @@ class SeekableInputStream : public InputStream, public SeekableStream
 class SeekableOutputStream : public OutputStream, public SeekableStream
 {
 };
-
-#endif

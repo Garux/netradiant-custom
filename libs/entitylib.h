@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_ENTITYLIB_H )
-#define INCLUDED_ENTITYLIB_H
+#pragma once
 
 #include "ireference.h"
 #include "debugging/debugging.h"
@@ -709,5 +708,3 @@ inline bool aabb_fits_view( const AABB& aabb, const Matrix4& modelview, const Ma
 	//return ( aabb.extents[0] / viewport[0] ) > 0.25f || ( aabb.extents[1] / viewport[5] ) > 0.25f;
 	return ( viewport[0] + viewport[5] ) / ( transformed_bounds.extents[0] + transformed_bounds.extents[1] ) < ratio;
 }
-
-#endif

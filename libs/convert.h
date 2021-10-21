@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_CONVERT_H )
-#define INCLUDED_CONVERT_H
+#pragma once
 
 /// \file
 /// \brief Character encoding conversion.
@@ -261,6 +260,3 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 	}
 	return ostream;
 }
-
-
-#endif

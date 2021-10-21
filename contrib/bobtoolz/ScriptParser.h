@@ -18,8 +18,7 @@
  */
 
 
-#ifndef _SCRIPTPARSER_H_
-#define _SCRIPTPARSER_H_
+#pragma once
 
 //#include "interfaces/IScriptParser.h"
 
@@ -57,5 +56,3 @@ public:
 	void AddBreakChar( char c );
 private:
 };
-
-#endif

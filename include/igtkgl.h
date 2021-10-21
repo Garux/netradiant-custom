@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_IGTKGL_H )
-#define INCLUDED_IGTKGL_H
+#pragma once
 
 #include "generic/constant.h"
 
@@ -39,5 +38,3 @@ struct _QERGtkGLTable
 	void ( *glwidget_destroy_context )( GtkWidget* widget );
 	void ( *glwidget_create_context )( GtkWidget* widget );
 };
-
-#endif

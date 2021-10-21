@@ -6,9 +6,6 @@
     email                : ashaduri '@' gmail.com
  ***************************************************************************/
 
-#ifndef _GTKTHEME_H_
-#define _GTKTHEME_H_
+#pragma once
 
 void gtkThemeDlg();
-
-#endif

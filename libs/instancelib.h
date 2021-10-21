@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined ( INCLUDED_INSTANCELIB_H )
-#define INCLUDED_INSTANCELIB_H
+#pragma once
 
 #include "debugging/debugging.h"
 
@@ -171,5 +170,3 @@ public:
 	}
 	typedef ReferenceCaller<InstanceSet, &InstanceSetEvaluateTransform<Type>::apply> Caller;
 };
-
-#endif

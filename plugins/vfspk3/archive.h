@@ -19,11 +19,8 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ARCHIVE_H )
-#define INCLUDED_ARCHIVE_H
+#pragma once
 
 #include "iarchive.h"
 
 const _QERArchiveTable* GetArchiveTable( ArchiveModules& archiveModules, const char* type );
-
-#endif

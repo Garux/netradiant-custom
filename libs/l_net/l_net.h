@@ -29,6 +29,8 @@
 // Notes:
 //====================================================================
 
+#pragma once
+
 //++timo FIXME: the l_net code understands that as the max size for the netmessage_s structure
 //  we have defined unsigned char data[MAX_NETMESSAGE] in netmessage_s but actually it cannot be filled completely
 //  we need to introduce a new #define and adapt to data[MAX_NETBUFFER]

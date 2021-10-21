@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MATH_PLANE_H )
-#define INCLUDED_MATH_PLANE_H
+#pragma once
 
 /// \file
 /// \brief Plane data types and related operations.
@@ -174,5 +173,3 @@ template<typename P, typename V>
 inline BasicVector3<V> plane3_project_point( const Plane3___<P>& plane, const BasicVector3<V>& point ){
 	return point - plane.normal() * plane3_distance_to_point( plane, point );
 }
-
-#endif

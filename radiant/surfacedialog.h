@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_SURFACEDIALOG_H )
-#define INCLUDED_SURFACEDIALOG_H
+#pragma once
 
 
 void SurfaceInspector_Construct();
@@ -55,5 +54,3 @@ struct si_globals_t
 	}
 };
 extern si_globals_t g_si_globals;
-
-#endif

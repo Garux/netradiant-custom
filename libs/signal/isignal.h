@@ -1,6 +1,5 @@
 
-#if !defined( INCLUDED_ISIGNAL_H )
-#define INCLUDED_ISIGNAL_H
+#pragma once
 
 #include "generic/callback.h"
 #include "signal/signalfwd.h"
@@ -201,5 +200,3 @@ inline SignalHandler3<
 	            typename Caller::fourth_argument_type
 	       >( BindFirstOpaque3<Caller>( callee ) );
 }
-
-#endif

@@ -19,6 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#pragma once
 
 #if defined( STRICTUNZIP ) || defined( STRICTZIPUNZIP )
 /* like the STRICT of WIN32, we define a pointer that cannot be converted

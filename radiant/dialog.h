@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_DIALOG_H )
-#define INCLUDED_DIALOG_H
+#pragma once
 
 #include <list>
 
@@ -196,5 +195,3 @@ protected:
 	void AddDialogData( GtkAdjustment& object, float& data );
 	void AddDialogData( GtkComboBox& object, int& data );
 };
-
-#endif

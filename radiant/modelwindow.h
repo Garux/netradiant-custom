@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_MODELWINDOW_H )
-#define INCLUDED_MODELWINDOW_H
+#pragma once
 
 
 void ModelBrowser_Construct();
@@ -36,6 +35,3 @@ void ModelBrowser_destroyWindow();
 GtkWidget* ModelBrowser_getGLWidget();
 
 void ModelBrowser_flushReferences();
-
-
-#endif

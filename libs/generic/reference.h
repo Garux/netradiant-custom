@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GENERIC_REFERENCE_H )
-#define INCLUDED_GENERIC_REFERENCE_H
+#pragma once
 
 /// \file
 /// \brief Wrappers to allow storing objects in templated containers using 'reference' semantics.
@@ -98,6 +97,3 @@ template<typename Type>
 inline ConstReference<Type> makeReference( const Type& value ){
 	return ConstReference<Type>( value );
 }
-
-
-#endif

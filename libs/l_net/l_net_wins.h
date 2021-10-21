@@ -28,6 +28,9 @@
 // Tab Size:     3
 // Notes:
 //===========================================================================
+
+#pragma once
+
 #include "bytebool.h"
 int  WINS_Init( void );
 void WINS_Shutdown( void );

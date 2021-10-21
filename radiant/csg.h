@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_CSG_H )
-#define INCLUDED_CSG_H
+#pragma once
 
 void CSG_MakeRoom();
 void CSG_Subtract();
@@ -38,5 +37,3 @@ class ClipperPoints;
 
 void Scene_BrushSetClipPlane( scene::Graph& graph, const ClipperPoints& points, bool flip );
 void Scene_BrushSplitByPlane( scene::Graph& graph, const ClipperPoints& points, bool flip, bool caulk, bool split );
-
-#endif

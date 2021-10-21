@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GTKUTIL_CURSOR_H )
-#define INCLUDED_GTKUTIL_CURSOR_H
+#pragma once
 
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -268,6 +267,3 @@ public:
 		self->value_changed( gtk_adjustment_get_value( adjustment ) );
 	}
 };
-
-
-#endif

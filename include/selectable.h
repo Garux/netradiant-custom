@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_SELECTABLE_H )
-#define INCLUDED_SELECTABLE_H
+#pragma once
 
 #include <cstddef>
 
@@ -305,7 +304,3 @@ public:
 	virtual void selectByPlane( const Plane3& plane ) = 0;
 	virtual void gatherPolygonsByPlane( const Plane3& plane, std::vector<std::vector<Vector3>>& polygons ) const = 0;
 };
-
-
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_GROUPDIALOG_H )
-#define INCLUDED_GROUPDIALOG_H
+#pragma once
 
 #include "generic/callback.h"
 
@@ -43,5 +42,3 @@ GtkWidget* GroupDialog_addPage( const char* tabLabel, GtkWidget* widget, const S
 
 void GroupDialog_showPage( GtkWidget* page );
 void GroupDialog_updatePageTitle( GtkWidget* page );
-
-#endif

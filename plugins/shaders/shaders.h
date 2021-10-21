@@ -28,8 +28,7 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined( INCLUDED_SHADERS_H )
-#define INCLUDED_SHADERS_H
+#pragma once
 
 void Shaders_Construct();
 void Shaders_Destroy();
@@ -50,6 +49,3 @@ extern bool g_enableDefaultShaders;
 extern bool g_useShaderList;
 struct _QERPlugImageTable;
 extern _QERPlugImageTable* g_bitmapModule;
-
-
-#endif

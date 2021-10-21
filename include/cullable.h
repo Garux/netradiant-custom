@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_CULLABLE_H )
-#define INCLUDED_CULLABLE_H
+#pragma once
 
 #include "generic/constant.h"
 
@@ -71,6 +70,3 @@ public:
 
 	virtual VolumeIntersectionValue intersectVolume( const VolumeTest& test, const Matrix4& localToWorld ) const = 0;
 };
-
-
-#endif

@@ -19,8 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_ZLIBSTREAM_H )
-#define INCLUDED_ZLIBSTREAM_H
+#pragma once
 
 #include "zlib.h"
 #include "idatastream.h"
@@ -64,5 +63,3 @@ public:
 		return length - m_zipstream.avail_out;
 	}
 };
-
-#endif

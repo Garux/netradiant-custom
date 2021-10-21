@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include "mathlib.h"
 
 #define LUMP_ENTITIES       0
