@@ -473,6 +473,7 @@ void DoMergePatches(){
 		   delete newPatch;*/
 
 		if ( !newPatch ) {
+			globalErrorStream() << "bobToolz.mergePatch: Merge result would exceed max patch rows.\n";
 		}
 		else
 		{
@@ -519,9 +520,8 @@ void DoSplitPatch() {
 
 	patch.LoadFromPatch( instance );
 
-	std::list<DPatch> patchList = patch.Split();
-	for ( std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++ ) {
-		( *patches ).BuildInRadiant( instance.path().parent().get_pointer() );
+	for ( auto&& p : patch.Split() ) {
+		p.BuildInRadiant( instance.path().parent().get_pointer() );
 	}
 
 	Path_deleteTop( instance.path() );
@@ -549,9 +549,8 @@ void DoSplitPatchCols() {
 
 	patch.LoadFromPatch( instance );
 
-	std::list<DPatch> patchList = patch.SplitCols();
-	for ( std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++ ) {
-		( *patches ).BuildInRadiant( instance.path().parent().get_pointer() );
+	for ( auto&& p : patch.SplitCols() ) {
+		p.BuildInRadiant( instance.path().parent().get_pointer() );
 	}
 
 	Path_deleteTop( instance.path() );
@@ -579,9 +578,8 @@ void DoSplitPatchRows() {
 
 	patch.LoadFromPatch( instance );
 
-	std::list<DPatch> patchList = patch.SplitRows();
-	for ( std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++ ) {
-		( *patches ).BuildInRadiant( instance.path().parent().get_pointer() );
+	for ( auto&& p : patch.SplitRows() ) {
+		p.BuildInRadiant( instance.path().parent().get_pointer() );
 	}
 
 	Path_deleteTop( instance.path() );

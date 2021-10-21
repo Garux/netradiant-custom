@@ -444,7 +444,7 @@ std::list<DPatch> DPatch::SplitCols(){
 		}
 	}
 	else {
-		//globalErrorStream() << "bobToolz SplitPatchRows: Patch has not enough rows for splitting.\n";
+		globalWarningStream() << "bobToolz SplitPatchCols: Patch has not enough columns for splitting.\n";
 		patchList.push_back( *this );
 	}
 	return patchList;
@@ -476,6 +476,7 @@ std::list<DPatch> DPatch::SplitRows(){
 	}
 	else
 	{
+		globalWarningStream() << "bobToolz SplitPatchRows: Patch has not enough rows for splitting.\n";
 		patchList.push_back( *this );
 	}
 	return patchList;
@@ -486,30 +487,20 @@ std::list<DPatch> DPatch::Split(){
 
 	if ( height >= 5 ) {
 		std::list<DPatch> patchColList = SplitCols();
-		for ( std::list<DPatch>::iterator patchesCol = patchColList.begin(); patchesCol != patchColList.end(); patchesCol++ )
-		{
-			if( width >= 5 ){
-				std::list<DPatch> patchRowList = ( *patchesCol ).SplitRows();
-				for ( std::list<DPatch>::iterator patchesRow = patchRowList.begin(); patchesRow != patchRowList.end(); patchesRow++ )
-				{
-					patchList.push_front( *patchesRow );
-				}
-			}
-			else{
-				patchList.push_front( *patchesCol );
-			}
+		if( width >= 5 ){
+			for( auto&& patchesCol : patchColList )
+				patchList.splice( patchList.cend(), patchesCol.SplitRows() );
+		}
+		else{
+			patchList.swap( patchColList );
 		}
 	}
 	else if ( width >= 5 ) {
-		std::list<DPatch> patchRowList = SplitRows();
-		for ( std::list<DPatch>::iterator patchesRow = patchRowList.begin(); patchesRow != patchRowList.end(); patchesRow++ )
-		{
-			patchList.push_front( *patchesRow );
-		}
+		patchList = SplitRows();
 	}
 	else
 	{
-		//globalErrorStream() << "bobToolz SplitPatchRows: Patch has not enough rows for splitting.\n";
+		globalWarningStream() << "bobToolz SplitPatch: Patch has not enough rows and columns for splitting.\n";
 		patchList.push_back( *this );
 	}
 	return patchList;
