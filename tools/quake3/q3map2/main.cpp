@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define MAIN_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 #include "autopk3.h"
