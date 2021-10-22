@@ -40,7 +40,7 @@
 #include <windows.h>
 #endif
 
-#ifdef WIN32
+#ifdef _MSC_VER
 	#ifdef NDEBUG                           // Don't show in a Release build
 		#pragma warning(disable : 4305)     // truncate from double to float
 		#pragma warning(disable : 4244)     // conversion from double to float

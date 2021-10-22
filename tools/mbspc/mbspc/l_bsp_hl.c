@@ -642,9 +642,6 @@ void HL_WriteBSPFile (char *filename)
 
 //============================================================================
 
-#define ENTRIES(a)		(sizeof(a)/sizeof(*(a)))
-#define ENTRYSIZE(a)	(sizeof(*(a)))
-
 int ArrayUsage( char *szItem, int items, int maxitems, int itemsize )
 {
 	float	percentage = maxitems ? items * 100.0 / maxitems : 0.0;
@@ -694,22 +691,22 @@ void HL_PrintBSPFileSizes(void)
 	qprintf("Object names  Objects/Maxobjs  Memory / Maxmem  Fullness\n" );
 	qprintf("------------  ---------------  ---------------  --------\n" );
 
-	totalmemory += ArrayUsage( "models",		hl_nummodels,		ENTRIES(hl_dmodels),		ENTRYSIZE(hl_dmodels) );
-	totalmemory += ArrayUsage( "planes",		hl_numplanes,		ENTRIES(hl_dplanes),		ENTRYSIZE(hl_dplanes) );
-	totalmemory += ArrayUsage( "vertexes",		hl_numvertexes,	ENTRIES(hl_dvertexes),	ENTRYSIZE(hl_dvertexes) );
-	totalmemory += ArrayUsage( "nodes",			hl_numnodes,		ENTRIES(hl_dnodes),		ENTRYSIZE(hl_dnodes) );
-	totalmemory += ArrayUsage( "texinfos",		hl_numtexinfo,		ENTRIES(hl_texinfo),		ENTRYSIZE(hl_texinfo) );
-	totalmemory += ArrayUsage( "faces",			hl_numfaces,		ENTRIES(hl_dfaces),		ENTRYSIZE(hl_dfaces) );
-	totalmemory += ArrayUsage( "clipnodes",	hl_numclipnodes,	ENTRIES(hl_dclipnodes),	ENTRYSIZE(hl_dclipnodes) );
-	totalmemory += ArrayUsage( "leaves",		hl_numleafs,		ENTRIES(hl_dleafs),		ENTRYSIZE(hl_dleafs) );
-	totalmemory += ArrayUsage( "marksurfaces",hl_nummarksurfaces,ENTRIES(hl_dmarksurfaces),ENTRYSIZE(hl_dmarksurfaces) );
-	totalmemory += ArrayUsage( "surfedges",	hl_numsurfedges,	ENTRIES(hl_dsurfedges),	ENTRYSIZE(hl_dsurfedges) );
-	totalmemory += ArrayUsage( "edges",			hl_numedges,		ENTRIES(hl_dedges),		ENTRYSIZE(hl_dedges) );
+	totalmemory += ArrayUsage( "models",       hl_nummodels,       HL_MAX_MAP_MODELS,       sizeof(*hl_dmodels) );
+	totalmemory += ArrayUsage( "planes",       hl_numplanes,       HL_MAX_MAP_PLANES,       sizeof(*hl_dplanes) );
+	totalmemory += ArrayUsage( "vertexes",     hl_numvertexes,     HL_MAX_MAP_VERTS,        sizeof(*hl_dvertexes) );
+	totalmemory += ArrayUsage( "nodes",        hl_numnodes,        HL_MAX_MAP_NODES,        sizeof(*hl_dnodes) );
+	totalmemory += ArrayUsage( "texinfos",     hl_numtexinfo,      HL_MAX_MAP_TEXINFO,      sizeof(*hl_texinfo) );
+	totalmemory += ArrayUsage( "faces",        hl_numfaces,        HL_MAX_MAP_FACES,        sizeof(*hl_dfaces) );
+	totalmemory += ArrayUsage( "clipnodes",    hl_numclipnodes,    HL_MAX_MAP_CLIPNODES,    sizeof(*hl_dclipnodes) );
+	totalmemory += ArrayUsage( "leaves",       hl_numleafs,        HL_MAX_MAP_LEAFS,        sizeof(*hl_dleafs) );
+	totalmemory += ArrayUsage( "marksurfaces", hl_nummarksurfaces, HL_MAX_MAP_MARKSURFACES, sizeof(*hl_dmarksurfaces) );
+	totalmemory += ArrayUsage( "surfedges",    hl_numsurfedges,    HL_MAX_MAP_SURFEDGES,    sizeof(*hl_dsurfedges) );
+	totalmemory += ArrayUsage( "edges",        hl_numedges,        HL_MAX_MAP_EDGES,        sizeof(*hl_dedges) );
 
-	totalmemory += GlobUsage( "texdata",		hl_texdatasize,	sizeof(hl_dtexdata) );
-	totalmemory += GlobUsage( "lightdata",		hl_lightdatasize,	sizeof(hl_dlightdata) );
-	totalmemory += GlobUsage( "visdata",		hl_visdatasize,	sizeof(hl_dvisdata) );
-	totalmemory += GlobUsage( "entdata",		hl_entdatasize,	sizeof(hl_dentdata) );
+	totalmemory += GlobUsage( "texdata",       hl_texdatasize,   HL_MAX_MAP_MIPTEX );
+	totalmemory += GlobUsage( "lightdata",     hl_lightdatasize, HL_MAX_MAP_LIGHTING );
+	totalmemory += GlobUsage( "visdata",       hl_visdatasize,   HL_MAX_MAP_VISIBILITY );
+	totalmemory += GlobUsage( "entdata",       hl_entdatasize,   HL_MAX_MAP_ENTSTRING );
 
 	qprintf( "=== Total BSP file data space used: %d bytes ===\n\n", totalmemory );
 }
