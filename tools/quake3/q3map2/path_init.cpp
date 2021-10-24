@@ -254,7 +254,7 @@ void AddHomeBasePath( std::vector<CopiedString>& basePaths, const char *homePath
 	}
 	else if ( strEqualSuffix( homePath, "/." ) ) {
 		/* concatenate home dir and path */ /* remove trailing /. of homePath */
-		str( StringRange( homePath, homePath + strlen( homePath ) - 1 ), homeBasePath );
+		str( StringRange( homePath, strlen( homePath ) - 1 ), homeBasePath );
 	}
 	else
 	{

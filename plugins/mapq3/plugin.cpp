@@ -511,30 +511,27 @@ inline void parseToken( Tokeniser& tokeniser, const char* token ){
 	ASSERT_MESSAGE( Tokeniser_parseToken( tokeniser, token ), "error parsing vmf: token not found: " << makeQuoted( token ) );
 }
 
-#include "generic/arrayrange.h"
-
-class VMFBlock;
-typedef ArrayConstRange<VMFBlock> VMFBlockArrayRange;
 
 
 class VMFBlock
 {
 public:
+	using VMFBlockArray = std::vector<const VMFBlock*>;
 	const char* m_name;
-	VMFBlockArrayRange m_children;
-	typedef const VMFBlock Value;
+	VMFBlockArray m_children;
 
-	VMFBlock( const char* name, VMFBlockArrayRange children = VMFBlockArrayRange( 0, 0 ) ) : m_name( name ), m_children( children ){
+	VMFBlock( const char* name, VMFBlockArray children = VMFBlockArray() ) : m_name( name ), m_children( children ){
 	}
 	const char* name() const {
 		return m_name;
 	}
-	typedef Value* const_iterator;
+
+	using const_iterator = VMFBlockArray::const_iterator;
 	const_iterator begin() const {
-		return m_children.first;
+		return m_children.begin();
 	}
 	const_iterator end() const {
-		return m_children.last;
+		return m_children.end();
 	}
 };
 
@@ -545,36 +542,28 @@ const VMFBlock c_vmfOffsetNormals( "offset_normals" );
 const VMFBlock c_vmfAlphas( "alphas" );
 const VMFBlock c_vmfTriangleTags( "triangle_tags" );
 const VMFBlock c_vmfAllowedVerts( "allowed_verts" );
-const VMFBlock c_vmfDispInfoChildren[] = { c_vmfNormals, c_vmfDistances, c_vmfOffsets, c_vmfOffsetNormals, c_vmfAlphas, c_vmfTriangleTags, c_vmfAllowedVerts };
-const VMFBlock c_vmfDispInfo( "dispinfo", ARRAY_RANGE( c_vmfDispInfoChildren ) );
-const VMFBlock c_vmfSideChildren[] = { c_vmfDispInfo };
-const VMFBlock c_vmfSide( "side", ARRAY_RANGE( c_vmfSideChildren ) );
+const VMFBlock c_vmfDispInfo( "dispinfo", { &c_vmfNormals, &c_vmfDistances, &c_vmfOffsets, &c_vmfOffsetNormals, &c_vmfAlphas, &c_vmfTriangleTags, &c_vmfAllowedVerts } );
+const VMFBlock c_vmfSide( "side", { &c_vmfDispInfo } );
 const VMFBlock c_vmfEditor( "editor" );
 const VMFBlock c_vmfVersionInfo( "versioninfo" );
 const VMFBlock c_vmfViewSettings( "viewsettings" );
 const VMFBlock c_vmfCordon( "cordon" );
-const VMFBlock c_vmfGroupChildren[] = { c_vmfEditor };
-const VMFBlock c_vmfGroup( "group", ARRAY_RANGE( c_vmfGroupChildren ) );
+const VMFBlock c_vmfGroup( "group", { &c_vmfEditor } );
 const VMFBlock c_vmfCamera( "camera" );
-const VMFBlock c_vmfCamerasChildren[] = { c_vmfCamera };
-const VMFBlock c_vmfCameras( "cameras", ARRAY_RANGE( c_vmfCamerasChildren ) );
+const VMFBlock c_vmfCameras( "cameras", { &c_vmfCamera } );
 VMFBlock c_vmfVisGroup( "visgroup" );
-VMFBlock c_vmfVisGroups( "visgroups", VMFBlockArrayRange( &c_vmfVisGroup, &c_vmfVisGroup + 1 ) );
-const VMFBlock c_vmfSolidChildren[] = { c_vmfSide, c_vmfEditor };
-const VMFBlock c_vmfSolid( "solid", ARRAY_RANGE( c_vmfSolidChildren ) );
+const VMFBlock c_vmfVisGroups( "visgroups", { &c_vmfVisGroup } );
+const VMFBlock c_vmfSolid( "solid", { &c_vmfSide, &c_vmfEditor } );
 const VMFBlock c_vmfConnections( "connections" );
-const VMFBlock c_vmfEntityChildren[] = { c_vmfEditor, c_vmfSolid, c_vmfGroup, c_vmfConnections };
-const VMFBlock c_vmfEntity( "entity", ARRAY_RANGE( c_vmfEntityChildren ) );
-const VMFBlock c_vmfWorldChildren[] = { c_vmfEditor, c_vmfSolid, c_vmfGroup };
-const VMFBlock c_vmfWorld( "world", ARRAY_RANGE( c_vmfWorldChildren ) );
-const VMFBlock c_vmfRootChildren[] = { c_vmfVersionInfo, c_vmfViewSettings, c_vmfVisGroups, c_vmfWorld, c_vmfEntity, c_vmfCameras, c_vmfCordon };
-const VMFBlock c_vmfRoot( "", ARRAY_RANGE( c_vmfRootChildren ) );
+const VMFBlock c_vmfEntity( "entity", { &c_vmfEditor, &c_vmfSolid, &c_vmfGroup, &c_vmfConnections } );
+const VMFBlock c_vmfWorld( "world", { &c_vmfEditor, &c_vmfSolid, &c_vmfGroup } );
+const VMFBlock c_vmfRoot( "", { &c_vmfVersionInfo, &c_vmfViewSettings, &c_vmfVisGroups, &c_vmfWorld, &c_vmfEntity, &c_vmfCameras, &c_vmfCordon } );
 
 class VMFInit
 {
 public:
 	VMFInit(){
-		c_vmfVisGroup.m_children = VMFBlockArrayRange( &c_vmfVisGroup, &c_vmfVisGroup + 1 );
+		c_vmfVisGroup.m_children = { &c_vmfVisGroup };
 	}
 };
 
@@ -586,7 +575,7 @@ int g_vmf_brushes;
 inline VMFBlock::const_iterator VMFBlock_find( const VMFBlock& block, const char* name ){
 	for ( VMFBlock::const_iterator i = block.begin(); i != block.end(); ++i )
 	{
-		if ( string_equal( name, ( *i ).name() ) ) {
+		if ( string_equal( name, ( *i )->name() ) ) {
 			return i;
 		}
 	}
@@ -614,7 +603,7 @@ void VMF_parseBlock( Tokeniser& tokeniser, const VMFBlock& block ){
 			else if ( string_equal( tmp.c_str(), "entity" ) || string_equal( tmp.c_str(), "world" ) ) {
 				++g_vmf_entities;
 			}
-			VMF_parseBlock( tokeniser, *i );
+			VMF_parseBlock( tokeniser, **i );
 			parseToken( tokeniser, "}" );
 			tokeniser.nextLine();
 		}

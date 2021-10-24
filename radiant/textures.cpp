@@ -720,7 +720,7 @@ void Textures_constructPreferences( PreferencesPage& page ){
 		const char* percentages[] = { "100%", "50%", "25%", "12.5%", };
 		page.appendRadio(
 		    "Texture Quality",
-		    STRING_ARRAY_RANGE( percentages ),
+		    StringArrayRange( percentages ),
 		    TextureMiplevelImportCaller( g_Textures_mipLevel ),
 		    IntExportCaller( g_Textures_mipLevel )
 		);
@@ -737,7 +737,7 @@ void Textures_constructPreferences( PreferencesPage& page ){
 		const char* texture_mode[] = { "Nearest", "Nearest Mipmap", "Linear", "Bilinear", "Bilinear Mipmap", "Trilinear" };
 		page.appendCombo(
 		    "Texture Render Mode",
-		    STRING_ARRAY_RANGE( texture_mode ),
+		    StringArrayRange( texture_mode ),
 		    IntImportCallback( TextureModeImportCaller( g_texture_mode ) ),
 		    IntExportCallback( TextureModeExportCaller( g_texture_mode ) )
 		);
@@ -747,14 +747,14 @@ void Textures_constructPreferences( PreferencesPage& page ){
 		const char* compression_opengl[] = { "None", "OpenGL ARB" };
 		const char* compression_s3tc[] = { "None", "S3TC DXT1", "S3TC DXT3", "S3TC DXT5" };
 		const char* compression_opengl_s3tc[] = { "None", "OpenGL ARB", "S3TC DXT1", "S3TC DXT3", "S3TC DXT5" };
-		StringArrayRange compression(
+		const StringArrayRange compression(
 		    ( g_texture_globals.m_bOpenGLCompressionSupported )
 		    ? ( g_texture_globals.m_bS3CompressionSupported )
-		      ? STRING_ARRAY_RANGE( compression_opengl_s3tc )
-		      : STRING_ARRAY_RANGE( compression_opengl )
+		      ? StringArrayRange( compression_opengl_s3tc )
+		      : StringArrayRange( compression_opengl )
 		    : ( g_texture_globals.m_bS3CompressionSupported )
-		      ? STRING_ARRAY_RANGE( compression_s3tc )
-		      : STRING_ARRAY_RANGE( compression_none )
+		      ? StringArrayRange( compression_s3tc )
+		      : StringArrayRange( compression_none )
 		);
 		page.appendCombo(
 		    "Hardware Texture Compression",

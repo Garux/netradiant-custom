@@ -37,21 +37,6 @@
 
 #include <map>
 
-template<typename T>
-class Span
-{
-	T * const first;
-	T * const last;
-public:
-	Span( T *start, int size ) : first( start ), last( start + size ){}
-	T *begin() const {
-		return first;
-	}
-	T *end() const {
-		return last;
-	}
-};
-
 #define for_indexed(...) for_indexed_v(i, __VA_ARGS__)
 #define for_indexed_v(v, ...) if (std::size_t v = -1) for (__VA_ARGS__) if ((++v, true))
 

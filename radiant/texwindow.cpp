@@ -85,7 +85,7 @@
 #include "commands.h"
 
 bool string_equal_start( const char* string, StringRange start ){
-	return string_equal_n( string, start.first, start.last - start.first );
+	return string_equal_n( string, start.data(), start.size() );
 }
 
 typedef std::set<CopiedString> TextureGroups;
@@ -1314,7 +1314,7 @@ gboolean TextureBrowser_button_press( GtkWidget* widget, GdkEventButton* event, 
 	/* loads directory, containing active shader + focuses on it */
 	else if ( event->type == GDK_2BUTTON_PRESS && event->button == 1 && !TextureBrowser::wads ) {
 		const StringRange range( strchr( textureBrowser->shader.c_str(), '/' ) + 1, strrchr( textureBrowser->shader.c_str(), '/' ) + 1 );
-		if( range.last > range.first ){
+		if( !range.empty() ){
 			const CopiedString dir = range;
 			ScopeDisableScreenUpdates disableScreenUpdates( dir.c_str(), "Loading Textures" );
 			TextureBrowser_ShowDirectory( *textureBrowser, dir.c_str() );
@@ -2670,7 +2670,7 @@ void TextureBrowser_constructPreferences( PreferencesPage& page ){
 		const char* texture_scale[] = { "10%", "25%", "50%", "100%", "200%" };
 		page.appendCombo(
 		    "Texture Thumbnail Scale",
-		    STRING_ARRAY_RANGE( texture_scale ),
+		    StringArrayRange( texture_scale ),
 		    IntImportCallback( TextureScaleImportCaller( GlobalTextureBrowser() ) ),
 		    IntExportCallback( TextureScaleExportCaller( GlobalTextureBrowser() ) )
 		);
@@ -2680,7 +2680,7 @@ void TextureBrowser_constructPreferences( PreferencesPage& page ){
 	page.appendEntry( "Mousewheel Increment", GlobalTextureBrowser().m_mouseWheelScrollIncrement );
 	{
 		const char* startup_shaders[] = { "None", TextureBrowser_getCommonShadersName() };
-		page.appendCombo( "Load Shaders at Startup", reinterpret_cast<int&>( GlobalTextureBrowser().m_startupShaders ), STRING_ARRAY_RANGE( startup_shaders ) );
+		page.appendCombo( "Load Shaders at Startup", reinterpret_cast<int&>( GlobalTextureBrowser().m_startupShaders ), StringArrayRange( startup_shaders ) );
 	}
 	{
 		StringOutputStream sstream( 256 );

@@ -106,7 +106,7 @@ class XMLStreamWriter : public XMLImporter, public XMLAttrVisitor
 	std::vector<state_t> m_elements;
 
 	void write_cdata( const char* buffer, std::size_t length ){
-		m_ostream << StringRange( buffer, buffer + length );
+		m_ostream << StringRange( buffer, length );
 	}
 	void write_string( const char* string ){
 		m_ostream << string;

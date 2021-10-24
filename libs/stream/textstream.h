@@ -281,7 +281,7 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 /// \brief Writes a \p range of characters to \p ostream.
 template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const StringRange& range ){
-	ostream.write( range.first, range.last - range.first );
+	ostream.write( range.data(), range.size() );
 	return ostream;
 }
 

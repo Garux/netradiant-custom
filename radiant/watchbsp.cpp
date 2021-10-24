@@ -395,7 +395,7 @@ inline MessageOutputStream& operator<<( MessageOutputStream& ostream, const T& t
 
 static void saxCharacters( message_info_t *data, const xmlChar *ch, int len ){
 	MessageOutputStream ostream( data );
-	ostream << StringRange( reinterpret_cast<const char*>( ch ), reinterpret_cast<const char*>( ch + len ) );
+	ostream << StringRange( reinterpret_cast<const char*>( ch ), len );
 }
 
 static void saxComment( void *ctx, const xmlChar *msg ){

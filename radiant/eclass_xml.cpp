@@ -242,10 +242,10 @@ public:
 	std::size_t write( const char* data, std::size_t length ){
 		CopiedString& desc = m_attribute->m_description;
 		if( desc.empty() ){
-			desc = StringRange( data, data + length );
+			desc = StringRange( data, length );
 		}
 		else{ // in case of special symbols, e.g. &quot, &apos, &lt, &gt, &amp, xml writes in a few steps
-			desc = StringOutputStream()( desc, StringRange( data, data + length ) );
+			desc = StringOutputStream()( desc, StringRange( data, length ) );
 		}
 
 		return m_comment.write( data, length );

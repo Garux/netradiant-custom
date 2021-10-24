@@ -1081,7 +1081,7 @@ static void TreeView_onRowActivated( GtkTreeView* treeview, GtkTreePath* path, G
 		for( GtkTreeIter& i : iters ){
 			gchar* buffer;
 			gtk_tree_model_get( model, &i, 0, &buffer, -1 );
-			const auto found = modelFS->m_folders.find( ModelFS( StringRange( buffer, buffer + strlen( buffer ) ) ) );
+			const auto found = modelFS->m_folders.find( ModelFS( StringRange( buffer, strlen( buffer ) ) ) );
 			if( found != modelFS->m_folders.end() ){ // ok to not find, while loading root
 				modelFS = &( *found );
 				sstream << buffer << "/";

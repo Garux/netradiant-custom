@@ -453,12 +453,6 @@ public:
 	typedef MemberCaller1<AngleAttribute, const Vector3&, &AngleAttribute::apply> ApplyVecCaller;
 };
 
-namespace
-{
-typedef const char* String;
-const String buttons[] = { "up", "down", "yaw" };
-}
-
 class DirectionAttribute final : public EntityAttribute
 {
 	CopiedString m_key;
@@ -468,11 +462,12 @@ class DirectionAttribute final : public EntityAttribute
 	NonModalRadio m_nonModalRadio;
 	CamAnglesButton m_butt;
 	GtkHBox* m_hbox;
+	static constexpr const char *const buttons[] = { "up", "down", "yaw" };
 public:
 	DirectionAttribute( const char* key ) :
 		m_key( key ),
 		m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ),
-		m_radio( RadioHBox_new( STRING_ARRAY_RANGE( buttons ) ) ),
+		m_radio( RadioHBox_new( StringArrayRange( buttons ) ) ),
 		m_nonModalRadio( ApplyRadioCaller( *this ) ),
 		m_butt( ApplyVecCaller( *this ) ){
 		m_entry = numeric_entry_new();

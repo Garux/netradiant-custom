@@ -212,11 +212,11 @@ std::size_t Sys_Print( int level, const char* buf, std::size_t length ){
 				GtkTextBufferOutputStream textBuffer( buffer, &iter, tag );
 				if ( !globalCharacterSet().isUTF8() ) {
 					BufferedTextOutputStream<GtkTextBufferOutputStream> buffered( textBuffer );
-					buffered << StringRange( buf, buf + length );
+					buffered << StringRange( buf, length );
 				}
 				else
 				{
-					textBuffer << StringRange( buf, buf + length );
+					textBuffer << StringRange( buf, length );
 				}
 			}
 

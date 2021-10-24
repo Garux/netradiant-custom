@@ -884,7 +884,7 @@ static void ParseShaderFile( const char *filename ){
 
 		/* ignore ":q3map" suffix */
 		if( striEqualSuffix( token, ":q3map" ) )
-			si->shader << StringRange( token, token + strlen( token ) - strlen( ":q3map" ) );
+			si->shader << StringRange( token, strlen( token ) - strlen( ":q3map" ) );
 		else
 			si->shader << token;
 

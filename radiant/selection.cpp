@@ -8002,7 +8002,7 @@ void SelectionSystem_constructPreferences( PreferencesPage& page ){
 		const char* styles[] = { "XY plane + Z with Alt", "View plane + Forward with Alt", };
 		page.appendCombo(
 		    "Move style in 3D",
-		    STRING_ARRAY_RANGE( styles ),
+		    StringArrayRange( styles ),
 		    IntImportCaller( TranslateFreeXY_Z::m_viewdependent ),
 		    IntExportCaller( TranslateFreeXY_Z::m_viewdependent )
 		);

@@ -230,25 +230,24 @@ inline StringRange PathFilenameless( const char *path ){
 class PathCleaned
 {
 public:
-	const char* m_path;
-	const char* m_end;
-	PathCleaned( const char* path ) : m_path( path ), m_end( path + std::strlen( path ) ){
+	const StringRange m_path;
+	PathCleaned( const char* path ) : m_path( path, std::strlen( path ) ){
 	}
-	PathCleaned( const StringRange& range ) : m_path( range.first ), m_end( range.last ){
+	PathCleaned( const StringRange& range ) : m_path( range ){
 	}
 };
 
 /// \brief Writes \p path to \p ostream with dos-style separators replaced by unix-style separators.
 template<typename TextOutputStreamType>
 TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const PathCleaned& path ){
-	for ( const char* i = path.m_path; i != path.m_end; ++i )
+	for ( const char c : path.m_path )
 	{
-		if ( *i == '\\' ) {
+		if ( c == '\\' ) {
 			ostream << '/';
 		}
 		else
 		{
-			ostream << *i;
+			ostream << c;
 		}
 	}
 	return ostream;
@@ -300,7 +299,7 @@ template<typename TextOutputStreamType, typename SRC>
 TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const PathDefaultExtension<SRC>& path ){
 	ostream << path.m_path;
 	if constexpr ( std::is_same_v<SRC, PathCleaned> ){
-		if( strEmpty( path_get_extension( path.m_path.m_path ) ) )
+		if( strEmpty( path_get_extension( path.m_path.m_path.data() ) ) )
 			ostream << path.m_extension;
 	}
 	else if constexpr ( std::is_same_v<SRC, const char*> ){

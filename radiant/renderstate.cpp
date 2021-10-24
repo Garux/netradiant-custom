@@ -133,7 +133,7 @@ void printShaderLog( GLhandleARB object ){
 	Array<char> log( log_length );
 	glGetInfoLogARB( object, log_length, &log_length, log.data() );
 
-	globalErrorStream() << StringRange( log.begin(), log.begin() + log_length ) << "\n";
+	globalErrorStream() << StringRange( log.begin(), log_length ) << "\n";
 }
 
 void createShader( GLhandleARB program, const char* filename, GLenum type ){

@@ -65,9 +65,8 @@ enum GridPower
 };
 
 
-typedef const char* GridName;
 // this must match the GridPower enumeration
-const GridName g_gridnames[] = {
+const char *const g_gridnames[] = {
 	"0.125",
 	"0.25",
 	"0.5",
@@ -260,14 +259,14 @@ void Grid_constructPreferences( PreferencesPage& page ){
 	page.appendCombo(
 	    "Default grid spacing",
 	    g_grid_default,
-	    ARRAY_RANGE( g_gridnames )
+	    StringArrayRange( g_gridnames )
 	);
 	{
 		const char* coords[] = { "4096", "8192", "16384", "32768", "65536" };
 
 		page.appendCombo(
 		    "Max grid coordinate",
-		    STRING_ARRAY_RANGE( coords ),
+		    StringArrayRange( coords ),
 		    IntImportCallback( maxGridCoordPowerImportCaller() ),
 		    IntExportCallback( maxGridCoordPowerExportCaller() )
 		);

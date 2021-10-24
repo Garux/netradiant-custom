@@ -186,9 +186,9 @@ RadioHBox RadioHBox_new( StringArrayRange names ){
 	gtk_widget_show( GTK_WIDGET( hbox ) );
 
 	GtkRadioButton* radio = 0;
-	for ( StringArrayRange::Iterator i = names.first; i != names.last; ++i )
+	for ( const char *name : names )
 	{
-		radio = GTK_RADIO_BUTTON( gtk_radio_button_new_with_label_from_widget( radio, *i ) );
+		radio = GTK_RADIO_BUTTON( gtk_radio_button_new_with_label_from_widget( radio, name ) );
 		gtk_widget_show( GTK_WIDGET( radio ) );
 		gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( radio ), FALSE, FALSE, 0 );
 	}
