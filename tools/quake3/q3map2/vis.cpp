@@ -813,7 +813,7 @@ void LoadPortals( char *name ){
 		}
 	}
 
-	faces = safe_calloc( 2 * numfaces * sizeof( vportal_t ) );
+	faces = safe_calloc( numfaces * sizeof( vportal_t ) );
 	faceleafs = safe_calloc( portalclusters * sizeof( leaf_t ) );
 
 	for ( int i = 0; i < numfaces; ++i )
