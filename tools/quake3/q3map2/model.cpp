@@ -238,8 +238,7 @@ struct AssModel
 		}
 
 		void forEachFace( std::function<void( const Vector3 ( &xyz )[3], const Vector2 ( &st )[3])> visitor ) const override {
-			for ( size_t t = 0; t < m_mesh->mNumFaces; ++t ){
-				const aiFace& face = m_mesh->mFaces[t];
+			for ( const aiFace& face : Span( m_mesh->mFaces, m_mesh->mNumFaces ) ){
 				// if( face.mNumIndices == 3 )
 				Vector3 xyz[3];
 				Vector2 st[3];
@@ -1236,8 +1235,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 		/* copy indexes */
 		{
 			size_t idCopied = 0;
-			for ( size_t t = 0; t < mesh->mNumFaces; ++t ){
-				const aiFace& face = mesh->mFaces[t];
+			for ( const aiFace& face : Span( mesh->mFaces, mesh->mNumFaces ) ){
 				// if( face.mNumIndices == 3 )
 				for ( size_t i = 0; i < 3; i++ ){
 					ds->indexes[idCopied++] = face.mIndices[i];

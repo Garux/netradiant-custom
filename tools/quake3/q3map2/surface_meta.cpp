@@ -648,8 +648,8 @@ void MaxAreaFaceSurface( mapDrawSurface_t *ds ){
 void FanFaceSurface( mapDrawSurface_t *ds ){
 	int i, k, a, b, c;
 	Color4f color[ MAX_LIGHTMAPS ];
-	for ( k = 0; k < MAX_LIGHTMAPS; k++ )
-		color[k].set( 0 );
+	for ( auto& co : color )
+		co.set( 0 );
 	bspDrawVert_t   *verts, *centroid, *dv;
 	double iv;
 
@@ -855,29 +855,24 @@ void EmitMetaStats(){
  */
 
 void MakeEntityMetaTriangles( entity_t *e ){
-	int i, f, fOld, start;
-	mapDrawSurface_t    *ds;
-
-
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- MakeEntityMetaTriangles ---\n" );
 
 	/* init pacifier */
-	fOld = -1;
-	start = I_FloatTime();
+	int fOld = -1;
+	const int start = I_FloatTime();
 
 	/* walk the list of surfaces in the entity */
-	for ( i = e->firstDrawSurf; i < numMapDrawSurfs; i++ )
+	for ( int i = e->firstDrawSurf; i < numMapDrawSurfs; ++i )
 	{
 		/* print pacifier */
-		f = 10 * ( i - e->firstDrawSurf ) / ( numMapDrawSurfs - e->firstDrawSurf );
-		if ( f != fOld ) {
+		if ( const int f = 10 * ( i - e->firstDrawSurf ) / ( numMapDrawSurfs - e->firstDrawSurf ); f != fOld ) {
 			fOld = f;
 			Sys_FPrintf( SYS_VRB, "%d...", f );
 		}
 
 		/* get surface */
-		ds = &mapDrawSurfs[ i ];
+		mapDrawSurface_t *ds = &mapDrawSurfs[ i ];
 		if ( ds->numVerts <= 0 ) {
 			continue;
 		}

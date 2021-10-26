@@ -194,7 +194,6 @@ void xml_Winding( const char *msg, const Vector3 p[], int numpoints, bool die ){
 	char buf[WINDING_BUFSIZE];
 	char smlbuf[128];
 	char level[2];
-	int i;
 
 	node = xmlNewNode( NULL, (const xmlChar*)"windingmsg" );
 	xmlNodeAddContent( node, (const xmlChar*)msg );
@@ -203,11 +202,11 @@ void xml_Winding( const char *msg, const Vector3 p[], int numpoints, bool die ){
 	xmlSetProp( node, (const xmlChar*)"level", (const xmlChar *)level );
 	// a 'winding' node
 	sprintf( buf, "%i ", numpoints );
-	for ( i = 0; i < numpoints; i++ )
+	for ( int i = 0; i < numpoints; ++i )
 	{
 		sprintf( smlbuf, "(%g %g %g)", p[i][0], p[i][1], p[i][2] );
 		// don't overflow
-		if ( strlen( buf ) + strlen( smlbuf ) > WINDING_BUFSIZE ) {
+		if ( strlen( buf ) + strlen( smlbuf ) >= WINDING_BUFSIZE ) {
 			break;
 		}
 		strcat( buf, smlbuf );

@@ -40,13 +40,6 @@
  */
 
 void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
-	int i, j;
-	float c;
-	Color4f mult, add;
-	bspDrawVert_t   *dv;
-	colorMod_t      *cm2;
-
-
 	/* dummy check */
 	if ( cm == NULL || numVerts < 1 || drawVerts == NULL ) {
 		return;
@@ -54,83 +47,81 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
 
 
 	/* walk vertex list */
-	for ( i = 0; i < numVerts; i++ )
+	for ( bspDrawVert_t& dv : Span( drawVerts, numVerts ) )
 	{
-		/* get vertex */
-		dv = &drawVerts[ i ];
-
 		/* walk colorMod list */
-		for ( cm2 = cm; cm2 != NULL; cm2 = cm2->next )
+		for ( ; cm != NULL; cm = cm->next )
 		{
+			float c;
 			/* default */
-			mult.set( 1 );
-			add.set( 0 );
+			Color4f mult( 1, 1, 1, 1 );
+			Color4f add( 0, 0, 0, 0 );
 
-			const Vector3 cm2_vec3 = vector3_from_array( cm2->data );
+			const Vector3 cm_vec3 = vector3_from_array( cm->data );
 			/* switch on type */
-			switch ( cm2->type )
+			switch ( cm->type )
 			{
 			case EColorMod::ColorSet:
 				mult.rgb().set( 0 );
-				add.rgb() = cm2_vec3 * 255.0f;
+				add.rgb() = cm_vec3 * 255.0f;
 				break;
 
 			case EColorMod::AlphaSet:
 				mult.alpha() = 0.0f;
-				add.alpha() = cm2->data[ 0 ] * 255.0f;
+				add.alpha() = cm->data[ 0 ] * 255.0f;
 				break;
 
 			case EColorMod::ColorScale:
-				mult.rgb() = cm2_vec3;
+				mult.rgb() = cm_vec3;
 				break;
 
 			case EColorMod::AlphaScale:
-				mult.alpha() = cm2->data[ 0 ];
+				mult.alpha() = cm->data[ 0 ];
 				break;
 
 			case EColorMod::ColorDotProduct:
-				c = vector3_dot( dv->normal, cm2_vec3 );
+				c = vector3_dot( dv.normal, cm_vec3 );
 				mult.rgb().set( c );
 				break;
 
 			case EColorMod::ColorDotProductScale:
-				c = vector3_dot( dv->normal, cm2_vec3 );
-				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
+				c = vector3_dot( dv.normal, cm_vec3 );
+				c = ( c - cm->data[3] ) / ( cm->data[4] - cm->data[3] );
 				mult.rgb().set( c );
 				break;
 
 			case EColorMod::AlphaDotProduct:
-				mult.alpha() = vector3_dot( dv->normal, cm2_vec3 );
+				mult.alpha() = vector3_dot( dv.normal, cm_vec3 );
 				break;
 
 			case EColorMod::AlphaDotProductScale:
-				c = vector3_dot( dv->normal, cm2_vec3 );
-				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
+				c = vector3_dot( dv.normal, cm_vec3 );
+				c = ( c - cm->data[3] ) / ( cm->data[4] - cm->data[3] );
 				mult.alpha() = c;
 				break;
 
 			case EColorMod::ColorDotProduct2:
-				c = vector3_dot( dv->normal, cm2_vec3 );
+				c = vector3_dot( dv.normal, cm_vec3 );
 				c *= c;
 				mult.rgb().set( c );
 				break;
 
 			case EColorMod::ColorDotProduct2Scale:
-				c = vector3_dot( dv->normal, cm2_vec3 );
+				c = vector3_dot( dv.normal, cm_vec3 );
 				c *= c;
-				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
+				c = ( c - cm->data[3] ) / ( cm->data[4] - cm->data[3] );
 				mult.rgb().set( c );
 				break;
 
 			case EColorMod::AlphaDotProduct2:
-				mult.alpha() = vector3_dot( dv->normal, cm2_vec3 );
+				mult.alpha() = vector3_dot( dv.normal, cm_vec3 );
 				mult.alpha() *= mult.alpha();
 				break;
 
 			case EColorMod::AlphaDotProduct2Scale:
-				c = vector3_dot( dv->normal, cm2_vec3 );
+				c = vector3_dot( dv.normal, cm_vec3 );
 				c *= c;
-				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
+				c = ( c - cm->data[3] ) / ( cm->data[4] - cm->data[3] );
 				mult.alpha() = c;
 				break;
 
@@ -139,9 +130,9 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
 			}
 
 			/* apply mod */
-			for ( j = 0; j < MAX_LIGHTMAPS; j++ )
+			for ( auto& color : dv.color )
 			{
-				dv->color[ j ] = color_to_byte( mult * static_cast<BasicVector4<byte>>( dv->color[ j ] ) + add );
+				color = color_to_byte( mult * static_cast<BasicVector4<byte>>( color ) + add );
 			}
 		}
 	}
@@ -253,11 +244,8 @@ bool ApplySurfaceParm( const char *name, int *contentFlags, int *surfaceFlags, i
 	}
 
 	/* check custom info parms */
-	for ( int i = 0; i < numCustSurfaceParms; i++ )
+	for ( const surfaceParm_t& sp : Span( custSurfaceParms, numCustSurfaceParms ) )
 	{
-		/* get surfaceparm */
-		const surfaceParm_t& sp = custSurfaceParms[ i ];
-
 		/* match? */
 		if ( striEqual( name, sp.name ) ) {
 			/* clear and set flags */
@@ -314,33 +302,21 @@ void BeginMapShaderFile( const char *mapFile ){
  */
 
 void WriteMapShaderFile( void ){
-	FILE            *file;
-	shaderInfo_t    *si;
-	int i, num;
-
-
 	/* dummy check */
 	if ( mapShaderFile.empty() ) {
 		return;
 	}
 
 	/* are there any custom shaders? */
-	for ( i = 0, num = 0; i < numShaderInfo; i++ )
-	{
-		if ( shaderInfo[ i ].custom ) {
-			break;
-		}
-	}
-	if ( i == numShaderInfo ) {
+	if( std::none_of( shaderInfo, shaderInfo + numShaderInfo, []( const shaderInfo_t& si ){ return si.custom; } ) )
 		return;
-	}
 
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- WriteMapShaderFile ---\n" );
 	Sys_FPrintf( SYS_VRB, "Writing %s", mapShaderFile.c_str() );
 
 	/* open shader file */
-	file = fopen( mapShaderFile.c_str(), "wt" );
+	FILE *file = fopen( mapShaderFile.c_str(), "wt" );
 	if ( file == NULL ) {
 		Sys_Warning( "Unable to open map shader file %s for writing\n", mapShaderFile.c_str() );
 		return;
@@ -354,20 +330,18 @@ void WriteMapShaderFile( void ){
 	         mapName.c_str() );
 
 	/* walk the shader list */
-	for ( i = 0, num = 0; i < numShaderInfo; i++ )
+	int num = 0;
+	for ( const shaderInfo_t& si : Span( shaderInfo, numShaderInfo ) )
 	{
-		/* get the shader and print it */
-		si = &shaderInfo[ i ];
-		if ( !si->custom || strEmptyOrNull( si->shaderText ) ) {
-			continue;
+		if ( si.custom && !strEmptyOrNull( si.shaderText ) ) {
+			num++;
+
+			/* print it to the file */
+			fprintf( file, "%s%s\n", si.shader.c_str(), si.shaderText );
+			//Sys_Printf( "%s%s\n", si.shader.c_str(), si.shaderText ); /* FIXME: remove debugging code */
+
+			Sys_FPrintf( SYS_VRB, "." );
 		}
-		num++;
-
-		/* print it to the file */
-		fprintf( file, "%s%s\n", si->shader.c_str(), si->shaderText );
-		//Sys_Printf( "%s%s\n", si->shader, si->shaderText ); /* FIXME: remove debugging code */
-
-		Sys_FPrintf( SYS_VRB, "." );
 	}
 
 	/* close the shader */

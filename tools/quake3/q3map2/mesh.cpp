@@ -94,10 +94,8 @@ void FreeMesh( mesh_t *m ) {
 }
 
 void PrintMesh( mesh_t *m ) {
-	int i, j;
-
-	for ( i = 0 ; i < m->height ; i++ ) {
-		for ( j = 0 ; j < m->width ; j++ ) {
+	for ( int i = 0; i < m->height; ++i ) {
+		for ( int j = 0; j < m->width; ++j ) {
 			Sys_Printf( "(%5.2f %5.2f %5.2f) "
 			            , m->verts[i * m->width + j].xyz[0]
 			            , m->verts[i * m->width + j].xyz[1]
@@ -109,14 +107,11 @@ void PrintMesh( mesh_t *m ) {
 
 
 mesh_t *CopyMesh( mesh_t *mesh ) {
-	mesh_t  *out;
-	int size;
-
-	out = safe_malloc( sizeof( *out ) );
+	mesh_t *out = safe_malloc( sizeof( *out ) );
 	out->width = mesh->width;
 	out->height = mesh->height;
 
-	size = out->width * out->height * sizeof( *out->verts );
+	const int size = out->width * out->height * sizeof( *out->verts );
 	out->verts = safe_malloc( size );
 	memcpy( out->verts, mesh->verts, size );
 
@@ -130,16 +125,13 @@ mesh_t *CopyMesh( mesh_t *mesh ) {
  */
 
 mesh_t *TransposeMesh( mesh_t *in ) {
-	int w, h;
-	mesh_t      *out;
-
-	out = safe_malloc( sizeof( *out ) );
+	mesh_t *out = safe_malloc( sizeof( *out ) );
 	out->width = in->height;
 	out->height = in->width;
 	out->verts = safe_malloc( out->width * out->height * sizeof( bspDrawVert_t ) );
 
-	for ( h = 0 ; h < in->height ; h++ ) {
-		for ( w = 0 ; w < in->width ; w++ ) {
+	for ( int h = 0; h < in->height; ++h ) {
+		for ( int w = 0; w < in->width; ++w ) {
 			out->verts[ w * in->height + h ] = in->verts[ h * in->width + w ];
 		}
 	}
@@ -150,14 +142,12 @@ mesh_t *TransposeMesh( mesh_t *in ) {
 }
 
 void InvertMesh( mesh_t *in ) {
-	int w, h;
-	bspDrawVert_t temp;
-
-	for ( h = 0 ; h < in->height ; h++ ) {
-		for ( w = 0 ; w < in->width / 2 ; w++ ) {
-			temp = in->verts[ h * in->width + w ];
-			in->verts[ h * in->width + w ] = in->verts[ h * in->width + in->width - 1 - w ];
-			in->verts[ h * in->width + in->width - 1 - w ] = temp;
+	for ( int h = 0; h < in->height; ++h ) {
+		for ( int w = 0; w < in->width / 2; ++w ) {
+			std::swap(
+				in->verts[ h * in->width + w ],
+				in->verts[ h * in->width + in->width - 1 - w ]
+			);
 		}
 	}
 }
@@ -275,12 +265,9 @@ void MakeMeshNormals( mesh_t in ){
  */
 
 void PutMeshOnCurve( mesh_t in ) {
-	int i, j, m;
-
-
 	// put all the aproximating points on the curve
-	for ( i = 0 ; i < in.width ; i++ ) {
-		for ( j = 1 ; j < in.height ; j += 2 ) {
+	for ( int i = 0; i < in.width; ++i ) {
+		for ( int j = 1; j < in.height; j += 2 ) {
 			const int idx = j * in.width + i;
 			const int idprev = ( j + 1 ) * in.width + i;
 			const int idnext = ( j - 1 ) * in.width + i;
@@ -289,7 +276,7 @@ void PutMeshOnCurve( mesh_t in ) {
 			/* ydnar: interpolating st coords */
 			in.verts[idx].st = vector2_mid( vector2_mid( in.verts[idx].st, in.verts[idprev].st ),
 			                                vector2_mid( in.verts[idx].st, in.verts[idnext].st ) );
-			for ( m = 0; m < MAX_LIGHTMAPS; m++ )
+			for ( int m = 0; m < MAX_LIGHTMAPS; ++m )
 			{
 				in.verts[idx].lightmap[ m ] = vector2_mid( vector2_mid( in.verts[idx].lightmap[ m ], in.verts[idprev].lightmap[ m ] ),
 				                                           vector2_mid( in.verts[idx].lightmap[ m ], in.verts[idnext].lightmap[ m ] ) );
@@ -297,15 +284,15 @@ void PutMeshOnCurve( mesh_t in ) {
 		}
 	}
 
-	for ( j = 0 ; j < in.height ; j++ ) {
-		for ( i = 1 ; i < in.width ; i += 2 ) {
+	for ( int j = 0; j < in.height; ++j ) {
+		for ( int i = 1; i < in.width; i += 2 ) {
 			const int idx = j * in.width + i;
 			in.verts[idx].xyz = vector3_mid( vector3_mid( in.verts[idx].xyz, in.verts[idx + 1].xyz ),
 			                                 vector3_mid( in.verts[idx].xyz, in.verts[idx - 1].xyz ) );
 			/* ydnar: interpolating st coords */
 			in.verts[idx].st = vector2_mid( vector2_mid( in.verts[idx].st, in.verts[idx + 1].st ),
 			                                vector2_mid( in.verts[idx].st, in.verts[idx - 1].st ) );
-			for ( m = 0; m < MAX_LIGHTMAPS; m++ )
+			for ( int m = 0; m < MAX_LIGHTMAPS; ++m )
 			{
 				in.verts[idx].lightmap[ m ] = vector2_mid( vector2_mid( in.verts[idx].lightmap[ m ], in.verts[idx + 1].lightmap[ m ] ),
 				                                           vector2_mid( in.verts[idx].lightmap[ m ], in.verts[idx - 1].lightmap[ m ] ) );
@@ -538,7 +525,7 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 				LerpDrawVert( &expand[ j + 1 ][ i ], &expand[ j + 2 ][ i ], &next );
 				LerpDrawVert( &prev, &next, &mid );
 
-				for ( k = out.height - 1; k > j  +  3; k-- )
+				for ( k = out.height - 1; k > j + 3; k-- )
 					expand[ k ][ i ] = expand[ k - 2 ][ i ];
 				expand[ j + 1 ][ i ] = prev;
 				expand[ j + 2 ][ i ] = mid;

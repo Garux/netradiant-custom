@@ -46,44 +46,35 @@
  */
 
 void Fur( mapDrawSurface_t *ds ){
-	int i, j, k, numLayers;
-	float offset, fade, a;
-	mapDrawSurface_t    *fur;
-	bspDrawVert_t       *dv;
-
-
 	/* dummy check */
 	if ( ds == NULL || ds->fur || ds->shaderInfo->furNumLayers < 1 ) {
 		return;
 	}
 
 	/* get basic info */
-	numLayers = ds->shaderInfo->furNumLayers;
-	offset = ds->shaderInfo->furOffset;
-	fade = ds->shaderInfo->furFade * 255.0f;
+	const int numLayers = ds->shaderInfo->furNumLayers;
+	const float offset = ds->shaderInfo->furOffset;
+	const float fade = ds->shaderInfo->furFade * 255.0f;
 
 	/* debug code */
 	//%	Sys_FPrintf( SYS_VRB, "Fur():  layers: %d  offset: %f   fade: %f  %s\n",
 	//%		numLayers, offset, fade, ds->shaderInfo->shader );
 
 	/* initial offset */
-	for ( j = 0; j < ds->numVerts; j++ )
+	for ( bspDrawVert_t& dv : Span( ds->verts, ds->numVerts ) )
 	{
-		/* get surface vert */
-		dv = &ds->verts[ j ];
-
 		/* offset is scaled by original vertex alpha */
-		a = (float) dv->color[ 0 ].alpha() / 255.0;
+		const float a = dv.color[ 0 ].alpha() / 255.0;
 
 		/* offset it */
-		dv->xyz += dv->normal * ( offset * a );
+		dv.xyz += dv.normal * ( offset * a );
 	}
 
 	/* wash, rinse, repeat */
-	for ( i = 1; i < numLayers; i++ )
+	for ( int i = 1; i < numLayers; ++i )
 	{
 		/* clone the surface */
-		fur = CloneSurface( ds, ds->shaderInfo );
+		mapDrawSurface_t *fur = CloneSurface( ds, ds->shaderInfo );
 		if ( fur == NULL ) {
 			return;
 		}
@@ -92,25 +83,21 @@ void Fur( mapDrawSurface_t *ds ){
 		fur->fur = true;
 
 		/* walk the verts */
-		for ( j = 0; j < fur->numVerts; j++ )
+		for ( int j = 0; j < fur->numVerts; ++j )
 		{
-			/* get surface vert */
-			dv = &ds->verts[ j ];
-
 			/* offset is scaled by original vertex alpha */
-			a = (float) dv->color[ 0 ].alpha() / 255.0;
+			const float a = ds->verts[ j ].color[ 0 ].alpha() / 255.0;
 
 			/* get fur vert */
-			dv = &fur->verts[ j ];
+			bspDrawVert_t& dv = fur->verts[ j ];
 
 			/* offset it */
-			dv->xyz += dv->normal * ( offset * a * i );
+			dv.xyz += dv.normal * ( offset * a * i );
 
 			/* fade alpha */
-			for ( k = 0; k < MAX_LIGHTMAPS; k++ )
+			for ( auto& color : dv.color )
 			{
-				a = (float) dv->color[ k ].alpha() - fade;
-				dv->color[ k ].alpha() = color_to_byte( a );
+				color.alpha() = color_to_byte( color.alpha() - fade );
 			}
 		}
 	}

@@ -1741,7 +1741,6 @@ void                        MakeEntityDecals( entity_t *e );
 std::array<Vector3, 2>      TextureAxisFromPlane( const plane_t& plane );
 
 /* vis.c */
-fixedWinding_t              *NewFixedWinding( int points );
 int                         VisMain( Args& args );
 
 /* visflow.c */

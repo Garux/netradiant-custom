@@ -51,13 +51,11 @@ struct minimap_t
 static minimap_t minimap;
 
 bool BrushIntersectionWithLine( const bspBrush_t& brush, const Vector3& start, const Vector3& dir, float *t_in, float *t_out ){
-	int i;
 	bool in = false, out = false;
-	bspBrushSide_t *sides = &bspBrushSides[brush.firstSide];
 
-	for ( i = 0; i < brush.numSides; ++i )
+	for ( const bspBrushSide_t& side : Span( &bspBrushSides[brush.firstSide], brush.numSides ) )
 	{
-		const bspPlane_t& p = bspPlanes[sides[i].planeNum];
+		const bspPlane_t& p = bspPlanes[side.planeNum];
 		float sn = vector3_dot( start, p.normal() );
 		float dn = vector3_dot( dir, p.normal() );
 		if ( dn == 0 ) {

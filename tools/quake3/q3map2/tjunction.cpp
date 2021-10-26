@@ -201,12 +201,12 @@ int AddEdge( bspDrawVert_t& dv1, bspDrawVert_t& dv2, bool createNonAxial ) {
    adds a surface's edges
  */
 
-void AddSurfaceEdges( mapDrawSurface_t *ds ){
-	for ( int i = 0; i < ds->numVerts; i++ )
+void AddSurfaceEdges( mapDrawSurface_t& ds ){
+	for ( int i = 0; i < ds.numVerts; i++ )
 	{
 		/* save the edge number in the lightmap field so we don't need to look it up again */
-		ds->verts[i].lightmap[ 0 ][ 0 ] =
-		    AddEdge( ds->verts[ i ], ds->verts[ ( i + 1 ) % ds->numVerts ], false );
+		ds.verts[i].lightmap[ 0 ][ 0 ] =
+		    AddEdge( ds.verts[ i ], ds.verts[ ( i + 1 ) % ds.numVerts ], false );
 	}
 }
 
@@ -249,14 +249,12 @@ bool ColinearEdge( const Vector3& v1, const Vector3& v2, const Vector3& v3 ){
    brush tjunctions
    ====================
  */
-void AddPatchEdges( mapDrawSurface_t *ds ) {
-	int i;
-
-	for ( i = 0 ; i < ds->patchWidth - 2; i += 2 ) {
+void AddPatchEdges( mapDrawSurface_t& ds ) {
+	for ( int i = 0; i < ds.patchWidth - 2; i += 2 ) {
 		{
-			bspDrawVert_t& v1 = ds->verts[ i ];
-			bspDrawVert_t& v2 = ds->verts[ i + 1 ];
-			bspDrawVert_t& v3 = ds->verts[ i + 2 ];
+			bspDrawVert_t& v1 = ds.verts[ i + 0 ];
+			bspDrawVert_t& v2 = ds.verts[ i + 1 ];
+			bspDrawVert_t& v3 = ds.verts[ i + 2 ];
 
 			// if v2 is the midpoint of v1 to v3, add an edge from v1 to v3
 			if ( ColinearEdge( v1.xyz, v2.xyz, v3.xyz ) ) {
@@ -264,9 +262,9 @@ void AddPatchEdges( mapDrawSurface_t *ds ) {
 			}
 		}
 		{
-			bspDrawVert_t& v1 = ds->verts[ ( ds->patchHeight - 1 ) * ds->patchWidth + i ];
-			bspDrawVert_t& v2 = ds->verts[ ( ds->patchHeight - 1 ) * ds->patchWidth + i + 1 ];
-			bspDrawVert_t& v3 = ds->verts[ ( ds->patchHeight - 1 ) * ds->patchWidth + i + 2 ];
+			bspDrawVert_t& v1 = ds.verts[ ( ds.patchHeight - 1 ) * ds.patchWidth + i + 0 ];
+			bspDrawVert_t& v2 = ds.verts[ ( ds.patchHeight - 1 ) * ds.patchWidth + i + 1 ];
+			bspDrawVert_t& v3 = ds.verts[ ( ds.patchHeight - 1 ) * ds.patchWidth + i + 2 ];
 
 			// if v2 is on the v1 to v3 line, add an edge from v1 to v3
 			if ( ColinearEdge( v1.xyz, v2.xyz, v3.xyz ) ) {
@@ -275,11 +273,11 @@ void AddPatchEdges( mapDrawSurface_t *ds ) {
 		}
 	}
 
-	for ( i = 0 ; i < ds->patchHeight - 2 ; i += 2 ) {
+	for ( int i = 0; i < ds.patchHeight - 2; i += 2 ) {
 		{
-			bspDrawVert_t& v1 = ds->verts[ i * ds->patchWidth ];
-			bspDrawVert_t& v2 = ds->verts[ ( i + 1 ) * ds->patchWidth ];
-			bspDrawVert_t& v3 = ds->verts[ ( i + 2 ) * ds->patchWidth ];
+			bspDrawVert_t& v1 = ds.verts[ ( i + 0 ) * ds.patchWidth ];
+			bspDrawVert_t& v2 = ds.verts[ ( i + 1 ) * ds.patchWidth ];
+			bspDrawVert_t& v3 = ds.verts[ ( i + 2 ) * ds.patchWidth ];
 
 			// if v2 is the midpoint of v1 to v3, add an edge from v1 to v3
 			if ( ColinearEdge( v1.xyz, v2.xyz, v3.xyz ) ) {
@@ -287,9 +285,9 @@ void AddPatchEdges( mapDrawSurface_t *ds ) {
 			}
 		}
 		{
-			bspDrawVert_t& v1 = ds->verts[ ( ds->patchWidth - 1 ) + i * ds->patchWidth ];
-			bspDrawVert_t& v2 = ds->verts[ ( ds->patchWidth - 1 ) + ( i + 1 ) * ds->patchWidth ];
-			bspDrawVert_t& v3 = ds->verts[ ( ds->patchWidth - 1 ) + ( i + 2 ) * ds->patchWidth ];
+			bspDrawVert_t& v1 = ds.verts[ ( ds.patchWidth - 1 ) + ( i + 0 ) * ds.patchWidth ];
+			bspDrawVert_t& v2 = ds.verts[ ( ds.patchWidth - 1 ) + ( i + 1 ) * ds.patchWidth ];
+			bspDrawVert_t& v3 = ds.verts[ ( ds.patchWidth - 1 ) + ( i + 2 ) * ds.patchWidth ];
 
 			// if v2 is the midpoint of v1 to v3, add an edge from v1 to v3
 			if ( ColinearEdge( v1.xyz, v2.xyz, v3.xyz ) ) {
@@ -297,8 +295,6 @@ void AddPatchEdges( mapDrawSurface_t *ds ) {
 			}
 		}
 	}
-
-
 }
 
 
@@ -308,7 +304,7 @@ void AddPatchEdges( mapDrawSurface_t *ds ) {
    ====================
  */
 #define MAX_SURFACE_VERTS   256
-void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
+void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 	int i, j, k;
 	edgeLine_t  *e;
 	edgePoint_t *p;
@@ -320,7 +316,7 @@ void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
 
 
 	numVerts = 0;
-	for ( i = 0 ; i < ds->numVerts ; i++ )
+	for ( i = 0; i < ds.numVerts; ++i )
 	{
 		counts[i] = 0;
 
@@ -328,15 +324,15 @@ void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
 		if ( numVerts == MAX_SURFACE_VERTS ) {
 			Error( "MAX_SURFACE_VERTS" );
 		}
-		verts[numVerts] = ds->verts[i];
+		verts[numVerts] = ds.verts[i];
 		originals[numVerts] = i;
 		numVerts++;
 
 		// check to see if there are any t junctions before the next vert
-		v1 = &ds->verts[i];
-		v2 = &ds->verts[ ( i + 1 ) % ds->numVerts ];
+		v1 = &ds.verts[i];
+		v2 = &ds.verts[ ( i + 1 ) % ds.numVerts ];
 
-		j = (int)ds->verts[i].lightmap[ 0 ][ 0 ];
+		j = (int)ds.verts[i].lightmap[ 0 ][ 0 ];
 		if ( j == -1 ) {
 			continue;       // degenerate edge
 		}
@@ -408,7 +404,7 @@ void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
 		}
 	}
 
-	c_addedVerts += numVerts - ds->numVerts;
+	c_addedVerts += numVerts - ds.numVerts;
 	c_totalVerts += numVerts;
 
 
@@ -433,9 +429,9 @@ void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
 		// fine the way it is
 		c_natural++;
 
-		ds->numVerts = numVerts;
-		ds->verts = safe_malloc( numVerts * sizeof( *ds->verts ) );
-		memcpy( ds->verts, verts, numVerts * sizeof( *ds->verts ) );
+		ds.numVerts = numVerts;
+		ds.verts = safe_malloc( numVerts * sizeof( *ds.verts ) );
+		memcpy( ds.verts, verts, numVerts * sizeof( *ds.verts ) );
 
 		return;
 	}
@@ -464,11 +460,11 @@ void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
 
 	}
 
-	ds->numVerts = numVerts;
-	ds->verts = safe_malloc( numVerts * sizeof( *ds->verts ) );
+	ds.numVerts = numVerts;
+	ds.verts = safe_malloc( numVerts * sizeof( *ds.verts ) );
 
-	for ( j = 0 ; j < ds->numVerts ; j++ ) {
-		ds->verts[j] = verts[ ( j + i ) % ds->numVerts ];
+	for ( j = 0 ; j < ds.numVerts ; j++ ) {
+		ds.verts[j] = verts[ ( j + i ) % ds.numVerts ];
 	}
 }
 
@@ -486,69 +482,58 @@ void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
 
 int c_broken = 0;
 
-bool FixBrokenSurface( mapDrawSurface_t *ds ){
-	bspDrawVert_t   *dv1, *dv2, avg;
-	int i, j, k;
-
-
+bool FixBrokenSurface( mapDrawSurface_t& ds ){
 	/* dummy check */
-	if ( ds == NULL ) {
-		return false;
-	}
-	if ( ds->type != ESurfaceType::Face ) {
+	if ( ds.type != ESurfaceType::Face ) {
 		return false;
 	}
 
 	/* check all verts */
-	for ( i = 0; i < ds->numVerts; i++ )
+	for ( int i = 0; i < ds.numVerts; ++i )
 	{
 		/* get verts */
-		dv1 = &ds->verts[ i ];
-		dv2 = &ds->verts[ ( i + 1 ) % ds->numVerts ];
+		bspDrawVert_t& dv1 = ds.verts[ i ];
+		bspDrawVert_t& dv2 = ds.verts[ ( i + 1 ) % ds.numVerts ];
+		bspDrawVert_t avg;
 
 		/* degenerate edge? */
-		avg.xyz = dv1->xyz - dv2->xyz;
+		avg.xyz = dv1.xyz - dv2.xyz;
 		if ( vector3_length( avg.xyz ) < DEGENERATE_EPSILON ) {
 			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: Degenerate T-junction edge found, fixing...\n" );
 
 			/* create an average drawvert */
 			/* ydnar 2002-01-26: added nearest-integer welding preference */
-			avg.xyz = SnapWeldVector( dv1->xyz, dv2->xyz );
-			avg.normal = VectorNormalized( dv1->normal + dv2->normal );
-			avg.st = vector2_mid( dv1->st, dv2->st );
+			avg.xyz = SnapWeldVector( dv1.xyz, dv2.xyz );
+			avg.normal = VectorNormalized( dv1.normal + dv2.normal );
+			avg.st = vector2_mid( dv1.st, dv2.st );
 
 			/* lightmap st/colors */
-			for ( k = 0; k < MAX_LIGHTMAPS; k++ )
+			for ( int k = 0; k < MAX_LIGHTMAPS; ++k )
 			{
-				avg.lightmap[ k ] = vector2_mid( dv1->lightmap[ k ], dv2->lightmap[ k ] );
-				for ( j = 0; j < 4; j++ )
-					avg.color[ k ][ j ] = (int) ( dv1->color[ k ][ j ] + dv2->color[ k ][ j ] ) >> 1;
+				avg.lightmap[ k ] = vector2_mid( dv1.lightmap[ k ], dv2.lightmap[ k ] );
+				for ( int j = 0; j < 4; ++j )
+					avg.color[ k ][ j ] = (int) ( dv1.color[ k ][ j ] + dv2.color[ k ][ j ] ) >> 1;
 			}
 
 			/* ydnar: der... */
-			memcpy( dv1, &avg, sizeof( avg ) );
+			dv1 = avg;
 
 			/* move the remaining verts */
-			for ( k = i + 2; k < ds->numVerts; k++ )
+			for ( int k = i + 2; k < ds.numVerts; ++k )
 			{
-				/* get verts */
-				dv1 = &ds->verts[ k ];
-				dv2 = &ds->verts[ k - 1 ];
-
-				/* copy */
-				memcpy( dv2, dv1, sizeof( bspDrawVert_t ) );
+				ds.verts[ k - 1 ] = ds.verts[ k ];
 			}
-			ds->numVerts--;
+			ds.numVerts--;
 
 			/* after welding, we have to consider the same vertex again, as it now has a new neighbor dv2 */
 			--i;
 
-			/* should ds->numVerts have become 0, then i is now -1. In the next iteration, the loop will abort. */
+			/* should ds.numVerts have become 0, then i is now -1. In the next iteration, the loop will abort. */
 		}
 	}
 
 	/* one last check and return */
-	return ds->numVerts >= 3;
+	return ds.numVerts >= 3;
 }
 
 
@@ -562,12 +547,7 @@ bool FixBrokenSurface( mapDrawSurface_t *ds ){
  */
 
 void FixTJunctions( entity_t *ent ){
-	int i;
-	mapDrawSurface_t    *ds;
-	shaderInfo_t        *si;
 	int axialEdgeLines;
-	originalEdge_t      *e;
-	bspDrawVert_t   *dv;
 
 	/* meta mode has its own t-junction code (currently not as good as this code) */
 	//%	if( meta )
@@ -582,17 +562,17 @@ void FixTJunctions( entity_t *ent ){
 	// this actually creates axial edges, but it
 	// only creates originalEdge_t structures
 	// for non-axial edges
-	for ( i = ent->firstDrawSurf ; i < numMapDrawSurfs ; i++ )
+	for ( int i = ent->firstDrawSurf; i < numMapDrawSurfs; ++i )
 	{
 		/* get surface and early out if possible */
-		ds = &mapDrawSurfs[ i ];
-		si = ds->shaderInfo;
-		if ( ( si->compileFlags & C_NODRAW ) || si->autosprite || si->notjunc || ds->numVerts == 0 ) {
+		mapDrawSurface_t& ds = mapDrawSurfs[ i ];
+		const shaderInfo_t *si = ds.shaderInfo;
+		if ( ( si->compileFlags & C_NODRAW ) || si->autosprite || si->notjunc || ds.numVerts == 0 ) {
 			continue;
 		}
 
 		/* ydnar: gs mods: handle the various types of surfaces */
-		switch ( ds->type )
+		switch ( ds.type )
 		{
 		/* handle brush faces */
 		case ESurfaceType::Face:
@@ -619,10 +599,8 @@ void FixTJunctions( entity_t *ent ){
 
 	// add the non-axial edges, longest first
 	// this gives the most accurate edge description
-	for ( i = 0 ; i < numOriginalEdges ; i++ ) {
-		e = &originalEdges[i];
-		dv = e->dv[0]; // e might change during AddEdge
-		dv->lightmap[ 0 ][ 0 ] = AddEdge( *e->dv[ 0 ], *e->dv[ 1 ], true );
+	for ( originalEdge_t& e : Span( originalEdges, numOriginalEdges ) ) { // originalEdges might not change during AddEdge( true )
+		e.dv[ 0 ]->lightmap[ 0 ][ 0 ] = AddEdge( *e.dv[ 0 ], *e.dv[ 1 ], true );
 	}
 
 	Sys_FPrintf( SYS_VRB, "%9d axial edge lines\n", axialEdgeLines );
@@ -630,24 +608,24 @@ void FixTJunctions( entity_t *ent ){
 	Sys_FPrintf( SYS_VRB, "%9d degenerate edges\n", c_degenerateEdges );
 
 	// insert any needed vertexes
-	for ( i = ent->firstDrawSurf; i < numMapDrawSurfs ; i++ )
+	for ( int i = ent->firstDrawSurf; i < numMapDrawSurfs; ++i )
 	{
 		/* get surface and early out if possible */
-		ds = &mapDrawSurfs[ i ];
-		si = ds->shaderInfo;
-		if ( ( si->compileFlags & C_NODRAW ) || si->autosprite || si->notjunc || ds->numVerts == 0 || ds->type != ESurfaceType::Face ) {
+		mapDrawSurface_t& ds = mapDrawSurfs[ i ];
+		const shaderInfo_t *si = ds.shaderInfo;
+		if ( ( si->compileFlags & C_NODRAW ) || si->autosprite || si->notjunc || ds.numVerts == 0 || ds.type != ESurfaceType::Face ) {
 			continue;
 		}
 
 		/* ydnar: gs mods: handle the various types of surfaces */
-		switch ( ds->type )
+		switch ( ds.type )
 		{
 		/* handle brush faces */
 		case ESurfaceType::Face:
 			FixSurfaceJunctions( ds );
 			if ( !FixBrokenSurface( ds ) ) {
 				c_broken++;
-				ClearSurface( ds );
+				ClearSurface( &ds );
 			}
 			break;
 

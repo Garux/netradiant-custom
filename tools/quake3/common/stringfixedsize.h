@@ -42,8 +42,8 @@ public:
 	}
 	std::size_t write( const char* buffer, std::size_t length ) override {
 		if( m_length + length < SIZE ){
-			for( auto i = length; i != 0; --i )
-				m_string[m_length++] = *buffer++;
+			std::copy_n( buffer, length, m_string + m_length );
+			m_length += length;
 			strClear( &m_string[m_length] );
 		}
 		else{

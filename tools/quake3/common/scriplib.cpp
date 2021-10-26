@@ -315,11 +315,9 @@ void MatchToken( const char *match ) {
 
 template<typename T>
 void Parse1DMatrix( int x, T *m ) {
-	int i;
-
 	MatchToken( "(" );
 
-	for ( i = 0 ; i < x ; i++ ) {
+	for ( int i = 0; i < x; ++i ) {
 		GetToken( false );
 		m[i] = atof( token );
 	}
@@ -330,11 +328,9 @@ template void Parse1DMatrix<float>( int x, float *m );
 template void Parse1DMatrix<double>( int x, double *m );
 
 void Parse2DMatrix( int y, int x, float *m ) {
-	int i;
-
 	MatchToken( "(" );
 
-	for ( i = 0 ; i < y ; i++ ) {
+	for ( int i = 0; i < y; ++i ) {
 		Parse1DMatrix( x, m + i * x );
 	}
 
@@ -342,11 +338,9 @@ void Parse2DMatrix( int y, int x, float *m ) {
 }
 
 void Parse3DMatrix( int z, int y, int x, float *m ) {
-	int i;
-
 	MatchToken( "(" );
 
-	for ( i = 0 ; i < z ; i++ ) {
+	for ( int i = 0; i < z; ++i ) {
 		Parse2DMatrix( y, x, m + i * x * y );
 	}
 
@@ -355,10 +349,8 @@ void Parse3DMatrix( int z, int y, int x, float *m ) {
 
 
 void Write1DMatrix( FILE *f, int x, float *m ) {
-	int i;
-
 	fprintf( f, "( " );
-	for ( i = 0 ; i < x ; i++ ) {
+	for ( int i = 0; i < x; ++i ) {
 		if ( m[i] == (int)m[i] ) {
 			fprintf( f, "%i ", (int)m[i] );
 		}
@@ -370,10 +362,8 @@ void Write1DMatrix( FILE *f, int x, float *m ) {
 }
 
 void Write2DMatrix( FILE *f, int y, int x, float *m ) {
-	int i;
-
 	fprintf( f, "( " );
-	for ( i = 0 ; i < y ; i++ ) {
+	for ( int i = 0; i < y; ++i ) {
 		Write1DMatrix( f, x, m + i * x );
 		fprintf( f, " " );
 	}
@@ -382,10 +372,8 @@ void Write2DMatrix( FILE *f, int y, int x, float *m ) {
 
 
 void Write3DMatrix( FILE *f, int z, int y, int x, float *m ) {
-	int i;
-
 	fprintf( f, "(\n" );
-	for ( i = 0 ; i < z ; i++ ) {
+	for ( int i = 0; i < z; ++i ) {
 		Write2DMatrix( f, y, x, m + i * ( x * y ) );
 	}
 	fprintf( f, ")\n" );

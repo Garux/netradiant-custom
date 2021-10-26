@@ -300,10 +300,10 @@ void SnapPlaneImproved( Plane3f& plane, int numPoints, const Vector3 *points ){
 	if ( SnapNormal( plane.normal() ) ) {
 		if ( numPoints > 0 ) {
 			// Adjust the dist so that the provided points don't drift away.
-			Vector3 center( 0 );
-			for ( int i = 0; i < numPoints; i++ )
+			DoubleVector3 center( 0 );
+			for ( const Vector3& point : Span( points, numPoints ) )
 			{
-				center += points[i];
+				center += point;
 			}
 			center /= numPoints;
 			plane.dist() = vector3_dot( plane.normal(), center );
@@ -1281,8 +1281,8 @@ void AdjustBrushesForOrigin( entity_t *ent ){
 	/* walk patch list */
 	for ( parseMesh_t *p = ent->patches; p != NULL; p = p->next )
 	{
-		for ( int i = 0; i < ( p->mesh.width * p->mesh.height ); i++ )
-			p->mesh.verts[ i ].xyz -= ent->originbrush_origin;
+		for ( bspDrawVert_t& vert : Span( p->mesh.verts, p->mesh.width * p->mesh.height ) )
+			vert.xyz -= ent->originbrush_origin;
 	}
 }
 
@@ -1330,11 +1330,9 @@ void SetEntityBounds( entity_t *e ){
  */
 
 void LoadEntityIndexMap( entity_t *e ){
-	int i, size, numLayers, w, h;
+	int numLayers, w, h;
 	const char      *indexMapFilename, *shader;
 	byte            *pixels;
-	unsigned int    *pixels32;
-	indexMap_t      *im;
 
 
 	/* this only works with bmodel ents */
@@ -1371,12 +1369,13 @@ void LoadEntityIndexMap( entity_t *e ){
 	/* handle tga image */
 	if ( path_extension_is( indexMapFilename, "tga" ) ) {
 		/* load it */
+		unsigned int    *pixels32;
 		Load32BitImage( indexMapFilename, &pixels32, &w, &h );
 
 		/* convert to bytes */
-		size = w * h;
+		const int size = w * h;
 		pixels = safe_malloc( size );
-		for ( i = 0; i < size; i++ )
+		for ( int i = 0; i < size; i++ )
 		{
 			pixels[ i ] = ( ( pixels32[ i ] & 0xFF ) * numLayers ) / 256;
 			if ( pixels[ i ] >= numLayers ) {
@@ -1396,8 +1395,8 @@ void LoadEntityIndexMap( entity_t *e ){
 		//%	Sys_Printf( "-------------------------------" );
 
 		/* fix up out-of-range values */
-		size = w * h;
-		for ( i = 0; i < size; i++ )
+		const int size = w * h;
+		for ( int i = 0; i < size; i++ )
 		{
 			if ( pixels[ i ] >= numLayers ) {
 				pixels[ i ] = numLayers - 1;
@@ -1422,7 +1421,7 @@ void LoadEntityIndexMap( entity_t *e ){
 	}
 
 	/* create a new index map */
-	im = safe_malloc( sizeof( *im ) );
+	indexMap_t *im = safe_malloc( sizeof( *im ) );
 	new ( im ) indexMap_t{}; // placement new
 
 	/* set it up */
@@ -1437,7 +1436,7 @@ void LoadEntityIndexMap( entity_t *e ){
 	if( mapEnt->read_keyvalue( offset, "_offsets", "offsets" ) ){
 		/* value is a space-separated set of numbers */
 		/* get each value */
-		for ( i = 0; i < 256 && !strEmpty( offset ); i++ )
+		for ( int i = 0; i < 256 && !strEmpty( offset ); ++i )
 		{
 			const char *space = strchr( offset, ' ' );
 			if ( space == NULL ) {
