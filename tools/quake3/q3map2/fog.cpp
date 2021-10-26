@@ -344,8 +344,8 @@ winding_t WindingFromDrawSurf( const mapDrawSurface_t *ds ){
 	}
 
 	winding_t w = AllocWinding( ds->numVerts );
-	for ( int i = 0; i < ds->numVerts; i++ ) {
-		w.push_back( ds->verts[i].xyz );
+	for ( const bspDrawVert_t& vert : Span( ds->verts, ds->numVerts ) ) {
+		w.push_back( vert.xyz );
 	}
 	return w;
 }
@@ -485,8 +485,8 @@ void FogDrawSurfaces( entity_t *e ){
 			{
 				/* find drawsurface bounds */
 				MinMax minmax;
-				for ( int j = 0; j < ds->numVerts; j++ )
-					minmax.extend( ds->verts[ j ].xyz );
+				for ( const bspDrawVert_t& vert : Span( ds->verts, ds->numVerts ) )
+					minmax.extend( vert.xyz );
 
 				/* check against the fog brush */
 				if( !minmax.test( fog.brush->minmax ) ){

@@ -1303,8 +1303,8 @@ void SetEntityBounds( entity_t *e ){
 	}
 	for ( parseMesh_t *p = e->patches; p; p = p->next )
 	{
-		for ( int i = 0; i < ( p->mesh.width * p->mesh.height ); i++ )
-			minmax.extend( p->mesh.verts[ i ].xyz );
+		for ( const bspDrawVert_t& vert : Span( p->mesh.verts, p->mesh.width * p->mesh.height ) )
+			minmax.extend( vert.xyz );
 	}
 
 	/* try to find explicit min/max key */

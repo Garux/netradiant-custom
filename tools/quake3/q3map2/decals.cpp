@@ -360,7 +360,7 @@ static int MakeDecalProjector( shaderInfo_t *si, const Plane3f& projection, floa
 #define PLANAR_EPSILON  0.5f
 
 void ProcessDecals( void ){
-	int j, x, y, pw[ 5 ], r, iterations;
+	int x, y, pw[ 5 ], r, iterations;
 	float distance;
 	Plane3f projection, plane;
 	entity_t            *e2;
@@ -424,8 +424,8 @@ void ProcessDecals( void ){
 				FreeMesh( subdivided );
 
 				/* offset by projector origin */
-				for ( j = 0; j < ( mesh->width * mesh->height ); j++ )
-					mesh->verts[ j ].xyz += e.origin;
+				for ( bspDrawVert_t& vert : Span( mesh->verts, mesh->width * mesh->height ) )
+					vert.xyz += e.origin;
 
 				/* iterate through the mesh quads */
 				for ( y = 0; y < ( mesh->height - 1 ); y++ )
@@ -699,7 +699,7 @@ static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *d
 	{
 		/* generate decal */
 		winding_t w{
-			ds->verts[ ds->indexes[ i ] ].xyz,
+			ds->verts[ ds->indexes[ i + 0 ] ].xyz,
 			ds->verts[ ds->indexes[ i + 1 ] ].xyz,
 			ds->verts[ ds->indexes[ i + 2 ] ].xyz };
 		ProjectDecalOntoWinding( dp, ds, w );

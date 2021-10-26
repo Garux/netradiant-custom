@@ -48,7 +48,6 @@ static void RadClipWindingEpsilon( radWinding_t *in, const Vector3& normal, floa
 	int counts[ 3 ];
 	float dot;                  /* ydnar: changed from static b/c of threading */ /* VC 4.2 optimizer bug if not static? */
 	int i, k;
-	radVert_t       *v1, *v2, mid;
 	int maxPoints;
 
 
@@ -97,20 +96,20 @@ static void RadClipWindingEpsilon( radWinding_t *in, const Vector3& normal, floa
 	for ( i = 0; i < in->numVerts; i++ )
 	{
 		/* do simple vertex copies first */
-		v1 = &in->verts[ i ];
+		const radVert_t& v1 = in->verts[ i ];
 
 		if ( sides[ i ] == eSideOn ) {
-			memcpy( &front->verts[ front->numVerts++ ], v1, sizeof( radVert_t ) );
-			memcpy( &back->verts[ back->numVerts++ ], v1, sizeof( radVert_t ) );
+			front->verts[ front->numVerts++ ] = v1;
+			back->verts[ back->numVerts++ ] = v1;
 			continue;
 		}
 
 		if ( sides[ i ] == eSideFront ) {
-			memcpy( &front->verts[ front->numVerts++ ], v1, sizeof( radVert_t ) );
+			front->verts[ front->numVerts++ ] = v1;
 		}
 
 		if ( sides[ i ] == eSideBack ) {
-			memcpy( &back->verts[ back->numVerts++ ], v1, sizeof( radVert_t ) );
+			back->verts[ back->numVerts++ ] = v1;
 		}
 
 		if ( sides[ i + 1 ] == eSideOn || sides[ i + 1 ] == sides[ i ] ) {
@@ -118,29 +117,30 @@ static void RadClipWindingEpsilon( radWinding_t *in, const Vector3& normal, floa
 		}
 
 		/* generate a split vertex */
-		v2 = &in->verts[ ( i + 1 ) % in->numVerts ];
+		const radVert_t& v2 = in->verts[ ( i + 1 ) % in->numVerts ];
 
 		dot = dists[ i ] / ( dists[ i ] - dists[ i + 1 ] );
 
 		/* average vertex values */
+		radVert_t mid;
 		/* color */
 		for ( k = 0; k < MAX_LIGHTMAPS; k++ ){
-			mid.color[ k ] = v1->color[ k ] + ( v2->color[ k ] - v1->color[ k ] ) * dot;
+			mid.color[ k ] = v1.color[ k ] + ( v2.color[ k ] - v1.color[ k ] ) * dot;
 		}
 		/* xyz, normal */
-		mid.xyz = v1->xyz + ( v2->xyz - v1->xyz ) * dot;
-		mid.normal = v1->normal + ( v2->normal - v1->normal ) * dot;
+		mid.xyz = v1.xyz + ( v2.xyz - v1.xyz ) * dot;
+		mid.normal = v1.normal + ( v2.normal - v1.normal ) * dot;
 		/* st, lightmap */
-		mid.st = v1->st + ( v2->st - v1->st ) * dot;
+		mid.st = v1.st + ( v2.st - v1.st ) * dot;
 		for ( k = 0; k < MAX_LIGHTMAPS; k++ )
-			mid.lightmap[ k ] = v1->lightmap[ k ] + ( v2->lightmap[ k ] - v1->lightmap[ k ] ) * dot;
+			mid.lightmap[ k ] = v1.lightmap[ k ] + ( v2.lightmap[ k ] - v1.lightmap[ k ] ) * dot;
 
 		/* normalize the averaged normal */
 		VectorNormalize( mid.normal );
 
 		/* copy the midpoint to both windings */
-		memcpy( &front->verts[ front->numVerts++ ], &mid, sizeof( radVert_t ) );
-		memcpy( &back->verts[ back->numVerts++ ], &mid, sizeof( radVert_t ) );
+		front->verts[ front->numVerts++ ] = mid;
+		back->verts[ back->numVerts++ ] = mid;
 	}
 
 	/* error check */
@@ -373,8 +373,8 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 
 	/* get bounds for winding */
 	MinMax minmax;
-	for ( i = 0; i < rw->numVerts; i++ )
-		minmax.extend( rw->verts[ i ].xyz );
+	for ( const radVert_t& vert : Span( rw->verts, rw->numVerts ) )
+		minmax.extend( vert.xyz );
 
 	/* subdivide if necessary */
 	for ( i = 0; i < 3; i++ )
@@ -421,9 +421,9 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 
 	/* create an average normal */
 	normal.set( 0 );
-	for ( i = 0; i < rw->numVerts; i++ )
+	for ( const radVert_t& vert : Span( rw->verts, rw->numVerts ) )
 	{
-		normal += rw->verts[ i ].normal;
+		normal += vert.normal;
 	}
 	normal /= rw->numVerts;
 	if ( VectorNormalize( normal ) == 0.0f ) {
@@ -469,9 +469,9 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 	light.fade = 1.0f;
 	/* create a regular winding */
 	light.w = AllocWinding( rw->numVerts );
-	for ( i = 0; i < rw->numVerts; i++ )
+	for ( const radVert_t& vert : Span( rw->verts, rw->numVerts ) )
 	{
-		light.w.push_back( rw->verts[ i ].xyz );
+		light.w.push_back( vert.xyz );
 	}
 
 	/* set falloff threshold */
@@ -683,11 +683,10 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 	/* FIXME: build interpolation table into color[ 1 ] */
 
 	/* fix up color indexes */
-	for ( i = 0; i < ( mesh->width * mesh->height ); i++ )
+	for ( bspDrawVert_t& vert : Span( mesh->verts, mesh->width * mesh->height ) )
 	{
-		dv[ 0 ] = &mesh->verts[ i ];
-		if ( dv[ 0 ]->color[ 0 ][ 0 ] >= ds->numVerts ) {
-			dv[ 0 ]->color[ 0 ][ 0 ] = ds->numVerts - 1;
+		if ( vert.color[ 0 ][ 0 ] >= ds->numVerts ) {
+			vert.color[ 0 ][ 0 ] = ds->numVerts - 1;
 		}
 	}
 

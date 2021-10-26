@@ -501,8 +501,8 @@ void BeginModel( void ){
 	/* bound patches */
 	for ( const parseMesh_t *p = e.patches; p; p = p->next )
 	{
-		for ( int i = 0; i < ( p->mesh.width * p->mesh.height ); i++ )
-			minmax.extend( p->mesh.verts[i].xyz );
+		for ( const bspDrawVert_t& vert : Span( p->mesh.verts, p->mesh.width * p->mesh.height ) )
+			minmax.extend( vert.xyz );
 	}
 
 	/* ydnar: lightgrid mins/maxs */

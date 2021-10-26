@@ -156,7 +156,7 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
  */
 
 void Foliage( mapDrawSurface_t *src ){
-	int i, j, k, x, y, pw[ 5 ], r, oldNumMapDrawSurfs;
+	int i, j, x, y, pw[ 5 ], r, oldNumMapDrawSurfs;
 	mapDrawSurface_t    *ds;
 	shaderInfo_t        *si;
 	mesh_t srcMesh, *subdivided, *mesh;
@@ -291,9 +291,9 @@ void Foliage( mapDrawSurface_t *src ){
 				fi->normal = foliageInstances[ j ].normal;
 
 				/* ydnar: set color */
-				for ( k = 0; k < MAX_LIGHTMAPS; k++ )
+				for ( auto& color : fi->color )
 				{
-					fi->color[ k ].set( 255 );
+					color.set( 255 );
 				}
 			}
 
