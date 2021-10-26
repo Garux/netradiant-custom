@@ -189,7 +189,7 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	}
 	else
 	{
-		for ( i = 0 ; i < numthreads ; i++ )
+		for ( i = 0; i < numthreads; ++i )
 		{
 			threadhandle[i] = CreateThread(
 			                      NULL,                         // LPSECURITY_ATTRIBUTES  lpThreadAttributes,
@@ -204,7 +204,7 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 			                      NULL );                       // LPDWORD                lpThreadId
 		}
 
-		for ( i = 0 ; i < numthreads ; i++ )
+		for ( i = 0; i < numthreads; ++i )
 			WaitForSingleObject( threadhandle[i], INFINITE );
 	}
 	DeleteCriticalSection( &crit );
@@ -300,7 +300,7 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 		Error( "pthread_attr_setstacksize failed" );
 	}
 
-	for ( i = 0 ; i < numthreads ; i++ )
+	for ( i = 0; i < numthreads; ++i )
 	{
 		if ( pthread_create( &work_threads[i], attrib
 		                     , (pthread_startroutine_t)func, (pthread_addr_t)i ) == -1 ) {
@@ -308,7 +308,7 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 		}
 	}
 
-	for ( i = 0 ; i < numthreads ; i++ )
+	for ( i = 0; i < numthreads; ++i )
 	{
 		if ( pthread_join( work_threads[i], &status ) == -1 ) {
 			Error( "pthread_join failed" );
@@ -387,7 +387,7 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 
 	init_lock( &lck );
 
-	for ( i = 0 ; i < numthreads - 1 ; i++ )
+	for ( i = 0; i < numthreads - 1; ++i )
 	{
 		pid[i] = sprocsp( ( void ( * )( void *, size_t ) )func, PR_SALL, (void *)i
 		                  , NULL, 0x200000 ); // 2 meg stacks
@@ -399,7 +399,7 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 
 	func( i );
 
-	for ( i = 0 ; i < numthreads - 1 ; i++ )
+	for ( i = 0; i < numthreads - 1; ++i )
 		wait( NULL );
 
 	threaded = false;
@@ -571,14 +571,14 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 		}
 		recursive_mutex_init( mattrib );
 
-		for ( i = 0 ; i < numthreads ; i++ )
+		for ( i = 0; i < numthreads; ++i )
 		{
 			/* Default pthread attributes: joinable & non-realtime scheduling */
 			if ( pthread_create( &work_threads[i], &attr, (void *(*)(void *)) func, (void*)(size_t)i ) != 0 ) {
 				Error( "pthread_create failed" );
 			}
 		}
-		for ( i = 0 ; i < numthreads ; i++ )
+		for ( i = 0; i < numthreads; ++i )
 		{
 			if ( pthread_join( work_threads[i], NULL ) != 0 ) {
 				Error( "pthread_join failed" );

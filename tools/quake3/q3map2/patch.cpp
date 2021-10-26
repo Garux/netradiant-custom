@@ -390,7 +390,7 @@ void PatchMapDrawSurfs( entity_t *e ){
 	Sys_FPrintf( SYS_VRB, "--- PatchMapDrawSurfs ---\n" );
 
 	patchCount = 0;
-	for ( pm = e->patches ; pm ; pm = pm->next  ) {
+	for ( pm = e->patches; pm; pm = pm->next  ) {
 		meshes[patchCount] = pm;
 		patchCount++;
 	}
@@ -401,19 +401,19 @@ void PatchMapDrawSurfs( entity_t *e ){
 	bordering = safe_calloc( patchCount * patchCount );
 
 	// build the bordering matrix
-	for ( k = 0 ; k < patchCount ; k++ ) {
+	for ( k = 0; k < patchCount; ++k ) {
 		bordering[k * patchCount + k] = 1;
 
-		for ( l = k + 1 ; l < patchCount ; l++ ) {
+		for ( l = k + 1; l < patchCount; ++l ) {
 			check = meshes[k];
 			scan = meshes[l];
 			c1 = scan->mesh.width * scan->mesh.height;
 			v1 = scan->mesh.verts;
 
-			for ( i = 0 ; i < c1 ; i++, v1++ ) {
+			for ( i = 0; i < c1; ++i, ++v1 ) {
 				c2 = check->mesh.width * check->mesh.height;
 				v2 = check->mesh.verts;
-				for ( j = 0 ; j < c2 ; j++, v2++ ) {
+				for ( j = 0; j < c2; ++j, ++v2 ) {
 					if ( vector3_equal_epsilon( v1->xyz, v2->xyz, 1.f ) ) {
 						break;
 					}

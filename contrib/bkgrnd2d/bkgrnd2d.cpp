@@ -250,16 +250,16 @@ static bool get_selection_bounds( vec3_t mins, vec3_t maxs ){
 		return false;
 	}
 
-	for ( i = 0 ; i < 3 ; i++ )
+	for ( i = 0; i < 3; i++ )
 	{
 		mins[i] = 99999;
 		maxs[i] = -99999;
 	}
 
-	for ( b = selected_brushes->next ; b != selected_brushes ; b = b->next )
+	for ( b = selected_brushes->next; b != selected_brushes; b = b->next )
 	{
 		if ( b->owner->eclass->fixedsize ) {
-			for ( i = 0 ; i < 3 ; i++ )
+			for ( i = 0; i < 3; i++ )
 			{
 				if ( b->owner->origin[i] < mins[i] ) {
 					mins[i] = b->owner->origin[i];
@@ -271,7 +271,7 @@ static bool get_selection_bounds( vec3_t mins, vec3_t maxs ){
 		}
 		else
 		{
-			for ( i = 0 ; i < 3 ; i++ )
+			for ( i = 0; i < 3; i++ )
 			{
 				if ( b->mins[i] < mins[i] ) {
 					mins[i] = b->mins[i];

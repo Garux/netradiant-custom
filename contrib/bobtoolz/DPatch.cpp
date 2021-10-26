@@ -326,7 +326,7 @@ DPatch* DPatch::MergePatches( patch_merge_t merge_info, DPatch& p1, DPatch& p2 )
 void DPatch::Invert(){
 	int i, j;
 
-	for ( i = 0 ; i < width ; i++ )
+	for ( i = 0; i < width; i++ )
 	{
 		for ( j = 0; j < height / 2; j++ )
 		{
@@ -378,9 +378,9 @@ void DPatch::Transpose(){
 	int i, j;
 
 	if ( width > height ) {
-		for ( i = 0 ; i < height ; i++ )
+		for ( i = 0; i < height; i++ )
 		{
-			for ( j = i + 1 ; j < width ; j++ )
+			for ( j = i + 1; j < width; j++ )
 			{
 				if ( j < height ) {
 					// swap the value
@@ -396,9 +396,9 @@ void DPatch::Transpose(){
 	}
 	else
 	{
-		for ( i = 0 ; i < width ; i++ )
+		for ( i = 0; i < width; i++ )
 		{
-			for ( j = i + 1 ; j < height ; j++ )
+			for ( j = i + 1; j < height; j++ )
 			{
 				if ( j < width ) {
 					// swap the value

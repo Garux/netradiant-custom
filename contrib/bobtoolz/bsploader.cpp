@@ -97,7 +97,7 @@ void SwapBlock( int *block, int sizeOfBlock ) {
 	int i;
 
 	sizeOfBlock >>= 2;
-	for ( i = 0 ; i < sizeOfBlock ; i++ ) {
+	for ( i = 0; i < sizeOfBlock; i++ ) {
 		block[i] = LittleLong( block[i] );
 	}
 }
@@ -116,7 +116,7 @@ void SwapBSPFile( void ) {
 //	SwapBlock( (int *)dmodels, nummodels * sizeof( dmodels[0] ) );
 
 	// shaders (don't swap the name)
-//	for ( i = 0 ; i < numShaders ; i++ ) {
+//	for ( i = 0; i < numShaders; i++ ) {
 //		dshaders[i].contentFlags = LittleLong( dshaders[i].contentFlags );
 //		dshaders[i].surfaceFlags = LittleLong( dshaders[i].surfaceFlags );
 //	}
@@ -147,7 +147,7 @@ void SwapBSPFile( void ) {
 	( (int *)&visBytes )[1] = LittleLong( ( (int *)&visBytes )[1] );
 
 	// drawverts (don't swap colors )
-	for ( i = 0 ; i < numDrawVerts ; i++ ) {
+	for ( i = 0; i < numDrawVerts; i++ ) {
 		drawVerts[i].lightmap[0] = LittleFloat( drawVerts[i].lightmap[0] );
 		drawVerts[i].lightmap[1] = LittleFloat( drawVerts[i].lightmap[1] );
 		drawVerts[i].st[0] = LittleFloat( drawVerts[i].st[0] );
@@ -167,7 +167,7 @@ void SwapBSPFile( void ) {
 	SwapBlock( (int *)drawSurfaces, numDrawSurfaces * sizeof( drawSurfaces[0] ) );
 
 	// fogs
-//	for ( i = 0 ; i < numFogs ; i++ ) {
+//	for ( i = 0; i < numFogs; i++ ) {
 //		dfogs[i].brushNum = LittleLong( dfogs[i].brushNum );
 //		dfogs[i].visibleSide = LittleLong( dfogs[i].visibleSide );
 //	}

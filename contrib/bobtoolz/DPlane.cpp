@@ -153,7 +153,7 @@ DWinding* DPlane::BaseWindingForPlane(){
 
 	max = -131072;
 	x = -1;
-	for ( i = 0 ; i < 3; i++ )
+	for ( i = 0; i < 3; i++ )
 	{
 		v = (float)fabs( normal[i] );
 		if ( v > max ) {

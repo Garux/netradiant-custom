@@ -81,7 +81,7 @@ bool CBspPortal::Build( char *def ){
 
 	for ( n = 0; n < point_count; n++ )
 	{
-		for (; *c != 0 && *c != '('; c++ ) ;
+		for (; *c != 0 && *c != '('; c++ ){};
 
 		if ( *c == 0 ) {
 			return false;

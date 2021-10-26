@@ -297,7 +297,7 @@ public:
 // It is safe to disconnect the signal handler currently being invoked.
 template<typename InputIterator, typename SignalHandlerInvoke>
 inline void invokeSignalHandlers( InputIterator first, InputIterator last, SignalHandlerInvoke invoke ){
-	while ( first != last && invoke( *first++ ) != SIGNAL_STOP_EMISSION ) ;
+	while ( first != last && invoke( *first++ ) != SIGNAL_STOP_EMISSION ){};
 }
 
 class Signal0 : public SignalBase<SignalHandler>

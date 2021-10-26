@@ -73,13 +73,13 @@ void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, mesh_t 
 	float frac;
 	int frontAprox, backAprox;
 
-	for ( i = 0 ; i < 2 ; i++ ) {
+	for ( i = 0; i < 2; ++i ) {
 		dv = in->verts;
 		c_front = 0;
 		c_back = 0;
 		c_on = 0;
-		for ( h = 0 ; h < in->height ; h++ ) {
-			for ( w = 0 ; w < in->width ; w++, dv++ ) {
+		for ( h = 0; h < in->height; ++h ) {
+			for ( w = 0; w < in->width; ++w, ++dv ) {
 				d[h][w] = plane3_distance_to_point( plane, dv->xyz );
 				if ( d[h][w] > ON_EPSILON ) {
 					c_front++;
@@ -107,7 +107,7 @@ void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, mesh_t 
 
 		// find a split point
 		split = -1;
-		for ( w = 0 ; w < in->width - 1 ; w++ ) {
+		for ( w = 0; w < in->width - 1; ++w ) {
 			if ( ( d[0][w] < 0 ) != ( d[0][w + 1] < 0 ) ) {
 				if ( split == -1 ) {
 					split = w;
@@ -129,8 +129,8 @@ void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, mesh_t 
 		}
 
 		// make sure the split point stays the same for all other rows
-		for ( h = 1 ; h < in->height ; h++ ) {
-			for ( w = 0 ; w < in->width - 1 ; w++ ) {
+		for ( h = 1; h < in->height; ++h ) {
+			for ( w = 0; w < in->width - 1; ++w ) {
 				if ( ( d[h][w] < 0 ) != ( d[h][w + 1] < 0 ) ) {
 					if ( w != split ) {
 						Sys_Printf( "multiple crossing points for patch -- can't clip\n" );
@@ -191,8 +191,8 @@ void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, mesh_t 
 	}
 
 	// distribute the points
-	for ( w = 0 ; w < in->width ; w++ ) {
-		for ( h = 0 ; h < in->height ; h++ ) {
+	for ( w = 0; w < in->width; ++w ) {
+		for ( h = 0; h < in->height; ++h ) {
 			if ( w <= split ) {
 				f->verts[ h * f->width + w ] = in->verts[ h * in->width + w ];
 			}
@@ -257,14 +257,14 @@ bool ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, const brush_t *
 	// only split by the top and bottom planes to avoid
 	// some messy patch clipping issues
 
-	for ( i = 4 ; i <= 5 ; i++ ) {
+	for ( i = 4; i <= 5; ++i ) {
 		const plane_t& plane = mapplanes[ b->sides[ i ].planenum ];
 
 		SplitMeshByPlane( m, plane.plane, &front, &back );
 
 		if ( !back ) {
 			// nothing actually contained inside
-			for ( j = 0 ; j < numOutside ; j++ ) {
+			for ( j = 0; j < numOutside; ++j ) {
 				FreeMesh( outside[j] );
 			}
 			return false;

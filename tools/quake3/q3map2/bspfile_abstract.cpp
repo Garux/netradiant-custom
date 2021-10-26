@@ -410,7 +410,7 @@ bool ParseEntity( void ){
 void ParseEntities( void ){
 	entities.clear();
 	ParseFromMemory( bspEntData.data(), bspEntData.size() );
-	while ( ParseEntity() ) ;
+	while ( ParseEntity() ){};
 
 	/* ydnar: set number of bsp entities in case a map is loaded on top */
 	numBSPEntities = entities.size();

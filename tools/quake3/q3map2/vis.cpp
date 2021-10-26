@@ -300,7 +300,7 @@ void CalcVis( void ){
 	// assemble the leaf vis lists by oring and compressing the portal lists
 	//
 	Sys_Printf( "creating leaf vis...\n" );
-	for ( i = 0 ; i < portalclusters ; i++ )
+	for ( i = 0; i < portalclusters; ++i )
 		ClusterMerge( i );
 
 	totalvis = 0;
@@ -582,7 +582,7 @@ fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, const V
 	newf = NewFixedWinding( f1->numpoints + f2->numpoints );
 
 	// copy first polygon
-	for ( k = ( i + 1 ) % f1->numpoints ; k != i ; k = ( k + 1 ) % f1->numpoints )
+	for ( k = ( i + 1 ) % f1->numpoints; k != i; k = ( k + 1 ) % f1->numpoints )
 	{
 		if ( k == ( i + 1 ) % f1->numpoints && !keep2 ) {
 			continue;
@@ -593,7 +593,7 @@ fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, const V
 	}
 
 	// copy second polygon
-	for ( l = ( j + 1 ) % f2->numpoints ; l != j ; l = ( l + 1 ) % f2->numpoints )
+	for ( l = ( j + 1 ) % f2->numpoints; l != j; l = ( l + 1 ) % f2->numpoints )
 	{
 		if ( l == ( j + 1 ) % f2->numpoints && !keep1 ) {
 			continue;

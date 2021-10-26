@@ -854,7 +854,7 @@ std::array<Vector3, 2> TextureAxisFromPlane( const plane_t& plane ){
 	float best = 0;
 	int bestaxis = 0;
 
-	for ( int i = 0 ; i < 6 ; i++ )
+	for ( int i = 0; i < 6; ++i )
 	{
 		const float dot = vector3_dot( plane.normal(), baseaxis[i * 3] );
 		if ( dot > best + 0.0001f ) { /* ydnar: bug 637 fix, suggested by jmonroe */
@@ -889,16 +889,16 @@ void QuakeTextureVecs( const plane_t& plane, float shift[ 2 ], float rotate, flo
 
 	// rotate axis
 	if ( rotate == 0 ) {
-		sinv = 0 ; cosv = 1;
+		sinv = 0; cosv = 1;
 	}
 	else if ( rotate == 90 ) {
-		sinv = 1 ; cosv = 0;
+		sinv = 1; cosv = 0;
 	}
 	else if ( rotate == 180 ) {
-		sinv = 0 ; cosv = -1;
+		sinv = 0; cosv = -1;
 	}
 	else if ( rotate == 270 ) {
-		sinv = -1 ; cosv = 0;
+		sinv = -1; cosv = 0;
 	}
 	else
 	{
@@ -927,7 +927,7 @@ void QuakeTextureVecs( const plane_t& plane, float shift[ 2 ], float rotate, flo
 		tv = 2;
 	}
 
-	for ( int i = 0 ; i < 2 ; i++ ) {
+	for ( int i = 0; i < 2; ++i ) {
 		const float ns = cosv * vecs[i][sv] - sinv * vecs[i][tv];
 		const float nt = sinv * vecs[i][sv] + cosv * vecs[i][tv];
 		vecs[i][sv] = ns;
@@ -1244,7 +1244,7 @@ void MoveBrushesToWorld( entity_t *ent ){
 	/* move patches */
 	if ( ent->patches != NULL ) {
 		parseMesh_t *pm;
-		for ( pm = ent->patches; pm->next != NULL; pm = pm->next ) ;
+		for ( pm = ent->patches; pm->next != NULL; pm = pm->next ){};
 
 		pm->next = entities[ 0 ].patches;
 		entities[ 0 ].patches = ent->patches;
@@ -1683,7 +1683,7 @@ void LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups )
 	buildBrush.sides.reserve( MAX_BUILD_SIDES );
 
 	/* parse the map file */
-	while ( ParseMapEntity( onlyLights, noCollapseGroups ) ) ;
+	while ( ParseMapEntity( onlyLights, noCollapseGroups ) ){};
 
 	/* light loading */
 	if ( onlyLights ) {

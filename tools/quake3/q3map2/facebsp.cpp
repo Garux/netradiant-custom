@@ -113,7 +113,7 @@ static void SelectSplitPlaneNum( const node_t *node, const facelist_t& list, int
 			//Base score = 20000 perfectly balanced
 			value = 20000 - ( abs( front - back ) );
 			value -= plane.counter; // If we've already used this plane sometime in the past try not to use it again
-			value -= facing ;       // if we're going to have alot of other surfs use this plane, we want to get it in quickly.
+			value -= facing;        // if we're going to have alot of other surfs use this plane, we want to get it in quickly.
 			value -= splits * 5;        //more splits = bad
 			value +=  sizeBias * 10; //We want a huge score bias based on plane size
 		}

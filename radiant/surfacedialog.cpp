@@ -482,7 +482,7 @@ void SurfaceInspector_ProjectTexture( GtkWidget* widget, EProjectTexture type ){
 		direction = g_vector3_axes[GlobalXYWnd_getCurrentViewType()];
 		break;
 	case eProjectCam:
-		//direction = -g_pParentWnd->GetCamWnd()->getCamera().vpn ;
+		//direction = -g_pParentWnd->GetCamWnd()->getCamera().vpn;
 		direction = -Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
 		break;
 	}

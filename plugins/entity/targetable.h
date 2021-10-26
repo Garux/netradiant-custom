@@ -195,7 +195,7 @@ public:
 			Vector3 hack( 0.57735f, 0.57735f, 0.57735f );
 			int maxI = 0;
 			float max = 0;
-			for ( int i = 0; i < 3 ; ++i ){
+			for ( int i = 0; i < 3; ++i ){
 				if ( dir[i] < 0 ){
 					hack[i] *= -1.f;
 				}

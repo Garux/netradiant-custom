@@ -148,7 +148,7 @@ const char *WINS_ErrorMessage( int error ){
 		if ( error == errlist[search].errnum ) {
 			return errlist[search].errstr;
 		}
-	}  //end for
+	}
 
 	return "Unknown error";
 } //end of the function WINS_ErrorMessage

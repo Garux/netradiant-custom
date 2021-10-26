@@ -956,7 +956,7 @@ char *_pico_parse( picoParser_t *p, int allowLFs ){
  *  skips the rest of the current line in parser.
  */
 void _pico_parse_skip_rest( picoParser_t *p ){
-	while ( _pico_parse_ex( p,0,0 ) ) ;
+	while ( _pico_parse_ex( p,0,0 ) ){};
 }
 
 /* _pico_parse_skip_braced:

@@ -167,8 +167,8 @@ void MakeHeadnodePortals( tree_t& tree ){
 	tree.outside_node.portals = NULL;
 	tree.outside_node.opaque = false;
 
-	for ( int i = 0 ; i < 3 ; i++ )
-		for ( int j = 0 ; j < 2 ; j++ )
+	for ( int i = 0; i < 3; ++i )
+		for ( int j = 0; j < 2; ++j )
 		{
 			portal_t *p = portals[j * 3 + i] = AllocPortal();
 
@@ -184,9 +184,9 @@ void MakeHeadnodePortals( tree_t& tree ){
 		}
 
 // clip the basewindings by all the other planes
-	for ( int i = 0 ; i < 6 ; i++ )
+	for ( int i = 0; i < 6; ++i )
 	{
-		for ( int j = 0 ; j < 6 ; j++ )
+		for ( int j = 0; j < 6; ++j )
 		{
 			if ( j == i ) {
 				continue;

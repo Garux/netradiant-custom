@@ -480,7 +480,7 @@ void PicoFreeShader( picoShader_t *shader ){
 
 picoShader_t *PicoFindShader( picoModel_t *model, char *name, int caseSensitive ){
 	int i;
-	
+
 	/* sanity checks */
 	if ( model == NULL || name == NULL ) { /* sea: null name fix */
 		return NULL;
@@ -2249,7 +2249,7 @@ void PicoAddTriangleToModel( picoModel_t *model, picoVec3_t** xyz, picoVec3_t** 
 	picoSurface_t* workSurface = NULL;
 
 	/* see if a surface already has the shader */
-	for ( i = 0 ; i < model->numSurfaces ; i++ )
+	for ( i = 0; i < model->numSurfaces; i++ )
 	{
 		workSurface = model->surface[i];
 		if ( !name || !strcmp( workSurface->name, name ) ) {
@@ -2275,7 +2275,7 @@ void PicoAddTriangleToModel( picoModel_t *model, picoVec3_t** xyz, picoVec3_t** 
 	}
 
 	/* add the triangle data to the surface */
-	for ( i = 0 ; i < 3 ; i++ )
+	for ( i = 0; i < 3; i++ )
 	{
 		/* get the next free spot in the index array */
 		int newVertIndex = PicoGetSurfaceNumIndexes( workSurface );
@@ -2293,11 +2293,11 @@ void PicoAddTriangleToModel( picoModel_t *model, picoVec3_t** xyz, picoVec3_t** 
 			PicoSetSurfaceNormal( workSurface, vertDataIndex, *normals[i] );
 
 			/* make sure to copy over all available ST's and colors for the vertex */
-			for ( j = 0 ; j < numColors ; j++ )
+			for ( j = 0; j < numColors; j++ )
 			{
 				PicoSetSurfaceColor( workSurface, j, vertDataIndex, colors[i][j] );
 			}
-			for ( j = 0 ; j < numSTs ; j++ )
+			for ( j = 0; j < numSTs; j++ )
 			{
 				PicoSetSurfaceST( workSurface, j, vertDataIndex, st[i][j] );
 			}

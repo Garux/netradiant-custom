@@ -278,12 +278,12 @@ void Texture_InitPalette( byte *pal ){
 	gamma = g_texture_globals.fGamma;
 
 	if ( gamma == 1.0 ) {
-		for ( i = 0 ; i < 256 ; i++ )
+		for ( i = 0; i < 256; i++ )
 			gammatable[i] = i;
 	}
 	else
 	{
-		for ( i = 0 ; i < 256 ; i++ )
+		for ( i = 0; i < 256; i++ )
 		{
 			inf = (int)( 255 * pow( ( i + 0.5 ) / 255.5, gamma ) + 0.5 );
 			if ( inf < 0 ) {
@@ -296,7 +296,7 @@ void Texture_InitPalette( byte *pal ){
 		}
 	}
 
-	for ( i = 0 ; i < 256 ; i++ )
+	for ( i = 0; i < 256; i++ )
 	{
 		r = gammatable[pal[0]];
 		g = gammatable[pal[1]];

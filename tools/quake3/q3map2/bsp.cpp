@@ -675,7 +675,7 @@ int BSPMain( Args& args ){
 			Sys_Printf( "Leaving light entities on map after compile\n" );
 		}
 		while ( args.takeArg( "-nodetail" ) ) {
-			Sys_Printf( "Ignoring detail brushes\n" ) ;
+			Sys_Printf( "Ignoring detail brushes\n" );
 			nodetail = true;
 		}
 		while ( args.takeArg( "-fulldetail" ) ) {

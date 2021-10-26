@@ -217,9 +217,9 @@ inline void FacePlane_exportXML( const FacePlane& facePlane, XMLImporter& import
 
 	{
 		// write planepts
-		for ( int i = 0 ; i < 3 ; i++ )
+		for ( int i = 0; i < 3; i++ )
 		{
-			for ( int j = 0 ; j < 3 ; j++ )
+			for ( int j = 0; j < 3; j++ )
 			{
 				importer << Face::m_quantise( facePlane.planePoints()[i][j] ) << ' ';
 			}

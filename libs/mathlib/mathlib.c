@@ -101,7 +101,7 @@ vec_t VectorLength( const vec3_t v ){
 	float length;
 
 	length = 0.0f;
-	for ( i = 0 ; i < 3 ; i++ )
+	for ( i = 0; i < 3; i++ )
 		length += v[i] * v[i];
 	length = (float)sqrt( length );
 
@@ -111,7 +111,7 @@ vec_t VectorLength( const vec3_t v ){
 bool VectorCompare( const vec3_t v1, const vec3_t v2 ){
 	int i;
 
-	for ( i = 0 ; i < 3 ; i++ )
+	for ( i = 0; i < 3; i++ )
 		if ( fabs( v1[i] - v2[i] ) > EQUAL_EPSILON ) {
 			return false;
 		}
@@ -290,7 +290,7 @@ void VectorSnap( vec3_t v ){
 
 void VectorISnap( vec3_t point, int snap ){
 	int i;
-	for ( i = 0 ; i < 3 ; i++ )
+	for ( i = 0; i < 3; i++ )
 	{
 		point[i] = (vec_t)FLOAT_SNAP( point[i], snap );
 	}
@@ -298,7 +298,7 @@ void VectorISnap( vec3_t point, int snap ){
 
 void VectorFSnap( vec3_t point, float snap ){
 	int i;
-	for ( i = 0 ; i < 3 ; i++ )
+	for ( i = 0; i < 3; i++ )
 	{
 		point[i] = (vec_t)FLOAT_SNAP( point[i], snap );
 	}
@@ -344,7 +344,7 @@ void AddPointToBounds( vec3_t v, vec3_t mins, vec3_t maxs ){
 		}
 	}
 
-	for ( i = 0 ; i < 3 ; i++ )
+	for ( i = 0; i < 3; i++ )
 	{
 		val = v[i];
 		if ( val < mins[i] ) {

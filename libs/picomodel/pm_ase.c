@@ -259,7 +259,7 @@ typedef aseFace_t* aseFacesIter_t;
 picoSurface_t* PicoModelFindOrAddSurface( picoModel_t *model, picoShader_t* shader ){
 	/* see if a surface already has the shader */
 	int i = 0;
-	for ( ; i < model->numSurfaces ; i++ )
+	for ( ; i < model->numSurfaces; i++ )
 	{
 		picoSurface_t* workSurface = model->surface[i];
 		if ( workSurface->shader == shader ) {
@@ -377,7 +377,7 @@ static void _ase_submit_triangles_unshared( picoModel_t* model, aseMaterial_t* m
 			picoSurface_t* surface = PicoModelFindOrAddSurface( model, subMtl->shader );
 			int j;
 			/* we pull the data from the vertex, color and texcoord arrays using the face index data */
-			for ( j = 0 ; j < 3 ; j++ )
+			for ( j = 0; j < 3; j++ )
 			{
 				picoIndex_t index = (picoIndex_t)( ( ( i - faces ) * 3 ) + j );
 				picoIndex_t size = (picoIndex_t)aseUniqueIndices_size( &indices );
@@ -433,7 +433,7 @@ static void _ase_submit_triangles( picoModel_t* model, aseMaterial_t* materials,
 			picoIndex_t smooth[3];
 			int j;
 			/* we pull the data from the vertex, color and texcoord arrays using the face index data */
-			for ( j = 0 ; j < 3 ; j++ )
+			for ( j = 0; j < 3; j++ )
 			{
 				xyz[j]    = &vertices[( *i ).indices[j]].xyz;
 				normal[j] = &vertices[( *i ).indices[j]].normal;

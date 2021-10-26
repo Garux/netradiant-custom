@@ -81,7 +81,7 @@ const picoModule_t *picoModules[] =
 const picoModule_t **PicoModuleList( int *numModules ){
 	/* get module count */
 	if ( numModules != NULL ) {
-		for ( ( *numModules ) = 0; picoModules[ *numModules ] != NULL; ( *numModules )++ ) ;
+		for ( ( *numModules ) = 0; picoModules[ *numModules ] != NULL; ( *numModules )++ ){};
 	}
 
 	/* return list of modules */

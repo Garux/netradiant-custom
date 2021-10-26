@@ -270,7 +270,7 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
 				//
 				// unpack PBM
 				//
-				for ( y = 0 ; y < bmhd.h ; y++, pic_p += bmhd.w )
+				for ( y = 0; y < bmhd.h; ++y, pic_p += bmhd.w )
 				{
 					if ( bmhd.compression == cm_rle1 ) {
 						body_p = LBMRLEDecompress( (byte *)body_p
@@ -586,9 +586,9 @@ void WritePCXfile( const char *filename, byte *data,
 	// pack the image
 	pack = &pcx->data;
 
-	for ( i = 0 ; i < height ; i++ )
+	for ( i = 0; i < height; ++i )
 	{
-		for ( j = 0 ; j < width ; j++ )
+		for ( j = 0; j < width; ++j )
 		{
 			if ( ( *data & 0xc0 ) != 0xc0 ) {
 				*pack++ = *data++;
@@ -603,7 +603,7 @@ void WritePCXfile( const char *filename, byte *data,
 
 	// write the palette
 	*pack++ = 0x0c; // palette ID byte
-	for ( i = 0 ; i < 768 ; i++ )
+	for ( i = 0; i < 768; ++i )
 		*pack++ = *palette++;
 
 // write output file
@@ -723,7 +723,7 @@ void LoadBMP( const char *filename, byte **pic, byte **palette, int *width, int 
 			pos += 1024;
 			*palette = safe_malloc( 768 );
 
-			for ( i = 0 ; i < 256 ; i++ )
+			for ( i = 0; i < 256; ++i )
 			{
 				( *palette )[i * 3 + 0] = bcPalette[i * 4 + 2];
 				( *palette )[i * 3 + 1] = bcPalette[i * 4 + 1];
@@ -743,7 +743,7 @@ void LoadBMP( const char *filename, byte **pic, byte **palette, int *width, int 
 			pos += 768;
 			*palette = safe_malloc( 768 );
 
-			for ( i = 0 ; i < 256 ; i++ ) {
+			for ( i = 0; i < 256; ++i ) {
 				( *palette )[i * 3 + 0] = bcPalette[i * 3 + 2];
 				( *palette )[i * 3 + 1] = bcPalette[i * 3 + 1];
 				( *palette )[i * 3 + 2] = bcPalette[i * 3 + 0];
@@ -786,7 +786,7 @@ void LoadBMP( const char *filename, byte **pic, byte **palette, int *width, int 
 	pos = bfOffBits;
 
 	if ( flipped ) {
-		for ( i = 0 ; i < bcHeight ; i++ ) {
+		for ( i = 0; i < bcHeight; ++i ) {
 			memcpy( out + bcWidth * ( bcHeight - 1 - i ), in + pos, bcWidth );
 			pos += bcWidth;
 		}
@@ -1132,7 +1132,7 @@ void WriteTGA( const char *filename, const byte *data, int width, int height ) {
 
 	// swap rgb to bgr
 	c = 18 + width * height * 4;
-	for ( i = 18 ; i < c ; i += 4 )
+	for ( i = 18; i < c; i += 4 )
 	{
 		buffer[i] = data[i - 18 + 2];       // blue
 		buffer[i + 1] = data[i - 18 + 1];     // green
@@ -1199,7 +1199,7 @@ void Load32BitImage( const char *name, unsigned **pixels,  int *width, int *heig
 		size = *width * *height;
 		pixels32 = safe_malloc( size * 4 );
 		*pixels = (unsigned *)pixels32;
-		for ( i = 0 ; i < size ; i++ ) {
+		for ( i = 0; i < size; ++i ) {
 			v = pixels8[i];
 			pixels32[i * 4 + 0] = palette[ v * 3 + 0 ];
 			pixels32[i * 4 + 1] = palette[ v * 3 + 1 ];

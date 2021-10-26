@@ -352,7 +352,7 @@ bool CreateBrushWindings( brush_t& brush ){
 brush_t BrushFromBounds( const Vector3& mins, const Vector3& maxs ){
 	brush_t b;
 	b.sides.resize( 6 );
-	for ( int i = 0 ; i < 3 ; i++ )
+	for ( int i = 0; i < 3; ++i )
 	{
 		float dist = maxs[i];
 		b.sides[i].planenum = FindFloatPlane( g_vector3_axes[i], dist, 1, &maxs );

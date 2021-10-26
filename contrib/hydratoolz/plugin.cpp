@@ -291,7 +291,7 @@ GSList *AddToWadList( GSList *wadlist, const char *shadername, const char *wad )
 		wadname = strdup( wad );
 	}
 
-	for ( GSList *l = wadlist; l != NULL ; l = l->next )
+	for ( GSList *l = wadlist; l != NULL; l = l->next )
 	{
 		if ( string_equal_nocase( (char *)l->data,wadname ) ) {
 			free( wadname );
@@ -380,7 +380,7 @@ void UpdateWadKeyPair( void ){
 		}
 		else
 		{
-			for ( f = b->brush_faces ; f ; f = f->next )
+			for ( f = b->brush_faces; f; f = f->next )
 			{
 				wadlist = AddToWadList( wadlist, f->pShader->getName(),NULL );
 			}
@@ -397,7 +397,7 @@ void UpdateWadKeyPair( void ){
 		}
 		else
 		{
-			for ( f = b->brush_faces ; f ; f = f->next )
+			for ( f = b->brush_faces; f; f = f->next )
 			{
 				wadlist = AddToWadList( wadlist, f->pShader->getName(),NULL );
 			}

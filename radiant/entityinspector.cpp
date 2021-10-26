@@ -1003,7 +1003,7 @@ void SurfaceFlags_setEntityClass( EntityClass* eclass ){
 
 	{
 		// do a first pass to count the spawn flags, don't touch the widgets, we don't know in what state they are
-		for ( int i = 0 ; i < MAX_FLAGS ; i++ )
+		for ( int i = 0; i < MAX_FLAGS; i++ )
 		{
 			if ( eclass->flagnames[i] && eclass->flagnames[i][0] != 0 && strcmp( eclass->flagnames[i],"-" ) ) {
 				spawn_table[spawnflag_count] = i;

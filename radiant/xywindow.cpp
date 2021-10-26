@@ -911,7 +911,7 @@ void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 		}
 	}
 
-	for ( int i = 0 ; i < 3 ; i++ )
+	for ( int i = 0; i < 3; i++ )
 	{
 		if ( mins[i] == maxs[i] )
 			return; // don't create a degenerate brush
@@ -1535,14 +1535,14 @@ void XYWnd::XY_DrawGrid( void ) {
 
 			glBegin( GL_LINES );
 			int i = 0;
-			for ( x = xb ; x < xe ; x += minor_step, ++i ) {
+			for ( x = xb; x < xe; x += minor_step, ++i ) {
 				if ( ( i & mask ) != 0 ) {
 					glVertex2f( x, yb );
 					glVertex2f( x, ye );
 				}
 			}
 			i = 0;
-			for ( y = yb ; y < ye ; y += minor_step, ++i ) {
+			for ( y = yb; y < ye; y += minor_step, ++i ) {
 				if ( ( i & mask ) != 0 ) {
 					glVertex2f( xb, y );
 					glVertex2f( xe, y );
@@ -1556,11 +1556,11 @@ void XYWnd::XY_DrawGrid( void ) {
 			glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridmajor, a ) ) );
 
 			glBegin( GL_LINES );
-			for ( x = xb ; x <= xe ; x += step ) {
+			for ( x = xb; x <= xe; x += step ) {
 				glVertex2f( x, yb );
 				glVertex2f( x, ye );
 			}
-			for ( y = yb ; y <= ye ; y += step ) {
+			for ( y = yb; y <= ye; y += step ) {
 				glVertex2f( xb, y );
 				glVertex2f( xe, y );
 			}
@@ -1584,14 +1584,14 @@ void XYWnd::XY_DrawGrid( void ) {
 
 				glBegin( GL_LINES );
 				int i = 0;
-				for ( x = xb_ ; x < xe_ ; x += minor_step, ++i ) {
+				for ( x = xb_; x < xe_; x += minor_step, ++i ) {
 					if ( ( i & mask ) != 0 ) {
 						glVertex2f( x, yb_ );
 						glVertex2f( x, ye_ );
 					}
 				}
 				i = 0;
-				for ( y = yb_ ; y < ye_ ; y += minor_step, ++i ) {
+				for ( y = yb_; y < ye_; y += minor_step, ++i ) {
 					if ( ( i & mask ) != 0 ) {
 						glVertex2f( xb_, y );
 						glVertex2f( xe_, y );
@@ -1605,11 +1605,11 @@ void XYWnd::XY_DrawGrid( void ) {
 				glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridmajor, .5f ) ) );
 
 				glBegin( GL_LINES );
-				for ( x = xb_ ; x <= xe_ ; x += step ) {
+				for ( x = xb_; x <= xe_; x += step ) {
 					glVertex2f( x, yb_ );
 					glVertex2f( x, ye_ );
 				}
-				for ( y = yb_ ; y <= ye_ ; y += step ) {
+				for ( y = yb_; y <= ye_; y += step ) {
 					glVertex2f( xb_, y );
 					glVertex2f( xe_, y );
 				}
@@ -1625,12 +1625,12 @@ void XYWnd::XY_DrawGrid( void ) {
 		const float offx = m_vOrigin[nDim2] + h - ( 1 + GlobalOpenGL().m_font->getPixelHeight() ) / m_fScale;
 		const float offy = m_vOrigin[nDim1] - w +  4                                            / m_fScale;
 		const float fontDescent = ( GlobalOpenGL().m_font->getPixelDescent() - 1 ) / m_fScale;
-		for ( x = xb - fmod( xb, stepx ); x <= xe ; x += stepx ) {
+		for ( x = xb - fmod( xb, stepx ); x <= xe; x += stepx ) {
 			glRasterPos2f( x, offx );
 			sprintf( text, "%g", x );
 			GlobalOpenGL().drawString( text );
 		}
-		for ( y = yb - fmod( yb, stepy ); y <= ye ; y += stepy ) {
+		for ( y = yb - fmod( yb, stepy ); y <= ye; y += stepy ) {
 			glRasterPos2f( offy, y - fontDescent );
 			sprintf( text, "%g", y );
 			GlobalOpenGL().drawString( text );
@@ -1708,14 +1708,14 @@ void XYWnd::XY_DrawBlockGrid(){
 
 	glBegin( GL_LINES );
 
-	for ( x = xb ; x <= xe ; x += g_xywindow_globals_private.blockSize )
+	for ( x = xb; x <= xe; x += g_xywindow_globals_private.blockSize )
 	{
 		glVertex2f( x, yb );
 		glVertex2f( x, ye );
 	}
 
 	if ( m_viewType == XY ) {
-		for ( y = yb ; y <= ye ; y += g_xywindow_globals_private.blockSize )
+		for ( y = yb; y <= ye; y += g_xywindow_globals_private.blockSize )
 		{
 			glVertex2f( xb, y );
 			glVertex2f( xe, y );
@@ -1728,8 +1728,8 @@ void XYWnd::XY_DrawBlockGrid(){
 	// draw coordinate text if needed
 
 	if ( m_viewType == XY && m_fScale > .1 ) {
-		for ( x = xb ; x < xe ; x += g_xywindow_globals_private.blockSize )
-			for ( y = yb ; y < ye ; y += g_xywindow_globals_private.blockSize )
+		for ( x = xb; x < xe; x += g_xywindow_globals_private.blockSize )
+			for ( y = yb; y < ye; y += g_xywindow_globals_private.blockSize )
 			{
 				glRasterPos2f( x + ( g_xywindow_globals_private.blockSize / 2 ), y + ( g_xywindow_globals_private.blockSize / 2 ) );
 				sprintf( text, "%i,%i",(int)floor( x / g_xywindow_globals_private.blockSize ), (int)floor( y / g_xywindow_globals_private.blockSize ) );

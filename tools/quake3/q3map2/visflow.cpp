@@ -125,7 +125,7 @@ fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, const visP
 	counts[0] = counts[1] = counts[2] = 0;
 
 	// determine sides for each point
-	for ( i = 0 ; i < in->numpoints ; i++ )
+	for ( i = 0; i < in->numpoints; ++i )
 	{
 		dists[i] = plane3_distance_to_point( split, in->points[i] );
 		if ( dists[i] > ON_EPSILON ) {
@@ -157,7 +157,7 @@ fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, const visP
 
 	neww->numpoints = 0;
 
-	for ( i = 0 ; i < in->numpoints ; i++ )
+	for ( i = 0; i < in->numpoints; ++i )
 	{
 		const Vector3& p1 = in->points[i];
 
@@ -190,7 +190,7 @@ fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, const visP
 		const Vector3& p2 = in->points[( i + 1 ) % in->numpoints];
 
 		dot = dists[i] / ( dists[i] - dists[i + 1] );
-		for ( j = 0 ; j < 3 ; j++ )
+		for ( j = 0; j < 3; ++j )
 		{	// avoid round off error when possible
 			if ( split.normal()[j] == 1 ) {
 				mid[j] = split.dist();
@@ -236,14 +236,14 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 	bool fliptest;
 
 	// check all combinations
-	for ( i = 0 ; i < source->numpoints ; i++ )
+	for ( i = 0; i < source->numpoints; ++i )
 	{
 		l = ( i + 1 ) % source->numpoints;
 
 		// find a vertex of pass that makes a plane that puts all of the
 		// vertexes of pass on the front side and all of the vertexes of
 		// source on the back side
-		for ( j = 0 ; j < pass->numpoints ; j++ )
+		for ( j = 0; j < pass->numpoints; ++j )
 		{
 			visPlane_t plane;
 			// if points don't make a valid plane, skip it
@@ -257,7 +257,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 			//
 #if 1
 			fliptest = false;
-			for ( k = 0 ; k < source->numpoints ; k++ )
+			for ( k = 0; k < source->numpoints; ++k )
 			{
 				if ( k == i || k == l ) {
 					continue;
@@ -292,7 +292,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 			// this is the separating plane
 			//
 			counts[0] = counts[1] = counts[2] = 0;
-			for ( k = 0 ; k < pass->numpoints ; k++ )
+			for ( k = 0; k < pass->numpoints; ++k )
 			{
 				if ( k == j ) {
 					continue;
@@ -444,7 +444,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 
 		more = 0;
 		prevmight = (long *)prevstack->mightsee;
-		for ( j = 0 ; j < portallongs ; j++ )
+		for ( j = 0; j < portallongs; ++j )
 		{
 			might[j] = prevmight[j] & test[j];
 			more |= ( might[j] & ~vis[j] );
@@ -618,7 +618,7 @@ void PortalFlow( int portalnum ){
 	data.pstack_head.source = p->winding;
 	data.pstack_head.portalplane = p->plane;
 	data.pstack_head.depth = 0;
-	for ( i = 0 ; i < portallongs ; i++ )
+	for ( i = 0; i < portallongs; ++i )
 		( (long *)data.pstack_head.mightsee )[i] = ( (long *)p->portalflood )[i];
 
 	RecursiveLeafFlow( p->leaf, &data, &data.pstack_head );
@@ -743,7 +743,7 @@ void PassageFlow( int portalnum ){
 	data.pstack_head.source = p->winding;
 	data.pstack_head.portalplane = p->plane;
 	data.pstack_head.depth = 0;
-	for ( i = 0 ; i < portallongs ; i++ )
+	for ( i = 0; i < portallongs; ++i )
 		( (long *)data.pstack_head.mightsee )[i] = ( (long *)p->portalflood )[i];
 
 	RecursivePassageFlow( p, &data, &data.pstack_head );
@@ -998,7 +998,7 @@ void PassagePortalFlow( int portalnum ){
 	data.pstack_head.source = p->winding;
 	data.pstack_head.portalplane = p->plane;
 	data.pstack_head.depth = 0;
-	for ( i = 0 ; i < portallongs ; i++ )
+	for ( i = 0; i < portallongs; ++i )
 		( (long *)data.pstack_head.mightsee )[i] = ( (long *)p->portalflood )[i];
 
 	RecursivePassagePortalFlow( p, &data, &data.pstack_head );
@@ -1025,7 +1025,7 @@ fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, con
 	counts[0] = counts[1] = counts[2] = 0;
 
 	// determine sides for each point
-	for ( i = 0 ; i < in->numpoints ; i++ )
+	for ( i = 0; i < in->numpoints; ++i )
 	{
 		dists[i] = plane3_distance_to_point( split, in->points[i] );
 		if ( dists[i] > ON_EPSILON ) {
@@ -1056,7 +1056,7 @@ fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, con
 
 	neww->numpoints = 0;
 
-	for ( i = 0 ; i < in->numpoints ; i++ )
+	for ( i = 0; i < in->numpoints; ++i )
 	{
 		const Vector3& p1 = in->points[i];
 
@@ -1087,7 +1087,7 @@ fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, con
 		const Vector3& p2 = in->points[( i + 1 ) % in->numpoints];
 
 		dot = dists[i] / ( dists[i] - dists[i + 1] );
-		for ( j = 0 ; j < 3 ; j++ )
+		for ( j = 0; j < 3; ++j )
 		{	// avoid round off error when possible
 			if ( split.normal()[j] == 1 ) {
 				mid[j] = split.dist();
@@ -1119,14 +1119,14 @@ int AddSeperators( const fixedWinding_t *source, const fixedWinding_t *pass, boo
 
 	numseperators = 0;
 	// check all combinations
-	for ( i = 0 ; i < source->numpoints ; i++ )
+	for ( i = 0; i < source->numpoints; ++i )
 	{
 		l = ( i + 1 ) % source->numpoints;
 
 		// find a vertex of pass that makes a plane that puts all of the
 		// vertexes of pass on the front side and all of the vertexes of
 		// source on the back side
-		for ( j = 0 ; j < pass->numpoints ; j++ )
+		for ( j = 0; j < pass->numpoints; ++j )
 		{
 			visPlane_t plane;
 			// if points don't make a valid plane, skip it
@@ -1140,7 +1140,7 @@ int AddSeperators( const fixedWinding_t *source, const fixedWinding_t *pass, boo
 			//
 #if 1
 			fliptest = false;
-			for ( k = 0 ; k < source->numpoints ; k++ )
+			for ( k = 0; k < source->numpoints; ++k )
 			{
 				if ( k == i || k == l ) {
 					continue;
@@ -1175,7 +1175,7 @@ int AddSeperators( const fixedWinding_t *source, const fixedWinding_t *pass, boo
 			// this is the separating plane
 			//
 			counts[0] = counts[1] = counts[2] = 0;
-			for ( k = 0 ; k < pass->numpoints ; k++ )
+			for ( k = 0; k < pass->numpoints; ++k )
 			{
 				if ( k == j ) {
 					continue;
@@ -1465,7 +1465,7 @@ void BasePortalVis( int portalnum ){
 	p->portalflood = safe_calloc( portalbytes );
 	p->portalvis = safe_calloc( portalbytes );
 
-	for ( j = 0, tp = portals ; j < numportals * 2 ; j++, tp++ )
+	for ( j = 0, tp = portals; j < numportals * 2; ++j, ++tp )
 	{
 		if ( j == portalnum ) {
 			continue;
@@ -1507,7 +1507,7 @@ void BasePortalVis( int portalnum ){
 
 
 		w = tp->winding;
-		for ( k = 0 ; k < w->numpoints ; k++ )
+		for ( k = 0; k < w->numpoints; ++k )
 		{
 			if ( plane3_distance_to_point( p->plane, w->points[k] ) > ON_EPSILON ) {
 				break;
@@ -1518,7 +1518,7 @@ void BasePortalVis( int portalnum ){
 
 		}
 		w = p->winding;
-		for ( k = 0 ; k < w->numpoints ; k++ )
+		for ( k = 0; k < w->numpoints; ++k )
 		{
 			if ( plane3_distance_to_point( tp->plane, w->points[k] ) < -ON_EPSILON ) {
 				break;

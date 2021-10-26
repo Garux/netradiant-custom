@@ -141,7 +141,7 @@ void Brush_ConstructPrism( Brush& brush, const AABB& bounds, std::size_t sides, 
 
 	brush.addPlane( planepts[0], planepts[1], planepts[2], shader, projection );
 
-	for ( std::size_t i = 0 ; i < sides ; ++i )
+	for ( std::size_t i = 0; i < sides; ++i )
 	{
 		const double sv = sin( i * c_2pi / sides );
 		const double cv = cos( i * c_2pi / sides );
@@ -192,7 +192,7 @@ void Brush_ConstructCone( Brush& brush, const AABB& bounds, std::size_t sides, c
 
 	brush.addPlane( planepts[0], planepts[1], planepts[2], shader, projection );
 
-	for ( std::size_t i = 0 ; i < sides ; ++i )
+	for ( std::size_t i = 0; i < sides; ++i )
 	{
 		double sv = sin( i * 3.14159265 * 2 / sides );
 		double cv = cos( i * 3.14159265 * 2 / sides );

@@ -148,7 +148,7 @@ void xml_Select( const char *msg, int entitynum, int brushnum, bool bError ){
 	sprintf( buf, "Entity %i, Brush %i: %s", entitynum, brushnum, msg );
 	node = xmlNewNode( NULL, (const xmlChar*)"select" );
 	xmlNodeAddContent( node, (const xmlChar*)buf );
-	level[0] = (int)'0' + ( bError ? SYS_ERR : SYS_WRN )  ;
+	level[0] = (int)'0' + ( bError ? SYS_ERR : SYS_WRN );
 	level[1] = 0;
 	xmlSetProp( node, (const xmlChar*)"level", (const xmlChar *)level );
 	// a 'select' information

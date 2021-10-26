@@ -554,7 +554,7 @@ public:
 		vector3_scale( delta, m_axis );
 
 		Vector3 start( vector3_snapped( m_start, GetSnapGridSize() != 0.f ? GetSnapGridSize() : 1e-3f ) );
-		for ( std::size_t i = 0; i < 3 ; ++i ){ //prevent snapping to 0 with big gridsize
+		for ( std::size_t i = 0; i < 3; ++i ){ //prevent snapping to 0 with big gridsize
 			if( float_snapped( m_start[i], 1e-3f ) != 0.f && start[i] == 0.f ){
 				start[i] = GetSnapGridSize();
 			}
@@ -627,7 +627,7 @@ public:
 			delta = vector3_scaled( delta, m_axis ) + vector3_scaled( delta, m_axis2 );
 
 		Vector3 start( vector3_snapped( m_start, GetSnapGridSize() != 0.f ? GetSnapGridSize() : 1e-3f ) );
-		for ( std::size_t i = 0; i < 3 ; ++i ){ //prevent snapping to 0 with big gridsize
+		for ( std::size_t i = 0; i < 3; ++i ){ //prevent snapping to 0 with big gridsize
 			if( float_snapped( m_start[i], 1e-3f ) != 0.f && start[i] == 0.f ){
 				start[i] = GetSnapGridSize();
 			}
@@ -6190,7 +6190,7 @@ public:
 		case eUV:
 			{
 				const Vector3 uv_origin = matrix4_transformed_point( m_local2tex, m_origin );
-				const Vector3 uv_start{ m_selectedV->vertex.x(), m_selectedU->vertex.y(), 0 } ;
+				const Vector3 uv_start{ m_selectedV->vertex.x(), m_selectedU->vertex.y(), 0 };
 				const Vector3 uv_current{ ( m_selectedV->vertex + matrix4_transformed_point( m_local2tex, current ) - matrix4_transformed_point( m_local2tex, m_start ) ).x(),
 				                          ( m_selectedU->vertex + matrix4_transformed_point( m_local2tex, current ) - matrix4_transformed_point( m_local2tex, m_start ) ).y(),
 				                          0 };
@@ -6550,7 +6550,7 @@ public:
 		current = vector3_subtracted( current, m_start );
 
 		if( snap ){
-			for ( std::size_t i = 0; i < 3 ; ++i ){
+			for ( std::size_t i = 0; i < 3; ++i ){
 				if( fabs( current[i] ) >= fabs( current[(i + 1) % 3] ) ){
 					current[(i + 1) % 3] = 0.f;
 				}
@@ -6561,7 +6561,7 @@ public:
 		}
 
 		bool set[3] = { true, true, true };
-		for ( std::size_t i = 0; i < 3 ; ++i ){
+		for ( std::size_t i = 0; i < 3; ++i ){
 			if( fabs( current[i] ) < 1e-3f ){
 				set[i] = false;
 			}

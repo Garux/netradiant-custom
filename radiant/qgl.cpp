@@ -106,7 +106,7 @@ const GLubyte* qgluErrorString( GLenum errCode ){
 		if ( errCode == glu_errlist[search].errnum ) {
 			return (const GLubyte *)glu_errlist[search].errstr;
 		}
-	} //end for
+	}
 	return (const GLubyte *)"Unknown error";
 }
 

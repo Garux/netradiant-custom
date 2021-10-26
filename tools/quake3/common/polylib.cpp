@@ -243,7 +243,7 @@ winding_t BaseWindingForPlane( const Plane3f& plane ){
 
 	max = -BOGUS_RANGE;
 	x = -1;
-	for ( i = 0 ; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		v = fabs( plane.normal()[i] );
 		if ( v > max ) {
@@ -653,7 +653,7 @@ void CheckWinding( const winding_t& w ){
 
 	const Plane3f faceplane = WindingPlane( w );
 
-	for ( size_t i = 0 ; i < w.size() ; i++ )
+	for ( size_t i = 0; i < w.size(); ++i )
 	{
 		const Vector3& p1 = w[i];
 
@@ -678,7 +678,7 @@ void CheckWinding( const winding_t& w ){
 		const float edgedist = vector3_dot( p1, edgenormal ) + ON_EPSILON;
 
 		// all other points must be on front side
-		for ( size_t j = 0 ; j < w.size() ; j++ )
+		for ( size_t j = 0; j < w.size(); ++j )
 		{
 			if ( j == i ) {
 				continue;

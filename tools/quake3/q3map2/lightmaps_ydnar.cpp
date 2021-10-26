@@ -1961,7 +1961,7 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 			else{
 				i = ( ( numOutLightmaps - LIGHTMAP_RESERVE_COUNT ) / lightmapSearchBlockSize ) * lightmapSearchBlockSize;
 			}
-			for ( ; i < numOutLightmaps; i++ )
+			for ( ; i < numOutLightmaps; ++i )
 			{
 				/* get the output lightmap */
 				olm = &outLightmaps[ i ];

@@ -156,7 +156,7 @@ int AddEdge( bspDrawVert_t& dv1, bspDrawVert_t& dv2, bool createNonAxial ) {
 		}
 	}
 
-	for ( i = 0 ; i < numEdgeLines ; i++ ) {
+	for ( i = 0; i < numEdgeLines; ++i ) {
 		e = &edgeLines[i];
 
 		if ( !float_equal_epsilon( vector3_dot( v1, e->normal1 ), e->dist1, POINT_ON_LINE_EPSILON )
@@ -350,7 +350,7 @@ void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 			p = e->chain->prev;
 		}
 
-		for (  ; p != e->chain ; ) {
+		for ( ; p != e->chain; ) {
 			if ( start < end ) {
 				if ( p->intercept > end - ON_EPSILON ) {
 					break;
@@ -413,7 +413,7 @@ void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 
 	// rotate the points so that the initial vertex is between
 	// two non-subdivided edges
-	for ( i = 0 ; i < numVerts ; i++ ) {
+	for ( i = 0; i < numVerts; ++i ) {
 		if ( originals[ ( i + 1 ) % numVerts ] == originals[ i ] ) {
 			continue;
 		}
@@ -441,12 +441,12 @@ void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 
 /*
 		memset ( &verts[numVerts], 0, sizeof( verts[numVerts] ) );
-		for ( i = 0 ; i < numVerts ; i++ ) {
-			for ( j = 0 ; j < 10 ; j++ ) {
+		for ( i = 0; i < numVerts; ++i ) {
+			for ( j = 0; j < 10; ++j ) {
 				verts[numVerts].xyz[j] += verts[i].xyz[j];
 			}
 		}
-		for ( j = 0 ; j < 10 ; j++ ) {
+		for ( j = 0; j < 10; ++j ) {
 			verts[numVerts].xyz[j] /= numVerts;
 		}
 
@@ -463,7 +463,7 @@ void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 	ds.numVerts = numVerts;
 	ds.verts = safe_malloc( numVerts * sizeof( *ds.verts ) );
 
-	for ( j = 0 ; j < ds.numVerts ; j++ ) {
+	for ( j = 0; j < ds.numVerts; ++j ) {
 		ds.verts[j] = verts[ ( j + i ) % ds.numVerts ];
 	}
 }

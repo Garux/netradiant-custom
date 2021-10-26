@@ -150,7 +150,7 @@ public:
 	}
 	virtual void activate() const {
 		bi->func();
-		return ;
+		return;
 	}
 	virtual EType getType() const {
 		return bi->type;
