@@ -96,9 +96,9 @@ void SortPortals( void ){
 int LeafVectorFromPortalVector( byte *portalbits, byte *leafbits ){
 	for ( int i = 0; i < numportals * 2; ++i )
 	{
-		if ( portalbits[i >> 3] & ( 1 << ( i & 7 ) ) ) {
+		if ( bit_is_enabled( portalbits, i ) ) {
 			const vportal_t& p = portals[i];
-			leafbits[p.leaf >> 3] |= ( 1 << ( p.leaf & 7 ) );
+			bit_enable( leafbits, p.leaf );
 		}
 	}
 
@@ -108,8 +108,8 @@ int LeafVectorFromPortalVector( byte *portalbits, byte *leafbits ){
 		while ( leafs[leafnum].merged >= 0 )
 			leafnum = leafs[leafnum].merged;
 		//if the merged leaf is visible then the original leaf is visible
-		if ( leafbits[leafnum >> 3] & ( 1 << ( leafnum & 7 ) ) ) {
-			leafbits[i >> 3] |= ( 1 << ( i & 7 ) );
+		if ( bit_is_enabled( leafbits, leafnum ) ) {
+			bit_enable( leafbits, i );
 		}
 	}
 	return CountBits( leafbits, portalclusters ); //c_leafs
@@ -148,13 +148,12 @@ void ClusterMerge( int leafnum ){
 		}
 		for ( int j = 0; j < portallongs; ++j )
 			( (long *)portalvector )[j] |= ( (long *)p->portalvis )[j];
-		const int pnum = p - portals;
-		portalvector[pnum >> 3] |= 1 << ( pnum & 7 );
+		bit_enable( portalvector, p - portals );
 	}
 
 	memset( uncompressed, 0, leafbytes );
 
-	uncompressed[mergedleafnum >> 3] |= ( 1 << ( mergedleafnum & 7 ) );
+	bit_enable( uncompressed, mergedleafnum );
 	// convert portal bits to leaf bits
 	numvis = LeafVectorFromPortalVector( portalvector, uncompressed );
 

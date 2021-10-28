@@ -22,6 +22,14 @@ inline void value_minimize( T& value, const T& other ){
 }
 
 
+inline bool bit_is_enabled( const byte *bytes, int bit_index ){
+	return ( bytes[bit_index >> 3] & ( 1 << ( bit_index & 7 ) ) ) != 0;
+}
+inline void bit_enable( byte *bytes, int bit_index ){
+	bytes[bit_index >> 3] |= ( 1 << ( bit_index & 7 ) );
+}
+
+
 template<typename T>
 struct MinMax___
 {

@@ -56,7 +56,7 @@
 int CountBits( const byte *bits, int numbits ){
 	int c = 0;
 	for ( int i = 0; i < numbits; ++i )
-		if ( bits[i >> 3] & ( 1 << ( i & 7 ) ) ) {
+		if ( bit_is_enabled( bits, i ) ) {
 			c++;
 		}
 
@@ -380,7 +380,6 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 	leaf_t      *leaf;
 	int j, n;
 	long        *test, *might, *prevmight, *vis, more;
-	int pnum;
 
 	thread->c_chains++;
 
@@ -408,7 +407,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		if ( p->removed ) {
 			continue;
 		}
-		pnum = p - portals;
+		const int pnum = p - portals;
 
 		/* MrE: portal trace debug code
 		   {
@@ -429,7 +428,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		   }
 		 */
 
-		if ( !( prevstack->mightsee[pnum >> 3] & ( 1 << ( pnum & 7 ) ) ) ) {
+		if ( !bit_is_enabled( prevstack->mightsee, pnum ) ) {
 			continue;   // can't possibly see it
 		}
 
@@ -451,7 +450,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		}
 
 		if ( !more &&
-		     ( thread->base->portalvis[pnum >> 3] & ( 1 << ( pnum & 7 ) ) ) ) { // can't see anything new
+		     bit_is_enabled( thread->base->portalvis, pnum ) ) { // can't see anything new
 			continue;
 		}
 
@@ -522,7 +521,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		if ( !prevstack->pass ) { // the second leaf can only be blocked if coplanar
 
 			// mark the portal as visible
-			thread->base->portalvis[pnum >> 3] |= ( 1 << ( pnum & 7 ) );
+			bit_enable( thread->base->portalvis, pnum );
 
 			RecursiveLeafFlow( p->leaf, thread, &stack );
 			continue;
@@ -574,7 +573,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		}
 
 		// mark the portal as visible
-		thread->base->portalvis[pnum >> 3] |= ( 1 << ( pnum & 7 ) );
+		bit_enable( thread->base->portalvis, pnum );
 
 		// flow through it for real
 		RecursiveLeafFlow( p->leaf, thread, &stack );
@@ -641,7 +640,6 @@ void RecursivePassageFlow( vportal_t *portal, threaddata_t *thread, pstack_t *pr
 	passage_t   *passage, *nextpassage;
 	int i, j;
 	long        *might, *vis, *prevmight, *cansee, *portalvis, more;
-	int pnum;
 
 	leaf = &leafs[portal->leaf];
 
@@ -662,14 +660,14 @@ void RecursivePassageFlow( vportal_t *portal, threaddata_t *thread, pstack_t *pr
 			continue;
 		}
 		nextpassage = passage->next;
-		pnum = p - portals;
+		const int pnum = p - portals;
 
-		if ( !( prevstack->mightsee[pnum >> 3] & ( 1 << ( pnum & 7 ) ) ) ) {
+		if ( !bit_is_enabled( prevstack->mightsee, pnum ) ) {
 			continue;   // can't possibly see it
 		}
 
 		// mark the portal as visible
-		thread->base->portalvis[pnum >> 3] |= ( 1 << ( pnum & 7 ) );
+		bit_enable( thread->base->portalvis, pnum );
 
 		prevmight = (long *)prevstack->mightsee;
 		cansee = (long *)passage->cansee;
@@ -764,7 +762,6 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 	passage_t   *passage, *nextpassage;
 	int i, j, n;
 	long        *might, *vis, *prevmight, *cansee, *portalvis, more;
-	int pnum;
 
 //	thread->c_chains++;
 
@@ -795,9 +792,9 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 			continue;
 		}
 		nextpassage = passage->next;
-		pnum = p - portals;
+		const int pnum = p - portals;
 
-		if ( !( prevstack->mightsee[pnum >> 3] & ( 1 << ( pnum & 7 ) ) ) ) {
+		if ( !bit_is_enabled( prevstack->mightsee, pnum ) ) {
 			continue;   // can't possibly see it
 
 		}
@@ -823,7 +820,7 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 			might++;
 		}
 
-		if ( !more && ( thread->base->portalvis[pnum >> 3] & ( 1 << ( pnum & 7 ) ) ) ) { // can't see anything new
+		if ( !more && bit_is_enabled( thread->base->portalvis, pnum ) ) { // can't see anything new
 			continue;
 		}
 
@@ -894,7 +891,7 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 		if ( !prevstack->pass ) { // the second leaf can only be blocked if coplanar
 
 			// mark the portal as visible
-			thread->base->portalvis[pnum >> 3] |= ( 1 << ( pnum & 7 ) );
+			bit_enable( thread->base->portalvis, pnum );
 
 			RecursivePassagePortalFlow( p, thread, &stack );
 			continue;
@@ -946,7 +943,7 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 		}
 
 		// mark the portal as visible
-		thread->base->portalvis[pnum >> 3] |= ( 1 << ( pnum & 7 ) );
+		bit_enable( thread->base->portalvis, pnum );
 
 		// flow through it for real
 		RecursivePassagePortalFlow( p, thread, &stack );
@@ -1273,10 +1270,10 @@ void CreatePassages( int portalnum ){
 			if ( p->removed ) {
 				continue;
 			}
-			if ( !( target->portalflood[j >> 3] & ( 1 << ( j & 7 ) ) ) ) {
+			if ( !bit_is_enabled( target->portalflood, j ) ) {
 				continue;
 			}
-			if ( !( portal->portalflood[j >> 3] & ( 1 << ( j & 7 ) ) ) ) {
+			if ( !bit_is_enabled( portal->portalflood, j ) ) {
 				continue;
 			}
 			for ( k = 0; k < numseperators; k++ )
@@ -1334,7 +1331,7 @@ void CreatePassages( int portalnum ){
 			if ( k < numseperators ) {
 				continue;
 			}
-			passage->cansee[j >> 3] |= ( 1 << ( j & 7 ) );
+			bit_enable( passage->cansee, j );
 			numsee++;
 		}
 	}
@@ -1418,15 +1415,15 @@ void SimpleFlood( vportal_t *srcportal, int leafnum ){
 			continue;
 		}
 		const int pnum = p - portals;
-		if ( !( srcportal->portalfront[pnum >> 3] & ( 1 << ( pnum & 7 ) ) ) ) {
+		if ( !bit_is_enabled( srcportal->portalfront, pnum ) ) {
 			continue;
 		}
 
-		if ( srcportal->portalflood[pnum >> 3] & ( 1 << ( pnum & 7 ) ) ) {
+		if ( bit_is_enabled( srcportal->portalflood, pnum ) ) {
 			continue;
 		}
 
-		srcportal->portalflood[pnum >> 3] |= ( 1 << ( pnum & 7 ) );
+		bit_enable( srcportal->portalflood, pnum );
 
 		SimpleFlood( srcportal, p->leaf );
 	}
@@ -1516,7 +1513,7 @@ void BasePortalVis( int portalnum ){
 			continue;   // no points on front
 
 		}
-		p->portalfront[j >> 3] |= ( 1 << ( j & 7 ) );
+		bit_enable( p->portalfront, j );
 	}
 
 	SimpleFlood( p, p->leaf );
@@ -1560,7 +1557,7 @@ void RecursiveLeafBitFlow( int leafnum, byte *mightsee, byte *cansee ){
 		const int pnum = p - portals;
 
 		// if some previous portal can't see it, skip
-		if ( !( mightsee[pnum >> 3] & ( 1 << ( pnum & 7 ) ) ) ) {
+		if ( !bit_is_enabled( mightsee, pnum ) ) {
 			continue;
 		}
 
@@ -1577,7 +1574,7 @@ void RecursiveLeafBitFlow( int leafnum, byte *mightsee, byte *cansee ){
 			continue;   // can't see anything new
 
 		}
-		cansee[pnum >> 3] |= ( 1 << ( pnum & 7 ) );
+		bit_enable( cansee, pnum );
 
 		RecursiveLeafBitFlow( p->leaf, newmight, cansee );
 	}

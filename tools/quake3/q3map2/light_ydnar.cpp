@@ -3019,7 +3019,7 @@ bool ClusterVisible( int a, int b ){
 	const byte *pvs = bspVisBytes.data() + VIS_HEADER_SIZE + ( a * leafBytes );
 
 	/* check */
-	return ( pvs[ b >> 3 ] & ( 1 << ( b & 7 ) ) );
+	return bit_is_enabled( pvs, b );
 }
 
 

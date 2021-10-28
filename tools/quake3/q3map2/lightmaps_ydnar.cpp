@@ -1761,9 +1761,6 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
  */
 
 static bool TestOutLightmapStamp( rawLightmap_t *lm, int lightmapNum, outLightmap_t *olm, int x, int y ){
-	int sx, sy, ox, oy, offset;
-
-
 	/* bounds check */
 	if ( x < 0 || y < 0 || ( x + lm->w ) > olm->customWidth || ( y + lm->h ) > olm->customHeight ) {
 		return false;
@@ -1771,17 +1768,16 @@ static bool TestOutLightmapStamp( rawLightmap_t *lm, int lightmapNum, outLightma
 
 	/* solid lightmaps test a 1x1 stamp */
 	if ( lm->solid[ lightmapNum ] ) {
-		offset = ( y * olm->customWidth ) + x;
-		if ( olm->lightBits[ offset >> 3 ] & ( 1 << ( offset & 7 ) ) ) {
+		if ( bit_is_enabled( olm->lightBits, ( y * olm->customWidth ) + x ) ) {
 			return false;
 		}
 		return true;
 	}
 
 	/* test the stamp */
-	for ( sy = 0; sy < lm->h; sy++ )
+	for ( int sy = 0; sy < lm->h; ++sy )
 	{
-		for ( sx = 0; sx < lm->w; sx++ )
+		for ( int sx = 0; sx < lm->w; ++sx )
 		{
 			/* get luxel */
 			if ( lm->getBspLuxel( lightmapNum, sx, sy )[ 0 ] < 0.0f ) {
@@ -1789,10 +1785,9 @@ static bool TestOutLightmapStamp( rawLightmap_t *lm, int lightmapNum, outLightma
 			}
 
 			/* get bsp lightmap coords and test */
-			ox = x + sx;
-			oy = y + sy;
-			offset = ( oy * olm->customWidth ) + ox;
-			if ( olm->lightBits[ offset >> 3 ] & ( 1 << ( offset & 7 ) ) ) {
+			const int ox = x + sx;
+			const int oy = y + sy;
+			if ( bit_is_enabled( olm->lightBits, ( oy * olm->customWidth ) + ox ) ) {
 				return false;
 			}
 		}
@@ -1856,7 +1851,7 @@ static void SetupOutLightmap( rawLightmap_t *lm, outLightmap_t *olm ){
 
 #define LIGHTMAP_RESERVE_COUNT 1
 static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
-	int i, j, k, lightmapNum, xMax, yMax, x = -1, y = -1, sx, sy, ox, oy, offset;
+	int i, j, k, lightmapNum, xMax, yMax, x = -1, y = -1, sx, sy, ox, oy;
 	outLightmap_t       *olm;
 	surfaceInfo_t       *info;
 	bool ok;
@@ -2140,10 +2135,9 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 				/* get bsp lightmap coords  */
 				ox = x + lm->lightmapX[ lightmapNum ];
 				oy = y + lm->lightmapY[ lightmapNum ];
-				offset = ( oy * olm->customWidth ) + ox;
 
 				/* flag pixel as used */
-				olm->lightBits[ offset >> 3 ] |= ( 1 << ( offset & 7 ) );
+				bit_enable( olm->lightBits, ( oy * olm->customWidth ) + ox );
 				olm->freeLuxels--;
 
 				/* store color */
@@ -2249,7 +2243,7 @@ void FillOutLightmap( outLightmap_t *olm ){
 			for ( x = 0; x < olm->customWidth; ++x )
 			{
 				ofs = y * olm->customWidth + x;
-				if ( olm->lightBits[ofs >> 3] & ( 1 << ( ofs & 7 ) ) ) { /* already filled */
+				if ( bit_is_enabled( olm->lightBits, ofs ) ) { /* already filled */
 					continue;
 				}
 				cnt = 0;
@@ -2257,7 +2251,7 @@ void FillOutLightmap( outLightmap_t *olm ){
 
 				/* try all four neighbors */
 				ofs = ( ( y + olm->customHeight - 1 ) % olm->customHeight ) * olm->customWidth + x;
-				if ( olm->lightBits[ofs >> 3] & ( 1 << ( ofs & 7 ) ) ) { /* already filled */
+				if ( bit_is_enabled( olm->lightBits, ofs ) ) { /* already filled */
 					++cnt;
 					light_sum += olm->bspLightBytes[ofs];
 					if ( deluxemap ) {
@@ -2266,7 +2260,7 @@ void FillOutLightmap( outLightmap_t *olm ){
 				}
 
 				ofs = ( ( y + 1 ) % olm->customHeight ) * olm->customWidth + x;
-				if ( olm->lightBits[ofs >> 3] & ( 1 << ( ofs & 7 ) ) ) { /* already filled */
+				if ( bit_is_enabled( olm->lightBits, ofs ) ) { /* already filled */
 					++cnt;
 					light_sum += olm->bspLightBytes[ofs];
 					if ( deluxemap ) {
@@ -2275,7 +2269,7 @@ void FillOutLightmap( outLightmap_t *olm ){
 				}
 
 				ofs = y * olm->customWidth + ( x + olm->customWidth - 1 ) % olm->customWidth;
-				if ( olm->lightBits[ofs >> 3] & ( 1 << ( ofs & 7 ) ) ) { /* already filled */
+				if ( bit_is_enabled( olm->lightBits, ofs ) ) { /* already filled */
 					++cnt;
 					light_sum += olm->bspLightBytes[ofs];
 					if ( deluxemap ) {
@@ -2284,7 +2278,7 @@ void FillOutLightmap( outLightmap_t *olm ){
 				}
 
 				ofs = y * olm->customWidth + ( x + 1 ) % olm->customWidth;
-				if ( olm->lightBits[ofs >> 3] & ( 1 << ( ofs & 7 ) ) ) { /* already filled */
+				if ( bit_is_enabled( olm->lightBits, ofs ) ) { /* already filled */
 					++cnt;
 					light_sum += olm->bspLightBytes[ofs];
 					if ( deluxemap ) {
@@ -2295,7 +2289,7 @@ void FillOutLightmap( outLightmap_t *olm ){
 				if ( cnt ) {
 					++filled;
 					ofs = y * olm->customWidth + x;
-					lightBitsNew[ofs >> 3] |= ( 1 << ( ofs & 7 ) );
+					bit_enable( lightBitsNew, ofs );
 					lightBytesNew[ofs] = light_sum * ( 1.0 / cnt );
 					if ( deluxemap ) {
 						dirBytesNew[ofs] = dir_sum * ( 1.0 / cnt );
@@ -2986,7 +2980,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 		}
 		else if( lightmapPink ){
 			for ( x = 0; x < olm->customHeight * olm->customWidth; ++x ){
-				if ( ( olm->lightBits[x >> 3] & ( 1 << ( x & 7 ) ) ) == 0 ) { /* not filled */
+				if ( !bit_is_enabled( olm->lightBits, x ) ) { /* not filled */
 					olm->bspLightBytes[x] = { 255, 0, 255 };
 				}
 			}
