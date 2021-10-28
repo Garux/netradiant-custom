@@ -1744,7 +1744,7 @@ std::array<Vector3, 2>      TextureAxisFromPlane( const plane_t& plane );
 int                         VisMain( Args& args );
 
 /* visflow.c */
-int                         CountBits( byte *bits, int numbits );
+int                         CountBits( const byte *bits, int numbits );
 void                        PassageFlow( int portalnum );
 void                        CreatePassages( int portalnum );
 void                        PassageMemory( void );

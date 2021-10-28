@@ -53,7 +53,7 @@
    void CalcMightSee (leaf_t *leaf,
  */
 
-int CountBits( byte *bits, int numbits ){
+int CountBits( const byte *bits, int numbits ){
 	int c = 0;
 	for ( int i = 0; i < numbits; ++i )
 		if ( bits[i >> 3] & ( 1 << ( i & 7 ) ) ) {
@@ -592,7 +592,6 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
  */
 void PortalFlow( int portalnum ){
 	threaddata_t data;
-	int i;
 	vportal_t       *p;
 	int c_might, c_can;
 
@@ -618,8 +617,7 @@ void PortalFlow( int portalnum ){
 	data.pstack_head.source = p->winding;
 	data.pstack_head.portalplane = p->plane;
 	data.pstack_head.depth = 0;
-	for ( i = 0; i < portallongs; ++i )
-		( (long *)data.pstack_head.mightsee )[i] = ( (long *)p->portalflood )[i];
+	memcpy( data.pstack_head.mightsee, p->portalflood, portalbytes );
 
 	RecursiveLeafFlow( p->leaf, &data, &data.pstack_head );
 
@@ -687,14 +685,11 @@ void RecursivePassageFlow( vportal_t *portal, threaddata_t *thread, pstack_t *pr
 		for ( j = 0; j < portallongs; j++ )
 		{
 			if ( *might ) {
-				*might &= *cansee++ & *portalvis++;
+				*might &= *cansee & *portalvis;
 				more |= ( *might & ~vis[j] );
 			}
-			else
-			{
-				cansee++;
-				portalvis++;
-			}
+			cansee++;
+			portalvis++;
 			might++;
 		}
 
@@ -717,7 +712,6 @@ void RecursivePassageFlow( vportal_t *portal, threaddata_t *thread, pstack_t *pr
  */
 void PassageFlow( int portalnum ){
 	threaddata_t data;
-	int i;
 	vportal_t       *p;
 //	int				c_might, c_can;
 
@@ -743,8 +737,7 @@ void PassageFlow( int portalnum ){
 	data.pstack_head.source = p->winding;
 	data.pstack_head.portalplane = p->plane;
 	data.pstack_head.depth = 0;
-	for ( i = 0; i < portallongs; ++i )
-		( (long *)data.pstack_head.mightsee )[i] = ( (long *)p->portalflood )[i];
+	memcpy( data.pstack_head.mightsee, p->portalflood, portalbytes );
 
 	RecursivePassageFlow( p, &data, &data.pstack_head );
 
@@ -822,14 +815,11 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 		for ( j = 0; j < portallongs; j++ )
 		{
 			if ( *might ) {
-				*might &= *cansee++ & *portalvis++;
+				*might &= *cansee & *portalvis;
 				more |= ( *might & ~vis[j] );
 			}
-			else
-			{
-				cansee++;
-				portalvis++;
-			}
+			cansee++;
+			portalvis++;
 			might++;
 		}
 
@@ -972,7 +962,6 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
  */
 void PassagePortalFlow( int portalnum ){
 	threaddata_t data;
-	int i;
 	vportal_t       *p;
 //	int				c_might, c_can;
 
@@ -998,8 +987,7 @@ void PassagePortalFlow( int portalnum ){
 	data.pstack_head.source = p->winding;
 	data.pstack_head.portalplane = p->plane;
 	data.pstack_head.depth = 0;
-	for ( i = 0; i < portallongs; ++i )
-		( (long *)data.pstack_head.mightsee )[i] = ( (long *)p->portalflood )[i];
+	memcpy( data.pstack_head.mightsee, p->portalflood, portalbytes );
 
 	RecursivePassagePortalFlow( p, &data, &data.pstack_head );
 
