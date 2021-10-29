@@ -381,7 +381,7 @@ void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	memcpy( dsNew, ds, sizeof( *ds ) );
 
 	/* if the patch is nonsolid, then discard it */
-	if ( !( ds->shaderInfo->compileFlags & C_SOLID ) ) {
+	if ( !( ds->shaderInfo->compileFlags & C_SOLID ) && !( ds->shaderInfo->contentFlags & GetRequiredSurfaceParm( "playerclip"_Tstring ).contentFlags ) ) {
 		ClearSurface( ds );
 	}
 

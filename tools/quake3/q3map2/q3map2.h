@@ -1841,6 +1841,22 @@ void                        TCModScale( tcMod_t& mod, float s, float t );
 void                        TCModRotate( tcMod_t& mod, float euler );
 
 bool                        ApplySurfaceParm( const char *name, int *contentFlags, int *surfaceFlags, int *compileFlags );
+const surfaceParm_t         *GetSurfaceParm( const char *name );
+
+// Encode the string as a type
+template <char... chars>
+using TemplateString = std::integer_sequence<char, chars...>;
+// Create a user defined literal operator
+template <typename T, T... chars>
+constexpr TemplateString<chars...> operator""_Tstring() { return { }; }
+/// \brief returns statically evaluated \c surfaceParm_t for the given name or emits \c Error
+template<char... chars>
+const surfaceParm_t         &GetRequiredSurfaceParm( const TemplateString<chars...> ){
+    static constexpr char str[sizeof...(chars) + 1] = { chars..., '\0' }; // Recover the character data
+	static const surfaceParm_t *const sp = GetSurfaceParm( str );
+	ENSURE( sp != nullptr );
+    return *sp;
+}
 
 void                        BeginMapShaderFile( const char *mapFile );
 void                        WriteMapShaderFile( void );

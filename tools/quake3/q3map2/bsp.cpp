@@ -42,16 +42,18 @@ static void autocaulk_write(){
 
 	FILE* file = SafeOpenWrite( filename, "wt" );
 
-	int fslime = 16;
+	int fslime = 0;
 	ApplySurfaceParm( "slime", &fslime, NULL, NULL );
-	int flava = 8;
+	int flava = 0;
 	ApplySurfaceParm( "lava", &flava, NULL, NULL );
 
 	for ( const brush_t& b : entities[0].brushes ) {
 		fprintf( file, "%i ", b.brushNum );
 		const shaderInfo_t* contentShader = b.contentShader;
+		const bool globalFog = ( contentShader->compileFlags & C_FOG )
+			&& std::all_of( b.sides.cbegin(), b.sides.cend(), []( const side_t& side ){ return side.visibleHull.empty(); } );
 		for( const side_t& side : b.sides ){
-			if( !side.visibleHull.empty() || ( side.compileFlags & C_NODRAW ) ){
+			if( !side.visibleHull.empty() || ( side.compileFlags & C_NODRAW ) || globalFog ){
 				fprintf( file, "-" );
 			}
 			else if( contentShader->compileFlags & C_LIQUID ){

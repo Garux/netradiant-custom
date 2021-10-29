@@ -2196,8 +2196,6 @@ void EmitFlareSurface( mapDrawSurface_t *ds ){
  */
 
 void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
-	int surfaceFlags, contentFlags;
-
 	/* vortex: _patchMeta support */
 	const bool forcePatchMeta = e->boolForKey( "_patchMeta", "patchMeta" );
 
@@ -2232,8 +2230,8 @@ void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	}
 	else if ( patchMeta || forcePatchMeta ) {
 		/* patch meta requires that we have nodraw patches for collision */
-		surfaceFlags = ds->shaderInfo->surfaceFlags;
-		contentFlags = ds->shaderInfo->contentFlags;
+		int surfaceFlags = ds->shaderInfo->surfaceFlags;
+		int contentFlags = ds->shaderInfo->contentFlags;
 		ApplySurfaceParm( "nodraw", &contentFlags, &surfaceFlags, NULL );
 		ApplySurfaceParm( "pointlight", &contentFlags, &surfaceFlags, NULL );
 

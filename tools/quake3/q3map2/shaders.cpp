@@ -202,65 +202,43 @@ void TCModRotate( tcMod_t& mod, float euler ){
 
 
 
+const surfaceParm_t         *GetSurfaceParm( const char *name ){
+	/* walk the current game's surfaceparms */
+	for( const surfaceParm_t& sp : g_game->surfaceParms )
+		if ( striEqual( name, sp.name ) )
+			return &sp;
+
+	/* check custom info parms */
+	for ( const surfaceParm_t& sp : Span( custSurfaceParms, numCustSurfaceParms ) )
+		if ( striEqual( name, sp.name ) )
+			return &sp;
+
+	return nullptr;
+}
+
 /*
    ApplySurfaceParm() - ydnar
    applies a named surfaceparm to the supplied flags
  */
 
 bool ApplySurfaceParm( const char *name, int *contentFlags, int *surfaceFlags, int *compileFlags ){
-	int fake;
-
-
-	/* dummy check */
-	if ( name == NULL ) {
-		name = "";
-	}
-	if ( contentFlags == NULL ) {
-		contentFlags = &fake;
-	}
-	if ( surfaceFlags == NULL ) {
-		surfaceFlags = &fake;
-	}
-	if ( compileFlags == NULL ) {
-		compileFlags = &fake;
-	}
-
-	/* walk the current game's surfaceparms */
-	for( const surfaceParm_t& sp : g_game->surfaceParms )
-	{
-		/* match? */
-		if ( striEqual( name, sp.name ) ) {
-			/* clear and set flags */
-			*contentFlags &= ~( sp.contentFlagsClear );
-			*contentFlags |= sp.contentFlags;
-			*surfaceFlags &= ~( sp.surfaceFlagsClear );
-			*surfaceFlags |= sp.surfaceFlags;
-			*compileFlags &= ~( sp.compileFlagsClear );
-			*compileFlags |= sp.compileFlags;
-
-			/* return ok */
-			return true;
+	if( const surfaceParm_t *sp = GetSurfaceParm( name ) ){
+		/* clear and set flags */
+		if( contentFlags != nullptr ){
+			*contentFlags &= ~( sp->contentFlagsClear );
+			*contentFlags |= sp->contentFlags;
 		}
-	}
-
-	/* check custom info parms */
-	for ( const surfaceParm_t& sp : Span( custSurfaceParms, numCustSurfaceParms ) )
-	{
-		/* match? */
-		if ( striEqual( name, sp.name ) ) {
-			/* clear and set flags */
-			*contentFlags &= ~( sp.contentFlagsClear );
-			*contentFlags |= sp.contentFlags;
-			*surfaceFlags &= ~( sp.surfaceFlagsClear );
-			*surfaceFlags |= sp.surfaceFlags;
-			*compileFlags &= ~( sp.compileFlagsClear );
-			*compileFlags |= sp.compileFlags;
-
-			/* return ok */
-			return true;
+		if( surfaceFlags != nullptr ){
+			*surfaceFlags &= ~( sp->surfaceFlagsClear );
+			*surfaceFlags |= sp->surfaceFlags;
 		}
+		if( compileFlags != nullptr ){
+			*compileFlags &= ~( sp->compileFlagsClear );
+			*compileFlags |= sp->compileFlags;
+		}
+		/* return ok */
+		return true;
 	}
-
 	/* no matching surfaceparm found */
 	return false;
 }
@@ -659,7 +637,7 @@ void FinishShader( shaderInfo_t *si ){
 	}
 
 	if( noob && !( si->compileFlags & C_OB ) ){
-		ApplySurfaceParm( "noob", &si->contentFlags, &si->surfaceFlags, &si->compileFlags );
+		ApplySurfaceParm( "noob", nullptr, &si->surfaceFlags, nullptr );
 	}
 
 	/* set to finished */

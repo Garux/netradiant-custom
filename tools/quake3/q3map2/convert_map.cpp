@@ -337,18 +337,20 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 		fprintf( f, "\t{\n" );
 	}
 
-	/* find out if brush is detail */ // note: this also flags structural transparent brushes as detail, e.g. hints
+	/* find out if brush is detail */
 	int contentFlag = 0;
-	for( const auto& leaf : bspLeafs ){
-		if( leaf.cluster >= 0 )
-			for( auto id = bspLeafBrushes.cbegin() + leaf.firstBSPLeafBrush, end = id + leaf.numBSPLeafBrushes; id != end; ++id ){
-				if( *id == bspBrushNum ){
-					contentFlag = C_DETAIL;
-					break;
+	if( !( bspShaders[bspBrushes[bspBrushNum].shaderNum].contentFlags & GetRequiredSurfaceParm( "structural"_Tstring ).contentFlags ) ){ // sort out structural transparent brushes, e.g. hints
+		for( const auto& leaf : bspLeafs ){
+			if( leaf.cluster >= 0 )
+				for( auto id = bspLeafBrushes.cbegin() + leaf.firstBSPLeafBrush, end = id + leaf.numBSPLeafBrushes; id != end; ++id ){
+					if( *id == bspBrushNum ){
+						contentFlag = C_DETAIL;
+						break;
+					}
 				}
-			}
-		if( contentFlag == C_DETAIL)
-			break;
+			if( contentFlag == C_DETAIL)
+				break;
+		}
 	}
 
 	/* iterate through build brush sides */
