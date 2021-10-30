@@ -422,7 +422,7 @@ static void OnBtnMatchGrid( GtkWidget *widget, gpointer data ){
 // DoSurface will always try to show the surface inspector
 // or update it because something new has been selected
 // Shamus: It does get called when the SI is hidden, but not when you select something new. ;-)
-void DoSurface( void ){
+void DoSurface(){
 	if ( getSurfaceInspector().GetWidget() == 0 ) {
 		getSurfaceInspector().Create();
 
@@ -2189,8 +2189,8 @@ namespace TexTool { // namespace hides these symbols from other object-files
 struct Extent
 {
 	float minX, minY, maxX, maxY;
-	float width( void ) { return fabs( maxX - minX ); }
-	float height( void ) { return fabs( maxY - minY ); }
+	float width() { return fabs( maxX - minX ); }
+	float height() { return fabs( maxY - minY ); }
 };
 
 //This seems to control the texture scale... (Yep! ;-)
@@ -2232,7 +2232,7 @@ Vector2 oldCenter;
 void DrawCircularArc( Vector2 ctr, float startAngle, float endAngle, float radius );
 
 
-void CopyPointsFromSelectedFace( void ){
+void CopyPointsFromSelectedFace(){
 	// Make sure that there's a face and winding to get!
 
 	if ( g_SelectedFaceInstances.empty() ) {
@@ -2267,7 +2267,7 @@ void CopyPointsFromSelectedFace( void ){
 
 brushprimit_texdef_t bp;
 //This approach is probably wrongheaded and just not right anyway. So, !!! FIX !!! [DONE]
-void CommitChanges( void ){
+void CommitChanges(){
 	texdef_t t;                                 // Throwaway, since this is BP only
 
 	bp.coords[0][0] = tm.coords[0][0] * origBP.coords[0][0] + tm.coords[0][1] * origBP.coords[1][0];
@@ -2296,7 +2296,7 @@ void CommitChanges( void ){
 //Yep. :-P
 }
 
-void UpdateControlPoints( void ){
+void UpdateControlPoints(){
 	CommitChanges();
 
 	// Init texture transform matrix
@@ -2362,7 +2362,7 @@ const WidgetColor widgetColor[10] = {
 #define COLOR_LT_CYAN       8
 #define COLOR_LT_GREY       9
 
-void DrawControlWidgets( void ){
+void DrawControlWidgets(){
 //Note that the grid should go *behind* the face outline... !!! FIX !!!
 	// Grid
 	float xStart = center.x() - ( gridWidth / 2.0f );
@@ -2456,7 +2456,7 @@ void DrawControlWidgets( void ){
 	glPopMatrix();
 }
 
-void DrawControlPoints( void ){
+void DrawControlPoints(){
 	glColor3f( 1, 1, 1 );
 	glBegin( GL_LINE_LOOP );
 

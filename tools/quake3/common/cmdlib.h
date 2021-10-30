@@ -91,7 +91,7 @@ void    Q_mkdir( const char *path );
 char *ExpandArg( const char *path );    // from cmd line
 
 
-double I_FloatTime( void );
+double I_FloatTime();
 
 FILE    *SafeOpenWrite( const char *filename, const char *mode = "wb" );
 FILE    *SafeOpenRead( const char *filename, const char *mode = "rb" );

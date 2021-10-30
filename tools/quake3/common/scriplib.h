@@ -40,11 +40,11 @@ bool GetToken( bool crossline );
 
 /// \brief Signals that the current token was not used, and should be reported for the next \c GetToken().
 /// Only may be used once between the \c GetToken() calls.
-void UnGetToken( void );
+void UnGetToken();
 
 /// \brief
 /// \return true, if there is another token on the line.
-bool TokenAvailable( void );
+bool TokenAvailable();
 
 /// \brief Parses next token and emits \c Error, if it's not equal to \p match.
 /// Allowed to cross a line.

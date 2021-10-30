@@ -45,7 +45,7 @@
    exports the entities to a text file (.ent)
  */
 
-void ExportEntities( void ){
+static void ExportEntities(){
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- ExportEntities ---\n" );
 

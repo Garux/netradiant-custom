@@ -1,5 +1,6 @@
-/*
-   Copyright (C) 1999-2006 Id Software, Inc. and contributors.
+/* -------------------------------------------------------------------------------
+
+   Copyright (C) 1999-2007 id Software, Inc. and contributors.
    For a list of contributors, see the accompanying CONTRIBUTORS file.
 
    This file is part of GtkRadiant.
@@ -17,15 +18,16 @@
    You should have received a copy of the GNU General Public License
    along with GtkRadiant; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
+*/
+
 
 #pragma once
 
-extern bool g_SnapShots_Enabled;
-
-void AutoSave_clear();
-void QE_CheckAutoSave();
-void Map_Snapshot();
-
-void Autosave_Construct();
-void Autosave_Destroy();
+int                         CountBits( const byte *bits, int numbits );
+void                        PassageFlow( int portalnum );
+void                        CreatePassages( int portalnum );
+void                        PassageMemory();
+void                        BasePortalVis( int portalnum );
+void                        BetterPortalVis( int portalnum );
+void                        PortalFlow( int portalnum );
+void                        PassagePortalFlow( int portalnum );

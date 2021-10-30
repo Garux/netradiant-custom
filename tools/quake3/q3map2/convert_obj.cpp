@@ -38,11 +38,11 @@
    converts a bsp drawsurface to an obj chunk
  */
 
-int firstLightmap = 0;
-int lastLightmap = -1;
+static int firstLightmap = 0;
+static int lastLightmap = -1;
 
-int objVertexCount = 0;
-int objLastShaderNum = -1;
+static int objVertexCount = 0;
+static int objLastShaderNum = -1;
 
 static void ConvertSurfaceToOBJ( FILE *f, int modelNum, int surfaceNum, const Vector3& origin, const std::vector<int>& lmIndices ){
 	const bspDrawSurface_t& ds = bspDrawSurfaces[ surfaceNum ];

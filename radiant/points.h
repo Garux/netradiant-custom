@@ -28,7 +28,7 @@
 #pragma once
 
 void Pointfile_Clear();
-void Pointfile_Delete( void );
+void Pointfile_Delete();
 
 void Pointfile_Construct();
 void Pointfile_Destroy();

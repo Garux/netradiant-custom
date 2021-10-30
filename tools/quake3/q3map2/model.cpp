@@ -291,7 +291,7 @@ static std::map<ModelNameFrame, AssModel> s_assModels;
    loads a picoModel and returns a pointer to the picoModel_t struct or NULL if not found
  */
 
-AssModel *LoadModel( const char *name, int frame ){
+static AssModel *LoadModel( const char *name, int frame ){
 	/* dummy check */
 	if ( strEmptyOrNull( name ) ) {
 		return nullptr;

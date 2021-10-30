@@ -39,7 +39,7 @@
    converts a bsp drawsurface to an ase chunk
  */
 
-int numLightmapsASE = 0;
+static int numLightmapsASE = 0;
 
 static void ConvertSurface( FILE *f, int modelNum, int surfaceNum, const Vector3& origin, const std::vector<int>& lmIndices ){
 	char name[ 1024 ];

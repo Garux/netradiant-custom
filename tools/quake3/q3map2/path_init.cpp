@@ -42,7 +42,7 @@
    gets the user's home dir (for ~/.q3a)
  */
 
-CopiedString LokiGetHomeDir( void ){
+static CopiedString LokiGetHomeDir(){
 	#ifndef Q_UNIX
 	return "";
 	#else
@@ -73,7 +73,7 @@ CopiedString LokiGetHomeDir( void ){
    initializes some paths on linux/os x
  */
 
-void LokiInitPaths( const char *argv0, CopiedString& homePath, CopiedString& installPath ){
+static void LokiInitPaths( const char *argv0, CopiedString& homePath, CopiedString& installPath ){
 	if ( homePath.empty() ) {
 		/* get home dir */
 		homePath = LokiGetHomeDir();
@@ -218,7 +218,7 @@ inline void insert_unique( std::vector<CopiedString>& list, const char *string )
    adds a base path to the list
  */
 
-void AddBasePath( std::vector<CopiedString>& basePaths, const char *path ){
+static void AddBasePath( std::vector<CopiedString>& basePaths, const char *path ){
 	/* dummy check */
 	if ( !strEmptyOrNull( path ) ) {
 		/* add it to the list */
@@ -235,7 +235,7 @@ void AddBasePath( std::vector<CopiedString>& basePaths, const char *path ){
    adds a base path to the beginning of the list, prefixed by ~/
  */
 
-void AddHomeBasePath( std::vector<CopiedString>& basePaths, const char *homePath, const char *homeBasePath ){
+static void AddHomeBasePath( std::vector<CopiedString>& basePaths, const char *homePath, const char *homeBasePath ){
 	if ( strEmpty( homePath ) ) {
 		return;
 	}

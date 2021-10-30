@@ -43,7 +43,7 @@ static void new_handler(){
    cleanup routine
  */
 
-static void ExitQ3Map( void ){
+static void ExitQ3Map(){
 	/* flush xml send buffer, shut down connection */
 	Broadcast_Shutdown();
 	free( mapDrawSurfs );
@@ -58,7 +58,6 @@ static void ExitQ3Map( void ){
 
 int main( int argc, char **argv ){
 	int r;
-	double start, end;
 
 #ifdef WIN32
 	_setmaxstdio(2048);
@@ -68,7 +67,7 @@ int main( int argc, char **argv ){
 	srand( 0 );
 
 	/* start timer */
-	start = I_FloatTime();
+	const double start = I_FloatTime();
 
 	/* this was changed to emit version number over the network */
 	printf( Q3MAP_VERSION "\n" );
@@ -120,13 +119,6 @@ int main( int argc, char **argv ){
 
 	/* set number of threads */
 	ThreadSetDefault();
-
-	/* generate sinusoid jitter table */
-	for ( int i = 0; i < MAX_JITTERS; i++ )
-	{
-		jitters[ i ] = sin( i * 139.54152147 );
-		//%	Sys_Printf( "Jitter %4d: %f\n", i, jitters[ i ] );
-	}
 
 	/* we print out two versions, q3map's main version (since it evolves a bit out of GtkRadiant)
 	   and we put the GtkRadiant version to make it easy to track with what version of Radiant it was built with */
@@ -236,8 +228,7 @@ int main( int argc, char **argv ){
 	}
 
 	/* emit time */
-	end = I_FloatTime();
-	Sys_Printf( "%9.0f seconds elapsed\n", end - start );
+	Sys_Printf( "%9.0f seconds elapsed\n", I_FloatTime() - start );
 
 	/* return any error code */
 	return r;

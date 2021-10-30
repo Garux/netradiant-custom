@@ -154,7 +154,7 @@ static void RadClipWindingEpsilon( radWinding_t *in, const Vector3& normal, floa
 
 
 
-float Modulo1IfNegative( float f ){
+inline float Modulo1IfNegative( float f ){
 	return f < 0.0f ? f - floor( f ) : f;
 }
 
@@ -783,7 +783,7 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
    creates unbounced diffuse lights for a given surface
  */
 
-void RadLight( int num ){
+static void RadLight( int num ){
 	int lightmapNum;
 	float scale, subdivide;
 	int contentFlags, surfaceFlags, compileFlags;
@@ -856,9 +856,7 @@ void RadLight( int num ){
    creates lights for unbounced light on surfaces in the bsp
  */
 
-int iterations = 0;
-
-void RadCreateDiffuseLights( void ){
+void RadCreateDiffuseLights(){
 	/* startup */
 	Sys_FPrintf( SYS_VRB, "--- RadCreateDiffuseLights ---\n" );
 	numDiffuseSurfaces = 0;
@@ -866,6 +864,7 @@ void RadCreateDiffuseLights( void ){
 	numBrushDiffuseLights = 0;
 	numTriangleDiffuseLights = 0;
 	numPatchDiffuseLights = 0;
+	int iterations = 0;
 
 	/* hit every surface (threaded) */
 	RunThreadsOnIndividual( bspDrawSurfaces.size(), true, RadLight );

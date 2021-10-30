@@ -95,7 +95,7 @@ static std::list<metaTriangle_t> metaTriangles;
    called before staring a new entity to clear out the triangle list
  */
 
-void ClearMetaTriangles( void ){
+void ClearMetaTriangles(){
 	metaVerts.clear();
 	metaTriangles.clear();
 }
@@ -340,7 +340,7 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
    creates triangles from a patch
  */
 
-void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
+static void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	int x, y, pw[ 5 ], r;
 	mapDrawSurface_t    *dsNew;
 	mesh_t src, *subdivided, *mesh;
@@ -436,7 +436,7 @@ void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 
 #define TINY_AREA 1.0f
 #define MAXAREA_MAXTRIES 8
-int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
+static int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 	int r, s, t, bestR = 0, bestS = 1, bestT = 2;
 	int i, j;
 	double A, bestA = -1, V, bestV = -1;
@@ -645,7 +645,7 @@ void MaxAreaFaceSurface( mapDrawSurface_t *ds ){
    loosely based on SurfaceAsTriFan()
  */
 
-void FanFaceSurface( mapDrawSurface_t *ds ){
+static void FanFaceSurface( mapDrawSurface_t *ds ){
 	int i, k, a, b, c;
 	Color4f color[ MAX_LIGHTMAPS ];
 	for ( auto& co : color )
@@ -952,7 +952,7 @@ struct edge_t
 	Plane3f plane;
 };
 
-void CreateEdge( const Plane3f& plane, const Vector3& a, const Vector3& b, edge_t *edge ){
+static void CreateEdge( const Plane3f& plane, const Vector3& a, const Vector3& b, edge_t *edge ){
 	/* copy edge origin */
 	edge->origin = a;
 
@@ -982,7 +982,7 @@ void CreateEdge( const Plane3f& plane, const Vector3& a, const Vector3& b, edge_
 #define TJ_EDGE_EPSILON     ( 1.0f / 8.0f )
 #define TJ_POINT_EPSILON    ( 1.0f / 8.0f )
 
-void FixMetaTJunctions( void ){
+void FixMetaTJunctions(){
 #if 0
 	int i, j, k, f, fOld, start, vertIndex, triIndex, numTJuncs;
 	metaTriangle_t  *tri, *newTri;
@@ -1156,7 +1156,7 @@ void FixMetaTJunctions( void ){
 #define THETA_EPSILON           0.000001
 #define EQUAL_NORMAL_EPSILON    0.01f
 
-void SmoothMetaTriangles( void ){
+void SmoothMetaTriangles(){
 	const double start = I_FloatTime();
 	int numSmoothed = 0;
 
@@ -1284,7 +1284,7 @@ int>;   // index of bspDrawVert_t in mapDrawSurface_t::verts array
    returns the index of that vert (or < 0 on failure)
  */
 
-int AddMetaVertToSurface( mapDrawSurface_t *ds, const bspDrawVert_t& dv1, const Sorted_indices& sorted_indices, int *coincident ){
+static int AddMetaVertToSurface( mapDrawSurface_t *ds, const bspDrawVert_t& dv1, const Sorted_indices& sorted_indices, int *coincident ){
 	/* go through the verts and find a suitable candidate */
 	const auto begin = sorted_indices.lower_bound( spatial_distance( dv1.xyz ) - c_spatial_EQUAL_EPSILON );
 	const auto end = sorted_indices.upper_bound( spatial_distance( dv1.xyz ) + c_spatial_EQUAL_EPSILON );
@@ -1663,7 +1663,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
    merges meta triangles into drawsurfaces
  */
 
-void MergeMetaTriangles( void ){
+void MergeMetaTriangles(){
 	/* only do this if there are meta triangles */
 	if ( metaTriangles.empty() ) {
 		return;

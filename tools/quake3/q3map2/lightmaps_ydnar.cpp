@@ -31,6 +31,7 @@
 /* dependencies */
 #include "q3map2.h"
 #include "bspfile_rbsp.h"
+#include "surface_extra.h"
 
 
 
@@ -55,7 +56,7 @@
    based on WriteTGA() from imagelib.c
  */
 
-void WriteTGA24( char *filename, byte *data, int width, int height, bool flip ){
+static void WriteTGA24( char *filename, byte *data, int width, int height, bool flip ){
 	int i;
 	const int headSz = 18;
 	const int sz = width * height * 3 + headSz;
@@ -106,7 +107,7 @@ void WriteTGA24( char *filename, byte *data, int width, int height, bool flip ){
    exports the lightmaps as a list of numbered tga images
  */
 
-void ExportLightmaps( void ){
+void ExportLightmaps(){
 	int i;
 	char dirname[ 1024 ], filename[ 1024 ];
 	byte        *lightmap;
@@ -264,12 +265,24 @@ int ImportLightmapsMain( Args& args ){
 
    ------------------------------------------------------------------------------- */
 
+namespace
+{
+int numSurfsVertexLit;
+int numSurfsVertexForced;
+int numSurfsVertexApproximated;
+int numSurfsLightmapped;
+int numPlanarsLightmapped;
+int numNonPlanarsLightmapped;
+int numPatchesLightmapped;
+int numPlanarPatchesLightmapped;
+}
+
 /*
    FinishRawLightmap()
    allocates a raw lightmap's necessary buffers
  */
 
-void FinishRawLightmap( rawLightmap_t *lm ){
+static void FinishRawLightmap( rawLightmap_t *lm ){
 	int i, j, c, size, *sc;
 	float is;
 	surfaceInfo_t       *info;
@@ -438,7 +451,7 @@ void FinishRawLightmap( rawLightmap_t *lm ){
    based on AllocateLightmapForPatch()
  */
 
-bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
+static bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info;
 	int x, y;
@@ -555,7 +568,7 @@ bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
    based on AllocateLightmapForSurface()
  */
 
-bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
+static bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 	bspDrawSurface_t    *ds, *ds2;
 	surfaceInfo_t       *info;
 	int num2, n, i, axisNum;
@@ -922,7 +935,7 @@ struct CompareSurfaceInfo
    this depends on yDrawVerts being allocated
  */
 
-void SetupSurfaceLightmaps( void ){
+void SetupSurfaceLightmaps(){
 	int i, j, k, s,num, num2;
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info, *info2;
@@ -955,7 +968,7 @@ void SetupSurfaceLightmaps( void ){
 		surfaceInfos[ i ].childSurfaceNum = -1;
 
 	/* allocate a list of surface indexes to be sorted */
-	sortSurfaces = safe_calloc( numBSPDrawSurfaces * sizeof( int ) );
+	int *sortSurfaces = safe_calloc( numBSPDrawSurfaces * sizeof( int ) );
 
 	/* walk each model in the bsp */
 	for ( const bspModel_t& model : bspModels )
@@ -979,19 +992,21 @@ void SetupSurfaceLightmaps( void ){
 			info->plane = NULL;
 			info->firstSurfaceCluster = numSurfaceClusters;
 
-			/* get extra data */
-			info->si = GetSurfaceExtraShaderInfo( num );
-			if ( info->si == NULL ) {
-				info->si = ShaderInfoForShader( bspShaders[ ds->shaderNum ].shader );
+			{ /* get extra data */
+				const surfaceExtra_t& se = GetSurfaceExtra( num );
+				info->si = se.si;
+				if ( info->si == NULL ) {
+					info->si = ShaderInfoForShader( bspShaders[ ds->shaderNum ].shader );
+				}
+				info->parentSurfaceNum = se.parentSurfaceNum;
+				info->entityNum = se.entityNum;
+				info->castShadows = se.castShadows;
+				info->recvShadows = se.recvShadows;
+				info->sampleSize = se.sampleSize;
+				info->longestCurve = se.longestCurve;
+				info->patchIterations = IterationsForCurve( info->longestCurve, patchSubdivisions );
+				info->axis = se.lightmapAxis;
 			}
-			info->parentSurfaceNum = GetSurfaceExtraParentSurfaceNum( num );
-			info->entityNum = GetSurfaceExtraEntityNum( num );
-			info->castShadows = GetSurfaceExtraCastShadows( num );
-			info->recvShadows = GetSurfaceExtraRecvShadows( num );
-			info->sampleSize = GetSurfaceExtraSampleSize( num );
-			info->longestCurve = GetSurfaceExtraLongestCurve( num );
-			info->patchIterations = IterationsForCurve( info->longestCurve, patchSubdivisions );
-			info->axis = GetSurfaceExtraLightmapAxis( num );
 
 			/* mark parent */
 			if ( info->parentSurfaceNum >= 0 ) {
@@ -1040,7 +1055,7 @@ void SetupSurfaceLightmaps( void ){
 			if ( ds->surfaceType == MST_TRIANGLE_SOUP ||
 			     ds->surfaceType == MST_FOLIAGE ||
 			     ( info->si->compileFlags & C_VERTEXLIT ) ||
-			     nolm ) {
+			     noLightmaps ) {
 				numSurfsVertexLit++;
 			}
 			else
@@ -1173,7 +1188,7 @@ void SetupSurfaceLightmaps( void ){
 #define MAX_STITCH_CANDIDATES   32
 #define MAX_STITCH_LUXELS       64
 
-void StitchSurfaceLightmaps( void ){
+void StitchSurfaceLightmaps(){
 	int i, j, x, y, x2, y2,
 	    numStitched, numCandidates, numLuxels, f, fOld, start;
 	rawLightmap_t   *lm, *a, *b, *c[ MAX_STITCH_CANDIDATES ];
@@ -2205,7 +2220,7 @@ struct CompareRawLightmap
 	}
 };
 
-void FillOutLightmap( outLightmap_t *olm ){
+static void FillOutLightmap( outLightmap_t *olm ){
 	int x, y;
 	int ofs;
 	int cnt, filled;

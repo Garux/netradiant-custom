@@ -30,7 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
-
+#include "surface_extra.h"
 
 
 /* -------------------------------------------------------------------------------
@@ -39,24 +39,13 @@
 
    ------------------------------------------------------------------------------- */
 
-struct surfaceExtra_t
-{
-	const mapDrawSurface_t        *mds;
-	const shaderInfo_t            *si;
-	int parentSurfaceNum;
-	int entityNum;
-	int castShadows, recvShadows;
-	int sampleSize;
-	float longestCurve;
-	Vector3 lightmapAxis;
-};
 
 #define GROW_SURFACE_EXTRAS 1024
 
-int numSurfaceExtras = 0;
-int maxSurfaceExtras = 0;
-surfaceExtra_t              *surfaceExtras;
-surfaceExtra_t seDefault = { NULL, NULL, -1, 0, WORLDSPAWN_CAST_SHADOWS, WORLDSPAWN_RECV_SHADOWS, 0, 0, { 0, 0, 0 } };
+static int numSurfaceExtras = 0;
+static int maxSurfaceExtras = 0;
+static surfaceExtra_t              *surfaceExtras;
+static surfaceExtra_t seDefault;
 
 
 
@@ -65,14 +54,13 @@ surfaceExtra_t seDefault = { NULL, NULL, -1, 0, WORLDSPAWN_CAST_SHADOWS, WORLDSP
    allocates a new extra storage
  */
 
-static surfaceExtra_t *AllocSurfaceExtra( void ){
+static surfaceExtra_t& AllocSurfaceExtra(){
 	/* enough space? */
 	AUTOEXPAND_BY_REALLOC_ADD( surfaceExtras, numSurfaceExtras, maxSurfaceExtras, GROW_SURFACE_EXTRAS );
 
 	/* add another */
-	surfaceExtra_t *se = &surfaceExtras[ numSurfaceExtras ];
-	numSurfaceExtras++;
-	memcpy( se, &seDefault, sizeof( surfaceExtra_t ) );
+	surfaceExtra_t& se = surfaceExtras[ numSurfaceExtras++ ];
+	se = seDefault;
 
 	/* return it */
 	return se;
@@ -98,18 +86,18 @@ void SetDefaultSampleSize( int sampleSize ){
 
 void SetSurfaceExtra( const mapDrawSurface_t& ds ){
 	/* get a new extra */
-	surfaceExtra_t *se = AllocSurfaceExtra();
+	surfaceExtra_t& se = AllocSurfaceExtra();
 
 	/* copy out the relevant bits */
-	se->mds = &ds;
-	se->si = ds.shaderInfo;
-	se->parentSurfaceNum = ds.parent != NULL ? ds.parent->outputNum : -1;
-	se->entityNum = ds.entityNum;
-	se->castShadows = ds.castShadows;
-	se->recvShadows = ds.recvShadows;
-	se->sampleSize = ds.sampleSize;
-	se->longestCurve = ds.longestCurve;
-	se->lightmapAxis = ds.lightmapAxis;
+	se.mds = &ds;
+	se.si = ds.shaderInfo;
+	se.parentSurfaceNum = ds.parent != NULL ? ds.parent->outputNum : -1;
+	se.entityNum = ds.entityNum;
+	se.castShadows = ds.castShadows;
+	se.recvShadows = ds.recvShadows;
+	se.sampleSize = ds.sampleSize;
+	se.longestCurve = ds.longestCurve;
+	se.lightmapAxis = ds.lightmapAxis;
 
 	/* debug code */
 	//%	Sys_FPrintf( SYS_VRB, "SetSurfaceExtra(): entityNum = %d\n", ds.entityNum );
@@ -122,53 +110,12 @@ void SetSurfaceExtra( const mapDrawSurface_t& ds ){
    getter functions for extra surface data
  */
 
-static surfaceExtra_t *GetSurfaceExtra( int num ){
+const surfaceExtra_t& GetSurfaceExtra( int num ){
 	if ( num < 0 || num >= numSurfaceExtras ) {
-		return &seDefault;
+		return seDefault;
 	}
-	return &surfaceExtras[ num ];
+	return surfaceExtras[ num ];
 }
-
-
-const shaderInfo_t *GetSurfaceExtraShaderInfo( int num ){
-	return GetSurfaceExtra( num )->si;
-}
-
-
-int GetSurfaceExtraParentSurfaceNum( int num ){
-	return GetSurfaceExtra( num )->parentSurfaceNum;
-}
-
-
-int GetSurfaceExtraEntityNum( int num ){
-	return GetSurfaceExtra( num )->entityNum;
-}
-
-
-int GetSurfaceExtraCastShadows( int num ){
-	return GetSurfaceExtra( num )->castShadows;
-}
-
-
-int GetSurfaceExtraRecvShadows( int num ){
-	return GetSurfaceExtra( num )->recvShadows;
-}
-
-
-int GetSurfaceExtraSampleSize( int num ){
-	return GetSurfaceExtra( num )->sampleSize;
-}
-
-
-float GetSurfaceExtraLongestCurve( int num ){
-	return GetSurfaceExtra( num )->longestCurve;
-}
-
-
-Vector3 GetSurfaceExtraLightmapAxis( int num ){
-	return GetSurfaceExtra( num )->lightmapAxis;
-}
-
 
 
 
@@ -178,9 +125,6 @@ Vector3 GetSurfaceExtraLightmapAxis( int num ){
  */
 
 void WriteSurfaceExtraFile( const char *path ){
-	surfaceExtra_t  *se;
-	int i;
-
 	/* dummy check */
 	if ( strEmptyOrNull( path ) ) {
 		return;
@@ -195,10 +139,10 @@ void WriteSurfaceExtraFile( const char *path ){
 	FILE *sf = SafeOpenWrite( srfPath, "wt" );
 
 	/* lap through the extras list */
-	for ( i = -1; i < numSurfaceExtras; i++ )
+	for ( int i = -1; i < numSurfaceExtras; i++ )
 	{
 		/* get extra */
-		se = GetSurfaceExtra( i );
+		const surfaceExtra_t *se = &GetSurfaceExtra( i );
 
 		/* default or surface num? */
 		if ( i < 0 ) {
@@ -309,7 +253,7 @@ void LoadSurfaceExtraFile( const char *path ){
 				Error( "ReadSurfaceExtraFile(): %s, line %d: bogus surface num %d", srfPath.c_str(), scriptline, surfaceNum );
 			}
 			while ( surfaceNum >= numSurfaceExtras )
-				se = AllocSurfaceExtra();
+				AllocSurfaceExtra();
 			se = &surfaceExtras[ surfaceNum ];
 		}
 

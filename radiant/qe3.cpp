@@ -323,7 +323,7 @@ void Sys_SetTitle( const char *text, bool modified ){
 
 bool g_bWaitCursor = false;
 
-void Sys_BeginWait( void ){
+void Sys_BeginWait(){
 	ScreenUpdates_Disable( "Processing...", "Please Wait" );
 	GdkCursor *cursor = gdk_cursor_new( GDK_WATCH );
 	gdk_window_set_cursor( gtk_widget_get_window( GTK_WIDGET( MainFrame_getWindow() ) ), cursor );
@@ -331,12 +331,12 @@ void Sys_BeginWait( void ){
 	g_bWaitCursor = true;
 }
 
-void Sys_EndWait( void ){
+void Sys_EndWait(){
 	ScreenUpdates_Enable();
 	gdk_window_set_cursor( gtk_widget_get_window( GTK_WIDGET( MainFrame_getWindow() ) ), 0 );
 	g_bWaitCursor = false;
 }
 
-void Sys_Beep( void ){
+void Sys_Beep(){
 	gdk_beep();
 }

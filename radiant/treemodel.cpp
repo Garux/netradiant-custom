@@ -560,7 +560,7 @@ static void graph_tree_model_drag_dest_init( GtkTreeDragDestIface *iface ){
 	iface->row_drop_possible = graph_tree_model_row_drop_possible;
 }
 
-GType graph_tree_model_get_type( void ){
+GType graph_tree_model_get_type(){
 	static GType graph_tree_model_type = 0;
 
 	if ( !graph_tree_model_type ) {
@@ -1050,7 +1050,7 @@ static void graph_tree_model_tree_model_init( GtkTreeModelIface *iface ){
 	iface->iter_parent = graph_tree_model_iter_parent;
 }
 
-GType graph_tree_model_get_type( void ){
+GType graph_tree_model_get_type(){
 	static GType graph_tree_model_type = 0;
 
 	if ( !graph_tree_model_type ) {

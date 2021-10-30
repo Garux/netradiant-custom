@@ -87,7 +87,7 @@ char *ExpandArg( const char *path ){
    I_FloatTime
    ================
  */
-double I_FloatTime( void ){
+double I_FloatTime(){
 	time_t t;
 
 	time( &t );

@@ -50,7 +50,7 @@ struct minimap_t
 
 static minimap_t minimap;
 
-bool BrushIntersectionWithLine( const bspBrush_t& brush, const Vector3& start, const Vector3& dir, float *t_in, float *t_out ){
+static bool BrushIntersectionWithLine( const bspBrush_t& brush, const Vector3& start, const Vector3& dir, float *t_in, float *t_out ){
 	bool in = false, out = false;
 
 	for ( const bspBrushSide_t& side : Span( &bspBrushSides[brush.firstSide], brush.numSides ) )
@@ -133,7 +133,7 @@ static float MiniMapSample( float x, float y ){
 	return samp;
 }
 
-void RandomVector2f( float v[2] ){
+inline void RandomVector2f( float v[2] ){
 	do
 	{
 		v[0] = 2 * Random() - 1;
@@ -271,7 +271,7 @@ static void MiniMapBrightnessContrast( int y ){
 	}
 }
 
-void MiniMapMakeMinsMaxs( const Vector3& mins_in, const Vector3& maxs_in, float border, bool keepaspect ){
+static void MiniMapMakeMinsMaxs( const Vector3& mins_in, const Vector3& maxs_in, float border, bool keepaspect ){
 	Vector3 mins = mins_in;
 	Vector3 maxs = maxs_in;
 	Vector3 extend;
@@ -312,14 +312,14 @@ void MiniMapMakeMinsMaxs( const Vector3& mins_in, const Vector3& maxs_in, float 
    determines solid non-sky brushes in the world
  */
 
-void MiniMapSetupBrushes( void ){
+static void MiniMapSetupBrushes(){
 	SetupBrushesFlags( C_SOLID | C_SKY, C_SOLID, 0, 0 );
 	// at least one must be solid
 	// none may be sky
 	// not all may be nodraw
 }
 
-bool MiniMapEvaluateSampleOffsets( int *bestj, int *bestk, float *bestval ){
+static bool MiniMapEvaluateSampleOffsets( int *bestj, int *bestk, float *bestval ){
 	float val, dx, dy;
 	int j, k;
 
@@ -354,7 +354,7 @@ bool MiniMapEvaluateSampleOffsets( int *bestj, int *bestk, float *bestval ){
 	return *bestval < 3;
 }
 
-void MiniMapMakeSampleOffsets(){
+static void MiniMapMakeSampleOffsets(){
 	int i, j, k, jj, kk;
 	float val, valj, valk, sx, sy, rx, ry;
 
@@ -422,7 +422,7 @@ void MiniMapMakeSampleOffsets(){
 	}
 }
 
-void MergeRelativePath( char *out, const char *absolute, const char *relative ){
+static void MergeRelativePath( char *out, const char *absolute, const char *relative ){
 	const char *endpos = absolute + strlen( absolute );
 	while ( endpos != absolute && path_separator( endpos[-1] ) )
 		--endpos;
@@ -466,7 +466,6 @@ int MiniMapBSPMain( Args& args ){
 	strcpy( source, ExpandArg( fileName ) );
 	path_set_extension( source, ".bsp" );
 	Sys_Printf( "Loading %s\n", source );
-	//BeginMapShaderFile( source ); //do not delete q3map2_*.shader on minimap generation
 	LoadShaderInfo();
 	LoadBSPFile( source );
 

@@ -32,11 +32,6 @@
 #include "q3map2.h"
 
 
-/* dependencies */
-#include "q3map2.h"
-
-
-
 #define MAX_NODE_ITEMS          5
 #define MAX_NODE_TRIANGLES      5
 #define MAX_TRACE_DEPTH         32
@@ -93,6 +88,8 @@ struct traceNode_t
 };
 
 
+namespace
+{
 int noDrawContentFlags, noDrawSurfaceFlags, noDrawCompileFlags;
 
 int numTraceInfos = 0, maxTraceInfos = 0, firstTraceInfo = 0;
@@ -107,6 +104,7 @@ traceTriangle_t                 *traceTriangles = NULL;
 int headNodeNum = 0, skyboxNodeNum = 0, maxTraceDepth = 0, numTraceLeafNodes = 0;
 int numTraceNodes = 0, maxTraceNodes = 0;
 traceNode_t                     *traceNodes = NULL;
+}
 
 
 
@@ -155,7 +153,7 @@ static int AddTraceInfo( traceInfo_t *ti ){
    allocates a new trace node
  */
 
-static int AllocTraceNode( void ){
+static int AllocTraceNode(){
 	/* enough space? */
 	AUTOEXPAND_BY_REALLOC_ADD( traceNodes, numTraceNodes, maxTraceNodes, GROW_TRACE_NODES );
 
@@ -1048,7 +1046,7 @@ static void PopulateWithPicoModel( int castShadows, const std::vector<const AssM
    fills the raytracing tree with world and entity occluders
  */
 
-static void PopulateTraceNodes( void ){
+static void PopulateTraceNodes(){
 	size_t m;
 	const char      *value;
 
@@ -1162,7 +1160,7 @@ static void PopulateTraceNodes( void ){
    creates a balanced bsp with axis-aligned splits for efficient raytracing
  */
 
-void SetupTraceNodes( void ){
+void SetupTraceNodes(){
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- SetupTraceNodes ---\n" );
 
@@ -1255,7 +1253,7 @@ void SetupTraceNodes( void ){
 #define NEAR_SHADOW_EPSILON     1.5f    //%	1.25f
 #define SELF_SHADOW_EPSILON     0.5f
 
-bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
+static bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	int i;
 	Vector3 tvec, pvec, qvec;
 	float det, invDet, depth;
@@ -1420,7 +1418,7 @@ bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
    temporary hack
  */
 
-bool TraceWinding( traceWinding_t *tw, trace_t *trace ){
+static bool TraceWinding( traceWinding_t *tw, trace_t *trace ){
 	int i;
 	traceTriangle_t tt;
 

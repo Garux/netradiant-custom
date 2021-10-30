@@ -99,7 +99,7 @@ int EmitShader( const char *shader, const int *contentFlags, const int *surfaceF
    brushes will be saved in the map
  */
 
-void EmitPlanes( void ){
+static void EmitPlanes(){
 	bspPlanes.reserve( mapplanes.size() );
 	/* walk plane list */
 	for ( const plane_t& plane : mapplanes )
@@ -118,7 +118,7 @@ void EmitPlanes( void ){
    emits a leafnode to the bsp file
  */
 
-void EmitLeaf( node_t *node ){
+static void EmitLeaf( node_t *node ){
 	bspLeaf_t& leaf = bspLeafs.emplace_back();
 
 	leaf.cluster = node->cluster;
@@ -158,7 +158,7 @@ void EmitLeaf( node_t *node ){
    recursively emit the bsp nodes
  */
 
-int EmitDrawNode_r( node_t *node ){
+static int EmitDrawNode_r( node_t *node ){
 	/* check for leafnode */
 	if ( node->planenum == PLANENUM_LEAF ) {
 		EmitLeaf( node );
@@ -206,7 +206,7 @@ int EmitDrawNode_r( node_t *node ){
    SetModelNumbers
    ============
  */
-void SetModelNumbers( void ){
+void SetModelNumbers(){
 	int models = 1;
 	for ( std::size_t i = 1; i < entities.size(); ++i ) {
 		if ( !entities[i].brushes.empty() || entities[i].patches ) {
@@ -227,11 +227,12 @@ void SetModelNumbers( void ){
    sets style keys for entity lights
  */
 
-void SetLightStyles( void ){
+void SetLightStyles(){
 	int j, numStyles;
 	char value[ 10 ];
 	char lightTargets[ MAX_SWITCHED_LIGHTS ][ 64 ];
 	int lightStyles[ MAX_SWITCHED_LIGHTS ];
+	int numStrippedLights = 0;
 
 	/* -keeplights option: force lights to be kept and ignore what the map file says */
 	if ( keepLights ) {
@@ -306,7 +307,7 @@ void SetLightStyles( void ){
    starts a new bsp file
  */
 
-void BeginBSPFile( void ){
+void BeginBSPFile(){
 	/* these values may actually be initialized if the file existed when loaded, so clear them explicitly */
 	bspModels.clear();
 	bspNodes.clear();
@@ -410,7 +411,7 @@ void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
    turns map fogs into bsp fogs
  */
 
-void EmitFogs( void ){
+void EmitFogs(){
 	/* walk list */
 	for ( size_t i = 0; i < mapFogs.size(); ++i )
 	{
@@ -475,7 +476,7 @@ void EmitFogs( void ){
    sets up a new brush model
  */
 
-void BeginModel( void ){
+void BeginModel(){
 	MinMax minmax;
 	MinMax lgMinmax;          /* ydnar: lightgrid mins/maxs */
 

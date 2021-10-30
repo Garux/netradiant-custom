@@ -346,8 +346,7 @@ static int MakeDecalProjector( shaderInfo_t *si, const Plane3f& projection, floa
 	}
 
 	/* return ok */
-	numProjectors++;
-	return numProjectors - 1;
+	return numProjectors++;
 }
 
 
@@ -359,7 +358,7 @@ static int MakeDecalProjector( shaderInfo_t *si, const Plane3f& projection, floa
 
 #define PLANAR_EPSILON  0.5f
 
-void ProcessDecals( void ){
+void ProcessDecals(){
 	int x, y, pw[ 5 ], r, iterations;
 	float distance;
 	Plane3f projection, plane;

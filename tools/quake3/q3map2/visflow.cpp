@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "vis.h"
 
 
 
@@ -64,7 +65,7 @@ int CountBits( const byte *bits, int numbits ){
 }
 
 
-void CheckStack( leaf_t *leaf, threaddata_t *thread ){
+static void CheckStack( leaf_t *leaf, threaddata_t *thread ){
 	for ( pstack_t *p = thread->pstack_head.next; p; p = p->next )
 	{
 //		Sys_Printf ("=");
@@ -80,7 +81,7 @@ void CheckStack( leaf_t *leaf, threaddata_t *thread ){
 }
 
 
-fixedWinding_t *AllocStackWinding( pstack_t *stack ){
+static fixedWinding_t *AllocStackWinding( pstack_t *stack ){
 	for ( int i = 0; i < 3; ++i )
 	{
 		if ( stack->freewindings[i] ) {
@@ -94,7 +95,7 @@ fixedWinding_t *AllocStackWinding( pstack_t *stack ){
 	return NULL;
 }
 
-void FreeStackWinding( fixedWinding_t *w, pstack_t *stack ){
+static void FreeStackWinding( fixedWinding_t *w, pstack_t *stack ){
 	const int i = w - stack->windings;
 
 	if ( i < 0 || i > 2 ) {
@@ -113,7 +114,7 @@ void FreeStackWinding( fixedWinding_t *w, pstack_t *stack ){
 
    ==============
  */
-fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, const visPlane_t& split ){
+static fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, const visPlane_t& split ){
 	float dists[128];
 	EPlaneSide sides[128];
 	int counts[3];
@@ -229,7 +230,7 @@ fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, const visP
    flipclip should be set.
    ==============
  */
-fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass, fixedWinding_t *target, bool flipclip, pstack_t *stack ){
+static fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass, fixedWinding_t *target, bool flipclip, pstack_t *stack ){
 	int i, j, k, l;
 	float d;
 	int counts[3];
@@ -374,7 +375,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
    If src_portal is NULL, this is the originating leaf
    ==================
  */
-void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack ){
+static void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack ){
 	pstack_t stack;
 	visPlane_t backplane;
 	leaf_t      *leaf;
@@ -633,7 +634,7 @@ void PortalFlow( int portalnum ){
    RecursivePassageFlow
    ==================
  */
-void RecursivePassageFlow( vportal_t *portal, threaddata_t *thread, pstack_t *prevstack ){
+static void RecursivePassageFlow( vportal_t *portal, threaddata_t *thread, pstack_t *prevstack ){
 	pstack_t stack;
 	vportal_t   *p;
 	leaf_t      *leaf;
@@ -754,7 +755,7 @@ void PassageFlow( int portalnum ){
    RecursivePassagePortalFlow
    ==================
  */
-void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack_t *prevstack ){
+static void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack_t *prevstack ){
 	pstack_t stack;
 	vportal_t   *p;
 	leaf_t      *leaf;
@@ -998,7 +999,7 @@ void PassagePortalFlow( int portalnum ){
 	 */
 }
 
-fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, const visPlane_t& split ){
+static fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, const visPlane_t& split ){
 	float dists[128];
 	EPlaneSide sides[128];
 	int counts[3];
@@ -1097,7 +1098,7 @@ fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, con
    AddSeperators
    ===============
  */
-int AddSeperators( const fixedWinding_t *source, const fixedWinding_t *pass, bool flipclip, visPlane_t *seperators, int maxseperators ){
+static int AddSeperators( const fixedWinding_t *source, const fixedWinding_t *pass, bool flipclip, visPlane_t *seperators, int maxseperators ){
 	int i, j, k, l;
 	int counts[3], numseperators;
 	bool fliptest;
@@ -1337,7 +1338,7 @@ void CreatePassages( int portalnum ){
 	}
 }
 
-void PassageMemory( void ){
+void PassageMemory(){
 	int totalmem = 0, totalportals = 0;
 
 	for ( const vportal_t *portal : Span( sorted_portals, numportals ) )
@@ -1408,7 +1409,7 @@ void PassageMemory( void ){
 
    ==================
  */
-void SimpleFlood( vportal_t *srcportal, int leafnum ){
+static void SimpleFlood( vportal_t *srcportal, int leafnum ){
 	for ( const vportal_t *p : Span( leafs[leafnum].portals, leafs[leafnum].numportals ) )
 	{
 		if ( p->removed ) {
@@ -1544,7 +1545,7 @@ void BasePortalVis( int portalnum ){
 
    ==================
  */
-void RecursiveLeafBitFlow( int leafnum, byte *mightsee, byte *cansee ){
+static void RecursiveLeafBitFlow( int leafnum, byte *mightsee, byte *cansee ){
 	byte newmight[MAX_PORTALS / 8];
 
 

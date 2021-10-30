@@ -33,6 +33,12 @@
 #include "shaders.h"
 
 
+static bool g_warnImage = true;
+
+static surfaceParm_t custSurfaceParms[ 256 ];
+static int numCustSurfaceParms;
+
+
 
 /*
    ColorMod()
@@ -153,14 +159,14 @@ void TCMod( const tcMod_t& mod, Vector2& st ){
 }
 
 
-void TCModIdentity( tcMod_t& mod ){
+static void TCModIdentity( tcMod_t& mod ){
 	mod[ 0 ][ 0 ] = 1.0f;   mod[ 0 ][ 1 ] = 0.0f;   mod[ 0 ][ 2 ] = 0.0f;
 	mod[ 1 ][ 0 ] = 0.0f;   mod[ 1 ][ 1 ] = 1.0f;   mod[ 1 ][ 2 ] = 0.0f;
 	mod[ 2 ][ 0 ] = 0.0f;   mod[ 2 ][ 1 ] = 0.0f;   mod[ 2 ][ 2 ] = 1.0f;   /* this row is only used for multiples, not transformation */
 }
 
 
-void TCModMultiply( const tcMod_t& a, const tcMod_t& b, tcMod_t& out ){
+static void TCModMultiply( const tcMod_t& a, const tcMod_t& b, tcMod_t& out ){
 	for ( int i = 0; i < 3; i++ )
 	{
 		out[ i ][ 0 ] = ( a[ i ][ 0 ] * b[ 0 ][ 0 ] ) + ( a[ i ][ 1 ] * b[ 1 ][ 0 ] ) + ( a[ i ][ 2 ] * b[ 2 ][ 0 ] );
@@ -170,19 +176,19 @@ void TCModMultiply( const tcMod_t& a, const tcMod_t& b, tcMod_t& out ){
 }
 
 
-void TCModTranslate( tcMod_t& mod, float s, float t ){
+static void TCModTranslate( tcMod_t& mod, float s, float t ){
 	mod[ 0 ][ 2 ] += s;
 	mod[ 1 ][ 2 ] += t;
 }
 
 
-void TCModScale( tcMod_t& mod, float s, float t ){
+static void TCModScale( tcMod_t& mod, float s, float t ){
 	mod[ 0 ][ 0 ] *= s;
 	mod[ 1 ][ 1 ] *= t;
 }
 
 
-void TCModRotate( tcMod_t& mod, float euler ){
+static void TCModRotate( tcMod_t& mod, float euler ){
 	tcMod_t old, temp;
 	float radians, sinv, cosv;
 
@@ -269,7 +275,7 @@ void BeginMapShaderFile( const char *mapFile ){
 	remove( mapShaderFile.c_str() );
 
 	/* stop making warnings about missing images */
-	warnImage = false;
+	g_warnImage = false;
 }
 
 
@@ -279,7 +285,7 @@ void BeginMapShaderFile( const char *mapFile ){
    writes a shader to the map shader script
  */
 
-void WriteMapShaderFile( void ){
+void WriteMapShaderFile(){
 	/* dummy check */
 	if ( mapShaderFile.empty() ) {
 		return;
@@ -531,7 +537,7 @@ void EmitVertexRemapShader( char *from, char *to ){
    allocates and initializes a new shader
  */
 
-static shaderInfo_t *AllocShaderInfo( void ){
+static shaderInfo_t *AllocShaderInfo(){
 	shaderInfo_t    *si;
 
 
@@ -592,7 +598,7 @@ static shaderInfo_t *AllocShaderInfo( void ){
    sets a shader's width and height among other things
  */
 
-void FinishShader( shaderInfo_t *si ){
+static void FinishShader( shaderInfo_t *si ){
 	int x, y;
 	Vector2 st;
 
@@ -636,7 +642,7 @@ void FinishShader( shaderInfo_t *si ){
 		}
 	}
 
-	if( noob && !( si->compileFlags & C_OB ) ){
+	if( g_noob && !( si->compileFlags & C_OB ) ){
 		ApplySurfaceParm( "noob", nullptr, &si->surfaceFlags, nullptr );
 	}
 
@@ -681,7 +687,7 @@ static void LoadShaderImages( shaderInfo_t *si ){
 		/* otherwise, use default image */
 		if ( si->shaderImage == NULL ) {
 			si->shaderImage = ImageLoad( DEFAULT_IMAGE );
-			if ( warnImage && !strEqual( si->shader, "noshader" ) ) {
+			if ( g_warnImage && !strEqual( si->shader, "noshader" ) ) {
 				Sys_Warning( "Couldn't find image for shader %s\n", si->shader.c_str() );
 			}
 		}
@@ -1136,17 +1142,12 @@ static void ParseShaderFile( const char *filename ){
 			else if ( striEqualPrefix( token, "q3map_" ) ) {
 				/* ydnar: q3map_baseShader <shader> (inherit this shader's parameters) */
 				if ( striEqual( token, "q3map_baseShader" ) ) {
-					shaderInfo_t    *si2;
-					bool oldWarnImage;
-
-
 					/* get shader */
 					text.GetToken( false );
 					//%	Sys_FPrintf( SYS_VRB, "Shader %s has base shader %s\n", si->shader, token );
-					oldWarnImage = warnImage;
-					warnImage = false;
-					si2 = ShaderInfoForShader( token );
-					warnImage = oldWarnImage;
+					const bool oldWarnImage = std::exchange( g_warnImage, false );
+					shaderInfo_t *si2 = ShaderInfoForShader( token );
+					g_warnImage = oldWarnImage;
 
 					/* subclass it */
 					if ( si2 != NULL ) {
@@ -1772,7 +1773,7 @@ static void ParseShaderFile( const char *filename ){
    loads custom info parms file for mods
  */
 
-static void ParseCustomInfoParms( void ){
+static void ParseCustomInfoParms(){
 	/* file exists? */
 	if ( vfsGetFileCount( "scripts/custinfoparms.txt" ) == 0 ) {
 		return;
@@ -1829,7 +1830,7 @@ static void ParseCustomInfoParms( void ){
    on linux there's an additional twist, we actually merge the stuff from ~/.q3a/ and from the base dir
  */
 
-void LoadShaderInfo( void ){
+void LoadShaderInfo(){
 	std::vector<CopiedString> shaderFiles;
 
 

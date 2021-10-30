@@ -2385,7 +2385,7 @@ void CamWnd_SetMode( camera_draw_mode mode ){
 	}
 }
 
-void CamWnd_TogglePreview( void ){
+void CamWnd_TogglePreview(){
 	// gametype must be doom3 for this function to work
 	// if the gametype is not doom3 something is wrong with the
 	// global command list or somebody else calls this function.

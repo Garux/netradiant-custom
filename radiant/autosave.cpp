@@ -114,7 +114,7 @@ scene::Node& Map_Node(){
 	return GlobalSceneGraph().root();
 }
 
-void QE_CheckAutoSave( void ){
+void QE_CheckAutoSave(){
 	if ( !Map_Valid( g_map ) || !ScreenUpdates_Enabled() ) {
 		return;
 	}

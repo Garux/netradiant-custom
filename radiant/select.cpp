@@ -260,7 +260,7 @@ void Scene_DeleteSelected( scene::Graph& graph ){
 	SceneChangeNotify();
 }
 
-void Select_Delete( void ){
+void Select_Delete(){
 	Scene_DeleteSelected( GlobalSceneGraph() );
 }
 
@@ -903,11 +903,11 @@ void Select_FacesAndPatchesByShader(){
 	Scene_PatchSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
 }
 
-void Select_Inside( void ){
+void Select_Inside(){
 	SelectByBounds<SelectionPolicy_Inside>::DoSelection();
 }
 
-void Select_Touching( void ){
+void Select_Touching(){
 	SelectByBounds<SelectionPolicy_Touching>::DoSelection( false );
 }
 

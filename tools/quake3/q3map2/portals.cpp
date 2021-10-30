@@ -32,12 +32,6 @@
 #include "q3map2.h"
 
 
-
-/* ydnar: to fix broken portal windings */
-extern bool FixWinding( winding_t& w );
-
-
-
 /*
    PortalPassable
    returns true if the portal has non-opaque leafs on both sides
@@ -72,15 +66,15 @@ bool PortalPassable( const portal_t *p ){
 
 
 
-int c_tinyportals;
-int c_badportals;       /* ydnar */
+static int c_tinyportals;
+static int c_badportals;       /* ydnar */
 
 /*
    =============
    AddPortalToNodes
    =============
  */
-void AddPortalToNodes( portal_t *p, node_t *front, node_t *back ){
+static void AddPortalToNodes( portal_t *p, node_t *front, node_t *back ){
 	if ( p->nodes[0] || p->nodes[1] ) {
 		Error( "AddPortalToNode: already included" );
 	}
@@ -139,7 +133,7 @@ void RemovePortalFromNode( portal_t *portal, node_t *l ){
 
 //============================================================================
 
-void PrintPortal( const portal_t *p ){
+static void PrintPortal( const portal_t *p ){
 	for ( const Vector3& point : p->winding )
 		Sys_Printf( "(%5.0f,%5.0f,%5.0f)\n", point[0], point[1], point[2] );
 }
@@ -152,7 +146,7 @@ void PrintPortal( const portal_t *p ){
    ================
  */
 #define SIDESPACE   8
-void MakeHeadnodePortals( tree_t& tree ){
+static void MakeHeadnodePortals( tree_t& tree ){
 	portal_t    *portals[6];
 
 // pad with some space so there will never be null volume leafs
@@ -207,7 +201,7 @@ void MakeHeadnodePortals( tree_t& tree ){
 #define BASE_WINDING_EPSILON    0.001
 #define SPLIT_WINDING_EPSILON   0.001
 
-winding_t   BaseWindingForNode( const node_t *node ){
+static winding_t   BaseWindingForNode( const node_t *node ){
 	winding_t w = BaseWindingForPlane( mapplanes[node->planenum].plane );
 
 	// clip by all the parents
@@ -239,7 +233,7 @@ winding_t   BaseWindingForNode( const node_t *node ){
    and clipping it by all of parents of this node
    ==================
  */
-void MakeNodePortal( node_t *node ){
+static void MakeNodePortal( node_t *node ){
 	int side;
 
 	winding_t w = BaseWindingForNode( node );
@@ -296,7 +290,7 @@ void MakeNodePortal( node_t *node ){
    children have portals instead of node.
    ==============
  */
-void SplitNodePortals( node_t *node ){
+static void SplitNodePortals( node_t *node ){
 	node_t      *f, *b, *other_node;
 
 	const plane_t& plane = mapplanes[node->planenum];
@@ -403,7 +397,7 @@ void SplitNodePortals( node_t *node ){
    CalcNodeBounds
    ================
  */
-void CalcNodeBounds( node_t *node ){
+static void CalcNodeBounds( node_t *node ){
 	portal_t    *p;
 	int s;
 
@@ -421,7 +415,7 @@ void CalcNodeBounds( node_t *node ){
    MakeTreePortals_r
    ==================
  */
-void MakeTreePortals_r( node_t *node ){
+static void MakeTreePortals_r( node_t *node ){
 	CalcNodeBounds( node );
 	if ( !node->minmax.valid() ) {
 		Sys_Warning( "node without a volume\n"
@@ -470,9 +464,9 @@ void MakeTreePortals( tree_t& tree ){
    =========================================================
  */
 
-int c_floodedleafs;
+static int c_floodedleafs;
 
-void FloodPortals( node_t *node, bool skybox ){
+static void FloodPortals( node_t *node, bool skybox ){
 	int dist = 1;
 	std::vector<node_t*> nodes{ node };
 	while( !nodes.empty() ){
@@ -512,7 +506,7 @@ void FloodPortals( node_t *node, bool skybox ){
    =============
  */
 
-bool PlaceOccupant( node_t *headnode, const Vector3& origin, const entity_t *occupant, bool skybox ){
+static bool PlaceOccupant( node_t *headnode, const Vector3& origin, const entity_t *occupant, bool skybox ){
 	node_t  *node;
 
 	// find the leaf to start in
@@ -637,7 +631,7 @@ EFloodEntities FloodEntities( tree_t& tree ){
    =========================================================
  */
 
-int c_areas;
+static int c_areas;
 
 
 
@@ -646,7 +640,7 @@ int c_areas;
    floods through leaf portals to tag leafs with an area
  */
 
-void FloodAreas_r( node_t *node ){
+static void FloodAreas_r( node_t *node ){
 	int s;
 	portal_t    *p;
 
@@ -718,7 +712,7 @@ void FloodAreas_r( node_t *node ){
    area set, flood fill out from there
    =============
  */
-void FindAreas_r( node_t *node ){
+static void FindAreas_r( node_t *node ){
 	if ( node->planenum != PLANENUM_LEAF ) {
 		FindAreas_r( node->children[ 0 ] );
 		FindAreas_r( node->children[ 1 ] );
@@ -738,7 +732,7 @@ void FindAreas_r( node_t *node ){
    CheckAreas_r
    =============
  */
-void CheckAreas_r( const node_t *node ){
+static void CheckAreas_r( const node_t *node ){
 	if ( node->planenum != PLANENUM_LEAF ) {
 		CheckAreas_r( node->children[0] );
 		CheckAreas_r( node->children[1] );
@@ -771,7 +765,7 @@ void CheckAreas_r( const node_t *node ){
    sets all nodes with the skybox area to skybox
  */
 
-void FloodSkyboxArea_r( node_t *node ){
+static void FloodSkyboxArea_r( node_t *node ){
 	if ( skyboxArea < 0 ) {
 		return;
 	}
@@ -814,11 +808,11 @@ void FloodAreas( tree_t& tree ){
 
 //======================================================
 
-int c_outside;
-int c_inside;
-int c_solid;
+static int c_outside;
+static int c_inside;
+static int c_solid;
 
-void FillOutside_r( node_t *node ){
+static void FillOutside_r( node_t *node ){
 	if ( node->planenum != PLANENUM_LEAF ) {
 		FillOutside_r( node->children[0] );
 		FillOutside_r( node->children[1] );

@@ -28,7 +28,12 @@
  */
 
 #include <string.h>     /* XoXus: needed for memset call */
-#include "md4.h"
+#include <cstdint>
+
+struct mdfour {
+	std::uint32_t A, B, C, D;
+	std::uint32_t totalN;
+};
 
 /* NOTE: This code makes no attempt to be fast!
 
@@ -47,7 +52,7 @@ static struct mdfour *m;
 #define ROUND3( a,b,c,d,k,s ) a = lshift( a + H( b,c,d ) + X[k] + 0x6ED9EBA1,s )
 
 /* this applies md4 to 64 byte chunks */
-static void mdfour64( std::uint32_t *M ){
+inline void mdfour64( std::uint32_t *M ){
 	int j;
 	std::uint32_t AA, BB, CC, DD;
 	std::uint32_t X[16];
@@ -94,22 +99,20 @@ static void mdfour64( std::uint32_t *M ){
 	m->A = A; m->B = B; m->C = C; m->D = D;
 }
 
-static void copy64( std::uint32_t *M, unsigned char *in ){
-	int i;
-
-	for ( i = 0; i < 16; i++ )
+inline void copy64( std::uint32_t *M, unsigned char *in ){
+	for ( int i = 0; i < 16; ++i )
 		M[i] = ( in[i * 4 + 3] << 24 ) | ( in[i * 4 + 2] << 16 ) |
 		       ( in[i * 4 + 1] << 8 ) | ( in[i * 4 + 0] << 0 );
 }
 
-static void copy4( unsigned char *out, std::uint32_t x ){
+inline void copy4( unsigned char *out, std::uint32_t x ){
 	out[0] = x & 0xFF;
 	out[1] = ( x >> 8 ) & 0xFF;
 	out[2] = ( x >> 16 ) & 0xFF;
 	out[3] = ( x >> 24 ) & 0xFF;
 }
 
-void mdfour_begin( struct mdfour *md ){
+inline void mdfour_begin( struct mdfour *md ){
 	md->A = 0x67452301;
 	md->B = 0xefcdab89;
 	md->C = 0x98badcfe;
@@ -118,7 +121,7 @@ void mdfour_begin( struct mdfour *md ){
 }
 
 
-static void mdfour_tail( unsigned char *in, int n ){
+inline void mdfour_tail( unsigned char *in, int n ){
 	unsigned char buf[128] = {0};
 	std::uint32_t M[16];
 	std::uint32_t b;
@@ -146,7 +149,7 @@ static void mdfour_tail( unsigned char *in, int n ){
 	}
 }
 
-void mdfour_update( struct mdfour *md, unsigned char *in, int n ){
+inline void mdfour_update( struct mdfour *md, unsigned char *in, int n ){
 	std::uint32_t M[16];
 
 // start of edit by Forest 'LordHavoc' Hale
@@ -168,7 +171,7 @@ void mdfour_update( struct mdfour *md, unsigned char *in, int n ){
 }
 
 
-void mdfour_result( struct mdfour *md, unsigned char *out ){
+inline void mdfour_result( struct mdfour *md, unsigned char *out ){
 	m = md;
 
 	copy4( out, m->A );
@@ -178,7 +181,7 @@ void mdfour_result( struct mdfour *md, unsigned char *out ){
 }
 
 
-void mdfour( unsigned char *out, unsigned char *in, int n ){
+inline void mdfour( unsigned char *out, unsigned char *in, int n ){
 	struct mdfour md;
 	mdfour_begin( &md );
 	mdfour_update( &md, in, n );

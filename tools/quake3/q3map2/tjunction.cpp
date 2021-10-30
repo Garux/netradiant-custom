@@ -61,20 +61,24 @@ struct originalEdge_t
 	bspDrawVert_t   *dv[2];
 };
 
-originalEdge_t  *originalEdges = NULL;
+namespace
+{
+originalEdge_t  *originalEdges;
 int numOriginalEdges;
-int allocatedOriginalEdges = 0;
+int allocatedOriginalEdges;
 
 
-edgeLine_t      *edgeLines = NULL;
+edgeLine_t      *edgeLines;
 int numEdgeLines;
-int allocatedEdgeLines = 0;
+int allocatedEdgeLines;
 
 int c_degenerateEdges;
 int c_addedVerts;
 int c_totalVerts;
 
 int c_natural, c_rotate, c_cant;
+int c_broken;
+}
 
 // these should be whatever epsilon we actually expect,
 // plus SNAP_INT_TO_FLOAT
@@ -86,7 +90,7 @@ int c_natural, c_rotate, c_cant;
    InsertPointOnEdge
    ====================
  */
-void InsertPointOnEdge( const Vector3 &v, edgeLine_t *e ) {
+static void InsertPointOnEdge( const Vector3 &v, edgeLine_t *e ) {
 	edgePoint_t *p, *scan;
 
 	p = safe_malloc( sizeof( edgePoint_t ) );
@@ -129,7 +133,7 @@ void InsertPointOnEdge( const Vector3 &v, edgeLine_t *e ) {
    AddEdge
    ====================
  */
-int AddEdge( bspDrawVert_t& dv1, bspDrawVert_t& dv2, bool createNonAxial ) {
+static int AddEdge( bspDrawVert_t& dv1, bspDrawVert_t& dv2, bool createNonAxial ) {
 	int i;
 	edgeLine_t  *e;
 	float d;
@@ -201,7 +205,7 @@ int AddEdge( bspDrawVert_t& dv1, bspDrawVert_t& dv2, bool createNonAxial ) {
    adds a surface's edges
  */
 
-void AddSurfaceEdges( mapDrawSurface_t& ds ){
+static void AddSurfaceEdges( mapDrawSurface_t& ds ){
 	for ( int i = 0; i < ds.numVerts; i++ )
 	{
 		/* save the edge number in the lightmap field so we don't need to look it up again */
@@ -217,7 +221,7 @@ void AddSurfaceEdges( mapDrawSurface_t& ds ){
    determines if an edge is colinear
  */
 
-bool ColinearEdge( const Vector3& v1, const Vector3& v2, const Vector3& v3 ){
+static bool ColinearEdge( const Vector3& v1, const Vector3& v2, const Vector3& v3 ){
 	Vector3 midpoint, dir, offset, on;
 	float d;
 
@@ -249,7 +253,7 @@ bool ColinearEdge( const Vector3& v1, const Vector3& v2, const Vector3& v3 ){
    brush tjunctions
    ====================
  */
-void AddPatchEdges( mapDrawSurface_t& ds ) {
+static void AddPatchEdges( mapDrawSurface_t& ds ) {
 	for ( int i = 0; i < ds.patchWidth - 2; i += 2 ) {
 		{
 			bspDrawVert_t& v1 = ds.verts[ i + 0 ];
@@ -304,7 +308,7 @@ void AddPatchEdges( mapDrawSurface_t& ds ) {
    ====================
  */
 #define MAX_SURFACE_VERTS   256
-void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
+static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 	int i, j, k;
 	edgeLine_t  *e;
 	edgePoint_t *p;
@@ -480,9 +484,7 @@ void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 
 #define DEGENERATE_EPSILON  0.1
 
-int c_broken = 0;
-
-bool FixBrokenSurface( mapDrawSurface_t& ds ){
+static bool FixBrokenSurface( mapDrawSurface_t& ds ){
 	/* dummy check */
 	if ( ds.type != ESurfaceType::Face ) {
 		return false;

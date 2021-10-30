@@ -33,8 +33,8 @@
 
 
 
-static void AAS_DData( unsigned char *data, int size ){
-	for ( int i = 0; i < size; i++ )
+inline void AAS_DData( unsigned char *data, int size ){
+	for ( int i = 0; i < size; ++i )
 		data[i] ^= (unsigned char) i * 119;
 }
 
@@ -943,7 +943,7 @@ int MergeBSPMain( Args& args ){
    PseudoCompileBSP()
    a stripped down ProcessModels
  */
-void PseudoCompileBSP( bool need_tree ){
+static void PseudoCompileBSP( bool need_tree ){
 	int models;
 	char modelValue[16];
 	entity_t *entity;

@@ -33,7 +33,7 @@
 
 
 
-int c_faceLeafs;
+static int c_faceLeafs;
 
 
 
@@ -172,7 +172,7 @@ static void SelectSplitPlaneNum( const node_t *node, const facelist_t& list, int
    recursively builds the bsp, splitting on face planes
  */
 
-void BuildFaceTree_r( node_t *node, facelist_t& list ){
+static void BuildFaceTree_r( node_t *node, facelist_t& list ){
 	facelist_t childLists[2];
 	int splitPlaneNum, compileFlags;
 #if 0
@@ -330,6 +330,12 @@ tree_t FaceBSP( facelist_t& list ) {
    MakeStructuralBSPFaceList()
    get structural brush faces
  */
+
+#define HINT_PRIORITY           1000        /* ydnar: force hint splits first and antiportal/areaportal splits last */
+#define ANTIPORTAL_PRIORITY     -1000
+#define AREAPORTAL_PRIORITY     -1000
+#define DETAIL_PRIORITY         -3000
+
 
 facelist_t MakeStructuralBSPFaceList( const brushlist_t& list ){
 	facelist_t flist;

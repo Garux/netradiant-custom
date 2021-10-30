@@ -918,7 +918,7 @@ scene::Path ultimate_group_path(){
 	return path;
 }
 
-void CSG_Merge( void ){
+void CSG_Merge(){
 	brush_vector_t selected_brushes;
 
 	// remove selected

@@ -45,7 +45,7 @@ bool threaded;
 
    =============
  */
-int GetThreadWork( void ){
+int GetThreadWork(){
 	int r;
 	int f;
 
@@ -125,7 +125,7 @@ int numthreads = -1;
 CRITICAL_SECTION crit;
 static int enter;
 
-void ThreadSetDefault( void ){
+void ThreadSetDefault(){
 	SYSTEM_INFO info;
 
 	if ( numthreads == -1 ) { // not set manually
@@ -140,7 +140,7 @@ void ThreadSetDefault( void ){
 }
 
 
-void ThreadLock( void ){
+void ThreadLock(){
 	if ( !threaded ) {
 		return;
 	}
@@ -151,7 +151,7 @@ void ThreadLock( void ){
 	enter = 1;
 }
 
-void ThreadUnlock( void ){
+void ThreadUnlock(){
 	if ( !threaded ) {
 		return;
 	}
@@ -232,7 +232,7 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 
 int numthreads = 4;
 
-void ThreadSetDefault( void ){
+void ThreadSetDefault(){
 	if ( numthreads == -1 ) { // not set manually
 		numthreads = 4;
 	}
@@ -243,13 +243,13 @@ void ThreadSetDefault( void ){
 
 pthread_mutex_t *my_mutex;
 
-void ThreadLock( void ){
+void ThreadLock(){
 	if ( my_mutex ) {
 		pthread_mutex_lock( my_mutex );
 	}
 }
 
-void ThreadUnlock( void ){
+void ThreadUnlock(){
 	if ( my_mutex ) {
 		pthread_mutex_unlock( my_mutex );
 	}
@@ -346,7 +346,7 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 int numthreads = -1;
 abilock_t lck;
 
-void ThreadSetDefault( void ){
+void ThreadSetDefault(){
 	if ( numthreads == -1 ) {
 		numthreads = prctl( PR_MAXPPROCS );
 	}
@@ -355,11 +355,11 @@ void ThreadSetDefault( void ){
 }
 
 
-void ThreadLock( void ){
+void ThreadLock(){
 	spin_lock( &lck );
 }
 
-void ThreadUnlock( void ){
+void ThreadUnlock(){
 	release_lock( &lck );
 }
 
@@ -429,7 +429,7 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 
 int numthreads = -1;
 
-void ThreadSetDefault( void ){
+void ThreadSetDefault(){
 	if ( numthreads == -1 ) { // not set manually
 #ifdef _SC_NPROCESSORS_ONLN
 		long cpus = sysconf( _SC_NPROCESSORS_ONLN );
@@ -459,7 +459,7 @@ struct pt_mutex_t
 
 pt_mutex_t global_lock;
 
-void ThreadLock( void ){
+void ThreadLock(){
 	pt_mutex_t *pt_mutex = &global_lock;
 
 	if ( !threaded ) {
@@ -492,7 +492,7 @@ void ThreadLock( void ){
 	pthread_mutex_unlock( &pt_mutex->a_mutex );
 }
 
-void ThreadUnlock( void ){
+void ThreadUnlock(){
 	pt_mutex_t *pt_mutex = &global_lock;
 
 	if ( !threaded ) {
@@ -608,14 +608,14 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 
 int numthreads = 1;
 
-void ThreadSetDefault( void ){
+void ThreadSetDefault(){
 	numthreads = 1;
 }
 
-void ThreadLock( void ){
+void ThreadLock(){
 }
 
-void ThreadUnlock( void ){
+void ThreadUnlock(){
 }
 
 /*

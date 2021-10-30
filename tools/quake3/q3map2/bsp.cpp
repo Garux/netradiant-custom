@@ -91,7 +91,7 @@ static void autocaulk_write(){
    copies advertisement info into the BSP structures
  */
 
-static void ProcessAdvertisements( void ) {
+static void ProcessAdvertisements() {
 	Sys_FPrintf( SYS_VRB, "--- ProcessAdvertisements ---\n" );
 
 	for ( const auto& e : entities ) {
@@ -142,7 +142,7 @@ static void ProcessAdvertisements( void ) {
    sets the model numbers for brush entities
  */
 
-static void SetCloneModelNumbers( void ){
+static void SetCloneModelNumbers(){
 	int models;
 	char modelValue[ 16 ];
 	const char  *value, *value2, *value3;
@@ -259,7 +259,7 @@ static void FixBrushSides( entity_t *e ){
    creates a full bsp + surfaces for the worldspawn entity
  */
 
-void ProcessWorldModel( void ){
+static void ProcessWorldModel(){
 	entity_t    *e;
 	const char  *value;
 
@@ -458,7 +458,7 @@ void ProcessWorldModel( void ){
    creates bsp + surfaces for other brush models
  */
 
-void ProcessSubModel( void ){
+static void ProcessSubModel(){
 	/* start a brush model */
 	BeginModel();
 	entity_t *e = &entities[ mapEntityNum ];
@@ -530,12 +530,9 @@ void ProcessSubModel( void ){
    process world + other models into the bsp
  */
 
-void ProcessModels( void ){
-	bool oldVerbose;
-
-
+static void ProcessModels(){
 	/* preserve -v setting */
-	oldVerbose = verbose;
+	const bool oldVerbose = verbose;
 
 	/* start a new bsp */
 	BeginBSPFile();
@@ -584,7 +581,7 @@ void ProcessModels( void ){
    this is probably broken unless teamed with a radiant version that preserves entity order
  */
 
-void OnlyEnts( const char *filename ){
+static void OnlyEnts( const char *filename ){
 	/* note it */
 	Sys_Printf( "--- OnlyEnts ---\n" );
 
@@ -861,7 +858,7 @@ int BSPMain( Args& args ){
 		}
 		while ( args.takeArg( "-noob" ) ) {
 			Sys_Printf( "No oBs!\n" );
-			noob = true;
+			g_noob = true;
 		}
 		while ( args.takeArg( "-autocaulk" ) ) {
 			Sys_Printf( "\trunning in autocaulk mode\n" );

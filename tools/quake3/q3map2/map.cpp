@@ -39,6 +39,7 @@
 #define USE_HASHING
 #define PLANE_HASHES    8192
 
+namespace{
 int planehash[ PLANE_HASHES ];
 
 int c_boxbevels;
@@ -46,6 +47,8 @@ int c_edgebevels;
 int c_areaportals;
 int c_detail;
 int c_structural;
+int c_patches;
+}
 
 
 
@@ -81,7 +84,7 @@ bool PlaneEqual( const plane_t& p, const Plane3f& plane ){
    AddPlaneToHash()
  */
 
-void AddPlaneToHash( plane_t& p ){
+inline void AddPlaneToHash( plane_t& p ){
 	const int hash = ( PLANE_HASHES - 1 ) & (int) fabs( p.dist() );
 
 	p.hash_chain = planehash[hash];
@@ -93,7 +96,7 @@ void AddPlaneToHash( plane_t& p ){
    CreateNewFloatPlane
    ================
  */
-int CreateNewFloatPlane( const Plane3f& plane ){
+static int CreateNewFloatPlane( const Plane3f& plane ){
 
 	if ( vector3_length( plane.normal() ) < 0.5 ) {
 		Sys_Printf( "FloatPlane: bad normal\n" );
@@ -133,7 +136,7 @@ int CreateNewFloatPlane( const Plane3f& plane ){
    Returns true if and only if the normal was adjusted.
  */
 
-bool SnapNormal( Vector3& normal ){
+static bool SnapNormal( Vector3& normal ){
 #if Q3MAP2_EXPERIMENTAL_SNAP_NORMAL_FIX
 	int i;
 	bool adjusted = false;
@@ -256,7 +259,7 @@ bool SnapNormal( Vector3& normal ){
    snaps a plane to normal/distance epsilons
  */
 
-void SnapPlane( Plane3f& plane ){
+static void SnapPlane( Plane3f& plane ){
 // SnapPlane disabled by LordHavoc because it often messes up collision
 // brushes made from triangles of embedded models, and it has little effect
 // on anything else (axial planes are usually derived from snapped points)
@@ -296,7 +299,7 @@ void SnapPlane( Plane3f& plane ){
    SnapPlaneImproved()
    snaps a plane to normal/distance epsilons, improved code
  */
-void SnapPlaneImproved( Plane3f& plane, int numPoints, const Vector3 *points ){
+static void SnapPlaneImproved( Plane3f& plane, int numPoints, const Vector3 *points ){
 	if ( SnapNormal( plane.normal() ) ) {
 		if ( numPoints > 0 ) {
 			// Adjust the dist so that the provided points don't drift away.
@@ -434,7 +437,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
    takes 3 points and finds the plane they lie in
  */
 
-int MapPlaneFromPoints( DoubleVector3 p[3] ){
+inline int MapPlaneFromPoints( DoubleVector3 p[3] ){
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
 	Plane3 plane;
 	PlaneFromPoints( plane, p );
@@ -457,7 +460,7 @@ int MapPlaneFromPoints( DoubleVector3 p[3] ){
    the content flags and compile flags on all sides of a brush should be the same
  */
 
-void SetBrushContents( brush_t& b ){
+static void SetBrushContents( brush_t& b ){
 	if( b.sides.empty() )
 		return;
 
@@ -565,7 +568,7 @@ void SetBrushContents( brush_t& b ){
    ydnar 2003-01-20: added mrelusive fixes
  */
 
-void AddBrushBevels( void ){
+void AddBrushBevels(){
 	const int surfaceFlagsMask = g_game->brushBevelsSurfaceFlagsMask;
 	auto& sides = buildBrush.sides;
 
@@ -839,7 +842,7 @@ static void FinishBrush( bool noCollapseGroups ){
    (must be identical in radiant!)
  */
 
-const Vector3 baseaxis[18] =
+static const Vector3 baseaxis[18] =
 {
 	 g_vector3_axis_z, g_vector3_axis_x, -g_vector3_axis_y,        // floor
 	-g_vector3_axis_z, g_vector3_axis_x, -g_vector3_axis_y,        // ceiling
@@ -873,7 +876,7 @@ std::array<Vector3, 2> TextureAxisFromPlane( const plane_t& plane ){
    creates world-to-texture mapping vecs for crappy quake plane arrangements
  */
 
-void QuakeTextureVecs( const plane_t& plane, float shift[ 2 ], float rotate, float scale[ 2 ], Vector4 mappingVecs[ 2 ] ){
+static void QuakeTextureVecs( const plane_t& plane, float shift[ 2 ], float rotate, float scale[ 2 ], Vector4 mappingVecs[ 2 ] ){
 	int sv, tv;
 	float sinv, cosv;
 	auto vecs = TextureAxisFromPlane( plane );
@@ -1117,7 +1120,7 @@ static void ParseRawBrush( bool onlyLights ){
    also removes planes without any normal
  */
 
-bool RemoveDuplicateBrushPlanes( brush_t& b ){
+static bool RemoveDuplicateBrushPlanes( brush_t& b ){
 	auto& sides = b.sides;
 
 	for( auto it = sides.cbegin(); it != sides.cend(); ){
@@ -1211,7 +1214,8 @@ static void ParseBrush( bool onlyLights, bool noCollapseGroups ){
    (used by func_group)
  */
 
-void AdjustBrushesForOrigin( entity_t *ent );
+static void AdjustBrushesForOrigin( entity_t *ent );
+
 void MoveBrushesToWorld( entity_t *ent ){
 	/* we need to undo the common/origin adjustment, and instead shift them by the entity key origin */
 	ent->originbrush_origin = -ent->origin;
@@ -1258,7 +1262,7 @@ void MoveBrushesToWorld( entity_t *ent ){
    AdjustBrushesForOrigin()
  */
 
-void AdjustBrushesForOrigin( entity_t *ent ){
+static void AdjustBrushesForOrigin( entity_t *ent ){
 	/* walk brush list */
 	for ( brush_t& b : ent->brushes )
 	{
@@ -1292,7 +1296,7 @@ void AdjustBrushesForOrigin( entity_t *ent ){
    finds the bounds of an entity's brushes (necessary for terrain-style generic metashaders)
  */
 
-void SetEntityBounds( entity_t *e ){
+static void SetEntityBounds( entity_t *e ){
 	MinMax minmax;
 
 	/* walk the entity's brushes/patches and determine bounds */
@@ -1328,7 +1332,7 @@ void SetEntityBounds( entity_t *e ){
    based on LoadAlphaMap() from terrain.c, a little more generic
  */
 
-void LoadEntityIndexMap( entity_t *e ){
+static void LoadEntityIndexMap( entity_t *e ){
 	int numLayers, w, h;
 	const char      *indexMapFilename, *shader;
 	byte            *pixels;
@@ -1486,8 +1490,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	mapEnt = &entities.emplace_back();
 
 	/* ydnar: true entity numbering */
-	mapEnt->mapEntityNum = numMapEntities;
-	numMapEntities++;
+	mapEnt->mapEntityNum = numMapEntities++;
 
 	/* loop */
 	while ( 1 )
@@ -1511,7 +1514,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 
 			/* check */
 			if ( strEqual( token, "patchDef2" ) ) {
-				numMapPatches++;
+				++c_patches;
 				ParsePatch( onlyLights );
 			}
 			else if ( strEqual( token, "terrainDef" ) ) {
@@ -1707,7 +1710,7 @@ void LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups )
 		/* emit some statistics */
 		Sys_FPrintf( SYS_VRB, "%9d total world brushes\n", numMapBrushes );
 		Sys_FPrintf( SYS_VRB, "%9d detail brushes\n", c_detail );
-		Sys_FPrintf( SYS_VRB, "%9d patches\n", numMapPatches );
+		Sys_FPrintf( SYS_VRB, "%9d patches\n", c_patches );
 		Sys_FPrintf( SYS_VRB, "%9d boxbevels\n", c_boxbevels );
 		Sys_FPrintf( SYS_VRB, "%9d edgebevels\n", c_edgebevels );
 		Sys_FPrintf( SYS_VRB, "%9zu entities\n", entities.size() );

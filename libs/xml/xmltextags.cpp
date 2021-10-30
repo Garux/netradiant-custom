@@ -98,7 +98,7 @@ bool XmlTagBuilder::OpenXmlDoc( const char* file, const char* savefile ){
 	}
 }
 
-bool XmlTagBuilder::SaveXmlDoc( void ){
+bool XmlTagBuilder::SaveXmlDoc(){
 	return SaveXmlDoc( m_savefilename.c_str() );
 }
 

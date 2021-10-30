@@ -84,7 +84,7 @@ public:
 	bool CreateXmlDocument();
 	bool OpenXmlDoc( const char* file, const char* savefile = 0 );
 	bool SaveXmlDoc( const char* file );
-	bool SaveXmlDoc( void );
+	bool SaveXmlDoc();
 	bool AddShaderNode( const char* shader, TextureType textureType, NodeShaderType nodeShaderType );
 	bool DeleteShaderNode( const char* shader );
 	bool CheckShaderTag( const char* shader );

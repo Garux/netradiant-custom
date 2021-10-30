@@ -199,7 +199,7 @@ static void CreateSkyLights( const Vector3& color, float value, int iterations, 
    creates lights from light entities
  */
 
-void CreateEntityLights( void ){
+static void CreateEntityLights(){
 	/* go through entity list and find lights */
 	for ( std::size_t i = 0; i < entities.size(); ++i )
 	{
@@ -466,7 +466,7 @@ void CreateEntityLights( void ){
 
 #define APPROX_BOUNCE   1.0f
 
-void CreateSurfaceLights( void ){
+static void CreateSurfaceLights(){
 	clipWork_t cw;
 
 
@@ -549,7 +549,7 @@ void CreateSurfaceLights( void ){
    find the offset values for inline models
  */
 
-void SetEntityOrigins( void ){
+static void SetEntityOrigins(){
 	/* ydnar: copy drawverts into private storage for nefarious purposes */
 	yDrawVerts = bspDrawVerts;
 
@@ -596,54 +596,46 @@ void SetEntityOrigins( void ){
    between this and the approximation
  */
 
-#define ONE_OVER_2PI    0.159154942f    //% (1.0f / (2.0f * 3.141592657f))
-
 float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, const winding_t& w ){
 	Vector3 dirs[ MAX_POINTS_ON_WINDING ];
-	float total;
-	float angle, facing;
+	double total = 0;
 
 
 	/* this is expensive */
-	size_t i;
-	for ( i = 0; i < w.size(); i++ )
+	for ( size_t i = 0; i < w.size(); ++i )
 	{
 		dirs[ i ] = w[ i ] - point;
 		VectorFastNormalize( dirs[ i ] );
 	}
 
 	/* duplicate first vertex to avoid mod operation */
-	dirs[ i ] = dirs[ 0 ];
+	dirs[ w.size() ] = dirs[ 0 ];
 
 	/* calculcate relative area */
-	total = 0.0f;
-	for ( i = 0; i < w.size(); i++ )
+	for ( size_t i = 0; i < w.size(); ++i )
 	{
 		/* get a triangle */
-		const size_t j = i + 1;
-
-		/* get the angle */
-		/* roundoff can cause slight creep, which gives an IND from acos, thus clamp */
-		angle = acos( std::clamp( vector3_dot( dirs[ i ], dirs[ j ] ), -1.0, 1.0 ) );
-
-		Vector3 triNormal = vector3_cross( dirs[ i ], dirs[ j ] );
+		Vector3 triNormal = vector3_cross( dirs[ i ], dirs[ i + 1 ] );
 		if ( VectorFastNormalize( triNormal ) < 0.0001f ) {
 			continue;
 		}
 
-		facing = vector3_dot( normal, triNormal );
+		/* get the angle */
+		/* roundoff can cause slight creep, which gives an IND from acos, thus clamp */
+		const double angle = acos( std::clamp( vector3_dot( dirs[ i ], dirs[ i + 1 ] ), -1.0, 1.0 ) );
+
+		const double facing = vector3_dot( normal, triNormal );
 		total += facing * angle;
 
 		/* ydnar: this was throwing too many errors with radiosity + crappy maps. ignoring it. */
-		if ( total > 6.3f || total < -6.3f ) {
+		if ( total > 6.3 || total < -6.3 ) {
 			return 0.0f;
 		}
 	}
 
 	/* now in the range of 0 to 1 over the entire incoming hemisphere */
 	//%	total /= (2.0f * 3.141592657f);
-	total *= ONE_OVER_2PI;
-	return total;
+	return total * c_inv_2pi;
 }
 
 
@@ -1135,7 +1127,7 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&c
    note: this is similar to LightContributionToSample() but optimized for omnidirectional sampling
  */
 
-bool LightContributionToPoint( trace_t *trace ){
+static bool LightContributionToPoint( trace_t *trace ){
 	float add, dist;
 
 	/* get light */
@@ -1339,7 +1331,7 @@ struct contribution_t
 	int style;
 };
 
-void TraceGrid( int num ){
+static void TraceGrid( int num ){
 	int i, j, x, y, z, mod, numCon, numStyles;
 	float d, step;
 	Vector3 cheapColor, thisdir;
@@ -1602,7 +1594,7 @@ void TraceGrid( int num ){
    calculates the size of the lightgrid and allocates memory
  */
 
-void SetupGrid( void ){
+static void SetupGrid(){
 	/* don't do this if not grid lighting */
 	if ( noGridLighting ) {
 		return;
@@ -1678,7 +1670,7 @@ void SetupGrid( void ){
    does what it says...
  */
 
-void LightWorld( bool fastAllocate ){
+static void LightWorld( bool fastAllocate ){
 	Vector3 color;
 	float f;
 	int b, bt;
@@ -2037,7 +2029,7 @@ int LightMain( Args& args ){
 		}
 
 		while ( args.takeArg( "-nolm" ) ) {
-			nolm = true;
+			noLightmaps = true;
 			Sys_Printf( "No lightmaps yo\n" );
 		}
 
@@ -2370,11 +2362,6 @@ int LightMain( Args& args ){
 			}
 		}
 
-		while ( args.takeArg( "-smooth" ) ) {
-			lightSamples = EXTRA_SCALE;
-			Sys_Printf( "The -smooth argument is deprecated, use \"-samples 2\" instead\n" );
-		}
-
 		while ( args.takeArg( "-nofastpoint" ) ) {
 			fastpoint = false;
 			Sys_Printf( "Automatic fast mode for point lights disabled\n" );
@@ -2474,15 +2461,6 @@ int LightMain( Args& args ){
 		while ( args.takeArg( "-patchshadows" ) ) {
 			patchShadows = true;
 			Sys_Printf( "Patch shadow casting enabled\n" );
-		}
-		while ( args.takeArg( "-extra" ) ) {
-			superSample = EXTRA_SCALE;      /* ydnar */
-			Sys_Printf( "The -extra argument is deprecated, use \"-super 2\" instead\n" );
-		}
-		while ( args.takeArg( "-extrawide" ) ) {
-			superSample = EXTRAWIDE_SCALE;  /* ydnar */
-			filter = true;                  /* ydnar */
-			Sys_Printf( "The -extrawide argument is deprecated, use \"-filter [-super 2]\" instead\n" );
 		}
 		while ( args.takeArg( "-samplesize" ) ) {
 			sampleSize = std::max( 1, atoi( args.takeNext() ) );

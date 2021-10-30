@@ -31,6 +31,7 @@
 /* dependencies */
 #include "q3map2.h"
 #include "bspfile_ibsp.h"
+#include <ctime>
 
 
 
@@ -57,9 +58,6 @@
  */
 
 void SwapBlock( int *block, int size ){
-	int i;
-
-
 	/* dummy check */
 	if ( block == NULL ) {
 		return;
@@ -67,7 +65,7 @@ void SwapBlock( int *block, int size ){
 
 	/* swap */
 	size >>= 2;
-	for ( i = 0; i < size; i++ )
+	for ( int i = 0; i < size; ++i )
 		block[ i ] = LittleLong( block[ i ] );
 }
 
@@ -91,7 +89,7 @@ void SwapBlock( std::vector<T>& block ){
    byte swaps all data in the abstract bsp
  */
 
-void SwapBSPFile( void ){
+static void SwapBSPFile(){
 	/* models */
 	SwapBlock( bspModels );
 
@@ -256,7 +254,7 @@ void WriteBSPFile( const char *filename ){
    dumps info about current file
  */
 
-void PrintBSPFileSizes( void ){
+void PrintBSPFileSizes(){
 	/* parse entities first */
 	if ( entities.empty() ) {
 		ParseEntities();
@@ -336,7 +334,7 @@ void PrintBSPFileSizes( void ){
    strips low byte chars off the end of a string
  */
 
-StringRange StripTrailing( const char *string ){
+inline StringRange StripTrailing( const char *string ){
 	const char *end = string + strlen( string );
 	while ( end != string && end[-1] <= 32 ){
 		--end;
@@ -372,7 +370,7 @@ void ParseEPair( std::list<epair_t>& epairs ){
    parses an entity's epairs
  */
 
-bool ParseEntity( void ){
+static bool ParseEntity(){
 	/* dummy check */
 	if ( !GetToken( true ) ) {
 		return false;
@@ -407,7 +405,7 @@ bool ParseEntity( void ){
    parses the bsp entity data string into entities
  */
 
-void ParseEntities( void ){
+void ParseEntities(){
 	entities.clear();
 	ParseFromMemory( bspEntData.data(), bspEntData.size() );
 	while ( ParseEntity() ){};
@@ -444,11 +442,11 @@ void InjectCommandLine( const char *stage, const std::vector<const char *>& args
    pairs to the data created by the map editor
  */
 
-void UnparseEntities( void ){
+void UnparseEntities(){
 	StringOutputStream data( 8192 );
 
 	/* run through entity list */
-	for ( std::size_t i = 0; i < numBSPEntities && i < entities.size(); i++ )
+	for ( std::size_t i = 0; i < numBSPEntities && i < entities.size(); ++i )
 	{
 		const entity_t& e = entities[ i ];
 		/* get epair */

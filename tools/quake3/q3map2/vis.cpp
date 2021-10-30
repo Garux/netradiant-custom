@@ -30,11 +30,13 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "vis.h"
+#include "visflow.h"
+
+vportal_t          *sorted_portals[ MAX_MAP_PORTALS * 2 ];
 
 
-
-
-visPlane_t PlaneFromWinding( const fixedWinding_t *w ){
+static visPlane_t PlaneFromWinding( const fixedWinding_t *w ){
 	// calc plane
 	visPlane_t plane;
 	PlaneFromPoints( plane, w->points[0], w->points[1], w->points[2] );
@@ -48,7 +50,7 @@ visPlane_t PlaneFromWinding( const fixedWinding_t *w ){
    ydnar: altered this a bit to reconcile multiply-defined winding_t
  */
 
-fixedWinding_t *NewFixedWinding( int numpoints ){
+static fixedWinding_t *NewFixedWinding( int numpoints ){
 	if ( numpoints > MAX_POINTS_ON_WINDING ) {
 		Error( "NewWinding: %i points", numpoints );
 	}
@@ -57,7 +59,7 @@ fixedWinding_t *NewFixedWinding( int numpoints ){
 
 
 
-void prl( leaf_t *l ){
+static void print_leaf( const leaf_t *l ){
 	for ( const vportal_t *p : Span( l->portals, l->numportals ) )
 	{
 		const visPlane_t pl = p->plane;
@@ -76,7 +78,7 @@ void prl( leaf_t *l ){
    the earlier information.
    =============
  */
-void SortPortals( void ){
+static void SortPortals(){
 	for ( int i = 0; i < numportals * 2; ++i )
 		sorted_portals[i] = &portals[i];
 
@@ -93,7 +95,7 @@ void SortPortals( void ){
    LeafVectorFromPortalVector
    ==============
  */
-int LeafVectorFromPortalVector( byte *portalbits, byte *leafbits ){
+static int LeafVectorFromPortalVector( byte *portalbits, byte *leafbits ){
 	for ( int i = 0; i < numportals * 2; ++i )
 	{
 		if ( bit_is_enabled( portalbits, i ) ) {
@@ -124,7 +126,8 @@ int LeafVectorFromPortalVector( byte *portalbits, byte *leafbits ){
    ===============
  */
 static int clustersizehistogram[MAX_MAP_LEAFS] = {0};
-void ClusterMerge( int leafnum ){
+
+static void ClusterMerge( int leafnum ){
 	byte portalvector[MAX_PORTALS / 8];
 	byte uncompressed[MAX_MAP_LEAFS / 8];
 	int numvis, mergedleafnum;
@@ -175,7 +178,7 @@ void ClusterMerge( int leafnum ){
    CalcPortalVis
    ==================
  */
-void CalcPortalVis( void ){
+static void CalcPortalVis(){
 #ifdef MREDEBUG
 	Sys_Printf( "%6d portals out of %d", 0, numportals * 2 );
 	//get rid of the counter
@@ -191,7 +194,7 @@ void CalcPortalVis( void ){
    CalcPassageVis
    ==================
  */
-void CalcPassageVis( void ){
+static void CalcPassageVis(){
 	PassageMemory();
 
 #ifdef MREDEBUG
@@ -215,7 +218,7 @@ void CalcPassageVis( void ){
    CalcPassagePortalVis
    ==================
  */
-void CalcPassagePortalVis( void ){
+static void CalcPassagePortalVis(){
 	PassageMemory();
 
 #ifdef MREDEBUG
@@ -239,7 +242,7 @@ void CalcPassagePortalVis( void ){
    CalcFastVis
    ==================
  */
-void CalcFastVis( void ){
+static void CalcFastVis(){
 	// fastvis just uses mightsee for a very loose bound
 	for ( vportal_t& p : Span( portals, numportals * 2 ) )
 	{
@@ -253,7 +256,7 @@ void CalcFastVis( void ){
    CalcVis
    ==================
  */
-void CalcVis( void ){
+static void CalcVis(){
 	int i, minvis, maxvis;
 	double mu, sigma, totalvis, totalvis2;
 
@@ -337,7 +340,7 @@ void CalcVis( void ){
    SetPortalSphere
    ==================
  */
-void SetPortalSphere( vportal_t& p ){
+static void SetPortalSphere( vportal_t& p ){
 	Vector3 origin( 0 );
 
 	for ( const Vector3& point : Span( p.winding->points, p.winding->numpoints ) )
@@ -451,7 +454,7 @@ static bool TryMergeLeaves( int l1num, int l2num ){
    UpdatePortals
    ============
  */
-void UpdatePortals( void ){
+static void UpdatePortals(){
 	for ( vportal_t& p : Span( portals, numportals * 2 ) )
 		if ( !p.removed )
 			while ( leafs[p.leaf].merged >= 0 )
@@ -465,7 +468,7 @@ void UpdatePortals( void ){
    try to merge leaves but don't merge through hint splitters
    ============
  */
-void MergeLeaves( void ){
+static void MergeLeaves(){
 	int nummerges, totalnummerges = 0;
 
 	do
@@ -506,7 +509,7 @@ void MergeLeaves( void ){
  */
 #define CONTINUOUS_EPSILON  0.005
 
-fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, const Vector3& planenormal ){
+static fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, const Vector3& planenormal ){
 	const Vector3       *p1, *p2, *p3, *p4, *back;
 	fixedWinding_t  *newf;
 	int i, j, k, l;
@@ -609,7 +612,7 @@ fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, const V
    MergeLeafPortals
    ============
  */
-void MergeLeafPortals( void ){
+static void MergeLeafPortals(){
 	int i, j, k, nummerges, hintsmerged;
 	leaf_t *leaf;
 	vportal_t *p1, *p2;
@@ -667,7 +670,7 @@ void MergeLeafPortals( void ){
    WritePortals
    ============
  */
-int CountActivePortals( void ){
+static int CountActivePortals(){
 	int num = 0, hints = 0;
 
 	for ( const vportal_t& p : Span( portals, numportals * 2 ) )
@@ -688,7 +691,7 @@ int CountActivePortals( void ){
    LoadPortals
    ============
  */
-void LoadPortals( char *name ){
+static void LoadPortals( char *name ){
 	char magic[80];
 	FILE        *f;
 	int numpoints, leafnums[2], flags;

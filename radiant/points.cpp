@@ -172,7 +172,7 @@ void CPointfile::GenerateDisplayList(){
 
 // old (but still relevant) pointfile code -------------------------------------
 
-void Pointfile_Delete( void ){
+void Pointfile_Delete(){
 	const char* mapname = Map_Name( g_map );
 	file_remove( StringOutputStream( 256 )( PathExtensionless( mapname ), ".lin" ).c_str() );
 }
@@ -194,7 +194,7 @@ void Pointfile_UpdateViews( CPointfile::const_iterator i ){
 }
 
 // advance camera to next point
-void Pointfile_Next( void ){
+void Pointfile_Next(){
 	if ( !s_pointfile.shown() ) {
 		return;
 	}
@@ -208,7 +208,7 @@ void Pointfile_Next( void ){
 }
 
 // advance camera to previous point
-void Pointfile_Prev( void ){
+void Pointfile_Prev(){
 	if ( !s_pointfile.shown() ) {
 		return;
 	}

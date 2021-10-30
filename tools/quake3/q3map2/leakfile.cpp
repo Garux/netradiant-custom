@@ -55,7 +55,7 @@
    TTimo: builds a polyline xml node
    =============
  */
-xmlNodePtr LeakFile( const tree_t& tree ){
+static xmlNodePtr LeakFile( const tree_t& tree ){
 	Vector3 mid;
 	FILE    *linefile;
 	const node_t  *node;

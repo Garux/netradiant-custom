@@ -1428,7 +1428,7 @@ void WXY_SetBackgroundImage(){
    ==============
  */
 
-void XYWnd::XY_DrawAxis( void ){
+void XYWnd::XY_DrawAxis(){
 	const char g_AxisName[3] = { 'X', 'Y', 'Z' };
 	NDIM1NDIM2( m_viewType )
 	const float w = ( m_nWidth / 2 / m_fScale );
@@ -1475,7 +1475,7 @@ void XYWnd::XY_DrawAxis( void ){
 	GlobalOpenGL().drawChar( g_AxisName[nDim2] );
 }
 
-void XYWnd::XY_DrawGrid( void ) {
+void XYWnd::XY_DrawGrid() {
 	float x, y;
 	char text[32];
 	float step, minor_step, stepx, stepy;

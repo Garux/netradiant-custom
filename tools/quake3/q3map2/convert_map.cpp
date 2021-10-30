@@ -38,7 +38,7 @@
    exports a map brush
  */
 
-static float Det3x3( float a00, float a01, float a02,
+inline float Det3x3( float a00, float a01, float a02,
                      float a10, float a11, float a12,
                      float a20, float a21, float a22 ){
 	return
@@ -47,7 +47,7 @@ static float Det3x3( float a00, float a01, float a02,
 	    +   a02 * ( a10 * a21 - a11 * a20 );
 }
 
-void GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, const bspDrawVert_t *bestVert[3] ){
+static void GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, const bspDrawVert_t *bestVert[3] ){
 	float best = 0;
 	float thisarea;
 	const bspDrawVert_t *vert[3];
@@ -845,7 +845,7 @@ static void ConvertEPairs( FILE *f, const entity_t& e, bool skip_origin ){
    exports an quake map file from the bsp
  */
 
-int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
+static int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 	/* setup brush conversion prerequisites */
 	{
 		/* convert bsp planes to map planes */

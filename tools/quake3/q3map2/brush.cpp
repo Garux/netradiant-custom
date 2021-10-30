@@ -67,7 +67,7 @@ sideRef_t *AllocSideRef( const side_t *side, sideRef_t *next ){
    returns false if the brush doesn't enclose a valid volume
  */
 
-bool BoundBrush( brush_t& brush ){
+static bool BoundBrush( brush_t& brush ){
 	brush.minmax.clear();
 	for ( const side_t& side : brush.sides )
 	{
@@ -132,7 +132,7 @@ Vector3 SnapWeldVector( const Vector3& a, const Vector3& b ){
    instead of averaging.
    ==================
  */
-DoubleVector3 SnapWeldVectorAccu( const DoubleVector3& a, const DoubleVector3& b ){
+static DoubleVector3 SnapWeldVectorAccu( const DoubleVector3& a, const DoubleVector3& b ){
 	// I'm just preserving what I think was the intended logic of the original
 	// SnapWeldVector().  I'm not actually sure where this function should even
 	// be used.  I'd like to know which kinds of problems this function addresses.
@@ -180,7 +180,7 @@ DoubleVector3 SnapWeldVectorAccu( const DoubleVector3& a, const DoubleVector3& b
 
 #define DEGENERATE_EPSILON  0.1
 
-bool FixWinding( winding_t& w ){
+static bool FixWinding( winding_t& w ){
 	bool valid = true;
 
 	/* dummy check */
@@ -236,7 +236,7 @@ bool FixWinding( winding_t& w ){
    if the some of the winding's points are close together.
    ==================
  */
-bool FixWindingAccu( winding_accu_t& w ){
+static bool FixWindingAccu( winding_accu_t& w ){
 	bool altered = false;
 
 	while ( true )
@@ -349,7 +349,7 @@ bool CreateBrushWindings( brush_t& brush ){
    Creates a new axial brush
    ==================
  */
-brush_t BrushFromBounds( const Vector3& mins, const Vector3& maxs ){
+static brush_t BrushFromBounds( const Vector3& mins, const Vector3& maxs ){
 	brush_t b;
 	b.sides.resize( 6 );
 	for ( int i = 0; i < 3; ++i )
@@ -372,7 +372,7 @@ brush_t BrushFromBounds( const Vector3& mins, const Vector3& maxs ){
 
    ==================
  */
-float BrushVolume( const brush_t& brush ){
+static float BrushVolume( const brush_t& brush ){
 	float volume = 0;
 
 	for ( auto i = brush.sides.cbegin(); i != brush.sides.cend(); ++i ){
@@ -438,8 +438,9 @@ void WriteBSPBrushMap( const char *name, const brushlist_t& list ){
    FilterBrushIntoTree_r()
    adds brush reference to any intersecting bsp leafnode
  */
+static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenum );
 
-int FilterBrushIntoTree_r( brush_t&& b, node_t *node ){
+static int FilterBrushIntoTree_r( brush_t&& b, node_t *node ){
 	/* dummy check */
 	if ( b.sides.empty() ) {
 		return 0;
@@ -567,7 +568,7 @@ bool WindingIsTiny( const winding_t& w ){
    from basewinding for plane
    ================
  */
-bool WindingIsHuge( const winding_t& w ){
+static bool WindingIsHuge( const winding_t& w ){
 	for ( const Vector3& p : w )
 		if ( !c_worldMinmax.test( p ) )
 			return true;
@@ -582,9 +583,9 @@ bool WindingIsHuge( const winding_t& w ){
 
    ==================
  */
-int BrushMostlyOnSide( const brush_t& brush, const Plane3f& plane ){
+static EPlaneSide BrushMostlyOnSide( const brush_t& brush, const Plane3f& plane ){
 	float max = 0;
-	int side = PSIDE_FRONT;
+	EPlaneSide side = eSideFront;
 	for ( const side_t& s : brush.sides )
 	{
 		for ( const Vector3& p : s.winding )
@@ -592,11 +593,11 @@ int BrushMostlyOnSide( const brush_t& brush, const Plane3f& plane ){
 			const double d = plane3_distance_to_point( plane, p );
 			if ( d > max ) {
 				max = d;
-				side = PSIDE_FRONT;
+				side = eSideFront;
 			}
 			if ( -d > max ) {
 				max = -d;
-				side = PSIDE_BACK;
+				side = eSideBack;
 			}
 		}
 	}
@@ -610,7 +611,7 @@ int BrushMostlyOnSide( const brush_t& brush, const Plane3f& plane ){
    generates two new brushes, leaving the original unchanged
  */
 
-std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenum ){
+static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenum ){
 	const Plane3f& plane = mapplanes[planenum].plane;
 
 	// check all points
@@ -649,11 +650,10 @@ std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenum ){
 	}
 
 	if ( midwinding.empty() || WindingIsTiny( midwinding ) ) { // the brush isn't really split
-		const int side = BrushMostlyOnSide( brush, plane );
-		if ( side == PSIDE_BACK ) {
+		if ( BrushMostlyOnSide( brush, plane ) == eSideBack ) {
 			return { {}, brush };
 		}
-		else { // side == PSIDE_FRONT
+		else { // side == eSideFront
 			return { brush, {} };
 		}
 	}

@@ -63,8 +63,9 @@ mapDrawSurface_t *AllocDrawSurface( ESurfaceType type ){
    FinishSurface()
    ydnar: general surface finish pass
  */
+static mapDrawSurface_t *MakeCelSurface( mapDrawSurface_t *src, shaderInfo_t *si );
 
-void FinishSurface( mapDrawSurface_t *ds ){
+static void FinishSurface( mapDrawSurface_t *ds ){
 	mapDrawSurface_t    *ds2;
 
 
@@ -149,7 +150,7 @@ mapDrawSurface_t *CloneSurface( mapDrawSurface_t *src, shaderInfo_t *si ){
    makes a copy of a surface, but specific to cel shading
  */
 
-mapDrawSurface_t *MakeCelSurface( mapDrawSurface_t *src, shaderInfo_t *si ){
+static mapDrawSurface_t *MakeCelSurface( mapDrawSurface_t *src, shaderInfo_t *si ){
 	/* dummy check */
 	if ( src == NULL || si == NULL ) {
 		return NULL;
@@ -183,7 +184,7 @@ mapDrawSurface_t *MakeCelSurface( mapDrawSurface_t *src, shaderInfo_t *si ){
    generates a skybox surface, viewable from everywhere there is sky
  */
 
-mapDrawSurface_t *MakeSkyboxSurface( mapDrawSurface_t *src ){
+static mapDrawSurface_t *MakeSkyboxSurface( mapDrawSurface_t *src ){
 	/* dummy check */
 	if ( src == NULL ) {
 		return NULL;
@@ -491,7 +492,7 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 		   ----------------------------------------------------------------- */
 
 		/* vertex lit surfaces don't need this information */
-		if ( si->compileFlags & C_VERTEXLIT || ds->type == ESurfaceType::Triangles || nolm ) {
+		if ( si->compileFlags & C_VERTEXLIT || ds->type == ESurfaceType::Triangles || noLightmaps ) {
 			ds->lightmapAxis.set( 0 );
 			//% ds->lightmapVecs[ 2 ].set( 0 );
 			ds->sampleSize = 0;
@@ -588,7 +589,7 @@ void ClassifyEntitySurfaces( entity_t *e ){
    for shader-indexed surfaces (terrain), find a matching index from the indexmap
  */
 
-byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax, const Vector3& point ){
+static byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax, const Vector3& point ){
 	/* early out if no indexmap */
 	if ( im == NULL ) {
 		return 0;
@@ -637,7 +638,7 @@ byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax, const 
    this combines a couple different functions from terrain.c
  */
 
-shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im, int numPoints, byte *shaderIndexes ){
+static shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im, int numPoints, byte *shaderIndexes ){
 	/* early out if bad data */
 	if ( im == NULL || numPoints <= 0 || shaderIndexes == NULL ) {
 		return ShaderInfoForShader( "default" );
@@ -708,6 +709,8 @@ shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im
 
 const double SNAP_FLOAT_TO_INT = 8.0;
 const double SNAP_INT_TO_FLOAT = ( 1.0 / SNAP_FLOAT_TO_INT );
+
+static mapDrawSurface_t *DrawSurfaceForShader( const char *shader );
 
 mapDrawSurface_t *DrawSurfaceForSide( const entity_t *e, const brush_t& b, const side_t& s, const winding_t& w ){
 	mapDrawSurface_t    *ds;
@@ -1086,7 +1089,7 @@ mapDrawSurface_t *DrawSurfaceForFlare( int entNum, const Vector3& origin, const 
    creates a bogus surface to forcing the game to load a shader
  */
 
-mapDrawSurface_t *DrawSurfaceForShader( const char *shader ){
+static mapDrawSurface_t *DrawSurfaceForShader( const char *shader ){
 	/* get shader */
 	shaderInfo_t *si = ShaderInfoForShader( shader );
 
@@ -1261,7 +1264,7 @@ void SubdivideFaceSurfaces( entity_t *e ){
    ====================
  */
 
-void ClipSideIntoTree_r( const winding_t& w, side_t& side, const node_t *node ){
+static void ClipSideIntoTree_r( const winding_t& w, side_t& side, const node_t *node ){
 	if ( w.empty() ) {
 		return;
 	}
@@ -1312,7 +1315,7 @@ static int g_numHiddenFaces, g_numCoinFaces;
    determines if a brushside lies inside another brush
  */
 
-bool SideInBrush( side_t& side, const brush_t& b ){
+static bool SideInBrush( side_t& side, const brush_t& b ){
 	/* ignore sides w/o windings or shaders */
 	if ( side.winding.empty() || side.shaderInfo == NULL ) {
 		return true;
@@ -1358,7 +1361,7 @@ bool SideInBrush( side_t& side, const brush_t& b ){
    culls obscured or buried brushsides from the map
  */
 
-void CullSides( entity_t *e ){
+static void CullSides( entity_t *e ){
 	int k, l, first, second, dir;
 
 
@@ -1610,7 +1613,7 @@ void ClipSidesIntoTree( entity_t *e, const tree_t& tree ){
    adds a reference to surface ds in the bsp leaf node
  */
 
-int AddReferenceToLeaf( mapDrawSurface_t *ds, node_t *node ){
+static int AddReferenceToLeaf( mapDrawSurface_t *ds, node_t *node ){
 	drawSurfRef_t   *dsr;
 	const int numBSPDrawSurfaces = bspDrawSurfaces.size();
 
@@ -1653,7 +1656,7 @@ int AddReferenceToLeaf( mapDrawSurface_t *ds, node_t *node ){
    adds a reference to the specified drawsurface to every leaf in the tree
  */
 
-int AddReferenceToTree_r( mapDrawSurface_t *ds, node_t *node, bool skybox ){
+static int AddReferenceToTree_r( mapDrawSurface_t *ds, node_t *node, bool skybox ){
 	int refs = 0;
 
 
@@ -1693,7 +1696,7 @@ int AddReferenceToTree_r( mapDrawSurface_t *ds, node_t *node, bool skybox ){
    filters a single point from a surface into the tree
  */
 
-int FilterPointIntoTree_r( const Vector3& point, mapDrawSurface_t *ds, node_t *node ){
+static int FilterPointIntoTree_r( const Vector3& point, mapDrawSurface_t *ds, node_t *node ){
 	float d;
 	int refs = 0;
 
@@ -1725,7 +1728,7 @@ int FilterPointIntoTree_r( const Vector3& point, mapDrawSurface_t *ds, node_t *n
    filters the convex hull of multiple points from a surface into the tree
  */
 
-int FilterPointConvexHullIntoTree_r( Vector3 *points[], const int npoints, mapDrawSurface_t *ds, node_t *node ){
+static int FilterPointConvexHullIntoTree_r( Vector3 *points[], const int npoints, mapDrawSurface_t *ds, node_t *node ){
 	if ( !points ) {
 		return 0;
 	}
@@ -1767,7 +1770,7 @@ int FilterPointConvexHullIntoTree_r( Vector3 *points[], const int npoints, mapDr
    filters a winding from a drawsurface into the tree
  */
 
-int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t *ds, node_t *node ){
+static int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t *ds, node_t *node ){
 	int refs = 0;
 
 	/* get shaderinfo */
@@ -1874,7 +1877,7 @@ int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t *ds, node_t *node ){
    filters a planar winding face drawsurface into the bsp tree
  */
 
-int FilterFaceIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
+static int FilterFaceIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
 	/* make a winding and filter it into the tree */
 	winding_t w = WindingFromDrawSurf( ds );
 	int refs = FilterWindingIntoTree_r( w, ds, tree.headnode );
@@ -2013,7 +2016,7 @@ static int FilterFlareSurfIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
    emits bsp drawverts from a map drawsurface
  */
 
-void EmitDrawVerts( const mapDrawSurface_t *ds, bspDrawSurface_t& out ){
+static void EmitDrawVerts( const mapDrawSurface_t *ds, bspDrawSurface_t& out ){
 	/* get stuff */
 	const float offset = ds->shaderInfo->offset;
 
@@ -2054,7 +2057,7 @@ void EmitDrawVerts( const mapDrawSurface_t *ds, bspDrawSurface_t& out ){
    returns numIndexes + 1 if the search failed
  */
 
-int FindDrawIndexes( int numIndexes, const int *indexes ){
+static int FindDrawIndexes( int numIndexes, const int *indexes ){
 	int i, j, numTestIndexes;
 	const int numBSPDrawIndexes = bspDrawIndexes.size();
 
@@ -2123,7 +2126,7 @@ int FindDrawIndexes( int numIndexes, const int *indexes ){
    attempts to find an existing run of drawindexes before adding new ones
  */
 
-void EmitDrawIndexes( const mapDrawSurface_t *ds, bspDrawSurface_t& out ){
+static void EmitDrawIndexes( const mapDrawSurface_t *ds, bspDrawSurface_t& out ){
 	/* attempt to use redundant indexing */
 	out.firstIndex = FindDrawIndexes( ds->numIndexes, ds->indexes );
 	out.numIndexes = ds->numIndexes;
@@ -2156,7 +2159,7 @@ void EmitDrawIndexes( const mapDrawSurface_t *ds, bspDrawSurface_t& out ){
    emits a bsp flare drawsurface
  */
 
-void EmitFlareSurface( mapDrawSurface_t *ds ){
+static void EmitFlareSurface( mapDrawSurface_t *ds ){
 	/* ydnar: nuking useless flare drawsurfaces */
 	if ( !emitFlares && ds->type != ESurfaceType::Shader ) {
 		return;
@@ -2195,7 +2198,7 @@ void EmitFlareSurface( mapDrawSurface_t *ds ){
    emits a bsp patch drawsurface
  */
 
-void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
+static void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	/* vortex: _patchMeta support */
 	const bool forcePatchMeta = e->boolForKey( "_patchMeta", "patchMeta" );
 
@@ -2403,7 +2406,7 @@ static void OptimizeTriangleSurface( mapDrawSurface_t *ds ){
    creates a bsp drawsurface from arbitrary triangle surfaces
  */
 
-void EmitTriangleSurface( mapDrawSurface_t *ds ){
+static void EmitTriangleSurface( mapDrawSurface_t *ds ){
 	int i, temp;
 
 	/* invert the surface if necessary */
@@ -2693,7 +2696,7 @@ void MakeFogHullSurfs( entity_t *e, const char *shader ){
    biases a surface's texcoords as close to 0 as possible
  */
 
-void BiasSurfaceTextures( mapDrawSurface_t *ds ){
+static void BiasSurfaceTextures( mapDrawSurface_t *ds ){
 	/* don't bias globaltextured shaders */
 	if ( ds->shaderInfo->globalTexture ) {
 		return;
@@ -2716,7 +2719,7 @@ void BiasSurfaceTextures( mapDrawSurface_t *ds ){
    adds models to a specified triangle, returns the number of models added
  */
 
-int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceModel_t& model, bspDrawVert_t **tri ){
+static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceModel_t& model, bspDrawVert_t **tri ){
 	bspDrawVert_t mid, *tri2[ 3 ];
 	int max, n, localNumSurfaceModels;
 
@@ -2847,7 +2850,7 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceModel_t& mo
    adds a surface's shader models to the surface
  */
 
-int AddSurfaceModels( mapDrawSurface_t *ds ){
+static int AddSurfaceModels( mapDrawSurface_t *ds ){
 	int i, x, y, n, pw[ 5 ], r, localNumSurfaceModels, iterations;
 	mesh_t src, *mesh, *subdivided;
 	bspDrawVert_t centroid, *tri[ 3 ];

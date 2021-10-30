@@ -128,7 +128,7 @@ void ParseFromMemory( char *buffer, size_t size ){
    could cross a line boundary.
    ==============
  */
-void UnGetToken( void ){
+void UnGetToken(){
 	ENSURE( !tokenready && "Can't UnGetToken() twice in a row!" );
 	tokenready = true;
 }
@@ -280,7 +280,7 @@ skipspace:
    Returns true if there is another token on the line
    ==============
  */
-bool TokenAvailable( void ) {
+bool TokenAvailable() {
 	/* save */
 	const int oldLine = scriptline;
 

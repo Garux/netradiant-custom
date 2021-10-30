@@ -42,15 +42,15 @@
    ==============================================================================
  */
 
-
-#define PORTALFILE  "PRT1"
-
+namespace
+{
 FILE    *pf;
 int num_visclusters;                    // clusters the player can be in
 int num_visportals;
 int num_solidfaces;
+}
 
-void WriteFloat( FILE *f, float v ){
+inline void WriteFloat( FILE *f, float v ){
 	if ( fabs( v - std::rint( v ) ) < 0.001 ) {
 		fprintf( f, "%li ", std::lrint( v ) );
 	}
@@ -59,7 +59,7 @@ void WriteFloat( FILE *f, float v ){
 	}
 }
 
-void CountVisportals_r( const node_t *node ){
+static void CountVisportals_r( const node_t *node ){
 	int s;
 
 	// decision node
@@ -93,7 +93,7 @@ void CountVisportals_r( const node_t *node ){
    WritePortalFile_r
    =================
  */
-void WritePortalFile_r( const node_t *node ){
+static void WritePortalFile_r( const node_t *node ){
 	int s, flags;
 
 	// decision node
@@ -161,7 +161,7 @@ void WritePortalFile_r( const node_t *node ){
 
 }
 
-void CountSolidFaces_r( const node_t *node ){
+static void CountSolidFaces_r( const node_t *node ){
 	int s;
 
 	// decision node
@@ -197,7 +197,7 @@ void CountSolidFaces_r( const node_t *node ){
    WriteFaceFile_r
    =================
  */
-void WriteFaceFile_r( const node_t *node ){
+static void WriteFaceFile_r( const node_t *node ){
 	int s;
 
 	// decision node
@@ -258,7 +258,7 @@ void WriteFaceFile_r( const node_t *node ){
    NumberLeafs_r
    ================
  */
-void NumberLeafs_r( node_t *node, int c ){
+static void NumberLeafs_r( node_t *node, int c ){
 #if 0
 	portal_t    *p;
 #endif

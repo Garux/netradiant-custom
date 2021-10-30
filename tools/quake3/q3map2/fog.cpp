@@ -33,8 +33,8 @@
 
 
 
-int numFogFragments;
-int numFogPatchFragments;
+static int numFogFragments;
+static int numFogPatchFragments;
 
 
 
@@ -43,7 +43,7 @@ int numFogPatchFragments;
    converts a patch drawsurface to a mesh_t
  */
 
-mesh_t *DrawSurfToMesh( mapDrawSurface_t *ds ){
+static mesh_t *DrawSurfToMesh( mapDrawSurface_t *ds ){
 	mesh_t      *m;
 
 
@@ -63,7 +63,7 @@ mesh_t *DrawSurfToMesh( mapDrawSurface_t *ds ){
    chops a mesh by a plane
  */
 
-void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, mesh_t **back ){
+static void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, mesh_t **back ){
 	int w, h, split;
 	float d[MAX_PATCH_SIZE][MAX_PATCH_SIZE];
 	bspDrawVert_t   *dv, *v1, *v2;
@@ -244,7 +244,7 @@ void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, mesh_t 
    chops a patch up by a fog brush
  */
 
-bool ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, const brush_t *b ){
+static bool ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, const brush_t *b ){
 	int i, j;
 	mesh_t      *outside[MAX_BRUSH_SIDES];
 	int numOutside;
@@ -357,7 +357,7 @@ winding_t WindingFromDrawSurf( const mapDrawSurface_t *ds ){
    chops up a face drawsurface by a fog brush, with a potential fragment left inside
  */
 
-bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, const brush_t *b ){
+static bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, const brush_t *b ){
 	std::list<winding_t> outside;
 	mapDrawSurface_t    *newds;
 
@@ -635,7 +635,7 @@ int FogForBounds( const MinMax& minmax, float epsilon ){
    generates a list of map fogs
  */
 
-void CreateMapFogs( void ){
+void CreateMapFogs(){
 	/* skip? */
 	if ( nofog ) {
 		return;

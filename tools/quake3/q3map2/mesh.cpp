@@ -554,7 +554,7 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
    ProjectPointOntoVector
    ================
  */
-Vector3 ProjectPointOntoVector( const Vector3& point, const Vector3& vStart, const Vector3& vEnd ){
+inline Vector3 ProjectPointOntoVector( const Vector3& point, const Vector3& vStart, const Vector3& vEnd ){
 	const Vector3 pVec = point - vStart;
 	const Vector3 vec = VectorNormalized( vEnd - vStart );
 	// project onto the directional vector for this segment
@@ -628,7 +628,7 @@ mesh_t *RemoveLinearMeshColumnsRows( mesh_t *in ) {
    SubdivideMeshQuads
    =================
  */
-mesh_t *SubdivideMeshQuads( mesh_t *in, float minLength, int maxsize, int *widthtable, int *heighttable ){
+static mesh_t *SubdivideMeshQuads( mesh_t *in, float minLength, int maxsize, int *widthtable, int *heighttable ){
 	int i, j, k, w, h, maxsubdivisions, subdivisions;
 	mesh_t out;
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];

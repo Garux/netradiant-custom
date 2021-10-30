@@ -1638,7 +1638,7 @@ void Map_RegionBounds( const AABB& bounds ){
    Map_RegionBrush
    ===========
  */
-void Map_RegionBrush( void ){
+void Map_RegionBrush(){
 	if ( GlobalSelectionSystem().countSelected() != 0 ) {
 		scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
 		Map_RegionBounds( instance.worldAABB() );

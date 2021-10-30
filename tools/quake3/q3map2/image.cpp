@@ -30,6 +30,8 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "png.h"
+#include "ddslib.h"
 
 
 
@@ -95,7 +97,7 @@ struct pngBuffer_t
 	png_size_t size, offset;
 };
 
-void PNGReadData( png_struct *png, png_byte *buffer, png_size_t size ){
+static void PNGReadData( png_struct *png, png_byte *buffer, png_size_t size ){
 	pngBuffer_t     *pb = (pngBuffer_t*) png_get_io_ptr( png );
 
 
