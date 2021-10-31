@@ -2214,7 +2214,8 @@ void CamWnd::draw(){
 }
 
 void CamWnd::BenchMark(){
-	double dStart = Sys_DoubleTime();
+	Timer timer;
+	timer.start();
 	for ( int i = 0; i < 100; i++ )
 	{
 		Vector3 angles;
@@ -2223,8 +2224,7 @@ void CamWnd::BenchMark(){
 		angles[CAMERA_YAW] = static_cast<float>( i * ( 360.0 / 100.0 ) );
 		Camera_setAngles( *this, angles );
 	}
-	double dEnd = Sys_DoubleTime();
-	globalOutputStream() << FloatFormat( dEnd - dStart, 5, 2 ) << " seconds\n";
+	globalOutputStream() << timer.elapsed_msec() << " milliseconds\n";
 }
 
 
