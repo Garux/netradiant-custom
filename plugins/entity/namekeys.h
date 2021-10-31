@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <stdio.h>
+#include <cstdio>
 #include <map>
 #include "generic/static.h"
 #include "entitylib.h"

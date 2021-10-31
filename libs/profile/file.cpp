@@ -37,10 +37,10 @@
 
 #include "file.h"
 
-#include <memory.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
+#include <memory>
+#include <cstdlib>
+#include <cstring>
+#include <cstdarg>
 
 /////////////////////////////////////////////////////////////////////////////
 // File construction/destruction

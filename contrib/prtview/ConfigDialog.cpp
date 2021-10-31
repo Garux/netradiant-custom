@@ -18,7 +18,7 @@
  */
 
 #include "ConfigDialog.h"
-#include <stdio.h>
+#include <cstdio>
 #include <gtk/gtk.h>
 #include "gtkutil/pointer.h"
 

@@ -24,8 +24,8 @@
 #include "idatastream.h"
 #include "iarchive.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <vector>
 
 #include "stream/filestream.h"

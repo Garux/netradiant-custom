@@ -45,7 +45,7 @@
 #include <unistd.h> // access()
 #endif
 
-#include <stdio.h> // rename(), remove()
+#include <cstdio> // rename(), remove()
 #include <sys/stat.h> // stat()
 #include <sys/types.h> // this is included by stat.h on win32
 #include <cstddef>

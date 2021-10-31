@@ -21,8 +21,8 @@
 
 #include "mru.h"
 
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 #include <gtk/gtk.h>
 
 #include "os/file.h"

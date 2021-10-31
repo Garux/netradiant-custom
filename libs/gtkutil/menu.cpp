@@ -21,7 +21,7 @@
 
 #include "menu.h"
 
-#include <ctype.h>
+#include <cctype>
 #include <gtk/gtk.h>
 
 #include "generic/callback.h"

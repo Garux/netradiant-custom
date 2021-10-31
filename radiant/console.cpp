@@ -21,7 +21,7 @@
 
 #include "console.h"
 
-#include <time.h>
+#include <ctime>
 #include <gtk/gtk.h>
 
 #include "gtkutil/accelerator.h"

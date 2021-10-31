@@ -40,7 +40,7 @@
 #include <list>
 #include <map>
 #include <algorithm>
-#include <time.h>
+#include <ctime>
 
 #include "scenelib.h"
 #include "texturelib.h"

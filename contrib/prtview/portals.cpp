@@ -18,12 +18,12 @@
  */
 
 #include "portals.h"
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 #ifndef __APPLE__
 #include <search.h>
 #endif
-#include <stdio.h>
+#include <cstdio>
 
 #include "iglrender.h"
 #include "cullable.h"

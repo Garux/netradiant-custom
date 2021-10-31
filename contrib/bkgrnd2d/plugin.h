@@ -34,7 +34,7 @@
    and the external dependencies (such as GLib, STL, mathlib etc.)
  */
 
-#include <stdio.h>
+#include <cstdio>
 // for CPtrArray for idata.h
 #include "missing.h"
 

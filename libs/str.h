@@ -35,11 +35,11 @@
 // loose replacement for CString from MFC
 //
 
-#include <string.h>
-#include <ctype.h>
+#include <cstring>
+#include <cctype>
 
-#include <stdio.h>
-#include <stdarg.h>
+#include <cstdio>
+#include <cstdarg>
 
 #include <cstdio>
 

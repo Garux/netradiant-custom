@@ -33,7 +33,7 @@
 #define UNICODE
 #include <windows.h>
 #else
-#include <errno.h>
+#include <cerrno>
 #include <unistd.h>
 #endif
 

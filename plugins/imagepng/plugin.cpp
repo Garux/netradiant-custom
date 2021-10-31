@@ -31,7 +31,7 @@
 // ====== PNG loader functionality ======
 
 #include "png.h"
-#include <stdlib.h>
+#include <cstdlib>
 
 void user_warning_fn( png_structp png_ptr, png_const_charp warning_msg ){
 	globalWarningStream() << "libpng warning: " << warning_msg << "\n";

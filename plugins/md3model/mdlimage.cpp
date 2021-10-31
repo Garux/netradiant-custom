@@ -21,8 +21,8 @@
 
 #include "mdlimage.h"
 
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
 
 #include "ifilesystem.h"
 #include "bytestreamutils.h"

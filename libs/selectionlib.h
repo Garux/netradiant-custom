@@ -24,7 +24,7 @@
 #include "iselection.h"
 #include "generic/callback.h"
 #include "scenelib.h"
-#include <stdlib.h>
+#include <cstdlib>
 
 class SelectableBool : public Selectable
 {

@@ -22,7 +22,7 @@
 #pragma once
 
 #include <cstddef>
-#include <string.h>
+#include <cstring>
 #include "generic/constant.h"
 
 #if defined( WIN32 )

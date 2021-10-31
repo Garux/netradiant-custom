@@ -21,10 +21,10 @@
 
 #include "plugin.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include "picomodel.h"
 typedef unsigned char byte;
-#include <stdlib.h>
+#include <cstdlib>
 #include <algorithm>
 #include <list>
 

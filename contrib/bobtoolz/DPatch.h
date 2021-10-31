@@ -24,7 +24,7 @@
 #pragma once
 
 #include <list>
-#include <stdlib.h>
+#include <cstdlib>
 
 typedef struct
 {

@@ -33,7 +33,7 @@
 
 #include "mainframe.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <gtk/gtk.h>
 

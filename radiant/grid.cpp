@@ -21,7 +21,7 @@
 
 #include "grid.h"
 
-#include <math.h>
+#include <cmath>
 #include <vector>
 #include <algorithm>
 

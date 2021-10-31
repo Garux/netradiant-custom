@@ -36,13 +36,13 @@
 
 #include "profile.h"
 
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
+#include <cstring>
+#include <cstdio>
+#include <cmath>
 
 #include "file.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "str.h"
 

@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "mathlib.h"
 #include "DMap.h"
 class DBrush;

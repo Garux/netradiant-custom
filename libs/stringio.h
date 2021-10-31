@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <cctype>
 
 #include "generic/vector.h"

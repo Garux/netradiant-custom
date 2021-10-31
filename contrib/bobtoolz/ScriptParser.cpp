@@ -18,7 +18,7 @@
  */
 
 #include "ScriptParser.h"
-#include <string.h>
+#include <cstring>
 
 CScriptParser::CScriptParser( void ) :
 	m_pScript( NULL ),

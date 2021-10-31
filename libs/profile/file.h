@@ -71,7 +71,7 @@ public:
 	virtual void Close() = 0;
 };
 
-#include <stdio.h>
+#include <cstdio>
 
 class MemStream : public IDataStream
 {

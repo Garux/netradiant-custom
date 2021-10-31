@@ -22,7 +22,7 @@
 #pragma once
 
 #include <cstdio>
-#include <string.h>
+#include <cstring>
 #include "ixml.h"
 #include "libxml/parser.h"
 #include "convert.h"
@@ -62,7 +62,7 @@ private:
 	const char** m_atts;
 };
 
-#include <stdarg.h>
+#include <cstdarg>
 
 class FormattedVA
 {

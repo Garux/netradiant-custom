@@ -23,7 +23,7 @@
 
 #if defined( DEBUG_CULLING )
 
-#include <stdio.h>
+#include <cstdio>
 
 char g_cull_stats[1024];
 int g_count_dots;

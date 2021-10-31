@@ -19,8 +19,8 @@
 
 #include "CPortals.h"
 
-#include <string.h>
-#include <math.h>
+#include <cstring>
+#include <cmath>
 
 #include "misc.h"
 

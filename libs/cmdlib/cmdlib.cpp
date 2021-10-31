@@ -25,8 +25,8 @@
 
 #include "cmdlib.h"
 
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 #include "string/string.h"
 #include "os/path.h"

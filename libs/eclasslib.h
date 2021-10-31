@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <list>
 #include <map>
 #include <vector>

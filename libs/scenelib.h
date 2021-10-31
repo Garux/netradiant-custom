@@ -26,7 +26,7 @@
 
 #include "warnings.h"
 #include <cstddef>
-#include <string.h>
+#include <cstring>
 
 #include "math/aabb.h"
 #include "transformlib.h"

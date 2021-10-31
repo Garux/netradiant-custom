@@ -34,10 +34,10 @@
 // Leonardo Zide (leo@lokigames.com)
 //
 
-#include <setjmp.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <csetjmp>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
 #include <jpeglib.h>
 #include <jerror.h>

@@ -29,9 +29,9 @@
 #pragma once
 
 #include "mathlib.h"
-#include <string.h>
+#include <cstring>
 #include "qertypes.h"
-#include <stdio.h>
+#include <cstdio>
 
 #define USE_QERTABLE_DEFINE
 #include "qerplugin.h"

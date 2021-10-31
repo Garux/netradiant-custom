@@ -22,7 +22,7 @@
 #pragma once
 
 #include "itextstream.h"
-#include <stdio.h>
+#include <cstdio>
 
 /// \brief A wrapper around a file input stream opened for reading in text mode. Similar to std::ifstream.
 class TextFileInputStream : public TextInputStream

@@ -36,10 +36,10 @@
 
 #include "jpeg.h"
 
-#include <setjmp.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <csetjmp>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
 extern "C" {
 #include <jpeglib.h>

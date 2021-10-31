@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include <stdio.h>
+#include <cstdio>
 #include <list>
 #include "mathlib.h"
 #include "str.h"

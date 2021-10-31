@@ -21,9 +21,9 @@
 
 #include "plugin.h"
 
-#include <stdio.h>
+#include <cstdio>
 typedef unsigned char byte;
-#include <stdlib.h>
+#include <cstdlib>
 #include <algorithm>
 #include <list>
 

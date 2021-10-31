@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <string.h>
+#include <cstring>
 
 // equality comparison for two 4-byte ident strings
 inline bool ident_equal( const unsigned char* ident, const unsigned char* other ){

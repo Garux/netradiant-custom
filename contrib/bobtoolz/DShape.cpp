@@ -24,7 +24,7 @@
 #include "DShape.h"
 
 #include <list>
-#include <time.h>
+#include <ctime>
 #include "str.h"
 
 #include "DPoint.h"

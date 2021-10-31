@@ -24,9 +24,9 @@
 
 #include "debugging/debugging.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #if defined( _WIN32 )
 #define WINGDIAPI __declspec( dllimport )

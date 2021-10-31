@@ -68,7 +68,7 @@ inline long long llrint( double f ){
 #endif
 
 #include <cmath>
-#include <float.h>
+#include <cfloat>
 #include <algorithm>
 
 

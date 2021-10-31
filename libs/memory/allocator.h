@@ -22,7 +22,7 @@
 #pragma once
 
 #include <memory>
-#include <stddef.h>
+#include <cstddef>
 
 #if 0
 

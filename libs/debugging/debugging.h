@@ -33,7 +33,7 @@
 #elif ( defined ( __i386__ ) || defined ( __x86_64__ ) ) && defined ( __GNUC__ ) && __GNUC__ >= 2
 #define DEBUGGER_BREAKPOINT() __asm__ __volatile__ ( "int $03" )
 #else
-#include <signal.h>
+#include <csignal>
 
 #define DEBUGGER_BREAKPOINT() raise( SIGTRAP );
 #endif

@@ -64,8 +64,8 @@ MillisecondTime MillisecondTime::current(){
 
 #elif defined( POSIX )
 
-#include <time.h>
-#include "sys/time.h"
+#include <ctime>
+#include <sys/time.h>
 
 MillisecondTime MillisecondTime::current(){
 	static class Cached

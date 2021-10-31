@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <time.h>
+#include <ctime>
 
 
 // TTimo started adding portability code:

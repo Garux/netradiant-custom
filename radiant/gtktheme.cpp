@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
+#include <cstdlib>
 #include <sstream>
 #include <gtk/gtk.h>
 
@@ -22,8 +22,8 @@
 #include <unistd.h>
 
 #include <sys/types.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 #include <gdk/gdkkeysyms.h>
 
 #include "gtktheme.h"

@@ -21,9 +21,9 @@
 
 #include "mip.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
 
 typedef unsigned char byte;
 

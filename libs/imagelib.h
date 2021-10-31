@@ -24,7 +24,7 @@
 #include "iimage.h"
 #include "iarchive.h"
 #include "idatastream.h"
-#include <stdlib.h>
+#include <cstdlib>
 
 struct RGBAPixel
 {

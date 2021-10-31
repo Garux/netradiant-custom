@@ -25,8 +25,8 @@
 // standard headers
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #if !defined( WIN32 )
 

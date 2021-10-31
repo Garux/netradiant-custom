@@ -29,8 +29,8 @@
 #include <cctype>
 #include <cstddef>
 #include <cmath>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <algorithm>
 
 #include "generic/arrayrange.h"

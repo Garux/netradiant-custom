@@ -29,7 +29,7 @@
 #define __USE_ISOC9X    1
 #define __USE_ISOC99    1
 
-#include <stdint.h>
+#include <cstdint>
 
 #endif
 

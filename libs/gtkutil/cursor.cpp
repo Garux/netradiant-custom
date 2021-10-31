@@ -23,7 +23,7 @@
 
 #include "stream/textstream.h"
 
-#include <string.h>
+#include <cstring>
 #include <gdk/gdk.h>
 
 #if 0

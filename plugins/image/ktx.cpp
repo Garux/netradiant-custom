@@ -21,7 +21,7 @@
 
 #include "ktx.h"
 
-#include <string.h>
+#include <cstring>
 
 #include "bytestreamutils.h"
 #include "etclib.h"

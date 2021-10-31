@@ -22,9 +22,9 @@
 #pragma once
 
 #include "mathlib.h"
-#include <string.h>
+#include <cstring>
 #include "qertypes.h"
-#include <stdio.h>
+#include <cstdio>
 
 #define USE_QERTABLE_DEFINE
 #include "iscenegraph.h"
@@ -35,8 +35,7 @@
 #include "ientity.h"
 
 #include <gtk/gtk.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "iplugin.h"
 

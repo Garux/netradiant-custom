@@ -35,7 +35,6 @@
 
 
 /* dependencies */
-#include <string.h>
 #include "picointernal.h"
 
 
