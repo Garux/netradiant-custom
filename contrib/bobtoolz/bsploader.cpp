@@ -1,6 +1,6 @@
 #include "bsploader.h"
 #include "dialogs/dialogs-gtk.h"
-#include "cmdlib.h"
+#include "commandlib.h"
 
 int numnodes;
 int numplanes;

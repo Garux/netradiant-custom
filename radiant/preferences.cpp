@@ -41,7 +41,7 @@
 #include "os/dir.h"
 #include "gtkutil/filechooser.h"
 #include "gtkutil/messagebox.h"
-#include "cmdlib.h"
+#include "commandlib.h"
 
 #include "error.h"
 #include "console.h"

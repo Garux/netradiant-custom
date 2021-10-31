@@ -49,7 +49,7 @@
 #include "traverselib.h"
 #include "maplib.h"
 #include "eclasslib.h"
-#include "cmdlib.h"
+#include "commandlib.h"
 #include "stream/textfilestream.h"
 #include "os/path.h"
 #include "uniquenames.h"

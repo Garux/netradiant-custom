@@ -27,7 +27,7 @@
 #include "debugging/debugging.h"
 #include "os/path.h"
 #include "os/file.h"
-#include "cmdlib.h"
+#include "commandlib.h"
 
 int g_argc;
 const char** g_argv;

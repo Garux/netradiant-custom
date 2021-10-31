@@ -182,7 +182,7 @@ extern char* PLUGIN_NAME;
     return buffer;
    }*/
 
-#include "cmdlib.h"
+#include "commandlib.h"
 
 void StartBSP(){
 	char exename[256];

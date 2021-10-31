@@ -32,7 +32,7 @@
 #include "DTreePlanter.h"
 
 #include "dialogs/dialogs-gtk.h"
-#include "../../libs/cmdlib.h"
+#include "commandlib.h"
 
 #include "bobToolz-GTK.h"
 

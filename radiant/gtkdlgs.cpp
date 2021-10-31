@@ -65,7 +65,7 @@
 #include "mainframe.h"
 #include "preferences.h"
 #include "url.h"
-#include "cmdlib.h"
+#include "commandlib.h"
 
 #include "qerplugin.h"
 #include "os/file.h"

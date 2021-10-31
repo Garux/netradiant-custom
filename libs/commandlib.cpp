@@ -23,14 +23,13 @@
 // start of shared cmdlib stuff
 //
 
-#include "cmdlib.h"
+#include "commandlib.h"
 
 #include <cstring>
 #include <cstdio>
 
 #include "string/string.h"
 #include "os/path.h"
-#include "container/array.h"
 
 
 #if defined ( POSIX )

@@ -55,7 +55,7 @@
 
 #include "scriplib.h"
 #include "polylib.h"
-#include "imagelib.h"
+#include "qimagelib.h"
 #include "qthreads.h"
 #include "inout.h"
 #include "inout_xml.h"

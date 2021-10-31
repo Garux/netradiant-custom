@@ -523,7 +523,7 @@ $(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) 
 $(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) $(CPPFLAGS_JPEG) -Itools/quake3/common -Ilibs -Iinclude -Ilibs/assimp/include
 $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
-	tools/quake3/common/imagelib.o \
+	tools/quake3/common/qimagelib.o \
 	tools/quake3/common/inout.o \
 	tools/quake3/common/jpeg.o \
 	tools/quake3/common/md4.o \
@@ -902,7 +902,7 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/windowobservers.o \
 	radiant/xmlstuff.o \
 	radiant/xywindow.o \
-	libcmdlib.$(A) \
+	libcommandlib.$(A) \
 	libgtkutil.$(A) \
 	libl_net.$(A) \
 	libprofile.$(A) \
@@ -914,9 +914,9 @@ libfilematch.$(A): CPPFLAGS_EXTRA := -Ilibs
 libfilematch.$(A): \
 	libs/filematch.o \
 
-libcmdlib.$(A): CPPFLAGS_EXTRA := -Ilibs
-libcmdlib.$(A): \
-	libs/cmdlib/cmdlib.o \
+libcommandlib.$(A): CPPFLAGS_EXTRA := -Ilibs
+libcommandlib.$(A): \
+	libs/commandlib.o \
 
 libprofile.$(A): CPPFLAGS_EXTRA := -Ilibs -Iinclude
 libprofile.$(A): \
@@ -1099,7 +1099,7 @@ $(INSTALLDIR)/plugins/bobtoolz.$(DLL): \
 	contrib/bobtoolz/ScriptParser.o \
 	contrib/bobtoolz/shapes.o \
 	contrib/bobtoolz/visfind.o \
-	libcmdlib.$(A) \
+	libcommandlib.$(A) \
 	libmathlib.$(A) \
 	libprofile.$(A) \
 

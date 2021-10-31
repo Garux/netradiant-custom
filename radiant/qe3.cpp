@@ -44,7 +44,7 @@
 #include <gtk/gtk.h>
 
 #include "stream/textfilestream.h"
-#include "cmdlib.h"
+#include "commandlib.h"
 #include "stream/stringstream.h"
 #include "os/path.h"
 #include "scenelib.h"

@@ -22,7 +22,7 @@
 #include "archive.h"
 
 #include "idatastream.h"
-#include "cmdlib.h"
+#include "commandlib.h"
 #include "bytestreamutils.h"
 #include <algorithm>
 #include "stream/filestream.h"

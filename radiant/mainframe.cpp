@@ -45,7 +45,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "cmdlib.h"
+#include "commandlib.h"
 #include "scenelib.h"
 #include "stream/stringstream.h"
 #include "signal/isignal.h"

@@ -19,14 +19,12 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-// imagelib.c
-
 #include "inout.h"
 #include "cmdlib.h"
 #include "qstringops.h"
 #include "qpathops.h"
 #include "etclib.h"
-#include "imagelib.h"
+#include "qimagelib.h"
 #include "vfs.h"
 
 int fgetLittleShort( FILE *f ){

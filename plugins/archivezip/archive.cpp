@@ -20,7 +20,7 @@
  */
 
 #include "idatastream.h"
-#include "cmdlib.h"
+#include "commandlib.h"
 #include "bytestreamutils.h"
 
 #include "modulesystem.h"

@@ -38,7 +38,7 @@
 #include <algorithm>
 #include <gtk/gtk.h>
 
-#include "cmdlib.h"
+#include "commandlib.h"
 #include "convert.h"
 #include "string/string.h"
 #include "stream/stringstream.h"

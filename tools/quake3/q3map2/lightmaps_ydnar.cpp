@@ -53,7 +53,7 @@
 
 /*
    WriteTGA24()
-   based on WriteTGA() from imagelib.c
+   based on WriteTGA() from qimagelib.cpp
  */
 
 static void WriteTGA24( char *filename, byte *data, int width, int height, bool flip ){

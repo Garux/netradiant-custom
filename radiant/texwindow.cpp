@@ -52,7 +52,7 @@
 #include "stream/memstream.h"
 #include "stream/textfilestream.h"
 #include "stream/stringstream.h"
-#include "cmdlib.h"
+#include "commandlib.h"
 #include "texmanip.h"
 #include "textures.h"
 #include "convert.h"

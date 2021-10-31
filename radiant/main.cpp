@@ -71,7 +71,7 @@
 
 #include <gtk/gtk.h>
 
-#include "cmdlib.h"
+#include "commandlib.h"
 #include "os/file.h"
 #include "os/path.h"
 #include "stream/stringstream.h"

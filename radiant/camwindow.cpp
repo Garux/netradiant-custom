@@ -41,7 +41,7 @@
 #include "container/array.h"
 #include "scenelib.h"
 #include "render.h"
-#include "cmdlib.h"
+#include "commandlib.h"
 #include "math/frustum.h"
 
 #include "gtkutil/widget.h"

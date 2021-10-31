@@ -37,7 +37,7 @@
 #include "stream/stringstream.h"
 #include "os/path.h"
 #include "os/file.h"
-#include "cmdlib.h"
+#include "commandlib.h"
 
 #include "map.h"
 #include "qe3.h"
