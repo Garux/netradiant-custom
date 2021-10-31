@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 #include <cctype>
 
 inline bool strEmpty( const char* string ){

@@ -36,8 +36,8 @@
 #include "stream/textstream.h"
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <time.h>
-#include <errno.h>
+#include <ctime>
+#include <cerrno>
 
 #ifdef WIN32
 #include <direct.h>

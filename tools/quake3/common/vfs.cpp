@@ -44,7 +44,6 @@
 #if defined ( __linux__ ) || defined ( __APPLE__ )
 #include <dirent.h>
 #include <unistd.h>
-#include <limits.h>
 #else
 #include <io.h>
 
@@ -54,8 +53,8 @@
 
 #endif
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 #include <sys/stat.h>
 #include <glib.h>
 

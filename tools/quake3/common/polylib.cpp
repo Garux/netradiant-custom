@@ -20,7 +20,7 @@
  */
 
 
-#include <stddef.h>
+#include <cstddef>
 #include <cstring>
 
 #include "cmdlib.h"

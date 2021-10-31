@@ -31,6 +31,12 @@
 /* dependencies */
 #include "q3map2.h"
 
+/* platform-specific */
+#if defined( __linux__ ) || defined( __APPLE__ )
+	#include <unistd.h>
+	#include <pwd.h>
+	#define Q_UNIX
+#endif
 
 /*
    some of this code is based off the original q3map port from loki

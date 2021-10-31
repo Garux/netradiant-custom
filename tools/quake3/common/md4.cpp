@@ -27,7 +27,7 @@
     $Id: mdfour.c 7689 2007-11-12 14:28:40Z divverent $
  */
 
-#include <string.h>     /* XoXus: needed for memset call */
+#include <cstring>     /* XoXus: needed for memset call */
 #include <cstdint>
 
 struct mdfour {

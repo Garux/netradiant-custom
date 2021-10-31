@@ -45,21 +45,6 @@
 
    ------------------------------------------------------------------------------- */
 
-/* platform-specific */
-#if defined( __linux__ ) || defined( __APPLE__ )
-	#define Q_UNIX
-#endif
-
-#ifdef Q_UNIX
-	#include <unistd.h>
-	#include <pwd.h>
-	#include <limits.h>
-#endif
-
-#ifdef WIN32
-	#include <windows.h>
-#endif
-
 
 /* general */
 #include "version.h"            /* ttimo: might want to guard that if built outside of the GtkRadiant tree */
@@ -84,8 +69,8 @@
 #include <forward_list>
 #include "qmath.h"
 
-#include <stddef.h>
-#include <stdlib.h>
+#include <cstddef>
+#include <cstdlib>
 
 #include "maxworld.h"
 #include "games.h"

@@ -28,7 +28,7 @@
 #include "scriplib.h"
 #include "vfs.h"
 #include <list>
-#include <errno.h>
+#include <cerrno>
 
 /*
    =============================================================================
