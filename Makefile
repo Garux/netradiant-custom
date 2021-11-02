@@ -1064,6 +1064,7 @@ $(INSTALLDIR)/modules/shaders.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) -Ilibs 
 $(INSTALLDIR)/modules/shaders.$(DLL): \
 	plugins/shaders/plugin.o \
 	plugins/shaders/shaders.o \
+	libcommandlib.$(A) \
 
 $(INSTALLDIR)/modules/vfspk3.$(DLL): LIBS_EXTRA := $(LIBS_GLIB)
 $(INSTALLDIR)/modules/vfspk3.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) -Ilibs -Iinclude

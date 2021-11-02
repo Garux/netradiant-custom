@@ -38,6 +38,7 @@
 #include <sys/stat.h>
 #include <ctime>
 #include <cerrno>
+#include <filesystem>
 
 #ifdef WIN32
 #include <direct.h>
@@ -124,36 +125,11 @@ void Q_getwd( char *out ){
 }
 
 
-void Q_mkdir( const char *path ){
-	char parentbuf[256];
-	const char *p = NULL;
-	int retry = 2;
-	while ( retry-- )
-	{
-#ifdef WIN32
-		if ( _mkdir( path ) != -1 ) {
-			return;
-		}
-#else
-		if ( mkdir( path, 0777 ) != -1 ) {
-			return;
-		}
-#endif
-		if ( errno == ENOENT ) {
-			p = path_get_last_separator( path );
-		}
-		if ( !strEmptyOrNull( p ) ) {
-			strcpyQ( parentbuf, path, p - path + 1 );
-			if ( ( p - path ) < (ptrdiff_t) sizeof( parentbuf ) ) {
-				Sys_Printf( "mkdir: %s: creating parent %s first\n", path, parentbuf );
-				Q_mkdir( parentbuf );
-				continue;
-			}
-		}
-		break;
-	}
-	if ( errno != EEXIST ) {
-		Error( "mkdir %s: %s", path, strerror( errno ) );
+void Q_mkdir( const char* path ){
+	std::error_code err;
+	std::filesystem::create_directories( path, err );
+	if ( err ) {
+		Error( "Q_mkdir %s: %s", path, err.message().c_str() );
 	}
 }
 

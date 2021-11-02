@@ -25,8 +25,6 @@
 
 #pragma once
 
-#include <ctime>
-
 
 // TTimo started adding portability code:
 // return true if spawning was successful, false otherwise
@@ -47,14 +45,4 @@ bool Q_Exec( const char *cmd, char *cmdline, const char *execdir, bool bCreateCo
 
 // Q_mkdir
 // returns true if succeeded in creating directory
-#ifdef WIN32
-#include <direct.h>
-inline bool Q_mkdir( const char* name ){
-	return _mkdir( name ) != -1;
-}
-#else
-#include <sys/stat.h>
-inline bool Q_mkdir( const char* name ){
-	return mkdir( name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH ) != -1; // rwxrwxr-x
-}
-#endif
+bool Q_mkdir( const char* path );

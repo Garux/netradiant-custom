@@ -28,9 +28,6 @@
 #include <cstring>
 #include <cstdio>
 
-#include "string/string.h"
-#include "os/path.h"
-
 
 #if defined ( POSIX )
 
@@ -134,3 +131,11 @@ bool Q_Exec( const char *cmd, char *cmdline, const char *execdir, bool bCreateCo
 }
 
 #endif
+
+#include <filesystem>
+
+bool Q_mkdir( const char* path ){
+	std::error_code err;
+	std::filesystem::create_directories( path, err );
+	return !err;
+}
