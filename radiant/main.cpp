@@ -90,10 +90,6 @@
 #include "stacktrace.h"
 #include "error.h"
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 void show_splash();
 void hide_splash();
 
@@ -584,27 +580,6 @@ int main( int argc, char* argv[] ){
 	streams_init();
 
 #ifdef WIN32
-	{
-		bool aero = true;
-		for ( int i = 1; i < argc; ++i ){
-			if ( !stricmp( argv[i], "-aero" ) ){
-				aero = false;
-				break;
-			}
-		}
-		if( !aero ){
-			HMODULE lib;
-			lib = LoadLibrary( "dwmapi.dll" );
-			if ( lib != 0 ) {
-				void ( WINAPI *qDwmEnableComposition )( bool bEnable ) = ( void (WINAPI *) ( bool bEnable ) )GetProcAddress( lib, "DwmEnableComposition" );
-				if ( qDwmEnableComposition ) {
-					// disable Aero
-					qDwmEnableComposition( FALSE );
-				}
-				FreeLibrary( lib );
-			}
-		}
-	}
 	_setmaxstdio(2048);
 #endif
 
