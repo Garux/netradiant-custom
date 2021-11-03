@@ -44,10 +44,9 @@ class DebugScopeTimer
 public:
 	DebugScopeTimer( const char* operation )
 		: m_operation( operation ){
-		m_timer.start();
 	}
 	~DebugScopeTimer(){
-		unsigned int elapsed = m_timer.elapsed_msec();
+		const int elapsed = m_timer.elapsed_msec();
 		if ( elapsed > 0 ) {
 			globalOutputStream() << m_operation << ": " << elapsed << " msec\n";
 		}

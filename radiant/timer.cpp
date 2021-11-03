@@ -20,81 +20,15 @@
  */
 
 #include "timer.h"
+#include <chrono>
 
 
-#if defined( WIN32 )
-
-#include <windows.h>
-
-MillisecondTime MillisecondTime::current(){
-	static class Cached
-	{
-		LONGLONG m_frequency;
-		LONGLONG m_base;
-	public:
-		Cached(){
-			QueryPerformanceFrequency( (LARGE_INTEGER *) &m_frequency );
-			QueryPerformanceCounter( (LARGE_INTEGER *) &m_base );
-		}
-		LONGLONG frequency(){
-			return m_frequency;
-		}
-		LONGLONG base(){
-			return m_base;
-		}
-	} cached;
-
-	if ( cached.frequency() > 0 ) {
-		LONGLONG count;
-		QueryPerformanceCounter( (LARGE_INTEGER *) &count );
-		return time_from_ticks( count - cached.base(), cached.frequency() );
-	}
-	else
-	{
-#if 1
-		return MillisecondTime();
-#else
-		return time_from_ticks( timeGetTime(), 1000 );
-#endif
-	}
+void Timer::start(){
+	m_start = std::chrono::steady_clock::now().time_since_epoch().count();
 }
 
-
-
-
-#elif defined( POSIX )
-
-#include <ctime>
-#include <sys/time.h>
-
-MillisecondTime MillisecondTime::current(){
-	static class Cached
-	{
-		time_t m_base;
-	public:
-		Cached(){
-			time( &m_base );
-		}
-		time_t base(){
-			return m_base;
-		}
-	} cached;
-
-	timeval time;
-	gettimeofday( &time, 0 );
-	return MillisecondTime( ( time.tv_sec - cached.base() ) * 1000 + time.tv_usec / 1000 );
+int Timer::elapsed_msec() const {
+	return ( std::chrono::steady_clock::now().time_since_epoch().count() - m_start )
+	* std::chrono::steady_clock::period::num
+	/ ( std::chrono::steady_clock::period::den / 1000 );
 }
-
-
-
-#else
-
-#include <ctime>
-
-MillisecondTime MillisecondTime::current(){
-	return time_from_ticks<std::clock_t>( std::clock(), CLOCKS_PER_SEC );
-}
-
-
-
-#endif

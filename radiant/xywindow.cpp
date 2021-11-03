@@ -398,7 +398,7 @@ void WXY_Print(){
 Timer g_chasemouse_timer;
 
 void XYWnd::ChaseMouse(){
-	float multiplier = g_chasemouse_timer.elapsed_msec() / 10.0f;
+	const float multiplier = g_chasemouse_timer.elapsed_msec() / 10.0f;
 	Scroll( float_to_integer( multiplier * m_chasemouse_delta_x ), float_to_integer( multiplier * -m_chasemouse_delta_y ) );
 
 	//globalOutputStream() << "chasemouse: multiplier=" << multiplier << " x=" << m_chasemouse_delta_x << " y=" << m_chasemouse_delta_y << '\n';

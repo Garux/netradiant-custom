@@ -466,7 +466,7 @@ void Cam_KeyControl( camera_t& camera, float dtime ){
 	else{ /* accelerate */
 		camera.m_keymove_speed_current = std::min( camera.m_keymove_speed_current
 		                                           + g_camwindow_globals_private.m_nMoveSpeed * dtime
-		                                           / g_camwindow_globals_private.m_time_toMaxSpeed * static_cast<float>( msec_per_sec ),
+		                                           / g_camwindow_globals_private.m_time_toMaxSpeed * 1000,
 		                                           static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) );
 	}
 	const float dpos = dtime * camera.m_keymove_speed_current;
@@ -500,7 +500,7 @@ void Camera_keyMove( camera_t& camera ){
 	camera.m_mouseMove.flush();
 
 	//globalOutputStream() << "keymove... ";
-	float time_seconds = camera.m_keycontrol_timer.elapsed_msec() / static_cast<float>( msec_per_sec );
+	float time_seconds = camera.m_keycontrol_timer.elapsed_sec();
 	if( time_seconds == 0 ) /* some reasonable move at the very start */
 		time_seconds = 0.008f;
 	camera.m_keycontrol_timer.start();

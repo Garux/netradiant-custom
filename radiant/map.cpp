@@ -1117,11 +1117,9 @@ class ScopeTimer
 public:
 	ScopeTimer( const char* message )
 		: m_message( message ){
-		m_timer.start();
 	}
 	~ScopeTimer(){
-		double elapsed_time = m_timer.elapsed_msec() / 1000.f;
-		globalOutputStream() << m_message << " timer: " << FloatFormat( elapsed_time, 5, 2 ) << " second(s) elapsed\n";
+		globalOutputStream() << m_message << " timer: " << FloatFormat( m_timer.elapsed_sec(), 5, 2 ) << " second(s) elapsed\n";
 	}
 };
 
