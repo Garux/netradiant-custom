@@ -892,7 +892,6 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/texmanip.o \
 	radiant/textures.o \
 	radiant/texwindow.o \
-	radiant/timer.o \
 	radiant/treemodel.o \
 	radiant/undo.o \
 	radiant/url.o \

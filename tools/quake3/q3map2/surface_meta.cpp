@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "timer.h"
 #include <map>
 #include <set>
 
@@ -860,7 +861,7 @@ void MakeEntityMetaTriangles( entity_t *e ){
 
 	/* init pacifier */
 	int fOld = -1;
-	const int start = I_FloatTime();
+	Timer timer;
 
 	/* walk the list of surfaces in the entity */
 	for ( int i = e->firstDrawSurf; i < numMapDrawSurfs; ++i )
@@ -920,7 +921,7 @@ void MakeEntityMetaTriangles( entity_t *e ){
 
 	/* print time */
 	if ( ( numMapDrawSurfs - e->firstDrawSurf ) ) {
-		Sys_FPrintf( SYS_VRB, " (%d)\n", (int) ( I_FloatTime() - start ) );
+		Sys_FPrintf( SYS_VRB, " (%d)\n", int( timer.elapsed_sec() ) );
 	}
 
 	/* emit some stats */
@@ -984,7 +985,7 @@ static void CreateEdge( const Plane3f& plane, const Vector3& a, const Vector3& b
 
 void FixMetaTJunctions(){
 #if 0
-	int i, j, k, f, fOld, start, vertIndex, triIndex, numTJuncs;
+	int i, j, k, fOld, vertIndex, triIndex, numTJuncs;
 	metaTriangle_t  *tri, *newTri;
 	shaderInfo_t    *si;
 	bspDrawVert_t   *a, *b, *c, junc;
@@ -1001,7 +1002,7 @@ void FixMetaTJunctions(){
 
 	/* init pacifier */
 	fOld = -1;
-	start = I_FloatTime();
+	Timer timer;
 
 	/* walk triangle list */
 	numTJuncs = 0;
@@ -1011,8 +1012,7 @@ void FixMetaTJunctions(){
 		tri = &metaTriangles[ i ];
 
 		/* print pacifier */
-		f = 10 * i / numMetaTriangles;
-		if ( f != fOld ) {
+		if ( const int f = 10 * i / numMetaTriangles; f != fOld ) {
 			fOld = f;
 			Sys_FPrintf( SYS_VRB, "%d...", f );
 		}
@@ -1139,7 +1139,7 @@ void FixMetaTJunctions(){
 	}
 
 	/* print time */
-	Sys_FPrintf( SYS_VRB, " (%d)\n", (int) ( I_FloatTime() - start ) );
+	Sys_FPrintf( SYS_VRB, " (%d)\n", int( timer.elapsed_sec() ) );
 
 	/* emit some stats */
 	Sys_FPrintf( SYS_VRB, "%9d T-junctions added\n", numTJuncs );
@@ -1157,7 +1157,7 @@ void FixMetaTJunctions(){
 #define EQUAL_NORMAL_EPSILON    0.01f
 
 void SmoothMetaTriangles(){
-	const double start = I_FloatTime();
+	Timer timer;
 	int numSmoothed = 0;
 
 	/* note it */
@@ -1265,7 +1265,7 @@ void SmoothMetaTriangles(){
 	}
 
 	/* print time */
-	Sys_FPrintf( SYS_VRB, " (%d)\n", (int) ( I_FloatTime() - start ) );
+	Sys_FPrintf( SYS_VRB, " (%d)\n", int( timer.elapsed_sec() ) );
 
 	/* emit some stats */
 	Sys_FPrintf( SYS_VRB, "%9d smoothed vertexes\n", numSmoothed );
@@ -1674,7 +1674,7 @@ void MergeMetaTriangles(){
 
 	/* init pacifier */
 	int fOld = -1;
-	int start = I_FloatTime();
+	Timer timer;
 	int numAdded = 0;
 #if 1
 	for( metaTriangle_t& tri : metaTriangles ){
@@ -1690,7 +1690,7 @@ void MergeMetaTriangles(){
 	ClearMetaTriangles();
 
 	/* print time */
-	Sys_FPrintf( SYS_VRB, " (%d)\n", (int) ( I_FloatTime() - start ) );
+	Sys_FPrintf( SYS_VRB, " (%d)\n", int( timer.elapsed_sec() ) );
 
 	/* emit some stats */
 	Sys_FPrintf( SYS_VRB, "%9d surfaces merged\n", numMergedSurfaces );

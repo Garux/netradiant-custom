@@ -31,6 +31,7 @@
 /* dependencies */
 #include "q3map2.h"
 #include "autopk3.h"
+#include "timer.h"
 
 
 
@@ -67,7 +68,7 @@ int main( int argc, char **argv ){
 	srand( 0 );
 
 	/* start timer */
-	const double start = I_FloatTime();
+	Timer timer;
 
 	/* this was changed to emit version number over the network */
 	printf( Q3MAP_VERSION "\n" );
@@ -228,7 +229,7 @@ int main( int argc, char **argv ){
 	}
 
 	/* emit time */
-	Sys_Printf( "%9.0f seconds elapsed\n", I_FloatTime() - start );
+	Sys_Printf( "%9.0f seconds elapsed\n", timer.elapsed_sec() );
 
 	/* return any error code */
 	return r;

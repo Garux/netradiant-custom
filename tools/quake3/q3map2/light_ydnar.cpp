@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "timer.h"
 
 
 // http://www.graficaobscura.com/matrix/index.html
@@ -157,7 +158,7 @@ Vector3b ColorToBytes( const Vector3& color, float scale ){
 #define EQUAL_NORMAL_EPSILON    0.01f
 
 void SmoothNormals(){
-	int fOld, start;
+	int fOld;
 	float shadeAngle, defaultShadeAngle, maxShadeAngle;
 	int indexes[ MAX_SAMPLES ];
 	Vector3 votes[ MAX_SAMPLES ];
@@ -215,7 +216,7 @@ void SmoothNormals(){
 
 	/* init pacifier */
 	fOld = -1;
-	start = I_FloatTime();
+	Timer timer;
 
 	/* go through the list of vertexes */
 	for ( int i = 0; i < numBSPDrawVerts; i++ )
@@ -297,7 +298,7 @@ void SmoothNormals(){
 	}
 
 	/* print time */
-	Sys_Printf( " (%i)\n", (int) ( I_FloatTime() - start ) );
+	Sys_Printf( " (%i)\n", int( timer.elapsed_sec() ) );
 }
 
 

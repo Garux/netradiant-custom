@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2006, William Joseph.
+	 Copyright (C) 2001-2006, William Joseph.
    All Rights Reserved.
 
    This file is part of GtkRadiant.
@@ -19,16 +19,27 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "timer.h"
+#pragma once
+
 #include <chrono>
 
 
-void Timer::start(){
-	m_start = std::chrono::steady_clock::now().time_since_epoch().count();
-}
+class Timer
+{
+	std::chrono::time_point<std::chrono::steady_clock> m_start;
+public:
+	Timer(){
+		start();
+	}
+	void start(){
+		m_start = std::chrono::steady_clock::now();
+	}
+	int elapsed_msec() const {
+		return std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - m_start ).count();
+	}
+	double elapsed_sec() const {
+		return std::chrono::duration<double>( std::chrono::steady_clock::now() - m_start ).count();
+	}
+};
 
-int Timer::elapsed_msec() const {
-	return ( std::chrono::steady_clock::now().time_since_epoch().count() - m_start )
-	* std::chrono::steady_clock::period::num
-	/ ( std::chrono::steady_clock::period::den / 1000 );
-}
+

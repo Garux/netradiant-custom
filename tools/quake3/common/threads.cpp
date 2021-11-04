@@ -29,6 +29,7 @@
 #include "cmdlib.h"
 #include "inout.h"
 #include "qthreads.h"
+#include "timer.h"
 
 #define MAX_THREADS 64
 
@@ -170,9 +171,8 @@ void ThreadUnlock(){
 void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	HANDLE threadhandle[MAX_THREADS];
 	int i;
-	int start, end;
+	Timer timer;
 
-	start = I_FloatTime();
 	dispatch = 0;
 	workcount = workcnt;
 	oldf = -1;
@@ -210,9 +210,8 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	DeleteCriticalSection( &crit );
 
 	threaded = false;
-	end = I_FloatTime();
 	if ( pacifier ) {
-		Sys_Printf( " (%i)\n", end - start );
+		Sys_Printf( " (%i)\n", int( timer.elapsed_sec() ) );
 	}
 }
 
@@ -267,9 +266,8 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	pthread_addr_t status;
 	pthread_attr_t attrib;
 	pthread_mutexattr_t mattrib;
-	int start, end;
+	Timer timer;
 
-	start = I_FloatTime();
 	dispatch = 0;
 	workcount = workcnt;
 	oldf = -1;
@@ -317,9 +315,8 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 
 	threaded = false;
 
-	end = I_FloatTime();
 	if ( pacifier ) {
-		Sys_Printf( " (%i)\n", end - start );
+		Sys_Printf( " (%i)\n", int( timer.elapsed_sec() ) );
 	}
 }
 
@@ -372,9 +369,8 @@ void ThreadUnlock(){
 void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	int i;
 	int pid[MAX_THREADS];
-	int start, end;
+	Timer timer;
 
-	start = I_FloatTime();
 	dispatch = 0;
 	workcount = workcnt;
 	oldf = -1;
@@ -404,9 +400,8 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 
 	threaded = false;
 
-	end = I_FloatTime();
 	if ( pacifier ) {
-		Sys_Printf( " (%i)\n", end - start );
+		Sys_Printf( " (%i)\n", int( timer.elapsed_sec() ) );
 	}
 }
 
@@ -535,10 +530,9 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	pthread_t work_threads[MAX_THREADS];
 	size_t stacksize;
 
-	int start, end;
+	Timer timer;
 	int i = 0;
 
-	start     = I_FloatTime();
 	pacifier  = showpacifier;
 
 	dispatch  = 0;
@@ -588,9 +582,8 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 		threaded = false;
 	}
 
-	end = I_FloatTime();
 	if ( pacifier ) {
-		Sys_Printf( " (%i)\n", end - start );
+		Sys_Printf( " (%i)\n", int( timer.elapsed_sec() ) );
 	}
 }
 #endif // ifdef __linux__
@@ -625,18 +618,16 @@ void ThreadUnlock(){
  */
 void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	int i;
-	int start, end;
+	Timer timer;
 
 	dispatch = 0;
 	workcount = workcnt;
 	oldf = -1;
 	pacifier = showpacifier;
-	start = I_FloatTime();
 	func( 0 );
 
-	end = I_FloatTime();
 	if ( pacifier ) {
-		Sys_Printf( " (%i)\n", end - start );
+		Sys_Printf( " (%i)\n", int( timer.elapsed_sec() ) );
 	}
 }
 

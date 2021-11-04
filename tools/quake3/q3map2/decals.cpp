@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "timer.h"
 
 
 
@@ -713,7 +714,7 @@ static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *d
  */
 
 void MakeEntityDecals( entity_t *e ){
-	int i, j, f, fOld, start;
+	int i, j, fOld;
 	decalProjector_t dp;
 	mapDrawSurface_t    *ds;
 
@@ -726,14 +727,13 @@ void MakeEntityDecals( entity_t *e ){
 
 	/* init pacifier */
 	fOld = -1;
-	start = I_FloatTime();
+	Timer timer;
 
 	/* walk the list of decal projectors */
 	for ( i = 0; i < numProjectors; i++ )
 	{
 		/* print pacifier */
-		f = 10 * i / numProjectors;
-		if ( f != fOld ) {
+		if ( const int f = 10 * i / numProjectors; f != fOld ) {
 			fOld = f;
 			Sys_FPrintf( SYS_VRB, "%d...", f );
 		}
@@ -784,7 +784,7 @@ void MakeEntityDecals( entity_t *e ){
 	}
 
 	/* print time */
-	Sys_FPrintf( SYS_VRB, " (%d)\n", (int) ( I_FloatTime() - start ) );
+	Sys_FPrintf( SYS_VRB, " (%d)\n", int( timer.elapsed_sec() ) );
 
 	/* emit some stats */
 	Sys_FPrintf( SYS_VRB, "%9d decal surfaces\n", numDecalSurfaces );

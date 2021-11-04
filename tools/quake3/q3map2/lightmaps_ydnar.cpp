@@ -32,6 +32,7 @@
 #include "q3map2.h"
 #include "bspfile_rbsp.h"
 #include "surface_extra.h"
+#include "timer.h"
 
 
 
@@ -1190,7 +1191,7 @@ void SetupSurfaceLightmaps(){
 
 void StitchSurfaceLightmaps(){
 	int i, j, x, y, x2, y2,
-	    numStitched, numCandidates, numLuxels, f, fOld, start;
+	    numStitched, numCandidates, numLuxels, fOld;
 	rawLightmap_t   *lm, *a, *b, *c[ MAX_STITCH_CANDIDATES ];
 	float           sampleSize, totalColor;
 
@@ -1203,15 +1204,14 @@ void StitchSurfaceLightmaps(){
 
 	/* init pacifier */
 	fOld = -1;
-	start = I_FloatTime();
+	Timer timer;
 
 	/* walk the list of raw lightmaps */
 	numStitched = 0;
 	for ( i = 0; i < numRawLightmaps; i++ )
 	{
 		/* print pacifier */
-		f = 10 * i / numRawLightmaps;
-		if ( f != fOld ) {
+		if ( const int f = 10 * i / numRawLightmaps; f != fOld ) {
 			fOld = f;
 			Sys_Printf( "%i...", f );
 		}
@@ -1328,7 +1328,7 @@ void StitchSurfaceLightmaps(){
 	}
 
 	/* emit statistics */
-	Sys_Printf( " (%i)\n", (int) ( I_FloatTime() - start ) );
+	Sys_Printf( " (%i)\n", int( timer.elapsed_sec() ) );
 	Sys_FPrintf( SYS_VRB, "%9d luxels stitched\n", numStitched );
 }
 
@@ -2337,7 +2337,7 @@ static void FillOutLightmap( outLightmap_t *olm ){
  */
 
 void StoreSurfaceLightmaps( bool fastAllocate ){
-	int i, j, k, x, y, lx, ly, sx, sy, mappedSamples, timer_start;
+	int i, j, k, x, y, lx, ly, sx, sy, mappedSamples;
 	int style, lightmapNum, lightmapNum2;
 	float               samples, occludedSamples;
 	Vector3 sample, occludedSample, dirSample;
@@ -2376,7 +2376,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	/* note it */
 	Sys_Printf( "Subsampling..." );
 
-	timer_start = I_FloatTime();
+	Timer timer;
 
 	/* walk the list of raw lightmaps */
 	numUsed = 0;
@@ -2693,7 +2693,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 		}
 	}
 
-	Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
+	Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
 
 	/* -----------------------------------------------------------------
 	   convert modelspace deluxemaps to tangentspace
@@ -2701,7 +2701,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	/* note it */
 	if ( !bouncing ) {
 		if ( deluxemap && deluxemode == 1 ) {
-			timer_start = I_FloatTime();
+			timer.start();
 
 			Sys_Printf( "converting..." );
 
@@ -2763,7 +2763,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 				}
 			}
 
-			Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
+			Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
 		}
 	}
 
@@ -2820,7 +2820,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 		/* note it */
 		Sys_Printf( "collapsing..." );
 
-		timer_start = I_FloatTime();
+		timer.start();
 
 		/* set all twin refs to null */
 		for ( i = 0; i < numRawLightmaps; i++ )
@@ -2883,7 +2883,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 			}
 		}
 
-		Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
+		Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
 	}
 
 	/* -----------------------------------------------------------------
@@ -2893,7 +2893,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	/* note it */
 	Sys_Printf( "sorting..." );
 
-	timer_start = I_FloatTime();
+	timer.start();
 
 	/* allocate a new sorted list */
 	if ( sortLightmaps == NULL ) {
@@ -2905,7 +2905,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 		sortLightmaps[ i ] = i;
 	std::sort( sortLightmaps, sortLightmaps + numRawLightmaps, CompareRawLightmap() );
 
-	Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
+	Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
 
 	/* -----------------------------------------------------------------
 	   allocate output lightmaps
@@ -2914,7 +2914,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	/* note it */
 	Sys_Printf( "allocating..." );
 
-	timer_start = I_FloatTime();
+	timer.start();
 
 	/* kill all existing output lightmaps */
 	if ( outLightmaps != NULL ) {
@@ -2962,7 +2962,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 		}
 	}
 
-	Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
+	Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
 
 	/* -----------------------------------------------------------------
 	   store output lightmaps
@@ -2971,7 +2971,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	/* note it */
 	Sys_Printf( "storing..." );
 
-	timer_start = I_FloatTime();
+	timer.start();
 
 	/* count the bsp lightmaps and allocate space */
 	const size_t gameLmSize = g_game->lightmapSize * g_game->lightmapSize * sizeof( Vector3b );
@@ -3059,7 +3059,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 		remove( filename );
 	}
 
-	Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
+	Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
 
 	/* -----------------------------------------------------------------
 	   project the lightmaps onto the bsp surfaces
@@ -3068,7 +3068,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	/* note it */
 	Sys_Printf( "projecting..." );
 
-	timer_start = I_FloatTime();
+	timer.start();
 
 	/* walk the list of surfaces */
 	for ( size_t i = 0; i < bspDrawSurfaces.size(); ++i )
@@ -3343,7 +3343,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 		}
 	}
 
-	Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
+	Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
 
 	/* finish */
 	Sys_Printf( "done.\n" );

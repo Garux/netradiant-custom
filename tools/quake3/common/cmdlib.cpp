@@ -34,9 +34,6 @@
 #include "qpathops.h"
 #include "stream/stringstream.h"
 #include "stream/textstream.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <ctime>
 #include <cerrno>
 #include <filesystem>
 
@@ -82,34 +79,6 @@ char *ExpandArg( const char *path ){
 }
 
 
-
-/*
-   ================
-   I_FloatTime
-   ================
- */
-double I_FloatTime(){
-	time_t t;
-
-	time( &t );
-
-	return t;
-#if 0
-// more precise, less portable
-	struct timeval tp;
-	struct timezone tzp;
-	static int secbase;
-
-	gettimeofday( &tp, &tzp );
-
-	if ( !secbase ) {
-		secbase = tp.tv_sec;
-		return tp.tv_usec / 1000000.0;
-	}
-
-	return ( tp.tv_sec - secbase ) + tp.tv_usec / 1000000.0;
-#endif
-}
 
 void Q_getwd( char *out ){
 #ifdef WIN32
