@@ -782,31 +782,34 @@ int MergeBSPMain( Args& args ){
 			}
 		}
 		/* make target/targetname names unique */
-		if( fixnames ){ ///! assumes there are no dummy targetnames to fix in incoming bsp
-			const auto has_name = []( const std::vector<entity_t>& entities, const char *name ){
+		if( fixnames ){
+			const auto is_name = []( const epair_t& ep ){ return striEqual( ep.key.c_str(), "target" ) || striEqual( ep.key.c_str(), "targetname" ); };
+			const auto has_name = [is_name]( const std::vector<entity_t>& entities, const char *name ){
 				for( auto&& e : entities )
-					if( striEqual( name, e.valueForKey( "target" ) )
-					 || striEqual( name, e.valueForKey( "targetname" ) ) )
-						return true;
+					for( auto&& ep : e.epairs )
+						if( is_name( ep ) && striEqual( name, ep.value.c_str() ) )
+							return true;
 				return false;
 			};
 			for( auto&& e : bsp.entities )
 			{
-				if( const char *name; e.read_keyvalue( name, "target" ) ){
-					if( has_name( entities, name ) ){
-						StringOutputStream newName;
-						int id = 0;
-						do{
-							newName( name, '_', id++ );
-						} while( has_name( entities, newName )
-						      || has_name( bsp.entities, newName ) );
+				for( const char *key : { "target", "targetname" } )
+				{
+					if( const char *name; e.read_keyvalue( name, key ) ){
+						if( has_name( entities, name ) ){
+							StringOutputStream newName;
+							int id = 0;
+							do{
+								newName( name, '_', id++ );
+							} while( has_name( entities, newName )
+							      || has_name( bsp.entities, newName ) );
 
-						const CopiedString oldName = name; // backup it, original will change
-						for( auto&& e : bsp.entities )
-							for( auto&& ep : e.epairs )
-								if( ( striEqual( ep.key.c_str(), "target" ) || striEqual( ep.key.c_str(), "targetname" ) )
-								&& striEqual( ep.value.c_str(), oldName.c_str() ) )
-									ep.value = newName;
+							const CopiedString oldName = name; // backup it, original will change
+							for( auto&& e : bsp.entities )
+								for( auto&& ep : e.epairs )
+									if( is_name( ep ) && striEqual( ep.value.c_str(), oldName.c_str() ) )
+										ep.value = newName;
+						}
 					}
 				}
 			}
