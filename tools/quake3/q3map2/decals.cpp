@@ -713,7 +713,7 @@ static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *d
    projects decals onto world surfaces
  */
 
-void MakeEntityDecals( entity_t *e ){
+void MakeEntityDecals( const entity_t& e ){
 	int i, j, fOld;
 	decalProjector_t dp;
 	mapDrawSurface_t    *ds;
@@ -739,10 +739,10 @@ void MakeEntityDecals( entity_t *e ){
 		}
 
 		/* get projector */
-		TransformDecalProjector( &projectors[ i ], g_vector3_axes, e->origin, &dp );
+		TransformDecalProjector( &projectors[ i ], g_vector3_axes, e.origin, &dp );
 
 		/* walk the list of surfaces in the entity */
-		for ( j = e->firstDrawSurf; j < numMapDrawSurfs; j++ )
+		for ( j = e.firstDrawSurf; j < numMapDrawSurfs; ++j )
 		{
 			/* get surface */
 			ds = &mapDrawSurfs[ j ];

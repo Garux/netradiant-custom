@@ -548,7 +548,7 @@ static bool FixBrokenSurface( mapDrawSurface_t& ds ){
    call after the surface list has been pruned
  */
 
-void FixTJunctions( entity_t *ent ){
+void FixTJunctions( const entity_t& ent ){
 	int axialEdgeLines;
 
 	/* meta mode has its own t-junction code (currently not as good as this code) */
@@ -564,7 +564,7 @@ void FixTJunctions( entity_t *ent ){
 	// this actually creates axial edges, but it
 	// only creates originalEdge_t structures
 	// for non-axial edges
-	for ( int i = ent->firstDrawSurf; i < numMapDrawSurfs; ++i )
+	for ( int i = ent.firstDrawSurf; i < numMapDrawSurfs; ++i )
 	{
 		/* get surface and early out if possible */
 		mapDrawSurface_t& ds = mapDrawSurfs[ i ];
@@ -610,7 +610,7 @@ void FixTJunctions( entity_t *ent ){
 	Sys_FPrintf( SYS_VRB, "%9d degenerate edges\n", c_degenerateEdges );
 
 	// insert any needed vertexes
-	for ( int i = ent->firstDrawSurf; i < numMapDrawSurfs; ++i )
+	for ( int i = ent.firstDrawSurf; i < numMapDrawSurfs; ++i )
 	{
 		/* get surface and early out if possible */
 		mapDrawSurface_t& ds = mapDrawSurfs[ i ];

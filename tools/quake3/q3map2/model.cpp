@@ -1260,17 +1260,17 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
    adds misc_model surfaces to the bsp
  */
 
-void AddTriangleModels( entity_t *eparent ){
+void AddTriangleModels( entity_t& eparent ){
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- AddTriangleModels ---\n" );
 
 	/* get current brush entity targetname */
 	const char *targetName;
-	if ( eparent == &entities[0] ) {
+	if ( &eparent == &entities[0] ) {
 		targetName = "";
 	}
 	else{  /* misc_model entities target non-worldspawn brush model entities */
-		if ( !eparent->read_keyvalue( targetName, "targetname" ) ) {
+		if ( !eparent.read_keyvalue( targetName, "targetname" ) ) {
 			return;
 		}
 	}
@@ -1302,7 +1302,7 @@ void AddTriangleModels( entity_t *eparent ){
 		const int frame = e.intForKey( "_frame", "frame" );
 
 		int castShadows, recvShadows;
-		if ( eparent == &entities[0] ) {    /* worldspawn (and func_groups) default to cast/recv shadows in worldspawn group */
+		if ( &eparent == &entities[0] ) {    /* worldspawn (and func_groups) default to cast/recv shadows in worldspawn group */
 			castShadows = WORLDSPAWN_CAST_SHADOWS;
 			recvShadows = WORLDSPAWN_RECV_SHADOWS;
 		}
@@ -1312,13 +1312,13 @@ void AddTriangleModels( entity_t *eparent ){
 		}
 
 		/* get explicit shadow flags */
-		GetEntityShadowFlags( &e, eparent, &castShadows, &recvShadows );
+		GetEntityShadowFlags( &e, &eparent, &castShadows, &recvShadows );
 
 		/* get spawnflags */
 		const int spawnFlags = e.intForKey( "spawnflags" );
 
 		/* get origin */
-		const Vector3 origin = e.vectorForKey( "origin" ) - eparent->origin;    /* offset by parent */
+		const Vector3 origin = e.vectorForKey( "origin" ) - eparent.origin;    /* offset by parent */
 
 		/* get scale */
 		Vector3 scale( 1 );
@@ -1410,6 +1410,6 @@ void AddTriangleModels( entity_t *eparent ){
 
 
 		/* insert the model */
-		InsertModel( model, skin, frame, transform, &remaps, celShader, *eparent, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle, clipDepth );
+		InsertModel( model, skin, frame, transform, &remaps, celShader, eparent, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle, clipDepth );
 	}
 }

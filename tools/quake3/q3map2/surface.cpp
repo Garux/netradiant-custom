@@ -262,7 +262,7 @@ void ClearSurface( mapDrawSurface_t *ds ){
    deletes all empty or bad surfaces from the surface list
  */
 
-void TidyEntitySurfaces( entity_t *e ){
+void TidyEntitySurfaces( const entity_t& e ){
 	int i, j, deleted;
 	mapDrawSurface_t    *out, *in = NULL;
 
@@ -272,7 +272,7 @@ void TidyEntitySurfaces( entity_t *e ){
 
 	/* walk the surface list */
 	deleted = 0;
-	for ( i = e->firstDrawSurf, j = e->firstDrawSurf; j < numMapDrawSurfs; i++, j++ )
+	for ( i = e.firstDrawSurf, j = e.firstDrawSurf; j < numMapDrawSurfs; ++i, ++j )
 	{
 		/* get out surface */
 		out = &mapDrawSurfs[ i ];
@@ -567,12 +567,12 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
    classifies all surfaces in an entity
  */
 
-void ClassifyEntitySurfaces( entity_t *e ){
+void ClassifyEntitySurfaces( const entity_t& e ){
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- ClassifyEntitySurfaces ---\n" );
 
 	/* walk the surface list */
-	for ( int i = e->firstDrawSurf; i < numMapDrawSurfs; ++i )
+	for ( int i = e.firstDrawSurf; i < numMapDrawSurfs; ++i )
 	{
 		FinishSurface( &mapDrawSurfs[ i ] );
 		ClassifySurfaces( 1, &mapDrawSurfs[ i ] );
@@ -712,7 +712,7 @@ const double SNAP_INT_TO_FLOAT = ( 1.0 / SNAP_FLOAT_TO_INT );
 
 static mapDrawSurface_t *DrawSurfaceForShader( const char *shader );
 
-mapDrawSurface_t *DrawSurfaceForSide( const entity_t *e, const brush_t& b, const side_t& s, const winding_t& w ){
+mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const side_t& s, const winding_t& w ){
 	mapDrawSurface_t    *ds;
 	shaderInfo_t        *si, *parent;
 	bspDrawVert_t       *dv;
@@ -802,7 +802,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t *e, const brush_t& b, const
 		/* round the xyz to a given precision and translate by origin */
 		for ( size_t i = 0; i < 3; i++ )
 			dv->xyz[ i ] = SNAP_INT_TO_FLOAT * floor( dv->xyz[ i ] * SNAP_FLOAT_TO_INT + 0.5 );
-		vTranslated = dv->xyz + e->originbrush_origin;
+		vTranslated = dv->xyz + e.originbrush_origin;
 
 		/* ydnar: tek-fu celshading support for flat shaded shit */
 		if ( flat ) {
@@ -866,7 +866,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t *e, const brush_t& b, const
    moved here from patch.c
  */
 
-mapDrawSurface_t *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh ){
+mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t *p, mesh_t *mesh ){
 	int i, numVerts;
 	Plane3f plane;
 	bool planar;
@@ -1011,7 +1011,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh 
 		/* ydnar: gs mods: added support for explicit shader texcoord generation */
 		else if ( si->tcGen ) {
 			/* translate by origin and project the texture */
-			const Vector3 vTranslated = dv->xyz + e->origin;
+			const Vector3 vTranslated = dv->xyz + e.origin;
 			dv->st[ 0 ] = vector3_dot( si->vecs[ 0 ], vTranslated );
 			dv->st[ 1 ] = vector3_dot( si->vecs[ 1 ], vTranslated );
 		}
@@ -1140,7 +1140,7 @@ static void AddSurfaceFlare( mapDrawSurface_t *ds, const Vector3& entityOrigin )
    subdivides a face surface until it is smaller than the specified size (subdivisions)
  */
 
-static void SubdivideFace_r( entity_t *e, const brush_t& brush, const side_t& side, winding_t& w, int fogNum, float subdivisions ){
+static void SubdivideFace_r( const entity_t& e, const brush_t& brush, const side_t& side, winding_t& w, int fogNum, float subdivisions ){
 	int axis;
 	MinMax bounds;
 	const float epsilon = 0.1;
@@ -1209,12 +1209,12 @@ static void SubdivideFace_r( entity_t *e, const brush_t& brush, const side_t& si
    ydnar: and subdivide surfaces that exceed specified texture coordinate range
  */
 
-void SubdivideFaceSurfaces( entity_t *e ){
+void SubdivideFaceSurfaces( const entity_t& e ){
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- SubdivideFaceSurfaces ---\n" );
 
 	/* walk the list of original surfaces, numMapDrawSurfs may increase in the process */
-	for ( mapDrawSurface_t& ds : Span( mapDrawSurfs + e->firstDrawSurf, numMapDrawSurfs ) )
+	for ( mapDrawSurface_t& ds : Span( mapDrawSurfs + e.firstDrawSurf, numMapDrawSurfs ) )
 	{
 		/* only subdivide brush sides */
 		if ( ds.type != ESurfaceType::Face || ds.mapBrush == NULL || ds.sideRef == NULL || ds.sideRef->side == NULL ) {
@@ -1361,7 +1361,7 @@ static bool SideInBrush( side_t& side, const brush_t& b ){
    culls obscured or buried brushsides from the map
  */
 
-static void CullSides( entity_t *e ){
+static void CullSides( entity_t& e ){
 	int k, l, first, second, dir;
 
 
@@ -1372,7 +1372,7 @@ static void CullSides( entity_t *e ){
 	g_numCoinFaces = 0;
 
 	/* brush interator 1 */
-	for ( brushlist_t::iterator b1 = e->brushes.begin(); b1 != e->brushes.end(); ++b1 )
+	for ( brushlist_t::iterator b1 = e.brushes.begin(); b1 != e.brushes.end(); ++b1 )
 	{
 		/* sides check */
 		if ( b1->sides.empty() ) {
@@ -1380,7 +1380,7 @@ static void CullSides( entity_t *e ){
 		}
 
 		/* brush iterator 2 */
-		for ( brushlist_t::iterator b2 = std::next( b1 ); b2 != e->brushes.end(); ++b2 )
+		for ( brushlist_t::iterator b2 = std::next( b1 ); b2 != e.brushes.end(); ++b2 )
 		{
 			/* sides check */
 			if ( b2->sides.empty() ) {
@@ -1542,7 +1542,7 @@ static void CullSides( entity_t *e ){
    to be trimmed off automatically.
  */
 
-void ClipSidesIntoTree( entity_t *e, const tree_t& tree ){
+void ClipSidesIntoTree( entity_t& e, const tree_t& tree ){
 	/* ydnar: cull brush sides */
 	CullSides( e );
 
@@ -1550,7 +1550,7 @@ void ClipSidesIntoTree( entity_t *e, const tree_t& tree ){
 	Sys_FPrintf( SYS_VRB, "--- ClipSidesIntoTree ---\n" );
 
 	/* walk the brush list */
-	for ( brush_t& b : e->brushes )
+	for ( brush_t& b : e.brushes )
 	{
 		/* walk the brush sides */
 		for ( side_t& side : b.sides )
@@ -2198,9 +2198,9 @@ static void EmitFlareSurface( mapDrawSurface_t *ds ){
    emits a bsp patch drawsurface
  */
 
-static void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
+static void EmitPatchSurface( const entity_t& e, mapDrawSurface_t *ds ){
 	/* vortex: _patchMeta support */
-	const bool forcePatchMeta = e->boolForKey( "_patchMeta", "patchMeta" );
+	const bool forcePatchMeta = e.boolForKey( "_patchMeta", "patchMeta" );
 
 	/* invert the surface if necessary */
 	if ( ds->backSide || ds->shaderInfo->invert ) {
@@ -2636,7 +2636,7 @@ void MakeDebugPortalSurfs( const tree_t& tree ){
    generates drawsurfaces for a foghull (this MUST use a sky shader)
  */
 
-void MakeFogHullSurfs( entity_t *e, const char *shader ){
+void MakeFogHullSurfs( const char *shader ){
 	shaderInfo_t        *si;
 	mapDrawSurface_t    *ds;
 	int indexes[] =
@@ -3005,16 +3005,13 @@ static int AddSurfaceModels( mapDrawSurface_t *ds, entity_t& entity ){
    adds surfacemodels to an entity's surfaces
  */
 
-void AddEntitySurfaceModels( entity_t *e ){
-	int i;
-
-
+void AddEntitySurfaceModels( entity_t& e ){
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- AddEntitySurfaceModels ---\n" );
 
 	/* walk the surface list */
-	for ( i = e->firstDrawSurf; i < numMapDrawSurfs; i++ )
-		numSurfaceModels += AddSurfaceModels( &mapDrawSurfs[ i ], *e );
+	for ( int i = e.firstDrawSurf; i < numMapDrawSurfs; ++i )
+		numSurfaceModels += AddSurfaceModels( &mapDrawSurfs[ i ], e );
 }
 
 
@@ -3024,9 +3021,9 @@ void AddEntitySurfaceModels( entity_t *e ){
    applies brush/volumetric color/alpha modulation to vertexes
  */
 
-static void VolumeColorMods( entity_t *e, mapDrawSurface_t *ds ){
+static void VolumeColorMods( const entity_t& e, mapDrawSurface_t *ds ){
 	/* iterate brushes */
-	for ( const brush_t *b : e->colorModBrushes )
+	for ( const brush_t *b : e.colorModBrushes )
 	{
 		/* worldspawn alpha brushes affect all, grouped ones only affect original entity */
 		if ( b->entityNum != 0 && b->entityNum != ds->entityNum ) {
@@ -3041,20 +3038,10 @@ static void VolumeColorMods( entity_t *e, mapDrawSurface_t *ds ){
 		/* iterate verts */
 		for ( bspDrawVert_t& vert : Span( ds->verts, ds->numVerts ) )
 		{
-			/* iterate planes */
-			size_t j;
-			for ( j = 0; j < b->sides.size(); ++j )
-			{
-				/* point-plane test */
-				if ( plane3_distance_to_point( mapplanes[ b->sides[ j ].planenum ].plane, vert.xyz ) > 1.0f ) {
-					break;
-				}
-			}
-
-			/* apply colormods */
-			if ( j == b->sides.size() ) {
+			if( std::none_of( b->sides.cbegin(), b->sides.cend(), [&vert]( const side_t& side ){
+				return plane3_distance_to_point( mapplanes[ side.planenum ].plane, vert.xyz ) > 1.0f; } ) ) /* point-plane test */
+				/* apply colormods */
 				ColorMod( b->contentShader->colorMod, 1, &vert );
-			}
 		}
 	}
 }
@@ -3068,7 +3055,7 @@ static void VolumeColorMods( entity_t *e, mapDrawSurface_t *ds ){
    will have valid final indexes
  */
 
-void FilterDrawsurfsIntoTree( entity_t *e, tree_t& tree ){
+void FilterDrawsurfsIntoTree( entity_t& e, tree_t& tree ){
 	int refs;
 	int numSurfs, numRefs, numSkyboxSurfaces;
 	bool sb;
@@ -3081,7 +3068,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t& tree ){
 	numSurfs = 0;
 	numRefs = 0;
 	numSkyboxSurfaces = 0;
-	for ( int i = e->firstDrawSurf; i < numMapDrawSurfs; ++i )
+	for ( int i = e.firstDrawSurf; i < numMapDrawSurfs; ++i )
 	{
 		/* get surface and try to early out */
 		mapDrawSurface_t *ds = &mapDrawSurfs[ i ];
@@ -3122,12 +3109,12 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t& tree ){
 
 			/* ydnar/sd: make foliage surfaces */
 			if ( !si->foliage.empty() ) {
-				Foliage( ds, *e );
+				Foliage( ds, e );
 			}
 
 			/* create a flare surface if necessary */
 			if ( !strEmptyOrNull( si->flareShader ) ) {
-				AddSurfaceFlare( ds, e->origin );
+				AddSurfaceFlare( ds, e.origin );
 			}
 
 			/* ydnar: don't emit nodraw surfaces (like nodraw fog) */
@@ -3139,9 +3126,9 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t& tree ){
 			BiasSurfaceTextures( ds );
 
 			/* ydnar: globalizing of fog volume handling (eek a hack) */
-			if ( e != &entities[0] && !si->noFog ) {
+			if ( &e != &entities[0] && !si->noFog ) {
 				/* offset surface by entity origin */
-				const MinMax minmax( ds->minmax.mins + e->origin, ds->minmax.maxs + e->origin );
+				const MinMax minmax( ds->minmax.mins + e.origin, ds->minmax.maxs + e.origin );
 
 				/* set the fog number for this surface */
 				ds->fogNum = FogForBounds( minmax, 1.0f );  //%	FogForPoint( origin, 0.0f );

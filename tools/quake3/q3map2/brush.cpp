@@ -484,7 +484,7 @@ static int FilterBrushIntoTree_r( brush_t&& b, node_t *node ){
    fragment all the detail brushes into the structural leafs
  */
 
-void FilterDetailBrushesIntoTree( entity_t *e, tree_t& tree ){
+void FilterDetailBrushesIntoTree( const entity_t& e, tree_t& tree ){
 	int c_unique = 0, c_clusters = 0;
 
 
@@ -494,7 +494,7 @@ void FilterDetailBrushesIntoTree( entity_t *e, tree_t& tree ){
 	/* walk the list of brushes */
 	c_unique = 0;
 	c_clusters = 0;
-	for ( brush_t& b : e->brushes )
+	for ( const brush_t& b : e.brushes )
 	{
 		if ( !b.detail ) {
 			continue;
@@ -515,12 +515,12 @@ void FilterDetailBrushesIntoTree( entity_t *e, tree_t& tree ){
    Mark the leafs as opaque and areaportals
    =====================
  */
-void FilterStructuralBrushesIntoTree( entity_t *e, tree_t& tree ) {
+void FilterStructuralBrushesIntoTree( const entity_t& e, tree_t& tree ) {
 	int c_unique = 0, c_clusters = 0;
 
 	Sys_FPrintf( SYS_VRB, "--- FilterStructuralBrushesIntoTree ---\n" );
 
-	for ( brush_t& b : e->brushes ) {
+	for ( const brush_t& b : e.brushes ) {
 		if ( b.detail ) {
 			continue;
 		}

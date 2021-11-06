@@ -1418,8 +1418,8 @@ Vector3                     SnapWeldVector( const Vector3& a, const Vector3& b )
 bool                        CreateBrushWindings( brush_t& brush );
 void                        WriteBSPBrushMap( const char *name, const brushlist_t& list );
 
-void                        FilterDetailBrushesIntoTree( entity_t *e, tree_t& tree );
-void                        FilterStructuralBrushesIntoTree( entity_t *e, tree_t& tree );
+void                        FilterDetailBrushesIntoTree( const entity_t& e, tree_t& tree );
+void                        FilterStructuralBrushesIntoTree( const entity_t& e, tree_t& tree );
 
 bool                        WindingIsTiny( const winding_t& w );
 
@@ -1490,7 +1490,7 @@ void                        EmitBrushes( brushlist_t& brushes, int *firstBrush, 
 void                        EmitFogs();
 
 void                        BeginModel( const entity_t& e );
-void                        EndModel( entity_t *e, node_t *headnode );
+void                        EndModel( const entity_t& e, node_t *headnode );
 
 
 /* tree.c */
@@ -1500,16 +1500,16 @@ inline node_t               *AllocNode(){ return new node_t(); }
 
 /* patch.c */
 void                        ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum );
-void                        PatchMapDrawSurfs( entity_t *e );
+void                        PatchMapDrawSurfs( entity_t& e );
 
 
 /* tjunction.c */
-void                        FixTJunctions( entity_t *e );
+void                        FixTJunctions( const entity_t& e );
 
 
 /* fog.c */
 winding_t                   WindingFromDrawSurf( const mapDrawSurface_t *ds );
-void                        FogDrawSurfaces( entity_t *e );
+void                        FogDrawSurfaces( const entity_t& e );
 int                         FogForPoint( const Vector3& point, float epsilon );
 int                         FogForBounds( const MinMax& minmax, float epsilon );
 void                        CreateMapFogs();
@@ -1524,7 +1524,7 @@ tree_t                      FaceBSP( facelist_t& list );
 /* model.c */
 void                        assimp_init();
 void                        InsertModel( const char *name, int skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, entity_t& entity, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth );
-void                        AddTriangleModels( entity_t *e );
+void                        AddTriangleModels( entity_t& eparent );
 
 
 /* surface.c */
@@ -1533,20 +1533,20 @@ void                        StripFaceSurface( mapDrawSurface_t *ds );
 void                        MaxAreaFaceSurface( mapDrawSurface_t *ds );
 Vector3                     CalcLightmapAxis( const Vector3& normal );
 void                        ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds );
-void                        ClassifyEntitySurfaces( entity_t *e );
-void                        TidyEntitySurfaces( entity_t *e );
+void                        ClassifyEntitySurfaces( const entity_t& e );
+void                        TidyEntitySurfaces( const entity_t& e );
 mapDrawSurface_t            *CloneSurface( mapDrawSurface_t *src, shaderInfo_t *si );
 bool                        IsTriangleDegenerate( bspDrawVert_t *points, int a, int b, int c );
 void                        ClearSurface( mapDrawSurface_t *ds );
-mapDrawSurface_t            *DrawSurfaceForSide( const entity_t *e, const brush_t& b, const side_t& s, const winding_t& w );
-mapDrawSurface_t            *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh );
+mapDrawSurface_t            *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const side_t& s, const winding_t& w );
+mapDrawSurface_t            *DrawSurfaceForMesh( const entity_t& e, parseMesh_t *p, mesh_t *mesh );
 mapDrawSurface_t            *DrawSurfaceForFlare( int entNum, const Vector3& origin, const Vector3& normal, const Vector3& color, const char *flareShader, int lightStyle );
-void                        ClipSidesIntoTree( entity_t *e, const tree_t& tree );
+void                        ClipSidesIntoTree( entity_t& e, const tree_t& tree );
 void                        MakeDebugPortalSurfs( const tree_t& tree );
-void                        MakeFogHullSurfs( entity_t *e, const char *shader );
-void                        SubdivideFaceSurfaces( entity_t *e );
-void                        AddEntitySurfaceModels( entity_t *e );
-void                        FilterDrawsurfsIntoTree( entity_t *e, tree_t& tree );
+void                        MakeFogHullSurfs( const char *shader );
+void                        SubdivideFaceSurfaces( const entity_t& e );
+void                        AddEntitySurfaceModels( entity_t& e );
+void                        FilterDrawsurfsIntoTree( entity_t& e, tree_t& tree );
 
 
 /* surface_fur.c */
@@ -1559,7 +1559,7 @@ void                        Foliage( mapDrawSurface_t *src, entity_t& entity );
 
 /* ydnar: surface_meta.c */
 void                        ClearMetaTriangles();
-void                        MakeEntityMetaTriangles( entity_t *e );
+void                        MakeEntityMetaTriangles( const entity_t& e );
 void                        FixMetaTJunctions();
 void                        SmoothMetaTriangles();
 void                        MergeMetaTriangles();
@@ -1575,7 +1575,7 @@ void                        LoadSurfaceExtraFile( const char *path );
 
 /* decals.c */
 void                        ProcessDecals();
-void                        MakeEntityDecals( entity_t *e );
+void                        MakeEntityDecals( const entity_t& e );
 
 /* map.c */
 std::array<Vector3, 2>      TextureAxisFromPlane( const plane_t& plane );
@@ -1647,7 +1647,7 @@ const image_t               *ImageLoad( const char *name );
 
 
 /* shaders.c */
-void                        ColorMod( colorMod_t *am, int numVerts, bspDrawVert_t *drawVerts );
+void                        ColorMod( const colorMod_t *am, int numVerts, bspDrawVert_t *drawVerts );
 
 void                        TCMod( const tcMod_t& mod, Vector2& st );
 

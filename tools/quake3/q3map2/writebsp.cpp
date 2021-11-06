@@ -534,7 +534,7 @@ void BeginModel( const entity_t& e ){
    finish a model's processing
  */
 
-void EndModel( entity_t *e, node_t *headnode ){
+void EndModel( const entity_t& e, node_t *headnode ){
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- EndModel ---\n" );
 
@@ -544,6 +544,6 @@ void EndModel( entity_t *e, node_t *headnode ){
 
 	/* set surfaces and brushes */
 	mod.numBSPSurfaces = bspDrawSurfaces.size() - mod.firstBSPSurface;
-	mod.firstBSPBrush = e->firstBrush;
-	mod.numBSPBrushes = e->numBrushes;
+	mod.firstBSPBrush = e.firstBrush;
+	mod.numBSPBrushes = e.numBrushes;
 }

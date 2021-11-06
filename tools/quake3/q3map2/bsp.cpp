@@ -217,12 +217,12 @@ static void SetCloneModelNumbers(){
    matches brushsides back to their appropriate drawsurface and shader
  */
 
-static void FixBrushSides( entity_t *e ){
+static void FixBrushSides( const entity_t& e ){
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- FixBrushSides ---\n" );
 
 	/* walk list of drawsurfaces */
-	for ( int i = e->firstDrawSurf; i < numMapDrawSurfs; i++ )
+	for ( int i = e.firstDrawSurf; i < numMapDrawSurfs; ++i )
 	{
 		/* get surface and try to early out */
 		const mapDrawSurface_t& ds = mapDrawSurfs[ i ];
@@ -354,7 +354,7 @@ static void ProcessWorldModel( entity_t& e ){
 	AddEntitySurfaceModels( e );
 
 	/* generate bsp brushes from map brushes */
-	EmitBrushes( e->brushes, &e->firstBrush, &e->numBrushes );
+	EmitBrushes( e.brushes, &e.firstBrush, &e.numBrushes );
 
 	/* add references to the detail brushes */
 	FilterDetailBrushesIntoTree( e, tree );
@@ -394,7 +394,7 @@ static void ProcessWorldModel( entity_t& e ){
 	/* ydnar: fog hull */
 	if ( e.read_keyvalue( value, "_foghull" ) ) {
 		const auto shader = String64()( "textures/", value );
-		MakeFogHullSurfs( e, shader );
+		MakeFogHullSurfs( shader );
 	}
 
 	/* ydnar: bug 645: do flares for lights */
@@ -482,10 +482,10 @@ static void ProcessSubModel( entity_t& e ){
 	AddEntitySurfaceModels( e );
 
 	/* generate bsp brushes from map brushes */
-	EmitBrushes( e->brushes, &e->firstBrush, &e->numBrushes );
+	EmitBrushes( e.brushes, &e.firstBrush, &e.numBrushes );
 
 	/* just put all the brushes in headnode */
-	tree.headnode->brushlist = e->brushes;
+	tree.headnode->brushlist = e.brushes;
 
 	/* subdivide each drawsurf as required by shader tesselation */
 	if ( !nosubdivide ) {

@@ -372,7 +372,7 @@ static void GrowGroup_r( parseMesh_t *pm, int patchNum, int patchCount, parseMes
    pull apart.
  */
 
-void PatchMapDrawSurfs( entity_t *e ){
+void PatchMapDrawSurfs( entity_t& e ){
 	int i, j, k, l, c1, c2;
 	parseMesh_t             *pm;
 	parseMesh_t             *check, *scan;
@@ -390,7 +390,7 @@ void PatchMapDrawSurfs( entity_t *e ){
 	Sys_FPrintf( SYS_VRB, "--- PatchMapDrawSurfs ---\n" );
 
 	patchCount = 0;
-	for ( pm = e->patches; pm; pm = pm->next  ) {
+	for ( pm = e.patches; pm; pm = pm->next ) {
 		meshes[patchCount] = pm;
 		patchCount++;
 	}

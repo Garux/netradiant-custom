@@ -244,7 +244,7 @@ static void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, 
    chops a patch up by a fog brush
  */
 
-static bool ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, const brush_t *b ){
+static bool ChopPatchSurfaceByBrush( mapDrawSurface_t *ds, const brush_t *b ){
 	int i, j;
 	mesh_t      *outside[MAX_BRUSH_SIDES];
 	int numOutside;
@@ -357,7 +357,7 @@ winding_t WindingFromDrawSurf( const mapDrawSurface_t *ds ){
    chops up a face drawsurface by a fog brush, with a potential fragment left inside
  */
 
-static bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, const brush_t *b ){
+static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t *ds, const brush_t *b ){
 	std::list<winding_t> outside;
 	mapDrawSurface_t    *newds;
 
@@ -443,7 +443,7 @@ static bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, const bru
    call after the surface list has been pruned, before tjunction fixing
  */
 
-void FogDrawSurfaces( entity_t *e ){
+void FogDrawSurfaces( const entity_t& e ){
 	int fogged, numFogged;
 	int numBaseDrawSurfs;
 
@@ -503,7 +503,7 @@ void FogDrawSurfaces( entity_t *e ){
 
 				/* handle patches */
 				case ESurfaceType::Patch:
-					fogged = ChopPatchSurfaceByBrush( e, ds, fog.brush );
+					fogged = ChopPatchSurfaceByBrush( ds, fog.brush );
 					break;
 
 				/* handle triangle surfaces (fixme: split triangle surfaces) */

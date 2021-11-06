@@ -341,13 +341,13 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
    creates triangles from a patch
  */
 
-static void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
+static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t *ds ){
 	int x, y, pw[ 5 ], r;
 	mapDrawSurface_t    *dsNew;
 	mesh_t src, *subdivided, *mesh;
 
 	/* vortex: _patchMeta, _patchQuality, _patchSubdivide support */
-	const bool forcePatchMeta = e->boolForKey( "_patchMeta", "patchMeta" );
+	const bool forcePatchMeta = e.boolForKey( "_patchMeta", "patchMeta" );
 
 	/* try to early out */
 	if ( ds->numVerts == 0 || ds->type != ESurfaceType::Patch || ( !patchMeta && !forcePatchMeta ) ) {
@@ -361,11 +361,11 @@ static void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 
 	int iterations;
 	int patchSubdivision;
-	if ( e->read_keyvalue( patchSubdivision, "_patchSubdivide", "patchSubdivide" ) ) {
+	if ( e.read_keyvalue( patchSubdivision, "_patchSubdivide", "patchSubdivide" ) ) {
 		iterations = IterationsForCurve( ds->longestCurve, patchSubdivision );
 	}
 	else{
-		const int patchQuality = e->intForKey( "_patchQuality", "patchQuality" );
+		const int patchQuality = e.intForKey( "_patchQuality", "patchQuality" );
 		iterations = IterationsForCurve( ds->longestCurve, patchSubdivisions / ( patchQuality == 0? 1 : patchQuality ) );
 	}
 
@@ -855,7 +855,7 @@ void EmitMetaStats(){
    builds meta triangles from brush faces (tristrips and fans)
  */
 
-void MakeEntityMetaTriangles( entity_t *e ){
+void MakeEntityMetaTriangles( const entity_t& e ){
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- MakeEntityMetaTriangles ---\n" );
 
@@ -864,10 +864,10 @@ void MakeEntityMetaTriangles( entity_t *e ){
 	Timer timer;
 
 	/* walk the list of surfaces in the entity */
-	for ( int i = e->firstDrawSurf; i < numMapDrawSurfs; ++i )
+	for ( int i = e.firstDrawSurf; i < numMapDrawSurfs; ++i )
 	{
 		/* print pacifier */
-		if ( const int f = 10 * ( i - e->firstDrawSurf ) / ( numMapDrawSurfs - e->firstDrawSurf ); f != fOld ) {
+		if ( const int f = 10 * ( i - e.firstDrawSurf ) / ( numMapDrawSurfs - e.firstDrawSurf ); f != fOld ) {
 			fOld = f;
 			Sys_FPrintf( SYS_VRB, "%d...", f );
 		}
@@ -920,7 +920,7 @@ void MakeEntityMetaTriangles( entity_t *e ){
 	}
 
 	/* print time */
-	if ( ( numMapDrawSurfs - e->firstDrawSurf ) ) {
+	if ( ( numMapDrawSurfs - e.firstDrawSurf ) ) {
 		Sys_FPrintf( SYS_VRB, " (%d)\n", int( timer.elapsed_sec() ) );
 	}
 
