@@ -947,9 +947,8 @@ int MergeBSPMain( Args& args ){
    a stripped down ProcessModels
  */
 static void PseudoCompileBSP( bool need_tree ){
-	int models;
+	int models = 1;
 	char modelValue[16];
-	entity_t *entity;
 	facelist_t faces;
 	tree_t tree{};
 
@@ -957,30 +956,29 @@ static void PseudoCompileBSP( bool need_tree ){
 	numMapDrawSurfs = 0;
 
 	BeginBSPFile();
-	models = 1;
-	for ( mapEntityNum = 0; mapEntityNum < entities.size(); mapEntityNum++ )
+	for ( size_t entityNum = 0; entityNum < entities.size(); ++entityNum )
 	{
 		/* get entity */
-		entity = &entities[ mapEntityNum ];
-		if ( entity->brushes.empty() && entity->patches == NULL ) {
+		entity_t& entity = entities[ entityNum ];
+		if ( entity.brushes.empty() && entity.patches == NULL ) {
 			continue;
 		}
 
-		if ( mapEntityNum != 0 ) {
+		if ( entityNum != 0 ) {
 			sprintf( modelValue, "*%d", models++ );
-			entity->setKeyValue( "model", modelValue );
+			entity.setKeyValue( "model", modelValue );
 		}
 
 		/* process the model */
 		Sys_FPrintf( SYS_VRB, "############### model %zu ###############\n", bspModels.size() );
-		BeginModel();
+		BeginModel( entity );
 
-		entity->firstDrawSurf = numMapDrawSurfs;
+		entity.firstDrawSurf = numMapDrawSurfs;
 
 		ClearMetaTriangles();
 		PatchMapDrawSurfs( entity );
 
-		if ( mapEntityNum == 0 && need_tree ) {
+		if ( entityNum == 0 && need_tree ) {
 			faces = MakeStructuralBSPFaceList( entities[0].brushes );
 			tree = FaceBSP( faces );
 		}
@@ -991,7 +989,7 @@ static void PseudoCompileBSP( bool need_tree ){
 		}
 
 		/* a minimized ClipSidesIntoTree */
-		for ( const brush_t& brush : entity->brushes )
+		for ( const brush_t& brush : entity.brushes )
 		{
 			/* walk the brush sides */
 			for ( const side_t& side : brush.sides )
@@ -1020,7 +1018,7 @@ static void PseudoCompileBSP( bool need_tree ){
 		FilterStructuralBrushesIntoTree( entity, tree );
 		FilterDetailBrushesIntoTree( entity, tree );
 
-		EmitBrushes( entity->brushes, &entity->firstBrush, &entity->numBrushes );
+		EmitBrushes( entity.brushes, &entity.firstBrush, &entity.numBrushes );
 		EndModel( entity, tree.headnode );
 	}
 	EndBSPFile( false );

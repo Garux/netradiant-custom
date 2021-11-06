@@ -2719,7 +2719,7 @@ static void BiasSurfaceTextures( mapDrawSurface_t *ds ){
    adds models to a specified triangle, returns the number of models added
  */
 
-static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceModel_t& model, bspDrawVert_t **tri ){
+static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceModel_t& model, bspDrawVert_t **tri, entity_t& entity ){
 	bspDrawVert_t mid, *tri2[ 3 ];
 	int max, n, localNumSurfaceModels;
 
@@ -2811,7 +2811,7 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceMode
 			}
 
 			/* insert the model */
-			InsertModel( model.model.c_str(), 0, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0, clipDepthGlobal );
+			InsertModel( model.model.c_str(), 0, 0, transform, NULL, ds->celShader, entity, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0, clipDepthGlobal );
 
 			/* return to sender */
 			return 1;
@@ -2824,7 +2824,7 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceMode
 	/* recurse to first triangle */
 	VectorCopy( tri, tri2 );
 	tri2[ max ] = &mid;
-	n = AddSurfaceModelsToTriangle_r( ds, model, tri2 );
+	n = AddSurfaceModelsToTriangle_r( ds, model, tri2, entity );
 	if ( n < 0 ) {
 		return n;
 	}
@@ -2833,7 +2833,7 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceMode
 	/* recurse to second triangle */
 	VectorCopy( tri, tri2 );
 	tri2[ ( max + 1 ) % 3 ] = &mid;
-	n = AddSurfaceModelsToTriangle_r( ds, model, tri2 );
+	n = AddSurfaceModelsToTriangle_r( ds, model, tri2, entity );
 	if ( n < 0 ) {
 		return n;
 	}
@@ -2850,7 +2850,7 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceMode
    adds a surface's shader models to the surface
  */
 
-static int AddSurfaceModels( mapDrawSurface_t *ds ){
+static int AddSurfaceModels( mapDrawSurface_t *ds, entity_t& entity ){
 	int i, x, y, n, pw[ 5 ], r, localNumSurfaceModels, iterations;
 	mesh_t src, *mesh, *subdivided;
 	bspDrawVert_t centroid, *tri[ 3 ];
@@ -2906,7 +2906,7 @@ static int AddSurfaceModels( mapDrawSurface_t *ds ){
 				tri[ 2 ] = &ds->verts[ ( i + 1 ) % ds->numVerts ];
 
 				/* create models */
-				n = AddSurfaceModelsToTriangle_r( ds, model, tri );
+				n = AddSurfaceModelsToTriangle_r( ds, model, tri, entity );
 				if ( n < 0 ) {
 					return n;
 				}
@@ -2948,7 +2948,7 @@ static int AddSurfaceModels( mapDrawSurface_t *ds ){
 					tri[ 0 ] = &mesh->verts[ pw[ r + 0 ] ];
 					tri[ 1 ] = &mesh->verts[ pw[ r + 1 ] ];
 					tri[ 2 ] = &mesh->verts[ pw[ r + 2 ] ];
-					n = AddSurfaceModelsToTriangle_r( ds, model, tri );
+					n = AddSurfaceModelsToTriangle_r( ds, model, tri, entity );
 					if ( n < 0 ) {
 						return n;
 					}
@@ -2958,7 +2958,7 @@ static int AddSurfaceModels( mapDrawSurface_t *ds ){
 					tri[ 0 ] = &mesh->verts[ pw[ r + 0 ] ];
 					tri[ 1 ] = &mesh->verts[ pw[ r + 2 ] ];
 					tri[ 2 ] = &mesh->verts[ pw[ r + 3 ] ];
-					n = AddSurfaceModelsToTriangle_r( ds, model, tri );
+					n = AddSurfaceModelsToTriangle_r( ds, model, tri, entity );
 					if ( n < 0 ) {
 						return n;
 					}
@@ -2980,7 +2980,7 @@ static int AddSurfaceModels( mapDrawSurface_t *ds ){
 				tri[ 0 ] = &ds->verts[ ds->indexes[ i ] ];
 				tri[ 1 ] = &ds->verts[ ds->indexes[ i + 1 ] ];
 				tri[ 2 ] = &ds->verts[ ds->indexes[ i + 2 ] ];
-				n = AddSurfaceModelsToTriangle_r( ds, model, tri );
+				n = AddSurfaceModelsToTriangle_r( ds, model, tri, entity );
 				if ( n < 0 ) {
 					return n;
 				}
@@ -3014,7 +3014,7 @@ void AddEntitySurfaceModels( entity_t *e ){
 
 	/* walk the surface list */
 	for ( i = e->firstDrawSurf; i < numMapDrawSurfs; i++ )
-		numSurfaceModels += AddSurfaceModels( &mapDrawSurfs[ i ] );
+		numSurfaceModels += AddSurfaceModels( &mapDrawSurfs[ i ], *e );
 }
 
 
@@ -3122,7 +3122,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t& tree ){
 
 			/* ydnar/sd: make foliage surfaces */
 			if ( !si->foliage.empty() ) {
-				Foliage( ds );
+				Foliage( ds, *e );
 			}
 
 			/* create a flare surface if necessary */

@@ -476,13 +476,9 @@ void EmitFogs(){
    sets up a new brush model
  */
 
-void BeginModel(){
+void BeginModel( const entity_t& e ){
 	MinMax minmax;
 	MinMax lgMinmax;          /* ydnar: lightgrid mins/maxs */
-
-	/* get model and entity */
-	bspModel_t& mod = bspModels.emplace_back();
-	const entity_t& e = entities[ mapEntityNum ];
 
 	/* bound the brushes */
 	for ( const brush_t& b : e.brushes )
@@ -505,6 +501,9 @@ void BeginModel(){
 		for ( const bspDrawVert_t& vert : Span( p->mesh.verts, p->mesh.width * p->mesh.height ) )
 			minmax.extend( vert.xyz );
 	}
+
+	/* get model */
+	bspModel_t& mod = bspModels.emplace_back();
 
 	/* ydnar: lightgrid mins/maxs */
 	if ( lgMinmax.valid() ) {

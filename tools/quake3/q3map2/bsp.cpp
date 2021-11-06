@@ -259,12 +259,11 @@ static void FixBrushSides( entity_t *e ){
    creates a full bsp + surfaces for the worldspawn entity
  */
 
-static void ProcessWorldModel(){
-	entity_t    *e;
+static void ProcessWorldModel( entity_t& e ){
 	const char  *value;
 
 	/* sets integer blockSize from worldspawn "_blocksize" key if it exists */
-	if( entities[ 0 ].read_keyvalue( value, "_blocksize", "blocksize", "chopsize" ) ) {  /* "chopsize" : sof2 */
+	if( e.read_keyvalue( value, "_blocksize", "blocksize", "chopsize" ) ) {  /* "chopsize" : sof2 */
 		/* scan 3 numbers */
 		const int s = sscanf( value, "%d %d %d", &blockSize[ 0 ], &blockSize[ 1 ], &blockSize[ 2 ] );
 
@@ -276,12 +275,11 @@ static void ProcessWorldModel(){
 	Sys_Printf( "block size = { %d %d %d }\n", blockSize[ 0 ], blockSize[ 1 ], blockSize[ 2 ] );
 
 	/* sof2: ignore leaks? */
-	const bool ignoreLeaks = entities[ 0 ].boolForKey( "_ignoreleaks", "ignoreleaks" );
+	const bool ignoreLeaks = e.boolForKey( "_ignoreleaks", "ignoreleaks" );
 
 	/* begin worldspawn model */
-	BeginModel();
-	e = &entities[ 0 ];
-	e->firstDrawSurf = 0;
+	BeginModel( e );
+	e.firstDrawSurf = 0;
 
 	/* ydnar: gs mods */
 	ClearMetaTriangles();
@@ -294,7 +292,7 @@ static void ProcessWorldModel(){
 	}
 
 	/* build an initial bsp tree using all of the sides of all of the structural brushes */
-	facelist_t faces = MakeStructuralBSPFaceList( entities[ 0 ].brushes );
+	facelist_t faces = MakeStructuralBSPFaceList( e.brushes );
 	tree_t tree = FaceBSP( faces );
 	MakeTreePortals( tree );
 	FilterStructuralBrushesIntoTree( e, tree );
@@ -322,7 +320,7 @@ static void ProcessWorldModel(){
 		ClipSidesIntoTree( e, tree );
 
 		/* build a visible face tree (same thing as the initial bsp tree but after reducing the faces) */
-		faces = MakeVisibleBSPFaceList( entities[ 0 ].brushes );
+		faces = MakeVisibleBSPFaceList( e.brushes );
 		FreeTree( tree );
 		tree = FaceBSP( faces );
 		MakeTreePortals( tree );
@@ -394,7 +392,7 @@ static void ProcessWorldModel(){
 	}
 
 	/* ydnar: fog hull */
-	if ( entities[ 0 ].read_keyvalue( value, "_foghull" ) ) {
+	if ( e.read_keyvalue( value, "_foghull" ) ) {
 		const auto shader = String64()( "textures/", value );
 		MakeFogHullSurfs( e, shader );
 	}
@@ -434,7 +432,7 @@ static void ProcessWorldModel(){
 					}
 
 					/* create the flare surface (note shader defaults automatically) */
-					DrawSurfaceForFlare( mapEntityNum, origin, normal, color, flareShader, lightStyle );
+					DrawSurfaceForFlare( e.mapEntityNum, origin, normal, color, flareShader, lightStyle );
 				}
 			}
 		}
@@ -458,11 +456,10 @@ static void ProcessWorldModel(){
    creates bsp + surfaces for other brush models
  */
 
-static void ProcessSubModel(){
+static void ProcessSubModel( entity_t& e ){
 	/* start a brush model */
-	BeginModel();
-	entity_t *e = &entities[ mapEntityNum ];
-	e->firstDrawSurf = numMapDrawSurfs;
+	BeginModel( e );
+	e.firstDrawSurf = numMapDrawSurfs;
 
 	/* ydnar: gs mods */
 	ClearMetaTriangles();
@@ -541,21 +538,21 @@ static void ProcessModels(){
 	CreateMapFogs();
 
 	/* walk entity list */
-	for ( mapEntityNum = 0; mapEntityNum < entities.size(); mapEntityNum++ )
+	for ( size_t entityNum = 0; entityNum < entities.size(); ++entityNum )
 	{
 		/* get entity */
-		const entity_t& entity = entities[ mapEntityNum ];
+		entity_t& entity = entities[ entityNum ];
 		if ( entity.brushes.empty() && entity.patches == NULL ) {
 			continue;
 		}
 
 		/* process the model */
 		Sys_FPrintf( SYS_VRB, "############### model %zu ###############\n", bspModels.size() );
-		if ( mapEntityNum == 0 ) {
-			ProcessWorldModel();
+		if ( entityNum == 0 ) {
+			ProcessWorldModel( entity );
 		}
 		else{
-			ProcessSubModel();
+			ProcessSubModel( entity );
 		}
 
 		/* potentially turn off the deluge of text */

@@ -1489,7 +1489,7 @@ void                        EndBSPFile( bool do_write );
 void                        EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes );
 void                        EmitFogs();
 
-void                        BeginModel();
+void                        BeginModel( const entity_t& e );
 void                        EndModel( entity_t *e, node_t *headnode );
 
 
@@ -1523,7 +1523,7 @@ tree_t                      FaceBSP( facelist_t& list );
 
 /* model.c */
 void                        assimp_init();
-void                        InsertModel( const char *name, int skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth );
+void                        InsertModel( const char *name, int skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, entity_t& entity, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth );
 void                        AddTriangleModels( entity_t *e );
 
 
@@ -1538,7 +1538,6 @@ void                        TidyEntitySurfaces( entity_t *e );
 mapDrawSurface_t            *CloneSurface( mapDrawSurface_t *src, shaderInfo_t *si );
 bool                        IsTriangleDegenerate( bspDrawVert_t *points, int a, int b, int c );
 void                        ClearSurface( mapDrawSurface_t *ds );
-void                        AddEntitySurfaceModels( entity_t *e );
 mapDrawSurface_t            *DrawSurfaceForSide( const entity_t *e, const brush_t& b, const side_t& s, const winding_t& w );
 mapDrawSurface_t            *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh );
 mapDrawSurface_t            *DrawSurfaceForFlare( int entNum, const Vector3& origin, const Vector3& normal, const Vector3& color, const char *flareShader, int lightStyle );
@@ -1555,7 +1554,7 @@ void                        Fur( mapDrawSurface_t *src );
 
 
 /* surface_foliage.c */
-void                        Foliage( mapDrawSurface_t *src );
+void                        Foliage( mapDrawSurface_t *src, entity_t& entity );
 
 
 /* ydnar: surface_meta.c */
@@ -1798,8 +1797,6 @@ inline char source[ 1024 ];
 inline int sampleSize = DEFAULT_LIGHTMAP_SAMPLE_SIZE;          /* lightmap sample size in units */
 inline int minSampleSize = DEFAULT_LIGHTMAP_MIN_SAMPLE_SIZE;   /* minimum sample size to use at all */
 inline int sampleScale;                                                  /* vortex: lightmap sample scale (ie quality)*/
-
-inline std::size_t mapEntityNum;
 
 inline std::vector<plane_t> mapplanes;       /* mapplanes[ num ^ 1 ] will always be the mirror or mapplanes[ num ] */ /* nummapplanes will always be even */
 inline MinMax g_mapMinmax;

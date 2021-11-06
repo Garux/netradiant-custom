@@ -1362,7 +1362,7 @@ static void LoadEntityIndexMap( entity_t& e ){
 	}
 
 	/* note it */
-	Sys_FPrintf( SYS_VRB, "Entity %d (%s) has shader index map \"%s\"\n",  e.mapEntityNum, e.classname(), indexMapFilename );
+	Sys_FPrintf( SYS_VRB, "Entity %d (%s) has shader index map \"%s\"\n", e.mapEntityNum, e.classname(), indexMapFilename );
 
 	/* handle tga image */
 	if ( path_extension_is( indexMapFilename, "tga" ) ) {

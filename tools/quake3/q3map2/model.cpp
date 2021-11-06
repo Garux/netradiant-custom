@@ -415,7 +415,7 @@ static void make_brush_sides( const Plane3f plane, const Plane3f (&p)[3], const 
 		buildBrush.sides[4].planenum = FindFloatPlane( reverse, 0, NULL );
 }
 
-static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const mapDrawSurface_t *ds, const char *modelName ){
+static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const mapDrawSurface_t *ds, const char *modelName, entity_t& entity ){
 	const int spf = ( spawnFlags & ( eClipFlags & ~eClipModel ) );
 
 	/* ydnar: giant hack land: generate clipping brushes for model triangles */
@@ -489,7 +489,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 
 		/* prepare a brush */
 		buildBrush.sides.reserve( MAX_BUILD_SIDES );
-		buildBrush.entityNum = mapEntityNum;
+		buildBrush.entityNum = entity.mapEntityNum;
 		buildBrush.contentShader = si;
 		buildBrush.compileFlags = si->compileFlags;
 		buildBrush.contentFlags = si->contentFlags;
@@ -966,9 +966,9 @@ default_CLIPMODEL:
 				if ( CreateBrushWindings( buildBrush ) ) {
 					AddBrushBevels();
 					//%	EmitBrushes( buildBrush, NULL, NULL );
-					brush_t& newBrush = entities[ mapEntityNum ].brushes.emplace_front( buildBrush );
+					brush_t& newBrush = entity.brushes.emplace_front( buildBrush );
 					newBrush.original = &newBrush;
-					entities[ mapEntityNum ].numBrushes++;
+					entity.numBrushes++;
 				}
 				else{
 					Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
@@ -988,7 +988,7 @@ default_CLIPMODEL:
    adds a picomodel into the bsp
  */
 
-void InsertModel( const char *name, int skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth ){
+void InsertModel( const char *name, int skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, entity_t& entity, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth ){
 	int i, j;
 	const Matrix4 nTransform( matrix4_for_normal_transform( transform ) );
 	const bool transform_lefthanded = MATRIX4_LEFTHANDED == matrix4_handedness( transform );
@@ -1138,7 +1138,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 
 		/* allocate a surface (ydnar: gs mods) */
 		ds = AllocDrawSurface( ESurfaceType::Triangles );
-		ds->entityNum = eNum;
+		ds->entityNum = entity.mapEntityNum;
 		ds->castShadows = castShadows;
 		ds->recvShadows = recvShadows;
 
@@ -1249,7 +1249,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 		/* set cel shader */
 		ds->celShader = celShader;
 
-		ClipModel( spawnFlags, clipDepth, si, ds, name );
+		ClipModel( spawnFlags, clipDepth, si, ds, name, entity );
 	}
 }
 
@@ -1410,7 +1410,6 @@ void AddTriangleModels( entity_t *eparent ){
 
 
 		/* insert the model */
-		InsertModel( model, skin, frame, transform, &remaps, celShader, mapEntityNum, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle, clipDepth );
+		InsertModel( model, skin, frame, transform, &remaps, celShader, *eparent, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle, clipDepth );
 	}
-
 }
