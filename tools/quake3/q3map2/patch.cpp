@@ -194,7 +194,7 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, const Vector3
    creates a mapDrawSurface_t from the patch text
  */
 
-void ParsePatch( bool onlyLights, entity_t& mapEnt ){
+void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 	float info[ 5 ];
 	mesh_t m;
 	bspDrawVert_t   *verts;
@@ -292,7 +292,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt ){
 
 	/* warn and select degenerate patch */
 	if ( degenerate ) {
-		xml_Select( "degenerate patch", mapEnt.mapEntityNum, entitySourceBrushes, false );
+		xml_Select( "degenerate patch", mapEnt.mapEntityNum, mapPrimitiveNum, false );
 		free( m.verts );
 		return;
 	}
@@ -316,7 +316,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt ){
 
 	/* ydnar: add entity/brush numbering */
 	pm->entityNum = mapEnt.mapEntityNum;
-	pm->brushNum = entitySourceBrushes;
+	pm->brushNum = mapPrimitiveNum;
 
 	/* set shader */
 	pm->shaderInfo = ShaderInfoForShader( shader );

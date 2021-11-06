@@ -787,11 +787,11 @@ static void FinishBrush( bool noCollapseGroups, entity_t& mapEnt ){
 	   after the entire entity is parsed, the planenums and texinfos will be adjusted for the origin brush */
 	if ( buildBrush.compileFlags & C_ORIGIN ) {
 		Sys_Printf( "Entity %i (%s), Brush %i: origin brush detected\n",
-		            mapEnt.mapEntityNum, mapEnt.classname(), entitySourceBrushes );
+		            mapEnt.mapEntityNum, mapEnt.classname(), buildBrush.brushNum );
 
 		if ( entities.size() == 1 ) {
 			Sys_FPrintf( SYS_WRN, "Entity %i, Brush %i: origin brushes not allowed in world\n",
-			             mapEnt.mapEntityNum, entitySourceBrushes );
+			             mapEnt.mapEntityNum, buildBrush.brushNum );
 			return;
 		}
 
@@ -804,7 +804,7 @@ static void FinishBrush( bool noCollapseGroups, entity_t& mapEnt ){
 	/* determine if the brush is an area portal */
 	if ( buildBrush.compileFlags & C_AREAPORTAL ) {
 		if ( entities.size() != 1 ) {
-			Sys_FPrintf( SYS_WRN, "Entity %i (%s), Brush %i: areaportals only allowed in world\n", mapEnt.mapEntityNum, mapEnt.classname(), entitySourceBrushes );
+			Sys_FPrintf( SYS_WRN, "Entity %i (%s), Brush %i: areaportals only allowed in world\n", mapEnt.mapEntityNum, mapEnt.classname(), buildBrush.brushNum );
 			return;
 		}
 	}
@@ -1159,7 +1159,7 @@ static bool RemoveDuplicateBrushPlanes( brush_t& b ){
    parses a brush out of a map file and sets it up
  */
 
-static void ParseBrush( bool onlyLights, bool noCollapseGroups, entity_t& mapEnt ){
+static void ParseBrush( bool onlyLights, bool noCollapseGroups, entity_t& mapEnt, int mapPrimitiveNum ){
 	/* parse the brush out of the map */
 	ParseRawBrush( onlyLights );
 
@@ -1173,7 +1173,7 @@ static void ParseBrush( bool onlyLights, bool noCollapseGroups, entity_t& mapEnt
 	buildBrush.portalareas[ 1 ] = -1;
 	/* set map entity and brush numbering */
 	buildBrush.entityNum = mapEnt.mapEntityNum;
-	buildBrush.brushNum = entitySourceBrushes;
+	buildBrush.brushNum = mapPrimitiveNum;
 
 	/* if there are mirrored planes, the entire brush is invalid */
 	if ( !RemoveDuplicateBrushPlanes( buildBrush ) ) {
@@ -1466,7 +1466,7 @@ static void LoadEntityIndexMap( entity_t& e ){
    parses a single entity out of a map file
  */
 
-static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
+static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntityNum ){
 	/* eof check */
 	if ( !GetToken( true ) ) {
 		return false;
@@ -1481,11 +1481,11 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	}
 
 	/* setup */
-	entitySourceBrushes = 0;
 	entity_t& mapEnt = entities.emplace_back();
+	int mapPrimitiveNum = 0; /* track .map file numbering of primitives inside an entity */
 
 	/* ydnar: true entity numbering */
-	mapEnt.mapEntityNum = numMapEntities++;
+	mapEnt.mapEntityNum = mapEntityNum;
 
 	/* loop */
 	while ( 1 )
@@ -1510,7 +1510,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 			/* check */
 			if ( strEqual( token, "patchDef2" ) ) {
 				++c_patches;
-				ParsePatch( onlyLights, mapEnt );
+				ParsePatch( onlyLights, mapEnt, mapPrimitiveNum );
 			}
 			else if ( strEqual( token, "terrainDef" ) ) {
 				//% ParseTerrain();
@@ -1521,15 +1521,15 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 					Sys_FPrintf( SYS_VRB, "detected brushType = BRUSH PRIMITIVES\n" );
 					g_brushType = EBrushType::Bp;
 				}
-				ParseBrush( onlyLights, noCollapseGroups, mapEnt );
+				ParseBrush( onlyLights, noCollapseGroups, mapEnt, mapPrimitiveNum );
 			}
 			else
 			{
 				/* AP or 220 */
 				UnGetToken(); // (
-				ParseBrush( onlyLights, noCollapseGroups, mapEnt );
+				ParseBrush( onlyLights, noCollapseGroups, mapEnt, mapPrimitiveNum );
 			}
-			entitySourceBrushes++;
+			++mapPrimitiveNum;
 		}
 		else
 		{
@@ -1680,7 +1680,8 @@ void LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups )
 	buildBrush.sides.reserve( MAX_BUILD_SIDES );
 
 	/* parse the map file */
-	while ( ParseMapEntity( onlyLights, noCollapseGroups ) ){};
+	int mapEntityNum = 0; /* track .map file entities numbering */
+	while ( ParseMapEntity( onlyLights, noCollapseGroups, mapEntityNum++ ) ){};
 
 	/* light loading */
 	if ( onlyLights ) {

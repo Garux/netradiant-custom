@@ -873,7 +873,8 @@ struct entity_t
 	brushlist_t brushes;
 	std::vector<brush_t*>  colorModBrushes;
 	parseMesh_t         *patches;
-	int mapEntityNum, firstDrawSurf;
+	int mapEntityNum;                               /* .map file entities numbering */
+	int firstDrawSurf;
 	int firstBrush, numBrushes;                     /* only valid during BSP compile */
 	std::list<epair_t> epairs;
 	Vector3 originbrush_origin{ 0 };
@@ -1498,7 +1499,7 @@ inline node_t               *AllocNode(){ return new node_t(); }
 
 
 /* patch.c */
-void                        ParsePatch( bool onlyLights, entity_t& mapEnt );
+void                        ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum );
 void                        PatchMapDrawSurfs( entity_t *e );
 
 
@@ -1788,8 +1789,6 @@ inline double distanceEpsilon = 0.01;
 
 
 /* bsp */
-inline int numMapEntities;
-
 inline int blockSize[ 3 ] = { 1024, 1024, 1024 };                          /* should be the same as in radiant */
 
 inline CopiedString g_enginePath;
@@ -1801,8 +1800,6 @@ inline int minSampleSize = DEFAULT_LIGHTMAP_MIN_SAMPLE_SIZE;   /* minimum sample
 inline int sampleScale;                                                  /* vortex: lightmap sample scale (ie quality)*/
 
 inline std::size_t mapEntityNum;
-
-inline int entitySourceBrushes;
 
 inline std::vector<plane_t> mapplanes;       /* mapplanes[ num ^ 1 ] will always be the mirror or mapplanes[ num ] */ /* nummapplanes will always be even */
 inline MinMax g_mapMinmax;
