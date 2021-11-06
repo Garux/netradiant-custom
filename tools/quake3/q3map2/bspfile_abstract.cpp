@@ -360,7 +360,7 @@ void ParseEPair( std::list<epair_t>& epairs ){
 	ep.value = StripTrailing( token );
 
 	if( !ep.key.empty() && !ep.value.empty() )
-		epairs.emplace_back( ep );
+		epairs.push_back( std::move( ep ) );
 }
 
 
@@ -380,7 +380,7 @@ static bool ParseEntity(){
 	}
 
 	/* create new entity */
-	mapEnt = &entities.emplace_back();
+	entity_t& e = entities.emplace_back();
 
 	/* parse */
 	while ( 1 )
@@ -391,7 +391,7 @@ static bool ParseEntity(){
 		if ( strEqual( token, "}" ) ) {
 			break;
 		}
-		ParseEPair( mapEnt->epairs );
+		ParseEPair( e.epairs );
 	}
 
 	/* return to sender */

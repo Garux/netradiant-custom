@@ -1498,7 +1498,7 @@ inline node_t               *AllocNode(){ return new node_t(); }
 
 
 /* patch.c */
-void                        ParsePatch( bool onlyLights );
+void                        ParsePatch( bool onlyLights, entity_t& mapEnt );
 void                        PatchMapDrawSurfs( entity_t *e );
 
 
@@ -1812,7 +1812,6 @@ inline const MinMax c_worldMinmax( Vector3( MIN_WORLD_COORD ), Vector3( MAX_WORL
 inline int defaultFogNum = -1;                  /* ydnar: cleaner fog handling */
 inline std::vector<fog_t> mapFogs;
 
-inline entity_t           *mapEnt;
 inline brush_t            buildBrush;
 inline EBrushType g_brushType = EBrushType::Undefined;
 

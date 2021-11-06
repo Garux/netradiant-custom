@@ -516,7 +516,7 @@ static void SetBrushContents( brush_t& b ){
 
 	/* check for detail & structural */
 	if ( ( compileFlags & C_DETAIL ) && ( compileFlags & C_STRUCTURAL ) ) {
-		xml_Select( "Mixed detail and structural (defaulting to structural)", mapEnt->mapEntityNum, entitySourceBrushes, false );
+		xml_Select( "Mixed detail and structural (defaulting to structural)", b.entityNum, b.brushNum, false );
 		compileFlags &= ~C_DETAIL;
 	}
 
@@ -777,7 +777,7 @@ static void MergeOrigin( entity_t& ent, const Vector3& origin ){
    and links it to the current entity
  */
 
-static void FinishBrush( bool noCollapseGroups ){
+static void FinishBrush( bool noCollapseGroups, entity_t& mapEnt ){
 	/* create windings for sides and bounds for brush */
 	if ( !CreateBrushWindings( buildBrush ) ) {
 		return;
@@ -787,15 +787,15 @@ static void FinishBrush( bool noCollapseGroups ){
 	   after the entire entity is parsed, the planenums and texinfos will be adjusted for the origin brush */
 	if ( buildBrush.compileFlags & C_ORIGIN ) {
 		Sys_Printf( "Entity %i (%s), Brush %i: origin brush detected\n",
-		            mapEnt->mapEntityNum, mapEnt->classname(), entitySourceBrushes );
+		            mapEnt.mapEntityNum, mapEnt.classname(), entitySourceBrushes );
 
 		if ( entities.size() == 1 ) {
 			Sys_FPrintf( SYS_WRN, "Entity %i, Brush %i: origin brushes not allowed in world\n",
-			             mapEnt->mapEntityNum, entitySourceBrushes );
+			             mapEnt.mapEntityNum, entitySourceBrushes );
 			return;
 		}
 
-		MergeOrigin( entities.back(), buildBrush.minmax.origin() );
+		MergeOrigin( mapEnt, buildBrush.minmax.origin() );
 
 		/* don't keep this brush */
 		return;
@@ -804,7 +804,7 @@ static void FinishBrush( bool noCollapseGroups ){
 	/* determine if the brush is an area portal */
 	if ( buildBrush.compileFlags & C_AREAPORTAL ) {
 		if ( entities.size() != 1 ) {
-			Sys_FPrintf( SYS_WRN, "Entity %zu (%s), Brush %i: areaportals only allowed in world\n", entities.size() - 1, mapEnt->classname(), entitySourceBrushes );
+			Sys_FPrintf( SYS_WRN, "Entity %i (%s), Brush %i: areaportals only allowed in world\n", mapEnt.mapEntityNum, mapEnt.classname(), entitySourceBrushes );
 			return;
 		}
 	}
@@ -816,12 +816,8 @@ static void FinishBrush( bool noCollapseGroups ){
 
 	/* keep it */
 	/* link opaque brushes to head of list, translucent brushes to end */
-	brush_t& b = ( buildBrush.opaque )? mapEnt->brushes.emplace_front( buildBrush )
-	                                   : mapEnt->brushes.emplace_back( buildBrush );
-
-	/* set map entity and brush numbering */
-	b.entityNum = mapEnt->mapEntityNum;
-	b.brushNum = entitySourceBrushes;
+	brush_t& b = ( buildBrush.opaque )? mapEnt.brushes.emplace_front( buildBrush )
+	                                   : mapEnt.brushes.emplace_back( buildBrush );
 
 	/* set original */
 	b.original = &b;
@@ -830,7 +826,7 @@ static void FinishBrush( bool noCollapseGroups ){
 	if ( b.contentShader != NULL &&
 	     b.contentShader->colorMod != NULL &&
 	     b.contentShader->colorMod->type == EColorMod::Volume ) {
-		mapEnt->colorModBrushes.push_back( &b );
+		mapEnt.colorModBrushes.push_back( &b );
 	}
 }
 
@@ -1163,7 +1159,7 @@ static bool RemoveDuplicateBrushPlanes( brush_t& b ){
    parses a brush out of a map file and sets it up
  */
 
-static void ParseBrush( bool onlyLights, bool noCollapseGroups ){
+static void ParseBrush( bool onlyLights, bool noCollapseGroups, entity_t& mapEnt ){
 	/* parse the brush out of the map */
 	ParseRawBrush( onlyLights );
 
@@ -1175,7 +1171,8 @@ static void ParseBrush( bool onlyLights, bool noCollapseGroups ){
 	/* set some defaults */
 	buildBrush.portalareas[ 0 ] = -1;
 	buildBrush.portalareas[ 1 ] = -1;
-	buildBrush.entityNum = numMapEntities - 1;
+	/* set map entity and brush numbering */
+	buildBrush.entityNum = mapEnt.mapEntityNum;
 	buildBrush.brushNum = entitySourceBrushes;
 
 	/* if there are mirrored planes, the entire brush is invalid */
@@ -1202,7 +1199,40 @@ static void ParseBrush( bool onlyLights, bool noCollapseGroups ){
 	}
 
 	/* finish the brush */
-	FinishBrush( noCollapseGroups );
+	FinishBrush( noCollapseGroups, mapEnt );
+}
+
+
+
+/*
+   AdjustBrushesForOrigin()
+ */
+
+static void AdjustBrushesForOrigin( entity_t& ent ){
+	/* walk brush list */
+	for ( brush_t& b : ent.brushes )
+	{
+		/* offset brush planes */
+		for ( side_t& side : b.sides )
+		{
+			/* offset side plane */
+			const float newdist = -plane3_distance_to_point( mapplanes[ side.planenum ].plane, ent.originbrush_origin );
+
+			/* find a new plane */
+			side.planenum = FindFloatPlane( mapplanes[ side.planenum ].normal(), newdist, 0, NULL );
+			side.plane.dist() = -plane3_distance_to_point( side.plane, ent.originbrush_origin );
+		}
+
+		/* rebuild brush windings (ydnar: just offsetting the winding above should be fine) */
+		CreateBrushWindings( b );
+	}
+
+	/* walk patch list */
+	for ( parseMesh_t *p = ent.patches; p != NULL; p = p->next )
+	{
+		for ( bspDrawVert_t& vert : Span( p->mesh.verts, p->mesh.width * p->mesh.height ) )
+			vert.xyz -= ent.originbrush_origin;
+	}
 }
 
 
@@ -1214,78 +1244,43 @@ static void ParseBrush( bool onlyLights, bool noCollapseGroups ){
    (used by func_group)
  */
 
-static void AdjustBrushesForOrigin( entity_t *ent );
-
-void MoveBrushesToWorld( entity_t *ent ){
+static void MoveBrushesToWorld( entity_t& ent ){
 	/* we need to undo the common/origin adjustment, and instead shift them by the entity key origin */
-	ent->originbrush_origin = -ent->origin;
+	ent.originbrush_origin = -ent.origin;
 	AdjustBrushesForOrigin( ent );
-	ent->originbrush_origin.set( 0 );
+	ent.originbrush_origin.set( 0 );
 
 	/* move brushes */
-	for ( brushlist_t::const_iterator next, b = ent->brushes.begin(); b != ent->brushes.end(); b = next )
+	for ( brushlist_t::const_iterator next, b = ent.brushes.begin(); b != ent.brushes.end(); b = next )
 	{
 		/* get next brush */
 		next = std::next( b );
 
 		/* link opaque brushes to head of list, translucent brushes to end */
 		if ( b->opaque ) {
-			entities[ 0 ].brushes.splice( entities[ 0 ].brushes.begin(), ent->brushes, b );
+			entities[ 0 ].brushes.splice( entities[ 0 ].brushes.begin(), ent.brushes, b );
 		}
 		else
 		{
-			entities[ 0 ].brushes.splice( entities[ 0 ].brushes.end(), ent->brushes, b );
+			entities[ 0 ].brushes.splice( entities[ 0 ].brushes.end(), ent.brushes, b );
 		}
 	}
 
 	/* ydnar: move colormod brushes */
-	if ( !ent->colorModBrushes.empty() ) {
-		entities[ 0 ].colorModBrushes.insert( entities[ 0 ].colorModBrushes.end(), ent->colorModBrushes.begin(), ent->colorModBrushes.end() );
-		ent->colorModBrushes.clear();
+	if ( !ent.colorModBrushes.empty() ) {
+		entities[ 0 ].colorModBrushes.insert( entities[ 0 ].colorModBrushes.end(), ent.colorModBrushes.begin(), ent.colorModBrushes.end() );
+		ent.colorModBrushes.clear();
 	}
 
 	/* move patches */
-	if ( ent->patches != NULL ) {
+	if ( ent.patches != NULL ) {
 		parseMesh_t *pm;
-		for ( pm = ent->patches; pm->next != NULL; pm = pm->next ){};
+		for ( pm = ent.patches; pm->next != NULL; pm = pm->next ){};
 
 		pm->next = entities[ 0 ].patches;
-		entities[ 0 ].patches = ent->patches;
+		entities[ 0 ].patches = ent.patches;
 
-		ent->patches = NULL;
-	}
-}
-
-
-
-/*
-   AdjustBrushesForOrigin()
- */
-
-static void AdjustBrushesForOrigin( entity_t *ent ){
-	/* walk brush list */
-	for ( brush_t& b : ent->brushes )
-	{
-		/* offset brush planes */
-		for ( side_t& side : b.sides )
-		{
-			/* offset side plane */
-			const float newdist = -plane3_distance_to_point( mapplanes[ side.planenum ].plane, ent->originbrush_origin );
-
-			/* find a new plane */
-			side.planenum = FindFloatPlane( mapplanes[ side.planenum ].normal(), newdist, 0, NULL );
-			side.plane.dist() = -plane3_distance_to_point( side.plane, ent->originbrush_origin );
-		}
-
-		/* rebuild brush windings (ydnar: just offsetting the winding above should be fine) */
-		CreateBrushWindings( b );
-	}
-
-	/* walk patch list */
-	for ( parseMesh_t *p = ent->patches; p != NULL; p = p->next )
-	{
-		for ( bspDrawVert_t& vert : Span( p->mesh.verts, p->mesh.width * p->mesh.height ) )
-			vert.xyz -= ent->originbrush_origin;
+		ent.patches = NULL;
 	}
 }
 
@@ -1296,30 +1291,30 @@ static void AdjustBrushesForOrigin( entity_t *ent ){
    finds the bounds of an entity's brushes (necessary for terrain-style generic metashaders)
  */
 
-static void SetEntityBounds( entity_t *e ){
+static void SetEntityBounds( entity_t& e ){
 	MinMax minmax;
 
 	/* walk the entity's brushes/patches and determine bounds */
-	for ( const brush_t& b : e->brushes )
+	for ( const brush_t& b : e.brushes )
 	{
 		minmax.extend( b.minmax );
 	}
-	for ( parseMesh_t *p = e->patches; p; p = p->next )
+	for ( const parseMesh_t *p = e.patches; p; p = p->next )
 	{
 		for ( const bspDrawVert_t& vert : Span( p->mesh.verts, p->mesh.width * p->mesh.height ) )
 			minmax.extend( vert.xyz );
 	}
 
 	/* try to find explicit min/max key */
-	e->read_keyvalue( minmax.mins, "min" );
-	e->read_keyvalue( minmax.maxs, "max" );
+	e.read_keyvalue( minmax.mins, "min" );
+	e.read_keyvalue( minmax.maxs, "max" );
 
 	/* store the bounds */
-	for ( brush_t& b : e->brushes )
+	for ( brush_t& b : e.brushes )
 	{
 		b.eMinmax = minmax;
 	}
-	for ( parseMesh_t *p = e->patches; p; p = p->next )
+	for ( parseMesh_t *p = e.patches; p; p = p->next )
 	{
 		p->eMinmax = minmax;
 	}
@@ -1332,23 +1327,23 @@ static void SetEntityBounds( entity_t *e ){
    based on LoadAlphaMap() from terrain.c, a little more generic
  */
 
-static void LoadEntityIndexMap( entity_t *e ){
+static void LoadEntityIndexMap( entity_t& e ){
 	int numLayers, w, h;
 	const char      *indexMapFilename, *shader;
 	byte            *pixels;
 
 
 	/* this only works with bmodel ents */
-	if ( e->brushes.empty() && e->patches == NULL ) {
+	if ( e.brushes.empty() && e.patches == NULL ) {
 		return;
 	}
 
 	/* determine if there is an index map (support legacy "alphamap" key as well) */
-	if( !e->read_keyvalue( indexMapFilename, "_indexmap", "alphamap" ) )
+	if( !e.read_keyvalue( indexMapFilename, "_indexmap", "alphamap" ) )
 		return;
 
 	/* get number of layers (support legacy "layers" key as well) */
-	if( !e->read_keyvalue( numLayers, "_layers", "layers" ) ){
+	if( !e.read_keyvalue( numLayers, "_layers", "layers" ) ){
 		Sys_Warning( "Entity with index/alpha map \"%s\" has missing \"_layers\" or \"layers\" key\n", indexMapFilename );
 		Sys_Printf( "Entity will not be textured properly. Check your keys/values.\n" );
 		return;
@@ -1360,14 +1355,14 @@ static void LoadEntityIndexMap( entity_t *e ){
 	}
 
 	/* get base shader name (support legacy "shader" key as well) */
-	if( !mapEnt->read_keyvalue( shader, "_shader", "shader" ) ){
+	if( !e.read_keyvalue( shader, "_shader", "shader" ) ){
 		Sys_Warning( "Entity with index/alpha map \"%s\" has missing \"_shader\" or \"shader\" key\n", indexMapFilename );
 		Sys_Printf( "Entity will not be textured properly. Check your keys/values.\n" );
 		return;
 	}
 
 	/* note it */
-	Sys_FPrintf( SYS_VRB, "Entity %d (%s) has shader index map \"%s\"\n",  mapEnt->mapEntityNum, e->classname(), indexMapFilename );
+	Sys_FPrintf( SYS_VRB, "Entity %d (%s) has shader index map \"%s\"\n",  e.mapEntityNum, e.classname(), indexMapFilename );
 
 	/* handle tga image */
 	if ( path_extension_is( indexMapFilename, "tga" ) ) {
@@ -1436,7 +1431,7 @@ static void LoadEntityIndexMap( entity_t *e ){
 
 	/* get height offsets */
 	const char *offset;
-	if( mapEnt->read_keyvalue( offset, "_offsets", "offsets" ) ){
+	if( e.read_keyvalue( offset, "_offsets", "offsets" ) ){
 		/* value is a space-separated set of numbers */
 		/* get each value */
 		for ( int i = 0; i < 256 && !strEmpty( offset ); ++i )
@@ -1454,9 +1449,9 @@ static void LoadEntityIndexMap( entity_t *e ){
 	}
 
 	/* store the index map in every brush/patch in the entity */
-	for ( brush_t& b : e->brushes )
+	for ( brush_t& b : e.brushes )
 		b.im = im;
-	for ( parseMesh_t *p = e->patches; p != NULL; p = p->next )
+	for ( parseMesh_t *p = e.patches; p != NULL; p = p->next )
 		p->im = im;
 }
 
@@ -1487,10 +1482,10 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 
 	/* setup */
 	entitySourceBrushes = 0;
-	mapEnt = &entities.emplace_back();
+	entity_t& mapEnt = entities.emplace_back();
 
 	/* ydnar: true entity numbering */
-	mapEnt->mapEntityNum = numMapEntities++;
+	mapEnt.mapEntityNum = numMapEntities++;
 
 	/* loop */
 	while ( 1 )
@@ -1515,7 +1510,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 			/* check */
 			if ( strEqual( token, "patchDef2" ) ) {
 				++c_patches;
-				ParsePatch( onlyLights );
+				ParsePatch( onlyLights, mapEnt );
 			}
 			else if ( strEqual( token, "terrainDef" ) ) {
 				//% ParseTerrain();
@@ -1526,25 +1521,25 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 					Sys_FPrintf( SYS_VRB, "detected brushType = BRUSH PRIMITIVES\n" );
 					g_brushType = EBrushType::Bp;
 				}
-				ParseBrush( onlyLights, noCollapseGroups );
+				ParseBrush( onlyLights, noCollapseGroups, mapEnt );
 			}
 			else
 			{
 				/* AP or 220 */
 				UnGetToken(); // (
-				ParseBrush( onlyLights, noCollapseGroups );
+				ParseBrush( onlyLights, noCollapseGroups, mapEnt );
 			}
 			entitySourceBrushes++;
 		}
 		else
 		{
 			/* parse a key / value pair */
-			ParseEPair( mapEnt->epairs );
+			ParseEPair( mapEnt.epairs );
 		}
 	}
 
 	/* ydnar: get classname */
-	const char *classname = mapEnt->classname();
+	const char *classname = mapEnt.classname();
 
 	/* ydnar: only lights? */
 	if ( onlyLights && !striEqualPrefix( classname, "light" ) ) {
@@ -1557,52 +1552,52 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 
 	/* worldspawn (and func_groups) default to cast/recv shadows in worldspawn group */
 	int castShadows, recvShadows;
-	if ( funcGroup || mapEnt->mapEntityNum == 0 ) {
-		//%	Sys_Printf( "World:  %d\n", mapEnt->mapEntityNum );
+	if ( funcGroup || mapEnt.mapEntityNum == 0 ) {
+		//%	Sys_Printf( "World:  %d\n", mapEnt.mapEntityNum );
 		castShadows = WORLDSPAWN_CAST_SHADOWS;
 		recvShadows = WORLDSPAWN_RECV_SHADOWS;
 	}
 	else{    /* other entities don't cast any shadows, but recv worldspawn shadows */
-		//%	Sys_Printf( "Entity: %d\n", mapEnt->mapEntityNum );
+		//%	Sys_Printf( "Entity: %d\n", mapEnt.mapEntityNum );
 		castShadows = ENTITY_CAST_SHADOWS;
 		recvShadows = ENTITY_RECV_SHADOWS;
 	}
 
 	/* get explicit shadow flags */
-	GetEntityShadowFlags( mapEnt, NULL, &castShadows, &recvShadows );
+	GetEntityShadowFlags( &mapEnt, NULL, &castShadows, &recvShadows );
 
 	/* ydnar: get lightmap scaling value for this entity */
-	const float lightmapScale = std::max( 0.f, mapEnt->floatForKey( "lightmapscale", "_lightmapscale", "_ls" ) );
+	const float lightmapScale = std::max( 0.f, mapEnt.floatForKey( "lightmapscale", "_lightmapscale", "_ls" ) );
 	if ( lightmapScale != 0 )
-		Sys_Printf( "Entity %d (%s) has lightmap scale of %.4f\n", mapEnt->mapEntityNum, classname, lightmapScale );
+		Sys_Printf( "Entity %d (%s) has lightmap scale of %.4f\n", mapEnt.mapEntityNum, classname, lightmapScale );
 
 	/* ydnar: get cel shader :) for this entity */
 	shaderInfo_t *celShader;
 	const char *value;
-	if( mapEnt->read_keyvalue( value, "_celshader" ) ||
+	if( mapEnt.read_keyvalue( value, "_celshader" ) ||
 	    entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
 		celShader = ShaderInfoForShader( String64()( "textures/", value ) );
-		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt->mapEntityNum, classname, celShader->shader.c_str() );
+		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt.mapEntityNum, classname, celShader->shader.c_str() );
 	}
 	else{
 		celShader = globalCelShader.empty() ? NULL : ShaderInfoForShader( globalCelShader );
 	}
 
 	/* jal : entity based _shadeangle */
-	const float shadeAngle = std::max( 0.f, mapEnt->floatForKey( "_shadeangle",
+	const float shadeAngle = std::max( 0.f, mapEnt.floatForKey( "_shadeangle",
 	                                      "_smoothnormals", "_sn", "_sa", "_smooth" ) ); /* vortex' aliases */
 	if ( shadeAngle != 0 )
-		Sys_Printf( "Entity %d (%s) has shading angle of %.4f\n", mapEnt->mapEntityNum, classname, shadeAngle );
+		Sys_Printf( "Entity %d (%s) has shading angle of %.4f\n", mapEnt.mapEntityNum, classname, shadeAngle );
 
 	/* jal : entity based _samplesize */
-	const int lightmapSampleSize = std::max( 0, mapEnt->intForKey( "_lightmapsamplesize", "_samplesize", "_ss" ) );
+	const int lightmapSampleSize = std::max( 0, mapEnt.intForKey( "_lightmapsamplesize", "_samplesize", "_ss" ) );
 	if ( lightmapSampleSize != 0 )
-		Sys_Printf( "Entity %d (%s) has lightmap sample size of %d\n", mapEnt->mapEntityNum, classname, lightmapSampleSize );
+		Sys_Printf( "Entity %d (%s) has lightmap sample size of %d\n", mapEnt.mapEntityNum, classname, lightmapSampleSize );
 
 	/* attach stuff to everything in the entity */
-	for ( brush_t& brush : mapEnt->brushes )
+	for ( brush_t& brush : mapEnt.brushes )
 	{
-		brush.entityNum = mapEnt->mapEntityNum;
+		brush.entityNum = mapEnt.mapEntityNum;
 		brush.castShadows = castShadows;
 		brush.recvShadows = recvShadows;
 		brush.lightmapSampleSize = lightmapSampleSize;
@@ -1611,9 +1606,9 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 		brush.shadeAngleDegrees = shadeAngle;
 	}
 
-	for ( parseMesh_t *patch = mapEnt->patches; patch != NULL; patch = patch->next )
+	for ( parseMesh_t *patch = mapEnt.patches; patch != NULL; patch = patch->next )
 	{
-		patch->entityNum = mapEnt->mapEntityNum;
+		patch->entityNum = mapEnt.mapEntityNum;
 		patch->castShadows = castShadows;
 		patch->recvShadows = recvShadows;
 		patch->lightmapSampleSize = lightmapSampleSize;
@@ -1628,8 +1623,8 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	LoadEntityIndexMap( mapEnt );
 
 	/* get entity origin and adjust brushes */
-	mapEnt->origin = mapEnt->vectorForKey( "origin" );
-	if ( mapEnt->originbrush_origin != g_vector3_identity ) {
+	mapEnt.origin = mapEnt.vectorForKey( "origin" );
+	if ( mapEnt.originbrush_origin != g_vector3_identity ) {
 		AdjustBrushesForOrigin( mapEnt );
 	}
 
