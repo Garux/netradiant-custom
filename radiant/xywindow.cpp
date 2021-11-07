@@ -88,7 +88,6 @@ struct xywindow_globals_private_t
 	bool show_workzone;
 
 	bool show_blocks;
-	int blockSize;
 
 	bool m_bChaseMouse;
 	bool m_bShowSize;
@@ -1670,21 +1669,25 @@ void XYWnd::XY_DrawGrid() {
    ==============
  */
 void XYWnd::XY_DrawBlockGrid(){
+	int bs[3] = { 1024, 1024, 1024 }; // compiler's default
+
 	if ( Map_FindWorldspawn( g_map ) == 0 ) {
 		return;
 	}
 	const char *value = Node_getEntity( *Map_GetWorldspawn( g_map ) )->getKeyValue( "_blocksize" );
-	if ( strlen( value ) ) {
-		sscanf( value, "%i", &g_xywindow_globals_private.blockSize );
+	if ( !string_empty( value ) ) {
+		const int scanned = sscanf( value, "%i %i %i", bs, bs + 1, bs + 2 );
+		if( scanned == 1 || scanned == 2 ) /* handle legacy case */
+			bs[1] = bs[2] = bs[0];
 	}
 
-	if ( !g_xywindow_globals_private.blockSize || g_xywindow_globals_private.blockSize > 65536 || g_xywindow_globals_private.blockSize < 1024 ) {
-		// don't use custom blocksize if it is less than the default, or greater than the maximum world coordinate
-		g_xywindow_globals_private.blockSize = 1024;
-	}
+	NDIM1NDIM2( m_viewType )
 
-	float x, y;
-	char text[32];
+	int bs1 = bs[nDim1];
+	int bs2 = bs[nDim2];
+
+	if( bs1 <= 0 && bs2 <= 0 ) // zero disables
+		return;
 
 	glDisable( GL_TEXTURE_2D );
 	glDisable( GL_TEXTURE_1D );
@@ -1694,12 +1697,21 @@ void XYWnd::XY_DrawBlockGrid(){
 	const float w = ( m_nWidth / 2 / m_fScale );
 	const float h = ( m_nHeight / 2 / m_fScale );
 
-	NDIM1NDIM2( m_viewType )
+	float xb = std::max( m_vOrigin[nDim1] - w, g_region_mins[nDim1] );
+	float xe = std::min( m_vOrigin[nDim1] + w, g_region_maxs[nDim1] );
+	float yb = std::max( m_vOrigin[nDim2] - h, g_region_mins[nDim2] );
+	float ye = std::min( m_vOrigin[nDim2] + h, g_region_maxs[nDim2] );
 
-	const float xb = g_xywindow_globals_private.blockSize * floor( std::max( m_vOrigin[nDim1] - w, g_region_mins[nDim1] ) / g_xywindow_globals_private.blockSize );
-	const float xe = g_xywindow_globals_private.blockSize * ceil( std::min( m_vOrigin[nDim1] + w, g_region_maxs[nDim1] ) / g_xywindow_globals_private.blockSize );
-	const float yb = g_xywindow_globals_private.blockSize * floor( std::max( m_vOrigin[nDim2] - h, g_region_mins[nDim2] ) / g_xywindow_globals_private.blockSize );
-	const float ye = g_xywindow_globals_private.blockSize * ceil( std::min( m_vOrigin[nDim2] + h, g_region_maxs[nDim2] ) / g_xywindow_globals_private.blockSize );
+	if( bs1 > 0 ){
+		bs1 = std::clamp( bs1, 256, 65536 );
+		xb = bs1 * floor( xb / bs1 );
+		xe = bs1 * ceil( xe / bs1 );
+	}
+	if( bs2 > 0 ){
+		bs2 = std::clamp( bs2, 256, 65536 );
+		yb = bs2 * floor( yb / bs2 );
+		ye = bs2 * ceil( ye / bs2 );
+	}
 
 	// draw major blocks
 
@@ -1708,14 +1720,16 @@ void XYWnd::XY_DrawBlockGrid(){
 
 	glBegin( GL_LINES );
 
-	for ( x = xb; x <= xe; x += g_xywindow_globals_private.blockSize )
-	{
-		glVertex2f( x, yb );
-		glVertex2f( x, ye );
+	if( bs1 > 0 ) {
+		for ( float x = xb; x <= xe; x += bs1 )
+		{
+			glVertex2f( x, yb );
+			glVertex2f( x, ye );
+		}
 	}
 
-	if ( m_viewType == XY ) {
-		for ( y = yb; y <= ye; y += g_xywindow_globals_private.blockSize )
+	if ( bs2 > 0 ) {
+		for ( float y = yb; y <= ye; y += bs2 )
 		{
 			glVertex2f( xb, y );
 			glVertex2f( xe, y );
@@ -1725,18 +1739,19 @@ void XYWnd::XY_DrawBlockGrid(){
 	glEnd();
 	glLineWidth( 1 );
 
+#if 0
 	// draw coordinate text if needed
-
+	char text[32];
 	if ( m_viewType == XY && m_fScale > .1 ) {
-		for ( x = xb; x < xe; x += g_xywindow_globals_private.blockSize )
-			for ( y = yb; y < ye; y += g_xywindow_globals_private.blockSize )
+		for ( float x = xb; x < xe; x += bs1 )
+			for ( float y = yb; y < ye; y += bs2 )
 			{
-				glRasterPos2f( x + ( g_xywindow_globals_private.blockSize / 2 ), y + ( g_xywindow_globals_private.blockSize / 2 ) );
-				sprintf( text, "%i,%i",(int)floor( x / g_xywindow_globals_private.blockSize ), (int)floor( y / g_xywindow_globals_private.blockSize ) );
+				glRasterPos2f( x + ( bs1 / 2 ), y + ( bs2 / 2 ) );
+				sprintf( text, "%i,%i",(int)floor( x / bs1 ), (int)floor( y / bs2 ) );
 				GlobalOpenGL().drawString( text );
 			}
 	}
-
+#endif
 	glColor4f( 0, 0, 0, 0 );
 }
 
