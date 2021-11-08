@@ -179,6 +179,11 @@ inline bool VectorIsOnAxis( const Vector3& v ){
 	return zeroComponentCount > 1; // The zero vector will be on axis.
 }
 
+/* (pitch yaw roll) -> (roll pitch yaw) */
+inline Vector3 angles_pyr2rpy( const Vector3& angles ){
+	return Vector3( angles.z(), angles.x(), angles.y() );
+}
+
 /*
    =====================
    PlaneFromPoints

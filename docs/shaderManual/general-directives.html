@@ -181,7 +181,7 @@ textures/skies/xtoxicsky_dm9
 
 <h2 id="sort">sort value</h2>
 <p>Use this keyword to fine-tune the depth sorting of shaders as they are compared against other shaders in the game world. The basic concept is that if there is a question or a problem with shaders drawing in the wrong order against each other, this allows the designer to create a hierarchy of which shader draws in what order.</p>
-<p>The default behavior is to put all blended shaders in sort "additive" and all other shaders in sort "opaque", so you only need to specify this when you are trying to work around a sorting problem with multiple transparent surfaces in a scene.</p>
+<p>The default behavior is to put all blended shaders in sort 9 and all other shaders in sort "opaque", so you only need to specify this when you are trying to work around a sorting problem with multiple transparent surfaces in a scene.</p>
 <p>The value here can be either a numerical value or one of the keywords in the following list (listed in order of ascending priority):</p>
 <dl>
 	<dt>portal (1)</dt><dd>This surface is a portal, it draws over every other shader seen inside the portal, but before anything in the main view. Default for shaders marked as portal.</dd>

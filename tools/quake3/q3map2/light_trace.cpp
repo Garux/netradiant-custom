@@ -1059,11 +1059,11 @@ static void PopulateTraceNodes(){
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* get entity */
-		entity_t *e = &entities[ i ];
+		const entity_t& e = entities[ i ];
 
 		/* get shadow flags */
 		int castShadows = ENTITY_CAST_SHADOWS;
-		GetEntityShadowFlags( e, NULL, &castShadows, NULL );
+		GetEntityShadowFlags( &e, NULL, &castShadows, NULL );
 
 		/* early out? */
 		if ( !castShadows ) {
@@ -1071,19 +1071,18 @@ static void PopulateTraceNodes(){
 		}
 
 		/* get entity origin */
-		const Vector3 origin( e->vectorForKey( "origin" ) );
+		const Vector3 origin( e.vectorForKey( "origin" ) );
 
 		/* get scale */
 		Vector3 scale( 1 );
-		if( !e->read_keyvalue( scale, "modelscale_vec" ) )
-			if( e->read_keyvalue( scale[0], "modelscale" ) )
+		if( !e.read_keyvalue( scale, "modelscale_vec" ) )
+			if( e.read_keyvalue( scale[0], "modelscale" ) )
 				scale[1] = scale[2] = scale[0];
 
 		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 		Vector3 angles( 0 );
-		if ( !e->read_keyvalue( value, "angles" ) ||
-		     3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
-			e->read_keyvalue( angles[ 2 ], "angle" );
+		if ( e.read_keyvalue( angles, "angles" ) || e.read_keyvalue( angles.y(), "angle" ) )
+			angles = angles_pyr2rpy( angles );
 
 		/* set transform matrix (thanks spog) */
 		transform = g_matrix4_identity;
@@ -1095,7 +1094,7 @@ static void PopulateTraceNodes(){
 		//%	m4x4_transpose( transform );
 
 		/* get model */
-		value = e->valueForKey( "model" );
+		value = e.valueForKey( "model" );
 
 		/* switch on model type */
 		switch ( value[ 0 ] )
@@ -1115,12 +1114,12 @@ static void PopulateTraceNodes(){
 
 		/* external model */
 		default:
-			PopulateWithPicoModel( castShadows, LoadModelWalker( value, e->intForKey( "_frame", "frame" ) ), transform );
+			PopulateWithPicoModel( castShadows, LoadModelWalker( value, e.intForKey( "_frame", "frame" ) ), transform );
 			continue;
 		}
 
 		/* get model2 */
-		value = e->valueForKey( "model2" );
+		value = e.valueForKey( "model2" );
 
 		/* switch on model type */
 		switch ( value[ 0 ] )
@@ -1140,7 +1139,7 @@ static void PopulateTraceNodes(){
 
 		/* external model */
 		default:
-			PopulateWithPicoModel( castShadows, LoadModelWalker( value, e->intForKey( "_frame2" ) ), transform );
+			PopulateWithPicoModel( castShadows, LoadModelWalker( value, e.intForKey( "_frame2" ) ), transform );
 			continue;
 		}
 	}

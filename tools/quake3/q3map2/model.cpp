@@ -1327,11 +1327,9 @@ void AddTriangleModels( entity_t& eparent ){
 				scale[1] = scale[2] = scale[0];
 
 		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
-		const char *value;
 		Vector3 angles( 0 );
-		if ( !e.read_keyvalue( value, "angles" ) ||
-		     3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
-			e.read_keyvalue( angles[ 2 ], "angle" );
+		if ( e.read_keyvalue( angles, "angles" ) || e.read_keyvalue( angles.y(), "angle" ) )
+			angles = angles_pyr2rpy( angles );
 
 		/* set transform matrix (thanks spog) */
 		Matrix4 transform( g_matrix4_identity );
@@ -1378,7 +1376,7 @@ void AddTriangleModels( entity_t& eparent ){
 
 		/* ydnar: cel shader support */
 		shaderInfo_t *celShader;
-		if( e.read_keyvalue( value, "_celshader" ) ||
+		if( const char *value; e.read_keyvalue( value, "_celshader" ) ||
 		    entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
 			celShader = ShaderInfoForShader( String64()( "textures/", value ) );
 		}

@@ -542,7 +542,6 @@ static bool PlaceOccupant( node_t *headnode, const Vector3& origin, const entity
 
 EFloodEntities FloodEntities( tree_t& tree ){
 	bool r, inside, skybox;
-	const char  *value;
 
 
 	Sys_FPrintf( SYS_VRB, "--- FloodEntities ---\n" );
@@ -580,9 +579,8 @@ EFloodEntities FloodEntities( tree_t& tree ){
 
 			/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 			Vector3 angles( 0 );
-			if ( !e.read_keyvalue( value, "angles" ) ||
-			     3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
-				e.read_keyvalue( angles[ 2 ], "angle" );
+			if ( e.read_keyvalue( angles, "angles" ) || e.read_keyvalue( angles.y(), "angle" ) )
+				angles = angles_pyr2rpy( angles );
 
 			/* set transform matrix (thanks spog) */
 			skyboxTransform = g_matrix4_identity;
