@@ -362,7 +362,7 @@ tcMod scroll 1 1
 <p>This should be the LAST tcMod in a stage. Otherwise there may be a popping or snapping visual effect in some shaders.</p>
 
 <h3>tcMod stretch <em>func base amplitude phase frequency</em></h3>
-<p>Stretches the texture coordinates with the given function. Stretching is defined as stretching the texture coordinate away from the center of the polygon and then compressing it towards the center of the polygon. (see Chapter 1: Key Concepts for waveform parameter definitions).</p>
+<p>Stretches the texture coordinates with the given function. Stretching is defined as stretching the texture coordinate away from the texture center closest to the polygon center and then compressing it towards the center. (see Chapter 1: Key Concepts for waveform parameter definitions).</p>
 
 <h3>tcMod transform <em>m00 m01 m10 m11 t0 t1</em></h3>
 <p>Transforms each texture coordinate as follows:</p>

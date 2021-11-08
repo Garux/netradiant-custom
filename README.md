@@ -31,6 +31,8 @@ Development is focused on smoothing and tweaking editing process.
 * Free and robust vertex editing, also providing abilities to remove and insert vertices
 * UV Tool (edits texture alignment of selected face or patch)
 * Autocaulk
+* Model browser
+* Brush faces extrusion
 * Left mouse button click tunnel selector, paint selector
 * Numerous mouse shortcuts (see help->General->Mouse Shortcuts)
 * Focus camera on selected (Tab)
@@ -39,7 +41,7 @@ Development is focused on smoothing and tweaking editing process.
 * Quick vertices drag / brush faces shear shortcut
 * Simple shader editor
 * Texture painting by drag
-* Seamless brush face to face texture paste
+* Seamless brush face<->face, patch<->face texture paste
 * Customizable keyboard shortcuts
 * Customizable GUI themes, fonts
 * MeshTex plugin
@@ -77,24 +79,30 @@ Development is focused on smoothing and tweaking editing process.
 
 #### Q3Map2:
 
-* Allowed simultaneous samples+filter use, makes sense
-* -vertexscale
-* -novertex works, (0..1) sets globally
-* Fixed _clone _ins _instance (_clonename) functionality
-* -nolm - no lightmaps
-* -bouncecolorratio 0..1 (ratio of colorizing light sample by texture)
 * q3map_remapshader remaps anything fine, on all stages
-* Fixed model autoclip, added 20 new modes
 * Automatic map packager (complete Q3 support)
-* -brightness 0..alot, def 1: mimics q3map_lightmapBrightness, but globally + affects vertexlight
-* -contrast -255..255, def 0: lighting contrast
 * Report full / full pk3 path on file syntax errors
+* Allowed simultaneous samples+filter use, makes sense
+* -brightness 0..alot, def 1: mimics q3map_lightmapBrightness globally
+* -contrast -255..255, def 0: lighting contrast
+* -saturation light option
+* -bouncecolorratio 0..1 (ratio of colorizing light sample by texture)
+* -nolm - no lightmaps
+* -novertex works, (0..1) sets globally
+* -vertexscale
 * New area lights backsplash algorithm (utilizing area lights instead of point ones)
 * -backsplash (float)scale (float)distance: adjust area lights globally (real area lights have no backsplash)
 * New slightly less careful, but much faster lightmaps packing algorithm (allocating... process)
+* -extlmhacksize zero effort external lightmaps for Q3
 * Valve220 mapformat autodetection and support
-* Correct .obj and .mtl loading
-* Guessing model shaders paths
+* Consistent brush content deduction with mixed face parameters
+* Model shaders paths deduction
+* Fixed model autoclip, added 20 new clipping modes
+* Support negative misc_model scale
+* Assimp model loading library (40+ formats)
+* -json bsp export/import
+* -mergebsp injects one bsp to another
+* No shaderlist.txt mode: load all shaders
 
 ###### see changelog-custom.txt for more
 

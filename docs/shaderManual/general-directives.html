@@ -184,12 +184,17 @@ textures/skies/xtoxicsky_dm9
 <p>The default behavior is to put all blended shaders in sort "additive" and all other shaders in sort "opaque", so you only need to specify this when you are trying to work around a sorting problem with multiple transparent surfaces in a scene.</p>
 <p>The value here can be either a numerical value or one of the keywords in the following list (listed in order of ascending priority):</p>
 <dl>
-	<dt>portal (1)</dt><dd>This surface is a portal, it draws over every other shader seen inside the portal, but before anything in the main view.</dd>
-	<dt>Sky (2)</dt><dd>Typically, the sky is the farthest surface in the game world. Drawing this after other opaque surfaces can be an optimization on some cards. This currently has the wrong value for this purpose, so it doesn't do much of anything.</dd>
-	<dt>Opaque (3)</dt><dd>This surface is opaque (rarely needed since this is the default with no blendfunc)</dd>
+	<dt>portal (1)</dt><dd>This surface is a portal, it draws over every other shader seen inside the portal, but before anything in the main view. Default for shaders marked as portal.</dd>
+	<dt>Sky (2)</dt><dd>Typically, the sky is the farthest surface in the game world. Drawing this after other opaque surfaces can be an optimization on some cards. This currently has the wrong value for this purpose, so it doesn't do much of anything. Default for skies.</dd>
+	<dt>Opaque (3)</dt><dd>This surface is opaque (rarely needed since this is the default with no blendfunc).</dd>
+	<dt>Decal (4)</dt><dd>Scorch marks etc, default with polygonOffset.</dd>
+	<dt>SeeThrough (5)</dt><dd>Ladders, grates, grills that may have small blended edges in addition to alpha test.</dd>
 	<dt>Banner (6)</dt><dd>Transparent, but very close to walls.</dd>
+	<dt>(7)</dt><dd>Default for fog.</dd>
 	<dt>Underwater (8)</dt><dd>Draw behind normal transparent surfaces.</dd>
-	<dt>Additive (9)</dt><dd>Normal transparent surface (default for shaders with blendfunc's)</dd>
+	<dt>(9)</dt><dd>Normal transparent surface (default for shaders with blendfunc's).</dd>
+	<dt>Additive (10)</dt><dd>Generally only used for additive type effects.</dd>
+	<dt>(14)</dt><dd>Used for stencil shadows.</dd>
 	<dt>Nearest (16)</dt><dd>This shader should always sort closest to the viewer, e.g. muzzle flashes and blend blobs.</dd>
 </dl>
 

@@ -88,7 +88,7 @@ textures/liquids/lavahell2			//path and name of new texture
 -->
 
 <h2 id="trans">qer_trans N.N</h2>
-<p>This directive defines the percentage of transparency that a brush will have when seen in the editor (no effect on game rendering at all). It can have a positive value between 0 and 1. The higher the value, the less transparent the texture. Example: qer_trans 0.2 means the brush is 20% opaque and nearly invisible.</p>
+<p>This directive makes brush transparent when seen in the editor (no effect on game rendering at all). It can have a positive value between 0 and 1. The higher the value, the less transparent the texture. Example: qer_trans 0.2 means the brush is 20% opaque and nearly invisible.</p>
 <blockquote>
 	<h4>Design Notes:</h4>
 	<p>On GtkRadiant 1.4 and earlier, if the shader uses qer_trans and a qer_editorImage with an alpha channel, the transparent areas of the editorImage will be 100% transparent. To keep the solid areas of the editorImage opaque, use a near 1 value for qer_trans (eg. 0.9999). This is useful for grates, windows, fences, etc. If using GtkRadiant 1.5 or later, use qer_alphaFunc for editorImage masking instead.</p>
