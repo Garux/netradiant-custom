@@ -988,7 +988,7 @@ default_CLIPMODEL:
    adds a picomodel into the bsp
  */
 
-void InsertModel( const char *name, int skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, entity_t& entity, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth ){
+void InsertModel( const char *name, const char *skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, entity_t& entity, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth ){
 	int i, j;
 	const Matrix4 nTransform( matrix4_for_normal_transform( transform ) );
 	const bool transform_lefthanded = MATRIX4_LEFTHANDED == matrix4_handedness( transform );
@@ -1006,27 +1006,27 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 
 	/* load skin file */
 	std::list<remap_t> skins;
-	{
-		auto skinfilename = StringOutputStream(99)( PathExtensionless( name ), '_', skin, ".skin" );
-		MemBuffer skinfile = vfsLoadFile( skinfilename );
-		if ( skinfile && skin != 0 ) {
-			/* fallback to skin 0 if invalid */
-			skinfilename( PathExtensionless( name ), "_0.skin" );
-			skinfile = vfsLoadFile( skinfilename );
-			if ( skinfile ) {
-				Sys_Printf( "Skin %d of %s does not exist, using 0 instead\n", skin, name );
-			}
-		}
-		if ( skinfile ) {
-			Sys_Printf( "Using skin %d of %s\n", skin, name );
+	if( !strEmptyOrNull( skin ) ){
+		const bool isnumber = std::all_of( skin, skin + strlen( skin ), ::isdigit );
+
+		StringOutputStream skinfilename( 99 );
+		if( isnumber )
+			skinfilename( name, '_', skin, ".skin" ); // DarkPlaces naming: models/relics/relic.md3_14.skin for models/relics/relic.md3
+		else
+			skinfilename( PathExtensionless( name ), '_', skin, ".skin" ); // Q3 naming: models/players/sarge/head_roderic.skin for models/players/sarge/head.md3
+
+		if ( MemBuffer skinfile = vfsLoadFile( skinfilename ) ) {
+			Sys_Printf( "Using skin %s of %s\n", skin, name );
 			for ( char *skinfilenextptr, *skinfileptr = skinfile.data(); !strEmpty( skinfileptr ); skinfileptr = skinfilenextptr )
 			{
-				// for fscanf
+				// for sscanf
 				char format[64];
 
 				skinfilenextptr = strchr( skinfileptr, '\r' );
 				if ( skinfilenextptr != NULL ) {
 					strClear( skinfilenextptr++ );
+					if( *skinfilenextptr == '\n' ) // handle \r\n
+						++skinfilenextptr;
 				}
 				else
 				{
@@ -1400,7 +1400,8 @@ void AddTriangleModels( entity_t& eparent ){
 		if ( shadeAngle != 0 )
 			Sys_Printf( "misc_model has shading angle of %.4f\n", shadeAngle );
 
-		const int skin = e.intForKey( "_skin", "skin" );
+		const char *skin = nullptr;
+		e.read_keyvalue( skin, "_skin", "skin" );
 
 		float clipDepth = clipDepthGlobal;
 		if ( e.read_keyvalue( clipDepth, "_clipdepth" ) )
