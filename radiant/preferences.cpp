@@ -92,9 +92,7 @@ CGameDescription::CGameDescription( xmlDocPtr pDoc, const CopiedString& gameFile
 	}
 
 	{
-		StringOutputStream path( 256 );
-		path << AppPath_get() << gameFile << "/";
-		mGameToolsPath = path.c_str();
+		mGameToolsPath = StringOutputStream( 256 )( AppPath_get(), "gamepacks/", gameFile, '/' );
 	}
 
 	ASSERT_MESSAGE( file_exists( mGameToolsPath.c_str() ), "game directory not found: " << makeQuoted( mGameToolsPath ) );
@@ -331,9 +329,7 @@ public:
 };
 
 void CGameDialog::ScanForGames(){
-	StringOutputStream strGamesPath( 256 );
-	strGamesPath << AppPath_get() << "games/";
-	const char *path = strGamesPath.c_str();
+	const auto path = StringOutputStream( 256 )( AppPath_get(), "gamepacks/games/" );
 
 	globalOutputStream() << "Scanning for game description files: " << path << '\n';
 

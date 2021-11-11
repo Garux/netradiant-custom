@@ -1327,9 +1327,9 @@ $(INSTALLDIR)/mbspc.$(EXE): \
 
 .PHONY: install-data
 install-data: binaries
-	$(MKDIR) $(INSTALLDIR)/games
+	$(MKDIR) $(INSTALLDIR)/gamepacks/games
 	$(FIND) $(INSTALLDIR_BASE)/ -name .svn -exec $(RM_R) {} \; -prune
-	DOWNLOAD_GAMEPACKS="$(DOWNLOAD_GAMEPACKS)" GIT="$(GIT)" SVN="$(SVN)" WGET="$(WGET)" RM_R="$(RM_R)" MV="$(MV)" UNZIPPER="$(UNZIPPER)" ECHO="$(ECHO)" SH="$(SH)" CP="$(CP)" CP_R="$(CP_R)" $(SH) install-gamepacks.sh "$(INSTALLDIR)"
+	DOWNLOAD_GAMEPACKS="$(DOWNLOAD_GAMEPACKS)" GIT="$(GIT)" SVN="$(SVN)" WGET="$(WGET)" RM_R="$(RM_R)" MV="$(MV)" UNZIPPER="$(UNZIPPER)" ECHO="$(ECHO)" SH="$(SH)" CP="$(CP)" CP_R="$(CP_R)" $(SH) install-gamepacks.sh "$(INSTALLDIR)/gamepacks"
 	$(ECHO) $(RADIANT_MINOR_VERSION) > $(INSTALLDIR)/RADIANT_MINOR
 	$(ECHO) $(RADIANT_MAJOR_VERSION) > $(INSTALLDIR)/RADIANT_MAJOR
 	$(CP_R) setup/data/tools/* $(INSTALLDIR)/
