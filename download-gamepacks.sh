@@ -108,7 +108,7 @@ pack()
 		*)
 			;;
 	esac
-	
+
 	$ECHO "Downloading $pack..."
 	case "$sourcetype" in
 		svn)
@@ -147,32 +147,51 @@ pack()
 }
 
 mkdir -p games
+pack AlienArenaPack    GPL         svn    https://svn.code.sf.net/p/alienarena-cc/code/trunk/tools/netradiant_gamepack/AlienArenaPack
 pack DarkPlacesPack    GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/DarkPlacesPack/branches/1.5/
 pack Doom3Pack         proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/Doom3Pack/branches/1.5/
 pack ETPack            proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/ETPack/branches/1.5/
 pack Heretic2Pack      proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/Her2Pack/branches/1.5/
-pack JediAcademyPack   proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/JAPack/branches/1.5/
+pack JediAcademyPack   proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/JAPack/branches/1.5/ #600Mb dl
+#pack JediOutcastPack  proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/JK2Pack/branches/1.4/ #not 1.5 pack
+#pack KingpinPack      unknown     zip1   http://download.kingpin.info/kingpin/editing/maps/map_editors/NetRadiant/addon/Kingpinpack.zip #dl error: wrong certificate
+pack KingpinPack       unknown     git    https://gitlab.com/netradiant/gamepacks/kingpin-mapeditor-support.git
 pack NeverballPack     proprietary zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/NeverballPack.zip
+#pack NeverballPack    proprietary git    https://gitlab.com/netradiant/gamepacks/neverball-mapeditor-support.git
 pack NexuizPack        GPL         gitdir git://git.icculus.org/divverent/nexuiz.git misc/netradiant-NexuizPack master
-#pack OpenArenaPack    unknown     zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/OpenArenaPack.zip
+#pack OpenArenaPack    unknown     zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/OpenArenaPack.zip
 pack OpenArenaPack     GPL         git    https://github.com/NeonKnightOA/oagamepack.git
 pack OsirionPack       GPL         zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/OsirionPack.zip
 pack PreyPack          proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/PreyPack/trunk/
-pack Q3Pack            proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q3Pack/trunk/ -r29
+pack Q3RallyPack       proprietary svn    https://svn.code.sf.net/p/q3rallysa/code/tools/radiant-config/radiant15-netradiant/
 pack Quake2Pack        proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q2Pack/branches/1.5/
+pack Quake3Pack        proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q3Pack/trunk/ -r29
+#pack Quake3Pack       proprietary git    https://gitlab.com/netradiant/gamepacks/quake3-mapeditor-support.git
 pack Quake4Pack        proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q4Pack/branches/1.5/
+pack QuakeLivePack     proprietary git    https://gitlab.com/netradiant/gamepacks/quakelive-mapeditor-support.git
 #pack QuakePack        proprietary zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/QuakePack.zip
 pack QuakePack         GPL         zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/Quake1Pack.zip
-#pack Quake2WorldPack  GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q2WPack/branches/1.5/
+#pack Quake2WorldPack  GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q2WPack/branches/1.5/ #renamed as Quetoo
+#pack Quake2WorldPack  GPL         svn    svn://jdolan.dyndns.org/quake2world/trunk/gtkradiant #renamed as Quetoo
 pack QuetooPack        GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/QuetooPack/branches/1.5/
+pack SmokinGunsPack    unknown     git    https://github.com/smokin-guns/smokinguns-mapeditor-support.git
+pack SoF2Pack          unknown     git    https://gitlab.com/netradiant/gamepacks/sof2-mapeditor-support.git
+pack STVEFPack         unknown     git    https://gitlab.com/netradiant/gamepacks/stvef-mapeditor-support.git
 #pack TremulousPack    proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/TremulousPack/branches/1.5/
 pack TremulousPack     proprietary zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/TremulousPack.zip
+#pack TremulousPack    proprietary git    https://gitlab.com/netradiant/gamepacks/tremulous-mapeditor-support.git
 pack TurtleArenaPack   proprietary git    https://github.com/Turtle-Arena/turtle-arena-radiant-pack.git
 pack UFOAIPack         proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/UFOAIPack/branches/1.5/
 #pack UnvanquishedPack unknown     zip1   http://ingar.intranifty.net/gtkradiant/files/gamepacks/UnvanquishedPack.zip
-pack UnvanquishedPack  BSD         svn    https://github.com/Unvanquished/unvanquished-mapeditor-support.git/trunk/build/netradiant
+#pack UnvanquishedPack BSD         svn    https://github.com/Unvanquished/unvanquished-mapeditor-support.git/trunk/build/netradiant
+pack UnvanquishedPack  BSD         git    https://github.com/Unvanquished/unvanquished-mapeditor-support.git
+pack UrbanTerrorPack   unknown     git    https://gitlab.com/netradiant/gamepacks/urbanterror-mapeditor-support.git
+#pack WarforkPack      GPL         zip1   https://cdn.discordapp.com/attachments/611741789237411850/659512520553267201/netradiant_warfork_gamepack.zip
+pack WarforkPack       GPL         git    https://gitlab.com/netradiant/gamepacks/warfork-mapeditor-support.git
 #pack WarsowPack       GPL         svn    https://svn.bountysource.com/wswpack/trunk/netradiant/games/WarsowPack/
 #pack WarsowPack       GPL         zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/WarsowPack.zip
 pack WarsowPack        GPL         git    https://github.com/Warsow/NetRadiantPack.git
 pack WolfPack          proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/WolfPack/branches/1.5/
+pack WoPPack           proprietary git    https://github.com/PadWorld-Entertainment/wop-mapeditor-support.git
 pack XonoticPack       GPL         git    https://gitlab.com/xonotic/netradiant-xonoticpack.git
+pack ZEQ2LitePack      unknown     git    https://gitlab.com/netradiant/gamepacks/zeq2lite-mapeditor-support.git

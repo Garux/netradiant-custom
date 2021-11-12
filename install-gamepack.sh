@@ -17,11 +17,17 @@ case $pack in
 	*/JediAcademyPack)
 		pack="$pack/Tools"
 	;;
-	*/PreyPack|*/Q3Pack)
+	*/PreyPack|*/Quake3Pack)
 		pack="$pack/tools"
 	;;
 	*/WolfPack)
 		pack="$pack/bin"
+	;;
+	*/SmokinGunsPack|*/UnvanquishedPack)
+		pack="$pack/build/netradiant"
+	;;
+	*/WoPPack)
+		pack="$pack/netradiant"
 	;;
 esac
 
