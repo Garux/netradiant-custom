@@ -68,6 +68,10 @@ QEGlobals_t g_qeglobals;
 #define PATH_MAX 260
 #endif
 
+#if defined( POSIX )
+#include <sys/stat.h> // chmod
+#endif
+
 #define RADIANT_MONITOR_ADDRESS "127.0.0.1:39000"
 
 
