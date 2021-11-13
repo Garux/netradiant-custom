@@ -1647,7 +1647,7 @@ const image_t               *ImageLoad( const char *name );
 
 
 /* shaders.c */
-void                        ColorMod( const colorMod_t *am, int numVerts, bspDrawVert_t *drawVerts );
+void                        ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVerts );
 
 void                        TCMod( const tcMod_t& mod, Vector2& st );
 

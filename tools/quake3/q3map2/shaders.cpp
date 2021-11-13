@@ -45,9 +45,9 @@ static int numCustSurfaceParms;
    routines for dealing with vertex color/alpha modification
  */
 
-void ColorMod( const colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
+void ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVerts ){
 	/* dummy check */
-	if ( cm == NULL || numVerts < 1 || drawVerts == NULL ) {
+	if ( colormod == NULL || numVerts < 1 || drawVerts == NULL ) {
 		return;
 	}
 
@@ -56,7 +56,7 @@ void ColorMod( const colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
 	for ( bspDrawVert_t& dv : Span( drawVerts, numVerts ) )
 	{
 		/* walk colorMod list */
-		for ( ; cm != NULL; cm = cm->next )
+		for ( const colorMod_t *cm = colormod; cm != NULL; cm = cm->next )
 		{
 			float c;
 			/* default */
