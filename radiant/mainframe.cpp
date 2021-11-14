@@ -882,6 +882,31 @@ void ColorScheme_Blender(){
 	XY_UpdateAllWindows();
 }
 
+/* color scheme to fit the GTK Adwaita Dark theme */
+void ColorScheme_AdwaitaDark()
+{
+	TextureBrowser_setBackgroundColour( GlobalTextureBrowser(), Vector3( 0.25f, 0.25f, 0.25f ) );
+
+	g_camwindow_globals.color_cameraback = Vector3( 0.25f, 0.25f, 0.25f );
+	g_camwindow_globals.color_selbrushes3d = Vector3( 1.0f, 0.0f, 0.0f );
+	CamWnd_reconstructStatic();
+	CamWnd_Update( *g_pParentWnd->GetCamWnd() );
+
+	g_xywindow_globals.color_gridback = Vector3( 0.25f, 0.25f, 0.25f );
+	g_xywindow_globals.color_gridminor = Vector3( 0.21f, 0.23f, 0.23f );
+	g_xywindow_globals.color_gridmajor = Vector3( 0.14f, 0.15f, 0.15f );
+	g_xywindow_globals.color_gridblock = Vector3( 1.0f, 1.0f, 1.0f );
+	g_xywindow_globals.color_gridtext = Vector3( 0.0f, 0.0f, 0.0f );
+	g_xywindow_globals.color_selbrushes = Vector3( 1.0f, 0.0f, 0.0f );
+	XYWnd::recaptureStates();
+	g_xywindow_globals.color_clipper = Vector3( 0.0f, 0.0f, 1.0f );
+	Brush_clipperColourChanged();
+	g_xywindow_globals.color_brushes = Vector3( 0.73f, 0.73f, 0.73f );
+	SetWorldspawnColour( g_xywindow_globals.color_brushes );
+	g_xywindow_globals.color_viewname = Vector3( 0.5f, 0.0f, 0.75f );
+	XY_UpdateAllWindows();
+}
+
 typedef Callback1<Vector3&> GetColourCallback;
 typedef Callback1<const Vector3&> SetColourCallback;
 
@@ -1004,6 +1029,7 @@ GtkMenuItem* create_colours_menu(){
 	create_menu_item_with_mnemonic( menu_3, "Black and Green", "ColorSchemeBlackAndGreen" );
 	create_menu_item_with_mnemonic( menu_3, "Maya/Max/Lightwave Emulation", "ColorSchemeYdnar" );
 	create_menu_item_with_mnemonic( menu_3, "Blender/Dark", "ColorSchemeBlender" );
+	create_menu_item_with_mnemonic( menu_3, "Adwaita Dark", "ColorSchemeAdwaitaDark" );
 
 	create_menu_item_with_mnemonic( menu_in_menu, "GTK Theme...", "gtkThemeDlg" );
 	create_menu_item_with_mnemonic( menu_in_menu, "OpenGL Font...", "OpenGLFont" );
@@ -3638,6 +3664,7 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "ColorSchemeBlackAndGreen", FreeCaller<ColorScheme_Black>() );
 	GlobalCommands_insert( "ColorSchemeYdnar", FreeCaller<ColorScheme_Ydnar>() );
 	GlobalCommands_insert( "ColorSchemeBlender", FreeCaller<ColorScheme_Blender>() );
+	GlobalCommands_insert( "ColorSchemeAdwaitaDark", FreeCaller<ColorScheme_AdwaitaDark>() );
 	GlobalCommands_insert( "ChooseTextureBackgroundColor", makeCallback( g_ColoursMenu.m_textureback ) );
 	GlobalCommands_insert( "ChooseGridBackgroundColor", makeCallback( g_ColoursMenu.m_xyback ) );
 	GlobalCommands_insert( "ChooseGridMajorColor", makeCallback( g_ColoursMenu.m_gridmajor ) );
