@@ -214,9 +214,7 @@ struct game_quakelive : game_default
 	                                                //  probably be re-purposed some day.)
 	game_quakelive(){
 		arg = "quakelive";
-		// gamePath = "baseq3";        /* default base game data dir (FIXME what does quake live really use?) */
-		homeBasePath = ".quakelive/quakelive/home"; /* unix home sub-dir (FIXME what does quake live really use?) */
-		// magic = "quake";            /* magic path word (FIXME where does quake live install to?) */
+		homeBasePath = ".quakelive";
 		bspVersion = 47;
 		surfaceParms.insert( surfaceParms.end(), {
 		{ "snowsteps",      0,                          0,                          Q_SURF_SNOWSTEPS,           0,                          0,                          0 },
@@ -297,13 +295,12 @@ struct game_unvanquished : game_tremulous
 	game_unvanquished(){
 		arg = "unvanquished";
 		gamePath = "pkg";
-		homeBasePath = ".unvanquished";
+		homeBasePath = ".local/share/unvanquished";
 		magic = "unvanquished";
 		maxLMSurfaceVerts = 1048575;
 		maxSurfaceVerts = 1048575;
 		maxSurfaceIndexes = 1048575;
 		keepLights = true;
-		deluxeMode = 1;
 		miniMapMode = EMiniMapMode::White;
 		miniMapNameFormat = "../minimaps/%s.tga";
 	}
