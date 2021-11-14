@@ -874,7 +874,7 @@ int VisMain( Args& args ){
 
 	/* process arguments */
 	if ( args.empty() ) {
-		Error( "usage: vis [-threads #] [-level 0-4] [-fast] [-v] bspfile" );
+		Error( "usage: vis [-threads #] [-fast] [-v] bspfile" );
 	}
 	const char *fileName = args.takeBack();
 	const auto argsToInject = args.getVector();

@@ -325,7 +325,7 @@ static void HelpConvert()
 static void HelpExport()
 {
 	const std::vector<HelpOption> options = {
-		{"-export <filename.bsp>", "Copies lightmaps from the BSP to `filename/lightmap_0000.tga` ff"}
+		{"-export <filename.bsp>", "Copies lightmaps from the BSP to `filename/lightmap_NNNN.tga`"}
 	};
 
 	HelpOptions("Exporting lightmaps", 0, 80, options);
@@ -334,7 +334,7 @@ static void HelpExport()
 static void HelpImport()
 {
 	const std::vector<HelpOption> options = {
-		{"-import <filename.bsp>", "Copies lightmaps from `filename/lightmap_0000.tga` ff into the BSP"},
+		{"-import <filename.bsp>", "Copies lightmaps from `filename/lightmap_NNNN.tga` into the BSP"},
 	};
 
 	HelpOptions("Importing lightmaps", 0, 80, options);
