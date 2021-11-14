@@ -465,6 +465,7 @@ struct game_etut : game_default
 		maxLMSurfaceVerts = 1024;
 		maxSurfaceVerts = 1024;
 		maxSurfaceIndexes = 6144;
+		lightmapGamma = 2.2f;
 		lightmapsRGB = true;
 		// texturesRGB = false; /* texture sRGB (yes, this is incorrect, but we better match ET:UT) */
 		bspVersion = 47;
