@@ -147,10 +147,6 @@ public:
 
 #include <dlfcn.h>
 
-#ifndef RTLD_DEEPBIND
-#define RTLD_DEEPBIND 0
-#endif
-
 class DynamicLibrary
 {
 	void* m_library;
@@ -158,7 +154,7 @@ public:
 	typedef int ( *FunctionPointer )();
 
 	DynamicLibrary( const char* filename ){
-		m_library = dlopen( filename, RTLD_NOW | (RTLD_DEEPBIND + 0) );
+		m_library = dlopen( filename, RTLD_NOW );
 	}
 	~DynamicLibrary(){
 		if ( !failed() ) {
