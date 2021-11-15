@@ -117,7 +117,8 @@ inline void ray_transform( Ray& ray, const Matrix4& matrix ){
 }
 
 // closest-point-on-line
-inline double ray_squared_distance_to_point( const Ray& ray, const Vector3& point ){
+template<typename T, typename T2>
+inline double ray_squared_distance_to_point( const BasicRay<T>& ray, const BasicVector3<T2>& point ){
 	return vector3_length_squared(
 	           vector3_subtracted(
 	               point,

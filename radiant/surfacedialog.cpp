@@ -1686,7 +1686,7 @@ std::unique_ptr<PatchEdgeIter> PatchRowForwardIter::getCrossIter() const {
 }
 
 // returns 0 or 3 CW points
-static std::vector<const PatchControl*> Patch_getClosestTriangle( const PatchData& patch, const Winding& w ){
+static std::vector<const PatchControl*> Patch_getClosestTriangle( const PatchData& patch, const Winding& w, const Plane3& plane ){
 	/*
 	// height = 3
 	col  0  1  2  3  4
@@ -1705,6 +1705,15 @@ static std::vector<const PatchControl*> Patch_getClosestTriangle( const PatchDat
 		return vector3_length_squared( line_closest_point( line, p.m_vertex ) - p.m_vertex ) < eps;
 	};
 
+	const auto ray_close = [eps]( const DoubleRay& ray, const PatchControl& p ){
+		return ray_squared_distance_to_point( ray, p.m_vertex ) < eps;
+	};
+
+	const auto plane_close = [eps]( const Plane3& plane, const PatchControl& p ){
+		return std::pow( plane3_distance_to_point( plane, p.m_vertex ), 2 ) < eps;
+	};
+
+	/* try patchControls-on-edge */
 	for ( std::size_t i = w.numpoints - 1, j = 0; j < w.numpoints; i = j, ++j ){
 		const Line line( w[i].vertex, w[j].vertex );
 
@@ -1734,6 +1743,67 @@ static std::vector<const PatchControl*> Patch_getClosestTriangle( const PatchDat
 			}
 		}
 	}
+
+	/* try patchControls-on-edgeLine */
+	for ( std::size_t i = w.numpoints - 1, j = 0; j < w.numpoints; i = j, ++j ){
+		const DoubleRay ray = ray_for_points( DoubleVector3( w[i].vertex ), DoubleVector3( w[j].vertex ) );
+
+		for( auto& iter : {
+			std::unique_ptr<PatchEdgeIter>( new PatchRowBackIter( patch, 0 ) ),
+			std::unique_ptr<PatchEdgeIter>( new PatchRowForwardIter( patch, patch.getHeight() - 1 ) ),
+			std::unique_ptr<PatchEdgeIter>( new PatchColBackIter( patch, patch.getWidth() - 1 ) ),
+			std::unique_ptr<PatchEdgeIter>( new PatchColForwardIter( patch, 0 ) ) } )
+		{
+			for( const std::unique_ptr<PatchEdgeIter>& i0 = iter; *i0; *i0 += 2 ){
+				const PatchControl& p0 = **i0;
+				if( ray_close( ray, p0 ) ){
+					for( std::unique_ptr<PatchEdgeIter> i1 = *i0 + size_t{ 2 }; *i1; *i1 += 2 ){
+						const PatchControl& p1 = **i1;
+						if( ray_close( ray, p1 )
+						 && vector3_length_squared( p1.m_vertex - p0.m_vertex ) > eps ){
+							for( std::unique_ptr<PatchEdgeIter> i2 = *i0->getCrossIter() + size_t{ 1 }, i22 = *i1->getCrossIter() + size_t{ 1 }; *i2 && *i22; ++*i2, ++*i22 ){
+								for( const PatchControl& p2 : { **i2, **i22 } ){
+									if( triangle_ok( p0, p1, p2 ) ){
+										return { &p0, &p1, &p2 };
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/* try patchControls-on-facePlane */
+	{
+		for( auto& iter : {
+			std::unique_ptr<PatchEdgeIter>( new PatchRowBackIter( patch, 0 ) ),
+			std::unique_ptr<PatchEdgeIter>( new PatchRowForwardIter( patch, patch.getHeight() - 1 ) ),
+			std::unique_ptr<PatchEdgeIter>( new PatchColBackIter( patch, patch.getWidth() - 1 ) ),
+			std::unique_ptr<PatchEdgeIter>( new PatchColForwardIter( patch, 0 ) ) } )
+		{
+			for( const std::unique_ptr<PatchEdgeIter>& i0 = iter; *i0; *i0 += 2 ){
+				const PatchControl& p0 = **i0;
+				if( plane_close( plane, p0 ) ){
+					for( std::unique_ptr<PatchEdgeIter> i1 = *i0 + size_t{ 2 }; *i1; *i1 += 2 ){
+						const PatchControl& p1 = **i1;
+						if( plane_close( plane, p1 )
+						 && vector3_length_squared( p1.m_vertex - p0.m_vertex ) > eps ){
+							for( std::unique_ptr<PatchEdgeIter> i2 = *i0->getCrossIter() + size_t{ 1 }, i22 = *i1->getCrossIter() + size_t{ 1 }; *i2 && *i22; ++*i2, ++*i22 ){
+								for( const PatchControl& p2 : { **i2, **i22 } ){
+									if( triangle_ok( p0, p1, p2 ) ){
+										return { &p0, &p1, &p2 };
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return {};
 }
 
@@ -1790,7 +1860,7 @@ void Face_setTexture( Face& face, const char* shader, const FaceTexture& clipboa
 			Face_getTexture( face, dummy, g_faceTextureClipboard );
 		}
 		else if( clipboard.m_pasteSource == FaceTexture::ePatch ){
-			const auto pc = Patch_getClosestTriangle( clipboard.m_patch, face.getWinding() );
+			const auto pc = Patch_getClosestTriangle( clipboard.m_patch, face.getWinding(), face.getPlane().plane3() );
 			// todo in patch->brush, brush->patch shall we apply texture, if alignment part fails?
 			if( pc.empty() )
 				return;
@@ -1846,7 +1916,7 @@ void Patch_setTexture( Patch& patch, const char* shader, const FaceTexture& clip
 	else if( mode == ePasteSeamless ){
 		PatchData patchData;
 		patchData.copy( patch );
-		const auto pc = Patch_getClosestTriangle( patchData, clipboard.m_winding );
+		const auto pc = Patch_getClosestTriangle( patchData, clipboard.m_winding, clipboard.m_plane );
 
 		if( pc.empty() )
 			return;
