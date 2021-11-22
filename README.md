@@ -17,7 +17,7 @@ Ready-to-use packages are available in the [Releases section](/../../releases).
 
 Main focus is on Quake, Quake3 and Quake Live.
 
-Though other normally supported games should work too; See [unverified game configs](/../readme_files/unverified_gamepacks.7z "darkplaces&NewLine;doom3&NewLine;et&NewLine;heretic2&NewLine;hl&NewLine;ja&NewLine;jk2&NewLine;neverball&NewLine;nexuiz&NewLine;oa&NewLine;osirion&NewLine;prey&NewLine;q2&NewLine;q4&NewLine;quetoo&NewLine;sof2&NewLine;stvef&NewLine;trem&NewLine;turtlearena&NewLine;ufoai&NewLine;unvanquished&NewLine;warsow&NewLine;wolf&NewLine;xonotic").
+Though other normally supported games should work too. Releases include configs for the following games: Alien Arena, Darkplaces, Doom 3, Doombringer, Wolfenstein: Enemy Territory, Heretic II, Half-Life, Jedi Knight Jedi Academy, Jedi Knight II: Jedi Outcast, Kingpin, Neverball, Nexuiz, Open Arena, Project::OSiRiON, Prey, Quake II, Q3Rally, Quake 4, Quetoo, Smokin' Guns, Soldier of Fortune II - Double Helix, Star Trek Voyager : Elite Force, Tremulous, Turtle Arena, UFO:Alien Invasion, Unreal Arena, Unvanquished, Urban Terror, Warfork, Warsow, Return To Castle Wolfenstein, World of Padman, Xonotic, ZEQ2 Lite.
 
 ## Features
 
