@@ -1574,116 +1574,87 @@ void TextureClipboard_textureSelected( const char* shader ){
 
 class PatchEdgeIter
 {
-protected:
+public:
+	enum Type
+	{
+		eRowForward, // iterate inside a row
+		eRowBack,
+		eColForward, // iterate inside a column
+		eColBack
+	};
+private:
 	const PatchControl* const m_ctrl;
 	const int m_width;
 	const int m_height;
+	const Type m_type;
 	int m_row;
 	int m_col;
 	const PatchControl& ctrlAt( size_t row, size_t col ) const {
 		return m_ctrl[row * m_width + col];
 	}
 public:
-	PatchEdgeIter( const PatchData& patch ) : m_ctrl( patch.data() ), m_width( patch.getWidth() ), m_height( patch.getHeight() ){
+	PatchEdgeIter( const PatchData& patch, Type type, int rowOrCol ) :
+		m_ctrl( patch.data() ),
+		m_width( patch.getWidth() ),
+		m_height( patch.getHeight() ),
+		m_type( type ),
+		m_row( type == eColForward? 0 : type == eColBack? patch.getHeight() - 1 : rowOrCol ),
+		m_col( type == eRowForward? 0 : type == eRowBack? patch.getWidth() - 1 : rowOrCol ) {
 	}
 	PatchEdgeIter( const PatchEdgeIter& other ) = default;
-	virtual ~PatchEdgeIter(){};
-	virtual std::unique_ptr<PatchEdgeIter> clone() const = 0;
+	PatchEdgeIter( const PatchEdgeIter& other, Type type ) :
+		m_ctrl( other.m_ctrl ),
+		m_width( other.m_width ),
+		m_height( other.m_height ),
+		m_type( type ),
+		m_row( other.m_row ),
+		m_col( other.m_col ) {
+	}
 	const PatchControl& operator*() const {
 		return ctrlAt( m_row, m_col );
 	}
 	operator bool() const {
 		return m_row >=0 && m_row < m_height && m_col >=0 && m_col < m_width;
 	}
-	virtual void operator++() = 0;
-	void operator+=( size_t inc ){
-		while( inc-- )
-			operator++();
+	void operator++(){
+		operator+=( 1 );
 	}
-	std::unique_ptr<PatchEdgeIter> operator+( size_t inc ) const {
-		std::unique_ptr<PatchEdgeIter> it = clone();
-		*it += inc;
+	void operator+=( size_t inc ){
+		switch ( m_type )
+		{
+		case eRowForward:
+			m_col += inc;
+			break;
+		case eRowBack:
+			m_col -= inc;
+			break;
+		case eColForward:
+			m_row += inc;
+			break;
+		case eColBack:
+			m_row -= inc;
+			break;
+		}
+	}
+	PatchEdgeIter operator+( size_t inc ) const {
+		PatchEdgeIter it( *this );
+		it += inc;
 		return it;
 	}
-	virtual std::unique_ptr<PatchEdgeIter> getCrossIter() const = 0;
-};
-
-class PatchRowBackIter : public PatchEdgeIter
-{
-public:
-	PatchRowBackIter( const PatchData& patch, size_t row ) : PatchEdgeIter( patch ){
-		m_row = row;
-		m_col = m_width - 1;
-	}
-	PatchRowBackIter( const PatchEdgeIter& base ) : PatchEdgeIter( base ){}
-	std::unique_ptr<PatchEdgeIter> clone() const override {
-		return std::unique_ptr<PatchEdgeIter>( new PatchRowBackIter( *this ) );
-	}
-	void operator++() override {
-		--m_col;
-	}
-	std::unique_ptr<PatchEdgeIter> getCrossIter() const override;
-};
-class PatchRowForwardIter : public PatchEdgeIter
-{
-public:
-	PatchRowForwardIter( const PatchData& patch, size_t row ) : PatchEdgeIter( patch ){
-		m_row = row;
-		m_col = 0;
-	}
-	PatchRowForwardIter( const PatchEdgeIter& base ) : PatchEdgeIter( base ){}
-	std::unique_ptr<PatchEdgeIter> clone() const override {
-		return std::unique_ptr<PatchEdgeIter>( new PatchRowForwardIter( *this ) );
-	}
-	void operator++() override {
-		++m_col;
-	}
-	std::unique_ptr<PatchEdgeIter> getCrossIter() const override;
-};
-class PatchColBackIter : public PatchEdgeIter
-{
-public:
-	PatchColBackIter( const PatchData& patch, size_t col ) : PatchEdgeIter( patch ){
-		m_row = m_height - 1;
-		m_col = col;
-	}
-	PatchColBackIter( const PatchEdgeIter& base ) : PatchEdgeIter( base ){}
-	std::unique_ptr<PatchEdgeIter> clone() const override {
-		return std::unique_ptr<PatchEdgeIter>( new PatchColBackIter( *this ) );
-	}
-	void operator++() override {
-		--m_row;
-	}
-	std::unique_ptr<PatchEdgeIter> getCrossIter() const override {
-		return std::unique_ptr<PatchEdgeIter>( new PatchRowBackIter( *this ) );
+	PatchEdgeIter getCrossIter() const {
+		switch ( m_type )
+		{
+		case eRowForward:
+			return PatchEdgeIter( *this, eColBack );
+		case eRowBack:
+			return PatchEdgeIter( *this, eColForward );
+		case eColForward:
+			return PatchEdgeIter( *this, eRowForward );
+		case eColBack:
+			return PatchEdgeIter( *this, eRowBack );
+		}
 	}
 };
-class PatchColForwardIter : public PatchEdgeIter
-{
-public:
-	PatchColForwardIter( const PatchData& patch, size_t col ) : PatchEdgeIter( patch ){
-		m_row = 0;
-		m_col = col;
-	}
-	PatchColForwardIter( const PatchEdgeIter& base ) : PatchEdgeIter( base ){}
-	std::unique_ptr<PatchEdgeIter> clone() const override {
-		return std::unique_ptr<PatchEdgeIter>( new PatchColForwardIter( *this ) );
-	}
-	void operator++() override {
-		++m_row;
-	}
-	std::unique_ptr<PatchEdgeIter> getCrossIter() const override {
-		return std::unique_ptr<PatchEdgeIter>( new PatchRowForwardIter( *this ) );
-	}
-};
-
-std::unique_ptr<PatchEdgeIter> PatchRowBackIter::getCrossIter() const {
-	return std::unique_ptr<PatchEdgeIter>( new PatchColForwardIter( *this ) );
-}
-
-std::unique_ptr<PatchEdgeIter> PatchRowForwardIter::getCrossIter() const {
-	return std::unique_ptr<PatchEdgeIter>( new PatchColBackIter( *this ) );
-}
 
 // returns 0 or 3 CW points
 static std::vector<const PatchControl*> Patch_getClosestTriangle( const PatchData& patch, const Winding& w, const Plane3& plane ){
@@ -1701,110 +1672,64 @@ static std::vector<const PatchControl*> Patch_getClosestTriangle( const PatchDat
 
 	const double eps = .25;
 
-	const auto line_close = [eps]( const Line& line, const PatchControl& p ){
-		return vector3_length_squared( line_closest_point( line, p.m_vertex ) - p.m_vertex ) < eps;
-	};
+	std::vector<const PatchControl*> ret;
 
-	const auto ray_close = [eps]( const DoubleRay& ray, const PatchControl& p ){
-		return ray_squared_distance_to_point( ray, p.m_vertex ) < eps;
-	};
-
-	const auto plane_close = [eps]( const Plane3& plane, const PatchControl& p ){
-		return std::pow( plane3_distance_to_point( plane, p.m_vertex ), 2 ) < eps;
+	const auto find_triangle = [&ret, &patch, triangle_ok, eps]( const auto& check_func ){
+		for( auto& iter : {
+			PatchEdgeIter( patch, PatchEdgeIter::eRowBack, 0 ),
+			PatchEdgeIter( patch, PatchEdgeIter::eRowForward, patch.getHeight() - 1 ),
+			PatchEdgeIter( patch, PatchEdgeIter::eColBack, patch.getWidth() - 1 ),
+			PatchEdgeIter( patch, PatchEdgeIter::eColForward, 0 ) } )
+		{
+			for( PatchEdgeIter i0 = iter; i0; i0 += 2 ){
+				const PatchControl& p0 = *i0;
+				if( check_func( p0 ) ){
+					for( PatchEdgeIter i1 = i0 + size_t{ 2 }; i1; i1 += 2 ){
+						const PatchControl& p1 = *i1;
+						if( check_func( p1 )
+						 && vector3_length_squared( p1.m_vertex - p0.m_vertex ) > eps ){
+							for( PatchEdgeIter i2 = i0.getCrossIter() + size_t{ 1 }, i22 = i1.getCrossIter() + size_t{ 1 }; i2 && i22; ++i2, ++i22 ){
+								for( const PatchControl& p2 : { *i2, *i22 } ){
+									if( triangle_ok( p0, p1, p2 ) ){
+										ret = { &p0, &p1, &p2 };
+										return;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	};
 
 	/* try patchControls-on-edge */
-	for ( std::size_t i = w.numpoints - 1, j = 0; j < w.numpoints; i = j, ++j ){
-		const Line line( w[i].vertex, w[j].vertex );
-
-		for( auto& iter : {
-			std::unique_ptr<PatchEdgeIter>( new PatchRowBackIter( patch, 0 ) ),
-			std::unique_ptr<PatchEdgeIter>( new PatchRowForwardIter( patch, patch.getHeight() - 1 ) ),
-			std::unique_ptr<PatchEdgeIter>( new PatchColBackIter( patch, patch.getWidth() - 1 ) ),
-			std::unique_ptr<PatchEdgeIter>( new PatchColForwardIter( patch, 0 ) ) } )
-		{
-			for( const std::unique_ptr<PatchEdgeIter>& i0 = iter; *i0; *i0 += 2 ){
-				const PatchControl& p0 = **i0;
-				if( line_close( line, p0 ) ){
-					for( std::unique_ptr<PatchEdgeIter> i1 = *i0 + size_t{ 2 }; *i1; *i1 += 2 ){
-						const PatchControl& p1 = **i1;
-						if( line_close( line, p1 )
-						 && vector3_length_squared( p1.m_vertex - p0.m_vertex ) > eps ){
-							for( std::unique_ptr<PatchEdgeIter> i2 = *i0->getCrossIter() + size_t{ 1 }, i22 = *i1->getCrossIter() + size_t{ 1 }; *i2 && *i22; ++*i2, ++*i22 ){
-								for( const PatchControl& p2 : { **i2, **i22 } ){
-									if( triangle_ok( p0, p1, p2 ) ){
-										return { &p0, &p1, &p2 };
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+	for ( std::size_t i = w.numpoints - 1, j = 0; j < w.numpoints && ret.empty(); i = j, ++j )
+	{
+		const auto line_close = [eps, line = Line( w[i].vertex, w[j].vertex )]( const PatchControl& p ){
+			return vector3_length_squared( line_closest_point( line, p.m_vertex ) - p.m_vertex ) < eps;
+		};
+		find_triangle( line_close );
 	}
 
 	/* try patchControls-on-edgeLine */
-	for ( std::size_t i = w.numpoints - 1, j = 0; j < w.numpoints; i = j, ++j ){
-		const DoubleRay ray = ray_for_points( DoubleVector3( w[i].vertex ), DoubleVector3( w[j].vertex ) );
-
-		for( auto& iter : {
-			std::unique_ptr<PatchEdgeIter>( new PatchRowBackIter( patch, 0 ) ),
-			std::unique_ptr<PatchEdgeIter>( new PatchRowForwardIter( patch, patch.getHeight() - 1 ) ),
-			std::unique_ptr<PatchEdgeIter>( new PatchColBackIter( patch, patch.getWidth() - 1 ) ),
-			std::unique_ptr<PatchEdgeIter>( new PatchColForwardIter( patch, 0 ) ) } )
-		{
-			for( const std::unique_ptr<PatchEdgeIter>& i0 = iter; *i0; *i0 += 2 ){
-				const PatchControl& p0 = **i0;
-				if( ray_close( ray, p0 ) ){
-					for( std::unique_ptr<PatchEdgeIter> i1 = *i0 + size_t{ 2 }; *i1; *i1 += 2 ){
-						const PatchControl& p1 = **i1;
-						if( ray_close( ray, p1 )
-						 && vector3_length_squared( p1.m_vertex - p0.m_vertex ) > eps ){
-							for( std::unique_ptr<PatchEdgeIter> i2 = *i0->getCrossIter() + size_t{ 1 }, i22 = *i1->getCrossIter() + size_t{ 1 }; *i2 && *i22; ++*i2, ++*i22 ){
-								for( const PatchControl& p2 : { **i2, **i22 } ){
-									if( triangle_ok( p0, p1, p2 ) ){
-										return { &p0, &p1, &p2 };
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+	for ( std::size_t i = w.numpoints - 1, j = 0; j < w.numpoints && ret.empty(); i = j, ++j )
+	{
+		const auto ray_close = [eps, ray = ray_for_points( DoubleVector3( w[i].vertex ), DoubleVector3( w[j].vertex ) )]( const PatchControl& p ){
+			return ray_squared_distance_to_point( ray, p.m_vertex ) < eps;
+		};
+		find_triangle( ray_close );
 	}
 
 	/* try patchControls-on-facePlane */
-	{
-		for( auto& iter : {
-			std::unique_ptr<PatchEdgeIter>( new PatchRowBackIter( patch, 0 ) ),
-			std::unique_ptr<PatchEdgeIter>( new PatchRowForwardIter( patch, patch.getHeight() - 1 ) ),
-			std::unique_ptr<PatchEdgeIter>( new PatchColBackIter( patch, patch.getWidth() - 1 ) ),
-			std::unique_ptr<PatchEdgeIter>( new PatchColForwardIter( patch, 0 ) ) } )
-		{
-			for( const std::unique_ptr<PatchEdgeIter>& i0 = iter; *i0; *i0 += 2 ){
-				const PatchControl& p0 = **i0;
-				if( plane_close( plane, p0 ) ){
-					for( std::unique_ptr<PatchEdgeIter> i1 = *i0 + size_t{ 2 }; *i1; *i1 += 2 ){
-						const PatchControl& p1 = **i1;
-						if( plane_close( plane, p1 )
-						 && vector3_length_squared( p1.m_vertex - p0.m_vertex ) > eps ){
-							for( std::unique_ptr<PatchEdgeIter> i2 = *i0->getCrossIter() + size_t{ 1 }, i22 = *i1->getCrossIter() + size_t{ 1 }; *i2 && *i22; ++*i2, ++*i22 ){
-								for( const PatchControl& p2 : { **i2, **i22 } ){
-									if( triangle_ok( p0, p1, p2 ) ){
-										return { &p0, &p1, &p2 };
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+	if( ret.empty() ){
+		const auto plane_close = [eps, plane]( const PatchControl& p ){
+			return std::pow( plane3_distance_to_point( plane, p.m_vertex ), 2 ) < eps;
+		};
+		find_triangle( plane_close );
 	}
 
-	return {};
+	return ret;
 }
 
 
