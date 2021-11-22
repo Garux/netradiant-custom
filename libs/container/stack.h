@@ -37,10 +37,7 @@ class Stack : public DefaultAllocator<Type>
 {
 	typedef DefaultAllocator<Type> Allocator;
 
-	enum
-	{
-		DEFAULT_CAPACITY = 4,
-	};
+	static constexpr size_t DEFAULT_CAPACITY = 4;
 
 	typedef Type* pointer;
 	typedef const Type* const_pointer;
@@ -58,7 +55,7 @@ private:
 		Allocator::construct( m_end++, value );
 	}
 	void insert_overflow( const Type& value ){
-		const std::size_t new_capacity = ( m_capacity ) ? m_capacity + m_capacity : std::size_t( DEFAULT_CAPACITY );
+		const std::size_t new_capacity = ( m_capacity ) ? m_capacity + m_capacity : DEFAULT_CAPACITY;
 		const pointer new_data = Allocator::allocate( new_capacity );
 		const pointer new_end = std::copy( m_data, m_end, new_data );
 

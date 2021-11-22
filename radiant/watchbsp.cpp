@@ -61,7 +61,7 @@ void message_print( message_info_t* self, const char* characters, std::size_t le
 	const char* end = characters + length;
 	while ( characters != end )
 	{
-		std::size_t space = message_info_t::bufsize - 1 - self->m_length;
+		std::size_t space = std::size( self->m_buffer ) - 1 - self->m_length;
 		if ( space == 0 ) {
 			message_flush( self );
 		}

@@ -55,11 +55,7 @@ void Pointfile_Parse( CPointfile& pointfile );
 
 class CPointfile : public ISAXHandler, public Renderable, public OpenGLRenderable
 {
-	enum
-	{
-		MAX_POINTFILE = 8192,
-	};
-	Vector3 s_pointvecs[MAX_POINTFILE];
+	Vector3 s_pointvecs[8192];
 	std::size_t s_num_points;
 	int m_displaylist;
 	static Shader* m_renderstate;
@@ -149,7 +145,7 @@ void CPointfile::Init(){
 }
 
 void CPointfile::PushPoint( const Vector3& v ){
-	if ( s_num_points < MAX_POINTFILE ) {
+	if ( s_num_points < std::size( s_pointvecs ) ) {
 		s_pointvecs[s_num_points] = v;
 		++s_num_points;
 	}

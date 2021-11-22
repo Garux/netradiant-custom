@@ -398,9 +398,8 @@ public:
 /// \brief A wrapper for a TextOutputStream, optimised for writing a single character at a time.
 class SingleCharacterOutputStream : public TextOutputStream
 {
-	enum unnamed0 { m_bufsize = 1024 };
 	TextOutputStream& m_ostream;
-	char m_buffer[m_bufsize];
+	char m_buffer[1024];
 	char* m_pos;
 	const char* m_end;
 
@@ -415,7 +414,7 @@ class SingleCharacterOutputStream : public TextOutputStream
 		reset();
 	}
 public:
-	SingleCharacterOutputStream( TextOutputStream& ostream ) : m_ostream( ostream ), m_pos( m_buffer ), m_end( m_buffer + m_bufsize ){
+	SingleCharacterOutputStream( TextOutputStream& ostream ) : m_ostream( ostream ), m_pos( m_buffer ), m_end( m_buffer + std::size( m_buffer ) ){
 	}
 	~SingleCharacterOutputStream(){
 		flush();

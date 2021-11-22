@@ -57,8 +57,7 @@ struct message_info_t
 	int geometry_depth; // are we parsing some geometry information (i.e. do we forward the SAX calls?)
 	ISAXHandler* pGeometry; // the handler
 
-	enum unnamed0 { bufsize = 1024 };
-	char m_buffer[bufsize];
+	char m_buffer[1024];
 	std::size_t m_length;
 };
 

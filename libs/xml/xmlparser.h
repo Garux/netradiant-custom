@@ -180,7 +180,6 @@ public:
 
 class XMLStreamParser : public XMLExporter
 {
-	enum unnamed0 { BUFSIZE = 1024 };
 public:
 	XMLStreamParser( TextInputStream& istream )
 		: m_istream( istream ){
@@ -188,7 +187,7 @@ public:
 	virtual void exportXML( XMLImporter& importer ){
 		//bool wellFormed = false;
 
-		char chars[BUFSIZE];
+		char chars[1024];
 		std::size_t res = m_istream.read( chars, 4 );
 		if ( res > 0 ) {
 			XMLSAXImporter sax( importer );
@@ -196,7 +195,7 @@ public:
 			xmlParserCtxtPtr ctxt = xmlCreatePushParserCtxt( sax.callbacks(), sax.context(), chars, static_cast<int>( res ), 0 );
 			ctxt->replaceEntities = 1;
 
-			while ( ( res = m_istream.read( chars, BUFSIZE ) ) > 0 )
+			while ( ( res = m_istream.read( chars, std::size( chars ) ) ) > 0 )
 			{
 				xmlParseChunk( ctxt, chars, static_cast<int>( res ), 0 );
 			}
