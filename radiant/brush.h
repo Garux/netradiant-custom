@@ -860,7 +860,11 @@ inline double quantiseInteger( double f ){
 }
 
 inline double quantiseFloating( double f ){
+#if 0
 	return float_snapped( f, 1.f / ( 1 << 16 ) );
+#else
+	return f;
+#endif
 }
 
 typedef double ( *QuantiseFunc )( double f );
