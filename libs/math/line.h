@@ -28,32 +28,37 @@
 #include "math/plane.h"
 
 /// \brief A line segment defined by a start point and and end point.
-class Line
+template<typename T>
+class Line___
 {
 public:
-	Vector3 start, end;
+	BasicVector3<T> start, end;
 
-	Line(){
+	Line___(){
 	}
-	Line( const Vector3& start_, const Vector3& end_ ) : start( start_ ), end( end_ ){
+	Line___( const BasicVector3<T>& start_, const BasicVector3<T>& end_ ) : start( start_ ), end( end_ ){
 	}
 };
 
-inline Vector3 line_closest_point( const Line& line, const Vector3& point ){
-	Vector3 v = line.end - line.start;
-	Vector3 w = point - line.start;
+using Line = Line___<float>;
+using DoubleLine = Line___<double>;
 
-	double c1 = vector3_dot( w,v );
+template<typename T>
+inline BasicVector3<T> line_closest_point( const Line___<T>& line, const BasicVector3<T>& point ){
+	BasicVector3<T> v = line.end - line.start;
+	BasicVector3<T> w = point - line.start;
+
+	double c1 = vector3_dot( w, v );
 	if ( c1 <= 0 ) {
 		return line.start;
 	}
 
-	double c2 = vector3_dot( v,v );
+	double c2 = vector3_dot( v, v );
 	if ( c2 <= c1 ) {
 		return line.end;
 	}
 
-	return Vector3( line.start + v * ( c1 / c2 ) );
+	return BasicVector3<T>( line.start + v * ( c1 / c2 ) );
 }
 
 
