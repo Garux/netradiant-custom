@@ -253,7 +253,7 @@ brushsplit_t Winding_ClassifyPlane( const Winding& winding, const Plane3& plane 
 	return split;
 }
 
-void WindingVertex_ClassifyPlane( const Vector3& vertex, const Plane3& plane, brushsplit_t& split ){
+void WindingVertex_ClassifyPlane( const DoubleVector3& vertex, const Plane3& plane, brushsplit_t& split ){
 	++split.counts[Winding_ClassifyDistance( plane3_distance_to_point( plane, vertex ), ON_EPSILON )];
 }
 
@@ -339,7 +339,7 @@ std::size_t Winding_Opposite( const Winding& winding, const std::size_t index, c
 	double dist_best = 0;
 	std::size_t index_best = c_brush_maxFaces;
 
-	Ray edge( ray_for_points( winding[index].vertex, winding[other].vertex ) );
+	const DoubleRay edge( ray_for_points( winding[index].vertex, winding[other].vertex ) );
 
 	for ( std::size_t i = 0; i < winding.numpoints; ++i )
 	{
@@ -347,7 +347,7 @@ std::size_t Winding_Opposite( const Winding& winding, const std::size_t index, c
 			continue;
 		}
 
-		double dist_squared = ray_squared_distance_to_point( edge, winding[i].vertex );
+		const double dist_squared = ray_squared_distance_to_point( edge, winding[i].vertex );
 
 		if ( dist_squared > dist_best ) {
 			dist_best = dist_squared;
@@ -368,20 +368,20 @@ void Winding_Centroid( const Winding& winding, const Plane3& plane, Vector3& cen
 	const indexremap_t remap = indexremap_for_projectionaxis( axis );
 	for ( std::size_t i = winding.numpoints - 1, j = 0; j < winding.numpoints; i = j, ++j )
 	{
-		const double ai = static_cast<double>( winding[i].vertex[remap.x] ) * winding[j].vertex[remap.y] - static_cast<double>( winding[j].vertex[remap.x] ) * winding[i].vertex[remap.y];
+		const double ai = winding[i].vertex[remap.x] * winding[j].vertex[remap.y] - winding[j].vertex[remap.x] * winding[i].vertex[remap.y];
 		area2 += ai;
-		x_sum += ( static_cast<double>( winding[j].vertex[remap.x] ) + winding[i].vertex[remap.x] ) * ai;
-		y_sum += ( static_cast<double>( winding[j].vertex[remap.y] ) + winding[i].vertex[remap.y] ) * ai;
+		x_sum += ( winding[j].vertex[remap.x] + winding[i].vertex[remap.x] ) * ai;
+		y_sum += ( winding[j].vertex[remap.y] + winding[i].vertex[remap.y] ) * ai;
 	}
 
-	centroid[remap.x] = static_cast<float>( x_sum / ( 3 * area2 ) );
-	centroid[remap.y] = static_cast<float>( y_sum / ( 3 * area2 ) );
+	centroid[remap.x] = x_sum / ( 3 * area2 );
+	centroid[remap.y] = y_sum / ( 3 * area2 );
 	{
 		Ray ray( Vector3( 0, 0, 0 ), Vector3( 0, 0, 0 ) );
 		ray.origin[remap.x] = centroid[remap.x];
 		ray.origin[remap.y] = centroid[remap.y];
 		ray.direction[remap.z] = 1;
-		centroid[remap.z] = static_cast<float>( ray_distance_to_plane( ray, plane ) );
+		centroid[remap.z] = ray_distance_to_plane( ray, plane );
 	}
 //	windingTestInfinity();
 }

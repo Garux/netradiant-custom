@@ -1034,7 +1034,7 @@ private:
 						const auto addSidePlanes = [&outBrush, shader, &projection]( const Winding& winding0, const Winding& winding2, const DoubleVector3 normal, const bool swap ){
 							for( std::size_t index0 = 0; index0 < winding0.numpoints; ++index0 ){
 								const std::size_t next = Winding_next( winding0, index0 );
-								Vector3 BestPoint;
+								DoubleVector3 BestPoint;
 								double bestdot = -1;
 								for( std::size_t index2 = 0; index2 < winding2.numpoints; ++index2 ){
 									const double dot = vector3_dot(
@@ -1066,7 +1066,7 @@ private:
 						const auto addSidePlanes = [&outBrush, shader, &projection]( const Winding& winding0, const Brush& brush2, const Plane3 plane, const bool swap ){
 							for( std::size_t index0 = 0; index0 < winding0.numpoints; ++index0 ){
 								const std::size_t next = Winding_next( winding0, index0 );
-								Vector3 BestPoint;
+								DoubleVector3 BestPoint;
 								double bestdist = 999999;
 								for( const Face* f : brush2 ) {
 									const Winding& winding2 = f->getWinding();
@@ -3170,9 +3170,9 @@ public:
 			BestPoint(
 			    matrix4_clip_triangle(
 			        m_local2view,
-			        reinterpret_cast<const Vector3&>( vertices[0] ),
-			        reinterpret_cast<const Vector3&>( vertices[i + 1] ),
-			        reinterpret_cast<const Vector3&>( vertices[i + 2] ),
+			        reinterpret_cast<const DoubleVector3&>( vertices[0] ),
+			        reinterpret_cast<const DoubleVector3&>( vertices[i + 1] ),
+			        reinterpret_cast<const DoubleVector3&>( vertices[i + 2] ),
 			        clipped
 			    ),
 			    clipped,
@@ -4100,21 +4100,23 @@ Vector3 testSelected_scene_snapped_point( const SelectionVolume& test, ClipperSe
 		float bestDist = FLT_MAX;
 		Vector3 wannabePoint;
 		for ( Winding::const_iterator prev = face.getWinding().end() - 1, curr = face.getWinding().begin(); curr != face.getWinding().end(); prev = curr, ++curr ){
+			const Vector3 v1( prev->vertex );
+			const Vector3 v2( curr->vertex );
 			{	/* try vertices */
-				const float dist = vector3_length_squared( ( *curr ).vertex - point );
+				const float dist = vector3_length_squared( v2 - point );
 				if( dist < bestDist ){
-					wannabePoint = ( *curr ).vertex;
+					wannabePoint = v2;
 					bestDist = dist;
 				}
 			}
 			{	/* try edges */
-				Vector3 edgePoint = line_closest_point( Line( ( *prev ).vertex, ( *curr ).vertex ), point );
-				if( edgePoint != ( *prev ).vertex && edgePoint != ( *curr ).vertex ){
-					const Vector3 edgedir = vector3_normalised( ( *curr ).vertex - ( *prev ).vertex );
+				Vector3 edgePoint = line_closest_point( Line( v1, v2 ), point );
+				if( edgePoint != v1 && edgePoint != v2 ){
+					const Vector3 edgedir = vector3_normalised( v2 - v1 );
 					const std::size_t maxi = vector3_max_abs_component_index( edgedir );
-					// ( *prev ).vertex[maxi] + edgedir[maxi] * coef = float_snapped( point[maxi], GetSnapGridSize() )
-					const float coef = ( float_snapped( point[maxi], GetSnapGridSize() ) - ( *prev ).vertex[maxi] ) / edgedir[maxi];
-					edgePoint = ( *prev ).vertex + edgedir * coef;
+					// v1[maxi] + edgedir[maxi] * coef = float_snapped( point[maxi], GetSnapGridSize() )
+					const float coef = ( float_snapped( point[maxi], GetSnapGridSize() ) - v1[maxi] ) / edgedir[maxi];
+					edgePoint = v1 + edgedir * coef;
 					const float dist = vector3_length_squared( edgePoint - point );
 					if( dist < bestDist ){
 						wannabePoint = edgePoint;

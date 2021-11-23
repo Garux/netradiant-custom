@@ -1239,7 +1239,7 @@ void SmoothMetaTriangles(){
 						smoothed[ j ] = true;
 
 						/* see if this normal has already been voted */
-						if( votes.end() == std::find_if( votes.begin(), votes.end(),
+						if( std::none_of( votes.begin(), votes.end(),
 							[normal = verts[j]->normal]( const Vector3& vote ){
 								return vector3_equal_epsilon( normal, vote, EQUAL_NORMAL_EPSILON );
 							} ) )

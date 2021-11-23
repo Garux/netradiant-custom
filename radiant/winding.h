@@ -85,7 +85,7 @@ const std::size_t c_brush_maxFaces = 1024;
 class WindingVertex
 {
 public:
-	Vector3 vertex;
+	DoubleVector3 vertex;
 	Vector2 texcoord;
 	Vector3 tangent;
 	Vector3 bitangent;
@@ -210,9 +210,9 @@ inline void Winding_forFixedWinding( Winding& winding, const FixedWinding& fixed
 	winding.numpoints = fixed.size();
 	for ( std::size_t i = 0; i < fixed.size(); ++i )
 	{
-		winding[i].vertex[0] = static_cast<float>( fixed[i].vertex[0] );
-		winding[i].vertex[1] = static_cast<float>( fixed[i].vertex[1] );
-		winding[i].vertex[2] = static_cast<float>( fixed[i].vertex[2] );
+		winding[i].vertex[0] = fixed[i].vertex[0];
+		winding[i].vertex[1] = fixed[i].vertex[1];
+		winding[i].vertex[2] = fixed[i].vertex[2];
 		winding[i].adjacent = fixed[i].adjacent;
 	}
 }
@@ -232,7 +232,7 @@ void Winding_createInfinite( FixedWinding& w, const Plane3& plane, double infini
 const double ON_EPSILON = 1.0 / ( 1 << 8 );
 
 /// \brief Returns true if edge (\p x, \p y) is smaller than the epsilon used to classify winding points against a plane.
-inline bool Edge_isDegenerate( const Vector3& x, const Vector3& y ){
+inline bool Edge_isDegenerate( const DoubleVector3& x, const DoubleVector3& y ){
 	return vector3_length_squared( y - x ) < ( ON_EPSILON * ON_EPSILON );
 }
 
@@ -255,7 +255,7 @@ struct brushsplit_t
 };
 
 brushsplit_t Winding_ClassifyPlane( const Winding& w, const Plane3& plane );
-void WindingVertex_ClassifyPlane( const Vector3& vertex, const Plane3& plane, brushsplit_t& split );
+void WindingVertex_ClassifyPlane( const DoubleVector3& vertex, const Plane3& plane, brushsplit_t& split );
 
 bool Winding_PlanesConcave( const Winding& w1, const Winding& w2, const Plane3& plane1, const Plane3& plane2 );
 bool Winding_TestPlane( const Winding& w, const Plane3& plane, bool flipped );

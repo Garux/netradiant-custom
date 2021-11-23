@@ -52,7 +52,7 @@ public:
 	virtual void gatherComponentsHighlight( std::vector<std::vector<Vector3>>& polygons, SelectionIntersection& intersection, SelectionTest& test, SelectionSystem::EComponentMode mode ) const = 0;
 };
 
-typedef std::function<void( const Vector3& )> Vector3Callback;
+typedef std::function<void( const DoubleVector3& )> Vector3Callback;
 
 class ComponentEditable
 {

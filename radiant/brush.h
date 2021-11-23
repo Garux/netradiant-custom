@@ -79,12 +79,12 @@ inline bool texdef_sane( const texdef_t& texdef ){
 }
 
 inline void Winding_DrawWireframe( const Winding& winding ){
-	glVertexPointer( 3, GL_FLOAT, sizeof( WindingVertex ), &winding.points.data()->vertex );
+	glVertexPointer( 3, GL_DOUBLE, sizeof( WindingVertex ), &winding.points.data()->vertex );
 	glDrawArrays( GL_LINE_LOOP, 0, GLsizei( winding.numpoints ) );
 }
 
 inline void Winding_Draw( const Winding& winding, const Vector3& normal, RenderStateFlags state ){
-	glVertexPointer( 3, GL_FLOAT, sizeof( WindingVertex ), &winding.points.data()->vertex );
+	glVertexPointer( 3, GL_DOUBLE, sizeof( WindingVertex ), &winding.points.data()->vertex );
 
 	Vector3 normals[c_brush_maxFaces];
 
@@ -823,7 +823,7 @@ public:
 			updateSource();
 		}
 	}
-	void copy( const Vector3& p0, const Vector3& p1, const Vector3& p2 ){
+	void copy( const DoubleVector3& p0, const DoubleVector3& p1, const DoubleVector3& p2 ){
 		if ( !isDoom3Plane() ) {
 			m_planepts[0] = p0;
 			m_planepts[1] = p1;
@@ -980,14 +980,14 @@ public:
 		m_undoable_observer( 0 ),
 		m_map( 0 ){
 		m_shader.attach( *this );
-		m_plane.copy( Vector3( 0, 0, 0 ), Vector3( 64, 0, 0 ), Vector3( 0, 64, 0 ) );
+		m_plane.copy( DoubleVector3( 0, 0, 0 ), DoubleVector3( 64, 0, 0 ), DoubleVector3( 0, 64, 0 ) );
 		m_texdef.setBasis( m_plane.plane3().normal() );
 		planeChanged();
 	}
 	Face(
-	    const Vector3& p0,
-	    const Vector3& p1,
-	    const Vector3& p2,
+	    const DoubleVector3& p0,
+	    const DoubleVector3& p1,
+	    const DoubleVector3& p2,
 	    const char* shader,
 	    const TextureProjection& projection,
 	    FaceObserver* observer
@@ -1541,7 +1541,7 @@ public:
 class SelectableVertex
 {
 public:
-	Vector3 getVertex() const {
+	DoubleVector3 getVertex() const {
 		return getFace().getWinding()[m_faceVertex.getVertex()].vertex;
 	}
 
@@ -1930,11 +1930,11 @@ public:
 	class VertexModeVertex
 	{
 	public:
-		const Vector3 m_vertex;
-		Vector3 m_vertexTransformed;
+		const DoubleVector3 m_vertex;
+		DoubleVector3 m_vertexTransformed;
 		const bool m_selected;
 		std::vector<const Face*> m_faces;
-		VertexModeVertex( const Vector3& vertex, const bool selected ) : m_vertex( vertex ), m_vertexTransformed( vertex ), m_selected( selected ) {
+		VertexModeVertex( const DoubleVector3& vertex, const bool selected ) : m_vertex( vertex ), m_vertexTransformed( vertex ), m_selected( selected ) {
 		}
 	};
 	typedef std::vector<VertexModeVertex> VertexModeVertices;
@@ -2030,7 +2030,7 @@ public:
 	}
 
 /// \brief Appends a new face constructed from the parameters to the end of the face list.
-	Face* addPlane( const Vector3& p0, const Vector3& p1, const Vector3& p2, const char* shader, const TextureProjection& projection ){
+	Face* addPlane( const DoubleVector3& p0, const DoubleVector3& p1, const DoubleVector3& p2, const char* shader, const TextureProjection& projection ){
 		if ( m_faces.size() == c_brush_maxFaces ) {
 			return 0;
 		}
@@ -3357,7 +3357,7 @@ public:
 		}
 		while ( faceVertex.getFace() != m_vertex->m_faceVertex.getFace() );
 	}
-	bool vertex_select( const Vector3& vertex ){
+	bool vertex_select( const DoubleVector3& vertex ){
 		if( vector3_length_squared( vertex - m_vertex->getVertex() ) < ( 0.1 * 0.1 ) ){
 			setSelected( true );
 			return true;
@@ -4036,7 +4036,7 @@ public:
 					v.pop_back();
 			}
 			std::vector<bool> ok( v.size(), true );
-			gatherSelectedComponents( [&]( const Vector3 & value ) {
+			gatherSelectedComponents( [&]( const DoubleVector3 & value ) {
 				for( std::size_t i = 0; i < v.size(); ++i )
 					if( vector3_length_squared( v[i].m_vertex - value ) < 0.05 * 0.05 )
 						ok[i] = false;

@@ -305,17 +305,17 @@ void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::si
 		matrix4_multiply_by_matrix4( local2tex, xyz2st );
 	}
 
-	Vector3 tangent( vector3_normalised( vector4_to_vector3( matrix4_transposed( local2tex ).x() ) ) );
-	Vector3 bitangent( vector3_normalised( vector4_to_vector3( matrix4_transposed( local2tex ).y() ) ) );
+	const Vector3 tangent( vector3_normalised( vector4_to_vector3( matrix4_transposed( local2tex ).x() ) ) );
+	const Vector3 bitangent( vector3_normalised( vector4_to_vector3( matrix4_transposed( local2tex ).y() ) ) );
 
 	matrix4_multiply_by_matrix4( local2tex, localToWorld );
 
-	for ( Winding::iterator i = w.begin(); i != w.end(); ++i )
+	for ( WindingVertex& v : w )
 	{
-		( *i ).texcoord = matrix4_transformed_point( local2tex, ( *i ).vertex ).vec2();
+		v.texcoord = matrix4_transformed_point( local2tex, v.vertex ).vec2();
 
-		( *i ).tangent = tangent;
-		( *i ).bitangent = bitangent;
+		v.tangent = tangent;
+		v.bitangent = bitangent;
 	}
 }
 

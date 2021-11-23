@@ -144,7 +144,7 @@ static void InitPakFile( ArchiveModules& archiveModules, const char *filename ){
 }
 
 inline void pathlist_append_unique( StrList& pathlist, CopiedString path ){
-	if( pathlist.cend() == std::find_if( pathlist.cbegin(), pathlist.cend(),
+	if( std::none_of( pathlist.cbegin(), pathlist.cend(),
 	[&path]( const CopiedString& str ){ return path_compare( str.c_str(), path.c_str() ) == 0; } ) )
 		pathlist.emplace_back( std::move( path ) );
 }

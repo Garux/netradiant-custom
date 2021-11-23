@@ -400,7 +400,7 @@ void Brush_ConstructIcosahedron( Brush& brush, const AABB& bounds, std::size_t s
 		}
 		const Plane3 plane = plane3_for_points( p );
 		if( plane3_valid( plane ) ){
-			if( std::find_if( planes.begin(), planes.end(), [&plane]( const Plane3& pla ){ return plane3_equal( plane, pla ); } ) == planes.end() ){
+			if( std::none_of( planes.begin(), planes.end(), [&plane]( const Plane3& pla ){ return plane3_equal( plane, pla ); } ) ){
 				planes.push_back( plane );
 				brush.addPlane( p[0] * radius + mid, p[1] * radius + mid, p[2] * radius + mid, shader, projection );
 			}

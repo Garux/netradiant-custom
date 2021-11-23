@@ -243,7 +243,7 @@ void brush_extrudeDiag( const Brush& brush0, const Brush& brush2, brush_vector_t
 					const auto addSidePlanes = [&m_out, shader, &projection]( const Winding& winding0, const Winding& winding2, const DoubleVector3 normal, const bool swap ){
 						for( std::size_t index0 = 0; index0 < winding0.numpoints; ++index0 ){
 							const std::size_t next = Winding_next( winding0, index0 );
-							Vector3 BestPoint;
+							DoubleVector3 BestPoint;
 							double bestdot = -1;
 							for( std::size_t index2 = 0; index2 < winding2.numpoints; ++index2 ){
 								const double dot = vector3_dot(
@@ -275,7 +275,7 @@ void brush_extrudeDiag( const Brush& brush0, const Brush& brush2, brush_vector_t
 					const Winding& winding0 = face0.getWinding();
 					for( std::size_t index0 = 0; index0 < winding0.numpoints; ++index0 ){
 						const std::size_t next = Winding_next( winding0, index0 );
-						Vector3 BestPoint;
+						DoubleVector3 BestPoint;
 						double bestdist = 999999;
 						for( const Face* f : brush2 ) {
 							const Winding& winding2 = f->getWinding();
@@ -966,19 +966,16 @@ void CSG_Merge(){
 
 class MergeVertices
 {
-	typedef std::vector<Vector3> Vertices;
+	typedef std::vector<DoubleVector3> Vertices;
 	Vertices m_vertices;
 public:
 	typedef Vertices::const_iterator const_iterator;
-	void insert( const Vector3& vertex ){
+	void insert( const DoubleVector3& vertex ){
 		if( !contains( vertex ) )
 			m_vertices.push_back( vertex );
 	}
-	bool contains( const Vector3& vertex ) const {
-		for( const_iterator i = begin(); i != end(); ++i )
-			if( Edge_isDegenerate( vertex, *i ) )
-				return true;
-		return false;
+	bool contains( const DoubleVector3& vertex ) const {
+		return std::any_of( begin(), end(), [&vertex]( const DoubleVector3& v ){ return Edge_isDegenerate( vertex, v ); } );
 	}
 	const_iterator begin() const {
 		return m_vertices.begin();
@@ -989,13 +986,13 @@ public:
 	std::size_t size() const {
 		return m_vertices.size();
 	}
-	const Vector3& operator[]( std::size_t i ) const {
+	const DoubleVector3& operator[]( std::size_t i ) const {
 		return m_vertices[i];
 	}
 	brushsplit_t classify_plane( const Plane3& plane ) const {
 		brushsplit_t split;
-		for( const_iterator i = begin(); i != end(); ++i ){
-			WindingVertex_ClassifyPlane( ( *i ), plane, split );
+		for( const DoubleVector3& vertex : m_vertices ){
+			WindingVertex_ClassifyPlane( vertex, plane, split );
 			if( ( split.counts[ePlaneFront] != 0 ) && ( split.counts[ePlaneBack] != 0 ) ) // optimized to break, if plane is inside
 				break;
 		}
@@ -1009,7 +1006,7 @@ class Scene_gatherSelectedComponents : public scene::Graph::Walker
 	const Vector3Callback m_callback;
 public:
 	Scene_gatherSelectedComponents( MergeVertices& mergeVertices )
-		: m_mergeVertices( mergeVertices ), m_callback( [this]( const Vector3& value ){ m_mergeVertices.insert( value ); } ){
+		: m_mergeVertices( mergeVertices ), m_callback( [this]( const DoubleVector3& value ){ m_mergeVertices.insert( value ); } ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		if ( path.top().get().visible() ) {
@@ -1023,17 +1020,14 @@ public:
 	}
 };
 
-class MergePlane
+struct MergePlane
 {
-public:
-	Plane3 m_plane;
-	const Face* m_face;
-	Vector3 m_v1;
-	Vector3 m_v2;
-	Vector3 m_v3;
+	const Plane3 m_plane;
+	const Face *const m_face;
+	const DoubleVector3 m_verts[3];
 	MergePlane( const Plane3& plane, const Face* face ) : m_plane( plane ), m_face( face ){
 	}
-	MergePlane( const Plane3& plane, const Vector3& v1, const Vector3& v2, const Vector3& v3 ) : m_plane( plane ), m_face( 0 ), m_v1( v1 ), m_v2( v2 ), m_v3( v3 ){
+	MergePlane( const Plane3& plane, const DoubleVector3 verts[3] ) : m_plane( plane ), m_face( 0 ), m_verts{ verts[0], verts[1], verts[2] } {
 	}
 };
 
@@ -1044,10 +1038,8 @@ class MergePlanes
 public:
 	typedef Planes::const_iterator const_iterator;
 	void insert( const MergePlane& plane ){
-		for( const_iterator i = begin(); i != end(); ++i )
-			if( plane3_equal( plane.m_plane, i->m_plane ) )
-				return;
-		m_planes.push_back( plane );
+		if( std::none_of( begin(), end(), [&plane]( const MergePlane& pla ){ return plane3_equal( plane.m_plane, pla.m_plane ); } ) )
+			m_planes.push_back( plane );
 	}
 	const_iterator begin() const {
 		return m_planes.begin();
@@ -1086,22 +1078,20 @@ void CSG_build_hull( const MergeVertices& mergeVertices, MergePlanes& mergePlane
 		quickhull::QuickHull<double> quickhull;
 		std::vector<quickhull::Vector3<double>> pointCloud;
 		pointCloud.reserve( mergeVertices.size() );
-		for( std::size_t i = 0; i < mergeVertices.size(); ++i ){
-			pointCloud.push_back( quickhull::Vector3<double>( static_cast<double>( mergeVertices[i].x() ),
-			                                                  static_cast<double>( mergeVertices[i].y() ),
-			                                                  static_cast<double>( mergeVertices[i].z() ) ) );
+		for( const DoubleVector3& v : mergeVertices ){
+			pointCloud.push_back( quickhull::Vector3<double>( v.x(), v.y(), v.z() ) );
 		}
 		auto hull = quickhull.getConvexHull( pointCloud, true, true );
 		const auto& indexBuffer = hull.getIndexBuffer();
 		const size_t triangleCount = indexBuffer.size() / 3;
 		for( size_t i = 0; i < triangleCount; ++i ) {
-			Vector3 p[3];
+			DoubleVector3 points[3];
 			for( size_t j = 0; j < 3; ++j ){
-				p[j] = mergeVertices[indexBuffer[i * 3 + j]];
+				points[j] = mergeVertices[indexBuffer[i * 3 + j]];
 			}
-			const Plane3 plane = plane3_for_points( p[0], p[1], p[2] );
+			const Plane3 plane = plane3_for_points( points );
 			if( plane3_valid( plane ) ){
-				mergePlanes.insert( MergePlane( plane, p[0], p[1], p[2] ) );
+				mergePlanes.insert( MergePlane( plane, points ) );
 			}
 		}
 	}
@@ -1120,13 +1110,11 @@ void CSG_WrapMerge( const ClipperPoints& clipperPoints ){
 
 	MergeVertices mergeVertices;
 	/* gather unique vertices */
-	for ( brush_vector_t::const_iterator b = selected_brushes.begin(); b != selected_brushes.end(); ++b )
-		for ( Brush::const_iterator f = ( *b )->begin(); f != ( *b )->end(); ++f )
-			if ( ( *f )->contributes() ){
-				const Winding& winding = ( *f )->getWinding();
-				for ( std::size_t w = 0; w != winding.numpoints; ++w )
-					mergeVertices.insert( winding[w].vertex );
-			}
+	for ( const Brush *brush : selected_brushes )
+		for ( const FaceSmartPointer& face : *brush )
+			if ( face->contributes() )
+				for ( const WindingVertex& v : face->getWinding() )
+					mergeVertices.insert( v.vertex );
 
 	GlobalSceneGraph().traverse( Scene_gatherSelectedComponents( mergeVertices ) );
 
@@ -1141,15 +1129,13 @@ void CSG_WrapMerge( const ClipperPoints& clipperPoints ){
 
 	MergePlanes mergePlanes;
 	/* gather unique && worthy planes */
-	for ( brush_vector_t::const_iterator b = selected_brushes.begin(); b != selected_brushes.end(); ++b )
-		for ( Brush::const_iterator f = ( *b )->begin(); f != ( *b )->end(); ++f ){
-			const Face& face = *( *f );
-			if ( face.contributes() ){
-				const brushsplit_t split = mergeVertices.classify_plane( face.getPlane().plane3() );
+	for ( const Brush *brush : selected_brushes )
+		for ( const FaceSmartPointer& face : *brush )
+			if ( face->contributes() ){
+				const brushsplit_t split = mergeVertices.classify_plane( face->getPlane().plane3() );
 				if( ( split.counts[ePlaneFront] == 0 ) != ( split.counts[ePlaneBack] == 0 ) )
-					mergePlanes.insert( MergePlane( face.getPlane().plane3(), &face ) );
+					mergePlanes.insert( MergePlane( face->getPlane().plane3(), face.get() ) );
 			}
-		}
 
 	CSG_build_hull( mergeVertices, mergePlanes );
 
@@ -1172,12 +1158,12 @@ void CSG_WrapMerge( const ClipperPoints& clipperPoints ){
 		const char* shader = TextureBrowser_GetSelectedShader();
 		TextureProjection projection;
 		TexDef_Construct_Default( projection );
-		for( MergePlanes::const_iterator i = mergePlanes.begin(); i != mergePlanes.end(); ++i ){
-			if( i->m_face )
-				brush->addFace( *( i->m_face ) );
+		for( const MergePlane& p : mergePlanes ){
+			if( p.m_face )
+				brush->addFace( *( p.m_face ) );
 			else
-				brush->addPlane( i->m_v1, i->m_v2, i->m_v3, shader, projection );
-//			globalOutputStream() << i->m_plane.normal() << " " << i->m_plane.dist() << " i->m_plane\n";
+				brush->addPlane( p.m_verts[0], p.m_verts[1], p.m_verts[2], shader, projection );
+//			globalOutputStream() << p.m_plane.normal() << " " << p.m_plane.dist() << " p.m_plane\n";
 		}
 		brush->removeEmptyFaces();
 	}

@@ -1715,7 +1715,7 @@ static std::vector<const PatchControl*> Patch_getClosestTriangle( const PatchDat
 	/* try patchControls-on-edgeLine */
 	for ( std::size_t i = w.numpoints - 1, j = 0; j < w.numpoints && ret.empty(); i = j, ++j )
 	{
-		const auto ray_close = [eps, ray = ray_for_points( DoubleVector3( w[i].vertex ), DoubleVector3( w[j].vertex ) )]( const PatchControl& p ){
+		const auto ray_close = [eps, ray = ray_for_points( w[i].vertex, w[j].vertex )]( const PatchControl& p ){
 			return ray_squared_distance_to_point( ray, p.m_vertex ) < eps;
 		};
 		find_triangle( ray_close );

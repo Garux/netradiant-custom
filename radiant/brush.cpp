@@ -422,11 +422,7 @@ public:
 		m_planes.push_back( plane );
 	}
 	iterator find( const Plane3& plane ){
-		iterator i = begin();
-		for( ; i != end(); ++i )
-			if( plane3_equal( plane, i->m_plane ) )
-				break;
-		return i;
+		return std::find_if( begin(), end(), [&plane]( const VertexModePlane& pla ){ return plane3_equal( plane, pla.m_plane ); } );
 	}
 	const_iterator begin() const {
 		return m_planes.begin();
@@ -446,15 +442,13 @@ public:
 };
 
 const Face* vertex_mode_find_common_face( const Brush::VertexModeVertex& v1, const Brush::VertexModeVertex& v2, const Brush::VertexModeVertex& v3 ){
-	const Face* face = 0;
-	for( const auto& i : v1.m_faces ){
-		if( std::find( v2.m_faces.begin(), v2.m_faces.end(), i ) != v2.m_faces.end()
-		 && std::find( v3.m_faces.begin(), v3.m_faces.end(), i ) != v3.m_faces.end() ){
-			face = i;
-			break;
+	for( const Face* face : v1.m_faces ){
+		if( std::find( v2.m_faces.begin(), v2.m_faces.end(), face ) != v2.m_faces.end()
+		 && std::find( v3.m_faces.begin(), v3.m_faces.end(), face ) != v3.m_faces.end() ){
+			return face;
 		}
 	}
-	return face;
+	return nullptr;
 }
 
 #include "quickhull/QuickHull.hpp"
@@ -463,9 +457,9 @@ void Brush::vertexModeBuildHull( bool allTransformed /*= false*/ ){
 	std::vector<quickhull::Vector3<double>> pointCloud;
 	pointCloud.reserve( m_vertexModeVertices.size() );
 	for( auto& i : m_vertexModeVertices ){
-		pointCloud.push_back( quickhull::Vector3<double>( static_cast<double>( i.m_vertexTransformed.x() ),
-		                                                  static_cast<double>( i.m_vertexTransformed.y() ),
-		                                                  static_cast<double>( i.m_vertexTransformed.z() ) ) );
+		pointCloud.push_back( quickhull::Vector3<double>( i.m_vertexTransformed.x(),
+		                                                  i.m_vertexTransformed.y(),
+		                                                  i.m_vertexTransformed.z() ) );
 	}
 	auto hull = quickhull.getConvexHull( pointCloud, true, true );
 	const auto& indexBuffer = hull.getIndexBuffer();

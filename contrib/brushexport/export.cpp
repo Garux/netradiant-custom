@@ -208,7 +208,7 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 	{
 		std::multimap<std::string, std::string> brushMaterials;
 
-		std::vector<Vector3> vertices; // unique vertices list for welding
+		std::vector<DoubleVector3> vertices; // unique vertices list for welding
 
 		// submesh starts here
 		if ( objs ) {
@@ -238,9 +238,9 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 				--i;
 				++texcoord_count;
 				std::size_t vertexN = 0; // vertex index to use, 0 is special value = no vertex to weld to found
-				const Vector3& vertex = w[i].vertex;
+				const DoubleVector3& vertex = w[i].vertex;
 				if( weld ){
-					auto found = std::find_if( vertices.begin(), vertices.end(), [&vertex]( const Vector3& othervertex ){
+					auto found = std::find_if( vertices.begin(), vertices.end(), [&vertex]( const DoubleVector3& othervertex ){
 						return Edge_isDegenerate( vertex, othervertex );
 					} );
 					if( found == vertices.end() ){ // unique vertex, add to the list
