@@ -99,9 +99,9 @@ class _QERFaceData
 public:
 	_QERFaceData() : m_shader( "" ), contents( 0 ), flags( 0 ), value( 0 ){
 	}
-	Vector3 m_p0;
-	Vector3 m_p1;
-	Vector3 m_p2;
+	DoubleVector3 m_p0;
+	DoubleVector3 m_p1;
+	DoubleVector3 m_p2;
 	texdef_t m_texdef;
 	const char* m_shader;
 	int contents;

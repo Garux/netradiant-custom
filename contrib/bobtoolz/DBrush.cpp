@@ -121,12 +121,12 @@ int DBrush::BuildPoints(){
 }
 
 void DBrush_addFace( DBrush& brush, const _QERFaceData& faceData ){
-	brush.AddFace( vector3_to_array( faceData.m_p0 ), vector3_to_array( faceData.m_p1 ), vector3_to_array( faceData.m_p2 ), 0 );
+	brush.AddFace( Vector3( faceData.m_p0 ).data(), Vector3( faceData.m_p1 ).data(), Vector3( faceData.m_p2 ).data(), 0 );
 }
 typedef ReferenceCaller1<DBrush, const _QERFaceData&, DBrush_addFace> DBrushAddFaceCaller;
 
 void DBrush_addFaceTextured( DBrush& brush, const _QERFaceData& faceData ){
-	brush.AddFace( vector3_to_array( faceData.m_p0 ), vector3_to_array( faceData.m_p1 ), vector3_to_array( faceData.m_p2 ), &faceData );
+	brush.AddFace( Vector3( faceData.m_p0 ).data(), Vector3( faceData.m_p1 ).data(), Vector3( faceData.m_p2 ).data(), &faceData );
 }
 typedef ReferenceCaller1<DBrush, const _QERFaceData&, DBrush_addFaceTextured> DBrushAddFaceTexturedCaller;
 
