@@ -71,15 +71,15 @@ class NameKeys : public Entity::Observer, public Namespaced
 		}
 	}
 	void insertAll(){
-		for ( KeyValues::iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
+		for ( auto& [key, value] : m_keyValues )
 		{
-			insertName( ( *i ).first.c_str(), *( *i ).second );
+			insertName( key.c_str(), *value );
 		}
 	}
 	void eraseAll(){
-		for ( KeyValues::iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
+		for ( auto& [key, value] : m_keyValues )
 		{
-			eraseName( ( *i ).first.c_str(), *( *i ).second );
+			eraseName( key.c_str(), *value );
 		}
 	}
 public:

@@ -158,26 +158,24 @@ public:
 
 		UniqueNames uniqueNames( other.m_uniqueNames );
 
-		for ( Names::const_iterator i = m_names.begin(); i != m_names.end(); ++i )
+		for ( const auto& [callback, observer] : m_names )
 		{
-			groups[( *i ).second.c_str()].push_back( ( *i ).first );
+			groups[observer.c_str()].push_back( callback );
 		}
 
-		for ( NameGroups::iterator i = groups.begin(); i != groups.end(); ++i )
+		for ( const auto& [name, setNameCallbacks] : groups )
 		{
-			name_t uniqueName( uniqueNames.make_unique( name_read( ( *i ).first.c_str() ) ) );
+			name_t uniqueName( uniqueNames.make_unique( name_read( name.c_str() ) ) );
 			uniqueNames.insert( uniqueName );
 
 			char buffer[1024];
 			name_write( buffer, uniqueName );
 
-			//globalOutputStream() << "renaming " << makeQuoted((*i).first.c_str()) << " to " << makeQuoted(buffer) << "\n";
+			//globalOutputStream() << "renaming " << makeQuoted(name.c_str()) << " to " << makeQuoted(buffer) << "\n";
 
-			SetNameCallbacks& setNameCallbacks = ( *i ).second;
-
-			for ( SetNameCallbacks::const_iterator j = setNameCallbacks.begin(); j != setNameCallbacks.end(); ++j )
+			for ( const NameCallback& nameCallback : setNameCallbacks )
 			{
-				( *j )( buffer );
+				nameCallback( buffer );
 			}
 		}
 	}
@@ -206,7 +204,7 @@ typedef Static<NamespaceModule> StaticNamespaceModule;
 StaticRegisterModule staticRegisterDefaultNamespace( StaticNamespaceModule::instance() );
 
 
-std::list<Namespaced*> g_cloned;
+std::vector<Namespaced*> g_cloned;
 
 inline Namespaced* Node_getNamespaced( scene::Node& node ){
 	return NodeTypeCast<Namespaced>::cast( node );
@@ -234,15 +232,15 @@ void Map_gatherNamespaced( scene::Node& root ){
 
 void Map_mergeClonedNames( bool makeUnique /*= true*/ ){
 	if( makeUnique ){
-		for ( std::list<Namespaced*>::const_iterator i = g_cloned.begin(); i != g_cloned.end(); ++i )
+		for ( Namespaced *namespaced : g_cloned )
 		{
-			( *i )->setNamespace( g_cloneNamespace );
+			namespaced->setNamespace( g_cloneNamespace );
 		}
 		g_cloneNamespace.mergeNames( g_defaultNamespace );
 	}
-	for ( std::list<Namespaced*>::const_iterator i = g_cloned.begin(); i != g_cloned.end(); ++i )
+	for ( Namespaced *namespaced : g_cloned )
 	{
-		( *i )->setNamespace( g_defaultNamespace );
+		namespaced->setNamespace( g_defaultNamespace );
 	}
 
 	g_cloned.clear();
