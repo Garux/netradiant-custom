@@ -1263,6 +1263,7 @@ class CloneSelected : public scene::Graph::Walker
 	const bool m_makeUnique;
 	const scene::Node* m_world;
 public:
+	mutable std::vector<scene::Node*> m_cloned;
 	CloneSelected( bool makeUnique ) : m_makeUnique( makeUnique ), m_world( Map_FindWorldspawn( g_map ) ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
@@ -1278,10 +1279,7 @@ public:
 			if ( Instance_isSelected( instance ) ) {
 				return false;
 			}
-			if( m_makeUnique && instance.childSelected() ){ /* clone group entity primitives to new group entity */
-				NodeSmartReference clone( Node_Clone_Selected( path.top() ) );
-				Map_gatherNamespaced( clone );
-				Node_getTraversable( path.parent().get() )->insert( clone );
+			if( m_makeUnique && instance.childSelected() ){ /* clone selected group entity primitives to new group entity */
 				return false;
 			}
 		}
@@ -1302,15 +1300,49 @@ public:
 				NodeSmartReference clone( Node_Clone( path.top() ) );
 				Map_gatherNamespaced( clone );
 				Node_getTraversable( path.parent().get() )->insert( clone );
+				m_cloned.push_back( clone.get_pointer() );
+			}
+			else if( m_makeUnique && instance.childSelected() ){ /* clone selected group entity primitives to new group entity */
+				NodeSmartReference clone( Node_Clone_Selected( path.top() ) );
+				Map_gatherNamespaced( clone );
+				Node_getTraversable( path.parent().get() )->insert( clone );
+				m_cloned.push_back( clone.get_pointer() );
 			}
 		}
 	}
 };
 
 void Scene_Clone_Selected( scene::Graph& graph, bool makeUnique ){
-	graph.traverse( CloneSelected( makeUnique ) );
+	CloneSelected cloneSelected( makeUnique );
+	graph.traverse( cloneSelected );
 
 	Map_mergeClonedNames( makeUnique );
+
+	/* deselect originals */
+	GlobalSelectionSystem().setSelectedAll( false );
+	/* select cloned */
+	for( scene::Node *node : cloneSelected.m_cloned )
+	{
+		class walker : public scene::Traversable::Walker
+		{
+		public:
+			bool pre( scene::Node& node ) const override {
+				if( scene::Instantiable *instantiable = Node_getInstantiable( node ) ){
+					class visitor : public scene::Instantiable::Visitor
+					{
+					public:
+						void visit( scene::Instance& instance ) const override {
+							Instance_setSelected( instance, true );
+						}
+					};
+
+					instantiable->forEachInstance( visitor() );
+				}
+				return true;
+			}
+		};
+		Node_traverseSubgraph( *node, walker() );
+	}
 }
 
 enum ENudgeDirection

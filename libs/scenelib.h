@@ -823,7 +823,7 @@ inline void Scene_forEachChildSelectable( const Functor& functor, const scene::P
 
 class SelectableSetSelected
 {
-	bool m_selected;
+	const bool m_selected;
 public:
 	SelectableSetSelected( bool selected ) : m_selected( selected ){
 	}
