@@ -699,7 +699,7 @@ public:
 
 void Map_ImportSelected( TextInputStream& in, const MapFormat& format ){
 	NodeSmartReference node( ( new BasicContainer )->node() );
-	EBrushType brush_type = GlobalBrushCreator().getFormat();
+	const EBrushType brush_type = GlobalBrushCreator().getFormat();
 	format.readGraph( node, in, GlobalEntityCreator() );
 	if ( brush_type != GlobalBrushCreator().getFormat() ) {
 		Node_getTraversable( node )->traverse( Convert_Brushes( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ), BrushType_getTexdefType( brush_type ) ) );
@@ -1665,7 +1665,7 @@ bool Map_ImportFile( const char* filename ){
 	}
 
 	{
-		EBrushType brush_type = GlobalBrushCreator().getFormat();
+		const EBrushType brush_type = GlobalBrushCreator().getFormat();
 
 		Resource* resource = GlobalReferenceCache().capture( filename );
 		resource->refresh(); // avoid loading old version if map has changed on disk since last import
@@ -1682,11 +1682,12 @@ bool Map_ImportFile( const char* filename ){
 		}
 		NodeSmartReference clone( NewMapRoot( "" ) );
 		Node_getTraversable( *resource->getNode() )->traverse( CloneAll( clone ) );
+		resource->flush(); /* wipe map from cache to not spoil namespace */
+		GlobalReferenceCache().release( filename );
 		Map_gatherNamespaced( clone );
 		Map_mergeClonedNames();
 		MergeMap( clone );
 		success = true;
-		GlobalReferenceCache().release( filename );
 	}
 
 	SceneChangeNotify();
@@ -1716,7 +1717,7 @@ tryDecompile:
 		str( PathExtensionless( filename ), "_converted.map" );
 		filename = str.c_str();
 
-		EBrushType brush_type = GlobalBrushCreator().getFormat();
+		const EBrushType brush_type = GlobalBrushCreator().getFormat();
 		// open
 		Resource* resource = GlobalReferenceCache().capture( filename );
 		resource->refresh(); // avoid loading old version if map has changed on disk since last import
@@ -1733,11 +1734,12 @@ tryDecompile:
 		}
 		NodeSmartReference clone( NewMapRoot( "" ) );
 		Node_getTraversable( *resource->getNode() )->traverse( CloneAll( clone ) );
+		resource->flush(); /* wipe map from cache to not spoil namespace */
+		GlobalReferenceCache().release( filename );
 		Map_gatherNamespaced( clone );
 		Map_mergeClonedNames();
 		MergeMap( clone );
 		success = true;
-		GlobalReferenceCache().release( filename );
 	}
 
 	SceneChangeNotify();
