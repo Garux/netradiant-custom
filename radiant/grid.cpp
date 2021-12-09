@@ -62,6 +62,8 @@ enum GridPower
 	GRIDPOWER_64 = 6,
 	GRIDPOWER_128 = 7,
 	GRIDPOWER_256 = 8,
+	GRIDPOWER_512 = 9,
+	GRIDPOWER_1024 = 10,
 };
 
 
@@ -79,6 +81,8 @@ const char *const g_gridnames[] = {
 	"64",
 	"128",
 	"256",
+	"512",
+	"1024",
 };
 
 inline GridPower GridPower_forGridDefault( int gridDefault ){
@@ -151,6 +155,8 @@ GridMenuItem g_gridMenu32( GRIDPOWER_32 );
 GridMenuItem g_gridMenu64( GRIDPOWER_64 );
 GridMenuItem g_gridMenu128( GRIDPOWER_128 );
 GridMenuItem g_gridMenu256( GRIDPOWER_256 );
+GridMenuItem g_gridMenu512( GRIDPOWER_512 );
+GridMenuItem g_gridMenu1024( GRIDPOWER_1024 );
 
 void setGridPower( GridPower power ){
 	g_grid_snap = true;
@@ -168,6 +174,8 @@ void setGridPower( GridPower power ){
 	g_gridMenu64.m_item.update();
 	g_gridMenu128.m_item.update();
 	g_gridMenu256.m_item.update();
+	g_gridMenu512.m_item.update();
+	g_gridMenu1024.m_item.update();
 	GridChangeNotify();
 }
 
@@ -180,7 +188,7 @@ void GridPrev(){
 
 void GridNext(){
 	g_grid_snap = true;
-	if ( g_grid_power < GRIDPOWER_256 ) {
+	if ( g_grid_power < GRIDPOWER_1024 ) {
 		setGridPower( static_cast<GridPower>( ++g_grid_power ) );
 	}
 }
@@ -200,14 +208,14 @@ float GetMaxGridCoord(){
 void Region_defaultMinMax();
 void maxGridCoordPowerImport( int value ){
 	g_maxGridCoordPower = value;
-	g_maxGridCoord = pow( 2.0, std::min( 4, std::max( 0, g_maxGridCoordPower ) ) + 12 );
+	g_maxGridCoord = pow( 2.0, std::clamp( g_maxGridCoordPower, 0, 4 ) + 12 );
 	Region_defaultMinMax();
 	GridChangeNotify();
 }
 typedef FreeCaller1<int, maxGridCoordPowerImport> maxGridCoordPowerImportCaller;
 
 void maxGridCoordPowerExport( const IntImportCallback& importer ){
-	importer( std::min( 4, std::max( 0, g_maxGridCoordPower ) ) );
+	importer( std::clamp( g_maxGridCoordPower, 0, 4 ) );
 }
 typedef FreeCaller1<const IntImportCallback&, maxGridCoordPowerExport> maxGridCoordPowerExportCaller;
 
@@ -230,6 +238,8 @@ void Grid_registerCommands(){
 	GlobalToggles_insert( "SetGrid64", GridMenuItem::SetCaller( g_gridMenu64 ), ToggleItem::AddCallbackCaller( g_gridMenu64.m_item ), Accelerator( '7' ) );
 	GlobalToggles_insert( "SetGrid128", GridMenuItem::SetCaller( g_gridMenu128 ), ToggleItem::AddCallbackCaller( g_gridMenu128.m_item ), Accelerator( '8' ) );
 	GlobalToggles_insert( "SetGrid256", GridMenuItem::SetCaller( g_gridMenu256 ), ToggleItem::AddCallbackCaller( g_gridMenu256.m_item ), Accelerator( '9' ) );
+	GlobalToggles_insert( "SetGrid512", GridMenuItem::SetCaller( g_gridMenu512 ), ToggleItem::AddCallbackCaller( g_gridMenu512.m_item ) );
+	GlobalToggles_insert( "SetGrid1024", GridMenuItem::SetCaller( g_gridMenu1024 ), ToggleItem::AddCallbackCaller( g_gridMenu1024.m_item ) );
 }
 
 
@@ -246,6 +256,8 @@ void Grid_constructMenu( GtkMenu* menu ){
 	create_check_menu_item_with_mnemonic( menu, "Grid64", "SetGrid64" );
 	create_check_menu_item_with_mnemonic( menu, "Grid128", "SetGrid128" );
 	create_check_menu_item_with_mnemonic( menu, "Grid256", "SetGrid256" );
+	create_check_menu_item_with_mnemonic( menu, "Grid512", "SetGrid512" );
+	create_check_menu_item_with_mnemonic( menu, "Grid1024", "SetGrid1024" );
 }
 
 void Grid_registerShortcuts(){
