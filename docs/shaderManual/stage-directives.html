@@ -112,12 +112,12 @@ textures/sfx/metalbridge06_bounce
 <h3>animMap <em>frequency texture1... texture8</em></h3>
 <p>The surfaces in the game can be animated by displaying a sequence of 1 to 8 frames (separate texture maps). These animations are affected by other keyword effects in the same and later shader stages.</p>
 <dl>
-	<dt>frequency</dt><dd>The number of times that the animation cycle will repeat within a one second time period. The larger the value, the more repeats within a second. Animations that should last for more than a second need to be expressed as decimal values.</dd>
-	<dt>texture1... texture8</dt><dd>the texture path/texture name for each animation frame must be explicitly listed. Up to eight frames (eight separate .tga files) can be used to make an animated sequence. Each frame is displayed for an equal subdivision of the frequency value.</dd>
+	<dt>frequency</dt><dd>The number of frames to display per one second time period (fps).</dd>
+	<dt>texture1... texture8</dt><dd>the texture path/texture name for each animation frame must be explicitly listed. Up to eight frames (eight separate .tga files) can be used to make an animated sequence. Each frame is displayed for 1/frequency seconds.</dd>
 </dl>
 <blockquote>
 	<h4>Example:</h4>
-	<p>animMap 0.25 textures/sfx/b_flame1.tga textures/sfx/b_flame2.tga textures/sfx/b_flame3.tga textures/sfx/b_flame4.tga would be a 4 frame animated sequence, calling each frame in sequence over a cycle length of 4 seconds. Each frame would be displayed for 1 second before the next one is displayed. The cycle repeats after the last frame in sequence shown.</p>
+	<p>animMap 0.5 textures/sfx/b_flame1.tga textures/sfx/b_flame2.tga textures/sfx/b_flame3.tga textures/sfx/b_flame4.tga would be a 4 frame animated sequence. Each frame would be displayed for 2 second before the next one is displayed. Whole cycle length would be 8 seconds. The cycle repeats after the last frame in sequence shown.</p>
 </blockquote>
 <pre>
 textures/sfx/flameanim_blue
@@ -350,9 +350,9 @@ tcMod scroll 1 1
 <p>This keyword causes the texture coordinates to rotate. The value is expressed in degrees rotated each second. A positive value means clockwise rotation. A negative value means counterclockwise rotation. For example "tcMod rotate 5" would rotate texture coordinates 5 degrees each second in a clockwise direction. The texture rotates around the center point of the texture map, so you are rotating a texture with a single repetition, be careful to center it on the brush (unless off-center rotation is desired).</p>
 
 <h3>tcMod scale <em>sScale tScale</em></h3>
-<p>Resizes (enlarges or shrinks) the texture coordinates by multiplying them against the given factors of sScale and tScale. The values "s" and "t"conform to the "x" and "y" values (respectively) as they are found in the original texture TGA. The values for sScale and tScale are NOT normalized. This means that a value greater than 1.0 will increase the size of the texture. A positive value less than one will reduce the texture to a fraction of its size and cause it to repeat within the same area as the original texture (Note: see clampTexCoords for ways to control this).</p>
+<p>Resizes (enlarges or shrinks) the texture coordinates by multiplying them against the given factors of sScale and tScale. The values "s" and "t" conform to the "x" and "y" values (respectively) as they are found in the original texture. A positive value less than one will increase the size of the texture. A value greater than 1.0 will reduce the texture to a fraction of its size and cause it to repeat within the same area as the original texture (Note: see clampTexCoords for ways to control this).</p>
 
-<p>Example: tcMod scale 0.5 2 would cause the texture to repeat twice along its width, but expand to twice its height (in which case half of the texture would be seen in the same area as the original)</p>
+<img src="tcmodscale.png" class="center" />
 
 <h3>tcMod scroll <em>sSpeed tSpeed</em></h3>
 <p>Scrolls the texture coordinates with the given speeds. The values "s" and "t" conform to the "x" and "y" values (respectively) as they are found in the original texture TGA. The scroll speed is measured in "textures" per second. A "texture" is the dimension of the texture being modified and includes any previous shader modifications to the original TGA). A negative s value would scroll the texture to the left. A negative t value would scroll the texture down.</p>
