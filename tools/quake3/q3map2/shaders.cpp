@@ -1273,7 +1273,7 @@ static void ParseShaderFile( const char *filename ){
 					si->backsplashDistance = atof( token );
 				}
 
-				/* q3map_floodLight <r> <g> <b> <diste> <intensity> <light_direction_power> */
+				/* q3map_floodLight <r> <g> <b> <distance> <intensity> <light_direction_power> */
 				else if ( striEqual( token, "q3map_floodLight" ) ) {
 					/* get color */
 					text.GetToken( false );

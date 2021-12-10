@@ -8,7 +8,7 @@
  ABOUT
 ==========
 
- The FS-R releases are modifications of Q3map2 FS releases (see fs_readme.txt) by TwentySeven. 
+ The FS-R releases are modifications of Q3map2 FS releases (see fs_readme.txt) by TwentySeven.
 
  This software is licensed under the GPL.
 
@@ -23,7 +23,7 @@
 ----------
 
 - added "-gridscale X" and "-gridambientscale X" to scale grid lightning, note that ambient grid receive
-both "-gridscale" and "-gridambientscale". For -darkplaces, -dq and -prophecy game mode added 
+both "-gridscale" and "-gridambientscale". For -darkplaces, -dq and -prophecy game mode added
 default game-specific values: -gridscale 0.3 -gridambientscale 0.4
 
 - modified game-specific options prints at the begin of light stage
@@ -71,9 +71,9 @@ default game-specific values: -gridscale 0.3 -gridambientscale 0.4
 - removed "q3map_minlight" test code that was added in previous version
 
 - added "-deluxemode 1" switch to generate tangentspace deluxemaps instead of modelspace.
-Actually deluxemaps being converted to tangentspace in StoreLigtmaps phase. "-deluxemode 0" will switch back to modelspace deluxemaps. 
+Actually deluxemaps being converted to tangentspace in StoreLigtmaps phase. "-deluxemode 0" will switch back to modelspace deluxemaps.
 
-- added game-specific setting of deluxemode. "darkplaces", "dq" and "prophecy" games still have 0 because darkplaces engine can't detect tangentspace deluxemaps on Q3BSP yet (probably detection can be done by setting of custom world field?). 
+- added game-specific setting of deluxemode. "darkplaces", "dq" and "prophecy" games still have 0 because darkplaces engine can't detect tangentspace deluxemaps on Q3BSP yet (probably detection can be done by setting of custom world field?).
 
 --------------------
 ----------------------------------------
@@ -81,14 +81,14 @@ Actually deluxemaps being converted to tangentspace in StoreLigtmaps phase. "-de
 --------------------
 ----------
 
-- added shader deprecation keyword "q3map_deprecateShader <shader>", a global variant of q3map_baseShader/q3map_remapShader. Replacing is done in early load stage, so all q3map2 keyworlds are supported (instead of q3map_remapShader which only remaps rendering part of shader so surfaceparms won't work). Maximum of 16 chained deprecations are allowed. In other worlds if you deprecate the shader by this keyword, it will be showed in map with another name.
+- added shader deprecation keyword "q3map_deprecateShader <shader>", a global variant of q3map_baseShader/q3map_remapShader. Replacing is done in early load stage, so all q3map2 keyworlds are supported (instead of q3map_remapShader which only remaps rendering part of shader so surfaceparms won't work). Maximum of 16 chained deprecations are allowed. In other words if you deprecate the shader by this keyword, it will be showed in map with another name.
 
  Example deprecated shader:
 
  // this shader will appear as "textures/#water0" in map
  textures/test/test_deprecate_water
  {
- 	q3map_deprecateShader textures/#water0 
+ 	q3map_deprecateShader textures/#water0
  }
 
 - added "_patchMeta 1" (or "patchMeta") entity keyword to force entity patch surfaces to be converted to planar brush at compile. This works exactly as "-patchmeta" bsp switch, but only for user customized entities. Additional 2 new keys: "_patchQuality" ("patchQuality") and "_patchSubdivide" ("patchSubdivide") are added. _PatchQuality divides the default patch subdivisions by it's value (2 means 2x more detailed patch). _patchSubdivide overrides patch subdivisions for that entity (use 4 to match Quake3) and ignores _patchQuality. Note: using "_patchMeta" on world makes all world patches to be triangulated, but other entities will remain same.
@@ -97,7 +97,7 @@ Actually deluxemaps being converted to tangentspace in StoreLigtmaps phase. "-de
 
 - added "EmitMetaStats" printing in the end of BSP stage to show full meta statistics, not only for world. So all "_patchMeta 1" surfaces will be in it.
 
-- added gametype-controlled structure fields for "-deluxe", "-subdivisions", "-nostyles", "-patchshadows". New "dq" (deluxequake), "prophecy" and "darkplaces" games uses them. Additionally added "-nodeluxe", "-nopatchshadows", "-styles" to negate positive defaults. 
+- added gametype-controlled structure fields for "-deluxe", "-subdivisions", "-nostyles", "-patchshadows". New "dq" (deluxequake), "prophecy" and "darkplaces" games uses them. Additionally added "-nodeluxe", "-nopatchshadows", "-styles" to negate positive defaults.
 
 - Floodligting code is changed to handle custom surfaces. And "q3map_floodlight <red> <green> <blue> <distance> <brightness> <low_quality>" shader keyword was added. Per-surfaces floodlight code does not intersect with global floodlight done by -floodlight of _floodlight worldspawn key, their effects get summarized. This is good way to light up surfacelight surfaces, such as water.
 

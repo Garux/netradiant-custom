@@ -23,7 +23,7 @@
 td.formatted_questions { text-align: left; white-space: normal}
 td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
   </style>
- <link href="stylesheet.css" media="screen" rel="stylesheet" type="text/css" /> 
+ <link href="stylesheet.css" media="screen" rel="stylesheet" type="text/css" />
 <!-- page specific tags -->
 
   <link href="scm.css" media="screen" rel="stylesheet" type="text/css" />
@@ -34,11 +34,11 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
     <div id="account">
         <ul><li><a href="/login" class="login">Войти</a></li>
 <li><a href="/account/register" class="register">Регистрация</a></li></ul>    </div>
-    
+
     <ul><li><a href="/" class="home">Домашняя страница</a></li>
 <li><a href="/projects" class="projects">Проекты</a></li>
 <li><a href="http://www.redmine.org/guide" class="help">Помощь</a></li></ul></div>
-      
+
 <div id="header">
     <div id="quick-search">
         <form action="/search/index/netradiant" method="get">
@@ -46,11 +46,11 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
         <a href="/search/index/netradiant" accesskey="4">Поиск</a>:
         <input accesskey="f" class="small" id="q" name="q" size="20" type="text" />
         </form>
-        
+
     </div>
-    
+
     <h1>NetRadiant</h1>
-    
+
     <div id="main-menu">
         <ul><li><a href="/projects/netradiant" class="overview">Просмотр</a></li>
 <li><a href="/projects/netradiant/activity" class="activity">Активность</a></li>
@@ -66,8 +66,8 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 </div>
 
 <div class="" id="main">
-    <div id="sidebar">        
-        
+    <div id="sidebar">
+
   <h3>Wiki</h3>
 
 <a href="/projects/netradiant/wiki">Стартовая страница</a><br />
@@ -75,11 +75,11 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 <a href="/projects/netradiant/wiki/Date_index">История страниц</a><br />
 
 
-        
+
     </div>
-    
+
     <div id="content">
-				
+
         <div class="contextual">
 
 
@@ -130,15 +130,16 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>implicitBlend</code>:</strong> ???</li>
 		<li><strong><code>implicitMap</code>:</strong> ???</li>
 		<li><strong><code>implicitMask</code>:</strong> ???</li>
-		<li><strong><code>light</code> shadername:</strong> sets the given shader as flare shader</li>
+		<li><strong><code>light</code> N:</strong> sets the default game flare shader as flare shader</li>
 		<li><strong><code>polygonoffset</code>:</strong> enable polygon offset</li>
+		<li><strong><code>q3map_alphaGen</code>, <code>q3map_alphaMod</code>:</strong> &ltset F|const F|scale F|dotProduct ( X Y Z )|dotProduct2 ( X Y Z )|dotProductScale ( X Y Z MIN MAX )|dotProduct2scale ( X Y Z MIN MAX )|volume&gt</li>
 		<li><strong><code>q3map_backShader</code> shadername:</strong> sets the given shader as shader for back faces</li>
 		<li><strong><code>q3map_backsplash</code> percent distance:</strong> configures light backsplash (self-surfacelight)</li>
 		<li><strong><code>q3map_baseShader</code> shadername:</strong> inherit parameters from a shader</li>
 		<li><strong><code>q3map_bounce</code> F, <code>q3map_bounceScale</code> F:</strong> scales the intensity of radiosity</li>
 		<li><strong><code>q3map_clipmodel</code>:</strong> ???</li>
 		<li><strong><code>q3map_cloneShader</code> shadername:</strong> ???</li>
-		<li><strong><code>q3map_colorGen</code>:</strong> FIXME later</li>
+		<li><strong><code>q3map_colorGen</code>, <code>q3map_colorMod</code>, <code>q3map_rgbGen</code>, <code>q3map_rgbMod</code>:</strong> &ltset ( R G B )|const ( R G B )|scale ( F F F )|dotProduct ( X Y Z )|dotProduct2 ( X Y Z )|dotProductScale ( X Y Z MIN MAX )|dotProduct2scale ( X Y Z MIN MAX )|volume&gt</li>
 		<li><strong><code>q3map_deprecateShader</code> shadername:</strong> ???</li>
 		<li><strong><code>q3map_flare</code> shadername, <code>q3map_flareShader</code> shadername:</strong> sets the given shader as flare shader</li>
 		<li><strong><code>q3map_floodLight</code> r g b dist intensity power:</strong> overrides the global floodlight parameters</li>
@@ -150,6 +151,7 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>q3map_globaltexture</code>:</strong> ???</li>
 		<li><strong><code>q3map_indexed</code>:</strong> ???</li>
 		<li><strong><code>q3map_invert</code>:</strong> inverts the direction from which the face is visible</li>
+		<li><strong><code>q3map_lightImage</code> texture:</strong> sets the image to take the light color from</li>
 		<li><strong><code>q3map_lightRGB</code> r g b:</strong> overrides the light color of the texture</li>
 		<li><strong><code>q3map_lightStyle</code> N:</strong> sets the light style (SoF2, JK2)</li>
 		<li><strong><code>q3map_lightSubdivide</code> N:</strong> subdivision interval for <code>q3map_surfacelight</code></li>
@@ -157,16 +159,18 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>q3map_lightmapBrightness</code> F, <code>q3map_lightmapGamma</code> F:</strong> overrides lightmap brightness</li>
 		<li><strong><code>q3map_lightmapFilterRadius</code> self other:</strong> ???</li>
 		<li><strong><code>q3map_lightmapMergable</code>:</strong> allows merging the lightmap with other surfaces on another plane</li>
-		<li><strong><code>q3map_lightmapSampleOffset</code> F:</strong> multiplies samplesize by a factor</li>
+		<li><strong><code>q3map_lightmapSampleOffset</code> F:</strong> light sampling point offset off the surface</li>
 		<li><strong><code>q3map_lightmapSampleSize</code> N:</strong> overrides samplesize</li>
 		<li><strong><code>q3map_lightmapSize</code> N:</strong> overrides the lightmap size (forces an external lightmap for this surface)</li>
 		<li><strong><code>q3map_material</code> materialname:</strong> ???</li>
+		<li><strong><code>q3map_noDirty</code>:</strong> don't apply <code>-dirty</code> on this surface</li>
 		<li><strong><code>q3map_noFast</code>:</strong> disable <code>-fast</code> style lighting for this surface</li>
 		<li><strong><code>q3map_noVertexLight</code>:</strong> turns off vertex lighting for this surface</li>
 		<li><strong><code>q3map_noVertexShadows</code>:</strong> ???</li>
 		<li><strong><code>q3map_noclip</code>:</strong> do not clip the surface by the BSP tree</li>
 		<li><strong><code>q3map_nofog</code>:</strong> ???</li>
 		<li><strong><code>q3map_nonplanar</code>:</strong> marks the surface as nonplanar for meta surface merging</li>
+		<li><strong><code>q3map_normalImage</code> texture:</strong> sets the normal map for bump mapping</li>
 		<li><strong><code>q3map_notjunc</code>:</strong> do not do t-junction elimination</li>
 		<li><strong><code>q3map_offset</code> F:</strong> ???</li>
 		<li><strong><code>q3map_onlyVertexLighting</code>:</strong> same as using <code>surfaceparm pointlight</code></li>
@@ -191,10 +195,9 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>q3map_vertexScale</code> F:</strong> scales vertex lighting amount by a factor</li>
 		<li><strong><code>q3map_vertexShadows</code>:</strong> ???</li>
 		<li><strong><code>qer_editorImage</code> texture:</strong> sets the texture to show for radiant</li>
-		<li><strong><code>qer_lightImage</code> texture:</strong> sets the image to take the light color from</li>
-		<li><strong><code>qer_normalImage</code> texture:</strong> sets the normal map for bump mapping</li>
 		<li><strong><code>skyparms</code> outerimage cloudheight innerimage:</strong> loads a skybox</li>
 		<li><strong><code>surfaceparm</code> alphashadow:</strong> use the alpha channel of the shader image as shadow mask</li>
+		<li><strong><code>surfaceparm</code> antiportal:</strong> creates opaque autoexpanding portal</li>
 		<li><strong><code>surfaceparm</code> areaportal:</strong> ???</li>
 		<li><strong><code>surfaceparm</code> botclip:</strong> ???</li>
 		<li><strong><code>surfaceparm</code> clusterportal:</strong> ???</li>
@@ -204,6 +207,7 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>surfaceparm</code> hint:</strong> use this surface as a hint to generate BSP splits</li>
 		<li><strong><code>surfaceparm</code> lava:</strong> Stef hates this brush</li>
 		<li><strong><code>surfaceparm</code> lightfilter:</strong> use the color channel of the shader image as shadow mask</li>
+		<li><strong><code>surfaceparm</code> lightgrid:</strong> limit map lightgrid to bounds of brushes with this shader</li>
 		<li><strong><code>surfaceparm</code> monsterclip:</strong> monsters can't go through this brush, but shots can</li>
 		<li><strong><code>surfaceparm</code> nodraw:</strong> do not generate draw surfaces</li>
 		<li><strong><code>surfaceparm</code> nodrop:</strong> items can't be dropped on this brush</li>
@@ -212,6 +216,7 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>surfaceparm</code> nonsolid:</strong> do not make this surface solid</li>
 		<li><strong><code>surfaceparm</code> origin:</strong> the center of this brush shall be the origin of this brush model</li>
 		<li><strong><code>surfaceparm</code> playerclip:</strong> players can't go through this brush, but shots can</li>
+		<li><strong><code>surfaceparm</code> skip:</strong> for unused faces of hint, antiportal brushes</li>
 		<li><strong><code>surfaceparm</code> sky:</strong> this surface shows the skybox</li>
 		<li><strong><code>surfaceparm</code> slime:</strong> this brush contains more poisonous stuff than dihydrogene monoxide</li>
 		<li><strong><code>surfaceparm</code> structural:</strong> use this surface for vis</li>
@@ -238,13 +243,13 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 
 
 
-        
+
 				<div style="clear:both;"></div>
     </div>
 </div>
 
 <div id="ajax-indicator" style="display:none;"><span>Загрузка...</span></div>
-	
+
 <div id="footer">
     Powered by <a href="http://www.redmine.org/">Redmine</a> &copy; 2006-2010 Jean-Philippe Lang
 </div>

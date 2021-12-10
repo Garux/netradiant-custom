@@ -145,7 +145,7 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>_blocksize</code>, <code>blocksize</code>, <code>chopsize</code>:</strong> block size for unconditional BSP subdivisions</li>
 		<li><strong><code>_color</code>:</strong> color to use for <strong><code>_ambient</code></strong>, <strong><code>_minlight</code></strong>, <strong><code>_minvertexlight</code></strong>, <strong><code>_mingridlight</code></strong></li>
 		<li><strong><code>_farplanedist</code>, <code>fogclip</code>, <code>distancecull</code>:</strong> far plane distance for vis culling -- this must be the shortest distance at which nothing can be seen any more due to fog; o/r/e value suffixes enable Origin2Origin/Radius+Radius/Exact distance measuring modes respectively</li>
-		<li><strong><code>_floodlight</code>:</strong> a quintuple of values "r g b dist intensity" to set global floodlight parameters (good defaults are 240 240 255 1024 128)</li>
+		<li><strong><code>_floodlight</code>:</strong> a sextet of values "r g b dist intensity directional_power" to set global floodlight parameters (good defaults are 240 240 255 1024 128 1)</li>
 		<li><strong><code>_fog</code>, <code>fog</code>:</strong> if set, the whole map is fogged using the given shader name; only for engines, supporting this, e.g. ET</li>
 		<li><strong><code>_foghull</code>:</strong> must be set to a sky shader without <strong><code>textures/</code></strong> prefix when <code>_farplanedist</code> is used to avoid HoM effect</li>
 		<li><strong><code>_ignoreleaks</code>, <code>ignoreleaks</code>:</strong> when set, no leak test is performed</li>

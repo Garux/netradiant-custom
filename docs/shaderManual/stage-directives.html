@@ -350,7 +350,7 @@ tcMod scroll 1 1
 <p>This keyword causes the texture coordinates to rotate. The value is expressed in degrees rotated each second. A positive value means clockwise rotation. A negative value means counterclockwise rotation. For example "tcMod rotate 5" would rotate texture coordinates 5 degrees each second in a clockwise direction. The texture rotates around the center point of the texture map, so you are rotating a texture with a single repetition, be careful to center it on the brush (unless off-center rotation is desired).</p>
 
 <h3>tcMod scale <em>sScale tScale</em></h3>
-<p>Resizes (enlarges or shrinks) the texture coordinates by multiplying them against the given factors of sScale and tScale. The values "s" and "t" conform to the "x" and "y" values (respectively) as they are found in the original texture. A positive value less than one will increase the size of the texture. A value greater than 1.0 will reduce the texture to a fraction of its size and cause it to repeat within the same area as the original texture (Note: see clampTexCoords for ways to control this).</p>
+<p>Resizes (enlarges or shrinks) the texture coordinates by multiplying them against the given factors of sScale and tScale. The values "s" and "t" conform to the "x" and "y" values (respectively) as they are found in the original texture. A positive value less than one will increase the size of the texture. A value greater than 1.0 will reduce the texture to a fraction of its size and cause it to repeat within the same area as the original texture (Note: see clampMap for ways to control this).</p>
 
 <img src="tcmodscale.png" class="center" />
 

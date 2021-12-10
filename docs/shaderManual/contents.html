@@ -94,6 +94,7 @@
 			</li>
 			<li><a href="q3map-global-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html">Q3Map Global Directives</a>
 				<ul>
+					<li><a href="q3map-global-directives.html#light">light</a></li>
 					<li><a href="q3map-global-directives.html#q3map_alphaGen" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_alphaGen">q3map_alphaGen</a></li>
 					<li><a href="q3map-global-directives.html#q3map_alphaMod" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_alphaMod">q3map_alphaMod</a></li>
 					<li><a href="q3map-global-directives.html#q3map_backShader" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_backShader">q3map_backShader</a></li>
@@ -105,11 +106,12 @@
 					<li><a href="q3map-global-directives.html#q3map_cloneShader" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_cloneShader">q3map_cloneShader</a></li>
 					<li><a href="q3map-global-directives.html#q3map_colorGen" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_colorGen">q3map_colorGen</a></li>
 					<li><a href="q3map-global-directives.html#q3map_colorMod" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_colorMod">q3map_colorMod</a></li>
-					<!--
-					<li><a href="q3map-global-directives.html#q3map_extraShader">q3map_extraShader</a></li>
-					<li><a href="q3map-global-directives.html#q3map_fadeAlpha">q3map_fadeAlpha</a></li>
-					-->
+					<li><a href="q3map-global-directives.html#q3map_deprecateShader">q3map_deprecateShader</a></li>
+					<li><a href="q3map-global-directives.html#q3map_flare">q3map_flare</a></li>
+					<li><a href="q3map-global-directives.html#q3map_flareShader">q3map_flareShader</a></li>
+					<li><a href="q3map-global-directives.html#q3map_floodLight">q3map_floodLight</a></li>
 					<li><a href="q3map-global-directives.html#q3map_fogDir" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_fogDir">q3map_fogDir</a></li>
+					<li><a href="q3map-global-directives.html#q3map_foliage">q3map_foliage</a></li>
 					<li><a href="q3map-global-directives.html#q3map_forceMeta" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_forceMeta">q3map_forceMeta</a></li>
 					<li><a href="q3map-global-directives.html#q3map_forceSunlight" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_forceSunlight">q3map_forceSunlight</a></li>
 					<li><a href="q3map-global-directives.html#q3map_fur" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_fur">q3map_fur</a></li>
@@ -129,6 +131,7 @@
 					<li><a href="q3map-global-directives.html#q3map_lightStyle" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_lightStyle">q3map_lightStyle</a></li>
 					<li><a href="q3map-global-directives.html#q3map_lightSubdivide" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_lightSubdivide">q3map_lightSubdivide</a></li>
 					<li><a href="q3map-global-directives.html#q3map_noClip" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_noClip">q3map_noClip</a></li>
+					<li><a href="q3map-global-directives.html#q3map_noDirty">q3map_noDirty</a></li>
 					<li><a href="q3map-global-directives.html#q3map_noFast" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_noFast">q3map_noFast</a></li>
 					<li><a href="q3map-global-directives.html#q3map_noFog" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_noFog">q3map_noFog</a></li>
 					<li><a href="q3map-global-directives.html#q3map_nonPlanar" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_nonPlanar">q3map_nonPlanar</a></li>
@@ -139,9 +142,6 @@
 					<li><a href="q3map-global-directives.html#q3map_offset" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_offset">q3map_offset</a></li>
 					<li><a href="q3map-global-directives.html#q3map_patchShadows" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_patchShadows">q3map_patchShadows</a></li>
 					<li><a href="q3map-global-directives.html#q3map_remapShader" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_remapShader">q3map_remapShader</a></li>
-					<!--
-					<li><a href="q3map-global-directives.html#q3map_replicate">q3map_replicate</a></li>
-					-->
 					<li><a href="q3map-global-directives.html#q3map_rgbGen" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_rgbGen">q3map_rgbGen</a></li>
 					<li><a href="q3map-global-directives.html#q3map_rgbMod" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_rgbMod">q3map_rgbMod</a></li>
 					<li><a href="q3map-global-directives.html#q3map_shadeAngle" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_shadeAngle">q3map_shadeAngle</a></li>
@@ -151,9 +151,6 @@
 					<li><a href="q3map-global-directives.html#q3map_styleMarker2" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_styleMarker2">q3map_styleMarker2</a></li>
 					<li><a href="q3map-global-directives.html#q3map_sun" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_sun">q3map_sun</a></li>
 					<li><a href="q3map-global-directives.html#q3map_sunExt" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_sunExt">q3map_sunExt</a></li>
-					<!--
-					<li><a href="q3map-global-directives.html#q3map_sunlight">q3map_sunlight</a></li>
-					-->
 					<li><a href="q3map-global-directives.html#q3map_surfaceLight" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_surfaceLight">q3map_surfaceLight</a></li>
 					<li><a href="q3map-global-directives.html#q3map_surfaceModel" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_surfaceModel">q3map_surfaceModel</a></li>
 					<li><a href="q3map-global-directives.html#q3map_tcGen" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_tcGen">q3map_tcGen</a></li>
@@ -161,10 +158,8 @@
 					<li><a href="q3map-global-directives.html#q3map_terrain" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_terrain">q3map_terrain</a></li>
 					<li><a href="q3map-global-directives.html#q3map_tessSize" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_tessSize">q3map_tessSize</a></li>
 					<li><a href="q3map-global-directives.html#q3map_textureSize" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_textureSize">q3map_textureSize</a></li>
-					<li><a href="q3map-global-directives.html#q3map_traceLight" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_traceLight">q3map_traceLight</a></li>
 					<li><a href="q3map-global-directives.html#q3map_vertexScale" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_vertexScale">q3map_vertexScale</a></li>
 					<li><a href="q3map-global-directives.html#q3map_vertexShadows" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_vertexShadows">q3map_vertexShadows</a></li>
-					<li><a href="q3map-global-directives.html#q3map_vlight" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html#q3map_vlight">q3map_vlight</a></li>
 				</ul>
 			</li><!-- end Q3Map Global Directives -->
 			<li><a href="q3map-surface-parameter-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html">Q3Map Surface Parameter Directives</a>
@@ -204,6 +199,7 @@
 					<li><a href="q3map-surface-parameter-directives.html#slime" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html#slime">surfaceparm slime</a></li>
 					<li><a href="q3map-surface-parameter-directives.html#structural" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html#structural">surfaceparm structural</a></li>
 					<li><a href="q3map-surface-parameter-directives.html#trans" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html#trans">surfaceparm trans</a></li>
+					<li><a href="q3map-surface-parameter-directives.html#trigger">surfaceparm trigger</a></li>
 					<li><a href="q3map-surface-parameter-directives.html#water" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html#water">surfaceparm water</a></li>
 				</ul>
 			</li>
@@ -228,13 +224,6 @@
 					<li><a href="stage-directives.html#alphaFunc" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/stage-directives.html#alphaFunc">alphaFunc</a></li>
 				</ul>
 			</li>
-			<!--
-			<li>Platform Specific Directives
-				<ul>
-					<li></li>
-				</ul>
-			</li>
-			-->
 		</ul>
 	</li><!-- end Directives -->
 	<li><h3>Articles</h3>

@@ -56,6 +56,9 @@
 <h1>Q3Map Global Directives</h1>
 <p>Q3Map2 global directives change the physical nature of the textures and the brushes that are marked with them. Changing any of these values will require the map to be re-compiled. These are global and affect the entire shader.</p>
 
+<h2 id="light">light value</h2>
+<p>Tells compiler to generate flare surface with default game flare shader. Value is not used, but must be present.</p>
+
 <h2 id="q3map_alphaGen">q3map_alphaGen func</h2>
 <p>Currently takes a single function, const. This directive is used to set a surfaces vertex alpha values. q3map_alphaGen operations are applied to an object's vertexes so the alphaGen vertex directive is required for each affected stage.</p>
 
@@ -63,7 +66,7 @@
 <p>Forces a fixed vertex alpha value to the entire shader surface, useful for controlling transparency or blending. Values are a normalized number.</p>
 
 <h2 id="q3map_alphaMod">q3map_alphaMod func</h2>
-<p>This is used for special vertex alpha blending effects on surfaces by altering the vertex alpha values depending on specific surface properties, such as the surfaces normal axis or the vertexes contained within its volume. q3map_alphaMod operations are applied to an object's vertexes so the rgbGen vertex directive is required for each affected stage.</p>
+<p>This is used for special vertex alpha blending effects on surfaces by altering the vertex alpha values depending on specific surface properties, such as the surfaces normal axis or the vertexes contained within its volume. q3map_alphaMod operations are applied to an object's vertexes so the alphaGen vertex directive is required for each affected stage.</p>
 
 <h3>q3map_alphaMod dotproduct ( X Y Z )</h3>
 <p>Used to blend textures using alphaFunc or blendFunc in the shader's second pass, with the transparency depending on the surface's normal axis vector. This is achieved by taking the user specified vector ( X Y Z ) and applying a dotproduct calculation with the generated vertex normal vector to yield a normalized vertex alpha value. The dot product operation multiplies each element of one vector against the corresponding elements of a second vector, then adds them:</p>
@@ -117,6 +120,21 @@ textures/shaderlab_terrain/dirt_rock_grass
 	}
 }
 </pre>
+
+<h3>q3map_alphaMod dotproductScale ( X Y Z MIN MAX )</h3>
+<p>Works similar to q3map_alphaMod dotproduct, but in addition values MIN and MAX denote a range of cosine values, in which blending will occur. So less than MIN is mapped to alpha value 0, above MAX is mapped to alpha value 1, and everything in between is mapped linearily.</p>
+<p>If you prefer working with angles, you can set MIN to the cosine of the most steep angle of the blending, and MAX to the cosine of the most flat angle of the blending. Example:</p>
+<pre>
+q3map_alphagen dotProductScale ( 0 0 1 0.500 0.966 )
+</pre>
+<p>will set alpha value 0 for anything steeper than 60 degrees, and alpha value 1 for anything more flat than 15 degrees.</p>
+
+<h3>q3map_alphaMod dotproduct2scale ( X Y Z MIN MAX )</h3>
+<p>The same extension to dotProduct2. Note that the MIN and MAX values are squared cosine here. You get a different alpha values curve with the same min/max angles by writing:</p>
+<pre>
+q3map_alphagen dotProduct2scale ( 0 0 1 0.250 0.933 )
+</pre>
+
 <blockquote>
 	<h4>Design Notes:</h4>
 	<p>Typical examples of use include snow covering the top faces of objects, or terrain with grass growing on horizontal planes blending into rocky cliffs on near vertical surfaces. It is an excellent way of automatically creating realistic alpha-blended terrain without the complicated steps of setting up an alpha map.</p>
@@ -167,13 +185,13 @@ textures/shaderlab_terrain/dirt_rock_grass
 <p>Clones surface and applies target shader's properties and appearance to clone. Be careful, this can lead to an infinite loop if a cloning shader references another cloning shader or itself.</p>
 
 <h2 id="q3map_colorGen">q3map_colorGen func</h2>
-<p>Currently takes a single function, const. This directive is used to set a surfaces vertex color values. q3map_colorGen operations are applied to an object's vertexes so the rgbGen vertex directive is required for each affected stage. Same as q3map_rgbGen.</p>
+<p>Currently takes a single function, const. This directive is used to set a surfaces vertex color values. q3map_colorGen operations are applied to an object's vertexes so the rgbGen vertex directive is required for each affected stage. It's also needed to use q3map_noVertexLight or -novertex to avoid overwriting RGB vertex values by -light build stage. Same as q3map_rgbGen.</p>
 
 <h3>q3map_colorGen const ( R G B )</h3>
 <p>Forces a fixed vertex color value to the entire shader surface.</p>
 
 <h2 id="q3map_colorMod">q3map_colorMod func</h2>
-<p>Used to alter the vertex color values of vertexes contained within its volume. q3map_colorMod operations are applied to an object's vertexes so the rgbGen vertex directive is required for each affected stage. Possible uses include creating a neutral hued texture for a CTF middleground and then creating shader instances of the texture for red and blue bases. Same as q3map_rgbMod.</p>
+<p>Used to alter the vertex color values of vertexes contained within its volume. q3map_colorMod operations are applied to an object's vertexes so the rgbGen vertex directive is required for each affected stage. It's also needed to use q3map_noVertexLight or -novertex to avoid overwriting RGB vertex values by -light build stage. Possible uses include creating a neutral hued texture for a CTF middleground and then creating shader instances of the texture for red and blue bases. Same as q3map_rgbMod.</p>
 
 <h3>q3map_colorMod scale ( R G B )</h3>
 <p>Used in conjunction with q3map_colorMod volume. Scales the vertex color by the specified color values.</p>
@@ -190,12 +208,42 @@ textures/shaderlab_terrain/dirt_rock_grass
 
 <h3>q3map_colorMod dotproduct ( X Y Z )</h3>
 <h3>q3map_colorMod dotproduct2 ( X Y Z )</h3>
+<h3>q3map_colorMod dotproductScale ( X Y Z MIN MAX )</h3>
+<h3>q3map_colorMod dotproduct2scale ( X Y Z MIN MAX )</h3>
 <p>These ones work just like q3map_alphaMod dotproduct, but are modifying vertex color values.
 </p>
 
 
+<h2 id="q3map_deprecateShader">q3map_deprecateShader newShaderName</h2>
+<p>Rename current shader to newShaderName, so it will be shown in a map as newShaderName. Similar to q3map_remapShader, but, unlike it, performs renaming in early loading stage, so compile parameters of newShaderName are used.</p>
+
+<h2 id="q3map_flare">q3map_flare shadername</h2>
+<p>Tells compiler to generate flare surface with specified shader.</p>
+
+<h2 id="q3map_flareShader">q3map_flareShader shadername</h2>
+<p>q3map_flare alias.</p>
+
+<h2 id="q3map_floodLight">q3map_floodLight r g b dist intensity power</h2>
+<p>Overrides the global floodlight (sort of ambient occlusion) parameters.</p>
+<dl>
+	<dt>r g b</dt><dd>Light color, e.g. 240 240 255.</dd>
+	<dt>dist</dt><dd>The distance (in game units) at which occlusion test starts making an effect, e.g. 1024.</dd>
+	<dt>intensity</dt><dd>Light intensity, e.g. 128.</dd>
+	<dt>power</dt><dd>Light direction power, e.g. 1.</dd>
+</dl>
+
 <h2 id="q3map_fogDir">q3map_fogDir X Y Z</h2>
 <p>Specifies the direction a fog shader fades from transparent to opaque. Values indicate a directional vector.</p>
+
+<h2 id="q3map_foliage">q3map_foliage model scale density odds invert_alpha</h2>
+<p>Wolf ET randomized instanced foliage.</p>
+<dl>
+	<dt>model</dt><dd>Model path.</dd>
+	<dt>scale</dt><dd>Model scale.</dd>
+	<dt>density</dt><dd>Distribution density.</dd>
+	<dt>odds</dt><dd>Controls placement probability: placed if (alpha * odds) > random(0..1).</dd>
+	<dt>invert_alpha</dt><dd>0: use vertex alpha, 1: use inverted vertex alpha, 2: use alpha = 1.0.</dd>
+</dl>
 
 <h2 id="q3map_forceMeta">q3map_forceMeta</h2>
 <p>Forces model (MD3, ASE, etc.) surfaces to be broken down into their component triangles like brush faces and passed through the meta code on a per shader basis. This is required for lightmapped models. Setting spawnflags 4 on a misc_model will set q3map_forceMeta on all its surfaces.</p>
@@ -295,6 +343,9 @@ textures/eerie/ironcrosslt2_10000
 
 <h2 id="q3map_noClip">q3map_noClip</h2>
 <p>You might have noticed that terrain has been made to not clip or t-junction anymore. It was causing too many issues, so a new parameter was added: q3map_noClip. Normally, Q3Map2 clips all faces to the BSP, and then takes the minimum polygon that encompasses all visible fragments. q3map_noClip forces Q3Map2 to uses the original brush faces (This is implicit for autosprite(2) surfaces). Therefore, if you map tidy, you could theoretically use q3map_noClip on all your shaders. q3map_noClip and q3map_noTJunc, when used in combination, will preserve mesh geometry exactly as you make it.</p>
+
+<h2 id="q3map_noDirty">q3map_noDirty</h2>
+<p>Don't apply -dirty on this surface.</p>
 
 <h2 id="q3map_noFast">q3map_noFast</h2>
 <p>When used on surfaces that emit light, this will disable -fast optimizations. This is useful for large areas of dim sky, where you want the dim light to reach all surfaces. This shader directive prevents fast from affecting dim sky surfaces. It is necessary, if you can't do a workaround with brighter skies or by using a larger q3map_lightSubdivide value.</p>
@@ -430,17 +481,11 @@ q3map_indexed
 <h2 id="q3map_textureSize">q3map_textureSize X Y</h2>
 <p>Deprecated. Useful when you don't specify an editor or light image for a shader. Recent builds of Q3Map2 will find some referenced image in a shader and use that as a fallback. Historically, this was used for surface splitting for RTCW for PS2, to accommodate the hardware's limited texture range precision.</p>
 
-<h2 id="q3map_traceLight">q3map_traceLight</h2>
-<p>Obsolete! Surfaces using a shader with this option will always be lit with the original light algorithm. Patches will not cast shadows on this surface, unless the shader option q3map_patchShadows is also used.</p>
-
 <h2 id="q3map_vertexScale">q3map_vertexScale N.N</h2>
 <p>The light value, at the vertices of a surface using a shader with this option, is multiplied by the scale value. This is a way to lighten, or darken, a vertex_lit surface, in comparison to other lightmap_lit surfaces around it. Values must be normalized.</p>
 
 <h2 id="q3map_vertexShadows">q3map_vertexShadows</h2>
 <p>Obsolete! (See q3map_noVertexShadows) By default, no shadows are cast on vertex_lit_surfaces (see surfaceparm pointlight). In addition, when running Quake III Arena in vertex light, no shadows are cast upon any surface at all, since shadows are part of the lightmap. When using this shader directive, shadows will be cast on surfaces that are vertex lit. However, sharp shadow edges won't be seen on the surfaces, since light values are only calculated at the vertices.</p>
-
-<h2 id="q3map_vlight">q3map_vlight</h2>
-<p>Obsolete!</p>
 
 </body>
 </html>

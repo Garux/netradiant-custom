@@ -97,7 +97,7 @@
 </blockquote>
 
 <h2 id="dust">surfaceparm dust</h2>
-<p>If a player lands on a surface that uses a shader with this parameter, a puff of dust will appear at the player's feet. Note that the worldspawn entity must contain the "enabledust" key with a set value of "1".</p>
+<p>Team Arena specific: if a player lands on a surface that uses a shader with this parameter, a puff of dust will appear at the player's feet. Note that the worldspawn entity must contain the "enabledust" key with a set value of "1".</p>
 
 <h2 id="flesh">surfaceparm flesh</h2>
 <p>This will cue different sounds (in a similar manner to metalsteps) and cause blood to appear instead of bullet impact flashes. Actually, the code for this was never fully implemented by id Software. It remains half-finished so unfortunately it doesn't work.</p>
@@ -187,7 +187,10 @@
 <p>This surface attribute causes a brush to be seen by the Q3Map2 process as a possible break-point in a BSP tree. It is used as a part of the shader for the "hint" texture. Generally speaking, any opaque texture not marked as "detail" is, by default, structural, so you shouldn't need to specify this.</p>
 
 <h2 id="trans">surfaceparm trans</h2>
-<p>Tells Q3Map2 that pre-computed visibility should not be blocked by this surface. Generally, any shaders that have blendfunc's should be marked as surfaceparm trans.</p>
+<p>Tells Q3Map2 that pre-computed visibility and light should not be blocked by this surface. Generally, any shaders that have blendfunc's should be marked as surfaceparm trans.</p>
+
+<h2 id="trigger">surfaceparm trigger</h2>
+<p>Implies transparent and nonsolid inside q3map2. Is not necessary for the game, as it assigns this flag basing on entity type.</p>
 
 <h2 id="water">surfaceparm water</h2>
 <p>Assigns to the texture the game properties for water. This affects both the surface and the content of a brush.</p>
