@@ -1922,7 +1922,7 @@ inline bool debugnormals;
 inline bool floodlighty;
 inline bool floodlight_lowquality;
 inline Vector3 floodlightRGB;
-inline float floodlightIntensity = 512.0f;
+inline float floodlightIntensity = 128.0f;
 inline float floodlightDistance = 1024.0f;
 inline float floodlightDirectionScale = 1.0f;
 
