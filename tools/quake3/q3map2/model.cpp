@@ -202,9 +202,13 @@ struct AssModel
 #ifdef _DEBUG
 						Sys_Printf( "matname: %s\n", matname.C_Str() );
 #endif
-			aiString texname;
-			if( aiReturn_SUCCESS == material->Get( AI_MATKEY_TEXTURE_DIFFUSE(0), texname )
-			 && texname.length != 0 ){
+			if( aiString texname;
+			    aiReturn_SUCCESS == material->Get( AI_MATKEY_TEXTURE_DIFFUSE(0), texname )
+			 && texname.length != 0
+			 && !string_equal_prefix_nocase( matname.C_Str(), "textures/" ) /* matname looks intentionally named as ingame shader */
+			 && !string_equal_prefix_nocase( matname.C_Str(), "textures\"" )
+			 && !string_equal_prefix_nocase( matname.C_Str(), "models/" )
+			 && !string_equal_prefix_nocase( matname.C_Str(), "models\"" ) ){
 #ifdef _DEBUG
 							Sys_Printf( "texname: %s\n", texname.C_Str() );
 #endif
