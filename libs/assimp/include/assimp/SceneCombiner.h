@@ -51,12 +51,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma GCC system_header
 #endif
 
-#include <assimp/Defines.h>
 #include <assimp/ai_assert.h>
 #include <assimp/types.h>
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 #include <list>
 #include <set>
 #include <vector>
@@ -362,6 +361,7 @@ public:
     static void Copy(aiNodeAnim **dest, const aiNodeAnim *src);
     static void Copy(aiMeshMorphAnim **dest, const aiMeshMorphAnim *src);
     static void Copy(aiMetadata **dest, const aiMetadata *src);
+    static void Copy(aiString **dest, const aiString *src);
 
     // recursive, of course
     static void Copy(aiNode **dest, const aiNode *src);

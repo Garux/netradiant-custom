@@ -79,7 +79,7 @@ using namespace Util;
 
 #define MAGIC_NODE_TAG "_$AssimpFbx$"
 
-#define CONVERT_FBX_TIME(time) (static_cast<double>(time) * 1000.0 / 46186158000LL)
+#define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000LL
 
 FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBones) :
         defaultMaterialIndex(),
@@ -811,7 +811,7 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
     // we need to generate a full node chain to accommodate for assimp's
     // lack to express pivots and offsets.
     if ((chainBits & chainMaskComplex) && doc.Settings().preservePivots) {
-        FBXImporter::LogInfo("generating full transformation chain for node: " + name);
+        FBXImporter::LogInfo("generating full transformation chain for node: ", name);
 
         // query the anim_chain_bits dictionary to find out which chain elements
         // have associated node animation channels. These can not be dropped
@@ -862,7 +862,7 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
     output_nodes.push_back(std::move(nd));
     return false;
 }
-  
+
 void FBXConverter::SetupNodeMetadata(const Model &model, aiNode &nd) {
     const PropertyTable &props = model.Props();
     DirectPropertyMap unparsedProperties = props.GetUnparsedProperties();
@@ -917,8 +917,10 @@ void FBXConverter::ConvertModel(const Model &model, aiNode *parent, aiNode *root
         } else if (line) {
             const std::vector<unsigned int> &indices = ConvertLine(*line, root_node);
             std::copy(indices.begin(), indices.end(), std::back_inserter(meshes));
+        } else if (geo) {
+            FBXImporter::LogWarn("ignoring unrecognized geometry: ", geo->Name());
         } else {
-            FBXImporter::LogWarn("ignoring unrecognized geometry: " + geo->Name());
+            FBXImporter::LogWarn("skipping null geometry");
         }
     }
 
@@ -944,7 +946,7 @@ FBXConverter::ConvertMesh(const MeshGeometry &mesh, const Model &model, aiNode *
     const std::vector<aiVector3D> &vertices = mesh.GetVertices();
     const std::vector<unsigned int> &faces = mesh.GetFaceIndexCounts();
     if (vertices.empty() || faces.empty()) {
-        FBXImporter::LogWarn("ignoring empty geometry: " + mesh.Name());
+        FBXImporter::LogWarn("ignoring empty geometry: ", mesh.Name());
         return temp;
     }
 
@@ -971,7 +973,7 @@ std::vector<unsigned int> FBXConverter::ConvertLine(const LineGeometry &line, ai
     const std::vector<aiVector3D> &vertices = line.GetVertices();
     const std::vector<int> &indices = line.GetIndices();
     if (vertices.empty() || indices.empty()) {
-        FBXImporter::LogWarn("ignoring empty line: " + line.Name());
+        FBXImporter::LogWarn("ignoring empty line: ", line.Name());
         return temp;
     }
 
@@ -1125,6 +1127,8 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
         for (const aiVector2D &v : uvs) {
             *out_uv++ = aiVector3D(v.x, v.y, 0.0f);
         }
+
+        out_mesh->SetTextureCoordsName(i, aiString(mesh.GetTextureCoordChannelName(i)));
 
         out_mesh->mNumUVComponents[i] = 2;
     }
@@ -1542,10 +1546,10 @@ void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const
     aiBone *bone = nullptr;
 
     if (bone_map.count(deformer_name)) {
-        ASSIMP_LOG_VERBOSE_DEBUG_F("retrieved bone from lookup ", bone_name.C_Str(), ". Deformer:", deformer_name);
+        ASSIMP_LOG_VERBOSE_DEBUG("retrieved bone from lookup ", bone_name.C_Str(), ". Deformer:", deformer_name);
         bone = bone_map[deformer_name];
     } else {
-        ASSIMP_LOG_VERBOSE_DEBUG_F("created new bone ", bone_name.C_Str(), ". Deformer: ", deformer_name);
+        ASSIMP_LOG_VERBOSE_DEBUG("created new bone ", bone_name.C_Str(), ". Deformer: ", deformer_name);
         bone = new aiBone();
         bone->mName = bone_name;
 
@@ -1591,7 +1595,7 @@ void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const
         bone_map.insert(std::pair<const std::string, aiBone *>(deformer_name, bone));
     }
 
-    ASSIMP_LOG_DEBUG_F("bone research: Indicies size: ", out_indices.size());
+    ASSIMP_LOG_DEBUG("bone research: Indices size: ", out_indices.size());
 
     // lookup must be populated in case something goes wrong
     // this also allocates bones to mesh instance outside
@@ -1764,6 +1768,7 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const TextureMap
         // XXX handle all kinds of UV transformations
         uvTrafo.mScaling = tex->UVScaling();
         uvTrafo.mTranslation = tex->UVTranslation();
+        uvTrafo.mRotation = tex->UVRotation();
         out_mat->AddProperty(&uvTrafo, 1, _AI_MATKEY_UVTRANSFORM_BASE, target, 0);
 
         const PropertyTable &props = tex->Props();
@@ -1815,14 +1820,14 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const TextureMap
                             }
                         }
                         if (index == -1) {
-                            FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+                            FBXImporter::LogWarn("did not find UV channel named ", uvSet, " in a mesh using this material");
                             continue;
                         }
 
                         if (uvIndex == -1) {
                             uvIndex = index;
                         } else {
-                            FBXImporter::LogWarn("the UV channel named " + uvSet +
+                            FBXImporter::LogWarn("the UV channel named ", uvSet,
                                                  " appears at different positions in meshes, results will be wrong");
                         }
                     }
@@ -1839,7 +1844,7 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const TextureMap
                         }
                     }
                     if (index == -1) {
-                        FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+                        FBXImporter::LogWarn("did not find UV channel named ", uvSet, " in a mesh using this material");
                     }
 
                     if (uvIndex == -1) {
@@ -1848,7 +1853,7 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const TextureMap
                 }
 
                 if (uvIndex == -1) {
-                    FBXImporter::LogWarn("failed to resolve UV channel " + uvSet + ", using first UV channel");
+                    FBXImporter::LogWarn("failed to resolve UV channel ", uvSet, ", using first UV channel");
                     uvIndex = 0;
                 }
             }
@@ -1883,6 +1888,7 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const LayeredTex
         // XXX handle all kinds of UV transformations
         uvTrafo.mScaling = tex->UVScaling();
         uvTrafo.mTranslation = tex->UVTranslation();
+        uvTrafo.mRotation = tex->UVRotation();
         out_mat->AddProperty(&uvTrafo, 1, _AI_MATKEY_UVTRANSFORM_BASE, target, texIndex);
 
         const PropertyTable &props = tex->Props();
@@ -1934,14 +1940,14 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const LayeredTex
                             }
                         }
                         if (index == -1) {
-                            FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+                            FBXImporter::LogWarn("did not find UV channel named ", uvSet, " in a mesh using this material");
                             continue;
                         }
 
                         if (uvIndex == -1) {
                             uvIndex = index;
                         } else {
-                            FBXImporter::LogWarn("the UV channel named " + uvSet +
+                            FBXImporter::LogWarn("the UV channel named ", uvSet,
                                                  " appears at different positions in meshes, results will be wrong");
                         }
                     }
@@ -1958,7 +1964,7 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const LayeredTex
                         }
                     }
                     if (index == -1) {
-                        FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+                        FBXImporter::LogWarn("did not find UV channel named ", uvSet, " in a mesh using this material");
                     }
 
                     if (uvIndex == -1) {
@@ -1967,7 +1973,7 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const LayeredTex
                 }
 
                 if (uvIndex == -1) {
-                    FBXImporter::LogWarn("failed to resolve UV channel " + uvSet + ", using first UV channel");
+                    FBXImporter::LogWarn("failed to resolve UV channel ", uvSet, ", using first UV channel");
                     uvIndex = 0;
                 }
             }
@@ -2126,7 +2132,12 @@ void FBXConverter::SetShadingPropertiesCommon(aiMaterial *out_mat, const Propert
     const aiColor3D &Emissive = GetColorPropertyFromMaterial(props, "Emissive", ok);
     if (ok) {
         out_mat->AddProperty(&Emissive, 1, AI_MATKEY_COLOR_EMISSIVE);
-    }
+    } else {
+        const aiColor3D &emissiveColor = GetColorProperty(props, "Maya|emissive", ok);
+        if (ok) {
+            out_mat->AddProperty(&emissiveColor, 1, AI_MATKEY_COLOR_EMISSIVE);
+        }
+     }
 
     const aiColor3D &Ambient = GetColorPropertyFromMaterial(props, "Ambient", ok);
     if (ok) {
@@ -2207,6 +2218,52 @@ void FBXConverter::SetShadingPropertiesCommon(aiMaterial *out_mat, const Propert
     if (ok) {
         out_mat->AddProperty(&DispFactor, 1, "$mat.displacementscaling", 0, 0);
     }
+
+    // PBR material information
+    const aiColor3D &baseColor = GetColorProperty(props, "Maya|base_color", ok);
+    if (ok) {
+        out_mat->AddProperty(&baseColor, 1, AI_MATKEY_BASE_COLOR);
+    }
+
+    const float useColorMap = PropertyGet<float>(props, "Maya|use_color_map", ok);
+    if (ok) {
+        out_mat->AddProperty(&useColorMap, 1, AI_MATKEY_USE_COLOR_MAP);
+    }
+
+    const float useMetallicMap = PropertyGet<float>(props, "Maya|use_metallic_map", ok);
+    if (ok) {
+        out_mat->AddProperty(&useMetallicMap, 1, AI_MATKEY_USE_METALLIC_MAP);
+    }
+
+    const float metallicFactor = PropertyGet<float>(props, "Maya|metallic", ok);
+    if (ok) {
+        out_mat->AddProperty(&metallicFactor, 1, AI_MATKEY_METALLIC_FACTOR);
+    }
+
+    const float useRoughnessMap = PropertyGet<float>(props, "Maya|use_roughness_map", ok);
+    if (ok) {
+        out_mat->AddProperty(&useRoughnessMap, 1, AI_MATKEY_USE_ROUGHNESS_MAP);
+    }
+
+    const float roughnessFactor = PropertyGet<float>(props, "Maya|roughness", ok);
+    if (ok) {
+        out_mat->AddProperty(&roughnessFactor, 1, AI_MATKEY_ROUGHNESS_FACTOR);
+    }
+
+    const float useEmissiveMap = PropertyGet<float>(props, "Maya|use_emissive_map", ok);
+    if (ok) {
+        out_mat->AddProperty(&useEmissiveMap, 1, AI_MATKEY_USE_EMISSIVE_MAP);
+    }
+
+    const float emissiveIntensity = PropertyGet<float>(props, "Maya|emissive_intensity", ok);
+    if (ok) {
+        out_mat->AddProperty(&emissiveIntensity, 1, AI_MATKEY_EMISSIVE_INTENSITY);
+    }
+
+    const float useAOMap = PropertyGet<float>(props, "Maya|use_ao_map", ok);
+    if (ok) {
+        out_mat->AddProperty(&useAOMap, 1, AI_MATKEY_USE_AO_MAP);
+    }
 }
 
 void FBXConverter::SetShadingPropertiesRaw(aiMaterial *out_mat, const PropertyTable &props, const TextureMap &_textures, const MeshGeometry *const mesh) {
@@ -2271,6 +2328,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial *out_mat, const PropertyTa
             // XXX handle all kinds of UV transformations
             uvTrafo.mScaling = tex->UVScaling();
             uvTrafo.mTranslation = tex->UVTranslation();
+            uvTrafo.mRotation = tex->UVRotation();
             out_mat->AddProperty(&uvTrafo, 1, (name + "|uvtrafo").c_str(), aiTextureType_UNKNOWN, 0);
 
             int uvIndex = 0;
@@ -2319,14 +2377,14 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial *out_mat, const PropertyTa
                                 }
                             }
                             if (index == -1) {
-                                FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+                                FBXImporter::LogWarn("did not find UV channel named ", uvSet, " in a mesh using this material");
                                 continue;
                             }
 
                             if (uvIndex == -1) {
                                 uvIndex = index;
                             } else {
-                                FBXImporter::LogWarn("the UV channel named " + uvSet + " appears at different positions in meshes, results will be wrong");
+                                FBXImporter::LogWarn("the UV channel named ", uvSet, " appears at different positions in meshes, results will be wrong");
                             }
                         }
                     } else {
@@ -2342,7 +2400,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial *out_mat, const PropertyTa
                             }
                         }
                         if (index == -1) {
-                            FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+                            FBXImporter::LogWarn("did not find UV channel named ", uvSet, " in a mesh using this material");
                         }
 
                         if (uvIndex == -1) {
@@ -2351,7 +2409,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial *out_mat, const PropertyTa
                     }
 
                     if (uvIndex == -1) {
-                        FBXImporter::LogWarn("failed to resolve UV channel " + uvSet + ", using first UV channel");
+                        FBXImporter::LogWarn("failed to resolve UV channel ", uvSet, ", using first UV channel");
                         uvIndex = 0;
                     }
                 }
@@ -2546,7 +2604,7 @@ void FBXConverter::ConvertAnimationStack(const AnimationStack &st) {
             anim->mMorphMeshChannels = new aiMeshMorphAnim *[numMorphMeshChannels];
             anim->mNumMorphMeshChannels = numMorphMeshChannels;
             unsigned int i = 0;
-            for (auto morphAnimIt : morphAnimDatas) {
+            for (const auto &morphAnimIt : morphAnimDatas) {
                 morphAnimData *animData = morphAnimIt.second;
                 unsigned int numKeys = static_cast<unsigned int>(animData->size());
                 aiMeshMorphAnim *meshMorphAnim = new aiMeshMorphAnim();
@@ -2560,7 +2618,7 @@ void FBXConverter::ConvertAnimationStack(const AnimationStack &st) {
                     meshMorphAnim->mKeys[j].mNumValuesAndWeights = numValuesAndWeights;
                     meshMorphAnim->mKeys[j].mValues = new unsigned int[numValuesAndWeights];
                     meshMorphAnim->mKeys[j].mWeights = new double[numValuesAndWeights];
-                    meshMorphAnim->mKeys[j].mTime = CONVERT_FBX_TIME(animIt.first);
+                    meshMorphAnim->mKeys[j].mTime = CONVERT_FBX_TIME(animIt.first) * anim_fps;
                     for (unsigned int k = 0; k < numValuesAndWeights; k++) {
                         meshMorphAnim->mKeys[j].mValues[k] = keyData->values.at(k);
                         meshMorphAnim->mKeys[j].mWeights[k] = keyData->weights.at(k);
@@ -2574,12 +2632,12 @@ void FBXConverter::ConvertAnimationStack(const AnimationStack &st) {
         // empty animations would fail validation, so drop them
         delete anim;
         animations.pop_back();
-        FBXImporter::LogInfo("ignoring empty AnimationStack (using IK?): " + name);
+        FBXImporter::LogInfo("ignoring empty AnimationStack (using IK?): ", name);
         return;
     }
 
-    double start_time_fps = has_local_startstop ? CONVERT_FBX_TIME(start_time) : min_time;
-    double stop_time_fps = has_local_startstop ? CONVERT_FBX_TIME(stop_time) : max_time;
+    double start_time_fps = has_local_startstop ? (CONVERT_FBX_TIME(start_time) * anim_fps) : min_time;
+    double stop_time_fps = has_local_startstop ? (CONVERT_FBX_TIME(stop_time) * anim_fps) : max_time;
 
     // adjust relative timing for animation
     for (unsigned int c = 0; c < anim->mNumChannels; c++) {
@@ -2707,13 +2765,13 @@ void FBXConverter::GenerateNodeAnimations(std::vector<aiNodeAnim *> &node_anims,
         ai_assert(node);
 
         if (node->TargetProperty().empty()) {
-            FBXImporter::LogWarn("target property for animation curve not set: " + node->Name());
+            FBXImporter::LogWarn("target property for animation curve not set: ", node->Name());
             continue;
         }
 
         curve_node = node;
         if (node->Curves().empty()) {
-            FBXImporter::LogWarn("no animation curves assigned to AnimationCurveNode: " + node->Name());
+            FBXImporter::LogWarn("no animation curves assigned to AnimationCurveNode: ", node->Name());
             continue;
         }
 
@@ -2748,7 +2806,7 @@ void FBXConverter::GenerateNodeAnimations(std::vector<aiNodeAnim *> &node_anims,
             if (doc.Settings().optimizeEmptyAnimationCurves &&
                     IsRedundantAnimationData(target, comp, (chain[i]->second))) {
 
-                FBXImporter::LogVerboseDebug("dropping redundant animation channel for node " + target.Name());
+                FBXImporter::LogVerboseDebug("dropping redundant animation channel for node ", target.Name());
                 continue;
             }
 
@@ -3069,7 +3127,12 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
         if (chain[i] == iterEnd)
             continue;
 
-        keyframeLists[i] = GetKeyframeList((*chain[i]).second, start, stop);
+        if (i == TransformationComp_Rotation || i == TransformationComp_PreRotation
+                || i == TransformationComp_PostRotation || i == TransformationComp_GeometricRotation) {
+            keyframeLists[i] = GetRotationKeyframeList((*chain[i]).second, start, stop);
+        } else {
+            keyframeLists[i] = GetKeyframeList((*chain[i]).second, start, stop);
+        }
 
         for (KeyFrameListList::const_iterator it = keyframeLists[i].begin(); it != keyframeLists[i].end(); ++it) {
             const KeyTimeList& times = *std::get<0>(*it);
@@ -3099,7 +3162,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
         InterpolateKeys(outTranslations, keytimes, keyframeLists[TransformationComp_Translation], defTranslate, maxTime, minTime);
     } else {
         for (size_t i = 0; i < keyCount; ++i) {
-            outTranslations[i].mTime = CONVERT_FBX_TIME(keytimes[i]);
+            outTranslations[i].mTime = CONVERT_FBX_TIME(keytimes[i]) * anim_fps;
             outTranslations[i].mValue = defTranslate;
         }
     }
@@ -3108,7 +3171,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
         InterpolateKeys(outRotations, keytimes, keyframeLists[TransformationComp_Rotation], defRotation, maxTime, minTime, rotOrder);
     } else {
         for (size_t i = 0; i < keyCount; ++i) {
-            outRotations[i].mTime = CONVERT_FBX_TIME(keytimes[i]);
+            outRotations[i].mTime = CONVERT_FBX_TIME(keytimes[i]) * anim_fps;
             outRotations[i].mValue = defQuat;
         }
     }
@@ -3117,7 +3180,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
         InterpolateKeys(outScales, keytimes, keyframeLists[TransformationComp_Scaling], defScale, maxTime, minTime);
     } else {
         for (size_t i = 0; i < keyCount; ++i) {
-            outScales[i].mTime = CONVERT_FBX_TIME(keytimes[i]);
+            outScales[i].mTime = CONVERT_FBX_TIME(keytimes[i]) * anim_fps;
             outScales[i].mValue = defScale;
         }
     }
@@ -3216,6 +3279,79 @@ FBXConverter::KeyFrameListList FBXConverter::GetKeyframeList(const std::vector<c
     return inputs; // pray for NRVO :-)
 }
 
+FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::vector<const AnimationCurveNode *> &nodes,
+                                                                     int64_t start, int64_t stop) {
+    KeyFrameListList inputs;
+    inputs.reserve(nodes.size() * 3);
+
+    //give some breathing room for rounding errors
+    const int64_t adj_start = start - 10000;
+    const int64_t adj_stop = stop + 10000;
+
+    for (const AnimationCurveNode *node : nodes) {
+        ai_assert(node);
+
+        const AnimationCurveMap &curves = node->Curves();
+        for (const AnimationCurveMap::value_type &kv : curves) {
+
+            unsigned int mapto;
+            if (kv.first == "d|X") {
+                mapto = 0;
+            } else if (kv.first == "d|Y") {
+                mapto = 1;
+            } else if (kv.first == "d|Z") {
+                mapto = 2;
+            } else {
+                FBXImporter::LogWarn("ignoring scale animation curve, did not recognize target component");
+                continue;
+            }
+
+            const AnimationCurve *const curve = kv.second;
+            ai_assert(curve->GetKeys().size() == curve->GetValues().size());
+            ai_assert(curve->GetKeys().size());
+
+            //get values within the start/stop time window
+            std::shared_ptr<KeyTimeList> Keys(new KeyTimeList());
+            std::shared_ptr<KeyValueList> Values(new KeyValueList());
+            const size_t count = curve->GetKeys().size();
+
+            int64_t tp = curve->GetKeys().at(0);
+            float vp = curve->GetValues().at(0);
+            Keys->push_back(tp);
+            Values->push_back(vp);
+            if (count > 1) {
+                int64_t tc = curve->GetKeys().at(1);
+                float vc = curve->GetValues().at(1);
+                for (size_t n = 1; n < count; n++) {
+                    while (std::abs(vc - vp) >= 180.0f) {
+                        float step = std::floor(float(tc - tp) / (vc - vp) * 179.0f);
+                        int64_t tnew = tp + int64_t(step);
+                        float vnew = vp + (vc - vp) * step / float(tc - tp);
+                        if (tnew >= adj_start && tnew <= adj_stop) {
+                            Keys->push_back(tnew);
+                            Values->push_back(vnew);
+                        }
+                        tp = tnew;
+                        vp = vnew;
+                    }
+                    if (tc >= adj_start && tc <= adj_stop) {
+                        Keys->push_back(tc);
+                        Values->push_back(vc);
+                    }
+                    if (n + 1 < count) {
+                        tp = tc;
+                        vp = vc;
+                        tc = curve->GetKeys().at(n + 1);
+                        vc = curve->GetValues().at(n + 1);
+                    }
+                }
+            }
+            inputs.push_back(std::make_tuple(Keys, Values, mapto));
+        }
+    }
+    return inputs;
+}
+
 KeyTimeList FBXConverter::GetKeyTimeList(const KeyFrameListList &inputs) {
     ai_assert(!inputs.empty());
 
@@ -3306,7 +3442,7 @@ void FBXConverter::InterpolateKeys(aiVectorKey *valOut, const KeyTimeList &keys,
         }
 
         // magic value to convert fbx times to seconds
-        valOut->mTime = CONVERT_FBX_TIME(time);
+        valOut->mTime = CONVERT_FBX_TIME(time) * anim_fps;
 
         min_time = std::min(min_time, valOut->mTime);
         max_time = std::max(max_time, valOut->mTime);
@@ -3406,7 +3542,7 @@ void FBXConverter::ConvertRotationKeys(aiNodeAnim *na, const std::vector<const A
     ai_assert(nodes.size());
 
     // XXX see notes in ConvertScaleKeys()
-    const std::vector<KeyFrameList> &inputs = GetKeyframeList(nodes, start, stop);
+    const std::vector<KeyFrameList> &inputs = GetRotationKeyframeList(nodes, start, stop);
     const KeyTimeList &keys = GetKeyTimeList(inputs);
 
     na->mNumRotationKeys = static_cast<unsigned int>(keys.size());
@@ -3516,7 +3652,7 @@ void FBXConverter::ConvertOrphanedEmbeddedTextures() {
                         if (texture->Media() && texture->Media()->ContentLength() > 0) {
                             realTexture = texture;
                         }
-                    }    
+                    }
                 }
             } catch (...) {
                 // do nothing

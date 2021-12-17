@@ -254,7 +254,7 @@ void MDLImporter::InternReadFile(const std::string &pFile,
         } else {
             // print the magic word to the log file
             throw DeadlyImportError("Unknown MDL subformat ", pFile,
-                                    ". Magic word (", std::string((char *)&iMagicWord, 4), ") is not known");
+                                    ". Magic word (", ai_str_toprintable((const char *)&iMagicWord, sizeof(iMagicWord)), ") is not known");
         }
 
         if (is_half_life){
@@ -600,7 +600,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
 
     // need to read all textures
     for (unsigned int i = 0; i < (unsigned int)pcHeader->num_skins; ++i) {
-        if (szCurrent >= szEnd) {
+        if (szCurrent + sizeof(uint32_t) > szEnd) {
             throw DeadlyImportError("Texture data past end of file.");
         }
         BE_NCONST MDL::Skin *pcSkin;
@@ -721,7 +721,6 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
 
                 // read the normal vector from the precalculated normal table
                 MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex, pcMesh->mNormals[iCurrent]);
-                pcMesh->mNormals[iCurrent] *= -1;
                 // pcMesh->mNormals[iCurrent].y *= -1.0f;
 
                 // read texture coordinates
@@ -777,7 +776,6 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
 
                 // read the normal vector from the precalculated normal table
                 MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex, pcMesh->mNormals[iCurrent]);
-                pcMesh->mNormals[iCurrent] *= -1;
                 // pcMesh->mNormals[iCurrent].y *= -1.0f;
 
                 // read texture coordinates
@@ -1859,7 +1857,7 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
                 for (unsigned int c = 0; c < 3; ++c) {
                     const uint32_t iIndex = oldFace.mIndices[c];
                     pcMesh->mVertices[iCurrent] = groupData.vPositions[iIndex];
-                    pcMesh->mNormals[iCurrent] = -groupData.vNormals[iIndex];
+                    pcMesh->mNormals[iCurrent] = groupData.vNormals[iIndex];
 
                     if (!groupData.vTextureCoords1.empty()) {
 

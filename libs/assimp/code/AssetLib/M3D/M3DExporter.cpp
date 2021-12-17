@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define M3D_EXPORTER
 #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
 #define M3D_NODUP
-#endif
+
 
 // Header files, standard library.
 #include <memory> // shared_ptr
@@ -76,7 +76,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Currently supports static meshes, vertex colors, materials, textures
  *
  * For animation, it would require the following conversions:
- *  - aiNode (bones) -> m3d_t.bone (with parent id, position vector and oriantation quaternion)
+ *  - aiNode (bones) -> m3d_t.bone (with parent id, position vector and orientation quaternion)
  *  - aiMesh.aiBone -> m3d_t.skin (per vertex, with bone id, weight pairs)
  *  - aiAnimation -> m3d_action (frame with timestamp and list of bone id, position, orientation
  *      triplets, instead of per bone timestamp + lists)
@@ -294,21 +294,17 @@ void ExportSceneM3D(
 // Worker function for exporting a scene to ASCII A3D.
 // Prototyped and registered in Exporter.cpp
 void ExportSceneM3DA(
-        const char *,
-        IOSystem *,
-        const aiScene *,
-        const ExportProperties *
+        const char *pFile,
+        IOSystem *pIOSystem,
+        const aiScene *pScene,
+        const ExportProperties *pProperties
 
 ) {
-#ifdef M3D_ASCII
     // initialize the exporter
     M3DExporter exporter(pScene, pProperties);
 
     // perform ascii export
     exporter.doExport(pFile, pIOSystem, true);
-#else
-    throw DeadlyExportError("Assimp configured without M3D_ASCII support");
-#endif
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -441,6 +437,6 @@ void M3DExporter::NodeWalk(const M3DWrapper &m3d, const aiNode *pNode, aiMatrix4
     }
 }
 } // namespace Assimp
-
+#endif
 #endif // ASSIMP_BUILD_NO_M3D_EXPORTER
 #endif // ASSIMP_BUILD_NO_EXPORT

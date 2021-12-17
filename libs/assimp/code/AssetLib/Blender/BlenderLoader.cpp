@@ -88,7 +88,7 @@ using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
 static const aiImporterDesc blenderDesc = {
-    "Blender 3D Importer \nhttp://www.blender3d.org",
+    "Blender 3D Importer (http://www.blender3d.org)",
     "",
     "",
     "No animation support yet",
@@ -113,8 +113,8 @@ BlenderImporter::~BlenderImporter() {
     delete modifier_cache;
 }
 
-static const char *Tokens[] = { "BLENDER" };
-static const char *TokensForSearch[] = { "blender" };
+static const char * const Tokens[] = { "BLENDER" };
+static const char * const TokensForSearch[] = { "blender" };
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -130,12 +130,6 @@ bool BlenderImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bo
     }
 
     return false;
-}
-
-// ------------------------------------------------------------------------------------------------
-// List all extensions handled by this loader
-void BlenderImporter::GetExtensionList(std::set<std::string> &app) {
-    app.insert("blend");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -241,9 +235,9 @@ void BlenderImporter::InternReadFile(const std::string &pFile,
     stream->Read(magic, 3, 1);
     magic[3] = '\0';
 
-    LogInfo((format(), "Blender version is ", magic[0], ".", magic + 1,
+    LogInfo("Blender version is ", magic[0], ".", magic + 1,
             " (64bit: ", file.i64bit ? "true" : "false",
-            ", little endian: ", file.little ? "true" : "false", ")"));
+            ", little endian: ", file.little ? "true" : "false", ")");
 
     ParseBlendFile(file, stream);
 
@@ -316,7 +310,7 @@ void BlenderImporter::ExtractScene(Scene &out, const FileDatabase &file) {
     ss.Convert(out, file);
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
-    ASSIMP_LOG_INFO_F(
+    ASSIMP_LOG_INFO(
             "(Stats) Fields read: ", file.stats().fields_read,
             ", pointers resolved: ", file.stats().pointers_resolved,
             ", cache hits: ", file.stats().cache_hits,
@@ -325,41 +319,80 @@ void BlenderImporter::ExtractScene(Scene &out, const FileDatabase &file) {
 }
 
 // ------------------------------------------------------------------------------------------------
+void BlenderImporter::ParseSubCollection(const Blender::Scene &in, aiNode *root, std::shared_ptr<Collection> collection, ConversionData &conv_data) {
+
+    std::deque<Object *> root_objects;
+    // Count number of objects
+    for (std::shared_ptr<CollectionObject> cur = std::static_pointer_cast<CollectionObject>(collection->gobject.first); cur; cur = cur->next) {
+        if (cur->ob) {
+            root_objects.push_back(cur->ob);
+        }
+    }
+    std::deque<Collection *> root_children;
+    // Count number of child nodes
+    for (std::shared_ptr<CollectionChild> cur = std::static_pointer_cast<CollectionChild>(collection->children.first); cur; cur = cur->next) {
+        if (cur->collection) {
+            root_children.push_back(cur->collection.get());
+        }
+    }
+    root->mNumChildren = static_cast<unsigned int>(root_objects.size() + root_children.size());
+    root->mChildren = new aiNode *[root->mNumChildren]();
+
+    for (unsigned int i = 0; i < static_cast<unsigned int>(root_objects.size()); ++i) {
+        root->mChildren[i] = ConvertNode(in, root_objects[i], conv_data, aiMatrix4x4());
+        root->mChildren[i]->mParent = root;
+    }
+
+    // For each subcollection create a new node to represent it
+    unsigned int iterator = static_cast<unsigned int>(root_objects.size());
+    for (std::shared_ptr<CollectionChild> cur = std::static_pointer_cast<CollectionChild>(collection->children.first); cur; cur = cur->next) {
+        if (cur->collection) {
+            root->mChildren[iterator] = new aiNode(cur->collection->id.name + 2); // skip over the name prefix 'OB'
+            root->mChildren[iterator]->mParent = root;
+            ParseSubCollection(in, root->mChildren[iterator], cur->collection, conv_data);
+        }
+        iterator += 1;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
 void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const FileDatabase &file) {
     ConversionData conv(file);
 
-    // FIXME it must be possible to take the hierarchy directly from
-    // the file. This is terrible. Here, we're first looking for
-    // all objects which don't have parent objects at all -
-    std::deque<const Object *> no_parents;
-    for (std::shared_ptr<Base> cur = std::static_pointer_cast<Base>(in.base.first); cur; cur = cur->next) {
-        if (cur->object) {
-            if (!cur->object->parent) {
-                no_parents.push_back(cur->object.get());
-            } else {
-                conv.objects.insert(cur->object.get());
-            }
-        }
-    }
-    for (std::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
-        if (cur->object) {
-            if (cur->object->parent) {
-                conv.objects.insert(cur->object.get());
-            }
-        }
-    }
-
-    if (no_parents.empty()) {
-        ThrowException("Expected at least one object with no parent");
-    }
-
     aiNode *root = out->mRootNode = new aiNode("<BlenderRoot>");
+    // Iterate over all objects directly under master_collection,
+    // If in.master_collection == null, then we're parsing something older.
+    if (in.master_collection) {
+        ParseSubCollection(in, root, in.master_collection, conv);
+    } else {
+        std::deque<const Object *> no_parents;
+        for (std::shared_ptr<Base> cur = std::static_pointer_cast<Base>(in.base.first); cur; cur = cur->next) {
+            if (cur->object) {
+                if (!cur->object->parent) {
+                    no_parents.push_back(cur->object.get());
+                } else {
+                    conv.objects.insert(cur->object.get());
+                }
+            }
+        }
+        for (std::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
+            if (cur->object) {
+                if (cur->object->parent) {
+                    conv.objects.insert(cur->object.get());
+                }
+            }
+        }
 
-    root->mNumChildren = static_cast<unsigned int>(no_parents.size());
-    root->mChildren = new aiNode *[root->mNumChildren]();
-    for (unsigned int i = 0; i < root->mNumChildren; ++i) {
-        root->mChildren[i] = ConvertNode(in, no_parents[i], conv, aiMatrix4x4());
-        root->mChildren[i]->mParent = root;
+        if (no_parents.empty()) {
+            ThrowException("Expected at least one object with no parent");
+        }
+
+        root->mNumChildren = static_cast<unsigned int>(no_parents.size());
+        root->mChildren = new aiNode *[root->mNumChildren]();
+        for (unsigned int i = 0; i < root->mNumChildren; ++i) {
+            root->mChildren[i] = ConvertNode(in, no_parents[i], conv, aiMatrix4x4());
+            root->mChildren[i]->mParent = root;
+        }
     }
 
     BuildMaterials(conv);
@@ -426,9 +459,9 @@ void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const M
             --s;
         }
 
-        curTex->achFormatHint[0] = s + 1 > e ? '\0' : (char)::tolower(s[1]);
-        curTex->achFormatHint[1] = s + 2 > e ? '\0' : (char)::tolower(s[2]);
-        curTex->achFormatHint[2] = s + 3 > e ? '\0' : (char)::tolower(s[3]);
+        curTex->achFormatHint[0] = s + 1 > e ? '\0' : (char)::tolower((unsigned char)s[1]);
+        curTex->achFormatHint[1] = s + 2 > e ? '\0' : (char)::tolower((unsigned char)s[2]);
+        curTex->achFormatHint[2] = s + 3 > e ? '\0' : (char)::tolower((unsigned char)s[3]);
         curTex->achFormatHint[3] = '\0';
 
         // tex->mHeight = 0;
@@ -440,7 +473,7 @@ void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const M
 
         curTex->pcData = reinterpret_cast<aiTexel *>(ch);
 
-        LogInfo("Reading embedded texture, original file was " + std::string(img->name));
+        LogInfo("Reading embedded texture, original file was ", img->name);
     } else {
         name = aiString(img->name);
     }
@@ -522,7 +555,7 @@ void BlenderImporter::ResolveTexture(aiMaterial *out, const Material *mat, const
     case Tex::Type_POINTDENSITY:
     case Tex::Type_VOXELDATA:
 
-        LogWarn(std::string("Encountered a texture with an unsupported type: ") + dispnam);
+        LogWarn("Encountered a texture with an unsupported type: ", dispnam);
         AddSentinelTexture(out, mat, tex, conv_data);
         break;
 
@@ -685,7 +718,7 @@ void BlenderImporter::BuildMaterials(ConversionData &conv_data) {
 
     BuildDefaultMaterial(conv_data);
 
-    for (std::shared_ptr<Material> mat : conv_data.materials_raw) {
+    for (const std::shared_ptr<Material> &mat : conv_data.materials_raw) {
 
         // reset per material global counters
         for (size_t i = 0; i < sizeof(conv_data.next_texture) / sizeof(conv_data.next_texture[0]); ++i) {
@@ -758,7 +791,7 @@ void BlenderImporter::CheckActualType(const ElemBase *dt, const char *check) {
 
 // ------------------------------------------------------------------------------------------------
 void BlenderImporter::NotSupportedObjectType(const Object *obj, const char *type) {
-    LogWarn((format(), "Object `", obj->id.name, "` - type is unsupported: `", type, "`, skipping"));
+    LogWarn("Object `", obj->id.name, "` - type is unsupported: `", type, "`, skipping");
 }
 
 // ------------------------------------------------------------------------------------------------
