@@ -344,18 +344,16 @@ AI_CONFIG_IMPORT_GLOBAL_KEYFRAME // vertex anim frame to load
 fbx orientation fix		https://github.com/assimp/assimp/issues/849
 ? aiProcess_GenSmoothNormals //if it does not join disconnected verts
 	"ase ask" asc? // 'c' check in the code
-crashes: irr irrmesh !lwo/lwo2/UglyVertexColors.lwo !cube_normals.m3d !regr01.obj !openGEX triangle_with_empty_solid.stl ter x3d invalid
-crashes: irr !pk3 x3d
-	//x3d: File extension not known, trying signature-based detection	//not implemented
+crashes: !regr01.obj !openGEX
 	et mdc 0 + weapons2/thompson crash
 	hl mdl flipped faces + texture
 hl mdl multiple texs, number of fails in models/
 hl spr 'models'?
 	mdl# flipped normals
-q4 lwo, *.md5mesh: mat name should be preferred
+	q4 lwo, *.md5mesh: mat name should be preferred // done so due to models/ textures/ prefix
 *.3d;*.3ds;*.3mf;*.ac;*.ac3d;*.acc;*.amf;*.ase;*.ask;*.assbin;*.b3d;*.blend;*.bvh;*.cob;*.csm;*.dae;*.dxf;*.enff;*.fbx;*.glb;*.gltf;*.hmp;*.ifc;*.ifczip;*.irr;*.irrmesh;*.lwo;*.lws;*.lxo;*.m3d;*.md2;*.md3;*.md5anim;*.md5camera;*.md5mesh;*.mdc;*.mdl;*.mesh;*.mesh.xml;*.mot;*.ms3d;*.ndo;*.nff;*.obj;*.off;*.ogex;*.pk3;*.ply;*.pmx;*.prj;*.q3o;*.q3s;*.raw;*.scn;*.sib;*.smd;*.stl;*.stp;*.ter;*.uc;*.vta;*.x;*.x3d;*.x3db;*.xgl;*.xml;*.zae;*.zgl
 Enabled importer formats: AMF 3DS AC ASE ASSBIN B3D BVH COLLADA DXF CSM HMP IRRMESH IRR LWO LWS M3D MD2 MD3 MD5 MDC MDL NFF NDO OFF OBJ OGRE OPENGEX PLY MS3D COB BLEND IFC XGL FBX Q3D Q3BSP RAW SIB SMD STL TERRAGEN 3D X X3D GLTF 3MF MMD
-_minus: pk3 md5anim md5camera ogex
+_minus: bsp pk3 md5anim md5camera ogex
 old list: md2 md3 ase lwo obj 3ds picoterrain mdl md5mesh ms3d fm
 	-DNDEBUG
 disable crashy loaders

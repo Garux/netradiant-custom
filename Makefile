@@ -778,11 +778,24 @@ $(INSTALLDIR)/libassimp_.$(DLL): \
 	libs/assimp/code/AssetLib/X/XFileImporter.o \
 	libs/assimp/code/AssetLib/X/XFileParser.o \
 	libs/assimp/code/AssetLib/X3D/X3DImporter.o \
+	libs/assimp/code/AssetLib/X3D/X3DGeoHelper.o \
+	libs/assimp/code/AssetLib/X3D/X3DImporter_Geometry2D.o \
+	libs/assimp/code/AssetLib/X3D/X3DImporter_Geometry3D.o \
+	libs/assimp/code/AssetLib/X3D/X3DImporter_Group.o \
+	libs/assimp/code/AssetLib/X3D/X3DImporter_Light.o \
+	libs/assimp/code/AssetLib/X3D/X3DImporter_Metadata.o \
+	libs/assimp/code/AssetLib/X3D/X3DImporter_Networking.o \
+	libs/assimp/code/AssetLib/X3D/X3DImporter_Postprocess.o \
+	libs/assimp/code/AssetLib/X3D/X3DImporter_Rendering.o \
+	libs/assimp/code/AssetLib/X3D/X3DImporter_Shape.o \
+	libs/assimp/code/AssetLib/X3D/X3DImporter_Texturing.o \
+	libs/assimp/code/AssetLib/X3D/X3DXmlHelper.o \
 	libs/assimp/code/AssetLib/glTF/glTFCommon.o \
 	libs/assimp/code/AssetLib/glTF/glTFImporter.o \
 	libs/assimp/code/AssetLib/glTF2/glTF2Importer.o \
 	libs/assimp/code/AssetLib/3MF/D3MFImporter.o \
 	libs/assimp/code/AssetLib/3MF/D3MFOpcPackage.o \
+	libs/assimp/code/AssetLib/3MF/XmlSerializer.o \
 	libs/assimp/code/AssetLib/MMD/MMDImporter.o \
 	libs/assimp/code/AssetLib/MMD/MMDPmxParser.o \
 	libs/assimp/contrib/unzip/crypt.o \
