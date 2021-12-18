@@ -766,6 +766,7 @@ $(INSTALLDIR)/libassimp_.$(DLL): \
 	libs/assimp/code/AssetLib/FBX/FBXDeformer.o \
 	libs/assimp/code/AssetLib/FBX/FBXBinaryTokenizer.o \
 	libs/assimp/code/AssetLib/FBX/FBXDocumentUtil.o \
+	libs/assimp/code/AssetLib/IQM/IQMImporter.o \
 	libs/assimp/code/AssetLib/Q3D/Q3DLoader.o \
 	libs/assimp/code/AssetLib/Q3BSP/Q3BSPFileParser.o \
 	libs/assimp/code/AssetLib/Q3BSP/Q3BSPFileImporter.o \
