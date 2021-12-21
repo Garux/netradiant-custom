@@ -3045,7 +3045,7 @@ void IlluminateVertexes( int num ){
 			/* color the luxel with luxel origin? */
 			else if ( debugOrigin ) {
 				const Vector3 temp = ( info->minmax.maxs - info->minmax.mins ) * ( 1.0f / 255.0f );
-				const Vector3 temp2 = origin - lm->minmax.mins;
+				const Vector3 temp2 = verts[ i ].xyz - info->minmax.mins;
 				radVertLuxel = info->minmax.mins + ( temp * temp2 );
 			}
 
