@@ -238,9 +238,9 @@ private:
 			    aiReturn_SUCCESS == material->Get( AI_MATKEY_TEXTURE_DIFFUSE(0), texname )
 			 && texname.length != 0
 			 && !string_equal_prefix_nocase( matname.C_Str(), "textures/" ) /* matname looks intentionally named as ingame shader */
-			 && !string_equal_prefix_nocase( matname.C_Str(), "textures\"" )
+			 && !string_equal_prefix_nocase( matname.C_Str(), "textures\\" )
 			 && !string_equal_prefix_nocase( matname.C_Str(), "models/" )
-			 && !string_equal_prefix_nocase( matname.C_Str(), "models\"" ) ){
+			 && !string_equal_prefix_nocase( matname.C_Str(), "models\\" ) ){
 #ifdef _DEBUG
 							globalOutputStream() << "texname: " << texname.C_Str() << "\n";
 #endif
