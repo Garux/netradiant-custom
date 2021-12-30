@@ -1214,7 +1214,7 @@ void SubdivideFaceSurfaces( const entity_t& e ){
 	Sys_FPrintf( SYS_VRB, "--- SubdivideFaceSurfaces ---\n" );
 
 	/* walk the list of original surfaces, numMapDrawSurfs may increase in the process */
-	for ( mapDrawSurface_t& ds : Span( mapDrawSurfs + e.firstDrawSurf, numMapDrawSurfs ) )
+	for ( mapDrawSurface_t& ds : Span( mapDrawSurfs + e.firstDrawSurf, mapDrawSurfs + numMapDrawSurfs ) )
 	{
 		/* only subdivide brush sides */
 		if ( ds.type != ESurfaceType::Face || ds.mapBrush == NULL || ds.sideRef == NULL || ds.sideRef->side == NULL ) {
