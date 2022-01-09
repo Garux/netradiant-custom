@@ -1,0 +1,106 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  windows-msys:
+    name: ${{ matrix.config }} Windows ${{ matrix.arch }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86, x86_64]
+        cc: [gcc]
+        include:
+          - arch: x86
+            msystem: MINGW32
+            prefix: mingw-w64-i686
+
+          - arch: x86_64
+            msystem: MINGW64
+            prefix: mingw-w64-x86_64
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        install: ${{ matrix.prefix }}-gtk2 ${{ matrix.prefix }}-gtkglext ${{ matrix.prefix }}-gtk-engines ${{ matrix.prefix }}-gtk-engine-murrine svn git
+        msystem: ${{ matrix.msystem }}
+        path-type: minimal
+        release: false
+        update: false
+
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Build
+      run: |
+        make DOWNLOAD_GAMEPACKS=no MAKEFILE_CONF=msys2-Makefile.conf BUILD=release -j$(nproc) CXXFLAGS="-Wno-deprecated-declarations" 2> windows-warn-${{ matrix.arch }}.log
+        wget https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
+        unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
+        wget https://www.dropbox.com/s/hcgkwzzmja3m6c0/netradiant-custom-extra-win.zip
+        unzip -o netradiant-custom-extra-win.zip -d "install"
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Windows-${{ matrix.arch }}
+        path: install/
+        if-no-files-found: error
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: warnings
+        path: windows-warn*.log
+
+  linux:
+    name: ${{ matrix.config }} Linux ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64]
+
+    steps:
+    - name: Install tools
+      run: |
+          sudo apt-get -qq update
+          sudo apt-get -y install mesa-common-dev libgtk2.0-dev libpango1.0-dev libgtkglext1-dev
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Build
+      run: |
+        make -j 4 DOWNLOAD_GAMEPACKS=no CXXFLAGS="-Wno-deprecated-declarations"
+        wget https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
+        unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Linux-${{ matrix.arch }}
+        path: install/
+        if-no-files-found: error
+
+  create-testing:
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: [windows-msys, linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Create binary archives
+        run: |
+          7z a -r netradiant-custom-windows-x86_64.zip  ./Windows-x86_64/*
+          7z a -r netradiant-custom-linux-x86_64.zip    ./Linux-x86_64/*
+      - name: Create latest build
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: Development Build
+          files: |
+            *.zip
