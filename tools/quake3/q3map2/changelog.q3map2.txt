@@ -171,7 +171,7 @@ Q3Map2 Version History + Changelog (Reverse Chronological Order)
   ignored on sun traces
 - Added BSP file size printout
 - Filtering of any kind now disables adaptive supersampling on a per-light,
-  per-ightmap basis
+  per-lightmap basis
 - Fixed another _minlight <-> styled light interaction bug (thanks pjw!)
 
 
@@ -551,7 +551,7 @@ Known issues:
   "_flare" "1" -- use default flare (different for each game)
   "_flareshader" "path/to/flareshader" -- use a specific flare shader
   Note: This only matters in SOF2/JK2 now. Make a light targetted (a spotlight)
-  to get it to aim the correct direction, otherwise it defaults to pointing 
+  to get it to aim the correct direction, otherwise it defaults to pointing
   downward. You cannot have omnidirectional flares
 - Lightgrid size is automatically increased to accommodate large maps. The
   MAX_MAP_LIGHTGRID error will never happen again
@@ -662,7 +662,7 @@ Known issues:
 
   q3map_surfacemodel <path to md3> <density in units> <odds of appearing>
       <min scale> <max scale> <min angle> <max angle> <oriented>
-  
+
   The last flag is 1 or 0, and sets whether the model gets fitted to the
   orientation of the surface. Not functional yet. See screenshots page for
   shots of this in action.

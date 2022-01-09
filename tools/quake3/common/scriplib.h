@@ -44,6 +44,7 @@ void UnGetToken();
 
 /// \brief
 /// \return true, if there is another token on the line.
+/// Warning: 2nd of two sequential calls can cross the line.
 bool TokenAvailable();
 
 /// \brief Parses next token and emits \c Error, if it's not equal to \p match.

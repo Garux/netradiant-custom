@@ -391,8 +391,14 @@ textures/eerie/ironcrosslt2_10000
 <h2 id="q3map_shadeAngle">q3map_shadeAngle angle</h2>
 <p>Specifies the breaking angle for phong shading. This allows for smooth shadows between brush faces like patches. The angle parameter is the angle between adjacent faces at which smoothing will start to occur. Typical values are usually in the 120-179 range.</p>
 
-<h2 id="q3map_skylight">q3map_skylight amount iterations</h2>
-<p>This replaces q3map_surfacelight and q3map_lightSubdivide on sky surfaces for much faster and more uniform sky illumination. Amount is a brightness value, similar to what you would use in q3map_sun. Good values are between 50 and 200. Iterations is an exponential factor. 3 is the best value that balances speed and quality. Values of 4 and 5 are higher quality at the expense of higher compile time. Values below 3 are not too useful. See Appendix: Light Emitting Shaders.</p>
+<h2 id="q3map_skylight">q3map_skylight <em>amount iterations</em> optional[<em>horizon_min horizon_max sample_color</em>]</h2>
+<p>This replaces q3map_surfacelight and q3map_lightSubdivide on sky surfaces for much faster and more uniform sky illumination. May be used multiple times in a single shader. See Appendix: Light Emitting Shaders.</p>
+<dl>
+	<dt>amount</dt><dd>Brightness value, similar to what you would use in q3map_sun. Good values are between 50 and 200.</dd>
+	<dt>iterations</dt><dd>An exponential factor. 3 is the best value that balances speed and quality. Values of 4 and 5 are higher quality at the expense of higher compile time. Values below 3 are not too useful.</dd>
+	<dt>horizon_min horizon_max</dt><dd>Two spherical angles, defining portion of sphere to emit light from. Default is <em>0 90</em>, which is upper hemisphere. <em>-90 90</em> will be whole sphere.</dd>
+	<dt>sample_color</dt><dd>Default = 1: sample color of each individual light from skybox images, if they are present. 0: use shader color, set by q3map_lightRGB/q3map_lightImage/_up skybox image/qer_editorImage.</dd>
+</dl>
 
 <h2 id="q3map_splotchFix">q3map_splotchFix</h2>
 <p>This is used on lightmapped model shaders if splotched lighting artifacts appear. Any shadows at the ambient/dark level will be flooded from neighbouring luxels. This gets rid of shadow acne, but a surface must be more or less uniformly lit or this looks ugly. Try using q3map_lightmapSampleOffset first before using this as a last resort.</p>

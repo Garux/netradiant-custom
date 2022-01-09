@@ -1075,36 +1075,33 @@ static void ParseShaderFile( const char *filename ){
 			   degree of 0 = from the east, 90 = north, etc.  altitude of 0 = sunrise/set, 90 = noon
 			   ydnar: sof2map has bareword 'sun' token, so we support that as well */
 			else if ( striEqual( token, "sun" ) /* sof2 */ || striEqual( token, "q3map_sun" ) || striEqual( token, "q3map_sunExt" ) ) {
-				sun_t       *sun;
+				sun_t& sun = si->suns.emplace_back();
 				/* ydnar: extended sun directive? */
 				const bool ext = striEqual( token, "q3map_sunext" );
 
-				/* allocate sun */
-				sun = safe_calloc( sizeof( *sun ) );
-
 				/* set style */
-				sun->style = si->lightStyle;
+				sun.style = si->lightStyle;
 
 				/* get color */
 				text.GetToken( false );
-				sun->color[ 0 ] = atof( token );
+				sun.color[ 0 ] = atof( token );
 				text.GetToken( false );
-				sun->color[ 1 ] = atof( token );
+				sun.color[ 1 ] = atof( token );
 				text.GetToken( false );
-				sun->color[ 2 ] = atof( token );
+				sun.color[ 2 ] = atof( token );
 
 				if ( colorsRGB ) {
-					sun->color[0] = Image_LinearFloatFromsRGBFloat( sun->color[0] );
-					sun->color[1] = Image_LinearFloatFromsRGBFloat( sun->color[1] );
-					sun->color[2] = Image_LinearFloatFromsRGBFloat( sun->color[2] );
+					sun.color[0] = Image_LinearFloatFromsRGBFloat( sun.color[0] );
+					sun.color[1] = Image_LinearFloatFromsRGBFloat( sun.color[1] );
+					sun.color[2] = Image_LinearFloatFromsRGBFloat( sun.color[2] );
 				}
 
 				/* normalize it */
-				ColorNormalize( sun->color );
+				ColorNormalize( sun.color );
 
 				/* scale color by brightness */
 				text.GetToken( false );
-				sun->photons = atof( token );
+				sun.photons = atof( token );
 
 				/* get sun angle/elevation */
 				text.GetToken( false );
@@ -1113,23 +1110,19 @@ static void ParseShaderFile( const char *filename ){
 				text.GetToken( false );
 				const double b = degrees_to_radians( atof( token ) );
 
-				sun->direction = vector3_for_spherical( a, b );
+				sun.direction = vector3_for_spherical( a, b );
 
 				/* get filter radius from shader */
-				sun->filterRadius = si->lightFilterRadius;
+				sun.filterRadius = si->lightFilterRadius;
 
 				/* ydnar: get sun angular deviance/samples */
 				if ( ext && TokenAvailable() ) {
 					text.GetToken( false );
-					sun->deviance = degrees_to_radians( atof( token ) );
+					sun.deviance = degrees_to_radians( atof( token ) );
 
 					text.GetToken( false );
-					sun->numSamples = atoi( token );
+					sun.numSamples = atoi( token );
 				}
-
-				/* store sun */
-				sun->next = si->sun;
-				si->sun = sun;
 
 				/* apply sky surfaceparm */
 				ApplySurfaceParm( "sky", &si->contentFlags, &si->surfaceFlags, &si->compileFlags );
@@ -1220,14 +1213,38 @@ static void ParseShaderFile( const char *filename ){
 
 				/* ydnar/splashdamage: q3map_skyLight <value> <iterations> */
 				else if ( striEqual( token, "q3map_skyLight" )  ) {
+					skylight_t& skylight = si->skylights.emplace_back();
 					text.GetToken( false );
-					si->skyLightValue = atof( token );
+					skylight.value = atof( token );
 					text.GetToken( false );
-					si->skyLightIterations = atoi( token );
+					skylight.iterations = atoi( token );
 
 					/* clamp */
-					value_maximize( si->skyLightValue, 0.0f );
-					value_maximize( si->skyLightIterations, 2 );
+					value_maximize( skylight.value, 0.0f );
+					value_maximize( skylight.iterations, 2 );
+
+					/* read optional extension: horizon_min horizon_max sample_color*/
+					if( TokenAvailable() ){
+						text.GetToken( false );
+						skylight.horizon_min = std::clamp( atoi( token ), -90, 90 );
+					}
+					else{
+						continue; // avoid two sequential TokenAvailable()
+					}
+					if( TokenAvailable() ){
+						text.GetToken( false );
+						skylight.horizon_max = std::clamp( atoi( token ), -90, 90 );
+					}
+					else{
+						continue; // avoid two sequential TokenAvailable()
+					}
+					if( TokenAvailable() ){
+						text.GetToken( false );
+						skylight.sample_color = atoi( token ) != 0;
+					}
+					else{
+						continue; // avoid two sequential TokenAvailable()
+					}
 				}
 
 				/* q3map_surfacelight <value> */

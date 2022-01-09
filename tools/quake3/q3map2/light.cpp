@@ -38,58 +38,50 @@
    this creates a sun light
  */
 
-static void CreateSunLight( sun_t *sun ){
-	int i;
-	float photons, d, angle, elevation, da, de;
-	Vector3 direction;
-
-
-	/* dummy check */
-	if ( sun == NULL ) {
-		return;
-	}
-
+static void CreateSunLight( sun_t& sun ){
 	/* fixup */
-	value_maximize( sun->numSamples, 1 );
+	value_maximize( sun.numSamples, 1 );
 
 	/* set photons */
-	photons = sun->photons / sun->numSamples;
+	const float photons = sun.photons / sun.numSamples;
 
 	/* create the right number of suns */
-	for ( i = 0; i < sun->numSamples; i++ )
+	for ( int i = 0; i < sun.numSamples; ++i )
 	{
 		/* calculate sun direction */
+		Vector3 direction;
 		if ( i == 0 ) {
-			direction = sun->direction;
+			direction = sun.direction;
 		}
 		else
 		{
 			/*
-			    sun->direction[ 0 ] = cos( angle ) * cos( elevation );
-			    sun->direction[ 1 ] = sin( angle ) * cos( elevation );
-			    sun->direction[ 2 ] = sin( elevation );
+			    sun.direction[ 0 ] = cos( angle ) * cos( elevation );
+			    sun.direction[ 1 ] = sin( angle ) * cos( elevation );
+			    sun.direction[ 2 ] = sin( elevation );
 
 			    xz_dist   = sqrt( x*x + z*z )
 			    latitude  = atan2( xz_dist, y ) * RADIANS
 			    longitude = atan2( x,       z ) * RADIANS
 			 */
 
-			d = sqrt( sun->direction[ 0 ] * sun->direction[ 0 ] + sun->direction[ 1 ] * sun->direction[ 1 ] );
-			angle = atan2( sun->direction[ 1 ], sun->direction[ 0 ] );
-			elevation = atan2( sun->direction[ 2 ], d );
+			const double d = sqrt( sun.direction[ 0 ] * sun.direction[ 0 ] + sun.direction[ 1 ] * sun.direction[ 1 ] );
+			double angle = atan2( sun.direction[ 1 ], sun.direction[ 0 ] );
+			double elevation = atan2( sun.direction[ 2 ], d );
 
-			/* jitter the angles (loop to keep random sample within sun->deviance steridians) */
+			/* jitter the angles (loop to keep random sample within sun.deviance steridians) */
+			float da, de;
 			do
 			{
-				da = ( Random() * 2.0f - 1.0f ) * sun->deviance;
-				de = ( Random() * 2.0f - 1.0f ) * sun->deviance;
+				da = ( Random() * 2.0f - 1.0f ) * sun.deviance;
+				de = ( Random() * 2.0f - 1.0f ) * sun.deviance;
 			}
-			while ( ( da * da + de * de ) > ( sun->deviance * sun->deviance ) );
+			while ( ( da * da + de * de ) > ( sun.deviance * sun.deviance ) );
 			angle += da;
 			elevation += de;
 
 			/* debug code */
-			//%	Sys_Printf( "%d: Angle: %3.4lf Elevation: %3.3lf\n", sun->numSamples, radians_to_degrees( angle ), radians_to_degrees( elevation ) );
+			//%	Sys_Printf( "%d: Angle: %3.4lf Elevation: %3.3lf\n", sun.numSamples, radians_to_degrees( angle ), radians_to_degrees( elevation ) );
 
 			/* create new vector */
 			direction = vector3_for_spherical( angle, elevation );
@@ -104,8 +96,8 @@ static void CreateSunLight( sun_t *sun ){
 		light.type = ELightType::Sun;
 		light.fade = 1.0f;
 		light.falloffTolerance = falloffTolerance;
-		light.filterRadius = sun->filterRadius / sun->numSamples;
-		light.style = noStyles ? LS_NORMAL : sun->style;
+		light.filterRadius = sun.filterRadius / sun.numSamples;
+		light.style = noStyles ? LS_NORMAL : sun.style;
 
 		/* set the light's position out to infinity */
 		light.origin = direction * ( MAX_WORLD_COORD * 8.0f );    /* MAX_WORLD_COORD * 2.0f */
@@ -115,15 +107,107 @@ static void CreateSunLight( sun_t *sun ){
 		light.dist = vector3_dot( light.origin, light.normal );
 
 		/* set color and photons */
-		light.color = sun->color;
+		light.color = sun.color;
 		light.photons = photons * skyScale;
 	}
-
-	/* another sun? */
-	if ( sun->next != NULL ) {
-		CreateSunLight( sun->next );
-	}
 }
+
+
+
+class SkyProbes
+{
+	struct SkyProbe
+	{
+		Vector3 color;
+		Vector3 normal;
+	};
+	std::vector<SkyProbe> m_probes;
+public:
+	SkyProbes() = default;
+	SkyProbes( const String64& skyParmsImageBase ){
+		if( !skyParmsImageBase.empty() ){
+			std::vector<const image_t*> images;
+			for( const auto suffix : { "_lf", "_rt", "_ft", "_bk", "_up", "_dn" } )
+			{
+				if( nullptr == images.emplace_back( ImageLoad( StringOutputStream( 64 )( skyParmsImageBase, suffix ) ) ) ){
+					Sys_Warning( "Couldn't find image %s\n", StringOutputStream( 64 )( skyParmsImageBase, suffix ).c_str() );
+					return;
+				}
+			}
+
+			const size_t res = 64;
+			m_probes.reserve( res * res * 6 );
+
+	/* Q3 skybox (top view)
+		   ^Y
+		   |
+		   bk
+		lf    rt ->X
+		   ft
+	*/
+			// postrotate everything from _rt (+x)
+			const std::array<Matrix4, 6> transforms{ matrix4_scale_for_vec3( Vector3( -1, -1, 1 ) ),
+													g_matrix4_identity,
+													matrix4_rotation_for_sincos_z( -1, 0 ),
+													matrix4_rotation_for_sincos_z( 1, 0 ),
+													matrix4_rotation_for_sincos_y( -1, 0 ),
+													matrix4_rotation_for_sincos_y( 1, 0 ) };
+
+	/* img
+			0-----> width / U
+			|he
+			|ig
+			|ht
+			V
+	*/
+			for( size_t i = 0; i < 6; ++i )
+			{
+				for( size_t u = 0; u < res; ++u )
+				{
+					for( size_t v = 0; v < res; ++v )
+					{
+						const Vector3 normal = vector3_normalised( Vector3( 1, 1 - u * 2.f / res, 1 - v * 2.f / res ) );
+						Vector3 color( 0 );
+						{
+							const image_t& img = *images[i];
+							const size_t w = img.width * u / res;
+							const size_t w2 = std::max( w + 1, img.width * ( u + 1 ) / res );
+							const size_t h = img.height * v / res;
+							const size_t h2 = std::max( h + 1, img.height * ( v + 1 ) / res );
+							for( size_t iw = w; iw < w2; ++iw )
+							{
+								for( size_t ih = h; ih < h2; ++ih )
+								{
+									color += vector3_from_array( img.at( iw, ih ) );
+								}
+							}
+							color /= ( ( w2 - w ) * ( h2 - h ) );
+						}
+						color *= vector3_dot( normal, g_vector3_axis_x );
+						m_probes.push_back( SkyProbe{ color / 255, matrix4_transformed_direction( transforms[i], normal ) } );
+					}
+				}
+			}
+		}
+	}
+	Vector3 sampleColour( const Vector3& direction, const Vector3& limitDirection ) const {
+		Vector3 color( 0 );
+		float weightSum = 0;
+		for( const auto& probe : m_probes )
+		{
+			const double dot = vector3_dot( probe.normal, direction );
+			if( dot > 0 && vector3_dot( probe.normal, limitDirection ) >= 0 ){
+				color += probe.color * dot;
+				weightSum += dot;
+			}
+		}
+		return weightSum != 0? color / weightSum : color;
+	}
+	operator bool() const {
+		return !m_probes.empty();
+	}
+};
+
 
 
 
@@ -132,48 +216,54 @@ static void CreateSunLight( sun_t *sun ){
    simulates sky light with multiple suns
  */
 
-static void CreateSkyLights( const Vector3& color, float value, int iterations, float filterRadius, int style ){
-	int i, j, numSuns;
-	int angleSteps, elevationSteps;
-	float angle, elevation;
-	float angleStep, elevationStep;
-	sun_t sun;
-
-
+static void CreateSkyLights( const skylight_t& skylight, const Vector3& color, float filterRadius, int style, const String64& skyParmsImageBase ){
 	/* dummy check */
-	if ( value <= 0.0f || iterations < 2 ) {
+	if ( skylight.value <= 0.0f || skylight.iterations < 2 || skylight.horizon_min > skylight.horizon_max ) {
 		return;
 	}
 
+	const SkyProbes probes = skylight.sample_color? SkyProbes( skyParmsImageBase ) : SkyProbes();
+	const Vector3 probesLimitDirection = skylight.horizon_min >= 0? g_vector3_axis_z : skylight.horizon_max <= 0? -g_vector3_axis_z : Vector3( 0 );
+
 	/* basic sun setup */
+	sun_t sun;
+	std::vector<sun_t> suns;
 	sun.color = color;
 	sun.deviance = 0.0f;
 	sun.filterRadius = filterRadius;
 	sun.numSamples = 1;
 	sun.style = noStyles ? LS_NORMAL : style;
-	sun.next = NULL;
 
 	/* setup */
-	elevationSteps = iterations - 1;
-	angleSteps = elevationSteps * 4;
-	elevationStep = degrees_to_radians( 90.0f / iterations );  /* skip elevation 0 */
-	angleStep = degrees_to_radians( 360.0f / angleSteps );
+	const int doBot = ( skylight.horizon_min == -90 );
+	const int doTop = ( skylight.horizon_max == 90 );
+	const int angleSteps = ( skylight.iterations - 1 ) * 4;
+	const float eleStep = 90.0f / skylight.iterations;
+	const float elevationStep = degrees_to_radians( eleStep );  /* skip elevation 0 */
+	const float angleStep = degrees_to_radians( 360.0f / angleSteps );
+	// const int elevationSteps = skylight.iterations - 1;
+	const float eleMin = doBot? -90 + eleStep * 1.5 : skylight.horizon_min + eleStep * 0.5;
+	const float eleMax = doTop? 90 - eleStep * 1.5 : skylight.horizon_max - eleStep * 0.5;
+	const int elevationSteps = float_to_integer( 1 + std::max( 0.f, ( eleMax - eleMin ) / eleStep ) );
 
 	/* calc individual sun brightness */
-	numSuns = angleSteps * elevationSteps + 1;
-	sun.photons = value / numSuns;
+	const int numSuns = angleSteps * elevationSteps + doBot + doTop;
+	sun.photons = skylight.value / numSuns * std::max( .25, ( skylight.horizon_max - skylight.horizon_min ) / 90.0 );
+	suns.reserve( numSuns );
 
 	/* iterate elevation */
-	elevation = elevationStep * 0.5f;
-	angle = 0.0f;
-	for ( i = 0, elevation = elevationStep * 0.5f; i < elevationSteps; i++ )
+	float elevation = degrees_to_radians( std::min( eleMin, float( skylight.horizon_max ) ) );
+	float angle = 0.0f;
+	for ( int i = 0; i < elevationSteps; ++i )
 	{
 		/* iterate angle */
-		for ( j = 0; j < angleSteps; j++ )
+		for ( int j = 0; j < angleSteps; ++j )
 		{
 			/* create sun */
 			sun.direction = vector3_for_spherical( angle, elevation );
-			CreateSunLight( &sun );
+			if( probes )
+				sun.color = probes.sampleColour( sun.direction, probesLimitDirection );
+			suns.push_back( sun );
 
 			/* move */
 			angle += angleStep;
@@ -184,12 +274,35 @@ static void CreateSkyLights( const Vector3& color, float value, int iterations, 
 		angle += angleStep / elevationSteps;
 	}
 
-	/* create vertical sun */
-	sun.direction = g_vector3_axis_z;
-	CreateSunLight( &sun );
+	/* create vertical suns */
+	if( doBot ){
+		sun.direction = -g_vector3_axis_z;
+		if( probes )
+			sun.color = probes.sampleColour( sun.direction, probesLimitDirection );
+		suns.push_back( sun );
+	}
+	if( doTop ){
+		sun.direction = g_vector3_axis_z;
+		if( probes )
+			sun.color = probes.sampleColour( sun.direction, probesLimitDirection );
+		suns.push_back( sun );
+	}
 
-	/* short circuit */
-	return;
+	/* normalize colours */
+	if( probes ){
+		float max = 0;
+		for( const auto& sun : suns )
+		{
+			value_maximize( max, sun.color[0] );
+			value_maximize( max, sun.color[1] );
+			value_maximize( max, sun.color[2] );
+		}
+		if( max != 0 )
+			for( auto& sun : suns )
+				sun.color /= max;
+	}
+
+	std::for_each( suns.begin(), suns.end(), CreateSunLight );
 }
 
 
@@ -407,20 +520,19 @@ static void CreateEntityLights(){
 					numSpotLights--;
 
 					/* make a sun */
-					sun_t sun;
+					sun_t sun{};
 					sun.direction = -light.normal;
 					sun.color = light.color;
 					sun.photons = intensity;
 					sun.deviance = degrees_to_radians( deviance );
 					sun.numSamples = numSamples;
 					sun.style = noStyles ? LS_NORMAL : light.style;
-					sun.next = NULL;
 
 					/* free original light before sun insertion */
 					lights.pop_front();
 
 					/* make a sun light */
-					CreateSunLight( &sun );
+					CreateSunLight( sun );
 
 					/* skip the rest of this love story */
 					continue;
@@ -482,17 +594,19 @@ static void CreateSurfaceLights(){
 		const shaderInfo_t *si = info->si;
 
 		/* sunlight? */
-		if ( si->sun != NULL && !nss ) {
+		if ( !si->suns.empty() && !nss ) {
+			shaderInfo_t* si_ = const_cast<shaderInfo_t*>( si );   /* FIXME: hack! */
 			Sys_FPrintf( SYS_VRB, "Sun: %s\n", si->shader.c_str() );
-			CreateSunLight( si->sun );
-			const_cast<shaderInfo_t*>( si )->sun = NULL; /* FIXME: leak! */
+			std::for_each( si_->suns.begin(), si_->suns.end(), CreateSunLight );
+			si_->suns.clear();   /* FIXME: hack! */
 		}
 
 		/* sky light? */
-		if ( si->skyLightValue > 0.0f ) {
+		if ( !si->skylights.empty() ) {
 			Sys_FPrintf( SYS_VRB, "Sky: %s\n", si->shader.c_str() );
-			CreateSkyLights( si->color, si->skyLightValue, si->skyLightIterations, si->lightFilterRadius, si->lightStyle );
-			const_cast<shaderInfo_t*>( si )->skyLightValue = 0.0f;   /* FIXME: hack! */
+			for( const skylight_t& skylight : si->skylights )
+				CreateSkyLights( skylight, si->color, si->lightFilterRadius, si->lightStyle, si->skyParmsImageBase );
+			const_cast<shaderInfo_t*>( si )->skylights.clear();   /* FIXME: hack! */
 		}
 
 		/* try to early out */
