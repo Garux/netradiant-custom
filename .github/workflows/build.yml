@@ -44,6 +44,7 @@ jobs:
         unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
         wget https://www.dropbox.com/s/hcgkwzzmja3m6c0/netradiant-custom-extra-win.zip
         unzip -o netradiant-custom-extra-win.zip -d "install"
+
     - uses: actions/upload-artifact@v2
       with:
         name: Windows-${{ matrix.arch }}
@@ -77,6 +78,7 @@ jobs:
         make -j 4 DOWNLOAD_GAMEPACKS=no CXXFLAGS="-Wno-deprecated-declarations"
         wget https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
         unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
+
     - uses: actions/upload-artifact@v2
       with:
         name: Linux-${{ matrix.arch }}
@@ -86,15 +88,17 @@ jobs:
   create-testing:
     if: github.ref == 'refs/heads/master' && github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: [windows-msys, linux]
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@v2
 
       - name: Create binary archives
+        shell: cmd
         run: |
-          7z a -r netradiant-custom-windows-x86_64.zip  ./Windows-x86_64/*
-          7z a -r netradiant-custom-linux-x86_64.zip    ./Linux-x86_64/*
+          "%programfiles%\7-Zip\7z.exe" a -r netradiant-custom-windows-x86_64.zip  "%CD%\Windows-x86_64\*"
+          "%programfiles%\7-Zip\7z.exe" a -r netradiant-custom-linux-x86_64.zip    "%CD%\Linux-x86_64\*"
+
       - name: Create latest build
         uses: marvinpinto/action-automatic-releases@latest
         with:
