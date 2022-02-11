@@ -71,6 +71,9 @@ static inline void tex2list( StrList& texlist, const StrList& EXtex, const StrLi
 	      !StrList_find( *rEXtex, token ) ) ){
 		texlist.emplace_back( token );
 	}
+	else{
+		Sys_FPrintf( SYS_WRN, "WARNING444: %s\n", token );
+	}
 	strcpy( dot, ".tga" ); // default extension for repacked shader text
 }
 
@@ -747,7 +750,12 @@ int repackBSPMain( Args& args ){
 	if( analyze )
 		return 0;
 
-
+	LoadShaderInfo();
+	for( const auto& si : Span( shaderInfo, shaderInfo + numShaderInfo ) ){
+		if( strIstr( si.shaderText, "skyparms" ) ){
+			res2list( pk3Shaders, si.shader );
+		}
+	}
 
 	pk3Shaderfiles = vfsListShaderFiles( g_game->shaderPath );
 

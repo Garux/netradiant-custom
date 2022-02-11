@@ -100,7 +100,7 @@
 
 #define DEF_RADIOSITY_BOUNCE    1.0f    /* ydnar: default to 100% re-emitted light */
 
-#define MAX_SHADER_INFO         8192
+#define MAX_SHADER_INFO         8192 * 16
 
 
 /* epair parsing (note case-sensitivity directive) */
