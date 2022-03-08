@@ -1,11 +1,11 @@
 name: build
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   windows-msys:
     name: ${{ matrix.config }} Windows ${{ matrix.arch }}
-    runs-on: windows-latest
+    runs-on: windows-2019
     strategy:
       fail-fast: false
       matrix:
@@ -33,7 +33,7 @@ jobs:
         release: false
         update: false
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
 
@@ -45,13 +45,13 @@ jobs:
         wget https://www.dropbox.com/s/hcgkwzzmja3m6c0/netradiant-custom-extra-win.zip
         unzip -o netradiant-custom-extra-win.zip -d "install"
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: Windows-${{ matrix.arch }}
         path: install/
         if-no-files-found: error
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: warnings
         path: windows-warn*.log
@@ -79,7 +79,7 @@ jobs:
         wget https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
         unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: Linux-${{ matrix.arch }}
         path: install/
@@ -91,7 +91,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
 
       - name: Create binary archives
         shell: cmd
@@ -100,7 +100,7 @@ jobs:
           "%programfiles%\7-Zip\7z.exe" a -r netradiant-custom-linux-x86_64.zip    "%CD%\Linux-x86_64\*"
 
       - name: Create latest build
-        uses: marvinpinto/action-automatic-releases@latest
+        uses: ec-/action-automatic-releases@test
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           automatic_release_tag: "latest"
