@@ -383,7 +383,7 @@ struct image_t
 		name( name ),
 		filename( filename ),
 		width( width ),
-		height(height ),
+		height( height ),
 		pixels( pixels )
 	{}
 	image_t( image_t&& other ) noexcept :
@@ -396,15 +396,27 @@ struct image_t
 	~image_t(){
 		free( pixels );
 	}
+
+	byte *at( int width, int height ) const {
+		return pixels + 4 * ( height * this->width + width );
+	}
 };
 
 
 struct sun_t
 {
-	sun_t        *next;
 	Vector3 direction, color;
 	float photons, deviance, filterRadius;
 	int numSamples, style;
+};
+
+struct skylight_t
+{
+	float value;
+	int iterations;
+	int horizon_min = 0;
+	int horizon_max = 90;
+	bool sample_color = true;
 };
 
 
@@ -559,9 +571,8 @@ struct shaderInfo_t
 	const image_t       *lightImage;
 	const image_t       *normalImage;
 
-	float skyLightValue;                                /* ydnar */
-	int skyLightIterations;                             /* ydnar */
-	sun_t               *sun;                           /* ydnar */
+	std::vector<skylight_t>  skylights;                 /* ydnar */
+	std::vector<sun_t>  suns;                           /* ydnar */
 
 	Vector3 color{ 0 };                                 /* normalized color */
 	Color4f averageColor = { 0, 0, 0, 0 };

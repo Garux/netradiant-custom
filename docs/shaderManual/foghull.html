@@ -61,7 +61,7 @@
 <p>Since distance clipping is not a feature natively built into Quake III Arena, using distance culling would result in a hall of mirrors (HOM) effect where the culled geometry begins, since nothing is being drawn in the frame buffer. To compensate for this, the foghull feature uses a series of six skybox images that are drawn in place of the absent culled geometry, thus preventing the HOM effect.</p>
 
 <h2>Skybox Images</h2>
-<p>The skybox images used with the foghull feature should never be actually seen since the idea is to use the fog to obsure the maximum distance that the player can see. It only exists to prevent the HOM effect. To pull this off in a convincing manner, the skybox images should be six identical 8x8 pixel (to save on texture memory) textures each filled with a flat color matching the exact color of the fog. The six skybox images must be named in accordance to the skyParms farbox convention, using the _ft, _rt, _bk, _lf, _up, _dn suffixes.</p>
+<p>The skybox images used with the foghull feature should never be actually seen since the idea is to use the fog to obscure the maximum distance that the player can see. It only exists to prevent the HOM effect. To pull this off in a convincing manner, the skybox images should be six identical 8x8 pixel (to save on texture memory) textures each filled with a flat color matching the exact color of the fog. The six skybox images must be named in accordance to the skyParms farbox convention, using the _ft, _rt, _bk, _lf, _up, _dn suffixes.</p>
 
 <h2>Foghull Shaders</h2>
 <p>Two shaders are required when using the foghull feature, a fog volume shader and a skybox shader, both of which are simple, standard shaders.</p>
