@@ -58,7 +58,7 @@ void Map_Snapshot(){
 
 	if ( file_exists( snapshotsDir.c_str() ) || Q_mkdir( snapshotsDir.c_str() ) ) {
 		std::size_t lSize = 0;
-		const auto strNewPath = StringOutputStream( 256 )( snapshotsDir.c_str(), '/', mapname );
+		const auto strNewPath = StringOutputStream( 256 )( snapshotsDir.c_str(), '/', path_get_filename_start( mapname ) );
 		const char* ext = path_get_filename_base_end( strNewPath.c_str() );
 
 		StringOutputStream snapshotFilename( 256 );
