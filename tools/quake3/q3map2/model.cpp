@@ -400,7 +400,7 @@ static void make_brush_sides( const Plane3f plane, const Plane3f (&p)[3], const 
 	if( debugClip ){
 		buildBrush.sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
 		for ( size_t i = 1; i < N; ++i )
-			buildBrush.sides[i].shaderInfo = ShaderInfoForShader( "debugclip" );  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+			buildBrush.sides[i].shaderInfo = ShaderInfoForShader( "debugclip" );
 	}
 	else{
 		buildBrush.sides[0].shaderInfo = si;
@@ -414,7 +414,7 @@ static void make_brush_sides( const Plane3f plane, const Plane3f (&p)[3], const 
 	buildBrush.sides[0].planenum = FindFloatPlane( plane, 3, points );
 	buildBrush.sides[1].planenum = FindFloatPlane( p[0], 2, &points[0] ); // p[0] contains points[0] and points[1]
 	buildBrush.sides[2].planenum = FindFloatPlane( p[1], 2, &points[1] ); // p[1] contains points[1] and points[2]
-	buildBrush.sides[3].planenum = FindFloatPlane( p[2], 2, &points[2] ); // p[2] contains points[2] and points[0] (copied to points[3]
+	buildBrush.sides[3].planenum = FindFloatPlane( p[2], 2, &points[2] ); // p[2] contains points[2] and points[0] (copied to points[3])
 	if constexpr( N == 5 )
 		buildBrush.sides[4].planenum = FindFloatPlane( reverse, 0, NULL );
 }
@@ -908,8 +908,8 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 					cnt -= plane.normal() * clipDepth;
 
 					/* make 3 more planes */
-					if( PlaneFromPoints( p[0], points[2], points[1], cnt ) &&
-					    PlaneFromPoints( p[1], points[1], points[0], cnt ) &&
+					if( PlaneFromPoints( p[0], points[1], points[0], cnt ) &&
+					    PlaneFromPoints( p[1], points[2], points[1], cnt ) &&
 					    PlaneFromPoints( p[2], points[0], points[2], cnt ) ) {
 
 						//check for dangerous planes
@@ -924,8 +924,8 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 						       (( p[2].c != 0.0 || p[2].b != 0.0 ) && fabs( p[2].c ) < 0.00025 && fabs( p[2].b ) < 0.00025) ) {
 							cnt -= plane.normal() * 0.1f;
 							//	Sys_Printf( "shifting pyramid point\n" );
-							PlaneFromPoints( p[0], points[2], points[1], cnt );
-							PlaneFromPoints( p[1], points[1], points[0], cnt );
+							PlaneFromPoints( p[0], points[1], points[0], cnt );
+							PlaneFromPoints( p[1], points[2], points[1], cnt );
 							PlaneFromPoints( p[2], points[0], points[2], cnt );
 						}
 
