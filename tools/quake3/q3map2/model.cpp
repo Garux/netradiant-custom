@@ -372,52 +372,103 @@ enum EModelFlags{
 	eClipFlags = eClipModel | eExtrudeFaceNormals | eExtrudeTerrain | eExtrudeVertexNormals | ePyramidaClip | eExtrudeDownwards | eExtrudeUpwards | eMaxExtrude | eAxialBackplane,
 };
 
-inline void nonax_clip_dbg( const Plane3f (&p)[3] ){
-#if 0
-	for ( int j = 0; j < 3; ++j ){
-		for ( int k = 0; k < 3; ++k ){
-			const Vector3& n = p[j].normal();
-			if ( fabs( n[k] ) < 0.00025 && n[k] != 0 ){
-				Sys_Printf( "nonax nrm %6.17f %6.17f %6.17f\n", n[0], n[1], n[2] );
-			}
-		}
-	}
-#endif
-}
-
 inline size_t normal_make_axial( Vector3& normal ){
 	const size_t i = vector3_max_abs_component_index( normal );
 	normal = normal[i] >= 0? g_vector3_axes[i] : -g_vector3_axes[i];
 	return i;
 }
 
-template<size_t N> // N = 4 or 5
-static void make_brush_sides( const Plane3f plane, const Plane3f (&p)[3], const Plane3f& reverse, Vector3 (&points)[4], shaderInfo_t *si ){
-	/* set up brush sides */
-	buildBrush.sides.clear(); // clear, so resize() will value-initialize elements
-	buildBrush.sides.resize( N );
+struct ClipSides
+{
+	struct ClipSide
+	{
+		winding_t points;
+		Plane3f plane;
+	};
 
-	if( debugClip ){
-		buildBrush.sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
-		for ( size_t i = 1; i < N; ++i )
-			buildBrush.sides[i].shaderInfo = ShaderInfoForShader( "debugclip" );
+	winding_t w;
+	ClipSide front;
+	std::vector<ClipSide> sides;
+
+	/* construct front and sides, requires w */
+	bool construct(){
+		if( PlaneFromPoints( front.plane, w.data() ) ){
+			const Plane3f pln = front.plane;
+			SnapPlaneImproved( front.plane, w.size(), w.data() );
+			if( pln.normal() != front.plane.normal() || pln.dist() != front.plane.dist() ){
+				for( Vector3& v : w ){
+					v = plane3_project_point( front.plane, v );
+				}
+			}
+
+			front.points = w;
+			sides.resize( w.size() );
+
+			/* sanity check */
+			{
+				const Vector3 d1 = w[1] - w[0];
+				const Vector3 d2 = w[2] - w[0];
+				const Vector3 normal = vector3_cross( d2, d1 );
+				/* https://en.wikipedia.org/wiki/Cross_product#Geometric_meaning
+					cross( a, b ).length = a.length b.length sin( angle ) */
+				const double lengthsSquared = vector3_length_squared( d1 ) * vector3_length_squared( d2 );
+				if ( lengthsSquared == 0 || ( vector3_length_squared( normal ) / lengthsSquared ) < 1e-8 ) {
+					Sys_Warning( "points on line\n" );
+				}
+				else{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
-	else{
-		buildBrush.sides[0].shaderInfo = si;
-		buildBrush.sides[0].surfaceFlags = si->surfaceFlags;
-		for ( size_t i = 1; i < N; ++i )
-			buildBrush.sides[i].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+#if 0
+	void push_side( const Vector3& point ){
+		ClipSide& side = sides.emplace_back();
+		side.w.push_back( point );
+		PlaneFromPoints( side.plane, front.w[sides.size()], front.w[sides.size() - 1], side.w[0] );
+		const Plane3f pln = side.plane;
+		SnapPlaneImproved( side.plane, 2, front.w.data() + sides.size() - 1 );
+		if( pln.normal() != side.plane.normal() || pln.dist() != side.plane.dist() ){
+			const Vector3 n = VectorNormalized( vector3_cross( front.plane.normal(), vector3_cross( front.plane.normal(), side.plane.normal() ) ) );
+			for( Vector3& v : Span( &front.w[sides.size() - 1], 2 ) ){
+				v = plane3_project_point( Plane3( side.plane ), v, n );
+			}
+		}
+	}
+#endif
+	void add_back_plane( float clipDepth, const Vector3& bestNormal ){
+		ClipSide& back = sides.emplace_back( front );
+		back.plane = plane3_flipped( back.plane );
+		back.plane.dist() += vector3_dot( bestNormal, front.plane.normal() ) * clipDepth;
+		for( Vector3& v : back.points )
+			v -= bestNormal * clipDepth;
 	}
 
-	points[3] = points[0]; // for cyclic usage
+	void make_brush_sides( shaderInfo_t *si ) const {
+		/* set up brush sides */
+		buildBrush.sides.clear(); // clear, so resize() will value-initialize elements
+		buildBrush.sides.resize( sides.size() + 1 );
 
-	buildBrush.sides[0].planenum = FindFloatPlane( plane, 3, points );
-	buildBrush.sides[1].planenum = FindFloatPlane( p[0], 2, &points[0] ); // p[0] contains points[0] and points[1]
-	buildBrush.sides[2].planenum = FindFloatPlane( p[1], 2, &points[1] ); // p[1] contains points[1] and points[2]
-	buildBrush.sides[3].planenum = FindFloatPlane( p[2], 2, &points[2] ); // p[2] contains points[2] and points[0] (copied to points[3])
-	if constexpr( N == 5 )
-		buildBrush.sides[4].planenum = FindFloatPlane( reverse, 0, NULL );
-}
+		if( debugClip ){
+			buildBrush.sides[0].shaderInfo = ShaderInfoForShader( "debugclip2" );
+			for ( size_t i = 0; i < sides.size(); ++i )
+				buildBrush.sides[i + 1].shaderInfo = ShaderInfoForShader( "debugclip" );
+		}
+		else{
+			buildBrush.sides[0].shaderInfo = si;
+			buildBrush.sides[0].surfaceFlags = si->surfaceFlags;
+			for ( size_t i = 0; i < sides.size(); ++i )
+				buildBrush.sides[i + 1].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+		}
+
+		buildBrush.sides[0].planenum = FindFloatPlane( front.plane, front.points.size(), front.points.data() );
+		for( size_t i = 0; i < sides.size(); ++i ){
+			buildBrush.sides[i + 1].planenum = FindFloatPlane( sides[i].plane, sides[i].points.size(), sides[i].points.data() );
+		}
+	}
+};
+
 
 static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const mapDrawSurface_t *ds, const char *modelName, entity_t& entity ){
 	const int spf = ( spawnFlags & ( eClipFlags & ~eClipModel ) );
@@ -444,18 +495,14 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 	  || spf == ( eExtrudeDownwards | eExtrudeUpwards | eAxialBackplane )
 	  || spf == ( eExtrudeUpwards | eMaxExtrude )
 	  || spf == ( eExtrudeUpwards | eAxialBackplane ) ){
-		int i, j, k;
-		//int ok=0, notok=0;
 		float limDepth = 0;
 		if ( clipDepth < 0 ){
 			limDepth = -clipDepth;
 			clipDepth = 2.0;
 		}
-		Vector3 points[ 4 ];
-		Plane3f plane, reverse, p[3];
 		MinMax minmax;
 		Vector3 avgDirection( 0 );
-		int axis;
+		size_t axis;
 
 		/* temp hack */
 		if ( !si->clipModel && !( si->compileFlags & C_SOLID ) ) {
@@ -469,17 +516,19 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 
 		if ( ( spf & eMaxExtrude ) || ( spf & eExtrudeTerrain ) ){
 
-			for ( i = 0; i < ds->numIndexes; i += 3 ){
-				for ( j = 0; j < 3; ++j ){
-					points[j] = ds->verts[ds->indexes[i + j]].xyz;
+			for ( int idx = 0; idx < ds->numIndexes; idx += 3 ){
+				Vector3 points[3];
+				Plane3f plane;
+				for ( int i = 0; i < 3; ++i ){
+					points[i] = ds->verts[ds->indexes[idx + i]].xyz;
 				}
 				if ( PlaneFromPoints( plane, points ) ){
 					if ( spf & eExtrudeTerrain )
 						avgDirection += plane.normal();	//calculate average mesh facing direction
 
 					//get min/max
-					for ( j = 0; j < 3; ++j ){
-						minmax.extend( points[j] );
+					for ( int i = 0; i < 3; ++i ){
+						minmax.extend( points[i] );
 					}
 				}
 			}
@@ -500,151 +549,66 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 		buildBrush.detail = true;
 
 		/* walk triangle list */
-		for ( i = 0; i < ds->numIndexes; i += 3 ){
+		for ( int idx = 0; idx < ds->numIndexes; idx += 3 ){
+			ClipSides cs;
 			/* make points */
-			for ( j = 0; j < 3; ++j ){
+			for ( int i = 0; i < 3; ++i ){
 				/* copy xyz */
-				points[j] = ds->verts[ds->indexes[i + j] ].xyz;
+				cs.w.push_back( ds->verts[ds->indexes[idx + i]].xyz );
 			}
 
 			/* make plane for triangle */
-			if ( PlaneFromPoints( plane, points ) ) {
+			if ( cs.construct() ) {
 				//snap points before using them for further calculations
 				//precision suffers a lot, when two of normal values are under .00025 (often no collision, knocking up effect in ioq3)
 				//also broken drawsurfs in case of normal brushes
-				bool snpd = false;
-				for ( j = 0; j < 3; ++j )
-				{
-					if ( fabs( plane.normal()[j] ) < 0.00025 && fabs( plane.normal()[( j + 1) % 3] ) < 0.00025
-					&& ( plane.normal()[j] != 0.0 || plane.normal()[( j + 1 ) % 3] != 0.0 ) ){
-						const Vector3 cnt = ( points[0] + points[1] + points[2] ) / 3.0;
-						points[0][( j + 2 ) % 3] = points[1][(j + 2 ) % 3] = points[2][( j + 2 ) % 3] = cnt[( j + 2 ) % 3];
-						snpd = true;
-						break;
-					}
-				}
-
-				//snap pairs of points to prevent bad side planes
-				for ( j = 0; j < 3; ++j )
-				{
-					const Vector3 nrm = VectorNormalized( points[j] - points[( j + 1 ) % 3] );
-					for ( k = 0; k < 3; ++k )
-					{
-						if ( nrm[k] != 0.0 && fabs( nrm[k] ) < 0.00025 ){
-							//Sys_Printf( "b4(%6.6f %6.6f %6.6f)(%6.6f %6.6f %6.6f)\n", points[j][0], points[j][1], points[j][2], points[(j+1)%3][0], points[(j+1)%3][1], points[(j+1)%3][2] );
-							points[j][k] = points[( j + 1 ) % 3][k] = ( points[j][k] + points[( j + 1 ) % 3][k] ) / 2.0;
-							//Sys_Printf( "sn(%6.6f %6.6f %6.6f)(%6.6f %6.6f %6.6f)\n", points[j][0], points[j][1], points[j][2], points[(j+1)%3][0], points[(j+1)%3][1], points[(j+1)%3][2] );
-							snpd = true;
-						}
-					}
-				}
-
-				if ( snpd ) {
-					PlaneFromPoints( plane, points );
-					snpd = false;
-				}
-
-				//vector-is-close-to-be-on-axis check again, happens after previous code sometimes
-				for ( j = 0; j < 3; ++j )
-				{
-					if ( fabs( plane.normal()[j] ) < 0.00025 && fabs( plane.normal()[( j + 1 ) % 3] ) < 0.00025
-					&& ( plane.normal()[j] != 0.0 || plane.normal()[( j + 1 ) % 3] != 0.0 ) ){
-						const Vector3 cnt = ( points[0] + points[1] + points[2] ) / 3.0;
-						points[0][( j + 2 ) % 3] = points[1][( j + 2 ) % 3] = points[2][( j + 2 ) % 3] = cnt[( j + 2 ) % 3];
-						PlaneFromPoints( plane, points );
-						break;
-					}
-				}
-
-				//snap single snappable normal components
-				for ( j = 0; j < 3; ++j )
-				{
-					if ( plane.normal()[j] != 0 && fabs( plane.normal()[j] ) < 0.00005 ){
-						plane.normal()[j] = 0;
-						snpd = true;
-					}
-				}
-
-				//adjust plane dist
-				if ( snpd ) {
-					const Vector3 cnt = ( points[0] + points[1] + points[2] ) / 3.0;
-					VectorNormalize( plane.normal() );
-					plane.dist() = vector3_dot( plane.normal(), cnt );
-
-					//project points to resulting plane to keep intersections precision
-					for ( j = 0; j < 3; ++j )
-					{
-						//Sys_Printf( "b4 %i (%6.7f %6.7f %6.7f)\n", j, points[j][0], points[j][1], points[j][2] );
-						points[j] = plane3_project_point( plane, points[j] );
-						//Sys_Printf( "sn %i (%6.7f %6.7f %6.7f)\n", j, points[j][0], points[j][1], points[j][2] );
-					}
-					//Sys_Printf( "sn pln (%6.7f %6.7f %6.7f %6.7f)\n", plane.a, plane.b, plane.c, plane.d );
-					//PlaneFromPoints( plane, points );
-					//Sys_Printf( "pts pln (%6.7f %6.7f %6.7f %6.7f)\n", plane.a, plane.b, plane.c, plane.d );
-				}
-
-				/* sanity check */
-				{
-					const Vector3 d1 = points[1] - points[0];
-					const Vector3 d2 = points[2] - points[0];
-					const Vector3 normal = vector3_cross( d2, d1 );
-					/* https://en.wikipedia.org/wiki/Cross_product#Geometric_meaning
-					   cross( a, b ).length = a.length b.length sin( angle ) */
-					const double lengthsSquared = vector3_length_squared( d1 ) * vector3_length_squared( d2 );
-					if ( lengthsSquared == 0 || ( vector3_length_squared( normal ) / lengthsSquared ) < 1e-8 ) {
-						Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped: points on line\n",
-						             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], modelName );
-						continue;
-					}
-				}
-
 
 				if ( spf == ( ePyramidaClip | eAxialBackplane ) ){ // pyramid with 3 of 4 sides axial (->small bsp)
 
-					for ( j = 0; j < 3; ++j )
-						if ( fabs( plane.normal()[j] ) < 0.05 && fabs( plane.normal()[( j + 1 ) % 3] ) < 0.05 ) //no way, close to lay on two axes
+					for ( int i = 0; i < 3; ++i )
+						if ( fabs( cs.front.plane.normal()[i] ) < 0.05 && fabs( cs.front.plane.normal()[( i + 1 ) % 3] ) < 0.05 ) //no way, close to lay on two axes
 							goto default_CLIPMODEL;
 
 					// best axial normal
-					Vector3 bestNormal = plane.normal();
+					Vector3 bestNormal = cs.front.plane.normal();
 					axis = normal_make_axial( bestNormal );
 
 					float mindist = 999999;
 
-					for ( j = 0; j < 3; ++j ){ // planes
+					for ( size_t i = 0; i < cs.w.size(); ++i ){ // planes
 						float bestdist = 999999, bestangle = 1;
 
-						for ( k = 0; k < 3; ++k ){ // axes
-							Vector3 nrm = points[( j + 1 ) % 3] - points[j];
-							if ( k == axis ){
-								reverse.normal() = vector3_cross( bestNormal, nrm );
+						for ( size_t j = 0; j < 3; ++j ){ // axes
+							Plane3f pln;
+							Vector3 nrm = cs.w[winding_next( cs.w, i )] - cs.w[i];
+							if ( j == axis ){
+								pln.normal() = VectorNormalized( vector3_cross( bestNormal, nrm ) );
 							}
 							else{
 								Vector3 vnrm( 0 );
-								if ( ( k + 1 ) % 3 == axis ){
-									if ( nrm[( k + 2 ) % 3] == 0 )
+								if ( ( j + 1 ) % 3 == axis ){
+									if ( nrm[( j + 2 ) % 3] == 0 )
 										continue;
-									vnrm[( k + 2 ) % 3] = nrm[( k + 2 ) % 3];
+									vnrm[( j + 2 ) % 3] = nrm[( j + 2 ) % 3];
 								}
 								else{
-									if ( nrm[( k + 1 ) % 3] == 0 )
+									if ( nrm[( j + 1 ) % 3] == 0 )
 										continue;
-									vnrm[( k + 1 ) % 3] = nrm[( k + 1 ) % 3];
+									vnrm[( j + 1 ) % 3] = nrm[( j + 1 ) % 3];
 								}
 								const Vector3 enrm = vector3_cross( bestNormal, vnrm );
-								reverse.normal() = vector3_cross( enrm, nrm );
+								pln.normal() = VectorNormalized( vector3_cross( enrm, nrm ) );
 							}
-							VectorNormalize( reverse.normal() );
-							reverse.dist() = vector3_dot( points[ j ], reverse.normal() );
+							pln.dist() = vector3_dot( cs.w[i], pln.normal() );
 							//check facing, thickness
-							const float currdist = reverse.dist() - vector3_dot( reverse.normal(), points[( j + 2 ) % 3] );
-							const float currangle = vector3_dot( reverse.normal(), plane.normal() );
+							const float currdist = -plane3_distance_to_point( pln, cs.w[( i + 2 ) % cs.w.size()] );
+							const float currangle = vector3_dot( pln.normal(), cs.front.plane.normal() );
 							if ( ( ( currdist > 0.1 ) && ( currdist < bestdist ) && ( currangle < 0 ) ) ||
 							     ( ( currangle >= 0 ) && ( currangle <= bestangle ) ) ){
 								bestangle = currangle;
 								if ( currangle < 0 )
 									bestdist = currdist;
-								p[j] = reverse;
+								cs.sides[i].plane = pln;
 							}
 						}
 						if ( bestdist == 999999 && bestangle == 1 ){
@@ -656,11 +620,8 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 					if ( (limDepth != 0.0) && (mindist > limDepth) )
 						goto default_CLIPMODEL;
 
-					nonax_clip_dbg( p );
-
-					make_brush_sides<4>( plane, p, reverse, points, si );
+					cs.make_brush_sides( si );
 				}
-
 
 				else if ( spf == eExtrudeTerrain
 				       || spf == eExtrudeDownwards
@@ -684,7 +645,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 					else{
 						axis = 2;
 						if ( ( spf & eExtrudeDownwards ) && ( spf & eExtrudeUpwards ) ){
-							bestNormal = plane.normal()[2] >= 0? g_vector3_axis_z : -g_vector3_axis_z;
+							bestNormal = cs.front.plane.normal().z() >= 0? g_vector3_axis_z : -g_vector3_axis_z;
 						}
 						else if ( spf & eExtrudeDownwards ){
 							bestNormal = g_vector3_axis_z;
@@ -693,134 +654,114 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 							bestNormal = -g_vector3_axis_z;
 						}
 						else{ // best axial normal
-							bestNormal = plane.normal();
+							bestNormal = cs.front.plane.normal();
 							axis = normal_make_axial( bestNormal );
 						}
 					}
 
-					if ( vector3_dot( plane.normal(), bestNormal ) < 0.05 ){
+					if ( vector3_dot( cs.front.plane.normal(), bestNormal ) < 0.05 ){
 						goto default_CLIPMODEL;
 					}
 
 
 					/* make side planes */
-					for ( j = 0; j < 3; ++j )
+					for ( size_t i = 0; i < cs.w.size(); ++i )
 					{
-						p[j].normal() = VectorNormalized( vector3_cross( bestNormal, points[( j + 1 ) % 3] - points[j] ) );
-						p[j].dist() = vector3_dot( points[j], p[j].normal() );
+						cs.sides[i].plane.normal() = VectorNormalized( vector3_cross( bestNormal, cs.w[winding_next( cs.w, i )] - cs.w[i] ) );
+						cs.sides[i].plane.dist() = vector3_dot( cs.w[i], cs.sides[i].plane.normal() );
 					}
 
 					/* make back plane */
 					if ( spf & eMaxExtrude ){ //max extrude
-						reverse.normal() = -bestNormal;
+						Plane3f& pln = cs.sides.emplace_back().plane;
+						pln.normal() = -bestNormal;
 						if ( bestNormal[axis] > 0 ){
-							reverse.dist() = -minmax.mins[axis] + clipDepth;
+							pln.dist() = -minmax.mins[axis] + clipDepth;
 						}
 						else{
-							reverse.dist() = minmax.maxs[axis] + clipDepth;
+							pln.dist() = minmax.maxs[axis] + clipDepth;
 						}
 					}
 					else if ( spf & eAxialBackplane ){ //axial backplane
-						reverse.normal() = -bestNormal;
-						reverse.dist() = points[0][axis];
+						Plane3f& pln = cs.sides.emplace_back().plane;
+						pln.normal() = -bestNormal;
+						pln.dist() = cs.w[0][axis];
 						if ( bestNormal[axis] > 0 ){
-							for ( j = 1; j < 3; ++j ){
-								value_minimize( reverse.dist(), points[j][axis] );
+							for ( size_t i = 1; i < cs.w.size(); ++i ){
+								value_minimize( pln.dist(), cs.w[i][axis] );
 							}
-							reverse.dist() = -reverse.dist() + clipDepth;
+							pln.dist() = -pln.dist() + clipDepth;
 						}
 						else{
-							for ( j = 1; j < 3; ++j ){
-								value_maximize( reverse.dist(), points[j][axis] );
+							for ( size_t i = 1; i < cs.w.size(); ++i ){
+								value_maximize( pln.dist(), cs.w[i][axis] );
 							}
-							reverse.dist() += clipDepth;
+							pln.dist() += clipDepth;
 						}
 						if ( limDepth != 0.0 ){
-							Vector3 cnt = points[0];
+							Vector3 cnt = cs.w[0];
 							if ( bestNormal[axis] > 0 ){
-								for ( j = 1; j < 3; ++j ){
-									if ( points[j][axis] > cnt[axis] ){
-										cnt = points[j];
+								for ( size_t i = 1; i < cs.w.size(); ++i ){
+									if ( cs.w[i][axis] > cnt[axis] ){
+										cnt = cs.w[i];
 									}
 								}
 							}
 							else {
-								for ( j = 1; j < 3; ++j ){
-									if ( points[j][axis] < cnt[axis] ){
-										cnt = points[j];
+								for ( size_t i = 1; i < cs.w.size(); ++i ){
+									if ( cs.w[i][axis] < cnt[axis] ){
+										cnt = cs.w[i];
 									}
 								}
 							}
-							cnt = plane3_project_point( reverse, cnt );
-							if ( -plane3_distance_to_point( plane, cnt ) > limDepth ){
-								reverse = plane3_flipped( plane );
-								reverse.dist() += clipDepth;
+							cnt = plane3_project_point( pln, cnt );
+							if ( -plane3_distance_to_point( cs.front.plane, cnt ) > limDepth ){
+								cs.sides.pop_back();
+								cs.add_back_plane( clipDepth, cs.front.plane.normal() );
 							}
 						}
 					}
 					else{	//normal backplane
-						reverse = plane3_flipped( plane );
-						reverse.dist() += clipDepth;
+						cs.add_back_plane( clipDepth, cs.front.plane.normal() );
 					}
 
-					nonax_clip_dbg( p );
-
-					make_brush_sides<5>( plane, p, reverse, points, si );
+					cs.make_brush_sides( si );
 				}
-
 
 				else if ( spf == ( eExtrudeFaceNormals | ePyramidaClip ) ){	// extrude 45
 					//45 degrees normals for side planes
-					for ( j = 0; j < 3; ++j )
+					for ( size_t i = 0; i < cs.w.size(); ++i )
 					{
-						const Vector3 nrm = points[( j + 1 ) % 3] - points[ j ];
-						Vector3 enrm = VectorNormalized( vector3_cross( plane.normal(), nrm ) );
-						enrm += plane.normal();
-						VectorNormalize( enrm );
+						const Vector3 enrm = VectorNormalized( vector3_cross( cs.front.plane.normal(), cs.w[winding_next( cs.w, i )] - cs.w[i] ) );
 						/* make side planes */
-						p[j].normal() = VectorNormalized( vector3_cross( enrm, nrm ) );
-						p[j].dist() = vector3_dot( points[j], p[j].normal() );
-						//snap nearly axial side planes
-						snpd = false;
-						for ( k = 0; k < 3; ++k )
-						{
-							if ( fabs( p[j].normal()[k] ) < 0.00025 && p[j].normal()[k] != 0.0 ){
-								p[j].normal()[k] = 0.0;
-								snpd = true;
-							}
-						}
-						if ( snpd ){
-							VectorNormalize( p[j].normal() );
-							p[j].dist() = vector3_dot( ( points[j] + points[( j + 1 ) % 3] ) / 2.0, p[j].normal() );
-						}
+						cs.sides[i].plane.normal() = VectorNormalized( enrm - cs.front.plane.normal() );
+						cs.sides[i].plane.dist() = vector3_dot( cs.w[i], cs.sides[i].plane.normal() );
 					}
 
 					/* make back plane */
-					reverse = plane3_flipped( plane );
-					reverse.dist() += clipDepth;
+					cs.add_back_plane( clipDepth, cs.front.plane.normal() );
 
-					make_brush_sides<5>( plane, p, reverse, points, si );
+					cs.make_brush_sides( si );
 				}
-
 
 				else if ( spf == eExtrudeVertexNormals
 				       || spf == ( eExtrudeVertexNormals | ePyramidaClip ) ){ // vertex normals + don't check for sides, sticking outwards
 					Vector3 Vnorm[3], Enorm[3];
 					/* get vertex normals */
-					for ( j = 0; j < 3; ++j ){
+					for ( int i = 0; i < 3; ++i ){
 						/* copy normal */
-						Vnorm[j] = ds->verts[ds->indexes[i + j]].normal;
+						Vnorm[i] = ds->verts[ds->indexes[idx + i]].normal;
 					}
 
 					//avg normals for side planes
-					for ( j = 0; j < 3; ++j )
+					for ( int i = 0; i < 3; ++i )
 					{
-						Enorm[ j ] = VectorNormalized( Vnorm[ j ] + Vnorm[( j + 1 ) % 3] );
+						Enorm[i] = VectorNormalized( Vnorm[i] + Vnorm[( i + 1 ) % 3] );
 						//check fuer bad ones
-						const Vector3 nrm = VectorNormalized( vector3_cross( plane.normal(), points[( j + 1 ) % 3] - points[ j ] ) );
+						const Vector3 nrm = VectorNormalized( vector3_cross( cs.front.plane.normal(), cs.w[( i + 1 ) % 3] - cs.w[i] ) );
 						//check for negative or outside direction
-						if ( vector3_dot( Enorm[j], plane.normal() ) > 0.1 ){
-							if ( ( vector3_dot( Enorm[j], nrm ) > -0.2 ) || ( spf & ePyramidaClip ) ){
+						if ( vector3_dot( Enorm[i], cs.front.plane.normal() ) > 0.1 ){
+							if ( ( vector3_dot( Enorm[i], nrm ) > -0.2 ) || ( spf & ePyramidaClip ) ){
 								//ok++;
 								continue;
 							}
@@ -828,141 +769,68 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 						//notok++;
 						//Sys_Printf( "faulty Enormal %i/%i\n", notok, ok );
 						//use 45 normal
-						Enorm[ j ] = plane.normal() + nrm;
-						VectorNormalize( Enorm[ j ] );
+						Enorm[i] = VectorNormalized( cs.front.plane.normal() + nrm );
 					}
 
 					/* make side planes */
-					for ( j = 0; j < 3; ++j )
+					for ( int i = 0; i < 3; ++i )
 					{
-						p[j].normal() = VectorNormalized( vector3_cross( Enorm[j], points[( j + 1 ) % 3] - points[j] ) );
-						p[j].dist() = vector3_dot( points[j], p[j].normal() );
-						//snap nearly axial side planes
-						snpd = false;
-						for ( k = 0; k < 3; ++k )
-						{
-							if ( fabs( p[j].normal()[k] ) < 0.00025 && p[j].normal()[k] != 0.0 ){
-								//Sys_Printf( "init plane %6.8f %6.8f %6.8f %6.8f\n", p[j].a, p[j].b, p[j].c, p[j].d );
-								p[j].normal()[k] = 0.0;
-								snpd = true;
-							}
-						}
-						if ( snpd ){
-							VectorNormalize( p[j].normal() );
-							//Sys_Printf( "nrm plane %6.8f %6.8f %6.8f %6.8f\n", p[j].a, p[j].b, p[j].c, p[j].d );
-							p[j].dist() = vector3_dot( ( points[j] + points[( j + 1 ) % 3] ) / 2.0, p[j].normal() );
-							//Sys_Printf( "dst plane %6.8f %6.8f %6.8f %6.8f\n", p[j].a, p[j].b, p[j].c, p[j].d );
-						}
+						cs.sides[i].plane.normal() = VectorNormalized( vector3_cross( Enorm[i], cs.w[( i + 1 ) % 3] - cs.w[i] ) );
+						cs.sides[i].plane.dist() = vector3_dot( cs.w[i], cs.sides[i].plane.normal() );
 					}
 
 					/* make back plane */
-					reverse = plane3_flipped( plane );
-					reverse.dist() += clipDepth;
+					cs.add_back_plane( clipDepth, cs.front.plane.normal() );
 
-					make_brush_sides<5>( plane, p, reverse, points, si );
+					cs.make_brush_sides( si );
 				}
-
 
 				else if ( spf == eExtrudeFaceNormals ){
-
 					/* make side planes */
-					for ( j = 0; j < 3; ++j )
+					for ( size_t i = 0; i < cs.w.size(); ++i )
 					{
-						p[j].normal() = VectorNormalized( vector3_cross( plane.normal(), points[( j + 1 ) % 3] - points[j] ) );
-						p[j].dist() = vector3_dot( points[j], p[j].normal() );
-						//snap nearly axial side planes
-						snpd = false;
-						for ( k = 0; k < 3; ++k )
-						{
-							if ( fabs( p[j].normal()[k] ) < 0.00025 && p[j].normal()[k] != 0.0 ){
-								//Sys_Printf( "init plane %6.8f %6.8f %6.8f %6.8f\n", p[j].a, p[j].b, p[j].c, p[j].d );
-								p[j].normal()[k] = 0.0;
-								snpd = true;
-							}
-						}
-						if ( snpd ){
-							VectorNormalize( p[j].normal() );
-							//Sys_Printf( "nrm plane %6.8f %6.8f %6.8f %6.8f\n", p[j].a, p[j].b, p[j].c, p[j].d );
-							const Vector3 cnt = ( points[j] + points[( j + 1 ) % 3] ) / 2.0;
-							p[j].dist() = vector3_dot( cnt, p[j].normal() );
-							//Sys_Printf( "dst plane %6.8f %6.8f %6.8f %6.8f\n", p[j].a, p[j].b, p[j].c, p[j].d );
-						}
+						cs.sides[i].plane.normal() = VectorNormalized( vector3_cross( cs.front.plane.normal(), cs.w[winding_next( cs.w, i )] - cs.w[i] ) );
+						cs.sides[i].plane.dist() = vector3_dot( cs.w[i], cs.sides[i].plane.normal() );
 					}
 
 					/* make back plane */
-					reverse = plane3_flipped( plane );
-					reverse.dist() += clipDepth;
+					cs.add_back_plane( clipDepth, cs.front.plane.normal() );
 
-					nonax_clip_dbg( p );
-
-					make_brush_sides<5>( plane, p, reverse, points, si );
+					cs.make_brush_sides( si );
 				}
-
 
 				else if ( spf == ePyramidaClip ){
-
 					/* calculate center */
-					Vector3 cnt = ( points[0] + points[1] + points[2] ) / 3.0;
-
+					Vector3 cnt = ( cs.w[0] + cs.w[1] + cs.w[2] ) / 3.0;
 					/* make back pyramid point */
-					cnt -= plane.normal() * clipDepth;
+					cnt -= cs.front.plane.normal() * clipDepth;
 
 					/* make 3 more planes */
-					if( PlaneFromPoints( p[0], points[1], points[0], cnt ) &&
-					    PlaneFromPoints( p[1], points[2], points[1], cnt ) &&
-					    PlaneFromPoints( p[2], points[0], points[2], cnt ) ) {
-
-						//check for dangerous planes
-						while( (( p[0].a != 0.0 || p[0].b != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].b ) < 0.00025) ||
-						       (( p[0].a != 0.0 || p[0].c != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].c ) < 0.00025) ||
-						       (( p[0].c != 0.0 || p[0].b != 0.0 ) && fabs( p[0].c ) < 0.00025 && fabs( p[0].b ) < 0.00025) ||
-						       (( p[1].a != 0.0 || p[1].b != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].b ) < 0.00025) ||
-						       (( p[1].a != 0.0 || p[1].c != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].c ) < 0.00025) ||
-						       (( p[1].c != 0.0 || p[1].b != 0.0 ) && fabs( p[1].c ) < 0.00025 && fabs( p[1].b ) < 0.00025) ||
-						       (( p[2].a != 0.0 || p[2].b != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].b ) < 0.00025) ||
-						       (( p[2].a != 0.0 || p[2].c != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].c ) < 0.00025) ||
-						       (( p[2].c != 0.0 || p[2].b != 0.0 ) && fabs( p[2].c ) < 0.00025 && fabs( p[2].b ) < 0.00025) ) {
-							cnt -= plane.normal() * 0.1f;
-							//	Sys_Printf( "shifting pyramid point\n" );
-							PlaneFromPoints( p[0], points[1], points[0], cnt );
-							PlaneFromPoints( p[1], points[2], points[1], cnt );
-							PlaneFromPoints( p[2], points[0], points[2], cnt );
-						}
-
-						nonax_clip_dbg( p );
-
-						make_brush_sides<4>( plane, p, reverse, points, si );
-					}
-					else
+					for ( size_t i = 0; i < cs.w.size(); ++i )
 					{
-						Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
-						             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], modelName );
-						continue;
+						PlaneFromPoints( cs.sides[i].plane, cs.w[winding_next( cs.w, i )], cs.w[i], cnt );
 					}
+
+					cs.make_brush_sides( si );
 				}
 
-
 				else if ( ( si->clipModel && spf == 0 ) || ( spawnFlags & eClipFlags ) == eClipModel ){	//default CLIPMODEL
-
 default_CLIPMODEL:
 					// axial normal
-					Vector3 bestNormal = plane.normal();
+					Vector3 bestNormal = cs.front.plane.normal();
 					normal_make_axial( bestNormal );
 
 					/* make side planes */
-					for ( j = 0; j < 3; ++j )
+					for ( size_t i = 0; i < cs.w.size(); ++i )
 					{
-						p[j].normal() = VectorNormalized( vector3_cross( bestNormal, points[( j + 1 ) % 3] - points[j] ) );
-						p[j].dist() = vector3_dot( points[j], p[j].normal() );
+						cs.sides[i].plane.normal() = VectorNormalized( vector3_cross( bestNormal, cs.w[winding_next( cs.w, i )] - cs.w[i] ) );
+						cs.sides[i].plane.dist() = vector3_dot( cs.w[i], cs.sides[i].plane.normal() );
 					}
 
 					/* make back plane */
-					reverse = plane3_flipped( plane );
-					reverse.dist() += vector3_dot( bestNormal, plane.normal() ) * clipDepth;
+					cs.add_back_plane( clipDepth, bestNormal );
 
-					nonax_clip_dbg( p );
-
-					make_brush_sides<5>( plane, p, reverse, points, si );
+					cs.make_brush_sides( si );
 				}
 
 
@@ -973,12 +841,13 @@ default_CLIPMODEL:
 					brush_t& newBrush = entity.brushes.emplace_front( buildBrush );
 					newBrush.original = &newBrush;
 					entity.numBrushes++;
-				}
-				else{
-					Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
-					             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], modelName );
+					continue;
 				}
 			}
+			Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
+			             cs.w[0][0], cs.w[0][1], cs.w[0][2],
+			             cs.w[1][0], cs.w[1][1], cs.w[1][2],
+			             cs.w[2][0], cs.w[2][1], cs.w[2][2], modelName );
 		}
 		// normalEpsilon = normalEpsilon_save;
 	}

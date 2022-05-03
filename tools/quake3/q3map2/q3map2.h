@@ -1453,6 +1453,7 @@ void                        PutMeshOnCurve( mesh_t in );
 
 /* map.c */
 void                        LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups );
+void                        SnapPlaneImproved( Plane3f& plane, int numPoints, const Vector3 *points );
 int                         FindFloatPlane( const Plane3f& plane, int numPoints, const Vector3 *points );
 inline int                  FindFloatPlane( const Vector3& normal, float dist, int numPoints, const Vector3 *points ){
 	return FindFloatPlane( Plane3f( normal, dist ), numPoints, points );

@@ -299,7 +299,7 @@ static void SnapPlane( Plane3f& plane ){
    SnapPlaneImproved()
    snaps a plane to normal/distance epsilons, improved code
  */
-static void SnapPlaneImproved( Plane3f& plane, int numPoints, const Vector3 *points ){
+void SnapPlaneImproved( Plane3f& plane, int numPoints, const Vector3 *points ){
 	if ( SnapNormal( plane.normal() ) ) {
 		if ( numPoints > 0 ) {
 			// Adjust the dist so that the provided points don't drift away.
