@@ -668,6 +668,256 @@ int pk3BSPMain( Args& args ){
 }
 
 
+static void findShaderDups(){
+	LoadShaderInfo();
+	struct ShaderMaps
+	{
+		String64 box;
+		StrList maps;
+		const shaderInfo_t *si;
+
+		bool equal_box( const ShaderMaps& other ) const {
+			return striEqual( box, other.box );
+		}
+		bool equal_maps( const ShaderMaps& other ) const {
+			if( maps.size() != other.maps.size() )
+				return false;
+			for( size_t i = 0; i < maps.size(); ++i ){
+				if( !striEqual( maps[i], other.maps[i] ) ){
+					return false;
+				}
+			}
+			return true;
+		}
+	};
+
+	std::vector<ShaderMaps> shaderMapsList;
+
+	for( const auto& si : Span( shaderInfo, shaderInfo + numShaderInfo ) ){
+		/* load the shader */
+		ParseFromMemory( si.shaderText, strlen( si.shaderText ) + 1 );
+
+		/* tokenize it */
+		{
+			/* handle { } section */
+			if ( !( GetToken( true ) && strEqual( token, "{" ) ) ) {
+				Error( "ParseShader: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
+				       si.shader.c_str(), scriptline, token, g_strLoadedFileLocation );
+			}
+
+			bool hasmap = false;
+			ShaderMaps& shaderMaps = shaderMapsList.emplace_back();
+			shaderMaps.si = &si;
+
+			while ( GetToken( true ) && !strEqual( token, "}" ) )
+			{
+				/* parse stage directives */
+				if ( strEqual( token, "{" ) ) {
+					while ( GetToken( true ) && !strEqual( token, "}" ) )
+					{
+						/* digest any images */
+						if ( striEqual( token, "map" ) ||
+						     striEqual( token, "clampMap" ) ) {
+							hasmap = true;
+
+							/* get an image */
+							GetToken( false );
+							if ( token[ 0 ] != '*' && token[ 0 ] != '$' ) {
+								shaderMaps.maps.emplace_back( token );
+							}
+						}
+						else if ( striEqual( token, "animMap" ) ||
+						          striEqual( token, "clampAnimMap" ) ) {
+							hasmap = true;
+
+							GetToken( false );// skip num
+							while ( TokenAvailable() ){
+								shaderMaps.maps.emplace_back( token );
+								GetToken( false ); // append token, modified by tex2list()
+							}
+						}
+						else if ( striEqual( token, "videoMap" ) ){
+							hasmap = true;
+							GetToken( false );
+							FixDOSName( token );
+							shaderMaps.maps.emplace_back( token );
+						}
+						else if ( striEqual( token, "mapComp" ) || striEqual( token, "mapNoComp" ) || striEqual( token, "animmapcomp" ) || striEqual( token, "animmapnocomp" ) ){
+							Sys_FPrintf( SYS_WRN, "WARNING7: %s : %s shader\n", si.shader.c_str(), token );
+							hasmap = true;
+						}
+					}
+				}
+
+				/* skyparms <outer image> <cloud height> <inner image> */
+				else if ( striEqual( token, "skyParms" ) ) {
+					hasmap = true;
+					/* get image base */
+					GetToken( false );
+
+					/* ignore bogus paths */
+					if ( !strEqual( token, "-" ) && !striEqual( token, "full" ) ) {
+						shaderMaps.box = token;
+					}
+					/* skip rest of line */
+					GetToken( false );
+					GetToken( false );
+				}
+			}
+		}
+	}
+
+	StringOutputStream outa, outb;
+
+	const auto save = [&outa, &outb]( const char *suffix ){
+		StringOutputStream filename( 256 );
+		filename( g_enginePath, "shadersDiff", suffix, "A.shader" );
+		SaveFile( filename, outa.c_str(), outa.end() - outa.begin() );
+		Sys_Printf( "\nSaved to %s\n", filename.c_str() );
+		filename( g_enginePath, "shadersDiff", suffix, "B.shader" );
+		SaveFile( filename, outb.c_str(), outb.end() - outb.begin() );
+		Sys_Printf( "\nSaved to %s\n", filename.c_str() );
+		outa.clear();
+		outb.clear();
+	};
+
+	for( auto a = shaderMapsList.cbegin(); a != shaderMapsList.cend(); ++a )
+	{
+		for( auto b = a + 1; b != shaderMapsList.cend(); ++b )
+		{
+			if( a->equal_box( *b ) && a->equal_maps( *b ) ){
+				outa << "\n//========================================\n";
+				outb << "\n//========================================\n";
+				outa << a->si->shader << a->si->shaderText << '\n';
+				outb << b->si->shader << b->si->shaderText << '\n';
+			}
+		}
+	}
+	save( "" );
+#if 1
+	for( auto a = shaderMapsList.cbegin(); a != shaderMapsList.cend(); ++a )
+	{
+		for( auto b = a + 1; b != shaderMapsList.cend(); ++b )
+		{
+			if( !a->maps.empty() && a->equal_maps( *b ) ){
+				outa << "\n//========================================@@@@@@@@===EQ_CLOUDS\n";
+				outb << "\n//========================================@@@@@@@@===EQ_CLOUDS\n";
+				outa << a->si->shader << a->si->shaderText << '\n';
+				outb << b->si->shader << b->si->shaderText << '\n';
+			}
+		}
+	}
+	save( "_EQ_CLOUDS_" );
+
+	std::sort( shaderMapsList.begin(), shaderMapsList.end(),
+	[]( const ShaderMaps& a, const ShaderMaps& b ){
+			return ( string_compare_nocase( a.box, b.box ) < 0 );
+		} );
+	for( auto a = shaderMapsList.cbegin(); a != shaderMapsList.cend(); ++a )
+	{
+		for( auto b = a + 1; b != shaderMapsList.cend(); ++b )
+		{
+			if( !a->box.empty() && a->equal_box( *b ) ){
+				outa << "\n//========================================######===EQ_BOX\n";
+				outb << "\n//========================================######===EQ_BOX\n";
+				outa << a->si->shader << a->si->shaderText << '\n';
+				outb << b->si->shader << b->si->shaderText << '\n';
+			}
+		}
+	}
+	save( "_EQ_BOX_" );
+
+	for( auto a = shaderMapsList.cbegin(); a != shaderMapsList.cend(); ++a )
+	{
+		for( auto b = a + 1; b != shaderMapsList.cend(); ++b )
+		{
+			if( !a->equal_maps( *b ) ){
+				for( const auto& amap : a->maps )
+					for( const auto& bmap : b->maps )
+						if( striEqual( amap, bmap ) ){
+							outa << "\n//===========@@@@@@@@===EQ_MAP: " << amap << '\n';
+							outb << "\n//===========@@@@@@@@===EQ_MAP: " << bmap << '\n';
+							outa << a->si->shader << a->si->shaderText << '\n';
+							outb << b->si->shader << b->si->shaderText << '\n';
+						}
+			}
+		}
+	}
+	save( "_EQ_MAP_" );
+#endif
+	std::sort( shaderInfo, shaderInfo + numShaderInfo,
+	[]( const shaderInfo_t& a, const shaderInfo_t& b ){
+			return ( string_compare_nocase( a.shader, b.shader ) < 0 );
+		} );
+	for( auto si = shaderInfo; si != shaderInfo + numShaderInfo - 1; ++si )
+		if( striEqual( si->shader, (si + 1)->shader ) ){
+			outa << "\n//========================================$$$===EQ_NAME\n";
+			outb << "\n//========================================$$$===EQ_NAME\n";
+			outa << si->shader << si->shaderText << '\n';
+			outb << (si + 1)->shader << (si + 1)->shaderText << '\n';
+		}
+	save( "_EQ_NAME_" );
+}
+
+// checks shader resources presence
+class ShaderValidator
+{
+private:
+	const bool m_doThings;
+	const StrList& m_excludedTexs;
+	bool m_usesBase = false;
+	bool m_usesNotBase = false;
+	bool m_isPartiallyValid = false; //has some present res
+	bool m_isInvalid = false; //has some missing res
+	StrList m_missing;
+public:
+	ShaderValidator( bool doThings, const StrList& excludedTexs ) : m_doThings( doThings ), m_excludedTexs( excludedTexs ){
+	}
+	void test( const char *intex ){
+		if( m_doThings ){
+			const auto tex = String64()( PathExtensionless( intex ) );
+			if( StrList_find( m_excludedTexs, tex ) ){
+				m_usesBase = true;
+				m_isPartiallyValid = true;
+			}
+			else{
+				m_usesNotBase = true;
+				bool found = false;
+				for( const auto ext : { ".png", ".tga", ".jpg" } )
+				{
+					if( vfsGetFileCount( String64()( tex, ext ) ) ){
+						found = true;
+						break;
+					}
+				}
+				m_isPartiallyValid |= found;
+				m_isInvalid |= !found;
+				if( !found )
+					m_missing.emplace_back( intex );
+			}
+		}
+	}
+	bool valid() const {
+		return !m_doThings || ( m_isPartiallyValid );
+	}
+	const StringOutputStream getComment() const {
+		StringOutputStream str;
+		if( m_doThings ){
+			if( m_isInvalid ){
+				for( const auto& miss : m_missing )
+					str << "\n//! m_isInvalid " << miss;
+			}
+			if( m_usesBase )
+				if( !m_usesNotBase )
+					str << "\n//! m_isPureBase";
+				else
+					str << "\n//! m_usesBase";
+		}
+		return str;
+	}
+};
+
+
 /*
    repackBSPMain()
    repack multiple maps, strip out only required shaders
@@ -694,6 +944,14 @@ int repackBSPMain( Args& args ){
 			compLevel = std::clamp( atoi( args.takeNext() ), -1, 10 );
 			Sys_Printf( "Compression level set to %i\n", compLevel );
 		}
+	}
+	const bool validateShaders = args.takeArg( "-validateShaders" );
+	const bool packDups = args.takeArg( "-packDups" );
+	const bool packQer = args.takeArg( "-packQer" );
+
+	if( args.takeArg( "-shaderDups" ) ){
+		findShaderDups();
+		return 0;
 	}
 
 	/* extract pack name */
@@ -757,6 +1015,22 @@ int repackBSPMain( Args& args ){
 		}
 	}
 
+	std::sort( shaderInfo, shaderInfo + numShaderInfo,
+	[]( const shaderInfo_t& a, const shaderInfo_t& b ){
+			if( string_compare_nocase( a.shader, b.shader ) < 0 )
+				return true;
+			else if( string_compare_nocase( a.shader, b.shader ) > 0 )
+				return false;
+			else if( string_compare_nocase( a.skyParmsImageBase, b.skyParmsImageBase ) < 0 )
+				return true;
+			else
+				return false;
+		} );
+	for( auto si = shaderInfo; si != shaderInfo + numShaderInfo - 1; ++si )
+		if( striEqual( si->shader, (si + 1)->shader ) && !striEqual( si->skyParmsImageBase, (si + 1)->skyParmsImageBase ) )
+			Sys_Printf( "WARNING666: %s : %s | %s\n", si->shader.c_str(), si->skyParmsImageBase.c_str(), (si + 1)->skyParmsImageBase.c_str() );
+
+
 	pk3Shaderfiles = vfsListShaderFiles( g_game->shaderPath );
 
 	if( dbg ){
@@ -803,6 +1077,8 @@ int repackBSPMain( Args& args ){
 			/* do wanna le shader? */
 			String64 *wantShader = StrList_find( pk3Shaders, token );
 
+			ShaderValidator shaderValidator( validateShaders, ex.textures );
+
 			/* handle { } section */
 			if ( !( text.GetToken( true ) && strEqual( token, "{" ) ) ) {
 				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
@@ -830,6 +1106,7 @@ int repackBSPMain( Args& args ){
 							GetToken( false );
 							if ( token[ 0 ] != '*' && token[ 0 ] != '$' ) {
 								tex2list( pk3Textures, ex.textures, &rex.textures );
+								shaderValidator.test( token );
 							}
 							text.tokenAppend(); // append token, modified by tex2list()
 						}
@@ -840,6 +1117,7 @@ int repackBSPMain( Args& args ){
 							text.GetToken( false );// skip num
 							while ( TokenAvailable() ){
 								tex2list( pk3Textures, ex.textures, &rex.textures );
+								shaderValidator.test( token );
 								text.GetToken( false ); // append token, modified by tex2list()
 							}
 						}
@@ -877,11 +1155,19 @@ int repackBSPMain( Args& args ){
 						for( const auto side : { "up", "dn", "lf", "rt", "bk", "ft" } ){
 							memcpy( skysidestring, side, 2 );
 							tex2list( pk3Textures, ex.textures, &rex.textures );
+							shaderValidator.test( token );
 						}
 					}
 					/* skip rest of line */
 					text.GetToken( false );
 					text.GetToken( false );
+				}
+				else if ( packQer && striEqual( token, "qer_editorimage" ) ) {
+					/* get an image */
+					GetToken( false );
+					tex2list( pk3Textures, ex.textures, &rex.textures );
+					shaderValidator.test( token );
+					text.tokenAppend(); // append token, modified by tex2list()
 				}
 				else if ( striEqualPrefix( token, "implicit" ) ){
 					Sys_FPrintf( SYS_WRN, "WARNING5: %s : %s shader\n", wantShader->c_str(), token );
@@ -905,7 +1191,8 @@ int repackBSPMain( Args& args ){
 					wantShader = nullptr;
 				}
 				if ( wantShader ){
-					allShaders << text.text << '\n';
+					if( shaderValidator.valid() )
+						allShaders << shaderValidator.getComment() << text.text << '\n';
 					wantShader->clear();
 				}
 			}
@@ -953,6 +1240,9 @@ int repackBSPMain( Args& args ){
 	SaveFile( stream, allShaders.c_str(), allShaders.end() - allShaders.begin() );
 	Sys_Printf( "Shaders saved to %s\n", stream.c_str() );
 
+	if( validateShaders )
+		return 0;
+
 	/* make a pack */
 	stream( g_enginePath, nameOFpack, "_repacked.pk3" );
 	remove( stream );
@@ -962,7 +1252,7 @@ int repackBSPMain( Args& args ){
 	Sys_Printf( "\n\tShader referenced textures....\n" );
 
 	for ( const auto& s : pk3Textures ){
-		if( !packTexture( s, stream, compLevel, png ) ){
+		if( !( ( packDups && vfsPackSkyImage( s, stream, compLevel ) ) || ( !packDups && packTexture( s, stream, compLevel, png ) ) ) ){
 			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", s.c_str() );
 		}
 	}
@@ -971,7 +1261,7 @@ int repackBSPMain( Args& args ){
 
 	for ( const auto& s : pk3Shaders ){
 		if ( !s.empty() ){
-			if( !packTexture( s, stream, compLevel, png ) ){
+			if( !( ( packDups && vfsPackSkyImage( s, stream, compLevel ) ) || ( !packDups && packTexture( s, stream, compLevel, png ) ) ) ){
 				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", s.c_str() );
 			}
 		}
@@ -996,6 +1286,9 @@ int repackBSPMain( Args& args ){
 	}
 
 	Sys_Printf( "\nSaved to %s\n", stream.c_str() );
+
+	if( packDups )
+		vfsFindSkyFiles( std::vector<CopiedString>( pk3Textures.cbegin(), pk3Textures.cend() ) );
 
 	/* return to sender */
 	return 0;

@@ -73,12 +73,12 @@
 
 struct VFS_PAK
 {
-	unzFile zipfile;
+	// unzFile zipfile;
 	const CopiedString unzFilePath;
-	VFS_PAK( unzFile zipfile, const char *unzFilePath ) : zipfile( zipfile ), unzFilePath( unzFilePath ) {};
+	VFS_PAK( const char *unzFilePath ) : unzFilePath( unzFilePath ) {};
 	VFS_PAK( VFS_PAK&& ) noexcept = delete;
 	~VFS_PAK(){
-		unzClose( zipfile );
+		// unzClose( zipfile );
 	}
 };
 
@@ -89,6 +89,27 @@ struct VFS_PAKFILE
 	VFS_PAK& pak;
 	const guint32 size;
 };
+
+
+static MemBuffer read_file_from_pak( const VFS_PAKFILE& file ){
+	MemBuffer buffer;
+	unzFile zipfile = unzOpen( file.pak.unzFilePath.c_str() );
+	if( zipfile != nullptr ){
+		*(unz_s*)zipfile = file.zipinfo;
+
+		if ( unzOpenCurrentFile( zipfile ) == UNZ_OK ) {
+			buffer = MemBuffer( file.size );
+
+			if ( unzReadCurrentFile( zipfile, buffer.data(), file.size ) < 0 ) {
+				buffer = MemBuffer();
+			}
+			unzCloseCurrentFile( zipfile );
+		}
+		unzClose( zipfile );
+	}
+	return buffer;
+}
+
 
 // =============================================================================
 // Global variables
@@ -106,7 +127,7 @@ char g_strLoadedFileLocation[1024];
 static void vfsInitPakFile( const char *filename ){
 	unzFile uf = unzOpen( filename );
 	if ( uf != NULL ) {
-		VFS_PAK& pak = g_paks.emplace_front( uf, filename );
+		VFS_PAK& pak = g_paks.emplace_front( filename );
 
 		if ( unzGoToFirstFile( uf ) == UNZ_OK ) {
 			do {
@@ -129,6 +150,7 @@ static void vfsInitPakFile( const char *filename ){
 					} );
 				}
 			} while( unzGoToNextFile( uf ) == UNZ_OK );
+			unzClose( uf );
 		}
 	}
 }
@@ -195,6 +217,70 @@ void vfsInitDirectory( const char *path ){
 }
 
 
+#include <set>
+
+void vfsFindSkyFiles( const std::vector<CopiedString>& present_list ){
+	for ( const VFS_PAKFILE& file : g_pakFiles )
+	{
+		const char *name = file.name.c_str();
+		if ( path_extension_is( name, "tga" ) || path_extension_is( name, "jpg" ) || path_extension_is( name, "png" ) ) {
+			auto n = StringOutputStream( 64 )( PathExtensionless( name ) );
+			if( string_equal_suffix_nocase( n, "_bk" )
+			 || string_equal_suffix_nocase( n, "_rt" )
+			 || string_equal_suffix_nocase( n, "_ft" )
+			 || string_equal_suffix_nocase( n, "_lf" )
+			 || string_equal_suffix_nocase( n, "_up" )
+			 || string_equal_suffix_nocase( n, "_dn" )
+			 ){
+				bool found = false;
+				for( const auto& pre : present_list )
+					if( striEqual( pre.c_str(), n ) )
+						found = true;
+				if( !found ){
+					auto add_crc = [crcs = std::set<unsigned long>()]( const MemBuffer& boo )mutable->bool{
+						return crcs.insert( crc32( 0, boo.data(), boo.size() ) ).second;
+					};
+
+					struct FTYPE
+					{
+						const char *ext;
+						int idx;
+					};
+					FTYPE ftypes[3]{ { ".png", 1 }, { ".tga", 1 }, { ".jpg", 1 } };
+
+					for( auto& ftype : ftypes )
+					{
+						const StringOutputStream fullnames[] = { StringOutputStream( 256 )( "c:/qsky/__/skpk/", n, ftype.ext ),
+						StringOutputStream( 256 )( "c:/qsky/__/dups/", n, ftype.ext ),
+						StringOutputStream( 256 )( "c:/qsky/__/dups/", n, " (2)", ftype.ext ),
+						StringOutputStream( 256 )( "c:/qsky/__/dups/", n, " (3)", ftype.ext ),
+						StringOutputStream( 256 )( "c:/qsky/__/dups/", n, " (4)", ftype.ext ),
+						StringOutputStream( 256 )( "c:/qsky/__/dups/", n, " (5)", ftype.ext ) };
+						for( const auto& fullname : fullnames )
+						{
+							if( FileExists( fullname ) ){
+								++ftype.idx;
+								add_crc( LoadFile( fullname ) );
+							}
+						}
+					}
+
+
+					if( MemBuffer buffer = read_file_from_pak( file ) ){
+						if( add_crc( buffer ) ){
+							Sys_Printf( "WARNING777: %s :: %s\n", name, file.pak.unzFilePath.c_str() );
+							if ( !mz_zip_add_mem_to_archive_file_in_place_with_time( "c:/qsky/test_bigbox_repacked_noShader.pk3", name, buffer.data(), buffer.size(), 0, 0, 9, file.zipinfo.cur_file_info.dosDate ) ){
+								Error( "Failed creating zip archive \"%s\"!\n", "c:/qsky/test_bigbox_repacked_noShader.pk3" );
+							}
+						}
+					}
+				}
+			 }
+		}
+	}
+}
+
+
 // lists all unique .shader files with extension and w/o path
 std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath ){
 	std::vector<CopiedString> list;
@@ -220,6 +306,7 @@ std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath ){
 		}
 	}
 	/* search in packs */
+#if 0
 	for ( const VFS_PAKFILE& file : g_pakFiles )
 	{
 		const char *name = file.name.c_str();
@@ -228,7 +315,7 @@ std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath ){
 			insert( path_get_filename_start( name ) );
 		}
 	}
-
+#endif
 	return list;
 }
 
@@ -302,36 +389,143 @@ MemBuffer vfsLoadFile( const char *filename, int index /* = 0 */ ){
 	auto fixed = StringOutputStream( 64 )( PathCleaned( filename ) );
 	strLower( fixed.c_str() );
 
-	MemBuffer buffer;
-
 	for ( const VFS_PAKFILE& file : g_pakFiles )
 	{
 		if ( strEqual( file.name.c_str(), fixed ) && 0 == index-- )
 		{
 			snprintf( g_strLoadedFileLocation, sizeof( g_strLoadedFileLocation ), "%s :: %s", file.pak.unzFilePath.c_str(), filename );
 
-			unzFile zipfile = file.pak.zipfile;
-			*(unz_s*)zipfile = file.zipinfo;
-
-			if ( unzOpenCurrentFile( zipfile ) == UNZ_OK ) {
-				buffer = MemBuffer( file.size );
-
-				if ( unzReadCurrentFile( zipfile, buffer.data(), file.size ) < 0 ) {
-					buffer = MemBuffer();
-				}
-				unzCloseCurrentFile( zipfile );
-			}
-			return buffer;
+			// unzFile zipfile = file.pak.zipfile;
+			return read_file_from_pak( file );
 		}
 	}
 
-	return buffer;
+	return {};
 }
 
 
 
 
-bool vfsPackFile( const char *filename, const char *packname, const int compLevel ){
+#include <filesystem>
+
+bool vfsPackSkyImage( const char *filename, const char *packname, const int compLevel ){
+	bool packed = false;
+	bool resInMain = false;
+
+	auto add_crc = [crcs = std::set<unsigned long>()]( const MemBuffer& boo )mutable->bool{
+		return crcs.insert( crc32( 0, boo.data(), boo.size() ) ).second;
+	};
+
+	struct FTYPE
+	{
+		const char *ext;
+		int idx;
+	};
+	FTYPE ftypes[3]{ { ".png", 1 }, { ".tga", 1 }, { ".jpg", 1 } };
+
+	for( auto& ftype : ftypes )
+	{
+		const StringOutputStream fullnames[] = { StringOutputStream( 256 )( "c:/qsky/__/skpk/", filename, ftype.ext ),
+		StringOutputStream( 256 )( "c:/qsky/__/dups/", filename, ftype.ext ),
+		StringOutputStream( 256 )( "c:/qsky/__/dups/", filename, " (2)", ftype.ext ),
+		StringOutputStream( 256 )( "c:/qsky/__/dups/", filename, " (3)", ftype.ext ),
+		StringOutputStream( 256 )( "c:/qsky/__/dups/", filename, " (4)", ftype.ext ),
+		StringOutputStream( 256 )( "c:/qsky/__/dups/", filename, " (5)", ftype.ext ) };
+		for( const auto& fullname : fullnames )
+		{
+			if( FileExists( fullname ) ){
+				resInMain = packed = true;
+				++ftype.idx;
+				add_crc( LoadFile( fullname ) );
+			}
+		}
+	}
+
+	for( auto& ftype : ftypes )
+	{
+		for ( const auto& dir : g_strDirs )
+		{
+			const auto fullname = StringOutputStream( 256 )( dir, filename, ftype.ext );
+			if( FileExists( fullname ) && add_crc( LoadFile( fullname ) ) ){
+				if( !packed ){
+					packed = vfsPackFile_Absolute_Path( fullname, StringOutputStream( 256 )( filename, ftype.ext ), packname, compLevel );
+				}
+				else{
+					#if 0
+					auto toname = StringOutputStream( 256 )( "c:/qsky/m_dups/", filename );
+					if( idx > 1 )
+						toname << " (" << idx << ")";
+					toname << ext;
+					std::filesystem::create_directories( std::filesystem::path( toname.c_str() ).remove_filename() );
+					std::filesystem::copy_file( fullname.c_str(), toname.c_str() );
+					#else
+					auto toname = StringOutputStream( 256 )( filename );
+					if( ftype.idx > 1 ) // original name for files in alt format, (2) etc suffix for alt versions in the same format
+						toname << " (" << ftype.idx << ")";
+					toname << ftype.ext;
+					if( resInMain )
+						vfsPackFile_Absolute_Path( fullname, toname, StringOutputStream( 256 )( PathExtensionless( packname ), "_altMain.", path_get_extension( packname ) ), compLevel );
+					else
+						vfsPackFile_Absolute_Path( fullname, toname, StringOutputStream( 256 )( PathExtensionless( packname ), "_altNew.", path_get_extension( packname ) ), compLevel );
+					#endif
+				}
+				++ftype.idx;
+			}
+		}
+	}
+
+	auto fixed = StringOutputStream( 64 )( PathCleaned( filename ) );
+	strLower( fixed.c_str() );
+
+	for( auto& ftype : ftypes )
+	{
+		const auto fullfixed = StringOutputStream( 256 )( fixed, ftype.ext );
+		for ( const VFS_PAKFILE& file : g_pakFiles )
+		{
+			if ( strEqual( file.name.c_str(), fullfixed ) )
+			{
+				// unzFile zipfile = file.pak.zipfile;
+				if ( MemBuffer buffer = read_file_from_pak( file ) ) {
+					if ( add_crc( buffer ) ) {
+						if( !packed ){
+							packed = true;
+							if ( !mz_zip_add_mem_to_archive_file_in_place_with_time( packname, StringOutputStream( 256 )( filename, ftype.ext ), buffer.data(), buffer.size(), 0, 0, compLevel, file.zipinfo.cur_file_info.dosDate ) ){
+								Error( "Failed creating zip archive \"%s\"!\n", packname );
+							}
+						}
+						else{
+							auto toname = StringOutputStream( 256 )( filename );
+							if( ftype.idx > 1 ) // original name for files in alt format, (2) etc suffix for alt versions in the same format
+								toname << " (" << ftype.idx << ")";
+							toname << ftype.ext;
+							if( resInMain ){
+								if ( !mz_zip_add_mem_to_archive_file_in_place_with_time( StringOutputStream( 256 )( PathExtensionless( packname ), "_altMain.", path_get_extension( packname ) ), toname, buffer.data(), buffer.size(), 0, 0, compLevel, file.zipinfo.cur_file_info.dosDate ) ){
+									Error( "Failed creating zip archive \"%s\"!\n", packname );
+								}
+							}
+							else{
+								if ( !mz_zip_add_mem_to_archive_file_in_place_with_time( StringOutputStream( 256 )( PathExtensionless( packname ), "_altNew.", path_get_extension( packname ) ), toname, buffer.data(), buffer.size(), 0, 0, compLevel, file.zipinfo.cur_file_info.dosDate ) ){
+									Error( "Failed creating zip archive \"%s\"!\n", packname );
+								}
+							}
+						}
+						++ftype.idx;
+					}
+				}
+			}
+		}
+	}
+	return packed;
+}
+
+bool vfsPackFile( const char *filename, const char *packname_in, const int compLevel ){
+	static int packNum = 0;
+	auto packname = StringOutputStream( 256 )( PathExtensionless( packname_in ), packNum, '.', path_get_extension( packname_in ) );
+	if( std::filesystem::exists( packname.c_str() ) && std::filesystem::file_size( packname.c_str() ) > 2147483648 - 10485760 ){
+		++packNum;
+		packname( PathExtensionless( packname_in ), packNum, '.', path_get_extension( packname_in ) );
+	}
+
 	for ( const auto& dir : g_strDirs )
 	{
 		if( vfsPackFile_Absolute_Path( StringOutputStream( 256 )( dir, filename ), filename, packname, compLevel ) )
@@ -345,20 +539,12 @@ bool vfsPackFile( const char *filename, const char *packname, const int compLeve
 	{
 		if ( strEqual( file.name.c_str(), fixed ) )
 		{
-			unzFile zipfile = file.pak.zipfile;
-			*(unz_s*)zipfile = file.zipinfo;
-
-			if ( unzOpenCurrentFile( zipfile ) == UNZ_OK ) {
-				MemBuffer buffer( file.size );
-
-				const int size = unzReadCurrentFile( zipfile, buffer.data(), file.size );
-				unzCloseCurrentFile( zipfile );
-				if ( size >= 0 ) {
-					if ( !mz_zip_add_mem_to_archive_file_in_place_with_time( packname, filename, buffer.data(), size, 0, 0, compLevel, file.zipinfo.cur_file_info.dosDate ) ){
-						Error( "Failed creating zip archive \"%s\"!\n", packname );
-					}
-					return true;
+			// unzFile zipfile = file.pak.zipfile;
+			if( MemBuffer buffer = read_file_from_pak( file ) ){
+				if ( !mz_zip_add_mem_to_archive_file_in_place_with_time( packname, filename, buffer.data(), buffer.size(), 0, 0, compLevel, file.zipinfo.cur_file_info.dosDate ) ){
+					Error( "Failed creating zip archive \"%s\"!\n", packname.c_str() );
 				}
+				return true;
 			}
 			return false;
 		}

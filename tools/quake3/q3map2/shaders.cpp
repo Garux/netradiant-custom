@@ -1858,7 +1858,7 @@ void LoadShaderInfo(){
 
 	/* we can pile up several shader files, the one in baseq3 and ones in the mod dir or other spots */
 	const auto filename = StringOutputStream( 64 )( g_game->shaderPath, "/shaderlist.txt" );
-	const int count = vfsGetFileCount( filename );
+	const int count = 0; // vfsGetFileCount( filename );
 
 	/* load them all */
 	for ( int i = 0; i < count; i++ )

@@ -40,6 +40,8 @@ int vfsGetFileCount( const char *filename );
 MemBuffer vfsLoadFile( const char *filename, int index = 0 );
 std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath );
 bool vfsPackFile( const char *filename, const char *packname, const int compLevel );
+bool vfsPackSkyImage( const char *filename, const char *packname, const int compLevel );
+void vfsFindSkyFiles( const std::vector<CopiedString>& present_list );
 bool vfsPackFile_Absolute_Path( const char *filepath, const char *filename, const char *packname, const int compLevel );
 
 extern std::vector<CopiedString> g_strForbiddenDirs;
