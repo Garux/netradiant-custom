@@ -458,15 +458,15 @@ int ScaleBSPMain( Args& args ){
 	/* scale nodes */
 	for ( bspNode_t& node : bspNodes )
 	{
-		node.minmax.mins *= scale;
-		node.minmax.maxs *= scale;
+		node.minmax.mins = scale * node.minmax.mins; // this multiplication order to calculate in floats
+		node.minmax.maxs = scale * node.minmax.maxs;
 	}
 
 	/* scale leafs */
 	for ( bspLeaf_t& leaf : bspLeafs )
 	{
-		leaf.minmax.mins *= scale;
-		leaf.minmax.maxs *= scale;
+		leaf.minmax.mins = scale * leaf.minmax.mins;
+		leaf.minmax.maxs = scale * leaf.minmax.maxs;
 	}
 
 	if ( texscale ) {
