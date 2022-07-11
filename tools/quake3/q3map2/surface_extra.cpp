@@ -134,7 +134,7 @@ void WriteSurfaceExtraFile( const char *path ){
 	Sys_Printf( "--- WriteSurfaceExtraFile ---\n" );
 
 	/* open the file */
-	auto srfPath = StringOutputStream( 256 )( PathExtensionless( path ), ".srf" );
+	const auto srfPath = StringOutputStream( 256 )( path, ".srf" );
 	Sys_Printf( "Writing %s\n", srfPath.c_str() );
 	FILE *sf = SafeOpenWrite( srfPath, "wt" );
 
