@@ -32,8 +32,9 @@ class LoadImageCallback
 public:
 	void* m_environment;
 	LoadFunc m_func;
+	bool m_skybox;
 
-	LoadImageCallback( void* environment, LoadFunc func ) : m_environment( environment ), m_func( func ){
+	LoadImageCallback( void* environment, LoadFunc func, bool skybox = false ) : m_environment( environment ), m_func( func ), m_skybox( skybox ){
 	}
 	Image* loadImage( const char* name ) const {
 		return m_func( m_environment, name );

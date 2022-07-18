@@ -209,6 +209,7 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 					oldy = yi;
 				}
 				memcpy( out, row1, outwidth4 );
+				out += outwidth4;
 			}
 		}
 	}
@@ -297,6 +298,7 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 					oldy = yi;
 				}
 				memcpy( out, row1, outwidth3 );
+				out += outwidth3;
 			}
 		}
 	}

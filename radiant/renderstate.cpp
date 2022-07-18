@@ -365,6 +365,69 @@ public:
 GLSLDepthFillProgram g_depthFillGLSL;
 
 
+class GLSLSkyboxProgram : public GLProgram
+{
+public:
+	GLhandleARB m_program;
+	GLint u_view_origin;
+
+	GLSLSkyboxProgram() : m_program( 0 ){
+	}
+
+	void create(){
+		// create program
+		m_program = glCreateProgramObjectARB();
+
+		// create shader
+		{
+			StringOutputStream filename( 256 );
+			createShader( m_program, filename( GlobalRadiant().getAppPath(), "gl/skybox_vp.glsl" ), GL_VERTEX_SHADER_ARB );
+			createShader( m_program, filename( GlobalRadiant().getAppPath(), "gl/skybox_fp.glsl" ), GL_FRAGMENT_SHADER_ARB );
+		}
+
+		GLSLProgram_link( m_program );
+		GLSLProgram_validate( m_program );
+
+		glUseProgramObjectARB( m_program );
+
+		u_view_origin = glGetUniformLocationARB( m_program, "u_view_origin" );
+
+		glUseProgramObjectARB( 0 );
+
+		GlobalOpenGL_debugAssertNoErrors();
+	}
+
+	void destroy(){
+		glDeleteObjectARB( m_program );
+		m_program = 0;
+	}
+
+	void enable(){
+		glUseProgramObjectARB( m_program );
+
+		GlobalOpenGL_debugAssertNoErrors();
+
+		debug_string( "enable skybox" );
+	}
+
+	void disable(){
+		glUseProgramObjectARB( 0 );
+
+		GlobalOpenGL_debugAssertNoErrors();
+
+		debug_string( "disable skybox" );
+	}
+
+	void setParameters( const Vector3& viewer, const Matrix4& localToWorld, const Vector3& origin, const Vector3& colour, const Matrix4& world2light ){
+		glUniform3fARB( u_view_origin, viewer.x(), viewer.y(), viewer.z() );
+
+		GlobalOpenGL_debugAssertNoErrors();
+	}
+};
+
+GLSLSkyboxProgram g_skyboxGLSL;
+
+
 // ARB path
 
 void createProgram( const char* filename, GLenum type ){
@@ -790,6 +853,9 @@ inline bool OpenGLState_less( const OpenGLState& self, const OpenGLState& other 
 	if ( self.m_texture7 != other.m_texture7 ) {
 		return self.m_texture7 < other.m_texture7;
 	}
+	if ( self.m_textureSkyBox != other.m_textureSkyBox ) {
+		return self.m_textureSkyBox < other.m_textureSkyBox;
+	}
 	//! Sort by state bit-vector.
 	if ( self.m_state != other.m_state ) {
 		return self.m_state < other.m_state;
@@ -809,6 +875,7 @@ void OpenGLState_constructDefault( OpenGLState& state ){
 	state.m_texture5 = 0;
 	state.m_texture6 = 0;
 	state.m_texture7 = 0;
+	state.m_textureSkyBox = 0;
 
 	state.m_colour[0] = 1;
 	state.m_colour[1] = 1;
@@ -1158,7 +1225,7 @@ class OpenGLShaderCache final : public ShaderCache, public TexturesCacheObserver
 
 	bool m_lightingEnabled;
 	bool m_lightingSupported;
-	bool m_useShaderLanguage;
+	const bool m_useShaderLanguage;
 
 public:
 	OpenGLShaderCache() :
@@ -1302,8 +1369,9 @@ public:
 		}
 		debug_string( "end rendering" );
 
-		OpenGLState reset = current; /* popmatrix after RENDER_TEXT */
-		reset.m_state = current.m_state & ~RENDER_TEXT;
+		OpenGLState reset = current; /* reset some states */
+		reset.m_state = current.m_state & ~RENDER_TEXT; /* popmatrix after RENDER_TEXT */
+		reset.m_program = nullptr; /* disable shader */
 		OpenGLState_apply( reset, current, globalstate );
 	}
 	void realise(){
@@ -1319,6 +1387,9 @@ public:
 					g_depthFillARB.create();
 				}
 			}
+
+			if( lightingSupported() )
+				g_skyboxGLSL.create();
 
 			for ( Shaders::iterator i = m_shaders.begin(); i != m_shaders.end(); ++i )
 			{
@@ -1347,6 +1418,8 @@ public:
 					g_depthFillARB.destroy();
 				}
 			}
+			if( GlobalOpenGL().contextValid && lightingSupported() )
+				g_skyboxGLSL.destroy();
 		}
 	}
 	bool realised(){
@@ -1645,7 +1718,7 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 	if ( program != current.m_program ) {
 		if ( current.m_program != 0 ) {
 			current.m_program->disable();
-			glColor4fv( vector4_to_array( current.m_colour ) );
+//why?			glColor4fv( vector4_to_array( current.m_colour ) );
 			debug_colour( "cleaning program" );
 		}
 
@@ -1888,6 +1961,16 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 	}
 
 
+	if( current.m_textureSkyBox != self.m_textureSkyBox ){
+		if ( GlobalOpenGL().GL_1_3() ) {
+			glActiveTexture( GL_TEXTURE0 );
+			glClientActiveTexture( GL_TEXTURE0 );
+		}
+		glBindTexture( GL_TEXTURE_CUBE_MAP, self.m_textureSkyBox );
+		GlobalOpenGL_debugAssertNoErrors();
+		current.m_textureSkyBox = self.m_textureSkyBox;
+	}
+
 	if ( state & RENDER_TEXTURE && self.m_colour[3] != current.m_colour[3] ) {
 		debug_colour( "setting alpha" );
 		glColor4f( 1,1,1,self.m_colour[3] );
@@ -1932,6 +2015,11 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 void Renderables_flush( OpenGLStateBucket::Renderables& renderables, OpenGLState& current, unsigned int globalstate, const Vector3& viewer ){
 	const Matrix4* transform = 0;
 	glPushMatrix();
+
+	if ( current.m_program != 0 && current.m_textureSkyBox != 0 && globalstate & RENDER_PROGRAM ) {
+		current.m_program->setParameters( viewer, g_matrix4_identity, g_vector3_identity, g_vector3_identity, g_matrix4_identity );
+	}
+
 	for ( OpenGLStateBucket::Renderables::const_iterator i = renderables.begin(); i != renderables.end(); ++i )
 	{
 		//qglLoadMatrixf(i->m_transform);
@@ -2421,6 +2509,19 @@ void OpenGLShader::construct( const char* name ){
 			bumpPass.m_blend_src = GL_ONE;
 			bumpPass.m_blend_dst = GL_ONE;
 		}
+		// g_ShaderCache->lightingSupported() as in GLSL is available
+		else if( m_shader->getSkyBox() != nullptr && m_shader->getSkyBox()->texture_number != 0 && g_ShaderCache->lightingSupported() )
+		{
+			state.m_texture = m_shader->getTexture()->texture_number;
+			state.m_textureSkyBox = m_shader->getSkyBox()->texture_number;
+
+			state.m_state = RENDER_FILL | RENDER_CULLFACE | RENDER_TEXTURE | RENDER_DEPTHTEST | RENDER_DEPTHWRITE | RENDER_COLOURWRITE | RENDER_PROGRAM;
+			state.m_colour.vec3() = m_shader->getTexture()->color;
+			state.m_colour[3] = 1.0f;
+			state.m_sort = OpenGLState::eSortFullbright;
+
+			state.m_program = &g_skyboxGLSL;
+		}
 		else
 		{
 			state.m_texture = m_shader->getTexture()->texture_number;
@@ -2461,7 +2562,7 @@ void OpenGLShader::construct( const char* name ){
 					break;
 				}
 			}
-			reinterpret_cast<Vector3&>( state.m_colour ) = m_shader->getTexture()->color;
+			state.m_colour.vec3() = m_shader->getTexture()->color;
 			state.m_colour[3] = 1.0f;
 
 			if ( ( m_shader->getFlags() & QER_TRANS ) != 0 ) {

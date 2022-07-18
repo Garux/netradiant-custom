@@ -33,6 +33,7 @@
 #include "container/hashfunc.h"
 #include "container/cache.h"
 #include "generic/callback.h"
+#include "stream/stringstream.h"
 #include "stringio.h"
 
 #include "image.h"
@@ -334,19 +335,67 @@ typedef std::pair<LoadImageCallback, CopiedString> TextureKey;
 void qtexture_realise( qtexture_t& texture, const TextureKey& key ){
 	texture.texture_number = 0;
 	if ( !string_empty( key.second.c_str() ) ) {
-		Image* image = key.first.loadImage( key.second.c_str() );
-		if ( image != 0 ) {
-			LoadTextureRGBA( &texture, image->getRGBAPixels(), image->getWidth(), image->getHeight() );
-			texture.surfaceFlags = image->getSurfaceFlags();
-			texture.contentFlags = image->getContentFlags();
-			texture.value = image->getValue();
-			image->release();
-			globalOutputStream() << "Loaded Texture: \"" << key.second << "\"\n";
-			GlobalOpenGL_debugAssertNoErrors();
+		if( !key.first.m_skybox ){
+			Image* image = key.first.loadImage( key.second.c_str() );
+			if ( image != 0 ) {
+				LoadTextureRGBA( &texture, image->getRGBAPixels(), image->getWidth(), image->getHeight() );
+				texture.surfaceFlags = image->getSurfaceFlags();
+				texture.contentFlags = image->getContentFlags();
+				texture.value = image->getValue();
+				image->release();
+				globalOutputStream() << "Loaded Texture: \"" << key.second << "\"\n";
+				GlobalOpenGL_debugAssertNoErrors();
+			}
+			else
+			{
+				globalErrorStream() << "Texture load failed: \"" << key.second << "\"\n";
+			}
 		}
-		else
-		{
-			globalErrorStream() << "Texture load failed: \"" << key.second << "\"\n";
+		else {
+			Image *images[6]{};
+			/* load in order, so that Q3 cubemap is seamless in openGL, but rotated & flipped; fix misorientation in shader later */
+			const char *suffixes[] = { "_ft", "_bk", "_up", "_dn", "_rt", "_lf" };
+			for( int i = 0; i < 6; ++i ){
+				images[i] = key.first.loadImage( StringOutputStream( 64 )( key.second, suffixes[i] ) );
+			}
+			if( std::all_of( images, images + std::size( images ), []( const Image *img ){ return img != nullptr; } ) ){
+				glGenTextures( 1, &texture.texture_number );
+				glBindTexture( GL_TEXTURE_CUBE_MAP, texture.texture_number );
+				glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_GENERATE_MIPMAP, GL_FALSE );
+
+				glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+				glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+				glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
+				glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+				glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+				glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0 );
+				glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0); //this or mipmaps are required for samplerCube to work
+				// fix non quadratic, varying sizes; GL_TEXTURE_CUBE_MAP requires this
+				unsigned int size = 0;
+				for( const auto img : images )
+					size = std::max( { size, img->getWidth(), img->getHeight() } );
+				for( int i = 0; i < 6; ++i ){
+					const Image& img = *images[i];
+					byte *pix = img.getRGBAPixels();
+					if( img.getWidth() != size || img.getHeight() != size ){
+						pix = static_cast<byte*>( malloc( size * size * 4 ) );
+						R_ResampleTexture( img.getRGBAPixels(), img.getWidth(), img.getHeight(), pix, size, size, 4 );
+					}
+					glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, g_texture_globals.texture_components, size, size, 0, GL_RGBA, GL_UNSIGNED_BYTE, pix );
+					if( pix != img.getRGBAPixels() )
+						free( pix );
+				}
+
+				glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );
+				globalOutputStream() << "Loaded Skybox: \"" << key.second << "\"\n";
+				GlobalOpenGL_debugAssertNoErrors();
+			}
+			else
+			{
+				globalErrorStream() << "Skybox load failed: \"" << key.second << "\"\n";
+			}
+
+			std::for_each_n( images, std::size( images ), []( Image *img ){ if( img != nullptr ) img->release(); } );
 		}
 	}
 }

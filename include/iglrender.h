@@ -82,6 +82,7 @@ public:
 	GLint m_texture5;
 	GLint m_texture6;
 	GLint m_texture7;
+	GLint m_textureSkyBox;
 	Vector4 m_colour;
 	GLenum m_blend_src, m_blend_dst;
 	GLenum m_depthfunc;

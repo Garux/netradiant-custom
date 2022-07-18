@@ -2091,7 +2091,8 @@ void CamWnd::Cam_Draw(){
 		            | RENDER_LIGHTING
 		            | RENDER_TEXTURE
 		            | RENDER_SMOOTH
-		            | RENDER_SCALED;
+		            | RENDER_SCALED
+		            | RENDER_PROGRAM;
 		break;
 	case cd_lighting:
 		globalstate |= RENDER_FILL

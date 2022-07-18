@@ -279,6 +279,7 @@ public:
 	ShaderParameters m_params;
 
 	TextureExpression m_textureName;
+	TextureExpression m_skyBox;
 	TextureExpression m_diffuse;
 	TextureExpression m_bump;
 	ShaderValue m_heightmapScale;
@@ -838,6 +839,7 @@ class CShader : public IShader
 	CopiedString m_Name;
 
 	qtexture_t* m_pTexture;
+	qtexture_t* m_pSkyBox;
 	qtexture_t* m_notfound;
 	qtexture_t* m_pDiffuse;
 	float m_heightmapScale;
@@ -860,6 +862,7 @@ public:
 		m_blendFunc( BLEND_SRC_ALPHA, BLEND_ONE_MINUS_SRC_ALPHA ),
 		m_bInUse( false ){
 		m_pTexture = 0;
+		m_pSkyBox = 0;
 		m_pDiffuse = 0;
 		m_pBump = 0;
 		m_pSpecular = 0;
@@ -892,6 +895,13 @@ public:
 // get/set the qtexture_t* Radiant uses to represent this shader object
 	qtexture_t* getTexture() const {
 		return m_pTexture;
+	}
+	qtexture_t* getSkyBox() override {
+		/* load skybox if only used */
+		if( m_pSkyBox == nullptr && !m_template.m_skyBox.empty() )
+			m_pSkyBox = GlobalTexturesCache().capture( LoadImageCallback( 0, GlobalTexturesCache().defaultLoader().m_func, true ), m_template.m_skyBox.c_str() );
+
+		return m_pSkyBox;
 	}
 	qtexture_t* getDiffuse() const {
 		return m_pDiffuse;
@@ -964,6 +974,10 @@ public:
 
 		if ( m_notfound != 0 ) {
 			GlobalTexturesCache().release( m_notfound );
+		}
+
+		if ( m_pSkyBox != 0 ) {
+			GlobalTexturesCache().release( m_pSkyBox );
 		}
 
 		unrealiseLighting();
@@ -1219,6 +1233,18 @@ bool ShaderTemplate::parseQuake3( Tokeniser& tokeniser ){
 				m_nFlags |= QER_ALPHATEST;
 
 				RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, m_AlphaRef ) );
+			}
+			else if ( string_equal_nocase( token, "skyparms" ) ) {
+				const char* sky = tokeniser.getToken();
+
+				if ( sky == 0 ) {
+					Tokeniser_unexpectedError( tokeniser, sky, "#skyparms" );
+					return false;
+				}
+
+				if( !string_equal( sky, "-" ) ){
+					m_skyBox = sky;
+				}
 			}
 			else if ( string_equal_nocase( token, "cull" ) ) {
 				const char* cull = tokeniser.getToken();

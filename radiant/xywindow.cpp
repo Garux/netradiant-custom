@@ -1313,8 +1313,8 @@ void BackgroundImage::render( const VIEWTYPE viewtype ){
 		glDisable( GL_DEPTH_TEST );
 
 		glBindTexture( GL_TEXTURE_2D, _tex );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
 		glBegin( GL_QUADS );
 
