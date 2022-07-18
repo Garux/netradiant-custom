@@ -152,6 +152,8 @@ GtkToolbar* create_filter_toolbar(){
 	button = toolbar_append_toggle_button( toolbar, "HintsSkips (CTRL + H)\nRightClick: toggle tex\n\thint\n\thintLocal\n\thintSkip", "f-hint.png", "FilterHintsSkips" );
 	g_commonFuncs.emplace_back( button, std::vector<const char*>{ "hint", "hintlocal", "hintskip" } );
 
+	button = toolbar_append_toggle_button( toolbar, "Sky", "f-sky.png", "FilterSky" );
+
 	//toolbar_append_toggle_button( toolbar, "Paths (ALT + 8)", "texture_lock.png", "FilterPaths" );
 	toolbar_append_space( toolbar );
 	toolbar_append_toggle_button( toolbar, "Entities (ALT + 2)", "f-entities.png", "FilterEntities" );

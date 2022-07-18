@@ -1245,6 +1245,8 @@ bool ShaderTemplate::parseQuake3( Tokeniser& tokeniser ){
 				if( !string_equal( sky, "-" ) ){
 					m_skyBox = sky;
 				}
+
+				m_nFlags |= QER_SKY;
 			}
 			else if ( string_equal_nocase( token, "cull" ) ) {
 				const char* cull = tokeniser.getToken();

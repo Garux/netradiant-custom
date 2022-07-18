@@ -1196,6 +1196,9 @@ filter_brush_all_faces g_filter_brush_detail( &g_filter_face_detail );
 filter_face_shader_prefix g_filter_face_decals( "textures/decals/" );
 filter_brush_any_face g_filter_brush_decals( &g_filter_face_decals );
 
+filter_face_flags g_filter_face_sky( QER_SKY );
+filter_brush_any_face g_filter_brush_sky( &g_filter_face_sky );
+
 
 void BrushFilters_construct(){
 	add_brush_filter( g_filter_brush_clip, EXCLUDE_CLIP );
@@ -1227,6 +1230,7 @@ void BrushFilters_construct(){
 		add_brush_filter( g_filter_brush_liquids_q1, EXCLUDE_LIQUIDS );
 	add_brush_filter( g_filter_brush_lightgrid, EXCLUDE_LIGHTGRID );
 	add_brush_filter( g_filter_brush_decals, EXCLUDE_DECALS );
+	add_brush_filter( g_filter_brush_sky, EXCLUDE_SKY );
 }
 
 #if 0

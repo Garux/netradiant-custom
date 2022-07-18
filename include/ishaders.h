@@ -37,6 +37,7 @@ enum
 	QER_AREAPORTAL = 1 << 8,
 	QER_CLIP = 1 << 9,
 	QER_BOTCLIP = 1 << 10,
+	QER_SKY = 1 << 11,
 };
 
 struct qtexture_t;
