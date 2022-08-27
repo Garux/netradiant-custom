@@ -114,14 +114,15 @@ bool MapResource_saveFile( const MapFormat& format, scene::Node& root, GraphTrav
 }
 
 bool file_saveBackup( const char* path ){
-	if ( file_writeable( path ) ) {
-		const auto backup = StringOutputStream( 256 )( PathExtensionless( path ), ".bak" );
+	const auto backup = StringOutputStream( 256 )( PathExtensionless( path ), ".bak" );
 
-		return ( !file_exists( backup ) || file_remove( backup ) ) // remove backup
-		       && file_move( path, backup ); // rename current to backup
+	if ( file_move( path, backup.c_str() ) ) {
+		return true;
 	}
-
-	globalErrorStream() << "map path is not writeable: " << makeQuoted( path ) << "\n";
+	if ( !file_exists( path ) ) {
+		return true; // nothing to move, no wonder it failed
+	}
+	globalErrorStream() << "map path (or backup path) is not writable: " << makeQuoted( path ) << "\n";
 	return false;
 }
 
@@ -130,11 +131,14 @@ bool MapResource_save( const MapFormat& format, scene::Node& root, const char* p
 	fullpath << path << name;
 
 	if ( path_is_absolute( fullpath.c_str() ) ) {
-		if ( !file_exists( fullpath.c_str() ) || file_saveBackup( fullpath.c_str() ) ) {
+		// We don't want a backup + rename operation if the .map file is
+		// a symlink. Otherwise we'll break the user's careful symlink setup.
+		// Just overwrite the original file. Assume the user has versioning.
+		if ( file_is_symlink( fullpath.c_str() ) || file_saveBackup( fullpath.c_str() ) ) {
 			return MapResource_saveFile( format, root, Map_Traverse, fullpath.c_str() );
 		}
 
-		globalErrorStream() << "failed to save a backup map file: " << makeQuoted( fullpath.c_str() ) << "\n";
+		globalErrorStream() << "failed to save map file: " << makeQuoted( fullpath.c_str() ) << "\n";
 		return false;
 	}
 

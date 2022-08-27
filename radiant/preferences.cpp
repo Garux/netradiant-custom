@@ -175,11 +175,8 @@ bool Preferences_Save( PreferenceDictionary& preferences, const char* filename )
 
 bool Preferences_Save_Safe( PreferenceDictionary& preferences, const char* filename ){
 	const auto tmpName = StringOutputStream()( filename, "TMP" );
-	return Preferences_Save( preferences, tmpName )
-	       && ( !file_exists( filename ) || file_remove( filename ) )
-	       && file_move( tmpName, filename );
+	return Preferences_Save( preferences, tmpName ) && file_move( tmpName, filename );
 }
-
 
 
 void LogConsole_importString( const char* string ){

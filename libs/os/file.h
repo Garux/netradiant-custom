@@ -45,11 +45,13 @@
 #include <unistd.h> // access()
 #endif
 
-#include <cstdio> // rename(), remove()
+#include <cstdio> // remove()
 #include <sys/stat.h> // stat()
 #include <sys/types.h> // this is included by stat.h on win32
 #include <cstddef>
 #include <ctime>
+
+#include <filesystem> // std::filesystem::rename()
 
 #include "debugging/debugging.h"
 
@@ -62,7 +64,12 @@
 /// - The directory component of \p to identifies an existing directory which is accessible for writing.
 inline bool file_move( const char* from, const char* to ){
 	ASSERT_MESSAGE( from != 0 && to != 0, "file_move: invalid path" );
-	return rename( from, to ) == 0;
+	std::error_code err;
+	// Contrary to ::rename, std::filesystem::rename guarantees that
+	// existing files will be overwritten on both Windows and POSIX
+	// systems.
+	std::filesystem::rename( from, to, err );
+	return !err;
 }
 
 /// \brief Attempts to remove the file identified by \p path and returns true if the operation was successful.
@@ -98,7 +105,7 @@ inline bool file_readable( const char* path ){
 }
 
 /// \brief Returns true if the file or directory identified by \p path exists and may be opened for writing.
-inline bool file_writeable( const char* path ){
+inline bool file_writable( const char* path ){
 	return file_accessible( path, FileAccess::Write );
 }
 
@@ -115,6 +122,15 @@ inline bool file_is_directory( const char* path ){
 		return false;
 	}
 	return S_ISDIR( st.st_mode ) != 0;
+}
+
+/// \brief Returns true if the target is a symlink and no error occurred.
+inline bool file_is_symlink( const char* path ){
+	ASSERT_MESSAGE( path != 0, "file_is_symlink: invalid path" );
+	std::error_code err;
+	// Contrary to ::lstat, std::filesystem::is_symlink is portable.
+	bool ret = std::filesystem::is_symlink( path, err );
+	return ret && !err;
 }
 
 typedef std::size_t FileSize;
