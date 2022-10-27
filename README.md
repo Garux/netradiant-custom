@@ -52,7 +52,7 @@ Development is focused on smoothing and tweaking editing process.
 * \'all Supported formats\' default option in open dialogs
 * Opening *.map, sent via cmd line (can assign *.map files in OS to be opened with radiant)
 * Texture browser: show alpha transparency option
-* Texture browser: gtk search in directories and tags trees
+* Texture browser: search in directories and tags trees
 * Texture browser: search in currently shown textures
 * CSG Tool (aka shell modifier)
 * Working region compilations (build a map with region enabled = compile regioned part only)
@@ -74,6 +74,7 @@ Development is focused on smoothing and tweaking editing process.
 * Autodetect brush type on map opening
 * Automatic AP, BP and Valve220 brush types conversion on map Import and Paste
 * New bbox styled manipulator, allowing any affine transform (move, rotate, scale, skew)
+* rendering of Q3 shader based skyboxes
 * Incredible number of fixes and options
 
 
