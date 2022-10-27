@@ -21,136 +21,90 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
+#include <QLineEdit>
+#include <QKeyEvent>
+#include <QTimer>
 
 #include "generic/callback.h"
 
-#include "pointer.h"
-#include "button.h"
+#include "spinbox.h"
 
 
-inline gboolean escape_clear_focus_widget( GtkWidget* widget, GdkEventKey* event, gpointer data ){
-	if ( event->keyval == GDK_KEY_Escape ) {
-		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), NULL );
-		return TRUE;
-	}
-	return FALSE;
-}
-
-inline void widget_connect_escape_clear_focus_widget( GtkWidget* widget ){
-	g_signal_connect( G_OBJECT( widget ), "key_press_event", G_CALLBACK( escape_clear_focus_widget ), 0 );
-}
-
-
-class NonModalEntry
+class NonModalEntry : public QLineEdit
 {
-	bool m_editing;
+	bool m_editing{};
 	Callback m_apply;
 	Callback m_cancel;
-
-	static gboolean focus_in( GtkEntry* entry, GdkEventFocus *event, NonModalEntry* self ){
-		self->m_editing = false;
-		return FALSE;
-	}
-
-	static gboolean focus_out( GtkEntry* entry, GdkEventFocus *event, NonModalEntry* self ){
-		if ( self->m_editing && gtk_widget_get_visible( GTK_WIDGET( entry ) ) ) {
-			self->m_apply();
-		}
-		self->m_editing = false;
-		return FALSE;
-	}
-
-	static gboolean changed( GtkEntry* entry, NonModalEntry* self ){
-		self->m_editing = true;
-		return FALSE;
-	}
-
-	static gboolean enter( GtkEntry* entry, GdkEventKey* event, NonModalEntry* self ){
-		if ( event->keyval == GDK_KEY_Return ) {
-			self->m_apply();
-			self->m_editing = false;
-			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( entry ) ) ), NULL );
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-	static gboolean escape( GtkEntry* entry, GdkEventKey* event, NonModalEntry* self ){
-		if ( event->keyval == GDK_KEY_Escape ) {
-			self->m_cancel();
-			self->m_editing = false;
-			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( entry ) ) ), NULL );
-			return TRUE;
-		}
-		return FALSE;
-	}
-
 public:
-	NonModalEntry( const Callback& apply, const Callback& cancel ) : m_editing( false ), m_apply( apply ), m_cancel( cancel ){
+	NonModalEntry( const Callback& apply, const Callback& cancel ) : QLineEdit(), m_apply( apply ), m_cancel( cancel ){
+		QObject::connect( this, &QLineEdit::textEdited, [this](){ m_editing = true; } );
+		QObject::connect( this, &QLineEdit::editingFinished, [this](){ // on enter or focus out
+			if( m_editing ){
+				m_apply();
+				m_editing = false;
+			}
+			clearFocus();
+		} );
 	}
-	void connect( GtkEntry* entry ){
-		g_signal_connect( G_OBJECT( entry ), "focus_in_event", G_CALLBACK( focus_in ), this );
-		g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( focus_out ), this );
-		g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( enter ), this );
-		g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( escape ), this );
-		g_signal_connect( G_OBJECT( entry ), "changed", G_CALLBACK( changed ), this );
+protected:
+	bool event( QEvent *event ) override {
+		if( event->type() == QEvent::ShortcutOverride ){
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			if( keyEvent->key() == Qt::Key_Escape ){
+				m_editing = false;
+				m_cancel();
+				clearFocus();
+				event->accept();
+			}
+		}
+		return QLineEdit::event( event );
+	}
+	void focusInEvent( QFocusEvent *event ) override {
+		if( event->reason() == Qt::FocusReason::MouseFocusReason )
+			QTimer::singleShot( 0, [this](){ selectAll(); } );
+		QLineEdit::focusInEvent( event );
 	}
 };
 
 
-class NonModalSpinner
+class NonModalSpinner : public DoubleSpinBox
 {
+	using DoubleSpinBox::DoubleSpinBox;
+	bool m_editing{};
 	Callback m_apply;
 	Callback m_cancel;
-
-	static gboolean changed( GtkSpinButton* spin, NonModalSpinner* self ){
-		self->m_apply();
-		return FALSE;
-	}
-
-	static gboolean enter( GtkSpinButton* spin, GdkEventKey* event, NonModalSpinner* self ){
-		if ( event->keyval == GDK_KEY_Return ) {
-			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( spin ) ) ), NULL );
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-	static gboolean escape( GtkSpinButton* spin, GdkEventKey* event, NonModalSpinner* self ){
-		if ( event->keyval == GDK_KEY_Escape ) {
-			self->m_cancel();
-			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( spin ) ) ), NULL );
-			return TRUE;
-		}
-		return FALSE;
-	}
-
 public:
-	NonModalSpinner( const Callback& apply, const Callback& cancel ) : m_apply( apply ), m_cancel( cancel ){
+	void setCallbacks( const Callback& apply, const Callback& cancel ){
+		m_apply = apply;
+		m_cancel = cancel;
+		// on enter & focus out; need to track editing, as nonedited triggers this too
+		QObject::connect( this, &QAbstractSpinBox::editingFinished, [this](){
+			if( m_editing ){
+				m_editing = false;
+				m_apply();
+			}
+			clearFocus();
+		} );
+		QObject::connect( lineEdit(), &QLineEdit::textEdited, [this](){
+			m_editing = true;
+		} );
 	}
-	void connect( GtkSpinButton* spin ){
-		guint handler = g_signal_connect( G_OBJECT( gtk_spin_button_get_adjustment( spin ) ), "value_changed", G_CALLBACK( changed ), this );
-		g_object_set_data( G_OBJECT( spin ), "handler", gint_to_pointer( handler ) );
-		g_signal_connect( G_OBJECT( spin ), "key_press_event", G_CALLBACK( enter ), this );
-		g_signal_connect( G_OBJECT( spin ), "key_press_event", G_CALLBACK( escape ), this );
+	bool event( QEvent *event ) override {
+		if( event->type() == QEvent::ShortcutOverride ){
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			if( keyEvent->key() == Qt::Key_Escape ){
+				m_editing = false;
+				m_cancel();
+				clearFocus();
+				event->accept();
+			}
+		}
+		return DoubleSpinBox::event( event );
+	}
+	void stepBy( int steps ) override {
+		DoubleSpinBox::stepBy( steps );
+		m_editing = false;
+		m_apply();
 	}
 };
 
-
-class NonModalRadio
-{
-	Callback m_changed;
-
-public:
-	NonModalRadio( const Callback& changed ) : m_changed( changed ){
-	}
-	void connect( GtkRadioButton* radio ){
-		GSList* group = gtk_radio_button_get_group( radio );
-		for (; group != 0; group = g_slist_next( group ) )
-		{
-			toggle_button_connect_callback( GTK_TOGGLE_BUTTON( group->data ), m_changed );
-		}
-	}
-};

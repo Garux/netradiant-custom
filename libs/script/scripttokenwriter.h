@@ -53,7 +53,7 @@ public:
 	}
 	void writeUnsigned( std::size_t i ){
 		writeSeparator();
-		m_ostream << Unsigned( i );
+		m_ostream << i;
 	}
 	void writeFloat( double f ){
 		writeSeparator();

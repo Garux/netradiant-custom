@@ -39,12 +39,23 @@
 #include "stream/stringstream.h"
 #include "generic/callback.h"
 
-#include <gtk/gtk.h>
 #include "gtkutil/glwidget.h"
-#include "gtkutil/button.h"
 #include "gtkutil/toolbar.h"
 #include "gtkutil/cursor.h"
 #include "gtkmisc.h"
+#include "gtkutil/fbo.h"
+#include "gtkutil/mousepresses.h"
+#include "gtkutil/guisettings.h"
+
+#include <QWidget>
+#include <QToolBar>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QSplitter>
+#include <QTreeView>
+#include <QStandardItemModel>
+#include <QScrollBar>
+#include <QOpenGLWidget>
 
 #include "mainframe.h"
 #include "camwindow.h"
@@ -511,8 +522,6 @@ public:
 	}
 };
 
-void ModelBrowser_scrollChanged( void* data, gdouble value );
-
 class ModelBrowser : public scene::Instantiable::Observer
 {
 	// track instances in the order of insertion
@@ -520,24 +529,22 @@ class ModelBrowser : public scene::Instantiable::Observer
 public:
 	ModelFS m_modelFS;
 	CopiedString m_prefFoldersToLoad = "*models/99*";
-	ModelBrowser() : m_scrollAdjustment( ModelBrowser_scrollChanged, this ){
+	ModelBrowser() : m_scrollAdjustment( [this]( int value ){
+		//globalOutputStream() << "vertical scroll\n";
+		setOriginZ( -value );
+	} )
+	{
 	}
 	~ModelBrowser(){
 	}
 
-	FBO* m_fbo = nullptr;
-	FBO* fbo_get(){
-		return m_fbo = m_fbo? m_fbo : GlobalOpenGL().support_ARB_framebuffer_object? new FBO : new FBO_fallback;
-	}
 	const int m_MSAA = 8;
 
-	GtkWindow* m_parent = nullptr;
-	GtkWidget* m_gl_widget = nullptr;
-	GtkWidget* m_gl_scroll = nullptr;
-	GtkWidget* m_treeViewTree = nullptr;
+	QWidget* m_parent = nullptr;
+	QOpenGLWidget* m_gl_widget = nullptr;
+	QScrollBar* m_gl_scroll = nullptr;
+	QTreeView* m_treeView = nullptr;
 
-	guint m_sizeHandler;
-	guint m_exposeHandler;
 	int m_width;
 	int m_height;
 
@@ -563,16 +570,11 @@ private:
 		return constructCellPos().totalHeight( m_height, m_modelInstances.size() );
 	}
 	void updateScroll() const {
-		GtkAdjustment *vadjustment = gtk_range_get_adjustment( GTK_RANGE( m_gl_scroll ) );
-
-		gtk_adjustment_set_value( vadjustment, -m_originZ );
-		gtk_adjustment_set_page_size( vadjustment, m_height );
-		gtk_adjustment_set_page_increment( vadjustment, m_height / 2 );
-		gtk_adjustment_set_step_increment( vadjustment, 20 );
-		gtk_adjustment_set_lower( vadjustment, 0 );
-		gtk_adjustment_set_upper( vadjustment, totalHeight() );
-
-		g_signal_emit_by_name( G_OBJECT( vadjustment ), "changed" );
+		m_gl_scroll->setMinimum( 0 );
+		m_gl_scroll->setMaximum( totalHeight() - m_height );
+		m_gl_scroll->setValue( -m_originZ );
+		m_gl_scroll->setPageStep( m_height );
+		m_gl_scroll->setSingleStep( 20 );
 	}
 public:
 	void setOriginZ( int origin ){
@@ -582,7 +584,7 @@ public:
 	}
 	void queueDraw() const {
 		if ( m_gl_widget != nullptr )
-			gtk_widget_queue_draw( m_gl_widget );
+			widget_queue_draw( *m_gl_widget );
 	}
 	bool m_originInvalid = true;
 	void validate(){
@@ -595,30 +597,29 @@ public:
 	}
 
 private:
+	void trackingDelta( int x, int y, const QMouseEvent *event ){
+		m_move_amount += std::abs( x ) + std::abs( y );
+		if ( event->buttons() & Qt::MouseButton::RightButton && y != 0 ) { // scroll view
+			const int scale = event->modifiers().testFlag( Qt::KeyboardModifier::ShiftModifier )? 4 : 1;
+			setOriginZ( m_originZ + y * scale );
+		}
+		else if ( event->buttons() & Qt::MouseButton::LeftButton && ( x != 0 || y != 0 ) && m_currentModelId >= 0 ) { // rotate selected model
+			ASSERT_MESSAGE( m_currentModelId < static_cast<int>( m_modelInstances.size() ), "modelBrowser.m_currentModelId out of range" );
+			scene::Instance *instance = m_modelInstances[m_currentModelId];
+			if( TransformNode *transformNode = Node_getTransformNode( instance->path().parent() ) ){
+				Matrix4 rot( g_matrix4_identity );
+				matrix4_pivoted_rotate_by_euler_xyz_degrees( rot, Vector3( y, 0, x ) * ( 45.f / m_cellSize ), constructCellPos().getOrigin( m_currentModelId ) );
+				matrix4_premultiply_by_matrix4( const_cast<Matrix4&>( transformNode->localToParent() ), rot );
+				instance->parent()->transformChangedLocal();
+				instance->transformChangedLocal();
+				queueDraw();
+			}
+		}
+	}
 	FreezePointer m_freezePointer;
 	bool m_move_started = false;
 public:
 	int m_move_amount;
-	static void trackingDelta( int x, int y, unsigned int state, void* data ){
-		ModelBrowser& modelBrowser = *reinterpret_cast<ModelBrowser*>( data );
-		modelBrowser.m_move_amount += std::abs( x ) + std::abs( y );
-		if ( ( state & GDK_BUTTON3_MASK ) && y != 0 ) { // scroll view
-			const int scale = ( state & GDK_SHIFT_MASK )? 4 : 1;
-			modelBrowser.setOriginZ( modelBrowser.m_originZ + y * scale );
-		}
-		else if ( ( state & GDK_BUTTON1_MASK ) && ( x != 0 || y != 0 ) && modelBrowser.m_currentModelId >= 0 ) { // rotate selected model
-			ASSERT_MESSAGE( modelBrowser.m_currentModelId < static_cast<int>( modelBrowser.m_modelInstances.size() ), "modelBrowser.m_currentModelId out of range" );
-			scene::Instance *instance = modelBrowser.m_modelInstances[modelBrowser.m_currentModelId];
-			if( TransformNode *transformNode = Node_getTransformNode( instance->path().parent() ) ){
-				Matrix4 rot( g_matrix4_identity );
-				matrix4_pivoted_rotate_by_euler_xyz_degrees( rot, Vector3( y, 0, x ) * ( 45.f / modelBrowser.m_cellSize ), modelBrowser.constructCellPos().getOrigin( modelBrowser.m_currentModelId ) );
-				matrix4_premultiply_by_matrix4( const_cast<Matrix4&>( transformNode->localToParent() ), rot );
-				instance->parent()->transformChangedLocal();
-				instance->transformChangedLocal();
-				modelBrowser.queueDraw();
-			}
-		}
-	}
 	void tracking_MouseUp(){
 		if( m_move_started ){
 			m_move_started = false;
@@ -629,7 +630,13 @@ public:
 		tracking_MouseUp();
 		m_move_started = true;
 		m_move_amount = 0;
-		m_freezePointer.freeze_pointer( m_parent, m_gl_widget, trackingDelta, this );
+		m_freezePointer.freeze_pointer( m_gl_widget,
+			[this]( int x, int y, const QMouseEvent *event ){
+				trackingDelta( x, y, event );
+			},
+			[this](){
+				tracking_MouseUp();
+			} );
 	}
 
 	void insert( scene::Instance* instance ) override {
@@ -749,18 +756,16 @@ origin -----> +x
 void ModelBrowser_render(){
 	g_ModelBrowser.validate();
 
-	g_ModelBrowser.fbo_get()->start();
-
 	const int W = g_ModelBrowser.m_width;
 	const int H = g_ModelBrowser.m_height;
-	glViewport( 0, 0, W, H );
+	gl().glViewport( 0, 0, W, H );
 
 	// enable depth buffer writes
-	glDepthMask( GL_TRUE );
-	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+	gl().glDepthMask( GL_TRUE );
+	gl().glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-	glClearColor( .25f, .25f, .25f, 0 );
-	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	gl().glClearColor( .25f, .25f, .25f, 0 );
+	gl().glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	const unsigned int globalstate = RENDER_DEPTHTEST
 	                               | RENDER_COLOURWRITE
@@ -769,8 +774,6 @@ void ModelBrowser_render(){
 	                               | RENDER_BLEND
 	                               | RENDER_CULLFACE
 	                               | RENDER_COLOURARRAY
-	                               | RENDER_POLYGONSMOOTH
-	                               | RENDER_LINESMOOTH
 	                               | RENDER_FOG
 	                               | RENDER_COLOURCHANGE
 	                               | RENDER_FILL
@@ -827,53 +830,51 @@ void ModelBrowser_render(){
 	m_view.Construct( m_projection, m_modelview, W, H );
 
 
-	glMatrixMode( GL_PROJECTION );
-	glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
+	gl().glMatrixMode( GL_PROJECTION );
+	gl().glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
 
-	glMatrixMode( GL_MODELVIEW );
-	glLoadMatrixf( reinterpret_cast<const float*>( &m_modelview ) );
+	gl().glMatrixMode( GL_MODELVIEW );
+	gl().glLoadMatrixf( reinterpret_cast<const float*>( &m_modelview ) );
 
 
 	if( g_ModelBrowser.m_currentFolder != nullptr ){
 		{	// prepare for 2d stuff
-			glDisable( GL_BLEND );
+			gl().glDisable( GL_BLEND );
 
-			if ( GlobalOpenGL().GL_1_3() ) {
-				glClientActiveTexture( GL_TEXTURE0 );
-				glActiveTexture( GL_TEXTURE0 );
-			}
+			gl().glClientActiveTexture( GL_TEXTURE0 );
+			gl().glActiveTexture( GL_TEXTURE0 );
 
-			glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-			glDisableClientState( GL_NORMAL_ARRAY );
-			glDisableClientState( GL_COLOR_ARRAY );
+			gl().glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+			gl().glDisableClientState( GL_NORMAL_ARRAY );
+			gl().glDisableClientState( GL_COLOR_ARRAY );
 
-			glDisable( GL_TEXTURE_2D );
-			glDisable( GL_LIGHTING );
-			glDisable( GL_COLOR_MATERIAL );
-			glDisable( GL_DEPTH_TEST );
+			gl().glDisable( GL_TEXTURE_2D );
+			gl().glDisable( GL_LIGHTING );
+			gl().glDisable( GL_COLOR_MATERIAL );
+			gl().glDisable( GL_DEPTH_TEST );
 		}
 
 		{	// brighter background squares
-			glColor4f( 0.3f, 0.3f, 0.3f, 1.f );
-			glDepthMask( GL_FALSE );
-			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-			glDisable( GL_CULL_FACE );
+			gl().glColor4f( 0.3f, 0.3f, 0.3f, 1.f );
+			gl().glDepthMask( GL_FALSE );
+			gl().glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+			gl().glDisable( GL_CULL_FACE );
 
 			CellPos cellPos = g_ModelBrowser.constructCellPos();
-			glBegin( GL_QUADS );
+			gl().glBegin( GL_QUADS );
 			for( std::size_t i = g_ModelBrowser.m_currentFolder->m_files.size(); i != 0; --i ){
 				const Vector3 origin = cellPos.getOrigin();
 				const float minx = origin.x() - cellPos.getCellSize();
 				const float maxx = origin.x() + cellPos.getCellSize();
 				const float minz = origin.z() - cellPos.getCellSize();
 				const float maxz = origin.z() + cellPos.getCellSize();
-				glVertex3f( minx, 0, maxz );
-				glVertex3f( minx, 0, minz );
-				glVertex3f( maxx, 0, minz );
-				glVertex3f( maxx, 0, maxz );
+				gl().glVertex3f( minx, 0, maxz );
+				gl().glVertex3f( minx, 0, minz );
+				gl().glVertex3f( maxx, 0, minz );
+				gl().glVertex3f( maxx, 0, maxz );
 				++cellPos;
 			}
-			glEnd();
+			gl().glEnd();
 		}
 
 		// one directional light source directly behind the viewer
@@ -890,12 +891,12 @@ void ModelBrowser_render(){
 			inverse_cam_dir[2] = -m_view.getViewDir()[2];
 			inverse_cam_dir[3] = 0;
 
-			glLightfv( GL_LIGHT0, GL_POSITION, inverse_cam_dir );
+			gl().glLightfv( GL_LIGHT0, GL_POSITION, inverse_cam_dir );
 
-			glLightfv( GL_LIGHT0, GL_AMBIENT, ambient );
-			glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse );
+			gl().glLightfv( GL_LIGHT0, GL_AMBIENT, ambient );
+			gl().glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse );
 
-			glEnable( GL_LIGHT0 );
+			gl().glEnable( GL_LIGHT0 );
 		}
 
 		{
@@ -910,30 +911,28 @@ void ModelBrowser_render(){
 		}
 
 		{	// prepare for 2d stuff
-			glColor4f( 1, 1, 1, 1 );
-			glDisable( GL_BLEND );
+			gl().glColor4f( 1, 1, 1, 1 );
+			gl().glDisable( GL_BLEND );
 
-			if ( GlobalOpenGL().GL_1_3() ) {
-				glClientActiveTexture( GL_TEXTURE0 );
-				glActiveTexture( GL_TEXTURE0 );
-			}
+			gl().glClientActiveTexture( GL_TEXTURE0 );
+			gl().glActiveTexture( GL_TEXTURE0 );
 
-			glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-			glDisableClientState( GL_NORMAL_ARRAY );
-			glDisableClientState( GL_COLOR_ARRAY );
+			gl().glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+			gl().glDisableClientState( GL_NORMAL_ARRAY );
+			gl().glDisableClientState( GL_COLOR_ARRAY );
 
-			glDisable( GL_TEXTURE_2D );
-			glDisable( GL_LIGHTING );
-			glDisable( GL_COLOR_MATERIAL );
-			glDisable( GL_DEPTH_TEST );
-			glLineWidth( 1 );
+			gl().glDisable( GL_TEXTURE_2D );
+			gl().glDisable( GL_LIGHTING );
+			gl().glDisable( GL_COLOR_MATERIAL );
+			gl().glDisable( GL_DEPTH_TEST );
+			gl().glLineWidth( 1 );
 		}
 		{	// render model file names
 			CellPos cellPos = g_ModelBrowser.constructCellPos();
 			for( const CopiedString& string : g_ModelBrowser.m_currentFolder->m_files ){
 				const Vector3 pos = cellPos.getTextPos();
 				if( m_view.TestPoint( pos ) ){
-					glRasterPos3f( pos.x(), pos.y(), pos.z() );
+					gl().glRasterPos3f( pos.x(), pos.y(), pos.z() );
 					GlobalOpenGL().drawString( string.c_str() );
 				}
 				++cellPos;
@@ -943,109 +942,102 @@ void ModelBrowser_render(){
 
 	// bind back to the default texture so that we don't have problems
 	// elsewhere using/modifying texture maps between contexts
-	glBindTexture( GL_TEXTURE_2D, 0 );
-
-	g_ModelBrowser.fbo_get()->save();
+	gl().glBindTexture( GL_TEXTURE_2D, 0 );
 }
 
 
-gboolean ModelBrowser_size_allocate( GtkWidget* widget, GtkAllocation* allocation, ModelBrowser* modelBrowser ){
-	modelBrowser->fbo_get()->reset( allocation->width, allocation->height, modelBrowser->m_MSAA, true );
-	modelBrowser->m_width = allocation->width;
-	modelBrowser->m_height = allocation->height;
-	modelBrowser->m_originInvalid = true;
-	modelBrowser->forEachModelInstance( models_set_transforms() );
-	modelBrowser->queueDraw();
-	return FALSE;
-}
-
-gboolean ModelBrowser_expose( GtkWidget* widget, GdkEventExpose* event, ModelBrowser* modelBrowser ){
-	if ( glwidget_make_current( modelBrowser->m_gl_widget ) ) {
-		GlobalOpenGL_debugAssertNoErrors();
-		ModelBrowser_render();
-		GlobalOpenGL_debugAssertNoErrors();
-		glwidget_swap_buffers( modelBrowser->m_gl_widget );
+class ModelBrowserGLWidget : public QOpenGLWidget
+{
+	ModelBrowser& m_modBro;
+	FBO *m_fbo{};
+	MousePresses m_mouse;
+public:
+	ModelBrowserGLWidget( ModelBrowser& modelBrowser ) : QOpenGLWidget(), m_modBro( modelBrowser )
+	{
 	}
-	return FALSE;
-}
 
-
-
-
-gboolean ModelBrowser_mouseScroll( GtkWidget* widget, GdkEventScroll* event, ModelBrowser* modelBrowser ){
-	gtk_widget_grab_focus( widget );
-	if( !gtk_window_is_active( modelBrowser->m_parent ) )
-		gtk_window_present( modelBrowser->m_parent );
-
-	if ( event->direction == GDK_SCROLL_UP ) {
-		modelBrowser->setOriginZ( modelBrowser->m_originZ + 64 );
+	~ModelBrowserGLWidget() override {
+		delete m_fbo;
+		glwidget_context_destroyed();
 	}
-	else if ( event->direction == GDK_SCROLL_DOWN ) {
-		modelBrowser->setOriginZ( modelBrowser->m_originZ - 64 );
+protected:
+	void initializeGL() override
+	{
+		glwidget_context_created( *this );
 	}
-	return FALSE;
-}
+	void resizeGL( int w, int h ) override
+	{
+		delete m_fbo;
+		m_fbo = new FBO( w, h, true, m_modBro.m_MSAA );
 
-void ModelBrowser_scrollChanged( void* data, gdouble value ){
-	//globalOutputStream() << "vertical scroll\n";
-	reinterpret_cast<ModelBrowser*>( data )->setOriginZ( -(int)value );
-}
-
-static void ModelBrowser_scrollbarScroll( GtkAdjustment *adjustment, ModelBrowser* modelBrowser ){
-	modelBrowser->m_scrollAdjustment.value_changed( gtk_adjustment_get_value( adjustment ) );
-}
-
-
-gboolean ModelBrowser_button_press( GtkWidget* widget, GdkEventButton* event, ModelBrowser* modelBrowser ){
-	if ( event->type == GDK_BUTTON_PRESS ) {
-		gtk_widget_grab_focus( widget );
-		if ( event->button == 1 || event->button == 3 ) {
-			modelBrowser->tracking_MouseDown();
-		}
-		if ( event->button == 1 ) {
-			modelBrowser->testSelect( static_cast<int>( event->x ), static_cast<int>( event->y ) );
+		m_modBro.m_width = w;
+		m_modBro.m_height = h;
+		m_modBro.m_originInvalid = true;
+		m_modBro.forEachModelInstance( models_set_transforms() );
+	}
+	void paintGL() override
+	{
+		if( ScreenUpdates_Enabled() && m_fbo->bind() ){
+			GlobalOpenGL_debugAssertNoErrors();
+			ModelBrowser_render();
+			GlobalOpenGL_debugAssertNoErrors();
+			m_fbo->blit();
+			m_fbo->release();
 		}
 	}
-	/* create misc_model */
-	else if ( event->type == GDK_2BUTTON_PRESS && event->button == 1 && modelBrowser->m_currentFolder != nullptr && modelBrowser->m_currentModelId >= 0 ) {
-		UndoableCommand undo( "insertModel" );
-		// todo
-		// GlobalEntityClassManager() search for "misc_model"
-		// otherwise search for entityClass->miscmodel_is
-		// otherwise go with GlobalEntityClassManager().findOrInsert( "misc_model", false );
-		EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( "misc_model", false );
-		NodeSmartReference node( GlobalEntityCreator().createEntity( entityClass ) );
 
-		Node_getTraversable( GlobalSceneGraph().root() )->insert( node );
-
-		scene::Path entitypath( makeReference( GlobalSceneGraph().root() ) );
-		entitypath.push( makeReference( node.get() ) );
-		scene::Instance& instance = findInstance( entitypath );
-
-		if ( Transformable* transform = Instance_getTransformable( instance ) ) { // might be cool to consider model aabb here
-			transform->setType( TRANSFORM_PRIMITIVE );
-			transform->setTranslation( vector3_snapped( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ) - Camera_getViewVector( *g_pParentWnd->GetCamWnd() ) * 128.f, GetSnapGridSize() ) );
-			transform->freezeTransform();
+	void mousePressEvent( QMouseEvent *event ) override {
+		setFocus();
+		const auto press = m_mouse.press( event );
+		if( press == MousePresses::Left2x ){
+			mouseDoubleClick();
 		}
-
-		GlobalSelectionSystem().setSelectedAll( false );
-		Instance_setSelected( instance, true );
-
-		StringOutputStream sstream( 128 );
-		sstream << modelBrowser->m_currentFolderPath << std::next( modelBrowser->m_currentFolder->m_files.begin(), modelBrowser->m_currentModelId )->c_str();
-		Node_getEntity( node )->setKeyValue( entityClass->miscmodel_key(), sstream.c_str() );
+		else if ( press == MousePresses::Left || press == MousePresses::Right ) {
+			m_modBro.tracking_MouseDown();
+			if ( press == MousePresses::Left ) {
+				m_modBro.testSelect( event->x(), event->y() );
+			}
+		}
 	}
-	return FALSE;
-}
+	void mouseDoubleClick(){
+		/* create misc_model */
+		if ( m_modBro.m_currentFolder != nullptr && m_modBro.m_currentModelId >= 0 ) {
+			UndoableCommand undo( "insertModel" );
+			// todo
+			// GlobalEntityClassManager() search for "misc_model"
+			// otherwise search for entityClass->miscmodel_is
+			// otherwise go with GlobalEntityClassManager().findOrInsert( "misc_model", false );
+			EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( "misc_model", false );
+			NodeSmartReference node( GlobalEntityCreator().createEntity( entityClass ) );
 
-gboolean ModelBrowser_button_release( GtkWidget* widget, GdkEventButton* event, ModelBrowser* modelBrowser ){
-	if ( event->type == GDK_BUTTON_RELEASE ) {
-		if ( event->button == 1 || event->button == 3 ) {
-			modelBrowser->tracking_MouseUp();
-		}
-		if ( event->button == 1 && modelBrowser->m_move_amount < 16 && modelBrowser->m_currentFolder != nullptr && modelBrowser->m_currentModelId >= 0 ) { // assign model to selected entity nodes
+			Node_getTraversable( GlobalSceneGraph().root() )->insert( node );
+
+			scene::Path entitypath( makeReference( GlobalSceneGraph().root() ) );
+			entitypath.push( makeReference( node.get() ) );
+			scene::Instance& instance = findInstance( entitypath );
+
+			if ( Transformable* transform = Instance_getTransformable( instance ) ) { // might be cool to consider model aabb here
+				transform->setType( TRANSFORM_PRIMITIVE );
+				transform->setTranslation( vector3_snapped( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ) - Camera_getViewVector( *g_pParentWnd->GetCamWnd() ) * 128.f, GetSnapGridSize() ) );
+				transform->freezeTransform();
+			}
+
+			GlobalSelectionSystem().setSelectedAll( false );
+			Instance_setSelected( instance, true );
+
 			StringOutputStream sstream( 128 );
-			sstream << modelBrowser->m_currentFolderPath << std::next( modelBrowser->m_currentFolder->m_files.begin(), modelBrowser->m_currentModelId )->c_str();
+			sstream << m_modBro.m_currentFolderPath << std::next( m_modBro.m_currentFolder->m_files.begin(), m_modBro.m_currentModelId )->c_str();
+			Node_getEntity( node )->setKeyValue( entityClass->miscmodel_key(), sstream.c_str() );
+		}
+	}
+	void mouseReleaseEvent( QMouseEvent *event ) override {
+		const auto release = m_mouse.release( event );
+		if ( release == MousePresses::Left || release == MousePresses::Right ) {
+			m_modBro.tracking_MouseUp();
+		}
+		if ( release == MousePresses::Left && m_modBro.m_move_amount < 16 && m_modBro.m_currentFolder != nullptr && m_modBro.m_currentModelId >= 0 ) { // assign model to selected entity nodes
+			StringOutputStream sstream( 128 );
+			sstream << m_modBro.m_currentFolderPath << std::next( m_modBro.m_currentFolder->m_files.begin(), m_modBro.m_currentModelId )->c_str();
 			class EntityVisitor : public SelectionSystem::Visitor
 			{
 				const char* m_filePath;
@@ -1062,58 +1054,61 @@ gboolean ModelBrowser_button_release( GtkWidget* widget, GdkEventButton* event, 
 			GlobalSelectionSystem().foreachSelected( visitor );
 		}
 	}
-	return FALSE;
-}
+	void wheelEvent( QWheelEvent *event ) override {
+		setFocus();
+		if( !m_modBro.m_parent->isActiveWindow() ){
+			m_modBro.m_parent->activateWindow();
+			m_modBro.m_parent->raise();
+		}
+
+		m_modBro.setOriginZ( m_modBro.m_originZ + std::copysign( 64, event->angleDelta().y() ) );
+	}
+};
 
 
 
-static void TreeView_onRowActivated( GtkTreeView* treeview, GtkTreePath* path, GtkTreeViewColumn* col, gpointer userdata ){
-	GtkTreeModel* model = gtk_tree_view_get_model( GTK_TREE_VIEW( treeview ) );
-	GtkTreeIter iter;
-	if ( gtk_tree_model_get_iter( model, &iter, path ) ) {
-		std::deque<GtkTreeIter> iters;
-		iters.push_front( iter );
-		GtkTreeIter parent;
-		while( gtk_tree_model_iter_parent( model, &parent, &iters.front() ) )
-			iters.push_front( parent );
-		StringOutputStream sstream( 64 );
-		const ModelFS *modelFS = &g_ModelBrowser.m_modelFS;
-		for( GtkTreeIter& i : iters ){
-			gchar* buffer;
-			gtk_tree_model_get( model, &i, 0, &buffer, -1 );
-			const auto found = modelFS->m_folders.find( ModelFS( StringRange( buffer, strlen( buffer ) ) ) );
+static void TreeView_onRowActivated( const QModelIndex& index ){
+	StringOutputStream sstream( 64 );
+	const ModelFS *modelFS = &g_ModelBrowser.m_modelFS;
+	{
+		std::deque<QModelIndex> iters;
+		iters.push_front( index );
+		while( iters.front().parent().isValid() )
+			iters.push_front( iters.front().parent() );
+		for( const QModelIndex& i : iters ){
+			const auto dir = i.data( Qt::ItemDataRole::DisplayRole ).toByteArray();
+			const auto found = modelFS->m_folders.find( ModelFS( StringRange( dir.constData(), strlen( dir.constData() ) ) ) );
 			if( found != modelFS->m_folders.end() ){ // ok to not find, while loading root
 				modelFS = &( *found );
-				sstream << buffer << "/";
+				sstream << dir.constData() << "/";
 			}
-			g_free( buffer );
 		}
+	}
 
 //%						globalOutputStream() << sstream.c_str() << " sstream.c_str()\n";
 
-		ModelGraph_clear(); // this goes 1st: resets m_currentFolder
+	ModelGraph_clear(); // this goes 1st: resets m_currentFolder
 
-		g_ModelBrowser.m_currentFolder = modelFS;
-		g_ModelBrowser.m_currentFolderPath = sstream.c_str();
+	g_ModelBrowser.m_currentFolder = modelFS;
+	g_ModelBrowser.m_currentFolderPath = sstream.c_str();
 
+	{
 		ScopeDisableScreenUpdates disableScreenUpdates( g_ModelBrowser.m_currentFolderPath.c_str(), "Loading Models" );
-		{
-			for( const CopiedString& filename : g_ModelBrowser.m_currentFolder->m_files ){
-				sstream.clear();
-				sstream << g_ModelBrowser.m_currentFolderPath << filename;
-				ModelNode *modelNode = new ModelNode;
-				modelNode->setModel( sstream.c_str() );
-				NodeSmartReference node( modelNode->node() );
-				Node_getTraversable( g_modelGraph->root() )->insert( node );
-			}
-			g_ModelBrowser.forEachModelInstance( models_set_transforms() );
+
+		for( const CopiedString& filename : g_ModelBrowser.m_currentFolder->m_files ){
+			sstream( g_ModelBrowser.m_currentFolderPath, filename );
+			ModelNode *modelNode = new ModelNode;
+			modelNode->setModel( sstream.c_str() );
+			NodeSmartReference node( modelNode->node() );
+			Node_getTraversable( g_modelGraph->root() )->insert( node );
 		}
-
-		g_ModelBrowser.queueDraw();
-
-		//deactivate, so SPACE and RETURN wont be broken for 2d
-		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( treeview ) ) ), NULL );
+		g_ModelBrowser.forEachModelInstance( models_set_transforms() );
 	}
+
+	g_ModelBrowser.queueDraw();
+
+	//deactivate, so SPACE and RETURN wont be broken for 2d
+	g_ModelBrowser.m_treeView->clearFocus();
 }
 
 
@@ -1132,12 +1127,11 @@ void modelFS_traverse( const ModelFS& modelFS ){
 	--depth;
 }
 #endif
-void ModelBrowser_constructTreeModel( const ModelFS& modelFS, GtkTreeStore* store, GtkTreeIter* parent ){
-	GtkTreeIter iter;
-	gtk_tree_store_append( store, &iter, parent );
-	gtk_tree_store_set( store, &iter, 0, modelFS.m_folderName.c_str(), -1 );
+void ModelBrowser_constructTreeModel( const ModelFS& modelFS, QStandardItemModel* model, QStandardItem* parent ){
+	auto item = new QStandardItem( modelFS.m_folderName.c_str() );
+	parent->appendRow( item );
 	for( const ModelFS& m : modelFS.m_folders )
-		ModelBrowser_constructTreeModel( m, store, &iter ); //recursion
+		ModelBrowser_constructTreeModel( m, model, item ); //recursion
 }
 
 typedef std::map<CopiedString, std::size_t> ModelFoldersMap;
@@ -1241,107 +1235,90 @@ void ModelBrowser_constructTree(){
 //%	modelFS_traverse( g_ModelBrowser.m_modelFS );
 
 
-	GtkTreeStore* store = gtk_tree_store_new( 1, G_TYPE_STRING );
+	auto model = new QStandardItemModel( g_ModelBrowser.m_treeView ); //. ? delete old or clear() & reuse
 
 	{
-		if( !g_ModelBrowser.m_modelFS.m_files.empty() ){ // models in the root
-			GtkTreeIter iter;
-			gtk_tree_store_append( store, &iter, nullptr );
-			gtk_tree_store_set( store, &iter, 0, "", -1 );
+		if( !g_ModelBrowser.m_modelFS.m_files.empty() ){ // models in the root: add blank item for access
+			model->invisibleRootItem()->appendRow( new QStandardItem( "" ) );
 		}
 
 		for( const ModelFS& m : g_ModelBrowser.m_modelFS.m_folders )
-			ModelBrowser_constructTreeModel( m, store, nullptr );
+			ModelBrowser_constructTreeModel( m, model, model->invisibleRootItem() );
 	}
 
-	gtk_tree_view_set_model( GTK_TREE_VIEW( g_ModelBrowser.m_treeViewTree ), GTK_TREE_MODEL( store ) );
-
-	g_object_unref( G_OBJECT( store ) );
+	g_ModelBrowser.m_treeView->setModel( model );
 }
 
-GtkWidget* ModelBrowser_constructWindow( GtkWindow* toplevel ){
+class TexBro_QTreeView : public QTreeView
+{
+protected:
+	bool event( QEvent *event ) override {
+		if( event->type() == QEvent::ShortcutOverride ){
+			event->accept();
+			return true;
+		}
+		return QTreeView::event( event );
+	}
+};
+
+QWidget* ModelBrowser_constructWindow( QWidget* toplevel ){
 	g_ModelBrowser.m_parent = toplevel;
 
-	GtkWidget* table = gtk_table_new( 1, 3, FALSE );
-	GtkWidget* vbox = gtk_vbox_new( FALSE, 0 );
-	gtk_table_attach( GTK_TABLE( table ), vbox, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0 );
-	gtk_widget_show( vbox );
+	QSplitter *splitter = new QSplitter;
+	QWidget *containerWidgetLeft = new QWidget; // Adding a QLayout to a QSplitter is not supported, use proxy widget
+	QWidget *containerWidgetRight = new QWidget; // Adding a QLayout to a QSplitter is not supported, use proxy widget
+	splitter->addWidget( containerWidgetLeft );
+	splitter->addWidget( containerWidgetRight );
+	QVBoxLayout *vbox = new QVBoxLayout( containerWidgetLeft );
+	QHBoxLayout *hbox = new QHBoxLayout( containerWidgetRight );
+
+	hbox->setContentsMargins( 0, 0, 0, 0 );
+	vbox->setContentsMargins( 0, 0, 0, 0 );
+	hbox->setSpacing( 0 );
+	vbox->setSpacing( 0 );
 
 	{	// menu bar
-		GtkToolbar* toolbar = toolbar_new();
-		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( toolbar ), FALSE, FALSE, 0 );
+		QToolBar* toolbar = new QToolBar;
+		vbox->addWidget( toolbar );
 
-		GtkToolButton* button = toolbar_append_button( toolbar, "Reload Model Folders Tree View", "texbro_refresh.png", FreeCaller<ModelBrowser_constructTree>() );
-//		gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
+		toolbar_append_button( toolbar, "Reload Model Folders Tree View", "texbro_refresh.png", FreeCaller<ModelBrowser_constructTree>() );
 	}
 	{	// TreeView
-		GtkWidget* scr = gtk_scrolled_window_new( NULL, NULL );
-		gtk_container_set_border_width( GTK_CONTAINER( scr ), 0 );
-		// vertical only scrolling for treeview
-		gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
-		gtk_widget_show( scr );
+		g_ModelBrowser.m_treeView = new TexBro_QTreeView;
+		g_ModelBrowser.m_treeView->setHeaderHidden( true );
+		g_ModelBrowser.m_treeView->setEditTriggers( QAbstractItemView::EditTrigger::NoEditTriggers );
+		g_ModelBrowser.m_treeView->setUniformRowHeights( true ); // optimization
+		g_ModelBrowser.m_treeView->setFocusPolicy( Qt::FocusPolicy::ClickFocus );
+		g_ModelBrowser.m_treeView->setExpandsOnDoubleClick( false );
 
-		g_ModelBrowser.m_treeViewTree = gtk_tree_view_new();
-		GtkTreeView* treeview = GTK_TREE_VIEW( g_ModelBrowser.m_treeViewTree );
-		//gtk_tree_view_set_enable_search( treeview, FALSE );
 
-		gtk_tree_view_set_headers_visible( treeview, FALSE );
-		g_signal_connect( treeview, "row-activated", (GCallback) TreeView_onRowActivated, NULL );
-
-		GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-		//g_object_set( G_OBJECT( renderer ), "ellipsize", PANGO_ELLIPSIZE_START, NULL );
-		gtk_tree_view_insert_column_with_attributes( treeview, -1, "", renderer, "text", 0, NULL );
-
+		QObject::connect( g_ModelBrowser.m_treeView, &QAbstractItemView::activated, TreeView_onRowActivated );
 
 		ModelBrowser_constructTree();
 
-
-		//gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( scr ), g_ModelBrowser.m_treeViewTree );
-		gtk_container_add( GTK_CONTAINER( scr ), g_ModelBrowser.m_treeViewTree ); //GtkTreeView has native scrolling support; should not be used with the GtkViewport proxy.
-		gtk_widget_show( g_ModelBrowser.m_treeViewTree );
-
-		gtk_box_pack_start( GTK_BOX( vbox ), scr, TRUE, TRUE, 0 );
-	}
-	{	// gl_widget scrollbar
-		GtkWidget* w = g_ModelBrowser.m_gl_scroll = gtk_vscrollbar_new( GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 0, 1, 1, 0 ) ) );
-		gtk_table_attach( GTK_TABLE( table ), w, 2, 3, 0, 1, GTK_SHRINK, GTK_FILL, 0, 0 );
-		gtk_widget_show( w );
-
-		GtkAdjustment *vadjustment = gtk_range_get_adjustment( GTK_RANGE( w ) );
-		g_signal_connect( G_OBJECT( vadjustment ), "value_changed", G_CALLBACK( ModelBrowser_scrollbarScroll ), &g_ModelBrowser );
+		vbox->addWidget( g_ModelBrowser.m_treeView );
 	}
 	{	// gl_widget
-		GtkWidget* w = g_ModelBrowser.m_gl_widget = glwidget_new( TRUE );
-		g_object_ref( G_OBJECT( w ) );
+		g_ModelBrowser.m_gl_widget = new ModelBrowserGLWidget( g_ModelBrowser );
+		hbox->addWidget( g_ModelBrowser.m_gl_widget );
+	}
+	{	// gl_widget scrollbar
+		auto scroll = g_ModelBrowser.m_gl_scroll = new QScrollBar;
+		hbox->addWidget( scroll );
 
-		gtk_widget_set_events( w, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
-		gtk_widget_set_can_focus( w, TRUE );
-
-		gtk_table_attach_defaults( GTK_TABLE( table ), w, 1, 2, 0, 1 );
-		gtk_widget_show( w );
-
-		g_ModelBrowser.m_sizeHandler = g_signal_connect( G_OBJECT( w ), "size_allocate", G_CALLBACK( ModelBrowser_size_allocate ), &g_ModelBrowser );
-		g_ModelBrowser.m_exposeHandler = g_signal_connect( G_OBJECT( w ), "expose_event", G_CALLBACK( ModelBrowser_expose ), &g_ModelBrowser );
-
-		g_signal_connect( G_OBJECT( w ), "button_press_event", G_CALLBACK( ModelBrowser_button_press ), &g_ModelBrowser );
-		g_signal_connect( G_OBJECT( w ), "button_release_event", G_CALLBACK( ModelBrowser_button_release ), &g_ModelBrowser );
-		g_signal_connect( G_OBJECT( w ), "scroll_event", G_CALLBACK( ModelBrowser_mouseScroll ), &g_ModelBrowser );
+		QObject::connect( scroll, &QAbstractSlider::valueChanged, []( int value ){
+			g_ModelBrowser.m_scrollAdjustment.value_changed( value );
+		} );
 	}
 
-	//prevent focusing on filter entry or tex dirs treeview after click on tab of floating group dialog (np, if called via hotkey)
-	gtk_container_set_focus_chain( GTK_CONTAINER( table ), NULL );
-
-	return table;
+	splitter->setStretchFactor( 0, 0 ); // consistent treeview side sizing on resizes
+	splitter->setStretchFactor( 1, 1 );
+	g_guiSettings.addSplitter( splitter, "ModelBrowser/splitter", { 100, 500 } );
+	return splitter;
 }
 
 void ModelBrowser_destroyWindow(){
-	g_signal_handler_disconnect( G_OBJECT( g_ModelBrowser.m_gl_widget ), g_ModelBrowser.m_sizeHandler );
-	g_signal_handler_disconnect( G_OBJECT( g_ModelBrowser.m_gl_widget ), g_ModelBrowser.m_exposeHandler );
-
-	g_object_unref( G_OBJECT( g_ModelBrowser.m_gl_widget ) );
 	g_ModelBrowser.m_gl_widget = nullptr;
-
-	delete g_ModelBrowser.m_fbo;
 }
 
 
@@ -1370,7 +1347,7 @@ typedef ReferenceCaller1<CopiedString, const char*, FoldersToLoadImport> Folders
 void ModelBrowser_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Model Browser", "Model Browser Preferences" ) );
 
-	page.appendSpinner( "Model View Size", 80.0, 16.0, 8192.0,
+	page.appendSpinner( "Model View Size", 16.0, 8192.0,
 	                    IntImportCallback( CellSizeImportCaller( g_ModelBrowser.m_cellSize ) ),
 	                    IntExportCallback( IntExportCaller( g_ModelBrowser.m_cellSize ) ) );
 	page.appendEntry( "List of *folderToLoad/depth*",
@@ -1394,10 +1371,6 @@ void ModelBrowser_Construct(){
 void ModelBrowser_Destroy(){
 	g_modelGraph->erase_root();
 	delete g_modelGraph;
-}
-
-GtkWidget* ModelBrowser_getGLWidget(){
-	return g_ModelBrowser.m_gl_widget;
 }
 
 void ModelBrowser_flushReferences(){

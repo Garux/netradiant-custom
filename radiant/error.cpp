@@ -88,7 +88,7 @@ void Error( const char *error, ... ){
 		{
 			scan = next;
 			text[strlen( text ) + 1] = '\0';
-			if ( ( scan[0] >= 0 ) && ( scan[0] <= 127 ) ) {
+			if ( scan[0] >= 0 ) {
 				text[strlen( text )] = char(scan[0]);
 			}
 			else{
@@ -114,7 +114,7 @@ void Error( const char *error, ... ){
 		// glGetError .. can record several errors, clears after calling
 		//++timo TODO: be able to deal with several errors if necessary, for now I'm just warning about pending error messages
 		// NOTE: forget that, most boards don't seem to follow the OpenGL standard
-		GLenum iGLError = glGetError();
+		GLenum iGLError = gl().glGetError();
 		if ( iGLError != GL_NO_ERROR ) {
 			// use our own gluErrorString
 			strcat( text, "gluErrorString: " );

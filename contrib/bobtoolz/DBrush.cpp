@@ -143,9 +143,9 @@ void DBrush::LoadFromBrush( scene::Instance& brush, bool textured ){
 int DBrush::PointPosition( vec3_t pnt ){
 	int state = POINT_IN_BRUSH; // if nothing happens point is inside brush
 
-	for ( std::list<DPlane *>::const_iterator chkPlane = faceList.begin(); chkPlane != faceList.end(); chkPlane++ )
+	for ( DPlane *plane : faceList )
 	{
-		float dist = ( *chkPlane )->DistanceToPoint( pnt );
+		float dist = plane->DistanceToPoint( pnt );
 
 		if ( dist > MAX_ROUND_ERROR ) {
 			return POINT_OUT_BRUSH;     // if point is in front of plane, it CANT be in the brush
@@ -160,17 +160,17 @@ int DBrush::PointPosition( vec3_t pnt ){
 }
 
 void DBrush::ClearPoints(){
-	for ( std::list<DPoint *>::const_iterator deadPoint = pointList.begin(); deadPoint != pointList.end(); deadPoint++ ) {
-		delete *deadPoint;
+	for ( DPoint *point : pointList ) {
+		delete point;
 	}
 	pointList.clear();
 }
 
 void DBrush::ClearFaces(){
 	bBoundsBuilt = false;
-	for ( std::list<DPlane *>::const_iterator deadPlane = faceList.begin(); deadPlane != faceList.end(); deadPlane++ )
+	for ( DPlane *plane : faceList )
 	{
-		delete *deadPlane;
+		delete plane;
 	}
 	faceList.clear();
 }
@@ -182,9 +182,9 @@ void DBrush::AddPoint( vec3_t pnt ){
 }
 
 bool DBrush::HasPoint( vec3_t pnt ){
-	for ( std::list<DPoint *>::const_iterator chkPoint = pointList.begin(); chkPoint != pointList.end(); chkPoint++ )
+	for ( DPoint *chkPoint : pointList )
 	{
-		if ( **chkPoint == pnt ) {
+		if ( *chkPoint == pnt ) {
 			return true;
 		}
 	}
@@ -311,10 +311,10 @@ bool DBrush::BBoxCollision( DBrush* chkBrush ){
 }
 
 DPlane* DBrush::HasPlane( DPlane* chkPlane ){
-	for ( std::list<DPlane *>::const_iterator brushPlane = faceList.begin(); brushPlane != faceList.end(); brushPlane++ )
+	for ( DPlane *plane : faceList )
 	{
-		if ( **brushPlane == *chkPlane ) {
-			return *brushPlane;
+		if ( *plane == *chkPlane ) {
+			return plane;
 		}
 	}
 	return NULL;
@@ -374,9 +374,9 @@ scene::Node* DBrush::BuildInRadiant( bool allowDestruction, int* changeCnt, scen
 	if ( allowDestruction ) {
 		bool kill = true;
 
-		for ( std::list<DPlane *>::const_iterator chkPlane = faceList.begin(); chkPlane != faceList.end(); chkPlane++ )
+		for ( DPlane *plane : faceList )
 		{
-			if ( ( *chkPlane )->m_bChkOk ) {
+			if ( plane->m_bChkOk ) {
 				kill = false;
 				break;
 			}
@@ -395,8 +395,8 @@ scene::Node* DBrush::BuildInRadiant( bool allowDestruction, int* changeCnt, scen
 
 	NodeSmartReference node( GlobalBrushCreator().createBrush() );
 
-	for ( std::list<DPlane *>::const_iterator buildPlane = faceList.begin(); buildPlane != faceList.end(); buildPlane++ ) {
-		if ( ( *buildPlane )->AddToBrush( node ) && changeCnt ) {
+	for ( DPlane *plane : faceList ) {
+		if ( plane->AddToBrush( node ) && changeCnt ) {
 			( *changeCnt )++;
 		}
 	}
@@ -424,10 +424,10 @@ void DBrush::CutByPlane( DPlane *cutPlane, DBrush **newBrush1, DBrush **newBrush
 	DBrush* b1 = new DBrush;
 	DBrush* b2 = new DBrush;
 
-	for ( std::list<DPlane *>::const_iterator parsePlane = faceList.begin(); parsePlane != faceList.end(); parsePlane++ )
+	for ( DPlane *plane : faceList )
 	{
-		b1->AddFace( ( *parsePlane )->points[0], ( *parsePlane )->points[1], ( *parsePlane )->points[2], NULL );
-		b2->AddFace( ( *parsePlane )->points[0], ( *parsePlane )->points[1], ( *parsePlane )->points[2], NULL );
+		b1->AddFace( plane->points[0], plane->points[1], plane->points[2], NULL );
+		b2->AddFace( plane->points[0], plane->points[1], plane->points[2], NULL );
 	}
 
 	b1->AddFace( cutPlane->points[0], cutPlane->points[1], cutPlane->points[2], NULL );
@@ -457,15 +457,13 @@ bool DBrush::IntersectsWith( DBrush *chkBrush ){
 		return false;
 	}
 
-	std::list<DPlane *>::const_iterator iplPlane;
-
-	for ( iplPlane = faceList.begin(); iplPlane != faceList.end(); iplPlane++ )
+	for ( DPlane *plane : faceList )
 	{
 
 		bool allInFront = true;
-		for ( std::list<DPoint *>::const_iterator iPoint = chkBrush->pointList.begin(); iPoint != chkBrush->pointList.end(); iPoint++ )
+		for ( DPoint *point : chkBrush->pointList )
 		{
-			if ( ( *iplPlane )->DistanceToPoint( ( *iPoint )->_pnt ) < -MAX_ROUND_ERROR ) {
+			if ( plane->DistanceToPoint( point->_pnt ) < -MAX_ROUND_ERROR ) {
 				allInFront = false;
 				break;
 			}
@@ -475,12 +473,12 @@ bool DBrush::IntersectsWith( DBrush *chkBrush ){
 		}
 	}
 
-	for ( iplPlane = chkBrush->faceList.begin(); iplPlane != chkBrush->faceList.end(); iplPlane++ )
+	for ( DPlane *plane : chkBrush->faceList )
 	{
 		bool allInFront = true;
-		for ( std::list<DPoint *>::const_iterator iPoint = pointList.begin(); iPoint != pointList.end(); iPoint++ )
+		for ( DPoint *point : pointList )
 		{
-			if ( ( *iplPlane )->DistanceToPoint( ( *iPoint )->_pnt ) < -MAX_ROUND_ERROR ) {
+			if ( plane->DistanceToPoint( point->_pnt ) < -MAX_ROUND_ERROR ) {
 				allInFront = false;
 				break;
 			}
@@ -496,15 +494,13 @@ bool DBrush::IntersectsWith( DBrush *chkBrush ){
 bool DBrush::IntersectsWith( DPlane* p1, DPlane* p2, vec3_t v ) {
 	vec3_t vDown = { 0, 0, -1 };
 
-	std::list<DPlane *>::const_iterator iplPlane;
-	for ( iplPlane = faceList.begin(); iplPlane != faceList.end(); iplPlane++ ) {
-		DPlane* p = ( *iplPlane );
-
-		vec_t d = DotProduct( p->normal, vDown );
+	for ( DPlane *plane : faceList )
+	{
+		vec_t d = DotProduct( plane->normal, vDown );
 		if ( d >= 0 ) {
 			continue;
 		}
-		if ( p->PlaneIntersection( p1, p2, v ) ) {
+		if ( plane->PlaneIntersection( p1, p2, v ) ) {
 			if ( PointPosition( v ) != POINT_OUT_BRUSH ) {
 				return true;
 			}
@@ -619,30 +615,30 @@ bool DBrush::BBoxTouch( DBrush *chkBrush ){
 }
 
 void DBrush::ResetChecks( std::list<Str>* exclusionList ){
-	for ( std::list<DPlane *>::const_iterator resetPlane = faceList.begin(); resetPlane != faceList.end(); resetPlane++ )
+	for ( DPlane *plane : faceList )
 	{
 		bool set = false;
 
 		if ( exclusionList ) {
-			for ( std::list<Str>::iterator eTexture = exclusionList->begin(); eTexture != exclusionList->end(); eTexture++ )
+			for ( const Str& texture : *exclusionList )
 			{
-				if ( strstr( ( *resetPlane )->m_shader.c_str(), eTexture->GetBuffer() ) ) {
+				if ( strstr( plane->m_shader.c_str(), texture.GetBuffer() ) ) {
 					set = true;
 					break;
 				}
 			}
 		}
 
-		( *resetPlane )->m_bChkOk = set;
+		plane->m_bChkOk = set;
 	}
 }
 
 DPlane* DBrush::HasPlaneInverted( DPlane *chkPlane ){
-	for ( std::list<DPlane *>::const_iterator brushPlane = faceList.begin(); brushPlane != faceList.end(); brushPlane++ )
+	for ( DPlane *plane : faceList )
 	{
-		if ( **brushPlane != *chkPlane ) {
-			if ( fabs( ( *brushPlane )->_d + chkPlane->_d ) < 0.1 ) {
-				return ( *brushPlane );
+		if ( *plane != *chkPlane ) {
+			if ( fabs( plane->_d + chkPlane->_d ) < 0.1 ) {
+				return plane;
 			}
 		}
 	}
@@ -650,9 +646,9 @@ DPlane* DBrush::HasPlaneInverted( DPlane *chkPlane ){
 }
 
 bool DBrush::HasTexture( const char *textureName ){
-	for ( std::list<DPlane *>::const_iterator chkPlane = faceList.begin(); chkPlane != faceList.end(); chkPlane++ )
+	for ( const DPlane *plane : faceList )
 	{
-		if ( strstr( ( *chkPlane )->m_shader.c_str(), textureName ) ) {
+		if ( strstr( plane->m_shader.c_str(), textureName ) ) {
 			return true;
 		}
 
@@ -661,9 +657,9 @@ bool DBrush::HasTexture( const char *textureName ){
 }
 
 bool DBrush::IsDetail(){
-	for ( std::list<DPlane *>::const_iterator chkPlane = faceList.begin(); chkPlane != faceList.end(); chkPlane++ )
+	for ( const DPlane *plane : faceList )
 	{
-		if ( ( *chkPlane )->texInfo.contents & FACE_DETAIL ) {
+		if ( plane->texInfo.contents & FACE_DETAIL ) {
 			return true;
 		}
 
@@ -699,18 +695,18 @@ void DBrush::BuildFromWinding( DWinding *w ){
 void DBrush::SaveToFile( FILE *pFile ){
 	fprintf( pFile, "{\n" );
 
-	for ( std::list<DPlane *>::const_iterator pp = faceList.begin(); pp != faceList.end(); pp++ )
+	for ( const DPlane *pp : faceList )
 	{
 		char buffer[512];
 
 		sprintf( buffer, "( %.0f %.0f %.0f ) ( %.0f %.0f %.0f ) ( %.0f %.0f %.0f ) %s %.0f %.0f %f %f %.0f 0 0 0\n",
-		         ( *pp )->points[0][0], ( *pp )->points[0][1], ( *pp )->points[0][2],
-		         ( *pp )->points[1][0], ( *pp )->points[1][1], ( *pp )->points[1][2],
-		         ( *pp )->points[2][0], ( *pp )->points[2][1], ( *pp )->points[2][2],
-		         ( *pp )->m_shader.c_str(),
-		         ( *pp )->texInfo.m_texdef.shift[0], ( *pp )->texInfo.m_texdef.shift[1],
-		         ( *pp )->texInfo.m_texdef.scale[0], ( *pp )->texInfo.m_texdef.scale[0],
-		         ( *pp )->texInfo.m_texdef.rotate );
+		         pp->points[0][0], pp->points[0][1], pp->points[0][2],
+		         pp->points[1][0], pp->points[1][1], pp->points[1][2],
+		         pp->points[2][0], pp->points[2][1], pp->points[2][2],
+		         pp->m_shader.c_str(),
+		         pp->texInfo.m_texdef.shift[0], pp->texInfo.m_texdef.shift[1],
+		         pp->texInfo.m_texdef.scale[0], pp->texInfo.m_texdef.scale[0],
+		         pp->texInfo.m_texdef.rotate );
 
 		fprintf( pFile, "%s", buffer );
 	}
@@ -719,12 +715,12 @@ void DBrush::SaveToFile( FILE *pFile ){
 }
 
 void DBrush::Rotate( vec3_t vOrigin, vec3_t vRotation ){
-	for ( std::list<DPlane *>::const_iterator rotPlane = faceList.begin(); rotPlane != faceList.end(); rotPlane++ )
+	for ( DPlane *plane : faceList )
 	{
 		for ( int i = 0; i < 3; i++ )
-			VectorRotate( ( *rotPlane )->points[i], vRotation, vOrigin );
+			VectorRotate( plane->points[i], vRotation, vOrigin );
 
-		( *rotPlane )->Rebuild();
+		plane->Rebuild();
 	}
 }
 
@@ -739,33 +735,33 @@ void DBrush::RotateAboutCentre( vec3_t vRotation ){
 	Rotate( centre, vRotation );
 }
 
-bool DBrush::ResetTextures( const char* textureName, float fScale[2],    float fShift[2],    int rotation, const char* newTextureName,
-                            int bResetTextureName,   int bResetScale[2], int bResetShift[2], int bResetRotation ){
+bool DBrush::ResetTextures( const char* textureName, float fScale[2],     float fShift[2],     int rotation, const char* newTextureName,
+                            bool bResetTextureName,  bool bResetScale[2], bool bResetShift[2], bool bResetRotation ){
 	if ( textureName ) {
 		bool changed = false;
-		for ( std::list<DPlane *>::const_iterator resetPlane = faceList.begin(); resetPlane != faceList.end(); resetPlane++ )
+		for ( DPlane *plane : faceList )
 		{
-			if ( !strcmp( ( *resetPlane )->m_shader.c_str(), textureName ) ) {
+			if ( !strcmp( plane->m_shader.c_str(), textureName ) ) {
 				if ( bResetTextureName ) {
-					( *resetPlane )->m_shader = newTextureName;
+					plane->m_shader = newTextureName;
 				}
 
 				if ( bResetScale[0] ) {
-					( *resetPlane )->texInfo.m_texdef.scale[0] = fScale[0];
+					plane->texInfo.m_texdef.scale[0] = fScale[0];
 				}
 				if ( bResetScale[1] ) {
-					( *resetPlane )->texInfo.m_texdef.scale[1] = fScale[1];
+					plane->texInfo.m_texdef.scale[1] = fScale[1];
 				}
 
 				if ( bResetShift[0] ) {
-					( *resetPlane )->texInfo.m_texdef.shift[0] = fShift[0];
+					plane->texInfo.m_texdef.shift[0] = fShift[0];
 				}
 				if ( bResetShift[1] ) {
-					( *resetPlane )->texInfo.m_texdef.shift[1] = fShift[1];
+					plane->texInfo.m_texdef.shift[1] = fShift[1];
 				}
 
 				if ( bResetRotation ) {
-					( *resetPlane )->texInfo.m_texdef.rotate = (float)rotation;
+					plane->texInfo.m_texdef.rotate = (float)rotation;
 				}
 
 				changed = true;
@@ -775,28 +771,28 @@ bool DBrush::ResetTextures( const char* textureName, float fScale[2],    float f
 	}
 	else
 	{
-		for ( std::list<DPlane *>::const_iterator resetPlane = faceList.begin(); resetPlane != faceList.end(); resetPlane++ )
+		for ( DPlane *plane : faceList )
 		{
 			if ( bResetTextureName ) {
-				( *resetPlane )->m_shader = newTextureName;
+				plane->m_shader = newTextureName;
 			}
 
 			if ( bResetScale[0] ) {
-				( *resetPlane )->texInfo.m_texdef.scale[0] = fScale[0];
+				plane->texInfo.m_texdef.scale[0] = fScale[0];
 			}
 			if ( bResetScale[1] ) {
-				( *resetPlane )->texInfo.m_texdef.scale[1] = fScale[1];
+				plane->texInfo.m_texdef.scale[1] = fScale[1];
 			}
 
 			if ( bResetShift[0] ) {
-				( *resetPlane )->texInfo.m_texdef.shift[0] = fShift[0];
+				plane->texInfo.m_texdef.shift[0] = fShift[0];
 			}
 			if ( bResetShift[1] ) {
-				( *resetPlane )->texInfo.m_texdef.shift[1] = fShift[1];
+				plane->texInfo.m_texdef.shift[1] = fShift[1];
 			}
 
 			if ( bResetRotation ) {
-				( *resetPlane )->texInfo.m_texdef.rotate = (float)rotation;
+				plane->texInfo.m_texdef.rotate = (float)rotation;
 			}
 		}
 		return true;
@@ -804,18 +800,16 @@ bool DBrush::ResetTextures( const char* textureName, float fScale[2],    float f
 }
 
 bool DBrush::operator ==( DBrush* other ){
-	std::list<DPlane *>::const_iterator chkPlane;
-
-	for ( chkPlane = faceList.begin(); chkPlane != faceList.end(); chkPlane++ )
+	for ( DPlane *plane : faceList )
 	{
-		if ( !other->HasPlane( ( *chkPlane ) ) ) {
+		if ( !other->HasPlane( plane ) ) {
 			return false;
 		}
 	}
 
-	for ( chkPlane = faceList.begin(); chkPlane != faceList.end(); chkPlane++ )
+	for ( DPlane *plane : other->faceList )
 	{
-		if ( !HasPlane( ( *chkPlane ) ) ) {
+		if ( !HasPlane( plane ) ) {
 			return false;
 		}
 	}
@@ -834,14 +828,11 @@ DPlane* DBrush::AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, cons
 DPlane* DBrush::FindPlaneWithClosestNormal( vec_t* normal ) {
 	vec_t bestDot = -2;
 	DPlane* bestDotPlane = NULL;
-	std::list<DPlane *>::const_iterator chkPlane;
-	for ( chkPlane = faceList.begin(); chkPlane != faceList.end(); chkPlane++ ) {
-		DPlane* pPlane = ( *chkPlane );
-
-		vec_t dot = DotProduct( pPlane->normal, normal );
+	for ( DPlane *plane : faceList ) {
+		vec_t dot = DotProduct( plane->normal, normal );
 		if ( dot > bestDot ) {
 			bestDot = dot;
-			bestDotPlane = pPlane;
+			bestDotPlane = plane;
 		}
 	}
 
@@ -857,9 +848,8 @@ int DBrush::FindPointsForPlane( DPlane* plane, DPoint** pnts, int maxpnts ) {
 
 	BuildPoints();
 
-	for ( std::list<DPoint *>::const_iterator points = pointList.begin(); points != pointList.end(); points++ ) {
-		DPoint* point = ( *points );
-
+	for ( DPoint *point : pointList )
+	{
 		if ( fabs( plane->DistanceToPoint( point->_pnt ) ) < MAX_ROUND_ERROR ) {
 			pnts[numpnts] = point;
 			numpnts++;
@@ -876,9 +866,9 @@ int DBrush::FindPointsForPlane( DPlane* plane, DPoint** pnts, int maxpnts ) {
 
 void DBrush::RemovePlane( DPlane* plane ) {
 	bBoundsBuilt = false;
-	for ( std::list<DPlane *>::const_iterator deadPlane = faceList.begin(); deadPlane != faceList.end(); deadPlane++ ) {
-		if ( *deadPlane == plane ) {
-			delete *deadPlane;
+	for ( DPlane *deadPlane : faceList ) {
+		if ( deadPlane == plane ) {
+			delete deadPlane;
 			faceList.remove( plane );
 		}
 	}

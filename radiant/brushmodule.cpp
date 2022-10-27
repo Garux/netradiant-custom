@@ -90,9 +90,11 @@ void Brush_constructPreferences( PreferencesPage& page ){
 	    FaceImportSnapPlanesCaller(),
 	    FaceExportSnapPlanesCaller()
 	);
-	page.appendEntry(
+	page.appendSpinner(
 	    "Default texture scale",
-	    g_texdef_default_scale
+	    g_texdef_default_scale,
+		0.0625,
+		64
 	);
 	if ( g_multipleBrushTypes ) {
 		const char* names[] = { BrushType_getName( g_brushTypes[0] ), BrushType_getName( g_brushTypes[1] ), BrushType_getName( g_brushTypes[2] ) };

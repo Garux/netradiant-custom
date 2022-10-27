@@ -700,7 +700,7 @@ void CSG_Subtract(){
 	}
 	else
 	{
-		globalOutputStream() << "CSG Subtract: Subtracting " << Unsigned( selected_brushes.size() ) << " brushes.\n";
+		globalOutputStream() << "CSG Subtract: Subtracting " << selected_brushes.size() << " brushes.\n";
 
 		UndoableCommand undo( "brushSubtract" );
 
@@ -709,8 +709,8 @@ void CSG_Subtract(){
 		std::size_t after = 0;
 		GlobalSceneGraph().traverse( SubtractBrushesFromUnselected( selected_brushes, before, after ) );
 		globalOutputStream() << "CSG Subtract: Result: "
-		                     << Unsigned( after ) << " fragment" << ( after == 1 ? "" : "s" )
-		                     << " from " << Unsigned( before ) << " brush" << ( before == 1 ? "" : "es" ) << ".\n";
+		                     << after << " fragment" << ( after == 1 ? "" : "s" )
+		                     << " from " << before << " brush" << ( before == 1 ? "" : "es" ) << ".\n";
 
 		SceneChangeNotify();
 	}
@@ -934,7 +934,7 @@ void CSG_Merge(){
 		return;
 	}
 
-	globalOutputStream() << "CSG Merge: Merging " << Unsigned( selected_brushes.size() ) << " brushes.\n";
+	globalOutputStream() << "CSG Merge: Merging " << selected_brushes.size() << " brushes.\n";
 
 	UndoableCommand undo( "brushMerge" );
 
@@ -1294,45 +1294,30 @@ void CSG_DeleteComponents(){
    =============
  */
 #include "mainframe.h"
-#include <gtk/gtk.h>
 #include "gtkutil/dialog.h"
-#include "gtkutil/button.h"
 #include "gtkutil/accelerator.h"
+#include "gtkutil/image.h"
+#include "gtkutil/spinbox.h"
+#include "gtkutil/guisettings.h"
 #include "xywindow.h"
 #include "camwindow.h"
 
+#include <QWidget>
+#include <QToolButton>
+#include <QRadioButton>
+#include <QButtonGroup>
+#include <QGridLayout>
+#include <QFrame>
+
 struct CSGToolDialog
 {
-	GtkSpinButton* spin;
-	GtkWindow *window;
-	GtkToggleButton *radFaces, *radPlusFaces, *radProj, *radCam, *caulk, *removeInner;
+	QDoubleSpinBox* spin;
+	QWidget *window{};
+	QRadioButton *radFaces, *radPlusFaces, *radProj, *radCam;
+	QToolButton *caulk, *removeInner;
 };
 
 CSGToolDialog g_csgtool_dialog;
-
-#if 0
-DoubleVector3 getExclusion(){
-	if( gtk_toggle_button_get_active( g_csgtool_dialog.radProj ) ){
-		return DoubleVector3( g_vector3_axes[GlobalXYWnd_getCurrentViewType()] );
-	}
-	if( gtk_toggle_button_get_active( g_csgtool_dialog.radCam ) ){
-		Vector3 angles( Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
-//		globalOutputStream() << angles << " angles\n";
-		DoubleVector3 radangles( degrees_to_radians( angles[0] ), degrees_to_radians( angles[1] ), degrees_to_radians( angles[2] ) );
-//		globalOutputStream() << radangles << " radangles\n";
-//		x = cos(yaw)*cos(pitch)
-//		y = sin(yaw)*cos(pitch)
-//		z = sin(pitch)
-		DoubleVector3 viewvector;
-		viewvector[0] = cos( radangles[1] ) * cos( radangles[0] );
-		viewvector[1] = sin( radangles[1] ) * cos( radangles[0] );
-		viewvector[2] = sin( radangles[0] );
-//		globalOutputStream() << viewvector << " viewvector\n";
-		return viewvector;
-	}
-	return DoubleVector3( 0, 0, 0 );
-}
-#endif
 
 class BrushFaceOffset {
 	HollowSettings& m_settings;
@@ -1368,28 +1353,30 @@ void CSG_MakeRoom(){
 	SceneChangeNotify();
 }
 
-void CSGdlg_getSettings( HollowSettings& settings, const CSGToolDialog& dialog ){
-	gtk_spin_button_update( dialog.spin );
-	settings.m_offset = static_cast<float>( gtk_spin_button_get_value( dialog.spin ) );
-	if( gtk_toggle_button_get_active( dialog.radProj ) ){
+HollowSettings CSGdlg_getSettings( const CSGToolDialog& dialog ){
+	HollowSettings settings;
+
+	settings.m_offset = dialog.spin->value();
+	if( dialog.radProj->isChecked() ){
 		settings.m_excludeByAxis = true;
 		settings.m_exclusionAxis = g_vector3_axes[GlobalXYWnd_getCurrentViewType()];
 	}
-	else if( gtk_toggle_button_get_active( dialog.radCam ) ){
+	else if( dialog.radCam->isChecked() ){
 		settings.m_excludeByAxis = true;
 		settings.m_exclusionAxis = Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
 	}
-	else{
+	else{ // either + or - faces
 		settings.m_excludeByAxis = false;
-		settings.m_excludeSelectedFaces = gtk_toggle_button_get_active( dialog.radFaces );
+		settings.m_excludeSelectedFaces = dialog.radFaces->isChecked();
 	}
-	settings.m_caulk = gtk_toggle_button_get_active( dialog.caulk );
-	settings.m_removeInner = gtk_toggle_button_get_active( dialog.removeInner );
+	settings.m_caulk = dialog.caulk->isChecked();
+	settings.m_removeInner = dialog.removeInner->isChecked();
+
+	return settings;
 }
 
 void CSG_Hollow( EHollowType type, const char* undoString, const CSGToolDialog& dialog ){
-	HollowSettings settings;
-	CSGdlg_getSettings( settings, dialog );
+	HollowSettings settings = CSGdlg_getSettings( dialog );
 	settings.m_hollowType = type;
 	UndoableCommand undo( undoString );
 	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( settings ) );
@@ -1401,226 +1388,168 @@ void CSG_Hollow( EHollowType type, const char* undoString, const CSGToolDialog& 
 
 //=================DLG
 
-static gboolean CSGdlg_HollowDiag( GtkWidget *widget, CSGToolDialog* dialog ){
-	CSG_Hollow( eDiag, "brushHollow::Diag", *dialog );
-	return TRUE;
-}
-
-static gboolean CSGdlg_HollowWrap( GtkWidget *widget, CSGToolDialog* dialog ){
-	CSG_Hollow( eWrap, "brushHollow::Wrap", *dialog );
-	return TRUE;
-}
-
-static gboolean CSGdlg_HollowExtrude( GtkWidget *widget, CSGToolDialog* dialog ){
-	CSG_Hollow( eExtrude, "brushHollow::Extrude", *dialog );
-	return TRUE;
-}
-
-static gboolean CSGdlg_HollowPull( GtkWidget *widget, CSGToolDialog* dialog ){
-	CSG_Hollow( ePull, "brushHollow::Pull", *dialog );
-	return TRUE;
-}
-
-static gboolean CSGdlg_BrushShrink( GtkWidget *widget, CSGToolDialog* dialog ){
-	HollowSettings settings;
-	CSGdlg_getSettings( settings, *dialog );
+static void CSGdlg_BrushShrink(){
+	HollowSettings settings = CSGdlg_getSettings( g_csgtool_dialog );
 	settings.m_offset *= -1;
 	UndoableCommand undo( "Shrink brush" );
 //	Scene_forEachSelectedBrush( BrushFaceOffset( settings ) );
 	Scene_forEachVisibleBrush( GlobalSceneGraph(), BrushFaceOffset( settings ) );
 	SceneChangeNotify();
-	return TRUE;
 }
 
-static gboolean CSGdlg_BrushExpand( GtkWidget *widget, CSGToolDialog* dialog ){
-	HollowSettings settings;
-	CSGdlg_getSettings( settings, *dialog );
+static void CSGdlg_BrushExpand(){
+	HollowSettings settings = CSGdlg_getSettings( g_csgtool_dialog );
 	UndoableCommand undo( "Expand brush" );
 //	Scene_forEachSelectedBrush( BrushFaceOffset( settings ) );
 	Scene_forEachVisibleBrush( GlobalSceneGraph(), BrushFaceOffset( settings ) );
 	SceneChangeNotify();
-	return TRUE;
 }
 
-static gboolean CSGdlg_grid2spin( GtkWidget *widget, CSGToolDialog* dialog ){
-	gtk_spin_button_set_value( dialog->spin, GetGridSize() );
-	return TRUE;
-}
 
-static gboolean CSGdlg_delete( GtkWidget *widget, GdkEventAny *event, CSGToolDialog* dialog ){
-	gtk_widget_hide( GTK_WIDGET( dialog->window ) );
-	return TRUE;
-}
+class CSG_SpinBoxLabel : public SpinBoxLabel<QDoubleSpinBox>
+{
+	using SpinBoxLabel<QDoubleSpinBox>::SpinBoxLabel;
+protected:
+	void mouseReleaseEvent( QMouseEvent* event ) override {
+		if( !m_dragOccured ){
+			m_spin->setValue( GetGridSize() );
+			m_spin->setSingleStep( GetGridSize() );
+		}
+		SpinBoxLabel::mouseReleaseEvent( event );
+    }
+};
+
 
 void CSG_Tool(){
-	if ( g_csgtool_dialog.window == NULL ) {
-		g_csgtool_dialog.window = create_dialog_window( MainFrame_getWindow(), "CSG Tool", G_CALLBACK( CSGdlg_delete ), &g_csgtool_dialog );
-		gtk_window_set_type_hint( g_csgtool_dialog.window, GDK_WINDOW_TYPE_HINT_UTILITY );
-
-		//GtkAccelGroup* accel = gtk_accel_group_new();
-		//gtk_window_add_accel_group( g_csgtool_dialog.window, accel );
-		global_accel_connect_window( g_csgtool_dialog.window );
+	if ( g_csgtool_dialog.window == nullptr ) {
+		g_csgtool_dialog.window = new QWidget( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+		g_csgtool_dialog.window->setWindowTitle( "CSG Tool" );
+		g_guiSettings.addWindow( g_csgtool_dialog.window, "CSGTool/geometry" );
 
 		{
-			GtkHBox* hbox = create_dialog_hbox( 4, 4 );
-			gtk_container_add( GTK_CONTAINER( g_csgtool_dialog.window ), GTK_WIDGET( hbox ) );
+			auto grid = new QGridLayout( g_csgtool_dialog.window ); // 3 x 8
+			grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 			{
-				GtkTable* table = create_dialog_table( 3, 8, 4, 4 );
-				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
-				{
-					//GtkWidget* label = gtk_label_new( "<->" );
-					//gtk_widget_show( label );
-					GtkWidget* button = gtk_button_new_with_label( "Grid->" );
-					gtk_table_attach( table, button, 0, 1, 0, 1,
-					                  (GtkAttachOptions) ( 0 ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_show( button );
-					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_grid2spin ), &g_csgtool_dialog );
-				}
-				{
-					GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 16, 0, 9999, 1, 10, 0 ) );
-					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 3 ) );
-					gtk_widget_show( GTK_WIDGET( spin ) );
-					gtk_widget_set_tooltip_text( GTK_WIDGET( spin ), "Thickness" );
-					gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 0, 1,
-					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_size_request( GTK_WIDGET( spin ), 64, -1 );
-					gtk_spin_button_set_numeric( spin, TRUE );
+				auto spin = g_csgtool_dialog.spin = new DoubleSpinBox( 0, 9999, 16, 3, 16 );
+				spin->setToolTip( "Thickness" );
+				grid->addWidget( spin, 0, 1 );
+			}
+			{
+				auto label = new CSG_SpinBoxLabel( "Grid->", g_csgtool_dialog.spin );
+				grid->addWidget( label, 0, 0 );
+			}
+			{
+				//radio button group for choosing the exclude axis
+				auto radFaces = g_csgtool_dialog.radFaces = new QRadioButton( "-faces" );
+				radFaces->setToolTip( "Exclude selected faces" );
+				grid->addWidget( radFaces, 0, 2 );
 
-					g_csgtool_dialog.spin = spin;
-				}
-				{
-					//radio button group for choosing the exclude axis
-					GtkWidget* radFaces = gtk_radio_button_new_with_label_from_widget( NULL, "-faces" );
-					gtk_widget_set_tooltip_text( radFaces, "Exclude selected faces" );
-					GtkWidget* radPlusFaces = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(radFaces), "+faces" );
-					gtk_widget_set_tooltip_text( radPlusFaces, "Only process selected faces" );
-					GtkWidget* radProj = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(radFaces), "-proj" );
-					gtk_widget_set_tooltip_text( radProj, "Exclude faces, most orthogonal to active projection" );
-					GtkWidget* radCam = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(radFaces), "-cam" );
-					gtk_widget_set_tooltip_text( radCam, "Exclude faces, most orthogonal to camera view" );
+				auto radPlusFaces = g_csgtool_dialog.radPlusFaces = new QRadioButton( "+faces" );
+				radPlusFaces->setToolTip( "Only process selected faces" );
+				grid->addWidget( radPlusFaces, 0, 3 );
 
-					gtk_widget_show( radFaces );
-					gtk_widget_show( radPlusFaces );
-					gtk_widget_show( radProj );
-					gtk_widget_show( radCam );
+				auto radProj = g_csgtool_dialog.radProj = new QRadioButton( "-proj" );
+				radProj->setToolTip( "Exclude faces, most orthogonal to active projection" );
+				grid->addWidget( radProj, 0, 4 );
 
-					gtk_table_attach( table, radFaces, 2, 3, 0, 1,
-					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_table_attach( table, radPlusFaces, 3, 4, 0, 1,
-					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_table_attach( table, radProj, 4, 5, 0, 1,
-					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_table_attach( table, radCam, 5, 6, 0, 1,
-					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
+				auto radCam = g_csgtool_dialog.radCam = new QRadioButton( "-cam" );
+				radCam->setToolTip( "Exclude faces, most orthogonal to camera view" );
+				grid->addWidget( radCam, 0, 5 );
 
-					g_csgtool_dialog.radFaces = GTK_TOGGLE_BUTTON( radFaces );
-					g_csgtool_dialog.radPlusFaces = GTK_TOGGLE_BUTTON( radPlusFaces );
-					g_csgtool_dialog.radProj = GTK_TOGGLE_BUTTON( radProj );
-					g_csgtool_dialog.radCam = GTK_TOGGLE_BUTTON( radCam );
-				}
-				{
-					GtkWidget* button = gtk_toggle_button_new();
-					button_set_icon( GTK_BUTTON( button ), "f-caulk.png" );
-					gtk_button_set_relief( GTK_BUTTON( button ), GTK_RELIEF_NONE );
-					gtk_table_attach( table, button, 6, 7, 0, 1,
-					                  (GtkAttachOptions) ( GTK_EXPAND ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_tooltip_text( button, "Caulk some faces" );
-					gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( button ), TRUE );
-					gtk_widget_show( button );
-					g_csgtool_dialog.caulk = GTK_TOGGLE_BUTTON( button );
-				}
-				{
-					GtkWidget* button = gtk_toggle_button_new();
-					button_set_icon( GTK_BUTTON( button ), "csgtool_removeinner.png" );
-					gtk_button_set_relief( GTK_BUTTON( button ), GTK_RELIEF_NONE );
-					gtk_table_attach( table, button, 7, 8, 0, 1,
-					                  (GtkAttachOptions) ( GTK_EXPAND ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_tooltip_text( button, "Remove inner brush" );
-					gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( button ), TRUE );
-					gtk_widget_show( button );
-					g_csgtool_dialog.removeInner = GTK_TOGGLE_BUTTON( button );
-				}
-				{
-					GtkWidget* sep = gtk_hseparator_new();
-					gtk_widget_show( sep );
-					gtk_table_attach( table, sep, 0, 8, 1, 2,
-					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-				}
-				{
-					GtkWidget* button = gtk_button_new();
-					button_set_icon( GTK_BUTTON( button ), "csgtool_shrink.png" );
-					gtk_table_attach( table, button, 0, 1, 2, 3,
-					                  (GtkAttachOptions) ( GTK_EXPAND ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_tooltip_text( button, "Shrink brush" );
-					gtk_widget_show( button );
-					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_BrushShrink ), &g_csgtool_dialog );
-				}
-				{
-					GtkWidget* button = gtk_button_new();
-					button_set_icon( GTK_BUTTON( button ), "csgtool_expand.png" );
-					gtk_table_attach( table, button, 1, 2, 2, 3,
-					                  (GtkAttachOptions) ( GTK_EXPAND ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_tooltip_text( button, "Expand brush" );
-					gtk_widget_show( button );
-					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_BrushExpand ), &g_csgtool_dialog );
-				}
-				{
-					GtkWidget* button = gtk_button_new();
-					button_set_icon( GTK_BUTTON( button ), "csgtool_diagonal.png" );
-					gtk_table_attach( table, button, 3, 4, 2, 3,
-					                  (GtkAttachOptions) ( GTK_EXPAND ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_tooltip_text( button, "Hollow::diagonal joints" );
-					gtk_widget_show( button );
-					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowDiag ), &g_csgtool_dialog );
-				}
-				{
-					GtkWidget* button = gtk_button_new();
-					button_set_icon( GTK_BUTTON( button ), "csgtool_wrap.png" );
-					gtk_table_attach( table, button, 4, 5, 2, 3,
-					                  (GtkAttachOptions) ( GTK_EXPAND ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_tooltip_text( button, "Hollow::wrap" );
-					gtk_widget_show( button );
-					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowWrap ), &g_csgtool_dialog );
-				}
-				{
-					GtkWidget* button = gtk_button_new();
-					button_set_icon( GTK_BUTTON( button ), "csgtool_extrude.png" );
-					gtk_table_attach( table, button, 5, 6, 2, 3,
-					                  (GtkAttachOptions) ( GTK_EXPAND ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_tooltip_text( button, "Hollow::extrude faces" );
-					gtk_widget_show( button );
-					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowExtrude ), &g_csgtool_dialog );
-				}
-				{
-					GtkWidget* button = gtk_button_new();
-					button_set_icon( GTK_BUTTON( button ), "csgtool_pull.png" );
-					gtk_table_attach( table, button, 6, 7, 2, 3,
-					                  (GtkAttachOptions) ( GTK_EXPAND ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_tooltip_text( button, "Hollow::pull faces" );
-					gtk_widget_show( button );
-					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowPull ), &g_csgtool_dialog );
-				}
-
+				radFaces->setChecked( true );
+			}
+			{
+				auto button = g_csgtool_dialog.caulk = new QToolButton;
+				auto pix = new_local_image( "f-caulk.png" );
+				button->setIcon( pix );
+				button->setIconSize( pix.size() + QSize( 8, 8 ) );
+				button->setToolTip( "Caulk some faces" );
+				button->setCheckable( true );
+				button->setChecked( true );
+				grid->addWidget( button, 0, 6 );
+			}
+			{
+				auto button = g_csgtool_dialog.removeInner = new QToolButton;
+				auto pix = new_local_image( "csgtool_removeinner.png" );
+				button->setIcon( pix );
+				button->setIconSize( pix.size() + QSize( 8, 8 ) );
+				button->setToolTip( "Remove inner brush" );
+				button->setCheckable( true );
+				button->setChecked( true );
+				grid->addWidget( button, 0, 7 );
+			}
+			{
+				auto line = new QFrame;
+				line->setFrameShape( QFrame::Shape::HLine );
+				line->setFrameShadow( QFrame::Shadow::Raised );
+				grid->addWidget( line, 1, 0, 1, 8 );
+			}
+			{
+				auto button = new QToolButton;
+				auto pix = new_local_image( "csgtool_shrink.png" );
+				button->setIcon( pix );
+				button->setIconSize( pix.size() + QSize( 8, 8 ) );
+				button->setToolTip( "Shrink brush" );
+				grid->addWidget( button, 2, 0 );
+				QObject::connect( button, &QAbstractButton::clicked, CSGdlg_BrushShrink );
+			}
+			{
+				auto button = new QToolButton;
+				auto pix = new_local_image( "csgtool_expand.png" );
+				button->setIcon( pix );
+				button->setIconSize( pix.size() + QSize( 8, 8 ) );
+				button->setToolTip( "Expand brush" );
+				grid->addWidget( button, 2, 1 );
+				QObject::connect( button, &QAbstractButton::clicked, CSGdlg_BrushExpand );
+			}
+			{
+				auto button = new QToolButton;
+				auto pix = new_local_image( "csgtool_diagonal.png" );
+				button->setIcon( pix );
+				button->setIconSize( pix.size() + QSize( 8, 8 ) );
+				button->setToolTip( "Hollow::diagonal joints" );
+				grid->addWidget( button, 2, 3 );
+				QObject::connect( button, &QAbstractButton::clicked, [](){ CSG_Hollow( eDiag, "brushHollow::Diag", g_csgtool_dialog ); } );
+			}
+			{
+				auto button = new QToolButton;
+				auto pix = new_local_image( "csgtool_wrap.png" );
+				button->setIcon( pix );
+				button->setIconSize( pix.size() + QSize( 8, 8 ) );
+				button->setToolTip( "Hollow::wrap" );
+				grid->addWidget( button, 2, 4 );
+				QObject::connect( button, &QAbstractButton::clicked, [](){ CSG_Hollow( eWrap, "brushHollow::Wrap", g_csgtool_dialog ); } );
+			}
+			{
+				auto button = new QToolButton;
+				auto pix = new_local_image( "csgtool_extrude.png" );
+				button->setIcon( pix );
+				button->setIconSize( pix.size() + QSize( 8, 8 ) );
+				button->setToolTip( "Hollow::extrude faces" );
+				grid->addWidget( button, 2, 5 );
+				QObject::connect( button, &QAbstractButton::clicked, [](){ CSG_Hollow( eExtrude, "brushHollow::Extrude", g_csgtool_dialog ); } );
+			}
+			{
+				auto button = new QToolButton;
+				auto pix = new_local_image( "csgtool_pull.png" );
+				button->setIcon( pix );
+				button->setIconSize( pix.size() + QSize( 8, 8 ) );
+				button->setToolTip( "Hollow::pull faces" );
+				grid->addWidget( button, 2, 6 );
+				QObject::connect( button, &QAbstractButton::clicked, [](){ CSG_Hollow( ePull, "brushHollow::Pull", g_csgtool_dialog ); } );
 			}
 		}
 	}
 
-	gtk_widget_show( GTK_WIDGET( g_csgtool_dialog.window ) );
-	gtk_window_present( g_csgtool_dialog.window );
+	g_csgtool_dialog.window->show();
 }
 
+#include "commands.h"
+
+void CSG_registerCommands(){
+	GlobalCommands_insert( "CSGSubtract", FreeCaller<CSG_Subtract>(), QKeySequence( "Shift+U" ) );
+	GlobalCommands_insert( "CSGMerge", FreeCaller<CSG_Merge>() );
+	GlobalCommands_insert( "CSGWrapMerge", FreeCaller<CSG_WrapMerge>(), QKeySequence( "Ctrl+U" ) );
+	GlobalCommands_insert( "CSGroom", FreeCaller<CSG_MakeRoom>() );
+	GlobalCommands_insert( "CSGTool", FreeCaller<CSG_Tool>() );
+}

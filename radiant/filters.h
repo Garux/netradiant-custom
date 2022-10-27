@@ -21,5 +21,4 @@
 
 #pragma once
 
-typedef struct _GtkMenu GtkMenu;
-void Filters_constructMenu( GtkMenu* menu_in_menu );
+void Filters_constructMenu( class QMenu* menu );

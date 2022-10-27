@@ -21,5 +21,4 @@
 
 #pragma once
 
-class TextOutputStream;
-void write_stack_trace( TextOutputStream& outputStream );
+void write_stack_trace( class TextOutputStream& outputStream );

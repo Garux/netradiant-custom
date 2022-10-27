@@ -56,7 +56,7 @@ public:
 	DPlane* HasPlane( DPlane* chkPlane );
 	DPlane* AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, const _QERFaceData* texData );
 
-	bool ResetTextures( const char* textureName, float fScale[2], float fShift[2], int rotation, const char* newTextureName, int bResetTextureName, int bResetScale[2], int bResetShift[2], int bResetRotation );
+	bool ResetTextures( const char* textureName, float fScale[2], float fShift[2], int rotation, const char* newTextureName, bool bResetTextureName, bool bResetScale[2], bool bResetShift[2], bool bResetRotation );
 	bool IsDetail();
 	bool HasTexture( const char* textureName );
 	bool IntersectsWith( DBrush *chkBrush );

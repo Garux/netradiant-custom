@@ -27,7 +27,7 @@ jobs:
     steps:
     - uses: msys2/setup-msys2@v2
       with:
-        install: ${{ matrix.prefix }}-gtk2 ${{ matrix.prefix }}-gtkglext ${{ matrix.prefix }}-gtk-engines ${{ matrix.prefix }}-gtk-engine-murrine svn git
+        install: ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-libxml2 svn git
         msystem: ${{ matrix.msystem }}
         path-type: minimal
         release: false
@@ -39,7 +39,7 @@ jobs:
 
     - name: Build
       run: |
-        make DOWNLOAD_GAMEPACKS=no MAKEFILE_CONF=msys2-Makefile.conf BUILD=release -j$(nproc) CXXFLAGS="-Wno-deprecated-declarations" 2> windows-warn-${{ matrix.arch }}.log
+        make DOWNLOAD_GAMEPACKS=no MAKEFILE_CONF=msys2-Makefile.conf BUILD=release -j$(nproc) 2> windows-warn-${{ matrix.arch }}.log
         wget https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
         unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
         wget https://www.dropbox.com/s/hcgkwzzmja3m6c0/netradiant-custom-extra-win.zip
@@ -68,7 +68,7 @@ jobs:
     - name: Install tools
       run: |
           sudo apt-get -qq update
-          sudo apt-get -y install mesa-common-dev libgtk2.0-dev libpango1.0-dev libgtkglext1-dev
+          sudo apt-get -y install mesa-common-dev qtbase5-dev
     - uses: actions/checkout@v2
       with:
         submodules: recursive

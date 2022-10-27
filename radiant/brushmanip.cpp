@@ -98,11 +98,11 @@ const char* const c_brushPrism_name = "brushPrism";
 
 void Brush_ConstructPrism( Brush& brush, const AABB& bounds, std::size_t sides, size_t axis, const char* shader, const TextureProjection& projection ){
 	if ( sides < c_brushPrism_minSides ) {
-		globalErrorStream() << c_brushPrism_name << ": sides " << Unsigned( sides ) << ": too few sides, minimum is " << Unsigned( c_brushPrism_minSides ) << "\n";
+		globalErrorStream() << c_brushPrism_name << ": sides " << sides << ": too few sides, minimum is " << c_brushPrism_minSides << "\n";
 		return;
 	}
 	if ( sides > c_brushPrism_maxSides ) {
-		globalErrorStream() << c_brushPrism_name << ": sides " << Unsigned( sides ) << ": too many sides, maximum is " << Unsigned( c_brushPrism_maxSides ) << "\n";
+		globalErrorStream() << c_brushPrism_name << ": sides " << sides << ": too many sides, maximum is " << c_brushPrism_maxSides << "\n";
 		return;
 	}
 
@@ -168,11 +168,11 @@ const char* const c_brushCone_name = "brushCone";
 
 void Brush_ConstructCone( Brush& brush, const AABB& bounds, std::size_t sides, const char* shader, const TextureProjection& projection ){
 	if ( sides < c_brushCone_minSides ) {
-		globalErrorStream() << c_brushCone_name << ": sides " << Unsigned( sides ) << ": too few sides, minimum is " << Unsigned( c_brushCone_minSides ) << "\n";
+		globalErrorStream() << c_brushCone_name << ": sides " << sides << ": too few sides, minimum is " << c_brushCone_minSides << "\n";
 		return;
 	}
 	if ( sides > c_brushCone_maxSides ) {
-		globalErrorStream() << c_brushCone_name << ": sides " << Unsigned( sides ) << ": too many sides, maximum is " << Unsigned( c_brushCone_maxSides ) << "\n";
+		globalErrorStream() << c_brushCone_name << ": sides " << sides << ": too many sides, maximum is " << c_brushCone_maxSides << "\n";
 		return;
 	}
 
@@ -223,11 +223,11 @@ const char* const c_brushSphere_name = "brushSphere";
 
 void Brush_ConstructSphere( Brush& brush, const AABB& bounds, std::size_t sides, const char* shader, const TextureProjection& projection ){
 	if ( sides < c_brushSphere_minSides ) {
-		globalErrorStream() << c_brushSphere_name << ": sides " << Unsigned( sides ) << ": too few sides, minimum is " << Unsigned( c_brushSphere_minSides ) << "\n";
+		globalErrorStream() << c_brushSphere_name << ": sides " << sides << ": too few sides, minimum is " << c_brushSphere_minSides << "\n";
 		return;
 	}
 	if ( sides > c_brushSphere_maxSides ) {
-		globalErrorStream() << c_brushSphere_name << ": sides " << Unsigned( sides ) << ": too many sides, maximum is " << Unsigned( c_brushSphere_maxSides ) << "\n";
+		globalErrorStream() << c_brushSphere_name << ": sides " << sides << ": too many sides, maximum is " << c_brushSphere_maxSides << "\n";
 		return;
 	}
 
@@ -276,11 +276,11 @@ const char* const c_brushRock_name = "brushRock";
 
 void Brush_ConstructRock( Brush& brush, const AABB& bounds, std::size_t sides, const char* shader, const TextureProjection& projection ){
 	if ( sides < c_brushRock_minSides ) {
-		globalErrorStream() << c_brushRock_name << ": sides " << Unsigned( sides ) << ": too few sides, minimum is " << Unsigned( c_brushRock_minSides ) << "\n";
+		globalErrorStream() << c_brushRock_name << ": sides " << sides << ": too few sides, minimum is " << c_brushRock_minSides << "\n";
 		return;
 	}
 	if ( sides > c_brushRock_maxSides ) {
-		globalErrorStream() << c_brushRock_name << ": sides " << Unsigned( sides ) << ": too many sides, maximum is " << Unsigned( c_brushRock_maxSides ) << "\n";
+		globalErrorStream() << c_brushRock_name << ": sides " << sides << ": too many sides, maximum is " << c_brushRock_maxSides << "\n";
 		return;
 	}
 
@@ -413,54 +413,54 @@ void Brush_ConstructIcosahedron( Brush& brush, const AABB& bounds, std::size_t s
 void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds, std::size_t sides, bool option, const char* shader, const TextureProjection& projection ){
 	switch ( type )
 	{
-	case eBrushCuboid:
+	case EBrushPrefab::Cuboid:
 		{
 			UndoableCommand undo( "brushCuboid" );
 
 			Brush_ConstructCuboid( brush, bounds, shader, projection );
 		}
 		break;
-	case eBrushPrism:
+	case EBrushPrefab::Prism:
 		{
 			const size_t axis = GlobalXYWnd_getCurrentViewType();
 			StringOutputStream command;
-			command << c_brushPrism_name << " -sides " << Unsigned( sides ) << " -axis " << Unsigned( axis );
+			command << c_brushPrism_name << " -sides " << sides << " -axis " << axis;
 			UndoableCommand undo( command.c_str() );
 
 			Brush_ConstructPrism( brush, bounds, sides, axis, shader, projection );
 		}
 		break;
-	case eBrushCone:
+	case EBrushPrefab::Cone:
 		{
 			StringOutputStream command;
-			command << c_brushCone_name << " -sides " << Unsigned( sides );
+			command << c_brushCone_name << " -sides " << sides;
 			UndoableCommand undo( command.c_str() );
 
 			Brush_ConstructCone( brush, bounds, sides, shader, projection );
 		}
 		break;
-	case eBrushSphere:
+	case EBrushPrefab::Sphere:
 		{
 			StringOutputStream command;
-			command << c_brushSphere_name << " -sides " << Unsigned( sides );
+			command << c_brushSphere_name << " -sides " << sides;
 			UndoableCommand undo( command.c_str() );
 
 			Brush_ConstructSphere( brush, bounds, sides, shader, projection );
 		}
 		break;
-	case eBrushRock:
+	case EBrushPrefab::Rock:
 		{
 			StringOutputStream command;
-			command << c_brushRock_name << " -sides " << Unsigned( sides );
+			command << c_brushRock_name << " -sides " << sides;
 			UndoableCommand undo( command.c_str() );
 
 			Brush_ConstructRock( brush, bounds, sides, shader, projection );
 		}
 		break;
-	case eBrushIcosahedron:
+	case EBrushPrefab::Icosahedron:
 		{
 			StringOutputStream command;
-			command << "brushIcosahedron" << " -subdivisions " << Unsigned( sides );
+			command << "brushIcosahedron" << " -subdivisions " << sides;
 			UndoableCommand undo( command.c_str() );
 
 			icosahedron::Brush_ConstructIcosahedron( brush, bounds, sides, option, shader, projection );
@@ -654,19 +654,8 @@ void Scene_BrushSetShader_Component_Selected( scene::Graph& graph, const char* n
 	SceneChangeNotify();
 }
 
-class FaceSetDetail
-{
-	bool m_detail;
-public:
-	FaceSetDetail( bool detail ) : m_detail( detail ){
-	}
-	void operator()( Face& face ) const {
-		face.setDetail( m_detail );
-	}
-};
-
 void Scene_BrushSetDetail_Selected( scene::Graph& graph, bool detail ){
-	Scene_ForEachSelectedBrush_ForEachFace( graph, FaceSetDetail( detail ) );
+	Scene_ForEachSelectedBrush_ForEachFace( graph, [detail]( Face& face ){ face.setDetail( detail ); } );
 	SceneChangeNotify();
 }
 
@@ -929,14 +918,6 @@ void Scene_BrushGetTexdef_Component_Selected( scene::Graph& graph, TextureProjec
 	FaceGetTexdef visitor( projection );
 	Scene_ForEachSelectedBrushFace( graph, visitor );
 #endif
-}
-
-void Scene_BrushGetShaderSize_Component_Selected( scene::Graph& graph, size_t& width, size_t& height ){
-	if ( !g_SelectedFaceInstances.empty() ) {
-		FaceInstance& faceInstance = g_SelectedFaceInstances.last();
-		width = faceInstance.getFace().getShader().width();
-		height = faceInstance.getFace().getShader().height();
-	}
 }
 
 
@@ -1236,8 +1217,8 @@ void BrushFilters_construct(){
 #if 0
 
 void normalquantisation_draw(){
-	glPointSize( 1 );
-	glBegin( GL_POINTS );
+	gl().glPointSize( 1 );
+	gl().glBegin( GL_POINTS );
 	for ( std::size_t i = 0; i <= c_quantise_normal; ++i )
 	{
 		for ( std::size_t j = 0; j <= c_quantise_normal; ++j )
@@ -1248,12 +1229,12 @@ void normalquantisation_draw(){
 			        static_cast<float>( j )
 			                                      ) ) );
 			VectorScale( normal3f_to_array( vertex ), 64.f, normal3f_to_array( vertex ) );
-			glVertex3fv( normal3f_to_array( vertex ) );
+			gl().glVertex3fv( normal3f_to_array( vertex ) );
 			vertex.x = -vertex.x;
-			glVertex3fv( normal3f_to_array( vertex ) );
+			gl().glVertex3fv( normal3f_to_array( vertex ) );
 		}
 	}
-	glEnd();
+	gl().glEnd();
 }
 
 class RenderableNormalQuantisation : public OpenGLRenderable
@@ -1463,7 +1444,7 @@ public:
 		: m_count( count ){
 	}
 	void set(){
-		Scene_BrushConstructPrefab( GlobalSceneGraph(), eBrushPrism, m_count, false, TextureBrowser_GetSelectedShader() );
+		Scene_BrushConstructPrefab( GlobalSceneGraph(), EBrushPrefab::Prism, m_count, false, TextureBrowser_GetSelectedShader() );
 	}
 	typedef MemberCaller<BrushMakeSided, &BrushMakeSided::set> SetCaller;
 };
@@ -1486,23 +1467,22 @@ public:
 		: m_type( type ){
 	}
 	void set(){
-		DoSides( m_type, GlobalXYWnd_getCurrentViewType() );
+		DoSides( m_type );
 	}
 	typedef MemberCaller<BrushPrefab, &BrushPrefab::set> SetCaller;
 };
 
-BrushPrefab g_brushprism( eBrushPrism );
-BrushPrefab g_brushcone( eBrushCone );
-BrushPrefab g_brushsphere( eBrushSphere );
-BrushPrefab g_brushrock( eBrushRock );
-BrushPrefab g_brushicosahedron( eBrushIcosahedron );
+BrushPrefab g_brushprism( EBrushPrefab::Prism );
+BrushPrefab g_brushcone( EBrushPrefab::Cone );
+BrushPrefab g_brushsphere( EBrushPrefab::Sphere );
+BrushPrefab g_brushrock( EBrushPrefab::Rock );
+BrushPrefab g_brushicosahedron( EBrushPrefab::Icosahedron );
 
 
 
 
 Callback g_texture_lock_status_changed;
-BoolExportCaller g_texdef_movelock_caller( g_brush_texturelock_enabled );
-ToggleItem g_texdef_movelock_item( g_texdef_movelock_caller );
+ToggleItem g_texdef_movelock_item{ BoolExportCaller( g_brush_texturelock_enabled ) };
 
 void Texdef_ToggleMoveLock(){
 	g_brush_texturelock_enabled = !g_brush_texturelock_enabled;
@@ -1510,8 +1490,7 @@ void Texdef_ToggleMoveLock(){
 	g_texture_lock_status_changed();
 }
 
-BoolExportCaller g_texdef_moveVlock_caller( g_brush_textureVertexlock_enabled );
-ToggleItem g_texdef_moveVlock_item( g_texdef_moveVlock_caller );
+ToggleItem g_texdef_moveVlock_item{ BoolExportCaller( g_brush_textureVertexlock_enabled ) };
 void Texdef_ToggleMoveVLock(){
 	g_brush_textureVertexlock_enabled = !g_brush_textureVertexlock_enabled;
 	g_texdef_moveVlock_item.update();
@@ -1521,7 +1500,7 @@ void Texdef_ToggleMoveVLock(){
 
 
 void Brush_registerCommands(){
-	GlobalToggles_insert( "TogTexLock", FreeCaller<Texdef_ToggleMoveLock>(), ToggleItem::AddCallbackCaller( g_texdef_movelock_item ), Accelerator( 'T', GDK_SHIFT_MASK ) );
+	GlobalToggles_insert( "TogTexLock", FreeCaller<Texdef_ToggleMoveLock>(), ToggleItem::AddCallbackCaller( g_texdef_movelock_item ), QKeySequence( "Shift+T" ) );
 	GlobalToggles_insert( "TogTexVertexLock", FreeCaller<Texdef_ToggleMoveVLock>(), ToggleItem::AddCallbackCaller( g_texdef_moveVlock_item ) );
 
 	GlobalCommands_insert( "BrushPrism", BrushPrefab::SetCaller( g_brushprism ) );
@@ -1530,57 +1509,54 @@ void Brush_registerCommands(){
 	GlobalCommands_insert( "BrushRock", BrushPrefab::SetCaller( g_brushrock ) );
 	GlobalCommands_insert( "BrushIcosahedron", BrushPrefab::SetCaller( g_brushicosahedron ) );
 
-	GlobalCommands_insert( "Brush3Sided", BrushMakeSided::SetCaller( g_brushmakesided3 ), Accelerator( '3', GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "Brush4Sided", BrushMakeSided::SetCaller( g_brushmakesided4 ), Accelerator( '4', GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "Brush5Sided", BrushMakeSided::SetCaller( g_brushmakesided5 ), Accelerator( '5', GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "Brush6Sided", BrushMakeSided::SetCaller( g_brushmakesided6 ), Accelerator( '6', GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "Brush7Sided", BrushMakeSided::SetCaller( g_brushmakesided7 ), Accelerator( '7', GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "Brush8Sided", BrushMakeSided::SetCaller( g_brushmakesided8 ), Accelerator( '8', GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "Brush9Sided", BrushMakeSided::SetCaller( g_brushmakesided9 ), Accelerator( '9', GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "Brush3Sided", BrushMakeSided::SetCaller( g_brushmakesided3 ), QKeySequence( "Ctrl+3" ) );
+	GlobalCommands_insert( "Brush4Sided", BrushMakeSided::SetCaller( g_brushmakesided4 ), QKeySequence( "Ctrl+4" ) );
+	GlobalCommands_insert( "Brush5Sided", BrushMakeSided::SetCaller( g_brushmakesided5 ), QKeySequence( "Ctrl+5" ) );
+	GlobalCommands_insert( "Brush6Sided", BrushMakeSided::SetCaller( g_brushmakesided6 ), QKeySequence( "Ctrl+6" ) );
+	GlobalCommands_insert( "Brush7Sided", BrushMakeSided::SetCaller( g_brushmakesided7 ), QKeySequence( "Ctrl+7" ) );
+	GlobalCommands_insert( "Brush8Sided", BrushMakeSided::SetCaller( g_brushmakesided8 ), QKeySequence( "Ctrl+8" ) );
+	GlobalCommands_insert( "Brush9Sided", BrushMakeSided::SetCaller( g_brushmakesided9 ), QKeySequence( "Ctrl+9" ) );
 
-	GlobalCommands_insert( "MakeDetail", FreeCaller<Select_MakeDetail>(), Accelerator( 'D', GDK_MOD1_MASK ) );
-	GlobalCommands_insert( "MakeStructural", FreeCaller<Select_MakeStructural>(), Accelerator( 'S', GDK_MOD1_MASK ) );
+	GlobalCommands_insert( "MakeDetail", FreeCaller<Select_MakeDetail>(), QKeySequence( "Alt+D" ) );
+	GlobalCommands_insert( "MakeStructural", FreeCaller<Select_MakeStructural>(), QKeySequence( "Alt+S" ) );
 }
 
-void Brush_constructMenu( GtkMenu* menu ){
+void Brush_constructMenu( QMenu* menu ){
 	create_menu_item_with_mnemonic( menu, "Prism...", "BrushPrism" );
 	create_menu_item_with_mnemonic( menu, "Cone...", "BrushCone" );
 	create_menu_item_with_mnemonic( menu, "Sphere...", "BrushSphere" );
 	create_menu_item_with_mnemonic( menu, "Rock...", "BrushRock" );
 	create_menu_item_with_mnemonic( menu, "Icosahedron...", "BrushIcosahedron" );
-	menu_separator( menu );
+	menu->addSeparator();
 	{
-		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "CSG" );
-		if ( g_Layout_enableDetachableMenus.m_value ) {
-			menu_tearoff( menu_in_menu );
-		}
-		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Subtract", "CSGSubtract" );
-		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Merge", "CSGMerge" );
-		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Wrap Merge", "CSGWrapMerge" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Make _Room", "CSGroom" );
-		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Tool", "CSGTool" );
-	}
-	menu_separator( menu );
-	{
-		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Clipper" );
-		if ( g_Layout_enableDetachableMenus.m_value ) {
-			menu_tearoff( menu_in_menu );
-		}
+		QMenu* submenu = menu->addMenu( "CSG" );
 
-		create_menu_item_with_mnemonic( menu_in_menu, "Clip selection", "ClipperClip" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Split selection", "ClipperSplit" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Flip Clip orientation", "ClipperFlip" );
+		submenu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
+
+		create_menu_item_with_mnemonic( submenu, "CSG &Subtract", "CSGSubtract" );
+		create_menu_item_with_mnemonic( submenu, "CSG &Merge", "CSGMerge" );
+		create_menu_item_with_mnemonic( submenu, "CSG &Wrap Merge", "CSGWrapMerge" );
+		create_menu_item_with_mnemonic( submenu, "Make &Room", "CSGroom" );
+		create_menu_item_with_mnemonic( submenu, "CSG &Tool", "CSGTool" );
 	}
-	menu_separator( menu );
+	menu->addSeparator();
+	{
+		QMenu* submenu = menu->addMenu( "Clipper" );
+
+		submenu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
+
+		create_menu_item_with_mnemonic( submenu, "Clip selection", "ClipperClip" );
+		create_menu_item_with_mnemonic( submenu, "Split selection", "ClipperSplit" );
+		create_menu_item_with_mnemonic( submenu, "Flip Clip orientation", "ClipperFlip" );
+	}
+	menu->addSeparator();
 	create_menu_item_with_mnemonic( menu, "Make detail", "MakeDetail" );
 	create_menu_item_with_mnemonic( menu, "Make structural", "MakeStructural" );
 
-	menu_separator( menu );
+	menu->addSeparator();
 	create_check_menu_item_with_mnemonic( menu, "Texture Lock", "TogTexLock" );
 	create_check_menu_item_with_mnemonic( menu, "Texture Vertex Lock", "TogTexVertexLock" );
 	create_menu_item_with_mnemonic( menu, "Reset Texture", "TextureReset/Cap" );
-	create_menu_item_with_mnemonic( menu, "Copy Face Texture", "Copy" );
-	create_menu_item_with_mnemonic( menu, "Paste Face Texture", "Paste" );
 	create_menu_item_with_mnemonic( menu, "AutoCaulk Selected", "AutoCaulkSelected" );
 
 	command_connect_accelerator( "Brush3Sided" );

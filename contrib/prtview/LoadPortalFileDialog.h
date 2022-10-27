@@ -19,4 +19,4 @@
 
 #pragma once
 
-int DoLoadPortalFileDialog();
+bool DoLoadPortalFileDialog();

@@ -21,10 +21,8 @@
 
 #pragma once
 
-typedef struct _GtkToolbar GtkToolbar;
-GtkToolbar* create_plugin_toolbar();
+void create_plugin_toolbar( class QToolBar *toolbar );
 void PluginToolbar_populate();
 void PluginToolbar_clear();
 
-typedef struct _GtkImage GtkImage;
-GtkImage* new_plugin_image( const char* filename ); // filename is relative to plugin bitmaps path
+class QIcon new_plugin_icon( const char* filename ); // filename is relative to plugin bitmaps path

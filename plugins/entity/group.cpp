@@ -169,7 +169,7 @@ public:
 	void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected, const AABB& childBounds ) const {
 		if ( m_renderName.excluded_not() ) {
 			// place name in the middle of the "children cloud"
-			m_name_origin = extents_valid( childBounds.extents.x() )? childBounds.origin : vector4_to_vector3( localToWorld.t() );
+			m_name_origin = extents_valid( childBounds.extents.x() )? childBounds.origin : localToWorld.t().vec3();
 
 			if ( selected || childSelected || g_showNames )
 				m_renderName.render( renderer, volume, g_matrix4_identity, selected, childSelected );
@@ -197,7 +197,7 @@ public:
 //		}
 		if ( m_renderName.excluded_not() ) {
 			// place name in the middle of the "children cloud"
-			m_name_origin = extents_valid( childBounds.extents.x() )? childBounds.origin : vector4_to_vector3( localToWorld.t() );
+			m_name_origin = extents_valid( childBounds.extents.x() )? childBounds.origin : localToWorld.t().vec3();
 
 			if ( selected || childSelected || ( g_showNames && aabb_fits_view( childBounds, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) )
 				m_renderName.render( renderer, volume, g_matrix4_identity, selected, childSelected );

@@ -25,14 +25,11 @@
 
 #include <list>
 #include <vector>
-#include <gtk/gtk.h>
+#include <QFileDialog>
 
 #include "string/string.h"
 #include "stream/stringstream.h"
-#include "container/array.h"
 #include "os/path.h"
-#include "os/file.h"
-
 #include "messagebox.h"
 
 
@@ -91,20 +88,20 @@ public:
 
 	GTKMasks( const FileTypeList& types ) : m_types( types ){
 		m_masks.reserve( m_types.size() );
-		for ( FileTypeList::const_iterator i = m_types.begin(); i != m_types.end(); ++i )
+		for ( const auto& type : types )
 		{
-			std::size_t len = strlen( ( *i ).m_name.c_str() ) + strlen( ( *i ).m_pattern.c_str() ) + 3;
+			std::size_t len = strlen( type.m_name.c_str() ) + strlen( type.m_pattern.c_str() ) + 3;
 			StringOutputStream buffer( len + 1 ); // length + null char
 
-			buffer << ( *i ).m_name << " <" << ( *i ).m_pattern << ">";
+			buffer << type.m_name << " (" << type.m_pattern << ")";
 
 			m_masks.push_back( buffer.c_str() );
 		}
 
 		m_filters.reserve( m_types.size() );
-		for ( FileTypeList::const_iterator i = m_types.begin(); i != m_types.end(); ++i )
+		for ( const auto& type : types )
 		{
-			m_filters.push_back( ( *i ).m_pattern );
+			m_filters.push_back( type.m_pattern );
 		}
 	}
 
@@ -121,9 +118,9 @@ public:
 
 };
 
-static char g_file_dialog_file[1024];
+static QByteArray g_file_dialog_file;
 
-const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, const char* path, const char* pattern, bool want_load, bool want_import, bool want_save ){
+const char* file_dialog( QWidget* parent, bool open, const char* title, const char* path, const char* pattern, bool want_load, bool want_import, bool want_save ){
 	if ( pattern == 0 ) {
 		pattern = "*";
 	}
@@ -131,165 +128,58 @@ const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, c
 	FileTypeList typelist;
 	GlobalFiletypes().getTypeList( pattern, &typelist, want_load, want_import, want_save );
 
-	GTKMasks masks( typelist );
+	const GTKMasks masks( typelist );
 
-	if ( title == 0 ) {
-		title = open ? "Open File" : "Save File";
-	}
-
-	GtkWidget* dialog;
-	if ( open ) {
-		dialog = gtk_file_chooser_dialog_new( title,
-		                                      GTK_WINDOW( parent ),
-		                                      GTK_FILE_CHOOSER_ACTION_OPEN,
-		                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		                                      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-		                                      NULL );
-	}
-	else
-	{
-		dialog = gtk_file_chooser_dialog_new( title,
-		                                      GTK_WINDOW( parent ),
-		                                      GTK_FILE_CHOOSER_ACTION_SAVE,
-		                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		                                      GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-		                                      NULL );
-		gtk_file_chooser_set_current_name( GTK_FILE_CHOOSER( dialog ), "unnamed" );
-	}
-
-	gtk_window_set_modal( GTK_WINDOW( dialog ), TRUE );
-	gtk_window_set_position( GTK_WINDOW( dialog ), GTK_WIN_POS_CENTER_ON_PARENT );
-
-	// we expect an actual path below, if the path is 0 we might crash
 	if ( path != 0 && !string_empty( path ) ) {
 		ASSERT_MESSAGE( path_is_absolute( path ), "file_dialog_show: path not absolute: " << makeQuoted( path ) );
-
-		Array<char> new_path( strlen( path ) + 1 );
-
-		// copy path, replacing dir separators as appropriate
-		Array<char>::iterator w = new_path.begin();
-		for ( const char* r = path; *r != '\0'; ++r )
-		{
-			*w++ = ( *r == '/' ) ? G_DIR_SEPARATOR : *r;
-		}
-		// terminate string
-		*w = '\0';
-
-		if( file_is_directory( new_path.data() ) ){ // folder path
-			gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER( dialog ), new_path.data() );
-		}
-		else{ // file path
-			gtk_file_chooser_set_filename( GTK_FILE_CHOOSER( dialog ), new_path.data() );
-		}
 	}
 
 	// we should add all important paths as shortcut folder...
 	// gtk_file_chooser_add_shortcut_folder(GTK_FILE_CHOOSER(dialog), "/tmp/", NULL);
 
+	QString filter;
+
 	if ( open && masks.m_filters.size() > 1 ){
-		GtkFileFilter* filter = gtk_file_filter_new();
-		gtk_file_filter_set_name( filter, "All supported formats" );
-		for ( std::size_t i = 0; i < masks.m_filters.size(); ++i )
+		filter += "All supported formats (";
+		for ( const auto& f : masks.m_filters )
 		{
-			gtk_file_filter_add_pattern( filter, masks.m_filters[i].c_str() );
+			filter += ' ';
+			filter += f.c_str();
 		}
-		gtk_file_chooser_add_filter( GTK_FILE_CHOOSER( dialog ), filter );
+		filter += ")";
 	}
 
-	for ( std::size_t i = 0; i < masks.m_filters.size(); ++i )
+	for ( const auto& mask : masks.m_masks )
 	{
-		GtkFileFilter* filter = gtk_file_filter_new();
-		gtk_file_filter_add_pattern( filter, masks.m_filters[i].c_str() );
-		gtk_file_filter_set_name( filter, masks.m_masks[i].c_str() );
-		gtk_file_chooser_add_filter( GTK_FILE_CHOOSER( dialog ), filter );
+		if( !filter.isEmpty() )
+			filter += ";;";
+		filter += mask.c_str();
 	}
+	// this handles backslashes as input and returns forwardly slashed path
+	// input path may be either folder or file
+	// only existing file path may be chosen for open; overwriting is prompted on save
+	g_file_dialog_file = open
+		? QFileDialog::getOpenFileName( parent, title, path, filter ).toLatin1()
+		: QFileDialog::getSaveFileName( parent, title, path, filter ).toLatin1();
 
-	if ( gtk_dialog_run( GTK_DIALOG( dialog ) ) == GTK_RESPONSE_ACCEPT ) {
-		strcpy( g_file_dialog_file, gtk_file_chooser_get_filename( GTK_FILE_CHOOSER( dialog ) ) );
-
-		if ( !string_equal( pattern, "*" ) ) {
-			const char* extension = path_get_extension( g_file_dialog_file ); /* anything may be entered via 'location' dialog field, thus try to be safe */
-			if ( string_empty( extension ) ) { /* add an extension */
-				filetype_t type;
-				GtkFileFilter* filter = gtk_file_chooser_get_filter( GTK_FILE_CHOOSER( dialog ) );
-				if ( filter != 0 // no filter set? some file-chooser implementations may allow the user to set no filter, which we treat as 'all files'
-				     && !string_equal( gtk_file_filter_get_name( filter ), "All supported formats" ) )
-					type = masks.GetTypeForGTKMask( gtk_file_filter_get_name( filter ) ).m_type;
-				else
-					type = masks.GetTypeForGTKMask( ( *masks.m_masks.begin() ).c_str() ).m_type;
-
-				strcat( g_file_dialog_file, type.pattern + 1 );
-			}
-			else{ /* validate extension */
-				bool valid = false;
-				for ( std::size_t i = 0; i < masks.m_filters.size(); ++i )
-					if( string_length( masks.m_filters[i].c_str() ) >= 2 && extension_equal( extension, masks.m_filters[i].c_str() + 2 ) )
-						valid = true;
-				if( !valid ){
-					g_file_dialog_file[0] = '\0';
-					globalErrorStream() << makeQuoted( extension ) << " is unsupported file type for requested operation\n";
-				}
-			}
-		}
-
-		// convert back to unix format
-		for ( char* w = g_file_dialog_file; *w != '\0'; w++ )
-		{
-			if ( *w == '\\' ) {
-				*w = '/';
-			}
-		}
+	/* validate extension: it is possible pick existing file, not respecting the filter... */
+	if( !g_file_dialog_file.isEmpty() && !string_equal( pattern, "*" ) ){
+		const char* extension = path_get_extension( g_file_dialog_file.constData() );
+		if( !string_empty( extension ) )
+			for( const auto& f : masks.m_filters )
+				if( extension_equal( extension, path_get_extension( f.c_str() ) ) )
+					goto extension_validated;
+		qt_MessageBox( parent, StringOutputStream( 256 )( makeQuoted( extension ), " is unsupported file type for requested operation\n" ), extension, EMessageBoxType::Error );
+		g_file_dialog_file.clear();
 	}
-	else
-	{
-		g_file_dialog_file[0] = '\0';
-	}
-
-	gtk_widget_destroy( dialog );
+extension_validated:
 
 	// don't return an empty filename
-	if ( g_file_dialog_file[0] == '\0' ) {
-		return NULL;
-	}
-
-	return g_file_dialog_file;
+	return g_file_dialog_file.isEmpty()
+		? nullptr
+		: g_file_dialog_file.constData();
 }
 
-char* dir_dialog( GtkWidget* parent, const char* title, const char* path ){
-	GtkWidget* dialog = gtk_file_chooser_dialog_new( title,
-	                                                 GTK_WINDOW( parent ),
-	                                                 GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-	                                                 GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	                                                 GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-	                                                 NULL );
-
-	gtk_window_set_modal( GTK_WINDOW( dialog ), TRUE );
-	gtk_window_set_position( GTK_WINDOW( dialog ), GTK_WIN_POS_CENTER_ON_PARENT );
-
-	if ( !string_empty( path ) ) {
-		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER( dialog ), path );
-	}
-
-	char* filename = 0;
-	if ( gtk_dialog_run( GTK_DIALOG( dialog ) ) == GTK_RESPONSE_ACCEPT ) {
-		filename = gtk_file_chooser_get_filename( GTK_FILE_CHOOSER( dialog ) );
-	}
-
-	gtk_widget_destroy( dialog );
-
-	return filename;
-}
-
-const char* file_dialog( GtkWidget* parent, bool open, const char* title, const char* path, const char* pattern, bool want_load, bool want_import, bool want_save ){
-	for (;; )
-	{
-		const char* file = file_dialog_show( parent, open, title, path, pattern, want_load, want_import, want_save );
-
-		if ( open
-		  || file == 0
-		  || !file_exists( file )
-		  || gtk_MessageBox( parent, "The file specified already exists.\nDo you want to replace it?", title, eMB_NOYES, eMB_ICONQUESTION ) == eIDYES ) {
-			return file;
-		}
-	}
+QString dir_dialog( QWidget *parent, const QString& path ){
+	return QFileDialog::getExistingDirectory( parent, {}, path );
 }

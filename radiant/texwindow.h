@@ -24,38 +24,31 @@
 #include "generic/callbackfwd.h"
 #include "signal/signalfwd.h"
 
-typedef struct _GtkWidget GtkWidget;
-
-class TextureBrowser;
-TextureBrowser& GlobalTextureBrowser();
-
-typedef struct _GtkWindow GtkWindow;
-GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel );
+class QWidget;
+QWidget* TextureBrowser_constructWindow( QWidget* toplevel );
 void TextureBrowser_destroyWindow();
 
 
-void TextureBrowser_ShowDirectory( TextureBrowser& textureBrowser, const char* name );
-void TextureBrowser_ShowStartupShaders( TextureBrowser& textureBrowser );
-
+void TextureBrowser_ShowStartupShaders();
 const char* TextureBrowser_GetSelectedShader();
 
 void TextureBrowser_Construct();
 void TextureBrowser_Destroy();
 
+
 typedef Callback1<const char*> StringImportCallback;
 template<typename FirstArgument, void( *func ) (FirstArgument)>
 class FreeCaller1;
 
-extern GtkWidget* g_page_textures;
+extern QWidget* g_page_textures;
 void TextureBrowser_exportTitle( const StringImportCallback& importer );
 typedef FreeCaller1<const StringImportCallback&, TextureBrowser_exportTitle> TextureBrowserExportTitleCaller;
 
+
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
-const Vector3& TextureBrowser_getBackgroundColour( TextureBrowser& textureBrowser );
-void TextureBrowser_setBackgroundColour( TextureBrowser& textureBrowser, const Vector3& colour );
+const Vector3& TextureBrowser_getBackgroundColour();
+void TextureBrowser_setBackgroundColour( const Vector3& colour );
 
 void TextureBrowser_addActiveShadersChangedCallback( const SignalHandler& handler );
 void TextureBrowser_addShadersRealiseCallback( const SignalHandler& handler );
-
-GtkWidget* TextureBrowser_getGLWidget();

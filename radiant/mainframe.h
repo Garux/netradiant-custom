@@ -21,22 +21,20 @@
 
 #pragma once
 
-#include "gtkutil/window.h"
 #include "gtkutil/idledraw.h"
 #include "gtkutil/widget.h"
 #include "string/string.h"
 
 #include "qerplugin.h"
 
-class IPlugIn;
-class IToolbarButton;
-
 class XYWnd;
 class CamWnd;
 class ZWnd;
 
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
+class QMainWindow;
+class QSplitter;
+class QLabel;
+class QWidget;
 
 const int c_status_command = 0;
 const int c_status_position = 1;
@@ -61,34 +59,34 @@ public:
 	MainFrame();
 	~MainFrame();
 
-	GtkWindow* m_window;
+	QMainWindow* m_window{};
 
 private:
 
 	void Create();
-	void SaveWindowInfo();
+	void SaveGuiState();
+	void RestoreGuiState();
 	void Shutdown();
 
 public:
-	GtkWidget* m_vSplit;
-	GtkWidget* m_hSplit;
-	GtkWidget* m_vSplit2;
+	QSplitter* m_vSplit{};
+	QSplitter* m_hSplit{};
+	QSplitter* m_vSplit2{};
 
 private:
 
-	XYWnd* m_pXYWnd;
-	XYWnd* m_pYZWnd;
-	XYWnd* m_pXZWnd;
-	CamWnd* m_pCamWnd;
-	ZWnd* m_pZWnd;
-	XYWnd* m_pActiveXY;
+	XYWnd* m_pXYWnd{};
+	XYWnd* m_pYZWnd{};
+	XYWnd* m_pXZWnd{};
+	CamWnd* m_pCamWnd{};
+	ZWnd* m_pZWnd{};
+	XYWnd* m_pActiveXY{};
 
 	CopiedString m_status[c_status__count];
-	GtkWidget *m_statusLabel[c_status__count];
+	QLabel *m_statusLabel[c_status__count]{};
 
 
 	EViewStyle m_nCurrentStyle;
-	WindowPositionTracker m_position_tracker;
 
 	IdleDraw m_idleRedrawStatusText;
 
@@ -139,15 +137,13 @@ public:
 
 extern MainFrame* g_pParentWnd;
 
-GtkWindow* MainFrame_getWindow();
+QWidget* MainFrame_getWindow();
 
 
 template<typename Value>
 class LatchedValue;
 typedef LatchedValue<bool> LatchedBool;
 extern LatchedBool g_Layout_enableDetachableMenus;
-
-void deleteSelection();
 
 
 void Sys_Status( const char* status );
@@ -208,8 +204,6 @@ void Radiant_Shutdown();
 
 void Radiant_Restart();
 
-void SaveMapAs();
-
 
 void XY_UpdateAllWindows();
 void UpdateAllWindows();
@@ -255,6 +249,6 @@ void XYWindowDestroyed_disconnect( SignalHandlerId id );
 MouseEventHandlerId XYWindowMouseDown_connect( const MouseEventHandler& handler );
 void XYWindowMouseDown_disconnect( MouseEventHandlerId id );
 
-extern GtkWidget* g_page_entity;
+extern QWidget* g_page_entity;
 
 void FocusAllViews();

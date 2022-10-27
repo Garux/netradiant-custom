@@ -70,12 +70,8 @@ done
 cd $MINGWDIR
 
 for EXTRAPATH in \
-    './lib/gtk-2.0/2.10.0/engines/*.dll' \
-    './lib/gtk-2.0/modules/*.dll' \
-    './share/themes' \
-    './etc/fonts/fonts.conf' \
-    './lib/gdk-pixbuf-2.0/2.10.0/loaders/*.dll' \
-    './lib/gdk-pixbuf-2.0/2.10.0/loaders.cache' \
+    './share/qt5/plugins/imageformats/*.dll' \
+    './share/qt5/plugins/platforms/*.dll' \
 ; do
     cp --parent -v `find $EXTRAPATH -type f` "$INSTALLDIR"
 done

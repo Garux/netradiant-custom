@@ -21,15 +21,10 @@
 
 #pragma once
 
-typedef struct _GtkWidget GtkWidget;
-typedef int gint;
-typedef gint gboolean;
-#define NV_DRIVER_GAMMA_BUG 1 //! todo remove as soon, as driver will be fixed
-GtkWidget* glwidget_new( gboolean zbuffer );
-void glwidget_swap_buffers( GtkWidget* widget );
-gboolean glwidget_make_current( GtkWidget* widget );
-void glwidget_destroy_context( GtkWidget* widget );
-void glwidget_create_context( GtkWidget* widget );
+void glwidget_setDefaultFormat();
+void glwidget_context_created( class QOpenGLWidget& widget );
+void glwidget_context_destroyed();
+
 
 extern void ( *GLWidget_sharedContextCreated )();
 extern void ( *GLWidget_sharedContextDestroyed )();

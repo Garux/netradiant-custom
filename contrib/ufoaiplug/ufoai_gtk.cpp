@@ -22,42 +22,6 @@
 #include "itoolbar.h"
 #include "iscenegraph.h"
 
-#include <gtk/gtk.h>
-
-/**
- * GTK callback functions
- */
-
-
-#if 0
-/**
- * @brief If you return FALSE in the "delete_event" signal handler,
- * GTK will emit the "destroy" signal. Returning TRUE means
- * you don't want the window to be destroyed.
- * This is useful for popping up 'are you sure you want to quit?'
- * type dialogs.
- */
-static gboolean delete_event( GtkWidget *widget, GdkEvent *event, gpointer data ){
-	return FALSE;
-}
-
-/**
- * @brief destroy widget if destroy signal is passed to widget
- */
-static void destroy( GtkWidget *widget, gpointer data ){
-	gtk_widget_destroy( widget );
-}
-
-/**
- * @brief function for close button to destroy the toplevel widget
- */
-static void close_window( GtkWidget *widget, gpointer data ){
-	gtk_widget_destroy( gtk_widget_get_toplevel( widget ) );
-}
-#endif
-
-/* =============================== */
-
 #define NUM_TOOLBARBUTTONS 12
 
 /**

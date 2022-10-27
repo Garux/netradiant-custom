@@ -23,15 +23,11 @@
 #include "iplugin.h"
 #include "qerplugin.h"
 
-#include <gtk/gtk.h>
-
 #include "debugging/debugging.h"
 #include "string/string.h"
 #include "modulesystem/singletonmodule.h"
 #include "stream/textfilestream.h"
 #include "stream/stringstream.h"
-#include "gtkutil/messagebox.h"
-#include "gtkutil/filechooser.h"
 
 #include "ibrush.h"
 #include "iscenegraph.h"
@@ -39,22 +35,19 @@
 #include "ifilesystem.h"
 #include "ifiletypes.h"
 
-#include "support.h"
-
 #include "typesystem.h"
 
 void CreateWindow( void );
 
-GtkWidget *g_pRadiantWnd = NULL;
+QWidget *g_pRadiantWnd = nullptr;
 
 namespace BrushExport
 {
-GtkWindow* g_mainwnd;
+QWidget* g_mainwnd;
 
 const char* init( void* hApp, void* pMainWidget ){
-	g_mainwnd = (GtkWindow*)pMainWidget;
-	g_pRadiantWnd = (GtkWidget*)pMainWidget;
-	ASSERT_NOTNULL( g_mainwnd );
+	g_pRadiantWnd = static_cast<QWidget*>( pMainWidget );
+	ASSERT_NOTNULL( g_pRadiantWnd );
 	return "";
 }
 const char* getName(){
@@ -69,11 +62,11 @@ const char* getCommandTitleList(){
 
 void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush ){
 	if ( string_equal( command, "About" ) ) {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_mainwnd ),
-		                                 "Brushexport plugin v 2.0 by namespace (www.codecreator.net)\n"
-		                                 "Enjoy!\n\nSend feedback to spam@codecreator.net", "About me...",
-		                                 eMB_OK,
-		                                 eMB_ICONDEFAULT );
+		GlobalRadiant().m_pfnMessageBox( g_pRadiantWnd,
+		                                 "Brushexport plugin v 3.0 by namespace (<a href='http://www.codecreator.net'>http://www.codecreator.net</a>)<br>"
+		                                 "Enjoy!<br><br>"
+										 "Send feedback to <a href='mailto:spam@codecreator.net'>spam@codecreator.net</a>",
+										 "About me...", EMessageBoxType::Info, 0 );
 	}
 	else if ( string_equal( command, "Export .obj" ) ) {
 		CreateWindow();

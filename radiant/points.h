@@ -33,5 +33,4 @@ void Pointfile_Delete();
 void Pointfile_Construct();
 void Pointfile_Destroy();
 
-class ISAXHandler;
-extern ISAXHandler& g_pointfile;
+extern class ISAXHandler& g_pointfile;

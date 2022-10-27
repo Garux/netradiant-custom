@@ -40,14 +40,8 @@ void BobToolz_construct(){
 }
 
 void BobToolz_destroy(){
-	if ( g_PathView ) {
-		delete g_PathView;
-		g_PathView = NULL;
-	}
-	if ( g_VisView ) {
-		delete g_VisView;
-		g_VisView = NULL;
-	}
+	g_PathView.reset();
+	g_VisView.reset();
 	if ( g_TrainView ) {
 		delete g_TrainView;
 		g_TrainView = NULL;
@@ -62,19 +56,44 @@ void BobToolz_destroy(){
 const char* PLUGIN_NAME = "bobToolz";
 
 // commands in the menu
-static const char* PLUGIN_COMMANDS = "About...,-,Reset Textures...,PitOMatic,-,Vis Viewer,Brush Cleanup,Polygon Builder,Caulk Selection,-,Tree Planter,Drop Entity,Plot Splines,-,Merge Patches,Split patches,Split patches cols,Split patches rows,Turn edge";
+constexpr char PLUGIN_COMMANDS[] = "About...,"
+								   "-,"
+								   "Stair Builder...,"
+								   "Door Builder...,"
+								   "Intersect...,"
+								   "Make Chain...,"
+								   "Path Plotter...,"
+								   "-,"
+								   "Reset Textures...,"
+								   "PitOMatic,"
+								   "-,"
+								   "Vis Viewer,"
+								   "Brush Cleanup,"
+								   "Polygon Builder,"
+								   "Caulk Selection,"
+								   "-,"
+								   "Tree Planter,"
+								   "Drop Entity,"
+								   "Plot Splines,"
+								   "-,"
+								   "Merge Patches,"
+								   "Split patches,"
+								   "Split patches cols,"
+								   "Split patches rows,"
+								   "Turn edge"
+									;
 
 // globals
-GtkWidget *g_pRadiantWnd = NULL;
+QWidget *g_pRadiantWnd = nullptr;
 
-static const char *PLUGIN_ABOUT =   "bobToolz for SDRadiant\n"
-                                    "by digibob (digibob@splashdamage.com)\n"
-                                    "http://www.splashdamage.com\n\n"
-                                    "Additional Contributors:\n"
-                                    "MarsMattel, RR2DO2\n";
+constexpr char PLUGIN_ABOUT[] = "bobToolz for SDRadiant<br>"
+                                "by digibob (<a href='mailto:digibob@splashdamage.com'>digibob@splashdamage.com</a>)<br>"
+                                "<a href='http://www.splashdamage.com'>http://www.splashdamage.com</a><br><br>"
+                                "Additional Contributors:<br>"
+                                "MarsMattel, RR2DO2<br>";
 
 extern "C" const char* QERPlug_Init( void* hApp, void* pMainWidget ) {
-	g_pRadiantWnd = (GtkWidget*)pMainWidget;
+	g_pRadiantWnd = static_cast<QWidget*>( pMainWidget );
 
 	return "bobToolz for GTKradiant";
 }
@@ -148,7 +167,7 @@ extern "C" void QERPlug_Dispatch( const char *p, vec3_t vMin, vec3_t vMax, bool 
 		DoPathPlotter();
 	}
 	else if ( string_equal_nocase( p, "about..." ) ) {
-		DoMessageBox( PLUGIN_ABOUT, "About", eMB_OK );
+		DoMessageBox( PLUGIN_ABOUT, "About" );
 	}
 }
 

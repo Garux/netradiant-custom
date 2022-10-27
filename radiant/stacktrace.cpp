@@ -266,7 +266,7 @@ void write_stack_trace( PCONTEXT pContext, TextOutputStream& outputStream ){
 				DWORD dwLineDisplacement;
 				if ( SymGetLineFromAddr64( m_hProcess, sf.AddrPC.Offset,
 				                           &dwLineDisplacement, &lineInfo ) ) {
-					outputStream << " " << lineInfo.FileName << " line " << Unsigned( lineInfo.LineNumber );
+					outputStream << " " << lineInfo.FileName << " line " << lineInfo.LineNumber;
 				}
 			}
 			else

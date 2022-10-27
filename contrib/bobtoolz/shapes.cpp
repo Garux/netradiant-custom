@@ -45,8 +45,6 @@
 #include "scenelib.h"
 #include "texturelib.h"
 
-//#include "dialogs-gtk.h"
-
 /************************
     Cube Diagram
 ************************/

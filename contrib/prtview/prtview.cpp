@@ -50,19 +50,20 @@ CopiedString INIfn;
 
 const char RENDER_2D[] = "Render2D";
 const char WIDTH_2D[] = "Width2D";
-const char AA_2D[] = "AntiAlias2D";
 const char COLOR_2D[] = "Color2D";
+
+const char DRAW_HINTS[] = "DrawHints";
+const char DRAW_NONHINTS[] = "DrawNonHints";
 
 const char RENDER_3D[] = "Render3D";
 const char WIDTH_3D[] = "Width3D";
-const char AA_3D[] = "AntiAlias3D";
 const char COLOR_3D[] = "Color3D";
 const char COLOR_FOG[] = "ColorFog";
 const char FOG[] = "Fog";
 const char ZBUFFER[] = "ZBuffer";
 const char POLYGON[] = "Polygons";
 const char LINE[] = "Lines";
-const char TRANS_3D[] = "Transparency";
+const char OPACITY_3D[] = "Opacity";
 const char CLIP_RANGE[] = "ClipRange";
 const char CLIP[] = "Clip";
 
@@ -72,59 +73,29 @@ void PrtView_construct(){
 	tmp << GlobalRadiant().getSettingsPath() << "prtview.ini";
 	INIfn = tmp.c_str();
 
-	portals.show_2d = INIGetInt( RENDER_2D, FALSE ) ? true : false;
-	portals.aa_2d = INIGetInt( AA_2D, FALSE ) ? true : false;
-	portals.width_2d = (float)INIGetInt( WIDTH_2D, 10 );
-	portals.color_2d = (PackedColour)INIGetInt( COLOR_2D, RGB( 0, 0, 255 ) ) & 0xFFFFFF;
+	portals.show_2d = INIGetInt( RENDER_2D, 0 );
+	portals.width_2d = std::clamp( INIGetInt( WIDTH_2D, 3 ), 1, 10 );
+	portals.color_2d = INIGetInt( COLOR_2D, RGB_PACK( 0, 0, 255 ) ) & 0xFFFFFF;
 
-	if ( portals.width_2d > 40.0f ) {
-		portals.width_2d = 40.0f;
-	}
-	else if ( portals.width_2d < 2.0f ) {
-		portals.width_2d = 2.0f;
-	}
+	portals.draw_hints = INIGetInt( DRAW_HINTS, 1 );
+	portals.draw_nonhints = INIGetInt( DRAW_NONHINTS, 1 );
 
-	portals.show_3d = INIGetInt( RENDER_3D, TRUE ) ? true : false;
+	portals.show_3d = INIGetInt( RENDER_3D, 1 );
 
 	portals.zbuffer = INIGetInt( ZBUFFER, 1 );
-	portals.fog = INIGetInt( FOG, FALSE ) ? true : false;
-	portals.polygons = INIGetInt( POLYGON, TRUE );
-	portals.lines = INIGetInt( LINE, TRUE );
-	portals.aa_3d = INIGetInt( AA_3D, FALSE ) ? true : false;
-	portals.width_3d = (float)INIGetInt( WIDTH_3D, 4 );
-	portals.color_3d = (PackedColour)INIGetInt( COLOR_3D, RGB( 255, 255, 0 ) ) & 0xFFFFFF;
-	portals.color_fog = (PackedColour)INIGetInt( COLOR_FOG, RGB( 127, 127, 127 ) ) & 0xFFFFFF;
-	portals.trans_3d = (float)INIGetInt( TRANS_3D, 50 );
-	portals.clip = INIGetInt( CLIP, FALSE ) ? true : false;
-	portals.clip_range = (float)INIGetInt( CLIP_RANGE, 16 );
+	portals.fog = INIGetInt( FOG, 0 );
+	portals.polygons = INIGetInt( POLYGON, 1 );
+	portals.lines = INIGetInt( LINE, 1 );
+	portals.width_3d = std::clamp( INIGetInt( WIDTH_3D, 3 ), 1, 10 );
+	portals.color_3d = INIGetInt( COLOR_3D, RGB_PACK( 255, 255, 0 ) ) & 0xFFFFFF;
+	portals.color_fog = INIGetInt( COLOR_FOG, RGB_PACK( 127, 127, 127 ) ) & 0xFFFFFF;
+	portals.opacity_3d = std::clamp( INIGetInt( OPACITY_3D, 50 ), 0, 100 );
+	portals.clip = INIGetInt( CLIP, 0 );
+	portals.clip_range = std::clamp( INIGetInt( CLIP_RANGE, 1024 ), 64, 8192 );
 
-	if ( portals.clip_range < 1 ) {
-		portals.clip_range = 1;
-	}
-	else if ( portals.clip_range > 128 ) {
-		portals.clip_range = 128;
-	}
-
-	if ( portals.zbuffer < 0 ) {
+	if ( portals.zbuffer < 0 || portals.zbuffer > 2 )
 		portals.zbuffer = 0;
-	}
-	else if ( portals.zbuffer > 2 ) {
-		portals.zbuffer = 0;
-	}
 
-	if ( portals.width_3d > 40.0f ) {
-		portals.width_3d = 40.0f;
-	}
-	else if ( portals.width_3d < 2.0f ) {
-		portals.width_3d = 2.0f;
-	}
-
-	if ( portals.trans_3d > 100.0f ) {
-		portals.trans_3d = 100.0f;
-	}
-	else if ( portals.trans_3d < 0.0f ) {
-		portals.trans_3d = 0.0f;
-	}
 
 	SaveConfig();
 
@@ -141,22 +112,20 @@ void PrtView_destroy(){
 
 void SaveConfig(){
 	INISetInt( RENDER_2D, portals.show_2d, "Draw in 2D windows" );
-	INISetInt( WIDTH_2D, (int)portals.width_2d, "Width of lines in 2D windows (in units of 1/2)" );
-	INISetInt( COLOR_2D, (int)portals.color_2d, "Color of lines in 2D windows" );
-	INISetInt( AA_2D, portals.aa_2d, "Draw lines in 2D window anti-aliased" );
+	INISetInt( WIDTH_2D, portals.width_2d, "Width of lines in 2D windows" );
+	INISetInt( COLOR_2D, portals.color_2d, "Color of lines in 2D windows" );
 
 	INISetInt( ZBUFFER, portals.zbuffer, "ZBuffer level in 3D window" );
 	INISetInt( FOG, portals.fog, "Use depth cueing in 3D window" );
-	INISetInt( POLYGON, portals.polygons, "Render using polygons polygons in 3D window" );
-	INISetInt( LINE, portals.polygons, "Render using lines in 3D window" );
+	INISetInt( POLYGON, portals.polygons, "Render using polygons in 3D window" );
+	INISetInt( LINE, portals.lines, "Render using lines in 3D window" );
 	INISetInt( RENDER_3D, portals.show_3d, "Draw in 3D windows" );
-	INISetInt( WIDTH_3D, (int)portals.width_3d, "Width of lines in 3D window (in units of 1/2)" );
-	INISetInt( COLOR_3D, (int)portals.color_3d, "Color of lines/polygons in 3D window" );
-	INISetInt( COLOR_FOG, (int)portals.color_fog, "Color of distant lines/polygons in 3D window" );
-	INISetInt( AA_3D, portals.aa_3d, "Draw lines in 3D window anti-aliased" );
-	INISetInt( TRANS_3D, (int)portals.trans_3d, "Transparency in 3d view (0 = solid, 100 = invisible)" );
+	INISetInt( WIDTH_3D, portals.width_3d, "Width of lines in 3D window" );
+	INISetInt( COLOR_3D, portals.color_3d, "Color of lines/polygons in 3D window" );
+	INISetInt( COLOR_FOG, portals.color_fog, "Color of distant lines/polygons in 3D window" );
+	INISetInt( OPACITY_3D, portals.opacity_3d, "Opacity in 3d view (0 = invisible, 100 = solid)" );
 	INISetInt( CLIP, portals.clip, "Cubic clipper active for portal viewer" );
-	INISetInt( CLIP_RANGE, (int)portals.clip_range, "Portal viewer cubic clip distance (in units of 64)" );
+	INISetInt( CLIP_RANGE, portals.clip_range, "Portal viewer cubic clip distance (in units of 64)" );
 }
 
 
@@ -201,10 +170,10 @@ static const char *PLUGIN_COMMANDS =
     Q3R_CMD_LOAD;
 
 
-GtkWidget *g_pRadiantWnd = NULL;
+QWidget *g_pRadiantWnd = NULL;
 
 const char* QERPlug_Init( void *hApp, void* pMainWidget ){
-	g_pRadiantWnd = (GtkWidget*)pMainWidget;
+	g_pRadiantWnd = static_cast<QWidget*>( pMainWidget );
 	return "Portal Viewer for Q3Radiant";
 }
 
@@ -229,7 +198,7 @@ void QERPlug_Dispatch( const char* p, float* vMin, float* vMax, bool bSingleBrus
 		DoAboutDlg();
 	}
 	else if ( !strcmp( p,Q3R_CMD_LOAD ) ) {
-		if ( DoLoadPortalFileDialog() == IDOK ) {
+		if ( DoLoadPortalFileDialog() ) {
 			portals.Load();
 			SceneChangeNotify();
 		}

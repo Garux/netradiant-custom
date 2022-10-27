@@ -21,7 +21,5 @@
 
 #pragma once
 
-#if _MSC_VER > 1000 && defined( WIN32 )
-#pragma warning(disable:4355) // 'this' : used in base member initializer list
-#pragma warning(disable:4503) // '[symbol]' : decorated name length exceeded, name was truncated
-#endif
+void theme_contruct_menu( class QMenu *menu );
+void theme_contruct();

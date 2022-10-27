@@ -34,58 +34,47 @@
 // NOTE: parent can be 0 in all functions but it's best to set them
 
 // this API does not depend on gtk+ or glib
-typedef struct _GtkWidget GtkWidget;
+class QWidget;
+class QString;
 
-enum EMessageBoxType
+enum class EMessageBoxType
 {
-	eMB_OK,
-	eMB_OKCANCEL,
-	eMB_YESNO,
-	eMB_YESNOCANCEL,
-	eMB_NOYES,
-};
-
-enum EMessageBoxIcon
-{
-	eMB_ICONDEFAULT,
-	eMB_ICONERROR,
-	eMB_ICONWARNING,
-	eMB_ICONQUESTION,
-	eMB_ICONASTERISK,
+	Info,
+	Question,	/* eIDYES | eIDNO */
+	Warning,
+	Error,
 };
 
 enum EMessageBoxReturn
 {
-	eIDOK,
-	eIDCANCEL,
-	eIDYES,
-	eIDNO,
+	eIDOK = 1,
+	eIDCANCEL = 2,
+	eIDYES = 4,
+	eIDNO = 8,
 };
 
 // simple Message Box, see above for the 'type' flags
-
-typedef EMessageBoxReturn ( *PFN_QERAPP_MESSAGEBOX )( GtkWidget *parent, const char* text, const char* caption /* = "NetRadiant"*/, EMessageBoxType type /* = eMB_OK*/, EMessageBoxIcon icon /* = eMB_ICONDEFAULT*/ );
+//! \p buttons is combination of \enum EMessageBoxReturn flags or 0 for buttons, respecting \enum class EMessageBoxType
+typedef EMessageBoxReturn ( *PFN_QERAPP_MESSAGEBOX )( QWidget *parent, const char* text, const char* caption /* = "NetRadiant"*/, EMessageBoxType type /* = Info*/, int buttons /* = 0*/ );
 
 // file and directory selection functions return null if the user hits cancel
 // - 'title' is the dialog title (can be null)
 // - 'path' is used to set the initial directory (can be null)
 // - 'pattern': the first pattern is for the win32 mode, then comes the Gtk pattern list, see Radiant source for samples
-typedef const char* ( *PFN_QERAPP_FILEDIALOG )( GtkWidget *parent, bool open, const char* title, const char* path /* = 0*/, const char* pattern /* = 0*/, bool want_load /* = false*/, bool want_import /* = false*/, bool want_save /* = false*/ );
+typedef const char* ( *PFN_QERAPP_FILEDIALOG )( QWidget *parent, bool open, const char* title, const char* path /* = 0*/, const char* pattern /* = 0*/, bool want_load /* = false*/, bool want_import /* = false*/, bool want_save /* = false*/ );
 
-// returns a gchar* string that must be g_free'd by the user
-typedef char* ( *PFN_QERAPP_DIRDIALOG )( GtkWidget *parent, const char* title /* = "Choose Directory"*/, const char* path /* = 0*/ );
-
+typedef QString ( *PFN_QERAPP_DIRDIALOG )( QWidget *parent, const QString& path /* = {} */ );
 // return true if the user closed the dialog with 'Ok'
 // 'color' is used to set the initial value and store the selected value
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
-typedef bool ( *PFN_QERAPP_COLORDIALOG )( GtkWidget *parent, Vector3& color,
+typedef bool ( *PFN_QERAPP_COLORDIALOG )( QWidget *parent, Vector3& color,
                                           const char* title /* = "Choose Color"*/ );
 
-// load a .bmp file and create a GtkImage widget from it
+// load an image file and create QIcon from it
 // NOTE: 'filename' is relative to <radiant_path>/plugins/bitmaps/
-typedef struct _GtkImage GtkImage;
-typedef GtkImage* ( *PFN_QERAPP_NEWIMAGE )( const char* filename );
+class QIcon;
+typedef QIcon ( *PFN_QERAPP_NEWICON )( const char* filename );
 
 // ========================================
 
@@ -156,12 +145,12 @@ struct _QERFuncTable_1
 
 	const char* ( *TextureBrowser_getSelectedShader )( );
 
-	// GTK+ functions
+	// Qt functions
 	PFN_QERAPP_MESSAGEBOX m_pfnMessageBox;
 	PFN_QERAPP_FILEDIALOG m_pfnFileDialog;
 	PFN_QERAPP_DIRDIALOG m_pfnDirDialog;
 	PFN_QERAPP_COLORDIALOG m_pfnColorDialog;
-	PFN_QERAPP_NEWIMAGE m_pfnNewImage;
+	PFN_QERAPP_NEWICON m_pfnNewIcon;
 
 };
 

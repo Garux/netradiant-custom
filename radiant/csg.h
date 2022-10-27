@@ -21,12 +21,8 @@
 
 #pragma once
 
-void CSG_MakeRoom();
-void CSG_Subtract();
-void CSG_Merge();
-void CSG_WrapMerge();
 void CSG_DeleteComponents();
-void CSG_Tool();
+void CSG_registerCommands();
 
 namespace scene
 {

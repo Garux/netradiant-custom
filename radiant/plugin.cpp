@@ -63,7 +63,6 @@
 #include "mainframe.h"
 #include "build.h"
 #include "mru.h"
-#include "multimon.h"
 #include "surfacedialog.h"
 #include "groupdialog.h"
 #include "patchdialog.h"
@@ -157,11 +156,11 @@ public:
 
 		m_radiantcore.TextureBrowser_getSelectedShader = TextureBrowser_GetSelectedShader;
 
-		m_radiantcore.m_pfnMessageBox = &gtk_MessageBox;
+		m_radiantcore.m_pfnMessageBox = &qt_MessageBox;
 		m_radiantcore.m_pfnFileDialog = &file_dialog;
 		m_radiantcore.m_pfnColorDialog = &color_dialog;
 		m_radiantcore.m_pfnDirDialog = &dir_dialog;
-		m_radiantcore.m_pfnNewImage = &new_plugin_image;
+		m_radiantcore.m_pfnNewIcon = &new_plugin_icon;
 	}
 	_QERFuncTable_1* getTable(){
 		return &m_radiantcore;
@@ -251,7 +250,6 @@ public:
 		HomePaths_Construct();
 		VFS_Construct();
 		Grid_construct();
-		MultiMon_Construct();
 		MRU_Construct();
 		Pointfile_Construct();
 		BuildMenu_Construct();
@@ -260,7 +258,6 @@ public:
 		MainFrame_Construct();
 		GroupDialog_Construct();
 		SurfaceInspector_Construct();
-		PatchInspector_Construct();
 		CamWnd_Construct();
 		XYWindow_Construct();
 		BuildMonitor_Construct();
@@ -290,7 +287,6 @@ public:
 		BuildMonitor_Destroy();
 		XYWindow_Destroy();
 		CamWnd_Destroy();
-		PatchInspector_Destroy();
 		SurfaceInspector_Destroy();
 		GroupDialog_Destroy();
 		MainFrame_Destroy();
@@ -299,7 +295,6 @@ public:
 		BuildMenu_Destroy();
 		Pointfile_Destroy();
 		MRU_Destroy();
-		MultiMon_Destroy();
 		Grid_destroy();
 		VFS_Destroy();
 		HomePaths_Destroy();

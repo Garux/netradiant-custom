@@ -24,7 +24,6 @@
 void EntityList_Construct();
 void EntityList_Destroy();
 
-typedef struct _GtkWindow GtkWindow;
-void EntityList_constructWindow( GtkWindow* main_window );
+void EntityList_constructWindow( class QWidget* main_window );
 void EntityList_destroyWindow();
 void EntityList_toggleShown();

@@ -1,196 +1,122 @@
-#include <gdk/gdkkeysyms.h>
-#include <gtk/gtk.h>
+
 
 #include "debugging/debugging.h"
 #include "callbacks.h"
-#include "support.h"
 #include "plugin.h"
 
-#define GLADE_HOOKUP_OBJECT( component,widget,name ) \
-	g_object_set_data_full( G_OBJECT( component ), name, \
-							g_object_ref( (gpointer)widget ), (GDestroyNotify) g_object_unref )
+#include <QEvent>
+inline void qt_connect_shortcut_override( QWidget *widget ){
+	class Filter : public QObject
+	{
+		using QObject::QObject;
+	protected:
+		bool eventFilter( QObject *obj, QEvent *event ) override {
+			if( event->type() == QEvent::ShortcutOverride ) {
+				event->accept();
+				return true;
+			}
+			return QObject::eventFilter( obj, event ); // standard event processing
+		}
+	};
+	widget->installEventFilter( new Filter( widget ) );
+}
 
-#define GLADE_HOOKUP_OBJECT_NO_REF( component,widget,name )	\
-	g_object_set_data( G_OBJECT( component ), name, widget )
+#include <QKeyEvent>
+class Del_QListWidget : public QListWidget
+{
+	using QListWidget::QListWidget;
+protected:
+	void keyPressEvent( QKeyEvent *event ) override {
+		if( event->matches( QKeySequence::StandardKey::Delete ) )
+			callbacks::OnRemoveMaterial();
+		QListWidget::keyPressEvent( event );
+	}
+};
 
-// created by glade
-GtkWidget*
-create_w_plugplug2( void ){
-	GtkWidget *w_plugplug2;
-	GtkWidget *vbox1;
-	GtkWidget *hbox2;
-	GtkWidget *vbox4;
-	GtkWidget *r_collapse;
-	GtkWidget *r_collapsebymaterial;
-	GtkWidget *r_nocollapse;
-	GtkWidget *vbox3;
-	GtkWidget *b_export;
-	GtkWidget *b_exportAs;
-	GtkWidget *b_close;
-	GtkWidget *vbox2;
-	GtkWidget *label1;
-	GtkWidget *scrolledwindow1;
-	GtkWidget *t_materialist;
-	GtkWidget *ed_materialname;
-	GtkWidget *hbox1;
-	GtkWidget *b_addmaterial;
-	GtkWidget *b_removematerial;
-	GtkWidget *t_exportmaterials;
-	GtkWidget *t_limitmatnames;
-	GtkWidget *t_objects;
-	GtkWidget *t_weld;
-
-	w_plugplug2 = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-	gtk_window_set_title( GTK_WINDOW( w_plugplug2 ), "BrushExport-Plugin 3.0 by namespace" );
-	gtk_window_set_position( GTK_WINDOW( w_plugplug2 ), GTK_WIN_POS_CENTER_ON_PARENT );
-	gtk_window_set_transient_for( GTK_WINDOW( w_plugplug2 ), GTK_WINDOW( g_pRadiantWnd ) );
-	gtk_window_set_destroy_with_parent( GTK_WINDOW( w_plugplug2 ), TRUE );
-
-	vbox1 = gtk_vbox_new( FALSE, 0 );
-	gtk_container_add( GTK_CONTAINER( w_plugplug2 ), vbox1 );
-	gtk_container_set_border_width( GTK_CONTAINER( vbox1 ), 5 );
-
-	hbox2 = gtk_hbox_new( TRUE, 5 );
-	gtk_box_pack_start( GTK_BOX( vbox1 ), hbox2, FALSE, FALSE, 0 );
-	gtk_container_set_border_width( GTK_CONTAINER( hbox2 ), 5 );
-
-	vbox4 = gtk_vbox_new( TRUE, 0 );
-	gtk_box_pack_start( GTK_BOX( hbox2 ), vbox4, TRUE, FALSE, 0 );
-
-	r_collapse = gtk_radio_button_new_with_label_from_widget( NULL, "Collapse mesh" );
-	gtk_widget_set_tooltip_text( r_collapse, "Collapse all brushes into a single group" );
-	gtk_box_pack_start( GTK_BOX( vbox4 ), r_collapse, FALSE, FALSE, 0 );
-
-	r_collapsebymaterial = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( r_collapse ), "Collapse by material" );
-	gtk_widget_set_tooltip_text( r_collapsebymaterial, "Collapse into groups by material" );
-	gtk_box_pack_start( GTK_BOX( vbox4 ), r_collapsebymaterial, FALSE, FALSE, 0 );
-
-	r_nocollapse = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( r_collapse ), "Don't collapse" );
-	gtk_widget_set_tooltip_text( r_nocollapse, "Every brush is stored in its own group" );
-	gtk_box_pack_start( GTK_BOX( vbox4 ), r_nocollapse, FALSE, FALSE, 0 );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( r_nocollapse ), TRUE );
-
-	vbox3 = gtk_vbox_new( FALSE, 0 );
-	gtk_box_pack_start( GTK_BOX( hbox2 ), vbox3, FALSE, FALSE, 0 );
-
-	b_export = gtk_button_new_from_stock( "gtk-save" );
-	gtk_box_pack_start( GTK_BOX( vbox3 ), b_export, TRUE, FALSE, 0 );
-	gtk_container_set_border_width( GTK_CONTAINER( b_export ), 5 );
-	gtk_widget_set_sensitive( b_export, FALSE );
-
-	b_exportAs = gtk_button_new_from_stock( "gtk-save-as" );
-	gtk_box_pack_start( GTK_BOX( vbox3 ), b_exportAs, TRUE, FALSE, 0 );
-	gtk_container_set_border_width( GTK_CONTAINER( b_exportAs ), 5 );
-
-	b_close = gtk_button_new_from_stock( "gtk-cancel" );
-	gtk_box_pack_start( GTK_BOX( vbox3 ), b_close, TRUE, FALSE, 0 );
-	gtk_container_set_border_width( GTK_CONTAINER( b_close ), 5 );
-
-	vbox2 = gtk_vbox_new( FALSE, 5 );
-	gtk_box_pack_start( GTK_BOX( vbox1 ), vbox2, TRUE, TRUE, 0 );
-	gtk_container_set_border_width( GTK_CONTAINER( vbox2 ), 2 );
-
-	label1 = gtk_label_new( "Ignored materials:" );
-	gtk_box_pack_start( GTK_BOX( vbox2 ), label1, FALSE, FALSE, 0 );
-
-	scrolledwindow1 = gtk_scrolled_window_new( NULL, NULL );
-	gtk_box_pack_start( GTK_BOX( vbox2 ), scrolledwindow1, TRUE, TRUE, 0 );
-	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow1 ), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
-	gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scrolledwindow1 ), GTK_SHADOW_IN );
+QWidget* create_w_plugplug2(){
+	auto window = g_dialog.window = new QWidget( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	window->setWindowTitle( "BrushExport-Plugin 3.0 by namespace" );
+	qt_connect_shortcut_override( window );
 
 	{
-		t_materialist = gtk_tree_view_new();
-		gtk_container_add( GTK_CONTAINER( scrolledwindow1 ), t_materialist );
-		gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( t_materialist ), FALSE );
-		gtk_tree_view_set_enable_search( GTK_TREE_VIEW( t_materialist ), FALSE );
+		auto grid = new QGridLayout( window );
+		{
+			auto r_collapse = g_dialog.r_collapse = new QRadioButton( "Collapse mesh" );
+			r_collapse->setToolTip( "Collapse all brushes into a single group" );
+			grid->addWidget( r_collapse, 0, 0 );
 
-		// column & renderer
-		GtkTreeViewColumn* col = gtk_tree_view_column_new();
-		gtk_tree_view_column_set_title( col, "materials" );
-		gtk_tree_view_append_column( GTK_TREE_VIEW( t_materialist ), col );
-		GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-		gtk_tree_view_insert_column_with_attributes( GTK_TREE_VIEW( t_materialist ), -1, "", renderer, "text", 0, NULL );
+			auto r_collapsebymaterial = g_dialog.r_collapsebymaterial = new QRadioButton( "Collapse by material" );
+			r_collapsebymaterial->setToolTip( "Collapse into groups by material" );
+			grid->addWidget( r_collapsebymaterial, 1, 0 );
 
-		// list store
-		GtkListStore* ignorelist = gtk_list_store_new( 1, G_TYPE_STRING );
-		gtk_tree_view_set_model( GTK_TREE_VIEW( t_materialist ), GTK_TREE_MODEL( ignorelist ) );
-		g_object_unref( ignorelist );
+			auto r_nocollapse = g_dialog.r_nocollapse = new QRadioButton( "Don't collapse" );
+			r_nocollapse->setToolTip( "Every brush is stored in its own group" );
+			grid->addWidget( r_nocollapse, 2, 0 );
+			r_nocollapse->setChecked( true );
+		}
+		{
+			auto b_export = g_dialog.b_export = new QPushButton( "Save" );
+			grid->addWidget( b_export, 0, 1 );
+			b_export->setDisabled( true );
+			QObject::connect( b_export, &QAbstractButton::clicked, callbacks::OnExportClicked );
+
+			auto b_exportAs = new QPushButton( "Save As" );
+			grid->addWidget( b_exportAs, 1, 1 );
+			QObject::connect( b_exportAs, &QAbstractButton::clicked, [](){
+				callbacks::OnExportClicked( true );
+			} );
+
+			auto b_close = new QPushButton( "Cancel" );
+			grid->addWidget( b_close, 2, 1 );
+			QObject::connect( b_close, &QAbstractButton::clicked, window, &QWidget::hide );
+		}
+		{
+			grid->addWidget( new QLabel( "Ignored materials:" ), 3, 0, 1, 2, Qt::AlignmentFlag::AlignHCenter );
+		}
+		{
+			auto t_materialist = g_dialog.t_materialist = new Del_QListWidget;
+			grid->addWidget( t_materialist, 4, 0, 1, 2 );
+			t_materialist->setEditTriggers( QAbstractItemView::EditTrigger::DoubleClicked | QAbstractItemView::EditTrigger::EditKeyPressed );
+		}
+		{
+			auto ed_materialname = g_dialog.ed_materialname = new QLineEdit;
+			grid->addWidget( ed_materialname, 5, 0, 1, 2 );
+			QObject::connect( ed_materialname, &QLineEdit::returnPressed, callbacks::OnAddMaterial );
+		}
+		{
+			auto b_addmaterial = new QPushButton( "Add" );
+			grid->addWidget( b_addmaterial, 6, 0 );
+			QObject::connect( b_addmaterial, &QAbstractButton::clicked, callbacks::OnAddMaterial );
+
+			auto b_removematerial = new QPushButton( "Remove" );
+			grid->addWidget( b_removematerial, 6, 1 );
+			QObject::connect( b_removematerial, &QAbstractButton::clicked, callbacks::OnRemoveMaterial );
+		}
+		{
+			auto t_limitmatnames = g_dialog.t_limitmatnames = new QCheckBox( "Use short material names (max. 20 chars)" );
+			grid->addWidget( t_limitmatnames, 7, 0, 1, 2 );
+
+			auto t_objects = g_dialog.t_objects = new QCheckBox( "Create (o)bjects instead of (g)roups" );
+			grid->addWidget( t_objects, 8, 0, 1, 2 );
+
+			auto t_weld = g_dialog.t_weld = new QCheckBox( "Weld vertices" );
+			grid->addWidget( t_weld, 9, 0, 1, 2 );
+			t_weld->setToolTip( "inside groups/objects" );
+			t_weld->setChecked( true );
+
+			auto t_exportmaterials = g_dialog.t_exportmaterials = new QCheckBox( "Create material information (.mtl file)" );
+			grid->addWidget( t_exportmaterials, 10, 0, 1, 2 );
+			t_exportmaterials->setChecked( true );
+		}
 	}
 
-	ed_materialname = gtk_entry_new();
-	gtk_box_pack_start( GTK_BOX( vbox2 ), ed_materialname, FALSE, FALSE, 0 );
-
-	hbox1 = gtk_hbox_new( TRUE, 0 );
-	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox1, FALSE, FALSE, 0 );
-
-	b_addmaterial = gtk_button_new_from_stock( "gtk-add" );
-	gtk_box_pack_start( GTK_BOX( hbox1 ), b_addmaterial, FALSE, FALSE, 0 );
-
-	b_removematerial = gtk_button_new_from_stock( "gtk-remove" );
-	gtk_box_pack_start( GTK_BOX( hbox1 ), b_removematerial, FALSE, FALSE, 0 );
-
-	t_limitmatnames = gtk_check_button_new_with_mnemonic( "Use short material names (max. 20 chars)" );
-	gtk_box_pack_end( GTK_BOX( vbox2 ), t_limitmatnames, FALSE, FALSE, 0 );
-
-	t_objects = gtk_check_button_new_with_mnemonic( "Create (o)bjects instead of (g)roups" );
-	gtk_box_pack_end( GTK_BOX( vbox2 ), t_objects, FALSE, FALSE, 0 );
-
-	t_weld = gtk_check_button_new_with_mnemonic( "Weld vertices" );
-	gtk_widget_set_tooltip_text( t_weld, "inside groups/objects" );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( t_weld ), TRUE );
-	gtk_box_pack_end( GTK_BOX( vbox2 ), t_weld, FALSE, FALSE, 0 );
-
-	t_exportmaterials = gtk_check_button_new_with_mnemonic( "Create material information (.mtl file)" );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( t_exportmaterials ), TRUE );
-	gtk_box_pack_end( GTK_BOX( vbox2 ), t_exportmaterials, FALSE, FALSE, 0 );
-
-	using namespace callbacks;
-	g_signal_connect( G_OBJECT( w_plugplug2 ), "delete_event", G_CALLBACK( gtk_widget_hide_on_delete ), NULL );
-	g_signal_connect_swapped( G_OBJECT( b_close ), "clicked", G_CALLBACK( gtk_widget_hide ), w_plugplug2 );
-
-	g_signal_connect( G_OBJECT( b_export ), "clicked", G_CALLBACK( OnExportClicked ), NULL );
-	g_signal_connect( G_OBJECT( b_exportAs ), "clicked", G_CALLBACK( OnExportClicked ), gpointer( 1 ) );
-	g_signal_connect( G_OBJECT( b_addmaterial ), "clicked", G_CALLBACK( OnAddMaterial ), NULL );
-	g_signal_connect( G_OBJECT( ed_materialname ), "activate", G_CALLBACK( OnAddMaterial ), NULL ); // NB: wrong callback, but pointer casting works
-	g_signal_connect( G_OBJECT( b_removematerial ), "clicked", G_CALLBACK( OnRemoveMaterial ), NULL );
-	g_signal_connect( G_OBJECT( t_materialist ), "key-press-event", G_CALLBACK( OnRemoveMaterialKb ), NULL );
-
-
-	/* Store pointers to all widgets, for use by lookup_widget(). */
-	GLADE_HOOKUP_OBJECT_NO_REF( w_plugplug2, w_plugplug2, "w_plugplug2" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, vbox1, "vbox1" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, hbox2, "hbox2" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, vbox4, "vbox4" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, r_collapse, "r_collapse" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, r_collapsebymaterial, "r_collapsebymaterial" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, r_nocollapse, "r_nocollapse" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, vbox3, "vbox3" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, b_export, "b_export" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, b_close, "b_close" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, vbox2, "vbox2" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, label1, "label1" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, scrolledwindow1, "scrolledwindow1" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, t_materialist, "t_materialist" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, ed_materialname, "ed_materialname" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, hbox1, "hbox1" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, b_addmaterial, "b_addmaterial" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, b_removematerial, "b_removematerial" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, t_exportmaterials, "t_exportmaterials" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, t_limitmatnames, "t_limitmatnames" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, t_objects, "t_objects" );
-	GLADE_HOOKUP_OBJECT( w_plugplug2, t_weld, "t_weld" );
-
-	gtk_widget_show_all( w_plugplug2 );
-
-	return w_plugplug2;
+	return window;
 }
 
 // global main window, is 0 when not created
-GtkWidget* g_brushexp_window = 0;
-
 // spawn or unhide plugin window
-void CreateWindow( void ){
-	if( !g_brushexp_window )
-		g_brushexp_window = create_w_plugplug2();
-	gtk_widget_show( g_brushexp_window );
+void CreateWindow(){
+	if( g_dialog.window == nullptr )
+		g_dialog.window = create_w_plugplug2();
+	g_dialog.window->show();
 }

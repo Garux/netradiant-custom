@@ -25,67 +25,54 @@
 #include "itoolbar.h"
 #include "modulesystem.h"
 
-#include <gtk/gtk.h>
-
 #include "stream/stringstream.h"
+#include "os/file.h"
 #include "gtkutil/image.h"
-#include "gtkutil/container.h"
 #include "gtkutil/toolbar.h"
 
 #include "mainframe.h"
 #include "plugin.h"
 
-GtkImage* new_plugin_image( const char* filename ){
+QIcon new_plugin_icon( const char* filename ){
+	StringOutputStream fullpath( 256 );
 	{
-		StringOutputStream fullpath( 256 );
-		fullpath << AppPath_get() << g_pluginsDir << "bitmaps/" << filename;
-		GtkImage* image = image_new_from_file_with_mask( fullpath.c_str() );
-		if ( image != 0 ) {
-			return image;
-		}
+		fullpath( AppPath_get(), g_pluginsDir, "bitmaps/", filename );
+		if( file_exists( fullpath ) )
+			return QIcon( fullpath.c_str() );
 	}
 
 	{
-		StringOutputStream fullpath( 256 );
-		fullpath << GameToolsPath_get() << g_pluginsDir << "bitmaps/" << filename;
-		GtkImage* image = image_new_from_file_with_mask( fullpath.c_str() );
-		if ( image != 0 ) {
-			return image;
-		}
+		fullpath( GameToolsPath_get(), g_pluginsDir, "bitmaps/", filename );
+		if( file_exists( fullpath ) )
+			return QIcon( fullpath.c_str() );
 	}
 
 	{
-		StringOutputStream fullpath( 256 );
-		fullpath << AppPath_get() << g_modulesDir << "bitmaps/" << filename;
-		GtkImage* image = image_new_from_file_with_mask( fullpath.c_str() );
-		if ( image != 0 ) {
-			return image;
-		}
+		fullpath( AppPath_get(), g_modulesDir, "bitmaps/", filename );
+		if( file_exists( fullpath ) )
+			return QIcon( fullpath.c_str() );
 	}
 
-	return image_new_missing();
+	return {};
 }
 
-void toolbar_insert( GtkToolbar *toolbar, const char* icon, const char* text, const char* tooltip, IToolbarButton::EType type, GCallback callback, gpointer data ){
+void toolbar_insert( QToolBar *toolbar, const char* icon, const char* text, const char* tooltip, IToolbarButton::EType type, const IToolbarButton* ibutton ){
 	switch ( type )
 	{
 	case IToolbarButton::eSpace:
-		toolbar_append_space( toolbar );
+		toolbar->addSeparator();
 		return;
 	case IToolbarButton::eButton:
 		{
-			GtkToolButton* button = GTK_TOOL_BUTTON( gtk_tool_button_new( GTK_WIDGET( new_plugin_image( icon ) ), text ) );
-			g_signal_connect( G_OBJECT( button ), "clicked", callback, data );
-			toolbar_append( toolbar, GTK_TOOL_ITEM( button ), tooltip );
+			QAction *button = toolbar->addAction( new_plugin_icon( icon ), text, [ibutton](){ ibutton->activate(); } );
+			button->setToolTip( tooltip );
 		}
 		return;
 	case IToolbarButton::eToggleButton:
 		{
-			GtkToggleToolButton* button = GTK_TOGGLE_TOOL_BUTTON( gtk_toggle_tool_button_new() );
-			gtk_tool_button_set_icon_widget( GTK_TOOL_BUTTON( button ), GTK_WIDGET( new_plugin_image( icon ) ) );
-			gtk_tool_button_set_label( GTK_TOOL_BUTTON( button ), text );
-			g_signal_connect( G_OBJECT( button ), "toggled", callback, data );
-			toolbar_append( toolbar, GTK_TOOL_ITEM( button ), tooltip );
+			QAction *button = toolbar->addAction( new_plugin_icon( icon ), text, [ibutton](){ ibutton->activate(); } );
+			button->setToolTip( tooltip );
+			button->setCheckable( true );
 		}
 		return;
 	case IToolbarButton::eRadioButton:
@@ -97,22 +84,18 @@ void toolbar_insert( GtkToolbar *toolbar, const char* icon, const char* text, co
 	}
 }
 
-void ActivateToolbarButton( GtkWidget *widget, gpointer data ){
-	const_cast<const IToolbarButton*>( reinterpret_cast<IToolbarButton*>( data ) )->activate();
+void PlugInToolbar_AddButton( QToolBar* toolbar, const IToolbarButton* button ){
+	toolbar_insert( toolbar, button->getImage(), button->getText(), button->getTooltip(), button->getType(), button );
 }
 
-void PlugInToolbar_AddButton( GtkToolbar* toolbar, const IToolbarButton* button ){
-	toolbar_insert( toolbar, button->getImage(), button->getText(), button->getTooltip(), button->getType(), G_CALLBACK( ActivateToolbarButton ), reinterpret_cast<gpointer>( const_cast<IToolbarButton*>( button ) ) );
-}
-
-GtkToolbar* g_plugin_toolbar = 0;
+QToolBar* g_plugin_toolbar = 0;
 
 void PluginToolbar_populate(){
 	class AddToolbarItemVisitor : public ToolbarModules::Visitor
 	{
-		GtkToolbar* m_toolbar;
+		QToolBar* m_toolbar;
 	public:
-		AddToolbarItemVisitor( GtkToolbar* toolbar )
+		AddToolbarItemVisitor( QToolBar* toolbar )
 			: m_toolbar( toolbar ){
 		}
 		void visit( const char* name, const _QERPlugToolbarTable& table ) const {
@@ -129,11 +112,12 @@ void PluginToolbar_populate(){
 }
 
 void PluginToolbar_clear(){
+#if 0 // unused, intended for "Refresh"
 	container_remove_all( GTK_CONTAINER( g_plugin_toolbar ) );
+#endif
 }
 
-GtkToolbar* create_plugin_toolbar(){
-	g_plugin_toolbar = toolbar_new();
+void create_plugin_toolbar( QToolBar *toolbar ){
+	g_plugin_toolbar = toolbar;
 	PluginToolbar_populate();
-	return g_plugin_toolbar;
 }

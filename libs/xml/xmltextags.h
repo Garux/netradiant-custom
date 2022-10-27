@@ -30,19 +30,21 @@
 #include <libxml/xpath.h>
 #include <libxml/xmlwriter.h>
 
-enum NodeTagType
+constexpr char SHADERTAG_FILE[] = "shadertags.xml";
+
+enum class NodeTagType
 {
 	TAG,
 	EMPTY
 };
 
-enum NodeShaderType
+enum class NodeShaderType
 {
 	SHADER,
 	TEXTURE
 };
 
-enum TextureType
+enum class TextureType
 {
 	STOCK,
 	CUSTOM
@@ -52,8 +54,8 @@ class XmlTagBuilder
 {
 private:
 	CopiedString m_savefilename;
-	xmlDocPtr doc;
-	xmlXPathContextPtr context;
+	xmlDocPtr doc{};
+	xmlXPathContextPtr context{};
 
 	xmlXPathObjectPtr XpathEval( const char* queryString ){
 		const xmlChar* expression = (const xmlChar*)queryString;
@@ -67,10 +69,10 @@ private:
 
 		switch ( nodeTagType )
 		{
-		case TAG:
+		case NodeTagType::TAG:
 			strcat( buffer, "']/tag" );
 			break;
-		case EMPTY:
+		case NodeTagType::EMPTY:
 			strcat( buffer, "']" );
 		};
 
@@ -81,7 +83,7 @@ public:
 	XmlTagBuilder();
 	~XmlTagBuilder();
 
-	bool CreateXmlDocument();
+	bool CreateXmlDocument( const char* savefile = nullptr );
 	bool OpenXmlDoc( const char* file, const char* savefile = 0 );
 	bool SaveXmlDoc( const char* file );
 	bool SaveXmlDoc();

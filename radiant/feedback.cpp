@@ -32,7 +32,9 @@
 #include "igl.h"
 #include "iselection.h"
 
-#include <gtk/gtk.h>
+#include <QTreeWidget>
+#include <QHeaderView>
+#include <QVBoxLayout>
 
 #include "map.h"
 #include "dialog.h"
@@ -128,17 +130,17 @@ void CPointMsg::DropHighlight(){
 
 void CPointMsg::Draw2D( VIEWTYPE vt ){
 	NDIM1NDIM2( vt )
-	glPointSize( 4 );
-	glColor3f( 1.0f,0.0f,0.0f );
-	glBegin( GL_POINTS );
-	glVertex2f( pt[nDim1], pt[nDim2] );
-	glEnd();
-	glBegin( GL_LINE_LOOP );
-	glVertex2f( pt[nDim1] - 8, pt[nDim2] - 8 );
-	glVertex2f( pt[nDim1] + 8, pt[nDim2] - 8 );
-	glVertex2f( pt[nDim1] + 8, pt[nDim2] + 8 );
-	glVertex2f( pt[nDim1] - 8, pt[nDim2] + 8 );
-	glEnd();
+	gl().glPointSize( 4 );
+	gl().glColor3f( 1.0f,0.0f,0.0f );
+	gl().glBegin( GL_POINTS );
+	gl().glVertex2f( pt[nDim1], pt[nDim2] );
+	gl().glEnd();
+	gl().glBegin( GL_LINE_LOOP );
+	gl().glVertex2f( pt[nDim1] - 8, pt[nDim2] - 8 );
+	gl().glVertex2f( pt[nDim1] + 8, pt[nDim2] - 8 );
+	gl().glVertex2f( pt[nDim1] + 8, pt[nDim2] + 8 );
+	gl().glVertex2f( pt[nDim1] - 8, pt[nDim2] + 8 );
+	gl().glEnd();
 }
 
 void CWindingMsg::saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs ){
@@ -200,36 +202,32 @@ void CWindingMsg::Draw2D( VIEWTYPE vt ){
 	int i;
 
 	NDIM1NDIM2( vt )
-	glColor3f( 1.0f,0.f,0.0f );
+	gl().glColor3f( 1.0f,0.f,0.0f );
 
-	glPointSize( 4 );
-	glBegin( GL_POINTS );
+	gl().glPointSize( 4 );
+	gl().glBegin( GL_POINTS );
 	for ( i = 0; i < numpoints; i++ )
-		glVertex2f( wt[i][nDim1], wt[i][nDim2] );
-	glEnd();
-	glPointSize( 1 );
+		gl().glVertex2f( wt[i][nDim1], wt[i][nDim2] );
+	gl().glEnd();
+	gl().glPointSize( 1 );
 
-	glEnable( GL_BLEND );
-	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	glColor4f( 0.133f,0.4f,1.0f,0.5f );
-	glBegin( GL_POLYGON );
+	gl().glEnable( GL_BLEND );
+	gl().glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+	gl().glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	gl().glColor4f( 0.133f,0.4f,1.0f,0.5f );
+	gl().glBegin( GL_POLYGON );
 	for ( i = 0; i < numpoints; i++ )
-		glVertex2f( wt[i][nDim1], wt[i][nDim2] );
-	glEnd();
-	glDisable( GL_BLEND );
+		gl().glVertex2f( wt[i][nDim1], wt[i][nDim2] );
+	gl().glEnd();
+	gl().glDisable( GL_BLEND );
 }
 
 // triggered when the user selects an entry in the feedback box
-static void feedback_selection_changed( GtkTreeSelection* selection, gpointer data ){
-	g_DbgDlg.DropHighlight();
+void CDbgDlg::feedback_selection_changed( QTreeWidgetItem *current ){
+	DropHighlight();
 
-	GtkTreeModel* model;
-	GtkTreeIter selected;
-	if ( gtk_tree_selection_get_selected( selection, &model, &selected ) ) {
-		GtkTreePath* path = gtk_tree_model_get_path( model, &selected );
-		g_DbgDlg.SetHighlight( gtk_tree_path_get_indices( path )[0] );
-		gtk_tree_path_free( path );
+	if( current != nullptr ){
+		SetHighlight( m_clist->indexOfTopLevelItem( current ) );
 	}
 }
 
@@ -241,88 +239,59 @@ void CDbgDlg::DropHighlight(){
 	}
 }
 
-void CDbgDlg::SetHighlight( gint row ){
-	ISAXHandler *h = GetElement( row );
-	if ( h != NULL ) {
+void CDbgDlg::SetHighlight( std::size_t row ){
+	if ( ISAXHandler *h = m_feedbackElements.at( row ) ) {
 		m_pDraw2D = h->Highlight();
 		m_pHighlight = h;
 	}
-}
-
-ISAXHandler *CDbgDlg::GetElement( std::size_t row ){
-	return static_cast<ISAXHandler *>( g_ptr_array_index( m_pFeedbackElements, gint( row ) ) );
 }
 
 void CDbgDlg::Init(){
 	DropHighlight();
 
 	// free all the ISAXHandler*, clean it
-	while ( m_pFeedbackElements->len )
-	{
-		static_cast<ISAXHandler *>( g_ptr_array_index( m_pFeedbackElements, 0 ) )->Release();
-		g_ptr_array_remove_index( m_pFeedbackElements, 0 );
-	}
+	for( auto *e : m_feedbackElements )
+		e->Release();
+	m_feedbackElements.clear();
 
 	if ( m_clist != NULL ) {
-		gtk_list_store_clear( m_clist );
+		m_clist->clear();
 	}
 }
 
 void CDbgDlg::Push( ISAXHandler *pHandler ){
 	// push in the list
-	g_ptr_array_add( m_pFeedbackElements, (void *)pHandler );
+	m_feedbackElements.push_back( pHandler );
 
 	if ( GetWidget() == 0 ) {
-		Create();
+		Create( MainFrame_getWindow() );
 	}
 
 	// put stuff in the list
-	gtk_list_store_clear( m_clist );
-	for ( std::size_t i = 0; i < static_cast<std::size_t>( m_pFeedbackElements->len ); ++i )
+	m_clist->clear();
+	for ( auto *element : m_feedbackElements )
 	{
-		GtkTreeIter iter;
-		gtk_list_store_append( m_clist, &iter );
-		gtk_list_store_set( m_clist, &iter, 0, GetElement( i )->getName(), -1 );
+		auto *item = new QTreeWidgetItem( m_clist );
+		item->setText( 0, element->getName() );
 	}
 
 	ShowDlg();
 }
 
-GtkWindow* CDbgDlg::BuildDialog(){
-	GtkWindow* window = create_floating_window( "Q3Map debug window", MainFrame_getWindow() );
+void CDbgDlg::BuildDialog(){
+	GetWidget()->setWindowTitle( "Q3Map debug window" );
 
-	GtkWidget* scr = gtk_scrolled_window_new( NULL, NULL );
-	gtk_widget_show( scr );
-	gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( scr ) );
-	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
-	gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scr ), GTK_SHADOW_IN );
+	auto *tree = m_clist = new QTreeWidget;
+	( new QVBoxLayout( GetWidget() ) )->addWidget( tree );
+	tree->setColumnCount( 1 );
+	tree->setUniformRowHeights( true ); // optimization
+	tree->setHorizontalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
+	tree->setSizeAdjustPolicy( QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents ); // scroll area will inherit column size
+	tree->header()->setStretchLastSection( false ); // non greedy column sizing
+	tree->header()->setSectionResizeMode( QHeaderView::ResizeMode::ResizeToContents ); // no text elision
+	tree->setHeaderHidden( true );
+	tree->setRootIsDecorated( false );
+	tree->setEditTriggers( QAbstractItemView::EditTrigger::NoEditTriggers );
 
-	{
-		GtkListStore* store = gtk_list_store_new( 1, G_TYPE_STRING );
-
-		GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
-		gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
-
-		{
-			GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-			GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 0, NULL );
-			gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
-		}
-
-		{
-			GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( view ) );
-			gtk_tree_selection_set_mode( selection, GTK_SELECTION_BROWSE );
-			g_signal_connect( G_OBJECT( selection ), "changed", G_CALLBACK( feedback_selection_changed ), NULL );
-		}
-
-		gtk_widget_show( view );
-
-		gtk_container_add( GTK_CONTAINER( scr ), view );
-
-		g_object_unref( G_OBJECT( store ) );
-
-		m_clist = store;
-	}
-
-	return window;
+	QObject::connect( tree, &QTreeWidget::currentItemChanged, [this]( QTreeWidgetItem *current ){ feedback_selection_changed( current ); } );
 }

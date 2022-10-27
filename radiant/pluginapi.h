@@ -27,4 +27,3 @@ typedef BasicVector3<float> Vector3;
 // camera API
 void QERApp_GetCamera( Vector3& origin, Vector3& angles );
 void QERApp_SetCamera( const Vector3& origin, const Vector3& angles );
-void QERApp_GetCamWindowExtents( int *x, int *y, int *width, int *height );

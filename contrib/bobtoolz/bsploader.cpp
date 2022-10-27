@@ -211,12 +211,12 @@ bool    LoadBSPFile( const char *filename ) {
 	SwapBlock( (int *)header, sizeof( *header ) );
 
 	if ( header->ident != BSP_IDENT ) {
-		DoMessageBox( "Cant find a valid IBSP file", "Error", eMB_OK );
+		DoMessageBox( "Cant find a valid IBSP file", "Error", EMessageBoxType::Error );
 		return false;
 	}
 	if ( ( header->version != Q3_BSP_VERSION ) &&
 	     ( header->version != WOLF_BSP_VERSION ) ) {
-		DoMessageBox( "File is incorrect version", "Error", eMB_OK );
+		DoMessageBox( "File is incorrect version", "Error", EMessageBoxType::Error );
 		return false;
 	}
 

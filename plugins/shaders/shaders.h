@@ -32,8 +32,7 @@
 
 void Shaders_Construct();
 void Shaders_Destroy();
-class ShaderSystem;
-ShaderSystem& GetShaderSystem();
+class ShaderSystem& GetShaderSystem();
 
 enum ShaderLanguage
 {

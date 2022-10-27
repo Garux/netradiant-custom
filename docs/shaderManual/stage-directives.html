@@ -278,9 +278,6 @@ textures/obsidian_video/intro
 <h3>rgbGen exactVertex</h3>
 <p>Like vertex, except vertex ignores overbrightbits. Engine uses this mode in default shaders for vertexlit surfaces. Generally brighter under default settings.</p>
 
-<h3>rgbGen fromVertex</h3>
-<p>(Pending)</p>
-
 <h3>rgbGen entity</h3>
 <p>Colors are grabbed from the entity's modulate field. This is used for things like explosions. This keyword would probably not be used by a level designer.</p>
 
@@ -294,11 +291,8 @@ textures/obsidian_video/intro
 	<p>rgbGen lightingDiffuse is used when you want the RGB values to be computed for a dynamic model (i.e. non-map object) in the world using regular in-game lighting. For example, you would specify on shaders for items, characters, weapons, etc.</p>
 </blockquote>
 
-<h3>rgbGen noise</h3>
-<p>(Probably doesn't exist)</p>
-
 <h3>rgbGen wave <em>func base amplitude phase freq</em></h3>
-<p>Colors are generated using the specified waveform. An affected texture with become darker and lighter, but will not change hue. Hue stays constant. Note that the RGB values for color will not go below 0 (black) or above 1 (white). Valid waveforms are sin, triangle, square, sawtooth, inversesawtooth and noise (see Waveform Functions).</p>
+<p>Colors are generated using the specified waveform. An affected texture will become darker and lighter, but will not change hue. Hue stays constant. Note that the RGB values for color will not go below 0 (black) or above 1 (white). Valid waveforms are sin, triangle, square, sawtooth, inversesawtooth and noise (see Waveform Functions).</p>
 
 <h3>rgbGen const ( <em>R G B</em> )</h3>
 <p>A constant vertex colour is assigned to the affected surface. This modifies the hue of the texture.</p>

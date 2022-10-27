@@ -35,11 +35,13 @@ XmlTagBuilder::~XmlTagBuilder(){
 	xmlXPathFreeContext( context );
 }
 
-bool XmlTagBuilder::CreateXmlDocument(){
+bool XmlTagBuilder::CreateXmlDocument( const char* savefile ){
 	/* Creates an XML file
 
 	   returns TRUE if the file was created successfully or FALSE when failed
 	 */
+	if( savefile != nullptr )
+		m_savefilename = savefile;
 
 	xmlTextWriterPtr writer;
 
@@ -129,10 +131,10 @@ bool XmlTagBuilder::AddShaderNode( const char* shader, TextureType textureType, 
 
 	switch ( textureType )
 	{
-	case STOCK:
+	case TextureType::STOCK:
 		xpathPtr = XpathEval( "/root/stock" );
 		break;
-	case CUSTOM:
+	case TextureType::CUSTOM:
 		xpathPtr = XpathEval( "/root/custom" );
 	};
 
@@ -150,10 +152,10 @@ bool XmlTagBuilder::AddShaderNode( const char* shader, TextureType textureType, 
 		// create a new node and set the node attribute (shader path)
 		switch ( nodeShaderType )
 		{
-		case SHADER:
+		case NodeShaderType::SHADER:
 			newnode = xmlNewNode( NULL, (const xmlChar*)"shader" );
 			break;
-		case TEXTURE:
+		case NodeShaderType::TEXTURE:
 		default:
 			newnode = xmlNewNode( NULL, (const xmlChar*)"texture" );
 			break;
@@ -202,7 +204,7 @@ bool XmlTagBuilder::DeleteShaderNode( const char* shader ){
 	 */
 
 	char buffer[256];
-	char* expression = GetTagsXpathExpression( buffer, shader, EMPTY );
+	char* expression = GetTagsXpathExpression( buffer, shader, NodeTagType::EMPTY );
 	xmlXPathObjectPtr xpathPtr = XpathEval( expression );
 
 	xmlNodeSetPtr nodePtr;
@@ -317,7 +319,7 @@ bool XmlTagBuilder::AddShaderTag( const char* shader, const char* content, NodeT
 
 	// build the XPath expression
 	char buffer[256];
-	char* expression = GetTagsXpathExpression( buffer, shader, EMPTY );
+	char* expression = GetTagsXpathExpression( buffer, shader, NodeTagType::EMPTY );
 
 	xmlXPathObjectPtr xpathPtr = XpathEval( expression );
 	xmlNodeSetPtr nodePtr;
@@ -396,7 +398,6 @@ int XmlTagBuilder::RenameShaderTag( const char* oldtag, CopiedString newtag ){
 		}
 	}
 
-	SaveXmlDoc();
 	xmlXPathFreeObject( result ); // CHANGED
 	return num;
 }
@@ -411,7 +412,7 @@ bool XmlTagBuilder::DeleteShaderTag( const char* shader, const char* tag ){
 	 */
 
 	char buffer[256];
-	char* expression = GetTagsXpathExpression( buffer, shader, TAG );
+	char* expression = GetTagsXpathExpression( buffer, shader, NodeTagType::TAG );
 	xmlXPathObjectPtr xpathPtr = XpathEval( expression );
 	xmlNodeSetPtr nodePtr;
 	if ( xpathPtr ) {
@@ -466,7 +467,6 @@ bool XmlTagBuilder::DeleteTag( const char* tag ){
 	{
 		DeleteShaderTag( iter->c_str(), tag );
 	}
-	SaveXmlDoc();
 
 	return true;
 }
@@ -486,7 +486,7 @@ void XmlTagBuilder::GetShaderTags( const char* shader, std::vector<CopiedString>
 	}
 	else {
 		char buffer[256];
-		expression = GetTagsXpathExpression( buffer, shader, TAG );
+		expression = GetTagsXpathExpression( buffer, shader, NodeTagType::TAG );
 	}
 
 	xmlXPathObjectPtr xpathPtr = XpathEval( expression );

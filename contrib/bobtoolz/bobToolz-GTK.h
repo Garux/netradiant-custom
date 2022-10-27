@@ -1,4 +1,4 @@
 
 #pragma once
 
-extern GtkWidget *g_pRadiantWnd;
+extern QWidget *g_pRadiantWnd;

@@ -32,5 +32,4 @@
 
 void FileSystem_Init();
 void FileSystem_Shutdown();
-class VirtualFileSystem;
-VirtualFileSystem& GetFileSystem();
+class VirtualFileSystem& GetFileSystem();

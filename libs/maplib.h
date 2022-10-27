@@ -63,7 +63,7 @@ public:
 	UndoFileChangeTracker() : m_size( 0 ), m_saved( MAPFILE_MAX_CHANGES ), m_pending( 0 ){
 	}
 	void print(){
-		globalOutputStream() << "saved: " << Unsigned( m_saved ) << " size: " << Unsigned( m_size ) << "\n";
+		globalOutputStream() << "saved: " << m_saved << " size: " << m_size << "\n";
 	}
 
 	void push(){

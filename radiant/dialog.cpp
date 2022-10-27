@@ -35,78 +35,66 @@
 
 #include <cstdlib>
 
-#include <gtk/gtk.h>
-
 #include "stream/stringstream.h"
 #include "convert.h"
 #include "gtkutil/dialog.h"
-#include "gtkutil/button.h"
 #include "gtkutil/entry.h"
 #include "gtkutil/image.h"
+#include "gtkutil/spinbox.h"
 
 #include "gtkmisc.h"
 
+#include <QCheckBox>
+#include <QComboBox>
+#include <QSlider>
+#include <QRadioButton>
+#include <QButtonGroup>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QString>
 
-GtkEntry* DialogEntry_new(){
-	GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
-	gtk_widget_show( GTK_WIDGET( entry ) );
-	gtk_widget_set_size_request( GTK_WIDGET( entry ), 64, -1 );
-	return entry;
-}
 
-class DialogEntryRow
+struct DialogSliderRow
 {
-public:
-	DialogEntryRow( GtkWidget* row, GtkEntry* entry ) : m_row( row ), m_entry( entry ){
+	QSlider *m_slider;
+	QHBoxLayout *m_layout;
+	DialogSliderRow( int lower, int upper, int step_increment, int page_increment ){
+		m_slider = new QSlider( Qt::Orientation::Horizontal );
+		m_slider->setRange( lower, upper );
+		m_slider->setSingleStep( step_increment );
+		m_slider->setPageStep( page_increment );
+
+		auto label = new QLabel;
+		label->setMinimumWidth( label->fontMetrics().horizontalAdvance( QString::number( upper ) ) );
+		QObject::connect( m_slider, &QSlider::valueChanged,
+			[label]( int value ){
+				label->setText( QString::number( value ) );
+			} );
+
+		m_layout = new QHBoxLayout;
+		m_layout->addWidget( label );
+		m_layout->addWidget( m_slider );
 	}
-	GtkWidget* m_row;
-	GtkEntry* m_entry;
+
+	DialogSliderRow( double lower, double upper, double step_increment, double page_increment ){
+		m_slider = new QSlider( Qt::Orientation::Horizontal );
+		m_slider->setRange( lower * 10, upper * 10 );
+		m_slider->setSingleStep( step_increment * 10 );
+		m_slider->setPageStep( page_increment * 10 );
+
+		auto label = new QLabel;
+		label->setMinimumWidth( label->fontMetrics().horizontalAdvance( QString::number( upper, 'f', 1 ) ) );
+		QObject::connect( m_slider, &QSlider::valueChanged,
+			[label]( int value ){
+				label->setText( QString::number( value / 10.0, 'f', 1 ) );
+			} );
+
+		m_layout = new QHBoxLayout;
+		m_layout->addWidget( label );
+		m_layout->addWidget( m_slider );
+	}
 };
-
-DialogEntryRow DialogEntryRow_new( const char* name ){
-	GtkWidget* alignment = gtk_alignment_new( 0.0, 0.5, 0.0, 0.0 );
-	gtk_widget_show( alignment );
-
-	GtkEntry* entry = DialogEntry_new();
-	gtk_container_add( GTK_CONTAINER( alignment ), GTK_WIDGET( entry ) );
-
-	return DialogEntryRow( GTK_WIDGET( DialogRow_new( name, alignment ) ), entry );
-}
-
-
-GtkSpinButton* DialogSpinner_new( double value, double lower, double upper, int fraction ){
-	double step = 1.0 / double(fraction);
-	unsigned int digits = 0;
-	for (; fraction > 1; fraction /= 10 )
-	{
-		++digits;
-	}
-	GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( value, lower, upper, step, 10, 0 ) ), step, digits ) );
-	gtk_spin_button_set_numeric( spin, TRUE );
-	gtk_widget_show( GTK_WIDGET( spin ) );
-	gtk_widget_set_size_request( GTK_WIDGET( spin ), 64, -1 );
-	return spin;
-}
-
-class DialogSpinnerRow
-{
-public:
-	DialogSpinnerRow( GtkWidget* row, GtkSpinButton* spin ) : m_row( row ), m_spin( spin ){
-	}
-	GtkWidget* m_row;
-	GtkSpinButton* m_spin;
-};
-
-DialogSpinnerRow DialogSpinnerRow_new( const char* name, double value, double lower, double upper, int fraction ){
-	GtkWidget* alignment = gtk_alignment_new( 0.0, 0.5, 0.0, 0.0 );
-	gtk_widget_show( alignment );
-
-	GtkSpinButton* spin = DialogSpinner_new( value, lower, upper, fraction );
-	gtk_container_add( GTK_CONTAINER( alignment ), GTK_WIDGET( spin ) );
-
-	return DialogSpinnerRow( GTK_WIDGET( DialogRow_new( name, alignment ) ), spin );
-}
-
 
 
 template<
@@ -133,105 +121,76 @@ typedef ImportExport<CopiedString, const char*, StringImport, StringExport> Stri
 
 
 
-void BoolToggleImport( GtkToggleButton& widget, bool value ){
-	gtk_toggle_button_set_active( &widget, value );
+void BoolToggleImport( QCheckBox& widget, bool value ){
+	widget.setChecked( value );
 }
-void BoolToggleExport( GtkToggleButton& widget, const BoolImportCallback& importCallback ){
-	importCallback( gtk_toggle_button_get_active( &widget ) );
+void BoolToggleExport( QCheckBox& widget, const BoolImportCallback& importCallback ){
+	importCallback( widget.isChecked() );
 }
-typedef ImportExport<GtkToggleButton, bool, BoolToggleImport, BoolToggleExport> BoolToggleImportExport;
+typedef ImportExport<QCheckBox, bool, BoolToggleImport, BoolToggleExport> BoolToggleImportExport;
 
 
-void IntRadioImport( GtkRadioButton& widget, int index ){
-	radio_button_set_active( &widget, index );
+void IntRadioImport( QButtonGroup& widget, int index ){
+	widget.button( index )->setChecked( true );
 }
-void IntRadioExport( GtkRadioButton& widget, const IntImportCallback& importCallback ){
-	importCallback( radio_button_get_active( &widget ) );
+void IntRadioExport( QButtonGroup& widget, const IntImportCallback& importCallback ){
+	importCallback( widget.checkedId() );
 }
-typedef ImportExport<GtkRadioButton, int, IntRadioImport, IntRadioExport> IntRadioImportExport;
-
-void TextEntryImport( GtkEntry& widget, const char* text ){
-	gtk_entry_set_text( &widget, text );
-}
-void TextEntryExport( GtkEntry& widget, const StringImportCallback& importCallback ){
-	importCallback( gtk_entry_get_text( &widget ) );
-}
-typedef ImportExport<GtkEntry, const char*, TextEntryImport, TextEntryExport> TextEntryImportExport;
+typedef ImportExport<QButtonGroup, int, IntRadioImport, IntRadioExport> IntRadioImportExport;
 
 
-void IntEntryImport( GtkEntry& widget, int value ){
-	entry_set_int( &widget, value );
+void TextEntryImport( QLineEdit& widget, const char* text ){
+	widget.setText( text );
 }
-void IntEntryExport( GtkEntry& widget, const IntImportCallback& importCallback ){
-	importCallback( atoi( gtk_entry_get_text( &widget ) ) );
+void TextEntryExport( QLineEdit& widget, const StringImportCallback& importCallback ){
+	importCallback( widget.text().toLatin1().constData() );
 }
-typedef ImportExport<GtkEntry, int, IntEntryImport, IntEntryExport> IntEntryImportExport;
+typedef ImportExport<QLineEdit, const char*, TextEntryImport, TextEntryExport> TextEntryImportExport;
 
 
-void SizeEntryImport( GtkEntry& widget, std::size_t value ){
-	entry_set_int( &widget, int(value) );
+void FloatSpinnerImport( QDoubleSpinBox& widget, float value ){
+	widget.setValue( value );
 }
-void SizeEntryExport( GtkEntry& widget, const SizeImportCallback& importCallback ){
-	int value = atoi( gtk_entry_get_text( &widget ) );
-	if ( value < 0 ) {
-		value = 0;
-	}
-	importCallback( value );
+void FloatSpinnerExport( QDoubleSpinBox& widget, const FloatImportCallback& importCallback ){
+	importCallback( widget.value() );
 }
-typedef ImportExport<GtkEntry, std::size_t, SizeEntryImport, SizeEntryExport> SizeEntryImportExport;
+typedef ImportExport<QDoubleSpinBox, float, FloatSpinnerImport, FloatSpinnerExport> FloatSpinnerImportExport;
 
 
-void FloatEntryImport( GtkEntry& widget, float value ){
-	entry_set_float( &widget, value );
+void IntSpinnerImport( QSpinBox& widget, int value ){
+	widget.setValue( value );
 }
-void FloatEntryExport( GtkEntry& widget, const FloatImportCallback& importCallback ){
-	importCallback( (float)atof( gtk_entry_get_text( &widget ) ) );
+void IntSpinnerExport( QSpinBox& widget, const IntImportCallback& importCallback ){
+	importCallback( widget.value() );
 }
-typedef ImportExport<GtkEntry, float, FloatEntryImport, FloatEntryExport> FloatEntryImportExport;
+typedef ImportExport<QSpinBox, int, IntSpinnerImport, IntSpinnerExport> IntSpinnerImportExport;
 
 
-void FloatSpinnerImport( GtkSpinButton& widget, float value ){
-	gtk_spin_button_set_value( &widget, value );
+void IntSliderImport( QSlider& widget, int value ){
+	widget.setValue( value );
 }
-void FloatSpinnerExport( GtkSpinButton& widget, const FloatImportCallback& importCallback ){
-	importCallback( static_cast<float>( gtk_spin_button_get_value( &widget ) ) );
+void IntSliderExport( QSlider& widget, const IntImportCallback& importCallback ){
+	importCallback( widget.value() );
 }
-typedef ImportExport<GtkSpinButton, float, FloatSpinnerImport, FloatSpinnerExport> FloatSpinnerImportExport;
+typedef ImportExport<QSlider, int, IntSliderImport, IntSliderExport> IntSliderImportExport;
+
+// QSlider operates on int values only, so using 10x range for floats
+void FloatSliderImport( QSlider& widget, float value ){
+	widget.setValue( value * 10.0 );
+}
+void FloatSliderExport( QSlider& widget, const FloatImportCallback& importCallback ){
+	importCallback( widget.value() / 10.0 );
+}
+typedef ImportExport<QSlider, float, FloatSliderImport, FloatSliderExport> FloatSliderImportExport;
 
 
-void IntSpinnerImport( GtkSpinButton& widget, int value ){
-	gtk_spin_button_set_value( &widget, value );
+void IntComboImport( QComboBox& widget, int value ){
+	widget.setCurrentIndex( value );
 }
-void IntSpinnerExport( GtkSpinButton& widget, const IntImportCallback& importCallback ){
-	importCallback( gtk_spin_button_get_value_as_int( &widget ) );
+void IntComboExport( QComboBox& widget, const IntImportCallback& importCallback ){
+	importCallback( widget.currentIndex() );
 }
-typedef ImportExport<GtkSpinButton, int, IntSpinnerImport, IntSpinnerExport> IntSpinnerImportExport;
-
-
-void IntAdjustmentImport( GtkAdjustment& widget, int value ){
-	gtk_adjustment_set_value( &widget, value );
-}
-void IntAdjustmentExport( GtkAdjustment& widget, const IntImportCallback& importCallback ){
-	importCallback( (int)gtk_adjustment_get_value( &widget ) );
-}
-typedef ImportExport<GtkAdjustment, int, IntAdjustmentImport, IntAdjustmentExport> IntAdjustmentImportExport;
-
-void FloatAdjustmentImport( GtkAdjustment& widget, float value ){
-	gtk_adjustment_set_value( &widget, value );
-}
-void FloatAdjustmentExport( GtkAdjustment& widget, const FloatImportCallback& importCallback ){
-	importCallback( (float)gtk_adjustment_get_value( &widget ) );
-}
-typedef ImportExport<GtkAdjustment, float, FloatAdjustmentImport, FloatAdjustmentExport> FloatAdjustmentImportExport;
-
-
-void IntComboImport( GtkComboBox& widget, int value ){
-	gtk_combo_box_set_active( &widget, value );
-}
-void IntComboExport( GtkComboBox& widget, const IntImportCallback& importCallback ){
-	importCallback( gtk_combo_box_get_active( &widget ) );
-}
-typedef ImportExport<GtkComboBox, int, IntComboImport, IntComboExport> IntComboImportExport;
+typedef ImportExport<QComboBox, int, IntComboImport, IntComboExport> IntComboImportExport;
 
 
 template<typename FirstArgument>
@@ -307,9 +266,6 @@ public:
 // =============================================================================
 // Dialog class
 
-Dialog::Dialog() : m_window( 0 ), m_parent( 0 ){
-}
-
 Dialog::~Dialog(){
 	for ( DialogDataList::iterator i = m_data.begin(); i != m_data.end(); ++i )
 	{
@@ -322,112 +278,87 @@ Dialog::~Dialog(){
 void Dialog::ShowDlg(){
 	ASSERT_MESSAGE( m_window != 0, "dialog was not constructed" );
 	importData();
-	gtk_widget_show( GTK_WIDGET( m_window ) );
+	m_window->show();
+	m_window->raise();
+	m_window->activateWindow();
 }
 
 void Dialog::HideDlg(){
 	ASSERT_MESSAGE( m_window != 0, "dialog was not constructed" );
 	exportData();
-	gtk_widget_hide( GTK_WIDGET( m_window ) );
+	m_window->hide();
 }
 
-static gint delete_event_callback( GtkWidget *widget, GdkEvent* event, gpointer data ){
-	reinterpret_cast<Dialog*>( data )->HideDlg();
-	reinterpret_cast<Dialog*>( data )->EndModal( eIDCANCEL );
-	return TRUE;
-}
-
-void Dialog::Create(){
+void Dialog::Create( QWidget *parent ){
 	ASSERT_MESSAGE( m_window == 0, "dialog cannot be constructed" );
 
-	m_window = BuildDialog();
-	g_signal_connect( G_OBJECT( m_window ), "delete_event", G_CALLBACK( delete_event_callback ), this );
+	m_window = new QDialog( parent, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	BuildDialog();
 }
 
 void Dialog::Destroy(){
 	ASSERT_MESSAGE( m_window != 0, "dialog cannot be destroyed" );
 
-	gtk_widget_destroy( GTK_WIDGET( m_window ) );
+	delete m_window;
 	m_window = 0;
 }
 
 
-void Dialog::AddBoolToggleData( GtkToggleButton& widget, const BoolImportCallback& importViewer, const BoolExportCallback& exportViewer ){
+void Dialog::AddBoolToggleData( QCheckBox& widget, const BoolImportCallback& importViewer, const BoolExportCallback& exportViewer ){
 	AddCustomData<BoolToggleImportExport>( m_data ).apply( widget, importViewer, exportViewer );
 }
 
-void Dialog::AddIntRadioData( GtkRadioButton& widget, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
+void Dialog::AddIntRadioData( QButtonGroup& widget, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
 	AddCustomData<IntRadioImportExport>( m_data ).apply( widget, importViewer, exportViewer );
 }
 
-void Dialog::AddTextEntryData( GtkEntry& widget, const StringImportCallback& importViewer, const StringExportCallback& exportViewer ){
+void Dialog::AddTextEntryData( QLineEdit& widget, const StringImportCallback& importViewer, const StringExportCallback& exportViewer ){
 	AddCustomData<TextEntryImportExport>( m_data ).apply( widget, importViewer, exportViewer );
 }
 
-void Dialog::AddIntEntryData( GtkEntry& widget, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	AddCustomData<IntEntryImportExport>( m_data ).apply( widget, importViewer, exportViewer );
-}
-
-void Dialog::AddSizeEntryData( GtkEntry& widget, const SizeImportCallback& importViewer, const SizeExportCallback& exportViewer ){
-	AddCustomData<SizeEntryImportExport>( m_data ).apply( widget, importViewer, exportViewer );
-}
-
-void Dialog::AddFloatEntryData( GtkEntry& widget, const FloatImportCallback& importViewer, const FloatExportCallback& exportViewer ){
-	AddCustomData<FloatEntryImportExport>( m_data ).apply( widget, importViewer, exportViewer );
-}
-
-void Dialog::AddFloatSpinnerData( GtkSpinButton& widget, const FloatImportCallback& importViewer, const FloatExportCallback& exportViewer ){
+void Dialog::AddFloatSpinnerData( QDoubleSpinBox& widget, const FloatImportCallback& importViewer, const FloatExportCallback& exportViewer ){
 	AddCustomData<FloatSpinnerImportExport>( m_data ).apply( widget, importViewer, exportViewer );
 }
 
-void Dialog::AddIntSpinnerData( GtkSpinButton& widget, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
+void Dialog::AddIntSpinnerData( QSpinBox& widget, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
 	AddCustomData<IntSpinnerImportExport>( m_data ).apply( widget, importViewer, exportViewer );
 }
 
-void Dialog::AddIntAdjustmentData( GtkAdjustment& widget, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	AddCustomData<IntAdjustmentImportExport>( m_data ).apply( widget, importViewer, exportViewer );
+void Dialog::AddIntSliderData( QSlider& widget, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
+	AddCustomData<IntSliderImportExport>( m_data ).apply( widget, importViewer, exportViewer );
 }
 
-void Dialog::AddFloatAdjustmentData( GtkAdjustment& widget, const FloatImportCallback& importViewer, const FloatExportCallback& exportViewer ){
-	AddCustomData<FloatAdjustmentImportExport>( m_data ).apply( widget, importViewer, exportViewer );
+void Dialog::AddFloatSliderData( QSlider& widget, const FloatImportCallback& importViewer, const FloatExportCallback& exportViewer ){
+	AddCustomData<FloatSliderImportExport>( m_data ).apply( widget, importViewer, exportViewer );
 }
 
-void Dialog::AddIntComboData( GtkComboBox& widget, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
+void Dialog::AddIntComboData( QComboBox& widget, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
 	AddCustomData<IntComboImportExport>( m_data ).apply( widget, importViewer, exportViewer );
 }
 
 
-void Dialog::AddDialogData( GtkToggleButton& widget, bool& data ){
+void Dialog::AddDialogData( QCheckBox& widget, bool& data ){
 	AddData<BoolToggleImportExport, BoolImportExport>( m_data ).apply( widget, data );
 }
-void Dialog::AddDialogData( GtkRadioButton& widget, int& data ){
+void Dialog::AddDialogData( QButtonGroup& widget, int& data ){
 	AddData<IntRadioImportExport, IntImportExport>( m_data ).apply( widget, data );
 }
-void Dialog::AddDialogData( GtkEntry& widget, CopiedString& data ){
+void Dialog::AddDialogData( QLineEdit& widget, CopiedString& data ){
 	AddData<TextEntryImportExport, StringImportExport>( m_data ).apply( widget, data );
 }
-void Dialog::AddDialogData( GtkEntry& widget, int& data ){
-	AddData<IntEntryImportExport, IntImportExport>( m_data ).apply( widget, data );
-}
-void Dialog::AddDialogData( GtkEntry& widget, std::size_t& data ){
-	AddData<SizeEntryImportExport, SizeImportExport>( m_data ).apply( widget, data );
-}
-void Dialog::AddDialogData( GtkEntry& widget, float& data ){
-	AddData<FloatEntryImportExport, FloatImportExport>( m_data ).apply( widget, data );
-}
-void Dialog::AddDialogData( GtkSpinButton& widget, float& data ){
+void Dialog::AddDialogData( QDoubleSpinBox& widget, float& data ){
 	AddData<FloatSpinnerImportExport, FloatImportExport>( m_data ).apply( widget, data );
 }
-void Dialog::AddDialogData( GtkSpinButton& widget, int& data ){
+void Dialog::AddDialogData( QSpinBox& widget, int& data ){
 	AddData<IntSpinnerImportExport, IntImportExport>( m_data ).apply( widget, data );
 }
-void Dialog::AddDialogData( GtkAdjustment& widget, int& data ){
-	AddData<IntAdjustmentImportExport, IntImportExport>( m_data ).apply( widget, data );
+void Dialog::AddDialogData( QSlider& widget, int& data ){
+	AddData<IntSliderImportExport, IntImportExport>( m_data ).apply( widget, data );
 }
-void Dialog::AddDialogData( GtkAdjustment& widget, float& data ){
-	AddData<FloatAdjustmentImportExport, FloatImportExport>( m_data ).apply( widget, data );
+void Dialog::AddDialogData( QSlider& widget, float& data ){
+	AddData<FloatSliderImportExport, FloatImportExport>( m_data ).apply( widget, data );
 }
-void Dialog::AddDialogData( GtkComboBox& widget, int& data ){
+void Dialog::AddDialogData( QComboBox& widget, int& data ){
 	AddData<IntComboImportExport, IntImportExport>( m_data ).apply( widget, data );
 }
 
@@ -445,230 +376,152 @@ void Dialog::importData(){
 	}
 }
 
-void Dialog::EndModal( EMessageBoxReturn code ){
-	m_modal.loop = 0;
-	m_modal.ret = code;
+void Dialog::EndModal( QDialog::DialogCode code ){
+	m_window->done( code );
 }
 
-EMessageBoxReturn Dialog::DoModal(){
+QDialog::DialogCode Dialog::DoModal(){
 	importData();
 
 	PreModal();
 
-	EMessageBoxReturn ret = modal_dialog_show( m_window, m_modal );
 	ASSERT_NOTNULL( m_window );
-	if ( ret == eIDOK ) {
+	const QDialog::DialogCode ret = static_cast<QDialog::DialogCode>( m_window->exec() );
+	if ( ret == QDialog::DialogCode::Accepted ) {
 		exportData();
 	}
 
-	gtk_widget_hide( GTK_WIDGET( m_window ) );
+	m_window->hide();
 
-	PostModal( m_modal.ret );
+	PostModal( ret );
 
-	return m_modal.ret;
+	return ret;
 }
 
 
-GtkWidget* Dialog::addCheckBox( GtkWidget* vbox, const char* name, const char* flag, const BoolImportCallback& importViewer, const BoolExportCallback& exportViewer ){
-	GtkWidget* check = gtk_check_button_new_with_label( flag );
-	gtk_widget_show( check );
-	AddBoolToggleData( *GTK_TOGGLE_BUTTON( check ), importViewer, exportViewer );
-
-	DialogVBox_packRow( GTK_VBOX( vbox ), GTK_WIDGET( DialogRow_new( name, check ) ) );
+QCheckBox* Dialog::addCheckBox( QGridLayout* grid, const char* name, const char* flag, const BoolImportCallback& importViewer, const BoolExportCallback& exportViewer ){
+	auto check = new QCheckBox( flag );
+	AddBoolToggleData( *check, importViewer, exportViewer );
+	DialogGrid_packRow( grid, check, name );
 	return check;
 }
 
-GtkWidget* Dialog::addCheckBox( GtkWidget* vbox, const char* name, const char* flag, bool& data ){
-	return addCheckBox( vbox, name, flag, BoolImportCaller( data ), BoolExportCaller( data ) );
+QCheckBox* Dialog::addCheckBox( QGridLayout* grid, const char* name, const char* flag, bool& data ){
+	return addCheckBox( grid, name, flag, BoolImportCaller( data ), BoolExportCaller( data ) );
 }
 
-void Dialog::addCombo( GtkWidget* vbox, const char* name, StringArrayRange values, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	GtkWidget* alignment = gtk_alignment_new( 0.0, 0.5, 0.0, 0.0 );
-	gtk_widget_show( alignment );
-	{
-		GtkWidget* combo = gtk_combo_box_text_new();
+QComboBox* Dialog::addCombo( QGridLayout* grid, const char* name, StringArrayRange values, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
+	auto combo = new QComboBox;
 
-		for ( const char *value : values )
-		{
-			gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT( combo ), value );
-		}
+	for ( const char *value : values )
+		combo->addItem( value );
 
-		AddIntComboData( *GTK_COMBO_BOX( combo ), importViewer, exportViewer );
+	AddIntComboData( *combo, importViewer, exportViewer );
 
-		gtk_widget_show( combo );
-		gtk_container_add( GTK_CONTAINER( alignment ), combo );
-	}
+	DialogGrid_packRow( grid, combo, name );
 
-	GtkTable* row = DialogRow_new( name, alignment );
-	DialogVBox_packRow( GTK_VBOX( vbox ), GTK_WIDGET( row ) );
+	return combo;
 }
 
-void Dialog::addCombo( GtkWidget* vbox, const char* name, int& data, StringArrayRange values ){
-	addCombo( vbox, name, values, IntImportCaller( data ), IntExportCaller( data ) );
+QComboBox* Dialog::addCombo( QGridLayout* grid, const char* name, int& data, StringArrayRange values ){
+	return addCombo( grid, name, values, IntImportCaller( data ), IntExportCaller( data ) );
 }
 
-void addSlider_( GtkAdjustment* adj, GtkWidget* vbox, const char* name, gboolean draw_value, const char* low, const char* high, int digits ){
-#if 0
-	if ( !draw_value ) {
-		GtkWidget* hbox2 = gtk_hbox_new( FALSE, 0 );
-		gtk_widget_show( hbox2 );
-		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox2 ), FALSE, FALSE, 0 );
-		{
-			GtkWidget* label = gtk_label_new( low );
-			gtk_widget_show( label );
-			gtk_box_pack_start( GTK_BOX( hbox2 ), label, FALSE, FALSE, 0 );
-		}
-		{
-			GtkWidget* label = gtk_label_new( high );
-			gtk_widget_show( label );
-			gtk_box_pack_end( GTK_BOX( hbox2 ), label, FALSE, FALSE, 0 );
-		}
-	}
-#endif
-	// scale
-	GtkWidget* alignment = gtk_alignment_new( 0.0, 0.5, 1.0, 0.0 );
-	gtk_widget_show( alignment );
+void Dialog::addSlider( QGridLayout* grid, const char* name, int& data, int lower, int upper, int step_increment, int page_increment ){
+	DialogSliderRow row( lower, upper, step_increment, page_increment );
 
-	GtkWidget* scale = gtk_hscale_new( adj );
-	gtk_scale_set_value_pos( GTK_SCALE( scale ), GTK_POS_LEFT );
-	gtk_widget_show( scale );
-	gtk_container_add( GTK_CONTAINER( alignment ), scale );
+	AddIntSliderData( *row.m_slider, IntImportCaller( data ), IntExportCaller( data ) );
 
-	gtk_scale_set_draw_value( GTK_SCALE( scale ), draw_value );
-	gtk_scale_set_digits( GTK_SCALE( scale ), digits );
-
-	GtkTable* row = DialogRow_new( name, alignment );
-	DialogVBox_packRow( GTK_VBOX( vbox ), GTK_WIDGET( row ) );
+	DialogGrid_packRow( grid, row.m_layout, name );
 }
 
-void Dialog::addSlider( GtkWidget* vbox, const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
-	// adjustment
-	GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( value, lower, upper, step_increment, page_increment, 0 ) );
-	AddIntAdjustmentData( *adj, IntImportCaller( data ), IntExportCaller( data ) );
+void Dialog::addSlider( QGridLayout* grid, const char* name, float& data, double lower, double upper, double step_increment, double page_increment ){
+	DialogSliderRow row( lower, upper, step_increment, page_increment );
 
-	addSlider_( adj, vbox, name, draw_value, low, high, 0 );
+	AddFloatSliderData( *row.m_slider, FloatImportCaller( data ), FloatExportCaller( data ) );
+
+	DialogGrid_packRow( grid, row.m_layout, name );
 }
 
-void Dialog::addSlider( GtkWidget* vbox, const char* name, float& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
-	// adjustment
-	GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( value, lower, upper, step_increment, page_increment, 0 ) );
-	AddFloatAdjustmentData( *adj, FloatImportCaller( data ), FloatExportCaller( data ) );
+void Dialog::addRadio( QGridLayout* grid, const char* name, StringArrayRange names, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
+	RadioHBox radioBox = RadioHBox_new( names );
+	AddIntRadioData( *radioBox.m_radio, importViewer, exportViewer );
 
-	addSlider_( adj, vbox, name, draw_value, low, high, 1 );
+	DialogGrid_packRow( grid, radioBox.m_hbox, name );
 }
 
-void Dialog::addRadio( GtkWidget* vbox, const char* name, StringArrayRange names, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	GtkWidget* alignment = gtk_alignment_new( 0.0, 0.5, 0.0, 0.0 );
-	gtk_widget_show( alignment );
-	{
-		RadioHBox radioBox = RadioHBox_new( names );
-		gtk_container_add( GTK_CONTAINER( alignment ), GTK_WIDGET( radioBox.m_hbox ) );
-		AddIntRadioData( *GTK_RADIO_BUTTON( radioBox.m_radio ), importViewer, exportViewer );
-	}
-
-	GtkTable* row = DialogRow_new( name, alignment );
-	DialogVBox_packRow( GTK_VBOX( vbox ), GTK_WIDGET( row ) );
+void Dialog::addRadio( QGridLayout* grid, const char* name, int& data, StringArrayRange names ){
+	addRadio( grid, name, names, IntImportCaller( data ), IntExportCaller( data ) );
 }
 
-void Dialog::addRadio( GtkWidget* vbox, const char* name, int& data, StringArrayRange names ){
-	addRadio( vbox, name, names, IntImportCaller( data ), IntExportCaller( data ) );
-}
+void Dialog::addRadioIcons( QGridLayout* grid, const char* name, StringArrayRange icons, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
+	auto subgrid = new QGridLayout;
+	auto buttons = new QButtonGroup( subgrid );
 
-void Dialog::addRadioIcons( GtkWidget* vbox, const char* name, StringArrayRange icons, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	GtkWidget* table = gtk_table_new( 2, icons.size(), FALSE );
-	gtk_widget_show( table );
-
-	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
-	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
-
-	GtkWidget* radio = 0;
 	for ( size_t i = 0; i < icons.size(); ++i )
 	{
-		GtkImage* image = new_local_image( icons[i] );
-		gtk_widget_show( GTK_WIDGET( image ) );
-		gtk_table_attach( GTK_TABLE( table ), GTK_WIDGET( image ), i, i + 1, 0, 1,
-		                  (GtkAttachOptions) ( 0 ),
-		                  (GtkAttachOptions) ( 0 ), 0, 0 );
+		auto label = new QLabel;
+		label->setPixmap( new_local_image( icons[i] ) );
+		subgrid->addWidget( label, 0, i, Qt::AlignmentFlag::AlignHCenter );
 
-		radio = gtk_radio_button_new_from_widget( GTK_RADIO_BUTTON( radio ) );
-		gtk_widget_show( radio );
-		gtk_table_attach( GTK_TABLE( table ), radio, i, i + 1, 1, 2,
-		                  (GtkAttachOptions) ( 0 ),
-		                  (GtkAttachOptions) ( 0 ), 0, 0 );
+		auto button = new QRadioButton;
+		buttons->addButton( button, i ); // set ids 0+, default ones are negative
+		subgrid->addWidget( button, 1, i, Qt::AlignmentFlag::AlignHCenter );
 	}
 
-	AddIntRadioData( *GTK_RADIO_BUTTON( radio ), importViewer, exportViewer );
+	AddIntRadioData( *buttons, importViewer, exportViewer );
 
-	DialogVBox_packRow( GTK_VBOX( vbox ), GTK_WIDGET( DialogRow_new( name, table ) ) );
+	DialogGrid_packRow( grid, subgrid, name );
 }
 
-void Dialog::addRadioIcons( GtkWidget* vbox, const char* name, int& data, StringArrayRange icons ){
-	addRadioIcons( vbox, name, icons, IntImportCaller( data ), IntExportCaller( data ) );
+void Dialog::addRadioIcons( QGridLayout* grid, const char* name, int& data, StringArrayRange icons ){
+	addRadioIcons( grid, name, icons, IntImportCaller( data ), IntExportCaller( data ) );
 }
 
-GtkWidget* Dialog::addIntEntry( GtkWidget* vbox, const char* name, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	DialogEntryRow row( DialogEntryRow_new( name ) );
-	AddIntEntryData( *row.m_entry, importViewer, exportViewer );
-	DialogVBox_packRow( GTK_VBOX( vbox ), row.m_row );
-	return row.m_row;
-}
-
-GtkWidget* Dialog::addSizeEntry( GtkWidget* vbox, const char* name, const SizeImportCallback& importViewer, const SizeExportCallback& exportViewer ){
-	DialogEntryRow row( DialogEntryRow_new( name ) );
-	AddSizeEntryData( *row.m_entry, importViewer, exportViewer );
-	DialogVBox_packRow( GTK_VBOX( vbox ), row.m_row );
-	return row.m_row;
-}
-
-GtkWidget* Dialog::addFloatEntry( GtkWidget* vbox, const char* name, const FloatImportCallback& importViewer, const FloatExportCallback& exportViewer ){
-	DialogEntryRow row( DialogEntryRow_new( name ) );
-	AddFloatEntryData( *row.m_entry, importViewer, exportViewer );
-	DialogVBox_packRow( GTK_VBOX( vbox ), row.m_row );
-	return row.m_row;
-}
-
-GtkWidget* Dialog::addTextEntry( GtkWidget* vbox, const char* name, const StringImportCallback& importViewer, const StringExportCallback& exportViewer ){
-	GtkEntry* entry = DialogEntry_new();
-	gtk_widget_set_size_request( GTK_WIDGET( entry ), -1, -1 ); // unset
-
+void Dialog::addTextEntry( QGridLayout* grid, const char* name, const StringImportCallback& importViewer, const StringExportCallback& exportViewer ){
+	auto entry = new QLineEdit;
 	AddTextEntryData( *entry, importViewer, exportViewer );
 
-	GtkTable* row = DialogRow_new( name, GTK_WIDGET( entry ) );
-	DialogVBox_packRow( GTK_VBOX( vbox ), GTK_WIDGET( row ) );
-
-	return GTK_WIDGET( row );
+	DialogGrid_packRow( grid, entry, name );
 }
 
-GtkWidget* Dialog::addPathEntry( GtkWidget* vbox, const char* name, bool browse_directory, const StringImportCallback& importViewer, const StringExportCallback& exportViewer ){
+void Dialog::addPathEntry( QGridLayout* grid, const char* name, bool browse_directory, const StringImportCallback& importViewer, const StringExportCallback& exportViewer ){
 	PathEntry pathEntry = PathEntry_new();
-	g_signal_connect( G_OBJECT( pathEntry.m_button ), "clicked", G_CALLBACK( browse_directory ? button_clicked_entry_browse_directory : button_clicked_entry_browse_file ), pathEntry.m_entry );
 
-	AddTextEntryData( *GTK_ENTRY( pathEntry.m_entry ), importViewer, exportViewer );
+	if( browse_directory )
+		QObject::connect( pathEntry.m_button, &QAction::triggered, [entry = pathEntry.m_entry](){ button_clicked_entry_browse_directory( entry ); } );
+	else
+		QObject::connect( pathEntry.m_button, &QAction::triggered, [entry = pathEntry.m_entry](){ button_clicked_entry_browse_file( entry ); } );
 
-	GtkTable* row = DialogRow_new( name, GTK_WIDGET( pathEntry.m_frame ) );
-	DialogVBox_packRow( GTK_VBOX( vbox ), GTK_WIDGET( row ) );
+	AddTextEntryData( *pathEntry.m_entry, importViewer, exportViewer );
 
-	return GTK_WIDGET( row );
+	DialogGrid_packRow( grid, pathEntry.m_entry, name );
 }
 
-GtkWidget* Dialog::addPathEntry( GtkWidget* vbox, const char* name, CopiedString& data, bool browse_directory ){
-	return addPathEntry( vbox, name, browse_directory, StringImportCallback( StringImportCaller( data ) ), StringExportCallback( StringExportCaller( data ) ) );
+void Dialog::addPathEntry( QGridLayout* grid, const char* name, CopiedString& data, bool browse_directory ){
+	addPathEntry( grid, name, browse_directory, StringImportCallback( StringImportCaller( data ) ), StringExportCallback( StringExportCaller( data ) ) );
 }
 
-GtkWidget* Dialog::addSpinner( GtkWidget* vbox, const char* name, double value, double lower, double upper, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	DialogSpinnerRow row( DialogSpinnerRow_new( name, value, lower, upper, 1 ) );
-	AddIntSpinnerData( *row.m_spin, importViewer, exportViewer );
-	DialogVBox_packRow( GTK_VBOX( vbox ), row.m_row );
-	return row.m_row;
+QWidget* Dialog::addSpinner( QGridLayout* grid, const char* name, int lower, int upper, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
+	auto spin = new SpinBox( lower, upper );
+	spin->setStepType( QAbstractSpinBox::StepType::AdaptiveDecimalStepType );
+	AddIntSpinnerData( *spin, importViewer, exportViewer );
+	DialogGrid_packRow( grid, spin, new SpinBoxLabel( name, spin ) );
+	return spin;
 }
 
-GtkWidget* Dialog::addSpinner( GtkWidget* vbox, const char* name, int& data, double value, double lower, double upper ){
-	return addSpinner( vbox, name, value, lower, upper, IntImportCallback( IntImportCaller( data ) ), IntExportCallback( IntExportCaller( data ) ) );
+QWidget* Dialog::addSpinner( QGridLayout* grid, const char* name, int& data, int lower, int upper ){
+	return addSpinner( grid, name, lower, upper, IntImportCallback( IntImportCaller( data ) ), IntExportCallback( IntExportCaller( data ) ) );
 }
 
-GtkWidget* Dialog::addSpinner( GtkWidget* vbox, const char* name, double value, double lower, double upper, const FloatImportCallback& importViewer, const FloatExportCallback& exportViewer ){
-	DialogSpinnerRow row( DialogSpinnerRow_new( name, value, lower, upper, 10 ) );
-	AddFloatSpinnerData( *row.m_spin, importViewer, exportViewer );
-	DialogVBox_packRow( GTK_VBOX( vbox ), row.m_row );
-	return row.m_row;
+QWidget* Dialog::addSpinner( QGridLayout* grid, const char* name, double lower, double upper, const FloatImportCallback& importViewer, const FloatExportCallback& exportViewer ){
+	auto spin = new DoubleSpinBox( lower, upper );
+	spin->setStepType( QAbstractSpinBox::StepType::AdaptiveDecimalStepType );
+	AddFloatSpinnerData( *spin, importViewer, exportViewer );
+	DialogGrid_packRow( grid, spin, new SpinBoxLabel( name, spin ) );
+	return spin;
+}
+
+QWidget* Dialog::addSpinner( QGridLayout* grid, const char* name, float& data, double lower, double upper ){
+	return addSpinner( grid, name, lower, upper, FloatImportCallback( FloatImportCaller( data ) ), FloatExportCallback( FloatExportCaller( data ) ) );
 }

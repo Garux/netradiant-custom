@@ -24,8 +24,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_PLUGINPROPERTIES_H)
-#define INCLUDED_PLUGINPROPERTIES_H
+#pragma once
 
 #include "UtilityMacros.h"
 //#include "CodeVersion.h"
@@ -40,5 +39,3 @@
 #define PLUGIN_DESCRIPTION "Align and scale textures on patch meshes"
 #define PLUGIN_FILE_BASENAME "meshtex"
 #define PLUGIN_FILE_DESCRIPTION "patch mesh texturing plugin for GtkRadiant 1.5"
-
-#endif // #if !defined(INCLUDED_PLUGINPROPERTIES_H)

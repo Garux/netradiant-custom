@@ -23,8 +23,6 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtk/gtk.h>
-
 #include "GenericPluginUI.h"
 #include "GeneralFunctionDialog.h"
 #include "PluginUIMessages.h"
@@ -95,506 +93,203 @@ GeneralFunctionDialog::GeneralFunctionDialog(const std::string& key) :
    GenericDialog(key),
    _nullVisitor(new MeshVisitor())
 {
-   // Enable the usual handling of the close event.
-   CreateWindowCloseCallback();
-
    // Configure the dialog window.
-   gtk_window_set_resizable(GTK_WINDOW(_dialog), FALSE);
-   gtk_window_set_title(GTK_WINDOW(_dialog), DIALOG_GEN_FUNC_TITLE);
-   gtk_container_set_border_width(GTK_CONTAINER(_dialog), 10);
+   _dialog->setWindowTitle(DIALOG_GEN_FUNC_TITLE);
 
    // Create the contained widgets.
-
-   GtkWidget *table;
-   GtkWidget *entry;
-   GtkWidget *applybutton, *refbutton, *button;
-   GtkWidget *separator;
-   GtkWidget *label;
-   GtkWidget *mainvbox, *vbox, *hbox, *mainhbox;
-   GtkWidget *frame;
-
-   table = gtk_table_new(6, 13, FALSE);
-   gtk_table_set_row_spacing(GTK_TABLE(table), 0, 5);
-   gtk_table_set_row_spacing(GTK_TABLE(table), 1, 10);
-   gtk_table_set_row_spacing(GTK_TABLE(table), 3, 15);
-   gtk_table_set_row_spacing(GTK_TABLE(table), 4, 15);
-   gtk_container_add(GTK_CONTAINER(_dialog), table);
-   gtk_widget_show(table);
-
-   hbox = gtk_hbox_new(TRUE, 10);
-   gtk_table_attach(GTK_TABLE(table), hbox, 0, 13, 0, 1, GTK_SHRINK, GTK_EXPAND, 0, 0);
-   gtk_widget_show(hbox);
-
-   // Mutually exclusive "Surface values" and "Control values" radio buttons.
-
-   button = gtk_radio_button_new_with_label_from_widget(NULL,
-                                            DIALOG_GEN_FUNC_SURFACE_VALUES);
-   g_object_set_data(G_OBJECT(_dialog), "surface", button);
-   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-   gtk_widget_show(button);
-
-   button = gtk_radio_button_new_with_label_from_widget(
-                             GTK_RADIO_BUTTON(button),
-                             DIALOG_GEN_FUNC_CONTROL_VALUES);
-   g_object_set_data(G_OBJECT(_dialog), "control", button);
-   gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-   gtk_widget_show(button);
-
-   separator = gtk_hseparator_new();
-   gtk_table_attach_defaults(GTK_TABLE(table), separator, 0, 13, 1, 2);
-   gtk_widget_show(separator);
-
-   // Checkbox for the "S" row of factors. All the other widgets on this row
-   // will have a dependence registered on this checkbox; i.e. they will only
-   // be active when it is checked.
-
-   applybutton = gtk_check_button_new();
-   g_object_set_data(G_OBJECT(_dialog), "s_apply", applybutton);
-   gtk_table_attach_defaults(GTK_TABLE(table), applybutton, 0, 1, 2, 3);
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(applybutton), TRUE);
-   gtk_widget_show(applybutton);
-
-   label = gtk_label_new(DIALOG_GEN_FUNC_S_FUNC_LABEL);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 1, 2, 2, 3);
-   gtk_widget_show(label);
-
-   UIInstance().RegisterWidgetDependence(applybutton, label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "s_oldval", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "1.0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 2, 3, 2, 3);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(applybutton, entry);
-
-   label = gtk_label_new(DIALOG_GEN_FUNC_OLD_S_LABEL);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 3, 4, 2, 3);
-   gtk_widget_show(label);
-
-   UIInstance().RegisterWidgetDependence(applybutton, label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "s_rowdist", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0.0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 4, 5, 2, 3);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(applybutton, entry);
-
-   label = gtk_label_new(DIALOG_GEN_FUNC_ROW_DIST_LABEL);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 5, 6, 2, 3);
-   gtk_widget_show(label);
-
-   UIInstance().RegisterWidgetDependence(applybutton, label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "s_coldist", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0.0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 6, 7, 2, 3);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(applybutton, entry);
-
-   label = gtk_label_new(DIALOG_GEN_FUNC_COL_DIST_LABEL);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 7, 8, 2, 3);
-   gtk_widget_show(label);
-
-   UIInstance().RegisterWidgetDependence(applybutton, label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "s_rownum", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0.0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 8, 9, 2, 3);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(applybutton, entry);
-
-   label = gtk_label_new(DIALOG_GEN_FUNC_ROW_NUM_LABEL);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 9, 10, 2, 3);
-   gtk_widget_show(label);
-
-   UIInstance().RegisterWidgetDependence(applybutton, label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "s_colnum", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0.0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 10, 11, 2, 3);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(applybutton, entry);
-
-   label = gtk_label_new(DIALOG_GEN_FUNC_COL_NUM_LABEL);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 11, 12, 2, 3);
-   gtk_widget_show(label);
-
-   UIInstance().RegisterWidgetDependence(applybutton, label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "s_constant", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0.0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 12, 13, 2, 3);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(applybutton, entry);
-
-   // Checkbox for the "T" row of factors. All the other widgets on this row
-   // will have a dependence registered on this checkbox; i.e. they will only
-   // be active when it is checked.
-
-   applybutton = gtk_check_button_new();
-   g_object_set_data(G_OBJECT(_dialog), "t_apply", applybutton);
-   gtk_table_attach_defaults(GTK_TABLE(table), applybutton, 0, 1, 3, 4);
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(applybutton), TRUE);
-   gtk_widget_show(applybutton);
-
-   label = gtk_label_new(DIALOG_GEN_FUNC_T_FUNC_LABEL);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 1, 2, 3, 4);
-   gtk_widget_show(label);
-
-   UIInstance().RegisterWidgetDependence(applybutton, label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "t_oldval", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "1.0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 2, 3, 3, 4);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(applybutton, entry);
-
-   label = gtk_label_new(DIALOG_GEN_FUNC_OLD_T_LABEL);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 3, 4, 3, 4);
-   gtk_widget_show(label);
-
-   UIInstance().RegisterWidgetDependence(applybutton, label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "t_rowdist", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0.0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 4, 5, 3, 4);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(applybutton, entry);
-
-   label = gtk_label_new(DIALOG_GEN_FUNC_ROW_DIST_LABEL);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 5, 6, 3, 4);
-   gtk_widget_show(label);
-
-   UIInstance().RegisterWidgetDependence(applybutton, label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "t_coldist", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0.0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 6, 7, 3, 4);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(applybutton, entry);
-
-   label = gtk_label_new(DIALOG_GEN_FUNC_COL_DIST_LABEL);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 7, 8, 3, 4);
-   gtk_widget_show(label);
-
-   UIInstance().RegisterWidgetDependence(applybutton, label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "t_rownum", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0.0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 8, 9, 3, 4);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(applybutton, entry);
-
-   label = gtk_label_new(DIALOG_GEN_FUNC_ROW_NUM_LABEL);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 9, 10, 3, 4);
-   gtk_widget_show(label);
-
-   UIInstance().RegisterWidgetDependence(applybutton, label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "t_colnum", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0.0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 10, 11, 3, 4);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(applybutton, entry);
-
-   label = gtk_label_new(DIALOG_GEN_FUNC_COL_NUM_LABEL);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 11, 12, 3, 4);
-   gtk_widget_show(label);
-
-   UIInstance().RegisterWidgetDependence(applybutton, label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "t_constant", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0.0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 12, 13, 3, 4);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(applybutton, entry);
-
-   mainhbox = gtk_hbox_new(TRUE, 0);
-   gtk_table_attach(GTK_TABLE(table), mainhbox, 0, 13, 4, 5, GTK_SHRINK, GTK_EXPAND, 0, 0);
-   gtk_widget_show(mainhbox);
-
-   mainvbox = gtk_vbox_new(FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(mainhbox), mainvbox, FALSE, FALSE, 0);
-   gtk_widget_show(mainvbox);
-
-   hbox = gtk_hbox_new(FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(mainvbox), hbox, TRUE, TRUE, 5);
-   gtk_widget_show(hbox);
-
-   frame = gtk_frame_new(DIALOG_GEN_FUNC_COL_ALIGN_FRAME_LABEL);
-   gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 5);
-   gtk_widget_show(frame);
-
-   vbox = gtk_vbox_new(FALSE, 0);
-   gtk_container_add(GTK_CONTAINER(frame), vbox);
-   gtk_widget_show(vbox);
-
-   hbox = gtk_hbox_new(FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
-   gtk_widget_show(hbox);
-
-   // Widgets for specifying the alignment column.
-
-   button = gtk_radio_button_new(NULL);
-   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-   gtk_widget_show(button);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "col_num_align", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0");
-   gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
-   gtk_widget_set_size_request(entry, 25, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(button, entry);
-
-   button = gtk_radio_button_new_with_label_from_widget(
-                             GTK_RADIO_BUTTON(button),
-                             DIALOG_GEN_FUNC_MAX_OPT_LABEL);
-   g_object_set_data(G_OBJECT(_dialog), "col_max_align", button);
-   gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
-   gtk_widget_show(button);
-
-   hbox = gtk_hbox_new(FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(mainvbox), hbox, TRUE, TRUE, 5);
-   gtk_widget_show(hbox);
-
-   // Widgets for specifying the reference row & usage.
-
-   refbutton = gtk_check_button_new_with_label(DIALOG_GEN_FUNC_REF_ROW_FRAME_LABEL);
-   g_object_set_data(G_OBJECT(_dialog), "row_ref", refbutton);
-   gtk_widget_show(refbutton);
-
-   frame = gtk_frame_new(NULL);
-   gtk_frame_set_label_widget(GTK_FRAME(frame), refbutton);
-   gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 5);
-   gtk_widget_show(frame);
-
-   vbox = gtk_vbox_new(FALSE, 0);
-   gtk_container_add(GTK_CONTAINER(frame), vbox);
-   gtk_widget_show(vbox);
-
-   hbox = gtk_hbox_new(FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
-   gtk_widget_show(hbox);
-
-   button = gtk_radio_button_new(NULL);
-   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-   gtk_widget_set_sensitive(button, FALSE);
-   gtk_widget_show(button);
-
-   UIInstance().RegisterWidgetDependence(refbutton, button);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "row_num_ref", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0");
-   gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
-   gtk_widget_set_size_request(entry, 25, -1);
-   gtk_widget_set_sensitive(entry, FALSE);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(refbutton, entry);
-   UIInstance().RegisterWidgetDependence(button, entry);
-
-   button = gtk_radio_button_new_with_label_from_widget(
-                             GTK_RADIO_BUTTON(button),
-                             DIALOG_GEN_FUNC_MAX_OPT_LABEL);
-   g_object_set_data(G_OBJECT(_dialog), "row_max_ref", button);
-   gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
-   gtk_widget_set_sensitive(button, FALSE);
-   gtk_widget_show(button);
-
-   UIInstance().RegisterWidgetDependence(refbutton, button);
-
-   hbox = gtk_hbox_new(FALSE, 0);
-   gtk_box_pack_end(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
-   gtk_widget_show(hbox);
-
-   button = gtk_check_button_new_with_label(DIALOG_GEN_FUNC_REF_TOTAL_OPT_LABEL);
-   g_object_set_data(G_OBJECT(_dialog), "row_ref_total", button);
-   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-   gtk_widget_set_sensitive(button, FALSE);
-   gtk_widget_show(button);
-
-   UIInstance().RegisterWidgetDependence(refbutton, button);
-
-   mainvbox = gtk_vbox_new(FALSE, 0);
-   gtk_box_pack_end(GTK_BOX(mainhbox), mainvbox, FALSE, FALSE, 0);
-   gtk_widget_show(mainvbox);
-
-   hbox = gtk_hbox_new(FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(mainvbox), hbox, TRUE, TRUE, 5);
-   gtk_widget_show(hbox);
-
-   frame = gtk_frame_new(DIALOG_GEN_FUNC_ROW_ALIGN_FRAME_LABEL);
-   gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 5);
-   gtk_widget_show(frame);
-
-   vbox = gtk_vbox_new(FALSE, 0);
-   gtk_container_add(GTK_CONTAINER(frame), vbox);
-   gtk_widget_show(vbox);
-
-   hbox = gtk_hbox_new(FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
-   gtk_widget_show(hbox);
-
-   // Widgets for specifying the alignment row.
-
-   button = gtk_radio_button_new(NULL);
-   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-   gtk_widget_show(button);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "row_num_align", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0");
-   gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
-   gtk_widget_set_size_request(entry, 25, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(button, entry);
-
-   button = gtk_radio_button_new_with_label_from_widget(
-                             GTK_RADIO_BUTTON(button),
-                             DIALOG_GEN_FUNC_MAX_OPT_LABEL);
-   g_object_set_data(G_OBJECT(_dialog), "row_max_align", button);
-   gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
-   gtk_widget_show(button);
-
-   hbox = gtk_hbox_new(FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(mainvbox), hbox, TRUE, TRUE, 5);
-   gtk_widget_show(hbox);
-
-   // Widgets for specifying the reference column & usage.
-
-   refbutton = gtk_check_button_new_with_label(DIALOG_GEN_FUNC_REF_COL_FRAME_LABEL);
-   g_object_set_data(G_OBJECT(_dialog), "col_ref", refbutton);
-   gtk_widget_show(refbutton);
-
-   frame = gtk_frame_new(NULL);
-   gtk_frame_set_label_widget(GTK_FRAME(frame), refbutton);
-   gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 5);
-   gtk_widget_show(frame);
-
-   vbox = gtk_vbox_new(FALSE, 0);
-   gtk_container_add(GTK_CONTAINER(frame), vbox);
-   gtk_widget_show(vbox);
-
-   hbox = gtk_hbox_new(FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
-   gtk_widget_show(hbox);
-
-   button = gtk_radio_button_new(NULL);
-   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-   gtk_widget_set_sensitive(button, FALSE);
-   gtk_widget_show(button);
-
-   UIInstance().RegisterWidgetDependence(refbutton, button);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "col_num_ref", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0");
-   gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
-   gtk_widget_set_size_request(entry, 25, -1);
-   gtk_widget_set_sensitive(entry, FALSE);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(refbutton, entry);
-   UIInstance().RegisterWidgetDependence(button, entry);
-
-   button = gtk_radio_button_new_with_label_from_widget(
-                             GTK_RADIO_BUTTON(button),
-                             DIALOG_GEN_FUNC_MAX_OPT_LABEL);
-   g_object_set_data(G_OBJECT(_dialog), "col_max_ref", button);
-   gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
-   gtk_widget_set_sensitive(button, FALSE);
-   gtk_widget_show(button);
-
-   UIInstance().RegisterWidgetDependence(refbutton, button);
-
-   hbox = gtk_hbox_new(FALSE, 0);
-   gtk_box_pack_end(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
-   gtk_widget_show(hbox);
-
-   button = gtk_check_button_new_with_label(DIALOG_GEN_FUNC_REF_TOTAL_OPT_LABEL);
-   g_object_set_data(G_OBJECT(_dialog), "col_ref_total", button);
-   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-   gtk_widget_set_sensitive(button, FALSE);
-   gtk_widget_show(button);
-
-   UIInstance().RegisterWidgetDependence(refbutton, button);
-
-   hbox = gtk_hbox_new(FALSE, 0);
-   gtk_table_attach_defaults(GTK_TABLE(table), hbox, 0, 13, 5, 6);
-   gtk_widget_show(hbox);
-
-   // Create Cancel button and hook it to callback.
-
-   button = gtk_button_new_with_label(DIALOG_CANCEL_BUTTON);
-   gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-   gtk_widget_set_size_request(button, 60, -1);
-   gtk_widget_show(button);
-
-   CreateCancelButtonCallback(button);
-
-   // Create Apply button and hook it to callback.
-
-   button = gtk_button_new_with_label(DIALOG_APPLY_BUTTON);
-   gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 10);
-   gtk_widget_set_size_request (button, 60, -1);
-   gtk_widget_show(button);
-
-   CreateApplyButtonCallback(button);
-
-   // Create OK button and hook it to callback.
-
-   button = gtk_button_new_with_label(DIALOG_OK_BUTTON);
-   gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-   gtk_widget_set_size_request (button, 60, -1);
-   gtk_widget_show(button);
-
-   CreateOkButtonCallback(button);
+   {
+      auto grid = new QGridLayout( _dialog ); // 6 x 13
+      grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
+      grid->setColumnStretch( 0, 1 );
+      grid->setColumnStretch( 3, 1 );
+      {
+         // Mutually exclusive "Surface values" and "Control values" radio buttons.
+         {
+            auto radio = surface = new QRadioButton( DIALOG_GEN_FUNC_SURFACE_VALUES );
+            grid->addWidget( radio, 0, 1 );
+            radio->setChecked( true );
+         }
+         {
+            auto radio = new QRadioButton( DIALOG_GEN_FUNC_CONTROL_VALUES );
+            grid->addWidget( radio, 0, 2 );
+         }
+         {
+            auto line = new QFrame;
+				line->setFrameShape( QFrame::Shape::HLine );
+				line->setFrameShadow( QFrame::Shadow::Raised );
+				grid->addWidget( line, 1, 0, 1, 4 );
+         }
+         // Checkbox for the "S" row of factors. All the other widgets on this row
+         // will have a dependence registered on this checkbox; i.e. they will only
+         // be active when it is checked.
+         {
+            auto hbox = new QHBoxLayout;
+            grid->addLayout( hbox, 2, 0, 1, 4 );
+
+            auto check = s_apply = new QCheckBox;
+            check->setChecked( true );
+            hbox->addWidget( check );
+
+            auto container = new QWidget;
+            hbox->addWidget( container );
+            UIInstance().RegisterWidgetDependence( check, container );
+
+            auto container_hbox = new QHBoxLayout( container );
+            container_hbox->setContentsMargins( 0, 0, 0, 0 );
+            {
+               const struct{ const char* name; QDoubleSpinBox *&spin; } data[] = {
+                  { DIALOG_GEN_FUNC_S_FUNC_LABEL, s_oldval },
+                  { DIALOG_GEN_FUNC_OLD_S_LABEL, s_rowdist },
+                  { DIALOG_GEN_FUNC_ROW_DIST_LABEL, s_coldist },
+                  { DIALOG_GEN_FUNC_COL_DIST_LABEL, s_rownum },
+                  { DIALOG_GEN_FUNC_ROW_NUM_LABEL, s_colnum },
+                  { DIALOG_GEN_FUNC_COL_NUM_LABEL, s_constant },
+               };
+               for( auto [ name, spin ] : data )
+               {
+                  container_hbox->addWidget( new QLabel( name ) );
+                  container_hbox->addWidget( spin = new DoubleSpinBox( -999, 999, 0, 3, .01 ) );
+               }
+               s_oldval->setValue( 1 );
+            }
+         }
+         // Checkbox for the "T" row of factors. All the other widgets on this row
+         // will have a dependence registered on this checkbox; i.e. they will only
+         // be active when it is checked.
+         {
+            auto hbox = new QHBoxLayout;
+            grid->addLayout( hbox, 3, 0, 1, 4 );
+
+            auto check = t_apply = new QCheckBox;
+            check->setChecked( true );
+            hbox->addWidget( check );
+
+            auto container = new QWidget;
+            hbox->addWidget( container );
+            UIInstance().RegisterWidgetDependence( check, container );
+
+            auto container_hbox = new QHBoxLayout( container );
+            container_hbox->setContentsMargins( 0, 0, 0, 0 );
+            {
+               const struct{ const char* name; QDoubleSpinBox *&spin; } data[] = {
+                  { DIALOG_GEN_FUNC_T_FUNC_LABEL, t_oldval },
+                  { DIALOG_GEN_FUNC_OLD_S_LABEL, t_rowdist },
+                  { DIALOG_GEN_FUNC_ROW_DIST_LABEL, t_coldist },
+                  { DIALOG_GEN_FUNC_COL_DIST_LABEL, t_rownum },
+                  { DIALOG_GEN_FUNC_ROW_NUM_LABEL, t_colnum },
+                  { DIALOG_GEN_FUNC_COL_NUM_LABEL, t_constant },
+               };
+               for( auto [ name, spin ] : data )
+               {
+                  container_hbox->addWidget( new QLabel( name ) );
+                  container_hbox->addWidget( spin = new DoubleSpinBox( -999, 999, 0, 3, .01 ) );
+               }
+               t_oldval->setValue( 1 );
+            }
+         }
+         {
+            // Widgets for specifying the alignment column.
+            auto group = new QGroupBox( DIALOG_GEN_FUNC_COL_ALIGN_FRAME_LABEL );
+            grid->addWidget( group, 4, 1 );
+
+            auto grid = new QGridLayout( group );
+            grid->setColumnStretch( 2, 1 );
+            {
+               auto radio = new QRadioButton;
+               grid->addWidget( radio, 0, 0 );
+               auto spin = col_num_align = new SpinBox( 0, 30 );
+               grid->addWidget( spin, 0, 1 );
+               UIInstance().RegisterWidgetDependence( radio, spin );
+               radio->setChecked( true );
+            }
+            {
+               auto radio = new QRadioButton( DIALOG_GEN_FUNC_MAX_OPT_LABEL );
+               grid->addWidget( radio, 0, 2, Qt::AlignmentFlag::AlignRight );
+            }
+         }
+         {
+            // Widgets for specifying the reference row & usage.
+            auto group = row_ref = new QGroupBox( DIALOG_GEN_FUNC_REF_ROW_FRAME_LABEL );
+            group->setCheckable( true );
+            group->setChecked( true );
+            grid->addWidget( group, 5, 1 );
+
+            auto grid = new QGridLayout( group );
+            grid->setColumnStretch( 2, 1 );
+            {
+               auto radio = new QRadioButton;
+               grid->addWidget( radio, 0, 0 );
+               auto spin = row_num_ref = new SpinBox( 0, 30 );
+               grid->addWidget( spin, 0, 1 );
+               UIInstance().RegisterWidgetDependence( radio, spin );
+               radio->setChecked( true );
+            }
+            {
+               auto radio = new QRadioButton( DIALOG_GEN_FUNC_MAX_OPT_LABEL );
+               grid->addWidget( radio, 0, 2, Qt::AlignmentFlag::AlignRight );
+            }
+            {
+               auto check = row_ref_total = new QCheckBox( DIALOG_GEN_FUNC_REF_TOTAL_OPT_LABEL );
+               grid->addWidget( check, 1, 0, 1, 3 );
+               check->setChecked( true );
+            }
+         }
+         {
+            // Widgets for specifying the alignment row.
+            auto group = new QGroupBox( DIALOG_GEN_FUNC_ROW_ALIGN_FRAME_LABEL );
+            grid->addWidget( group, 4, 2 );
+
+            auto grid = new QGridLayout( group );
+            grid->setColumnStretch( 2, 1 );
+            {
+               auto radio = new QRadioButton;
+               grid->addWidget( radio, 0, 0 );
+               auto spin = row_num_align = new SpinBox( 0, 30 );
+               grid->addWidget( spin, 0, 1 );
+               UIInstance().RegisterWidgetDependence( radio, spin );
+               radio->setChecked( true );
+            }
+            {
+               auto radio = new QRadioButton( DIALOG_GEN_FUNC_MAX_OPT_LABEL );
+               grid->addWidget( radio, 0, 2, Qt::AlignmentFlag::AlignRight );
+            }
+         }
+         {
+            // Widgets for specifying the reference column & usage.
+            auto group = col_ref = new QGroupBox( DIALOG_GEN_FUNC_REF_COL_FRAME_LABEL );
+            group->setCheckable( true );
+            group->setChecked( true );
+            grid->addWidget( group, 5, 2 );
+
+            auto grid = new QGridLayout( group );
+            grid->setColumnStretch( 2, 1 );
+            {
+               auto radio = new QRadioButton;
+               grid->addWidget( radio, 0, 0 );
+               auto spin = col_num_ref = new SpinBox( 0, 30 );
+               grid->addWidget( spin, 0, 1 );
+               UIInstance().RegisterWidgetDependence( radio, spin );
+               radio->setChecked( true );
+            }
+            {
+               auto radio = new QRadioButton( DIALOG_GEN_FUNC_MAX_OPT_LABEL );
+               grid->addWidget( radio, 0, 2, Qt::AlignmentFlag::AlignRight );
+            }
+            {
+               auto check = col_ref_total = new QCheckBox( DIALOG_GEN_FUNC_REF_TOTAL_OPT_LABEL );
+               grid->addWidget( check, 1, 0, 1, 3 );
+               check->setChecked( true );
+            }
+         }
+         {
+            auto buttons = new QDialogButtonBox;
+            grid->addWidget( buttons, 6, 0, 1, 4 );
+            CreateOkButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Ok ) );
+            CreateApplyButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Apply ) );
+            CreateCancelButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Cancel ) );
+         }
+      }
+   }
 }
 
 /**
@@ -625,8 +320,8 @@ GeneralFunctionDialog::Apply()
    }
 
    // See if we're going to be affecting the S and/or T texture axis.
-   bool sApply = NamedToggleWidgetActive("s_apply");
-   bool tApply = NamedToggleWidgetActive("t_apply");
+   const bool sApply = s_apply->isChecked();
+   const bool tApply = t_apply->isChecked();
 
    if (!sApply && !tApply)
    {
@@ -642,50 +337,50 @@ GeneralFunctionDialog::Apply()
    if (sApply)
    {
       // S axis is affected, so read the S factors.
-      s.oldValue = (float)atof(NamedEntryWidgetText("s_oldval"));
-      s.rowDistance = (float)atof(NamedEntryWidgetText("s_rowdist"));
-      s.colDistance = (float)atof(NamedEntryWidgetText("s_coldist"));
-      s.rowNumber = (float)atof(NamedEntryWidgetText("s_rownum"));
-      s.colNumber = (float)atof(NamedEntryWidgetText("s_colnum"));
-      s.constant = (float)atof(NamedEntryWidgetText("s_constant"));
+      s.oldValue = s_oldval->value();
+      s.rowDistance = s_rowdist->value();
+      s.colDistance = s_coldist->value();
+      s.rowNumber = s_rownum->value();
+      s.colNumber = s_colnum->value();
+      s.constant = s_constant->value();
       sFactors = &s;
    }
    if (tApply)
    {
       // T axis is affected, so read the T factors.
-      t.oldValue = (float)atof(NamedEntryWidgetText("t_oldval"));
-      t.rowDistance = (float)atof(NamedEntryWidgetText("t_rowdist"));
-      t.colDistance = (float)atof(NamedEntryWidgetText("t_coldist"));
-      t.rowNumber = (float)atof(NamedEntryWidgetText("t_rownum"));
-      t.colNumber = (float)atof(NamedEntryWidgetText("t_colnum"));
-      t.constant = (float)atof(NamedEntryWidgetText("t_constant"));
+      t.oldValue = t_oldval->value();
+      t.rowDistance = t_rowdist->value();
+      t.colDistance = t_coldist->value();
+      t.rowNumber = t_rownum->value();
+      t.colNumber = t_colnum->value();
+      t.constant = t_constant->value();
       tFactors = &t;
    }
    MeshEntity::SliceDesignation alignRow, alignCol;
-   alignRow.maxSlice = NamedToggleWidgetActive("row_max_align");
-   alignRow.index = atoi(NamedEntryWidgetText("row_num_align"));
-   alignCol.maxSlice = NamedToggleWidgetActive("col_max_align");
-   alignCol.index = atoi(NamedEntryWidgetText("col_num_align"));
+   alignRow.maxSlice = !row_num_align->isEnabled();
+   alignRow.index = row_num_align->value();
+   alignCol.maxSlice = !col_num_align->isEnabled();
+   alignCol.index = col_num_align->value();
    MeshEntity::RefSliceDescriptor row, col;
    MeshEntity::RefSliceDescriptor *refRow = NULL;
    MeshEntity::RefSliceDescriptor *refCol = NULL;
-   if (NamedToggleWidgetActive("row_ref"))
+   if ( row_ref->isChecked() )
    {
       // Reference row is specified, so get that info.
-      row.designation.maxSlice = NamedToggleWidgetActive("row_max_ref");
-      row.designation.index = atoi(NamedEntryWidgetText("row_num_ref"));
-      row.totalLengthOnly = NamedToggleWidgetActive("row_ref_total");
+      row.designation.maxSlice = !row_num_ref->isEnabled();
+      row.designation.index = row_num_ref->value();
+      row.totalLengthOnly = row_ref_total->isChecked();
       refRow = &row;
    }
-   if (NamedToggleWidgetActive("col_ref"))
+   if ( col_ref->isChecked() )
    {
       // Reference column is specified, so get that info.
-      col.designation.maxSlice = NamedToggleWidgetActive("col_max_ref");
-      col.designation.index = atoi(NamedEntryWidgetText("col_num_ref"));
-      col.totalLengthOnly = NamedToggleWidgetActive("col_ref_total");
+      col.designation.maxSlice = !col_num_ref->isEnabled();
+      col.designation.index = col_num_ref->value();
+      col.totalLengthOnly = col_ref_total->isChecked();
       refCol = &col;
    }
-   bool surfaceValues = NamedToggleWidgetActive("surface");
+   const bool surfaceValues = surface->isChecked();
 
    // Let Radiant know the name of the operation responsible for the changes
    // that are about to happen.

@@ -21,5 +21,4 @@
 
 #pragma once
 
-typedef struct _GtkWidget GtkWidget;
-extern GtkWidget *g_pRadiantWnd;
+extern class QWidget *g_pRadiantWnd;

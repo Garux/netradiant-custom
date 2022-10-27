@@ -67,15 +67,15 @@ LIBS_XML           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) li
 CPPFLAGS_PNG       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --cflags $(STDERR_TO_DEVNULL))
 LIBS_PNG           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-L $(STDERR_TO_DEVNULL)) \
                       $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-l $(STDERR_TO_DEVNULL))
-CPPFLAGS_GTK       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --cflags $(STDERR_TO_DEVNULL))
-LIBS_GTK           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --libs-only-L $(STDERR_TO_DEVNULL)) \
-                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --libs-only-l $(STDERR_TO_DEVNULL))
-CPPFLAGS_PANGOFT2  ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) pangoft2 --cflags $(STDERR_TO_DEVNULL))
-LIBS_PANGOFT2      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) pangoft2 --libs-only-L $(STDERR_TO_DEVNULL)) \
-                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) pangoft2 --libs-only-l $(STDERR_TO_DEVNULL))
-CPPFLAGS_GTKGLEXT  ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --cflags $(STDERR_TO_DEVNULL))
-LIBS_GTKGLEXT      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --libs-only-L $(STDERR_TO_DEVNULL)) \
-                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_QTCORE    ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Core --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+LIBS_QTCORE        ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Core --libs-only-L $(STDERR_TO_DEVNULL)) \
+                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Core --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_QTGUI     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --cflags $(STDERR_TO_DEVNULL))
+LIBS_QTGUI         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --libs-only-L $(STDERR_TO_DEVNULL)) \
+                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_QTWIDGETS ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --cflags $(STDERR_TO_DEVNULL))
+LIBS_QTWIDGETS     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --libs-only-L $(STDERR_TO_DEVNULL)) \
+                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_GL        ?=
 LIBS_GL            ?= -lGL # -lopengl32 on Win32
 CPPFLAGS_DL        ?=
@@ -98,7 +98,7 @@ DEPENDENCIES_CHECK ?= quiet
 endif
 
 # these are used on Win32 only
-GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --variable=prefix $(STDERR_TO_DEVNULL))
+GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --variable=prefix $(STDERR_TO_DEVNULL))
 WHICHDLL           ?= which
 DLLINSTALL         ?= install-dlls.sh
 
@@ -240,7 +240,6 @@ ifeq ($(OS),Darwin)
 
 	# workaround: http://developer.apple.com/qa/qa2007/qa1567.html
 	LIBS_GL += -lX11 -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib
-	LIBS_GTKGLEXT += -lX11 -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib
 	# workaround: we have no "ldd" for OS X, so...
 	LDD =
 	OTOOL = otool
@@ -379,9 +378,9 @@ dependencies-check:
 	checkheader libxml2-dev libxml/xpath.h xmlXPathInit "$(CPPFLAGS_XML)" "$(LIBS_XML)"; \
 	checkheader libpng12-dev png.h png_create_read_struct "$(CPPFLAGS_PNG)" "$(LIBS_PNG)"; \
 	checkheader "mesa-common-dev (or another OpenGL library)" GL/gl.h glClear "$(CPPFLAGS_GL)" "$(LIBS_GL)"; \
-	checkheader libgtk2.0-dev gtk/gtkdialog.h gtk_dialog_run "$(CPPFLAGS_GTK)" "$(LIBS_GTK)"; \
-	checkheader libpango1.0-dev pango/pangoft2.h pango_ft2_font_map_new "$(CPPFLAGS_PANGOFT2)" "$(LIBS_PANGOFT2)"; \
-	checkheader libgtkglext1-dev gtk/gtkglwidget.h gtk_widget_get_gl_context "$(CPPFLAGS_GTKGLEXT)" "$(LIBS_GTKGLEXT)"; \
+	checkheader Qt5Core QCoreApplication QCoreApplication::exec "$(CPPFLAGS_QTCORE)" "$(LIBS_QTCORE)"; \
+	checkheader Qt5Gui QGuiApplication QGuiApplication::exec "$(CPPFLAGS_QTGUI)" "$(LIBS_QTGUI)"; \
+	checkheader Qt5Widgets QApplication QApplication::exec "$(CPPFLAGS_QTWIDGETS)" "$(LIBS_QTWIDGETS)"; \
 	[ "$(OS)" != "Win32" ] && checkheader libc6-dev dlfcn.h dlopen "$(CPPFLAGS_DL)" "$(LIBS_DL)"; \
 	checkheader zlib1g-dev zlib.h zlibVersion "$(CPPFLAGS_ZLIB)" "$(LIBS_ZLIB)"; \
 	[ "$$failed" = "0" ] && $(ECHO) All required libraries have been found!
@@ -830,8 +829,8 @@ libetclib.$(A): \
 	libs/etclib.o \
 
 $(INSTALLDIR)/radiant.$(EXE): LDFLAGS_EXTRA := $(MWINDOWS)
-$(INSTALLDIR)/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT) $(LIBS_ZLIB) $(LIBS_PANGOFT2)
-$(INSTALLDIR)/radiant.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_GL) $(CPPFLAGS_DL) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) $(CPPFLAGS_PANGOFT2) -Ilibs -Iinclude
+$(INSTALLDIR)/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS) $(LIBS_ZLIB)
+$(INSTALLDIR)/radiant.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_GL) $(CPPFLAGS_DL) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/autosave.o \
 	radiant/brushmanip.o \
@@ -844,6 +843,7 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/build.o \
 	radiant/camwindow.o \
 	radiant/clippertool.o \
+	radiant/colors.o \
 	radiant/commands.o \
 	radiant/console.o \
 	radiant/csg.o \
@@ -868,14 +868,12 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/groupdialog.o \
 	radiant/gtkdlgs.o \
 	radiant/gtkmisc.o \
-	radiant/gtktheme.o \
 	radiant/help.o \
 	radiant/image.o \
 	radiant/mainframe.o \
 	radiant/main.o \
 	radiant/map.o \
 	radiant/modelwindow.o \
-	$(if $(findstring Win32,$(OS)),radiant/multimon.o,) \
 	radiant/mru.o \
 	radiant/nullmodel.o \
 	radiant/parse.o \
@@ -906,6 +904,8 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/texmanip.o \
 	radiant/textures.o \
 	radiant/texwindow.o \
+	radiant/theme.o \
+	radiant/tools.o \
 	radiant/treemodel.o \
 	radiant/undo.o \
 	radiant/url.o \
@@ -936,30 +936,23 @@ libprofile.$(A): \
 	libs/profile/file.o \
 	libs/profile/profile.o \
 
-libgtkutil.$(A): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) $(CPPFLAGS_PANGOFT2) -Ilibs -Iinclude
+libgtkutil.$(A): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 libgtkutil.$(A): \
 	libs/gtkutil/accelerator.o \
-	libs/gtkutil/button.o \
 	libs/gtkutil/clipboard.o \
-	libs/gtkutil/closure.o \
-	libs/gtkutil/container.o \
-	libs/gtkutil/cursor.o \
 	libs/gtkutil/dialog.o \
 	libs/gtkutil/entry.o \
 	libs/gtkutil/filechooser.o \
-	libs/gtkutil/frame.o \
 	libs/gtkutil/glfont.o \
 	libs/gtkutil/glwidget.o \
+	libs/gtkutil/guisettings.o \
 	libs/gtkutil/idledraw.o \
 	libs/gtkutil/image.o \
 	libs/gtkutil/menu.o \
 	libs/gtkutil/messagebox.o \
 	libs/gtkutil/nonmodal.o \
-	libs/gtkutil/paned.o \
-	libs/gtkutil/pointer.o \
 	libs/gtkutil/toolbar.o \
 	libs/gtkutil/widget.o \
-	libs/gtkutil/window.o \
 	libs/gtkutil/xorrectangle.o \
 
 libxmllib.$(A): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
@@ -994,7 +987,7 @@ $(INSTALLDIR)/modules/archivepak.$(DLL): \
 	plugins/archivepak/pak.o \
 	plugins/archivepak/plugin.o \
 
-$(INSTALLDIR)/modules/entity.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/entity.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude $(CPPFLAGS_QTGUI)
 $(INSTALLDIR)/modules/entity.$(DLL): \
 	plugins/entity/angle.o \
 	plugins/entity/angles.o \
@@ -1065,7 +1058,7 @@ ifneq ($(OS),Win32)
 $(INSTALLDIR)/modules/assmodel.$(DLL): LDFLAGS_EXTRA := -Wl,-rpath '-Wl,$$ORIGIN/..'
 endif
 $(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := -lassimp_ -L$(INSTALLDIR)
-$(INSTALLDIR)/modules/assmodel.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude -Ilibs/assimp/include
+$(INSTALLDIR)/modules/assmodel.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude -Ilibs/assimp/include $(CPPFLAGS_QTGUI)
 $(INSTALLDIR)/modules/assmodel.$(DLL): \
 	plugins/assmodel/mdlimage.o \
 	plugins/assmodel/model.o \
@@ -1087,8 +1080,8 @@ $(INSTALLDIR)/modules/vfspk3.$(DLL): \
 	plugins/vfspk3/vfspk3.o \
 	libfilematch.$(A) \
 
-$(INSTALLDIR)/plugins/bobtoolz.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-$(INSTALLDIR)/plugins/bobtoolz.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/bobtoolz.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/bobtoolz.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/bobtoolz.$(DLL): \
 	contrib/bobtoolz/bobToolz-GTK.o \
 	contrib/bobtoolz/bsploader.o \
@@ -1117,17 +1110,16 @@ $(INSTALLDIR)/plugins/bobtoolz.$(DLL): \
 	libmathlib.$(A) \
 	libprofile.$(A) \
 
-$(INSTALLDIR)/plugins/brushexport.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-$(INSTALLDIR)/plugins/brushexport.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/brushexport.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/brushexport.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/brushexport.$(DLL): \
 	contrib/brushexport/callbacks.o \
 	contrib/brushexport/export.o \
 	contrib/brushexport/interface.o \
 	contrib/brushexport/plugin.o \
-	contrib/brushexport/support.o \
 
-$(INSTALLDIR)/plugins/prtview.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-$(INSTALLDIR)/plugins/prtview.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/prtview.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/prtview.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/prtview.$(DLL): \
 	contrib/prtview/AboutDialog.o \
 	contrib/prtview/ConfigDialog.o \
@@ -1136,14 +1128,14 @@ $(INSTALLDIR)/plugins/prtview.$(DLL): \
 	contrib/prtview/prtview.o \
 	libprofile.$(A) \
 
-$(INSTALLDIR)/plugins/shaderplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_XML)
-$(INSTALLDIR)/plugins/shaderplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_XML) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/shaderplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS) $(LIBS_XML)
+$(INSTALLDIR)/plugins/shaderplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) $(CPPFLAGS_XML) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/shaderplug.$(DLL): \
 	contrib/shaderplug/shaderplug.o \
 	libxmllib.$(A) \
 
-$(INSTALLDIR)/plugins/sunplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-$(INSTALLDIR)/plugins/sunplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/sunplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/sunplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/sunplug.$(DLL): \
 	contrib/sunplug/sunplug.o \
 
@@ -1209,16 +1201,16 @@ $(INSTALLDIR)/q2map.$(EXE): \
 	libl_net.$(A) \
 	$(if $(findstring Win32,$(OS)),icons/q2map.o,) \
 
-$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/ufoaiplug.$(DLL): \
 	contrib/ufoaiplug/ufoai_filters.o \
 	contrib/ufoaiplug/ufoai_gtk.o \
 	contrib/ufoaiplug/ufoai_level.o \
 	contrib/ufoaiplug/ufoai.o \
 
-$(INSTALLDIR)/plugins/meshtex.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-$(INSTALLDIR)/plugins/meshtex.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/meshtex.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/meshtex.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/meshtex.$(DLL): \
 	contrib/meshtex/GeneralFunctionDialog.o \
 	contrib/meshtex/GenericDialog.o \
@@ -1234,8 +1226,8 @@ $(INSTALLDIR)/plugins/meshtex.$(DLL): \
 	contrib/meshtex/RefCounted.o \
 	contrib/meshtex/SetScaleDialog.o \
 
-$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): \
 	contrib/bkgrnd2d/bkgrnd2d.o \
 	contrib/bkgrnd2d/dialog.o \

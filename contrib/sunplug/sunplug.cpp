@@ -34,138 +34,20 @@
 #include "scenelib.h"    // declaration of datastructure of the map
 #include "qerplugin.h"   // declaration to use other interfaces as a plugin
 
-#include <gtk/gtk.h>     // to display something with gtk (windows, buttons etc.), the whole package might not be necessary
+#include "generic/vector.h"
+#include "gtkutil/spinbox.h"
+#include <QDialog>
+#include <QPushButton>
+#include <QDialogButtonBox>
+#include <QFrame>
+#include <QFormLayout>
+#include <QHBoxLayout>
+
+
 
 void about_plugin_window();
 void MapCoordinator();
 
-#ifndef _WIN32
-// linux itoa implementation
-char* itoa( int value, char* result, int base ){
-	// check that the base if valid
-	if ( base < 2 || base > 16 ) {
-		*result = 0;
-		return result;
-	}
-
-	char* out = result;
-	int quotient = value;
-
-	do
-	{
-		*out = "0123456789abcdef"[abs( quotient % base )];
-		++out;
-
-		quotient /= base;
-	} while ( quotient );
-
-	// Only apply negative sign for base 10
-	if ( value < 0 && base == 10 ) {
-		*out++ = '-';
-	}
-
-	std::reverse( result, out );
-
-	*out = 0;
-	return result;
-}
-#endif
-
-typedef struct _mapcoord_setting_packet {
-	GtkSpinButton *spinner1, *spinner2, *spinner3, *spinner4;
-	Entity* worldspawn;
-} mapcoord_setting_packet;
-
-static int map_minX, map_maxX, map_minY, map_maxY;
-static int minX, maxX, minY, maxY;
-mapcoord_setting_packet msp;
-
-//  **************************
-// ** find entities by class **  from radiant/map.cpp
-//  **************************
-class EntityFindByClassname : public scene::Graph::Walker
-{
-	const char* m_name;
-	Entity*& m_entity;
-public:
-	EntityFindByClassname( const char* name, Entity*& entity ) : m_name( name ), m_entity( entity ){
-		m_entity = 0;
-	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
-		if ( m_entity == 0 ) {
-			Entity* entity = Node_getEntity( path.top() );
-			if ( entity != 0
-			     && string_equal( m_name, entity->getClassName() ) ) {
-				m_entity = entity;
-			}
-		}
-		return true;
-	}
-};
-
-Entity* Scene_FindEntityByClass( const char* name ){
-	Entity* entity;
-	GlobalSceneGraph().traverse( EntityFindByClassname( name, entity ) );
-	return entity;
-}
-
-//  **************************
-// ** GTK callback functions **
-//  **************************
-
-static gboolean delete_event( GtkWidget *widget, GdkEvent *event, gpointer data ){
-	/* If you return FALSE in the "delete_event" signal handler,
-	 * GTK will emit the "destroy" signal. Returning TRUE means
-	 * you don't want the window to be destroyed.
-	 * This is useful for popping up 'are you sure you want to quit?'
-	 * type dialogs. */
-
-	return FALSE;
-}
-
-// destroy widget if destroy signal is passed to widget
-static void destroy( GtkWidget *widget, gpointer data ){
-	gtk_widget_destroy( widget );
-}
-
-// function for close button to destroy the toplevel widget
-static void close_window( GtkWidget *widget, gpointer data ){
-	gtk_widget_destroy( gtk_widget_get_toplevel( widget ) );
-}
-
-// callback function to assign the optimal mapcoords to the spinboxes
-static void input_optimal( GtkWidget *widget, gpointer data ){
-	gtk_spin_button_set_value( msp.spinner1, minX );
-	gtk_spin_button_set_value( msp.spinner2, maxY );
-	gtk_spin_button_set_value( msp.spinner3, maxX );
-	gtk_spin_button_set_value( msp.spinner4, minY );
-}
-
-// Spinner return value function
-gint grab_int_value( GtkSpinButton *a_spinner, gpointer user_data ) {
-	return gtk_spin_button_get_value_as_int( a_spinner );
-}
-
-// write the values of the Spinner-Boxes to the worldspawn
-static void set_coordinates( GtkWidget *widget, gpointer data ){
-	//Str str_min, str_max;
-	char buffer[10], str_min[20], str_max[20];
-
-	itoa( gtk_spin_button_get_value_as_int( msp.spinner1 ), str_min, 10 );
-	itoa( gtk_spin_button_get_value_as_int( msp.spinner2 ), buffer, 10 );
-	strcat( str_min, " " );
-	strcat( str_min, buffer );
-	msp.worldspawn->setKeyValue( "mapcoordsmins", str_min );
-
-	itoa( gtk_spin_button_get_value_as_int( msp.spinner3 ), str_max, 10 );
-	itoa( gtk_spin_button_get_value_as_int( msp.spinner4 ), buffer, 10 );
-	strcat( str_max, " " );
-	strcat( str_max, buffer );
-	UndoableCommand undo( "SunPlug.entitySetMapcoords" );
-	msp.worldspawn->setKeyValue( "mapcoordsmaxs", str_max );
-
-	close_window( widget, NULL );
-}
 
 class SunPlugPluginDependencies :
 	public GlobalRadiantModuleRef,  // basic class for all other module refs
@@ -184,11 +66,11 @@ public:
 //  *************************
 namespace SunPlug
 {
-GtkWindow* main_window;
+QWidget* main_window;
 char MenuList[100] = "";
 
 const char* init( void* hApp, void* pMainWidget ){
-	main_window = GTK_WINDOW( pMainWidget );
+	main_window = static_cast<QWidget*>( pMainWidget );
 	return "Initializing SunPlug for GTKRadiant";
 }
 const char* getName(){
@@ -199,9 +81,9 @@ const char* getCommandList(){
 	const char etMapCoordinator[] = ";ET-MapCoordinator";
 
 	strcat( MenuList, about );
-	if ( strncmp( GlobalRadiant().getGameName(), "etmain", 6 ) == 0 ) {
+//.	if ( strncmp( GlobalRadiant().getGameName(), "etmain", 6 ) == 0 ) {
 		strcat( MenuList, etMapCoordinator );
-	}
+//.	}
 	return (const char*)MenuList;
 }
 const char* getCommandTitleList(){
@@ -247,196 +129,149 @@ extern "C" void RADIANT_DLLEXPORT Radiant_RegisterModules( ModuleServer& server 
 	g_SunPlugModule.selfRegister();
 }
 
+
+
+//  **************************
+// ** find entities by class **  from radiant/map.cpp
+//  **************************
+class EntityFindByClassname : public scene::Graph::Walker
+{
+	const char* m_name;
+	Entity*& m_entity;
+public:
+	EntityFindByClassname( const char* name, Entity*& entity ) : m_name( name ), m_entity( entity ){
+		m_entity = 0;
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( m_entity == 0 ) {
+			Entity* entity = Node_getEntity( path.top() );
+			if ( entity != 0
+			     && string_equal( m_name, entity->getClassName() ) ) {
+				m_entity = entity;
+			}
+		}
+		return true;
+	}
+};
+
+Entity* Scene_FindEntityByClass( const char* name ){
+	Entity* entity;
+	GlobalSceneGraph().traverse( EntityFindByClassname( name, entity ) );
+	return entity;
+}
+
 //  ************
 // ** my stuff **
 //  ************
 
 // About dialog
 void about_plugin_window(){
-	GtkWidget *window, *vbox, *label, *button;
+	GlobalRadiant().m_pfnMessageBox( SunPlug::main_window, "SunPlug v1.0 for NetRadiant 1.5\nby Topsun", "About SunPlug", EMessageBoxType::Info, 0 );
+}
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL ); // create a window
-	gtk_window_set_transient_for( GTK_WINDOW( window ), SunPlug::main_window ); // make the window to stay in front of the main window
-	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( delete_event ), NULL ); // connect the delete event
-	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( destroy ), NULL ); // connect the destroy event for the window
-	gtk_window_set_title( GTK_WINDOW( window ), "About SunPlug" ); // set the title of the window for the window
-	gtk_window_set_resizable( GTK_WINDOW( window ), FALSE ); // don't let the user resize the window
-	gtk_window_set_modal( GTK_WINDOW( window ), TRUE ); // force the user not to do something with the other windows
-	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 ); // set the border of the window
 
-	vbox = gtk_vbox_new( FALSE, 10 ); // create a box to arrange new objects vertically
-	gtk_container_add( GTK_CONTAINER( window ), vbox ); // add the box to the window
-
-	label = gtk_label_new( "SunPlug v1.0 for NetRadiant 1.5\nby Topsun" ); // create a label
-	gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // text align left
-	gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, FALSE, 2 ); // insert the label in the box
-
-	button = gtk_button_new_with_label( "OK" ); // create a button with text
-	g_signal_connect_swapped( G_OBJECT( button ), "clicked", G_CALLBACK( gtk_widget_destroy ), window ); // connect the click event to close the window
-	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 2 ); // insert the button in the box
-
-	gtk_window_set_position( GTK_WINDOW( window ), GTK_WIN_POS_CENTER ); // center the window on screen
-
-	gtk_widget_show_all( window ); // show the window and all subelements
+AABB GetMapBounds(){
+	scene::Path path = makeReference( GlobalSceneGraph().root() ); // get the path to the root element of the graph
+	scene::Instance* instance = GlobalSceneGraph().find( path ); // find the instance to the given path
+	return instance->worldAABB(); // get the bounding box of the level
 }
 
 // get the current bounding box and return the optimal coordinates
-void GetOptimalCoordinates( AABB *levelBoundingBox ){
-	int half_width, half_heigth, center_x, center_y;
-
-	half_width = levelBoundingBox->extents.x();
-	half_heigth = levelBoundingBox->extents.y();
-	center_x = levelBoundingBox->origin.x();
-	center_y = levelBoundingBox->origin.y();
-
-	if ( half_width > 175 || half_heigth > 175 ) { // the square must be at least 350x350 units
-		// the wider side is the indicator for the square
-		if ( half_width >= half_heigth ) {
-			minX = center_x - half_width;
-			maxX = center_x + half_width;
-			minY = center_y - half_width;
-			maxY = center_y + half_width;
-		}
-		else {
-			minX = center_x - half_heigth;
-			maxX = center_x + half_heigth;
-			minY = center_y - half_heigth;
-			maxY = center_y + half_heigth;
-		}
-	}
-	else {
-		minX = center_x - 175;
-		maxX = center_x + 175;
-		minY = center_y - 175;
-		maxY = center_y + 175;
-	}
+auto GetOptimalCoordinates(){
+	const AABB bounds = GetMapBounds();
+	const float max = std::max( { bounds.extents.x(), bounds.extents.y(), 175.f } ); // the square must be at least 350x350 units
+	return std::pair( BasicVector2<int>( bounds.origin.vec2() - Vector2( max, max ) ),
+	                  BasicVector2<int>( bounds.origin.vec2() + Vector2( max, max ) ) );
 }
+
 
 // MapCoordinator dialog window
 void MapCoordinator(){
-	GtkWidget *window, *vbox, *table, *label, *spinnerMinX, *spinnerMinY, *spinnerMaxX, *spinnerMaxY, *button;
-	GtkAdjustment *spinner_adj_MinX, *spinner_adj_MinY, *spinner_adj_MaxX, *spinner_adj_MaxY;
-	Entity *theWorldspawn = NULL;
-	const char *buffer;
-	char line[20];
-
-	// in any case we need a window to show the user what to do
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL ); // create the window
-	gtk_window_set_transient_for( GTK_WINDOW( window ), SunPlug::main_window ); // make the window to stay in front of the main window
-	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( delete_event ), NULL ); // connect the delete event for the window
-	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( destroy ), NULL ); // connect the destroy event for the window
-	gtk_window_set_title( GTK_WINDOW( window ), "ET-MapCoordinator" ); // set the title of the window for the window
-	gtk_window_set_resizable( GTK_WINDOW( window ), FALSE ); // don't let the user resize the window
-	gtk_window_set_modal( GTK_WINDOW( window ), TRUE ); // force the user not to do something with the other windows
-	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 ); // set the border of the window
-
-	vbox = gtk_vbox_new( FALSE, 10 ); // create a box to arrange new objects vertically
-	gtk_container_add( GTK_CONTAINER( window ), vbox ); // add the box to the window
-
-	scene::Path path = makeReference( GlobalSceneGraph().root() ); // get the path to the root element of the graph
-	scene::Instance* instance = GlobalSceneGraph().find( path ); // find the instance to the given path
-	AABB levelBoundingBox = instance->worldAABB(); // get the bounding box of the level
-
-	theWorldspawn = Scene_FindEntityByClass( "worldspawn" ); // find the entity worldspawn
-	if ( theWorldspawn != 0 ) { // need to have a worldspawn otherwise setting a value crashes the radiant
-		// next two if's: get the current values of the mapcoords
-		buffer = theWorldspawn->getKeyValue( "mapcoordsmins" ); // upper left corner
-		if ( strlen( buffer ) > 0 ) {
-			strncpy( line, buffer, 19 );
-			map_minX = atoi( strtok( line, " " ) ); // minimum of x value
-			map_minY = atoi( strtok( NULL, " " ) ); // maximum of y value
+	// find the entity worldspawn
+	if ( Entity *theWorldspawn = Scene_FindEntityByClass( "worldspawn" ) ) { // need to have a worldspawn otherwise setting a value crashes the radiant
+		// get the current values of the mapcoords
+		BasicVector2<int> min( 0, 0 ), max( 0, 0 );
+		{
+			StringTokeniser tokeniser( theWorldspawn->getKeyValue( "mapcoordsmins" ) ); // upper left corner
+			min.x() = atoi( tokeniser.getToken() ); // minimum of x value
+			min.y() = atoi( tokeniser.getToken() ); // maximum of y value
 		}
-		else {
-			map_minX = 0;
-			map_minY = 0;
-		}
-		buffer = theWorldspawn->getKeyValue( "mapcoordsmaxs" ); // lower right corner
-		if ( strlen( buffer ) > 0 ) {
-			strncpy( line, buffer, 19 );
-			map_maxX = atoi( strtok( line, " " ) ); // maximum of x value
-			map_maxY = atoi( strtok( NULL, " " ) ); // minimum of y value
-		}
-		else {
-			map_maxX = 0;
-			map_maxY = 0;
+		{
+			StringTokeniser tokeniser( theWorldspawn->getKeyValue( "mapcoordsmaxs" ) ); // lower right corner
+			max.x() = atoi( tokeniser.getToken() ); // maximum of x value
+			max.y() = atoi( tokeniser.getToken() ); // minimum of y value
 		}
 
 		globalOutputStream() << "SunPlug: calculating optimal coordinates\n"; // write to console that we are calculating the coordinates
-		GetOptimalCoordinates( &levelBoundingBox ); // calculate optimal mapcoords with the dimensions of the level bounding box
-		globalOutputStream() << "SunPlug: advised mapcoordsmins=" << minX << " " << maxY << "\n"; // console info about mapcoordsmins
-		globalOutputStream() << "SunPlug: advised mapcoordsmaxs=" << maxX << " " << minY << "\n"; // console info about mapcoordsmaxs
+		const auto [ calc_min, calc_max ] = GetOptimalCoordinates(); // calculate optimal mapcoords with the dimensions of the level bounding box
+		globalOutputStream() << "SunPlug: advised mapcoordsmins=" << calc_min.x() << " " << calc_max.y() << "\n"; // console info about mapcoordsmins
+		globalOutputStream() << "SunPlug: advised mapcoordsmaxs=" << calc_max.x() << " " << calc_min.y() << "\n"; // console info about mapcoordsmaxs
 
-		spinner_adj_MinX = (GtkAdjustment *)gtk_adjustment_new( map_minX, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of minimum x value
-		spinner_adj_MinY = (GtkAdjustment *)gtk_adjustment_new( map_minY, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of minimum y value
-		spinner_adj_MaxX = (GtkAdjustment *)gtk_adjustment_new( map_maxX, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of maximum x value
-		spinner_adj_MaxY = (GtkAdjustment *)gtk_adjustment_new( map_maxY, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of maximum y value
+		{
+			QDialog dialog( SunPlug::main_window, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+			dialog.setWindowTitle( "ET-MapCoordinator" );
+			{
+				auto form = new QFormLayout( &dialog );
+				form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
+				{
+					auto spin_minX = new SpinBox( -65536, 65536, min.x() );
+					auto spin_minY = new SpinBox( -65536, 65536, min.y() );
+					auto spin_maxX = new SpinBox( -65536, 65536, max.x() );
+					auto spin_maxY = new SpinBox( -65536, 65536, max.y() );
+					spin_minX->setPrefix( "X: " );
+					spin_minY->setPrefix( "Y: " );
+					spin_maxX->setPrefix( "X: " );
+					spin_maxY->setPrefix( "Y: " );
+					{
+						auto button = new QPushButton( "Get optimal mapcoords" );
+						form->addWidget( button );
+						QObject::connect( button, &QPushButton::clicked, [&](){
+							spin_minX->setValue( calc_min.x() );
+							spin_minY->setValue( calc_max.y() );
+							spin_maxX->setValue( calc_max.x() );
+							spin_maxY->setValue( calc_min.y() );
+						} );
+					}
+					{
+						auto line = new QFrame;
+						line->setFrameShape( QFrame::Shape::HLine );
+						line->setFrameShadow( QFrame::Shadow::Raised );
+						form->addRow( line );
+					}
+					{
+						auto hbox = new QHBoxLayout;
+						hbox->addWidget( spin_minX );
+						hbox->addWidget( spin_minY );
+						form->addRow( new QLabel( "MapCoordsMins" ), hbox );
+					}
+					{
+						auto hbox = new QHBoxLayout;
+						hbox->addWidget( spin_maxX );
+						hbox->addWidget( spin_maxY );
+						form->addRow( new QLabel( "MapCoordsMaxs" ), hbox );
+					}
+					{
+						auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+						form->addWidget( buttons );
+						QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
+						QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );
+						buttons->button( QDialogButtonBox::StandardButton::Ok )->setText( "Set" );
+					}
 
-		button = gtk_button_new_with_label( "Get optimal mapcoords" ); // create button with text
-		g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( input_optimal ), NULL ); // connect button with callback function
-		gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 2 ); // insert button into vbox
-
-		gtk_box_pack_start( GTK_BOX( vbox ), gtk_hseparator_new(), FALSE, FALSE, 2 ); // insert separator into vbox
-
-		table = gtk_table_new( 4, 3, TRUE ); // create table
-		gtk_table_set_row_spacings( GTK_TABLE( table ), 8 ); // set row spacings
-		gtk_table_set_col_spacings( GTK_TABLE( table ), 8 ); // set column spacings
-		gtk_box_pack_start( GTK_BOX( vbox ), table, FALSE, FALSE, 2 ); // insert table into vbox
-
-		label = gtk_label_new( "x" ); // create label
-		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // align text to the left side
-		gtk_table_attach_defaults( GTK_TABLE( table ), label, 1, 2, 0, 1 ); // insert label into table
-
-		label = gtk_label_new( "y" ); // create label
-		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // align text to the left side
-		gtk_table_attach_defaults( GTK_TABLE( table ), label, 2, 3, 0, 1 ); // insert label into table
-
-		label = gtk_label_new( "mapcoordsmins" ); // create label
-		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // align text to the left side
-		gtk_table_attach_defaults( GTK_TABLE( table ), label, 0, 1, 1, 2 ); // insert label into table
-
-		spinnerMinX = gtk_spin_button_new( spinner_adj_MinX, 1.0, 0 ); // create textbox with value spin, value and value range
-		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMinX, 1, 2, 1, 2 ); // insert spinbox into table
-
-		spinnerMinY = gtk_spin_button_new( spinner_adj_MinY, 1.0, 0 ); // create textbox with value spin, value and value range
-		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMinY, 2, 3, 1, 2 ); // insert spinbox into table
-
-		label = gtk_label_new( "mapcoordsmaxs" ); // create label
-		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // align text to the left side
-		gtk_table_attach_defaults( GTK_TABLE( table ), label, 0, 1, 2, 3 ); // insert label into table
-
-		spinnerMaxX = gtk_spin_button_new( spinner_adj_MaxX, 1.0, 0 ); // create textbox with value spin, value and value range
-		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMaxX, 1, 2, 2, 3 ); // insert spinbox into table
-
-		spinnerMaxY = gtk_spin_button_new( spinner_adj_MaxY, 1.0, 0 ); // create textbox with value spin, value and value range
-		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMaxY, 2, 3, 2, 3 ); // insert spinbox into table
-
-		// put the references to the spinboxes and the worldspawn into the global exchange
-		msp.spinner1 = GTK_SPIN_BUTTON( spinnerMinX );
-		msp.spinner2 = GTK_SPIN_BUTTON( spinnerMinY );
-		msp.spinner3 = GTK_SPIN_BUTTON( spinnerMaxX );
-		msp.spinner4 = GTK_SPIN_BUTTON( spinnerMaxY );
-		msp.worldspawn = theWorldspawn;
-
-		button = gtk_button_new_with_label( "Set" ); // create button with text
-		g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( set_coordinates ), NULL ); // connect button with callback function
-		gtk_table_attach_defaults( GTK_TABLE( table ), button, 1, 2, 3, 4 ); // insert button into table
-
-		button = gtk_button_new_with_label( "Cancel" ); // create button with text
-		g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( close_window ), NULL ); // connect button with callback function
-		gtk_table_attach_defaults( GTK_TABLE( table ), button, 2, 3, 3, 4 ); // insert button into table
+					if( dialog.exec() ){
+						UndoableCommand undo( "SunPlug.entitySetMapcoords" );
+						theWorldspawn->setKeyValue( "mapcoordsmins", ( spin_minX->text() + " " + spin_minY->text() ).toLatin1().constData() );
+						theWorldspawn->setKeyValue( "mapcoordsmaxs", ( spin_maxX->text() + " " + spin_maxY->text() ).toLatin1().constData() );
+					}
+				}
+			}
+		}
 	}
 	else {
 		globalErrorStream() << "SunPlug: no worldspawn found!\n"; // output error to console
 
-		label = gtk_label_new( "ERROR: No worldspawn was found in the map!\nIn order to use this tool the map must have at least one brush in the worldspawn. " ); // create a label
-		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // text align left
-		gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, FALSE, 2 ); // insert the label in the box
-
-		button = gtk_button_new_with_label( "OK" ); // create a button with text
-		g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( close_window ), NULL ); // connect the click event to close the window
-		gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 2 ); // insert the button in the box
+		GlobalRadiant().m_pfnMessageBox( SunPlug::main_window,
+			"No worldspawn was found in the map!\nIn order to use this tool the map must have at least one brush in the worldspawn.",
+			"ET-MapCoordinator", EMessageBoxType::Error, 0 );
 	}
-
-	gtk_window_set_position( GTK_WINDOW( window ), GTK_WIN_POS_CENTER ); // center the window
-	gtk_widget_show_all( window ); // show the window and all subelements
 }

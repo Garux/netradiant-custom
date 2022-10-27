@@ -24,17 +24,17 @@
 #include "gtkutil/accelerator.h"
 
 
-const Accelerator& GlobalShortcuts_insert( const char* name, const Accelerator& accelerator );
+const QKeySequence& GlobalShortcuts_insert( const char* name, const QKeySequence& accelerator = {} );
 void GlobalShortcuts_register( const char* name, int type ); // 1 = command, 2 = toggle
 void GlobalShortcuts_reportUnregistered();
 
-void GlobalCommands_insert( const char* name, const Callback& callback, const Accelerator& accelerator = accelerator_null() );
+void GlobalCommands_insert( const char* name, const Callback& callback, const QKeySequence& accelerator = {} );
 const Command& GlobalCommands_find( const char* name );
 
-void GlobalToggles_insert( const char* name, const Callback& callback, const BoolExportCallback& exportCallback, const Accelerator& accelerator = accelerator_null() );
+void GlobalToggles_insert( const char* name, const Callback& callback, const BoolExportCallback& exportCallback, const QKeySequence& accelerator = {} );
 const Toggle& GlobalToggles_find( const char* name );
 
-void GlobalKeyEvents_insert( const char* name, const Accelerator& accelerator, const Callback& keyDown, const Callback& keyUp );
+void GlobalKeyEvents_insert( const char* name, const Callback& keyDown, const Callback& keyUp, const QKeySequence& accelerator = {} );
 const KeyEvent& GlobalKeyEvents_find( const char* name );
 
 

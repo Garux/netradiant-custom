@@ -300,35 +300,27 @@ public:
 
 typedef std::pair<CopiedString, Build> BuildPair;
 #define SEPARATOR_STRING "-"
-static bool is_separator( const BuildPair &p ){
-	if ( !string_equal( p.first.c_str(), SEPARATOR_STRING ) ) {
+inline bool is_separator( const CopiedString& name, const Build& commands ){
+	if ( !string_equal( name.c_str(), SEPARATOR_STRING ) ) {
 		return false;
 	}
-	for ( Build::const_iterator j = p.second.begin(); j != p.second.end(); ++j )
+	for ( const BuildCommand& cmd : commands )
 	{
-		if ( !string_equal( ( *j ).c_str(), "" ) ) {
+		if ( !string_empty( cmd.c_str() ) ) {
 			return false;
 		}
 	}
 	return true;
 }
+inline bool is_separator( const BuildPair &p ){
+	return is_separator( p.first, p.second );
+}
 
-
-class BuildPairEqual
-{
-	const char* m_name;
-public:
-	BuildPairEqual( const char* name ) : m_name( name ){
-	}
-	bool operator()( const BuildPair& self ) const {
-		return string_equal( self.first.c_str(), m_name );
-	}
-};
 
 typedef std::list<BuildPair> Project;
 
 Project::iterator Project_find( Project& project, const char* name ){
-	return std::find_if( project.begin(), project.end(), BuildPairEqual( name ) );
+	return std::find_if( project.begin(), project.end(), [name]( const BuildPair& self ){ return string_equal( self.first.c_str(), name ); } );
 }
 
 Project::iterator Project_find( Project& project, std::size_t index ){
@@ -639,176 +631,144 @@ void build_commands_write( const char* filename ){
 }
 
 
-#include <gdk/gdkkeysyms.h>
-#include <gtk/gtk.h>
+#include <QDialog>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QTreeWidget>
+#include <QHeaderView>
+#include <QGroupBox>
+#include <QDialogButtonBox>
+#include <QPushButton>
+#include <QLabel>
+#include <QKeyEvent>
 
-#include "gtkutil/dialog.h"
-#include "gtkutil/closure.h"
-#include "gtkutil/window.h"
-#include "gtkutil/accelerator.h"
-#include "gtkdlgs.h"
 
-void Build_refreshMenu( GtkMenu* menu );
+void Build_refreshMenu( QMenu* menu );
+
+inline QTreeWidgetItem* new_item( const char *text ){
+	auto item = new QTreeWidgetItem;
+	item->setText( 0, text );
+	item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren );
+	return item;
+}
 
 #define LAST_ITER_STRING "..."
-inline void last_iter_append( GtkListStore* store ){
-	GtkTreeIter lastIter;
-	gtk_list_store_append( store, &lastIter );
-	gtk_list_store_set( store, &lastIter, 0, LAST_ITER_STRING, -1 );
+inline void last_iter_append( QTreeWidget* tree ){
+	tree->addTopLevelItem( new_item( LAST_ITER_STRING ) );
 }
 
 
-void BSPCommandList_Construct( GtkListStore* store, Project& project ){
-	gtk_list_store_clear( store );
+void BSPCommandList_Construct( QTreeWidget* tree, Project& project ){
+	tree->clear();
 
-	for ( Project::iterator i = project.begin(); i != project.end(); ++i )
+	for ( const auto& [ name, commands ] : project )
 	{
-		const char* buildName = ( *i ).first.c_str();
-
-		GtkTreeIter buildIter;
-		gtk_list_store_append( store, &buildIter );
-		gtk_list_store_set( store, &buildIter, 0, const_cast<char*>( buildName ), -1 );
+		tree->addTopLevelItem( new_item( name.c_str() ) );
 	}
 
-	last_iter_append( store );
-}
-
-static void project_cell_editing_started( GtkCellRenderer* cell, GtkCellEditable* editable, const gchar* path, gpointer data ) {
-	ASSERT_MESSAGE( GTK_IS_ENTRY( editable ), "editable is not GtkEntry" );
-	GtkEntry* entry = GTK_ENTRY( editable );
-	if( string_equal( LAST_ITER_STRING, gtk_entry_get_text( entry ) ) )
-		gtk_entry_set_text( entry, "" );
+	last_iter_append( tree );
 }
 
 class ProjectList
 {
 public:
 	Project& m_project;
-	GtkListStore* m_store;
-	GtkWidget* m_buildView;
+	QTreeWidget* m_buildView;
 	bool m_changed;
 	ProjectList( Project& project ) : m_project( project ), m_changed( false ){
 	}
 };
 
-gboolean project_cell_edited( GtkCellRendererText* cell, gchar* path_string, gchar* new_text, ProjectList* projectList ){
-	Project& project = projectList->m_project;
+void project_cell_edited( QTreeWidgetItem *item, ProjectList& projectList ){
+	Project& project = projectList.m_project;
+	const auto new_text = item->text( 0 ).toLatin1();
 
-	GtkTreePath* path = gtk_tree_path_new_from_string( path_string );
-
-	ASSERT_MESSAGE( gtk_tree_path_get_depth( path ) == 1, "invalid path length" );
-
-	GtkTreeIter iter;
-	gtk_tree_model_get_iter( GTK_TREE_MODEL( projectList->m_store ), &iter, path );
-
-	Project::iterator i = Project_find( project, gtk_tree_path_get_indices( path )[0] );
-	if ( i != project.end() ) {
-		projectList->m_changed = true;
-		if ( string_empty( new_text ) ) {
+	Project::iterator i = Project_find( project, item->treeWidget()->indexOfTopLevelItem( item ) );
+	if ( i != project.end() ) { // edit
+		projectList.m_changed = true;
+		if ( new_text.isEmpty() ) { // empty = delete
 			project.erase( i );
-			gtk_list_store_remove( projectList->m_store, &iter );
+			delete item;
 		}
 		else
 		{
-			( *i ).first = new_text;
-			gtk_list_store_set( projectList->m_store, &iter, 0, new_text, -1 );
+			( *i ).first = new_text.constData();
 		}
 	}
-	else if ( !string_empty( new_text ) && !string_equal( new_text, LAST_ITER_STRING ) ) {
-		projectList->m_changed = true;
-		project.push_back( Project::value_type( new_text, Build() ) );
+	else if ( !new_text.isEmpty() && !string_equal( new_text, LAST_ITER_STRING ) ) { // add new
+		projectList.m_changed = true;
+		project.push_back( Project::value_type( new_text.constData(), Build() ) );
 
-		gtk_list_store_set( projectList->m_store, &iter, 0, new_text, -1 );
-		last_iter_append( projectList->m_store );
-		//make command field activatable
-		g_signal_emit_by_name( G_OBJECT( gtk_tree_view_get_selection( GTK_TREE_VIEW( projectList->m_buildView ) ) ), "changed" );
+		last_iter_append( projectList.m_buildView );
+		//refresh command field
+		item->treeWidget()->currentItemChanged( item, nullptr );
 	}
 
-	gtk_tree_path_free( path );
-
 	Build_refreshMenu( g_bsp_menu );
-
-	return FALSE;
 }
 
 
 BuildPair g_buildpair_copied;
 BuildCommand g_buildcommand_copied;
 
-inline bool event_is_del( const GdkEventKey* event ){
-	return accelerator_for_event_key( event ) == Accelerator( GDK_KEY_Delete );
-}
-inline bool event_is_copy( const GdkEventKey* event ){
-	return ( accelerator_for_event_key( event ) == Accelerator( 'C', GDK_CONTROL_MASK ) )
-	    || ( accelerator_for_event_key( event ) == Accelerator( GDK_KEY_Insert, GDK_CONTROL_MASK ) );
-}
-inline bool event_is_paste( const GdkEventKey* event ){
-	return ( accelerator_for_event_key( event ) == Accelerator( 'V', GDK_CONTROL_MASK ) )
-	    || ( accelerator_for_event_key( event ) == Accelerator( GDK_KEY_Insert, GDK_SHIFT_MASK ) );
-}
+class Project_key_press : public QObject
+{
+	ProjectList& m_projectList;
+public:
+	Project_key_press( ProjectList& projectList ) : QObject( projectList.m_buildView ), m_projectList( projectList ){}
+protected:
+	bool eventFilter( QObject *obj, QEvent *event ) override {
+		if( event->type() == QEvent::KeyPress ) {
+			Project& project = m_projectList.m_project;
+			if( QTreeWidgetItem *item = m_projectList.m_buildView->currentItem() ){
+				Project::iterator x = Project_find( project, item->treeWidget()->indexOfTopLevelItem( item ) );
+				QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+				if ( keyEvent->matches( QKeySequence::StandardKey::Delete ) && x != project.end() ) {
+					m_projectList.m_changed = true;
+					project.erase( x );
+					Build_refreshMenu( g_bsp_menu );
 
-gboolean project_key_press( GtkWidget* widget, GdkEventKey* event, ProjectList* projectList ){
-	Project& project = projectList->m_project;
+					const int id = item->treeWidget()->indexOfTopLevelItem( item );
+					delete item;
+					m_projectList.m_buildView->currentItemChanged( m_projectList.m_buildView->topLevelItem( id ), nullptr ); //refresh command field
+				}
+				else if ( keyEvent->matches( QKeySequence::StandardKey::Copy ) && x != project.end() ) {
+					g_buildpair_copied = ( *x );
+				}
+				else if ( keyEvent->matches( QKeySequence::StandardKey::Paste ) && !g_buildpair_copied.first.empty() ) {
+					m_projectList.m_changed = true;
+					project.insert( x, g_buildpair_copied );
+					Build_refreshMenu( g_bsp_menu );
 
-	if ( event_is_del( event ) || event_is_copy( event ) || event_is_paste( event ) ) {
-		GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( widget ) );
-		GtkTreeIter iter;
-		GtkTreeModel* model;
-		if ( gtk_tree_selection_get_selected( selection, &model, &iter ) ) {
-			GtkTreePath* path = gtk_tree_model_get_path( model, &iter );
-			Project::iterator x = Project_find( project, gtk_tree_path_get_indices( path )[0] );
-			gtk_tree_path_free( path );
+					item->treeWidget()->insertTopLevelItem( item->treeWidget()->indexOfTopLevelItem( item ), new_item( g_buildpair_copied.first.c_str() ) );
+				}
 
-			if ( event_is_del( event ) && x != project.end() ) {
-				projectList->m_changed = true;
-				project.erase( x );
-				Build_refreshMenu( g_bsp_menu );
-
-				gtk_list_store_remove( projectList->m_store, &iter );
-			}
-			else if ( event_is_copy( event ) && x != project.end() ) {
-				g_buildpair_copied = ( *x );
-			}
-			else if ( event_is_paste( event ) && !g_buildpair_copied.first.empty() ) {
-				projectList->m_changed = true;
-				project.insert( x, g_buildpair_copied );
-				Build_refreshMenu( g_bsp_menu );
-
-				GtkTreeIter newIter;
-				gtk_list_store_insert_before( projectList->m_store, &newIter, &iter );
-				gtk_list_store_set( projectList->m_store, &newIter, 0, g_buildpair_copied.first.c_str(), -1 );
+				event->accept();
 			}
 		}
+		return QObject::eventFilter( obj, event ); // standard event processing
 	}
-	return FALSE;
-}
-
+};
 
 Build* g_current_build = 0;
 
-gboolean project_selection_changed( GtkTreeSelection* selection, GtkListStore* store ){
+void project_selection_changed( QTreeWidgetItem* buildItem, QTreeWidget* cmdTree ){
 	Project& project = g_build_project;
 
-	gtk_list_store_clear( store );
+	cmdTree->clear();
 
-	GtkTreeIter iter;
-	GtkTreeModel* model;
-	if ( gtk_tree_selection_get_selected( selection, &model, &iter ) ) {
-		GtkTreePath* path = gtk_tree_model_get_path( model, &iter );
-		Project::iterator x = Project_find( project, gtk_tree_path_get_indices( path )[0] );
-		gtk_tree_path_free( path );
+	if ( buildItem != nullptr ) {
+		Project::iterator x = Project_find( project, buildItem->treeWidget()->indexOfTopLevelItem( buildItem ) );
 
 		if ( x != project.end() ) {
 			Build& build = ( *x ).second;
 			g_current_build = &build;
 
-			for ( Build::iterator i = build.begin(); i != build.end(); ++i )
+			for ( const BuildCommand& cmd : build )
 			{
-				GtkTreeIter commandIter;
-				gtk_list_store_append( store, &commandIter );
-				gtk_list_store_set( store, &commandIter, 0, const_cast<char*>( ( *i ).c_str() ), -1 );
+				cmdTree->addTopLevelItem( new_item( cmd.c_str() ) );
 			}
-			last_iter_append( store );
+			last_iter_append( cmdTree );
 		}
 		else
 		{
@@ -819,244 +779,178 @@ gboolean project_selection_changed( GtkTreeSelection* selection, GtkListStore* s
 	{
 		g_current_build = 0;
 	}
-
-	return FALSE;
 }
 
-gboolean commands_cell_edited( GtkCellRendererText* cell, gchar* path_string, gchar* new_text, GtkListStore* store ){
+void commands_cell_edited( QTreeWidgetItem *item ){
 	if ( g_current_build == 0 ) {
-		return FALSE;
+		return;
 	}
 	Build& build = *g_current_build;
+	const auto new_text = item->text( 0 ).toLatin1();
 
-	GtkTreePath* path = gtk_tree_path_new_from_string( path_string );
-
-	ASSERT_MESSAGE( gtk_tree_path_get_depth( path ) == 1, "invalid path length" );
-
-	GtkTreeIter iter;
-	gtk_tree_model_get_iter( GTK_TREE_MODEL( store ), &iter, path );
-
-	Build::iterator i = Build_find( build, gtk_tree_path_get_indices( path )[0] );
-	if ( i != build.end() ) {
+	Build::iterator i = Build_find( build, item->treeWidget()->indexOfTopLevelItem( item ) );
+	if ( i != build.end() ) { // edit
 		g_build_changed = true;
 		( *i ).setString( new_text );
-
-		gtk_list_store_set( store, &iter, 0, new_text, -1 );
 	}
-	else if ( !string_empty( new_text ) && !string_equal( new_text, LAST_ITER_STRING ) ) {
+	else if ( !new_text.isEmpty() && !string_equal( new_text, LAST_ITER_STRING ) ) { // add new
 		g_build_changed = true;
 		build.push_back( Build::value_type( VariableString( new_text ) ) );
 
-		gtk_list_store_set( store, &iter, 0, new_text, -1 );
-
-		last_iter_append( store );
+		last_iter_append( item->treeWidget() );
 	}
-
-	gtk_tree_path_free( path );
 
 	Build_refreshMenu( g_bsp_menu );
-
-	return FALSE;
 }
 
-gboolean commands_key_press( GtkWidget* widget, GdkEventKey* event, GtkListStore* store ){
-	if ( g_current_build == 0 ) {
-		return FALSE;
-	}
-	Build& build = *g_current_build;
+class Commands_key_press : public QObject
+{
+	QTreeWidget* m_tree;
+public:
+	Commands_key_press( QTreeWidget* tree ) : QObject( tree ), m_tree( tree ){}
+protected:
+	bool eventFilter( QObject *obj, QEvent *event ) override {
+		if( event->type() == QEvent::KeyPress && g_current_build != nullptr ) {
+			Build& build = *g_current_build;
+			if( QTreeWidgetItem *item = m_tree->currentItem() ){
+				Build::iterator x = Build_find( build, item->treeWidget()->indexOfTopLevelItem( item ) );
+				QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+				if ( keyEvent->matches( QKeySequence::StandardKey::Delete ) && x != build.end() ) {
+					g_build_changed = true;
+					build.erase( x );
 
-	if ( event_is_del( event ) || event_is_copy( event ) || event_is_paste( event ) ) {
-		GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( widget ) );
-		GtkTreeIter iter;
-		GtkTreeModel* model;
-		if ( gtk_tree_selection_get_selected( selection, &model, &iter ) ) {
-			GtkTreePath* path = gtk_tree_model_get_path( model, &iter );
-			Build::iterator i = Build_find( build, gtk_tree_path_get_indices( path )[0] );
-			gtk_tree_path_free( path );
+					delete item;
+				}
+				else if ( keyEvent->matches( QKeySequence::StandardKey::Copy ) && x != build.end() ) {
+					g_buildcommand_copied = ( *x );
+				}
+				else if ( keyEvent->matches( QKeySequence::StandardKey::Paste ) && !g_buildpair_copied.first.empty() ) {
+					g_build_changed = true;
+					build.insert( x, g_buildcommand_copied );
 
-			if ( event_is_del( event ) && i != build.end() ) {
-				g_build_changed = true;
-				build.erase( i );
+					item->treeWidget()->insertTopLevelItem( item->treeWidget()->indexOfTopLevelItem( item ), new_item( g_buildcommand_copied.c_str() ) );
+				}
 
-				gtk_list_store_remove( store, &iter );
-			}
-			else if ( event_is_copy( event ) && i != build.end() ) {
-				g_buildcommand_copied = ( *i );
-			}
-			else if ( event_is_paste( event ) ) {
-				g_build_changed = true;
-				build.insert( i, g_buildcommand_copied );
-
-				GtkTreeIter newIter;
-				gtk_list_store_insert_before( store, &newIter, &iter );
-				gtk_list_store_set( store, &newIter, 0, g_buildcommand_copied.c_str(), -1 );
+				event->accept();
 			}
 		}
+		return QObject::eventFilter( obj, event ); // standard event processing
 	}
-	return FALSE;
-}
+};
 
 #include "qe3.h"
 
-GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectList ){
-	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Build Menu", G_CALLBACK( dialog_delete_callback ), &modal, -1, 400 );
+EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
+	QDialog dialog( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	dialog.setWindowTitle( "Build Menu" );
 
-	GtkWidget* buildView = 0;
+	QTreeWidget* buildView = nullptr;
 
 	{
-		GtkTable* table1 = create_dialog_table( 3, 2, 4, 4, 4 );
-		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( table1 ) );
+		auto grid = new QGridLayout( &dialog );
 		{
-			GtkVBox* vbox = create_dialog_vbox( 4 );
-			gtk_table_attach( table1, GTK_WIDGET( vbox ), 1, 2, 0, 1,
-			                  (GtkAttachOptions) ( GTK_FILL ),
-			                  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
-			{
-				GtkButton* button = create_dialog_button( "OK", G_CALLBACK( dialog_button_ok ), &modal );
-				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-			}
-			{
-				GtkButton* button = create_dialog_button( "Cancel", G_CALLBACK( dialog_button_cancel ), &modal );
-				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-			}
-			{
-				GtkButton* button = create_dialog_button( "Reset", G_CALLBACK( dialog_button_no ), &modal );
-				gtk_widget_set_tooltip_text( GTK_WIDGET( button ), "Reset to editor start state" );
-				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-			}
+			auto buttons = new QDialogButtonBox;
+			buttons->setOrientation( Qt::Orientation::Vertical );
+			// rejection via dialog means will return DialogCode::Rejected (0), eID* > 0
+			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Ok ),
+								&QAbstractButton::clicked, [&dialog](){ dialog.done( eIDOK ); } );
+			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Cancel ),
+								&QAbstractButton::clicked, &dialog, &QDialog::reject );
+			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Reset ),
+								&QAbstractButton::clicked, [&dialog](){ dialog.done( eIDNO ); } );
+			buttons->button( QDialogButtonBox::StandardButton::Reset )->setToolTip( "Reset to editor start state" );
+			grid->addWidget( buttons, 0, 1 );
 		}
 		{
-			GtkFrame* frame = create_dialog_frame( "Build menu" );
-			gtk_table_attach( table1, GTK_WIDGET( frame ), 0, 1, 0, 1,
-			                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-			                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
+			auto frame = new QGroupBox( "Build menu" );
+			grid->addWidget( frame, 0, 0 );
 			{
-				GtkScrolledWindow* scr = create_scrolled_window( GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC, 4 );
-				gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( scr ) );
-
+				auto tree = projectList.m_buildView = buildView = new QTreeWidget;
+				tree->setColumnCount( 1 );
+				tree->setUniformRowHeights( true ); // optimization
+				tree->setHorizontalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
+				tree->setSizeAdjustPolicy( QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents ); // scroll area will inherit column size
+				tree->header()->setStretchLastSection( false ); // non greedy column sizing
+				tree->header()->setSectionResizeMode( QHeaderView::ResizeMode::ResizeToContents ); // no text elision
+				tree->setHeaderHidden( true );
+				tree->setRootIsDecorated( false );
+				( new QHBoxLayout( frame ) )->addWidget( tree );
 				{
-					GtkListStore* store = gtk_list_store_new( 1, G_TYPE_STRING );
+					QObject::connect( tree, &QTreeWidget::itemChanged, [&projectList]( QTreeWidgetItem *item, int column ){
+						project_cell_edited( item, projectList );
+					} );
 
-					GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
-					gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
-
-					GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-					object_set_boolean_property( G_OBJECT( renderer ), "editable", TRUE );
-					g_signal_connect( renderer, "edited", G_CALLBACK( project_cell_edited ), &projectList );
-					g_signal_connect( renderer, "editing-started", G_CALLBACK( project_cell_editing_started ), 0 );
-
-					GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 0, NULL );
-					gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
-
-					GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( view ) );
-					gtk_tree_selection_set_mode( selection, GTK_SELECTION_BROWSE );
-
-					gtk_widget_show( view );
-
-					buildView = view;
-					projectList.m_buildView = buildView;
-					projectList.m_store = store;
-					gtk_container_add( GTK_CONTAINER( scr ), view );
-
-					g_signal_connect( G_OBJECT( view ), "key_press_event", G_CALLBACK( project_key_press ), &projectList );
-
-					g_object_unref( G_OBJECT( store ) );
+					tree->installEventFilter( new Project_key_press( projectList ) );
 				}
 			}
 		}
 		{
-			GtkFrame* frame = create_dialog_frame( "Commandline" );
-			gtk_table_attach( table1, GTK_WIDGET( frame ), 0, 1, 1, 2,
-			                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-			                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
+			auto frame = new QGroupBox( "Commandline" );
+			grid->addWidget( frame, 1, 0 );
 			{
-				GtkScrolledWindow* scr = create_scrolled_window( GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC, 4 );
-				gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( scr ) );
-
+				auto tree = new QTreeWidget;
+				tree->setColumnCount( 1 );
+				tree->setUniformRowHeights( true ); // optimization
+				tree->setHorizontalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
+				tree->setSizeAdjustPolicy( QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents ); // scroll area will inherit column size
+				tree->header()->setStretchLastSection( false ); // non greedy column sizing
+				tree->header()->setSectionResizeMode( QHeaderView::ResizeMode::ResizeToContents ); // no text elision
+				tree->setHeaderHidden( true );
+				tree->setRootIsDecorated( false );
+				( new QHBoxLayout( frame ) )->addWidget( tree );
 				{
-					GtkListStore* store = gtk_list_store_new( 1, G_TYPE_STRING );
+					QObject::connect( tree, &QTreeWidget::itemChanged, []( QTreeWidgetItem *item, int column ){
+						commands_cell_edited( item );
+					} );
 
-					GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
-					gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
+					QObject::connect( buildView, &QTreeWidget::currentItemChanged, [tree]( QTreeWidgetItem *current, QTreeWidgetItem *previous ){
+						project_selection_changed( current, tree );
+					} );
 
-					GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-					object_set_boolean_property( G_OBJECT( renderer ), "editable", TRUE );
-					g_object_set( G_OBJECT( renderer ), "wrap-mode", PANGO_WRAP_WORD, NULL );
-					//g_object_set( G_OBJECT( renderer ), "ellipsize", PANGO_ELLIPSIZE_MIDDLE, NULL );
-					object_set_int_property( G_OBJECT( renderer ), "wrap-width", 640 );
-					g_signal_connect( renderer, "edited", G_CALLBACK( commands_cell_edited ), store );
-					g_signal_connect( renderer, "editing-started", G_CALLBACK( project_cell_editing_started ), 0 );
-
-					GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 0, NULL );
-					gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
-
-					GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( view ) );
-					gtk_tree_selection_set_mode( selection, GTK_SELECTION_BROWSE );
-
-					gtk_widget_show( view );
-
-					gtk_container_add( GTK_CONTAINER( scr ), view );
-
-					g_object_unref( G_OBJECT( store ) );
-
-					g_signal_connect( G_OBJECT( view ), "key_press_event", G_CALLBACK( commands_key_press ), store );
-
-					g_signal_connect( G_OBJECT( gtk_tree_view_get_selection( GTK_TREE_VIEW( buildView ) ) ), "changed", G_CALLBACK( project_selection_changed ), store );
+					tree->installEventFilter( new Commands_key_press( tree ) );
 				}
 			}
 		}
 		{
-			GtkWidget* expander = gtk_expander_new_with_mnemonic( "build variables" );
-			gtk_widget_show( expander );
-			gtk_table_attach( table1, expander, 0, 2, 2, 3,
-			                  (GtkAttachOptions) ( GTK_FILL ),
-			                  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
+			auto expander = new QGroupBox( "build variables" );
+			expander->setFlat( true );
+			expander->setCheckable( true );
+			expander->setChecked( false );
+			grid->addWidget( expander, 2, 0 );
 
 			bsp_init();
-			for ( Tools::iterator i = g_build_tools.begin(); i != g_build_tools.end(); ++i ){
+			for ( auto& [ name, tool ] : g_build_tools ){
 				StringBuffer output;
-				( *i ).second.evaluate( output );
-				build_set_variable( ( *i ).first.c_str(), output.c_str() );
+				tool.evaluate( output );
+				build_set_variable( name.c_str(), output.c_str() );
 			}
 			StringOutputStream stream;
-			for( Variables::iterator i = g_build_variables.begin(); i != g_build_variables.end(); ++i ){
-				stream << "[" << ( *i ).first << "] = " << ( *i ).second << "\n";
+			for( const auto& [ name, var ] : g_build_variables ){
+				stream << "[" << name << "] = " << var << "\n";
 			}
 			build_clear_variables();
 
-			GtkWidget* label = gtk_label_new( stream.c_str() );
-			gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
-#if 1
-			gtk_label_set_ellipsize( GTK_LABEL( label ), PANGO_ELLIPSIZE_END );
-#else
-			gtk_label_set_line_wrap( GTK_LABEL( label ), TRUE );
-			//gtk_label_set_max_width_chars( GTK_LABEL( label ), 100 );
-			//gtk_label_set_width_chars( GTK_LABEL( label ), 100 );
-			gtk_widget_set_size_request( label, 500, -1 );
-#endif
-			gtk_widget_show( label );
-			gtk_container_add( GTK_CONTAINER( expander ), label );
+			auto label = new QLabel( stream.c_str() );
+			label->hide();
+			( new QHBoxLayout( expander ) )->addWidget( label );
+			QObject::connect( expander, &QGroupBox::clicked, label, &QWidget::setVisible );
 		}
 	}
 
-	BSPCommandList_Construct( projectList.m_store, g_build_project );
+	BSPCommandList_Construct( projectList.m_buildView, g_build_project );
 
-	return window;
+	return static_cast<EMessageBoxReturn>( dialog.exec() );
 }
 
 void LoadBuildMenu();
 
 void DoBuildMenu(){
-	ModalDialog modal;
-
 	ProjectList projectList( g_build_project );
+	const Project bakproj = g_build_project;
 
-	GtkWindow* window = BuildMenuDialog_construct( modal, projectList );
+	const EMessageBoxReturn ret = BuildMenuDialog_construct( projectList );
 
-	Project bakproj = g_build_project;
-
-	EMessageBoxReturn ret = modal_dialog_show( window, modal );
-	if ( ret == eIDCANCEL ) {
+	if ( ret == eIDCANCEL || ret == 0 ) {
 		if ( projectList.m_changed || g_build_changed ){
 			g_build_project = bakproj;
 			Build_refreshMenu( g_bsp_menu );
@@ -1071,8 +965,6 @@ void DoBuildMenu(){
 	else if ( projectList.m_changed ) {
 		g_build_changed = true;
 	}
-
-	gtk_widget_destroy( GTK_WIDGET( window ) );
 }
 
 
@@ -1080,20 +972,19 @@ void DoBuildMenu(){
 #include "gtkutil/menu.h"
 #include "mainframe.h"
 #include "preferences.h"
-typedef struct _GtkMenuItem GtkMenuItem;
 
-CopiedString g_lastExecutedBuild;
+class BuildMenuItem *g_lastExecutedBuild = nullptr;
 
 class BuildMenuItem
 {
 	const char* m_name;
 public:
-	GtkMenuItem* m_item;
-	BuildMenuItem( const char* name, GtkMenuItem* item )
+	QAction* m_item;
+	BuildMenuItem( const char* name, QAction* item )
 		: m_name( name ), m_item( item ){
 	}
 	void run(){
-		g_lastExecutedBuild = m_name;
+		g_lastExecutedBuild = this;
 		RunBSP( m_name );
 	}
 	typedef MemberCaller<BuildMenuItem, &BuildMenuItem::run> RunCaller;
@@ -1103,27 +994,36 @@ typedef std::list<BuildMenuItem> BuildMenuItems;
 BuildMenuItems g_BuildMenuItems;
 
 
-GtkMenu* g_bsp_menu;
+QMenu* g_bsp_menu;
 
-void Build_constructMenu( GtkMenu* menu ){
-	for ( Project::iterator i = g_build_project.begin(); i != g_build_project.end(); ++i )
+void Build_constructMenu( QMenu* menu ){
+	for ( const auto& [ name, commands ] : g_build_project )
 	{
-		g_BuildMenuItems.push_back( BuildMenuItem( ( *i ).first.c_str(), 0 ) );
-		if ( is_separator( *i ) ) {
-			g_BuildMenuItems.back().m_item = menu_separator( menu );
+		g_BuildMenuItems.push_back( BuildMenuItem( name.c_str(), 0 ) );
+		if ( is_separator( name, commands ) ) {
+			g_BuildMenuItems.back().m_item = menu->addSeparator();
 		}
 		else
 		{
-			g_BuildMenuItems.back().m_item = create_menu_item_with_mnemonic( menu, ( *i ).first.c_str(), BuildMenuItem::RunCaller( g_BuildMenuItems.back() ) );
+			g_BuildMenuItems.back().m_item = create_menu_item_with_mnemonic( menu, name.c_str(), BuildMenuItem::RunCaller( g_BuildMenuItems.back() ) );
+			{
+				QString str;
+				for( const BuildCommand& cmd : commands ){
+					str += cmd.c_str();
+					str += '\n';
+				}
+				str.truncate( str.size() - 1 );
+				g_BuildMenuItems.back().m_item->setToolTip( str );
+			}
 		}
 	}
 }
 
 
-void Build_refreshMenu( GtkMenu* menu ){
-	for ( BuildMenuItems::iterator i = g_BuildMenuItems.begin(); i != g_BuildMenuItems.end(); ++i )
+void Build_refreshMenu( QMenu* menu ){
+	for ( const BuildMenuItem& item : g_BuildMenuItems )
 	{
-		gtk_container_remove( GTK_CONTAINER( menu ), GTK_WIDGET( ( *i ).m_item ) );
+		menu->removeAction( item.m_item );
 	}
 
 	g_BuildMenuItems.clear();
@@ -1186,10 +1086,11 @@ void BuildMenu_Destroy(){
 
 
 void Build_runRecentExecutedBuild(){
-	if( g_lastExecutedBuild.empty() ){
-		g_BuildMenuItems.begin()->run();
+	if( std::any_of( g_BuildMenuItems.cbegin(), g_BuildMenuItems.cend(), []( const BuildMenuItem& item ){ return g_lastExecutedBuild == &item; } ) ){
+		g_lastExecutedBuild->run();
 	}
 	else{
-		RunBSP( g_lastExecutedBuild.c_str() );
+		if( !g_BuildMenuItems.empty() )
+			g_BuildMenuItems.begin()->run();
 	}
 }

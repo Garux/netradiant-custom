@@ -23,9 +23,8 @@
 
 #include "stream/textstream.h"
 
-#include <gtk/gtk.h>
+#include <QMenuBar>
 
-#include "gtkutil/pointer.h"
 #include "gtkutil/menu.h"
 
 #include "pluginmanager.h"
@@ -35,17 +34,16 @@
 #include "gtkmisc.h"
 
 #include <stack>
-typedef std::stack<GtkMenu*> MenuStack;
+typedef std::stack<QMenu*> MenuStack;
 
-void PlugInMenu_Add( GtkMenu* plugin_menu, IPlugIn* pPlugIn ){
-	GtkMenu *menu;
+void PlugInMenu_Add( QMenu* plugin_menu, IPlugIn* pPlugIn ){
+	QMenu *menu;
 	const char *menuText;
 	MenuStack menuStack;
 
-	menu = create_sub_menu_with_mnemonic( plugin_menu, pPlugIn->getMenuName() );
-	if ( g_Layout_enableDetachableMenus.m_value ) {
-		menu_tearoff( menu );
-	}
+	menu = plugin_menu->addMenu( pPlugIn->getMenuName() );
+
+	menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
 
 	std::size_t nCount = pPlugIn->getCommandCount();
 	{
@@ -55,7 +53,7 @@ void PlugInMenu_Add( GtkMenu* plugin_menu, IPlugIn* pPlugIn ){
 
 			if ( menuText != 0 && strlen( menuText ) > 0 ) {
 				if ( plugin_menu_separator( menuText ) ) {
-					menu_separator( menu );
+					menu->addSeparator();
 				}
 				else if ( plugin_submenu_in( menuText ) ) {
 					menuText = pPlugIn->getCommandTitle( --nCount );
@@ -64,10 +62,10 @@ void PlugInMenu_Add( GtkMenu* plugin_menu, IPlugIn* pPlugIn ){
 						continue;
 					}
 					menuStack.push( menu );
-					menu = create_sub_menu_with_mnemonic( menu, menuText );
-					if ( g_Layout_enableDetachableMenus.m_value ) {
-						menu_tearoff( menu );
-					}
+					menu = menu->addMenu( menuText );
+
+					menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
+
 					continue;
 				}
 				else if ( plugin_submenu_out( menuText ) ) {
@@ -88,20 +86,20 @@ void PlugInMenu_Add( GtkMenu* plugin_menu, IPlugIn* pPlugIn ){
 			}
 		}
 		if ( !menuStack.empty() ) {
-			globalErrorStream() << pPlugIn->getMenuName() << " mismatched > <. " << Unsigned( menuStack.size() ) << " submenu(s) not closed.\n";
+			globalErrorStream() << pPlugIn->getMenuName() << " mismatched > <. " << menuStack.size() << " submenu(s) not closed.\n";
 		}
 	}
 }
 
-GtkMenu* g_plugins_menu = 0;
-GtkMenuItem* g_plugins_menu_separator = 0;
+QMenu* g_plugins_menu = 0;
+QAction* g_plugins_menu_separator = 0;
 
 void PluginsMenu_populate(){
 	class PluginsMenuConstructor : public PluginsVisitor
 	{
-		GtkMenu* m_menu;
+		QMenu* m_menu;
 	public:
-		PluginsMenuConstructor( GtkMenu* menu ) : m_menu( menu ){
+		PluginsMenuConstructor( QMenu* menu ) : m_menu( menu ){
 		}
 		void visit( IPlugIn& plugin ){
 			PlugInMenu_Add( m_menu, &plugin );
@@ -113,21 +111,21 @@ void PluginsMenu_populate(){
 }
 
 void PluginsMenu_clear(){
+#if 0 // unused, intended for "Refresh"
 	GList* lst = g_list_find( gtk_container_get_children( GTK_CONTAINER( g_plugins_menu ) ), GTK_WIDGET( g_plugins_menu_separator ) );
 	while ( lst->next )
 	{
 		gtk_container_remove( GTK_CONTAINER( g_plugins_menu ), GTK_WIDGET( lst->next->data ) );
 		lst = g_list_find( gtk_container_get_children( GTK_CONTAINER( g_plugins_menu ) ),  GTK_WIDGET( g_plugins_menu_separator ) );
 	}
+#endif
 }
 
-GtkMenuItem* create_plugins_menu(){
+void create_plugins_menu( QMenuBar *menubar ){
 	// Plugins menu
-	GtkMenuItem* plugins_menu_item = new_sub_menu_item_with_mnemonic( "_Plugins" );
-	GtkMenu* menu = GTK_MENU( gtk_menu_item_get_submenu( plugins_menu_item ) );
-	if ( g_Layout_enableDetachableMenus.m_value ) {
-		menu_tearoff( menu );
-	}
+	QMenu *menu = menubar->addMenu( "&Plugins" );
+
+	menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
 
 	g_plugins_menu = menu;
 
@@ -140,6 +138,4 @@ GtkMenuItem* create_plugins_menu(){
 #endif
 
 	PluginsMenu_populate();
-
-	return plugins_menu_item;
 }

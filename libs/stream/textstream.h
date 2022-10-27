@@ -201,6 +201,13 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 	return ostream;
 }
 
+#elif defined ( _WIN32 ) || defined ( __LP32__ )
+
+// template<typename TextOutputStreamType>
+// inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const size_t i ){
+// 	return ostream_write( ostream, Unsigned( i ) );
+// }
+
 #endif
 
 /// \brief Writes a null-terminated \p string to \p ostream.
@@ -439,28 +446,26 @@ public:
 template<typename TextOutputStreamType, int SIZE = 1024>
 class BufferedTextOutputStream : public TextOutputStream
 {
-	TextOutputStreamType outputStream;
+	TextOutputStreamType& outputStream;
 	char m_buffer[SIZE];
-	char* m_cur;
-
 public:
-	BufferedTextOutputStream( TextOutputStreamType& outputStream ) : outputStream( outputStream ), m_cur( m_buffer ){
+	BufferedTextOutputStream( TextOutputStreamType& outputStream ) : outputStream( outputStream ) {
 	}
 	~BufferedTextOutputStream(){
-		outputStream.write( m_buffer, m_cur - m_buffer );
 	}
 	std::size_t write( const char* buffer, std::size_t length ){
 		std::size_t remaining = length;
 		for (;; )
 		{
-			std::size_t n = std::min( remaining, std::size_t( ( m_buffer + SIZE ) - m_cur ) );
-			m_cur = std::copy( buffer, buffer + n, m_cur );
+			const std::size_t n = std::min( remaining, std::size_t( SIZE ) );
+			std::copy( buffer, buffer + n, m_buffer );
 			remaining -= n;
+			buffer += n;
 			if ( remaining == 0 ) {
+				outputStream.write( m_buffer, n );
 				return 0;
 			}
 			outputStream.write( m_buffer, SIZE );
-			m_cur = m_buffer;
 		}
 	}
 };

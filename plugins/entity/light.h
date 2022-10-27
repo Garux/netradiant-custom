@@ -25,9 +25,8 @@ namespace scene
 {
 class Node;
 };
-class EntityClass;
 
-scene::Node& New_Light( EntityClass* eclass );
+scene::Node& New_Light( class EntityClass* eclass );
 enum LightType
 {
 	LIGHTTYPE_DEFAULT,

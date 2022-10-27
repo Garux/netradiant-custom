@@ -206,12 +206,12 @@ MeshEntity::IsValid() const
 
 /**
  * Get information about the patch mesh.
- * 
+ *
  * A message string describing general mesh information (number of rows/cols,
  * min/max texture coords, extent in worldspace) will be composed and sent to
  * the infoReportCallback that was specified when this wrapper object was
  * constructed.
- * 
+ *
  * Optionally this method can do additional reporting on a specific
  * "reference row" and "reference column". If a reference row and/or column
  * is specified, then information about the reference slice(s) will be added
@@ -235,7 +235,7 @@ MeshEntity::GetInfo(const int *refRow,
 {
    // Prep a message buffer to compose the response.
    char messageBuffer[INFO_BUFFER_SIZE + 1];
-   messageBuffer[INFO_BUFFER_SIZE] = 0;
+   messageBuffer[0] = 0;
    size_t bufferOffset = 0;
    // Get reference row info if requested; this will be written into the message
    // buffer as well as sent to the row callback (if any).
@@ -350,14 +350,14 @@ MeshEntity::MinMaxAlignShrink(TextureAxisSelection axes)
  * Set the texture scaling along the rows or columns of the mesh. This
  * affects only the texture axis that is naturally associated with rows (S)
  * or columns (T) according to the chosen sliceType.
- * 
+ *
  * The scaling may be input either as a multiple of the natural scale that
  * Radiant would choose for this texture, or as the number of tiles of the
  * texture that should fit on the mesh's row/column.
- * 
+ *
  * Among the slices perpendicular to the direction of scaling, an alignment
  * slice is used to fix the position of the texture boundary.
- * 
+ *
  * A reference slice may optionally be chosen among the slices parallel to
  * the scaling direction. If a reference slice is not specified, then the
  * texture coordinates are independently determined for each slice. If a
@@ -475,7 +475,7 @@ MeshEntity::SetScale(SliceType sliceType,
  * control points themselves, or to directly set the texture coordinates at
  * the locations on the mesh surface that correspond to each half-patch
  * interval.
- * 
+ *
  * An alignment row is used as the zero-point for any calculations of row
  * number or of distance along a column surface when processing the equation.
  * An alignment column is similarly used. (Note that the number identifying
@@ -483,7 +483,7 @@ MeshEntity::SetScale(SliceType sliceType,
  * it's not the modified number as affected by the alignment column/row when
  * processing the equation. We don't want to be stuck in a chicken-and-egg
  * situation.)
- * 
+ *
  * Calculations of distance along row/col surface may optionally be affected
  * by a designated reference row/col. The reference row/col can be used as a
  * source of end-to-end distance only, in which case the proportional spacing
@@ -753,7 +753,7 @@ MeshEntity::GetSliceTexScale(SliceType sliceType,
    // We're going to be walking patches along the mesh, choosing the patches
    // that surround/affect the slice we are interested in. We'll calculate
    // the length of the slice's surface across each patch & add those up.
-   
+
    // A SlicePatchContext will contain all the necessary information to
    // evaluate our slice's surface length within each patch. Some aspects of
    // the SlicePatchContext will vary as we move from patch to patch, but we
@@ -1512,7 +1512,7 @@ MeshEntity::CopyValuesFromControlTex(TextureAxis axis,
 /**
  * Generate a set of values based on surface slice lengths and some amount of
  * desired scaling or tiling.
- * 
+ *
  * This method does a great deal of the work for the SetScale public method;
  * refer to that method's comment header for more details about the alignment
  * slice and reference slice inputs. The main difference from the SetScale
@@ -1549,7 +1549,7 @@ MeshEntity::GenScaledDistanceValues(SliceType sliceType,
 
    // We're going to be walking patches along the mesh, choosing the patches
    // that surround/affect the slice we are interested in.
-   
+
    // A SlicePatchContext will contain all the necessary information to
    // evaluate our slice's surface length within each patch.
    SlicePatchContext context;
@@ -1665,7 +1665,7 @@ MeshEntity::GenScaledDistanceValues(SliceType sliceType,
    }
 
    // Now we may adjust the distance values based on scaling/tiling input.
- 
+
    // If there's a reference slice, we're going to need to know the total slice
    // length, so save that away.
    float refTotalLength;

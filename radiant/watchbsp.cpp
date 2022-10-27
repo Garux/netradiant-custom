@@ -36,7 +36,7 @@
 #include "watchbsp.h"
 
 #include <algorithm>
-#include <gtk/gtk.h>
+#include <QTimer>
 
 #include "commandlib.h"
 #include "convert.h"
@@ -51,6 +51,7 @@
 #include "feedback.h"
 #include "mainframe.h"
 #include "sockets.h"
+#include "timer.h"
 
 void message_flush( message_info_t* self ){
 	Sys_Print( self->msg_level, self->m_buffer, self->m_length );
@@ -76,7 +77,6 @@ void message_print( message_info_t* self, const char* characters, std::size_t le
 }
 
 
-#include <glib.h>
 #include "xmlstuff.h"
 
 class CWatchBSP
@@ -99,8 +99,9 @@ private:
 	netmessage_t msg;
 	GPtrArray *m_pCmd;
 // used to timeout EBeginStep
-	GTimer    *m_pTimer;
+	Timer m_timeout_timer;
 	std::size_t m_iCurrentStep;
+	QTimer m_monitoring_timer;
 // name of the map so we can run the engine
 	char    *m_sBSPName;
 // buffer we use in push mode to receive data directly from the network
@@ -122,16 +123,15 @@ public:
 		m_pListenSocket = NULL;
 		m_pInSocket = NULL;
 		m_eState = EIdle;
-		m_pTimer = g_timer_new();
 		m_sBSPName = NULL;
 		m_xmlInputBuffer = NULL;
 		m_bNeedCtxtInit = true;
+		m_monitoring_timer.callOnTimeout( [this](){ RoutineProcessing(); } );
+		m_monitoring_timer.setInterval( 25 );
 	}
 	virtual ~CWatchBSP(){
 		EndMonitoringLoop();
 		Net_Shutdown();
-
-		g_timer_destroy( m_pTimer );
 	}
 
 	bool HasBSPPlugin() const
@@ -176,9 +176,9 @@ const int g_WatchBSP_Timeout = 5;
 
 
 void Build_constructPreferences( PreferencesPage& page ){
-	GtkWidget* monitorbsp = page.appendCheckBox( "", "Enable Build Process Monitoring", g_WatchBSP_Enabled );
-	GtkWidget* leakstop = page.appendCheckBox( "", "Stop Compilation on Leak", g_WatchBSP_LeakStop );
-	GtkWidget* runengine = page.appendCheckBox( "", "Run Engine After Compile", g_WatchBSP_RunQuake );
+	QCheckBox* monitorbsp = page.appendCheckBox( "", "Enable Build Process Monitoring", g_WatchBSP_Enabled );
+	QCheckBox* leakstop = page.appendCheckBox( "", "Stop Compilation on Leak", g_WatchBSP_LeakStop );
+	QCheckBox* runengine = page.appendCheckBox( "", "Run Engine After Compile", g_WatchBSP_RunQuake );
 	Widget_connectToggleDependency( leakstop, monitorbsp );
 	Widget_connectToggleDependency( runengine, monitorbsp );
 	page.appendCheckBox( "", "Dump non Monitored Builds Log", g_WatchBSP0_DumpLog );
@@ -470,13 +470,6 @@ static xmlSAXHandler saxParser = {
 
 // ------------------------------------------------------------------------------------------------
 
-
-guint s_routine_id = 0;
-static gboolean watchbsp_routine( gpointer data ){
-	reinterpret_cast<CWatchBSP*>( data )->RoutineProcessing();
-	return TRUE;
-}
-
 void CWatchBSP::Reset(){
 	if ( m_pInSocket ) {
 		Net_Disconnect( m_pInSocket );
@@ -491,10 +484,7 @@ void CWatchBSP::Reset(){
 		m_xmlInputBuffer = NULL;
 	}
 	m_eState = EIdle;
-	if ( s_routine_id != 0 ) {
-		g_source_remove( s_routine_id );
-		s_routine_id = 0;
-	}
+	m_monitoring_timer.stop();
 }
 
 bool CWatchBSP::SetupListening(){
@@ -519,12 +509,11 @@ void CWatchBSP::DoEBeginStep(){
 	if ( SetupListening() == false ) {
 		const char* msg = "Failed to get a listening socket on port 39000.\nTry running with Build monitoring disabled if you can't fix this.\n";
 		globalOutputStream() << msg;
-		gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), msg, "Build monitoring", eMB_OK, eMB_ICONERROR );
+		qt_MessageBox( MainFrame_getWindow(), msg, "Build monitoring", EMessageBoxType::Error );
 		return;
 	}
 	// set the timer for timeouts and step cancellation
-	g_timer_reset( m_pTimer );
-	g_timer_start( m_pTimer );
+	m_timeout_timer.start();
 
 	if ( !m_bBSPPlugin ) {
 		globalOutputStream() << "=== running build command ===\n"
@@ -536,7 +525,7 @@ void CWatchBSP::DoEBeginStep(){
 			msg << reinterpret_cast<const char*>( g_ptr_array_index( m_pCmd, m_iCurrentStep ) );
 			msg << "\nCheck that the file exists and that you don't run out of system resources.\n";
 			globalOutputStream() << msg.c_str();
-			gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), msg.c_str(), "Build monitoring", eMB_OK, eMB_ICONERROR );
+			qt_MessageBox( MainFrame_getWindow(), msg.c_str(), "Build monitoring", EMessageBoxType::Error );
 			return;
 		}
 		// re-initialise the debug window
@@ -545,7 +534,7 @@ void CWatchBSP::DoEBeginStep(){
 		}
 	}
 	m_eState = EBeginStep;
-	s_routine_id = g_timeout_add( 25, watchbsp_routine, this );
+	m_monitoring_timer.start();
 }
 
 
@@ -615,8 +604,10 @@ void CWatchBSP::RoutineProcessing(){
 	{
 	case EBeginStep:
 		// timeout: if we don't get an incoming connection fast enough, go back to idle
-		if ( g_timer_elapsed( m_pTimer, NULL ) > g_WatchBSP_Timeout ) {
-			gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),  "The connection timed out, assuming the build process failed\nMake sure you are using a networked version of Q3Map?\nOtherwise you need to disable BSP Monitoring in prefs.", "BSP process monitoring", eMB_OK );
+		if ( m_timeout_timer.elapsed_sec() > g_WatchBSP_Timeout ) {
+			qt_MessageBox( MainFrame_getWindow(),  "The connection timed out, assuming the build process failed\n"
+			                                                      "Make sure you are using a networked version of Q3Map?\n"
+			                                                      "Otherwise you need to disable BSP Monitoring in prefs.", "BSP process monitoring" );
 			EndMonitoringLoop();
 #if 0
 			if ( m_bBSPPlugin ) {
@@ -742,7 +733,7 @@ void CWatchBSP::RoutineProcessing(){
 								StringOutputStream msg;
 								msg << "Failed to execute the following command: " << cmd.c_str() << cmdline.c_str();
 								globalOutputStream() << msg.c_str();
-								gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),  msg.c_str(), "Build monitoring", eMB_OK, eMB_ICONERROR );
+								qt_MessageBox( MainFrame_getWindow(),  msg.c_str(), "Build monitoring", EMessageBoxType::Error );
 							}
 						}
 						EndMonitoringLoop();
@@ -770,8 +761,8 @@ void CWatchBSP::DoMonitoringLoop( GPtrArray *pCmd, const char *sBSPName ){
 	if ( m_eState != EIdle ) {
 		globalWarningStream() << "WatchBSP got a monitoring request while not idling...\n";
 		// prompt the user, should we cancel the current process and go ahead?
-//		if ( gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),  "I am already monitoring a Build process.\nDo you want me to override and start a new compilation?",
-//							 "Build process monitoring", eMB_YESNO ) == eIDYES ) {
+//		if ( qt_MessageBox( MainFrame_getWindow(),  "I am already monitoring a Build process.\nDo you want me to override and start a new compilation?",
+//							 "Build process monitoring", EMessageBoxType::Question ) == eIDYES ) {
 			// disconnect and set EIdle state
 			Reset();
 //		}

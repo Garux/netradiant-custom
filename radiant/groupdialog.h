@@ -23,22 +23,21 @@
 
 #include "generic/callback.h"
 
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
+class QWidget;
 
 void GroupDialog_Construct();
 void GroupDialog_Destroy();
 
-void GroupDialog_constructWindow( GtkWindow* main_window );
+void GroupDialog_constructWindow( QWidget* main_window );
 void GroupDialog_destroyWindow();
-GtkWindow* GroupDialog_getWindow();
+QWidget* GroupDialog_getWindow();
 void GroupDialog_show();
 
 inline void RawStringExport( const char* string, const StringImportCallback& importer ){
 	importer( string );
 }
 typedef ConstPointerCaller1<char, const StringImportCallback&, RawStringExport> RawStringExportCaller;
-GtkWidget* GroupDialog_addPage( const char* tabLabel, GtkWidget* widget, const StringExportCallback& title );
+QWidget* GroupDialog_addPage( const char* tabLabel, QWidget* widget, const StringExportCallback& title );
 
-void GroupDialog_showPage( GtkWidget* page );
-void GroupDialog_updatePageTitle( GtkWidget* page );
+void GroupDialog_showPage( QWidget* page );
+void GroupDialog_updatePageTitle( QWidget* page );

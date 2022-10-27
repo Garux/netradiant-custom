@@ -93,9 +93,9 @@ struct Skew{
 inline Matrix4 matrix4_transform_for_components( const Translation& translation, const Rotation& rotation, const Scale& scale, const Skew& skew ){
 	Matrix4 result( matrix4_rotation_for_quaternion_quantised( rotation ) );
 	result[skew.index] += skew.amount;
-	vector4_to_vector3( result.x() ) *= scale.x();
-	vector4_to_vector3( result.y() ) *= scale.y();
-	vector4_to_vector3( result.z() ) *= scale.z();
+	result.x().vec3() *= scale.x();
+	result.y().vec3() *= scale.y();
+	result.z().vec3() *= scale.z();
 	result.tx() = translation.x();
 	result.ty() = translation.y();
 	result.tz() = translation.z();

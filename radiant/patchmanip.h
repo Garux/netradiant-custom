@@ -24,10 +24,8 @@
 #include "string/stringfwd.h"
 
 void Patch_registerCommands();
-typedef struct _GtkToolbar GtkToolbar;
-typedef struct _GtkMenu GtkMenu;
-void Patch_constructToolbar( GtkToolbar* toolbar );
-void Patch_constructMenu( GtkMenu* menu );
+void Patch_constructToolbar( class QToolBar* toolbar );
+void Patch_constructMenu( class QMenu* menu );
 
 namespace scene
 {
@@ -39,6 +37,9 @@ void Scene_PatchGetShader_Selected( scene::Graph& graph, CopiedString& name );
 void Scene_PatchSelectByShader( scene::Graph& graph, const char* name );
 void Scene_PatchFindReplaceShader( scene::Graph& graph, const char* find, const char* replace );
 void Scene_PatchFindReplaceShader_Selected( scene::Graph& graph, const char* find, const char* replace );
+
+void Scene_PatchGetTexdef_Selected( scene::Graph& graph, class TextureProjection &projection );
+void Patch_SetTexdef( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
 
 void Scene_PatchCapTexture_Selected( scene::Graph& graph );
 class texdef_t;
@@ -58,10 +59,8 @@ void Patch_registerPreferencesPage();
 
 void Patch_NaturalTexture();
 void Patch_CapTexture();
-void Patch_FitTexture();
-void Patch_FitTexture11();
+void Scene_PatchFlipTexture_Selected( scene::Graph& graph, int axis );
 void Patch_FlipTextureX();
 void Patch_FlipTextureY();
 
-class PatchCreator;
-extern PatchCreator* g_patchCreator;
+extern class PatchCreator* g_patchCreator;

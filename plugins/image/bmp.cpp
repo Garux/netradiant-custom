@@ -146,7 +146,7 @@ Image* LoadBMPBuff( PointerInputStream& inputStream, std::size_t length ){
 		return 0;
 	}
 	if ( bmpHeader.fileSize != length ) {
-		globalErrorStream() << "LoadBMP: header size does not match file size (" << Unsigned( bmpHeader.fileSize ) << " vs. " << Unsigned( length ) << ")\n";
+		globalErrorStream() << "LoadBMP: header size does not match file size (" << Unsigned( bmpHeader.fileSize ) << " vs. " << length << ")\n";
 		return 0;
 	}
 	if ( bmpHeader.compression != 0 ) {

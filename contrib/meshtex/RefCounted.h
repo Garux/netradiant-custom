@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_REFCOUNTED_H)
-#define INCLUDED_REFCOUNTED_H
+#pragma once
 
 /**
  * A mixin for maintaining a reference count associated with an object, and
@@ -58,5 +57,3 @@ private: // private member vars
     */
    int _refCount;
 };
-
-#endif // #if !defined(INCLUDED_REFCOUNTED_H)

@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_MESHENTITY_H)
-#define INCLUDED_MESHENTITY_H
+#pragma once
 
 #include "AllocatedMatrix.h"
 
@@ -62,9 +61,9 @@ public: // public types
     */
    enum SliceType
    {
-      ROW_SLICE_TYPE = 0,  ///< row 
-      COL_SLICE_TYPE = 1,  ///< column 
-      NUM_SLICE_TYPES = 2  ///< number of kinds of slice 
+      ROW_SLICE_TYPE = 0,  ///< row
+      COL_SLICE_TYPE = 1,  ///< column
+      NUM_SLICE_TYPES = 2  ///< number of kinds of slice
    };
 
    /**
@@ -189,7 +188,7 @@ private: // private types
     */
    enum TextureAxis
    {
-      S_TEX_AXIS = 0,   ///< S texture axis 
+      S_TEX_AXIS = 0,   ///< S texture axis
       T_TEX_AXIS = 1,   ///< T texture axis
       NUM_TEX_AXES = 2  ///< number of kinds of texture axis
    };
@@ -199,7 +198,7 @@ private: // private types
     */
    enum PositionAxis
    {
-      X_POS_AXIS = 0,   ///< X position axis 
+      X_POS_AXIS = 0,   ///< X position axis
       Y_POS_AXIS = 1,   ///< Y position axis
       Z_POS_AXIS = 2,   ///< Z position axis
       NUM_POS_AXES = 3  ///< number of kinds of position axis
@@ -270,7 +269,7 @@ private: // private template methods
                                         SliceType sliceType,
                                         int slice,
                                         int index) {
-      return (sliceType == ROW_SLICE_TYPE ? matrix(slice, index) : 
+      return (sliceType == ROW_SLICE_TYPE ? matrix(slice, index) :
                                             matrix(index, slice));
    }
 
@@ -463,5 +462,3 @@ private: // private member vars
     */
    float _posMax[NUM_POS_AXES];
 };
-
-#endif // #if !defined(INCLUDED_MESHENTITY_H)

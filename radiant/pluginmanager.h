@@ -23,8 +23,6 @@
 
 #include <cstddef>
 
-typedef struct _GtkWidget GtkWidget;
-
 /*!
    \class IPlugin
    pure virtual interface for a plugin
@@ -52,7 +50,7 @@ public:
 class CPlugInManager
 {
 public:
-	void Init( GtkWidget* main_window );
+	void Init( class QWidget* main_window );
 	void constructMenu( PluginsVisitor& menu );
 	void Shutdown();
 };

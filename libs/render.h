@@ -778,7 +778,7 @@ struct DepthTestedPointVertex
 	}
 	~DepthTestedPointVertex(){
 		if( query != 0 )
-			glDeleteQueries( 1, &query );
+			gl().glDeleteQueries( 1, &query );
 	}
 	DepthTestedPointVertex( Vertex3f _vertex )
 		: colour( Colour4b( 255, 255, 255, 255 ) ), vertex( _vertex ){
@@ -843,8 +843,8 @@ inline ArbitraryMeshVertex arbitrarymeshvertex_quantised( const ArbitraryMeshVer
 /// \brief Sets up the OpenGL colour and vertex arrays for \p array.
 template<typename PointVertex_t>
 inline void pointvertex_gl_array( const PointVertex_t* array ){
-	glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex_t ), &array->colour );
-	glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex_t ), &array->vertex );
+	gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex_t ), &array->colour );
+	gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex_t ), &array->vertex );
 }
 
 template<typename PointVertex_t>
@@ -859,12 +859,12 @@ public:
 	void render( RenderStateFlags state ) const {
 #define NV_DRIVER_BUG 0
 #if NV_DRIVER_BUG
-		glColorPointer( 4, GL_UNSIGNED_BYTE, 0, 0 );
-		glVertexPointer( 3, GL_FLOAT, 0, 0 );
-		glDrawArrays( GL_TRIANGLE_FAN, 0, 0 );
+		gl().glColorPointer( 4, GL_UNSIGNED_BYTE, 0, 0 );
+		gl().glVertexPointer( 3, GL_FLOAT, 0, 0 );
+		gl().glDrawArrays( GL_TRIANGLE_FAN, 0, 0 );
 #endif
 		pointvertex_gl_array( m_array.data() );
-		glDrawArrays( m_mode, 0, GLsizei( m_array.size() ) );
+		gl().glDrawArrays( m_mode, 0, GLsizei( m_array.size() ) );
 	}
 };
 
@@ -879,7 +879,7 @@ public:
 
 	void render( RenderStateFlags state ) const {
 		pointvertex_gl_array( &m_vector.front() );
-		glDrawArrays( m_mode, 0, GLsizei( m_vector.size() ) );
+		gl().glDrawArrays( m_mode, 0, GLsizei( m_vector.size() ) );
 	}
 
 	std::size_t size() const {
@@ -911,7 +911,7 @@ public:
 
 	void render( RenderStateFlags state ) const {
 		pointvertex_gl_array( m_vertices.data() );
-		glDrawArrays( m_mode, 0, m_vertices.size() );
+		gl().glDrawArrays( m_mode, 0, m_vertices.size() );
 	}
 };
 
@@ -928,24 +928,24 @@ public:
 	void render( RenderStateFlags state ) const {
 #if 1
 		pointvertex_gl_array( m_vertices.data() );
-		glDrawElements( m_mode, GLsizei( m_indices.size() ), RenderIndexTypeID, m_indices.data() );
+		gl().glDrawElements( m_mode, GLsizei( m_indices.size() ), RenderIndexTypeID, m_indices.data() );
 #else
-		glBegin( m_mode );
+		gl().glBegin( m_mode );
 		if ( state & RENDER_COLOURARRAY != 0 ) {
 			for ( std::size_t i = 0; i < m_indices.size(); ++i )
 			{
-				glColor4ubv( &m_vertices[m_indices[i]].colour.r );
-				glVertex3fv( &m_vertices[m_indices[i]].vertex.x );
+				gl().glColor4ubv( &m_vertices[m_indices[i]].colour.r );
+				gl().glVertex3fv( &m_vertices[m_indices[i]].vertex.x );
 			}
 		}
 		else
 		{
 			for ( std::size_t i = 0; i < m_indices.size(); ++i )
 			{
-				glVertex3fv( &m_vertices[m_indices[i]].vertex.x );
+				gl().glVertex3fv( &m_vertices[m_indices[i]].vertex.x );
 			}
 		}
-		glEnd();
+		gl().glEnd();
 #endif
 	}
 };
@@ -962,7 +962,7 @@ public:
 		if( state & RENDER_COLOURWRITE ){ // render depending on visibility
 			for( auto& p : m_array ){
 				GLuint sampleCount;
-				glGetQueryObjectuiv( p.query, GL_QUERY_RESULT, &sampleCount );
+				gl().glGetQueryObjectuiv( p.query, GL_QUERY_RESULT, &sampleCount );
 				if ( sampleCount == 0 ){
 					p.colour = colour_occluded;
 				}
@@ -971,16 +971,16 @@ public:
 				}
 			}
 			pointvertex_gl_array( m_array.data() );
-			glDrawArrays( m_mode, 0, GLsizei( m_array.size() ) );
+			gl().glDrawArrays( m_mode, 0, GLsizei( m_array.size() ) );
 		}
 		else{ // test visibility
 			for( auto& p : m_array ){
 				if( p.query == 0 )
-					glGenQueries( 1, &p.query );
-				glBeginQuery( GL_SAMPLES_PASSED, p.query );
-				glVertexPointer( 3, GL_FLOAT, 0, &p.vertex );
-				glDrawArrays( m_mode, 0, 1 );
-				glEndQuery( GL_SAMPLES_PASSED );
+					gl().glGenQueries( 1, &p.query );
+				gl().glBeginQuery( GL_SAMPLES_PASSED, p.query );
+				gl().glVertexPointer( 3, GL_FLOAT, 0, &p.vertex );
+				gl().glDrawArrays( m_mode, 0, 1 );
+				gl().glEndQuery( GL_SAMPLES_PASSED );
 			}
 		}
 	}
@@ -1268,7 +1268,7 @@ public:
 		texFree();
 	}
 	void texAlloc( const char* text, const Vector3& color01 ){
-		glGenTextures( 1, &tex );
+		gl().glGenTextures( 1, &tex );
 		if( tex > 0 ){
 			const BasicVector3<unsigned char> colour = color01 * 255.f;
 			GlobalOpenGL().m_font->renderString( text, tex, colour.data(), width, height );
@@ -1276,13 +1276,13 @@ public:
 	}
 	void texFree(){
 		if( tex > 0 ){
-			glDeleteTextures( 1, &tex );
+			gl().glDeleteTextures( 1, &tex );
 			tex = 0;
 		}
 	}
 	void render( RenderStateFlags state ) const {
 		if( tex > 0 ){
-			glBindTexture( GL_TEXTURE_2D, tex );
+			gl().glBindTexture( GL_TEXTURE_2D, tex );
 			//Here we draw the texturemaped quads.
 			//The bitmap that we got from FreeType was not
 			//oriented quite like we would like it to be,
@@ -1297,260 +1297,21 @@ public:
 			                             { subTex / 3.f, 0 },
 			                             { ( subTex + 1 ) / 3.f, 0 },
 			                             { ( subTex + 1 ) / 3.f, 1 } };
-			glVertexPointer( 2, GL_FLOAT, 0, verts );
-			glTexCoordPointer( 2, GL_FLOAT, 0, coords );
-			glDrawArrays( GL_QUADS, 0, 4 );
+			gl().glVertexPointer( 2, GL_FLOAT, 0, verts );
+			gl().glTexCoordPointer( 2, GL_FLOAT, 0, coords );
+			gl().glDrawArrays( GL_QUADS, 0, 4 );
 #else // this is faster :0
-			glBegin( GL_QUADS );
-			glTexCoord2f( subTex / 3.f, 1 );
-			glVertex2f( screenPos.x(), screenPos.y() );
-			glTexCoord2f( subTex / 3.f, 0 );
-			glVertex2f( screenPos.x(), screenPos.y() + height + .01f );
-			glTexCoord2f( ( subTex + 1 ) / 3.f, 0 );
-			glVertex2f( screenPos.x() + width + .01f, screenPos.y() + height + .01f );
-			glTexCoord2f( ( subTex + 1 ) / 3.f, 1 );
-			glVertex2f( screenPos.x() + width + .01f, screenPos.y() );
-			glEnd();
+			gl().glBegin( GL_QUADS );
+			gl().glTexCoord2f( subTex / 3.f, 1 );
+			gl().glVertex2f( screenPos.x(), screenPos.y() );
+			gl().glTexCoord2f( subTex / 3.f, 0 );
+			gl().glVertex2f( screenPos.x(), screenPos.y() + height + .01f );
+			gl().glTexCoord2f( ( subTex + 1 ) / 3.f, 0 );
+			gl().glVertex2f( screenPos.x() + width + .01f, screenPos.y() + height + .01f );
+			gl().glTexCoord2f( ( subTex + 1 ) / 3.f, 1 );
+			gl().glVertex2f( screenPos.x() + width + .01f, screenPos.y() );
+			gl().glEnd();
 #endif
 		}
 	}
-};
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// check FBO completeness
-///////////////////////////////////////////////////////////////////////////////
-inline bool checkFramebufferStatus() {
-	// check FBO status
-	GLenum status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
-	switch( status ) {
-	case GL_FRAMEBUFFER_COMPLETE:
-//		globalErrorStream() << "Framebuffer complete.\n";
-		return true;
-
-	case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-		globalErrorStream() << "[ERROR] Framebuffer incomplete: Attachment is NOT complete.\n";
-		return false;
-
-	case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-		globalErrorStream() << "[ERROR] Framebuffer incomplete: No image is attached to FBO.\n";
-		return false;
-/*
-	case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-		globalErrorStream() << "[ERROR] Framebuffer incomplete: Attached images have different dimensions.\n";
-		return false;
-
-	case GL_FRAMEBUFFER_INCOMPLETE_FORMATS:
-		globalErrorStream() << "[ERROR] Framebuffer incomplete: Color attached images have different internal formats.\n";
-		return false;
-*/
-	case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-		globalErrorStream() << "[ERROR] Framebuffer incomplete: Draw buffer.\n";
-		return false;
-
-	case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-		globalErrorStream() << "[ERROR] Framebuffer incomplete: Read buffer.\n";
-		return false;
-
-	case GL_FRAMEBUFFER_UNSUPPORTED:
-		globalErrorStream() << "[ERROR] Framebuffer incomplete: Unsupported by FBO implementation.\n";
-		return false;
-
-	default:
-		globalErrorStream() << "[ERROR] Framebuffer incomplete: Unknown error.\n";
-		return false;
-	}
-}
-
-
-class FBO
-{
-public:
-	FBO():
-		_constructed( false ),
-		_has_depth( false ),
-		_width( 0 ),
-		_height( 0 ),
-		_fbo( 0 ),
-		_tex( 0 ),
-		_depth( 0 ),
-		_color( 0 ){
-	}
-	virtual ~FBO(){
-		reset( 0, 0, 0, false );
-	}
-	virtual void reset( int width, int height, int samples, bool has_depth ){
-		_width = width;
-		_height = height;
-		_samples = samples;
-		_has_depth = has_depth;
-		if( _depth )
-			glDeleteRenderbuffers( 1, &_depth );
-		_depth = 0;
-		if( _color )
-			glDeleteRenderbuffers( 1, &_color );
-		_color = 0;
-		if( _fbo )
-			glDeleteFramebuffers( 1, &_fbo );
-		_fbo = 0;
-		_constructed = false;
-	}
-	virtual void start(){
-		if( !_constructed ){
-			construct();
-		}
-		setMultisample();
-		glBindFramebuffer( GL_FRAMEBUFFER, _fbo );
-	}
-	virtual void save(){
-		blit();
-	}
-	virtual void blit(){
-		glBindFramebuffer( GL_READ_FRAMEBUFFER, _fbo );
-		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-		//glDrawBuffer( GL_BACK );
-		glBlitFramebuffer( 0, 0, _width, _height, 0, 0, _width, _height, GL_COLOR_BUFFER_BIT, GL_NEAREST );
-		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-	}
-protected:
-	bool _constructed;
-	bool _has_depth;
-	int _width;
-	int _height;
-	int _samples;
-	GLuint _fbo;
-	GLuint _tex;
-	GLuint _depth;
-	GLuint _color;
-	void setMultisample(){
-		if( GlobalOpenGL().GL_1_3() ) {
-			if( _samples )
-				glEnable( GL_MULTISAMPLE );
-			else
-				glDisable( GL_MULTISAMPLE );
-		}
-	}
-	virtual void construct() {
-		int curSamples;
-		glGetIntegerv( GL_SAMPLES, &curSamples );
-		if( curSamples > 0 && _samples != 0 ){
-			_samples = curSamples;
-		}
-		else{
-			int maxSamples;
-			glGetIntegerv( GL_MAX_SAMPLES, &maxSamples );
-			if( _samples > maxSamples ){
-				_samples = maxSamples;
-			}
-		}
-//		globalErrorStream() << _samples << " samples\n";
-		setMultisample();
-
-		glGenFramebuffers( 1, &_fbo );
-		glBindFramebuffer( GL_FRAMEBUFFER, _fbo );
-
-		// Color buffer
-		glGenRenderbuffers( 1, &_color );
-		glBindRenderbuffer( GL_RENDERBUFFER, _color );
-		glRenderbufferStorageMultisample( GL_RENDERBUFFER, _samples, GL_RGBA8, _width, _height );
-		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _color );
-
-		if( _has_depth ){
-			// Depth buffer
-			glGenRenderbuffers( 1, &_depth );
-			glBindRenderbuffer( GL_RENDERBUFFER, _depth );
-			glRenderbufferStorageMultisample( GL_RENDERBUFFER, _samples, GL_DEPTH_COMPONENT, _width, _height );
-			glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depth );
-		}
-
-		if( !checkFramebufferStatus() && _samples > 0 ){
-			globalErrorStream() << "Falling back to no multisampling.\n";
-			_samples = 0;
-			reset( _width, _height, 0, _has_depth );
-			construct();
-		}
-
-		_constructed = true;
-	}
-private:
-};
-
-class FBO_fallback : public FBO
-{
-public:
-	~FBO_fallback(){
-		reset( 0, 0, 0, false );
-	}
-	void reset( int width, int height, int samples, bool has_depth ){
-		_width = width;
-		_height = height;
-		if( _tex )
-			glDeleteTextures( 1, &_tex );
-		_tex = 0;
-		_constructed = false;
-	}
-	void start(){
-		if( !_constructed ){
-			construct();
-		}
-	}
-	void save(){
-		glBindTexture( GL_TEXTURE_2D, _tex );
-		glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, 0, 0, _width, _height, 0 );
-		//glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_nWidth, m_nHeight );
-		glBindTexture( GL_TEXTURE_2D, 0 );
-	}
-	void blit(){
-		glViewport( 0, 0, _width, _height );
-
-		glMatrixMode( GL_PROJECTION );
-		glLoadIdentity();
-		glOrtho( 0, 1, 0, 1, -100, 100 );
-
-		glMatrixMode( GL_MODELVIEW );
-		glLoadIdentity();
-
-		glDisable( GL_LINE_STIPPLE );
-		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-		glDisableClientState( GL_NORMAL_ARRAY );
-		glDisableClientState( GL_COLOR_ARRAY );
-		glDisable( GL_LIGHTING );
-		glDisable( GL_COLOR_MATERIAL );
-		glDisable( GL_DEPTH_TEST );
-		glDisable( GL_TEXTURE_1D );
-
-		glEnable( GL_TEXTURE_2D );
-		glDisable( GL_BLEND );
-
-		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-		glBindTexture( GL_TEXTURE_2D, _tex );
-
-		glColor4f( 1.f, 1.f, 1.f, 1.f );
-		glBegin( GL_QUADS );
-
-		glTexCoord2i( 0, 0 );
-		glVertex2i( 0, 0 );
-		glTexCoord2i( 0, 1 );
-		glVertex2i( 0, 1 );
-		glTexCoord2i( 1, 1 );
-		glVertex2i( 1, 1 );
-		glTexCoord2i( 1, 0 );
-		glVertex2i( 1, 0 );
-		glEnd();
-		glBindTexture( GL_TEXTURE_2D, 0 );
-	}
-protected:
-	void construct() {
-		glGenTextures( 1, &_tex );
-		glEnable( GL_TEXTURE_2D );
-		glBindTexture( GL_TEXTURE_2D, _tex );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-		glBindTexture( GL_TEXTURE_2D, 0 );
-		_constructed = true;
-	}
-private:
 };

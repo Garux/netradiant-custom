@@ -19,16 +19,11 @@
 
 #pragma once
 
-#include <glib.h>
 #include "irender.h"
 #include "renderable.h"
 #include "math/vector.h"
+#include <vector>
 
-
-class CBspPoint {
-public:
-	float p[3];
-};
 
 class CBspPortal {
 public:
@@ -38,13 +33,12 @@ public:
 protected:
 
 public:
-	CBspPoint center;
-	unsigned point_count;
-	CBspPoint *point;
-	CBspPoint *inner_point;
+	Vector3 center{ 0 };
+	std::vector<Vector3> point;
+	std::vector<Vector3> inner_point;
 	float fp_color_random[4];
-	float min[3];
-	float max[3];
+	Vector3 min;
+	Vector3 max;
 	float dist;
 	bool hint;
 
@@ -56,11 +50,12 @@ public:
 #else
 #define PRTVIEW_PATH_MAX 260
 #endif
-typedef guint32 PackedColour;
-#define RGB( r, g, b ) ( (guint32)( ( (guint8) ( r ) | ( (guint16) ( g ) << 8 ) ) | ( ( (guint32) (guint8) ( b ) ) << 16 ) ) )
-#define GetRValue( rgb )      ( (guint8)( rgb ) )
-#define GetGValue( rgb )      ( (guint8)( ( (guint16)( rgb ) ) >> 8 ) )
-#define GetBValue( rgb )      ( (guint8)( ( rgb ) >> 16 ) )
+
+using PackedColour = std::uint32_t;
+#define RGB_PACK( r, g, b ) ( (std::uint32_t)( ( (std::uint8_t)( r ) | ( (std::uint16_t)( (std::uint8_t)( g ) ) << 8 ) ) | ( ( (std::uint32_t)(std::uint8_t)( b ) ) << 16 ) ) )
+#define RGB_UNPACK_R( rgb )      ( (std::uint8_t)( rgb ) )
+#define RGB_UNPACK_G( rgb )      ( (std::uint8_t)( ( (std::uint16_t)( rgb ) ) >> 8 ) )
+#define RGB_UNPACK_B( rgb )      ( (std::uint8_t)( ( rgb ) >> 16 ) )
 
 
 class CPortals {
@@ -83,33 +78,31 @@ public:
 	char fn[PRTVIEW_PATH_MAX];
 
 	int zbuffer;
-	int polygons;
-	int lines;
+	bool polygons;
+	bool lines;
 	bool show_3d;
-	bool aa_3d;
 	bool fog;
 	PackedColour color_3d;
-	float width_3d;      // in 8'ths
+	int width_3d;
 	float fp_color_3d[4];
 	PackedColour color_fog;
 	float fp_color_fog[4];
-	float trans_3d;
-	float clip_range;
+	int opacity_3d;
+	int clip_range;
 	bool clip;
 
+	bool draw_hints;
+	bool draw_nonhints;
+
 	bool show_2d;
-	bool aa_2d;
 	PackedColour color_2d;
-	float width_2d;      // in 8'ths
+	int width_2d;
 	float fp_color_2d[4];
 
-	CBspPortal *portal;
-	int *portal_sort;
+	std::vector<CBspPortal> portal;
+	std::vector<const CBspPortal*> portal_sort;
 	bool hint_flags;
 //	CBspNode *node;
-
-	unsigned int node_count;
-	unsigned int portal_count;
 };
 
 class CubicClipVolume

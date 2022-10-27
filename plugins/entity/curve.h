@@ -40,7 +40,7 @@ public:
 	std::vector<PointVertex> m_vertices;
 	void render( RenderStateFlags state ) const {
 		pointvertex_gl_array( &m_vertices.front() );
-		glDrawArrays( GL_LINE_STRIP, 0, GLsizei( m_vertices.size() ) );
+		gl().glDrawArrays( GL_LINE_STRIP, 0, GLsizei( m_vertices.size() ) );
 	}
 };
 
@@ -94,7 +94,7 @@ inline bool ControlPoints_parse( ControlPoints& controlPoints, const char* value
 }
 
 inline void ControlPoints_write( const ControlPoints& controlPoints, StringOutputStream& value ){
-	value << Unsigned( controlPoints.size() ) << " (";
+	value << controlPoints.size() << " (";
 	for ( ControlPoints::const_iterator i = controlPoints.begin(); i != controlPoints.end(); ++i )
 	{
 		value << " " << ( *i ).x() << " " << ( *i ).y() << " " << ( *i ).z() << " ";

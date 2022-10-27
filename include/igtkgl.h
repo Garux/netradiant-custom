@@ -23,18 +23,8 @@
 
 #include "generic/constant.h"
 
-typedef struct _GtkWidget GtkWidget;
-typedef int gint;
-typedef gint gboolean;
-
 struct _QERGtkGLTable
 {
 	INTEGER_CONSTANT( Version, 1 );
 	STRING_CONSTANT( Name, "gtkgl" );
-
-	GtkWidget* ( *glwidget_new )(gboolean zbufffer);
-	void ( *glwidget_swap_buffers )( GtkWidget* widget );
-	gboolean ( *glwidget_make_current )( GtkWidget* widget );
-	void ( *glwidget_destroy_context )( GtkWidget* widget );
-	void ( *glwidget_create_context )( GtkWidget* widget );
 };

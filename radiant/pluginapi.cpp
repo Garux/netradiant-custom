@@ -45,17 +45,6 @@ void QERApp_SetCamera( const Vector3& origin, const Vector3& angles ){
 	Camera_setAngles( camwnd, angles );
 }
 
-void QERApp_GetCamWindowExtents( int *x, int *y, int *width, int *height ){
-#if 0
-	CamWnd* camwnd = g_pParentWnd->GetCamWnd();
-
-	gtk_window_get_position( GTK_WINDOW( camwnd->m_window ), x, y );
-
-	*width = camwnd->Camera()->width;
-	*height = camwnd->Camera()->height;
-#endif
-}
-
 #include "icamera.h"
 
 class CameraAPI
@@ -68,7 +57,6 @@ public:
 	CameraAPI(){
 		m_camera.m_pfnGetCamera = &QERApp_GetCamera;
 		m_camera.m_pfnSetCamera = &QERApp_SetCamera;
-		m_camera.m_pfnGetCamWindowExtents = &QERApp_GetCamWindowExtents;
 	}
 	_QERCameraTable* getTable(){
 		return &m_camera;

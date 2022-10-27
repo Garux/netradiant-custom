@@ -272,6 +272,6 @@ inline void Winding_printConnectivity( Winding& winding ){
 	for ( Winding::iterator i = winding.begin(); i != winding.end(); ++i )
 	{
 		std::size_t vertexIndex = std::distance( winding.begin(), i );
-		globalOutputStream() << "vertex: " << Unsigned( vertexIndex ) << " adjacent: " << Unsigned( ( *i ).adjacent ) << "\n";
+		globalOutputStream() << "vertex: " << vertexIndex << " adjacent: " << ( *i ).adjacent << "\n";
 	}
 }

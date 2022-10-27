@@ -21,5 +21,4 @@
 
 #pragma once
 
-typedef struct _GtkMenu GtkMenu;
-void create_game_help_menu( GtkMenu *menu );
+void create_game_help_menu( class QMenu *menu );

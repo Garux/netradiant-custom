@@ -51,16 +51,16 @@ void HandleHelpCommand( CopiedString& str ){
 	OpenURL( str.c_str() );
 }
 
-void process_xlink( const char* filename, const char *menu_name, const char *base_url, GtkMenu *menu ){
+void process_xlink( const char* filename, const char *menu_name, const char *base_url, QMenu *menu ){
 	if ( file_exists( filename ) ) {
 		xmlDocPtr pDoc = xmlParseFile( filename );
 		if ( pDoc ) {
 			globalOutputStream() << "Processing .xlink file '" << filename << "'\n";
 			// create sub menu
-			GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, menu_name );
-			if ( g_Layout_enableDetachableMenus.m_value ) {
-				menu_tearoff( menu_in_menu );
-			}
+			menu = menu->addMenu( menu_name );
+
+			menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
+
 			// start walking the nodes, find the 'links' one
 			xmlNodePtr pNode = pDoc->children;
 			while ( pNode && strcmp( (const char*)pNode->name, "links" ) )
@@ -93,7 +93,7 @@ void process_xlink( const char* filename, const char *menu_name, const char *bas
 
 						prop = xmlGetProp( pNode, reinterpret_cast<const xmlChar*>( "name" ) );
 						ASSERT_NOTNULL( prop );
-						create_menu_item_with_mnemonic( menu_in_menu, reinterpret_cast<const char*>( prop ), ReferenceCaller<CopiedString, HandleHelpCommand>( mHelpURLs.back() ) );
+						create_menu_item_with_mnemonic( menu, reinterpret_cast<const char*>( prop ), ReferenceCaller<CopiedString, HandleHelpCommand>( mHelpURLs.back() ) );
 						xmlFree( prop );
 					}
 					pNode = pNode->next;
@@ -112,14 +112,12 @@ void process_xlink( const char* filename, const char *menu_name, const char *bas
 	}
 }
 
-void create_game_help_menu( GtkMenu *menu ){
-	StringOutputStream filename( 256 );
-	filename << AppPath_get() << "global.xlink";
+void create_game_help_menu( QMenu *menu ){
+	auto filename = StringOutputStream( 256 )( AppPath_get(), "global.xlink" );
 	process_xlink( filename.c_str(), "General", AppPath_get(), menu );
 
 #if 1
-	filename.clear();
-	filename << g_pGameDescription->mGameToolsPath << "game.xlink";
+	filename( g_pGameDescription->mGameToolsPath, "game.xlink" );
 	process_xlink( filename.c_str(), g_pGameDescription->getRequiredKeyValue( "name" ), g_pGameDescription->mGameToolsPath.c_str(), menu );
 #else
 	for ( std::list<CGameDescription *>::iterator iGame = g_GamesDialog.mGames.begin(); iGame != g_GamesDialog.mGames.end(); ++iGame )

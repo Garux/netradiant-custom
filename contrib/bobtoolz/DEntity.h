@@ -59,7 +59,7 @@ public:
 //	---------------------------------------------
 
 //	random functions........
-	bool ResetTextures( const char* textureName, float fScale[2], float fShift[2], int rotation, const char* newTextureName, int bResetTextureName, int bResetScale[2], int bResetShift[2], int bResetRotation, bool rebuild );
+	bool ResetTextures( const char* textureName, float fScale[2], float fShift[2], int rotation, const char* newTextureName, bool bResetTextureName, bool bResetScale[2], bool bResetShift[2], bool bResetRotation, bool rebuild );
 	void SaveToFile( FILE* pFile );
 	void SetClassname( const char* classname );
 	int GetIDMax();

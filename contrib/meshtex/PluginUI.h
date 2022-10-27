@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_PLUGINUI_H)
-#define INCLUDED_PLUGINUI_H
+#pragma once
 
 #include "GenericPluginUI.h"
 
@@ -57,5 +56,3 @@ public: // public methods
 
    static PluginUI& Instance();
 };
-
-#endif // #if !defined(INCLUDED_PLUGINUI_H)

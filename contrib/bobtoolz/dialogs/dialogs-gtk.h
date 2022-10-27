@@ -17,8 +17,7 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#if !defined( INCLUDED_DIALOGS_GTK_H )
-#define INCLUDED_DIALOGS_GTK_H
+#pragma once
 
 #include "qerplugin.h"
 
@@ -32,25 +31,18 @@ struct BuildStairsRS {
 };
 
 struct ResetTextureRS {
-	int bResetTextureName;
+	bool bResetTextureName;
 	char textureName[256];
 	char newTextureName[256];
 
-	int bResetScale[2];
+	bool bResetScale[2];
 	float fScale[2];
 
-	int bResetShift[2];
+	bool bResetShift[2];
 	float fShift[2];
 
-	int bResetRotation;
+	bool bResetRotation;
 	int rotation;
-};
-
-struct TrainThingRS {
-	float fRadiusX, fRadiusY;
-	float fStartAngle, fEndAngle;
-	int iNumPoints;
-	float fStartHeight, fEndHeight;
 };
 
 struct IntersectRS {
@@ -90,23 +82,13 @@ struct MakeChainRS {
 	int linkNum;
 };
 
-typedef struct _GtkWidget GtkWidget;
 
-struct TwinWidget {
-	GtkWidget* one;
-	GtkWidget* two;
-};
-
-EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMessageBoxType type );
-EMessageBoxReturn DoIntersectBox( IntersectRS* rs );
-EMessageBoxReturn DoPolygonBox( PolygonRS* rs );
+EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMessageBoxType type = EMessageBoxType::Info );
+bool DoIntersectBox( IntersectRS* rs );
+bool DoPolygonBox( PolygonRS* rs );
 EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs );
-EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs );
-EMessageBoxReturn DoDoorsBox( DoorRS* rs );
+bool DoBuildStairsBox( BuildStairsRS* rs );
+bool DoDoorsBox( DoorRS* rs );
 EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs );
 EMessageBoxReturn DoCTFColourChangeBox();
-EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs );
-EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs );
-//GtkWidget* GetProgressWindow(char* title, GtkProgressBar* feedback);
-
-#endif
+bool DoMakeChainBox( MakeChainRS* rs );

@@ -24,9 +24,7 @@
 //#include "string/string.h"
 #include "string/stringfwd.h"
 
-typedef struct _GtkToolbar GtkToolbar;
-
-GtkToolbar* create_filter_toolbar();
+void create_filter_toolbar( class QToolBar *toolbar );
 
 CopiedString GetCommonShader( const char* name );
 

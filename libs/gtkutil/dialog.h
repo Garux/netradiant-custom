@@ -21,59 +21,24 @@
 
 #pragma once
 
-#include "generic/callback.h"
 #include "generic/arrayrange.h"
-#include "qerplugin.h"
-#include <gtk/gtk.h>
 
+class QWidget;
+class QGridLayout;
+class QButtonGroup;
+class QHBoxLayout;
+class QAction;
+class QLineEdit;
+class QLayout;
+class QLabel;
 
-struct ModalDialog
-{
-	ModalDialog()
-		: loop( true ), ret( eIDCANCEL ){
-	}
-	bool loop;
-	EMessageBoxReturn ret;
-};
-
-struct ModalDialogButton
-{
-	ModalDialogButton( ModalDialog& dialog, EMessageBoxReturn value )
-		: m_dialog( dialog ), m_value( value ){
-	}
-	ModalDialog& m_dialog;
-	EMessageBoxReturn m_value;
-};
-
-GtkWindow* create_fixedsize_modal_window( GtkWindow* parent, const char* title, int width, int height );
-
-GtkWindow* create_dialog_window( GtkWindow* parent, const char* title, GCallback func, gpointer data, int default_w = -1, int default_h = -1 );
-GtkTable* create_dialog_table( unsigned int rows, unsigned int columns, unsigned int row_spacing, unsigned int col_spacing, int border = 0 );
-GtkButton* create_dialog_button( const char* label, GCallback func, gpointer data );
-GtkVBox* create_dialog_vbox( int spacing, int border = 0 );
-GtkHBox* create_dialog_hbox( int spacing, int border = 0 );
-GtkFrame* create_dialog_frame( const char* label, GtkShadowType shadow = GTK_SHADOW_ETCHED_IN );
-
-GtkButton* create_modal_dialog_button( const char* label, ModalDialogButton& button );
-GtkWindow* create_modal_dialog_window( GtkWindow* parent, const char* title, ModalDialog& dialog, int default_w = -1, int default_h = -1 );
-GtkWindow* create_fixedsize_modal_dialog_window( GtkWindow* parent, const char* title, ModalDialog& dialog, int width = -1, int height = -1 );
-EMessageBoxReturn modal_dialog_show( GtkWindow* window, ModalDialog& dialog );
-
-
-gboolean dialog_button_ok( GtkWidget *widget, ModalDialog* data );
-gboolean dialog_button_cancel( GtkWidget *widget, ModalDialog* data );
-gboolean dialog_button_yes( GtkWidget *widget, ModalDialog* data );
-gboolean dialog_button_no( GtkWidget *widget, ModalDialog* data );
-gboolean dialog_delete_callback( GtkWidget *widget, GdkEventAny* event, ModalDialog* data );
-
-GtkWindow* create_simple_modal_dialog_window( const char* title, ModalDialog& dialog, GtkWidget* contents );
 
 class RadioHBox
 {
 public:
-	GtkHBox* m_hbox;
-	GtkRadioButton* m_radio;
-	RadioHBox( GtkHBox* hbox, GtkRadioButton* radio ) :
+	QHBoxLayout* m_hbox;
+	QButtonGroup* m_radio;
+	RadioHBox( QHBoxLayout* hbox, QButtonGroup* radio ) :
 		m_hbox( hbox ),
 		m_radio( radio ){
 	}
@@ -85,11 +50,9 @@ RadioHBox RadioHBox_new( StringArrayRange names );
 class PathEntry
 {
 public:
-	GtkFrame* m_frame;
-	GtkEntry* m_entry;
-	GtkButton* m_button;
-	PathEntry( GtkFrame* frame, GtkEntry* entry, GtkButton* button ) :
-		m_frame( frame ),
+	QLineEdit* m_entry;
+	QAction* m_button;
+	PathEntry( QLineEdit* entry, QAction* button ) :
 		m_entry( entry ),
 		m_button( button ){
 	}
@@ -97,18 +60,7 @@ public:
 
 PathEntry PathEntry_new();
 
-class BrowsedPathEntry
-{
-public:
-	typedef Callback1<const char*> SetPathCallback;
-	typedef Callback1<const SetPathCallback&> BrowseCallback;
-
-	PathEntry m_entry;
-	BrowseCallback m_browse;
-
-	BrowsedPathEntry( const BrowseCallback& browse );
-};
-
-GtkLabel* DialogLabel_new( const char* name );
-GtkTable* DialogRow_new( const char* name, GtkWidget* widget );
-void DialogVBox_packRow( GtkVBox* vbox, GtkWidget* row );
+void DialogGrid_packRow( QGridLayout* grid, QWidget* row, QLabel *label );
+void DialogGrid_packRow( QGridLayout* grid, QWidget* row, const char* name );
+void DialogGrid_packRow( QGridLayout* grid, QLayout* row, QLabel *label );
+void DialogGrid_packRow( QGridLayout* grid, QLayout* row, const char* name );

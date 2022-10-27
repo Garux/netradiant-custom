@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_PLUGINMODULE_H)
-#define INCLUDED_PLUGINMODULE_H
+#pragma once
 
 #include "PluginProperties.h"
 
@@ -84,5 +83,3 @@ private: // private member vars
 
    static _QERPluginTable _pluginAPI;
 };
-
-#endif // #if !defined(INCLUDED_PLUGINMODULE_H)

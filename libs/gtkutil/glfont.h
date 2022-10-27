@@ -30,10 +30,10 @@ public:
 	virtual int getPixelAscent() const = 0;
 	virtual int getPixelDescent() const = 0;
 	virtual void printString( const char *s ) = 0;
-	virtual void renderString( const char *s, const GLuint& tex, const unsigned char colour[3], unsigned int& wid, unsigned int& hei ) = 0;
+	virtual void renderString( const char *s, const GLuint& tex, const unsigned char colour[3], unsigned int& out_wid, unsigned int& out_hei ) = 0;
 	virtual ~GLFont(){
 	}
 };
 
-GLFont *glfont_create( const char* font_string );
+GLFont *glfont_create( const char* family, int fontSize, const char* appPath );
 // release with delete

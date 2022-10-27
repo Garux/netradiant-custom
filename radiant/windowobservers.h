@@ -23,39 +23,35 @@
 
 #include "windowobserver.h"
 
-#include <gdk/gdk.h>
+#include <Qt>
 
-#include "math/vector.h"
+void GlobalWindowObservers_add( class WindowObserver* observer );
+void GlobalWindowObservers_connectWidget( class QWidget* widget );
+void GlobalWindowObservers_connectTopLevel( class QWidget* window );
 
-class WindowObserver;
-void GlobalWindowObservers_add( WindowObserver* observer );
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
-void GlobalWindowObservers_connectWidget( GtkWidget* widget );
-void GlobalWindowObservers_connectTopLevel( GtkWindow* window );
-
-inline ButtonIdentifier button_for_button( unsigned int button ){
+inline ButtonIdentifier button_for_button( Qt::MouseButton button ){
 	switch ( button )
 	{
-	case 1:
+	case Qt::MouseButton::LeftButton:
 		return c_buttonLeft;
-	case 2:
+	case Qt::MouseButton::MiddleButton:
 		return c_buttonMiddle;
-	case 3:
+	case Qt::MouseButton::RightButton:
 		return c_buttonRight;
+	default:
+		return c_buttonInvalid;
 	}
-	return c_buttonInvalid;
 }
 
-inline ModifierFlags modifiers_for_state( unsigned int state ){
+inline ModifierFlags modifiers_for_state( Qt::KeyboardModifiers state ){
 	ModifierFlags modifiers = c_modifierNone;
-	if ( state & GDK_SHIFT_MASK ) {
+	if ( state & Qt::KeyboardModifier::ShiftModifier ) {
 		modifiers |= c_modifierShift;
 	}
-	if ( state & GDK_CONTROL_MASK ) {
+	if ( state & Qt::KeyboardModifier::ControlModifier ) {
 		modifiers |= c_modifierControl;
 	}
-	if ( state & GDK_MOD1_MASK ) {
+	if ( state & Qt::KeyboardModifier::AltModifier ) {
 		modifiers |= c_modifierAlt;
 	}
 	return modifiers;

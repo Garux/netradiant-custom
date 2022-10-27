@@ -86,7 +86,6 @@ public:
 
 float Texdef_getDefaultTextureScale();
 
-class texdef_t;
 struct Winding;
 class Matrix4;
 template<typename T> class Plane3___;
@@ -107,10 +106,12 @@ void Texdef_FitTexture( TextureProjection& projection, std::size_t width, std::s
 void Texdef_Construct_local2tex( const TextureProjection& projection, std::size_t width, std::size_t height, const Vector3& normal, Matrix4& local2tex );
 void Texdef_Construct_local2tex4projection( const texdef_t& texdef, std::size_t width, std::size_t height, const Vector3& normal, const Vector3* direction, Matrix4& local2tex );
 void Texdef_Construct_local2tex_from_ST( const DoubleVector3 points[3], const DoubleVector3 st[3], Matrix4& local2tex );
+void BP_Construct_local2tex( const brushprimit_texdef_t& bp, const Plane3& plane, Matrix4& local2tex );
 void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::size_t width, std::size_t height, Winding& w, const Vector3& normal, const Matrix4& localToWorld );
 
 void ShiftScaleRotate_fromFace( texdef_t& shiftScaleRotate, const TextureProjection& projection );
 void ShiftScaleRotate_toFace( const texdef_t& shiftScaleRotate, TextureProjection& projection );
+void ShiftScaleRotate_fromPatch( texdef_t& shiftScaleRotate, const TextureProjection& projection );
 
 void Texdef_transformLocked( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const Matrix4& transform, const Vector3& invariant = g_vector3_identity );
 void Texdef_transform( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const Matrix4& transform, const Vector3& invariant = g_vector3_identity );
@@ -133,6 +134,8 @@ extern float g_texdef_default_scale;
 
 void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, TextureProjection& projection, std::size_t width, std::size_t height );
 void Texdef_from_ST( TextureProjection& projection, const DoubleVector3 points[3], const DoubleVector3 st[3], std::size_t width, std::size_t height );
+void BP_from_ST( brushprimit_texdef_t& bp, const DoubleVector3 points[3], const DoubleVector3 st[3], const DoubleVector3& normal, const bool normalize = true );
+void BPTexdef_Assign( brushprimit_texdef_t& bp_td, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
 
 //++timo replace everywhere texX by texS etc. ( ----> and in q3map !)
 // NOTE : ComputeAxisBase here and in q3map code must always BE THE SAME !

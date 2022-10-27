@@ -1,6 +1,7 @@
-#include <glib.h>
-#include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
+
+
+#include "callbacks.h"
+
 #include <set>
 
 #include "qerplugin.h"
@@ -8,17 +9,16 @@
 #include "os/path.h"
 #include "os/file.h"
 #include "stream/stringstream.h"
-#include "support.h"
 #include "export.h"
+
+
 
 
 namespace callbacks {
 
 static std::string s_export_path;
 
-void OnExportClicked( GtkButton* button, gpointer choose_path ){
-	GtkWidget* window = lookup_widget( GTK_WIDGET( button ), "w_plugplug2" );
-	ASSERT_NOTNULL( window );
+void OnExportClicked( bool choose_path ){
 	if( choose_path ){
 		StringOutputStream buffer( 1024 );
 
@@ -35,7 +35,7 @@ void OnExportClicked( GtkButton* button, gpointer choose_path ){
 			}
 		}
 
-		const char* cpath = GlobalRadiant().m_pfnFileDialog( window, false, "Save as Obj", buffer.c_str(), 0, false, false, true );
+		const char* cpath = GlobalRadiant().m_pfnFileDialog( g_dialog.window, false, "Save as Obj", buffer.c_str(), 0, false, false, true );
 		if ( !cpath ) {
 			return;
 		}
@@ -43,11 +43,9 @@ void OnExportClicked( GtkButton* button, gpointer choose_path ){
 		if( !string_equal_suffix_nocase( s_export_path.c_str(), ".obj" ) )
 			s_export_path += ".obj";
 		// enable button to reexport with the selected name
-		GtkWidget* b_export = lookup_widget( GTK_WIDGET( button ), "b_export" );
-		ASSERT_NOTNULL( b_export );
-		gtk_widget_set_sensitive( b_export, TRUE );
+		g_dialog.b_export->setEnabled( true );
 		// add tooltip
-		gtk_widget_set_tooltip_text( b_export, ( std::string( "ReExport to " ) + s_export_path ).c_str() );
+		g_dialog.b_export->setToolTip( ( std::string( "ReExport to " ) + s_export_path ).c_str() );
 	}
 	else if( s_export_path.empty() ){
 		return;
@@ -59,21 +57,9 @@ void OnExportClicked( GtkButton* button, gpointer choose_path ){
 		return string_less_nocase( lhs.c_str(), rhs.c_str() );
 	} );
 
-	GtkTreeView* view = GTK_TREE_VIEW( lookup_widget( GTK_WIDGET( button ), "t_materialist" ) );
-	GtkListStore* list = GTK_LIST_STORE( gtk_tree_view_get_model( view ) );
-
-	GtkTreeIter iter;
-	gboolean valid = gtk_tree_model_get_iter_first( GTK_TREE_MODEL( list ), &iter );
-	while ( valid )
+	for( int i = 0; i < g_dialog.t_materialist->count(); ++i )
 	{
-		gchar* data;
-		gtk_tree_model_get( GTK_TREE_MODEL( list ), &iter, 0, &data, -1 );
-#ifdef _DEBUG
-		globalOutputStream() << data << "\n";
-#endif
-		ignore.insert( std::string( data ) );
-		g_free( data );
-		valid = gtk_tree_model_iter_next( GTK_TREE_MODEL( list ), &iter );
+		ignore.insert( g_dialog.t_materialist->item( i )->text().toStdString() );
 	}
 #ifdef _DEBUG
 	for ( const std::string& str : ignore )
@@ -82,77 +68,46 @@ void OnExportClicked( GtkButton* button, gpointer choose_path ){
 	// collapse mode
 	collapsemode mode = COLLAPSE_NONE;
 
-	GtkWidget* radio = lookup_widget( GTK_WIDGET( button ), "r_collapse" );
-	ASSERT_NOTNULL( radio );
-
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radio ) ) ) {
+	if ( g_dialog.r_collapse->isChecked() ) {
 		mode = COLLAPSE_ALL;
 	}
-	else
-	{
-		radio = lookup_widget( GTK_WIDGET( button ), "r_collapsebymaterial" );
-		ASSERT_NOTNULL( radio );
-		if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radio ) ) ) {
-			mode = COLLAPSE_BY_MATERIAL;
-		}
-		else
-		{
-			radio = lookup_widget( GTK_WIDGET( button ), "r_nocollapse" );
-			ASSERT_NOTNULL( radio );
-			ASSERT_NOTNULL( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radio ) ) );
-			mode = COLLAPSE_NONE;
-		}
+	else if ( g_dialog.r_collapsebymaterial->isChecked() ) {
+		mode = COLLAPSE_BY_MATERIAL;
+	}
+	else{
+		ASSERT_NOTNULL( g_dialog.r_nocollapse->isChecked() );
+		mode = COLLAPSE_NONE;
 	}
 
-	GtkWidget* toggle;
 	// export materials?
-	ASSERT_NOTNULL( ( toggle = lookup_widget( GTK_WIDGET( button ), "t_exportmaterials" ) ) );
-	const bool exportmat = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) );
+	const bool exportmat = g_dialog.t_exportmaterials->isChecked();
 
 	// limit material names?
-	ASSERT_NOTNULL( ( toggle = lookup_widget( GTK_WIDGET( button ), "t_limitmatnames" ) ) );
-	const bool limitMatNames = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) );
+	const bool limitMatNames = g_dialog.t_limitmatnames->isChecked();
 
 	// create objects instead of groups?
-	ASSERT_NOTNULL( ( toggle = lookup_widget( GTK_WIDGET( button ), "t_objects" ) ) );
-	const bool objects = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) );
+	const bool objects = g_dialog.t_objects->isChecked();
 
-	ASSERT_NOTNULL( ( toggle = lookup_widget( GTK_WIDGET( button ), "t_weld" ) ) );
-	const bool weld = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) );
+	const bool weld = g_dialog.t_weld->isChecked();
 
 	// export
 	ExportSelection( ignore, mode, exportmat, s_export_path, limitMatNames, objects, weld );
 }
 
-void OnAddMaterial( GtkButton* button, gpointer user_data ){
-	GtkEntry* edit = GTK_ENTRY( lookup_widget( GTK_WIDGET( button ), "ed_materialname" ) );
-	ASSERT_NOTNULL( edit );
+void OnAddMaterial(){
+	const auto text = g_dialog.ed_materialname->text().toLatin1();
 
-	const gchar* name = path_get_filename_start( gtk_entry_get_text( edit ) );
-	if ( g_utf8_strlen( name, -1 ) > 0 ) {
-		GtkListStore* list = GTK_LIST_STORE( gtk_tree_view_get_model( GTK_TREE_VIEW( lookup_widget( GTK_WIDGET( button ), "t_materialist" ) ) ) );
-		GtkTreeIter iter;
-		gtk_list_store_append( list, &iter );
-		gtk_list_store_set( list, &iter, 0, name, -1 );
-		gtk_entry_set_text( edit, "" );
+	const char* name = path_get_filename_start( text.constData() );
+	if ( strlen( name ) > 0 ) {
+		auto item = new QListWidgetItem( name );
+		item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren );
+		g_dialog.t_materialist->addItem( item );
 	}
 }
 
-void OnRemoveMaterial( GtkButton* button, gpointer user_data ){
-	GtkTreeView* view = GTK_TREE_VIEW( lookup_widget( GTK_WIDGET( button ), "t_materialist" ) );
-	GtkListStore* list = GTK_LIST_STORE( gtk_tree_view_get_model( view ) );
-	GtkTreeSelection* sel = gtk_tree_view_get_selection( view );
-
-	GtkTreeIter iter;
-	if ( gtk_tree_selection_get_selected( sel, 0, &iter ) ) {
-		gtk_list_store_remove( list, &iter );
-	}
+void OnRemoveMaterial(){
+	qDeleteAll( g_dialog.t_materialist->selectedItems() );
 }
 
-gboolean OnRemoveMaterialKb( GtkWidget* widget, GdkEventKey* event, gpointer user_data ){
-	if( event->keyval == GDK_KEY_Delete )
-		OnRemoveMaterial( reinterpret_cast<GtkButton*>( widget ), NULL );
-	return FALSE;
-}
 
 } // callbacks

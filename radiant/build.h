@@ -35,8 +35,7 @@ void DoBuildMenu();
 void BuildMenu_Construct();
 void BuildMenu_Destroy();
 
-typedef struct _GtkMenu GtkMenu;
-void Build_constructMenu( GtkMenu* menu );
-extern GtkMenu* g_bsp_menu;
+void Build_constructMenu( class QMenu* menu );
+extern QMenu* g_bsp_menu;
 
 void Build_runRecentExecutedBuild();

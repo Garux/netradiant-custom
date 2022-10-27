@@ -27,13 +27,13 @@
 inline void billboard_viewplaneOriented( Matrix4& rotation, const Matrix4& world2screen ){
 #if 1
 	rotation = g_matrix4_identity;
-	Vector3 x( vector3_normalised( vector4_to_vector3( world2screen.x() ) ) );
-	Vector3 y( vector3_normalised( vector4_to_vector3( world2screen.y() ) ) );
-	Vector3 z( vector3_normalised( vector4_to_vector3( world2screen.z() ) ) );
-	vector4_to_vector3( rotation.y() ) = Vector3( x.y(), y.y(), z.y() );
-	vector4_to_vector3( rotation.z() ) = vector3_negated( Vector3( x.z(), y.z(), z.z() ) );
-	vector4_to_vector3( rotation.x() ) = vector3_normalised( vector3_cross( vector4_to_vector3( rotation.y() ), vector4_to_vector3( rotation.z() ) ) );
-	vector4_to_vector3( rotation.y() ) = vector3_cross( vector4_to_vector3( rotation.z() ), vector4_to_vector3( rotation.x() ) );
+	Vector3 x( vector3_normalised( world2screen.x().vec3() ) );
+	Vector3 y( vector3_normalised( world2screen.y().vec3() ) );
+	Vector3 z( vector3_normalised( world2screen.z().vec3() ) );
+	rotation.y().vec3() = Vector3( x.y(), y.y(), z.y() );
+	rotation.z().vec3() = vector3_negated( Vector3( x.z(), y.z(), z.z() ) );
+	rotation.x().vec3() = vector3_normalised( vector3_cross( rotation.y().vec3(), rotation.z().vec3() ) );
+	rotation.y().vec3() = vector3_cross( rotation.z().vec3(), rotation.x().vec3() );
 #else
 	Matrix4 screen2world( matrix4_full_inverse( world2screen ) );
 
@@ -65,10 +65,10 @@ inline void billboard_viewplaneOriented( Matrix4& rotation, const Matrix4& world
 	);
 
 	rotation = g_matrix4_identity;
-	vector4_to_vector3( rotation.y() ) = vector3_normalised( vector3_subtracted( up, near_ ) );
-	vector4_to_vector3( rotation.z() ) = vector3_normalised( vector3_subtracted( near_, far_ ) );
-	vector4_to_vector3( rotation.x() ) = vector3_normalised( vector3_cross( vector4_to_vector3( rotation.y() ), vector4_to_vector3( rotation.z() ) ) );
-	vector4_to_vector3( rotation.y() ) = vector3_cross( vector4_to_vector3( rotation.z() ), vector4_to_vector3( rotation.x() ) );
+	rotation.y().vec3() = vector3_normalised( vector3_subtracted( up, near_ ) );
+	rotation.z().vec3() = vector3_normalised( vector3_subtracted( near_, far_ ) );
+	rotation.x().vec3() = vector3_normalised( vector3_cross( rotation.y().vec3(), rotation.z().vec3() ) );
+	rotation.y().vec3() = vector3_cross( rotation.z().vec3(), rotation.x().vec3() );
 #endif
 }
 
@@ -77,10 +77,10 @@ inline void billboard_viewpointOriented( Matrix4& rotation, const Matrix4& world
 
 #if 1
 	rotation = g_matrix4_identity;
-	vector4_to_vector3( rotation.y() ) = vector3_normalised( vector4_to_vector3( screen2world.y() ) );
-	vector4_to_vector3( rotation.z() ) = vector3_negated( vector3_normalised( vector4_to_vector3( screen2world.z() ) ) );
-	vector4_to_vector3( rotation.x() ) = vector3_normalised( vector3_cross( vector4_to_vector3( rotation.y() ), vector4_to_vector3( rotation.z() ) ) );
-	vector4_to_vector3( rotation.y() ) = vector3_cross( vector4_to_vector3( rotation.z() ), vector4_to_vector3( rotation.x() ) );
+	rotation.y().vec3() = vector3_normalised( screen2world.y().vec3() );
+	rotation.z().vec3() = vector3_negated( vector3_normalised( screen2world.z().vec3() ) );
+	rotation.x().vec3() = vector3_normalised( vector3_cross( rotation.y().vec3(), rotation.z().vec3() ) );
+	rotation.y().vec3() = vector3_cross( rotation.z().vec3(), rotation.x().vec3() );
 #else
 	Vector3 near_(
 	    vector4_projected(
@@ -110,10 +110,10 @@ inline void billboard_viewpointOriented( Matrix4& rotation, const Matrix4& world
 	);
 
 	rotation = g_matrix4_identity;
-	vector4_to_vector3( rotation.y() ) = vector3_normalised( vector3_subtracted( up, near_ ) );
-	vector4_to_vector3( rotation.z() ) = vector3_normalised( vector3_subtracted( near_, far_ ) );
-	vector4_to_vector3( rotation.x() ) = vector3_normalised( vector3_cross( vector4_to_vector3( rotation.y() ), vector4_to_vector3( rotation.z() ) ) );
-	vector4_to_vector3( rotation.y() ) = vector3_cross( vector4_to_vector3( rotation.z() ), vector4_to_vector3( rotation.x() ) );
+	rotation.y().vec3() = vector3_normalised( vector3_subtracted( up, near_ ) );
+	rotation.z().vec3() = vector3_normalised( vector3_subtracted( near_, far_ ) );
+	rotation.x().vec3() = vector3_normalised( vector3_cross( rotation.y().vec3(), rotation.z().vec3() ) );
+	rotation.y().vec3() = vector3_cross( rotation.z().vec3(), rotation.x().vec3() );
 #endif
 }
 
@@ -139,9 +139,9 @@ inline void ConstructDevice2Object( Matrix4& device2object, const Matrix4& objec
 //! S =  ( Inverse(Object2Screen *post ScaleOf(Object2Screen) ) *post Object2Screen
 inline void pivot_scale( Matrix4& scale, const Matrix4& pivot2screen ){
 	Matrix4 pre_scale( g_matrix4_identity );
-	pre_scale[0] = static_cast<float>( vector3_length( vector4_to_vector3( pivot2screen.x() ) ) );
-	pre_scale[5] = static_cast<float>( vector3_length( vector4_to_vector3( pivot2screen.y() ) ) );
-	pre_scale[10] = static_cast<float>( vector3_length( vector4_to_vector3( pivot2screen.z() ) ) );
+	pre_scale[0] = static_cast<float>( vector3_length( pivot2screen.x().vec3() ) );
+	pre_scale[5] = static_cast<float>( vector3_length( pivot2screen.y().vec3() ) );
+	pre_scale[10] = static_cast<float>( vector3_length( pivot2screen.z().vec3() ) );
 
 	scale = pivot2screen;
 	matrix4_multiply_by_matrix4( scale, pre_scale );
@@ -194,7 +194,7 @@ inline void Pivot2World_viewpointSpace( Matrix4& manip2world, Vector3& axis, con
 	matrix4_multiply_by_matrix4( manip2world, scale );
 
 	billboard_viewpointOriented( scale, pivot2screen );
-	axis = vector4_to_vector3( scale.z() );
+	axis = scale.z().vec3();
 	matrix4_multiply_by_matrix4( manip2world, scale );
 
 	pivot_perspective( scale, pivot2screen );
@@ -259,9 +259,9 @@ public:
 		if ( m_vertices.data() == 0 ) {
 			return;
 		}
-		glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
-		glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices.data()->colour );
-		glDrawArrays( GL_LINES, 0, m_vertices.size() );
+		gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
+		gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices.data()->colour );
+		gl().glDrawArrays( GL_LINES, 0, m_vertices.size() );
 	}
 
 	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld ) const {

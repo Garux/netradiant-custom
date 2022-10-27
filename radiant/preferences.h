@@ -29,87 +29,75 @@
 #pragma once
 
 #include "libxml/parser.h"
+#include "stream/textstream.h"
+#include "debugging/debugging.h"
 #include "dialog.h"
 #include <list>
 #include <map>
 
-void Widget_connectToggleDependency( GtkWidget* self, GtkWidget* toggleButton );
+void Widget_connectToggleDependency( QWidget* self, QCheckBox* toggleButton );
+void Widget_connectToggleDependency( QCheckBox* self, QCheckBox* toggleButton );
 
 class PreferencesPage
 {
 	Dialog& m_dialog;
-	GtkWidget* m_vbox;
+	class QGridLayout* m_grid;
 public:
-	PreferencesPage( Dialog& dialog, GtkWidget* vbox ) : m_dialog( dialog ), m_vbox( vbox ){
+	PreferencesPage( Dialog& dialog, QGridLayout* grid ) : m_dialog( dialog ), m_grid( grid ){
 	}
-	GtkWidget* appendCheckBox( const char* name, const char* flag, bool& data ){
-		return m_dialog.addCheckBox( m_vbox, name, flag, data );
+	QCheckBox* appendCheckBox( const char* name, const char* flag, bool& data ){
+		return m_dialog.addCheckBox( m_grid, name, flag, data );
 	}
-	GtkWidget* appendCheckBox( const char* name, const char* flag, const BoolImportCallback& importCallback, const BoolExportCallback& exportCallback ){
-		return m_dialog.addCheckBox( m_vbox, name, flag, importCallback, exportCallback );
+	QCheckBox* appendCheckBox( const char* name, const char* flag, const BoolImportCallback& importCallback, const BoolExportCallback& exportCallback ){
+		return m_dialog.addCheckBox( m_grid, name, flag, importCallback, exportCallback );
 	}
-	void appendCombo( const char* name, StringArrayRange values, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
-		m_dialog.addCombo( m_vbox, name, values, importCallback, exportCallback );
+	QComboBox* appendCombo( const char* name, StringArrayRange values, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
+		return m_dialog.addCombo( m_grid, name, values, importCallback, exportCallback );
 	}
-	void appendCombo( const char* name, int& data, StringArrayRange values ){
-		m_dialog.addCombo( m_vbox, name, data, values );
+	QComboBox* appendCombo( const char* name, int& data, StringArrayRange values ){
+		return m_dialog.addCombo( m_grid, name, data, values );
 	}
-	void appendSlider( const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
-		m_dialog.addSlider( m_vbox, name, data, draw_value, low, high, value, lower, upper, step_increment, page_increment );
+	void appendSlider( const char* name, int& data, int lower, int upper, int step_increment, int page_increment ){
+		m_dialog.addSlider( m_grid, name, data, lower, upper, step_increment, page_increment );
 	}
-	void appendSlider( const char* name, float& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
-		m_dialog.addSlider( m_vbox, name, data, draw_value, low, high, value, lower, upper, step_increment, page_increment );
+	void appendSlider( const char* name, float& data, double lower, double upper, double step_increment, double page_increment ){
+		m_dialog.addSlider( m_grid, name, data, lower, upper, step_increment, page_increment );
 	}
 	void appendRadio( const char* name, StringArrayRange names, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
-		m_dialog.addRadio( m_vbox, name, names, importCallback, exportCallback );
+		m_dialog.addRadio( m_grid, name, names, importCallback, exportCallback );
 	}
 	void appendRadio( const char* name, int& data, StringArrayRange names ){
-		m_dialog.addRadio( m_vbox, name, data, names );
+		m_dialog.addRadio( m_grid, name, data, names );
 	}
 	void appendRadioIcons( const char* name, StringArrayRange icons, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
-		m_dialog.addRadioIcons( m_vbox, name, icons, importCallback, exportCallback );
+		m_dialog.addRadioIcons( m_grid, name, icons, importCallback, exportCallback );
 	}
 	void appendRadioIcons( const char* name, int& data, StringArrayRange icons ){
-		m_dialog.addRadioIcons( m_vbox, name, data, icons );
+		m_dialog.addRadioIcons( m_grid, name, data, icons );
 	}
-	GtkWidget* appendEntry( const char* name, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
-		return m_dialog.addIntEntry( m_vbox, name, importCallback, exportCallback );
+	void appendEntry( const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
+		m_dialog.addTextEntry( m_grid, name, importCallback, exportCallback );
 	}
-	GtkWidget* appendEntry( const char* name, int& data ){
-		return m_dialog.addEntry( m_vbox, name, data );
+	void appendEntry( const char* name, CopiedString& data ){
+		m_dialog.addEntry( m_grid, name, data );
 	}
-	GtkWidget* appendEntry( const char* name, const SizeImportCallback& importCallback, const SizeExportCallback& exportCallback ){
-		return m_dialog.addSizeEntry( m_vbox, name, importCallback, exportCallback );
+	void appendPathEntry( const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
+		m_dialog.addPathEntry( m_grid, name, browse_directory, importCallback, exportCallback );
 	}
-	GtkWidget* appendEntry( const char* name, std::size_t& data ){
-		return m_dialog.addEntry( m_vbox, name, data );
+	void appendPathEntry( const char* name, CopiedString& data, bool directory ){
+		m_dialog.addPathEntry( m_grid, name, data, directory );
 	}
-	GtkWidget* appendEntry( const char* name, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback ){
-		return m_dialog.addFloatEntry( m_vbox, name, importCallback, exportCallback );
+	QWidget* appendSpinner( const char* name, int& data, int lower, int upper ){
+		return m_dialog.addSpinner( m_grid, name, data, lower, upper );
 	}
-	GtkWidget* appendEntry( const char* name, float& data ){
-		return m_dialog.addEntry( m_vbox, name, data );
+	QWidget* appendSpinner( const char* name, int lower, int upper, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
+		return m_dialog.addSpinner( m_grid, name, lower, upper, importCallback, exportCallback );
 	}
-	GtkWidget* appendEntry( const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
-		return m_dialog.addTextEntry( m_vbox, name, importCallback, exportCallback );
+	QWidget* appendSpinner( const char* name, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback ){
+		return m_dialog.addSpinner( m_grid, name, lower, upper, importCallback, exportCallback );
 	}
-	GtkWidget* appendEntry( const char* name, CopiedString& data ){
-		return m_dialog.addEntry( m_vbox, name, data );
-	}
-	GtkWidget* appendPathEntry( const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
-		return m_dialog.addPathEntry( m_vbox, name, browse_directory, importCallback, exportCallback );
-	}
-	GtkWidget* appendPathEntry( const char* name, CopiedString& data, bool directory ){
-		return m_dialog.addPathEntry( m_vbox, name, data, directory );
-	}
-	GtkWidget* appendSpinner( const char* name, int& data, double value, double lower, double upper ){
-		return m_dialog.addSpinner( m_vbox, name, data, value, lower, upper );
-	}
-	GtkWidget* appendSpinner( const char* name, double value, double lower, double upper, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
-		return m_dialog.addSpinner( m_vbox, name, value, lower, upper, importCallback, exportCallback );
-	}
-	GtkWidget* appendSpinner( const char* name, double value, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback ){
-		return m_dialog.addSpinner( m_vbox, name, value, lower, upper, importCallback, exportCallback );
+	QWidget* appendSpinner( const char* name, float& data, double lower, double upper ){
+		return m_dialog.addSpinner( m_grid, name, data, lower, upper );
 	}
 };
 
@@ -214,8 +202,6 @@ public:
 
 extern CGameDescription *g_pGameDescription;
 
-typedef struct _GtkWidget GtkWidget;
-
 class StringOutputStream;
 
 /*!
@@ -286,7 +272,7 @@ public:
 	   Dialog API
 	   this is only called when the dialog is built at startup for main engine select
 	 */
-	GtkWindow* BuildDialog();
+	void BuildDialog() override;
 
 	void GameFileAssign( int value );
 	void GameFileImport( int value );
@@ -341,12 +327,10 @@ class PrefsDlg : public Dialog
 {
 public:
 
-	GtkWidget *m_notebook;
-	GtkWidget *m_treeview;
+	class QStackedWidget *m_notebook;
+	class QTreeView *m_treeview;
 
 	virtual ~PrefsDlg(){
-		g_string_free( m_rc_path, true );
-		g_string_free( m_inipath, true );
 	}
 
 	/*!
@@ -354,7 +338,7 @@ public:
 	   win32: AppPath
 	   linux: ~/.radiant/[version]/
 	 */
-	GString *m_global_rc_path;
+	CopiedString m_global_rc_path;
 
 	/*!
 	   path to per-game settings
@@ -362,26 +346,23 @@ public:
 	   win32: GameToolsPath
 	   linux: ~/.radiant/[version]/[gamename]/
 	 */
-	GString *m_rc_path;
+	CopiedString m_rc_path;
 
 	/*!
 	   holds per-game settings
 	   m_rc_path+"local.pref"
 	   \todo FIXME at some point this should become XML property bag code too
 	 */
-	GString *m_inipath;
+	CopiedString m_inipath;
 
 // initialize the above paths
 	void Init();
 
-	/*! Utility function for swapping notebook pages for tree list selections */
-	void showPrefPage( GtkWidget* prefpage );
-
 protected:
 
 	/*! Dialog API */
-	GtkWindow* BuildDialog();
-	void PostModal( EMessageBoxReturn code );
+	void BuildDialog() override;
+	void PostModal( QDialog::DialogCode code ) override;
 };
 
 extern PrefsDlg g_Preferences;
@@ -389,14 +370,11 @@ extern PrefsDlg g_Preferences;
 struct preferences_globals_t
 {
 	// disabled all INI / registry read write .. used when shutting down after registry cleanup
-	bool disable_ini;
-	preferences_globals_t() : disable_ini( false ){
-	}
+	bool disable_ini = false;
 };
 extern preferences_globals_t g_preferences_globals;
 
-typedef struct _GtkWindow GtkWindow;
-void PreferencesDialog_constructWindow( GtkWindow* main_window );
+void PreferencesDialog_constructWindow( QWidget* main_window );
 void PreferencesDialog_destroyWindow();
 
 void PreferencesDialog_showDialog();

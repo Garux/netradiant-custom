@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2001-2006, William Joseph.
-   All Rights Reserved.
+   Copyright (C) 1999-2006 Id Software, Inc. and contributors.
+   For a list of contributors, see the accompanying CONTRIBUTORS file.
 
    This file is part of GtkRadiant.
 
@@ -19,4 +19,11 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "closure.h"
+#pragma once
+
+template<typename Element> class BasicVector3;
+typedef BasicVector3<float> Vector3;
+
+void SetWorldspawnColour( const Vector3& colour );
+void Colors_registerCommands();
+void create_colours_menu( class QMenu *menu );

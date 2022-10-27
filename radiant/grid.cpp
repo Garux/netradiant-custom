@@ -221,29 +221,29 @@ typedef FreeCaller1<const IntImportCallback&, maxGridCoordPowerExport> maxGridCo
 
 
 void Grid_registerCommands(){
-	GlobalCommands_insert( "GridDown", FreeCaller<GridPrev>(), Accelerator( '[' ) );
-	GlobalCommands_insert( "GridUp", FreeCaller<GridNext>(), Accelerator( ']' ) );
+	GlobalCommands_insert( "GridDown", FreeCaller<GridPrev>(), QKeySequence( "[" ) );
+	GlobalCommands_insert( "GridUp", FreeCaller<GridNext>(), QKeySequence( "]" ) );
 
 	GlobalCommands_insert( "ToggleGridSnap", FreeCaller<ToggleGridSnap>() );
 
 	GlobalToggles_insert( "SetGrid0.125", GridMenuItem::SetCaller( g_gridMenu0125 ), ToggleItem::AddCallbackCaller( g_gridMenu0125.m_item ) );
 	GlobalToggles_insert( "SetGrid0.25", GridMenuItem::SetCaller( g_gridMenu025 ), ToggleItem::AddCallbackCaller( g_gridMenu025.m_item ) );
 	GlobalToggles_insert( "SetGrid0.5", GridMenuItem::SetCaller( g_gridMenu05 ), ToggleItem::AddCallbackCaller( g_gridMenu05.m_item ) );
-	GlobalToggles_insert( "SetGrid1", GridMenuItem::SetCaller( g_gridMenu1 ), ToggleItem::AddCallbackCaller( g_gridMenu1.m_item ), Accelerator( '1' ) );
-	GlobalToggles_insert( "SetGrid2", GridMenuItem::SetCaller( g_gridMenu2 ), ToggleItem::AddCallbackCaller( g_gridMenu2.m_item ), Accelerator( '2' ) );
-	GlobalToggles_insert( "SetGrid4", GridMenuItem::SetCaller( g_gridMenu4 ), ToggleItem::AddCallbackCaller( g_gridMenu4.m_item ), Accelerator( '3' ) );
-	GlobalToggles_insert( "SetGrid8", GridMenuItem::SetCaller( g_gridMenu8 ), ToggleItem::AddCallbackCaller( g_gridMenu8.m_item ), Accelerator( '4' ) );
-	GlobalToggles_insert( "SetGrid16", GridMenuItem::SetCaller( g_gridMenu16 ), ToggleItem::AddCallbackCaller( g_gridMenu16.m_item ), Accelerator( '5' ) );
-	GlobalToggles_insert( "SetGrid32", GridMenuItem::SetCaller( g_gridMenu32 ), ToggleItem::AddCallbackCaller( g_gridMenu32.m_item ), Accelerator( '6' ) );
-	GlobalToggles_insert( "SetGrid64", GridMenuItem::SetCaller( g_gridMenu64 ), ToggleItem::AddCallbackCaller( g_gridMenu64.m_item ), Accelerator( '7' ) );
-	GlobalToggles_insert( "SetGrid128", GridMenuItem::SetCaller( g_gridMenu128 ), ToggleItem::AddCallbackCaller( g_gridMenu128.m_item ), Accelerator( '8' ) );
-	GlobalToggles_insert( "SetGrid256", GridMenuItem::SetCaller( g_gridMenu256 ), ToggleItem::AddCallbackCaller( g_gridMenu256.m_item ), Accelerator( '9' ) );
+	GlobalToggles_insert( "SetGrid1", GridMenuItem::SetCaller( g_gridMenu1 ), ToggleItem::AddCallbackCaller( g_gridMenu1.m_item ), QKeySequence( "1" ) );
+	GlobalToggles_insert( "SetGrid2", GridMenuItem::SetCaller( g_gridMenu2 ), ToggleItem::AddCallbackCaller( g_gridMenu2.m_item ), QKeySequence( "2" ) );
+	GlobalToggles_insert( "SetGrid4", GridMenuItem::SetCaller( g_gridMenu4 ), ToggleItem::AddCallbackCaller( g_gridMenu4.m_item ), QKeySequence( "3" ) );
+	GlobalToggles_insert( "SetGrid8", GridMenuItem::SetCaller( g_gridMenu8 ), ToggleItem::AddCallbackCaller( g_gridMenu8.m_item ), QKeySequence( "4" ) );
+	GlobalToggles_insert( "SetGrid16", GridMenuItem::SetCaller( g_gridMenu16 ), ToggleItem::AddCallbackCaller( g_gridMenu16.m_item ), QKeySequence( "5" ) );
+	GlobalToggles_insert( "SetGrid32", GridMenuItem::SetCaller( g_gridMenu32 ), ToggleItem::AddCallbackCaller( g_gridMenu32.m_item ), QKeySequence( "6" ) );
+	GlobalToggles_insert( "SetGrid64", GridMenuItem::SetCaller( g_gridMenu64 ), ToggleItem::AddCallbackCaller( g_gridMenu64.m_item ), QKeySequence( "7" ) );
+	GlobalToggles_insert( "SetGrid128", GridMenuItem::SetCaller( g_gridMenu128 ), ToggleItem::AddCallbackCaller( g_gridMenu128.m_item ), QKeySequence( "8" ) );
+	GlobalToggles_insert( "SetGrid256", GridMenuItem::SetCaller( g_gridMenu256 ), ToggleItem::AddCallbackCaller( g_gridMenu256.m_item ), QKeySequence( "9" ) );
 	GlobalToggles_insert( "SetGrid512", GridMenuItem::SetCaller( g_gridMenu512 ), ToggleItem::AddCallbackCaller( g_gridMenu512.m_item ) );
 	GlobalToggles_insert( "SetGrid1024", GridMenuItem::SetCaller( g_gridMenu1024 ), ToggleItem::AddCallbackCaller( g_gridMenu1024.m_item ) );
 }
 
 
-void Grid_constructMenu( GtkMenu* menu ){
+void Grid_constructMenu( QMenu* menu ){
 	create_check_menu_item_with_mnemonic( menu, "Grid0.125", "SetGrid0.125" );
 	create_check_menu_item_with_mnemonic( menu, "Grid0.25", "SetGrid0.25" );
 	create_check_menu_item_with_mnemonic( menu, "Grid0.5", "SetGrid0.5" );

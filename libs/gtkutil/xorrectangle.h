@@ -25,75 +25,73 @@
 #include "igl.h"
 
 class XORRectangle {
-	void draw( const rect_t& rect, const GLenum mode ) const{
-		glBegin( mode );
-		glVertex2f( rect.min[0], rect.max[1] );
-		glVertex2f( rect.max[0], rect.max[1] );
-		glVertex2f( rect.max[0], rect.min[1] );
-		glVertex2f( rect.min[0], rect.min[1] );
-		glEnd();
+	void draw( const rect_t& rect, const GLenum mode ) const {
+		gl().glBegin( mode );
+		gl().glVertex2f( rect.min[0], rect.max[1] );
+		gl().glVertex2f( rect.max[0], rect.max[1] );
+		gl().glVertex2f( rect.max[0], rect.min[1] );
+		gl().glVertex2f( rect.min[0], rect.min[1] );
+		gl().glEnd();
 	}
 public:
 	XORRectangle() {
 	}
 	~XORRectangle() {
 	}
-	void set( rect_t rect, int width, int height ) {
-		if( rect.max[0] - rect.min[0] != 0.f && rect.max[1] - rect.min[1] != 0.f ) {
+	void render( rect_t rect, int viewWidth, int viewHeight ) {
+		if( rect.max[0] != rect.min[0] && rect.max[1] != rect.min[1] ) {
 			GlobalOpenGL_debugAssertNoErrors();
 
-			glViewport( 0, 0, width, height );
+			gl().glViewport( 0, 0, viewWidth, viewHeight );
 			// set up viewpoint
-			glMatrixMode( GL_PROJECTION );
-			glLoadIdentity();
-			glOrtho( -1, 1, -1, 1, -100, 100 );
+			gl().glMatrixMode( GL_PROJECTION );
+			gl().glLoadIdentity();
+			gl().glOrtho( -1, 1, -1, 1, -100, 100 );
 
-			glMatrixMode( GL_MODELVIEW );
-			glLoadIdentity();
+			gl().glMatrixMode( GL_MODELVIEW );
+			gl().glLoadIdentity();
 
-			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-			glDisable( GL_DEPTH_TEST );
-			glDisable( GL_TEXTURE_2D );
+			gl().glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+			gl().glDisable( GL_DEPTH_TEST );
+			gl().glDisable( GL_TEXTURE_2D );
 
-			if( GlobalOpenGL().GL_1_3() ) {
-				glDisable( GL_MULTISAMPLE );
-			}
+			gl().glDisable( GL_MULTISAMPLE );
 
-			glEnable( GL_BLEND );
+			gl().glEnable( GL_BLEND );
 			/* additive to handle dark background */
-			glBlendFunc( GL_ONE, GL_ONE );
+			gl().glBlendFunc( GL_ONE, GL_ONE );
 			const float r = 10.f;
 			switch ( rect.modifier )
 			{
-			case rect_t::eSelect:   glColor3f( 1.f / r, .5f / r, 0.f );     break;
-			case rect_t::eDeselect: glColor3f( 0.f, 0.f, 1.f / r  );        break;
-			case rect_t::eToggle:   glColor3f( 1.f / r, 1.f / r, 1.f / r ); break;
+			case rect_t::eSelect:   gl().glColor3f( 1.f / r, .5f / r, 0.f );     break;
+			case rect_t::eDeselect: gl().glColor3f( 0.f, 0.f, 1.f / r  );        break;
+			case rect_t::eToggle:   gl().glColor3f( 1.f / r, 1.f / r, 1.f / r ); break;
 			}
 			draw( rect, GL_QUADS );
 			/* filter to handle bright background */
-			glBlendFunc( GL_ZERO, GL_SRC_COLOR );
+			gl().glBlendFunc( GL_ZERO, GL_SRC_COLOR );
 			switch ( rect.modifier )
 			{
-			case rect_t::eSelect:   glColor3f( 1.f, .9f, 0.7f );    break;
-			case rect_t::eDeselect: glColor3f( 0.8f, 0.8f, 1.f  );  break;
-			case rect_t::eToggle:   glColor3f( .8f, .8f, .8f );     break;
+			case rect_t::eSelect:   gl().glColor3f( 1.f, .9f, 0.7f );    break;
+			case rect_t::eDeselect: gl().glColor3f( 0.8f, 0.8f, 1.f  );  break;
+			case rect_t::eToggle:   gl().glColor3f( .8f, .8f, .8f );     break;
 			}
 			draw( rect, GL_QUADS );
 			/* alpha blend on top */
-			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+			gl().glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 			const float a = .3f;
 			switch ( rect.modifier )
 			{
-			case rect_t::eSelect:   glColor4f( 1.f, .5f, 0.f, a );  break;
-			case rect_t::eDeselect: glColor4f( 0.f, 0.f, 1.f, a );  break;
-			case rect_t::eToggle:   glColor4f( 1.f, 1.f, 1.f, a );  break;
+			case rect_t::eSelect:   gl().glColor4f( 1.f, .5f, 0.f, a );  break;
+			case rect_t::eDeselect: gl().glColor4f( 0.f, 0.f, 1.f, a );  break;
+			case rect_t::eToggle:   gl().glColor4f( 1.f, 1.f, 1.f, a );  break;
 			}
 			draw( rect, GL_QUADS );
 
-			glDisable( GL_BLEND );
-			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-			glLineWidth( 1 );
-			glColor3f( 1.f, .5f, 0.f );
+			gl().glDisable( GL_BLEND );
+			gl().glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+			gl().glLineWidth( 1 );
+			gl().glColor3f( 1.f, .5f, 0.f );
 			draw( rect, GL_LINE_LOOP );
 
 			GlobalOpenGL_debugAssertNoErrors();

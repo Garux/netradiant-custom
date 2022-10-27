@@ -21,37 +21,29 @@
 
 #pragma once
 
-#include <glib.h>
-
 #include "generic/callback.h"
+
+#include <QTimer>
 
 class IdleDraw
 {
 	Callback m_draw;
-	unsigned int m_handler;
-	static gboolean draw( gpointer data ){
-		reinterpret_cast<IdleDraw*>( data )->m_draw();
-		reinterpret_cast<IdleDraw*>( data )->m_handler = 0;
-		return FALSE;
-	}
+	QTimer m_timer;
 public:
-	IdleDraw( const Callback& draw ) : m_draw( draw ), m_handler( 0 ){
-	}
-	~IdleDraw(){
-		if ( m_handler != 0 ) {
-			g_source_remove( m_handler );
-		}
+	IdleDraw( const Callback& draw ) : m_draw( draw ){
+		m_timer.setSingleShot( true );
+		m_timer.callOnTimeout( m_draw );
 	}
 	void queueDraw(){
-		if ( m_handler == 0 ) {
-			m_handler = g_idle_add( &draw, this );
-		}
+		if( !m_timer.isActive() )
+			m_timer.start();
 	}
 	typedef MemberCaller<IdleDraw, &IdleDraw::queueDraw> QueueDrawCaller;
 
 	void flush(){
-		if ( m_handler != 0 ) {
-			draw( this );
+		if ( m_timer.isActive() ) {
+			m_timer.stop();
+			m_draw();
 		}
 	}
 };

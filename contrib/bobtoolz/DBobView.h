@@ -28,11 +28,7 @@
 #include "renderable.h"
 #include "mathlib.h"
 
-class DListener;
 class Shader;
-
-#define BOUNDS_ALL  0
-#define BOUNDS_APEX 1
 
 class DBobView : public Renderable, public OpenGLRenderable, public Entity::Observer
 {
@@ -43,29 +39,23 @@ public:
 	virtual ~DBobView();
 
 protected:
-	vec3_t* path;
+	std::unique_ptr<vec3_t[]> path;
 public:
 	bool m_bShowExtra;
-	int boundingShow;
-	DListener* eyes;
 	float fVarGravity;
 	float fMultiplier;
 	int nPathCount;
 
-	Entity* trigger;
-	Entity* target;
+	Entity* target{};
 
 	bool UpdatePath();
-	char entTarget[256];
-	char entTrigger[256];
-	void Begin( const char*, const char*, float, int, float, bool, bool );
+	char targetName[256];
+	void Begin( const char*, float, int, float, bool );
 	bool CalculateTrajectory( vec3_t, vec3_t, float, int, float );
 
-	void SetPath( vec3_t* pPath );
-
-	void render( RenderStateFlags state ) const;
-	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const;
-	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const;
+	void render( RenderStateFlags state ) const override;
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const override;
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const override;
 
 	void constructShaders();
 	void destroyShaders();
@@ -74,21 +64,18 @@ public:
 		UpdatePath();
 	}
 	typedef MemberCaller1<DBobView, const char*, &DBobView::valueChanged> ValueChangedCaller;
-	void insert( const char* key, EntityKeyValue& value ){
+	void insert( const char* key, EntityKeyValue& value ) override {
 		value.attach( ValueChangedCaller( *this ) );
 	}
-	void erase( const char* key, EntityKeyValue& value ){
+	void erase( const char* key, EntityKeyValue& value ) override {
 		value.detach( ValueChangedCaller( *this ) );
 	}
-	void clear(){
-		if ( trigger != 0 ) {
-			trigger->detach( *this );
+	void clear() override {
+		if ( target != 0 ) {
 			target->detach( *this );
-			trigger = 0;
 			target = 0;
 		}
 	}
 };
 
-class Entity;
 void DBobView_setEntity( Entity& entity, float multiplier, int points, float varGravity, bool bNoUpdate, bool bShowExtra );

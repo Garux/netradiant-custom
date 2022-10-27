@@ -22,184 +22,28 @@
 
 #include "str.h"
 #include <list>
-#include <gtk/gtk.h>
-#include "gtkutil/pointer.h"
 
 #include "../lists.h"
 #include "../misc.h"
 
 #include "../bobToolz-GTK.h"
 
+#include <QDialog>
+#include <QGroupBox>
+#include <QFormLayout>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QDialogButtonBox>
+#include <QPushButton>
+#include <QCheckBox>
+#include <QButtonGroup>
+#include <QRadioButton>
+#include <QFrame>
+#include <QComboBox>
+#include "gtkutil/spinbox.h"
 
-/*--------------------------------
-        Callback Functions
-   ---------------------------------*/
-
-typedef struct {
-	GtkWidget *cbTexChange;
-	GtkWidget *editTexOld, *editTexNew;
-
-	GtkWidget *cbScaleHor, *cbScaleVert;
-	GtkWidget *editScaleHor, *editScaleVert;
-
-	GtkWidget *cbShiftHor, *cbShiftVert;
-	GtkWidget *editShiftHor, *editShiftVert;
-
-	GtkWidget *cbRotation;
-	GtkWidget *editRotation;
-} dlg_texReset_t;
-
-dlg_texReset_t dlgTexReset;
-
-void Update_TextureReseter();
-
-static void dialog_button_callback_texreset_update( GtkWidget *widget, gpointer data ){
-	Update_TextureReseter();
-}
-
-void Update_TextureReseter(){
-	gboolean check;
-
-	check = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbTexChange ) );
-	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editTexNew ), check );
-	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editTexOld ), check );
-
-	check = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbScaleHor ) );
-	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editScaleHor ), check );
-
-	check = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbScaleVert ) );
-	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editScaleVert ), check );
-
-	check = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbShiftHor ) );
-	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editShiftHor ), check );
-
-	check = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbShiftVert ) );
-	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editShiftVert ), check );
-
-	check = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbRotation ) );
-	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editRotation ), check );
-}
-
-static void dialog_button_callback( GtkWidget *widget, gpointer data ){
-	GtkWidget *parent;
-	int *loop;
-	EMessageBoxReturn *ret;
-
-	parent = gtk_widget_get_toplevel( widget );
-	loop = (int*)g_object_get_data( G_OBJECT( parent ), "loop" );
-	ret = (EMessageBoxReturn*)g_object_get_data( G_OBJECT( parent ), "ret" );
-
-	*loop = 0;
-	*ret = (EMessageBoxReturn)gpointer_to_int( data );
-}
-
-static gint dialog_delete_callback( GtkWidget *widget, GdkEvent* event, gpointer data ){
-	int *loop;
-
-	gtk_widget_hide( widget );
-	loop = (int*)g_object_get_data( G_OBJECT( widget ), "loop" );
-	*loop = 0;
-
-	*(EMessageBoxReturn*)g_object_get_data( G_OBJECT( widget ), "ret" ) = eIDCANCEL;
-
-	return TRUE;
-}
-
-static void dialog_button_callback_settex( GtkWidget *widget, gpointer data ){
-	TwinWidget* tw = (TwinWidget*)data;
-
-	GtkEntry* entry = GTK_ENTRY( tw->one );
-	GtkComboBox* combo = GTK_COMBO_BOX( tw->two );
-
-	const gchar* tex = gtk_entry_get_text( GTK_ENTRY( gtk_bin_get_child( GTK_BIN( combo ) ) ) );
-	gtk_entry_set_text( entry, tex );
-}
-
-/*--------------------------------
-    Data validation Routines
-   ---------------------------------*/
-
-bool ValidateTextFloat( const char* pData, const char* error_title, float* value ){
-	if ( pData ) {
-		float testNum = (float)atof( pData );
-
-		if ( ( testNum == 0.0f ) && strcmp( pData, "0" ) ) {
-			DoMessageBox( "Please Enter A Floating Point Number", error_title, eMB_OK );
-			return FALSE;
-		}
-		else
-		{
-			*value = testNum;
-			return TRUE;
-		}
-	}
-
-	DoMessageBox( "Please Enter A Floating Point Number", error_title, eMB_OK );
-	return FALSE;
-}
-
-bool ValidateTextFloatRange( const char* pData, float min, float max, const char* error_title, float* value ){
-	char error_buffer[256];
-	sprintf( error_buffer, "Please Enter A Floating Point Number Between %.3f and %.3f", min, max );
-
-	if ( pData ) {
-		float testNum = (float)atof( pData );
-
-		if ( ( testNum < min ) || ( testNum > max ) ) {
-			DoMessageBox( error_buffer, error_title, eMB_OK );
-			return FALSE;
-		}
-		else
-		{
-			*value = testNum;
-			return TRUE;
-		}
-	}
-
-	DoMessageBox( error_buffer, error_title, eMB_OK );
-	return FALSE;
-}
-
-bool ValidateTextIntRange( const char* pData, int min, int max, const char* error_title, int* value ){
-	char error_buffer[256];
-	sprintf( error_buffer, "Please Enter An Integer Between %i and %i", min, max );
-
-	if ( pData ) {
-		int testNum = atoi( pData );
-
-		if ( ( testNum < min ) || ( testNum > max ) ) {
-			DoMessageBox( error_buffer, error_title, eMB_OK );
-			return FALSE;
-		}
-		else
-		{
-			*value = testNum;
-			return TRUE;
-		}
-	}
-
-	DoMessageBox( error_buffer, error_title, eMB_OK );
-	return FALSE;
-}
-
-bool ValidateTextInt( const char* pData, const char* error_title, int* value ){
-	if ( pData ) {
-		int testNum = atoi( pData );
-
-		if ( ( testNum == 0 ) && strcmp( pData, "0" ) ) {
-			DoMessageBox( "Please Enter An Integer", error_title, eMB_OK );
-			return FALSE;
-		}
-		else
-		{
-			*value = testNum;
-			return TRUE;
-		}
-	}
-
-	DoMessageBox( "Please Enter An Integer", error_title, eMB_OK );
-	return FALSE;
-}
 
 /*--------------------------------
         Modal Dialog Boxes
@@ -213,1789 +57,504 @@ bool ValidateTextInt( const char* pData, const char* error_title, int* value ){
  */
 
 EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMessageBoxType type ){
-	GtkWidget *window, *w, *vbox, *hbox;
-	EMessageBoxReturn ret;
-	int loop = 1;
+	return GlobalRadiant().m_pfnMessageBox( g_pRadiantWnd, lpText, lpCaption, type, 0 );
+}
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-	gtk_window_set_transient_for( GTK_WINDOW( window ), GTK_WINDOW( g_pRadiantWnd ) );
-	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
-	g_signal_connect( G_OBJECT( window ), "delete_event",
-	                  G_CALLBACK( dialog_delete_callback ), NULL );
-	g_signal_connect( G_OBJECT( window ), "destroy",
-	                  G_CALLBACK( gtk_widget_destroy ), NULL );
-	gtk_window_set_title( GTK_WINDOW( window ), lpCaption );
-	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
-	g_object_set_data( G_OBJECT( window ), "loop", &loop );
-	g_object_set_data( G_OBJECT( window ), "ret", &ret );
-	gtk_widget_realize( window );
+bool DoIntersectBox( IntersectRS* rs ){
+	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	dialog.setWindowTitle( "Intersect" );
 
-	vbox = gtk_vbox_new( FALSE, 10 );
-	gtk_container_add( GTK_CONTAINER( window ), vbox );
-	gtk_widget_show( vbox );
+	QRadioButton *radio1, *radio2;
+	QCheckBox *check1, *check2;
 
-	w = gtk_label_new( lpText );
-	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 2 );
-	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
-	gtk_widget_show( w );
-
-	w = gtk_hseparator_new();
-	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 2 );
-	gtk_widget_show( w );
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox );
-
-	if ( type == eMB_OK ) {
-		w = gtk_button_new_with_label( "Ok" );
-		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		g_signal_connect( G_OBJECT( w ), "clicked",
-		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-		gtk_widget_set_can_default( w, TRUE );
-		gtk_widget_grab_default( w );
-		gtk_widget_show( w );
-		ret = eIDOK;
-	}
-	else if ( type ==  eMB_OKCANCEL ) {
-		w = gtk_button_new_with_label( "Ok" );
-		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		g_signal_connect( G_OBJECT( w ), "clicked",
-		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-		gtk_widget_set_can_default( w, TRUE );
-		gtk_widget_grab_default( w );
-		gtk_widget_show( w );
-
-		w = gtk_button_new_with_label( "Cancel" );
-		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		g_signal_connect( G_OBJECT( w ), "clicked",
-		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
-		gtk_widget_show( w );
-		ret = eIDCANCEL;
-	}
-	else if ( type == eMB_YESNOCANCEL ) {
-		w = gtk_button_new_with_label( "Yes" );
-		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		g_signal_connect( G_OBJECT( w ), "clicked",
-		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
-		gtk_widget_set_can_default( w, TRUE );
-		gtk_widget_grab_default( w );
-		gtk_widget_show( w );
-
-		w = gtk_button_new_with_label( "No" );
-		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		g_signal_connect( G_OBJECT( w ), "clicked",
-		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
-		gtk_widget_show( w );
-
-		w = gtk_button_new_with_label( "Cancel" );
-		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		g_signal_connect( G_OBJECT( w ), "clicked",
-		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
-		gtk_widget_show( w );
-		ret = eIDCANCEL;
-	}
-	else /* if (mode == MB_YESNO) */
 	{
-		w = gtk_button_new_with_label( "Yes" );
-		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		g_signal_connect( G_OBJECT( w ), "clicked",
-		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
-		gtk_widget_set_can_default( w, TRUE );
-		gtk_widget_grab_default( w );
-		gtk_widget_show( w );
-
-		w = gtk_button_new_with_label( "No" );
-		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		g_signal_connect( G_OBJECT( w ), "clicked",
-		                  G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
-		gtk_widget_show( w );
-		ret = eIDNO;
+		auto vbox = new QVBoxLayout( &dialog );
+		vbox->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
+		{
+			vbox->addWidget( radio1 = new QRadioButton( "Use Whole Map" ) );
+			vbox->addWidget( radio2 = new QRadioButton( "Use Selected Brushes" ) );
+			radio1->setChecked( true );
+		}
+		{
+				auto line = new QFrame;
+				line->setFrameShape( QFrame::Shape::HLine );
+				line->setFrameShadow( QFrame::Shadow::Raised );
+				vbox->addWidget( line );
+		}
+		{
+			vbox->addWidget( check1 = new QCheckBox( "Include Detail Brushes" ) );
+			vbox->addWidget( check2 = new QCheckBox( "Select Duplicate Brushes Only" ) );
+		}
+		{
+			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			vbox->addWidget( buttons );
+			QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
+			QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );
+		}
 	}
 
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER_ON_PARENT );
-	gtk_widget_show( window );
-
-	while ( loop )
-		gtk_main_iteration();
-
-	gtk_widget_destroy( window );
-
-	return ret;
-}
-
-EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
-	GtkWidget *window, *w, *vbox, *hbox;
-	GtkWidget *radio1, *radio2;
-	GtkWidget *check1, *check2;
-	EMessageBoxReturn ret;
-	int loop = 1;
-
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-
-	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
-	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
-
-	gtk_window_set_title( GTK_WINDOW( window ), "Intersect" );
-	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
-
-	g_object_set_data( G_OBJECT( window ), "loop", &loop );
-	g_object_set_data( G_OBJECT( window ), "ret", &ret );
-
-	gtk_widget_realize( window );
-
-
-
-	vbox = gtk_vbox_new( FALSE, 10 );
-	gtk_container_add( GTK_CONTAINER( window ), vbox );
-	gtk_widget_show( vbox );
-
-	// ---- vbox ----
-
-
-	radio1 = gtk_radio_button_new_with_label_from_widget( NULL, "Use Whole Map" );
-	gtk_box_pack_start( GTK_BOX( vbox ), radio1, FALSE, FALSE, 2 );
-	gtk_widget_show( radio1 );
-
-	radio2 = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(radio1), "Use Selected Brushes" );
-	gtk_box_pack_start( GTK_BOX( vbox ), radio2, FALSE, FALSE, 2 );
-	gtk_widget_show( radio2 );
-
-	w = gtk_hseparator_new();
-	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 2 );
-	gtk_widget_show( w );
-
-	check1 = gtk_check_button_new_with_label( "Include Detail Brushes" );
-	gtk_box_pack_start( GTK_BOX( vbox ), check1, FALSE, FALSE, 0 );
-	gtk_widget_show( check1 );
-
-	check2 = gtk_check_button_new_with_label( "Select Duplicate Brushes Only" );
-	gtk_box_pack_start( GTK_BOX( vbox ), check2, FALSE, FALSE, 0 );
-	gtk_widget_show( check2 );
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox );
-
-	// ---- hbox ---- ok/cancel buttons
-
-	w = gtk_button_new_with_label( "Ok" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-
-	gtk_widget_set_can_default( w, TRUE );
-	gtk_widget_grab_default( w );
-	gtk_widget_show( w );
-
-	w = gtk_button_new_with_label( "Cancel" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
-	gtk_widget_show( w );
-	ret = eIDCANCEL;
-
-	// ---- /hbox ----
-
-	// ---- /vbox ----
-
-	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
-	gtk_widget_show( window );
-
-	while ( loop )
-		gtk_main_iteration();
-
-	if ( gtk_toggle_button_get_active( (GtkToggleButton*)radio1 ) ) {
-		rs->nBrushOptions = BRUSH_OPT_WHOLE_MAP;
+	if( dialog.exec() ){
+		rs->nBrushOptions = radio1->isChecked()
+		                    ? BRUSH_OPT_WHOLE_MAP
+							: BRUSH_OPT_SELECTED;
+		rs->bUseDetail = check1->isChecked();
+		rs->bDuplicateOnly = check2->isChecked();
+		return true;
 	}
-	else if ( gtk_toggle_button_get_active( (GtkToggleButton*)radio2 ) ) {
-		rs->nBrushOptions = BRUSH_OPT_SELECTED;
-	}
-
-	rs->bUseDetail = gtk_toggle_button_get_active( (GtkToggleButton*)check1 ) ? true : false;
-	rs->bDuplicateOnly = gtk_toggle_button_get_active( (GtkToggleButton*)check2 ) ? true : false;
-
-	gtk_widget_destroy( window );
-
-	return ret;
+	return false;
 }
 
-inline GtkWidget* entry_new_with_max_length( gint max ){
-	GtkWidget* entry = gtk_entry_new();
-	gtk_entry_set_max_length( GTK_ENTRY( entry ), max );
-	return entry;
-}
+bool DoPolygonBox( PolygonRS* rs ){
+	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	dialog.setWindowTitle( "Polygon Builder" );
 
-EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
-	GtkWidget *window, *w, *vbox, *hbox, *vbox2, *hbox2;
+	QSpinBox *spin_sides, *spin_border;
+	QCheckBox *check_border, *check_inverse, *check_align;
 
-	GtkWidget *check1, *check2, *check3;
-	GtkWidget *text1, *text2;
-
-	EMessageBoxReturn ret;
-	int loop = 1;
-
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-	gtk_window_set_transient_for( GTK_WINDOW( window ), GTK_WINDOW( g_pRadiantWnd ) );
-
-	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
-	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
-
-	gtk_window_set_title( GTK_WINDOW( window ), "Polygon Builder" );
-	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
-
-	g_object_set_data( G_OBJECT( window ), "loop", &loop );
-	g_object_set_data( G_OBJECT( window ), "ret", &ret );
-
-	gtk_widget_realize( window );
-
-
-
-	vbox = gtk_vbox_new( FALSE, 10 );
-	gtk_container_add( GTK_CONTAINER( window ), vbox );
-	gtk_widget_show( vbox );
-
-	// ---- vbox ----
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox );
-
-	// ---- hbox ----
-
-
-	vbox2 = gtk_vbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( hbox ), vbox2, FALSE, FALSE, 2 );
-	gtk_widget_show( vbox2 );
-
-	// ---- vbox2 ----
-
-	hbox2 = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox2, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox2 );
-
-	// ---- hbox2 ----
-
-	text1 = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( text1 ), "3" );
-	gtk_box_pack_start( GTK_BOX( hbox2 ), text1, FALSE, FALSE, 2 );
-	gtk_widget_show( text1 );
-
-	w = gtk_label_new( "Number Of Sides" );
-	gtk_box_pack_start( GTK_BOX( hbox2 ), w, FALSE, FALSE, 2 );
-	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
-	gtk_widget_show( w );
-
-	// ---- /hbox2 ----
-
-	hbox2 = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox2, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox2 );
-
-	// ---- hbox2 ----
-
-	text2 = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( text2 ), "8" );
-	gtk_box_pack_start( GTK_BOX( hbox2 ), text2, FALSE, FALSE, 2 );
-	gtk_widget_show( text2 );
-
-	w = gtk_label_new( "Border Width" );
-	gtk_box_pack_start( GTK_BOX( hbox2 ), w, FALSE, FALSE, 2 );
-	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
-	gtk_widget_show( w );
-
-	// ---- /hbox2 ----
-
-	// ---- /vbox2 ----
-
-
-
-	vbox2 = gtk_vbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( hbox ), vbox2, FALSE, FALSE, 2 );
-	gtk_widget_show( vbox2 );
-
-	// ---- vbox2 ----
-
-	check1 = gtk_check_button_new_with_label( "Use Border" );
-	gtk_box_pack_start( GTK_BOX( vbox2 ), check1, FALSE, FALSE, 0 );
-	gtk_widget_show( check1 );
-
-
-	check2 = gtk_check_button_new_with_label( "Inverse Polygon" );
-	gtk_box_pack_start( GTK_BOX( vbox2 ), check2, FALSE, FALSE, 0 );
-	gtk_widget_show( check2 );
-
-
-	check3 = gtk_check_button_new_with_label( "Align Top Edge" );
-	gtk_box_pack_start( GTK_BOX( vbox2 ), check3, FALSE, FALSE, 0 );
-	gtk_widget_show( check3 );
-
-	// ---- /vbox2 ----
-
-	// ---- /hbox ----
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox );
-
-	// ---- hbox ----
-
-	w = gtk_button_new_with_label( "Ok" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-
-	gtk_widget_set_can_default( w, TRUE );
-	gtk_widget_grab_default( w );
-	gtk_widget_show( w );
-
-	w = gtk_button_new_with_label( "Cancel" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
-	gtk_widget_show( w );
-	ret = eIDCANCEL;
-
-	// ---- /hbox ----
-
-	// ---- /vbox ----
-
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER_ON_PARENT );
-	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
-	gtk_widget_show( window );
-
-	bool dialogError = TRUE;
-	while ( dialogError )
 	{
-		loop = 1;
-		while ( loop )
-			gtk_main_iteration();
-
-		dialogError = FALSE;
-
-		if ( ret == eIDOK ) {
-			rs->bUseBorder = gtk_toggle_button_get_active( (GtkToggleButton*)check1 ) ? true : false;
-			rs->bInverse = gtk_toggle_button_get_active( (GtkToggleButton*)check2 ) ? true : false;
-			rs->bAlignTop = gtk_toggle_button_get_active( (GtkToggleButton*)check3 ) ? true : false;
-
-			if ( !ValidateTextIntRange( gtk_entry_get_text( GTK_ENTRY( text1 ) ), 3, 128, "Number Of Sides", &rs->nSides ) ) {
-				dialogError = TRUE;
+		auto hbox = new QHBoxLayout( &dialog );
+		hbox->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
+		{
+			auto form = new QFormLayout;
+			hbox->addLayout( form );
+			{
+				auto spin = spin_sides = new SpinBox( 3, 128, 6 );
+				form->addRow( new SpinBoxLabel( "Number Of Sides", spin ), spin );
 			}
-
-			if ( rs->bUseBorder ) {
-				if ( !ValidateTextIntRange( gtk_entry_get_text( GTK_ENTRY( text2 ) ), 8, 256, "Border Width", &rs->nBorderWidth ) ) {
-					dialogError = TRUE;
-				}
+			{
+				auto spin = spin_border = new SpinBox( 8, 256, 16 );
+				form->addRow( new SpinBoxLabel( "Border Width", spin ), spin );
+			}
+			{
+				auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+				form->addWidget( buttons );
+				QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
+				QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );
+			}
+		}
+		{
+			auto vbox = new QVBoxLayout;
+			hbox->addLayout( vbox );
+			{
+				vbox->addWidget( check_border = new QCheckBox( "Use Border" ) );
+				vbox->addWidget( check_inverse = new QCheckBox( "Inverse Polygon" ) );
+				vbox->addWidget( check_align = new QCheckBox( "Align Top Edge" ) );
+				QObject::connect( check_border, &QCheckBox::stateChanged, spin_border, &QWidget::setEnabled );
+				spin_border->setEnabled( false );
+				QObject::connect( check_inverse, &QCheckBox::stateChanged, [check_border]( int on ){
+					if( on ) // either of border or inverse may be used
+						check_border->setChecked( false );
+				} );
+				QObject::connect( check_border, &QCheckBox::stateChanged, [check_inverse]( int on ){
+					if( on ) // either of border or inverse may be used
+						check_inverse->setChecked( false );
+				} );
 			}
 		}
 	}
 
-	gtk_widget_destroy( window );
+	if( dialog.exec() ){
+		rs->nSides = spin_sides->value();
+		rs->nBorderWidth = spin_border->value();
 
-	return ret;
+		rs->bUseBorder = check_border->isChecked();
+		rs->bInverse = check_inverse->isChecked();
+		rs->bAlignTop = check_align->isChecked();
+
+		return true;
+	}
+	return false;
 }
 
 // mars
 // for stair builder stuck as close as i could to the MFC version
 // obviously feel free to change it at will :)
-EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
-	// i made widgets for just about everything ... i think that's what i need to do  dunno tho
-	GtkWidget   *window, *w, *vbox, *hbox;
-	GtkWidget   *textStairHeight, *textRiserTex, *textMainTex;
-	GtkWidget   *radioNorth, *radioSouth, *radioEast, *radioWest;   // i'm guessing we can't just abuse 'w' for these if we're getting a value
-	GtkWidget   *radioOldStyle, *radioBobStyle, *radioCornerStyle;
-	GtkWidget   *checkUseDetail;
-	EMessageBoxReturn ret;
-	int loop = 1;
+bool DoBuildStairsBox( BuildStairsRS* rs ){
+	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	dialog.setWindowTitle( "Stair Builder" );
 
-	const char *text = "Please set a value in the boxes below and press 'OK' to build the stairs";
+	QSpinBox *spin_stairHeight;
+	QButtonGroup *group_direction, *group_style;
+	QCheckBox *check_detail;
+	QLineEdit *edit_mainTex, *edit_riserTex;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-
-	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
-	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
-
-	gtk_window_set_title( GTK_WINDOW( window ), "Stair Builder" );
-
-	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
-
-	g_object_set_data( G_OBJECT( window ), "loop", &loop );
-	g_object_set_data( G_OBJECT( window ), "ret", &ret );
-
-	gtk_widget_realize( window );
-
-	// new vbox
-	vbox = gtk_vbox_new( FALSE, 10 );
-	gtk_container_add( GTK_CONTAINER( window ), vbox );
-	gtk_widget_show( vbox );
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_container_add( GTK_CONTAINER( vbox ), hbox );
-	gtk_widget_show( hbox );
-
-	// dunno if you want this text or not ...
-	w = gtk_label_new( text );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 ); // not entirely sure on all the parameters / what they do ...
-	gtk_widget_show( w );
-
-	w = gtk_hseparator_new();
-	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
-	gtk_widget_show( w );
-
-	// ------------------------- // indenting == good way of keeping track of lines :)
-
-	// new hbox
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	textStairHeight = entry_new_with_max_length( 256 );
-	gtk_box_pack_start( GTK_BOX( hbox ), textStairHeight, FALSE, FALSE, 1 );
-	gtk_widget_show( textStairHeight );
-
-	w = gtk_label_new( "Stair Height" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 1 );
-	gtk_widget_show( w );
-
-	// ------------------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	w = gtk_label_new( "Direction:" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 5 );
-	gtk_widget_show( w );
-
-	// -------------------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	// radio buttons confuse me ...
-	// but this _looks_ right
-
-	// djbob: actually it looks very nice :), slightly better than the way i did it
-	// edit: actually it doesn't work :P, you must pass the last radio item each time, ugh
-
-	radioNorth = gtk_radio_button_new_with_label_from_widget( NULL, "North" );
-	gtk_box_pack_start( GTK_BOX( hbox ), radioNorth, FALSE, FALSE, 3 );
-	gtk_widget_show( radioNorth );
-
-	radioSouth = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radioNorth ), "South" );
-	gtk_box_pack_start( GTK_BOX( hbox ), radioSouth, FALSE, FALSE, 2 );
-	gtk_widget_show( radioSouth );
-
-	radioEast = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radioNorth ), "East" );
-	gtk_box_pack_start( GTK_BOX( hbox ), radioEast, FALSE, FALSE, 1 );
-	gtk_widget_show( radioEast );
-
-	radioWest = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radioNorth ), "West" );
-	gtk_box_pack_start( GTK_BOX( hbox ), radioWest, FALSE, FALSE, 0 );
-	gtk_widget_show( radioWest );
-
-	// --------------------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	w = gtk_label_new( "Style:" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 5 );
-	gtk_widget_show( w );
-
-	// --------------------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	radioOldStyle = gtk_radio_button_new_with_label_from_widget( NULL, "Original" );
-	gtk_box_pack_start( GTK_BOX( hbox ), radioOldStyle, FALSE, FALSE, 0 );
-	gtk_widget_show( radioOldStyle );
-
-	radioBobStyle = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radioOldStyle ), "Bob's Style" );
-	gtk_box_pack_start( GTK_BOX( hbox ), radioBobStyle, FALSE, FALSE, 0 );
-	gtk_widget_show( radioBobStyle );
-
-	radioCornerStyle = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radioOldStyle ), "Corner Style" );
-	gtk_box_pack_start( GTK_BOX( hbox ), radioCornerStyle, FALSE, FALSE, 0 );
-	gtk_widget_show( radioCornerStyle );
-
-	// err, the q3r has an if or something so you need bob style checked before this
-	// is "ungreyed out" but you'll need to do that, as i suck :)
-
-	// djbob: er.... yeah um, im not at all sure how i'm gonna sort this
-	// djbob: think we need some button callback functions or smuffin
-	// FIXME: actually get around to doing what i suggested!!!!
-
-	checkUseDetail = gtk_check_button_new_with_label( "Use Detail Brushes" );
-	gtk_box_pack_start( GTK_BOX( hbox ), checkUseDetail, FALSE, FALSE, 0 );
-	gtk_widget_show( checkUseDetail );
-
-	// --------------------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	textMainTex = entry_new_with_max_length( 512 );
-	gtk_entry_set_text( GTK_ENTRY( textMainTex ), rs->mainTexture );
-	gtk_box_pack_start( GTK_BOX( hbox ), textMainTex, FALSE, FALSE, 0 );
-	gtk_widget_show( textMainTex );
-
-	w = gtk_label_new( "Main Texture" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 1 );
-	gtk_widget_show( w );
-
-	// -------------------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	textRiserTex = entry_new_with_max_length( 512 );
-	gtk_box_pack_start( GTK_BOX( hbox ), textRiserTex, FALSE, FALSE, 0 );
-	gtk_widget_show( textRiserTex );
-
-	w = gtk_label_new( "Riser Texture" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 1 );
-	gtk_widget_show( w );
-
-	// -------------------------- //
-	w = gtk_hseparator_new();
-	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
-	gtk_widget_show( w );
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	w = gtk_button_new_with_label( "OK" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-	gtk_widget_set_can_default( w, TRUE );
-	gtk_widget_grab_default( w );
-	gtk_widget_show( w );
-
-	w = gtk_button_new_with_label( "Cancel" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
-	gtk_widget_show( w );
-
-	ret = eIDCANCEL;
-
-// +djbob: need our "little" modal loop mars :P
-	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
-	gtk_widget_show( window );
-
-	bool dialogError = TRUE;
-	while ( dialogError )
 	{
-		loop = 1;
-		while ( loop )
-			gtk_main_iteration();
-
-		dialogError = FALSE;
-
-		if ( ret == eIDOK ) {
-			rs->bUseDetail = gtk_toggle_button_get_active( (GtkToggleButton*)checkUseDetail ) ? true : false;
-
-			strcpy( rs->riserTexture, gtk_entry_get_text( GTK_ENTRY( textRiserTex ) ) );
-			strcpy( rs->mainTexture, gtk_entry_get_text( GTK_ENTRY( textMainTex ) ) );
-
-			if ( gtk_toggle_button_get_active( (GtkToggleButton*)radioNorth ) ) {
-				rs->direction = MOVE_NORTH;
-			}
-			else if ( gtk_toggle_button_get_active( (GtkToggleButton*)radioSouth ) ) {
-				rs->direction = MOVE_SOUTH;
-			}
-			else if ( gtk_toggle_button_get_active( (GtkToggleButton*)radioEast ) ) {
-				rs->direction = MOVE_EAST;
-			}
-			else if ( gtk_toggle_button_get_active( (GtkToggleButton*)radioWest ) ) {
-				rs->direction = MOVE_WEST;
-			}
-
-			if ( !ValidateTextInt( gtk_entry_get_text( GTK_ENTRY( textStairHeight ) ), "Stair Height", &rs->stairHeight ) ) {
-				dialogError = TRUE;
-			}
-
-			if ( gtk_toggle_button_get_active( (GtkToggleButton*)radioOldStyle ) ) {
-				rs->style = STYLE_ORIGINAL;
-			}
-			else if ( gtk_toggle_button_get_active( (GtkToggleButton*)radioBobStyle ) ) {
-				rs->style = STYLE_BOB;
-			}
-			else if ( gtk_toggle_button_get_active( (GtkToggleButton*)radioCornerStyle ) ) {
-				rs->style = STYLE_CORNER;
-			}
+		auto form = new QFormLayout( &dialog );
+		form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
+		{
+			auto spin = spin_stairHeight = new SpinBox( 1, 1024, 8 );
+			form->addRow( new SpinBoxLabel( "Stair Height", spin ), spin );
+		}
+		{
+			auto hbox = new QHBoxLayout;
+			form->addRow( "Direction:", hbox );
+			group_direction = new QButtonGroup( form );
+			group_direction->addButton( new QRadioButton( "North" ), MOVE_NORTH );
+			group_direction->addButton( new QRadioButton( "South" ), MOVE_SOUTH );
+			group_direction->addButton( new QRadioButton( "East" ), MOVE_EAST );
+			group_direction->addButton( new QRadioButton( "West" ), MOVE_WEST );
+			for( auto b : group_direction->buttons() )
+				hbox->addWidget( b );
+			group_direction->button( MOVE_NORTH )->setChecked( true );
+		}
+		{
+			auto hbox = new QHBoxLayout;
+			form->addRow( "Style:", hbox );
+			group_style = new QButtonGroup( form );
+			group_style->addButton( new QRadioButton( "Original" ), STYLE_ORIGINAL );
+			group_style->addButton( new QRadioButton( "Bob's Style" ), STYLE_BOB );
+			group_style->addButton( new QRadioButton( "Corner Style" ), STYLE_CORNER );
+			for( auto b : group_style->buttons() )
+				hbox->addWidget( b );
+			group_style->button( STYLE_ORIGINAL )->setChecked( true );
+		}
+		{
+			form->addWidget( check_detail = new QCheckBox( "Use Detail Brushes" ) );
+			QObject::connect( group_style, &QButtonGroup::idClicked, [check_detail]( int id ){
+				check_detail->setEnabled( id == STYLE_BOB );
+			} );
+			check_detail->setEnabled( false );
+		}
+		{
+			form->addRow( "Main Texture", edit_mainTex = new QLineEdit( rs->mainTexture ) );
+			edit_mainTex->setMaxLength( std::size( rs->mainTexture ) - 1 );
+		}
+		{
+			form->addRow( "Riser Texture", edit_riserTex = new QLineEdit );
+			edit_riserTex->setMaxLength( std::size( rs->riserTexture ) - 1 );
+		}
+		{
+			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			form->addWidget( buttons );
+			QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
+			QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );
 		}
 	}
 
-	gtk_widget_destroy( window );
+	if( dialog.exec() )
+	{
+		rs->stairHeight = spin_stairHeight->value();
+		rs->direction = group_direction->checkedId();
+		rs->style = group_style->checkedId();
+		rs->bUseDetail = check_detail->isChecked();
 
-	return ret;
-// -djbob
+		strcpy( rs->mainTexture, edit_mainTex->text().toLatin1().constData() );
+		strcpy( rs->riserTexture, edit_riserTex->text().toLatin1().constData() );
 
-	// there we go, all done ... on my end at least, not bad for a night's work
+		return true;
+	}
+	return false;
 }
 
-EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
-	GtkWidget   *window, *hbox, *vbox, *w;
-	GtkWidget   *textFrontBackTex, *textTrimTex;
-	GtkWidget   *checkScaleMainH, *checkScaleMainV, *checkScaleTrimH, *checkScaleTrimV;
-	GtkWidget   *comboMain, *comboTrim;
-	GtkWidget   *buttonSetMain, *buttonSetTrim;
-	GtkWidget   *radioNS, *radioEW;
-	TwinWidget tw1, tw2;
-	EMessageBoxReturn ret;
-	int loop = 1;
+bool DoDoorsBox( DoorRS* rs ){
+	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	dialog.setWindowTitle( "Door Builder" );
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	QCheckBox   *checkScaleMainH, *checkScaleMainV, *checkScaleTrimH, *checkScaleTrimV;
+	QComboBox   *comboMain, *comboTrim;
+	QRadioButton   *radioNS, *radioEW;
 
-	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
-	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
-
-	gtk_window_set_title( GTK_WINDOW( window ), "Door Builder" );
-
-	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
-
-	g_object_set_data( G_OBJECT( window ), "loop", &loop );
-	g_object_set_data( G_OBJECT( window ), "ret", &ret );
-
-	gtk_widget_realize( window );
-
-	char buffer[256];
-	GtkListStore *listMainTextures = gtk_list_store_new( 1, G_TYPE_STRING );
-	GtkListStore *listTrimTextures = gtk_list_store_new( 1, G_TYPE_STRING );
-	LoadListStore( GetFilename( buffer, "bt/door-tex.txt" ), listMainTextures );
-	LoadListStore( GetFilename( buffer, "bt/door-tex-trim.txt" ), listTrimTextures );
-
-	vbox = gtk_vbox_new( FALSE, 10 );
-	gtk_container_add( GTK_CONTAINER( window ), vbox );
-	gtk_widget_show( vbox );
-
-	// -------------------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	textFrontBackTex = entry_new_with_max_length( 512 );
-	gtk_entry_set_text( GTK_ENTRY( textFrontBackTex ), rs->mainTexture );
-	gtk_box_pack_start( GTK_BOX( hbox ), textFrontBackTex, FALSE, FALSE, 0 );
-	gtk_widget_show( textFrontBackTex );
-
-	w = gtk_label_new( "Door Front/Back Texture" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
-	gtk_widget_show( w );
-
-	// ------------------------ //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	textTrimTex = entry_new_with_max_length( 512 );
-	gtk_box_pack_start( GTK_BOX( hbox ), textTrimTex, FALSE, FALSE, 0 );
-	gtk_widget_show( textTrimTex );
-
-	w = gtk_label_new( "Door Trim Texture" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
-	gtk_widget_show( w );
-
-	// ----------------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	// sp: horizontally ????
-	// djbob: yes mars, u can spell :]
-	checkScaleMainH = gtk_check_button_new_with_label( "Scale Main Texture Horizontally" );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( checkScaleMainH ), TRUE );
-	gtk_box_pack_start( GTK_BOX( hbox ), checkScaleMainH, FALSE, FALSE, 0 );
-	gtk_widget_show( checkScaleMainH );
-
-	checkScaleTrimH = gtk_check_button_new_with_label( "Scale Trim Texture Horizontally" );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( checkScaleTrimH ), TRUE );
-	gtk_box_pack_start( GTK_BOX( hbox ), checkScaleTrimH, FALSE, FALSE, 0 );
-	gtk_widget_show( checkScaleTrimH );
-
-	// ---------------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	checkScaleMainV = gtk_check_button_new_with_label( "Scale Main Texture Vertically" );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( checkScaleMainV ), TRUE );
-	gtk_box_pack_start( GTK_BOX( hbox ), checkScaleMainV, FALSE, FALSE, 0 );
-	gtk_widget_show( checkScaleMainV );
-
-	checkScaleTrimV = gtk_check_button_new_with_label( "Scale Trim Texture Vertically" );
-	gtk_box_pack_start( GTK_BOX( hbox ), checkScaleTrimV, FALSE, FALSE, 0 );
-	gtk_widget_show( checkScaleTrimV );
-
-	// --------------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	// djbob: lists added
-
-	comboMain = gtk_combo_box_new_with_model_and_entry( GTK_TREE_MODEL( listMainTextures ) );
-	gtk_combo_box_set_entry_text_column( GTK_COMBO_BOX( comboMain ), 0 );
-	gtk_box_pack_start( GTK_BOX( hbox ), comboMain, FALSE, FALSE, 0 );
-	gtk_widget_show( comboMain );
-
-	tw1.one = textFrontBackTex;
-	tw1.two = comboMain;
-
-	buttonSetMain = gtk_button_new_with_label( "Set As Main Texture" );
-	g_signal_connect( G_OBJECT( buttonSetMain ), "clicked", G_CALLBACK( dialog_button_callback_settex ), &tw1 );
-	gtk_box_pack_start( GTK_BOX( hbox ), buttonSetMain, FALSE, FALSE, 0 );
-	gtk_widget_show( buttonSetMain );
-
-	// ------------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	comboTrim = gtk_combo_box_new_with_model_and_entry( GTK_TREE_MODEL( listTrimTextures ) );
-	gtk_combo_box_set_entry_text_column( GTK_COMBO_BOX( comboTrim ), 0 );
-	gtk_box_pack_start( GTK_BOX( hbox ), comboTrim, FALSE, FALSE, 0 );
-	gtk_widget_show( comboTrim );
-
-	tw2.one = textTrimTex;
-	tw2.two = comboTrim;
-
-	buttonSetTrim = gtk_button_new_with_label( "Set As Trim Texture" );
-	g_signal_connect( G_OBJECT( buttonSetTrim ), "clicked", G_CALLBACK( dialog_button_callback_settex ), &tw2 );
-	gtk_box_pack_start( GTK_BOX( hbox ), buttonSetTrim, FALSE, FALSE, 0 );
-	gtk_widget_show( buttonSetTrim );
-
-	// ------------------ //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	w = gtk_label_new( "Orientation" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
-	gtk_widget_show( w );
-
-	// argh more radio buttons!
-	radioNS = gtk_radio_button_new_with_label_from_widget( NULL, "North - South" );
-	gtk_box_pack_start( GTK_BOX( hbox ), radioNS, FALSE, FALSE, 0 );
-	gtk_widget_show( radioNS );
-
-	radioEW = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radioNS ), "East - West" );
-	gtk_box_pack_start( GTK_BOX( hbox ), radioEW, FALSE, FALSE, 0 );
-	gtk_widget_show( radioEW );
-
-	// ----------------- //
-
-	w = gtk_hseparator_new();
-	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
-	gtk_widget_show( w );
-
-	// ----------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	w = gtk_button_new_with_label( "OK" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-	gtk_widget_set_can_default( w, TRUE );
-	gtk_widget_grab_default( w );
-	gtk_widget_show( w );
-
-	w = gtk_button_new_with_label( "Cancel" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
-	gtk_widget_show( w );
-	ret = eIDCANCEL;
-
-	// ----------------- //
-
-//+djbob
-	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
-	gtk_widget_show( window );
-
-	while ( loop )
-		gtk_main_iteration();
-
-	strcpy( rs->mainTexture, gtk_entry_get_text( GTK_ENTRY( textFrontBackTex ) ) );
-	strcpy( rs->trimTexture, gtk_entry_get_text( GTK_ENTRY( textTrimTex ) ) );
-
-	rs->bScaleMainH = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( checkScaleMainH ) ) ? true : false;
-	rs->bScaleMainV = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( checkScaleMainV ) ) ? true : false;
-	rs->bScaleTrimH = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( checkScaleTrimH ) ) ? true : false;
-	rs->bScaleTrimV = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( checkScaleTrimV ) ) ? true : false;
-
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radioNS ) ) ) {
-		rs->nOrientation = DIRECTION_NS;
-	}
-	else if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radioEW ) ) ) {
-		rs->nOrientation = DIRECTION_EW;
+	{
+		auto form = new QFormLayout( &dialog );
+		form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
+		{
+			form->addRow( "Door Front/Back Texture", comboMain = new QComboBox );
+			char buffer[256];
+			comboMain->addItems( LoadListStore( GetFilename( buffer, "bt/door-tex.txt" ) ) );
+			comboMain->setEditable( true );
+			comboMain->lineEdit()->setMaxLength( std::size( rs->mainTexture ) - 1 );
+			comboMain->setCurrentText( rs->mainTexture );
+		}
+		{
+			form->addWidget( checkScaleMainH = new QCheckBox( "Scale Main Texture Horizontally" ) );
+			form->addWidget( checkScaleMainV = new QCheckBox( "Scale Main Texture Vertically" ) );
+			checkScaleMainH->setChecked( true );
+			checkScaleMainV->setChecked( true );
+		}
+		{
+			form->addRow( "Door Trim Texture", comboTrim = new QComboBox );
+			char buffer[256];
+			comboTrim->addItems( LoadListStore( GetFilename( buffer, "bt/door-tex-trim.txt" ) ) );
+			comboTrim->setEditable( true );
+			comboTrim->lineEdit()->setMaxLength( std::size( rs->trimTexture ) - 1 );
+			comboTrim->setCurrentText( QString() );
+		}
+		{
+			form->addWidget( checkScaleTrimH = new QCheckBox( "Scale Trim Texture Horizontally" ) );
+			form->addWidget( checkScaleTrimV = new QCheckBox( "Scale Trim Texture Vertically" ) );
+			checkScaleTrimH->setChecked( true );
+		}
+		{
+			form->addRow( "Orientation", radioNS = new QRadioButton( "North - South" ) );
+			form->addRow( "", radioEW = new QRadioButton( "North - South" ) );
+			radioNS->setChecked( true );
+		}
+		{
+			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			form->addWidget( buttons );
+			QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
+			QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );
+		}
 	}
 
-	gtk_widget_destroy( window );
+	if( dialog.exec() ){
+		strcpy( rs->mainTexture, comboMain->currentText().toLatin1().constData() );
+		strcpy( rs->trimTexture, comboTrim->currentText().toLatin1().constData() );
 
-	return ret;
-//-djbob
+		rs->bScaleMainH = checkScaleMainH->isChecked();
+		rs->bScaleMainV = checkScaleMainV->isChecked();
+		rs->bScaleTrimH = checkScaleTrimH->isChecked();
+		rs->bScaleTrimV = checkScaleTrimV->isChecked();
+
+		rs->nOrientation = radioNS->isChecked()
+		                 ? DIRECTION_NS
+						 : DIRECTION_EW;
+		return true;
+	}
+	return false;
 }
 
 EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
-	GtkWidget *window, *w, *vbox, *hbox;
+	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	dialog.setWindowTitle( "Path Plotter" );
 
-	GtkWidget *text1, *text2, *text3;
-	GtkWidget *check1, *check2;
+	QSpinBox *spin_pts;
+	QDoubleSpinBox *spin_mult, *spin_grav;
+	QCheckBox *check1, *check2;
 
-	EMessageBoxReturn ret;
-	int loop = 1;
+	EMessageBoxReturn ret = eIDCANCEL;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-
-	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
-	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
-
-	gtk_window_set_title( GTK_WINDOW( window ), "Texture Reset" );
-	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
-
-	g_object_set_data( G_OBJECT( window ), "loop", &loop );
-	g_object_set_data( G_OBJECT( window ), "ret", &ret );
-
-	gtk_widget_realize( window );
-
-
-
-	vbox = gtk_vbox_new( FALSE, 10 );
-	gtk_container_add( GTK_CONTAINER( window ), vbox );
-	gtk_widget_show( vbox );
-
-	// ---- vbox ----
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox );
-
-	// ---- hbox ----
-
-	text1 = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( text1 ), "25" );
-	gtk_box_pack_start( GTK_BOX( hbox ), text1, FALSE, FALSE, 2 );
-	gtk_widget_show( text1 );
-
-	w = gtk_label_new( "Number Of Points" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 2 );
-	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
-	gtk_widget_show( w );
-
-	// ---- /hbox ----
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox );
-
-	// ---- hbox ----
-
-	text2 = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( text2 ), "3" );
-	gtk_box_pack_start( GTK_BOX( hbox ), text2, FALSE, FALSE, 2 );
-	gtk_widget_show( text2 );
-
-	w = gtk_label_new( "Multipler" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 2 );
-	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
-	gtk_widget_show( w );
-
-	// ---- /hbox ----
-
-	w = gtk_label_new( "Path Distance = dist(start -> apex) * multiplier" );
-	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
-	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
-	gtk_widget_show( w );
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox );
-
-	// ---- hbox ----
-
-	text3 = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( text3 ), "-800" );
-	gtk_box_pack_start( GTK_BOX( hbox ), text3, FALSE, FALSE, 2 );
-	gtk_widget_show( text3 );
-
-	w = gtk_label_new( "Gravity" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 2 );
-	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
-	gtk_widget_show( w );
-
-	// ---- /hbox ----
-
-	w = gtk_hseparator_new();
-	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
-	gtk_widget_show( w );
-
-	check1 = gtk_check_button_new_with_label( "No Dynamic Update" );
-	gtk_box_pack_start( GTK_BOX( vbox ), check1, FALSE, FALSE, 0 );
-	gtk_widget_show( check1 );
-
-	check2 = gtk_check_button_new_with_label( "Show Bounding Lines" );
-	gtk_box_pack_start( GTK_BOX( vbox ), check2, FALSE, FALSE, 0 );
-	gtk_widget_show( check2 );
-
-	// ---- /vbox ----
-
-
-	// ----------------- //
-
-	w = gtk_hseparator_new();
-	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
-	gtk_widget_show( w );
-
-	// ----------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	w = gtk_button_new_with_label( "Enable" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
-	gtk_widget_show( w );
-
-	gtk_widget_set_can_default( w, TRUE );
-	gtk_widget_grab_default( w );
-
-	w = gtk_button_new_with_label( "Disable" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
-	gtk_widget_show( w );
-
-	w = gtk_button_new_with_label( "Cancel" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
-	gtk_widget_show( w );
-
-	ret = eIDCANCEL;
-
-	// ----------------- //
-
-	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
-	gtk_widget_show( window );
-
-	bool dialogError = TRUE;
-	while ( dialogError )
 	{
-		loop = 1;
-		while ( loop )
-			gtk_main_iteration();
-
-		dialogError = FALSE;
-
-		if ( ret == eIDYES ) {
-			if ( !ValidateTextIntRange( gtk_entry_get_text( GTK_ENTRY( text1 ) ), 1, 200, "Number Of Points", &rs->nPoints ) ) {
-				dialogError = TRUE;
-			}
-
-			if ( !ValidateTextFloatRange( gtk_entry_get_text( GTK_ENTRY( text2 ) ), 1.0f, 10.0f, "Multiplier", &rs->fMultiplier ) ) {
-				dialogError = TRUE;
-			}
-
-			if ( !ValidateTextFloatRange( gtk_entry_get_text( GTK_ENTRY( text3 ) ), -10000.0f, -1.0f, "Gravity", &rs->fGravity ) ) {
-				dialogError = TRUE;
-			}
-
-			rs->bNoUpdate = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( check1 ) ) ? true : false;
-			rs->bShowExtra = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( check2 ) ) ? true : false;
+		auto form = new QFormLayout( &dialog );
+		form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
+		{
+			auto spin = spin_pts = new SpinBox( 1, 200, 50 );
+			form->addRow( new SpinBoxLabel( "Number Of Points", spin ), spin );
+		}
+		{
+			auto spin = spin_mult = new DoubleSpinBox( 1, 10, 3 );
+			form->addRow( new SpinBoxLabel( "Distance Multipler", spin ), spin );
+			spin->setToolTip( "Path Distance = dist(start -> apex) * multiplier" );
+		}
+		{
+			auto spin = spin_grav = new DoubleSpinBox( -10000, -1, -800 );
+			form->addRow( new SpinBoxLabel( "Gravity", spin ), spin );
+		}
+		{
+			form->addWidget( check1 = new QCheckBox( "No Dynamic Update" ) );
+			form->addWidget( check2 = new QCheckBox( "Show Bounding Lines" ) );
+		}
+		{
+			auto buttons = new QDialogButtonBox;
+			form->addWidget( buttons );
+			// rejection via dialog means will return DialogCode::Rejected (0), eID* > 0
+			QObject::connect( buttons->addButton( "Enable", QDialogButtonBox::ButtonRole::AcceptRole ),
+			                  &QAbstractButton::clicked, [&dialog](){ dialog.done( eIDYES ); } );
+			QObject::connect( buttons->addButton( "Disable", QDialogButtonBox::ButtonRole::NoRole ),
+			                  &QAbstractButton::clicked, [&dialog](){ dialog.done( eIDNO ); } );
+			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Cancel ),
+			                  &QAbstractButton::clicked, &dialog, &QDialog::reject );
 		}
 	}
 
-	gtk_widget_destroy( window );
+	if( const int r = dialog.exec() ){
+		ret = static_cast<EMessageBoxReturn>( r );
+
+		if ( ret == eIDYES ) {
+			rs->nPoints = spin_pts->value();
+			rs->fMultiplier = spin_mult->value();
+			rs->fGravity = spin_grav->value();
+
+			rs->bNoUpdate = check1->isChecked();
+			rs->bShowExtra = check2->isChecked();
+		}
+	}
 
 	return ret;
 }
 
 EMessageBoxReturn DoCTFColourChangeBox(){
-	GtkWidget *window, *w, *vbox, *hbox;
-	EMessageBoxReturn ret;
-	int loop = 1;
+	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	dialog.setWindowTitle( "CTF Colour Changer" );
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	EMessageBoxReturn ret = eIDCANCEL;
 
-	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
-	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
+	{
+		auto buttons = new QDialogButtonBox;
+		// rejection via dialog means will return DialogCode::Rejected (0), eID* > 0
+		QObject::connect( buttons->addButton( "Red->Blue", QDialogButtonBox::ButtonRole::AcceptRole ),
+							&QAbstractButton::clicked, [&dialog](){ dialog.done( eIDOK ); } );
+		QObject::connect( buttons->addButton( "Blue->Red", QDialogButtonBox::ButtonRole::NoRole ),
+							&QAbstractButton::clicked, [&dialog](){ dialog.done( eIDYES ); } );
+		QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Cancel ),
+							&QAbstractButton::clicked, &dialog, &QDialog::reject );
+		( new QHBoxLayout( &dialog ) )->addWidget( buttons );
+	}
 
-	gtk_window_set_title( GTK_WINDOW( window ), "CTF Colour Changer" );
-	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
-
-	g_object_set_data( G_OBJECT( window ), "loop", &loop );
-	g_object_set_data( G_OBJECT( window ), "ret", &ret );
-
-	gtk_widget_realize( window );
-
-
-
-	vbox = gtk_vbox_new( FALSE, 10 );
-	gtk_container_add( GTK_CONTAINER( window ), vbox );
-	gtk_widget_show( vbox );
-
-	// ---- vbox ----
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, TRUE, TRUE, 0 );
-	gtk_widget_show( hbox );
-
-	// ---- hbox ---- ok/cancel buttons
-
-	w = gtk_button_new_with_label( "Red->Blue" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-
-	gtk_widget_set_can_default( w, TRUE );
-	gtk_widget_grab_default( w );
-	gtk_widget_show( w );
-
-	w = gtk_button_new_with_label( "Blue->Red" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
-	gtk_widget_show( w );
-
-	w = gtk_button_new_with_label( "Cancel" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
-	gtk_widget_show( w );
-	ret = eIDCANCEL;
-
-	// ---- /hbox ----
-
-	// ---- /vbox ----
-
-	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
-	gtk_widget_show( window );
-
-	while ( loop )
-		gtk_main_iteration();
-
-	gtk_widget_destroy( window );
+	if( const int r = dialog.exec() ){
+		ret = static_cast<EMessageBoxReturn>( r );
+	}
 
 	return ret;
 }
+
 
 EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
-	Str texSelected;
+	EMessageBoxReturn ret = eIDCANCEL;
 
-	GtkWidget *window, *w, *vbox, *hbox, *frame, *table;
+	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	dialog.setWindowTitle( "Texture Reset" );
 
-	EMessageBoxReturn ret;
-	int loop = 1;
+	QLineEdit *editTexOld, *editTexNew;
+	QDoubleSpinBox *spin_ScaleHor, *spin_ScaleVert;
+	QDoubleSpinBox *spin_ShiftHor, *spin_ShiftVert;
+	QDoubleSpinBox *spin_Rotation;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-	gtk_window_set_transient_for( GTK_WINDOW( window ), GTK_WINDOW( g_pRadiantWnd ) );
-	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
-
-	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
-	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
-
-	gtk_window_set_title( GTK_WINDOW( window ), "Texture Reset" );
-	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
-
-	g_object_set_data( G_OBJECT( window ), "loop", &loop );
-	g_object_set_data( G_OBJECT( window ), "ret", &ret );
-
-	gtk_widget_realize( window );
-
-	vbox = gtk_vbox_new( FALSE, 10 );
-	gtk_container_add( GTK_CONTAINER( window ), vbox );
-	gtk_widget_show( vbox );
-
-	// ---- vbox ----
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox );
-
-	// ---- hbox ----
-
-	texSelected = "Currently Selected Texture:   ";
-	texSelected += GetCurrentTexture();
-
-	w = gtk_label_new( texSelected );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 2 );
-	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
-	gtk_widget_show( w );
-
-	// ---- /hbox ----
-
-	frame = gtk_frame_new( "Reset Texture Names" );
-	gtk_widget_show( frame );
-	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
-
-	table = gtk_table_new( 2, 3, TRUE );
-	gtk_widget_show( table );
-	gtk_container_add( GTK_CONTAINER( frame ), table );
-	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
-	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
-	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
-
-	// ---- frame ----
-
-	dlgTexReset.cbTexChange = gtk_check_button_new_with_label( "Enabled" );
-	g_signal_connect( G_OBJECT( dlgTexReset.cbTexChange ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
-	gtk_widget_show( dlgTexReset.cbTexChange );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbTexChange, 0, 1, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-
-	w = gtk_label_new( "Old Name: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	dlgTexReset.editTexOld = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editTexOld ), rs->textureName );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editTexOld, 2, 3, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( dlgTexReset.editTexOld );
-
-	w = gtk_label_new( "New Name: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	dlgTexReset.editTexNew = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editTexNew ), rs->textureName );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editTexNew, 2, 3, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( dlgTexReset.editTexNew );
-
-	// ---- /frame ----
-
-	frame = gtk_frame_new( "Reset Scales" );
-	gtk_widget_show( frame );
-	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
-
-	table = gtk_table_new( 2, 3, TRUE );
-	gtk_widget_show( table );
-	gtk_container_add( GTK_CONTAINER( frame ), table );
-	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
-	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
-	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
-
-	// ---- frame ----
-
-	dlgTexReset.cbScaleHor = gtk_check_button_new_with_label( "Enabled" );
-	g_signal_connect( G_OBJECT( dlgTexReset.cbScaleHor ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
-	gtk_widget_show( dlgTexReset.cbScaleHor );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbScaleHor, 0, 1, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-
-	w = gtk_label_new( "New Horizontal Scale: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	dlgTexReset.editScaleHor = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editScaleHor ), "0.5" );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editScaleHor, 2, 3, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( dlgTexReset.editScaleHor );
-
-
-	dlgTexReset.cbScaleVert = gtk_check_button_new_with_label( "Enabled" );
-	g_signal_connect( G_OBJECT( dlgTexReset.cbScaleVert ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
-	gtk_widget_show( dlgTexReset.cbScaleVert );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbScaleVert, 0, 1, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-
-	w = gtk_label_new( "New Vertical Scale: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	dlgTexReset.editScaleVert = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editScaleVert ), "0.5" );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editScaleVert, 2, 3, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( dlgTexReset.editScaleVert );
-
-	// ---- /frame ----
-
-	frame = gtk_frame_new( "Reset Shift" );
-	gtk_widget_show( frame );
-	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
-
-	table = gtk_table_new( 2, 3, TRUE );
-	gtk_widget_show( table );
-	gtk_container_add( GTK_CONTAINER( frame ), table );
-	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
-	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
-	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
-
-	// ---- frame ----
-
-	dlgTexReset.cbShiftHor = gtk_check_button_new_with_label( "Enabled" );
-	g_signal_connect( G_OBJECT( dlgTexReset.cbShiftHor ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
-	gtk_widget_show( dlgTexReset.cbShiftHor );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbShiftHor, 0, 1, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-
-	w = gtk_label_new( "New Horizontal Shift: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	dlgTexReset.editShiftHor = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editShiftHor ), "0" );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editShiftHor, 2, 3, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( dlgTexReset.editShiftHor );
-
-
-	dlgTexReset.cbShiftVert = gtk_check_button_new_with_label( "Enabled" );
-	g_signal_connect( G_OBJECT( dlgTexReset.cbShiftVert ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
-	gtk_widget_show( dlgTexReset.cbShiftVert );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbShiftVert, 0, 1, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-
-	w = gtk_label_new( "New Vertical Shift: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	dlgTexReset.editShiftVert = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editShiftVert ), "0" );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editShiftVert, 2, 3, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( dlgTexReset.editShiftVert );
-
-	// ---- /frame ----
-
-	frame = gtk_frame_new( "Reset Rotation" );
-	gtk_widget_show( frame );
-	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
-
-	table = gtk_table_new( 1, 3, TRUE );
-	gtk_widget_show( table );
-	gtk_container_add( GTK_CONTAINER( frame ), table );
-	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
-	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
-	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
-
-	// ---- frame ----
-
-	dlgTexReset.cbRotation = gtk_check_button_new_with_label( "Enabled" );
-	gtk_widget_show( dlgTexReset.cbRotation );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbRotation, 0, 1, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-
-	w = gtk_label_new( "New Rotation Value: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	dlgTexReset.editRotation = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editRotation ), "0" );
-	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editRotation, 2, 3, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( dlgTexReset.editRotation );
-
-	// ---- /frame ----
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox );
-
-	// ---- hbox ----
-
-	w = gtk_button_new_with_label( "Use Selected Brushes" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-
-	gtk_widget_set_can_default( w, TRUE );
-	gtk_widget_grab_default( w );
-	gtk_widget_show( w );
-
-	w = gtk_button_new_with_label( "Use All Brushes" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
-	gtk_widget_show( w );
-
-	w = gtk_button_new_with_label( "Cancel" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
-	gtk_widget_show( w );
-	ret = eIDCANCEL;
-
-	// ---- /hbox ----
-
-	// ---- /vbox ----
-
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER_ON_PARENT );
-	gtk_widget_show( window );
-
-	Update_TextureReseter();
-
-	bool dialogError = TRUE;
-	while ( dialogError )
 	{
-		loop = 1;
-		while ( loop )
-			gtk_main_iteration();
-
-		dialogError = FALSE;
-
-		if ( ret != eIDCANCEL ) {
-			rs->bResetRotation =  gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbRotation ) );
-			if ( rs->bResetRotation ) {
-				if ( !ValidateTextInt( gtk_entry_get_text( GTK_ENTRY( dlgTexReset.editRotation ) ), "Rotation", &rs->rotation ) ) {
-					dialogError = TRUE;
+		auto vbox = new QVBoxLayout( &dialog );
+		{
+			vbox->addWidget( new QLabel( QString( "Currently Selected Texture:   " ) + GetCurrentTexture() ) );
+		}
+		{
+			auto group = new QGroupBox( "Reset Texture Names" );
+			group->setCheckable( true );
+			group->setChecked( false );
+			vbox->addWidget( group );
+			{
+				auto form = new QFormLayout( group );
+				{
+					form->addRow( "Old Name: ", editTexOld = new QLineEdit( rs->textureName ) );
+					editTexOld->setMaxLength( std::size( rs->textureName ) - 1 );
+				}
+				{
+					form->addRow( "New Name: ", editTexNew = new QLineEdit( rs->newTextureName ) );
+					editTexNew->setMaxLength( std::size( rs->newTextureName ) - 1 );
 				}
 			}
-
-			rs->bResetScale[0] =  gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbScaleHor ) );
-			if ( rs->bResetScale[0] ) {
-				if ( !ValidateTextFloat( gtk_entry_get_text( GTK_ENTRY( dlgTexReset.editScaleHor ) ), "Horizontal Scale", &rs->fScale[0] ) ) {
-					dialogError = TRUE;
-				}
+		}
+		{
+			auto group = new QGroupBox( "New Horizontal Scale" );
+			group->setCheckable( true );
+			group->setChecked( false );
+			vbox->addWidget( group );
+			{
+				auto spin = spin_ScaleHor = new DoubleSpinBox( -1024, 1024, .5, 3, .25 );
+				( new QFormLayout( group ) )->addWidget( spin );
 			}
-
-			rs->bResetScale[1] =  gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbScaleVert ) );
-			if ( rs->bResetScale[1] ) {
-				if ( !ValidateTextFloat( gtk_entry_get_text( GTK_ENTRY( dlgTexReset.editScaleVert ) ), "Vertical Scale", &rs->fScale[1] ) ) {
-					dialogError = TRUE;
-				}
+		}
+		{
+			auto group = new QGroupBox( "New Vertical Scale" );
+			group->setCheckable( true );
+			group->setChecked( false );
+			vbox->addWidget( group );
+			{
+				auto spin = spin_ScaleVert = new DoubleSpinBox( -1024, 1024, .5, 3, .25 );
+				( new QFormLayout( group ) )->addWidget( spin );
 			}
-
-			rs->bResetShift[0] =  gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbShiftHor ) );
-			if ( rs->bResetShift[0] ) {
-				if ( !ValidateTextFloat( gtk_entry_get_text( GTK_ENTRY( dlgTexReset.editShiftHor ) ), "Horizontal Shift", &rs->fShift[0] ) ) {
-					dialogError = TRUE;
-				}
+		}
+		{
+			auto group = new QGroupBox( "New Horizontal Shift" );
+			group->setCheckable( true );
+			group->setChecked( false );
+			vbox->addWidget( group );
+			{
+				auto spin = spin_ShiftHor = new DoubleSpinBox( -999999, 999999 );
+				( new QFormLayout( group ) )->addWidget( spin );
 			}
-
-			rs->bResetShift[1] =  gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbShiftVert ) );
-			if ( rs->bResetShift[1] ) {
-				if ( !ValidateTextFloat( gtk_entry_get_text( GTK_ENTRY( dlgTexReset.editShiftVert ) ), "Vertical Shift", &rs->fShift[1] ) ) {
-					dialogError = TRUE;
-				}
+		}
+		{
+			auto group = new QGroupBox( "New Vertical Shift" );
+			group->setCheckable( true );
+			group->setChecked( false );
+			vbox->addWidget( group );
+			{
+				auto spin = spin_ShiftVert = new DoubleSpinBox( -999999, 999999 );
+				( new QFormLayout( group ) )->addWidget( spin );
 			}
-
-			rs->bResetTextureName =  gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbTexChange ) );
-			if ( rs->bResetTextureName ) {
-				strcpy( rs->textureName,     gtk_entry_get_text( GTK_ENTRY( dlgTexReset.editTexOld ) ) );
-				strcpy( rs->newTextureName,  gtk_entry_get_text( GTK_ENTRY( dlgTexReset.editTexNew ) ) );
+		}
+		{
+			auto group = new QGroupBox( "New Rotation Value" );
+			group->setCheckable( true );
+			group->setChecked( false );
+			vbox->addWidget( group );
+			{
+				auto spin = spin_Rotation = new DoubleSpinBox( -360, 360, 0, 2, 1, true );
+				( new QFormLayout( group ) )->addWidget( spin );
 			}
+		}
+
+		{
+			auto buttons = new QDialogButtonBox;
+			vbox->addWidget( buttons );
+			// rejection via dialog means will return DialogCode::Rejected (0), eID* > 0
+			QObject::connect( buttons->addButton( "Use Selected Brushes", QDialogButtonBox::ButtonRole::AcceptRole ),
+			                  &QAbstractButton::clicked, [&dialog](){ dialog.done( eIDOK ); } );
+			QObject::connect( buttons->addButton( "Use All Brushes", QDialogButtonBox::ButtonRole::NoRole ),
+			                  &QAbstractButton::clicked, [&dialog](){ dialog.done( eIDYES ); } );
+			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Cancel ),
+			                  &QAbstractButton::clicked, &dialog, &QDialog::reject );
 		}
 	}
 
-	gtk_widget_destroy( window );
+
+	if( const int r = dialog.exec() ){
+		ret = static_cast<EMessageBoxReturn>( r );
+		if ( ( rs->bResetTextureName = editTexOld->isEnabled() ) ) {
+			strcpy( rs->textureName,     editTexOld->text().toLatin1().constData() );
+			strcpy( rs->newTextureName,  editTexNew->text().toLatin1().constData() );
+		}
+		if ( ( rs->bResetScale[0] = spin_ScaleHor->isEnabled() ) )
+			rs->fScale[0] = spin_ScaleHor->value();
+
+		if ( ( rs->bResetScale[1] = spin_ScaleVert->isEnabled() ) )
+			rs->fScale[1] = spin_ScaleVert->value();
+
+		if ( ( rs->bResetShift[0] = spin_ShiftHor->isEnabled() ) )
+			rs->fShift[0] = spin_ShiftHor->value();
+
+		if ( ( rs->bResetShift[1] = spin_ShiftVert->isEnabled() ) )
+			rs->fShift[1] = spin_ShiftVert->value();
+
+		if ( ( rs->bResetRotation = spin_Rotation->isEnabled() ) )
+			rs->rotation = spin_Rotation->value();
+	}
 
 	return ret;
 }
 
-EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
-	Str texSelected;
 
-	GtkWidget *window, *w, *vbox, *hbox, *frame, *table;
-
-	GtkWidget *radiusX, *radiusY;
-	GtkWidget *angleStart, *angleEnd;
-	GtkWidget *heightStart, *heightEnd;
-	GtkWidget *numPoints;
-
-	EMessageBoxReturn ret;
-	int loop = 1;
-
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-
-	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
-	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
-
-	gtk_window_set_title( GTK_WINDOW( window ), "Train Thing" );
-	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
-
-	g_object_set_data( G_OBJECT( window ), "loop", &loop );
-	g_object_set_data( G_OBJECT( window ), "ret", &ret );
-
-	gtk_widget_realize( window );
-
-	vbox = gtk_vbox_new( FALSE, 10 );
-	gtk_container_add( GTK_CONTAINER( window ), vbox );
-	gtk_widget_show( vbox );
-
-	// ---- vbox ----
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox );
-
-	// ---- /hbox ----
-
-	frame = gtk_frame_new( "Radii" );
-	gtk_widget_show( frame );
-	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
-
-	table = gtk_table_new( 2, 3, TRUE );
-	gtk_widget_show( table );
-	gtk_container_add( GTK_CONTAINER( frame ), table );
-	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
-	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
-	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
-
-	// ---- frame ----
-
-	w = gtk_label_new( "X: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	radiusX = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( radiusX ), "100" );
-	gtk_table_attach( GTK_TABLE( table ), radiusX, 1, 2, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( radiusX );
-
-
-
-	w = gtk_label_new( "Y: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	radiusY = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( radiusY ), "100" );
-	gtk_table_attach( GTK_TABLE( table ), radiusY, 1, 2, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( radiusY );
-
-
-
-	frame = gtk_frame_new( "Angles" );
-	gtk_widget_show( frame );
-	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
-
-	table = gtk_table_new( 2, 3, TRUE );
-	gtk_widget_show( table );
-	gtk_container_add( GTK_CONTAINER( frame ), table );
-	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
-	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
-	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
-
-	// ---- frame ----
-
-	w = gtk_label_new( "Start: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	angleStart = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( angleStart ), "0" );
-	gtk_table_attach( GTK_TABLE( table ), angleStart, 1, 2, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( angleStart );
-
-
-
-	w = gtk_label_new( "End: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	angleEnd = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( angleEnd ), "90" );
-	gtk_table_attach( GTK_TABLE( table ), angleEnd, 1, 2, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( angleEnd );
-
-
-	frame = gtk_frame_new( "Height" );
-	gtk_widget_show( frame );
-	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
-
-	table = gtk_table_new( 2, 3, TRUE );
-	gtk_widget_show( table );
-	gtk_container_add( GTK_CONTAINER( frame ), table );
-	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
-	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
-	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
-
-	// ---- frame ----
-
-	w = gtk_label_new( "Start: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	heightStart = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( heightStart ), "0" );
-	gtk_table_attach( GTK_TABLE( table ), heightStart, 1, 2, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( heightStart );
-
-
-
-	w = gtk_label_new( "End: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	heightEnd = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( heightEnd ), "0" );
-	gtk_table_attach( GTK_TABLE( table ), heightEnd, 1, 2, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( heightEnd );
-
-
-
-	frame = gtk_frame_new( "Points" );
-	gtk_widget_show( frame );
-	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
-
-	table = gtk_table_new( 2, 3, TRUE );
-	gtk_widget_show( table );
-	gtk_container_add( GTK_CONTAINER( frame ), table );
-	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
-	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
-	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
-
-	// ---- frame ----
-
-	w = gtk_label_new( "Number: " );
-	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( w );
-
-	numPoints = entry_new_with_max_length( 256 );
-	gtk_entry_set_text( GTK_ENTRY( numPoints ), "0" );
-	gtk_table_attach( GTK_TABLE( table ), numPoints, 1, 2, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_widget_show( numPoints );
-
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
-	gtk_widget_show( hbox );
-
-	// ---- hbox ----
-
-	w = gtk_button_new_with_label( "Ok" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-
-	gtk_widget_set_can_default( w, TRUE );
-	gtk_widget_grab_default( w );
-	gtk_widget_show( w );
-
-	w = gtk_button_new_with_label( "Cancel" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
-	gtk_widget_show( w );
-	ret = eIDCANCEL;
-
-	// ---- /hbox ----
-
-
-	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
-	gtk_widget_show( window );
-
-	bool dialogError = TRUE;
-	while ( dialogError )
-	{
-		loop = 1;
-		while ( loop )
-			gtk_main_iteration();
-
-		dialogError = FALSE;
-
-		if ( ret != eIDCANCEL ) {
-			if ( !ValidateTextFloat( gtk_entry_get_text( GTK_ENTRY( radiusX ) ), "Radius (X)", &rs->fRadiusX ) ) {
-				dialogError = TRUE;
-			}
-
-			if ( !ValidateTextFloat( gtk_entry_get_text( GTK_ENTRY( radiusY ) ), "Radius (Y)", &rs->fRadiusY ) ) {
-				dialogError = TRUE;
-			}
-
-			if ( !ValidateTextFloat( gtk_entry_get_text( GTK_ENTRY( angleStart ) ), "Angle (Start)", &rs->fStartAngle ) ) {
-				dialogError = TRUE;
-			}
-
-			if ( !ValidateTextFloat( gtk_entry_get_text( GTK_ENTRY( angleEnd ) ), "Angle (End)", &rs->fEndAngle ) ) {
-				dialogError = TRUE;
-			}
-
-			if ( !ValidateTextFloat( gtk_entry_get_text( GTK_ENTRY( heightStart ) ), "Height (Start)", &rs->fStartHeight ) ) {
-				dialogError = TRUE;
-			}
-
-			if ( !ValidateTextFloat( gtk_entry_get_text( GTK_ENTRY( heightEnd ) ), "Height (End)", &rs->fEndHeight ) ) {
-				dialogError = TRUE;
-			}
-
-			if ( !ValidateTextInt( gtk_entry_get_text( GTK_ENTRY( numPoints ) ), "Num Points", &rs->iNumPoints ) ) {
-				dialogError = TRUE;
-			}
-		}
-	}
-
-	gtk_widget_destroy( window );
-
-	return ret;
-}
 // ailmanki
 // add a simple input for the MakeChain thing..
-EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
-	GtkWidget   *window, *w, *vbox, *hbox;
-	GtkWidget   *textlinkNum, *textlinkName;
-	EMessageBoxReturn ret;
-	int loop = 1;
+bool DoMakeChainBox( MakeChainRS* rs ){
+	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	dialog.setWindowTitle( "Make Chain" );
 
-	const char *text = "Please set a value in the boxes below and press 'OK' to make a chain";
+	QSpinBox *spin_linkNum;
+	QLineEdit *edit_linkName;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-
-	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
-	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
-
-	gtk_window_set_title( GTK_WINDOW( window ), "Make Chain" );
-
-	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
-
-	g_object_set_data( G_OBJECT( window ), "loop", &loop );
-	g_object_set_data( G_OBJECT( window ), "ret", &ret );
-
-	gtk_widget_realize( window );
-
-	// new vbox
-	vbox = gtk_vbox_new( FALSE, 10 );
-	gtk_container_add( GTK_CONTAINER( window ), vbox );
-	gtk_widget_show( vbox );
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_container_add( GTK_CONTAINER( vbox ), hbox );
-	gtk_widget_show( hbox );
-
-	// dunno if you want this text or not ...
-	w = gtk_label_new( text );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
-	gtk_widget_show( w );
-
-	w = gtk_hseparator_new();
-	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
-	gtk_widget_show( w );
-
-	// ------------------------- //
-
-	// new hbox
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	textlinkNum = entry_new_with_max_length( 256 );
-	gtk_box_pack_start( GTK_BOX( hbox ), textlinkNum, FALSE, FALSE, 1 );
-	gtk_widget_show( textlinkNum );
-
-	w = gtk_label_new( "Number of elements in chain" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 1 );
-	gtk_widget_show( w );
-
-	// -------------------------- //
-
-	hbox = gtk_hbox_new( FALSE, 10 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-	gtk_widget_show( hbox );
-
-	textlinkName = entry_new_with_max_length( 256 );
-	gtk_box_pack_start( GTK_BOX( hbox ), textlinkName, FALSE, FALSE, 0 );
-	gtk_widget_show( textlinkName );
-
-	w = gtk_label_new( "Basename for chain's targetnames." );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 1 );
-	gtk_widget_show( w );
-
-
-	w = gtk_button_new_with_label( "OK" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-	gtk_widget_set_can_default( w, TRUE );
-	gtk_widget_grab_default( w );
-	gtk_widget_show( w );
-
-	w = gtk_button_new_with_label( "Cancel" );
-	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
-	gtk_widget_show( w );
-
-	ret = eIDCANCEL;
-
-	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
-	gtk_widget_show( window );
-
-	bool dialogError = TRUE;
-	while ( dialogError )
 	{
-		loop = 1;
-		while ( loop )
-			gtk_main_iteration();
-
-		dialogError = FALSE;
-
-		if ( ret == eIDOK ) {
-			strcpy( rs->linkName, gtk_entry_get_text( GTK_ENTRY( textlinkName ) ) );
-			if ( !ValidateTextInt( gtk_entry_get_text( GTK_ENTRY( textlinkNum ) ), "Elements", &rs->linkNum ) ) {
-				dialogError = TRUE;
-			}
+		auto form = new QFormLayout( &dialog );
+		form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
+		{
+			auto spin = spin_linkNum = new SpinBox( 1, 1000 );
+			form->addRow( new SpinBoxLabel( "Number of elements in chain", spin ), spin );
+		}
+		{
+			form->addRow( "Basename for chain's targetnames", edit_linkName = new QLineEdit );
+			edit_linkName->setMaxLength( std::size( rs->linkName ) - 1 );
+		}
+		{
+			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			form->addWidget( buttons );
+			QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
+			QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );
 		}
 	}
 
-	gtk_widget_destroy( window );
-
-	return ret;
+	if( dialog.exec() ){
+		rs->linkNum = spin_linkNum->value();
+		strcpy( rs->linkName, edit_linkName->text().toLatin1().constData() );
+		return true;
+	}
+	return false;
 }

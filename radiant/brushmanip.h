@@ -25,14 +25,14 @@
 #include "string/stringfwd.h"
 #include "generic/callbackfwd.h"
 
-enum EBrushPrefab
+enum class EBrushPrefab
 {
-	eBrushCuboid,
-	eBrushPrism,
-	eBrushCone,
-	eBrushSphere,
-	eBrushRock,
-	eBrushIcosahedron,
+	Cuboid,
+	Prism,
+	Cone,
+	Sphere,
+	Rock,
+	Icosahedron,
 };
 
 class TextureProjection;
@@ -52,7 +52,6 @@ void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const float* hShift, co
 void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
 void Scene_BrushGetTexdef_Selected( scene::Graph& graph, TextureProjection& projection );
 void Scene_BrushGetTexdef_Component_Selected( scene::Graph& graph, TextureProjection& projection );
-void Scene_BrushGetShaderSize_Component_Selected( scene::Graph& graph, size_t& width, size_t& height );
 void Scene_BrushSetFlags_Selected( scene::Graph& graph, const ContentsFlagsValue& flags );
 void Scene_BrushSetFlags_Component_Selected( scene::Graph& graph, const ContentsFlagsValue& flags );
 void Scene_BrushGetFlags_Selected( scene::Graph& graph, ContentsFlagsValue& flags );
@@ -85,8 +84,7 @@ void Scene_BrushProjectTexture_Component_Selected( scene::Graph& graph, const Te
 void Scene_BrushFitTexture_Selected( scene::Graph& graph, float s_repeat, float t_repeat, bool only_dimension );
 void Scene_BrushFitTexture_Component_Selected( scene::Graph& graph, float s_repeat, float t_repeat, bool only_dimension );
 
-typedef struct _GtkMenu GtkMenu;
-void Brush_constructMenu( GtkMenu* menu );
+void Brush_constructMenu( class QMenu* menu );
 
 extern Callback g_texture_lock_status_changed;
 

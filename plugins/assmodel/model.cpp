@@ -103,31 +103,22 @@ public:
 
 	void render( RenderStateFlags state ) const {
 		if ( ( state & RENDER_BUMP ) != 0 ) {
-			if ( GlobalShaderCache().useShaderLanguage() ) {
-				glNormalPointer( GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->normal );
-				glVertexAttribPointerARB( c_attr_TexCoord0, 2, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->texcoord );
-				glVertexAttribPointerARB( c_attr_Tangent, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->tangent );
-				glVertexAttribPointerARB( c_attr_Binormal, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->bitangent );
-			}
-			else
-			{
-				glVertexAttribPointerARB( 11, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->normal );
-				glVertexAttribPointerARB( 8, 2, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->texcoord );
-				glVertexAttribPointerARB( 9, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->tangent );
-				glVertexAttribPointerARB( 10, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->bitangent );
-			}
+			gl().glNormalPointer( GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->normal );
+			gl().glVertexAttribPointer( c_attr_TexCoord0, 2, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->texcoord );
+			gl().glVertexAttribPointer( c_attr_Tangent, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->tangent );
+			gl().glVertexAttribPointer( c_attr_Binormal, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->bitangent );
 		}
 		else
 		{
-			glNormalPointer( GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->normal );
-			glTexCoordPointer( 2, GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->texcoord );
+			gl().glNormalPointer( GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->normal );
+			gl().glTexCoordPointer( 2, GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->texcoord );
 		}
-		glVertexPointer( 3, GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->vertex );
-		glDrawElements( GL_TRIANGLES, GLsizei( m_indices.size() ), RenderIndexTypeID, m_indices.data() );
+		gl().glVertexPointer( 3, GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->vertex );
+		gl().glDrawElements( GL_TRIANGLES, GLsizei( m_indices.size() ), RenderIndexTypeID, m_indices.data() );
 
 #if defined( _DEBUG ) && !defined( _DEBUG_QUICKER )
 		GLfloat modelview[16];
-		glGetFloatv( GL_MODELVIEW_MATRIX, modelview ); // I know this is slow as hell, but hey - we're in _DEBUG
+		gl().glGetFloatv( GL_MODELVIEW_MATRIX, modelview ); // I know this is slow as hell, but hey - we're in _DEBUG
 		Matrix4 modelview_inv(
 		    modelview[0], modelview[1], modelview[2], modelview[3],
 		    modelview[4], modelview[5], modelview[6], modelview[7],
@@ -136,17 +127,17 @@ public:
 		matrix4_full_invert( modelview_inv );
 		Matrix4 modelview_inv_transposed = matrix4_transposed( modelview_inv );
 
-		glBegin( GL_LINES );
+		gl().glBegin( GL_LINES );
 
 		for ( Array<ArbitraryMeshVertex>::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
 		{
 			Vector3 normal = normal3f_to_vector3( ( *i ).normal );
 			normal = matrix4_transformed_direction( modelview_inv, vector3_normalised( matrix4_transformed_direction( modelview_inv_transposed, normal ) ) ); // do some magic
 			Vector3 normalTransformed = vector3_added( vertex3f_to_vector3( ( *i ).vertex ), vector3_scaled( normal, 8 ) );
-			glVertex3fv( vertex3f_to_array( ( *i ).vertex ) );
-			glVertex3fv( vector3_to_array( normalTransformed ) );
+			gl().glVertex3fv( vertex3f_to_array( ( *i ).vertex ) );
+			gl().glVertex3fv( vector3_to_array( normalTransformed ) );
 		}
-		glEnd();
+		gl().glEnd();
 #endif
 	}
 

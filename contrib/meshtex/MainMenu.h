@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_MAINMENU_H)
-#define INCLUDED_MAINMENU_H
+#pragma once
 
 #include "GenericMainMenu.h"
 #include "MeshVisitor.h"
@@ -101,5 +100,3 @@ private:
    const CommandCallbackMethod
       <MainMenu, &MainMenu::CommandMeshVisitor> _commandMeshVisitor;
 };
-
-#endif // #if !defined(INCLUDED_MAINMENU_H)

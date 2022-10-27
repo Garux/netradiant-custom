@@ -23,8 +23,6 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtk/gtk.h>
-
 #include "GenericPluginUI.h"
 #include "GetInfoDialog.h"
 #include "PluginUIMessages.h"
@@ -88,111 +86,43 @@ GetInfoDialog::GetInfoDialog(const std::string& key,
                                         &SetScaleDialog::PopulateTWidgets>(*setScaleDialog)),
    _nullVisitor(new MeshVisitor())
 {
-   // Enable the usual handling of the close event.
-   CreateWindowCloseCallback();
-
    // Configure the dialog window.
-   gtk_window_set_resizable(GTK_WINDOW(_dialog), FALSE);
-   gtk_window_set_title(GTK_WINDOW(_dialog), DIALOG_GET_INFO_TITLE);
-   gtk_container_set_border_width(GTK_CONTAINER(_dialog), 10);
+   _dialog->setWindowTitle(DIALOG_GET_INFO_TITLE);
 
    // Create the contained widgets.
+   {
+      auto form = new QFormLayout( _dialog );
+      form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
+      {
+         // Widgets for specifying the reference row if any.
+         auto check = new QCheckBox( DIALOG_GET_INFO_S_ROW_HEADER );
+         check->setChecked( true );
+         auto spin = s_ref_row = new SpinBox( 0, 30 );
+         form->addRow( check, spin );
+         UIInstance().RegisterWidgetDependence( check, spin );
+      }
+      {
+         // Widgets for specifying the reference column if any.
+         auto check = new QCheckBox( DIALOG_GET_INFO_T_COL_HEADER );
+         check->setChecked( true );
+         auto spin = t_ref_col = new SpinBox( 0, 30 );
+         form->addRow( check, spin );
+         UIInstance().RegisterWidgetDependence( check, spin );
+      }
+      {
+         // Checkbox to enable the callbacks to Set S/T Scale.
+         auto check = check_transfer = new QCheckBox( DIALOG_GET_INFO_XFER_OPT_LABEL );
+         form->addRow( check );
+      }
+      {
+         auto buttons = new QDialogButtonBox;
+         form->addWidget( buttons );
+         CreateOkButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Ok ) );
+         CreateApplyButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Apply ) );
+         CreateCancelButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Cancel ) );
+      }
 
-   GtkWidget *table;
-   GtkWidget *entry;
-   GtkWidget *button;
-   GtkWidget *label;
-   GtkWidget *hbox;
-
-   table = gtk_table_new(4, 3, FALSE);
-   gtk_table_set_row_spacing(GTK_TABLE(table), 1, 10);
-   gtk_table_set_row_spacing(GTK_TABLE(table), 2, 15);
-   gtk_container_add(GTK_CONTAINER(_dialog), table);
-   gtk_widget_show(table);
-
-   // Widgets for specifying the reference row if any.
-
-   button = gtk_check_button_new();
-   g_object_set_data(G_OBJECT(_dialog), "s_apply", button);
-   gtk_table_attach_defaults(GTK_TABLE(table), button, 0, 1, 0, 1);
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-   gtk_widget_show(button);
-
-   label = gtk_label_new(DIALOG_GET_INFO_S_ROW_HEADER);
-   gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_RIGHT);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 1, 2, 0, 1);
-   gtk_widget_show(label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "s_ref_row", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 2, 3, 0, 1);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(button, label);
-   UIInstance().RegisterWidgetDependence(button, entry);
-
-   // Widgets for specifying the reference column if any.
-
-   button = gtk_check_button_new();
-   g_object_set_data(G_OBJECT(_dialog), "t_apply", button);
-   gtk_table_attach_defaults(GTK_TABLE(table), button, 0, 1, 1, 2);
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-   gtk_widget_show(button);
-
-   label = gtk_label_new(DIALOG_GET_INFO_T_COL_HEADER);
-   gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_RIGHT);
-   gtk_table_attach_defaults(GTK_TABLE(table), label, 1, 2, 1, 2);
-   gtk_widget_show(label);
-
-   entry = gtk_entry_new();
-   g_object_set_data(G_OBJECT(_dialog), "t_ref_col", entry);
-   gtk_entry_set_text(GTK_ENTRY(entry), "0");
-   gtk_table_attach_defaults(GTK_TABLE(table), entry, 2, 3, 1, 2);
-   gtk_widget_set_size_request(entry, 50, -1);
-   gtk_widget_show(entry);
-
-   UIInstance().RegisterWidgetDependence(button, label);
-   UIInstance().RegisterWidgetDependence(button, entry);
-
-   // Checkbox to enable the callbacks to Set S/T Scale.
-
-   button = gtk_check_button_new_with_label(DIALOG_GET_INFO_XFER_OPT_LABEL);
-   g_object_set_data(G_OBJECT(_dialog), "transfer", button);
-   gtk_table_attach(GTK_TABLE(table), button, 0, 3, 2, 3, GTK_EXPAND, GTK_EXPAND, 0, 0);
-   gtk_widget_show(button);
-
-   hbox = gtk_hbox_new(FALSE, 0);
-   gtk_table_attach_defaults(GTK_TABLE(table), hbox, 0, 3, 3, 4);
-   gtk_widget_show(hbox);
-
-   // Create Cancel button and hook it to callback.
-
-   button = gtk_button_new_with_label(DIALOG_CANCEL_BUTTON);
-   gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-   gtk_widget_set_size_request(button, 60, -1);
-   gtk_widget_show(button);
-
-   CreateCancelButtonCallback(button);
-
-   // Create Apply button and hook it to callback.
-
-   button = gtk_button_new_with_label(DIALOG_APPLY_BUTTON);
-   gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 10);
-   gtk_widget_set_size_request (button, 60, -1);
-   gtk_widget_show(button);
-
-   CreateApplyButtonCallback(button);
-
-   // Create OK button and hook it to callback.
-
-   button = gtk_button_new_with_label(DIALOG_OK_BUTTON);
-   gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-   gtk_widget_set_size_request (button, 60, -1);
-   gtk_widget_show(button);
-
-   CreateOkButtonCallback(button);
+   }
 }
 
 /**
@@ -225,7 +155,7 @@ GetInfoDialog::Apply()
 
    // If the option to transfer info to Set S/T Scale is active, then only one
    // mesh may be selected.
-   bool transfer = NamedToggleWidgetActive("transfer");
+   const bool transfer = check_transfer->isChecked();
    if (transfer && _nullVisitor->GetVisitedCount() != 1)
    {
       // Multiple selected. Warn and bail out.
@@ -236,18 +166,15 @@ GetInfoDialog::Apply()
 
    // OK read the remaining info from the widgets.
 
-   bool sApply = NamedToggleWidgetActive("s_apply");
-   bool tApply = NamedToggleWidgetActive("t_apply");
-
    int row, col;
-   int *refRow = NULL;
-   int *refCol = NULL;
-   MeshEntity::TexInfoCallback *rowTexInfoCallback = NULL;
-   MeshEntity::TexInfoCallback *colTexInfoCallback = NULL;
-   if (sApply)
+   int *refRow = nullptr;
+   int *refCol = nullptr;
+   MeshEntity::TexInfoCallback *rowTexInfoCallback = nullptr;
+   MeshEntity::TexInfoCallback *colTexInfoCallback = nullptr;
+   if ( s_ref_row->isEnabled() )
    {
       // Reference row is specified, so get that info.
-      row = atoi(NamedEntryWidgetText("s_ref_row"));
+      row = s_ref_row->value();
       refRow = &row;
       if (transfer)
       {
@@ -255,10 +182,10 @@ GetInfoDialog::Apply()
          rowTexInfoCallback = &_rowTexInfoCallback;
       }
    }
-   if (tApply)
+   if ( t_ref_col->isEnabled() )
    {
       // Reference column is specified, so get that info.
-      col = atoi(NamedEntryWidgetText("t_ref_col"));
+      col = t_ref_col->value();
       refCol = &col;
       if (transfer)
       {

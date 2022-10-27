@@ -79,12 +79,12 @@ inline bool texdef_sane( const texdef_t& texdef ){
 }
 
 inline void Winding_DrawWireframe( const Winding& winding ){
-	glVertexPointer( 3, GL_DOUBLE, sizeof( WindingVertex ), &winding.points.data()->vertex );
-	glDrawArrays( GL_LINE_LOOP, 0, GLsizei( winding.numpoints ) );
+	gl().glVertexPointer( 3, GL_DOUBLE, sizeof( WindingVertex ), &winding.points.data()->vertex );
+	gl().glDrawArrays( GL_LINE_LOOP, 0, GLsizei( winding.numpoints ) );
 }
 
 inline void Winding_Draw( const Winding& winding, const Vector3& normal, RenderStateFlags state ){
-	glVertexPointer( 3, GL_DOUBLE, sizeof( WindingVertex ), &winding.points.data()->vertex );
+	gl().glVertexPointer( 3, GL_DOUBLE, sizeof( WindingVertex ), &winding.points.data()->vertex );
 
 	Vector3 normals[c_brush_maxFaces];
 
@@ -94,19 +94,10 @@ inline void Winding_Draw( const Winding& winding, const Vector3& normal, RenderS
 		{
 			*i = normal;
 		}
-		if ( GlobalShaderCache().useShaderLanguage() ) {
-			glNormalPointer( GL_FLOAT, sizeof( Vector3 ), normals );
-			glVertexAttribPointerARB( c_attr_TexCoord0, 2, GL_FLOAT, 0, sizeof( WindingVertex ), &winding.points.data()->texcoord );
-			glVertexAttribPointerARB( c_attr_Tangent, 3, GL_FLOAT, 0, sizeof( WindingVertex ), &winding.points.data()->tangent );
-			glVertexAttribPointerARB( c_attr_Binormal, 3, GL_FLOAT, 0, sizeof( WindingVertex ), &winding.points.data()->bitangent );
-		}
-		else
-		{
-			glVertexAttribPointerARB( 11, 3, GL_FLOAT, 0, sizeof( Vector3 ), normals );
-			glVertexAttribPointerARB( 8, 2, GL_FLOAT, 0, sizeof( WindingVertex ), &winding.points.data()->texcoord );
-			glVertexAttribPointerARB( 9, 3, GL_FLOAT, 0, sizeof( WindingVertex ), &winding.points.data()->tangent );
-			glVertexAttribPointerARB( 10, 3, GL_FLOAT, 0, sizeof( WindingVertex ), &winding.points.data()->bitangent );
-		}
+		gl().glNormalPointer( GL_FLOAT, sizeof( Vector3 ), normals );
+		gl().glVertexAttribPointer( c_attr_TexCoord0, 2, GL_FLOAT, 0, sizeof( WindingVertex ), &winding.points.data()->texcoord );
+		gl().glVertexAttribPointer( c_attr_Tangent, 3, GL_FLOAT, 0, sizeof( WindingVertex ), &winding.points.data()->tangent );
+		gl().glVertexAttribPointer( c_attr_Binormal, 3, GL_FLOAT, 0, sizeof( WindingVertex ), &winding.points.data()->bitangent );
 	}
 	else
 	{
@@ -116,48 +107,48 @@ inline void Winding_Draw( const Winding& winding, const Vector3& normal, RenderS
 			{
 				*i = normal;
 			}
-			glNormalPointer( GL_FLOAT, sizeof( Vector3 ), normals );
+			gl().glNormalPointer( GL_FLOAT, sizeof( Vector3 ), normals );
 		}
 
 		if ( state & RENDER_TEXTURE ) {
-			glTexCoordPointer( 2, GL_FLOAT, sizeof( WindingVertex ), &winding.points.data()->texcoord );
+			gl().glTexCoordPointer( 2, GL_FLOAT, sizeof( WindingVertex ), &winding.points.data()->texcoord );
 		}
 	}
 #if 0
 	if ( state & RENDER_FILL ) {
-		glDrawArrays( GL_TRIANGLE_FAN, 0, GLsizei( winding.numpoints ) );
+		gl().glDrawArrays( GL_TRIANGLE_FAN, 0, GLsizei( winding.numpoints ) );
 	}
 	else
 	{
-		glDrawArrays( GL_LINE_LOOP, 0, GLsizei( winding.numpoints ) );
+		gl().glDrawArrays( GL_LINE_LOOP, 0, GLsizei( winding.numpoints ) );
 	}
 #else
-	glDrawArrays( GL_POLYGON, 0, GLsizei( winding.numpoints ) );
+	gl().glDrawArrays( GL_POLYGON, 0, GLsizei( winding.numpoints ) );
 #endif
 
 #if 0
 	const Winding& winding = winding;
 
 	if ( state & RENDER_FILL ) {
-		glBegin( GL_POLYGON );
+		gl().glBegin( GL_POLYGON );
 	}
 	else
 	{
-		glBegin( GL_LINE_LOOP );
+		gl().glBegin( GL_LINE_LOOP );
 	}
 
 	if ( state & RENDER_LIGHTING ) {
-		glNormal3fv( normal );
+		gl().glNormal3fv( normal );
 	}
 
 	for ( int i = 0; i < winding.numpoints; ++i )
 	{
 		if ( state & RENDER_TEXTURE ) {
-			glTexCoord2fv( &winding.points[i][3] );
+			gl().glTexCoord2fv( &winding.points[i][3] );
 		}
-		glVertex3fv( winding.points[i] );
+		gl().glVertex3fv( winding.points[i] );
 	}
-	glEnd();
+	gl().glEnd();
 #endif
 }
 
@@ -288,22 +279,6 @@ public:
 	virtual void unrealiseShader() = 0;
 };
 
-class FaceShaderObserverRealise
-{
-public:
-	void operator()( FaceShaderObserver& observer ) const {
-		observer.realiseShader();
-	}
-};
-
-class FaceShaderObserverUnrealise
-{
-public:
-	void operator()( FaceShaderObserver& observer ) const {
-		observer.unrealiseShader();
-	}
-};
-
 typedef ReferencePair<FaceShaderObserver> FaceShaderObserverPair;
 
 
@@ -404,11 +379,11 @@ public:
 	void realise(){
 		ASSERT_MESSAGE( !m_realised, "FaceTexdef::realise: already realised" );
 		m_realised = true;
-		m_observers.forEach( FaceShaderObserverRealise() );
+		m_observers.forEach( []( FaceShaderObserver& observer ){ observer.realiseShader(); } );
 	}
 	void unrealise(){
 		ASSERT_MESSAGE( m_realised, "FaceTexdef::unrealise: already unrealised" );
-		m_observers.forEach( FaceShaderObserverUnrealise() );
+		m_observers.forEach( []( FaceShaderObserver& observer ){ observer.unrealiseShader(); } );
 		m_realised = false;
 	}
 
@@ -1445,16 +1420,16 @@ class RenderableWireframe : public OpenGLRenderable
 public:
 	void render( RenderStateFlags state ) const {
 #if 1
-		glVertexPointer( 3, GL_FLOAT, sizeof( DepthTestedPointVertex ), &m_vertices->vertex );
-		glDrawElements( GL_LINES, GLsizei( m_size << 1 ), RenderIndexTypeID, m_faceVertex.data() );
+		gl().glVertexPointer( 3, GL_FLOAT, sizeof( DepthTestedPointVertex ), &m_vertices->vertex );
+		gl().glDrawElements( GL_LINES, GLsizei( m_size << 1 ), RenderIndexTypeID, m_faceVertex.data() );
 #else
-		glBegin( GL_LINES );
+		gl().glBegin( GL_LINES );
 		for ( std::size_t i = 0; i < m_size; ++i )
 		{
-			glVertex3fv( &m_vertices[m_faceVertex[i].first].vertex.x );
-			glVertex3fv( &m_vertices[m_faceVertex[i].second].vertex.x );
+			gl().glVertex3fv( &m_vertices[m_faceVertex[i].first].vertex.x );
+			gl().glVertex3fv( &m_vertices[m_faceVertex[i].second].vertex.x );
 		}
-		glEnd();
+		gl().glEnd();
 #endif
 	}
 
@@ -1868,18 +1843,13 @@ public:
 		{
 		case SelectionSystem::eVertex:
 			{
-				if( GlobalOpenGL().GL_1_5() ){
-					if( volume.fill() ){
-						renderer.SetState( m_state_deeppoint, Renderer::eFullMaterials );
-						renderer.addRenderable( m_render_deepvertices, localToWorld );
-					}
-					else{
-						for( auto& p : m_uniqueVertexPoints )
-							p.colour = colour_vertex;
-						renderer.addRenderable( m_render_vertices, localToWorld );
-					}
+				if( volume.fill() ){
+					renderer.SetState( m_state_deeppoint, Renderer::eFullMaterials );
+					renderer.addRenderable( m_render_deepvertices, localToWorld );
 				}
 				else{
+					for( auto& p : m_uniqueVertexPoints )
+						p.colour = colour_vertex;
 					renderer.addRenderable( m_render_vertices, localToWorld );
 				}
 			}
@@ -3152,8 +3122,8 @@ public:
 			Winding_Centroid( m_winding, m_plane, lineverts[0] );
 			lineverts[1] = vector3_added( lineverts[0], vector3_scaled( m_plane.normal(), Brush::m_maxWorldCoord * 4 ) );
 
-			glVertexPointer( 3, GL_FLOAT, sizeof( Vector3 ), &lineverts[0] );
-			glDrawArrays( GL_LINES, 0, GLsizei( 2 ) );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( Vector3 ), &lineverts[0] );
+			gl().glDrawArrays( GL_LINES, 0, GLsizei( 2 ) );
 		}
 	}
 

@@ -24,8 +24,7 @@
 #include "math/vector.h"
 #include "signal/signalfwd.h"
 
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
+class QWidget;
 
 class CamWnd;
 CamWnd* NewCamWnd();
@@ -35,14 +34,13 @@ void AddCameraMovedCallback( const SignalHandler& handler );
 
 void CamWnd_Update( CamWnd& camwnd );
 
-GtkWidget* CamWnd_getWidget( CamWnd& camwnd );
-void CamWnd_setParent( CamWnd& camwnd, GtkWindow* parent );
-void CamWnd_Shown_Construct( GtkWindow* parent );
+QWidget* CamWnd_getWidget( CamWnd& camwnd );
+void CamWnd_setParent( CamWnd& camwnd, QWidget* parent );
+void CamWnd_Shown_Construct( QWidget* parent );
 
 void GlobalCamera_setCamWnd( CamWnd& camwnd );
 
-typedef struct _GtkToolbar GtkToolbar;
-void CamWnd_constructToolbar( GtkToolbar* toolbar );
+void CamWnd_constructToolbar( class QToolBar* toolbar );
 void CamWnd_registerShortcuts();
 
 void GlobalCamera_Benchmark();
@@ -66,20 +64,12 @@ const Vector3& Camera_getViewVector( CamWnd& camwnd );
 
 struct camwindow_globals_t
 {
-	Vector3 color_cameraback;
-	Vector3 color_selbrushes3d;
+	Vector3 color_cameraback = { 0.25f, 0.25f, 0.25f };
+	Vector3 color_selbrushes3d = { 1.0f, 0.627451f, 0.0f };
 
-	int m_nCubicScale;
+	int m_nCubicScale = 14;
 
-	bool m_showStats;
-
-	camwindow_globals_t() :
-		color_cameraback( 0.25f, 0.25f, 0.25f ),
-		color_selbrushes3d( 1.0f, 0.f, 0.f ),
-		m_nCubicScale( 14 ),
-		m_showStats( false ){
-	}
-
+	bool m_showStats = false;
 };
 
 extern camwindow_globals_t g_camwindow_globals;

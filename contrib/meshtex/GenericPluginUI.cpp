@@ -23,8 +23,6 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtk/gtk.h>
-
 #include "GenericPluginUI.h"
 
 
@@ -36,9 +34,7 @@
  */
 GenericPluginUI::GenericPluginUI() :
    _window(NULL),
-   _mainMenu(NULL),
-   _callbackID(1),
-   _widgetControlCallback(*this)
+   _mainMenu(NULL)
 {
 }
 
@@ -89,17 +85,16 @@ GenericPluginUI::RegisterDialog(SmartPointer<GenericDialog>& dialog)
  * @param window The main window.
  */
 void
-GenericPluginUI::SetWindow(GtkWidget *window)
+GenericPluginUI::SetWindow(QWidget *window)
 {
    // Remember it.
    _window = window;
    // Set it as the parent for every dialog window.
-   DialogMap::const_iterator dialogMapIter = _dialogMap.begin();
-   for (; dialogMapIter != _dialogMap.end(); ++dialogMapIter)
+   for ( const auto& [name, ptr] : _dialogMap )
    {
-      if (dialogMapIter->second.get() != NULL)
+      if (ptr.get() != NULL)
       {
-         dialogMapIter->second->SetWindow(window);
+         ptr->SetWindow(window);
       }
    }
 }
@@ -138,110 +133,6 @@ GenericPluginUI::Dialog(const std::string& key)
 }
 
 /**
- * Generic event callback used to invoke the specific callback functions
- * registered with this manager. Those specific callbacks are not themselves
- * registered directly with GTK+ because they may be methods that must be
- * invoked on objects. (Unlike this function, which is a static method.)
- *
- * @param widget The widget generating the event.
- * @param event  The event.
- * @param data   ID of the specific callback registered with this manager.
- *
- * @return The return value from the specific callback.
- */
-gint
-GenericPluginUI::DialogEventCallbackDispatch(GtkWidget *widget,
-                                             GdkEvent* event,
-                                             gpointer data)
-{
-   // Look up the callback ID in our registration map.
-   DialogEventCallbackMap::iterator dialogEventCallbackMapIter =
-      UIInstance()._dialogEventCallbackMap.find(data);
-   if (dialogEventCallbackMapIter == UIInstance()._dialogEventCallbackMap.end())
-   {
-      // If we didn't find it, nothing to do.
-      return TRUE;
-   }
-   // Otherwise invoke that callback.
-   return dialogEventCallbackMapIter->second(widget, event, data);
-}
-
-/**
- * Generic signal callback used to invoke the specific callback functions
- * registered with this manager. Those specific callbacks are not themselves
- * registered directly with GTK+ because they may be methods that must be
- * invoked on objects. (Unlike this function, which is a static method.)
- *
- * @param widget The widget generating the signal.
- * @param data   ID of the specific callback registered with this manager.
- */
-void
-GenericPluginUI::DialogSignalCallbackDispatch(GtkWidget *widget,
-                                              gpointer data)
-{
-   // Look up the callback ID in our registration map.
-   DialogSignalCallbackMap::iterator dialogSignalCallbackMapIter =
-      UIInstance()._dialogSignalCallbackMap.find(data);
-   if (dialogSignalCallbackMapIter == UIInstance()._dialogSignalCallbackMap.end())
-   {
-      // If we didn't find it, nothing to do.
-      return;
-   }
-   // Otherwise invoke that callback.
-   dialogSignalCallbackMapIter->second(widget, data);
-}
-
-/**
- * Register a function to be invoked when a widget generates an event.
- *
- * @param widget   The widget generating the event.
- * @param name     The name of the event.
- * @param callback The callback function.
- *
- * @return The unique ID for the registered callback function.
- */
-gpointer
-GenericPluginUI::RegisterDialogEventCallback(GtkWidget *widget,
-                                             const gchar *name,
-                                             const DialogEventCallback& callback)
-{
-   // Get the next callback ID to use.
-   gpointer callbackID = GUINT_TO_POINTER(_callbackID++);
-   // Make that event on that dialog widget trigger our event dispatch.
-   g_signal_connect(G_OBJECT(widget), name,
-                    G_CALLBACK(DialogEventCallbackDispatch), callbackID);
-   // Save the association between callback ID and function.
-   _dialogEventCallbackMap.insert(std::make_pair(callbackID, callback));
-   // Return the generated unique callback ID.
-   return callbackID;
-}
-
-/**
- * Register a function to be invoked when a widget generates a signal.
- *
- * @param widget   The widget generating the signal.
- * @param name     The name of the signal.
- * @param callback The callback function.
- *
- * @return The unique ID for the registered callback function.
- */
-gpointer
-GenericPluginUI::RegisterDialogSignalCallback(GtkWidget *widget,
-                                              const gchar *name,
-                                              const DialogSignalCallback& callback)
-{
-   // Get the next callback ID to use.
-   gpointer callbackID = GUINT_TO_POINTER(_callbackID++);
-   // Make that signal on that dialog widget trigger our signal dispatch.
-   g_signal_connect(G_OBJECT(widget), name,
-                    G_CALLBACK(DialogSignalCallbackDispatch), callbackID);
-   // Save the association between callback ID and function.
-   _dialogSignalCallbackMap.insert(std::make_pair(callbackID, callback));
-   // Return the generated unique callback ID.
-   return callbackID;
-}
-
-/**
  * Declare that the controllee widget should be inactive when the
  * controller widget is inactive. The controllee will be active only
  * when all of its controllers allow it to be so.
@@ -250,13 +141,15 @@ GenericPluginUI::RegisterDialogSignalCallback(GtkWidget *widget,
  * @param controllee The controllee widget.
  */
 void
-GenericPluginUI::RegisterWidgetDependence(GtkWidget *controller,
-                                          GtkWidget *controllee)
+GenericPluginUI::RegisterWidgetDependence(QAbstractButton *controller,
+                                          QWidget *controllee)
 {
    // Make sure we get a callback when the controller is toggled.
    if (_widgetControlMap.find(controller) == _widgetControlMap.end())
    {
-      RegisterDialogSignalCallback(controller, "clicked", _widgetControlCallback);
+      QObject::connect( controller, &QAbstractButton::toggled, [this, controller]( bool checked ){
+         WidgetControlCallback( controller );
+      } );
    }
    // Save the association.
    _widgetControlMap[controller].push_back(controllee);
@@ -272,13 +165,15 @@ GenericPluginUI::RegisterWidgetDependence(GtkWidget *controller,
  * @param controllee The controllee widget.
  */
 void
-GenericPluginUI::RegisterWidgetAntiDependence(GtkWidget *controller,
-                                              GtkWidget *controllee)
+GenericPluginUI::RegisterWidgetAntiDependence(QAbstractButton *controller,
+                                              QWidget *controllee)
 {
    // Make sure we get a callback when the controller is toggled.
    if (_widgetControlMap.find(controller) == _widgetControlMap.end())
    {
-      RegisterDialogSignalCallback(controller, "clicked", _widgetControlCallback);
+      QObject::connect( controller, &QAbstractButton::toggled, [this, controller]( bool checked ){
+         WidgetControlCallback( controller );
+      } );
    }
    // Save the association.
    _widgetControlMap[controller].push_back(controllee);
@@ -292,42 +187,35 @@ GenericPluginUI::RegisterWidgetAntiDependence(GtkWidget *controller,
  * @param callbackID Unique numerical ID for the callback.
  */
 void
-GenericPluginUI::WidgetControlCallback(GtkWidget *widget,
-                                       gpointer callbackID)
+GenericPluginUI::WidgetControlCallback( QAbstractButton *button )
 {
    // Iterate over all controllees registered for this widget.
-   std::vector<GtkWidget *>::iterator controlleeIter =
-      _widgetControlMap[widget].begin();
-   for (; controlleeIter != _widgetControlMap[widget].end(); ++controlleeIter)
+   for ( QWidget *controllee : _widgetControlMap[button] )
    {
-      GtkWidget *controllee = *controlleeIter;
-      std::vector<GtkWidget *>::iterator controllerIter;
       // Start with an assumption that the controllee widget will be active.
       bool sensitive = true;
       // Look for a dependence on any widget.
-      controllerIter = _widgetControlledByMap[controllee].begin();
-      for (; controllerIter != _widgetControlledByMap[controllee].end(); ++controllerIter)
+      for ( QAbstractButton *controller : _widgetControlledByMap[controllee] )
       {
          // Dependence found; honor it.
-         if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(*controllerIter)))
+         if ( !controller->isChecked() )
          {
             sensitive = false;
             break;
          }
       }
       // Look for an anti-dependence on any widget.
-      controllerIter = _widgetAntiControlledByMap[controllee].begin();
-      for (; controllerIter != _widgetAntiControlledByMap[controllee].end(); ++controllerIter)
+      for ( QAbstractButton *controller : _widgetAntiControlledByMap[controllee] )
       {
          // Anti-dependence found; honor it.
-         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(*controllerIter)))
+         if ( controller->isChecked() )
          {
             sensitive = false;
             break;
          }
       }
       // Set the active state of the controllee appropriately.
-      gtk_widget_set_sensitive(controllee, sensitive);
+      controllee->setEnabled( sensitive);
    }
 }
 
@@ -342,7 +230,7 @@ GenericPluginUI::ErrorReportDialog(const char *title,
                                    const char *message)
 {
    // Pass this operation to Radiant.
-   GlobalRadiant().m_pfnMessageBox(UIInstance()._window, message, title, eMB_OK, eMB_ICONERROR);
+   GlobalRadiant().m_pfnMessageBox(UIInstance()._window, message, title, EMessageBoxType::Error, 0);
 }
 
 /**
@@ -356,7 +244,7 @@ GenericPluginUI::WarningReportDialog(const char *title,
                                      const char *message)
 {
    // Pass this operation to Radiant.
-   GlobalRadiant().m_pfnMessageBox(UIInstance()._window, message, title, eMB_OK, eMB_ICONWARNING);
+   GlobalRadiant().m_pfnMessageBox(UIInstance()._window, message, title, EMessageBoxType::Warning, 0);
 }
 
 /**
@@ -370,5 +258,5 @@ GenericPluginUI::InfoReportDialog(const char *title,
                                   const char *message)
 {
    // Pass this operation to Radiant.
-   GlobalRadiant().m_pfnMessageBox(UIInstance()._window, message, title, eMB_OK, eMB_ICONDEFAULT);
+   GlobalRadiant().m_pfnMessageBox(UIInstance()._window, message, title, EMessageBoxType::Info, 0);
 }

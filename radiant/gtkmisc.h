@@ -30,39 +30,35 @@
 
 #pragma once
 
+#include <QMenu>
+#include <QToolBar>
+
 void process_gui();
+
+void GlobalShortcuts_setWidget( QWidget *widget );
 
 void command_connect_accelerator( const char* commandName );
 void command_disconnect_accelerator( const char* commandName );
 void toggle_add_accelerator( const char* commandName );
 void toggle_remove_accelerator( const char* name );
 
-typedef struct _GtkMenu GtkMenu;
-typedef struct _GtkMenuItem GtkMenuItem;
-typedef struct _GtkCheckMenuItem GtkCheckMenuItem;
+// this also sets up the shortcut using command_connect_accelerator
+QAction* create_menu_item_with_mnemonic( QMenu *menu, const char *mnemonic, const char* commandName );
+// this also sets up the shortcut using command_connect_accelerator
+QAction* create_check_menu_item_with_mnemonic( QMenu* menu, const char* mnemonic, const char* commandName );
 
 // this also sets up the shortcut using command_connect_accelerator
-GtkMenuItem* create_menu_item_with_mnemonic( GtkMenu *menu, const char *mnemonic, const char* commandName );
+QAction* toolbar_append_button( QToolBar* toolbar, const char* description, const char* icon, const char* commandName );
 // this also sets up the shortcut using command_connect_accelerator
-GtkCheckMenuItem* create_check_menu_item_with_mnemonic( GtkMenu* menu, const char* mnemonic, const char* commandName );
+QAction* toolbar_append_toggle_button( QToolBar* toolbar, const char* description, const char* icon, const char* commandName );
 
-typedef struct _GtkToolButton GtkToolButton;
-typedef struct _GtkToggleToolButton GtkToggleToolButton;
-typedef struct _GtkToolbar GtkToolbar;
-
-// this DOES NOT set up the shortcut using command_connect_accelerator
-GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName );
-// this DOES NOT set up the shortcut using command_connect_accelerator
-GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName );
-
-typedef struct _GtkWidget GtkWidget;
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
-bool color_dialog( GtkWidget *parent, Vector3& color, const char* title = "Choose Color" );
+bool color_dialog( QWidget *parent, Vector3& color, const char* title = "Choose Color" );
 
 #include "string/stringfwd.h"
-bool OpenGLFont_dialog( GtkWidget *parent, const char* font, CopiedString &newfont );
+bool OpenGLFont_dialog( QWidget *parent, const char* font, const int size, CopiedString &newfont, int &newsize );
 
-typedef struct _GtkEntry GtkEntry;
-void button_clicked_entry_browse_file( GtkWidget* widget, GtkEntry* entry );
-void button_clicked_entry_browse_directory( GtkWidget* widget, GtkEntry* entry );
+class QLineEdit;
+void button_clicked_entry_browse_file( QLineEdit* entry );
+void button_clicked_entry_browse_directory( QLineEdit* entry );

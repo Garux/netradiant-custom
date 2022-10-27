@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_ALLOCATEDMATRIX_H)
-#define INCLUDED_ALLOCATEDMATRIX_H
+#pragma once
 
 #include "debugging/debugging.h"
 #include "ipatch.h"
@@ -66,5 +65,3 @@ private: // private member vars
     */
    Element *_allocated;
 };
-
-#endif // #if !defined(INCLUDED_ALLOCATEDMATRIX_H)

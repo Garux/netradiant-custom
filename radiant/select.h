@@ -26,46 +26,26 @@
 void Select_GetBounds( Vector3& mins, Vector3& maxs );
 
 void Select_Delete();
-void Select_Invert();
-void Select_Inside();
-void Select_Touching();
-void Scene_ExpandSelectionToPrimitives();
-void Scene_ExpandSelectionToEntities();
+void deleteSelection();
 
-
-void Selection_MoveDown();
-void Selection_MoveUp();
-
-void Select_AllOfType();
 void Select_EntitiesByKeyValue( const char* key, const char* value );
 
 void Select_ConnectedEntities( bool targeting, bool targets, bool focus );
-void SelectConnectedEntities();
-
-void DoRotateDlg();
-void DoScaleDlg();
 
 
 void Select_SetShader( const char* shader );
 void Select_SetShader_Undo( const char* shader );
 
-class TextureProjection;
-void Select_SetTexdef( const TextureProjection& projection, bool setBasis = true, bool resetBasis = false );
+void Select_SetTexdef( const class TextureProjection& projection, bool setBasis = true, bool resetBasis = false );
 void Select_SetTexdef( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
 
-class ContentsFlagsValue;
-void Select_SetFlags( const ContentsFlagsValue& flags );
+void Select_SetFlags( const class ContentsFlagsValue& flags );
 
-void Select_RotateTexture( float amt );
-void Select_ScaleTexture( float x, float y );
-void Select_ShiftTexture( float x, float y );
-class texdef_t;
-void Select_ProjectTexture( const texdef_t& texdef, const Vector3* direction );
-void Select_ProjectTexture( const TextureProjection& projection, const Vector3& normal );
+void Select_ProjectTexture( const class texdef_t& texdef, const Vector3* direction );
+void Select_ProjectTexture( const class TextureProjection& projection, const Vector3& normal );
 void Select_FitTexture( float horizontal = 1, float vertical = 1, bool only_dimension = false );
 void FindReplaceTextures( const char* pFind, const char* pReplace, bool bSelected );
 
-void HideSelected();
 void Select_ShowAllHidden();
 void Select_registerCommands();
 

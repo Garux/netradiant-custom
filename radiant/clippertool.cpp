@@ -29,9 +29,6 @@
 #include "mainframe.h"
 #include "camwindow.h"
 #include "xywindow.h"
-#include "gtkutil/cursor.h"
-
-GdkCursor* g_clipper_cursor;
 
 ClipperPoints g_clipper_points;
 bool g_clipper_flipped = false;
@@ -94,15 +91,12 @@ void Clipper_SelectionChanged( const Selectable& selectable ){
 
 
 void Clipper_modeChanged( bool isClipper ){
-	GdkCursor* cursor = isClipper? g_clipper_cursor : 0;
-
 	if( g_pParentWnd ){
-		g_pParentWnd->forEachXYWnd( [&cursor]( XYWnd* xywnd ){
-			gdk_window_set_cursor( gtk_widget_get_window( xywnd->GetWidget() ), cursor );
+		g_pParentWnd->forEachXYWnd( [isClipper]( XYWnd* xywnd ){
+			isClipper? xywnd->GetWidget()->setCursor( Qt::CursorShape::PointingHandCursor ) : xywnd->GetWidget()->unsetCursor();
 		} );
 		if( g_pParentWnd->GetCamWnd() )
-			if( !isClipper || !gdk_pointer_is_grabbed() ) /* prevent cursor change `GDK_BLANK_CURSOR->g_clipper_cursor` during freelook */
-				gdk_window_set_cursor( gtk_widget_get_window( CamWnd_getWidget( *g_pParentWnd->GetCamWnd() ) ), cursor );
+			isClipper? CamWnd_getWidget( *g_pParentWnd->GetCamWnd() )->setCursor( Qt::CursorShape::PointingHandCursor ) : CamWnd_getWidget( *g_pParentWnd->GetCamWnd() )->unsetCursor();
 	}
 
 	if( g_clipper_resetFlip )
@@ -173,8 +167,8 @@ void Clipper_tryDoubleclickedCut(){	//onMouseUp
 #include "signal/isignal.h"
 void Clipper_constructPreferences( PreferencesPage& page ){
 	page.appendCheckBox( "", "Caulk Clipper Cuts", g_clipper_caulk );
-	GtkWidget* resetFlip = page.appendCheckBox( "", "Reset Flipped State", g_clipper_resetFlip );
-	GtkWidget* resetPoints = page.appendCheckBox( "", "Reset Points on Split", g_clipper_resetPoints );
+	QCheckBox* resetFlip = page.appendCheckBox( "", "Reset Flipped State", g_clipper_resetFlip );
+	QCheckBox* resetPoints = page.appendCheckBox( "", "Reset Points on Split", g_clipper_resetPoints );
 	Widget_connectToggleDependency( resetFlip, resetPoints );
 	page.appendCheckBox( "", "2 Points in 2D Views", g_clipper_2pointsIn2d );
 	{
@@ -196,16 +190,14 @@ void Clipper_registerPreferencesPage(){
 }
 
 void Clipper_registerCommands(){
-	GlobalCommands_insert( "ClipperClip", FreeCaller<Clipper_doClip>(), Accelerator( GDK_KEY_Return ) );
-	GlobalCommands_insert( "ClipperSplit", FreeCaller<Clipper_doSplit>(), Accelerator( GDK_KEY_Return, GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "ClipperFlip", FreeCaller<Clipper_doFlip>(), Accelerator( GDK_KEY_Return, GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "ClipperClip", FreeCaller<Clipper_doClip>(), QKeySequence( "Return" ) );
+	GlobalCommands_insert( "ClipperSplit", FreeCaller<Clipper_doSplit>(), QKeySequence( "Shift+Return" ) );
+	GlobalCommands_insert( "ClipperFlip", FreeCaller<Clipper_doFlip>(), QKeySequence( "Ctrl+Return" ) );
 }
 
 SignalHandlerId ClipperTool_boundsChanged;
 
 void Clipper_Construct(){
-	g_clipper_cursor = gdk_cursor_new( GDK_HAND2 );
-
 	Clipper_registerCommands();
 	GlobalPreferenceSystem().registerPreference( "ClipperCaulk", BoolImportStringCaller( g_clipper_caulk ), BoolExportStringCaller( g_clipper_caulk ) );
 	GlobalPreferenceSystem().registerPreference( "ClipperResetFlip", BoolImportStringCaller( g_clipper_resetFlip ), BoolExportStringCaller( g_clipper_resetFlip ) );
@@ -221,6 +213,5 @@ void Clipper_Construct(){
 }
 
 void Clipper_Destroy(){
-	gdk_cursor_unref( g_clipper_cursor );
 	GlobalSceneGraph().removeBoundsChangedCallback( ClipperTool_boundsChanged );
 }

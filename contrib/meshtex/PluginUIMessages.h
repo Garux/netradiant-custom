@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_PLUGINUIMESSAGES_H)
-#define INCLUDED_PLUGINUIMESSAGES_H
+#pragma once
 
 #include "GenericPluginUIMessages.h"
 #include "PluginProperties.h"
@@ -43,10 +42,10 @@
 //@{
 #define DIALOG_MULTIMESHES_ERROR "Must select only one patch mesh for this function."
 #define DIALOG_NOMESHES_MSG "No valid patch meshes selected."
-#define DIALOG_ABOUT_MSG PLUGIN_NAME " " PLUGIN_VERSION "\n\n" PLUGIN_DESCRIPTION "\n\n" PLUGIN_AUTHOR " (" PLUGIN_AUTHOR_EMAIL ")"
+#define DIALOG_ABOUT_MSG PLUGIN_NAME " " PLUGIN_VERSION "<br><br>" PLUGIN_DESCRIPTION "<br><br>" PLUGIN_AUTHOR " ( <a href='mailto:" PLUGIN_AUTHOR_EMAIL "'>" PLUGIN_AUTHOR_EMAIL "</a> )"
 #define DIALOG_HELP_MSG "The Set S/T Scale, Get Info, and General Function dialogs will affect patch meshes that are selected when OK or Apply is clicked. " \
-                        "For the other menu options, select the mesh(es) before selecting the option.\n\n" \
-                        "http://neogeographica.com/site/pages/tools/meshtex.html"
+                        "For the other menu options, select the mesh(es) before selecting the option.<br><br>" \
+                        "<a href='http://neogeographica.com/site/pages/tools/meshtex.html'>http://neogeographica.com/site/pages/tools/meshtex.html</a>"
 //@}
 
 /// @name Get Info
@@ -90,5 +89,3 @@
 #define DIALOG_GEN_FUNC_REF_COL_FRAME_LABEL DIALOG_SET_SCALE_T_REF_COL_OPT_LABEL " (for distances)"
 #define DIALOG_GEN_FUNC_REF_TOTAL_OPT_LABEL DIALOG_SET_SCALE_REF_TOTAL_OPT_LABEL
 //@}
-
-#endif // #if !defined(INCLUDED_PLUGINUIMESSAGES_H)

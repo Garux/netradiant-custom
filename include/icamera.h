@@ -60,5 +60,4 @@ struct _QERCameraTable
 
 	PFN_GETCAMERA m_pfnGetCamera;
 	PFN_SETCAMERA m_pfnSetCamera;
-	PFN_GETCAMWINDOWEXTENTS m_pfnGetCamWindowExtents;
 };

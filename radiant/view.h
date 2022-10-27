@@ -186,7 +186,7 @@ public:
 		return m_fill;
 	}
 	const Vector3& getViewer() const {
-		return vector4_to_vector3( m_viewer );
+		return m_viewer.vec3();
 	}
 	const Vector3& getViewDir() const {
 		return m_viewdir;

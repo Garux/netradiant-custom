@@ -61,7 +61,7 @@ void LoadLists(){
 
 void DoCTFColourChanger(){
 	if ( !clrLst1Loaded || !clrLst2Loaded ) {
-		DoMessageBox( "CTF texture lists not found, this function will terminate.", "Error", MB_OK );
+		DoMessageBox( "CTF texture lists not found, this function will terminate.", "Error", EMessageBoxType::Error );
 		return;
 	}
 

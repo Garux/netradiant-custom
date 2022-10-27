@@ -30,19 +30,16 @@
 
 #pragma once
 
-#include "qerplugin.h"
 #include "string/string.h"
 
-EMessageBoxReturn DoLightIntensityDlg( int *intensity );
-EMessageBoxReturn DoShaderTagDlg( CopiedString& tag, const char* title );
-EMessageBoxReturn DoShaderInfoDlg( const char* name, const char* filename, const char* title );
-EMessageBoxReturn DoTextureLayout( float *fx, float *fy );
+bool DoLightIntensityDlg( int *intensity );
+void DoShaderInfoDlg( const char* name, const char* filename, const char* title );
 void DoShaderView( const char *shaderFileName, const char *shaderName, bool external_editor );
 
-void DoProjectSettings();
+void Game_constructPreferences( class PreferencesPage& page );
 
-void DoFind();
-void DoSides( int type, int axis );
+enum class EBrushPrefab;
+void DoSides( EBrushPrefab type );
 void DoAbout();
 
 

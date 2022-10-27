@@ -22,7 +22,6 @@
 #include "undo.h"
 
 #include "debugging/debugging.h"
-#include "warnings.h"
 
 #include "iundo.h"
 #include "preferencesystem.h"
@@ -398,7 +397,7 @@ typedef ConstReferenceCaller1<RadiantUndoSystem, const IntImportCallback&, UndoL
 
 
 void Undo_constructPreferences( RadiantUndoSystem& undo, PreferencesPage& page ){
-	page.appendSpinner( "Undo Queue Size", 512, 0, 4096, IntImportCallback( UndoLevelsImportCaller( undo ) ), IntExportCallback( UndoLevelsExportCaller( undo ) ) );
+	page.appendSpinner( "Undo Queue Size", 0, 4096, IntImportCallback( UndoLevelsImportCaller( undo ) ), IntExportCallback( UndoLevelsExportCaller( undo ) ) );
 }
 void Undo_constructPage( RadiantUndoSystem& undo, PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Undo", "Undo Queue Settings" ) );
@@ -444,6 +443,7 @@ StaticRegisterModule staticRegisterUndoSystem( StaticUndoSystemModule::instance(
 
 
 
+#if 0
 
 class undoable_test : public Undoable
 {
@@ -484,7 +484,6 @@ public:
 	}
 };
 
-#if 0
 
 class TestUndo
 {

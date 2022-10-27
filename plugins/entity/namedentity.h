@@ -180,7 +180,7 @@ RenderableNamedEntity( const NamedEntity& named, const Vector3& position )
 	: m_named( named ), m_position( position ){
 }
 void render( RenderStateFlags state ) const {
-	glRasterPos3fv( vector3_to_array( m_position ) );
+	gl().glRasterPos3fv( vector3_to_array( m_position ) );
 	GlobalOpenGL().drawString( g_showTargetNames ? m_named.name() : m_named.classname() );
 }
 };

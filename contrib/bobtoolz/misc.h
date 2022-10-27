@@ -39,6 +39,7 @@ void BuildMiniPrt( std::list<Str>* exclusionList );
 void MoveBlock( int dir, vec3_t min, vec3_t max, float dist );
 void SetInitialStairPos( int dir, vec3_t min, vec3_t max, float width );
 
+const scene::Path* FindEntityFromTarget( const char* target );
 const scene::Path* FindEntityFromTargetname( const char* targetname );
 
 char* UnixToDosPath( char* path );
@@ -50,5 +51,5 @@ float Determinant3x3( float a1, float a2, float a3,
                       float b1, float b2, float b3,
                       float c1, float c2, float c3 );
 
-bool GetEntityCentre( const char* entity, vec3_t centre );
+bool GetEntityCentre( const char* entityKey, bool keyIsTarget, vec3_t centre );
 void MakeNormal( const vec_t* va, const vec_t* vb, const vec_t* vc, vec_t* out );

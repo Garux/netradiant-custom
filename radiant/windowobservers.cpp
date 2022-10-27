@@ -22,8 +22,11 @@
 #include "windowobservers.h"
 
 #include <vector>
-#include <gdk/gdk.h>
 #include "generic/bitfield.h"
+
+#include <QWidget>
+#include <QMouseEvent>
+#include <QKeyEvent>
 
 namespace
 {
@@ -31,68 +34,69 @@ ModifierFlags g_modifier_state = c_modifierNone;
 }
 
 typedef std::vector<WindowObserver*> WindowObservers;
+WindowObservers g_window_observers;
 
 inline void WindowObservers_OnModifierDown( WindowObservers& observers, ModifierFlags type ){
 	g_modifier_state = bitfield_enable( g_modifier_state, type );
-	for ( WindowObservers::iterator i = observers.begin(); i != observers.end(); ++i )
+	for ( auto observer : observers )
 	{
-		( *i )->onModifierDown( type );
+		observer->onModifierDown( type );
 	}
 }
 
 inline void WindowObservers_OnModifierUp( WindowObservers& observers, ModifierFlags type ){
 	g_modifier_state = bitfield_disable( g_modifier_state, type );
-	for ( WindowObservers::iterator i = observers.begin(); i != observers.end(); ++i )
+	for ( auto observer : observers )
 	{
-		( *i )->onModifierUp( type );
+		observer->onModifierUp( type );
 	}
 }
 
-#include <gdk/gdkkeysyms.h>
 
-gboolean selection_modifier_key_press( GtkWidget* widget, GdkEventKey* event, WindowObservers& observers ){
-	switch ( event->keyval )
-	{
-	case GDK_KEY_Alt_L:
-	case GDK_KEY_Alt_R:
-		//globalOutputStream() << "Alt PRESSED\n";
-		WindowObservers_OnModifierDown( observers, c_modifierAlt );
-		break;
-	case GDK_KEY_Shift_L:
-	case GDK_KEY_Shift_R:
-		//globalOutputStream() << "Shift PRESSED\n";
-		WindowObservers_OnModifierDown( observers, c_modifierShift );
-		break;
-	case GDK_KEY_Control_L:
-	case GDK_KEY_Control_R:
-		//globalOutputStream() << "Control PRESSED\n";
-		WindowObservers_OnModifierDown( observers, c_modifierControl );
-		break;
+class : public QObject
+{
+protected:
+	bool eventFilter( QObject *obj, QEvent *event ) override {
+		if( event->type() == QEvent::KeyPress ) {
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			switch ( keyEvent->key() )
+			{
+			case Qt::Key_Alt:
+				//globalOutputStream() << "Alt PRESSED\n";
+				WindowObservers_OnModifierDown( g_window_observers, c_modifierAlt );
+				break;
+			case Qt::Key_Shift:
+				//globalOutputStream() << "Shift PRESSED\n";
+				WindowObservers_OnModifierDown( g_window_observers, c_modifierShift );
+				break;
+			case Qt::Key_Control:
+				//globalOutputStream() << "Control PRESSED\n";
+				WindowObservers_OnModifierDown( g_window_observers, c_modifierControl );
+				break;
+			}
+		}
+		else if( event->type() == QEvent::KeyRelease ) {
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			switch ( keyEvent->key() )
+			{
+			case Qt::Key_Alt:
+				//globalOutputStream() << "Alt RELEASED\n";
+				WindowObservers_OnModifierUp( g_window_observers, c_modifierAlt );
+				break;
+			case Qt::Key_Shift:
+				//globalOutputStream() << "Shift RELEASED\n";
+				WindowObservers_OnModifierUp( g_window_observers, c_modifierShift );
+				break;
+			case Qt::Key_Control:
+				//globalOutputStream() << "Control RELEASED\n";
+				WindowObservers_OnModifierUp( g_window_observers, c_modifierControl );
+				break;
+			}
+		}
+		return QObject::eventFilter( obj, event ); // standard event processing
 	}
-	return FALSE;
 }
-
-gboolean selection_modifier_key_release( GtkWidget* widget, GdkEventKey* event, WindowObservers& observers ){
-	switch ( event->keyval )
-	{
-	case GDK_KEY_Alt_L:
-	case GDK_KEY_Alt_R:
-		//globalOutputStream() << "Alt RELEASED\n";
-		WindowObservers_OnModifierUp( observers, c_modifierAlt );
-		break;
-	case GDK_KEY_Shift_L:
-	case GDK_KEY_Shift_R:
-		//globalOutputStream() << "Shift RELEASED\n";
-		WindowObservers_OnModifierUp( observers, c_modifierShift );
-		break;
-	case GDK_KEY_Control_L:
-	case GDK_KEY_Control_R:
-		//globalOutputStream() << "Control RELEASED\n";
-		WindowObservers_OnModifierUp( observers, c_modifierControl );
-		break;
-	}
-	return FALSE;
-}
+g_keyboard_event_filter;
 
 void WindowObservers_UpdateModifier( WindowObservers& observers, ModifierFlags modifiers, ModifierFlags modifier ){
 	if ( !bitfield_enabled( g_modifier_state, modifier ) && bitfield_enabled( modifiers, modifier ) ) {
@@ -109,43 +113,30 @@ void WindowObservers_UpdateModifiers( WindowObservers& observers, ModifierFlags 
 	WindowObservers_UpdateModifier( observers, modifiers, c_modifierControl );
 }
 
-gboolean modifiers_button_press( GtkWidget* widget, GdkEventButton* event, WindowObservers* observers ){
-	if ( event->type == GDK_BUTTON_PRESS ) {
-		WindowObservers_UpdateModifiers( *observers, modifiers_for_state( event->state ) );
+
+class : public QObject
+{
+protected:
+	bool eventFilter( QObject *obj, QEvent *event ) override {
+		if( event->type() == QEvent::MouseButtonPress
+		 || event->type() == QEvent::MouseMove
+		 || event->type() == QEvent::MouseButtonRelease ) {
+			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>( event );
+			WindowObservers_UpdateModifiers( g_window_observers, modifiers_for_state( mouseEvent->modifiers() ) );
+		}
+		return QObject::eventFilter( obj, event ); // standard event processing
 	}
-	return FALSE;
 }
-
-gboolean modifiers_button_release( GtkWidget* widget, GdkEventButton* event, WindowObservers* observers ){
-	if ( event->type == GDK_BUTTON_RELEASE ) {
-		WindowObservers_UpdateModifiers( *observers, modifiers_for_state( event->state ) );
-	}
-	return FALSE;
-}
-
-gboolean modifiers_motion( GtkWidget *widget, GdkEventMotion *event, WindowObservers* observers ){
-	WindowObservers_UpdateModifiers( *observers, modifiers_for_state( event->state ) );
-	return FALSE;
-}
-
-
-WindowObservers g_window_observers;
-
-void GlobalWindowObservers_updateModifiers( ModifierFlags modifiers ){
-	WindowObservers_UpdateModifiers( g_window_observers, modifiers );
-}
+g_mouse_event_filter;
 
 void GlobalWindowObservers_add( WindowObserver* observer ){
 	g_window_observers.push_back( observer );
 }
 
-void GlobalWindowObservers_connectTopLevel( GtkWindow* window ){
-	g_signal_connect( G_OBJECT( window ), "key_press_event", G_CALLBACK( selection_modifier_key_press ), &g_window_observers );
-	g_signal_connect( G_OBJECT( window ), "key_release_event", G_CALLBACK( selection_modifier_key_release ), &g_window_observers );
+void GlobalWindowObservers_connectTopLevel( QWidget* window ){
+	window->installEventFilter( &g_keyboard_event_filter );
 }
 
-void GlobalWindowObservers_connectWidget( GtkWidget* widget ){
-	g_signal_connect( G_OBJECT( widget ), "button_press_event", G_CALLBACK( modifiers_button_press ), &g_window_observers );
-	g_signal_connect( G_OBJECT( widget ), "button_release_event", G_CALLBACK( modifiers_button_release ), &g_window_observers );
-	g_signal_connect( G_OBJECT( widget ), "motion_notify_event", G_CALLBACK( modifiers_motion ), &g_window_observers );
+void GlobalWindowObservers_connectWidget( QWidget* widget ){
+	widget->installEventFilter( &g_mouse_event_filter );
 }

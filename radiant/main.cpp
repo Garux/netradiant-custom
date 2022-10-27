@@ -69,13 +69,12 @@
 
 #include "iundo.h"
 
-#include <gtk/gtk.h>
-
 #include "commandlib.h"
 #include "os/file.h"
 #include "os/path.h"
 #include "stream/stringstream.h"
 #include "stream/textfilestream.h"
+#include "character.h"
 
 #include "gtkutil/messagebox.h"
 #include "gtkutil/image.h"
@@ -90,127 +89,11 @@
 #include "stacktrace.h"
 #include "error.h"
 
+#include <QApplication>
+#include "gtkutil/glwidget.h"
+
 void show_splash();
 void hide_splash();
-
-void error_redirect( const gchar *domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data ){
-	gboolean in_recursion;
-	gboolean is_fatal;
-	char buf[256];
-
-	in_recursion = ( log_level & G_LOG_FLAG_RECURSION ) != 0;
-	is_fatal = ( log_level & G_LOG_FLAG_FATAL ) != 0;
-	log_level = (GLogLevelFlags) ( log_level & G_LOG_LEVEL_MASK );
-
-	if ( !message ) {
-		message = "(0) message";
-	}
-
-	if ( domain ) {
-		strcpy( buf, domain );
-	}
-	else{
-		strcpy( buf, "**" );
-	}
-	strcat( buf, "-" );
-
-	switch ( log_level )
-	{
-	case G_LOG_LEVEL_ERROR:
-		if ( in_recursion ) {
-			strcat( buf, "ERROR (recursed) **: " );
-		}
-		else{
-			strcat( buf, "ERROR **: " );
-		}
-		break;
-	case G_LOG_LEVEL_CRITICAL:
-		if ( in_recursion ) {
-			strcat( buf, "CRITICAL (recursed) **: " );
-		}
-		else{
-			strcat( buf, "CRITICAL **: " );
-		}
-		break;
-	case G_LOG_LEVEL_WARNING:
-		if ( in_recursion ) {
-			strcat( buf, "WARNING (recursed) **: " );
-		}
-		else{
-			strcat( buf, "WARNING **: " );
-		}
-		break;
-	case G_LOG_LEVEL_MESSAGE:
-		if ( in_recursion ) {
-			strcat( buf, "Message (recursed): " );
-		}
-		else{
-			strcat( buf, "Message: " );
-		}
-		break;
-	case G_LOG_LEVEL_INFO:
-		if ( in_recursion ) {
-			strcat( buf, "INFO (recursed): " );
-		}
-		else{
-			strcat( buf, "INFO: " );
-		}
-		break;
-	case G_LOG_LEVEL_DEBUG:
-		if ( in_recursion ) {
-			strcat( buf, "DEBUG (recursed): " );
-		}
-		else{
-			strcat( buf, "DEBUG: " );
-		}
-		break;
-	default:
-		/* we are used for a log level that is not defined by GLib itself,
-		 * try to make the best out of it.
-		 */
-		if ( in_recursion ) {
-			strcat( buf, "LOG (recursed:" );
-		}
-		else{
-			strcat( buf, "LOG (" );
-		}
-		if ( log_level ) {
-			gchar string[] = "0x00): ";
-			gchar *p = string + 2;
-			guint i;
-
-			i = g_bit_nth_msf( log_level, -1 );
-			*p = i >> 4;
-			p++;
-			*p = '0' + ( i & 0xf );
-			if ( *p > '9' ) {
-				*p += 'A' - '9' - 1;
-			}
-
-			strcat( buf, string );
-		}
-		else{
-			strcat( buf, "): " );
-		}
-	}
-
-	strcat( buf, message );
-	if ( is_fatal ) {
-		strcat( buf, "\naborting...\n" );
-	}
-	else{
-		strcat( buf, "\n" );
-	}
-
-	// spam it...
-	globalErrorStream() << buf << "\n";
-
-	// FIXME why are warnings is_fatal?
-#ifndef _DEBUG
-	if ( is_fatal )
-#endif
-		ERROR_MESSAGE( "GTK+ error: " << buf );
-}
 
 #if defined ( _DEBUG ) && defined ( WIN32 ) && defined ( _MSC_VER )
 #include "crtdbg.h"
@@ -222,6 +105,28 @@ void crt_init(){
 #endif
 }
 
+void qute_messageHandler( QtMsgType type, const QMessageLogContext &context, const QString &msg )
+{
+	static StringOutputStream buf( 256 );
+	buf.clear();
+	switch (type)
+	{
+	case QtInfoMsg:     buf << "QT INF "; break;
+	case QtDebugMsg:    buf << "QT DBG "; break;
+	case QtWarningMsg:  buf << "QT WRN "; break;
+	case QtCriticalMsg: buf << "QT CRT "; break;
+	case QtFatalMsg:    buf << "QT FTL "; break;
+	}
+	buf << context.category << ": " << msg.toLatin1().constData() << '\n';
+	switch (type)
+	{
+	case QtInfoMsg:
+	case QtDebugMsg:    globalOutputStream() << buf; break;
+	case QtWarningMsg:  globalWarningStream() << buf; break;
+	case QtCriticalMsg:
+	case QtFatalMsg:    globalErrorStream() << buf; break;
+	}
+}
 class Lock
 {
 	bool m_locked;
@@ -302,12 +207,12 @@ public:
 			ScopedLock lock( m_lock );
 #if defined _DEBUG
 			m_buffer << "Break into the debugger?\n";
-			bool handled = gtk_MessageBox( 0, m_buffer.c_str(), "Radiant - Runtime Error", eMB_YESNO, eMB_ICONERROR ) == eIDNO;
+			bool handled = qt_MessageBox( 0, m_buffer.c_str(), "Radiant - Runtime Error", EMessageBoxType::Error, eIDYES | eIDNO ) == eIDNO;
 			m_buffer.clear();
 			return handled;
 #else
 			m_buffer << "Please report this error to the developers\n";
-			gtk_MessageBox( 0, m_buffer.c_str(), "Radiant - Runtime Error", eMB_OK, eMB_ICONERROR );
+			qt_MessageBox( 0, m_buffer.c_str(), "Radiant - Runtime Error", EMessageBoxType::Error );
 			m_buffer.clear();
 #endif
 		}
@@ -326,7 +231,7 @@ void streams_init(){
 void paths_init(){
 	const char* home = environment_get_home_path();
 
-	if( !g_str_is_ascii( home ) )
+	if( !string_is_ascii( home ) )
 		Error( "Home path is not ASCII: %s", home );
 
 	Q_mkdir( home );
@@ -341,7 +246,7 @@ void paths_init(){
 
 	g_strAppPath = environment_get_app_path();
 
-	if( !g_str_is_ascii( g_strAppPath.c_str() ) )
+	if( !string_is_ascii( g_strAppPath.c_str() ) )
 		Error( "Radiant path is not ASCII: %s", g_strAppPath.c_str() );
 
 	// radiant is installed in the parent dir of "tools/"
@@ -403,7 +308,7 @@ bool check_version(){
 		msg << "This editor binary (" RADIANT_VERSION ") doesn't match what the latest setup has configured in this directory\n"
 		       "Make sure you run the right/latest editor binary you installed\n"
 		    << AppPath_get();
-		gtk_MessageBox( 0, msg.c_str(), "Radiant", eMB_OK, eMB_ICONDEFAULT );
+		qt_MessageBox( 0, msg.c_str(), "Radiant" );
 	}
 	return bVerIsGood;
 #else
@@ -431,7 +336,7 @@ void create_global_pid(){
 		if ( remove( g_pidFile.c_str() ) == -1 ) {
 			StringOutputStream msg( 256 );
 			msg << "WARNING: Could not delete " << g_pidFile.c_str();
-			gtk_MessageBox( 0, msg.c_str(), "Radiant", eMB_OK, eMB_ICONERROR );
+			qt_MessageBox( 0, msg.c_str(), "Radiant", EMessageBoxType::Error );
 		}
 
 		// in debug, never prompt to clean registry, turn console logging auto after a failed start
@@ -441,14 +346,14 @@ void create_global_pid(){
 		       "The failure may be related to current global preferences.\n"
 		       "Do you want to reset global preferences to defaults?";
 
-		if ( gtk_MessageBox( 0, msg.c_str(), "Radiant - Startup Failure", eMB_YESNO, eMB_ICONQUESTION ) == eIDYES ) {
+		if ( qt_MessageBox( 0, msg.c_str(), "Radiant - Startup Failure", EMessageBoxType::Question ) == eIDYES ) {
 			g_GamesDialog.Reset();
 		}
 
 		msg.clear();
 		msg << "Logging console output to " << SettingsPath_get() << "radiant.log\nRefer to the log if Radiant fails to start again.";
 
-		gtk_MessageBox( 0, msg.c_str(), "Radiant - Console Log", eMB_OK );
+		qt_MessageBox( 0, msg.c_str(), "Radiant - Console Log" );
 #endif
 
 		// set without saving, the class is not in a coherent state yet
@@ -472,7 +377,7 @@ void remove_global_pid(){
 	if ( remove( g_pidFile.c_str() ) == -1 ) {
 		StringOutputStream msg( 256 );
 		msg << "WARNING: Could not delete " << g_pidFile.c_str();
-		gtk_MessageBox( 0, msg.c_str(), "Radiant", eMB_OK, eMB_ICONERROR );
+		qt_MessageBox( 0, msg.c_str(), "Radiant", EMessageBoxType::Error );
 	}
 }
 
@@ -490,7 +395,7 @@ void create_local_pid(){
 		if ( remove( g_pidGameFile.c_str() ) == -1 ) {
 			StringOutputStream msg;
 			msg << "WARNING: Could not delete " << g_pidGameFile.c_str();
-			gtk_MessageBox( 0, msg.c_str(), "Radiant", eMB_OK, eMB_ICONERROR );
+			qt_MessageBox( 0, msg.c_str(), "Radiant", EMessageBoxType::Error );
 		}
 
 		// in debug, never prompt to clean registry, turn console logging auto after a failed start
@@ -500,14 +405,14 @@ void create_local_pid(){
 		       "The failure may be caused by current preferences.\n"
 		       "Do you want to reset all preferences to defaults?";
 
-		if ( gtk_MessageBox( 0, msg.c_str(), "Radiant - Startup Failure", eMB_YESNO, eMB_ICONQUESTION ) == eIDYES ) {
+		if ( qt_MessageBox( 0, msg.c_str(), "Radiant - Startup Failure", EMessageBoxType::Question ) == eIDYES ) {
 			Preferences_Reset();
 		}
 
 		msg.clear();
 		msg << "Logging console output to " << SettingsPath_get() << "radiant.log\nRefer to the log if Radiant fails to start again.";
 
-		gtk_MessageBox( 0, msg.c_str(), "Radiant - Console Log", eMB_OK );
+		qt_MessageBox( 0, msg.c_str(), "Radiant - Console Log" );
 #endif
 
 		// force console logging on! (will go in prefs too)
@@ -535,44 +440,6 @@ void remove_local_pid(){
 	remove( g_pidGameFile.c_str() );
 }
 
-void add_local_rc_files(){
-	{
-		StringOutputStream path( 512 );
-		path << AppPath_get() << ".gtkrc-2.0.radiant";
-		gtk_rc_add_default_file( path.c_str() );
-	}
-#ifdef WIN32
-	{
-		StringOutputStream path( 512 );
-		path << AppPath_get() << ".gtkrc-2.0.win";
-		gtk_rc_add_default_file( path.c_str() );
-	}
-#endif
-}
-
-#ifdef WIN32
-/* as in windows packages we are using local font file for entity names to avoid long parsing of all system fonts by fontconfig,
-   let's also write local.conf with absolute path to local fonts/ dir, as fonts.conf has no opportunity to get it, when pwd != radiant/
-   ( when starting radiant by opening .map, associated to one, for example ) */
-void fontconfig_workaround(){
-	StringOutputStream path( 1024 );
-	path << AppPath_get() << "etc/fonts/local.conf";
-
-	TextFileOutputStream file( path.c_str() );
-	if ( !file.failed() ) {
-		file << "<?xml version=\"1.0\"?>\n\
-<!DOCTYPE fontconfig SYSTEM \"fonts.dtd\">\n\
-<fontconfig>\n\
-	<its:rules xmlns:its=\"http://www.w3.org/2005/11/its\" version=\"1.0\">\n\
-		<its:translateRule translate=\"no\" selector=\"/fontconfig/*[not(self::description)]\"/>\n\
-	</its:rules>\n\
-\n\
-	<description>Load font from local dir</description>\n\
-		<dir>" << AppPath_get() << "etc/fonts</dir>\n\
-</fontconfig>\n";
-	}
-}
-#endif
 
 int main( int argc, char* argv[] ){
 	crt_init();
@@ -583,33 +450,27 @@ int main( int argc, char* argv[] ){
 	_setmaxstdio(2048);
 #endif
 
-	gtk_disable_setlocale();
-
-	gtk_init( &argc, &argv );
-
-	// redirect Gtk warnings to the console
-	g_log_set_handler( "Gdk", (GLogLevelFlags)( G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
-	                                            G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
-	g_log_set_handler( "Gtk", (GLogLevelFlags)( G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
-	                                            G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
-	g_log_set_handler( "GtkGLExt", (GLogLevelFlags)( G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
-	                                                 G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
-	g_log_set_handler( "GLib", (GLogLevelFlags)( G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
-	                                             G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
-	g_log_set_handler( 0, (GLogLevelFlags)( G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
-	                                        G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION ), error_redirect, 0 );
+	glwidget_setDefaultFormat(); // must go before QApplication instantiation
+#ifdef WIN32
+	std::vector<char*> args( argv, argv + argc );
+	args.push_back( string_clone( "-platform" ) );
+	args.push_back( string_clone( "windows:darkmode=1" ) );
+	args.push_back( nullptr );
+	argc += 2;
+	argv = args.data();
+#endif
+	QApplication qapplication( argc, argv );
+	setlocale( LC_NUMERIC, "C" );
+	qInstallMessageHandler( qute_messageHandler );
+	QCoreApplication::setOrganizationName( "QtRadiant" );
+	QCoreApplication::setApplicationName( "NetRadiant-Custom" );
+	QCoreApplication::setApplicationVersion( QT_VERSION_STR );
 
 	GlobalDebugMessageHandler::instance().setHandler( GlobalPopupDebugMessageHandler::instance() );
 
 	environment_init( argc, argv );
 
 	paths_init();
-
-	add_local_rc_files();
-
-#ifdef WIN32
-	fontconfig_workaround();
-#endif
 
 	if ( !check_version() ) {
 		return EXIT_FAILURE;
@@ -643,8 +504,6 @@ int main( int argc, char* argv[] ){
 
 	Radiant_Initialise();
 
-	global_accel_init();
-
 //	user_shortcuts_init();
 
 	g_pParentWnd = 0;
@@ -662,15 +521,14 @@ int main( int argc, char* argv[] ){
 	{
 		Map_New();
 	}
-
 	// load up shaders now that we have the map loaded
 	// eviltypeguy
-	TextureBrowser_ShowStartupShaders( GlobalTextureBrowser() );
+	TextureBrowser_ShowStartupShaders();
 
 
 	remove_local_pid();
 
-	gtk_main();
+	qapplication.exec();
 
 	Map_Free();
 
@@ -681,8 +539,6 @@ int main( int argc, char* argv[] ){
 	delete g_pParentWnd;
 
 //	user_shortcuts_save();
-
-	global_accel_destroy();
 
 	Radiant_Shutdown();
 

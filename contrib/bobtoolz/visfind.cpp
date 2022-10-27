@@ -141,7 +141,7 @@ void AddCluster( DMetaSurfaces* pointlist, dleaf_t    *cl, bool* repeatlist, con
 
 		qdrawVert_t* vert = &drawVerts[surf->firstVert];
 		if ( surf->firstVert + surf->numVerts > numDrawVerts ) {
-			DoMessageBox( "Warning", "Warning", eMB_OK );
+			DoMessageBox( "Warning", "Warning", EMessageBoxType::Warning );
 		}
 
 		DMetaSurf* meta = new DMetaSurf( surf->numVerts, surf->numIndexes );

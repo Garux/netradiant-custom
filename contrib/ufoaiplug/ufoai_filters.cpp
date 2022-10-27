@@ -219,7 +219,7 @@ void filter_level( int flag ){
 	}
 	else
 	{
-		globalOutputStream() << "UFO:AI: Found " << Unsigned( brushes.size() ) << " brushes.\n";
+		globalOutputStream() << "UFO:AI: Found " << brushes.size() << " brushes.\n";
 	}
 
 	// now let's filter all entities like misc_model, func_breakable and func_door that have the spawnflags set
@@ -228,7 +228,7 @@ void filter_level( int flag ){
 	}
 	else
 	{
-		globalOutputStream() << "UFO:AI: Found " << Unsigned( entities.size() ) << " entities.\n";
+		globalOutputStream() << "UFO:AI: Found " << entities.size() << " entities.\n";
 	}
 #endif
 }
@@ -248,7 +248,7 @@ void filter_stepon( void ){
 	}
 	else
 	{
-		globalOutputStream() << "UFO:AI: Hiding " << Unsigned( brushes.size() ) << " stepon brushes.\n";
+		globalOutputStream() << "UFO:AI: Hiding " << brushes.size() << " stepon brushes.\n";
 	}
 }
 
@@ -268,7 +268,7 @@ void filter_nodraw( void ){
 	}
 	else
 	{
-		globalOutputStream() << "UFO:AI: Hiding " << Unsigned( brushes.size() ) << " nodraw brushes.\n";
+		globalOutputStream() << "UFO:AI: Hiding " << brushes.size() << " nodraw brushes.\n";
 	}
 #endif
 }
@@ -289,7 +289,7 @@ void filter_actorclip( void ){
 	}
 	else
 	{
-		globalOutputStream() << "UFO:AI: Hiding " << Unsigned( brushes.size() ) << " actorclip brushes.\n";
+		globalOutputStream() << "UFO:AI: Hiding " << brushes.size() << " actorclip brushes.\n";
 	}
 #endif
 }
@@ -310,7 +310,7 @@ void filter_weaponclip( void ){
 	}
 	else
 	{
-		globalOutputStream() << "UFO:AI: Hiding " << Unsigned( brushes.size() ) << " weaponclip brushes.\n";
+		globalOutputStream() << "UFO:AI: Hiding " << brushes.size() << " weaponclip brushes.\n";
 	}
 #endif
 }

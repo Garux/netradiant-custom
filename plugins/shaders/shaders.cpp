@@ -48,8 +48,6 @@
 #include "qerplugin.h"
 #include "irender.h"
 
-#include <glib.h>
-
 #include "debugging/debugging.h"
 #include "string/pooledstring.h"
 #include "math/vector.h"

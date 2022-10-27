@@ -73,7 +73,7 @@ PluginModule::QERPluginInit(void *hApp,
                             void *pMainWidget)
 {
    // Inform the UI of the main app window.
-   UIInstance().SetWindow((GtkWidget *)pMainWidget);
+   UIInstance().SetWindow(static_cast<QWidget*>(pMainWidget));
    // Return the plugin name.
    return PLUGIN_NAME;
 }

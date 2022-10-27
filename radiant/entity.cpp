@@ -52,11 +52,7 @@
 
 struct entity_globals_t
 {
-	Vector3 color_entity;
-
-	entity_globals_t() :
-		color_entity( 0.0f, 0.0f, 0.0f ){
-	}
+	Vector3 color_entity = { 0.0f, 0.0f, 0.0f };
 };
 
 entity_globals_t g_entity_globals;
@@ -384,13 +380,13 @@ int g_iLastLightIntensity;
 void Entity_createFromSelection( const char* name, const Vector3& origin ){
 #if 0
 	if ( string_equal_nocase( name, "worldspawn" ) ) {
-		gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), "Can't create an entity with worldspawn.", "info" );
+		qt_MessageBox( MainFrame_getWindow(), "Can't create an entity with worldspawn.", "info" );
 		return;
 	}
 #else
 	const scene::Node* world_node = Map_FindWorldspawn( g_map );
 	if ( world_node && string_equal( name, "worldspawn" ) ) {
-//		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( MainFrame_getWindow() ), "There's already a worldspawn in your map!", "Info", eMB_OK, eMB_ICONDEFAULT );
+//		GlobalRadiant().m_pfnMessageBox( MainFrame_getWindow(), "There's already a worldspawn in your map!", "Info", EMessageBoxType::Info, 0 );
 		UndoableCommand undo( "ungroupSelectedPrimitives" );
 		Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), Map_FindOrInsertWorldspawn( g_map ) ); //=no action, if no worldspawn (but one inserted) (since insertion deselects everything)
 		//Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), *Map_FindWorldspawn( g_map ) ); = crash, if no worldspawn
@@ -468,7 +464,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 		  || string_equal_nocase( name, "light_spot" ) ) {
 			int intensity = g_iLastLightIntensity;
 
-			if ( DoLightIntensityDlg( &intensity ) == eIDOK ) {
+			if ( DoLightIntensityDlg( &intensity ) ) {
 				g_iLastLightIntensity = intensity;
 				char buf[30];
 				sprintf( buf, "255 255 255 %d", intensity );
@@ -480,7 +476,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 		if ( g_pGameDescription->mGameType != "doom3" ) {
 			int intensity = g_iLastLightIntensity;
 
-			if ( DoLightIntensityDlg( &intensity ) == eIDOK ) {
+			if ( DoLightIntensityDlg( &intensity ) ) {
 				g_iLastLightIntensity = intensity;
 				char buf[10];
 				sprintf( buf, "%d", intensity );
@@ -499,7 +495,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 	}
 
 	if ( isModel && string_empty( EntityClass_valueForKey( *entityClass, entityClass->miscmodel_key() ) ) ) { // handle set default model key value : no dialog needed
-		const char* model = misc_model_dialog( GTK_WIDGET( MainFrame_getWindow() ) );
+		const char* model = misc_model_dialog( MainFrame_getWindow() );
 		if ( model != 0 ) {
 			entity->setKeyValue( entityClass->miscmodel_key(), model );
 		}
@@ -571,7 +567,7 @@ void Entity_setColour(){
 					g_entity_globals.color_entity = rgb;
 				}
 			}
-			if ( color_dialog( GTK_WIDGET( MainFrame_getWindow() ), g_entity_globals.color_entity ) ) {
+			if ( color_dialog( MainFrame_getWindow(), g_entity_globals.color_entity ) ) {
 				char buffer[128];
 				sprintf( buffer, "%g %g %g", g_entity_globals.color_entity[0],
 				                             g_entity_globals.color_entity[1],
@@ -586,7 +582,7 @@ void Entity_setColour(){
 	}
 }
 
-const char* misc_model_dialog( GtkWidget* parent, const char* filepath ){
+const char* misc_model_dialog( QWidget* parent, const char* filepath ){
 	StringOutputStream buffer( 1024 );
 
 	if( !string_empty( filepath ) ){
@@ -672,11 +668,11 @@ typedef ReferenceCaller1<EntityCreator, const BoolImportCallback&, ShowTargetNam
 
 
 void Entity_constructPreferences( PreferencesPage& page ){
-	page.appendSpinner(	"Names Display Distance (3D)", 512.0, 0.0, 200500.0,
+	page.appendSpinner(	"Names Display Distance (3D)", 0.0, 200500.0,
 	                    IntImportCallback( ShowNamesDistImportCaller( GlobalEntityCreator() ) ),
 	                    IntExportCallback( ShowNamesDistExportCaller( GlobalEntityCreator() ) )
 	                  );
-	page.appendSpinner(	"Names Display Ratio (2D)", 64.0, 0.0, 100500.0,
+	page.appendSpinner(	"Names Display Ratio (2D)", 0.0, 100500.0,
 	                    IntImportCallback( ShowNamesRatioImportCaller( GlobalEntityCreator() ) ),
 	                    IntExportCallback( ShowNamesRatioExportCaller( GlobalEntityCreator() ) )
 	                  );
@@ -705,14 +701,14 @@ void ToggleShowLightRadii(){
 	UpdateAllWindows();
 }
 
-void Entity_constructMenu( GtkMenu* menu ){
-	create_menu_item_with_mnemonic( menu, "_Connect Entities", "EntitiesConnect" );
+void Entity_constructMenu( QMenu* menu ){
+	create_menu_item_with_mnemonic( menu, "&Connect Entities", "EntitiesConnect" );
 	if ( g_pGameDescription->mGameType == "nexuiz" || g_pGameDescription->mGameType == "q1" ) {
-		create_menu_item_with_mnemonic( menu, "_KillConnect Entities", "EntitiesKillConnect" );
+		create_menu_item_with_mnemonic( menu, "&KillConnect Entities", "EntitiesKillConnect" );
 	}
-	create_menu_item_with_mnemonic( menu, "_Move Primitives to Entity", "EntityMovePrimitivesToLast" );
-	create_menu_item_with_mnemonic( menu, "_Select Color...", "EntityColorSet" );
-	create_menu_item_with_mnemonic( menu, "_Normalize Color", "EntityColorNormalize" );
+	create_menu_item_with_mnemonic( menu, "&Move Primitives to Entity", "EntityMovePrimitivesToLast" );
+	create_menu_item_with_mnemonic( menu, "&Select Color...", "EntityColorSet" );
+	create_menu_item_with_mnemonic( menu, "&Normalize Color", "EntityColorNormalize" );
 }
 
 void Entity_registerShortcuts(){
@@ -727,12 +723,12 @@ void Entity_registerShortcuts(){
 #include "stringio.h"
 
 void Entity_Construct(){
-	GlobalCommands_insert( "EntityColorSet", FreeCaller<Entity_setColour>(), Accelerator( 'K' ) );
+	GlobalCommands_insert( "EntityColorSet", FreeCaller<Entity_setColour>(), QKeySequence( "K" ) );
 	GlobalCommands_insert( "EntityColorNormalize", FreeCaller<Entity_normalizeColor>() );
-	GlobalCommands_insert( "EntitiesConnect", FreeCaller<Entity_connectSelected>(), Accelerator( 'K', GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "EntitiesConnect", FreeCaller<Entity_connectSelected>(), QKeySequence( "Ctrl+K" ) );
 	if ( g_pGameDescription->mGameType == "nexuiz" || g_pGameDescription->mGameType == "q1" )
-		GlobalCommands_insert( "EntitiesKillConnect", FreeCaller<Entity_killconnectSelected>(), Accelerator( 'K', GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "EntityMovePrimitivesToLast", FreeCaller<Entity_moveSelectedPrimitivesToLast>(), Accelerator( 'M', GDK_CONTROL_MASK ) );
+		GlobalCommands_insert( "EntitiesKillConnect", FreeCaller<Entity_killconnectSelected>(), QKeySequence( "Shift+K" ) );
+	GlobalCommands_insert( "EntityMovePrimitivesToLast", FreeCaller<Entity_moveSelectedPrimitivesToLast>(), QKeySequence( "Ctrl+M" ) );
 	GlobalCommands_insert( "EntityMovePrimitivesToFirst", FreeCaller<Entity_moveSelectedPrimitivesToFirst>() );
 	GlobalCommands_insert( "EntityUngroup", FreeCaller<Entity_ungroup>() );
 	GlobalCommands_insert( "EntityUngroupPrimitives", FreeCaller<Entity_ungroupSelectedPrimitives>() );

@@ -23,14 +23,12 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtk/gtk.h>
-
 #include "GenericDialog.h"
 #include "GenericPluginUI.h"
 
 
 /**
- * Constructor. Create the GTK+ widget for the dialog window (not visible
+ * Constructor. Create the Qt widget for the dialog window (not visible
  * yet). Initialize callback IDs to zero (invalid). Note that as this is a
  * protected method, GenericDialog objects cannot be created directly; only
  * subclasses of GenericDialog can be created.
@@ -38,29 +36,21 @@
  * @param key Unique key to identify this dialog widget.
  */
 GenericDialog::GenericDialog(const std::string& key) :
-   _dialog(gtk_window_new(GTK_WINDOW_TOPLEVEL)),
-   _window(NULL),
+   _dialog(new QDialog( nullptr, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint )),
+   _window(nullptr),
    _key(key),
    _okCallbackID(0),
    _applyCallbackID(0),
    _cancelCallbackID(0)
 {
-   // XXX Should we go ahead invoke CreateWindowCloseCallback here (and make it
-   // private) rather than leaving that to the subclass constructors? Depends on
-   // whether it's plausible that a dialog would ever NOT want the usual
-   // handling for the close event.
 }
 
 /**
- * Virtual destructor. Destroy the GTK+ dialog widget (and therefore its
- * contained widgets) if necessary.
+ * Virtual destructor.
  */
 GenericDialog::~GenericDialog()
 {
-   if (_dialog != NULL)
-   {
-      gtk_widget_destroy(_dialog);
-   }
+   // destroyed by parent
 }
 
 /**
@@ -80,14 +70,14 @@ GenericDialog::GetKey() const
  * @param window The parent window.
  */
 void
-GenericDialog::SetWindow(GtkWidget *window)
+GenericDialog::SetWindow(QWidget *window)
 {
    // Remember the parent window.
    _window = window;
    // Mark this widget as a modal dialog for it.
-   if (_dialog != NULL)
+   if (_dialog != nullptr)
    {
-      gtk_window_set_transient_for(GTK_WINDOW(_dialog), GTK_WINDOW(_window));
+      static_cast<QObject*>( _dialog )->setParent( _window );
    }
 }
 
@@ -98,9 +88,10 @@ void
 GenericDialog::Raise()
 {
    // Don't bother if not visible.
-   if (gtk_widget_get_visible(_dialog))
+   if (_dialog->isVisible())
    {
-      gdk_window_raise(gtk_widget_get_window( _dialog ));
+      _dialog->raise();
+      _dialog->activateWindow();
    }
 }
 
@@ -116,9 +107,9 @@ GenericDialog::Show(const std::string& triggerCommand)
    // use of this information.
    _triggerCommand = triggerCommand;
    // Show the window if it is currently hidden.
-   if (!gtk_widget_get_visible(_dialog))
+   if (!_dialog->isVisible())
    {
-      gtk_widget_show(_dialog);
+      _dialog->show();
    }
    // Raise the window to the top of the stack.
    Raise();
@@ -131,18 +122,10 @@ void
 GenericDialog::Hide()
 {
    // Bail out if the window is already invisible.
-   if (!gtk_widget_get_visible(_dialog))
+   if (_dialog->isVisible())
    {
-      return;
+      _dialog->hide();
    }
-   // Hide the window.
-   gtk_widget_hide(_dialog);
-   // If there's a parent window, raise it to the top of the stack.
-   if (_window == NULL)
-   {
-      return;
-   }
-   gdk_window_raise(gtk_widget_get_window(_window));
 }
 
 /**
@@ -162,33 +145,13 @@ GenericDialog::Apply()
 }
 
 /**
- * Callback for window-close event.
- *
- * @param widget     This dialog window widget.
- * @param event      The event that instigated the callback.
- * @param callbackID Unique numerical ID for the callback.
- *
- * @return TRUE as defined by glib.
- */
-gint
-GenericDialog::CloseEventCallback(GtkWidget *widget,
-                                  GdkEvent* event,
-                                  gpointer callbackID)
-{
-   // All we need to do is hide the window.
-   Hide();
-   return TRUE;
-}
-
-/**
  * Callback for clicking on OK/Apply/Cancel button.
  *
  * @param widget     This dialog window widget.
  * @param callbackID Unique numerical ID for the callback.
  */
 void
-GenericDialog::FinalizeCallback(GtkWidget *widget,
-                                gpointer callbackID)
+GenericDialog::FinalizeCallback(QAbstractButton *callbackID)
 {
    // Assume success until we have to do something.
    bool success = true;
@@ -205,32 +168,18 @@ GenericDialog::FinalizeCallback(GtkWidget *widget,
 }
 
 /**
- * Register the callback for the close-window event.
- */
-void
-GenericDialog::CreateWindowCloseCallback()
-{
-   // The close-window event will trigger the CloseEventCallback method.
-   const GenericPluginUI::DialogEventCallbackMethod
-      <GenericDialog, &GenericDialog::CloseEventCallback> closeCallback(*this);
-   UIInstance().RegisterDialogEventCallback(_dialog, "delete_event", closeCallback);
-}
-
-/**
  * Register the callback for the OK button.
  *
  * @param button The OK button widget.
  */
 void
-GenericDialog::CreateOkButtonCallback(GtkWidget *button)
+GenericDialog::CreateOkButtonCallback(QAbstractButton *button)
 {
    // Clicking the OK button will trigger the FinalizeCallback method. Since
    // FinalizeCallback can be used for multiple buttons, we'll save the specific
    // callback ID associated with the OK button.
-   const GenericPluginUI::DialogSignalCallbackMethod
-      <GenericDialog, &GenericDialog::FinalizeCallback> finalizeCallback(*this);
-   _okCallbackID =
-      UIInstance().RegisterDialogSignalCallback(button, "clicked", finalizeCallback);
+   _okCallbackID = button;
+   QObject::connect( button, &QAbstractButton::clicked, [this, button](){ FinalizeCallback( button ); } );
 }
 
 /**
@@ -239,15 +188,13 @@ GenericDialog::CreateOkButtonCallback(GtkWidget *button)
  * @param button The Apply button widget.
  */
 void
-GenericDialog::CreateApplyButtonCallback(GtkWidget *button)
+GenericDialog::CreateApplyButtonCallback(QAbstractButton *button)
 {
    // Clicking the Apply button will trigger the FinalizeCallback method. Since
    // FinalizeCallback can be used for multiple buttons, we'll save the specific
    // callback ID associated with the Apply button.
-   const GenericPluginUI::DialogSignalCallbackMethod
-      <GenericDialog, &GenericDialog::FinalizeCallback> finalizeCallback(*this);
-   _applyCallbackID =
-      UIInstance().RegisterDialogSignalCallback(button, "clicked", finalizeCallback);
+   _applyCallbackID = button;
+   QObject::connect( button, &QAbstractButton::clicked, [this, button](){ FinalizeCallback( button ); } );
 }
 
 /**
@@ -256,13 +203,11 @@ GenericDialog::CreateApplyButtonCallback(GtkWidget *button)
  * @param button The Cancel button widget.
  */
 void
-GenericDialog::CreateCancelButtonCallback(GtkWidget *button)
+GenericDialog::CreateCancelButtonCallback(QAbstractButton *button)
 {
    // Clicking the Cancel button will trigger the FinalizeCallback method. Since
    // FinalizeCallback can be used for multiple buttons, we'll save the specific
    // callback ID associated with the Cancel button.
-   const GenericPluginUI::DialogSignalCallbackMethod
-      <GenericDialog, &GenericDialog::FinalizeCallback> finalizeCallback(*this);
-   _cancelCallbackID =
-      UIInstance().RegisterDialogSignalCallback(button, "clicked", finalizeCallback);
+   _cancelCallbackID = button;
+   QObject::connect( button, &QAbstractButton::clicked, [this, button](){ FinalizeCallback( button ); } );
 }

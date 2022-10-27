@@ -19,13 +19,13 @@
 
 #pragma once
 
-class DBobView;
-class DVisDrawer;
+#include <memory>
+
 class DTrainDrawer;
 class DTreePlanter;
 
-extern DBobView* g_PathView;
-extern DVisDrawer* g_VisView;
+extern std::unique_ptr<class DBobView> g_PathView;
+extern std::unique_ptr<class DVisDrawer> g_VisView;
 extern DTrainDrawer* g_TrainView;
 extern DTreePlanter* g_TreePlanter;
 

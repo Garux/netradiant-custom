@@ -34,8 +34,6 @@
 
 #include "gtkmisc.h"
 
-#include <gtk/gtk.h>
-
 #include "math/vector.h"
 #include "os/path.h"
 
@@ -43,142 +41,164 @@
 #include "gtkutil/filechooser.h"
 #include "gtkutil/menu.h"
 #include "gtkutil/toolbar.h"
+#include "gtkutil/image.h"
 #include "commands.h"
+
+#include <QCoreApplication>
+#include <QLineEdit>
+#include <QFontDialog>
 
 
 void process_gui(){
-	while ( gtk_events_pending() )
-	{
-		gtk_main_iteration();
-	}
+	QCoreApplication::processEvents();
 }
 
 // =============================================================================
 // Misc stuff
 
-void command_connect_accelerator( const char* name ){
-	const Command& command = GlobalCommands_find( name );
+static QWidget *g_shortcuts_widget = nullptr;
+
+void GlobalShortcuts_setWidget( QWidget *widget ){
+	g_shortcuts_widget = widget;
+}
+
+inline QAction* command_connect_accelerator( const Command& command ){
+	QAction *&action = command.getAction();
+	if( action == nullptr ){
+		action = new QAction( g_shortcuts_widget );
+		g_shortcuts_widget->addAction( action );
+		action->setShortcutContext( Qt::ShortcutContext::ApplicationShortcut );
+		QObject::connect( action, &QAction::triggered, command.m_callback );
+	}
+	action->setShortcut( command.m_accelerator );
+	return action;
+}
+
+
+inline QAction* command_connect_accelerator_( const char* name ){
 	GlobalShortcuts_register( name, 1 );
-	global_accel_group_connect( command.m_accelerator, command.m_callback );
+	return command_connect_accelerator( GlobalCommands_find( name ) );
+}
+
+void command_connect_accelerator( const char* name ){
+	command_connect_accelerator_( name );
 }
 
 void command_disconnect_accelerator( const char* name ){
 	const Command& command = GlobalCommands_find( name );
-	global_accel_group_disconnect( command.m_accelerator, command.m_callback );
+	if( command.getAction() != nullptr )
+		command.getAction()->setShortcut( {} );
+}
+
+
+static void action_set_checked_callback( QAction& action, bool enabled ){
+	action.setChecked( enabled );
+}
+typedef ReferenceCaller1<QAction, bool, action_set_checked_callback> ActionSetCheckedCaller;
+
+inline QAction* toggle_add_accelerator_( const char* name ){
+	GlobalShortcuts_register( name, 2 );
+	const Toggle& toggle = GlobalToggles_find( name );
+	auto action = command_connect_accelerator( toggle.m_command );
+	action->setCheckable( true );
+	toggle.m_exportCallback( ActionSetCheckedCaller( *action ) );
+	return action;
 }
 
 void toggle_add_accelerator( const char* name ){
-	const Toggle& toggle = GlobalToggles_find( name );
-	GlobalShortcuts_register( name, 2 );
-	global_accel_group_connect( toggle.m_command.m_accelerator, toggle.m_command.m_callback );
+	toggle_add_accelerator_( name );
 }
 
 void toggle_remove_accelerator( const char* name ){
 	const Toggle& toggle = GlobalToggles_find( name );
-	global_accel_group_disconnect( toggle.m_command.m_accelerator, toggle.m_command.m_callback );
+	if( toggle.m_command.getAction() != nullptr )
+		toggle.m_command.getAction()->setShortcut( {} );
 }
 
-GtkCheckMenuItem* create_check_menu_item_with_mnemonic( GtkMenu* menu, const char* mnemonic, const char* commandName ){
-	GlobalShortcuts_register( commandName, 2 );
-	const Toggle& toggle = GlobalToggles_find( commandName );
-	global_accel_group_connect( toggle.m_command.m_accelerator, toggle.m_command.m_callback );
-	return create_check_menu_item_with_mnemonic( menu, mnemonic, toggle );
+
+QAction* create_check_menu_item_with_mnemonic( QMenu* menu, const char* mnemonic, const char* commandName ){
+	auto action = toggle_add_accelerator_( commandName );
+	action->setText( mnemonic );
+	menu->addAction( action );
+	return action;
 }
 
-GtkMenuItem* create_menu_item_with_mnemonic( GtkMenu* menu, const char *mnemonic, const char* commandName ){
-	GlobalShortcuts_register( commandName, 1 );
-	const Command& command = GlobalCommands_find( commandName );
-	global_accel_group_connect( command.m_accelerator, command.m_callback );
-	return create_menu_item_with_mnemonic( menu, mnemonic, command );
+QAction* create_menu_item_with_mnemonic( QMenu *menu, const char *mnemonic, const char* commandName ){
+	auto action = command_connect_accelerator_( commandName );
+	action->setText( mnemonic );
+	menu->addAction( action );
+	return action;
 }
 
-GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName ){
-	return toolbar_append_button( toolbar, description, icon, GlobalCommands_find( commandName ) );
-}
 
-GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName ){
-	return toolbar_append_toggle_button( toolbar, description, icon, GlobalToggles_find( commandName ) );
-}
-
-// =============================================================================
-// File dialog
-
-bool color_dialog( GtkWidget *parent, Vector3& color, const char* title ){
-	GtkWidget* dlg;
-	GdkColor clr = { 0, guint16( color[0] * 65535 ),
-	                    guint16( color[1] * 65535 ),
-	                    guint16( color[2] * 65535 ) };
-	ModalDialog dialog;
-
-	dlg = gtk_color_selection_dialog_new( title );
-	gtk_color_selection_set_current_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection( GTK_COLOR_SELECTION_DIALOG( dlg ) ) ), &clr );
-	g_signal_connect( G_OBJECT( dlg ), "delete_event", G_CALLBACK( dialog_delete_callback ), &dialog );
-	GtkWidget *ok_button, *cancel_button;
-	g_object_get( G_OBJECT( dlg ), "ok-button", &ok_button, "cancel-button", &cancel_button, nullptr );
-	g_signal_connect( G_OBJECT( ok_button ), "clicked", G_CALLBACK( dialog_button_ok ), &dialog );
-	g_signal_connect( G_OBJECT( cancel_button ), "clicked", G_CALLBACK( dialog_button_cancel ), &dialog );
-
-	if ( parent != 0 ) {
-		gtk_window_set_transient_for( GTK_WINDOW( dlg ), GTK_WINDOW( parent ) );
+// can update this on QAction::changed() signal, but it's called too often and even on setChecked(); let's only have this on construction
+static void toolbar_action_set_tooltip( QAction *action, const char *description ){
+	if( QKeySequence_valid( action->shortcut() ) ){
+		QString out;
+		const char *p = description;
+		for( ; *p && *p != '\n'; ++p ) // append 1st line
+			out += *p;
+		out += " (";
+		out += action->shortcut().toString();  // append shortcut
+		out += ")";
+		for( ; *p; ++p )  // append the rest
+			out += *p;
+		action->setToolTip( out );
 	}
-
-	bool ok = modal_dialog_show( GTK_WINDOW( dlg ), dialog ) == eIDOK;
-	if ( ok ) {
-		gtk_color_selection_get_current_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection( GTK_COLOR_SELECTION_DIALOG( dlg ) ) ), &clr );
-		color[0] = clr.red / 65535.0;
-		color[1] = clr.green / 65535.0;
-		color[2] = clr.blue / 65535.0;
+	else{
+		action->setToolTip( description );
 	}
+}
 
-	gtk_widget_destroy( dlg );
+QAction* toolbar_append_button( QToolBar* toolbar, const char* description, const char* icon, const char* commandName ){
+	auto action = command_connect_accelerator_( commandName );
+	action->setIcon( new_local_icon( icon ) );
+	toolbar_action_set_tooltip( action, description );
+	toolbar->addAction( action );
+	return action;
+}
 
+QAction* toolbar_append_toggle_button( QToolBar* toolbar, const char* description, const char* icon, const char* commandName ){
+	auto action = toggle_add_accelerator_( commandName );
+	action->setIcon( new_local_icon( icon ) );
+	toolbar_action_set_tooltip( action, description );
+	toolbar->addAction( action );
+	return action;
+}
+
+#include <QColorDialog>
+bool color_dialog( QWidget *parent, Vector3& color, const char* title ){
+	const QColor clr = QColorDialog::getColor( QColor::fromRgbF( color[0], color[1], color[2] ), parent, title );
+
+	if( clr.isValid() )
+		color = Vector3( clr.redF(), clr.greenF(), clr.blueF() );
+	return clr.isValid();
+}
+
+bool OpenGLFont_dialog( QWidget *parent, const char* font, const int size, CopiedString &newfont, int &newsize ){
+	bool ok;
+	QFont f = QFontDialog::getFont( &ok, QFont( font, size ), parent );
+	if( ok ){
+		newfont = f.family().toLatin1().constData();
+		newsize = f.pointSize();
+	}
 	return ok;
 }
 
-bool OpenGLFont_dialog( GtkWidget *parent, const char* font, CopiedString &newfont ){
-	GtkWidget* dlg;
-	ModalDialog dialog;
-
-
-	dlg = gtk_font_selection_dialog_new( "OpenGLFont" );
-	gtk_font_selection_dialog_set_font_name( GTK_FONT_SELECTION_DIALOG( dlg ), font );
-
-	g_signal_connect( G_OBJECT( dlg ), "delete_event", G_CALLBACK( dialog_delete_callback ), &dialog );
-	g_signal_connect( G_OBJECT( gtk_font_selection_dialog_get_ok_button( GTK_FONT_SELECTION_DIALOG( dlg ) ) ), "clicked", G_CALLBACK( dialog_button_ok ), &dialog );
-	g_signal_connect( G_OBJECT( gtk_font_selection_dialog_get_cancel_button( GTK_FONT_SELECTION_DIALOG( dlg ) ) ), "clicked", G_CALLBACK( dialog_button_cancel ), &dialog );
-
-	if ( parent != 0 ) {
-		gtk_window_set_transient_for( GTK_WINDOW( dlg ), GTK_WINDOW( parent ) );
-	}
-
-	bool ok = modal_dialog_show( GTK_WINDOW( dlg ), dialog ) == eIDOK;
-	if ( ok ) {
-		gchar* selectedfont = gtk_font_selection_dialog_get_font_name( GTK_FONT_SELECTION_DIALOG( dlg ) );
-		newfont = selectedfont;
-		g_free( selectedfont );
-	}
-
-	gtk_widget_destroy( dlg );
-
-	return ok;
-}
-
-void button_clicked_entry_browse_file( GtkWidget* widget, GtkEntry* entry ){
-	const char *filename = file_dialog( gtk_widget_get_toplevel( widget ), true, "Choose File", gtk_entry_get_text( entry ) );
+void button_clicked_entry_browse_file( QLineEdit* entry ){
+	const char *filename = file_dialog( entry, true, "Choose File", entry->text().toLatin1().constData() );
 
 	if ( filename != 0 ) {
-		gtk_entry_set_text( entry, filename );
+		entry->setText( filename );
 	}
 }
 
-void button_clicked_entry_browse_directory( GtkWidget* widget, GtkEntry* entry ){
-	const char* text = gtk_entry_get_text( entry );
-	char *dir = dir_dialog( gtk_widget_get_toplevel( widget ), "Choose Directory", path_is_absolute( text ) ? text : "" );
+void button_clicked_entry_browse_directory( QLineEdit* entry ){
+	const QString dir = dir_dialog( entry,
+		path_is_absolute( entry->text().toLatin1().constData() )
+		? entry->text()
+		: QString() );
 
-	if ( dir != 0 ) {
-		gchar* converted = g_filename_to_utf8( dir, -1, 0, 0, 0 );
-		gtk_entry_set_text( entry, converted );
-		g_free( dir );
-		g_free( converted );
-	}
+	if ( !dir.isEmpty() )
+		entry->setText( dir );
 }

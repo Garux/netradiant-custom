@@ -29,7 +29,6 @@
 
 #include "math/vector.h"
 #include "stream/stringstream.h"
-#include <glib.h>
 #include "xmlstuff.h"
 #include "dialog.h"
 #include "xywindow.h"
@@ -163,28 +162,23 @@ public:
 	void Draw2D( VIEWTYPE vt );
 };
 
-typedef struct _GtkListStore GtkListStore;
-
 class CDbgDlg : public Dialog
 {
-	GPtrArray *m_pFeedbackElements;
+	std::vector<ISAXHandler*> m_feedbackElements;
 // the list widget we use in the dialog
-	GtkListStore* m_clist;
-	ISAXHandler *m_pHighlight;
-	IGL2DWindow* m_pDraw2D;
+	class QTreeWidget *m_clist{};
+	ISAXHandler *m_pHighlight{};
+	IGL2DWindow* m_pDraw2D{};
 public:
-	CDbgDlg(){
-		m_pFeedbackElements = g_ptr_array_new();
-		m_pHighlight = NULL;
-		m_pDraw2D = NULL;
-	}
 // refresh items
 	void Push( ISAXHandler * );
 // clean the debug window, release all ISAXHanlders we have
 	void Init();
-	ISAXHandler *GetElement( std::size_t row );
-	void SetHighlight( gint row );
+private:
+	void feedback_selection_changed( class QTreeWidgetItem *current );
+	void SetHighlight( std::size_t row );
 	void DropHighlight();
+public:
 	void draw2D( VIEWTYPE viewType ){
 		if ( m_pDraw2D != 0 ) {
 			m_pDraw2D->Draw2D( viewType );
@@ -197,7 +191,7 @@ public:
 	}
 //  void HideDlg();
 protected:
-	GtkWindow* BuildDialog();
+	void BuildDialog() override;
 };
 
 extern CDbgDlg g_DbgDlg;

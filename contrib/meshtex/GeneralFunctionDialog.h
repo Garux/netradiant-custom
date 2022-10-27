@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_GENERALFUNCTIONDIALOG_H)
-#define INCLUDED_GENERALFUNCTIONDIALOG_H
+#pragma once
 
 #include "GenericDialog.h"
 #include "MeshVisitor.h"
@@ -35,7 +34,7 @@
  * for setting S and T values as a linear combination of various factors.
  *
  * @image html genfunc.png
- * 
+ *
  * @ingroup meshtex-ui
  */
 class GeneralFunctionDialog : public GenericDialog
@@ -75,11 +74,26 @@ public: // public methods
 
 private: // private member vars
 
+   QRadioButton *surface;
+
+   QCheckBox *s_apply;
+   QDoubleSpinBox *s_oldval, *s_rowdist, *s_coldist, *s_rownum, *s_colnum, *s_constant;
+   QCheckBox *t_apply;
+   QDoubleSpinBox *t_oldval, *t_rowdist, *t_coldist, *t_rownum, *t_colnum, *t_constant;
+
+   QSpinBox *col_num_align;
+   QGroupBox *row_ref;
+   QSpinBox *row_num_ref;
+   QCheckBox *row_ref_total;
+
+   QSpinBox *row_num_align;
+   QGroupBox *col_ref;
+   QSpinBox *col_num_ref;
+   QCheckBox *col_ref_total;
+
    /**
     * Action-less mesh visitor used purely to count the number of selected mesh
     * entities.
     */
    SmartPointer<MeshVisitor> _nullVisitor;
 };
-
-#endif // #if !defined(INCLUDED_GENERALFUNCTIONDIALOG_H)

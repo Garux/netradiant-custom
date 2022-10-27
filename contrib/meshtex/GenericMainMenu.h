@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_GENERICMAINMENU_H)
-#define INCLUDED_GENERICMAINMENU_H
+#pragma once
 
 #include <string>
 #include <map>
@@ -45,7 +44,7 @@
  * Framework for a Radiant plugin's main menu. This object handles the menu
  * logic: what commands exist and how to execute them. The actual menu
  * display is handled by Radiant.
- * 
+ *
  * A subclass should handle creating the command list.
  *
  * @ingroup generic-ui
@@ -152,5 +151,3 @@ private: // private member vars
     */
    DialogMap _dialogMap;
 };
-
-#endif // #if !defined(INCLUDED_GENERICMAINMENU_H)

@@ -83,9 +83,9 @@ PluginUI::Instance()
 {
    //static PluginUI singleton;
    //return singleton;
-    if(!singleton)
-            singleton = new PluginUI();
-        return *singleton;
+   if(!singleton)
+      singleton = new PluginUI();
+   return *singleton;
 }
 
 /**

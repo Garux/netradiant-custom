@@ -21,8 +21,7 @@
 
 #pragma once
 
-class ModuleServer;
-ModuleServer& GlobalModuleServer_get();
+class ModuleServer& GlobalModuleServer_get();
 void GlobalModuleServer_loadModule( const char* filename );
 void GlobalModuleServer_Initialise();
 void GlobalModuleServer_Shutdown();

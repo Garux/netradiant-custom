@@ -74,7 +74,7 @@ void sphere_draw_fill( const Vector3& origin, float radius, int sides ){
 	const double dt = c_2pi / static_cast<double>( sides );
 	const double dp = c_pi / static_cast<double>( sides );
 
-	glBegin( GL_TRIANGLES );
+	gl().glBegin( GL_TRIANGLES );
 	for ( int i = 0; i <= sides - 1; ++i )
 	{
 		for ( int j = 0; j <= sides - 2; ++j )
@@ -84,32 +84,32 @@ void sphere_draw_fill( const Vector3& origin, float radius, int sides ){
 
 			{
 				Vector3 v( vector3_added( origin, vector3_scaled( vector3_for_spherical( t, p ), radius ) ) );
-				glVertex3fv( vector3_to_array( v ) );
+				gl().glVertex3fv( vector3_to_array( v ) );
 			}
 
 			{
 				Vector3 v( vector3_added( origin, vector3_scaled( vector3_for_spherical( t, p + dp ), radius ) ) );
-				glVertex3fv( vector3_to_array( v ) );
+				gl().glVertex3fv( vector3_to_array( v ) );
 			}
 
 			{
 				Vector3 v( vector3_added( origin, vector3_scaled( vector3_for_spherical( t + dt, p + dp ), radius ) ) );
-				glVertex3fv( vector3_to_array( v ) );
+				gl().glVertex3fv( vector3_to_array( v ) );
 			}
 
 			{
 				Vector3 v( vector3_added( origin, vector3_scaled( vector3_for_spherical( t, p ), radius ) ) );
-				glVertex3fv( vector3_to_array( v ) );
+				gl().glVertex3fv( vector3_to_array( v ) );
 			}
 
 			{
 				Vector3 v( vector3_added( origin, vector3_scaled( vector3_for_spherical( t + dt, p + dp ), radius ) ) );
-				glVertex3fv( vector3_to_array( v ) );
+				gl().glVertex3fv( vector3_to_array( v ) );
 			}
 
 			{
 				Vector3 v( vector3_added( origin, vector3_scaled( vector3_for_spherical( t + dt, p ), radius ) ) );
-				glVertex3fv( vector3_to_array( v ) );
+				gl().glVertex3fv( vector3_to_array( v ) );
 			}
 		}
 	}
@@ -122,21 +122,21 @@ void sphere_draw_fill( const Vector3& origin, float radius, int sides ){
 
 			{
 				Vector3 v( vector3_added( origin, vector3_scaled( vector3_for_spherical( t, p ), radius ) ) );
-				glVertex3fv( vector3_to_array( v ) );
+				gl().glVertex3fv( vector3_to_array( v ) );
 			}
 
 			{
 				Vector3 v( vector3_added( origin, vector3_scaled( vector3_for_spherical( t + dt, p + dp ), radius ) ) );
-				glVertex3fv( vector3_to_array( v ) );
+				gl().glVertex3fv( vector3_to_array( v ) );
 			}
 
 			{
 				Vector3 v( vector3_added( origin, vector3_scaled( vector3_for_spherical( t + dt, p ), radius ) ) );
-				glVertex3fv( vector3_to_array( v ) );
+				gl().glVertex3fv( vector3_to_array( v ) );
 			}
 		}
 	}
-	glEnd();
+	gl().glEnd();
 }
 
 void light_draw_radius_fill( const Vector3& origin, const float envelope[3] ){
@@ -202,12 +202,12 @@ void sphere_construct_fill( Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
 }
 
 void sphere_draw_fill( const Vector3& origin, float radius, const Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
-	glBegin( GL_TRIANGLE_STRIP );
+	gl().glBegin( GL_TRIANGLE_STRIP );
 	for ( int i = 0; i < SPHERE_FILL_POINTS; ++i )
 	{
-		glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[i], radius ) ) ) );
+		gl().glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[i], radius ) ) ) );
 	}
-	glEnd();
+	gl().glEnd();
 }
 
 	#elif 0 // triangles
@@ -310,12 +310,12 @@ void sphere_construct_fill( Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
 		#endif
 
 void sphere_draw_fill( const Vector3& origin, float radius, const Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
-	glBegin( GL_TRIANGLES );
+	gl().glBegin( GL_TRIANGLES );
 	for ( int i = 0; i < SPHERE_FILL_POINTS; ++i )
 	{
-		glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[i], radius ) ) ) );
+		gl().glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[i], radius ) ) ) );
 	}
-	glEnd();
+	gl().glEnd();
 }
 
 	#endif
@@ -337,57 +337,57 @@ void light_draw_radius_fill( const Vector3& origin, const float envelope[3], con
 #if 0 //old straight calculations + render
 void sphere_draw_wire( const Vector3& origin, float radius, int sides ){
 	{
-		glBegin( GL_LINE_LOOP );
+		gl().glBegin( GL_LINE_LOOP );
 
 		for ( int i = 0; i <= sides; i++ )
 		{
 			double ds = sin( ( i * 2 * c_pi ) / sides );
 			double dc = cos( ( i * 2 * c_pi ) / sides );
 
-			glVertex3f(
+			gl().glVertex3f(
 			    static_cast<float>( origin[0] + radius * dc ),
 			    static_cast<float>( origin[1] + radius * ds ),
 			    origin[2]
 			);
 		}
 
-		glEnd();
+		gl().glEnd();
 	}
 
 	{
-		glBegin( GL_LINE_LOOP );
+		gl().glBegin( GL_LINE_LOOP );
 
 		for ( int i = 0; i <= sides; i++ )
 		{
 			double ds = sin( ( i * 2 * c_pi ) / sides );
 			double dc = cos( ( i * 2 * c_pi ) / sides );
 
-			glVertex3f(
+			gl().glVertex3f(
 			    static_cast<float>( origin[0] + radius * dc ),
 			    origin[1],
 			    static_cast<float>( origin[2] + radius * ds )
 			);
 		}
 
-		glEnd();
+		gl().glEnd();
 	}
 
 	{
-		glBegin( GL_LINE_LOOP );
+		gl().glBegin( GL_LINE_LOOP );
 
 		for ( int i = 0; i <= sides; i++ )
 		{
 			double ds = sin( ( i * 2 * c_pi ) / sides );
 			double dc = cos( ( i * 2 * c_pi ) / sides );
 
-			glVertex3f(
+			gl().glVertex3f(
 			    origin[0],
 			    static_cast<float>( origin[1] + radius * dc ),
 			    static_cast<float>( origin[2] + radius * ds )
 			);
 		}
 
-		glEnd();
+		gl().glEnd();
 	}
 }
 
@@ -456,14 +456,14 @@ void sphere_draw_wire( const Vector3& origin, float radius, const Vector3 radiiP
 	int k = 0;
 	for( int j = 0; j < 3; j++ )
 	{
-		glBegin( GL_LINE_LOOP );
+		gl().glBegin( GL_LINE_LOOP );
 
 		for ( int i = 0; i < SPHERE_WIRE_SIDES; i++ )
 		{
-			glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[k++], radius ) ) ) );
+			gl().glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[k++], radius ) ) ) );
 		}
 
-		glEnd();
+		gl().glEnd();
 	}
 }
 
@@ -483,33 +483,33 @@ void light_draw_radius_wire( const Vector3& origin, const float envelope[3], con
 
 void light_draw_box_lines( const Vector3& origin, const Vector3 points[8] ){
 	//draw lines from the center of the bbox to the corners
-	glBegin( GL_LINES );
+	gl().glBegin( GL_LINES );
 
-	glVertex3fv( vector3_to_array( origin ) );
-	glVertex3fv( vector3_to_array( points[1] ) );
+	gl().glVertex3fv( vector3_to_array( origin ) );
+	gl().glVertex3fv( vector3_to_array( points[1] ) );
 
-	glVertex3fv( vector3_to_array( origin ) );
-	glVertex3fv( vector3_to_array( points[5] ) );
+	gl().glVertex3fv( vector3_to_array( origin ) );
+	gl().glVertex3fv( vector3_to_array( points[5] ) );
 
-	glVertex3fv( vector3_to_array( origin ) );
-	glVertex3fv( vector3_to_array( points[2] ) );
+	gl().glVertex3fv( vector3_to_array( origin ) );
+	gl().glVertex3fv( vector3_to_array( points[2] ) );
 
-	glVertex3fv( vector3_to_array( origin ) );
-	glVertex3fv( vector3_to_array( points[6] ) );
+	gl().glVertex3fv( vector3_to_array( origin ) );
+	gl().glVertex3fv( vector3_to_array( points[6] ) );
 
-	glVertex3fv( vector3_to_array( origin ) );
-	glVertex3fv( vector3_to_array( points[0] ) );
+	gl().glVertex3fv( vector3_to_array( origin ) );
+	gl().glVertex3fv( vector3_to_array( points[0] ) );
 
-	glVertex3fv( vector3_to_array( origin ) );
-	glVertex3fv( vector3_to_array( points[4] ) );
+	gl().glVertex3fv( vector3_to_array( origin ) );
+	gl().glVertex3fv( vector3_to_array( points[4] ) );
 
-	glVertex3fv( vector3_to_array( origin ) );
-	glVertex3fv( vector3_to_array( points[3] ) );
+	gl().glVertex3fv( vector3_to_array( origin ) );
+	gl().glVertex3fv( vector3_to_array( points[3] ) );
 
-	glVertex3fv( vector3_to_array( origin ) );
-	glVertex3fv( vector3_to_array( points[7] ) );
+	gl().glVertex3fv( vector3_to_array( origin ) );
+	gl().glVertex3fv( vector3_to_array( points[7] ) );
 
-	glEnd();
+	gl().glEnd();
 }
 
 void light_vertices( const AABB& aabb_light, Vector3 points[6] ){
@@ -561,66 +561,66 @@ void light_draw( const AABB& aabb_light, RenderStateFlags state ){
 		};
 
 #if !defined( USE_TRIANGLE_FAN )
-		glBegin( GL_TRIANGLES );
+		gl().glBegin( GL_TRIANGLES );
 #else
-		glBegin( GL_TRIANGLE_FAN );
+		gl().glBegin( GL_TRIANGLE_FAN );
 #endif
-		glVertex3fv( vector3_to_array( points[0] ) );
-		glVertex3fv( vector3_to_array( points[2] ) );
-		glNormal3fv( vector3_to_array( normals[0] ) );
-		glVertex3fv( vector3_to_array( points[3] ) );
+		gl().glVertex3fv( vector3_to_array( points[0] ) );
+		gl().glVertex3fv( vector3_to_array( points[2] ) );
+		gl().glNormal3fv( vector3_to_array( normals[0] ) );
+		gl().glVertex3fv( vector3_to_array( points[3] ) );
 
 #if !defined( USE_TRIANGLE_FAN )
-		glVertex3fv( vector3_to_array( points[0] ) );
-		glVertex3fv( vector3_to_array( points[3] ) );
+		gl().glVertex3fv( vector3_to_array( points[0] ) );
+		gl().glVertex3fv( vector3_to_array( points[3] ) );
 #endif
-		glNormal3fv( vector3_to_array( normals[1] ) );
-		glVertex3fv( vector3_to_array( points[4] ) );
+		gl().glNormal3fv( vector3_to_array( normals[1] ) );
+		gl().glVertex3fv( vector3_to_array( points[4] ) );
 
 #if !defined( USE_TRIANGLE_FAN )
-		glVertex3fv( vector3_to_array( points[0] ) );
-		glVertex3fv( vector3_to_array( points[4] ) );
+		gl().glVertex3fv( vector3_to_array( points[0] ) );
+		gl().glVertex3fv( vector3_to_array( points[4] ) );
 #endif
-		glNormal3fv( vector3_to_array( normals[2] ) );
-		glVertex3fv( vector3_to_array( points[5] ) );
+		gl().glNormal3fv( vector3_to_array( normals[2] ) );
+		gl().glVertex3fv( vector3_to_array( points[5] ) );
 #if !defined( USE_TRIANGLE_FAN )
-		glVertex3fv( vector3_to_array( points[0] ) );
-		glVertex3fv( vector3_to_array( points[5] ) );
+		gl().glVertex3fv( vector3_to_array( points[0] ) );
+		gl().glVertex3fv( vector3_to_array( points[5] ) );
 #endif
-		glNormal3fv( vector3_to_array( normals[3] ) );
-		glVertex3fv( vector3_to_array( points[2] ) );
+		gl().glNormal3fv( vector3_to_array( normals[3] ) );
+		gl().glVertex3fv( vector3_to_array( points[2] ) );
 #if defined( USE_TRIANGLE_FAN )
-		glEnd();
-		glBegin( GL_TRIANGLE_FAN );
+		gl().glEnd();
+		gl().glBegin( GL_TRIANGLE_FAN );
 #endif
 
-		glVertex3fv( vector3_to_array( points[1] ) );
-		glVertex3fv( vector3_to_array( points[2] ) );
-		glNormal3fv( vector3_to_array( normals[7] ) );
-		glVertex3fv( vector3_to_array( points[5] ) );
+		gl().glVertex3fv( vector3_to_array( points[1] ) );
+		gl().glVertex3fv( vector3_to_array( points[2] ) );
+		gl().glNormal3fv( vector3_to_array( normals[7] ) );
+		gl().glVertex3fv( vector3_to_array( points[5] ) );
 
 #if !defined( USE_TRIANGLE_FAN )
-		glVertex3fv( vector3_to_array( points[1] ) );
-		glVertex3fv( vector3_to_array( points[5] ) );
+		gl().glVertex3fv( vector3_to_array( points[1] ) );
+		gl().glVertex3fv( vector3_to_array( points[5] ) );
 #endif
-		glNormal3fv( vector3_to_array( normals[6] ) );
-		glVertex3fv( vector3_to_array( points[4] ) );
+		gl().glNormal3fv( vector3_to_array( normals[6] ) );
+		gl().glVertex3fv( vector3_to_array( points[4] ) );
 
 #if !defined( USE_TRIANGLE_FAN )
-		glVertex3fv( vector3_to_array( points[1] ) );
-		glVertex3fv( vector3_to_array( points[4] ) );
+		gl().glVertex3fv( vector3_to_array( points[1] ) );
+		gl().glVertex3fv( vector3_to_array( points[4] ) );
 #endif
-		glNormal3fv( vector3_to_array( normals[5] ) );
-		glVertex3fv( vector3_to_array( points[3] ) );
+		gl().glNormal3fv( vector3_to_array( normals[5] ) );
+		gl().glVertex3fv( vector3_to_array( points[3] ) );
 
 #if !defined( USE_TRIANGLE_FAN )
-		glVertex3fv( vector3_to_array( points[1] ) );
-		glVertex3fv( vector3_to_array( points[3] ) );
+		gl().glVertex3fv( vector3_to_array( points[1] ) );
+		gl().glVertex3fv( vector3_to_array( points[3] ) );
 #endif
-		glNormal3fv( vector3_to_array( normals[4] ) );
-		glVertex3fv( vector3_to_array( points[2] ) );
+		gl().glNormal3fv( vector3_to_array( normals[4] ) );
+		gl().glVertex3fv( vector3_to_array( points[2] ) );
 
-		glEnd();
+		gl().glEnd();
 	}
 	else
 	{
@@ -636,15 +636,15 @@ void light_draw( const AABB& aabb_light, RenderStateFlags state ){
 			1, 3, 2
 		};
 #if 1
-		glVertexPointer( 3, GL_FLOAT, 0, points );
-		glDrawElements( GL_TRIANGLES, sizeof( indices ) / sizeof( index_t ), RenderIndexTypeID, indices );
+		gl().glVertexPointer( 3, GL_FLOAT, 0, points );
+		gl().glDrawElements( GL_TRIANGLES, sizeof( indices ) / sizeof( index_t ), RenderIndexTypeID, indices );
 #else
-		glBegin( GL_TRIANGLES );
+		gl().glBegin( GL_TRIANGLES );
 		for ( unsigned int i = 0; i < sizeof( indices ) / sizeof( index_t ); ++i )
 		{
-			glVertex3fv( points[indices[i]] );
+			gl().glVertex3fv( points[indices[i]] );
 		}
-		glEnd();
+		gl().glEnd();
 #endif
 	}
 
@@ -658,29 +658,29 @@ void light_draw( const AABB& aabb_light, RenderStateFlags state ){
 		GetVectorForKey( e, "light_up", vUp );
 		GetVectorForKey( e, "light_target", vTarget );
 
-		glColor3f( 0, 1, 0 );
-		glBegin( GL_LINE_LOOP );
+		gl().glColor3f( 0, 1, 0 );
+		gl().glBegin( GL_LINE_LOOP );
 		VectorAdd( vTarget, e->origin, vTemp );
 		VectorAdd( vTemp, vRight, vTemp );
 		VectorAdd( vTemp, vUp, vTemp );
-		glVertex3fv( e->origin );
-		glVertex3fv( vTemp );
+		gl().glVertex3fv( e->origin );
+		gl().glVertex3fv( vTemp );
 		VectorAdd( vTarget, e->origin, vTemp );
 		VectorAdd( vTemp, vUp, vTemp );
 		VectorSubtract( vTemp, vRight, vTemp );
-		glVertex3fv( e->origin );
-		glVertex3fv( vTemp );
+		gl().glVertex3fv( e->origin );
+		gl().glVertex3fv( vTemp );
 		VectorAdd( vTarget, e->origin, vTemp );
 		VectorAdd( vTemp, vRight, vTemp );
 		VectorSubtract( vTemp, vUp, vTemp );
-		glVertex3fv( e->origin );
-		glVertex3fv( vTemp );
+		gl().glVertex3fv( e->origin );
+		gl().glVertex3fv( vTemp );
 		VectorAdd( vTarget, e->origin, vTemp );
 		VectorSubtract( vTemp, vUp, vTemp );
 		VectorSubtract( vTemp, vRight, vTemp );
-		glVertex3fv( e->origin );
-		glVertex3fv( vTemp );
-		glEnd();
+		gl().glVertex3fv( e->origin );
+		gl().glVertex3fv( vTemp );
+		gl().glEnd();
 
 	}
 #endif
@@ -959,10 +959,10 @@ public:
 	RenderLightCenter( const Vector3& center, EntityClass& eclass ) : m_center( center ), m_eclass( eclass ){
 	}
 	void render( RenderStateFlags state ) const {
-		glBegin( GL_POINTS );
-		glColor3fv( vector3_to_array( m_eclass.color ) );
-		glVertex3fv( vector3_to_array( m_center ) );
-		glEnd();
+		gl().glBegin( GL_POINTS );
+		gl().glColor3fv( vector3_to_array( m_eclass.color ) );
+		gl().glVertex3fv( vector3_to_array( m_center ) );
+		gl().glEnd();
 	}
 };
 
@@ -1462,7 +1462,7 @@ public:
 				if ( isProjected() ) {
 					projection();
 					m_projectionOrientation = rotation();
-					vector4_to_vector3( m_projectionOrientation.t() ) = localAABB().origin;
+					m_projectionOrientation.t().vec3() = localAABB().origin;
 					renderer.addRenderable( m_renderProjection, m_projectionOrientation );
 				}
 				else
@@ -1589,7 +1589,7 @@ public:
 	mutable Matrix4 m_localPivot;
 	const Matrix4& getLocalPivot() const {
 		m_localPivot = rotation_toMatrix( m_rotation );
-		vector4_to_vector3( m_localPivot.t() ) = m_aabb_light.origin;
+		m_localPivot.t().vec3() = m_aabb_light.origin;
 		return m_localPivot;
 	}
 
@@ -1604,7 +1604,7 @@ public:
 	bool testAABB( const AABB& other ) const {
 		if ( isProjected() ) {
 			Matrix4 transform = rotation();
-			vector4_to_vector3( transform.t() ) = localAABB().origin;
+			transform.t().vec3() = localAABB().origin;
 			projection();
 			Frustum frustum( frustum_transformed( m_doom3Frustum, transform ) );
 			return frustum_test_aabb( frustum, other ) != c_volumeOutside;

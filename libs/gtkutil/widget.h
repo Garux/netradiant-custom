@@ -22,36 +22,11 @@
 #pragma once
 
 #include <list>
-#include <gtk/gtk.h>
 #include "generic/callback.h"
-#include "warnings.h"
 #include "debugging/debugging.h"
 
-inline bool widget_is_visible( GtkWidget* widget ){
-	//return GTK_WIDGET_VISIBLE( widget );
-	return gtk_widget_get_visible( widget );
-}
-
-inline void widget_set_visible( GtkWidget* widget, bool show ){
-	if ( show ) {
-		/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
-		GtkWidget* glwidget = GTK_WIDGET( g_object_get_data( G_OBJECT( widget ), "glwidget" ) );
-		if ( glwidget ){
-			gtk_widget_hide( glwidget );
-			gtk_widget_show( glwidget );
-		}
-		gtk_widget_show( widget );
-	}
-	else
-	{
-		gtk_widget_hide( widget );
-	}
-}
-
-
-inline void widget_toggle_visible( GtkWidget* widget ){
-	widget_set_visible( widget, !widget_is_visible( widget ) );
-}
+#include <QWidget>
+#include <QEvent>
 
 class ToggleItem
 {
@@ -76,27 +51,11 @@ public:
 	typedef MemberCaller1<ToggleItem, const BoolImportCallback&, &ToggleItem::addCallback> AddCallbackCaller;
 };
 
-class ToggleShown
+class ToggleShown : public QObject
 {
 	bool m_shownDeferred;
-
-	static gboolean notify_visible( GtkWidget* widget, gpointer dummy, ToggleShown* self ){
-		/* destroy = notify::visible with visible = 0, thus let's filter it out  */
-		if( gtk_main_level() > 0 ){ //== 0 at destroy time
-			self->m_shownDeferred = widget_is_visible( self->m_widget );
-		}
-	//globalOutputStream() << "ToggleShown::notify_visible time  " << gtk_get_current_event_time() << "  visible " << self->m_shownDeferred << "\n";
-		self->update();
-		return FALSE;
-	}
-	static gboolean destroy( GtkWidget* widget, ToggleShown* self ){
-	//globalOutputStream() << "ToggleShown::destroy time  " << gtk_get_current_event_time() << "  visible " << self->m_shownDeferred << "\n";
-		//self->m_shownDeferred = widget_is_visible( self->m_widget ); //always 0 at destroy time
-		self->m_widget = 0;
-		return FALSE;
-	}
+	QWidget* m_widget;
 public:
-	GtkWidget* m_widget;
 	ToggleItem m_item;
 
 	ToggleShown( const ToggleShown& other ) = delete; // NOT COPYABLE
@@ -106,46 +65,43 @@ public:
 		: m_shownDeferred( shown ), m_widget( 0 ), m_item( ActiveCaller( *this ) ){
 	}
 	void update(){
-	//globalOutputStream() << "ToggleShown::update\n";
 		m_item.update();
 	}
 	bool active() const {
-	//globalOutputStream() << "ToggleShown::active\n";
-		if ( m_widget == 0 ) {
-			return m_shownDeferred;
-		}
-		else
-		{
-			return widget_is_visible( m_widget );
-		}
+		return m_widget == nullptr
+		     ? m_shownDeferred
+		     : m_widget->isVisible();
 	}
 	void exportActive( const BoolImportCallback& importCallback ){
-	//globalOutputStream() << "ToggleShown::exportActive\n";
 		importCallback( active() );
 	}
 	typedef MemberCaller1<ToggleShown, const BoolImportCallback&, &ToggleShown::exportActive> ActiveCaller;
 	void set( bool shown ){
-	//globalOutputStream() << "ToggleShown::set\n";
-		if ( m_widget == 0 ) {
-			m_shownDeferred = shown;
-		}
-		else
-		{
-			widget_set_visible( m_widget, shown );
-		}
+		m_shownDeferred = shown;
+		if ( m_widget != nullptr )
+			m_widget->setVisible( shown );
 	}
 	void toggle(){
-	//globalOutputStream() << "ToggleShown::toggle\n";
-		widget_toggle_visible( m_widget );
+		m_widget->setVisible( m_shownDeferred = !m_widget->isVisible() );
 	}
 	typedef MemberCaller<ToggleShown, &ToggleShown::toggle> ToggleCaller;
-	void connect( GtkWidget* widget ){
-	//globalOutputStream() << "ToggleShown::connect\n";
+	void connect( QWidget* widget ){
 		m_widget = widget;
-		widget_set_visible( m_widget, m_shownDeferred );
-		g_signal_connect( G_OBJECT( m_widget ), "notify::visible", G_CALLBACK( notify_visible ), this );
-		g_signal_connect( G_OBJECT( m_widget ), "destroy", G_CALLBACK( destroy ), this );
+		m_widget->setVisible( m_shownDeferred );
+		m_widget->installEventFilter( this );
+		QObject::connect( m_widget, &QObject::destroyed, [this](){ m_widget = nullptr; } );
 		update();
+	}
+protected:
+	bool eventFilter( QObject *obj, QEvent *event ) override {
+		if( event->type() == QEvent::Close ) {
+			m_shownDeferred = false;
+			/* HACK */ //.  because widget isVisible() at this point
+			const auto tmp = std::exchange( m_widget, nullptr );
+			update();
+			m_widget = tmp;
+		}
+		return QObject::eventFilter( obj, event ); // standard event processing
 	}
 };
 
@@ -162,34 +118,9 @@ typedef ConstReferenceCaller1<ToggleShown, const BoolImportCallback&, ToggleShow
 
 }
 
-inline void widget_queue_draw( GtkWidget& widget ){
-	gtk_widget_queue_draw( &widget );
+
+inline void widget_queue_draw( QWidget& widget ){
+	widget.update();
 }
-typedef ReferenceCaller<GtkWidget, widget_queue_draw> WidgetQueueDrawCaller;
+typedef ReferenceCaller<QWidget, widget_queue_draw> WidgetQueueDrawCaller;
 
-
-inline void widget_make_default( GtkWidget* widget ){
-	gtk_widget_set_can_default( widget, TRUE );
-	gtk_widget_grab_default( widget );
-}
-
-class WidgetFocusPrinter
-{
-	const char* m_name;
-
-	static gboolean focus_in( GtkWidget *widget, GdkEventFocus *event, WidgetFocusPrinter* self ){
-		globalOutputStream() << self->m_name << " takes focus\n";
-		return FALSE;
-	}
-	static gboolean focus_out( GtkWidget *widget, GdkEventFocus *event, WidgetFocusPrinter* self ){
-		globalOutputStream() << self->m_name << " loses focus\n";
-		return FALSE;
-	}
-public:
-	WidgetFocusPrinter( const char* name ) : m_name( name ){
-	}
-	void connect( GtkWidget* widget ){
-		g_signal_connect( G_OBJECT( widget ), "focus_in_event", G_CALLBACK( focus_in ), this );
-		g_signal_connect( G_OBJECT( widget ), "focus_out_event", G_CALLBACK( focus_out ), this );
-	}
-};

@@ -22,9 +22,11 @@
 #pragma once
 
 
-#include <gtk/gtk.h>
-
-#include "gtkutil/idledraw.h"
+#include <QCompleter>
+#include <QStringListModel>
+#include <QObject>
+#include <QLineEdit>
+#include <QEvent>
 
 #include "generic/static.h"
 #include "signal/isignal.h"
@@ -33,39 +35,34 @@
 #include "texwindow.h"
 
 template<typename StringList>
-class EntryCompletion
+class EntryCompletion : public QObject
 {
-	GtkListStore* m_store;
-	bool m_invalid;
+	QCompleter* m_completer{};
+	QStringListModel* m_model{};
+	bool m_invalid = true;
 public:
-	EntryCompletion() : m_store( 0 ), m_invalid( true ){
+	~EntryCompletion(){
+		delete m_completer;
 	}
 
-	static gboolean focus_in( GtkEntry* entry, GdkEventFocus *event, EntryCompletion* self ){
-		self->update();
-		return FALSE;
-	}
-
-	void connect( GtkEntry* entry ){
-		if ( m_store == 0 ) {
-			m_store = gtk_list_store_new( 1, G_TYPE_STRING );
-
-			fill();
+	void connect( QLineEdit* entry ){
+		if ( m_completer == nullptr ) {
+			m_completer = new QCompleter;
+			m_model = new QStringListModel( m_completer );
+			m_completer->setModel( m_model );
+			m_completer->setCaseSensitivity( Qt::CaseSensitivity::CaseInsensitive );
 
 			StringList().connect( InvalidateCaller( *this ) );
 		}
 
-		GtkEntryCompletion* completion = gtk_entry_completion_new();
-		gtk_entry_set_completion( entry, completion );
-		gtk_entry_completion_set_model( completion, GTK_TREE_MODEL( m_store ) );
-		gtk_entry_completion_set_text_column( completion, 0 );
-		g_signal_connect( G_OBJECT( entry ), "focus_in_event", G_CALLBACK( focus_in ), this );
+		entry->setCompleter( m_completer );
+		entry->installEventFilter( this );
 	}
 
 	void append( const char* string ){
-		GtkTreeIter iter;
-		gtk_list_store_append( m_store, &iter );
-		gtk_list_store_set( m_store, &iter, 0, string, -1 );
+		if( m_model->insertRow( m_model->rowCount() ) ){
+			m_model->setData( m_model->index( m_model->rowCount() - 1 ), string );
+		}
 	}
 	typedef MemberCaller1<EntryCompletion, const char*, &EntryCompletion::append> AppendCaller;
 
@@ -75,7 +72,7 @@ public:
 	}
 
 	void clear(){
-		gtk_list_store_clear( m_store );
+		m_model->removeRows( 0, m_model->rowCount() );
 	}
 
 	void update(){
@@ -89,6 +86,13 @@ public:
 		m_invalid = true;
 	}
 	typedef MemberCaller<EntryCompletion, &EntryCompletion::invalidate> InvalidateCaller;
+protected:
+	bool eventFilter( QObject *obj, QEvent *event ) override {
+		if( event->type() == QEvent::FocusIn ) {
+			update();
+		}
+		return QObject::eventFilter( obj, event ); // standard event processing
+	}
 };
 
 /* loaded ( shaders + textures ) */

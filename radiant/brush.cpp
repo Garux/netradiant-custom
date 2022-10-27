@@ -273,7 +273,7 @@ void Brush::buildBRep(){
 					std::size_t faceIndex = std::distance( m_faces.begin(), i );
 
 					if ( !( *i )->contributes() ) {
-						globalOutputStream() << "face: " << Unsigned( faceIndex ) << " does not contribute\n";
+						globalOutputStream() << "face: " << faceIndex << " does not contribute\n";
 					}
 
 					Winding_printConnectivity( ( *i )->getWinding() );
@@ -548,7 +548,7 @@ void BrushInstance::transformComponents( const Matrix4& matrix ){
 	const Vector3 translation = matrix4_get_translation_vec3( matrix );
 	if( translation != g_vector3_identity ){ //has translation
 		Matrix4 ma( matrix );
-		Vector3& tra = vector4_to_vector3( ma.t() );
+		Vector3& tra = ma.t().vec3();
 		tra = g_vector3_identity;
 		if( g_matrix4_identity == ma ){ //only translation
 			for ( const auto& fi : m_faceInstances ){

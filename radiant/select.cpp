@@ -31,22 +31,28 @@
 
 #include "stream/stringstream.h"
 #include "signal/isignal.h"
+#include "signal/isignal.h"
 #include "shaderlib.h"
 #include "scenelib.h"
 
 #include "gtkutil/idledraw.h"
 #include "gtkutil/dialog.h"
 #include "gtkutil/widget.h"
+#include "gtkutil/clipboard.h"
 #include "brushmanip.h"
 #include "brush.h"
 #include "patch.h"
 #include "patchmanip.h"
 #include "patchdialog.h"
+#include "surfacedialog.h"
 #include "texwindow.h"
 #include "mainframe.h"
+#include "camwindow.h"
+#include "tools.h"
 #include "grid.h"
 #include "map.h"
 #include "entityinspector.h"
+#include "csg.h"
 
 
 
@@ -934,6 +940,7 @@ void Select_ProjectTexture( const TextureProjection& projection, const Vector3& 
 void Select_FitTexture( float horizontal, float vertical, bool only_dimension ){
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushFitTexture_Selected( GlobalSceneGraph(), horizontal, vertical, only_dimension );
+		Scene_PatchTileTexture_Selected( GlobalSceneGraph(), horizontal, vertical );
 	}
 	Scene_BrushFitTexture_Component_Selected( GlobalSceneGraph(), horizontal, vertical, only_dimension );
 
@@ -952,8 +959,7 @@ inline void hide_node( scene::Node& node, bool hide ){
 
 bool g_nodes_be_hidden = false;
 
-BoolExportCaller g_hidden_caller( g_nodes_be_hidden );
-ToggleItem g_hidden_item( g_hidden_caller );
+ToggleItem g_hidden_item{ BoolExportCaller( g_nodes_be_hidden ) };
 
 class HideSelectedWalker : public scene::Graph::Walker
 {
@@ -1108,28 +1114,6 @@ void Selection_RotateAnticlockwise(){
 }
 
 
-
-void Select_registerCommands(){
-	GlobalCommands_insert( "ShowHidden", FreeCaller<Select_ShowAllHidden>(), Accelerator( 'H', GDK_SHIFT_MASK ) );
-	GlobalToggles_insert( "HideSelected", FreeCaller<HideSelected>(), ToggleItem::AddCallbackCaller( g_hidden_item ), Accelerator( 'H' ) );
-
-	GlobalCommands_insert( "MirrorSelectionX", FreeCaller<Selection_Flipx>() );
-	GlobalCommands_insert( "RotateSelectionX", FreeCaller<Selection_Rotatex>() );
-	GlobalCommands_insert( "MirrorSelectionY", FreeCaller<Selection_Flipy>() );
-	GlobalCommands_insert( "RotateSelectionY", FreeCaller<Selection_Rotatey>() );
-	GlobalCommands_insert( "MirrorSelectionZ", FreeCaller<Selection_Flipz>() );
-	GlobalCommands_insert( "RotateSelectionZ", FreeCaller<Selection_Rotatez>() );
-
-	GlobalCommands_insert( "MirrorSelectionHorizontally", FreeCaller<Selection_FlipHorizontally>() );
-	GlobalCommands_insert( "MirrorSelectionVertically", FreeCaller<Selection_FlipVertically>() );
-
-	GlobalCommands_insert( "RotateSelectionClockwise", FreeCaller<Selection_RotateClockwise>() );
-	GlobalCommands_insert( "RotateSelectionAnticlockwise", FreeCaller<Selection_RotateAnticlockwise>() );
-
-	GlobalCommands_insert( "SelectTextured", FreeCaller<Select_FacesAndPatchesByShader>(), Accelerator( 'A', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
-}
-
-
 void Nudge( int nDim, float fNudge ){
 	Vector3 translate( 0, 0, 0 );
 	translate[nDim] = fNudge;
@@ -1152,30 +1136,6 @@ void Selection_MoveDown(){
 void Selection_MoveUp(){
 	Selection_NudgeZ( GetGridSize() );
 }
-
-void SceneSelectionChange( const Selectable& selectable ){
-	SceneChangeNotify();
-}
-
-SignalHandlerId Selection_boundsChanged;
-
-void Selection_construct(){
-	typedef FreeCaller1<const Selectable&, SceneSelectionChange> SceneSelectionChangeCaller;
-	GlobalSelectionSystem().addSelectionChangeCallback( SceneSelectionChangeCaller() );
-	typedef FreeCaller1<const Selectable&, UpdateWorkzone_ForSelectionChanged> UpdateWorkzoneForSelectionChangedCaller;
-	GlobalSelectionSystem().addSelectionChangeCallback( UpdateWorkzoneForSelectionChangedCaller() );
-	typedef FreeCaller<UpdateWorkzone_ForSelection> UpdateWorkzoneForSelectionCaller;
-	Selection_boundsChanged = GlobalSceneGraph().addBoundsChangedCallback( UpdateWorkzoneForSelectionCaller() );
-}
-
-void Selection_destroy(){
-	GlobalSceneGraph().removeBoundsChangedCallback( Selection_boundsChanged );
-}
-
-
-#include "gtkdlgs.h"
-#include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
 
 
 inline Quaternion quaternion_for_euler_xyz_degrees( const Vector3& eulerXYZ ){
@@ -1206,302 +1166,616 @@ inline Quaternion quaternion_for_euler_xyz_degrees( const Vector3& eulerXYZ ){
 #endif
 }
 
-struct RotateDialog
+
+void Undo(){
+	GlobalUndoSystem().undo();
+	SceneChangeNotify();
+}
+
+void Redo(){
+	GlobalUndoSystem().redo();
+	SceneChangeNotify();
+}
+
+void deleteSelection(){
+	if( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && GlobalSelectionSystem().countSelectedComponents() != 0 ){
+		UndoableCommand undo( "deleteSelectedComponents" );
+		CSG_DeleteComponents();
+	}
+	else{
+		UndoableCommand undo( "deleteSelected" );
+		Select_Delete();
+	}
+}
+
+void Map_ExportSelected( TextOutputStream& ostream ){
+	Map_ExportSelected( ostream, Map_getFormat( g_map ) );
+}
+
+void Map_ImportSelected( TextInputStream& istream ){
+	Map_ImportSelected( istream, Map_getFormat( g_map ) );
+}
+
+void Selection_Copy(){
+	clipboard_copy( Map_ExportSelected );
+}
+
+void Selection_Paste(){
+	clipboard_paste( Map_ImportSelected );
+}
+
+void Copy(){
+	Selection_Copy();
+}
+
+void Paste(){
+	UndoableCommand undo( "paste" );
+
+	GlobalSelectionSystem().setSelectedAll( false );
+	Selection_Paste();
+}
+
+void TranslateToCamera(){
+	CamWnd& camwnd = *g_pParentWnd->GetCamWnd();
+	GlobalSelectionSystem().translateSelected( vector3_snapped( Camera_getOrigin( camwnd ) - GlobalSelectionSystem().getBoundsSelected().origin, GetSnapGridSize() ) );
+}
+
+void PasteToCamera(){
+	GlobalSelectionSystem().setSelectedAll( false );
+	UndoableCommand undo( "pasteToCamera" );
+	Selection_Paste();
+	TranslateToCamera();
+}
+
+void MoveToCamera(){
+	UndoableCommand undo( "moveToCamera" );
+	TranslateToCamera();
+}
+
+
+
+class CloneSelected : public scene::Graph::Walker
 {
-	GtkSpinButton* x;
-	GtkSpinButton* y;
-	GtkSpinButton* z;
-	GtkWindow *window;
-};
+	const bool m_makeUnique;
+	const scene::Node* m_world;
+public:
+	mutable std::vector<scene::Node*> m_cloned;
+	CloneSelected( bool makeUnique ) : m_makeUnique( makeUnique ), m_world( Map_FindWorldspawn( g_map ) ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.size() == 1 ) {
+			return true;
+		}
 
-static gboolean rotatedlg_apply( GtkWidget *widget, RotateDialog* rotateDialog ){
-	Vector3 eulerXYZ;
+		if ( path.top().get_pointer() == m_world ) { // ignore worldspawn, but keep checking children
+			return true;
+		}
 
-	/* only update in scenario of enter pressed to also allow extra precision of values after execution by buttons */
-	if( gtk_widget_has_focus( GTK_WIDGET( rotateDialog->x ) ) )
-		gtk_spin_button_update( rotateDialog->x );
-	else if( gtk_widget_has_focus( GTK_WIDGET( rotateDialog->y ) ) )
-		gtk_spin_button_update( rotateDialog->y );
-	else if( gtk_widget_has_focus( GTK_WIDGET( rotateDialog->z ) ) )
-		gtk_spin_button_update( rotateDialog->z );
-
-	eulerXYZ[0] = static_cast<float>( gtk_spin_button_get_value( rotateDialog->x ) );
-	eulerXYZ[1] = static_cast<float>( gtk_spin_button_get_value( rotateDialog->y ) );
-	eulerXYZ[2] = static_cast<float>( gtk_spin_button_get_value( rotateDialog->z ) );
-
-	StringOutputStream command;
-	command << "rotateSelectedEulerXYZ -x " << eulerXYZ[0] << " -y " << eulerXYZ[1] << " -z " << eulerXYZ[2];
-	UndoableCommand undo( command.c_str() );
-
-	GlobalSelectionSystem().rotateSelected( quaternion_for_euler_xyz_degrees( eulerXYZ ) );
-	return TRUE;
-}
-
-static gboolean rotatedlg_cancel( GtkWidget *widget, RotateDialog* rotateDialog ){
-	gtk_widget_hide( GTK_WIDGET( rotateDialog->window ) );
-
-	gtk_spin_button_set_value( rotateDialog->x, 0.0 ); // reset to 0 on close
-	gtk_spin_button_set_value( rotateDialog->y, 0.0 );
-	gtk_spin_button_set_value( rotateDialog->z, 0.0 );
-
-	return TRUE;
-}
-
-static gboolean rotatedlg_ok( GtkWidget *widget, RotateDialog* rotateDialog ){
-	rotatedlg_apply( widget, rotateDialog );
-//	rotatedlg_cancel( widget, rotateDialog );
-	gtk_widget_hide( GTK_WIDGET( rotateDialog->window ) );
-	return TRUE;
-}
-
-static gboolean rotatedlg_delete( GtkWidget *widget, GdkEventAny *event, RotateDialog* rotateDialog ){
-	rotatedlg_cancel( widget, rotateDialog );
-	return TRUE;
-}
-
-RotateDialog g_rotate_dialog;
-void DoRotateDlg(){
-	if ( g_rotate_dialog.window == NULL ) {
-		g_rotate_dialog.window = create_dialog_window( MainFrame_getWindow(), "Arbitrary rotation", G_CALLBACK( rotatedlg_delete ), &g_rotate_dialog );
-
-		GtkAccelGroup* accel = gtk_accel_group_new();
-		gtk_window_add_accel_group( g_rotate_dialog.window, accel );
-
-		{
-			GtkHBox* hbox = create_dialog_hbox( 4, 4 );
-			gtk_container_add( GTK_CONTAINER( g_rotate_dialog.window ), GTK_WIDGET( hbox ) );
-			{
-				GtkTable* table = create_dialog_table( 3, 2, 4, 4 );
-				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
-				{
-					GtkWidget* label = gtk_label_new( "  X  " );
-					gtk_widget_show( label );
-					gtk_table_attach( table, label, 0, 1, 0, 1,
-					                  (GtkAttachOptions) ( 0 ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-				}
-				{
-					GtkWidget* label = gtk_label_new( "  Y  " );
-					gtk_widget_show( label );
-					gtk_table_attach( table, label, 0, 1, 1, 2,
-					                  (GtkAttachOptions) ( 0 ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-				}
-				{
-					GtkWidget* label = gtk_label_new( "  Z  " );
-					gtk_widget_show( label );
-					gtk_table_attach( table, label, 0, 1, 2, 3,
-					                  (GtkAttachOptions) ( 0 ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-				}
-				{
-					GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 0, -359, 359, 1, 10, 0 ) );
-					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 2 ) );
-					gtk_widget_show( GTK_WIDGET( spin ) );
-					gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 0, 1,
-					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_size_request( GTK_WIDGET( spin ), 64, -1 );
-					gtk_spin_button_set_wrap( spin, TRUE );
-
-					gtk_widget_grab_focus( GTK_WIDGET( spin ) );
-
-					g_rotate_dialog.x = spin;
-				}
-				{
-					GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 0, -359, 359, 1, 10, 0 ) );
-					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 2 ) );
-					gtk_widget_show( GTK_WIDGET( spin ) );
-					gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 1, 2,
-					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_size_request( GTK_WIDGET( spin ), 64, -1 );
-					gtk_spin_button_set_wrap( spin, TRUE );
-
-					g_rotate_dialog.y = spin;
-				}
-				{
-					GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 0, -359, 359, 1, 10, 0 ) );
-					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 2 ) );
-					gtk_widget_show( GTK_WIDGET( spin ) );
-					gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 2, 3,
-					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_size_request( GTK_WIDGET( spin ), 64, -1 );
-					gtk_spin_button_set_wrap( spin, TRUE );
-
-					g_rotate_dialog.z = spin;
-				}
+		if ( !path.top().get().isRoot() ) {
+			if ( Instance_isSelected( instance ) ) {
+				return false;
 			}
-			{
-				GtkVBox* vbox = create_dialog_vbox( 4 );
-				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox ), TRUE, TRUE, 0 );
-				{
-					GtkButton* button = create_dialog_button( "OK", G_CALLBACK( rotatedlg_ok ), &g_rotate_dialog );
-					gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-					widget_make_default( GTK_WIDGET( button ) );
-					gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
-				}
-				{
-					GtkButton* button = create_dialog_button( "Cancel", G_CALLBACK( rotatedlg_cancel ), &g_rotate_dialog );
-					gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-					gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
-				}
-				{
-					GtkButton* button = create_dialog_button( "Apply", G_CALLBACK( rotatedlg_apply ), &g_rotate_dialog );
-					gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-				}
+			if( m_makeUnique && instance.childSelected() ){ /* clone selected group entity primitives to new group entity */
+				return false;
+			}
+		}
+
+		return true;
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.size() == 1 ) {
+			return;
+		}
+
+		if ( path.top().get_pointer() == m_world ) { // ignore worldspawn
+			return;
+		}
+
+		if ( !path.top().get().isRoot() ) {
+			if ( Instance_isSelected( instance ) ) {
+				NodeSmartReference clone( Node_Clone( path.top() ) );
+				Map_gatherNamespaced( clone );
+				Node_getTraversable( path.parent().get() )->insert( clone );
+				m_cloned.push_back( clone.get_pointer() );
+			}
+			else if( m_makeUnique && instance.childSelected() ){ /* clone selected group entity primitives to new group entity */
+				NodeSmartReference clone( Node_Clone_Selected( path.top() ) );
+				Map_gatherNamespaced( clone );
+				Node_getTraversable( path.parent().get() )->insert( clone );
+				m_cloned.push_back( clone.get_pointer() );
 			}
 		}
 	}
-
-	gtk_widget_show( GTK_WIDGET( g_rotate_dialog.window ) );
-}
-
-
-
-
-
-
-
-
-
-struct ScaleDialog
-{
-	GtkWidget* x;
-	GtkWidget* y;
-	GtkWidget* z;
-	GtkWindow *window;
 };
 
-static gboolean scaledlg_apply( GtkWidget *widget, ScaleDialog* scaleDialog ){
-	float sx, sy, sz;
+void Scene_Clone_Selected( scene::Graph& graph, bool makeUnique ){
+	CloneSelected cloneSelected( makeUnique );
+	graph.traverse( cloneSelected );
 
-	sx = static_cast<float>( atof( gtk_entry_get_text( GTK_ENTRY( scaleDialog->x ) ) ) );
-	sy = static_cast<float>( atof( gtk_entry_get_text( GTK_ENTRY( scaleDialog->y ) ) ) );
-	sz = static_cast<float>( atof( gtk_entry_get_text( GTK_ENTRY( scaleDialog->z ) ) ) );
+	Map_mergeClonedNames( makeUnique );
 
+	/* deselect originals */
+	GlobalSelectionSystem().setSelectedAll( false );
+	/* select cloned */
+	for( scene::Node *node : cloneSelected.m_cloned )
+	{
+		class walker : public scene::Traversable::Walker
+		{
+		public:
+			bool pre( scene::Node& node ) const override {
+				if( scene::Instantiable *instantiable = Node_getInstantiable( node ) ){
+					class visitor : public scene::Instantiable::Visitor
+					{
+					public:
+						void visit( scene::Instance& instance ) const override {
+							Instance_setSelected( instance, true );
+						}
+					};
+
+					instantiable->forEachInstance( visitor() );
+				}
+				return true;
+			}
+		};
+		Node_traverseSubgraph( *node, walker() );
+	}
+}
+
+enum ENudgeDirection
+{
+	eNudgeUp = 1,
+	eNudgeDown = 3,
+	eNudgeLeft = 0,
+	eNudgeRight = 2,
+};
+
+struct AxisBase
+{
+	Vector3 x;
+	Vector3 y;
+	Vector3 z;
+	AxisBase( const Vector3& x_, const Vector3& y_, const Vector3& z_ )
+		: x( x_ ), y( y_ ), z( z_ ){
+	}
+};
+
+AxisBase AxisBase_forViewType( VIEWTYPE viewtype ){
+	switch ( viewtype )
+	{
+	case XY:
+		return AxisBase( g_vector3_axis_x, g_vector3_axis_y, g_vector3_axis_z );
+	case XZ:
+		return AxisBase( g_vector3_axis_x, g_vector3_axis_z, g_vector3_axis_y );
+	case YZ:
+		return AxisBase( g_vector3_axis_y, g_vector3_axis_z, g_vector3_axis_x );
+	}
+
+	ERROR_MESSAGE( "invalid viewtype" );
+	return AxisBase( Vector3( 0, 0, 0 ), Vector3( 0, 0, 0 ), Vector3( 0, 0, 0 ) );
+}
+
+Vector3 AxisBase_axisForDirection( const AxisBase& axes, ENudgeDirection direction ){
+	switch ( direction )
+	{
+	case eNudgeLeft:
+		return vector3_negated( axes.x );
+	case eNudgeUp:
+		return axes.y;
+	case eNudgeRight:
+		return axes.x;
+	case eNudgeDown:
+		return vector3_negated( axes.y );
+	}
+
+	ERROR_MESSAGE( "invalid direction" );
+	return Vector3( 0, 0, 0 );
+}
+
+bool g_bNudgeAfterClone = false;
+
+void NudgeSelection( ENudgeDirection direction, float fAmount, VIEWTYPE viewtype ){
+	AxisBase axes( AxisBase_forViewType( viewtype ) );
+	Vector3 view_direction( vector3_negated( axes.z ) );
+	Vector3 nudge( vector3_scaled( AxisBase_axisForDirection( axes, direction ), fAmount ) );
+	GlobalSelectionSystem().NudgeManipulator( nudge, view_direction );
+}
+
+void Selection_Clone(){
+	if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ) {
+		UndoableCommand undo( "cloneSelected" );
+
+		Scene_Clone_Selected( GlobalSceneGraph(), false );
+
+		if( g_bNudgeAfterClone ){
+			NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+			NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+		}
+	}
+}
+
+void Selection_Clone_MakeUnique(){
+	if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ) {
+		UndoableCommand undo( "cloneSelectedMakeUnique" );
+
+		Scene_Clone_Selected( GlobalSceneGraph(), true );
+
+		if( g_bNudgeAfterClone ){
+			NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+			NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+		}
+	}
+}
+
+// called when the escape key is used (either on the main window or on an inspector)
+void Selection_Deselect(){
+	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent ) {
+		if ( GlobalSelectionSystem().countSelectedComponents() != 0 ) {
+			GlobalSelectionSystem().setSelectedAllComponents( false );
+		}
+		else
+		{
+			SelectionSystem_DefaultMode();
+			ComponentModeChanged();
+		}
+	}
+	else
+	{
+		if ( GlobalSelectionSystem().countSelectedComponents() != 0 ) {
+			GlobalSelectionSystem().setSelectedAllComponents( false );
+		}
+		else
+		{
+			GlobalSelectionSystem().setSelectedAll( false );
+		}
+	}
+}
+
+void Scene_Clone_Selected(){
+	Scene_Clone_Selected( GlobalSceneGraph(), false );
+}
+
+void RepeatTransforms(){
+	GlobalSelectionSystem().repeatTransforms( FreeCaller<Scene_Clone_Selected>() );
+}
+
+
+void Selection_NudgeUp(){
+	UndoableCommand undo( "nudgeSelectedUp" );
+	NudgeSelection( eNudgeUp, GetGridSize(), GlobalXYWnd_getCurrentViewType() );
+}
+
+void Selection_NudgeDown(){
+	UndoableCommand undo( "nudgeSelectedDown" );
+	NudgeSelection( eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType() );
+}
+
+void Selection_NudgeLeft(){
+	UndoableCommand undo( "nudgeSelectedLeft" );
+	NudgeSelection( eNudgeLeft, GetGridSize(), GlobalXYWnd_getCurrentViewType() );
+}
+
+void Selection_NudgeRight(){
+	UndoableCommand undo( "nudgeSelectedRight" );
+	NudgeSelection( eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType() );
+}
+
+
+
+void Texdef_Rotate( float angle ){
 	StringOutputStream command;
-	command << "scaleSelected -x " << sx << " -y " << sy << " -z " << sz;
+	command << "brushRotateTexture -angle " << angle;
+	UndoableCommand undo( command.c_str() );
+	Select_RotateTexture( angle );
+}
+// these are actually {Anti,}Clockwise in BP mode only (AP/220 - 50/50)
+// TODO is possible to make really {Anti,}Clockwise
+void Texdef_RotateClockwise(){
+	Texdef_Rotate( static_cast<float>( -fabs( g_si_globals.rotate ) ) );
+}
+
+void Texdef_RotateAntiClockwise(){
+	Texdef_Rotate( static_cast<float>( fabs( g_si_globals.rotate ) ) );
+}
+
+void Texdef_Scale( float x, float y ){
+	StringOutputStream command;
+	command << "brushScaleTexture -x " << x << " -y " << y;
+	UndoableCommand undo( command.c_str() );
+	Select_ScaleTexture( x, y );
+}
+
+void Texdef_ScaleUp(){
+	Texdef_Scale( 0, g_si_globals.scale[1] );
+}
+
+void Texdef_ScaleDown(){
+	Texdef_Scale( 0, -g_si_globals.scale[1] );
+}
+
+void Texdef_ScaleLeft(){
+	Texdef_Scale( -g_si_globals.scale[0],0 );
+}
+
+void Texdef_ScaleRight(){
+	Texdef_Scale( g_si_globals.scale[0],0 );
+}
+
+void Texdef_Shift( float x, float y ){
+	StringOutputStream command;
+	command << "brushShiftTexture -x " << x << " -y " << y;
+	UndoableCommand undo( command.c_str() );
+	Select_ShiftTexture( x, y );
+}
+
+void Texdef_ShiftLeft(){
+	Texdef_Shift( -g_si_globals.shift[0], 0 );
+}
+
+void Texdef_ShiftRight(){
+	Texdef_Shift( g_si_globals.shift[0], 0 );
+}
+
+void Texdef_ShiftUp(){
+	Texdef_Shift( 0, g_si_globals.shift[1] );
+}
+
+void Texdef_ShiftDown(){
+	Texdef_Shift( 0, -g_si_globals.shift[1] );
+}
+
+
+
+class SnappableSnapToGridSelected : public scene::Graph::Walker
+{
+	float m_snap;
+public:
+	SnappableSnapToGridSelected( float snap )
+		: m_snap( snap ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.top().get().visible() ) {
+			Snappable* snappable = Node_getSnappable( path.top() );
+			if ( snappable != 0
+			  && Instance_isSelected( instance ) ) {
+				snappable->snapto( m_snap );
+			}
+		}
+		return true;
+	}
+};
+
+void Scene_SnapToGrid_Selected( scene::Graph& graph, float snap ){
+	graph.traverse( SnappableSnapToGridSelected( snap ) );
+}
+
+class ComponentSnappableSnapToGridSelected : public scene::Graph::Walker
+{
+	float m_snap;
+public:
+	ComponentSnappableSnapToGridSelected( float snap )
+		: m_snap( snap ){
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if ( path.top().get().visible() ) {
+			ComponentSnappable* componentSnappable = Instance_getComponentSnappable( instance );
+			if ( componentSnappable != 0
+			  && Instance_isSelected( instance ) ) {
+				componentSnappable->snapComponents( m_snap );
+			}
+		}
+		return true;
+	}
+};
+
+void Scene_SnapToGrid_Component_Selected( scene::Graph& graph, float snap ){
+	graph.traverse( ComponentSnappableSnapToGridSelected( snap ) );
+}
+
+void Selection_SnapToGrid(){
+	StringOutputStream command;
+	command << "snapSelected -grid " << GetGridSize();
 	UndoableCommand undo( command.c_str() );
 
-	Select_Scale( sx, sy, sz );
-
-	return TRUE;
+	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && GlobalSelectionSystem().countSelectedComponents() ) {
+		Scene_SnapToGrid_Component_Selected( GlobalSceneGraph(), GetGridSize() );
+	}
+	else
+	{
+		Scene_SnapToGrid_Selected( GlobalSceneGraph(), GetGridSize() );
+	}
 }
 
-static gboolean scaledlg_cancel( GtkWidget *widget, ScaleDialog* scaleDialog ){
-	gtk_widget_hide( GTK_WIDGET( scaleDialog->window ) );
 
-	gtk_entry_set_text( GTK_ENTRY( scaleDialog->x ), "1.0" );
-	gtk_entry_set_text( GTK_ENTRY( scaleDialog->y ), "1.0" );
-	gtk_entry_set_text( GTK_ENTRY( scaleDialog->z ), "1.0" );
 
-	return TRUE;
+#include <QWidget>
+#include <QGridLayout>
+#include <QDialogButtonBox>
+#include <QPushButton>
+#include "gtkutil/spinbox.h"
+
+
+class RotateDialog : public QObject
+{
+	QWidget *m_window{};
+	QDoubleSpinBox *m_x;
+	QDoubleSpinBox *m_y;
+	QDoubleSpinBox *m_z;
+	void construct(){
+		m_window = new QWidget( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+		m_window->setWindowTitle( "Arbitrary rotation" );
+		m_window->installEventFilter( this );
+
+		auto grid = new QGridLayout( m_window );
+		grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
+
+		{
+			grid->addWidget( m_x = new DoubleSpinBox( -360, 360, 0, 6, 1, true ), 0, 1 );
+			grid->addWidget( m_y = new DoubleSpinBox( -360, 360, 0, 6, 1, true ), 1, 1 );
+			grid->addWidget( m_z = new DoubleSpinBox( -360, 360, 0, 6, 1, true ), 2, 1 );
+		}
+		{
+			grid->addWidget( new SpinBoxLabel( "  X  ", m_x ), 0, 0 );
+			grid->addWidget( new SpinBoxLabel( "  Y  ", m_y ), 1, 0 );
+			grid->addWidget( new SpinBoxLabel( "  Z  ", m_z ), 2, 0 );
+		}
+		{
+			auto buttons = new QDialogButtonBox( Qt::Orientation::Vertical );
+			grid->addWidget( buttons, 0, 2, 3, 1 );
+			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Ok ), &QPushButton::clicked, [this](){ ok(); } );
+			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Cancel ), &QPushButton::clicked, [this](){ cancel(); } );
+			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Apply ), &QPushButton::clicked, [this](){ apply(); } );
+		}
+	}
+	void apply(){
+		const Vector3 eulerXYZ( m_x->value(), m_y->value(), m_z->value() );
+
+		StringOutputStream command;
+		command << "rotateSelectedEulerXYZ -x " << eulerXYZ[0] << " -y " << eulerXYZ[1] << " -z " << eulerXYZ[2];
+		UndoableCommand undo( command.c_str() );
+
+		GlobalSelectionSystem().rotateSelected( quaternion_for_euler_xyz_degrees( eulerXYZ ) );
+	}
+	void cancel(){
+		m_window->hide();
+
+		m_x->setValue( 0 ); // reset to 0 on close
+		m_y->setValue( 0 );
+		m_z->setValue( 0 );
+	}
+	void ok(){
+		apply();
+	//	cancel();
+		m_window->hide();
+	}
+protected:
+	bool eventFilter( QObject *obj, QEvent *event ) override {
+		if( event->type() == QEvent::ShortcutOverride ) {
+			QKeyEvent *keyEvent = static_cast<QKeyEvent*>( event );
+			if( keyEvent->key() == Qt::Key_Escape ){
+				cancel();
+				event->accept();
+			}
+			else if( keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter ){
+				ok();
+				event->accept();
+			}
+			else if( keyEvent->key() == Qt::Key_Tab || keyEvent->key() == Qt::Key_Space ){
+				event->accept();
+			}
+		}
+		else if( event->type() == QEvent::Close ) {
+			event->ignore();
+			cancel();
+			return true;
+		}
+		return QObject::eventFilter( obj, event ); // standard event processing
+	}
+public:
+	void show(){
+		if( m_window == nullptr )
+			construct();
+		m_window->show();
+		m_window->raise();
+		m_window->activateWindow();
+	}
+}
+g_rotate_dialog;
+
+void DoRotateDlg(){
+	g_rotate_dialog.show();
 }
 
-static gboolean scaledlg_ok( GtkWidget *widget, ScaleDialog* scaleDialog ){
-	scaledlg_apply( widget, scaleDialog );
-	//scaledlg_cancel( widget, scaleDialog );
-	gtk_widget_hide( GTK_WIDGET( scaleDialog->window ) );
-	return TRUE;
-}
 
-static gboolean scaledlg_delete( GtkWidget *widget, GdkEventAny *event, ScaleDialog* scaleDialog ){
-	scaledlg_cancel( widget, scaleDialog );
-	return TRUE;
-}
 
-ScaleDialog g_scale_dialog;
+class ScaleDialog : public QObject
+{
+	QWidget *m_window{};
+	QDoubleSpinBox *m_x;
+	QDoubleSpinBox *m_y;
+	QDoubleSpinBox *m_z;
+	void construct(){
+		m_window = new QWidget( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+		m_window->setWindowTitle( "Arbitrary scale" );
+		m_window->installEventFilter( this );
+
+		auto grid = new QGridLayout( m_window );
+		grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
+
+		{
+			grid->addWidget( m_x = new DoubleSpinBox( -32768, 32768, 1, 6, 1, false ), 0, 1 );
+			grid->addWidget( m_y = new DoubleSpinBox( -32768, 32768, 1, 6, 1, false ), 1, 1 );
+			grid->addWidget( m_z = new DoubleSpinBox( -32768, 32768, 1, 6, 1, false ), 2, 1 );
+		}
+		{
+			grid->addWidget( new SpinBoxLabel( "  X  ", m_x ), 0, 0 );
+			grid->addWidget( new SpinBoxLabel( "  Y  ", m_y ), 1, 0 );
+			grid->addWidget( new SpinBoxLabel( "  Z  ", m_z ), 2, 0 );
+		}
+		{
+			auto buttons = new QDialogButtonBox( Qt::Orientation::Vertical );
+			grid->addWidget( buttons, 0, 2, 3, 1 );
+			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Ok ), &QPushButton::clicked, [this](){ ok(); } );
+			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Cancel ), &QPushButton::clicked, [this](){ cancel(); } );
+			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Apply ), &QPushButton::clicked, [this](){ apply(); } );
+		}
+	}
+	void apply(){
+		const float sx = m_x->value(), sy = m_y->value(), sz = m_z->value();
+
+		StringOutputStream command;
+		command << "scaleSelected -x " << sx << " -y " << sy << " -z " << sz;
+		UndoableCommand undo( command.c_str() );
+
+		Select_Scale( sx, sy, sz );
+	}
+	void cancel(){
+		m_window->hide();
+
+		m_x->setValue( 1 ); // reset to 1 on close
+		m_y->setValue( 1 );
+		m_z->setValue( 1 );
+	}
+	void ok(){
+		apply();
+	//	cancel();
+		m_window->hide();
+	}
+protected:
+	bool eventFilter( QObject *obj, QEvent *event ) override {
+		if( event->type() == QEvent::ShortcutOverride ) {
+			QKeyEvent *keyEvent = static_cast<QKeyEvent*>( event );
+			if( keyEvent->key() == Qt::Key_Escape ){
+				cancel();
+				event->accept();
+			}
+			else if( keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter ){
+				ok();
+				event->accept();
+			}
+			else if( keyEvent->key() == Qt::Key_Tab || keyEvent->key() == Qt::Key_Space ){
+				event->accept();
+			}
+		}
+		else if( event->type() == QEvent::Close ) {
+			event->ignore();
+			cancel();
+			return true;
+		}
+		return QObject::eventFilter( obj, event ); // standard event processing
+	}
+public:
+	void show(){
+		if( m_window == nullptr )
+			construct();
+		m_window->show();
+		m_window->raise();
+		m_window->activateWindow();
+	}
+}
+g_scale_dialog;
 
 void DoScaleDlg(){
-	if ( g_scale_dialog.window == NULL ) {
-		g_scale_dialog.window = create_dialog_window( MainFrame_getWindow(), "Arbitrary scale", G_CALLBACK( scaledlg_delete ), &g_scale_dialog );
-
-		GtkAccelGroup* accel = gtk_accel_group_new();
-		gtk_window_add_accel_group( g_scale_dialog.window, accel );
-
-		{
-			GtkHBox* hbox = create_dialog_hbox( 4, 4 );
-			gtk_container_add( GTK_CONTAINER( g_scale_dialog.window ), GTK_WIDGET( hbox ) );
-			{
-				GtkTable* table = create_dialog_table( 3, 2, 4, 4 );
-				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
-				{
-					GtkWidget* label = gtk_label_new( "  X  " );
-					gtk_widget_show( label );
-					gtk_table_attach( table, label, 0, 1, 0, 1,
-					                  (GtkAttachOptions) ( 0 ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-				}
-				{
-					GtkWidget* label = gtk_label_new( "  Y  " );
-					gtk_widget_show( label );
-					gtk_table_attach( table, label, 0, 1, 1, 2,
-					                  (GtkAttachOptions) ( 0 ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-				}
-				{
-					GtkWidget* label = gtk_label_new( "  Z  " );
-					gtk_widget_show( label );
-					gtk_table_attach( table, label, 0, 1, 2, 3,
-					                  (GtkAttachOptions) ( 0 ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-				}
-				{
-					GtkWidget* entry = gtk_entry_new();
-					gtk_entry_set_text( GTK_ENTRY( entry ), "1.0" );
-					gtk_widget_show( entry );
-					gtk_table_attach( table, entry, 1, 2, 0, 1,
-					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-
-					g_scale_dialog.x = entry;
-				}
-				{
-					GtkWidget* entry = gtk_entry_new();
-					gtk_entry_set_text( GTK_ENTRY( entry ), "1.0" );
-					gtk_widget_show( entry );
-					gtk_table_attach( table, entry, 1, 2, 1, 2,
-					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-
-					g_scale_dialog.y = entry;
-				}
-				{
-					GtkWidget* entry = gtk_entry_new();
-					gtk_entry_set_text( GTK_ENTRY( entry ), "1.0" );
-					gtk_widget_show( entry );
-					gtk_table_attach( table, entry, 1, 2, 2, 3,
-					                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-					                  (GtkAttachOptions) ( 0 ), 0, 0 );
-
-					g_scale_dialog.z = entry;
-				}
-			}
-			{
-				GtkVBox* vbox = create_dialog_vbox( 4 );
-				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox ), TRUE, TRUE, 0 );
-				{
-					GtkButton* button = create_dialog_button( "OK", G_CALLBACK( scaledlg_ok ), &g_scale_dialog );
-					gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-					widget_make_default( GTK_WIDGET( button ) );
-					gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
-				}
-				{
-					GtkButton* button = create_dialog_button( "Cancel", G_CALLBACK( scaledlg_cancel ), &g_scale_dialog );
-					gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-					gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
-				}
-				{
-					GtkButton* button = create_dialog_button( "Apply", G_CALLBACK( scaledlg_apply ), &g_scale_dialog );
-					gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-				}
-			}
-		}
-	}
-
-	gtk_widget_show( GTK_WIDGET( g_scale_dialog.window ) );
+	g_scale_dialog.show();
 }
 
 
@@ -1577,4 +1851,102 @@ void Select_ConnectedEntities( bool targeting, bool targets, bool focus ){
 
 void SelectConnectedEntities(){
 	Select_ConnectedEntities( true, true, false );
+}
+
+
+
+void Select_registerCommands(){
+	GlobalCommands_insert( "ShowHidden", FreeCaller<Select_ShowAllHidden>(), QKeySequence( "Shift+H" ) );
+	GlobalToggles_insert( "HideSelected", FreeCaller<HideSelected>(), ToggleItem::AddCallbackCaller( g_hidden_item ), QKeySequence( "H" ) );
+
+	GlobalCommands_insert( "MirrorSelectionX", FreeCaller<Selection_Flipx>() );
+	GlobalCommands_insert( "RotateSelectionX", FreeCaller<Selection_Rotatex>() );
+	GlobalCommands_insert( "MirrorSelectionY", FreeCaller<Selection_Flipy>() );
+	GlobalCommands_insert( "RotateSelectionY", FreeCaller<Selection_Rotatey>() );
+	GlobalCommands_insert( "MirrorSelectionZ", FreeCaller<Selection_Flipz>() );
+	GlobalCommands_insert( "RotateSelectionZ", FreeCaller<Selection_Rotatez>() );
+
+	GlobalCommands_insert( "MirrorSelectionHorizontally", FreeCaller<Selection_FlipHorizontally>() );
+	GlobalCommands_insert( "MirrorSelectionVertically", FreeCaller<Selection_FlipVertically>() );
+
+	GlobalCommands_insert( "RotateSelectionClockwise", FreeCaller<Selection_RotateClockwise>() );
+	GlobalCommands_insert( "RotateSelectionAnticlockwise", FreeCaller<Selection_RotateAnticlockwise>() );
+
+	GlobalCommands_insert( "SelectTextured", FreeCaller<Select_FacesAndPatchesByShader>(), QKeySequence( "Ctrl+Shift+A" ) );
+
+	GlobalCommands_insert( "Undo", FreeCaller<Undo>(), QKeySequence( "Ctrl+Z" ) );
+	GlobalCommands_insert( "Redo", FreeCaller<Redo>(), QKeySequence( "Ctrl+Shift+Z" ) );
+	GlobalCommands_insert( "Redo2", FreeCaller<Redo>(), QKeySequence( "Ctrl+Y" ) );
+	GlobalCommands_insert( "Copy", FreeCaller<Copy>(), QKeySequence( "Ctrl+C" ) );
+	GlobalCommands_insert( "Paste", FreeCaller<Paste>(), QKeySequence( "Ctrl+V" ) );
+	GlobalCommands_insert( "PasteToCamera", FreeCaller<PasteToCamera>(), QKeySequence( "Shift+V" ) );
+	GlobalCommands_insert( "MoveToCamera", FreeCaller<MoveToCamera>(), QKeySequence( "Ctrl+Shift+V" ) );
+	GlobalCommands_insert( "CloneSelection", FreeCaller<Selection_Clone>(), QKeySequence( "Space" ) );
+	GlobalCommands_insert( "CloneSelectionAndMakeUnique", FreeCaller<Selection_Clone_MakeUnique>(), QKeySequence( "Shift+Space" ) );
+	GlobalCommands_insert( "DeleteSelection2", FreeCaller<deleteSelection>(), QKeySequence( "Backspace" ) );
+	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), QKeySequence( "Z" ) );
+	GlobalCommands_insert( "RepeatTransforms", FreeCaller<RepeatTransforms>(), QKeySequence( "Ctrl+R" ) );
+//	GlobalCommands_insert( "ParentSelection", FreeCaller<Scene_parentSelected>() );
+	GlobalCommands_insert( "UnSelectSelection2", FreeCaller<Selection_Deselect>(), QKeySequence( "Escape" ) );
+	GlobalCommands_insert( "UnSelectSelection", FreeCaller<Selection_Deselect>(), QKeySequence( "C" ) );
+	GlobalCommands_insert( "InvertSelection", FreeCaller<Select_Invert>(), QKeySequence( "I" ) );
+	GlobalCommands_insert( "SelectInside", FreeCaller<Select_Inside>() );
+	GlobalCommands_insert( "SelectTouching", FreeCaller<Select_Touching>() );
+	GlobalCommands_insert( "ExpandSelectionToPrimitives", FreeCaller<Scene_ExpandSelectionToPrimitives>(), QKeySequence( "Ctrl+E" ) );
+	GlobalCommands_insert( "ExpandSelectionToEntities", FreeCaller<Scene_ExpandSelectionToEntities>(), QKeySequence( "Shift+E" ) );
+	GlobalCommands_insert( "SelectConnectedEntities", FreeCaller<SelectConnectedEntities>(), QKeySequence( "Ctrl+Shift+E" ) );
+
+	GlobalCommands_insert( "ArbitraryRotation", FreeCaller<DoRotateDlg>(), QKeySequence( "Shift+R" ) );
+	GlobalCommands_insert( "ArbitraryScale", FreeCaller<DoScaleDlg>(), QKeySequence( "Ctrl+Shift+S" ) );
+
+	GlobalCommands_insert( "SnapToGrid", FreeCaller<Selection_SnapToGrid>(), QKeySequence( "Ctrl+G" ) );
+
+	GlobalCommands_insert( "SelectAllOfType", FreeCaller<Select_AllOfType>(), QKeySequence( "Shift+A" ) );
+
+	GlobalCommands_insert( "TexRotateClock", FreeCaller<Texdef_RotateClockwise>(), QKeySequence( "Shift+PgDown" ) );
+	GlobalCommands_insert( "TexRotateCounter", FreeCaller<Texdef_RotateAntiClockwise>(), QKeySequence( "Shift+PgUp" ) );
+	GlobalCommands_insert( "TexScaleUp", FreeCaller<Texdef_ScaleUp>(), QKeySequence( "Ctrl+Up" ) );
+	GlobalCommands_insert( "TexScaleDown", FreeCaller<Texdef_ScaleDown>(), QKeySequence( "Ctrl+Down" ) );
+	GlobalCommands_insert( "TexScaleLeft", FreeCaller<Texdef_ScaleLeft>(), QKeySequence( "Ctrl+Left" ) );
+	GlobalCommands_insert( "TexScaleRight", FreeCaller<Texdef_ScaleRight>(), QKeySequence( "Ctrl+Right" ) );
+	GlobalCommands_insert( "TexShiftUp", FreeCaller<Texdef_ShiftUp>(), QKeySequence( "Shift+Up" ) );
+	GlobalCommands_insert( "TexShiftDown", FreeCaller<Texdef_ShiftDown>(), QKeySequence( "Shift+Down" ) );
+	GlobalCommands_insert( "TexShiftLeft", FreeCaller<Texdef_ShiftLeft>(), QKeySequence( "Shift+Left" ) );
+	GlobalCommands_insert( "TexShiftRight", FreeCaller<Texdef_ShiftRight>(), QKeySequence( "Shift+Right" ) );
+
+	GlobalCommands_insert( "MoveSelectionDOWN", FreeCaller<Selection_MoveDown>(), QKeySequence( Qt::Key_Minus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "MoveSelectionUP", FreeCaller<Selection_MoveUp>(), QKeySequence( Qt::Key_Plus + Qt::KeypadModifier ) );
+
+	GlobalCommands_insert( "SelectNudgeLeft", FreeCaller<Selection_NudgeLeft>(), QKeySequence( "Alt+Left" ) );
+	GlobalCommands_insert( "SelectNudgeRight", FreeCaller<Selection_NudgeRight>(), QKeySequence( "Alt+Right" ) );
+	GlobalCommands_insert( "SelectNudgeUp", FreeCaller<Selection_NudgeUp>(), QKeySequence( "Alt+Up" ) );
+	GlobalCommands_insert( "SelectNudgeDown", FreeCaller<Selection_NudgeDown>(), QKeySequence( "Alt+Down" ) );
+}
+
+
+
+void SceneSelectionChange( const Selectable& selectable ){
+	SceneChangeNotify();
+}
+
+SignalHandlerId Selection_boundsChanged;
+
+#include "preferencesystem.h"
+
+void Nudge_constructPreferences( PreferencesPage& page ){
+	page.appendCheckBox( "", "Nudge selected after duplication", g_bNudgeAfterClone );
+}
+
+void Selection_construct(){
+	GlobalPreferenceSystem().registerPreference( "NudgeAfterClone", BoolImportStringCaller( g_bNudgeAfterClone ), BoolExportStringCaller( g_bNudgeAfterClone ) );
+
+	PreferencesDialog_addSettingsPreferences( FreeCaller1<PreferencesPage&, Nudge_constructPreferences>() );
+
+	GlobalSelectionSystem().addSelectionChangeCallback( FreeCaller1<const Selectable&, SceneSelectionChange>() );
+	GlobalSelectionSystem().addSelectionChangeCallback( FreeCaller1<const Selectable&, UpdateWorkzone_ForSelectionChanged>() );
+	Selection_boundsChanged = GlobalSceneGraph().addBoundsChangedCallback( FreeCaller<UpdateWorkzone_ForSelection>() );
+}
+
+void Selection_destroy(){
+	GlobalSceneGraph().removeBoundsChangedCallback( Selection_boundsChanged );
 }

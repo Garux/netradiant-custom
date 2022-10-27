@@ -80,7 +80,7 @@ extern "C" void WINAPI QERPlug_Dispatch( LPCSTR p, vec3_t vMin, vec3_t vMax, boo
 	}
 
 	if ( !strcmp( p, "About..." ) ) {
-		DoMessageBox( PLUGIN_ABOUT, "About", IDOK );
+		DoMessageBox( PLUGIN_ABOUT, "About" );
 	}
 	else if ( !strcmp( p, "Colour Changer..." ) ) {
 		DoCTFColourChanger();

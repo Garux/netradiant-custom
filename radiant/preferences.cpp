@@ -30,8 +30,6 @@
 
 #include "debugging/debugging.h"
 
-#include <gtk/gtk.h>
-
 #include "generic/callback.h"
 #include "math/vector.h"
 #include "string/string.h"
@@ -50,6 +48,16 @@
 #include "qe3.h"
 #include "gtkdlgs.h"
 
+#include <QCoreApplication>
+#include <QGridLayout>
+#include <QDialogButtonBox>
+#include <QPushButton>
+#include <QStackedWidget>
+#include <QTreeView>
+#include <QStandardItemModel>
+#include <QGroupBox>
+#include <QCheckBox>
+#include <QHeaderView>
 
 
 void Global_constructPreferences( PreferencesPage& page ){
@@ -124,7 +132,6 @@ void CGameDescription::Dump(){
 CGameDescription *g_pGameDescription;
 
 
-#include "warnings.h"
 #include "stream/textfilestream.h"
 #include "container/array.h"
 #include "xml/ixml.h"
@@ -202,7 +209,7 @@ void GlobalPreferences_Init(){
 void CGameDialog::LoadPrefs(){
 	// load global .pref file
 	StringOutputStream strGlobalPref( 256 );
-	strGlobalPref << g_Preferences.m_global_rc_path->str << "global.pref";
+	strGlobalPref << g_Preferences.m_global_rc_path << "global.pref";
 
 	globalOutputStream() << "loading global preferences from " << makeQuoted( strGlobalPref.c_str() ) << "\n";
 
@@ -213,7 +220,7 @@ void CGameDialog::LoadPrefs(){
 
 void CGameDialog::SavePrefs(){
 	StringOutputStream strGlobalPref( 256 );
-	strGlobalPref << g_Preferences.m_global_rc_path->str << "global.pref";
+	strGlobalPref << g_Preferences.m_global_rc_path << "global.pref";
 
 	globalOutputStream() << "saving global preferences to " << strGlobalPref.c_str() << "\n";
 
@@ -283,19 +290,30 @@ void CGameDialog::CreateGlobalFrame( PreferencesPage& page, bool global ){
 	page.appendCheckBox( "Startup", "Show Global Preferences", m_bGamePrompt );
 }
 
-GtkWindow* CGameDialog::BuildDialog(){
-	GtkFrame* frame = create_dialog_frame( "Game settings", GTK_SHADOW_ETCHED_IN );
+void CGameDialog::BuildDialog(){
+	GetWidget()->setWindowTitle( "Global Preferences" );
 
-	GtkVBox* vbox2 = create_dialog_vbox( 0, 4 );
-	gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox2 ) );
-
+	auto vbox = new QVBoxLayout( GetWidget() );
+	vbox->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 	{
-		PreferencesPage preferencesPage( *this, GTK_WIDGET( vbox2 ) );
-		Global_constructPreferences( preferencesPage );
-		CreateGlobalFrame( preferencesPage, true );
-	}
+		auto frame = new QGroupBox( "Game settings" );
+		vbox->addWidget( frame );
 
-	return create_simple_modal_dialog_window( "Global Preferences", m_modal, GTK_WIDGET( frame ) );
+		auto grid = new QGridLayout( frame );
+		grid->setAlignment( Qt::AlignmentFlag::AlignTop );
+		grid->setColumnStretch( 0, 111 );
+		grid->setColumnStretch( 1, 333 );
+		{
+			PreferencesPage preferencesPage( *this, grid );
+			Global_constructPreferences( preferencesPage );
+			CreateGlobalFrame( preferencesPage, true );
+		}
+	}
+	{
+		auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok );
+		vbox->addWidget( buttons );
+		QObject::connect( buttons, &QDialogButtonBox::accepted, GetWidget(), &QDialog::accept );
+	}
 }
 
 class LoadGameFile
@@ -343,15 +361,15 @@ void CGameDialog::ScanForGames(){
 }
 
 void CGameDialog::InitGlobalPrefPath(){
-	g_Preferences.m_global_rc_path = g_string_new( SettingsPath_get() );
+	g_Preferences.m_global_rc_path = SettingsPath_get();
 }
 
 void CGameDialog::Reset(){
-	if ( !g_Preferences.m_global_rc_path ) {
+	if ( g_Preferences.m_global_rc_path.empty() ) {
 		InitGlobalPrefPath();
 	}
 
-	file_remove( StringOutputStream( 256 )( g_Preferences.m_global_rc_path->str, "global.pref" ) );
+	file_remove( StringOutputStream( 256 )( g_Preferences.m_global_rc_path, "global.pref" ) );
 }
 
 void CGameDialog::Init(){
@@ -382,7 +400,7 @@ void CGameDialog::Init(){
 		}
 	}
 	if ( !currentGameDescription ) {
-		Create();
+		Create( nullptr );
 		DoGameDialog();
 		// use m_nComboSelect to identify the game to run as and set the globals
 		currentGameDescription = GameDescriptionForComboItem();
@@ -417,10 +435,9 @@ inline const char* GameDescription_getIdentifier( const CGameDescription& gameDe
 void CGameDialog::AddPacksURL( StringOutputStream &URL ){
 	// add the URLs for the list of game packs installed
 	// FIXME: this is kinda hardcoded for now..
-	std::list<CGameDescription *>::iterator iGame;
-	for ( iGame = mGames.begin(); iGame != mGames.end(); ++iGame )
+	for ( const CGameDescription *iGame : mGames )
 	{
-		URL << "&Games_dlup%5B%5D=" << GameDescription_getIdentifier( *( *iGame ) );
+		URL << "&Games_dlup%5B%5D=" << GameDescription_getIdentifier( *iGame );
 	}
 }
 
@@ -430,18 +447,17 @@ CGameDialog g_GamesDialog;
 // =============================================================================
 // Widget callbacks for PrefsDlg
 
-static void OnButtonClean( GtkWidget *widget, gpointer data ){
+static void OnButtonClean( PrefsDlg *dlg ){
 	// make sure this is what the user wants
-	if ( gtk_MessageBox( GTK_WIDGET( g_Preferences.GetWidget() ),
+	if ( qt_MessageBox( g_Preferences.GetWidget(),
 	                     "This will close Radiant and clean the corresponding registry entries.\n"
 	                     "Next time you start Radiant it will be good as new. Do you wish to continue?",
-	                     "Reset Registry", eMB_YESNO, eMB_ICONASTERISK ) == eIDYES ) {
-		PrefsDlg *dlg = (PrefsDlg*)data;
-		dlg->EndModal( eIDCANCEL );
+	                     "Reset Registry", EMessageBoxType::Warning, eIDYES | eIDNO ) == eIDYES ) {
+		dlg->EndModal( QDialog::DialogCode::Rejected );
 
 		g_preferences_globals.disable_ini = true;
 		Preferences_Reset();
-		gtk_main_quit();
+		QCoreApplication::quit();
 	}
 }
 
@@ -469,41 +485,14 @@ void PrefsDlg::Init(){
 	// takes the form: global-pref-path/gamename/prefs-file
 
 	// this is common to win32 and Linux init now
-	m_rc_path = g_string_new( m_global_rc_path->str );
-
 	// game sub-dir
-	g_string_append( m_rc_path, g_pGameDescription->mGameFile.c_str() );
-	g_string_append( m_rc_path, "/" );
-	Q_mkdir( m_rc_path->str );
+	m_rc_path = StringOutputStream( 256 )( m_global_rc_path, g_pGameDescription->mGameFile.c_str(), '/' );
+	Q_mkdir( m_rc_path.c_str() );
 
 	// then the ini file
-	m_inipath = g_string_new( m_rc_path->str );
-	g_string_append( m_inipath, PREFS_LOCAL_FILENAME );
+	m_inipath = StringOutputStream( 256 )( m_rc_path, PREFS_LOCAL_FILENAME );
 }
 
-void notebook_set_page( GtkWidget* notebook, GtkWidget* page ){
-	int pagenum = gtk_notebook_page_num( GTK_NOTEBOOK( notebook ), page );
-	if ( gtk_notebook_get_current_page( GTK_NOTEBOOK( notebook ) ) != pagenum ) {
-		gtk_notebook_set_current_page( GTK_NOTEBOOK( notebook ), pagenum );
-	}
-}
-
-void PrefsDlg::showPrefPage( GtkWidget* prefpage ){
-	notebook_set_page( m_notebook, prefpage );
-	return;
-}
-
-static void treeSelection( GtkTreeSelection* selection, gpointer data ){
-	PrefsDlg *dlg = (PrefsDlg*)data;
-
-	GtkTreeModel* model;
-	GtkTreeIter selected;
-	if ( gtk_tree_selection_get_selected( selection, &model, &selected ) ) {
-		GtkWidget* prefpage;
-		gtk_tree_model_get( model, &selected, 1, (gpointer*)&prefpage, -1 );
-		dlg->showPrefPage( prefpage );
-	}
-}
 
 typedef std::list<PreferenceGroupCallback> PreferenceGroupCallbacks;
 
@@ -568,242 +557,173 @@ void PreferencesDialog_addSettingsPage( const PreferenceGroupCallback& callback 
 	PreferenceGroupCallbacks_pushBack( g_settingsCallbacks, callback );
 }
 
-void Widget_updateDependency( GtkWidget* self, GtkWidget* toggleButton ){
-	gtk_widget_set_sensitive( self, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggleButton ) ) && gtk_widget_is_sensitive( toggleButton ) );
+//! note: doesn't handle dependency on setting \p toggleButton insensitive
+void Widget_connectToggleDependency( QWidget* self, QCheckBox* toggleButton ){
+	QObject::connect( toggleButton, &QCheckBox::stateChanged, [self, toggleButton]( int state ){
+		self->setEnabled( state && toggleButton->isEnabled() );
+	} );
 }
-
-void ToggleButton_toggled_Widget_updateDependency( GtkWidget *toggleButton, GtkWidget* self ){
-	Widget_updateDependency( self, toggleButton );
-}
-
-void ToggleButton_state_changed_Widget_updateDependency( GtkWidget* toggleButton, GtkStateType state, GtkWidget* self ){
-	if ( state == GTK_STATE_INSENSITIVE ) {
-		Widget_updateDependency( self, toggleButton );
-	}
-}
-
-void Widget_connectToggleDependency( GtkWidget* self, GtkWidget* toggleButton ){
-	g_signal_connect( G_OBJECT( toggleButton ), "state_changed", G_CALLBACK( ToggleButton_state_changed_Widget_updateDependency ), self );
-	g_signal_connect( G_OBJECT( toggleButton ), "toggled", G_CALLBACK( ToggleButton_toggled_Widget_updateDependency ), self );
-	Widget_updateDependency( self, toggleButton );
+void Widget_connectToggleDependency( QCheckBox* self, QCheckBox* toggleButton ){
+	Widget_connectToggleDependency( static_cast<QWidget*>( self ), toggleButton );
 }
 
 
-inline GtkWidget* getVBox( GtkWidget* page ){
-	return gtk_bin_get_child( GTK_BIN( page ) );
+QStandardItem* PreferenceTree_appendPage( QStandardItemModel* model, QStandardItem* parent, const char* name, int pageIndex ){
+	auto item = new QStandardItem( name );
+	item->setData( pageIndex, Qt::ItemDataRole::UserRole );
+	parent->appendRow( item );
+	return item;
 }
 
-GtkTreeIter PreferenceTree_appendPage( GtkTreeStore* store, GtkTreeIter* parent, const char* name, GtkWidget* page ){
-	GtkTreeIter group;
-	gtk_tree_store_append( store, &group, parent );
-	gtk_tree_store_set( store, &group, 0, name, 1, page, -1 );
-	return group;
-}
-
-GtkWidget* PreferencePages_addPage( GtkWidget* notebook, const char* name ){
-	GtkWidget* preflabel = gtk_label_new( name );
-	gtk_widget_show( preflabel );
-
-	GtkWidget* pageframe = gtk_frame_new( name );
-	gtk_container_set_border_width( GTK_CONTAINER( pageframe ), 4 );
-	gtk_widget_show( pageframe );
-
-	GtkWidget* vbox = gtk_vbox_new( FALSE, 4 );
-	gtk_widget_show( vbox );
-	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 4 );
-	gtk_container_add( GTK_CONTAINER( pageframe ), vbox );
-
-	// Add the page to the notebook
-	gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), pageframe, preflabel );
-
-	return pageframe;
+auto PreferencePages_addPage( QStackedWidget* notebook, const char* name ){
+	auto frame = new QGroupBox( name );
+	auto grid = new QGridLayout( frame );
+	grid->setAlignment( Qt::AlignmentFlag::AlignTop );
+	grid->setColumnStretch( 0, 111 );
+	grid->setColumnStretch( 1, 333 );
+	return std::pair( notebook->addWidget( frame ), grid );
 }
 
 class PreferenceTreeGroup : public PreferenceGroup
 {
 	Dialog& m_dialog;
-	GtkWidget* m_notebook;
-	GtkTreeStore* m_store;
-	GtkTreeIter m_group;
+	QStackedWidget* m_notebook;
+	QStandardItemModel* m_model;
+	QStandardItem *m_group;
 public:
-	PreferenceTreeGroup( Dialog& dialog, GtkWidget* notebook, GtkTreeStore* store, GtkTreeIter group ) :
+	PreferenceTreeGroup( Dialog& dialog, QStackedWidget* notebook, QStandardItemModel* model, QStandardItem *group ) :
 		m_dialog( dialog ),
 		m_notebook( notebook ),
-		m_store( store ),
+		m_model( model ),
 		m_group( group ){
 	}
-	PreferencesPage createPage( const char* treeName, const char* frameName ){
-		GtkWidget* page = PreferencePages_addPage( m_notebook, frameName );
-		PreferenceTree_appendPage( m_store, &m_group, treeName, page );
-		return PreferencesPage( m_dialog, getVBox( page ) );
+	PreferencesPage createPage( const char* treeName, const char* frameName ) override {
+		const auto [ pageIndex, layout ] = PreferencePages_addPage( m_notebook, frameName );
+		PreferenceTree_appendPage( m_model, m_group, treeName, pageIndex );
+		return PreferencesPage( m_dialog, layout );
 	}
 };
 
-#include <gdk/gdkkeysyms.h>
-
-GtkWindow* PrefsDlg::BuildDialog(){
+void PrefsDlg::BuildDialog(){
 	PreferencesDialog_addInterfacePreferences( FreeCaller1<PreferencesPage&, Interface_constructPreferences>() );
 
-	GtkWindow* dialog = create_floating_window( "NetRadiant Preferences", m_parent );
-
-	GtkAccelGroup* accel = gtk_accel_group_new();
-	gtk_window_add_accel_group( dialog, accel );
+	GetWidget()->setWindowTitle( "NetRadiant Preferences" );
 
 	{
-		GtkWidget* mainvbox = gtk_vbox_new( FALSE, 5 );
-		gtk_container_add( GTK_CONTAINER( dialog ), mainvbox );
-		gtk_container_set_border_width( GTK_CONTAINER( mainvbox ), 5 );
-		gtk_widget_show( mainvbox );
-
+		auto grid = new QGridLayout( GetWidget() );
+		grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 		{
-			GtkWidget* hbox = gtk_hbox_new( FALSE, 5 );
-			gtk_widget_show( hbox );
-			gtk_box_pack_end( GTK_BOX( mainvbox ), hbox, FALSE, TRUE, 0 );
-
-			{
-				GtkButton* button = create_dialog_button( "OK", G_CALLBACK( dialog_button_ok ), &m_modal );
-				gtk_box_pack_end( GTK_BOX( hbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-			}
-			{
-				GtkButton* button = create_dialog_button( "Cancel", G_CALLBACK( dialog_button_cancel ), &m_modal );
-				gtk_box_pack_end( GTK_BOX( hbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-				gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
-			}
-			{
-				GtkButton* button = create_dialog_button( "Clean", G_CALLBACK( OnButtonClean ), this );
-				gtk_box_pack_end( GTK_BOX( hbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-			}
+			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			grid->addWidget( buttons, 1, 1 );
+			QObject::connect( buttons, &QDialogButtonBox::accepted, GetWidget(), &QDialog::accept );
+			QObject::connect( buttons, &QDialogButtonBox::rejected, GetWidget(), &QDialog::reject );
+			QObject::connect( buttons->addButton( "Clean", QDialogButtonBox::ButtonRole::ResetRole ), &QPushButton::clicked, [this](){ OnButtonClean( this ); } );
 		}
 
 		{
-			GtkWidget* hbox = gtk_hbox_new( FALSE, 5 );
-			gtk_box_pack_start( GTK_BOX( mainvbox ), hbox, TRUE, TRUE, 0 );
-			gtk_widget_show( hbox );
-
 			{
-				GtkWidget* sc_win = gtk_scrolled_window_new( 0, 0 );
-				gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( sc_win ), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
-				gtk_box_pack_start( GTK_BOX( hbox ), sc_win, FALSE, FALSE, 0 );
-				gtk_widget_show( sc_win );
-				gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( sc_win ), GTK_SHADOW_IN );
-
 				// prefs pages notebook
-				m_notebook = gtk_notebook_new();
-				// hide the notebook tabs since its not supposed to look like a notebook
-				gtk_notebook_set_show_tabs( GTK_NOTEBOOK( m_notebook ), FALSE );
-				gtk_box_pack_start( GTK_BOX( hbox ), m_notebook, TRUE, TRUE, 0 );
-				gtk_widget_show( m_notebook );
-
-
+				m_notebook = new QStackedWidget;
+				grid->addWidget( m_notebook, 0, 1 );
 				{
-					GtkTreeStore* store = gtk_tree_store_new( 2, G_TYPE_STRING, G_TYPE_POINTER );
+					m_treeview = new QTreeView;
+					m_treeview->setHeaderHidden( true );
+					m_treeview->setEditTriggers( QAbstractItemView::EditTrigger::NoEditTriggers );
+					m_treeview->setUniformRowHeights( true ); // optimization
+					m_treeview->setHorizontalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
+					m_treeview->setSizeAdjustPolicy( QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents ); // scroll area will inherit column size
+					m_treeview->setSizePolicy( QSizePolicy::Policy::Fixed, m_treeview->sizePolicy().verticalPolicy() );
+					m_treeview->header()->setStretchLastSection( false ); // non greedy column sizing; + QHeaderView::ResizeMode::ResizeToContents = no text elision 🤷‍♀️
+					m_treeview->header()->setSectionResizeMode( QHeaderView::ResizeMode::ResizeToContents );
+					grid->addWidget( m_treeview, 0, 0, 2, 1 );
 
-					GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
-					m_treeview = view;
-					gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
+					// store display name in column #0 and page index in data( Qt::ItemDataRole::UserRole )
+					auto model = new QStandardItemModel( m_treeview );
+					m_treeview->setModel( model );
 
-					{
-						GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-						GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "Preferences", renderer, "text", 0, NULL );
-						gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
-					}
-
-					{
-						GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( view ) );
-						g_signal_connect( G_OBJECT( selection ), "changed", G_CALLBACK( treeSelection ), this );
-					}
-
-					gtk_widget_show( view );
-
-					gtk_container_add( GTK_CONTAINER( sc_win ), view );
+					QObject::connect( m_treeview->selectionModel(), &QItemSelectionModel::currentChanged, [this]( const QModelIndex& current ){
+						m_notebook->setCurrentIndex( current.data( Qt::ItemDataRole::UserRole ).toInt() );
+					} );
 
 					{
 						/********************************************************************/
 						/* Add preference tree options                                      */
 						/********************************************************************/
-						// Front page...
-						//GtkWidget* front =
-						PreferencePages_addPage( m_notebook, "Front Page" );
-
 						{
-							GtkWidget* global = PreferencePages_addPage( m_notebook, "Global Preferences" );
+							const auto [ pageIndex, layout ] = PreferencePages_addPage( m_notebook, "Global Preferences" );
 							{
-								PreferencesPage preferencesPage( *this, getVBox( global ) );
+								PreferencesPage preferencesPage( *this, layout );
 								Global_constructPreferences( preferencesPage );
 							}
-							GtkTreeIter group = PreferenceTree_appendPage( store, 0, "Global", global );
+							QStandardItem *group = PreferenceTree_appendPage( model, model->invisibleRootItem(), "Global", pageIndex );
 							{
-								GtkWidget* game = PreferencePages_addPage( m_notebook, "Game" );
-								PreferencesPage preferencesPage( *this, getVBox( game ) );
+								const auto [ pageIndex, layout ] = PreferencePages_addPage( m_notebook, "Game" );
+								PreferencesPage preferencesPage( *this, layout );
 								g_GamesDialog.CreateGlobalFrame( preferencesPage, false );
 
-								PreferenceTree_appendPage( store, &group, "Game", game );
+								PreferenceTree_appendPage( model, group, "Game", pageIndex );
 							}
 						}
 
 						{
-							GtkWidget* gamePage = PreferencePages_addPage( m_notebook, "Game Settings" );
+							const auto [ pageIndex, layout ] = PreferencePages_addPage( m_notebook, "Game Settings" );
 							{
-								PreferencesPage preferencesPage( *this, getVBox( gamePage ) );
+								PreferencesPage preferencesPage( *this, layout );
+								Game_constructPreferences( preferencesPage );
 								PreferencesPageCallbacks_constructPage( g_gamePreferences, preferencesPage );
 							}
 
-							GtkTreeIter group = PreferenceTree_appendPage( store, 0, "Game", gamePage );
-							PreferenceTreeGroup preferenceGroup( *this, m_notebook, store, group );
+							QStandardItem *group = PreferenceTree_appendPage( model, model->invisibleRootItem(), "Game", pageIndex );
+							PreferenceTreeGroup preferenceGroup( *this, m_notebook, model, group );
 
 							PreferenceGroupCallbacks_constructGroup( g_gameCallbacks, preferenceGroup );
 						}
 
 						{
-							GtkWidget* interfacePage = PreferencePages_addPage( m_notebook, "Interface Preferences" );
+							const auto [ pageIndex, layout ] = PreferencePages_addPage( m_notebook, "Interface Preferences" );
 							{
-								PreferencesPage preferencesPage( *this, getVBox( interfacePage ) );
+								PreferencesPage preferencesPage( *this, layout );
 								PreferencesPageCallbacks_constructPage( g_interfacePreferences, preferencesPage );
 							}
 
-							GtkTreeIter group = PreferenceTree_appendPage( store, 0, "Interface", interfacePage );
-							PreferenceTreeGroup preferenceGroup( *this, m_notebook, store, group );
+							QStandardItem *group = PreferenceTree_appendPage( model, model->invisibleRootItem(), "Interface", pageIndex );
+							PreferenceTreeGroup preferenceGroup( *this, m_notebook, model, group );
 
 							PreferenceGroupCallbacks_constructGroup( g_interfaceCallbacks, preferenceGroup );
 						}
 
 						{
-							GtkWidget* display = PreferencePages_addPage( m_notebook, "Display Preferences" );
+							const auto [ pageIndex, layout ] = PreferencePages_addPage( m_notebook, "Display Preferences" );
 							{
-								PreferencesPage preferencesPage( *this, getVBox( display ) );
+								PreferencesPage preferencesPage( *this, layout );
 								PreferencesPageCallbacks_constructPage( g_displayPreferences, preferencesPage );
 							}
-							GtkTreeIter group = PreferenceTree_appendPage( store, 0, "Display", display );
-							PreferenceTreeGroup preferenceGroup( *this, m_notebook, store, group );
+							QStandardItem *group = PreferenceTree_appendPage( model, model->invisibleRootItem(), "Display", pageIndex );
+							PreferenceTreeGroup preferenceGroup( *this, m_notebook, model, group );
 
 							PreferenceGroupCallbacks_constructGroup( g_displayCallbacks, preferenceGroup );
 						}
 
 						{
-							GtkWidget* settings = PreferencePages_addPage( m_notebook, "General Settings" );
+							const auto [ pageIndex, layout ] = PreferencePages_addPage( m_notebook, "General Settings" );
 							{
-								PreferencesPage preferencesPage( *this, getVBox( settings ) );
+								PreferencesPage preferencesPage( *this, layout );
 								PreferencesPageCallbacks_constructPage( g_settingsPreferences, preferencesPage );
 							}
 
-							GtkTreeIter group = PreferenceTree_appendPage( store, 0, "Settings", settings );
-							PreferenceTreeGroup preferenceGroup( *this, m_notebook, store, group );
+							QStandardItem *group = PreferenceTree_appendPage( model, model->invisibleRootItem(), "Settings", pageIndex );
+							PreferenceTreeGroup preferenceGroup( *this, m_notebook, model, group );
 
 							PreferenceGroupCallbacks_constructGroup( g_settingsCallbacks, preferenceGroup );
 						}
 					}
-
-					gtk_tree_view_expand_all( GTK_TREE_VIEW( view ) );
-
-					g_object_unref( G_OBJECT( store ) );
+					// convenience calls
+					m_treeview->expandAll();
+					m_treeview->setCurrentIndex( m_treeview->model()->index( 0, 0 ) );
 				}
 			}
 		}
 	}
-
-	gtk_notebook_set_current_page( GTK_NOTEBOOK( m_notebook ), 0 );
-
-	return dialog;
 }
 
 preferences_globals_t g_preferences_globals;
@@ -811,9 +731,8 @@ preferences_globals_t g_preferences_globals;
 PrefsDlg g_Preferences;               // global prefs instance
 
 
-void PreferencesDialog_constructWindow( GtkWindow* main_window ){
-	g_Preferences.m_parent = main_window;
-	g_Preferences.Create();
+void PreferencesDialog_constructWindow( QWidget* main_window ){
+	g_Preferences.Create( main_window );
 }
 void PreferencesDialog_destroyWindow(){
 	g_Preferences.Destroy();
@@ -851,10 +770,10 @@ StaticRegisterModule staticRegisterPreferenceSystem( StaticPreferenceSystemModul
 void Preferences_Load(){
 	g_GamesDialog.LoadPrefs();
 
-	globalOutputStream() << "loading local preferences from " << g_Preferences.m_inipath->str << "\n";
+	globalOutputStream() << "loading local preferences from " << g_Preferences.m_inipath << "\n";
 
-	if ( !Preferences_Load( g_preferences, g_Preferences.m_inipath->str, g_GamesDialog.m_sGameFile.m_value.c_str() ) ) {
-		globalWarningStream() << "failed to load local preferences from " << g_Preferences.m_inipath->str << "\n";
+	if ( !Preferences_Load( g_preferences, g_Preferences.m_inipath.c_str(), g_GamesDialog.m_sGameFile.m_value.c_str() ) ) {
+		globalWarningStream() << "failed to load local preferences from " << g_Preferences.m_inipath << "\n";
 	}
 }
 
@@ -865,20 +784,20 @@ void Preferences_Save(){
 
 	g_GamesDialog.SavePrefs();
 
-	globalOutputStream() << "saving local preferences to " << g_Preferences.m_inipath->str << "\n";
+	globalOutputStream() << "saving local preferences to " << g_Preferences.m_inipath << "\n";
 
-	if ( !Preferences_Save_Safe( g_preferences, g_Preferences.m_inipath->str ) ) {
-		globalWarningStream() << "failed to save local preferences to " << g_Preferences.m_inipath->str << "\n";
+	if ( !Preferences_Save_Safe( g_preferences, g_Preferences.m_inipath.c_str() ) ) {
+		globalWarningStream() << "failed to save local preferences to " << g_Preferences.m_inipath << "\n";
 	}
 }
 
 void Preferences_Reset(){
-	file_remove( g_Preferences.m_inipath->str );
+	file_remove( g_Preferences.m_inipath.c_str() );
 }
 
 
-void PrefsDlg::PostModal( EMessageBoxReturn code ){
-	if ( code == eIDOK ) {
+void PrefsDlg::PostModal( QDialog::DialogCode code ){
+	if ( code == QDialog::DialogCode::Accepted ) {
 		Preferences_Save();
 		UpdateAllWindows();
 	}
@@ -892,9 +811,8 @@ void PreferencesDialog_restartRequired( const char* staticName ){
 
 void PreferencesDialog_showDialog(){
 	//if ( ConfirmModified( "Edit Preferences" ) && g_Preferences.DoModal() == eIDOK ) {
-	if( gtk_widget_get_realized( g_Preferences.m_treeview ) )
-		gtk_widget_grab_focus( g_Preferences.m_treeview );
-	if ( g_Preferences.DoModal() == eIDOK ) {
+	g_Preferences.m_treeview->setFocus(); // focus tree to have it immediately available for text search
+	if ( g_Preferences.DoModal() == QDialog::DialogCode::Accepted ) {
 		if ( !g_restart_required.empty() ) {
 			StringOutputStream message( 256 );
 			message << "Preference changes require a restart:\n\n";
@@ -903,7 +821,7 @@ void PreferencesDialog_showDialog(){
 			g_restart_required.clear();
 			message << "\nRestart now?";
 
-			if( gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), message.c_str(), "Restart is required", eMB_YESNO, eMB_ICONQUESTION ) == eIDYES )
+			if( qt_MessageBox( MainFrame_getWindow(), message.c_str(), "Restart is required", EMessageBoxType::Question ) == eIDYES )
 				Radiant_Restart();
 		}
 	}

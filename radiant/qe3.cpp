@@ -41,7 +41,7 @@
 
 #include <map>
 
-#include <gtk/gtk.h>
+#include <QWidget>
 
 #include "stream/textfilestream.h"
 #include "commandlib.h"
@@ -92,9 +92,9 @@ void QE_InitVFS(){
 
 	StringOutputStream str( 256 );
 	// if we have a mod dir
-	if ( !string_equal( gamename, basegame ) ) {
+	if ( !path_equal( gamename, basegame ) ) {
 		// ~/.<gameprefix>/<fs_game>
-		if ( !string_equal( globalRoot, userRoot ) ) {
+		if ( !path_equal( globalRoot, userRoot ) ) {
 			GlobalFileSystem().initDirectory( str( userRoot, gamename, '/' ) ); // userGamePath
 		}
 
@@ -105,7 +105,7 @@ void QE_InitVFS(){
 	}
 
 	// ~/.<gameprefix>/<fs_main>
-	if ( !string_equal( globalRoot, userRoot ) ) {
+	if ( !path_equal( globalRoot, userRoot ) ) {
 		GlobalFileSystem().initDirectory( str( userRoot, basegame, '/' ) ); // userBasePath
 	}
 
@@ -144,9 +144,9 @@ bool ConfirmModified( const char* title ){
 		return true;
 	}
 
-	EMessageBoxReturn result = gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),
+	EMessageBoxReturn result = qt_MessageBox( MainFrame_getWindow(),
 	                                           "The current map has changed since it was last saved.\nDo you want to save the current map before continuing?",
-	                                           title, eMB_YESNOCANCEL, eMB_ICONQUESTION );
+	                                           title, EMessageBoxType::Question, eIDYES | eIDNO | eIDCANCEL );
 	if ( result == eIDCANCEL ) {
 		return false;
 	}
@@ -159,7 +159,7 @@ bool ConfirmModified( const char* title ){
 			return Map_Save();
 		}
 	}
-	return true;
+	return true; // eIDNO
 }
 
 void bsp_init(){
@@ -322,25 +322,5 @@ void Sys_SetTitle( const char *text, bool modified ){
 		title << " *";
 	}
 
-	gtk_window_set_title( MainFrame_getWindow(), title.c_str() );
-}
-
-bool g_bWaitCursor = false;
-
-void Sys_BeginWait(){
-	ScreenUpdates_Disable( "Processing...", "Please Wait" );
-	GdkCursor *cursor = gdk_cursor_new( GDK_WATCH );
-	gdk_window_set_cursor( gtk_widget_get_window( GTK_WIDGET( MainFrame_getWindow() ) ), cursor );
-	gdk_cursor_unref( cursor );
-	g_bWaitCursor = true;
-}
-
-void Sys_EndWait(){
-	ScreenUpdates_Enable();
-	gdk_window_set_cursor( gtk_widget_get_window( GTK_WIDGET( MainFrame_getWindow() ) ), 0 );
-	g_bWaitCursor = false;
-}
-
-void Sys_Beep(){
-	gdk_beep();
+	MainFrame_getWindow()->setWindowTitle( title.c_str() );
 }

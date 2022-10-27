@@ -30,8 +30,6 @@
 #include "stream/stringstream.h"
 #include "os/file.h"
 
-#include <gtk/gtk.h>
-
 #include "iplugin.h"
 #include "qerplugin.h"
 #include "ifilesystem.h"
@@ -41,9 +39,6 @@
 
 #include "generic/callback.h"
 
-namespace {
-const char SHADERTAG_FILE[] = "shadertags.xml";
-}
 
 class ShaderPlugPluginDependencies : public GlobalRadiantModuleRef,
 	public GlobalFileSystemModuleRef,
@@ -57,7 +52,7 @@ public:
 
 namespace Shaderplug
 {
-GtkWindow* g_window;
+QWidget* g_window;
 
 std::vector<const char*> archives;
 std::set<std::string> shaders;
@@ -67,7 +62,7 @@ XmlTagBuilder TagBuilder;
 void CreateTagFile();
 
 const char* init( void* hApp, void* pMainWidget ){
-	g_window = GTK_WINDOW( pMainWidget );
+	g_window = static_cast<QWidget*>( pMainWidget );
 	return "";
 }
 const char* getName(){
@@ -81,12 +76,12 @@ const char* getCommandTitleList(){
 }
 void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush ){
 	if ( string_equal( command, "About" ) ) {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ),
-		                                 "Shaderplug (1.0)\n\n"
-		                                 "by Shaderman (shaderman@gmx.net)",
+		GlobalRadiant().m_pfnMessageBox( g_window,
+		                                 "Shaderplug (1.0)<br><br>"
+		                                 "by Shaderman (<a href='mailto:shaderman@gmx.net'>shaderman@gmx.net</a>)",
 		                                 "About",
-		                                 eMB_OK,
-		                                 eMB_ICONDEFAULT );
+		                                 EMessageBoxType::Info,
+		                                 0 );
 	}
 	if ( string_equal( command, "Create tag file" ) ) {
 		CreateTagFile();
@@ -137,21 +132,21 @@ void GetAllShaders(){
 
 void GetArchiveList(){
 	GlobalFileSystem().forEachArchive( LoadArchiveFileCaller() );
-	globalOutputStream() << "Shaderplug: " << (Unsigned)Shaderplug::archives.size() << " archives found.\n";
+	globalOutputStream() << "Shaderplug: " << Shaderplug::archives.size() << " archives found.\n";
 }
 
 void CreateTagFile(){
 	const char* shader_type = GlobalRadiant().getGameDescriptionKeyValue( "shaders" );
 
 	GetAllShaders();
-	globalOutputStream() << "Shaderplug: " << (Unsigned)shaders.size() << " shaders found.\n";
+	globalOutputStream() << "Shaderplug: " << shaders.size() << " shaders found.\n";
 
 	if ( string_equal( shader_type, "quake3" ) ) {
 		GetTextures( "jpg" );
 		GetTextures( "tga" );
 		GetTextures( "png" );
 
-		globalOutputStream() << "Shaderplug: " << (Unsigned)textures.size() << " textures found.\n";
+		globalOutputStream() << "Shaderplug: " << textures.size() << " textures found.\n";
 	}
 
 	if ( shaders.size() || textures.size() != 0 ) {
@@ -159,51 +154,41 @@ void CreateTagFile(){
 
 		TagBuilder.CreateXmlDocument();
 
-		std::set<std::string>::reverse_iterator r_iter;
-
-		for ( r_iter = textures.rbegin(); r_iter != textures.rend(); ++r_iter )
+		for ( auto r_iter = textures.crbegin(); r_iter != textures.crend(); ++r_iter )
 		{
-			TagBuilder.AddShaderNode( const_cast<char*>( ( *r_iter ).c_str() ), STOCK, TEXTURE );
+			TagBuilder.AddShaderNode( r_iter->c_str(), TextureType::STOCK, NodeShaderType::TEXTURE );
 		}
 
-		for ( r_iter = shaders.rbegin(); r_iter != shaders.rend(); ++r_iter )
+		for ( auto r_iter = shaders.crbegin(); r_iter != shaders.crend(); ++r_iter )
 		{
-			TagBuilder.AddShaderNode( const_cast<char*>( ( *r_iter ).c_str() ), STOCK, SHADER );
+			TagBuilder.AddShaderNode( r_iter->c_str(), TextureType::STOCK, NodeShaderType::SHADER );
 		}
 
 		// Get the tag file
-		StringOutputStream tagFileStream( 256 );
-		tagFileStream << GlobalRadiant().getLocalRcPath() << SHADERTAG_FILE;
-		char* tagFile = tagFileStream.c_str();
-
-		char message[256];
-		strcpy( message, "Tag file saved to\n" );
-		strcat( message, tagFile );
-		strcat( message, "\nPlease restart Radiant now.\n" );
+		const auto tagFile = StringOutputStream( 256 )( GlobalRadiant().getLocalRcPath(), SHADERTAG_FILE );
+		const auto message = StringOutputStream( 256 )( "Tag file saved to\n", tagFile, "\nPlease restart Radiant now.\n" );
 
 		if ( file_exists( tagFile ) ) {
-			EMessageBoxReturn result = GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ),
+			EMessageBoxReturn result = GlobalRadiant().m_pfnMessageBox( g_window,
 			                                                            "WARNING! A tag file already exists! Overwrite it?", "Overwrite tag file?",
-			                                                            eMB_NOYES,
-			                                                            eMB_ICONWARNING );
+			                                                            EMessageBoxType::Warning,
+			                                                            eIDYES | eIDNO );
 
 			if ( result == eIDYES ) {
 				TagBuilder.SaveXmlDoc( tagFile );
-				GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ), message, "INFO", eMB_OK, eMB_ICONASTERISK );
+				GlobalRadiant().m_pfnMessageBox( g_window, message, "INFO", EMessageBoxType::Info, 0 );
 			}
 		}
 		else {
 			TagBuilder.SaveXmlDoc( tagFile );
-			GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ), message, "INFO", eMB_OK, eMB_ICONASTERISK );
+			GlobalRadiant().m_pfnMessageBox( g_window, message, "INFO", EMessageBoxType::Info, 0 );
 		}
 	}
 	else {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ),
-		                                 "No shaders or textures found. No XML tag file created!\n"
-		                                 "",
+		GlobalRadiant().m_pfnMessageBox( g_window,
+		                                 "No shaders or textures found. No XML tag file created!\n",
 		                                 "ERROR",
-		                                 eMB_OK,
-		                                 eMB_ICONERROR );
+		                                 EMessageBoxType::Error, 0 );
 	}
 }
 } // namespace

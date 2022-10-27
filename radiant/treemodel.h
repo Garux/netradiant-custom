@@ -21,9 +21,7 @@
 
 #pragma once
 
-struct GraphTreeModel;
-
-GraphTreeModel* graph_tree_model_new();
+class GraphTreeModel* graph_tree_model_new();
 void graph_tree_model_delete( GraphTreeModel* model );
 
 namespace scene
@@ -32,3 +30,10 @@ class Instance;
 }
 void graph_tree_model_insert( GraphTreeModel* model, const scene::Instance& instance );
 void graph_tree_model_erase( GraphTreeModel* model, const scene::Instance& instance );
+
+
+#include <qnamespace.h>
+constexpr int c_ItemDataRole_Instance = Qt::ItemDataRole::UserRole + 1;
+constexpr int c_ItemDataRole_Node = Qt::ItemDataRole::UserRole + 2;
+
+

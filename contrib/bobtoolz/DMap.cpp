@@ -75,8 +75,8 @@ DEntity* DMap::AddEntity( const char *classname, int ID ){
 void DMap::ClearEntities(){
 	m_nNextEntity = 1;
 
-	for ( std::list<DEntity *>::const_iterator deadEntity = entityList.begin(); deadEntity != entityList.end(); deadEntity++ )
-		delete *deadEntity;
+	for ( DEntity *entity : entityList )
+		delete entity;
 
 	entityList.clear();
 }
@@ -84,10 +84,10 @@ void DMap::ClearEntities(){
 DEntity* DMap::GetEntityForID( int ID ){
 	DEntity* findEntity = NULL;
 
-	for ( std::list<DEntity *>::const_iterator chkEntity = entityList.begin(); chkEntity != entityList.end(); chkEntity++ )
+	for ( DEntity *entity : entityList )
 	{
-		if ( ( *chkEntity )->m_nID == ID ) {
-			findEntity = ( *chkEntity );
+		if ( entity->m_nID == ID ) {
+			findEntity = entity;
 			break;
 		}
 	}
@@ -105,8 +105,8 @@ DEntity* DMap::GetWorldSpawn(){
 }
 
 void DMap::BuildInRadiant( bool bAllowDestruction ){
-	for ( std::list<DEntity *>::const_iterator buildEntity = entityList.begin(); buildEntity != entityList.end(); buildEntity++ )
-		( *buildEntity )->BuildInRadiant( bAllowDestruction );
+	for ( DEntity *entity : entityList )
+		entity->BuildInRadiant( bAllowDestruction );
 }
 
 void DMap::LoadAll( bool bLoadPatches ){
@@ -136,27 +136,27 @@ void DMap::LoadAll( bool bLoadPatches ){
 
 int DMap::FixBrushes(){
 	int count = 0;
-	for ( std::list<DEntity *>::const_iterator fixEntity = entityList.begin(); fixEntity != entityList.end(); fixEntity++ )
+	for ( DEntity *entity : entityList )
 	{
-		count += ( *fixEntity )->FixBrushes();
+		count += entity->FixBrushes();
 	}
 
 	return count;
 }
 
 void DMap::ResetTextures( const char* textureName, float fScale[2],      float fShift[2],      int rotation, const char* newTextureName,
-                          int bResetTextureName,  int bResetScale[2],  int bResetShift[2],  int bResetRotation ){
-	for ( std::list<DEntity *>::const_iterator texEntity = entityList.begin(); texEntity != entityList.end(); texEntity++ )
+                          bool bResetTextureName,  bool bResetScale[2],  bool bResetShift[2],  bool bResetRotation ){
+	for ( DEntity *entity : entityList )
 	{
-		if ( string_equal_nocase( "worldspawn", ( *texEntity )->m_Classname ) ) {
-			( *texEntity )->ResetTextures( textureName,        fScale,       fShift,       rotation, newTextureName,
-			                               bResetTextureName,  bResetScale,  bResetShift,  bResetRotation, true );
+		if ( string_equal_nocase( "worldspawn", entity->m_Classname ) ) {
+			entity->ResetTextures( textureName,        fScale,       fShift,       rotation, newTextureName,
+			                       bResetTextureName,  bResetScale,  bResetShift,  bResetRotation, true );
 		}
 		else
 		{
-			if ( ( *texEntity )->ResetTextures( textureName,        fScale,       fShift,       rotation, newTextureName,
-			                                    bResetTextureName,  bResetScale,  bResetShift,  bResetRotation, false ) ) {
-				RebuildEntity( *texEntity );
+			if ( entity->ResetTextures( textureName,        fScale,       fShift,       rotation, newTextureName,
+			                            bResetTextureName,  bResetScale,  bResetShift,  bResetRotation, false ) ) {
+				RebuildEntity( entity );
 			}
 		}
 	}

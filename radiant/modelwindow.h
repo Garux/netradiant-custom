@@ -26,12 +26,7 @@ void ModelBrowser_Construct();
 void ModelBrowser_Destroy();
 
 
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
-
-GtkWidget* ModelBrowser_constructWindow( GtkWindow* toplevel );
+class QWidget* ModelBrowser_constructWindow( QWidget* toplevel );
 void ModelBrowser_destroyWindow();
-
-GtkWidget* ModelBrowser_getGLWidget();
 
 void ModelBrowser_flushReferences();

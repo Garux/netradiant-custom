@@ -33,17 +33,6 @@
 #include "instancelib.h"
 #include "treemodel.h"
 
-class StringEqualPredicate
-{
-	const char* m_string;
-public:
-	StringEqualPredicate( const char* string ) : m_string( string ){
-	}
-	bool operator()( const char* other ) const {
-		return string_equal( m_string, other );
-	}
-};
-
 template<std::size_t SIZE>
 class TypeIdMap
 {
@@ -56,9 +45,9 @@ public:
 	TypeIdMap() : m_typeNamesEnd( m_typeNames ){
 	}
 	TypeId getTypeId( const char* name ){
-		TypeName* i = std::find_if( m_typeNames, m_typeNamesEnd, StringEqualPredicate( name ) );
+		TypeName* i = std::find_if( m_typeNames, m_typeNamesEnd, [name]( const char* other ){ return string_equal( name, other ); } );
 		if ( i == m_typeNamesEnd ) {
-			ASSERT_MESSAGE( m_typeNamesEnd != m_typeNames + SIZE, "reached maximum number of type names supported (" << Unsigned( SIZE ) << ")" );
+			ASSERT_MESSAGE( m_typeNamesEnd != m_typeNames + SIZE, "reached maximum number of type names supported (" << SIZE << ")" );
 			*m_typeNamesEnd++ = name;
 		}
 		return i - m_typeNames;

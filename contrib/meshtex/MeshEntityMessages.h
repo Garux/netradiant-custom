@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_MESHENTITYMESSAGES_H)
-#define INCLUDED_MESHENTITYMESSAGES_H
+#pragma once
 
 /// @name Informational messages
 //@{
@@ -51,5 +50,3 @@
 #define ERROR_ROW_ZEROTILES "A tile count of zero cannot be applied; the S values of the row will not be changed."
 #define ERROR_COL_ZEROTILES "A tile count of zero cannot be applied; the T values of the column will not be changed."
 //@}
-
-#endif // #if !defined(INCLUDED_MESHENTITYMESSAGES_H)

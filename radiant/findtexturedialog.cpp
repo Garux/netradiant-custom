@@ -31,9 +31,16 @@
 
 #include "ishaders.h"
 
-#include <gtk/gtk.h>
+#include <QHBoxLayout>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QLabel>
+#include <QCheckBox>
+#include <QEvent>
+#include <QDialogButtonBox>
+#include <QPushButton>
 
-#include "gtkutil/window.h"
+#include "gtkutil/guisettings.h"
 #include "stream/stringstream.h"
 #include "os/path.h"
 
@@ -47,7 +54,6 @@
 class FindTextureDialog : public Dialog
 {
 public:
-	WindowPositionTracker m_position_tracker;
 	static void setReplaceStr( const char* name );
 	static void setFindStr( const char* name );
 	static bool isOpen();
@@ -57,11 +63,10 @@ public:
 
 	FindTextureDialog();
 	virtual ~FindTextureDialog();
-	GtkWindow* BuildDialog();
+	void BuildDialog() override;
 
-	void constructWindow( GtkWindow* parent ){
-		m_parent = parent;
-		Create();
+	void constructWindow( QWidget* parent ){
+		Create( parent );
 	}
 	void destroyWindow(){
 		Destroy();
@@ -84,148 +89,92 @@ void FindTextureDialog_apply(){
 	FindReplaceTextures( find.c_str(), replace.c_str(), g_FindTextureDialog.m_bSelectedOnly );
 }
 
-static void OnApply( GtkWidget* widget, gpointer data ){
-	g_FindTextureDialog.exportData();
-	FindTextureDialog_apply();
-}
-#if 0
-static void OnFind( GtkWidget* widget, gpointer data ){
-	g_FindTextureDialog.exportData();
-	FindTextureDialog_apply();
+class FindActiveTracker : public QObject
+{
+	const bool m_findActive;
+public:
+	FindActiveTracker( bool findActive ) : m_findActive( findActive ){}
+protected:
+	bool eventFilter( QObject *obj, QEvent *event ) override {
+		if( event->type() == QEvent::FocusIn ) {
+			g_bFindActive = m_findActive;
+		}
+		return QObject::eventFilter( obj, event ); // standard event processing
+	}
+};
+FindActiveTracker s_find_focus_in( true );
+FindActiveTracker s_replace_focus_in( false );
+
 }
 
-static void OnOK( GtkWidget* widget, gpointer data ){
-	g_FindTextureDialog.exportData();
-	FindTextureDialog_apply();
-	g_FindTextureDialog.HideDlg();
-}
-#endif
-static void OnClose( GtkWidget* widget, gpointer data ){
-	g_FindTextureDialog.HideDlg();
-}
-
-
-static gint find_focus_in( GtkWidget* widget, GdkEventFocus *event, gpointer data ){
-	g_bFindActive = true;
-	return FALSE;
-}
-
-static gint replace_focus_in( GtkWidget* widget, GdkEventFocus *event, gpointer data ){
-	g_bFindActive = false;
-	return FALSE;
-}
-}
 
 // =============================================================================
 // FindTextureDialog class
 
-FindTextureDialog::FindTextureDialog(){
-	m_bSelectedOnly = FALSE;
-	m_position_tracker.setPosition( WindowPosition( -1, -1, 0, 0 ) );
+FindTextureDialog::FindTextureDialog() : m_bSelectedOnly( false ){
 }
 
 FindTextureDialog::~FindTextureDialog(){
 }
 
-GtkWindow* FindTextureDialog::BuildDialog(){
-	GtkWidget* vbox, *hbox, *table, *label;
-	GtkWidget* button, *check, *entry;
+void FindTextureDialog::BuildDialog(){
+	GetWidget()->setWindowTitle( "Find / Replace Texture(s)" );
 
-	GtkWindow* dlg = create_floating_window( "Find / Replace Texture(s)", m_parent );
+	g_guiSettings.addWindow( GetWidget(), "TextureBrowser/FindReplace" );
 
-	m_position_tracker.connect( dlg );
+	auto hbox = new QHBoxLayout( GetWidget() );
+	auto form = new QFormLayout;
+	hbox->addLayout( form );
 
-	hbox = gtk_hbox_new( FALSE, 5 );
-	gtk_widget_show( hbox );
-	gtk_container_add( GTK_CONTAINER( dlg ), GTK_WIDGET( hbox ) );
-	gtk_container_set_border_width( GTK_CONTAINER( hbox ), 5 );
+	{
+		auto entry = new QLineEdit;
+		form->addRow( "Find:", entry );
+		AddDialogData( *entry, m_strFind );
+		entry->installEventFilter( &s_find_focus_in );
+		GlobalTextureEntryCompletion::instance().connect( entry );
+	}
+	{
+		auto entry = new QLineEdit;
+		auto label = new QLabel( "Replace:" );
+		form->addRow( label, entry );
+		entry->setPlaceholderText( "Empty = search mode" );
+		AddDialogData( *entry, m_strReplace );
+		entry->installEventFilter( &s_replace_focus_in );
+		GlobalTextureEntryCompletion::instance().connect( entry );
+	}
+	{
+		auto check = new QCheckBox( "Within selected brushes only" );
+		form->addWidget( check );
+		AddDialogData( *check, m_bSelectedOnly );
+	}
 
-	vbox = gtk_vbox_new( FALSE, 5 );
-	gtk_widget_show( vbox );
-	gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox ), TRUE, TRUE, 0 );
-
-	table = gtk_table_new( 2, 2, FALSE );
-	gtk_widget_show( table );
-	gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
-	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
-	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
-
-	label = gtk_label_new( "Find:" );
-	gtk_widget_show( label );
-	gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 0, 1,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
-
-	label = gtk_label_new( "Replace:*" );
-	gtk_widget_set_tooltip_text( label, "Empty = search mode" );
-	gtk_widget_show( label );
-	gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 1, 2,
-	                  (GtkAttachOptions) ( GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
-
-	entry = gtk_entry_new();
-	gtk_widget_show( entry );
-	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 0, 1,
-	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	g_signal_connect( G_OBJECT( entry ), "focus_in_event",
-	                  G_CALLBACK( find_focus_in ), 0 );
-	AddDialogData( *GTK_ENTRY( entry ), m_strFind );
-	GlobalTextureEntryCompletion::instance().connect( GTK_ENTRY( entry ) );
-
-	entry = gtk_entry_new();
-	gtk_widget_set_tooltip_text( entry, "Empty = search mode" );
-	gtk_widget_show( entry );
-	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 1, 2,
-	                  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-	                  (GtkAttachOptions) ( 0 ), 0, 0 );
-	g_signal_connect( G_OBJECT( entry ), "focus_in_event",
-	                  G_CALLBACK( replace_focus_in ), 0 );
-	AddDialogData( *GTK_ENTRY( entry ), m_strReplace );
-	GlobalTextureEntryCompletion::instance().connect( GTK_ENTRY( entry ) );
-
-	check = gtk_check_button_new_with_label( "Within selected brushes only" );
-	gtk_widget_show( check );
-	gtk_box_pack_start( GTK_BOX( vbox ), check, TRUE, TRUE, 0 );
-	AddDialogData( *GTK_TOGGLE_BUTTON( check ), m_bSelectedOnly );
-
-	vbox = gtk_vbox_new( FALSE, 5 );
-	gtk_widget_show( vbox );
-	gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox ), FALSE, FALSE, 0 );
-
-	button = gtk_button_new_with_label( "Apply" );
-	gtk_widget_show( button );
-	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 0 );
-	g_signal_connect( G_OBJECT( button ), "clicked",
-	                  G_CALLBACK( OnApply ), 0 );
-	gtk_widget_set_size_request( button, 60, -1 );
-
-	button = gtk_button_new_with_label( "Close" );
-	gtk_widget_show( button );
-	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 0 );
-	g_signal_connect( G_OBJECT( button ), "clicked",
-	                  G_CALLBACK( OnClose ), 0 );
-	gtk_widget_set_size_request( button, 60, -1 );
-
-	return dlg;
+	{
+		auto buttons = new QDialogButtonBox( Qt::Orientation::Vertical );
+		hbox->addWidget( buttons );
+		QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Apply ), &QPushButton::clicked, [](){
+			g_FindTextureDialog.exportData();
+			FindTextureDialog_apply();
+		} );
+		QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Close ), &QPushButton::clicked, [](){
+			g_FindTextureDialog.HideDlg();
+		} );
+	}
 }
 
 void FindTextureDialog::updateTextures( const char* name ){
 	if ( isOpen() ) {
 		if ( g_bFindActive ) {
-			setFindStr( name + 9 );
+			setFindStr( name + strlen( "textures/" ) );
 		}
 		else
 		{
-			setReplaceStr( name + 9 );
+			setReplaceStr( name + strlen( "textures/" ) );
 		}
 	}
 }
 
 bool FindTextureDialog::isOpen(){
-	return gtk_widget_get_visible( GTK_WIDGET( g_FindTextureDialog.GetWidget() ) );
+	return g_FindTextureDialog.GetWidget()->isVisible();
 }
 
 void FindTextureDialog::setFindStr( const char* name ){
@@ -242,11 +191,10 @@ void FindTextureDialog::setReplaceStr( const char* name ){
 
 void FindTextureDialog::show(){
 	g_FindTextureDialog.ShowDlg();
-	gtk_window_present( g_FindTextureDialog.GetWidget() );
 }
 
 
-void FindTextureDialog_constructWindow( GtkWindow* main_window ){
+void FindTextureDialog_constructWindow( QWidget* main_window ){
 	g_FindTextureDialog.constructWindow( main_window );
 }
 
@@ -266,7 +214,6 @@ void FindTextureDialog_selectTexture( const char* name ){
 
 void FindTextureDialog_Construct(){
 	GlobalCommands_insert( "FindReplaceTextures", FindTextureDialog::ShowCaller() );
-	GlobalPreferenceSystem().registerPreference( "FindReplacehWnd", WindowPositionTrackerImportStringCaller( g_FindTextureDialog.m_position_tracker ), WindowPositionTrackerExportStringCaller( g_FindTextureDialog.m_position_tracker ) );
 }
 
 void FindTextureDialog_Destroy(){

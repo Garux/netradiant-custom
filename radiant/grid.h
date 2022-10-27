@@ -32,8 +32,7 @@ float GetMaxGridCoord();
 void AddGridChangeCallback( const SignalHandler& handler );
 
 void Grid_registerCommands();
-typedef struct _GtkMenu GtkMenu;
-void Grid_constructMenu( GtkMenu* menu );
+void Grid_constructMenu( class QMenu* menu );
 
 void Grid_registerShortcuts();
 

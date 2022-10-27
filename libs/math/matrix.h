@@ -274,8 +274,8 @@ enum Matrix4Handedness
 inline Matrix4Handedness matrix4_handedness( const Matrix4& self ){
 	return (
 	           vector3_dot(
-	               vector3_cross( vector4_to_vector3( self.x() ), vector4_to_vector3( self.y() ) ),
-	               vector4_to_vector3( self.z() )
+	               vector3_cross( self.x().vec3(), self.y().vec3() ),
+	               self.z().vec3()
 	           )
 	           < 0.0
 	       ) ? MATRIX4_LEFTHANDED : MATRIX4_RIGHTHANDED;
@@ -600,7 +600,7 @@ inline Matrix4 matrix4_translation_for_vec3( const Vector3& translation ){
 
 /// \brief Returns the translation part of \p self.
 inline Vector3 matrix4_get_translation_vec3( const Matrix4& self ){
-	return vector4_to_vector3( self.t() );
+	return self.t().vec3();
 }
 
 /// \brief Concatenates \p self with \p translation.
@@ -1118,9 +1118,9 @@ inline Matrix4 matrix4_scale_for_vec3( const Vector3& scale ){
 /// \p self must be affine and orthogonal to produce a meaningful result.
 inline Vector3 matrix4_get_scale_vec3( const Matrix4& self ){
 	return Vector3(
-	           static_cast<float>( vector3_length( vector4_to_vector3( self.x() ) ) ),
-	           static_cast<float>( vector3_length( vector4_to_vector3( self.y() ) ) ),
-	           static_cast<float>( vector3_length( vector4_to_vector3( self.z() ) ) )
+	           static_cast<float>( vector3_length( self.x().vec3() ) ),
+	           static_cast<float>( vector3_length( self.y().vec3() ) ),
+	           static_cast<float>( vector3_length( self.z().vec3() ) )
 	       );
 }
 

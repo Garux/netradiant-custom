@@ -549,9 +549,9 @@ inline double plane_distance_to_point( const Plane3& plane, const Vector3& point
 }
 
 inline double plane_distance_to_oriented_extents( const Plane3& plane, const Vector3& extents, const Matrix4& orientation ){
-	return fabs( extents[0] * vector3_dot( plane.normal(), vector4_to_vector3( orientation.x() ) ) )
-	     + fabs( extents[1] * vector3_dot( plane.normal(), vector4_to_vector3( orientation.y() ) ) )
-	     + fabs( extents[2] * vector3_dot( plane.normal(), vector4_to_vector3( orientation.z() ) ) );
+	return fabs( extents[0] * vector3_dot( plane.normal(), orientation.x().vec3() ) )
+	     + fabs( extents[1] * vector3_dot( plane.normal(), orientation.y().vec3() ) )
+	     + fabs( extents[2] * vector3_dot( plane.normal(), orientation.z().vec3() ) );
 }
 
 /// \brief Return false if \p aabb with \p orientation is partially or completely outside \p plane.
@@ -622,11 +622,11 @@ inline bool viewer_test_triangle( const Vector4& viewer, const Vector3& p0, cons
 
 inline Vector4 viewer_from_transformed_viewer( const Vector4& viewer, const Matrix4& transform ){
 	if ( viewer[3] == 0 ) {
-		return Vector4( matrix4_transformed_direction( transform, vector4_to_vector3( viewer ) ), 0 );
+		return Vector4( matrix4_transformed_direction( transform, viewer.vec3() ), 0 );
 	}
 	else
 	{
-		return Vector4( matrix4_transformed_point( transform, vector4_to_vector3( viewer ) ), viewer[3] );
+		return Vector4( matrix4_transformed_point( transform, viewer.vec3() ), viewer[3] );
 	}
 }
 

@@ -25,7 +25,6 @@
 #include "signal/signal.h"
 
 #include "gtkutil/cursor.h"
-#include "gtkutil/window.h"
 #include "gtkutil/xorrectangle.h"
 #include "view.h"
 #include "map.h"
@@ -40,8 +39,6 @@ namespace scene
 {
 class Node;
 }
-typedef struct _GtkWindow GtkWindow;
-typedef struct _GtkMenu GtkMenu;
 
 inline const char* ViewType_getTitle( VIEWTYPE viewtype ){
 	if ( viewtype == XY ) {
@@ -76,37 +73,30 @@ private:
 };
 
 #include "timer.h"
-#include "gtkutil/idledraw.h"
-class FBO;
+class QWidget;
 
 class XYWnd
 {
-	GtkWidget* m_gl_widget;
-	guint m_sizeHandler;
-	guint m_exposeHandler;
+	QWidget* m_gl_widget;
 
 	DeferredDraw m_deferredDraw;
-	IdleDraw m_deferredOverlayDraw;
-	DeferredMotion m_deferred_motion;
 
-	FBO* m_fbo;
 public:
-	FBO* fbo_get();
 
-	GtkWindow* m_parent;
+	QWidget* m_parent;
 	XYWnd();
 	~XYWnd();
 
 	void queueDraw(){
 		m_deferredDraw.draw();
 	}
-	GtkWidget* GetWidget(){
+	QWidget* GetWidget(){
 		return m_gl_widget;
 	}
 
 	SelectionSystemWindowObserver* m_window_observer;
 	XORRectangle m_XORRectangle;
-	WindowPositionTracker m_positionTracker;
+	rect_t m_XORRect;
 
 	static void captureStates();
 	static void releaseStates();
@@ -119,11 +109,9 @@ public:
 	void SetOrigin( const Vector3& origin );
 	void Scroll( int x, int y );
 
+	bool m_drawRequired{}; // whether complete redraw is required, or just overlay update is enough
 	void XY_Draw();
-	bool overlayStart();
-	void overlayFinish();
 	void overlayDraw();
-	void overlayUpdate();
 	void DrawCameraIcon( const Vector3& origin, const Vector3& angles );
 	void XY_DrawBlockGrid();
 	void XY_DrawAxis();
@@ -142,12 +130,10 @@ public:
 	void Move_Begin();
 	void Move_End();
 	bool m_move_started;
-	guint m_move_focusOut;
 
 	void Zoom_Begin( int x, int y );
 	void Zoom_End();
 	bool m_zoom_started;
-	guint m_zoom_focusOut;
 
 	void ZoomIn();
 	void ZoomOut();
@@ -158,7 +144,7 @@ public:
 
 	void SetActive( bool b ){
 		m_bActive = b;
-		overlayUpdate();
+		queueDraw();
 	};
 	bool Active(){
 		return m_bActive;
@@ -169,13 +155,12 @@ public:
 	void SetViewType( VIEWTYPE n );
 	bool m_bActive;
 
-	static GtkMenu* m_mnuDrop;
+	static class QMenu* m_mnuDrop;
 
 	int m_chasemouse_current_x, m_chasemouse_current_y;
 	int m_chasemouse_delta_x, m_chasemouse_delta_y;
 
 
-	guint m_chasemouse_handler;
 	void ChaseMouse();
 	bool chaseMouseMotion( int x, int y );
 
@@ -257,6 +242,7 @@ public:
 };
 
 inline void XYWnd_Update( XYWnd& xywnd ){
+	xywnd.m_drawRequired = true;
 	xywnd.queueDraw();
 }
 
@@ -264,38 +250,20 @@ void XY_Centralize();
 
 struct xywindow_globals_t
 {
-	Vector3 color_gridback;
-	Vector3 color_gridminor;
-	Vector3 color_gridmajor;
-	Vector3 color_gridblock;
-	Vector3 color_gridtext;
-	Vector3 color_brushes;
-	Vector3 color_selbrushes;
-	Vector3 color_clipper;
-	Vector3 color_viewname;
-	Vector3 AxisColorX;
-	Vector3 AxisColorY;
-	Vector3 AxisColorZ;
+	Vector3 color_gridback = { .225803f, .225803f, .225803f };
+	Vector3 color_gridminor = { .254902f, .254902f, .254902f };
+	Vector3 color_gridmajor = { .294118f, .294118f, .294118f };
+	Vector3 color_gridblock = { 1.0f, 1.0f, 1.0f };
+	Vector3 color_gridtext = { .972549f, .972549f, .972549f };
+	Vector3 color_brushes = { 0.f, 0.f, 0.f };
+	Vector3 color_selbrushes = { 1.0f, 0.627451f, 0.0f };
+	Vector3 color_clipper = { 0.0f, 0.0f, 1.0f };
+	Vector3 color_viewname = { 0.516136f, 0.516136f, 0.516136f };
+	Vector3 AxisColorX = { 1.f, 0.f, 0.f };
+	Vector3 AxisColorY = { 0.f, 1.f, 0.f };
+	Vector3 AxisColorZ = { 0.f, 0.f, 1.f };
 
-	bool m_bNoStipple;
-
-	xywindow_globals_t() :
-		color_gridback( 0.77f, 0.77f, 0.77f ),
-		color_gridminor( 0.83f, 0.83f, 0.83f ),
-		color_gridmajor( 0.89f, 0.89f, 0.89f ),
-		color_gridblock( 1.0f, 1.0f, 1.0f ),
-		color_gridtext( 0.f, 0.f, 0.f ),
-		color_brushes( 0.f, 0.f, 0.f ),
-		color_selbrushes( 1.f, 0.f, 0.f ),
-		color_clipper( 0.f, 0.f, 1.f ),
-		color_viewname( 0.5f, 0.f, 0.75f ),
-
-		AxisColorX( 1.f, 0.f, 0.f ),
-		AxisColorY( 0.f, 1.f, 0.f ),
-		AxisColorZ( 0.f, 0.f, 1.f ),
-		m_bNoStipple( true ){
-	}
-
+	bool m_bNoStipple = true;
 };
 
 extern xywindow_globals_t g_xywindow_globals;
@@ -303,15 +271,13 @@ extern xywindow_globals_t g_xywindow_globals;
 
 VIEWTYPE GlobalXYWnd_getCurrentViewType();
 
-typedef struct _GtkWindow GtkWindow;
-void XY_Top_Shown_Construct( GtkWindow* parent );
-void YZ_Side_Shown_Construct( GtkWindow* parent );
-void XZ_Front_Shown_Construct( GtkWindow* parent );
+void XY_Top_Shown_Construct( QWidget* parent );
+void YZ_Side_Shown_Construct( QWidget* parent );
+void XZ_Front_Shown_Construct( QWidget* parent );
 
 void XYWindow_Construct();
 void XYWindow_Destroy();
 
-void WXY_Print();
 void WXY_SetBackgroundImage();
 
 void XYShow_registerCommands();

@@ -23,7 +23,6 @@
 
 #include "iundo.h"
 #include "mapfile.h"
-#include "warnings.h"
 #include "generic/callback.h"
 
 template<typename Copyable>

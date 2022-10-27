@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_SETSCALEDIALOG_H)
-#define INCLUDED_SETSCALEDIALOG_H
+#pragma once
 
 #include "GenericDialog.h"
 #include "MeshVisitor.h"
@@ -33,7 +32,7 @@
  * Subclass of GenericDialog that implements the window summoned by selecting
  * the Set S/T Scale menu entry. This window is used to control the scaling
  * of the S and/or T texture axes.
- * 
+ *
  * @image html setscale.png
  *
  * @ingroup meshtex-ui
@@ -93,12 +92,23 @@ public: // public methods
    void PopulateTWidgets(float scale,
                          float tiles);
 
-private: // private methods
-
-   void PopulateEntry(const char *widgetName,
-                      float value);
-
 private: // private member vars
+
+   QGroupBox *s_apply;
+   QDoubleSpinBox *s_scale;
+   QDoubleSpinBox *s_tiles;
+   QSpinBox *col_num_align;
+   QGroupBox *row_ref;
+   QSpinBox *row_num_ref;
+   QCheckBox *row_ref_total;
+
+   QGroupBox *t_apply;
+   QDoubleSpinBox *t_scale;
+   QDoubleSpinBox *t_tiles;
+   QSpinBox *row_num_align;
+   QGroupBox *col_ref;
+   QSpinBox *col_num_ref;
+   QCheckBox *col_ref_total;
 
    /**
     * Action-less mesh visitor used purely to count the number of selected mesh
@@ -106,5 +116,3 @@ private: // private member vars
     */
    SmartPointer<MeshVisitor> _nullVisitor;
 };
-
-#endif // #if !defined(INCLUDED_SETSCALEDIALOG_H)

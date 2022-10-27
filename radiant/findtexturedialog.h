@@ -24,8 +24,7 @@
 void FindTextureDialog_Construct();
 void FindTextureDialog_Destroy();
 
-typedef struct _GtkWindow GtkWindow;
-void FindTextureDialog_constructWindow( GtkWindow* main_window );
+void FindTextureDialog_constructWindow( class QWidget* main_window );
 void FindTextureDialog_destroyWindow();
 bool FindTextureDialog_isOpen();
 void FindTextureDialog_selectTexture( const char* name );

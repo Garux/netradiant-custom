@@ -29,12 +29,10 @@ void Scene_EntitySetKeyValue_Selected( const char* key, const char* value );
 void Scene_EntitySetClassname_Selected( const char* classname );
 
 
-typedef struct _GtkWidget GtkWidget;
-const char* misc_model_dialog( GtkWidget* parent, const char* filepath = "" );
+const char* misc_model_dialog( class QWidget* parent, const char* filepath = "" );
 void Entity_setColour();
 
-typedef struct _GtkMenu GtkMenu;
-void Entity_constructMenu( GtkMenu* menu );
+void Entity_constructMenu( class QMenu* menu );
 
 void Entity_registerShortcuts();
 

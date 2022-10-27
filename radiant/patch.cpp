@@ -153,9 +153,6 @@ void BezierCurveTree_FromCurveList( BezierCurveTree *pTree, std::forward_list<Be
 }
 
 
-//int Patch::m_CycleCapIndex = 0;
-
-
 void Patch::setDims( std::size_t w, std::size_t h ){
 	if ( ( w % 2 ) == 0 ) {
 		w -= 1;
@@ -548,16 +545,15 @@ void Patch::RotateTexture( float angle ){
 
 
 void Patch::SetTextureRepeat( float s, float t ){
-	std::size_t w, h;
-	float si, ti, sc, tc;
-	PatchControl *pDest;
-
 	undoSave();
 
-	si = s / (float)( m_width - 1 );
-	ti = t / (float)( m_height - 1 );
+	std::size_t w, h;
+	float sc, tc;
 
-	pDest = m_ctrl.data();
+	const float si = ( s == 0? 1.f : s ) / ( m_width - 1 );
+	const float ti = ( t == 0? 1.f : t ) / ( m_height - 1 );
+
+	PatchControl *pDest = m_ctrl.data();
 	for ( h = 0, tc = 0.0f; h < m_height; h++, tc += ti )
 	{
 		for ( w = 0, sc = 0.0f; w < m_width; w++, sc += si )
@@ -1065,7 +1061,7 @@ void Patch::RemovePoints( EMatrixMajor mt, bool bFirst ){
 void Patch::ConstructSeam( EPatchCap eType, Vector3* p, std::size_t width ){
 	switch ( eType )
 	{
-	case eCapIBevel:
+	case EPatchCap::IBevel:
 		{
 			setDims( 3, 3 );
 			m_ctrl[0].m_vertex = p[0];
@@ -1079,7 +1075,7 @@ void Patch::ConstructSeam( EPatchCap eType, Vector3* p, std::size_t width ){
 			m_ctrl[8].m_vertex = p[1];
 		}
 		break;
-	case eCapBevel:
+	case EPatchCap::Bevel:
 		{
 			setDims( 3, 3 );
 			Vector3 p3( vector3_added( p[2], vector3_subtracted( p[0], p[1] ) ) );
@@ -1094,7 +1090,7 @@ void Patch::ConstructSeam( EPatchCap eType, Vector3* p, std::size_t width ){
 			m_ctrl[8].m_vertex = p[0];
 		}
 		break;
-	case eCapEndCap:
+	case EPatchCap::EndCap:
 		{
 			Vector3 p5( vector3_mid( p[0], p[4] ) );
 
@@ -1110,7 +1106,7 @@ void Patch::ConstructSeam( EPatchCap eType, Vector3* p, std::size_t width ){
 			m_ctrl[8].m_vertex = p[2];
 		}
 		break;
-	case eCapIEndCap:
+	case EPatchCap::IEndCap:
 		{
 			setDims( 5, 3 );
 			m_ctrl[0].m_vertex = p[4];
@@ -1130,7 +1126,7 @@ void Patch::ConstructSeam( EPatchCap eType, Vector3* p, std::size_t width ){
 			m_ctrl[14].m_vertex = p[1];
 		}
 		break;
-	case eCapCylinder:
+	case EPatchCap::Cylinder:
 		{
 			std::size_t mid = ( width - 1 ) >> 1;
 
@@ -1303,21 +1299,21 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		return;
 	}
 
-	if ( eType != ePlane ) {
+	if ( eType != EPatchPrefab::Plane ) {
 		vPos[0] = vector3_subtracted( aabb.origin, aabb.extents );
 		vPos[1] = aabb.origin;
 		vPos[2] = vector3_added( aabb.origin, aabb.extents );
 	}
 
-	if ( eType == ePlane ) {
+	if ( eType == EPatchPrefab::Plane ) {
 		constructPlane( aabb, axis, width, height );
 	}
-	else if ( eType == eSqCylinder
-	       || eType == eCylinder
-	       || eType == eDenseCylinder
-	       || eType == eVeryDenseCylinder
-	       || eType == eCone
-	       || eType == eSphere ) {
+	else if ( eType == EPatchPrefab::SqCylinder
+	       || eType == EPatchPrefab::Cylinder
+	       || eType == EPatchPrefab::DenseCylinder
+	       || eType == EPatchPrefab::VeryDenseCylinder
+	       || eType == EPatchPrefab::Cone
+	       || eType == EPatchPrefab::Sphere ) {
 		unsigned char *pIndex;
 		unsigned char pCylIndex[] =
 		{
@@ -1336,21 +1332,21 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		PatchControl *pStart;
 		switch ( eType )
 		{
-		case eSqCylinder:
+		case EPatchPrefab::SqCylinder:
 			setDims( 9, 3 );
 			pStart = m_ctrl.data();
 			break;
-		case eDenseCylinder:
-		case eVeryDenseCylinder:
-		case eCylinder:
+		case EPatchPrefab::DenseCylinder:
+		case EPatchPrefab::VeryDenseCylinder:
+		case EPatchPrefab::Cylinder:
 			setDims( 9, 3 );
 			pStart = m_ctrl.data() + 1;
 			break;
-		case eCone:
+		case EPatchPrefab::Cone:
 			setDims( 9, 3 );
 			pStart = m_ctrl.data() + 1;
 			break;
-		case eSphere:
+		case EPatchPrefab::Sphere:
 			setDims( 9, 5 );
 			pStart = m_ctrl.data() + ( 9 + 1 );
 			break;
@@ -1374,7 +1370,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 
 		switch ( eType )
 		{
-		case eSqCylinder:
+		case EPatchPrefab::SqCylinder:
 			{
 				PatchControl* pCtrl = m_ctrl.data();
 				for ( std::size_t h = 0; h < 3; h++, pCtrl += 9 )
@@ -1383,9 +1379,9 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 				}
 			}
 			break;
-		case eDenseCylinder:
-		case eVeryDenseCylinder:
-		case eCylinder:
+		case EPatchPrefab::DenseCylinder:
+		case EPatchPrefab::VeryDenseCylinder:
+		case EPatchPrefab::Cylinder:
 			{
 				PatchControl* pCtrl = m_ctrl.data();
 				for ( std::size_t h = 0; h < 3; h++, pCtrl += 9 )
@@ -1394,7 +1390,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 				}
 			}
 			break;
-		case eCone:
+		case EPatchPrefab::Cone:
 			{
 				PatchControl* pCtrl = m_ctrl.data();
 				for ( std::size_t h = 0; h < 2; h++, pCtrl += 9 )
@@ -1412,7 +1408,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 				}
 			}
 			break;
-		case eSphere:
+		case EPatchPrefab::Sphere:
 			{
 				PatchControl* pCtrl = m_ctrl.data() + 9;
 				for ( std::size_t h = 0; h < 3; h++, pCtrl += 9 )
@@ -1444,7 +1440,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			return;
 		}
 	}
-	else if ( eType == eXactCylinder ) {
+	else if ( eType == EPatchPrefab::ExactCylinder ) {
 		int n = ( width - 1 ) / 2; // n = number of segments
 		setDims( width, height );
 
@@ -1470,7 +1466,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			}
 		}
 	}
-	else if ( eType == eXactCone ) {
+	else if ( eType == EPatchPrefab::ExactCone ) {
 		int n = ( width - 1 ) / 2; // n = number of segments
 		setDims( width, height );
 
@@ -1496,7 +1492,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			}
 		}
 	}
-	else if ( eType == eXactSphere ) {
+	else if ( eType == EPatchPrefab::ExactSphere ) {
 		int n = ( width - 1 ) / 2; // n = number of segments (yaw)
 		int m = ( height - 1 ) / 2; // m = number of segments (pitch)
 		setDims( width, height );
@@ -1525,7 +1521,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			}
 		}
 	}
-	else if  ( eType == eBevel ) {
+	else if  ( eType == EPatchPrefab::Bevel ) {
 		unsigned char *pIndex;
 		unsigned char pBevIndex[] =
 		{
@@ -1548,7 +1544,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			}
 		}
 	}
-	else if ( eType == eEndCap ) {
+	else if ( eType == EPatchPrefab::EndCap ) {
 		unsigned char *pIndex;
 		unsigned char pEndIndex[] =
 		{
@@ -1574,16 +1570,16 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		}
 	}
 
-	if ( eType == eDenseCylinder ) {
+	if ( eType == EPatchPrefab::DenseCylinder ) {
 		InsertRemove( true, false, true );
 	}
 
-	if ( eType == eVeryDenseCylinder ) {
+	if ( eType == EPatchPrefab::VeryDenseCylinder ) {
 		InsertRemove( true, false, false );
 		InsertRemove( true, false, true );
 	}
 
-	if ( eType == ePlane )
+	if ( eType == EPatchPrefab::Plane )
 		CapTexture();
 	else
 		NaturalTexture();
@@ -1592,21 +1588,21 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 void Patch::RenderDebug( RenderStateFlags state ) const {
 	for ( std::size_t i = 0; i < m_tess.m_numStrips; i++ )
 	{
-		glBegin( GL_QUAD_STRIP );
+		gl().glBegin( GL_QUAD_STRIP );
 		for ( std::size_t j = 0; j < m_tess.m_lenStrips; j++ )
 		{
-			glNormal3fv( normal3f_to_array( ( m_tess.m_vertices.data() + m_tess.m_indices[i * m_tess.m_lenStrips + j] )->normal ) );
-			glTexCoord2fv( texcoord2f_to_array( ( m_tess.m_vertices.data() + m_tess.m_indices[i * m_tess.m_lenStrips + j] )->texcoord ) );
-			glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + m_tess.m_indices[i * m_tess.m_lenStrips + j] )->vertex ) );
+			gl().glNormal3fv( normal3f_to_array( ( m_tess.m_vertices.data() + m_tess.m_indices[i * m_tess.m_lenStrips + j] )->normal ) );
+			gl().glTexCoord2fv( texcoord2f_to_array( ( m_tess.m_vertices.data() + m_tess.m_indices[i * m_tess.m_lenStrips + j] )->texcoord ) );
+			gl().glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + m_tess.m_indices[i * m_tess.m_lenStrips + j] )->vertex ) );
 		}
-		glEnd();
+		gl().glEnd();
 	}
 }
 
 void RenderablePatchSolid::RenderNormals() const {
 	const std::size_t width = m_tess.m_numStrips + 1;
 	const std::size_t height = m_tess.m_lenStrips >> 1;
-	glBegin( GL_LINES );
+	gl().glBegin( GL_LINES );
 	for ( std::size_t i = 0; i < width; i++ )
 	{
 		for ( std::size_t j = 0; j < height; j++ )
@@ -1618,8 +1614,8 @@ void RenderablePatchSolid::RenderNormals() const {
 				        vector3_scaled( normal3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->normal ), 8 )
 				    )
 				);
-				glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ) );
-				glVertex3fv( &vNormal[0] );
+				gl().glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ) );
+				gl().glVertex3fv( &vNormal[0] );
 			}
 			{
 				Vector3 vNormal(
@@ -1628,8 +1624,8 @@ void RenderablePatchSolid::RenderNormals() const {
 				        vector3_scaled( normal3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->tangent ), 8 )
 				    )
 				);
-				glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ) );
-				glVertex3fv( &vNormal[0] );
+				gl().glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ) );
+				gl().glVertex3fv( &vNormal[0] );
 			}
 			{
 				Vector3 vNormal(
@@ -1638,12 +1634,12 @@ void RenderablePatchSolid::RenderNormals() const {
 				        vector3_scaled( normal3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->bitangent ), 8 )
 				    )
 				);
-				glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ) );
-				glVertex3fv( &vNormal[0] );
+				gl().glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ) );
+				gl().glVertex3fv( &vNormal[0] );
 			}
 		}
 	}
-	glEnd();
+	gl().glEnd();
 }
 
 #define DEGEN_0a  0x01

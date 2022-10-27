@@ -24,10 +24,10 @@ inline void StringPool_analyse( StringPool& pool ){
 		pooled += size + 20;
 		ordered.insert( Ordered::value_type( ( *i ).value, ( *i ).key ) );
 	}
-	globalOutputStream() << "total: " << Unsigned( total ) << " pooled:" << Unsigned( pooled ) << "\n";
+	globalOutputStream() << "total: " << total << " pooled:" << pooled << "\n";
 	for ( Ordered::iterator i = ordered.begin(); i != ordered.end(); ++i )
 	{
-		globalOutputStream() << ( *i ).second << " " << Unsigned( ( *i ).first ) << "\n";
+		globalOutputStream() << ( *i ).second << " " << ( *i ).first << "\n";
 	}
 }
 

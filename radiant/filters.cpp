@@ -39,11 +39,7 @@
 
 struct filters_globals_t
 {
-	std::size_t exclude;
-
-	filters_globals_t() :
-		exclude( 0 ){
-	}
+	std::size_t exclude = 0;
 };
 
 filters_globals_t g_filters_globals;
@@ -148,7 +144,7 @@ public:
 typedef std::list<ToggleFilterFlag> ToggleFilterFlags;
 ToggleFilterFlags g_filter_items;
 
-void add_filter_command( unsigned int flag, const char* command, const Accelerator& accelerator ){
+void add_filter_command( unsigned int flag, const char* command, const QKeySequence& accelerator = {} ){
 	g_filter_items.push_back( ToggleFilterFlag( flag ) );
 	GlobalToggles_insert( command, ToggleFilterFlag::ToggleCaller( g_filter_items.back() ), ToggleItem::AddCallbackCaller( g_filter_items.back().m_item ), accelerator );
 }
@@ -171,47 +167,47 @@ void ResetFilters(){
 	}
 }
 
-void Filters_constructMenu( GtkMenu* menu_in_menu ){
-	create_check_menu_item_with_mnemonic( menu_in_menu, "World", "FilterWorldBrushes" );
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Entities", "FilterEntities" );
+void Filters_constructMenu( QMenu* menu ){
+	create_check_menu_item_with_mnemonic( menu, "World", "FilterWorldBrushes" );
+	create_check_menu_item_with_mnemonic( menu, "Entities", "FilterEntities" );
 	if ( g_pGameDescription->mGameType == "doom3" ) {
-		create_check_menu_item_with_mnemonic( menu_in_menu, "Visportals", "FilterVisportals" );
+		create_check_menu_item_with_mnemonic( menu, "Visportals", "FilterVisportals" );
 	}
 	else
 	{
-		create_check_menu_item_with_mnemonic( menu_in_menu, "Areaportals", "FilterAreaportals" );
+		create_check_menu_item_with_mnemonic( menu, "Areaportals", "FilterAreaportals" );
 	}
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Translucent", "FilterTranslucent" );
+	create_check_menu_item_with_mnemonic( menu, "Translucent", "FilterTranslucent" );
 	if ( g_pGameDescription->mGameType != "doom3" ) {
-		create_check_menu_item_with_mnemonic( menu_in_menu, "Liquids", "FilterLiquids" );
+		create_check_menu_item_with_mnemonic( menu, "Liquids", "FilterLiquids" );
 	}
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Caulk", "FilterCaulk" );
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Clips", "FilterClips" );
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Paths", "FilterPaths" );
+	create_check_menu_item_with_mnemonic( menu, "Caulk", "FilterCaulk" );
+	create_check_menu_item_with_mnemonic( menu, "Clips", "FilterClips" );
+	create_check_menu_item_with_mnemonic( menu, "Paths", "FilterPaths" );
 	if ( g_pGameDescription->mGameType != "doom3" ) {
-		create_check_menu_item_with_mnemonic( menu_in_menu, "Clusterportals", "FilterClusterportals" );
+		create_check_menu_item_with_mnemonic( menu, "Clusterportals", "FilterClusterportals" );
 	}
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Lights", "FilterLights" );
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Structural", "FilterStructural" );
+	create_check_menu_item_with_mnemonic( menu, "Lights", "FilterLights" );
+	create_check_menu_item_with_mnemonic( menu, "Structural", "FilterStructural" );
 	if ( g_pGameDescription->mGameType != "doom3" ) {
-		create_check_menu_item_with_mnemonic( menu_in_menu, "Lightgrid", "FilterLightgrid" );
+		create_check_menu_item_with_mnemonic( menu, "Lightgrid", "FilterLightgrid" );
 	}
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Patches", "FilterPatches" );
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Details", "FilterDetails" );
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Hints", "FilterHintsSkips" );
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Models", "FilterModels" );
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Triggers", "FilterTriggers" );
+	create_check_menu_item_with_mnemonic( menu, "Patches", "FilterPatches" );
+	create_check_menu_item_with_mnemonic( menu, "Details", "FilterDetails" );
+	create_check_menu_item_with_mnemonic( menu, "Hints", "FilterHintsSkips" );
+	create_check_menu_item_with_mnemonic( menu, "Models", "FilterModels" );
+	create_check_menu_item_with_mnemonic( menu, "Triggers", "FilterTriggers" );
 	if ( g_pGameDescription->mGameType != "doom3" ) {
-		create_check_menu_item_with_mnemonic( menu_in_menu, "Botclips", "FilterBotClips" );
-		create_check_menu_item_with_mnemonic( menu_in_menu, "Decals", "FilterDecals" );
+		create_check_menu_item_with_mnemonic( menu, "Botclips", "FilterBotClips" );
+		create_check_menu_item_with_mnemonic( menu, "Decals", "FilterDecals" );
 	}
-	create_check_menu_item_with_mnemonic( menu_in_menu, "FuncGroups", "FilterFuncGroups" );
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Point Entities", "FilterPointEntities" );
-	create_check_menu_item_with_mnemonic( menu_in_menu, "Sky", "FilterSky" );
+	create_check_menu_item_with_mnemonic( menu, "FuncGroups", "FilterFuncGroups" );
+	create_check_menu_item_with_mnemonic( menu, "Point Entities", "FilterPointEntities" );
+	create_check_menu_item_with_mnemonic( menu, "Sky", "FilterSky" );
 	// filter manipulation
-	menu_separator( menu_in_menu );
-	create_menu_item_with_mnemonic( menu_in_menu, "Invert filters", "InvertFilters" );
-	create_menu_item_with_mnemonic( menu_in_menu, "Reset filters", "ResetFilters" );
+	menu->addSeparator();
+	create_menu_item_with_mnemonic( menu, "Invert filters", "InvertFilters" );
+	create_menu_item_with_mnemonic( menu, "Reset filters", "ResetFilters" );
 }
 
 
@@ -224,40 +220,40 @@ void ConstructFilters(){
 	GlobalCommands_insert( "InvertFilters", FreeCaller<InvertFilters>() );
 	GlobalCommands_insert( "ResetFilters", FreeCaller<ResetFilters>() );
 
-	add_filter_command( EXCLUDE_WORLD, "FilterWorldBrushes", Accelerator( '1', GDK_MOD1_MASK ) );
-	add_filter_command( EXCLUDE_ENT, "FilterEntities", Accelerator( '2', GDK_MOD1_MASK ) );
+	add_filter_command( EXCLUDE_WORLD, "FilterWorldBrushes", QKeySequence( "Alt+1" ) );
+	add_filter_command( EXCLUDE_ENT, "FilterEntities", QKeySequence( "Alt+2" ) );
 	if ( g_pGameDescription->mGameType == "doom3" ) {
-		add_filter_command( EXCLUDE_VISPORTALS, "FilterVisportals", Accelerator( '3', GDK_MOD1_MASK ) );
+		add_filter_command( EXCLUDE_VISPORTALS, "FilterVisportals", QKeySequence( "Alt+3" ) );
 	}
 	else
 	{
-		add_filter_command( EXCLUDE_AREAPORTALS, "FilterAreaportals", Accelerator( '3', GDK_MOD1_MASK ) );
+		add_filter_command( EXCLUDE_AREAPORTALS, "FilterAreaportals", QKeySequence( "Alt+3" ) );
 	}
-	add_filter_command( EXCLUDE_TRANSLUCENT, "FilterTranslucent", Accelerator( '4', GDK_MOD1_MASK ) );
-	add_filter_command( EXCLUDE_LIQUIDS, "FilterLiquids", Accelerator( '5', GDK_MOD1_MASK ) );
-	add_filter_command( EXCLUDE_CAULK, "FilterCaulk", Accelerator( '6', GDK_MOD1_MASK ) );
-	add_filter_command( EXCLUDE_CLIP, "FilterClips", Accelerator( '7', GDK_MOD1_MASK ) );
-	add_filter_command( EXCLUDE_PATHS, "FilterPaths", Accelerator( '8', GDK_MOD1_MASK ) );
+	add_filter_command( EXCLUDE_TRANSLUCENT, "FilterTranslucent", QKeySequence( "Alt+4" ) );
+	add_filter_command( EXCLUDE_LIQUIDS, "FilterLiquids", QKeySequence( "Alt+5" ) );
+	add_filter_command( EXCLUDE_CAULK, "FilterCaulk", QKeySequence( "Alt+6" ) );
+	add_filter_command( EXCLUDE_CLIP, "FilterClips", QKeySequence( "Alt+7" ) );
+	add_filter_command( EXCLUDE_PATHS, "FilterPaths", QKeySequence( "Alt+8" ) );
 	if ( g_pGameDescription->mGameType != "doom3" ) {
-		add_filter_command( EXCLUDE_CLUSTERPORTALS, "FilterClusterportals", Accelerator( '9', GDK_MOD1_MASK ) );
+		add_filter_command( EXCLUDE_CLUSTERPORTALS, "FilterClusterportals", QKeySequence( "Alt+9" ) );
 	}
-	add_filter_command( EXCLUDE_LIGHTS, "FilterLights", Accelerator( '0', GDK_MOD1_MASK ) );
-	add_filter_command( EXCLUDE_STRUCTURAL, "FilterStructural", Accelerator( 'D', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
+	add_filter_command( EXCLUDE_LIGHTS, "FilterLights", QKeySequence( "Alt+0" ) );
+	add_filter_command( EXCLUDE_STRUCTURAL, "FilterStructural", QKeySequence( "Ctrl+Shift+D" ) );
 	if ( g_pGameDescription->mGameType != "doom3" ) {
-		add_filter_command( EXCLUDE_LIGHTGRID, "FilterLightgrid", accelerator_null() );
+		add_filter_command( EXCLUDE_LIGHTGRID, "FilterLightgrid" );
 	}
-	add_filter_command( EXCLUDE_CURVES, "FilterPatches", Accelerator( 'P', GDK_CONTROL_MASK ) );
-	add_filter_command( EXCLUDE_DETAILS, "FilterDetails", Accelerator( 'D', GDK_CONTROL_MASK ) );
-	add_filter_command( EXCLUDE_HINTSSKIPS, "FilterHintsSkips", Accelerator( 'H', GDK_CONTROL_MASK ) );
-	add_filter_command( EXCLUDE_MODELS, "FilterModels", Accelerator( 'M', GDK_SHIFT_MASK ) );
-	add_filter_command( EXCLUDE_TRIGGERS, "FilterTriggers", Accelerator( 'T', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
+	add_filter_command( EXCLUDE_CURVES, "FilterPatches", QKeySequence( "Ctrl+P" ) );
+	add_filter_command( EXCLUDE_DETAILS, "FilterDetails", QKeySequence( "Ctrl+D" ) );
+	add_filter_command( EXCLUDE_HINTSSKIPS, "FilterHintsSkips", QKeySequence( "Ctrl+H" ) );
+	add_filter_command( EXCLUDE_MODELS, "FilterModels", QKeySequence( "Shift+M" ) );
+	add_filter_command( EXCLUDE_TRIGGERS, "FilterTriggers", QKeySequence( "Ctrl+Shift+T" ) );
 	if ( g_pGameDescription->mGameType != "doom3" ) {
-		add_filter_command( EXCLUDE_BOTCLIP, "FilterBotClips", Accelerator( 'M', GDK_MOD1_MASK ) );
-		add_filter_command( EXCLUDE_DECALS, "FilterDecals", Accelerator( 'D', GDK_SHIFT_MASK ) );
+		add_filter_command( EXCLUDE_BOTCLIP, "FilterBotClips", QKeySequence( "Alt+M" ) );
+		add_filter_command( EXCLUDE_DECALS, "FilterDecals", QKeySequence( "Shift+D" ) );
 	}
-	add_filter_command( EXCLUDE_FUNC_GROUPS, "FilterFuncGroups", accelerator_null() );
-	add_filter_command( EXCLUDE_POINT_ENT, "FilterPointEntities", accelerator_null() );
-	add_filter_command( EXCLUDE_SKY, "FilterSky", accelerator_null() );
+	add_filter_command( EXCLUDE_FUNC_GROUPS, "FilterFuncGroups" );
+	add_filter_command( EXCLUDE_POINT_ENT, "FilterPointEntities" );
+	add_filter_command( EXCLUDE_SKY, "FilterSky" );
 
 	PerformFiltering();
 }

@@ -21,8 +21,6 @@
 
 #pragma once
 
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
-GtkWidget* EntityInspector_constructWindow( GtkWindow* parent );
+class QWidget* EntityInspector_constructWindow( QWidget* parent );
 void EntityInspector_construct();
 void EntityInspector_destroy();

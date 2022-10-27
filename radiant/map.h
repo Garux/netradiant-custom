@@ -110,11 +110,8 @@ void Map_RegionOff();
 
 bool Map_SaveRegion( const char* filename );
 
-class TextInputStream;
-class TextOutputStream;
-
-void Map_ImportSelected( TextInputStream& in, const MapFormat& format );
-void Map_ExportSelected( TextOutputStream& out, const MapFormat& format );
+void Map_ImportSelected( class TextInputStream& in, const MapFormat& format );
+void Map_ExportSelected( class TextOutputStream& out, const MapFormat& format );
 
 bool Map_Modified( const Map& map );
 void Map_SetModified( Map& map, bool modified );
@@ -125,8 +122,6 @@ bool Map_SaveAs();
 scene::Node& Node_Clone( scene::Node& node );
 scene::Node& Node_Clone_Selected( scene::Node& node );
 
-void DoMapInfo();
-
 void Scene_parentSelectedBrushesToEntity( scene::Graph& graph, scene::Node& parent );
 void Scene_parentSubgraphSelectedBrushesToEntity( scene::Graph& graph, scene::Node& parent, const scene::Path& start );
 std::size_t Scene_countSelectedBrushes( scene::Graph& graph );
@@ -135,13 +130,7 @@ std::size_t Scene_countSelectedBrushes( scene::Graph& graph );
 
 void OnUndoSizeChanged();
 
-void NewMap();
-void OpenMap();
-void ImportMap();
-void SaveMapAs();
 void SaveMap();
-void ExportMap();
-void SaveRegion();
 
 
 void Map_Traverse( scene::Node& root, const scene::Traversable::Walker& walker );

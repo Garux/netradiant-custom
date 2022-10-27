@@ -43,3 +43,17 @@ public:
 };
 
 
+
+class DoubleClickTimer
+{
+	Timer m_timer;
+	bool m_fired{};
+public:
+	void click(){
+		m_fired = m_timer.elapsed_msec() < 250;
+		m_timer.start();
+	}
+	bool fired() const {
+		return m_fired;
+	}
+};

@@ -19,15 +19,12 @@
 
 #include "lists.h"
 
-#include <gtk/gtk.h>
-
 #include "misc.h"
 
 bool LoadExclusionList( char* filename, std::list<Str>* exclusionList ){
 	FILE* eFile = fopen( filename, "r" );
 	if ( eFile ) {
 		char buffer[256];
-		int cnt = 0;
 		while ( !feof( eFile ) )
 		{
 			memset( buffer, 0, 256 );
@@ -36,43 +33,37 @@ bool LoadExclusionList( char* filename, std::list<Str>* exclusionList ){
 			if ( strlen( buffer ) > 0 ) {
 				exclusionList->push_back( buffer );
 			}
-			else{
-				cnt++;
-			}
 		}
 
 		fclose( eFile );
 
-		return TRUE;
+		return true;
 	}
 
 	globalErrorStream() << "Failed To Load Exclusion List: " << filename << "\n";
-	return FALSE;
+	return false;
 }
 
-bool LoadListStore( char* filename, GtkListStore* loadlist ){
+QStringList LoadListStore( char* filename ){
+	QStringList list;
 	FILE* eFile = fopen( filename, "r" );
 	if ( eFile ) {
 		char buffer[256];
-		int cnt = 0;
 		while ( !feof( eFile ) )
 		{
 			memset( buffer, 0, 256 );
 			fscanf( eFile, "%s\n", buffer );
 
 			if ( strlen( buffer ) > 0 ) {
-				gtk_list_store_insert_with_values( loadlist, NULL, -1, 0, buffer, -1 );
-			}
-			else{
-				cnt++;
+				list.append( buffer );
 			}
 		}
 
 		fclose( eFile );
 
-		return TRUE;
+		return list;
 	}
 
 	globalErrorStream() << "Failed To Load GList: " << filename << "\n";
-	return FALSE;
+	return list;
 }

@@ -25,9 +25,7 @@
 void SurfaceInspector_Construct();
 void SurfaceInspector_Destroy();
 
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
-void SurfaceInspector_constructWindow( GtkWindow* widget );
+void SurfaceInspector_constructWindow( class QWidget* widget );
 void SurfaceInspector_destroyWindow();
 
 bool SelectedFaces_empty();
@@ -39,18 +37,10 @@ void FaceTextureClipboard_setDefault();
 // the increment we are using for the surface inspector (this is saved in the prefs)
 struct si_globals_t
 {
-	float shift[2];
-	float scale[2];
-	float rotate;
+	float shift[2] = { 8.0f, 8.0f };
+	float scale[2] = { 0.5f, 0.5f };
+	float rotate = 45.0f;
 
-	bool m_bSnapTToGrid;
-
-	si_globals_t() : m_bSnapTToGrid( false ){
-		shift[0] = 8.0f;
-		shift[1] = 8.0f;
-		scale[0] = 0.5f;
-		scale[1] = 0.5f;
-		rotate = 45.0f;
-	}
+	bool m_bSnapTToGrid = false;
 };
 extern si_globals_t g_si_globals;

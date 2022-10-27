@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_GETINFODIALOG_H)
-#define INCLUDED_GETINFODIALOG_H
+#pragma once
 
 #include "GenericDialog.h"
 #include "SetScaleDialog.h"
@@ -37,7 +36,7 @@
  * the Get Info menu entry. This window allows the user to query information
  * about selected meshes and optionally transfer some of that information to
  * the Set S/T Scale dialog.
- * 
+ *
  * @image html getinfo.png
  *
  * @ingroup meshtex-ui
@@ -74,6 +73,10 @@ public: // public methods
 
 private: // private member vars
 
+   QSpinBox *s_ref_row;
+   QSpinBox *t_ref_col;
+   QCheckBox *check_transfer;
+
    /**
     * Handle on the Set S/T Scale dialog.
     */
@@ -95,5 +98,3 @@ private: // private member vars
     */
    SmartPointer<MeshVisitor> _nullVisitor;
 };
-
-#endif // #if !defined(INCLUDED_GETINFODIALOG_H)

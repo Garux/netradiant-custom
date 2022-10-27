@@ -23,38 +23,15 @@
 
 #include "mainframe.h"
 #include "gtkutil/messagebox.h"
-
-#ifdef WIN32
-#include <gdk/gdkwin32.h>
-#include <shellapi.h>
-bool open_url( const char* url ){
-	return ShellExecute( (HWND)GDK_WINDOW_HWND( gtk_widget_get_window( GTK_WIDGET( MainFrame_getWindow() ) ) ), "open", url, 0, 0, SW_SHOW ) > (HINSTANCE)32;
-}
-#endif
-
-#if defined( __linux__ ) || defined( __FreeBSD__ )
-#include <cstdlib>
-bool open_url( const char* url ){
-	char command[2 * PATH_MAX];
-	snprintf( command, sizeof( command ),
-	          "xdg-open \"%s\" &", url );
-	return system( command ) == 0;
-}
-#endif
-
-#ifdef __APPLE__
-#include <cstdlib>
-bool open_url( const char* url ){
-	char command[2 * PATH_MAX];
-	snprintf( command, sizeof( command ), "open \"%s\" &", url );
-	return system( command ) == 0;
-}
-#endif
+#include <QDesktopServices>
+#include <QUrl>
 
 void OpenURL( const char *url ){
 	// let's put a little comment
 	globalOutputStream() << "OpenURL: " << url << "\n";
-	if ( !open_url( url ) ) {
-		gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), "Failed to launch browser!" );
+	// QUrl::fromUserInput appears to work well for urls and local paths with spaces
+	// alternatively can prepend file:/// to the latter and use default QUrl contructor
+	if ( !QDesktopServices::openUrl( QUrl::fromUserInput( url ) ) ) {
+		qt_MessageBox( MainFrame_getWindow(), "Failed to launch browser!" );
 	}
 }

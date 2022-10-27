@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_MESHVISITOR_H)
-#define INCLUDED_MESHVISITOR_H
+#pragma once
 
 #include "RefCounted.h"
 #include "MeshEntity.h"
@@ -68,5 +67,3 @@ private: // private member vars
     */
    mutable unsigned _visitedCount;
 };
-
-#endif // #if !defined(INCLUDED_MESHVISITOR_H)

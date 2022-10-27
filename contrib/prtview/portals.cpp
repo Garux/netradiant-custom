@@ -35,31 +35,16 @@
 CPortals portals;
 CPortalsRender render;
 
-int compare( const void *arg1, const void *arg2 ){
-
-	if ( portals.portal[*( (const int *)arg1 )].dist > portals.portal[*( (const int *)arg2 )].dist ) {
-		return -1;
-	}
-	else if ( portals.portal[*( (const int *)arg1 )].dist < portals.portal[*( (const int *)arg2 )].dist ) {
-		return 1;
-	}
-
-	return 0;
-}
-
 
 CBspPortal::CBspPortal(){
-	memset( this, 0, sizeof( CBspPortal ) );
 }
 
 CBspPortal::~CBspPortal(){
-	delete[] point;
-	delete[] inner_point;
 }
 
 bool CBspPortal::Build( char *def ){
 	char *c = def;
-	unsigned int n;
+	unsigned int point_count;
 	int dummy1, dummy2;
 	int res_cnt = 0;
 
@@ -76,10 +61,10 @@ bool CBspPortal::Build( char *def ){
 		return false;
 	}
 
-	point = new CBspPoint[point_count];
-	inner_point = new CBspPoint[point_count];
+	point.resize( point_count );
+	inner_point.reserve( point_count );
 
-	for ( n = 0; n < point_count; n++ )
+	for ( auto& p : point )
 	{
 		for (; *c != 0 && *c != '('; c++ ){};
 
@@ -89,66 +74,47 @@ bool CBspPortal::Build( char *def ){
 
 		c++;
 
-		sscanf( c, "%f %f %f", point[n].p, point[n].p + 1, point[n].p + 2 );
+		sscanf( c, "%f %f %f", &p.x(), &p.y(), &p.z() );
 
-		center.p[0] += point[n].p[0];
-		center.p[1] += point[n].p[1];
-		center.p[2] += point[n].p[2];
+		center += p;
 
-		if ( n == 0 ) {
-			for ( int i = 0; i < 3; i++ )
-			{
-				min[i] = point[n].p[i];
-				max[i] = point[n].p[i];
-			}
+		if ( &p == &point.front() ) {
+			min = p;
+			max = p;
 		}
 		else
 		{
-			for ( int i = 0; i < 3; i++ )
+			for ( size_t i = 0; i < 3; ++i )
 			{
-				if ( min[i] > point[n].p[i] ) {
-					min[i] = point[n].p[i];
-				}
-				if ( max[i] < point[n].p[i] ) {
-					max[i] = point[n].p[i];
-				}
+				min[i] = std::min( min[i], p[i] );
+				max[i] = std::max( max[i], p[i] );
 			}
 		}
 	}
 
-	center.p[0] /= (float)point_count;
-	center.p[1] /= (float)point_count;
-	center.p[2] /= (float)point_count;
+	center /= point.size();
 
-	for ( n = 0; n < point_count; n++ )
+	for ( const auto& p : point )
 	{
-		inner_point[n].p[0] = ( 0.01f * center.p[0] ) + ( 0.99f * point[n].p[0] );
-		inner_point[n].p[1] = ( 0.01f * center.p[1] ) + ( 0.99f * point[n].p[1] );
-		inner_point[n].p[2] = ( 0.01f * center.p[2] ) + ( 0.99f * point[n].p[2] );
+		inner_point.push_back( ( center * 0.01f ) + ( p * 0.99f ) );
 	}
 
-	fp_color_random[0] = (float)( rand() & 0xff ) / 255.0f;
-	fp_color_random[1] = (float)( rand() & 0xff ) / 255.0f;
-	fp_color_random[2] = (float)( rand() & 0xff ) / 255.0f;
+	fp_color_random[0] = ( rand() & 0xff ) / 255.0f;
+	fp_color_random[1] = ( rand() & 0xff ) / 255.0f;
+	fp_color_random[2] = ( rand() & 0xff ) / 255.0f;
 	fp_color_random[3] = 1.0f;
 
 	return true;
 }
 
 CPortals::CPortals(){
-	memset( this, 0, sizeof( CPortals ) );
 }
 
 CPortals::~CPortals(){
-	Purge();
 }
 
 void CPortals::Purge(){
-	delete[] portal;
-	delete[] portal_sort;
-	portal = NULL;
-	portal_sort = NULL;
-	portal_count = 0;
+	portal.clear();
 
 	/*
 	   delete[] node;
@@ -159,6 +125,7 @@ void CPortals::Purge(){
 
 void CPortals::Load(){
 	char buf[LINE_BUF + 1];
+	unsigned int portal_count, node_count;
 
 	memset( buf, 0, LINE_BUF + 1 );
 
@@ -179,7 +146,6 @@ void CPortals::Load(){
 	#define GETLINE \
 	if ( !fgets( buf, LINE_BUF, in ) ) { \
 		fclose( in ); \
-		node_count = 0; \
 		globalErrorStream() << "  ERROR - File ended prematurely.\n"; \
 		return; \
 	}
@@ -239,7 +205,7 @@ void CPortals::Load(){
 	{
 		fclose(in);
 
-		node_count = 0;
+		Purge();
 
 		globalErrorStream() << "  ERROR - Extreme number of nodes, aborting.\n";
 
@@ -250,9 +216,6 @@ void CPortals::Load(){
 	if ( portal_count > 0xFFFF ) {
 		fclose( in );
 
-		portal_count = 0;
-		node_count = 0;
-
 		globalErrorStream() << "  ERROR - Extreme number of portals, aborting.\n";
 
 		return;
@@ -261,24 +224,19 @@ void CPortals::Load(){
 	if ( portal_count == 0 ) {
 		fclose( in );
 
-		portal_count = 0;
-		node_count = 0;
-
 		globalErrorStream() << "  ERROR - number of portals equals 0, aborting.\n";
 
 		return;
 	}
 
 //	node = new CBspNode[node_count];
-	portal = new CBspPortal[portal_count];
-	portal_sort = new int[portal_count];
+	portal.resize( portal_count );
 
-	unsigned int n;
 	unsigned test_vals_1, test_vals_2;
 
 	hint_flags = false;
 
-	for ( n = 0; n < portal_count; )
+	for ( unsigned int n = 0; n < portal_count; )
 	{
 		if ( !fgets( buf, LINE_BUF, in ) ) {
 			fclose( in );
@@ -306,7 +264,7 @@ void CPortals::Load(){
 			return;
 		}
 
-		n++;
+		++n;
 	}
 
 	fclose( in );
@@ -328,22 +286,16 @@ void Portals_constructShaders(){
 	GlobalOpenGLStateLibrary().getDefaultState( state );
 	state.m_state = RENDER_COLOURWRITE | RENDER_DEPTHWRITE;
 	state.m_sort = OpenGLState::eSortOverlayFirst;
-	state.m_linewidth = portals.width_2d * 0.5f;
+	state.m_linewidth = portals.width_2d;
 	state.m_colour[0] = portals.fp_color_2d[0];
 	state.m_colour[1] = portals.fp_color_2d[1];
 	state.m_colour[2] = portals.fp_color_2d[2];
 	state.m_colour[3] = portals.fp_color_2d[3];
-	if ( portals.aa_2d ) {
-		state.m_state |= RENDER_BLEND | RENDER_LINESMOOTH;
-	}
+
 	GlobalOpenGLStateLibrary().insert( g_state_wireframe, state );
 
 	GlobalOpenGLStateLibrary().getDefaultState( state );
 	state.m_state = RENDER_FILL | RENDER_BLEND | RENDER_COLOURWRITE | RENDER_COLOURCHANGE | RENDER_SMOOTH;
-
-	if ( portals.aa_3d ) {
-		state.m_state |= RENDER_POLYGONSMOOTH;
-	}
 
 	switch ( portals.zbuffer )
 	{
@@ -376,15 +328,11 @@ void Portals_constructShaders(){
 	GlobalOpenGLStateLibrary().getDefaultState( state );
 	state.m_state = RENDER_COLOURWRITE | RENDER_DEPTHWRITE;
 	state.m_sort = OpenGLState::eSortOverlayFirst;
-	state.m_linewidth = portals.width_3d * 0.5f;
+	state.m_linewidth = portals.width_3d;
 	state.m_colour[0] = portals.fp_color_3d[0];
 	state.m_colour[1] = portals.fp_color_3d[1];
 	state.m_colour[2] = portals.fp_color_3d[2];
 	state.m_colour[3] = portals.fp_color_3d[3];
-
-	if ( portals.aa_3d ) {
-		state.m_state |= RENDER_LINESMOOTH;
-	}
 
 	switch ( portals.zbuffer )
 	{
@@ -435,24 +383,24 @@ void Portals_shadersChanged(){
 }
 
 void CPortals::FixColors(){
-	fp_color_2d[0] = (float)GetRValue( color_2d ) / 255.0f;
-	fp_color_2d[1] = (float)GetGValue( color_2d ) / 255.0f;
-	fp_color_2d[2] = (float)GetBValue( color_2d ) / 255.0f;
+	fp_color_2d[0] = RGB_UNPACK_R( color_2d ) / 255.0f;
+	fp_color_2d[1] = RGB_UNPACK_G( color_2d ) / 255.0f;
+	fp_color_2d[2] = RGB_UNPACK_B( color_2d ) / 255.0f;
 	fp_color_2d[3] = 1.0f;
 
-	fp_color_3d[0] = (float)GetRValue( color_3d ) / 255.0f;
-	fp_color_3d[1] = (float)GetGValue( color_3d ) / 255.0f;
-	fp_color_3d[2] = (float)GetBValue( color_3d ) / 255.0f;
+	fp_color_3d[0] = RGB_UNPACK_R( color_3d ) / 255.0f;
+	fp_color_3d[1] = RGB_UNPACK_G( color_3d ) / 255.0f;
+	fp_color_3d[2] = RGB_UNPACK_B( color_3d ) / 255.0f;
 	fp_color_3d[3] = 1.0f;
 
-	fp_color_fog[0] = 0.0f; //(float)GetRValue(color_fog) / 255.0f;
-	fp_color_fog[1] = 0.0f; //(float)GetGValue(color_fog) / 255.0f;
-	fp_color_fog[2] = 0.0f; //(float)GetBValue(color_fog) / 255.0f;
+	fp_color_fog[0] = RGB_UNPACK_R( color_fog ) / 255.0f;
+	fp_color_fog[1] = RGB_UNPACK_G( color_fog ) / 255.0f;
+	fp_color_fog[2] = RGB_UNPACK_B( color_fog ) / 255.0f;
 	fp_color_fog[3] = 1.0f;
 }
 
 void CPortalsRender::renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
-	if ( !portals.show_2d || portals.portal_count < 1 ) {
+	if ( !portals.show_2d || portals.portal.empty() ) {
 		return;
 	}
 
@@ -462,16 +410,14 @@ void CPortalsRender::renderWireframe( Renderer& renderer, const VolumeTest& volu
 }
 
 void CPortalsDrawWireframe::render( RenderStateFlags state ) const {
-	unsigned int n, p;
-
-	for ( n = 0; n < portals.portal_count; n++ )
+	for ( const auto& prt : portals.portal )
 	{
-		glBegin( GL_LINE_LOOP );
+		gl().glBegin( GL_LINE_LOOP );
 
-		for ( p = 0; p < portals.portal[n].point_count; p++ )
-			glVertex3fv( portals.portal[n].point[p].p );
+		for ( const auto& p : prt.point )
+			gl().glVertex3fv( p.data() );
 
-		glEnd();
+		gl().glEnd();
 	}
 }
 
@@ -483,17 +429,13 @@ CubicClipVolume calculateCubicClipVolume( const Matrix4& viewproj ){
 	                   Vector4( 0, 0, -1, 1 )
 	               )
 	           );
-	clip.min[0] = clip.cam[0] + ( portals.clip_range * 64.0f );
-	clip.min[1] = clip.cam[1] + ( portals.clip_range * 64.0f );
-	clip.min[2] = clip.cam[2] + ( portals.clip_range * 64.0f );
-	clip.max[0] = clip.cam[0] - ( portals.clip_range * 64.0f );
-	clip.max[1] = clip.cam[1] - ( portals.clip_range * 64.0f );
-	clip.max[2] = clip.cam[2] - ( portals.clip_range * 64.0f );
+	clip.min = clip.cam + Vector3( portals.clip_range );
+	clip.max = clip.cam - Vector3( portals.clip_range );
 	return clip;
 }
 
 void CPortalsRender::renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
-	if ( !portals.show_3d || portals.portal_count < 1 ) {
+	if ( !portals.show_3d || portals.portal.empty() ) {
 		return;
 	}
 
@@ -517,142 +459,100 @@ void CPortalsRender::renderSolid( Renderer& renderer, const VolumeTest& volume )
 }
 
 void CPortalsDrawSolid::render( RenderStateFlags state ) const {
-	float trans = ( 100.0f - portals.trans_3d ) / 100.0f;
-
-	unsigned int n, p;
+	const float opacity = portals.opacity_3d / 100.0f;
 
 	if ( portals.zbuffer != 0 ) {
-		float d;
-
-		for ( n = 0; n < portals.portal_count; n++ )
+		portals.portal_sort.clear();
+		portals.portal_sort.reserve( portals.portal.size() );
+		for ( auto& prt : portals.portal )
 		{
-			d = (float)clip.cam[0] - portals.portal[n].center.p[0];
-			portals.portal[n].dist = d * d;
+			prt.dist = vector3_length_squared( clip.cam - prt.center );
 
-			d = (float)clip.cam[1] - portals.portal[n].center.p[1];
-			portals.portal[n].dist += d * d;
-
-			d = (float)clip.cam[2] - portals.portal[n].center.p[2];
-			portals.portal[n].dist += d * d;
-
-			portals.portal_sort[n] = n;
+			portals.portal_sort.push_back( &prt );
 		}
 
-		qsort( portals.portal_sort, portals.portal_count, 4, compare );
+		std::sort( portals.portal_sort.begin(), portals.portal_sort.end(), []( const CBspPortal *a, const CBspPortal *b ){
+			return a->dist < b->dist;
+		} );
 
-		for ( n = 0; n < portals.portal_count; n++ )
+		for ( const auto prt : portals.portal_sort )
 		{
-			if ( portals.polygons == 2 && !portals.portal[portals.portal_sort[n]].hint ) {
-				continue;
+			if( ( !prt->hint && portals.draw_nonhints )
+			  || ( prt->hint && portals.draw_hints ) )
+			{
+				if ( portals.clip ) {
+					if ( clip.min[0] < prt->min[0]
+					  || clip.min[1] < prt->min[1]
+					  || clip.min[2] < prt->min[2]
+					  || clip.max[0] > prt->max[0]
+					  || clip.max[1] > prt->max[1]
+					  || clip.max[2] > prt->max[2]
+					) continue;
+				}
+
+				gl().glColor4f( prt->fp_color_random[0], prt->fp_color_random[1], prt->fp_color_random[2], opacity );
+
+				gl().glBegin( GL_POLYGON );
+
+				for ( const auto& p : prt->point )
+					gl().glVertex3fv( p.data() );
+
+				gl().glEnd();
 			}
-
-			if ( portals.clip ) {
-				if ( clip.min[0] < portals.portal[portals.portal_sort[n]].min[0] ) {
-					continue;
-				}
-				else if ( clip.min[1] < portals.portal[portals.portal_sort[n]].min[1] ) {
-					continue;
-				}
-				else if ( clip.min[2] < portals.portal[portals.portal_sort[n]].min[2] ) {
-					continue;
-				}
-				else if ( clip.max[0] > portals.portal[portals.portal_sort[n]].max[0] ) {
-					continue;
-				}
-				else if ( clip.max[1] > portals.portal[portals.portal_sort[n]].max[1] ) {
-					continue;
-				}
-				else if ( clip.max[2] > portals.portal[portals.portal_sort[n]].max[2] ) {
-					continue;
-				}
-			}
-
-			glColor4f( portals.portal[portals.portal_sort[n]].fp_color_random[0], portals.portal[portals.portal_sort[n]].fp_color_random[1],
-			           portals.portal[portals.portal_sort[n]].fp_color_random[2], trans );
-
-			glBegin( GL_POLYGON );
-
-			for ( p = 0; p < portals.portal[portals.portal_sort[n]].point_count; p++ )
-				glVertex3fv( portals.portal[portals.portal_sort[n]].point[p].p );
-
-			glEnd();
 		}
 	}
 	else
 	{
-		for ( n = 0; n < portals.portal_count; n++ )
+		for ( const auto& prt : portals.portal )
 		{
-			if ( portals.polygons == 2 && !portals.portal[n].hint ) {
-				continue;
+			if( ( !prt.hint && portals.draw_nonhints )
+			  || ( prt.hint && portals.draw_hints ) )
+			{
+				if ( portals.clip ) {
+					if ( clip.min[0] < prt.min[0]
+					  || clip.min[1] < prt.min[1]
+					  || clip.min[2] < prt.min[2]
+					  || clip.max[0] > prt.max[0]
+					  || clip.max[1] > prt.max[1]
+					  || clip.max[2] > prt.max[2]
+					) continue;
+				}
+
+				gl().glColor4f( prt.fp_color_random[0], prt.fp_color_random[1], prt.fp_color_random[2], opacity );
+
+				gl().glBegin( GL_POLYGON );
+
+				for ( const auto& p : prt.point )
+					gl().glVertex3fv( p.data() );
+
+				gl().glEnd();
 			}
-
-			if ( portals.clip ) {
-				if ( clip.min[0] < portals.portal[n].min[0] ) {
-					continue;
-				}
-				else if ( clip.min[1] < portals.portal[n].min[1] ) {
-					continue;
-				}
-				else if ( clip.min[2] < portals.portal[n].min[2] ) {
-					continue;
-				}
-				else if ( clip.max[0] > portals.portal[n].max[0] ) {
-					continue;
-				}
-				else if ( clip.max[1] > portals.portal[n].max[1] ) {
-					continue;
-				}
-				else if ( clip.max[2] > portals.portal[n].max[2] ) {
-					continue;
-				}
-			}
-
-			glColor4f( portals.portal[n].fp_color_random[0], portals.portal[n].fp_color_random[1],
-			           portals.portal[n].fp_color_random[2], trans );
-
-			glBegin( GL_POLYGON );
-
-			for ( p = 0; p < portals.portal[n].point_count; p++ )
-				glVertex3fv( portals.portal[n].point[p].p );
-
-			glEnd();
 		}
 	}
 }
 
 void CPortalsDrawSolidOutline::render( RenderStateFlags state ) const {
-	for ( unsigned int n = 0; n < portals.portal_count; n++ )
+	for ( const auto& prt : portals.portal )
 	{
-		if ( portals.lines == 2 && !portals.portal[n].hint ) {
-			continue;
+		if( ( !prt.hint && portals.draw_nonhints )
+			|| ( prt.hint && portals.draw_hints ) )
+		{
+			if ( portals.clip ) {
+				if ( clip.min[0] < prt.min[0]
+				  || clip.min[1] < prt.min[1]
+				  || clip.min[2] < prt.min[2]
+				  || clip.max[0] > prt.max[0]
+				  || clip.max[1] > prt.max[1]
+				  || clip.max[2] > prt.max[2]
+				) continue;
+			}
+
+			gl().glBegin( GL_LINE_LOOP );
+
+			for ( const auto& p : prt.inner_point )
+				gl().glVertex3fv( p.data() );
+
+			gl().glEnd();
 		}
-
-		if ( portals.clip ) {
-			if ( clip.min[0] < portals.portal[n].min[0] ) {
-				continue;
-			}
-			else if ( clip.min[1] < portals.portal[n].min[1] ) {
-				continue;
-			}
-			else if ( clip.min[2] < portals.portal[n].min[2] ) {
-				continue;
-			}
-			else if ( clip.max[0] > portals.portal[n].max[0] ) {
-				continue;
-			}
-			else if ( clip.max[1] > portals.portal[n].max[1] ) {
-				continue;
-			}
-			else if ( clip.max[2] > portals.portal[n].max[2] ) {
-				continue;
-			}
-		}
-
-		glBegin( GL_LINE_LOOP );
-
-		for ( unsigned int p = 0; p < portals.portal[n].point_count; p++ )
-			glVertex3fv( portals.portal[n].inner_point[p].p );
-
-		glEnd();
 	}
 }

@@ -30,8 +30,6 @@
 #include "string/string.h"
 #include "modulesystem/singletonmodule.h"
 
-#include <gtk/gtk.h>
-
 #define PLUGIN_VERSION "0.4"
 
 #include "ifilter.h"
@@ -59,10 +57,10 @@ public:
 
 namespace UFOAI
 {
-GtkWindow* g_mainwnd;
+QWidget* g_mainwnd;
 
 const char* init( void* hApp, void* pMainWidget ){
-	g_mainwnd = GTK_WINDOW( pMainWidget );
+	g_mainwnd = static_cast<QWidget*>( pMainWidget );
 	return "Initializing GTKRadiant UFOAI plugin";
 }
 const char* getName(){
@@ -78,9 +76,13 @@ const char* getCommandTitleList(){
 void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush ){
 	const char *message = NULL;
 	if ( string_equal( command, "About" ) ) {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_mainwnd ),
-		                                 "UFO:AI Plugin (http://ufoai.sf.net)\nBuild: " __DATE__ "\nRadiant version: " RADIANT_VERSION "\nPlugin version: " PLUGIN_VERSION "\nAuthor: Martin Gerhardy (tlh2000/mattn)\n", "About",
-		                                 eMB_OK, eMB_ICONDEFAULT );
+		GlobalRadiant().m_pfnMessageBox( g_mainwnd,
+		                                 "UFO:AI Plugin (<a href='http://ufoai.sf.net'>http://ufoai.sf.net</a>)"
+										 "<br>Build: " __DATE__
+										 "<br>Radiant version: " RADIANT_VERSION
+										 "<br>Plugin version: " PLUGIN_VERSION
+										 "<br>Author: Martin Gerhardy (tlh2000/mattn)<br>",
+										 "About", EMessageBoxType::Info, 0 );
 	}
 	else if ( string_equal( command, "Level 1" ) ) {
 		filter_level( CONTENTS_LEVEL1 );
@@ -129,9 +131,9 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 	}
 
 	if ( message != NULL ) {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_mainwnd ),
+		GlobalRadiant().m_pfnMessageBox( g_mainwnd,
 		                                 message, "Note",
-		                                 eMB_OK, eMB_ICONDEFAULT );
+		                                 EMessageBoxType::Info, 0 );
 	}
 	SceneChangeNotify();
 }

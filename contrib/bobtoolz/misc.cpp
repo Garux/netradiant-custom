@@ -254,27 +254,32 @@ void BuildMiniPrt( std::list<Str>* exclusionList ){
 	StartBSP();
 }
 
-class EntityFindByTargetName
+class EntityFindByKeyValue
 {
-	const char* targetname;
+	const char* m_key;
+	const char* m_value;
 public:
 	mutable const scene::Path* result;
-	EntityFindByTargetName( const char* targetname )
-		: targetname( targetname ), result( 0 ){
+	EntityFindByKeyValue( const char* key, const char* value )
+		: m_key( key ), m_value( value ), result( 0 ){
 	}
 	void operator()( scene::Instance& instance ) const {
 		if ( result == 0 ) {
-			const char* value = Node_getEntity( instance.path().top() )->getKeyValue( "targetname" );
+			const char* value = Node_getEntity( instance.path().top() )->getKeyValue( m_key );
 
-			if ( !strcmp( value, targetname ) ) {
+			if ( !strcmp( value, m_value ) ) {
 				result = &instance.path();
 			}
 		}
 	}
 };
 
+const scene::Path* FindEntityFromTarget( const char* target ){
+	return Scene_forEachEntity( EntityFindByKeyValue( "target", target ) ).result;
+}
+
 const scene::Path* FindEntityFromTargetname( const char* targetname ){
-	return Scene_forEachEntity( EntityFindByTargetName( targetname ) ).result;
+	return Scene_forEachEntity( EntityFindByKeyValue( "targetname", targetname ) ).result;
 }
 
 void FillDefaultTexture( _QERFaceData* faceData, vec3_t va, vec3_t vb, vec3_t vc, const char* texture ){
@@ -303,8 +308,10 @@ float Determinant3x3( float a1, float a2, float a3,
 	return a1 * ( b2 * c3 - b3 * c2 ) - a2 * ( b1 * c3 - b3 * c1 ) + a3 * ( b1 * c2 - b2 * c1 );
 }
 
-bool GetEntityCentre( const char* entity, vec3_t centre ){
-	const scene::Path* ent = FindEntityFromTargetname( entity );
+bool GetEntityCentre( const char* entityKey, bool keyIsTarget, vec3_t centre ){
+	const scene::Path* ent = keyIsTarget
+	                       ? FindEntityFromTarget( entityKey )
+	                       : FindEntityFromTargetname( entityKey );
 	if ( !ent ) {
 		return false;
 	}

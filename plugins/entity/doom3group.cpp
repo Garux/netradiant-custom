@@ -373,7 +373,7 @@ public:
 			}
 			else{
 				// place name in the middle of the "children cloud"
-				m_name_origin = extents_valid( childBounds.extents.x() )? childBounds.origin : vector4_to_vector3( localToWorld.t() );
+				m_name_origin = extents_valid( childBounds.extents.x() )? childBounds.origin : localToWorld.t().vec3();
 				m_renderName.render( renderer, volume, g_matrix4_identity, selected, childSelected );
 			}
 		}
@@ -422,17 +422,6 @@ public:
 		m_curveCatmullRom.curveChanged();
 	}
 	typedef MemberCaller<Doom3Group, &Doom3Group::transformChanged> TransformChangedCaller;
-};
-
-class ControlPointAddBounds
-{
-	AABB& m_bounds;
-public:
-	ControlPointAddBounds( AABB& bounds ) : m_bounds( bounds ){
-	}
-	void operator()( const Vector3& point ) const {
-		aabb_extend_by_point_safe( m_bounds, point );
-	}
 };
 
 class Doom3GroupInstance :
@@ -558,8 +547,8 @@ public:
 
 	const AABB& getSelectedComponentsBounds() const {
 		m_aabb_component = AABB();
-		m_curveNURBS.forEachSelected( ControlPointAddBounds( m_aabb_component ) );
-		m_curveCatmullRom.forEachSelected( ControlPointAddBounds( m_aabb_component ) );
+		m_curveNURBS.forEachSelected( AABBExtendByPoint( m_aabb_component ) );
+		m_curveCatmullRom.forEachSelected( AABBExtendByPoint( m_aabb_component ) );
 		return m_aabb_component;
 	}
 	void gatherSelectedComponents( const Vector3Callback& callback ) const {

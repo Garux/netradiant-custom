@@ -21,7 +21,7 @@
 
 #include <list>
 #include "str.h"
-typedef struct _GtkListStore GtkListStore;
+#include <QStringList>
 
 bool LoadExclusionList( char* filename, std::list<Str>* exclusionList );
-bool LoadListStore( char* filename, GtkListStore* loadlist );
+QStringList LoadListStore( char* filename );

@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_UTILITYMACROS_H)
-#define INCLUDED_UTILITYMACROS_H
+#pragma once
 
 /**
  * Convert a token to a string at compile-time.
@@ -39,5 +38,3 @@
  * @param A The name of the macro to process.
  */
 #define STRINGIFY_MACRO(A) STRINGIFY(A)
-
-#endif // #if !defined(INCLUDED_UTILITYMACROS_H)

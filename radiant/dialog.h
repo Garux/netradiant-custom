@@ -91,107 +91,88 @@ struct DLG_DATA
 	virtual void exportData() const = 0;
 };
 
-typedef struct _GtkWindow GtkWindow;
-typedef struct _GtkToggleButton GtkToggleButton;
-typedef struct _GtkRadioButton GtkRadioButton;
-typedef struct _GtkSpinButton GtkSpinButton;
-typedef struct _GtkComboBox GtkComboBox;
-typedef struct _GtkEntry GtkEntry;
-typedef struct _GtkAdjustment GtkAdjustment;
-
 template<typename FirstArgument>
 class CallbackDialogData;
 
 typedef std::list<DLG_DATA*> DialogDataList;
 
+#include <QDialog>
+class QGridLayout;
+class QCheckBox;
+class QComboBox;
+class QSlider;
+class QButtonGroup;
+class QLineEdit;
+class QSpinBox;
+class QDoubleSpinBox;
+
 class Dialog
 {
-	GtkWindow* m_window;
+	QDialog* m_window{};
 	DialogDataList m_data;
 public:
-	ModalDialog m_modal;
-	GtkWindow* m_parent;
-
-	Dialog();
 	virtual ~Dialog();
 
 	/*!
 	   start modal dialog box
 	   you need to use AddModalButton to select eIDOK eIDCANCEL buttons
 	 */
-	EMessageBoxReturn DoModal();
-	void EndModal( EMessageBoxReturn code );
-	virtual GtkWindow* BuildDialog() = 0;
+	QDialog::DialogCode DoModal();
+	void EndModal( QDialog::DialogCode code );
+	virtual void BuildDialog() = 0;
 	virtual void exportData();
 	virtual void importData();
 	virtual void PreModal() { };
-	virtual void PostModal( EMessageBoxReturn code ) { };
+	virtual void PostModal( QDialog::DialogCode code ) { };
 	virtual void ShowDlg();
 	virtual void HideDlg();
-	void Create();
+	void Create( QWidget *parent );
 	void Destroy();
-	GtkWindow* GetWidget(){
+	QDialog* GetWidget(){
 		return m_window;
 	}
-	const GtkWindow* GetWidget() const {
+	const QDialog* GetWidget() const {
 		return m_window;
 	}
 
-	GtkWidget* addCheckBox( GtkWidget* vbox, const char* name, const char* flag, const BoolImportCallback& importCallback, const BoolExportCallback& exportCallback );
-	GtkWidget* addCheckBox( GtkWidget* vbox, const char* name, const char* flag, bool& data );
-	void addCombo( GtkWidget* vbox, const char* name, StringArrayRange values, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	void addCombo( GtkWidget* vbox, const char* name, int& data, StringArrayRange values );
-	void addSlider( GtkWidget* vbox, const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment );
-	void addSlider( GtkWidget* vbox, const char* name, float& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment );
-	void addRadio( GtkWidget* vbox, const char* name, StringArrayRange names, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	void addRadio( GtkWidget* vbox, const char* name, int& data, StringArrayRange names );
-	void addRadioIcons( GtkWidget* vbox, const char* name, StringArrayRange icons, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	void addRadioIcons( GtkWidget* vbox, const char* name, int& data, StringArrayRange icons );
-	GtkWidget* addIntEntry( GtkWidget* vbox, const char* name, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	GtkWidget* addEntry( GtkWidget* vbox, const char* name, int& data ){
-		return addIntEntry( vbox, name, IntImportCaller( data ), IntExportCaller( data ) );
+	QCheckBox* addCheckBox( QGridLayout *grid, const char* name, const char* flag, const BoolImportCallback& importCallback, const BoolExportCallback& exportCallback );
+	QCheckBox* addCheckBox( QGridLayout *grid, const char* name, const char* flag, bool& data );
+	QComboBox* addCombo( QGridLayout *grid, const char* name, StringArrayRange values, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	QComboBox* addCombo( QGridLayout *grid, const char* name, int& data, StringArrayRange values );
+	void addSlider( QGridLayout *grid, const char* name, int& data, int lower, int upper, int step_increment, int page_increment );
+	void addSlider( QGridLayout *grid, const char* name, float& data, double lower, double upper, double step_increment, double page_increment );
+	void addRadio( QGridLayout *grid, const char* name, StringArrayRange names, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	void addRadio( QGridLayout *grid, const char* name, int& data, StringArrayRange names );
+	void addRadioIcons( QGridLayout *grid, const char* name, StringArrayRange icons, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	void addRadioIcons( QGridLayout *grid, const char* name, int& data, StringArrayRange icons );
+	void addTextEntry( QGridLayout *grid, const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
+	void addEntry( QGridLayout *grid, const char* name, CopiedString& data ){
+		addTextEntry( grid, name, StringImportCallback( StringImportCaller( data ) ), StringExportCallback( StringExportCaller( data ) ) );
 	}
-	GtkWidget* addSizeEntry( GtkWidget* vbox, const char* name, const SizeImportCallback& importCallback, const SizeExportCallback& exportCallback );
-	GtkWidget* addEntry( GtkWidget* vbox, const char* name, std::size_t& data ){
-		return addSizeEntry( vbox, name, SizeImportCaller( data ), SizeExportCaller( data ) );
-	}
-	GtkWidget* addFloatEntry( GtkWidget* vbox, const char* name, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
-	GtkWidget* addEntry( GtkWidget* vbox, const char* name, float& data ){
-		return addFloatEntry( vbox, name, FloatImportCaller( data ), FloatExportCaller( data ) );
-	}
-	GtkWidget* addTextEntry( GtkWidget* vbox, const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
-	GtkWidget* addEntry( GtkWidget* vbox, const char* name, CopiedString& data ){
-		return addTextEntry( vbox, name, StringImportCallback( StringImportCaller( data ) ), StringExportCallback( StringExportCaller( data ) ) );
-	}
-	GtkWidget* addPathEntry( GtkWidget* vbox, const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
-	GtkWidget* addPathEntry( GtkWidget* vbox, const char* name, CopiedString& data, bool directory );
-	GtkWidget* addSpinner( GtkWidget* vbox, const char* name, int& data, double value, double lower, double upper );
-	GtkWidget* addSpinner( GtkWidget* vbox, const char* name, double value, double lower, double upper, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	GtkWidget* addSpinner( GtkWidget* vbox, const char* name, double value, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
+	void addPathEntry( QGridLayout *grid, const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
+	void addPathEntry( QGridLayout *grid, const char* name, CopiedString& data, bool directory );
+	QWidget* addSpinner( QGridLayout *grid, const char* name, int& data, int lower, int upper );
+	QWidget* addSpinner( QGridLayout *grid, const char* name, int lower, int upper, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	QWidget* addSpinner( QGridLayout *grid, const char* name, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
+	QWidget* addSpinner( QGridLayout* grid, const char* name, float& data, double lower, double upper );
 
 protected:
 
-	void AddBoolToggleData( GtkToggleButton& object, const BoolImportCallback& importCallback, const BoolExportCallback& exportCallback );
-	void AddIntRadioData( GtkRadioButton& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	void AddTextEntryData( GtkEntry& object, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
-	void AddIntEntryData( GtkEntry& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	void AddSizeEntryData( GtkEntry& object, const SizeImportCallback& importCallback, const SizeExportCallback& exportCallback );
-	void AddFloatEntryData( GtkEntry& object, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
-	void AddFloatSpinnerData( GtkSpinButton& object, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
-	void AddIntSpinnerData( GtkSpinButton& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	void AddIntAdjustmentData( GtkAdjustment& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	void AddFloatAdjustmentData( GtkAdjustment& object, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
-	void AddIntComboData( GtkComboBox& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	void AddBoolToggleData( QCheckBox& object, const BoolImportCallback& importCallback, const BoolExportCallback& exportCallback );
+	void AddIntRadioData( QButtonGroup& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	void AddTextEntryData( QLineEdit& object, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
+	void AddFloatSpinnerData( QDoubleSpinBox& object, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
+	void AddIntSpinnerData( QSpinBox& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	void AddIntSliderData( QSlider& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	void AddFloatSliderData( QSlider& object, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
+	void AddIntComboData( QComboBox& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
 
-	void AddDialogData( GtkToggleButton& object, bool& data );
-	void AddDialogData( GtkRadioButton& object, int& data );
-	void AddDialogData( GtkEntry& object, CopiedString& data );
-	void AddDialogData( GtkEntry& object, int& data );
-	void AddDialogData( GtkEntry& object, std::size_t& data );
-	void AddDialogData( GtkEntry& object, float& data );
-	void AddDialogData( GtkSpinButton& object, float& data );
-	void AddDialogData( GtkSpinButton& object, int& data );
-	void AddDialogData( GtkAdjustment& object, int& data );
-	void AddDialogData( GtkAdjustment& object, float& data );
-	void AddDialogData( GtkComboBox& object, int& data );
+	void AddDialogData( QCheckBox& object, bool& data );
+	void AddDialogData( QButtonGroup& object, int& data );
+	void AddDialogData( QLineEdit& object, CopiedString& data );
+	void AddDialogData( QDoubleSpinBox& object, float& data );
+	void AddDialogData( QSpinBox& object, int& data );
+	void AddDialogData( QSlider& object, int& data );
+	void AddDialogData( QSlider& object, float& data );
+	void AddDialogData( QComboBox& object, int& data );
 };

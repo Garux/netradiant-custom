@@ -21,13 +21,8 @@
 
 #pragma once
 
-void PatchInspector_Construct();
-void PatchInspector_Destroy();
-
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
-void PatchInspector_constructWindow( GtkWindow* main_window );
-void PatchInspector_destroyWindow();
+class QGroupBox* patch_tesselation_create();
+void patch_tesselation_update();
 
 namespace scene
 {

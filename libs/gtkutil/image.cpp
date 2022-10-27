@@ -21,8 +21,6 @@
 
 #include "image.h"
 
-#include <gtk/gtk.h>
-
 #include "string/string.h"
 #include "stream/stringstream.h"
 #include "stream/textstream.h"
@@ -37,46 +35,12 @@ void BitmapsPath_set( const char* path ){
 	g_bitmapsPath = path;
 }
 
-GdkPixbuf* pixbuf_new_from_file_with_mask( const char* filename ){
-	GError *error = nullptr;
-	GdkPixbuf* rgba = gdk_pixbuf_new_from_file( filename, &error );
-	if ( rgba == 0 ) {
-		globalErrorStream() << "ERROR: gdk_pixbuf_new_from_file(): " << error->message << "\n";
-		g_error_free( error );
-	}
-	return rgba;
+QPixmap new_local_image( const char* filename ){
+	const auto fullPath = StringOutputStream( 256 )( g_bitmapsPath, filename );
+	return QPixmap( QString( fullPath.c_str() ) );
 }
 
-GtkImage* image_new_from_file_with_mask( const char* filename ){
-	GdkPixbuf* rgba = pixbuf_new_from_file_with_mask( filename );
-	if ( rgba == 0 ) {
-		return 0;
-	}
-	else
-	{
-		GtkImage* image = GTK_IMAGE( gtk_image_new_from_pixbuf( rgba ) );
-		g_object_unref( rgba );
-		return image;
-	}
-}
-
-GtkImage* image_new_missing(){
-	return GTK_IMAGE( gtk_image_new_from_stock( GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-}
-
-GtkImage* new_image( const char* filename ){
-	{
-		GtkImage* image = image_new_from_file_with_mask( filename );
-		if ( image != 0 ) {
-			return image;
-		}
-	}
-
-	return image_new_missing();
-}
-
-GtkImage* new_local_image( const char* filename ){
-	StringOutputStream fullPath( 256 );
-	fullPath << g_bitmapsPath << filename;
-	return new_image( fullPath );
+QIcon new_local_icon( const char* filename ){
+	const auto fullPath = StringOutputStream( 256 )( g_bitmapsPath, filename );
+	return QIcon( fullPath.c_str() );
 }

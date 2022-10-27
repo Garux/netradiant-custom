@@ -23,6 +23,5 @@
 
 #include "qerplugin.h"
 
-typedef struct _GtkWidget GtkWidget;
 /// \brief Shows a modal message-box.
-EMessageBoxReturn gtk_MessageBox( GtkWidget *parent, const char* text, const char* title = "NetRadiant", EMessageBoxType type = eMB_OK, EMessageBoxIcon icon = eMB_ICONDEFAULT );
+EMessageBoxReturn qt_MessageBox( class QWidget *parent, const char* text, const char* title = "NetRadiant", EMessageBoxType type = EMessageBoxType::Info, int buttons = 0 );

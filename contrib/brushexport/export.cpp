@@ -312,7 +312,7 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 		}
 
 		outMtl << "# Wavefront material file exported with NetRadiants brushexport plugin.\n";
-		outMtl << "# Material Count: " << (Unsigned)materials.size() << "\n\n";
+		outMtl << "# Material Count: " << materials.size() << "\n\n";
 		for ( const auto& material : materials )
 		{
 			const std::string& str = material.first;
@@ -380,7 +380,7 @@ bool ExportSelection( const StringSetWithLambda& ignorelist, collapsemode m, boo
 
 	if( GlobalSelectionSystem().countSelected() == 0 ){
 		globalErrorStream() << "Nothing is selected.\n";
-		GlobalRadiant().m_pfnMessageBox( g_pRadiantWnd, "Nothing is selected.", "brushexport", eMB_OK, eMB_ICONERROR );
+		GlobalRadiant().m_pfnMessageBox( g_pRadiantWnd, "Nothing is selected.", "brushexport", EMessageBoxType::Error, 0 );
 		return false;
 	}
 

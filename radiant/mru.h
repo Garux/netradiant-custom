@@ -23,8 +23,7 @@
 
 void MRU_AddFile( const char *str );
 
-typedef struct _GtkMenu GtkMenu;
-void MRU_constructMenu( GtkMenu* menu );
+void MRU_constructMenu( class QMenu* menu );
 
 void MRU_Construct();
 void MRU_Destroy();

@@ -22,11 +22,9 @@
 #include "console.h"
 
 #include <ctime>
-#include <gtk/gtk.h>
 
 #include "gtkutil/accelerator.h"
 #include "gtkutil/messagebox.h"
-#include "gtkutil/container.h"
 #include "gtkutil/menu.h"
 #include "gtkutil/nonmodal.h"
 #include "stream/stringstream.h"
@@ -36,6 +34,9 @@
 #include "aboutmsg.h"
 #include "gtkmisc.h"
 #include "mainframe.h"
+
+#include <QTextEdit>
+#include <QContextMenuEvent>
 
 // handle to the console log file
 namespace
@@ -66,8 +67,8 @@ void Sys_LogFile( bool enable ){
 			                     << "This is NetRadiant '" RADIANT_VERSION "' compiled " __DATE__ "\n" RADIANT_ABOUTMSG "\n";
 		}
 		else{
-			gtk_MessageBox( 0, "Failed to create log file, check write permissions in Radiant directory.\n",
-			                "Console logging", eMB_OK, eMB_ICONERROR );
+			qt_MessageBox( 0, "Failed to create log file, check write permissions in Radiant directory.\n",
+			                "Console logging", EMessageBoxType::Error );
 		}
 	}
 	else if ( !enable && g_hLogFile != 0 ) {
@@ -80,62 +81,38 @@ void Sys_LogFile( bool enable ){
 	}
 }
 
-GtkWidget* g_console = 0;
+QTextEdit* g_console = 0;
 
-void console_clear(){
-	GtkTextBuffer* buffer = gtk_text_view_get_buffer( GTK_TEXT_VIEW( g_console ) );
-	gtk_text_buffer_set_text( buffer, "", -1 );
-}
-
-void console_populate_popup( GtkTextView* textview, GtkMenu* menu, gpointer user_data ){
-	menu_separator( menu );
-
-	GtkWidget* item = gtk_menu_item_new_with_label( "Clear" );
-	g_signal_connect( G_OBJECT( item ), "activate", G_CALLBACK( console_clear ), 0 );
-	gtk_widget_show( item );
-	container_add_widget( GTK_CONTAINER( menu ), item );
-}
-
-gboolean destroy_set_null( GtkWindow* widget, GtkWidget** p ){
-	*p = 0;
-	return FALSE;
-}
-
-WidgetFocusPrinter g_consoleWidgetFocusPrinter( "console" );
+class QTextEdit_console : public QTextEdit
+{
+protected:
+	void contextMenuEvent( QContextMenuEvent *event ) override {
+		QMenu *menu = createStandardContextMenu();
+		QAction *action = menu->addAction( "Clear" );
+		connect( action, &QAction::triggered, this, &QTextEdit::clear );
+		menu->exec( event->globalPos() );
+		delete menu;
+	}
+};
 
 
-GtkWidget* Console_constructWindow( GtkWindow* toplevel ){
-	GtkWidget* scr = gtk_scrolled_window_new( 0, 0 );
-	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
-	gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scr ), GTK_SHADOW_IN );
-	gtk_widget_show( scr );
+QWidget* Console_constructWindow(){
+	QTextEdit *text = new QTextEdit_console();
+	text->setReadOnly( true );
+	text->setUndoRedoEnabled( false );
+	text->setAcceptRichText( false );
+	text->setMinimumHeight( 10 );
+	text->setFocusPolicy( Qt::FocusPolicy::NoFocus );
 
 	{
-		GtkWidget* text = gtk_text_view_new();
-		gtk_widget_set_size_request( text, 0, -1 ); // allow shrinking
-		gtk_text_view_set_wrap_mode( GTK_TEXT_VIEW( text ), GTK_WRAP_WORD );
-		gtk_text_view_set_editable( GTK_TEXT_VIEW( text ), FALSE );
-		gtk_container_add( GTK_CONTAINER( scr ), text );
-		gtk_widget_show( text );
 		g_console = text;
 
 		//globalExtendedASCIICharacterSet().print();
 
-		widget_connect_escape_clear_focus_widget( g_console );
-
-		//g_consoleWidgetFocusPrinter.connect(g_console);
-
-		g_signal_connect( G_OBJECT( g_console ), "populate-popup", G_CALLBACK( console_populate_popup ), 0 );
-		g_signal_connect( G_OBJECT( g_console ), "destroy", G_CALLBACK( destroy_set_null ), &g_console );
+		text->connect( text, &QObject::destroyed, [](){ g_console = nullptr; } );
 	}
 
-	//prevent focusing on text view after click on tab of floating group dialog (np, if called via hotkey)
-	GtkWidget* vbox = gtk_vbox_new( FALSE, 0 );
-	gtk_widget_show( vbox );
-	gtk_box_pack_start( GTK_BOX( vbox ), scr, TRUE, TRUE, 0 );
-	gtk_container_set_focus_chain( GTK_CONTAINER( vbox ), NULL );
-
-	return vbox;
+	return text;
 }
 
 //#pragma GCC push_options
@@ -143,18 +120,16 @@ GtkWidget* Console_constructWindow( GtkWindow* toplevel ){
 
 class GtkTextBufferOutputStream : public TextOutputStream
 {
-	GtkTextBuffer* textBuffer;
-	GtkTextIter* iter;
-	GtkTextTag* tag;
+	QTextEdit* textBuffer;
 public:
-	GtkTextBufferOutputStream( GtkTextBuffer* textBuffer, GtkTextIter* iter, GtkTextTag* tag ) : textBuffer( textBuffer ), iter( iter ), tag( tag ){
+	GtkTextBufferOutputStream( QTextEdit* textBuffer ) : textBuffer( textBuffer ) {
 	}
 	std::size_t
 #ifdef __GNUC__
 //__attribute__((optimize("O0")))
 #endif
 	write( const char* buffer, std::size_t length ){
-		gtk_text_buffer_insert_with_tags( textBuffer, iter, buffer, gint( length ), tag, NULL );
+		textBuffer->insertPlainText( QString::fromLatin1( buffer, length ) );
 		return length;
 	}
 };
@@ -162,7 +137,7 @@ public:
 //#pragma GCC pop_options
 
 std::size_t Sys_Print( int level, const char* buf, std::size_t length ){
-	bool contains_newline = std::find( buf, buf + length, '\n' ) != buf + length;
+	const bool contains_newline = std::find( buf, buf + length, '\n' ) != buf + length;
 
 	if ( level == SYS_ERR ) {
 		Sys_LogFile( true );
@@ -177,39 +152,25 @@ std::size_t Sys_Print( int level, const char* buf, std::size_t length ){
 
 	if ( level != SYS_NOCON ) {
 		if ( g_console != 0 ) {
-			GtkTextBuffer* buffer = gtk_text_view_get_buffer( GTK_TEXT_VIEW( g_console ) );
+			g_console->moveCursor( QTextCursor::End ); // must go before setTextColor()
 
-			GtkTextIter iter;
-			gtk_text_buffer_get_end_iter( buffer, &iter );
-
-			static GtkTextMark* end = gtk_text_buffer_create_mark( buffer, "end", &iter, FALSE );
-
-//			const GdkColor yellow = { 0, 0xb0ff, 0xb0ff, 0x0000 };
-			const GdkColor orange = { 0, 0xffff, 0x8888, 0x0000 };
-			const GdkColor red = { 0, 0xffff, 0x0000, 0x0000 };
-
-			static GtkTextTag* error_tag = gtk_text_buffer_create_tag( buffer, "red_foreground", "foreground-gdk", &red, nullptr );
-			static GtkTextTag* warning_tag = gtk_text_buffer_create_tag( buffer, "yellow_foreground", "foreground-gdk", &orange, nullptr );
-			static GtkTextTag* standard_tag = gtk_text_buffer_create_tag( buffer, "black_foreground", nullptr );
-			GtkTextTag* tag;
 			switch ( level )
 			{
 			case SYS_WRN:
-				tag = warning_tag;
+				g_console->setTextColor( QColor( 255, 127, 0 ) );
 				break;
 			case SYS_ERR:
-				tag = error_tag;
+				g_console->setTextColor( QColor( 255, 0, 0 ) );
 				break;
 			case SYS_STD:
 			case SYS_VRB:
 			default:
-				tag = standard_tag;
+				g_console->setTextColor( g_console->palette().text().color() );
 				break;
 			}
 
-
 			{
-				GtkTextBufferOutputStream textBuffer( buffer, &iter, tag );
+				GtkTextBufferOutputStream textBuffer( g_console );
 				if ( !globalCharacterSet().isUTF8() ) {
 					BufferedTextOutputStream<GtkTextBufferOutputStream> buffered( textBuffer );
 					buffered << StringRange( buf, length );
@@ -220,15 +181,15 @@ std::size_t Sys_Print( int level, const char* buf, std::size_t length ){
 				}
 			}
 
-			// update console widget immediately if we're doing something time-consuming
-			if ( contains_newline ) {
-				gtk_text_view_scroll_mark_onscreen( GTK_TEXT_VIEW( g_console ), end );
+ 			if ( contains_newline ) {
+				g_console->ensureCursorVisible();
 
-				if ( !ScreenUpdates_Enabled() && gtk_widget_get_realized( g_console ) ) {
+				// update console widget immediately if we're doing something time-consuming
+				if ( !ScreenUpdates_Enabled() && g_console->isVisible() ) {
 					ScreenUpdates_process();
 				}
 			}
-		}
+ 		}
 	}
 	return length;
 }

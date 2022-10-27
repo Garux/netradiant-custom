@@ -35,9 +35,7 @@ TextOutputStream& getSysPrintOutputStream();
 TextOutputStream& getSysPrintWarningStream();
 TextOutputStream& getSysPrintErrorStream();
 
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
-GtkWidget* Console_constructWindow( GtkWindow* toplevel );
+class QWidget* Console_constructWindow();
 
 // will open/close the log file based on the parameter
 void Sys_LogFile( bool enable );

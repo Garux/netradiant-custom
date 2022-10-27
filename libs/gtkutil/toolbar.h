@@ -22,18 +22,7 @@
 #pragma once
 
 #include "generic/callbackfwd.h"
+#include <QToolBar>
 
-typedef struct _GtkToolItem GtkToolItem;
-typedef struct _GtkToolButton GtkToolButton;
-typedef struct _GtkToggleToolButton GtkToggleToolButton;
-typedef struct _GtkToolbar GtkToolbar;
-class Command;
-class Toggle;
-
-GtkToolbar* toolbar_new();
-void toolbar_append_space( GtkToolbar* toolbar );
-void toolbar_append( GtkToolbar* toolbar, GtkToolItem* button, const char* description );
-GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback );
-GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Command& command );
-GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback );
-GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Toggle& toggle );
+QAction* toolbar_append_button( QToolBar* toolbar, const char* description, const char* icon, const Callback& callback );
+QAction* toolbar_append_toggle_button( QToolBar* toolbar, const char* description, const char* icon, const Callback& callback );

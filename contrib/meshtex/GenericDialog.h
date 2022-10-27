@@ -23,40 +23,29 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_GENERICDIALOG_H)
-#define INCLUDED_GENERICDIALOG_H
+#pragma once
 
 #include <string>
-#include <gdk/gdk.h>
-#include <glib.h>
 
 #include "RefCounted.h"
 
 #include "qerplugin.h"
 
-/**
- * Macro to get a handle on a widget inside the dialog by name.
- *
- * @param widgetName Name of the contained widget to find.
- */
-#define NamedWidget(widgetName) \
-   (g_object_get_data(G_OBJECT(_dialog), widgetName))
+#include <QDialog>
+#include <QWidget>
+#include <QFormLayout>
+#include <QCheckBox>
+#include <QDialogButtonBox>
+#include <QPushButton>
+#include <QGroupBox>
+#include <QRadioButton>
+#include <QGridLayout>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFrame>
+#include <QLabel>
+#include "gtkutil/spinbox.h"
 
-/**
- * Macro to enable/disable a widget inside the dialog, selected by name.
- *
- * @param widgetName Name of the contained widget to enable/disable.
- */
-#define NamedToggleWidgetActive(widgetName) \
-   gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(NamedWidget(widgetName)))
-
-/**
- * Macro to read text from a widget inside the dialog, selected by name.
- *
- * @param widgetName Name of the contained widget to read from.
- */
-#define NamedEntryWidgetText(widgetName) \
-   (gtk_entry_get_text(GTK_ENTRY(NamedWidget(widgetName))))
 
 /**
  * Framework for a basic dialog window with OK/Apply/Cancel actions.
@@ -93,7 +82,7 @@ public: // public methods
    //@}
    /// @name Window management
    //@{
-   virtual void SetWindow(GtkWidget *window);
+   virtual void SetWindow(QWidget *window);
    virtual void Raise();
    virtual void Show(const std::string& triggerCommand);
    virtual void Hide();
@@ -101,18 +90,13 @@ public: // public methods
    /// @name Callback implementation
    //@{
    virtual bool Apply();
-   virtual gint CloseEventCallback(GtkWidget *widget,
-                                   GdkEvent* event,
-                                   gpointer callbackID);
-   virtual void FinalizeCallback(GtkWidget *widget,
-                                 gpointer callbackID);
+   virtual void FinalizeCallback(QAbstractButton *callbackID);
    //@}
    /// @name Callback creation
    //@{
-   void CreateWindowCloseCallback();
-   void CreateOkButtonCallback(GtkWidget *button);
-   void CreateApplyButtonCallback(GtkWidget *button);
-   void CreateCancelButtonCallback(GtkWidget *button);
+   void CreateOkButtonCallback(QAbstractButton *button);
+   void CreateApplyButtonCallback(QAbstractButton *button);
+   void CreateCancelButtonCallback(QAbstractButton *button);
    //@}
 
 protected: // protected member vars
@@ -120,12 +104,12 @@ protected: // protected member vars
    /**
     * This dialog widget.
     */
-   GtkWidget *_dialog;
+   QDialog *_dialog;
 
    /**
     * Parent window.
     */
-   GtkWidget *_window;
+   QWidget *_window;
 
    /**
     * Unique key for this dialog.
@@ -140,17 +124,15 @@ protected: // protected member vars
    /**
     * Callback ID associated with an OK button; 0 if none.
     */
-   gpointer _okCallbackID;
+   QAbstractButton *_okCallbackID;
 
    /**
     * Callback ID associated with an Apply button; 0 if none.
     */
-   gpointer _applyCallbackID;
+   QAbstractButton *_applyCallbackID;
 
    /**
     * Callback ID associated with a Cancel button; 0 if none.
     */
-   gpointer _cancelCallbackID;
+   QAbstractButton *_cancelCallbackID;
 };
-
-#endif // #if !defined(INCLUDED_GENERICDIALOG_H)

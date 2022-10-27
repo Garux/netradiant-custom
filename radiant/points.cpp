@@ -49,8 +49,7 @@
 #include "commands.h"
 
 
-class CPointfile;
-void Pointfile_Parse( CPointfile& pointfile );
+void Pointfile_Parse( class CPointfile& pointfile );
 
 
 class CPointfile : public ISAXHandler, public Renderable, public OpenGLRenderable
@@ -98,14 +97,14 @@ public:
 			}
 		}
 		else if ( !show && shown() ) {
-			glDeleteLists( m_displaylist, 1 );
+			gl().glDeleteLists( m_displaylist, 1 );
 			m_displaylist = 0;
 			SceneChangeNotify();
 		}
 	}
 
 	void render( RenderStateFlags state ) const {
-		glCallList( m_displaylist );
+		gl().glCallList( m_displaylist );
 	}
 
 	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
@@ -153,17 +152,17 @@ void CPointfile::PushPoint( const Vector3& v ){
 
 // create the display list at the end
 void CPointfile::GenerateDisplayList(){
-	m_displaylist = glGenLists( 1 );
+	m_displaylist = gl().glGenLists( 1 );
 
-	glNewList( m_displaylist,  GL_COMPILE );
+	gl().glNewList( m_displaylist, GL_COMPILE );
 
-	glBegin( GL_LINE_STRIP );
+	gl().glBegin( GL_LINE_STRIP );
 	for ( std::size_t i = 0; i < s_num_points; i++ )
-		glVertex3fv( vector3_to_array( s_pointvecs[i] ) );
-	glEnd();
-	glLineWidth( 1 );
+		gl().glVertex3fv( vector3_to_array( s_pointvecs[i] ) );
+	gl().glEnd();
+	gl().glLineWidth( 1 );
 
-	glEndList();
+	gl().glEndList();
 }
 
 // old (but still relevant) pointfile code -------------------------------------
@@ -305,7 +304,7 @@ void Pointfile_Parse( CPointfile& pointfile ){
 		pointfile.PushPoint( v );
 	}
 
-	g_free( text );
+	free( text );
 }
 
 void Pointfile_Clear(){
@@ -324,8 +323,8 @@ void Pointfile_Construct(){
 	GlobalShaderCache().attachRenderable( s_pointfile );
 
 	GlobalCommands_insert( "TogglePointfile", FreeCaller<Pointfile_Toggle>() );
-	GlobalCommands_insert( "NextLeakSpot", FreeCaller<Pointfile_Next>(), Accelerator( 'K', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
-	GlobalCommands_insert( "PrevLeakSpot", FreeCaller<Pointfile_Prev>(), Accelerator( 'L', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
+	GlobalCommands_insert( "NextLeakSpot", FreeCaller<Pointfile_Next>(), QKeySequence( "Ctrl+Shift+K" ) );
+	GlobalCommands_insert( "PrevLeakSpot", FreeCaller<Pointfile_Prev>(), QKeySequence( "Ctrl+Shift+L" ) );
 }
 
 void Pointfile_Destroy(){

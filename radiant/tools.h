@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2001-2006, William Joseph.
-   All Rights Reserved.
+   Copyright (C) 1999-2006 Id Software, Inc. and contributors.
+   For a list of contributors, see the accompanying CONTRIBUTORS file.
 
    This file is part of GtkRadiant.
 
@@ -21,27 +21,8 @@
 
 #pragma once
 
-struct WindowPosition;
 
-void PositionWindowOnPrimaryScreen( WindowPosition& position );
+void Tools_registerCommands();
 
-struct multimon_globals_t
-{
-	bool m_bStartOnPrimMon;
-
-	multimon_globals_t() :
-		m_bStartOnPrimMon( false ){
-	}
-};
-
-extern multimon_globals_t g_multimon_globals;
-
-#if defined( WIN32 )
-void MultiMon_Construct();
-void MultiMon_Destroy();
-#else
-inline void MultiMon_Construct(){
-}
-inline void MultiMon_Destroy(){
-}
-#endif
+void SelectionSystem_DefaultMode();
+void ComponentModeChanged();

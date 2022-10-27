@@ -23,8 +23,7 @@
  * along with MeshTex.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(INCLUDED_GENERICPLUGINUIMESSAGES_H)
-#define INCLUDED_GENERICPLUGINUIMESSAGES_H
+#pragma once
 
 /// @name Window titles
 //@{
@@ -36,12 +35,3 @@
 //@{
 #define DIALOG_INTERNAL_ERROR "Internal error in plugin code."
 //@}
-
-/// @name Button labels
-//@{
-#define DIALOG_CANCEL_BUTTON "Cancel"
-#define DIALOG_APPLY_BUTTON "Apply"
-#define DIALOG_OK_BUTTON "OK"
-//@}
-
-#endif // #if !defined(INCLUDED_GENERICPLUGINUIMESSAGES_H)

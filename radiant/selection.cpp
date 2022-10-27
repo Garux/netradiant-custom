@@ -1119,13 +1119,13 @@ public:
 	void render( RenderStateFlags state ) const {
 		for ( std::size_t i = 0; i < m_primitives.size(); ++i )
 		{
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_primitives[i].m_points[0].colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_primitives[i].m_points[0].vertex );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_primitives[i].m_points[0].colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_primitives[i].m_points[0].vertex );
 			switch ( m_primitives[i].m_count )
 			{
 			case 1: break;
-			case 2: glDrawArrays( GL_LINES, 0, GLsizei( m_primitives[i].m_count ) ); break;
-			default: glDrawArrays( GL_POLYGON, 0, GLsizei( m_primitives[i].m_count ) ); break;
+			case 2: gl().glDrawArrays( GL_LINES, 0, GLsizei( m_primitives[i].m_count ) ); break;
+			default: gl().glDrawArrays( GL_POLYGON, 0, GLsizei( m_primitives[i].m_count ) ); break;
 			}
 		}
 	}
@@ -1546,9 +1546,9 @@ class RotateManipulator : public Manipulator
 		RenderableCircle( std::size_t size ) : m_vertices( size ){
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices.data()->colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
-			glDrawArrays( GL_LINE_LOOP, 0, GLsizei( m_vertices.size() ) );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices.data()->colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
+			gl().glDrawArrays( GL_LINE_LOOP, 0, GLsizei( m_vertices.size() ) );
 		}
 		void setColour( const Colour4b& colour ){
 			for ( Array<PointVertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
@@ -1565,9 +1565,9 @@ class RotateManipulator : public Manipulator
 		RenderableSemiCircle( std::size_t size ) : m_vertices( size ){
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices.data()->colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
-			glDrawArrays( GL_LINE_STRIP, 0, GLsizei( m_vertices.size() ) );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices.data()->colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
+			gl().glDrawArrays( GL_LINE_STRIP, 0, GLsizei( m_vertices.size() ) );
 		}
 		void setColour( const Colour4b& colour ){
 			for ( Array<PointVertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
@@ -1628,16 +1628,16 @@ public:
 	}
 
 	void updateCircleTransforms(){
-		Vector3 localViewpoint( matrix4_transformed_direction( matrix4_transposed( m_pivot.m_worldSpace ), vector4_to_vector3( m_pivot.m_viewpointSpace.z() ) ) );
+		Vector3 localViewpoint( matrix4_transformed_direction( matrix4_transposed( m_pivot.m_worldSpace ), m_pivot.m_viewpointSpace.z().vec3() ) );
 
 		m_circle_x_visible = !vector3_equal_epsilon( g_vector3_axis_x, localViewpoint, 1e-6f );
 		if ( m_circle_x_visible ) {
 			m_local2world_x = g_matrix4_identity;
-			vector4_to_vector3( m_local2world_x.y() ) = normalised_safe(
+			m_local2world_x.y().vec3() = normalised_safe(
 			            vector3_cross( g_vector3_axis_x, localViewpoint )
 			        );
-			vector4_to_vector3( m_local2world_x.z() ) = normalised_safe(
-			            vector3_cross( vector4_to_vector3( m_local2world_x.x() ), vector4_to_vector3( m_local2world_x.y() ) )
+			m_local2world_x.z().vec3() = normalised_safe(
+			            vector3_cross( m_local2world_x.x().vec3(), m_local2world_x.y().vec3() )
 			        );
 			matrix4_premultiply_by_matrix4( m_local2world_x, m_pivot.m_worldSpace );
 		}
@@ -1645,11 +1645,11 @@ public:
 		m_circle_y_visible = !vector3_equal_epsilon( g_vector3_axis_y, localViewpoint, 1e-6f );
 		if ( m_circle_y_visible ) {
 			m_local2world_y = g_matrix4_identity;
-			vector4_to_vector3( m_local2world_y.z() ) = normalised_safe(
+			m_local2world_y.z().vec3() = normalised_safe(
 			            vector3_cross( g_vector3_axis_y, localViewpoint )
 			        );
-			vector4_to_vector3( m_local2world_y.x() ) = normalised_safe(
-			            vector3_cross( vector4_to_vector3( m_local2world_y.y() ), vector4_to_vector3( m_local2world_y.z() ) )
+			m_local2world_y.x().vec3() = normalised_safe(
+			            vector3_cross( m_local2world_y.y().vec3(), m_local2world_y.z().vec3() )
 			        );
 			matrix4_premultiply_by_matrix4( m_local2world_y, m_pivot.m_worldSpace );
 		}
@@ -1657,11 +1657,11 @@ public:
 		m_circle_z_visible = !vector3_equal_epsilon( g_vector3_axis_z, localViewpoint, 1e-6f );
 		if ( m_circle_z_visible ) {
 			m_local2world_z = g_matrix4_identity;
-			vector4_to_vector3( m_local2world_z.x() ) = normalised_safe(
+			m_local2world_z.x().vec3() = normalised_safe(
 			            vector3_cross( g_vector3_axis_z, localViewpoint )
 			        );
-			vector4_to_vector3( m_local2world_z.y() ) = normalised_safe(
-			            vector3_cross( vector4_to_vector3( m_local2world_z.z() ), vector4_to_vector3( m_local2world_z.x() ) )
+			m_local2world_z.y().vec3() = normalised_safe(
+			            vector3_cross( m_local2world_z.z().vec3(), m_local2world_z.x().vec3() )
 			        );
 			matrix4_premultiply_by_matrix4( m_local2world_z, m_pivot.m_worldSpace );
 		}
@@ -1959,9 +1959,9 @@ class TranslateManipulator : public Manipulator, public ManipulatorSelectionChan
 		RenderableArrowLine(){
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_line[0].colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_line[0].vertex );
-			glDrawArrays( GL_LINES, 0, 2 );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_line[0].colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_line[0].vertex );
+			gl().glDrawArrays( GL_LINES, 0, 2 );
 		}
 		void setColour( const Colour4b& colour ){
 			m_line[0].colour = colour;
@@ -1976,10 +1976,10 @@ class TranslateManipulator : public Manipulator, public ManipulatorSelectionChan
 			: m_vertices( size ){
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( FlatShadedVertex ), &m_vertices.data()->colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( FlatShadedVertex ), &m_vertices.data()->vertex );
-			glNormalPointer( GL_FLOAT, sizeof( FlatShadedVertex ), &m_vertices.data()->normal );
-			glDrawArrays( GL_TRIANGLES, 0, GLsizei( m_vertices.size() ) );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( FlatShadedVertex ), &m_vertices.data()->colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( FlatShadedVertex ), &m_vertices.data()->vertex );
+			gl().glNormalPointer( GL_FLOAT, sizeof( FlatShadedVertex ), &m_vertices.data()->normal );
+			gl().glDrawArrays( GL_TRIANGLES, 0, GLsizei( m_vertices.size() ) );
 		}
 		void setColour( const Colour4b& colour ){
 			for ( Array<FlatShadedVertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
@@ -1992,9 +1992,9 @@ class TranslateManipulator : public Manipulator, public ManipulatorSelectionChan
 	{
 		PointVertex m_quad[4];
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_quad[0].colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_quad[0].vertex );
-			glDrawArrays( GL_LINE_LOOP, 0, 4 );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_quad[0].colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_quad[0].vertex );
+			gl().glDrawArrays( GL_LINE_LOOP, 0, 4 );
 		}
 		void setColour( const Colour4b& colour ){
 			m_quad[0].colour = colour;
@@ -2058,13 +2058,13 @@ public:
 		// temp hack
 		UpdateColours();
 
-		Vector3 x = vector3_normalised( vector4_to_vector3( m_pivot.m_worldSpace.x() ) );
+		Vector3 x = vector3_normalised( m_pivot.m_worldSpace.x().vec3() );
 		bool show_x = manipulator_show_axis( m_pivot, x );
 
-		Vector3 y = vector3_normalised( vector4_to_vector3( m_pivot.m_worldSpace.y() ) );
+		Vector3 y = vector3_normalised( m_pivot.m_worldSpace.y().vec3() );
 		bool show_y = manipulator_show_axis( m_pivot, y );
 
-		Vector3 z = vector3_normalised( vector4_to_vector3( m_pivot.m_worldSpace.z() ) );
+		Vector3 z = vector3_normalised( m_pivot.m_worldSpace.z().vec3() );
 		bool show_z = manipulator_show_axis( m_pivot, z );
 
 		renderer.SetState( m_state_wire, Renderer::eWireframeOnly );
@@ -2100,13 +2100,13 @@ public:
 
 		SelectionPool selector;
 
-		Vector3 x = vector3_normalised( vector4_to_vector3( m_pivot.m_worldSpace.x() ) );
+		Vector3 x = vector3_normalised( m_pivot.m_worldSpace.x().vec3() );
 		bool show_x = manipulator_show_axis( m_pivot, x );
 
-		Vector3 y = vector3_normalised( vector4_to_vector3( m_pivot.m_worldSpace.y() ) );
+		Vector3 y = vector3_normalised( m_pivot.m_worldSpace.y().vec3() );
 		bool show_y = manipulator_show_axis( m_pivot, y );
 
-		Vector3 z = vector3_normalised( vector4_to_vector3( m_pivot.m_worldSpace.z() ) );
+		Vector3 z = vector3_normalised( m_pivot.m_worldSpace.z().vec3() );
 		bool show_z = manipulator_show_axis( m_pivot, z );
 
 		{
@@ -2197,9 +2197,9 @@ class ScaleManipulator : public Manipulator, public ManipulatorSelectionChangeab
 		PointVertex m_line[2];
 
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_line[0].colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_line[0].vertex );
-			glDrawArrays( GL_LINES, 0, 2 );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_line[0].colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_line[0].vertex );
+			gl().glDrawArrays( GL_LINES, 0, 2 );
 		}
 		void setColour( const Colour4b& colour ){
 			m_line[0].colour = colour;
@@ -2210,9 +2210,9 @@ class ScaleManipulator : public Manipulator, public ManipulatorSelectionChangeab
 	{
 		PointVertex m_quad[4];
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_quad[0].colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_quad[0].vertex );
-			glDrawArrays( GL_QUADS, 0, 4 );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_quad[0].colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_quad[0].vertex );
+			gl().glDrawArrays( GL_QUADS, 0, 4 );
 		}
 		void setColour( const Colour4b& colour ){
 			m_quad[0].colour = colour;
@@ -2349,9 +2349,9 @@ class SkewManipulator : public Manipulator
 		RenderableLine() {
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_line[0].colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_line[0].vertex );
-			glDrawArrays( GL_LINES, 0, 2 );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_line[0].colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_line[0].vertex );
+			gl().glDrawArrays( GL_LINES, 0, 2 );
 		}
 		void setColour( const Colour4b& colour ) {
 			m_line[0].colour = colour;
@@ -2366,10 +2366,10 @@ class SkewManipulator : public Manipulator
 			: m_vertices( size ) {
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( FlatShadedVertex ), &m_vertices.data()->colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( FlatShadedVertex ), &m_vertices.data()->vertex );
-			glNormalPointer( GL_FLOAT, sizeof( FlatShadedVertex ), &m_vertices.data()->normal );
-			glDrawArrays( GL_TRIANGLES, 0, GLsizei( m_vertices.size() ) );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( FlatShadedVertex ), &m_vertices.data()->colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( FlatShadedVertex ), &m_vertices.data()->vertex );
+			gl().glNormalPointer( GL_FLOAT, sizeof( FlatShadedVertex ), &m_vertices.data()->normal );
+			gl().glDrawArrays( GL_TRIANGLES, 0, GLsizei( m_vertices.size() ) );
 		}
 		void setColour( const Colour4b & colour ) {
 			for( Array<FlatShadedVertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i ) {
@@ -2384,9 +2384,9 @@ class SkewManipulator : public Manipulator
 			m_point( vertex3f_identity ) {
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_point.colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_point.vertex );
-			glDrawArrays( GL_POINTS, 0, 1 );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_point.colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_point.vertex );
+			gl().glDrawArrays( GL_POINTS, 0, 1 );
 		}
 		void setColour( const Colour4b & colour ) {
 			m_point.colour = colour;
@@ -4146,17 +4146,6 @@ DoubleVector3 testSelected_scene_snapped_point( const SelectionVolume& test, Cli
 	return point;
 }
 
-class Scene_insert_brush_vertices
-{
-	const Brush::VertexModeVertices& m_vertexModeVertices;
-public:
-	Scene_insert_brush_vertices( const Brush::VertexModeVertices& vertexModeVertices ) : m_vertexModeVertices( vertexModeVertices ) {
-	}
-	void operator()( BrushInstance& brush ) const {
-		brush.insert_vertices( m_vertexModeVertices );
-	}
-};
-
 bool scene_insert_brush_vertices( const View& view, TranslateFreeXY_Z& freeDragXY_Z ){
 	SelectionVolume test( view );
 	ClipperSelector clipperSelector;
@@ -4177,7 +4166,7 @@ bool scene_insert_brush_vertices( const View& view, TranslateFreeXY_Z& freeDragX
 			vertexModeVertices.back().m_faces.push_back( clipperSelector.face() );
 
 		UndoableCommand undo( "InsertBrushVertices" );
-		Scene_forEachSelectedBrush( Scene_insert_brush_vertices( vertexModeVertices ) );
+		Scene_forEachSelectedBrush( [&vertexModeVertices]( BrushInstance& brush ){ brush.insert_vertices( vertexModeVertices ); } );
 		return true;
 	}
 	else if( !view.fill() ){ //+two points
@@ -4195,7 +4184,7 @@ bool scene_insert_brush_vertices( const View& view, TranslateFreeXY_Z& freeDragX
 			vertexModeVertices.push_back( Brush::VertexModeVertex( b, true ) );
 
 			UndoableCommand undo( "InsertBrushVertices" );
-			Scene_forEachSelectedBrush( Scene_insert_brush_vertices( vertexModeVertices ) );
+			Scene_forEachSelectedBrush( [&vertexModeVertices]( BrushInstance& brush ){ brush.insert_vertices( vertexModeVertices ); } );
 			return true;
 		}
 	}
@@ -4257,10 +4246,10 @@ static bool g_bTmpComponentMode = false;
 
 class DragManipulator : public Manipulator
 {
+	ResizeTranslatable m_resize;
 	TranslateFree m_freeResize;
 	TranslateAxis2 m_axisResize;
 	TranslateFreeXY_Z m_freeDragXY_Z;
-	ResizeTranslatable m_resize;
 	DragNewBrush m_dragNewBrush;
 	DragExtrudeFaces m_dragExtrudeFaces;
 	bool m_dragSelected; //drag selected primitives or components
@@ -4273,7 +4262,7 @@ public:
 
 	static Shader* m_state_wire;
 
-	DragManipulator( Translatable& translatable ) : m_freeResize( m_resize ), m_axisResize( m_resize ), m_freeDragXY_Z( translatable ), m_renderCircle( 2 << 3 ){
+	DragManipulator( Translatable& translatable ) : m_resize(), m_freeResize( m_resize ), m_axisResize( m_resize ), m_freeDragXY_Z( translatable ), m_renderCircle( 2 << 3 ){
 		setSelected( false );
 		draw_circle( m_renderCircle.m_vertices.size() >> 3, 5, m_renderCircle.m_vertices.data(), RemapXYZ() );
 	}
@@ -4363,9 +4352,9 @@ public:
 				start = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, bestPointSelector.best().depth(), 1 ) ) );
 			}
 			else{
-				const Vector3 near = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, -1, 1 ) ) );
-				const Vector3 far = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, 1, 1 ) ) );
-				start = vector3_normalised( far - near ) * ( 256.f + GetGridSize() * sqrt( 3.0 ) ) + near;
+				const Vector3 pnear = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, -1, 1 ) ) );
+				const Vector3 pfar = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, 1, 1 ) ) );
+				start = vector3_normalised( pfar - pnear ) * ( 256.f + GetGridSize() * sqrt( 3.0 ) ) + pnear;
 			}
 			vector3_snap( start, GetSnapGridSize() );
 			m_dragNewBrush.set0( start );
@@ -4478,12 +4467,12 @@ private:
 		RenderablePoly( const std::vector<std::vector<Vector3>>& polygons ) : m_polygons( polygons ){
 		}
 		void render( RenderStateFlags state ) const {
-			glPolygonOffset( -2, -2 );
+			gl().glPolygonOffset( -2, -2 );
 			for( const auto& poly : m_polygons ){
-				glVertexPointer( 3, GL_FLOAT, sizeof( m_polygons[0][0] ), poly[0].data() );
-				glDrawArrays( GL_POLYGON, 0, GLsizei( poly.size() ) );
+				gl().glVertexPointer( 3, GL_FLOAT, sizeof( m_polygons[0][0] ), poly[0].data() );
+				gl().glDrawArrays( GL_POLYGON, 0, GLsizei( poly.size() ) );
 			}
-			glPolygonOffset( -1, 1 ); // restore default
+			gl().glPolygonOffset( -1, 1 ); // restore default
 		}
 	};
 	RenderablePoly m_renderPoly{ m_polygons };
@@ -4495,8 +4484,8 @@ private:
 		RenderableCircle( std::size_t size ) : m_vertices( size ){
 		}
 		void render( RenderStateFlags state ) const {
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
-			glDrawArrays( GL_LINE_LOOP, 0, GLsizei( m_vertices.size() ) );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
+			gl().glDrawArrays( GL_LINE_LOOP, 0, GLsizei( m_vertices.size() ) );
 		}
 	};
 	RenderableCircle m_renderCircle;
@@ -4516,12 +4505,12 @@ class ClipManipulator : public Manipulator, public ManipulatorSelectionChangeabl
 			m_p( vertex3f_identity ), m_set( false ) {
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_p.colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_p.vertex );
-			glDrawArrays( GL_POINTS, 0, 1 );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_p.colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_p.vertex );
+			gl().glDrawArrays( GL_POINTS, 0, 1 );
 
-			glColor4ub( m_p.colour.r, m_p.colour.g, m_p.colour.b, m_p.colour.a ); ///?
-			glRasterPos3f( m_namePos.x(), m_namePos.y(), m_namePos.z() );
+			gl().glColor4ub( m_p.colour.r, m_p.colour.g, m_p.colour.b, m_p.colour.a ); ///?
+			gl().glRasterPos3f( m_namePos.x(), m_namePos.y(), m_namePos.z() );
 			GlobalOpenGL().drawChar( m_name );
 		}
 		void setColour( const Colour4b& colour ) {
@@ -4787,9 +4776,9 @@ class BuildManipulator : public Manipulator, public Manipulatable
 		RenderableLine() {
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_line[0].colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_line[0].vertex );
-			glDrawArrays( GL_LINES, 0, 2 );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_line[0].colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_line[0].vertex );
+			gl().glDrawArrays( GL_LINES, 0, 2 );
 		}
 		void setColour( const Colour4b& colour ) {
 			m_line[0].colour = colour;
@@ -4803,9 +4792,9 @@ class BuildManipulator : public Manipulator, public Manipulatable
 			m_point( vertex3f_identity ) {
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_point.colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_point.vertex );
-			glDrawArrays( GL_POINTS, 0, 1 );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_point.colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_point.vertex );
+			gl().glDrawArrays( GL_POINTS, 0, 1 );
 		}
 		void setColour( const Colour4b & colour ) {
 			m_point.colour = colour;
@@ -4880,9 +4869,9 @@ class UVManipulator : public Manipulator, public Manipulatable
 			m_point( vertex3f_identity ) {
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_point.colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_point.vertex );
-			glDrawArrays( GL_POINTS, 0, 1 );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_point.colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_point.vertex );
+			gl().glDrawArrays( GL_POINTS, 0, 1 );
 		}
 		void setColour( const Colour4b & colour ) {
 			m_point.colour = colour;
@@ -4894,9 +4883,9 @@ class UVManipulator : public Manipulator, public Manipulatable
 		RenderablePoints(){
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_points[0].colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_points[0].vertex );
-			glDrawArrays( GL_POINTS, 0, m_points.size() );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_points[0].colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_points[0].vertex );
+			gl().glDrawArrays( GL_POINTS, 0, m_points.size() );
 		}
 	};
 	struct RenderableLines : public OpenGLRenderable
@@ -4906,9 +4895,9 @@ class UVManipulator : public Manipulator, public Manipulatable
 		}
 		void render( RenderStateFlags state ) const {
 			if( m_lines.size() != 0 ){
-				glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_lines[0].colour );
-				glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_lines[0].vertex );
-				glDrawArrays( GL_LINES, 0, m_lines.size() );
+				gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_lines[0].colour );
+				gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_lines[0].vertex );
+				gl().glDrawArrays( GL_LINES, 0, m_lines.size() );
 			}
 		}
 	};
@@ -4919,9 +4908,9 @@ class UVManipulator : public Manipulator, public Manipulatable
 		RenderableCircle( std::size_t size ) : m_vertices( size ){
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices.data()->colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
-			glDrawArrays( GL_LINE_LOOP, 0, GLsizei( m_vertices.size() ) );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices.data()->colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
+			gl().glDrawArrays( GL_LINE_LOOP, 0, GLsizei( m_vertices.size() ) );
 		}
 		void setColour( const Colour4b& colour ){
 			for ( Array<PointVertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
@@ -4940,10 +4929,10 @@ class UVManipulator : public Manipulator, public Manipulatable
 		void render( RenderStateFlags state ) const {
 			if( state & RENDER_FILL ){
 				const std::vector<Vector3> normals( m_patchControlArray->size(), g_vector3_axis_z );
-				glNormalPointer( GL_FLOAT, sizeof( Vector3 ), normals.data() );
-				glVertexPointer( 2, GL_FLOAT, sizeof( PatchControl ), &m_patchControlArray->data()->m_texcoord );
-				glTexCoordPointer( 2, GL_FLOAT, sizeof( PatchControl ), &m_patchControlArray->data()->m_texcoord );
-				glDrawElements( GL_TRIANGLES, GLsizei( m_trianglesIndices.size() ), RenderIndexTypeID, m_trianglesIndices.data() );
+				gl().glNormalPointer( GL_FLOAT, sizeof( Vector3 ), normals.data() );
+				gl().glVertexPointer( 2, GL_FLOAT, sizeof( PatchControl ), &m_patchControlArray->data()->m_texcoord );
+				gl().glTexCoordPointer( 2, GL_FLOAT, sizeof( PatchControl ), &m_patchControlArray->data()->m_texcoord );
+				gl().glDrawElements( GL_TRIANGLES, GLsizei( m_trianglesIndices.size() ), RenderIndexTypeID, m_trianglesIndices.data() );
 			}
 		}
 	};
@@ -5139,9 +5128,10 @@ private:
 	}
 	bool projection_valid() const {
 		return !( !std::isfinite( m_local2tex[0] ) //nan
-		          || fabs( vector3_dot( m_plane.normal(), vector4_to_vector3( m_tex2local.z() ) ) ) < 1e-6 //projected along face
-		          || vector3_length_squared( vector4_to_vector3( m_tex2local.x() ) ) < .01 //srsly scaled down, limit at max 10 textures per world unit
-		          || vector3_length_squared( vector4_to_vector3( m_tex2local.y() ) ) < .01 );
+		       || !std::isfinite( m_tex2local[0] ) //nan
+		       || fabs( vector3_dot( m_plane.normal(), m_tex2local.z().vec3() ) ) < 1e-6 //projected along face
+		       || vector3_length_squared( m_tex2local.x().vec3() ) < .01 //srsly scaled down, limit at max 10 textures per world unit
+		       || vector3_length_squared( m_tex2local.y().vec3() ) < .01 );
 	}
 	void UpdateFaceData( bool updateOrigin, bool updateLines = true ) {
 		//!? todo fewer outer quads for large textures
@@ -5268,12 +5258,12 @@ private:
 		}
 
 		m_faceTex2local = m_tex2local;
-		vector4_to_vector3( m_faceTex2local.x() ) = plane3_project_point( Plane3( m_plane.normal(), 0 ), vector4_to_vector3( m_tex2local.x() ), vector4_to_vector3( m_tex2local.z() ) );
-		vector4_to_vector3( m_faceTex2local.y() ) = plane3_project_point( Plane3( m_plane.normal(), 0 ), vector4_to_vector3( m_tex2local.y() ), vector4_to_vector3( m_tex2local.z() ) );
+		m_faceTex2local.x().vec3() = plane3_project_point( Plane3( m_plane.normal(), 0 ), m_tex2local.x().vec3(), m_tex2local.z().vec3() );
+		m_faceTex2local.y().vec3() = plane3_project_point( Plane3( m_plane.normal(), 0 ), m_tex2local.y().vec3(), m_tex2local.z().vec3() );
 		m_faceTex2local = matrix4_multiplied_by_matrix4( // adjust to have UV's z = 0: move the plane along m_tex2local.z() so that plane.dist() = 0
 		                      matrix4_translation_for_vec3(
-		                          vector4_to_vector3( m_tex2local.z() ) * ( m_plane.dist() - vector3_dot( m_plane.normal(), vector4_to_vector3( m_tex2local.t() ) ) )
-		                          / vector3_dot( m_plane.normal(), vector4_to_vector3( m_tex2local.z() ) )
+		                          m_tex2local.z().vec3() * ( m_plane.dist() - vector3_dot( m_plane.normal(), m_tex2local.t().vec3() ) )
+		                          / vector3_dot( m_plane.normal(), m_tex2local.z().vec3() )
 		                      ),
 		                      m_faceTex2local );
 		m_faceLocal2tex = matrix4_affine_inverse( m_faceTex2local );
@@ -5380,9 +5370,9 @@ private:
 		}
 
 		m_pivot2world = m_tex2local;
-		vector3_normalise( vector4_to_vector3( m_pivot2world.x() ) );
-		vector3_normalise( vector4_to_vector3( m_pivot2world.y() ) );
-		vector4_to_vector3( m_pivot2world.t() ) = m_origin;
+		vector3_normalise( m_pivot2world.x().vec3() );
+		vector3_normalise( m_pivot2world.y().vec3() );
+		m_pivot2world.t().vec3() = m_origin;
 		m_pivot2world0 = m_pivot2world;
 
 		{
@@ -5395,11 +5385,11 @@ private:
 			} );
 			bestDist = sqrt( bestDist );
 			m_circle2world = g_matrix4_identity;
-			ComputeAxisBase( m_plane.normal(), vector4_to_vector3( m_circle2world.x() ), vector4_to_vector3( m_circle2world.y() ) );
-			vector4_to_vector3( m_circle2world.x() ) *= bestDist;
-			vector4_to_vector3( m_circle2world.y() ) *= bestDist;
-			vector4_to_vector3( m_circle2world.z() ) = m_plane.normal();
-			vector4_to_vector3( m_circle2world.t() ) = m_origin;
+			ComputeAxisBase( m_plane.normal(), m_circle2world.x().vec3(), m_circle2world.y().vec3() );
+			m_circle2world.x().vec3() *= bestDist;
+			m_circle2world.y().vec3() *= bestDist;
+			m_circle2world.z().vec3() = m_plane.normal();
+			m_circle2world.t().vec3() = m_origin;
 		}
 
 		min -= Vector2( 5, 5 );
@@ -5907,13 +5897,13 @@ public:
 					}
 				} );
 				Vector3 result( uv_origin_start );
-				if( bestDistU * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) < 3 || snapHard ){
+				if( bestDistU * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){
 					result.y() = snapToU;
 				}
 				else{
 					result.y() = uv_origin.y();
 				}
-				if( bestDistV * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) < 3 || snapHard ){
+				if( bestDistV * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){
 					result.x() = snapToV;
 				}
 				else{
@@ -5945,7 +5935,7 @@ public:
 					}
 				} );
 				Vector3 result( uv_origin_start );
-				if( bestDist * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) < 3 || snapHard ){
+				if( bestDist * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){
 					result.y() = snapTo;
 				}
 				else{
@@ -5977,7 +5967,7 @@ public:
 					}
 				} );
 				Vector3 result( uv_origin_start );
-				if( bestDist * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) < 3 || snapHard ){
+				if( bestDist * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){
 					result.x() = snapTo;
 				}
 				else{
@@ -6045,31 +6035,31 @@ public:
 		case eCircle:
 			{
 				Vector3 from = m_start - m_origin;
-				constrain_to_axis( from, vector4_to_vector3( m_tex2local.z() ) );
+				constrain_to_axis( from, m_tex2local.z().vec3() );
 				Vector3 to = current - m_origin;
-				constrain_to_axis( to, vector4_to_vector3( m_tex2local.z() ) );
+				constrain_to_axis( to, m_tex2local.z().vec3() );
 				Matrix4 rot = g_matrix4_identity;
 				if( snap ){
 					matrix4_pivoted_rotate_by_axisangle( rot,
-					                                     vector4_to_vector3( m_tex2local.z() ),
-					                                     float_snapped( angle_for_axis( from, to, vector4_to_vector3( m_tex2local.z() ) ), static_cast<float>( c_pi / 12.0 ) ),
+					                                     m_tex2local.z().vec3(),
+					                                     float_snapped( angle_for_axis( from, to, m_tex2local.z().vec3() ), static_cast<float>( c_pi / 12.0 ) ),
 					                                     m_origin );
 				}
 				else{
 					matrix4_pivoted_rotate_by_axisangle( rot,
-					                                     vector4_to_vector3( m_tex2local.z() ),
-					                                     angle_for_axis( from, to, vector4_to_vector3( m_tex2local.z() ) ),
+					                                     m_tex2local.z().vec3(),
+					                                     angle_for_axis( from, to, m_tex2local.z().vec3() ),
 					                                     m_origin );
 				}
 				{	// snap
-					const Vector3 uvec = vector3_normalised( matrix4_transformed_direction( rot, vector4_to_vector3( m_tex2local.x() ) ) );
-					const Vector3 vvec = vector3_normalised( matrix4_transformed_direction( rot, vector4_to_vector3( m_tex2local.y() ) ) );
+					const Vector3 uvec = vector3_normalised( matrix4_transformed_direction( rot, m_tex2local.x().vec3() ) );
+					const Vector3 vvec = vector3_normalised( matrix4_transformed_direction( rot, m_tex2local.y().vec3() ) );
 					float bestDot = 0;
 					Vector3 bestTo;
 					bool V = false;
 					forEachEdge( [&]( const Vector3& point0, const Vector3& point1 ){
 						Vector3 vec( point1 - point0 );
-						constrain_to_axis( vec, vector4_to_vector3( m_tex2local.z() ) );
+						constrain_to_axis( vec, m_tex2local.z().vec3() );
 						const float dotU = fabs( vector3_dot( uvec, vec ) );
 						if( dotU > bestDot ){
 							bestDot = dotU;
@@ -6084,22 +6074,22 @@ public:
 						}
 					} );
 					if( bestDot > 0.9994f || snapHard ){
-						const Vector3 bestFrom = vector3_normalised( vector4_to_vector3( V? m_tex2local.y() : m_tex2local.x() ) );
+						const Vector3 bestFrom = vector3_normalised( V? m_tex2local.y().vec3() : m_tex2local.x().vec3() );
 						rot = g_matrix4_identity;
 						matrix4_pivoted_rotate_by_axisangle( rot,
-						                                     vector4_to_vector3( m_tex2local.z() ),
-						                                     angle_for_axis( bestFrom, bestTo, vector4_to_vector3( m_tex2local.z() ) ),
+						                                     m_tex2local.z().vec3(),
+						                                     angle_for_axis( bestFrom, bestTo, m_tex2local.z().vec3() ),
 						                                     m_origin );
 					}
 				}
 
 				Matrix4 faceTex2local = matrix4_multiplied_by_matrix4( rot, m_tex2local );
-				vector4_to_vector3( faceTex2local.x() ) = plane3_project_point( Plane3( m_plane.normal(), 0 ), vector4_to_vector3( faceTex2local.x() ), vector4_to_vector3( m_tex2local.z() ) );
-				vector4_to_vector3( faceTex2local.y() ) = plane3_project_point( Plane3( m_plane.normal(), 0 ), vector4_to_vector3( faceTex2local.y() ), vector4_to_vector3( m_tex2local.z() ) );
+				faceTex2local.x().vec3() = plane3_project_point( Plane3( m_plane.normal(), 0 ), faceTex2local.x().vec3(), m_tex2local.z().vec3() );
+				faceTex2local.y().vec3() = plane3_project_point( Plane3( m_plane.normal(), 0 ), faceTex2local.y().vec3(), m_tex2local.z().vec3() );
 				faceTex2local = matrix4_multiplied_by_matrix4( // adjust to have UV's z = 0: move the plane along m_tex2local.z() so that plane.dist() = 0
 				                    matrix4_translation_for_vec3(
-				                        vector4_to_vector3( m_tex2local.z() ) * ( m_plane.dist() - vector3_dot( m_plane.normal(), vector4_to_vector3( faceTex2local.t() ) ) )
-				                        / vector3_dot( m_plane.normal(), vector4_to_vector3( m_tex2local.z() ) )
+				                        m_tex2local.z().vec3() * ( m_plane.dist() - vector3_dot( m_plane.normal(), faceTex2local.t().vec3() ) )
+				                        / vector3_dot( m_plane.normal(), m_tex2local.z().vec3() )
 				                    ),
 				                    faceTex2local );
 				m_lines2world = m_pivotLines2world = faceTex2local;
@@ -6124,7 +6114,7 @@ public:
 					}
 				} );
 				Vector3 result( 1, uv_current.y(), 1 );
-				if( bestDist * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) < 3 || snapHard ){
+				if( bestDist * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){
 					result.y() = snapTo;
 				}
 				result.y() = ( result.y() - uv_origin.y() ) / ( uv_start.y() - uv_origin.y() );
@@ -6133,7 +6123,7 @@ public:
 					result.x() = fabs( result.y() );
 
 				/* prevent scaling to 0, limit at max 10 textures per world unit */
-				if( vector3_length_squared( vector4_to_vector3( m_tex2local.y() ) * result.y() ) < .01 )
+				if( vector3_length_squared( m_tex2local.y().vec3() * result.y() ) < .01 )
 					return;
 
 				Matrix4 scale = g_matrix4_identity;
@@ -6164,7 +6154,7 @@ public:
 					}
 				} );
 				Vector3 result( uv_current.x(), 1, 1 );
-				if( bestDist * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) < 3 || snapHard ){
+				if( bestDist * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){
 					result.x() = snapTo;
 				}
 				result.x() = ( result.x() - uv_origin.x() ) / ( uv_start.x() - uv_origin.x() );
@@ -6173,7 +6163,7 @@ public:
 					result.y() = fabs( result.x() );
 
 				/* prevent scaling to 0, limit at max 10 textures per world unit */
-				if( vector3_length_squared( vector4_to_vector3( m_tex2local.x() ) * result.x() ) < .01 )
+				if( vector3_length_squared( m_tex2local.x().vec3() * result.x() ) < .01 )
 					return;
 
 				Matrix4 scale = g_matrix4_identity;
@@ -6214,12 +6204,12 @@ public:
 				} );
 
 				Vector3 result( uv_current.x(), uv_current.y(), 1 );
-				if( bestDistU * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) < 3 || snapHard ){
+				if( bestDistU * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){
 					result.y() = snapToU;
 				}
 				result.y() = ( result.y() - uv_origin.y() ) / ( uv_start.y() - uv_origin.y() );
 
-				if( bestDistV * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) < 3 || snapHard ){
+				if( bestDistV * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){
 					result.x() = snapToV;
 				}
 				result.x() = ( result.x() - uv_origin.x() ) / ( uv_start.x() - uv_origin.x() );
@@ -6230,8 +6220,8 @@ public:
 				}
 
 				/* prevent scaling to 0, limit at max 10 textures per world unit */
-				if( vector3_length_squared( vector4_to_vector3( m_tex2local.x() ) * result.x() ) < .01 ||
-				    vector3_length_squared( vector4_to_vector3( m_tex2local.y() ) * result.y() ) < .01 )
+				if( vector3_length_squared( m_tex2local.x().vec3() * result.x() ) < .01 ||
+				    vector3_length_squared( m_tex2local.y().vec3() * result.y() ) < .01 )
 					return;
 
 				Matrix4 scale = g_matrix4_identity;
@@ -6255,7 +6245,7 @@ public:
 				skew[4] = uv_move.x() / ( m_selectedU->vertex - uv_origin ).y();
 
 				Matrix4 scale = matrix4_scale_for_vec3( // scale snap measurement space so that x/y = 1
-				                    Vector3( vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) / vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ),
+				                    Vector3( vector3_length( m_faceTex2local.x().vec3() ) / vector3_length( m_faceTex2local.y().vec3() ),
 				                             1, 1 ) );
 				const Vector3 skewed = vector3_normalised( matrix4_transformed_direction( matrix4_multiplied_by_matrix4( scale, skew ), g_vector3_axis_y ) );
 				matrix4_multiply_by_matrix4( scale, m_faceLocal2tex );
@@ -6301,7 +6291,7 @@ public:
 				skew[1] = uv_move.y() / ( m_selectedV->vertex - uv_origin ).x();
 
 				Matrix4 scale = matrix4_scale_for_vec3( // scale snap measurement space so that x/y = 1
-				                    Vector3( vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) / vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ),
+				                    Vector3( vector3_length( m_faceTex2local.x().vec3() ) / vector3_length( m_faceTex2local.y().vec3() ),
 				                             1, 1 ) );
 				const Vector3 skewed = vector3_normalised( matrix4_transformed_direction( matrix4_multiplied_by_matrix4( scale, skew ), g_vector3_axis_x ) );
 				matrix4_multiply_by_matrix4( scale, m_faceLocal2tex );
@@ -6369,16 +6359,16 @@ public:
 				functor( matrix4_transformed_point( m_faceLocal2tex, m_origin ) );
 
 				Vector3 result( uvmove );
-				if( bestDistU * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) < 3 || snapHard ){
+				if( bestDistU * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){
 					result.y() = snapMoveU;
 				}
-				if( bestDistV * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) < 3 || snapHard ){
+				if( bestDistV * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){
 					result.x() = snapMoveV;
 				}
 
 				if( snap ){
-					auto& smaller = fabs( uvmove.x() * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) ) <
-					                fabs( uvmove.y() * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) )? result.x() : result.y();
+					auto& smaller = fabs( uvmove.x() * vector3_length( m_faceTex2local.x().vec3() ) ) <
+					                fabs( uvmove.y() * vector3_length( m_faceTex2local.y().vec3() ) )? result.x() : result.y();
 					smaller = 0;
 				}
 
@@ -6446,16 +6436,16 @@ public:
 				}
 
 				Vector3 result( uvmove );
-				if( bestDistU * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) < 3 || snapHard ){
+				if( bestDistU * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){
 					result.y() = snapMoveU;
 				}
-				if( bestDistV * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) < 3 || snapHard ){
+				if( bestDistV * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){
 					result.x() = snapMoveV;
 				}
 
 				if( snap ){
-					auto& smaller = fabs( uvmove.x() * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) ) <
-					                fabs( uvmove.y() * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) )? result.x() : result.y();
+					auto& smaller = fabs( uvmove.x() * vector3_length( m_faceTex2local.x().vec3() ) ) <
+					                fabs( uvmove.y() * vector3_length( m_faceTex2local.y().vec3() ) )? result.x() : result.y();
 					smaller = 0;
 				}
 
@@ -6584,9 +6574,9 @@ class TransformOriginManipulator : public Manipulator, public ManipulatorSelecti
 			m_point( vertex3f_identity ) {
 		}
 		void render( RenderStateFlags state ) const {
-			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_point.colour );
-			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_point.vertex );
-			glDrawArrays( GL_POINTS, 0, 1 );
+			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_point.colour );
+			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_point.vertex );
+			gl().glDrawArrays( GL_POINTS, 0, 1 );
 		}
 		void setColour( const Colour4b & colour ) {
 			m_point.colour = colour;
@@ -7010,11 +7000,11 @@ public:
 				Matrix4 device2manip;
 				ConstructDevice2Manip( device2manip, m_pivot2world_start, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 				if( m_pivot_moving ){
-					m_manipulator->GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], m_bounds, vector4_to_vector3( GetPivot2World().t() ) );
+					m_manipulator->GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], m_bounds, GetPivot2World().t().vec3() );
 					m_undo_begun = false;
 				}
 				else if( movingOrigin ){
-					m_transformOrigin_manipulator.GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], m_bounds, vector4_to_vector3( GetPivot2World().t() ) );
+					m_transformOrigin_manipulator.GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], m_bounds, GetPivot2World().t().vec3() );
 				}
 			}
 
@@ -7340,16 +7330,16 @@ public:
 			m_rotation = rotation;
 			m_repeatableTransforms.m_rotation = rotation;
 			if( ( m_repeatableTransforms.m_rotationOriginSet = m_pivotIsCustom ) )
-				m_repeatableTransforms.m_rotationOrigin = vector4_to_vector3( m_pivot2world.t() );
+				m_repeatableTransforms.m_rotationOrigin = m_pivot2world.t().vec3();
 
 			if ( Mode() == eComponent ) {
-				Scene_Rotate_Component_Selected( GlobalSceneGraph(), m_rotation, vector4_to_vector3( m_pivot2world.t() ) );
+				Scene_Rotate_Component_Selected( GlobalSceneGraph(), m_rotation, m_pivot2world.t().vec3() );
 
 				matrix4_assign_rotation_for_pivot( m_pivot2world, m_component_selection.back() );
 			}
 			else
 			{
-				Scene_Rotate_Selected( GlobalSceneGraph(), m_rotation, vector4_to_vector3( m_pivot2world.t() ) );
+				Scene_Rotate_Selected( GlobalSceneGraph(), m_rotation, m_pivot2world.t().vec3() );
 
 				matrix4_assign_rotation_for_pivot( m_pivot2world, m_selection.back() );
 			}
@@ -7368,14 +7358,14 @@ public:
 			m_scale = scaling;
 			m_repeatableTransforms.m_scale = scaling;
 			if( ( m_repeatableTransforms.m_scaleOriginSet = m_pivotIsCustom ) )
-				m_repeatableTransforms.m_scaleOrigin = vector4_to_vector3( m_pivot2world.t() );
+				m_repeatableTransforms.m_scaleOrigin = m_pivot2world.t().vec3();
 
 			if ( Mode() == eComponent ) {
-				Scene_Scale_Component_Selected( GlobalSceneGraph(), m_scale, vector4_to_vector3( m_pivot2world.t() ) );
+				Scene_Scale_Component_Selected( GlobalSceneGraph(), m_scale, m_pivot2world.t().vec3() );
 			}
 			else
 			{
-				Scene_Scale_Selected( GlobalSceneGraph(), m_scale, vector4_to_vector3( m_pivot2world.t() ) );
+				Scene_Scale_Selected( GlobalSceneGraph(), m_scale, m_pivot2world.t().vec3() );
 			}
 
 			if( ManipulatorMode() == eSkew ){
@@ -7396,14 +7386,14 @@ public:
 			m_skew = skew;
 			m_repeatableTransforms.m_skew = skew;
 			if( ( m_repeatableTransforms.m_skewOriginSet = m_pivotIsCustom ) )
-				m_repeatableTransforms.m_skewOrigin = vector4_to_vector3( m_pivot2world.t() );
+				m_repeatableTransforms.m_skewOrigin = m_pivot2world.t().vec3();
 
 			if ( Mode() == eComponent ) {
-				Scene_Skew_Component_Selected( GlobalSceneGraph(), m_skew, vector4_to_vector3( m_pivot2world.t() ) );
+				Scene_Skew_Component_Selected( GlobalSceneGraph(), m_skew, m_pivot2world.t().vec3() );
 			}
 			else
 			{
-				Scene_Skew_Selected( GlobalSceneGraph(), m_skew, vector4_to_vector3( m_pivot2world.t() ) );
+				Scene_Skew_Selected( GlobalSceneGraph(), m_skew, m_pivot2world.t().vec3() );
 			}
 			m_pivot2world[skew.index] = skew.amount;
 			SceneChangeNotify();
@@ -7412,7 +7402,7 @@ public:
 
 	void rotateSelected( const Quaternion& rotation, bool snapOrigin = false ){
 		if( snapOrigin && !m_pivotIsCustom )
-			vector3_snap( vector4_to_vector3( m_pivot2world.t() ), GetSnapGridSize() );
+			vector3_snap( m_pivot2world.t().vec3(), GetSnapGridSize() );
 		startMove();
 		rotate( rotation );
 		freezeTransforms();
@@ -7424,7 +7414,7 @@ public:
 	}
 	void scaleSelected( const Vector3& scaling, bool snapOrigin = false ){
 		if( snapOrigin && !m_pivotIsCustom )
-			vector3_snap( vector4_to_vector3( m_pivot2world.t() ), GetSnapGridSize() );
+			vector3_snap( m_pivot2world.t().vec3(), GetSnapGridSize() );
 		startMove();
 		scale( scaling );
 		freezeTransforms();
@@ -7439,11 +7429,11 @@ public:
 			if( Mode() == ePrimitive )
 				clone();
 			if ( Mode() == eComponent ) {
-				GlobalSelectionSystem().foreachSelectedComponent( transform_component_selected( m_repeatableTransforms, vector4_to_vector3( m_pivot2world.t() ) ) );
+				GlobalSelectionSystem().foreachSelectedComponent( transform_component_selected( m_repeatableTransforms, m_pivot2world.t().vec3() ) );
 			}
 			else
 			{
-				GlobalSelectionSystem().foreachSelected( transform_selected( m_repeatableTransforms, vector4_to_vector3( m_pivot2world.t() ) ) );
+				GlobalSelectionSystem().foreachSelected( transform_selected( m_repeatableTransforms, m_pivot2world.t().vec3() ) );
 			}
 			freezeTransforms();
 		}
@@ -7458,7 +7448,7 @@ public:
 
 	void transformOriginTranslate( const Vector3& translation, const bool set[3] ){
 		m_pivot2world = m_pivot2world_start;
-		setCustomTransformOrigin( translation + vector4_to_vector3( m_pivot2world_start.t() ), set );
+		setCustomTransformOrigin( translation + m_pivot2world_start.t().vec3(), set );
 		SceneChangeNotify();
 	}
 
@@ -7695,9 +7685,9 @@ void Scene_Intersect( const View& view, const float device_point[2], const float
 		intersection = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, bestPointSelector.best().depth(), 1 ) ) );
 	}
 	else{
-		const Vector3 near = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, -1, 1 ) ) );
-		const Vector3 far = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, 1, 1 ) ) );
-		intersection = vector3_normalised( far - near ) * 256.f + near;
+		const Vector3 pnear = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, -1, 1 ) ) );
+		const Vector3 pfar = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, 1, 1 ) ) );
+		intersection = vector3_normalised( pfar - pnear ) * 256.f + pnear;
 	}
 }
 
@@ -7787,11 +7777,11 @@ inline AABB Instance_getPivotBounds( scene::Instance& instance ){
 	          || !node_is_group( instance.path().top() ) ) ) {
 		Editable* editable = Node_getEditable( instance.path().top() );
 		if ( editable != 0 ) {
-			return AABB( vector4_to_vector3( matrix4_multiplied_by_matrix4( instance.localToWorld(), editable->getLocalPivot() ).t() ), Vector3( 0, 0, 0 ) );
+			return AABB( matrix4_multiplied_by_matrix4( instance.localToWorld(), editable->getLocalPivot() ).t().vec3(), Vector3( 0, 0, 0 ) );
 		}
 		else
 		{
-			return AABB( vector4_to_vector3( instance.localToWorld().t() ), Vector3( 0, 0, 0 ) );
+			return AABB( instance.localToWorld().t().vec3(), Vector3( 0, 0, 0 ) );
 		}
 	}
 
@@ -7906,7 +7896,7 @@ void RadiantSelectionSystem::ConstructPivot() const {
 			m_pivot2world = matrix4_translation_for_vec3( object_pivot );
 		}
 		else{
-//			m_pivot2world = matrix4_translation_for_vec3( vector4_to_vector3( m_pivot2world.t() ) );
+//			m_pivot2world = matrix4_translation_for_vec3( m_pivot2world.t().vec3() );
 			matrix4_assign_rotation( m_pivot2world, g_matrix4_identity );
 		}
 
@@ -7997,7 +7987,7 @@ void RadiantSelectionSystem::renderSolid( Renderer& renderer, const VolumeTest& 
 bool g_bLeftMouseClickSelector = true;
 
 void SelectionSystem_constructPreferences( PreferencesPage& page ){
-	page.appendSpinner( "Selector size (pixels)", g_SELECT_EPSILON, 8, 2, 64 );
+	page.appendSpinner( "Selector size (pixels)", g_SELECT_EPSILON, 2, 64 );
 	page.appendCheckBox( "", "Prefer point entities in 2D", getSelectionSystem().m_bPreferPointEntsIn2D );
 	page.appendCheckBox( "", "Left mouse click tunnel selector", g_bLeftMouseClickSelector );
 	{

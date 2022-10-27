@@ -25,7 +25,6 @@
 /// \brief Debugging macros for fatal error/assert messages.
 
 #include "stream/textstream.h"
-#include "warnings.h"
 #include "generic/static.h"
 
 #if defined( _MSC_VER ) && ( defined( _M_IX86 ) || defined( _M_AMD64 ) )

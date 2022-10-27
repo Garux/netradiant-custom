@@ -50,8 +50,6 @@ DVisDrawer::~DVisDrawer(){
 	destroyShaders();
 
 	ClearPoints();
-
-	g_VisView = NULL;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -87,15 +85,15 @@ void DVisDrawer::destroyShaders(){
 }
 
 void DVisDrawer::render( RenderStateFlags state ) const {
-	glEnable( GL_POLYGON_OFFSET_FILL );
+	gl().glEnable( GL_POLYGON_OFFSET_FILL );
 	for( const auto surf : *m_list ){
 		const DMetaSurf& s = *surf;
-		glColor4f( s.colour[0], s.colour[1], s.colour[2], 0.5f );
-		glVertexPointer( 3, GL_FLOAT, sizeof( vec3_t ), s.verts );
-		glDrawElements( GL_TRIANGLES, GLsizei( s.indicesN ), GL_UNSIGNED_INT, s.indices );
+		gl().glColor4f( s.colour[0], s.colour[1], s.colour[2], 0.5f );
+		gl().glVertexPointer( 3, GL_FLOAT, sizeof( vec3_t ), s.verts );
+		gl().glDrawElements( GL_TRIANGLES, GLsizei( s.indicesN ), GL_UNSIGNED_INT, s.indices );
 	}
-	glDisable( GL_POLYGON_OFFSET_FILL );
-	glColor4f( 1, 1, 1, 1 );
+	gl().glDisable( GL_POLYGON_OFFSET_FILL );
+	gl().glColor4f( 1, 1, 1, 1 );
 }
 
 void DVisDrawer::renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {

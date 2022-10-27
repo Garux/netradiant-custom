@@ -21,10 +21,7 @@
 
 #pragma once
 
-typedef struct _GtkMenuItem GtkMenuItem;
-GtkMenuItem* create_plugins_menu();
+void create_plugins_menu( class QMenuBar *menubar );
 
-typedef struct _GtkMenu GtkMenu;
-typedef struct _GtkMenuItem GtkMenuItem;
 void PluginsMenu_populate();
 void PluginsMenu_clear();

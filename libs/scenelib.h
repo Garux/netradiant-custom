@@ -24,7 +24,6 @@
 #include "iscenegraph.h"
 #include "iselection.h"
 
-#include "warnings.h"
 #include <cstddef>
 #include <cstring>
 

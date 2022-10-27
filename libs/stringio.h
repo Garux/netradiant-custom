@@ -222,7 +222,7 @@ inline bool string_parse_size( const char* string, std::size_t& i ){
 #define RETURN_FALSE_IF_FAIL( expression ) do{ if ( !expression ) {return false; } }while( 0 )
 
 inline void Tokeniser_unexpectedError( Tokeniser& tokeniser, const char* token, const char* expected ){
-	globalErrorStream() << Unsigned( tokeniser.getLine() ) << ":" << Unsigned( tokeniser.getColumn() ) << ": parse error at '" << ( token != 0 ? token : "#EOF" ) << "': expected '" << expected << "'\n";
+	globalErrorStream() << tokeniser.getLine() << ":" << tokeniser.getColumn() << ": parse error at '" << ( token != 0 ? token : "#EOF" ) << "': expected '" << expected << "'\n";
 }
 
 
@@ -233,7 +233,7 @@ inline bool Tokeniser_getFloat( Tokeniser& tokeniser, float& f ){
 	}
 	//fallback for 1.#IND 1.#INF 1.#QNAN cases, happening sometimes after texture locking algorithms
 	else if ( token != 0 && strstr( token, ".#" ) ) {
-		globalWarningStream() << "Warning: " << Unsigned( tokeniser.getLine() ) << ":" << Unsigned( tokeniser.getColumn() ) << ": expected parse problem at '" << token << "': wanted '#number'\nProcessing anyway\n";
+		globalWarningStream() << "Warning: " << tokeniser.getLine() << ":" << tokeniser.getColumn() << ": expected parse problem at '" << token << "': wanted '#number'\nProcessing anyway\n";
 //		*strstr( token, ".#" ) = '\0';
 		return true;
 	}

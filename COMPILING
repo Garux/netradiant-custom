@@ -27,8 +27,8 @@ environment:
 - svn >= 1.1 (some build steps use svn)
 
 dependencies:
-- gtk+ >= 2.4.0 (requires glib, atk, pango, iconv, etc)
-- gtkglext >= 1.0.0 (requires opengl)
+- qt5
+- glib
 - libxml2 >= 2.0.0
 - zlib >= 1.2.0 (for archivezip module)
 - libpng >= 1.2.0 (for imagepng module)
@@ -67,7 +67,7 @@ run:
 Switch into the install folder, and run NetRadiant.app
 
 
-Win32 (using MSYS2)(recommended)
+Win32 (using MSYS2)
 ==================
 
 environment:
@@ -75,9 +75,9 @@ environment:
 - from msys2_shell:
   pacman -S --needed base-devel
     32 bit:
-  pacman -S --needed mingw-w64-i686-{toolchain,gtk2,gtkglext}
+  pacman -S --needed mingw-w64-i686-{toolchain,qt5-base,libxml2}
     64 bit:
-  pacman -S mingw-w64-x86_64-{toolchain,gtk2,gtkglext}
+  pacman -S --needed mingw-w64-x86_64-{toolchain,qt5-base,libxml2}
     these are only strictly required for gamepacks:
   pacman -S --needed unzip svn git
 
@@ -90,31 +90,3 @@ build:
   make MAKEFILE_CONF=msys2-Makefile.conf DEPENDENCIES_CHECK=off DOWNLOAD_GAMEPACKS=no INSTALL_DLLS=no BUILD=debug RADIANT_ABOUTMSG="NetRadiant custom dev build" -j$(nproc)
 run:
 - in the "install" directory, double click radiant.exe
-
-
-Win32 (using MinGW)
-==================
-
-environment:
-- MinGW (http://www.mingw.org/wiki/Getting_Started)
-  Install this to c:\mingw, and select the components C compiler, C++ compiler
-  and MSYS Basic System
-- Start the MSYS shell once, then exit it
-- Prepackaged Radiant dependencies (Gtk and other stuff):
-  http://www.icculus.org/netradiant/files/netradiant-dependencies-mingw32-20101211-7z.exe
-  Extract this one to
-  c:\mingw\msys\1.0\home\username
-  (if you do this with 7zip, keep the "netradiant-dependencies-mingw32" folder
-  name of the contents)
-- now download the source from the MSYS shell, if you don't already have it:
-  ~/netradiant-dependencies-mingw32/util/bin/git clone git://git.icculus.org/divverent/netradiant.git
-
-build:
-- Start the MSYS shell
-- Switch to the directory with NetRadiant-custom source
-- make MAKEFILE_CONF=mingw-Makefile.conf
-
-run:
-- in the "install" directory, double click radiant.exe
-- if you get a DLL not found error, copy the DLL from either c:\mingw\bin or
-  from c:\mingw\msys\1.0\bin to the "install" directory
