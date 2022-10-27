@@ -530,10 +530,10 @@ protected:
 			g_pParentWnd->SetActiveXY( &m_xywnd );
 		}
 		if ( event->angleDelta().y() > 0 ) {
-			m_xywnd.ZoomInWithMouse( event->position().x(), event->position().y() );
+			m_xywnd.ZoomInWithMouse( event->x(), event->y() );
 		}
 		else if ( event->angleDelta().y() < 0 ) {
-			m_xywnd.ZoomOutWithMouse( event->position().x(), event->position().y() );
+			m_xywnd.ZoomOutWithMouse( event->x(), event->y() );
 		}
 	}
 
