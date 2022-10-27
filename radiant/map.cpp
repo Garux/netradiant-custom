@@ -922,7 +922,7 @@ void DoMapInfo(){
 		{
 			auto item = new QTreeWidgetItem( tree );
 			item->setData( 0, Qt::ItemDataRole::DisplayRole, name.c_str() );
-			item->setData( 1, Qt::ItemDataRole::DisplayRole, count );
+			item->setData( 1, Qt::ItemDataRole::DisplayRole, int( count ) );
 		}
 	}
 

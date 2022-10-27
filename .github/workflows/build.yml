@@ -75,7 +75,7 @@ jobs:
 
     - name: Build
       run: |
-        make -j 4 DOWNLOAD_GAMEPACKS=no CXXFLAGS="-Wno-deprecated-declarations"
+        make -j 4 DOWNLOAD_GAMEPACKS=no CXXFLAGS="-Wno-deprecated-copy"
         wget https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
         unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
 

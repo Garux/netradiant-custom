@@ -65,6 +65,7 @@
 #include "signal/isignal.h"
 #include "os/path.h"
 #include "os/file.h"
+#include <glib.h>
 #include "eclasslib.h"
 #include "moduleobservers.h"
 
