@@ -135,7 +135,7 @@ void CPortals::Load(){
 
 	FILE *in;
 
-	in = fopen( fn, "rt" );
+	in = fopen( fn.c_str(), "rt" );
 
 	if ( in == NULL ) {
 		globalErrorStream() << "  ERROR - could not open file.\n";

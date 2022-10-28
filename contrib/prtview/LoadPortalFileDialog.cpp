@@ -24,6 +24,7 @@
 
 #include "stream/stringstream.h"
 #include "convert.h"
+#include "os/path.h"
 
 #include "qerplugin.h"
 
@@ -51,7 +52,6 @@ bool DoLoadPortalFileDialog(){
 		auto vbox = new QVBoxLayout( &dialog );
 		{
 			vbox->addWidget( line = new QLineEdit );
-			line->setMaxLength( std::size( portals.fn ) - 1 );
 			auto button = line->addAction( QApplication::style()->standardIcon( QStyle::SP_FileDialogStart ), QLineEdit::ActionPosition::TrailingPosition );
 			QObject::connect( button, &QAction::triggered, [line](){
 				if ( const char* filename = GlobalRadiant().m_pfnFileDialog( g_pRadiantWnd, true, "Locate portal (.prt) file", line->text().toLatin1().constData(), 0, true, false, false ) )
@@ -71,18 +71,14 @@ bool DoLoadPortalFileDialog(){
 	}
 
 
-	strcpy( portals.fn, GlobalRadiant().getMapName() );
-	char* fn = strrchr( portals.fn, '.' );
-	if ( fn != NULL ) {
-		strcpy( fn, ".prt" );
-	}
+	portals.fn = StringOutputStream( 256 )( PathExtensionless( GlobalRadiant().getMapName() ), ".prt" );
 
-	line->setText( portals.fn );
+	line->setText( portals.fn.c_str() );
 	check3d->setChecked( portals.show_3d );
 	check2d->setChecked( portals.show_2d );
 
 	if ( dialog.exec() ) {
-		strcpy( portals.fn, line->text().toLatin1().constData() );
+		portals.fn = line->text().toLatin1().constData();
 
 		portals.Purge();
 

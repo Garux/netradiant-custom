@@ -22,6 +22,7 @@
 #include "irender.h"
 #include "renderable.h"
 #include "math/vector.h"
+#include "string/string.h"
 #include <vector>
 
 
@@ -44,12 +45,6 @@ public:
 
 	bool Build( char *def );
 };
-
-#ifdef PATH_MAX
-#define PRTVIEW_PATH_MAX PATH_MAX
-#else
-#define PRTVIEW_PATH_MAX 260
-#endif
 
 using PackedColour = std::uint32_t;
 #define RGB_PACK( r, g, b ) ( (std::uint32_t)( ( (std::uint8_t)( r ) | ( (std::uint16_t)( (std::uint8_t)( g ) ) << 8 ) ) | ( ( (std::uint32_t)(std::uint8_t)( b ) ) << 16 ) ) )
@@ -75,7 +70,7 @@ public:
 
 	void FixColors();
 
-	char fn[PRTVIEW_PATH_MAX];
+	CopiedString fn;
 
 	int zbuffer;
 	bool polygons;
