@@ -1133,6 +1133,20 @@ void Scene_PatchGetTexdef_Selected( scene::Graph& graph, TextureProjection &proj
 	}
 }
 
+bool Scene_PatchGetShaderTexdef_Selected( scene::Graph& graph, CopiedString& name, TextureProjection &projection ){
+	Patch* patch = nullptr;
+	if ( !( patch = Scene_GetUltimateSelectedVisiblePatch() ) )
+		Scene_forEachSelectedPatch( [&patch]( PatchInstance& p ){ if( !patch ) patch = &p.getPatch(); } );
+	if( patch ){
+		name = patch->GetShader();
+		PatchTexdefConstructor c( patch );
+		if( c.valid() )
+			projection.m_brushprimit_texdef = c.m_bp;
+		return true;
+	}
+	return false;
+}
+
 void Patch_SetTexdef( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
 	Scene_forEachVisibleSelectedPatch( [hShift, vShift, hScale, vScale, rotation]( Patch& patch ){
 		PatchTexdefConstructor c( &patch );

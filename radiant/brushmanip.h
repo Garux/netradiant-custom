@@ -51,6 +51,7 @@ void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const Texture
 void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
 void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
 void Scene_BrushGetTexdef_Selected( scene::Graph& graph, TextureProjection& projection );
+bool Scene_BrushGetShaderTexdef_Selected( scene::Graph& graph, CopiedString& shader, TextureProjection& projection );
 void Scene_BrushGetTexdef_Component_Selected( scene::Graph& graph, TextureProjection& projection );
 void Scene_BrushSetFlags_Selected( scene::Graph& graph, const ContentsFlagsValue& flags );
 void Scene_BrushSetFlags_Component_Selected( scene::Graph& graph, const ContentsFlagsValue& flags );

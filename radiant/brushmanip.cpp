@@ -908,6 +908,21 @@ void Scene_BrushGetTexdef_Selected( scene::Graph& graph, TextureProjection& proj
 	Scene_ForEachSelectedBrush_ForEachFace( graph, FaceGetTexdef( projection ) );
 }
 
+bool Scene_BrushGetShaderTexdef_Selected( scene::Graph& graph, CopiedString& shader, TextureProjection& projection ){
+	BrushInstance *brush = nullptr;
+	if ( GlobalSelectionSystem().countSelected() == 0
+	|| !( brush = Instance_getBrush( GlobalSelectionSystem().ultimateSelected() ) ) ) {
+		Scene_forEachSelectedBrush( [&brush]( BrushInstance& b ){ if( !brush ) brush = &b; } );
+	}
+	if( brush && !brush->getBrush().empty() ){
+		Face *face = brush->getBrush().begin()->get();
+		shader = face->GetShader();
+		face->GetTexdef( projection );
+		return true;
+	}
+	return false;
+}
+
 void Scene_BrushGetTexdef_Component_Selected( scene::Graph& graph, TextureProjection& projection ){
 #if 1
 	if ( !g_SelectedFaceInstances.empty() ) {

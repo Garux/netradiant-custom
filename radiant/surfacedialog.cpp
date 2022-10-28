@@ -251,7 +251,7 @@ void SurfaceInspector_SetCurrent_FromSelected(){
 
 			CopiedString name;
 			Scene_BrushGetShader_Component_Selected( GlobalSceneGraph(), name );
-			if ( string_not_empty( name.c_str() ) ) {
+			if ( !name.empty() ) {
 				SurfaceInspector_SetSelectedShader( name.c_str() );
 			}
 
@@ -263,18 +263,12 @@ void SurfaceInspector_SetCurrent_FromSelected(){
 		{
 			TextureProjection projection;
 			CopiedString name;
-			Scene_BrushGetShader_Selected( GlobalSceneGraph(), name );
-			if ( string_empty( name.c_str() ) ) {
-				s_patch_mode = true;
-				Scene_PatchGetShader_Selected( GlobalSceneGraph(), name );
-				Scene_PatchGetTexdef_Selected( GlobalSceneGraph(), projection );
-			}
-			else{
-				s_patch_mode = false;
-				Scene_BrushGetTexdef_Selected( GlobalSceneGraph(), projection );
-			}
+			s_patch_mode = false;
+			if( !Scene_BrushGetShaderTexdef_Selected( GlobalSceneGraph(), name, projection ) )
+				if( Scene_PatchGetShaderTexdef_Selected( GlobalSceneGraph(), name, projection ) )
+					s_patch_mode = true;
 			SurfaceInspector_SetSelectedTexdef( projection );
-			if ( string_not_empty( name.c_str() ) ) {
+			if ( !name.empty() ) {
 				SurfaceInspector_SetSelectedShader( name.c_str() );
 			}
 
