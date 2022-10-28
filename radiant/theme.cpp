@@ -31,7 +31,7 @@
 
 
 enum class ETheme{
-	Light = 0,
+	Default = 0,
 	Dark,
 	Darker
 };
@@ -76,7 +76,7 @@ void theme_set( ETheme theme ){
 	}
 	)";
 
-	if( theme == ETheme::Light ){
+	if( theme == ETheme::Default ){
 		qApp->setPalette( default_palette );
 	}
 	else if( theme == ETheme::Dark ){
@@ -142,7 +142,7 @@ void theme_contruct_menu( class QMenu *menu ){
 	m->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
 	auto *group = s_theme_group = new QActionGroup( m );
 	{
-		auto *a = m->addAction( "Light" );
+		auto *a = m->addAction( "Default" );
 		a->setCheckable( true );
 		group->addAction( a );
 	}
