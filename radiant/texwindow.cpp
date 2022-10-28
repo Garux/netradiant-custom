@@ -1633,6 +1633,8 @@ protected:
 	void initializeGL() override
 	{
 		glwidget_context_created( *this );
+		// show definitely after gl init, otherwise crash
+		TextureBrowser_ShowStartupShaders();
 	}
 	void resizeGL( int w, int h ) override
 	{

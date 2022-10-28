@@ -521,10 +521,6 @@ int main( int argc, char* argv[] ){
 	{
 		Map_New();
 	}
-	// load up shaders now that we have the map loaded
-	// eviltypeguy
-	TextureBrowser_ShowStartupShaders();
-
 
 	remove_local_pid();
 

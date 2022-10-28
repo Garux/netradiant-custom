@@ -29,7 +29,6 @@ QWidget* TextureBrowser_constructWindow( QWidget* toplevel );
 void TextureBrowser_destroyWindow();
 
 
-void TextureBrowser_ShowStartupShaders();
 const char* TextureBrowser_GetSelectedShader();
 
 void TextureBrowser_Construct();
