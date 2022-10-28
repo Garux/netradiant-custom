@@ -876,10 +876,10 @@ public:
 	}
 
 // IShaders implementation -----------------
-	void IncRef(){
+	void IncRef() override {
 		++m_refcount;
 	}
-	void DecRef(){
+	void DecRef() override {
 		ASSERT_MESSAGE( m_refcount != 0, "shader reference-count going below zero" );
 		if ( --m_refcount == 0 ) {
 			delete this;
@@ -891,7 +891,7 @@ public:
 	}
 
 // get/set the qtexture_t* Radiant uses to represent this shader object
-	qtexture_t* getTexture() const {
+	qtexture_t* getTexture() const override {
 		return m_pTexture;
 	}
 	qtexture_t* getSkyBox() override {
@@ -901,52 +901,52 @@ public:
 
 		return m_pSkyBox;
 	}
-	qtexture_t* getDiffuse() const {
+	qtexture_t* getDiffuse() const override {
 		return m_pDiffuse;
 	}
-	qtexture_t* getBump() const {
+	qtexture_t* getBump() const override {
 		return m_pBump;
 	}
-	qtexture_t* getSpecular() const {
+	qtexture_t* getSpecular() const override {
 		return m_pSpecular;
 	}
 // get shader name
-	const char* getName() const {
+	const char* getName() const override {
 		return m_Name.c_str();
 	}
-	bool IsInUse() const {
+	bool IsInUse() const override {
 		return m_bInUse;
 	}
-	void SetInUse( bool bInUse ){
+	void SetInUse( bool bInUse ) override {
 		m_bInUse = bInUse;
 		g_ActiveShadersChangedNotify();
 	}
 // get the shader flags
-	int getFlags() const {
+	int getFlags() const override {
 		return m_template.m_nFlags;
 	}
 // get the transparency value
-	float getTrans() const {
+	float getTrans() const override {
 		return m_template.m_fTrans;
 	}
 // test if it's a true shader, or a default shader created to wrap around a texture
-	bool IsDefault() const {
+	bool IsDefault() const override {
 		return string_empty( m_filename );
 	}
 // get the alphaFunc
-	void getAlphaFunc( EAlphaFunc *func, float *ref ) {
+	void getAlphaFunc( EAlphaFunc *func, float *ref ) override {
 		*func = m_template.m_AlphaFunc;
 		*ref = m_template.m_AlphaRef;
 	};
-	BlendFunc getBlendFunc() const {
+	BlendFunc getBlendFunc() const override {
 		return m_blendFunc;
 	}
 // get the cull type
-	ECull getCull(){
+	ECull getCull() override {
 		return m_template.m_Cull;
 	};
 // get shader file name (ie the file where this one is defined)
-	const char* getShaderFileName() const {
+	const char* getShaderFileName() const override {
 		return m_filename;
 	}
 // -----------------------------------------
@@ -1090,20 +1090,20 @@ public:
 	typedef std::vector<MapLayer> MapLayers;
 	MapLayers m_layers;
 
-	const ShaderLayer* firstLayer() const {
+	const ShaderLayer* firstLayer() const override {
 		if ( m_layers.empty() ) {
 			return 0;
 		}
 		return &m_layers.front();
 	}
-	void forEachLayer( const ShaderLayerCallback& callback ) const {
+	void forEachLayer( const ShaderLayerCallback& callback ) const override {
 		for ( MapLayers::const_iterator i = m_layers.begin(); i != m_layers.end(); ++i )
 		{
 			callback( *i );
 		}
 	}
 
-	qtexture_t* lightFalloffImage() const {
+	qtexture_t* lightFalloffImage() const override {
 		if ( !m_template.m_lightFalloffImage.empty() ) {
 			return m_pLightFalloffImage;
 		}

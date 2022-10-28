@@ -623,7 +623,7 @@ static void FinishShader( shaderInfo_t *si ){
 	}
 
 	/* find pixel coordinates best matching the average color of the image */
-	float bestDist = 99999999;
+	float bestDist = 99999999.f;
 	const Vector2 o( 1.0f / si->shaderImage->width, 1.0f / si->shaderImage->height );
 	for ( y = 0, st[ 1 ] = 0.0f; y < si->shaderImage->height; y++, st[ 1 ] += o[ 1 ] )
 	{

@@ -1701,7 +1701,7 @@ static float DirtForSample( trace_t *trace ){
 	}
 
 	/* apply gain (does this even do much? heh) */
-	outDirt = std::min( 1.0, pow( gatherDirt / ( numDirtVectors + 1 ), dirtGain ) );
+	outDirt = std::min( 1.f, std::pow( gatherDirt / ( numDirtVectors + 1 ), dirtGain ) );
 
 	/* apply scale */
 	outDirt *= dirtScale;

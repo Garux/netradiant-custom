@@ -87,7 +87,7 @@ struct VFS_PAKFILE
 	const CopiedString   name;
 	const unz_s zipinfo;
 	VFS_PAK& pak;
-	const guint32 size;
+	const unsigned long size;
 };
 
 // =============================================================================

@@ -116,7 +116,7 @@ void item_model_foreach( Functor f, QAbstractItemModel* model, QModelIndex paren
 }
 
 void EntityList_UpdateSelection( QAbstractItemModel* model, QTreeView* view ){
-	item_model_foreach( [model, view]( QModelIndex &index ){
+	item_model_foreach( [view]( QModelIndex &index ){
 		scene::Instance* instance = static_cast<scene::Instance*>( index.data( c_ItemDataRole_Instance ).value<void*>() );
 		if ( Selectable* selectable = Instance_getSelectable( *instance ) ) {
 			view->selectionModel()->select( index, selectable->isSelected()

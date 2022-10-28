@@ -225,7 +225,7 @@ void MapCoordinator(){
 					{
 						auto button = new QPushButton( "Get optimal mapcoords" );
 						form->addWidget( button );
-						QObject::connect( button, &QPushButton::clicked, [&](){
+						QObject::connect( button, &QPushButton::clicked, [&, calc_min = calc_min, calc_max = calc_max](){
 							spin_minX->setValue( calc_min.x() );
 							spin_minY->setValue( calc_max.y() );
 							spin_maxX->setValue( calc_max.x() );

@@ -1799,10 +1799,10 @@ public:
 	}
 	bool isSelected() const {
 		return m_selectable_x.isSelected()
-		     | m_selectable_y.isSelected()
-		     | m_selectable_z.isSelected()
-		     | m_selectable_screen.isSelected()
-		     | m_selectable_sphere.isSelected();
+		    || m_selectable_y.isSelected()
+		    || m_selectable_z.isSelected()
+		    || m_selectable_screen.isSelected()
+		    || m_selectable_sphere.isSelected();
 	}
 };
 
