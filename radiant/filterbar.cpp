@@ -55,6 +55,7 @@ class CommonFunc
 public:
 	static inline CommonFunc* m_recentFunc{};
 	virtual void exec() = 0;
+	virtual ~CommonFunc() = default;
 };
 
 class CommonFunc_tex : public CommonFunc
