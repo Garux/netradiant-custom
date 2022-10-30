@@ -440,7 +440,7 @@ void EmitFogs(){
 			/* find visible axial side */
 			for ( size_t j = 6; j-- > 0; ) // prioritize +Z (index 5) then -Z (index 4) in ambiguous case; fogged pit is assumed as most likely case
 			{
-				if ( !fog.brush->sides[ j ].visibleHull.empty() ) {
+				if ( !fog.brush->sides[ j ].visibleHull.empty() && !( fog.brush->sides[ j ].compileFlags & C_NODRAW ) ) {
 					Sys_Printf( "Fog %zu has visible side %zu\n", i, j );
 					bspFog.visibleSide = j;
 					break;
@@ -450,7 +450,7 @@ void EmitFogs(){
 			if( bspFog.visibleSide < 0 ){
 				for ( size_t j = 6; j < fog.brush->sides.size(); ++j )
 				{
-					if ( !fog.brush->sides[ j ].visibleHull.empty() ) {
+					if ( !fog.brush->sides[ j ].visibleHull.empty() && !( fog.brush->sides[ j ].compileFlags & C_NODRAW ) ) {
 						Sys_Printf( "Fog %zu has visible side %zu\n", i, j );
 						bspFog.visibleSide = j;
 						break;

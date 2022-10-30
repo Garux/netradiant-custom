@@ -152,7 +152,7 @@ textures/skies/xtoxicsky_dm9
 <p>Fog volume brushes must obey the following rules:</p>
 <ul>
 	<li>The fog volume can only have one surface visible (from outside the fog).</li>
-	<li>Fog must be made of one brush. It cannot be made of adjacent brushes.</li>
+	<li>Normally fog must be made of one brush. It can be made of adjacent brushes with nodraw shader on junctions, however each brush takes ingame fog slot, count of which is limited, e.g. 31 in Q3A.</li>
 </ul>
 <blockquote>
 	<h4>Design Notes:</h4>
