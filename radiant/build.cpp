@@ -848,6 +848,7 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 
 	{
 		auto grid = new QGridLayout( &dialog );
+		grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 		{
 			auto buttons = new QDialogButtonBox;
 			buttons->setOrientation( Qt::Orientation::Vertical );
