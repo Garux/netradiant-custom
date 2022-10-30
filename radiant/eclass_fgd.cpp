@@ -88,11 +88,30 @@ void EntityClassFGD_forEach( EntityClassVisitor& visitor ){
 	}
 }
 
+#define PARSE_ERROR "error parsing fgd entity class definition at line " << tokeniser.getLine() << ':' << tokeniser.getColumn()
+
+static bool s_fgd_warned = false;
+
 inline bool EntityClassFGD_parseToken( Tokeniser& tokeniser, const char* token ){
-	return string_equal( tokeniser.getToken(), token );
+	const bool w = s_fgd_warned;
+	const bool ok = string_equal( tokeniser.getToken(), token );
+	if( !ok ){
+		globalErrorStream() << PARSE_ERROR << "\nExpected " << makeQuoted( token ) << '\n';
+		s_fgd_warned = true;
+	}
+	return w || ok;
 }
 
-#define PARSE_ERROR "error parsing entity class definition"
+#define ERROR_FGD( message )\
+do{\
+	if( s_fgd_warned )\
+		globalErrorStream() << message << '\n';\
+	else{\
+		ERROR_MESSAGE( message );\
+		s_fgd_warned = true;\
+	}\
+}while( 0 )
+
 
 void EntityClassFGD_parseSplitString( Tokeniser& tokeniser, CopiedString& string ){
 	StringOutputStream buffer( 256 );
@@ -253,7 +272,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 		}
 		else
 		{
-			ERROR_MESSAGE( PARSE_ERROR );
+			ERROR_FGD( PARSE_ERROR );
 		}
 	}
 
@@ -504,7 +523,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 		}
 		else
 		{
-			ERROR_MESSAGE( "unknown key type: " << makeQuoted( type ) );
+			ERROR_FGD( "unknown key type: " << makeQuoted( type ) );
 		}
 		tokeniser.nextLine();
 	}
@@ -531,18 +550,18 @@ void EntityClassFGD_parse( TextInputStream& inputStream, const char* path ){
 		if ( blockType == 0 ) {
 			break;
 		}
-		if ( string_equal( blockType, "@SolidClass" ) ) {
+		if ( string_equal_nocase( blockType, "@SolidClass" ) ) {
 			EntityClassFGD_parseClass( tokeniser, false, false );
 		}
-		else if ( string_equal( blockType, "@BaseClass" ) ) {
+		else if ( string_equal_nocase( blockType, "@BaseClass" ) ) {
 			EntityClassFGD_parseClass( tokeniser, false, true );
 		}
-		else if ( string_equal( blockType, "@PointClass" )
+		else if ( string_equal_nocase( blockType, "@PointClass" )
 		       // hl2 below
-		       || string_equal( blockType, "@KeyFrameClass" )
-		       || string_equal( blockType, "@MoveClass" )
-		       || string_equal( blockType, "@FilterClass" )
-		       || string_equal( blockType, "@NPCClass" ) ) {
+		       || string_equal_nocase( blockType, "@KeyFrameClass" )
+		       || string_equal_nocase( blockType, "@MoveClass" )
+		       || string_equal_nocase( blockType, "@FilterClass" )
+		       || string_equal_nocase( blockType, "@NPCClass" ) ) {
 			EntityClassFGD_parseClass( tokeniser, true, false );
 		}
 		// hl2 below
@@ -560,7 +579,7 @@ void EntityClassFGD_parse( TextInputStream& inputStream, const char* path ){
 		}
 		else
 		{
-			ERROR_MESSAGE( "unknown block type: " << makeQuoted( blockType ) );
+			ERROR_FGD( "unknown block type: " << makeQuoted( blockType ) );
 		}
 	}
 
