@@ -105,7 +105,7 @@ static QCheckBox* new_checkbox( const char *name, bool& param ){
 }
 
 void DoConfigDialog(){
-	auto dialog = new QDialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	auto dialog = new QDialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog->setWindowTitle( "Portal Viewer Configuration" );
 	dialog->setAttribute( Qt::WidgetAttribute::WA_DeleteOnClose );
 

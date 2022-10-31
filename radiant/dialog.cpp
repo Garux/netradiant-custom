@@ -292,7 +292,7 @@ void Dialog::HideDlg(){
 void Dialog::Create( QWidget *parent ){
 	ASSERT_MESSAGE( m_window == 0, "dialog cannot be constructed" );
 
-	m_window = new QDialog( parent, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	m_window = new QDialog( parent, Qt::Dialog | Qt::WindowCloseButtonHint );
 	BuildDialog();
 }
 

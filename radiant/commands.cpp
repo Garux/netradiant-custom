@@ -328,7 +328,7 @@ void accelerator_edit( QTreeWidgetItem *item ){
 }
 
 void DoCommandListDlg(){
-	QDialog dialog( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Mapped Commands" );
 
 	auto grid = new QGridLayout( &dialog );

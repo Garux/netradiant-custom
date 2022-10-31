@@ -828,7 +828,7 @@ void Patch_constructMenu( QMenu* menu ){
 #include <QRadioButton>
 
 void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, int defcols, int maxrows, int maxcols ){
-	QDialog dialog( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Patch density" );
 
 	auto width = new QComboBox;
@@ -907,7 +907,7 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 
 
 void DoPatchDeformDlg(){
-	QDialog dialog( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Patch deform" );
 
 	auto spin = new SpinBox( -9999, 9999, 64 );
@@ -938,7 +938,7 @@ void DoPatchDeformDlg(){
 
 
 void DoCapDlg(){
-	QDialog dialog( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Cap" );
 
 	auto group = new QButtonGroup( &dialog );
@@ -980,7 +980,7 @@ void DoCapDlg(){
 
 
 void DoPatchThickenDlg(){
-	QDialog dialog( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Patch thicken" );
 
 	const int grid = std::max( GetGridSize(), 1.f );

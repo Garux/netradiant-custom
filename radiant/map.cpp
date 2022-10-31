@@ -869,7 +869,7 @@ void Scene_CountStuff( int& ents_ingame, int& groupents, int& groupents_ingame )
 #include <QHeaderView>
 
 void DoMapInfo(){
-	QDialog dialog( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Map Info" );
 
 	auto w_brushes = new QLabel;
@@ -2032,7 +2032,7 @@ static void GetSelectionIndex( int *ent, int *brush ){
 #include "gtkutil/spinbox.h"
 
 void DoFind(){
-	QDialog dialog( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Find Brush" );
 
 	auto entity = new SpinBox( 0, 999999 );

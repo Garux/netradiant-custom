@@ -275,7 +275,7 @@ void Game_constructPreferences( PreferencesPage& page ){
 // Arbitrary Sides dialog
 
 void DoSides( EBrushPrefab type ){
-	QDialog dialog( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Arbitrary sides" );
 
 	auto spin = new SpinBox;
@@ -333,7 +333,7 @@ void DoSides( EBrushPrefab type ){
 // About dialog (no program is complete without one)
 
 void DoAbout(){
-	QDialog dialog( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "About NetRadiant" );
 
 	{
@@ -410,7 +410,7 @@ class TextEditor
 	CopiedString m_filename;
 
 	void construct(){
-		m_window = new QWidget( MainFrame_getWindow(), Qt::Window );
+		m_window = new QWidget( MainFrame_getWindow(), Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
 		g_guiSettings.addWindow( m_window, "ShaderEditor/geometry" );
 
 		auto *vbox = new QVBoxLayout( m_window );
@@ -493,7 +493,7 @@ bool DoLightIntensityDlg( int *intensity ){
 	if( g_dontDoLightIntensityDlg )
 		return true;
 
-	QDialog dialog( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Light intensity" );
 
 	auto spin = new SpinBox( -99999, 99999, *intensity );

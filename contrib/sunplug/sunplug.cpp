@@ -208,7 +208,7 @@ void MapCoordinator(){
 		globalOutputStream() << "SunPlug: advised mapcoordsmaxs=" << calc_max.x() << " " << calc_min.y() << "\n"; // console info about mapcoordsmaxs
 
 		{
-			QDialog dialog( SunPlug::main_window, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+			QDialog dialog( SunPlug::main_window, Qt::Dialog | Qt::WindowCloseButtonHint );
 			dialog.setWindowTitle( "ET-MapCoordinator" );
 			{
 				auto form = new QFormLayout( &dialog );

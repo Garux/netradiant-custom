@@ -42,7 +42,7 @@
 
 
 bool DoLoadPortalFileDialog(){
-	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Load .prt" );
 
 	QLineEdit *line;

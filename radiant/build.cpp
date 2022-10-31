@@ -841,7 +841,7 @@ protected:
 #include "qe3.h"
 
 EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
-	QDialog dialog( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Build Menu" );
 
 	QTreeWidget* buildView = nullptr;

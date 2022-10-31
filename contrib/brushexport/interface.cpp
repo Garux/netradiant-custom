@@ -34,7 +34,7 @@ protected:
 };
 
 QWidget* create_w_plugplug2(){
-	auto window = g_dialog.window = new QWidget( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	auto window = g_dialog.window = new QWidget( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
 	window->setWindowTitle( "BrushExport-Plugin 3.0 by namespace" );
 	qt_connect_shortcut_override( window );
 

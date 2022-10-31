@@ -775,7 +775,7 @@ WaitDialog create_wait_dialog( const char* title, const char* text ){
 	/* Qt::Tool window type doesn't steal focus, which saves e.g. from losing freelook camera mode on autosave
 	   or entity menu from hiding, while clicked with ctrl, by tex/model loading popup.
 	   Qt::WidgetAttribute::WA_ShowWithoutActivating is implied, but lets have it set too. */
-	auto window = new QWidget( MainFrame_getWindow(), Qt::Tool | Qt::CustomizeWindowHint | Qt::WindowTitleHint );
+	auto window = new QWidget( MainFrame_getWindow(), Qt::Tool | Qt::WindowTitleHint );
 	window->setWindowTitle( title );
 	window->setWindowModality( Qt::WindowModality::ApplicationModal );
 	window->setAttribute( Qt::WidgetAttribute::WA_ShowWithoutActivating );
@@ -1721,7 +1721,7 @@ void MainFrame::Create(){
 	}
 	else if ( CurrentStyle() == eFloating ) {
 		{
-			QWidget* window = new QWidget( m_window, Qt::Window );
+			QWidget* window = new QWidget( m_window, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
 			window->setWindowTitle( "Camera" );
 			g_guiSettings.addWindow( window, "floating/cam", 400, 300, 50, 100 );
 
@@ -1741,7 +1741,7 @@ void MainFrame::Create(){
 		}
 
 		{
-			QWidget* window = new QWidget( m_window, Qt::Window );
+			QWidget* window = new QWidget( m_window, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
 			g_guiSettings.addWindow( window, "floating/xy", 400, 300, 500, 100 );
 
 			m_pXYWnd = new XYWnd();
@@ -1759,7 +1759,7 @@ void MainFrame::Create(){
 		}
 
 		{
-			QWidget* window = new QWidget( m_window, Qt::Window );
+			QWidget* window = new QWidget( m_window, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
 			g_guiSettings.addWindow( window, "floating/xz", 400, 300, 500, 450 );
 
 			m_pXZWnd = new XYWnd();
@@ -1777,7 +1777,7 @@ void MainFrame::Create(){
 		}
 
 		{
-			QWidget* window = new QWidget( m_window, Qt::Window );
+			QWidget* window = new QWidget( m_window, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
 			g_guiSettings.addWindow( window, "floating/yz", 400, 300, 50, 450 );
 
 			m_pYZWnd = new XYWnd();

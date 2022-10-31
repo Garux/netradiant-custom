@@ -61,7 +61,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 }
 
 bool DoIntersectBox( IntersectRS* rs ){
-	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Intersect" );
 
 	QRadioButton *radio1, *radio2;
@@ -105,7 +105,7 @@ bool DoIntersectBox( IntersectRS* rs ){
 }
 
 bool DoPolygonBox( PolygonRS* rs ){
-	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Polygon Builder" );
 
 	QSpinBox *spin_sides, *spin_border;
@@ -170,7 +170,7 @@ bool DoPolygonBox( PolygonRS* rs ){
 // for stair builder stuck as close as i could to the MFC version
 // obviously feel free to change it at will :)
 bool DoBuildStairsBox( BuildStairsRS* rs ){
-	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Stair Builder" );
 
 	QSpinBox *spin_stairHeight;
@@ -247,7 +247,7 @@ bool DoBuildStairsBox( BuildStairsRS* rs ){
 }
 
 bool DoDoorsBox( DoorRS* rs ){
-	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Door Builder" );
 
 	QCheckBox   *checkScaleMainH, *checkScaleMainV, *checkScaleTrimH, *checkScaleTrimV;
@@ -315,7 +315,7 @@ bool DoDoorsBox( DoorRS* rs ){
 }
 
 EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
-	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Path Plotter" );
 
 	QSpinBox *spin_pts;
@@ -374,7 +374,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 }
 
 EMessageBoxReturn DoCTFColourChangeBox(){
-	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "CTF Colour Changer" );
 
 	EMessageBoxReturn ret = eIDCANCEL;
@@ -402,7 +402,7 @@ EMessageBoxReturn DoCTFColourChangeBox(){
 EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	EMessageBoxReturn ret = eIDCANCEL;
 
-	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Texture Reset" );
 
 	QLineEdit *editTexOld, *editTexNew;
@@ -526,7 +526,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 // ailmanki
 // add a simple input for the MakeChain thing..
 bool DoMakeChainBox( MakeChainRS* rs ){
-	QDialog dialog( g_pRadiantWnd, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	QDialog dialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Make Chain" );
 
 	QSpinBox *spin_linkNum;

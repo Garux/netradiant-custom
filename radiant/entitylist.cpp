@@ -277,7 +277,7 @@ void DetachEntityTreeModel(){
 void EntityList_constructWindow( QWidget* main_window ){
 	ASSERT_MESSAGE( getEntityList().m_window == 0, "error" );
 
-	auto window = getEntityList().m_window = new QWidget( main_window, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+	auto window = getEntityList().m_window = new QWidget( main_window, Qt::Dialog | Qt::WindowCloseButtonHint );
 	window->setWindowTitle( "Entity List" );
 
 	g_guiSettings.addWindow( window, "EntityList/geometry", 350, 500 );

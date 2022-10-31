@@ -1601,7 +1601,7 @@ class RotateDialog : public QObject
 	QDoubleSpinBox *m_y;
 	QDoubleSpinBox *m_z;
 	void construct(){
-		m_window = new QWidget( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+		m_window = new QWidget( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 		m_window->setWindowTitle( "Arbitrary rotation" );
 		m_window->installEventFilter( this );
 
@@ -1694,7 +1694,7 @@ class ScaleDialog : public QObject
 	QDoubleSpinBox *m_y;
 	QDoubleSpinBox *m_z;
 	void construct(){
-		m_window = new QWidget( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+		m_window = new QWidget( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 		m_window->setWindowTitle( "Arbitrary scale" );
 		m_window->installEventFilter( this );
 

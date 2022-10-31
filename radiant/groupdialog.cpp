@@ -84,7 +84,7 @@ GroupDlg::GroupDlg() : m_window( 0 ){
 void GroupDlg::Create( QWidget* parent ){
 	ASSERT_MESSAGE( m_window == 0, "dialog already created" );
 
-	m_window = new QWidget( parent, Qt::Window );
+	m_window = new QWidget( parent, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
 	m_window->setWindowTitle( "Entities" );
 
 //.	window_connect_focus_in_clear_focus_widget( m_window );

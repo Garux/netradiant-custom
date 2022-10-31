@@ -1422,7 +1422,7 @@ protected:
 
 void CSG_Tool(){
 	if ( g_csgtool_dialog.window == nullptr ) {
-		g_csgtool_dialog.window = new QWidget( MainFrame_getWindow(), Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+		g_csgtool_dialog.window = new QWidget( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 		g_csgtool_dialog.window->setWindowTitle( "CSG Tool" );
 		g_guiSettings.addWindow( g_csgtool_dialog.window, "CSGTool/geometry" );
 

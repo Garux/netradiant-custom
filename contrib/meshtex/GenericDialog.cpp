@@ -36,7 +36,7 @@
  * @param key Unique key to identify this dialog widget.
  */
 GenericDialog::GenericDialog(const std::string& key) :
-   _dialog(new QDialog( nullptr, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint )),
+   _dialog(new QDialog( nullptr, Qt::Dialog | Qt::WindowCloseButtonHint )),
    _window(nullptr),
    _key(key),
    _okCallbackID(0),
