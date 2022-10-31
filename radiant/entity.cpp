@@ -375,7 +375,7 @@ AABB Doom3Light_getBounds( const AABB& workzone ){
 }
 
 
-int g_iLastLightIntensity;
+int g_iLastLightIntensity = 300;
 
 void Entity_createFromSelection( const char* name, const Vector3& origin ){
 #if 0
