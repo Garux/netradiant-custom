@@ -538,6 +538,7 @@ int main( int argc, char* argv[] ){
 
 	Radiant_Shutdown();
 
+	qInstallMessageHandler( nullptr );
 	// close the log file if any
 	Sys_LogFile( false );
 
