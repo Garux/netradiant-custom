@@ -1167,98 +1167,115 @@ void SmoothMetaTriangles(){
 	const float defaultShadeAngle = degrees_to_radians( npDegrees );
 
 	for( auto& [ d, list ] : metaVerts ){
-		if( list.size() > 1 ){
+		if( list.size() > 1 || ( list.size() == 1 && list.front().m_triangles.size() > 1 ) ){
 			float maxShadeAngle = 0.f;
 
-			std::vector<metaVertex_t*> verts;
-			verts.reserve( list.size() );
+			struct VT{ metaVertex_t *vertex; metaTriangle_t *triangle; float angle{}; bool skipped{}; bool smoothed{}; Vector3 newnormal{ 0 }; };
+			std::vector<VT> verts;
 			for( auto& v : list )
-				verts.push_back( &v );
-			/* allocate shade angle table */
-			std::vector<float> shadeAngles( list.size(), 179 );
-			/* allocate smoothed table */
-			std::vector<std::uint8_t> smoothed( list.size(), false );
+				for( auto* t : v.m_triangles )
+					verts.push_back( VT{ &v, t } );
 			/* get per-vertex smoothing angle */
-			for( size_t i = 0; i < verts.size(); ++i )
+			for( auto& v : verts )
 			{
-				for( metaTriangle_t *tri : verts[i]->m_triangles )
-				{
-					float shadeAngle = defaultShadeAngle;
-					/* get shade angle from shader */
-					if ( tri->si->shadeAngleDegrees > 0.0f ) {
-						shadeAngle = degrees_to_radians( tri->si->shadeAngleDegrees );
-					}
-					/* get shade angle from entity */
-					else if ( tri->shadeAngleDegrees > 0.0f ) {
-						shadeAngle = degrees_to_radians( tri->shadeAngleDegrees );
-					}
-
-					/* flag verts */
-					value_minimize( shadeAngles[i], shadeAngle );
-					smoothed[i] = shadeAngles[i] <= 0;
+				float shadeAngle = defaultShadeAngle;
+				/* get shade angle from shader */
+				if ( v.triangle->si->shadeAngleDegrees > 0.0f ) {
+					shadeAngle = degrees_to_radians( v.triangle->si->shadeAngleDegrees );
+				}
+				/* get shade angle from entity */
+				else if ( v.triangle->shadeAngleDegrees > 0.0f ) {
+					shadeAngle = degrees_to_radians( v.triangle->shadeAngleDegrees );
 				}
 
-				value_maximize( maxShadeAngle, shadeAngles[i] );
+				/* flag verts */
+				v.angle = shadeAngle;
+				v.skipped = shadeAngle <= 0;
+
+				value_maximize( maxShadeAngle, shadeAngle );
 			}
 
 			if( maxShadeAngle > 0 ){
 				/* go through the list of vertexes */
-				for ( size_t i = 0; i < verts.size(); ++i )
+				for ( auto v = verts.begin(); v != verts.end(); ++v )
 				{
 					/* already smoothed? */
-					if ( smoothed[ i ] ) {
+					if ( v->skipped || v->smoothed ) {
 						continue;
 					}
 
 					/* clear */
 					Vector3 average( 0 );
-					std::vector<metaVertex_t*> smoothedVerts;
+					std::vector<VT*> smoothedVerts;
 					std::vector<Vector3> votes;
 
 					/* test the rest, including self */
-					for ( size_t j = i; j < verts.size(); ++j )
+					for ( auto v2 = v; v2 != verts.end(); ++v2 )
 					{
 						/* already smoothed? */
-						if ( smoothed[ j ] ) {
+						if ( v2->skipped || v2->smoothed ) {
 							continue;
 						}
 
 						/* use smallest shade angle */
-						const float shadeAngle = std::min( shadeAngles[ i ], shadeAngles[ j ] );
+						const float shadeAngle = std::min( v->angle, v2->angle );
 
 						/* check shade angle */
-						const double dot = std::clamp( vector3_dot( verts[ i ]->normal, verts[ j ]->normal ), -1.0, 1.0 );
+						const double dot = std::clamp( vector3_dot( v->vertex->normal, v2->vertex->normal ), -1.0, 1.0 );
 						if ( acos( dot ) + THETA_EPSILON >= shadeAngle ) {
 							continue;
 						}
 
 						/* add to the list */
-						smoothedVerts.push_back( verts[j] );
-
-						/* flag vertex */
-						smoothed[ j ] = true;
+						smoothedVerts.push_back( v2.operator->() );
 
 						/* see if this normal has already been voted */
 						if( std::none_of( votes.begin(), votes.end(),
-							[normal = verts[j]->normal]( const Vector3& vote ){
+							[normal = v2->vertex->normal]( const Vector3& vote ){
 								return vector3_equal_epsilon( normal, vote, EQUAL_NORMAL_EPSILON );
 							} ) )
 						{ /* add a new vote */
-							average += verts[ j ]->normal;
-							votes.push_back( verts[ j ]->normal );
+							average += v2->vertex->normal;
+							votes.push_back( v2->vertex->normal );
 						}
 					}
 
+					/* flag vertices */
 					/* don't average for less than 2 verts */
-					if ( smoothedVerts.size() > 1 ) {
-						/* average normal */
-						if ( VectorNormalize( average ) != 0 ) {
-							/* smooth */
-							for ( auto v : smoothedVerts )
-								v->normal = average;
-							numSmoothed++;
+					if ( smoothedVerts.size() > 1 && VectorNormalize( average ) != 0 ) {
+						for ( auto *v : smoothedVerts ){
+							v->smoothed = true;
+							v->newnormal = average;
+						}
+						numSmoothed++;
+					}
+					else{
+						for ( auto *v : smoothedVerts ){
+							v->skipped = true;
 						}
 					}
+				}
+				/* reconstruct meta data from smoothed verts */
+				if( std::any_of( verts.cbegin(), verts.cend(), []( const VT& vt ){ return vt.smoothed; } ) ){
+					decltype( list ) newlist;
+					for( auto& v : verts ){
+						bspDrawVert_t newv = *v.vertex;
+						if( v.smoothed )
+							newv.normal = v.newnormal;
+
+						auto it = std::find_if( newlist.begin(), newlist.end(), [&newv]( const metaVertex_t& v ){
+							return bspDrawVert_equal( newv, v );
+						} );
+						if( it == newlist.end() ){ /* insert vertex */
+							newlist.push_back( newv );
+							it = --newlist.end();
+							it->m_metaVertexGroup = &list;
+						}
+						/* link vertex <> triangle */
+						it->m_triangles.push_back( v.triangle );
+						*std::find( v.triangle->m_vertices.begin(), v.triangle->m_vertices.end(), v.vertex ) = it.operator->();
+					}
+					list.swap( newlist );
 				}
 			}
 		}
