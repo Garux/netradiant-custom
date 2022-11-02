@@ -103,7 +103,20 @@ bool string_equal_start( const char* string, StringRange start ){
 	return string_equal_n( string, start.data(), start.size() );
 }
 
-typedef std::set<CopiedString> TextureGroups;
+// sort case insensitively, as it is user friendly
+// still preserve unequal names, as it is needed for linux case sensitive FS
+struct TextureGroups_compare
+{
+	bool operator()( const CopiedString& a, const CopiedString& b ) const {
+		const int cmp_nocase = string_compare_nocase( a.c_str(), b.c_str() );
+		if( cmp_nocase != 0 )
+			return cmp_nocase < 0;
+		else
+			return string_less( a.c_str(), b.c_str() );
+	}
+};
+
+typedef std::set<CopiedString, TextureGroups_compare> TextureGroups;
 
 void TextureGroups_addWad( TextureGroups& groups, const char* archive ){
 	if ( path_extension_is( archive, "wad" ) ) {
