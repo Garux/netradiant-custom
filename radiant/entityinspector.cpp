@@ -1231,7 +1231,7 @@ QWidget* EntityInspector_constructWindow( QWidget* toplevel ){
 			{
 				auto line = g_entityKeyEntry = new QLineEdit;
 				grid->addWidget( line, 0, 1 );
-				QObject::connect( line, &QLineEdit::returnPressed, [](){ g_entityValueEntry->setFocus(); } );
+				QObject::connect( line, &QLineEdit::returnPressed, [](){ g_entityValueEntry->setFocus(); g_entityValueEntry->selectAll(); } );
 			}
 
 			{
