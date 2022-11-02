@@ -784,11 +784,13 @@ public:
 	void primaryIntensityChanged( const char* value ){
 		m_primaryIntensity = string_read_float( value );
 		calculateRadii();
+		SceneChangeNotify();
 	}
 	typedef MemberCaller1<LightRadii, const char*, &LightRadii::primaryIntensityChanged> PrimaryIntensityChangedCaller;
 	void secondaryIntensityChanged( const char* value ){
 		m_secondaryIntensity = string_read_float( value );
 		calculateRadii();
+		SceneChangeNotify();
 	}
 	typedef MemberCaller1<LightRadii, const char*, &LightRadii::secondaryIntensityChanged> SecondaryIntensityChangedCaller;
 	void scaleChanged( const char* value ){
@@ -797,6 +799,7 @@ public:
 			m_scale = 1.0f;
 		}
 		calculateRadii();
+		SceneChangeNotify();
 	}
 	typedef MemberCaller1<LightRadii, const char*, &LightRadii::scaleChanged> ScaleChangedCaller;
 	void fadeChanged( const char* value ){
@@ -805,11 +808,13 @@ public:
 			m_fade = 1.0f;
 		}
 		calculateRadii();
+		SceneChangeNotify();
 	}
 	typedef MemberCaller1<LightRadii, const char*, &LightRadii::fadeChanged> FadeChangedCaller;
 	void flagsChanged( const char* value ){
 		m_flags = string_read_int( value );
 		calculateRadii();
+		SceneChangeNotify();
 	}
 	typedef MemberCaller1<LightRadii, const char*, &LightRadii::flagsChanged> FlagsChangedCaller;
 
@@ -1315,7 +1320,7 @@ public:
 		m_entity( eclass ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_rotationKey( RotationChangedCaller( *this ) ),
-		m_colour( Callback() ),
+		m_colour( FreeCaller<SceneChangeNotify>() ),
 		m_filter( m_entity, node ),
 		m_named( m_entity ),
 		m_nameKeys( m_entity ),
@@ -1339,7 +1344,7 @@ public:
 		m_entity( other.m_entity ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_rotationKey( RotationChangedCaller( *this ) ),
-		m_colour( Callback() ),
+		m_colour( FreeCaller<SceneChangeNotify>() ),
 		m_filter( m_entity, node ),
 		m_named( m_entity ),
 		m_nameKeys( m_entity ),
