@@ -48,6 +48,26 @@ public:
 	}
 };
 
+class DeferredMotion2
+{
+	QMouseEvent m_mouseMoveEvent;
+	const std::function<void( const QMouseEvent& )> m_func;
+public:
+	template<class Functor>
+	DeferredMotion2( Functor func ) :
+		m_mouseMoveEvent( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() ),
+		m_func( func )
+	{
+	}
+	void motion( const QMouseEvent *event ){
+		m_mouseMoveEvent = *event;
+	}
+	void invoke(){
+		m_func( m_mouseMoveEvent );
+	}
+	typedef MemberCaller<DeferredMotion2, &DeferredMotion2::invoke> InvokeCaller;
+};
+
 class DeferredMotionDelta
 {
 	QMouseEvent m_mouseMoveEvent;
@@ -77,6 +97,32 @@ public:
 		if( !m_timer.isActive() )
 			m_timer.start();
 	}
+};
+
+class DeferredMotionDelta2
+{
+	QMouseEvent m_mouseMoveEvent;
+	std::function<void( int, int, const QMouseEvent& )> m_func;
+	int m_delta_x = 0;
+	int m_delta_y = 0;
+public:
+	template<class Functor>
+	DeferredMotionDelta2( Functor func ) :
+		m_mouseMoveEvent( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() ),
+		m_func( func )
+	{
+	}
+	void motion_delta( int x, int y, const QMouseEvent *event ){
+		m_delta_x += x;
+		m_delta_y += y;
+		m_mouseMoveEvent = *event;
+	}
+	void invoke(){
+		m_func( m_delta_x, m_delta_y, m_mouseMoveEvent );
+		m_delta_x = 0;
+		m_delta_y = 0;
+	}
+	typedef MemberCaller<DeferredMotionDelta2, &DeferredMotionDelta2::invoke> InvokeCaller;
 };
 
 

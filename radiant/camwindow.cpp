@@ -62,6 +62,81 @@
 
 #include <QOpenGLWidget>
 
+#include <QApplication>
+
+// https://stackoverflow.com/questions/42566421/how-to-queue-lambda-function-into-qts-event-loop/42566867#42566867
+template <typename Fun> void postCall( QObject * obj, Fun && fun ) {
+	// qDebug() << __FUNCTION__;
+	struct Event : public QEvent {
+		using F = typename std::decay<Fun>::type;
+		F fun;
+		Event( F && fun ) : QEvent( QEvent::None ), fun( std::move( fun ) ) {}
+		Event( const F & fun ) : QEvent( QEvent::None ), fun( fun ) {}
+		~Event() { fun(); }
+	};
+	QCoreApplication::postEvent(
+			obj->thread() ? obj : qApp, new Event( std::forward<Fun>( fun ) ) );
+}
+
+class IdleDraw2 : public QObject
+{
+	Callback m_redraw;
+	std::vector<Callback> m_funcs;
+	Callback m_loopFunc;
+	bool m_running{};
+	bool m_queued{};
+	bool m_redrawDo{};
+
+	void invoke(){
+		if( !m_running ){
+			m_running = true;
+			for( auto& f : m_funcs )
+				f();
+			m_funcs.clear();
+			m_loopFunc();
+			if( m_redrawDo )
+				m_redraw();
+		}
+		else
+			globalWarningStream() << "invoke() during m_running\n";
+
+		m_running = false;
+		m_queued = false;
+		m_redrawDo = false;
+
+		doLoop();
+	}
+public:
+	IdleDraw2( const Callback& redrawCallback ) : m_redraw( redrawCallback ){}
+	void queueDraw( const Callback& func, bool redrawDo ){
+		if( !m_running ){
+			if( std::find( m_funcs.cbegin(), m_funcs.cend(), func ) == m_funcs.cend() ){
+				m_funcs.push_back( func );
+				// globalOutputStream() << m_funcs.size() << " m_funcs.size()\n";
+			}
+			m_redrawDo |= redrawDo;
+			if( !m_queued ){
+				m_queued = true;
+				postCall( this, [this](){ invoke(); } );
+			}
+		}
+		else
+			globalWarningStream() << "queueDraw() during m_running\n";
+	}
+	void startLoop( const Callback& func ){
+		m_loopFunc = func;
+		doLoop();
+	}
+	void doLoop(){
+		if( m_loopFunc != Callback() )
+			queueDraw( Callback(), true );
+	}
+	void breakLoop(){
+		m_loopFunc = {};
+	}
+};
+
+
 Signal0 g_cameraMoved_callbacks;
 
 void AddCameraMovedCallback( const SignalHandler& handler ){
@@ -135,8 +210,6 @@ struct camera_t
 {
 	int width, height;
 
-	bool timing;
-
 	Vector3 origin;
 	Vector3 angles;
 
@@ -159,17 +232,17 @@ struct camera_t
 
 	unsigned int movementflags; // movement flags
 	Timer m_keycontrol_timer;
-	QTimer m_keycontrol_caller;
 	float m_keymove_speed_current;
 
 
 	static float fieldOfView;
 	static const float near_z;
 
-	DeferredMotionDelta m_mouseMove;
+	DeferredMotionDelta2 m_mouseMove;
 
 	View* m_view;
 	Callback m_update;
+	IdleDraw2 m_idleDraw;
 
 	Callback1<const MotionDeltaValues&> m_update_motion_freemove;
 
@@ -178,7 +251,6 @@ struct camera_t
 	camera_t( View* view, const Callback& update, const Callback1<const MotionDeltaValues&>& update_motion_freemove ) :
 		width( 0 ),
 		height( 0 ),
-		timing( false ),
 		origin( 0, 0, 0 ),
 		angles( 0, 0, 0 ),
 		color( 0, 0, 0 ),
@@ -187,6 +259,7 @@ struct camera_t
 		m_mouseMove( [this]( int x, int y, const QMouseEvent& event ){ Camera_mouseMove( *this, x, y, event ); } ),
 		m_view( view ),
 		m_update( update ),
+		m_idleDraw( update ),
 		m_update_motion_freemove( update_motion_freemove ){
 	}
 };
@@ -364,7 +437,6 @@ void Camera_mouseMove( camera_t& camera, int x, int y, const QMouseEvent& event 
 	//globalOutputStream() << "mousemove... ";
 	Camera_FreeMove( camera, -x, -y );
 	camera.m_update_motion_freemove( MotionDeltaValues( x, y, event ) );
-	camera.m_update();
 	CameraMovedNotify();
 }
 
@@ -440,12 +512,6 @@ void Cam_KeyControl( camera_t& camera, float dtime ){
 }
 
 void Camera_keyMove( camera_t& camera ){
-//	globalOutputStream() << camera.m_keycontrol_timer.elapsed_sec() << '\n';
-	if( camera.m_keycontrol_timer.elapsed_msec() == 0 ) // a lot of zeros happen = torn, slow, inconsistent motion 🤔
-		return;
-
-	camera.m_mouseMove.flush();
-
 	//globalOutputStream() << "keymove... ";
 	float time_seconds = camera.m_keycontrol_timer.elapsed_sec();
 	if( time_seconds == 0 ) /* some reasonable move at the very start */
@@ -454,14 +520,12 @@ void Camera_keyMove( camera_t& camera ){
 
 	Cam_KeyControl( camera, time_seconds );
 
-	camera.m_update();
 	CameraMovedNotify();
 }
 
 void Camera_setMovementFlags( camera_t& camera, unsigned int mask ){
 	if ( ( ~camera.movementflags & mask ) != 0 && camera.movementflags == 0 ) {
-		camera.m_keycontrol_caller.callOnTimeout( [&camera](){ Camera_keyMove( camera ); } );
-		camera.m_keycontrol_caller.start( 4 ); // with 0 consumes entire thread by spamming calls 🤷‍♀️
+		camera.m_idleDraw.startLoop( ReferenceCaller<camera_t, Camera_keyMove>( camera ) );
 		camera.m_keycontrol_timer.start();
 		camera.m_keymove_speed_current = 0;
 	}
@@ -469,7 +533,7 @@ void Camera_setMovementFlags( camera_t& camera, unsigned int mask ){
 }
 void Camera_clearMovementFlags( camera_t& camera, unsigned int mask ){
 	if ( ( camera.movementflags & ~mask ) == 0 && camera.movementflags != 0 ) {
-		camera.m_keycontrol_caller.stop();
+		camera.m_idleDraw.breakLoop();
 	}
 	camera.movementflags &= ~mask;
 }
@@ -657,6 +721,7 @@ public:
 
 static void Camera_motionDelta( int x, int y, const QMouseEvent *event, camera_t& cam ){
 	cam.m_mouseMove.motion_delta( x, y, event );
+	cam.m_idleDraw.queueDraw( DeferredMotionDelta2::InvokeCaller( cam.m_mouseMove ), true );
 
 	cam.m_orbit = ( event->modifiers() & Qt::KeyboardModifier::AltModifier ) && ( event->buttons() & Qt::MouseButton::RightButton );
 	if( cam.m_orbit ){
@@ -896,7 +961,7 @@ public:
 	rect_t m_XORRect;
 
 	DeferredDraw m_deferredDraw;
-	DeferredMotion m_deferred_motion;
+	DeferredMotion2 m_deferred_motion;
 
 	Timer m_render_time;
 
@@ -1578,6 +1643,7 @@ protected:
 	void mouseMoveEvent( QMouseEvent *event ) override {
 		if( !m_camwnd.m_bFreeMove ){
 			m_camwnd.m_deferred_motion.motion( event );
+			m_camwnd.getCamera().m_idleDraw.queueDraw( DeferredMotion2::InvokeCaller( m_camwnd.m_deferred_motion ), false );
 		}
 		else{
 			;
