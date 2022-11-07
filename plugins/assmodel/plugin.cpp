@@ -305,6 +305,9 @@ extern "C" void RADIANT_DLLEXPORT Radiant_RegisterModules( ModuleServer& server 
 
 	aiString extensions;
 	s_assImporter->GetExtensionList( extensions ); // "*.3ds;*.obj;*.dae"
+	globalOutputStream() << extensions.C_Str() << " <-assimp->GetExtensionList( extensions );\n";
+	globalOutputStream() << s_assImporter->IsExtensionSupported( "md3" ) << " s_assImporter->IsExtensionSupported( \"md3\" )\n";
+	globalOutputStream() << s_assImporter->GetImporterCount() << " s_assImporter->GetImporterCount()\n";
 	const char *c = extensions.C_Str();
 	while( !string_empty( c ) ){
 		StringOutputStream ext;
