@@ -1131,14 +1131,14 @@ void camera_orbit_init( camera_t& cam, Vector2 xy ){
 	cam.m_orbit = true;
 }
 
-inline bool ORBIT_EVENT( const QMouseEvent *event ){
-	return event->button() == Qt::MouseButton::RightButton && modifiers_for_state( event->modifiers() ) == c_modifierAlt;
+inline bool ORBIT_EVENT( const QMouseEvent& event ){
+	return event.button() == Qt::MouseButton::RightButton && modifiers_for_state( event.modifiers() ) == c_modifierAlt;
 }
-inline bool M2_EVENT( const QMouseEvent *event ){
-	return event->button() == Qt::MouseButton::RightButton && modifiers_for_state( event->modifiers() ) == c_modifierNone;
+inline bool M2_EVENT( const QMouseEvent& event ){
+	return event.button() == Qt::MouseButton::RightButton && modifiers_for_state( event.modifiers() ) == c_modifierNone;
 }
 
-static void enable_freelook_button_press( const QMouseEvent *event, CamWnd& camwnd ){
+static void enable_freelook_button_press( const QMouseEvent& event, CamWnd& camwnd ){
 	const bool m2    = M2_EVENT( event );
 	const bool m2alt = ORBIT_EVENT( event );
 	if ( m2 || m2alt ) {
@@ -1148,7 +1148,7 @@ static void enable_freelook_button_press( const QMouseEvent *event, CamWnd& camw
 		}
 		else{
 			if( m2alt )
-				camera_orbit_init( camwnd.getCamera(), Vector2( event->x(), event->y() ) );
+				camera_orbit_init( camwnd.getCamera(), Vector2( event.x(), event.y() ) );
 			camwnd.EnableFreeMove();
 			camwnd.m_rightClickTimer.start();
 			camwnd.m_rightClickMove = 0;
@@ -1156,7 +1156,7 @@ static void enable_freelook_button_press( const QMouseEvent *event, CamWnd& camw
 	}
 }
 
-static void disable_freelook_button_press( const QMouseEvent *event, CamWnd& camwnd ){
+static void disable_freelook_button_press( const QMouseEvent& event, CamWnd& camwnd ){
 	const bool m2    = M2_EVENT( event );
 	const bool m2alt = ORBIT_EVENT( event );
 	if ( m2 || m2alt ) {
@@ -1167,14 +1167,14 @@ static void disable_freelook_button_press( const QMouseEvent *event, CamWnd& cam
 		}
 		else{
 			if( m2alt )
-				camera_orbit_init( camwnd.getCamera(), Vector2( event->x(), event->y() ) );
+				camera_orbit_init( camwnd.getCamera(), Vector2( event.x(), event.y() ) );
 			camwnd.m_rightClickTimer.start();
 			camwnd.m_rightClickMove = 0;
 		}
 	}
 }
 
-static void disable_freelook_button_release( const QMouseEvent *event, CamWnd& camwnd ){
+static void disable_freelook_button_release( const QMouseEvent& event, CamWnd& camwnd ){
 	const bool m2    = M2_EVENT( event );
 	const bool m2alt = ORBIT_EVENT( event );
 	if ( m2 || m2alt ) {
@@ -1192,13 +1192,13 @@ void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
  }
 
 
-static void selection_button_press( const QMouseEvent *event, WindowObserver* observer ){
+static void selection_button_press( const QMouseEvent& event, WindowObserver* observer ){
 	if( !ORBIT_EVENT( event ) )
-		observer->onMouseDown( WindowVector( event->x(), event->y() ), button_for_button( event->button() ), modifiers_for_state( event->modifiers() ) );
+		observer->onMouseDown( WindowVector( event.x(), event.y() ), button_for_button( event.button() ), modifiers_for_state( event.modifiers() ) );
 }
 
-static void selection_button_release( const QMouseEvent *event, WindowObserver* observer ){
-	observer->onMouseUp( WindowVector( event->x(), event->y() ), button_for_button( event->button() ), modifiers_for_state( event->modifiers() ) );
+static void selection_button_release( const QMouseEvent& event, WindowObserver* observer ){
+	observer->onMouseUp( WindowVector( event.x(), event.y() ), button_for_button( event.button() ), modifiers_for_state( event.modifiers() ) );
 }
 
 void selection_motion( const QMouseEvent& event, WindowObserver* observer ){
@@ -1208,16 +1208,16 @@ void selection_motion( const QMouseEvent& event, WindowObserver* observer ){
 
 inline WindowVector windowvector_for_widget_centre( const QWidget* widget ){
 	const QPoint center = widget->rect().center();
-	return WindowVector( center.x(), center.y() );
+	return WindowVector( center.x(), center.y() ) * widget->devicePixelRatioF();
 }
 
-static void selection_button_press_freemove( QWidget* widget, const QMouseEvent *event, WindowObserver* observer ){
+static void selection_button_press_freemove( QWidget* widget, const QMouseEvent& event, WindowObserver* observer ){
 	if( !ORBIT_EVENT( event ) )
-		observer->onMouseDown( windowvector_for_widget_centre( widget ), button_for_button( event->button() ), modifiers_for_state( event->modifiers() ) );
+		observer->onMouseDown( windowvector_for_widget_centre( widget ), button_for_button( event.button() ), modifiers_for_state( event.modifiers() ) );
 }
 
-static void selection_button_release_freemove( QWidget* widget, const QMouseEvent *event, WindowObserver* observer ){
-	observer->onMouseUp( windowvector_for_widget_centre( widget ), button_for_button( event->button() ), modifiers_for_state( event->modifiers() ) );
+static void selection_button_release_freemove( QWidget* widget, const QMouseEvent& event, WindowObserver* observer ){
+	observer->onMouseUp( windowvector_for_widget_centre( widget ), button_for_button( event.button() ), modifiers_for_state( event.modifiers() ) );
 }
 
 void CamWnd::selection_motion_freemove( const MotionDeltaValues& delta ){
@@ -1289,12 +1289,12 @@ static void camera_zoom( CamWnd& camwnd, float x, float y, float step ){
 	}
 }
 
-static void wheelmove_scroll( const QWheelEvent *event, CamWnd& camwnd ){
+static void wheelmove_scroll( const QWheelEvent& event, CamWnd& camwnd ){
 	camera_t& cam = camwnd.getCamera();
 
-	const int angleDelta = ( std::abs( event->angleDelta().y() ) > std::abs( event->angleDelta().x() ) ) // normal y() goes to x() with ALT pressed
-	                      ? event->angleDelta().y()
-						  : event->angleDelta().x();
+	const int angleDelta = ( std::abs( event.angleDelta().y() ) > std::abs( event.angleDelta().x() ) ) // normal y() goes to x() with ALT pressed
+	                      ? event.angleDelta().y()
+						  : event.angleDelta().x();
 
 	if ( angleDelta > 0 ) {
 		if ( cam.movementflags & MOVE_FOCUS ) {
@@ -1308,7 +1308,7 @@ static void wheelmove_scroll( const QWheelEvent *event, CamWnd& camwnd ){
 		}
 
 		Camera_Freemove_updateAxes( cam );
-		camera_zoom( camwnd, event->x(), event->y(), g_camwindow_globals_private.m_nScrollMoveSpeed );
+		camera_zoom( camwnd, event.x(), event.y(), g_camwindow_globals_private.m_nScrollMoveSpeed );
 	}
 	else if ( angleDelta < 0 ) {
 		if ( cam.movementflags & MOVE_FOCUS ) {
@@ -1322,7 +1322,7 @@ static void wheelmove_scroll( const QWheelEvent *event, CamWnd& camwnd ){
 		}
 
 		Camera_Freemove_updateAxes( cam );
-		camera_zoom( camwnd, event->x(), event->y(), -g_camwindow_globals_private.m_nScrollMoveSpeed );
+		camera_zoom( camwnd, event.x(), event.y(), -g_camwindow_globals_private.m_nScrollMoveSpeed );
 	}
 }
 
@@ -1583,6 +1583,7 @@ class CamGLWidget : public QOpenGLWidget
 {
 	CamWnd& m_camwnd;
 	FBO *m_fbo{};
+	qreal m_scale;
 public:
 	CamGLWidget( CamWnd& camwnd ) : QOpenGLWidget(), m_camwnd( camwnd ) {
 		setMouseTracking( true );
@@ -1600,15 +1601,16 @@ protected:
 	}
 	void resizeGL( int w, int h ) override
 	{
-		delete m_fbo;
-		m_fbo = new FBO( w, h, true, g_camwindow_globals_private.m_MSAA );
-
-		m_camwnd.getCamera().width = w;
-		m_camwnd.getCamera().height = h;
+		m_scale = devicePixelRatioF();
+		m_camwnd.getCamera().width = float_to_integer( w * m_scale );
+		m_camwnd.getCamera().height = float_to_integer( h * m_scale );
 		Camera_updateProjection( m_camwnd.getCamera() );
 		m_camwnd.m_window_observer->onSizeChanged( m_camwnd.getCamera().width, m_camwnd.getCamera().height );
 
 		m_camwnd.m_drawRequired = true;
+
+		delete m_fbo;
+		m_fbo = new FBO( m_camwnd.getCamera().width, m_camwnd.getCamera().height, true, g_camwindow_globals_private.m_MSAA );
 	}
 	void paintGL() override
 	{
@@ -1632,17 +1634,17 @@ protected:
 	void mousePressEvent( QMouseEvent *event ) override {
 		if( !m_camwnd.m_bFreeMove ){
 			setFocus();
-			selection_button_press( event, m_camwnd.m_window_observer );
-			enable_freelook_button_press( event, m_camwnd );
+			selection_button_press( scaledEvent( event ), m_camwnd.m_window_observer );
+			enable_freelook_button_press( scaledEvent( event ), m_camwnd );
 		}
 		else{
-			selection_button_press_freemove( this, event, m_camwnd.m_window_observer );
-			disable_freelook_button_press( event, m_camwnd );
+			selection_button_press_freemove( this, scaledEvent( event ), m_camwnd.m_window_observer );
+			disable_freelook_button_press( scaledEvent( event ), m_camwnd );
 		}
 	}
 	void mouseMoveEvent( QMouseEvent *event ) override {
 		if( !m_camwnd.m_bFreeMove ){
-			m_camwnd.m_deferred_motion.motion( event );
+			m_camwnd.m_deferred_motion.motion( scaledEvent( event ) );
 			m_camwnd.getCamera().m_idleDraw.queueDraw( DeferredMotion2::InvokeCaller( m_camwnd.m_deferred_motion ), false );
 		}
 		else{
@@ -1651,11 +1653,11 @@ protected:
 	}
 	void mouseReleaseEvent( QMouseEvent *event ) override {
 		if( !m_camwnd.m_bFreeMove ){
-			selection_button_release( event, m_camwnd.m_window_observer );
+			selection_button_release( scaledEvent( event ), m_camwnd.m_window_observer );
 		}
 		else{
-			selection_button_release_freemove( this, event, m_camwnd.m_window_observer );
-			disable_freelook_button_release( event, m_camwnd );
+			selection_button_release_freemove( this, scaledEvent( event ), m_camwnd.m_window_observer );
+			disable_freelook_button_release( scaledEvent( event ), m_camwnd );
 		}
 	}
 	void wheelEvent( QWheelEvent *event ) override {
@@ -1664,7 +1666,14 @@ protected:
 			m_camwnd.m_parent->activateWindow();
 			m_camwnd.m_parent->raise();
 		}
-		wheelmove_scroll( event, m_camwnd );
+		wheelmove_scroll( scaledEvent( event ), m_camwnd );
+	}
+private:
+	QMouseEvent scaledEvent( const QMouseEvent *event ) const {
+		return QMouseEvent( event->type(), event->localPos() * m_scale, event->windowPos() * m_scale, event->screenPos() * m_scale, event->button(), event->buttons(), event->modifiers() );
+	}
+	QWheelEvent scaledEvent( const QWheelEvent *event ) const {
+		return QWheelEvent( event->posF() * m_scale, event->globalPosF() * m_scale, event->pixelDelta(), event->angleDelta(), event->buttons(), event->modifiers(), event->phase(), false );
 	}
 };
 

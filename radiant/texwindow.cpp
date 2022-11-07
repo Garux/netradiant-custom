@@ -1633,6 +1633,7 @@ void TextureBrowser_filterSetModeIcon( QAction *action ){
 class TexWndGLWidget : public QOpenGLWidget
 {
 	TextureBrowser& m_texBro;
+	qreal m_scale;
 	MousePresses m_mouse;
 public:
 	TexWndGLWidget( TextureBrowser& textureBrowser ) : QOpenGLWidget(), m_texBro( textureBrowser )
@@ -1651,8 +1652,9 @@ protected:
 	}
 	void resizeGL( int w, int h ) override
 	{
-		m_texBro.m_width = w;
-		m_texBro.m_height = h;
+		m_scale = devicePixelRatioF();
+		m_texBro.m_width = float_to_integer( w * m_scale );
+		m_texBro.m_height = float_to_integer( h * m_scale );
 		m_texBro.heightChanged();
 		m_texBro.m_originInvalid = true;
 	}
@@ -1674,7 +1676,7 @@ protected:
 		}
 		else if ( press == MousePresses::Left || press == MousePresses::Middle ) {
 			if ( !event->modifiers().testFlag( Qt::KeyboardModifier::ShiftModifier ) )
-				SelectTexture( m_texBro, event->x(), event->y(), press == MousePresses::Middle );
+				SelectTexture( m_texBro, event->x() * m_scale, event->y() * m_scale, press == MousePresses::Middle );
 		}
 	}
 	void mouseDoubleClick( MousePresses::Result press ){
@@ -1701,7 +1703,7 @@ protected:
 			TextureBrowser_Tracking_MouseUp( m_texBro );
 		}
 		else if ( release == MousePresses::Left && event->modifiers().testFlag( Qt::KeyboardModifier::ShiftModifier ) ) {
-			TextureBrowser_ViewShader( m_texBro, event->modifiers(), event->x(), event->y() );
+			TextureBrowser_ViewShader( m_texBro, event->modifiers(), event->x() * m_scale, event->y() * m_scale );
 		}
 	}
 	void wheelEvent( QWheelEvent *event ) override {

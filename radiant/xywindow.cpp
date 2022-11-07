@@ -442,13 +442,14 @@ class XYGLWidget : public QOpenGLWidget
 	XYWnd& m_xywnd;
 	DeferredMotion m_deferred_motion;
 	FBO *m_fbo{};
+	qreal m_scale;
 public:
 	XYGLWidget( XYWnd& xywnd ) : QOpenGLWidget(), m_xywnd( xywnd ),
 		m_deferred_motion( [this]( const QMouseEvent& event ){
-				if ( m_xywnd.chaseMouseMotion( event.x(), event.y() ) ) {
+				if ( m_xywnd.chaseMouseMotion( event.x() * m_scale, event.y() * m_scale ) ) {
 					return;
 				}
-				m_xywnd.XY_MouseMoved( event.x(), event.y(), buttons_for_state( event ) );
+				m_xywnd.XY_MouseMoved( event.x() * m_scale, event.y() * m_scale, buttons_for_state( event ) );
 			} )
 	{
 		setMouseTracking( true );
@@ -466,21 +467,22 @@ protected:
 	}
 	void resizeGL( int w, int h ) override
 	{
-		delete m_fbo;
-		m_fbo = new FBO( w, h, false, g_xywindow_globals_private.m_MSAA );
-
-		m_xywnd.m_nWidth = w;
-		m_xywnd.m_nHeight = h;
+		m_scale = devicePixelRatioF();
+		m_xywnd.m_nWidth = float_to_integer( w * m_scale );
+		m_xywnd.m_nHeight = float_to_integer( h * m_scale );
 		m_xywnd.updateProjection();
 		m_xywnd.m_window_observer->onSizeChanged( m_xywnd.Width(), m_xywnd.Height() );
 
 		m_xywnd.m_drawRequired = true;
+
+		delete m_fbo;
+		m_fbo = new FBO( m_xywnd.Width(), m_xywnd.Height(), false, g_xywindow_globals_private.m_MSAA );
 	}
 	void paintGL() override
 	{
 		if( m_fbo->m_samples != g_xywindow_globals_private.m_MSAA ){
 			delete m_fbo;
-			m_fbo = new FBO( m_xywnd.m_nWidth, m_xywnd.m_nHeight, false, g_xywindow_globals_private.m_MSAA );
+			m_fbo = new FBO( m_xywnd.Width(), m_xywnd.Height(), false, g_xywindow_globals_private.m_MSAA );
 		}
 
 		if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() && m_fbo->bind() ) {
@@ -506,17 +508,17 @@ protected:
 
 		m_xywnd.ButtonState_onMouseDown( buttons_for_event_button( event ) );
 
-		m_xywnd.onMouseDown( WindowVector( event->x(), event->y() ), button_for_button( event->button() ), modifiers_for_state( event->modifiers() ) );
+		m_xywnd.onMouseDown( WindowVector( event->x(), event->y() ) * m_scale, button_for_button( event->button() ), modifiers_for_state( event->modifiers() ) );
 	}
 	void mouseMoveEvent( QMouseEvent *event ) override {
 		m_deferred_motion.motion( event );
 	}
 	void mouseReleaseEvent( QMouseEvent *event ) override {
-		m_xywnd.XY_MouseUp( event->x(), event->y(), buttons_for_event_button( event ) );
+		m_xywnd.XY_MouseUp( event->x() * m_scale, event->y() * m_scale, buttons_for_event_button( event ) );
 
 		m_xywnd.ButtonState_onMouseUp( buttons_for_event_button( event ) );
 
-		m_xywnd.chaseMouseMotion( event->x(), event->y() ); /* stop chaseMouseMotion this way */
+		m_xywnd.chaseMouseMotion( event->x() * m_scale, event->y() * m_scale ); /* stop chaseMouseMotion this way */
 	}
 	void wheelEvent( QWheelEvent *event ) override {
 		setFocus();
@@ -530,10 +532,10 @@ protected:
 			g_pParentWnd->SetActiveXY( &m_xywnd );
 		}
 		if ( event->angleDelta().y() > 0 ) {
-			m_xywnd.ZoomInWithMouse( event->x(), event->y() );
+			m_xywnd.ZoomInWithMouse( event->x() * m_scale, event->y() * m_scale );
 		}
 		else if ( event->angleDelta().y() < 0 ) {
-			m_xywnd.ZoomOutWithMouse( event->x(), event->y() );
+			m_xywnd.ZoomOutWithMouse( event->x() * m_scale, event->y() * m_scale );
 		}
 	}
 

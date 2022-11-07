@@ -59,8 +59,8 @@ public:
 		m_func( func )
 	{
 	}
-	void motion( const QMouseEvent *event ){
-		m_mouseMoveEvent = *event;
+	void motion( const QMouseEvent& event ){
+		m_mouseMoveEvent = event;
 	}
 	void invoke(){
 		m_func( m_mouseMoveEvent );

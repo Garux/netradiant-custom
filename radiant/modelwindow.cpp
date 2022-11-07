@@ -950,6 +950,7 @@ class ModelBrowserGLWidget : public QOpenGLWidget
 {
 	ModelBrowser& m_modBro;
 	FBO *m_fbo{};
+	qreal m_scale;
 	MousePresses m_mouse;
 public:
 	ModelBrowserGLWidget( ModelBrowser& modelBrowser ) : QOpenGLWidget(), m_modBro( modelBrowser )
@@ -967,13 +968,14 @@ protected:
 	}
 	void resizeGL( int w, int h ) override
 	{
-		delete m_fbo;
-		m_fbo = new FBO( w, h, true, m_modBro.m_MSAA );
-
-		m_modBro.m_width = w;
-		m_modBro.m_height = h;
+		m_scale = devicePixelRatioF();
+		m_modBro.m_width = float_to_integer( w * m_scale );
+		m_modBro.m_height = float_to_integer( h * m_scale );
 		m_modBro.m_originInvalid = true;
 		m_modBro.forEachModelInstance( models_set_transforms() );
+
+		delete m_fbo;
+		m_fbo = new FBO( m_modBro.m_width, m_modBro.m_height, true, m_modBro.m_MSAA );
 	}
 	void paintGL() override
 	{
@@ -995,7 +997,7 @@ protected:
 		else if ( press == MousePresses::Left || press == MousePresses::Right ) {
 			m_modBro.tracking_MouseDown();
 			if ( press == MousePresses::Left ) {
-				m_modBro.testSelect( event->x(), event->y() );
+				m_modBro.testSelect( event->x() * m_scale, event->y() * m_scale );
 			}
 		}
 	}
