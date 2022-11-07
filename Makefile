@@ -76,6 +76,12 @@ LIBS_QTGUI         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt
 CPPFLAGS_QTWIDGETS ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --cflags $(STDERR_TO_DEVNULL))
 LIBS_QTWIDGETS     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --libs-only-L $(STDERR_TO_DEVNULL)) \
                       $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --libs-only-l $(STDERR_TO_DEVNULL))
+ifeq ($(OS),Darwin)
+LIBS_QTCORE         = $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Core --libs $(STDERR_TO_DEVNULL))
+LIBS_QTGUI          = $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --libs $(STDERR_TO_DEVNULL))
+LIBS_QTWIDGETS      = $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --libs $(STDERR_TO_DEVNULL))
+endif
+
 CPPFLAGS_GL        ?=
 LIBS_GL            ?= -lGL # -lopengl32 on Win32
 CPPFLAGS_DL        ?=
@@ -226,7 +232,7 @@ ifeq ($(OS),Darwin)
 	CPPFLAGS_COMMON += -DPOSIX -DXWINDOWS
 	CFLAGS_COMMON += -fPIC
 	CXXFLAGS_COMMON += -fno-exceptions -fno-rtti
-	MACLIBDIR ?= /opt/local/lib
+	MACLIBDIR ?= /usr/local/lib
 	CPPFLAGS_COMMON += -I$(MACLIBDIR)/../include -I/usr/X11R6/include
 	LDFLAGS_COMMON += -L$(MACLIBDIR) -L/usr/X11R6/lib
 	LDFLAGS_DLL += -dynamiclib -ldl
