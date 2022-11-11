@@ -878,6 +878,7 @@ void UpdateAllWindows(){
 
 LatchedInt g_Layout_viewStyle( 0, "Window Layout" );
 LatchedBool g_Layout_enableDetachableMenus( true, "Detachable Menus" );
+LatchedBool g_Layout_builtInGroupDialog( false, "Built-In Group Dialog" );
 
 
 
@@ -956,8 +957,10 @@ void create_view_menu( QMenuBar *menubar, MainFrame::EViewStyle style ){
 		create_check_menu_item_with_mnemonic( menu, "XZ (Front) View", "ToggleFrontView" );
 		create_check_menu_item_with_mnemonic( menu, "YZ (Side) View", "ToggleSideView" );
 	}
-	if ( style == MainFrame::eFloating || style == MainFrame::eSplit ) {
+	if ( style != MainFrame::eRegular && style != MainFrame::eRegularLeft ) {
 		create_menu_item_with_mnemonic( menu, "Console", "ToggleConsole" );
+	}
+	if ( ( style != MainFrame::eRegular && style != MainFrame::eRegularLeft ) || g_Layout_builtInGroupDialog.m_value ) {
 		create_menu_item_with_mnemonic( menu, "Texture Browser", "ToggleTextures" );
 	}
 	create_menu_item_with_mnemonic( menu, "Model Browser", "ToggleModelBrowser" );
@@ -1416,6 +1419,8 @@ void create_main_toolbar( QToolBar *toolbar,  MainFrame::EViewStyle style ){
 	// disable the console and texture button in the regular layouts
 	if ( style != MainFrame::eRegular && style != MainFrame::eRegularLeft ) {
 		toolbar_append_button( toolbar, "Console", "console.png", "ToggleConsole" );
+	}
+	if ( ( style != MainFrame::eRegular && style != MainFrame::eRegularLeft ) || g_Layout_builtInGroupDialog.m_value ) {
 		toolbar_append_button( toolbar, "Texture Browser", "texture_browser.png", "ToggleTextures" );
 	}
 
@@ -1499,6 +1504,8 @@ MainFrame::MainFrame() : m_idleRedrawStatusText( RedrawStatusTextCaller( *this )
 
 MainFrame::~MainFrame(){
 	SaveGuiState();
+
+	m_window->hide(); // hide to avoid resize events during content deletion
 
 	Shutdown();
 
@@ -1715,7 +1722,10 @@ void MainFrame::Create(){
 				m_vSplit2->addWidget( CamWnd_getWidget( *m_pCamWnd ) );
 
 				// textures
-				m_vSplit2->addWidget( TextureBrowser_constructWindow( window ) );
+				if( g_Layout_builtInGroupDialog.m_value )
+					g_page_textures = GroupDialog_addPage( "Textures", TextureBrowser_constructWindow( GroupDialog_getWindow() ), TextureBrowserExportTitleCaller() );
+				else
+					m_vSplit2->addWidget( TextureBrowser_constructWindow( window ) );
 			}
 		}
 	}
@@ -1822,6 +1832,13 @@ void MainFrame::Create(){
 		m_pXZWnd->SetViewType( XZ );
 
 		m_vSplit2->addWidget( m_pXZWnd->GetWidget() );
+	}
+
+	if( g_Layout_builtInGroupDialog.m_value && CurrentStyle() != eFloating ){
+		m_hSplit->addWidget( GroupDialog_getWindow() );
+		m_hSplit->setStretchFactor( 0, 2222 ); // set relative splitter sizes for eSplit (no sizes are restored)
+		m_hSplit->setStretchFactor( 1, 2222 );
+		m_hSplit->setStretchFactor( 2, 0 );
 	}
 
 	EntityList_constructWindow( window );
@@ -1999,6 +2016,11 @@ void Layout_constructPreferences( PreferencesPage& page ){
 	    LatchedImportCaller( g_Layout_enableDetachableMenus ),
 	    BoolExportCaller( g_Layout_enableDetachableMenus.m_latched )
 	);
+	page.appendCheckBox(
+	    "", "Built-In Group Dialog",
+	    LatchedImportCaller( g_Layout_builtInGroupDialog ),
+	    BoolExportCaller( g_Layout_builtInGroupDialog.m_latched )
+	);
 }
 
 void Layout_constructPage( PreferenceGroup& group ){
@@ -2056,6 +2078,7 @@ void MainFrame_Construct(){
 
 	GlobalPreferenceSystem().registerPreference( "DetachableMenus", makeBoolStringImportCallback( LatchedAssignCaller( g_Layout_enableDetachableMenus ) ), BoolExportStringCaller( g_Layout_enableDetachableMenus.m_latched ) );
 	GlobalPreferenceSystem().registerPreference( "QE4StyleWindows", makeIntStringImportCallback( LatchedAssignCaller( g_Layout_viewStyle ) ), IntExportStringCaller( g_Layout_viewStyle.m_latched ) );
+	GlobalPreferenceSystem().registerPreference( "BuiltInGroupDialog", makeBoolStringImportCallback( LatchedAssignCaller( g_Layout_builtInGroupDialog ) ), BoolExportStringCaller( g_Layout_builtInGroupDialog.m_latched ) );
 	GlobalPreferenceSystem().registerPreference( "OpenGLFont", CopiedStringImportStringCaller( g_OpenGLFont ), CopiedStringExportStringCaller( g_OpenGLFont ) );
 	GlobalPreferenceSystem().registerPreference( "OpenGLFontSize", IntImportStringCaller( g_OpenGLFontSize ), IntExportStringCaller( g_OpenGLFontSize ) );
 
