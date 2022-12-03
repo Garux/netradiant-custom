@@ -187,8 +187,7 @@ private:
 
 	unsigned int m_buttonstate;
 
-	int m_nNewBrushPressx;
-	int m_nNewBrushPressy;
+	Vector3 m_nNewBrushPress;
 	scene::Node* m_NewBrushDrag;
 	bool m_bNewBrushDrag;
 

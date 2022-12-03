@@ -696,8 +696,7 @@ unsigned int NewBrushDrag_buttons(){
 
 void XYWnd::NewBrushDrag_Begin( int x, int y ){
 	m_NewBrushDrag = 0;
-	m_nNewBrushPressx = x;
-	m_nNewBrushPressy = y;
+	m_nNewBrushPress = XY_ToPoint( x, y, true );
 
 	m_bNewBrushDrag = true;
 }
@@ -709,10 +708,19 @@ void XYWnd::NewBrushDrag_End( int x, int y ){
 }
 
 void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
-	Vector3 mins = XY_ToPoint( m_nNewBrushPressx, m_nNewBrushPressy, true );
+	Vector3 mins = m_nNewBrushPress;
 	Vector3 maxs = XY_ToPoint( x, y, true );
+	const Vector3 maxs_real = XY_ToPoint( x, y );
 
 	const int nDim = GetViewType();
+	NDIM1NDIM2( nDim );
+
+	// avoid snapping to zero bounds
+	// if brush is already inserted or move is decent nuff
+	if( m_NewBrushDrag != nullptr || vector3_length( maxs_real - mins ) > GetSnapGridSize() / sqrt( 2.0 ) )
+		for( auto i : { nDim1, nDim2 } )
+			if( maxs[i] == mins[i] )
+				maxs[i] = mins[i] + std::copysign( GetSnapGridSize(), maxs_real[i] - mins[i] );
 
 	mins[nDim] = float_snapped( Select_getWorkZone().d_work_min[nDim], GetSnapGridSize() );
 	maxs[nDim] = float_snapped( Select_getWorkZone().d_work_max[nDim], GetSnapGridSize() );
@@ -722,7 +730,6 @@ void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 	}
 
 	if( square || cube ){
-		NDIM1NDIM2( nDim )
 		const float squaresize = std::max( fabs( maxs[nDim1] - mins[nDim1] ), fabs( maxs[nDim2] - mins[nDim2] ) );
 		for( auto i : { nDim1, nDim2 } )
 			maxs[i] = mins[i] + std::copysign( squaresize, maxs[i] - mins[i] );
