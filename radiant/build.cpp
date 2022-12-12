@@ -324,18 +324,22 @@ Project::iterator Project_find( Project& project, const char* name ){
 }
 
 Project::iterator Project_find( Project& project, std::size_t index ){
-	Project::iterator i = project.begin();
-	while ( index-- != 0 && i != project.end() )
-	{
-		++i;
-	}
-	return i;
+	return index < project.size()
+	       ? std::next( project.begin(), index )
+	       : project.end();
 }
 
 Build& project_find( Project& project, const char* build ){
 	Project::iterator i = Project_find( project, build );
 	ASSERT_MESSAGE( i != project.end(), "error finding build command" );
 	return ( *i ).second;
+}
+
+bool Project_contains( const Project& project, Project::const_iterator iterator ){
+	for( auto i = project.cbegin(); i != project.cend(); ++i )
+		if( i == iterator )
+			return true;
+	return false;
 }
 
 Build::iterator Build_find( Build& build, std::size_t index ){
@@ -451,6 +455,7 @@ public:
 namespace
 {
 Project g_build_project;
+Project::const_iterator g_lastExecutedBuild;
 Tools g_build_tools;
 bool g_build_changed = false;
 }
@@ -486,6 +491,7 @@ void build_run( const char* name, CommandListener& listener ){
 	{
 		Project::iterator i = Project_find( g_build_project, name );
 		if ( i != g_build_project.end() ) {
+			g_lastExecutedBuild = i;
 			Build& build = ( *i ).second;
 			for ( Build::iterator j = build.begin(); j != build.end(); ++j )
 			{
@@ -948,12 +954,16 @@ void LoadBuildMenu();
 void DoBuildMenu(){
 	ProjectList projectList( g_build_project );
 	const Project bakproj = g_build_project;
+	const size_t baklast = Project_contains( g_build_project, g_lastExecutedBuild )
+	                       ? std::distance( g_build_project.cbegin(), g_lastExecutedBuild )
+	                       : 0;
 
 	const EMessageBoxReturn ret = BuildMenuDialog_construct( projectList );
 
 	if ( ret == eIDCANCEL || ret == 0 ) {
 		if ( projectList.m_changed || g_build_changed ){
 			g_build_project = bakproj;
+			g_lastExecutedBuild = std::next( g_build_project.cbegin(), baklast );
 			Build_refreshMenu( g_bsp_menu );
 		}
 	}
@@ -974,8 +984,6 @@ void DoBuildMenu(){
 #include "mainframe.h"
 #include "preferences.h"
 
-class BuildMenuItem *g_lastExecutedBuild = nullptr;
-
 class BuildMenuItem
 {
 	const char* m_name;
@@ -984,11 +992,10 @@ public:
 	BuildMenuItem( const char* name, QAction* item )
 		: m_name( name ), m_item( item ){
 	}
-	void run(){
-		g_lastExecutedBuild = this;
+	void run() const {
 		RunBSP( m_name );
 	}
-	typedef MemberCaller<BuildMenuItem, &BuildMenuItem::run> RunCaller;
+	typedef ConstMemberCaller<BuildMenuItem, &BuildMenuItem::run> RunCaller;
 };
 
 typedef std::list<BuildMenuItem> BuildMenuItems;
@@ -1087,11 +1094,8 @@ void BuildMenu_Destroy(){
 
 
 void Build_runRecentExecutedBuild(){
-	if( std::any_of( g_BuildMenuItems.cbegin(), g_BuildMenuItems.cend(), []( const BuildMenuItem& item ){ return g_lastExecutedBuild == &item; } ) ){
-		g_lastExecutedBuild->run();
-	}
-	else{
-		if( !g_BuildMenuItems.empty() )
-			g_BuildMenuItems.begin()->run();
-	}
+	if( Project_contains( g_build_project, g_lastExecutedBuild ) )
+		RunBSP( g_lastExecutedBuild->first.c_str() );
+	else if( !g_build_project.empty() )
+		RunBSP( g_build_project.cbegin()->first.c_str() );
 }
