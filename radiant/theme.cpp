@@ -53,26 +53,85 @@ void theme_set( ETheme theme ){
 		background-color: #4D4F4B;
 		border: 1px solid white;
 	}
+
 	QScrollBar:vertical {
+		background: rgb( 73, 74, 71 );
+		border: 0px solid grey;
 		width: 7px;
+		margin: 0px 0px 0px 0px;
 	}
+	QScrollBar::handle:vertical {
+		border: 1px solid gray;
+		background: rgb( 111, 105, 100 );
+		min-height: 20px;
+	}
+	QScrollBar::add-line:vertical {
+		border: 0px solid grey;
+		background: #32CC99;
+		height: 0px;
+		subcontrol-position: bottom;
+		subcontrol-origin: margin;
+	}
+	QScrollBar::sub-line:vertical {
+		border: 0px solid grey;
+		background: #32CC99;
+		height: 0px;
+		subcontrol-position: top;
+		subcontrol-origin: margin;
+	}
+
 	QScrollBar:horizontal {
+		background: rgb( 73, 74, 71 );
+		border: 0px solid grey;
 		height: 7px;
+		margin: 0px 0px 0px 0px;
 	}
+	QScrollBar::handle:horizontal {
+		border: 1px solid gray;
+		background: rgb( 111, 105, 100 );
+		min-width: 20px;
+	}
+	QScrollBar::add-line:horizontal {
+		border: 0px solid grey;
+		background: #32CC99;
+		width: 0px;
+		subcontrol-position: right;
+		subcontrol-origin: margin;
+	}
+	QScrollBar::sub-line:horizontal {
+		border: 0px solid grey;
+		background: #32CC99;
+		width: 0px;
+		subcontrol-position: left;
+		subcontrol-origin: margin;
+	}
+
+	QScrollBar::handle:hover {
+		background: rgb( 250, 203, 129 );
+	}
+
 	QToolBar::separator:horizontal {
 		width: 1px;
 		margin: 3px 1px;
 		background-color: #aaaaaa;
 	}
-
 	QToolBar::separator:vertical {
 		height: 1px;
 		margin: 1px 3px;
 		background-color: #aaaaaa;
 	}
 	QToolButton {
-	    padding: 0;
+		padding: 0;
 		margin: 0;
+	}
+
+	QMenu::separator {
+		background: rgb( 93, 94, 91 );
+		height: 1px;
+		margin-top: 3px;
+		margin-bottom: 3px;
+		margin-left: 5px;
+		margin-right: 7px;
 	}
 	)";
 
