@@ -335,12 +335,8 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 		ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ")" ), PARSE_ERROR );
 
 		if ( string_equal_nocase( type.c_str(), "flags" ) ) {
-			EntityClassAttribute attribute;
-
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "=" ), PARSE_ERROR );
-			tokeniser.nextLine();
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "[" ), PARSE_ERROR );
-			tokeniser.nextLine();
 			for (;; )
 			{
 				const char* flag = tokeniser.getToken();
@@ -350,9 +346,16 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 				}
 				else
 				{
+					const size_t bit = std::log2( atoi( flag ) );
+					ASSERT_MESSAGE( bit < MAX_FLAGS, "invalid flag bit" << PARSE_ERROR );
+					ASSERT_MESSAGE( string_empty( entityClass->flagnames[bit] ), "non-unique flag bit" << PARSE_ERROR );
+
 					ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ":" ), PARSE_ERROR );
-					//const char* name =
-					tokeniser.getToken();
+
+					const char* name = tokeniser.getToken();
+					strcpy( entityClass->flagnames[bit], name );
+					EntityClassAttribute *attribute = &EntityClass_insertAttribute( *entityClass, name, EntityClassAttribute( "flag", name ) ).second;
+					entityClass->flagAttributes[bit] = attribute;
 					{
 						const char* defaultSeparator = tokeniser.getToken();
 						if ( string_equal( defaultSeparator, ":" ) ) {
@@ -360,7 +363,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 							{
 								const char* descriptionSeparator = tokeniser.getToken();
 								if ( string_equal( descriptionSeparator, ":" ) ) {
-									EntityClassFGD_parseSplitString( tokeniser, attribute.m_description );
+									EntityClassFGD_parseSplitString( tokeniser, attribute->m_description );
 								}
 								else
 								{
@@ -376,7 +379,6 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 				}
 				tokeniser.nextLine();
 			}
-			EntityClass_insertAttribute( *entityClass, key.c_str(), attribute );
 		}
 		else if ( string_equal_nocase( type.c_str(), "choices" ) ) {
 			EntityClassAttribute attribute;
@@ -650,6 +652,13 @@ void EntityClassFGD_resolveInheritance( EntityClass* derivedClass ){
 				for ( EntityClassAttributes::iterator k = parentClass->m_attributes.begin(); k != parentClass->m_attributes.end(); ++k )
 				{
 					EntityClass_insertAttribute( *derivedClass, ( *k ).first.c_str(), ( *k ).second );
+				}
+
+				for( size_t flag = 0; flag < MAX_FLAGS; ++flag ){
+					if( !string_empty( parentClass->flagnames[flag] ) && string_empty( derivedClass->flagnames[flag] ) ){
+						strcpy( derivedClass->flagnames[flag], parentClass->flagnames[flag] );
+						derivedClass->flagAttributes[flag] = parentClass->flagAttributes[flag];
+					}
 				}
 			}
 		}
