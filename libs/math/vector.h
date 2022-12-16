@@ -587,6 +587,16 @@ inline std::size_t vector3_min_abs_component_index( const BasicVector3<Element>&
 	return ( fabs( self[2] ) < fabs( self[mini] ) )? 2 : mini;
 }
 
+template<typename Element>
+inline Element vector3_max_component( const BasicVector3<Element>& v ){
+	return ( v[0] > v[1] ) ? ( ( v[0] > v[2] ) ? v[0] : v[2] ) : ( ( v[1] > v[2] ) ? v[1] : v[2] );
+}
+
+template<typename Element>
+inline Element vector3_min_component( const BasicVector3<Element>& v ){
+	return ( v[0] < v[1] ) ? ( ( v[0] < v[2] ) ? v[0] : v[2] ) : ( ( v[1] < v[2] ) ? v[1] : v[2] );
+}
+
 
 
 

@@ -162,11 +162,6 @@ inline bool VectorCompare( const Vector3& v1, const Vector3& v2 ){
 	return vector3_equal_epsilon( v1, v2, EQUAL_EPSILON );
 }
 
-template<typename T>
-T VectorMax( const BasicVector3<T>& v ){
-	return ( v[0] > v[1] ) ? ( ( v[0] > v[2] ) ? v[0] : v[2] ) : ( ( v[1] > v[2] ) ? v[1] : v[2] );
-}
-
 inline bool VectorIsOnAxis( const Vector3& v ){
 	int zeroComponentCount = 0;
 	for ( int i = 0; i < 3; ++i )
@@ -349,7 +344,7 @@ inline EPlaneType PlaneTypeForNormal( const Vector3& normal ) {
 
 
 inline void ColorNormalize( Vector3& color ) {
-	const float max = VectorMax( color );
+	const float max = vector3_max_component( color );
 
 	if ( max == 0 ) {
 		color.set( 1 );

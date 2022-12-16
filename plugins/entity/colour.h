@@ -37,6 +37,18 @@ inline void read_colour( Vector3& colour, const char* value ){
 		default_colour( colour );
 	}
 }
+inline void read_colour_normalized( Vector3& colour, const char* value ){
+	if ( !string_parse_vector3( value, colour ) ) {
+		default_colour( colour );
+	}
+	else{
+		const auto max = vector3_max_component( colour );
+		if ( max == 0 )
+			default_colour( colour );
+		else
+			colour /= max;
+	}
+}
 inline void write_colour( const Vector3& colour, Entity* entity ){
 	char value[64];
 
@@ -52,19 +64,21 @@ class Colour
 
 	void capture_state(){
 		m_state = colour_capture_state_fill( m_colour );
-		m_state_additive = colour_capture_state_add( m_colour );
+		m_state_additive = colour_capture_state_add( m_colour_add );
 	}
 	void release_state(){
 		colour_release_state_fill( m_colour );
-		colour_release_state_add( m_colour );
+		colour_release_state_add( m_colour_add );
 	}
 
+	Vector3 m_colour_add;
 public:
 	Vector3 m_colour;
 
 	Colour( const Callback& colourChanged )
 		: m_colourChanged( colourChanged ){
 		default_colour( m_colour );
+		m_colour_add = m_colour / 4;
 		capture_state();
 	}
 	~Colour(){
@@ -73,7 +87,8 @@ public:
 
 	void colourChanged( const char* value ){
 		release_state();
-		read_colour( m_colour, value );
+		read_colour_normalized( m_colour, value );
+		m_colour_add = m_colour / 4;
 		capture_state();
 
 		m_colourChanged();

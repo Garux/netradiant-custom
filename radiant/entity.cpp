@@ -509,13 +509,11 @@ void Entity_ungroupSelectedPrimitives(){
 
 /* scale color so that at least one component is at 1.0F */
 void NormalizeColor( Vector3& color ){
-	const std::size_t maxi = vector3_max_abs_component_index( color );
-	if ( color[maxi] == 0.f )
+	const auto max = vector3_max_component( color );
+	if ( max == 0 )
 		color = Vector3( 1, 1, 1 );
-	else{
-		const float max = color[maxi];
+	else
 		color /= max;
-	}
 }
 
 void Entity_normalizeColor(){
