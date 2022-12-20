@@ -44,7 +44,7 @@
 #include <QGridLayout>
 #include <QScrollArea>
 #include <QCheckBox>
-#include <QLineEdit>
+#include "gtkutil/lineedit.h"
 #include <QLabel>
 #include <QPushButton>
 #include <QToolButton>
@@ -1229,13 +1229,13 @@ QWidget* EntityInspector_constructWindow( QWidget* toplevel ){
 				grid->addWidget( new QLabel( "Value" ), 1, 0 );
 			}
 			{
-				auto line = g_entityKeyEntry = new QLineEdit;
+				auto line = g_entityKeyEntry = new LineEdit;
 				grid->addWidget( line, 0, 1 );
 				QObject::connect( line, &QLineEdit::returnPressed, [](){ g_entityValueEntry->setFocus(); g_entityValueEntry->selectAll(); } );
 			}
 
 			{
-				auto line = g_entityValueEntry = new QLineEdit;
+				auto line = g_entityValueEntry = new LineEdit;
 				grid->addWidget( line, 1, 1 );
 				QObject::connect( line, &QLineEdit::returnPressed, [](){ EntityInspector_applyKeyValue(); } );
 			}

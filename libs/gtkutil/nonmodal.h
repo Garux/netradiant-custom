@@ -21,22 +21,20 @@
 
 #pragma once
 
-#include <QLineEdit>
-#include <QKeyEvent>
+#include "lineedit.h"
+#include "spinbox.h"
 #include <QTimer>
 
 #include "generic/callback.h"
 
-#include "spinbox.h"
 
-
-class NonModalEntry : public QLineEdit
+class NonModalEntry : public LineEdit
 {
 	bool m_editing{};
 	Callback m_apply;
 	Callback m_cancel;
 public:
-	NonModalEntry( const Callback& apply, const Callback& cancel ) : QLineEdit(), m_apply( apply ), m_cancel( cancel ){
+	NonModalEntry( const Callback& apply, const Callback& cancel ) : LineEdit(), m_apply( apply ), m_cancel( cancel ){
 		QObject::connect( this, &QLineEdit::textEdited, [this](){ m_editing = true; } );
 		QObject::connect( this, &QLineEdit::editingFinished, [this](){ // on enter or focus out
 			if( m_editing ){
@@ -53,11 +51,12 @@ protected:
 			if( keyEvent->key() == Qt::Key_Escape ){
 				m_editing = false;
 				m_cancel();
-				clearFocus();
 				event->accept();
+				// defer clearFocus(); as immediately done after certain actions = cursor visible + not handling key input
+				QTimer::singleShot( 0, [this](){ clearFocus(); } );
 			}
 		}
-		return QLineEdit::event( event );
+		return LineEdit::event( event );
 	}
 	void focusInEvent( QFocusEvent *event ) override {
 		if( event->reason() == Qt::FocusReason::MouseFocusReason )

@@ -33,7 +33,7 @@
 
 #include <QHBoxLayout>
 #include <QFormLayout>
-#include <QLineEdit>
+#include "gtkutil/lineedit.h"
 #include <QLabel>
 #include <QCheckBox>
 #include <QEvent>
@@ -105,6 +105,21 @@ protected:
 FindActiveTracker s_find_focus_in( true );
 FindActiveTracker s_replace_focus_in( false );
 
+class : public QObject
+{
+protected:
+	bool eventFilter( QObject *obj, QEvent *event ) override {
+		if( event->type() == QEvent::ShortcutOverride ) {
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			if( keyEvent->key() == Qt::Key_Tab ){
+				event->accept();
+			}
+		}
+		return QObject::eventFilter( obj, event ); // standard event processing
+	}
+}
+s_pressedKeysFilter;
+
 }
 
 
@@ -120,6 +135,8 @@ FindTextureDialog::~FindTextureDialog(){
 void FindTextureDialog::BuildDialog(){
 	GetWidget()->setWindowTitle( "Find / Replace Texture(s)" );
 
+	GetWidget()->installEventFilter( &s_pressedKeysFilter );
+
 	g_guiSettings.addWindow( GetWidget(), "TextureBrowser/FindReplace" );
 
 	auto hbox = new QHBoxLayout( GetWidget() );
@@ -127,14 +144,14 @@ void FindTextureDialog::BuildDialog(){
 	hbox->addLayout( form );
 
 	{
-		auto entry = new QLineEdit;
+		auto entry = new LineEdit;
 		form->addRow( "Find:", entry );
 		AddDialogData( *entry, m_strFind );
 		entry->installEventFilter( &s_find_focus_in );
 		GlobalTextureEntryCompletion::instance().connect( entry );
 	}
 	{
-		auto entry = new QLineEdit;
+		auto entry = new LineEdit;
 		auto label = new QLabel( "Replace:" );
 		form->addRow( label, entry );
 		entry->setPlaceholderText( "Empty = search mode" );

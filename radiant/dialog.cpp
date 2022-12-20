@@ -45,7 +45,7 @@
 #include "gtkmisc.h"
 
 #include <QCheckBox>
-#include <QComboBox>
+#include "gtkutil/combobox.h"
 #include <QSlider>
 #include <QRadioButton>
 #include <QButtonGroup>
@@ -411,7 +411,7 @@ QCheckBox* Dialog::addCheckBox( QGridLayout* grid, const char* name, const char*
 }
 
 QComboBox* Dialog::addCombo( QGridLayout* grid, const char* name, StringArrayRange values, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	auto combo = new QComboBox;
+	auto combo = new ComboBox;
 
 	for ( const char *value : values )
 		combo->addItem( value );

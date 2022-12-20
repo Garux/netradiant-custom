@@ -820,7 +820,7 @@ void Patch_constructMenu( QMenu* menu ){
 #include "gtkutil/spinbox.h"
 
 #include <QDialog>
-#include <QComboBox>
+#include "gtkutil/combobox.h"
 #include <QCheckBox>
 #include <QFormLayout>
 #include <QDialogButtonBox>
@@ -831,8 +831,8 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Patch density" );
 
-	auto width = new QComboBox;
-	auto height = new QComboBox;
+	auto width = new ComboBox;
+	auto height = new ComboBox;
 	auto redisperseCheckBox = new QCheckBox( "Square" );
 
 	{

@@ -45,14 +45,23 @@ public:
 	}
 protected:
 	bool event( QEvent *event ) override {
-		/* QAbstractSpinBox has no well defined ShortcutOverride routine, unlike underlying QLineEdit
-		   thus box' portion of key events ends up firing application's shortcuts (e.g. up, down, pgUp, pgDown)
-		   let's lock entire input on the box except a few keys, handled by parent window */
 		if( event->type() == QEvent::ShortcutOverride ){
 			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
-			if( keyEvent->key() != Qt::Key_Return
-			 && keyEvent->key() != Qt::Key_Enter
-			 && keyEvent->key() != Qt::Key_Escape )
+			// don't pass undo/redo to be eaten by underlying lineedit
+			// it's more useful to have working undo of editor
+			if( keyEvent == QKeySequence::StandardKey::Undo
+			 || keyEvent == QKeySequence::StandardKey::Redo )
+				return false;
+			/* QAbstractSpinBox has no well defined ShortcutOverride routine, unlike underlying QLineEdit
+			   thus box' portion of key events ends up firing application's shortcuts (e.g. up, down, pgUp, pgDown)
+			   let's implement it kinda */
+			if( keyEvent->key() == Qt::Key_PageUp
+			 || keyEvent->key() == Qt::Key_PageDown
+			 || keyEvent->key() == Qt::Key_Up
+			 || keyEvent->key() == Qt::Key_Down
+			 || keyEvent->key() == Qt::Key_End
+			 || keyEvent->key() == Qt::Key_Home
+			 || keyEvent == QKeySequence::StandardKey::SelectAll )
 				event->accept();
 		}
 		return SpinT::event( event );
