@@ -1048,11 +1048,18 @@ void EntityInspector_applyKeyValue(){
 //		return;
 //	}
 
-	// RR2DO2: we don't want spaces in entity keys
-	if ( strstr( key.constData(), " " ) ) {
-		qt_MessageBox( g_entityKeyEntry->window(), "No spaces are allowed in entity key names." );
+	// RR2DO2: we don't want spaces and special symbols in entity keys
+	if ( std::any_of( key.cbegin(), key.cend(), []( const char c ){ return strchr( " \n\r\t\v\"", c ) != nullptr; } ) ) {
+		qt_MessageBox( g_entityKeyEntry->window(), "No spaces, newlines, tabs, quotes are allowed in entity key names." );
 		return;
 	}
+	if ( std::any_of( value.cbegin(), value.cend(), []( const char c ){ return strchr( "\n\r\"", c ) != nullptr; } ) ) {
+		qt_MessageBox( g_entityKeyEntry->window(), "No newlines & quotes are allowed in entity key values." );
+		return;
+	}
+	// avoid empty key name; empty value is okay: deletes key
+	if( key.isEmpty() )
+		return;
 
 	if ( string_equal( key.constData(), "classname" ) ) {
 		Scene_EntitySetClassname_Selected( value.constData() );
