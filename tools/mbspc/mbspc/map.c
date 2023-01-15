@@ -887,16 +887,20 @@ qboolean WriteMapBrush(FILE *fp, mapbrush_t *brush, vec3_t origin)
 				rotate = ang2 - ang1;
 				if (rotate < 0) rotate += 360;
 				if (rotate >= 360) rotate -= 360;
+
+				// avoid writing empty name, makes map not loadable
+				const char *texName = ti->texture[0] == '\0'? "NULL" : ti->texture;
+
 				//write the texture info
 				if( g_bsp2map220 ){
-					if( fprintf(fp, "%s [ %g %g %g %g ] [ %g %g %g %g ] %d %g %g", ti->texture,
+					if( fprintf(fp, "%s [ %g %g %g %g ] [ %g %g %g %g ] %d %g %g", texName,
 												vecs[0][0], vecs[0][1], vecs[0][2], ti->vecs[0][3] - DotProduct( origin, vecs[0] ),
 												vecs[1][0], vecs[1][1], vecs[1][2], ti->vecs[1][3] - DotProduct( origin, vecs[1] ),
 												rotate, scale[0], scale[1] ) < 0 )
 						return false;
 				}
 				else{
-					if (fprintf(fp, "%s %d %d %d", ti->texture, shift[0], shift[1], rotate) < 0) return false;
+					if (fprintf(fp, "%s %d %d %d", texName, shift[0], shift[1], rotate) < 0) return false;
 					if (fprintf(fp, " %g %g", scale[0], scale[1]) < 0) return false;
 				}
 
