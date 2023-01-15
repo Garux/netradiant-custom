@@ -100,7 +100,7 @@ typedef struct
 	short	t;
 } dstvert_t;
 
-typedef struct 
+typedef struct
 {
 	short	index_xyz[3];
 	short	index_st[3];
@@ -156,7 +156,7 @@ typedef struct
 	int			ofs_st;			// byte offset from start for stverts
 	int			ofs_tris;		// offset for dtriangles
 	int			ofs_frames;		// offset for first frame
-	int			ofs_glcmds;	
+	int			ofs_glcmds;
 	int			ofs_end;		// end of file
 
 } dmdl_t;
@@ -229,7 +229,7 @@ typedef struct miptex_s
 // 16 bit short limits
 #define	MAX_MAP_MODELS		1024
 #define	MAX_MAP_BRUSHES		8192
-#define	MAX_MAP_ENTITIES	2048
+#define	MAX_MAP_ENTITIES	4096
 #define	MAX_MAP_ENTSTRING	0x40000
 #define	MAX_MAP_TEXINFO		8192
 
@@ -237,7 +237,7 @@ typedef struct miptex_s
 #define	MAX_MAP_AREAPORTALS	1024
 #define	MAX_MAP_PLANES		65536
 #define	MAX_MAP_NODES		65536
-#define	MAX_MAP_BRUSHSIDES	65536
+#define	MAX_MAP_BRUSHSIDES	0x20000
 #define	MAX_MAP_LEAFS		65536
 #define	MAX_MAP_VERTS		65536
 #define	MAX_MAP_FACES		65536
@@ -285,7 +285,7 @@ typedef struct
 typedef struct
 {
 	int			ident;
-	int			version;	
+	int			version;
 	lump_t		lumps[HEADER_LUMPS];
 } dheader_t;
 
@@ -418,7 +418,7 @@ typedef struct
 	short		side;
 
 	int			firstedge;		// we must support > 64k edges
-	short		numedges;	
+	short		numedges;
 	short		texinfo;
 
 // lighting info

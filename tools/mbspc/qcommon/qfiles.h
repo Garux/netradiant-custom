@@ -120,7 +120,7 @@ typedef struct md3Tag_s {
 ** XyzNormals		sizeof( md3XyzNormal_t ) * numVerts * numFrames
 */
 typedef struct {
-	int		ident;				// 
+	int		ident;				//
 
 	char	name[MAX_QPATH];	// polyset name
 
@@ -167,7 +167,7 @@ typedef struct {
 	int			flags;
 
 	int			numFrames;
-	int			numTags;			
+	int			numTags;
 	int			numSurfaces;
 
 	int			numSkins;
@@ -420,7 +420,7 @@ typedef struct {
 // expense of more memory allocation in the utilities
 #define	MAX_MAP_MODELS		0x400
 #define	MAX_MAP_BRUSHES		0x8000
-#define	MAX_MAP_ENTITIES	0x800
+#define	MAX_MAP_ENTITIES	0x1000
 #define	MAX_MAP_ENTSTRING	0x40000
 #define	MAX_MAP_SHADERS		0x400
 

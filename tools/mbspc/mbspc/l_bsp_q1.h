@@ -25,23 +25,23 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define	Q1_MAX_MAP_HULLS		4
 
-#define	Q1_MAX_MAP_MODELS		256
+#define	Q1_MAX_MAP_MODELS		1024
 #define	Q1_MAX_MAP_BRUSHES		4096
 #define	Q1_MAX_MAP_ENTITIES	1024
-#define	Q1_MAX_MAP_ENTSTRING	65536
+#define	Q1_MAX_MAP_ENTSTRING	0x80000
 
-#define	Q1_MAX_MAP_PLANES		8192
+#define	Q1_MAX_MAP_PLANES		32768
 #define	Q1_MAX_MAP_NODES		32767		// because negative shorts are contents
-#define	Q1_MAX_MAP_CLIPNODES	32767		//
-#define	Q1_MAX_MAP_LEAFS		32767		// 
+#define	Q1_MAX_MAP_CLIPNODES	0xFFFF		//
+#define	Q1_MAX_MAP_LEAFS		32767		//
 #define	Q1_MAX_MAP_VERTS		65535
 #define	Q1_MAX_MAP_FACES		65535
 #define	Q1_MAX_MAP_MARKSURFACES 65535
-#define	Q1_MAX_MAP_TEXINFO		4096
+#define	Q1_MAX_MAP_TEXINFO		8192
 #define	Q1_MAX_MAP_EDGES		256000
 #define	Q1_MAX_MAP_SURFEDGES	512000
-#define	Q1_MAX_MAP_MIPTEX		0x200000
-#define	Q1_MAX_MAP_LIGHTING	0x100000
+#define	Q1_MAX_MAP_MIPTEX		0x1000000
+#define	Q1_MAX_MAP_LIGHTING	0x200000
 #define	Q1_MAX_MAP_VISIBILITY	0x100000
 
 // key / value pair sizes
@@ -88,7 +88,7 @@ typedef struct
 
 typedef struct
 {
-	int			version;	
+	int			version;
 	q1_lump_t	lumps[Q1_HEADER_LUMPS];
 } q1_dheader_t;
 
@@ -179,7 +179,7 @@ typedef struct
 	short		side;
 
 	int		firstedge;		// we must support > 64k edges
-	short		numedges;	
+	short		numedges;
 	short		texinfo;
 
 // lighting info
