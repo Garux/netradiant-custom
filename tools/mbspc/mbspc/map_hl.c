@@ -708,6 +708,8 @@ bspbrush_t *HL_TextureBrushes(bspbrush_t *brushlist, int modelnum)
 	hl_miptex_t *miptex;
 	bspbrush_t *brush, *nextbrush, *prevbrush, *newbrushes, *brushlistend;
 	vec_t defaultvec[4] = {1, 0, 0, 0};
+	const int firstFaceId = hl_dmodels[modelnum].firstface;
+	const int lastFaceId = firstFaceId + hl_dmodels[modelnum].numfaces;
 
 	if (!modelnum) qprintf("texturing brushes\n");
 	if (!modelnum) qprintf("%5d brushes", numbrushes = 0);
@@ -738,11 +740,13 @@ bspbrush_t *HL_TextureBrushes(bspbrush_t *brushlist, int modelnum)
 			//least number of brushes
 			if (!lessbrushes)
 			{
-				for (i = 0; i < hl_numfaces; i++)
+				for (i = firstFaceId; i < lastFaceId; i++)
 				{
 					//the face must be in the same plane as the node plane that created
 					//this brush side
-					if (hl_dfaces[i].planenum == hl_dnodes[sidenodenum].planenum)
+					if (hl_dfaces[i].planenum == hl_dnodes[sidenodenum].planenum
+					//and also on the plane side, where winding is
+					&& (DotProduct( hl_dplanes[hl_dfaces[i].planenum].normal, mapplanes[side->planenum].normal) > 0) == !hl_dfaces[i].side)
 					{
 						//get the area the face and the brush side overlap
 						area = HL_FaceOnWinding(&hl_dfaces[i], side->winding);
@@ -797,13 +801,13 @@ bspbrush_t *HL_TextureBrushes(bspbrush_t *brushlist, int modelnum)
 				} //end for
 				//if the brush was split the original brush is removed
 				//and we just continue with the next one in the list
-				if (i < hl_numfaces) break;
+				if (i < lastFaceId) break;
 			} //end if
 			else
 			{
 				//find the face with the largest overlap with this brush side
 				//for texturing the brush side
-				for (i = 0; i < hl_numfaces; i++)
+				for (i = firstFaceId; i < lastFaceId; i++)
 				{
 					//the face must be in the same plane as the node plane that created
 					//this brush side
