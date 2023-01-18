@@ -707,6 +707,11 @@ int main (int argc, char **argv)
 			comp = COMP_BSP2MAP;
 			qfiles = GetArgumentFiles(argc, argv, &i, "bsp");
 		} //end else if
+		else if (!stricmp(argv[i], "-lessbrushes"))
+		{
+			lessbrushes = true;
+			Log_Print("lessbrushes = true\n");
+		} //end else if
 		else if (!stricmp(argv[i], "-bsp2aas"))
 		{
 			if (i + 1 >= argc) {i = 0; break;}
@@ -1058,6 +1063,7 @@ int main (int argc, char **argv)
 			"   nocsg                                   = disables brush chopping\n"
 			"   forcesidesvisible                       = force all sides to be visible\n"
 			"   grapplereach                            = calculate grapple reachabilities\n"
+			"   lessbrushes                             = less brushes when decompiling Q1, HL maps at the expense of texturing\n"
 
 /*			"   glview     = output a GL view\n"
 			"   draw       = enables drawing\n"
