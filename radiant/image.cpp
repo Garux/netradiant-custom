@@ -50,7 +50,19 @@ Image* QERApp_LoadImage( void* environment, const char* name ){
 				StringOutputStream fullname( 256 );
 				fullname << m_name << '.' << name;
 				ArchiveFile* file = GlobalFileSystem().openFile( fullname.c_str() );
+
+				// also look for .dds image in dds/ prefix like Doom3 or DarkPlaces
+				if ( file == 0 && !string_compare( name, "dds" ) )
+				{
+					fullname.clear();
+					fullname << name << '/' << m_name << '.' << name;
+					file = GlobalFileSystem().openFile( fullname.c_str() );
+				}
+
 				if ( file != 0 ) {
+					// tell user which image file is found for the given texture path
+					globalOutputStream() << "Found image file: " << makeQuoted( fullname.c_str() ) << "\n";
+
 					m_image = table.loadImage( *file );
 					file->release();
 				}
