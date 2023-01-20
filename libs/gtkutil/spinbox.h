@@ -30,7 +30,7 @@
 template<class SpinT>
 class QSpinBox_mod : public SpinT
 {
-	using ValueT = typename std::conditional<std::is_same_v<SpinT, QSpinBox>, int, double>::type;
+	using ValueT = typename std::conditional_t<std::is_same_v<SpinT, QSpinBox>, int, double>;
 public:
 	QSpinBox_mod( ValueT min = 0, ValueT max = 99, ValueT value = 0, int decimals = 2, ValueT step = 1, bool wrap = false ) : SpinT() {
 		if constexpr ( std::is_same_v<SpinT, QDoubleSpinBox> ){
@@ -71,6 +71,18 @@ protected:
 			QTimer::singleShot( 0, [this](){ SpinT::selectAll(); } );
 		SpinT::focusInEvent( event );
 	}
+	void wheelEvent( QWheelEvent *event ) override {
+		// dirty way to have substep modifiers w/o interaction with manipulated values; only makes sense for DoubleSpinbox
+		if( std::is_base_of_v<QDoubleSpinBox, SpinT> && event->modifiers().testFlag( Qt::KeyboardModifier::ShiftModifier ) ){
+			const auto step = SpinT::singleStep();
+			// with Ctrl we /1000, because internal implementation will *10
+			SpinT::setSingleStep( event->modifiers().testFlag( Qt::KeyboardModifier::ControlModifier )? step / 1000 : step / 10 );
+			SpinT::wheelEvent( event );
+			SpinT::setSingleStep( step );
+		}
+		else
+			SpinT::wheelEvent( event );
+	}
 };
 
 using DoubleSpinBox = QSpinBox_mod<QDoubleSpinBox>;
@@ -79,7 +91,7 @@ using SpinBox = QSpinBox_mod<QSpinBox>;
 
 /// \brief Label for a QSpinBox or QDoubleSpinBox
 /// Changes their value by left mouse drag
-/// Ctrl adds 10x multiplier
+/// Ctrl adds 10x multiplier, Shift 0.1, Ctrl+Shift 0.01
 template <typename SpinBoxT>
 class SpinBoxLabel : public QLabel
 {
@@ -113,7 +125,15 @@ protected:
 			if( delta != 0 ){
 				m_dragOccured = true;
 				m_dragAccum %= 20;
-				m_spin->stepBy( event->modifiers().testFlag( Qt::KeyboardModifier::ControlModifier )? delta * 10 : delta );
+				// dirty way to have substep modifiers w/o interaction with manipulated values; only makes sense for DoubleSpinbox
+				if( std::is_base_of_v<QDoubleSpinBox, SpinBoxT> && event->modifiers().testFlag( Qt::KeyboardModifier::ShiftModifier ) ){
+					const auto step = m_spin->singleStep();
+					m_spin->setSingleStep( event->modifiers().testFlag( Qt::KeyboardModifier::ControlModifier )? step / 100 : step / 10 );
+					m_spin->stepBy( delta );
+					m_spin->setSingleStep( step );
+				}
+				else
+					m_spin->stepBy( event->modifiers().testFlag( Qt::KeyboardModifier::ControlModifier )? delta * 10 : delta );
 				QCursor::setPos( m_dragStart );
 			}
 		}
