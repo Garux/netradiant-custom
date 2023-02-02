@@ -624,6 +624,13 @@ protected:
 				return true;
 			}
 		}
+		// clear focus widget while showing to keep global shortcuts working
+		else if( event->type() == QEvent::Show ) {
+			QTimer::singleShot( 0, [obj](){
+				if( static_cast<QWidget*>( obj )->focusWidget() != nullptr )
+					static_cast<QWidget*>( obj )->focusWidget()->clearFocus();
+			} );
+		}
 		return QObject::eventFilter( obj, event ); // standard event processing
 	}
 }
