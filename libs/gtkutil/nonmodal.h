@@ -36,7 +36,8 @@ class NonModalEntry : public LineEdit
 public:
 	NonModalEntry( const Callback& apply, const Callback& cancel ) : LineEdit(), m_apply( apply ), m_cancel( cancel ){
 		QObject::connect( this, &QLineEdit::textEdited, [this](){ m_editing = true; } );
-		QObject::connect( this, &QLineEdit::editingFinished, [this](){ // on enter or focus out
+		// triggered on enter & focus out; need to track editing state, as nonedited triggers this too
+		QObject::connect( this, &QLineEdit::editingFinished, [this](){
 			if( m_editing ){
 				m_apply();
 				m_editing = false;
@@ -54,6 +55,9 @@ protected:
 				event->accept();
 				// defer clearFocus(); as immediately done after certain actions = cursor visible + not handling key input
 				QTimer::singleShot( 0, [this](){ clearFocus(); } );
+			}
+			else if( keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter ){
+				m_editing = true; // on Enter m_apply() is always wanted, since not every selected instance necessarily has shown property applied
 			}
 		}
 		return LineEdit::event( event );
@@ -76,7 +80,7 @@ public:
 	void setCallbacks( const Callback& apply, const Callback& cancel ){
 		m_apply = apply;
 		m_cancel = cancel;
-		// on enter & focus out; need to track editing, as nonedited triggers this too
+		// triggered on enter & focus out; need to track editing state, as nonedited triggers this too
 		QObject::connect( this, &QAbstractSpinBox::editingFinished, [this](){
 			if( m_editing ){
 				m_editing = false;
@@ -96,6 +100,9 @@ public:
 				m_cancel();
 				clearFocus();
 				event->accept();
+			}
+			else if( keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter ){
+				m_editing = true; // on Enter m_apply() is always wanted, since not every selected instance necessarily has shown property applied
 			}
 		}
 		return DoubleSpinBox::event( event );
