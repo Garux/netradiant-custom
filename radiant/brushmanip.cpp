@@ -1150,6 +1150,9 @@ filter_brush_all_faces g_filter_brush_caulk( &g_filter_face_caulk );
 filter_face_shader_prefix g_filter_face_caulk_ja( "textures/system/caulk" );
 filter_brush_all_faces g_filter_brush_caulk_ja( &g_filter_face_caulk_ja );
 
+filter_face_shader g_filter_face_caulk_q1( "textures/skip" );
+filter_brush_all_faces g_filter_brush_caulk_q1( &g_filter_face_caulk_q1 );
+
 filter_face_flags g_filter_face_liquids( QER_LIQUID );
 filter_brush_any_face g_filter_brush_liquids( &g_filter_face_liquids );
 
@@ -1222,8 +1225,11 @@ void BrushFilters_construct(){
 		add_brush_filter( g_filter_brush_detail, EXCLUDE_DETAILS );
 		add_brush_filter( g_filter_brush_detail, EXCLUDE_STRUCTURAL, true );
 	}
-	if( string_equal( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ), "quake" ) )
+	if( string_equal( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ), "quake" ) ){
 		add_brush_filter( g_filter_brush_liquids_q1, EXCLUDE_LIQUIDS );
+		add_brush_filter( g_filter_brush_caulk_q1, EXCLUDE_CAULK );
+		add_face_filter( g_filter_face_caulk_q1, EXCLUDE_CAULK );
+	}
 	add_brush_filter( g_filter_brush_lightgrid, EXCLUDE_LIGHTGRID );
 	add_brush_filter( g_filter_brush_decals, EXCLUDE_DECALS );
 	add_brush_filter( g_filter_brush_sky, EXCLUDE_SKY );
