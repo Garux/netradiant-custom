@@ -1,0 +1,23 @@
+name: shaderManual_deploy
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - 'docs/shaderManual/**'
+  workflow_dispatch:
+
+jobs:
+  shaderManual_deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.ACTION_TOKEN }}
+        script: |
+          await github.rest.actions.createWorkflowDispatch({
+           owner: 'Garux',
+           repo: 'shaderManual',
+           workflow_id: 'static.yml',
+           ref: 'main'
+          })
