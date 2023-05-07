@@ -6244,26 +6244,30 @@ public:
 				Matrix4 skew( g_matrix4_identity );
 				skew[4] = uv_move.x() / ( m_selectedU->vertex - uv_origin ).y();
 
-				Matrix4 scale = matrix4_scale_for_vec3( // scale snap measurement space so that x/y = 1
-				                    Vector3( vector3_length( m_faceTex2local.x().vec3() ) / vector3_length( m_faceTex2local.y().vec3() ),
-				                             1, 1 ) );
-				const Vector3 skewed = vector3_normalised( matrix4_transformed_direction( matrix4_multiplied_by_matrix4( scale, skew ), g_vector3_axis_y ) );
-				matrix4_multiply_by_matrix4( scale, m_faceLocal2tex );
-				float bestDot = 0;
+				const Vector3 skewed = matrix4_transformed_direction( skew, g_vector3_axis_y );
+				const float uv_y_measure_dist = ( m_selectedU->vertex - uv_origin ).y();
+				float bestDist = FLT_MAX;
 				Vector3 bestTo;
-				forEachEdge( [&]( const Vector3& point0, const Vector3& point1 ){
-					const Vector3 vec( vector3_normalised( matrix4_transformed_point( scale, point1 ) -
-					                                       matrix4_transformed_point( scale, point0 ) ) );
-					const float dot = fabs( vector3_dot( skewed, vec ) );
-					if( dot > bestDot
-					 && fabs( vector3_dot( vec, g_vector3_axis_x ) ) < 0.99999 ){ // don't snap so, that one axis = the other
-						bestDot = dot;
-						const Vector3 vecTo( vector3_normalised( matrix4_transformed_point( m_faceLocal2tex, point1 ) -
-						                     matrix4_transformed_point( m_faceLocal2tex, point0 ) ) );
-						bestTo = vector3_dot( skewed, vec ) > 0? vecTo : -vecTo;
+				const auto snap_to_edge = [&]( const Vector3 edge ){
+					if( fabs( edge.y() ) > 1e-5 ){ // don't snap so, that one axis = the other
+						const float dist = fabs( edge.x() * uv_y_measure_dist / edge.y() - skewed.x() * uv_y_measure_dist / skewed.y() );
+						if( dist < bestDist ){
+							bestDist = dist;
+							bestTo = edge;
+						}
 					}
+				};
+				forEachEdge( [&]( const Vector3& point0, const Vector3& point1 ){
+					snap_to_edge( matrix4_transformed_point( m_faceLocal2tex, point1 ) - matrix4_transformed_point( m_faceLocal2tex, point0 ) );
 				} );
-				if( bestDot > 0.9994f || snapHard ){ //!? todo add snap: make manipulated axis orthogonal to the other
+				forEachPoint( [&]( const Vector3& point ){
+					const Vector3 po = matrix4_transformed_point( m_faceLocal2tex, point );
+					for( std::vector<PointVertex>::const_iterator i = m_Vlines.m_lines.cbegin(); i != m_Vlines.m_lines.cend(); ++++i ){
+						snap_to_edge( po - Vector3( i->vertex.x(), uv_origin.y(), 0 ) );
+					}
+					snap_to_edge( po - Vector3( uv_origin.x(), uv_origin.y(), 0 ) );
+				} );
+				if( bestDist * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){ //!? todo add snap: make manipulated axis orthogonal to the other
 					skew[4] = bestTo.x() / bestTo.y();
 				}
 
@@ -6290,26 +6294,30 @@ public:
 				Matrix4 skew( g_matrix4_identity );
 				skew[1] = uv_move.y() / ( m_selectedV->vertex - uv_origin ).x();
 
-				Matrix4 scale = matrix4_scale_for_vec3( // scale snap measurement space so that x/y = 1
-				                    Vector3( vector3_length( m_faceTex2local.x().vec3() ) / vector3_length( m_faceTex2local.y().vec3() ),
-				                             1, 1 ) );
-				const Vector3 skewed = vector3_normalised( matrix4_transformed_direction( matrix4_multiplied_by_matrix4( scale, skew ), g_vector3_axis_x ) );
-				matrix4_multiply_by_matrix4( scale, m_faceLocal2tex );
-				float bestDot = 0;
+				const Vector3 skewed = matrix4_transformed_direction( skew, g_vector3_axis_x );
+				const float uv_x_measure_dist = ( m_selectedV->vertex - uv_origin ).x();
+				float bestDist = FLT_MAX;
 				Vector3 bestTo;
-				forEachEdge( [&]( const Vector3& point0, const Vector3& point1 ){
-					const Vector3 vec( vector3_normalised( matrix4_transformed_point( scale, point1 ) -
-					                                       matrix4_transformed_point( scale, point0 ) ) );
-					const float dot = fabs( vector3_dot( skewed, vec ) );
-					if( dot > bestDot
-					 && fabs( vector3_dot( vec, g_vector3_axis_y ) ) < 0.99999 ){ // don't snap so, that one axis = the other
-						bestDot = dot;
-						const Vector3 vecTo( vector3_normalised( matrix4_transformed_point( m_faceLocal2tex, point1 ) -
-						                     matrix4_transformed_point( m_faceLocal2tex, point0 ) ) );
-						bestTo = vector3_dot( skewed, vec ) > 0? vecTo : -vecTo;
+				const auto snap_to_edge = [&]( const Vector3 edge ){
+					if( fabs( edge.x() ) > 1e-5 ){ // don't snap so, that one axis = the other
+						const float dist = fabs( edge.y() * uv_x_measure_dist / edge.x() - skewed.y() * uv_x_measure_dist / skewed.x() );
+						if( dist < bestDist ){
+							bestDist = dist;
+							bestTo = edge;
+						}
 					}
+				};
+				forEachEdge( [&]( const Vector3& point0, const Vector3& point1 ){
+					snap_to_edge( matrix4_transformed_point( m_faceLocal2tex, point1 ) - matrix4_transformed_point( m_faceLocal2tex, point0 ) );
 				} );
-				if( bestDot > 0.9994f || snapHard ){
+				forEachPoint( [&]( const Vector3& point ){
+					const Vector3 po = matrix4_transformed_point( m_faceLocal2tex, point );
+					for( std::vector<PointVertex>::const_iterator i = m_Ulines.m_lines.cbegin(); i != m_Ulines.m_lines.cend(); ++++i ){
+						snap_to_edge( po - Vector3( uv_origin.x(), i->vertex.y(), 0 ) );
+					}
+					snap_to_edge( po - Vector3( uv_origin.x(), uv_origin.y(), 0 ) );
+				} );
+				if( bestDist * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){ //!? todo add snap: make manipulated axis orthogonal to the other
 					skew[1] = bestTo.y() / bestTo.x();
 				}
 
