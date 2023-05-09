@@ -5855,11 +5855,35 @@ public:
 	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
 		m_start = point_on_plane( m_plane, m_view->GetViewMatrix(), x, y );
 	}
-	//!? todo change snap dist measurement from world to screenspace
 	//!? fix meaningless undo on grid/origin change, then click tex or lines
 	//!? todo no snap mode with alt modifier
 	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapHard, const bool alt ){
 		const Vector3 current = point_on_plane( m_plane, m_view->GetViewMatrix(), x, y );
+
+		const class Snapper
+		{
+			float m_x; //uv axis to screen coef
+			float m_y;
+		public:
+			Snapper( const Vector3& current, const Matrix4& faceTex2local ) {
+				Vector3 scale( m_view->GetViewport().x().x(), m_view->GetViewport().y().y(), 0 );
+				scale /= float{ std::max( scale.x(), scale.y() ) }; // normalise to be consistent over screen width & height
+				const Matrix4 proj = matrix4_multiplied_by_matrix4( matrix4_scale_for_vec3( scale ), m_view->GetViewMatrix() );
+				// get unary world displacements over uv axes to screenspace
+				const Vector3 curr = vector4_projected( matrix4_transformed_vector4( proj, Vector4( current, 1 ) ) );
+				const Vector3 x = vector4_projected( matrix4_transformed_vector4( proj, Vector4( current + vector3_normalised( faceTex2local.x().vec3() ), 1 ) ) );
+				const Vector3 y = vector4_projected( matrix4_transformed_vector4( proj, Vector4( current + vector3_normalised( faceTex2local.y().vec3() ), 1 ) ) );
+				m_x = vector3_length( x - curr ) * vector3_length( faceTex2local.x().vec3() ); // consider uv space scaling
+				m_y = vector3_length( y - curr ) * vector3_length( faceTex2local.y().vec3() );
+			}
+			bool x_snaps( float uv_dist, float epsilon = .01f ) const {
+				return uv_dist * m_x < epsilon;
+			}
+			bool y_snaps( float uv_dist, float epsilon = .01f ) const {
+				return uv_dist * m_y < epsilon;
+			}
+		} snapper( current, m_faceTex2local );
+
 		switch ( m_selection )
 		{
 		case ePivot:
@@ -5897,13 +5921,13 @@ public:
 					}
 				} );
 				Vector3 result( uv_origin_start );
-				if( bestDistU * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){
+				if( snapper.y_snaps( bestDistU ) || snapHard ){
 					result.y() = snapToU;
 				}
 				else{
 					result.y() = uv_origin.y();
 				}
-				if( bestDistV * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){
+				if( snapper.x_snaps( bestDistV ) || snapHard ){
 					result.x() = snapToV;
 				}
 				else{
@@ -5935,7 +5959,7 @@ public:
 					}
 				} );
 				Vector3 result( uv_origin_start );
-				if( bestDist * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){
+				if( snapper.y_snaps( bestDist ) || snapHard ){
 					result.y() = snapTo;
 				}
 				else{
@@ -5967,7 +5991,7 @@ public:
 					}
 				} );
 				Vector3 result( uv_origin_start );
-				if( bestDist * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){
+				if( snapper.x_snaps( bestDist ) || snapHard ){
 					result.x() = snapTo;
 				}
 				else{
@@ -6114,7 +6138,7 @@ public:
 					}
 				} );
 				Vector3 result( 1, uv_current.y(), 1 );
-				if( bestDist * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){
+				if( snapper.y_snaps( bestDist ) || snapHard ){
 					result.y() = snapTo;
 				}
 				result.y() = ( result.y() - uv_origin.y() ) / ( uv_start.y() - uv_origin.y() );
@@ -6154,7 +6178,7 @@ public:
 					}
 				} );
 				Vector3 result( uv_current.x(), 1, 1 );
-				if( bestDist * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){
+				if( snapper.x_snaps( bestDist ) || snapHard ){
 					result.x() = snapTo;
 				}
 				result.x() = ( result.x() - uv_origin.x() ) / ( uv_start.x() - uv_origin.x() );
@@ -6204,12 +6228,12 @@ public:
 				} );
 
 				Vector3 result( uv_current.x(), uv_current.y(), 1 );
-				if( bestDistU * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){
+				if( snapper.y_snaps( bestDistU ) || snapHard ){
 					result.y() = snapToU;
 				}
 				result.y() = ( result.y() - uv_origin.y() ) / ( uv_start.y() - uv_origin.y() );
 
-				if( bestDistV * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){
+				if( snapper.x_snaps( bestDistV ) || snapHard ){
 					result.x() = snapToV;
 				}
 				result.x() = ( result.x() - uv_origin.x() ) / ( uv_start.x() - uv_origin.x() );
@@ -6267,7 +6291,7 @@ public:
 					}
 					snap_to_edge( po - Vector3( uv_origin.x(), uv_origin.y(), 0 ) );
 				} );
-				if( bestDist * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){ //!? todo add snap: make manipulated axis orthogonal to the other
+				if( snapper.x_snaps( bestDist, .015f ) || snapHard ){ //!? todo add snap: make manipulated axis orthogonal to the other
 					skew[4] = bestTo.x() / bestTo.y();
 				}
 
@@ -6317,7 +6341,7 @@ public:
 					}
 					snap_to_edge( po - Vector3( uv_origin.x(), uv_origin.y(), 0 ) );
 				} );
-				if( bestDist * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){ //!? todo add snap: make manipulated axis orthogonal to the other
+				if( snapper.y_snaps( bestDist, .015f ) || snapHard ){ //!? todo add snap: make manipulated axis orthogonal to the other
 					skew[1] = bestTo.y() / bestTo.x();
 				}
 
@@ -6367,10 +6391,10 @@ public:
 				functor( matrix4_transformed_point( m_faceLocal2tex, m_origin ) );
 
 				Vector3 result( uvmove );
-				if( bestDistU * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){
+				if( snapper.y_snaps( bestDistU ) || snapHard ){
 					result.y() = snapMoveU;
 				}
-				if( bestDistV * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){
+				if( snapper.x_snaps( bestDistV ) || snapHard ){
 					result.x() = snapMoveV;
 				}
 
@@ -6444,10 +6468,10 @@ public:
 				}
 
 				Vector3 result( uvmove );
-				if( bestDistU * vector3_length( m_faceTex2local.y().vec3() ) < 3 || snapHard ){
+				if( snapper.y_snaps( bestDistU ) || snapHard ){
 					result.y() = snapMoveU;
 				}
-				if( bestDistV * vector3_length( m_faceTex2local.x().vec3() ) < 3 || snapHard ){
+				if( snapper.x_snaps( bestDistV ) || snapHard ){
 					result.x() = snapMoveV;
 				}
 
