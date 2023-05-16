@@ -39,7 +39,7 @@ jobs:
 
     - name: Build
       run: |
-        make DOWNLOAD_GAMEPACKS=no MAKEFILE_CONF=msys2-Makefile.conf BUILD=release -j$(nproc) 2> windows-warn-${{ matrix.arch }}.log
+        make DOWNLOAD_GAMEPACKS=no MAKEFILE_CONF=msys2-Makefile.conf BUILD=release -j$(nproc)
         wget https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
         unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
         wget https://www.dropbox.com/s/hcgkwzzmja3m6c0/netradiant-custom-extra-win.zip
@@ -50,11 +50,6 @@ jobs:
         name: Windows-${{ matrix.arch }}
         path: install/
         if-no-files-found: error
-
-    - uses: actions/upload-artifact@v3
-      with:
-        name: warnings
-        path: windows-warn*.log
 
   linux:
     name: ${{ matrix.config }} Linux ${{ matrix.arch }}
