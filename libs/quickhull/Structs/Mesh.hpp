@@ -5,8 +5,6 @@
 #include "Vector3.hpp"
 #include "Plane.hpp"
 #include "Pool.hpp"
-#include "../Types.hpp"
-#include <string>
 #include <array>
 #include <cassert>
 #include <limits>
@@ -20,32 +18,32 @@ namespace quickhull {
 	class MeshBuilder {
 	public:
 		struct HalfEdge {
-			IndexType m_endVertex;
-			IndexType m_opp;
-			IndexType m_face;
-			IndexType m_next;
+			size_t m_endVertex;
+			size_t m_opp;
+			size_t m_face;
+			size_t m_next;
 			
 			void disable() {
-				m_endVertex = std::numeric_limits<IndexType>::max();
+				m_endVertex = std::numeric_limits<size_t>::max();
 			}
 			
 			bool isDisabled() const {
-				return m_endVertex == std::numeric_limits<IndexType>::max();
+				return m_endVertex == std::numeric_limits<size_t>::max();
 			}
 		};
 
 		struct Face {
-			IndexType m_he;
+			size_t m_he;
 			Plane<T> m_P;
 			T m_mostDistantPointDist;
-			IndexType m_mostDistantPoint;
+			size_t m_mostDistantPoint;
 			size_t m_visibilityCheckedOnIteration;
 			std::uint8_t m_isVisibleFaceOnCurrentIteration : 1;
 			std::uint8_t m_inFaceStack : 1;
 			std::uint8_t m_horizonEdgesOnCurrentIteration : 3; // Bit for each half edge assigned to this face, each being 0 or 1 depending on whether the edge belongs to horizon edge
-			std::unique_ptr<std::vector<IndexType>> m_pointsOnPositiveSide;
+			std::unique_ptr<std::vector<size_t>> m_pointsOnPositiveSide;
 
-			Face() : m_he(std::numeric_limits<IndexType>::max()),
+			Face() : m_he(std::numeric_limits<size_t>::max()),
 					 m_mostDistantPointDist(0),
 					 m_mostDistantPoint(0),
 					 m_visibilityCheckedOnIteration(0),
@@ -57,11 +55,11 @@ namespace quickhull {
 			}
 			
 			void disable() {
-				m_he = std::numeric_limits<IndexType>::max();
+				m_he = std::numeric_limits<size_t>::max();
 			}
 
 			bool isDisabled() const {
-				return m_he == std::numeric_limits<IndexType>::max();
+				return m_he == std::numeric_limits<size_t>::max();
 			}
 		};
 
@@ -72,11 +70,11 @@ namespace quickhull {
 		// When the mesh is modified and faces and half edges are removed from it, we do not actually remove them from the container vectors.
 		// Insted, they are marked as disabled which means that the indices can be reused when we need to add new faces and half edges to the mesh.
 		// We store the free indices in the following vectors.
-		std::vector<IndexType> m_disabledFaces,m_disabledHalfEdges;
+		std::vector<size_t> m_disabledFaces,m_disabledHalfEdges;
 		
-		IndexType addFace() {
+		size_t addFace() {
 			if (m_disabledFaces.size()) {
-				IndexType index = m_disabledFaces.back();
+				size_t index = m_disabledFaces.back();
 				auto& f = m_faces[index];
 				assert(f.isDisabled());
 				assert(!f.m_pointsOnPositiveSide);
@@ -88,9 +86,9 @@ namespace quickhull {
 			return m_faces.size()-1;
 		}
 
-		IndexType addHalfEdge()	{
+		size_t addHalfEdge()	{
 			if (m_disabledHalfEdges.size()) {
-				const IndexType index = m_disabledHalfEdges.back();
+				const size_t index = m_disabledHalfEdges.back();
 				m_disabledHalfEdges.pop_back();
 				return index;
 			}
@@ -99,14 +97,14 @@ namespace quickhull {
 		}
 
 		// Mark a face as disabled and return a pointer to the points that were on the positive of it.
-		std::unique_ptr<std::vector<IndexType>> disableFace(IndexType faceIndex) {
+		std::unique_ptr<std::vector<size_t>> disableFace(size_t faceIndex) {
 			auto& f = m_faces[faceIndex];
 			f.disable();
 			m_disabledFaces.push_back(faceIndex);
 			return std::move(f.m_pointsOnPositiveSide);
 		}
 
-		void disableHalfEdge(IndexType heIndex) {
+		void disableHalfEdge(size_t heIndex) {
 			auto& he = m_halfEdges[heIndex];
 			he.disable();
 			m_disabledHalfEdges.push_back(heIndex);
@@ -115,7 +113,15 @@ namespace quickhull {
 		MeshBuilder() = default;
 		
 		// Create a mesh with initial tetrahedron ABCD. Dot product of AB with the normal of triangle ABC should be negative.
-		MeshBuilder(IndexType a, IndexType b, IndexType c, IndexType d) {
+		void setup(size_t a, size_t b, size_t c, size_t d) {
+			m_faces.clear();
+			m_halfEdges.clear();
+			m_disabledFaces.clear();
+			m_disabledHalfEdges.clear();
+			
+			m_faces.reserve(4);
+			m_halfEdges.reserve(12);
+			
 			// Create halfedges
 			HalfEdge AB;
 			AB.m_endVertex = b;
@@ -219,8 +225,8 @@ namespace quickhull {
 			m_faces.push_back(std::move(CBD));
 		}
 
-		std::array<IndexType,3> getVertexIndicesOfFace(const Face& f) const {
-			std::array<IndexType,3> v;
+		std::array<size_t,3> getVertexIndicesOfFace(const Face& f) const {
+			std::array<size_t,3> v;
 			const HalfEdge* he = &m_halfEdges[f.m_he];
 			v[0] = he->m_endVertex;
 			he = &m_halfEdges[he->m_next];
@@ -230,11 +236,11 @@ namespace quickhull {
 			return v;
 		}
 
-		std::array<IndexType,2> getVertexIndicesOfHalfEdge(const HalfEdge& he) const {
+		std::array<size_t,2> getVertexIndicesOfHalfEdge(const HalfEdge& he) const {
 			return {m_halfEdges[he.m_opp].m_endVertex,he.m_endVertex};
 		}
 
-		std::array<IndexType,3> getHalfEdgeIndicesOfFace(const Face& f) const {
+		std::array<size_t,3> getHalfEdgeIndicesOfFace(const Face& f) const {
 			return {f.m_he,m_halfEdges[f.m_he].m_next,m_halfEdges[m_halfEdges[f.m_he].m_next].m_next};
 		}
 	};
