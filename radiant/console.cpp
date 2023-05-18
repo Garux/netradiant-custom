@@ -35,7 +35,7 @@
 #include "gtkmisc.h"
 #include "mainframe.h"
 
-#include <QTextEdit>
+#include <QPlainTextEdit>
 #include <QContextMenuEvent>
 
 // handle to the console log file
@@ -81,15 +81,15 @@ void Sys_LogFile( bool enable ){
 	}
 }
 
-QTextEdit* g_console = 0;
+QPlainTextEdit* g_console = 0;
 
-class QTextEdit_console : public QTextEdit
+class QPlainTextEdit_console : public QPlainTextEdit
 {
 protected:
 	void contextMenuEvent( QContextMenuEvent *event ) override {
 		QMenu *menu = createStandardContextMenu();
 		QAction *action = menu->addAction( "Clear" );
-		connect( action, &QAction::triggered, this, &QTextEdit::clear );
+		connect( action, &QAction::triggered, this, &QPlainTextEdit::clear );
 		menu->exec( event->globalPos() );
 		delete menu;
 	}
@@ -97,10 +97,9 @@ protected:
 
 
 QWidget* Console_constructWindow(){
-	QTextEdit *text = new QTextEdit_console();
+	QPlainTextEdit *text = new QPlainTextEdit_console();
 	text->setReadOnly( true );
 	text->setUndoRedoEnabled( false );
-	text->setAcceptRichText( false );
 	text->setMinimumHeight( 10 );
 	text->setFocusPolicy( Qt::FocusPolicy::NoFocus );
 
@@ -120,9 +119,9 @@ QWidget* Console_constructWindow(){
 
 class GtkTextBufferOutputStream : public TextOutputStream
 {
-	QTextEdit* textBuffer;
+	QPlainTextEdit* textBuffer;
 public:
-	GtkTextBufferOutputStream( QTextEdit* textBuffer ) : textBuffer( textBuffer ) {
+	GtkTextBufferOutputStream( QPlainTextEdit* textBuffer ) : textBuffer( textBuffer ) {
 	}
 	std::size_t
 #ifdef __GNUC__
@@ -152,21 +151,25 @@ std::size_t Sys_Print( int level, const char* buf, std::size_t length ){
 
 	if ( level != SYS_NOCON ) {
 		if ( g_console != 0 ) {
-			g_console->moveCursor( QTextCursor::End ); // must go before setTextColor()
+			g_console->moveCursor( QTextCursor::End ); // must go before setTextColor() & insertPlainText()
 
-			switch ( level )
 			{
-			case SYS_WRN:
-				g_console->setTextColor( QColor( 255, 127, 0 ) );
-				break;
-			case SYS_ERR:
-				g_console->setTextColor( QColor( 255, 0, 0 ) );
-				break;
-			case SYS_STD:
-			case SYS_VRB:
-			default:
-				g_console->setTextColor( g_console->palette().text().color() );
-				break;
+				QTextCharFormat format = g_console->currentCharFormat();
+				switch ( level )
+				{
+				case SYS_WRN:
+					format.setForeground( QColor( 255, 127, 0 ) );
+					break;
+				case SYS_ERR:
+					format.setForeground( QColor( 255, 0, 0 ) );
+					break;
+				case SYS_STD:
+				case SYS_VRB:
+				default:
+					format.setForeground( g_console->palette().text().color() );
+					break;
+				}
+				g_console->setCurrentCharFormat( format );
 			}
 
 			{

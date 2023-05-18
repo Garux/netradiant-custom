@@ -38,7 +38,7 @@
 #include <QSplitter>
 #include <QTreeWidget>
 #include <QHeaderView>
-#include <QTextEdit>
+#include <QPlainTextEdit>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGridLayout>
@@ -691,7 +691,7 @@ namespace
 bool g_entityInspector_windowConstructed = false;
 
 QTreeWidget* g_entityClassList;
-QTextEdit* g_entityClassComment;
+QPlainTextEdit* g_entityClassComment;
 
 QCheckBox* g_entitySpawnflagsCheck[MAX_FLAGS];
 
@@ -1192,10 +1192,9 @@ QWidget* EntityInspector_constructWindow( QWidget* toplevel ){
 		splitter->addWidget( tree );
 	}
 	{
-		auto text = g_entityClassComment = new QTextEdit;
+		auto text = g_entityClassComment = new QPlainTextEdit;
 		text->setReadOnly( true );
 		text->setUndoRedoEnabled( false );
-		text->setAcceptRichText( false );
 
 		splitter->addWidget( text );
 	}
