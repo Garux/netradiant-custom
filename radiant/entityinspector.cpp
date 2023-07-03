@@ -51,7 +51,7 @@
 #include <QKeyEvent>
 #include <QApplication>
 #include <QButtonGroup>
-#include <QComboBox>
+#include "gtkutil/combobox.h"
 
 #include "os/path.h"
 #include "eclasslib.h"
@@ -651,7 +651,7 @@ class ListAttribute final : public EntityAttribute
 public:
 	ListAttribute( const char* key, const ListAttributeType& type ) :
 		m_key( key ),
-		m_combo( new QComboBox ),
+		m_combo( new ComboBox ),
 		m_type( type ){
 		for ( const auto&[ name, value ] : type )
 		{

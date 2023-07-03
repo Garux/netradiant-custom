@@ -33,8 +33,8 @@
 #include <QSlider>
 #include <QLabel>
 #include <QPushButton>
-#include <QComboBox>
 #include <QCheckBox>
+#include "gtkutil/combobox.h"
 
 
 static void OnColor( PackedColour& clr ){
@@ -132,7 +132,7 @@ void DoConfigDialog(){
 				form_add_slider( form, portals.clip_range, 64, 8192, "Clip range = ", "", false );
 			}
 			{
-				auto combo = new QComboBox;
+				auto combo = new ComboBox;
 				vbox->addWidget( combo );
 				combo->addItem( "Z-Buffer Test and Write (recommended for solid or no polygons)" );
 				combo->addItem( "Z-Buffer Test Only (recommended for transparent polygons)" );

@@ -23,12 +23,17 @@
 
 #include <QComboBox>
 #include <QKeyEvent>
+#include <QAbstractItemView>
 
 /// @brief Subclassed QComboBox not comsuming Enter key (why does it do it? works as expected for editable ComboBox)
 /// purpose is to have working confirmation by Enter in dialogs
-/// fixme unsolved crude problem here is triggering arrows, page, home, end global shortcuts when pressed in popup; even if modal dialog 😱
+/// +fixes crude problem: triggering arrows, page, home, end global shortcuts when pressed in popup; even if modal dialog 😱
 class ComboBox : public QComboBox
 {
+public:
+	ComboBox( QWidget *parent = nullptr ) : QComboBox( parent ){
+		this->view()->installEventFilter( this );
+	}
 protected:
 	void keyPressEvent( QKeyEvent *event ) override {
 		if( event->key() == Qt::Key_Enter
@@ -37,5 +42,20 @@ protected:
 			return;
 		}
 		QComboBox::keyPressEvent( event );
+	}
+	bool eventFilter( QObject *obj, QEvent *event ) override {
+		// the popup leaks ALL shortcuts 😱 to global space 😱😱😱 besides ones handled in QComboBoxPrivateContainer::eventFilter
+		// it very bad, can interact with the editor while in modal dialog and crash it
+		// filter them all besides ones, taken by the other filter
+		if( event->type() == QEvent::ShortcutOverride ) {
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			if( keyEvent->key() != Qt::Key_Return
+			 && keyEvent->key() != Qt::Key_Enter
+			 && !keyEvent->matches( QKeySequence::Cancel ) ){
+				event->accept();
+				return true;
+			 }
+		}
+		return QObject::eventFilter( obj, event ); // standard event processing
 	}
 };
