@@ -90,7 +90,8 @@ public:
 				dirs.pop_back();
 				path.pop();
 			}
-			else if ( !string_equal( name, "." ) && !string_equal( name, ".." ) ) {
+			else if ( !string_equal( name, "." ) && !string_equal( name, ".." )
+			&& !( string_empty( root ) && string_equal_suffix_nocase( name, ".pk3dir" ) ) ) { //skip *.pk3dir in root, it is processed as DirectoryArchive
 				path.push_filename( name );
 
 				bool is_directory = file_is_directory( path.c_str() );

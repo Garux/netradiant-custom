@@ -1183,12 +1183,11 @@ class ModelPaths_ArchiveVisitor : public Archive::Visitor
 	ModelFS& m_modelFS;
 public:
 	const ModelFoldersMap& m_modelFoldersMap;
-	bool m_avoid_pk3dir;
 	ModelPaths_ArchiveVisitor( const StringSetWithLambda& modelExtensions, ModelFS& modelFS, const ModelFoldersMap& modelFoldersMap )
 		: m_modelExtensions( modelExtensions ),	m_modelFS( modelFS ), m_modelFoldersMap( modelFoldersMap ){
 	}
 	void visit( const char* name ) override {
-		if( m_modelExtensions.count( path_get_extension( name ) ) && ( !m_avoid_pk3dir || !string_in_string_nocase( name, ".pk3dir/" ) ) ){
+		if( m_modelExtensions.count( path_get_extension( name ) ) ){
 			m_modelFS.insert( name );
 //%			globalOutputStream() << name << " name\n";
 		}
@@ -1200,11 +1199,6 @@ void ModelPaths_addFromArchive( ModelPaths_ArchiveVisitor& visitor, const char *
 	Archive *archive = GlobalFileSystem().getArchive( archiveName, false );
 	if ( archive != nullptr ) {
 		for( const auto& folder : visitor.m_modelFoldersMap ){
-			/* should better avoid .pk3dir traversal right in archive implementation for normal folders */
-			visitor.m_avoid_pk3dir = string_empty( folder.first.c_str() ) // root
-			                      && folder.second > 1 // deep nuff
-			                      && string_equal_suffix( archiveName, "/" ) // normal folder, not archive
-			                      && !string_equal_suffix_nocase( archiveName, ".pk3dir/" ); // not .pk3dir
 			archive->forEachFile( Archive::VisitorFunc( visitor, Archive::eFiles, folder.second ), folder.first.c_str() );
 		}
 	}
