@@ -2164,7 +2164,6 @@ int LightMain( Args& args ){
 			spotScale *= f;
 			areaScale *= f;
 			skyScale *= f;
-			bounceScale *= f;
 			Sys_Printf( "All light scaled by %f\n", f );
 		}
 
