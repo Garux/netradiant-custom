@@ -222,7 +222,7 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>spawnflags</code>:</strong>  8 = when generating clipping planes, perform extrusion using the original normals from the model instead of per-triangle best axial normals</li>
 		<li><strong><code>spawnflags</code>:</strong> 16 = when generating clipping planes, perform extrusion using only up or down pointing normals (ideal for terrain)</li>
 		<li><strong><code>spawnflags</code>:</strong> 32 = turn vertex color from the model into alpha (for terrain blending)</li>
-		<li><strong><code>target</code>:</strong> points to brush entity to bake the model into</li>
+		<li><strong><code>target</code>, <code>_target</code>:</strong> points to brush entity with any of matching <strong><code>targetname</code></strong>/<strong><code>_targetname</code></strong> keys to bake the model into</li>
 	</ul>
 	</li>
 		<li>On classname <strong><code>_skybox</code></strong>

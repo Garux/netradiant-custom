@@ -1274,7 +1274,7 @@ void AddTriangleModels( entity_t& eparent ){
 		targetName = "";
 	}
 	else{  /* misc_model entities target non-worldspawn brush model entities */
-		if ( !eparent.read_keyvalue( targetName, "targetname" ) ) {
+		if ( !eparent.read_keyvalue( targetName, "_targetname", "targetname" ) ) {
 			return;
 		}
 	}
@@ -1291,7 +1291,7 @@ void AddTriangleModels( entity_t& eparent ){
 		}
 
 		/* ydnar: added support for md3 models on non-worldspawn models */
-		if ( !strEqual( e.valueForKey( "target" ), targetName ) ) {
+		if ( const char *target = ""; e.read_keyvalue( target, "_target", "target" ), !strEqual( target, targetName ) ) {
 			continue;
 		}
 
