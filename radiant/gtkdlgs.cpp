@@ -488,6 +488,7 @@ no completion on undo, paste? //atm on adding undo, not on removing
 QStringLiteral optimization
 QCompleter inactive entry in list // because is wrapAround()
 	check %p %t lengths in hl
+display line numbers, exremely useful for error messages handling
 */
 
 #include <set>
@@ -855,7 +856,7 @@ static const std::vector<ShaderFormat> g_shaderGeneralFormats{
 		"q3map_floodLight %c %c %c %f %f %f", c_pageGlob, c_colorKeyLv1
 	},
 	{
-		"q3map_fogDir %f %f %f", c_pageGlob, c_colorKeyLv1
+		"q3map_fogDir ( %f %f %f )", c_pageGlob, c_colorKeyLv1
 	},
 	{
 		"q3map_foliage %p %f %f %f %i", c_pageGlob, c_colorKeyLv1
@@ -973,7 +974,7 @@ static const std::vector<ShaderFormat> g_shaderGeneralFormats{
 		"q3map_surfaceModel %p %f %f %f %f %f %f %i", c_pageGlob, c_colorKeyLv1
 	},
 	{
-		"q3map_tcGen %s %f %f", c_pageGlob, c_colorKeyLv1, {
+		"q3map_tcGen %s ( %f %f %f ) ( %f %f %f )", c_pageGlob, c_colorKeyLv1, {
 			"vector",
 			"ivector",
 		}
