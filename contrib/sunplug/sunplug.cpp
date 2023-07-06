@@ -260,8 +260,8 @@ void MapCoordinator(){
 
 					if( dialog.exec() ){
 						UndoableCommand undo( "SunPlug.entitySetMapcoords" );
-						theWorldspawn->setKeyValue( "mapcoordsmins", ( spin_minX->text() + " " + spin_minY->text() ).toLatin1().constData() );
-						theWorldspawn->setKeyValue( "mapcoordsmaxs", ( spin_maxX->text() + " " + spin_maxY->text() ).toLatin1().constData() );
+						theWorldspawn->setKeyValue( "mapcoordsmins", ( spin_minX->cleanText() + " " + spin_minY->cleanText() ).toLatin1().constData() );
+						theWorldspawn->setKeyValue( "mapcoordsmaxs", ( spin_maxX->cleanText() + " " + spin_maxY->cleanText() ).toLatin1().constData() );
 					}
 				}
 			}
