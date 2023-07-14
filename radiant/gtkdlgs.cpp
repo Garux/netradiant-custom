@@ -502,6 +502,7 @@ display line numbers, exremely useful for error messages handling
 #include <QStringListModel>
 #include <QAbstractItemView>
 #include <QScrollBar>
+#include <QPainter>
 #include "stringio.h"
 #include "plugin.h"
 #include "ifilesystem.h"
@@ -594,6 +595,9 @@ static const char c_pageGlob[] = "q3map-global-directives.html#";
 static const char c_pageSurf[] = "q3map-surface-parameter-directives.html$";
 static const char c_pageQER[] = "quake-editor-radiant-directives.html#";
 static const char c_pageStage[] = "stage-directives.html#";
+
+static const QColor c_colorForeground( Qt::white );
+static const QColor c_colorBackground( 46, 52, 54 );
 
 static const QColor c_colorComment( Qt::darkGray );
 static const QColor c_colorShaderName( 249, 174, 88 );
@@ -1561,8 +1565,8 @@ public:
 
 		// force back/foreground colors to not be ruined by global theme
 		QPalette pal = palette();
-		pal.setColor( QPalette::Base, QColor( 46, 52, 54 ) );
-		pal.setColor( QPalette::Text, Qt::white );
+		pal.setColor( QPalette::Base, c_colorBackground );
+		pal.setColor( QPalette::Text, c_colorForeground );
 		setPalette( pal );
 	}
 protected:
@@ -1732,6 +1736,32 @@ protected:
 			return;
 		}
 		QPlainTextEdit::wheelEvent(e);
+	}
+	void paintEvent( QPaintEvent* pEvent ) override {
+		static QRect rect;
+		static int block;
+		int newblock = textCursor().blockNumber();
+		QRect newrect = cursorRect();
+		newrect.setLeft( -1 );
+		newrect.setRight( width() - 1 );
+		if( rect != newrect || block != newblock ){
+			QRegion region( newrect + QMargins( 0, 0, 0, 1 ) ); // expand invalidated area, bottom line appears drawn 1px lower
+			// this may differ from static rect, if e.g. scrolled, thus reevaluate
+			QRect oldr = cursorRect( QTextCursor( document()->findBlockByNumber( block ) ) );
+			oldr.setLeft( -1 );
+			oldr.setRight( width() - 1 );
+			region += oldr + QMargins( 0, 0, 0, 1 );
+
+			rect = newrect;
+			block = newblock;
+			viewport()->update( region );
+		}
+		else{ // highlight current line
+			QPainter painter( viewport() );
+			painter.setPen( c_colorBackground.lighter( 150 ) );
+			painter.drawRect( rect );
+		}
+		QPlainTextEdit::paintEvent( pEvent );
 	}
 private:
 	void texTree_construct(){
