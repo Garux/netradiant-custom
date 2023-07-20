@@ -41,53 +41,63 @@ void PlugInMenu_Add( QMenu* plugin_menu, IPlugIn* pPlugIn ){
 	const char *menuText;
 	MenuStack menuStack;
 
-	menu = plugin_menu->addMenu( pPlugIn->getMenuName() );
-
-	menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
-
 	std::size_t nCount = pPlugIn->getCommandCount();
+	globalErrorStream() << pPlugIn->getMenuName() << " mismatched > <. " << menuStack.size() << " submenu(s) not closed.\n";
 	{
-		while ( nCount > 0 )
-		{
-			menuText = pPlugIn->getCommandTitle( --nCount );
+		globalErrorStream() << pPlugIn->getMenuName() << " count: " << nCount << "\n";
+		if (nCount > 1) {
+			menu = plugin_menu->addMenu( pPlugIn->getMenuName() );
 
-			if ( menuText != 0 && strlen( menuText ) > 0 ) {
-				if ( plugin_menu_separator( menuText ) ) {
-					menu->addSeparator();
-				}
-				else if ( plugin_submenu_in( menuText ) ) {
-					menuText = pPlugIn->getCommandTitle( --nCount );
-					if ( plugin_menu_special( menuText ) ) {
-						globalErrorStream() << pPlugIn->getMenuName() << " Invalid title (" << menuText << ") for submenu.\n";
+			menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
+			while ( nCount > 0 )
+			{
+				menuText = pPlugIn->getCommandTitle( --nCount );
+
+				if ( menuText != 0 && strlen( menuText ) > 0 ) {
+					if ( plugin_menu_separator( menuText ) ) {
+						menu->addSeparator();
+					}
+					else if ( plugin_submenu_in( menuText ) ) {
+						menuText = pPlugIn->getCommandTitle( --nCount );
+						if ( plugin_menu_special( menuText ) ) {
+							globalErrorStream() << pPlugIn->getMenuName() << " Invalid title (" << menuText << ") for submenu.\n";
+							continue;
+						}
+						menuStack.push( menu );
+						menu = menu->addMenu( menuText );
+
+						menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
+
 						continue;
 					}
-					menuStack.push( menu );
-					menu = menu->addMenu( menuText );
-
-					menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
-
-					continue;
-				}
-				else if ( plugin_submenu_out( menuText ) ) {
-					if ( !menuStack.empty() ) {
-						menu = menuStack.top();
-						menuStack.pop();
+					else if ( plugin_submenu_out( menuText ) ) {
+						if ( !menuStack.empty() ) {
+							menu = menuStack.top();
+							menuStack.pop();
+						}
+						else
+						{
+							globalErrorStream() << pPlugIn->getMenuName() << ": Attempt to end non-existent submenu ignored.\n";
+						}
+						continue;
 					}
 					else
 					{
-						globalErrorStream() << pPlugIn->getMenuName() << ": Attempt to end non-existent submenu ignored.\n";
+						create_menu_item_with_mnemonic( menu, menuText, pPlugIn->getGlobalCommand( nCount ) );
 					}
-					continue;
-				}
-				else
-				{
-					create_menu_item_with_mnemonic( menu, menuText, pPlugIn->getGlobalCommand( nCount ) );
 				}
 			}
+			if ( !menuStack.empty() ) {
+				globalErrorStream() << pPlugIn->getMenuName() << " mismatched > <. " << menuStack.size() << " submenu(s) not closed.\n";
+			}
+		} else if (nCount == 1) {
+			menuText = pPlugIn->getCommandTitle( --nCount );
+
+			if ( menuText != 0 && strlen( menuText ) > 0 ) {
+				create_menu_item_with_mnemonic( plugin_menu, menuText, pPlugIn->getGlobalCommand( nCount ) );
+			}
 		}
-		if ( !menuStack.empty() ) {
-			globalErrorStream() << pPlugIn->getMenuName() << " mismatched > <. " << menuStack.size() << " submenu(s) not closed.\n";
-		}
+	
 	}
 }
 
