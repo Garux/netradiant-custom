@@ -488,7 +488,7 @@ no completion on undo, paste? //atm on adding undo, not on removing
 QStringLiteral optimization
 QCompleter inactive entry in list // because is wrapAround()
 	check %p %t lengths in hl
-display line numbers, exremely useful for error messages handling
+	display line numbers, exremely useful for error messages handling
 */
 
 #include <set>
@@ -1548,10 +1548,38 @@ public:
 };
 
 
+class LineNumberArea : public QWidget
+{
+	QPlainTextEdit *m_textEdit;
+	const Callback1<QPaintEvent*> m_paintCallback;
+public:
+	LineNumberArea( QPlainTextEdit *textEdit, const decltype( m_paintCallback )& paintCallback ) :
+		QWidget( textEdit ), m_textEdit( textEdit ), m_paintCallback( paintCallback ){}
+
+	QSize sizeHint() const override	{
+		return QSize( lineNumberAreaWidth(), 0 );
+	}
+	int lineNumberAreaWidth() const {
+		const int digits = 1 + std::log10( std::max( 1, m_textEdit->blockCount() ) );
+		return 3 + 10 + m_textEdit->fontMetrics().horizontalAdvance( QLatin1Char('9') ) * digits;
+	}
+	void updateLineNumberArea( const QRect &rect, int dy ){
+		if( dy )
+			scroll( 0, dy );
+		else
+			update( 0, rect.y(), width(), rect.height() );
+	}
+protected:
+	void paintEvent( QPaintEvent *event ) override {
+		m_paintCallback( event );
+	}
+};
+
 class QPlainTextEdit_Shader : public QPlainTextEdit
 {
 	QCompleter *m_completer;
 	TexTree m_texTree;
+	LineNumberArea *m_lineNumberArea;
 public:
 	QPlainTextEdit_Shader(){
 		m_completer = new QCompleter( this );
@@ -1563,11 +1591,42 @@ public:
 		setLineWrapMode( QPlainTextEdit::LineWrapMode::NoWrap );
 		new ShaderHighlighter( document() );
 
+		m_lineNumberArea = new LineNumberArea( this, MemberCaller1<QPlainTextEdit_Shader, QPaintEvent *, &QPlainTextEdit_Shader::lineNumberAreaPaintEvent>( *this ) );
+		QObject::connect( this, &QPlainTextEdit::blockCountChanged, [this]( int newBlockCount ){ updateLineNumberAreaWidth(); } );
+		QObject::connect( this, &QPlainTextEdit::updateRequest, [this]( const QRect &rect, int dy ){
+			m_lineNumberArea->updateLineNumberArea( rect, dy );
+			if( rect.contains( viewport()->rect() ) )
+				updateLineNumberAreaWidth();
+		} );
+		updateLineNumberAreaWidth();
+
 		// force back/foreground colors to not be ruined by global theme
 		QPalette pal = palette();
 		pal.setColor( QPalette::Base, c_colorBackground );
 		pal.setColor( QPalette::Text, c_colorForeground );
 		setPalette( pal );
+	}
+	void lineNumberAreaPaintEvent( QPaintEvent *event ){
+		QPainter painter( m_lineNumberArea );
+		painter.setFont( font() );
+		painter.setPen( Qt::darkGray );
+		painter.fillRect( event->rect(), c_colorBackground.lighter( 128 ) );
+
+		QTextBlock block = firstVisibleBlock();
+		int blockNumber = block.blockNumber();
+		int top = qRound( blockBoundingGeometry( block ).translated( contentOffset() ).top() );
+		int bottom = top + qRound( blockBoundingRect( block ).height() );
+
+		while( block.isValid() && top <= event->rect().bottom() ){
+			if( block.isVisible() && bottom >= event->rect().top() ){
+				painter.drawText( 0, top, m_lineNumberArea->width() - 10, fontMetrics().height(), Qt::AlignRight, QString::number( blockNumber + 1 ) );
+			}
+
+			block = block.next();
+			top = bottom;
+			bottom = top + qRound( blockBoundingRect( block ).height() );
+			++blockNumber;
+		}
 	}
 protected:
 	bool event( QEvent *event ) override {
@@ -1762,6 +1821,15 @@ protected:
 			painter.drawRect( rect );
 		}
 		QPlainTextEdit::paintEvent( pEvent );
+	}
+	void resizeEvent( QResizeEvent *e ) override {
+		QPlainTextEdit::resizeEvent( e );
+
+		const QRect cr = contentsRect();
+		m_lineNumberArea->setGeometry( QRect( cr.left(), cr.top(), m_lineNumberArea->lineNumberAreaWidth(), cr.height() ) );
+	}
+	void updateLineNumberAreaWidth(){
+		setViewportMargins( m_lineNumberArea->lineNumberAreaWidth(), 0, 0, 0 );
 	}
 private:
 	void texTree_construct(){
