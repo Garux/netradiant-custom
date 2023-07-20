@@ -42,7 +42,7 @@ void PlugInMenu_Add( QMenu* plugin_menu, IPlugIn* pPlugIn ){
 	MenuStack menuStack;
 
 	std::size_t nCount = pPlugIn->getCommandCount();
-	globalErrorStream() << pPlugIn->getMenuName() << " mismatched > <. " << menuStack.size() << " submenu(s) not closed.\n";
+
 	{
 		globalErrorStream() << pPlugIn->getMenuName() << " count: " << nCount << "\n";
 		if (nCount > 1) {
