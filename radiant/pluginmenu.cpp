@@ -40,9 +40,8 @@ void PlugInMenu_Add( QMenu* plugin_menu, IPlugIn* pPlugIn ){
 	QMenu *menu;
 	const char *menuText;
 	MenuStack menuStack;
-
+	
 	std::size_t nCount = pPlugIn->getCommandCount();
-
 	{
 		globalErrorStream() << pPlugIn->getMenuName() << " count: " << nCount << "\n";
 		if (nCount > 1) {
