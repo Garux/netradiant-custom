@@ -763,6 +763,9 @@ void TextureModeExport( ETexturesMode& self, const IntImportCallback& importer )
 }
 typedef ReferenceCaller1<ETexturesMode, const IntImportCallback&, TextureModeExport> TextureModeExportCaller;
 
+#include <QComboBox>
+#include <QEvent>
+
 void Textures_constructPreferences( PreferencesPage& page ){
 	{
 		const char* percentages[] = { "100%", "50%", "25%", "12.5%", };
@@ -790,25 +793,43 @@ void Textures_constructPreferences( PreferencesPage& page ){
 		);
 	}
 	{
-		const char* compression_none[] = { "None" };
-		const char* compression_opengl[] = { "None", "OpenGL ARB" };
-		const char* compression_s3tc[] = { "None", "S3TC DXT1", "S3TC DXT3", "S3TC DXT5" };
-		const char* compression_opengl_s3tc[] = { "None", "OpenGL ARB", "S3TC DXT1", "S3TC DXT3", "S3TC DXT5" };
-		const StringArrayRange compression(
-		    ( g_texture_globals.m_bOpenGLCompressionSupported )
-		    ? ( g_texture_globals.m_bS3CompressionSupported )
-		      ? StringArrayRange( compression_opengl_s3tc )
-		      : StringArrayRange( compression_opengl )
-		    : ( g_texture_globals.m_bS3CompressionSupported )
-		      ? StringArrayRange( compression_s3tc )
-		      : StringArrayRange( compression_none )
-		);
-		page.appendCombo(
+		//. note workaround: openGL is initialised after prefs dlg is constructed
+		//. solution for now is to defer dependent preference construction
+		class Filter : public QObject
+		{
+			using QObject::QObject;
+		protected:
+			bool eventFilter( QObject *obj, QEvent *event ) override {
+				if( event->type() == QEvent::Polish ) {
+					const char* compression_none[] = { "None" };
+					const char* compression_opengl[] = { "None", "OpenGL ARB" };
+					const char* compression_s3tc[] = { "None", "S3TC DXT1", "S3TC DXT3", "S3TC DXT5" };
+					const char* compression_opengl_s3tc[] = { "None", "OpenGL ARB", "S3TC DXT1", "S3TC DXT3", "S3TC DXT5" };
+					const StringArrayRange compression(
+					    ( g_texture_globals.m_bOpenGLCompressionSupported )
+					    ? ( g_texture_globals.m_bS3CompressionSupported )
+					      ? StringArrayRange( compression_opengl_s3tc )
+					      : StringArrayRange( compression_opengl )
+					    : ( g_texture_globals.m_bS3CompressionSupported )
+					      ? StringArrayRange( compression_s3tc )
+					      : StringArrayRange( compression_none )
+					);
+					QComboBox *combo = static_cast<QComboBox *>( obj );
+					for( const char *c : compression )
+						combo->addItem( c );
+					obj->removeEventFilter( this );
+				}
+				return QObject::eventFilter( obj, event ); // standard event processing
+			}
+		};
+
+		QComboBox *combo = page.appendCombo(
 		    "Hardware Texture Compression",
-		    compression,
+		    StringArrayRange(),
 		    TextureCompressionImportCaller( g_texture_globals.m_nTextureCompressionFormat ),
 		    IntExportCaller( reinterpret_cast<int&>( g_texture_globals.m_nTextureCompressionFormat ) )
 		);
+		combo->installEventFilter( new Filter( combo ) );
 	}
 	page.appendCheckBox( "", "Anisotropy",
 	                     FreeCaller1<bool, Textures_SetAnisotropy>(),
