@@ -49,6 +49,14 @@ enum
 	EXCLUDE_FUNC_GROUPS      = 0x00200000,
 	EXCLUDE_POINT_ENT        = 0x00400000,
 	EXCLUDE_SKY              = 0x00800000,
+	EXCLUDE_25               = 0x01000000,
+	EXCLUDE_26               = 0x02000000,
+	EXCLUDE_27               = 0x04000000,
+	EXCLUDE_28               = 0x08000000,
+	EXCLUDE_29               = 0x10000000,
+	EXCLUDE_30               = 0x20000000,
+	EXCLUDE_31               = 0x40000000,
+	EXCLUDE_32               = 0x80000000,
 };
 
 class Filter

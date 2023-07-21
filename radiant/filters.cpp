@@ -150,21 +150,13 @@ void add_filter_command( unsigned int flag, const char* command, const QKeySeque
 }
 
 void InvertFilters(){
-	std::list<ToggleFilterFlag>::iterator iter;
-
-	for ( iter = g_filter_items.begin(); iter != g_filter_items.end(); ++iter )
-	{
-		iter->toggle();
-	}
+	for ( ToggleFilterFlag& flag : g_filter_items )
+		flag.toggle();
 }
 
 void ResetFilters(){
-	std::list<ToggleFilterFlag>::iterator iter;
-
-	for ( iter = g_filter_items.begin(); iter != g_filter_items.end(); ++iter )
-	{
-		iter->reset();
-	}
+	for ( ToggleFilterFlag& flag : g_filter_items )
+		flag.reset();
 }
 
 void Filters_constructMenu( QMenu* menu ){
@@ -254,6 +246,15 @@ void ConstructFilters(){
 	add_filter_command( EXCLUDE_FUNC_GROUPS, "FilterFuncGroups" );
 	add_filter_command( EXCLUDE_POINT_ENT, "FilterPointEntities" );
 	add_filter_command( EXCLUDE_SKY, "FilterSky" );
+
+	add_filter_command( EXCLUDE_25, "Filter25" );
+	add_filter_command( EXCLUDE_26, "Filter26" );
+	add_filter_command( EXCLUDE_27, "Filter27" );
+	add_filter_command( EXCLUDE_28, "Filter28" );
+	add_filter_command( EXCLUDE_29, "Filter29" );
+	add_filter_command( EXCLUDE_30, "Filter30" );
+	add_filter_command( EXCLUDE_31, "Filter31" );
+	add_filter_command( EXCLUDE_32, "Filter32" );
 
 	PerformFiltering();
 }
