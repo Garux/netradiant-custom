@@ -41,12 +41,12 @@ void PlugInMenu_Add( QMenu* plugin_menu, IPlugIn* pPlugIn ){
 	const char *menuText;
 	MenuStack menuStack;
 
-	menu = plugin_menu->addMenu( pPlugIn->getMenuName() );
-
-	menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
-
 	std::size_t nCount = pPlugIn->getCommandCount();
-	{
+
+	if ( nCount > 1 ) { // create submenu
+		menu = plugin_menu->addMenu( pPlugIn->getMenuName() );
+
+		menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
 		while ( nCount > 0 )
 		{
 			menuText = pPlugIn->getCommandTitle( --nCount );
@@ -87,6 +87,13 @@ void PlugInMenu_Add( QMenu* plugin_menu, IPlugIn* pPlugIn ){
 		}
 		if ( !menuStack.empty() ) {
 			globalErrorStream() << pPlugIn->getMenuName() << " mismatched > <. " << menuStack.size() << " submenu(s) not closed.\n";
+		}
+	}
+	else if ( nCount == 1 ) { // add only command directly
+		menuText = pPlugIn->getCommandTitle( --nCount );
+
+		if ( menuText != 0 && strlen( menuText ) > 0 ) {
+			create_menu_item_with_mnemonic( plugin_menu, menuText, pPlugIn->getGlobalCommand( nCount ) );
 		}
 	}
 }
