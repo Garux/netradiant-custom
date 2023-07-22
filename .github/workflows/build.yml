@@ -27,7 +27,7 @@ jobs:
     steps:
     - uses: msys2/setup-msys2@v2
       with:
-        install: ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-libxml2 svn git
+        install: ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-libxml2 git
         msystem: ${{ matrix.msystem }}
         path-type: minimal
         release: false

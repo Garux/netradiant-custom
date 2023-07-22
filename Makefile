@@ -337,7 +337,7 @@ dependencies-check:
 	checkbinary pkg-config "$(PKGCONFIG)"; \
 	checkbinary unzip "$(UNZIPPER)"; \
 	checkbinary git-core "$(GIT)"; \
-	checkbinary subversion "$(SVN)"; \
+	[ "$(DOWNLOAD_GAMEPACKS)" = "yes" ] || [ "$(DOWNLOAD_GAMEPACKS)" = "all" ] && checkbinary subversion "$(SVN)"; \
 	checkbinary wget "$(WGET)"; \
 	[ "$(OS)" = "Win32" ] && checkbinary mingw32 "$(WINDRES)"; \
 	[ -n "$(LDD)" ] && checkbinary libc6 "$(LDD)"; \
