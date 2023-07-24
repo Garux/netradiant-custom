@@ -151,7 +151,7 @@ std::size_t Sys_Print( int level, const char* buf, std::size_t length ){
 
 	if ( level != SYS_NOCON ) {
 		if ( g_console != 0 ) {
-			g_console->moveCursor( QTextCursor::End ); // must go before setTextColor() & insertPlainText()
+			g_console->moveCursor( QTextCursor::End ); // must go before setCurrentCharFormat() & insertPlainText()
 
 			{
 				QTextCharFormat format = g_console->currentCharFormat();
@@ -166,7 +166,7 @@ std::size_t Sys_Print( int level, const char* buf, std::size_t length ){
 				case SYS_STD:
 				case SYS_VRB:
 				default:
-					format.setForeground( g_console->palette().text().color() );
+					format.clearForeground();
 					break;
 				}
 				g_console->setCurrentCharFormat( format );
