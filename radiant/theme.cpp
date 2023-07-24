@@ -19,7 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <QStyleFactory>
+#include <QStyle>
 #include <QApplication>
 #include <QMenu>
 #include <QActionGroup>
@@ -45,7 +45,13 @@ void theme_set( ETheme theme ){
 //	QSettings settings( "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat );
 //	if( settings.value( "AppsUseLightTheme" ) == 0 )
 #endif
-	static const QPalette default_palette = qApp->palette();
+	static struct
+	{
+		bool is1stThemeApplication = true; // guard to not apply possibly wrong defaults while app is started with Default theme
+		const QPalette palette = qApp->palette();
+		const QString style = qApp->style()->objectName();
+	}
+	defaults;
 
 	const char* sheet = R"(
 	QToolTip {
@@ -136,10 +142,14 @@ void theme_set( ETheme theme ){
 	)";
 
 	if( theme == ETheme::Default ){
-		qApp->setPalette( default_palette );
+		if( !defaults.is1stThemeApplication ){
+			qApp->setPalette( defaults.palette );
+			qApp->setStyleSheet( "" );
+			qApp->setStyle( defaults.style );
+		}
 	}
 	else if( theme == ETheme::Dark ){
-		qApp->setStyle( QStyleFactory::create( "Fusion" ) );
+		qApp->setStyle( "Fusion" );
 		QPalette darkPalette;
 		QColor darkColor = QColor( 83, 84, 81 );
 		QColor disabledColor = QColor( 127, 127, 127 );
@@ -168,7 +178,7 @@ void theme_set( ETheme theme ){
 		qApp->setStyleSheet( sheet );
 	}
 	else if( theme == ETheme::Darker ){
-		qApp->setStyle( QStyleFactory::create( "Fusion" ) );
+		qApp->setStyle( "Fusion" );
 		QPalette darkPalette;
 		QColor darkColor = QColor( 45, 45, 45 );
 		QColor disabledColor = QColor( 127, 127, 127 );
@@ -194,6 +204,8 @@ void theme_set( ETheme theme ){
 
 		qApp->setStyleSheet( sheet );
 	}
+
+	defaults.is1stThemeApplication = false;
 }
 
 void theme_contruct_menu( class QMenu *menu ){
