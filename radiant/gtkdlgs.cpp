@@ -52,6 +52,7 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QGroupBox>
+#include <QApplication>
 #include "gtkutil/spinbox.h"
 #include "gtkutil/guisettings.h"
 #include <QPlainTextEdit>
@@ -370,6 +371,10 @@ void DoAbout(){
 					auto button = buttons->addButton( "Changelog", QDialogButtonBox::ButtonRole::NoRole );
 					QObject::connect( button, &QPushButton::clicked, [](){ OpenURL( StringOutputStream( 256 )( AppPath_get(), "changelog.txt" ) ); } );
 					button->setEnabled( false );
+				}
+				{
+					auto button = buttons->addButton( "About Qt", QDialogButtonBox::ButtonRole::NoRole );
+					QObject::connect( button, &QPushButton::clicked, &QApplication::aboutQt );
 				}
 			}
 		}
