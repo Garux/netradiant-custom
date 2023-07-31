@@ -174,6 +174,90 @@ bool g_WatchBSP0_DumpLog = false;
 // if we don't get a connection quick enough we assume something failed and go back to idling
 const int g_WatchBSP_Timeout = 5;
 
+// manages customizable string, having variable internal default
+// keeps empty, if marked with "default:" prefix, to allow altered default
+// has CB to return custom or default to prefs dialog, other CB to return customized or empty to prefs saver
+class DefaultableString
+{
+	CopiedString m_string;
+	CopiedString ( * const m_getDefault )();
+	static constexpr char m_defaultPrefix[] = "default:";
+public:
+	DefaultableString( CopiedString ( * const getDefault )() ) : m_getDefault( getDefault ){}
+	void Import( const char *string ){
+		if( string_equal_prefix( string, m_defaultPrefix ) )
+			m_string = "";
+		else
+			m_string = string;
+	}
+	void ExportWithDefault( const StringImportCallback& importer ) const {
+		importer( m_string.empty()? StringOutputStream( 256 )( m_defaultPrefix, m_getDefault() ) : m_string.c_str() );
+	}
+	void Export( const StringImportCallback& importer ) const {
+		importer( m_string.c_str() );
+	}
+	auto getImportCaller(){
+		return MemberCaller1<DefaultableString, const char*, &DefaultableString::Import>( *this );
+	}
+	auto getExportWithDefaultCaller(){
+		return ConstMemberCaller1<DefaultableString, const StringImportCallback&, &DefaultableString::ExportWithDefault>( *this );
+	}
+	auto getExportCaller(){
+		return ConstMemberCaller1<DefaultableString, const StringImportCallback&, &DefaultableString::Export>( *this );
+	}
+	CopiedString string() const {
+		return m_string.empty()? m_getDefault() : m_string;
+	}
+};
+
+template<bool isMP>
+CopiedString constructEngineArgs(){
+	StringOutputStream string( 256 );
+	if ( g_pGameDescription->mGameType == "q2"
+	  || g_pGameDescription->mGameType == "heretic2" ) {
+		string << ". +exec radiant.cfg +map %mapname%";
+	}
+	else{
+		string << "+set sv_pure 0";
+		// TTimo: a check for vm_* but that's all fine
+		//cmdline = "+set sv_pure 0 +set vm_ui 0 +set vm_cgame 0 +set vm_game 0 ";
+		const char* fs_game = gamename_get();
+		if ( !string_equal( fs_game, basegame_get() ) ) {
+			string << " +set fs_game " << fs_game;
+		}
+		if ( g_pGameDescription->mGameType == "wolf" ) {
+		//|| g_pGameDescription->mGameType == "et" )
+			if constexpr ( isMP ) // MP
+				string << " +devmap %mapname%";
+			else // SP
+				string << " +set nextmap \"spdevmap %mapname%\"";
+		}
+		else{
+			string << " +devmap %mapname%";
+		}
+	}
+	return string.c_str();
+}
+
+#if defined( WIN32 )
+#define ENGINE_ATTRIBUTE "engine_win32"
+#define MP_ENGINE_ATTRIBUTE "mp_engine_win32"
+#elif defined( __linux__ ) || defined ( __FreeBSD__ )
+#define ENGINE_ATTRIBUTE "engine_linux"
+#define MP_ENGINE_ATTRIBUTE "mp_engine_linux"
+#elif defined( __APPLE__ )
+#define ENGINE_ATTRIBUTE "engine_macos"
+#define MP_ENGINE_ATTRIBUTE "mp_engine_macos"
+#else
+#error "unsupported platform"
+#endif
+
+static DefaultableString g_engineExecutable( []()->CopiedString{ return g_pGameDescription->getRequiredKeyValue( ENGINE_ATTRIBUTE ); } );
+static DefaultableString g_engineExecutableMP( []()->CopiedString{ return g_pGameDescription->getKeyValue( MP_ENGINE_ATTRIBUTE ); } );
+
+static DefaultableString g_engineArgs( constructEngineArgs<false> );
+static DefaultableString g_engineArgsMP( constructEngineArgs<true> );
+
 
 void Build_constructPreferences( PreferencesPage& page ){
 	QCheckBox* monitorbsp = page.appendCheckBox( "", "Enable Build Process Monitoring", g_WatchBSP_Enabled );
@@ -181,6 +265,18 @@ void Build_constructPreferences( PreferencesPage& page ){
 	QCheckBox* runengine = page.appendCheckBox( "", "Run Engine After Compile", g_WatchBSP_RunQuake );
 	Widget_connectToggleDependency( leakstop, monitorbsp );
 	Widget_connectToggleDependency( runengine, monitorbsp );
+
+	QWidget* engine = page.appendEntry( "Engine to Run", g_engineExecutable.getImportCaller(), g_engineExecutable.getExportWithDefaultCaller() );
+	Widget_connectToggleDependency( engine, runengine );
+	QWidget* engineargs = page.appendEntry( "Engine Arguments", g_engineArgs.getImportCaller(), g_engineArgs.getExportWithDefaultCaller() );
+	Widget_connectToggleDependency( engineargs, runengine );
+	if( !string_empty( g_pGameDescription->getKeyValue( "show_gamemode" ) ) ){
+		QWidget* mpengine = page.appendEntry( "MP Engine to Run", g_engineExecutableMP.getImportCaller(), g_engineExecutableMP.getExportWithDefaultCaller() );
+		Widget_connectToggleDependency( mpengine, runengine );
+		QWidget* mpengineargs = page.appendEntry( "MP Engine Arguments", g_engineArgsMP.getImportCaller(), g_engineArgsMP.getExportWithDefaultCaller() );
+		Widget_connectToggleDependency( mpengineargs, runengine );
+	}
+
 	page.appendCheckBox( "", "Dump non Monitored Builds Log", g_WatchBSP0_DumpLog );
 }
 void Build_constructPage( PreferenceGroup& group ){
@@ -202,6 +298,10 @@ void BuildMonitor_Construct(){
 	GlobalPreferenceSystem().registerPreference( "BuildMonitor", BoolImportStringCaller( g_WatchBSP_Enabled ), BoolExportStringCaller( g_WatchBSP_Enabled ) );
 	GlobalPreferenceSystem().registerPreference( "BuildRunGame", BoolImportStringCaller( g_WatchBSP_RunQuake ), BoolExportStringCaller( g_WatchBSP_RunQuake ) );
 	GlobalPreferenceSystem().registerPreference( "BuildLeakStop", BoolImportStringCaller( g_WatchBSP_LeakStop ), BoolExportStringCaller( g_WatchBSP_LeakStop ) );
+	GlobalPreferenceSystem().registerPreference( "BuildEngineExecutable", g_engineExecutable.getImportCaller(), g_engineExecutable.getExportCaller() );
+	GlobalPreferenceSystem().registerPreference( "BuildEngineExecutableMP", g_engineExecutableMP.getImportCaller(), g_engineExecutableMP.getExportCaller() );
+	GlobalPreferenceSystem().registerPreference( "BuildEngineArgs", g_engineArgs.getImportCaller(), g_engineArgs.getExportCaller() );
+	GlobalPreferenceSystem().registerPreference( "BuildEngineArgsMP", g_engineArgsMP.getImportCaller(), g_engineArgsMP.getExportCaller() );
 	GlobalPreferenceSystem().registerPreference( "BuildDumpLog", BoolImportStringCaller( g_WatchBSP0_DumpLog ), BoolExportStringCaller( g_WatchBSP0_DumpLog ) );
 
 	Build_registerPreferencesPage();
@@ -537,68 +637,6 @@ void CWatchBSP::DoEBeginStep(){
 	m_monitoring_timer.start();
 }
 
-
-#if defined( WIN32 )
-#define ENGINE_ATTRIBUTE "engine_win32"
-#define MP_ENGINE_ATTRIBUTE "mp_engine_win32"
-#elif defined( __linux__ ) || defined ( __FreeBSD__ )
-#define ENGINE_ATTRIBUTE "engine_linux"
-#define MP_ENGINE_ATTRIBUTE "mp_engine_linux"
-#elif defined( __APPLE__ )
-#define ENGINE_ATTRIBUTE "engine_macos"
-#define MP_ENGINE_ATTRIBUTE "mp_engine_macos"
-#else
-#error "unsupported platform"
-#endif
-
-class RunEngineConfiguration
-{
-public:
-	const char* executable;
-	const char* mp_executable;
-	bool do_sp_mp;
-
-	RunEngineConfiguration() :
-		executable( g_pGameDescription->getRequiredKeyValue( ENGINE_ATTRIBUTE ) ),
-		mp_executable( g_pGameDescription->getKeyValue( MP_ENGINE_ATTRIBUTE ) ){
-		do_sp_mp = !string_empty( mp_executable );
-	}
-};
-
-inline void GlobalGameDescription_string_write_mapparameter( StringOutputStream& string, const char* mapname ){
-	if ( g_pGameDescription->mGameType == "q2"
-	  || g_pGameDescription->mGameType == "heretic2" ) {
-		string << ". +exec radiant.cfg +map " << mapname;
-	}
-	else
-	{
-		string << "+set sv_pure 0 ";
-		// TTimo: a check for vm_* but that's all fine
-		//cmdline = "+set sv_pure 0 +set vm_ui 0 +set vm_cgame 0 +set vm_game 0 ";
-		const char* fs_game = gamename_get();
-		if ( !string_equal( fs_game, basegame_get() ) ) {
-			string << "+set fs_game " << fs_game << " ";
-		}
-		if ( g_pGameDescription->mGameType == "wolf" ) {
-			//|| g_pGameDescription->mGameType == "et")
-			if ( string_equal( gamemode_get(), "mp" ) ) {
-				// MP
-				string << "+devmap " << mapname;
-			}
-			else
-			{
-				// SP
-				string << "+set nextmap \"spdevmap " << mapname << "\"";
-			}
-		}
-		else
-		{
-			string << "+devmap " << mapname;
-		}
-	}
-}
-
-
 void CWatchBSP::RoutineProcessing(){
 	switch ( m_eState )
 	{
@@ -701,30 +739,27 @@ void CWatchBSP::RoutineProcessing(){
 						// launch the engine .. OMG
 						if ( g_WatchBSP_RunQuake ) {
 							globalOutputStream() << "Running engine...\n";
-							StringOutputStream cmd( 256 );
-							// build the command line
-							cmd << EnginePath_get();
-							// this is game dependant
+							auto cmd = StringOutputStream( 256 )( EnginePath_get() );
+							StringOutputStream cmdline;
 
-							RunEngineConfiguration engineConfig;
-
-							if ( engineConfig.do_sp_mp ) {
-								if ( string_equal( gamemode_get(), "mp" ) ) {
-									cmd << engineConfig.mp_executable;
-								}
+							const auto buildArgs = [&]( const char *str ){
+								const char *map = strstr( str, "%mapname%" );
+								if( map != nullptr )
+									cmdline << StringRange( str, map ) << m_sBSPName << ( map + strlen( "%mapname%" ) );
 								else
-								{
-									cmd << engineConfig.executable;
-								}
+									cmdline << str;
+							};
+
+							// this is game dependant
+							if ( string_equal( gamemode_get(), "mp" ) && !g_engineExecutableMP.string().empty() ) {
+								cmd << g_engineExecutableMP.string();
+								buildArgs( g_engineArgsMP.string().c_str() );
 							}
 							else
 							{
-								cmd << engineConfig.executable;
+								cmd << g_engineExecutable.string();
+								buildArgs( g_engineArgs.string().c_str() );
 							}
-
-							StringOutputStream cmdline;
-
-							GlobalGameDescription_string_write_mapparameter( cmdline, m_sBSPName );
 
 							globalOutputStream() << cmd.c_str() << " " << cmdline.c_str() << "\n";
 
