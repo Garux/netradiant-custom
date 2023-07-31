@@ -75,11 +75,11 @@ public:
 	void appendRadioIcons( const char* name, int& data, StringArrayRange icons ){
 		m_dialog.addRadioIcons( m_grid, name, data, icons );
 	}
-	void appendEntry( const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
-		m_dialog.addTextEntry( m_grid, name, importCallback, exportCallback );
+	QWidget* appendEntry( const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
+		return m_dialog.addTextEntry( m_grid, name, importCallback, exportCallback );
 	}
-	void appendEntry( const char* name, CopiedString& data ){
-		m_dialog.addEntry( m_grid, name, data );
+	QWidget* appendEntry( const char* name, CopiedString& data ){
+		return m_dialog.addEntry( m_grid, name, data );
 	}
 	void appendPathEntry( const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
 		m_dialog.addPathEntry( m_grid, name, browse_directory, importCallback, exportCallback );

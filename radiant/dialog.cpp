@@ -478,11 +478,12 @@ void Dialog::addRadioIcons( QGridLayout* grid, const char* name, int& data, Stri
 	addRadioIcons( grid, name, icons, IntImportCaller( data ), IntExportCaller( data ) );
 }
 
-void Dialog::addTextEntry( QGridLayout* grid, const char* name, const StringImportCallback& importViewer, const StringExportCallback& exportViewer ){
+QWidget* Dialog::addTextEntry( QGridLayout* grid, const char* name, const StringImportCallback& importViewer, const StringExportCallback& exportViewer ){
 	auto entry = new QLineEdit;
 	AddTextEntryData( *entry, importViewer, exportViewer );
 
 	DialogGrid_packRow( grid, entry, name );
+	return entry;
 }
 
 void Dialog::addPathEntry( QGridLayout* grid, const char* name, bool browse_directory, const StringImportCallback& importViewer, const StringExportCallback& exportViewer ){

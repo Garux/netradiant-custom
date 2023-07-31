@@ -557,11 +557,28 @@ void PreferencesDialog_addSettingsPage( const PreferenceGroupCallback& callback 
 	PreferenceGroupCallbacks_pushBack( g_settingsCallbacks, callback );
 }
 
-//! note: doesn't handle dependency on setting \p toggleButton insensitive
 void Widget_connectToggleDependency( QWidget* self, QCheckBox* toggleButton ){
-	QObject::connect( toggleButton, &QCheckBox::stateChanged, [self, toggleButton]( int state ){
+	class EnabledTracker : public QObject
+	{
+		QCheckBox *const m_checkbox;
+		QWidget *const m_dependent;
+	public:
+		EnabledTracker( QCheckBox *checkbox, QWidget *dependent ) : QObject( checkbox ), m_checkbox( checkbox ), m_dependent( dependent ){
+			m_checkbox->installEventFilter( this );
+		}
+	protected:
+		bool eventFilter( QObject *obj, QEvent *event ) override {
+			if( event->type() == QEvent::EnabledChange ) {
+				m_dependent->setEnabled( m_checkbox->checkState() && m_checkbox->isEnabled() );
+			}
+			return QObject::eventFilter( obj, event ); // standard event processing
+		}
+	};
+	new EnabledTracker( toggleButton, self ); // track graying out for chained dependencies
+	QObject::connect( toggleButton, &QCheckBox::stateChanged, [self, toggleButton]( int state ){ // track being checked
 		self->setEnabled( state && toggleButton->isEnabled() );
 	} );
+	self->setEnabled( toggleButton->checkState() && toggleButton->isEnabled() ); // apply dependency effect right away
 }
 void Widget_connectToggleDependency( QCheckBox* self, QCheckBox* toggleButton ){
 	Widget_connectToggleDependency( static_cast<QWidget*>( self ), toggleButton );

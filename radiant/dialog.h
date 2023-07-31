@@ -145,9 +145,9 @@ public:
 	void addRadio( QGridLayout *grid, const char* name, int& data, StringArrayRange names );
 	void addRadioIcons( QGridLayout *grid, const char* name, StringArrayRange icons, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
 	void addRadioIcons( QGridLayout *grid, const char* name, int& data, StringArrayRange icons );
-	void addTextEntry( QGridLayout *grid, const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
-	void addEntry( QGridLayout *grid, const char* name, CopiedString& data ){
-		addTextEntry( grid, name, StringImportCallback( StringImportCaller( data ) ), StringExportCallback( StringExportCaller( data ) ) );
+	QWidget* addTextEntry( QGridLayout *grid, const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
+	QWidget* addEntry( QGridLayout *grid, const char* name, CopiedString& data ){
+		return addTextEntry( grid, name, StringImportCallback( StringImportCaller( data ) ), StringExportCallback( StringExportCaller( data ) ) );
 	}
 	void addPathEntry( QGridLayout *grid, const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
 	void addPathEntry( QGridLayout *grid, const char* name, CopiedString& data, bool directory );
