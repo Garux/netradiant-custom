@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "bspfile_rbsp.h"
 
 
 
@@ -330,8 +331,8 @@ static void CreateEntityLights(){
 			continue;
 		}
 
-		/* lights with target names (and therefore styles) are only parsed from BSP */
-		if ( !strEmpty( e.valueForKey( "targetname" ) ) && i >= numBSPEntities ) {
+		/* lights with target names (and therefore styles in RBSP) are only parsed from BSP */
+		if ( !strEmpty( e.valueForKey( "targetname" ) ) && g_game->load == LoadRBSPFile && i >= numBSPEntities ) {
 			continue;
 		}
 

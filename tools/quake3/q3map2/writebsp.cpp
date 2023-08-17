@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "bspfile_rbsp.h"
 
 
 
@@ -242,7 +243,7 @@ void SetLightStyles(){
 	/* ydnar: determine if we keep lights in the bsp */
 	entities[ 0 ].read_keyvalue( keepLights, "_keepLights" );
 
-	/* any light that is controlled (has a targetname) must have a unique style number generated for it */
+	/* any light that is controlled (has a targetname) must have a unique style number generated for it in RBSP */
 	numStyles = 0;
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
@@ -252,7 +253,7 @@ void SetLightStyles(){
 			continue;
 		}
 		const char *t;
-		if ( !e.read_keyvalue( t, "targetname" ) ) {
+		if ( !( e.read_keyvalue( t, "targetname" ) && g_game->load == LoadRBSPFile ) ) { // only RBSP has switchable light styles
 			/* ydnar: strip the light from the BSP file */
 			if ( !keepLights ) {
 				e.epairs.clear();
@@ -461,7 +462,7 @@ void EmitFogs(){
 	}
 
 	/* warn about overflow */
-	if( strEqual( g_game->bspIdent, "RBSP" ) ){
+	if( g_game->load == LoadRBSPFile ){
 		if( mapFogs.size() > MAX_RBSP_FOGS )
 			Sys_Warning( "MAX_RBSP_FOGS (%i) exceeded (%zu). Visual inconsistencies are expected.\n", MAX_RBSP_FOGS, mapFogs.size() );
 	}
