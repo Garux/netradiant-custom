@@ -102,6 +102,7 @@ static void HelpBsp()
 		{"-flat", "Enable flat shading (good for combining with -celshader)"},
 		{"-fulldetail", "Treat detail brushes as structural ones"},
 		{"-keeplights", "Keep light entities in the BSP file after compile"},
+		{"-keepmodels", "Keep misc_model entities in the BSP file after compile"},
 		{"-leaktest", "Abort if a leak was found"},
 		{"-maxarea", "Use Max Area face surface generation"},
 		{"-meta", "Combine adjacent triangles of the same texture to surfaces (ALWAYS USE THIS)"},

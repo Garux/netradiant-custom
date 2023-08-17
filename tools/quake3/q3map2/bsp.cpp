@@ -670,6 +670,10 @@ int BSPMain( Args& args ){
 			keepLights = true;
 			Sys_Printf( "Leaving light entities on map after compile\n" );
 		}
+		while ( args.takeArg( "-keepmodels" ) ) {
+			keepModels = true;
+			Sys_Printf( "Leaving misc_model entities on map after compile\n" );
+		}
 		while ( args.takeArg( "-nodetail" ) ) {
 			Sys_Printf( "Ignoring detail brushes\n" );
 			nodetail = true;

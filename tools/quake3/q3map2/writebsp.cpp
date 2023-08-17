@@ -236,7 +236,7 @@ void SetLightStyles(){
 
 	/* -keeplights option: force lights to be kept and ignore what the map file says */
 	if ( keepLights ) {
-		entities[0].setKeyValue( "_keepLights", "1" );
+		entities[0].setKeyValue( "_keepLights", "1" ); // -keeplights is -bsp option; save key in worldspawn to pass it to the next stages
 	}
 
 	/* ydnar: determine if we keep lights in the bsp */

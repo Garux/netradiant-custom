@@ -1771,6 +1771,7 @@ inline int metaGoodScore = -1;
 inline bool g_noob;
 inline String64 globalCelShader;
 inline bool keepLights;
+inline bool keepModels;
 
 #if Q3MAP2_EXPERIMENTAL_SNAP_NORMAL_FIX
 // Increasing the normalEpsilon to compensate for new logic in SnapNormal(), where

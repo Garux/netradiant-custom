@@ -445,6 +445,13 @@ void InjectCommandLine( const char *stage, const std::vector<const char *>& args
 void UnparseEntities(){
 	StringOutputStream data( 8192 );
 
+	/* -keepmodels option: force misc_models to be kept and ignore what the map file says */
+	if ( keepModels )
+		entities[0].setKeyValue( "_keepModels", "1" ); // -keepmodels is -bsp option; save key in worldspawn to pass it to the next stages
+
+	/* determine if we keep misc_models in the bsp */
+	entities[ 0 ].read_keyvalue( keepModels, "_keepModels" );
+
 	/* run through entity list */
 	for ( std::size_t i = 0; i < numBSPEntities && i < entities.size(); ++i )
 	{
@@ -455,7 +462,7 @@ void UnparseEntities(){
 		}
 		/* ydnar: certain entities get stripped from bsp file */
 		const char *classname = e.classname();
-		if ( striEqual( classname, "misc_model" ) ||
+		if ( ( striEqual( classname, "misc_model" ) && !keepModels ) ||
 		     striEqual( classname, "_decal" ) ||
 		     striEqual( classname, "_skybox" ) ) {
 			continue;
