@@ -1492,6 +1492,7 @@ void                        WritePortalFile( const tree_t& tree );
 /* writebsp.c */
 void                        SetModelNumbers();
 void                        SetLightStyles();
+void                        UnSetLightStyles();
 
 int                         EmitShader( const char *shader, const int *contentFlags, const int *surfaceFlags );
 

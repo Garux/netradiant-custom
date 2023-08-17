@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "bspfile_rbsp.h"
 
 
 
@@ -53,6 +54,12 @@ static void ExportEntities(){
 	if ( bspEntData.empty() ) {
 		Sys_Warning( "No BSP entity data. aborting...\n" );
 		return;
+	}
+
+	if( g_game->load == LoadRBSPFile ){ // intent here is to make RBSP specific stuff usable for entity modding with -onlyents
+		ParseEntities();
+		UnSetLightStyles();
+		UnparseEntities();
 	}
 
 	/* write it */

@@ -301,6 +301,17 @@ void SetLightStyles(){
 	Sys_FPrintf( SYS_VRB, "%9d light entities stripped\n", numStrippedLights );
 }
 
+// reverts SetLightStyles() effect for decompilation purposes
+void UnSetLightStyles(){
+	for ( entity_t& e : entities ){
+		if ( e.classname_prefixed( "light" ) && !strEmpty( e.valueForKey( "targetname" ) ) && !strEmpty( e.valueForKey( "style" ) ) ) {
+			char value[ 10 ];
+			sprintf( value, "%d", e.intForKey( "switch_style" ) ); // value or 0, latter is fine too
+			e.setKeyValue( "style", value );
+		}
+	}
+}
+
 
 
 /*
