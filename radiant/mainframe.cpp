@@ -319,6 +319,16 @@ void EnginePath_Unrealise(){
 	}
 }
 
+static CopiedString g_installedDevFilesPath; // track last engine path, where dev files installation occured, to prompt again when changed
+
+static void installDevFiles( const CopiedString& enginePath ){
+	if( !path_equal( enginePath.c_str(), g_installedDevFilesPath.c_str() ) ){
+		ASSERT_MESSAGE( g_enginepath_unrealised != 0, "installDevFiles: engine path realised" );
+		DoInstallDevFilesDlg( enginePath.c_str() );
+		g_installedDevFilesPath = enginePath;
+	}
+}
+
 void setEnginePath( CopiedString& self, const char* value ){
 	const auto buffer = StringOutputStream( 256 )( DirectoryCleaned( value ) );
 	if ( !path_equal( buffer.c_str(), self.c_str() ) ) {
@@ -341,6 +351,8 @@ void setEnginePath( CopiedString& self, const char* value ){
 		EnginePath_Unrealise();
 
 		self = buffer.c_str();
+
+		installDevFiles( self );
 
 		EnginePath_Realise();
 	}
@@ -469,10 +481,12 @@ static bool g_strEnginePath_was_empty_1st_start = false;
 
 void EnginePath_verify(){
 	if ( !file_exists( g_strEnginePath.c_str() ) || g_strEnginePath_was_empty_1st_start ) {
+		g_installedDevFilesPath = ""; // trigger install for non existing engine path case
 		g_PathsDialog.Create( nullptr );
 		g_PathsDialog.DoModal();
 		g_PathsDialog.Destroy();
 	}
+	installDevFiles( g_strEnginePath ); // try this anytime, as engine path may be set via command line or -gamedetect
 }
 
 namespace
@@ -2084,6 +2098,7 @@ void MainFrame_Construct(){
 
 	GlobalPreferenceSystem().registerPreference( "ExtraResoucePath", CopiedStringImportStringCaller( g_strExtraResourcePath ), CopiedStringExportStringCaller( g_strExtraResourcePath ) );
 	GlobalPreferenceSystem().registerPreference( "EnginePath", CopiedStringImportStringCaller( g_strEnginePath ), CopiedStringExportStringCaller( g_strEnginePath ) );
+	GlobalPreferenceSystem().registerPreference( "InstalledDevFilesPath", CopiedStringImportStringCaller( g_installedDevFilesPath ), CopiedStringExportStringCaller( g_installedDevFilesPath ) );
 	if ( g_strEnginePath.empty() )
 	{
 		g_strEnginePath_was_empty_1st_start = true;

@@ -35,6 +35,7 @@
 bool DoLightIntensityDlg( int *intensity );
 void DoShaderInfoDlg( const char* name, const char* filename, const char* title );
 void DoShaderView( const char *shaderFileName, const char *shaderName, bool external_editor );
+void DoInstallDevFilesDlg( const char *enginePath );
 
 void Game_constructPreferences( class PreferencesPage& page );
 
