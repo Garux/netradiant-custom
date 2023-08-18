@@ -266,7 +266,7 @@ void SetLightStyles(){
 
 		/* get existing style */
 		const int style = e.intForKey( "style" );
-		if ( style < LS_NORMAL || style > LS_NONE ) {
+		if ( !style_is_valid( style ) ) {
 			Error( "Invalid lightstyle (%d) on entity %zu", style, i );
 		}
 
@@ -287,7 +287,7 @@ void SetLightStyles(){
 		}
 
 		/* set explicit style */
-		sprintf( value, "%d", 32 + j );
+		sprintf( value, "%d", MAX_SWITCHED_LIGHTS + j );
 		e.setKeyValue( "style", value );
 
 		/* set old style */

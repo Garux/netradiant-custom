@@ -1256,7 +1256,7 @@ static void ParseShaderFile( const char *filename ){
 				/* q3map_lightStyle (sof2/jk2 lightstyle) */
 				else if ( striEqual( token, "q3map_lightStyle" ) ) {
 					text.GetToken( false );
-					si->lightStyle = std::clamp( atoi( token ), 0, LS_NONE );
+					si->lightStyle = std::clamp( atoi( token ), LS_NORMAL, LS_NONE );
 				}
 
 				/* wolf: q3map_lightRGB <red> <green> <blue> */

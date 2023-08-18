@@ -187,6 +187,8 @@ enum class EBrushType
 #define LS_UNUSED               0xFE
 #define LS_NONE                 0xFF
 
+inline bool style_is_valid( int style ){ return LS_NORMAL <= style && style < LS_NONE; }
+
 #define MAX_LIGHTMAP_SHADERS    256
 
 /* ok to increase these at the expense of more memory */

@@ -428,7 +428,7 @@ static void CreateEntityLights(){
 		/* set origin */
 		light.origin = e.vectorForKey( "origin" );
 		e.read_keyvalue( light.style, "_style", "style" );
-		if ( light.style < LS_NORMAL || light.style >= LS_NONE ) {
+		if ( !style_is_valid( light.style ) ) {
 			Error( "Invalid lightstyle (%d) on entity %zu", light.style, i );
 		}
 

@@ -1071,10 +1071,7 @@ mapDrawSurface_t *DrawSurfaceForFlare( int entNum, const Vector3& origin, const 
 	ds->lightmapVecs[ 0 ] = color;
 
 	/* store light style */
-	ds->lightStyle = lightStyle;
-	if ( ds->lightStyle < 0 || ds->lightStyle >= LS_NONE ) {
-		ds->lightStyle = LS_NORMAL;
-	}
+	ds->lightStyle = style_is_valid( lightStyle )? lightStyle : LS_NORMAL;
 
 	/* fixme: fog */
 

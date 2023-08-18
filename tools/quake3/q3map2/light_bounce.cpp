@@ -487,10 +487,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 		light.photons = value * area * areaScale;
 		light.add = value * formFactorValueScale * areaScale;
 		light.color = si->color;
-		light.style = noStyles ? LS_NORMAL : si->lightStyle;
-		if ( light.style < LS_NORMAL || light.style >= LS_NONE ) {
-			light.style = LS_NORMAL;
-		}
+		light.style = noStyles || !style_is_valid( si->lightStyle )? LS_NORMAL : si->lightStyle;
 
 		/* set origin */
 		light.origin = minmax.origin();
@@ -542,10 +539,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 			splash.si = si;
 			splash.color = si->color;
 			splash.falloffTolerance = falloffTolerance;
-			splash.style = noStyles ? LS_NORMAL : si->lightStyle;
-			if ( splash.style < LS_NORMAL || splash.style >= LS_NONE ) {
-				splash.style = LS_NORMAL;
-			}
+			splash.style = noStyles || !style_is_valid( si->lightStyle )? LS_NORMAL : si->lightStyle;
 
 			/* create a regular winding */
 			splash.w = AllocWinding( rw->numVerts );
@@ -568,10 +562,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 		light.photons = value * area * bounceScale;
 		light.add = value * formFactorValueScale * bounceScale;
 		light.color = color;
-		light.style = noStyles ? LS_NORMAL : style;
-		if ( light.style < LS_NORMAL || light.style >= LS_NONE ) {
-			light.style = LS_NORMAL;
-		}
+		light.style = noStyles || !style_is_valid( style )? LS_NORMAL : style;
 
 		/* set origin */
 		light.origin = WindingCenter( light.w );
