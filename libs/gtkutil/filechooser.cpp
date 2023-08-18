@@ -90,7 +90,7 @@ public:
 		m_masks.reserve( m_types.size() );
 		for ( const auto& type : types )
 		{
-			std::size_t len = strlen( type.m_name.c_str() ) + strlen( type.m_pattern.c_str() ) + 3;
+			const std::size_t len = strlen( type.m_name.c_str() ) + strlen( type.m_pattern.c_str() ) + 3;
 			StringOutputStream buffer( len + 1 ); // length + null char
 
 			buffer << type.m_name << " (" << type.m_pattern << ")";
@@ -139,7 +139,7 @@ const char* file_dialog( QWidget* parent, bool open, const char* title, const ch
 
 	QString filter;
 
-	if ( open && masks.m_filters.size() > 1 ){
+	if ( open && masks.m_filters.size() > 1 ){ // e.g.: All supported formats ( *.map *.reg)
 		filter += "All supported formats (";
 		for ( const auto& f : masks.m_filters )
 		{
@@ -149,7 +149,7 @@ const char* file_dialog( QWidget* parent, bool open, const char* title, const ch
 		filter += ")";
 	}
 
-	for ( const auto& mask : masks.m_masks )
+	for ( const auto& mask : masks.m_masks ) // e.g.: quake3 maps (*.map);;quake3 region (*.reg)
 	{
 		if( !filter.isEmpty() )
 			filter += ";;";
@@ -158,21 +158,29 @@ const char* file_dialog( QWidget* parent, bool open, const char* title, const ch
 	// this handles backslashes as input and returns forwardly slashed path
 	// input path may be either folder or file
 	// only existing file path may be chosen for open; overwriting is prompted on save
+	QString selectedFilter;
 	g_file_dialog_file = open
-		? QFileDialog::getOpenFileName( parent, title, path, filter ).toLatin1()
-		: QFileDialog::getSaveFileName( parent, title, path, filter ).toLatin1();
+		? QFileDialog::getOpenFileName( parent, title, path, filter, &selectedFilter ).toLatin1()
+		: QFileDialog::getSaveFileName( parent, title, path, filter, &selectedFilter ).toLatin1();
 
-	/* validate extension: it is possible pick existing file, not respecting the filter... */
+	/* validate extension: it is possible to pick existing file, not respecting the filter...
+	   some dialog implementations may return file name w/o autoappended extension too */
 	if( !g_file_dialog_file.isEmpty() && !string_equal( pattern, "*" ) ){
 		const char* extension = path_get_extension( g_file_dialog_file.constData() );
-		if( !string_empty( extension ) )
-			for( const auto& f : masks.m_filters )
-				if( extension_equal( extension, path_get_extension( f.c_str() ) ) )
-					goto extension_validated;
-		qt_MessageBox( parent, StringOutputStream( 256 )( makeQuoted( extension ), " is unsupported file type for requested operation\n" ), extension, EMessageBoxType::Error );
-		g_file_dialog_file.clear();
+		if( !string_empty( extension ) ){ // validate it
+			const auto check = [extension]( const CopiedString& filter ){ return extension_equal( extension, path_get_extension( filter.c_str() ) ); };
+			if( !std::any_of( masks.m_filters.cbegin(), masks.m_filters.cend(), check ) ) {
+				qt_MessageBox( parent, StringOutputStream( 256 )( makeQuoted( extension ), " is unsupported file type for requested operation\n" ), extension, EMessageBoxType::Error );
+				g_file_dialog_file.clear();
+			}
+		}
+		else{ // add extension
+			selectedFilter = selectedFilter.right( selectedFilter.size() - ( selectedFilter.indexOf( "*." ) + 1 ) );
+			selectedFilter = selectedFilter.left( selectedFilter.indexOf( ')' ) );
+			selectedFilter = selectedFilter.left( selectedFilter.indexOf( ' ' ) ); // left() is preferred over truncate(), since it returns entire string on negative input
+			g_file_dialog_file.append( selectedFilter.toLatin1() );
+		}
 	}
-extension_validated:
 
 	// don't return an empty filename
 	return g_file_dialog_file.isEmpty()
