@@ -46,6 +46,9 @@ static void autocaulk_write(){
 	ApplySurfaceParm( "slime", &fslime, NULL, NULL );
 	int flava = 0;
 	ApplySurfaceParm( "lava", &flava, NULL, NULL );
+	// many setups have nodraw shader nonsolid, including vQ3; and nondrawnonsolid also... fall back to caulk in such case
+	// it would be better to decide in Radiant, as it has configurable per game common shaders, but it has no solidity info
+	const bool nodraw_is_solid = ShaderInfoForShader( "textures/common/nodraw" )->compileFlags & C_SOLID;
 
 	for ( const brush_t& b : entities[0].brushes ) {
 		fprintf( file, "%i ", b.brushNum );
@@ -66,7 +69,7 @@ static void autocaulk_write(){
 			}
 			else if( b.compileFlags & C_TRANSLUCENT ){
 				if( contentShader->compileFlags & C_SOLID )
-					fprintf( file, "N" );
+					fprintf( file, nodraw_is_solid? "N" : "c" );
 				else
 					fprintf( file, "n" );
 			}
