@@ -166,7 +166,7 @@ const std::size_t c_brushCone_minSides = 3;
 const std::size_t c_brushCone_maxSides = c_brush_maxFaces - 1;
 const char* const c_brushCone_name = "brushCone";
 
-void Brush_ConstructCone( Brush& brush, const AABB& bounds, std::size_t sides, const char* shader, const TextureProjection& projection ){
+void Brush_ConstructCone( Brush& brush, const AABB& bounds, std::size_t sides, size_t axis, const char* shader, const TextureProjection& projection ){
 	if ( sides < c_brushCone_minSides ) {
 		globalErrorStream() << c_brushCone_name << ": sides " << sides << ": too few sides, minimum is " << c_brushCone_minSides << "\n";
 		return;
@@ -179,39 +179,36 @@ void Brush_ConstructCone( Brush& brush, const AABB& bounds, std::size_t sides, c
 	brush.clear();
 	brush.reserve( sides + 1 );
 
-	Vector3 mins( vector3_subtracted( bounds.origin, bounds.extents ) );
-	Vector3 maxs( vector3_added( bounds.origin, bounds.extents ) );
+	const Vector3 mins( bounds.origin - bounds.extents );
+	const Vector3 maxs( bounds.origin + bounds.extents );
 
-	float radius = max_extent( bounds.extents );
+	const float radius = max_extent_2d( bounds.extents, axis );
 	const Vector3& mid = bounds.origin;
+	const size_t x = ( axis + 1 ) % 3, y = ( axis + 2 ) % 3, z = axis;
 	Vector3 planepts[3];
 
-	planepts[0][0] = mins[0]; planepts[0][1] = mins[1]; planepts[0][2] = mins[2];
-	planepts[1][0] = maxs[0]; planepts[1][1] = mins[1]; planepts[1][2] = mins[2];
-	planepts[2][0] = maxs[0]; planepts[2][1] = maxs[1]; planepts[2][2] = mins[2];
+	planepts[0][x] = mins[x]; planepts[0][y] = mins[y]; planepts[0][z] = mins[z];
+	planepts[1][x] = maxs[x]; planepts[1][y] = mins[y]; planepts[1][z] = mins[z];
+	planepts[2][x] = maxs[x]; planepts[2][y] = maxs[y]; planepts[2][z] = mins[z];
 
 	brush.addPlane( planepts[0], planepts[1], planepts[2], shader, projection );
 
 	for ( std::size_t i = 0; i < sides; ++i )
 	{
-		double sv = sin( i * 3.14159265 * 2 / sides );
-		double cv = cos( i * 3.14159265 * 2 / sides );
+		const double sv = sin( i * c_2pi / sides );
+		const double cv = cos( i * c_2pi / sides );
 
-		planepts[0][0] = static_cast<float>( mid[0] + radius * cv );
-		planepts[0][1] = static_cast<float>( mid[1] + radius * sv );
-//		planepts[0][0] = static_cast<float>( floor( mid[0] + radius * cv + 0.5 ) );
-//		planepts[0][1] = static_cast<float>( floor( mid[1] + radius * sv + 0.5 ) );
-		planepts[0][2] = mins[2];
+		planepts[0][x] = mid[x] + radius * cv;
+		planepts[0][y] = mid[y] + radius * sv;
+		planepts[0][z] = mins[z];
 
-		planepts[1][0] = mid[0];
-		planepts[1][1] = mid[1];
-		planepts[1][2] = maxs[2];
+		planepts[1][x] = mid[x];
+		planepts[1][y] = mid[y];
+		planepts[1][z] = maxs[z];
 
-		planepts[2][0] = static_cast<float>( planepts[0][0] - radius * sv );
-		planepts[2][1] = static_cast<float>( planepts[0][1] + radius * cv );
-//		planepts[2][0] = static_cast<float>( floor( planepts[0][0] - radius * sv + 0.5 ) );
-//		planepts[2][1] = static_cast<float>( floor( planepts[0][1] + radius * cv + 0.5 ) );
-		planepts[2][2] = maxs[2];
+		planepts[2][x] = planepts[0][x] - radius * sv;
+		planepts[2][y] = planepts[0][y] + radius * cv;
+		planepts[2][z] = mins[z];
 
 		brush.addPlane( planepts[0], planepts[1], planepts[2], shader, projection );
 	}
@@ -432,11 +429,12 @@ void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds,
 		break;
 	case EBrushPrefab::Cone:
 		{
+			const size_t axis = GlobalXYWnd_getCurrentViewType();
 			StringOutputStream command;
-			command << c_brushCone_name << " -sides " << sides;
+			command << c_brushCone_name << " -sides " << sides << " -axis " << axis;
 			UndoableCommand undo( command.c_str() );
 
-			Brush_ConstructCone( brush, bounds, sides, shader, projection );
+			Brush_ConstructCone( brush, bounds, sides, axis, shader, projection );
 		}
 		break;
 	case EBrushPrefab::Sphere:
