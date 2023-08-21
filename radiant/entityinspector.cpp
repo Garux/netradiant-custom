@@ -247,7 +247,7 @@ public:
 	ModelAttribute( const char* key ) :
 		m_key( key ),
 		m_entry( new NonModalEntry( ApplyCaller( *this ), UpdateCaller( *this ) ) ){
-		auto button = m_entry->addAction( QApplication::style()->standardIcon( QStyle::SP_FileDialogStart ), QLineEdit::ActionPosition::TrailingPosition );
+		auto button = m_entry->addAction( QApplication::style()->standardIcon( QStyle::SP_DialogOpenButton ), QLineEdit::ActionPosition::TrailingPosition );
 		QObject::connect( button, &QAction::triggered, [this](){ browse(); } );
 	}
 	void release() override {

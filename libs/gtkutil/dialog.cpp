@@ -49,7 +49,7 @@ RadioHBox RadioHBox_new( StringArrayRange names ){
 
 PathEntry PathEntry_new(){
 	auto entry = new QLineEdit;
-	auto button = entry->addAction( QApplication::style()->standardIcon( QStyle::SP_FileDialogStart ), QLineEdit::ActionPosition::TrailingPosition );
+	auto button = entry->addAction( QApplication::style()->standardIcon( QStyle::SP_DialogOpenButton ), QLineEdit::ActionPosition::TrailingPosition );
 	return PathEntry( entry, button );
 }
 
