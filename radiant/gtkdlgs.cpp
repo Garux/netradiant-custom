@@ -2256,10 +2256,10 @@ class TextEditor
 							"<meta http-equiv=Refresh content=\"0; url=" << link << "\"><body></body>"
 						"</html>";
 					file.close();
-					QDesktopServices::openUrl( filename );
+					QDesktopServices::openUrl( QUrl::fromUserInput( filename ) );
 				}
 #else
-				QDesktopServices::openUrl( link );
+				QDesktopServices::openUrl( QUrl::fromUserInput( link ) );
 #endif
 			} );
 
