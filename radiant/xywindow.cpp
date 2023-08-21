@@ -82,7 +82,7 @@ struct xywindow_globals_private_t
 
 	// these are in the View > Show menu with Show coordinates
 	bool show_names = false;
-	bool show_coordinates = false;
+	bool show_coordinates = true;
 	bool show_angles = true;
 	bool show_outline = true;
 	bool show_axis = true;
