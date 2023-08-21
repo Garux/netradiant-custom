@@ -148,7 +148,7 @@ void ColorScheme_Blender(){
 
 	g_xywindow_globals.color_gridback = Vector3( .225803f, .225803f, .225803f );
 	g_xywindow_globals.color_gridminor = Vector3( .254902f, .254902f, .254902f );
-	g_xywindow_globals.color_gridmajor = Vector3( .294118f, .294118f, .294118f );
+	g_xywindow_globals.color_gridmajor = Vector3( .301960f, .301960f, .301960f );
 	g_xywindow_globals.color_gridblock = Vector3( 1.0f, 1.0f, 1.0f );
 	g_xywindow_globals.color_gridtext = Vector3( .972549f, .972549f, .972549f );
 	g_xywindow_globals.color_selbrushes = Vector3( 1.0f, 0.627451f, 0.0f );
