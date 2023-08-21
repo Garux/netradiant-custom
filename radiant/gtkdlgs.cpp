@@ -2208,7 +2208,7 @@ private:
 	}
 };
 
-class TextEditor
+class TextEditor : public QObject
 {
 	QWidget *m_window = 0;
 	QPlainTextEdit *m_textView; // slave, text widget from the gtk editor
@@ -2218,6 +2218,7 @@ class TextEditor
 	void construct(){
 		m_window = new QWidget( MainFrame_getWindow(), Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
 		g_guiSettings.addWindow( m_window, "ShaderEditor/geometry" );
+		m_window->installEventFilter( this );
 
 		auto *vbox = new QVBoxLayout( m_window );
 		vbox->setContentsMargins( 0, 0, 0, 0 );
@@ -2312,11 +2313,31 @@ class TextEditor
 
 		m_textView->document()->setModified( false );
 	}
+	// returns true, if document modifications got saved or user decided to discard them
+	bool ensure_saved(){
+		if( m_textView->document()->isModified() ) {
+			const auto ret = qt_MessageBox( m_window, "Document has been modified.\nSave it?", "Save", EMessageBoxType::Question,
+				EMessageBoxReturn::eIDYES | EMessageBoxReturn::eIDNO | EMessageBoxReturn::eIDCANCEL );
+			if( ret == EMessageBoxReturn::eIDYES ){
+				editor_save();
+			}
+			if( ret == EMessageBoxReturn::eIDNO ){ // discard changes
+				m_textView->clear(); // unset isModified flag this way to avoid messagebox on next opening
+			}
+			else if( ret == EMessageBoxReturn::eIDCANCEL ){
+				return false;
+			}
+		}
+		return true;
+	}
 public:
 	void DoGtkTextEditor( const char* text, const char* shaderName, const char* filename, const bool editable ){
 		if ( !m_window ) {
 			construct(); // build it the first time we need it
 		}
+
+		if( !ensure_saved() )
+			return;
 
 		m_filename = filename;
 		m_textView->setReadOnly( !editable );
@@ -2341,6 +2362,16 @@ public:
 					break;
 				}
 		}
+	}
+protected:
+	bool eventFilter( QObject *obj, QEvent *event ) override {
+		if( event->type() == QEvent::Close ) {
+			if( !ensure_saved() ){ // keep editor opened
+				event->ignore();
+				return true;
+			}
+		}
+		return QObject::eventFilter( obj, event ); // standard event processing
 	}
 };
 
