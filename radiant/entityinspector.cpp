@@ -814,6 +814,12 @@ void SetComment( EntityClass* eclass ){
 	}
 
 	g_current_comment = eclass;
+
+	if( eclass == nullptr ){
+		g_entityClassComment->clear();
+		return;
+	}
+
 	g_entityClassComment->setPlainText( eclass->comments() );
 
 	{	// Catch patterns like "\nstuff :" used to describe keys and spawnflags, and make them bold for readability.
@@ -872,10 +878,13 @@ void SpawnFlags_setEntityClass( EntityClass* eclass ){
 }
 
 void EntityClassList_selectEntityClass( EntityClass* eclass ){
-	auto list = g_entityClassList->findItems( eclass->name(), Qt::MatchFlag::MatchFixedString );
-	if( !list.isEmpty() ){
-		g_entityClassList->setCurrentItem( list.first() );
-	}
+	const auto list = g_entityClassList->findItems( eclass->name(), Qt::MatchFlag::MatchFixedString );
+	g_entityClassList->setCurrentItem( !list.isEmpty()
+	                                   ? list.first()
+	                                   : nullptr );
+	// g_entityClassComment is only updated via g_entityClassList selection change
+	// using special nullprt case to also update it on selection of unknown entity added during runtime
+	// hence this->EntityClassList_selection_changed()->SetComment() must handle nullptr
 }
 
 void EntityInspector_appendAttribute( const EntityClassAttributePair& attributePair, EntityAttribute& attribute ){
@@ -1115,9 +1124,9 @@ void EntityInspector_clearAllKeyValues(){
 // callbacks
 
 static void EntityClassList_selection_changed( QTreeWidgetItem *current, QTreeWidgetItem *previous ){
-	if( current != nullptr ){
-		SetComment( current->data( 0, Qt::ItemDataRole::UserRole ).value<EntityClass*>() );
-	}
+	SetComment( current != nullptr
+	            ? current->data( 0, Qt::ItemDataRole::UserRole ).value<EntityClass*>()
+	            : nullptr );
 }
 
 static void EntityProperties_selection_changed( QTreeWidgetItem *item, int column ){
