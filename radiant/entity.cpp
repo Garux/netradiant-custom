@@ -699,9 +699,15 @@ void ToggleShowLightRadii(){
 	UpdateAllWindows();
 }
 
+inline bool game_has_killConnect(){
+	return g_pGameDescription->mGameType == "nexuiz"
+	    || g_pGameDescription->mGameType == "xonotic"
+	    || g_pGameDescription->mGameType == "q1";
+}
+
 void Entity_constructMenu( QMenu* menu ){
 	create_menu_item_with_mnemonic( menu, "&Connect Entities", "EntitiesConnect" );
-	if ( g_pGameDescription->mGameType == "nexuiz" || g_pGameDescription->mGameType == "q1" ) {
+	if ( game_has_killConnect() ) {
 		create_menu_item_with_mnemonic( menu, "&KillConnect Entities", "EntitiesKillConnect" );
 	}
 	create_menu_item_with_mnemonic( menu, "&Move Primitives to Entity", "EntityMovePrimitivesToLast" );
@@ -724,7 +730,7 @@ void Entity_Construct(){
 	GlobalCommands_insert( "EntityColorSet", FreeCaller<Entity_setColour>(), QKeySequence( "K" ) );
 	GlobalCommands_insert( "EntityColorNormalize", FreeCaller<Entity_normalizeColor>() );
 	GlobalCommands_insert( "EntitiesConnect", FreeCaller<Entity_connectSelected>(), QKeySequence( "Ctrl+K" ) );
-	if ( g_pGameDescription->mGameType == "nexuiz" || g_pGameDescription->mGameType == "q1" )
+	if ( game_has_killConnect() )
 		GlobalCommands_insert( "EntitiesKillConnect", FreeCaller<Entity_killconnectSelected>(), QKeySequence( "Shift+K" ) );
 	GlobalCommands_insert( "EntityMovePrimitivesToLast", FreeCaller<Entity_moveSelectedPrimitivesToLast>(), QKeySequence( "Ctrl+M" ) );
 	GlobalCommands_insert( "EntityMovePrimitivesToFirst", FreeCaller<Entity_moveSelectedPrimitivesToFirst>() );
