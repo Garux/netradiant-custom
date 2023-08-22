@@ -180,8 +180,7 @@ void Radiant_detachGameToolsPathObserver( ModuleObserver& observer );
 void EnginePath_verify();
 const char* EnginePath_get();
 
-extern CopiedString g_strExtraResourcePath;
-const char* ExtraResourcePath_get();
+const std::array<CopiedString, 5>& ExtraResourcePaths_get();
 
 extern CopiedString g_strAppPath;
 const char* AppPath_get();

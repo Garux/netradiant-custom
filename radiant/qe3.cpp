@@ -86,33 +86,29 @@ void QE_InitVFS(){
 	const char* userRoot = g_qeglobals.m_userEnginePath.c_str();
 	const char* globalRoot = EnginePath_get();
 
-	const char* extrapath = ExtraResourcePath_get();
-	if( !string_empty( extrapath ) )
-		GlobalFileSystem().initDirectory( extrapath );
+	std::vector<CopiedString> paths;
+	const auto paths_push = [&paths]( const char* newPath ){ // collects unique paths
+		if( !string_empty( newPath )
+		&& std::none_of( paths.cbegin(), paths.cend(), [newPath]( const CopiedString& path ){ return path_equal( path.c_str(), newPath ); } ) )
+			paths.emplace_back( newPath );
+	};
+
+
+	for( const auto& path : ExtraResourcePaths_get() )
+		paths_push( path.c_str() );
 
 	StringOutputStream str( 256 );
-	// if we have a mod dir
-	if ( !path_equal( gamename, basegame ) ) {
-		// ~/.<gameprefix>/<fs_game>
-		if ( !path_equal( globalRoot, userRoot ) ) {
-			GlobalFileSystem().initDirectory( str( userRoot, gamename, '/' ) ); // userGamePath
-		}
-
-		// <fs_basepath>/<fs_game>
-		{
-			GlobalFileSystem().initDirectory( str( globalRoot, gamename, '/' ) ); // globalGamePath
-		}
-	}
-
+	// ~/.<gameprefix>/<fs_game>
+	paths_push( str( userRoot, gamename, '/' ) ); // userGamePath
+	// <fs_basepath>/<fs_game>
+	paths_push( str( globalRoot, gamename, '/' ) ); // globalGamePath
 	// ~/.<gameprefix>/<fs_main>
-	if ( !path_equal( globalRoot, userRoot ) ) {
-		GlobalFileSystem().initDirectory( str( userRoot, basegame, '/' ) ); // userBasePath
-	}
-
+	paths_push( str( userRoot, basegame, '/' ) ); // userBasePath
 	// <fs_basepath>/<fs_main>
-	{
-		GlobalFileSystem().initDirectory( str( globalRoot, basegame, '/' ) ); // globalBasePath
-	}
+	paths_push( str( globalRoot, basegame, '/' ) ); // globalBasePath
+
+	for( const auto& path : paths )
+		GlobalFileSystem().initDirectory( path.c_str() );
 }
 
 
@@ -163,17 +159,20 @@ bool ConfirmModified( const char* title ){
 }
 
 void bsp_init(){
+	StringOutputStream stream( 256 );
+
 	build_set_variable( "RadiantPath", AppPath_get() );
 	build_set_variable( "ExecutableType", RADIANT_EXECUTABLE );
 	build_set_variable( "EnginePath", EnginePath_get() );
 	build_set_variable( "UserEnginePath", g_qeglobals.m_userEnginePath.c_str() );
-	build_set_variable( "ExtraResoucePath", string_empty( ExtraResourcePath_get() )? ""
-	                                       : StringOutputStream()( " -fs_pakpath ", makeQuoted( ExtraResourcePath_get() ) ) );
+	for( const auto& path : ExtraResourcePaths_get() )
+		if( !string_empty( path.c_str() ) )
+			stream << " -fs_pakpath " << makeQuoted( path );
+	build_set_variable( "ExtraResourcePaths", stream );
 	build_set_variable( "MonitorAddress", ( g_WatchBSP_Enabled ) ? RADIANT_MONITOR_ADDRESS : "" );
 	build_set_variable( "GameName", gamename_get() );
 
 	const char* mapname = Map_Name( g_map );
-	StringOutputStream stream( 256 );
 	{
 		build_set_variable( "BspFile", stream( PathExtensionless( mapname ), ".bsp" ) );
 	}
