@@ -144,20 +144,21 @@ void theme_set( ETheme theme ){
 	if( theme == ETheme::Default ){
 		if( !defaults.is1stThemeApplication ){
 			qApp->setPalette( defaults.palette );
-			qApp->setStyleSheet( "" );
+			qApp->setStyleSheet( QString() );
 			qApp->setStyle( defaults.style );
 		}
 	}
 	else if( theme == ETheme::Dark ){
 		qApp->setStyle( "Fusion" );
 		QPalette darkPalette;
-		QColor darkColor = QColor( 83, 84, 81 );
-		QColor disabledColor = QColor( 127, 127, 127 );
+		const QColor darkColor = QColor( 83, 84, 81 );
+		const QColor disabledColor = QColor( 127, 127, 127 );
+		const QColor baseColor( 46, 52, 54 );
 		darkPalette.setColor( QPalette::Window, darkColor );
 		darkPalette.setColor( QPalette::WindowText, Qt::white );
 		darkPalette.setColor( QPalette::Disabled, QPalette::WindowText, disabledColor );
-		darkPalette.setColor( QPalette::Base, QColor( 46, 52, 54 ) );
-		darkPalette.setColor( QPalette::AlternateBase, darkColor );
+		darkPalette.setColor( QPalette::Base, baseColor );
+		darkPalette.setColor( QPalette::AlternateBase, baseColor.darker( 130 ) );
 		darkPalette.setColor( QPalette::ToolTipBase, Qt::white );
 		darkPalette.setColor( QPalette::ToolTipText, Qt::white );
 		darkPalette.setColor( QPalette::Text, Qt::white );
@@ -180,12 +181,13 @@ void theme_set( ETheme theme ){
 	else if( theme == ETheme::Darker ){
 		qApp->setStyle( "Fusion" );
 		QPalette darkPalette;
-		QColor darkColor = QColor( 45, 45, 45 );
-		QColor disabledColor = QColor( 127, 127, 127 );
+		const QColor darkColor = QColor( 45, 45, 45 );
+		const QColor disabledColor = QColor( 127, 127, 127 );
+		const QColor baseColor( 18, 18, 18 );
 		darkPalette.setColor( QPalette::Window, darkColor );
 		darkPalette.setColor( QPalette::WindowText, Qt::white );
-		darkPalette.setColor( QPalette::Base, QColor( 18, 18, 18 ) );
-		darkPalette.setColor( QPalette::AlternateBase, darkColor );
+		darkPalette.setColor( QPalette::Base, baseColor );
+		darkPalette.setColor( QPalette::AlternateBase, baseColor.darker( 130 ) );
 		darkPalette.setColor( QPalette::ToolTipBase, Qt::white );
 		darkPalette.setColor( QPalette::ToolTipText, Qt::white );
 		darkPalette.setColor( QPalette::Text, Qt::white );
