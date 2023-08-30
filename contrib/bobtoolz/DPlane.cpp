@@ -120,7 +120,7 @@ bool DPlane::IsRedundant( std::list<DPoint*>& pointList ){
 	return true;
 }
 
-bool DPlane::operator ==( DPlane& other ){
+bool DPlane::operator ==( const DPlane& other ) const {
 	vec3_t chk;
 	VectorSubtract( other.normal, normal, chk );
 	if ( fabs( VectorLength( chk ) ) > MAX_ROUND_ERROR ) {

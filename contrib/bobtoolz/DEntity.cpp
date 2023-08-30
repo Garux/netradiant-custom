@@ -349,6 +349,13 @@ void DEntity::SelectBrushes( bool *selectList ){
 	}
 }
 
+void select_primitive( scene::Node *primitive, scene::Node *entity ){
+	scene::Path path( NodeReference( GlobalSceneGraph().root() ) );
+	path.push( NodeReference( *entity ) );
+	path.push( NodeReference( *primitive ) );
+	Instance_getSelectable( *GlobalSceneGraph().find( path ) )->setSelected( true );
+}
+
 bool DEntity::LoadFromEntity( scene::Node& ent, bool bLoadPatches ) {
 	ClearPatches();
 	ClearBrushes();

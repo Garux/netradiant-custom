@@ -116,3 +116,5 @@ public:
 	void SpawnFloat( const char* key, const char* defaultstring, float* out );
 	void SpawnVector( const char* key, const char* defaultstring, vec_t* out );
 };
+
+void select_primitive( scene::Node *primitive, scene::Node *entity );

@@ -46,7 +46,7 @@ public:
 
 	bool AddToBrush( scene::Node& brush );
 	bool operator !=( DPlane& other );
-	bool operator ==( DPlane& other );
+	bool operator ==( const DPlane& other ) const;
 
 	bool IsRedundant( std::list<DPoint*>& pointList );
 	bool PlaneIntersection( DPlane* pl1, DPlane* pl2, vec3_t out );;

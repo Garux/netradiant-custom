@@ -310,7 +310,7 @@ bool DBrush::BBoxCollision( DBrush* chkBrush ){
 	return true;
 }
 
-DPlane* DBrush::HasPlane( DPlane* chkPlane ){
+DPlane* DBrush::HasPlane( DPlane* chkPlane ) const {
 	for ( DPlane *plane : faceList )
 	{
 		if ( *plane == *chkPlane ) {
@@ -412,6 +412,12 @@ scene::Node* DBrush::BuildInRadiant( bool allowDestruction, int* changeCnt, scen
 	QER_brush = node.get_pointer();
 
 	return node.get_pointer();
+}
+
+void DBrush::selectInRadiant() const {
+	ASSERT_MESSAGE( QER_entity != nullptr, "QER_entity == nullptr" );
+	ASSERT_MESSAGE( QER_brush != nullptr, "QER_brush == nullptr" );
+	select_primitive( QER_brush, QER_entity );
 }
 
 void DBrush::CutByPlane( DPlane *cutPlane, DBrush **newBrush1, DBrush **newBrush2 ){
@@ -799,7 +805,7 @@ bool DBrush::ResetTextures( const char* textureName, float fScale[2],     float 
 	}
 }
 
-bool DBrush::operator ==( DBrush* other ){
+bool DBrush::operator ==( const DBrush* other ) const {
 	for ( DPlane *plane : faceList )
 	{
 		if ( !other->HasPlane( plane ) ) {

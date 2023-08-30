@@ -57,31 +57,32 @@ const char* PLUGIN_NAME = "bobToolz";
 
 // commands in the menu
 constexpr char PLUGIN_COMMANDS[] = "About...,"
-								   "-,"
-								   "Stair Builder...,"
-								   "Door Builder...,"
-								   "Intersect...,"
-								   "Make Chain...,"
-								   "Path Plotter...,"
-								   "-,"
-								   "Reset Textures...,"
-								   "PitOMatic,"
-								   "-,"
-								   "Vis Viewer,"
-								   "Brush Cleanup,"
-								   "Polygon Builder,"
-								   "Caulk Selection,"
-								   "-,"
-								   "Tree Planter,"
-								   "Drop Entity,"
-								   "Plot Splines,"
-								   "-,"
-								   "Merge Patches,"
-								   "Split patches,"
-								   "Split patches cols,"
-								   "Split patches rows,"
-								   "Turn edge"
-									;
+                                   "-,"
+                                   "Stair Builder...,"
+                                   "Door Builder...,"
+                                   "Find Duplicates,"
+                                   "Intersect...,"
+                                   "Make Chain...,"
+                                   "Path Plotter...,"
+                                   "-,"
+                                   "Reset Textures...,"
+                                   "PitOMatic,"
+                                   "-,"
+                                   "Vis Viewer,"
+                                   "Brush Cleanup,"
+                                   "Polygon Builder,"
+                                   "Caulk Selection,"
+                                   "-,"
+                                   "Tree Planter,"
+                                   "Drop Entity,"
+                                   "Plot Splines,"
+                                   "-,"
+                                   "Merge Patches,"
+                                   "Split patches,"
+                                   "Split patches cols,"
+                                   "Split patches rows,"
+                                   "Turn edge"
+                                    ;
 
 // globals
 QWidget *g_pRadiantWnd = nullptr;
@@ -159,6 +160,9 @@ extern "C" void QERPlug_Dispatch( const char *p, vec3_t vMin, vec3_t vMax, bool 
 	}
 	else if ( string_equal_nocase( p, "intersect..." ) ) {
 		DoIntersect();
+	}
+	else if ( string_equal_nocase( p, "find duplicates" ) ) {
+		DoFindDuplicates();
 	}
 	else if ( string_equal_nocase( p, "make chain..." ) ) {
 		DoMakeChain();

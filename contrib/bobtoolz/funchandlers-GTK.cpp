@@ -88,7 +88,6 @@ void LoadLists(){
 //========================//
 
 void DoIntersect(){
-	UndoableCommand undo( "bobToolz.intersect" );
 	IntersectRS rs;
 
 	if ( !DoIntersectBox( &rs ) ) {
@@ -133,6 +132,33 @@ void DoIntersect(){
 	int brushCount = GlobalSelectionSystem().countSelected();
 	globalOutputStream() << "bobToolz Intersect: " << brushCount << " intersecting brushes found.\n";
 	delete[] pbSelectList;
+}
+
+void DoFindDuplicates()
+{
+	DMap map;
+	map.LoadAll( false );
+
+	std::vector<const DBrush *> brushes;
+
+	for( const auto *e : map.entityList )
+		for( const auto *b : e->brushList )
+			brushes.push_back( b );
+
+	GlobalSelectionSystem().setSelectedAll( false );
+
+	for( auto b = brushes.begin(); b != brushes.end(); ++b ){
+		if( *b != nullptr ){
+			for( auto b2 = std::next( b ); b2 != brushes.end(); ++b2 ){
+				if( *b2 != nullptr ){
+					if( ( *b )->operator==( *b2 ) ){
+						( *b2 )->selectInRadiant();
+						*b2 = nullptr;
+					}
+				}
+			}
+		}
+	}
 }
 
 void DoPolygonsTB(){

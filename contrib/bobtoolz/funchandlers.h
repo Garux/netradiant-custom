@@ -53,6 +53,7 @@ void LoadLists();
 
 // djbob
 void DoIntersect();
+void DoFindDuplicates();
 void DoPolygonsTB();
 void DoPolygons();
 void DoFixBrushes();
