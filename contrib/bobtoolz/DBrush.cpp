@@ -47,8 +47,7 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-DBrush::DBrush( int ID ){
-	m_nBrushID = ID;
+DBrush::DBrush(){
 	bBoundsBuilt = false;
 	QER_entity = NULL;
 	QER_brush = NULL;

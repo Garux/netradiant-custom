@@ -91,7 +91,7 @@ public:
 	DPlane* FindPlaneWithClosestNormal( vec_t* normal );
 	int FindPointsForPlane( DPlane* plane, DPoint** pnts, int maxpnts );
 
-	DBrush( int ID = -1 );
+	DBrush();
 	virtual ~DBrush();
 
 	bool operator==( const DBrush* other ) const;
@@ -101,7 +101,6 @@ public:
 	scene::Node* QER_brush;
 	std::list<DPlane*> faceList;
 	std::list<DPoint*> pointList;
-	int m_nBrushID;
 	vec3_t bbox_min, bbox_max;
 	bool bBoundsBuilt;
 };

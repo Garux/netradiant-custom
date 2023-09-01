@@ -24,6 +24,7 @@
 #pragma once
 
 #include <list>
+#include <vector>
 #include "str.h"
 #include "mathlib.h"
 
@@ -62,13 +63,11 @@ public:
 	bool ResetTextures( const char* textureName, float fScale[2], float fShift[2], int rotation, const char* newTextureName, bool bResetTextureName, bool bResetScale[2], bool bResetShift[2], bool bResetRotation, bool rebuild );
 	void SaveToFile( FILE* pFile );
 	void SetClassname( const char* classname );
-	int GetIDMax();
 
 	void BuildInRadiant( bool allowDestruction );
 	void ResetChecks( std::list<Str>* exclusionList );
 	void RemoveNonCheckBrushes( std::list<Str>* exclusionList, bool useDetail );
 
-	DPlane* AddFaceToBrush( vec3_t va, vec3_t vb, vec3_t vc, _QERFaceData* faceData, int ID );      // slow, try not to use much
 	int GetBrushCount( void );
 	DBrush* FindBrushByPointer( scene::Node& brush );
 //	---------------------------------------------
@@ -84,8 +83,7 @@ public:
 //	brush operations
 	void ClearBrushes();        // clears brush list and frees memory for brushes
 
-	DBrush* GetBrushForID( int ID );
-	DBrush* NewBrush( int ID = -1 );
+	DBrush* NewBrush();
 //	---------------------------------------------
 
 //	patch operations
@@ -96,9 +94,9 @@ public:
 
 //	vars
 	std::list<DEPair*> epairList;
-	std::list<DBrush*> brushList;
+	std::vector<DBrush*> brushList;
 // new patches, wahey!!!
-	std::list<DPatch*> patchList;
+	std::vector<DPatch*> patchList;
 	Str m_Classname;
 //	---------------------------------------------
 
