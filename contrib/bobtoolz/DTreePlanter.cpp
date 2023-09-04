@@ -82,7 +82,7 @@ SignalHandlerResult DTreePlanter::mouseDown( const WindowVector& position, Butto
 
 			if ( pLastEntity ) {
 				DEntity e2;
-				e2.LoadFromEntity( pLastEntity->top(), true );
+				e2.LoadFromEntity( pLastEntity->top(), {.loadPatches = true} );
 				e2.AddEPair( "target", buffer );
 				e2.RemoveFromRadiant();
 				e2.BuildInRadiant( false );

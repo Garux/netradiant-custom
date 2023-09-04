@@ -51,26 +51,6 @@
 #include "scenelib.h"
 
 
-const char* brushEntityList[] = {
-	"worldspawn",
-	"trigger_always",
-	"trigger_hurt",
-	"trigger_multiple",
-	"trigger_push",
-	"trigger_teleport",
-	"func_bobbing",
-	"func_button",
-	"func_door",
-	"func_group",
-	"func_pendulum",
-	"func_plat",
-	"func_rotating",
-	"func_static",
-	"func_timer",
-	"func_train",
-	0
-};
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -298,15 +278,10 @@ void DEntity::SelectBrushes( bool *selectList ){
 
 	GlobalSelectionSystem().setSelectedAll( false );
 
-	scene::Path path( NodeReference( GlobalSceneGraph().root() ) );
-	path.push( NodeReference( *QER_Entity ) );
-
 	for ( size_t i = 0; i < brushList.size(); ++i )
 	{
 		if ( selectList[i] ) {
-			path.push( NodeReference( *brushList[i]->QER_brush ) );
-			Instance_getSelectable( *GlobalSceneGraph().find( path ) )->setSelected( true );
-			path.pop();
+			brushList[i]->selectInRadiant();
 		}
 	}
 }
@@ -318,7 +293,7 @@ void select_primitive( scene::Node *primitive, scene::Node *entity ){
 	Instance_getSelectable( *GlobalSceneGraph().find( path ) )->setSelected( true );
 }
 
-bool DEntity::LoadFromEntity( scene::Node& ent, bool bLoadPatches ) {
+bool DEntity::LoadFromEntity( scene::Node& ent, const LoadOptions options ) {
 	ClearPatches();
 	ClearBrushes();
 	ClearEPairs();
@@ -327,17 +302,7 @@ bool DEntity::LoadFromEntity( scene::Node& ent, bool bLoadPatches ) {
 
 	LoadEPairList( Node_getEntity( ent ) );
 
-	bool keep = false;
-	int i;
-	for ( i = 0; brushEntityList[i]; i++ )
-	{
-		if ( string_equal_nocase( brushEntityList[i], m_Classname ) ) {
-			keep = true;
-			break;
-		}
-	}
-
-	if ( !keep ) {
+	if ( !node_is_group( ent ) ) {
 		return false;
 	}
 
@@ -345,26 +310,37 @@ bool DEntity::LoadFromEntity( scene::Node& ent, bool bLoadPatches ) {
 		class load_brushes_t : public scene::Traversable::Walker
 		{
 			DEntity* m_entity;
+			const LoadOptions m_options;
 		public:
-			load_brushes_t( DEntity* entity )
-				: m_entity( entity ){
+			load_brushes_t( DEntity* entity, const LoadOptions options )
+				: m_entity( entity ), m_options( options ){
 			}
 			bool pre( scene::Node& node ) const {
-				scene::Path path( NodeReference( GlobalSceneGraph().root() ) );
-				path.push( NodeReference( *m_entity->QER_Entity ) );
-				path.push( NodeReference( node ) );
-				scene::Instance* instance = GlobalSceneGraph().find( path );
-				ASSERT_MESSAGE( instance != 0, "" );
+				if( !( m_options.loadVisibleOnly && !node.visible() ) ){
+					scene::Path path( NodeReference( GlobalSceneGraph().root() ) );
+					path.push( NodeReference( *m_entity->QER_Entity ) );
+					path.push( NodeReference( node ) );
+					scene::Instance* instance = GlobalSceneGraph().find( path );
+					ASSERT_MESSAGE( instance != 0, "" );
 
-				if ( Node_isPatch( node ) ) {
-					m_entity->NewPatch()->LoadFromPatch( *instance );
+					if( !( m_options.loadSelectedOnly && Instance_isSelected( *instance ) ) ){
+						if ( Node_isPatch( node ) ) {
+							if( m_options.loadPatches )
+								m_entity->NewPatch()->LoadFromPatch( *instance );
+						}
+						else if ( Node_isBrush( node ) ) {
+							m_entity->NewBrush()->LoadFromBrush( *instance, true );
+							if( !m_options.loadDetail && m_entity->brushList.back()->IsDetail() ){
+								delete m_entity->brushList.back();
+								m_entity->brushList.pop_back();
+							}
+						}
+					}
 				}
-				else if ( Node_isBrush( node ) ) {
-					m_entity->NewBrush()->LoadFromBrush( *instance, true );
-				}
+
 				return false;
 			}
-		} load_brushes( this );
+		} load_brushes( this, options );
 
 		Node_getTraversable( ent )->traverse( load_brushes );
 	}
@@ -372,10 +348,9 @@ bool DEntity::LoadFromEntity( scene::Node& ent, bool bLoadPatches ) {
 	return true;
 }
 
-void DEntity::RemoveNonCheckBrushes( std::list<Str>* exclusionList, bool useDetail ){
+void DEntity::RemoveNonCheckBrushes( std::list<Str>* exclusionList ){
 	brushList.erase( std::remove_if( brushList.begin(), brushList.end(), [&]( DBrush *brush ){
-		if ( ( !useDetail && brush->IsDetail() )
-		|| std::any_of( exclusionList->cbegin(), exclusionList->cend(), [brush]( const Str& tex ){ return brush->HasTexture( tex.GetBuffer() ); } ) ) {
+		if ( std::any_of( exclusionList->cbegin(), exclusionList->cend(), [brush]( const Str& tex ){ return brush->HasTexture( tex.GetBuffer() ); } ) ) {
 			delete brush;
 			return true;
 		}

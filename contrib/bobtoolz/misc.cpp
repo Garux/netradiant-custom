@@ -215,8 +215,8 @@ public:
 		const char* classname = Node_getEntity( instance.path().top() )->getClassName();
 
 		if ( !strcmp( classname, "worldspawn" ) ) {
-			world.LoadFromEntity( instance.path().top(), false );
-			world.RemoveNonCheckBrushes( exclusionList, true );
+			world.LoadFromEntity( instance.path().top() );
+			world.RemoveNonCheckBrushes( exclusionList );
 			world.SaveToFile( pFile );
 		}
 		else if ( strstr( classname, "info_" ) ) {

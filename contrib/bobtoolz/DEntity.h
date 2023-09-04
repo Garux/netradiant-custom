@@ -27,6 +27,7 @@
 #include <vector>
 #include "str.h"
 #include "mathlib.h"
+#include "DMap.h"
 
 class DEPair;
 class DBrush;
@@ -66,7 +67,7 @@ public:
 
 	void BuildInRadiant( bool allowDestruction );
 	void ResetChecks( std::list<Str>* exclusionList );
-	void RemoveNonCheckBrushes( std::list<Str>* exclusionList, bool useDetail );
+	void RemoveNonCheckBrushes( std::list<Str>* exclusionList );
 
 	int GetBrushCount( void );
 	DBrush* FindBrushByPointer( scene::Node& brush );
@@ -103,7 +104,9 @@ public:
 
 	int FixBrushes();
 
-	bool LoadFromEntity( scene::Node& ent, bool bLoadPatches = false );
+	bool LoadFromEntity( scene::Node& ent, const LoadOptions options = {} );
+	/* these two load any selected primitives to single entity, hence e.g. QER_Entity wont be correct
+	   basically use with high care */
 	void LoadSelectedBrushes();
 	void LoadSelectedPatches();
 

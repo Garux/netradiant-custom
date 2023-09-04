@@ -107,18 +107,16 @@ void DoIntersect(){
 	{
 	case BRUSH_OPT_SELECTED:
 	{
-
-		world.LoadFromEntity( GlobalRadiant().getMapWorldEntity(), false );
 		world.LoadSelectedBrushes();
 		break;
 	}
 	case BRUSH_OPT_WHOLE_MAP:
 	{
-		world.LoadFromEntity( GlobalRadiant().getMapWorldEntity(), false );
+		world.LoadFromEntity( GlobalRadiant().getMapWorldEntity(), {.loadDetail = rs.bUseDetail} );
 		break;
 	}
 	}
-	world.RemoveNonCheckBrushes( &exclusionList, rs.bUseDetail );
+	world.RemoveNonCheckBrushes( &exclusionList );
 
 	bool* pbSelectList;
 	if ( rs.bDuplicateOnly ) {
@@ -137,7 +135,7 @@ void DoIntersect(){
 void DoFindDuplicates()
 {
 	DMap map;
-	map.LoadAll( false );
+	map.LoadAll( {.loadVisibleOnly = true} );
 
 	std::vector<const DBrush *> brushes;
 
@@ -159,6 +157,7 @@ void DoFindDuplicates()
 			}
 		}
 	}
+	globalOutputStream() << "bobToolz Find Duplicates: " << (int)std::count( brushes.cbegin(), brushes.cend(), nullptr ) << " duplicate brushes found.\n";
 }
 
 void DoPolygonsTB(){
@@ -252,7 +251,7 @@ void DoResetTextures(){
 	else if ( ret == eIDYES )
 	{
 		DMap world;
-		world.LoadAll( true );
+		world.LoadAll( {.loadPatches = true} );
 		world.ResetTextures( texName,              rs.fScale,      rs.fShift,      rs.rotation, rs.newTextureName,
 		                     rs.bResetTextureName, rs.bResetScale, rs.bResetShift, rs.bResetRotation );
 	}

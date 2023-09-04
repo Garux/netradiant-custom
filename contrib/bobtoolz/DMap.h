@@ -27,13 +27,21 @@
 
 class DEntity;
 
+struct LoadOptions
+{
+	bool loadPatches = false;
+	bool loadSelectedOnly = false;
+	bool loadVisibleOnly = false;
+	bool loadDetail = true;
+};
+
 class DMap
 {
 public:
 	static void RebuildEntity( DEntity* ent );
 
 	void ResetTextures( const char* textureName, float fScale[2],      float fShift[2],      int rotation, const char* newTextureName, bool bResetTextureName,  bool bResetScale[2],  bool bResetShift[2],  bool bResetRotation );
-	void LoadAll( bool bLoadPatches = false );
+	void LoadAll( const LoadOptions options = {} );
 	void BuildInRadiant( bool bAllowDestruction );
 	int m_nNextEntity;
 	DEntity* GetWorldSpawn();
