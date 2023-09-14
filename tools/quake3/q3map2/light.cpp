@@ -710,10 +710,29 @@ static void SetEntityOrigins(){
    ydnar 2002-09-30: added -faster switch because only 19% deviance > 10%
    between this and the approximation
  */
+#include <immintrin.h>
+#include "sleefinline_purec_scalar.h"
+
+template<typename Element, typename OtherElement>
+inline float vector3_dotf( const BasicVector3<Element>& self, const BasicVector3<OtherElement>& other ){
+	return self.x() * other.x() + self.y() * other.y() + self.z() * other.z();
+}
+
+float VectorFastNormalize_( Vector3 &vec ) {
+	float length = vector3_dotf( vec, vec );
+	if( length ){
+		float ilength = _mm_cvtss_f32( _mm_rsqrt_ss( _mm_set_ss( length ) ) );
+		ilength = ( 1.5f - length * .5f * ilength * ilength ) * ilength;
+		length *= ilength;
+		vec *= ilength;
+	}
+	return length;
+}
 
 float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, const winding_t& w ){
+	if( !tstF[0] ){
 	Vector3 dirs[ MAX_POINTS_ON_WINDING ];
-	double total = 0;
+	float total = 0;
 
 
 	/* this is expensive */
@@ -737,13 +756,53 @@ float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, con
 
 		/* get the angle */
 		/* roundoff can cause slight creep, which gives an IND from acos, thus clamp */
-		const double angle = acos( std::clamp( vector3_dot( dirs[ i ], dirs[ i + 1 ] ), -1.0, 1.0 ) );
+		const float angle = acos( std::clamp( vector3_dotf( dirs[ i ], dirs[ i + 1 ] ), -1.f, 1.f ) );
 
-		const double facing = vector3_dot( normal, triNormal );
+		const float facing = vector3_dotf( normal, triNormal );
 		total += facing * angle;
 
 		/* ydnar: this was throwing too many errors with radiosity + crappy maps. ignoring it. */
-		if ( total > 6.3 || total < -6.3 ) {
+		if ( total > 6.3f || total < -6.3f ) {
+			return 0.0f;
+		}
+	}
+
+	/* now in the range of 0 to 1 over the entire incoming hemisphere */
+	//%	total /= (2.0f * 3.141592657f);
+	return total * c_inv_2pi;
+	}
+	Vector3 dirs[ MAX_POINTS_ON_WINDING ];
+	float total = 0;
+
+
+	/* this is expensive */
+	for ( size_t i = 0; i < w.size(); ++i )
+	{
+		dirs[ i ] = w[ i ] - point;
+		VectorFastNormalize_( dirs[ i ] );
+	}
+
+	/* duplicate first vertex to avoid mod operation */
+	dirs[ w.size() ] = dirs[ 0 ];
+
+	/* calculcate relative area */
+	for ( size_t i = 0; i < w.size(); ++i )
+	{
+		/* get a triangle */
+		Vector3 triNormal = vector3_cross( dirs[ i ], dirs[ i + 1 ] );
+		if ( VectorFastNormalize_( triNormal ) < 0.0001f ) {
+			continue;
+		}
+
+		/* get the angle */
+		/* roundoff can cause slight creep, which gives an IND from acos, thus clamp */
+		const float angle = Sleef_acosf1_u35purec( std::clamp( vector3_dotf( dirs[ i ], dirs[ i + 1 ] ), -1.f, 1.f ) );
+
+		const float facing = vector3_dotf( normal, triNormal );
+		total += facing * angle;
+
+		/* ydnar: this was throwing too many errors with radiosity + crappy maps. ignoring it. */
+		if ( total > 6.3f || total < -6.3f ) {
 			return 0.0f;
 		}
 	}
@@ -752,8 +811,6 @@ float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, con
 	//%	total /= (2.0f * 3.141592657f);
 	return total * c_inv_2pi;
 }
-
-
 
 /*
    LightContributionTosample()
