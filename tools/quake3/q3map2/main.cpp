@@ -113,6 +113,23 @@ int main( int argc, char **argv ){
 		while ( args.takeArg( "-threads" ) ) {
 			numthreads = atoi( args.takeNext() );
 		}
+
+		/* tst */
+		while ( args.takeArg( "-f0" ) ) {
+			tstF[0] = atof( args.takeNext() );
+		}
+		while ( args.takeArg( "-f1" ) ) {
+			tstF[1] = atof( args.takeNext() );
+		}
+		while ( args.takeArg( "-f2" ) ) {
+			tstF[2] = atof( args.takeNext() );
+		}
+		while ( args.takeArg( "-f3" ) ) {
+			tstF[3] = atof( args.takeNext() );
+		}
+		while ( args.takeArg( "-f4" ) ) {
+			tstF[4] = atof( args.takeNext() );
+		}
 	}
 
 	/* init model library */

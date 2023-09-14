@@ -1736,6 +1736,8 @@ inline bool lightmapsAsTexcoord;
 inline bool force;
 inline int patchSubdivisions = 8;                       /* ydnar: -patchmeta subdivisions */
 
+inline float tstF[5];
+
 /* commandline arguments */
 inline bool verboseEntities;
 inline bool useCustomInfoParms;
