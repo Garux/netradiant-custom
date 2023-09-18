@@ -849,8 +849,7 @@ void SurfaceInspector::BuildDialog(){
 				// QObject::connect( frame, &QGroupBox::clicked, container, &QWidget::setVisible );
 				QObject::connect( frame, &QGroupBox::clicked, [container, wnd = GetWidget()]( bool checked ){
 					container->setVisible( checked );
-					wnd->adjustSize();
-					QTimer::singleShot( 0, [wnd](){ wnd->resize( 99, 99 ); } );
+					QTimer::singleShot( 0, [wnd](){ wnd->adjustSize(); wnd->resize( 99, 99 ); } );
 				} );
 				container->setVisible( false );
 				{
@@ -882,8 +881,7 @@ void SurfaceInspector::BuildDialog(){
 
 				QObject::connect( frame, &QGroupBox::clicked, [container, wnd = GetWidget()]( bool checked ){
 					container->setVisible( checked );
-					wnd->adjustSize();
-					QTimer::singleShot( 0, [wnd](){ wnd->resize( 99, 99 ); } );
+					QTimer::singleShot( 0, [wnd](){ wnd->adjustSize(); wnd->resize( 99, 99 ); } );
 				} );
 				container->setVisible( false );
 				{
