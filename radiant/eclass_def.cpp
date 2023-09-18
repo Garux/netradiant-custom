@@ -268,7 +268,7 @@ EntityClass *Eclass_InitFromText( const char *text ){
 			if ( !p ) {
 				break;
 			}
-			strcpy( e->flagnames[i], Get_COM_Token() );
+			strncpy( e->flagnames[i], Get_COM_Token(), std::size( e->flagnames[i] ) - 1 );
 		}
 	}
 

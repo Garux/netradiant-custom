@@ -264,8 +264,8 @@ inline EntityClass* Eclass_Alloc(){
 	e->has_angles = false;
 	e->has_angles_key = false;
 	e->has_direction_key = false;
-	memset( e->flagnames, 0, MAX_FLAGS * 32 );
-	memset( e->flagAttributes, 0, MAX_FLAGS * sizeof( EntityClassAttribute* ) );
+	memset( e->flagnames, 0, sizeof( e->flagnames ) );
+	memset( e->flagAttributes, 0, sizeof( e->flagAttributes ) );
 
 	e->maxs = Vector3( -1,-1,-1 );
 	e->mins = Vector3( 1, 1, 1 );

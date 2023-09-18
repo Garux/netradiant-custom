@@ -353,7 +353,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 					ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ":" ), PARSE_ERROR );
 
 					const char* name = tokeniser.getToken();
-					strcpy( entityClass->flagnames[bit], name );
+					strncpy( entityClass->flagnames[bit], name, std::size( entityClass->flagnames[bit] ) - 1 );
 					EntityClassAttribute *attribute = &EntityClass_insertAttribute( *entityClass, name, EntityClassAttribute( "flag", name ) ).second;
 					entityClass->flagAttributes[bit] = attribute;
 					{
@@ -656,7 +656,7 @@ void EntityClassFGD_resolveInheritance( EntityClass* derivedClass ){
 
 				for( size_t flag = 0; flag < MAX_FLAGS; ++flag ){
 					if( !string_empty( parentClass->flagnames[flag] ) && string_empty( derivedClass->flagnames[flag] ) ){
-						strcpy( derivedClass->flagnames[flag], parentClass->flagnames[flag] );
+						strncpy( derivedClass->flagnames[flag], parentClass->flagnames[flag], std::size( derivedClass->flagnames[flag] ) - 1 );
 						derivedClass->flagAttributes[flag] = parentClass->flagAttributes[flag];
 					}
 				}

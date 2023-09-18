@@ -211,7 +211,7 @@ public:
 			std::size_t bit = atoi( element.attribute( "bit" ) );
 			ASSERT_MESSAGE( bit < MAX_FLAGS, "invalid flag bit" );
 			ASSERT_MESSAGE( string_empty( entityClass->flagnames[bit] ), "non-unique flag bit" );
-			strcpy( entityClass->flagnames[bit], key );
+			strncpy( entityClass->flagnames[bit], key, std::size( entityClass->flagnames[bit] ) - 1 );
 			entityClass->flagAttributes[bit] = m_attribute;
 		}
 		else if( entityClass->fixedsize && string_equal( type, "model" ) ){
