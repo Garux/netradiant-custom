@@ -104,16 +104,6 @@ class SurfaceInspector : public Dialog
 	void BuildDialog() override;
 
 	NonModalEntry *m_textureEntry;
-	NonModalSpinner *m_hshiftSpinner;
-	NonModalEntry *m_hshiftEntry;
-	NonModalSpinner *m_vshiftSpinner;
-	NonModalEntry *m_vshiftEntry;
-	NonModalSpinner *m_hscaleSpinner;
-	NonModalEntry *m_hscaleEntry;
-	NonModalSpinner *m_vscaleSpinner;
-	NonModalEntry *m_vscaleEntry;
-	NonModalSpinner *m_rotateSpinner;
-	NonModalEntry *m_rotateEntry;
 
 	IdleDraw m_idleDraw;
 
@@ -660,90 +650,97 @@ void SurfaceInspector::BuildDialog(){
 			}
 		}
 		{
-			auto *hbox = new QHBoxLayout;
-			vbox->addLayout( hbox );
+			auto *grid = new QGridLayout; // 5 x 5
+			vbox->addLayout( grid );
+
+			struct GridRowAdder
 			{
-				auto *form = new QFormLayout;
-				hbox->addLayout( form );
+				QGridLayout * const m_grid;
+				const int m_colLabel;
+				const int m_colField;
+				int m_row = 0;
+				void addRow( QWidget *label, QWidget *field ){
+					m_grid->addWidget( label, m_row, m_colLabel );
+					m_grid->addWidget( field, m_row, m_colField );
+					++m_row;
+				}
+				void addRow( const char *label, QWidget *field ){
+					addRow( new QLabel( label ), field );
+				}
+			};
+
+			{
+				GridRowAdder adder{ grid, 0, 2 };
+				adder.m_grid->setColumnStretch( adder.m_colField, 1 );
 				{
-					auto spin = m_hshiftSpinner = new NonModalSpinner( -8192, 8192, 0, 2, 2 );
+					auto spin = new NonModalSpinner( -8192, 8192, 0, 2, 2 );
 					spin->setCallbacks( ApplyTexdef_HShiftCaller( *this ), UpdateCaller( *this ) );
 					m_hshiftIncrement.m_spin = spin;
-					form->addRow( new SpinBoxLabel( "Horizontal shift", spin ), spin );
+					adder.addRow( new SpinBoxLabel( "Horizontal shift", spin ), spin );
 				}
 				{
-					auto spin = m_vshiftSpinner = new NonModalSpinner( -8192, 8192, 0, 2, 2 );
+					auto spin = new NonModalSpinner( -8192, 8192, 0, 2, 2 );
 					spin->setCallbacks( ApplyTexdef_VShiftCaller( *this ), UpdateCaller( *this ) );
 					m_vshiftIncrement.m_spin = spin;
-					form->addRow( new SpinBoxLabel( "Vertical shift", spin ), spin );
+					adder.addRow( new SpinBoxLabel( "Vertical shift", spin ), spin );
 				}
 				{
-					auto spin = m_hscaleSpinner = new NonModalSpinner( -8192, 8192, .5, 5, .5 );
+					auto spin = new NonModalSpinner( -8192, 8192, .5, 5, .5 );
 					spin->setCallbacks( ApplyTexdef_HScaleCaller( *this ), UpdateCaller( *this ) );
 					m_hscaleIncrement.m_spin = spin;
-					auto *hbox = new QHBoxLayout;
-					hbox->setContentsMargins( 0, 0, 0, 0 );
-					hbox->addWidget( new SpinBoxLabel( "Horizontal stretch", spin ) );
+					adder.addRow( new SpinBoxLabel( "Horizontal stretch", spin ), spin );
+
 					auto *b = new QToolButton;
+					adder.m_grid->addWidget( b, adder.m_row - 1, adder.m_colLabel + 1 );
 					b->setText( "-" );
-					hbox->addWidget( b );
-					auto *c = new QWidget;
-					c->setLayout( hbox );
-					form->addRow( c, spin );
 					QObject::connect( b, &QAbstractButton::clicked, SurfaceInspector_InvertTextureHorizontally );
 				}
 				{
-					auto spin = m_vscaleSpinner = new NonModalSpinner( -8192, 8192, .5, 5, .5 );
+					auto spin = new NonModalSpinner( -8192, 8192, .5, 5, .5 );
 					spin->setCallbacks( ApplyTexdef_VScaleCaller( *this ), UpdateCaller( *this ) );
 					m_vscaleIncrement.m_spin = spin;
-					auto *hbox = new QHBoxLayout;
-					hbox->setContentsMargins( 0, 0, 0, 0 );
-					hbox->addWidget( new SpinBoxLabel( "Vertical stretch   ", spin ) );
+					adder.addRow( new SpinBoxLabel( "Vertical stretch", spin ), spin );
+
 					auto *b = new QToolButton;
+					adder.m_grid->addWidget( b, adder.m_row - 1, adder.m_colLabel + 1 );
 					b->setText( "-" );
-					hbox->addWidget( b );
-					auto *c = new QWidget;
-					c->setLayout( hbox );
-					form->addRow( c, spin );
 					QObject::connect( b, &QAbstractButton::clicked, SurfaceInspector_InvertTextureVertically );
 				}
 				{
-					auto spin = m_rotateSpinner = new NonModalSpinner( -360, 360, 0, 2, 45, true );
+					auto spin = new NonModalSpinner( -360, 360, 0, 2, 45, true );
 					spin->setCallbacks( ApplyTexdef_RotationCaller( *this ), UpdateCaller( *this ) );
 					m_rotateIncrement.m_spin = spin;
-					form->addRow( new SpinBoxLabel( "Rotate", spin ), spin );
+					adder.addRow( new SpinBoxLabel( "Rotate", spin ), spin );
 				}
 			}
 			{
-				auto *form = new QFormLayout;
-				hbox->addLayout( form );
+				GridRowAdder adder{ grid, 3, 4 };
 				{
-					auto entry = m_hshiftEntry = new NonModalEntry( Increment::ApplyCaller( m_hshiftIncrement ), Increment::CancelCaller( m_hshiftIncrement ) );
+					auto entry = new NonModalEntry( Increment::ApplyCaller( m_hshiftIncrement ), Increment::CancelCaller( m_hshiftIncrement ) );
 					m_hshiftIncrement.m_entry = entry;
-					form->addRow( "Step", entry );
+					adder.addRow( "Step", entry );
 				}
 				{
-					auto entry = m_vshiftEntry = new NonModalEntry( Increment::ApplyCaller( m_vshiftIncrement ), Increment::CancelCaller( m_vshiftIncrement ) );
+					auto entry = new NonModalEntry( Increment::ApplyCaller( m_vshiftIncrement ), Increment::CancelCaller( m_vshiftIncrement ) );
 					m_vshiftIncrement.m_entry = entry;
-					form->addRow( "Step", entry );
+					adder.addRow( "Step", entry );
 				}
 				{
-					auto entry = m_hscaleEntry = new NonModalEntry( Increment::ApplyCaller( m_hscaleIncrement ), Increment::CancelCaller( m_hscaleIncrement ) );
+					auto entry = new NonModalEntry( Increment::ApplyCaller( m_hscaleIncrement ), Increment::CancelCaller( m_hscaleIncrement ) );
 					m_hscaleIncrement.m_entry = entry;
-					form->addRow( "Step", entry );
+					adder.addRow( "Step", entry );
 				}
 				{
-					auto entry = m_vscaleEntry = new NonModalEntry( Increment::ApplyCaller( m_vscaleIncrement ), Increment::CancelCaller( m_vscaleIncrement ) );
+					auto entry = new NonModalEntry( Increment::ApplyCaller( m_vscaleIncrement ), Increment::CancelCaller( m_vscaleIncrement ) );
 					m_vscaleIncrement.m_entry = entry;
-					form->addRow( "Step", entry );
+					adder.addRow( "Step", entry );
 				}
 				{
-					auto entry = m_rotateEntry = new NonModalEntry( Increment::ApplyCaller( m_rotateIncrement ), Increment::CancelCaller( m_rotateIncrement ) );
+					auto entry = new NonModalEntry( Increment::ApplyCaller( m_rotateIncrement ), Increment::CancelCaller( m_rotateIncrement ) );
 					m_rotateIncrement.m_entry = entry;
-					form->addRow( "Step", entry );
+					adder.addRow( "Step", entry );
 				}
 			}
-			hbox->setStretch( 0, 1 );
 		}
 		{
 			// match grid button
@@ -919,6 +916,7 @@ void SurfaceInspector::BuildDialog(){
 				}
 			}
 		}
+		vbox->addStretch( 1 );
 	}
 }
 
