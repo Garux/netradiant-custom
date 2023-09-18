@@ -27,7 +27,7 @@
 
 #include "generic/constant.h"
 
-#define MAX_FLAGS   16
+#define MAX_FLAGS   32
 
 // eclass show flags
 
