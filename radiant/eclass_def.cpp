@@ -268,6 +268,11 @@ EntityClass *Eclass_InitFromText( const char *text ){
 			if ( !p ) {
 				break;
 			}
+			if( string_equal( Get_COM_Token(), "-" )
+			 || string_equal( Get_COM_Token(), "x" )
+			 || string_equal_prefix_nocase( Get_COM_Token(), "unused" ) ){
+				continue;
+			}
 			strncpy( e->flagnames[i], Get_COM_Token(), std::size( e->flagnames[i] ) - 1 );
 		}
 	}
