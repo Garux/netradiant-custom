@@ -178,7 +178,7 @@ void create_filter_toolbar( QToolBar *toolbar ){
 	//toolbar_append_toggle_button( toolbar, "Paths", "texture_lock.png", "FilterPaths" );
 	toolbar->addSeparator();
 	toolbar_append_toggle_button( toolbar, "Entities", "f-entities.png", "FilterEntities" );
-	toolbar_append_toggle_button( toolbar, "Point Entities", "status_entiy.png", "FilterPointEntities" );
+	toolbar_append_toggle_button( toolbar, "Point Entities", "status_entity.png", "FilterPointEntities" );
 	toolbar_append_toggle_button( toolbar, "Lights", "f-lights.png", "FilterLights" );
 	toolbar_append_toggle_button( toolbar, "Models", "f-models.png", "FilterModels" );
 
