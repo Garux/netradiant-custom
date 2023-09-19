@@ -248,24 +248,20 @@ EntityClass *Eclass_InitFromText( const char *text ){
 		}
 	}
 
-	char parms[256];
-	// get the flags
-	{
-		// copy to the first /n
-		char* p = parms;
-		while ( *text && *text != '\n' )
-			*p++ = *text++;
-		*p = 0;
-		text++;
+	StringRange parms( text, text );
+	{ // get the flags: advance to the first \n
+		while ( *text && *text++ != '\n' ){};
+		parms = { parms.begin(), text };
+		( *text && ++text );
 	}
 
 	{
 		// any remaining words are parm flags
-		const char* p = parms;
+		const char* p = parms.begin();
 		for ( std::size_t i = 0; i < MAX_FLAGS; i++ )
 		{
 			p = COM_Parse( p );
-			if ( !p ) {
+			if ( p == nullptr || p > parms.end() ) {
 				break;
 			}
 			if( string_equal( Get_COM_Token(), "-" )
