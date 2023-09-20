@@ -606,10 +606,13 @@ protected:
 			 || keyEvent->key() == Qt::Key_Enter
 			 || keyEvent->key() == Qt::Key_Escape
 			 || keyEvent->key() == Qt::Key_Tab
-			 || keyEvent->key() == Qt::Key_Up
-			 || keyEvent->key() == Qt::Key_Down
-			 || keyEvent->key() == Qt::Key_PageUp
-			 || keyEvent->key() == Qt::Key_PageDown ){
+			 || ( ( keyEvent->modifiers() == Qt::KeyboardModifier::NoModifier
+			     || keyEvent->modifiers() == Qt::KeyboardModifier::KeypadModifier ) // do not filter editor's shortcuts with modifiers
+			  && ( keyEvent->key() == Qt::Key_Up
+			    || keyEvent->key() == Qt::Key_Down
+			    || keyEvent->key() == Qt::Key_PageUp
+			    || keyEvent->key() == Qt::Key_PageDown ) )
+			){
 				event->accept();
 				return true;
 			}
