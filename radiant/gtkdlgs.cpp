@@ -1139,8 +1139,8 @@ static const std::vector<ShaderFormat> g_shaderGeneralFormats{
 		"q3map_tcMod %s %f %f", c_pageGlob, c_colorKeyLv1, {
 			"scale",
 			"translate",
-			"move",
 			"shift",
+			"offset",
 		}
 	},
 	{
