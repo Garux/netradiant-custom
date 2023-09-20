@@ -463,6 +463,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 		       || string_equal_nocase( type.c_str(), "studio" )
 		       || string_equal_nocase( type.c_str(), "sprite" )
 		       || string_equal_nocase( type.c_str(), "color255" )
+		       || string_equal_nocase( type.c_str(), "color1" )
 		       || string_equal_nocase( type.c_str(), "target_source" )
 		       || string_equal_nocase( type.c_str(), "target_destination" )
 		       || string_equal_nocase( type.c_str(), "sound" )
@@ -489,6 +490,9 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 			const char* attributeType = "string";
 			if ( string_equal_nocase( type.c_str(), "studio" ) ) {
 				attributeType = "model";
+			}
+			else if ( string_equal_nocase( type.c_str(), "color1" ) ) {
+				attributeType = "color";
 			}
 
 			EntityClassAttribute attribute;
