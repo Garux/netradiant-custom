@@ -85,12 +85,20 @@ const char *const g_gridnames[] = {
 	"1024",
 };
 
+std::array<QAction *, std::size( g_gridnames )> g_gridActions{};
+
 inline GridPower GridPower_forGridDefault( int gridDefault ){
 	return static_cast<GridPower>( gridDefault - 3 );
 }
 
 inline int GridDefault_forGridPower( GridPower gridPower ){
 	return gridPower + 3;
+}
+
+inline void gridActions_setChecked( GridPower gridPower ){
+	auto *action = g_gridActions[GridDefault_forGridPower( gridPower )];
+	ASSERT_NOTNULL( action );
+	action->setChecked( true );
 }
 
 int g_grid_default = GridDefault_forGridPower( GRIDPOWER_16 );
@@ -118,71 +126,23 @@ float GetGridSize(){
 }
 
 
-void setGridPower( GridPower power );
-
-class GridMenuItem
-{
-	GridPower m_id;
-public:
-	ToggleItem m_item;
-
-	GridMenuItem( const GridMenuItem& other ) = delete; // NOT COPYABLE
-	GridMenuItem& operator=( const GridMenuItem& other ) = delete; // NOT ASSIGNABLE
-
-	GridMenuItem( GridPower id ) : m_id( id ), m_item( ExportCaller( *this ) ){
-	}
-	void set(){
-		g_grid_power = m_id;
-		m_item.update();
-		setGridPower( m_id );
-	}
-	typedef MemberCaller<GridMenuItem, &GridMenuItem::set> SetCaller;
-	void active( const BoolImportCallback& importCallback ){
-		importCallback( g_grid_power == m_id );
-	}
-	typedef MemberCaller1<GridMenuItem, const BoolImportCallback&, &GridMenuItem::active> ExportCaller;
-};
-
-GridMenuItem g_gridMenu0125( GRIDPOWER_0125 );
-GridMenuItem g_gridMenu025( GRIDPOWER_025 );
-GridMenuItem g_gridMenu05( GRIDPOWER_05 );
-GridMenuItem g_gridMenu1( GRIDPOWER_1 );
-GridMenuItem g_gridMenu2( GRIDPOWER_2 );
-GridMenuItem g_gridMenu4( GRIDPOWER_4 );
-GridMenuItem g_gridMenu8( GRIDPOWER_8 );
-GridMenuItem g_gridMenu16( GRIDPOWER_16 );
-GridMenuItem g_gridMenu32( GRIDPOWER_32 );
-GridMenuItem g_gridMenu64( GRIDPOWER_64 );
-GridMenuItem g_gridMenu128( GRIDPOWER_128 );
-GridMenuItem g_gridMenu256( GRIDPOWER_256 );
-GridMenuItem g_gridMenu512( GRIDPOWER_512 );
-GridMenuItem g_gridMenu1024( GRIDPOWER_1024 );
-
 void setGridPower( GridPower power ){
 	g_grid_snap = true;
 	g_gridsize = GridSize_forGridPower( power );
-
-	g_gridMenu0125.m_item.update();
-	g_gridMenu025.m_item.update();
-	g_gridMenu05.m_item.update();
-	g_gridMenu1.m_item.update();
-	g_gridMenu2.m_item.update();
-	g_gridMenu4.m_item.update();
-	g_gridMenu8.m_item.update();
-	g_gridMenu16.m_item.update();
-	g_gridMenu32.m_item.update();
-	g_gridMenu64.m_item.update();
-	g_gridMenu128.m_item.update();
-	g_gridMenu256.m_item.update();
-	g_gridMenu512.m_item.update();
-	g_gridMenu1024.m_item.update();
 	GridChangeNotify();
+}
+
+template<GridPower power>
+void setGridPower(){
+	g_grid_power = power;
+	setGridPower( power );
 }
 
 void GridPrev(){
 	g_grid_snap = true;
 	if ( g_grid_power > GRIDPOWER_0125 ) {
 		setGridPower( static_cast<GridPower>( --g_grid_power ) );
+		gridActions_setChecked( static_cast<GridPower>( g_grid_power ) );
 	}
 }
 
@@ -190,6 +150,7 @@ void GridNext(){
 	g_grid_snap = true;
 	if ( g_grid_power < GRIDPOWER_1024 ) {
 		setGridPower( static_cast<GridPower>( ++g_grid_power ) );
+		gridActions_setChecked( static_cast<GridPower>( g_grid_power ) );
 	}
 }
 
@@ -226,38 +187,48 @@ void Grid_registerCommands(){
 
 	GlobalCommands_insert( "ToggleGridSnap", FreeCaller<ToggleGridSnap>() );
 
-	GlobalToggles_insert( "SetGrid0.125", GridMenuItem::SetCaller( g_gridMenu0125 ), ToggleItem::AddCallbackCaller( g_gridMenu0125.m_item ) );
-	GlobalToggles_insert( "SetGrid0.25", GridMenuItem::SetCaller( g_gridMenu025 ), ToggleItem::AddCallbackCaller( g_gridMenu025.m_item ) );
-	GlobalToggles_insert( "SetGrid0.5", GridMenuItem::SetCaller( g_gridMenu05 ), ToggleItem::AddCallbackCaller( g_gridMenu05.m_item ) );
-	GlobalToggles_insert( "SetGrid1", GridMenuItem::SetCaller( g_gridMenu1 ), ToggleItem::AddCallbackCaller( g_gridMenu1.m_item ), QKeySequence( "1" ) );
-	GlobalToggles_insert( "SetGrid2", GridMenuItem::SetCaller( g_gridMenu2 ), ToggleItem::AddCallbackCaller( g_gridMenu2.m_item ), QKeySequence( "2" ) );
-	GlobalToggles_insert( "SetGrid4", GridMenuItem::SetCaller( g_gridMenu4 ), ToggleItem::AddCallbackCaller( g_gridMenu4.m_item ), QKeySequence( "3" ) );
-	GlobalToggles_insert( "SetGrid8", GridMenuItem::SetCaller( g_gridMenu8 ), ToggleItem::AddCallbackCaller( g_gridMenu8.m_item ), QKeySequence( "4" ) );
-	GlobalToggles_insert( "SetGrid16", GridMenuItem::SetCaller( g_gridMenu16 ), ToggleItem::AddCallbackCaller( g_gridMenu16.m_item ), QKeySequence( "5" ) );
-	GlobalToggles_insert( "SetGrid32", GridMenuItem::SetCaller( g_gridMenu32 ), ToggleItem::AddCallbackCaller( g_gridMenu32.m_item ), QKeySequence( "6" ) );
-	GlobalToggles_insert( "SetGrid64", GridMenuItem::SetCaller( g_gridMenu64 ), ToggleItem::AddCallbackCaller( g_gridMenu64.m_item ), QKeySequence( "7" ) );
-	GlobalToggles_insert( "SetGrid128", GridMenuItem::SetCaller( g_gridMenu128 ), ToggleItem::AddCallbackCaller( g_gridMenu128.m_item ), QKeySequence( "8" ) );
-	GlobalToggles_insert( "SetGrid256", GridMenuItem::SetCaller( g_gridMenu256 ), ToggleItem::AddCallbackCaller( g_gridMenu256.m_item ), QKeySequence( "9" ) );
-	GlobalToggles_insert( "SetGrid512", GridMenuItem::SetCaller( g_gridMenu512 ), ToggleItem::AddCallbackCaller( g_gridMenu512.m_item ) );
-	GlobalToggles_insert( "SetGrid1024", GridMenuItem::SetCaller( g_gridMenu1024 ), ToggleItem::AddCallbackCaller( g_gridMenu1024.m_item ) );
+	GlobalCommands_insert( "SetGrid0.125", FreeCaller<setGridPower<GRIDPOWER_0125>>() );
+	GlobalCommands_insert( "SetGrid0.25", FreeCaller<setGridPower<GRIDPOWER_025>>() );
+	GlobalCommands_insert( "SetGrid0.5", FreeCaller<setGridPower<GRIDPOWER_05>>() );
+	GlobalCommands_insert( "SetGrid1", FreeCaller<setGridPower<GRIDPOWER_1>>(), QKeySequence( "1" ) );
+	GlobalCommands_insert( "SetGrid2", FreeCaller<setGridPower<GRIDPOWER_2>>(), QKeySequence( "2" ) );
+	GlobalCommands_insert( "SetGrid4", FreeCaller<setGridPower<GRIDPOWER_4>>(), QKeySequence( "3" ) );
+	GlobalCommands_insert( "SetGrid8", FreeCaller<setGridPower<GRIDPOWER_8>>(), QKeySequence( "4" ) );
+	GlobalCommands_insert( "SetGrid16", FreeCaller<setGridPower<GRIDPOWER_16>>(), QKeySequence( "5" ) );
+	GlobalCommands_insert( "SetGrid32", FreeCaller<setGridPower<GRIDPOWER_32>>(), QKeySequence( "6" ) );
+	GlobalCommands_insert( "SetGrid64", FreeCaller<setGridPower<GRIDPOWER_64>>(), QKeySequence( "7" ) );
+	GlobalCommands_insert( "SetGrid128", FreeCaller<setGridPower<GRIDPOWER_128>>(), QKeySequence( "8" ) );
+	GlobalCommands_insert( "SetGrid256", FreeCaller<setGridPower<GRIDPOWER_256>>(), QKeySequence( "9" ) );
+	GlobalCommands_insert( "SetGrid512", FreeCaller<setGridPower<GRIDPOWER_512>>() );
+	GlobalCommands_insert( "SetGrid1024", FreeCaller<setGridPower<GRIDPOWER_1024>>() );
 }
 
 
 void Grid_constructMenu( QMenu* menu ){
-	create_check_menu_item_with_mnemonic( menu, "Grid0.125", "SetGrid0.125" );
-	create_check_menu_item_with_mnemonic( menu, "Grid0.25", "SetGrid0.25" );
-	create_check_menu_item_with_mnemonic( menu, "Grid0.5", "SetGrid0.5" );
-	create_check_menu_item_with_mnemonic( menu, "Grid1", "SetGrid1" );
-	create_check_menu_item_with_mnemonic( menu, "Grid2", "SetGrid2" );
-	create_check_menu_item_with_mnemonic( menu, "Grid4", "SetGrid4" );
-	create_check_menu_item_with_mnemonic( menu, "Grid8", "SetGrid8" );
-	create_check_menu_item_with_mnemonic( menu, "Grid16", "SetGrid16" );
-	create_check_menu_item_with_mnemonic( menu, "Grid32", "SetGrid32" );
-	create_check_menu_item_with_mnemonic( menu, "Grid64", "SetGrid64" );
-	create_check_menu_item_with_mnemonic( menu, "Grid128", "SetGrid128" );
-	create_check_menu_item_with_mnemonic( menu, "Grid256", "SetGrid256" );
-	create_check_menu_item_with_mnemonic( menu, "Grid512", "SetGrid512" );
-	create_check_menu_item_with_mnemonic( menu, "Grid1024", "SetGrid1024" );
+	g_gridActions = std::array{ // verify arrays size match this way
+		create_menu_item_with_mnemonic( menu, "Grid0.125", "SetGrid0.125" ),
+		create_menu_item_with_mnemonic( menu, "Grid0.25", "SetGrid0.25" ),
+		create_menu_item_with_mnemonic( menu, "Grid0.5", "SetGrid0.5" ),
+		create_menu_item_with_mnemonic( menu, "Grid1", "SetGrid1" ),
+		create_menu_item_with_mnemonic( menu, "Grid2", "SetGrid2" ),
+		create_menu_item_with_mnemonic( menu, "Grid4", "SetGrid4" ),
+		create_menu_item_with_mnemonic( menu, "Grid8", "SetGrid8" ),
+		create_menu_item_with_mnemonic( menu, "Grid16", "SetGrid16" ),
+		create_menu_item_with_mnemonic( menu, "Grid32", "SetGrid32" ),
+		create_menu_item_with_mnemonic( menu, "Grid64", "SetGrid64" ),
+		create_menu_item_with_mnemonic( menu, "Grid128", "SetGrid128" ),
+		create_menu_item_with_mnemonic( menu, "Grid256", "SetGrid256" ),
+		create_menu_item_with_mnemonic( menu, "Grid512", "SetGrid512" ),
+		create_menu_item_with_mnemonic( menu, "Grid1024", "SetGrid1024" )
+	};
+	// make them radio
+	auto *group = new QActionGroup( menu );
+	for( auto *action : g_gridActions ){
+		action->setCheckable( true );
+		action->setActionGroup( group );
+	}
+	// activate current
+	gridActions_setChecked( static_cast<GridPower>( g_grid_power ) );
 }
 
 void Grid_registerShortcuts(){
