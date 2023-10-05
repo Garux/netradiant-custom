@@ -1343,7 +1343,7 @@ typedef ReferenceCaller1<CopiedString, const char*, FoldersToLoadImport> Folders
 void ModelBrowser_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Model Browser", "Model Browser Preferences" ) );
 
-	page.appendSpinner( "Model View Size", 16.0, 8192.0,
+	page.appendSpinner( "Model View Size", 16, 8192,
 	                    IntImportCallback( CellSizeImportCaller( g_ModelBrowser.m_cellSize ) ),
 	                    IntExportCallback( IntExportCaller( g_ModelBrowser.m_cellSize ) ) );
 	page.appendEntry( "List of *folderToLoad/depth*",

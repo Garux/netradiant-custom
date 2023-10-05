@@ -2455,9 +2455,10 @@ void Camera_constructPreferences( PreferencesPage& page ){
 	    StringArrayRange( strafe_mode )
 	);
 
-	page.appendSpinner(	"Field Of View", 1.0, 175.0,
+	page.appendSpinner( "Field Of View", 1.0, 175.0,
 	                    FloatImportCallback( fieldOfViewImportCaller() ),
-	                    FloatExportCallback( FloatExportCaller( camera_t::fieldOfView ) )
+	                    FloatExportCallback( FloatExportCaller( camera_t::fieldOfView ) ),
+	                    0
 	                  );
 }
 void Camera_constructPage( PreferenceGroup& group ){

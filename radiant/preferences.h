@@ -93,11 +93,11 @@ public:
 	QWidget* appendSpinner( const char* name, int lower, int upper, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
 		return m_dialog.addSpinner( m_grid, name, lower, upper, importCallback, exportCallback );
 	}
-	QWidget* appendSpinner( const char* name, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback ){
-		return m_dialog.addSpinner( m_grid, name, lower, upper, importCallback, exportCallback );
+	QWidget* appendSpinner( const char* name, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback, int decimals = 2 ){
+		return m_dialog.addSpinner( m_grid, name, lower, upper, importCallback, exportCallback, decimals );
 	}
-	QWidget* appendSpinner( const char* name, float& data, double lower, double upper ){
-		return m_dialog.addSpinner( m_grid, name, data, lower, upper );
+	QWidget* appendSpinner( const char* name, float& data, double lower, double upper, int decimals = 2 ){
+		return m_dialog.addSpinner( m_grid, name, data, lower, upper, decimals );
 	}
 };
 

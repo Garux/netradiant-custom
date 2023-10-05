@@ -666,11 +666,11 @@ typedef ReferenceCaller1<EntityCreator, const BoolImportCallback&, ShowTargetNam
 
 
 void Entity_constructPreferences( PreferencesPage& page ){
-	page.appendSpinner(	"Names Display Distance (3D)", 0.0, 200500.0,
+	page.appendSpinner(	"Names Display Distance (3D)", 0, 200500,
 	                    IntImportCallback( ShowNamesDistImportCaller( GlobalEntityCreator() ) ),
 	                    IntExportCallback( ShowNamesDistExportCaller( GlobalEntityCreator() ) )
 	                  );
-	page.appendSpinner(	"Names Display Ratio (2D)", 0.0, 100500.0,
+	page.appendSpinner(	"Names Display Ratio (2D)", 0, 100500,
 	                    IntImportCallback( ShowNamesRatioImportCaller( GlobalEntityCreator() ) ),
 	                    IntExportCallback( ShowNamesRatioExportCaller( GlobalEntityCreator() ) )
 	                  );

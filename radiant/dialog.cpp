@@ -515,14 +515,14 @@ QWidget* Dialog::addSpinner( QGridLayout* grid, const char* name, int& data, int
 	return addSpinner( grid, name, lower, upper, IntImportCallback( IntImportCaller( data ) ), IntExportCallback( IntExportCaller( data ) ) );
 }
 
-QWidget* Dialog::addSpinner( QGridLayout* grid, const char* name, double lower, double upper, const FloatImportCallback& importViewer, const FloatExportCallback& exportViewer ){
-	auto spin = new DoubleSpinBox( lower, upper );
+QWidget* Dialog::addSpinner( QGridLayout* grid, const char* name, double lower, double upper, const FloatImportCallback& importViewer, const FloatExportCallback& exportViewer, int decimals ){
+	auto spin = new DoubleSpinBox( lower, upper, 0, decimals );
 	spin->setStepType( QAbstractSpinBox::StepType::AdaptiveDecimalStepType );
 	AddFloatSpinnerData( *spin, importViewer, exportViewer );
 	DialogGrid_packRow( grid, spin, new SpinBoxLabel( name, spin ) );
 	return spin;
 }
 
-QWidget* Dialog::addSpinner( QGridLayout* grid, const char* name, float& data, double lower, double upper ){
-	return addSpinner( grid, name, lower, upper, FloatImportCallback( FloatImportCaller( data ) ), FloatExportCallback( FloatExportCaller( data ) ) );
+QWidget* Dialog::addSpinner( QGridLayout* grid, const char* name, float& data, double lower, double upper, int decimals ){
+	return addSpinner( grid, name, lower, upper, FloatImportCallback( FloatImportCaller( data ) ), FloatExportCallback( FloatExportCaller( data ) ), decimals );
 }

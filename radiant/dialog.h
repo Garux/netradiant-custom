@@ -153,8 +153,8 @@ public:
 	void addPathEntry( QGridLayout *grid, const char* name, CopiedString& data, bool directory );
 	QWidget* addSpinner( QGridLayout *grid, const char* name, int& data, int lower, int upper );
 	QWidget* addSpinner( QGridLayout *grid, const char* name, int lower, int upper, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	QWidget* addSpinner( QGridLayout *grid, const char* name, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
-	QWidget* addSpinner( QGridLayout* grid, const char* name, float& data, double lower, double upper );
+	QWidget* addSpinner( QGridLayout *grid, const char* name, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback, int decimals );
+	QWidget* addSpinner( QGridLayout* grid, const char* name, float& data, double lower, double upper, int decimals );
 
 protected:
 
