@@ -1421,7 +1421,7 @@ void create_main_toolbar( QToolBar *toolbar,  MainFrame::EViewStyle style ){
 	Manipulators_constructToolbar( toolbar );
 	toolbar->addSeparator();
 
-	if ( !string_empty( g_pGameDescription->getKeyValue( "no_patch" ) ) ) {
+	if ( !string_equal( g_pGameDescription->getKeyValue( "no_patch" ), "1" ) ) {
 		Patch_constructToolbar( toolbar );
 		toolbar->addSeparator();
 	}
