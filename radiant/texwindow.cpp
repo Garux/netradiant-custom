@@ -45,6 +45,7 @@
 #include <QApplication>
 #include <QStyle>
 #include <QTreeView>
+#include <QHeaderView>
 #include <QStandardItemModel>
 #include <QListWidget>
 #include <QListWidgetItem>
@@ -1219,6 +1220,8 @@ void TextureBrowser_createTreeViewTree(){
 	g_TexBro.m_treeView->setUniformRowHeights( true ); // optimization
 	g_TexBro.m_treeView->setFocusPolicy( Qt::FocusPolicy::ClickFocus );
 	g_TexBro.m_treeView->setExpandsOnDoubleClick( false );
+	g_TexBro.m_treeView->header()->setStretchLastSection( false ); // non greedy column sizing; + QHeaderView::ResizeMode::ResizeToContents = no text elision 🤷‍♀️
+	g_TexBro.m_treeView->header()->setSectionResizeMode( QHeaderView::ResizeMode::ResizeToContents );
 
 	QObject::connect( g_TexBro.m_treeView, &QAbstractItemView::activated, TreeView_onRowActivated );
 

@@ -53,6 +53,7 @@
 #include <QVBoxLayout>
 #include <QSplitter>
 #include <QTreeView>
+#include <QHeaderView>
 #include <QStandardItemModel>
 #include <QScrollBar>
 #include <QOpenGLWidget>
@@ -1286,6 +1287,8 @@ QWidget* ModelBrowser_constructWindow( QWidget* toplevel ){
 		g_ModelBrowser.m_treeView->setUniformRowHeights( true ); // optimization
 		g_ModelBrowser.m_treeView->setFocusPolicy( Qt::FocusPolicy::ClickFocus );
 		g_ModelBrowser.m_treeView->setExpandsOnDoubleClick( false );
+		g_ModelBrowser.m_treeView->header()->setStretchLastSection( false ); // non greedy column sizing; + QHeaderView::ResizeMode::ResizeToContents = no text elision 🤷‍♀️
+		g_ModelBrowser.m_treeView->header()->setSectionResizeMode( QHeaderView::ResizeMode::ResizeToContents );
 
 
 		QObject::connect( g_ModelBrowser.m_treeView, &QAbstractItemView::activated, TreeView_onRowActivated );
