@@ -70,7 +70,6 @@ StaticRegisterModule staticRegisterEclassDef( StaticEclassDefModule::instance() 
 
 
 char com_token[1024];
-bool com_eof;
 
 /*
    ==============
@@ -95,7 +94,6 @@ skipwhite:
 	while ( ( c = *data ) <= ' ' )
 	{
 		if ( c == 0 ) {
-			com_eof = true;
 			return 0;           // end of file;
 		}
 		data++;
@@ -252,7 +250,6 @@ EntityClass *Eclass_InitFromText( const char *text ){
 	{ // get the flags: advance to the first \n
 		while ( *text && *text++ != '\n' ){};
 		parms = { parms.begin(), text };
-		( *text && ++text );
 	}
 
 	{
