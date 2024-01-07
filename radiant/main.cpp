@@ -451,14 +451,7 @@ int main( int argc, char* argv[] ){
 #endif
 
 	glwidget_setDefaultFormat(); // must go before QApplication instantiation
-#ifdef WIN32
-	std::vector<char*> args( argv, argv + argc );
-	args.push_back( string_clone( "-platform" ) );
-	args.push_back( string_clone( "windows:darkmode=1" ) );
-	args.push_back( nullptr );
-	argc += 2;
-	argv = args.data();
-#endif
+
 	QApplication qapplication( argc, argv );
 	setlocale( LC_NUMERIC, "C" );
 	qInstallMessageHandler( qute_messageHandler );
