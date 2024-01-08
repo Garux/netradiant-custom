@@ -295,13 +295,11 @@ static QTimer g_chasemouse_caller;
 
 void XYWnd::ChaseMouse(){
 	const float multiplier = g_chasemouse_timer.elapsed_msec() / 10.0f;
-	if( multiplier != 0 ){ // a lot of zeros happen = torn, slow, inconsistent motion 🤔
-		g_chasemouse_timer.start();
-		Scroll( float_to_integer( multiplier * m_chasemouse_delta_x ), float_to_integer( multiplier * -m_chasemouse_delta_y ) );
-		//globalOutputStream() << "chasemouse: multiplier=" << multiplier << " x=" << m_chasemouse_delta_x << " y=" << m_chasemouse_delta_y << '\n';
+	g_chasemouse_timer.start();
+	Scroll( float_to_integer( multiplier * m_chasemouse_delta_x ), float_to_integer( multiplier * -m_chasemouse_delta_y ) );
+	//globalOutputStream() << "chasemouse: multiplier=" << multiplier << " x=" << m_chasemouse_delta_x << " y=" << m_chasemouse_delta_y << '\n';
 
-		XY_MouseMoved( m_chasemouse_current_x, m_chasemouse_current_y, getButtonState() );
-	}
+	XY_MouseMoved( m_chasemouse_current_x, m_chasemouse_current_y, getButtonState() );
 }
 
 bool XYWnd::chaseMouseMotion( const int x, const int y ){
@@ -332,6 +330,7 @@ bool XYWnd::chaseMouseMotion( const int x, const int y ){
 			if ( !g_chasemouse_caller.isActive() ) {
 				//globalOutputStream() << "chasemouse timer start... ";
 				g_chasemouse_timer.start();
+				g_chasemouse_caller.disconnect(); // disconnect everything
 				g_chasemouse_caller.callOnTimeout( [this](){ ChaseMouse(); } );
 				g_chasemouse_caller.start( 4 ); // with 0 consumes entire thread by spamming calls 🤷‍♀️
 			}

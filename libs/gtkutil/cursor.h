@@ -159,6 +159,7 @@ protected:
 			// handle runaways with released buttons; FIXME: need more elegant way to persistently grab in this case
 			if( !m_widget->rect().contains( mouseEvent->pos() ) ){ // bomb cursor via timer to get it back to the widget
 				if( !m_rescueTimer.isActive() ){
+					m_rescueTimer.disconnect(); // disconnect everything
 					m_rescueTimer.callOnTimeout( [center = center](){ QCursor::setPos( center ); } );
 					m_rescueTimer.start( 33 );
 				}
