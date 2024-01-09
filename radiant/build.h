@@ -20,6 +20,8 @@
  */
 #pragma once
 
+#include <cstddef>
+
 void build_set_variable( const char* name, const char* value );
 void build_clear_variables();
 
@@ -28,7 +30,7 @@ class CommandListener
 public:
 	virtual void execute( const char* command ) = 0;
 };
-void build_run( const char* name, CommandListener& listener );
+void build_run( size_t buildIdx, CommandListener& listener );
 
 void DoBuildMenu();
 

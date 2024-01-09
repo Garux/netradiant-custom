@@ -56,8 +56,8 @@ class Evaluatable
 {
 public:
 	virtual ~Evaluatable(){}
-	virtual void evaluate( StringBuffer& output ) = 0;
-	virtual void exportXML( XMLImporter& importer ) = 0;
+	virtual void evaluate( StringBuffer& output ) const = 0;
+	virtual void exportXML( XMLImporter& importer ) const = 0;
 };
 
 class VariableString : public Evaluatable
@@ -74,7 +74,7 @@ public:
 	void setString( const char* string ){
 		m_string = string;
 	}
-	void evaluate( StringBuffer& output ){
+	void evaluate( StringBuffer& output ) const override {
 		StringBuffer variable;
 		bool in_variable = false;
 		for ( const char* i = m_string.c_str(); *i != '\0'; ++i )
@@ -106,7 +106,7 @@ public:
 			}
 		}
 	}
-	void exportXML( XMLImporter& importer ){
+	void exportXML( XMLImporter& importer ) const override {
 		importer << c_str();
 	}
 };
@@ -122,14 +122,14 @@ public:
 		delete m_test;
 		delete m_result;
 	}
-	void evaluate( StringBuffer& output ){
+	void evaluate( StringBuffer& output ) const override {
 		StringBuffer buffer;
 		m_test->evaluate( buffer );
 		if ( !string_empty( buffer.c_str() ) ) {
 			m_result->evaluate( output );
 		}
 	}
-	void exportXML( XMLImporter& importer ){
+	void exportXML( XMLImporter& importer ) const override {
 		StaticElement conditionElement( "cond" );
 		conditionElement.insertAttribute( "value", m_test->c_str() );
 		importer.pushElement( conditionElement );
@@ -145,24 +145,24 @@ class Tool : public Evaluatable
 	Evaluatables m_evaluatables;
 public:
 	~Tool(){
-		for ( Evaluatables::iterator i = m_evaluatables.begin(); i != m_evaluatables.end(); ++i )
+		for ( auto* e : m_evaluatables )
 		{
-			delete ( *i );
+			delete ( e );
 		}
 	}
 	void push_back( Evaluatable* evaluatable ){
 		m_evaluatables.push_back( evaluatable );
 	}
-	void evaluate( StringBuffer& output ){
-		for ( Evaluatables::iterator i = m_evaluatables.begin(); i != m_evaluatables.end(); ++i )
+	void evaluate( StringBuffer& output ) const override {
+		for ( const auto* e : m_evaluatables )
 		{
-			( *i )->evaluate( output );
+			e->evaluate( output );
 		}
 	}
-	void exportXML( XMLImporter& importer ){
-		for ( Evaluatables::iterator i = m_evaluatables.begin(); i != m_evaluatables.end(); ++i )
+	void exportXML( XMLImporter& importer ) const override {
+		for ( const auto* e : m_evaluatables )
 		{
-			( *i )->exportXML( importer );
+			e->exportXML( importer );
 		}
 	}
 };
@@ -312,34 +312,22 @@ inline bool is_separator( const CopiedString& name, const Build& commands ){
 	}
 	return true;
 }
-inline bool is_separator( const BuildPair &p ){
-	return is_separator( p.first, p.second );
-}
 
 
 typedef std::list<BuildPair> Project;
-
-Project::iterator Project_find( Project& project, const char* name ){
-	return std::find_if( project.begin(), project.end(), [name]( const BuildPair& self ){ return string_equal( self.first.c_str(), name ); } );
-}
 
 Project::iterator Project_find( Project& project, std::size_t index ){
 	return index < project.size()
 	       ? std::next( project.begin(), index )
 	       : project.end();
 }
-
-Build& project_find( Project& project, const char* build ){
-	Project::iterator i = Project_find( project, build );
-	ASSERT_MESSAGE( i != project.end(), "error finding build command" );
-	return ( *i ).second;
-}
-
-bool Project_contains( const Project& project, Project::const_iterator iterator ){
-	for( auto i = project.cbegin(); i != project.cend(); ++i )
+// returns either found index or fallback to 0
+size_t Project_find( const Project& project, const Project::const_iterator iterator ){
+	size_t idx = 0;
+	for( auto i = project.cbegin(); i != project.cend(); ++i, ++idx )
 		if( i == iterator )
-			return true;
-	return false;
+			return idx;
+	return 0;
 }
 
 Build::iterator Build_find( Build& build, std::size_t index ){
@@ -480,31 +468,28 @@ void project_verify( Project& project, Tools& tools ){
 #endif
 }
 
-void build_run( const char* name, CommandListener& listener ){
-	for ( Tools::iterator i = g_build_tools.begin(); i != g_build_tools.end(); ++i )
+void build_run( size_t buildIdx, CommandListener& listener ){
+	for ( const auto& [ name, tool ] : g_build_tools )
 	{
 		StringBuffer output;
-		( *i ).second.evaluate( output );
-		build_set_variable( ( *i ).first.c_str(), output.c_str() );
+		tool.evaluate( output );
+		build_set_variable( name.c_str(), output.c_str() );
 	}
 
+	if ( const auto buildIt = Project_find( g_build_project, buildIdx ); buildIt != g_build_project.end() )
 	{
-		Project::iterator i = Project_find( g_build_project, name );
-		if ( i != g_build_project.end() ) {
-			g_lastExecutedBuild = i;
-			Build& build = ( *i ).second;
-			for ( Build::iterator j = build.begin(); j != build.end(); ++j )
-			{
-				StringBuffer output;
-				( *j ).evaluate( output );
-				if ( !output.empty() )
-					listener.execute( output.c_str() );
-			}
-		}
-		else
+		g_lastExecutedBuild = buildIt;
+		for ( const auto& command : buildIt->second )
 		{
-			globalErrorStream() << "build " << makeQuoted( name ) << " not defined";
+			StringBuffer output;
+			command.evaluate( output );
+			if ( !output.empty() )
+				listener.execute( output.c_str() );
 		}
+	}
+	else
+	{
+		globalErrorStream() << "build #" << buildIdx << " not defined";
 	}
 }
 
@@ -561,17 +546,17 @@ void build_commands_clear(){
 
 class BuildXMLExporter
 {
-	Build& m_build;
+	const Build& m_build;
 public:
-	BuildXMLExporter( Build& build ) : m_build( build ){
+	BuildXMLExporter( const Build& build ) : m_build( build ){
 	}
-	void exportXML( XMLImporter& importer ){
+	void exportXML( XMLImporter& importer ) const {
 		importer << "\n";
-		for ( Build::iterator i = m_build.begin(); i != m_build.end(); ++i )
+		for ( const auto& command : m_build )
 		{
 			StaticElement commandElement( "command" );
 			importer.pushElement( commandElement );
-			( *i ).exportXML( importer );
+			command.exportXML( importer );
 			importer.popElement( commandElement.name() );
 			importer << "\n";
 		}
@@ -580,29 +565,29 @@ public:
 
 class ProjectXMLExporter
 {
-	Project& m_project;
-	Tools& m_tools;
+	const Project& m_project;
+	const Tools& m_tools;
 public:
-	ProjectXMLExporter( Project& project, Tools& tools ) : m_project( project ), m_tools( tools ){
+	ProjectXMLExporter( const Project& project, const Tools& tools ) : m_project( project ), m_tools( tools ){
 	}
-	void exportXML( XMLImporter& importer ){
+	void exportXML( XMLImporter& importer ) const {
 		StaticElement projectElement( "project" );
 		projectElement.insertAttribute( "version", BUILDMENU_VERSION );
 		importer.pushElement( projectElement );
 		importer << "\n";
 
-		for ( Tools::iterator i = m_tools.begin(); i != m_tools.end(); ++i )
+		for ( const auto& [ name, tool ] : m_tools )
 		{
 			StaticElement toolElement( "var" );
-			toolElement.insertAttribute( "name", ( *i ).first.c_str() );
+			toolElement.insertAttribute( "name", name.c_str() );
 			importer.pushElement( toolElement );
-			( *i ).second.exportXML( importer );
+			tool.exportXML( importer );
 			importer.popElement( toolElement.name() );
 			importer << "\n";
 		}
-		for ( Project::iterator i = m_project.begin(); i != m_project.end(); ++i )
+		for ( const auto& [ name, build ] : m_project )
 		{
-			if ( is_separator( *i ) ) {
+			if ( is_separator( name, build ) ) {
 				StaticElement buildElement( "separator" );
 				importer.pushElement( buildElement );
 				importer.popElement( buildElement.name() );
@@ -611,9 +596,9 @@ public:
 			else
 			{
 				StaticElement buildElement( "build" );
-				buildElement.insertAttribute( "name", ( *i ).first.c_str() );
+				buildElement.insertAttribute( "name", name.c_str() );
 				importer.pushElement( buildElement );
-				BuildXMLExporter buildExporter( ( *i ).second );
+				BuildXMLExporter buildExporter( build );
 				buildExporter.exportXML( importer );
 				importer.popElement( buildElement.name() );
 				importer << "\n";
@@ -954,9 +939,7 @@ void LoadBuildMenu();
 void DoBuildMenu(){
 	ProjectList projectList( g_build_project );
 	const Project bakproj = g_build_project;
-	const size_t baklast = Project_contains( g_build_project, g_lastExecutedBuild )
-	                       ? std::distance( g_build_project.cbegin(), g_lastExecutedBuild )
-	                       : 0;
+	const size_t baklast = Project_find( g_build_project, g_lastExecutedBuild );
 
 	const EMessageBoxReturn ret = BuildMenuDialog_construct( projectList );
 
@@ -986,14 +969,16 @@ void DoBuildMenu(){
 
 class BuildMenuItem
 {
-	const char* m_name;
+	/* using build index to pass build reference: it is okay for now, as we rebuild g_BuildMenuItems entirely on any modification
+	   using build name before was faulty design, as builds may have equal names */
+	const size_t m_buildIdx;
 public:
 	QAction* m_item;
-	BuildMenuItem( const char* name, QAction* item )
-		: m_name( name ), m_item( item ){
+	BuildMenuItem( size_t buildIdx )
+		: m_buildIdx( buildIdx ), m_item( nullptr ){
 	}
 	void run() const {
-		RunBSP( m_name );
+		RunBSP( m_buildIdx );
 	}
 	typedef ConstMemberCaller<BuildMenuItem, &BuildMenuItem::run> RunCaller;
 };
@@ -1005,9 +990,10 @@ BuildMenuItems g_BuildMenuItems;
 QMenu* g_bsp_menu;
 
 void Build_constructMenu( QMenu* menu ){
+	size_t buildIdx{};
 	for ( const auto& [ name, commands ] : g_build_project )
 	{
-		g_BuildMenuItems.push_back( BuildMenuItem( name.c_str(), 0 ) );
+		g_BuildMenuItems.push_back( BuildMenuItem( buildIdx++ ) );
 		if ( is_separator( name, commands ) ) {
 			g_BuildMenuItems.back().m_item = menu->addSeparator();
 		}
@@ -1094,8 +1080,6 @@ void BuildMenu_Destroy(){
 
 
 void Build_runRecentExecutedBuild(){
-	if( Project_contains( g_build_project, g_lastExecutedBuild ) )
-		RunBSP( g_lastExecutedBuild->first.c_str() );
-	else if( !g_build_project.empty() )
-		RunBSP( g_build_project.cbegin()->first.c_str() );
+	if( !g_build_project.empty() )
+		RunBSP( Project_find( g_build_project, g_lastExecutedBuild ) );
 }

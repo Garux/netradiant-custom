@@ -234,7 +234,7 @@ public:
 };
 
 
-void RunBSP( const char* name ){
+void RunBSP( size_t buildIdx ){
 	if( !g_region_active )
 		SaveMap();
 
@@ -256,7 +256,7 @@ void RunBSP( const char* name ){
 	bsp_init();
 
 	ArrayCommandListener listener;
-	build_run( name, listener );
+	build_run( buildIdx, listener );
 	bool monitor = false;
 	for ( guint i = 0; i < listener.array()->len; ++i )
 		if( strstr( (char*)g_ptr_array_index( listener.array(), i ), RADIANT_MONITOR_ADDRESS ) )
@@ -292,7 +292,7 @@ void RunBSP( const char* name ){
 				batchFile << "#!/bin/sh \n\n";
 #endif
 				BatchCommandListener listener( batchFile, g_WatchBSP0_DumpLog? junkpath : 0 );
-				build_run( name, listener );
+				build_run( buildIdx, listener );
 				written = true;
 			}
 		}

@@ -29,7 +29,7 @@
 void    Sys_SetTitle( const char *text, bool modified );
 
 
-void RunBSP( const char* name );
+void RunBSP( size_t buildIdx );
 
 
 void QE_InitVFS();
