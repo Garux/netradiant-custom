@@ -1233,7 +1233,7 @@ static QMenu* TextureBrowser_constructViewMenu(){
 
 	menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
 
-	create_check_menu_item_with_mnemonic( menu, "Hide _Unused", "ShowInUse" );
+	create_check_menu_item_with_mnemonic( menu, "Hide Unused", "ShowInUse" );
 	create_menu_item_with_mnemonic( menu, "Show All", "ShowAllTextures" );
 	menu->addSeparator();
 
@@ -1244,8 +1244,8 @@ static QMenu* TextureBrowser_constructViewMenu(){
 	}
 	else
 	{
-		create_check_menu_item_with_mnemonic( menu, "Show shaders", "ToggleShowShaders" );
-		create_check_menu_item_with_mnemonic( menu, "Show textures", "ToggleShowTextures" );
+		create_check_menu_item_with_mnemonic( menu, "Show Shaders", "ToggleShowShaders" );
+		create_check_menu_item_with_mnemonic( menu, "Show Textures", "ToggleShowTextures" );
 		menu->addSeparator();
 	}
 
@@ -1261,7 +1261,7 @@ static QMenu* TextureBrowser_constructViewMenu(){
 	create_check_menu_item_with_mnemonic( menu, "Transparency", "EnableAlpha" );
 
 	menu->addSeparator();
-	create_check_menu_item_with_mnemonic( menu, "Tags Gui", "TagsToggleGui" );
+	create_check_menu_item_with_mnemonic( menu, "Tags GUI", "TagsToggleGui" );
 
 	if ( !TextureBrowser::wads ) {
 		menu->addSeparator();

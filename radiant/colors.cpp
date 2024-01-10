@@ -297,7 +297,7 @@ void create_colours_menu( QMenu *menu ){
 	menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
 
 	{
-		QMenu* submenu = menu->addMenu( "Themes" );
+		QMenu* submenu = menu->addMenu( "Viewports Theme" );
 
 		submenu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
 
