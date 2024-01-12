@@ -1178,7 +1178,11 @@ void Map_RenameAbsolute( const char* absolute ){
 	}
 
 	g_map.m_resource->detach( g_map );
+	g_map.m_resource->flush(); /* wipe map from cache to not spoil namespace */
 	GlobalReferenceCache().release( g_map.m_name.c_str() );
+
+	Map_gatherNamespaced( clone );
+	Map_mergeClonedNames( false ); // set default namespace
 
 	g_map.m_resource = resource;
 
