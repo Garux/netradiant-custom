@@ -4244,6 +4244,8 @@ inline const Functor& Scene_forEachVisibleSelectedComponentSelectionTestable( co
 static ModifierFlags g_modifiers = c_modifierNone; //AltDragManipulatorResize, extrude, uvtool skew, select primitives in component modes
 static bool g_bTmpComponentMode = false;
 
+static bool g_3DCreateBrushes = true;
+
 class DragManipulator : public Manipulator
 {
 	ResizeTranslatable m_resize;
@@ -4342,7 +4344,7 @@ public:
 				value.second->setSelected( true );
 			g_bTmpComponentMode = m_selected | m_selected2;
 		}
-		else if( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ){
+		else if( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive && g_3DCreateBrushes ){
 			m_newBrush = true;
 			BestPointSelector bestPointSelector;
 			Scene_TestSelect_Primitive( bestPointSelector, test, view );
@@ -8016,12 +8018,10 @@ void RadiantSelectionSystem::renderSolid( Renderer& renderer, const VolumeTest& 
 #include "preferencesystem.h"
 #include "preferences.h"
 
-bool g_bLeftMouseClickSelector = true;
-
 void SelectionSystem_constructPreferences( PreferencesPage& page ){
 	page.appendSpinner( "Selector size (pixels)", g_SELECT_EPSILON, 2, 64 );
 	page.appendCheckBox( "", "Prefer point entities in 2D", getSelectionSystem().m_bPreferPointEntsIn2D );
-	page.appendCheckBox( "", "Left mouse click tunnel selector", g_bLeftMouseClickSelector );
+	page.appendCheckBox( "", "Create brushes in 3D", g_3DCreateBrushes );
 	{
 		const char* styles[] = { "XY plane + Z with Alt", "View plane + Forward with Alt", };
 		page.appendCombo(
@@ -8059,7 +8059,7 @@ void SelectionSystem_Construct(){
 
 	GlobalPreferenceSystem().registerPreference( "SELECT_EPSILON", IntImportStringCaller( g_SELECT_EPSILON ), IntExportStringCaller( g_SELECT_EPSILON ) );
 	GlobalPreferenceSystem().registerPreference( "PreferPointEntsIn2D", BoolImportStringCaller( getSelectionSystem().m_bPreferPointEntsIn2D ), BoolExportStringCaller( getSelectionSystem().m_bPreferPointEntsIn2D ) );
-	GlobalPreferenceSystem().registerPreference( "LeftMouseClickSelector", BoolImportStringCaller( g_bLeftMouseClickSelector ), BoolExportStringCaller( g_bLeftMouseClickSelector ) );
+	GlobalPreferenceSystem().registerPreference( "3DCreateBrushes", BoolImportStringCaller( g_3DCreateBrushes ), BoolExportStringCaller( g_3DCreateBrushes ) );
 	GlobalPreferenceSystem().registerPreference( "3DMoveStyle", IntImportStringCaller( TranslateFreeXY_Z::m_viewdependent ), IntExportStringCaller( TranslateFreeXY_Z::m_viewdependent ) );
 	SelectionSystem_registerPreferencesPage();
 }
@@ -8259,8 +8259,7 @@ public:
 	}
 
 	void testSelect_simpleM1( DeviceVector position ){
-		if( g_bLeftMouseClickSelector )
-			getSelectionSystem().SelectPoint( *m_view, &device_constrained( position )[0], &m_epsilon[0], m_mouseMoved ? RadiantSelectionSystem::eReplace : RadiantSelectionSystem::eCycle, false );
+		getSelectionSystem().SelectPoint( *m_view, &device_constrained( position )[0], &m_epsilon[0], m_mouseMoved ? RadiantSelectionSystem::eReplace : RadiantSelectionSystem::eCycle, false );
 	}
 
 
