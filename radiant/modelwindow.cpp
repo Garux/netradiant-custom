@@ -1056,6 +1056,10 @@ protected:
 			UndoableCommand undo( "entityAssignModel" );
 			GlobalSelectionSystem().foreachSelected( visitor );
 		}
+		else if( release == MousePresses::Right && m_modBro.m_move_amount < 16 && m_modBro.m_currentFolder != nullptr ){
+			m_modBro.forEachModelInstance( models_set_transforms() );
+			m_modBro.queueDraw();
+		}
 	}
 	void wheelEvent( QWheelEvent *event ) override {
 		setFocus();
