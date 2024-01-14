@@ -209,7 +209,7 @@ public:
 	ColorAttribute( const char* key ) :
 		m_key( key ),
 		m_entry( new NonModalEntry( ApplyCaller( *this ), UpdateCaller( *this ) ) ){
-		auto button = m_entry->addAction( QApplication::style()->standardIcon( QStyle::SP_DialogOkButton ), QLineEdit::ActionPosition::TrailingPosition );
+		auto button = m_entry->addAction( QApplication::style()->standardIcon( QStyle::SP_ArrowRight ), QLineEdit::ActionPosition::TrailingPosition );
 		QObject::connect( button, &QAction::triggered, [this](){ browse(); } );
 	}
 	void release() override {
