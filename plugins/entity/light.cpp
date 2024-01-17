@@ -139,7 +139,7 @@ void sphere_draw_fill( const Vector3& origin, float radius, int sides ){
 	gl().glEnd();
 }
 
-void light_draw_radius_fill( const Vector3& origin, const float envelope[3] ){
+void light_draw_radius_fill( const Vector3& origin, const std::array<float, 3>& envelope ){
 	if ( envelope[0] > 0 ) {
 		sphere_draw_fill( origin, envelope[0], 16 );
 	}
@@ -320,7 +320,7 @@ void sphere_draw_fill( const Vector3& origin, float radius, const Vector3 radiiP
 
 	#endif
 
-void light_draw_radius_fill( const Vector3& origin, const float envelope[3], const Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
+void light_draw_radius_fill( const Vector3& origin, const std::array<float, 3>& envelope, const Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
 	if ( envelope[0] > 0 ) {
 		sphere_draw_fill( origin, envelope[0], radiiPoints );
 	}
@@ -391,7 +391,7 @@ void sphere_draw_wire( const Vector3& origin, float radius, int sides ){
 	}
 }
 
-void light_draw_radius_wire( const Vector3& origin, const float envelope[3] ){
+void light_draw_radius_wire( const Vector3& origin, const std::array<float, 3>& envelope ){
 	if ( envelope[0] > 0 ) {
 		sphere_draw_wire( origin, envelope[0], 24 );
 	}
@@ -467,7 +467,7 @@ void sphere_draw_wire( const Vector3& origin, float radius, const Vector3 radiiP
 	}
 }
 
-void light_draw_radius_wire( const Vector3& origin, const float envelope[3], const Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
+void light_draw_radius_wire( const Vector3& origin, const std::array<float, 3>& envelope, const Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
 	if ( envelope[0] > 0 ) {
 		sphere_draw_wire( origin, envelope[0], radiiPoints );
 	}
@@ -698,15 +698,23 @@ inline void write_intensity( const float intensity, Entity* entity ){
 // These variables are tweakable on the q3map2 console, setting to q3map2
 // default here as there is no way to find out what the user actually uses
 // right now. Maybe move them to worldspawn?
-float fPointScale = 7500.f;
-float fLinearScale = 1.f / 8000.f;
+const float c_pointScale = 7500.f;
+const float c_linearScale = 1.f / 8000.f;
 
-float light_radius_linear( float fIntensity, float fFalloffTolerance ){
-	return ( ( fIntensity * fPointScale * fLinearScale ) - fFalloffTolerance );
+inline float light_radius_linear( float intensity, float falloffTolerance ){
+	return ( ( intensity * c_pointScale * c_linearScale ) - falloffTolerance );
 }
 
-float light_radius( float fIntensity, float fFalloffTolerance ){
-	return sqrt( fIntensity * fPointScale / fFalloffTolerance );
+inline float light_radius( float intensity, float falloffTolerance ){
+	return sqrt( intensity * c_pointScale / falloffTolerance );
+}
+
+inline float light_intensity_linear( float radius, float falloffTolerance ){
+	return ( radius + falloffTolerance ) / ( c_pointScale * c_linearScale );
+}
+
+inline float light_intensity( float radius, float falloffTolerance ){
+	return radius * radius * falloffTolerance / c_pointScale;
 }
 
 
@@ -734,9 +742,8 @@ bool spawnflags_linear( int flags ){
 class LightRadii
 {
 public:
-	float m_radii[3];
-	float m_radii_transformed[3];
-
+	std::array<float, 3> m_radii;
+	std::array<float, 3> m_radii_transformed;
 private:
 	float m_primaryIntensity;
 	float m_secondaryIntensity;
@@ -744,25 +751,16 @@ private:
 	float m_fade;
 	float m_scale;
 
+	float getIntensity() const {
+		return m_primaryIntensity != 0? m_primaryIntensity
+		     : m_secondaryIntensity != 0? m_secondaryIntensity
+		     : 300.f;
+	}
+
 	void calculateRadii(){
-		float intensity = 300.0f;
+		const float intensity = std::fabs( getIntensity() * m_scale ); // support either intensity sign
 
-		if ( m_primaryIntensity != 0.0f ) {
-			intensity = m_primaryIntensity;
-		}
-		else if ( m_secondaryIntensity != 0.0f ) {
-			intensity = m_secondaryIntensity;
-		}
-
-		intensity *= m_scale;
-
-		if( intensity < 0 ){ // prevent NaN
-			m_radii_transformed[0] = m_radii[0] =
-			m_radii_transformed[1] = m_radii[1] =
-			m_radii_transformed[2] = m_radii[2] = 0; // indicate negative intensity
-
-		}
-		else if ( spawnflags_linear( m_flags ) ) {
+		if ( spawnflags_linear( m_flags ) ) {
 			m_radii_transformed[0] = m_radii[0] = light_radius_linear( intensity, 1.0f ) / m_fade;
 			m_radii_transformed[1] = m_radii[1] = light_radius_linear( intensity, 48.0f ) / m_fade;
 			m_radii_transformed[2] = m_radii[2] = light_radius_linear( intensity, 255.0f ) / m_fade;
@@ -774,12 +772,10 @@ private:
 			m_radii_transformed[2] = m_radii[2] = light_radius( intensity, 255.0f );
 		}
 	}
-
 public:
 	LightRadii() : m_primaryIntensity( 0 ), m_secondaryIntensity( 0 ), m_flags( 0 ), m_fade( 1 ), m_scale( 1 ){
-		calculateRadii();
+		calculateRadii(); // init with default intensity for the case when it's not specified
 	}
-
 
 	void primaryIntensityChanged( const char* value ){
 		m_primaryIntensity = string_read_float( value );
@@ -821,11 +817,11 @@ public:
 	void transformRadii( float offset ){
 		const float radius = m_radii[1] + offset;
 
-		float (&r)[3] = m_radii_transformed;
+		auto& r = m_radii_transformed;
 
 		if ( spawnflags_linear( m_flags ) ) {
 			r[0] = radius + 47.0f / m_fade;
-			if( r[0] <= 1.f ){
+			if( r[0] <= 1.f ){ // prevent transform to negative
 				r[0] = 1.f;
 				r[1] = r[2] = 1.f - 47.0f / m_fade; // this is called once again after minimizing already minimal radii, so calculate correct r[1]
 				return;
@@ -846,13 +842,11 @@ public:
 		}
 //		globalOutputStream() << r[0] << " " << r[1] << " " << r[2] << " m_radii_transformed\n";
 	}
-	float calculateIntensityFromRadii(){
-		if( m_radii_transformed[0] == 0 ) // negative intensity
-			return m_primaryIntensity != 0? m_primaryIntensity : m_secondaryIntensity;
-		else if ( spawnflags_linear( m_flags ) )
-			return ( m_radii_transformed[0] * m_fade + 1.f ) / ( fPointScale * fLinearScale ) / m_scale;
-		else
-			return m_radii_transformed[0] * m_radii_transformed[0] * 1.f / fPointScale / m_scale;
+	float calculateIntensityFromRadii() const {
+		return std::copysign( spawnflags_linear( m_flags ) // keep intensity sign, while adjusting it via radii
+		                      ? light_intensity_linear( m_radii_transformed[0] * m_fade, 1.f ) / m_scale
+		                      : light_intensity( m_radii_transformed[0], 1.f ) / m_scale
+		                      , getIntensity() );
 	}
 };
 
@@ -1542,11 +1536,9 @@ public:
 		m_aabb_light.origin = m_useLightOrigin ? m_lightOrigin : m_originKey.m_origin;
 		rotation_assign( m_rotation, m_useLightRotation ? m_lightRotation : m_rotationKey.m_rotation );
 		m_doom3Radius.m_radiusTransformed = m_doom3Radius.m_radius;
-		m_radii.m_radii_transformed[0] = m_radii.m_radii[0];
-		m_radii.m_radii_transformed[1] = m_radii.m_radii[1];
-		m_radii.m_radii_transformed[2] = m_radii.m_radii[2];
+		m_radii.m_radii_transformed = m_radii.m_radii;
 	}
-	void freezeTransform(){
+	void freezeTransform( bool doradii ){
 		if ( g_lightType == LIGHTTYPE_DOOM3 && !m_useLightOrigin && !m_traverse.empty() ) {
 			m_useLightOrigin = true;
 		}
@@ -1577,11 +1569,9 @@ public:
 			m_doom3Radius.m_radius = m_doom3Radius.m_radiusTransformed;
 			write_origin( m_doom3Radius.m_radius, &m_entity, "light_radius" );
 		}
-		else{
+		else if( doradii ){
 			write_intensity( m_radii.calculateIntensityFromRadii(), &m_entity );
-			m_radii.m_radii[0] = m_radii.m_radii_transformed[0];
-			m_radii.m_radii[1] = m_radii.m_radii_transformed[1];
-			m_radii.m_radii[2] = m_radii.m_radii_transformed[2];
+			m_radii.m_radii = m_radii.m_radii_transformed;
 		}
 	}
 	void transformChanged(){
@@ -1952,7 +1942,7 @@ public:
 	void applyTransform(){
 		m_contained.revertTransform();
 		evaluateTransform();
-		m_contained.freezeTransform();
+		m_contained.freezeTransform( m_scaleRadius.isSelected() );
 	}
 	typedef MemberCaller<LightInstance, &LightInstance::applyTransform> ApplyTransformCaller;
 
