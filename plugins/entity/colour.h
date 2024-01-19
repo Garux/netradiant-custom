@@ -78,7 +78,7 @@ public:
 	Colour( const Callback& colourChanged )
 		: m_colourChanged( colourChanged ){
 		default_colour( m_colour );
-		m_colour_add = m_colour / 4;
+		m_colour_add = m_colour / 8;
 		capture_state();
 	}
 	~Colour(){
@@ -88,7 +88,7 @@ public:
 	void colourChanged( const char* value ){
 		release_state();
 		read_colour_normalized( m_colour, value );
-		m_colour_add = m_colour / 4;
+		m_colour_add = m_colour / 8;
 		capture_state();
 
 		m_colourChanged();

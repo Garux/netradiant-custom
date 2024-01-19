@@ -321,9 +321,11 @@ void sphere_draw_fill( const Vector3& origin, float radius, const Vector3 radiiP
 	#endif
 
 void light_draw_radius_fill( const Vector3& origin, const std::array<float, 3>& envelope, const Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
+#ifdef RADII_RENDER_BIG_RADIUS
 	if ( envelope[0] > 0 ) {
 		sphere_draw_fill( origin, envelope[0], radiiPoints );
 	}
+#endif
 	if ( envelope[1] > 0 ) {
 		sphere_draw_fill( origin, envelope[1], radiiPoints );
 	}
@@ -468,9 +470,11 @@ void sphere_draw_wire( const Vector3& origin, float radius, const Vector3 radiiP
 }
 
 void light_draw_radius_wire( const Vector3& origin, const std::array<float, 3>& envelope, const Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
+#ifdef RADII_RENDER_BIG_RADIUS
 	if ( envelope[0] > 0 ) {
 		sphere_draw_wire( origin, envelope[0], radiiPoints );
 	}
+#endif
 	if ( envelope[1] > 0 ) {
 		sphere_draw_wire( origin, envelope[1], radiiPoints );
 	}
@@ -821,24 +825,26 @@ public:
 
 		if ( spawnflags_linear( m_flags ) ) {
 			r[0] = radius + 47.0f / m_fade;
-			if( r[0] <= 1.f ){ // prevent transform to negative
+			if( r[0] < 1.f ){ // prevent transform to <=0, as we use r[0] to calculate intensity
 				r[0] = 1.f;
 				r[1] = r[2] = 1.f - 47.0f / m_fade; // this is called once again after minimizing already minimal radii, so calculate correct r[1]
-				return;
 			}
-			r[1] = radius;
-			r[2] = radius - 207.0f / m_fade;;
+			else{
+				r[1] = radius;
+				r[2] = radius - 207.0f / m_fade;;
+			}
 		}
 		else
 		{
 			r[0] = radius * sqrt( 48.f );
-			if( r[0] <= 1.f ){
+			if( r[0] < 1.f ){
 				r[0] = 1.f;
 				r[1] = r[2] = 0;
-				return;
 			}
-			r[1] = radius;
-			r[2] = r[0] / sqrt( 255.f );
+			else{
+				r[1] = radius;
+				r[2] = r[0] / sqrt( 255.f );
+			}
 		}
 //		globalOutputStream() << r[0] << " " << r[1] << " " << r[2] << " m_radii_transformed\n";
 	}
