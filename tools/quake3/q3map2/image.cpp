@@ -305,20 +305,13 @@ const image_t *ImageLoad( const char *name ){
 	else if( path_set_extension( filename, ".dds" ); buffer = vfsLoadFile( filename ) )
 	{
 		LoadDDSBuffer( buffer.data(), buffer.size(), &pixels, &width, &height );
-		/* debug code */
-		#if 0
-		{
-			ddsPF_t pf;
-			DDSGetInfo( (ddsBuffer_t*) buffer, nullptr, nullptr, &pf );
-			Sys_Printf( "pf = %d\n", pf );
-			if ( width > 0 ) {
-				path_set_extension( filename, "_converted.tga" );
-				WriteTGA( "C:\\games\\quake3\\baseq3\\textures\\rad\\dds_converted.tga", pixels, width, height );
-			}
-		}
-		#endif
 	}
-	else if( path_set_extension( filename, ".ktx" ); buffer = vfsLoadFile( filename ) )
+	else if( sprintf( filename, "dds/%s.dds", name ); buffer = vfsLoadFile( filename ) )
+	{
+		/* also look for .dds image in dds/ prefix like Doom3 or DarkPlaces */
+		LoadDDSBuffer( buffer.data(), buffer.size(), &pixels, &width, &height );
+	}
+	else if( sprintf( filename, "%s.ktx", name ); buffer = vfsLoadFile( filename ) )
 	{
 		LoadKTXBufferFirstImage( buffer.data(), buffer.size(), &pixels, &width, &height );
 	}
@@ -329,6 +322,9 @@ const image_t *ImageLoad( const char *name ){
 		//%		buffer.size(), width, height, pixels, filename );
 		return nullptr;
 	}
+
+	/* tell user which image file is found for the given texture path */
+	Sys_FPrintf( SYS_VRB, "Loaded image: \"%s\"\n", name );
 
 	/* everybody's in the place, create new image */
 	image_t& image = *images.emplace_after( images.cbegin(), name, filename, width, height, pixels );

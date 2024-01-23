@@ -675,6 +675,14 @@ public:
 };
 
 void TextureDirectory_loadTexture( const char* directory, const char* texture ){
+	// Doom3-like dds/ prefix (used by DarkPlaces).
+	// When we list dds/textures/ folder,
+	// store the texture names without dds/ prefix.
+	if ( !strncmp( "dds/", directory, 4 ) )
+	{
+		directory = &directory[ 4 ];
+	}
+
 	const auto name = StringOutputStream( 256 )( directory, PathExtensionless( texture ) );
 
 	if ( texture_name_ignore( name.c_str() ) ) {
@@ -713,6 +721,9 @@ void TextureBrowser_ShowDirectory( const char* directory ){
 			globalOutputStream() << "Loading " << makeQuoted( directory ) << " wad file.\n";
 			LoadShaderVisitor visitor;
 			archive->forEachFile( Archive::VisitorFunc( visitor, Archive::eFiles, 0 ), "textures/" );
+
+			// Doom3-like dds/ prefix (used by DarkPlaces).
+			archive->forEachFile( Archive::VisitorFunc( visitor, Archive::eFiles, 0 ), "dds/textures/" );
 		}
 		else{
 			globalErrorStream() << "Attempted to load " << makeQuoted( directory ) << " wad file.\n";
@@ -731,6 +742,12 @@ void TextureBrowser_ShowDirectory( const char* directory ){
 
 			StringOutputStream dirstring( 64 );
 			dirstring << "textures/" << directory;
+
+			Radiant_getImageModules().foreachModule( LoadTexturesByTypeVisitor( dirstring.c_str() ) );
+
+			// Doom3-like dds/ prefix (used by DarkPlaces).
+			dirstring.clear();
+			dirstring << "dds/textures/" << directory;
 
 			Radiant_getImageModules().foreachModule( LoadTexturesByTypeVisitor( dirstring.c_str() ) );
 		}
