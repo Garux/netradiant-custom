@@ -23,7 +23,6 @@
 #include "LoadPortalFileDialog.h"
 
 #include "stream/stringstream.h"
-#include "convert.h"
 #include "os/path.h"
 
 #include "qerplugin.h"

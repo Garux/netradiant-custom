@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "convert.h"
 #include <vector>
 #include "xml/ixml.h"
+#include "stream/textstream.h"
 
 class XMLEntityOutputStream
 {

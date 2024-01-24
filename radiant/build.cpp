@@ -468,13 +468,15 @@ void project_verify( Project& project, Tools& tools ){
 #endif
 }
 
-void build_run( size_t buildIdx, CommandListener& listener ){
+std::vector<CopiedString> build_construct_commands( size_t buildIdx ){
 	for ( const auto& [ name, tool ] : g_build_tools )
 	{
 		StringBuffer output;
 		tool.evaluate( output );
 		build_set_variable( name.c_str(), output.c_str() );
 	}
+
+	std::vector<CopiedString> commands;
 
 	if ( const auto buildIt = Project_find( g_build_project, buildIdx ); buildIt != g_build_project.end() )
 	{
@@ -484,13 +486,15 @@ void build_run( size_t buildIdx, CommandListener& listener ){
 			StringBuffer output;
 			command.evaluate( output );
 			if ( !output.empty() )
-				listener.execute( output.c_str() );
+				commands.emplace_back( output.c_str() );
 		}
 	}
 	else
 	{
 		globalErrorStream() << "build #" << buildIdx << " not defined";
 	}
+
+	return commands;
 }
 
 

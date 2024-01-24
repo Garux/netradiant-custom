@@ -30,11 +30,13 @@
 
 #pragma once
 
+#include <vector>
+#include "string/string.h"
+
 void BuildMonitor_Construct();
 void BuildMonitor_Destroy();
 
-typedef struct _GPtrArray GPtrArray;
-void BuildMonitor_Run( GPtrArray* commands, const char* mapName );
+void BuildMonitor_Run( const std::vector<CopiedString>& commands, const char* mapName );
 
 extern bool g_WatchBSP_Enabled;
 extern bool g_WatchBSP_LeakStop;

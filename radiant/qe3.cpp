@@ -37,7 +37,6 @@
 #include "debugging/debugging.h"
 
 #include "ifilesystem.h"
-//#include "imap.h"
 
 #include <map>
 
@@ -59,14 +58,9 @@
 #include "preferences.h"
 #include "watchbsp.h"
 #include "autosave.h"
-#include "convert.h"
 
 QEGlobals_t g_qeglobals;
 
-
-#if defined( WIN32 )
-#define PATH_MAX 260
-#endif
 
 #if defined( POSIX )
 #include <sys/stat.h> // chmod
@@ -193,27 +187,7 @@ void bsp_shutdown(){
 	build_clear_variables();
 }
 
-class ArrayCommandListener : public CommandListener
-{
-	GPtrArray* m_array;
-public:
-	ArrayCommandListener(){
-		m_array = g_ptr_array_new();
-	}
-	~ArrayCommandListener(){
-		g_ptr_array_free( m_array, TRUE );
-	}
-
-	void execute( const char* command ){
-		g_ptr_array_add( m_array, g_strdup( command ) );
-	}
-
-	GPtrArray* array() const {
-		return m_array;
-	}
-};
-
-class BatchCommandListener : public CommandListener
+class BatchCommandListener
 {
 	TextOutputStream& m_file;
 	std::size_t m_commandCount;
@@ -255,32 +229,25 @@ void RunBSP( size_t buildIdx ){
 
 	bsp_init();
 
-	ArrayCommandListener listener;
-	build_run( buildIdx, listener );
-	bool monitor = false;
-	for ( guint i = 0; i < listener.array()->len; ++i )
-		if( strstr( (char*)g_ptr_array_index( listener.array(), i ), RADIANT_MONITOR_ADDRESS ) )
-			monitor = true;
+	const std::vector<CopiedString> commands = build_construct_commands( buildIdx );
+	const bool monitor = std::any_of( commands.cbegin(), commands.cend(), []( const CopiedString& command ){
+		return strstr( command.c_str(), RADIANT_MONITOR_ADDRESS ) != 0;
+	} );
 
 	if ( g_WatchBSP_Enabled && monitor ) {
 		// grab the file name for engine running
 		const char* fullname = Map_Name( g_map );
 		const auto bspname = StringOutputStream( 64 )( PathFilename( fullname ) );
-		BuildMonitor_Run( listener.array(), bspname.c_str() );
+		BuildMonitor_Run( commands, bspname.c_str() );
 	}
 	else
 	{
-		char junkpath[PATH_MAX];
-		strcpy( junkpath, SettingsPath_get() );
-		strcat( junkpath, "junk.txt" );
+		const auto junkpath = StringOutputStream( 256 )( SettingsPath_get(), "junk.txt" );
 
-		char batpath[PATH_MAX];
 #if defined( POSIX )
-		strcpy( batpath, SettingsPath_get() );
-		strcat( batpath, "qe3bsp.sh" );
+		const auto batpath = StringOutputStream( 256 )( SettingsPath_get(), "qe3bsp.sh" );
 #elif defined( WIN32 )
-		strcpy( batpath, SettingsPath_get() );
-		strcat( batpath, "qe3bsp.bat" );
+		const auto batpath = StringOutputStream( 256 )( SettingsPath_get(), "qe3bsp.bat" );
 #else
 #error "unsupported platform"
 #endif
@@ -292,7 +259,8 @@ void RunBSP( size_t buildIdx ){
 				batchFile << "#!/bin/sh \n\n";
 #endif
 				BatchCommandListener listener( batchFile, g_WatchBSP0_DumpLog? junkpath : 0 );
-				build_run( buildIdx, listener );
+				for( const auto& command : commands )
+					listener.execute( command.c_str() );
 				written = true;
 			}
 		}

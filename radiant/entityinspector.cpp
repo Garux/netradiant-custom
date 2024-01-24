@@ -60,7 +60,6 @@
 #include "os/file.h"
 #include "stream/stringstream.h"
 #include "moduleobserver.h"
-#include "convert.h"
 #include "stringio.h"
 
 #include "gtkutil/accelerator.h"

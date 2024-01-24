@@ -21,16 +21,13 @@
 #pragma once
 
 #include <cstddef>
+#include <vector>
+#include "string/string.h"
 
 void build_set_variable( const char* name, const char* value );
 void build_clear_variables();
 
-class CommandListener
-{
-public:
-	virtual void execute( const char* command ) = 0;
-};
-void build_run( size_t buildIdx, CommandListener& listener );
+std::vector<CopiedString> build_construct_commands( size_t buildIdx );
 
 void DoBuildMenu();
 

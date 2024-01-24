@@ -36,7 +36,6 @@
 #include <cstdlib>
 
 #include "stream/stringstream.h"
-#include "convert.h"
 #include "gtkutil/dialog.h"
 #include "gtkutil/entry.h"
 #include "gtkutil/image.h"

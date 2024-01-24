@@ -27,7 +27,6 @@
 #include "os/file.h"
 #include "generic/callback.h"
 #include "stream/stringstream.h"
-#include "convert.h"
 
 #include "gtkutil/menu.h"
 #include "map.h"

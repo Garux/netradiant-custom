@@ -63,7 +63,6 @@
 #include "container/array.h"
 #include "generic/static.h"
 #include "stream/stringstream.h"
-#include "convert.h"
 #include "gtkutil/messagebox.h"
 #include "gtkutil/image.h"
 

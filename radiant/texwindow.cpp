@@ -69,7 +69,6 @@
 #include "commandlib.h"
 #include "texmanip.h"
 #include "textures.h"
-#include "convert.h"
 
 #include "gtkutil/menu.h"
 #include "gtkutil/nonmodal.h"
