@@ -198,44 +198,26 @@ std::size_t Sys_Print( int level, const char* buf, std::size_t length ){
 }
 
 
-class SysPrintOutputStream : public TextOutputStream
+template<int level>
+class SysPrintStream : public TextOutputStream
 {
 public:
 	std::size_t write( const char* buffer, std::size_t length ){
-		return Sys_Print( SYS_STD, buffer, length );
+		return Sys_Print( level, buffer, length );
 	}
 };
-
-class SysPrintErrorStream : public TextOutputStream
-{
-public:
-	std::size_t write( const char* buffer, std::size_t length ){
-		return Sys_Print( SYS_ERR, buffer, length );
-	}
-};
-
-class SysPrintWarningStream : public TextOutputStream
-{
-public:
-	std::size_t write( const char* buffer, std::size_t length ){
-		return Sys_Print( SYS_WRN, buffer, length );
-	}
-};
-
-SysPrintOutputStream g_outputStream;
 
 TextOutputStream& getSysPrintOutputStream(){
-	return g_outputStream;
+	static SysPrintStream<SYS_STD> stream;
+	return stream;
 }
-
-SysPrintWarningStream g_warningStream;
 
 TextOutputStream& getSysPrintWarningStream(){
-	return g_warningStream;
+	static SysPrintStream<SYS_WRN> stream;
+	return stream;
 }
 
-SysPrintErrorStream g_errorStream;
-
 TextOutputStream& getSysPrintErrorStream(){
-	return g_errorStream;
+	static SysPrintStream<SYS_ERR> stream;
+	return stream;
 }
