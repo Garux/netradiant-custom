@@ -100,7 +100,7 @@ static void SwapBSPFile(){
 			const shaderInfo_t *si = ShaderInfoForShader( shader.shader );
 			if ( !strEmptyOrNull( si->remapShader ) ) {
 				// copy and clear the rest of memory // check for overflow by String64
-				const auto remap = String64()( si->remapShader );
+				const String64 remap( si->remapShader );
 				strncpy( shader.shader, remap, sizeof( shader.shader ) );
 			}
 		}

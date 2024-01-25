@@ -1002,7 +1002,7 @@ static void ParseRawBrush( bool onlyLights ){
 
 		/* read shader name */
 		GetToken( false );
-		const auto shader = String64()( "textures/", token );
+		const String64 shader( "textures/", token );
 
 		/* set default flags and values */
 		shaderInfo_t *si = onlyLights? &shaderInfo[ 0 ]
@@ -1440,7 +1440,7 @@ static void LoadEntityIndexMap( entity_t& e ){
 			if ( space == NULL ) {
 				space = offset + strlen( offset );
 			}
-			im->offsets[ i ] = atof( String64()( StringRange( offset, space ) ) );
+			im->offsets[ i ] = atof( String64( StringRange( offset, space ) ) );
 			if ( space == NULL ) {
 				break;
 			}
@@ -1576,7 +1576,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 	const char *value;
 	if( mapEnt.read_keyvalue( value, "_celshader" ) ||
 	    entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
-		celShader = ShaderInfoForShader( String64()( "textures/", value ) );
+		celShader = ShaderInfoForShader( String64( "textures/", value ) );
 		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt.mapEntityNum, classname, celShader->shader.c_str() );
 	}
 	else{

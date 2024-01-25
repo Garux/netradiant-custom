@@ -206,7 +206,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 
 	/* get shader name */
 	GetToken( true );
-	const auto shader = String64()( "textures/", token );
+	const String64 shader( "textures/", token );
 
 	Parse1DMatrix( 5, info );
 	m.width = info[0];

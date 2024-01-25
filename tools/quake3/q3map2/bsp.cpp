@@ -104,7 +104,7 @@ static void ProcessAdvertisements() {
 			bspAdvertisement_t& ad = bspAds.emplace_back();
 			ad.cellId = e.intForKey( "cellId" );
 			// copy and clear the rest of memory // check for overflow by String64
-			const auto modelKey = String64()( e.valueForKey( "model" ) );
+			const String64 modelKey( e.valueForKey( "model" ) );
 			strncpy( ad.model, modelKey, sizeof( ad.model ) );
 
 			const bspModel_t& adModel = bspModels[atoi( modelKey.c_str() + 1 )];
@@ -396,8 +396,7 @@ static void ProcessWorldModel( entity_t& e ){
 
 	/* ydnar: fog hull */
 	if ( e.read_keyvalue( value, "_foghull" ) ) {
-		const auto shader = String64()( "textures/", value );
-		MakeFogHullSurfs( shader );
+		MakeFogHullSurfs( String64( "textures/", value ) );
 	}
 
 	/* ydnar: bug 645: do flares for lights */
