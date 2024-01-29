@@ -65,7 +65,7 @@ inline VertexPointer vertexpointer_arbitrarymeshvertex( const ArbitraryMeshVerte
 }
 
 inline void parseTextureName( CopiedString& name, const char* token ){
-	name = StringOutputStream( 256 )( PathCleaned( PathExtensionless( token ) ) ).c_str(); // remove extension
+	name = StringStream<64>( PathCleaned( PathExtensionless( token ) ) ); // remove extension
 }
 
 // generic renderable triangle surface

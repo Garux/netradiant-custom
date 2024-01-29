@@ -98,11 +98,11 @@ const char* const c_brushPrism_name = "brushPrism";
 
 void Brush_ConstructPrism( Brush& brush, const AABB& bounds, std::size_t sides, size_t axis, const char* shader, const TextureProjection& projection ){
 	if ( sides < c_brushPrism_minSides ) {
-		globalErrorStream() << c_brushPrism_name << ": sides " << sides << ": too few sides, minimum is " << c_brushPrism_minSides << "\n";
+		globalErrorStream() << c_brushPrism_name << ": sides " << sides << ": too few sides, minimum is " << c_brushPrism_minSides << '\n';
 		return;
 	}
 	if ( sides > c_brushPrism_maxSides ) {
-		globalErrorStream() << c_brushPrism_name << ": sides " << sides << ": too many sides, maximum is " << c_brushPrism_maxSides << "\n";
+		globalErrorStream() << c_brushPrism_name << ": sides " << sides << ": too many sides, maximum is " << c_brushPrism_maxSides << '\n';
 		return;
 	}
 
@@ -168,11 +168,11 @@ const char* const c_brushCone_name = "brushCone";
 
 void Brush_ConstructCone( Brush& brush, const AABB& bounds, std::size_t sides, size_t axis, const char* shader, const TextureProjection& projection ){
 	if ( sides < c_brushCone_minSides ) {
-		globalErrorStream() << c_brushCone_name << ": sides " << sides << ": too few sides, minimum is " << c_brushCone_minSides << "\n";
+		globalErrorStream() << c_brushCone_name << ": sides " << sides << ": too few sides, minimum is " << c_brushCone_minSides << '\n';
 		return;
 	}
 	if ( sides > c_brushCone_maxSides ) {
-		globalErrorStream() << c_brushCone_name << ": sides " << sides << ": too many sides, maximum is " << c_brushCone_maxSides << "\n";
+		globalErrorStream() << c_brushCone_name << ": sides " << sides << ": too many sides, maximum is " << c_brushCone_maxSides << '\n';
 		return;
 	}
 
@@ -220,11 +220,11 @@ const char* const c_brushSphere_name = "brushSphere";
 
 void Brush_ConstructSphere( Brush& brush, const AABB& bounds, std::size_t sides, const char* shader, const TextureProjection& projection ){
 	if ( sides < c_brushSphere_minSides ) {
-		globalErrorStream() << c_brushSphere_name << ": sides " << sides << ": too few sides, minimum is " << c_brushSphere_minSides << "\n";
+		globalErrorStream() << c_brushSphere_name << ": sides " << sides << ": too few sides, minimum is " << c_brushSphere_minSides << '\n';
 		return;
 	}
 	if ( sides > c_brushSphere_maxSides ) {
-		globalErrorStream() << c_brushSphere_name << ": sides " << sides << ": too many sides, maximum is " << c_brushSphere_maxSides << "\n";
+		globalErrorStream() << c_brushSphere_name << ": sides " << sides << ": too many sides, maximum is " << c_brushSphere_maxSides << '\n';
 		return;
 	}
 
@@ -273,11 +273,11 @@ const char* const c_brushRock_name = "brushRock";
 
 void Brush_ConstructRock( Brush& brush, const AABB& bounds, std::size_t sides, const char* shader, const TextureProjection& projection ){
 	if ( sides < c_brushRock_minSides ) {
-		globalErrorStream() << c_brushRock_name << ": sides " << sides << ": too few sides, minimum is " << c_brushRock_minSides << "\n";
+		globalErrorStream() << c_brushRock_name << ": sides " << sides << ": too few sides, minimum is " << c_brushRock_minSides << '\n';
 		return;
 	}
 	if ( sides > c_brushRock_maxSides ) {
-		globalErrorStream() << c_brushRock_name << ": sides " << sides << ": too many sides, maximum is " << c_brushRock_maxSides << "\n";
+		globalErrorStream() << c_brushRock_name << ": sides " << sides << ": too many sides, maximum is " << c_brushRock_maxSides << '\n';
 		return;
 	}
 
@@ -420,9 +420,8 @@ void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds,
 	case EBrushPrefab::Prism:
 		{
 			const size_t axis = GlobalXYWnd_getCurrentViewType();
-			StringOutputStream command;
-			command << c_brushPrism_name << " -sides " << sides << " -axis " << axis;
-			UndoableCommand undo( command.c_str() );
+			const auto command = StringStream<64>( c_brushPrism_name, " -sides ", sides, " -axis ", axis );
+			UndoableCommand undo( command );
 
 			Brush_ConstructPrism( brush, bounds, sides, axis, shader, projection );
 		}
@@ -430,36 +429,32 @@ void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds,
 	case EBrushPrefab::Cone:
 		{
 			const size_t axis = GlobalXYWnd_getCurrentViewType();
-			StringOutputStream command;
-			command << c_brushCone_name << " -sides " << sides << " -axis " << axis;
-			UndoableCommand undo( command.c_str() );
+			const auto command = StringStream<64>( c_brushCone_name, " -sides ", sides, " -axis ", axis );
+			UndoableCommand undo( command );
 
 			Brush_ConstructCone( brush, bounds, sides, axis, shader, projection );
 		}
 		break;
 	case EBrushPrefab::Sphere:
 		{
-			StringOutputStream command;
-			command << c_brushSphere_name << " -sides " << sides;
-			UndoableCommand undo( command.c_str() );
+			const auto command = StringStream<64>( c_brushSphere_name, " -sides ", sides );
+			UndoableCommand undo( command );
 
 			Brush_ConstructSphere( brush, bounds, sides, shader, projection );
 		}
 		break;
 	case EBrushPrefab::Rock:
 		{
-			StringOutputStream command;
-			command << c_brushRock_name << " -sides " << sides;
-			UndoableCommand undo( command.c_str() );
+			const auto command = StringStream<64>( c_brushRock_name, " -sides ", sides );
+			UndoableCommand undo( command );
 
 			Brush_ConstructRock( brush, bounds, sides, shader, projection );
 		}
 		break;
 	case EBrushPrefab::Icosahedron:
 		{
-			StringOutputStream command;
-			command << "brushIcosahedron" << " -subdivisions " << sides;
-			UndoableCommand undo( command.c_str() );
+			const auto command = StringStream<64>( "brushIcosahedron", " -subdivisions ", sides );
+			UndoableCommand undo( command );
 
 			icosahedron::Brush_ConstructIcosahedron( brush, bounds, sides, option, shader, projection );
 		}

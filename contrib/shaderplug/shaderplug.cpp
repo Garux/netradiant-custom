@@ -165,8 +165,8 @@ void CreateTagFile(){
 		}
 
 		// Get the tag file
-		const auto tagFile = StringOutputStream( 256 )( GlobalRadiant().getLocalRcPath(), SHADERTAG_FILE );
-		const auto message = StringOutputStream( 256 )( "Tag file saved to\n", tagFile, "\nPlease restart Radiant now.\n" );
+		const auto tagFile = StringStream( GlobalRadiant().getLocalRcPath(), SHADERTAG_FILE );
+		const auto message = StringStream( "Tag file saved to\n", tagFile, "\nPlease restart Radiant now.\n" );
 
 		if ( file_exists( tagFile ) ) {
 			EMessageBoxReturn result = GlobalRadiant().m_pfnMessageBox( g_window,

@@ -159,10 +159,9 @@ public:
 
 		// for a given name, we grab the first .def in the vfs
 		// this allows to override baseq3/scripts/entities.def for instance
-		StringOutputStream relPath( 256 );
-		relPath << m_directory << name;
+		const auto relPath = StringStream( m_directory, name );
 
-		scanner.scanFile( g_collector, relPath.c_str() );
+		scanner.scanFile( g_collector, relPath );
 	}
 };
 
@@ -195,12 +194,8 @@ void EntityClassQuake3_constructDirectory( const char* directory, const char* ex
 
 
 void EntityClassQuake3_Construct(){
-	StringOutputStream baseDirectory( 256 );
-	StringOutputStream gameDirectory( 256 );
-	const char* basegame = GlobalRadiant().getRequiredGameDescriptionKeyValue( "basegame" );
-	const char* gamename = GlobalRadiant().getGameName();
-	baseDirectory << GlobalRadiant().getGameToolsPath() << basegame << '/';
-	gameDirectory << GlobalRadiant().getGameToolsPath() << gamename << '/';
+	const auto baseDirectory = StringStream( GlobalRadiant().getGameToolsPath(), GlobalRadiant().getRequiredGameDescriptionKeyValue( "basegame" ), '/' );
+	const auto gameDirectory = StringStream( GlobalRadiant().getGameToolsPath(), GlobalRadiant().getGameName(), '/' );
 
 	class LoadEntityDefinitionsVisitor : public EClassModules::Visitor
 	{
@@ -224,7 +219,7 @@ void EntityClassQuake3_Construct(){
 		}
 	};
 
-	EntityClassManager_getEClassModules().foreachModule( LoadEntityDefinitionsVisitor( baseDirectory.c_str(), gameDirectory.c_str() ) );
+	EntityClassManager_getEClassModules().foreachModule( LoadEntityDefinitionsVisitor( baseDirectory, gameDirectory ) );
 }
 
 EntityClass *Eclass_ForName( const char *name, bool has_brushes ){

@@ -205,7 +205,7 @@ void DWinding::CheckWinding(){
 		int j;
 		for ( j = 0; j < 3; j++ )
 			if ( p1[j] > BOGUS_RANGE || p1[j] < -BOGUS_RANGE ) {
-				globalWarningStream() << "CheckFace: BOGUS_RANGE: " << p1[j] << "\n";
+				globalWarningStream() << "CheckFace: BOGUS_RANGE: " << p1[j] << '\n';
 			}
 
 		j = i + 1 == numpoints ? 0 : i + 1;

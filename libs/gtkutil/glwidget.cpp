@@ -44,7 +44,7 @@ void glwidget_context_created( QOpenGLWidget& widget ){
 		<< " depth: " << widget.format().depthBufferSize()
 		<< " swapInterval: " << widget.format().swapInterval()
 		<< " samples: " << widget.format().samples()
-		<< "\n";
+		<< '\n';
 
 	ASSERT_MESSAGE( widget.isValid(), "failed to create OpenGL widget" );
 

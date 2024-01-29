@@ -371,7 +371,7 @@ Image* LoadKTXBuff( PointerInputStream& istream ){
 		}
 
 		if ( !decoder ) {
-			globalErrorStream() << "LoadKTX: Image has an unsupported pixel type " << type << " or format " << format << "\n";
+			globalErrorStream() << "LoadKTX: Image has an unsupported pixel type " << type << " or format " << format << '\n';
 			image->release();
 			return 0;
 		}
@@ -400,7 +400,7 @@ Image* LoadKTXBuff( PointerInputStream& istream ){
 			KTX_DecodeETC1( istream, *image );
 			break;
 		default:
-			globalErrorStream() << "LoadKTX: Image has an unsupported compressed format " << format << "\n";
+			globalErrorStream() << "LoadKTX: Image has an unsupported compressed format " << format << '\n';
 			image->release();
 			return 0;
 		}

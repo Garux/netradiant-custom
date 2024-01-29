@@ -36,11 +36,11 @@ void BitmapsPath_set( const char* path ){
 }
 
 QPixmap new_local_image( const char* filename ){
-	const auto fullPath = StringOutputStream( 256 )( g_bitmapsPath, filename );
+	const auto fullPath = StringStream( g_bitmapsPath, filename );
 	return QPixmap( QString( fullPath.c_str() ) );
 }
 
 QIcon new_local_icon( const char* filename ){
-	const auto fullPath = StringOutputStream( 256 )( g_bitmapsPath, filename );
+	const auto fullPath = StringStream( g_bitmapsPath, filename );
 	return QIcon( fullPath.c_str() );
 }

@@ -598,7 +598,7 @@ int pk3BSPMain( Args& args ){
 
 	for ( CopiedString& file : pk3Shaderfiles ){
 		if ( !file.empty() ){
-			stream( g_game->shaderPath, "/", file.c_str() );
+			stream( g_game->shaderPath, '/', file );
 			if ( !packResource( stream, packname, compLevel ) ){
 				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", stream.c_str() );
 				packFAIL = true;
@@ -942,7 +942,7 @@ int repackBSPMain( Args& args ){
 
 	/* write shader */
 	stream( g_enginePath, nameOFpack, "_strippedBYrepacker.shader" );
-	SaveFile( stream, allShaders.c_str(), allShaders.end() - allShaders.begin() );
+	SaveFile( stream, allShaders, allShaders.end() - allShaders.begin() );
 	Sys_Printf( "Shaders saved to %s\n", stream.c_str() );
 
 	/* make a pack */

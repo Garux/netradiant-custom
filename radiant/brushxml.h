@@ -87,7 +87,7 @@ class FaceXMLImporter
 			return m_state;
 		}
 		const char* content() const {
-			return m_content.c_str();
+			return m_content;
 		}
 		std::size_t write( const char* buffer, std::size_t length ){
 			return m_content.write( buffer, length );

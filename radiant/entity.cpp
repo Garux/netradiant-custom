@@ -171,12 +171,12 @@ void Scene_EntitySetKeyValue_Selected( const char* key, const char* value ){
 
 void Scene_EntitySetClassname_Selected( const char* classname ){
 	if ( GlobalSelectionSystem().countSelected() > 0 ) {
-		StringOutputStream command;
+		StringOutputStream command( 64 );
 		if( string_equal( classname, "worldspawn" ) )
 			command << "ungroupSelectedEntities";
 		else
 			command << "entitySetClass -class " << classname;
-		UndoableCommand undo( command.c_str() );
+		UndoableCommand undo( command );
 		GlobalSceneGraph().traverse( EntitySetClassnameSelected( classname ) );
 	}
 }
@@ -306,9 +306,8 @@ void Entity_moveSelectedPrimitives( bool toLast ){
 	scene::Node& node = ( !Node_isEntity( path.top() ) && path.size() > 1 )? path.parent() : path.top();
 
 	if ( Node_isEntity( node ) && node_is_group( node ) ) {
-		StringOutputStream command;
-		command << "movePrimitivesToEntity " << makeQuoted( Node_getEntity( node )->getClassName() );
-		UndoableCommand undo( command.c_str() );
+		const auto command = StringStream<64>( "movePrimitivesToEntity ", makeQuoted( Node_getEntity( node )->getClassName() ) );
+		UndoableCommand undo( command );
 		Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), node );
 	}
 }
@@ -394,9 +393,8 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 	}
 #endif
 
-	StringOutputStream command;
-	command << "entityCreate -class " << name;
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream<64>( "entityCreate -class ", name );
+	UndoableCommand undo( command );
 
 	EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( name, true );
 
@@ -484,13 +482,9 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 			}
 		}
 		else if ( brushesSelected ) { // use workzone to set light position/size for doom3 lights, if there are brushes selected
-			AABB bounds( Doom3Light_getBounds( workzone ) );
-			StringOutputStream key( 64 );
-			key << bounds.origin[0] << " " << bounds.origin[1] << " " << bounds.origin[2];
-			entity->setKeyValue( "origin", key.c_str() );
-			key.clear();
-			key << bounds.extents[0] << " " << bounds.extents[1] << " " << bounds.extents[2];
-			entity->setKeyValue( "light_radius", key.c_str() );
+			const AABB bounds( Doom3Light_getBounds( workzone ) );
+			entity->setKeyValue( "origin", StringStream<64>( bounds.origin[0], ' ', bounds.origin[1], ' ', bounds.origin[2] ) );
+			entity->setKeyValue( "light_radius", StringStream<64>( bounds.extents[0], ' ', bounds.extents[1], ' ', bounds.extents[2] ) );
 		}
 	}
 
@@ -538,9 +532,8 @@ void Entity_normalizeColor(){
 					                             g_entity_globals.color_entity[1],
 					                             g_entity_globals.color_entity[2] );
 
-					StringOutputStream command( 256 );
-					command << "entityNormalizeColour " << buffer;
-					UndoableCommand undo( command.c_str() );
+					const auto command = StringStream<64>( "entityNormalizeColour ", buffer );
+					UndoableCommand undo( command );
 					Scene_EntitySetKeyValue_Selected( "_color", buffer );
 				}
 			}
@@ -571,9 +564,8 @@ void Entity_setColour(){
 				                             g_entity_globals.color_entity[1],
 				                             g_entity_globals.color_entity[2] );
 
-				StringOutputStream command( 256 );
-				command << "entitySetColour " << buffer;
-				UndoableCommand undo( command.c_str() );
+				const auto command = StringStream<64>( "entitySetColour ", buffer );
+				UndoableCommand undo( command );
 				Scene_EntitySetKeyValue_Selected( "_color", buffer );
 			}
 		}
@@ -581,7 +573,7 @@ void Entity_setColour(){
 }
 
 const char* misc_model_dialog( QWidget* parent, const char* filepath ){
-	StringOutputStream buffer( 1024 );
+	StringOutputStream buffer( 256 );
 
 	if( !string_empty( filepath ) ){
 		const char* root = GlobalFileSystem().findFile( filepath );
@@ -591,14 +583,13 @@ const char* misc_model_dialog( QWidget* parent, const char* filepath ){
 	if( buffer.empty() ){
 		buffer << g_qeglobals.m_userGamePath << "models/";
 
-		if ( !file_readable( buffer.c_str() ) ) {
+		if ( !file_readable( buffer ) ) {
 			// just go to fsmain
-			buffer.clear();
-			buffer << g_qeglobals.m_userGamePath;
+			buffer( g_qeglobals.m_userGamePath );
 		}
 	}
 
-	const char *filename = file_dialog( parent, true, "Choose Model", buffer.c_str(), ModelLoader::Name );
+	const char *filename = file_dialog( parent, true, "Choose Model", buffer, ModelLoader::Name );
 	if ( filename != 0 ) {
 		// use VFS to get the correct relative path
 		const char* relative = path_make_relative( filename, GlobalFileSystem().findRoot( filename ) );

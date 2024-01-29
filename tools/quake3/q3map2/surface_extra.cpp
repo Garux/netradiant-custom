@@ -134,7 +134,7 @@ void WriteSurfaceExtraFile( const char *path ){
 	Sys_Printf( "--- WriteSurfaceExtraFile ---\n" );
 
 	/* open the file */
-	const auto srfPath = StringOutputStream( 256 )( path, ".srf" );
+	const auto srfPath = StringStream( path, ".srf" );
 	Sys_Printf( "Writing %s\n", srfPath.c_str() );
 	FILE *sf = SafeOpenWrite( srfPath, "wt" );
 
@@ -230,7 +230,7 @@ void LoadSurfaceExtraFile( const char *path ){
 	}
 
 	/* load the file */
-	auto srfPath = StringOutputStream( 256 )( PathExtensionless( path ), ".srf" );
+	const auto srfPath = StringStream( PathExtensionless( path ), ".srf" );
 
 	/* parse the file */
 	if( !LoadScriptFile( srfPath, -1 ) )

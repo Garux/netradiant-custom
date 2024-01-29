@@ -130,8 +130,8 @@ public:
 			std::vector<const image_t*> images;
 			for( const auto suffix : { "_lf", "_rt", "_ft", "_bk", "_up", "_dn" } )
 			{
-				if( nullptr == images.emplace_back( ImageLoad( StringOutputStream( 64 )( skyParmsImageBase, suffix ) ) ) ){
-					Sys_Warning( "Couldn't find image %s\n", StringOutputStream( 64 )( skyParmsImageBase, suffix ).c_str() );
+				if( nullptr == images.emplace_back( ImageLoad( StringStream<64>( skyParmsImageBase, suffix ) ) ) ){
+					Sys_Warning( "Couldn't find image %s\n", StringStream<64>( skyParmsImageBase, suffix ).c_str() );
 					return;
 				}
 			}

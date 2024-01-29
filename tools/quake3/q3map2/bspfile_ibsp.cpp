@@ -313,7 +313,7 @@ void WriteIBSPFile( const char *filename ){
 		time_t t;
 		time( &t );
 		/* asctime adds an implicit trailing \n */
-		const auto marker = StringOutputStream( 256 )( "I LOVE MY Q3MAP2 ", Q3MAP_VERSION, " on ", asctime( localtime( &t ) ) );
+		const auto marker = StringStream( "I LOVE MY Q3MAP2 " Q3MAP_VERSION " on ", asctime( localtime( &t ) ) );
 		AddLump( file, header.lumps[0], std::vector<char>( marker.begin(), marker.end() + 1 ) );
 	}
 

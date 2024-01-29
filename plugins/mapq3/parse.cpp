@@ -93,7 +93,7 @@ NodeSmartReference Entity_parseTokens( Tokeniser& tokeniser, EntityCreator& enti
 			}
 			else
 			{
-				globalErrorStream() << "entity " << index << ": type " << classname << ": discarding brush " << count_primitives << "\n";
+				globalErrorStream() << "entity " << index << ": type " << classname << ": discarding brush " << count_primitives << '\n';
 			}
 			++count_primitives;
 		}

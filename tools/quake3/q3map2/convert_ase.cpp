@@ -327,10 +327,10 @@ int ConvertBSPToASE( char *bspName ){
 	Sys_Printf( "--- Convert BSP to ASE ---\n" );
 
 	/* create the ase filename from the bsp name */
-	auto dirname = StringOutputStream( 256 )( PathExtensionless( bspName ) );
-	auto name = StringOutputStream( 256 )( dirname, ".ase" );
+	const auto dirname = StringStream( PathExtensionless( bspName ) );
+	const auto name = StringStream( dirname, ".ase" );
 	Sys_Printf( "writing %s\n", name.c_str() );
-	auto base = StringOutputStream( 64 )( PathFilename( bspName ) );
+	const auto base = StringStream<64>( PathFilename( bspName ) );
 
 	/* open it */
 	f = SafeOpenWrite( name );

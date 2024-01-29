@@ -36,7 +36,6 @@
 #include "moduleobserver.h"
 
 #include <set>
-#include <string>
 #include <vector>
 
 #include <QVBoxLayout>
@@ -371,10 +370,11 @@ const char* TextureBrowser_GetSelectedShader(){
 void TextureBrowser_SetStatus( const char* name ){
 	IShader* shader = QERApp_Shader_ForName( name );
 	qtexture_t* q = shader->getTexture();
-	StringOutputStream strTex( 256 );
-	strTex << ( string_equal_prefix_nocase( name, "textures/" )? name + 9 : name ) << " W: " << q->width << " H: " << q->height;
+	const auto strTex = StringStream( ( string_equal_prefix_nocase( name, "textures/" )? name + 9 : name ),
+	                                  " W: ", q->width,
+	                                  " H: ", q->height );
 	shader->DecRef();
-	g_pParentWnd->SetStatusText( c_status_texture, strTex.c_str() );
+	g_pParentWnd->SetStatusText( c_status_texture, strTex );
 }
 
 void TextureBrowser_Focus( TextureBrowser& textureBrowser, const char* name );
@@ -606,7 +606,7 @@ typedef ReferenceCaller1<TextureBrowser, bool, TextureBrowser_importShowScrollba
  */
 
 inline bool texture_name_ignore( const char* name ){
-	auto temp = StringOutputStream( 64 )( LowerCase( name ) );
+	const auto temp = StringStream<64>( LowerCase( name ) );
 
 	return
 	    string_equal_suffix( temp, ".specular" ) ||
@@ -673,21 +673,22 @@ public:
 	}
 };
 
-void TextureDirectory_loadTexture( const char* directory, const char* texture ){
-	const auto name = StringOutputStream( 256 )( directory, PathExtensionless( texture ) );
-
-	if ( texture_name_ignore( name.c_str() ) ) {
+void TexturePath_loadTexture( const char* name ){
+	if ( texture_name_ignore( name ) ) {
 		return;
 	}
 
-	if ( !shader_valid( name.c_str() ) ) {
-		globalWarningStream() << "Skipping invalid texture name: [" << name.c_str() << "]\n";
+	if ( !shader_valid( name ) ) {
+		globalWarningStream() << "Skipping invalid texture name: [" << name << "]\n";
 		return;
 	}
 
 	// if a texture is already in use to represent a shader, ignore it
-	IShader* shader = QERApp_Shader_ForName( name.c_str() );
+	IShader* shader = QERApp_Shader_ForName( name );
 	shader->DecRef();
+}
+void TextureDirectory_loadTexture( const char* directory, const char* texture ){
+	TexturePath_loadTexture( StringStream<64>( directory, PathExtensionless( texture ) ) );
 }
 typedef ConstPointerCaller1<char, const char*, TextureDirectory_loadTexture> TextureDirectoryLoadTextureCaller;
 
@@ -727,11 +728,7 @@ void TextureBrowser_ShowDirectory( const char* directory ){
 
 		if ( g_pGameDescription->mGameType != "doom3" ) {
 			// load remaining texture files
-
-			StringOutputStream dirstring( 64 );
-			dirstring << "textures/" << directory;
-
-			Radiant_getImageModules().foreachModule( LoadTexturesByTypeVisitor( dirstring.c_str() ) );
+			Radiant_getImageModules().foreachModule( LoadTexturesByTypeVisitor( StringStream<64>( "textures/", directory ) ) );
 		}
 	}
 
@@ -1414,8 +1411,8 @@ void TextureBrowser_searchTags(){
 	const auto selected = g_TexBro.m_tagsListWidget->selectedItems();
 
 	if ( !selected.empty() ) {
-		auto buffer = StringOutputStream( 256 )( "/root/*/*[tag='" );
-		auto tags_searched = StringOutputStream( 256 )( "[TAGS] " );
+		auto buffer = StringStream( "/root/*/*[tag='" );
+		auto tags_searched = StringStream( "[TAGS] " );
 
 		for ( auto it = selected.begin(); it != selected.end(); ++it )
 		{
@@ -1434,16 +1431,12 @@ void TextureBrowser_searchTags(){
 		TagBuilder.TagSearch( buffer, g_TexBro.m_found_shaders );
 
 		if ( !g_TexBro.m_found_shaders.empty() ) { // found something
-			globalOutputStream() << "Found " << g_TexBro.m_found_shaders.size() << " textures and shaders with " << tags_searched << "\n";
+			globalOutputStream() << "Found " << g_TexBro.m_found_shaders.size() << " textures and shaders with " << tags_searched << '\n';
 			ScopeDisableScreenUpdates disableScreenUpdates( "Searching...", "Loading Textures" );
 
 			for ( const CopiedString& shader : g_TexBro.m_found_shaders )
 			{
-				std::string path = shader.c_str();
-				const size_t pos = path.find_last_of( "/" );
-				const std::string name = path.substr( pos + 1 );
-				path = path.substr( 0, pos + 1 );
-				TextureDirectory_loadTexture( path.c_str(), name.c_str() );
+				TexturePath_loadTexture( shader.c_str() );
 			}
 		}
 		TextureBrowser_SetHideUnused( g_TexBro, false );
@@ -1474,11 +1467,7 @@ void TextureBrowser_showUntagged(){
 
 		for ( const CopiedString& shader : g_TexBro.m_found_shaders )
 		{
-			std::string path = shader.c_str();
-			size_t pos = path.find_last_of( "/", path.size() );
-			std::string name = path.substr( pos + 1, path.size() );
-			path = path.substr( 0, pos + 1 );
-			TextureDirectory_loadTexture( path.c_str(), name.c_str() );
+			TexturePath_loadTexture( shader.c_str() );
 		}
 
 		TextureBrowser_SetHideUnused( g_TexBro, false );
@@ -1491,8 +1480,8 @@ void TextureBrowser_showUntagged(){
 }
 
 void TextureBrowser_checkTagFile(){
-	const auto rc_filename = StringOutputStream( 256 )( LocalRcPath_get(), SHADERTAG_FILE );
-	const auto default_filename = StringOutputStream( 256 )( g_pGameDescription->mGameToolsPath, SHADERTAG_FILE );
+	const auto rc_filename = StringStream( LocalRcPath_get(), SHADERTAG_FILE );
+	const auto default_filename = StringStream( g_pGameDescription->mGameToolsPath, SHADERTAG_FILE );
 
 	if ( file_exists( rc_filename ) && TagBuilder.OpenXmlDoc( rc_filename ) )
 	{
@@ -1512,7 +1501,7 @@ void TextureBrowser_checkTagFile(){
 }
 
 void TextureBrowser_addTag(){
-	auto tag = StringOutputStream( 64 )( "NewTag" );
+	auto tag = StringStream<64>( "NewTag" );
 	int index = 0;
 	while( g_TexBro.m_all_tags.find( tag.c_str() ) != g_TexBro.m_all_tags.cend() )
 		tag( "NewTag", ++index );
@@ -1592,13 +1581,8 @@ void TextureBrowser_pasteTag(){
 
 
 void TextureBrowser_SetNotex(){
-	StringOutputStream name( 256 );
-	name << GlobalRadiant().getAppPath() << "bitmaps/notex.png";
-	g_notex = name.c_str();
-
-	name.clear();
-	name << GlobalRadiant().getAppPath() << "bitmaps/shadernotex.png";
-	g_shadernotex = name.c_str();
+	g_notex = StringStream( GlobalRadiant().getAppPath(), "bitmaps/notex.png" );
+	g_shadernotex = StringStream( GlobalRadiant().getAppPath(), "bitmaps/shadernotex.png" );
 }
 
 
@@ -1948,16 +1932,10 @@ void TextureBrowser_filter_searchFromStart(){
 
 
 void TextureBrowser_exportTitle( const StringImportCallback& importer ){
-	StringOutputStream buffer( 64 );
-	buffer << "Textures: ";
-	if ( !g_TextureBrowser_currentDirectory.empty() ) {
-		buffer << g_TextureBrowser_currentDirectory;
-	}
-	else
-	{
-		buffer << "all";
-	}
-	importer( buffer.c_str() );
+	const auto buffer = StringStream<64>( "Textures: ", !g_TextureBrowser_currentDirectory.empty()
+	                                                    ? g_TextureBrowser_currentDirectory.c_str()
+	                                                    : "all" );
+	importer( buffer );
 }
 
 
@@ -2040,10 +2018,9 @@ void TextureBrowser_constructPreferences( PreferencesPage& page ){
 		page.appendCombo( "Load Shaders at Startup", reinterpret_cast<int&>( g_TexBro.m_startupShaders ), StringArrayRange( startup_shaders ) );
 	}
 	{
-		StringOutputStream sstream( 256 );
-		sstream << "Hide nonShaders in " << TextureBrowser_getCommonShadersDir() << " folder";
+		const auto str = StringStream<64>( "Hide nonShaders in ", TextureBrowser_getCommonShadersDir(), " folder" );
 		page.appendCheckBox(
-		    "", sstream.c_str(),
+		    "", str,
 		    g_TexBro.m_hideNonShadersInCommon
 		);
 	}

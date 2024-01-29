@@ -63,7 +63,7 @@ void gamedetect_found_game( const char *game, char *path ){
 		return;
 	}
 
-	globalOutputStream() << "Detected game " << game << " in " << path << "\n";
+	globalOutputStream() << "Detected game " << game << " in " << path << '\n';
 
 	sprintf( buf, "-%s-EnginePath", game );
 	argc = 0;
@@ -83,14 +83,14 @@ bool gamedetect_check_game( const char *gamefile, const char *checkfile1, const 
 	buf[bufpos] = '/';
 
 	strcpy( buf + bufpos + 1, checkfile1 );
-	globalOutputStream() << "Checking for a game file in " << buf << "\n";
+	globalOutputStream() << "Checking for a game file in " << buf << '\n';
 	if ( !file_exists( buf ) ) {
 		return false;
 	}
 
 	if ( checkfile2 ) {
 		strcpy( buf + bufpos + 1, checkfile2 );
-		globalOutputStream() << "Checking for a game file in " << buf << "\n";
+		globalOutputStream() << "Checking for a game file in " << buf << '\n';
 		if ( !file_exists( buf ) ) {
 			return false;
 		}
@@ -185,10 +185,9 @@ const char* environment_get_app_filepath(){
 }
 
 bool portable_app_setup(){
-	StringOutputStream confdir( 256 );
-	confdir << app_path << "settings/";
-	if ( file_exists( confdir.c_str() ) ) {
-		home_path = confdir.c_str();
+	const auto confdir = StringStream( app_path, "settings/" );
+	if ( file_exists( confdir ) ) {
+		home_path = confdir;
 		return true;
 	}
 	return false;
@@ -200,7 +199,7 @@ CopiedString g_openMapByCmd;
 void cmdMap(){
 	for ( int i = 1; i < g_argc; ++i )
 		if( path_extension_is( g_argv[i], "map" ) ){
-			g_openMapByCmd = StringOutputStream( 256 )( PathCleaned( g_argv[i] ) ).c_str();
+			g_openMapByCmd = StringStream( PathCleaned( g_argv[i] ) );
 			return;
 		}
 }
@@ -261,7 +260,7 @@ void environment_init( int argc, char* argv[] ){
 	}
 
 	if ( !portable_app_setup() ) {
-		home_path = StringOutputStream( 256 )( DirectoryCleaned( g_get_home_dir() ), ".netradiant/" ).c_str();
+		home_path = StringStream( DirectoryCleaned( g_get_home_dir() ), ".netradiant/" );
 		Q_mkdir( home_path.c_str() );
 	}
 	gamedetect();
@@ -280,7 +279,7 @@ void environment_init( int argc, char* argv[] ){
 		char filename[MAX_PATH + 1];
 		GetModuleFileName( 0, filename, MAX_PATH );
 
-		app_filepath = StringOutputStream( 256 )( PathCleaned( filename ) ).c_str();
+		app_filepath = StringStream( PathCleaned( filename ) );
 		app_path = PathFilenameless( app_filepath.c_str() );
 	}
 
@@ -297,8 +296,8 @@ void environment_init( int argc, char* argv[] ){
 			home << PathCleaned( appdata );
 		}
 		home << "/NetRadiantSettings/";
-		Q_mkdir( home.c_str() );
-		home_path = home.c_str();
+		Q_mkdir( home );
+		home_path = home;
 	}
 	gamedetect();
 	cmdMap();

@@ -382,9 +382,8 @@ void SurfaceInspector_ProjectTexture( EProjectTexture type, bool isGuiClick ){
 		texdef.scale[0] = texdef.scale[1] = Texdef_getDefaultTextureScale();
 	}
 
-	StringOutputStream str( 32 );
-	str << "textureProject" << ( type == eProjectAxial? "Axial" : type == eProjectOrtho? "Ortho" : "Cam" );
-	UndoableCommand undo( str.c_str() );
+	const auto str = StringStream<32>( "textureProject", ( type == eProjectAxial? "Axial" : type == eProjectOrtho? "Ortho" : "Cam" ) );
+	UndoableCommand undo( str );
 
 	Vector3 direction;
 
@@ -1008,17 +1007,17 @@ void SurfaceInspector::Update(){
    ===============
  */
 void SurfaceInspector::ApplyShader(){
-	const auto name = StringOutputStream( 256 )( GlobalTexturePrefix_get(), PathCleaned( m_textureEntry->text().toLatin1().constData() ) );
+	const auto name = StringStream<64>( GlobalTexturePrefix_get(), PathCleaned( m_textureEntry->text().toLatin1().constData() ) );
 
 	// TTimo: detect and refuse invalid texture names (at least the ones with spaces)
-	if ( !texdef_name_valid( name.c_str() ) ) {
-		globalErrorStream() << "invalid texture name '" << name.c_str() << "'\n";
+	if ( !texdef_name_valid( name ) ) {
+		globalErrorStream() << "invalid texture name '" << name << "'\n";
 		SurfaceInspector_queueDraw();
 		return;
 	}
 
 	UndoableCommand undo( "textureNameSetSelected" );
-	Select_SetShader( name.c_str() );
+	Select_SetShader( name );
 }
 #if 0
 void SurfaceInspector::ApplyTexdef(){
@@ -1039,45 +1038,40 @@ void SurfaceInspector::ApplyTexdef(){
 #endif
 void SurfaceInspector::ApplyTexdef_HShift(){
 	const float value = m_hshiftIncrement.m_spin->value();
-	StringOutputStream command;
-	command << "textureProjectionSetSelected -hShift " << value;
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream<64>( "textureProjectionSetSelected -hShift ", value );
+	UndoableCommand undo( command );
 	Select_SetTexdef( &value, 0, 0, 0, 0 );
 	Patch_SetTexdef( &value, 0, 0, 0, 0 );
 }
 
 void SurfaceInspector::ApplyTexdef_VShift(){
 	const float value = m_vshiftIncrement.m_spin->value();
-	StringOutputStream command;
-	command << "textureProjectionSetSelected -vShift " << value;
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream<64>( "textureProjectionSetSelected -vShift ", value );
+	UndoableCommand undo( command );
 	Select_SetTexdef( 0, &value, 0, 0, 0 );
 	Patch_SetTexdef( 0, &value, 0, 0, 0 );
 }
 
 void SurfaceInspector::ApplyTexdef_HScale(){
 	const float value = m_hscaleIncrement.m_spin->value();
-	StringOutputStream command;
-	command << "textureProjectionSetSelected -hScale " << value;
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream<64>( "textureProjectionSetSelected -hScale ", value );
+	UndoableCommand undo( command );
 	Select_SetTexdef( 0, 0, &value, 0, 0 );
 	Patch_SetTexdef( 0, 0, &value, 0, 0 );
 }
 
 void SurfaceInspector::ApplyTexdef_VScale(){
 	const float value = m_vscaleIncrement.m_spin->value();
-	StringOutputStream command;
-	command << "textureProjectionSetSelected -vScale " << value;
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream<64>( "textureProjectionSetSelected -vScale ", value );
+	UndoableCommand undo( command );
 	Select_SetTexdef( 0, 0, 0, &value, 0 );
 	Patch_SetTexdef( 0, 0, 0, &value, 0 );
 }
 
 void SurfaceInspector::ApplyTexdef_Rotation(){
 	const float value = m_rotateIncrement.m_spin->value();
-	StringOutputStream command;
-	command << "textureProjectionSetSelected -rotation " << static_cast<float>( float_to_integer( value * 100.f ) ) / 100.f;;
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream<64>( "textureProjectionSetSelected -rotation ", static_cast<float>( float_to_integer( value * 100.f ) ) / 100.f );
+	UndoableCommand undo( command );
 	Select_SetTexdef( 0, 0, 0, 0, &value );
 	Patch_SetTexdef( 0, 0, 0, 0, &value );
 }
@@ -1391,7 +1385,7 @@ void Face_setTexture( Face& face, const char* shader, const FaceTexture& clipboa
 			}
 
 			const Quaternion rotation = quaternion_for_unit_vectors( clipboard.m_plane.normal(), face.getPlane().plane3().normal() );
-//			globalOutputStream() << "rotation: " << rotation.x() << " " << rotation.y() << " " << rotation.z() << " " << rotation.w() << " " << "\n";
+//			globalOutputStream() << "rotation: " << rotation.x() << ' ' << rotation.y() << ' ' << rotation.z() << ' ' << rotation.w() << ' ' << '\n';
 			Matrix4 transform = g_matrix4_identity;
 			matrix4_pivoted_rotate_by_quaternion( transform, rotation, line.origin );
 

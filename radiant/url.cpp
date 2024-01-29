@@ -28,7 +28,7 @@
 
 void OpenURL( const char *url ){
 	// let's put a little comment
-	globalOutputStream() << "OpenURL: " << url << "\n";
+	globalOutputStream() << "OpenURL: " << url << '\n';
 	// QUrl::fromUserInput appears to work well for urls and local paths with spaces
 	// alternatively can prepend file:/// to the latter and use default QUrl contructor
 	if ( !QDesktopServices::openUrl( QUrl::fromUserInput( url ) ) ) {

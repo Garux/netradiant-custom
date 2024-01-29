@@ -65,7 +65,7 @@ static CopiedString LokiGetHomeDir(){
 		}
 	}
 	else{
-		return StringOutputStream( 256 )( home, "/." ).c_str();
+		return StringStream( home, "/." ).c_str();
 	}
 	/* return it */
 	return "";
@@ -93,7 +93,7 @@ static void LokiInitPaths( const char *argv0, CopiedString& homePath, CopiedStri
 	installPath = "../";
 	#else
 	const char *path = getenv( "PATH" );
-	auto temp = StringOutputStream( 256 )( argv0 );
+	auto temp = StringStream( argv0 );
 
 	/* do some path divining */
 	if ( strEmpty( path_get_last_separator( temp ) ) && path != NULL ) {
@@ -228,7 +228,7 @@ static void AddBasePath( std::vector<CopiedString>& basePaths, const char *path 
 	/* dummy check */
 	if ( !strEmptyOrNull( path ) ) {
 		/* add it to the list */
-		insert_unique( basePaths, StringOutputStream( 256 )( DirectoryCleaned( path ) ) );
+		insert_unique( basePaths, StringStream( DirectoryCleaned( path ) ) );
 		if ( g_enginePath.empty() )
 			g_enginePath = basePaths.back();
 	}
@@ -274,7 +274,7 @@ static void AddHomeBasePath( std::vector<CopiedString>& basePaths, const char *h
 	}
 
 	/* add it to the beginning of the list */
-	const auto clean = StringOutputStream( 256 )( DirectoryCleaned( str ) );
+	const auto clean = StringStream( DirectoryCleaned( str ) );
 	if( is_unique( basePaths, clean ) )
 		basePaths.emplace( basePaths.cbegin(), clean );
 }
@@ -383,7 +383,7 @@ void InitPaths( Args& args ){
 				if( found )
 					strClear( found );
 				/* add this as a base path */
-				AddBasePath( basePaths, stream.c_str() );
+				AddBasePath( basePaths, stream );
 				if( !basePaths.empty() )
 					break;
 			}

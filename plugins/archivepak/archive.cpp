@@ -92,7 +92,7 @@ public:
 
 					PakFileSystem::entry_type& file = m_filesystem[entry.filename];
 					if ( !file.is_directory() ) {
-						globalWarningStream() << "Warning: pak archive " << makeQuoted( m_name ) << " contains duplicated file: " << makeQuoted( entry.filename ) << "\n";
+						globalWarningStream() << "Warning: pak archive " << makeQuoted( m_name ) << " contains duplicated file: " << makeQuoted( entry.filename ) << '\n';
 					}
 					else
 					{

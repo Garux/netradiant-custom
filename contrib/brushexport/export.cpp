@@ -76,9 +76,7 @@ void ExportData::BeginBrush( Brush& b ){
 		groups.push_back( group() );
 		current = &groups.back();
 
-		StringOutputStream str( 256 );
-		str << "Brush" << (unsigned int)groups.size();
-		current->name = str.c_str();
+		current->name = StringStream<16>( "Brush", (unsigned int)groups.size() );
 	}
 }
 
@@ -127,7 +125,7 @@ void ExportData::AddBrushFace( Face& f ){
 	current->faces.push_back( &f );
 
 #ifdef _DEBUG
-	globalOutputStream() << "Added Face to group " << current->name.c_str() << "\n";
+	globalOutputStream() << "Added Face to group " << current->name.c_str() << '\n';
 #endif
 }
 
@@ -144,7 +142,7 @@ void ExportData::GetShaderNameFromShaderPath( const char* path, std::string& nam
 	}
 
 #ifdef _DEBUG
-	globalOutputStream() << "Last: " << (const unsigned int) last_slash << " " << "length: " << (const unsigned int)tmp.length() << "Name: " << name.c_str() << "\n";
+	globalOutputStream() << "Last: " << (const unsigned int) last_slash << " length: " << (const unsigned int)tmp.length() << "Name: " << name.c_str() << '\n';
 #endif
 }
 
@@ -198,7 +196,7 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 	if ( expmat ) {
 		size_t last = mtlFile.find_last_of( "//" );
 		std::string mtllib = mtlFile.substr( last + 1, mtlFile.size() - last ).c_str();
-		out << "mtllib " << mtllib.c_str() << "\n";
+		out << "mtllib " << mtllib.c_str() << '\n';
 	}
 
 	unsigned int vertex_count = 0;
@@ -217,7 +215,7 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 		else {
 			out << "\ng ";
 		}
-		out << group.name.c_str() << "\n";
+		out << group.name.c_str() << '\n';
 
 		// material
 		if ( expmat && mode == COLLAPSE_ALL ) {
@@ -253,9 +251,9 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 				// write vertices
 				if( vertexN == 0 ){
 					vertexN = ++vertex_count;
-					out << "v " << FloatFormat( vertex.x(), 1, 6 ) << " " << FloatFormat( vertex.z(), 1, 6 ) << " " << FloatFormat( -vertex.y(), 1, 6 ) << "\n";
+					out << "v " << FloatFormat( vertex.x(), 1, 6 ) << ' ' << FloatFormat( vertex.z(), 1, 6 ) << ' ' << FloatFormat( -vertex.y(), 1, 6 ) << '\n';
 				}
-				faceLine << " " << vertexN << "/" << texcoord_count; // store faces
+				faceLine << ' ' << vertexN << '/' << texcoord_count; // store faces
 			}
 			while( i != 0 );
 
@@ -265,7 +263,7 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 			brushMaterials.emplace( face->getShader().getShader(), faceLine.c_str() );
 		}
 
-		out << "\n";
+		out << '\n';
 
 		for ( const Face* face : group.faces )
 		{
@@ -275,7 +273,7 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 			size_t i = w.numpoints;
 			do{
 				--i;
-				out << "vt " << FloatFormat( w[i].texcoord.x(), 1, 6 ) << " " << FloatFormat( -w[i].texcoord.y(), 1, 6 ) << "\n";
+				out << "vt " << FloatFormat( w[i].texcoord.x(), 1, 6 ) << ' ' << FloatFormat( -w[i].texcoord.y(), 1, 6 ) << '\n';
 			}
 			while( i != 0 );
 		}
@@ -301,7 +299,7 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 			}
 		}
 
-		out << "\n";
+		out << '\n';
 	}
 
 	if ( expmat ) {
@@ -318,13 +316,13 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 			const std::string& str = material.first;
 			const Colour3& clr = material.second;
 			if ( limNames && str.size() > MAX_MATERIAL_NAME ) {
-				outMtl << "newmtl " << str.substr( str.size() - MAX_MATERIAL_NAME, str.size() ).c_str() << "\n";
+				outMtl << "newmtl " << str.substr( str.size() - MAX_MATERIAL_NAME, str.size() ).c_str() << '\n';
 			}
 			else {
-				outMtl << "newmtl " << str.c_str() << "\n";
+				outMtl << "newmtl " << str.c_str() << '\n';
 			}
-			outMtl << "Kd " << clr.x() << " " << clr.y() << " " << clr.z() << "\n";
-			outMtl << "map_Kd " << str.c_str() << "\n";
+			outMtl << "Kd " << clr.x() << ' ' << clr.y() << ' ' << clr.z() << '\n';
+			outMtl << "map_Kd " << str.c_str() << '\n';
 
 		}
 	}
@@ -388,7 +386,7 @@ bool ExportSelection( const StringSetWithLambda& ignorelist, collapsemode m, boo
 	GlobalSelectionSystem().foreachSelected( vis );
 
 	if( exporter.WriteToFile( path, m ) ){
-		globalOutputStream() << "brushexport::ExportSelection " << path.c_str() << "\n";
+		globalOutputStream() << "brushexport::ExportSelection " << path.c_str() << '\n';
 		return true;
 	}
 

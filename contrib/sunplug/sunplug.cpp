@@ -204,8 +204,8 @@ void MapCoordinator(){
 
 		globalOutputStream() << "SunPlug: calculating optimal coordinates\n"; // write to console that we are calculating the coordinates
 		const auto [ calc_min, calc_max ] = GetOptimalCoordinates(); // calculate optimal mapcoords with the dimensions of the level bounding box
-		globalOutputStream() << "SunPlug: advised mapcoordsmins=" << calc_min.x() << " " << calc_max.y() << "\n"; // console info about mapcoordsmins
-		globalOutputStream() << "SunPlug: advised mapcoordsmaxs=" << calc_max.x() << " " << calc_min.y() << "\n"; // console info about mapcoordsmaxs
+		globalOutputStream() << "SunPlug: advised mapcoordsmins=" << calc_min.x() << ' ' << calc_max.y() << '\n'; // console info about mapcoordsmins
+		globalOutputStream() << "SunPlug: advised mapcoordsmaxs=" << calc_max.x() << ' ' << calc_min.y() << '\n'; // console info about mapcoordsmaxs
 
 		{
 			QDialog dialog( SunPlug::main_window, Qt::Dialog | Qt::WindowCloseButtonHint );
@@ -260,8 +260,8 @@ void MapCoordinator(){
 
 					if( dialog.exec() ){
 						UndoableCommand undo( "SunPlug.entitySetMapcoords" );
-						theWorldspawn->setKeyValue( "mapcoordsmins", ( spin_minX->cleanText() + " " + spin_minY->cleanText() ).toLatin1().constData() );
-						theWorldspawn->setKeyValue( "mapcoordsmaxs", ( spin_maxX->cleanText() + " " + spin_maxY->cleanText() ).toLatin1().constData() );
+						theWorldspawn->setKeyValue( "mapcoordsmins", ( spin_minX->cleanText() + ' ' + spin_minY->cleanText() ).toLatin1().constData() );
+						theWorldspawn->setKeyValue( "mapcoordsmaxs", ( spin_maxX->cleanText() + ' ' + spin_maxY->cleanText() ).toLatin1().constData() );
 					}
 				}
 			}

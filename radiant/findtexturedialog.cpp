@@ -84,9 +84,9 @@ static bool g_bFindActive = true;
 namespace
 {
 void FindTextureDialog_apply(){
-	const auto find = StringOutputStream( 256 )( "textures/", g_FindTextureDialog.m_strFind );
-	const auto replace = StringOutputStream( 256 )( "textures/", PathCleaned( g_FindTextureDialog.m_strReplace.c_str() ) );
-	FindReplaceTextures( find.c_str(), replace.c_str(), g_FindTextureDialog.m_bSelectedOnly );
+	const auto find = StringStream<64>( "textures/", g_FindTextureDialog.m_strFind );
+	const auto replace = StringStream<64>( "textures/", PathCleaned( g_FindTextureDialog.m_strReplace.c_str() ) );
+	FindReplaceTextures( find, replace, g_FindTextureDialog.m_bSelectedOnly );
 }
 
 class FindActiveTracker : public QObject

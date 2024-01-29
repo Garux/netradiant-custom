@@ -356,7 +356,7 @@ static Image* LoadJPGBuff_( const void *src_buffer, int src_size ){
 	jerr.pub.error_exit = my_jpeg_error_exit;
 
 	if ( setjmp( jerr.setjmp_buffer ) ) { //< TODO: use c++ exceptions instead of setjmp/longjmp to handle errors
-		globalWarningStream() << "WARNING: JPEG library error: " << errormsg << "\n";
+		globalWarningStream() << "WARNING: JPEG library error: " << errormsg << '\n';
 		jpeg_destroy_decompress( &cinfo );
 		return 0;
 	}

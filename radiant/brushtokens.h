@@ -148,9 +148,7 @@ inline bool FaceShader_importTokens( FaceShader& faceShader, Tokeniser& tokenise
 	}
 	else
 	{
-		StringOutputStream shader( string_length( GlobalTexturePrefix_get() ) + string_length( texture ) );
-		shader << GlobalTexturePrefix_get() << texture;
-		faceShader.setShader( shader.c_str() );
+		faceShader.setShader( StringStream<64>( GlobalTexturePrefix_get(), texture ) );
 	}
 	return true;
 }

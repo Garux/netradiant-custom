@@ -20,7 +20,7 @@ static std::string s_export_path;
 
 void OnExportClicked( bool choose_path ){
 	if( choose_path ){
-		StringOutputStream buffer( 1024 );
+		StringOutputStream buffer( 256 );
 
 		if( !s_export_path.empty() ){
 			buffer << s_export_path.c_str();
@@ -28,14 +28,13 @@ void OnExportClicked( bool choose_path ){
 		if( buffer.empty() ){
 			buffer << GlobalRadiant().getEnginePath() << GlobalRadiant().getGameName() << "/models/";
 
-			if ( !file_readable( buffer.c_str() ) ) {
+			if ( !file_readable( buffer ) ) {
 				// just go to fsmain
-				buffer.clear();
-				buffer << GlobalRadiant().getEnginePath() << GlobalRadiant().getGameName();
+				buffer( GlobalRadiant().getEnginePath(), GlobalRadiant().getGameName() );
 			}
 		}
 
-		const char* cpath = GlobalRadiant().m_pfnFileDialog( g_dialog.window, false, "Save as Obj", buffer.c_str(), 0, false, false, true );
+		const char* cpath = GlobalRadiant().m_pfnFileDialog( g_dialog.window, false, "Save as Obj", buffer, 0, false, false, true );
 		if ( !cpath ) {
 			return;
 		}
@@ -63,7 +62,7 @@ void OnExportClicked( bool choose_path ){
 	}
 #ifdef _DEBUG
 	for ( const std::string& str : ignore )
-		globalOutputStream() << str.c_str() << "\n";
+		globalOutputStream() << str.c_str() << '\n';
 #endif
 	// collapse mode
 	collapsemode mode = COLLAPSE_NONE;

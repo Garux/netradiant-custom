@@ -169,7 +169,7 @@ void CPointfile::GenerateDisplayList(){
 
 void Pointfile_Delete(){
 	const char* mapname = Map_Name( g_map );
-	file_remove( StringOutputStream( 256 )( PathExtensionless( mapname ), ".lin" ).c_str() );
+	file_remove( StringStream( PathExtensionless( mapname ), ".lin" ) );
 }
 
 
@@ -254,11 +254,11 @@ void Pointfile_Parse( CPointfile& pointfile ){
 
 	size = LoadFile( name( PathExtensionless( mapname ), ".lin" ), (void**)&data );
 	if ( size == -1 ) {
-		globalErrorStream() << "Pointfile " << name.c_str() << " not found\n";
+		globalErrorStream() << "Pointfile " << name << " not found\n";
 		/* try .pts (q1) */
 		size = LoadFile( name( PathExtensionless( mapname ), ".pts" ), (void**)&data );
 		if ( size == -1 ) {
-			globalErrorStream() << "Pointfile " << name.c_str() << " not found\n";
+			globalErrorStream() << "Pointfile " << name << " not found\n";
 			return;
 		}
 	}
@@ -266,7 +266,7 @@ void Pointfile_Parse( CPointfile& pointfile ){
 	// store a pointer
 	text = data;
 
-	globalOutputStream() << "Reading pointfile " << name.c_str() << "\n";
+	globalOutputStream() << "Reading pointfile " << name << '\n';
 
 	pointfile.Init();
 
@@ -274,7 +274,7 @@ void Pointfile_Parse( CPointfile& pointfile ){
 	{
 		Vector3 v;
 		if ( sscanf( data,"%f %f %f", &v[0], &v[1], &v[2] ) != 3 ) {
-			globalWarningStream() << "Corrupt point file, line " << line << "\n";
+			globalWarningStream() << "Corrupt point file, line " << line << '\n';
 			break;
 		}
 
@@ -288,7 +288,7 @@ void Pointfile_Parse( CPointfile& pointfile ){
 		// deal with zhlt style point files.
 		if ( *data == '-' ) {
 			if ( sscanf( data,"- %f %f %f", &v[0], &v[1], &v[2] ) != 3 ) {
-				globalWarningStream() << "Corrupt point file, line " << line << "\n";
+				globalWarningStream() << "Corrupt point file, line " << line << '\n';
 				break;
 			}
 

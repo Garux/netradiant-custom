@@ -47,7 +47,7 @@ public:
 	TypeId getTypeId( const char* name ){
 		TypeName* i = std::find_if( m_typeNames, m_typeNamesEnd, [name]( const char* other ){ return string_equal( name, other ); } );
 		if ( i == m_typeNamesEnd ) {
-			ASSERT_MESSAGE( m_typeNamesEnd != m_typeNames + SIZE, "reached maximum number of type names supported (" << SIZE << ")" );
+			ASSERT_MESSAGE( m_typeNamesEnd != m_typeNames + SIZE, "reached maximum number of type names supported (" << SIZE << ')' );
 			*m_typeNamesEnd++ = name;
 		}
 		return i - m_typeNames;

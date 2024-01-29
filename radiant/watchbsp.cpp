@@ -180,7 +180,7 @@ public:
 			m_string = string;
 	}
 	void ExportWithDefault( const StringImportCallback& importer ) const {
-		importer( m_string.empty()? StringOutputStream( 256 )( m_defaultPrefix, m_getDefault() ) : m_string.c_str() );
+		importer( m_string.empty()? StringStream( m_defaultPrefix, m_getDefault() ) : m_string.c_str() );
 	}
 	void Export( const StringImportCallback& importer ) const {
 		importer( m_string.c_str() );
@@ -330,11 +330,11 @@ static void abortStream( message_info_t *data ){
 
 static void saxStartElement( message_info_t *data, const xmlChar *name, const xmlChar **attrs ){
 #if 0
-	globalOutputStream() << "<" << name;
+	globalOutputStream() << '<' << name;
 	if ( attrs != 0 ) {
 		for ( const xmlChar** p = attrs; *p != 0; p += 2 )
 		{
-			globalOutputStream() << " " << p[0] << "=" << makeQuoted( p[1] );
+			globalOutputStream() << ' ' << p[0] << '=' << makeQuoted( p[1] );
 		}
 	}
 	globalOutputStream() << ">\n";
@@ -417,7 +417,7 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 
 static void saxEndElement( message_info_t *data, const xmlChar *name ){
 #if 0
-	globalOutputStream() << "<" << name << "/>\n";
+	globalOutputStream() << '<' << name << "/>\n";
 #endif
 
 	data->recurse--;
@@ -488,7 +488,7 @@ static void saxCharacters( message_info_t *data, const xmlChar *ch, int len ){
 }
 
 static void saxComment( void *ctx, const xmlChar *msg ){
-	globalOutputStream() << "XML comment: " << reinterpret_cast<const char*>( msg ) << "\n";
+	globalOutputStream() << "XML comment: " << reinterpret_cast<const char*>( msg ) << '\n';
 }
 
 static void saxWarning( void *ctx, const char *msg, ... ){
@@ -498,7 +498,7 @@ static void saxWarning( void *ctx, const char *msg, ... ){
 	va_start( args, msg );
 	vsprintf( saxMsgBuffer, msg, args );
 	va_end( args );
-	globalWarningStream() << "XML warning: " << saxMsgBuffer << "\n";
+	globalWarningStream() << "XML warning: " << saxMsgBuffer << '\n';
 }
 
 static void saxError( void *ctx, const char *msg, ... ){
@@ -508,7 +508,7 @@ static void saxError( void *ctx, const char *msg, ... ){
 	va_start( args, msg );
 	vsprintf( saxMsgBuffer, msg, args );
 	va_end( args );
-	globalErrorStream() << "XML error: " << saxMsgBuffer << "\n";
+	globalErrorStream() << "XML error: " << saxMsgBuffer << '\n';
 }
 
 static void saxFatal( void *ctx, const char *msg, ... ){
@@ -519,7 +519,7 @@ static void saxFatal( void *ctx, const char *msg, ... ){
 	va_start( args, msg );
 	vsprintf( buffer, msg, args );
 	va_end( args );
-	globalErrorStream() << "XML fatal error: " << buffer << "\n";
+	globalErrorStream() << "XML fatal error: " << buffer << '\n';
 }
 
 static xmlSAXHandler saxParser = {
@@ -606,15 +606,13 @@ void CWatchBSP::DoEBeginStep(){
 
 	if ( !m_bBSPPlugin ) {
 		globalOutputStream() << "=== running build command ===\n"
-		                     << m_commands[m_iCurrentStep] << "\n";
+		                     << m_commands[m_iCurrentStep] << '\n';
 
 		if ( !Q_Exec( NULL, const_cast<char*>( m_commands[m_iCurrentStep].c_str() ), NULL, true, false ) ) {
-			StringOutputStream msg( 256 );
-			msg << "Failed to execute the following command: ";
-			msg << m_commands[m_iCurrentStep];
-			msg << "\nCheck that the file exists and that you don't run out of system resources.\n";
-			globalOutputStream() << msg.c_str();
-			qt_MessageBox( MainFrame_getWindow(), msg.c_str(), "Build monitoring", EMessageBoxType::Error );
+			const auto msg = StringStream( "Failed to execute the following command: ", m_commands[m_iCurrentStep],
+			                               "\nCheck that the file exists and that you don't run out of system resources.\n" );
+			globalOutputStream() << msg;
+			qt_MessageBox( MainFrame_getWindow(), msg, "Build monitoring", EMessageBoxType::Error );
 			return;
 		}
 		// re-initialise the debug window
@@ -728,8 +726,8 @@ void CWatchBSP::RoutineProcessing(){
 						// launch the engine .. OMG
 						if ( g_WatchBSP_RunQuake ) {
 							globalOutputStream() << "Running engine...\n";
-							auto cmd = StringOutputStream( 256 )( EnginePath_get() );
-							StringOutputStream cmdline;
+							auto cmd = StringStream( EnginePath_get() );
+							auto cmdline = StringOutputStream( 256 );
 
 							const auto buildArgs = [&]( const char *str ){
 								const char *map = strstr( str, "%mapname%" );
@@ -750,14 +748,13 @@ void CWatchBSP::RoutineProcessing(){
 								buildArgs( g_engineArgs.string().c_str() );
 							}
 
-							globalOutputStream() << cmd.c_str() << " " << cmdline.c_str() << "\n";
+							globalOutputStream() << cmd << ' ' << cmdline << '\n';
 
 							// execute now
-							if ( !Q_Exec( cmd.c_str(), cmdline.c_str(), EnginePath_get(), false, false ) ) {
-								StringOutputStream msg;
-								msg << "Failed to execute the following command: " << cmd.c_str() << cmdline.c_str();
-								globalOutputStream() << msg.c_str();
-								qt_MessageBox( MainFrame_getWindow(),  msg.c_str(), "Build monitoring", EMessageBoxType::Error );
+							if ( !Q_Exec( cmd, cmdline.c_str(), EnginePath_get(), false, false ) ) {
+								const auto msg = StringStream( "Failed to execute the following command: ", cmd, cmdline );
+								globalOutputStream() << msg;
+								qt_MessageBox( MainFrame_getWindow(), msg, "Build monitoring", EMessageBoxType::Error );
 							}
 						}
 						EndMonitoringLoop();

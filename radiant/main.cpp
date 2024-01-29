@@ -202,17 +202,17 @@ public:
 		LineLimitedTextOutputStream outputStream( getOutputStream(), 24 );
 		write_stack_trace( outputStream );
 		getOutputStream() << "----------------\n";
-		globalErrorStream() << m_buffer.c_str();
+		globalErrorStream() << m_buffer;
 		if ( !m_lock.locked() ) {
 			ScopedLock lock( m_lock );
 #if defined _DEBUG
 			m_buffer << "Break into the debugger?\n";
-			bool handled = qt_MessageBox( 0, m_buffer.c_str(), "Radiant - Runtime Error", EMessageBoxType::Error, eIDYES | eIDNO ) == eIDNO;
+			bool handled = qt_MessageBox( 0, m_buffer, "Radiant - Runtime Error", EMessageBoxType::Error, eIDYES | eIDNO ) == eIDNO;
 			m_buffer.clear();
 			return handled;
 #else
 			m_buffer << "Please report this error to the developers\n";
-			qt_MessageBox( 0, m_buffer.c_str(), "Radiant - Runtime Error", EMessageBoxType::Error );
+			qt_MessageBox( 0, m_buffer, "Radiant - Runtime Error", EMessageBoxType::Error );
 			m_buffer.clear();
 #endif
 		}
@@ -236,11 +236,7 @@ void paths_init(){
 
 	Q_mkdir( home );
 
-	{
-		StringOutputStream path( 256 );
-		path << home << "1." << RADIANT_MAJOR_VERSION "." << RADIANT_MINOR_VERSION << '/';
-		g_strSettingsPath = path.c_str();
-	}
+	g_strSettingsPath = StringStream( home, "1." RADIANT_MAJOR_VERSION "." RADIANT_MINOR_VERSION "/" );
 
 	Q_mkdir( g_strSettingsPath.c_str() );
 
@@ -253,11 +249,7 @@ void paths_init(){
 	// NOTE: this is not very easy for debugging
 	// maybe add options to lookup in several places?
 	// (for now I had to create symlinks)
-	{
-		StringOutputStream path( 256 );
-		path << g_strAppPath << "bitmaps/";
-		BitmapsPath_set( path.c_str() );
-	}
+	BitmapsPath_set( StringStream( g_strAppPath, "bitmaps/" ) );
 
 	// we will set this right after the game selection is done
 	g_strGameToolsPath = g_strAppPath;
@@ -293,22 +285,17 @@ bool check_version(){
 	// locate and open RADIANT_MAJOR and RADIANT_MINOR
 	bool bVerIsGood = true;
 	{
-		StringOutputStream ver_file_name( 256 );
-		ver_file_name << AppPath_get() << "RADIANT_MAJOR";
-		bVerIsGood = check_version_file( ver_file_name.c_str(), RADIANT_MAJOR_VERSION );
+		bVerIsGood = check_version_file( StringStream( AppPath_get(), "RADIANT_MAJOR" ), RADIANT_MAJOR_VERSION );
 	}
 	{
-		StringOutputStream ver_file_name( 256 );
-		ver_file_name << AppPath_get() << "RADIANT_MINOR";
-		bVerIsGood = check_version_file( ver_file_name.c_str(), RADIANT_MINOR_VERSION );
+		bVerIsGood = check_version_file( StringStream( AppPath_get(), "RADIANT_MINOR" ), RADIANT_MINOR_VERSION );
 	}
 
 	if ( !bVerIsGood ) {
-		StringOutputStream msg( 256 );
-		msg << "This editor binary (" RADIANT_VERSION ") doesn't match what the latest setup has configured in this directory\n"
-		       "Make sure you run the right/latest editor binary you installed\n"
-		    << AppPath_get();
-		qt_MessageBox( 0, msg.c_str(), "Radiant" );
+		const auto msg = StringStream(
+			"This editor binary (" RADIANT_VERSION ") doesn't match what the latest setup has configured in this directory\n"
+			"Make sure you run the right/latest editor binary you installed\n", AppPath_get() );
+		qt_MessageBox( 0, msg, "Radiant" );
 	}
 	return bVerIsGood;
 #else
@@ -324,36 +311,30 @@ void create_global_pid(){
 	   this is the first part of the two step .pid system
 	   http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=297
 	 */
-	StringOutputStream g_pidFile( 256 ); ///< the global .pid file (only for global part of the startup)
-
-	g_pidFile << SettingsPath_get() << "radiant.pid";
+	const auto g_pidFile = StringStream( SettingsPath_get(), "radiant.pid" ); ///< the global .pid file (only for global part of the startup)
 
 	FILE *pid;
-	pid = fopen( g_pidFile.c_str(), "r" );
+	pid = fopen( g_pidFile, "r" );
 	if ( pid != 0 ) {
 		fclose( pid );
 
-		if ( remove( g_pidFile.c_str() ) == -1 ) {
-			StringOutputStream msg( 256 );
-			msg << "WARNING: Could not delete " << g_pidFile.c_str();
-			qt_MessageBox( 0, msg.c_str(), "Radiant", EMessageBoxType::Error );
+		if ( remove( g_pidFile ) == -1 ) {
+			qt_MessageBox( 0, StringStream( "WARNING: Could not delete ", g_pidFile ), "Radiant", EMessageBoxType::Error );
 		}
 
 		// in debug, never prompt to clean registry, turn console logging auto after a failed start
 #if !defined( _DEBUG )
-		StringOutputStream msg( 256 );
-		msg << "Radiant failed to start properly the last time it was run.\n"
-		       "The failure may be related to current global preferences.\n"
-		       "Do you want to reset global preferences to defaults?";
+		const char msg[] = "Radiant failed to start properly the last time it was run.\n"
+		                   "The failure may be related to current global preferences.\n"
+		                   "Do you want to reset global preferences to defaults?";
 
-		if ( qt_MessageBox( 0, msg.c_str(), "Radiant - Startup Failure", EMessageBoxType::Question ) == eIDYES ) {
+		if ( qt_MessageBox( 0, msg, "Radiant - Startup Failure", EMessageBoxType::Question ) == eIDYES ) {
 			g_GamesDialog.Reset();
 		}
 
-		msg.clear();
-		msg << "Logging console output to " << SettingsPath_get() << "radiant.log\nRefer to the log if Radiant fails to start again.";
-
-		qt_MessageBox( 0, msg.c_str(), "Radiant - Console Log" );
+		const auto msg2 = StringStream( "Logging console output to ", SettingsPath_get(),
+		                                "radiant.log\nRefer to the log if Radiant fails to start again." );
+		qt_MessageBox( 0, msg2, "Radiant - Console Log" );
 #endif
 
 		// set without saving, the class is not in a coherent state yet
@@ -363,21 +344,17 @@ void create_global_pid(){
 	}
 
 	// create a primary .pid for global init run
-	pid = fopen( g_pidFile.c_str(), "w" );
+	pid = fopen( g_pidFile, "w" );
 	if ( pid ) {
 		fclose( pid );
 	}
 }
 
 void remove_global_pid(){
-	StringOutputStream g_pidFile( 256 );
-	g_pidFile << SettingsPath_get() << "radiant.pid";
-
+	const auto g_pidFile = StringStream( SettingsPath_get(), "radiant.pid" );
 	// close the primary
-	if ( remove( g_pidFile.c_str() ) == -1 ) {
-		StringOutputStream msg( 256 );
-		msg << "WARNING: Could not delete " << g_pidFile.c_str();
-		qt_MessageBox( 0, msg.c_str(), "Radiant", EMessageBoxType::Error );
+	if ( remove( g_pidFile ) == -1 ) {
+		qt_MessageBox( 0, StringStream( "WARNING: Could not delete ", g_pidFile ), "Radiant", EMessageBoxType::Error );
 	}
 }
 
@@ -386,33 +363,28 @@ void remove_global_pid(){
    http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=297
  */
 void create_local_pid(){
-	StringOutputStream g_pidGameFile( 256 ); ///< the game-specific .pid file
-	g_pidGameFile << SettingsPath_get() << g_pGameDescription->mGameFile << "/radiant-game.pid";
+	const auto g_pidGameFile = StringStream( SettingsPath_get(), g_pGameDescription->mGameFile, "/radiant-game.pid" ); ///< the game-specific .pid file
 
-	FILE *pid = fopen( g_pidGameFile.c_str(), "r" );
+	FILE *pid = fopen( g_pidGameFile, "r" );
 	if ( pid != 0 ) {
 		fclose( pid );
-		if ( remove( g_pidGameFile.c_str() ) == -1 ) {
-			StringOutputStream msg;
-			msg << "WARNING: Could not delete " << g_pidGameFile.c_str();
-			qt_MessageBox( 0, msg.c_str(), "Radiant", EMessageBoxType::Error );
+		if ( remove( g_pidGameFile ) == -1 ) {
+			qt_MessageBox( 0, StringStream( "WARNING: Could not delete ", g_pidGameFile ), "Radiant", EMessageBoxType::Error );
 		}
 
 		// in debug, never prompt to clean registry, turn console logging auto after a failed start
 #if !defined( _DEBUG )
-		StringOutputStream msg;
-		msg << "Radiant failed to start properly the last time it was run.\n"
-		       "The failure may be caused by current preferences.\n"
-		       "Do you want to reset all preferences to defaults?";
+		const char msg[] = "Radiant failed to start properly the last time it was run.\n"
+		                   "The failure may be caused by current preferences.\n"
+		                   "Do you want to reset all preferences to defaults?";
 
-		if ( qt_MessageBox( 0, msg.c_str(), "Radiant - Startup Failure", EMessageBoxType::Question ) == eIDYES ) {
+		if ( qt_MessageBox( 0, msg, "Radiant - Startup Failure", EMessageBoxType::Question ) == eIDYES ) {
 			Preferences_Reset();
 		}
 
-		msg.clear();
-		msg << "Logging console output to " << SettingsPath_get() << "radiant.log\nRefer to the log if Radiant fails to start again.";
-
-		qt_MessageBox( 0, msg.c_str(), "Radiant - Console Log" );
+		const auto msg2 = StringStream( "Logging console output to ", SettingsPath_get(),
+		                                "radiant.log\nRefer to the log if Radiant fails to start again." );
+		qt_MessageBox( 0, msg2, "Radiant - Console Log" );
 #endif
 
 		// force console logging on! (will go in prefs too)
@@ -422,7 +394,7 @@ void create_local_pid(){
 	else
 	{
 		// create one, will remove right after entering message loop
-		pid = fopen( g_pidGameFile.c_str(), "w" );
+		pid = fopen( g_pidGameFile, "w" );
 		if ( pid ) {
 			fclose( pid );
 		}
@@ -435,9 +407,7 @@ void create_local_pid(){
    http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=297
  */
 void remove_local_pid(){
-	StringOutputStream g_pidGameFile( 256 );
-	g_pidGameFile << SettingsPath_get() << g_pGameDescription->mGameFile << "/radiant-game.pid";
-	remove( g_pidGameFile.c_str() );
+	remove( StringStream( SettingsPath_get(), g_pGameDescription->mGameFile, "/radiant-game.pid" ) );
 }
 
 

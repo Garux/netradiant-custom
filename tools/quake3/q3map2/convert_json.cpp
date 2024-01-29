@@ -178,9 +178,9 @@ static void write_json( const char *directory ){
 				}
 				value.AddMember( "contentFlags", fvalue, all );
 			}
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "shader#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "shader#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "shaders.json" ), doc );
+		write_doc( StringStream( directory, "shaders.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
@@ -196,9 +196,9 @@ static void write_json( const char *directory ){
 			value.AddMember( "numBSPSurfaces", model.numBSPSurfaces, all );
 			value.AddMember( "firstBSPBrush", model.firstBSPBrush, all );
 			value.AddMember( "numBSPBrushes", model.numBSPBrushes, all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "model#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "model#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "models.json" ), doc );
+		write_doc( StringStream( directory, "models.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
@@ -208,9 +208,9 @@ static void write_json( const char *directory ){
 			value.PushBack( plane.b, all );
 			value.PushBack( plane.c, all );
 			value.PushBack( plane.d, all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "plane#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "plane#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "planes.json" ), doc );
+		write_doc( StringStream( directory, "planes.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
@@ -228,9 +228,9 @@ static void write_json( const char *directory ){
 			value.AddMember( "numBSPLeafSurfaces", leaf.numBSPLeafSurfaces, all );
 			value.AddMember( "firstBSPLeafBrush", leaf.firstBSPLeafBrush, all );
 			value.AddMember( "numBSPLeafBrushes", leaf.numBSPLeafBrushes, all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "leaf#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "leaf#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "leafs.json" ), doc );
+		write_doc( StringStream( directory, "leafs.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
@@ -244,27 +244,27 @@ static void write_json( const char *directory ){
 				minmax.AddMember( "maxs", value_for( node.minmax.maxs, all ), all );
 				value.AddMember( "minmax", minmax, all );
 			}
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "node#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "node#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "nodes.json" ), doc );
+		write_doc( StringStream( directory, "nodes.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
 		for_indexed( const auto& ls : bspLeafSurfaces ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "Num", ls, all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "LeafSurface#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "LeafSurface#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "LeafSurfaces.json" ), doc );
+		write_doc( StringStream( directory, "LeafSurfaces.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
 		for_indexed( const auto& lb : bspLeafBrushes ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "Num", lb, all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "LeafBrush#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "LeafBrush#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "LeafBrushes.json" ), doc );
+		write_doc( StringStream( directory, "LeafBrushes.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
@@ -273,9 +273,9 @@ static void write_json( const char *directory ){
 			value.AddMember( "firstSide", brush.firstSide, all );
 			value.AddMember( "numSides", brush.numSides, all );
 			value.AddMember( "shaderNum", brush.shaderNum, all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "Brush#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "Brush#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "Brushes.json" ), doc );
+		write_doc( StringStream( directory, "Brushes.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
@@ -284,9 +284,9 @@ static void write_json( const char *directory ){
 			value.AddMember( "planeNum", side.planeNum, all );
 			value.AddMember( "shaderNum", side.shaderNum, all );
 			value.AddMember( "surfaceNum", side.surfaceNum, all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "BrushSide#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "BrushSide#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "BrushSides.json" ), doc );
+		write_doc( StringStream( directory, "BrushSides.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
@@ -297,9 +297,9 @@ static void write_json( const char *directory ){
 			value.AddMember( "lightmap", value_for( vert.lightmap, all ), all );
 			value.AddMember( "normal", value_for( vert.normal, all ), all );
 			value.AddMember( "color", value_for( vert.color, all ), all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "DrawVert#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "DrawVert#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "DrawVert.json" ), doc );
+		write_doc( StringStream( directory, "DrawVert.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
@@ -323,9 +323,9 @@ static void write_json( const char *directory ){
 			value.AddMember( "lightmapVecs", value_for( surf.lightmapVecs, all ), all );
 			value.AddMember( "patchWidth", surf.patchWidth, all );
 			value.AddMember( "patchHeight", surf.patchHeight, all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "DrawSurface#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "DrawSurface#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "DrawSurfaces.json" ), doc );
+		write_doc( StringStream( directory, "DrawSurfaces.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
@@ -334,36 +334,36 @@ static void write_json( const char *directory ){
 			value.AddMember( "shader", rapidjson::StringRef( fog.shader ), all );
 			value.AddMember( "brushNum", fog.brushNum, all );
 			value.AddMember( "visibleSide", fog.visibleSide, all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "fog#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "fog#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "fogs.json" ), doc );
+		write_doc( StringStream( directory, "fogs.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
 		for_indexed( const auto& index : bspDrawIndexes ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "Num", index, all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "DrawIndex#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "DrawIndex#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "DrawIndexes.json" ), doc );
+		write_doc( StringStream( directory, "DrawIndexes.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
 		for_indexed( const auto& index : bspVisBytes ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "Num", index, all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "VisByte#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "VisByte#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "VisBytes.json" ), doc );
+		write_doc( StringStream( directory, "VisBytes.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
 		for_indexed( const auto& index : bspLightBytes ){
 			rapidjson::Value value( rapidjson::kObjectType );
 			value.AddMember( "Num", index, all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "LightByte#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "LightByte#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "LightBytes.json" ), doc );
+		write_doc( StringStream( directory, "LightBytes.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
@@ -375,9 +375,9 @@ static void write_json( const char *directory ){
 				array.PushBack( rapidjson::StringRef( kv.value.c_str() ), all );
 				value.AddMember( "KeyValue", array, all );
 			}
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "entity#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "entity#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "entities.json" ), doc );
+		write_doc( StringStream( directory, "entities.json" ), doc );
 	}
 	{
 		doc.RemoveAllMembers();
@@ -387,9 +387,9 @@ static void write_json( const char *directory ){
 			value.AddMember( "directed", value_for( point.directed, all ), all );
 			value.AddMember( "styles", value_for_array( point.styles, all ), all );
 			value.AddMember( "latLong", value_for_array( point.latLong, all ), all );
-			doc.AddMember( rapidjson::Value( StringOutputStream( 16 )( "GridPoint#", i ).c_str(), all ), value, all );
+			doc.AddMember( rapidjson::Value( StringStream<16>( "GridPoint#", i ).c_str(), all ), value, all );
 		}
-		write_doc( StringOutputStream( 256 )( directory, "GridPoints.json" ), doc );
+		write_doc( StringStream( directory, "GridPoints.json" ), doc );
 	}
 }
 
@@ -403,7 +403,7 @@ inline rapidjson::Document load_json( const char *fileName ){
 
 static void read_json( const char *directory, bool useFlagNames, bool skipUnknownFlags ){
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "shaders.json" ) );
+		const auto doc = load_json( StringStream( directory, "shaders.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspShaders.emplace_back();
 			strcpy( item.shader, obj.value["shader"].GetString() );
@@ -450,7 +450,7 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "models.json" ) );
+		const auto doc = load_json( StringStream( directory, "models.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspModels.emplace_back();
 			value_to( obj.value["minmax"].GetObj().operator[]("mins"), item.minmax.mins );
@@ -462,7 +462,7 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "planes.json" ) );
+		const auto doc = load_json( StringStream( directory, "planes.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspPlanes.emplace_back();
 			item.a = obj.value[0].GetFloat();
@@ -472,7 +472,7 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "leafs.json" ) );
+		const auto doc = load_json( StringStream( directory, "leafs.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspLeafs.emplace_back();
 			item.cluster = obj.value["cluster"].GetInt();
@@ -486,7 +486,7 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "nodes.json" ) );
+		const auto doc = load_json( StringStream( directory, "nodes.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspNodes.emplace_back();
 			item.planeNum = obj.value["planeNum"].GetInt();
@@ -497,21 +497,21 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "LeafSurfaces.json" ) );
+		const auto doc = load_json( StringStream( directory, "LeafSurfaces.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspLeafSurfaces.emplace_back();
 			item = obj.value["Num"].GetInt();
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "LeafBrushes.json" ) );
+		const auto doc = load_json( StringStream( directory, "LeafBrushes.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspLeafBrushes.emplace_back();
 			item = obj.value["Num"].GetInt();
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "Brushes.json" ) );
+		const auto doc = load_json( StringStream( directory, "Brushes.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspBrushes.emplace_back();
 			item.firstSide = obj.value["firstSide"].GetInt();
@@ -520,7 +520,7 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "BrushSides.json" ) );
+		const auto doc = load_json( StringStream( directory, "BrushSides.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspBrushSides.emplace_back();
 			item.planeNum = obj.value["planeNum"].GetInt();
@@ -529,7 +529,7 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "DrawVert.json" ) );
+		const auto doc = load_json( StringStream( directory, "DrawVert.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspDrawVerts.emplace_back();
 			value_to( obj.value["xyz"], item.xyz );
@@ -540,7 +540,7 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "DrawSurfaces.json" ) );
+		const auto doc = load_json( StringStream( directory, "DrawSurfaces.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspDrawSurfaces.emplace_back();
 			item.shaderNum = obj.value["shaderNum"].GetInt();
@@ -564,7 +564,7 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "fogs.json" ) );
+		const auto doc = load_json( StringStream( directory, "fogs.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspFogs.emplace_back();
 			strcpy( item.shader, obj.value["shader"].GetString() );
@@ -573,28 +573,28 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "DrawIndexes.json" ) );
+		const auto doc = load_json( StringStream( directory, "DrawIndexes.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspDrawIndexes.emplace_back();
 			item = obj.value["Num"].GetInt();
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "VisBytes.json" ) );
+		const auto doc = load_json( StringStream( directory, "VisBytes.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspVisBytes.emplace_back();
 			item = obj.value["Num"].GetInt();
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "LightBytes.json" ) );
+		const auto doc = load_json( StringStream( directory, "LightBytes.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspLightBytes.emplace_back();
 			item = obj.value["Num"].GetInt();
 		}
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "entities.json" ) );
+		const auto doc = load_json( StringStream( directory, "entities.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& entity = entities.emplace_back();
 			for( auto&& kvobj : obj.value.GetObj() ){
@@ -606,7 +606,7 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 		numBSPEntities = entities.size();
 	}
 	{
-		const auto doc = load_json( StringOutputStream( 256 )( directory, "GridPoints.json" ) );
+		const auto doc = load_json( StringStream( directory, "GridPoints.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspGridPoints.emplace_back();
 			value_to( obj.value["ambient"], item.ambient );
@@ -654,11 +654,11 @@ int ConvertJsonMain( Args& args ){
 		Sys_Printf( "Loading %s\n", source );
 		LoadBSPFile( source );
 		ParseEntities();
-		write_json( StringOutputStream( 256 )( PathExtensionless( source ), '/' ) );
+		write_json( StringStream( PathExtensionless( source ), '/' ) );
 	}
 	else{
 		/* write bsp */
-		read_json( StringOutputStream( 256 )( PathExtensionless( source ), '/' ), useFlagNames, skipUnknownFlags );
+		read_json( StringStream( PathExtensionless( source ), '/' ), useFlagNames, skipUnknownFlags );
 		UnparseEntities();
 		path_set_extension( source, "_json.bsp" );
 		Sys_Printf( "Writing %s\n", source );

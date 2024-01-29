@@ -124,7 +124,7 @@ bool EntityClassDoom3_parseUnknown( Tokeniser& tokeniser ){
 	//const char* name =
 	PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser ) );
 
-	//globalOutputStream() << "parsing unknown block " << makeQuoted(name) << "\n";
+	//globalOutputStream() << "parsing unknown block " << makeQuoted(name) << '\n';
 
 	PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser, "{" ) );
 	tokeniser.nextLine();
@@ -173,7 +173,7 @@ void Model_resolveInheritance( const char* name, Model& model ){
 		if ( !model.m_parent.empty() ) {
 			Models::iterator i = g_models.find( model.m_parent );
 			if ( i == g_models.end() ) {
-				globalErrorStream() << "model " << name << " inherits unknown model " << model.m_parent << "\n";
+				globalErrorStream() << "model " << name << " inherits unknown model " << model.m_parent << '\n';
 			}
 			else
 			{
@@ -276,7 +276,7 @@ bool EntityClassDoom3_parseModel( Tokeniser& tokeniser ){
 		}
 		else
 		{
-			globalErrorStream() << "unknown model parameter: " << makeQuoted( parameter ) << "\n";
+			globalErrorStream() << "unknown model parameter: " << makeQuoted( parameter ) << '\n';
 			return false;
 		}
 		tokeniser.nextLine();
@@ -339,13 +339,13 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 
 		if ( currentString != 0 && string_equal( key, "\\" ) ) {
 			tokeniser.nextLine();
-			*currentString << " ";
+			*currentString << ' ';
 			PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseString( tokeniser, *currentString ) );
 			continue;
 		}
 
 		if ( currentDescription != 0 ) {
-			*currentDescription = description.c_str();
+			*currentDescription = description;
 			description.clear();
 			currentDescription = 0;
 		}
@@ -359,7 +359,7 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 			const char* token;
 			PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseString( tokeniser, token ) );
 			entityClass.fixedsize = true;
-			entityClass.m_modelpath = StringOutputStream( 256 )( PathCleaned( token ) ).c_str();
+			entityClass.m_modelpath = StringStream<64>( PathCleaned( token ) );
 		}
 		else if ( string_equal( key, "editor_color" ) ) {
 			const char* value;
@@ -523,7 +523,7 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 		tokeniser.nextLine();
 	}
 
-	entityClass.m_comments = usage.c_str();
+	entityClass.m_comments = usage;
 
 	if ( string_equal( entityClass.name(), "light" ) ) {
 		{
@@ -604,7 +604,7 @@ bool EntityClassDoom3_parse( TextInputStream& inputStream, const char* filename 
 		}
 		CopiedString tmp( blockType );
 		if ( !EntityClassDoom3_parseBlock( tokeniser, tmp.c_str() ) ) {
-			globalErrorStream() << GlobalFileSystem().findFile( filename ) << filename << ":" << (unsigned int)tokeniser.getLine() << ": " << tmp << " parse failed, skipping rest of file\n";
+			globalErrorStream() << GlobalFileSystem().findFile( filename ) << filename << ':' << (unsigned int)tokeniser.getLine() << ": " << tmp << " parse failed, skipping rest of file\n";
 			return false;
 		}
 	}
@@ -614,14 +614,13 @@ bool EntityClassDoom3_parse( TextInputStream& inputStream, const char* filename 
 
 
 void EntityClassDoom3_loadFile( const char* filename ){
-	globalOutputStream() << "parsing entity classes from " << makeQuoted( filename ) << "\n";
+	globalOutputStream() << "parsing entity classes from " << makeQuoted( filename ) << '\n';
 
-	StringOutputStream fullname( 256 );
-	fullname << "def/" << filename;
+	const auto fullname = StringStream( "def/", filename );
 
-	ArchiveTextFile* file = GlobalFileSystem().openTextFile( fullname.c_str() );
+	ArchiveTextFile* file = GlobalFileSystem().openTextFile( fullname );
 	if ( file != 0 ) {
-		EntityClassDoom3_parse( file->getInputStream(), fullname.c_str() );
+		EntityClassDoom3_parse( file->getInputStream(), fullname );
 		file->release();
 	}
 }
@@ -656,7 +655,7 @@ void EntityClass_resolveInheritance( EntityClass* derivedClass ){
 		derivedClass->inheritanceResolved = true;
 		EntityClasses::iterator i = g_EntityClassDoom3_classes.find( derivedClass->m_parent.front().c_str() );
 		if ( i == g_EntityClassDoom3_classes.end() ) {
-			globalErrorStream() << "failed to find entityDef " << makeQuoted( derivedClass->m_parent.front() ) << " inherited by "  << makeQuoted( derivedClass->name() ) << "\n";
+			globalErrorStream() << "failed to find entityDef " << makeQuoted( derivedClass->m_parent.front() ) << " inherited by "  << makeQuoted( derivedClass->name() ) << '\n';
 		}
 		else
 		{
@@ -717,7 +716,7 @@ public:
 					usage << "-------- NOTES --------\n";
 
 					if ( !( *i ).second->m_comments.empty() ) {
-						usage << ( *i ).second->m_comments << "\n";
+						usage << ( *i ).second->m_comments << '\n';
 					}
 
 					usage << "\n-------- KEYS --------\n";
@@ -727,11 +726,11 @@ public:
 						const char* name = EntityClassAttributePair_getName( *j );
 						const char* description = EntityClassAttributePair_getDescription( *j );
 						if ( !string_equal( name, description ) ) {
-							usage << EntityClassAttributePair_getName( *j ) << " : " << EntityClassAttributePair_getDescription( *j ) << "\n";
+							usage << EntityClassAttributePair_getName( *j ) << " : " << EntityClassAttributePair_getDescription( *j ) << '\n';
 						}
 					}
 
-					( *i ).second->m_comments = usage.c_str();
+					( *i ).second->m_comments = usage;
 				}
 			}
 

@@ -53,23 +53,23 @@ void PicoPrintFunc( int level, const char *str ){
 	switch ( level )
 	{
 	case PICO_NORMAL:
-		globalOutputStream() << str << "\n";
+		globalOutputStream() << str << '\n';
 		break;
 
 	case PICO_VERBOSE:
-		//globalOutputStream() << "PICO_VERBOSE: " << str << "\n";
+		//globalOutputStream() << "PICO_VERBOSE: " << str << '\n';
 		break;
 
 	case PICO_WARNING:
-		globalWarningStream() << "PICO_WARNING: " << str << "\n";
+		globalWarningStream() << "PICO_WARNING: " << str << '\n';
 		break;
 
 	case PICO_ERROR:
-		globalErrorStream() << "PICO_ERROR: " << str << "\n";
+		globalErrorStream() << "PICO_ERROR: " << str << '\n';
 		break;
 
 	case PICO_FATAL:
-		globalErrorStream() << "PICO_FATAL: " << str << "\n";
+		globalErrorStream() << "PICO_FATAL: " << str << '\n';
 		break;
 	}
 }
@@ -122,9 +122,8 @@ public:
 
 	ModelPicoAPI( const char* extension, const picoModule_t* module ) :
 		m_modelLoader( module ){
-		StringOutputStream filter( 128 );
-		filter << "*." << extension;
-		GlobalFiletypesModule::getTable().addType( Type::Name, extension, filetype_t( module->displayName, filter.c_str() ) );
+		const auto filter = StringStream<16>( "*.", extension );
+		GlobalFiletypesModule::getTable().addType( Type::Name, extension, filetype_t( module->displayName, filter ) );
 	}
 	ModelLoader* getTable(){
 		return &m_modelLoader;

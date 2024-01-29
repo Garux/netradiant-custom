@@ -103,9 +103,8 @@ const char* SelectedEntity_getValueForKey( const char* key ){
 }
 
 void Scene_EntitySetKeyValue_Selected_Undoable( const char* key, const char* value ){
-	StringOutputStream command( 256 );
-	command << "entitySetKeyValue -key " << makeQuoted( key ) << " -value " << makeQuoted( value );
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream( "entitySetKeyValue -key ", makeQuoted( key ), " -value ", makeQuoted( value ) );
+	UndoableCommand undo( command );
 	Scene_EntitySetKeyValue_Selected( key, value );
 }
 
@@ -274,7 +273,7 @@ public:
 };
 
 const char* browse_sound( QWidget* parent, const char* filepath ){
-	StringOutputStream buffer( 1024 );
+	StringOutputStream buffer( 256 );
 
 	if( !string_empty( filepath ) ){
 		const char* root = GlobalFileSystem().findFile( filepath );
@@ -284,14 +283,13 @@ const char* browse_sound( QWidget* parent, const char* filepath ){
 	if( buffer.empty() ){
 		buffer << g_qeglobals.m_userGamePath << "sound/";
 
-		if ( !file_readable( buffer.c_str() ) ) {
+		if ( !file_readable( buffer ) ) {
 			// just go to fsmain
-			buffer.clear();
-			buffer << g_qeglobals.m_userGamePath;
+			buffer( g_qeglobals.m_userGamePath );
 		}
 	}
 
-	const char* filename = file_dialog( parent, true, "Open Sound File", buffer.c_str(), "sound" );
+	const char* filename = file_dialog( parent, true, "Open Sound File", buffer, "sound" );
 	if ( filename != 0 ) {
 		const char* relative = path_make_relative( filename, GlobalFileSystem().findRoot( filename ) );
 		if ( relative == filename ) {
@@ -387,17 +385,15 @@ public:
 		return m_hbox;
 	}
 	void apply(){
-		StringOutputStream angle( 32 );
-		angle << angle_normalised( entry_get_float( m_entry ) );
-		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angle.c_str() );
+		const auto angle = StringStream<32>( angle_normalised( entry_get_float( m_entry ) ) );
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angle );
 	}
 	typedef MemberCaller<AngleAttribute, &AngleAttribute::apply> ApplyCaller;
 
 	void update() override {
 		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
 		if ( !string_empty( value ) ) {
-			StringOutputStream angle( 32 );
-			angle << angle_normalised( atof( value ) );
+			const auto angle = StringStream<32>( angle_normalised( atof( value ) ) );
 			m_entry->setText( angle.c_str() );
 		}
 		else
@@ -441,9 +437,8 @@ public:
 		return m_hbox;
 	}
 	void apply(){
-		StringOutputStream angle( 32 );
-		angle << angle_normalised( entry_get_float( m_entry ) );
-		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angle.c_str() );
+		const auto angle = StringStream<32>( angle_normalised( entry_get_float( m_entry ) ) );
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angle );
 	}
 	typedef MemberCaller<DirectionAttribute, &DirectionAttribute::apply> ApplyCaller;
 
@@ -465,8 +460,7 @@ public:
 			{
 				m_entry->setEnabled( true );
 				m_radio.m_radio->button( 2 )->setChecked( true );
-				StringOutputStream angle( 32 );
-				angle << angle_normalised( f );
+				const auto angle = StringStream<32>( angle_normalised( f ) );
 				m_entry->setText( angle.c_str() );
 			}
 		}
@@ -532,22 +526,21 @@ public:
 		return m_hbox;
 	}
 	void apply(){
-		StringOutputStream angles( 64 );
-		angles << angle_normalised( entry_get_float( m_angles.m_pitch ) )
-		       << " " << angle_normalised( entry_get_float( m_angles.m_yaw ) )
-		       << " " << angle_normalised( entry_get_float( m_angles.m_roll ) );
-		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angles.c_str() );
+		const auto angles = StringStream<64>( angle_normalised( entry_get_float( m_angles.m_pitch ) ),
+		                                 ' ', angle_normalised( entry_get_float( m_angles.m_yaw ) ),
+		                                 ' ', angle_normalised( entry_get_float( m_angles.m_roll ) ) );
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angles );
 	}
 	typedef MemberCaller<AnglesAttribute, &AnglesAttribute::apply> ApplyCaller;
 
 	void update() override {
-		StringOutputStream angle( 32 );
 		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
 		if ( !string_empty( value ) ) {
 			DoubleVector3 pitch_yaw_roll;
 			if ( !string_parse_vector3( value, pitch_yaw_roll ) ) {
 				pitch_yaw_roll = DoubleVector3( 0, 0, 0 );
 			}
+			StringOutputStream angle( 32 );
 
 			angle( angle_normalised( pitch_yaw_roll.x() ) );
 			m_angles.m_pitch->setText( angle.c_str() );
@@ -606,22 +599,21 @@ public:
 		return m_hbox;
 	}
 	void apply(){
-		StringOutputStream vector3( 64 );
-		vector3 << entry_get_float( m_vector3.m_x )
-		        << " " << entry_get_float( m_vector3.m_y )
-		        << " " << entry_get_float( m_vector3.m_z );
-		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), vector3.c_str() );
+		const auto vector3 = StringStream<64>( entry_get_float( m_vector3.m_x ),
+		                                  ' ', entry_get_float( m_vector3.m_y ),
+		                                  ' ', entry_get_float( m_vector3.m_z ) );
+		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), vector3 );
 	}
 	typedef MemberCaller<Vector3Attribute, &Vector3Attribute::apply> ApplyCaller;
 
 	void update() override {
-		StringOutputStream buffer( 32 );
 		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
 		if ( !string_empty( value ) ) {
 			DoubleVector3 x_y_z;
 			if ( !string_parse_vector3( value, x_y_z ) ) {
 				x_y_z = DoubleVector3( 0, 0, 0 );
 			}
+			StringOutputStream buffer( 32 );
 
 			buffer( x_y_z.x() );
 			m_vector3.m_x->setText( buffer.c_str() );
@@ -864,7 +856,7 @@ void SpawnFlags_setEntityClass( EntityClass* eclass ){
 
 	for ( int i = 0; i < g_spawnflag_count; ++i )
 	{
-		const auto str = StringOutputStream( 16 )( LowerCase( eclass->flagnames[spawn_table[i]] ) );
+		const auto str = StringStream<16>( LowerCase( eclass->flagnames[spawn_table[i]] ) );
 
 		QCheckBox *check = g_entitySpawnflagsCheck[i];
 		check->setText( str.c_str() );
@@ -990,12 +982,12 @@ void EntityInspector_applySpawnflags(){
 		f |= v << spawn_table[i];
 	}
 
-	char sz[32];
-	sprintf( sz, "%i", f );
-	const char* value = ( f == 0 ) ? "" : sz;
+	char value[32] = {};
+	if( f != 0 )
+		sprintf( value, "%i", f );
 
 	{
-		const auto command = StringOutputStream( 64 )( "entitySetSpawnflags -flags ", f );
+		const auto command = StringStream<64>( "entitySetSpawnflags -flags ", f );
 		UndoableCommand undo( command );
 
 		Scene_EntitySetKeyValue_Selected( "spawnflags", value );
@@ -1085,8 +1077,8 @@ void EntityInspector_clearKeyValue(){
 		const auto key = item->text( 0 ).toLatin1();
 
 		if ( !string_equal( key.constData(), "classname" ) ) {
-			const auto command = StringOutputStream( 64 )( "entityDeleteKey -key ", key.constData() );
-			UndoableCommand undo( command.c_str() );
+			const auto command = StringStream<64>( "entityDeleteKey -key ", key.constData() );
+			UndoableCommand undo( command );
 			Scene_EntitySetKeyValue_Selected( key.constData(), "" );
 		}
 	}

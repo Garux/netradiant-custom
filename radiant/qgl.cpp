@@ -150,11 +150,11 @@ void QGL_assertNoErrors( const char *file, int line ){
 	{
 		const char* errorString = reinterpret_cast<const char*>( qgluErrorString( error ) );
 		if ( error == GL_OUT_OF_MEMORY ) {
-			ERROR_MESSAGE( "OpenGL out of memory error at " << file << ":" << line << ": " << errorString );
+			ERROR_MESSAGE( "OpenGL out of memory error at " << file << ':' << line << ": " << errorString );
 		}
 		else
 		{
-			ERROR_MESSAGE( "OpenGL error at " << file << ":" << line << ": " << errorString );
+			ERROR_MESSAGE( "OpenGL error at " << file << ':' << line << ": " << errorString );
 		}
 		error = gl().glGetError();
 	}

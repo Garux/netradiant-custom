@@ -54,12 +54,12 @@ void Map_Snapshot(){
 	// 2. find out what the lastest save is based on number
 	// 3. inc that and save the map
 	const char* mapname = Map_Name( g_map );
-	const auto snapshotsDir = StringOutputStream( 256 )( PathFilenameless( mapname ), "snapshots" );
+	const auto snapshotsDir = StringStream( PathFilenameless( mapname ), "snapshots" );
 
-	if ( file_exists( snapshotsDir.c_str() ) || Q_mkdir( snapshotsDir.c_str() ) ) {
+	if ( file_exists( snapshotsDir ) || Q_mkdir( snapshotsDir ) ) {
 		std::size_t lSize = 0;
-		const auto strNewPath = StringOutputStream( 256 )( snapshotsDir.c_str(), '/', path_get_filename_start( mapname ) );
-		const char* ext = path_get_filename_base_end( strNewPath.c_str() );
+		const auto strNewPath = StringStream( snapshotsDir, '/', path_get_filename_start( mapname ) );
+		const char* ext = path_get_filename_base_end( strNewPath );
 
 		StringOutputStream snapshotFilename( 256 );
 		for ( int nCount = 0; ; ++nCount )
@@ -68,23 +68,22 @@ void Map_Snapshot(){
 			// The snapshot's filename will be "<path>/snapshots/<name>.<count>.<ext>"
 			snapshotFilename( StringRange( strNewPath.c_str(), ext ), '.', nCount, ext );
 
-			if ( !DoesFileExist( snapshotFilename.c_str(), lSize ) ) {
+			if ( !DoesFileExist( snapshotFilename, lSize ) ) {
 				break;
 			}
 		}
 
 		// save in the next available slot
-		Map_SaveFile( snapshotFilename.c_str() );
+		Map_SaveFile( snapshotFilename );
 
 		if ( lSize > 50 * 1024 * 1024 ) { // total size of saves > 50 mb
-			globalOutputStream() << "The snapshot files in " << snapshotsDir.c_str() << " total more than 50 megabytes. You might consider cleaning up.";
+			globalOutputStream() << "The snapshot files in " << snapshotsDir << " total more than 50 megabytes. You might consider cleaning up.";
 		}
 	}
 	else
 	{
-		StringOutputStream strMsg( 256 );
-		strMsg << "Snapshot save failed.. unabled to create directory\n" << snapshotsDir.c_str();
-		qt_MessageBox( MainFrame_getWindow(), strMsg.c_str() );
+		const auto strMsg = StringStream( "Snapshot save failed.. unabled to create directory\n", snapshotsDir );
+		qt_MessageBox( MainFrame_getWindow(), strMsg );
 	}
 }
 /*
@@ -132,7 +131,7 @@ void QE_CheckAutoSave(){
 
 		if ( g_AutoSave_Enabled ) {
 			const char* strMsg = g_SnapShots_Enabled ? "Autosaving snapshot..." : "Autosaving...";
-			globalOutputStream() << strMsg << "\n";
+			globalOutputStream() << strMsg << '\n';
 			//Sys_Status(strMsg);
 
 			// only snapshot if not working on a default map
@@ -142,18 +141,17 @@ void QE_CheckAutoSave(){
 			else
 			{
 				if ( Map_Unnamed( g_map ) ) {
-					StringOutputStream autosave( 256 );
-					autosave << g_qeglobals.m_userGamePath << "maps/";
-					Q_mkdir( autosave.c_str() );
+					auto autosave = StringStream( g_qeglobals.m_userGamePath, "maps/" );
+					Q_mkdir( autosave );
 					autosave << "autosave.map";
-					Map_SaveFile( autosave.c_str() );
+					Map_SaveFile( autosave );
 				}
 				else
 				{
 					const char* name = Map_Name( g_map );
 					const char* extension = path_get_filename_base_end( name );
-					const auto autosave = StringOutputStream( 256 )( StringRange( name, extension ), ".autosave", extension );
-					Map_SaveFile( autosave.c_str() );
+					const auto autosave = StringStream( StringRange( name, extension ), ".autosave", extension );
+					Map_SaveFile( autosave );
 				}
 			}
 		}

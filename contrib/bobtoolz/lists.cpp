@@ -40,7 +40,7 @@ bool LoadExclusionList( char* filename, std::list<Str>* exclusionList ){
 		return true;
 	}
 
-	globalErrorStream() << "Failed To Load Exclusion List: " << filename << "\n";
+	globalErrorStream() << "Failed To Load Exclusion List: " << filename << '\n';
 	return false;
 }
 
@@ -64,6 +64,6 @@ QStringList LoadListStore( char* filename ){
 		return list;
 	}
 
-	globalErrorStream() << "Failed To Load GList: " << filename << "\n";
+	globalErrorStream() << "Failed To Load GList: " << filename << '\n';
 	return list;
 }

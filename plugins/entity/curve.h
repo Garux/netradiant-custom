@@ -51,16 +51,16 @@ inline void plotBasisFunction( std::size_t numSegments, int point, int degree ){
 	globalOutputStream() << "plotBasisFunction point " << point << " of 4, knot vector:";
 	for ( Knots::iterator i = knots.begin(); i != knots.end(); ++i )
 	{
-		globalOutputStream() << " " << *i;
+		globalOutputStream() << ' ' << *i;
 	}
-	globalOutputStream() << "\n";
-	globalOutputStream() << "t=0 basis=" << BSpline_basis( knots, point, degree, 0.0 ) << "\n";
+	globalOutputStream() << '\n';
+	globalOutputStream() << "t=0 basis=" << BSpline_basis( knots, point, degree, 0.0 ) << '\n';
 	for ( std::size_t i = 1; i < numSegments; ++i )
 	{
 		double t = ( 1.0 / double(numSegments) ) * double(i);
-		globalOutputStream() << "t=" << t << " basis=" << BSpline_basis( knots, point, degree, t ) << "\n";
+		globalOutputStream() << "t=" << t << " basis=" << BSpline_basis( knots, point, degree, t ) << '\n';
 	}
-	globalOutputStream() << "t=1 basis=" << BSpline_basis( knots, point, degree, 1.0 ) << "\n";
+	globalOutputStream() << "t=1 basis=" << BSpline_basis( knots, point, degree, 1.0 ) << '\n';
 }
 
 inline bool ControlPoints_parse( ControlPoints& controlPoints, const char* value ){
@@ -97,9 +97,9 @@ inline void ControlPoints_write( const ControlPoints& controlPoints, StringOutpu
 	value << controlPoints.size() << " (";
 	for ( ControlPoints::const_iterator i = controlPoints.begin(); i != controlPoints.end(); ++i )
 	{
-		value << " " << ( *i ).x() << " " << ( *i ).y() << " " << ( *i ).z() << " ";
+		value << ' ' << ( *i ).x() << ' ' << ( *i ).y() << ' ' << ( *i ).z() << ' ';
 	}
-	value << ")";
+	value << ')';
 }
 
 inline void ControlPoint_testSelect( const Vector3& point, ObservedSelectable& selectable, Selector& selector, SelectionTest& test ){
@@ -166,7 +166,7 @@ inline void ControlPoints_write( ControlPoints& controlPoints, const char* key, 
 	if ( !controlPoints.empty() ) {
 		ControlPoints_write( controlPoints, value );
 	}
-	entity.setKeyValue( key, value.c_str() );
+	entity.setKeyValue( key, value );
 }
 
 class CurveEdit

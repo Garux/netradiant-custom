@@ -424,7 +424,7 @@ public:
 		return true;
 	}
 	void post( const scene::Path& path, scene::Instance& instance ) const {
-		//globalOutputStream() << path.size() << "\n";
+		//globalOutputStream() << path.size() << '\n';
 		if ( path.top().get().visible() ) {
 			Brush* brush = Node_getBrush( path.top() );
 			if ( brush != 0
@@ -1163,7 +1163,7 @@ void CSG_WrapMerge( const ClipperPoints& clipperPoints ){
 				brush->addFace( *( p.m_face ) );
 			else
 				brush->addPlane( p.m_verts[0], p.m_verts[1], p.m_verts[2], shader, projection );
-//			globalOutputStream() << p.m_plane.normal() << " " << p.m_plane.dist() << " p.m_plane\n";
+//			globalOutputStream() << p.m_plane.normal() << ' ' << p.m_plane.dist() << " p.m_plane\n";
 		}
 		brush->removeEmptyFaces();
 	}

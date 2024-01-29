@@ -160,16 +160,15 @@ void bsp_init(){
 	build_set_variable( "EnginePath", EnginePath_get() );
 	build_set_variable( "UserEnginePath", g_qeglobals.m_userEnginePath.c_str() );
 	for( const auto& path : ExtraResourcePaths_get() )
-		if( !string_empty( path.c_str() ) )
+		if( !path.empty() )
 			stream << " -fs_pakpath " << makeQuoted( path );
 	build_set_variable( "ExtraResourcePaths", stream );
 	build_set_variable( "MonitorAddress", ( g_WatchBSP_Enabled ) ? RADIANT_MONITOR_ADDRESS : "" );
 	build_set_variable( "GameName", gamename_get() );
 
 	const char* mapname = Map_Name( g_map );
-	{
-		build_set_variable( "BspFile", stream( PathExtensionless( mapname ), ".bsp" ) );
-	}
+
+	build_set_variable( "BspFile", stream( PathExtensionless( mapname ), ".bsp" ) );
 
 	if( g_region_active ){
 		build_set_variable( "MapFile", stream( PathExtensionless( mapname ), ".reg" ) );
@@ -178,9 +177,7 @@ void bsp_init(){
 		build_set_variable( "MapFile", mapname );
 	}
 
-	{
-		build_set_variable( "MapName", stream( PathFilename( mapname ) ) );
-	}
+	build_set_variable( "MapName", stream( PathFilename( mapname ) ) );
 }
 
 void bsp_shutdown(){
@@ -200,9 +197,9 @@ public:
 		m_file << command;
 		if( m_outputRedirect ){
 			m_file << ( m_commandCount == 0? " > " : " >> " );
-			m_file << "\"" << m_outputRedirect << "\"";
+			m_file << makeQuoted( m_outputRedirect );
 		}
-		m_file << "\n";
+		m_file << '\n';
 		++m_commandCount;
 	}
 };
@@ -222,7 +219,7 @@ void RunBSP( size_t buildIdx ){
 
 	if ( g_region_active ) {
 		const char* mapname = Map_Name( g_map );
-		Map_SaveRegion( StringOutputStream( 256 )( PathExtensionless( mapname ), ".reg" ).c_str() );
+		Map_SaveRegion( StringStream( PathExtensionless( mapname ), ".reg" ) );
 	}
 
 	Pointfile_Delete();
@@ -237,17 +234,17 @@ void RunBSP( size_t buildIdx ){
 	if ( g_WatchBSP_Enabled && monitor ) {
 		// grab the file name for engine running
 		const char* fullname = Map_Name( g_map );
-		const auto bspname = StringOutputStream( 64 )( PathFilename( fullname ) );
-		BuildMonitor_Run( commands, bspname.c_str() );
+		const auto bspname = StringStream<64>( PathFilename( fullname ) );
+		BuildMonitor_Run( commands, bspname );
 	}
 	else
 	{
-		const auto junkpath = StringOutputStream( 256 )( SettingsPath_get(), "junk.txt" );
+		const auto junkpath = StringStream( SettingsPath_get(), "junk.txt" );
 
 #if defined( POSIX )
-		const auto batpath = StringOutputStream( 256 )( SettingsPath_get(), "qe3bsp.sh" );
+		const auto batpath = StringStream( SettingsPath_get(), "qe3bsp.sh" );
 #elif defined( WIN32 )
-		const auto batpath = StringOutputStream( 256 )( SettingsPath_get(), "qe3bsp.bat" );
+		const auto batpath = StringStream( SettingsPath_get(), "qe3bsp.bat" );
 #else
 #error "unsupported platform"
 #endif
@@ -282,8 +279,7 @@ void RunBSP( size_t buildIdx ){
 // Sys_ functions
 
 void Sys_SetTitle( const char *text, bool modified ){
-	StringOutputStream title;
-	title << text;
+	auto title = StringStream( text );
 
 	if ( modified ) {
 		title << " *";

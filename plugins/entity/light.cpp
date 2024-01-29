@@ -846,7 +846,7 @@ public:
 				r[2] = r[0] / sqrt( 255.f );
 			}
 		}
-//		globalOutputStream() << r[0] << " " << r[1] << " " << r[2] << " m_radii_transformed\n";
+//		globalOutputStream() << r[0] << ' ' << r[1] << ' ' << r[2] << " m_radii_transformed\n";
 	}
 	float calculateIntensityFromRadii() const {
 		return std::copysign( spawnflags_linear( m_flags ) // keep intensity sign, while adjusting it via radii
@@ -1935,7 +1935,7 @@ public:
 		}
 		else
 		{
-			//globalOutputStream() << getTranslation() << "\n";
+			//globalOutputStream() << getTranslation() << '\n';
 			if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 				m_dragPlanes.m_bounds = m_contained.aabb();
 				m_contained.setLightRadius( m_dragPlanes.evaluateResize( getTranslation(), rotation() ) );

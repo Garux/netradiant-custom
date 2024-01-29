@@ -63,7 +63,7 @@ void EntityClassFGD_clear(){
 EntityClass* EntityClassFGD_insertUniqueBase( EntityClass* entityClass ){
 	std::pair<BaseClasses::iterator, bool> result = g_EntityClassFGD_bases.insert( BaseClasses::value_type( entityClass->name(), entityClass ) );
 	if ( !result.second ) {
-		globalErrorStream() << "duplicate base class: " << makeQuoted( entityClass->name() ) << "\n";
+		globalErrorStream() << "duplicate base class: " << makeQuoted( entityClass->name() ) << '\n';
 		//eclass_capture_state(entityClass);
 		//entityClass->free(entityClass);
 	}
@@ -74,7 +74,7 @@ EntityClass* EntityClassFGD_insertUnique( EntityClass* entityClass ){
 	EntityClassFGD_insertUniqueBase( entityClass );
 	std::pair<EntityClasses::iterator, bool> result = g_EntityClassFGD_classes.insert( EntityClasses::value_type( entityClass->name(), entityClass ) );
 	if ( !result.second ) {
-		globalErrorStream() << "duplicate entity class: " << makeQuoted( entityClass->name() ) << "\n";
+		globalErrorStream() << "duplicate entity class: " << makeQuoted( entityClass->name() ) << '\n';
 		eclass_capture_state( entityClass );
 		entityClass->free( entityClass );
 	}
@@ -120,7 +120,7 @@ void EntityClassFGD_parseSplitString( Tokeniser& tokeniser, CopiedString& string
 		buffer << tokeniser.getToken();
 		if ( !string_equal( tokeniser.getToken(), "+" ) ) {
 			tokeniser.ungetToken();
-			string = buffer.c_str();
+			string = buffer;
 			return;
 		}
 	}
@@ -186,7 +186,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 		}
 		else if ( string_equal( property, "iconsprite" ) ) {
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "(" ), PARSE_ERROR );
-			entityClass->m_modelpath = StringOutputStream( 256 )( PathCleaned( tokeniser.getToken() ) ).c_str();
+			entityClass->m_modelpath = StringStream<64>( PathCleaned( tokeniser.getToken() ) );
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ")" ), PARSE_ERROR );
 		}
 		else if ( string_equal( property, "sprite" )
@@ -415,9 +415,8 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "[" ), PARSE_ERROR );
 			tokeniser.nextLine();
 
-			StringOutputStream listTypeName( 64 );
-			listTypeName << entityClass->name() << "_" << attribute.m_name;
-			attribute.m_type = listTypeName.c_str();
+			const auto listTypeName = StringStream<64>( entityClass->name(), '_', attribute.m_name );
+			attribute.m_type = listTypeName;
 
 			ListAttributeType& listType = g_listTypesFGD[listTypeName.c_str()];
 
@@ -572,7 +571,7 @@ void EntityClassFGD_parse( TextInputStream& inputStream, const char* path ){
 		}
 		// hl2 below
 		else if ( string_equal( blockType, "@include" ) ) {
-			EntityClassFGD_loadFile( StringOutputStream( 256 )( PathFilenameless( path ), tokeniser.getToken() ).c_str() );
+			EntityClassFGD_loadFile( StringStream( PathFilenameless( path ), tokeniser.getToken() ) );
 		}
 		else if ( string_equal( blockType, "@mapsize" ) ) {
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "(" ), PARSE_ERROR );
@@ -596,7 +595,7 @@ void EntityClassFGD_parse( TextInputStream& inputStream, const char* path ){
 void EntityClassFGD_loadFile( const char* filename ){
 	TextFileInputStream file( filename );
 	if ( !file.failed() ) {
-		globalOutputStream() << "parsing entity classes from " << makeQuoted( filename ) << "\n";
+		globalOutputStream() << "parsing entity classes from " << makeQuoted( filename ) << '\n';
 
 		EntityClassFGD_parse( file, filename );
 	}
@@ -637,7 +636,7 @@ void EntityClassFGD_resolveInheritance( EntityClass* derivedClass ){
 		{
 			BaseClasses::iterator i = g_EntityClassFGD_bases.find( ( *j ).c_str() );
 			if ( i == g_EntityClassFGD_bases.end() ) {
-				globalErrorStream() << "failed to find entityDef " << makeQuoted( ( *j ).c_str() ) << " inherited by "  << makeQuoted( derivedClass->name() ) << "\n";
+				globalErrorStream() << "failed to find entityDef " << makeQuoted( ( *j ).c_str() ) << " inherited by "  << makeQuoted( derivedClass->name() ) << '\n';
 			}
 			else
 			{
@@ -680,8 +679,8 @@ public:
 		if ( --m_unrealised == 0 ) {
 
 			{
-				const auto baseDirectory = StringOutputStream( 256 )( GlobalRadiant().getGameToolsPath(), GlobalRadiant().getRequiredGameDescriptionKeyValue( "basegame" ), '/' );
-				const auto gameDirectory = StringOutputStream( 256 )( GlobalRadiant().getGameToolsPath(), GlobalRadiant().getGameName(), '/' );
+				const auto baseDirectory = StringStream( GlobalRadiant().getGameToolsPath(), GlobalRadiant().getRequiredGameDescriptionKeyValue( "basegame" ), '/' );
+				const auto gameDirectory = StringStream( GlobalRadiant().getGameToolsPath(), GlobalRadiant().getGameName(), '/' );
 
 				const auto pathLess = []( const CopiedString& one, const CopiedString& other ){
 					return path_less( one.c_str(), other.c_str() );
@@ -701,7 +700,7 @@ public:
 				}
 
 				for( const auto& [ name, path ] : name_path ){
-					EntityClassFGD_loadFile( StringOutputStream()( path, name ) );
+					EntityClassFGD_loadFile( StringStream( path, name ) );
 				}
 			}
 

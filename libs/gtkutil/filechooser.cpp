@@ -90,12 +90,7 @@ public:
 		m_masks.reserve( m_types.size() );
 		for ( const auto& type : types )
 		{
-			const std::size_t len = strlen( type.m_name.c_str() ) + strlen( type.m_pattern.c_str() ) + 3;
-			StringOutputStream buffer( len + 1 ); // length + null char
-
-			buffer << type.m_name << " (" << type.m_pattern << ")";
-
-			m_masks.push_back( buffer.c_str() );
+			m_masks.push_back( StringStream<64>( type.m_name, " (", type.m_pattern, ')' ).c_str() );
 		}
 
 		m_filters.reserve( m_types.size() );
@@ -146,7 +141,7 @@ const char* file_dialog( QWidget* parent, bool open, const char* title, const ch
 			filter += ' ';
 			filter += f.c_str();
 		}
-		filter += ")";
+		filter += ')';
 	}
 
 	for ( const auto& mask : masks.m_masks ) // e.g.: quake3 maps (*.map);;quake3 region (*.reg)
@@ -170,7 +165,7 @@ const char* file_dialog( QWidget* parent, bool open, const char* title, const ch
 		if( !string_empty( extension ) ){ // validate it
 			const auto check = [extension]( const CopiedString& filter ){ return extension_equal( extension, path_get_extension( filter.c_str() ) ); };
 			if( !std::any_of( masks.m_filters.cbegin(), masks.m_filters.cend(), check ) ) {
-				qt_MessageBox( parent, StringOutputStream( 256 )( makeQuoted( extension ), " is unsupported file type for requested operation\n" ), extension, EMessageBoxType::Error );
+				qt_MessageBox( parent, StringStream<64>( makeQuoted( extension ), " is unsupported file type for requested operation\n" ), extension, EMessageBoxType::Error );
 				g_file_dialog_file.clear();
 			}
 		}

@@ -37,7 +37,7 @@ static bool g_autocaulk = false;
 
 static void autocaulk_write(){
 	Sys_FPrintf( SYS_VRB, "--- autocaulk_write ---\n" );
-	auto filename = StringOutputStream( 256 )( source, ".caulk" );
+	const auto filename = StringStream( source, ".caulk" );
 	Sys_Printf( "writing %s\n", filename.c_str() );
 
 	FILE* file = SafeOpenWrite( filename, "wt" );
@@ -584,7 +584,7 @@ static void OnlyEnts( const char *filename ){
 	/* note it */
 	Sys_Printf( "--- OnlyEnts ---\n" );
 
-	auto out = StringOutputStream( 256 )( source, ".bsp" );
+	const auto out = StringStream( source, ".bsp" );
 	LoadBSPFile( out );
 
 	ParseEntities();
@@ -881,13 +881,13 @@ int BSPMain( Args& args ){
 	SetDefaultSampleSize( sampleSize );
 
 	/* delete portal, line and surface files */
-	remove( StringOutputStream( 256 )( source, ".prt" ) );
-	remove( StringOutputStream( 256 )( source, ".lin" ) );
-	//%	remove( StringOutputStream( 256 )( source, ".srf" ) );	/* ydnar */
+	remove( StringStream( source, ".prt" ) );
+	remove( StringStream( source, ".lin" ) );
+	//%	remove( StringStream( source, ".srf" ) );	/* ydnar */
 
 	/* if we are doing a full map, delete the last saved region map */
 	if ( !path_extension_is( fileName, "reg" ) )
-		remove( StringOutputStream( 256 )( source, ".reg" ) );
+		remove( StringStream( source, ".reg" ) );
 
 	/* expand mapname */
 	StringOutputStream mapFileName( 256 );

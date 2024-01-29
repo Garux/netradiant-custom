@@ -162,11 +162,11 @@ public:
 /// \brief Prints the (up to) 128 characters in the current extended-ascii character set.
 /// Useful for debugging.
 	void print() const {
-		globalOutputStream() << "UTF-8 conversion required from charset: " << globalCharacterSet().get() << "\n";
+		globalOutputStream() << "UTF-8 conversion required from charset: " << globalCharacterSet().get() << '\n';
 		for ( std::size_t i = 1; i < 128; ++i )
 		{
 			if ( m_decodeMap[i].buffer != 0 ) {
-				globalOutputStream() << extended_ascii_for_index( i ) << " = " << m_decodeMap[i] << "\n";
+				globalOutputStream() << extended_ascii_for_index( i ) << " = " << m_decodeMap[i] << '\n';
 			}
 		}
 	}

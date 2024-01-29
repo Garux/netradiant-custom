@@ -212,16 +212,16 @@ struct AssModel
 #ifdef _DEBUG
 							Sys_Printf( "texname: %s\n", texname.C_Str() );
 #endif
-				m_shader = StringOutputStream()( PathCleaned( PathExtensionless( texname.C_Str() ) ) );
+				m_shader = StringStream<64>( PathCleaned( PathExtensionless( texname.C_Str() ) ) );
 
 			}
 			else{
-				m_shader = StringOutputStream()( PathCleaned( PathExtensionless( matname.C_Str() ) ) );
+				m_shader = StringStream<64>( PathCleaned( PathExtensionless( matname.C_Str() ) ) );
 			}
 
 			const CopiedString oldShader( m_shader );
 			if( strchr( m_shader.c_str(), '/' ) == nullptr ){ /* texture is likely in the folder, where model is */
-				m_shader = StringOutputStream()( rootPath, m_shader );
+				m_shader = StringStream<64>( rootPath, m_shader );
 			}
 			else{
 				const char *name = m_shader.c_str();
@@ -232,7 +232,7 @@ struct AssModel
 						m_shader = p + 1;
 					}
 					else{
-						m_shader = StringOutputStream()( rootPath, path_get_filename_start( name ) );
+						m_shader = StringStream<64>( rootPath, path_get_filename_start( name ) );
 					}
 				}
 			}
@@ -267,7 +267,7 @@ struct AssModel
 
 	AssModel( aiScene *scene, const char *modelname ) : m_scene( scene ){
 		m_meshes.reserve( scene->mNumMeshes );
-		const auto rootPath = StringOutputStream()( PathCleaned( PathFilenameless( modelname ) ) );
+		const auto rootPath = StringStream<64>( PathCleaned( PathFilenameless( modelname ) ) );
 		const auto traverse = [&]( const auto& self, const aiNode* node ) -> void {
 			for( size_t n = 0; n < node->mNumMeshes; ++n ){
 				const aiMesh *mesh = scene->mMeshes[node->mMeshes[n]];

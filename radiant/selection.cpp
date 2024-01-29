@@ -309,7 +309,7 @@ public:
 void aabb_snap_translation( Vector3& move, const AABB& bounds ){
 	const Vector3 maxs( bounds.origin + bounds.extents );
 	const Vector3 mins( bounds.origin - bounds.extents );
-//	globalOutputStream() << "move: " << move << "\n";
+//	globalOutputStream() << "move: " << move << '\n';
 	for( std::size_t i = 0; i < 3; ++i ){
 		if( fabs( move[i] ) > 1e-2f ){
 			const float snapto1 = float_snapped( maxs[i] + move[i], GetSnapGridSize() );
@@ -318,8 +318,8 @@ void aabb_snap_translation( Vector3& move, const AABB& bounds ){
 			const float dist1 = fabs( fabs( maxs[i] + move[i] ) - fabs( snapto1 ) );
 			const float dist2 = fabs( fabs( mins[i] + move[i] ) - fabs( snapto2 ) );
 
-//			globalOutputStream() << "maxs[i] + move[i]: " << maxs[i] + move[i]  << "    snapto1: " << snapto1 << "   dist1: " << dist1 << "\n";
-//			globalOutputStream() << "mins[i] + move[i]: " << mins[i] + move[i]  << "    snapto2: " << snapto2 << "   dist2: " << dist2 << "\n";
+//			globalOutputStream() << "maxs[i] + move[i]: " << maxs[i] + move[i]  << "    snapto1: " << snapto1 << "   dist1: " << dist1 << '\n';
+//			globalOutputStream() << "mins[i] + move[i]: " << mins[i] + move[i]  << "    snapto2: " << snapto2 << "   dist2: " << dist2 << '\n';
 			move[i] = dist2 > dist1 ? snapto1 - maxs[i] : snapto2 - mins[i];
 		}
 	}
@@ -545,7 +545,7 @@ public:
 		m_bounds = bounds;
 	}
 	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
-		//globalOutputStream() << "manip2object: " << manip2object << "  device2manip: " << device2manip << "  x: " << x << "  y:" << y <<"\n";
+		//globalOutputStream() << "manip2object: " << manip2object << "  device2manip: " << device2manip << "  x: " << x << "  y:" << y << '\n';
 		Vector3 current = point_on_axis( m_axis, device2manip, x, y );
 		Vector3 delta = vector3_subtracted( current, m_start );
 
@@ -559,7 +559,7 @@ public:
 				start[i] = GetSnapGridSize();
 			}
 		}
-		//globalOutputStream() << "m_start: " << m_start << "   start: " << start << "   delta: " << delta <<"\n";
+		//globalOutputStream() << "m_start: " << m_start << "   start: " << start << "   delta: " << delta << '\n';
 		/* boundless way */
 		Vector3 scale(
 		    start[0] == 0 ? 1 : 1 + delta[0] / start[0],
@@ -583,7 +583,7 @@ public:
 				}
 			}
 		}
-		//globalOutputStream() << "scale: " << scale <<"\n";
+		//globalOutputStream() << "scale: " << scale << '\n';
 		m_scalable.scale( scale );
 	}
 
@@ -643,7 +643,7 @@ public:
 		    start[2] == 0 ? 1 : 1 + delta[2] / start[2]
 		);
 
-		//globalOutputStream() << "m_start: " << m_start << "   start: " << start << "   delta: " << delta <<"\n";
+		//globalOutputStream() << "m_start: " << m_start << "   start: " << start << "   delta: " << delta << '\n';
 		for( std::size_t i = 0; i < 3; i++ ){
 			if( m_chosen_extent[i] > 0.0625f && start[i] != 0.f ){
 				scale[i] = ( m_chosen_extent[i] + delta[i] ) / m_chosen_extent[i];
@@ -653,14 +653,14 @@ public:
 				}
 			}
 		}
-		//globalOutputStream() << "pre snap scale: " << scale <<"\n";
+		//globalOutputStream() << "pre snap scale: " << scale << '\n';
 		if( snap ){
 			float bestscale = ignore_axis != 0 ? scale[0] : scale[1];
 			for( std::size_t i = ignore_axis != 0 ? 1 : 2; i < 3; i++ ){
 				if( ignore_axis != i && fabs( scale[i] ) < fabs( bestscale ) ){
 					bestscale = scale[i];
 				}
-				//globalOutputStream() << "bestscale: " << bestscale <<"\n";
+				//globalOutputStream() << "bestscale: " << bestscale << '\n';
 			}
 			for( std::size_t i = 0; i < 3; i++ ){
 				if( ignore_axis != i ){
@@ -668,7 +668,7 @@ public:
 				}
 			}
 		}
-		//globalOutputStream() << "scale: " << scale <<"\n";
+		//globalOutputStream() << "scale: " << scale << '\n';
 		m_scalable.scale( scale );
 	}
 	void SetAxes( const Vector3& axis, const Vector3& axis2 ){
@@ -715,7 +715,7 @@ public:
 	}
 	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
 		const Vector3 current = point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y ) - m_0;
-//	globalOutputStream() << m_axis_which << " by axis " << m_axis_by << "\n";
+//	globalOutputStream() << m_axis_which << " by axis " << m_axis_by << '\n';
 		m_skewable.skew( Skew( m_axis_by * 4 + m_axis_which, m_axis_by_extent != 0.f? float_snapped( current[m_axis_which], GetSnapGridSize() ) / m_axis_by_extent : 0 ) );
 	}
 	void SetAxes( int axis_which, int axis_by, int axis_by_sign ){
@@ -1239,7 +1239,7 @@ void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& be
 			plaine = plane3_for_points( normalised[0], normalised[1], normalised[2] );
 			plane = &plaine;
 		}
-//globalOutputStream() << plane.a << " " << plane.b << " " << plane.c << " " << "\n";
+//globalOutputStream() << plane.a << ' ' << plane.b << ' ' << plane.c << ' ' << '\n';
 		const point_iterator_t end = normalised + count;
 		for ( point_iterator_t previous = end - 1, current = normalised; current != end; previous = current, ++current )
 		{
@@ -1259,7 +1259,7 @@ void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& be
 //										globalOutputStream() << static_cast<float>( ray_distance_to_plane(
 //										Ray( Vector3( 0, 0, 0 ), Vector3( 0, 0, 1 ) ),
 //										plane
-//										) ) << "\n";
+//										) ) << '\n';
 			}
 		}
 	}
@@ -2483,7 +2483,7 @@ public:
 		//m_pivot.update( matrix4_translation_for_vec3( matrix4_get_translation_vec3( pivot2world ) ), volume.GetModelview(), volume.GetProjection(), volume.GetViewport() );
 		m_pivot.update( matrix4_translation_for_vec3( m_bounds.origin ), volume.GetModelview(), volume.GetProjection(), volume.GetViewport() );
 		//m_pivot.update( g_matrix4_identity, volume.GetModelview(), volume.GetProjection(), volume.GetViewport() ); //no shaking in cam due to low precision this way; smooth and sometimes very incorrect result
-//		globalOutputStream() << m_pivot.m_worldSpace << "\n";
+//		globalOutputStream() << m_pivot.m_worldSpace << '\n';
 		Matrix4& m = m_pivot.m_worldSpace; /* go affine to increase precision */
 		m[1] = m[2] = m[3] = m[4] = m[6] = m[7] = m[8] = m[9] = m[11] = 0;
 		m[15] = 1;
@@ -2501,8 +2501,8 @@ public:
 		matrix4_premultiply_by_matrix4( m_worldSpace, matrix4_translation_for_vec3( -matrix4_get_translation_vec3( pivot2world ) ) );
 		matrix4_premultiply_by_matrix4( m_worldSpace, pivot2world );
 
-//		globalOutputStream() << m_worldSpace << "\n";
-//		globalOutputStream() << pivot2world << "\n";
+//		globalOutputStream() << m_worldSpace << '\n';
+//		globalOutputStream() << pivot2world << '\n';
 	}
 
 	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& pivot2world ) {
@@ -2614,7 +2614,7 @@ public:
 								point -= origin;
 								point = vector3_added( point, vector3_scaled( m_pivot.m_axis_screen, -vector3_dot( point, m_pivot.m_axis_screen ) ) ); //constrain_to_axis
 								m_rotateAxis.SetRadius( vector3_length( point ) - g_SELECT_EPSILON / 2.0 - 1.0 ); /* use smaller radius to constrain to one rotation direction in 2D */
-								//globalOutputStream() << "radius " << ( vector3_length( point ) - g_SELECT_EPSILON / 2.0 - 1.0 ) << "\n";
+								//globalOutputStream() << "radius " << ( vector3_length( point ) - g_SELECT_EPSILON / 2.0 - 1.0 ) << '\n';
 							}
 							else{
 								m_rotateAxis.SetRadius( g_radius );
@@ -3512,11 +3512,11 @@ void translation_for_pivoted_matrix_transform( Vector3& parent_translation, cons
 
 	/*
 	   // verify it!
-	   globalOutputStream() << "World pivot is at " << world_pivot << "\n";
-	   globalOutputStream() << "Local pivot is at " << local_pivot << "\n";
-	   globalOutputStream() << "Transformation " << local_transform << " moves it to: " << matrix4_transformed_point(local_transform, local_pivot) << "\n";
-	   globalOutputStream() << "Must move by " << local_translation << " in the local system" << "\n";
-	   globalOutputStream() << "Must move by " << parent_translation << " in the parent system" << "\n";
+	   globalOutputStream() << "World pivot is at " << world_pivot << '\n';
+	   globalOutputStream() << "Local pivot is at " << local_pivot << '\n';
+	   globalOutputStream() << "Transformation " << local_transform << " moves it to: " << matrix4_transformed_point(local_transform, local_pivot) << '\n';
+	   globalOutputStream() << "Must move by " << local_translation << " in the local system" << '\n';
+	   globalOutputStream() << "Must move by " << parent_translation << " in the parent system" << '\n';
 	 */
 }
 
@@ -7134,7 +7134,7 @@ public:
 	}
 
 	void SelectPoint( const View& view, const float device_point[2], const float device_epsilon[2], RadiantSelectionSystem::EModifier modifier, bool face ){
-		//globalOutputStream() << device_point[0] << "   " << device_point[1] << "\n";
+		//globalOutputStream() << device_point[0] << "   " << device_point[1] << '\n';
 		ASSERT_MESSAGE( fabs( device_point[0] ) <= 1.f && fabs( device_point[1] ) <= 1.f, "point-selection error" );
 
 		if ( modifier == eReplace ) {
@@ -7294,8 +7294,8 @@ public:
 					globalOutputStream() << "\n\n\n===========\n";
 					while ( i != selector.end() )
 					{
-						globalOutputStream() << "depth:" << ( *i ).first.m_depth << " dist:" << ( *i ).first.m_distance << " depth2:" << ( *i ).first.m_depth2 << "\n";
-						globalOutputStream() << "depth - best depth:" << ( *i ).first.m_depth - ( *best ).first.m_depth << "\n";
+						globalOutputStream() << "depth:" << ( *i ).first.m_depth << " dist:" << ( *i ).first.m_distance << " depth2:" << ( *i ).first.m_depth2 << '\n';
+						globalOutputStream() << "depth - best depth:" << ( *i ).first.m_depth - ( *best ).first.m_depth << '\n';
 						++i;
 					}
 #endif
@@ -7355,7 +7355,7 @@ public:
 		}
 	}
 	void outputTranslation( TextOutputStream& ostream ){
-		ostream << " -xyz " << m_translation.x() << " " << m_translation.y() << " " << m_translation.z();
+		ostream << " -xyz " << m_translation.x() << ' ' << m_translation.y() << ' ' << m_translation.z();
 	}
 	void rotate( const Quaternion& rotation ){
 		if ( !nothingSelected() ) {
@@ -7385,7 +7385,7 @@ public:
 		}
 	}
 	void outputRotation( TextOutputStream& ostream ){
-		ostream << " -eulerXYZ " << m_rotation.x() << " " << m_rotation.y() << " " << m_rotation.z();
+		ostream << " -eulerXYZ " << m_rotation.x() << ' ' << m_rotation.y() << ' ' << m_rotation.z();
 	}
 	void scale( const Vector3& scaling ){
 		if ( !nothingSelected() ) {
@@ -7412,7 +7412,7 @@ public:
 		}
 	}
 	void outputScale( TextOutputStream& ostream ){
-		ostream << " -scale " << m_scale.x() << " " << m_scale.y() << " " << m_scale.z();
+		ostream << " -scale " << m_scale.x() << ' ' << m_scale.y() << ' ' << m_scale.z();
 	}
 
 	void skew( const Skew& skew ){
@@ -7774,7 +7774,7 @@ bool RadiantSelectionSystem::endMove(){
 	SceneChangeNotify();
 
 	if ( m_undo_begun ) {
-		StringOutputStream command;
+		StringOutputStream command( 64 );
 
 		if ( ManipulatorMode() == eTranslate ) {
 			command << "translateTool";
@@ -7799,7 +7799,7 @@ bool RadiantSelectionSystem::endMove(){
 			command << "UVTool";
 		}
 
-		GlobalUndoSystem().finish( command.c_str() );
+		GlobalUndoSystem().finish( command );
 	}
 	return false;
 }
@@ -7926,7 +7926,7 @@ void RadiantSelectionSystem::ConstructPivot() const {
 			Vector3 object_pivot = m_bounds.origin;
 
 			//vector3_snap( object_pivot, GetSnapGridSize() );
-			//globalOutputStream() << object_pivot << "\n";
+			//globalOutputStream() << object_pivot << '\n';
 			m_pivot2world = matrix4_translation_for_vec3( object_pivot );
 		}
 		else{
@@ -7941,7 +7941,7 @@ void RadiantSelectionSystem::ConstructPivot() const {
 void RadiantSelectionSystem::setCustomTransformOrigin( const Vector3& origin, const bool set[3] ) const {
 	if ( !nothingSelected() && transformOrigin_isTranslatable() ) {
 
-		//globalOutputStream() << origin << "\n";
+		//globalOutputStream() << origin << '\n';
 		for( std::size_t i = 0; i < 3; i++ ){
 			float value = origin[i];
 			if( set[i] ){

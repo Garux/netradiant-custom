@@ -84,15 +84,14 @@ bool MapResource_loadFile( const MapFormat& format, scene::Node& root, const cha
 NodeSmartReference MapResource_load( const MapFormat& format, const char* path, const char* name ){
 	NodeSmartReference root( NewMapRoot( name ) );
 
-	StringOutputStream fullpath( 256 );
-	fullpath << path << name;
+	const auto fullpath = StringStream( path, name );
 
-	if ( path_is_absolute( fullpath.c_str() ) ) {
-		MapResource_loadFile( format, root, fullpath.c_str() );
+	if ( path_is_absolute( fullpath ) ) {
+		MapResource_loadFile( format, root, fullpath );
 	}
 	else
 	{
-		globalErrorStream() << "map path is not fully qualified: " << makeQuoted( fullpath.c_str() ) << "\n";
+		globalErrorStream() << "map path is not fully qualified: " << makeQuoted( fullpath ) << '\n';
 	}
 
 	return root;
@@ -114,35 +113,34 @@ bool MapResource_saveFile( const MapFormat& format, scene::Node& root, GraphTrav
 }
 
 bool file_saveBackup( const char* path ){
-	const auto backup = StringOutputStream( 256 )( PathExtensionless( path ), ".bak" );
+	const auto backup = StringStream( PathExtensionless( path ), ".bak" );
 
-	if ( file_move( path, backup.c_str() ) ) {
+	if ( file_move( path, backup ) ) {
 		return true;
 	}
 	if ( !file_exists( path ) ) {
 		return true; // nothing to move, no wonder it failed
 	}
-	globalErrorStream() << "map path (or backup path) is not writable: " << makeQuoted( path ) << "\n";
+	globalErrorStream() << "map path (or backup path) is not writable: " << makeQuoted( path ) << '\n';
 	return false;
 }
 
 bool MapResource_save( const MapFormat& format, scene::Node& root, const char* path, const char* name ){
-	StringOutputStream fullpath( 256 );
-	fullpath << path << name;
+	const auto fullpath = StringStream( path, name );
 
-	if ( path_is_absolute( fullpath.c_str() ) ) {
+	if ( path_is_absolute( fullpath ) ) {
 		// We don't want a backup + rename operation if the .map file is
 		// a symlink. Otherwise we'll break the user's careful symlink setup.
 		// Just overwrite the original file. Assume the user has versioning.
-		if ( file_is_symlink( fullpath.c_str() ) || file_saveBackup( fullpath.c_str() ) ) {
-			return MapResource_saveFile( format, root, Map_Traverse, fullpath.c_str() );
+		if ( file_is_symlink( fullpath ) || file_saveBackup( fullpath ) ) {
+			return MapResource_saveFile( format, root, Map_Traverse, fullpath );
 		}
 
-		globalErrorStream() << "failed to save map file: " << makeQuoted( fullpath.c_str() ) << "\n";
+		globalErrorStream() << "failed to save map file: " << makeQuoted( fullpath ) << '\n';
 		return false;
 	}
 
-	globalErrorStream() << "map path is not fully qualified: " << makeQuoted( fullpath.c_str() ) << "\n";
+	globalErrorStream() << "map path is not fully qualified: " << makeQuoted( fullpath ) << '\n';
 	return false;
 }
 
@@ -454,7 +452,7 @@ struct ModelResource : public Resource
 			m_path = rootPath( m_originalName.c_str() );
 			m_name = path_make_relative( m_originalName.c_str(), m_path.c_str() );
 
-			//globalOutputStream() << "ModelResource::realise: " << m_path.c_str() << m_name.c_str() << "\n";
+			//globalOutputStream() << "ModelResource::realise: " << m_path.c_str() << m_name.c_str() << '\n';
 
 			m_observers.realise();
 		}
@@ -463,7 +461,7 @@ struct ModelResource : public Resource
 		if ( ++m_unrealised == 1 ) {
 			m_observers.unrealise();
 
-			//globalOutputStream() << "ModelResource::unrealise: " << m_path.c_str() << m_name.c_str() << "\n";
+			//globalOutputStream() << "ModelResource::unrealise: " << m_path.c_str() << m_name.c_str() << '\n';
 			clearModel();
 		}
 	}
@@ -477,9 +475,7 @@ struct ModelResource : public Resource
 		}
 	}
 	std::time_t modified() const {
-		StringOutputStream fullpath( 256 );
-		fullpath << m_path << m_name;
-		return file_modified( fullpath );
+		return file_modified( StringStream( m_path, m_name ) );
 	}
 	void mapSave(){
 		m_modified = modified();

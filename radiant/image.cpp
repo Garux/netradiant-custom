@@ -47,9 +47,7 @@ Image* QERApp_LoadImage( void* environment, const char* name ){
 		}
 		void visit( const char* name, const _QERPlugImageTable& table ) const {
 			if ( m_image == 0 ) {
-				StringOutputStream fullname( 256 );
-				fullname << m_name << '.' << name;
-				ArchiveFile* file = GlobalFileSystem().openFile( fullname.c_str() );
+				ArchiveFile* file = GlobalFileSystem().openFile( StringStream( m_name, '.', name ) );
 				if ( file != 0 ) {
 					m_image = table.loadImage( *file );
 					file->release();

@@ -42,7 +42,7 @@ void write_stack_trace( TextOutputStream& outputStream ){
 	char** symbol_names = backtrace_symbols( symbols, symbol_count );
 	if ( symbol_names ) {
 		for ( int i = 0; ( i < symbol_count ); ++i )
-			outputStream << symbol_names[i] << "\n";
+			outputStream << symbol_names[i] << '\n';
 
 		// not a memleak, see www.gnu.org/software/libc/manual (Debugging Support, Backtraces)
 		free( symbol_names );
@@ -133,7 +133,7 @@ void write_symbol( PSYMBOL_INFO pSym, STACKFRAME64& sf, TextOutputStream& output
 					WCHAR* name;
 					if ( SymGetTypeInfo( GetCurrentProcess(), pSym->ModBase, typeId,
 					                     TI_GET_SYMNAME, &name ) ) {
-						outputStream << name << " ";
+						outputStream << name << ' ';
 						LocalFree( name );
 						int bleh = 0;
 					}
@@ -240,7 +240,7 @@ void write_stack_trace( PCONTEXT pContext, TextOutputStream& outputStream ){
 
 		IMAGEHLP_MODULE64 module = { sizeof( IMAGEHLP_MODULE64 ) };
 		if ( SymGetModuleInfo64( m_hProcess, sf.AddrPC.Offset, &module ) ) {
-			outputStream << module.ModuleName << "!";
+			outputStream << module.ModuleName << '!';
 
 			if ( SymFromAddr( m_hProcess, sf.AddrPC.Offset, &symDisplacement, pSymbol ) ) {
 				char undecoratedName[max_sym_name];
@@ -248,7 +248,7 @@ void write_stack_trace( PCONTEXT pContext, TextOutputStream& outputStream ){
 
 				outputStream << undecoratedName;
 
-				outputStream << "(";
+				outputStream << '(';
 				// Use SymSetContext to get just the locals/params for this frame
 				IMAGEHLP_STACK_FRAME imagehlpStackFrame;
 				imagehlpStackFrame.InstructionOffset = sf.AddrPC.Offset;
@@ -257,7 +257,7 @@ void write_stack_trace( PCONTEXT pContext, TextOutputStream& outputStream ){
 				// Enumerate the locals/parameters
 				EnumerateSymbolsContext context( sf, outputStream );
 				SymEnumSymbols( m_hProcess, 0, 0, EnumerateSymbolsCallback, &context );
-				outputStream << ")";
+				outputStream << ')';
 
 				outputStream << " + " << Offset( reinterpret_cast<void*>( symDisplacement ) );
 
@@ -266,7 +266,7 @@ void write_stack_trace( PCONTEXT pContext, TextOutputStream& outputStream ){
 				DWORD dwLineDisplacement;
 				if ( SymGetLineFromAddr64( m_hProcess, sf.AddrPC.Offset,
 				                           &dwLineDisplacement, &lineInfo ) ) {
-					outputStream << " " << lineInfo.FileName << " line " << lineInfo.LineNumber;
+					outputStream << ' ' << lineInfo.FileName << " line " << lineInfo.LineNumber;
 				}
 			}
 			else
@@ -275,7 +275,7 @@ void write_stack_trace( PCONTEXT pContext, TextOutputStream& outputStream ){
 			}
 		}
 
-		outputStream << "\n";
+		outputStream << '\n';
 	}
 
 	SymCleanup( m_hProcess );

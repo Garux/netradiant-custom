@@ -234,7 +234,7 @@ void SoundTypes_register(){
 	const char* name;
 	while( !string_empty( name = tokeniser.getToken() ) )
 	{
-		GlobalFiletypes().addType( "sound", name, filetype_t( StringOutputStream()( name, " sound files" ), StringOutputStream()( "*.", name ) ) );
+		GlobalFiletypes().addType( "sound", name, filetype_t( StringStream<32>( name, " sound files" ), StringStream<32>( "*.", name ) ) );
 	}
 }
 

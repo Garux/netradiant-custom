@@ -202,9 +202,7 @@ Image* loadHeightmap( void* environment, const char* name ){
 
 Image* loadSpecial( void* environment, const char* name ){
 	if ( *name == '_' ) { // special image
-		StringOutputStream bitmapName( 256 );
-		bitmapName << GlobalRadiant().getAppPath() << "bitmaps/" << name + 1 << ".png";
-		Image* image = loadBitmap( environment, bitmapName.c_str() );
+		Image* image = loadBitmap( environment, StringStream( GlobalRadiant().getAppPath(), "bitmaps/", name + 1, ".png" ) );
 		if ( image != 0 ) {
 			return image;
 		}
@@ -228,7 +226,7 @@ typedef CopiedString TextureExpression;
 //++timo FIXME: we need to put code somewhere to detect when two shaders that are case insensitive equal are present
 template<typename StringType>
 void parseTextureName( StringType& name, const char* token ){
-	name = StringOutputStream( 256 )( PathCleaned( PathExtensionless( token ) ) ).c_str(); // remove extension
+	name = StringStream<64>( PathCleaned( PathExtensionless( token ) ) ).c_str(); // remove extension
 }
 
 bool Tokeniser_parseTextureName( Tokeniser& tokeniser, TextureExpression& name ){
@@ -705,7 +703,7 @@ bool parseTemplateInstance( Tokeniser& tokeniser, const char* filename ){
 	const char* templateName = tokeniser.getToken();
 	ShaderTemplate* shaderTemplate = findTemplate( templateName );
 	if ( shaderTemplate == 0 ) {
-		globalErrorStream() << "shader instance: " << makeQuoted( name ) << ": shader template not found: " << makeQuoted( templateName ) << "\n";
+		globalErrorStream() << "shader instance: " << makeQuoted( name ) << ": shader template not found: " << makeQuoted( templateName ) << '\n';
 	}
 
 	ShaderArguments args;
@@ -772,14 +770,14 @@ qtexture_t* evaluateTexture( const TextureExpression& texture, const ShaderParam
 		}
 		result << expression;
 	}
-	return GlobalTexturesCache().capture( loader, result.c_str() );
+	return GlobalTexturesCache().capture( loader, result );
 }
 
 float evaluateFloat( const ShaderValue& value, const ShaderParameters& params, const ShaderArguments& args ){
 	const char* result = evaluateShaderValue( value.c_str(), params, args );
 	float f;
 	if ( !string_parse_float( result, f ) ) {
-		globalErrorStream() << "parsing float value failed: " << makeQuoted( result ) << "\n";
+		globalErrorStream() << "parsing float value failed: " << makeQuoted( result ) << '\n';
 		return 1.f;
 	}
 	return f;
@@ -822,7 +820,7 @@ BlendFactor evaluateBlendFactor( const ShaderValue& value, const ShaderParameter
 		return BLEND_SRC_ALPHA_SATURATE;
 	}
 
-	globalErrorStream() << "parsing blend-factor value failed: " << makeQuoted( result ) << "\n";
+	globalErrorStream() << "parsing blend-factor value failed: " << makeQuoted( result ) << '\n';
 	return BLEND_ZERO;
 }
 
@@ -957,11 +955,8 @@ public:
 		if ( m_pTexture->texture_number == 0 ) {
 			m_notfound = m_pTexture;
 
-			{
-				StringOutputStream name( 256 );
-				name << GlobalRadiant().getAppPath() << "bitmaps/" << ( IsDefault() ? "notex.png" : "shadernotex.png" );
-				m_pTexture = GlobalTexturesCache().capture( LoadImageCallback( 0, loadBitmap ), name.c_str() );
-			}
+			const auto name = StringStream( GlobalRadiant().getAppPath(), "bitmaps/", ( IsDefault() ? "notex.png" : "shadernotex.png" ) );
+			m_pTexture = GlobalTexturesCache().capture( LoadImageCallback( 0, loadBitmap ), name );
 		}
 
 		realiseLighting();
@@ -1021,7 +1016,7 @@ public:
 					}
 					else
 					{
-						globalErrorStream() << "parsing blend value failed: " << makeQuoted( blend ) << "\n";
+						globalErrorStream() << "parsing blend value failed: " << makeQuoted( blend ) << '\n';
 					}
 				}
 			}
@@ -1402,7 +1397,7 @@ void ParseShaderFile( Tokeniser& tokeniser, const char* filename ){
 				}
 				else
 				{
-					globalErrorStream() << "Error parsing shader " << shaderTemplate->getName() << "\n";
+					globalErrorStream() << "Error parsing shader " << shaderTemplate->getName() << '\n';
 					return;
 				}
 			}
@@ -1452,7 +1447,7 @@ void LoadShaderFile( const char* filename ){
 	ArchiveTextFile* file = GlobalFileSystem().openTextFile( filename );
 
 	if ( file != 0 ) {
-		globalOutputStream() << "Parsing shaderfile " << filename << "\n";
+		globalOutputStream() << "Parsing shaderfile " << filename << '\n';
 
 		Tokeniser& tokeniser = GlobalScriptLibrary().m_pfnNewScriptTokeniser( file->getInputStream() );
 
@@ -1463,7 +1458,7 @@ void LoadShaderFile( const char* filename ){
 	}
 	else
 	{
-		globalWarningStream() << "Unable to read shaderfile " << filename << "\n";
+		globalWarningStream() << "Unable to read shaderfile " << filename << '\n';
 	}
 }
 
@@ -1471,23 +1466,22 @@ typedef FreeCaller1<const char*, LoadShaderFile> LoadShaderFileCaller;
 
 
 void loadGuideFile( const char* filename ){
-	StringOutputStream fullname( 256 );
-	fullname << "guides/" << filename;
-	ArchiveTextFile* file = GlobalFileSystem().openTextFile( fullname.c_str() );
+	const auto fullname = StringStream( "guides/", filename );
+	ArchiveTextFile* file = GlobalFileSystem().openTextFile( fullname );
 
 	if ( file != 0 ) {
-		globalOutputStream() << "Parsing guide file " << fullname.c_str() << "\n";
+		globalOutputStream() << "Parsing guide file " << fullname << '\n';
 
 		Tokeniser& tokeniser = GlobalScriptLibrary().m_pfnNewScriptTokeniser( file->getInputStream() );
 
-		parseGuideFile( tokeniser, fullname.c_str() );
+		parseGuideFile( tokeniser, fullname );
 
 		tokeniser.release();
 		file->release();
 	}
 	else
 	{
-		globalWarningStream() << "Unable to read guide file " << fullname.c_str() << "\n";
+		globalWarningStream() << "Unable to read guide file " << fullname << '\n';
 	}
 }
 
@@ -1561,7 +1555,7 @@ void IfFound_dumpUnreferencedShader( bool& bFound, const char* filename ){
 			bFound = true;
 			globalOutputStream() << "Following shader files are not referenced in any shaderlist.txt:\n";
 		}
-		globalOutputStream() << "\t" << filename << "\n";
+		globalOutputStream() << '\t' << filename << '\n';
 	}
 }
 typedef ReferenceCaller1<bool, const char*, IfFound_dumpUnreferencedShader> IfFoundDumpUnreferencedShaderCaller;
@@ -1599,22 +1593,15 @@ typedef FreeCaller1<const char*, ShaderList_addShaderFile> AddShaderFileCaller;
  */
 void BuildShaderList( TextInputStream& shaderlist ){
 	Tokeniser& tokeniser = GlobalScriptLibrary().m_pfnNewSimpleTokeniser( shaderlist );
-	tokeniser.nextLine();
-	const char* token = tokeniser.getToken();
 	StringOutputStream shaderFile( 64 );
-	while ( token != 0 )
+	for( const char* token; tokeniser.nextLine(), token = tokeniser.getToken(); )
 	{
 		// each token should be a shader filename
-		shaderFile << token;
+		shaderFile( token );
 		if( !path_extension_is( token, g_shadersExtension ) )
-			shaderFile << "." << g_shadersExtension;
+			shaderFile << '.' << g_shadersExtension;
 
-		ShaderList_addShaderFile( shaderFile.c_str() );
-
-		tokeniser.nextLine();
-		token = tokeniser.getToken();
-
-		shaderFile.clear();
+		ShaderList_addShaderFile( shaderFile );
 	}
 	tokeniser.release();
 }
@@ -1627,9 +1614,9 @@ void ShaderList_addFromArchive( const char *archivename ){
 
 	Archive *archive = GlobalFileSystem().getArchive( archivename, false );
 	if ( archive ) {
-		ArchiveTextFile *file = archive->openTextFile( StringOutputStream( 64 )( DirectoryCleaned( shaderpath ), "shaderlist.txt" ).c_str() );
+		ArchiveTextFile *file = archive->openTextFile( StringStream<64>( DirectoryCleaned( shaderpath ), "shaderlist.txt" ) );
 		if ( file ) {
-			globalOutputStream() << "Found shaderlist.txt in " << archivename << "\n";
+			globalOutputStream() << "Found shaderlist.txt in " << archivename << '\n';
 			BuildShaderList( file->getInputStream() );
 			file->release();
 		}
@@ -1641,23 +1628,20 @@ typedef FreeCaller1<const char *, ShaderList_addFromArchive> AddShaderListFromAr
 #include "stream/filestream.h"
 
 bool shaderlist_findOrInstall( const char* enginePath, const char* toolsPath, const char* shaderPath, const char* gamename ){
-	StringOutputStream absShaderList( 256 );
-	absShaderList << enginePath << gamename << '/' << shaderPath << "shaderlist.txt";
-	if ( file_exists( absShaderList.c_str() ) ) {
+	const auto absShaderList = StringStream( enginePath, gamename, '/', shaderPath, "shaderlist.txt" );
+	if ( file_exists( absShaderList ) ) {
 		return true;
 	}
 	{
-		StringOutputStream directory( 256 );
-		directory << enginePath << gamename << '/' << shaderPath;
-		if ( !file_exists( directory.c_str() ) && !Q_mkdir( directory.c_str() ) ) {
+		const auto directory = StringStream( enginePath, gamename, '/', shaderPath );
+		if ( !file_exists( directory ) && !Q_mkdir( directory ) ) {
 			return false;
 		}
 	}
 	{
-		StringOutputStream defaultShaderList( 256 );
-		defaultShaderList << toolsPath << gamename << '/' << "default_shaderlist.txt";
-		if ( file_exists( defaultShaderList.c_str() ) ) {
-			return file_copy( defaultShaderList.c_str(), absShaderList.c_str() );
+		const auto defaultShaderList = StringStream( toolsPath, gamename, '/', "default_shaderlist.txt" );
+		if ( file_exists( defaultShaderList ) ) {
+			return file_copy( defaultShaderList, absShaderList );
 		}
 	}
 	return false;
@@ -1670,7 +1654,7 @@ void Shaders_Load(){
 
 	const char* shaderPath = GlobalRadiant().getGameDescriptionKeyValue( "shaderpath" );
 	if ( !string_empty( shaderPath ) ) {
-		const auto path = StringOutputStream( 64 )( DirectoryCleaned( shaderPath ) );
+		const auto path = StringStream<64>( DirectoryCleaned( shaderPath ) );
 
 		if ( g_useShaderList ) {
 			// preload shader files that have been listed in shaderlist.txt
@@ -1681,9 +1665,9 @@ void Shaders_Load(){
 
 			bool isMod = !string_equal( basegame, gamename );
 
-			if ( !isMod || !shaderlist_findOrInstall( enginePath, toolsPath, path.c_str(), gamename ) ) {
+			if ( !isMod || !shaderlist_findOrInstall( enginePath, toolsPath, path, gamename ) ) {
 				gamename = basegame;
-				shaderlist_findOrInstall( enginePath, toolsPath, path.c_str(), gamename );
+				shaderlist_findOrInstall( enginePath, toolsPath, path, gamename );
 			}
 
 			GlobalFileSystem().forEachArchive( AddShaderListFromArchiveCaller(), false, true );
@@ -1692,20 +1676,18 @@ void Shaders_Load(){
 			}
 			else{
 				globalOutputStream() << "No shaderlist.txt found: loading all shaders\n";
-				GlobalFileSystem().forEachFile( path.c_str(), g_shadersExtension, AddShaderFileCaller(), 1 );
+				GlobalFileSystem().forEachFile( path, g_shadersExtension, AddShaderFileCaller(), 1 );
 			}
 		}
 		else
 		{
-			GlobalFileSystem().forEachFile( path.c_str(), g_shadersExtension, AddShaderFileCaller(), 0 );
+			GlobalFileSystem().forEachFile( path, g_shadersExtension, AddShaderFileCaller(), 0 );
 		}
 
 		StringOutputStream shadername( 256 );
 		for( const CopiedString& sh : l_shaderfiles )
 		{
-			shadername << path.c_str() << sh;
-			LoadShaderFile( shadername.c_str() );
-			shadername.clear();
+			LoadShaderFile( shadername( path, sh ) );
 		}
 	}
 

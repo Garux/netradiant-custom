@@ -58,10 +58,8 @@ public:
 	}
 
 	void modelChanged( const char* value ){
-		StringOutputStream cleaned( string_length( value ) );
-		cleaned << PathCleaned( value );
 		m_resource.detach( *this );
-		m_resource.setName( cleaned.c_str() );
+		m_resource.setName( StringOutputStream( string_length( value ) + 1 )( PathCleaned( value ) ) );
 		m_resource.attach( *this );
 		m_modelChanged();
 	}

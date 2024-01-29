@@ -355,7 +355,7 @@ void qtexture_realise( qtexture_t& texture, const TextureKey& key ){
 			/* load in order, so that Q3 cubemap is seamless in openGL, but rotated & flipped; fix misorientation in shader later */
 			const char *suffixes[] = { "_ft", "_bk", "_up", "_dn", "_rt", "_lf" };
 			for( int i = 0; i < 6; ++i ){
-				images[i] = key.first.loadImage( StringOutputStream( 64 )( key.second, suffixes[i] ) );
+				images[i] = key.first.loadImage( StringStream<64>( key.second, suffixes[i] ) );
 			}
 			if( std::all_of( images, images + std::size( images ), []( const Image *img ){ return img != nullptr; } ) ){
 				gl().glGenTextures( 1, &texture.texture_number );

@@ -38,7 +38,7 @@
 #include "stringio.h"
 
 void parseShaderName( CopiedString& name, const char* token ){
-	name = StringOutputStream( 256 )( PathCleaned( token ) ).c_str();
+	name = StringStream( PathCleaned( token ) );
 }
 
 class Doom3ModelSkin
@@ -136,11 +136,9 @@ public:
 	}
 
 	void parseFile( const char* name ){
-		StringOutputStream relativeName( 64 );
-		relativeName << "skins/" << name;
-		ArchiveTextFile* file = GlobalFileSystem().openTextFile( relativeName.c_str() );
+		ArchiveTextFile* file = GlobalFileSystem().openTextFile( StringStream<64>( "skins/", name ) );
 		if ( file != 0 ) {
-			globalOutputStream() << "parsing skins from " << makeQuoted( name ) << "\n";
+			globalOutputStream() << "parsing skins from " << makeQuoted( name ) << '\n';
 			{
 				Tokeniser& tokeniser = GlobalScriptLibrary().m_pfnNewSimpleTokeniser( file->getInputStream() );
 				parseTokens( tokeniser );
@@ -150,7 +148,7 @@ public:
 		}
 		else
 		{
-			globalErrorStream() << "failed to open " << makeQuoted( name ) << "\n";
+			globalErrorStream() << "failed to open " << makeQuoted( name ) << '\n';
 		}
 	}
 

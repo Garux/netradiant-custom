@@ -188,7 +188,7 @@ public:
 		char buf[80];
 		name_t r( "","" );
 		name_write( buf, name );
-		globalErrorStream() << "find unique name for " << buf << "\n";
+		globalErrorStream() << "find unique name for " << buf << '\n';
 		globalErrorStream() << "> currently registered names:\n";
 		for ( names_t::const_iterator i = m_names.begin(); i != m_names.end(); ++i )
 		{
@@ -198,7 +198,7 @@ public:
 				j->first.write( buf );
 				globalErrorStream() << " '" << buf << "'";
 			}
-			globalErrorStream() << "\n";
+			globalErrorStream() << '\n';
 		}
 		names_t::const_iterator i = m_names.find( name.first );
 		if ( i == m_names.end() ) {
@@ -209,7 +209,7 @@ public:
 			r = name_t( name.first, ( *i ).second.make_unique( name.second ) );
 		}
 		name_write( buf, r );
-		globalErrorStream() << "> unique name is " << buf << "\n";
+		globalErrorStream() << "> unique name is " << buf << '\n';
 		return r;
 #else
 		names_t::const_iterator i = m_names.find( name.first );

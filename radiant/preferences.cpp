@@ -99,9 +99,7 @@ CGameDescription::CGameDescription( xmlDocPtr pDoc, const CopiedString& gameFile
 		m_gameDescription.insert( GameDescription::value_type( xmlAttr_getName( attr ), xmlAttr_getValue( attr ) ) );
 	}
 
-	{
-		mGameToolsPath = StringOutputStream( 256 )( AppPath_get(), "gamepacks/", gameFile, '/' );
-	}
+	mGameToolsPath = StringStream( AppPath_get(), "gamepacks/", gameFile, '/' );
 
 	ASSERT_MESSAGE( file_exists( mGameToolsPath.c_str() ), "game directory not found: " << makeQuoted( mGameToolsPath ) );
 
@@ -122,10 +120,10 @@ CGameDescription::CGameDescription( xmlDocPtr pDoc, const CopiedString& gameFile
 }
 
 void CGameDescription::Dump(){
-	globalOutputStream() << "game description file: " << makeQuoted( mGameFile ) << "\n";
+	globalOutputStream() << "game description file: " << makeQuoted( mGameFile ) << '\n';
 	for ( GameDescription::iterator i = m_gameDescription.begin(); i != m_gameDescription.end(); ++i )
 	{
-		globalOutputStream() << ( *i ).first << " = " << makeQuoted( ( *i ).second ) << "\n";
+		globalOutputStream() << ( *i ).first << " = " << makeQuoted( ( *i ).second ) << '\n';
 	}
 }
 
@@ -181,7 +179,7 @@ bool Preferences_Save( PreferenceDictionary& preferences, const char* filename )
 }
 
 bool Preferences_Save_Safe( PreferenceDictionary& preferences, const char* filename ){
-	const auto tmpName = StringOutputStream()( filename, "TMP" );
+	const auto tmpName = StringStream( filename, "TMP" );
 	return Preferences_Save( preferences, tmpName ) && file_move( tmpName, filename );
 }
 
@@ -208,24 +206,22 @@ void GlobalPreferences_Init(){
 
 void CGameDialog::LoadPrefs(){
 	// load global .pref file
-	StringOutputStream strGlobalPref( 256 );
-	strGlobalPref << g_Preferences.m_global_rc_path << "global.pref";
+	const auto strGlobalPref = StringStream( g_Preferences.m_global_rc_path, "global.pref" );
 
-	globalOutputStream() << "loading global preferences from " << makeQuoted( strGlobalPref.c_str() ) << "\n";
+	globalOutputStream() << "loading global preferences from " << makeQuoted( strGlobalPref ) << '\n';
 
-	if ( !Preferences_Load( g_global_preferences, strGlobalPref.c_str(), "global" ) ) {
-		globalOutputStream() << "failed to load global preferences from " << strGlobalPref.c_str() << "\n";
+	if ( !Preferences_Load( g_global_preferences, strGlobalPref, "global" ) ) {
+		globalOutputStream() << "failed to load global preferences from " << strGlobalPref << '\n';
 	}
 }
 
 void CGameDialog::SavePrefs(){
-	StringOutputStream strGlobalPref( 256 );
-	strGlobalPref << g_Preferences.m_global_rc_path << "global.pref";
+	const auto strGlobalPref = StringStream( g_Preferences.m_global_rc_path, "global.pref" );
 
-	globalOutputStream() << "saving global preferences to " << strGlobalPref.c_str() << "\n";
+	globalOutputStream() << "saving global preferences to " << strGlobalPref << '\n';
 
-	if ( !Preferences_Save_Safe( g_global_preferences, strGlobalPref.c_str() ) ) {
-		globalOutputStream() << "failed to save global preferences to " << strGlobalPref.c_str() << "\n";
+	if ( !Preferences_Save_Safe( g_global_preferences, strGlobalPref ) ) {
+		globalOutputStream() << "failed to save global preferences to " << strGlobalPref << '\n';
 	}
 }
 
@@ -327,24 +323,23 @@ public:
 		if ( !path_extension_is( name, "game" ) ) {
 			return;
 		}
-		StringOutputStream strPath( 256 );
-		strPath << mPath << name;
-		globalOutputStream() << strPath.c_str() << '\n';
+		const auto strPath = StringStream( mPath, name );
+		globalOutputStream() << strPath << '\n';
 
-		xmlDocPtr pDoc = xmlParseFile( strPath.c_str() );
+		xmlDocPtr pDoc = xmlParseFile( strPath );
 		if ( pDoc ) {
 			mGames.push_back( new CGameDescription( pDoc, name ) );
 			xmlFreeDoc( pDoc );
 		}
 		else
 		{
-			globalErrorStream() << "XML parser failed on '" << strPath.c_str() << "'\n";
+			globalErrorStream() << "XML parser failed on '" << strPath << "'\n";
 		}
 	}
 };
 
 void CGameDialog::ScanForGames(){
-	const auto path = StringOutputStream( 256 )( AppPath_get(), "gamepacks/games/" );
+	const auto path = StringStream( AppPath_get(), "gamepacks/games/" );
 
 	globalOutputStream() << "Scanning for game description files: " << path << '\n';
 
@@ -369,7 +364,7 @@ void CGameDialog::Reset(){
 		InitGlobalPrefPath();
 	}
 
-	file_remove( StringOutputStream( 256 )( g_Preferences.m_global_rc_path, "global.pref" ) );
+	file_remove( StringStream( g_Preferences.m_global_rc_path, "global.pref" ) );
 }
 
 void CGameDialog::Init(){
@@ -486,11 +481,11 @@ void PrefsDlg::Init(){
 
 	// this is common to win32 and Linux init now
 	// game sub-dir
-	m_rc_path = StringOutputStream( 256 )( m_global_rc_path, g_pGameDescription->mGameFile.c_str(), '/' );
+	m_rc_path = StringStream( m_global_rc_path, g_pGameDescription->mGameFile.c_str(), '/' );
 	Q_mkdir( m_rc_path.c_str() );
 
 	// then the ini file
-	m_inipath = StringOutputStream( 256 )( m_rc_path, PREFS_LOCAL_FILENAME );
+	m_inipath = StringStream( m_rc_path, PREFS_LOCAL_FILENAME );
 }
 
 
@@ -787,10 +782,10 @@ StaticRegisterModule staticRegisterPreferenceSystem( StaticPreferenceSystemModul
 void Preferences_Load(){
 	g_GamesDialog.LoadPrefs();
 
-	globalOutputStream() << "loading local preferences from " << g_Preferences.m_inipath << "\n";
+	globalOutputStream() << "loading local preferences from " << g_Preferences.m_inipath << '\n';
 
 	if ( !Preferences_Load( g_preferences, g_Preferences.m_inipath.c_str(), g_GamesDialog.m_sGameFile.m_value.c_str() ) ) {
-		globalWarningStream() << "failed to load local preferences from " << g_Preferences.m_inipath << "\n";
+		globalWarningStream() << "failed to load local preferences from " << g_Preferences.m_inipath << '\n';
 	}
 }
 
@@ -801,10 +796,10 @@ void Preferences_Save(){
 
 	g_GamesDialog.SavePrefs();
 
-	globalOutputStream() << "saving local preferences to " << g_Preferences.m_inipath << "\n";
+	globalOutputStream() << "saving local preferences to " << g_Preferences.m_inipath << '\n';
 
 	if ( !Preferences_Save_Safe( g_preferences, g_Preferences.m_inipath.c_str() ) ) {
-		globalWarningStream() << "failed to save local preferences to " << g_Preferences.m_inipath << "\n";
+		globalWarningStream() << "failed to save local preferences to " << g_Preferences.m_inipath << '\n';
 	}
 }
 
@@ -831,14 +826,13 @@ void PreferencesDialog_showDialog(){
 	g_Preferences.m_treeview->setFocus(); // focus tree to have it immediately available for text search
 	if ( g_Preferences.DoModal() == QDialog::DialogCode::Accepted ) {
 		if ( !g_restart_required.empty() ) {
-			StringOutputStream message( 256 );
-			message << "Preference changes require a restart:\n\n";
+			auto message = StringStream( "Preference changes require a restart:\n\n" );
 			for ( const auto i : g_restart_required )
 				message << i << '\n';
 			g_restart_required.clear();
 			message << "\nRestart now?";
 
-			if( qt_MessageBox( MainFrame_getWindow(), message.c_str(), "Restart is required", EMessageBoxType::Question ) == eIDYES )
+			if( qt_MessageBox( MainFrame_getWindow(), message, "Restart is required", EMessageBoxType::Question ) == eIDYES )
 				Radiant_Restart();
 		}
 	}

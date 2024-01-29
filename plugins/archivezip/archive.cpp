@@ -161,7 +161,7 @@ class ZipArchive final : public Archive
 		{
 			ZipFileSystem::entry_type& file = m_filesystem[filename.data()];
 			if ( !file.is_directory() ) {
-				globalWarningStream() << "Warning: zip archive " << makeQuoted( m_name ) << " contains duplicated file: " << makeQuoted( filename.data() ) << "\n";
+				globalWarningStream() << "Warning: zip archive " << makeQuoted( m_name ) << " contains duplicated file: " << makeQuoted( filename.data() ) << '\n';
 			}
 			else
 			{

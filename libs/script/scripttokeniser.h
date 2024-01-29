@@ -109,7 +109,7 @@ class ScriptTokeniser final : public Tokeniser
 		{
 		case eNewline:
 			if ( !m_crossline ) {
-				globalErrorStream() << getLine() << ":" << getColumn() << ": unexpected end-of-line before token\n";
+				globalErrorStream() << getLine() << ':' << getColumn() << ": unexpected end-of-line before token\n";
 				return false;
 			}
 			break;
@@ -162,7 +162,7 @@ class ScriptTokeniser final : public Tokeniser
 		{
 		case eNewline:
 			if ( m_crossline ) {
-				globalErrorStream() << getLine() << ":" << getColumn() << ": unexpected end-of-line in quoted token\n";
+				globalErrorStream() << getLine() << ':' << getColumn() << ": unexpected end-of-line in quoted token\n";
 				return false;
 			}
 			break;

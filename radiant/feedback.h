@@ -72,7 +72,7 @@ public:
 	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
 // for use in the dialog window
 	const char* getName() {
-		return message.c_str();
+		return message;
 	}
 	IGL2DWindow* Highlight();
 	void DropHighlight() { }
@@ -99,7 +99,7 @@ public:
 	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
 // for use in the dialog window
 	const char* getName() {
-		return message.c_str();
+		return message;
 	}
 	IGL2DWindow* Highlight();
 	void DropHighlight();
@@ -142,7 +142,7 @@ public:
 	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
 // for use in the dialog window
 	const char* getName() {
-		return message.c_str();
+		return message;
 	}
 	IGL2DWindow* Highlight();
 	void DropHighlight();

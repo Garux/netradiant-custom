@@ -58,7 +58,7 @@ void CSelectMsg::saxStartElement( message_info_t *ctx, const xmlChar *name, cons
 		ASSERT_MESSAGE( string_equal( reinterpret_cast<const char*>( name ), "brush" ), "FEEDBACK PARSE ERROR" );
 		ASSERT_MESSAGE( ESelectState == SELECT_MESSAGE, "FEEDBACK PARSE ERROR" );
 		ESelectState = SELECT_BRUSH;
-		globalWarningStream() << message.c_str() << '\n';
+		globalWarningStream() << message << '\n';
 	}
 }
 
@@ -80,7 +80,7 @@ void CSelectMsg::saxCharacters( message_info_t *ctx, const xmlChar *ch, int len 
 IGL2DWindow* CSelectMsg::Highlight(){
 	GlobalSelectionSystem().setSelectedAll( false );
 	int entitynum, brushnum;
-	if ( sscanf( reinterpret_cast<const char*>( brush.c_str() ), "%i %i", &entitynum, &brushnum ) == 2 ) {
+	if ( sscanf( brush, "%i %i", &entitynum, &brushnum ) == 2 ) {
 		SelectBrush( entitynum, brushnum );
 	}
 	return 0;
@@ -97,7 +97,7 @@ void CPointMsg::saxStartElement( message_info_t *ctx, const xmlChar *name, const
 		ASSERT_MESSAGE( string_equal( reinterpret_cast<const char*>( name ), "point" ), "FEEDBACK PARSE ERROR" );
 		ASSERT_MESSAGE( EPointState == POINT_MESSAGE, "FEEDBACK PARSE ERROR" );
 		EPointState = POINT_POINT;
-		globalWarningStream() << message.c_str() << '\n';
+		globalWarningStream() << message << '\n';
 	}
 }
 
@@ -105,7 +105,7 @@ void CPointMsg::saxEndElement( message_info_t *ctx, const xmlChar *name ){
 	if ( string_equal( reinterpret_cast<const char*>( name ), "pointmsg" ) ) {
 	}
 	else if ( string_equal( reinterpret_cast<const char*>( name ), "point" ) ) {
-		sscanf( point.c_str(), "%g %g %g", &( pt[0] ), &( pt[1] ), &( pt[2] ) );
+		sscanf( point, "%g %g %g", &( pt[0] ), &( pt[1] ), &( pt[2] ) );
 		point.clear();
 	}
 }
@@ -154,7 +154,7 @@ void CWindingMsg::saxStartElement( message_info_t *ctx, const xmlChar *name, con
 		ASSERT_MESSAGE( string_equal( reinterpret_cast<const char*>( name ), "winding" ), "FEEDBACK PARSE ERROR" );
 		ASSERT_MESSAGE( EPointState == WINDING_MESSAGE, "FEEDBACK PARSE ERROR" );
 		EPointState = WINDING_WINDING;
-		globalWarningStream() << message.c_str() << '\n';
+		globalWarningStream() << message << '\n';
 	}
 }
 
@@ -162,7 +162,7 @@ void CWindingMsg::saxEndElement( message_info_t *ctx, const xmlChar *name ){
 	if ( string_equal( reinterpret_cast<const char*>( name ), "windingmsg" ) ) {
 	}
 	else if ( string_equal( reinterpret_cast<const char*>( name ), "winding" ) ) {
-		const char* c = winding.c_str();
+		const char* c = winding;
 		sscanf( c, "%i ", &numpoints );
 
 		int i = 0;

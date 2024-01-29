@@ -62,24 +62,24 @@ class AssLogger : public Assimp::Logger
 public:
 	void OnDebug( const char* message ) override {
 #ifdef _DEBUG
-		globalOutputStream() << message << "\n";
+		globalOutputStream() << message << '\n';
 #endif
 	}
 	void OnVerboseDebug( const char *message ) override {
 #ifdef _DEBUG
-		globalOutputStream() << message << "\n";
+		globalOutputStream() << message << '\n';
 #endif
 	}
 	void OnInfo( const char* message ) override {
 #ifdef _DEBUG
-		globalOutputStream() << message << "\n";
+		globalOutputStream() << message << '\n';
 #endif
 	}
 	void OnWarn( const char* message ) override {
-		globalWarningStream() << message << "\n";
+		globalWarningStream() << message << '\n';
 	}
 	void OnError( const char* message ) override {
-		globalErrorStream() << message << "\n";
+		globalErrorStream() << message << '\n';
 	}
 
 	bool attachStream( Assimp::LogStream *pStream, unsigned int severity ) override {
@@ -102,7 +102,7 @@ public:
 	 */
 	bool Exists( const char* pFile ) const override {
 		if( strchr( pFile, '\\' ) != nullptr ){
-			globalWarningStream() << "AssIOSystem::Exists " << pFile << "\n";
+			globalWarningStream() << "AssIOSystem::Exists " << pFile << '\n';
 			return false;
 		}
 
@@ -139,7 +139,7 @@ public:
 	 */
 	Assimp::IOStream* Open( const char* pFile, const char* pMode = "rb" ) override {
 		if( strchr( pFile, '\\' ) != nullptr ){
-			globalWarningStream() << "AssIOSystem::Open " << pFile << "\n";
+			globalWarningStream() << "AssIOSystem::Open " << pFile << '\n';
 			return nullptr;
 		}
 
@@ -238,7 +238,7 @@ public:
 	typedef ModelLoader Type;
 
 	ModelPicoAPI( const char* extension ){
-		GlobalFiletypesModule::getTable().addType( Type::Name, extension, filetype_t( StringOutputStream()( extension, " model" ), StringOutputStream()( "*.", extension ) ) );
+		GlobalFiletypesModule::getTable().addType( Type::Name, extension, filetype_t( StringStream<32>( extension, " model" ), StringStream<16>( "*.", extension ) ) );
 	}
 	ModelLoader* getTable(){
 		return &m_modelLoader;
@@ -307,7 +307,7 @@ extern "C" void RADIANT_DLLEXPORT Radiant_RegisterModules( ModuleServer& server 
 	s_assImporter->GetExtensionList( extensions ); // "*.3ds;*.obj;*.dae"
 	const char *c = extensions.C_Str();
 	while( !string_empty( c ) ){
-		StringOutputStream ext;
+		StringOutputStream ext( 16 );
 		do{
 			if( *c == '*' && *( c + 1 ) == '.' ){
 				c += 2;
@@ -326,7 +326,7 @@ extern "C" void RADIANT_DLLEXPORT Radiant_RegisterModules( ModuleServer& server 
 		g_PicoModelModules.push_back( PicoModelModule( PicoModelAPIConstructor( ext ) ) );
 		g_PicoModelModules.back().selfRegister();
 
-//		globalOutputStream() << ext << "\n";
+//		globalOutputStream() << ext << '\n';
 	}
 
 	g_ImageMDLModule.selfRegister();

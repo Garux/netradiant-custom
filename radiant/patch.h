@@ -1030,9 +1030,7 @@ inline bool Patch_importShader( Patch& patch, Tokeniser& tokeniser ){
 	}
 	else
 	{
-		StringOutputStream shader( string_length( GlobalTexturePrefix_get() ) + string_length( texture ) );
-		shader << GlobalTexturePrefix_get() << texture;
-		patch.SetShader( shader.c_str() );
+		patch.SetShader( StringStream<64>( GlobalTexturePrefix_get(), texture ) );
 	}
 	return true;
 }

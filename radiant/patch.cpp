@@ -395,7 +395,7 @@ void Patch::Smooth( EMatrixMajor mt ){
 	{
 		p1 = m_ctrl.data() + ( h * row_stride );
 		p2 = p1 + ( 2 * width ) * col_stride;
-		//globalErrorStream() << "compare " << p1->m_vertex << " and " << p2->m_vertex << "\n";
+		//globalErrorStream() << "compare " << p1->m_vertex << " and " << p2->m_vertex << '\n';
 		if ( vector3_length_squared( vector3_subtracted( p1->m_vertex, p2->m_vertex ) ) > 1.0 ) {
 			//globalErrorStream() << "too far\n";
 			wrap = false;
@@ -3119,9 +3119,9 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 
 						normal = getAverageNormal(normal1, normal2);
 						/*globalOutputStream() << "0\n";
-						globalOutputStream() << normal1 << "\n";
-						globalOutputStream() << normal2 << "\n";
-						globalOutputStream() << normal << "\n";*/
+						globalOutputStream() << normal1 << '\n';
+						globalOutputStream() << normal2 << '\n';
+						globalOutputStream() << normal << '\n';*/
 
 					}
 					// If two column tangents are available, take the length-corrected average
@@ -3133,9 +3133,9 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 
 						normal = getAverageNormal(normal1, normal2);
 						/*globalOutputStream() << "1\n";
-						globalOutputStream() << normal1 << "\n";
-						globalOutputStream() << normal2 << "\n";
-						globalOutputStream() << normal << "\n";*/
+						globalOutputStream() << normal1 << '\n';
+						globalOutputStream() << normal2 << '\n';
+						globalOutputStream() << normal << '\n';*/
 
 					}
 					else
@@ -3149,12 +3149,12 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 
 							normal = getAverageNormal(normal1, normal2);
 							/*globalOutputStream() << "2\n";
-							globalOutputStream() << rowTangent[0] << "\n";
-							globalOutputStream() << colTangent[0] << "\n";
-							globalOutputStream() << vector3_cross( rowTangent[0], colTangent[0]) << "\n";
-							globalOutputStream() << normal1 << "\n";
-							globalOutputStream() << normal2 << "\n";
-							globalOutputStream() << normal << "\n";*/
+							globalOutputStream() << rowTangent[0] << '\n';
+							globalOutputStream() << colTangent[0] << '\n';
+							globalOutputStream() << vector3_cross( rowTangent[0], colTangent[0]) << '\n';
+							globalOutputStream() << normal1 << '\n';
+							globalOutputStream() << normal2 << '\n';
+							globalOutputStream() << normal << '\n';*/
 
 						}
 						else
@@ -3162,8 +3162,8 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 							if ( vector3_length_squared( vector3_cross( rowTangent[0], colTangent[0] ) ) > 0 ){
 								normal = vector3_normalised( vector3_cross( rowTangent[0], colTangent[0] ) );
 								/*globalOutputStream() << "3\n";
-								globalOutputStream() << (float)vector3_length_squared( vector3_cross( rowTangent[0], colTangent[0] ) ) << "\n";
-								globalOutputStream() << normal << "\n";*/
+								globalOutputStream() << (float)vector3_length_squared( vector3_cross( rowTangent[0], colTangent[0] ) ) << '\n';
+								globalOutputStream() << normal << '\n';*/
 							}
 							else{
 								normal = extrudeAxis;

@@ -778,7 +778,7 @@ int MergeBSPMain( Args& args ){
 		{
 			const char *model = e.valueForKey( "model" );
 			if( model[0] == '*' ){
-				e.setKeyValue( "model", StringOutputStream( 8 )( '*', atoi( model + 1 ) + bspModels.size() - 1 ) ); // -1 : minus world
+				e.setKeyValue( "model", StringStream<8>( '*', atoi( model + 1 ) + bspModels.size() - 1 ) ); // -1 : minus world
 			}
 		}
 		/* make target/targetname names unique */

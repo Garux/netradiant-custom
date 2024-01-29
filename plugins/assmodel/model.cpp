@@ -223,7 +223,7 @@ private:
 
 			aiString matname = material->GetName();
 #ifdef _DEBUG
-						globalOutputStream() << "matname: " << matname.C_Str() << "\n";
+						globalOutputStream() << "matname: " << matname.C_Str() << '\n';
 #endif
 			if( aiString texname;
 			    aiReturn_SUCCESS == material->Get( AI_MATKEY_TEXTURE_DIFFUSE(0), texname )
@@ -233,18 +233,18 @@ private:
 			 && !string_equal_prefix_nocase( matname.C_Str(), "models/" )
 			 && !string_equal_prefix_nocase( matname.C_Str(), "models\\" ) ){
 #ifdef _DEBUG
-							globalOutputStream() << "texname: " << texname.C_Str() << "\n";
+							globalOutputStream() << "texname: " << texname.C_Str() << '\n';
 #endif
-				m_shader = StringOutputStream()( PathCleaned( PathExtensionless( texname.C_Str() ) ) );
+				m_shader = StringStream<64>( PathCleaned( PathExtensionless( texname.C_Str() ) ) );
 
 			}
 			else{
-				m_shader = StringOutputStream()( PathCleaned( PathExtensionless( matname.C_Str() ) ) );
+				m_shader = StringStream<64>( PathCleaned( PathExtensionless( matname.C_Str() ) ) );
 			}
 
 			const CopiedString oldShader( m_shader );
 			if( strchr( m_shader.c_str(), '/' ) == nullptr ){ /* texture is likely in the folder, where model is */
-				m_shader = StringOutputStream()( scene.m_rootPath, m_shader );
+				m_shader = StringStream<64>( scene.m_rootPath, m_shader );
 			}
 			else{
 				const char *name = m_shader.c_str();
@@ -255,13 +255,13 @@ private:
 						m_shader = p + 1;
 					}
 					else{
-						m_shader = StringOutputStream()( scene.m_rootPath, path_get_filename_start( name ) );
+						m_shader = StringStream<64>( scene.m_rootPath, path_get_filename_start( name ) );
 					}
 				}
 			}
 
 			if( oldShader != m_shader )
-				globalOutputStream() << "substituting: " << oldShader << " -> " << m_shader << "\n";
+				globalOutputStream() << "substituting: " << oldShader << " -> " << m_shader << '\n';
 		}
 
 		m_vertices.resize( mesh->mNumVertices );
@@ -688,8 +688,8 @@ scene::Node& loadPicoModel( Assimp::Importer& importer, ArchiveFile& file ){
 	if( scene != nullptr ){
 		if( scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE )
 			globalWarningStream() << "AI_SCENE_FLAGS_INCOMPLETE\n";
-		const auto rootPath = StringOutputStream()( PathFilenameless( file.getName() ) );
-		const auto matName = StringOutputStream()( PathExtensionless( file.getName() ) );
+		const auto rootPath = StringStream<64>( PathFilenameless( file.getName() ) );
+		const auto matName = StringStream<64>( PathExtensionless( file.getName() ) );
 		return ( new PicoModelNode( AssScene{ scene, rootPath, path_extension_is( file.getName(), "mdl" )? matName.c_str() : nullptr } ) )->node();
 	}
 	else{

@@ -30,7 +30,7 @@
 #include "traverselib.h"
 
 inline void parseTextureName( CopiedString& name, const char* token ){
-	name = StringOutputStream( 256 )( PathCleaned( PathExtensionless( token ) ) ).c_str(); // remove extension
+	name = StringStream( PathCleaned( PathExtensionless( token ) ) ); // remove extension
 }
 
 class ModelSkinKey : public ModuleObserver

@@ -71,7 +71,7 @@ static xmlNodePtr LeakFile( const tree_t& tree ){
 	//
 	// write the points to the file
 	//
-	auto filename = StringOutputStream( 256 )( source, ".lin" );
+	const auto filename = StringStream( source, ".lin" );
 	linefile = SafeOpenWrite( filename, "wt" );
 
 	xml_node = xmlNewNode( NULL, (const xmlChar*)"polyline" );

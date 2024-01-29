@@ -105,7 +105,7 @@ static void AddSlash( char *str ){
 	std::size_t n = strlen( str );
 	if ( n > 0 ) {
 		if ( str[n - 1] != '\\' && str[n - 1] != '/' ) {
-			globalWarningStream() << "WARNING: directory path does not end with separator: " << str << "\n";
+			globalWarningStream() << "WARNING: directory path does not end with separator: " << str << '\n';
 			strcat( str, "/" );
 		}
 	}
@@ -116,7 +116,7 @@ static void FixDOSName( char *src ){
 		return;
 	}
 
-	globalWarningStream() << "WARNING: invalid path separator '\\': " << src << "\n";
+	globalWarningStream() << "WARNING: invalid path separator '\\': " << src << '\n';
 
 	while ( *src )
 	{
@@ -130,16 +130,14 @@ static void FixDOSName( char *src ){
 
 
 const _QERArchiveTable* GetArchiveTable( ArchiveModules& archiveModules, const char* ext ){
-	StringOutputStream tmp( 16 );
-	tmp << LowerCase( ext );
-	return archiveModules.findModule( tmp.c_str() );
+	return archiveModules.findModule( StringStream<16>( LowerCase( ext ) ) );
 }
 static void InitPakFile( ArchiveModules& archiveModules, const char *filename ){
 	const _QERArchiveTable* table = GetArchiveTable( archiveModules, path_get_extension( filename ) );
 
 	if ( table != 0 ) {
 		g_archives.push_back( archive_entry_t{ filename, table->m_pfnOpenArchive( filename ), true } );
-		globalOutputStream() << "  pak file: " << filename << "\n";
+		globalOutputStream() << "  pak file: " << filename << '\n';
 	}
 }
 
@@ -287,15 +285,13 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 
 	g_numDirs++;
 
-	{
-		g_archives.push_back( archive_entry_t{ path, OpenArchive( path ), false } );
-	}
+	g_archives.push_back( archive_entry_t{ path, OpenArchive( path ), false } );
 
 	if ( g_bUsePak ) {
 		GDir* dir = g_dir_open( path, 0, 0 );
 
 		if ( dir != 0 ) {
-			globalOutputStream() << "vfs directory: " << path << "\n";
+			globalOutputStream() << "vfs directory: " << path << '\n';
 
 			const char* ignore_prefix = "";
 			const char* override_prefix = "";
@@ -347,9 +343,7 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 					AddSlash( g_strDirs[g_numDirs] );
 					g_numDirs++;
 
-					{
-						g_archives.push_back( archive_entry_t{ g_strDirs[g_numDirs - 1], OpenArchive( g_strDirs[g_numDirs - 1] ), false } );
-					}
+					g_archives.push_back( archive_entry_t{ g_strDirs[g_numDirs - 1], OpenArchive( g_strDirs[g_numDirs - 1] ), false } );
 				}
 
 				if ( ( ext == 0 ) || *( ++ext ) == '\0' || GetArchiveTable( archiveModules, ext ) == 0 ) {
@@ -388,7 +382,7 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 		}
 		else
 		{
-			globalErrorStream() << "vfs directory not found: " << path << "\n";
+			globalErrorStream() << "vfs directory not found: " << path << '\n';
 		}
 	}
 }
@@ -436,7 +430,7 @@ int GetFileCount( const char *filename, int flag ){
 }
 
 ArchiveFile* OpenFile( const char* filename ){
-	ASSERT_MESSAGE( strchr( filename, '\\' ) == 0, "path contains invalid separator '\\': \"" << filename << "\"" );
+	ASSERT_MESSAGE( strchr( filename, '\\' ) == 0, "path contains invalid separator '\\': " << makeQuoted( filename ) );
 	for ( archive_entry_t& arch : g_archives )
 	{
 		ArchiveFile* file = arch.archive->openFile( filename );
@@ -449,7 +443,7 @@ ArchiveFile* OpenFile( const char* filename ){
 }
 
 ArchiveTextFile* OpenTextFile( const char* filename ){
-	ASSERT_MESSAGE( strchr( filename, '\\' ) == 0, "path contains invalid separator '\\': \"" << filename << "\"" );
+	ASSERT_MESSAGE( strchr( filename, '\\' ) == 0, "path contains invalid separator '\\': " << makeQuoted( filename ) );
 	for ( archive_entry_t& arch : g_archives )
 	{
 		ArchiveTextFile* file = arch.archive->openTextFile( filename );

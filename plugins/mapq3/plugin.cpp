@@ -111,7 +111,7 @@ public:
 			return;
 		}
 		if ( version != MapVersion ) {
-			globalErrorStream() << "Doom 3 map version " << MapVersion << " supported, version is " << version << "\n";
+			globalErrorStream() << "Doom 3 map version " << MapVersion << " supported, version is " << version << '\n';
 			return;
 		}
 		tokeniser.nextLine();
@@ -182,7 +182,7 @@ public:
 			return;
 		}
 		if ( version != MapVersion ) {
-			globalErrorStream() << "Quake 4 map version " << MapVersion << " supported, version is " << version << "\n";
+			globalErrorStream() << "Quake 4 map version " << MapVersion << " supported, version is " << version << '\n';
 			return;
 		}
 		tokeniser.nextLine();

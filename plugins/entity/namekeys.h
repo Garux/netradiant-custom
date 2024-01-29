@@ -60,13 +60,13 @@ class NameKeys : public Entity::Observer, public Namespaced
 
 	void insertName( const char* key, EntityKeyValue& value ){
 		if ( m_namespace != 0 && m_keyIsName( key ) ) {
-			//globalOutputStream() << "insert " << key << "\n";
+			//globalOutputStream() << "insert " << key << '\n';
 			m_namespace->attach( KeyValueAssignCaller( value ), KeyValueAttachCaller( value ) );
 		}
 	}
 	void eraseName( const char* key, EntityKeyValue& value ){
 		if ( m_namespace != 0 && m_keyIsName( key ) ) {
-			//globalOutputStream() << "erase " << key << "\n";
+			//globalOutputStream() << "erase " << key << '\n';
 			m_namespace->detach( KeyValueAssignCaller( value ), KeyValueDetachCaller( value ) );
 		}
 	}

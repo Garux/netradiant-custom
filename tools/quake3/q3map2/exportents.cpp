@@ -63,7 +63,7 @@ static void ExportEntities(){
 	}
 
 	/* write it */
-	auto filename = StringOutputStream( 256 )( PathExtensionless( source ), ".ent" );
+	const auto filename = StringStream( PathExtensionless( source ), ".ent" );
 	Sys_Printf( "Writing %s\n", filename.c_str() );
 	Sys_FPrintf( SYS_VRB, "(%zu bytes)\n", bspEntData.size() );
 	FILE *file = SafeOpenWrite( filename, "wt" );

@@ -35,23 +35,18 @@
 
 QIcon new_plugin_icon( const char* filename ){
 	StringOutputStream fullpath( 256 );
-	{
-		fullpath( AppPath_get(), g_pluginsDir, "bitmaps/", filename );
-		if( file_exists( fullpath ) )
-			return QIcon( fullpath.c_str() );
-	}
 
-	{
-		fullpath( GameToolsPath_get(), g_pluginsDir, "bitmaps/", filename );
-		if( file_exists( fullpath ) )
-			return QIcon( fullpath.c_str() );
-	}
+	fullpath( AppPath_get(), g_pluginsDir, "bitmaps/", filename );
+	if( file_exists( fullpath ) )
+		return QIcon( fullpath.c_str() );
 
-	{
-		fullpath( AppPath_get(), g_modulesDir, "bitmaps/", filename );
-		if( file_exists( fullpath ) )
-			return QIcon( fullpath.c_str() );
-	}
+	fullpath( GameToolsPath_get(), g_pluginsDir, "bitmaps/", filename );
+	if( file_exists( fullpath ) )
+		return QIcon( fullpath.c_str() );
+
+	fullpath( AppPath_get(), g_modulesDir, "bitmaps/", filename );
+	if( file_exists( fullpath ) )
+		return QIcon( fullpath.c_str() );
 
 	return {};
 }

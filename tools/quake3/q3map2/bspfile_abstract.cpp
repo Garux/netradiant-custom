@@ -418,7 +418,7 @@ void ParseEntities(){
  * must be called before UnparseEntities
  */
 void InjectCommandLine( const char *stage, const std::vector<const char *>& args ){
-	auto str = StringOutputStream( 256 )( entities[ 0 ].valueForKey( "_q3map2_cmdline" ) ); // read previousCommandLine
+	auto str = StringStream( entities[ 0 ].valueForKey( "_q3map2_cmdline" ) ); // read previousCommandLine
 	if( !str.empty() )
 		str << "; ";
 

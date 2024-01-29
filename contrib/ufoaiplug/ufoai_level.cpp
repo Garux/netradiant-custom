@@ -119,7 +119,7 @@ public:
  */
 void get_team_count( const char *classname, int *count, int *team ){
 	GlobalSceneGraph().traverse( EntityFindTeams( classname, count, team ) );
-	globalOutputStream() << "UFO:AI: classname: " << classname << ": #" << ( *count ) << "\n";
+	globalOutputStream() << "UFO:AI: classname: " << classname << ": #" << ( *count ) << '\n';
 }
 
 /**

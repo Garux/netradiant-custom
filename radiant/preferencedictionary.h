@@ -204,12 +204,12 @@ public:
 			if ( string_equal( element.name(), "qpref" ) ) {
 				Version dataVersion( version_parse( element.attribute( "version" ) ) );
 				if ( !version_compatible( m_version, dataVersion ) ) {
-					globalOutputStream() << "qpref import: data version " << dataVersion << " is not compatible with code version " << m_version << "\n";
+					globalOutputStream() << "qpref import: data version " << dataVersion << " is not compatible with code version " << m_version << '\n';
 					m_xml_stack.push_back( xml_state_t::tag_qpref_ignore );
 				}
 				else
 				{
-					globalOutputStream() << "qpref import: data version " << dataVersion << " is compatible with code version " << m_version << "\n";
+					globalOutputStream() << "qpref import: data version " << dataVersion << " is compatible with code version " << m_version << '\n';
 					m_xml_stack.push_back( xml_state_t::tag_qpref );
 				}
 			}

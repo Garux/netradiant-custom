@@ -45,7 +45,7 @@ const char* build_get_variable( const char* name ){
 	if ( i != g_build_variables.end() ) {
 		return ( *i ).second.c_str();
 	}
-	globalErrorStream() << "undefined build variable: " << makeQuoted( name ) << "\n";
+	globalErrorStream() << "undefined build variable: " << makeQuoted( name ) << '\n';
 	return "";
 }
 
@@ -191,7 +191,7 @@ public:
 		return length;
 	}
 	XMLElementParser& pushElement( const XMLElement& element ){
-		ERROR_MESSAGE( "parse error: invalid element \"" << element.name() << "\"" );
+		ERROR_MESSAGE( "parse error: invalid element " << makeQuoted( element.name() ) );
 		return *this;
 	}
 	void popElement( const char* name ){
@@ -213,7 +213,7 @@ public:
 		return length;
 	}
 	XMLElementParser& pushElement( const XMLElement& element ){
-		ERROR_MESSAGE( "parse error: invalid element \"" << element.name() << "\"" );
+		ERROR_MESSAGE( "parse error: invalid element " << makeQuoted( element.name() ) );
 		return *this;
 	}
 	void popElement( const char* name ){
@@ -245,7 +245,7 @@ public:
 		}
 		else
 		{
-			ERROR_MESSAGE( "parse error: invalid element \"" << element.name() << "\"" );
+			ERROR_MESSAGE( "parse error: invalid element " << makeQuoted( element.name() ) );
 			return *this;
 		}
 	}
@@ -428,7 +428,7 @@ public:
 		}
 		else
 		{
-			//ERROR_MESSAGE("parse error: invalid element \"" << element.name() << "\"");
+			//ERROR_MESSAGE( "parse error: invalid element " << makeQuoted( element.name() ) );
 			return *this;
 		}
 	}
@@ -538,7 +538,7 @@ bool build_commands_parse( const char* filename ){
 
 			return true;
 		}
-		globalErrorStream() << "failed to parse build menu: " << makeQuoted( filename ) << "\n";
+		globalErrorStream() << "failed to parse build menu: " << makeQuoted( filename ) << '\n';
 	}
 	return false;
 }
@@ -555,14 +555,14 @@ public:
 	BuildXMLExporter( const Build& build ) : m_build( build ){
 	}
 	void exportXML( XMLImporter& importer ) const {
-		importer << "\n";
+		importer << '\n';
 		for ( const auto& command : m_build )
 		{
 			StaticElement commandElement( "command" );
 			importer.pushElement( commandElement );
 			command.exportXML( importer );
 			importer.popElement( commandElement.name() );
-			importer << "\n";
+			importer << '\n';
 		}
 	}
 };
@@ -578,7 +578,7 @@ public:
 		StaticElement projectElement( "project" );
 		projectElement.insertAttribute( "version", BUILDMENU_VERSION );
 		importer.pushElement( projectElement );
-		importer << "\n";
+		importer << '\n';
 
 		for ( const auto& [ name, tool ] : m_tools )
 		{
@@ -587,7 +587,7 @@ public:
 			importer.pushElement( toolElement );
 			tool.exportXML( importer );
 			importer.popElement( toolElement.name() );
-			importer << "\n";
+			importer << '\n';
 		}
 		for ( const auto& [ name, build ] : m_project )
 		{
@@ -595,7 +595,7 @@ public:
 				StaticElement buildElement( "separator" );
 				importer.pushElement( buildElement );
 				importer.popElement( buildElement.name() );
-				importer << "\n";
+				importer << '\n';
 			}
 			else
 			{
@@ -605,7 +605,7 @@ public:
 				BuildXMLExporter buildExporter( build );
 				buildExporter.exportXML( importer );
 				importer.popElement( buildElement.name() );
-				importer << "\n";
+				importer << '\n';
 			}
 		}
 		importer.popElement( projectElement.name() );
@@ -619,9 +619,9 @@ void build_commands_write( const char* filename ){
 	if ( !projectFile.failed() ) {
 		XMLStreamWriter writer( projectFile );
 		ProjectXMLExporter projectExporter( g_build_project, g_build_tools );
-		writer << "\n";
+		writer << '\n';
 		projectExporter.exportXML( writer );
-		writer << "\n";
+		writer << '\n';
 	}
 }
 
@@ -920,9 +920,9 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 				tool.evaluate( output );
 				build_set_variable( name.c_str(), output.c_str() );
 			}
-			StringOutputStream stream;
+			StringOutputStream stream( 256 );
 			for( const auto& [ name, var ] : g_build_variables ){
-				stream << "[" << name << "] = " << var << "\n";
+				stream << '[' << name << "] = " << var << '\n';
 			}
 			build_clear_variables();
 
@@ -1041,9 +1041,7 @@ const char* g_buildMenuFullPah(){
 		return g_buildMenu.c_str();
 
 	static StringOutputStream buffer( 256 );
-	buffer.clear();
-	buffer << SettingsPath_get() << g_pGameDescription->mGameFile << "/" << g_buildMenu;
-	return buffer.c_str();
+	return buffer( SettingsPath_get(), g_pGameDescription->mGameFile, '/', g_buildMenu );
 }
 }
 
@@ -1055,11 +1053,10 @@ void LoadBuildMenu(){
 				return;
 		}
 		{
-			StringOutputStream buffer( 256 );
-			buffer << GameToolsPath_get() << "default_build_menu.xml";
+			const auto buffer = StringStream( GameToolsPath_get(), "default_build_menu.xml" );
 
-			bool success = build_commands_parse( buffer.c_str() );
-			ASSERT_MESSAGE( success, "failed to parse default build commands: " << buffer.c_str() );
+			const bool success = build_commands_parse( buffer );
+			ASSERT_MESSAGE( success, "failed to parse default build commands: " << buffer );
 		}
 	}
 }

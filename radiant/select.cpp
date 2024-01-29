@@ -355,7 +355,7 @@ public:
 			}
 			globalOutputStream() << " classname_" << entity->getKeyValue( "classname" );
 		}
-		globalOutputStream() << "\n";
+		globalOutputStream() << '\n';
 //	globalOutputStream() << "" <<  ;
 //	globalOutputStream() << "" <<  ;
 //	globalOutputStream() << "" <<  ;
@@ -377,7 +377,7 @@ public:
 			}
 			globalOutputStream() << " classname_" << entity->getKeyValue( "classname" );
 		}
-		globalOutputStream() << "\n";
+		globalOutputStream() << '\n';
 		--m_depth;
 	}
 };
@@ -695,9 +695,8 @@ void FindReplaceTextures( const char* pFind, const char* pReplace, bool bSelecte
 		return;
 	}
 
-	StringOutputStream command;
-	command << "textureFindReplace -find " << pFind << " -replace " << pReplace;
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream<64>( "textureFindReplace -find ", pFind, " -replace ", pReplace );
+	UndoableCommand undo( command );
 
 	if( shader_equal( pReplace, "textures/" ) )
 		pReplace = 0; //do search
@@ -1122,9 +1121,8 @@ void Nudge( int nDim, float fNudge ){
 }
 
 void Selection_NudgeZ( float amount ){
-	StringOutputStream command;
-	command << "nudgeSelected -axis z -amount " << amount;
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream<64>( "nudgeSelected -axis z -amount ", amount );
+	UndoableCommand undo( command );
 
 	Nudge( 2, amount );
 }
@@ -1462,9 +1460,8 @@ void Selection_NudgeRight(){
 
 
 void Texdef_Rotate( float angle ){
-	StringOutputStream command;
-	command << "brushRotateTexture -angle " << angle;
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream<64>( "brushRotateTexture -angle ", angle );
+	UndoableCommand undo( command );
 	Select_RotateTexture( angle );
 }
 // these are actually {Anti,}Clockwise in BP mode only (AP/220 - 50/50)
@@ -1478,9 +1475,8 @@ void Texdef_RotateAntiClockwise(){
 }
 
 void Texdef_Scale( float x, float y ){
-	StringOutputStream command;
-	command << "brushScaleTexture -x " << x << " -y " << y;
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream<64>( "brushScaleTexture -x ", x, " -y ", y );
+	UndoableCommand undo( command );
 	Select_ScaleTexture( x, y );
 }
 
@@ -1501,9 +1497,8 @@ void Texdef_ScaleRight(){
 }
 
 void Texdef_Shift( float x, float y ){
-	StringOutputStream command;
-	command << "brushShiftTexture -x " << x << " -y " << y;
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream<64>( "brushShiftTexture -x ", x, " -y ", y );
+	UndoableCommand undo( command );
 	Select_ShiftTexture( x, y );
 }
 
@@ -1572,9 +1567,8 @@ void Scene_SnapToGrid_Component_Selected( scene::Graph& graph, float snap ){
 }
 
 void Selection_SnapToGrid(){
-	StringOutputStream command;
-	command << "snapSelected -grid " << GetGridSize();
-	UndoableCommand undo( command.c_str() );
+	const auto command = StringStream<64>( "snapSelected -grid ", GetGridSize() );
+	UndoableCommand undo( command );
 
 	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && GlobalSelectionSystem().countSelectedComponents() ) {
 		Scene_SnapToGrid_Component_Selected( GlobalSceneGraph(), GetGridSize() );
@@ -1629,9 +1623,8 @@ class RotateDialog : public QObject
 	void apply(){
 		const Vector3 eulerXYZ( m_x->value(), m_y->value(), m_z->value() );
 
-		StringOutputStream command;
-		command << "rotateSelectedEulerXYZ -x " << eulerXYZ[0] << " -y " << eulerXYZ[1] << " -z " << eulerXYZ[2];
-		UndoableCommand undo( command.c_str() );
+		const auto command = StringStream<64>( "rotateSelectedEulerXYZ -x ", eulerXYZ[0], " -y ", eulerXYZ[1], " -z ", eulerXYZ[2] );
+		UndoableCommand undo( command );
 
 		GlobalSelectionSystem().rotateSelected( quaternion_for_euler_xyz_degrees( eulerXYZ ) );
 	}
@@ -1722,9 +1715,8 @@ class ScaleDialog : public QObject
 	void apply(){
 		const float sx = m_x->value(), sy = m_y->value(), sz = m_z->value();
 
-		StringOutputStream command;
-		command << "scaleSelected -x " << sx << " -y " << sy << " -z " << sz;
-		UndoableCommand undo( command.c_str() );
+		const auto command = StringStream<64>( "scaleSelected -x ", sx, " -y ", sy, " -z ", sz );
+		UndoableCommand undo( command );
 
 		Select_Scale( sx, sy, sz );
 	}

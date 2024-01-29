@@ -64,11 +64,11 @@ public:
 	void registerModule( const char* type, int version, const char* name, Module& module ){
 		ASSERT_NOTNULL( (volatile intptr_t)&module );
 		if ( !m_modules.insert( Modules_::value_type( ModuleKey( ModuleType( type, version ), name ), &module ) ).second ) {
-			globalErrorStream() << "module already registered: type=" << makeQuoted( type ) << " name=" << makeQuoted( name ) << "\n";
+			globalErrorStream() << "module already registered: type=" << makeQuoted( type ) << " name=" << makeQuoted( name ) << '\n';
 		}
 		else
 		{
-			globalOutputStream() << "Module Registered: type=" << makeQuoted( type ) << " version=" << makeQuoted( version ) << " name=" << makeQuoted( name ) << "\n";
+			globalOutputStream() << "Module Registered: type=" << makeQuoted( type ) << " version=" << makeQuoted( version ) << " name=" << makeQuoted( name ) << '\n';
 		}
 	}
 

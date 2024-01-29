@@ -69,9 +69,7 @@ const char CLIP[] = "Clip";
 
 
 void PrtView_construct(){
-	StringOutputStream tmp( 64 );
-	tmp << GlobalRadiant().getSettingsPath() << "prtview.ini";
-	INIfn = tmp.c_str();
+	INIfn = StringStream( GlobalRadiant().getSettingsPath(), "prtview.ini" );
 
 	portals.show_2d = INIGetInt( RENDER_2D, 0 );
 	portals.width_2d = std::clamp( INIGetInt( WIDTH_2D, 3 ), 1, 10 );

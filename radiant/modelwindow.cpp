@@ -1028,9 +1028,8 @@ protected:
 			GlobalSelectionSystem().setSelectedAll( false );
 			Instance_setSelected( instance, true );
 
-			StringOutputStream sstream( 128 );
-			sstream << m_modBro.m_currentFolderPath << std::next( m_modBro.m_currentFolder->m_files.begin(), m_modBro.m_currentModelId )->c_str();
-			Node_getEntity( node )->setKeyValue( entityClass->miscmodel_key(), sstream.c_str() );
+			const auto sstream = StringStream<128>( m_modBro.m_currentFolderPath, std::next( m_modBro.m_currentFolder->m_files.begin(), m_modBro.m_currentModelId )->c_str() );
+			Node_getEntity( node )->setKeyValue( entityClass->miscmodel_key(), sstream );
 		}
 	}
 	void mouseReleaseEvent( QMouseEvent *event ) override {
@@ -1039,8 +1038,7 @@ protected:
 			m_modBro.tracking_MouseUp();
 		}
 		if ( release == MousePresses::Left && m_modBro.m_move_amount < 16 && m_modBro.m_currentFolder != nullptr && m_modBro.m_currentModelId >= 0 ) { // assign model to selected entity nodes
-			StringOutputStream sstream( 128 );
-			sstream << m_modBro.m_currentFolderPath << std::next( m_modBro.m_currentFolder->m_files.begin(), m_modBro.m_currentModelId )->c_str();
+			const auto sstream = StringStream<128>( m_modBro.m_currentFolderPath, std::next( m_modBro.m_currentFolder->m_files.begin(), m_modBro.m_currentModelId )->c_str() );
 			class EntityVisitor : public SelectionSystem::Visitor
 			{
 				const char* m_filePath;
@@ -1052,7 +1050,7 @@ protected:
 						entity->setKeyValue( entity->getEntityClass().miscmodel_key(), m_filePath );
 					}
 				}
-			} visitor( sstream.c_str() );
+			} visitor( sstream );
 			UndoableCommand undo( "entityAssignModel" );
 			GlobalSelectionSystem().foreachSelected( visitor );
 		}
@@ -1087,17 +1085,17 @@ static void TreeView_onRowActivated( const QModelIndex& index ){
 			const auto found = modelFS->m_folders.find( ModelFS( StringRange( dir.constData(), strlen( dir.constData() ) ) ) );
 			if( found != modelFS->m_folders.end() ){ // ok to not find, while loading root
 				modelFS = &( *found );
-				sstream << dir.constData() << "/";
+				sstream << dir.constData() << '/';
 			}
 		}
 	}
 
-//%						globalOutputStream() << sstream.c_str() << " sstream.c_str()\n";
+//%						globalOutputStream() << sstream << " sstream\n";
 
 	ModelGraph_clear(); // this goes 1st: resets m_currentFolder
 
 	g_ModelBrowser.m_currentFolder = modelFS;
-	g_ModelBrowser.m_currentFolderPath = sstream.c_str();
+	g_ModelBrowser.m_currentFolderPath = sstream;
 
 	{
 		ScopeDisableScreenUpdates disableScreenUpdates( g_ModelBrowser.m_currentFolderPath.c_str(), "Loading Models" );
@@ -1105,7 +1103,7 @@ static void TreeView_onRowActivated( const QModelIndex& index ){
 		for( const CopiedString& filename : g_ModelBrowser.m_currentFolder->m_files ){
 			sstream( g_ModelBrowser.m_currentFolderPath, filename );
 			ModelNode *modelNode = new ModelNode;
-			modelNode->setModel( sstream.c_str() );
+			modelNode->setModel( sstream );
 			NodeSmartReference node( modelNode->node() );
 			Node_getTraversable( g_modelGraph->root() )->insert( node );
 		}
@@ -1125,9 +1123,9 @@ void modelFS_traverse( const ModelFS& modelFS ){
 	static int depth = -1;
 	++depth;
 	for( int i = 0; i < depth; ++i ){
-		globalOutputStream() << "\t";
+		globalOutputStream() << '\t';
 	}
-	globalOutputStream() << modelFS.m_folderName.c_str() << "\n";
+	globalOutputStream() << modelFS.m_folderName << '\n';
 	for( const ModelFS& m : modelFS.m_folders )
 		modelFS_traverse( m );
 
@@ -1150,7 +1148,7 @@ public:
 	// parse string of format *pathToLoad/depth*path2ToLoad/depth*
 	// */depth* for root path
 	ModelFolders( const char* pathsString ){
-		const auto str = StringOutputStream( 128 )( PathCleaned( pathsString ) );
+		const auto str = StringStream<128>( PathCleaned( pathsString ) );
 
 		const char* start = str.c_str();
 		while( 1 ){

@@ -132,15 +132,13 @@ public:
 	ConnectEntities( Entity* e1, Entity* e2, int index ) : m_e1( e1 ), m_e2( e2 ), m_index( index ){
 	}
 	const char *keyname(){
-		StringOutputStream key( 16 );
 		if ( m_index <= 0 ) {
 			return "target";
 		}
 		if ( m_index == 1 ) {
 			return "killtarget";
 		}
-		key << "target" << m_index;
-		return key.c_str();
+		return StringStream<16>( "target", m_index );
 	}
 	void connect( const char* name ){
 		m_e1->setKeyValue( keyname(), name );
@@ -189,26 +187,24 @@ public:
 		if ( g_gameType == eGameTypeDoom3 ) {
 			StringOutputStream key( 16 );
 			if ( index >= 0 ) {
-				key << "target";
+				key( "target" );
 				if ( index != 0 ) {
 					key << index;
 				}
-				e1->setKeyValue( key.c_str(), e2->getKeyValue( "name" ) );
-				key.clear();
+				e1->setKeyValue( key, e2->getKeyValue( "name" ) );
 			}
 			else
 			{
 				for ( unsigned int i = 0; ; ++i )
 				{
-					key << "target";
+					key( "target" );
 					if ( i != 0 ) {
 						key << i;
 					}
-					if ( !e1->hasKeyValue( key.c_str() ) ) {
-						e1->setKeyValue( key.c_str(), e2->getKeyValue( "name" ) );
+					if ( !e1->hasKeyValue( key ) ) {
+						e1->setKeyValue( key, e2->getKeyValue( "name" ) );
 						break;
 					}
-					key.clear();
 				}
 			}
 		}
@@ -227,9 +223,8 @@ public:
 					if ( string_empty( type ) ) {
 						type = "t";
 					}
-					StringOutputStream key( 64 );
-					key << type << "1";
-					GlobalNamespace().makeUnique( key.c_str(), ConnectEntities::ConnectCaller( connector ) );
+					const auto key = StringStream<64>( type, '1' );
+					GlobalNamespace().makeUnique( key, ConnectEntities::ConnectCaller( connector ) );
 				}
 			}
 			//normal connect
@@ -250,9 +245,8 @@ public:
 						if ( string_empty( type ) ) {
 							type = "t";
 						}
-						StringOutputStream key( 64 );
-						key << type << "1";
-						GlobalNamespace().makeUnique( key.c_str(), ConnectEntities::ConnectCaller( connector ) );
+						const auto key = StringStream<64>( type, '1' );
+						GlobalNamespace().makeUnique( key, ConnectEntities::ConnectCaller( connector ) );
 					}
 				}
 			}

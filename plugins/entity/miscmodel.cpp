@@ -67,7 +67,7 @@ class RemapKeysObserver : public Entity::Observer, public ModelSkin
 			const char* split = strchr( value, ';' );
 			if( split != nullptr ){
 				m_from = { value, split };
-				m_to = StringOutputStream( 64 )( PathCleaned( split + 1 ) ).c_str();
+				m_to = StringStream<64>( PathCleaned( split + 1 ) );
 			}
 			else{
 				m_from = "";

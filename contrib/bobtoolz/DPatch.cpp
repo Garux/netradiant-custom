@@ -214,8 +214,8 @@ void Build1dArray( vec3_t* array, const drawVert_t points[MAX_PATCH_WIDTH][MAX_P
 
 void Print1dArray( vec3_t* array, int size ){
 	for ( int i = 0; i < size; i++ )
-		globalOutputStream() << "(" << array[i][0] << " " << array[i][1] << " " << array[i][2] << ")\t";
-	globalOutputStream() << "\n";
+		globalOutputStream() << '(' << array[i][0] << ' ' << array[i][1] << ' ' << array[i][2] << ")\t";
+	globalOutputStream() << '\n';
 }
 
 bool Compare1dArrays( vec3_t* a1, vec3_t* a2, int size ){
@@ -362,14 +362,14 @@ void DPatch::Invert(){
    //Function to figure out what is actually going wrong.
    void DPatch::DebugPrint()
    {
-    globalOutputStream() << "width: " << width << "\theight: " << height << "\n";
+    globalOutputStream() << "width: " << width << "\theight: " << height << '\n';
     for(int x = 0; x < height; x++)
     {
         for(int y = 0; y < width; y++)
         {
-            globalOutputStream() << "\t(" << points[x][y].xyz[0] << " " << points[x][y].xyz[1] << " " << points[x][y].xyz[2] << ")\t";
+            globalOutputStream() << "\t(" << points[x][y].xyz[0] << ' ' << points[x][y].xyz[1] << ' ' << points[x][y].xyz[2] << ")\t";
         }
-        globalOutputStream() << "\n";
+        globalOutputStream() << '\n';
     }
    }
  */

@@ -59,13 +59,13 @@
 
 inline void debug_string( const char* string ){
 #if (DEBUG_RENDER)
-	globalOutputStream() << string << "\n";
+	globalOutputStream() << string << '\n';
 #endif
 }
 
 inline void debug_int( const char* comment, int i ){
 #if (DEBUG_RENDER)
-	globalOutputStream() << comment << " " << i << "\n";
+	globalOutputStream() << comment << ' ' << i << '\n';
 #endif
 }
 
@@ -74,9 +74,9 @@ inline void debug_colour( const char* comment ){
 	Vector4 v;
 	gl().glGetFloatv( GL_CURRENT_COLOR, reinterpret_cast<float*>( &v ) );
 	globalOutputStream() << comment << " colour: "
-	                     << v[0] << " "
-	                     << v[1] << " "
-	                     << v[2] << " "
+	                     << v[0] << ' '
+	                     << v[1] << ' '
+	                     << v[2] << ' '
 	                     << v[3];
 	if ( gl().glIsEnabled( GL_COLOR_ARRAY ) ) {
 		globalOutputStream() << " ARRAY";
@@ -84,7 +84,7 @@ inline void debug_colour( const char* comment ){
 	if ( gl().glIsEnabled( GL_COLOR_MATERIAL ) ) {
 		globalOutputStream() << " MATERIAL";
 	}
-	globalOutputStream() << "\n";
+	globalOutputStream() << '\n';
 #endif
 }
 
@@ -121,7 +121,7 @@ const char* Renderer_GetStats(){
 	                 << " | states: " << g_count_states
 	                 << " | transforms: " << g_count_transforms
 	                 << " | msec: " << g_timer.elapsed_msec();
-	return g_renderer_stats.c_str();
+	return g_renderer_stats;
 }
 
 
@@ -132,7 +132,7 @@ void printShaderLog( GLuint shader ){
 	Array<char> log( log_length );
 	gl().glGetShaderInfoLog( shader, log_length, &log_length, log.data() );
 
-	globalErrorStream() << StringRange( log.begin(), log_length ) << "\n";
+	globalErrorStream() << StringRange( log.begin(), log_length ) << '\n';
 }
 
 void printProgramLog( GLuint program ){
@@ -142,7 +142,7 @@ void printProgramLog( GLuint program ){
 	Array<char> log( log_length );
 	gl().glGetProgramInfoLog( program, log_length, &log_length, log.data() );
 
-	globalErrorStream() << StringRange( log.begin(), log_length ) << "\n";
+	globalErrorStream() << StringRange( log.begin(), log_length ) << '\n';
 }
 
 void createShader( GLuint program, const char* filename, GLenum type ){
@@ -643,7 +643,7 @@ public:
 				if ( lights != 0 ) {
 					CountLights counter;
 					lights->forEachLight( makeCallback1( counter ) );
-					globalOutputStream() << "count = " << counter.count() << "\n";
+					globalOutputStream() << "count = " << counter.count() << '\n';
 					for ( std::size_t i = 0; i < counter.count(); ++i )
 					{
 						g_lightDebugShaders[counter.count()]->addRenderable( renderable, modelview );
@@ -856,7 +856,7 @@ public:
 	~OpenGLShaderCache(){
 		for ( Shaders::iterator i = m_shaders.begin(); i != m_shaders.end(); ++i )
 		{
-			globalOutputStream() << "leaked shader: " << makeQuoted( ( *i ).key ) << "\n";
+			globalOutputStream() << "leaked shader: " << makeQuoted( ( *i ).key ) << '\n';
 		}
 	}
 	Shader* capture( const char* name ){
@@ -865,7 +865,7 @@ public:
 		                || *name == '<'
 		                || *name == '('
 		                || *name == '{'
-		                || strchr( name, '\\' ) == 0, "shader name contains invalid characters: \"" << name << "\"" );
+		                || strchr( name, '\\' ) == 0, "shader name contains invalid characters: " << makeQuoted( name ) );
 #if DEBUG_SHADERS
 		globalOutputStream() << "shaders capture: " << makeQuoted( name ) << '\n';
 #endif
@@ -1160,8 +1160,8 @@ void ShaderCache_Construct(){
 		StringOutputStream buffer( 256 );
 		for ( std::size_t i = 0; i < 256; ++i )
 		{
-			buffer << "(" << g_DebugShaderColours[i].x() << " " << g_DebugShaderColours[i].y() << " " << g_DebugShaderColours[i].z() << ")";
-			g_lightDebugShaders.push_back( g_ShaderCache->capture( buffer.c_str() ) );
+			buffer << '(' << g_DebugShaderColours[i].x() << ' ' << g_DebugShaderColours[i].y() << ' ' << g_DebugShaderColours[i].z() << ')';
+			g_lightDebugShaders.push_back( g_ShaderCache->capture( buffer ) );
 			buffer.clear();
 		}
 #endif
@@ -1179,8 +1179,8 @@ void ShaderCache_Destroy(){
 		StringOutputStream buffer( 256 );
 		for ( std::size_t i = 0; i < 256; ++i )
 		{
-			buffer << "(" << g_DebugShaderColours[i].x() << " " << g_DebugShaderColours[i].y() << " " << g_DebugShaderColours[i].z() << ")";
-			g_ShaderCache->release( buffer.c_str() );
+			buffer << '(' << g_DebugShaderColours[i].x() << ' ' << g_DebugShaderColours[i].y() << ' ' << g_DebugShaderColours[i].z() << ')';
+			g_ShaderCache->release( buffer );
 		}
 #endif
 	}
@@ -1249,7 +1249,7 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 		gl().glLoadIdentity();
 		GLint viewprt[4];
 		gl().glGetIntegerv( GL_VIEWPORT, viewprt );
-		//globalOutputStream() << viewprt[2] << " " << viewprt[3] << "\n";
+		//globalOutputStream() << viewprt[2] << ' ' << viewprt[3] << '\n';
 		gl().glOrtho( 0, viewprt[2], 0, viewprt[3], -100, 100 );
 		gl().glTranslated( double( viewprt[2] ) / 2.0, double( viewprt[3] ) / 2.0, 0 );
 		gl().glMatrixMode( GL_MODELVIEW );

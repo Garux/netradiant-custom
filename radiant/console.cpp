@@ -56,11 +56,10 @@ void Sys_LogFile( bool enable ){
 		// open a file to log the console (if user prefs say so)
 		// the file handle is g_hLogFile
 		// the log file is erased
-		StringOutputStream name( 256 );
-		name << SettingsPath_get() << "radiant.log";
-		g_hLogFile = fopen( name.c_str(), "w" );
+		const auto name = StringStream( SettingsPath_get(), "radiant.log" );
+		g_hLogFile = fopen( name, "w" );
 		if ( g_hLogFile != 0 ) {
-			globalOutputStream() << "Started logging to " << name.c_str() << "\n";
+			globalOutputStream() << "Started logging to " << name << '\n';
 			time_t localtime;
 			time( &localtime );
 			globalOutputStream() << "Today is: " << ctime( &localtime )
@@ -75,7 +74,7 @@ void Sys_LogFile( bool enable ){
 		// settings say we should not be logging but still we have an active logfile .. close it
 		time_t localtime;
 		time( &localtime );
-		globalOutputStream() << "Closing log file at " << ctime( &localtime ) << "\n";
+		globalOutputStream() << "Closing log file at " << ctime( &localtime ) << '\n';
 		fclose( g_hLogFile );
 		g_hLogFile = 0;
 	}

@@ -809,9 +809,7 @@ private:
 		if( extent != _extents[i] ){
 			_extents[i] = extent;
 			m_labels[i].texFree();
-			StringOutputStream stream( 16 );
-			stream << ( extent * 2 );
-			m_labels[i].texAlloc( stream.c_str(), getColor( i ) );
+			m_labels[i].texAlloc( StringStream<16>( extent * 2 ), getColor( i ) );
 		}
 	}
 };
@@ -1113,7 +1111,7 @@ void context_menu_show(){
 /* GDK_2BUTTON_PRESS doesn't always work in this case, so... */
 /* with Qt freezepointer interrupts internal doubleclick timer, so use custom one */
 inline bool context_menu_try( const CamWnd& camwnd ){
-	//globalOutputStream() << camwnd->m_rightClickTimer.elapsed_msec() << "\n";
+	//globalOutputStream() << camwnd->m_rightClickTimer.elapsed_msec() << '\n';
 	return camwnd.m_rightClickTimer.elapsed_msec() < 250;
 	//doesn't work if cam redraw > 200msec (3x click works): gtk_widget_queue_draw proceeds after timer.start()
 }
@@ -1281,7 +1279,7 @@ static void camera_zoom( CamWnd& camwnd, float x, float y, float step ){
 		normalized *= ( camera_t::near_z * 2.f );
 			//globalOutputStream() << normalized << " normalized    ";
 		matrix4_transform_point( screen2world, normalized );
-			//globalOutputStream() << normalized << "\n";
+			//globalOutputStream() << normalized << '\n';
 		const Vector3 norm = vector3_normalised( normalized - Camera_getOrigin( camwnd ) );
 			//globalOutputStream() << normalized - Camera_getOrigin( *camwnd ) << "  normalized - Camera_getOrigin( *camwnd )\n";
 			//globalOutputStream() << norm << "  norm\n";
@@ -2105,9 +2103,7 @@ void CamWnd::Cam_Draw(){
 	if ( g_camwindow_globals.m_showStats ) {
 		gl().glRasterPos3f( 1.0f, static_cast<float>( m_Camera.height ), 0.0f );
 		extern const char* Renderer_GetStats();
-		StringOutputStream stream;
-		stream << Renderer_GetStats() << " | f2f: " << m_render_time.elapsed_msec();
-		GlobalOpenGL().drawString( stream.c_str() );
+		GlobalOpenGL().drawString( StringStream( Renderer_GetStats(), " | f2f: ", m_render_time.elapsed_msec() ) );
 		m_render_time.start();
 
 		gl().glRasterPos3f( 1.0f, static_cast<float>( m_Camera.height ) - GlobalOpenGL().m_font->getPixelHeight(), 0.0f );
@@ -2478,13 +2474,13 @@ typedef FreeCaller1<bool, CamWnd_Move_Discrete_Import> CamWndMoveDiscreteImportC
 void CameraSpeed_increase(){
 	g_camwindow_globals_private.m_nMoveSpeed = std::min( g_camwindow_globals_private.m_nMoveSpeed + CAM_SPEED_STEP, CAM_MAX_SPEED );
 	globalOutputStream() << " ++Camera Move Speed: ";
-	globalWarningStream() << g_camwindow_globals_private.m_nMoveSpeed << "\n";
+	globalWarningStream() << g_camwindow_globals_private.m_nMoveSpeed << '\n';
 }
 
 void CameraSpeed_decrease(){
 	g_camwindow_globals_private.m_nMoveSpeed = std::max( g_camwindow_globals_private.m_nMoveSpeed - CAM_SPEED_STEP, CAM_MIN_SPEED );
 	globalOutputStream() << " --Camera Move Speed: ";
-	globalWarningStream() << g_camwindow_globals_private.m_nMoveSpeed << "\n";
+	globalWarningStream() << g_camwindow_globals_private.m_nMoveSpeed << '\n';
 }
 
 /// \brief Initialisation for things that have the same lifespan as this module.

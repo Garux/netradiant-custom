@@ -872,7 +872,7 @@ static int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 	Sys_Printf( "--- Convert BSP to MAP ---\n" );
 
 	/* create map filename from the bsp name */
-	auto name = StringOutputStream( 256 )( PathExtensionless( bspName ), "_converted.map" );
+	const auto name = StringStream( PathExtensionless( bspName ), "_converted.map" );
 	Sys_Printf( "writing %s\n", name.c_str() );
 
 	/* open it */

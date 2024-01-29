@@ -34,11 +34,11 @@
 #include <cstdlib>
 
 void user_warning_fn( png_structp png_ptr, png_const_charp warning_msg ){
-	globalWarningStream() << "libpng warning: " << warning_msg << "\n";
+	globalWarningStream() << "libpng warning: " << warning_msg << '\n';
 }
 
 void user_error_fn( png_structp png_ptr, png_const_charp error_msg ){
-	globalErrorStream() << "libpng error: " << error_msg << "\n";
+	globalErrorStream() << "libpng error: " << error_msg << '\n';
 	longjmp( png_jmpbuf(png_ptr), 0 );
 }
 

@@ -268,7 +268,7 @@ void BeginMapShaderFile( const char *mapFile ){
 	mapName( PathFilename( mapFile ) );
 
 	/* append ../scripts/q3map2_<mapname>.shader */
-	mapShaderFile = StringOutputStream( 256 )( PathFilenameless( mapFile ), "../", g_game->shaderPath, "/q3map2_", mapName.c_str(), ".shader" );
+	mapShaderFile = StringStream( PathFilenameless( mapFile ), "../", g_game->shaderPath, "/q3map2_", mapName.c_str(), ".shader" );
 	Sys_FPrintf( SYS_VRB, "Map has shader script %s\n", mapShaderFile.c_str() );
 
 	/* remove it */
@@ -1732,7 +1732,7 @@ static void ParseShaderFile( const char *filename ){
 				/* q3map_material (sof2) */
 				else if ( striEqual( token, "q3map_material" ) ) {
 					text.GetToken( false );
-					if ( !ApplySurfaceParm( StringOutputStream( 64 )( "*mat_", token ), &si->contentFlags, &si->surfaceFlags, &si->compileFlags ) ) {
+					if ( !ApplySurfaceParm( StringStream<64>( "*mat_", token ), &si->contentFlags, &si->surfaceFlags, &si->compileFlags ) ) {
 						Sys_Warning( "Unknown material \"%s\"\n", token );
 					}
 				}
@@ -1857,7 +1857,7 @@ void LoadShaderInfo(){
 	}
 
 	/* we can pile up several shader files, the one in baseq3 and ones in the mod dir or other spots */
-	const auto filename = StringOutputStream( 64 )( g_game->shaderPath, "/shaderlist.txt" );
+	const auto filename = StringStream<64>( g_game->shaderPath, "/shaderlist.txt" );
 	const int count = vfsGetFileCount( filename );
 
 	/* load them all */
@@ -1894,7 +1894,7 @@ void LoadShaderInfo(){
 	/* parse the shader files */
 	for ( const CopiedString& file : shaderFiles )
 	{
-		ParseShaderFile( StringOutputStream( 64 )( g_game->shaderPath, '/', file ) );
+		ParseShaderFile( StringStream<64>( g_game->shaderPath, '/', file ) );
 	}
 
 	/* emit some statistics */

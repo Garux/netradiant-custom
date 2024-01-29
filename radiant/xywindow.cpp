@@ -677,7 +677,7 @@ void XYWnd_OrientCamera( XYWnd* xywnd, int x, int y, CamWnd& camwnd ){
 		}
 		Camera_setAngles( camwnd, angles );
 	}
-	//globalOutputStream() << Camera_getAngles( camwnd ) << "\n";
+	//globalOutputStream() << Camera_getAngles( camwnd ) << '\n';
 }
 
 unsigned int SetCustomPivotOrigin_buttons(){
@@ -1062,11 +1062,10 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 		m_window_observer->onMouseMotion( WindowVector( x, y ), modifiers_for_flags( buttons ) );
 
 		{
-			StringOutputStream status( 64 );
-			status << "x:: " << FloatFormat( m_mousePosition[0], 6, 1 )
-			       << "  y:: " << FloatFormat( m_mousePosition[1], 6, 1 )
-			       << "  z:: " << FloatFormat( m_mousePosition[2], 6, 1 );
-			g_pParentWnd->SetStatusText( c_status_position, status.c_str() );
+			const auto status = StringStream<64>( "x:: ", FloatFormat( m_mousePosition[0], 6, 1 ),
+			                                    "  y:: ", FloatFormat( m_mousePosition[1], 6, 1 ),
+			                                    "  z:: ", FloatFormat( m_mousePosition[2], 6, 1 ) );
+			g_pParentWnd->SetStatusText( c_status_position, status );
 		}
 
 		if ( g_bCrossHairs && button_for_flags( buttons ) == c_buttonInvalid ) { // don't update with a button pressed, observer calls update itself
@@ -1159,17 +1158,14 @@ void BackgroundImage::render( const VIEWTYPE viewtype ){
 #include "qe3.h"
 #include "os/file.h"
 const char* BackgroundImage::background_image_dialog(){
-	StringOutputStream buffer( 1024 );
+	auto buffer = StringStream( g_qeglobals.m_userGamePath, "textures/" );
 
-	buffer << g_qeglobals.m_userGamePath << "textures/";
-
-	if ( !file_readable( buffer.c_str() ) ) {
+	if ( !file_readable( buffer ) ) {
 		// just go to fsmain
-		buffer.clear();
-		buffer << g_qeglobals.m_userGamePath;
+		buffer( g_qeglobals.m_userGamePath );
 	}
 
-	const char *filename = file_dialog( MainFrame_getWindow(), true, "Background Image", buffer.c_str() );
+	const char *filename = file_dialog( MainFrame_getWindow(), true, "Background Image", buffer );
 	if ( filename != 0 ) {
 		// use VFS to get the correct relative path
 		const char* relative = path_make_relative( filename, GlobalFileSystem().findRoot( filename ) );
@@ -1202,16 +1198,16 @@ void BackgroundImage::set( const VIEWTYPE viewtype ){
 		free_tex();
 		const char *filename = background_image_dialog();
 		if( filename ){
-			const auto filename_noext = StringOutputStream( 256 )( PathExtensionless( filename ) );
-			Image *image = QERApp_LoadImage( 0, filename_noext.c_str() );
+			const auto filename_noext = StringStream( PathExtensionless( filename ) );
+			Image *image = QERApp_LoadImage( 0, filename_noext );
 			if ( !image ) {
-				globalErrorStream() << "Could not load texture " << filename_noext.c_str() << "\n";
+				globalErrorStream() << "Could not load texture " << filename_noext << '\n';
 			}
 			else{
 				qtexture_t* qtex = (qtexture_t*)malloc( sizeof( qtexture_t ) ); /* srs hack :E */
 				LoadTextureRGBA( qtex, image->getRGBAPixels(), image->getWidth(), image->getHeight() );
 				if( qtex->texture_number > 0 ){
-					globalOutputStream() << "Loaded background texture " << filename << "\n";
+					globalOutputStream() << "Loaded background texture " << filename << '\n';
 					_tex = qtex->texture_number;
 					_viewtype = viewtype;
 
@@ -1574,7 +1570,7 @@ void XYWnd::XY_DrawBlockGrid(){
 }
 
 void XYWnd::DrawCameraIcon( const Vector3& origin, const Vector3& angles ){
-//	globalOutputStream() << "pitch " << angles[CAMERA_PITCH] << "   yaw " << angles[CAMERA_YAW] << "\n";
+//	globalOutputStream() << "pitch " << angles[CAMERA_PITCH] << "   yaw " << angles[CAMERA_YAW] << '\n';
 	const float fov = 48 / m_fScale;
 	const float box = 16 / m_fScale;
 
@@ -1664,7 +1660,7 @@ void XYWnd::PaintSizeInfo( const int nDim1, const int nDim2 ){
 	v[nDim1] = min[nDim1] + 4.f;
 	v[nDim2] = max[nDim2] + 5.f / m_fScale;
 	gl().glRasterPos3fv( vector3_to_array( v ) );
-	GlobalOpenGL().drawString( dimensions( "(", dimStrings[nDim1], min[nDim1], "  ", dimStrings[nDim2], max[nDim2], ")" ) );
+	GlobalOpenGL().drawString( dimensions( '(', dimStrings[nDim1], min[nDim1], "  ", dimStrings[nDim2], max[nDim2], ')' ) );
 }
 
 class XYRenderer : public Renderer
@@ -1931,7 +1927,7 @@ void XYWnd::XY_Draw(){
 
 		gl().glRasterPos3f( 2.f, 0.f, 0.0f );
 		extern const char* Renderer_GetStats();
-		GlobalOpenGL().drawString( StringOutputStream( 64 )( Renderer_GetStats(), " | f2f: ", m_render_time.elapsed_msec() ) );
+		GlobalOpenGL().drawString( StringStream<64>( Renderer_GetStats(), " | f2f: ", m_render_time.elapsed_msec() ) );
 		m_render_time.start();
 	}
 }

@@ -356,7 +356,7 @@ void WritePortalFile( const tree_t& tree ){
 	Sys_FPrintf( SYS_VRB, "--- WritePortalFile ---\n" );
 
 	// write the file
-	auto filename = StringOutputStream( 256 )( source, ".prt" );
+	const auto filename = StringStream( source, ".prt" );
 	Sys_Printf( "writing %s\n", filename.c_str() );
 	pf = SafeOpenWrite( filename, "wt" );
 

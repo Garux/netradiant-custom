@@ -85,13 +85,13 @@ class NameObserver
 
 	void construct(){
 		if ( !empty() ) {
-			//globalOutputStream() << "construct " << makeQuoted(c_str()) << "\n";
+			//globalOutputStream() << "construct " << makeQuoted(c_str()) << '\n';
 			m_names.insert( name_read( c_str() ) );
 		}
 	}
 	void destroy(){
 		if ( !empty() ) {
-			//globalOutputStream() << "destroy " << makeQuoted(c_str()) << "\n";
+			//globalOutputStream() << "destroy " << makeQuoted(c_str()) << '\n';
 			m_names.erase( name_read( c_str() ) );
 		}
 	}
@@ -133,12 +133,12 @@ public:
 		std::pair<Names::iterator, bool> result = m_names.insert( Names::value_type( setName, m_uniqueNames ) );
 		ASSERT_MESSAGE( result.second, "cannot attach name" );
 		attachObserver( NameObserver::NameChangedCaller( ( *result.first ).second ) );
-		//globalOutputStream() << "attach: " << reinterpret_cast<const unsigned int&>(setName) << "\n";
+		//globalOutputStream() << "attach: " << reinterpret_cast<const unsigned int&>(setName) << '\n';
 	}
 	void detach( const NameCallback& setName, const NameCallbackCallback& detachObserver ){
 		Names::iterator i = m_names.find( setName );
 		ASSERT_MESSAGE( i != m_names.end(), "cannot detach name" );
-		//globalOutputStream() << "detach: " << reinterpret_cast<const unsigned int&>(setName) << "\n";
+		//globalOutputStream() << "detach: " << reinterpret_cast<const unsigned int&>(setName) << '\n';
 		detachObserver( NameObserver::NameChangedCaller( ( *i ).second ) );
 		m_names.erase( i );
 	}
@@ -169,7 +169,7 @@ public:
 			char buffer[1024];
 			name_write( buffer, uniqueName );
 
-			//globalOutputStream() << "renaming " << makeQuoted(name.c_str()) << " to " << makeQuoted(buffer) << "\n";
+			//globalOutputStream() << "renaming " << makeQuoted(name.c_str()) << " to " << makeQuoted(buffer) << '\n';
 
 			for ( const NameCallback& nameCallback : setNameCallbacks )
 			{
@@ -931,7 +931,7 @@ void DoMapInfo(){
 	int n_groupents_ingame = 0;
 	Scene_CountStuff( n_ents_ingame, n_groupents, n_groupents_ingame );
 
-	StringOutputStream str;
+	StringOutputStream str( 32 );
 	w_brushes->setText( str( "<b><i>", g_brushCount.get(), "</b></i>" ).c_str() );
 	w_patches->setText( str( "<b><i>", g_patchCount.get(), "</b></i>" ).c_str() );
 	w_ents->setText( str( "<b><i>", g_entityCount.get(), "</b></i>" ).c_str() );
@@ -964,7 +964,7 @@ public:
  */
 
 void Map_LoadFile( const char *filename ){
-	globalOutputStream() << "Loading map from " << filename << "\n";
+	globalOutputStream() << "Loading map from " << filename << '\n';
 	ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Loading Map" );
 
 	{
@@ -977,7 +977,7 @@ void Map_LoadFile( const char *filename ){
 	}
 
 	globalOutputStream() << "--- LoadMapFile ---\n";
-	globalOutputStream() << g_map.m_name << "\n";
+	globalOutputStream() << g_map.m_name << '\n';
 
 	globalOutputStream() << g_brushCount.get() + g_patchCount.get() << " primitives\n";
 	globalOutputStream() << g_entityCount.get() << " entities\n";
@@ -1538,12 +1538,12 @@ tryDecompile:
 	const char *type = GlobalRadiant().getGameDescriptionKeyValue( "q3map2_type" );
 	if ( path_extension_is( filename, "bsp" ) || path_extension_is( filename, "map" ) ) {
 		StringOutputStream str( 256 );
-		str << AppPath_get() << "q3map2." << RADIANT_EXECUTABLE;
-		str << " -v -game " << ( ( type && *type ) ? type : "quake3" );
-		str << " -fs_basepath " << makeQuoted( EnginePath_get() );
-		str << " -fs_homepath " << makeQuoted( g_qeglobals.m_userEnginePath.c_str() );
-		str << " -fs_game " << gamename_get();
-		str << " -convert -format " << ( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ) == TEXDEFTYPEID_QUAKE ? "map" : "map_bp" );
+		str << AppPath_get() << "q3map2." << RADIANT_EXECUTABLE
+		    << " -v -game " << ( ( type && *type ) ? type : "quake3" )
+		    << " -fs_basepath " << makeQuoted( EnginePath_get() )
+		    << " -fs_homepath " << makeQuoted( g_qeglobals.m_userEnginePath )
+		    << " -fs_game " << gamename_get()
+		    << " -convert -format " << ( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ) == TEXDEFTYPEID_QUAKE ? "map" : "map_bp" );
 		if ( path_extension_is( filename, "map" ) ) {
 			str << " -readmap ";
 		}
@@ -1927,9 +1927,9 @@ public:
 
 void Scene_FindEntityBrush( std::size_t entity, std::size_t brush, scene::Path& path ){
 	path.push( makeReference( GlobalSceneGraph().root() ) );
-	{
-		Node_getTraversable( path.top() )->traverse( EntityFindByIndexWalker( entity, path ) );
-	}
+
+	Node_getTraversable( path.top() )->traverse( EntityFindByIndexWalker( entity, path ) );
+
 	if ( path.size() == 2 ) {
 		scene::Traversable* traversable = Node_getTraversable( path.top() );
 		if ( traversable != 0 ) {
@@ -2112,8 +2112,7 @@ void map_autocaulk_selected(){
 
 	ScopeDisableScreenUpdates disableScreenUpdates( "processing", "autocaulk" );
 
-	StringOutputStream filename( 256 );
-	filename << PathExtensionless( g_map.m_name.c_str() ) << "_ac.map";
+	auto filename = StringStream( PathExtensionless( g_map.m_name.c_str() ), "_ac.map" );
 
 	{	// write .map
 		const Vector3 spawn( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ) );
@@ -2127,9 +2126,9 @@ void map_autocaulk_selected(){
 			return;
 		}
 
-		TextFileOutputStream file( filename.c_str() );
+		TextFileOutputStream file( filename );
 		if ( file.failed() ) {
-			globalErrorStream() << "writing " << filename.c_str() << " failure\n";
+			globalErrorStream() << "writing " << filename << " failure\n";
 			return;
 		}
 
@@ -2168,10 +2167,10 @@ void map_autocaulk_selected(){
 		// spawn
 		file << "{\n"
 		        "\"classname\" \"info_player_start\"\n"
-		        "\"origin\" \"" << spawn[0] << " " << spawn[1] << " " << spawn[2] << "\"\n"
+		        "\"origin\" \"" << spawn[0] << ' ' << spawn[1] << ' ' << spawn[2] << "\"\n"
 		        "}\n";
 		// point entities
-		const MapFormat& format = MapFormat_forFile( filename.c_str() );
+		const MapFormat& format = MapFormat_forFile( filename );
 		auto traverse_selected_point_entities = []( scene::Node& root, const scene::Traversable::Walker& walker ){
 			scene::Traversable* traversable = Node_getTraversable( root );
 			if ( traversable != 0 ) {
@@ -2216,7 +2215,7 @@ void map_autocaulk_selected(){
 		    << " -fs_homepath " << makeQuoted( g_qeglobals.m_userEnginePath )
 		    << " -fs_game " << gamename_get()
 		    << " -autocaulk -fulldetail "
-		    << makeQuoted( filename.c_str() );
+		    << makeQuoted( filename );
 		// run
 		Q_Exec( NULL, str.c_str(), NULL, false, true );
 	}
@@ -2224,12 +2223,11 @@ void map_autocaulk_selected(){
 	typedef std::map<std::size_t, CopiedString> CaulkMap;
 	CaulkMap map;
 	{	// load
-		filename.clear();
-		filename << PathExtensionless( g_map.m_name.c_str() ) << "_ac.caulk";
+		filename( PathExtensionless( g_map.m_name.c_str() ), "_ac.caulk" );
 
-		TextFileInputStream file( filename.c_str() );
+		TextFileInputStream file( filename );
 		if( file.failed() ){
-			globalErrorStream() << "reading " << filename.c_str() << " failure\n";
+			globalErrorStream() << "reading " << filename << " failure\n";
 			return;
 		}
 
@@ -2315,9 +2313,8 @@ void map_autocaulk_selected(){
 		CaulkBrushesWalker caulkBrushesWalker( map );
 		GlobalUndoSystem().start();
 		Map_Traverse_Selected( GlobalSceneGraph().root(), caulkBrushesWalker );
-		StringOutputStream str( 32 );
-		str << "AutoCaulk " << caulkBrushesWalker.m_caulkedCount << " faces";
-		GlobalUndoSystem().finish( str.c_str() );
+		const auto str = StringStream<32>( "AutoCaulk ", caulkBrushesWalker.m_caulkedCount, " faces" );
+		GlobalUndoSystem().finish( str );
 	}
 }
 
@@ -2365,10 +2362,8 @@ public:
 	void realise(){
 		if ( --m_unrealised == 0 ) {
 			ASSERT_MESSAGE( !g_qeglobals.m_userGamePath.empty(), "maps_directory: user-game-path is empty" );
-			StringOutputStream buffer( 256 );
-			buffer << g_qeglobals.m_userGamePath << "maps/";
-			Q_mkdir( buffer.c_str() );
-			g_mapsPath = buffer.c_str();
+			g_mapsPath = StringStream( g_qeglobals.m_userGamePath, "maps/" );
+			Q_mkdir( g_mapsPath.c_str() );
 		}
 	}
 	void unrealise(){
