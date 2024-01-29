@@ -279,28 +279,17 @@ bool check_version(){
 	// let's leave it disabled in debug mode in any case
 	// http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=431
 #ifndef _DEBUG
-#define CHECK_VERSION
-#endif
-#ifdef CHECK_VERSION
 	// locate and open RADIANT_MAJOR and RADIANT_MINOR
-	bool bVerIsGood = true;
-	{
-		bVerIsGood = check_version_file( StringStream( AppPath_get(), "RADIANT_MAJOR" ), RADIANT_MAJOR_VERSION );
-	}
-	{
-		bVerIsGood = check_version_file( StringStream( AppPath_get(), "RADIANT_MINOR" ), RADIANT_MINOR_VERSION );
-	}
-
-	if ( !bVerIsGood ) {
+	if ( !( check_version_file( StringStream( AppPath_get(), "RADIANT_MAJOR" ), RADIANT_MAJOR_VERSION )
+	     && check_version_file( StringStream( AppPath_get(), "RADIANT_MINOR" ), RADIANT_MINOR_VERSION ) ) ) {
 		const auto msg = StringStream(
 			"This editor binary (" RADIANT_VERSION ") doesn't match what the latest setup has configured in this directory\n"
 			"Make sure you run the right/latest editor binary you installed\n", AppPath_get() );
 		qt_MessageBox( 0, msg, "Radiant" );
+		return false;
 	}
-	return bVerIsGood;
-#else
-	return true;
 #endif
+	return true;
 }
 
 void create_global_pid(){
