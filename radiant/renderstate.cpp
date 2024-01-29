@@ -598,7 +598,7 @@ class CountLights
 {
 	std::size_t m_count;
 public:
-	typedef RendererLight& first_argument_type;
+	typedef const RendererLight& first_argument_type;
 
 	CountLights() : m_count( 0 ){
 	}
@@ -1160,9 +1160,7 @@ void ShaderCache_Construct(){
 		StringOutputStream buffer( 256 );
 		for ( std::size_t i = 0; i < 256; ++i )
 		{
-			buffer << '(' << g_DebugShaderColours[i].x() << ' ' << g_DebugShaderColours[i].y() << ' ' << g_DebugShaderColours[i].z() << ')';
-			g_lightDebugShaders.push_back( g_ShaderCache->capture( buffer ) );
-			buffer.clear();
+			g_lightDebugShaders.push_back( g_ShaderCache->capture( buffer( '(', g_DebugShaderColours[i].x(), ' ', g_DebugShaderColours[i].y(), ' ', g_DebugShaderColours[i].z(), ')' ) ) );
 		}
 #endif
 	}
@@ -1179,8 +1177,7 @@ void ShaderCache_Destroy(){
 		StringOutputStream buffer( 256 );
 		for ( std::size_t i = 0; i < 256; ++i )
 		{
-			buffer << '(' << g_DebugShaderColours[i].x() << ' ' << g_DebugShaderColours[i].y() << ' ' << g_DebugShaderColours[i].z() << ')';
-			g_ShaderCache->release( buffer );
+			g_ShaderCache->release( buffer( '(', g_DebugShaderColours[i].x(), ' ', g_DebugShaderColours[i].y(), ' ', g_DebugShaderColours[i].z(), ')' ) );
 		}
 #endif
 	}
