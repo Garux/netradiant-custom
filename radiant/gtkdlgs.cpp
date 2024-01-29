@@ -2230,7 +2230,7 @@ class TextEditor : public QObject
 
 		auto *hbox = new QHBoxLayout;
 		vbox->addLayout( hbox );
-		hbox->setContentsMargins( 0, 0, 0, 0 );
+		hbox->setContentsMargins( 4, 0, 4, 4 );
 
 		m_button = new QPushButton( "Save" );
 		m_button->setSizePolicy( QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed );

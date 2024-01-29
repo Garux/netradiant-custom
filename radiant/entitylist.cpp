@@ -283,7 +283,7 @@ void EntityList_constructWindow( QWidget* main_window ){
 	g_guiSettings.addWindow( window, "EntityList/geometry", 350, 500 );
 	{
 		auto *vbox = new QVBoxLayout( window );
-		vbox->setContentsMargins( 0, 0, 0, 0 );
+		vbox->setContentsMargins( 4, 0, 4, 4 );
 		{
 			auto *tree = getEntityList().m_tree_view = new QTreeView;
 			tree->setHeaderHidden( true );

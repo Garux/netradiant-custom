@@ -1237,6 +1237,7 @@ QWidget* EntityInspector_constructWindow( QWidget* toplevel ){
 		{
 			// key/value entry
 			auto grid = new QGridLayout;
+			grid->setContentsMargins( 4, 0, 4, 0 );
 			vbox->addLayout( grid );
 			{
 				grid->addWidget( new QLabel( "Key" ), 0, 0 );
@@ -1284,6 +1285,7 @@ QWidget* EntityInspector_constructWindow( QWidget* toplevel ){
 		}
 		{
 			auto hbox = new QHBoxLayout;
+			hbox->setContentsMargins( 4, 0, 4, 0 );
 			vbox->addLayout( hbox );
 			{
 				auto b = new QPushButton( "Clear All" );
