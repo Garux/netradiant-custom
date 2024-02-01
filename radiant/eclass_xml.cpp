@@ -300,7 +300,7 @@ public:
 		m_eclass->name_set( name );
 
 		const char* color = element.attribute( "color" );
-		ASSERT_MESSAGE( !string_empty( name ), "color attribute not specified for class " << name );
+		ASSERT_MESSAGE( !string_empty( color ), "color attribute not specified for class " << name );
 		string_parse_vector3( color, m_eclass->color );
 		eclass_capture_state( m_eclass );
 
