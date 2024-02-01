@@ -253,7 +253,7 @@ void environment_init( int argc, char* argv[] ){
 	{
 		char real[PATH_MAX];
 		app_filepath = getexename( real );
-		ASSERT_MESSAGE( !string_empty( app_filepath.c_str() ), "failed to deduce app path" );
+		ASSERT_MESSAGE( !app_filepath.empty(), "failed to deduce app path" );
 		// NOTE: we build app path with a trailing '/'
 		// it's a general convention in Radiant to have the slash at the end of directories
 		app_path = PathFilenameless( real );

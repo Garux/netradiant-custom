@@ -492,7 +492,7 @@ struct ModelResource : public Resource
 		return true;
 	}
 	bool isModified() const {
-		return ( ( !string_empty( m_path.c_str() ) // had or has an absolute path
+		return ( ( !m_path.empty() // had or has an absolute path
 		           && m_modified != modified() ) // AND disk timestamp changed
 		         || !path_equal( rootPath( m_originalName.c_str() ), m_path.c_str() ) ); // OR absolute vfs-root changed
 	}

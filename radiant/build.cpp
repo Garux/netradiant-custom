@@ -125,7 +125,7 @@ public:
 	void evaluate( StringBuffer& output ) const override {
 		StringBuffer buffer;
 		m_test->evaluate( buffer );
-		if ( !string_empty( buffer.c_str() ) ) {
+		if ( !buffer.empty() ) {
 			m_result->evaluate( output );
 		}
 	}

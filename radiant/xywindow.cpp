@@ -827,13 +827,13 @@ public:
 		m_stack.push_back( MenuPair( menu, "" ) );
 	}
 	~EntityClassMenuInserter(){
-		if ( !string_empty( m_previous.c_str() ) ) {
+		if ( !m_previous.empty() ) {
 			addItem( m_previous.c_str(), "" );
 		}
 	}
 	void visit( EntityClass* e ){
 		ASSERT_MESSAGE( !string_empty( e->name() ), "entity-class has no name" );
-		if ( !string_empty( m_previous.c_str() ) ) {
+		if ( !m_previous.empty() ) {
 			addItem( m_previous.c_str(), e->name() );
 		}
 		m_previous = e->name();

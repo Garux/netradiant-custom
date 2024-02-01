@@ -333,7 +333,7 @@ typedef std::pair<LoadImageCallback, CopiedString> TextureKey;
 
 void qtexture_realise( qtexture_t& texture, const TextureKey& key ){
 	texture.texture_number = 0;
-	if ( !string_empty( key.second.c_str() ) ) {
+	if ( !key.second.empty() ) {
 		if( !key.first.m_skybox ){
 			Image* image = key.first.loadImage( key.second.c_str() );
 			if ( image != 0 ) {
