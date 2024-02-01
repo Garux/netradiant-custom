@@ -27,6 +27,7 @@
 #include <cstring>
 #include <cctype>
 #include <algorithm>
+#include <utility>
 
 #include "memory/allocator.h"
 #include "generic/arrayrange.h"
@@ -366,8 +367,8 @@ public:
 	String( const String& other )
 		: Buffer( other ){
 	}
-	String( String&& other ) noexcept {
-		swap( other );
+	String( String&& other ) noexcept
+		: Buffer( std::move( other ) ) {
 	}
 
 	String& operator=( const String& other ){
@@ -484,14 +485,58 @@ public:
 	}
 };
 
+/// \brief A non-mutable string buffer which manages memory allocation.
+class DefaultCopiedBuffer
+{
+	char* m_string;
+
+	char* copy_range( StringRange range ){
+		return string_clone_range( range );
+	}
+	char* copy( const char* other ){
+		return string_clone( other );
+	}
+	void destroy( char* string ){
+		string_release( string, 0 ); // DefaultAllocator needs no length, strlen(nullprt) doesn't work either
+	}
+
+protected:
+	~DefaultCopiedBuffer(){
+		destroy( m_string );
+	}
+public:
+	DefaultCopiedBuffer()
+		: m_string( copy( "" ) ){
+	}
+	DefaultCopiedBuffer( const DefaultCopiedBuffer& other )
+		: m_string( copy( other.m_string ) ){
+	}
+	DefaultCopiedBuffer( DefaultCopiedBuffer&& other ) noexcept
+		: m_string( std::exchange( other.m_string, nullptr ) ){ // other will be destroyed fairly soon, operator delete(nullptr) is cool
+	}
+	DefaultCopiedBuffer( const char* string )
+		: m_string( copy( string ) ){
+	}
+	DefaultCopiedBuffer( StringRange range )
+		: m_string( copy_range( range ) ){
+	}
+	const char* c_str() const {
+		return m_string;
+	}
+	void swap( DefaultCopiedBuffer& other ){
+		string_swap( m_string, other.m_string );
+	}
+};
+
 /// \brief A non-mutable string which uses copy-by-value for assignment.
-typedef String< CopiedBuffer< DefaultAllocator<char> > > CopiedString;
+typedef String< DefaultCopiedBuffer > CopiedString;
+// typedef String< CopiedBuffer< DefaultAllocator<char> > > CopiedString;
 
 
 /// \brief Writes CopiedString \p string to \p ostream.
 template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const CopiedString& string ){
-	ostream.write( string.c_str(), strlen( string.c_str() ) );
+	ostream.write( string.c_str(), string_length( string.c_str() ) );
 	return ostream;
 }
 

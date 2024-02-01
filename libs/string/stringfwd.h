@@ -23,10 +23,6 @@
 
 // forward-declaration of CopiedString
 
-template<typename Type>
-class DefaultAllocator;
-template<typename Allocator>
-class CopiedBuffer;
 template<typename Buffer>
 class String;
-typedef String< CopiedBuffer< DefaultAllocator<char> > > CopiedString;
+typedef String< class DefaultCopiedBuffer > CopiedString;
