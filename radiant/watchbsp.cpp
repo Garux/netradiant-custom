@@ -726,33 +726,27 @@ void CWatchBSP::RoutineProcessing(){
 						// launch the engine .. OMG
 						if ( g_WatchBSP_RunQuake ) {
 							globalOutputStream() << "Running engine...\n";
-							auto cmd = StringStream( EnginePath_get() );
-							auto cmdline = StringOutputStream( 256 );
-
-							const auto buildArgs = [&]( const char *str ){
-								const char *map = strstr( str, "%mapname%" );
-								if( map != nullptr )
-									cmdline << StringRange( str, map ) << m_sBSPName << ( map + strlen( "%mapname%" ) );
-								else
-									cmdline << str;
-							};
-
 							// this is game dependant
-							if ( string_equal( gamemode_get(), "mp" ) && !g_engineExecutableMP.string().empty() ) {
-								cmd << g_engineExecutableMP.string();
-								buildArgs( g_engineArgsMP.string().c_str() );
-							}
-							else
-							{
-								cmd << g_engineExecutable.string();
-								buildArgs( g_engineArgs.string().c_str() );
-							}
+							const auto [exe, args] = [&](){
+								if( string_equal( gamemode_get(), "mp" ) ){
+									if( const auto exe = g_engineExecutableMP.string(); !exe.empty() )
+										return std::pair( std::move( exe ), g_engineArgsMP.string() );
+								}
+								return std::pair( g_engineExecutable.string(), g_engineArgs.string() );
+							}();
 
-							globalOutputStream() << cmd << ' ' << cmdline << '\n';
+							auto cmd = StringStream( '"', EnginePath_get(), exe, '"', ' ' );
+
+							if( const char *map = strstr( args.c_str(), "%mapname%" ) )
+								cmd << StringRange( args.c_str(), map ) << m_sBSPName << ( map + strlen( "%mapname%" ) );
+							else
+								cmd << args;
+
+							globalOutputStream() << cmd << '\n';
 
 							// execute now
-							if ( !Q_Exec( cmd, cmdline.c_str(), EnginePath_get(), false, false ) ) {
-								const auto msg = StringStream( "Failed to execute the following command: ", cmd, cmdline );
+							if ( !Q_Exec( nullptr, cmd.c_str(), EnginePath_get(), false, false ) ) {
+								const auto msg = StringStream( "Failed to execute the following command: ", cmd, '\n' );
 								globalOutputStream() << msg;
 								qt_MessageBox( MainFrame_getWindow(), msg, "Build monitoring", EMessageBoxType::Error );
 							}
