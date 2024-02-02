@@ -26,7 +26,7 @@
 #include "string/string.h"
 #include "generic/static.h"
 
-#if 1
+#if 0
 class Postfix
 {
 	int m_value; // -1 is special value to handle empty postfix
@@ -58,30 +58,21 @@ public:
 #else
 class Postfix
 {
-	std::pair<unsigned int, unsigned int> m_value;
+	int m_value; // -1 is special value to handle empty postfix
+	int m_minWidth;
 public:
-	Postfix( unsigned int number, unsigned int leading_zeros )
-		: m_value( leading_zeros, number ){
+	Postfix( const char* postfix ) : m_value( string_empty( postfix )? -1 : atoi( postfix ) ),
+	                                 m_minWidth( postfix[0] == '0'? string_length( postfix ) : 0 ) {
 	}
-	Postfix( const char* postfix )
-		: m_value( number_count_leading_zeros( postfix ), atoi( postfix ) ){
+	int number() const {
+		return m_value;
 	}
-	unsigned int number() const {
-		return m_value.second;
-	}
-	unsigned int leading_zeros() const {
-		return m_value.first;
-	}
-	void write( char* buffer ){
-		for ( unsigned int count = 0; count < m_value.first; ++count, ++buffer )
-			*buffer = '0';
-		sprintf( buffer, "%u", m_value.second );
+	void write( char* buffer ) const {
+		if( m_value != -1 )
+			sprintf( buffer, "%0*i", m_minWidth, m_value );
 	}
 	Postfix& operator++(){
-		++m_value.second;
-		if ( m_value.first != 0 && m_value.second % 10 == 0 ) {
-			--m_value.first;
-		}
+		++m_value;
 		return *this;
 	}
 	bool operator<( const Postfix& other ) const {
