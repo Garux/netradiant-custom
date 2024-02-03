@@ -1890,8 +1890,6 @@ static int FilterFaceIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
    subdivides a patch into an approximate curve and filters it into the tree
  */
 
-#define FILTER_SUBDIVISION      8
-
 static int FilterPatchIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
 	int refs = 0;
 
