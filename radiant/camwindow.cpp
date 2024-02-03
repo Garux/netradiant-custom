@@ -2102,8 +2102,8 @@ void CamWnd::Cam_Draw(){
 
 	if ( g_camwindow_globals.m_showStats ) {
 		gl().glRasterPos3f( 1.0f, static_cast<float>( m_Camera.height ), 0.0f );
-		extern const char* Renderer_GetStats();
-		GlobalOpenGL().drawString( StringStream( Renderer_GetStats(), " | f2f: ", m_render_time.elapsed_msec() ) );
+		extern const char* Renderer_GetStats( int frame2frame );
+		GlobalOpenGL().drawString( Renderer_GetStats( m_render_time.elapsed_msec() ) );
 		m_render_time.start();
 
 		gl().glRasterPos3f( 1.0f, static_cast<float>( m_Camera.height ) - GlobalOpenGL().m_font->getPixelHeight(), 0.0f );

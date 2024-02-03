@@ -115,13 +115,14 @@ void Renderer_ResetStats(){
 	g_timer.start();
 }
 
-const char* Renderer_GetStats(){
-	g_renderer_stats.clear();
-	g_renderer_stats << "prims: " << g_count_prims
-	                 << " | states: " << g_count_states
-	                 << " | transforms: " << g_count_transforms
-	                 << " | msec: " << g_timer.elapsed_msec();
-	return g_renderer_stats;
+const char* Renderer_GetStats( int frame2frame ){
+	return g_renderer_stats(
+		"prims: ", g_count_prims,
+		" | states: ", g_count_states,
+		" | transforms: ", g_count_transforms,
+		" | msec: ", g_timer.elapsed_msec(),
+		" | f2f: ", frame2frame
+	);
 }
 
 

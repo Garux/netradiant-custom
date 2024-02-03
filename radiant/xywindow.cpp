@@ -1926,8 +1926,8 @@ void XYWnd::XY_Draw(){
 		gl().glColor3fv( vector3_to_array( g_xywindow_globals.color_viewname ) );
 
 		gl().glRasterPos3f( 2.f, 0.f, 0.0f );
-		extern const char* Renderer_GetStats();
-		GlobalOpenGL().drawString( StringStream<64>( Renderer_GetStats(), " | f2f: ", m_render_time.elapsed_msec() ) );
+		extern const char* Renderer_GetStats( int frame2frame );
+		GlobalOpenGL().drawString( Renderer_GetStats( m_render_time.elapsed_msec() ) );
 		m_render_time.start();
 	}
 }
