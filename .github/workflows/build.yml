@@ -33,7 +33,7 @@ jobs:
         release: false
         update: false
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -45,7 +45,7 @@ jobs:
         wget https://www.dropbox.com/s/hcgkwzzmja3m6c0/netradiant-custom-extra-win.zip
         unzip -o netradiant-custom-extra-win.zip -d "install"
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: Windows-${{ matrix.arch }}
         path: install/
@@ -64,7 +64,7 @@ jobs:
       run: |
           sudo apt-get -qq update
           sudo apt-get -y install mesa-common-dev qtbase5-dev
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -74,19 +74,19 @@ jobs:
         wget https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
         unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: Linux-${{ matrix.arch }}
         path: install/
         if-no-files-found: error
 
   create-testing:
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/master' && ( github.event_name == 'push' || github.event_name == 'workflow_dispatch' )
     needs: [windows-msys, linux]
     runs-on: windows-latest
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
 
       - name: Create binary archives
         shell: cmd
