@@ -1306,7 +1306,7 @@ static void wheelmove_scroll( const QWheelEvent& event, CamWnd& camwnd ){
 		}
 
 		Camera_Freemove_updateAxes( cam );
-		camera_zoom( camwnd, event.x(), event.y(), g_camwindow_globals_private.m_nScrollMoveSpeed );
+		camera_zoom( camwnd, event.position().x(), event.position().y(), g_camwindow_globals_private.m_nScrollMoveSpeed );
 	}
 	else if ( angleDelta < 0 ) {
 		if ( cam.movementflags & MOVE_FOCUS ) {
@@ -1320,7 +1320,7 @@ static void wheelmove_scroll( const QWheelEvent& event, CamWnd& camwnd ){
 		}
 
 		Camera_Freemove_updateAxes( cam );
-		camera_zoom( camwnd, event.x(), event.y(), -g_camwindow_globals_private.m_nScrollMoveSpeed );
+		camera_zoom( camwnd, event.position().x(), event.position().y(), -g_camwindow_globals_private.m_nScrollMoveSpeed );
 	}
 }
 
