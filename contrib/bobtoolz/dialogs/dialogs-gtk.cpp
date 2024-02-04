@@ -210,7 +210,7 @@ bool DoBuildStairsBox( BuildStairsRS* rs ){
 		}
 		{
 			form->addWidget( check_detail = new QCheckBox( "Use Detail Brushes" ) );
-			QObject::connect( group_style, QOverload<int>::of( &QButtonGroup::buttonClicked ), [check_detail]( int id ){
+			QObject::connect( group_style, &QButtonGroup::idClicked, [check_detail]( int id ){
 				check_detail->setEnabled( id == STYLE_BOB );
 			} );
 			check_detail->setEnabled( false );

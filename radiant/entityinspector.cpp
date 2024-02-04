@@ -428,7 +428,7 @@ public:
 		static_cast<QHBoxLayout*>( m_hbox->layout() )->addLayout( m_radio.m_hbox );
 		m_hbox->layout()->addWidget( m_entry );
 		m_hbox->layout()->addWidget( m_butt.m_button );
-		QObject::connect( m_radio.m_radio, QOverload<int>::of( &QButtonGroup::buttonClicked ), ApplyRadioCaller( *this ) );
+		QObject::connect( m_radio.m_radio, &QButtonGroup::idClicked, ApplyRadioCaller( *this ) );
 	}
 	void release() override {
 		delete this;
