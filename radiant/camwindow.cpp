@@ -1671,7 +1671,7 @@ private:
 		return QMouseEvent( event->type(), event->localPos() * m_scale, event->windowPos() * m_scale, event->screenPos() * m_scale, event->button(), event->buttons(), event->modifiers() );
 	}
 	QWheelEvent scaledEvent( const QWheelEvent *event ) const {
-		return QWheelEvent( event->posF() * m_scale, event->globalPosF() * m_scale, event->pixelDelta(), event->angleDelta(), event->buttons(), event->modifiers(), event->phase(), false );
+		return QWheelEvent( event->position() * m_scale, event->globalPosition() * m_scale, event->pixelDelta(), event->angleDelta(), event->buttons(), event->modifiers(), event->phase(), false );
 	}
 };
 
