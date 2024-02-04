@@ -841,7 +841,8 @@ static void ParseShaderFile( const char *filename ){
 		shaderInfo_t *si = AllocShaderInfo();
 
 		/* ignore ":q3map" suffix */
-		if( striEqualSuffix( token, ":q3map" ) )
+		const bool isQ3mapOnlyShader = striEqualSuffix( token, ":q3map" );
+		if( isQ3mapOnlyShader )
 			si->shader << StringRange( token, strlen( token ) - strlen( ":q3map" ) );
 		else
 			si->shader << token;
@@ -1773,10 +1774,13 @@ static void ParseShaderFile( const char *filename ){
 		}
 
 		/* copy shader text to the shaderinfo */
-		text.text << '\n';
-		si->shaderText = copystring( text.text );
-		//%	if( vector3_length( si->vecs[ 0 ] ) )
-		//%		Sys_Printf( "%s\n", si->shaderText );
+		/* unless it's :q3map stageless shader: shaderText of those is not usable for custom shaders composition */
+		if( !( isQ3mapOnlyShader && !si->hasPasses ) ){
+			text.text << '\n';
+			si->shaderText = copystring( text.text );
+			//%	if( vector3_length( si->vecs[ 0 ] ) )
+			//%		Sys_Printf( "%s\n", si->shaderText );
+		}
 
 		/* ydnar: clear shader text buffer */
 		text.clear();
