@@ -581,6 +581,7 @@ public:
 	void setOriginZ( int origin ){
 		m_originZ = origin;
 		m_originInvalid = true;
+		validate(); // do updateScroll() immediately here; calling it in render() may call setOriginZ() again with old value
 		queueDraw();
 	}
 	void queueDraw() const {
