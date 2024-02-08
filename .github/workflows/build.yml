@@ -9,12 +9,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [x86, x86_64]
+        arch: [x86_64]
         cc: [gcc]
         include:
-          - arch: x86
-            msystem: MINGW32
-            prefix: mingw-w64-i686
+          # - arch: x86
+          #   msystem: MINGW32
+          #   prefix: mingw-w64-i686
 
           - arch: x86_64
             msystem: MINGW64
@@ -39,11 +39,11 @@ jobs:
 
     - name: Build
       run: |
-        make DOWNLOAD_GAMEPACKS=no MAKEFILE_CONF=msys2-Makefile.conf BUILD=release -j$(nproc)
+        make DOWNLOAD_GAMEPACKS=no MAKEFILE_CONF=msys2-Makefile.conf BUILD=release -j4
         wget https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
         unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
-        wget https://www.dropbox.com/s/hcgkwzzmja3m6c0/netradiant-custom-extra-win.zip
-        unzip -o netradiant-custom-extra-win.zip -d "install"
+        mkdir -p install/settings
+        echo > install/settings/DUMMMY
 
     - uses: actions/upload-artifact@v4
       with:
@@ -70,36 +70,40 @@ jobs:
 
     - name: Build
       run: |
-        make -j 4 DOWNLOAD_GAMEPACKS=no CXXFLAGS="-Wno-deprecated-copy"
+        make DOWNLOAD_GAMEPACKS=no CXXFLAGS="-Wno-deprecated-copy" -j4
         wget https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
         unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
+        7z a Linux-${{ matrix.arch }}.7z ./install/*
+#       7z to preserve file permissions
 
     - uses: actions/upload-artifact@v4
       with:
         name: Linux-${{ matrix.arch }}
-        path: install/
+        path: Linux-${{ matrix.arch }}.7z
         if-no-files-found: error
 
   create-testing:
     if: github.ref == 'refs/heads/master' && ( github.event_name == 'push' || github.event_name == 'workflow_dispatch' )
     needs: [windows-msys, linux]
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@v4
 
       - name: Create binary archives
-        shell: cmd
+        shell: bash
         run: |
-          "%programfiles%\7-Zip\7z.exe" a -r netradiant-custom-windows-x86_64.zip  "%CD%\Windows-x86_64\*"
-          "%programfiles%\7-Zip\7z.exe" a -r netradiant-custom-linux-x86_64.zip    "%CD%\Linux-x86_64\*"
+          7z a netradiant-custom-$(date +%Y%m%d)-windows-x86_64.zip ./Windows-x86_64/*
+          mv Linux-x86_64/Linux-x86_64.7z netradiant-custom-$(date +%Y%m%d)-linux-x86_64.7z
+#         note: dir/* doesn't match .bla (hidden) file in linux under dir/ but matches in subfolders
 
       - name: Create latest build
-        uses: ec-/action-automatic-releases@test
+        uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           automatic_release_tag: "latest"
-          prerelease: true
-          title: Development Build
+          prerelease: false
+          title: Latest Build
           files: |
             *.zip
+            *.7z
