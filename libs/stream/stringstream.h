@@ -104,7 +104,7 @@ public:
 
 	StringOutputStream(){
 	}
-	StringOutputStream( std::size_t capacity ) : m_string( capacity ){
+	explicit StringOutputStream( std::size_t capacity ) : m_string( capacity ){
 	}
 	std::size_t write( const char* buffer, std::size_t length ){
 		m_string.push_range( buffer, buffer + length );

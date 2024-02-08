@@ -255,7 +255,7 @@ void RunBSP( size_t buildIdx ){
 #if defined ( POSIX )
 				batchFile << "#!/bin/sh \n\n";
 #endif
-				BatchCommandListener listener( batchFile, g_WatchBSP0_DumpLog? junkpath : 0 );
+				BatchCommandListener listener( batchFile, g_WatchBSP0_DumpLog? junkpath.c_str() : nullptr );
 				for( const auto& command : commands )
 					listener.execute( command.c_str() );
 				written = true;
