@@ -9,7 +9,7 @@ BUILD              ?= release
 OS                 ?= $(shell uname)
 # or: Linux, Win32, Darwin
 LDFLAGS            ?=
-CFLAGS             ?=
+CFLAGS             ?= -fno-builtin-strrchr
 CXXFLAGS           ?=
 CPPFLAGS           ?=
 LIBS               ?=
@@ -232,7 +232,7 @@ ifeq ($(OS),Darwin)
 	CPPFLAGS_COMMON += -DPOSIX -DXWINDOWS
 	CFLAGS_COMMON += -fPIC
 	CXXFLAGS_COMMON += -fno-exceptions -fno-rtti
-	MACLIBDIR ?= /usr/local/lib
+	MACLIBDIR ?= /opt/local/lib
 	CPPFLAGS_COMMON += -I$(MACLIBDIR)/../include -I/usr/X11R6/include
 	LDFLAGS_COMMON += -L$(MACLIBDIR) -L/usr/X11R6/lib
 	LDFLAGS_DLL += -dynamiclib -ldl
@@ -522,9 +522,9 @@ $(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA := -Wl,--stack,4194304
 endif
 endif
 ifneq ($(OS),Win32)
-$(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA += -Wl,-rpath '-Wl,$$ORIGIN'
+$(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA += -Wl,-rpath,@loader_path/.. -Wl,-rpath,@executable_path/..
 endif
-$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB) -lassimp_ -L$(INSTALLDIR)
+$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB) -lassimp -L$(INSTALLDIR)
 $(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) $(CPPFLAGS_JPEG) -Itools/quake3/common -Ilibs -Iinclude -Ilibs/assimp/include
 $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
@@ -1061,9 +1061,9 @@ $(INSTALLDIR)/modules/mapxml.$(DLL): \
 	plugins/mapxml/xmlwrite.o \
 
 ifneq ($(OS),Win32)
-$(INSTALLDIR)/modules/assmodel.$(DLL): LDFLAGS_EXTRA := -Wl,-rpath '-Wl,$$ORIGIN/..'
+$(INSTALLDIR)/modules/assmodel.$(DLL): LDFLAGS_EXTRA := -Wl,-rpath,@loader_path/.. -Wl,-rpath,@executable_path/..
 endif
-$(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := -lassimp_ -L$(INSTALLDIR)
+$(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := -lassimp -L$(INSTALLDIR)
 $(INSTALLDIR)/modules/assmodel.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude -Ilibs/assimp/include $(CPPFLAGS_QTGUI)
 $(INSTALLDIR)/modules/assmodel.$(DLL): \
 	plugins/assmodel/mdlimage.o \
