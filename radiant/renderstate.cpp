@@ -208,7 +208,9 @@ void GLSLProgram_validate( GLuint program ){
 		printProgramLog( program );
 	}
 
+#ifndef __APPLE__ // hack: says 'Current draw framebuffer is invalid.' but works; Showing messagebox at this init point triggers Qt crash.
 	ASSERT_MESSAGE( validated, "program validation failed" );
+#endif
 }
 
 bool g_bumpGLSLPass_enabled = false;

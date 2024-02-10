@@ -9,7 +9,7 @@ BUILD              ?= release
 OS                 ?= $(shell uname)
 # or: Linux, Win32, Darwin
 LDFLAGS            ?=
-CFLAGS             ?=
+CFLAGS             ?= -fno-builtin-strrchr
 CXXFLAGS           ?=
 CPPFLAGS           ?=
 LIBS               ?=
@@ -76,6 +76,12 @@ LIBS_QTGUI         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt
 CPPFLAGS_QTWIDGETS ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --cflags $(STDERR_TO_DEVNULL))
 LIBS_QTWIDGETS     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --libs-only-L $(STDERR_TO_DEVNULL)) \
                       $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --libs-only-l $(STDERR_TO_DEVNULL))
+ifeq ($(OS),Darwin)
+LIBS_QTCORE         = $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Core --libs $(STDERR_TO_DEVNULL))
+LIBS_QTGUI          = $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --libs $(STDERR_TO_DEVNULL))
+LIBS_QTWIDGETS      = $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --libs $(STDERR_TO_DEVNULL))
+endif
+
 CPPFLAGS_GL        ?=
 LIBS_GL            ?= -lGL # -lopengl32 on Win32
 CPPFLAGS_DL        ?=
@@ -516,9 +522,9 @@ $(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA := -Wl,--stack,4194304
 endif
 endif
 ifneq ($(OS),Win32)
-$(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA += -Wl,-rpath '-Wl,$$ORIGIN'
+$(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA += -Wl,-rpath,@loader_path/.. -Wl,-rpath,@executable_path/..
 endif
-$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB) -lassimp_ -L$(INSTALLDIR)
+$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB) -lassimp -L$(INSTALLDIR)
 $(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) $(CPPFLAGS_JPEG) -Itools/quake3/common -Ilibs -Iinclude -Ilibs/assimp/include
 $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
@@ -1055,9 +1061,9 @@ $(INSTALLDIR)/modules/mapxml.$(DLL): \
 	plugins/mapxml/xmlwrite.o \
 
 ifneq ($(OS),Win32)
-$(INSTALLDIR)/modules/assmodel.$(DLL): LDFLAGS_EXTRA := -Wl,-rpath '-Wl,$$ORIGIN/..'
+$(INSTALLDIR)/modules/assmodel.$(DLL): LDFLAGS_EXTRA := -Wl,-rpath,@loader_path/.. -Wl,-rpath,@executable_path/..
 endif
-$(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := -lassimp_ -L$(INSTALLDIR)
+$(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := -lassimp -L$(INSTALLDIR)
 $(INSTALLDIR)/modules/assmodel.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude -Ilibs/assimp/include $(CPPFLAGS_QTGUI)
 $(INSTALLDIR)/modules/assmodel.$(DLL): \
 	plugins/assmodel/mdlimage.o \
