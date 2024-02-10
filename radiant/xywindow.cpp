@@ -1657,7 +1657,7 @@ void XYWnd::PaintSizeInfo( const int nDim1, const int nDim2 ){
 	gl().glRasterPos3fv( vector3_to_array( v ) );
 	GlobalOpenGL().drawString( dimensions( dimStrings[nDim2], size[nDim2] ) );
 
-	v[nDim1] = min[nDim1] + 4.f;
+	v[nDim1] = min[nDim1] + 4.f / m_fScale;
 	v[nDim2] = max[nDim2] + 5.f / m_fScale;
 	gl().glRasterPos3fv( vector3_to_array( v ) );
 	GlobalOpenGL().drawString( dimensions( '(', dimStrings[nDim1], min[nDim1], "  ", dimStrings[nDim2], max[nDim2], ')' ) );
