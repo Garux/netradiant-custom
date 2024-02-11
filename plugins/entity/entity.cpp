@@ -125,23 +125,14 @@ bool g_stupidQuakeBug = false;
 
 class ConnectEntities
 {
-public:
 	Entity* m_e1;
 	Entity* m_e2;
-	int m_index;
-	ConnectEntities( Entity* e1, Entity* e2, int index ) : m_e1( e1 ), m_e2( e2 ), m_index( index ){
-	}
-	const char *keyname(){
-		if ( m_index <= 0 ) {
-			return "target";
-		}
-		if ( m_index == 1 ) {
-			return "killtarget";
-		}
-		return StringStream<16>( "target", m_index );
+public:
+	const char* m_keyname;
+	ConnectEntities( Entity* e1, Entity* e2, int index ) : m_e1( e1 ), m_e2( e2 ), m_keyname( index == 1? "killtarget" : "target" ){
 	}
 	void connect( const char* name ){
-		m_e1->setKeyValue( keyname(), name );
+		m_e1->setKeyValue( m_keyname, name );
 		m_e2->setKeyValue( "targetname", name );
 	}
 	typedef MemberCaller1<ConnectEntities, const char*, &ConnectEntities::connect> ConnectCaller;
