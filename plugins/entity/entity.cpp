@@ -128,11 +128,11 @@ class ConnectEntities
 	Entity* m_e1;
 	Entity* m_e2;
 public:
-	const char* m_keyname;
-	ConnectEntities( Entity* e1, Entity* e2, int index ) : m_e1( e1 ), m_e2( e2 ), m_keyname( index == 1? "killtarget" : "target" ){
+	const char* m_targetkey;
+	ConnectEntities( Entity* e1, Entity* e2, int index ) : m_e1( e1 ), m_e2( e2 ), m_targetkey( index == 1? "killtarget" : "target" ){
 	}
 	void connect( const char* name ){
-		m_e1->setKeyValue( m_keyname, name );
+		m_e1->setKeyValue( m_targetkey, name );
 		m_e2->setKeyValue( "targetname", name );
 	}
 	typedef MemberCaller1<ConnectEntities, const char*, &ConnectEntities::connect> ConnectCaller;
@@ -202,44 +202,22 @@ public:
 		else
 		{
 			ConnectEntities connector( e1, e2, index );
-			//killconnect
-			if( index == 1 ){
-				const char* value = e2->getKeyValue( "targetname" );
-				if ( !string_empty( value ) ) {
-					connector.connect( value );
-				}
-				else
-				{
-					const char* type = e2->getClassName();
-					if ( string_empty( type ) ) {
-						type = "t";
-					}
-					const auto key = StringStream<64>( type, '1' );
-					GlobalNamespace().makeUnique( key, ConnectEntities::ConnectCaller( connector ) );
-				}
+			// prioritize existing target key: intent is to most probably not break existing connections
+			// checking, if ent has actual connections, could be better solution
+			const char* value = e1->getKeyValue( connector.m_targetkey );
+			if ( string_empty( value ) ) {
+				value = e2->getKeyValue( "targetname" );
 			}
-			//normal connect
+			if ( !string_empty( value ) ) {
+				connector.connect( value );
+			}
 			else{
-				//prioritize existing target key
-				//checking, if ent got other connected ones already, could be better solution
-				const char* value = e1->getKeyValue( "target" );
-				if ( !string_empty( value ) ) {
-					connector.connect( value );
+				const char* type = e2->getClassName();
+				if ( string_empty( type ) ) {
+					type = "t";
 				}
-				else{
-					value = e2->getKeyValue( "targetname" );
-					if ( !string_empty( value ) ) {
-						connector.connect( value );
-					}
-					else{
-						const char* type = e2->getClassName();
-						if ( string_empty( type ) ) {
-							type = "t";
-						}
-						const auto key = StringStream<64>( type, '1' );
-						GlobalNamespace().makeUnique( key, ConnectEntities::ConnectCaller( connector ) );
-					}
-				}
+				const auto key = StringStream<64>( type, '1' );
+				GlobalNamespace().makeUnique( key, ConnectEntities::ConnectCaller( connector ) );
 			}
 		}
 		SceneChangeNotify();
@@ -443,7 +421,9 @@ void Entity_Construct( EGameType gameType ){
 	}
 
 	Entity_InitFilters();
-	const LightType lightType = g_gameType == eGameTypeRTCW? LIGHTTYPE_RTCW : g_gameType == eGameTypeDoom3? LIGHTTYPE_DOOM3 : LIGHTTYPE_DEFAULT;
+	const LightType lightType = g_gameType == eGameTypeRTCW? LIGHTTYPE_RTCW
+	                          : g_gameType == eGameTypeDoom3? LIGHTTYPE_DOOM3
+	                                                         : LIGHTTYPE_DEFAULT;
 	Light_Construct( lightType );
 	MiscModel_construct();
 	Doom3Group_construct();
