@@ -1550,6 +1550,7 @@ void Brush_constructMenu( QMenu* menu ){
 		create_menu_item_with_mnemonic( submenu, "CSG &Subtract", "CSGSubtract" );
 		create_menu_item_with_mnemonic( submenu, "CSG &Merge", "CSGMerge" );
 		create_menu_item_with_mnemonic( submenu, "CSG &Wrap Merge", "CSGWrapMerge" );
+		create_menu_item_with_mnemonic( submenu, "CSG &Intersect", "CSGIntersect" );
 		create_menu_item_with_mnemonic( submenu, "Make &Room", "CSGroom" );
 		create_menu_item_with_mnemonic( submenu, "CSG &Tool", "CSGTool" );
 	}

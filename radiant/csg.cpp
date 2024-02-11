@@ -1198,6 +1198,51 @@ void CSG_WrapMerge(){
 }
 
 
+void CSG_Intersect(){
+	brush_vector_t selected_brushes;
+	scene::Node *ultimate_brush_node;
+
+	Scene_forEachVisibleSelectedBrush( [&selected_brushes, &ultimate_brush_node]( BrushInstance& brush ){
+		selected_brushes.push_back( &brush.getBrush() );
+		ultimate_brush_node = brush.path().top().get_pointer();
+	} );
+
+	if ( selected_brushes.empty() ) {
+		globalWarningStream() << "CSG Intersect: No brushes selected.\n";
+		return;
+	}
+
+	if ( selected_brushes.size() < 2 ) {
+		globalWarningStream() << "CSG Intersect: At least two brushes have to be selected.\n";
+		return;
+	}
+
+	UndoableCommand undo( "brushIntersect" );
+
+	Brush* ultimate_brush = selected_brushes.back();
+	selected_brushes.pop_back();
+
+	for ( const Brush *brush : selected_brushes )
+		for ( const FaceSmartPointer& face : *brush )
+			if ( face->contributes() ){
+				const brushsplit_t split = Brush_classifyPlane( *ultimate_brush, face->getPlane().plane3() );
+				if( split.counts[ePlaneFront] != 0 ){
+					ultimate_brush->addFace( *face.get() );
+					ultimate_brush->removeEmptyFaces();
+				}
+			}
+
+	if ( !ultimate_brush->hasContributingFaces() ) {
+		globalWarningStream() << "CSG Intesect: Failed - result would not be convex.\n";
+		GlobalSceneGraph().traverse( BrushDeleteSelected() );
+	}
+	else
+	{
+		GlobalSceneGraph().traverse( BrushDeleteSelected( ultimate_brush_node ) );
+	}
+}
+
+
 #if 0
 class find_instance_to_DeleteComponents : public SelectionSystem::Visitor
 {
@@ -1550,6 +1595,7 @@ void CSG_registerCommands(){
 	GlobalCommands_insert( "CSGSubtract", FreeCaller<CSG_Subtract>(), QKeySequence( "Shift+U" ) );
 	GlobalCommands_insert( "CSGMerge", FreeCaller<CSG_Merge>() );
 	GlobalCommands_insert( "CSGWrapMerge", FreeCaller<CSG_WrapMerge>(), QKeySequence( "Ctrl+U" ) );
+	GlobalCommands_insert( "CSGIntersect", FreeCaller<CSG_Intersect>(), QKeySequence( "Ctrl+Shift+U" ) );
 	GlobalCommands_insert( "CSGroom", FreeCaller<CSG_MakeRoom>() );
 	GlobalCommands_insert( "CSGTool", FreeCaller<CSG_Tool>() );
 }
