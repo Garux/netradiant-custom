@@ -335,31 +335,37 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 
 
 
+struct groupMesh_t
+{
+	parseMesh_t& mesh;
+	bool *bordering;
+	bool grouped;
+	bool group;
+};
+
 /*
    GrowGroup_r()
    recursively adds patches to a lod group
  */
 
-static void GrowGroup_r( parseMesh_t *pm, int patchNum, int patchCount, parseMesh_t **meshes, byte *bordering, byte *group ){
+static void GrowGroup_r( groupMesh_t& mesh, groupMesh_t& other, std::vector<groupMesh_t>& meshes ){
 	/* early out check */
-	if ( group[ patchNum ] ) {
+	if ( other.group ) {
 		return;
 	}
 
-
 	/* set it */
-	group[ patchNum ] = 1;
-	const byte *row = bordering + patchNum * patchCount;
+	other.group = true;
 
 	/* check maximums */
-	value_maximize( pm->longestCurve, meshes[ patchNum ]->longestCurve );
-	value_maximize( pm->maxIterations, meshes[ patchNum ]->maxIterations );
+	value_maximize( mesh.mesh.longestCurve, other.mesh.longestCurve );
+	value_maximize( mesh.mesh.maxIterations, other.mesh.maxIterations );
 
 	/* walk other patches */
-	for ( int i = 0; i < patchCount; ++i )
+	for ( size_t i = 0; i < meshes.size(); ++i )
 	{
-		if ( row[ i ] ) {
-			GrowGroup_r( pm, i, patchCount, meshes, bordering, group );
+		if ( other.bordering[i] ) {
+			GrowGroup_r( mesh, meshes[i], meshes );
 		}
 	}
 }
@@ -373,110 +379,74 @@ static void GrowGroup_r( parseMesh_t *pm, int patchNum, int patchCount, parseMes
  */
 
 void PatchMapDrawSurfs( entity_t& e ){
-	int i, j, k, l, c1, c2;
-	parseMesh_t             *pm;
-	parseMesh_t             *check, *scan;
-	mapDrawSurface_t        *ds;
-	int patchCount, groupCount;
-	bspDrawVert_t           *v1, *v2;
-	byte                    *bordering;
-
-	parseMesh_t  *meshes[ MAX_MAP_DRAW_SURFS ];
-	bool grouped[ MAX_MAP_DRAW_SURFS ];
-	byte group[ MAX_MAP_DRAW_SURFS ];
-
-
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- PatchMapDrawSurfs ---\n" );
 
-	patchCount = 0;
-	for ( pm = e.patches; pm; pm = pm->next ) {
-		meshes[patchCount] = pm;
-		patchCount++;
+	std::vector<groupMesh_t> meshes;
+	for ( parseMesh_t *pm = e.patches; pm; pm = pm->next ){
+		meshes.push_back( { .mesh = *pm, .grouped = false } );
 	}
-
-	if ( !patchCount ) {
+	if ( meshes.empty() ) {
 		return;
 	}
-	bordering = safe_calloc( patchCount * patchCount );
+
+	std::unique_ptr<bool[]> bordering( new bool[meshes.size() * meshes.size()] ); // mesh<->mesh bordering matrix
+	for( size_t i = 0; i < meshes.size(); ++i ){
+		meshes[i].bordering = &bordering[meshes.size() * i]; // reference matrix portion relevant to this mesh; this->bool[meshes.size()]
+	}
 
 	// build the bordering matrix
-	for ( k = 0; k < patchCount; ++k ) {
-		bordering[k * patchCount + k] = 1;
+	for ( size_t m1 = 0; m1 < meshes.size(); ++m1 ) {
+		meshes[m1].bordering[m1] = true; // mark mesh as bordered with self
 
-		for ( l = k + 1; l < patchCount; ++l ) {
-			check = meshes[k];
-			scan = meshes[l];
-			c1 = scan->mesh.width * scan->mesh.height;
-			v1 = scan->mesh.verts;
+		for ( size_t m2 = m1 + 1; m2 < meshes.size(); ++m2 ) {
+			const mesh_t& mesh1 = meshes[m1].mesh.mesh;
+			const mesh_t& mesh2 = meshes[m2].mesh.mesh;
 
-			for ( i = 0; i < c1; ++i, ++v1 ) {
-				c2 = check->mesh.width * check->mesh.height;
-				v2 = check->mesh.verts;
-				for ( j = 0; j < c2; ++j, ++v2 ) {
-					if ( vector3_equal_epsilon( v1->xyz, v2->xyz, 1.f ) ) {
-						break;
-					}
-				}
-				if ( j != c2 ) {
-					break;
-				}
-			}
-			if ( i != c1 ) {
-				// we have a connection
-				bordering[k * patchCount + l] =
-				    bordering[l * patchCount + k] = 1;
-			}
-			else {
-				// no connection
-				bordering[k * patchCount + l] =
-				    bordering[l * patchCount + k] = 0;
-			}
-
+			meshes[m1].bordering[m2] =
+			meshes[m2].bordering[m1] =
+				std::any_of( mesh1.verts, mesh1.verts + mesh1.width * mesh1.height, [mesh2]( const bspDrawVert_t& v1 ){
+					return std::any_of( mesh2.verts, mesh2.verts + mesh2.width * mesh2.height, [v1]( const bspDrawVert_t& v2 ){
+						return vector3_equal_epsilon( v1.xyz, v2.xyz, 1.f );
+					} );
+				} );
 		}
 	}
 
 	/* build groups */
-	memset( grouped, 0, patchCount );
-	groupCount = 0;
-	for ( i = 0; i < patchCount; i++ )
+	int groupCount = 0;
+	for ( auto& mesh : meshes )
 	{
-		/* get patch */
-		scan = meshes[ i ];
-
 		/* start a new group */
-		if ( !grouped[ i ] ) {
+		if ( !mesh.grouped ) {
 			groupCount++;
 		}
 
 		/* recursively find all patches that belong in the same group */
-		memset( group, 0, patchCount );
-		GrowGroup_r( scan, i, patchCount, meshes, bordering, group );
+		for( auto& m : meshes )
+			m.group = false;
+		GrowGroup_r( mesh, mesh, meshes );
 
 		/* bound them */
 		MinMax bounds;
-		for ( j = 0; j < patchCount; j++ )
+		for ( auto& m : meshes )
 		{
-			if ( group[ j ] ) {
-				grouped[ j ] = true;
-				check = meshes[ j ];
-				c1 = check->mesh.width * check->mesh.height;
-				v1 = check->mesh.verts;
-				for ( k = 0; k < c1; k++, v1++ )
-					bounds.extend( v1->xyz );
+			if ( m.group ) {
+				m.grouped = true;
+				std::for_each_n( m.mesh.mesh.verts, m.mesh.mesh.width * m.mesh.mesh.height,
+					[&bounds]( const bspDrawVert_t& v ){ bounds.extend( v.xyz ); } );
 			}
 		}
 
 		/* debug code */
-		//%	Sys_Printf( "Longest curve: %f Iterations: %d\n", scan->longestCurve, scan->maxIterations );
+		//%	Sys_Printf( "Longest curve: %f Iterations: %d\n", mesh.mesh.longestCurve, mesh.mesh.maxIterations );
 
 		/* create drawsurf */
-		scan->grouped = true;
-		ds = DrawSurfaceForMesh( e, scan, NULL );   /* ydnar */
+		mapDrawSurface_t *ds = DrawSurfaceForMesh( e, &mesh.mesh, NULL );   /* ydnar */
 		ds->bounds = bounds;
 	}
 
 	/* emit some statistics */
-	Sys_FPrintf( SYS_VRB, "%9d patches\n", patchCount );
+	Sys_FPrintf( SYS_VRB, "%9zu patches\n", meshes.size() );
 	Sys_FPrintf( SYS_VRB, "%9d patch LOD groups\n", groupCount );
 }

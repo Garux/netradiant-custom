@@ -754,7 +754,6 @@ struct parseMesh_t
 	indexMap_t          *im;
 
 	/* grouping */
-	bool grouped;
 	float longestCurve;
 	int maxIterations;
 };
