@@ -543,13 +543,14 @@ static shaderInfo_t *AllocShaderInfo(){
 
 	/* allocate? */
 	if ( shaderInfo == NULL ) {
-		shaderInfo = safe_malloc( sizeof( shaderInfo_t ) * MAX_SHADER_INFO );
+		shaderInfo = safe_malloc( sizeof( shaderInfo_t ) * max_shader_info );
 		numShaderInfo = 0;
 	}
 
 	/* bounds check */
-	if ( numShaderInfo == MAX_SHADER_INFO ) {
-		Error( "MAX_SHADER_INFO exceeded. Remove some PK3 files or shader scripts from shaderlist.txt and try again." );
+	if ( numShaderInfo == max_shader_info ) {
+		Error( "max_shader_info (%d) exceeded. Remove some PK3 files or shader scripts from shaderlist.txt and try again."
+		       " Or consider -maxshaderinfo to increase.", max_shader_info );
 	}
 	si = &shaderInfo[ numShaderInfo ];
 	numShaderInfo++;

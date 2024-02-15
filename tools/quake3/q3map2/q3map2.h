@@ -100,8 +100,6 @@
 
 #define DEF_RADIOSITY_BOUNCE    1.0f    /* ydnar: default to 100% re-emitted light */
 
-#define MAX_SHADER_INFO         8192
-
 
 /* epair parsing (note case-sensitivity directive) */
 #define CASE_INSENSITIVE_EPAIRS 1
@@ -1718,6 +1716,7 @@ void                        InjectCommandLine( const char *stage, const std::vec
 /* general */
 inline shaderInfo_t       *shaderInfo;
 inline int numShaderInfo;
+inline int max_shader_info = 8192;
 
 inline String64 mapName;                 /* ydnar: per-map custom shaders for larger lightmaps */
 inline CopiedString mapShaderFile;
