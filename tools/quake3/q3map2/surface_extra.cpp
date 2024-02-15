@@ -249,7 +249,7 @@ void LoadSurfaceExtraFile( const char *path ){
 		else
 		{
 			const int surfaceNum = atoi( token );
-			if ( surfaceNum < 0 || surfaceNum > MAX_MAP_DRAW_SURFS ) {
+			if ( surfaceNum < 0 ) {
 				Error( "ReadSurfaceExtraFile(): %s, line %d: bogus surface num %d", srfPath.c_str(), scriptline, surfaceNum );
 			}
 			while ( surfaceNum >= numSurfaceExtras )

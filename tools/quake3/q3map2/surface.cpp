@@ -40,8 +40,8 @@
 
 mapDrawSurface_t *AllocDrawSurface( ESurfaceType type ){
 	/* bounds check */
-	if ( numMapDrawSurfs >= MAX_MAP_DRAW_SURFS ) {
-		Error( "MAX_MAP_DRAW_SURFS (%d) exceeded", MAX_MAP_DRAW_SURFS );
+	if ( numMapDrawSurfs >= max_map_draw_surfs ) {
+		Error( "max_map_draw_surfs (%d) exceeded, consider -maxmapdrawsurfs to increase", max_map_draw_surfs );
 	}
 	mapDrawSurface_t *ds = &mapDrawSurfs[ numMapDrawSurfs ];
 	numMapDrawSurfs++;

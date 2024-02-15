@@ -203,8 +203,6 @@ inline bool style_is_valid( int style ){ return LS_NORMAL <= style && style < LS
 #define MAX_MAP_VISCLUSTERS     0x4000 // <= MAX_MAP_LEAFS
 #define MAX_MAP_VISIBILITY      ( VIS_HEADER_SIZE + MAX_MAP_VISCLUSTERS * ( ( ( MAX_MAP_VISCLUSTERS + 63 ) & ~63 ) >> 3 ) )
 
-#define MAX_MAP_DRAW_SURFS      0x20000
-
 /* the editor uses these predefined yaw angles to orient entities up or down */
 #define ANGLE_UP                -1
 #define ANGLE_DOWN              -2
@@ -1827,6 +1825,7 @@ inline EBrushType g_brushType = EBrushType::Undefined;
 /* surface stuff */
 inline mapDrawSurface_t   *mapDrawSurfs;
 inline int numMapDrawSurfs;
+inline int max_map_draw_surfs = 0x20000;
 
 inline int numSurfacesByType[ static_cast<std::size_t>( ESurfaceType::Shader ) + 1 ];
 inline int numStripSurfaces;

@@ -952,7 +952,7 @@ static void PseudoCompileBSP( bool need_tree ){
 	facelist_t faces;
 	tree_t tree{};
 
-	mapDrawSurfs = safe_calloc( sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
+	mapDrawSurfs = safe_calloc( sizeof( mapDrawSurface_t ) * max_map_draw_surfs );
 	numMapDrawSurfs = 0;
 
 	BeginBSPFile();

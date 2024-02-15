@@ -113,6 +113,13 @@ int main( int argc, char **argv ){
 		while ( args.takeArg( "-threads" ) ) {
 			numthreads = atoi( args.takeNext() );
 		}
+
+		/* max_map_draw_surfs */
+		while ( args.takeArg( "-maxmapdrawsurfs" ) ) {
+			max_map_draw_surfs = abs( atoi( args.takeNext() ) );
+			Sys_Printf( "max_map_draw_surfs = %d, mapDrawSurfs size = %.2f MBytes \n",
+			            max_map_draw_surfs, sizeof( mapDrawSurface_t ) * max_map_draw_surfs / ( 1024.f * 1024.f ) );
+		}
 	}
 
 	/* init model library */
