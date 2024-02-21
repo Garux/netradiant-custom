@@ -313,6 +313,7 @@ void DoSides( EBrushPrefab type ){
 				break;
 			}
 		}
+		spin->selectAll();
 		{
 			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
 			form->addWidget( buttons );
