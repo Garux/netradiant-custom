@@ -292,7 +292,7 @@ void PrintBSPFileSizes(){
 	            bspNodes.size(), bspNodes.size() * sizeof( bspNodes[0] ) );
 	Sys_Printf( "%9zu leafs         %9zu\n",
 	            bspLeafs.size(), bspLeafs.size() * sizeof( bspLeafs[0] ) );
-	Sys_Printf( "%zu leafsurfaces  %zu\n",
+	Sys_Printf( "%9zu leafsurfaces  %9zu\n",
 	            bspLeafSurfaces.size(), bspLeafSurfaces.size() * sizeof( bspLeafSurfaces[0] ) );
 	Sys_Printf( "%9zu leafbrushes   %9zu\n",
 	            bspLeafBrushes.size(), bspLeafBrushes.size() * sizeof( bspLeafBrushes[0] ) );
