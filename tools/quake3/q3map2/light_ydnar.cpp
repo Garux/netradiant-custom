@@ -201,12 +201,6 @@ void SmoothNormals(){
 				smoothed[ f ] = true;
 			}
 		}
-
-		/* ydnar: optional force-to-trisoup */
-		if ( trisoup && ds.surfaceType == MST_PLANAR ) {
-			ds.surfaceType = MST_TRIANGLE_SOUP;
-			ds.lightmapNum[ 0 ] = -3;
-		}
 	}
 
 	/* bail if no surfaces have a shade angle */

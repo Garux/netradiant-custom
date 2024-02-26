@@ -1990,6 +1990,16 @@ static void LightWorld( bool fastAllocate, bool bounceStore ){
 
 	/* ydnar: store off lightmaps */
 	StoreSurfaceLightmaps( fastAllocate, true );
+
+	/* ydnar: optional force-to-trisoup */
+	if( trisoup ){
+		for( auto& ds : bspDrawSurfaces ){
+			if( ds.surfaceType == MST_PLANAR ){
+				ds.surfaceType = MST_TRIANGLE_SOUP;
+				ds.lightmapNum[ 0 ] = -3;
+			}
+		}
+	}
 }
 
 
