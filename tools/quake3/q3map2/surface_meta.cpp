@@ -1663,6 +1663,10 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 		/* classify the surface */
 		ClassifySurfaces( 1, ds );
 		//% Sys_Warning( "numV: %d numIdx: %d\n", ds->numVerts, ds->numIndexes );
+		/* ClassifySurfaces() sets axis from vertex normals
+		   method is very questionable and axis actually happens to be wrong after normals passed through SmoothMetaTriangles()
+		   use metaTriangle_t::lightmapAxis which is guaranteedly set and used as main factor for triangles merge */
+		ds->lightmapAxis = seed.lightmapAxis;
 
 		/* add to count */
 		numMergedSurfaces++;

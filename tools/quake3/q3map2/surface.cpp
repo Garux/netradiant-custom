@@ -483,7 +483,7 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 		{
 			ds->planeNum = -1;
 			ds->lightmapVecs[ 2 ].set( 0 );
-			//% if( ds->type == SURF_META || ds->type == SURF_FACE )
+			//% if( ds->type == ESurfaceType::Meta || ds->type == ESurfaceType::Face )
 			//%		Sys_Warning( "Non-planar face (%d): %s\n", ds->planeNum, ds->shaderInfo->shader );
 		}
 
@@ -703,7 +703,7 @@ static shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMa
 
 /*
    DrawSurfaceForSide()
-   creates a SURF_FACE drawsurface from a given brush side and winding
+   creates a ESurfaceType::Face drawsurface from a given brush side and winding
    stores references to given brush and side
  */
 
