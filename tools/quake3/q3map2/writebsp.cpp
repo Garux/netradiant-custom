@@ -354,9 +354,7 @@ void EndBSPFile( bool do_write ){
 		WriteSurfaceExtraFile( source );
 
 		/* write the bsp */
-		const auto path = StringStream( source, ".bsp" );
-		Sys_Printf( "Writing %s\n", path.c_str() );
-		WriteBSPFile( path );
+		WriteBSPFile( StringStream( source, ".bsp" ) );
 	}
 }
 

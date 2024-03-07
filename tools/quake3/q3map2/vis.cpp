@@ -970,7 +970,6 @@ int VisMain( Args& args ){
 	}
 
 	/* write the bsp file */
-	Sys_Printf( "Writing %s\n", source );
 	WriteBSPFile( source );
 
 	return 0;

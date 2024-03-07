@@ -661,7 +661,6 @@ int ConvertJsonMain( Args& args ){
 		read_json( StringStream( PathExtensionless( source ), '/' ), useFlagNames, skipUnknownFlags );
 		UnparseEntities();
 		path_set_extension( source, "_json.bsp" );
-		Sys_Printf( "Writing %s\n", source );
 		WriteBSPFile( source );
 	}
 

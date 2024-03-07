@@ -545,7 +545,6 @@ int ScaleBSPMain( Args& args ){
 	/* write the bsp */
 	UnparseEntities();
 	path_set_extension( source, "_s.bsp" );
-	Sys_Printf( "Writing %s\n", source );
 	WriteBSPFile( source );
 
 	/* return to sender */
@@ -649,7 +648,6 @@ int ShiftBSPMain( Args& args ){
 	/* write the bsp */
 	UnparseEntities();
 	path_set_extension( source, "_sh.bsp" );
-	Sys_Printf( "Writing %s\n", source );
 	WriteBSPFile( source );
 
 	/* return to sender */
@@ -934,7 +932,6 @@ int MergeBSPMain( Args& args ){
 	/* write the bsp */
 	UnparseEntities();
 	path_set_extension( source, "_merged.bsp" );
-	Sys_Printf( "Writing %s\n", source );
 	WriteBSPFile( source );
 
 	/* return to sender */
@@ -1148,7 +1145,6 @@ int ConvertBSPMain( Args& args ){
 
 		/* write bsp */
 		path_set_extension( source, "_c.bsp" );
-		Sys_Printf( "Writing %s\n", source );
 		WriteBSPFile( source );
 
 		/* return to sender */

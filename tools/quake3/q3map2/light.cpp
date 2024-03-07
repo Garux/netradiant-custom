@@ -1920,7 +1920,6 @@ static void LightWorld( bool fastAllocate, bool bounceStore ){
 		StoreSurfaceLightmaps( fastAllocate, bounceStore );
 		if( bounceStore ){
 			UnparseEntities();
-			Sys_Printf( "Writing %s\n", source );
 			WriteBSPFile( source );
 		}
 
@@ -2840,7 +2839,6 @@ int LightMain( Args& args ){
 
 	/* write out the bsp */
 	UnparseEntities();
-	Sys_Printf( "Writing %s\n", source );
 	WriteBSPFile( source );
 
 	/* ydnar: export lightmaps */

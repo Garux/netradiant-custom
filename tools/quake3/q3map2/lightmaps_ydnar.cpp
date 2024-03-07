@@ -251,7 +251,6 @@ int ImportLightmapsMain( Args& args ){
 	}
 
 	/* write the bsp */
-	Sys_Printf( "writing %s\n", source );
 	WriteBSPFile( source );
 
 	/* return to sender */
