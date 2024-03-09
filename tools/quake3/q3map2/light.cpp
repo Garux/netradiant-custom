@@ -31,6 +31,7 @@
 /* dependencies */
 #include "q3map2.h"
 #include "bspfile_rbsp.h"
+#include <set>
 
 
 
@@ -1781,6 +1782,137 @@ static void SetupGrid(){
 
 
 /*
+	Handles writing optional hacks after -light and each -bounce pass
+*/
+
+static void WriteBSPFileAfterLight( const char *bspFileName ){
+	const auto lmPathStart = String64( "maps/", mapName, '/' );
+	std::set<int> lmIds;
+	// find external lm ids, if any
+	// stupidly search in shader text, ( numExtLightmaps > 0 && !externalLightmaps ) check wont work in e.g.
+	// ET with externalLightmaps + lightstyles hack or potentially with deluxemaps
+	for ( const shaderInfo_t& si : Span( shaderInfo, numShaderInfo ) )
+	{
+		if ( si.custom && !strEmptyOrNull( si.shaderText ) ) {
+			const char *txt = si.shaderText;
+			while( ( txt = strstr( txt, lmPathStart ) ) ){
+				txt += strlen( lmPathStart );
+				int lmindex;
+				int okcount = 0;
+				if( sscanf( txt, EXTERNAL_LIGHTMAP "%n", &lmindex, &okcount ) && okcount == strlen( EXTERNAL_LIGHTMAP ) ){
+					lmIds.insert( lmindex );
+				}
+			}
+		}
+	}
+
+	if( !lmIds.empty() || trisoup ){
+		std::vector<bspModel_t> bakModels;
+		std::vector<int> bakLeafSurfaces;
+		std::vector<bspBrushSide_t> bakBrushSides;
+		std::vector<bspDrawSurface_t> bakDrawSurfaces;
+
+		if( !lmIds.empty() ){
+			{ // write nomipmaps shaders
+				/* dummy check */
+				ENSURE( !mapShaderFile.empty() );
+
+				/* open shader file */
+				FILE *file = fopen( mapShaderFile.c_str(), "at" ); // append to existing file
+				if ( file == NULL ) {
+					Sys_Warning( "Unable to open map shader file %s for writing\n", mapShaderFile.c_str() );
+					return;
+				}
+
+				/* print header */
+				fprintf( file, "\n// Shaders to force nomipmaps flag on external lightmap images:\n\n" );
+
+				/* devise les shaders: max 8 stages, max 8 maps in animmap */
+				size_t shaderId = 0;
+				for( auto it = lmIds.cbegin(); it != lmIds.cend(); ){
+					fprintf( file, "%s\n{\n\tnomipmaps\n", String64( lmPathStart, "nomipmaps", shaderId++ ).c_str() );
+					for( size_t i = 0; i < 8 && it != lmIds.cend(); ++i ){
+						fprintf( file, "\t{\n\t\tanimmap .0042" );
+						for( size_t j = 0; j < 8 && it != lmIds.cend(); ++j, ++it ){
+							fprintf( file, " %s" EXTERNAL_LIGHTMAP, lmPathStart.c_str(), *it );
+						}
+						fprintf( file, "\n\t}\n" );
+					}
+					fprintf( file, "}\n\n" );
+				}
+
+				/* close the shader */
+				fflush( file );
+				fclose( file );
+			}
+
+			const size_t numNomipSurfs = ( lmIds.size() + 63 ) / 64;
+			// prepend nomip surfs to the list so that they are read by engine first
+			for( size_t su = 0; su < numNomipSurfs; ++su ){
+				auto& out = bakDrawSurfaces.emplace_back();
+
+				out.surfaceType = MST_FLARE;
+				out.shaderNum = EmitShader( String64( lmPathStart, "nomipmaps", su ), nullptr, nullptr );
+				out.fogNum = -1;
+
+				for ( int i = 0; i < MAX_LIGHTMAPS; i++ )
+				{
+					out.lightmapNum[ i ] = -3;
+					out.lightmapStyles[ i ] = LS_NONE;
+					out.vertexStyles[ i ] = LS_NONE;
+				}
+			}
+
+			bakDrawSurfaces.insert( bakDrawSurfaces.cend(), bspDrawSurfaces.cbegin(), bspDrawSurfaces.cend() );
+			// backup original bsp lumps
+			bakDrawSurfaces.swap( bspDrawSurfaces );
+
+			bakModels = bspModels;
+			bakModels.swap( bspModels );
+			bakLeafSurfaces = bspLeafSurfaces;
+			bakLeafSurfaces.swap( bspLeafSurfaces );
+			bakBrushSides = bspBrushSides;
+			bakBrushSides.swap( bspBrushSides );
+			// repair indices
+			for( auto&& index : bspLeafSurfaces )
+				index += numNomipSurfs;
+			for( auto&& side : bspBrushSides )
+				side.surfaceNum += numNomipSurfs;
+			for( auto&& model : bspModels )
+				model.firstBSPSurface += numNomipSurfs;
+		}
+
+		/* ydnar: optional force-to-trisoup */
+		if( trisoup ){
+			if( bakDrawSurfaces.empty() ){ // backup if not yet
+				bakDrawSurfaces = bspDrawSurfaces;
+				bakDrawSurfaces.swap( bspDrawSurfaces );
+			}
+			for( auto& ds : bspDrawSurfaces ){
+				if( ds.surfaceType == MST_PLANAR ){
+					ds.surfaceType = MST_TRIANGLE_SOUP;
+					ds.lightmapNum[ 0 ] = -3;
+				}
+			}
+		}
+
+		WriteBSPFile( bspFileName );
+		// restore original bsp lumps
+		bakDrawSurfaces.swap( bspDrawSurfaces );
+		if( !bakModels.empty() || !bakLeafSurfaces.empty() || !bakBrushSides.empty() ){
+			bakModels.swap( bspModels );
+			bakLeafSurfaces.swap( bspLeafSurfaces );
+			bakBrushSides.swap( bspBrushSides );
+		}
+	}
+	else{ // no hacks to apply 😵
+		WriteBSPFile( bspFileName );
+	}
+}
+
+
+
+/*
    LightWorld()
    does what it says...
  */
@@ -1920,7 +2052,7 @@ static void LightWorld( bool fastAllocate, bool bounceStore ){
 		StoreSurfaceLightmaps( fastAllocate, bounceStore );
 		if( bounceStore ){
 			UnparseEntities();
-			WriteBSPFile( source );
+			WriteBSPFileAfterLight( source );
 		}
 
 		/* note it */
@@ -1990,15 +2122,9 @@ static void LightWorld( bool fastAllocate, bool bounceStore ){
 	/* ydnar: store off lightmaps */
 	StoreSurfaceLightmaps( fastAllocate, true );
 
-	/* ydnar: optional force-to-trisoup */
-	if( trisoup ){
-		for( auto& ds : bspDrawSurfaces ){
-			if( ds.surfaceType == MST_PLANAR ){
-				ds.surfaceType = MST_TRIANGLE_SOUP;
-				ds.lightmapNum[ 0 ] = -3;
-			}
-		}
-	}
+	/* write out the bsp */
+	UnparseEntities();
+	WriteBSPFileAfterLight( source );
 }
 
 
@@ -2836,10 +2962,6 @@ int LightMain( Args& args ){
 
 	/* light the world */
 	LightWorld( fastAllocate, bounceStore );
-
-	/* write out the bsp */
-	UnparseEntities();
-	WriteBSPFile( source );
 
 	/* ydnar: export lightmaps */
 	if ( exportLightmaps && !externalLightmaps ) {
