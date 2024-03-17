@@ -72,7 +72,7 @@ Win32 (using MSYS2)
 
 environment:
 - MSYS2 (http://www.msys2.org/)
-- from msys2_shell:
+- from MSYS2 MINGW32 or MSYS2 MINGW64 shell:
   pacman -S --needed base-devel
     32 bit:
   pacman -S --needed mingw-w64-i686-{toolchain,qt5-base,libxml2}
