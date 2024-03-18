@@ -7,34 +7,28 @@
 
 Directory::Directory(const char* name) {
     this->dir = new QDir(name);
+    QStringList entryList = this->dir->entryList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
+    for(int i = 0; i < entryList.size(); i++) {
+        QString file_path = entryList.at(i);
+        QString file_name = QFileInfo(file_path).fileName();
+        this->entries.push_back(file_name.toLatin1().data());
+    }
 }
 
 bool Directory::good() {
-    if(this->dir) {
-        QDir* dir_instance = reinterpret_cast<QDir*>(this->dir);
-        return dir_instance->exists();
-    }
-    return false;
+    return this->dir->exists();
 }
 
 void Directory::close() {
-    if(this->dir) {
-        QDir* dir_instance = reinterpret_cast<QDir*>(this->dir);
-        delete dir_instance;
-        this->dir = nullptr;
-    }
+    this->entries.clear();
+    delete this->dir;
 }
 
-const char* Directory::read_and_increment(){
-    if(this->dir) {
-        QDir* dir_instance = reinterpret_cast<QDir*>(this->dir);
-        QStringList entryList = dir_instance->entryList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
-        if(this->entry_idx < entryList.size()) {
-            QString file_path = entryList.at(this->entry_idx);
-            QString file_name = QFileInfo(file_path).fileName();
-            this->entry_idx++;
-            return file_name.toStdString().c_str();
-        }
+const char* Directory::read_and_increment() {
+    if(this->entry_idx < this->entries.size()) {
+        const char* entry = this->entries.at(this->entry_idx);
+        this->entry_idx++;
+        return entry;
     }
     return nullptr;
 }

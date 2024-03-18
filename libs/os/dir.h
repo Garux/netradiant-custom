@@ -24,10 +24,16 @@
 /// \file
 /// \brief OS directory-listing object.
 
+#include <vector>
+
+class QDir;
+
 class Directory {
+
 	private:
-		int entry_idx = 0;
-		void* dir;
+		QDir* dir;
+		size_t entry_idx = 0;
+		std::vector<const char*> entries;
 
 	public:
 		Directory(const char* name);
