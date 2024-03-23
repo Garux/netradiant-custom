@@ -74,11 +74,11 @@ CPPFLAGS_QTCORE    ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt
 LIBS_QTCORE        ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Core --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_QTCORE    := $(CPPFLAGS_QTCORE)
 LIBS_QTCORE        := $(LIBS_QTCORE)
-CPPFLAGS_QTGUI     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --cflags $(STDERR_TO_DEVNULL))
+CPPFLAGS_QTGUI     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
 LIBS_QTGUI         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_QTGUI     := $(CPPFLAGS_QTGUI)
 LIBS_QTGUI         := $(LIBS_QTGUI)
-CPPFLAGS_QTWIDGETS ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --cflags $(STDERR_TO_DEVNULL))
+CPPFLAGS_QTWIDGETS ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
 LIBS_QTWIDGETS     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_QTWIDGETS := $(CPPFLAGS_QTWIDGETS)
 LIBS_QTWIDGETS     := $(LIBS_QTWIDGETS)
@@ -835,8 +835,8 @@ libetclib.$(A): \
 	libs/etclib.o \
 
 $(INSTALLDIR)/radiant.$(EXE): LDFLAGS_EXTRA := $(MWINDOWS)
-$(INSTALLDIR)/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS) $(LIBS_ZLIB)
-$(INSTALLDIR)/radiant.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_GL) $(CPPFLAGS_DL) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_QTWIDGETS) $(LIBS_ZLIB)
+$(INSTALLDIR)/radiant.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_GL) $(CPPFLAGS_DL) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/autosave.o \
 	radiant/brushmanip.o \
@@ -942,7 +942,7 @@ libprofile.$(A): \
 	libs/profile/file.o \
 	libs/profile/profile.o \
 
-libgtkutil.$(A): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+libgtkutil.$(A): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 libgtkutil.$(A): \
 	libs/gtkutil/accelerator.o \
 	libs/gtkutil/clipboard.o \
@@ -1086,8 +1086,8 @@ $(INSTALLDIR)/modules/vfspk3.$(DLL): \
 	plugins/vfspk3/vfspk3.o \
 	libfilematch.$(A) \
 
-$(INSTALLDIR)/plugins/bobtoolz.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
-$(INSTALLDIR)/plugins/bobtoolz.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/bobtoolz.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/bobtoolz.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/bobtoolz.$(DLL): \
 	contrib/bobtoolz/bobToolz-GTK.o \
 	contrib/bobtoolz/bsploader.o \
@@ -1116,16 +1116,16 @@ $(INSTALLDIR)/plugins/bobtoolz.$(DLL): \
 	libmathlib.$(A) \
 	libprofile.$(A) \
 
-$(INSTALLDIR)/plugins/brushexport.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
-$(INSTALLDIR)/plugins/brushexport.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/brushexport.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/brushexport.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/brushexport.$(DLL): \
 	contrib/brushexport/callbacks.o \
 	contrib/brushexport/export.o \
 	contrib/brushexport/interface.o \
 	contrib/brushexport/plugin.o \
 
-$(INSTALLDIR)/plugins/prtview.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
-$(INSTALLDIR)/plugins/prtview.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/prtview.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/prtview.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/prtview.$(DLL): \
 	contrib/prtview/AboutDialog.o \
 	contrib/prtview/ConfigDialog.o \
@@ -1134,14 +1134,14 @@ $(INSTALLDIR)/plugins/prtview.$(DLL): \
 	contrib/prtview/prtview.o \
 	libprofile.$(A) \
 
-$(INSTALLDIR)/plugins/shaderplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS) $(LIBS_XML)
-$(INSTALLDIR)/plugins/shaderplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) $(CPPFLAGS_XML) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/shaderplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS) $(LIBS_XML)
+$(INSTALLDIR)/plugins/shaderplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) $(CPPFLAGS_XML) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/shaderplug.$(DLL): \
 	contrib/shaderplug/shaderplug.o \
 	libxmllib.$(A) \
 
-$(INSTALLDIR)/plugins/sunplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
-$(INSTALLDIR)/plugins/sunplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/sunplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/sunplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/sunplug.$(DLL): \
 	contrib/sunplug/sunplug.o \
 
@@ -1207,16 +1207,16 @@ $(INSTALLDIR)/q2map.$(EXE): \
 	libl_net.$(A) \
 	$(if $(findstring Win32,$(OS)),icons/q2map.o,) \
 
-$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
-$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/ufoaiplug.$(DLL): \
 	contrib/ufoaiplug/ufoai_filters.o \
 	contrib/ufoaiplug/ufoai_gtk.o \
 	contrib/ufoaiplug/ufoai_level.o \
 	contrib/ufoaiplug/ufoai.o \
 
-$(INSTALLDIR)/plugins/meshtex.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
-$(INSTALLDIR)/plugins/meshtex.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/meshtex.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/meshtex.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/meshtex.$(DLL): \
 	contrib/meshtex/GeneralFunctionDialog.o \
 	contrib/meshtex/GenericDialog.o \
@@ -1232,8 +1232,8 @@ $(INSTALLDIR)/plugins/meshtex.$(DLL): \
 	contrib/meshtex/RefCounted.o \
 	contrib/meshtex/SetScaleDialog.o \
 
-$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) $(LIBS_QTGUI) $(LIBS_QTWIDGETS)
-$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) $(CPPFLAGS_QTGUI) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): \
 	contrib/bkgrnd2d/bkgrnd2d.o \
 	contrib/bkgrnd2d/dialog.o \
