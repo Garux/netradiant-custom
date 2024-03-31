@@ -617,7 +617,12 @@ protected:
 			}
 		}
 		// clear focus widget while showing to keep global shortcuts working
+#ifdef WIN32
 		else if( event->type() == QEvent::Show ) {
+#else
+		else if( event->type() == QEvent::WindowActivate ) { // fixme hack hack: events order varies in OSes, QEvent::Show doesn't work in Linux
+		// QEvent::WindowActivate seems preferable for usability, but allows QLineEdit content selection w/o focusing it in WIN32
+#endif
 			QTimer::singleShot( 0, [obj](){
 				if( static_cast<QWidget*>( obj )->focusWidget() != nullptr )
 					static_cast<QWidget*>( obj )->focusWidget()->clearFocus();
