@@ -1789,18 +1789,20 @@ static void WriteBSPFileAfterLight( const char *bspFileName ){
 	const auto lmPathStart = String64( "maps/", mapName, '/' );
 	std::set<int> lmIds;
 	// find external lm ids, if any
-	// stupidly search in shader text, ( numExtLightmaps > 0 && !externalLightmaps ) check wont work in e.g.
-	// ET with externalLightmaps + lightstyles hack or potentially with deluxemaps
-	for ( const shaderInfo_t& si : Span( shaderInfo, numShaderInfo ) )
-	{
-		if ( si.custom && !strEmptyOrNull( si.shaderText ) ) {
-			const char *txt = si.shaderText;
-			while( ( txt = strstr( txt, lmPathStart ) ) ){
-				txt += strlen( lmPathStart );
-				int lmindex;
-				int okcount = 0;
-				if( sscanf( txt, EXTERNAL_LIGHTMAP "%n", &lmindex, &okcount ) && okcount == strlen( EXTERNAL_LIGHTMAP ) ){
-					lmIds.insert( lmindex );
+	// stupidly search in shader text, ( numExtLightmaps > 0 ) check wont work when e.g. deluxemaps
+	// also would excessively include lightstyles using $lightmap reference
+	if( !externalLightmaps ){ // unless native ext lms: e.g. in ET with lightstyles hack preloading lm imgs breaks r_mapOverbrightBits
+		for ( const shaderInfo_t& si : Span( shaderInfo, numShaderInfo ) )
+		{
+			if ( si.custom && !strEmptyOrNull( si.shaderText ) ) {
+				const char *txt = si.shaderText;
+				while( ( txt = strstr( txt, lmPathStart ) ) ){
+					txt += strlen( lmPathStart );
+					int lmindex;
+					int okcount = 0;
+					if( sscanf( txt, EXTERNAL_LIGHTMAP "%n", &lmindex, &okcount ) && okcount == strlen( EXTERNAL_LIGHTMAP ) ){
+						lmIds.insert( lmindex );
+					}
 				}
 			}
 		}
