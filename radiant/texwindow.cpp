@@ -272,7 +272,8 @@ public:
 	}
 private:
 	void clampOriginY(){
-		m_originy = std::clamp( m_originy, m_height - totalHeight(), 0 );
+		const int minOrigin = std::min( m_height - totalHeight(), 0 );
+		m_originy = std::clamp( m_originy, minOrigin, 0 );
 	}
 	void evaluateHeight();
 	int totalHeight(){
