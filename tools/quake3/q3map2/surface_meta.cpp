@@ -73,6 +73,7 @@ struct metaTriangle_t
 	const side_t        *side;
 	int entityNum, surfaceNum, planeNum, fogNum, sampleSize, castShadows, recvShadows;
 	float shadeAngleDegrees;
+	int autoblendIdx;
 	Plane3f plane;
 	Vector3 lightmapAxis;
 	std::array<metaVertex_t*, 3> m_vertices;
@@ -319,6 +320,7 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
 			src.fogNum = ds->fogNum;
 			src.sampleSize = ds->sampleSize;
 			src.shadeAngleDegrees = ds->shadeAngleDegrees;
+			src.autoblendIdx = ds->autoblendIdx;
 			src.lightmapAxis = ds->lightmapAxis;
 
 			metaTriangle_insert( src, { ds->verts[ ds->indexes[ i ] ],

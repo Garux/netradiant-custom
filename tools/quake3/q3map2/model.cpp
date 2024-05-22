@@ -992,7 +992,7 @@ default_CLIPMODEL:
    adds a picomodel into the bsp
  */
 
-void InsertModel( const char *name, const char *skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, entity_t& entity, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth ){
+void InsertModel( const char *name, const char *skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, entity_t& entity, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth, int autoblendIdx ){
 	int i, j;
 	const Matrix4 nTransform( matrix4_for_normal_transform( transform ) );
 	const bool transform_lefthanded = MATRIX4_LEFTHANDED == matrix4_handedness( transform );
@@ -1138,6 +1138,7 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		ds->entityNum = entity.mapEntityNum;
 		ds->castShadows = castShadows;
 		ds->recvShadows = recvShadows;
+		ds->autoblendIdx = autoblendIdx;
 
 		/* set shader */
 		ds->shaderInfo = si;
@@ -1404,8 +1405,10 @@ void AddTriangleModels( entity_t& eparent ){
 		if ( e.read_keyvalue( clipDepth, "_clipdepth" ) )
 			Sys_Printf( "misc_model %s has autoclip depth of %.3f\n", model, clipDepth );
 
+		const int autoblendIdx = e.boolForKey( "_autoblend" )? ++mapDrawSurface_t::autoblendMaxIdx : 0;
+
 
 		/* insert the model */
-		InsertModel( model, skin, frame, transform, &remaps, celShader, eparent, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle, clipDepth );
+		InsertModel( model, skin, frame, transform, &remaps, celShader, eparent, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle, clipDepth, autoblendIdx );
 	}
 }

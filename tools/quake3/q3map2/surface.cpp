@@ -770,6 +770,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 	ds->entityNum = b.entityNum;
 	ds->castShadows = b.castShadows;
 	ds->recvShadows = b.recvShadows;
+	ds->autoblendIdx = b.autoblendIdx;
 
 	ds->planar = true;
 	ds->planeNum = s.planenum;
@@ -2806,7 +2807,7 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceMode
 			}
 
 			/* insert the model */
-			InsertModel( model.model.c_str(), NULL, 0, transform, NULL, ds->celShader, entity, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0, clipDepthGlobal );
+			InsertModel( model.model.c_str(), NULL, 0, transform, NULL, ds->celShader, entity, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0, clipDepthGlobal, 0 );
 
 			/* return to sender */
 			return 1;

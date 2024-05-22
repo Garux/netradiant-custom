@@ -1594,6 +1594,8 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 	if ( lightmapSampleSize != 0 )
 		Sys_Printf( "Entity %d (%s) has lightmap sample size of %d\n", mapEnt.mapEntityNum, classname, lightmapSampleSize );
 
+	const int autoblendIdx = mapEnt.boolForKey( "_autoblend" )? ++mapDrawSurface_t::autoblendMaxIdx : 0;
+
 	/* attach stuff to everything in the entity */
 	for ( brush_t& brush : mapEnt.brushes )
 	{
@@ -1604,6 +1606,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 		brush.lightmapScale = lightmapScale;
 		brush.celShader = celShader;
 		brush.shadeAngleDegrees = shadeAngle;
+		brush.autoblendIdx = autoblendIdx;
 	}
 
 	for ( parseMesh_t *patch = mapEnt.patches; patch != NULL; patch = patch->next )
