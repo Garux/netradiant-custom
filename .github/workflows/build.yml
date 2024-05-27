@@ -39,9 +39,7 @@ jobs:
 
     - name: Build
       run: |
-        make DOWNLOAD_GAMEPACKS=no MAKEFILE_CONF=msys2-Makefile.conf BUILD=release -j4
-        wget https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
-        unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
+        make MAKEFILE_CONF=msys2-Makefile.conf -j4
         mkdir -p install/settings
         echo > install/settings/DUMMMY
 
@@ -70,9 +68,7 @@ jobs:
 
     - name: Build
       run: |
-        make DOWNLOAD_GAMEPACKS=no CXXFLAGS="-Wno-deprecated-copy" -j4
-        wget https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
-        unzip -o netradiant-custom-extra-gamepacks.zip -d "install"
+        make CXXFLAGS="-Wno-deprecated-copy" -j4
         7z a Linux-${{ matrix.arch }}.7z ./install/*
 #       7z to preserve file permissions
 

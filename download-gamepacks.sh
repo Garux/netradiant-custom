@@ -82,6 +82,11 @@ pack()
 	esac
 	case " $LICENSEFILTER " in
 		"  ")
+			if [ "$license" == "allinone" ]; then
+				$ECHO "All-in-one pack skipped: only downloading it alone without other packs."
+				$ECHO
+				return
+			fi
 			;;
 		*" $license "*)
 			;;
@@ -195,3 +200,5 @@ pack WolfPack          proprietary svn    svn://svn.icculus.org/gtkradiant-gamep
 pack WoPPack           proprietary git    https://github.com/PadWorld-Entertainment/wop-mapeditor-support.git
 pack XonoticPack       GPL         git    https://gitlab.com/xonotic/netradiant-xonoticpack.git
 pack ZEQ2LitePack      unknown     git    https://gitlab.com/netradiant/gamepacks/zeq2lite-mapeditor-support.git
+
+pack NRCPack           allinone    zip1    https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip

@@ -11,6 +11,9 @@ case "$DOWNLOAD_GAMEPACKS" in
 	yes)
 		LICENSEFILTER=GPL BATCH=1 $SH download-gamepacks.sh
 		;;
+	allinone)
+		LICENSEFILTER=allinone BATCH=1 $SH download-gamepacks.sh
+		;;
 	all)
 		BATCH=1 $SH download-gamepacks.sh
 		;;

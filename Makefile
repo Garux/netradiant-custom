@@ -91,9 +91,9 @@ LIBS_ZLIB          ?= -lz
 CPPFLAGS_JPEG      ?=
 LIBS_JPEG          ?= -ljpeg
 DEPEND_ON_MAKEFILE ?= yes
-DOWNLOAD_GAMEPACKS ?= yes
+# yes = download; all = even download undistributable gamepacks; no = disable; allinone = dl all-in-one compact fixed archive
+DOWNLOAD_GAMEPACKS ?= allinone
 INSTALL_DLLS       ?= yes
-# set to no to disable gamepack, set to all to even download undistributable gamepacks
 
 # Support CHECK_DEPENDENCIES with DOWNLOAD_GAMEPACKS semantics
 ifneq ($(CHECK_DEPENDENCIES),)
