@@ -107,7 +107,7 @@ static void parseBspFile( const char *bspPath, StrList& outShaders, StrList& out
 		}
 
 		for ( size_t i = 0; i < bspShaders.size(); ++i ){
-			if ( drawsurfSHs[i] && !( bspShaders[i].surfaceFlags & GetRequiredSurfaceParm( "nodraw"_Tstring ).surfaceFlags ) ){ // also sort out nodraw patches
+			if ( drawsurfSHs[i] && !( bspShaders[i].surfaceFlags & GetRequiredSurfaceParm< "nodraw"_Tstring >().surfaceFlags ) ){ // also sort out nodraw patches
 				res2list( pk3Shaders, bspShaders[i].shader );
 			}
 		}

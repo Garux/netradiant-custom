@@ -496,10 +496,10 @@ static void SetBrushContents( brush_t& b ){
 		else if ( s->compileFlags & C_FOG ){
 			b.contentShader = s->shaderInfo;
 		}
-		else if ( b.contentShader->contentFlags & GetRequiredSurfaceParm( "playerclip"_Tstring ).contentFlags ){
+		else if ( b.contentShader->contentFlags & GetRequiredSurfaceParm< "playerclip"_Tstring >().contentFlags ){
 			continue;
 		}
-		else if ( s->contentFlags & GetRequiredSurfaceParm( "playerclip"_Tstring ).contentFlags ){
+		else if ( s->contentFlags & GetRequiredSurfaceParm< "playerclip"_Tstring >().contentFlags ){
 			b.contentShader = s->shaderInfo;
 		}
 		else if (!( b.contentShader->compileFlags & C_SOLID )){

@@ -67,6 +67,9 @@
 #include "bitflags.h"
 #include <list>
 #include <forward_list>
+#include <array>
+#include <algorithm>
+#include <cassert>
 #include "qmath.h"
 
 #include <cstddef>
@@ -1664,16 +1667,22 @@ bool                        ApplySurfaceParm( const char *name, int *contentFlag
 const surfaceParm_t         *GetSurfaceParm( const char *name );
 
 // Encode the string as a type
-template <char... chars>
-using TemplateString = std::integer_sequence<char, chars...>;
-// Create a user defined literal operator
-template <typename T, T... chars>
-constexpr TemplateString<chars...> operator""_Tstring() { return { }; }
+template <std::size_t N>
+struct TemplateString
+{
+	consteval TemplateString(const char(&s)[N]) {
+		std::copy_n(s, N, m_data.begin());
+		assert(s[N - 1] == '\0' && "TemplateString must be null-terminated"); // consteval ensures this is evaluated at compile time, despite not being a static_assert
+	}
+	auto operator<=>(const TemplateString&) const& = default;
+	std::array<char, N> m_data;
+};
+
+template<TemplateString s> constexpr auto operator ""_Tstring() { return s; }
 /// \brief returns statically evaluated \c surfaceParm_t for the given name or emits \c Error
-template<char... chars>
-const surfaceParm_t         &GetRequiredSurfaceParm( const TemplateString<chars...> ){
-    static constexpr char str[sizeof...(chars) + 1] = { chars..., '\0' }; // Recover the character data
-	static const surfaceParm_t *const sp = GetSurfaceParm( str );
+template<TemplateString s>
+const surfaceParm_t         &GetRequiredSurfaceParm(){
+	static const surfaceParm_t *const sp = GetSurfaceParm( s.m_data.data() ); // null-termination ensured in constructor
 	ENSURE( sp != nullptr );
     return *sp;
 }
