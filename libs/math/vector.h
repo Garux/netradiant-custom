@@ -28,6 +28,8 @@
 
 #if defined ( _MSC_VER )
 
+// Apparently modern MSC comes with lrint, but I don't know since when. 1940 is almost certainly too much.
+#if ( _MSC_VER ) < 1940
 inline int lrint( double flt ){
 	int i;
 
@@ -39,6 +41,7 @@ inline int lrint( double flt ){
 
 	return i;
 }
+#endif
 
 inline __int64 llrint( double f ){
 	return static_cast<__int64>( f + 0.5 );
