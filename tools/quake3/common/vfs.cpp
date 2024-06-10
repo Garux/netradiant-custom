@@ -56,7 +56,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <sys/stat.h>
-#include <glib.h>
+#include <filesystem>
 
 #include "cmdlib.h"
 #include "qstringops.h"
@@ -138,11 +138,9 @@ static void vfsInitPakFile( const char *filename ){
 
 // reads all pak files from a dir
 void vfsInitDirectory( const char *path ){
-	GDir *dir;
-
 	const auto path_is_forbidden = []( const char *path ){
 		for ( const auto& forbidden : g_strForbiddenDirs )
-			if ( matchpattern( path_get_filename_start( path ), forbidden.c_str(), TRUE ) )
+			if ( matchpattern( path_get_filename_start( path ), forbidden.c_str(), true ) )
 				return true;
 		return false;
 	};
@@ -161,24 +159,19 @@ void vfsInitDirectory( const char *path ){
 	const CopiedString pathCleaned = g_strDirs.emplace_back( StringStream( DirectoryCleaned( path ) ) );
 
 	if ( g_bUsePak ) {
-		dir = g_dir_open( path, 0, NULL );
-
-		if ( dir != NULL ) {
+		if ( std::filesystem::is_directory( path ) ) {
 			std::vector<StringOutputStream> paks;
-			const char* name;
-			while ( ( name = g_dir_read_name( dir ) ) )
+			for (const auto& entry : std::filesystem::directory_iterator())
 			{
-				if ( path_is_forbidden( name ) )
+				if ( path_is_forbidden( entry.path().filename().string().c_str()))
 					continue;
-
-				if ( path_extension_is( name, "pk3" ) ) {
-					paks.push_back( StringStream( pathCleaned, name ) );
+				if ( entry.path().extension().string() == ".pk3" ) {
+					paks.push_back( StringStream( pathCleaned, entry.path().filename().string().c_str()));
 				}
-				else if ( path_extension_is( name, "pk3dir" ) ) {
-					g_strDirs.emplace_back( StringStream( pathCleaned, name, '/' ) );
+				else if ( entry.path().extension().string() == ".pk3dir" ) {
+					g_strDirs.emplace_back( StringStream( pathCleaned, entry.path().filename().string().c_str(), '/'));
 				}
 			}
-			g_dir_close( dir );
 
 			// sort paks in ascending order
 			// pakFiles are then prepended to the list, reversing the order
@@ -206,17 +199,15 @@ std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath ){
 	};
 	/* search in dirs */
 	for ( const auto& strdir : g_strDirs ){
-		GDir *dir = g_dir_open( StringStream( strdir, shaderPath, '/' ), 0, NULL );
+		const auto path = StringStream(strdir, shaderPath, '/');
 
-		if ( dir != NULL ) {
-			const char* name;
-			while ( ( name = g_dir_read_name( dir ) ) )
+		if ( std::filesystem::exists( path.c_str() ) ) {
+			for ( const auto& entry : std::filesystem::directory_iterator() )
 			{
-				if ( path_extension_is( name, "shader" ) ) {
-					insert( name );
+				if ( entry.path().filename().extension().string() == ".shader" ) {
+					insert( entry.path().filename().string().c_str() );
 				}
 			}
-			g_dir_close( dir );
 		}
 	}
 	/* search in packs */
