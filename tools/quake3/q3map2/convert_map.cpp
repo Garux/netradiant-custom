@@ -340,7 +340,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 
 	/* find out if brush is detail */
 	int contentFlag = 0;
-	if( !( bspShaders[bspBrushes[bspBrushNum].shaderNum].contentFlags & GetRequiredSurfaceParm( "structural"_Tstring ).contentFlags ) ){ // sort out structural transparent brushes, e.g. hints
+	if( !( bspShaders[bspBrushes[bspBrushNum].shaderNum].contentFlags & GetRequiredSurfaceParm<"structural">().contentFlags ) ){ // sort out structural transparent brushes, e.g. hints
 		for( const auto& leaf : bspLeafs ){
 			if( leaf.cluster >= 0 )
 				for( auto id = bspLeafBrushes.cbegin() + leaf.firstBSPLeafBrush, end = id + leaf.numBSPLeafBrushes; id != end; ++id ){
