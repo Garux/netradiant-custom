@@ -32,6 +32,7 @@
 #include "inout.h"
 #include "qstringops.h"
 #include "qpathops.h"
+#include "os/file.h"
 #include "stream/stringstream.h"
 #include "stream/textstream.h"
 #include <cerrno>
