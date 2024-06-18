@@ -295,7 +295,11 @@ static std::map<ModelNameFrame, AssModel> s_assModels;
    loads a picoModel and returns a pointer to the picoModel_t struct or NULL if not found
  */
 
-static AssModel *LoadModel( const char *name, int frame ){
+static AssModel *LoadModel( const char *rawName, int frame ){
+	// attempt to canonicalize name across platforms
+	auto nameStr = StringStream<64>( PathCleaned( rawName ) );
+	auto name    = nameStr.c_str();
+
 	/* dummy check */
 	if ( strEmptyOrNull( name ) ) {
 		return nullptr;
