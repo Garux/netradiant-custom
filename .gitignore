@@ -5,3 +5,4 @@ install
 .vscode
 .idea
 /.cache
+/*.patch
