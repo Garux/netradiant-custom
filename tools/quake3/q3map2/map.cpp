@@ -1683,6 +1683,24 @@ void LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups )
 	int mapEntityNum = 0; /* track .map file entities numbering */
 	while ( ParseMapEntity( onlyLights, noCollapseGroups, mapEntityNum++ ) ){};
 
+	/* canonicalize paths cross plat */
+	for (auto &e : entities) {
+		for (epair_t &p : e.epairs) {
+			auto key     = p.key;
+			auto keyCstr = key.c_str();
+
+			if (
+				striEqual( keyCstr, "model" ) ||
+				striEqual( keyCstr, "_indexmap" ) ||
+				striEqual( keyCstr, "alphamap" ) ||
+				striEqual( keyCstr, "_shader" ) ||
+				striEqual( keyCstr, "shader" )
+				) {
+				p.value = StringStream<64>( PathCleaned( p.value.c_str() ) );
+			}
+		}
+	}
+
 	/* light loading */
 	if ( onlyLights ) {
 		/* emit some statistics */
