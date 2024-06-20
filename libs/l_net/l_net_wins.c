@@ -36,8 +36,6 @@ typedef struct tag_error_struct
 
 #define NET_NAMELEN         64
 
-char my_tcpip_address[NET_NAMELEN];
-
 #define DEFAULTnet_hostport 26000
 
 #define MAXHOSTNAMELEN      256
@@ -152,7 +150,6 @@ int WINS_Init( void ){
 	int i;
 	struct hostent *local;
 	char buff[MAXHOSTNAMELEN];
-	struct sockaddr_s addr;
 	char    *p;
 	int r;
 	WORD wVersionRequested;
@@ -205,33 +202,10 @@ int WINS_Init( void ){
 //		Cvar_Set ("hostname", buff);
 	}
 
-	if ( ( net_controlsocket = WINS_OpenSocket( 0 ) ) == -1 ) {
-		WinError( "WINS_Init: Unable to open control socket\n" );
-	}
-
-	( (struct sockaddr_in *)&broadcastaddr )->sin_family = AF_INET;
-	( (struct sockaddr_in *)&broadcastaddr )->sin_addr.s_addr = INADDR_BROADCAST;
-	( (struct sockaddr_in *)&broadcastaddr )->sin_port = htons( (unsigned short)net_hostport );
-
-	WINS_GetSocketAddr( net_controlsocket, &addr );
-	strcpy( my_tcpip_address,  WINS_AddrToString( &addr ) );
-	p = strrchr( my_tcpip_address, ':' );
-	if ( p ) {
-		*p = 0;
-	}
 	WinPrint( "Winsock Initialized\n" );
 
-	return net_controlsocket;
+	return 0;
 } //end of the function WINS_Init
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-char *WINS_MyAddress( void ){
-	return my_tcpip_address;
-} //end of the function WINS_MyAddress
 //===========================================================================
 //
 // Parameter:				-
@@ -240,7 +214,6 @@ char *WINS_MyAddress( void ){
 //===========================================================================
 void WINS_Shutdown( void ){
 	//WINS_Listen(0);
-	WINS_CloseSocket( net_controlsocket );
 	WSACleanup();
 	//
 	//WinPrint("Winsock Shutdown\n");

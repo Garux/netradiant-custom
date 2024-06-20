@@ -297,19 +297,8 @@ void Net_StringToAddress( const char *string, address_t *address ){
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void Net_MyAddress( address_t *address ){
-	strcpy( address->ip, WINS_MyAddress() );
-} //end of the function Net_MyAddress
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
 void Net_Setup( void ){
 	WINS_Init();
-	//
-	WinPrint( "my address is %s\n", WINS_MyAddress() );
 } //end of the function Net_Setup
 //===========================================================================
 //

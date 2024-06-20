@@ -81,8 +81,6 @@ int Net_Receive( socket_t *sock, netmessage_t *msg );
 socket_t *Net_Connect( address_t *address, int port );
 //disconnect from a host
 void Net_Disconnect( socket_t *sock );
-//returns the local address
-void Net_MyAddress( address_t *address );
 //listen at the given port
 socket_t *Net_ListenSocket( int port );
 //accept new connections at the given socket
