@@ -24,7 +24,6 @@
 #include "bytebool.h"
 int  WINS_Init( void );
 void WINS_Shutdown( void );
-char *WINS_MyAddress( void );
 int  WINS_Listen( int socket );
 int  WINS_Accept( int socket, struct sockaddr_s *addr );
 int  WINS_OpenSocket( int port );
