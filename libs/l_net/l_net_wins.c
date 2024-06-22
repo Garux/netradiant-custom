@@ -40,12 +40,6 @@ typedef struct tag_error_struct
 
 #define MAXHOSTNAMELEN      256
 
-static int net_acceptsocket = -1;       // socket for fielding new connections
-static int net_controlsocket;
-static int net_hostport;                // udp port number for acceptsocket
-static int net_broadcastsocket = 0;
-static struct sockaddr_s broadcastaddr;
-
 static unsigned long myAddr;
 
 WSADATA winsockdata;
@@ -163,17 +157,6 @@ bool WINS_Init( void ){
 		return false;
 	}
 
-	/*
-	   i = COM_CheckParm ("-udpport");
-	   if (i == 0)*/
-	net_hostport = DEFAULTnet_hostport;
-	/*
-	   else if (i < com_argc-1)
-	    net_hostport = Q_atoi (com_argv[i+1]);
-	   else
-	    Sys_Error ("WINS_Init: you must specify a number after -udpport");
-	 */
-
 	// determine my name & address
 	gethostname( buff, MAXHOSTNAMELEN );
 	local = gethostbyname( buff );
@@ -218,65 +201,6 @@ void WINS_Shutdown( void ){
 	//
 	//WinPrint("Winsock Shutdown\n");
 } //end of the function WINS_Shutdown
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-/*
-   void WINS_Listen(int state)
-   {
-    // enable listening
-    if (state)
-    {
-        if (net_acceptsocket != -1)
-            return;
-        if ((net_acceptsocket = WINS_OpenSocket (net_hostport)) == -1)
-            WinError ("WINS_Listen: Unable to open accept socket\n");
-        return;
-    }
-
-    // disable listening
-    if (net_acceptsocket == -1)
-        return;
-    WINS_CloseSocket (net_acceptsocket);
-    net_acceptsocket = -1;
-   } //end of the function WINS_Listen*/
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int WINS_OpenSocket( int port ){
-	int newsocket;
-	struct sockaddr_in address;
-	unsigned long _true = 1;
-
-	if ( ( newsocket = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP ) ) == -1 ) {
-		WinPrint( "WINS_OpenSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
-		return -1;
-	} //end if
-
-	if ( ioctlsocket( newsocket, FIONBIO, &_true ) == -1 ) {
-		WinPrint( "WINS_OpenSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
-		closesocket( newsocket );
-		return -1;
-	} //end if
-
-	memset( (char *) &address, 0, sizeof( address ) );
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons( (unsigned short)port );
-	if ( bind( newsocket, (void *)&address, sizeof( address ) ) == -1 ) {
-		WinPrint( "WINS_OpenSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
-		closesocket( newsocket );
-		return -1;
-	} //end if
-
-	return newsocket;
-} //end of the function WINS_OpenSocket
 //===========================================================================
 //
 // Parameter:				-
@@ -365,10 +289,6 @@ int WINS_Accept( int socket, struct sockaddr_s *addr ){
 // Changes Globals:		-
 //===========================================================================
 int WINS_CloseSocket( int socket ){
-	/*
-	   if (socket == net_broadcastsocket)
-	    net_broadcastsocket = 0;
-	 */
 //	shutdown(socket, SD_SEND);
 
 	if ( closesocket( socket ) == SOCKET_ERROR ) {
@@ -377,48 +297,6 @@ int WINS_CloseSocket( int socket ){
 	} //end if
 	return 0;
 } //end of the function WINS_CloseSocket
-//===========================================================================
-// this lets you type only as much of the net address as required, using
-// the local network components to fill in the rest
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-static int PartialIPAddress( char *in, struct sockaddr_s *hostaddr ){
-	char buff[256];
-	char *b;
-	int addr;
-	int num;
-	int mask;
-
-	buff[0] = '.';
-	b = buff;
-	strcpy( buff + 1, in );
-	if ( buff[1] == '.' ) {
-		b++;
-	}
-
-	addr = 0;
-	mask = -1;
-	while ( *b == '.' )
-	{
-		num = 0;
-		if ( *++b < '0' || *b > '9' ) {
-			return -1;
-		}
-		while ( !( *b < '0' || *b > '9' ) )
-			num = num * 10 + *( b++ ) - '0';
-		mask <<= 8;
-		addr = ( addr << 8 ) + num;
-	}
-
-	hostaddr->sa_family = AF_INET;
-	( (struct sockaddr_in *)hostaddr )->sin_port = htons( (unsigned short)net_hostport );
-	( (struct sockaddr_in *)hostaddr )->sin_addr.s_addr = ( myAddr & htonl( mask ) ) | htonl( addr );
-
-	return 0;
-} //end of the function PartialIPAddress
 //===========================================================================
 //
 // Parameter:				-
@@ -440,24 +318,6 @@ int WINS_Connect( int socket, struct sockaddr_s *addr ){
 	} //end if
 	return 0;
 } //end of the function WINS_Connect
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int WINS_CheckNewConnections( void ){
-	char buf[4];
-
-	if ( net_acceptsocket == -1 ) {
-		return -1;
-	}
-
-	if ( recvfrom( net_acceptsocket, buf, 4, MSG_PEEK, NULL, NULL ) > 0 ) {
-		return net_acceptsocket;
-	}
-	return -1;
-} //end of the function WINS_CheckNewConnections
 //===========================================================================
 // returns the number of bytes read
 // 0 if no bytes available
@@ -497,45 +357,6 @@ int WINS_Read( int socket, byte *buf, int len, struct sockaddr_s *addr ){
 	} //end if
 	return ret;
 } //end of the function WINS_Read
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int WINS_MakeSocketBroadcastCapable( int socket ){
-	int i = 1;
-
-	// make this socket broadcast capable
-	if ( setsockopt( socket, SOL_SOCKET, SO_BROADCAST, (char *)&i, sizeof( i ) ) < 0 ) {
-		return -1;
-	}
-	net_broadcastsocket = socket;
-
-	return 0;
-} //end of the function WINS_MakeSocketBroadcastCapable
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int WINS_Broadcast( int socket, byte *buf, int len ){
-	int ret;
-
-	if ( socket != net_broadcastsocket ) {
-		if ( net_broadcastsocket != 0 ) {
-			WinError( "Attempted to use multiple broadcasts sockets\n" );
-		}
-		ret = WINS_MakeSocketBroadcastCapable( socket );
-		if ( ret == -1 ) {
-			WinPrint( "Unable to make socket broadcast capable\n" );
-			return ret;
-		}
-	}
-
-	return WINS_Write( socket, buf, len, &broadcastaddr );
-} //end of the function WINS_Broadcast
 //===========================================================================
 // returns true on success or false on failure
 //
@@ -620,85 +441,3 @@ int WINS_GetSocketAddr( int socket, struct sockaddr_s *addr ){
 
 	return 0;
 } //end of the function WINS_GetSocketAddr
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int WINS_GetNameFromAddr( struct sockaddr_s *addr, char *name ){
-	struct hostent *hostentry;
-
-	hostentry = gethostbyaddr( (char *)&( (struct sockaddr_in *)addr )->sin_addr, sizeof( struct in_addr ), AF_INET );
-	if ( hostentry ) {
-		strncpy( name, (char *)hostentry->h_name, NET_NAMELEN - 1 );
-		return 0;
-	}
-
-	strcpy( name, WINS_AddrToString( addr ) );
-	return 0;
-} //end of the function WINS_GetNameFromAddr
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int WINS_GetAddrFromName( char *name, struct sockaddr_s *addr ){
-	struct hostent *hostentry;
-
-	if ( name[0] >= '0' && name[0] <= '9' ) {
-		return PartialIPAddress( name, addr );
-	}
-
-	hostentry = gethostbyname( name );
-	if ( !hostentry ) {
-		return -1;
-	}
-
-	addr->sa_family = AF_INET;
-	( (struct sockaddr_in *)addr )->sin_port = htons( (unsigned short)net_hostport );
-	( (struct sockaddr_in *)addr )->sin_addr.s_addr = *(int *)hostentry->h_addr_list[0];
-
-	return 0;
-} //end of the function WINS_GetAddrFromName
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int WINS_AddrCompare( struct sockaddr_s *addr1, struct sockaddr_s *addr2 ){
-	if ( addr1->sa_family != addr2->sa_family ) {
-		return -1;
-	}
-
-	if ( ( (struct sockaddr_in *)addr1 )->sin_addr.s_addr != ( (struct sockaddr_in *)addr2 )->sin_addr.s_addr ) {
-		return -1;
-	}
-
-	if ( ( (struct sockaddr_in *)addr1 )->sin_port != ( (struct sockaddr_in *)addr2 )->sin_port ) {
-		return 1;
-	}
-
-	return 0;
-} //end of the function WINS_AddrCompare
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int WINS_GetSocketPort( struct sockaddr_s *addr ){
-	return ntohs( ( (struct sockaddr_in *)addr )->sin_port );
-} //end of the function WINS_GetSocketPort
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int WINS_SetSocketPort( struct sockaddr_s *addr, int port ){
-	( (struct sockaddr_in *)addr )->sin_port = htons( (unsigned short)port );
-	return 0;
-} //end of the function WINS_SetSocketPort
