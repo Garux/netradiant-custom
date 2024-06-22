@@ -7,6 +7,14 @@ trim_trailing_whitespace = true
 indent_style = tab
 
 
+[*.py]
+indent_style = space
+indent_size = 2
+
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2
+
 [*.{c,cc,cpp,h,hh,hpp}]
 indent_style = tab
 indent_size = 4
