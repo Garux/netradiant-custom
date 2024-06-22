@@ -119,7 +119,7 @@ const char *WINS_ErrorMessage( int error ){
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-int WINS_Init( void ){
+bool WINS_Init( void ){
 	int i;
 	struct hostent *local;
 	char buff[MAXHOSTNAMELEN];
@@ -137,7 +137,7 @@ int WINS_Init( void ){
 
 	if ( r ) {
 		WinPrint( "Winsock initialization failed.\n" );
-		return -1;
+		return false;
 	}
 #endif
 	/*
@@ -181,7 +181,7 @@ int WINS_Init( void ){
 
 	WinPrint( "Winsock Initialized\n" );
 
-	return 0;
+	return true;
 } //end of the function WINS_Init
 //===========================================================================
 //

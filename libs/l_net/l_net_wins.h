@@ -22,7 +22,7 @@
 #pragma once
 
 #include "bytebool.h"
-int  WINS_Init( void );
+bool  WINS_Init( void );
 void WINS_Shutdown( void );
 int  WINS_Listen( int socket );
 int  WINS_Accept( int socket, struct sockaddr_s *addr );
