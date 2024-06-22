@@ -154,6 +154,10 @@ public:
 
 	DynamicLibrary( const char* filename ){
 		m_library = dlopen( filename, RTLD_NOW );
+		if ( failed() ) {
+			globalErrorStream() << "LoadLibrary failed: '" << filename << "'\n";
+			globalErrorStream() << "Module dlopen(3) Error: " << dlerror() << '\n';
+		}
 	}
 	~DynamicLibrary(){
 		if ( !failed() ) {
