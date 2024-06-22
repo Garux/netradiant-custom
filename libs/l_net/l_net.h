@@ -63,14 +63,8 @@ typedef struct socket_s
 
 void WinPrint( const char *format, ... );
 
-//compare addresses
-int Net_AddressCompare( address_t *addr1, address_t *addr2 );
-//gives the address of a socket
-void Net_SocketToAddress( socket_t *sock, address_t *address );
 //converts a string to an address
 void Net_StringToAddress( const char *string, address_t *address );
-//set the address ip port
-void Net_SetAddressPort( address_t *address, int port );
 //send a message to the given socket
 int Net_Send( socket_t *sock, netmessage_t *msg );
 //recieve a message from the given socket

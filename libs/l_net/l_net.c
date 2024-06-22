@@ -48,41 +48,6 @@ void WinPrint( const char *str, ... ){
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void Net_SetAddressPort( address_t *address, int port ){
-	sockaddr_t addr;
-
-	WINS_StringToAddr( address->ip, &addr );
-	WINS_SetSocketPort( &addr, port );
-	strcpy( address->ip, WINS_AddrToString( &addr ) );
-} //end of the function Net_SetAddressPort
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int Net_AddressCompare( address_t *addr1, address_t *addr2 ){
-#ifdef WIN32
-	return _stricmp( addr1->ip, addr2->ip );
-#else
-	return strcasecmp( addr1->ip, addr2->ip );
-#endif
-} //end of the function Net_AddressCompare
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void Net_SocketToAddress( socket_t *sock, address_t *address ){
-	strcpy( address->ip, WINS_AddrToString( &sock->addr ) );
-} //end of the function Net_SocketToAddress
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
 int Net_Send( socket_t *sock, netmessage_t *msg ){
 	int size;
 
