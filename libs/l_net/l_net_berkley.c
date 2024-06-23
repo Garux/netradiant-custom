@@ -311,6 +311,12 @@ int WINS_OpenReliableSocket( int port ){
 		return -1;
 	} //end if
 
+	// set SO_REUSEADDR to prevent "Address already in use"
+	if ( setsockopt( newsocket, SOL_SOCKET, SO_REUSEADDR, (void *) &_true, sizeof( int ) ) == -1 ) {
+		WinPrint( "WINS_OpenReliableSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
+		WinPrint( "setsockopt so_reuseaddr error\n" );
+	}
+
 	memset( (char *) &address, 0, sizeof( address ) );
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = htonl( INADDR_ANY );
@@ -324,7 +330,7 @@ int WINS_OpenReliableSocket( int port ){
 	//
 	if ( setsockopt( newsocket, IPPROTO_TCP, TCP_NODELAY, (void *) &_true, sizeof( int ) ) == -1 ) {
 		WinPrint( "WINS_OpenReliableSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
-		WinPrint( "setsockopt error\n" );
+		WinPrint( "setsockopt tcp_nodelay error\n" );
 	} //end if
 
 	return newsocket;
@@ -385,7 +391,12 @@ int WINS_CloseSocket( int socket ){
 	   if (socket == net_broadcastsocket)
 	    net_broadcastsocket = 0;
 	 */
-//	shutdown(socket, SD_SEND);
+
+	// cleanly shutdown socket communication
+	if (!shutdown(socket, SHUT_RDWR)) {
+		WinPrint( "WINS_CloseSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
+		WinPrint( "shutdown socket error\n" );
+	}
 
 	if ( closesocket( socket ) == SOCKET_ERROR ) {
 		WinPrint( "WINS_CloseSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
