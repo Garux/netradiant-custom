@@ -241,20 +241,20 @@ void vfsShutdown(){
 // return the number of files that match
 int vfsGetFileCount( const char *filename ){
 	int count = 0;
+	auto fixedname = StringStream<64>( PathCleaned( filename ) );
 
-	auto fixed = StringStream<64>( PathCleaned( filename ) );
-	strLower( fixed.c_str() );
-
-	for ( const VFS_PAKFILE& file : g_pakFiles )
+	for ( const auto& dir : g_strDirs )
 	{
-		if ( strEqual( file.name.c_str(), fixed ) ) {
+		if ( FileExists( StringStream( dir, fixedname ) ) ) {
 			++count;
 		}
 	}
 
-	for ( const auto& dir : g_strDirs )
+	strLower( fixedname.c_str() );
+
+	for ( const VFS_PAKFILE& file : g_pakFiles )
 	{
-		if ( FileExists( StringStream( dir, filename ) ) ) {
+		if ( strEqual( file.name.c_str(), fixedname ) ) {
 			++count;
 		}
 	}
@@ -286,27 +286,28 @@ MemBuffer vfsLoadFile( const char *filename, int index /* = 0 */ ){
 		return buffer;
 	};
 
+	auto fixedname = StringStream<64>( PathCleaned( filename ) );
+
 	// filename is a full path
 	if ( index == -1 ) {
-		return load_full_path( filename );
+		return load_full_path( fixedname );
 	}
 
 	for ( const auto& dir : g_strDirs )
 	{
-		const auto fullpath = StringStream( dir, filename );
+		const auto fullpath = StringStream( dir, fixedname );
 		if ( FileExists( fullpath ) && 0 == index-- ) {
 			return load_full_path( fullpath );
 		}
 	}
 
-	auto fixed = StringStream<64>( PathCleaned( filename ) );
-	strLower( fixed.c_str() );
+	strLower( fixedname.c_str() );
 
 	MemBuffer buffer;
 
 	for ( const VFS_PAKFILE& file : g_pakFiles )
 	{
-		if ( strEqual( file.name.c_str(), fixed ) && 0 == index-- )
+		if ( strEqual( file.name.c_str(), fixedname ) && 0 == index-- )
 		{
 			snprintf( g_strLoadedFileLocation, sizeof( g_strLoadedFileLocation ), "%s :: %s", file.pak.unzFilePath.c_str(), filename );
 
