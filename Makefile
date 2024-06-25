@@ -601,7 +601,7 @@ libmathlib.$(A): \
 libl_net.$(A): CPPFLAGS_EXTRA := -Ilibs
 libl_net.$(A): \
 	libs/l_net/l_net.o \
-	$(if $(findstring Win32,$(OS)),libs/l_net/l_net_wins.o,libs/l_net/l_net_berkley.o) \
+	libs/l_net/l_net_wins.o \
 
 libpicomodel.$(A): CPPFLAGS_EXTRA := -Ilibs
 libpicomodel.$(A): \
