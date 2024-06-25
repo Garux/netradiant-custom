@@ -19,12 +19,44 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+
+#ifdef WIN32
 #include <windows.h>
+
+#define socklen_t int
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "l_net.h"
 #include "l_net_wins.h"
+
+#ifndef WIN32
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <stdio.h>
+
+#define SOCKET_ERROR   -1
+#define INVALID_SOCKET -1
+#define ioctlsocket    ioctl
+#define closesocket    close
+
+#define LPSTR const char *
+
+int WSAGetLastError()
+{
+	return errno;
+}
+#endif
 
 #define WinError WinPrint
 
@@ -42,9 +74,12 @@ typedef struct tag_error_struct
 
 static unsigned long myAddr;
 
+#ifdef WIN32
 WSADATA winsockdata;
+#endif
 
 ERROR_STRUCT errlist[] = {
+#ifdef WIN32
 	{WSAEINTR,           "WSAEINTR - Interrupted"},
 	{WSAEBADF,           "WSAEBADF - Bad file number"},
 	{WSAEFAULT,          "WSAEFAULT - Bad address"},
@@ -110,7 +145,22 @@ ERROR_STRUCT errlist[] = {
 	{WSANO_RECOVERY,     "WSANO_RECOVERY - Non-recoverable error"},
 	{WSANO_DATA,         "WSANO_DATA - (or WSANO_ADDRESS) - No data record of requested type"},
 	{-1,                 NULL}
+#else
+	{EACCES, "EACCES - The address is protected,user is not root"},
+	{EAGAIN, "EAGAIN - Operation on non-blocking socket that cannot return immediately"},
+	{EBADF, "EBADF - sockfd is not a valid descriptor"},
+	{EFAULT, "EFAULT - The parameter is not in a writable part of the user address space"},
+	{EINVAL, "EINVAL - The socket is already bound to an address"},
+	{ENOBUFS, "ENOBUFS - not enough memory"},
+	{ENOMEM, "ENOMEM - not enough memory"},
+	{ENOTCONN, "ENOTCONN - not connected"},
+	{ENOTSOCK, "ENOTSOCK - Argument is file descriptor not a socket"},
+	{EOPNOTSUPP, "ENOTSUPP - The referenced socket is not of type SOCK_STREAM"},
+	{EPERM, "EPERM - Firewall rules forbid connection"},
+	{-1, NULL}
+#endif
 };
+
 
 //===========================================================================
 //
@@ -145,17 +195,21 @@ bool WINS_Init( void ){
 	struct hostent *local;
 	char buff[MAXHOSTNAMELEN];
 	char    *p;
-	int r;
-	WORD wVersionRequested;
+#ifdef WIN32
+	{
+		int r;
+		WORD wVersionRequested;
 
-	wVersionRequested = MAKEWORD( 1, 1 );
+		wVersionRequested = MAKEWORD( 1, 1 );
 
-	r = WSAStartup( wVersionRequested, &winsockdata );
+		r = WSAStartup( wVersionRequested, &winsockdata );
 
-	if ( r ) {
-		WinPrint( "Winsock initialization failed.\n" );
-		return false;
+		if ( r ) {
+			WinPrint( "Winsock initialization failed.\n" );
+			return false;
+		}
 	}
+#endif
 
 	// determine my name & address
 	gethostname( buff, MAXHOSTNAMELEN );
@@ -197,7 +251,9 @@ bool WINS_Init( void ){
 //===========================================================================
 void WINS_Shutdown( void ){
 	//WINS_Listen(0);
+#ifdef WIN32
 	WSACleanup();
+#endif
 	//
 	//WinPrint("Winsock Shutdown\n");
 } //end of the function WINS_Shutdown
@@ -210,7 +266,7 @@ void WINS_Shutdown( void ){
 int WINS_OpenReliableSocket( int port ){
 	int newsocket;
 	struct sockaddr_in address;
-	BOOL _true = 0xFFFFFFFF;
+	int _true = 0xFFFFFFFF;
 
 	//IPPROTO_TCP
 	//
@@ -218,6 +274,14 @@ int WINS_OpenReliableSocket( int port ){
 		WinPrint( "WINS_OpenReliableSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
 		return -1;
 	} //end if
+
+#ifndef WIN32
+	// set SO_REUSEADDR to prevent "Address already in use"
+	if ( setsockopt( newsocket, SOL_SOCKET, SO_REUSEADDR, (void *) &_true, sizeof( int ) ) == -1 ) {
+		WinPrint( "WINS_OpenReliableSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
+		WinPrint( "setsockopt so_reuseaddr error\n" );
+	}
+#endif
 
 	memset( (char *) &address, 0, sizeof( address ) );
 	address.sin_family = AF_INET;
@@ -232,7 +296,7 @@ int WINS_OpenReliableSocket( int port ){
 	//
 	if ( setsockopt( newsocket, IPPROTO_TCP, TCP_NODELAY, (void *) &_true, sizeof( int ) ) == SOCKET_ERROR ) {
 		WinPrint( "WINS_OpenReliableSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
-		WinPrint( "setsockopt error\n" );
+		WinPrint( "setsockopt tcp_nodelay error\n" );
 	} //end if
 
 	return newsocket;
@@ -263,19 +327,26 @@ int WINS_Listen( int socket ){
 // Changes Globals:		-
 //===========================================================================
 int WINS_Accept( int socket, struct sockaddr_s *addr ){
-	int addrlen = sizeof( struct sockaddr_s );
+	socklen_t addrlen = sizeof( struct sockaddr_s );
 	int newsocket;
-	BOOL _true = 1;
+	int _true = 1;
 
 	newsocket = accept( socket, (struct sockaddr *)addr, &addrlen );
 	if ( newsocket == INVALID_SOCKET ) {
+#ifdef WIN32
 		if ( WSAGetLastError() == WSAEWOULDBLOCK ) {
 			return -1;
 		}
+#else
+		if ( WSAGetLastError() == EAGAIN ) {
+			return -1;
+		}
+#endif
 		WinPrint( "WINS_Accept: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
 		return -1;
 	} //end if
 	  //
+
 	if ( setsockopt( newsocket, IPPROTO_TCP, TCP_NODELAY, (void *) &_true, sizeof( int ) ) == SOCKET_ERROR ) {
 		WinPrint( "WINS_Accept: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
 		WinPrint( "setsockopt error\n" );
@@ -289,7 +360,13 @@ int WINS_Accept( int socket, struct sockaddr_s *addr ){
 // Changes Globals:		-
 //===========================================================================
 int WINS_CloseSocket( int socket ){
-//	shutdown(socket, SD_SEND);
+#ifndef WIN32
+	// cleanly shutdown socket communication
+	if ( !shutdown( socket, SHUT_RDWR ) ) {
+		WinPrint( "WINS_CloseSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
+		WinPrint( "shutdown socket error\n" );
+	}
+#endif
 
 	if ( closesocket( socket ) == SOCKET_ERROR ) {
 		WinPrint( "WINS_CloseSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
@@ -328,33 +405,41 @@ int WINS_Connect( int socket, struct sockaddr_s *addr ){
 // Changes Globals:		-
 //===========================================================================
 int WINS_Read( int socket, byte *buf, int len, struct sockaddr_s *addr ){
-	int addrlen = sizeof( struct sockaddr_s );
+	socklen_t addrlen = sizeof( struct sockaddr_s );
 	int ret, error;
 
 	if ( addr ) {
 		ret = recvfrom( socket, buf, len, 0, (struct sockaddr *)addr, &addrlen );
-		if ( ret == -1 ) {
-			error = WSAGetLastError();
-
-			if ( error == WSAEWOULDBLOCK || error == WSAECONNREFUSED ) {
-				return 0;
-			}
-		} //end if
 	} //end if
 	else
 	{
 		ret = recv( socket, buf, len, 0 );
-		if ( ret == SOCKET_ERROR ) {
-			error = WSAGetLastError();
-
-			if ( error == WSAEWOULDBLOCK || error == WSAECONNREFUSED ) {
-				return 0;
-			}
-		} //end if
+#ifndef WIN32
+		// if there's no data on the socket ret == -1 and errno == EAGAIN
+		// MSDN states that if ret == 0 the socket has been closed
+		// man recv doesn't say anything
+		if ( ret == 0 ) {
+			return -1;
+		}
+#endif
 	} //end else
+
+	// handle socket read error
 	if ( ret == SOCKET_ERROR ) {
-		WinPrint( "WINS_Read: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
+		error = WSAGetLastError();
+		WinPrint( "WINS_Read: %s\n", WINS_ErrorMessage( error ) );
+
+#ifdef WIN32
+		if ( error == WSAEWOULDBLOCK || error == WSAECONNREFUSED ) {
+			return 0;
+		} //end if
+#else
+		if ( error == EAGAIN || error == ENOTCONN ) {
+			return 0;
+		} //end if
+#endif
 	} //end if
+
 	return ret;
 } //end of the function WINS_Read
 //===========================================================================
@@ -375,10 +460,16 @@ bool WINS_Write( int socket, byte *buf, int len, struct sockaddr_s *addr ){
 			ret = send( socket, buf, len, 0 );
 
 		if ( ret == SOCKET_ERROR ) {
+#ifdef WIN32
 			if ( WSAGetLastError() != WSAEWOULDBLOCK ) {
 				return false;
 			}
 			Sleep( 1000 );
+#else
+			if ( WSAGetLastError() != EAGAIN ) {
+				return false;
+			}
+#endif
 		} //end if
 		else
 		{
@@ -429,7 +520,7 @@ int WINS_StringToAddr( char *string, struct sockaddr_s *addr ){
 // Changes Globals:		-
 //===========================================================================
 int WINS_GetSocketAddr( int socket, struct sockaddr_s *addr ){
-	int addrlen = sizeof( struct sockaddr_s );
+	socklen_t addrlen = sizeof( struct sockaddr_s );
 	unsigned int a;
 
 	memset( addr, 0, sizeof( struct sockaddr_s ) );
