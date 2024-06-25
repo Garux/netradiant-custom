@@ -19,16 +19,6 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-//====================================================================
-//
-// Name:			l_net.h
-// Function:		-
-// Programmer:		MrElusive
-// Last update:		TTimo: cross-platform version, l_net library
-// Tab size:		2
-// Notes:
-//====================================================================
-
 #pragma once
 
 //++timo FIXME: the l_net code understands that as the max size for the netmessage_s structure
@@ -73,14 +63,8 @@ typedef struct socket_s
 
 void WinPrint( const char *format, ... );
 
-//compare addresses
-int Net_AddressCompare( address_t *addr1, address_t *addr2 );
-//gives the address of a socket
-void Net_SocketToAddress( socket_t *sock, address_t *address );
 //converts a string to an address
 void Net_StringToAddress( const char *string, address_t *address );
-//set the address ip port
-void Net_SetAddressPort( address_t *address, int port );
 //send a message to the given socket
 int Net_Send( socket_t *sock, netmessage_t *msg );
 //recieve a message from the given socket
@@ -91,8 +75,6 @@ int Net_Receive( socket_t *sock, netmessage_t *msg );
 socket_t *Net_Connect( address_t *address, int port );
 //disconnect from a host
 void Net_Disconnect( socket_t *sock );
-//returns the local address
-void Net_MyAddress( address_t *address );
 //listen at the given port
 socket_t *Net_ListenSocket( int port );
 //accept new connections at the given socket
