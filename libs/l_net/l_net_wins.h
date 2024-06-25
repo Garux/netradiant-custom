@@ -22,6 +22,8 @@
 #pragma once
 
 #include "bytebool.h"
+#include "l_net.h"
+
 bool  WINS_Init( void );
 void WINS_Shutdown( void );
 int  WINS_Listen( int socket );
