@@ -52,8 +52,7 @@
 
 #define LPSTR const char *
 
-int WSAGetLastError()
-{
+int WSAGetLastError(){
 	return errno;
 }
 #endif
@@ -78,71 +77,71 @@ WSADATA winsockdata;
 
 ERROR_STRUCT errlist[] = {
 #ifdef WIN32
-	{WSAEINTR,           "WSAEINTR - Interrupted"},
-	{WSAEBADF,           "WSAEBADF - Bad file number"},
-	{WSAEFAULT,          "WSAEFAULT - Bad address"},
-	{WSAEINVAL,          "WSAEINVAL - Invalid argument"},
-	{WSAEMFILE,          "WSAEMFILE - Too many open files"},
+	{WSAEINTR,           "WSAEINTR - Interrupted"                                               },
+	{WSAEBADF,           "WSAEBADF - Bad file number"                                           },
+	{WSAEFAULT,          "WSAEFAULT - Bad address"                                              },
+	{WSAEINVAL,          "WSAEINVAL - Invalid argument"                                         },
+	{WSAEMFILE,          "WSAEMFILE - Too many open files"                                      },
 
-/*
- *    Windows Sockets definitions of regular Berkeley error constants
- */
+	/*
+	 *    Windows Sockets definitions of regular Berkeley error constants
+	 */
 
-	{WSAEWOULDBLOCK,     "WSAEWOULDBLOCK - Socket marked as non-blocking"},
-	{WSAEINPROGRESS,     "WSAEINPROGRESS - Blocking call in progress"},
-	{WSAEALREADY,        "WSAEALREADY - Command already completed"},
-	{WSAENOTSOCK,        "WSAENOTSOCK - Descriptor is not a socket"},
-	{WSAEDESTADDRREQ,    "WSAEDESTADDRREQ - Destination address required"},
-	{WSAEMSGSIZE,        "WSAEMSGSIZE - Data size too large"},
-	{WSAEPROTOTYPE,      "WSAEPROTOTYPE - Protocol is of wrong type for this socket"},
-	{WSAENOPROTOOPT,     "WSAENOPROTOOPT - Protocol option not supported for this socket type"},
-	{WSAEPROTONOSUPPORT, "WSAEPROTONOSUPPORT - Protocol is not supported"},
+	{WSAEWOULDBLOCK,     "WSAEWOULDBLOCK - Socket marked as non-blocking"                       },
+	{WSAEINPROGRESS,     "WSAEINPROGRESS - Blocking call in progress"                           },
+	{WSAEALREADY,        "WSAEALREADY - Command already completed"                              },
+	{WSAENOTSOCK,        "WSAENOTSOCK - Descriptor is not a socket"                             },
+	{WSAEDESTADDRREQ,    "WSAEDESTADDRREQ - Destination address required"                       },
+	{WSAEMSGSIZE,        "WSAEMSGSIZE - Data size too large"                                    },
+	{WSAEPROTOTYPE,      "WSAEPROTOTYPE - Protocol is of wrong type for this socket"            },
+	{WSAENOPROTOOPT,     "WSAENOPROTOOPT - Protocol option not supported for this socket type"  },
+	{WSAEPROTONOSUPPORT, "WSAEPROTONOSUPPORT - Protocol is not supported"                       },
 	{WSAESOCKTNOSUPPORT, "WSAESOCKTNOSUPPORT - Socket type not supported by this address family"},
-	{WSAEOPNOTSUPP,      "WSAEOPNOTSUPP - Option not supported"},
-	{WSAEPFNOSUPPORT,    "WSAEPFNOSUPPORT - "},
-	{WSAEAFNOSUPPORT,    "WSAEAFNOSUPPORT - Address family not supported by this protocol"},
-	{WSAEADDRINUSE,      "WSAEADDRINUSE - Address is in use"},
-	{WSAEADDRNOTAVAIL,   "WSAEADDRNOTAVAIL - Address not available from local machine"},
-	{WSAENETDOWN,        "WSAENETDOWN - Network subsystem is down"},
-	{WSAENETUNREACH,     "WSAENETUNREACH - Network cannot be reached"},
-	{WSAENETRESET,       "WSAENETRESET - Connection has been dropped"},
-	{WSAECONNABORTED,    "WSAECONNABORTED - Connection aborted"},
-	{WSAECONNRESET,      "WSAECONNRESET - Connection reset"},
-	{WSAENOBUFS,         "WSAENOBUFS - No buffer space available"},
-	{WSAEISCONN,         "WSAEISCONN - Socket is already connected"},
-	{WSAENOTCONN,        "WSAENOTCONN - Socket is not connected"},
-	{WSAESHUTDOWN,       "WSAESHUTDOWN - Socket has been shut down"},
-	{WSAETOOMANYREFS,    "WSAETOOMANYREFS - Too many references"},
-	{WSAETIMEDOUT,       "WSAETIMEDOUT - Command timed out"},
-	{WSAECONNREFUSED,    "WSAECONNREFUSED - Connection refused"},
-	{WSAELOOP,           "WSAELOOP - "},
-	{WSAENAMETOOLONG,    "WSAENAMETOOLONG - "},
-	{WSAEHOSTDOWN,       "WSAEHOSTDOWN - Host is down"},
-	{WSAEHOSTUNREACH,    "WSAEHOSTUNREACH - "},
-	{WSAENOTEMPTY,       "WSAENOTEMPTY - "},
-	{WSAEPROCLIM,        "WSAEPROCLIM - "},
-	{WSAEUSERS,          "WSAEUSERS - "},
-	{WSAEDQUOT,          "WSAEDQUOT - "},
-	{WSAESTALE,          "WSAESTALE - "},
-	{WSAEREMOTE,         "WSAEREMOTE - "},
+	{WSAEOPNOTSUPP,      "WSAEOPNOTSUPP - Option not supported"                                 },
+	{WSAEPFNOSUPPORT,    "WSAEPFNOSUPPORT - "                                                   },
+	{WSAEAFNOSUPPORT,    "WSAEAFNOSUPPORT - Address family not supported by this protocol"      },
+	{WSAEADDRINUSE,      "WSAEADDRINUSE - Address is in use"                                    },
+	{WSAEADDRNOTAVAIL,   "WSAEADDRNOTAVAIL - Address not available from local machine"          },
+	{WSAENETDOWN,        "WSAENETDOWN - Network subsystem is down"                              },
+	{WSAENETUNREACH,     "WSAENETUNREACH - Network cannot be reached"                           },
+	{WSAENETRESET,       "WSAENETRESET - Connection has been dropped"                           },
+	{WSAECONNABORTED,    "WSAECONNABORTED - Connection aborted"                                 },
+	{WSAECONNRESET,      "WSAECONNRESET - Connection reset"                                     },
+	{WSAENOBUFS,         "WSAENOBUFS - No buffer space available"                               },
+	{WSAEISCONN,         "WSAEISCONN - Socket is already connected"                             },
+	{WSAENOTCONN,        "WSAENOTCONN - Socket is not connected"                                },
+	{WSAESHUTDOWN,       "WSAESHUTDOWN - Socket has been shut down"                             },
+	{WSAETOOMANYREFS,    "WSAETOOMANYREFS - Too many references"                                },
+	{WSAETIMEDOUT,       "WSAETIMEDOUT - Command timed out"                                     },
+	{WSAECONNREFUSED,    "WSAECONNREFUSED - Connection refused"                                 },
+	{WSAELOOP,           "WSAELOOP - "                                                          },
+	{WSAENAMETOOLONG,    "WSAENAMETOOLONG - "                                                   },
+	{WSAEHOSTDOWN,       "WSAEHOSTDOWN - Host is down"                                          },
+	{WSAEHOSTUNREACH,    "WSAEHOSTUNREACH - "                                                   },
+	{WSAENOTEMPTY,       "WSAENOTEMPTY - "                                                      },
+	{WSAEPROCLIM,        "WSAEPROCLIM - "                                                       },
+	{WSAEUSERS,          "WSAEUSERS - "                                                         },
+	{WSAEDQUOT,          "WSAEDQUOT - "                                                         },
+	{WSAESTALE,          "WSAESTALE - "                                                         },
+	{WSAEREMOTE,         "WSAEREMOTE - "                                                        },
 
-/*
- *    Extended Windows Sockets error constant definitions
- */
+	/*
+	 *    Extended Windows Sockets error constant definitions
+	 */
 
-	{WSASYSNOTREADY,     "WSASYSNOTREADY - Network subsystem not ready"},
-	{WSAVERNOTSUPPORTED, "WSAVERNOTSUPPORTED - Version not supported"},
-	{WSANOTINITIALISED,  "WSANOTINITIALISED - WSAStartup() has not been successfully called"},
+	{WSASYSNOTREADY,     "WSASYSNOTREADY - Network subsystem not ready"                         },
+	{WSAVERNOTSUPPORTED, "WSAVERNOTSUPPORTED - Version not supported"                           },
+	{WSANOTINITIALISED,  "WSANOTINITIALISED - WSAStartup() has not been successfully called"    },
 
-/*
- *    Other error constants.
- */
+	/*
+	 *    Other error constants.
+	 */
 
-	{WSAHOST_NOT_FOUND,  "WSAHOST_NOT_FOUND - Host not found"},
-	{WSATRY_AGAIN,       "WSATRY_AGAIN - Host not found or SERVERFAIL"},
-	{WSANO_RECOVERY,     "WSANO_RECOVERY - Non-recoverable error"},
-	{WSANO_DATA,         "WSANO_DATA - (or WSANO_ADDRESS) - No data record of requested type"},
-	{-1,                 NULL}
+	{WSAHOST_NOT_FOUND,  "WSAHOST_NOT_FOUND - Host not found"                                   },
+	{WSATRY_AGAIN,       "WSATRY_AGAIN - Host not found or SERVERFAIL"                          },
+	{WSANO_RECOVERY,     "WSANO_RECOVERY - Non-recoverable error"                               },
+	{WSANO_DATA,         "WSANO_DATA - (or WSANO_ADDRESS) - No data record of requested type"   },
+	{-1,                 NULL                                                                   }
 #else
 	{EACCES, "EACCES - The address is protected,user is not root"},
 	{EAGAIN, "EAGAIN - Operation on non-blocking socket that cannot return immediately"},
@@ -167,8 +166,7 @@ const char *WINS_ErrorMessage( int error ){
 		return "No error occurred";
 	}
 
-	for ( search = 0; errlist[search].errstr; search++ )
-	{
+	for ( search = 0; errlist[search].errstr; search++ ) {
 		if ( error == errlist[search].errnum ) {
 			return errlist[search].errstr;
 		}
@@ -181,7 +179,7 @@ bool WINS_Init( void ){
 	int i;
 	struct hostent *local;
 	char buff[MAXHOSTNAMELEN];
-	char    *p;
+	char *p;
 #ifdef WIN32
 	{
 		int r;
@@ -201,10 +199,12 @@ bool WINS_Init( void ){
 	// determine my name & address
 	gethostname( buff, MAXHOSTNAMELEN );
 	local = gethostbyname( buff );
-	if(local && local->h_addr_list && local->h_addr_list[0])
+	if ( local && local->h_addr_list && local->h_addr_list[0] ) {
 		myAddr = *(int *)local->h_addr_list[0];
-	else
-		myAddr = inet_addr("127.0.0.1");
+	}
+	else{
+		myAddr = inet_addr( "127.0.0.1" );
+	}
 
 	{
 		// see if it's a text IP address (well, close enough)
@@ -249,13 +249,13 @@ int WINS_OpenReliableSocket( int port ){
 
 #ifndef WIN32
 	// set SO_REUSEADDR to prevent "Address already in use"
-	if ( setsockopt( newsocket, SOL_SOCKET, SO_REUSEADDR, (void *) &_true, sizeof( int ) ) == -1 ) {
+	if ( setsockopt( newsocket, SOL_SOCKET, SO_REUSEADDR, (void *)&_true, sizeof( int ) ) == -1 ) {
 		WinPrint( "WINS_OpenReliableSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
 		WinPrint( "setsockopt so_reuseaddr error\n" );
 	}
 #endif
 
-	memset( (char *) &address, 0, sizeof( address ) );
+	memset( (char *)&address, 0, sizeof( address ) );
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = htonl( INADDR_ANY );
 	address.sin_port = htons( (unsigned short)port );
@@ -265,7 +265,7 @@ int WINS_OpenReliableSocket( int port ){
 		return -1;
 	}
 
-	if ( setsockopt( newsocket, IPPROTO_TCP, TCP_NODELAY, (void *) &_true, sizeof( int ) ) == SOCKET_ERROR ) {
+	if ( setsockopt( newsocket, IPPROTO_TCP, TCP_NODELAY, (void *)&_true, sizeof( int ) ) == SOCKET_ERROR ) {
 		WinPrint( "WINS_OpenReliableSocket: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
 		WinPrint( "setsockopt tcp_nodelay error\n" );
 	}
@@ -307,7 +307,7 @@ int WINS_Accept( int socket, struct sockaddr_s *addr ){
 		return -1;
 	}
 
-	if ( setsockopt( newsocket, IPPROTO_TCP, TCP_NODELAY, (void *) &_true, sizeof( int ) ) == SOCKET_ERROR ) {
+	if ( setsockopt( newsocket, IPPROTO_TCP, TCP_NODELAY, (void *)&_true, sizeof( int ) ) == SOCKET_ERROR ) {
 		WinPrint( "WINS_Accept: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
 		WinPrint( "setsockopt error\n" );
 	}
@@ -358,8 +358,7 @@ int WINS_Read( int socket, byte *buf, int len, struct sockaddr_s *addr ){
 	if ( addr ) {
 		ret = recvfrom( socket, buf, len, 0, (struct sockaddr *)addr, &addrlen );
 	}
-	else
-	{
+	else {
 		ret = recv( socket, buf, len, 0 );
 #ifndef WIN32
 		// if there's no data on the socket ret == -1 and errno == EAGAIN
@@ -396,12 +395,13 @@ int WINS_Read( int socket, byte *buf, int len, struct sockaddr_s *addr ){
 bool WINS_Write( int socket, byte *buf, int len, struct sockaddr_s *addr ){
 	int ret = 0, written = 0;
 
-	while ( written < len )
-	{
-		if ( addr )
+	while ( written < len ) {
+		if ( addr ) {
 			ret = sendto( socket, &buf[written], len - written, 0, (struct sockaddr *)addr, sizeof( struct sockaddr_s ) );
-		else
+		}
+		else{
 			ret = send( socket, buf, len, 0 );
+		}
 
 		if ( ret == SOCKET_ERROR ) {
 #ifdef WIN32
@@ -415,8 +415,7 @@ bool WINS_Write( int socket, byte *buf, int len, struct sockaddr_s *addr ){
 			}
 #endif
 		}
-		else
-		{
+		else {
 			written += ret;
 		}
 	}
