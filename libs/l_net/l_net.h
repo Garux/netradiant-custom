@@ -19,16 +19,6 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-//====================================================================
-//
-// Name:			l_net.h
-// Function:		-
-// Programmer:		MrElusive
-// Last update:		TTimo: cross-platform version, l_net library
-// Tab size:		2
-// Notes:
-//====================================================================
-
 #pragma once
 
 //++timo FIXME: the l_net code understands that as the max size for the netmessage_s structure

@@ -19,16 +19,6 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-//===========================================================================
-//
-// Name:         l_net_wins.c
-// Function:     WinSock
-// Programmer:   MrElusive
-// Last update:  TTimo: cross-platform version, l_net library
-// Tab Size:     2
-// Notes:
-//===========================================================================
-
 //#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
