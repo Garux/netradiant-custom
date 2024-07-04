@@ -415,7 +415,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "[" ), PARSE_ERROR );
 			tokeniser.nextLine();
 
-			const auto listTypeName = StringStream<64>( entityClass->name(), '_', attribute.m_name );
+			const auto listTypeName = StringStream<64>( entityClass->name(), '_', key );
 			attribute.m_type = listTypeName;
 
 			ListAttributeType& listType = g_listTypesFGD[listTypeName.c_str()];
