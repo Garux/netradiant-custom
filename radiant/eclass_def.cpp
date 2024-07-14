@@ -333,6 +333,9 @@ void Eclass_ScanFile( EntityClassCollector& collector, const char *filename ){
 				p = quakeEd;
 				state = eParseQuakeED;
 			}
+			else{
+				state = eParseDefault;
+			}
 			break;
 		case eParseComment:
 			if ( c == '\n' ) {
