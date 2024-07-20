@@ -401,6 +401,13 @@ void remove_local_pid(){
 
 
 int main( int argc, char* argv[] ){
+#ifdef __linux__
+	// Mouse pointer warping functions do not work with the Wayland backend.
+	// Forcing the backend to X11 will let us run using XWayland
+	// which does provide emulation of this functionality.
+	setenv("QT_QPA_PLATFORM", "xcb", 0);
+#endif
+
 	crt_init();
 
 	streams_init();
