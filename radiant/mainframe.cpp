@@ -1056,7 +1056,7 @@ void create_view_menu( QMenuBar *menubar, MainFrame::EViewStyle style ){
 
 		create_menu_item_with_mnemonic( submenu, "&Off", "RegionOff" );
 		create_menu_item_with_mnemonic( submenu, "&Set XY", "RegionSetXY" );
-		create_menu_item_with_mnemonic( submenu, "Set _Brush", "RegionSetBrush" );
+		create_menu_item_with_mnemonic( submenu, "Set &Brush", "RegionSetBrush" );
 		create_check_menu_item_with_mnemonic( submenu, "Set Se&lection", "RegionSetSelection" );
 	}
 
