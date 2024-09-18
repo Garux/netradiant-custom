@@ -855,13 +855,13 @@ void RadCreateDiffuseLights(){
 	numBrushDiffuseLights = 0;
 	numTriangleDiffuseLights = 0;
 	numPatchDiffuseLights = 0;
-	int iterations = 0;
+	static int iterations = 0;
 
 	/* hit every surface (threaded) */
 	RunThreadsOnIndividual( bspDrawSurfaces.size(), true, RadLight );
 
 	/* dump the lights generated to a file */
-	if ( dump ) {
+	if ( dump && !lights.empty() ) {
 		char dumpName[ 1024 ], ext[ 64 ];
 
 		strcpy( dumpName, source );
