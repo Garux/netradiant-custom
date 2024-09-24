@@ -364,7 +364,10 @@ tcMod scroll 1 1
 S' = s * m00 + t * m10 + t0
 T' = s * m01 + t * m11 + t1
 </pre>
-<p>This is primarily used by programmers.</p>
+<p>Essentially this is two rows of 3x3 matrix, which transforms 2D texture coordinate. Identity (no-transform) transform is:</p>
+<pre>
+tcMod transform 1 0 0 1 0 0
+</pre>
 
 <h3>tcMod turb <em>base amplitude phase frequency</em></h3>
 <p>Applies turbulence to the texture coordinate. Turbulence is a back and forth churning and swirling effect on the texture.</p>
