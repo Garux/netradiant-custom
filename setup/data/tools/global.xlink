@@ -5,15 +5,16 @@
 <item name="Mouse Shortcuts" url="docs/mouse shortcuts.txt"/>
 <item name="Complete list of Q3map2 command line parameters" url="docs/Complete_list_of_command_line_parameters.htm"/>
 <item name="Complete list of entity keys" url="docs/Complete_list_of_entity_keys.htm"/>
-<item name="Complete list of shader keywords" url="docs/Complete_list_of_shader_keywords.htm"/>
-<item name="Shader Manual (offline+fixed)" url="docs/shaderManual/contents.html"/>
-<item name="Shader Manual (web)" url="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html"/>
-<item name="q3map2 handbook (web)" url="https://en.wikibooks.org/wiki/Category:Book:Q3Map2"/>
+<!--item name="Complete list of shader keywords" url="docs/Complete_list_of_shader_keywords.htm"/-->
+<item name="Shader Manual" url="docs/shaderManual/contents.html"/>
+<!--item name="Shader Manual (web)" url="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html"/-->
+<item name="q3map2 handbook" url="https://en.wikibooks.org/wiki/Category:Book:Q3Map2"/>
 <item name="Additional map compiler features" url="docs/Additional_map_compiler_features.htm"/>
 <item name="Additional map editor features" url="docs/Additional_map_editor_features.htm"/>
-<item name="Editor features presentation (web)" url="https://garux.github.io/NRC/"/>
+<item name="Editor features presentation" url="https://garux.github.io/NRC/"/>
 <item name="Q3Map2 - FS20 - R5 readme" url="docs/fsr_readme.txt"/>
 <item name="Blendmodes cheatsheet" url="docs/Blendmodes_cheatsheet.jpg"/>
 <item name="MBSPC documentation" url="docs/mbspc.html"/>
 <!--item name="ETB documentation (web)" url="http://www.map-craft.com/modules.php?name=ETB"/-->
+<item name="iD Tech 3 mapping trello" url="https://trello.com/b/zJp4pE3m/id-tech-3-mapping"/>
 </links>
