@@ -60,7 +60,7 @@
 <dl>
 	<dt>farbox</dt><dd>Specifies a set of files to use as an environment box behind all cloudlayers. Specify "-" for no farbox, or a file base name. A base name of "env/test" would look for files "env/test_rt.tga", "env/test_lf.tga", "env/test_ft.tga", "env/test_bk.tga", "env/test_up.tga", "env/test_dn.tga" to use as the right, left, front, back, up, and down sides.</dd>
 	<dt>cloudheight</dt><dd>Controls apparent curvature of the cloud layers - lower numbers mean more curvature (and thus more distortion at the horizons). Higher height values create "flatter" skies with less horizon distortion. Think of height as the radius of a sphere on which the clouds are mapped. Good ranges are 64 to 256. The default value is 128.</dd>
-	<dt>nearbox</dt><dd>Specified as farbox, to be alpha blended ontop of the clouds. This has not be tested in a long time, so it probably doesn't actually work. Set to "-" to ignore.</dd>
+	<dt>nearbox</dt><dd>Specified as farbox, to be alpha blended ontop of the clouds. This doesn't actually work, set to "-" to ignore.</dd>
 </dl>
 <blockquote>
 	<h4>Design Notes:</h4>
@@ -81,7 +81,7 @@ textures/skies/xtoxicsky_dm9
 	q3map_surfacelight 400
 	surfaceparm sky
 	q3map_sun 1 1 0.5 150 30 60
-	skyparms full 512 -
+	skyparms - 512 -
 	{
 		map textures/skies/inteldimclouds.tga
 		tcMod scale 3 2
