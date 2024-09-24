@@ -369,8 +369,7 @@ void DoAbout(){
 				}
 				{
 					auto button = buttons->addButton( "Changelog", QDialogButtonBox::ButtonRole::NoRole );
-					QObject::connect( button, &QPushButton::clicked, [](){ OpenURL( StringStream( AppPath_get(), "changelog.txt" ) ); } );
-					button->setEnabled( false );
+					QObject::connect( button, &QPushButton::clicked, [](){ OpenURL( StringStream( AppPath_get(), "docs/changelog-custom.txt" ) ); } );
 				}
 				{
 					auto button = buttons->addButton( "About Qt", QDialogButtonBox::ButtonRole::NoRole );
