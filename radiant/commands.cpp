@@ -419,7 +419,8 @@ void DoCommandListDlg(){
 
 		QPushButton *resetallbutton = buttons->addButton( "Reset All", QDialogButtonBox::ButtonRole::ResetRole );
 		QObject::connect( resetallbutton, &QPushButton::clicked, [tree](){
-			accelerator_reset_all_button_clicked( tree );
+			if( eIDYES == qt_MessageBox( tree, "Surely reset all shortcuts now?", "Boo!", EMessageBoxType::Question ) )
+				accelerator_reset_all_button_clicked( tree );
 		} );
 	}
 
