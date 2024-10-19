@@ -455,6 +455,13 @@ public:
 	}
 };
 
+
+class AllTransformable
+{
+public:
+	virtual void alltransform( const Transforms& transforms, const Vector3& world_pivot ) = 0;
+};
+
 class TranslateFreeXY_Z : public Manipulatable
 {
 private:
@@ -6702,6 +6709,7 @@ class RadiantSelectionSystem final :
 	public Rotatable,
 	public Scalable,
 	public Skewable,
+	public AllTransformable,
 	public TransformOriginTranslatable,
 	public Renderable
 {
@@ -7381,6 +7389,19 @@ public:
 		}
 	}
 
+	void alltransform( const Transforms& transforms, const Vector3& world_pivot ) override {
+		if ( !nothingSelected() ) {
+			if ( Mode() == eComponent ) {
+				GlobalSelectionSystem().foreachSelectedComponent( transform_component_selected( transforms, world_pivot ) );
+			}
+			else
+			{
+				GlobalSelectionSystem().foreachSelected( transform_selected( transforms, world_pivot ) );
+			}
+			SceneChangeNotify();
+		}
+	}
+
 	void rotateSelected( const Quaternion& rotation, bool snapOrigin = false ){
 		if( snapOrigin && !m_pivotIsCustom )
 			vector3_snap( m_pivot2world.t().vec3(), GetSnapGridSize() );
@@ -7404,18 +7425,12 @@ public:
 	Transforms m_repeatableTransforms;
 
 	void repeatTransforms( const Callback& clone ){
-		if ( countSelected() != 0 && !m_repeatableTransforms.isIdentity() ) {
+		if ( !nothingSelected() && !m_repeatableTransforms.isIdentity() ) {
 			startMove();
 			UndoableCommand undo( "repeatTransforms" );
 			if( Mode() == ePrimitive )
 				clone();
-			if ( Mode() == eComponent ) {
-				GlobalSelectionSystem().foreachSelectedComponent( transform_component_selected( m_repeatableTransforms, m_pivot2world.t().vec3() ) );
-			}
-			else
-			{
-				GlobalSelectionSystem().foreachSelected( transform_selected( m_repeatableTransforms, m_pivot2world.t().vec3() ) );
-			}
+			alltransform( m_repeatableTransforms, m_pivot2world.t().vec3() );
 			freezeTransforms();
 		}
 	}
