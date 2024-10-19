@@ -314,6 +314,9 @@ binds...
 	* ctrl/ctrl + shift modifiers in value spinners divide step by 10 & 100 respectively
 	* Model Browser: unmoved m2 resets models rotations
 	* ctrl + shift + u: CSG Intersect
+	* m1 drag + ctrl (Drag tool, 3D view): move-snap selecton bbox corner to pointed position in scene
+	* m1 drag + alt + ctrl: rotate-snap selection bbox to pointed brush face plane (by opposite to bbox grab side)
+	* m1 drag + ctrl + shift: move selection along initially pointed brush face plane
 
 menus...
 	* smartified content basically

@@ -462,6 +462,129 @@ public:
 	virtual void alltransform( const Transforms& transforms, const Vector3& world_pivot ) = 0;
 };
 
+#include <optional>
+struct testSelect_unselected_scene_point_return_t{ DoubleVector3 point; std::optional<Plane3> plane; };
+std::optional<testSelect_unselected_scene_point_return_t>
+testSelect_unselected_scene_point( const View& view, const float device_point[2], const float device_epsilon[2] );
+
+void Scene_BoundsSelected_withEntityBounds( scene::Graph& graph, AABB& bounds );
+
+std::optional<Vector3> AABB_TestPoint( const View& view, const float device_point[2], const float device_epsilon[2], const AABB& aabb );
+
+class SnapBounds : public Manipulatable
+{
+private:
+	Translatable& m_translatable;
+	AllTransformable& m_transformable;
+	AABB m_bounds;
+	Vector3 m_0;
+	// rotate-snap axis and sign of aabb
+	size_t m_roatateAxis = 0;
+	int m_rotateSign = 1;
+
+	std::optional<Plane3> m_along_plane;
+	Vector2 m_along_plane_device_point;
+	Vector3 m_along_plane_start_point;
+public:
+	SnapBounds( Translatable& translatable, AllTransformable& transformable )
+		: m_translatable( translatable ), m_transformable( transformable ){
+	}
+	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
+		if( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive )
+			Scene_BoundsSelected_withEntityBounds( GlobalSceneGraph(), m_bounds );
+		else
+			m_bounds = bounds;
+
+		// for rotate-snap deduce aabb side opposite to clicked
+		if( const float device_point[2] = { x, y }; const auto point = AABB_TestPoint( *m_view, device_point, m_device_epsilon, m_bounds ) ){
+			m_0 = point.value(); // original m_0 is less reliable fallback
+		}
+		m_roatateAxis = 0;
+		m_rotateSign = 1;
+		float bestDist = FLT_MAX;
+		for( size_t axis : { 0, 1, 2 } )
+			for( int sign : { -1, 1 } )
+				if( const float dist = fabs( m_0[axis] - ( m_bounds.origin[axis] + std::copysign( m_bounds.extents[axis], sign ) ) ); dist < bestDist ){
+					bestDist = dist;
+					m_roatateAxis = axis;
+					m_rotateSign = sign;
+				}
+
+		m_along_plane.reset();
+		m_along_plane_device_point = Vector2( x, y );
+	}
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
+		Vector3 current( g_vector3_identity );
+		const float device_point[2] = { x, y };
+		if( snap ){ // move along plane
+			if( !m_along_plane ){ // try to initialize plane from original cursor position
+				if( const auto test = testSelect_unselected_scene_point( *m_view, m_along_plane_device_point.data(), m_device_epsilon );
+					test && test->plane ){
+					m_along_plane = test->plane;
+					m_along_plane_start_point = point_on_plane( *m_along_plane, m_view->GetViewMatrix(), m_along_plane_device_point.x(), m_along_plane_device_point.y() );
+				}
+				else if( const auto test = testSelect_unselected_scene_point( *m_view, device_point, m_device_epsilon );
+					test && test->plane ){ // init cursor pos was not on plane, try to fallback to current pos
+					m_along_plane = test->plane;
+					m_along_plane_start_point = point_on_plane( *m_along_plane, m_view->GetViewMatrix(), x, y );
+				}
+			}
+			if( m_along_plane ){ // got plane, lez go
+				current = point_on_plane( *m_along_plane, m_view->GetViewMatrix(), x, y ) - m_along_plane_start_point;
+				const size_t maxi = vector3_max_abs_component_index( m_along_plane->normal() );
+				vector3_snap( current, GetSnapGridSize() );
+				// snap move on two axes with least normal component -> need to find out 3rd move component
+				// it equals to point snap to plane with dist=0
+				// normal.dot( snapped move ) = 0
+				current[maxi] = -( m_along_plane->normal()[( maxi + 1 ) % 3] * current[( maxi + 1 ) % 3]
+				                 + m_along_plane->normal()[( maxi + 2 ) % 3] * current[( maxi + 2 ) % 3] )
+				                 / m_along_plane->normal()[maxi];
+				return m_translatable.translate( current );
+			}
+		}
+		else if( const auto test = testSelect_unselected_scene_point( *m_view, device_point, m_device_epsilon ) ){
+			const auto choose_aabb_corner = []( const AABB& bounds, const size_t axis, const Vector3& nrm, const Vector3& ray ){
+				Vector3 extents = bounds.extents;
+				extents[axis] = std::copysign( extents[axis], nrm[axis] );
+				extents[( axis + 1 ) % 3] = std::copysign( extents[( axis + 1 ) % 3], ray[( axis + 1 ) % 3] );
+				extents[( axis + 2 ) % 3] = std::copysign( extents[( axis + 2 ) % 3], ray[( axis + 2 ) % 3] );
+				return bounds.origin - extents;
+			};
+			const Ray ray = ray_for_device_point( matrix4_full_inverse( m_view->GetViewMatrix() ), x, y );
+			const Vector3 nrm = test->plane? Vector3( test->plane->normal() ) : -ray.direction;
+			if( alt ){ // rotate-snap
+				const Quaternion rotation = quaternion_for_unit_vectors_safe( g_vector3_axes[m_roatateAxis] * m_rotateSign, nrm );
+				const Matrix4 unrot = matrix4_rotation_for_quaternion( quaternion_inverse( rotation ) );
+				const Vector3 unray = matrix4_transformed_direction( unrot,
+					test->plane
+					? ray.direction
+					// when test point has no plane data we rotate exactly to test ray... tweak ray to deduce distinct aabb corner
+					: ray_for_device_point( matrix4_full_inverse( m_view->GetViewMatrix() ), x * 1.1f, y * 1.1f ).direction );
+				const Vector3 corner = choose_aabb_corner( m_bounds, m_roatateAxis, -unray, unray );
+
+				Transforms transforms;
+				transforms.setRotation( rotation );
+				transforms.setTranslation( test->point - corner );
+				return m_transformable.alltransform( transforms, corner );
+			}
+			else{ // move-snap
+				const std::size_t axis = vector3_max_abs_component_index( nrm ); // snap bbox along this axis
+				current = test->point - choose_aabb_corner( m_bounds, axis, nrm, ray.direction );
+				return m_translatable.translate( current );
+			}
+		}
+
+		m_translatable.translate( current ); // fallback to move to original position
+	}
+	void set0( const Vector3& start ){
+		m_0 = start;
+	}
+	static bool useCondition( bool snapbbox, const View& view ){
+		return snapbbox && view.fill();
+	}
+};
+
+
 class TranslateFreeXY_Z : public Manipulatable
 {
 private:
@@ -473,10 +596,11 @@ private:
 	Vector3 m_startZ;
 	Translatable& m_translatable;
 	AABB m_bounds;
+	SnapBounds m_snapBounds;
 public:
 	static int m_viewdependent;
-	TranslateFreeXY_Z( Translatable& translatable )
-		: m_translatable( translatable ){
+	TranslateFreeXY_Z( Translatable& translatable, AllTransformable& transformable )
+		: m_translatable( translatable ), m_snapBounds( translatable, transformable ){
 	}
 	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
 		m_axisZ = ( m_viewdependent || !m_view->fill() )? vector3_max_abs_component_index( m_view->getViewDir() ) : 2;
@@ -494,8 +618,15 @@ public:
 		m_startXY = point_on_plane( m_planeXY, m_view->GetViewMatrix(), x, y );
 		m_startZ = point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y );
 		m_bounds = bounds;
+
+		m_snapBounds.Construct( device2manip, x, y, bounds, transform_origin );
 	}
 	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
+		if( SnapBounds::useCondition( snapbbox, *m_view ) ){
+			m_snapBounds.Transform( manip2object, device2manip, x, y, snap, snapbbox, alt );
+			return;
+		}
+
 		Vector3 current;
 		if( alt && m_view->fill() )
 			current = ( point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y ) - m_startZ ) * g_vector3_axes[m_axisZ];
@@ -516,6 +647,7 @@ public:
 	}
 	void set0( const Vector3& start ){
 		m_0 = start;
+		m_snapBounds.set0( start );
 	}
 };
 int TranslateFreeXY_Z::m_viewdependent = 0;
@@ -2440,9 +2572,9 @@ public:
 	static Shader* m_state_wire;
 	static Shader* m_state_fill;
 	static Shader* m_state_point;
-	SkewManipulator( Skewable& skewable, Translatable& translatable, Scalable& scalable, Rotatable& rotatable, const AABB& bounds, Matrix4& pivot2world, const bool& pivotIsCustom, const std::size_t segments = 2 ) :
+	SkewManipulator( Skewable& skewable, Translatable& translatable, Scalable& scalable, Rotatable& rotatable, AllTransformable& transformable, const AABB& bounds, Matrix4& pivot2world, const bool& pivotIsCustom, const std::size_t segments = 2 ) :
 		m_skew( skewable ),
-		m_translateFreeXY_Z( translatable ),
+		m_translateFreeXY_Z( translatable, transformable ),
 		m_scaleAxis( scalable ),
 		m_scaleFree( scalable ),
 		m_rotateAxis( rotatable ),
@@ -3464,6 +3596,7 @@ public:
 		Transformable* transform = Instance_getTransformable( instance );
 		if ( transform != 0 ) {
 			transform->setType( TRANSFORM_PRIMITIVE );
+			transform->setRotation( c_rotation_identity );
 			transform->setTranslation( m_translate );
 		}
 	}
@@ -3743,6 +3876,7 @@ public:
 		Transformable* transform = Instance_getTransformable( instance );
 		if ( transform != 0 ) {
 			transform->setType( TRANSFORM_COMPONENT );
+			transform->setRotation( c_rotation_identity );
 			transform->setTranslation( m_translate );
 		}
 	}
@@ -4037,6 +4171,26 @@ public:
 	}
 };
 
+class testselect_scene_point_unselected : public scene::Graph::Walker {
+	ScenePointSelector& m_selector;
+	SelectionTest& m_test;
+public:
+	testselect_scene_point_unselected( ScenePointSelector& selector, SelectionTest& test ) : m_selector( selector ), m_test( test ) {
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if( !Instance_isSelected( instance ) ){
+			if( BrushInstance* brush = Instance_getBrush( instance ) ) {
+				detail::testselect_scene_point__brush( brush, m_selector, m_test );
+			}
+			else if( SelectionTestable* selectionTestable = Instance_getSelectionTestable( instance ) ) {
+				selectionTestable->testSelect( m_selector, m_test );
+			}
+			return true;
+		}
+		return false; // avoids entities with node unselected (e.g. model)
+	}
+};
+
 class testselect_scene_point_selected_brushes : public scene::Graph::Walker {
 	ScenePointSelector& m_selector;
 	SelectionTest& m_test;
@@ -4104,6 +4258,34 @@ DoubleVector3 testSelected_scene_snapped_point( const SelectionVolume& test, Sce
 		vector3_snap( point, GetSnapGridSize() );
 	}
 	return point;
+}
+
+std::optional<testSelect_unselected_scene_point_return_t>
+testSelect_unselected_scene_point( const View& view, const float device_point[2], const float device_epsilon[2] ){
+	View scissored( view );
+	ConstructSelectionTest( scissored, SelectionBoxForPoint( device_point, device_epsilon ) );
+
+	SelectionVolume test( scissored );
+	ScenePointSelector selector;
+	Scene_forEachVisible( GlobalSceneGraph(), scissored, testselect_scene_point_unselected( selector, test ) );
+	test.BeginMesh( g_matrix4_identity, true );
+	if( selector.isSelected() ){
+		return testSelect_unselected_scene_point_return_t{ testSelected_scene_snapped_point( test, selector ),
+			selector.face() != nullptr? selector.face()->plane3() : std::optional<Plane3>() };
+	}
+	return {};
+}
+
+std::optional<Vector3> AABB_TestPoint( const View& view, const float device_point[2], const float device_epsilon[2], const AABB& aabb ){
+	View scissored( view );
+	ConstructSelectionTest( scissored, SelectionBoxForPoint( device_point, device_epsilon ) );
+
+	SelectionIntersection best;
+	AABB_BestPoint( scissored.GetViewMatrix(), eClipCullCW, aabb, best );
+	if( best.valid() ){
+		return vector4_projected( matrix4_transformed_vector4( matrix4_full_inverse( scissored.GetViewMatrix() ), Vector4( 0, 0, best.depth(), 1 ) ) );
+	}
+	return {};
 }
 
 bool scene_insert_brush_vertices( const View& view, TranslateFreeXY_Z& freeDragXY_Z ){
@@ -4224,7 +4406,8 @@ public:
 
 	static Shader* m_state_wire;
 
-	DragManipulator( Translatable& translatable ) : m_resize(), m_freeResize( m_resize ), m_axisResize( m_resize ), m_freeDragXY_Z( translatable ), m_renderCircle( 2 << 3 ){
+	DragManipulator( Translatable& translatable, AllTransformable& transformable ) :
+		m_resize(), m_freeResize( m_resize ), m_axisResize( m_resize ), m_freeDragXY_Z( translatable, transformable ), m_renderCircle( 2 << 3 ){
 		setSelected( false );
 		draw_circle( m_renderCircle.m_vertices.size() >> 3, 5, m_renderCircle.m_vertices.data(), RemapXYZ() );
 	}
@@ -4458,7 +4641,7 @@ Shader* DragManipulator::m_state_wire;
 
 #include "clippertool.h"
 
-class ClipManipulator : public Manipulator, public ManipulatorSelectionChangeable, public Translatable, public Manipulatable
+class ClipManipulator : public Manipulator, public ManipulatorSelectionChangeable, public Translatable, public AllTransformable, public Manipulatable
 {
 	struct ClipperPoint : public OpenGLRenderable, public SelectableBool
 	{
@@ -4492,7 +4675,7 @@ class ClipManipulator : public Manipulator, public ManipulatorSelectionChangeabl
 public:
 	static Shader* m_state;
 
-	ClipManipulator( Matrix4& pivot2world, const AABB& bounds ) : m_pivot2world( pivot2world ), m_dragXY_Z( *this ), m_bounds( bounds ){
+	ClipManipulator( Matrix4& pivot2world, const AABB& bounds ) : m_pivot2world( pivot2world ), m_dragXY_Z( *this, *this ), m_bounds( bounds ){
 		m_points[0].m_name = '1';
 		m_points[1].m_name = '2';
 		m_points[2].m_name = '3';
@@ -4690,13 +4873,17 @@ public:
 				break;
 			}
 	}
+	/* AllTransformable */
+	void alltransform( const Transforms& transforms, const Vector3& world_pivot ) override {
+		ERROR_MESSAGE( "unreachable" );
+	}
 	/* Manipulatable */
 	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
 		m_dragXY_Z.set0( transform_origin );
 		m_dragXY_Z.Construct( device2manip, x, y, AABB( transform_origin, g_vector3_identity ), transform_origin );
 	}
 	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
-		if( snap || snapbbox || alt || !m_view->fill() )
+		if( ( snap || snapbbox || alt || !m_view->fill() ) && !SnapBounds::useCondition( snapbbox, *m_view ) )
 			return m_dragXY_Z.Transform( manip2object, device2manip, x, y, snap, snapbbox, alt );
 
 		View scissored( *m_view );
@@ -6790,8 +6977,8 @@ public:
 		m_translate_manipulator( *this, 2, 64 ),
 		m_rotate_manipulator( *this, 8, 64 ),
 		m_scale_manipulator( *this, 0, 64 ),
-		m_skew_manipulator( *this, *this, *this, *this, m_bounds, m_pivot2world, m_pivotIsCustom ),
-		m_drag_manipulator( *this ),
+		m_skew_manipulator( *this, *this, *this, *this, *this, m_bounds, m_pivot2world, m_pivotIsCustom ),
+		m_drag_manipulator( *this, *this ),
 		m_clip_manipulator( m_pivot2world, m_bounds ),
 		m_transformOrigin_manipulator( *this, m_pivotIsCustom ),
 		m_pivotChanged( false ),
@@ -7766,6 +7953,34 @@ bool RadiantSelectionSystem::endMove(){
 	return false;
 }
 
+class bounds_selected_withEntityBounds : public scene::Graph::Walker
+{
+	AABB& m_bounds;
+public:
+	bounds_selected_withEntityBounds( AABB& bounds )
+		: m_bounds( bounds ){
+		m_bounds = AABB();
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		const auto getBounds = [&]() -> AABB {
+			if( Entity* entity = Node_getEntity( path.top() ) ){
+				if ( const EntityClass& eclass = entity->getEntityClass(); eclass.fixedsize && !eclass.miscmodel_is ) {
+					Editable* editable = Node_getEditable( path.top() );
+					const Vector3 origin = editable != 0
+						? matrix4_multiplied_by_matrix4( instance.localToWorld(), editable->getLocalPivot() ).t().vec3()
+						: instance.localToWorld().t().vec3();
+					return aabb_for_minmax( eclass.mins + origin, eclass.maxs + origin );
+				}
+			}
+			return instance.worldAABB();
+		};
+		if ( Instance_isSelected( instance ) ) {
+			aabb_extend_by_aabb_safe( m_bounds, getBounds() );
+		}
+		return true;
+	}
+};
+
 inline AABB Instance_getPivotBounds( scene::Instance& instance ){
 	Entity* entity = Node_getEntity( instance.path().top() );
 	if ( entity != 0 && !entity->getEntityClass().miscmodel_is
@@ -7818,6 +8033,10 @@ public:
 		return true;
 	}
 };
+
+void Scene_BoundsSelected_withEntityBounds( scene::Graph& graph, AABB& bounds ){
+	graph.traverse( bounds_selected_withEntityBounds( bounds ) );
+}
 
 void Scene_BoundsSelected( scene::Graph& graph, AABB& bounds ){
 	graph.traverse( bounds_selected( bounds ) );
