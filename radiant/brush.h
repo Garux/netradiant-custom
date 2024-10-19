@@ -1110,14 +1110,7 @@ public:
 		else if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ){
 			const DoubleVector3 from = vector3_normalised( vector3_cross( m_texdefTransformed.m_basis_s, m_texdefTransformed.m_basis_t ) );
 			const DoubleVector3 to = matrix4_transformed_normal( matrix, from );
-			Quaternion quat = quaternion_for_unit_vectors( from, to );
-			if( quat.w() != quat.w() ){ //handle 180` cases
-				if( vector3_max_abs_component_index( from ) == 2 )
-					quat = Quaternion( g_vector3_axis_y, 0 );
-				else
-					quat = Quaternion( g_vector3_axis_z, 0 );
-			}
-			const Matrix4 mat = matrix4_rotation_for_quaternion( quat );
+			const Matrix4 mat = matrix4_rotation_for_quaternion( quaternion_for_unit_vectors_safe( from, to ) );
 			m_texdefTransformed.m_basis_s = vector3_normalised( matrix4_transformed_direction( mat, m_texdefTransformed.m_basis_s ) );
 			m_texdefTransformed.m_basis_t = vector3_normalised( matrix4_transformed_direction( mat, m_texdefTransformed.m_basis_t ) );
 		}

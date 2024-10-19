@@ -98,6 +98,16 @@ inline Quaternion quaternion_for_unit_vectors( const BasicVector3<T>& from, cons
 	return quaternion_normalised( Quaternion( vector3_cross( from, to ), 1.0 + vector3_dot( from, to ) ) );
 }
 
+/// \brief Safe version which specially handles 180` case; \p from and \p to still have to be nonzero unit vectors.
+template<typename T>
+inline Quaternion quaternion_for_unit_vectors_safe( const BasicVector3<T>& from, const BasicVector3<T>& to ){
+	const Quaternion q( vector3_cross( from, to ), 1.0 + vector3_dot( from, to ) );
+	const float len = q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3];
+	return len != 0
+		? quaternion_normalised( q )
+		: quaternion_normalised( Quaternion( vector3_cross( from, g_vector3_axes[vector3_min_abs_component_index( from )] ), 0 ) );
+}
+
 /// \brief Constructs a pure-rotation matrix from \p quaternion.
 inline Matrix4 matrix4_rotation_for_quaternion( const Quaternion& quaternion ){
 #if 0
