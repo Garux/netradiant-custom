@@ -134,157 +134,114 @@ const Scale c_scale_identity = Scale( 1, 1, 1 );
 const Skew c_skew_identity = Skew( 4, 0 );
 
 
-class TransformModifier : public Transformable
+class Transforms
 {
+protected:
 	Translation m_translation;
 	Rotation m_rotation;
 	Scale m_scale;
 	Skew m_skew;
+public:
+	Transforms() :
+		m_translation( c_translation_identity ),
+		m_rotation( c_quaternion_identity ),
+		m_scale( c_scale_identity ),
+		m_skew( c_skew_identity ){
+	}
+
+	bool isIdentity() const {
+		return m_translation == c_translation_identity
+		       && m_rotation == c_rotation_identity
+		       && m_scale == c_scale_identity
+		       && m_skew == c_skew_identity;
+	}
+	void setIdentity(){
+		*this = Transforms();
+	}
+
+	const Translation& getTranslation() const {
+		return m_translation;
+	}
+	const Rotation& getRotation() const {
+		return m_rotation;
+	}
+	const Scale& getScale() const {
+		return m_scale;
+	}
+	const Skew& getSkew() const {
+		return m_skew;
+	}
+	Matrix4 calculateTransform() const {
+		return matrix4_transform_for_components( getTranslation(), getRotation(), getScale(), getSkew() );
+	}
+
+	void setTranslation( const Translation& value ){
+		m_translation = value;
+	}
+	void setRotation( const Rotation& value ){
+		m_rotation = value;
+	}
+	void setScale( const Scale& value ){
+		m_scale = value;
+	}
+	void setSkew( const Skew& value ){
+		m_skew = value;
+	}
+};
+
+
+class TransformModifier : public Transforms, public Transformable
+{
+protected:
 	Callback m_changed;
 	Callback m_apply;
 	TransformModifierType m_type;
 public:
-
 	TransformModifier( const Callback& changed, const Callback& apply ) :
-		m_translation( c_translation_identity ),
-		m_rotation( c_quaternion_identity ),
-		m_scale( c_scale_identity ),
-		m_skew( c_skew_identity ),
 		m_changed( changed ),
 		m_apply( apply ),
 		m_type( TRANSFORM_PRIMITIVE ){
 	}
-	void setType( TransformModifierType type ){
+	void setType( TransformModifierType type ) override {
 		m_type = type;
 	}
 	TransformModifierType getType() const {
 		return m_type;
 	}
-	void setTranslation( const Translation& value ){
+	void setTranslation( const Translation& value ) override {
 		m_translation = value;
 		m_changed();
 	}
-	void setRotation( const Rotation& value ){
+	void setRotation( const Rotation& value ) override {
 		m_rotation = value;
 		m_changed();
 	}
-	void setScale( const Scale& value ){
+	void setScale( const Scale& value ) override {
 		m_scale = value;
 		m_changed();
 	}
-	void setSkew( const Skew& value ){
+	void setSkew( const Skew& value ) override {
 		m_skew = value;
 		m_changed();
 	}
-	void freezeTransform(){
+	void freezeTransform() override {
 		if ( !isIdentity() ) {
 			m_apply();
 			setIdentity();
 			m_changed();
 		}
 	}
-	const Translation& getTranslation() const {
-		return m_translation;
-	}
-	const Rotation& getRotation() const {
-		return m_rotation;
-	}
-	const Scale& getScale() const {
-		return m_scale;
-	}
-	const Skew& getSkew() const {
-		return m_skew;
-	}
-	Matrix4 calculateTransform() const {
-		return matrix4_transform_for_components( getTranslation(), getRotation(), getScale(), getSkew() );
-	}
-private:
-	bool isIdentity() const {
-		return m_translation == c_translation_identity
-		    && m_rotation == c_rotation_identity
-		    && m_scale == c_scale_identity
-		    && m_skew == c_skew_identity;
-	}
-	void setIdentity(){
-		m_translation = c_translation_identity;
-		m_rotation = c_rotation_identity;
-		m_scale = c_scale_identity;
-		m_skew = c_skew_identity;
-	}
 };
 
-class BrushTransformModifier : public Transformable
+// modification intended for more controllable freezeTransform() implementation via direct isIdentity(), setIdentity() accesses
+class BrushTransformModifier : public TransformModifier
 {
-	Translation m_translation;
-	Rotation m_rotation;
-	Scale m_scale;
-	Skew m_skew;
-	Callback m_changed;
-	Callback m_apply;
-	TransformModifierType m_type;
+	using TransformModifier::TransformModifier;
 public:
 	bool m_transformFrozen = true;
 
-	BrushTransformModifier( const Callback& changed, const Callback& apply ) :
-		m_translation( c_translation_identity ),
-		m_rotation( c_quaternion_identity ),
-		m_scale( c_scale_identity ),
-		m_skew( c_skew_identity ),
-		m_changed( changed ),
-		m_apply( apply ),
-		m_type( TRANSFORM_PRIMITIVE ){
-	}
-	void setType( TransformModifierType type ){
-		m_type = type;
-	}
-	TransformModifierType getType() const {
-		return m_type;
-	}
-	void setTranslation( const Translation& value ){
-		m_translation = value;
-		m_changed();
-	}
-	void setRotation( const Rotation& value ){
-		m_rotation = value;
-		m_changed();
-	}
-	void setScale( const Scale& value ){
-		m_scale = value;
-		m_changed();
-	}
-	void setSkew( const Skew& value ){
-		m_skew = value;
-		m_changed();
-	}
-	void freezeTransform(){
+	void freezeTransform() override {
 		m_apply();
 		m_transformFrozen = true;
-	}
-	const Translation& getTranslation() const {
-		return m_translation;
-	}
-	const Rotation& getRotation() const {
-		return m_rotation;
-	}
-	const Scale& getScale() const {
-		return m_scale;
-	}
-	const Skew& getSkew() const {
-		return m_skew;
-	}
-	Matrix4 calculateTransform() const {
-		return matrix4_transform_for_components( getTranslation(), getRotation(), getScale(), getSkew() );
-	}
-	bool isIdentity() const {
-		return m_translation == c_translation_identity
-		    && m_rotation == c_rotation_identity
-		    && m_scale == c_scale_identity
-		    && m_skew == c_skew_identity;
-	}
-	void setIdentity(){
-		m_translation = c_translation_identity;
-		m_rotation = c_rotation_identity;
-		m_scale = c_scale_identity;
-		m_skew = c_skew_identity;
 	}
 };

@@ -3685,55 +3685,12 @@ void Scene_Skew_Selected( scene::Graph& graph, const Skew& skew, const Vector3& 
 	}
 }
 
-
-class RepeatableTransforms
-{
-public:
-	Translation m_translation;
-	Rotation m_rotation;
-	Scale m_scale;
-	Skew m_skew;
-	/* next aren't used; TODO: think if unique origin per transform is needed, and how to implement this correctly for entities, having transform keys */
-	Vector3 m_rotationOrigin;
-	Vector3 m_scaleOrigin;
-	Vector3 m_skewOrigin;
-
-	bool m_rotationOriginSet;
-	bool m_scaleOriginSet;
-	bool m_skewOriginSet;
-
-	RepeatableTransforms(){
-		setIdentity();
-	}
-
-	bool isIdentity() const {
-		return m_translation == c_translation_identity
-		       && m_rotation == c_rotation_identity
-		       && m_scale == c_scale_identity
-		       && m_skew == c_skew_identity;
-	}
-	void setIdentity(){
-		m_translation = c_translation_identity;
-		m_rotation    = c_quaternion_identity;
-		m_scale       = c_scale_identity;
-		m_skew        = c_skew_identity;
-
-		m_rotationOrigin =
-		m_scaleOrigin =
-		m_skewOrigin = g_vector3_identity;
-
-		m_rotationOriginSet =
-		m_scaleOriginSet =
-		m_skewOriginSet = false;
-	}
-};
-
 class transform_selected : public SelectionSystem::Visitor
 {
-	const RepeatableTransforms& m_transforms;
+	const Transforms& m_transforms;
 	const Vector3& m_world_pivot;
 public:
-	transform_selected( const RepeatableTransforms& transforms, const Vector3& world_pivot )
+	transform_selected( const Transforms& transforms, const Vector3& world_pivot )
 		: m_transforms( transforms ), m_world_pivot( world_pivot ){
 	}
 	void visit( scene::Instance& instance ) const {
@@ -3742,14 +3699,15 @@ public:
 			Transformable* transform = Instance_getTransformable( instance );
 			if ( transform != 0 ) {
 				transform->setType( TRANSFORM_PRIMITIVE );
-				transform->setRotation( m_transforms.m_rotation );
-				transform->setScale( m_transforms.m_scale );
-				transform->setSkew( m_transforms.m_skew );
+				transform->setRotation( m_transforms.getRotation() );
+				transform->setScale( m_transforms.getScale() );
+				transform->setSkew( m_transforms.getSkew() );
+				transform->setTranslation( c_translation_identity );
 				{
 					Editable* editable = Node_getEditable( instance.path().top() );
 					const Matrix4& localPivot = editable != 0 ? editable->getLocalPivot() : g_matrix4_identity;
 
-					const Matrix4 local_transform = matrix4_transform_for_components( c_translation_identity, m_transforms.m_rotation, m_transforms.m_scale, m_transforms.m_skew );
+					const Matrix4 local_transform = matrix4_transform_for_components( c_translation_identity, m_transforms.getRotation(), m_transforms.getScale(), m_transforms.getSkew() );
 					Vector3 parent_translation;
 					translation_for_pivoted_matrix_transform(
 					    parent_translation,
@@ -3759,7 +3717,7 @@ public:
 					    matrix4_multiplied_by_matrix4( matrix4_translation_for_vec3( matrix4_get_translation_vec3( transformNode->localToParent() ) ), localPivot )
 					);
 
-					transform->setTranslation( parent_translation + m_transforms.m_translation );
+					transform->setTranslation( parent_translation + m_transforms.getTranslation() );
 				}
 			}
 		}
@@ -3873,24 +3831,24 @@ void Scene_Skew_Component_Selected( scene::Graph& graph, const Skew& skew, const
 
 class transform_component_selected : public SelectionSystem::Visitor
 {
-	const RepeatableTransforms& m_transforms;
+	const Transforms& m_transforms;
 	const Vector3& m_world_pivot;
 public:
-	transform_component_selected( const RepeatableTransforms& transforms, const Vector3& world_pivot )
+	transform_component_selected( const Transforms& transforms, const Vector3& world_pivot )
 		: m_transforms( transforms ), m_world_pivot( world_pivot ){
 	}
 	void visit( scene::Instance& instance ) const {
 		Transformable* transform = Instance_getTransformable( instance );
 		if ( transform != 0 ) {
-			const Matrix4 local_transform = matrix4_transform_for_components( c_translation_identity, m_transforms.m_rotation, m_transforms.m_scale, m_transforms.m_skew );
+			const Matrix4 local_transform = matrix4_transform_for_components( c_translation_identity, m_transforms.getRotation(), m_transforms.getScale(), m_transforms.getSkew() );
 			Vector3 parent_translation;
 			translation_for_pivoted_matrix_transform( parent_translation, local_transform, m_world_pivot, instance.localToWorld(), Node_getTransformNode( instance.path().top() )->localToParent() );
 
 			transform->setType( TRANSFORM_COMPONENT );
-			transform->setRotation( m_transforms.m_rotation );
-			transform->setScale( m_transforms.m_scale );
-			transform->setSkew( m_transforms.m_skew );
-			transform->setTranslation( parent_translation + m_transforms.m_translation );
+			transform->setRotation( m_transforms.getRotation() );
+			transform->setScale( m_transforms.getScale() );
+			transform->setSkew( m_transforms.getSkew() );
+			transform->setTranslation( parent_translation + m_transforms.getTranslation() );
 		}
 	}
 };
@@ -7338,7 +7296,7 @@ public:
 			//ASSERT_MESSAGE(!m_pivotChanged, "pivot is invalid");
 
 			m_translation = translation;
-			m_repeatableTransforms.m_translation = translation;
+			m_repeatableTransforms.setTranslation( translation );
 
 			m_pivot2world = m_pivot2world_start;
 			matrix4_translate_by_vec3( m_pivot2world, translation );
@@ -7362,9 +7320,7 @@ public:
 			//ASSERT_MESSAGE(!m_pivotChanged, "pivot is invalid");
 
 			m_rotation = rotation;
-			m_repeatableTransforms.m_rotation = rotation;
-			if( ( m_repeatableTransforms.m_rotationOriginSet = m_pivotIsCustom ) )
-				m_repeatableTransforms.m_rotationOrigin = m_pivot2world.t().vec3();
+			m_repeatableTransforms.setRotation( rotation );
 
 			if ( Mode() == eComponent ) {
 				Scene_Rotate_Component_Selected( GlobalSceneGraph(), m_rotation, m_pivot2world.t().vec3() );
@@ -7390,9 +7346,7 @@ public:
 	void scale( const Vector3& scaling ){
 		if ( !nothingSelected() ) {
 			m_scale = scaling;
-			m_repeatableTransforms.m_scale = scaling;
-			if( ( m_repeatableTransforms.m_scaleOriginSet = m_pivotIsCustom ) )
-				m_repeatableTransforms.m_scaleOrigin = m_pivot2world.t().vec3();
+			m_repeatableTransforms.setScale( scaling );
 
 			if ( Mode() == eComponent ) {
 				Scene_Scale_Component_Selected( GlobalSceneGraph(), m_scale, m_pivot2world.t().vec3() );
@@ -7418,9 +7372,7 @@ public:
 	void skew( const Skew& skew ){
 		if ( !nothingSelected() ) {
 			m_skew = skew;
-			m_repeatableTransforms.m_skew = skew;
-			if( ( m_repeatableTransforms.m_skewOriginSet = m_pivotIsCustom ) )
-				m_repeatableTransforms.m_skewOrigin = m_pivot2world.t().vec3();
+			m_repeatableTransforms.setSkew( skew );
 
 			if ( Mode() == eComponent ) {
 				Scene_Skew_Component_Selected( GlobalSceneGraph(), m_skew, m_pivot2world.t().vec3() );
@@ -7454,7 +7406,7 @@ public:
 		freezeTransforms();
 	}
 
-	RepeatableTransforms m_repeatableTransforms;
+	Transforms m_repeatableTransforms;
 
 	void repeatTransforms( const Callback& clone ){
 		if ( countSelected() != 0 && !m_repeatableTransforms.isIdentity() ) {
