@@ -3764,6 +3764,7 @@ public:
 		}
 	}
 	void gatherComponentsHighlight( std::vector<std::vector<Vector3>>& polygons, SelectionIntersection& intersection, SelectionTest& test, SelectionSystem::EComponentMode mode ) const {
+		m_brush.evaluateBRep(); // highlight() may happen right next to undo(), hence care to evaluate; normally render() triggers this beforehand
 		test.BeginMesh( localToWorld() );
 
 		switch ( mode )
