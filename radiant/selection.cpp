@@ -52,6 +52,8 @@
 
 #include "grid.h"
 
+typedef Vector2 DeviceVector;
+
 int g_SELECT_EPSILON = 12;
 
 struct Pivot2World
@@ -69,15 +71,15 @@ struct Pivot2World
 };
 
 
-inline Vector3 point_for_device_point( const Matrix4& device2object, const float x, const float y, const float z ){
+inline Vector3 point_for_device_point( const Matrix4& device2object, const DeviceVector xy, const float z ){
 	// transform from normalised device coords to object coords
-	return vector4_projected( matrix4_transformed_vector4( device2object, Vector4( x, y, z, 1 ) ) );
+	return vector4_projected( matrix4_transformed_vector4( device2object, Vector4( xy.x(), xy.y(), z, 1 ) ) );
 }
 
-inline Ray ray_for_device_point( const Matrix4& device2object, const float x, const float y ){
-	return ray_for_points( point_for_device_point( device2object, x, y, -1 ),	// point at x, y, zNear
-	                       point_for_device_point( device2object, x, y, 0 )		// point at x, y, zFar
-	                       //point_for_device_point( device2object, x, y, 1 ) //sometimes is inaccurate up to negative ray direction
+inline Ray ray_for_device_point( const Matrix4& device2object, const DeviceVector xy ){
+	return ray_for_points( point_for_device_point( device2object, xy, -1 ),	// point at x, y, zNear
+	                       point_for_device_point( device2object, xy, 0 )		// point at x, y, zFar
+	                       //point_for_device_point( device2object, xy, 1 ) //sometimes is inaccurate up to negative ray direction
 	                     );
 }
 
@@ -119,24 +121,24 @@ inline Vector3 ray_intersect_ray( const Ray& ray, const Ray& other ){
 const Vector3 g_origin( 0, 0, 0 );
 const float g_radius = 64;
 
-inline Vector3 point_on_sphere( const Matrix4& device2object, const float x, const float y, const float radius = g_radius ){
+inline Vector3 point_on_sphere( const Matrix4& device2object, const DeviceVector xy, const float radius = g_radius ){
 	return sphere_intersect_ray( g_origin,
 	                             radius,
-	                             ray_for_device_point( device2object, x, y ) );
+	                             ray_for_device_point( device2object, xy ) );
 }
 
-inline Vector3 point_on_axis( const Vector3& axis, const Matrix4& device2object, const float x, const float y ){
-	return ray_intersect_ray( ray_for_device_point( device2object, x, y ),
+inline Vector3 point_on_axis( const Vector3& axis, const Matrix4& device2object, const DeviceVector xy ){
+	return ray_intersect_ray( ray_for_device_point( device2object, xy ),
 	                          Ray( Vector3( 0, 0, 0 ), axis ) );
 }
 
-inline Vector3 point_on_plane( const Matrix4& device2object, const float x, const float y ){
+inline Vector3 point_on_plane( const Matrix4& device2object, const DeviceVector xy ){
 	const Matrix4 object2device( matrix4_full_inverse( device2object ) );
-	return vector4_projected( matrix4_transformed_vector4( device2object, Vector4( x, y, object2device[14] / object2device[15], 1 ) ) );
+	return vector4_projected( matrix4_transformed_vector4( device2object, Vector4( xy.x(), xy.y(), object2device[14] / object2device[15], 1 ) ) );
 }
 
-inline Vector3 point_on_plane( const Plane3& plane, const Matrix4& object2device, const float x, const float y ){
-	return ray_intersect_plane( ray_for_device_point( matrix4_full_inverse( object2device ), x, y ),
+inline Vector3 point_on_plane( const Plane3& plane, const Matrix4& object2device, const DeviceVector xy ){
+	return ray_intersect_plane( ray_for_device_point( matrix4_full_inverse( object2device ), xy ),
 	                            plane );
 }
 
@@ -185,23 +187,18 @@ inline float distance_for_axis( const Vector3& a, const Vector3& b, const Vector
 class Manipulatable
 {
 public:
-	virtual void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) = 0;
-	virtual void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) = 0;
-	static const View* m_view;
-	static float m_device_point[2];
-	static float m_device_epsilon[2];
-	static void assign_static( const View& view, const float device_point[2], const float device_epsilon[2] ){
-		m_view = &view;
-		m_device_point[0] = device_point[0];
-		m_device_point[1] = device_point[1];
-		m_device_epsilon[0] = device_epsilon[0];
-		m_device_epsilon[1] = device_epsilon[1];
+	virtual void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) = 0;
+	virtual void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) = 0;
 
+	inline static const View* m_view = 0;
+	inline static DeviceVector m_device_point;
+	inline static DeviceVector m_device_epsilon;
+	static void assign_static( const View& view, const DeviceVector& device_point, const DeviceVector& device_epsilon ){
+		m_view = &view;
+		m_device_point = device_point;
+		m_device_epsilon = device_epsilon;
 	}
 };
-const View* Manipulatable::m_view = 0;
-float Manipulatable::m_device_point[2];
-float Manipulatable::m_device_epsilon[2];
 
 inline Matrix4 transform_local2object( const Matrix4& local, const Matrix4& local2object ){
 	return matrix4_multiplied_by_matrix4(
@@ -230,12 +227,12 @@ public:
 	RotateFree( Rotatable& rotatable )
 		: m_rotatable( rotatable ){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
-		m_start = point_on_sphere( device2manip, x, y );
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
+		m_start = point_on_sphere( device2manip, device_point );
 		vector3_normalise( m_start );
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
-		Vector3 current = point_on_sphere( device2manip, x, y );
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
+		Vector3 current = point_on_sphere( device2manip, device_point );
 		vector3_normalise( current );
 
 		if( snap )
@@ -244,7 +241,7 @@ public:
 					return m_rotatable.rotate( quaternion_for_axisangle( g_vector3_axes[i], float_snapped( angle_for_axis( m_start, current, g_vector3_axes[i] ), static_cast<float>( c_pi / 12.0 ) ) ) );
 
 		m_rotatable.rotate( quaternion_for_unit_vectors( m_start, current ) );
-//	m_rotatable.rotate( quaternion_for_sphere_vectors( m_start, current ) ); //wrong math, 2x more sensitive
+	//	m_rotatable.rotate( quaternion_for_sphere_vectors( m_start, current ) ); //wrong math, 2x more sensitive
 	}
 };
 
@@ -261,30 +258,30 @@ public:
 	RotateAxis( Rotatable& rotatable )
 		: m_radius( g_radius ), m_rotatable( rotatable ){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
 		const float dot = vector3_dot( m_axis, m_view->fill()? vector3_normalised( m_view->getViewer() - transform_origin ) : m_view->getViewDir() );
 		m_plane_way = fabs( dot ) > 0.1;
 
 		if( m_plane_way ){
 			m_origin = transform_origin;
 			m_plane = Plane3( m_axis, vector3_dot( m_axis, m_origin ) );
-			m_start = point_on_plane( m_plane, m_view->GetViewMatrix(), x, y ) - m_origin;
+			m_start = point_on_plane( m_plane, m_view->GetViewMatrix(), device_point ) - m_origin;
 			vector3_normalise( m_start );
 		}
 		else{
-			m_start = point_on_sphere( device2manip, x, y, m_radius );
+			m_start = point_on_sphere( device2manip, device_point, m_radius );
 			constrain_to_axis( m_start, m_axis );
 		}
 	}
 /// \brief Converts current position to a normalised vector orthogonal to axis.
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
 		Vector3 current;
 		if( m_plane_way ){
-			current = point_on_plane( m_plane, m_view->GetViewMatrix(), x, y ) - m_origin;
+			current = point_on_plane( m_plane, m_view->GetViewMatrix(), device_point ) - m_origin;
 			vector3_normalise( current );
 		}
 		else{
-			current = point_on_sphere( device2manip, x, y, m_radius );
+			current = point_on_sphere( device2manip, device_point, m_radius );
 			constrain_to_axis( current, m_axis );
 		}
 
@@ -358,12 +355,12 @@ public:
 	TranslateAxis( Translatable& translatable )
 		: m_translatable( translatable ){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
-		m_start = point_on_axis( m_axis, device2manip, x, y );
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
+		m_start = point_on_axis( m_axis, device2manip, device_point );
 		m_bounds = bounds;
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
-		Vector3 current = point_on_axis( m_axis, device2manip, x, y );
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
+		Vector3 current = point_on_axis( m_axis, device2manip, device_point );
 		current = vector3_scaled( m_axis, distance_for_axis( m_start, current, m_axis ) );
 
 		current = translation_local2object( current, manip2object );
@@ -394,17 +391,17 @@ public:
 	TranslateAxis2( Translatable& translatable )
 		: m_translatable( translatable ){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
 		m_axisZ = vector3_max_abs_component_index( m_planeSelected.normal() );
 		Vector3 xydir( m_view->getViewer() - m_0 );
 		xydir[m_axisZ] = 0;
 		vector3_normalise( xydir );
 		m_planeZ = Plane3( xydir, vector3_dot( xydir, m_0 ) );
-		m_startZ = point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y );
+		m_startZ = point_on_plane( m_planeZ, m_view->GetViewMatrix(), device_point );
 		m_bounds = bounds;
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
-		Vector3 current = g_vector3_axes[m_axisZ] * vector3_dot( m_planeSelected.normal(), ( point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y ) - m_startZ ) )
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
+		Vector3 current = g_vector3_axes[m_axisZ] * vector3_dot( m_planeSelected.normal(), ( point_on_plane( m_planeZ, m_view->GetViewMatrix(), device_point ) - m_startZ ) )
 		                  * ( m_planeSelected.normal()[m_axisZ] >= 0? 1 : -1 );
 
 		if( !std::isfinite( current[0] ) || !std::isfinite( current[1] ) || !std::isfinite( current[2] ) ) // catch INF case, is likely with top of the box in 2D
@@ -433,12 +430,12 @@ public:
 	TranslateFree( Translatable& translatable )
 		: m_translatable( translatable ){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
-		m_start = point_on_plane( device2manip, x, y );
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
+		m_start = point_on_plane( device2manip, device_point );
 		m_bounds = bounds;
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
-		Vector3 current = point_on_plane( device2manip, x, y );
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
+		Vector3 current = point_on_plane( device2manip, device_point );
 		current = vector3_subtracted( current, m_start );
 
 		if( snap )
@@ -465,11 +462,11 @@ public:
 #include <optional>
 struct testSelect_unselected_scene_point_return_t{ DoubleVector3 point; std::optional<Plane3> plane; };
 std::optional<testSelect_unselected_scene_point_return_t>
-testSelect_unselected_scene_point( const View& view, const float device_point[2], const float device_epsilon[2] );
+testSelect_unselected_scene_point( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon );
 
 void Scene_BoundsSelected_withEntityBounds( scene::Graph& graph, AABB& bounds );
 
-std::optional<Vector3> AABB_TestPoint( const View& view, const float device_point[2], const float device_epsilon[2], const AABB& aabb );
+std::optional<Vector3> AABB_TestPoint( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon, const AABB& aabb );
 
 class SnapBounds : public Manipulatable
 {
@@ -483,20 +480,19 @@ private:
 	int m_rotateSign = 1;
 
 	std::optional<Plane3> m_along_plane;
-	Vector2 m_along_plane_device_point;
 	Vector3 m_along_plane_start_point;
 public:
 	SnapBounds( Translatable& translatable, AllTransformable& transformable )
 		: m_translatable( translatable ), m_transformable( transformable ){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
 		if( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive )
 			Scene_BoundsSelected_withEntityBounds( GlobalSceneGraph(), m_bounds );
 		else
 			m_bounds = bounds;
 
 		// for rotate-snap deduce aabb side opposite to clicked
-		if( const float device_point[2] = { x, y }; const auto point = AABB_TestPoint( *m_view, device_point, m_device_epsilon, m_bounds ) ){
+		if( const auto point = AABB_TestPoint( *m_view, device_point, m_device_epsilon, m_bounds ) ){
 			m_0 = point.value(); // original m_0 is less reliable fallback
 		}
 		m_roatateAxis = 0;
@@ -511,26 +507,24 @@ public:
 				}
 
 		m_along_plane.reset();
-		m_along_plane_device_point = Vector2( x, y );
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
 		Vector3 current( g_vector3_identity );
-		const float device_point[2] = { x, y };
 		if( snap ){ // move along plane
 			if( !m_along_plane ){ // try to initialize plane from original cursor position
-				if( const auto test = testSelect_unselected_scene_point( *m_view, m_along_plane_device_point.data(), m_device_epsilon );
+				if( const auto test = testSelect_unselected_scene_point( *m_view, m_device_point, m_device_epsilon );
 					test && test->plane ){
 					m_along_plane = test->plane;
-					m_along_plane_start_point = point_on_plane( *m_along_plane, m_view->GetViewMatrix(), m_along_plane_device_point.x(), m_along_plane_device_point.y() );
+					m_along_plane_start_point = point_on_plane( *m_along_plane, m_view->GetViewMatrix(), m_device_point );
 				}
 				else if( const auto test = testSelect_unselected_scene_point( *m_view, device_point, m_device_epsilon );
 					test && test->plane ){ // init cursor pos was not on plane, try to fallback to current pos
 					m_along_plane = test->plane;
-					m_along_plane_start_point = point_on_plane( *m_along_plane, m_view->GetViewMatrix(), x, y );
+					m_along_plane_start_point = point_on_plane( *m_along_plane, m_view->GetViewMatrix(), device_point );
 				}
 			}
 			if( m_along_plane ){ // got plane, lez go
-				current = point_on_plane( *m_along_plane, m_view->GetViewMatrix(), x, y ) - m_along_plane_start_point;
+				current = point_on_plane( *m_along_plane, m_view->GetViewMatrix(), device_point ) - m_along_plane_start_point;
 				const size_t maxi = vector3_max_abs_component_index( m_along_plane->normal() );
 				vector3_snap( current, GetSnapGridSize() );
 				// snap move on two axes with least normal component -> need to find out 3rd move component
@@ -550,7 +544,7 @@ public:
 				extents[( axis + 2 ) % 3] = std::copysign( extents[( axis + 2 ) % 3], ray[( axis + 2 ) % 3] );
 				return bounds.origin - extents;
 			};
-			const Ray ray = ray_for_device_point( matrix4_full_inverse( m_view->GetViewMatrix() ), x, y );
+			const Ray ray = ray_for_device_point( matrix4_full_inverse( m_view->GetViewMatrix() ), device_point );
 			const Vector3 nrm = test->plane? Vector3( test->plane->normal() ) : -ray.direction;
 			if( alt ){ // rotate-snap
 				const Quaternion rotation = quaternion_for_unit_vectors_safe( g_vector3_axes[m_roatateAxis] * m_rotateSign, nrm );
@@ -559,7 +553,7 @@ public:
 					test->plane
 					? ray.direction
 					// when test point has no plane data we rotate exactly to test ray... tweak ray to deduce distinct aabb corner
-					: ray_for_device_point( matrix4_full_inverse( m_view->GetViewMatrix() ), x * 1.1f, y * 1.1f ).direction );
+					: ray_for_device_point( matrix4_full_inverse( m_view->GetViewMatrix() ), device_point * 1.1f ).direction );
 				const Vector3 corner = choose_aabb_corner( m_bounds, m_roatateAxis, -unray, unray );
 
 				Transforms transforms;
@@ -602,7 +596,7 @@ public:
 	TranslateFreeXY_Z( Translatable& translatable, AllTransformable& transformable )
 		: m_translatable( translatable ), m_snapBounds( translatable, transformable ){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
 		m_axisZ = ( m_viewdependent || !m_view->fill() )? vector3_max_abs_component_index( m_view->getViewDir() ) : 2;
 		if( m_0 == g_vector3_identity ) /* special value to indicate missing good point to start with, i.e. while dragging components by clicking anywhere; m_startXY, m_startZ != m_0 in this case */
 			m_0 = transform_origin;
@@ -615,23 +609,23 @@ public:
 		xydir[m_axisZ] = 0;
 		vector3_normalise( xydir );
 		m_planeZ = Plane3( xydir, vector3_dot( xydir, m_0 ) );
-		m_startXY = point_on_plane( m_planeXY, m_view->GetViewMatrix(), x, y );
-		m_startZ = point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y );
+		m_startXY = point_on_plane( m_planeXY, m_view->GetViewMatrix(), device_point );
+		m_startZ = point_on_plane( m_planeZ, m_view->GetViewMatrix(), device_point );
 		m_bounds = bounds;
 
-		m_snapBounds.Construct( device2manip, x, y, bounds, transform_origin );
+		m_snapBounds.Construct( device2manip, device_point, bounds, transform_origin );
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
 		if( SnapBounds::useCondition( snapbbox, *m_view ) ){
-			m_snapBounds.Transform( manip2object, device2manip, x, y, snap, snapbbox, alt );
+			m_snapBounds.Transform( manip2object, device2manip, device_point, snap, snapbbox, alt );
 			return;
 		}
 
 		Vector3 current;
 		if( alt && m_view->fill() )
-			current = ( point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y ) - m_startZ ) * g_vector3_axes[m_axisZ];
+			current = ( point_on_plane( m_planeZ, m_view->GetViewMatrix(), device_point ) - m_startZ ) * g_vector3_axes[m_axisZ];
 		else{
-			current = point_on_plane( m_planeXY, m_view->GetViewMatrix(), x, y ) - m_startXY;
+			current = point_on_plane( m_planeXY, m_view->GetViewMatrix(), device_point ) - m_startXY;
 			current[m_axisZ] = 0;
 		}
 
@@ -673,8 +667,8 @@ public:
 	ScaleAxis( Scalable& scalable )
 		: m_scalable( scalable ){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
-		m_start = point_on_axis( m_axis, device2manip, x, y );
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
+		m_start = point_on_axis( m_axis, device2manip, device_point );
 
 		m_chosen_extent = Vector3(
 		                       std::max( bounds.origin[0] + bounds.extents[0] - transform_origin[0], - bounds.origin[0] + bounds.extents[0] + transform_origin[0] ),
@@ -683,9 +677,9 @@ public:
 		                   );
 		m_bounds = bounds;
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
 		//globalOutputStream() << "manip2object: " << manip2object << "  device2manip: " << device2manip << "  x: " << x << "  y:" << y << '\n';
-		Vector3 current = point_on_axis( m_axis, device2manip, x, y );
+		Vector3 current = point_on_axis( m_axis, device2manip, device_point );
 		Vector3 delta = vector3_subtracted( current, m_start );
 
 		delta = translation_local2object( delta, manip2object );
@@ -746,8 +740,8 @@ public:
 	ScaleFree( Scalable& scalable )
 		: m_scalable( scalable ){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
-		m_start = point_on_plane( device2manip, x, y );
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
+		m_start = point_on_plane( device2manip, device_point );
 
 		m_chosen_extent = Vector3(
 		                       std::max( bounds.origin[0] + bounds.extents[0] - transform_origin[0], -( bounds.origin[0] - bounds.extents[0] - transform_origin[0] ) ),
@@ -756,8 +750,8 @@ public:
 		                   );
 		m_bounds = bounds;
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
-		Vector3 current = point_on_plane( device2manip, x, y );
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
+		Vector3 current = point_on_plane( device2manip, device_point );
 		Vector3 delta = vector3_subtracted( current, m_start );
 
 		delta = translation_local2object( delta, manip2object );
@@ -842,19 +836,19 @@ public:
 	SkewAxis( Skewable& skewable )
 		: m_skewable( skewable ){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
 		Vector3 xydir( m_view->getViewer() - m_0 );
 		xydir[m_axis_which] = 0;
-//	xydir *= g_vector3_axes[vector3_max_abs_component_index( xydir )];
+	//	xydir *= g_vector3_axes[vector3_max_abs_component_index( xydir )];
 		vector3_normalise( xydir );
 		m_planeZ = Plane3( xydir, vector3_dot( xydir, m_0 ) );
 
 		m_bounds = bounds;
 		m_axis_by_extent = bounds.origin[m_axis_by] + bounds.extents[m_axis_by] * m_axis_by_sign - transform_origin[m_axis_by];
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
-		const Vector3 current = point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y ) - m_0;
-//	globalOutputStream() << m_axis_which << " by axis " << m_axis_by << '\n';
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
+		const Vector3 current = point_on_plane( m_planeZ, m_view->GetViewMatrix(), device_point ) - m_0;
+	//	globalOutputStream() << m_axis_which << " by axis " << m_axis_by << '\n';
 		m_skewable.skew( Skew( m_axis_by * 4 + m_axis_which, m_axis_by_extent != 0.f? float_snapped( current[m_axis_which], GetSnapGridSize() ) / m_axis_by_extent : 0 ) );
 	}
 	void SetAxes( int axis_which, int axis_by, int axis_by_sign ){
@@ -881,14 +875,14 @@ private:
 public:
 	DragNewBrush(){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
 		m_setSizeZ = m_size[0] = m_size[1] = m_size[2] = GetGridSize();
 		m_newBrushNode = 0;
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
-		Vector3 diff_raw = point_on_plane( Plane3( g_vector3_axis_z, vector3_dot( g_vector3_axis_z, Vector3( m_size.x(), m_size.y(), m_setSizeZ ) + m_0 ) ), m_view->GetViewMatrix(), x, y ) - m_0;
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
+		Vector3 diff_raw = point_on_plane( Plane3( g_vector3_axis_z, vector3_dot( g_vector3_axis_z, Vector3( m_size.x(), m_size.y(), m_setSizeZ ) + m_0 ) ), m_view->GetViewMatrix(), device_point ) - m_0;
 		const Vector3 xydir( vector3_normalised( Vector3( m_view->GetModelview()[2], m_view->GetModelview()[6], 0 ) ) );
-		diff_raw.z() = ( point_on_plane( Plane3( xydir, vector3_dot( xydir, Vector3( m_size.x(), m_size.y(), m_setSizeZ ) + m_0 ) ), m_view->GetViewMatrix(), x, y ) - m_0 ).z();
+		diff_raw.z() = ( point_on_plane( Plane3( xydir, vector3_dot( xydir, Vector3( m_size.x(), m_size.y(), m_setSizeZ ) + m_0 ) ), m_view->GetViewMatrix(), device_point ) - m_0 ).z();
 		Vector3 diff = vector3_snapped( diff_raw, GetSnapGridSize() );
 
 		for ( std::size_t i = 0; i < 3; ++i )
@@ -975,13 +969,13 @@ public:
 
 	DragExtrudeFaces(){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
 		m_axisZ = vector3_max_abs_component_index( m_planeSelected.normal() );
 		Vector3 xydir( m_view->getViewer() - m_0 );
 		xydir[m_axisZ] = 0;
 		vector3_normalise( xydir );
 		m_planeZ = Plane3( xydir, vector3_dot( xydir, m_0 ) );
-		m_startZ = point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y );
+		m_startZ = point_on_plane( m_planeZ, m_view->GetViewMatrix(), device_point );
 
 		m_originalBrushSaved = false;
 		m_originalBrushChanged = false;
@@ -1022,8 +1016,8 @@ public:
 			}
 		}
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
-		Vector3 current = g_vector3_axes[m_axisZ] * vector3_dot( m_planeSelected.normal(), ( point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y ) - m_startZ ) )
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
+		Vector3 current = g_vector3_axes[m_axisZ] * vector3_dot( m_planeSelected.normal(), ( point_on_plane( m_planeZ, m_view->GetViewMatrix(), device_point ) - m_startZ ) )
 		                  * ( m_planeSelected.normal()[m_axisZ] >= 0? 1 : -1 );
 
 		if( !std::isfinite( current[0] ) || !std::isfinite( current[1] ) || !std::isfinite( current[2] ) ) // catch INF case, is likely with top of the box in 2D
@@ -3115,7 +3109,7 @@ bool Scene_forEachPlaneSelectable_selectPlanes2( SelectionTest& test, TranslateA
 
 	if( plane3_valid( plane ) ){
 		if( intersectionPoint == Vector3( FLT_MAX, FLT_MAX, FLT_MAX ) ){ // direct
-			translateAxis.set0( point_on_plane( plane, test.getVolume().GetViewMatrix(), 0, 0 ), plane );
+			translateAxis.set0( point_on_plane( plane, test.getVolume().GetViewMatrix(), DeviceVector( 0, 0 ) ), plane );
 		}
 		else{ // indirect
 			test.BeginMesh( g_matrix4_identity );
@@ -3178,7 +3172,7 @@ bool Scene_forEachBrush_setupExtrude( SelectionTest& test, DragExtrudeFaces& ext
 
 	if( plane3_valid( plane ) ){
 		if( intersectionPoint == Vector3( FLT_MAX, FLT_MAX, FLT_MAX ) ){ // direct
-			extrudeFaces.set0( point_on_plane( plane, test.getVolume().GetViewMatrix(), 0, 0 ), plane );
+			extrudeFaces.set0( point_on_plane( plane, test.getVolume().GetViewMatrix(), DeviceVector( 0, 0 ) ), plane );
 		}
 		else{ // indirect
 			test.BeginMesh( g_matrix4_identity );
@@ -3527,7 +3521,7 @@ inline void ConstructSelectionTest( View& view, const rect_t selection_box ){
 	view.EnableScissor( selection_box.min[0], selection_box.max[0], selection_box.min[1], selection_box.max[1] );
 }
 
-inline const rect_t SelectionBoxForPoint( const float device_point[2], const float device_epsilon[2] ){
+inline const rect_t SelectionBoxForPoint( const DeviceVector& device_point, const DeviceVector& device_epsilon ){
 	rect_t selection_box;
 	selection_box.min[0] = device_point[0] - device_epsilon[0];
 	selection_box.min[1] = device_point[1] - device_epsilon[1];
@@ -4261,7 +4255,7 @@ DoubleVector3 testSelected_scene_snapped_point( const SelectionVolume& test, Sce
 }
 
 std::optional<testSelect_unselected_scene_point_return_t>
-testSelect_unselected_scene_point( const View& view, const float device_point[2], const float device_epsilon[2] ){
+testSelect_unselected_scene_point( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon ){
 	View scissored( view );
 	ConstructSelectionTest( scissored, SelectionBoxForPoint( device_point, device_epsilon ) );
 
@@ -4276,7 +4270,7 @@ testSelect_unselected_scene_point( const View& view, const float device_point[2]
 	return {};
 }
 
-std::optional<Vector3> AABB_TestPoint( const View& view, const float device_point[2], const float device_epsilon[2], const AABB& aabb ){
+std::optional<Vector3> AABB_TestPoint( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon, const AABB& aabb ){
 	View scissored( view );
 	ConstructSelectionTest( scissored, SelectionBoxForPoint( device_point, device_epsilon ) );
 
@@ -4878,16 +4872,15 @@ public:
 		ERROR_MESSAGE( "unreachable" );
 	}
 	/* Manipulatable */
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
 		m_dragXY_Z.set0( transform_origin );
-		m_dragXY_Z.Construct( device2manip, x, y, AABB( transform_origin, g_vector3_identity ), transform_origin );
+		m_dragXY_Z.Construct( device2manip, device_point, AABB( transform_origin, g_vector3_identity ), transform_origin );
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
 		if( ( snap || snapbbox || alt || !m_view->fill() ) && !SnapBounds::useCondition( snapbbox, *m_view ) )
-			return m_dragXY_Z.Transform( manip2object, device2manip, x, y, snap, snapbbox, alt );
+			return m_dragXY_Z.Transform( manip2object, device2manip, device_point, snap, snapbbox, alt );
 
 		View scissored( *m_view );
-		const float device_point[2] = { x, y };
 		ConstructSelectionTest( scissored, SelectionBoxForPoint( device_point, m_device_epsilon ) );
 
 		DoubleVector3 point;
@@ -4982,10 +4975,10 @@ public:
 		m_isSelected = true;
 	}
 	/* Manipulatable */
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
 		//do things with undo
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
 	}
 
 	Manipulatable* GetManipulatable() override {
@@ -6001,13 +5994,13 @@ private:
 	/* Manipulatable */
 	Vector3 m_start;
 public:
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
-		m_start = point_on_plane( m_plane, m_view->GetViewMatrix(), x, y );
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
+		m_start = point_on_plane( m_plane, m_view->GetViewMatrix(), device_point );
 	}
 	//!? fix meaningless undo on grid/origin change, then click tex or lines
 	//!? todo no snap mode with alt modifier
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapHard, const bool alt ) override {
-		const Vector3 current = point_on_plane( m_plane, m_view->GetViewMatrix(), x, y );
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapHard, const bool alt ) override {
+		const Vector3 current = point_on_plane( m_plane, m_view->GetViewMatrix(), device_point );
 
 		const class Snapper
 		{
@@ -6715,11 +6708,11 @@ public:
 	TransformOriginTranslate( TransformOriginTranslatable& transformOriginTranslatable )
 		: m_transformOriginTranslatable( transformOriginTranslatable ){
 	}
-	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) override {
-		m_start = point_on_plane( device2manip, x, y );
+	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
+		m_start = point_on_plane( device2manip, device_point );
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) override {
-		Vector3 current = point_on_plane( device2manip, x, y );
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point, const bool snap, const bool snapbbox, const bool alt ) override {
+		Vector3 current = point_on_plane( device2manip, device_point );
 		current = vector3_subtracted( current, m_start );
 
 		if( snap ){
@@ -7144,7 +7137,7 @@ public:
 		m_pivot2world_start = GetPivot2World();
 	}
 
-	bool SelectManipulator( const View& view, const float device_point[2], const float device_epsilon[2] ){
+	bool SelectManipulator( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon ){
 		bool movingOrigin = false;
 
 		if ( !nothingSelected() || ManipulatorMode() == eDrag || ManipulatorMode() == eClip || ManipulatorMode() == eBuild || ManipulatorMode() == eUV ) {
@@ -7182,11 +7175,11 @@ public:
 				Matrix4 device2manip;
 				ConstructDevice2Manip( device2manip, m_pivot2world_start, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 				if( m_pivot_moving ){
-					m_manipulator->GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], m_bounds, GetPivot2World().t().vec3() );
+					m_manipulator->GetManipulatable()->Construct( device2manip, device_point, m_bounds, GetPivot2World().t().vec3() );
 					m_undo_begun = false;
 				}
 				else if( movingOrigin ){
-					m_transformOrigin_manipulator.GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], m_bounds, GetPivot2World().t().vec3() );
+					m_transformOrigin_manipulator.GetManipulatable()->Construct( device2manip, device_point, m_bounds, GetPivot2World().t().vec3() );
 				}
 			}
 
@@ -7196,7 +7189,7 @@ public:
 		return m_pivot_moving || movingOrigin;
 	}
 
-	void HighlightManipulator( const View& view, const float device_point[2], const float device_epsilon[2] ){
+	void HighlightManipulator( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon ){
 		Manipulatable::assign_static( view, device_point, device_epsilon ); //this b4 m_manipulator calls!
 
 		if ( ( !nothingSelected() && transformOrigin_isTranslatable() )
@@ -7281,7 +7274,7 @@ public:
 #endif // SELECT_MATCHING
 	}
 
-	void SelectPoint( const View& view, const float device_point[2], const float device_epsilon[2], RadiantSelectionSystem::EModifier modifier, bool face ){
+	void SelectPoint( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon, RadiantSelectionSystem::EModifier modifier, bool face ){
 		//globalOutputStream() << device_point[0] << "   " << device_point[1] << '\n';
 		ASSERT_MESSAGE( fabs( device_point[0] ) <= 1.f && fabs( device_point[1] ) <= 1.f, "point-selection error" );
 
@@ -7402,7 +7395,7 @@ public:
 		}
 	}
 
-	bool SelectPoint_InitPaint( const View& view, const float device_point[2], const float device_epsilon[2], bool face ){
+	bool SelectPoint_InitPaint( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon, bool face ){
 		ASSERT_MESSAGE( fabs( device_point[0] ) <= 1.f && fabs( device_point[1] ) <= 1.f, "point-selection error" );
 #if defined ( DEBUG_SELECTION )
 		g_render_clipped.destroy();
@@ -7635,7 +7628,7 @@ public:
 		SceneChangeNotify();
 	}
 
-	void MoveSelected( const View& view, const float device_point[2], bool snap, bool snapbbox, bool alt ){
+	void MoveSelected( const View& view, const DeviceVector device_point, bool snap, bool snapbbox, bool alt ){
 		if ( m_manipulator->isSelected() ) {
 			if ( !m_undo_begun ) {
 				m_undo_begun = true;
@@ -7644,12 +7637,12 @@ public:
 
 			Matrix4 device2manip;
 			ConstructDevice2Manip( device2manip, m_pivot2world_start, view.GetModelview(), view.GetProjection(), view.GetViewport() );
-			m_manipulator->GetManipulatable()->Transform( m_manip2pivot_start, device2manip, device_point[0], device_point[1], snap, snapbbox, alt );
+			m_manipulator->GetManipulatable()->Transform( m_manip2pivot_start, device2manip, device_point, snap, snapbbox, alt );
 		}
 		else if( m_transformOrigin_manipulator.isSelected() ){
 			Matrix4 device2manip;
 			ConstructDevice2Manip( device2manip, m_pivot2world_start, view.GetModelview(), view.GetProjection(), view.GetViewport() );
-			m_transformOrigin_manipulator.GetManipulatable()->Transform( m_manip2pivot_start, device2manip, device_point[0], device_point[1], snap, snapbbox, alt );
+			m_transformOrigin_manipulator.GetManipulatable()->Transform( m_manip2pivot_start, device2manip, device_point, snap, snapbbox, alt );
 		}
 	}
 
@@ -7857,7 +7850,7 @@ void RadiantSelectionSystem::Scene_TestSelect( Selector& selector, SelectionTest
 
 void Scene_Intersect( const View& view, const float device_point[2], const float device_epsilon[2], Vector3& intersection ){
 	View scissored( view );
-	ConstructSelectionTest( scissored, SelectionBoxForPoint( device_point, device_epsilon ) );
+	ConstructSelectionTest( scissored, SelectionBoxForPoint( DeviceVector( device_point[0], device_point[1] ), DeviceVector( device_epsilon[0], device_epsilon[1] ) ) );
 	SelectionVolume test( scissored );
 
 	BestPointSelector bestPointSelector;
@@ -8262,8 +8255,6 @@ inline float screen_normalised( float pos, std::size_t size ){
 	return ( ( 2.0f * pos ) / size ) - 1.0f;
 }
 
-typedef Vector2 DeviceVector;
-
 inline DeviceVector window_to_normalised_device( WindowVector window, std::size_t width, std::size_t height ){
 	return DeviceVector( screen_normalised( window.x(), width ), screen_normalised( height - 1 - window.y(), height ) );
 }
@@ -8334,7 +8325,7 @@ public:
 
 	void mouseDown( DeviceVector position ){
 		View scissored( *m_view );
-		ConstructSelectionTest( scissored, SelectionBoxForPoint( &position[0], &m_epsilon[0] ) );
+		ConstructSelectionTest( scissored, SelectionBoxForPoint( position, m_epsilon ) );
 		SelectionVolume volume( scissored );
 
 		if( m_state == c_modifier_copy_texture ) {
@@ -8352,7 +8343,7 @@ public:
 	void mouseMoved( DeviceVector position ){
 		if( m_undo_begun ){
 			View scissored( *m_view );
-			ConstructSelectionTest( scissored, SelectionBoxForPoint( &device_constrained( position )[0], &m_epsilon[0] ) );
+			ConstructSelectionTest( scissored, SelectionBoxForPoint( device_constrained( position ), m_epsilon ) );
 			SelectionVolume volume( scissored );
 
 			Scene_applyClosestTexture( volume, bitfield_enabled( m_state, c_modifierShift ),
@@ -8431,7 +8422,7 @@ public:
 				if ( modifier == RadiantSelectionSystem::eReplace && !m_mouseMoved ) {
 					modifier = RadiantSelectionSystem::eCycle;
 				}
-				getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], modifier, ( m_state & c_modifier_face ) != c_modifierNone );
+				getSelectionSystem().SelectPoint( *m_view, position, m_epsilon, modifier, ( m_state & c_modifier_face ) != c_modifierNone );
 			}
 		}
 
@@ -8440,7 +8431,7 @@ public:
 	}
 
 	void testSelect_simpleM1( DeviceVector position ){
-		getSelectionSystem().SelectPoint( *m_view, &device_constrained( position )[0], &m_epsilon[0], m_mouseMoved ? RadiantSelectionSystem::eReplace : RadiantSelectionSystem::eCycle, false );
+		getSelectionSystem().SelectPoint( *m_view, device_constrained( position ), m_epsilon, m_mouseMoved ? RadiantSelectionSystem::eReplace : RadiantSelectionSystem::eCycle, false );
 	}
 
 
@@ -8459,7 +8450,7 @@ public:
 	void mouseDown( DeviceVector position ){
 		m_start = m_current = device_constrained( position );
 		if( !m_mouse2 && m_state != c_modifierNone ){
-			m_paintSelect = getSelectionSystem().SelectPoint_InitPaint( *m_view, &position[0], &m_epsilon[0], ( m_state & c_modifier_face ) != c_modifierNone );
+			m_paintSelect = getSelectionSystem().SelectPoint_InitPaint( *m_view, position, m_epsilon, ( m_state & c_modifier_face ) != c_modifierNone );
 		}
 	}
 
@@ -8469,7 +8460,7 @@ public:
 			draw_area();
 		}
 		else if( m_state != c_modifier_manipulator ){
-			getSelectionSystem().SelectPoint( *m_view, &m_current[0], &m_epsilon[0],
+			getSelectionSystem().SelectPoint( *m_view, m_current, m_epsilon,
 			                                  m_paintSelect ? RadiantSelectionSystem::eSelect : RadiantSelectionSystem::eDeselect,
 			                                  ( m_state & c_modifier_face ) != c_modifierNone );
 		}
@@ -8493,7 +8484,7 @@ public:
 
 class Manipulator_
 {
-	DeviceVector getEpsilon(){
+	DeviceVector getEpsilon() const {
 		switch ( getSelectionSystem().ManipulatorMode() )
 		{
 		case SelectionSystem::eClip:
@@ -8524,14 +8515,14 @@ public:
 	bool mouseDown( DeviceVector position ){
 		if( getSelectionSystem().ManipulatorMode() == SelectionSystem::eClip )
 			Clipper_tryDoubleclick();
-		return getSelectionSystem().SelectManipulator( *m_view, &position[0], &getEpsilon()[0] );
+		return getSelectionSystem().SelectManipulator( *m_view, position, getEpsilon() );
 	}
 
 	void mouseMoved( DeviceVector position ){
 		if( m_mouseMovedWhilePressed )
-			getSelectionSystem().MoveSelected( *m_view, &position[0], bitfield_enabled( m_state, c_modifierShift ),
-			                                                          bitfield_enabled( m_state, c_modifierControl ),
-			                                                          bitfield_enabled( m_state, c_modifierAlt ) );
+			getSelectionSystem().MoveSelected( *m_view, position, bitfield_enabled( m_state, c_modifierShift ),
+			                                                      bitfield_enabled( m_state, c_modifierControl ),
+			                                                      bitfield_enabled( m_state, c_modifierAlt ) );
 	}
 	typedef MemberCaller1<Manipulator_, DeviceVector, &Manipulator_::mouseMoved> MouseMovedCaller;
 
@@ -8543,7 +8534,7 @@ public:
 	typedef MemberCaller1<Manipulator_, DeviceVector, &Manipulator_::mouseUp> MouseUpCaller;
 
 	void highlight( DeviceVector position ){
-		getSelectionSystem().HighlightManipulator( *m_view, &position[0], &getEpsilon()[0] );
+		getSelectionSystem().HighlightManipulator( *m_view, position, getEpsilon() );
 	}
 };
 
