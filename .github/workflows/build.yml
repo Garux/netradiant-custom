@@ -93,11 +93,15 @@ jobs:
           mv Linux-x86_64/Linux-x86_64.7z netradiant-custom-$(date +%Y%m%d)-linux-x86_64.7z
 #         note: dir/* doesn't match .bla (hidden) file in linux under dir/ but matches in subfolders
 
+      - name: Get current date
+        run: |
+          echo "MY_DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
       - name: Create latest build
-        uses: czietz/action-automatic-releases@latest
+        uses: Garux/action-automatic-releases@master
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: "latest"
+          automatic_release_tag: ${{ env.MY_DATE }}
           prerelease: false
           title: Latest Build
           files: |
