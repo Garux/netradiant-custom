@@ -27,7 +27,7 @@ jobs:
     steps:
     - uses: msys2/setup-msys2@v2
       with:
-        install: ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-libxml2 git
+        install: ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-libxml2 git p7zip
         msystem: ${{ matrix.msystem }}
         path-type: minimal
         release: false
@@ -41,12 +41,13 @@ jobs:
       run: |
         make MAKEFILE_CONF=msys2-Makefile.conf -j4
         mkdir -p install/settings
-        echo > install/settings/DUMMMY
+        7z a Windows-${{ matrix.arch }}.zip ./install/*
+#       zip immediately, since .bla files and empty folders get lost somewhere later otherwise
 
     - uses: actions/upload-artifact@v4
       with:
         name: Windows-${{ matrix.arch }}
-        path: install/
+        path: Windows-${{ matrix.arch }}.zip
         if-no-files-found: error
 
   linux:
@@ -89,9 +90,9 @@ jobs:
       - name: Create binary archives
         shell: bash
         run: |
-          7z a netradiant-custom-$(date +%Y%m%d)-windows-x86_64.zip ./Windows-x86_64/*
+          mv Windows-x86_64/Windows-x86_64.zip netradiant-custom-$(date +%Y%m%d)-windows-x86_64.zip
           mv Linux-x86_64/Linux-x86_64.7z netradiant-custom-$(date +%Y%m%d)-linux-x86_64.7z
-#         note: dir/* doesn't match .bla (hidden) file in linux under dir/ but matches in subfolders
+#         note: 7z dir/* doesn't match .bla (hidden) file in linux under dir/ but matches in subfolders  # or doesn't match there now too?
 
       - name: Get current date
         run: |
