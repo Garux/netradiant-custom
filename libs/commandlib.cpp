@@ -33,12 +33,15 @@
 
 #include <cstdlib>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+
 
 bool Q_Exec( const char *cmd, char *cmdline, const char *, bool, bool waitfor ){
 	char fullcmd[2048];
 	char *pCmd;
+
 	pid_t pid;
 #ifdef _DEBUG
 	printf( "Q_Exec damnit\n" );
@@ -54,6 +57,17 @@ bool Q_Exec( const char *cmd, char *cmdline, const char *, bool, bool waitfor ){
 		return true;
 		break;
 	case 0:
+		// XXX : if we run q3map2 with '-connect' - redirect stdout and stderr
+		//		 to /dev/null - aka build monitoring - as it's already going to
+		//		 be written to stdout via 'radiant/console.cpp → Sys_print
+		if ( cmdline != NULL && ( strstr( cmdline, "q3map2" ) != NULL ) && ( strstr( cmdline, "-connect" ) != NULL ) ) {
+			int devNullFd = open( "/dev/null", 0 );
+			if ( devNullFd != -1 ) {
+				dup2( devNullFd, 1 );
+				dup2( devNullFd, 2 );
+			}
+		}
+
 		// always concat the command on linux
 		if ( cmd ) {
 			strcpy( fullcmd, cmd );
