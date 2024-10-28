@@ -173,12 +173,12 @@ inline void planepts_quantise( PlanePoints planepts, double snap ){
 	vector3_snap( planepts[2], snap );
 }
 
-inline float vector3_max_component( const Vector3& vec3 ){
+inline float vector3_max_abs_component( const Vector3& vec3 ){
 	return std::max( fabsf( vec3[0] ), std::max( fabsf( vec3[1] ), fabsf( vec3[2] ) ) );
 }
 
 inline void edge_snap( Vector3& edge, double snap ){
-	float scale = static_cast<float>( ceil( fabs( snap / vector3_max_component( edge ) ) ) );
+	float scale = static_cast<float>( ceil( fabs( snap / vector3_max_abs_component( edge ) ) ) );
 	if ( scale > 0.0f ) {
 		vector3_scale( edge, scale );
 	}
