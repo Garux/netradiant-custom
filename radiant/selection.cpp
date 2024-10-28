@@ -453,6 +453,28 @@ public:
 };
 
 
+/// \brief constructs Quaternion so that rotated box geometry ends up aligned to one or more axes (depends on how much axial \p to is).
+inline Quaternion quaternion_for_unit_vectors_for_bounds( const Vector3& axialfrom, const Vector3& to ){
+	// do step by step from the larger component to the smaller one
+	size_t ids[3] = { vector3_max_abs_component_index( to ), ( ids[0] + 1 ) %3, ( ids[0] + 2 ) %3 };
+	if( std::fabs( to[ids[2]] ) > std::fabs( to[ids[1]] ) )
+		std::swap( ids[2], ids[1] );
+
+	Vector3 steps[3] = { g_vector3_axes[ids[0]] * std::copysign( 1.f, to[ids[0]] ), to, to };
+
+	Quaternion rotation = quaternion_for_unit_vectors_safe( axialfrom, steps[0] );
+	if( std::fabs( to[ids[1]] ) > 1e-6f ){
+		steps[1][ids[2]] = 0;
+		vector3_normalise( steps[1] );
+		rotation = quaternion_multiplied_by_quaternion( quaternion_for_unit_vectors( steps[0], steps[1] ), rotation );
+		if( std::fabs( to[ids[2]] ) > 1e-6f ){
+			rotation = quaternion_multiplied_by_quaternion( quaternion_for_unit_vectors( steps[1], to ), rotation );
+		}
+	}
+	return rotation;
+}
+
+
 class AllTransformable
 {
 public:
@@ -547,7 +569,7 @@ public:
 			const Ray ray = ray_for_device_point( matrix4_full_inverse( m_view->GetViewMatrix() ), device_point );
 			const Vector3 nrm = test->plane? Vector3( test->plane->normal() ) : -ray.direction;
 			if( alt ){ // rotate-snap
-				const Quaternion rotation = quaternion_for_unit_vectors_safe( g_vector3_axes[m_roatateAxis] * m_rotateSign, nrm );
+				const Quaternion rotation = quaternion_for_unit_vectors_for_bounds( g_vector3_axes[m_roatateAxis] * m_rotateSign, nrm );
 				const Matrix4 unrot = matrix4_rotation_for_quaternion( quaternion_inverse( rotation ) );
 				const Vector3 unray = matrix4_transformed_direction( unrot,
 					test->plane
