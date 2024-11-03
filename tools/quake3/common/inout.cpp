@@ -32,6 +32,7 @@
 #include <sys/stat.h>
 #include <algorithm>
 #include "generic/vector.h"
+#include "timer.h"
 
 #ifdef WIN32
 #include <direct.h>
@@ -45,8 +46,8 @@
 // utf8 conversion
 #include <glib.h>
 
-socket_t *brdcst_socket;
-netmessage_t msg;
+static socket_t *brdcst_socket;
+static netmessage_t msg;
 
 bool verbose = false;
 
@@ -54,7 +55,7 @@ bool verbose = false;
 // is streamed through the network to Radiant
 // possibly written to disk at the end of the run
 //++timo FIXME: need to be global, required when creating nodes?
-xmlDocPtr doc;
+static xmlDocPtr doc;
 
 // some useful stuff
 xmlNodePtr xml_NodeForVec( const Vector3& v ){
@@ -67,7 +68,7 @@ xmlNodePtr xml_NodeForVec( const Vector3& v ){
 	return ret;
 }
 
-void xml_message_flush();
+static void xml_message_flush();
 
 // send a node down the stream, add it to the document
 void xml_SendNode( xmlNodePtr node ){
@@ -227,7 +228,7 @@ void xml_Winding( const char *msg, const Vector3 p[], int numpoints, bool die ){
 	}
 }
 
-void set_console_colour_for_flag( int flag ){
+static void set_console_colour_for_flag( int flag ){
 #ifdef WIN32
 	static int curFlag = SYS_STD;
 	static bool ok = true;
@@ -285,11 +286,12 @@ void Broadcast_Shutdown(){
 }
 
 #define MAX_MESEGE      MAX_NETMESSAGE / 2
-char mesege[MAX_MESEGE];
-size_t mesege_len = 0;
-int mesege_flag = SYS_STD;
+static char mesege[MAX_MESEGE];
+static size_t mesege_len = 0;
+static int mesege_flag = SYS_STD;
+static Timer mesege_send_timer;
 
-void xml_message_flush(){
+static void xml_message_flush(){
 	if( mesege_len == 0 )
 		return;
 	xmlNodePtr node;
@@ -307,9 +309,11 @@ void xml_message_flush(){
 	xmlSetProp( node, (const xmlChar*)"level", (const xmlChar *)level );
 
 	xml_SendNode( node );
+
+	mesege_send_timer.start();
 }
 
-void xml_message_push( int flag, const char* characters, size_t length ){
+static void xml_message_push( int flag, const char* characters, size_t length ){
 	if( flag != mesege_flag ){
 		xml_message_flush();
 		mesege_flag = flag;
@@ -318,22 +322,26 @@ void xml_message_push( int flag, const char* characters, size_t length ){
 	const char* end = characters + length;
 	while ( characters != end )
 	{
-		size_t space = MAX_MESEGE - 1 - mesege_len;
+		const size_t space = MAX_MESEGE - 1 - mesege_len;
 		if ( space == 0 ) {
 			xml_message_flush();
 		}
 		else
 		{
-			size_t size = std::min( space, static_cast<size_t>( end - characters ) );
+			const size_t size = std::min( space, static_cast<size_t>( end - characters ) );
 			memcpy( mesege + mesege_len, characters, size );
 			mesege_len += size;
 			characters += size;
 		}
 	}
+
+	if( mesege_send_timer.elapsed_msec() + 1000 * mesege_len / MAX_MESEGE > 2000 ){ // force send if >1-2 seconds has passed
+		xml_message_flush();
+	}
 }
 
 // all output ends up through here
-void FPrintf( int flag, char *buf ){
+static void FPrintf( int flag, char *buf ){
 	static bool bGotXML = false;
 
 	set_console_colour_for_flag( flag & ~( SYS_NOXMLflag | SYS_VRBflag ) );

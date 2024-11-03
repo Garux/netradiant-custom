@@ -51,31 +51,6 @@
 #include "mainframe.h"
 #include "sockets.h"
 #include "timer.h"
-
-void message_flush( message_info_t* self ){
-	Sys_Print( self->msg_level, self->m_buffer, self->m_length );
-	self->m_length = 0;
-}
-
-void message_print( message_info_t* self, const char* characters, std::size_t length ){
-	const char* end = characters + length;
-	while ( characters != end )
-	{
-		std::size_t space = std::size( self->m_buffer ) - 1 - self->m_length;
-		if ( space == 0 ) {
-			message_flush( self );
-		}
-		else
-		{
-			std::size_t size = std::min( space, std::size_t( end - characters ) );
-			memcpy( self->m_buffer + self->m_length, characters, size );
-			self->m_length += size;
-			characters += size;
-		}
-	}
-}
-
-
 #include "xmlstuff.h"
 
 class CWatchBSP
@@ -352,14 +327,12 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 				// old q3map don't send a version attribute
 				// the ones we support .. send Q3MAP_STREAM_VERSION
 				if ( !attrs[0] || !attrs[1] || ( strcmp( reinterpret_cast<const char*>( attrs[0] ), "version" ) != 0 ) ) {
-					message_flush( data );
 					globalErrorStream() << "No stream version given in the feedback stream, this is an old q3map version.\n"
 					                       "Please turn off monitored compiling if you still wish to use this q3map executable\n";
 					abortStream( data );
 					return;
 				}
 				else if ( strcmp( reinterpret_cast<const char*>( attrs[1] ), Q3MAP_STREAM_VERSION ) != 0 ) {
-					message_flush( data );
 					globalErrorStream() <<
 					    "This version of Radiant reads version " Q3MAP_STREAM_VERSION " debug streams, I got an incoming connection with version " << reinterpret_cast<const char*>( attrs[1] ) << "\n"
 					    "Please make sure your versions of Radiant and q3map are matching.\n";
@@ -371,7 +344,6 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 			else if ( strcmp( reinterpret_cast<const char*>( name ), "message" ) == 0 ) {
 				int msg_level = atoi( reinterpret_cast<const char*>( attrs[1] ) );
 				if ( msg_level != data->msg_level ) {
-					message_flush( data );
 					data->msg_level = msg_level;
 				}
 			}
@@ -382,21 +354,18 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 				data->pGeometry->saxStartElement( data, name, attrs );
 			}
 			else if ( strcmp( reinterpret_cast<const char*>( name ), "select" ) == 0 ) {
-				message_flush( data );
 				CSelectMsg *pSelect = new CSelectMsg();
 				data->geometry_depth = data->recurse;
 				data->pGeometry = pSelect;
 				data->pGeometry->saxStartElement( data, name, attrs );
 			}
 			else if ( strcmp( reinterpret_cast<const char*>( name ), "pointmsg" ) == 0 ) {
-				message_flush( data );
 				CPointMsg *pPoint = new CPointMsg();
 				data->geometry_depth = data->recurse;
 				data->pGeometry = pPoint;
 				data->pGeometry->saxStartElement( data, name, attrs );
 			}
 			else if ( strcmp( reinterpret_cast<const char*>( name ), "windingmsg" ) == 0 ) {
-				message_flush( data );
 				CWindingMsg *pWinding = new CWindingMsg();
 				data->geometry_depth = data->recurse;
 				data->pGeometry = pWinding;
@@ -404,7 +373,6 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 			}
 			else
 			{
-				message_flush( data );
 				globalWarningStream() << "Warning: ignoring unrecognized node in XML stream (" << reinterpret_cast<const char*>( name ) << ")\n";
 				// we don't recognize this node, jump over it
 				// (NOTE: the ignore mechanism is a bit screwed, only works when starting an ignore at the highest level)
@@ -435,7 +403,6 @@ static void saxEndElement( message_info_t *data, const xmlChar *name ){
 		}
 	}
 	if ( data->recurse == data->stop_depth ) {
-		message_flush( data );
 #ifdef _DEBUG
 		globalWarningStream() << "Received error msg .. shutting down..\n";
 #endif
@@ -464,7 +431,7 @@ public:
 		{
 			if ( m_data->ignore_depth == 0 ) {
 				// output the message using the level
-				message_print( m_data, buffer, length );
+				Sys_Print( m_data->msg_level, buffer, length );
 				// if this message has error level flag, we mark the depth to stop the compilation when we get out
 				// we don't set the msg level if we don't stop on leak
 				if ( m_data->msg_level == 3 ) {
@@ -702,7 +669,6 @@ void CWatchBSP::RoutineProcessing(){
 				}
 				else
 				{
-					message_flush( &m_message_info );
 					// error or connection closed/reset
 					// NOTE: if we get an error down the XML stream we don't reach here
 					Net_Disconnect( m_pInSocket );

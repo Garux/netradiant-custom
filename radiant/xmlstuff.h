@@ -56,9 +56,6 @@ struct message_info_t
 	int stop_depth; // the depth we need to stop at the end
 	int geometry_depth; // are we parsing some geometry information (i.e. do we forward the SAX calls?)
 	ISAXHandler* pGeometry; // the handler
-
-	char m_buffer[1024];
-	std::size_t m_length;
 };
 
 class IGL2DWindow;
