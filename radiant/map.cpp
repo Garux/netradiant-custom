@@ -2378,7 +2378,7 @@ MapModuleObserver g_MapModuleObserver;
 #include "preferencesystem.h"
 
 CopiedString g_strLastMap;
-bool g_bLoadLastMap = false;
+bool g_bLoadLastMap = true;
 
 void Map_Construct(){
 	GlobalCommands_insert( "NewMap", FreeCaller<NewMap>() );
