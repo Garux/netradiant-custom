@@ -634,14 +634,12 @@ void AddBrushBevels(){
 
 				s.planenum = FindFloatPlane( plane, 0, NULL );
 				s.contentFlags = sides[ 0 ].contentFlags;
-				/* handle bevel surfaceflags for topmost one only: assuming that only walkable ones are meaningful */
-				if( axis == 2 && dir == 1 ){
-					for ( const side_t& side : sides ) {
-						for ( const Vector3& point : side.winding ) {
-							if ( fabs( plane.dist() - point[axis] ) < .1f ) {
-								s.surfaceFlags |= ( side.surfaceFlags & surfaceFlagsMask );
-								break;
-							}
+				/* handle bevel surfaceflags */
+				for ( const side_t& side : sides ) {
+					for ( const Vector3& point : side.winding ) {
+						if ( fabs( plane.dist() - point[axis] ) < .1f ) {
+							s.surfaceFlags |= ( side.surfaceFlags & surfaceFlagsMask );
+							break;
 						}
 					}
 				}
