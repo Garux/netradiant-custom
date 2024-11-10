@@ -353,3 +353,31 @@ inline void ColorNormalize( Vector3& color ) {
 		color *= ( 1.f / max );
 	}
 }
+
+
+inline double angle_squared_sin( const Vector3& a, const Vector3& b, const Vector3& c ){
+	const Vector3 d1 = b - a;
+	const Vector3 d2 = c - a;
+	const Vector3 normal = vector3_cross( d2, d1 );
+	/* https://en.wikipedia.org/wiki/Cross_product#Geometric_meaning
+		cross( a, b ).length = a.length b.length sin( angle ) */
+	const double lengthsSquared = vector3_length_squared( d1 ) * vector3_length_squared( d2 );
+	return lengthsSquared == 0? 0 : ( vector3_length_squared( normal ) / lengthsSquared );
+}
+
+inline double triangle_min_angle_squared_sin( const Vector3& a, const Vector3& b, const Vector3& c ){
+	const Vector3 d[3] = { b - a, c - a, c - b };
+	const double l[3] = { vector3_length_squared( d[0] ), vector3_length_squared( d[1] ), vector3_length_squared( d[2] ) };
+	const size_t mini = ( l[0] < l[1] ) ? ( ( l[0] < l[2] ) ? 0 : 2 ) : ( ( l[1] < l[2] ) ? 1 : 2 );
+	if( l[mini] == 0 )
+		return 0;
+
+	const size_t minj = mini == 2? 0 : mini + 1;
+	const size_t mink = minj == 2? 0 : minj + 1;
+	return vector3_length_squared( vector3_cross( d[minj], d[mink] ) ) / ( l[minj] * l[mink] );
+}
+
+
+inline double triangle_area2x( const Vector3& a, const Vector3& b, const Vector3& c ){
+	return vector3_length( vector3_cross( b - a, c - a ) );
+}

@@ -176,6 +176,7 @@ Q3map2:
 		-light -extlmhacksize 1024 -trisoup //gen shaders for external lms and mark as trisoup
 	* generate shaders to force nomipmaps flag on external lightmap images created by lightstyles and external lms hacks
 	* -nobrushsnap: disable brush vertices snapping (of drawsurfs) (experimental, keep eye on meta merge efficiency)
+	* improved brush faces triangulation wrt degenerate triangles production (non -maxarea algorithm)
 
 
 

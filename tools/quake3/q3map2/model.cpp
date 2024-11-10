@@ -584,18 +584,10 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 				}
 
 				/* sanity check */
-				{
-					const Vector3 d1 = points[1] - points[0];
-					const Vector3 d2 = points[2] - points[0];
-					const Vector3 normal = vector3_cross( d2, d1 );
-					/* https://en.wikipedia.org/wiki/Cross_product#Geometric_meaning
-					   cross( a, b ).length = a.length b.length sin( angle ) */
-					const double lengthsSquared = vector3_length_squared( d1 ) * vector3_length_squared( d2 );
-					if ( lengthsSquared == 0 || ( vector3_length_squared( normal ) / lengthsSquared ) < 1e-8 ) {
-						Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped: points on line\n",
-						             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], modelName );
-						continue;
-					}
+				if ( triangle_min_angle_squared_sin( points[0], points[1], points[2] ) < 1e-8 ) {
+					Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped: points on line\n",
+					             points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], modelName );
+					continue;
 				}
 
 

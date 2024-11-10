@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "tjunction.h"
 
 
 
@@ -209,8 +210,7 @@ static void AddSurfaceEdges( mapDrawSurface_t& ds ){
 	for ( int i = 0; i < ds.numVerts; i++ )
 	{
 		/* save the edge number in the lightmap field so we don't need to look it up again */
-		ds.verts[i].lightmap[ 0 ][ 0 ] =
-		    AddEdge( ds.verts[ i ], ds.verts[ ( i + 1 ) % ds.numVerts ], false );
+		bspDrawVert_edge_index_write( ds.verts[ i ], AddEdge( ds.verts[ i ], ds.verts[ ( i + 1 ) % ds.numVerts ], false ) );
 	}
 }
 
@@ -309,18 +309,13 @@ static void AddPatchEdges( mapDrawSurface_t& ds ) {
  */
 #define MAX_SURFACE_VERTS   256
 static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
-	int i, j, k;
-	edgeLine_t  *e;
-	edgePoint_t *p;
 	int counts[MAX_SURFACE_VERTS];
 	int originals[MAX_SURFACE_VERTS];
-	bspDrawVert_t verts[MAX_SURFACE_VERTS], *v1, *v2;
-	int numVerts;
-	float start, end, c;
+	bspDrawVert_t verts[MAX_SURFACE_VERTS];
+	int numVerts = 0;
 
 
-	numVerts = 0;
-	for ( i = 0; i < ds.numVerts; ++i )
+	for ( int i = 0; i < ds.numVerts; ++i )
 	{
 		counts[i] = 0;
 
@@ -333,28 +328,20 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 		numVerts++;
 
 		// check to see if there are any t junctions before the next vert
-		v1 = &ds.verts[i];
-		v2 = &ds.verts[ ( i + 1 ) % ds.numVerts ];
+		const bspDrawVert_t& v1 = ds.verts[i];
+		const bspDrawVert_t& v2 = ds.verts[ ( i + 1 ) % ds.numVerts ];
 
-		j = (int)ds.verts[i].lightmap[ 0 ][ 0 ];
+		const int j = bspDrawVert_edge_index_read( ds.verts[ i ] );
 		if ( j == -1 ) {
 			continue;       // degenerate edge
 		}
-		e = &edgeLines[ j ];
+		const edgeLine_t& e = edgeLines[ j ];
 
-		start = vector3_dot( v1->xyz - e->origin, e->dir );
+		const float start = vector3_dot( v1.xyz - e.origin, e.dir );
 
-		end = vector3_dot( v2->xyz - e->origin, e->dir );
+		const float end = vector3_dot( v2.xyz - e.origin, e.dir );
 
-
-		if ( start < end ) {
-			p = e->chain->next;
-		}
-		else {
-			p = e->chain->prev;
-		}
-
-		for ( ; p != e->chain; ) {
+		for ( edgePoint_t *p = ( start < end )? e.chain->next : e.chain->prev; p != e.chain; p = ( start < end )? p->next : p->prev ) {
 			if ( start < end ) {
 				if ( p->intercept > end - ON_EPSILON ) {
 					break;
@@ -372,38 +359,35 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 				if ( numVerts == MAX_SURFACE_VERTS ) {
 					Error( "MAX_SURFACE_VERTS" );
 				}
+				bspDrawVert_t& v = verts[ numVerts ];
 
 				/* take the exact intercept point */
-				verts[ numVerts ].xyz = p->xyz;
+				v.xyz = p->xyz;
 
 				/* interpolate the texture coordinates */
 				const float frac = ( p->intercept - start ) / ( end - start );
-				verts[ numVerts ].st = v1->st + ( v2->st - v1->st ) * frac;
+				v.st = v1.st + ( v2.st - v1.st ) * frac;
 
 				/* copy the normal (FIXME: what about nonplanar surfaces? */
-				verts[ numVerts ].normal = v1->normal;
+				v.normal = v1.normal;
 
 				/* ydnar: interpolate the color */
-				for ( k = 0; k < MAX_LIGHTMAPS; k++ )
+				for ( int k = 0; k < MAX_LIGHTMAPS; ++k )
 				{
-					for ( j = 0; j < 4; j++ )
+					for ( int j = 0; j < 4; ++j )
 					{
-						c = (float) v1->color[ k ][ j ] + frac * ( (float) v2->color[ k ][ j ] - (float) v1->color[ k ][ j ] );
-						verts[ numVerts ].color[ k ][ j ] = color_to_byte( c );
+						const float c = v1.color[ k ][ j ] + frac * ( v2.color[ k ][ j ] - v1.color[ k ][ j ] );
+						v.color[ k ][ j ] = color_to_byte( c );
 					}
+					v.lightmap[ k ] = { 0, 0 }; // do zero init
 				}
+				v.lightmap[ 0 ] = vector2_mid( v1.lightmap[ 0 ], v2.lightmap[ 0 ] );
+				bspDrawVert_mark_tjunc( v );
 
 				/* next... */
 				originals[ numVerts ] = i;
 				numVerts++;
 				counts[ i ]++;
-			}
-
-			if ( start < end ) {
-				p = p->next;
-			}
-			else {
-				p = p->prev;
 			}
 		}
 	}
@@ -417,12 +401,13 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 
 	// rotate the points so that the initial vertex is between
 	// two non-subdivided edges
+	int i;
 	for ( i = 0; i < numVerts; ++i ) {
 		if ( originals[ ( i + 1 ) % numVerts ] == originals[ i ] ) {
 			continue;
 		}
-		j = ( i + numVerts - 1 ) % numVerts;
-		k = ( i + numVerts - 2 ) % numVerts;
+		const int j = ( i + numVerts - 1 ) % numVerts;
+		const int k = ( i + numVerts - 2 ) % numVerts;
 		if ( originals[ j ] == originals[ k ] ) {
 			continue;
 		}
@@ -433,6 +418,7 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 		// fine the way it is
 		c_natural++;
 
+		free( ds.verts );
 		ds.numVerts = numVerts;
 		ds.verts = safe_malloc( numVerts * sizeof( *ds.verts ) );
 		memcpy( ds.verts, verts, numVerts * sizeof( *ds.verts ) );
@@ -464,10 +450,11 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 
 	}
 
+	free( ds.verts );
 	ds.numVerts = numVerts;
 	ds.verts = safe_malloc( numVerts * sizeof( *ds.verts ) );
 
-	for ( j = 0; j < ds.numVerts; ++j ) {
+	for ( int j = 0; j < ds.numVerts; ++j ) {
 		ds.verts[j] = verts[ ( j + i ) % ds.numVerts ];
 	}
 }
@@ -512,10 +499,14 @@ static bool FixBrokenSurface( mapDrawSurface_t& ds ){
 			/* lightmap st/colors */
 			for ( int k = 0; k < MAX_LIGHTMAPS; ++k )
 			{
-				avg.lightmap[ k ] = vector2_mid( dv1.lightmap[ k ], dv2.lightmap[ k ] );
+				avg.lightmap[ k ] = { 0, 0 };
 				for ( int j = 0; j < 4; ++j )
-					avg.color[ k ][ j ] = (int) ( dv1.color[ k ][ j ] + dv2.color[ k ][ j ] ) >> 1;
+					avg.color[ k ][ j ] = ( dv1.color[ k ][ j ] + dv2.color[ k ][ j ] ) >> 1;
 			}
+			avg.lightmap[ 0 ] = vector2_mid( dv1.lightmap[ 0 ], dv2.lightmap[ 0 ] );
+
+			if( bspDrawVert_is_tjunc( dv1 ) && bspDrawVert_is_tjunc( dv2 ) )
+				bspDrawVert_mark_tjunc( avg );
 
 			/* ydnar: der... */
 			dv1 = avg;
@@ -602,7 +593,7 @@ void FixTJunctions( const entity_t& ent ){
 	// add the non-axial edges, longest first
 	// this gives the most accurate edge description
 	for ( originalEdge_t& e : Span( originalEdges, numOriginalEdges ) ) { // originalEdges might not change during AddEdge( true )
-		e.dv[ 0 ]->lightmap[ 0 ][ 0 ] = AddEdge( *e.dv[ 0 ], *e.dv[ 1 ], true );
+		bspDrawVert_edge_index_write( *e.dv[ 0 ], AddEdge( *e.dv[ 0 ], *e.dv[ 1 ], true ) );
 	}
 
 	Sys_FPrintf( SYS_VRB, "%9d axial edge lines\n", axialEdgeLines );

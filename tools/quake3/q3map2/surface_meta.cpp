@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "tjunction.h"
 #include "timer.h"
 #include <map>
 #include <set>
@@ -435,7 +436,7 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t *ds ){
 	ClassifySurfaces( 1, ds );
 }
 
-#define TINY_AREA 1.0f
+#define TINY_AREA   1.0
 #define MAXAREA_MAXTRIES 8
 static int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 	int r, s, t, bestR = 0, bestS = 1, bestT = 2;
@@ -452,7 +453,7 @@ static int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 	A = 0;
 	for ( i = 1; i + 1 < cnt; ++i )
 	{
-		A += vector3_length( vector3_cross( vert[i].xyz - vert[0].xyz, vert[i + 1].xyz - vert[0].xyz ) );
+		A += triangle_area2x( vert[0].xyz, vert[i].xyz, vert[i + 1].xyz );
 	}
 	V = 0;
 	for ( i = 0; i < cnt; ++i )
@@ -533,7 +534,7 @@ static int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 			}
 			// abc abc abc abc abc abc
 
-			bestA = vector3_length( vector3_cross( vert[bestS].xyz - vert[bestR].xyz, vert[bestT].xyz - vert[bestR].xyz ) );
+			bestA = triangle_area2x( vert[bestR].xyz, vert[bestS].xyz, vert[bestT].xyz );
 		}
 
 		if ( bestA < TINY_AREA ) {
@@ -727,8 +728,7 @@ static void FanFaceSurface( mapDrawSurface_t *ds ){
 #define MAX_INDEXES     1024
 
 void StripFaceSurface( mapDrawSurface_t *ds ){
-	int i, r, least, rotate, numIndexes, ni, a, b, c, indexes[ MAX_INDEXES ];
-
+	int numIndexes, indexes[ MAX_INDEXES ];
 
 	/* try to early out  */
 	if ( !ds->numVerts || ( ds->type != ESurfaceType::Face && ds->type != ESurfaceType::Decal ) ) {
@@ -745,9 +745,9 @@ void StripFaceSurface( mapDrawSurface_t *ds ){
 	else
 	{
 		/* ydnar: find smallest coordinate */
-		least = 0;
+		int least = 0;
 		if ( ds->shaderInfo != NULL && !ds->shaderInfo->autosprite ) {
-			for ( i = 0; i < ds->numVerts; i++ )
+			for ( int i = 0; i < ds->numVerts; i++ )
 			{
 				/* get points */
 				const Vector3& v1 = ds->verts[ i ].xyz;
@@ -768,59 +768,55 @@ void StripFaceSurface( mapDrawSurface_t *ds ){
 			Error( "MAX_INDEXES exceeded for surface (%d > %d) (%d verts)", numIndexes, MAX_INDEXES, ds->numVerts );
 		}
 
-		/* try all possible orderings of the points looking for a non-degenerate strip order */
-		ni = 0;
-		for ( r = 0; r < ds->numVerts; r++ )
+		class TriEval
 		{
-			/* set rotation */
-			rotate = ( r + least ) % ds->numVerts;
+			const bspDrawVert_t *m_verts;
+			double m_area = std::numeric_limits<double>::max(); // 2x area
+			double m_angle = std::numeric_limits<double>::max(); // squared sin of the angle
+		public:
+			TriEval( const bspDrawVert_t *verts ) : m_verts( verts ){
+			}
+			void push( int a, int b, int c ){
+				value_minimize( m_angle, triangle_min_angle_squared_sin( m_verts[a].xyz, m_verts[b].xyz, m_verts[c].xyz ) );
+				value_minimize( m_area, triangle_area2x( m_verts[a].xyz, m_verts[b].xyz, m_verts[c].xyz ) );
+			}
+			bool decent() const {
+				return m_angle > 1e-5 && m_area > TINY_AREA;
+			}
+			void reset(){
+				*this = TriEval( m_verts );
+			}
+		} triEval( ds->verts );
 
+		const auto idx = [n = ds->numVerts]( int i ){ return i < 0? i + n : i < n? i : i - n; };
+
+		/* try all possible orderings of the points looking for a non-degenerate strip order */
+		for ( int r = 0; r < ds->numVerts; ++r )
+		{
+			triEval.reset();
 			/* walk the winding in both directions */
-			for ( ni = 0, i = 0; i < ds->numVerts - 2 - i; i++ )
+			for( int i = idx( r + least ), j = idx( i - 1 ), k, swap = 0, out = 0;
+			    ( swap ^= bspDrawVert_is_tjunc( ds->verts[idx( swap? i + 1 : j - 1 )] )
+			           >= bspDrawVert_is_tjunc( ds->verts[idx( swap? j - 1 : i + 1 )] ) )
+			    ? ( k = j, j = idx( --j ) ) : ( k = i, i = idx( ++i ) ), i != j; )
 			{
-				/* make indexes */
-				a = ( ds->numVerts - 1 - i + rotate ) % ds->numVerts;
-				b = ( i + rotate ) % ds->numVerts;
-				c = ( ds->numVerts - 2 - i + rotate ) % ds->numVerts;
-
 				/* test this triangle */
-				if ( ds->numVerts > 4 && IsTriangleDegenerate( ds->verts, a, b, c ) ) {
+				if ( triEval.push( i, j, k ), !triEval.decent() ) {
 					break;
 				}
-				indexes[ ni++ ] = a;
-				indexes[ ni++ ] = b;
-				indexes[ ni++ ] = c;
-
-				/* handle end case */
-				if ( i + 1 != ds->numVerts - 1 - i ) {
-					/* make indexes */
-					a = ( ds->numVerts - 2 - i + rotate ) % ds->numVerts;
-					b = ( i + rotate ) % ds->numVerts;
-					c = ( i + 1 + rotate ) % ds->numVerts;
-
-					/* test triangle */
-					if ( ds->numVerts > 4 && IsTriangleDegenerate( ds->verts, a, b, c ) ) {
-						break;
-					}
-					indexes[ ni++ ] = a;
-					indexes[ ni++ ] = b;
-					indexes[ ni++ ] = c;
-				}
+				indexes[ out++ ] = i;
+				indexes[ out++ ] = j;
+				indexes[ out++ ] = k;
 			}
 
-			/* valid strip? */
-			if ( ni == numIndexes ) {
-				break;
-			}
+			if( triEval.decent() )
+				goto okej;
 		}
 
 		/* if any triangle in the strip is degenerate, render from a centered fan point instead */
-		if ( ni < numIndexes ) {
-			FanFaceSurface( ds );
-			return;
-		}
+		return FanFaceSurface( ds );
 	}
-
+okej:
 	/* copy strip triangle indexes */
 	ds->numIndexes = numIndexes;
 	ds->indexes = safe_malloc( ds->numIndexes * sizeof( int ) );

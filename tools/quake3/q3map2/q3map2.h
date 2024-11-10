@@ -1545,7 +1545,6 @@ void                        ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds
 void                        ClassifyEntitySurfaces( const entity_t& e );
 void                        TidyEntitySurfaces( const entity_t& e );
 mapDrawSurface_t            *CloneSurface( mapDrawSurface_t *src, shaderInfo_t *si );
-bool                        IsTriangleDegenerate( bspDrawVert_t *points, int a, int b, int c );
 void                        ClearSurface( mapDrawSurface_t *ds );
 mapDrawSurface_t            *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const side_t& s, const winding_t& w );
 mapDrawSurface_t            *DrawSurfaceForMesh( const entity_t& e, parseMesh_t *p, mesh_t *mesh );
