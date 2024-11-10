@@ -1756,6 +1756,7 @@ inline int maxSurfaceVerts = 999;                       /* ydnar */
 inline int maxSurfaceIndexes = 6000;                    /* ydnar */
 inline float npDegrees;                                 /* ydnar: nonplanar degrees */
 inline int bevelSnap;                                   /* ydnar: bevel plane snap */
+inline bool g_brushSnap = true;
 inline bool flat;
 inline bool meta;
 inline bool patchMeta;

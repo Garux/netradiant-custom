@@ -112,6 +112,7 @@ static void HelpBsp()
 		{"-mi <N>", "Sets the maximum number of indexes per surface"},
 		{"-mv <N>", "Sets the maximum number of vertices of a lightmapped surface"},
 		{"-ne <F>", "Normal epsilon for plane snapping etc."},
+		{"-nobrushsnap", "Disable brush vertices snapping"},
 		{"-nocurves", "Turn off support for patches"},
 		{"-nodetail", "Leave out detail brushes"},
 		{"-noflares", "Turn off support for flares"},

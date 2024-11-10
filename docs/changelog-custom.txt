@@ -175,6 +175,7 @@ Q3map2:
 		-bsp -meta -mv 999 //get big lmed surfs with max verts count = max trisoup verts (-debugsurfaces to debug)
 		-light -extlmhacksize 1024 -trisoup //gen shaders for external lms and mark as trisoup
 	* generate shaders to force nomipmaps flag on external lightmap images created by lightstyles and external lms hacks
+	* -nobrushsnap: disable brush vertices snapping (of drawsurfs) (experimental, keep eye on meta merge efficiency)
 
 
 
@@ -231,7 +232,7 @@ binds...
 	* shift + m3: set custom transform/pivot origin in pivoted mode
 		switch manipulator mode = disable
 		is snapped to (if SnapToGrid is on):
-			grid 
+			grid
 			selection bbox edges
 			selection bbox origin
 	* F5: run first in the list or recently invoked build option
@@ -714,7 +715,7 @@ misc...
 	* new brush prefab: icosahedron
 	* refactored CSGTool, improved Hollow::diagonal algorithm stability
 	* fix scaling for doom3 brush format
-	* Pointfile function: try to also load .pts leak line file (q1), if .lin isn't found 
+	* Pointfile function: try to also load .pts leak line file (q1), if .lin isn't found
 	* snap transform origin for flip commands
 	* change light intensity save format from %f to %g to prevent .99999 on transforms
 	* support 'stupid quake bug' (invert pitch in angles)(generic and miscmodel ents)(cfg: entities="quake" in .game)
@@ -913,7 +914,7 @@ misc...
 	* up/down floor walker: examine all types of scene nodes (was brushes only)
 				consider only top/down and selected instances (was whole scene)
 				fix jam at close coords
-				also jump to bottommost coord of considered objects				
+				also jump to bottommost coord of considered objects
 	* enable entity->killconnect for game type="q1"
 	* map objects counts statusbar icons
 	* omit textures/ prefix in texture clipboard status
@@ -1042,7 +1043,7 @@ misc...
 	* .ent: "angles" attribute presence enables angles support for EclassModel
 	* entity keys: prefer "angles" over "angle", "modelscale_vec" over "modelscale" if both are set
 	* support entries with .shader extension in shaderlist.txt
-	* Q2::surface inspector::brush face flags: add "Unset flags" button	
+	* Q2::surface inspector::brush face flags: add "Unset flags" button
 	* patch thicken: set default thickness and increment step to current grid size
 	* patch thicken: create new patches in original patch entity
 	* region build: widen temp box to handle small volumes, light entities at the edge and flat primitives

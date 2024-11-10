@@ -761,6 +761,10 @@ int BSPMain( Args& args ){
 				Sys_Printf( "Snapping brush bevel planes to %d units\n", bevelSnap );
 			}
 		}
+		while ( args.takeArg( "-nobrushsnap" ) ) {
+			Sys_Printf( "Brush vertices snapping disabled\n" );
+			g_brushSnap = false;
+		}
 		while ( args.takeArg( "-nohint" ) ) {
 			Sys_Printf( "Hint brushes disabled\n" );
 			noHint = true;
