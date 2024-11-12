@@ -39,7 +39,6 @@ struct edgePoint_t
 {
 	float intercept;
 	Vector3 xyz;
-	struct edgePoint_t  *prev, *next;
 };
 
 struct edgeLine_t
@@ -53,25 +52,21 @@ struct edgeLine_t
 	Vector3 origin;
 	Vector3 dir;
 
-	edgePoint_t *chain;     // unused element of doubly linked list
+	std::list<edgePoint_t> points;
 };
 
 struct originalEdge_t
 {
 	float length;
-	bspDrawVert_t   *dv[2];
+	bspDrawVert_t *dv1;
+	bspDrawVert_t *dv2;
 };
 
 namespace
 {
-originalEdge_t  *originalEdges;
-int numOriginalEdges;
-int allocatedOriginalEdges;
+std::vector<originalEdge_t> originalEdges;
 
-
-edgeLine_t      *edgeLines;
-int numEdgeLines;
-int allocatedEdgeLines;
+std::vector<edgeLine_t> edgeLines;
 
 int c_degenerateEdges;
 int c_addedVerts;
@@ -91,41 +86,23 @@ int c_broken;
    InsertPointOnEdge
    ====================
  */
-static void InsertPointOnEdge( const Vector3 &v, edgeLine_t *e ) {
-	edgePoint_t *p, *scan;
+static void InsertPointOnEdge( const Vector3 &v, edgeLine_t& e ) {
+	const edgePoint_t p = { .intercept = vector3_dot( v - e.origin, e.dir ), .xyz = v };
 
-	p = safe_malloc( sizeof( edgePoint_t ) );
-	p->intercept = vector3_dot( v - e->origin, e->dir );
-	p->xyz = v;
-
-	if ( e->chain->next == e->chain ) {
-		e->chain->next = e->chain->prev = p;
-		p->next = p->prev = e->chain;
-		return;
-	}
-
-	scan = e->chain->next;
-	for ( ; scan != e->chain; scan = scan->next ) {
-		if ( float_equal_epsilon( p->intercept, scan->intercept, LINE_POSITION_EPSILON ) ) {
-			free( p );
+	for ( auto it = e.points.cbegin(); it != e.points.cend(); ++it ) {
+		if ( float_equal_epsilon( p.intercept, it->intercept, LINE_POSITION_EPSILON ) ) {
 			return;     // the point is already set
 		}
 
-		if ( p->intercept < scan->intercept ) {
+		if ( p.intercept < it->intercept ) {
 			// insert here
-			p->prev = scan->prev;
-			p->next = scan;
-			scan->prev->next = p;
-			scan->prev = p;
+			e.points.insert( it, p );
 			return;
 		}
 	}
 
-	// add at the end
-	p->prev = scan->prev;
-	p->next = scan;
-	scan->prev->next = p;
-	scan->prev = p;
+	// add at the end if empty list or greatest new point
+	e.points.push_back( p );
 }
 
 
@@ -135,15 +112,11 @@ static void InsertPointOnEdge( const Vector3 &v, edgeLine_t *e ) {
    ====================
  */
 static int AddEdge( bspDrawVert_t& dv1, bspDrawVert_t& dv2, bool createNonAxial ) {
-	int i;
-	edgeLine_t  *e;
-	float d;
-	Vector3 dir;
 	const Vector3& v1 = dv1.xyz;
 	const Vector3& v2 = dv2.xyz;
 
-	dir = v2 - v1;
-	d = VectorNormalize( dir );
+	Vector3 dir = v2 - v1;
+	const float d = VectorNormalize( dir );
 	if ( d < 0.1 ) {
 		// if we added a 0 length vector, it would make degenerate planes
 		c_degenerateEdges++;
@@ -152,51 +125,39 @@ static int AddEdge( bspDrawVert_t& dv1, bspDrawVert_t& dv2, bool createNonAxial 
 
 	if ( !createNonAxial ) {
 		if ( fabs( dir[0] + dir[1] + dir[2] ) != 1.0 ) {
-			AUTOEXPAND_BY_REALLOC( originalEdges, numOriginalEdges, allocatedOriginalEdges, 1024 );
-			originalEdges[ numOriginalEdges ].dv[0] = &dv1;
-			originalEdges[ numOriginalEdges ].dv[1] = &dv2;
-			originalEdges[ numOriginalEdges ].length = d;
-			numOriginalEdges++;
+			originalEdges.push_back( originalEdge_t{ .length = d, .dv1 = &dv1, .dv2 = &dv2 } );
 			return -1;
 		}
 	}
 
-	for ( i = 0; i < numEdgeLines; ++i ) {
-		e = &edgeLines[i];
-
-		if ( !float_equal_epsilon( vector3_dot( v1, e->normal1 ), e->dist1, POINT_ON_LINE_EPSILON )
-		  || !float_equal_epsilon( vector3_dot( v1, e->normal2 ), e->dist2, POINT_ON_LINE_EPSILON )
-		  || !float_equal_epsilon( vector3_dot( v2, e->normal1 ), e->dist1, POINT_ON_LINE_EPSILON )
-		  || !float_equal_epsilon( vector3_dot( v2, e->normal2 ), e->dist2, POINT_ON_LINE_EPSILON ) ) {
+	for ( edgeLine_t& e : edgeLines ) {
+		if ( !float_equal_epsilon( vector3_dot( v1, e.normal1 ), e.dist1, POINT_ON_LINE_EPSILON )
+		  || !float_equal_epsilon( vector3_dot( v1, e.normal2 ), e.dist2, POINT_ON_LINE_EPSILON )
+		  || !float_equal_epsilon( vector3_dot( v2, e.normal1 ), e.dist1, POINT_ON_LINE_EPSILON )
+		  || !float_equal_epsilon( vector3_dot( v2, e.normal2 ), e.dist2, POINT_ON_LINE_EPSILON ) ) {
 			continue;
 		}
 
 		// this is the edge
 		InsertPointOnEdge( v1, e );
 		InsertPointOnEdge( v2, e );
-		return i;
+		return &e - &edgeLines[0];
 	}
 
 	// create a new edge
-	AUTOEXPAND_BY_REALLOC( edgeLines, numEdgeLines, allocatedEdgeLines, 1024 );
+	edgeLine_t& e = edgeLines.emplace_back();
 
-	e = &edgeLines[ numEdgeLines ];
-	numEdgeLines++;
+	e.origin = v1;
+	e.dir = dir;
 
-	e->chain = safe_malloc( sizeof( edgePoint_t ) );
-	e->chain->next = e->chain->prev = e->chain;
-
-	e->origin = v1;
-	e->dir = dir;
-
-	MakeNormalVectors( e->dir, e->normal1, e->normal2 );
-	e->dist1 = vector3_dot( e->origin, e->normal1 );
-	e->dist2 = vector3_dot( e->origin, e->normal2 );
+	MakeNormalVectors( e.dir, e.normal1, e.normal2 );
+	e.dist1 = vector3_dot( e.origin, e.normal1 );
+	e.dist2 = vector3_dot( e.origin, e.normal2 );
 
 	InsertPointOnEdge( v1, e );
 	InsertPointOnEdge( v2, e );
 
-	return numEdgeLines - 1;
+	return edgeLines.size() - 1;
 }
 
 
@@ -222,25 +183,17 @@ static void AddSurfaceEdges( mapDrawSurface_t& ds ){
  */
 
 static bool ColinearEdge( const Vector3& v1, const Vector3& v2, const Vector3& v3 ){
-	Vector3 midpoint, dir, offset, on;
-	float d;
-
-	midpoint = v2 - v1;
-	dir = v3 - v1;
+	const Vector3 midpoint = v2 - v1;
+	Vector3 dir = v3 - v1;
 	if ( VectorNormalize( dir ) == 0 ) {
 		return false;  // degenerate
 	}
 
-	d = vector3_dot( midpoint, dir );
-	on = dir * d;
-	offset = midpoint - on;
-	d = vector3_length( offset );
+	const float d = vector3_dot( midpoint, dir );
+	const Vector3 on = dir * d;
+	const Vector3 offset = midpoint - on;
 
-	if ( d < 0.1 ) {
-		return true;
-	}
-
-	return false;
+	return vector3_length( offset ) < 0.1;
 }
 
 
@@ -341,53 +294,60 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 
 		const float end = vector3_dot( v2.xyz - e.origin, e.dir );
 
-		for ( edgePoint_t *p = ( start < end )? e.chain->next : e.chain->prev; p != e.chain; p = ( start < end )? p->next : p->prev ) {
-			if ( start < end ) {
-				if ( p->intercept > end - ON_EPSILON ) {
-					break;
-				}
+		const auto insert_this_point = [&]( const edgePoint_t& p ){
+			// insert this point
+			if ( numVerts == MAX_SURFACE_VERTS ) {
+				Error( "MAX_SURFACE_VERTS" );
 			}
-			else {
-				if ( p->intercept < end + ON_EPSILON ) {
-					break;
-				}
-			}
+			bspDrawVert_t& v = verts[ numVerts ];
 
-			if ( ( start < end && p->intercept > start + ON_EPSILON ) ||
-			     ( start > end && p->intercept < start - ON_EPSILON ) ) {
-				// insert this point
-				if ( numVerts == MAX_SURFACE_VERTS ) {
-					Error( "MAX_SURFACE_VERTS" );
-				}
-				bspDrawVert_t& v = verts[ numVerts ];
+			/* take the exact intercept point */
+			v.xyz = p.xyz;
 
-				/* take the exact intercept point */
-				v.xyz = p->xyz;
+			/* interpolate the texture coordinates */
+			const float frac = ( p.intercept - start ) / ( end - start );
+			v.st = v1.st + ( v2.st - v1.st ) * frac;
 
-				/* interpolate the texture coordinates */
-				const float frac = ( p->intercept - start ) / ( end - start );
-				v.st = v1.st + ( v2.st - v1.st ) * frac;
+			/* copy the normal (FIXME: what about nonplanar surfaces? */
+			v.normal = v1.normal;
 
-				/* copy the normal (FIXME: what about nonplanar surfaces? */
-				v.normal = v1.normal;
-
-				/* ydnar: interpolate the color */
-				for ( int k = 0; k < MAX_LIGHTMAPS; ++k )
+			/* ydnar: interpolate the color */
+			for ( int k = 0; k < MAX_LIGHTMAPS; ++k )
+			{
+				for ( int j = 0; j < 4; ++j )
 				{
-					for ( int j = 0; j < 4; ++j )
-					{
-						const float c = v1.color[ k ][ j ] + frac * ( v2.color[ k ][ j ] - v1.color[ k ][ j ] );
-						v.color[ k ][ j ] = color_to_byte( c );
-					}
-					v.lightmap[ k ] = { 0, 0 }; // do zero init
+					const float c = v1.color[ k ][ j ] + frac * ( v2.color[ k ][ j ] - v1.color[ k ][ j ] );
+					v.color[ k ][ j ] = color_to_byte( c );
 				}
-				v.lightmap[ 0 ] = vector2_mid( v1.lightmap[ 0 ], v2.lightmap[ 0 ] );
-				bspDrawVert_mark_tjunc( v );
+				v.lightmap[ k ] = { 0, 0 }; // do zero init
+			}
+			v.lightmap[ 0 ] = vector2_mid( v1.lightmap[ 0 ], v2.lightmap[ 0 ] );
+			bspDrawVert_mark_tjunc( v );
 
-				/* next... */
-				originals[ numVerts ] = i;
-				numVerts++;
-				counts[ i ]++;
+			/* next... */
+			originals[ numVerts ] = i;
+			numVerts++;
+			counts[ i ]++;
+		};
+
+		if( start < end ){
+			for( auto p = e.points.cbegin(); p != e.points.cend(); ++p ){
+				if( p->intercept > start + ON_EPSILON ){
+					if ( p->intercept > end - ON_EPSILON )
+						break;
+					else
+						insert_this_point( *p );
+				}
+			}
+		}
+		else{
+			for( auto p = e.points.crbegin(); p != e.points.crend(); ++p ){
+				if( p->intercept < start - ON_EPSILON ){
+					if( p->intercept < end + ON_EPSILON )
+						break;
+					else
+						insert_this_point( *p );
+				}
 			}
 		}
 	}
@@ -540,16 +500,12 @@ static bool FixBrokenSurface( mapDrawSurface_t& ds ){
  */
 
 void FixTJunctions( const entity_t& ent ){
-	int axialEdgeLines;
-
 	/* meta mode has its own t-junction code (currently not as good as this code) */
 	//%	if( meta )
 	//%		return;
 
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- FixTJunctions ---\n" );
-	numEdgeLines = 0;
-	numOriginalEdges = 0;
 
 	// add all the edges
 	// this actually creates axial edges, but it
@@ -583,21 +539,22 @@ void FixTJunctions( const entity_t& ent ){
 		}
 	}
 
-	axialEdgeLines = numEdgeLines;
+	const size_t axialEdgeLines = edgeLines.size();
 
 	// sort the non-axial edges by length
-	std::sort( originalEdges, originalEdges + numOriginalEdges, []( const originalEdge_t& a, const originalEdge_t& b ){
+	std::sort( originalEdges.begin(), originalEdges.end(), []( const originalEdge_t& a, const originalEdge_t& b ){
 		return a.length < b.length;
 	} );
 
 	// add the non-axial edges, longest first
 	// this gives the most accurate edge description
-	for ( originalEdge_t& e : Span( originalEdges, numOriginalEdges ) ) { // originalEdges might not change during AddEdge( true )
-		bspDrawVert_edge_index_write( *e.dv[ 0 ], AddEdge( *e.dv[ 0 ], *e.dv[ 1 ], true ) );
+	for ( originalEdge_t& e : originalEdges ) { // originalEdges might not change during AddEdge( true )
+		bspDrawVert_edge_index_write( *e.dv1, AddEdge( *e.dv1, *e.dv2, true ) );
 	}
+	originalEdges.clear();
 
-	Sys_FPrintf( SYS_VRB, "%9d axial edge lines\n", axialEdgeLines );
-	Sys_FPrintf( SYS_VRB, "%9d non-axial edge lines\n", numEdgeLines - axialEdgeLines );
+	Sys_FPrintf( SYS_VRB, "%9zu axial edge lines\n", axialEdgeLines );
+	Sys_FPrintf( SYS_VRB, "%9zu non-axial edge lines\n", edgeLines.size() - axialEdgeLines );
 	Sys_FPrintf( SYS_VRB, "%9d degenerate edges\n", c_degenerateEdges );
 
 	// insert any needed vertexes
@@ -627,6 +584,8 @@ void FixTJunctions( const entity_t& ent ){
 			break;
 		}
 	}
+
+	edgeLines.clear();
 
 	/* emit some statistics */
 	Sys_FPrintf( SYS_VRB, "%9d verts added for T-junctions\n", c_addedVerts );
