@@ -39,8 +39,8 @@ public:
 		// triggered on enter & focus out; need to track editing state, as nonedited triggers this too
 		QObject::connect( this, &QLineEdit::editingFinished, [this](){
 			if( m_editing ){
-				m_apply();
 				m_editing = false;
+				m_apply();
 			}
 			clearFocus();
 		} );
@@ -80,6 +80,7 @@ public:
 	void setCallbacks( const Callback& apply, const Callback& cancel ){
 		m_apply = apply;
 		m_cancel = cancel;
+		QObject::connect( lineEdit(), &QLineEdit::textEdited, [this](){ m_editing = true; } );
 		// triggered on enter & focus out; need to track editing state, as nonedited triggers this too
 		QObject::connect( this, &QAbstractSpinBox::editingFinished, [this](){
 			if( m_editing ){
@@ -87,9 +88,6 @@ public:
 				m_apply();
 			}
 			clearFocus();
-		} );
-		QObject::connect( lineEdit(), &QLineEdit::textEdited, [this](){
-			m_editing = true;
 		} );
 	}
 	bool event( QEvent *event ) override {
