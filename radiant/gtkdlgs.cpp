@@ -695,7 +695,8 @@ R"(
 		depthFunc equal
 	}
 	{
-		map %s
+		// same texture once more
+		map textures/
 		blendFunc GL_DST_COLOR GL_ZERO
 		rgbGen identity
 		depthFunc equal
@@ -730,6 +731,17 @@ R"(
 		blendFunc GL_DST_COLOR GL_ZERO
 		rgbGen identity
 	}
+}
+)"
+	},
+	{
+		"remap",
+R"(
+	// compile time parameter
+	surfaceparm slick
+	qer_editorimage textures/
+	// remap back to original shader
+	q3map_remapShader textures/
 }
 )"
 	},
