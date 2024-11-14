@@ -1768,6 +1768,7 @@ inline float clipDepthGlobal = 2.0f;
 inline int metaAdequateScore = -1;
 inline int metaGoodScore = -1;
 inline bool g_noob;
+inline int g_globalSurfaceFlags;
 inline String64 globalCelShader;
 inline bool keepLights;
 inline bool keepModels;

@@ -867,6 +867,10 @@ int BSPMain( Args& args ){
 			Sys_Printf( "No oBs!\n" );
 			g_noob = true;
 		}
+		while ( args.takeArg( "-globalflag" ) ) {
+			ApplySurfaceParm( args.takeNext(), nullptr, &g_globalSurfaceFlags, nullptr );
+			Sys_Printf( "g_globalSurfaceFlags: 0x%.8X\n", g_globalSurfaceFlags );
+		}
 		while ( args.takeArg( "-autocaulk" ) ) {
 			Sys_Printf( "\trunning in autocaulk mode\n" );
 			g_autocaulk = true;

@@ -101,6 +101,7 @@ static void HelpBsp()
 		{"-flares", "Turn on support for flares"},
 		{"-flat", "Enable flat shading (good for combining with -celshader)"},
 		{"-fulldetail", "Treat detail brushes as structural ones"},
+		{"-globalflag <surfaceparm>", "Add surface flag to every bsp shader. Reusable, e.g. -globalflag slick -globalflag nodamage."},
 		{"-keeplights", "Keep light entities in the BSP file after compile"},
 		{"-keepmodels", "Keep misc_model entities in the BSP file after compile"},
 		{"-leaktest", "Abort if a leak was found"},

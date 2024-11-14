@@ -177,6 +177,7 @@ Q3map2:
 	* generate shaders to force nomipmaps flag on external lightmap images created by lightstyles and external lms hacks
 	* -nobrushsnap: disable brush vertices snapping (of drawsurfs) (experimental, keep eye on meta merge efficiency)
 	* improved brush faces triangulation wrt degenerate triangles production (non -maxarea algorithm)
+	* -globalflag <surfaceparm>: add surface flag to every bsp shader. Reusable, e.g. -globalflag slick -globalflag nodamage.
 
 
 

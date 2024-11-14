@@ -646,6 +646,7 @@ static void FinishShader( shaderInfo_t *si ){
 	if( g_noob && !( si->compileFlags & C_OB ) ){
 		ApplySurfaceParm( "noob", nullptr, &si->surfaceFlags, nullptr );
 	}
+	si->surfaceFlags |= g_globalSurfaceFlags;
 
 	/* set to finished */
 	si->finished = true;
