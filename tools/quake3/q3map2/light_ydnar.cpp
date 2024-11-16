@@ -3061,13 +3061,13 @@ void IlluminateVertexes( int num ){
 			{
 				/* clear vertex luxel */
 				radVertLuxel.set( -1.0f );
-
+				/* setup trace */
+				trace.normal = verts[ i ].normal;
 				/* try at initial origin */
 				trace.cluster = ClusterForPointExtFilter( verts[ i ].xyz, VERTEX_EPSILON, info->numSurfaceClusters, &surfaceClusters[ info->firstSurfaceCluster ] );
 				if ( trace.cluster >= 0 ) {
 					/* setup trace */
 					trace.origin = verts[ i ].xyz;
-					trace.normal = verts[ i ].normal;
 
 					/* r7 dirt */
 					if ( dirty && !bouncing ) {

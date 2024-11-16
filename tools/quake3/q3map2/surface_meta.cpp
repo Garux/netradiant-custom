@@ -1444,7 +1444,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, const metaTriangle_t&
 		newTexMinMax.extend( Vector3( tri.m_vertices[ 0 ]->st ) );
 		newTexMinMax.extend( Vector3( tri.m_vertices[ 1 ]->st ) );
 		newTexMinMax.extend( Vector3( tri.m_vertices[ 2 ]->st ) );
-		if( texMinMax.surrounds( newTexMinMax ) ){
+		if( numVerts_original == 0 || texMinMax.surrounds( newTexMinMax ) ){
 			score += 4 * ST_SCORE;
 		}
 		else{
