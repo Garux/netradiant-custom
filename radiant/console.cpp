@@ -37,6 +37,10 @@
 #include <QPlainTextEdit>
 #include <QContextMenuEvent>
 
+#ifndef WIN32
+#include <unistd.h> // write()
+#endif
+
 // handle to the console log file
 namespace
 {
