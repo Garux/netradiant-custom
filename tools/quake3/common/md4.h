@@ -27,5 +27,5 @@
 
 #pragma once
 
-unsigned Com_BlockChecksum( void *buffer, int length );
-void Com_BlockFullChecksum( void *buffer, int len, unsigned char *outbuf );
+unsigned Com_BlockChecksum( const void *buffer, int length );
+void Com_BlockFullChecksum( const void *buffer, int len, unsigned char *outbuf );

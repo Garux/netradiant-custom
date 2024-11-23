@@ -29,18 +29,17 @@
 
 #include <cstring>     /* XoXus: needed for memset call */
 #include <cstdint>
+#include <array>
 
-struct mdfour {
-	std::uint32_t A, B, C, D;
-	std::uint32_t totalN;
+struct md4 {
+	std::uint32_t A = 0x67452301, B = 0xefcdab89, C = 0x98badcfe, D = 0x10325476;
+	std::uint32_t totalN = 0;
 };
 
 /* NOTE: This code makes no attempt to be fast!
 
    It assumes that a int is at least 32 bits long
  */
-
-static struct mdfour *m;
 
 #define F( X,Y,Z ) ( ( (X)&( Y ) ) | ( ( ~( X ) ) & ( Z ) ) )
 #define G( X,Y,Z ) ( ( (X)&( Y ) ) | ( (X)&( Z ) ) | ( (Y)&( Z ) ) )
@@ -52,17 +51,8 @@ static struct mdfour *m;
 #define ROUND3( a,b,c,d,k,s ) a = lshift( a + H( b,c,d ) + X[k] + 0x6ED9EBA1,s )
 
 /* this applies md4 to 64 byte chunks */
-inline void mdfour64( std::uint32_t *M ){
-	int j;
-	std::uint32_t AA, BB, CC, DD;
-	std::uint32_t X[16];
-	std::uint32_t A,B,C,D;
-
-	for ( j = 0; j < 16; j++ )
-		X[j] = M[j];
-
-	A = m->A; B = m->B; C = m->C; D = m->D;
-	AA = A; BB = B; CC = C; DD = D;
+inline void mdfour64( md4& m, const std::array<std::uint32_t, 16> X ){
+	std::uint32_t A = m.A, B = m.B, C = m.C, D = m.D;
 
 	ROUND1( A,B,C,D,  0,  3 );  ROUND1( D,A,B,C,  1,  7 );
 	ROUND1( C,D,A,B,  2, 11 );  ROUND1( B,C,D,A,  3, 19 );
@@ -91,18 +81,15 @@ inline void mdfour64( std::uint32_t *M ){
 	ROUND3( A,B,C,D,  3,  3 );  ROUND3( D,A,B,C, 11,  9 );
 	ROUND3( C,D,A,B,  7, 11 );  ROUND3( B,C,D,A, 15, 15 );
 
-	A += AA; B += BB; C += CC; D += DD;
-
-	for ( j = 0; j < 16; j++ )
-		X[j] = 0;
-
-	m->A = A; m->B = B; m->C = C; m->D = D;
+	m.A += A; m.B += B; m.C += C; m.D += D;
 }
 
-inline void copy64( std::uint32_t *M, unsigned char *in ){
+inline std::array<std::uint32_t, 16> copy64( const unsigned char *in ){
+	std::array<std::uint32_t, 16> M;
 	for ( int i = 0; i < 16; ++i )
 		M[i] = ( in[i * 4 + 3] << 24 ) | ( in[i * 4 + 2] << 16 ) |
-		       ( in[i * 4 + 1] << 8 ) | ( in[i * 4 + 0] << 0 );
+		       ( in[i * 4 + 1] << 8  ) | ( in[i * 4 + 0] << 0  );
+	return M;
 }
 
 inline void copy4( unsigned char *out, std::uint32_t x ){
@@ -112,23 +99,13 @@ inline void copy4( unsigned char *out, std::uint32_t x ){
 	out[3] = ( x >> 24 ) & 0xFF;
 }
 
-inline void mdfour_begin( struct mdfour *md ){
-	md->A = 0x67452301;
-	md->B = 0xefcdab89;
-	md->C = 0x98badcfe;
-	md->D = 0x10325476;
-	md->totalN = 0;
-}
 
-
-inline void mdfour_tail( unsigned char *in, int n ){
+inline void mdfour_tail( md4& m, const unsigned char *in, int n ){
 	unsigned char buf[128] = {0};
-	std::uint32_t M[16];
-	std::uint32_t b;
 
-	m->totalN += n;
+	m.totalN += n;
 
-	b = m->totalN * 8;
+	const std::uint32_t b = m.totalN * 8;
 
 	if ( n ) {
 		memcpy( buf, in, n );
@@ -137,55 +114,44 @@ inline void mdfour_tail( unsigned char *in, int n ){
 
 	if ( n <= 55 ) {
 		copy4( buf + 56, b );
-		copy64( M, buf );
-		mdfour64( M );
+		mdfour64( m, copy64( buf ) );
 	}
 	else {
 		copy4( buf + 120, b );
-		copy64( M, buf );
-		mdfour64( M );
-		copy64( M, buf + 64 );
-		mdfour64( M );
+		mdfour64( m, copy64( buf ) );
+		mdfour64( m, copy64( buf + 64 ) );
 	}
 }
 
-inline void mdfour_update( struct mdfour *md, unsigned char *in, int n ){
-	std::uint32_t M[16];
-
+inline void mdfour_update( md4& m, const unsigned char *in, int n ){
 // start of edit by Forest 'LordHavoc' Hale
 // commented out to prevent crashing when length is 0
 //	if (n == 0) mdfour_tail(in, n);
 // end of edit by Forest 'LordHavoc' Hale
 
-	m = md;
-
 	while ( n >= 64 ) {
-		copy64( M, in );
-		mdfour64( M );
+		mdfour64( m, copy64( in ) );
 		in += 64;
 		n -= 64;
-		m->totalN += 64;
+		m.totalN += 64;
 	}
 
-	mdfour_tail( in, n );
+	mdfour_tail( m, in, n );
 }
 
 
-inline void mdfour_result( struct mdfour *md, unsigned char *out ){
-	m = md;
-
-	copy4( out, m->A );
-	copy4( out + 4, m->B );
-	copy4( out + 8, m->C );
-	copy4( out + 12, m->D );
+inline void mdfour_result( const md4& m, unsigned char *out ){
+	copy4( out + 0,  m.A );
+	copy4( out + 4,  m.B );
+	copy4( out + 8,  m.C );
+	copy4( out + 12, m.D );
 }
 
 
-inline void mdfour( unsigned char *out, unsigned char *in, int n ){
-	struct mdfour md;
-	mdfour_begin( &md );
-	mdfour_update( &md, in, n );
-	mdfour_result( &md, out );
+inline void mdfour( unsigned char *out, const unsigned char *in, int n ){
+	md4 m;
+	mdfour_update( m, in, n );
+	mdfour_result( m, out );
 }
 
 ///////////////////////////////////////////////////////////////
@@ -196,17 +162,17 @@ inline void mdfour( unsigned char *out, unsigned char *in, int n ){
 //	Author: Jeff Teunissen	<d2deek@pmail.net>
 //	Date: 01 Jan 2000
 
-unsigned Com_BlockChecksum( void *buffer, int length ){
+unsigned Com_BlockChecksum( const void *buffer, int length ){
 	int digest[4];
 	unsigned val;
 
-	mdfour( (unsigned char *) digest, (unsigned char *) buffer, length );
+	mdfour( (unsigned char *) digest, (const unsigned char *) buffer, length );
 
 	val = digest[0] ^ digest[1] ^ digest[2] ^ digest[3];
 
 	return val;
 }
 
-void Com_BlockFullChecksum( void *buffer, int len, unsigned char *outbuf ){
-	mdfour( outbuf, (unsigned char *) buffer, len );
+void Com_BlockFullChecksum( const void *buffer, int len, unsigned char *outbuf ){
+	mdfour( outbuf, (const unsigned char *) buffer, len );
 }
