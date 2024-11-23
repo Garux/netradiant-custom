@@ -25,15 +25,18 @@
 
 #include <list>
 
-class EntityFilterWrapper : public Filter
+class EntityFilterWrapper final : public Filter
 {
 	bool m_active;
 	bool m_invert;
 	EntityFilter& m_filter;
 public:
-	EntityFilterWrapper( EntityFilter& filter, bool invert ) : m_invert( invert ), m_filter( filter ){
+	EntityFilterWrapper( EntityFilter& filter, bool invert ) :
+		m_active( false ), // suppress uninitialized warning
+		m_invert( invert ),
+		m_filter( filter ){
 	}
-	void setActive( bool active ){
+	void setActive( bool active ) override {
 		m_active = active;
 	}
 	bool active(){

@@ -34,15 +34,15 @@ public:
 		: m_selected( false )
 	{}
 
-	void setSelected( bool select = true ){
+	void setSelected( bool select = true ) override {
 		m_selected = select;
 	}
-	bool isSelected() const {
+	bool isSelected() const override {
 		return m_selected;
 	}
 };
 
-class ObservedSelectable : public Selectable
+class ObservedSelectable final : public Selectable
 {
 	SelectionChangeCallback m_onchanged;
 	bool m_selected;
@@ -60,14 +60,14 @@ public:
 		setSelected( false );
 	}
 
-	void setSelected( bool select ){
+	void setSelected( bool select ) override {
 		if ( select ^ m_selected ) {
 			m_selected = select;
 
 			m_onchanged( *this );
 		}
 	}
-	bool isSelected() const {
+	bool isSelected() const override {
 		return m_selected;
 	}
 };

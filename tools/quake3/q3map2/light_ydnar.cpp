@@ -3901,7 +3901,7 @@ static void FloodLightRawLightmapPass( rawLightmap_t *lm, Vector3& lmFloodLightR
 	// int sx, sy;
 	// float samples, average, *floodlight2;
 
-	memset( &trace,0,sizeof( trace_t ) );
+	memset( &trace, 0, sizeof( trace_t ) );
 
 	/* setup trace */
 	trace.testOcclusion = true;

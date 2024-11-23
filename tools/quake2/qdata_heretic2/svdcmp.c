@@ -42,7 +42,7 @@ void ntrerror( char *s ){
 double *allocVect( int sz ){
 	double *ret;
 
-	ret = calloc( sizeof( double ), (size_t)sz );
+	ret = calloc( (size_t)sz, sizeof( double ) );
 	return ret;
 }
 
@@ -53,7 +53,7 @@ void freeVect( double *ret ){
 double **allocMatrix( int r,int c ){
 	double **ret;
 
-	ret = calloc( sizeof( double ), (size_t)( r * c ) );
+	ret = calloc( (size_t)( r * c ), sizeof( double ) );
 	return ret;
 }
 
@@ -323,7 +323,7 @@ void DOsvd( float *a,float *res,float *comp,float *values,int nframes,int frames
 
 	svdcmp( da,usedfs,nframes,w,v );
 
-	remap = calloc( sizeof( int ), (size_t)nframes );
+	remap = calloc( (size_t)nframes, sizeof( int ) );
 
 
 	for ( i = 0; i < nframes; i++ )

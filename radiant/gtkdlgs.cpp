@@ -1583,7 +1583,7 @@ class QLineEdit_search : public QLineEdit
 	QPlainTextEdit& m_textEdit;
 public:
 	QLineEdit_search( QPlainTextEdit& textEdit ) : m_textEdit( textEdit ){
-		setPlaceholderText( QString::fromUtf8( u8"🔍" ) );
+		setPlaceholderText( QString::fromUtf8( "🔍" ) );
 		QObject::connect( this, &QLineEdit::textEdited, [this]( const QString &text ){
 			// when typing, we do not want jumping to next occurence on each letter input, set cursor to selection start
 			if( auto cursor = m_textEdit.textCursor(); cursor.hasSelection() ){

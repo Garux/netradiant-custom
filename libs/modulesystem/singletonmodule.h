@@ -65,7 +65,7 @@ class NullDependencies
 
 
 template<typename API, typename Dependencies = NullDependencies, typename APIConstructor = DefaultAPIConstructor<API, Dependencies> >
-class SingletonModule : public APIConstructor, public Module, public ModuleRegisterable
+class SingletonModule final : public APIConstructor, public Module, public ModuleRegisterable
 {
 	Dependencies* m_dependencies;
 	API* m_api;
@@ -85,20 +85,20 @@ public:
 		ASSERT_MESSAGE( m_refcount == 0, "module still referenced at shutdown" );
 	}
 
-	void selfRegister(){
+	void selfRegister() override {
 		globalModuleServer().registerModule( Type::Name, Type::Version, APIConstructor::getName(), *this );
 	}
 
 	Dependencies& getDependencies(){
 		return *m_dependencies;
 	}
-	void* getTable(){
+	void* getTable() override {
 		if ( m_api != 0 ) {
 			return m_api->getTable();
 		}
 		return 0;
 	}
-	void capture(){
+	void capture() override {
 		if ( ++m_refcount == 1 ) {
 			globalOutputStream() << "Module Initialising: '" << Type::Name << "' '" << APIConstructor::getName() << "'\n";
 			m_dependencies = new Dependencies();
@@ -116,7 +116,7 @@ public:
 
 		ASSERT_MESSAGE( m_cycleCheck, "cyclic dependency detected" );
 	}
-	void release(){
+	void release() override {
 		if ( --m_refcount == 0 ) {
 			if ( m_dependencyCheck ) {
 				APIConstructor::destroyAPI( m_api );

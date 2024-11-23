@@ -116,7 +116,7 @@ ifeq ($(OS),Windows_NT)
 	OS = Win32
 endif
 
-CFLAGS_COMMON = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -fno-strict-aliasing
+CFLAGS_COMMON = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -Wno-unused-function -fno-strict-aliasing
 CPPFLAGS_COMMON =
 LDFLAGS_COMMON =
 LIBS_COMMON =
@@ -630,7 +630,13 @@ libpicomodel.$(A): \
 	libs/picomodel/pm_terrain.o \
 
 $(INSTALLDIR)/libassimp_.$(DLL): LIBS_EXTRA := $(LIBS_ZLIB)
-$(INSTALLDIR)/libassimp_.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_ZLIB) -Ilibs/assimp/include -Ilibs/assimp/code -Ilibs/assimp/contrib/pugixml/src -Ilibs/assimp/contrib/unzip -Ilibs/assimp -Ilibs/assimp/contrib/openddlparser/include -Ilibs/assimp/contrib/rapidjson/include -Ilibs/assimp/contrib -DASSIMP_BUILD_DLL_EXPORT -DASSIMP_BUILD_NO_C4D_IMPORTER -DASSIMP_BUILD_NO_EXPORT -DASSIMP_BUILD_NO_IFC_IMPORTER -DASSIMP_BUILD_NO_OWN_ZLIB -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 -DMINIZ_USE_UNALIGNED_LOADS_AND_STORES=0 -DOPENDDLPARSER_BUILD -DRAPIDJSON_HAS_STDSTRING=1 -DRAPIDJSON_NOMEMBERITERATORCLASS -DWIN32_LEAN_AND_MEAN -Dassimp_EXPORTS -fvisibility=hidden -Wno-long-long -fexceptions -frtti
+$(INSTALLDIR)/libassimp_.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_ZLIB) \
+	-Ilibs/assimp/include -Ilibs/assimp/code -Ilibs/assimp/contrib/pugixml/src -Ilibs/assimp/contrib/unzip \
+	-Ilibs/assimp -Ilibs/assimp/contrib/openddlparser/include -Ilibs/assimp/contrib/rapidjson/include -Ilibs/assimp/contrib \
+	-DASSIMP_BUILD_DLL_EXPORT -DASSIMP_BUILD_NO_C4D_IMPORTER -DASSIMP_BUILD_NO_EXPORT -DASSIMP_BUILD_NO_IFC_IMPORTER \
+	-DASSIMP_BUILD_NO_OWN_ZLIB -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 -DMINIZ_USE_UNALIGNED_LOADS_AND_STORES=0 -DOPENDDLPARSER_BUILD \
+	-DRAPIDJSON_HAS_STDSTRING=1 -DRAPIDJSON_NOMEMBERITERATORCLASS -DWIN32_LEAN_AND_MEAN -Dassimp_EXPORTS \
+	-fvisibility=hidden -Wno-long-long -fexceptions -frtti -Wno-cast-qual
 $(INSTALLDIR)/libassimp_.$(DLL): \
 	libs/assimp/code/Common/Assimp.o \
 	libs/assimp/code/CApi/CInterfaceIOWrapper.o \
@@ -1146,7 +1152,7 @@ $(INSTALLDIR)/plugins/sunplug.$(DLL): \
 	contrib/sunplug/sunplug.o \
 
 $(INSTALLDIR)/qdata3.$(EXE): LIBS_EXTRA := $(LIBS_XML)
-$(INSTALLDIR)/qdata3.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
+$(INSTALLDIR)/qdata3.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude -Wno-format-overflow
 $(INSTALLDIR)/qdata3.$(EXE): \
 	tools/quake2/common/bspfile.o \
 	tools/quake2/common/cmdlib.o \
@@ -1170,7 +1176,7 @@ $(INSTALLDIR)/qdata3.$(EXE): \
 	$(if $(findstring Win32,$(OS)),icons/qdata3.o,) \
 
 $(INSTALLDIR)/q2map.$(EXE): LIBS_EXTRA := $(LIBS_XML)
-$(INSTALLDIR)/q2map.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
+$(INSTALLDIR)/q2map.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude -Wno-format-overflow
 $(INSTALLDIR)/q2map.$(EXE): \
 	tools/quake2/common/bspfile.o \
 	tools/quake2/common/cmdlib.o \
@@ -1240,7 +1246,8 @@ $(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): \
 	contrib/bkgrnd2d/plugin.o \
 
 $(INSTALLDIR)/h2data.$(EXE): LIBS_EXTRA := $(LIBS_XML)
-$(INSTALLDIR)/h2data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/qdata_heretic2/common -Itools/quake2/qdata_heretic2/qcommon -Itools/quake2/qdata_heretic2 -Itools/quake2/common -Ilibs -Iinclude
+$(INSTALLDIR)/h2data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Wno-format-overflow \
+	-Itools/quake2/qdata_heretic2/common -Itools/quake2/qdata_heretic2/qcommon -Itools/quake2/qdata_heretic2 -Itools/quake2/common -Ilibs -Iinclude
 $(INSTALLDIR)/h2data.$(EXE): \
 	tools/quake2/qdata_heretic2/common/bspfile.o \
 	tools/quake2/qdata_heretic2/common/cmdlib.o \
@@ -1275,7 +1282,7 @@ $(INSTALLDIR)/h2data.$(EXE): \
 	libl_net.$(A) \
 	$(if $(findstring Win32,$(OS)),icons/h2data.o,) \
 
-$(INSTALLDIR)/mbspc.$(EXE): CPPFLAGS_EXTRA := -Wstrict-prototypes -DNDEBUG -DBSPC -DBSPCINCLUDE -Ilibs
+$(INSTALLDIR)/mbspc.$(EXE): CPPFLAGS_EXTRA := -Wstrict-prototypes -Wno-format-overflow -DNDEBUG -DBSPC -DBSPCINCLUDE -Ilibs
 $(INSTALLDIR)/mbspc.$(EXE): \
 	tools/mbspc/botlib/be_aas_bspq3.o \
 	tools/mbspc/botlib/be_aas_cluster.o \

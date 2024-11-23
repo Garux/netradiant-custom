@@ -378,12 +378,12 @@ void DoCommandListDlg(){
 		auto commandLine = new QLineEdit;
 		grid->addWidget( commandLine, 0, 0 );
 		commandLine->setClearButtonEnabled( true );
-		commandLine->setPlaceholderText( QString::fromUtf8( u8"🔍 by command name" ) );
+		commandLine->setPlaceholderText( QString::fromUtf8( "🔍 by command name" ) );
 
 		auto keyLine = new QLineEdit;
 		grid->addWidget( keyLine, 0, 1 );
 		keyLine->setClearButtonEnabled( true );
-		keyLine->setPlaceholderText( QString::fromUtf8( u8"🔍 by keys" ) );
+		keyLine->setPlaceholderText( QString::fromUtf8( "🔍 by keys" ) );
 
 		const auto filter = [tree]( const int column, const QString& text ){
 			for( QTreeWidgetItemIterator it( tree ); *it; ++it )

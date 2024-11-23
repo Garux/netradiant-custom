@@ -285,15 +285,15 @@ const image_t *ImageLoad( const char *name ){
 	bool alphaHack = false;
 
 	/* attempt to load various formats */
-	if ( sprintf( filename, "%s.tga", name ); buffer = vfsLoadFile( filename ) ) // StripExtension( name ); already
+	if ( sprintf( filename, "%s.tga", name ); ( buffer = vfsLoadFile( filename ) ) ) // StripExtension( name ); already
 	{
 		LoadTGABuffer( buffer.data(), buffer.size(), &pixels, &width, &height );
 	}
-	else if( path_set_extension( filename, ".png" ); buffer = vfsLoadFile( filename ) )
+	else if( path_set_extension( filename, ".png" ); ( buffer = vfsLoadFile( filename ) ) )
 	{
 		LoadPNGBuffer( buffer.data(), buffer.size(), &pixels, &width, &height );
 	}
-	else if( path_set_extension( filename, ".jpg" ); buffer = vfsLoadFile( filename ) )
+	else if( path_set_extension( filename, ".jpg" ); ( buffer = vfsLoadFile( filename ) ) )
 	{
 		if ( LoadJPGBuff( buffer.data(), buffer.size(), &pixels, &width, &height ) == -1 && pixels != nullptr ) {
 			// On error, LoadJPGBuff might store a pointer to the error message in pixels
@@ -302,7 +302,7 @@ const image_t *ImageLoad( const char *name ){
 		}
 		alphaHack = true;
 	}
-	else if( path_set_extension( filename, ".dds" ); buffer = vfsLoadFile( filename ) )
+	else if( path_set_extension( filename, ".dds" ); ( buffer = vfsLoadFile( filename ) ) )
 	{
 		LoadDDSBuffer( buffer.data(), buffer.size(), &pixels, &width, &height );
 		/* debug code */
@@ -318,7 +318,7 @@ const image_t *ImageLoad( const char *name ){
 		}
 		#endif
 	}
-	else if( path_set_extension( filename, ".ktx" ); buffer = vfsLoadFile( filename ) )
+	else if( path_set_extension( filename, ".ktx" ); ( buffer = vfsLoadFile( filename ) ) )
 	{
 		LoadKTXBufferFirstImage( buffer.data(), buffer.size(), &pixels, &width, &height );
 	}
@@ -334,7 +334,7 @@ const image_t *ImageLoad( const char *name ){
 	image_t& image = *images.emplace_after( images.cbegin(), name, filename, width, height, pixels );
 
 	if ( alphaHack ) {
-		if ( path_set_extension( filename, "_alpha.jpg" ); buffer = vfsLoadFile( filename ) ) {
+		if ( path_set_extension( filename, "_alpha.jpg" ); ( buffer = vfsLoadFile( filename ) ) ) {
 			if ( LoadJPGBuff( buffer.data(), buffer.size(), &pixels, &width, &height ) == -1 ) {
 				if ( pixels ) {
 					// On error, LoadJPGBuff might store a pointer to the error message in pixels

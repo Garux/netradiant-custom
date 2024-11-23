@@ -1046,7 +1046,7 @@ public:
 		m_Name = name;
 	}
 
-	class MapLayer : public ShaderLayer
+	class MapLayer final : public ShaderLayer
 	{
 		qtexture_t* m_texture;
 		BlendFunc m_blendFunc;
@@ -1059,16 +1059,16 @@ public:
 			m_clampToBorder( false ),
 			m_alphaTest( alphaTest ){
 		}
-		qtexture_t* texture() const {
+		qtexture_t* texture() const override {
 			return m_texture;
 		}
-		BlendFunc blendFunc() const {
+		BlendFunc blendFunc() const override {
 			return m_blendFunc;
 		}
-		bool clampToBorder() const {
+		bool clampToBorder() const override {
 			return m_clampToBorder;
 		}
-		float alphaTest() const {
+		float alphaTest() const override {
 			return m_alphaTest;
 		}
 	};

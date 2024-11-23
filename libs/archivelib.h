@@ -93,7 +93,7 @@ public:
 };
 
 /// \brief An ArchiveFile which is stored uncompressed as part of a larger archive file.
-class StoredArchiveFile : public ArchiveFile
+class StoredArchiveFile final : public ArchiveFile
 {
 	CopiedString m_name;
 	FileInputStream m_filestream;
@@ -111,22 +111,22 @@ public:
 		return New<StoredArchiveFile>().scalar( name, archiveName, position, stream_size, file_size );
 	}
 
-	void release(){
+	void release() override {
 		Delete<StoredArchiveFile>().scalar( this );
 	}
-	size_type size() const {
+	size_type size() const override {
 		return m_size;
 	}
-	const char* getName() const {
+	const char* getName() const override {
 		return m_name.c_str();
 	}
-	InputStream& getInputStream(){
+	InputStream& getInputStream() override {
 		return m_substream;
 	}
 };
 
 /// \brief An ArchiveTextFile which is stored uncompressed as part of a larger archive file.
-class StoredArchiveTextFile : public ArchiveTextFile
+class StoredArchiveTextFile final : public ArchiveTextFile
 {
 	CopiedString m_name;
 	FileInputStream m_filestream;
@@ -144,13 +144,13 @@ public:
 		return New<StoredArchiveTextFile>().scalar( name, archiveName, position, stream_size );
 	}
 
-	void release(){
+	void release() override {
 		Delete<StoredArchiveTextFile>().scalar( this );
 	}
 	const char* getName() const {
 		return m_name.c_str();
 	}
-	TextInputStream& getInputStream(){
+	TextInputStream& getInputStream() override {
 		return m_textStream;
 	}
 };

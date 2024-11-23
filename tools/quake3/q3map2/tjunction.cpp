@@ -87,7 +87,7 @@ int c_broken;
    ====================
  */
 static void InsertPointOnEdge( const Vector3 &v, edgeLine_t& e ) {
-	const edgePoint_t p = { .intercept = vector3_dot( v - e.origin, e.dir ), .xyz = v };
+	const edgePoint_t p = { .intercept = static_cast<float>( vector3_dot( v - e.origin, e.dir ) ), .xyz = v };
 
 	for ( auto it = e.points.cbegin(); it != e.points.cend(); ++it ) {
 		if ( float_equal_epsilon( p.intercept, it->intercept, LINE_POSITION_EPSILON ) ) {

@@ -3278,15 +3278,18 @@ void Patch::createThickenedWall(const Patch& sourcePatch,
 }
 
 
-class PatchFilterWrapper : public Filter
+class PatchFilterWrapper final : public Filter
 {
 	bool m_active;
 	bool m_invert;
 	PatchFilter& m_filter;
 public:
-	PatchFilterWrapper( PatchFilter& filter, bool invert ) : m_invert( invert ), m_filter( filter ){
+	PatchFilterWrapper( PatchFilter& filter, bool invert ) :
+		m_active( false ), // suppress uninitialized warning
+		m_invert( invert ),
+		m_filter( filter ){
 	}
-	void setActive( bool active ){
+	void setActive( bool active ) override {
 		m_active = active;
 	}
 	bool active(){

@@ -168,7 +168,7 @@ public:
 	}
 };
 
-class BreakImporter : public TreeXMLImporter
+class BreakImporter final : public TreeXMLImporter
 {
 public:
 	BreakImporter( StringOutputStream& comment ){
@@ -177,19 +177,19 @@ public:
 	static const char* name(){
 		return "n";
 	}
-	TreeXMLImporter& pushElement( const XMLElement& element ){
+	TreeXMLImporter& pushElement( const XMLElement& element ) override {
 		ERROR_MESSAGE( PARSE_ERROR( element.name(), name() ) );
 		return *this;
 	}
-	void popElement( const char* elementName ){
+	void popElement( const char* elementName ) override {
 		ERROR_MESSAGE( PARSE_ERROR( elementName, name() ) );
 	}
-	std::size_t write( const char* data, std::size_t length ){
+	std::size_t write( const char* data, std::size_t length ) override {
 		return length;
 	}
 };
 
-class AttributeImporter : public TreeXMLImporter
+class AttributeImporter final : public TreeXMLImporter
 {
 	StringOutputStream& m_comment;
 
@@ -232,14 +232,14 @@ public:
 	}
 	~AttributeImporter(){
 	}
-	TreeXMLImporter& pushElement( const XMLElement& element ){
+	TreeXMLImporter& pushElement( const XMLElement& element ) override {
 		ERROR_MESSAGE( PARSE_ERROR( element.name(), "attribute" ) );
 		return *this;
 	}
-	void popElement( const char* elementName ){
+	void popElement( const char* elementName ) override {
 		ERROR_MESSAGE( PARSE_ERROR( elementName, "attribute" ) );
 	}
-	std::size_t write( const char* data, std::size_t length ){
+	std::size_t write( const char* data, std::size_t length ) override {
 		CopiedString& desc = m_attribute->m_description;
 		if( desc.empty() ){
 			desc = StringRange( data, length );
@@ -281,7 +281,7 @@ bool listAttributeSupported( ListAttributeTypes& listTypes, const char* name ){
 }
 
 
-class ClassImporter : public TreeXMLImporter
+class ClassImporter final : public TreeXMLImporter
 {
 	EntityClassCollector& m_collector;
 	EntityClass* m_eclass;
@@ -329,7 +329,7 @@ public:
 	static const char* name(){
 		return "class";
 	}
-	TreeXMLImporter& pushElement( const XMLElement& element ){
+	TreeXMLImporter& pushElement( const XMLElement& element ) override {
 		if ( attributeSupported( element.name() ) || listAttributeSupported( m_listTypes, element.name() ) ) {
 			constructor( m_attribute.get(), makeReference( m_comment ), m_eclass, element );
 			return m_attribute.get();
@@ -340,7 +340,7 @@ public:
 			return *this;
 		}
 	}
-	void popElement( const char* elementName ){
+	void popElement( const char* elementName ) override {
 		if ( attributeSupported( elementName ) || listAttributeSupported( m_listTypes, elementName ) ) {
 			destructor( m_attribute.get() );
 		}
@@ -349,12 +349,12 @@ public:
 			ERROR_MESSAGE( PARSE_ERROR( elementName, name() ) );
 		}
 	}
-	std::size_t write( const char* data, std::size_t length ){
+	std::size_t write( const char* data, std::size_t length ) override {
 		return m_comment.write( data, length );
 	}
 };
 
-class ItemImporter : public TreeXMLImporter
+class ItemImporter final : public TreeXMLImporter
 {
 public:
 	ItemImporter( ListAttributeType& list, const XMLElement& element ){
@@ -362,14 +362,14 @@ public:
 		const char* value = element.attribute( "value" );
 		list.push_back( name, value );
 	}
-	TreeXMLImporter& pushElement( const XMLElement& element ){
+	TreeXMLImporter& pushElement( const XMLElement& element ) override {
 		ERROR_MESSAGE( PARSE_ERROR( element.name(), "item" ) );
 		return *this;
 	}
-	void popElement( const char* elementName ){
+	void popElement( const char* elementName ) override {
 		ERROR_MESSAGE( PARSE_ERROR( elementName, "item" ) );
 	}
-	std::size_t write( const char* data, std::size_t length ){
+	std::size_t write( const char* data, std::size_t length ) override {
 		return length;
 	}
 };
@@ -378,7 +378,7 @@ bool isItem( const char* name ){
 	return string_equal( name, "item" );
 }
 
-class ListAttributeImporter : public TreeXMLImporter
+class ListAttributeImporter final : public TreeXMLImporter
 {
 	ListAttributeType* m_listType;
 	Storage<ItemImporter> m_item;
@@ -387,7 +387,7 @@ public:
 		const char* name = element.attribute( "name" );
 		m_listType = &listTypes[name];
 	}
-	TreeXMLImporter& pushElement( const XMLElement& element ){
+	TreeXMLImporter& pushElement( const XMLElement& element ) override {
 		if ( isItem( element.name() ) ) {
 			constructor( m_item.get(), makeReference( *m_listType ), element );
 			return m_item.get();
@@ -398,7 +398,7 @@ public:
 			return *this;
 		}
 	}
-	void popElement( const char* elementName ){
+	void popElement( const char* elementName ) override {
 		if ( isItem( elementName ) ) {
 			destructor( m_item.get() );
 		}
@@ -407,7 +407,7 @@ public:
 			ERROR_MESSAGE( PARSE_ERROR( elementName, "list" ) );
 		}
 	}
-	std::size_t write( const char* data, std::size_t length ){
+	std::size_t write( const char* data, std::size_t length ) override {
 		return length;
 	}
 };
@@ -421,7 +421,7 @@ bool listSupported( const char* name ){
 	return string_equal( name, "list" );
 }
 
-class ClassesImporter : public TreeXMLImporter
+class ClassesImporter final : public TreeXMLImporter
 {
 	EntityClassCollector& m_collector;
 	Storage<ClassImporter> m_class;
@@ -434,7 +434,7 @@ public:
 	static const char* name(){
 		return "classes";
 	}
-	TreeXMLImporter& pushElement( const XMLElement& element ){
+	TreeXMLImporter& pushElement( const XMLElement& element ) override {
 		if ( classSupported( element.name() ) ) {
 			constructor( m_class.get(), makeReference( m_collector ), makeReference( m_listTypes ), element );
 			return m_class.get();
@@ -449,7 +449,7 @@ public:
 			return *this;
 		}
 	}
-	void popElement( const char* elementName ){
+	void popElement( const char* elementName ) override {
 		if ( classSupported( elementName ) ) {
 			destructor( m_class.get() );
 		}
@@ -461,12 +461,12 @@ public:
 			ERROR_MESSAGE( PARSE_ERROR( elementName, name() ) );
 		}
 	}
-	std::size_t write( const char* data, std::size_t length ){
+	std::size_t write( const char* data, std::size_t length ) override {
 		return length;
 	}
 };
 
-class EclassXMLImporter : public TreeXMLImporter
+class EclassXMLImporter final : public TreeXMLImporter
 {
 	EntityClassCollector& m_collector;
 	Storage<ClassesImporter> m_classes;
@@ -477,7 +477,7 @@ public:
 	static const char* name(){
 		return "classes";
 	}
-	TreeXMLImporter& pushElement( const XMLElement& element ){
+	TreeXMLImporter& pushElement( const XMLElement& element ) override {
 		if ( string_equal( element.name(), ClassesImporter::name() ) ) {
 			constructor( m_classes.get(), makeReference( m_collector ) );
 			return m_classes.get();
@@ -488,7 +488,7 @@ public:
 			return *this;
 		}
 	}
-	void popElement( const char* elementName ){
+	void popElement( const char* elementName ) override {
 		if ( string_equal( elementName, ClassesImporter::name() ) ) {
 			destructor( m_classes.get() );
 		}
@@ -497,26 +497,26 @@ public:
 			ERROR_MESSAGE( PARSE_ERROR( elementName, name() ) );
 		}
 	}
-	std::size_t write( const char* data, std::size_t length ){
+	std::size_t write( const char* data, std::size_t length ) override {
 		return length;
 	}
 };
 
-class TreeXMLImporterStack : public XMLImporter
+class TreeXMLImporterStack final : public XMLImporter
 {
 	std::vector< Reference<TreeXMLImporter> > m_importers;
 public:
 	TreeXMLImporterStack( TreeXMLImporter& importer ){
 		m_importers.push_back( makeReference( importer ) );
 	}
-	void pushElement( const XMLElement& element ){
+	void pushElement( const XMLElement& element ) override {
 		m_importers.push_back( makeReference( m_importers.back().get().pushElement( element ) ) );
 	}
-	void popElement( const char* name ){
+	void popElement( const char* name ) override {
 		m_importers.pop_back();
 		m_importers.back().get().popElement( name );
 	}
-	std::size_t write( const char* buffer, std::size_t length ){
+	std::size_t write( const char* buffer, std::size_t length ) override {
 		return m_importers.back().get().write( buffer, length );
 	}
 };

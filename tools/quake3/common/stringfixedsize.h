@@ -29,7 +29,7 @@
 /// \brief A TextOutputStream which writes to a null terminated fixed length char array.
 /// Similar to std::stringstream.
 template<std::size_t SIZE>
-class StringFixedSize : public TextOutputStream
+class StringFixedSize final : public TextOutputStream
 {
 	char m_string[SIZE];
 	std::size_t m_length;

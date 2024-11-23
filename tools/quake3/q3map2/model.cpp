@@ -190,7 +190,7 @@ struct ModelNameFrame
 };
 struct AssModel
 {
-	struct AssModelMesh : public AssMeshWalker
+	struct AssModelMesh final : public AssMeshWalker
 	{
 		const aiMesh *m_mesh;
 		CopiedString m_shader;

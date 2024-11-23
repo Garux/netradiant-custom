@@ -320,7 +320,7 @@ const char* rootPath( const char* name ){
 }
 }
 
-struct ModelResource : public Resource
+struct ModelResource final : public Resource
 {
 	NodeSmartReference m_model;
 	const CopiedString m_originalName;
@@ -389,7 +389,7 @@ struct ModelResource : public Resource
 		mapSave();
 	}
 
-	bool load(){
+	bool load() override {
 		ASSERT_MESSAGE( realised(), "resource not realised" );
 		if ( m_model == g_nullModel ) {
 			loadModel();
@@ -397,7 +397,7 @@ struct ModelResource : public Resource
 
 		return m_model != g_nullModel;
 	}
-	bool save(){
+	bool save() override {
 		if ( !mapSaved() ) {
 			const char* moduleName = findModuleName( GetFileTypeRegistry(), MapFormat::Name, m_type.c_str() );
 			if ( string_not_empty( moduleName ) ) {
@@ -410,19 +410,19 @@ struct ModelResource : public Resource
 		}
 		return false;
 	}
-	void flush(){
+	void flush() override {
 		if ( realised() ) {
 			ModelCache_flush( m_path.c_str(), m_name.c_str() );
 		}
 	}
-	scene::Node* getNode(){
+	scene::Node* getNode() override {
 		//if(m_model != g_nullModel)
 		{
 			return m_model.get_pointer();
 		}
 		//return 0;
 	}
-	void setNode( scene::Node* node ){
+	void setNode( scene::Node* node ) override {
 		ModelCache::iterator i = ModelCache_find( m_path.c_str(), m_name.c_str() );
 		if ( i != g_modelCache.end() ) {
 			( *i ).value = NodeSmartReference( *node );
@@ -431,13 +431,13 @@ struct ModelResource : public Resource
 
 		connectMap();
 	}
-	void attach( ModuleObserver& observer ){
+	void attach( ModuleObserver& observer ) override {
 		if ( realised() ) {
 			observer.realise();
 		}
 		m_observers.attach( observer );
 	}
-	void detach( ModuleObserver& observer ){
+	void detach( ModuleObserver& observer ) override {
 		if ( realised() ) {
 			observer.unrealise();
 		}
@@ -446,7 +446,7 @@ struct ModelResource : public Resource
 	bool realised(){
 		return m_unrealised == 0;
 	}
-	void realise(){
+	void realise() override {
 		ASSERT_MESSAGE( m_unrealised != 0, "ModelResource::realise: already realised" );
 		if ( --m_unrealised == 0 ) {
 			m_path = rootPath( m_originalName.c_str() );
@@ -457,7 +457,7 @@ struct ModelResource : public Resource
 			m_observers.realise();
 		}
 	}
-	void unrealise(){
+	void unrealise() override {
 		if ( ++m_unrealised == 1 ) {
 			m_observers.unrealise();
 
@@ -496,7 +496,7 @@ struct ModelResource : public Resource
 		           && m_modified != modified() ) // AND disk timestamp changed
 		         || !path_equal( rootPath( m_originalName.c_str() ), m_path.c_str() ) ); // OR absolute vfs-root changed
 	}
-	void refresh(){
+	void refresh() override {
 		if ( isModified() ) {
 			flush();
 			unrealise();

@@ -2336,9 +2336,9 @@ public:
 	}
 	bool isSelected() const override {
 		return m_selectable_x.isSelected()
-		     | m_selectable_y.isSelected()
-		     | m_selectable_z.isSelected()
-		     | m_selectable_screen.isSelected();
+		    || m_selectable_y.isSelected()
+		    || m_selectable_z.isSelected()
+		    || m_selectable_screen.isSelected();
 	}
 };
 
@@ -2489,9 +2489,9 @@ public:
 	}
 	bool isSelected() const override {
 		return m_selectable_x.isSelected()
-		     | m_selectable_y.isSelected()
-		     | m_selectable_z.isSelected()
-		     | m_selectable_screen.isSelected();
+		    || m_selectable_y.isSelected()
+		    || m_selectable_z.isSelected()
+		    || m_selectable_screen.isSelected();
 	}
 };
 
@@ -7678,8 +7678,8 @@ public:
 	bool endMove();
 	void freezeTransforms();
 
-	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const;
-	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const override;
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const override {
 		renderSolid( renderer, volume );
 	}
 
@@ -8592,7 +8592,7 @@ public:
 		m_manipulator( m_epsilon, m_state ),
 		m_texmanipulator( m_epsilon, m_state ){
 	}
-	void release(){
+	void release() override {
 		delete this;
 	}
 	void setView( const View& view ) override {
@@ -8606,12 +8606,12 @@ public:
 	void updateEpsilon(){
 		m_epsilon = DeviceVector( g_SELECT_EPSILON / static_cast<float>( m_width ), g_SELECT_EPSILON / static_cast<float>( m_height ) );
 	}
-	void onSizeChanged( int width, int height ){
+	void onSizeChanged( int width, int height ) override {
 		m_width = width;
 		m_height = height;
 		updateEpsilon();
 	}
-	void onMouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
+	void onMouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ) override {
 		updateEpsilon(); /* could have changed, as it is user setting */
 
 		const DeviceVector devicePosition( device( position ) );
@@ -8649,7 +8649,7 @@ public:
 		m_moveStart = devicePosition;
 		m_movePressed = 0.f;
 	}
-	void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ){
+	void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ) override {
 		m_selector.m_mouseMoved = mouse_moved_epsilon( position, m_moveEnd, m_move );
 		if ( m_mouse_down && !g_mouseMovedCallback.empty() ) {
 			m_manipulator.m_mouseMovedWhilePressed = m_selector.m_mouseMovedWhilePressed = mouse_moved_epsilon( position, m_moveStart, m_movePressed );
@@ -8659,7 +8659,7 @@ public:
 			m_manipulator.highlight( device( position ) );
 		}
 	}
-	void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
+	void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ) override {
 		if ( ( button == c_button_select || button == c_button_select2 || button == c_button_texture ) && !g_mouseUpCallback.empty() ) {
 			g_mouseUpCallback.get() ( device( position ) );
 			m_mouse_down = false;
@@ -8683,11 +8683,11 @@ public:
 		m_moveEnd = device( position );
 		m_move = 0.f;
 	}
-	void onModifierDown( ModifierFlags type ){
+	void onModifierDown( ModifierFlags type ) override {
 		g_modifiers = m_state = bitfield_enable( m_state, type );
 		m_selector.setState( m_state );
 	}
-	void onModifierUp( ModifierFlags type ){
+	void onModifierUp( ModifierFlags type ) override {
 		g_modifiers = m_state = bitfield_disable( m_state, type );
 		m_selector.setState( m_state );
 	}

@@ -66,27 +66,27 @@ public:
 	virtual TreeXMLImporter& child() = 0;
 };
 
-class SubPrimitiveImporter : public TreeXMLImporter
+class SubPrimitiveImporter final : public TreeXMLImporter
 {
 	XMLImporter* m_importer;
 public:
 	SubPrimitiveImporter( XMLImporter* importer ) : m_importer( importer ){
 	}
-	void pushElement( const XMLElement& element ){
+	void pushElement( const XMLElement& element ) override {
 		m_importer->pushElement( element );
 	}
-	void popElement( const char* name ){
+	void popElement( const char* name ) override {
 		m_importer->popElement( name );
 	}
-	std::size_t write( const char* buffer, std::size_t length ){
+	std::size_t write( const char* buffer, std::size_t length ) override {
 		return m_importer->write( buffer, length );
 	}
-	SubPrimitiveImporter& child(){
+	SubPrimitiveImporter& child() override {
 		return *this;
 	}
 };
 
-class PrimitiveImporter : public TreeXMLImporter
+class PrimitiveImporter final : public TreeXMLImporter
 {
 	scene::Node& m_parent;
 	XMLImporter* m_importer;
@@ -98,7 +98,7 @@ class PrimitiveImporter : public TreeXMLImporter
 public:
 	PrimitiveImporter( scene::Node& parent ) : m_parent( parent ), m_importer( 0 ){
 	}
-	void pushElement( const XMLElement& element ){
+	void pushElement( const XMLElement& element ) override {
 		if ( string_equal( element.name(), "epair" ) ) {
 			ASSERT_MESSAGE( string_equal( element.name(), "epair" ), PARSE_ERROR );
 			Node_getEntity( m_parent )->setKeyValue( element.attribute( "key" ), element.attribute( "value" ) );
@@ -116,7 +116,7 @@ public:
 			Node_getTraversable( m_parent )->insert( node );
 		}
 	}
-	void popElement( const char* name ){
+	void popElement( const char* name ) override {
 		if ( string_equal( name, "epair" ) ) {
 		}
 		else
@@ -127,15 +127,15 @@ public:
 			m_importer = 0;
 		}
 	}
-	std::size_t write( const char* buffer, std::size_t length ){
+	std::size_t write( const char* buffer, std::size_t length ) override {
 		return m_importer->write( buffer, length );
 	}
-	TreeXMLImporter& child(){
+	TreeXMLImporter& child() override {
 		return subprimitive();
 	}
 };
 
-class EntityImporter : public TreeXMLImporter
+class EntityImporter final : public TreeXMLImporter
 {
 	scene::Node& m_parent;
 	char m_node[sizeof( NodeSmartReference )];
@@ -152,12 +152,12 @@ class EntityImporter : public TreeXMLImporter
 public:
 	EntityImporter( scene::Node& parent, EntityCreator& entityTable ) : m_parent( parent ), m_entityTable( entityTable ){
 	}
-	void pushElement( const XMLElement& element ){
+	void pushElement( const XMLElement& element ) override {
 		ASSERT_MESSAGE( string_equal( element.name(), "entity" ), PARSE_ERROR );
 		constructor( node(), NodeSmartReference( m_entityTable.createEntity( GlobalEntityClassManager().findOrInsert( "", true ) ) ) );
 		constructor( primitive(), makeReference( node().get() ) );
 	}
-	void popElement( const char* name ){
+	void popElement( const char* name ) override {
 		ASSERT_MESSAGE( string_equal( name, "entity" ), PARSE_ERROR );
 		NodeSmartReference entity( m_entityTable.createEntity( GlobalEntityClassManager().findOrInsert( Node_getEntity( node() )->getClassName(), node_is_group( node() ) ) ) );
 
@@ -175,15 +175,15 @@ public:
 		destructor( primitive() );
 		destructor( node() );
 	}
-	std::size_t write( const char* buffer, std::size_t length ){
+	std::size_t write( const char* buffer, std::size_t length ) override {
 		return length;
 	}
-	TreeXMLImporter& child(){
+	TreeXMLImporter& child() override {
 		return primitive();
 	}
 };
 
-class MapDoom3Importer : public TreeXMLImporter
+class MapDoom3Importer final : public TreeXMLImporter
 {
 	scene::Node& m_root;
 	char m_child[sizeof( EntityImporter )];
@@ -195,38 +195,38 @@ class MapDoom3Importer : public TreeXMLImporter
 public:
 	MapDoom3Importer( scene::Node& root, EntityCreator& entityTable ) : m_root( root ), m_entityTable( entityTable ){
 	}
-	void pushElement( const XMLElement& element ){
+	void pushElement( const XMLElement& element ) override {
 		ASSERT_MESSAGE( string_equal( element.name(), "mapdoom3" ), PARSE_ERROR );
 		constructor( getEntity(), makeReference( m_root ), makeReference( m_entityTable ) );
 	}
-	void popElement( const char* name ){
+	void popElement( const char* name ) override {
 		ASSERT_MESSAGE( string_equal( name, "mapdoom3" ), PARSE_ERROR );
 		destructor( getEntity() );
 	}
-	std::size_t write( const char* data, std::size_t length ){
+	std::size_t write( const char* data, std::size_t length ) override {
 		return length;
 	}
-	TreeXMLImporter& child(){
+	TreeXMLImporter& child() override {
 		return getEntity();
 	}
 };
 
-class TreeXMLImporterStack : public XMLImporter
+class TreeXMLImporterStack final : public XMLImporter
 {
 	std::vector< Reference<TreeXMLImporter> > m_importers;
 public:
 	TreeXMLImporterStack( TreeXMLImporter& importer ){
 		m_importers.push_back( makeReference( importer ) );
 	}
-	void pushElement( const XMLElement& element ){
+	void pushElement( const XMLElement& element ) override {
 		m_importers.back().get().pushElement( element );
 		m_importers.push_back( makeReference( m_importers.back().get().child() ) );
 	}
-	void popElement( const char* name ){
+	void popElement( const char* name ) override {
 		m_importers.pop_back();
 		m_importers.back().get().popElement( name );
 	}
-	std::size_t write( const char* buffer, std::size_t length ){
+	std::size_t write( const char* buffer, std::size_t length ) override {
 		return ( *( m_importers.end() - 2 ) ).get().write( buffer, length );
 	}
 };

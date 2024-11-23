@@ -436,6 +436,8 @@ void ClipTraceWinding( traceWinding_t *tw, const Plane3f& plane, traceWinding_t 
 				front->v[ front->numVerts++ ] = *a;
 				back->v[ back->numVerts++ ] = *a;
 				continue;
+			case eSideCross: // unused here, suppress warning
+				break;
 			}
 
 			/* check next point to see if we need to split the edge */

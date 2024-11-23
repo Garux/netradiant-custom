@@ -51,7 +51,13 @@ const char* node_get_name( scene::Node& node ){
 }
 
 const char* node_get_name_safe( scene::Node& node ){
-	volatile intptr_t n = (intptr_t)&node;  // see the comment on line 650
+	// https://github.com/TTimo/GtkRadiant/issues/289
+	// Reference cannot be bound to dereferenced null pointer in well-defined
+	// C++ code, and Clang will assume that comparison below always evaluates
+	// to true, resulting in a segmentation fault.  Use a dirty hack to force
+	// Clang to check those "bad" references for null nonetheless.
+	// At least here check is vital , 0 is g_null_node
+	volatile intptr_t n = (intptr_t)&node;  // see the comment on line 54
 	if ( n == 0 ) {
 		return "";
 	}
@@ -59,7 +65,7 @@ const char* node_get_name_safe( scene::Node& node ){
 }
 
 void node_attach_name_changed_callback( scene::Node& node, const NameCallback& callback ){
-	volatile intptr_t n = (intptr_t)&node;  // see the comment on line 650
+	volatile intptr_t n = (intptr_t)&node;  // see the comment on line 54
 	if ( n != 0 ) {
 		Nameable* nameable = Node_getNameable( node );
 		if ( nameable != 0 ) {
@@ -68,7 +74,7 @@ void node_attach_name_changed_callback( scene::Node& node, const NameCallback& c
 	}
 }
 void node_detach_name_changed_callback( scene::Node& node, const NameCallback& callback ){
-	volatile intptr_t n = (intptr_t)&node;  // see the comment on line 650
+	volatile intptr_t n = (intptr_t)&node;  // see the comment on line 54
 	if ( n != 0 ) {
 		Nameable* nameable = Node_getNameable( node );
 		if ( nameable != 0 ) {
