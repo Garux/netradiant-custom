@@ -4,6 +4,7 @@
 
 #include "Structs/Vector3.hpp"
 #include "Structs/Ray.hpp"
+#include "Structs/Plane.hpp"
 
 namespace quickhull {
 	
@@ -16,7 +17,8 @@ namespace quickhull {
 			return s.getLengthSquared() - t*t*r.m_VInvLengthSquared;
 		}
 		
-		// Note that the unit of distance returned is relative to plane's normal's length (divide by N.getNormalized() if needed to get the "real" distance).
+		// Note that the unit of distance returned is relative to plane's normal's length
+		// (divide by N.getNormalized() to get actual Euclidian distance).
 		template <typename T>
 		inline T getSignedDistanceToPlane(const Vector3<T>& v, const Plane<T>& p) {
 			return p.m_N.dotProduct(v) + p.m_D;
