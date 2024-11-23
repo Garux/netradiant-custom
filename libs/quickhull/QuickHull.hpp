@@ -43,15 +43,13 @@
  *              - Each point that was assigned to visible faces is now assigned to at most one of the newly created faces.
  *              - Those new faces that have points assigned to them are added to the top of Face Stack.
  *          - M is now the convex hull.
- *
- * TO DO:
- *  - Implement a proper 2D QuickHull and use that to solve the degenerate 2D case (when all the points lie on the same plane in 3D space).
  * */
 
 namespace quickhull {
 	
 	struct DiagnosticsData {
-		size_t m_failedHorizonEdges; // How many times QuickHull failed to solve the horizon edge. Failures lead to degenerated convex hulls.
+		size_t m_failedHorizonEdges; // How many times QuickHull failed to solve the horizon edge.
+		                             // Failures lead to degenerate convex hulls.
 		
 		DiagnosticsData() : m_failedHorizonEdges(0) { }
 	};
@@ -79,51 +77,64 @@ namespace quickhull {
 		std::vector<size_t> m_horizonEdges;
 		struct FaceData {
 			size_t m_faceIndex;
-			size_t m_enteredFromHalfEdge; // If the face turns out not to be visible, this half edge will be marked as horizon edge
+			size_t m_enteredFromHalfEdge; // If the face turns out not to be visible,
+			                              // this half edge will be marked as horizon edge
 			FaceData(size_t fi, size_t he) : m_faceIndex(fi),m_enteredFromHalfEdge(he) {}
 		};
 		std::vector<FaceData> m_possiblyVisibleFaces;
 		std::deque<size_t> m_faceList;
 
-		// Create a half edge mesh representing the base tetrahedron from which the QuickHull iteration proceeds. m_extremeValues must be properly set up when this is called.
+		// Create a half edge mesh representing the base tetrahedron from which the QuickHull
+		// iteration proceeds. m_extremeValues must be properly set up when this is called.
 		void setupInitialTetrahedron();
 
-		// Given a list of half edges, try to rearrange them so that they form a loop. Return true on success.
+		// Given a list of half edges, try to rearrange them so that they form a loop.
+		// Return true on success.
 		bool reorderHorizonEdges(std::vector<size_t>& horizonEdges);
 		
-		// Find indices of extreme values (max x, min x, max y, min y, max z, min z) for the given point cloud
+		// Find indices of extreme values (max x, min x, max y, min y, max z, min z) for the
+		// given point cloud
 		std::array<size_t,6> getExtremeValues();
 		
 		// Compute scale of the vertex data.
 		FloatType getScale(const std::array<size_t,6>& extremeValues);
 		
-		// Each face contains a unique pointer to a vector of indices. However, many - often most - faces do not have any points on the positive
-		// side of them especially at the the end of the iteration. When a face is removed from the mesh, its associated point vector, if such
-		// exists, is moved to the index vector pool, and when we need to add new faces with points on the positive side to the mesh,
-		// we reuse these vectors. This reduces the amount of std::vectors we have to deal with, and impact on performance is remarkable.
+		// Each face contains a unique pointer to a vector of indices.
+		// However, many - often most - faces do not have any points on the positive
+		// side of them especially at the the end of the iteration. When a face is removed
+		// from the mesh, its associated point vector, if such exists, is moved to the index
+		// vector pool, and when we need to add new faces with points on the positive side to the
+		// mesh, we reuse these vectors. This reduces the amount of std::vectors we have to deal
+		// with, and impact on performance is remarkable.
 		Pool<std::vector<size_t>> m_indexVectorPool;
 		inline std::unique_ptr<std::vector<size_t>> getIndexVectorFromPool();
 		inline void reclaimToIndexVectorPool(std::unique_ptr<std::vector<size_t>>& ptr);
 		
-		// Associates a point with a face if the point resides on the positive side of the plane. Returns true if the points was on the positive side.
+		// Associates a point with a face if the point resides on the positive side of the plane.
+		// Returns true if the points was on the positive side.
 		inline bool addPointToFace(typename MeshBuilder<FloatType>::Face& f, size_t pointIndex);
 		
-		// This will update m_mesh from which we create the ConvexHull object that getConvexHull function returns
+		// This will update m_mesh from which we create the ConvexHull object that getConvexHull
+		// function returns
 		void createConvexHalfEdgeMesh();
 		
-		// Constructs the convex hull into a MeshBuilder object which can be converted to a ConvexHull or Mesh object
-		void buildMesh(const VertexDataSource<FloatType>& pointCloud, bool CCW, bool useOriginalIndices, FloatType eps);
+		// Constructs the convex hull into a MeshBuilder object which can be converted to a
+		// ConvexHull or Mesh object
+		void buildMesh(const VertexDataSource<FloatType>& pointCloud, FloatType eps);
 		
 		// The public getConvexHull functions will setup a VertexDataSource object and call this
-		ConvexHull<FloatType> getConvexHull(const VertexDataSource<FloatType>& pointCloud, bool CCW, bool useOriginalIndices, FloatType eps);
+		ConvexHull<FloatType> getConvexHull(const VertexDataSource<FloatType>& pointCloud,
+											bool CCW, bool useOriginalIndices, FloatType eps);
 	public:
 		// Computes convex hull for a given point cloud.
 		// Params:
 		//   pointCloud: a vector of of 3D points
 		//   CCW: whether the output mesh triangles should have CCW orientation
-		//   useOriginalIndices: should the output mesh use same vertex indices as the original point cloud. If this is false,
-		//      then we generate a new vertex buffer which contains only the vertices that are part of the convex hull.
-		//   eps: minimum distance to a plane to consider a point being on positive of it (for a point cloud with scale 1)
+		//   useOriginalIndices: should the output mesh use same vertex indices as the original point
+		//     cloud. If this is false, then we generate a new vertex buffer which contains only
+		//     the vertices that are part of the convex hull.
+		//   eps: minimum distance to a plane to consider a point being on positive of it
+		//     (for a point cloud with scale 1)
 		ConvexHull<FloatType> getConvexHull(const std::vector<Vector3<FloatType>>& pointCloud,
 											bool CCW,
 											bool useOriginalIndices,
@@ -133,40 +144,22 @@ namespace quickhull {
 		// Params:
 		//   vertexData: pointer to the first 3D point of the point cloud
 		//   vertexCount: number of vertices in the point cloud
-		//   CCW: whether the output mesh triangles should have CCW orientation
-		//   useOriginalIndices: should the output mesh use same vertex indices as the original point cloud. If this is false,
-		//      then we generate a new vertex buffer which contains only the vertices that are part of the convex hull.
-		//   eps: minimum distance to a plane to consider a point being on positive side of it (for a point cloud with scale 1)
 		ConvexHull<FloatType> getConvexHull(const Vector3<FloatType>* vertexData,
 											size_t vertexCount,
 											bool CCW,
 											bool useOriginalIndices,
 											FloatType eps = defaultEps<FloatType>());
 		
-		// Computes convex hull for a given point cloud. This function assumes that the vertex data resides in memory
-		// in the following format: x_0,y_0,z_0,x_1,y_1,z_1,...
-		// Params:
-		//   vertexData: pointer to the X component of the first point of the point cloud.
-		//   vertexCount: number of vertices in the point cloud
-		//   CCW: whether the output mesh triangles should have CCW orientation
-		//   useOriginalIndices: should the output mesh use same vertex indices as the original point cloud. If this is false,
-		//      then we generate a new vertex buffer which contains only the vertices that are part of the convex hull.
-		//   eps: minimum distance to a plane to consider a point being on positive side of it (for a point cloud with scale 1)
+		// Computes convex hull for a given point cloud.
+		// This function assumes that the vertex data resides in memory in the following format:
+		// x_0,y_0,z_0,x_1,y_1,z_1,...
 		ConvexHull<FloatType> getConvexHull(const FloatType* vertexData,
 											size_t vertexCount,
 											bool CCW,
 											bool useOriginalIndices,
 											FloatType eps = defaultEps<FloatType>());
 		
-		// Computes convex hull for a given point cloud. This function assumes that the vertex data resides in memory
-		// in the following format: x_0,y_0,z_0,x_1,y_1,z_1,...
-		// Params:
-		//   vertexData: pointer to the X component of the first point of the point cloud.
-		//   vertexCount: number of vertices in the point cloud
-		//   CCW: whether the output mesh triangles should have CCW orientation
-		//   eps: minimum distance to a plane to consider a point being on positive side of it (for a point cloud with scale 1)
-		// Returns:
-		//   Convex hull of the point cloud as a mesh object with half edge structure.
+		// Convex hull of the point cloud as a mesh object with half edge structure.
 		HalfEdgeMesh<FloatType, size_t> getConvexHullAsMesh(const FloatType* vertexData,
 															size_t vertexCount,
 															bool CCW,
@@ -177,10 +170,6 @@ namespace quickhull {
 			return m_diagnostics;
 		}
 	};
-	
-	/*
-	 * Inline function definitions
-	 */
 	
 	template<typename T>
 	std::unique_ptr<std::vector<size_t>> QuickHull<T>::getIndexVectorFromPool() {
@@ -193,7 +182,9 @@ namespace quickhull {
 	void QuickHull<T>::reclaimToIndexVectorPool(std::unique_ptr<std::vector<size_t>>& ptr) {
 		const size_t oldSize = ptr->size();
 		if ((oldSize+1)*128 < ptr->capacity()) {
-			// Reduce memory usage! Huge vectors are needed at the beginning of iteration when faces have many points on their positive side. Later on, smaller vectors will suffice.
+			// Reduce memory usage! Huge vectors are needed at the beginning of iteration when
+			// faces have many points on their positive side. Later on, smaller vectors will
+			// suffice.
 			ptr.reset(nullptr);
 			return;
 		}

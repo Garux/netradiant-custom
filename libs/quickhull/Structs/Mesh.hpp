@@ -23,11 +23,11 @@ namespace quickhull {
 			size_t m_opp;
 			size_t m_face;
 			size_t m_next;
-
+			
 			void disable() {
 				m_endVertex = std::numeric_limits<size_t>::max();
 			}
-
+			
 			bool isDisabled() const {
 				return m_endVertex == std::numeric_limits<size_t>::max();
 			}
@@ -54,7 +54,7 @@ namespace quickhull {
 			{
 
 			}
-
+			
 			void disable() {
 				m_he = std::numeric_limits<size_t>::max();
 			}
@@ -67,12 +67,12 @@ namespace quickhull {
 		// Mesh data
 		std::vector<Face> m_faces;
 		std::vector<HalfEdge> m_halfEdges;
-
+		
 		// When the mesh is modified and faces and half edges are removed from it, we do not actually remove them from the container vectors.
 		// Insted, they are marked as disabled which means that the indices can be reused when we need to add new faces and half edges to the mesh.
 		// We store the free indices in the following vectors.
 		std::vector<size_t> m_disabledFaces,m_disabledHalfEdges;
-
+		
 		size_t addFace() {
 			if (m_disabledFaces.size()) {
 				size_t index = m_disabledFaces.back();
@@ -112,17 +112,17 @@ namespace quickhull {
 		}
 
 		MeshBuilder() = default;
-
+		
 		// Create a mesh with initial tetrahedron ABCD. Dot product of AB with the normal of triangle ABC should be negative.
 		void setup(size_t a, size_t b, size_t c, size_t d) {
 			m_faces.clear();
 			m_halfEdges.clear();
 			m_disabledFaces.clear();
 			m_disabledHalfEdges.clear();
-
+			
 			m_faces.reserve(4);
 			m_halfEdges.reserve(12);
-
+			
 			// Create halfedges
 			HalfEdge AB;
 			AB.m_endVertex = b;
@@ -245,11 +245,11 @@ namespace quickhull {
 			return {f.m_he,m_halfEdges[f.m_he].m_next,m_halfEdges[m_halfEdges[f.m_he].m_next].m_next};
 		}
 	};
-
+	
 
 
 }
 
 
 
-#endif
+#endif 

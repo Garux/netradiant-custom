@@ -5,6 +5,8 @@
 #include <cassert>
 #include <chrono>
 
+#define VERIFY(x) if (!(x)) { std::cout << "test failed: '" << #x << "' is not true." << std::endl; }
+
 namespace quickhull {
 	
 	namespace tests {
@@ -20,10 +22,12 @@ namespace quickhull {
 			return from + (FloatType)dist(rng)*(to-from);
 		};
 		
-		static void assertSameValue(FloatType a, FloatType b) {
-			assert(std::abs(a-b)<0.0001f);
+		static void CHECK_CLOSE(FloatType a, FloatType b, FloatType maxDiff = 0.0001f) {
+			if (std::abs(a-b) >= maxDiff) {
+				throw std::runtime_error("Difference too big");
+			}
 		}
-		
+
 		static void testVector3() {
 			typedef Vector3<FloatType> vec3;
 			vec3 a(1,0,0);
@@ -39,13 +43,15 @@ namespace quickhull {
 		}
 		
 		template <typename T>
-		static std::vector<Vector3<T>> createSphere(T radius, size_t M, Vector3<T> offset = Vector3<T>(0,0,0)) {
+		static std::vector<Vector3<T>> createSphere(T radius, size_t M,
+													Vector3<T> offset = Vector3<T>(0,0,0)) {
 			std::vector<Vector3<T>> pc;
 			const T pi = 3.14159f;
 			for (int i=0;i<=M;i++) {
 				FloatType y = std::sin(pi/2 + (FloatType)i/(M)*pi);
 				FloatType r = std::cos(pi/2 + (FloatType)i/(M)*pi);
-				FloatType K = FloatType(1)-std::abs((FloatType)((FloatType)i-M/2.0f))/(FloatType)(M/2.0f);
+				FloatType K =
+					FloatType(1)-std::abs((FloatType)((FloatType)i-M/2.0f))/(FloatType)(M/2.0f);
 				const size_t pcount = (size_t)(1 + K*M + FloatType(1)/2);
 				for (size_t j=0;j<pcount;j++) {
 					FloatType x = pcount>1 ? r*std::cos((FloatType)j/pcount*pi*2) : 0;
@@ -69,8 +75,9 @@ namespace quickhull {
 				}
 			}
 			
-			// Test worst case scenario: more and more points on the unit sphere. All points should be part of the convex hull, as long as we can make epsilon smaller without
-			// running out of numerical accuracy.
+			// Test worst case scenario: more and more points on the unit sphere.
+			// All points should be part of the convex hull, as long as we can make epsilon
+			// smaller without running out of numerical accuracy.
 			size_t i =  1;
 			FloatType eps = 0.002f;
 			for (;;) {
@@ -120,33 +127,36 @@ namespace quickhull {
 				pc.emplace_back(h&1?-2:2, h&2?-2:2, h&4?-2:2);
 			}
 			HalfEdgeMesh<FloatType, size_t> mesh = qh.getConvexHullAsMesh(&pc[0].x, pc.size(), true);
-			assert(mesh.m_faces.size() == 12);
-			assert(mesh.m_halfEdges.size() == 36);
-			assert(mesh.m_vertices.size() == 8);
+			VERIFY(mesh.m_faces.size() == 12);
+			VERIFY(mesh.m_halfEdges.size() == 36);
+			VERIFY(mesh.m_vertices.size() == 8);
 
 			// Verify that for each face f, f.halfedgeIndex equals next(next(next(f.halfedgeIndex))).
 			for (const auto& f : mesh.m_faces) {
 				size_t next = mesh.m_halfEdges[f.m_halfEdgeIndex].m_next;
 				next = mesh.m_halfEdges[next].m_next;
 				next = mesh.m_halfEdges[next].m_next;
-				assert(next == f.m_halfEdgeIndex);
+				VERIFY(next == f.m_halfEdgeIndex);
 			}
 		}
 		
 		static void testPlanes() {
-			Vector3<FloatType> N(1,0,0);
-			Vector3<FloatType> p(2,0,0);
-			Plane<FloatType> P(N,p);
-			auto dist = mathutils::getSignedDistanceToPlane(Vector3<FloatType>(3,0,0), P);
-			assertSameValue(dist,1);
+			vec3 N(1, 0, 0);
+			vec3 p(2, 0, 0);
+			Plane<FloatType> P(N, p);
+			VERIFY(P.isPointOnPositiveSide(p));
+			VERIFY(P.isPointOnPositiveSide(vec3(3, 0, 0)));
+			VERIFY(!P.isPointOnPositiveSide(vec3(1, 0, 0)));
+			FloatType dist = mathutils::getSignedDistanceToPlane(vec3(3,0,0), P);
+			CHECK_CLOSE(dist,1);
 			dist = mathutils::getSignedDistanceToPlane(Vector3<FloatType>(1,0,0), P);
-			assertSameValue(dist,-1);
+			CHECK_CLOSE(dist,-1);
 			dist = mathutils::getSignedDistanceToPlane(Vector3<FloatType>(1,0,0), P);
-			assertSameValue(dist,-1);
+			CHECK_CLOSE(dist,-1);
 			N = Vector3<FloatType>(2,0,0);
 			P = Plane<FloatType>(N,p);
 			dist = mathutils::getSignedDistanceToPlane(Vector3<FloatType>(6,0,0), P);
-			assertSameValue(dist,8);
+			CHECK_CLOSE(dist,8);
 		}
 
 		static void testVertexBufferAddress() {
@@ -180,11 +190,12 @@ namespace quickhull {
 				const auto indices = hull.getIndexBuffer();
 				assert(vertices.size() == 3);
 				assert(indices.size() >= 6);
-				const vec3 triangle[3] = { vertices[indices[0]], vertices[indices[1]], vertices[indices[2]] };
+				const vec3 triangle[3] = { vertices[indices[0]], vertices[indices[1]],
+										   vertices[indices[2]] };
 				normal[i] = mathutils::getTriangleNormal(triangle[0], triangle[1], triangle[2]);
 			}
 			const auto dot = normal[0].dotProduct(normal[1]);
-			assertSameValue(dot, -1);
+			CHECK_CLOSE(dot, -1);
 		}
 
 		int run() {
@@ -196,10 +207,12 @@ namespace quickhull {
 			
 			// Seed RNG using Unix time
 			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-			auto seed = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+			auto seed =
+				std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
 			rng.seed((unsigned int)seed);
 			
-			// Test 1 : Put N points inside unit cube. Result mesh must have exactly 8 vertices because the convex hull is the unit cube.
+			// Test 1 : Put N points inside unit cube. Result mesh must have exactly 8 vertices
+			// because the convex hull is the unit cube.
 			pc.clear();
 			for (int i=0;i<8;i++) {
 				pc.emplace_back(i&1 ? -1 : 1,i&2 ? -1 : 1,i&4 ? -1 : 1);
@@ -210,7 +223,7 @@ namespace quickhull {
 			}
 			hull = qh.getConvexHull(pc,true,false);
 			assert(hull.getVertexBuffer().size()==8);
-			assert(hull.getIndexBuffer().size()==3*2*6); // 6 cube faces, 2 triangles per face, 3 indices per triangle
+			assert(hull.getIndexBuffer().size()==3*2*6); // 6 faces, 2 triangles/face, 3 indices/tri
 			assert(&(hull.getVertexBuffer()[0])!=&(pc[0]));
 			auto hull2 = hull;
 			assert(hull2.getVertexBuffer().size()==hull.getVertexBuffer().size());
@@ -225,7 +238,8 @@ namespace quickhull {
 			assert(hull.getVertexBuffer().size()==pc.size());
 			assert(&(hull.getVertexBuffer()[0])==&(pc[0]));
 			
-			// Test 2 : random N points from the boundary of unit sphere. Result mesh must have exactly N points.
+			// Test 2 : random N points from the boundary of unit sphere.
+			// Result mesh must have exactly N points.
 			pc = createSphere<FloatType>(1, 50);
 			hull = qh.getConvexHull(pc,true,false);
 			assert(pc.size() == hull.getVertexBuffer().size());
@@ -239,7 +253,8 @@ namespace quickhull {
 			hull = qh.getConvexHull(pc,true,false);
 			assert(pc.size()/2 == hull.getVertexBuffer().size());
 			
-			// Test 2.1 : Multiply x components of the unit sphere vectors by a huge number => essentially we get a line
+			// Test 2.1 : Multiply x components of the unit sphere vectors by a huge
+			// number => essentially we get a line
 			const FloatType mul = 2*2*2;
 			while (true) {
 				for (auto& p : pc) {
@@ -256,7 +271,9 @@ namespace quickhull {
 			vec3 centerPoint(2,2,2);
 			pc.push_back(centerPoint);
 			for (size_t i=0;i<100;i++) {
-				auto newp = centerPoint + vec3(rnd(-0.000001f,0.000001f),rnd(-0.000001f,0.000001f),rnd(-0.000001f,0.000001f));
+				auto newp = centerPoint + vec3(rnd(-0.000001f,0.000001f),
+											   rnd(-0.000001f,0.000001f),
+											   rnd(-0.000001f,0.000001f));
 				pc.push_back(newp);
 			}
 			hull = qh.getConvexHull(pc,true,false);

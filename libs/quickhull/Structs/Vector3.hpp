@@ -119,7 +119,10 @@ namespace quickhull {
 			const T dz = z-other.z;
 			return dx*dx+dy*dy+dz*dz;
 		}
-		
+
+		bool operator==(const Vector3& other) const {
+			return x == other.x && y == other.y && z == other.z;
+		}
 	};
 	
 	// Overload also << operator for easy printing of debug data
