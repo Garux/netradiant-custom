@@ -213,8 +213,8 @@ inline char* string_clone( const char* other, Allocator& allocator ){
 /// The returned buffer must be released with \c string_release using a matching \p allocator.
 template<typename Allocator>
 inline char* string_clone_range( StringRange range, Allocator& allocator ){
-	char* copied = strncpy( string_new( range.size(), allocator ), range.data(), range.size() );
-	copied[range.size()] = '\0';
+	char* copied = string_new( range.size(), allocator );
+	*std::copy_n( range.data(), range.size(), copied ) = '\0';
 	return copied;
 }
 
