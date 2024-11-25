@@ -246,19 +246,15 @@ EntityClass *Eclass_InitFromText( const char *text ){
 		}
 	}
 
-	StringRange parms( text, text );
-	{ // get the flags: advance to the first \n
+	{ // any remaining words on the line are parm flags
+		const char *p = text;
+		// get the flags: advance past the first \n
 		while ( *text && *text++ != '\n' ){};
-		parms = { parms.begin(), text };
-	}
 
-	{
-		// any remaining words are parm flags
-		const char* p = parms.begin();
 		for ( std::size_t i = 0; i < MAX_FLAGS; i++ )
 		{
 			p = COM_Parse( p );
-			if ( p == nullptr || p > parms.end() ) {
+			if ( p == nullptr || p > text ) {
 				break;
 			}
 			if( string_equal( Get_COM_Token(), "-" )
