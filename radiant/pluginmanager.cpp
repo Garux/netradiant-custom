@@ -105,10 +105,11 @@ CPluginSlot::CPluginSlot( QWidget* main_window, const char* name, const _QERPlug
 			m_CommandTitleStrings.push_back( titleToken );
 
 		m_callbacks.emplace_back( PluginCaller( this, m_CommandStrings.back().c_str() ) );
-		StringOutputStream str( 64 );
+		StringBuffer str( 64 );
 		{
-			if( !string_equal_nocase_n( cmdToken, getMenuName(), string_length( getMenuName() ) ) ){ //plugin name is not part of command name
-				str << getMenuName() << "::";
+			if( !string_equal_prefix_nocase( cmdToken, getMenuName() ) ){ //plugin name is not part of command name
+				str.push_string( getMenuName() );
+				str.push_string( "::" );
 			}
 			/* remove spaces + camelcasify */
 			const char* p = cmdToken;
@@ -119,20 +120,18 @@ CPluginSlot::CPluginSlot( QWidget* main_window, const char* name, const _QERPlug
 				}
 				else if( wasspace ){
 					wasspace = false;
-					str << static_cast<char>( std::toupper( *p ) );
+					str.push_back( std::toupper( *p ) );
 				}
 				else{
-					str << *p;
+					str.push_back( *p );
 				}
 				++p;
 			}
 			/* del trailing periods */
-			char* pp = &( *( str.end() - 1 ) );
-			while( *pp == '.' ){
-				*pp = '\0';
-				--pp;
+			while( !str.empty() && str.back() == '.' ){
+				str.pop_back();
 			}
-			*str.c_str() = std::tolower( *str.c_str() ); //put to the end of the list this way
+			*str.c_str() = std::tolower( *str.c_str() ); //put to the end of the list this way //not in Qt 🤔
 		}
 		m_globalCommandNames.emplace_back( str.c_str() );
 		if ( !plugin_menu_special( cmdToken ) ) //ain't special
