@@ -484,7 +484,7 @@ void UnparseEntities(){
 	}
 
 	/* save out */
-	bspEntData = { data.begin(), data.end() + 1 }; // include '\0'
+	bspEntData = { data.cbegin(), data.cend() + 1 }; // include '\0'
 }
 
 

@@ -102,8 +102,7 @@ public:
 	typedef StringBuffer::iterator iterator;
 	typedef StringBuffer::const_iterator const_iterator;
 
-	StringOutputStream(){
-	}
+	StringOutputStream() = default;
 	explicit StringOutputStream( std::size_t capacity ) : m_string( capacity ){
 	}
 	std::size_t write( const char* buffer, std::size_t length ) override {
@@ -122,16 +121,10 @@ public:
 		return c_str();
 	}
 
-	iterator begin(){
+	const_iterator cbegin() const {
 		return m_string.begin();
 	}
-	const_iterator begin() const {
-		return m_string.begin();
-	}
-	iterator end(){
-		return m_string.end();
-	}
-	const_iterator end() const {
+	const_iterator cend() const {
 		return m_string.end();
 	}
 
@@ -148,6 +141,11 @@ public:
 		m_string.clear();
 	}
 };
+
+static_assert( !std::is_constructible_v<StringRange, const StringOutputStream&>
+            && !std::is_constructible_v<StringRange, StringOutputStream&>,
+"StringRange must be not constructible from StringOutputStream as this leads to implicit convertion during overload resolution "
+"= ambiguity (->char* or ->StringRange) and different code functionality." );
 
 template<typename T>
 inline StringOutputStream& operator<<( StringOutputStream& ostream, const T& t ){

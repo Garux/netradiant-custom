@@ -942,7 +942,7 @@ int repackBSPMain( Args& args ){
 
 	/* write shader */
 	stream( g_enginePath, nameOFpack, "_strippedBYrepacker.shader" );
-	SaveFile( stream, allShaders, allShaders.end() - allShaders.begin() );
+	SaveFile( stream, allShaders, allShaders.cend() - allShaders.cbegin() );
 	Sys_Printf( "Shaders saved to %s\n", stream.c_str() );
 
 	/* make a pack */

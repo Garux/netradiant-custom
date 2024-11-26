@@ -1663,10 +1663,10 @@ public:
 			return string_compare_nocase_n( texTree.m_name.c_str(), prefix.prefix, strlen( prefix.prefix ) ) > 0;
 		}
 		bool operator()( const TexTree& texTree, const StringRange range ) const {
-			return string_compare_nocase_n( texTree.m_name.c_str(), range.begin(), range.size() ) < 0;
+			return string_compare_nocase_n( texTree.m_name.c_str(), range.data(), range.size() ) < 0;
 		}
 		bool operator()( const StringRange range, const TexTree& texTree ) const {
-			return string_compare_nocase_n( texTree.m_name.c_str(), range.begin(), range.size() ) > 0;
+			return string_compare_nocase_n( texTree.m_name.c_str(), range.data(), range.size() ) > 0;
 		}
 	};
 

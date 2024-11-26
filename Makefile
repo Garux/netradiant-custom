@@ -120,7 +120,7 @@ CFLAGS_COMMON = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -Wn
 CPPFLAGS_COMMON =
 LDFLAGS_COMMON =
 LIBS_COMMON =
-CXXFLAGS_COMMON = -std=c++17 -Wreorder -fno-exceptions -fno-rtti
+CXXFLAGS_COMMON = -std=c++20 -Wreorder -fno-exceptions -fno-rtti
 
 ifeq ($(BUILD),debug)
 ifeq ($(findstring -g,$(CFLAGS)),)
