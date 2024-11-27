@@ -59,7 +59,7 @@ GenericMainMenu::Dispatch(const char *command)
    // The command key should always be in the map, since the set of commands
    // advertised to Radiant is the same as the set used to make the map.
 #if defined(_DEBUG)
-   ASSERT_MESSAGE(_dispatchMap.find(commandString) != _dispatchMap.end(),
+   ASSERT_MESSAGE(_dispatchMap.contains(commandString),
                   "dispatched plugin command unknown");
 #endif
    _dispatchMap[commandString](commandString);

@@ -509,7 +509,7 @@ bool Texture_IsShown( IShader* shader, const TextureBrowser& textureBrowser ){
 	}
 
 	if ( textureBrowser.m_searchedTags ) {
-		return textureBrowser.m_found_shaders.find( shader->getName() ) != textureBrowser.m_found_shaders.cend();
+		return textureBrowser.m_found_shaders.contains( shader->getName() );
 	}
 	else {
 		if ( !shader_equal_prefix( shader_get_textureName( shader->getName() ), g_TextureBrowser_currentDirectory.c_str() ) ) {
@@ -1380,7 +1380,7 @@ protected:
 			const auto oldName = index.data( Qt::ItemDataRole::DisplayRole ).toByteArray();
 
 			if( oldName != newName	// is changed
-			 && g_TexBro.m_all_tags.find( newName.constData() ) != g_TexBro.m_all_tags.cend() ){	// & found in existing names
+			 && g_TexBro.m_all_tags.contains( newName.constData() ) ){	// & found in existing names
 				qt_MessageBox( g_TexBro.m_parent, "New tag name is already taken :0", newName.constData(), EMessageBoxType::Error );
 			}
 			else{
@@ -1504,7 +1504,7 @@ void TextureBrowser_checkTagFile(){
 void TextureBrowser_addTag(){
 	auto tag = StringStream<64>( "NewTag" );
 	int index = 0;
-	while( g_TexBro.m_all_tags.find( tag.c_str() ) != g_TexBro.m_all_tags.cend() )
+	while( g_TexBro.m_all_tags.contains( tag.c_str() ) )
 		tag( "NewTag", ++index );
 
 	auto item = new QListWidgetItem( tag.c_str() );

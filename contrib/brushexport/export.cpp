@@ -96,7 +96,7 @@ void ExportData::AddBrushFace( Face& f ){
 	GetShaderNameFromShaderPath( f.GetShader(), shadername );
 
 	// ignore faces from ignore list
-	if ( ignorelist.find( shadername ) != ignorelist.end() ) {
+	if ( ignorelist.contains( shadername ) ) {
 		return;
 	}
 

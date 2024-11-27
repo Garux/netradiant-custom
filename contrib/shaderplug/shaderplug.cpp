@@ -103,11 +103,8 @@ void LoadTextureFile( const char* filename ){
 	// append filename without trailing file extension (.tga or .jpg for example)
 	strncat( buffer, filename, s_filename.length() - 4 );
 
-	std::set<std::string>::iterator iter;
-	iter = shaders.find( buffer );
-
 	// a shader with this name already exists
-	if ( iter == shaders.end() ) {
+	if ( !shaders.contains( buffer ) ) {
 		textures.insert( buffer );
 	}
 }

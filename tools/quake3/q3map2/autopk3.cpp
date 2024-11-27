@@ -533,10 +533,10 @@ int pk3BSPMain( Args& args ){
 //wanted shaders from excluded .shaders
 	Sys_Printf( "\n" );
 	for ( auto& s : pk3Shaders ){
-		if ( !s.empty() && ( ExReasonShader.count( &s ) || ExReasonShaderFile.count( &s ) ) ){
+		if ( !s.empty() && ( ExReasonShader.contains( &s ) || ExReasonShaderFile.contains( &s ) ) ){
 			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", s.c_str() );
 			packFAIL = true;
-			if ( ExReasonShader.count( &s ) ){
+			if ( ExReasonShader.contains( &s ) ){
 				Sys_Printf( "     reason: is located in %s,\n     containing restricted shader %s\n", ExReasonShaderFile[&s].c_str(), ExReasonShader[&s].c_str() );
 			}
 			else{

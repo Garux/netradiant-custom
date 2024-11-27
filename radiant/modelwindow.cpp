@@ -1191,7 +1191,7 @@ public:
 		: m_modelExtensions( modelExtensions ),	m_modelFS( modelFS ), m_modelFoldersMap( modelFoldersMap ){
 	}
 	void visit( const char* name ) override {
-		if( m_modelExtensions.count( path_get_extension( name ) ) ){
+		if( m_modelExtensions.contains( path_get_extension( name ) ) ){
 			m_modelFS.insert( name );
 //%			globalOutputStream() << name << " name\n";
 		}

@@ -3048,14 +3048,6 @@ public:
 
 typedef std::set<Plane3, PlaneLess> PlaneSet;
 
-inline void PlaneSet_insert( PlaneSet& self, const Plane3& plane ){
-	self.insert( plane );
-}
-
-inline bool PlaneSet_contains( const PlaneSet& self, const Plane3& plane ){
-	return self.find( plane ) != self.end();
-}
-
 
 class SelectedPlaneSet : public SelectedPlanes
 {
@@ -3066,10 +3058,10 @@ public:
 	}
 
 	void insert( const Plane3& plane ){
-		PlaneSet_insert( m_selectedPlanes, plane );
+		m_selectedPlanes.insert( plane );
 	}
 	bool contains( const Plane3& plane ) const override {
-		return PlaneSet_contains( m_selectedPlanes, plane );
+		return m_selectedPlanes.contains( plane );
 	}
 	typedef MemberCaller1<SelectedPlaneSet, const Plane3&, &SelectedPlaneSet::insert> InsertCaller;
 };

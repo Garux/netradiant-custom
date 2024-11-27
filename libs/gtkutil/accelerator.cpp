@@ -98,14 +98,14 @@ bool Keys_press( PressedKeys::Keys& keys, int keyval ){
 	if ( keys.insert( keyval ).second ) {
 		return AcceleratorMap_activate( g_keydown_accelerators, accelerator_for_event_key( keyval, {} ) );
 	}
-	return g_keydown_accelerators.find( accelerator_for_event_key( keyval, {} ) ) != g_keydown_accelerators.end();
+	return g_keydown_accelerators.contains( accelerator_for_event_key( keyval, {} ) );
 }
 
 bool Keys_release( PressedKeys::Keys& keys, int keyval ){
 	if ( keys.erase( keyval ) != 0 ) {
 		return AcceleratorMap_activate( g_keyup_accelerators, accelerator_for_event_key( keyval, {} ) );
 	}
-	return g_keyup_accelerators.find( accelerator_for_event_key( keyval, {} ) ) != g_keyup_accelerators.end();
+	return g_keyup_accelerators.contains( accelerator_for_event_key( keyval, {} ) );
 }
 
 void Keys_releaseAll( PressedKeys::Keys& keys, Qt::KeyboardModifiers state ){

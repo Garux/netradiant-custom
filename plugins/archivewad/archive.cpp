@@ -146,7 +146,7 @@ public:
 		return 0;
 	}
 	bool containsFile( const char* name ){
-		return m_files.find( name ) != m_files.end();
+		return m_files.contains( name );
 	}
 	void forEachFile( VisitorFunc visitor, const char* root ){
 		if ( root[0] == '\0' ) {

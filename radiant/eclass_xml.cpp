@@ -277,7 +277,7 @@ bool attributeSupported( const char* name ){
 typedef std::map<CopiedString, ListAttributeType> ListAttributeTypes;
 
 bool listAttributeSupported( ListAttributeTypes& listTypes, const char* name ){
-	return listTypes.find( name ) != listTypes.end();
+	return listTypes.contains( name );
 }
 
 

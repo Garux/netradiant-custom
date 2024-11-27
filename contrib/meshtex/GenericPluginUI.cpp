@@ -145,7 +145,7 @@ GenericPluginUI::RegisterWidgetDependence(QAbstractButton *controller,
                                           QWidget *controllee)
 {
    // Make sure we get a callback when the controller is toggled.
-   if (_widgetControlMap.find(controller) == _widgetControlMap.end())
+   if (!_widgetControlMap.contains(controller))
    {
       QObject::connect( controller, &QAbstractButton::toggled, [this, controller]( bool checked ){
          WidgetControlCallback( controller );
@@ -169,7 +169,7 @@ GenericPluginUI::RegisterWidgetAntiDependence(QAbstractButton *controller,
                                               QWidget *controllee)
 {
    // Make sure we get a callback when the controller is toggled.
-   if (_widgetControlMap.find(controller) == _widgetControlMap.end())
+   if (!_widgetControlMap.contains(controller))
    {
       QObject::connect( controller, &QAbstractButton::toggled, [this, controller]( bool checked ){
          WidgetControlCallback( controller );
