@@ -1376,11 +1376,8 @@ protected:
 		if ( newName.isEmpty() ){
 			qt_MessageBox( g_TexBro.m_parent, "New tag name is empty :0", ":o", EMessageBoxType::Error );
 		}
-		else{
-			const auto oldName = index.data( Qt::ItemDataRole::DisplayRole ).toByteArray();
-
-			if( oldName != newName	// is changed
-			 && g_TexBro.m_all_tags.contains( newName.constData() ) ){	// & found in existing names
+		else if( const auto oldName = index.data( Qt::ItemDataRole::DisplayRole ).toByteArray(); oldName != newName ){ // is changed
+			if( g_TexBro.m_all_tags.contains( newName.constData() ) ){	// found in existing names
 				qt_MessageBox( g_TexBro.m_parent, "New tag name is already taken :0", newName.constData(), EMessageBoxType::Error );
 			}
 			else{
