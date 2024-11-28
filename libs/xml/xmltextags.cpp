@@ -21,8 +21,6 @@
 
 #include "xmltextags.h"
 
-#include <string>
-
 #include "qerplugin.h"
 #include "stream/stringstream.h"
 #include "libxml/parser.h"

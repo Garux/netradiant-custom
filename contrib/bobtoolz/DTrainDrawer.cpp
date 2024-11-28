@@ -160,8 +160,8 @@ void DTrainDrawer::renderWireframe( Renderer& renderer, const VolumeTest& volume
 
 void AddSplineControl( const char* control, splinePoint_t* pSP ) {
 	controlPoint_t cp;
-	strncpy( cp.strName, control, sizeof( cp.strName ) - 1 );
-	cp.strName[ sizeof( cp.strName ) - 1 ] = '\0';
+	strncpy( cp.strName, control, std::size( cp.strName ) - 1 );
+	cp.strName[ std::size( cp.strName ) - 1 ] = '\0';
 
 	pSP->m_pointList.push_front( cp );
 }
@@ -298,8 +298,8 @@ void DTrainDrawer::BuildPaths() {
 void DTrainDrawer::AddControlPoint( const char* name, vec_t* origin ){
 	controlPoint_t* pCP = new controlPoint_t;
 
-	strncpy( pCP->strName, name, sizeof( pCP->strName ) - 1 );
-	pCP->strName[ sizeof( pCP->strName ) - 1 ] = '\0';
+	strncpy( pCP->strName, name, std::size( pCP->strName ) - 1 );
+	pCP->strName[ std::size( pCP->strName ) - 1 ] = '\0';
 	VectorCopy( origin, pCP->vOrigin );
 
 	m_pointList.push_back( pCP );
@@ -308,10 +308,10 @@ void DTrainDrawer::AddControlPoint( const char* name, vec_t* origin ){
 splinePoint_t* DTrainDrawer::AddSplinePoint( const char* name, const char* target, vec_t* origin ){
 	splinePoint_t* pSP = new splinePoint_t;
 
-	strncpy( pSP->point.strName, name, sizeof( pSP->point.strName ) - 1 );
-	pSP->point.strName[ sizeof( pSP->point.strName ) - 1 ] = '\0';
-	strncpy( pSP->strTarget, target, sizeof( pSP->strTarget ) - 1 );
-	pSP->strTarget[ sizeof( pSP->strTarget ) - 1 ] = '\0';
+	strncpy( pSP->point.strName, name, std::size( pSP->point.strName ) - 1 );
+	pSP->point.strName[ std::size( pSP->point.strName ) - 1 ] = '\0';
+	strncpy( pSP->strTarget, target, std::size( pSP->strTarget ) - 1 );
+	pSP->strTarget[ std::size( pSP->strTarget ) - 1 ] = '\0';
 	VectorCopy( origin, pSP->point.vOrigin );
 	m_splineList.push_back( pSP );
 

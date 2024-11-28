@@ -549,8 +549,7 @@ class SmartBuffer : private Allocator
 
 	char* copy_range( StringRange range ){
 		char* buffer = Allocator::allocate( sizeof( std::size_t ) + range.size() + 1 );
-		strncpy( buffer + sizeof( std::size_t ), range.data(), range.size() );
-		buffer[sizeof( std::size_t ) + range.size()] = '\0';
+		*std::copy_n( range.data(), range.size(), buffer + sizeof( std::size_t ) ) = '\0';
 		*reinterpret_cast<std::size_t*>( buffer ) = 0;
 		return buffer;
 	}

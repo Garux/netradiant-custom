@@ -24,7 +24,7 @@
 #include <cctype>
 #include "string/string.h"
 #include "container/array.h"
-typedef  unsigned long int ub4;     /* unsigned 4-byte quantities */
+typedef  std::uint32_t ub4;     /* unsigned 4-byte quantities */
 typedef  unsigned char ub1;
 
 inline ub1 ub1_as_ub1_nocase( ub1 byte ){

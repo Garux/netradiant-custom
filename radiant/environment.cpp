@@ -71,8 +71,8 @@ void gamedetect_found_game( const char *game, char *path ){
 	gamedetect_argv_buffer[argc++] = game;
 	gamedetect_argv_buffer[argc++] = buf;
 	gamedetect_argv_buffer[argc++] = path;
-	if ( (size_t) ( argc + g_argc ) >= sizeof( gamedetect_argv_buffer ) / sizeof( *gamedetect_argv_buffer ) - 1 ) {
-		g_argc = sizeof( gamedetect_argv_buffer ) / sizeof( *gamedetect_argv_buffer ) - g_argc - 1;
+	if ( (size_t) ( argc + g_argc ) >= std::size( gamedetect_argv_buffer ) - 1 ) {
+		g_argc = std::size( gamedetect_argv_buffer ) - g_argc - 1;
 	}
 	memcpy( gamedetect_argv_buffer + 4, g_argv, sizeof( *gamedetect_argv_buffer ) * g_argc );
 	g_argc += argc;
@@ -96,7 +96,7 @@ bool gamedetect_check_game( const char *gamefile, const char *checkfile1, const 
 		}
 	}
 
-	buf[bufpos + 1] = 0;
+	buf[bufpos + 1] = '\0';
 	gamedetect_found_game( gamefile, buf );
 	return true;
 }
