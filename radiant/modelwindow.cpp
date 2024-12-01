@@ -1179,15 +1179,15 @@ public:
 };
 
 
-typedef std::set<CopiedString, bool(*)( const CopiedString&, const CopiedString& )> StringSetWithLambda;
+using StringSetNoCase = std::set<CopiedString, StringLessNoCase>;
 
 class ModelPaths_ArchiveVisitor : public Archive::Visitor
 {
-	const StringSetWithLambda& m_modelExtensions;
+	const StringSetNoCase& m_modelExtensions;
 	ModelFS& m_modelFS;
 public:
 	const ModelFoldersMap& m_modelFoldersMap;
-	ModelPaths_ArchiveVisitor( const StringSetWithLambda& modelExtensions, ModelFS& modelFS, const ModelFoldersMap& modelFoldersMap )
+	ModelPaths_ArchiveVisitor( const StringSetNoCase& modelExtensions, ModelFS& modelFS, const ModelFoldersMap& modelFoldersMap )
 		: m_modelExtensions( modelExtensions ),	m_modelFS( modelFS ), m_modelFoldersMap( modelFoldersMap ){
 	}
 	void visit( const char* name ) override {
@@ -1218,9 +1218,7 @@ void ModelBrowser_constructTree(){
 	class : public IFileTypeList
 	{
 	public:
-		StringSetWithLambda m_modelExtensions{ []( const CopiedString& lhs, const CopiedString& rhs )->bool{
-			return string_less_nocase( lhs.c_str(), rhs.c_str() );
-		} };
+		StringSetNoCase m_modelExtensions;
 		void addType( const char* moduleName, filetype_t type ) override {
 			m_modelExtensions.emplace( moduleName );
 		}

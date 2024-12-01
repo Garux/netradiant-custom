@@ -41,13 +41,7 @@ inline bool shader_equal_prefix( const char* string, const char* prefix ){
 	return shader_equal_n( string, prefix, string_length( prefix ) );
 }
 
-class shader_less_t
-{
-public:
-	bool operator()( const CopiedString& shader, const CopiedString& other ) const {
-		return shader_less( shader.c_str(), other.c_str() );
-	}
-};
+using shader_less_t = StringLessNoCase;
 
 inline bool shader_valid( const char* shader ){
 	return string_is_ascii( shader )
