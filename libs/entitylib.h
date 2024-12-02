@@ -448,6 +448,23 @@ private:
 		}
 	}
 
+	KeyValues::const_iterator find( const char* key ) const {
+		/* present in the pool -> actual search makes sense */
+		if( const StringPool::iterator it = getPool().find( const_cast<char *>( key ) ); it != getPool().end() )
+			for( KeyValues::const_iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
+				if( i->first == it )
+					return i;
+		return m_keyValues.end();
+	}
+	KeyValues::iterator find( const char* key ){
+		/* present in the pool -> actual search makes sense */
+		if( const StringPool::iterator it = getPool().find( const_cast<char *>( key ) ); it != getPool().end() )
+			for( KeyValues::iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
+				if( i->first == it )
+					return i;
+		return m_keyValues.end();
+	}
+
 	void insert( const char* key, const KeyValuePtr& keyValue ){
 		KeyValues::iterator i = m_keyValues.insert( KeyValues::value_type( key, keyValue ) );
 		notifyInsert( key, *( *i ).second );
@@ -458,7 +475,7 @@ private:
 	}
 
 	void insert( const char* key, const char* value ){
-		KeyValues::iterator i = m_keyValues.find( key );
+		KeyValues::iterator i = find( key );
 		if ( i != m_keyValues.end() ) {
 			( *i ).second->assign( value );
 		}
@@ -481,7 +498,7 @@ private:
 	}
 
 	void erase( const char* key ){
-		KeyValues::iterator i = m_keyValues.find( key );
+		KeyValues::iterator i = find( key );
 		if ( i != m_keyValues.end() ) {
 			m_undo.save();
 			erase( i );
@@ -616,7 +633,7 @@ public:
 		m_entityKeyValueChanged();
 	}
 	const char* getKeyValue( const char* key ) const override {
-		KeyValues::const_iterator i = m_keyValues.find( key );
+		KeyValues::const_iterator i = find( key );
 		if ( i != m_keyValues.end() ) {
 			return ( *i ).second->c_str();
 		}
@@ -625,7 +642,7 @@ public:
 		return "";
 	}
 	bool hasKeyValue( const char* key ) const override {
-		return m_keyValues.find( key ) != m_keyValues.end();
+		return find( key ) != m_keyValues.end();
 	}
 
 	bool isContainer() const override {

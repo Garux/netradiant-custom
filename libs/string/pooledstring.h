@@ -83,6 +83,9 @@ public:
 	bool operator==( const PooledString& other ) const {
 		return m_i == other.m_i;
 	}
+	bool operator==( const StringPool::iterator i ) const {
+		return m_i == i;
+	}
 	const char* c_str() const {
 		return ( *m_i ).key;
 	}
