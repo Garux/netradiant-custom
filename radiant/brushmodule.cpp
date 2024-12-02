@@ -85,11 +85,6 @@ void Face_exportSnapPlanes( const BoolImportCallback& importer ){
 typedef FreeCaller1<const BoolImportCallback&, Face_exportSnapPlanes> FaceExportSnapPlanesCaller;
 
 void Brush_constructPreferences( PreferencesPage& page ){
-	page.appendCheckBox(
-	    "", "Snap planes to integer grid",
-	    FaceImportSnapPlanesCaller(),
-	    FaceExportSnapPlanesCaller()
-	);
 	page.appendSpinner(
 		"Default texture scale",
 		g_texdef_default_scale,
@@ -110,6 +105,11 @@ void Brush_constructPreferences( PreferencesPage& page ){
 	                     "Always use caulk for new brushes",
 	                     g_brush_always_caulk
 	                   );
+	page.appendCheckBox(
+	    "Dangerous!", "Snap planes to integer grid (may break brushes)",
+	    FaceImportSnapPlanesCaller(),
+	    FaceExportSnapPlanesCaller()
+	);
 }
 void Brush_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Brush", "Brush Settings" ) );

@@ -1209,7 +1209,7 @@ void create_help_menu( QMenuBar *menubar ){
 	create_game_help_menu( menu );
 
 	create_menu_item_with_mnemonic( menu, "Bug report", FreeCaller<OpenBugReportURL>() );
-	create_menu_item_with_mnemonic( menu, "Check for NetRadiant update (web)", "CheckForUpdate" ); // FIXME
+	create_menu_item_with_mnemonic( menu, "Check for NetRadiant update", "CheckForUpdate" ); // FIXME
 	create_menu_item_with_mnemonic( menu, "&About", FreeCaller<DoAbout>() );
 }
 

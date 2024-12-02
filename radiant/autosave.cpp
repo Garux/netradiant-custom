@@ -164,7 +164,7 @@ void QE_CheckAutoSave(){
 }
 
 void Autosave_constructPreferences( PreferencesPage& page ){
-	QCheckBox* autosave_enabled = page.appendCheckBox( "Autosave", "Enable Autosave", g_AutoSave_Enabled );
+	QCheckBox* autosave_enabled = page.appendCheckBox( "", "Enable Autosave", g_AutoSave_Enabled );
 	QWidget* autosave_frequency = page.appendSpinner( "Autosave Frequency (minutes)", m_AutoSave_Frequency, 1, 60 );
 	Widget_connectToggleDependency( autosave_frequency, autosave_enabled );
 	page.appendCheckBox( "", "Save Snapshots", g_SnapShots_Enabled );
