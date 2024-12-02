@@ -41,6 +41,7 @@
 
 #include <list>
 #include <set>
+#include <optional>
 
 inline void arrow_draw( const Vector3& origin, const Vector3& direction_forward, const Vector3& direction_left, const Vector3& direction_up ){
 	Vector3 endpoint( vector3_added( origin, vector3_scaled( direction_forward, 32.0 ) ) );
@@ -347,20 +348,20 @@ public:
 		m_undo.instanceDetach( map );
 	}
 
-	void attach( const KeyObserver& observer ){
+	void attach( const KeyObserver& observer ) override {
 		( *m_observers.insert ( observer ) )( c_str() );
 	}
-	void detach( const KeyObserver& observer ){
+	void detach( const KeyObserver& observer ) override {
 		observer( m_empty );
 		m_observers.erase( observer );
 	}
-	const char* c_str() const {
+	const char* c_str() const override {
 		if ( m_string.empty() ) {
 			return m_empty;
 		}
 		return m_string.c_str();
 	}
-	void assign( const char* other ){
+	void assign( const char* other ) override {
 		if ( !string_equal( m_string.c_str(), other ) ) {
 			m_undo.save();
 			m_string = other;
@@ -421,48 +422,48 @@ private:
 
 	void notifyInsert( const char* key, Value& value ){
 		m_observerMutex = true;
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( Observer *o : m_observers )
 		{
-			( *i )->insert( key, value );
+			o->insert( key, value );
 		}
 		m_observerMutex = false;
 	}
 	void notifyErase( const char* key, Value& value ){
 		m_observerMutex = true;
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( Observer *o : m_observers )
 		{
-			( *i )->erase( key, value );
+			o->erase( key, value );
 		}
 		m_observerMutex = false;
 	}
 	void forEachKeyValue_notifyInsert(){
-		for ( KeyValues::const_iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
+		for ( const auto& [ key, value ] : m_keyValues )
 		{
-			notifyInsert( ( *i ).first.c_str(), *( *i ).second );
+			notifyInsert( key.c_str(), *value );
 		}
 	}
 	void forEachKeyValue_notifyErase(){
-		for ( KeyValues::const_iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
+		for ( const auto& [ key, value ] : m_keyValues )
 		{
-			notifyErase( ( *i ).first.c_str(), *( *i ).second );
+			notifyErase( key.c_str(), *value );
 		}
 	}
 
-	KeyValues::const_iterator find( const char* key ) const {
+	std::optional<KeyValues::const_iterator> find( const char* key ) const {
 		/* present in the pool -> actual search makes sense */
 		if( const StringPool::iterator it = getPool().find( const_cast<char *>( key ) ); it != getPool().end() )
 			for( KeyValues::const_iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
 				if( i->first == it )
 					return i;
-		return m_keyValues.end();
+		return {};
 	}
-	KeyValues::iterator find( const char* key ){
+	std::optional<KeyValues::iterator> find( const char* key ){
 		/* present in the pool -> actual search makes sense */
 		if( const StringPool::iterator it = getPool().find( const_cast<char *>( key ) ); it != getPool().end() )
 			for( KeyValues::iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
 				if( i->first == it )
 					return i;
-		return m_keyValues.end();
+		return {};
 	}
 
 	void insert( const char* key, const KeyValuePtr& keyValue ){
@@ -475,9 +476,8 @@ private:
 	}
 
 	void insert( const char* key, const char* value ){
-		KeyValues::iterator i = find( key );
-		if ( i != m_keyValues.end() ) {
-			( *i ).second->assign( value );
+		if ( auto i = find( key ) ) {
+			( *i )->second->assign( value );
 		}
 		else
 		{
@@ -498,10 +498,9 @@ private:
 	}
 
 	void erase( const char* key ){
-		KeyValues::iterator i = find( key );
-		if ( i != m_keyValues.end() ) {
+		if ( auto i = find( key ) ) {
 			m_undo.save();
-			erase( i );
+			erase( *i );
 		}
 	}
 
@@ -522,9 +521,9 @@ public:
 		m_instanced( false ),
 		m_observerMutex( false ),
 		m_isContainer( other.m_isContainer ){
-		for ( KeyValues::const_iterator i = other.m_keyValues.begin(); i != other.m_keyValues.end(); ++i )
+		for ( const auto& [ key, value ] : other.m_keyValues )
 		{
-			insert( ( *i ).first.c_str(), ( *i ).second->c_str() );
+			insert( key.c_str(), value->c_str() );
 		}
 	}
 	~EntityKeyValues(){
@@ -547,12 +546,12 @@ public:
 	void importState( const KeyValues& keyValues ){
 		for ( KeyValues::iterator i = m_keyValues.begin(); i != m_keyValues.end(); )
 		{
-			erase( i++ );
+			erase( i++ ); // post-increment to allow current element to be removed safely
 		}
 
-		for ( KeyValues::const_iterator i = keyValues.begin(); i != keyValues.end(); ++i )
+		for ( const auto& [ key, value ] : keyValues )
 		{
-			insert( ( *i ).first.c_str(), ( *i ).second );
+			insert( key.c_str(), value );
 		}
 
 		m_entityKeyValueChanged();
@@ -562,30 +561,30 @@ public:
 	void attach( Observer& observer ) override {
 		ASSERT_MESSAGE( !m_observerMutex, "observer cannot be attached during iteration" );
 		m_observers.insert( &observer );
-		for ( KeyValues::const_iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
+		for ( const auto& [ key, value ] : m_keyValues )
 		{
-			observer.insert( ( *i ).first.c_str(), *( *i ).second );
+			observer.insert( key.c_str(), *value );
 		}
 	}
 	void detach( Observer& observer ) override {
 		ASSERT_MESSAGE( !m_observerMutex, "observer cannot be detached during iteration" );
 		m_observers.erase( &observer );
-		for ( KeyValues::const_iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
+		for ( const auto& [ key, value ] : m_keyValues )
 		{
-			observer.erase( ( *i ).first.c_str(), *( *i ).second );
+			observer.erase( key.c_str(), *value );
 		}
 	}
 
 	void forEachKeyValue_instanceAttach( MapFile* map ){
-		for ( KeyValues::const_iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
+		for ( const auto& [ key, value ] : m_keyValues )
 		{
-			( *i ).second->instanceAttach( map );
+			value->instanceAttach( map );
 		}
 	}
 	void forEachKeyValue_instanceDetach( MapFile* map ){
-		for ( KeyValues::const_iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
+		for ( const auto& [ key, value ] : m_keyValues )
 		{
-			( *i ).second->instanceDetach( map );
+			value->instanceDetach( map );
 		}
 	}
 
@@ -616,9 +615,9 @@ public:
 		return m_eclass->name();
 	}
 	void forEachKeyValue( Visitor& visitor ) const override {
-		for ( KeyValues::const_iterator i = m_keyValues.begin(); i != m_keyValues.end(); ++i )
+		for ( const auto& [ key, value ] : m_keyValues )
 		{
-			visitor.visit( ( *i ).first.c_str(), ( *i ).second->c_str() );
+			visitor.visit( key.c_str(), value->c_str() );
 		}
 	}
 	void setKeyValue( const char* key, const char* value ) override {
@@ -633,16 +632,15 @@ public:
 		m_entityKeyValueChanged();
 	}
 	const char* getKeyValue( const char* key ) const override {
-		KeyValues::const_iterator i = find( key );
-		if ( i != m_keyValues.end() ) {
-			return ( *i ).second->c_str();
+		if ( auto i = find( key ) ) {
+			return ( *i )->second->c_str();
 		}
 
 		// return EntityClass_valueForKey( *m_eclass, key );
 		return "";
 	}
 	bool hasKeyValue( const char* key ) const override {
-		return find( key ) != m_keyValues.end();
+		return find( key ).has_value();
 	}
 
 	bool isContainer() const override {
