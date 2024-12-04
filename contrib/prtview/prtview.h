@@ -21,10 +21,4 @@
 
 #define MSG_PREFIX "Portal Viewer plugin: "
 
-void InitInstance();
-void SaveConfig();
-
-int INIGetInt( const char *key, int def );
-void INISetInt( const char *key, int val, const char *comment = 0 );
-
 extern class QWidget *g_pRadiantWnd;

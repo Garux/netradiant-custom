@@ -930,7 +930,6 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	libcommandlib.$(A) \
 	libgtkutil.$(A) \
 	libl_net.$(A) \
-	libprofile.$(A) \
 	libquickhull.$(A) \
 	libxmllib.$(A) \
 	$(if $(findstring Win32,$(OS)),icons/radiant.o,) \
@@ -942,11 +941,6 @@ libfilematch.$(A): \
 libcommandlib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libcommandlib.$(A): \
 	libs/commandlib.o \
-
-libprofile.$(A): CPPFLAGS_EXTRA := -Ilibs -Iinclude
-libprofile.$(A): \
-	libs/profile/file.o \
-	libs/profile/profile.o \
 
 libgtkutil.$(A): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 libgtkutil.$(A): \
@@ -1120,7 +1114,6 @@ $(INSTALLDIR)/plugins/bobtoolz.$(DLL): \
 	contrib/bobtoolz/visfind.o \
 	libcommandlib.$(A) \
 	libmathlib.$(A) \
-	libprofile.$(A) \
 
 $(INSTALLDIR)/plugins/brushexport.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
 $(INSTALLDIR)/plugins/brushexport.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
@@ -1138,7 +1131,6 @@ $(INSTALLDIR)/plugins/prtview.$(DLL): \
 	contrib/prtview/LoadPortalFileDialog.o \
 	contrib/prtview/portals.o \
 	contrib/prtview/prtview.o \
-	libprofile.$(A) \
 
 $(INSTALLDIR)/plugins/shaderplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS) $(LIBS_XML)
 $(INSTALLDIR)/plugins/shaderplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) $(CPPFLAGS_XML) -Ilibs -Iinclude

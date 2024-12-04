@@ -22,7 +22,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "profile/profile.h"
+#include "profile/profile2.h"
 
 #include "qerplugin.h"
 #include "iscenegraph.h"
@@ -36,120 +36,125 @@
 #include "LoadPortalFileDialog.h"
 
 #define Q3R_CMD_SPLITTER "-"
-#define Q3R_CMD_ABOUT "About Portal Viewer"
-#define Q3R_CMD_LOAD "Load .prt file"
-#define Q3R_CMD_RELEASE "Unload .prt file"
-#define Q3R_CMD_SHOW_3D "Toggle portals (3D)"
-#define Q3R_CMD_SHOW_2D "Toggle portals (2D)"
-#define Q3R_CMD_OPTIONS "Configure Portal Viewer"
-
-CopiedString INIfn;
+#define Q3R_CMD_ABOUT    "About Portal Viewer"
+#define Q3R_CMD_LOAD     "Load .prt file"
+#define Q3R_CMD_RELEASE  "Unload .prt file"
+#define Q3R_CMD_SHOW_3D  "Toggle portals (3D)"
+#define Q3R_CMD_SHOW_2D  "Toggle portals (2D)"
+#define Q3R_CMD_OPTIONS  "Configure Portal Viewer"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPrtViewApp construction
 
-const char RENDER_2D[] = "Render2D";
-const char WIDTH_2D[] = "Width2D";
-const char COLOR_2D[] = "Color2D";
+const char RENDER_2D    [] = "Render2D";
+const char WIDTH_2D     [] = "Width2D";
+const char COLOR_2D     [] = "Color2D";
 
-const char DRAW_HINTS[] = "DrawHints";
+const char DRAW_HINTS   [] = "DrawHints";
 const char DRAW_NONHINTS[] = "DrawNonHints";
 
-const char RENDER_3D[] = "Render3D";
-const char WIDTH_3D[] = "Width3D";
-const char COLOR_3D[] = "Color3D";
-const char COLOR_FOG[] = "ColorFog";
-const char FOG[] = "Fog";
-const char ZBUFFER[] = "ZBuffer";
-const char POLYGON[] = "Polygons";
-const char LINE[] = "Lines";
-const char OPACITY_3D[] = "Opacity";
-const char CLIP_RANGE[] = "ClipRange";
-const char CLIP[] = "Clip";
+const char RENDER_3D    [] = "Render3D";
+const char ZBUFFER      [] = "ZBuffer";
+const char FOG          [] = "Fog";
+const char POLYGON      [] = "Polygons";
+const char LINE         [] = "Lines";
+const char WIDTH_3D     [] = "Width3D";
+const char COLOR_3D     [] = "Color3D";
+const char COLOR_FOG    [] = "ColorFog";
+const char OPACITY_3D   [] = "Opacity";
+const char CLIP         [] = "Clip";
+const char CLIP_RANGE   [] = "ClipRange";
 
+class PrtViewIniFile
+{
+	IniFile m_ini;
+	StringOutputStream INI_path() const {
+		return StringStream( GlobalRadiant().getSettingsPath(), "prtview.ini" );
+	}
+	static constexpr char CONFIG_SECTION[] = "Configuration";
+public:
+	void read(){
+		m_ini.read( INI_path() );
+	}
+	void write() const {
+		m_ini.write( INI_path() );
+	}
+	int GetInt( const char *key, int def ) const {
+		const auto value = m_ini.getValue( CONFIG_SECTION, key );
+		return value? atoi( *value ) : def;
+	}
+	void SetInt( const char *key, int val, const char *comment ){
+		char s[512];
+		snprintf( s, std::size( s ), "%d        ; %s", val, comment );
+		m_ini.setValue( CONFIG_SECTION, key, s );
+	}
+};
 
-void PrtView_construct(){
-	INIfn = StringStream( GlobalRadiant().getSettingsPath(), "prtview.ini" );
+void LoadConfig(){
+	PrtViewIniFile ini;
+	ini.read();
 
-	portals.show_2d = INIGetInt( RENDER_2D, 0 );
-	portals.width_2d = std::clamp( INIGetInt( WIDTH_2D, 3 ), 1, 10 );
-	portals.color_2d = INIGetInt( COLOR_2D, RGB_PACK( 0, 0, 255 ) ) & 0xFFFFFF;
+	portals.show_2d                = ini.GetInt( RENDER_2D    , 0 );
+	portals.width_2d   = std::clamp( ini.GetInt( WIDTH_2D     , 3 ), 1, 10 );
+	portals.color_2d               = ini.GetInt( COLOR_2D     , RGB_PACK( 0, 0, 255 ) ) & 0xFFFFFF;
 
-	portals.draw_hints = INIGetInt( DRAW_HINTS, 1 );
-	portals.draw_nonhints = INIGetInt( DRAW_NONHINTS, 1 );
+	portals.draw_hints             = ini.GetInt( DRAW_HINTS   , 1 );
+	portals.draw_nonhints          = ini.GetInt( DRAW_NONHINTS, 1 );
 
-	portals.show_3d = INIGetInt( RENDER_3D, 1 );
-
-	portals.zbuffer = INIGetInt( ZBUFFER, 1 );
-	portals.fog = INIGetInt( FOG, 0 );
-	portals.polygons = INIGetInt( POLYGON, 1 );
-	portals.lines = INIGetInt( LINE, 1 );
-	portals.width_3d = std::clamp( INIGetInt( WIDTH_3D, 3 ), 1, 10 );
-	portals.color_3d = INIGetInt( COLOR_3D, RGB_PACK( 255, 255, 0 ) ) & 0xFFFFFF;
-	portals.color_fog = INIGetInt( COLOR_FOG, RGB_PACK( 127, 127, 127 ) ) & 0xFFFFFF;
-	portals.opacity_3d = std::clamp( INIGetInt( OPACITY_3D, 50 ), 0, 100 );
-	portals.clip = INIGetInt( CLIP, 0 );
-	portals.clip_range = std::clamp( INIGetInt( CLIP_RANGE, 1024 ), 64, 8192 );
+	portals.show_3d                = ini.GetInt( RENDER_3D    , 1 );
+	portals.zbuffer                = ini.GetInt( ZBUFFER      , 1 );
+	portals.fog                    = ini.GetInt( FOG          , 0 );
+	portals.polygons               = ini.GetInt( POLYGON      , 1 );
+	portals.lines                  = ini.GetInt( LINE         , 1 );
+	portals.width_3d   = std::clamp( ini.GetInt( WIDTH_3D     , 3 ), 1, 10 );
+	portals.color_3d               = ini.GetInt( COLOR_3D     , RGB_PACK( 255, 255, 0 ) ) & 0xFFFFFF;
+	portals.color_fog              = ini.GetInt( COLOR_FOG    , RGB_PACK( 127, 127, 127 ) ) & 0xFFFFFF;
+	portals.opacity_3d = std::clamp( ini.GetInt( OPACITY_3D   , 50 ), 0, 100 );
+	portals.clip                   = ini.GetInt( CLIP         , 0 );
+	portals.clip_range = std::clamp( ini.GetInt( CLIP_RANGE   , 1024 ), 64, 8192 );
 
 	if ( portals.zbuffer < 0 || portals.zbuffer > 2 )
 		portals.zbuffer = 0;
 
-
-	SaveConfig();
-
 	portals.FixColors();
+}
 
+void SaveConfig(){
+	PrtViewIniFile ini;
+
+	ini.SetInt( RENDER_2D,     portals.show_2d,       "Draw in 2D windows" );
+	ini.SetInt( WIDTH_2D,      portals.width_2d,      "Width of lines in 2D windows" );
+	ini.SetInt( COLOR_2D,      portals.color_2d,      "Color of lines in 2D windows" );
+
+	ini.SetInt( DRAW_HINTS,    portals.draw_hints,    "Draw Hint Portals" );
+	ini.SetInt( DRAW_NONHINTS, portals.draw_nonhints, "Draw Regular Portals" );
+
+	ini.SetInt( RENDER_3D,     portals.show_3d,       "Draw in 3D windows" );
+	ini.SetInt( ZBUFFER,       portals.zbuffer,       "ZBuffer level in 3D window" );
+	ini.SetInt( FOG,           portals.fog,           "Use depth cueing in 3D window" );
+	ini.SetInt( POLYGON,       portals.polygons,      "Render using polygons in 3D window" );
+	ini.SetInt( LINE,          portals.lines,         "Render using lines in 3D window" );
+	ini.SetInt( WIDTH_3D,      portals.width_3d,      "Width of lines in 3D window" );
+	ini.SetInt( COLOR_3D,      portals.color_3d,      "Color of lines/polygons in 3D window" );
+	ini.SetInt( COLOR_FOG,     portals.color_fog,     "Color of distant lines/polygons in 3D window" );
+	ini.SetInt( OPACITY_3D,    portals.opacity_3d,    "Opacity in 3d view (0 = invisible, 100 = solid)" );
+	ini.SetInt( CLIP,          portals.clip,          "Cubic clipper active for portal viewer" );
+	ini.SetInt( CLIP_RANGE,    portals.clip_range,    "Portal viewer cubic clip distance (in units of 64)" );
+
+	ini.write();
+}
+
+
+void PrtView_construct(){
+	LoadConfig();
 	Portals_constructShaders();
 	GlobalShaderCache().attachRenderable( render );
 }
 
 void PrtView_destroy(){
+	SaveConfig();
 	GlobalShaderCache().detachRenderable( render );
 	Portals_destroyShaders();
-}
-
-void SaveConfig(){
-	INISetInt( RENDER_2D, portals.show_2d, "Draw in 2D windows" );
-	INISetInt( WIDTH_2D, portals.width_2d, "Width of lines in 2D windows" );
-	INISetInt( COLOR_2D, portals.color_2d, "Color of lines in 2D windows" );
-
-	INISetInt( ZBUFFER, portals.zbuffer, "ZBuffer level in 3D window" );
-	INISetInt( FOG, portals.fog, "Use depth cueing in 3D window" );
-	INISetInt( POLYGON, portals.polygons, "Render using polygons in 3D window" );
-	INISetInt( LINE, portals.lines, "Render using lines in 3D window" );
-	INISetInt( RENDER_3D, portals.show_3d, "Draw in 3D windows" );
-	INISetInt( WIDTH_3D, portals.width_3d, "Width of lines in 3D window" );
-	INISetInt( COLOR_3D, portals.color_3d, "Color of lines/polygons in 3D window" );
-	INISetInt( COLOR_FOG, portals.color_fog, "Color of distant lines/polygons in 3D window" );
-	INISetInt( OPACITY_3D, portals.opacity_3d, "Opacity in 3d view (0 = invisible, 100 = solid)" );
-	INISetInt( CLIP, portals.clip, "Cubic clipper active for portal viewer" );
-	INISetInt( CLIP_RANGE, portals.clip_range, "Portal viewer cubic clip distance (in units of 64)" );
-}
-
-
-const char CONFIG_SECTION[] = "Configuration";
-
-int INIGetInt( const char *key, int def ){
-	char value[1024];
-
-	if ( read_var( INIfn.c_str(), CONFIG_SECTION, key, value ) ) {
-		return atoi( value );
-	}
-	else{
-		return def;
-	}
-}
-
-void INISetInt( const char *key, int val, const char *comment /* = NULL */ ){
-	char s[1000];
-
-	if ( comment ) {
-		sprintf( s, "%d        ; %s", val, comment );
-	}
-	else{
-		sprintf( s, "%d", val );
-	}
-	save_var( INIfn.c_str(), CONFIG_SECTION, key, s );
 }
 
 
@@ -192,10 +197,10 @@ const char* QERPlug_GetCommandTitleList(){
 void QERPlug_Dispatch( const char* p, float* vMin, float* vMax, bool bSingleBrush ){
 	globalOutputStream() << MSG_PREFIX "Command \"" << p << "\"\n";
 
-	if ( !strcmp( p,Q3R_CMD_ABOUT ) ) {
+	if ( !strcmp( p, Q3R_CMD_ABOUT ) ) {
 		DoAboutDlg();
 	}
-	else if ( !strcmp( p,Q3R_CMD_LOAD ) ) {
+	else if ( !strcmp( p, Q3R_CMD_LOAD ) ) {
 		if ( DoLoadPortalFileDialog() ) {
 			portals.Load();
 			SceneChangeNotify();
@@ -205,18 +210,17 @@ void QERPlug_Dispatch( const char* p, float* vMin, float* vMax, bool bSingleBrus
 			globalOutputStream() << MSG_PREFIX "Portal file load aborted.\n";
 		}
 	}
-	else if ( !strcmp( p,Q3R_CMD_RELEASE ) ) {
+	else if ( !strcmp( p, Q3R_CMD_RELEASE ) ) {
 		portals.Purge();
 
 		SceneChangeNotify();
 
 		globalOutputStream() << MSG_PREFIX "Portals unloaded.\n";
 	}
-	else if ( !strcmp( p,Q3R_CMD_SHOW_2D ) ) {
+	else if ( !strcmp( p, Q3R_CMD_SHOW_2D ) ) {
 		portals.show_2d = !portals.show_2d;
 
 		SceneChangeNotify();
-		SaveConfig();
 
 		if ( portals.show_2d ) {
 			globalOutputStream() << MSG_PREFIX "Portals will be rendered in 2D view.\n";
@@ -225,9 +229,8 @@ void QERPlug_Dispatch( const char* p, float* vMin, float* vMax, bool bSingleBrus
 			globalOutputStream() << MSG_PREFIX "Portals will NOT be rendered in 2D view.\n";
 		}
 	}
-	else if ( !strcmp( p,Q3R_CMD_SHOW_3D ) ) {
+	else if ( !strcmp( p, Q3R_CMD_SHOW_3D ) ) {
 		portals.show_3d = !portals.show_3d;
-		SaveConfig();
 
 		SceneChangeNotify();
 
@@ -238,9 +241,8 @@ void QERPlug_Dispatch( const char* p, float* vMin, float* vMax, bool bSingleBrus
 			globalOutputStream() << MSG_PREFIX "Portals will NOT be rendered in 3D view.\n";
 		}
 	}
-	else if ( !strcmp( p,Q3R_CMD_OPTIONS ) ) {
+	else if ( !strcmp( p, Q3R_CMD_OPTIONS ) ) {
 		DoConfigDialog();
-		SaveConfig();
 
 		SceneChangeNotify();
 	}

@@ -78,6 +78,12 @@ public:
 		return &( *m_string.begin() );
 	}
 
+	char& front(){
+		return *begin();
+	}
+	const char& front() const {
+		return *begin();
+	}
 	char& back(){
 		return *( end() - 1 );
 	}
