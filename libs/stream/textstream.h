@@ -122,10 +122,6 @@ inline char* write_size_t_decimal_backward( char* ptr, size_t decimal, bool show
 }
 
 
-#ifdef WIN32
-#define snprintf _snprintf
-#endif
-
 /// \brief Writes a single character \p c to \p ostream.
 template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, char c ){
@@ -139,7 +135,7 @@ template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const double d ){
 	const std::size_t bufferSize = 16;
 	char buf[bufferSize];
-	ostream.write( buf, snprintf( buf, bufferSize, "%g", d ) );
+	ostream.write( buf, std::snprintf( buf, bufferSize, "%g", d ) );
 	return ostream;
 }
 
@@ -161,7 +157,7 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 	ostream.write( begin, ( buf + bufferSize ) - begin );
 #else
 	char buf[bufferSize];
-	ostream.write( buf, snprintf( buf, bufferSize, "%i", i ) );
+	ostream.write( buf, std::snprintf( buf, bufferSize, "%i", i ) );
 #endif
 	return ostream;
 }
@@ -178,7 +174,7 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 	ostream.write( begin, ( buf + bufferSize ) - begin );
 #else
 	char buf[bufferSize];
-	ostream.write( buf, snprintf( buf, bufferSize, "%u", i ) );
+	ostream.write( buf, std::snprintf( buf, bufferSize, "%u", i ) );
 #endif
 	return ostream;
 }
@@ -196,7 +192,7 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 	ostream.write( begin, ( buf + bufferSize ) - begin );
 #else
 	char buf[bufferSize];
-	ostream.write( buf, snprintf( buf, bufferSize, "%u", i ) );
+	ostream.write( buf, std::snprintf( buf, bufferSize, "%u", i ) );
 #endif
 	return ostream;
 }
@@ -230,7 +226,7 @@ template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const HexChar& c ){
 	const std::size_t bufferSize = 16;
 	char buf[bufferSize];
-	ostream.write( buf, snprintf( buf, bufferSize, "%X", c.m_value & 0xFF ) );
+	ostream.write( buf, std::snprintf( buf, bufferSize, "%X", c.m_value & 0xFF ) );
 	return ostream;
 }
 
@@ -250,7 +246,7 @@ template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const FloatFormat& formatted ){
 	const std::size_t bufferSize = 32;
 	char buf[bufferSize];
-	ostream.write( buf, snprintf( buf, bufferSize, "%*.*lf", formatted.m_width, formatted.m_precision, formatted.m_f ) );
+	ostream.write( buf, std::snprintf( buf, bufferSize, "%*.*lf", formatted.m_width, formatted.m_precision, formatted.m_f ) );
 	return ostream;
 }
 
@@ -268,7 +264,7 @@ template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const Decimal& decimal ){
 	const std::size_t bufferSize = 22;
 	char buf[bufferSize];
-	const std::size_t length = snprintf( buf, bufferSize, "%10.10lf", decimal.m_f );
+	const std::size_t length = std::snprintf( buf, bufferSize, "%10.10lf", decimal.m_f );
 	const char* first = buf;
 	for (; *first == ' '; ++first )
 	{

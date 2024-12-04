@@ -205,8 +205,7 @@ int Convert_CountLightmaps( const char* dirname ){
 	for ( ; ; lightmapCount++ )
 	{
 		char buf[1024];
-		snprintf( buf, sizeof( buf ), "%s/" EXTERNAL_LIGHTMAP, dirname, lightmapCount );
-		buf[sizeof( buf ) - 1] = 0;
+		std::snprintf( buf, std::size( buf ), "%s/" EXTERNAL_LIGHTMAP, dirname, lightmapCount );
 		if ( !FileExists( buf ) ) {
 			break;
 		}

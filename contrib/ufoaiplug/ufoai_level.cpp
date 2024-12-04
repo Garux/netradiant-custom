@@ -127,10 +127,10 @@ void get_team_count( const char *classname, int *count, int *team ){
  */
 void assign_default_values_to_worldspawn( bool override, const char **returnMsg ){
 	static char message[1024];
+	*message = '\0';
 	Entity* worldspawn;
 	int teams = 0;
 	int count = 0;
-	char str[64];
 
 	worldspawn = Scene_FindEntityByClass( "worldspawn" );
 	if ( !worldspawn ) {
@@ -139,24 +139,22 @@ void assign_default_values_to_worldspawn( bool override, const char **returnMsg 
 		return;
 	}
 
-	*message = '\0';
-	*str = '\0';
-
 	if ( override || !worldspawn->hasKeyValue( "maxlevel" ) ) {
 		// TODO: Get highest brush - a level has 64 units
 		worldspawn->setKeyValue( "maxlevel", "5" );
-		snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Set maxlevel to: %s", "5" );
+		std::snprintf( &message[strlen( message )], std::size( message ) - strlen( message ), "Set maxlevel to: %s", "5" );
 	}
 
 	if ( override || !worldspawn->hasKeyValue( "maxteams" ) ) {
 		get_team_count( "info_player_start", &count, &teams );
 		if ( teams ) {
-			snprintf( str, sizeof( str ) - 1, "%i", teams );
+			char str[64] = { 0 };
+			std::snprintf( str, std::size( str ), "%i", teams );
 			worldspawn->setKeyValue( "maxteams", str );
-			snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Set maxteams to: %s", str );
+			std::snprintf( &message[strlen( message )], std::size( message ) - strlen( message ), "Set maxteams to: %s", str );
 		}
 		if ( count < 16 ) {
-			snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "You should at least place 16 info_player_start" );
+			std::snprintf( &message[strlen( message )], std::size( message ) - strlen( message ), "You should at least place 16 info_player_start" );
 		}
 	}
 
@@ -187,11 +185,11 @@ int check_entity_flags( const char *classname, const char *flag ){
  */
 void check_map_values( const char **returnMsg ){
 	static char message[1024];
+	*message = '\0';
 	int count = 0;
 	int teams = 0;
 	int ent_flags;
 	Entity* worldspawn;
-	char str[64];
 
 	worldspawn = Scene_FindEntityByClass( "worldspawn" );
 	if ( !worldspawn ) {
@@ -200,78 +198,75 @@ void check_map_values( const char **returnMsg ){
 		return;
 	}
 
-	*message = '\0';
-	*str = '\0';
-
 	// multiplayer start positions
 	get_team_count( "info_player_start", &count, &teams );
 	if ( !count ) {
-		strncat( message, "No multiplayer start positions (info_player_start)\n", sizeof( message ) - 1 );
+		strncat( message, "No multiplayer start positions (info_player_start)\n", sizeof( message ) - strlen( message ) - 1 );
 	}
 
 	// singleplayer map?
 	count = 0;
 	get_team_count( "info_human_start", &count, NULL );
 	if ( !count ) {
-		strncat( message, "No singleplayer start positions (info_human_start)\n", sizeof( message ) - 1 );
+		strncat( message, "No singleplayer start positions (info_human_start)\n", sizeof( message ) - strlen( message ) - 1 );
 	}
 
 	// singleplayer map?
 	count = 0;
 	get_team_count( "info_2x2_start", &count, NULL );
 	if ( !count ) {
-		strncat( message, "No singleplayer start positions for 2x2 units (info_2x2_start)\n", sizeof( message ) - 1 );
+		strncat( message, "No singleplayer start positions for 2x2 units (info_2x2_start)\n", sizeof( message ) - strlen( message ) - 1 );
 	}
 
 	// search for civilians
 	count = 0;
 	get_team_count( "info_civilian_start", &count, NULL );
 	if ( !count ) {
-		strncat( message, "No civilian start positions (info_civilian_start)\n", sizeof( message ) - 1 );
+		strncat( message, "No civilian start positions (info_civilian_start)\n", sizeof( message ) - strlen( message ) - 1 );
 	}
 
 	// check maxlevel
 	if ( !worldspawn->hasKeyValue( "maxlevel" ) ) {
-		strncat( message, "Worldspawn: No maxlevel defined\n", sizeof( message ) - 1 );
+		strncat( message, "Worldspawn: No maxlevel defined\n", sizeof( message ) - strlen( message ) - 1 );
 	}
 	else if ( atoi( worldspawn->getKeyValue( "maxlevel" ) ) > 8 ) {
-		strncat( message, "Worldspawn: Highest maxlevel is 8\n", sizeof( message ) - 1 );
+		strncat( message, "Worldspawn: Highest maxlevel is 8\n", sizeof( message ) - strlen( message ) - 1 );
 		worldspawn->setKeyValue( "maxlevel", "8" );
 	}
 
 	ent_flags = check_entity_flags( "func_door", "spawnflags" );
 	if ( ent_flags ) {
-		snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Found %i func_door with no spawnflags\n", ent_flags );
+		std::snprintf( &message[strlen( message )], std::size( message ) - strlen( message ), "Found %i func_door with no spawnflags\n", ent_flags );
 	}
 	ent_flags = check_entity_flags( "func_breakable", "spawnflags" );
 	if ( ent_flags ) {
-		snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Found %i func_breakable with no spawnflags\n", ent_flags );
+		std::snprintf( &message[strlen( message )], std::size( message ) - strlen( message ), "Found %i func_breakable with no spawnflags\n", ent_flags );
 	}
 	ent_flags = check_entity_flags( "misc_sound", "spawnflags" );
 	if ( ent_flags ) {
-		snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Found %i misc_sound with no spawnflags\n", ent_flags );
+		std::snprintf( &message[strlen( message )], std::size( message ) - strlen( message ), "Found %i misc_sound with no spawnflags\n", ent_flags );
 	}
 	ent_flags = check_entity_flags( "misc_model", "spawnflags" );
 	if ( ent_flags ) {
-		snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Found %i misc_model with no spawnflags\n", ent_flags );
+		std::snprintf( &message[strlen( message )], std::size( message ) - strlen( message ), "Found %i misc_model with no spawnflags\n", ent_flags );
 	}
 	ent_flags = check_entity_flags( "misc_particle", "spawnflags" );
 	if ( ent_flags ) {
-		snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Found %i misc_particle with no spawnflags\n", ent_flags );
+		std::snprintf( &message[strlen( message )], std::size( message ) - strlen( message ), "Found %i misc_particle with no spawnflags\n", ent_flags );
 	}
 	ent_flags = check_entity_flags( "info_player_start", "team" );
 	if ( ent_flags ) {
-		snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Found %i info_player_start with no team assigned\n!!Teamcount may change after you've fixed this\n", ent_flags );
+		std::snprintf( &message[strlen( message )], std::size( message ) - strlen( message ), "Found %i info_player_start with no team assigned\n!!Teamcount may change after you've fixed this\n", ent_flags );
 	}
 	ent_flags = check_entity_flags( "light", "color" );
 	ent_flags = check_entity_flags( "light", "_color" );
 	if ( ent_flags ) {
-		snprintf( &message[strlen( message )], sizeof( message ) - 1 - strlen( message ), "Found %i lights with no color value\n", ent_flags );
+		std::snprintf( &message[strlen( message )], std::size( message ) - strlen( message ), "Found %i lights with no color value\n", ent_flags );
 	}
 
 	// no errors found
 	if ( !strlen( message ) ) {
-		snprintf( message, sizeof( message ) - 1, "No errors found - you are ready to compile the map now\n" );
+		std::snprintf( message, std::size( message ), "No errors found - you are ready to compile the map now\n" );
 	}
 
 	*returnMsg = message;

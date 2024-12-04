@@ -337,8 +337,7 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 					if ( g_numDirs == VFS_MAXDIRS ) {
 						continue;
 					}
-					snprintf( g_strDirs[g_numDirs], PATH_MAX, "%s%s/", path, name );
-					g_strDirs[g_numDirs][PATH_MAX] = '\0';
+					std::snprintf( g_strDirs[g_numDirs], PATH_MAX, "%s%s/", path, name );
 					FixDOSName( g_strDirs[g_numDirs] );
 					AddSlash( g_strDirs[g_numDirs] );
 					g_numDirs++;

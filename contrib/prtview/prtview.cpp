@@ -85,7 +85,7 @@ public:
 	}
 	void SetInt( const char *key, int val, const char *comment ){
 		char s[512];
-		snprintf( s, std::size( s ), "%d        ; %s", val, comment );
+		std::snprintf( s, std::size( s ), "%d        ; %s", val, comment );
 		m_ini.setValue( CONFIG_SECTION, key, s );
 	}
 };

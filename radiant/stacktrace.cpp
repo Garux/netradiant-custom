@@ -67,7 +67,7 @@ template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const Address& p ){
 	const std::size_t bufferSize = ( sizeof( void* ) * 2 ) + 1;
 	char buf[bufferSize];
-	ostream.write( buf, snprintf( buf, bufferSize, "%0p", p.m_value ) );
+	ostream.write( buf, std::snprintf( buf, bufferSize, "%0p", p.m_value ) );
 	return ostream;
 }
 
@@ -84,7 +84,7 @@ template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const Offset& p ){
 	const std::size_t bufferSize = ( sizeof( void* ) * 2 ) + 1;
 	char buf[bufferSize];
-	ostream.write( buf, snprintf( buf, bufferSize, "%X", p.m_value ) );
+	ostream.write( buf, std::snprintf( buf, bufferSize, "%X", p.m_value ) );
 	return ostream;
 }
 
@@ -93,7 +93,7 @@ template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const WCHAR* s ){
 	const std::size_t bufferSize = 1024;
 	char buf[bufferSize];
-	ostream.write( buf, snprintf( buf, bufferSize, "%ls", s ) );
+	ostream.write( buf, std::snprintf( buf, bufferSize, "%ls", s ) );
 	return ostream;
 }
 
