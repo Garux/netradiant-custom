@@ -25,48 +25,6 @@
 /// \brief Vector data types and related operations.
 
 #include "generic/vector.h"
-
-#if defined ( _MSC_VER )
-
-inline int lrint( double flt ){
-	int i;
-
-	_asm
-	{
-		fld flt
-		fistp i
-	};
-
-	return i;
-}
-
-inline __int64 llrint( double f ){
-	return static_cast<__int64>( f + 0.5 );
-}
-
-#elif defined( __FreeBSD__ )
-
-inline long lrint( double f ){
-	return static_cast<long>( f + 0.5 );
-}
-
-inline long long llrint( double f ){
-	return static_cast<long long>( f + 0.5 );
-}
-
-#elif defined( __GNUC__ )
-
-// lrint is part of ISO C99
-#define _ISOC9X_SOURCE  1
-#define _ISOC99_SOURCE  1
-
-#define __USE_ISOC9X    1
-#define __USE_ISOC99    1
-
-#else
-#error "unsupported platform"
-#endif
-
 #include <cmath>
 #include <cfloat>
 #include <algorithm>
@@ -89,7 +47,7 @@ inline Element float_mid( const Element& self, const Element& other ){
 /// \brief Returns \p f rounded to the nearest integer. Note that this is not the same behaviour as casting from float to int.
 template<typename Element>
 inline int float_to_integer( const Element& f ){
-	return lrint( f );
+	return std::lrint( f );
 }
 
 /// \brief Returns \p f rounded to the nearest multiple of \p snap.
@@ -99,7 +57,7 @@ inline Element float_snapped( const Element& f, const OtherElement& snap ){
 	if ( snap == 0 ) {
 		return f;
 	}
-	return Element( llrint( f / snap ) * snap ); // llrint has more significant bits
+	return Element( std::llrint( f / snap ) * snap ); // llrint has more significant bits
 }
 
 /// \brief Returns true if \p f has no decimal fraction part.
