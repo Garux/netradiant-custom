@@ -24,7 +24,7 @@
 #include <cstdio>
 #include <cstring>
 #include "ixml.h"
-#include "libxml/parser.h"
+#include <libxml/parser.h>
 #include "stream/textstream.h"
 
 class TextInputStream;

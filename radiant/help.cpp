@@ -26,7 +26,7 @@
 #include <vector>
 #include <list>
 
-#include "libxml/parser.h"
+#include <libxml/parser.h>
 #include "generic/callback.h"
 #include "gtkutil/menu.h"
 #include "stream/stringstream.h"

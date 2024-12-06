@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include "libxml/parser.h"
+#include <libxml/parser.h>
 #include "stream/textstream.h"
 #include "debugging/debugging.h"
 #include "dialog.h"

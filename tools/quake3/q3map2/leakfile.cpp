@@ -30,7 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
-#include "libxml/tree.h"
+#include <libxml/tree.h>
 
 
 

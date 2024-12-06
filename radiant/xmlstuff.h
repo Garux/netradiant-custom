@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include "libxml/parser.h"
+#include <libxml/parser.h>
 
 #include <cstddef>
 

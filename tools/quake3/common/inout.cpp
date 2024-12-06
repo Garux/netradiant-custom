@@ -41,7 +41,7 @@
 
 // network broadcasting
 #include "l_net/l_net.h"
-#include "libxml/tree.h"
+#include <libxml/tree.h>
 
 // utf8 conversion
 #include <glib.h>
