@@ -4429,7 +4429,7 @@ int AAS_ContinueInitReachability(float time)
 		//if the calculation took more time than the max reachability delay
 		if (Sys_MilliSeconds() - start_time > (int) reachability_delay) break;
 		//
-		if (aasworld.numreachabilityareas * 1000 / aasworld.numareas > lastpercentage) break;
+		if (aasworld.numreachabilityareas * 100 / aasworld.numareas > lastpercentage) break;
 	} //end for
 	//
 	if (aasworld.numreachabilityareas == aasworld.numareas)
@@ -4491,8 +4491,8 @@ int AAS_ContinueInitReachability(float time)
 	} //end if
 	else
 	{
-		lastpercentage = aasworld.numreachabilityareas * 1000 / aasworld.numareas;
-		botimport.Print(PRT_MESSAGE, "\r%6.1f%%", (float) lastpercentage / 10);
+		lastpercentage = aasworld.numreachabilityareas * 100 / aasworld.numareas;
+		botimport.Print(PRT_MESSAGE, "\r%6.1f%%", (float) lastpercentage);
 	} //end else
 	//not yet finished
 	return true;

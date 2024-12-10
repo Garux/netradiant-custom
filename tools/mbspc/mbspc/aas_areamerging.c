@@ -330,7 +330,7 @@ void AAS_MergeAreas(void)
 
 	nummerges = 0;
 	Log_Write("AAS_MergeAreas\r\n");
-	qprintf("%6d areas merged", 1);
+	qprintf("%6d areas merged", nummerges);
 	//
 	groundfirst = true;
 	//for (i = 0; i < 4 || merges; i++)
@@ -370,7 +370,7 @@ void AAS_MergeAreas(void)
 					} //end if
 					if (AAS_TryMergeFaceAreas(face))
 					{
-						qprintf("\r%6d", ++nummerges);
+						qprint_progress(++nummerges);
 						merges++;
 						break;
 					} //end if
@@ -383,7 +383,7 @@ void AAS_MergeAreas(void)
 			else break;
 		} //end if
 	} //end for
-	qprintf("\n");
+	qprintf("\r%6d areas merged\n", nummerges);
 	Log_Write("%6d areas merged\r\n", nummerges);
 	//refresh the merged tree
 	AAS_RefreshMergedTree_r(tmpaasworld.nodes);

@@ -458,6 +458,7 @@ void AAS_CreateCurveBrushes(void)
 	winding_t *winding;
 
 	qprintf("nummapbrushsides = %d\n", nummapbrushsides);
+	qprintf("%6d curve brushes", numcurvebrushes);
 	mapent = &entities[0];
 	for (i = 0; i < q3_numDrawSurfaces; i++)
 	{
@@ -506,7 +507,7 @@ void AAS_CreateCurveBrushes(void)
 			brush->contents = CONTENTS_SOLID;
 			//
 			//qprintf("\r%6d curve brushes", nummapbrushsides);//++numcurvebrushes);
-			qprintf("\r%6d curve brushes", ++numcurvebrushes);
+			qprint_progress(++numcurvebrushes);
 			//
 			planenum = FindFloatPlane(pc->planes[facet->surfacePlane].plane, pc->planes[facet->surfacePlane].plane[3]);
 			//

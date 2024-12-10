@@ -425,7 +425,7 @@ tmp_node_t *AAS_SubdivideArea_r(tmp_node_t *tmpnode)
 
 	if (AAS_FindBestAreaSplitPlane(tmpnode->tmparea, normal, &dist))
 	{
-		qprintf("\r%6d", ++numgravitationalsubdivisions);
+		qprint_progress(++numgravitationalsubdivisions);
 		//
 		planenum = FindFloatPlane(normal, dist);
 		//split the area
@@ -475,11 +475,11 @@ void AAS_GravitationalSubdivision(void)
 {
 	Log_Write("AAS_GravitationalSubdivision\r\n");
 	numgravitationalsubdivisions = 0;
-	qprintf("%6i gravitational subdivisions", numgravitationalsubdivisions);
+	qprintf("%6d gravitational subdivisions", numgravitationalsubdivisions);
 	//start with the head node
 	AAS_GravitationalSubdivision_r(tmpaasworld.nodes);
-	qprintf("\n");
-	Log_Write("%6i gravitational subdivisions\r\n", numgravitationalsubdivisions);
+	qprintf("\r%6d gravitational subdivisions\n", numgravitationalsubdivisions);
+	Log_Write("%6d gravitational subdivisions\r\n", numgravitationalsubdivisions);
 } //end of the function AAS_GravitationalSubdivision
 //===========================================================================
 //
@@ -598,7 +598,7 @@ tmp_node_t *AAS_LadderSubdivideArea_r(tmp_node_t *tmpnode)
 	if (!w) return tmpnode;
 	FreeWinding(w);
 	//split the area with a horizontal plane through the lowest point
-	qprintf("\r%6d", ++numladdersubdivisions);
+	qprint_progress(++numladdersubdivisions);
 	//
 	AAS_SplitArea(tmparea, planenum, &frontarea, &backarea);
 	//
@@ -647,10 +647,10 @@ void AAS_LadderSubdivision(void)
 {
 	Log_Write("AAS_LadderSubdivision\r\n");
 	numladdersubdivisions = 0;
-	qprintf("%6i ladder subdivisions", numladdersubdivisions);
+	qprintf("%6d ladder subdivisions", numladdersubdivisions);
 	//start with the head node
 	AAS_LadderSubdivision_r(tmpaasworld.nodes);
 	//
-	qprintf("\n");
-	Log_Write("%6i ladder subdivisions\r\n", numladdersubdivisions);
+	qprintf("\r%6d ladder subdivisions\n", numladdersubdivisions);
+	Log_Write("%6d ladder subdivisions\r\n", numladdersubdivisions);
 } //end of the function AAS_LadderSubdivision

@@ -619,9 +619,9 @@ void AAS_CreateAreaSettings(void)
 		//presence type of the area
 		tmparea->settings->presencetype = tmparea->presencetype;
 		//
-		qprintf("\r%6d", ++i);
+		qprint_progress(++i);
 	} //end for
-	qprintf("\n");
+	qprintf("\r%6d areas provided with settings\n", i);
 #ifdef AASINFO
 	Log_Print("%6d grounded areas\n", numgrounded);
 	Log_Print("%6d ladder areas\n", numladderareas);
@@ -719,7 +719,7 @@ tmp_node_t *AAS_CreateArea(node_t *node)
 			AAS_AddFaceSideToArea(tmpface, 0, tmparea);
 		} //end else
 	} //end for
-	qprintf("\r%6d", tmparea->areanum);
+	qprint_progress(tmparea->areanum);
 	//presence type in the area
 	tmparea->presencetype = ~node->expansionbboxes & cfg.allpresencetypes;
 	//
@@ -790,7 +790,7 @@ void AAS_CreateAreas(node_t *node)
 	Log_Write("AAS_CreateAreas\r\n");
 	qprintf("%6d areas created", 0);
 	tmpaasworld.nodes = AAS_CreateAreas_r(node);
-	qprintf("\n");
+	qprintf("\r%6d areas created\n", tmpaasworld.numareas);
 	Log_Write("%6d areas created\r\n", tmpaasworld.numareas);
 } //end of the function AAS_CreateAreas
 //===========================================================================
@@ -1018,9 +1018,9 @@ void AAS_FlipSharedFaces(void)
 				side2 = face2->frontarea != tmparea1;
 			} //end for
 		} //end for
-		qprintf("\r%6d", ++i);
+		qprint_progress(++i);
 	} //end for
-	qprintf("\n");
+	qprintf("\r%6d areas checked for shared face flipping\n", i);
 	Log_Write("%6d areas checked for shared face flipping\r\n", i);
 } //end of the function AAS_FlipSharedFaces
 //===========================================================================

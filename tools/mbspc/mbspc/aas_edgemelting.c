@@ -100,9 +100,9 @@ void AAS_MeltAreaFaceWindings(void)
 	for (tmparea = tmpaasworld.areas; tmparea; tmparea = tmparea->l_next)
 	{
 		num_windingsplits += AAS_MeltFaceWindingsOfArea(tmparea);
-		qprintf("\r%6d", num_windingsplits);
+		qprint_progress(num_windingsplits);
 	} //end for
-	qprintf("\n");
+	qprintf("\r%6d edges melted\n", num_windingsplits);
 	Log_Write("%6d edges melted\r\n", num_windingsplits);
 } //end of the function AAS_MeltAreaFaceWindings
 

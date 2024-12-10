@@ -613,7 +613,7 @@ void MakeTreePortals_r (node_t *node)
 	int		i;
 
 #ifdef ME
-	qprintf("\r%6d", ++c_numportalizednodes);
+	qprint_progress(++c_numportalizednodes);
 	if (cancelconversion) return;
 #endif //ME
 
@@ -660,7 +660,7 @@ void MakeTreePortals(tree_t *tree)
 	MakeTreePortals_r(tree->headnode);
 
 #ifdef ME
-	qprintf("\n");
+	qprintf("\r%6d nodes portalized\n", c_numportalizednodes);
 	Log_Write("%6d nodes portalized\r\n", c_numportalizednodes);
 	Log_Print("%6d tiny portals\r\n", c_tinyportals);
 	Log_Print("%6d KB of portal memory\r\n", c_portalmemory >> 10);

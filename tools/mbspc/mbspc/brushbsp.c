@@ -1429,8 +1429,7 @@ node_t *BuildTree_r (node_t *node, bspbrush_t *brushes)
 	int			i, totalmem;
 	bspbrush_t	*children[2];
 
-	qprintf("\r%6d", numrecurse);
-	numrecurse++;
+	qprint_progress(++numrecurse);
 
 	if (numthreads == 1)
 	{
@@ -1597,7 +1596,7 @@ void IncreaseNodeCounter(void)
 {
 	ThreadLock();
 	//if (verbose) printf("\r%6d", numrecurse++);
-	qprintf("\r%6d", numrecurse++);
+	qprint_progress(++numrecurse);
 	//qprintf("\r%6d %d, %5d ", numrecurse++, GetNumThreads(), nodelistsize);
 	ThreadUnlock();
 } //end of the function IncreaseNodeCounter
@@ -1731,7 +1730,7 @@ void BuildTree(tree_t *tree)
 	Log_Print("%6d threads max\n", numthreads);
 	if (use_nodequeue) Log_Print("breadth first bsp building\n");
 	else Log_Print("depth first bsp building\n");
-	qprintf("%6d splits", 0);
+	qprintf("%6d splits", numrecurse);
 	//add the first node to the list
 	AddNodeToList(tree->headnode);
 	//start the threads
@@ -1833,7 +1832,7 @@ tree_t *BrushBSP(bspbrush_t *brushlist, vec3_t mins, vec3_t maxs)
 	//if the conversion is cancelled
 	if (cancelconversion) return tree;
 
-	qprintf("\n");
+	qprintf("\r%6d splits\n", numrecurse);
 	Log_Write("%6d splits\r\n", numrecurse);
 //	Log_Print("%6i visible nodes\n", c_nodes/2 - c_nonvis);
 //	Log_Print("%6i nonvis nodes\n", c_nonvis);

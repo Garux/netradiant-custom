@@ -512,7 +512,7 @@ bspbrush_t *HL_MergeBrushes(bspbrush_t *brushlist, int modelnum)
 
 	if (!brushlist) return NULL;
 
-	if (!modelnum) qprintf("%5d brushes merged", nummerges = 0);
+	if (!modelnum) qprintf("%6d brushes merged", nummerges);
 	do
 	{
 		for (tail = brushlist; tail; tail = tail->next)
@@ -549,7 +549,7 @@ bspbrush_t *HL_MergeBrushes(bspbrush_t *brushlist, int modelnum)
 						if (!tail->next) break;
 					} //end for
 					merged++;
-					if (!modelnum) qprintf("\r%5d", nummerges++);
+					if (!modelnum) qprint_progress(++nummerges);
 					break;
 				} //end if
 				lastb2 = b2;
@@ -565,7 +565,7 @@ bspbrush_t *HL_MergeBrushes(bspbrush_t *brushlist, int modelnum)
 		} //end for
 		brushlist = newbrushlist;
 	} while(merged);
-	if (!modelnum) qprintf("\n");
+	if (!modelnum) qprintf("\r%6d brushes merged\n", nummerges);
 	return newbrushlist;
 } //end of the function HL_MergeBrushes
 //===========================================================================
@@ -712,7 +712,7 @@ bspbrush_t *HL_TextureBrushes(bspbrush_t *brushlist, int modelnum)
 	const int lastFaceId = firstFaceId + hl_dmodels[modelnum].numfaces;
 
 	if (!modelnum) qprintf("texturing brushes\n");
-	if (!modelnum) qprintf("%5d brushes", numbrushes = 0);
+	if (!modelnum) qprintf("%6d brushes", numbrushes);
 	//get a pointer to the last brush in the list
 	for (brushlistend = brushlist; brushlistend; brushlistend = brushlistend->next)
 	{
@@ -870,11 +870,11 @@ bspbrush_t *HL_TextureBrushes(bspbrush_t *brushlist, int modelnum)
 			} //end if
 		} //end for
 		//
-		if (!modelnum && prevbrush != brush) qprintf("\r%5d", ++numbrushes);
+		if (!modelnum && prevbrush != brush) qprint_progress(++numbrushes);
 		//previous brush in the list
 		prevbrush = brush;
 	} //end for
-	if (!modelnum) qprintf("\n");
+	if (!modelnum) qprintf("\r%6d brushes\n", numbrushes);
 	//return the new list with brushes
 	return brushlist;
 } //end of the function HL_TextureBrushes
@@ -1042,16 +1042,16 @@ void HL_CreateMapBrushes(entity_t *mapent, int modelnum)
 	} //end if
 	//
 	if (!modelnum) qprintf("converting brushes to map brushes\n");
-	if (!modelnum) qprintf("%5d brushes", i );
+	if (!modelnum) qprintf("%6d brushes", i );
 	for (brush = brushlist; brush; brush = nextbrush)
 	{
 		nextbrush = brush->next;
 		HL_BSPBrushToMapBrush(brush, mapent);
 		brush->next = NULL;
 		FreeBrush(brush);
-		if (!modelnum) qprintf("\r%5d", ++i);
+		if (!modelnum) qprint_progress(++i);
 	} //end for
-	if (!modelnum) qprintf("\n");
+	if (!modelnum) qprintf("\r%6d brushes\n", i );
 } //end of the function HL_CreateMapBrushes
 //===========================================================================
 //

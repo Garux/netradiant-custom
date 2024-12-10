@@ -154,8 +154,7 @@ void AAS_MergeAreaFaces(void)
 				{
 					//start over again after merging two faces
 					restart = true;
-					num_facemerges++;
-					qprintf("\r%6d", num_facemerges);
+					qprint_progress(++num_facemerges);
 					AAS_CheckArea(tmparea);
 					break;
 				} //end if
@@ -168,7 +167,7 @@ void AAS_MergeAreaFaces(void)
 		} //end for
 		lasttmparea = tmparea;
 	} //end for
-	qprintf("\n");
+	qprintf("\r%6d face merges\n", num_facemerges);
 	Log_Write("%6d face merges\r\n", num_facemerges);
 } //end of the function AAS_MergeAreaFaces
 //===========================================================================
@@ -271,12 +270,11 @@ void AAS_MergeAreaPlaneFaces(void)
 			{
 				AAS_MergePlaneFaces(tmparea, face1->planenum);
 				nexttmparea = tmparea;
-				num_facemerges++;
-				qprintf("\r%6d", num_facemerges);
+				qprint_progress(++num_facemerges);
 				break;
 			} //end if
 		} //end for
 	} //end for
-	qprintf("\n");
+	qprintf("\r%6d plane face merges\n", num_facemerges);
 	Log_Write("%6d plane face merges\r\n", num_facemerges);
 } //end of the function AAS_MergeAreaPlaneFaces

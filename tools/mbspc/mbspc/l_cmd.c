@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdint.h>
 #include "l_cmd.h"
 #include "l_log.h"
 #include "l_mem.h"
@@ -219,6 +220,32 @@ void qprintf(char *format, ...)
 #endif //WINBSPC
 	va_end(argptr);
 } //end of the function qprintf
+
+// https://graphics.stanford.edu/~seander/bithacks.html#IntegerLogDeBruijn
+// find the log base 2 of 32-bit v
+int qlog2( int32_t v ){
+	static const int MultiplyDeBruijnBitPosition[32] =
+	{
+	0, 9, 1, 10, 13, 21, 2, 29, 11, 14, 16, 18, 22, 25, 3, 30,
+	8, 12, 20, 28, 15, 17, 24, 7, 19, 27, 23, 6, 26, 5, 4, 31
+	};
+
+	v |= v >> 1; // first round down to one less than a power of 2
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+
+	return MultiplyDeBruijnBitPosition[(uint32_t)(v * 0x07C4ACDDU) >> 27];
+}
+
+void qprint_progress( int count ){
+	int power = qlog2( count );
+	power = power > 13? 8 : ( 1 + ( power >> 1 ) );
+	int flags = ( 1 << power ) - 1;
+	if( ( count & flags ) == 0 )
+		qprintf("\r%6d", count);
+}
 
 void Com_Error(int level, char *error, ...)
 {

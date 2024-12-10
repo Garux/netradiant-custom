@@ -373,7 +373,7 @@ void Q3_FindVisibleBrushSides(void)
 	//create planes for the planar surfaces
 	Q3_CreatePlanarSurfacePlanes();
 	Log_Print("searching visible brush sides...\n");
-	Log_Print("%6d brush sides", numsides);
+	qprintf("%6d brush sides", numsides);
 	//go over all the brushes
 	for (i = 0; i < q3_numbrushes; i++)
 	{
@@ -381,7 +381,7 @@ void Q3_FindVisibleBrushSides(void)
 		//go over all the sides of the brush
 		for (j = 0; j < brush->numSides; j++)
 		{
-			qprintf("\r%6d", numsides++);
+			qprint_progress(++numsides);
 			brushside = &q3_dbrushsides[brush->firstSide + j];
 			//
 			w = Q3_BrushSideWinding(brush, brushside);
@@ -443,13 +443,14 @@ void Q3_FindVisibleBrushSides(void)
 		} //end for
 	} //end for
 	qprintf("\r%6d brush sides\n", numsides);
+	Log_Write("%6d brush sides\n", numsides);
 	numtextured = 0;
 	for (i = 0; i < q3_numbrushsides; i++)
 	{
 		if (forcesidesvisible) q3_dbrushsidetextured[i] = true;
 		if (q3_dbrushsidetextured[i]) numtextured++;
 	} //end for
-	Log_Print("%d brush sides textured out of %d\n", numtextured, q3_numbrushsides);
+	Log_Print("%6d brush sides textured out of %d\n", numtextured, q3_numbrushsides);
 } //end of the function Q3_FindVisibleBrushSides
 
 /*

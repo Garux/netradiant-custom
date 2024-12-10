@@ -125,6 +125,7 @@ extern	char			archivedir[1024];
 
 extern	qboolean verbose;
 void qprintf (char *format, ...);
+void qprint_progress( int count );
 
 void ExpandWildcards (int *argc, char ***argv);
 

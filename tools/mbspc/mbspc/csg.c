@@ -270,13 +270,13 @@ bspbrush_t *TryMergeBrushes(bspbrush_t *brush1, bspbrush_t *brush2)
 //===========================================================================
 bspbrush_t *MergeBrushes(bspbrush_t *brushlist)
 {
-	int nummerges, merged;
+	int nummerges = 0, merged;
 	bspbrush_t *b1, *b2, *tail, *newbrush, *newbrushlist;
 	bspbrush_t *lastb2;
 
 	if (!brushlist) return NULL;
 
-	qprintf("%5d brushes merged", nummerges = 0);
+	qprintf("%6d brushes merged", nummerges);
 	do
 	{
 		for (tail = brushlist; tail; tail = tail->next)
@@ -306,7 +306,7 @@ bspbrush_t *MergeBrushes(bspbrush_t *brushlist)
 						if (!tail->next) break;
 					} //end for
 					merged++;
-					qprintf("\r%5d", nummerges++);
+					qprint_progress(++nummerges);
 					break;
 				} //end if
 				lastb2 = b2;
@@ -322,7 +322,7 @@ bspbrush_t *MergeBrushes(bspbrush_t *brushlist)
 		} //end for
 		brushlist = newbrushlist;
 	} while(merged);
-	qprintf("\n");
+	qprintf("\r%6d brushes merged\n", nummerges);
 	return newbrushlist;
 } //end of the function MergeBrushes
 //===========================================================================
@@ -848,13 +848,12 @@ newlist:
 			b1->next = keep;
 			keep = b1;
 		} //end if
-		num_csg_iterations++;
-		qprintf("\r%6d", num_csg_iterations);
+		qprint_progress(++num_csg_iterations);
 	} //end for
 
 	if (cancelconversion) return keep;
 	//
-	qprintf("\n");
+	qprintf("\r%6d output brushes\n", num_csg_iterations);
 	Log_Write("%6d output brushes\r\n", num_csg_iterations);
 
 #if 0

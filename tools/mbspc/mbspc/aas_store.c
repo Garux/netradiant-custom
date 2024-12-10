@@ -1006,7 +1006,7 @@ int AAS_StoreArea(tmp_area_t *tmparea)
 	AAS_StoreAreaSettings(tmparea->settings);
 	//
 	//Log_Write("tmp area %d became aas area %d\r\n", tmpareanum, aasarea->areanum);
-	qprintf("\r%6d", aasarea->areanum);
+	qprint_progress(aasarea->areanum);
 	//
 	aasworld.numareas++;
 	return -(aasworld.numareas - 1);
@@ -1074,7 +1074,7 @@ void AAS_StoreFile(char *filename)
 	qprintf("%6d areas stored", 0);
 	//start with node 1 because node zero is a dummy
 	AAS_StoreTree_r(tmpaasworld.nodes);
-	qprintf("\n");
+	qprintf("\r%6d areas stored\n", aasworld.numareas);
 	Log_Write("%6d areas stored\r\n", aasworld.numareas);
 	aasworld.loaded = true;
 } //end of the function AAS_StoreFile
