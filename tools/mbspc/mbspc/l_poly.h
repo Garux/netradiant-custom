@@ -50,7 +50,7 @@ vec_t WindingArea (winding_t *w);
 void WindingCenter (winding_t *w, vec3_t center);
 //clips the given winding to the given plane and gives the front
 //and back part of the clipped winding
-void ClipWindingEpsilon (winding_t *in, vec3_t normal, vec_t dist, 
+void ClipWindingEpsilon (winding_t *in, vec3_t normal, vec_t dist,
 					vec_t epsilon, winding_t **front, winding_t **back);
 //returns the fragment of the given winding that is on the front
 //side of the cliping plane. The original is freed.
@@ -103,7 +103,7 @@ void RemoveEqualPoints(winding_t *w, float epsilon);
 winding_t *AddWindingPoint(winding_t *w, vec3_t point, int spot);
 //returns true if the point is on one of the winding 'edges'
 //when the point is on one of the edged the number of the first
-//point of the edge is stored in 'spot' 
+//point of the edge is stored in 'spot'
 int PointOnWinding(winding_t *w, vec3_t normal, float dist, vec3_t point, int *spot);
 //find a plane separating the two windings
 //true is returned when the windings area adjacent

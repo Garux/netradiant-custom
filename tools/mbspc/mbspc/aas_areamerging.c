@@ -65,7 +65,7 @@ int NonConvex(tmp_face_t *face1, tmp_face_t *face2, int side1, int side2)
 	int i;
 	winding_t *w1, *w2;
 	plane_t *plane1, *plane2;
-	
+
 	w1 = face1->winding;
 	w2 = face2->winding;
 

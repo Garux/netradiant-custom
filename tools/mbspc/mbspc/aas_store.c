@@ -284,7 +284,7 @@ void AAS_FreeMaxAAS(void)
 	if (aasworld.clusters) FreeMemory(aasworld.clusters);
 	aasworld.clusters = NULL;
 	aasworld.numclusters = 0;
-	
+
 	Log_Print("freed ");
 	PrintMemorySize(allocatedaasmem);
 	Log_Print(" of AAS memory\n");
@@ -316,7 +316,7 @@ unsigned AAS_HashVec(vec3_t vec)
 		Log_Print("This should never happen!\n");
 		return -1;
 	} //end if
-	
+
 	return y*VERTEX_HASH_SIZE + x;
 } //end of the function AAS_HashVec
 //===========================================================================
@@ -338,7 +338,7 @@ qboolean AAS_GetVertex(vec3_t v, int *vnum)
 #ifdef VERTEX_HASHING
 	int h, vn;
 	vec3_t vert;
-	
+
 	for (i = 0; i < 3; i++)
 	{
 		if ( fabs(v[i] - Q_rint(v[i])) < INTEGRAL_EPSILON)
@@ -560,7 +560,7 @@ qboolean AAS_GetEdge(vec3_t v1, vec3_t v2, int *edgenum)
 int AAS_PlaneTypeForNormal(vec3_t normal)
 {
 	vec_t	ax, ay, az;
-	
+
 	//NOTE: epsilon used
 	if (	(normal[0] >= 1.0 -NORMAL_EPSILON) ||
 			(normal[0] <= -1.0 + NORMAL_EPSILON)) return PLANE_X;
@@ -568,11 +568,11 @@ int AAS_PlaneTypeForNormal(vec3_t normal)
 			(normal[1] <= -1.0 + NORMAL_EPSILON)) return PLANE_Y;
 	if (	(normal[2] >= 1.0 -NORMAL_EPSILON) ||
 			(normal[2] <= -1.0 + NORMAL_EPSILON)) return PLANE_Z;
-		
+
 	ax = fabs(normal[0]);
 	ay = fabs(normal[1]);
 	az = fabs(normal[2]);
-	
+
 	if (ax >= ay && ax >= az) return PLANE_ANYX;
 	if (ay >= ax && ay >= az) return PLANE_ANYY;
 	return PLANE_ANYZ;

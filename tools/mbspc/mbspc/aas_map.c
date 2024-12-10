@@ -807,7 +807,7 @@ void AAS_CreateMapBrushes(mapbrush_t *brush, entity_t *mapent, int addbevels)
 	//liquid brushes are expanded for the maximum possible bounding box
 	if (brush->contents & (CONTENTS_WATER
 									| CONTENTS_LAVA
-									| CONTENTS_SLIME 
+									| CONTENTS_SLIME
 									| CONTENTS_TELEPORTER
 									| CONTENTS_JUMPPAD
 									| CONTENTS_DONOTENTER

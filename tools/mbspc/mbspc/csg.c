@@ -501,7 +501,7 @@ bspbrush_t *ClipBrushToBox(bspbrush_t *brush, vec3_t clipmins, vec3_t clipmaxs)
 	for (i=0 ; i<brush->numsides ; i++)
 	{
 		p = brush->sides[i].planenum & ~1;
-		if (p == maxplanenums[0] || p == maxplanenums[1] 
+		if (p == maxplanenums[0] || p == maxplanenums[1]
 			|| p == minplanenums[0] || p == minplanenums[1])
 		{
 			brush->sides[i].texinfo = TEXINFO_NODE;
@@ -709,13 +709,13 @@ qboolean BrushGE (bspbrush_t *b1, bspbrush_t *b2)
 		//never have a ladder brush bite something else
 		if ( (b1->original->contents & CONTENTS_LADDER)
 			&& !(b2->original->contents & CONTENTS_LADDER))
-		{ 
+		{
 			return false;
 		} //end if
 	} //end if
 #endif //ME
 	// detail brushes never bite structural brushes
-	if ( (b1->original->contents & CONTENTS_DETAIL) 
+	if ( (b1->original->contents & CONTENTS_DETAIL)
 		&& !(b2->original->contents & CONTENTS_DETAIL) )
 	{
 		return false;
@@ -773,7 +773,7 @@ newlist:
 			keep = b1;
 			continue;
 		} //end if
-		
+
 		for (b2 = b1->next; b2; b2 = b2->next)
 		{
 			if (BrushesDisjoint (b1, b2))
@@ -980,7 +980,7 @@ tree_t *ProcessWorldBrushes(int brush_start, int brush_end)
 	else
 	{
 		//Carves any intersecting solid brushes into the minimum number
-		//of non-intersecting brushes. 
+		//of non-intersecting brushes.
 		if (!nocsg)
 		{
 			brushes = ChopBrushes(brushes);

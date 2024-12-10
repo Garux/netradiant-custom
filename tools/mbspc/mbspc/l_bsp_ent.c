@@ -57,7 +57,7 @@ epair_t *ParseEpair(script_t *script)
 
 	e = GetMemory(sizeof(epair_t));
 	memset (e, 0, sizeof(epair_t));
-	
+
 	PS_ExpectAnyToken(script, &token);
 	StripDoubleQuotes(token.string);
 	if (strlen(token.string) >= MAX_KEY-1)
@@ -93,7 +93,7 @@ qboolean	ParseEntity(script_t *script)
 
 	if (strcmp(token.string, "{"))
 		Error ("ParseEntity: { not found");
-	
+
 	if (num_entities == MAX_MAP_ENTITIES)
 		Error ("num_entities == MAX_MAP_ENTITIES");
 
@@ -111,14 +111,14 @@ qboolean	ParseEntity(script_t *script)
 		e->next = mapent->epairs;
 		mapent->epairs = e;
 	} while (1);
-	
+
 	return true;
 } //end of the function ParseEntity
 
 void PrintEntity (entity_t *ent)
 {
 	epair_t	*ep;
-	
+
 	printf ("------- entity %p -------\n", ent);
 	for (ep=ent->epairs ; ep ; ep=ep->next)
 	{
@@ -130,7 +130,7 @@ void PrintEntity (entity_t *ent)
 void 	SetKeyValue (entity_t *ent, char *key, char *value)
 {
 	epair_t	*ep;
-	
+
 	for (ep=ent->epairs ; ep ; ep=ep->next)
 		if (!strcmp (ep->key, key) )
 		{
@@ -148,7 +148,7 @@ void 	SetKeyValue (entity_t *ent, char *key, char *value)
 char 	*ValueForKey (entity_t *ent, char *key)
 {
 	epair_t	*ep;
-	
+
 	for (ep=ent->epairs ; ep ; ep=ep->next)
 		if (!strcmp (ep->key, key) )
 			return ep->value;
@@ -158,7 +158,7 @@ char 	*ValueForKey (entity_t *ent, char *key)
 vec_t	FloatForKey (entity_t *ent, char *key)
 {
 	char	*k;
-	
+
 	k = ValueForKey (ent, key);
 	return atof(k);
 }

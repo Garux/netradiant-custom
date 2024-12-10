@@ -285,7 +285,7 @@ void Q2_ParseBrush (script_t *script, entity_t *mapent)
 			side->contents |= CONTENTS_DETAIL;
 		if (fulldetail)
 			side->contents &= ~CONTENTS_DETAIL;
-		if (!(side->contents & ((LAST_VISIBLE_CONTENTS-1) 
+		if (!(side->contents & ((LAST_VISIBLE_CONTENTS-1)
 			| CONTENTS_PLAYERCLIP|CONTENTS_MONSTERCLIP|CONTENTS_MIST)  ) )
 			side->contents |= CONTENTS_SOLID;
 
@@ -370,7 +370,7 @@ void Q2_ParseBrush (script_t *script, entity_t *mapent)
 	} //end if
 #endif //ME
 
-	// allow detail brushes to be removed 
+	// allow detail brushes to be removed
 	if (nodetail && (b->contents & CONTENTS_DETAIL) )
 	{
 		b->numsides = 0;
@@ -432,7 +432,7 @@ void Q2_ParseBrush (script_t *script, entity_t *mapent)
 	AddBrushBevels(b);
 
 	nummapbrushes++;
-	mapent->numbrushes++;		
+	mapent->numbrushes++;
 }
 
 /*
@@ -502,7 +502,7 @@ qboolean	Q2_ParseMapEntity(script_t *script)
 
 	if (strcmp(token.string, "{") )
 		Error ("ParseEntity: { not found");
-	
+
 	if (num_entities == MAX_MAP_ENTITIES)
 		Error ("num_entities == MAX_MAP_ENTITIES");
 
@@ -598,7 +598,7 @@ LoadMapFile
 ================
 */
 void Q2_LoadMapFile(char *filename)
-{		
+{
 	int i;
 	script_t *script;
 
@@ -623,7 +623,7 @@ void Q2_LoadMapFile(char *filename)
 
 	nummapbrushsides = 0;
 	num_entities = 0;
-	
+
 	while (Q2_ParseMapEntity(script))
 	{
 	}
@@ -726,7 +726,7 @@ void Q2_SetBrushModelNumbers(entity_t *mapent)
 	//head node (root) of the bsp tree
 	n = dmodels[mapent->modelnum].headnode;
 	pn = 0;
-	
+
 	do
 	{
 		//if we are in a leaf (negative node number)
@@ -811,7 +811,7 @@ void Q2_BSPBrushToMapBrush(dbrush_t *bspbrush, entity_t *mapent)
 			side->contents |= CONTENTS_DETAIL;
 		if (fulldetail)
 			side->contents &= ~CONTENTS_DETAIL;
-		if (!(side->contents & ((LAST_VISIBLE_CONTENTS-1) 
+		if (!(side->contents & ((LAST_VISIBLE_CONTENTS-1)
 			| CONTENTS_PLAYERCLIP|CONTENTS_MONSTERCLIP|CONTENTS_MIST)  ) )
 			side->contents |= CONTENTS_SOLID;
 
@@ -895,7 +895,7 @@ void Q2_BSPBrushToMapBrush(dbrush_t *bspbrush, entity_t *mapent)
 		return;
 	} //end if
 
-	// allow detail brushes to be removed 
+	// allow detail brushes to be removed
 	if (nodetail && (b->contents & CONTENTS_DETAIL) )
 	{
 		b->numsides = 0;

@@ -53,7 +53,7 @@ WritePortalFile_r
 */
 void WritePortalFile_r (node_t *node)
 {
-	int			i, s;	
+	int			i, s;
 	portal_t	*p;
 	winding_t	*w;
 	vec3_t		normal;
@@ -66,7 +66,7 @@ void WritePortalFile_r (node_t *node)
 		WritePortalFile_r (node->children[1]);
 		return;
 	}
-	
+
 	if (node->contents & CONTENTS_SOLID)
 		return;
 
@@ -79,7 +79,7 @@ void WritePortalFile_r (node_t *node)
 			if (!Portal_VisFlood (p))
 				continue;
 		// write out to the file
-		
+
 		// sometimes planes get turned around when they are very near
 		// the changeover point between different axis.  interpret the
 		// plane the same way vis will, and flip the side orders if needed
@@ -143,7 +143,7 @@ void NumberLeafs_r (node_t *node)
 		NumberLeafs_r (node->children[1]);
 		return;
 	}
-	
+
 	// either a leaf or a detail cluster
 
 	if ( node->contents & CONTENTS_SOLID )
@@ -165,7 +165,7 @@ void NumberLeafs_r (node_t *node)
 			p = p->next[0];
 		}
 		else
-			p = p->next[1];		
+			p = p->next[1];
 	}
 
 }
@@ -260,14 +260,14 @@ void WritePortalFile (tree_t *tree)
 // set the cluster field in every leaf and count the total number of portals
 
 	NumberLeafs_r (headnode);
-	
+
 // write the file
 	sprintf (filename, "%s.prt", source);
 	printf ("writing %s\n", filename);
 	pf = fopen (filename, "w");
 	if (!pf)
 		Error ("Error opening %s", filename);
-		
+
 	fprintf (pf, "%s\n", PORTALFILE);
 	fprintf (pf, "%i\n", num_visclusters);
 	fprintf (pf, "%i\n", num_visportals);

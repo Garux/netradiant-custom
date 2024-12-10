@@ -398,7 +398,7 @@ int AAS_WriteAASLump(FILE *fp, aas_header_t *h, int lumpnum, void *data, int len
 	aas_lump_t *lump;
 
 	lump = &h->lumps[lumpnum];
-	
+
 	lump->fileofs = LittleLong(ftell(fp));
 	lump->filelen = LittleLong(length);
 

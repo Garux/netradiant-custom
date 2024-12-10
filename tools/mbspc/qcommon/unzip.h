@@ -23,14 +23,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #if defined(STRICTUNZIP) || defined(STRICTZIPUNZIP)
 /* like the STRICT of WIN32, we define a pointer that cannot be converted
     from (void*) without cast */
-typedef struct TagunzFile__ { int unused; } unzFile__; 
+typedef struct TagunzFile__ { int unused; } unzFile__;
 typedef unzFile__ *unzFile;
 #else
 typedef void* unzFile;
 #endif
 
 /* tm_unz contain date/time info */
-typedef struct tm_unz_s 
+typedef struct tm_unz_s
 {
 	unsigned int tm_sec;            /* seconds after the minute - [0,59] */
 	unsigned int tm_min;            /* minutes after the hour - [0,59] */
@@ -58,8 +58,8 @@ typedef struct unz_file_info_s
     unsigned long compression_method;   /* compression method              2 unsigned chars */
     unsigned long dosDate;              /* last mod file date in Dos fmt   4 unsigned chars */
     unsigned long crc;                  /* crc-32                          4 unsigned chars */
-    unsigned long compressed_size;      /* compressed size                 4 unsigned chars */ 
-    unsigned long uncompressed_size;    /* uncompressed size               4 unsigned chars */ 
+    unsigned long compressed_size;      /* compressed size                 4 unsigned chars */
+    unsigned long uncompressed_size;    /* uncompressed size               4 unsigned chars */
     unsigned long size_filename;        /* filename length                 2 unsigned chars */
     unsigned long size_file_extra;      /* extra field length              2 unsigned chars */
     unsigned long size_file_comment;    /* file comment length             2 unsigned chars */
@@ -294,7 +294,7 @@ extern int unzCloseCurrentFile (unzFile file);
   Return UNZ_CRCERROR if all the file was read but the CRC is not good
 */
 
-												
+
 extern int unzReadCurrentFile (unzFile file, void* buf, unsigned len);
 
 /*
@@ -317,7 +317,7 @@ extern long unztell(unzFile file);
 extern int unzeof (unzFile file);
 
 /*
-  return 1 if the end of file was reached, 0 elsewhere 
+  return 1 if the end of file was reached, 0 elsewhere
 */
 
 extern int unzGetLocalExtrafield (unzFile file, void* buf, unsigned len);
@@ -331,6 +331,6 @@ extern int unzGetLocalExtrafield (unzFile file, void* buf, unsigned len);
 
   if buf!=NULL, len is the size of the buffer, the extra header is copied in
 	buf.
-  the return value is the number of unsigned chars copied in buf, or (if <0) 
+  the return value is the number of unsigned chars copied in buf, or (if <0)
 	the error code
 */

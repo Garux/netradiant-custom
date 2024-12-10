@@ -67,9 +67,9 @@ int Sin_BrushContents(mapbrush_t *b)
 		if (s->contents != contents)
 		{
 #ifdef SIN
-      if ( 
+      if (
             ( s->contents & CONTENTS_DETAIL && !(contents & CONTENTS_DETAIL) ) ||
-            ( !(s->contents & CONTENTS_DETAIL) && contents & CONTENTS_DETAIL ) 
+            ( !(s->contents & CONTENTS_DETAIL) && contents & CONTENTS_DETAIL )
          )
          {
          s->contents |= CONTENTS_DETAIL;
@@ -164,17 +164,17 @@ void ParseBrush (entity_t *mapent)
 				GetToken (true);
 			if (strcmp (token, "(") )
 				Error ("parsing brush");
-			
+
 			for (j=0 ; j<3 ; j++)
 			{
 				GetToken (false);
 				planepts[i][j] = atoi(token);
 			}
-			
+
 			GetToken (false);
 			if (strcmp (token, ")") )
 				Error ("parsing brush");
-				
+
 		}
 
 
@@ -190,9 +190,9 @@ void ParseBrush (entity_t *mapent)
 		td.shift[1] = atoi(token);
 		GetToken (false);
 #ifdef SIN
-		td.rotate = atof(token);	
+		td.rotate = atof(token);
 #else
-		td.rotate = atoi(token);	
+		td.rotate = atoi(token);
 #endif
 		GetToken (false);
 		td.scale[0] = atof(token);
@@ -239,7 +239,7 @@ void ParseBrush (entity_t *mapent)
 			side->contents |= CONTENTS_DETAIL;
 		if (fulldetail)
 			side->contents &= ~CONTENTS_DETAIL;
-		if (!(side->contents & ((LAST_VISIBLE_CONTENTS-1) 
+		if (!(side->contents & ((LAST_VISIBLE_CONTENTS-1)
 			| CONTENTS_PLAYERCLIP|CONTENTS_MONSTERCLIP|CONTENTS_MIST)  ) )
 			side->contents |= CONTENTS_SOLID;
 
@@ -294,7 +294,7 @@ void ParseBrush (entity_t *mapent)
 #ifdef SIN
 		side->texinfo = TexinfoForBrushTexture (&mapplanes[planenum],
 			&td, vec3_origin, &newref);
-      // 
+      //
       // save off lightinfo
       //
 		side->lightinfo = LightinfoForBrushTexture ( &td );
@@ -319,7 +319,7 @@ void ParseBrush (entity_t *mapent)
 	// get the content for the entire brush
 	b->contents = Sin_BrushContents (b);
 
-	// allow detail brushes to be removed 
+	// allow detail brushes to be removed
 	if (nodetail && (b->contents & CONTENTS_DETAIL) )
 	{
 		b->numsides = 0;
@@ -381,7 +381,7 @@ void ParseBrush (entity_t *mapent)
 	AddBrushBevels (b);
 
 	nummapbrushes++;
-	mapent->numbrushes++;		
+	mapent->numbrushes++;
 } //*/
 
 /*
@@ -451,7 +451,7 @@ qboolean	Sin_ParseMapEntity (void)
 
 	if (strcmp (token, "{") )
 		Error ("ParseEntity: { not found");
-	
+
 	if (num_entities == MAX_MAP_ENTITIES)
 		Error ("num_entities == MAX_MAP_ENTITIES");
 
@@ -560,7 +560,7 @@ qboolean	Sin_ParseMapEntity (void)
 #ifdef SIN
 				s->texinfo = TexinfoForBrushTexture (&mapplanes[s->planenum],
 					&side_brushtextures[s-brushsides], mapent->origin, &side_newrefs[s-brushsides]);
-            // 
+            //
             // save off lightinfo
             //
             s->lightinfo = LightinfoForBrushTexture (	&side_brushtextures[s-brushsides] );
@@ -659,7 +659,7 @@ LoadMapFile
 ================
 * /
 void Sin_LoadMapFile (char *filename)
-{		
+{
 	int		i;
 #ifdef SIN
    int num_detailsides=0;
@@ -675,7 +675,7 @@ void Sin_LoadMapFile (char *filename)
 
 	nummapbrushsides = 0;
 	num_entities = 0;
-	
+
 	while (ParseMapEntity ())
 	{
 	}
@@ -837,7 +837,7 @@ void Sin_SetBrushModelNumbers(entity_t *mapent)
 	//head node (root) of the bsp tree
 	n = sin_dmodels[mapent->modelnum].headnode;
 	pn = 0;
-	
+
 	do
 	{
 		//if we are in a leaf (negative node number)
@@ -922,7 +922,7 @@ void Sin_BSPBrushToMapBrush(sin_dbrush_t *bspbrush, entity_t *mapent)
 			side->contents |= CONTENTS_DETAIL;
 		if (fulldetail)
 			side->contents &= ~CONTENTS_DETAIL;
-		if (!(side->contents & ((LAST_VISIBLE_CONTENTS-1) 
+		if (!(side->contents & ((LAST_VISIBLE_CONTENTS-1)
 			| CONTENTS_PLAYERCLIP|CONTENTS_MONSTERCLIP|CONTENTS_MIST)  ) )
 			side->contents |= CONTENTS_SOLID;
 
@@ -1003,7 +1003,7 @@ void Sin_BSPBrushToMapBrush(sin_dbrush_t *bspbrush, entity_t *mapent)
 		return;
 	} //end if
 
-	// allow detail brushes to be removed 
+	// allow detail brushes to be removed
 	if (nodetail && (b->contents & CONTENTS_DETAIL) )
 	{
 		b->numsides = 0;

@@ -174,7 +174,7 @@ int			draw_socket;
 void GLS_BeginScene (void)
 {
 	WSADATA	winsockdata;
-	WORD	wVersionRequested; 
+	WORD	wVersionRequested;
 	struct sockaddr_in	address;
 	int		r;
 
@@ -182,7 +182,7 @@ void GLS_BeginScene (void)
 	{
 		wins_init = true;
 
-		wVersionRequested = MAKEWORD(1, 1); 
+		wVersionRequested = MAKEWORD(1, 1);
 
 		r = WSAStartup (MAKEWORD(1, 1), &winsockdata);
 

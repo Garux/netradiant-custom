@@ -106,7 +106,7 @@ typedef struct
 typedef struct
 {
 	int			ident;
-	int			version;	
+	int			version;
 	sin_lump_t	lumps[SINHEADER_LUMPS];
 } sin_dheader_t;
 
@@ -290,7 +290,7 @@ typedef struct
 	short		side;
 
 	int		firstedge;		// we must support > 64k edges
-	short		numedges;	
+	short		numedges;
 	short		texinfo;
 
 // lighting info

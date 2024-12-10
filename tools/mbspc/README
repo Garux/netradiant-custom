@@ -20,7 +20,7 @@ New features:
 
 1. When MBSPC is used for converting BSP files to MAP files, the correct
 texture name is written for every brush side (but see Note 1.).
-  
+
 2. Added a new switch '-entlist'. This will produce a list of entity
 definitions from a BSP file in an editable ASCII text file.
 

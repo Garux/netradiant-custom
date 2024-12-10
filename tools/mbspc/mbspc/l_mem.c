@@ -260,7 +260,7 @@ memoryblock_t *BlockFromPointer(void *ptr, char *str)
 	} //end if
 	if (block->ptr != ptr)
 	{
-		
+
 		Error("%s: memory block pointer invalid\n", str);
 	} //end if
 	return block;

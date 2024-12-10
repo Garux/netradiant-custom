@@ -99,7 +99,7 @@ unsigned HashVec (vec3_t vec)
 
 	if ( x < 0 || x >= HASH_SIZE || y < 0 || y >= HASH_SIZE )
 		Error ("HashVec: point outside valid range");
-	
+
 	return y*HASH_SIZE + x;
 }
 
@@ -128,9 +128,9 @@ int	GetVertexnum (vec3_t in)
 		else
 			vert[i] = in[i];
 	}
-	
+
 	h = HashVec (vert);
-	
+
 	for (vnum=hashverts[h] ; vnum ; vnum=vertexchain[vnum])
 	{
 		p = dvertexes[vnum].point;
@@ -139,7 +139,7 @@ int	GetVertexnum (vec3_t in)
 		&& fabs(p[2]-vert[2])<POINT_EPSILON )
 			return vnum;
 	}
-	
+
 // emit a vertex
 	if (numvertexes == MAX_MAP_VERTS)
 		Error ("numvertexes == MAX_MAP_VERTS");
@@ -154,7 +154,7 @@ int	GetVertexnum (vec3_t in)
 	c_uniqueverts++;
 
 	numvertexes++;
-		
+
 	return numvertexes-1;
 }
 #else
@@ -663,7 +663,7 @@ int GetEdge2 (int v1, int v2,  face_t *f)
 	edge->v[0] = v1;
 	edge->v[1] = v2;
 	edgefaces[numedges-1][0] = f;
-	
+
 	return numedges-1;
 }
 
@@ -699,7 +699,7 @@ face_t *TryMerge (face_t *f1, face_t *f2, vec3_t planenormal)
 		return NULL;
 	if (f1->contents != f2->contents)
 		return NULL;
-		
+
 
 	nw = TryMergeWinding (f1->w, f2->w, planenormal);
 	if (!nw)
@@ -728,7 +728,7 @@ void MergeNodeFaces (node_t *node)
 
 	plane = &mapplanes[node->planenum];
 	merged = NULL;
-	
+
 	for (f1 = node->faces ; f1 ; f1 = f1->next)
 	{
 		if (f1->merged || f1->split[0] || f1->split[1])
@@ -745,7 +745,7 @@ void MergeNodeFaces (node_t *node)
 			//the result of the convex/concave test in TryMergeWinding(),
 			//which depends on the normal, is flipped. This causes faces
 			//that shouldn't be merged to be merged and faces that
-			//should be merged to not be merged. 
+			//should be merged to not be merged.
 			//the following added line fixes this bug
 			//thanks to: Alexander Malmberg <alexander@malmberg.org>
 			plane = &mapplanes[f1->planenum];
@@ -754,7 +754,7 @@ void MergeNodeFaces (node_t *node)
 			if (!merged)
 				continue;
 
-			// add merged to the end of the node face list 
+			// add merged to the end of the node face list
 			// so it will be checked against all the faces again
 			for (end = node->faces ; end->next ; end = end->next)
 			;
@@ -801,7 +801,7 @@ void SubdivideFace (node_t *node, face_t *f)
 		{
 			mins = 999999;
 			maxs = -999999;
-			
+
 			VectorCopy (tex->vecs[axis], temp);
 			w = f->w;
 			for (i=0 ; i<w->numpoints ; i++)
@@ -823,10 +823,10 @@ void SubdivideFace (node_t *node, face_t *f)
 			}
 			else if (maxs - mins <= subdivide_size)
 				break;
-			
+
 		// split it
 			c_subdivide++;
-			
+
 			v = VectorNormalize (temp);
 
 			dist = (mins + subdivide_size - 16)/v;
