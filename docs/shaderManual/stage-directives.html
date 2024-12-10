@@ -310,8 +310,29 @@ textures/obsidian_video/intro
 <h3>alphaGen const N.N</h3>
 <p>A constant vertex alpha is assigned to the affected surface. This modifies the transparency of the texture.</p>
 
-<h3>alphaGen portal</h3>
-<p>This rendering stage keyword is used in conjunction with the surface parameter keyword portal. The function accomplishes the "fade" that causes the scene in the portal to fade from view. Specifically, it means "Generate alpha values based on the distance from the viewer to the portal." Use alphaGen portal on the last rendering pass.</p>
+<h3>alphaGen portal <em>distance</em></h3>
+<p>This rendering stage keyword is normally used in conjunction with the surface parameter keyword portal. The function accomplishes the "fade" that causes the scene in the portal/mirror to fade from view. Specifically, it means "Generate alpha values based on the distance from the viewer to the portal". Viewer distance 0 maps to alpha 0, when distance is more than "distance" parameter value, alpha is 1. While latter is the case, portal/mirror content is not rendering at all, this optimization is original purpose of the keyword, though it may be utilized for other distance dependent effects.</p>
+<p>
+Basic fading portal/mirror shader example:
+</p>
+<pre>
+textures/ztest/portal
+{
+	qer_editorimage textures/sfx/portalfog.tga
+	surfaceparm nolightmap
+	portal
+	{
+		map textures/sfx/portalfog.tga
+		blendFunc GL_ZERO GL_SRC_ALPHA
+		depthWrite
+	}
+	{
+		map textures/sfx/portalfog.tga
+		blendfunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphagen portal 256
+	}
+}
+</pre>
 
 <h2 id="tcGen">tcGen coordinateSource</h2>
 <p>Specifies how texture coordinates are generated and where they come from. Valid functions are base, lightmap, environment and vector.</p>

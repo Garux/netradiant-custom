@@ -1238,7 +1238,6 @@ static const std::vector<ShaderFormat> g_shaderStageFormats{
 			"oneMinusEntity",
 			"vertex",
 			"oneMinusVertex",
-			"portal",
 		}
 	},
 	{
@@ -1252,7 +1251,10 @@ static const std::vector<ShaderFormat> g_shaderStageFormats{
 		}
 	},
 	{
-		"alphaGen const %f", c_pageStage, c_colorKeyLv2
+		"alphaGen %s %f", c_pageStage, c_colorKeyLv2, {
+			"const",
+			"portal",
+		}
 	},
 	{
 		"tcGen %s", c_pageStage, c_colorKeyLv2, {

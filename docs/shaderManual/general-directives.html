@@ -176,7 +176,21 @@ textures/skies/xtoxicsky_dm9
 </blockquote>
 
 <h2 id="portal">portal</h2>
-<p>Specifies that this texture is the surface for a portal or mirror. In the game map, a portal entity must be placed directly in front of the texture (within 64 game units). All this does is set "sort portal", so it isn't needed if you specify that explicitly.</p>
+<p>Specifies that this shader is the surface for a portal or mirror. In the game map, a portal entity (e.g. "misc_portal_surface") must be placed directly in front of the surface (within 64 game units). All this does is set "sort portal", so it isn't needed if you specify that explicitly.</p>
+<p>Bare bones mirror shader example:</p>
+<pre>
+textures/ztest/mirror
+{
+	qer_editorimage textures/sfx/portalfog.tga
+	surfaceparm nolightmap
+	portal
+	{
+		map textures/sfx/portalfog.tga
+		blendFunc GL_ZERO GL_SRC_ALPHA
+		depthWrite
+	}
+}
+</pre>
 
 <h2 id="sort">sort value</h2>
 <p>Use this keyword to fine-tune the depth sorting of shaders as they are compared against other shaders in the game world. The basic concept is that if there is a question or a problem with shaders drawing in the wrong order against each other, this allows the designer to create a hierarchy of which shader draws in what order.</p>
