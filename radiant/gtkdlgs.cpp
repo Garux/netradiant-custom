@@ -655,7 +655,7 @@ QCompleter inactive entry in list // because is wrapAround()
 
 static const struct{ const char *name; const char *text; } c_shaderTemplates[] = {
 	{
-		"map",
+		"%map",
 R"(
 	{
 		map $lightmap
@@ -670,7 +670,7 @@ R"(
 )"
 	},
 	{
-		"map-vertex",
+		"%map-vertex",
 R"(
 	surfaceparm nolightmap
 	{
@@ -681,7 +681,7 @@ R"(
 )"
 	},
 	{
-		"mask",
+		"%mask",
 R"(
 	cull none
 	{
@@ -705,7 +705,7 @@ R"(
 )"
 	},
 	{
-		"mask-vertex",
+		"%mask-vertex",
 R"(
 	surfaceparm nolightmap
 	cull none
@@ -719,7 +719,7 @@ R"(
 )"
 	},
 	{
-		"blend",
+		"%blend",
 R"(
 	cull none
 	{
@@ -735,7 +735,7 @@ R"(
 )"
 	},
 	{
-		"remap",
+		"%remap",
 R"(
 	// compile time parameter
 	surfaceparm slick
