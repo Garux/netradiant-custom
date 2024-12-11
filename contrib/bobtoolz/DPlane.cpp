@@ -28,7 +28,6 @@
 #include "DPoint.h"
 #include "DWinding.h"
 
-#include "str.h"
 #include "misc.h"
 
 //////////////////////////////////////////////////////////////////////

@@ -19,7 +19,6 @@
 
 
 
-#include "str.h"
 #include "qerplugin.h"
 #include "mathlib.h"
 #include "string/string.h"

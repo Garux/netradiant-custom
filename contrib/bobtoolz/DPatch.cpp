@@ -24,7 +24,6 @@
 #include "DPatch.h"
 
 #include <list>
-#include "str.h"
 #include "scenelib.h"
 
 #include "ipatch.h"

@@ -25,11 +25,8 @@
 //#include "misc.h"
 #include "funchandlers.h"
 
-#include <list>
-
 #include "iglrender.h"
 #include "qerplugin.h"
-#include "str.h"
 #include "math/matrix.h"
 
 #include "DEntity.h"
@@ -202,9 +199,9 @@ void DBobView_setEntity( Entity& entity, float multiplier, int points, float var
 	DEntity trigger;
 	trigger.LoadEPairList( &entity );
 
-	if ( !strcmp( trigger.m_Classname, "trigger_push" ) ) {
+	if ( trigger.m_Classname == "trigger_push" ) {
 		if ( DEPair* trigger_ep = trigger.FindEPairByKey( "target" ) ) {
-			const scene::Path* entTarget = FindEntityFromTargetname( trigger_ep->value );
+			const scene::Path* entTarget = FindEntityFromTargetname( trigger_ep->value.c_str() );
 			if ( entTarget ) {
 				g_PathView.reset(); // delete old at first
 				g_PathView.reset( new DBobView );
@@ -215,7 +212,7 @@ void DBobView_setEntity( Entity& entity, float multiplier, int points, float var
 						g_PathView->target = target;
 						target->attach( *g_PathView );
 					}
-					g_PathView->Begin( trigger_ep->value, multiplier, points, varGravity, bShowExtra );
+					g_PathView->Begin( trigger_ep->value.c_str(), multiplier, points, varGravity, bShowExtra );
 				}
 				else{
 					globalErrorStream() << "bobToolz PathPlotter: trigger_push ARGH\n";

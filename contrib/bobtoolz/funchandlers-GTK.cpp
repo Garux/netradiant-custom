@@ -21,8 +21,7 @@
 
 #include "dialogs/dialogs-gtk.h"
 
-#include <list>
-#include "str.h"
+#include "string/string.h"
 
 #include "DPoint.h"
 #include "DPlane.h"
@@ -47,19 +46,16 @@
 
 #include <vector>
 #include <list>
-#include <map>
 #include <algorithm>
 
 #include "scenelib.h"
 
 // for autocaulk
-std::list<Str> exclusionList;       // whole brush exclusion
-std::list<Str> exclusionList_Face;  // single face exclusion
+std::vector<CopiedString> exclusionList;       // whole brush exclusion
+std::vector<CopiedString> exclusionList_Face;  // single face exclusion
 
 bool el1Loaded =        false;
 bool el2Loaded =        false;
-bool clrLst1Loaded =    false;
-bool clrLst2Loaded =    false;
 
 std::unique_ptr<DBobView> g_PathView;
 std::unique_ptr<DVisDrawer> g_VisView;
@@ -75,10 +71,10 @@ void LoadLists(){
 	char buffer[256];
 
 	if ( !el1Loaded ) {
-		el1Loaded = LoadExclusionList( GetFilename( buffer, "bt/bt-el1.txt" ), &exclusionList );
+		el1Loaded = LoadExclusionList( GetFilename( buffer, "bt/bt-el1.txt" ), exclusionList );
 	}
 	if ( !el2Loaded ) {
-		el2Loaded = LoadExclusionList( GetFilename( buffer, "bt/bt-el2.txt" ), &exclusionList_Face );
+		el2Loaded = LoadExclusionList( GetFilename( buffer, "bt/bt-el2.txt" ), exclusionList_Face );
 	}
 }
 
@@ -116,7 +112,7 @@ void DoIntersect(){
 		break;
 	}
 	}
-	world.RemoveNonCheckBrushes( &exclusionList );
+	world.RemoveNonCheckBrushes( exclusionList );
 
 	bool* pbSelectList;
 	if ( rs.bDuplicateOnly ) {

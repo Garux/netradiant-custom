@@ -23,13 +23,12 @@
 
 #pragma once
 
-#include <list>
 #include <vector>
-#include "str.h"
+#include "string/string.h"
 #include "mathlib.h"
 #include "DMap.h"
+#include "DEPair.h"
 
-class DEPair;
 class DBrush;
 class DPlane;
 class DPatch;
@@ -66,8 +65,8 @@ public:
 	void SetClassname( const char* classname );
 
 	void BuildInRadiant( bool allowDestruction );
-	void ResetChecks( std::list<Str>* exclusionList );
-	void RemoveNonCheckBrushes( std::list<Str>* exclusionList );
+	void ResetChecks( const std::vector<CopiedString>& exclusionList );
+	void RemoveNonCheckBrushes( const std::vector<CopiedString>& exclusionList );
 
 	int GetBrushCount( void );
 	DBrush* FindBrushByPointer( scene::Node& brush );
@@ -94,11 +93,11 @@ public:
 //	---------------------------------------------
 
 //	vars
-	std::list<DEPair*> epairList;
+	std::vector<DEPair> epairList;
 	std::vector<DBrush*> brushList;
 // new patches, wahey!!!
 	std::vector<DPatch*> patchList;
-	Str m_Classname;
+	CopiedString m_Classname;
 //	---------------------------------------------
 
 

@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include <list>
-#include "str.h"
+#include <vector>
+#include "string/string.h"
 #include <QStringList>
 
-bool LoadExclusionList( char* filename, std::list<Str>* exclusionList );
+bool LoadExclusionList( const char* filename, std::vector<CopiedString>& exclusionList );
 QStringList LoadListStore( char* filename );

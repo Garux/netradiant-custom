@@ -26,9 +26,6 @@
 #include "iglrender.h"
 #include "math/matrix.h"
 
-#include <list>
-#include "str.h"
-
 #include "DPoint.h"
 
 #include "misc.h"

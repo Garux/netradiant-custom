@@ -19,9 +19,6 @@
 
 #include "misc.h"
 
-#include <list>
-#include "str.h"
-
 #include "DPoint.h"
 #include "DPlane.h"
 #include "DBrush.h"
@@ -42,8 +39,6 @@
 #include "qerplugin.h"
 
 #include <vector>
-#include <list>
-#include <map>
 #include <algorithm>
 
 #include "scenelib.h"
@@ -206,15 +201,15 @@ class EntityWriteMiniPrt
 {
 	mutable DEntity world;
 	FILE* pFile;
-	std::list<Str>* exclusionList;
+	const std::vector<CopiedString>& exclusionList;
 public:
-	EntityWriteMiniPrt( FILE* pFile, std::list<Str>* exclusionList )
+	EntityWriteMiniPrt( FILE* pFile, const std::vector<CopiedString>& exclusionList )
 		: pFile( pFile ), exclusionList( exclusionList ){
 	}
 	void operator()( scene::Instance& instance ) const {
 		const char* classname = Node_getEntity( instance.path().top() )->getClassName();
 
-		if ( !strcmp( classname, "worldspawn" ) ) {
+		if ( string_equal( classname, "worldspawn" ) ) {
 			world.LoadFromEntity( instance.path().top() );
 			world.RemoveNonCheckBrushes( exclusionList );
 			world.SaveToFile( pFile );
@@ -228,7 +223,7 @@ public:
 	}
 };
 
-void BuildMiniPrt( std::list<Str>* exclusionList ){
+void BuildMiniPrt( const std::vector<CopiedString>& exclusionList ){
 	// yes, we could just use -fulldetail option, but, as SPOG said
 	// it'd be faster without all the hint, donotenter etc textures and
 	// doors, etc

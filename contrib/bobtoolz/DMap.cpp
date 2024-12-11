@@ -23,9 +23,6 @@
 
 #include "DMap.h"
 
-#include "str.h"
-#include <list>
-
 #include "DPoint.h"
 #include "DPlane.h"
 #include "DBrush.h"
@@ -37,9 +34,6 @@
 
 #include "generic/referencecounted.h"
 
-#include <vector>
-#include <list>
-#include <map>
 #include <algorithm>
 
 #include "scenelib.h"
@@ -147,7 +141,7 @@ void DMap::ResetTextures( const char* textureName, float fScale[2],      float f
                           bool bResetTextureName,  bool bResetScale[2],  bool bResetShift[2],  bool bResetRotation ){
 	for ( DEntity *entity : entityList )
 	{
-		if ( string_equal_nocase( "worldspawn", entity->m_Classname ) ) {
+		if ( string_equal_nocase( "worldspawn", entity->m_Classname.c_str() ) ) {
 			entity->ResetTextures( textureName,        fScale,       fShift,       rotation, newTextureName,
 			                       bResetTextureName,  bResetScale,  bResetShift,  bResetRotation, true );
 		}

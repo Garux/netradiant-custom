@@ -20,7 +20,6 @@
 #include "DTrainDrawer.h"
 
 #include <list>
-#include "str.h"
 
 #include "DPoint.h"
 #include "DPlane.h"
@@ -177,7 +176,7 @@ public:
 		e.ClearEPairs();
 		e.LoadEPairList( Node_getEntity( instance.path().top() ) );
 
-		const char* classname = e.m_Classname.GetBuffer();
+		const char* classname = e.m_Classname.c_str();
 		const char* target;
 		const char* control;
 		const char* targetname;

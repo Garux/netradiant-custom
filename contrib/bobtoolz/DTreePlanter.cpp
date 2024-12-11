@@ -19,9 +19,6 @@
 
 #include "DTreePlanter.h"
 
-#include <list>
-#include "str.h"
-
 #include "DPoint.h"
 #include "DPlane.h"
 #include "DBrush.h"
@@ -184,7 +181,7 @@ public:
 		}
 
 		vec3_t vec, out;
-		sscanf( pEpair->value.GetBuffer(), "%f %f %f", &vec[0], &vec[1], &vec[2] );
+		sscanf( pEpair->value.c_str(), "%f %f %f", &vec[0], &vec[1], &vec[2] );
 
 		planter.FindDropPoint( vec, out );
 

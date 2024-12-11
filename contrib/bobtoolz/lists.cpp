@@ -21,17 +21,17 @@
 
 #include "misc.h"
 
-bool LoadExclusionList( char* filename, std::list<Str>* exclusionList ){
+bool LoadExclusionList( const char* filename, std::vector<CopiedString>& exclusionList ){
 	FILE* eFile = fopen( filename, "r" );
 	if ( eFile ) {
 		char buffer[256];
 		while ( !feof( eFile ) )
 		{
-			memset( buffer, 0, 256 );
+			memset( buffer, 0, sizeof( buffer ) );
 			fscanf( eFile, "%s\n", buffer );
 
-			if ( strlen( buffer ) > 0 ) {
-				exclusionList->push_back( buffer );
+			if ( !string_empty( buffer ) ) {
+				exclusionList.push_back( buffer );
 			}
 		}
 

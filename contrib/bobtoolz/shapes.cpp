@@ -20,12 +20,9 @@
 
 #include "shapes.h"
 
-#include <list>
-
 #include "DPoint.h"
 #include "DPlane.h"
 
-#include "str.h"
 #include "misc.h"
 #include "funchandlers.h"
 
@@ -36,9 +33,6 @@
 #include "ipatch.h"
 #include "qerplugin.h"
 
-#include <vector>
-#include <list>
-#include <map>
 #include <algorithm>
 #include <ctime>
 

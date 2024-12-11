@@ -24,7 +24,6 @@
 #include "DBrush.h"
 
 #include <list>
-#include "str.h"
 
 #include "DPoint.h"
 #include "DPlane.h"
@@ -619,22 +618,13 @@ bool DBrush::BBoxTouch( DBrush *chkBrush ){
 	return true;
 }
 
-void DBrush::ResetChecks( std::list<Str>* exclusionList ){
+void DBrush::ResetChecks( const std::vector<CopiedString>& exclusionList ){
 	for ( DPlane *plane : faceList )
 	{
-		bool set = false;
-
-		if ( exclusionList ) {
-			for ( const Str& texture : *exclusionList )
-			{
-				if ( strstr( plane->m_shader.c_str(), texture.GetBuffer() ) ) {
-					set = true;
-					break;
-				}
-			}
-		}
-
-		plane->m_bChkOk = set;
+		plane->m_bChkOk = std::any_of( exclusionList.cbegin(), exclusionList.cend(),
+			[plane]( const CopiedString& texture ){
+				return strstr( plane->m_shader.c_str(), texture.c_str() ) != nullptr;
+			} );
 	}
 }
 

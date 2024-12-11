@@ -7,8 +7,6 @@
 #include "bsploader.h"
 #include "DVisDrawer.h"
 
-#include <list>
-
 typedef struct {
 	int portalclusters;
 	int leafbytes;           //leafbytes = ((portalclusters+63)&~63)>>3;

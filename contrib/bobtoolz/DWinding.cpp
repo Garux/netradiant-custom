@@ -23,8 +23,6 @@
 
 #include "DWinding.h"
 
-#include <list>
-
 #include "DPoint.h"
 #include "DPlane.h"
 

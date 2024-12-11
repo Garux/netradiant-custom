@@ -23,18 +23,12 @@
 
 #pragma once
 
-#include "str.h"
+#include "string/string.h"
 
-class DEPair
+struct DEPair
 {
-public:
-	DEPair();
-	virtual ~DEPair();
-
-	void Build( const char* pKey, const char* pValue );
-
-	Str key;
-	Str value;
+	DEPair( const char* pKey, const char* pValue ) : key( pKey ), value( pValue ){
+  }
+	CopiedString key;
+	CopiedString value;
 };
-
-//typedef CList<DEPair*, DEPair*> DEPairList;
