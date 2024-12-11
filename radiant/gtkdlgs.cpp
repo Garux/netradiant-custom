@@ -745,6 +745,22 @@ R"(
 }
 )"
 	},
+	{
+		"%skybox",
+R"(
+	qer_editorImage env/
+	surfaceparm noimpact
+	surfaceparm nolightmap
+	surfaceparm sky
+	q3map_sunExt 1 1 1 85 -43 60 2 16
+	q3map_LightMapFilterRadius 0 8
+	q3map_skylight 70 4
+	nopicmip
+	// path without _bk.tga suffix
+	skyparms env/
+}
+)"
+	},
 };
 
 
