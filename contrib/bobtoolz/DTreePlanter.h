@@ -122,8 +122,8 @@ public:
 				GT;
 				CT;
 
-				strncpy( m_trees[m_numModels++].name, pToken, std::size( m_trees[m_numModels].name ) - 1 );
-				m_trees[m_numModels].name[ std::size( m_trees[m_numModels].name ) - 1 ] = '\0';
+				strncpy( m_trees[m_numModels++].name, pToken, std::size( m_trees[0].name ) - 1 );
+				m_trees[m_numModels].name[ std::size( m_trees[0].name ) - 1 ] = '\0';
 			}
 			else if ( MT( "link" ) ) {
 				GT;
