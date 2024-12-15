@@ -49,18 +49,9 @@ public:
 	typedef Member<DTreePlanter, void, &DTreePlanter::destroyed> DestroyedCaller;
 
 	DTreePlanter() {
-		m_numModels =   0;
-		m_offset =      0;
-		m_maxPitch =    0;
-		m_minPitch =    0;
-		m_maxYaw =      0;
-		m_minYaw =      0;
-		m_setAngles =   false;
-		m_useScale =    false;
-		m_autoLink =    false;
-		m_linkNum =     0;
-
 		m_world.LoadSelectedBrushes();
+		if( m_world.brushList.size() == 0 )
+			globalErrorStream() << "bobToolz::TreePlanter requires selected brushes to plant on!\n";
 
 		char buffer[256];
 		GetFilename( buffer, "bt/tp_ent.txt" );
@@ -86,6 +77,9 @@ public:
 
 			fclose( file );
 		}
+
+		if( string_empty( m_entType ) )
+			globalErrorStream() << "bobToolz::TreePlanter parsed no entity name from " << makeQuoted( buffer ) << '\n';
 
 		m_mouseDown = GlobalRadiant().XYWindowMouseDown_connect( makeSignalHandler3( MouseDownCaller(), *this ) );
 		m_destroyed = GlobalRadiant().XYWindowDestroyed_connect( makeSignalHandler( DestroyedCaller(), *this ) );
@@ -195,31 +189,31 @@ public:
 		} while ( true );
 	}
 
-	bool FindDropPoint( vec3_t in, vec3_t out );
-	void DropEntsToGround( void );
-	void MakeChain( int linkNum, const char* linkName );
-	void SelectChain( void );
+	bool FindDropPoint( vec3_t in, vec3_t out ) const;
+	void DropEntsToGround();
 
 private:
 	DEntity m_world;
 
 	treeModel_t m_trees[MAX_TP_MODELS];
 
-	int m_numModels;
-	int m_offset;
-	int m_maxPitch;
-	int m_minPitch;
-	int m_maxYaw;
-	int m_minYaw;
+	int m_numModels = 0;
+	int m_offset = 0;
+	int m_maxPitch = 0;
+	int m_minPitch = 0;
+	int m_maxYaw = 0;
+	int m_minYaw = 0;
 
-	char m_entType[MAX_QPATH];
-	char m_linkName[MAX_QPATH];
-	int m_linkNum;
+	char m_entType[MAX_QPATH] = {};
+	char m_linkName[MAX_QPATH] = {};
+	int m_linkNum = 0;
 
-	float m_minScale;
-	float m_maxScale;
+	float m_minScale = 0;
+	float m_maxScale = 0;
 
-	bool m_useScale;
-	bool m_setAngles;
-	bool m_autoLink;
+	bool m_useScale = false;
+	bool m_setAngles = false;
+	bool m_autoLink = false;
 };
+
+void MakeChain( int linkNum, const char* linkName );

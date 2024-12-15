@@ -29,6 +29,8 @@
 #include "ScriptParser.h"
 #include "misc.h"
 #include "scenelib.h"
+#include "iundo.h"
+#include "ientity.h"
 
 
 
@@ -43,7 +45,9 @@ SignalHandlerResult DTreePlanter::mouseDown( const WindowVector& position, Butto
 
 	pt = vector3_snapped( GlobalRadiant().XYWindow_windowToWorld( position ), GlobalRadiant().getGridSize() );
 
-	if ( FindDropPoint( vector3_to_array( pt ), vector3_to_array( vhit ) ) ) {
+	if ( FindDropPoint( vector3_to_array( pt ), vector3_to_array( vhit ) ) && !string_empty( m_entType ) ) {
+		UndoableCommand undo( "bobToolz.treePlanter" );
+
 		vhit[2] += m_offset;
 
 		char buffer[128];
@@ -117,7 +121,7 @@ SignalHandlerResult DTreePlanter::mouseDown( const WindowVector& position, Butto
 	return SIGNAL_STOP_EMISSION;
 }
 
-bool DTreePlanter::FindDropPoint( vec3_t in, vec3_t out ) {
+bool DTreePlanter::FindDropPoint( vec3_t in, vec3_t out ) const {
 	DPlane p1;
 	DPlane p2;
 
@@ -170,34 +174,27 @@ public:
 	TreePlanterDropEntityIfSelected( DTreePlanter& planter ) : planter( planter ){
 	}
 	void operator()( scene::Instance& instance ) const {
-		if ( !instance.isSelected() ) {
-			return;
+		if ( instance.isSelected() ) {
+			Entity *entity = Node_getEntity( instance.path().top() );
+			if( const char *origin = entity->getKeyValue( "origin" ); !string_empty( origin ) ){
+				vec3_t vec, out;
+				sscanf( origin, "%f %f %f", &vec[0], &vec[1], &vec[2] );
+
+				if( planter.FindDropPoint( vec, out ) ){
+					char buffer[256];
+					sprintf( buffer, "%g %g %g", out[0], out[1], out[2] );
+					entity->setKeyValue( "origin", buffer );
+				}
+			}
 		}
-		ent.LoadFromEntity( instance.path().top() );
-
-		DEPair* pEpair = ent.FindEPairByKey( "origin" );
-		if ( !pEpair ) {
-			return;
-		}
-
-		vec3_t vec, out;
-		sscanf( pEpair->value.c_str(), "%f %f %f", &vec[0], &vec[1], &vec[2] );
-
-		planter.FindDropPoint( vec, out );
-
-		char buffer[256];
-		sprintf( buffer, "%f %f %f", out[0], out[1], out[2] );
-		ent.AddEPair( "origin", buffer );
-		ent.RemoveFromRadiant();
-		ent.BuildInRadiant( false );
 	}
 };
 
-void DTreePlanter::DropEntsToGround( void ) {
+void DTreePlanter::DropEntsToGround() {
 	Scene_forEachEntity( TreePlanterDropEntityIfSelected( *this ) );
 }
 
-void DTreePlanter::MakeChain( int linkNum, const char* linkName ) {
+void MakeChain( int linkNum, const char* linkName ) {
 	char buffer[256];
 	int i;
 	for ( i = 0; i < linkNum; i++ ) {
@@ -209,7 +206,7 @@ void DTreePlanter::MakeChain( int linkNum, const char* linkName ) {
 		sprintf( buffer, "0 %i 0", i * 64 );
 		e.AddEPair( "origin", buffer );
 
-		if ( i != m_linkNum - 1 ) {
+		if ( i != linkNum - 1 ) {
 			sprintf( buffer, "%s_pt%i", linkName, i + 1 );
 			e.AddEPair( "target", buffer );
 
@@ -230,40 +227,4 @@ void DTreePlanter::MakeChain( int linkNum, const char* linkName ) {
 
 		e.BuildInRadiant( false );
 	}
-}
-
-void DTreePlanter::SelectChain( void ) {
-/*	char buffer[256];
-
-	for(int i = 0; i < m_linkNum; i++) {
-		DEntity e("info_train_spline_main");
-
-		sprintf( buffer, "%s_pt%i", m_linkName, i );
-		e.AddEPair( "targetname", buffer );
-
-		sprintf( buffer, "0 %i 0", i * 64 );
-		e.AddEPair( "origin", buffer );
-
-		if(i != m_linkNum-1) {
-			sprintf( buffer, "%s_pt%i", m_linkName, i+1 );
-			e.AddEPair( "target", buffer );
-
-			sprintf( buffer, "%s_ctl%i", m_linkName, i );
-			e.AddEPair( "control", buffer );
-		}
-
-		e.BuildInRadiant( false );
-	}
-
-	for(int i = 0; i < m_linkNum-1; i++) {
-		DEntity e("info_train_spline_control");
-
-		sprintf( buffer, "%s_ctl%i", m_linkName, i );
-		e.AddEPair( "targetname", buffer );
-
-		sprintf( buffer, "0 %i 0", (i * 64) + 32);
-		e.AddEPair( "origin", buffer );
-
-		e.BuildInRadiant( false );
-	}*/
 }

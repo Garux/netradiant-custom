@@ -21,13 +21,10 @@
 
 #include <memory>
 
-class DTrainDrawer;
-class DTreePlanter;
-
 extern std::unique_ptr<class DBobView> g_PathView;
 extern std::unique_ptr<class DVisDrawer> g_VisView;
-extern DTrainDrawer* g_TrainView;
-extern DTreePlanter* g_TreePlanter;
+extern std::unique_ptr<class DTrainDrawer> g_TrainView;
+extern std::unique_ptr<class DTreePlanter> g_TreePlanter;
 
 // intersect stuff
 #define BRUSH_OPT_WHOLE_MAP 0
