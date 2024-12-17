@@ -178,6 +178,7 @@ Q3map2:
 	* -nobrushsnap: disable brush vertices snapping (of drawsurfs) (experimental, keep eye on meta merge efficiency)
 	* improved brush faces triangulation wrt degenerate triangles production (non -maxarea algorithm)
 	* -globalflag <surfaceparm>: add surface flag to every bsp shader. Reusable, e.g. -globalflag slick -globalflag nodamage.
+	* fix deformvertexes autosprite2 on brushes and models
 
 
 
@@ -195,6 +196,7 @@ MBSPC:
 	* append _decompiled suffix to decompiled map file names
 	* improve decompilation quality of Q1, HL maps greatly (texturing correctness, less brushes)
 	* -lessbrushes switch: less brushes when decompiling Q1, HL maps at the expense of texturing
+	* fix build speed penalty due to terminal output
 
 
 
