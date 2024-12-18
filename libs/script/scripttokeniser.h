@@ -40,7 +40,7 @@ class ScriptTokeniser final : public Tokeniser
 
 	Tokenise m_stack[3];
 	Tokenise* m_state;
-	SingleCharacterInputStreamDoubleBuffered<TextInputStream> m_istream;
+	SingleCharacterInputStream<TextInputStream> m_istream;
 	std::size_t m_scriptline;
 	std::size_t m_scriptcolumn;
 
@@ -340,7 +340,7 @@ public:
 	std::size_t getColumn() const {
 		return m_scriptcolumn;
 	}
-	bool bufferContains( const char* str ) const {
+	bool bufferContains( const char* str ){
 		return m_istream.bufferContains( str );
 	}
 };

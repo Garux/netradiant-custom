@@ -355,48 +355,16 @@ public:
 		c = *m_cur++;
 		return true;
 	}
-};
-
-/// doublefuffered to be able to read forward for map format (valve220) detection
-template<typename TextInputStreamType, int SIZE = 1024>
-class SingleCharacterInputStreamDoubleBuffered
-{
-	TextInputStreamType& m_inputStream;
-	char m_bu[SIZE];
-	char* m_buffer;
-	char* m_cur;
-	char* m_end;
-
-	char m_bu2[SIZE];
-	char* m_buffer2;
-	char* m_end2;
-
-	bool fillBuffer(){
-		std::swap( m_buffer, m_buffer2 );
+	// looks forward for map format (valve220) detection
+	bool bufferContains( const char* str ){
+		const size_t shift = m_cur - m_buffer;
+		std::memmove( m_buffer, m_cur, m_end - m_cur ); //shift not yet read data to the beginning
 		m_cur = m_buffer;
-		m_end = m_end2;
-		m_end2 = m_buffer2 + m_inputStream.read( m_buffer2, SIZE );
-		return m_cur != m_end;
-	}
-public:
-
-	SingleCharacterInputStreamDoubleBuffered( TextInputStreamType& inputStream ) : m_inputStream( inputStream ), m_buffer( m_bu ), m_cur( m_buffer ), m_end( m_buffer ), m_buffer2( m_bu2 ){
-		m_end2 = m_buffer2 + m_inputStream.read( m_buffer2, SIZE );
-	}
-	bool readChar( char& c ){
-		if ( m_cur == m_end && !fillBuffer() ) {
-			return false;
-		}
-
-		c = *m_cur++;
-		return true;
-	}
-	bool bufferContains( const char* str ) const {
-		return ( std::search( m_cur, m_end, str, str + strlen( str ) ) != m_end ) ||
-		       ( std::search( m_buffer2, m_end2, str, str + strlen( str ) ) != m_end2 );
+		m_end -= shift;
+		m_end += m_inputStream.read( m_end, shift ); //fill freed space in the end
+		return std::search( m_cur, m_end, str, str + strlen( str ) ) != m_end;
 	}
 };
-
 
 /// \brief A wrapper for a TextOutputStream, optimised for writing a single character at a time.
 class SingleCharacterOutputStream : public TextOutputStream
