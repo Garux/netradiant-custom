@@ -1255,8 +1255,10 @@ ToggleItem g_region_item{ BoolExportCaller( g_region_active ) };
 Vector3 g_region_mins;
 Vector3 g_region_maxs;
 void Region_defaultMinMax(){
-	g_region_maxs = Vector3( GetMaxGridCoord() );
-	g_region_mins = -g_region_maxs;
+	if( !g_region_active ){ // don't invalidate region bounds, while in region mode
+		g_region_maxs = Vector3( GetMaxGridCoord() );
+		g_region_mins = -g_region_maxs;
+	}
 }
 
 /*
