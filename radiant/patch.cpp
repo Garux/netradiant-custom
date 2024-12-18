@@ -497,6 +497,7 @@ void Patch::FlipTexture( int nAxis ){
 	}
 
 	controlPointsChanged();
+	Patch_textureChanged();
 }
 
 void Patch::TranslateTexture( float s, float t ){
@@ -512,6 +513,7 @@ void Patch::TranslateTexture( float s, float t ){
 	}
 
 	controlPointsChanged();
+	Patch_textureChanged();
 }
 
 void Patch::ScaleTexture( float s, float t ){
@@ -524,6 +526,7 @@ void Patch::ScaleTexture( float s, float t ){
 	}
 
 	controlPointsChanged();
+	Patch_textureChanged();
 }
 
 void Patch::RotateTexture( float angle ){
@@ -541,6 +544,7 @@ void Patch::RotateTexture( float angle ){
 	}
 
 	controlPointsChanged();
+	Patch_textureChanged();
 }
 
 
@@ -565,6 +569,7 @@ void Patch::SetTextureRepeat( float s, float t ){
 	}
 
 	controlPointsChanged();
+	Patch_textureChanged();
 }
 
 /*
@@ -754,6 +759,7 @@ void Patch::NaturalTexture(){
 	}
 
 	controlPointsChanged();
+	Patch_textureChanged();
 }
 
 
@@ -1221,6 +1227,7 @@ void Patch::ProjectTexture( TextureProjection projection, const Vector3& normal 
 	}
 
 	controlPointsChanged();
+	Patch_textureChanged();
 }
 #endif
 
@@ -1236,6 +1243,7 @@ void Patch::ProjectTexture( const texdef_t& texdef, const Vector3* direction ){
 	}
 
 	controlPointsChanged();
+	Patch_textureChanged();
 }
 
 void Patch::constructPlane( const AABB& aabb, int axis, std::size_t width, std::size_t height ){

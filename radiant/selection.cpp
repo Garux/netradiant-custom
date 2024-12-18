@@ -5993,7 +5993,7 @@ private:
 	void commitTransform( const Matrix4& transform ) const {
 		if( m_face ){
 			m_face->transform_texdef( transform, m_origin ); //! todo make SI update after Brush_textureChanged(); same problem after brush moved with tex lock
-		}
+		} // also after Patch_textureChanged(); calling them now in this->freezeTransform() works good nuff
 		else if( m_patch ){
 			const Matrix4 uvTransform = transform_local2object( matrix4_affine_inverse( transform ), m_faceLocal2tex, m_faceTex2local );
 			for( std::size_t i = 0; i < m_patchCtrl.size(); ++i ){
@@ -6682,10 +6682,14 @@ public:
 		 || m_selection == ePatchRow
 		 || m_selection == ePatchColumn )
 		{
-			if( m_face )
+			if( m_face ){
 				m_face->freezeTransform();
-			else if( m_patch )
+				Brush_textureChanged();
+			}
+			else if( m_patch ){
 				m_patch->freezeTransform();
+				Patch_textureChanged();
+			}
 		}
 	}
 

@@ -1500,6 +1500,7 @@ void Patch_setTexture( Patch& patch, const char* shader, const FaceTexture& clip
 			p.m_texcoord = matrix4_transformed_point( mat, Vector3( p.m_texcoord ) ).vec2();
 		}
 		patch.controlPointsChanged();
+		Patch_textureChanged();
 
 		// Patch_getTexture
 		g_faceTextureClipboard.m_width = patch.getShader()->getTexture().width;
