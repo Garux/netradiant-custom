@@ -1098,6 +1098,7 @@ misc...
 	* fix: do not modify light intensity on transformations besides light radius transformation
 	* light radiuses: don't render biggest radius, make them less occluding in 3D
 	* fix surface inspector updates on patch texturing changes, on UV Tool edits
+	* add prefs->Build->Region Box Shader (shader to use on the box generated around region)
 
 
 

@@ -222,6 +222,8 @@ static DefaultableString g_engineExecutableMP( []()->CopiedString{ return g_pGam
 static DefaultableString g_engineArgs( constructEngineArgs<false> );
 static DefaultableString g_engineArgsMP( constructEngineArgs<true> );
 
+extern CopiedString g_regionBoxShader;
+
 
 void Build_constructPreferences( PreferencesPage& page ){
 	QCheckBox* monitorbsp = page.appendCheckBox( "", "Enable Build Process Monitoring", g_WatchBSP_Enabled );
@@ -242,6 +244,8 @@ void Build_constructPreferences( PreferencesPage& page ){
 	}
 
 	page.appendCheckBox( "", "Dump non Monitored Builds Log", g_WatchBSP0_DumpLog );
+
+	page.appendEntry( "Region Box Shader", g_regionBoxShader );
 }
 void Build_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Build", "Build Preferences" ) );
@@ -267,7 +271,7 @@ void BuildMonitor_Construct(){
 	GlobalPreferenceSystem().registerPreference( "BuildEngineArgs", g_engineArgs.getImportCaller(), g_engineArgs.getExportCaller() );
 	GlobalPreferenceSystem().registerPreference( "BuildEngineArgsMP", g_engineArgsMP.getImportCaller(), g_engineArgsMP.getExportCaller() );
 	GlobalPreferenceSystem().registerPreference( "BuildDumpLog", BoolImportStringCaller( g_WatchBSP0_DumpLog ), BoolExportStringCaller( g_WatchBSP0_DumpLog ) );
-
+	GlobalPreferenceSystem().registerPreference( "RegionBoxShader", CopiedStringImportStringCaller( g_regionBoxShader ), CopiedStringExportStringCaller( g_regionBoxShader ) );
 	Build_registerPreferencesPage();
 }
 
