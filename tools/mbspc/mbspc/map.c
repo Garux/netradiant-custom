@@ -1065,7 +1065,7 @@ qboolean WriteMapFileSafe(FILE *fp)
 		{
 			continue;
 		} //end if
-		if (fprintf(fp, "{\n") < 0) return false;
+		if (fprintf(fp, "{ //entity %d\n", i) < 0) return false;
 		//
 		if (loadedmaptype == MAPTYPE_QUAKE3)
 		{
