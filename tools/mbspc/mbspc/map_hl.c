@@ -208,7 +208,7 @@ void HL_SplitBrush(bspbrush_t *brush, int planenum, int nodenum,
 		BoundBrush (b[i]);
 		for (j=0 ; j<3 ; j++)
 		{
-			if (b[i]->mins[j] < -4096 || b[i]->maxs[j] > 4096)
+			if (b[i]->mins[j] < -4096 * 4 || b[i]->maxs[j] > 4096 * 4)
 			{
 				Log_Print("HL_SplitBrush: bogus brush after clip\n");
 				break;
