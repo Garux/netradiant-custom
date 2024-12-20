@@ -803,6 +803,13 @@ qboolean WriteMapBrush(FILE *fp, mapbrush_t *brush, vec3_t origin)
 						fprintf(fp, "clip");
 					}
 				}
+				else if(loadedmaptype == MAPTYPE_HALFLIFE)
+				{
+					if(!Q_strncasecmp(ValueForKey(&entities[brush->entitynum], "classname"), "trigger_", 8))
+						fprintf(fp, "AAATRIGGER");
+					else
+						fprintf(fp, "NULL");
+				}
 				else
 				{
 					fprintf(fp, "clip");
@@ -1061,6 +1068,10 @@ qboolean WriteMapFileSafe(FILE *fp)
 	if (loadedmaptype == MAPTYPE_SIN)
 	{
 		fprintf(fp, "// generic/misc/red is used for unknown textures\n");
+	}
+	if (loadedmaptype == MAPTYPE_HALFLIFE)
+	{
+		fprintf(fp, "// NULL is used for unknown textures\n");
 	}
 	fprintf(fp,
 		"//\n"

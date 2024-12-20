@@ -363,9 +363,6 @@ bspbrush_t *HL_CreateBrushes_r(bspbrush_t *brush, int nodenum)
 				return NULL;
 			} //end case
 			case HL_CONTENTS_SOLID:
-#ifdef HLCONTENTS
-			case HL_CONTENTS_CLIP:
-#endif //HLCONTENTS
 			case HL_CONTENTS_SKY:
 #ifdef HLCONTENTS
 			case HL_CONTENTS_TRANSLUCENT:
@@ -374,6 +371,13 @@ bspbrush_t *HL_CreateBrushes_r(bspbrush_t *brush, int nodenum)
 				brush->side = CONTENTS_SOLID;
 				return brush;
 			} //end case
+#ifdef HLCONTENTS
+			case HL_CONTENTS_CLIP:
+			{
+				brush->side = CONTENTS_PLAYERCLIP;
+				return brush;
+			} //end case
+#endif //HLCONTENTS
 			case HL_CONTENTS_WATER:
 			{
 				brush->side = CONTENTS_WATER;
@@ -988,7 +992,7 @@ void HL_BSPBrushToMapBrush(bspbrush_t *bspbrush, entity_t *mapent)
 		mapbrush->numsides++;
 	} //end for
 	//
-	if (besttexinfo == TEXINFO_NODE)
+	if (besttexinfo == TEXINFO_NODE && !(bspbrush->side & (CONTENTS_SOLID | CONTENTS_PLAYERCLIP)))
 	{
 		mapbrush->numsides = 0;
 		hl_numclipbrushes++;
