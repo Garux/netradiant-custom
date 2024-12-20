@@ -899,7 +899,7 @@ void HL_FixContentsTextures(bspbrush_t *brushlist)
 		for (i = 0; i < brush->numsides; i++)
 		{
 			texinfonum = brush->sides[i].texinfo;
-			if (HL_TextureContents(map_texinfo[texinfonum].texture) == brush->side) break;
+			if (texinfonum >= 0 && HL_TextureContents(map_texinfo[texinfonum].texture) == brush->side) break;
 		} //end for
 		//if no specific contents texture was found
 		if (i >= brush->numsides)
@@ -917,10 +917,12 @@ void HL_FixContentsTextures(bspbrush_t *brushlist)
 		//
 		if (texinfonum >= 0)
 		{
-			//give all the brush sides this contents texture
+			//replace all non matching brush sides texinfos with this contents texture
 			for (i = 0; i < brush->numsides; i++)
 			{
-				brush->sides[i].texinfo = texinfonum;
+				const int ti = brush->sides[i].texinfo;
+				if(ti < 0 || HL_TextureContents(map_texinfo[ti].texture) != brush->side)
+					brush->sides[i].texinfo = texinfonum;
 			} //end for
 		} //end if
 		else Log_Print("brush contents %d with wrong textures\n", brush->side);
