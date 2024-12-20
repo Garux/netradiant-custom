@@ -423,7 +423,7 @@ extern	textureref_t	textureref[MAX_MAP_TEXTURES];
 
 int FindMiptex(char *name);
 int TexinfoForBrushTexture(plane_t *plane, brush_texture_t *bt, vec3_t origin);
-void TextureAxisFromPlane(plane_t *pln, vec3_t xv, vec3_t yv);
+void TextureAxisFromPlane(const vec3_t normal, vec3_t xv, vec3_t yv);
 
 //=============================================================================
 // csg

@@ -82,7 +82,7 @@ vec3_t	baseaxis[18] =
 {0,-1,0}, {1,0,0}, {0,0,-1}		// north wall
 };
 
-void TextureAxisFromPlane(plane_t *pln, vec3_t xv, vec3_t yv)
+void TextureAxisFromPlane(const vec3_t normal, vec3_t xv, vec3_t yv)
 {
 	int		bestaxis;
 	vec_t	dot,best;
@@ -93,7 +93,7 @@ void TextureAxisFromPlane(plane_t *pln, vec3_t xv, vec3_t yv)
 
 	for (i=0 ; i<6 ; i++)
 	{
-		dot = DotProduct (pln->normal, baseaxis[i*3]);
+		dot = DotProduct (normal, baseaxis[i*3]);
 		if (dot > best)
 		{
 			best = dot;
@@ -128,7 +128,7 @@ int TexinfoForBrushTexture(plane_t *plane, brush_texture_t *bt, vec3_t origin)
 	memset (&tx, 0, sizeof(tx));
 	strcpy (tx.texture, bt->name);
 
-	TextureAxisFromPlane(plane, vecs[0], vecs[1]);
+	TextureAxisFromPlane(plane->normal, vecs[0], vecs[1]);
 
 	shift[0] = DotProduct (origin, vecs[0]);
 	shift[1] = DotProduct (origin, vecs[1]);

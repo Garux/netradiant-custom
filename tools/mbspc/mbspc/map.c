@@ -684,6 +684,20 @@ get_shader_ptr(int bidx, int sidx)
 }
 
 qboolean g_bsp2map220;
+
+static void WriteDefaultTexDef( FILE *fp, const vec3_t normal ){
+	if( g_bsp2map220 ){ // " [ 1 0 0 0 ] [ 0 1 0 0 ] 0 1 1"
+		vec3_t vecs[2];
+		TextureAxisFromPlane(normal, vecs[0], vecs[1]);
+		fprintf(fp, " [ %g %g %g 0 ] [ %g %g %g 0 ] 0 1 1",
+			vecs[0][0], vecs[0][1], vecs[0][2],
+			vecs[1][0], vecs[1][1], vecs[1][2] );
+	}
+	else{
+		fprintf( fp, " 0 0 0 1 1" );
+	}
+}
+
 //===========================================================================
 //
 // Parameter:				-
@@ -699,7 +713,6 @@ qboolean WriteMapBrush(FILE *fp, mapbrush_t *brush, vec3_t origin)
 	winding_t *w;
 	side_t *s;
 	plane_t *plane;
-	const char* defAlign = g_bsp2map220? "[ 1 0 0 0 ] [ 0 1 0 0 ] 0 1 1" : "0 0 0 1 1";
 
 	if (noliquids)
 	{
@@ -796,7 +809,7 @@ qboolean WriteMapBrush(FILE *fp, mapbrush_t *brush, vec3_t origin)
 					Log_Write("brush->contents = %d\n", brush->contents);
 				}
 
-				fprintf( fp, " %s", defAlign );
+				WriteDefaultTexDef( fp, plane->normal );
 
 				if ( loadedmaptype == MAPTYPE_QUAKE3 )
 					fprintf( fp, " 0 0 0" );
@@ -816,7 +829,7 @@ qboolean WriteMapBrush(FILE *fp, mapbrush_t *brush, vec3_t origin)
 					fprintf(fp, "generic/misc/red");
 				}
 
-				fprintf( fp, " %s", defAlign );
+				WriteDefaultTexDef( fp, plane->normal );
 			}
 			else if (loadedmaptype == MAPTYPE_QUAKE3)
 			{
@@ -847,7 +860,8 @@ qboolean WriteMapBrush(FILE *fp, mapbrush_t *brush, vec3_t origin)
 					}
 				}
 
-				fprintf( fp, " %s 0 0 0", defAlign );
+				WriteDefaultTexDef( fp, plane->normal );
+				fprintf( fp, " 0 0 0" );
 			}
 
 			else
@@ -858,7 +872,7 @@ qboolean WriteMapBrush(FILE *fp, mapbrush_t *brush, vec3_t origin)
 				scale[0] = 1 / VectorNormalize2(ti->vecs[0], vecs[0]);
 				scale[1] = 1 / VectorNormalize2(ti->vecs[1], vecs[1]);
 				//
-				TextureAxisFromPlane(plane, axis[0], axis[1]);
+				TextureAxisFromPlane(plane->normal, axis[0], axis[1]);
 				//calculate texture shift done by entity origin
 				originshift[0] = DotProduct(origin, axis[0]);
 				originshift[1] = DotProduct(origin, axis[1]);
@@ -926,7 +940,6 @@ qboolean WriteOriginBrush(FILE *fp, vec3_t origin)
 	float dist;
 	int i, s;
 	winding_t *w;
-	const char* defAlign = g_bsp2map220? "[ 1 0 0 0 ] [ 0 1 0 0 ] 0 1 1" : "0 0 0 1 1";
 
 	fprintf(fp, " {\n");
 	//
@@ -966,7 +979,7 @@ qboolean WriteOriginBrush(FILE *fp, vec3_t origin)
 				fprintf(fp, "origin");
 			}
 
-			fprintf( fp, " %s", defAlign );
+			WriteDefaultTexDef(fp, normal);
 
 			if ( loadedmaptype == MAPTYPE_QUAKE3 )
 				fprintf( fp, " 0 0 0" );
