@@ -24,8 +24,6 @@
 extern int numthreads;
 
 void ThreadSetDefault();
-int GetThreadWork();
 void RunThreadsOnIndividual( int workcnt, bool showpacifier, void ( *func )( int ) );
-void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) );
 void ThreadLock();
 void ThreadUnlock();
