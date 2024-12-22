@@ -311,7 +311,7 @@ textures/obsidian_video/intro
 <p>A constant vertex alpha is assigned to the affected surface. This modifies the transparency of the texture.</p>
 
 <h3>alphaGen portal <em>distance</em></h3>
-<p>This rendering stage keyword is normally used in conjunction with the surface parameter keyword portal. The function accomplishes the "fade" that causes the scene in the portal/mirror to fade from view. Specifically, it means "Generate alpha values based on the distance from the viewer to the portal". Viewer distance 0 maps to alpha 0, when distance is more than "distance" parameter value, alpha is 1. While latter is the case, portal/mirror content is not rendering at all, this optimization is original purpose of the keyword, though it may be utilized for other distance dependent effects.</p>
+<p>This rendering stage keyword is normally used in conjunction with the surface parameter keyword portal. It is mandatory for portals to work (but not for mirrors). The function accomplishes the "fade" that causes the scene in the portal/mirror to fade from view. Specifically, it means "Generate alpha values based on the distance from the viewer to the portal". Viewer distance 0 maps to alpha 0, when distance is more than "distance" parameter value, alpha is 1. While latter is the case, portal/mirror content is not rendering at all, this optimization is original purpose of the keyword, though it may be utilized for other distance dependent effects.</p>
 <p>
 Basic fading portal/mirror shader example:
 </p>
@@ -323,13 +323,9 @@ textures/ztest/portal
 	portal
 	{
 		map textures/sfx/portalfog.tga
-		blendFunc GL_ZERO GL_SRC_ALPHA
+		blendFunc blend
+		alphaGen portal 256
 		depthWrite
-	}
-	{
-		map textures/sfx/portalfog.tga
-		blendfunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphagen portal 256
 	}
 }
 </pre>
