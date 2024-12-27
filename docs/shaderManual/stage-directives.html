@@ -67,7 +67,7 @@
 <h3>map <em>$whiteimage</em></h3>
 <p>This is used for specular lighting on MD3 models. This is a white image generated internally by the game. This image can be used in lieu of $lightmap or an actual texture map if, for example, you wish for the vertex colors to come through unaltered.</p>
 
-<h3>clampMap <em>texturename</em></h3>
+<h3 id="clampMap">clampMap <em>texturename</em></h3>
 <!-- obsidian: clampMap may have been once named clampTexCoords. Changed all instances of clampTexCoords (2nd paragraph) to clampMap -->
 <p>Dictates that this stage should clamp texture coordinates instead of wrapping them. During a stretch function, the area, which the texture must cover during a wave cycle, enlarges and decreases. Instead of repeating a texture multiple times during enlargement (or seeing only a portion of the texture during shrinking) the texture dimensions increase or contract accordingly. This is only relevant when using something like deformTexCoordParms to stretch/compress texture coordinates for a specific special effect. Remember that the Quake III Arena engine normalizes all texture coordinates (regardless of actual texture size) into a scale of 0.0 to 1.0.</p>
 <p>When using clampMap make sure the texture is properly aligned on the brush. The clampMap function keeps the image from tiling. However, the editor doesn't represent this properly and shows a tiled image. Therefore, what appears to be the correct position may be offset. This is very apparent on anything with a tcMod rotate and clampMap function.</p>
@@ -109,7 +109,7 @@ textures/sfx/metalbridge06_bounce
 }
 </pre>
 
-<h3>animMap <em>frequency texture1... texture8</em></h3>
+<h3 id="animMap">animMap <em>frequency texture1... texture8</em></h3>
 <p>The surfaces in the game can be animated by displaying a sequence of 1 to 8 frames (separate texture maps). These animations are affected by other keyword effects in the same and later shader stages.</p>
 <dl>
 	<dt>frequency</dt><dd>The number of frames to display per one second time period (fps).</dd>
@@ -164,7 +164,7 @@ textures/sfx/flameanim_blue
 	<p>To make a texture image appear for an unequal (longer) amount of time (compared to other frames), repeat that frame more than once in the sequence.</p>
 </blockquote>
 
-<h3>videoMap <em>videoname</em></h3>
+<h3 id="videoMap">videoMap <em>videoname</em></h3>
 <p>Surfaces marked with a shader containing this directive in one of its stages will display an animated video playing in a continuous loop. The video clip must be in ROQ format and playing at 30 frames per second. The ROQ file is stored in the "video" directory within the main mod directory. A third-party program is required to convert other video formats to the ROQ format for use within Quake III engine games.</p>
 <pre>
 textures/obsidian_video/intro

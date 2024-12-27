@@ -934,13 +934,13 @@ static const std::vector<ShaderFormat> g_shaderGeneralFormats{
 		}
 	},
 	{
-		"qer_editorImage %t", "quake-editor-radiant-directives.html#editorImage", c_colorKeyLv1
+		"qer_editorImage %t", c_pageQER, c_colorKeyLv1
 	},
 	{
-		"qer_trans %f", "quake-editor-radiant-directives.html#trans", c_colorKeyLv1
+		"qer_trans %f", c_pageQER, c_colorKeyLv1
 	},
 	{
-		"qer_alphaFunc %s %f", "quake-editor-radiant-directives.html#alphaFunc", c_colorKeyLv1, {
+		"qer_alphaFunc %s %f", c_pageQER, c_colorKeyLv1, {
 			"equal",
 			"greater",
 			"less",

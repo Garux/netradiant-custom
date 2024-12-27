@@ -55,7 +55,7 @@
 <h1>Radiant Editor Directives</h1>
 <p>These directives only affect the texture when it is seen in the Radiant editor. They have no effect on the surface in-game. They should be grouped with the surface parameters but ahead of them in sequence.</p>
 
-<h2 id="editorImage">qer_editorImage textureName</h2>
+<h2 id="qer_editorImage">qer_editorImage textureName</h2>
 <p>This directive creates a shader name in memory, but in the editor, it displays the TGA art image specified in qer_editorImage (in the shader below this is, textures/eerie/lavahell.tga).</p>
 <p>The editor maps a texture using the size attributes of the TGA file used for the editor image. When that editor image represents a shader, any texture used in any of the shader stages will be scaled up or down to the dimensions of the editor image. If a 128x128 pixel image is used to represent the shader in the editor, then a 256x256 image used in a later stage will be shrunk to fit. A 64x64 image would be stretched to fit. Be sure to check this on bouncy, acceleration, and power-up pads placed on surfaces other than 256 x 256. Use tcMod scale to change the size of the stretched texture. Remember that tcMod scale 0.5 0.5 will double your image, while tcMod scale 2 2 will halve it.</p>
 <pre>
@@ -87,14 +87,14 @@ textures/liquids/lavahell2			//path and name of new texture
 <p>A brush marked with this instruction will not be affected by CSG subtract functions. It is especially useful for water and fog textures.</p>
 -->
 
-<h2 id="trans">qer_trans N.N</h2>
+<h2 id="qer_trans">qer_trans N.N</h2>
 <p>This directive makes brush transparent when seen in the editor and filterable by 'translucent' filter (no effect on game rendering at all). It can have a positive value between 0 and 1. The higher the value, the less transparent the texture. Example: qer_trans 0.2 means the brush is 20% opaque and nearly invisible.</p>
 <blockquote>
 	<h4>Design Notes:</h4>
 	<p>On GtkRadiant 1.4 and earlier, if the shader uses qer_trans and a qer_editorImage with an alpha channel, the transparent areas of the editorImage will be 100% transparent. To keep the solid areas of the editorImage opaque, use a near 1 value for qer_trans (eg. 0.9999). This is useful for grates, windows, fences, etc. If using GtkRadiant 1.5 or later, use qer_alphaFunc for editorImage masking instead. In NetRadiant-custom any value of qer_trans enables alpha channel transparency display, this may be used when alpha blending is wanted instead of alpha masking.</p>
 </blockquote>
 
-<h2 id="alphaFunc">qer_alphaFunc func N.N</h2>
+<h2 id="qer_alphaFunc">qer_alphaFunc func N.N</h2>
 <p>This directive is only supported by GtkRadiant 1.5 based editors. This is used when you have an alpha channel in the editorImage that you want to appear as an alpha mask in the editor. qer_alphaFunc by itself does not get filtered with qer_trans. This is useful for grates, windows, fences, etc.</p>
 
 <p>Supported functions are: equal, greater, less, gequal, lequal.<br>Values: positive between 0 and 1.</p>
