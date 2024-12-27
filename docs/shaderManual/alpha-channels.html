@@ -65,23 +65,23 @@
 // Opaque texture with see-through holes knocked in in.
 textures/base_floor/pjgrate1
 {
-    surfaceparm metalsteps
-    cull none
+	surfaceparm metalsteps
+	cull none
 
-    // A GRATE OR GRILL THAT CAN BE SEEN FROM BOTH SIDES
-    {
-        map textures/base_floor/pjgrate1.tga
-        blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-        alphaFunc GT0
-        depthWrite
-        rgbGen identity
-    }
-    {
-        map $lightmap
-        rgbGen identity
-        blendFunc GL_DST_COLOR GL_ZERO
-        depthFunc equal
-    }
+	// A GRATE OR GRILL THAT CAN BE SEEN FROM BOTH SIDES
+	{
+		map textures/base_floor/pjgrate1.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphaFunc GT0
+		depthWrite
+		rgbGen identity
+	}
+	{
+		map $lightmap
+		rgbGen identity
+		blendFunc GL_DST_COLOR GL_ZERO
+		depthFunc equal
+	}
 }
 </pre>
 

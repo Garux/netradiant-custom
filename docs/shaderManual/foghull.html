@@ -71,9 +71,10 @@
 <pre>
 textures/env/fog1024
 {
-	fogParms ( 0.8 0.8 0.8 ) 1024	//Normalized RGB, distance to opaque
+	//Normalized RGB, distance to opaque
+	fogParms ( 0.8 0.8 0.8 ) 1024
 
-	surfaceparm fog		//Must be used
+	surfaceparm fog    //Must be used
 	surfaceparm nolightmap
 	surfaceparm nonsolid
 	surfaceparm trans
@@ -88,11 +89,12 @@ textures/env/fog1024
 <pre>
 textures/skies/foghullsky
 {
-	skyParms textures/skies/foghullsky 0 -	//farbox cloudheight nearbox
+	//farbox cloudheight nearbox
+	skyParms textures/skies/foghullsky 0 -
 
 	surfaceparm nolightmap
 	surfaceparm nonsolid
-	surfaceparm sky			//Must be used
+	surfaceparm sky        //Must be used
 	surfaceparm trans
 }
 </pre>

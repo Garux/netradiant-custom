@@ -77,22 +77,22 @@ classname          worldspawn
 <pre>
 textures/slstyle/light
 {
-    q3map_surfacelight 3700
-    q3map_lightStyle 1    // sets style index #1
-    {
-        map $lightmap
-        rgbGen identity
-    }
-    q3map_styleMarker     // note: after the $lightmap stage
-    {
-        map textures/slstyle/light.tga
-        blendFunc GL_DST_COLOR GL_ZERO
-        rgbGen identity
-    }
-    {
-        map textures/slstyle/light.blend.tga
-        blendfunc GL_ONE GL_ONE
-    }
+	q3map_surfacelight 3700
+	q3map_lightStyle 1    // sets style index #1
+	{
+		map $lightmap
+		rgbGen identity
+	}
+	q3map_styleMarker     // note: after the $lightmap stage
+	{
+		map textures/slstyle/light.tga
+		blendFunc GL_DST_COLOR GL_ZERO
+		rgbGen identity
+	}
+	{
+		map textures/slstyle/light.blend.tga
+		blendfunc GL_ONE GL_ONE
+	}
 }
 </pre>
 
@@ -102,18 +102,18 @@ textures/slstyle/light
 <pre>
 textures/slstyle/plywood2sided
 {
-    cull none
-    qer_editorImage textures/slstyle/plywood-2-tone.tga
-    {
-        map $lightmap
-        rgbGen identity
-    }
-    q3map_styleMarker     // note: after the $lightmap stage
-    {
-        map textures/slstyle/plywood-2-tone.tga
-        blendFunc GL_DST_COLOR GL_ZERO
-        rgbGen identity
-    }
+	cull none
+	qer_editorImage textures/slstyle/plywood-2-tone.tga
+	{
+		map $lightmap
+		rgbGen identity
+	}
+	q3map_styleMarker     // note: after the $lightmap stage
+	{
+		map textures/slstyle/plywood-2-tone.tga
+		blendFunc GL_DST_COLOR GL_ZERO
+		rgbGen identity
+	}
 }
 </pre>
 

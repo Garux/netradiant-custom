@@ -68,13 +68,13 @@
 <pre>
 textures/liquids/lava-example                   //Shader name
 {
-    deformVertexes wave sin 0 3 0 0.1           //General directive
-    q3map_tessSize 64                           //Q3Map2 directive
-    surfaceparm lava                            //Surface parameter directive
-    qer_editorimage textures/common/lava.tga    //Editor directive
-    {
-        map textures/common/lava.tga            //Stage directive
-    }
+	deformVertexes wave sin 0 3 0 0.1           //General directive
+	q3map_tessSize 64                           //Q3Map2 directive
+	surfaceparm lava                            //Surface parameter directive
+	qer_editorimage textures/common/lava.tga    //Editor directive
+	{
+		map textures/common/lava.tga            //Stage directive
+	}
 }
 </pre>
 <p>Shaders need to be referenced by the map editor, compiler (Q3Map2) and game engine - each of which uses a different part of the shader. In the above example shader, the different sections are listed on the right.</p>

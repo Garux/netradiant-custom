@@ -65,15 +65,16 @@
 <pre>
 textures/shadermanual/sky
 {
-	skyparms textures/shaderlab_terrain/env/sky 1024 -		//farbox cloudheight nearbox
+	//farbox cloudheight nearbox
+	skyparms textures/shaderlab_terrain/env/sky 1024 -
 
 	q3map_lightImage textures/shaderlab_terrain/sky_clouds.tga
 
-	q3map_sun 1 1 1 140 -35 25	//red green blue intensity degrees elevation
-	q3map_lightSubdivide 256	//sets a pointlight every 256 game units
-	q3map_surfaceLight 200		//emits 200 units of light
+	q3map_sun 1 1 1 140 -35 25  //red green blue intensity degrees elevation
+	q3map_lightSubdivide 256    //sets non-default surface light granularity
+	q3map_surfaceLight 200      //emits 200 units of light
 
-	surfaceparm sky				//flags compiler that this is sky
+	surfaceparm sky             //flags compiler that this is sky
 	surfaceparm noimpact
 	surfaceparm nolightmap
 	surfaceparm nodlight
@@ -112,7 +113,7 @@ textures/shadermanual/sky
 	q3map_lightImage textures/shaderlab_terrain/sky_clouds.tga
 
 	q3map_sun 1 1 1 140 -35 25
-	q3map_skylight 100 3			//amount iterations
+	q3map_skylight 100 3          //amount iterations
 
 	surfaceparm sky
 	surfaceparm noimpact
@@ -152,7 +153,7 @@ textures/shadermanual/sky
 
 	q3map_lightImage textures/shaderlab_terrain/sky_clouds.tga
 
-	q3map_sunExt 1 1 1 140 -35 25 3 16		//adds deviance and samples
+	q3map_sunExt 1 1 1 140 -35 25 3 16     //adds deviance and samples
 	q3map_skylight 100 3
 
 	surfaceparm sky
@@ -203,7 +204,7 @@ textures/shadermanual/sky
 	q3map_lightImage textures/shaderlab_terrain/sky_clouds.tga
 
 	q3map_sunExt 1 1 1 140 -35 25 3 16
-	q3map_lightmapFilterRadius 0 8		//self other
+	q3map_lightmapFilterRadius 0 8    //self other
 	q3map_skyLight 100 3
 
 	surfaceparm sky

@@ -81,7 +81,6 @@
 <pre>
 textures/sfx/metalbridge06_bounce
 {
-	//q3map_surfacelight 2000
 	surfaceparm nodamage
 	q3map_lightimage textures/sfx/jumppadsmall.tga
 	q3map_surfacelight 400
@@ -105,7 +104,6 @@ textures/sfx/metalbridge06_bounce
 		tcMod stretch sin 1.2 .8 0 1.5
 		rgbGen wave square .5 .5 .25 1.5
 	}
-	// END
 }
 </pre>
 
@@ -435,7 +433,7 @@ blendFunc GL_DST_COLOR GL_SRC_COLOR
 <pre>
 textures/bwhtest/foo
 {
-	q3map_globalTexture	//may be required when using tcMod scale in later stages
+	q3map_globalTexture  //may be required when using tcMod scale in later stages
 
 	// draw the lightmap first
 	{
@@ -453,7 +451,7 @@ textures/bwhtest/foo
 	{
 		map textures/details/detail01.tga
 		blendFunc GL_DST_COLOR GL_SRC_COLOR	//MUST BE USED
-		detail	//allows detail shaders to be disabled
+		detail   //allows detail shaders to be disabled
 		tcMod scale 9.1 9.2
 	}
 }
