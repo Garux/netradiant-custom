@@ -124,12 +124,12 @@ textures/liquids/lava-example                   //Shader name
 	<dt>Square</dt><dd>A square wave simply switches from -1 to 1 with no in-between.</dd>
 	<dt>Sawtooth</dt><dd>In the sawtooth wave, the ascent is like a triangle wave from 0 to 1, but the decay cuts off sharply back to 0.</dd>
 	<dt>Inversesawtooth</dt><dd>This is the reverse of the sawtooth... instant ascent to the peak value (1), then a triangle wave descent to the valley value (0). The phase on this goes from 1.0 to 0.0 instead of 0.0 to 1.0. This wave is particularly useful for additive cross-fades.</dd>
-	<dt>Noise</dt><dd>Available for some functions only (rgbGen wave, but not alphaGen wave), adds a randomly changing value. The frequency value is (probably) hard-coded so changing it (probably) doesn't affect the speed  of the flickering.</dd>
+	<dt>Noise</dt><dd>Available for <a href="stage-directives.html#rgbGenWave">rgbGen wave</a> function only, adds a randomly changing value. The frequency value affects the speed of the flickering.</dd>
 </dl>
 <p>Waveforms all have the following properties:</p>
 <dl>
 	<dt>base</dt><dd>Where the wave form begins. Amplitude is measured from this base value.</dd>
-	<dt>amplitude</dt><dd>This is the height of the wave created, measured from the base. You will probably need to test and tweak this value to get it correct for each new shader stage. The greater the amplitude, the higher the wave peaks and the deeper the valleys.</dd>
+	<dt>amplitude</dt><dd>This defines the height of the wave created. Functions handle this differently: sin, triangle, square, noise produce output values in the range [base - amplitude, base + amplitude], while sawtooth, inversesawtooth do [base, base + amplitude].</dd>
 	<dt>phase</dt><dd>This is a normalized value between 0.0 and 1.0. Changing phase to a non-zero value affects the point on the wave at which the wave form initially begins to be plotted. Example: In Sin or Triangle wave, a phase of 0.25 means it begins one fourth (25%) of the way along the curve, or more simply put, it begins at the peak of the wave. A phaseof 0.5 would begin at the point the wave re-crosses the base line. A phase of 0.75 would be at the lowest point of the valley. If only one wave form is being used in a shader, a phase shift will probably not be noticed and phase should have a value of zero (0). However, including two or more stages of the same process in a single shader, but with the phases shifted can be used to create interesting visual effects. Example: using rgbGen in two stages with different colors and a 0.5 difference in phase would cause the manipulated texture to modulate between two distinct colors. Phase changes can also be used when you have two uses of the same effect near each other, and you don't want them to be synchronized. You would write a separate shader for each, changing only the phase value.</dd>
 	<dt>freq</dt><dd>Frequency. This value is expressed as repetitions or cycles of the wave per second. A value of 1 would cycle once per second. A value of 10 would cycle 10 times per second. A value of 0.1 would cycle once every 10 seconds.</dd>
 </dl>
@@ -166,12 +166,23 @@ textures/q3map2_sm/floor:q3map
 	surfaceparm metalsteps
 }
 </pre>
+<p>Another case is when we want to create a version of existing shader with specific compile-time parameters. Possible to reduce the noise too:</p>
+<pre>
+textures/tim/rmetaltechgeomtrn_slick:q3map
+{
+	// compile time parameter
+	surfaceparm slick
+	qer_editorimage textures/tim/rmetaltechgeomtrn.tga
+	// remap back to original shader
+	q3map_remapShader textures/tim/rmetaltechgeomtrn
+}
+</pre>
 
 <h2 id="directivetypes">Directive Types</h2>
 <p>Only the shader name is case sensitive (use all lowercase). Shader directives are not, but by convention, you should use mixedCase (ie. q3map_alphaMod). Some of the shader directives are order dependant, so it's good practice to keep all directive of a similar type grouped together in the following order, from top-down:</p>
 
 <h3>General Directives</h3>
-<p>A shader may contain general directives, which affects the shader's appearance globally (affects the entire shader), and changes the physical attributes of the surface that uses the shader. These attributes can affect the player. These parameters are executed at runtime, that is, in order to see the changes one does not need to re-compile the map.</p>
+<p>A shader may contain general directives, which affects the shader's appearance globally (affects the entire shader), and changes the visual attributes of the surface that uses the shader. These parameters are executed at runtime, that is, in order to see the changes one does not need to re-compile the map.</p>
 
 <h3>Q3Map Directives</h3>
 <p>The general directives may be followed by Q3Map directives. These directives are used by the compiler to change the physical nature of the shader's surface and are also global.</p>

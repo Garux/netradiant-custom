@@ -61,18 +61,18 @@
 <h3>map <em>texturename</em></h3>
 <p>Specifies the source texture map (a 24 or 32-bit TGA or JPG file) used for this stage. The texture may or may not contain alpha channel information. The special keywords $lightmap and $whiteimage may be substituted in lieu of an actual texture map name. In those cases, the texture named in the first line of the shader becomes the texture that supplies the light mapping data for the process. The texture name should always end with the ".tga" suffix regardless of whether the source texture map is actually a .tga file or .jpg.</p>
 
-<h3>map <em>$lightmap</em></h3>
-<p>This is the overall lightmap for the game world. It is calculated during the Q3Map2 process. It is the initial color data found in the framebuffer. Note: due to the use of overbright bits in light calculation, the keyword rgbGen identity must accompany all $lightmap instructions.</p>
+<h3 id="mapLightmap">map <em>$lightmap</em></h3>
+<p>This is the overall lightmap for the game world. It is calculated during the Q3Map2 process. It is the initial color data found in the framebuffer. Note: due to the use of overbright bits in light calculation, the keyword <a href="stage-directives.html#rgbGenIdentity">rgbGen identity</a> must accompany all $lightmap instructions.</p>
 
 <h3>map <em>$whiteimage</em></h3>
 <p>This is used for specular lighting on MD3 models. This is a white image generated internally by the game. This image can be used in lieu of $lightmap or an actual texture map if, for example, you wish for the vertex colors to come through unaltered.</p>
 
 <h3 id="clampMap">clampMap <em>texturename</em></h3>
 <!-- obsidian: clampMap may have been once named clampTexCoords. Changed all instances of clampTexCoords (2nd paragraph) to clampMap -->
-<p>Dictates that this stage should clamp texture coordinates instead of wrapping them. During a stretch function, the area, which the texture must cover during a wave cycle, enlarges and decreases. Instead of repeating a texture multiple times during enlargement (or seeing only a portion of the texture during shrinking) the texture dimensions increase or contract accordingly. This is only relevant when using something like deformTexCoordParms to stretch/compress texture coordinates for a specific special effect. Remember that the Quake III Arena engine normalizes all texture coordinates (regardless of actual texture size) into a scale of 0.0 to 1.0.</p>
-<p>When using clampMap make sure the texture is properly aligned on the brush. The clampMap function keeps the image from tiling. However, the editor doesn't represent this properly and shows a tiled image. Therefore, what appears to be the correct position may be offset. This is very apparent on anything with a tcMod rotate and clampMap function.</p>
+<p>Dictates that this stage should clamp texture coordinates instead of wrapping them. During a <a href="stage-directives.html#tcModStretch">stretch function</a>, the area, which the texture must cover during a wave cycle, enlarges and decreases. Instead of repeating a texture multiple times during enlargement (or seeing only a portion of the texture during shrinking) the texture dimensions increase or contract accordingly. This is only relevant when using something like deformTexCoordParms to stretch/compress texture coordinates for a specific special effect. Remember that the Quake III Arena engine normalizes all texture coordinates (regardless of actual texture size) into a scale of 0.0 to 1.0.</p>
+<p>When using clampMap make sure the texture is properly aligned on the brush. The clampMap function keeps the image from tiling. However, the editor doesn't represent this properly and shows a tiled image. Therefore, what appears to be the correct position may be offset. This is very apparent on anything with a <a href="stage-directives.html#tcModRotate">tcMod rotate</a> and clampMap function.</p>
 
-<p>Avoiding Distortion: When seen at a given distance (which can vary, depending on hardware and the size of the texture), the compression phase of a stretch function will cause a "cross"-like visual artifact to form on the modified texture due to the way that textures are reduced. This occurs because the texture undergoing modification lacks sufficient "empty space" around the displayed (non-black) part of the texture (see below, left)<!--(see figure 2a)-->. To compensate for this, make the non-zero portion of the texture substantially smaller (50% of maximum stretched size -- see below, right<!--figure 2b-->) than the dimensions of the texture. Then, write a scaling function (tcMod scale) into the appropriate shader phase, to enlarge the image to the desired proportion.</p>
+<p>Avoiding Distortion: When seen at a given distance (which can vary, depending on hardware and the size of the texture), the compression phase of a stretch function will cause a "cross"-like visual artifact to form on the modified texture due to the way that textures are reduced. This occurs because the texture undergoing modification lacks sufficient "empty space" around the displayed (non-black) part of the texture (see below, left)<!--(see figure 2a)-->. To compensate for this, make the non-zero portion of the texture substantially smaller (50% of maximum stretched size -- see below, right<!--figure 2b-->) than the dimensions of the texture. Then, write a scaling function (<a href="stage-directives.html#tcModScale">tcMod scale</a>) into the appropriate shader phase, to enlarge the image to the desired proportion.</p>
 
 <p><strong><img src="clampmap.jpg" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_images/clampmap.jpg" alt="Figure 2a & 2b" class="center" /></strong></p>
 
@@ -110,7 +110,7 @@ textures/sfx/metalbridge06_bounce
 <h3 id="animMap">animMap <em>frequency texture1... texture8</em></h3>
 <p>The surfaces in the game can be animated by displaying a sequence of 1 to 8 frames (separate texture maps). These animations are affected by other keyword effects in the same and later shader stages.</p>
 <dl>
-	<dt>frequency</dt><dd>The number of frames to display per one second time period (fps).</dd>
+	<dt>frequency</dt><dd>The number of frames to display per one second time period (namely fps).</dd>
 	<dt>texture1... texture8</dt><dd>the texture path/texture name for each animation frame must be explicitly listed. Up to eight frames (eight separate .tga files) can be used to make an animated sequence. Each frame is displayed for 1/frequency seconds.</dd>
 </dl>
 <blockquote>
@@ -205,7 +205,7 @@ textures/obsidian_video/intro
 
 <p>Rather than think of the entire texture as a whole, it maybe easier to think of the number values that correspond to a single pixel, because that is essentially what the computer is processing... one pixel of the bitmap at a time.</p>
 
-<p>The process for calculating the final look of a texture in place in the game world begins with the precalculated lightmap for the area where the texture will be located. This data is in the frame buffer. That is to say, it is the initial data in the destination. In an unmanipulated texture (i.e. one without a special shader script), color information from the texture is combined with the lightmap. In a shader-modified texture, the $lightmap stage must be present for the lightmap to be included in the calculation of the final texture appearance.</p>
+<p>The process for calculating the final look of a texture in place in the game world begins with the precalculated lightmap for the area where the texture will be located. This data is in the frame buffer. That is to say, it is the initial data in the destination. In an unmanipulated texture (i.e. one without a special shader script), color information from the texture is combined with the lightmap. In a shader-modified texture, the <a href="stage-directives.html#mapLightmap">$lightmap</a> stage must be present for the lightmap to be included in the calculation of the final texture appearance.</p>
 
 <p>Each pass or "stage" of blending is combined (in a cumulative manner) with the color data passed onto it by the previous stage. How that data combines together depends on the values chosen for the source blends and destination blends at each stage. Remember it's numbers that are being mathematically combined together that are ultimately interpreted as colors.</p>
 
@@ -251,20 +251,20 @@ textures/obsidian_video/intro
 <p>Cards running in 16 bit color cannot use any GL_DST_ALPHA blends.</p>
 
 <h2 id="rgbGen">rgbGen func</h2>
-<p>There are two color sources for any given shader, the texture file and the vertex colors. Output at any given time will be equal to TEXTURE multiplied by VERTEXCOLOR. Most of the time VERTEXCOLOR will default to white (which is a normalized value of 1.0), so output will be TEXTURE (this usually lands in the Source side of the shader equation). Sometimes you do the opposite and use TEXTURE = WHITE, but this is only commonly used when doing specular lighting on entities (i.e. shaders that level designers will probably never create.</p>
+<p>There are two color sources for any given shader, the texture file and the vertex colors. Output at any given time will be equal to TEXTURE multiplied by VERTEXCOLOR. Most of the time VERTEXCOLOR will default to white (which is a <a href="shader-concepts.html#normalization">normalized value</a> of 1.0), so output will be TEXTURE (this usually lands in the Source side of the shader equation). Sometimes you do the opposite and use TEXTURE = WHITE, but this is only commonly used when doing specular lighting on entities (i.e. shaders that level designers will probably never create.</p>
 
 <p>The most common reason to use rgbGen is to pulsate something. This means that the VERTEXCOLOR will oscillate between two values, and that value will be multiplied (darkening) the texture.</p>
 
 <p>If no rgbGen is specified, either "identityLighting" or "identity" will be selected, depending on which blend modes are used.</p>
 
-<h3>rgbGen identity</h3>
+<h3 id="rgbGenIdentity">rgbGen identity</h3>
 <p>Colors are assumed to be all white (1.0, 1.0, 1.0). All filters stages (lightmaps, etc) will get this by default.</p>
 
 <h3>rgbGen identityLighting</h3>
 <p>Colors will be (1.0, 1.0, 1.0) if running without overbright bits (NT, Linux, windowed modes), or (0.5, 0.5, 0.5) if running with overbright. Overbright allows a greater color range at the expense of a loss of precision. Additive and blended stages will get this by default.</p>
 
-<h3>rgbGen vertex</h3>
-<p>Colors are filled in directly by the data from the map or model files. Use rgbGen vertex + alphaGen const or rgbGen exactVertex to disable surfaces from being affected by alphaMod volumes.
+<h3 id="rgbGenVertex">rgbGen vertex</h3>
+<p>Colors are filled in directly by the color data baked to vertices of the map or model files.</p>
 <blockquote>
 	<h4>Design Notes:</h4>
 	<p>rgbGen vertex  should be used when you want the RGB values to be computed for a static model (i.e. mapobject) in the world using precomputed static lighting from Q3BSP. This would be used on things like the gargoyles, the portal frame, skulls, and other decorative models put into the Quake III Arena world.</p>
@@ -289,8 +289,8 @@ textures/obsidian_video/intro
 	<p>rgbGen lightingDiffuse is used when you want the RGB values to be computed for a dynamic model (i.e. non-map object) in the world using regular in-game lighting. For example, you would specify on shaders for items, characters, weapons, etc.</p>
 </blockquote>
 
-<h3>rgbGen wave <em>func base amplitude phase freq</em></h3>
-<p>Colors are generated using the specified waveform. An affected texture will become darker and lighter, but will not change hue. Hue stays constant. Note that the RGB values for color will not go below 0 (black) or above 1 (white). Valid waveforms are sin, triangle, square, sawtooth, inversesawtooth and noise (see Waveform Functions).</p>
+<h3 id="rgbGenWave">rgbGen wave <em>func base amplitude phase freq</em></h3>
+<p>Colors are generated using the specified waveform. An affected texture will become darker and lighter, but will not change hue. Hue stays constant. Note that the RGB values for color will not go below 0 (black) or above 1 (white). Valid waveforms are sin, triangle, square, sawtooth, inversesawtooth and noise (see <a href="shader-concepts.html#waveformfunctions">Waveform Functions</a>).</p>
 
 <h3>rgbGen const ( <em>R G B</em> )</h3>
 <p>A constant vertex colour is assigned to the affected surface. This modifies the hue of the texture.</p>
@@ -299,17 +299,23 @@ textures/obsidian_video/intro
 <p>The alpha channel can be specified like the RGB channels. If not specified, it defaults to 1.0.</p>
 
 <h3>alphaGen lightingSpecular</h3>
+
 <h3>alphaGen wave</h3>
+<p>All <a href="shader-concepts.html#waveformfunctions">waveform functions</a> except <em>noise</em>.</p>
+
 <h3>alphaGen entity</h3>
 <h3>alphaGen oneMinusEntity</h3>
-<h3>alphaGen vertex</h3>
+
+<h3 id="alphaGenVertex">alphaGen vertex</h3>
+<p>Baked alpha value is read from surface vertices.</p>
 <h3>alphaGen oneMinusVertex</h3>
+<p>Same as above, but (1.0 - value).</p>
 
 <h3>alphaGen const N.N</h3>
 <p>A constant vertex alpha is assigned to the affected surface. This modifies the transparency of the texture.</p>
 
 <h3>alphaGen portal <em>distance</em></h3>
-<p>This rendering stage keyword is normally used in conjunction with the surface parameter keyword portal. It is mandatory for portals to work (but not for mirrors). The function accomplishes the "fade" that causes the scene in the portal/mirror to fade from view. Specifically, it means "Generate alpha values based on the distance from the viewer to the portal". Viewer distance 0 maps to alpha 0, when distance is more than "distance" parameter value, alpha is 1. While latter is the case, portal/mirror content is not rendering at all, this optimization is original purpose of the keyword, though it may be utilized for other distance dependent effects.</p>
+<p>This rendering stage keyword is normally used in conjunction with the surface parameter keyword <a href="general-directives.html#portal">portal</a>. It is mandatory for portals to work (but not for mirrors). The function accomplishes the "fade" that causes the scene in the portal/mirror to fade from view. Specifically, it means "Generate alpha values based on the distance from the viewer to the portal". Viewer distance 0 maps to alpha 0, when distance is more than "distance" parameter value, alpha is 1. While latter is the case, portal/mirror content is not rendering at all, this optimization is original purpose of the keyword, though it may be utilized for other distance dependent effects.</p>
 <p>
 Basic fading portal/mirror shader example:
 </p>
@@ -338,7 +344,7 @@ textures/ztest/portal
 	<dt>vector</dt><dd>Projects a texture from a specified direction.</dd>
 </dl>
 
-<h3>tcGen vector ( <em>sx sy sz</em> ) ( <em>tx ty tz</em> )</h3>
+<h3 id="tcGenVector">tcGen vector ( <em>sx sy sz</em> ) ( <em>tx ty tz</em> )</h3>
 <p>New texture coordinate generation by world projection. This allows you to project a texture onto a surface in a fixed way, regardless of its orientation.</p>
 
 <p>S-coordinates correspond to the "x" coordinates on the texture itself. T-coordinates correspond to the "y" coordinates on the texture itself. The measurements are in game units.</p>
@@ -355,11 +361,11 @@ tcMod scale 0.5 0.5
 tcMod scroll 1 1
 </pre>
 
-<h3>tcMod rotate <em>degrees/sec</em></h3>
+<h3 id="tcModRotate">tcMod rotate <em>degrees/sec</em></h3>
 <p>This keyword causes the texture coordinates to rotate. The value is expressed in degrees rotated each second. A positive value means clockwise rotation. A negative value means counterclockwise rotation. For example "tcMod rotate 5" would rotate texture coordinates 5 degrees each second in a clockwise direction. The texture rotates around the center point of the texture map, so you are rotating a texture with a single repetition, be careful to center it on the brush (unless off-center rotation is desired).</p>
 
-<h3>tcMod scale <em>sScale tScale</em></h3>
-<p>Resizes (enlarges or shrinks) the texture coordinates by multiplying them against the given factors of sScale and tScale. The values "s" and "t" conform to the "x" and "y" values (respectively) as they are found in the original texture. A positive value less than one will increase the size of the texture. A value greater than 1.0 will reduce the texture to a fraction of its size and cause it to repeat within the same area as the original texture (Note: see clampMap for ways to control this).</p>
+<h3 id="tcModScale">tcMod scale <em>sScale tScale</em></h3>
+<p>Resizes (enlarges or shrinks) the texture coordinates by multiplying them against the given factors of sScale and tScale. The values "s" and "t" conform to the "x" and "y" values (respectively) as they are found in the original texture. A positive value less than one will increase the size of the texture. A value greater than 1.0 will reduce the texture to a fraction of its size and cause it to repeat within the same area as the original texture (Note: see <a href="stage-directives.html#clampMap">clampMap</a> for ways to control this).</p>
 
 <img src="tcmodscale.png" class="center" />
 
@@ -370,8 +376,8 @@ tcMod scroll 1 1
 
 <p>This should be the LAST tcMod in a stage. Otherwise there may be a popping or snapping visual effect in some shaders.</p>
 
-<h3>tcMod stretch <em>func base amplitude phase frequency</em></h3>
-<p>Stretches the texture coordinates with the given function. Stretching is defined as stretching the texture coordinate away from the texture center closest to the polygon center and then compressing it towards the center. (see Chapter 1: Key Concepts for waveform parameter definitions).</p>
+<h3 id="tcModStretch">tcMod stretch <em>func base amplitude phase frequency</em></h3>
+<p>Stretches the texture coordinates with the given function. Stretching is defined as stretching the texture coordinate away from the texture center closest to the polygon center and then compressing it towards the center (see <a href="shader-concepts.html#waveformfunctions">Waveform Functions</a>).</p>
 
 <h3>tcMod transform <em>m00 m01 m10 m11 t0 t1</em></h3>
 <p>Transforms each texture coordinate as follows:</p>
@@ -390,7 +396,7 @@ tcMod transform 1 0 0 1 0 0
 <dl>
 	<dt>base</dt><dd>Undefined</dd>
 	<dt>amplitude</dt><dd>This is essentially the intensity of the disturbance or twisting and squiggling of the texture.</dd>
-	<dt>phase</dt><dd>See the explanation for phase under the deformVertexes keyword.</dd>
+	<dt>phase</dt><dd>See the explanation for phase in <a href="shader-concepts.html#waveformfunctions">Waveform Functions</a>.</dd>
 	<dt>frequency</dt><dd>Frequency. This value is expressed as repetitions or cycles of the wave per second. A value of one would cycle once per second. A value of 10 would cycle 10 times per second. A value of 0.1 would cycle once every 10 seconds.</dd>
 </dl>
 
@@ -401,7 +407,7 @@ tcMod transform 1 0 0 1 0 0
 <p>By default, writes to the depth buffer when depthFunc passes will happen for opaque surfaces and not for translucent surfaces. Blended surfaces can have the depth writes forced with this function.</p>
 
 <h2 id="detail">detail</h2>
-<p>This feature was not used in Quake III Arena maps, but still functions. Designates this stage as a detail texture stage, which means that if the c_var, r_detailtextures, is set to 0 then this stage will be ignored (detail will not be displayed). This keyword, by itself, does not affect rendering at all. If you do put in a detail texture, it has to conform to very specific rules. Specifically, the blendFunc:</p>
+<p>This feature was not used in Quake III Arena maps, but still functions. Designates this stage as a detail texture stage, which means that if the c_var r_detailtextures is set to 0 then this stage will be ignored (detail will not be displayed). This keyword, by itself, does not affect rendering at all. If you do put in a detail texture, it has to conform to very specific rules. Specifically, the blendFunc:</p>
 
 <pre>
 blendFunc GL_DST_COLOR GL_SRC_COLOR
@@ -423,7 +429,7 @@ blendFunc GL_DST_COLOR GL_SRC_COLOR
     <li>The detail texture MUST have a mean intensity around 127-129. If it does not then it will modify the displayed texture's perceived brightness in the world.</li>
     <li>The detail shader stage MUST have the "detail" keyword or it will not be disabled if the user uses the "r_detailtextures 0" setting.</li>
     <li>The detail stage MUST use "blendFunc GL_DST_COLOR GL_SRC_COLOR". Any other BlendFunc will cause mismatches in brightness between detail and non-detail views.</li>
-    <li>The detail stage should scale its textures by some amount (usually between 3 and 12) using "tcMod scale" to control density. This roughly corresponds to coarseness. A very large number, such as 12, will give very fine detail, however that detail will disappear VERY quickly as the viewer moves away from the wall since it will be MIP mapped away. A very small number, e.g. 3, gives diminishing returns since not enough is brought in when the user gets very close. I'm currently using values between 6 and 9.5. You should use non-integral numbers as much as possible to avoid seeing repeating patterns.</li>
+    <li>The detail stage should scale its textures by some amount (usually between 3 and 12) using "<a href="stage-directives.html#tcModScale">tcMod scale</a>" to control density. This roughly corresponds to coarseness. A very large number, such as 12, will give very fine detail, however that detail will disappear VERY quickly as the viewer moves away from the wall since it will be MIP mapped away. A very small number, e.g. 3, gives diminishing returns since not enough is brought in when the user gets very close. I'm currently using values between 6 and 9.5. You should use non-integral numbers as much as possible to avoid seeing repeating patterns.</li>
     <li>Detail textures add one pass of overdraw, so there is a definite performance hit.</li>
     <li>Detail textures can be shared, so designers may wish to define only a very small handful of detail textures for common surfaces such as rocks, etc.</li>
 </ul>
@@ -461,7 +467,7 @@ textures/bwhtest/foo
 
 <p>Determines the alpha test function used when rendering this map. Valid values are GT0, LT128, and GE128. These correspond to "GREATER THAN 0", "LESS THAN 128", and "GREATER THAN OR EQUAL TO 128". This function is used when determining if a pixel should be written to the framebuffer. For example, if GT0 is specified, the only the portions of the texture map with corresponding alpha values greater than zero will be written to the framebuffer. By default alpha testing is disabled.</p>
 
-<p>Both alpha testing and normal alpha blending can be used to get textures that have see-through parts. The difference is that alphaFunc is an all-or-nothing test, while blending smoothly blends between opaque and translucent at pixel edges. Alpha test can also be used with depthWrite, allowing other effects to be conditionally layered on top of just the opaque pixels by setting depthFunc to equal.</p>
+<p>Both alpha testing and normal alpha blending can be used to get textures that have see-through parts. The difference is that alphaFunc is an all-or-nothing test, while blending smoothly blends between opaque and translucent at pixel edges. Alpha test can also be used with depthWrite, allowing other effects to be conditionally layered on top of just the opaque pixels by setting <a href="stage-directives.html#depthFunc">depthFunc</a> to equal.</p>
 
 </body>
 </html>

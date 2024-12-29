@@ -61,12 +61,12 @@
 <p>Since distance clipping is not a feature natively built into Quake III Arena, using distance culling would result in a hall of mirrors (HOM) effect where the culled geometry begins, since nothing is being drawn in the frame buffer. To compensate for this, the foghull feature uses a series of six skybox images that are drawn in place of the absent culled geometry, thus preventing the HOM effect.</p>
 
 <h2>Skybox Images</h2>
-<p>The skybox images used with the foghull feature should never be actually seen since the idea is to use the fog to obscure the maximum distance that the player can see. It only exists to prevent the HOM effect. To pull this off in a convincing manner, the skybox images should be six identical 8x8 pixel (to save on texture memory) textures each filled with a flat color matching the exact color of the fog. The six skybox images must be named in accordance to the skyParms farbox convention, using the _ft, _rt, _bk, _lf, _up, _dn suffixes.</p>
+<p>The skybox images used with the foghull feature should never be actually seen since the idea is to use the fog to obscure the maximum distance that the player can see. It only exists to prevent the HOM effect. To pull this off in a convincing manner, the skybox images should be six identical 8x8 pixel (to save on texture memory) textures each filled with a flat color matching the exact color of the fog. The six skybox images must be named in accordance to the <a href="general-directives.html#skyParms">skyParms</a> farbox convention, using the _ft, _rt, _bk, _lf, _up, _dn suffixes.</p>
 
 <h2>Foghull Shaders</h2>
 <p>Two shaders are required when using the foghull feature, a fog volume shader and a skybox shader, both of which are simple, standard shaders.</p>
 
-<p>The color of the fog used must match the color used in the skybox images. Any decent image editing software will give you the three RGB color values of your skybox images, which must be normalized by dividing by 255. As with any other fog shader, the fogParms and surfaceparm fog keywords must be present.</p>
+<p>The color of the fog used must match the color used in the skybox images. Any decent image editing software will give you the three RGB color values of your skybox images, which must be normalized by dividing by 255. As with any other fog shader, the <a href="general-directives.html#fogParms">fogParms</a> and <a href="q3map-surface-parameter-directives.html#fog">surfaceparm fog</a> keywords must be present.</p>
 
 <pre>
 textures/env/fog1024
@@ -84,7 +84,7 @@ textures/env/fog1024
 }
 </pre>
 
-<p>The skyParms and surfaceparm sky keywords must be used to create the skybox "hull" of the map. The skyParms farbox value must point to the base name of the skybox images (sans suffix). Optional surface emitted sun lighting can be added using q3map_skylight with q3map_sun or q3map_sunExt (see Appendix I: Light Emitting Shaders).</p>
+<p>The <a href="general-directives.html#skyParms">skyParms</a> and <a href="q3map-surface-parameter-directives.html#sky">surfaceparm sky</a> keywords must be used to create the skybox "hull" of the map. The <a href="general-directives.html#skyParms">skyParms</a> farbox value must point to the base name of the skybox images (sans suffix). Optional surface emitted sun lighting can be added using <a href="q3map-global-directives.html#q3map_skylight">q3map_skylight</a> with <a href="q3map-global-directives.html#q3map_sun">q3map_sun</a> or <a href="q3map-global-directives.html#q3map_sunExt">q3map_sunExt</a> (see Appendix I: <a href="light-emitting-shaders.html">Light Emitting Shaders</a>).</p>
 
 <pre>
 textures/skies/foghullsky

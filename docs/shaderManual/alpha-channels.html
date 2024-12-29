@@ -91,7 +91,7 @@ textures/base_floor/pjgrate1
 
 <p>Start with a TGA file image. In this case, a pentagram on a plain white field (figure 1A). The color of the field surrrounding the image to be merged is not relevant to this process (although having a hard-edged break between the image to be isolated and the field makes the mask making process easier). Make an alpha channel. The area of the image to be merged with another image is masked off in white. The area to be masked out (notused) is pure black (figure 1B). The image to be merged into is greenfloor.tga (figure 1C).</p>
 
-<p>Make a qer_editorimage of greenfloor.tga. This is placed in the frame buffer as the map image for the texture. By using GL_SRC_ALPHA as the source part of the blend equation, the shader adds in only the non-black parts of the pentagram. Using GL_MINUS_ONE_SRC_ALPHA, the shader inverts the pentagram's alpha channel and adds in only the non-black parts of the green floor.</p>
+<p>Make a <a href="quake-editor-radiant-directives.html#qer_editorImage">qer_editorImage</a> of greenfloor.tga. This is placed in the frame buffer as the map image for the texture. By using GL_SRC_ALPHA as the source part of the blend equation, the shader adds in only the non-black parts of the pentagram. Using GL_MINUS_ONE_SRC_ALPHA, the shader inverts the pentagram's alpha channel and adds in only the non-black parts of the green floor.</p>
 
 <p>In a like manner, the alpha channel can be used to blend the textures more evenly. A simple experiment involves using a linear gradiant in the alpha channel (white to black) and merging two textures so they appear to cross fade into each other.</p>
 

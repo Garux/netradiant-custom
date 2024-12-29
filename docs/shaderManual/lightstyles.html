@@ -57,7 +57,7 @@
 <img src="lightstyles.jpg" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_images/lightstyles.jpg" width="416" height="316" alt="slstyle" class="center" />
 
 <h2>Worldspawn Keys</h2>
-<p>To create some flickering lights, we need some waveform functions. These are set on the worldspawn entity in Radiant's Entity Inspector using two new available key/value pairs: _style<em>N</em>rgbGen and _style<em>N</em>alphaGen keys, where "N" is the style index number, an integer between 1 and 31. Both keys will take <a href="shader-concepts.html#waveformfunctions" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/shader-concepts.html#waveformfunctions">standard waveform functions</a> as values. As an example:</p>
+<p>To create some flickering lights, we need some <a href="shader-concepts.html#waveformfunctions">waveform functions</a>. These are set on the worldspawn entity in Radiant's Entity Inspector using two new available key/value pairs: _style<em>N</em>rgbGen and _style<em>N</em>alphaGen keys, where "N" is the style index number, an integer between 1 and 31. Both keys will take <a href="shader-concepts.html#waveformfunctions" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/shader-concepts.html#waveformfunctions">standard waveform functions</a> as values. As an example:</p>
 <pre>
 _style1alphaGen    wave sin .5 .3 .25 1.5
 _style1rgbGen      wave noise 0.5 1 0 5.37
@@ -73,7 +73,7 @@ classname          worldspawn
 <p>With a light entity selected, open up the Entity Inspector and add a "style" key. Use a value between 1 and 31 matching the style index number previously set in the worldspawn.</p>
 
 <h3>Light Emitting Shaders</h3>
-<p>You can also use q3map_lightStyle N, where "N" is a value between 1 and 31 matching the style index number set in the worldspawn, on light-emitting shaders to have them emit styled light.</p>
+<p>You can also use <a href="q3map-global-directives.html#q3map_lightStyle">q3map_lightStyle</a> N, where "N" is a value between 1 and 31 matching the style index number set in the worldspawn, on light-emitting shaders to have them emit styled light.</p>
 <pre>
 textures/slstyle/light
 {
@@ -97,7 +97,7 @@ textures/slstyle/light
 </pre>
 
 <h2>Lightmapped Surfaces</h2>
-<p>For any shaders that may be hit by a styled light, you'll need to add q3map_styleMarker after the lightmap stages and before the texture stages so Q3Map2 can properly create the fake lightmap stages. For masked textures where a depthFunc equal is required, add q3map_styleMarker2.</p>
+<p>For any shaders that may be hit by a styled light, you'll need to add <a href="q3map-global-directives.html#q3map_styleMarker">q3map_styleMarker</a> after the lightmap stages and before the texture stages so Q3Map2 can properly create the fake lightmap stages. For masked textures where a depthFunc equal is required, add <a href="q3map-global-directives.html#q3map_styleMarker2">q3map_styleMarker2</a>.</p>
 <p>Shaders with lightmaps after texture passes will look odd. This may change in the future. Try to rearrange your shaders, if possible, to have lightmaps first.</p>
 <pre>
 textures/slstyle/plywood2sided

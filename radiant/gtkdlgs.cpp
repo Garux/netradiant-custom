@@ -1263,7 +1263,6 @@ static const std::vector<ShaderFormat> g_shaderStageFormats{
 			"square",
 			"sawtooth",
 			"inversesawtooth",
-			"noise",
 		}
 	},
 	{
