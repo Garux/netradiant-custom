@@ -33,6 +33,8 @@
 #include <algorithm>
 #include "generic/vector.h"
 #include "timer.h"
+#include <thread>
+#include <mutex>
 
 #ifdef WIN32
 #include <direct.h>
@@ -47,7 +49,10 @@
 #include <glib.h>
 
 static socket_t *brdcst_socket;
-static netmessage_t msg;
+
+// locks xml doc and mesege_*
+// messages may come from various threads, 'force send' signal comes from dedicated thread
+static std::recursive_mutex mesege_mutex;
 
 bool verbose = false;
 
@@ -72,69 +77,31 @@ static void xml_message_flush();
 
 // send a node down the stream, add it to the document
 void xml_SendNode( xmlNodePtr node ){
-	xml_message_flush(); /* flush regular print messages buffer, so that special ones will appear at correct spot */
+	std::lock_guard lock( mesege_mutex );
 
-	xmlBufferPtr xml_buf;
-	char xmlbuf[MAX_NETMESSAGE]; // we have to copy content from the xmlBufferPtr into an aux buffer .. that sucks ..
-	// this index loops through the node buffer
-	int pos = 0;
-	int size;
+	xml_message_flush(); /* flush regular print messages buffer, so that special ones will appear at correct spot */
 
 	xmlAddChild( doc->children, node );
 
 	if ( brdcst_socket ) {
-		xml_buf = xmlBufferCreate();
+		xmlBufferPtr xml_buf = xmlBufferCreate();
 		xmlNodeDump( xml_buf, doc, node, 0, 0 );
 
 		// the XML node might be too big to fit in a single network message
 		// l_net library defines an upper limit of MAX_NETMESSAGE
 		// there are some size check errors, so we use MAX_NETMESSAGE-10 to be safe
 		// if the size of the buffer exceeds MAX_NETMESSAGE-10 we'll send in several network messages
-		while ( pos < (int)xml_buf->use )
+		for ( int pos = 0; pos < (int)xml_buf->use; )
 		{
 			// what size are we gonna send now?
-			if( xml_buf->use - pos < MAX_NETMESSAGE - 10 ){
-				size = xml_buf->use - pos;
-			}
-			else{
-				size = MAX_NETMESSAGE - 10;
-				Sys_FPrintf( SYS_NOXMLflag | SYS_WRN, "Got to split the buffer\n" ); //++timo just a debug thing
-			}
-			memcpy( xmlbuf, xml_buf->content + pos, size );
-			xmlbuf[size] = '\0';
+			const int size = std::min( (int)xml_buf->use - pos, MAX_NETMESSAGE - 10 );
+			netmessage_t msg;
 			NMSG_Clear( &msg );
-			NMSG_WriteString( &msg, xmlbuf );
+			NMSG_WriteString_n( &msg, reinterpret_cast<const char*>( xml_buf->content + pos ), size );
 			Net_Send( brdcst_socket, &msg );
 			// now that the thing is sent prepare to loop again
 			pos += size;
 		}
-
-#if 0
-		// NOTE: the NMSG_WriteString is limited to MAX_NETMESSAGE
-		// we will need to split into chunks
-		// (we could also go lower level, in the end it's using send and receiv which are not size limited)
-		//++timo FIXME: MAX_NETMESSAGE is not exactly the max size we can stick in the message
-		//  there's some tweaking to do in l_net for that .. so let's give us a margin for now
-
-		//++timo we need to handle the case of a buffer too big to fit in a single message
-		// try without checks for now
-		if ( xml_buf->use > MAX_NETMESSAGE - 10 ) {
-			// if we send that we are probably gonna break the stream at the other end..
-			// and Error will call right there
-			//Error( "MAX_NETMESSAGE exceeded for XML feedback stream in FPrintf (%d)\n", xml_buf->use);
-			Sys_FPrintf( SYS_NOXMLflag | SYS_WRN, "MAX_NETMESSAGE exceeded for XML feedback stream in FPrintf (%d)\n", xml_buf->use );
-			xml_buf->content[xml_buf->use] = '\0'; //++timo this corrupts the buffer but we don't care it's for printing
-			Sys_FPrintf( SYS_NOXMLflag | SYS_WRN, xml_buf->content );
-
-		}
-
-		size = xml_buf->use;
-		memcpy( xmlbuf, xml_buf->content, size );
-		xmlbuf[size] = '\0';
-		NMSG_Clear( &msg );
-		NMSG_WriteString( &msg, xmlbuf );
-		Net_Send( brdcst_socket, &msg );
-#endif
 
 		xmlBufferFree( xml_buf );
 	}
@@ -256,22 +223,40 @@ static void set_console_colour_for_flag( int flag ){
 #endif
 }
 
+
+#define MAX_MESEGE      MAX_NETMESSAGE / 2
+static char mesege[MAX_MESEGE];
+static size_t mesege_len = 0;
+static int mesege_flag = SYS_STD;
+static Timer mesege_send_timer;
+
+
 // in include
 #include "stream_version.h"
 
 void Broadcast_Setup( const char *dest ){
 	address_t address;
-	char sMsg[1024];
 
 	Net_Setup();
 	Net_StringToAddress( dest, &address );
 	brdcst_socket = Net_Connect( &address, 0 );
 	if ( brdcst_socket ) {
 		// send in a header
-		sprintf( sMsg, "<?xml version=\"1.0\"?><q3map_feedback version=\"" Q3MAP_STREAM_VERSION "\">" );
+		const char string[] = "<?xml version=\"1.0\"?><q3map_feedback version=\"" Q3MAP_STREAM_VERSION "\">";
+		netmessage_t msg;
 		NMSG_Clear( &msg );
-		NMSG_WriteString( &msg, sMsg );
+		NMSG_WriteString( &msg, string );
 		Net_Send( brdcst_socket, &msg );
+
+		std::thread ( [](){
+			while( true ){
+				std::this_thread::sleep_for( std::chrono::milliseconds( 1000 ) );
+				std::lock_guard lock( mesege_mutex );
+				if( mesege_send_timer.elapsed_msec() + 1000 * mesege_len / MAX_MESEGE > 2000 ){ // force send if >1-2 seconds has passed
+					xml_message_flush();
+				}
+			}
+		} ).detach();
 	}
 }
 
@@ -285,17 +270,13 @@ void Broadcast_Shutdown(){
 	set_console_colour_for_flag( SYS_STD ); //restore default on exit
 }
 
-#define MAX_MESEGE      MAX_NETMESSAGE / 2
-static char mesege[MAX_MESEGE];
-static size_t mesege_len = 0;
-static int mesege_flag = SYS_STD;
-static Timer mesege_send_timer;
-
 static void xml_message_flush(){
+	std::lock_guard lock( mesege_mutex );
+
 	if( mesege_len == 0 )
 		return;
-	xmlNodePtr node;
-	node = xmlNewNode( NULL, (const xmlChar*)"message" );
+
+	xmlNodePtr node = xmlNewNode( NULL, (const xmlChar*)"message" );
 	{
 		mesege[mesege_len] = '\0';
 		mesege_len = 0;
@@ -314,6 +295,8 @@ static void xml_message_flush(){
 }
 
 static void xml_message_push( int flag, const char* characters, size_t length ){
+	std::lock_guard lock( mesege_mutex );
+
 	if( flag != mesege_flag ){
 		xml_message_flush();
 		mesege_flag = flag;
@@ -333,10 +316,6 @@ static void xml_message_push( int flag, const char* characters, size_t length ){
 			mesege_len += size;
 			characters += size;
 		}
-	}
-
-	if( mesege_send_timer.elapsed_msec() + 1000 * mesege_len / MAX_MESEGE > 2000 ){ // force send if >1-2 seconds has passed
-		xml_message_flush();
 	}
 }
 
@@ -440,7 +419,7 @@ void Error( const char *error, ... ){
 
 	//++timo HACK ALERT .. if we shut down too fast the xml stream won't reach the listener.
 	// a clean solution is to send a sync request node in the stream and wait for an answer before exiting
-	Sys_Sleep( 1000 );
+	std::this_thread::sleep_for( std::chrono::milliseconds( 1000 ) );
 
 	exit( 1 );
 }

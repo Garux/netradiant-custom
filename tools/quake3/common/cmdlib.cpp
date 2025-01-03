@@ -310,16 +310,3 @@ float   LittleFloat( float l ){
 
 
 #endif
-
-
-//=======================================================
-
-
-void Sys_Sleep( int n ){
-#ifdef WIN32
-	Sleep( n );
-#endif
-#if defined ( __linux__ ) || defined ( __APPLE__ )
-	usleep( n * 1000 );
-#endif
-}

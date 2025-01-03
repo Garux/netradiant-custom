@@ -378,13 +378,17 @@ void NMSG_WriteFloat( netmessage_t *msg, float c ){
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void NMSG_WriteString( netmessage_t *msg, char *string ){
-	if ( msg->size + strlen( string ) + 1 >= MAX_NETMESSAGE ) {
+void NMSG_WriteString_n( netmessage_t *msg, const char *string, int n ){
+	if ( msg->size + n >= MAX_NETMESSAGE ) {
 		WinPrint( "NMSG_WriteString: overflow\n" );
 		return;
 	} //end if
-	memcpy( &msg->data[msg->size], string, strlen( string ) + 1 );
-	msg->size += strlen( string ) + 1;
+	memcpy( &msg->data[msg->size], string, n );
+	msg->size += n;
+}
+
+void NMSG_WriteString( netmessage_t *msg, const char *string ){
+	NMSG_WriteString_n( msg, string, strlen( string ) );
 } //end of the function NMSG_WriteString
 //===========================================================================
 //

@@ -106,7 +106,3 @@ int     BigLong( int l );
 int     LittleLong( int l );
 float   BigFloat( float l );
 float   LittleFloat( float l );
-
-
-// sleep for the given amount of milliseconds
-void Sys_Sleep( int n );
