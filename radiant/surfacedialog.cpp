@@ -1517,6 +1517,8 @@ void Light_getTexture( Entity& entity, CopiedString& shader, FaceTexture& clipbo
 	string_parse_vector3( entity.getKeyValue( "_color" ), clipboard.m_colour );
 	if( !string_parse_float( entity.getKeyValue( "_light" ), clipboard.m_light ) )
 		string_parse_float( entity.getKeyValue( "light" ), clipboard.m_light );
+
+	shader = TextureBrowser_GetSelectedShader(); // preserve shader
 }
 typedef Function3<Entity&, CopiedString&, FaceTexture&, void, Light_getTexture> LightGetTexture;
 
