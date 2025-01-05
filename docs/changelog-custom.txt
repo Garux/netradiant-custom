@@ -1107,13 +1107,14 @@ misc...
 
 
 secret radiant features:
-	can alter in .game:	common_shaders_name="Common"	common_shaders_dir="common/"
+	can alter in .game: common_shaders_name="Common"    common_shaders_dir="common/"
 
 	can alter q3map2 being used: by editing build_menu.xml: <var name="q3map2">...
 
 	-global-Key Value and -gamename.game-Key Value options to set config settings from the command line
-		examples:	-global-gamefile q4.game	//start with q4 game mode
-				-q4.game-CamHeight 944		//set CamHeight to 944 in q4 local.pref
+		examples:
+	-global-gamefile q4.game  //start with q4 game mode
+	-q4.game-CamHeight 944    //set CamHeight to 944 in q4 local.pref
 
 
 QA

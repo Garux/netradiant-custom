@@ -3544,12 +3544,12 @@ inline const rect_t SelectionBoxForPoint( const DeviceVector& device_point, cons
 	return selection_box;
 }
 
-inline const rect_t SelectionBoxForArea( const float device_point[2], const float device_delta[2] ){
+inline const rect_t SelectionBoxForArea( const DeviceVector& device_point, const DeviceVector& device_delta ){
 	rect_t selection_box;
-	selection_box.min[0] = ( device_delta[0] < 0 ) ? ( device_point[0] + device_delta[0] ) : ( device_point[0] );
-	selection_box.min[1] = ( device_delta[1] < 0 ) ? ( device_point[1] + device_delta[1] ) : ( device_point[1] );
-	selection_box.max[0] = ( device_delta[0] > 0 ) ? ( device_point[0] + device_delta[0] ) : ( device_point[0] );
-	selection_box.max[1] = ( device_delta[1] > 0 ) ? ( device_point[1] + device_delta[1] ) : ( device_point[1] );
+	selection_box.min[0] = device_point[0] + std::min( device_delta[0], 0.f );
+	selection_box.min[1] = device_point[1] + std::min( device_delta[1], 0.f );
+	selection_box.max[0] = device_point[0] + std::max( device_delta[0], 0.f );
+	selection_box.max[1] = device_point[1] + std::max( device_delta[1], 0.f );
 	selection_box.modifier = device_delta[0] * device_delta[1] < 0?
 	                         rect_t::eToggle
 	                         : device_delta[0] < 0 ?
@@ -7866,9 +7866,9 @@ void RadiantSelectionSystem::Scene_TestSelect( Selector& selector, SelectionTest
 }
 
 
-void Scene_Intersect( const View& view, const float device_point[2], const float device_epsilon[2], Vector3& intersection ){
+void Scene_Intersect( const View& view, const Vector2& device_point, const Vector2& device_epsilon, Vector3& intersection ){
 	View scissored( view );
-	ConstructSelectionTest( scissored, SelectionBoxForPoint( DeviceVector( device_point[0], device_point[1] ), DeviceVector( device_epsilon[0], device_epsilon[1] ) ) );
+	ConstructSelectionTest( scissored, SelectionBoxForPoint( device_point, device_epsilon ) );
 	SelectionVolume test( scissored );
 
 	BestPointSelector bestPointSelector;
@@ -8378,8 +8378,6 @@ public:
 			                                                                  bitfield_enabled( m_state, c_modifierAlt ) ) );
 			m_undo_begun = false;
 		}
-		g_mouseMovedCallback.clear();
-		g_mouseUpCallback.clear();
 	}
 	typedef MemberCaller1<TexManipulator_, DeviceVector, &TexManipulator_::mouseUp> MouseUpCaller;
 };
@@ -8398,7 +8396,7 @@ class Selector_
 	rect_t getDeviceArea() const {
 		const DeviceVector delta( m_current - m_start );
 		if ( m_mouseMovedWhilePressed && selecting() && delta.x() != 0 && delta.y() != 0 )
-			return SelectionBoxForArea( &m_start[0], &delta[0] );
+			return SelectionBoxForArea( m_start, delta );
 		else
 			return rect_t();
 	}
@@ -8434,7 +8432,7 @@ public:
 		if ( modifier != RadiantSelectionSystem::eManipulator ) {
 			const DeviceVector delta( position - m_start );
 			if ( m_mouseMovedWhilePressed && delta.x() != 0 && delta.y() != 0 ) {
-				getSelectionSystem().SelectArea( *m_view, SelectionBoxForArea( &m_start[0], &delta[0] ), ( m_state & c_modifier_face ) != c_modifierNone );
+				getSelectionSystem().SelectArea( *m_view, SelectionBoxForArea( m_start, delta ), ( m_state & c_modifier_face ) != c_modifierNone );
 			}
 			else if( !m_mouseMovedWhilePressed ){
 				if ( modifier == RadiantSelectionSystem::eReplace && !m_mouseMoved ) {
@@ -8492,9 +8490,6 @@ public:
 		else{
 			m_start = m_current = DeviceVector( 0.0f, 0.0f );
 		}
-
-		g_mouseMovedCallback.clear();
-		g_mouseUpCallback.clear();
 	}
 	typedef MemberCaller1<Selector_, DeviceVector, &Selector_::mouseUp> MouseUpCaller;
 };
@@ -8546,8 +8541,6 @@ public:
 
 	void mouseUp( DeviceVector position ){
 		m_moving_transformOrigin = getSelectionSystem().endMove();
-		g_mouseMovedCallback.clear();
-		g_mouseUpCallback.clear();
 	}
 	typedef MemberCaller1<Manipulator_, DeviceVector, &Manipulator_::mouseUp> MouseUpCaller;
 
@@ -8610,6 +8603,8 @@ public:
 	void onMouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ) override {
 		updateEpsilon(); /* could have changed, as it is user setting */
 
+		if( m_mouse_down ) return; /* prevent simultaneous mouse presses */
+
 		const DeviceVector devicePosition( device( position ) );
 
 		if ( button == c_button_select || ( button == c_button_select2 && modifiers != c_modifierNone ) ) {
@@ -8629,7 +8624,7 @@ public:
 			}
 			else
 			{
-				m_selector.m_mouse2 = ( button != c_button_select );
+				m_selector.m_mouse2 = ( button == c_button_select2 );
 				m_selector.mouseDown( devicePosition );
 				g_mouseMovedCallback.insert( MouseEventCallback( Selector_::MouseMovedCaller( m_selector ) ) );
 				g_mouseUpCallback.insert( MouseEventCallback( Selector_::MouseUpCaller( m_selector ) ) );
@@ -8656,9 +8651,10 @@ public:
 		}
 	}
 	void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ) override {
-		if ( ( button == c_button_select || button == c_button_select2 || button == c_button_texture ) && !g_mouseUpCallback.empty() ) {
+		if ( button != c_buttonInvalid && !g_mouseUpCallback.empty() ) {
 			g_mouseUpCallback.get() ( device( position ) );
-			m_mouse_down = false;
+			g_mouseMovedCallback.clear();
+			g_mouseUpCallback.clear();
 		}
 		if( button == c_button_select	/* L button w/o mouse moved = tunnel selection */
 		 && modifiers == c_modifierNone
@@ -8672,6 +8668,7 @@ public:
 		if( getSelectionSystem().ManipulatorMode() == SelectionSystem::eClip )
 			Clipper_tryDoubleclickedCut();
 
+		m_mouse_down = false; /* unconditionally drop the flag to surely not lock the onMouseDown() */
 		m_manipulator.m_moving_transformOrigin = false;
 		m_selector.m_mouseMoved = false;
 		m_selector.m_mouseMovedWhilePressed = false;

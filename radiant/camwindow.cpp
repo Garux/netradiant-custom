@@ -1122,7 +1122,7 @@ void camera_orbit_init( camera_t& cam, Vector2 xy ){
 
 	const Vector2 epsilon( 8.f / cam.width, 8.f / cam.height ); //device epsilon
 
-	Scene_Intersect( *cam.m_view, xy.data(), epsilon.data(), cam.m_orbit_center );
+	Scene_Intersect( *cam.m_view, xy, epsilon, cam.m_orbit_center );
 
 	cam.m_orbit_initial_pos = cam.origin;
 	cam.m_orbit_offset = 0;
