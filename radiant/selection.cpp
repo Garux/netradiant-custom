@@ -8402,7 +8402,7 @@ class Selector_
 	}
 
 	const DeviceVector& m_epsilon;
-	ModifierFlags m_state;
+	const ModifierFlags& m_state;
 public:
 	DeviceVector m_start;
 	DeviceVector m_current;
@@ -8413,9 +8413,9 @@ public:
 	const View* m_view;
 	RectangleCallback m_window_update;
 
-	Selector_( const DeviceVector& epsilon ) :
+	Selector_( const DeviceVector& epsilon, const ModifierFlags& state ) :
 		m_epsilon( epsilon ),
-		m_state( c_modifierNone ),
+		m_state( state ),
 		m_start( 0.f, 0.f ),
 		m_current( 0.f, 0.f ),
 		m_mouse2( false ),
@@ -8450,17 +8450,8 @@ public:
 		getSelectionSystem().SelectPoint( *m_view, device_constrained( position ), m_epsilon, m_mouseMoved ? RadiantSelectionSystem::eReplace : RadiantSelectionSystem::eCycle, false );
 	}
 
-
 	bool selecting() const {
 		return m_state != c_modifier_manipulator && m_mouse2;
-	}
-
-	void setState( ModifierFlags state ){
-		const bool was_selecting = selecting();
-		m_state = state;
-		if ( was_selecting ^ selecting() ) {
-			draw_area();
-		}
 	}
 
 	void mouseDown( DeviceVector position ){
@@ -8567,6 +8558,9 @@ class RadiantWindowObserver final : public SelectionSystemWindowObserver
 	float m_movePressed; /* pressed move after m_moveStart, for decision: m1 tunnel selector or manipulate and if to do tunnel selector at all */
 	DeviceVector m_moveStart;
 	DeviceVector m_moveEnd;
+	// track latest onMouseMotion() interaction to trigger update onModifierDown(), onModifierUp()
+	inline static RadiantWindowObserver *m_latestObserver = nullptr;
+	inline static WindowVector m_latestPosition;
 
 	Selector_ m_selector;
 	Manipulator_ m_manipulator;
@@ -8577,9 +8571,12 @@ public:
 		m_state( c_modifierNone ),
 		m_mouse_down( false ),
 		m_moveEpsilon( .01f ),
-		m_selector( m_epsilon ),
+		m_selector( m_epsilon, m_state ),
 		m_manipulator( m_epsilon, m_state ),
 		m_texmanipulator( m_epsilon, m_state ){
+	}
+	~RadiantWindowObserver(){
+		m_latestObserver = nullptr;
 	}
 	void release() override {
 		delete this;
@@ -8649,6 +8646,8 @@ public:
 		else{
 			m_manipulator.highlight( device( position ) );
 		}
+		m_latestObserver = this;
+		m_latestPosition = position;
 	}
 	void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ) override {
 		if ( button != c_buttonInvalid && !g_mouseUpCallback.empty() ) {
@@ -8678,11 +8677,13 @@ public:
 	}
 	void onModifierDown( ModifierFlags type ) override {
 		g_modifiers = m_state = bitfield_enable( m_state, type );
-		m_selector.setState( m_state );
+		if( this == m_latestObserver )
+			onMouseMotion( m_latestPosition, m_state );
 	}
 	void onModifierUp( ModifierFlags type ) override {
 		g_modifiers = m_state = bitfield_disable( m_state, type );
-		m_selector.setState( m_state );
+		if( this == m_latestObserver )
+			onMouseMotion( m_latestPosition, m_state );
 	}
 	DeviceVector device( WindowVector window ) const {
 		return window_to_normalised_device( window, m_width, m_height );
