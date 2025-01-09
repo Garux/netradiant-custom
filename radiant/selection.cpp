@@ -7328,23 +7328,20 @@ public:
 #define SELECT_MATCHING_COMPONENTS_DIST .25f
 	void SelectionPool_Select( SelectionPool& pool, bool select, float dist_epsilon ){
 		SelectionPool::iterator best = pool.begin();
-		if( ( *best ).second->isSelected() != select ){
-			( *best ).second->setSelected( select );
+		if( best->second->isSelected() != select ){
+			best->second->setSelected( select );
 		}
 #ifdef SELECT_MATCHING
-		SelectionPool::iterator i = best;
-		++i;
-		while ( i != pool.end() )
+		for ( SelectionPool::iterator i = std::next( best ); i != pool.end(); ++i )
 		{
-			if( ( *i ).first.equalEpsilon( ( *best ).first, dist_epsilon, SELECT_MATCHING_DEPTH ) ){
-				//if( ( *i ).second->isSelected() != select ){
-				( *i ).second->setSelected( select );
+			if( i->first.equalEpsilon( best->first, dist_epsilon, SELECT_MATCHING_DEPTH ) ){
+				//if( i->second->isSelected() != select ){
+				i->second->setSelected( select );
 				//}
 			}
 			else{
 				break;
 			}
-			++i;
 		}
 #endif // SELECT_MATCHING
 	}
@@ -7372,31 +7369,27 @@ public:
 
 			SelectionVolume volume( scissored );
 			SelectionPool selector;
-			SelectionPool selector_point_ents;
 			const bool prefer_point_ents = m_bPreferPointEntsIn2D && Mode() == ePrimitive && !view.fill() && !face
-			                               && ( modifier == RadiantSelectionSystem::eReplace || modifier == RadiantSelectionSystem::eSelect || modifier == RadiantSelectionSystem::eDeselect );
+			                               && ( modifier == EModifier::eReplace || modifier == EModifier::eSelect || modifier == EModifier::eDeselect );
 
-			if( prefer_point_ents ){
-				Scene_TestSelect( selector_point_ents, volume, scissored, eEntity, ComponentMode() );
-			}
-			if( prefer_point_ents && !selector_point_ents.failed() ){
+			if( prefer_point_ents && ( Scene_TestSelect( selector, volume, scissored, eEntity, ComponentMode() ), !selector.failed() ) ){
 				switch ( modifier )
 				{
 				// if cycle mode not enabled, enable it
-				case RadiantSelectionSystem::eReplace:
+				case EModifier::eReplace:
 					{
 						// select closest
-						( *selector_point_ents.begin() ).second->setSelected( true );
+						selector.begin()->second->setSelected( true );
 					}
 					break;
-				case RadiantSelectionSystem::eSelect:
+				case EModifier::eSelect:
 					{
-						SelectionPool_Select( selector_point_ents, true, SELECT_MATCHING_DIST );
+						SelectionPool_Select( selector, true, SELECT_MATCHING_DIST );
 					}
 					break;
-				case RadiantSelectionSystem::eDeselect:
+				case EModifier::eDeselect:
 					{
-						SelectionPool_Select( selector_point_ents, false, SELECT_MATCHING_DIST );
+						SelectionPool_Select( selector, false, SELECT_MATCHING_DIST );
 					}
 					break;
 				default:
@@ -7404,31 +7397,31 @@ public:
 				}
 			}
 			else{
+				const EMode mode = g_modifiers == c_modifierAlt? ePrimitive : Mode();
 				if ( face ){
 					Scene_TestSelect_Component( selector, volume, scissored, eFace );
 				}
 				else{
-					Scene_TestSelect( selector, volume, scissored, g_modifiers == c_modifierAlt? ePrimitive : Mode(), ComponentMode() );
+					Scene_TestSelect( selector, volume, scissored, mode, ComponentMode() );
 				}
 
 				if ( !selector.failed() ) {
 					switch ( modifier )
 					{
 					// if cycle mode not enabled, enable it
-					case RadiantSelectionSystem::eReplace:
+					case EModifier::eReplace:
 						{
 							// select closest
-							( *selector.begin() ).second->setSelected( true );
+							selector.begin()->second->setSelected( true );
 						}
 						break;
 					// select the next object in the list from the one already selected
-					case RadiantSelectionSystem::eCycle:
+					case EModifier::eCycle:
 						{
 							bool cycleSelectionOccured = false;
-							SelectionPool::iterator i = selector.begin();
-							while ( i != selector.end() )
+							for ( SelectionPool::iterator i = selector.begin(); i != selector.end(); ++i )
 							{
-								if ( ( *i ).second->isSelected() ) {
+								if ( i->second->isSelected() ) {
 									deselectComponentsOrAll( face );
 									++i;
 									if ( i != selector.end() ) {
@@ -7441,22 +7434,22 @@ public:
 									cycleSelectionOccured = true;
 									break;
 								}
-								++i;
 							}
 							if( !cycleSelectionOccured ){
 								deselectComponentsOrAll( face );
-								( *selector.begin() ).second->setSelected( true );
+								selector.begin()->second->setSelected( true );
 							}
 						}
 						break;
-					case RadiantSelectionSystem::eSelect:
+					case EModifier::eSelect:
 						{
-							SelectionPool_Select( selector, true, ( Mode() == eComponent && g_modifiers != c_modifierAlt )? SELECT_MATCHING_COMPONENTS_DIST : SELECT_MATCHING_DIST );
+							SelectionPool_Select( selector, true, mode == eComponent? SELECT_MATCHING_COMPONENTS_DIST : SELECT_MATCHING_DIST );
 						}
 						break;
-					case RadiantSelectionSystem::eDeselect:
+					case EModifier::eDeselect:
 						{
-							SelectionPool_Select( selector, false, ( Mode() == eComponent && g_modifiers != c_modifierAlt )? SELECT_MATCHING_COMPONENTS_DIST : SELECT_MATCHING_DIST );
+							if( !( mode == ePrimitive && Mode() == eComponent && countSelected() == 1 ) ) // don't deselect only primitive in component mode
+								SelectionPool_Select( selector, false, mode == eComponent? SELECT_MATCHING_COMPONENTS_DIST : SELECT_MATCHING_DIST );
 						}
 						break;
 					default:
@@ -7483,27 +7476,25 @@ public:
 
 			SelectionVolume volume( scissored );
 			SelectionPool selector;
-			SelectionPool selector_point_ents;
 			const bool prefer_point_ents = m_bPreferPointEntsIn2D && Mode() == ePrimitive && !view.fill() && !face;
 
-			if( prefer_point_ents ){
-				Scene_TestSelect( selector_point_ents, volume, scissored, eEntity, ComponentMode() );
-			}
-			if( prefer_point_ents && !selector_point_ents.failed() ){
-				const bool wasSelected = ( *selector_point_ents.begin() ).second->isSelected();
-				SelectionPool_Select( selector_point_ents, !wasSelected, SELECT_MATCHING_DIST );
+			if( prefer_point_ents && ( Scene_TestSelect( selector, volume, scissored, eEntity, ComponentMode() ), !selector.failed() ) ){
+				const bool wasSelected = selector.begin()->second->isSelected();
+				SelectionPool_Select( selector, !wasSelected, SELECT_MATCHING_DIST );
 				return wasSelected? eDeselect : eSelect;
 			}
 			else{//do primitives, if ents failed
+				const EMode mode = g_modifiers == c_modifierAlt? ePrimitive : Mode();
 				if ( face ){
 					Scene_TestSelect_Component( selector, volume, scissored, eFace );
 				}
 				else{
-					Scene_TestSelect( selector, volume, scissored, g_modifiers == c_modifierAlt? ePrimitive : Mode(), ComponentMode() );
+					Scene_TestSelect( selector, volume, scissored, mode, ComponentMode() );
 				}
 				if ( !selector.failed() ){
-					const bool wasSelected = ( *selector.begin() ).second->isSelected();
-					SelectionPool_Select( selector, !wasSelected, ( Mode() == eComponent && g_modifiers != c_modifierAlt )? SELECT_MATCHING_COMPONENTS_DIST : SELECT_MATCHING_DIST );
+					const bool wasSelected = selector.begin()->second->isSelected();
+					if( !( mode == ePrimitive && Mode() == eComponent && countSelected() == 1 && wasSelected ) ) // don't deselect only primitive in component mode
+						SelectionPool_Select( selector, !wasSelected, mode == eComponent? SELECT_MATCHING_COMPONENTS_DIST : SELECT_MATCHING_DIST );
 
 #if 0
 					SelectionPool::iterator best = selector.begin();
