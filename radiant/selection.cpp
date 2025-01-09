@@ -1635,6 +1635,32 @@ public:
 };
 
 
+class ManipulatorSelectionChangeable
+{
+	Selectable* m_selectable_prev_ptr = nullptr;
+public:
+	void selectionChange( SelectionPool& selector ){
+		if ( !selector.failed() ) {
+			Selectable *se = selector.begin()->second;
+			se->setSelected( true );
+			if( m_selectable_prev_ptr != se ){
+				m_selectable_prev_ptr = se;
+				SceneChangeNotify();
+			}
+		}
+		else{
+			selectionDrop();
+		}
+	}
+	void selectionDrop(){
+		if( m_selectable_prev_ptr != nullptr ){
+			m_selectable_prev_ptr = nullptr;
+			SceneChangeNotify();
+		}
+	}
+};
+
+
 const Colour4b g_colour_sphere( 0, 0, 0, 255 );
 const Colour4b g_colour_screen( 0, 255, 255, 255 );
 const Colour4b g_colour_selected( 255, 255, 0, 255 );
@@ -1710,7 +1736,7 @@ inline Vector3 normalised_safe( const Vector3& self ){
 }
 
 
-class RotateManipulator : public Manipulator
+class RotateManipulator : public Manipulator, public ManipulatorSelectionChangeable
 {
 	struct RenderableCircle : public OpenGLRenderable
 	{
@@ -1763,7 +1789,6 @@ class RotateManipulator : public Manipulator
 	SelectableBool m_selectable_z;
 	SelectableBool m_selectable_screen;
 	SelectableBool m_selectable_sphere;
-	Selectable* m_selectable_prev_ptr;
 	Pivot2World m_pivot;
 	Matrix4 m_local2world_x;
 	Matrix4 m_local2world_y;
@@ -1781,8 +1806,7 @@ public:
 		m_circle_y( ( segments << 2 ) + 1 ),
 		m_circle_z( ( segments << 2 ) + 1 ),
 		m_circle_screen( segments << 3 ),
-		m_circle_sphere( segments << 3 ),
-		m_selectable_prev_ptr( 0 ){
+		m_circle_sphere( segments << 3 ){
 		draw_semicircle( segments, radius, m_circle_x.m_vertices.data(), RemapYZX() );
 		draw_semicircle( segments, radius, m_circle_y.m_vertices.data(), RemapZXY() );
 		draw_semicircle( segments, radius, m_circle_z.m_vertices.data(), RemapXYZ() );
@@ -1864,6 +1888,9 @@ public:
 		}
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
+		if( g_modifiers != c_modifierNone )
+			return selectionDrop();
+
 		m_pivot.update( pivot2world, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 		updateCircleTransforms();
 
@@ -1925,20 +1952,10 @@ public:
 
 		m_axis_screen = m_pivot.m_axis_screen;
 
-		if ( !selector.failed() ) {
-			( *selector.begin() ).second->setSelected( true );
-			if( m_selectable_prev_ptr != ( *selector.begin() ).second ){
-				m_selectable_prev_ptr = ( *selector.begin() ).second;
-				SceneChangeNotify();
-			}
-		}
-		else{
-			m_selectable_sphere.setSelected( true );
-			if( m_selectable_prev_ptr != &m_selectable_sphere ){
-				m_selectable_prev_ptr = &m_selectable_sphere;
-				SceneChangeNotify();
-			}
-		}
+		if ( selector.failed() )
+			selector.addSelectable( SelectionIntersection( 0, 0 ), &m_selectable_sphere );
+
+		selectionChange( selector );
 	}
 
 	Manipulatable* GetManipulatable() override {
@@ -2100,27 +2117,6 @@ public:
 	}
 };
 
-class ManipulatorSelectionChangeable
-{
-	Selectable* m_selectable_prev_ptr;
-public:
-	ManipulatorSelectionChangeable() : m_selectable_prev_ptr( 0 ){
-	}
-	void selectionChange( SelectionPool& selector ){
-		if ( !selector.failed() ) {
-			( *selector.begin() ).second->setSelected( true );
-			if( m_selectable_prev_ptr != ( *selector.begin() ).second ){
-				m_selectable_prev_ptr = ( *selector.begin() ).second;
-				SceneChangeNotify();
-			}
-		}
-		else if( m_selectable_prev_ptr ){
-			m_selectable_prev_ptr = 0;
-			SceneChangeNotify();
-		}
-	}
-};
-
 
 
 class TranslateManipulator : public Manipulator, public ManipulatorSelectionChangeable
@@ -2269,6 +2265,9 @@ public:
 		}
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
+		if( g_modifiers != c_modifierNone )
+			return selectionDrop();
+
 		m_pivot.update( pivot2world, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 
 		SelectionPool selector;
@@ -2437,6 +2436,9 @@ public:
 		renderer.addRenderable( m_quad_screen, m_pivot.m_viewpointSpace );
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
+		if( g_modifiers != c_modifierNone )
+			return selectionDrop();
+
 		m_pivot.update( pivot2world, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 
 		SelectionPool selector;
@@ -2748,6 +2750,15 @@ public:
 					}
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
+		if( g_modifiers != c_modifierNone ){
+			if( m_selectable_prev_ptr != nullptr ){
+				m_selectable_prev_ptr = nullptr;
+				m_selectable_prev_ptr2 = nullptr;
+				SceneChangeNotify();
+			}
+			return;
+		}
+
 		updateModelview( view, pivot2world );
 
 		SelectionPool selector;
@@ -2898,9 +2909,10 @@ public:
 		}
 
 		if( !selector.failed() ) {
-			( *selector.begin() ).second->setSelected( true );
-			if( m_selectable_prev_ptr != ( *selector.begin() ).second ) {
-				m_selectable_prev_ptr = ( *selector.begin() ).second;
+			Selectable *se = selector.begin()->second;
+			se->setSelected( true );
+			if( m_selectable_prev_ptr != se ) {
+				m_selectable_prev_ptr = se;
 				m_selectable_prev_ptr2 = 0;
 				SceneChangeNotify();
 			}
@@ -4469,7 +4481,7 @@ public:
 						m_selected = selection_selectVerticesOrFaceVertices( test );
 					}
 				}
-				else{
+				else if( g_modifiers == c_modifierNone ){
 					BooleanSelector booleanSelector;
 					Scene_TestSelect_Primitive( booleanSelector, test, view );
 
@@ -4483,7 +4495,7 @@ public:
 					}
 				}
 			}
-			else{ // components
+			else if( g_modifiers == c_modifierNone ){ // components
 				BestSelector bestSelector;
 				Scene_TestSelect_Component_Selected( bestSelector, test, view, GlobalSelectionSystem().ComponentMode() ); /* drag components */
 				for ( Selectable* s : bestSelector.best() ){
@@ -4512,7 +4524,7 @@ public:
 				value.second->setSelected( true );
 			g_bTmpComponentMode = m_selected | m_selected2;
 		}
-		else if( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive && g_3DCreateBrushes ){
+		else if( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive && g_3DCreateBrushes && g_modifiers == c_modifierNone ){
 			m_newBrush = true;
 			BestPointSelector bestPointSelector;
 			Scene_TestSelect_Primitive( bestPointSelector, test, view );
@@ -4613,7 +4625,9 @@ public:
 					}
 				}
 			}
-			else{ // components
+			else if( g_modifiers == c_modifierNone // components
+				|| g_modifiers == c_modifierShift // hack: these respect to the RadiantSelectionSystem::SelectPoint
+				|| ( g_modifiers == c_modifierControl && GlobalSelectionSystem().ComponentMode() == SelectionSystem::EComponentMode::eFace ) ){
 				SelectionIntersection intersection;
 				const SelectionSystem::EComponentMode mode = GlobalSelectionSystem().ComponentMode();
 				auto gatherComponentsHighlight = [&polygons, &intersection, &test, mode]( const ComponentSelectionTestable& componentSelectionTestable ){
@@ -4835,6 +4849,9 @@ public:
 		return false;
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
+		if( g_modifiers != c_modifierNone && !quickCondition( g_modifiers, view ) )
+			return selectionDrop();
+
 		testSelect_points( view );
 		if( !isSelected() ){
 			if( view.fill() ){
@@ -4861,6 +4878,9 @@ public:
 			}
 	}
 	void testSelect_points( const View& view ) {
+		if( g_modifiers != c_modifierNone && !quickCondition( g_modifiers, view ) )
+			return selectionDrop();
+
 		SelectionPool selector;
 		{
 			const Matrix4 local2view( view.GetViewMatrix() );
@@ -4935,6 +4955,10 @@ public:
 	}
 	bool isSelected() const override {
 		return m_points[0].isSelected() || m_points[1].isSelected() || m_points[2].isSelected();
+	}
+
+	static bool quickCondition( const ModifierFlags& modifiers, const View& view ){
+		return modifiers == c_modifierControl && !view.fill();
 	}
 };
 Shader* ClipManipulator::m_state;
@@ -5688,6 +5712,12 @@ public:
 		}
 
 		UVSelector selector;
+
+		if( g_modifiers == c_modifierAlt ) // only try skew with alt // note also grabs eTex
+			goto testSelectUVlines;
+		if( g_modifiers != c_modifierNone )
+			return applySelection( selector.m_selection, nullptr, nullptr, selector.m_index );
+
 		{	// try pivot point
 			const Matrix4 local2view( matrix4_multiplied_by_matrix4( view.GetViewMatrix(), m_pivot2world ) );
 			SelectionIntersection best;
@@ -5744,7 +5774,7 @@ public:
 			Line_BestPoint( local2view, &m_pivotLines.m_lines[2], best );
 			selector.addIntersection( best, ePivotV );
 		}
-
+testSelectUVlines:
 		PointVertex* selectedU = 0;
 		PointVertex* selectedV = 0;
 		EUVSelection& selection = selector.m_selection;
@@ -6829,6 +6859,9 @@ public:
 		renderer.addRenderable( m_point, m_pivot.m_worldSpace );
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
+		if( g_modifiers != c_modifierNone )
+			return selectionDrop();
+
 		m_pivot.update( pivot2world, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 
 		SelectionPool selector;
@@ -7178,7 +7211,11 @@ public:
 	bool SelectManipulator( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon ){
 		bool movingOrigin = false;
 
-		if ( !nothingSelected() || ManipulatorMode() == eDrag || ManipulatorMode() == eClip || ManipulatorMode() == eBuild || ManipulatorMode() == eUV ) {
+		if ( !nothingSelected()
+		|| ManipulatorMode() == eDrag
+		|| ManipulatorMode() == eClip
+		|| ManipulatorMode() == eBuild
+		|| ManipulatorMode() == eUV ) {
 #if defined ( DEBUG_SELECTION )
 			g_render_clipped.destroy();
 #endif
@@ -7231,10 +7268,10 @@ public:
 		Manipulatable::assign_static( view, device_point, device_epsilon ); //this b4 m_manipulator calls!
 
 		if ( ( !nothingSelected() && transformOrigin_isTranslatable() )
+		     || ManipulatorMode() == eDrag
 		     || ManipulatorMode() == eClip
 		     || ManipulatorMode() == eBuild
-		     || ManipulatorMode() == eUV
-		     || ManipulatorMode() == eDrag ) {
+		     || ManipulatorMode() == eUV ) {
 #if defined ( DEBUG_SELECTION )
 			g_render_clipped.destroy();
 #endif
@@ -7433,7 +7470,8 @@ public:
 		}
 	}
 
-	bool SelectPoint_InitPaint( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon, bool face ){
+	RadiantSelectionSystem::EModifier
+	SelectPoint_InitPaint( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon, bool face ){
 		ASSERT_MESSAGE( fabs( device_point[0] ) <= 1.f && fabs( device_point[1] ) <= 1.f, "point-selection error" );
 #if defined ( DEBUG_SELECTION )
 		g_render_clipped.destroy();
@@ -7454,7 +7492,7 @@ public:
 			if( prefer_point_ents && !selector_point_ents.failed() ){
 				const bool wasSelected = ( *selector_point_ents.begin() ).second->isSelected();
 				SelectionPool_Select( selector_point_ents, !wasSelected, SELECT_MATCHING_DIST );
-				return !wasSelected;
+				return wasSelected? eDeselect : eSelect;
 			}
 			else{//do primitives, if ents failed
 				if ( face ){
@@ -7479,10 +7517,10 @@ public:
 					}
 #endif
 
-					return !wasSelected;
+					return wasSelected? eDeselect : eSelect;
 				}
 				else{
-					return true;
+					return eSelect;
 				}
 			}
 		}
@@ -8298,7 +8336,7 @@ inline DeviceVector window_to_normalised_device( WindowVector window, std::size_
 }
 
 inline float device_constrained( float pos ){
-	return std::min( 1.0f, std::max( -1.0f, pos ) );
+	return std::clamp( pos, -1.0f, 1.0f );
 }
 
 inline DeviceVector device_constrained( DeviceVector device ){
@@ -8306,7 +8344,7 @@ inline DeviceVector device_constrained( DeviceVector device ){
 }
 
 inline float window_constrained( float pos, std::size_t origin, std::size_t size ){
-	return std::min( static_cast<float>( origin + size ), std::max( static_cast<float>( origin ), pos ) );
+	return std::clamp( pos, static_cast<float>( origin ), static_cast<float>( origin + size ) );
 }
 
 inline WindowVector window_constrained( WindowVector window, std::size_t x, std::size_t y, std::size_t width, std::size_t height ){
@@ -8397,20 +8435,52 @@ public:
 
 class Selector_
 {
-	RadiantSelectionSystem::EModifier modifier_for_state( ModifierFlags state ){
-		if ( ( state == c_modifier_toggle || state == c_modifier_toggle_face || state == c_modifier_face )
-		     && m_mouse2 )
-			return RadiantSelectionSystem::eReplace;
-		else
-			return RadiantSelectionSystem::eManipulator;
+	bool m1selecting() const {
+		return !m_mouse2 && ( g_modifiers == c_modifier_toggle || g_modifiers == c_modifier_face
+		|| ( g_modifiers == c_modifierAlt && getSelectionSystem().Mode() == SelectionSystem::eComponent ) ); // select primitives in component mode
+	}
+	bool m2selecting() const {
+		return m_mouse2 && ( g_modifiers == c_modifier_toggle || g_modifiers == c_modifier_face );
+	}
+
+	RadiantSelectionSystem::EModifier modifier_for_mouseMoved() const {
+		return m_mouseMoved
+		       ? RadiantSelectionSystem::eReplace
+	           : RadiantSelectionSystem::eCycle;
+	}
+	RadiantSelectionSystem::EModifier modifier_for_state() const {
+		return m2selecting()
+		       ? modifier_for_mouseMoved()
+		       : RadiantSelectionSystem::eManipulator;
 	}
 
 	rect_t getDeviceArea() const {
 		const DeviceVector delta( m_current - m_start );
-		if ( m_mouseMovedWhilePressed && selecting() && delta.x() != 0 && delta.y() != 0 )
+		if ( m_mouseMovedWhilePressed && m2selecting() && delta.x() != 0 && delta.y() != 0 )
 			return SelectionBoxForArea( m_start, delta );
 		else
 			return rect_t();
+	}
+
+	void draw_area(){
+		m_window_update( getDeviceArea() );
+	}
+
+	void m2testSelect( DeviceVector position ){
+		const RadiantSelectionSystem::EModifier modifier = modifier_for_state();
+		if ( modifier != RadiantSelectionSystem::eManipulator ) {
+			const DeviceVector delta( position - m_start );
+			if ( m_mouseMovedWhilePressed ) {
+				if( delta.x() != 0 && delta.y() != 0 )
+					getSelectionSystem().SelectArea( *m_view, SelectionBoxForArea( m_start, delta ), g_modifiers == c_modifier_face );
+			}
+			else{
+				getSelectionSystem().SelectPoint( *m_view, position, m_epsilon, modifier, g_modifiers == c_modifier_face );
+			}
+		}
+
+		m_start = m_current = DeviceVector( 0.f, 0.f );
+		draw_area();
 	}
 
 	const DeviceVector& m_epsilon;
@@ -8420,7 +8490,7 @@ public:
 	bool m_mouse2;
 	bool m_mouseMoved;
 	bool m_mouseMovedWhilePressed;
-	bool m_paintSelect;
+	RadiantSelectionSystem::EModifier m_paintMode;
 	const View* m_view;
 	RectangleCallback m_window_update;
 
@@ -8433,41 +8503,15 @@ public:
 		m_mouseMovedWhilePressed( false ){
 	}
 
-	void draw_area(){
-		m_window_update( getDeviceArea() );
-	}
-
-	void testSelect( DeviceVector position ){
-		RadiantSelectionSystem::EModifier modifier = modifier_for_state( g_modifiers );
-		if ( modifier != RadiantSelectionSystem::eManipulator ) {
-			const DeviceVector delta( position - m_start );
-			if ( m_mouseMovedWhilePressed && delta.x() != 0 && delta.y() != 0 ) {
-				getSelectionSystem().SelectArea( *m_view, SelectionBoxForArea( m_start, delta ), ( g_modifiers & c_modifier_face ) != c_modifierNone );
-			}
-			else if( !m_mouseMovedWhilePressed ){
-				if ( modifier == RadiantSelectionSystem::eReplace && !m_mouseMoved ) {
-					modifier = RadiantSelectionSystem::eCycle;
-				}
-				getSelectionSystem().SelectPoint( *m_view, position, m_epsilon, modifier, ( g_modifiers & c_modifier_face ) != c_modifierNone );
-			}
-		}
-
-		m_start = m_current = DeviceVector( 0.f, 0.f );
-		draw_area();
-	}
-
 	void testSelect_simpleM1( DeviceVector position ){
-		getSelectionSystem().SelectPoint( *m_view, device_constrained( position ), m_epsilon, m_mouseMoved ? RadiantSelectionSystem::eReplace : RadiantSelectionSystem::eCycle, false );
-	}
-
-	bool selecting() const {
-		return g_modifiers != c_modifier_manipulator && m_mouse2;
+		getSelectionSystem().SelectPoint( *m_view, device_constrained( position ), m_epsilon, modifier_for_mouseMoved(), false );
 	}
 
 	void mouseDown( DeviceVector position ){
 		m_start = m_current = device_constrained( position );
-		if( !m_mouse2 && g_modifiers != c_modifierNone ){
-			m_paintSelect = getSelectionSystem().SelectPoint_InitPaint( *m_view, position, m_epsilon, ( g_modifiers & c_modifier_face ) != c_modifierNone );
+		m_paintMode = RadiantSelectionSystem::eSelect;
+		if( m1selecting() ){
+			m_paintMode = getSelectionSystem().SelectPoint_InitPaint( *m_view, position, m_epsilon, g_modifiers == c_modifier_face );
 		}
 	}
 
@@ -8476,17 +8520,15 @@ public:
 		if( m_mouse2 ){
 			draw_area();
 		}
-		else if( g_modifiers != c_modifier_manipulator ){
-			getSelectionSystem().SelectPoint( *m_view, m_current, m_epsilon,
-			                                  m_paintSelect ? RadiantSelectionSystem::eSelect : RadiantSelectionSystem::eDeselect,
-			                                  ( g_modifiers & c_modifier_face ) != c_modifierNone );
+		else if( m1selecting() ){
+			getSelectionSystem().SelectPoint( *m_view, m_current, m_epsilon, m_paintMode, g_modifiers == c_modifier_face );
 		}
 	}
 	typedef MemberCaller1<Selector_, DeviceVector, &Selector_::mouseMoved> MouseMovedCaller;
 
 	void mouseUp( DeviceVector position ){
 		if( m_mouse2 ){
-			testSelect( device_constrained( position ) );
+			m2testSelect( device_constrained( position ) );
 		}
 		else{
 			m_start = m_current = DeviceVector( 0.0f, 0.0f );
@@ -8526,7 +8568,7 @@ public:
 
 	bool mouseDown( DeviceVector position ){
 		if( getSelectionSystem().ManipulatorMode() == SelectionSystem::eClip )
-			Clipper_tryDoubleclick();
+			Clipper_tryDoubleclick(); // this b4 SelectManipulator() to track that latest click added no points (hence 2x click one point)
 		return getSelectionSystem().SelectManipulator( *m_view, position, getEpsilon() );
 	}
 
@@ -8611,15 +8653,11 @@ public:
 		if ( button == c_button_select || ( button == c_button_select2 && modifiers != c_modifierNone ) ) {
 			m_mouse_down = true;
 
-			const bool clipper2d( !m_manipulator.m_view->fill() && button == c_button_select && modifiers == c_modifierControl );
+			const bool clipper2d( button == c_button_select && ClipManipulator::quickCondition( modifiers, *m_manipulator.m_view ) );
 			if( clipper2d && getSelectionSystem().ManipulatorMode() != SelectionSystem::eClip )
 				ClipperModeQuick();
 
-			if ( ( modifiers == c_modifier_manipulator
-			       || clipper2d
-			       || ( modifiers == c_modifierAlt && getSelectionSystem().Mode() == SelectionSystem::ePrimitive ) /* AltResize */
-			       || ( modifiers == ( c_modifierAlt | c_modifierControl ) && getSelectionSystem().Mode() == SelectionSystem::ePrimitive ) /* extrude */
-			     ) && m_manipulator.mouseDown( devicePosition ) ) {
+			if ( button == c_button_select && m_manipulator.mouseDown( devicePosition ) ) {
 				g_mouseMovedCallback.insert( MouseEventCallback( Manipulator_::MouseMovedCaller( m_manipulator ) ) );
 				g_mouseUpCallback.insert( MouseEventCallback( Manipulator_::MouseUpCaller( m_manipulator ) ) );
 			}
@@ -8668,7 +8706,8 @@ public:
 		 && getSelectionSystem().ManipulatorMode() != SelectionSystem::eBuild ){
 			m_selector.testSelect_simpleM1( device( position ) );
 		}
-		if( getSelectionSystem().ManipulatorMode() == SelectionSystem::eClip )
+		if( getSelectionSystem().ManipulatorMode() == SelectionSystem::eClip
+		&& button == c_button_select && ( modifiers == c_modifierNone || ClipManipulator::quickCondition( modifiers, *m_manipulator.m_view ) ) )
 			Clipper_tryDoubleclickedCut();
 
 		m_mouse_down = false; /* unconditionally drop the flag to surely not lock the onMouseDown() */
