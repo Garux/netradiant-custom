@@ -26,6 +26,7 @@
 
 #include "math/matrix.h"
 #include "math/plane.h"
+#include <array>
 
 class AABB
 {
@@ -194,32 +195,36 @@ inline unsigned int aabb_oriented_classify_plane( const AABB& aabb, const Matrix
 	return 0; // totally outside
 }
 
-inline void aabb_corners( const AABB& aabb, Vector3 corners[8] ){
-	Vector3 min( vector3_subtracted( aabb.origin, aabb.extents ) );
-	Vector3 max( vector3_added( aabb.origin, aabb.extents ) );
-	corners[0] = Vector3( min[0], max[1], max[2] );
-	corners[1] = Vector3( max[0], max[1], max[2] );
-	corners[2] = Vector3( max[0], min[1], max[2] );
-	corners[3] = Vector3( min[0], min[1], max[2] );
-	corners[4] = Vector3( min[0], max[1], min[2] );
-	corners[5] = Vector3( max[0], max[1], min[2] );
-	corners[6] = Vector3( max[0], min[1], min[2] );
-	corners[7] = Vector3( min[0], min[1], min[2] );
+inline std::array<Vector3, 8> aabb_corners( const AABB& aabb ){
+	const Vector3 min( vector3_subtracted( aabb.origin, aabb.extents ) );
+	const Vector3 max( vector3_added( aabb.origin, aabb.extents ) );
+	return {
+		Vector3( min[0], max[1], max[2] ),
+		Vector3( max[0], max[1], max[2] ),
+		Vector3( max[0], min[1], max[2] ),
+		Vector3( min[0], min[1], max[2] ),
+		Vector3( min[0], max[1], min[2] ),
+		Vector3( max[0], max[1], min[2] ),
+		Vector3( max[0], min[1], min[2] ),
+		Vector3( min[0], min[1], min[2] )
+	};
 }
 
-inline void aabb_corners_oriented( const AABB& aabb, const Matrix4& rotation, Vector3 corners[8] ){
-	Vector3 x = rotation.x().vec3() * aabb.extents.x();
-	Vector3 y = rotation.y().vec3() * aabb.extents.y();
-	Vector3 z = rotation.z().vec3() * aabb.extents.z();
+inline std::array<Vector3, 8> aabb_corners_oriented( const AABB& aabb, const Matrix4& rotation ){
+	const Vector3 x = rotation.x().vec3() * aabb.extents.x();
+	const Vector3 y = rotation.y().vec3() * aabb.extents.y();
+	const Vector3 z = rotation.z().vec3() * aabb.extents.z();
 
-	corners[0] = aabb.origin + -x +  y +  z;
-	corners[1] = aabb.origin +  x +  y +  z;
-	corners[2] = aabb.origin +  x + -y +  z;
-	corners[3] = aabb.origin + -x + -y +  z;
-	corners[4] = aabb.origin + -x +  y + -z;
-	corners[5] = aabb.origin +  x +  y + -z;
-	corners[6] = aabb.origin +  x + -y + -z;
-	corners[7] = aabb.origin + -x + -y + -z;
+	return {
+		aabb.origin - x + y + z,
+		aabb.origin + x + y + z,
+		aabb.origin + x - y + z,
+		aabb.origin - x - y + z,
+		aabb.origin - x + y - z,
+		aabb.origin + x + y - z,
+		aabb.origin + x - y - z,
+		aabb.origin - x - y - z
+	};
 }
 
 inline void aabb_planes( const AABB& aabb, Plane3 planes[6] ){
@@ -231,17 +236,19 @@ inline void aabb_planes( const AABB& aabb, Plane3 planes[6] ){
 	planes[5] = Plane3( vector3_negated( g_vector3_axes[2] ), -( aabb.origin[2] - aabb.extents[2] ) );
 }
 
-inline void aabb_planes_oriented( const AABB& aabb, const Matrix4& rotation, Plane3 planes[6] ){
-	double x = vector3_dot( rotation.x().vec3(), aabb.origin );
-	double y = vector3_dot( rotation.y().vec3(), aabb.origin );
-	double z = vector3_dot( rotation.z().vec3(), aabb.origin );
+inline std::array<Plane3, 6> aabb_planes_oriented( const AABB& aabb, const Matrix4& rotation ){
+	const double x = vector3_dot( rotation.x().vec3(), aabb.origin );
+	const double y = vector3_dot( rotation.y().vec3(), aabb.origin );
+	const double z = vector3_dot( rotation.z().vec3(), aabb.origin );
 
-	planes[0] = Plane3( rotation.x().vec3(), x + aabb.extents[0] );
-	planes[1] = Plane3( -rotation.x().vec3(), -( x - aabb.extents[0] ) );
-	planes[2] = Plane3( rotation.y().vec3(), y + aabb.extents[1] );
-	planes[3] = Plane3( -rotation.y().vec3(), -( y - aabb.extents[1] ) );
-	planes[4] = Plane3( rotation.z().vec3(), z + aabb.extents[2] );
-	planes[5] = Plane3( -rotation.z().vec3(), -( z - aabb.extents[2] ) );
+	return {
+		Plane3(  rotation.x().vec3(),    x + aabb.extents[0] ),
+		Plane3( -rotation.x().vec3(), -( x - aabb.extents[0] ) ),
+		Plane3(  rotation.y().vec3(),    y + aabb.extents[1] ),
+		Plane3( -rotation.y().vec3(), -( y - aabb.extents[1] ) ),
+		Plane3(  rotation.z().vec3(),    z + aabb.extents[2] ),
+		Plane3( -rotation.z().vec3(), -( z - aabb.extents[2] ) )
+	};
 }
 
 const Vector3 aabb_normals[6] = {

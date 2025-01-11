@@ -264,8 +264,7 @@ private:
 	void constructNull(){
 		AABB aabb( Vector3( 0, 0, 0 ), Vector3( 8, 8, 8 ) );
 
-		Vector3 points[8];
-		aabb_corners( aabb, points );
+		const std::array<Vector3, 8> points = aabb_corners( aabb );
 
 		m_vertices.resize( 24 );
 

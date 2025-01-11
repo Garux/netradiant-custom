@@ -485,7 +485,7 @@ void light_draw_radius_wire( const Vector3& origin, const std::array<float, 3>& 
 #endif
 
 
-void light_draw_box_lines( const Vector3& origin, const Vector3 points[8] ){
+void light_draw_box_lines( const Vector3& origin, const std::array<Vector3, 8>& points ){
 	//draw lines from the center of the bbox to the corners
 	gl().glBegin( GL_LINES );
 
@@ -933,7 +933,7 @@ class RenderLightRadiiBox : public OpenGLRenderable
 {
 	const Vector3& m_origin;
 public:
-	mutable Vector3 m_points[8];
+	mutable std::array<Vector3, 8> m_points;
 	//static Shader* m_state;
 
 	RenderLightRadiiBox( const Vector3& origin ) : m_origin( origin ){
@@ -982,8 +982,7 @@ public:
 	}
 	void render( RenderStateFlags state ) const {
 		Matrix4 unproject( matrix4_full_inverse( m_projection ) );
-		Vector3 points[8];
-		aabb_corners( AABB( Vector3( 0.5f, 0.5f, 0.5f ), Vector3( 0.5f, 0.5f, 0.5f ) ), points );
+		std::array<Vector3, 8> points = aabb_corners( AABB( Vector3( 0.5f, 0.5f, 0.5f ), Vector3( 0.5f, 0.5f, 0.5f ) ) );
 		points[0] = vector4_projected( matrix4_transformed_vector4( unproject, Vector4( points[0], 1 ) ) );
 		points[1] = vector4_projected( matrix4_transformed_vector4( unproject, Vector4( points[1], 1 ) ) );
 		points[2] = vector4_projected( matrix4_transformed_vector4( unproject, Vector4( points[2], 1 ) ) );
@@ -1280,7 +1279,7 @@ public:
 
 	void updateLightRadiiBox() const {
 		const Matrix4& rotation = rotation_toMatrix( m_rotation );
-		aabb_corners( AABB( Vector3( 0, 0, 0 ), m_doom3Radius.m_radiusTransformed ), m_radii_box.m_points );
+		m_radii_box.m_points = aabb_corners( AABB( Vector3( 0, 0, 0 ), m_doom3Radius.m_radiusTransformed ) );
 		matrix4_transform_point( rotation, m_radii_box.m_points[0] );
 		vector3_add( m_radii_box.m_points[0], m_aabb_light.origin );
 		matrix4_transform_point( rotation, m_radii_box.m_points[1] );

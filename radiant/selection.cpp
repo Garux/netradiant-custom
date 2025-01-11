@@ -1527,8 +1527,7 @@ void AABB_BestPoint( const Matrix4& local2view, clipcull_t cull, const AABB& aab
 		7, 6, 5, 4,
 	};
 
-	Vector3 points[8];
-	aabb_corners( aabb, points );
+	const std::array<Vector3, 8> points = aabb_corners( aabb );
 
 	const IndexPointer indices( indices_, 24 );
 
@@ -2843,8 +2842,7 @@ public:
 		if( selector.failed() ){
 			const Matrix4 screen2world( matrix4_full_inverse( view.GetViewMatrix() ) );
 
-			Vector3 corners[8];
-			aabb_corners( m_bounds_draw, corners );
+			const std::array<Vector3, 8> corners = aabb_corners( m_bounds_draw );
 
 			const int indices[24] = {
 				3, 7, 4, 0, //-x

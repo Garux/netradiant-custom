@@ -2169,22 +2169,21 @@ Vector3 Camera_getFocusPos( camera_t& camera ){
 	const Vector3 viewvector( -camera.vpn );
 #endif
 
-	Plane3 frustumPlanes[4];
-	frustumPlanes[0] = plane3_translated( view.getFrustum().left, camorigin - aabb.origin );
-	frustumPlanes[1] = plane3_translated( view.getFrustum().right, camorigin - aabb.origin );
-	frustumPlanes[2] = plane3_translated( view.getFrustum().top, camorigin - aabb.origin );
-	frustumPlanes[3] = plane3_translated( view.getFrustum().bottom, camorigin - aabb.origin );
-
+	const Plane3 frustumPlanes[4] = {
+		plane3_translated( view.getFrustum().left,   camorigin - aabb.origin ),
+		plane3_translated( view.getFrustum().right,  camorigin - aabb.origin ),
+		plane3_translated( view.getFrustum().top,    camorigin - aabb.origin ),
+		plane3_translated( view.getFrustum().bottom, camorigin - aabb.origin ),
+	};
 	float offset = 64.0f;
 
-	Vector3 corners[8];
-	aabb_corners( aabb, corners );
+	const std::array<Vector3, 8> corners = aabb_corners( aabb );
 
-	for ( std::size_t i = 0; i < 4; ++i ){
-		for ( std::size_t j = 0; j < 8; ++j ){
+	for ( const Plane3& plane : frustumPlanes ){
+		for ( const Vector3& corner : corners ){
 			const Ray ray( aabb.origin, -viewvector );
-			//Plane3 newplane( frustumPlanes[i].normal(), vector3_dot( frustumPlanes[i].normal(), corners[j] - frustumPlanes[i].normal() * 16.0f ) );
-			const Plane3 newplane( frustumPlanes[i].normal(), vector3_dot( frustumPlanes[i].normal(), corners[j] ) );
+			//Plane3 newplane( plane.normal(), vector3_dot( plane.normal(), corner - plane.normal() * 16.0f ) );
+			const Plane3 newplane( plane.normal(), vector3_dot( plane.normal(), corner ) );
 			const float d = vector3_dot( ray.direction, newplane.normal() );
 			if( d != 0 ){
 				const float s = vector3_dot( newplane.normal() * newplane.dist() - ray.origin, newplane.normal() ) / d;

@@ -112,12 +112,11 @@ inline void aabb_testselect( const AABB& aabb, SelectionTest& test, SelectionInt
 		7, 6, 5, 4,
 	};
 
-	Vector3 points[8];
-	aabb_corners( aabb, points );
-	test.TestQuads( VertexPointer( reinterpret_cast<VertexPointer::pointer>( points ), sizeof( Vector3 ) ), IndexPointer( indices, 24 ), best );
+	const std::array<Vector3, 8> points = aabb_corners( aabb );
+	test.TestQuads( VertexPointer( points[0].data(), sizeof( Vector3 ) ), IndexPointer( indices, 24 ), best );
 }
 
-inline void aabb_draw_wire( const Vector3 points[8] ){
+inline void aabb_draw_wire( const std::array<Vector3, 8>& points ){
 	unsigned int indices[26] = {
 		0, 1, 1, 2, 2, 3, 3, 0,
 		4, 5, 5, 6, 6, 7, 7, 4,
@@ -126,7 +125,7 @@ inline void aabb_draw_wire( const Vector3 points[8] ){
 		1, 7 // diagonal line (connect mins to maxs corner)
 	};
 #if 1
-	gl().glVertexPointer( 3, GL_FLOAT, 0, points );
+	gl().glVertexPointer( 3, GL_FLOAT, 0, points[0].data() );
 	gl().glDrawElements( GL_LINES, sizeof( indices ) / sizeof( indices[0] ), GL_UNSIGNED_INT, indices );
 #else
 	gl().glBegin( GL_LINES );
@@ -138,7 +137,7 @@ inline void aabb_draw_wire( const Vector3 points[8] ){
 #endif
 }
 
-inline void aabb_draw_flatshade( const Vector3 points[8] ){
+inline void aabb_draw_flatshade( const std::array<Vector3, 8>& points ){
 	gl().glBegin( GL_QUADS );
 
 	gl().glNormal3fv( vector3_to_array( aabb_normals[0] ) );
@@ -181,20 +180,15 @@ inline void aabb_draw_flatshade( const Vector3 points[8] ){
 }
 
 inline void aabb_draw_wire( const AABB& aabb ){
-	Vector3 points[8];
-	aabb_corners( aabb, points );
-	aabb_draw_wire( points );
+	aabb_draw_wire( aabb_corners( aabb ) );
 }
 
 inline void aabb_draw_flatshade( const AABB& aabb ){
-	Vector3 points[8];
-	aabb_corners( aabb, points );
-	aabb_draw_flatshade( points );
+	aabb_draw_flatshade( aabb_corners( aabb ) );
 }
 
 inline void aabb_draw_textured( const AABB& aabb ){
-	Vector3 points[8];
-	aabb_corners( aabb, points );
+	const std::array<Vector3, 8> points = aabb_corners( aabb );
 
 	gl().glBegin( GL_QUADS );
 
