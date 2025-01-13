@@ -299,8 +299,25 @@ public:
 	virtual void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ) = 0;
 	virtual void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ) = 0;
 
-	virtual void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ) const = 0;
-	virtual void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ) const = 0;
+	struct BestPlaneData
+	{
+		// common
+		Plane3 m_plane = Plane3( 0, 0, 0, 0 );
+		bool valid() const {
+			return plane3_valid( m_plane );
+		}
+		// direct
+		SelectionIntersection m_intersection;
+		bool direct() const {
+			return m_intersection.valid();
+		}
+		// indirect
+		Vector3 m_closestPoint;
+		float m_dist = std::numeric_limits<float>::max();
+	};
+
+	virtual void bestPlaneDirect( SelectionTest& test, BestPlaneData& planeData ) const = 0;
+	virtual void bestPlaneIndirect( SelectionTest& test, BestPlaneData& planeData ) const = 0;
 	virtual void selectByPlane( const Plane3& plane ) = 0;
 	virtual void gatherPolygonsByPlane( const Plane3& plane, std::vector<std::vector<Vector3>>& polygons ) const = 0;
 };

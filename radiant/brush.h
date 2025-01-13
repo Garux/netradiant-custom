@@ -3188,24 +3188,24 @@ public:
 		}
 	}
 
-	void bestPlaneIndirect( const SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, float& dot ) const {
+	void bestPlaneIndirect( const SelectionTest& test, PlaneSelectable::BestPlaneData& planeData, float& dot ) const {
 		const Winding& winding = m_edge->getFace().getWinding();
 		FaceVertexId faceVertex = m_edge->m_faceVertex;
 		Line line( winding[faceVertex.getVertex()].vertex, winding[Winding_next( winding, faceVertex.getVertex() )].vertex );
 		if( matrix4_clip_line_by_nearplane( test.getVolume().GetViewMatrix(), line ) == 2 ){
-			const Vector3 intersection_new = line_closest_point( line, g_vector3_identity );
-			const float dist_new = vector3_length_squared( intersection_new );
-			const float dot_new = fabs( vector3_dot( vector3_normalised( intersection_new ), vector3_normalised( line.end - line.start ) ) );
-			if( dist - dist_new > 1e-6f // new dist noticeably smaller
-			 || ( float_equal_epsilon( dist_new, dist, 1e-6f ) && dot_new < dot ) ){ // or ambiguous case. Resolve it by dot comparison
+			const Vector3 point_new = line_closest_point( line, g_vector3_identity );
+			const float dist_new = vector3_length_squared( point_new );
+			const float dot_new = fabs( vector3_dot( vector3_normalised( point_new ), vector3_normalised( line.end - line.start ) ) );
+			if( planeData.m_dist - dist_new > 1e-6f // new dist noticeably smaller
+			 || ( float_equal_epsilon( dist_new, planeData.m_dist, 1e-6f ) && dot_new < dot ) ){ // or ambiguous case. Resolve it by dot comparison
 				const Plane3& plane1 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
 				faceVertex = next_edge( m_edge->m_faces, faceVertex );
 				const Plane3& plane2 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
 
-				auto assign_plane = [&plane, &intersection, intersection_new, &dist, dist_new, &dot, dot_new]( const Plane3& plane_new ){
-					plane = plane_new;
-					intersection = intersection_new;
-					dist = dist_new;
+				auto assign_plane = [&planeData, point_new, dist_new, &dot, dot_new]( const Plane3& plane_new ){
+					planeData.m_plane = plane_new;
+					planeData.m_closestPoint = point_new;
+					planeData.m_dist = dist_new;
 					dot = dot_new;
 				};
 
@@ -3870,7 +3870,7 @@ public:
 			}
 		}
 	}
-	void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ){
+	void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ) override {
 		FaceInstances_ptrs bestInstances;
 		selectPlanes( test, bestInstances );
 
@@ -3881,39 +3881,39 @@ public:
 				return; // select only plane in camera
 		}
 	}
-	void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ){
+	void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ) override {
 		for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
 		{
 			( *i ).selectReversedPlane( selector, selectedPlanes );
 		}
 	}
 
-	void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ) const {
+	void bestPlaneDirect( SelectionTest& test, BestPlaneData& planeData ) const override {
 		test.BeginMesh( localToWorld() );
 		for ( const FaceInstance& fi : m_faceInstances )
 		{
-			SelectionIntersection intersection_new;
-			fi.testSelect( test, intersection_new );
-			if( SelectionIntersection_closer( intersection_new, intersection ) ){
-				intersection = intersection_new;
-				plane = fi.getFace().plane3();
+			SelectionIntersection intersection;
+			fi.testSelect( test, intersection );
+			if( SelectionIntersection_closer( intersection, planeData.m_intersection ) ){
+				planeData.m_intersection = intersection;
+				planeData.m_plane = fi.getFace().plane3();
 			}
 		}
 	}
-	void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ) const {
+	void bestPlaneIndirect( SelectionTest& test, BestPlaneData& planeData ) const override {
 		test.BeginMesh( localToWorld() );
 		float dot = 1;
 		for ( const EdgeInstance& ei : m_edgeInstances )
 		{
-			ei.bestPlaneIndirect( test, plane, intersection, dist, dot );
+			ei.bestPlaneIndirect( test, planeData, dot );
 		}
 	}
-	void selectByPlane( const Plane3& plane ){
+	void selectByPlane( const Plane3& plane ) override {
 		for ( FaceInstance& fi : m_faceInstances )
 			if( plane3_equal( plane, fi.getFace().plane3() ) || plane3_equal( plane, plane3_flipped( fi.getFace().plane3() ) ) )
 				fi.setSelected( SelectionSystem::eFace, true );
 	}
-	void gatherPolygonsByPlane( const Plane3& plane, std::vector<std::vector<Vector3>>& polygons ) const {
+	void gatherPolygonsByPlane( const Plane3& plane, std::vector<std::vector<Vector3>>& polygons ) const override {
 		gatherPolygonsByPlane( plane, polygons, true );
 	}
 	void gatherPolygonsByPlane( const Plane3& plane, std::vector<std::vector<Vector3>>& polygons, const bool reversed_plane_also ) const {

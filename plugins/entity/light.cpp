@@ -1859,7 +1859,7 @@ public:
 		m_contained.testSelect( selector, test, Instance::localToWorld() );
 	}
 
-	void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ){
+	void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ) override {
 		test.BeginMesh( localToWorld() );
 		if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 			m_dragPlanes.selectPlanes( m_contained.aabb(), selector, test, selectedPlaneCallback, rotation() );
@@ -1868,30 +1868,30 @@ public:
 			m_scaleRadius.selectPlanes( selector, test, selectedPlaneCallback );
 		}
 	}
-	void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ){
+	void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ) override {
 		if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 			m_dragPlanes.selectReversedPlanes( m_contained.aabb(), selector, selectedPlanes, rotation() );
 		}
 	}
 
-	void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ) const {
+	void bestPlaneDirect( SelectionTest& test, BestPlaneData& planeData ) const override {
 		if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 			test.BeginMesh( localToWorld() );
-			m_dragPlanes.bestPlaneDirect( m_contained.aabb(), test, plane, intersection, rotation() );
+			m_dragPlanes.bestPlaneDirect( m_contained.aabb(), test, planeData, rotation() );
 		}
 	}
-	void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ) const {
+	void bestPlaneIndirect( SelectionTest& test, BestPlaneData& planeData ) const override {
 		if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 			test.BeginMesh( localToWorld() );
-			m_dragPlanes.bestPlaneIndirect( m_contained.aabb(), test, plane, intersection, dist, rotation() );
+			m_dragPlanes.bestPlaneIndirect( m_contained.aabb(), test, planeData, rotation() );
 		}
 	}
-	void selectByPlane( const Plane3& plane ){
+	void selectByPlane( const Plane3& plane ) override {
 		if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 			m_dragPlanes.selectByPlane( m_contained.aabb(), plane, rotation() );
 		}
 	}
-	void gatherPolygonsByPlane( const Plane3& plane, std::vector<std::vector<Vector3>>& polygons ) const {
+	void gatherPolygonsByPlane( const Plane3& plane, std::vector<std::vector<Vector3>>& polygons ) const override {
 		if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 			m_dragPlanes.gatherPolygonsByPlane( m_contained.aabb(), plane, polygons, rotation() );
 		}

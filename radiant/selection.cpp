@@ -1593,6 +1593,239 @@ void Triangles_BestPoint( const Matrix4& local2view, clipcull_t cull, FlatShaded
 }
 
 
+class SelectionVolume : public SelectionTest
+{
+	Matrix4 m_local2view;
+	const View& m_view;
+	clipcull_t m_cull;
+#if 0
+	Vector3 m_near;
+	Vector3 m_far;
+#endif
+	Matrix4 m_screen2world;
+public:
+	SelectionVolume( const View& view )
+		: m_view( view ){
+	}
+
+	const VolumeTest& getVolume() const override {
+		return m_view;
+	}
+#if 0
+	const Vector3& getNear() const override {
+		return m_near;
+	}
+	const Vector3& getFar() const override {
+		return m_far;
+	}
+#endif
+	const Matrix4& getScreen2world() const override {
+		return m_screen2world;
+	}
+
+	void BeginMesh( const Matrix4& localToWorld, bool twoSided ) override {
+		m_local2view = matrix4_multiplied_by_matrix4( m_view.GetViewMatrix(), localToWorld );
+
+		// Cull back-facing polygons based on winding being clockwise or counter-clockwise.
+		// Don't cull if the view is wireframe and the polygons are two-sided.
+		m_cull = twoSided && !m_view.fill() ? eClipCullNone : ( matrix4_handedness( localToWorld ) == MATRIX4_RIGHTHANDED ) ? eClipCullCW : eClipCullCCW;
+
+		{
+			m_screen2world = matrix4_full_inverse( m_local2view );
+#if 0
+			m_near = vector4_projected(
+			             matrix4_transformed_vector4(
+			                 m_screen2world,
+			                 Vector4( 0, 0, -1, 1 )
+			             )
+			         );
+
+			m_far = vector4_projected(
+			            matrix4_transformed_vector4(
+			                m_screen2world,
+			                Vector4( 0, 0, 1, 1 )
+			            )
+			        );
+#endif
+		}
+
+#if defined( DEBUG_SELECTION )
+		g_render_clipped.construct( m_view.GetViewMatrix() );
+#endif
+	}
+	void TestPoint( const Vector3& point, SelectionIntersection& best ) override {
+		Vector4 clipped;
+		if ( matrix4_clip_point( m_local2view, point, clipped ) == c_CLIP_PASS ) {
+			best = select_point_from_clipped( clipped );
+		}
+	}
+	void TestPolygon( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best, const DoubleVector3 planepoints[3] ) override {
+		DoubleVector3 pts[3];
+		pts[0] = vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[0], 1 ) ) );
+		pts[1] = vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[1], 1 ) ) );
+		pts[2] = vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[2], 1 ) ) );
+		const Plane3 planeTransformed( plane3_for_points( pts ) );
+
+		Vector4 clipped[9];
+		for ( std::size_t i = 0; i + 2 < count; ++i )
+		{
+			BestPoint(
+			    matrix4_clip_triangle(
+			        m_local2view,
+			        reinterpret_cast<const DoubleVector3&>( vertices[0] ),
+			        reinterpret_cast<const DoubleVector3&>( vertices[i + 1] ),
+			        reinterpret_cast<const DoubleVector3&>( vertices[i + 2] ),
+			        clipped
+			    ),
+			    clipped,
+			    best,
+			    m_cull,
+			    &planeTransformed
+			);
+		}
+	}
+	void TestLineLoop( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) override {
+		if ( count == 0 ) {
+			return;
+		}
+		Vector4 clipped[9];
+		for ( VertexPointer::iterator i = vertices.begin(), end = i + count, prev = i + ( count - 1 ); i != end; prev = i, ++i )
+		{
+			BestPoint(
+			    matrix4_clip_line(
+			        m_local2view,
+			        reinterpret_cast<const Vector3&>( ( *prev ) ),
+			        reinterpret_cast<const Vector3&>( ( *i ) ),
+			        clipped
+			    ),
+			    clipped,
+			    best,
+			    m_cull
+			);
+		}
+	}
+	void TestLineStrip( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) override {
+		if ( count == 0 ) {
+			return;
+		}
+		Vector4 clipped[9];
+		for ( VertexPointer::iterator i = vertices.begin(), end = i + count, next = i + 1; next != end; i = next, ++next )
+		{
+			BestPoint(
+			    matrix4_clip_line(
+			        m_local2view,
+			        reinterpret_cast<const Vector3&>( ( *i ) ),
+			        reinterpret_cast<const Vector3&>( ( *next ) ),
+			        clipped
+			    ),
+			    clipped,
+			    best,
+			    m_cull
+			);
+		}
+	}
+	void TestLines( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) override {
+		if ( count == 0 ) {
+			return;
+		}
+		Vector4 clipped[9];
+		for ( VertexPointer::iterator i = vertices.begin(), end = i + count; i != end; i += 2 )
+		{
+			BestPoint(
+			    matrix4_clip_line(
+			        m_local2view,
+			        reinterpret_cast<const Vector3&>( ( *i ) ),
+			        reinterpret_cast<const Vector3&>( ( *( i + 1 ) ) ),
+			        clipped
+			    ),
+			    clipped,
+			    best,
+			    m_cull
+			);
+		}
+	}
+	void TestTriangles( const VertexPointer& vertices, const IndexPointer& indices, SelectionIntersection& best ) override {
+		Vector4 clipped[9];
+		for ( IndexPointer::iterator i( indices.begin() ); i != indices.end(); i += 3 )
+		{
+			BestPoint(
+			    matrix4_clip_triangle(
+			        m_local2view,
+			        reinterpret_cast<const Vector3&>( vertices[*i] ),
+			        reinterpret_cast<const Vector3&>( vertices[*( i + 1 )] ),
+			        reinterpret_cast<const Vector3&>( vertices[*( i + 2 )] ),
+			        clipped
+			    ),
+			    clipped,
+			    best,
+			    m_cull
+			);
+		}
+	}
+	void TestQuads( const VertexPointer& vertices, const IndexPointer& indices, SelectionIntersection& best ) override {
+		Vector4 clipped[9];
+		for ( IndexPointer::iterator i( indices.begin() ); i != indices.end(); i += 4 )
+		{
+			BestPoint(
+			    matrix4_clip_triangle(
+			        m_local2view,
+			        reinterpret_cast<const Vector3&>( vertices[*i] ),
+			        reinterpret_cast<const Vector3&>( vertices[*( i + 1 )] ),
+			        reinterpret_cast<const Vector3&>( vertices[*( i + 3 )] ),
+			        clipped
+			    ),
+			    clipped,
+			    best,
+			    m_cull
+			);
+			BestPoint(
+			    matrix4_clip_triangle(
+			        m_local2view,
+			        reinterpret_cast<const Vector3&>( vertices[*( i + 1 )] ),
+			        reinterpret_cast<const Vector3&>( vertices[*( i + 2 )] ),
+			        reinterpret_cast<const Vector3&>( vertices[*( i + 3 )] ),
+			        clipped
+			    ),
+			    clipped,
+			    best,
+			    m_cull
+			);
+		}
+	}
+	void TestQuadStrip( const VertexPointer& vertices, const IndexPointer& indices, SelectionIntersection& best ) override {
+		Vector4 clipped[9];
+		for ( IndexPointer::iterator i( indices.begin() ); i + 2 != indices.end(); i += 2 )
+		{
+			BestPoint(
+			    matrix4_clip_triangle(
+			        m_local2view,
+			        reinterpret_cast<const Vector3&>( vertices[*i] ),
+			        reinterpret_cast<const Vector3&>( vertices[*( i + 1 )] ),
+			        reinterpret_cast<const Vector3&>( vertices[*( i + 2 )] ),
+			        clipped
+			    ),
+			    clipped,
+			    best,
+			    m_cull
+			);
+			BestPoint(
+			    matrix4_clip_triangle(
+			        m_local2view,
+			        reinterpret_cast<const Vector3&>( vertices[*( i + 2 )] ),
+			        reinterpret_cast<const Vector3&>( vertices[*( i + 1 )] ),
+			        reinterpret_cast<const Vector3&>( vertices[*( i + 3 )] ),
+			        clipped
+			    ),
+			    clipped,
+			    best,
+			    m_cull
+			);
+		}
+	}
+};
+
+
+
 typedef std::multimap<SelectionIntersection, Selectable*> SelectableSortedSet;
 
 class SelectionPool : public Selector
@@ -1636,26 +1869,21 @@ public:
 
 class ManipulatorSelectionChangeable
 {
-	Selectable* m_selectable_prev_ptr = nullptr;
+	const Selectable* m_selectable_prev_ptr = nullptr;
 public:
-	void selectionChange( SelectionPool& selector ){
-		if ( !selector.failed() ) {
-			Selectable *se = selector.begin()->second;
-			se->setSelected( true );
-			if( m_selectable_prev_ptr != se ){
-				m_selectable_prev_ptr = se;
-				SceneChangeNotify();
-			}
-		}
-		else{
-			selectionDrop();
-		}
-	}
-	void selectionDrop(){
-		if( m_selectable_prev_ptr != nullptr ){
-			m_selectable_prev_ptr = nullptr;
+	void selectionChange( const Selectable *se ){
+		if( m_selectable_prev_ptr != se ){
+			m_selectable_prev_ptr = se;
 			SceneChangeNotify();
 		}
+	}
+	void selectionChange( SelectionPool& selector ){
+		Selectable *se = nullptr;
+		if ( !selector.failed() ) {
+			se = selector.begin()->second;
+			se->setSelected( true );
+		}
+		selectionChange( se );
 	}
 };
 
@@ -1888,7 +2116,7 @@ public:
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
 		if( g_modifiers != c_modifierNone )
-			return selectionDrop();
+			return selectionChange( nullptr );
 
 		m_pivot.update( pivot2world, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 		updateCircleTransforms();
@@ -2265,7 +2493,7 @@ public:
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
 		if( g_modifiers != c_modifierNone )
-			return selectionDrop();
+			return selectionChange( nullptr );
 
 		m_pivot.update( pivot2world, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 
@@ -2436,7 +2664,7 @@ public:
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
 		if( g_modifiers != c_modifierNone )
-			return selectionDrop();
+			return selectionChange( nullptr );
 
 		m_pivot.update( pivot2world, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 
@@ -2515,7 +2743,9 @@ public:
 };
 
 
-class SkewManipulator : public Manipulator
+#include "dragplanes.h"
+
+class SkewManipulator : public Manipulator, public ManipulatorSelectionChangeable
 {
 	struct RenderableLine : public OpenGLRenderable {
 		PointVertex m_line[2];
@@ -2593,10 +2823,8 @@ class SkewManipulator : public Manipulator
 	RenderableLine m_lines[3][2][2];
 	SelectableBool m_selectables[3][2][2];	//[X][YZ][-+]
 	SelectableBool m_selectable_translateFree;
-	SelectableBool m_selectables_scale[3][2];	//[X][-+]
+	DragPlanes m_selectables_scale; //+-X+-Y+-Z
 	SelectableBool m_selectables_rotate[3][2][2];	//[X][-+Y][-+Z]
-	Selectable* m_selectable_prev_ptr;
-	Selectable* m_selectable_prev_ptr2;
 	Pivot2World m_pivot;
 	Matrix4 m_worldSpace;
 	RenderableArrowHead m_arrow;
@@ -2616,8 +2844,7 @@ public:
 		m_bounds( bounds ),
 		m_pivot2world( pivot2world ),
 		m_pivotIsCustom( pivotIsCustom ),
-		m_selectable_prev_ptr( 0 ),
-		m_selectable_prev_ptr2( 0 ),
+		m_selectables_scale( {} ),
 		m_arrow( 3 * 2 * ( segments << 3 ) ) {
 		for ( int i = 0; i < 3; ++i ){
 			for ( int j = 0; j < 2; ++j ){
@@ -2646,9 +2873,9 @@ public:
 					m_lines[i][j][k].setColour( colourSelected( g_colour_screen, m_selectables[i][j][k].isSelected() ) );
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j )
-				if( m_selectables_scale[i][j].isSelected() ){
-					m_lines[(i + 1)%3][1][j].setColour( g_colour_z );
-					m_lines[(i + 2)%3][0][j].setColour( g_colour_z );
+				if( m_selectables_scale.getSelectables()[i * 2 + j].isSelected() ){
+					m_lines[(i + 1)%3][1][j ^ 1].setColour( g_colour_selected );
+					m_lines[(i + 2)%3][0][j ^ 1].setColour( g_colour_selected );
 				}
 	}
 
@@ -2749,20 +2976,15 @@ public:
 					}
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
-		if( g_modifiers != c_modifierNone ){
-			if( m_selectable_prev_ptr != nullptr ){
-				m_selectable_prev_ptr = nullptr;
-				m_selectable_prev_ptr2 = nullptr;
-				SceneChangeNotify();
-			}
-			return;
-		}
-
 		updateModelview( view, pivot2world );
-
 		SelectionPool selector;
-
 		const Matrix4 local2view( matrix4_multiplied_by_matrix4( view.GetViewMatrix(), m_worldSpace ) );
+
+		if( g_modifiers == c_modifierAlt && view.fill() )
+			goto testSelectBboxPlanes;
+		if( g_modifiers != c_modifierNone )
+			return selectionChange( nullptr );
+
 		/* try corner points to rotate */
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j )
@@ -2837,89 +3059,42 @@ public:
 					m_translateFreeXY_Z.set0( vector4_projected( matrix4_transformed_vector4( matrix4_full_inverse( view.GetViewMatrix() ), Vector4( 0, 0, selector.begin()->first.depth(), 1 ) ) ) );
 			}
 		}
-
-		/* try bbox planes to scale*/
+testSelectBboxPlanes:
+		/* try bbox planes to scale */
 		if( selector.failed() ){
-			const Matrix4 screen2world( matrix4_full_inverse( view.GetViewMatrix() ) );
+			SelectionVolume test( view );
+			test.BeginMesh( g_matrix4_identity, true );
 
-			const std::array<Vector3, 8> corners = aabb_corners( m_bounds_draw );
+			if( g_modifiers == c_modifierAlt ){
+				PlaneSelectable::BestPlaneData planeData;
+				m_selectables_scale.bestPlaneDirect( m_bounds_draw, test, planeData );
+				if( !planeData.valid() ){
+					m_selectables_scale.bestPlaneIndirect( m_bounds_draw, test, planeData );
+				}
+				if( planeData.valid() ){
+					m_selectables_scale.selectByPlane( m_bounds_draw, planeData.m_plane );
+				}
+			}
+			else{
+				m_selectables_scale.selectPlanes( m_bounds_draw, selector, test, {} );
+				for( auto& [ intersection, selectable ] : selector )
+					selectable->setSelected( true );
+			}
 
-			const int indices[24] = {
-				3, 7, 4, 0, //-x
-				2, 1, 5, 6, //+x
-				3, 2, 6, 7, //-y
-				1, 0, 4, 5, //+y
-				7, 6, 5, 4, //-z
-				0, 1, 2, 3, //+z
-			};
-
-			Selectable* selectable = 0;
-			Selectable* selectable2 = 0;
-			double bestDot = 1;
-			const Vector3 viewdir( view.getViewDir() );
-			for ( int i = 0; i < 3; ++i ){
-				for ( int j = 0; j < 2; ++j ){
-					const Vector3 normal = j? g_vector3_axes[i] : -g_vector3_axes[i];
-					const Vector3 centroid = m_bounds.origin + m_bounds.extents * normal;
-					const Vector3 projected = vector4_projected( matrix4_transformed_vector4( view.GetViewMatrix(), Vector4( centroid, 1 ) ) );
-					const Vector3 closest_point = vector4_projected( matrix4_transformed_vector4( screen2world, Vector4( 0, 0, projected[2], 1 ) ) );
-
-					const int index = i * 8 + j * 4;
-					if( vector3_dot( normal, closest_point - corners[indices[index]] ) > 0
-					 && vector3_dot( normal, closest_point - corners[indices[index + 1]] ) > 0
-					 && vector3_dot( normal, closest_point - corners[indices[index + 2]] ) > 0
-					 && vector3_dot( normal, closest_point - corners[indices[index + 3]] ) > 0 )
-					{
-						const double dot = fabs( vector3_dot( normal, viewdir ) );
-						const double diff = bestDot - dot;
-						if( diff > 0.03 ){
-							bestDot = dot;
-							selectable = &m_selectables_scale[i][j];
-							selectable2 = 0;
-						}
-						else if( fabs( diff ) <= 0.03 ){
-							selectable2 = &m_selectables_scale[i][j];
-						}
+			std::uintptr_t newsel = 0;
+			Vector3 origin = m_bounds.origin;
+			for ( int i = 0; i < 3; ++i )
+				for ( int j = 0; j < 2; ++j )
+					if( m_selectables_scale.getSelectables()[i * 2 + j].isSelected() ){
+						origin[i] += j? m_bounds.extents[i] : -m_bounds.extents[i];
+						newsel += reinterpret_cast<std::uintptr_t>( &m_selectables_scale.getSelectables()[i * 2 + j] ); // hack: store up to 2 pointers in one
 					}
-				}
-			}
-//			if( view.GetViewMatrix().xw() != 0 || view.GetViewMatrix().yw() != 0 )
-			if( view.fill() ) // select only plane in camera
-				selectable2 = 0;
-			if( selectable ){
-				Vector3 origin = m_bounds.origin;
-				for ( int i = 0; i < 3; ++i )
-					for ( int j = 0; j < 2; ++j )
-						if( &m_selectables_scale[i][j] == selectable || &m_selectables_scale[i][j] == selectable2 ){
-							m_selectables_scale[i][j].setSelected( true );
-							origin[i] += j? -m_bounds.extents[i] : m_bounds.extents[i];
-						}
-				if( !m_pivotIsCustom )
-					m_pivot2world = matrix4_translation_for_vec3( origin );
-				if( m_selectable_prev_ptr != selectable || m_selectable_prev_ptr2 != selectable2 ){
-					m_selectable_prev_ptr = selectable;
-					m_selectable_prev_ptr2 = selectable2;
-					SceneChangeNotify();
-				}
-				return;
-			}
-
+			if( !m_pivotIsCustom )
+				m_pivot2world = matrix4_translation_for_vec3( origin );
+			return selectionChange( reinterpret_cast<const ObservedSelectable *>( newsel ) );
 		}
 
-		if( !selector.failed() ) {
-			Selectable *se = selector.begin()->second;
-			se->setSelected( true );
-			if( m_selectable_prev_ptr != se ) {
-				m_selectable_prev_ptr = se;
-				m_selectable_prev_ptr2 = 0;
-				SceneChangeNotify();
-			}
-		}
-		else if( m_selectable_prev_ptr ) {
-			m_selectable_prev_ptr = 0;
-			m_selectable_prev_ptr2 = 0;
-			SceneChangeNotify();
-		}
+		selectionChange( selector );
 	}
 
 	Manipulatable* GetManipulatable() override {
@@ -2939,13 +3114,13 @@ public:
 			Vector3* axis = axes;
 			for ( int i = 0; i < 3; ++i )
 				for ( int j = 0; j < 2; ++j )
-					if( m_selectables_scale[i][j].isSelected() )
-						(*axis++)[i] = j? 1 : -1;
-			if( m_selectable_prev_ptr2 ){
+					if( m_selectables_scale.getSelectables()[i * 2 + j].isSelected() )
+						(*axis++)[i] = j? -1 : 1;
+			if( axis - axes == 2 ){
 				m_scaleFree.SetAxes( axes[0], axes[1] );
 				return &m_scaleFree;
 			}
-			else if( axis != axes ){
+			else if( axis - axes == 1 ){
 				m_scaleAxis.SetAxis( axes[0] );
 				return &m_scaleAxis;
 			}
@@ -2961,9 +3136,7 @@ public:
 					m_selectables[i][j][k].setSelected( select );
 					m_selectables_rotate[i][j][k].setSelected( select );
 				}
-		for ( int i = 0; i < 3; ++i )
-			for ( int j = 0; j < 2; ++j )
-				m_selectables_scale[i][j].setSelected( select );
+		m_selectables_scale.setSelected( select );
 	}
 	bool isSelected() const override {
 		bool selected = false;
@@ -2973,9 +3146,7 @@ public:
 					selected |= m_selectables[i][j][k].isSelected();
 					selected |= m_selectables_rotate[i][j][k].isSelected();
 				}
-		for ( int i = 0; i < 3; ++i )
-			for ( int j = 0; j < 2; ++j )
-				selected |= m_selectables_scale[i][j].isSelected();
+		selected |= m_selectables_scale.isSelected();
 		return selected | m_selectable_translateFree.isSelected();
 	}
 };
@@ -3129,34 +3300,33 @@ inline const Functor& Scene_forEachVisibleSelectedPlaneselectable( const Functor
 	return functor;
 }
 
-void Scene_forEachPlaneSelectable_bestPlane( SelectionTest& test, Plane3& plane, Vector3& intersectionPoint ){
-	SelectionIntersection intersection;
-	auto bestPlaneDirect = [&test, &plane, &intersection]( PlaneSelectable& planeSelectable ){
-		planeSelectable.bestPlaneDirect( test, plane, intersection );
+PlaneSelectable::BestPlaneData Scene_forEachPlaneSelectable_bestPlane( SelectionTest& test ){
+	PlaneSelectable::BestPlaneData planeData;
+	auto bestPlaneDirect = [&test, &planeData]( PlaneSelectable& planeSelectable ){
+		planeSelectable.bestPlaneDirect( test, planeData );
 	};
 	Scene_forEachVisibleSelectedPlaneselectable( bestPlaneDirect );
-	if( !plane3_valid( plane ) ){
-		float dist( FLT_MAX );
-		auto bestPlaneIndirect = [&test, &plane, &intersectionPoint, &dist]( PlaneSelectable& planeSelectable ){
-			planeSelectable.bestPlaneIndirect( test, plane, intersectionPoint, dist );
+	if( !planeData.valid() ){
+		auto bestPlaneIndirect = [&test, &planeData]( PlaneSelectable& planeSelectable ){
+			planeSelectable.bestPlaneIndirect( test, planeData );
 		};
 		Scene_forEachVisibleSelectedPlaneselectable( bestPlaneIndirect );
 	}
+	return planeData;
 }
 
 bool Scene_forEachPlaneSelectable_selectPlanes2( SelectionTest& test, TranslateAxis2& translateAxis ){
-	Plane3 plane( 0, 0, 0, 0 );
-	Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
-	Scene_forEachPlaneSelectable_bestPlane( test, plane, intersectionPoint );
+	const auto planeData = Scene_forEachPlaneSelectable_bestPlane( test );
 
-	if( plane3_valid( plane ) ){
-		if( intersectionPoint == Vector3( FLT_MAX, FLT_MAX, FLT_MAX ) ){ // direct
+	if( planeData.valid() ){
+		const Plane3 plane = planeData.m_plane;
+		if( planeData.direct() ){ // direct
 			translateAxis.set0( point_on_plane( plane, test.getVolume().GetViewMatrix(), DeviceVector( 0, 0 ) ), plane );
 		}
 		else{ // indirect
 			test.BeginMesh( g_matrix4_identity );
 			/* may introduce some screen space offset in manipulatable to handle far-from-edge clicks perfectly; thought clicking not so far isn't too nasty, right? */
-			translateAxis.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( intersectionPoint, 1 ) ) ), plane );
+			translateAxis.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( planeData.m_closestPoint, 1 ) ) ), plane );
 		}
 
 		auto selectByPlane = [plane]( PlaneSelectable& planeSelectable ){
@@ -3165,61 +3335,60 @@ bool Scene_forEachPlaneSelectable_selectPlanes2( SelectionTest& test, TranslateA
 		Scene_forEachVisibleSelectedPlaneselectable( selectByPlane );
 	}
 
-	return plane3_valid( plane );
+	return planeData.valid();
 }
 
 
-void Scene_forEachSelectedBrush_bestPlane( SelectionTest& test, Plane3& plane, Vector3& intersectionPoint ){
-	SelectionIntersection intersection;
-	auto bestPlaneDirect = [&test, &plane, &intersection]( BrushInstance& brushInstance ){
-		brushInstance.bestPlaneDirect( test, plane, intersection );
+PlaneSelectable::BestPlaneData Scene_forEachSelectedBrush_bestPlane( SelectionTest& test ){
+	PlaneSelectable::BestPlaneData planeData;
+	auto bestPlaneDirect = [&test, &planeData]( BrushInstance& brushInstance ){
+		brushInstance.bestPlaneDirect( test, planeData );
 	};
 	Scene_forEachVisibleSelectedBrush( bestPlaneDirect );
-	if( !plane3_valid( plane ) ){
-		float dist( FLT_MAX );
-		auto bestPlaneIndirect = [&test, &plane, &intersectionPoint, &dist]( BrushInstance& brushInstance ){
-			brushInstance.bestPlaneIndirect( test, plane, intersectionPoint, dist );
+	if( !planeData.valid() ){
+		auto bestPlaneIndirect = [&test, &planeData]( BrushInstance& brushInstance ){
+			brushInstance.bestPlaneIndirect( test, planeData );
 		};
 		Scene_forEachVisibleSelectedBrush( bestPlaneIndirect );
 	}
+	return planeData;
 }
 
-void Scene_forEachBrush_bestPlane( SelectionTest& test, Plane3& plane, Vector3& intersectionPoint ){
+PlaneSelectable::BestPlaneData Scene_forEachBrush_bestPlane( SelectionTest& test ){
 	if( g_SelectedFaceInstances.empty() ){
-		Scene_forEachSelectedBrush_bestPlane( test, plane, intersectionPoint );
+		return Scene_forEachSelectedBrush_bestPlane( test );
 	}
 	else{
-		SelectionIntersection intersection;
-		auto bestPlaneDirect = [&test, &plane, &intersection]( BrushInstance& brushInstance ){
+		PlaneSelectable::BestPlaneData planeData;
+		auto bestPlaneDirect = [&test, &planeData]( BrushInstance& brushInstance ){
 			if( brushInstance.isSelected() || brushInstance.isSelectedComponents() )
-				brushInstance.bestPlaneDirect( test, plane, intersection );
+				brushInstance.bestPlaneDirect( test, planeData );
 		};
 
 		Scene_forEachVisibleBrush( GlobalSceneGraph(), bestPlaneDirect );
-		if( !plane3_valid( plane ) ){
-			float dist( FLT_MAX );
-			auto bestPlaneIndirect = [&test, &plane, &intersectionPoint, &dist]( BrushInstance& brushInstance ){
+		if( !planeData.valid() ){
+			auto bestPlaneIndirect = [&test, &planeData]( BrushInstance& brushInstance ){
 				if( brushInstance.isSelected() || brushInstance.isSelectedComponents() )
-					brushInstance.bestPlaneIndirect( test, plane, intersectionPoint, dist );
+					brushInstance.bestPlaneIndirect( test, planeData );
 			};
 			Scene_forEachVisibleBrush( GlobalSceneGraph(), bestPlaneIndirect );
 		}
+		return planeData;
 	}
 }
 
 bool Scene_forEachBrush_setupExtrude( SelectionTest& test, DragExtrudeFaces& extrudeFaces ){
-	Plane3 plane( 0, 0, 0, 0 );
-	Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
-	Scene_forEachBrush_bestPlane( test, plane, intersectionPoint );
+	const auto planeData = Scene_forEachBrush_bestPlane( test );
 
-	if( plane3_valid( plane ) ){
-		if( intersectionPoint == Vector3( FLT_MAX, FLT_MAX, FLT_MAX ) ){ // direct
+	if( planeData.valid() ){
+		const Plane3 plane = planeData.m_plane;
+		if( planeData.direct() ){ // direct
 			extrudeFaces.set0( point_on_plane( plane, test.getVolume().GetViewMatrix(), DeviceVector( 0, 0 ) ), plane );
 		}
 		else{ // indirect
 			test.BeginMesh( g_matrix4_identity );
 			/* may introduce some screen space offset in manipulatable to handle far-from-edge clicks perfectly; thought clicking not so far isn't too nasty, right? */
-			extrudeFaces.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( intersectionPoint, 1 ) ) ), plane );
+			extrudeFaces.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( planeData.m_closestPoint, 1 ) ) ), plane );
 		}
 		extrudeFaces.m_extrudeSources.clear();
 		auto gatherExtrude = [plane, &extrudeFaces]( BrushInstance& brushInstance ){
@@ -3246,7 +3415,7 @@ bool Scene_forEachBrush_setupExtrude( SelectionTest& test, DragExtrudeFaces& ext
 		Scene_forEachVisibleBrush( GlobalSceneGraph(), gatherExtrude );
 	}
 
-	return plane3_valid( plane );
+	return planeData.valid();
 }
 
 
@@ -3265,237 +3434,6 @@ class ResizeTranslatable : public Translatable
 	}
 };
 
-
-class SelectionVolume : public SelectionTest
-{
-	Matrix4 m_local2view;
-	const View& m_view;
-	clipcull_t m_cull;
-#if 0
-	Vector3 m_near;
-	Vector3 m_far;
-#endif
-	Matrix4 m_screen2world;
-public:
-	SelectionVolume( const View& view )
-		: m_view( view ){
-	}
-
-	const VolumeTest& getVolume() const override {
-		return m_view;
-	}
-#if 0
-	const Vector3& getNear() const override {
-		return m_near;
-	}
-	const Vector3& getFar() const override {
-		return m_far;
-	}
-#endif
-	const Matrix4& getScreen2world() const override {
-		return m_screen2world;
-	}
-
-	void BeginMesh( const Matrix4& localToWorld, bool twoSided ) override {
-		m_local2view = matrix4_multiplied_by_matrix4( m_view.GetViewMatrix(), localToWorld );
-
-		// Cull back-facing polygons based on winding being clockwise or counter-clockwise.
-		// Don't cull if the view is wireframe and the polygons are two-sided.
-		m_cull = twoSided && !m_view.fill() ? eClipCullNone : ( matrix4_handedness( localToWorld ) == MATRIX4_RIGHTHANDED ) ? eClipCullCW : eClipCullCCW;
-
-		{
-			m_screen2world = matrix4_full_inverse( m_local2view );
-#if 0
-			m_near = vector4_projected(
-			             matrix4_transformed_vector4(
-			                 m_screen2world,
-			                 Vector4( 0, 0, -1, 1 )
-			             )
-			         );
-
-			m_far = vector4_projected(
-			            matrix4_transformed_vector4(
-			                m_screen2world,
-			                Vector4( 0, 0, 1, 1 )
-			            )
-			        );
-#endif
-		}
-
-#if defined( DEBUG_SELECTION )
-		g_render_clipped.construct( m_view.GetViewMatrix() );
-#endif
-	}
-	void TestPoint( const Vector3& point, SelectionIntersection& best ) override {
-		Vector4 clipped;
-		if ( matrix4_clip_point( m_local2view, point, clipped ) == c_CLIP_PASS ) {
-			best = select_point_from_clipped( clipped );
-		}
-	}
-	void TestPolygon( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best, const DoubleVector3 planepoints[3] ) override {
-		DoubleVector3 pts[3];
-		pts[0] = vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[0], 1 ) ) );
-		pts[1] = vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[1], 1 ) ) );
-		pts[2] = vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[2], 1 ) ) );
-		const Plane3 planeTransformed( plane3_for_points( pts ) );
-
-		Vector4 clipped[9];
-		for ( std::size_t i = 0; i + 2 < count; ++i )
-		{
-			BestPoint(
-			    matrix4_clip_triangle(
-			        m_local2view,
-			        reinterpret_cast<const DoubleVector3&>( vertices[0] ),
-			        reinterpret_cast<const DoubleVector3&>( vertices[i + 1] ),
-			        reinterpret_cast<const DoubleVector3&>( vertices[i + 2] ),
-			        clipped
-			    ),
-			    clipped,
-			    best,
-			    m_cull,
-			    &planeTransformed
-			);
-		}
-	}
-	void TestLineLoop( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) override {
-		if ( count == 0 ) {
-			return;
-		}
-		Vector4 clipped[9];
-		for ( VertexPointer::iterator i = vertices.begin(), end = i + count, prev = i + ( count - 1 ); i != end; prev = i, ++i )
-		{
-			BestPoint(
-			    matrix4_clip_line(
-			        m_local2view,
-			        reinterpret_cast<const Vector3&>( ( *prev ) ),
-			        reinterpret_cast<const Vector3&>( ( *i ) ),
-			        clipped
-			    ),
-			    clipped,
-			    best,
-			    m_cull
-			);
-		}
-	}
-	void TestLineStrip( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) override {
-		if ( count == 0 ) {
-			return;
-		}
-		Vector4 clipped[9];
-		for ( VertexPointer::iterator i = vertices.begin(), end = i + count, next = i + 1; next != end; i = next, ++next )
-		{
-			BestPoint(
-			    matrix4_clip_line(
-			        m_local2view,
-			        reinterpret_cast<const Vector3&>( ( *i ) ),
-			        reinterpret_cast<const Vector3&>( ( *next ) ),
-			        clipped
-			    ),
-			    clipped,
-			    best,
-			    m_cull
-			);
-		}
-	}
-	void TestLines( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) override {
-		if ( count == 0 ) {
-			return;
-		}
-		Vector4 clipped[9];
-		for ( VertexPointer::iterator i = vertices.begin(), end = i + count; i != end; i += 2 )
-		{
-			BestPoint(
-			    matrix4_clip_line(
-			        m_local2view,
-			        reinterpret_cast<const Vector3&>( ( *i ) ),
-			        reinterpret_cast<const Vector3&>( ( *( i + 1 ) ) ),
-			        clipped
-			    ),
-			    clipped,
-			    best,
-			    m_cull
-			);
-		}
-	}
-	void TestTriangles( const VertexPointer& vertices, const IndexPointer& indices, SelectionIntersection& best ) override {
-		Vector4 clipped[9];
-		for ( IndexPointer::iterator i( indices.begin() ); i != indices.end(); i += 3 )
-		{
-			BestPoint(
-			    matrix4_clip_triangle(
-			        m_local2view,
-			        reinterpret_cast<const Vector3&>( vertices[*i] ),
-			        reinterpret_cast<const Vector3&>( vertices[*( i + 1 )] ),
-			        reinterpret_cast<const Vector3&>( vertices[*( i + 2 )] ),
-			        clipped
-			    ),
-			    clipped,
-			    best,
-			    m_cull
-			);
-		}
-	}
-	void TestQuads( const VertexPointer& vertices, const IndexPointer& indices, SelectionIntersection& best ) override {
-		Vector4 clipped[9];
-		for ( IndexPointer::iterator i( indices.begin() ); i != indices.end(); i += 4 )
-		{
-			BestPoint(
-			    matrix4_clip_triangle(
-			        m_local2view,
-			        reinterpret_cast<const Vector3&>( vertices[*i] ),
-			        reinterpret_cast<const Vector3&>( vertices[*( i + 1 )] ),
-			        reinterpret_cast<const Vector3&>( vertices[*( i + 3 )] ),
-			        clipped
-			    ),
-			    clipped,
-			    best,
-			    m_cull
-			);
-			BestPoint(
-			    matrix4_clip_triangle(
-			        m_local2view,
-			        reinterpret_cast<const Vector3&>( vertices[*( i + 1 )] ),
-			        reinterpret_cast<const Vector3&>( vertices[*( i + 2 )] ),
-			        reinterpret_cast<const Vector3&>( vertices[*( i + 3 )] ),
-			        clipped
-			    ),
-			    clipped,
-			    best,
-			    m_cull
-			);
-		}
-	}
-	void TestQuadStrip( const VertexPointer& vertices, const IndexPointer& indices, SelectionIntersection& best ) override {
-		Vector4 clipped[9];
-		for ( IndexPointer::iterator i( indices.begin() ); i + 2 != indices.end(); i += 2 )
-		{
-			BestPoint(
-			    matrix4_clip_triangle(
-			        m_local2view,
-			        reinterpret_cast<const Vector3&>( vertices[*i] ),
-			        reinterpret_cast<const Vector3&>( vertices[*( i + 1 )] ),
-			        reinterpret_cast<const Vector3&>( vertices[*( i + 2 )] ),
-			        clipped
-			    ),
-			    clipped,
-			    best,
-			    m_cull
-			);
-			BestPoint(
-			    matrix4_clip_triangle(
-			        m_local2view,
-			        reinterpret_cast<const Vector3&>( vertices[*( i + 2 )] ),
-			        reinterpret_cast<const Vector3&>( vertices[*( i + 1 )] ),
-			        reinterpret_cast<const Vector3&>( vertices[*( i + 3 )] ),
-			        clipped
-			    ),
-			    clipped,
-			    best,
-			    m_cull
-			);
-		}
-	}
-};
 
 class SelectionCounter
 {
@@ -4380,18 +4318,15 @@ bool selection_selectVerticesOrFaceVertices( SelectionTest& test ){
 		}
 	}
 	/* otherwise select vertices of brush faces, which lay on best plane */
-	Plane3 plane( 0, 0, 0, 0 );
-	Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
-	Scene_forEachSelectedBrush_bestPlane( test, plane, intersectionPoint );
+	const auto planeData = Scene_forEachSelectedBrush_bestPlane( test );
 
-	if( plane3_valid( plane ) ){
-		auto selectVerticesOnPlane = [&plane]( BrushInstance& brushInstance ){
+	if( planeData.valid() ){
+		auto selectVerticesOnPlane = [plane = planeData.m_plane]( BrushInstance& brushInstance ){
 			brushInstance.selectVerticesOnPlane( plane );
 		};
 		Scene_forEachVisibleSelectedBrush( selectVerticesOnPlane );
-
 	}
-	return plane3_valid( plane );
+	return planeData.valid();
 }
 
 
@@ -4572,12 +4507,8 @@ public:
 		if( g_modifiers == ( c_modifierAlt | c_modifierControl )
 		 && GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive
 		 && ( GlobalSelectionSystem().countSelected() != 0 || !g_SelectedFaceInstances.empty() ) ){ // extrude
-			Plane3 plane( 0, 0, 0, 0 );
-			Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
-			Scene_forEachBrush_bestPlane( test, plane, intersectionPoint );
-
-			if( plane3_valid( plane ) ){
-				auto gatherPolygonsByPlane = [plane, &polygons]( BrushInstance& brushInstance ){
+			if( const auto planeData = Scene_forEachBrush_bestPlane( test ); planeData.valid() ){
+				auto gatherPolygonsByPlane = [plane = planeData.m_plane, &polygons]( BrushInstance& brushInstance ){
 					if( brushInstance.isSelected() || brushInstance.isSelectedComponents() )
 						brushInstance.gatherPolygonsByPlane( plane, polygons, false );
 				};
@@ -4588,12 +4519,8 @@ public:
 			if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ){
 				if( g_modifiers == c_modifierAlt ){
 					if( view.fill() ){ // alt resize
-						Plane3 plane( 0, 0, 0, 0 );
-						Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
-						Scene_forEachPlaneSelectable_bestPlane( test, plane, intersectionPoint );
-
-						if( plane3_valid( plane ) ){
-							auto gatherPolygonsByPlane = [plane, &polygons]( PlaneSelectable& planeSelectable ){
+						if( const auto planeData = Scene_forEachPlaneSelectable_bestPlane( test ); planeData.valid() ){
+							auto gatherPolygonsByPlane = [plane = planeData.m_plane, &polygons]( PlaneSelectable& planeSelectable ){
 								planeSelectable.gatherPolygonsByPlane( plane, polygons );
 							};
 							Scene_forEachVisibleSelectedPlaneselectable( gatherPolygonsByPlane );
@@ -4609,12 +4536,8 @@ public:
 						Scene_forEachVisibleSelectedComponentSelectionTestable( gatherComponentsHighlight );
 
 						if( polygons.empty() ){
-							Plane3 plane( 0, 0, 0, 0 );
-							Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
-							Scene_forEachSelectedBrush_bestPlane( test, plane, intersectionPoint );
-
-							if( plane3_valid( plane ) ){
-								auto gatherPolygonsByPlane = [plane, &polygons]( BrushInstance& brushInstance ){
+							if( const auto planeData = Scene_forEachSelectedBrush_bestPlane( test ); planeData.valid() ){
+								auto gatherPolygonsByPlane = [plane = planeData.m_plane, &polygons]( BrushInstance& brushInstance ){
 									brushInstance.gatherPolygonsByPlane( plane, polygons );
 								};
 								Scene_forEachVisibleSelectedBrush( gatherPolygonsByPlane );
@@ -4848,7 +4771,7 @@ public:
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
 		if( g_modifiers != c_modifierNone && !quickCondition( g_modifiers, view ) )
-			return selectionDrop();
+			return selectionChange( nullptr );
 
 		testSelect_points( view );
 		if( !isSelected() ){
@@ -4877,7 +4800,7 @@ public:
 	}
 	void testSelect_points( const View& view ) {
 		if( g_modifiers != c_modifierNone && !quickCondition( g_modifiers, view ) )
-			return selectionDrop();
+			return selectionChange( nullptr );
 
 		SelectionPool selector;
 		{
@@ -6858,7 +6781,7 @@ public:
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
 		if( g_modifiers != c_modifierNone )
-			return selectionDrop();
+			return selectionChange( nullptr );
 
 		m_pivot.update( pivot2world, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 

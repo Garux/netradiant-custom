@@ -1627,27 +1627,27 @@ public:
 	}
 
 
-	void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ){
+	void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ) override {
 		test.BeginMesh( localToWorld() );
 
 		m_dragPlanes.selectPlanes( m_patch.localAABB(), selector, test, selectedPlaneCallback );
 	}
-	void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ){
+	void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ) override {
 		m_dragPlanes.selectReversedPlanes( m_patch.localAABB(), selector, selectedPlanes );
 	}
 
-	void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ) const {
+	void bestPlaneDirect( SelectionTest& test, BestPlaneData& planeData ) const override {
 		test.BeginMesh( localToWorld() );
-		m_dragPlanes.bestPlaneDirect( m_patch.localAABB(), test, plane, intersection );
+		m_dragPlanes.bestPlaneDirect( m_patch.localAABB(), test, planeData );
 	}
-	void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ) const {
+	void bestPlaneIndirect( SelectionTest& test, BestPlaneData& planeData ) const override {
 		test.BeginMesh( localToWorld() );
-		m_dragPlanes.bestPlaneIndirect( m_patch.localAABB(), test, plane, intersection, dist );
+		m_dragPlanes.bestPlaneIndirect( m_patch.localAABB(), test, planeData );
 	}
-	void selectByPlane( const Plane3& plane ){
+	void selectByPlane( const Plane3& plane ) override {
 		m_dragPlanes.selectByPlane( m_patch.localAABB(), plane );
 	}
-	void gatherPolygonsByPlane( const Plane3& plane, std::vector<std::vector<Vector3>>& polygons ) const {
+	void gatherPolygonsByPlane( const Plane3& plane, std::vector<std::vector<Vector3>>& polygons ) const override {
 		m_dragPlanes.gatherPolygonsByPlane( m_patch.localAABB(), plane, polygons );
 	}
 

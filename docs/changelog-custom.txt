@@ -323,6 +323,7 @@ binds...
 	* m1 drag + ctrl (Drag tool, 3D view): move-snap selecton bbox corner to pointed position in scene
 	* m1 drag + alt + ctrl: rotate-snap selection bbox to pointed brush face plane (by opposite to bbox grab side)
 	* m1 drag + ctrl + shift: move selection along initially pointed brush face plane
+	* add alt + m1 selection style to transform manipulator for scaling in 3D
 
 menus...
 	* smartified content basically
