@@ -819,7 +819,7 @@ protected:
 				else if ( keyEvent->matches( QKeySequence::StandardKey::Copy ) && x != build.end() ) {
 					g_buildcommand_copied = ( *x );
 				}
-				else if ( keyEvent->matches( QKeySequence::StandardKey::Paste ) && !g_buildpair_copied.first.empty() ) {
+				else if ( keyEvent->matches( QKeySequence::StandardKey::Paste ) && !string_empty( g_buildcommand_copied.c_str() ) ) {
 					g_build_changed = true;
 					build.insert( x, g_buildcommand_copied );
 
