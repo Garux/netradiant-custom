@@ -630,6 +630,7 @@ void build_commands_write( const char* filename ){
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QTreeWidget>
+#include <QScrollBar>
 #include <QHeaderView>
 #include <QGroupBox>
 #include <QDialogButtonBox>
@@ -843,7 +844,6 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 
 	{
 		auto grid = new QGridLayout( &dialog );
-		grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 		{
 			auto buttons = new QDialogButtonBox;
 			buttons->setOrientation( Qt::Orientation::Vertical );
@@ -860,6 +860,7 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 		{
 			auto frame = new QGroupBox( "Build menu" );
 			grid->addWidget( frame, 0, 0 );
+			grid->setRowStretch( 0, 1 );
 			{
 				auto tree = projectList.m_buildView = buildView = new QTreeWidget;
 				tree->setColumnCount( 1 );
@@ -887,7 +888,7 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 				auto tree = new QTreeWidget;
 				tree->setColumnCount( 1 );
 				tree->setUniformRowHeights( true ); // optimization
-				tree->setHorizontalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
+				tree->setVerticalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
 				tree->setSizeAdjustPolicy( QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents ); // scroll area will inherit column size
 				tree->header()->setStretchLastSection( false ); // non greedy column sizing
 				tree->header()->setSectionResizeMode( QHeaderView::ResizeMode::ResizeToContents ); // no text elision
@@ -904,6 +905,11 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 					} );
 
 					tree->installEventFilter( new Commands_key_press( tree ) );
+
+					QObject::connect( tree->model(), &QAbstractItemModel::rowsInserted, [tree]( const QModelIndex &parent, int first, int last ){
+						tree->setFixedHeight( tree->sizeHintForRow( 0 ) * std::max( tree->model()->rowCount(), 4 )
+							+ tree->horizontalScrollBar()->sizeHint().height() + tree->frameWidth() * 2 );
+					} );
 				}
 			}
 		}
