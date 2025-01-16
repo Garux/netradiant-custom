@@ -835,28 +835,37 @@ protected:
 };
 
 #include "qe3.h"
+#include "gtkutil/guisettings.h"
 
 EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
-	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
-	dialog.setWindowTitle( "Build Menu" );
+	static auto [dialog, rootLayout] = [](){
+		QDialog *dialog = new QDialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
+		dialog->setWindowTitle( "Build Menu" );
+		g_guiSettings.addWindow( dialog, "BuildMenu/geometry", 700, 500 );
+		auto *rootLayout = new QHBoxLayout( dialog );
+		rootLayout->setContentsMargins( 0, 0, 0, 0 );
+		return std::pair( dialog, rootLayout );
+	}();
 
-	QTreeWidget* buildView = nullptr;
+	auto *container = new QWidget; // use container widget to easily remove window content
+	rootLayout->addWidget( container );
 
 	{
-		auto grid = new QGridLayout( &dialog );
+		auto grid = new QGridLayout( container );
 		{
 			auto buttons = new QDialogButtonBox;
 			buttons->setOrientation( Qt::Orientation::Vertical );
 			// rejection via dialog means will return DialogCode::Rejected (0), eID* > 0
 			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Ok ),
-								&QAbstractButton::clicked, [&dialog](){ dialog.done( eIDOK ); } );
+								&QAbstractButton::clicked, [dialog = dialog](){ dialog->done( eIDOK ); } );
 			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Cancel ),
-								&QAbstractButton::clicked, &dialog, &QDialog::reject );
+								&QAbstractButton::clicked, dialog, &QDialog::reject );
 			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Reset ),
-								&QAbstractButton::clicked, [&dialog](){ dialog.done( eIDNO ); } );
+								&QAbstractButton::clicked, [dialog = dialog](){ dialog->done( eIDNO ); } );
 			buttons->button( QDialogButtonBox::StandardButton::Reset )->setToolTip( "Reset to editor start state" );
 			grid->addWidget( buttons, 0, 1 );
 		}
+		QTreeWidget* buildView = nullptr;
 		{
 			auto frame = new QGroupBox( "Build menu" );
 			grid->addWidget( frame, 0, 0 );
@@ -941,7 +950,9 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 
 	BSPCommandList_Construct( projectList.m_buildView, g_build_project );
 
-	return static_cast<EMessageBoxReturn>( dialog.exec() );
+	const auto ret = static_cast<EMessageBoxReturn>( dialog->exec() );
+	delete container;
+	return ret;
 }
 
 void LoadBuildMenu();
