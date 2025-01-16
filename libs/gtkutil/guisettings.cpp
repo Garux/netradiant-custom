@@ -78,8 +78,10 @@ protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		// deal with the case w/o restoreGeometry() or move():
 		// when window is closed via VM means (gui cross, alt+f4), pos is defaulted on next show() (np with hide() )
+		// upd: problem with hide() too, defaulted size too
 		if( event->type() == QEvent::Show || event->type() == QEvent::Close ) {
 			m_window->setAttribute( Qt::WidgetAttribute::WA_Moved );
+			m_window->setAttribute( Qt::WidgetAttribute::WA_Resized );
 			m_window->removeEventFilter( this );
 			m_wantSave = true; // also track 'was shown' property
 		}

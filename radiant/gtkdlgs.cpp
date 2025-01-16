@@ -2256,7 +2256,7 @@ class TextEditor : public QObject
 
 	void construct(){
 		m_window = new QWidget( MainFrame_getWindow(), Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
-		g_guiSettings.addWindow( m_window, "ShaderEditor/geometry" );
+		g_guiSettings.addWindow( m_window, "ShaderEditor/geometry", 550, 700 );
 		m_window->installEventFilter( this );
 
 		auto *vbox = new QVBoxLayout( m_window );
