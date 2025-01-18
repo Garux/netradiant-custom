@@ -260,7 +260,7 @@ void PrintBSPFileSizes(){
 	if ( entities.empty() ) {
 		ParseEntities();
 	}
-	int patchCount = 0, planarCount = 0, trisoupCount = 0;
+	int patchCount = 0, planarCount = 0, trisoupCount = 0, flareCount = 0;
 	for ( const bspDrawSurface_t& s : bspDrawSurfaces ){
 		if ( s.surfaceType == MST_PATCH )
 			++patchCount;
@@ -268,6 +268,8 @@ void PrintBSPFileSizes(){
 			++planarCount;
 		else if ( s.surfaceType == MST_TRIANGLE_SOUP )
 			++trisoupCount;
+		else if ( s.surfaceType == MST_FLARE )
+			++flareCount;
 	}
 	/* note that this is abstracted */
 	Sys_Printf( "Abstracted BSP file components (*actual sizes may differ)\n" );
@@ -307,6 +309,9 @@ void PrintBSPFileSizes(){
 	            planarCount );
 	Sys_Printf( "%9d   trisoup surfaces\n",
 	            trisoupCount );
+	if( flareCount != 0 )
+		Sys_Printf( "%9d   flare surfaces\n",
+	            flareCount );
 	Sys_Printf( "%9zu drawverts     %9zu *\n",
 	            bspDrawVerts.size(), bspDrawVerts.size() * sizeof( bspDrawVerts[0] ) );
 	Sys_Printf( "%9zu drawindexes   %9zu\n",
