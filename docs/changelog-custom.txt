@@ -355,6 +355,7 @@ menus...
 	* Brush->AutoCaulk Selected (F4); camera must be there, where legit player respawn could be, i.e. close to selection and not inside of a brush
 	* Misc->Colors->Themes->Adwaita Dark color theme
 	* view->filter->sky: Q3 shader based skies (skyParms keyword)
+	* Misc->Colors display colors
 
 misc...
 	* removed note to save before going to preferences, project settings

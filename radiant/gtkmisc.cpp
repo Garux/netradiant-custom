@@ -172,7 +172,7 @@ bool color_dialog( QWidget *parent, Vector3& color, const char* title ){
 
 	if( clr.isValid() )
 		color = Vector3( clr.redF(), clr.greenF(), clr.blueF() );
-	return clr.isValid();
+	return clr.isValid(); // invalid color if the user cancels the dialog
 }
 
 bool OpenGLFont_dialog( QWidget *parent, const char* font, const int size, CopiedString &newfont, int &newsize ){
