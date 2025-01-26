@@ -194,11 +194,22 @@ class ChooseColour
 	GetColourCallback m_get;
 	SetColourCallback m_set;
 	QAction *m_action = nullptr;
+	const char *m_menuName;
 public:
-	ChooseColour( const GetColourCallback& get, const SetColourCallback& set )
-		: m_get( get ), m_set( set ){
+	const char *m_commandName;
+	const char *m_saveName;
+	ChooseColour( const GetColourCallback& get, const SetColourCallback& set, const char *mnemonic, const char* commandName, const char* saveName )
+	:	m_get ( get ),
+		m_set ( set ),
+		m_menuName ( mnemonic ),
+		m_commandName ( commandName ),
+		m_saveName ( saveName )
+	{}
+	void create_menu_item( QMenu *menu ){
+		m_action = create_menu_item_with_mnemonic( menu, m_menuName, m_commandName );
+		updateIcon();
 	}
-	void operator()(){
+	void operator()() const {
 		Vector3 colour = m_get();
 		color_dialog( MainFrame_getWindow(), colour );
 		m_set( colour );
@@ -206,16 +217,12 @@ public:
 		updateIcon( colour );
 	}
 
-	void setAction( QAction *action ){
-		m_action = action;
-		updateIcon();
-	}
-	void updateIcon( const Vector3& colour ){
+	void updateIcon( const Vector3& colour ) const {
 		QPixmap pixmap( QSize( 64, 64 ) ); // using larger pixmap, it gets downscaled
 		pixmap.fill( QColor::fromRgbF( colour[0], colour[1], colour[2] ) );
 		m_action->setIcon( QIcon( pixmap ) );
 	}
-	void updateIcon(){
+	void updateIcon() const {
 		updateIcon( m_get() );
 	}
 };
@@ -256,39 +263,20 @@ Vector3 TextureBrowserColour_get(){
 }
 
 
-class ColoursMenu
-{
-public:
-	ChooseColour m_textureback;
-	ChooseColour m_cameraback;
-	ChooseColour m_xyback;
-	ChooseColour m_gridmajor;
-	ChooseColour m_gridminor;
-	ChooseColour m_gridtext;
-	ChooseColour m_gridblock;
-	ChooseColour m_brush;
-	ChooseColour m_selectedbrush;
-	ChooseColour m_selectedbrush3d;
-	ChooseColour m_clipper;
-	ChooseColour m_viewname;
-
-	ColoursMenu() :
-		m_textureback( makeCallbackF( TextureBrowserColour_get ), makeCallbackF( TextureBrowser_setBackgroundColour ) ),
-		m_cameraback( ColourGetCaller( g_camwindow_globals.color_cameraback ), ColourSetCaller( g_camwindow_globals.color_cameraback ) ),
-		m_xyback( ColourGetCaller( g_xywindow_globals.color_gridback ), ColourSetCaller( g_xywindow_globals.color_gridback ) ),
-		m_gridmajor( ColourGetCaller( g_xywindow_globals.color_gridmajor ), ColourSetCaller( g_xywindow_globals.color_gridmajor ) ),
-		m_gridminor( ColourGetCaller( g_xywindow_globals.color_gridminor ), ColourSetCaller( g_xywindow_globals.color_gridminor ) ),
-		m_gridtext( ColourGetCaller( g_xywindow_globals.color_gridtext ), ColourSetCaller( g_xywindow_globals.color_gridtext ) ),
-		m_gridblock( ColourGetCaller( g_xywindow_globals.color_gridblock ), ColourSetCaller( g_xywindow_globals.color_gridblock ) ),
-		m_brush( ColourGetCaller( g_xywindow_globals.color_brushes ), makeCallbackF( BrushColour_set ) ),
-		m_selectedbrush( ColourGetCaller( g_xywindow_globals.color_selbrushes ), makeCallbackF( SelectedBrushColour_set ) ),
-		m_selectedbrush3d( ColourGetCaller( g_camwindow_globals.color_selbrushes3d ), makeCallbackF( SelectedBrush3dColour_set ) ),
-		m_clipper( ColourGetCaller( g_xywindow_globals.color_clipper ), makeCallbackF( ClipperColour_set ) ),
-		m_viewname( ColourGetCaller( g_xywindow_globals.color_viewname ), ColourSetCaller( g_xywindow_globals.color_viewname ) ){
-	}
+std::array g_ColoursMenu{
+	ChooseColour( makeCallbackF  ( TextureBrowserColour_get )              , makeCallbackF( TextureBrowser_setBackgroundColour )    , "&Texture Background..."           , "ChooseTextureBackgroundColor"  , "SI_Colors0" ),
+	ChooseColour( ColourGetCaller( g_camwindow_globals.color_cameraback )  , ColourSetCaller( g_camwindow_globals.color_cameraback ), "Camera Background..."             , "ChooseCameraBackgroundColor"   , "SI_Colors4" ),
+	ChooseColour( ColourGetCaller( g_xywindow_globals.color_gridback )     , ColourSetCaller( g_xywindow_globals.color_gridback )   , "Grid Background..."               , "ChooseGridBackgroundColor"     , "SI_Colors1" ),
+	ChooseColour( ColourGetCaller( g_xywindow_globals.color_gridmajor )    , ColourSetCaller( g_xywindow_globals.color_gridmajor )  , "Grid Major..."                    , "ChooseGridMajorColor"          , "SI_Colors3" ),
+	ChooseColour( ColourGetCaller( g_xywindow_globals.color_gridminor )    , ColourSetCaller( g_xywindow_globals.color_gridminor )  , "Grid Minor..."                    , "ChooseGridMinorColor"          , "SI_Colors2" ),
+	ChooseColour( ColourGetCaller( g_xywindow_globals.color_gridtext )     , ColourSetCaller( g_xywindow_globals.color_gridtext )   , "Grid Text..."                     , "ChooseGridTextColor"           , "SI_Colors7" ),
+	ChooseColour( ColourGetCaller( g_xywindow_globals.color_gridblock )    , ColourSetCaller( g_xywindow_globals.color_gridblock )  , "Grid Block..."                    , "ChooseGridBlockColor"          , "SI_Colors6" ),
+	ChooseColour( ColourGetCaller( g_xywindow_globals.color_brushes )      , makeCallbackF( BrushColour_set )                       , "Default Brush (2D)..."            , "ChooseBrushColor"              , "SI_Colors8" ),
+	ChooseColour( ColourGetCaller( g_xywindow_globals.color_selbrushes )   , makeCallbackF( SelectedBrushColour_set )               , "Selected Brush and Sizing (2D)...", "ChooseSelectedBrushColor"      , "SI_Colors11" ),
+	ChooseColour( ColourGetCaller( g_camwindow_globals.color_selbrushes3d ), makeCallbackF( SelectedBrush3dColour_set )             , "Selected Brush (Camera)..."       , "ChooseCameraSelectedBrushColor", "SI_Colors12" ),
+	ChooseColour( ColourGetCaller( g_xywindow_globals.color_clipper )      , makeCallbackF( ClipperColour_set )                     , "Clipper..."                       , "ChooseClipperColor"            , "SI_Colors10" ),
+	ChooseColour( ColourGetCaller( g_xywindow_globals.color_viewname )     , ColourSetCaller( g_xywindow_globals.color_viewname )   , "Active View Name and Outline..."  , "ChooseOrthoViewNameColor"      , "SI_Colors9" ),
 };
-
-ColoursMenu g_ColoursMenu;
 
 void create_colours_menu( QMenu *menu ){
 	menu = menu->addMenu( "Colors" );
@@ -314,18 +302,8 @@ void create_colours_menu( QMenu *menu ){
 
 	menu->addSeparator();
 
-	g_ColoursMenu.m_textureback    .setAction( create_menu_item_with_mnemonic( menu, "&Texture Background..."           , "ChooseTextureBackgroundColor" ) );
-	g_ColoursMenu.m_cameraback     .setAction( create_menu_item_with_mnemonic( menu, "Camera Background..."             , "ChooseCameraBackgroundColor" ) );
-	g_ColoursMenu.m_xyback         .setAction( create_menu_item_with_mnemonic( menu, "Grid Background..."               , "ChooseGridBackgroundColor" ) );
-	g_ColoursMenu.m_gridmajor      .setAction( create_menu_item_with_mnemonic( menu, "Grid Major..."                    , "ChooseGridMajorColor" ) );
-	g_ColoursMenu.m_gridminor      .setAction( create_menu_item_with_mnemonic( menu, "Grid Minor..."                    , "ChooseGridMinorColor" ) );
-	g_ColoursMenu.m_gridtext       .setAction( create_menu_item_with_mnemonic( menu, "Grid Text..."                     , "ChooseGridTextColor" ) );
-	g_ColoursMenu.m_gridblock      .setAction( create_menu_item_with_mnemonic( menu, "Grid Block..."                    , "ChooseGridBlockColor" ) );
-	g_ColoursMenu.m_brush          .setAction( create_menu_item_with_mnemonic( menu, "Default Brush (2D)..."            , "ChooseBrushColor" ) );
-	g_ColoursMenu.m_selectedbrush  .setAction( create_menu_item_with_mnemonic( menu, "Selected Brush and Sizing (2D)...", "ChooseSelectedBrushColor" ) );
-	g_ColoursMenu.m_selectedbrush3d.setAction( create_menu_item_with_mnemonic( menu, "Selected Brush (Camera)..."       , "ChooseCameraSelectedBrushColor" ) );
-	g_ColoursMenu.m_clipper        .setAction( create_menu_item_with_mnemonic( menu, "Clipper..."                       , "ChooseClipperColor" ) );
-	g_ColoursMenu.m_viewname       .setAction( create_menu_item_with_mnemonic( menu, "Active View Name and Outline..."  , "ChooseOrthoViewNameColor" ) );
+	for( auto& color : g_ColoursMenu )
+		color.create_menu_item( menu );
 }
 
 void Colors_registerCommands(){
@@ -335,16 +313,7 @@ void Colors_registerCommands(){
 	GlobalCommands_insert( "ColorSchemeYdnar", FreeCaller<void(), ColorScheme_Ydnar>() );
 	GlobalCommands_insert( "ColorSchemeBlender", FreeCaller<void(), ColorScheme_Blender>() );
 	GlobalCommands_insert( "ColorSchemeAdwaitaDark", FreeCaller<void(), ColorScheme_AdwaitaDark>() );
-	GlobalCommands_insert( "ChooseTextureBackgroundColor"  , makeCallback( g_ColoursMenu.m_textureback ) );
-	GlobalCommands_insert( "ChooseCameraBackgroundColor"   , makeCallback( g_ColoursMenu.m_cameraback ) );
-	GlobalCommands_insert( "ChooseGridBackgroundColor"     , makeCallback( g_ColoursMenu.m_xyback ) );
-	GlobalCommands_insert( "ChooseGridMajorColor"          , makeCallback( g_ColoursMenu.m_gridmajor ) );
-	GlobalCommands_insert( "ChooseGridMinorColor"          , makeCallback( g_ColoursMenu.m_gridminor ) );
-	GlobalCommands_insert( "ChooseGridTextColor"           , makeCallback( g_ColoursMenu.m_gridtext ) );
-	GlobalCommands_insert( "ChooseGridBlockColor"          , makeCallback( g_ColoursMenu.m_gridblock ) );
-	GlobalCommands_insert( "ChooseBrushColor"              , makeCallback( g_ColoursMenu.m_brush ) );
-	GlobalCommands_insert( "ChooseSelectedBrushColor"      , makeCallback( g_ColoursMenu.m_selectedbrush ) );
-	GlobalCommands_insert( "ChooseCameraSelectedBrushColor", makeCallback( g_ColoursMenu.m_selectedbrush3d ) );
-	GlobalCommands_insert( "ChooseClipperColor"            , makeCallback( g_ColoursMenu.m_clipper ) );
-	GlobalCommands_insert( "ChooseOrthoViewNameColor"      , makeCallback( g_ColoursMenu.m_viewname ) );
+
+	for( const auto& color : g_ColoursMenu )
+		GlobalCommands_insert( color.m_commandName, ConstMemberCaller<ChooseColour, void(), &ChooseColour::operator()>( color ) );
 }
