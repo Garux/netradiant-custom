@@ -326,10 +326,7 @@ void CGameDialog::ScanForGames(){
 	   (if that's really needed)
 	 */
 
-	Directory_forEach( path, [&]( const char *name ){
-		if ( !path_extension_is( name, "game" ) ) {
-			return;
-		}
+	Directory_forEach( path, matchFileExtension( "game", [&]( const char *name ){
 		const auto strPath = StringStream( path, name );
 		globalOutputStream() << strPath << '\n';
 
@@ -342,7 +339,7 @@ void CGameDialog::ScanForGames(){
 		{
 			globalErrorStream() << "XML parser failed on '" << strPath << "'\n";
 		}
-	});
+	}));
 }
 
 void CGameDialog::InitGlobalPrefPath(){

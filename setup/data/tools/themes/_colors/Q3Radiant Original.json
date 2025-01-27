@@ -1,0 +1,14 @@
+{
+/* TextureBackground   */    "SI_Colors0" : [0.25, 0.25, 0.25],
+/* CameraBackground    */    "SI_Colors4" : [0.25, 0.25, 0.25],
+/* GridBackground      */    "SI_Colors1" : [1.0, 1.0, 1.0],
+/* GridMajor           */    "SI_Colors3" : [0.5, 0.5, 0.5],
+/* GridMinor           */    "SI_Colors2" : [1.0, 1.0, 1.0],
+/* GridText            */    "SI_Colors7" : [0.0, 0.0, 0.0],
+/* GridBlock           */    "SI_Colors6" : [0.0, 0.0, 1.0],
+/* Brush               */    "SI_Colors8" : [0.0, 0.0, 0.0],
+/* SelectedBrush       */    "SI_Colors11": [1.0, 0.0, 0.0],
+/* CameraSelectedBrush */    "SI_Colors12": [1.0, 0.0, 0.0],
+/* Clipper             */    "SI_Colors10": [0.0, 0.0, 1.0],
+/* OrthoViewName       */    "SI_Colors9" : [0.5, 0.0, 0.75],
+}

@@ -199,8 +199,7 @@ public:
 	MatchFileExtension( const char* extension, const Functor& functor ) : m_extension( extension ), m_functor( functor ){
 	}
 	void operator()( const char* name ) const {
-		const char* extension = path_get_extension( name );
-		if ( extension_equal( extension, m_extension ) ) {
+		if ( path_extension_is( name, m_extension ) ) {
 			m_functor( name );
 		}
 	}
