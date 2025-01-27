@@ -1,0 +1,15 @@
+/* Blender2 Color Scheme: LIGHTER background, BLACK grid & WHITE brushes */
+{
+/* TextureBackground   */     "SI_Colors0" : [0.239215, 0.239215, 0.239215],
+/* CameraBackground    */     "SI_Colors4" : [0.239215, 0.239215, 0.239215],
+/* GridBackground      */     "SI_Colors1" : [0.290196, 0.290196, 0.290196],
+/* GridMajor           */     "SI_Colors3" : [0.156862, 0.156862, 0.156862],
+/* GridMinor           */     "SI_Colors2" : [0.239215, 0.239215, 0.239215],
+/* GridText            */     "SI_Colors7" : [0.721568, 0.721568, 0.721568],
+/* GridBlock           */     "SI_Colors6" : [0.250980, 0.501960, 1.0],
+/* Brush               */     "SI_Colors8" : [0.843137, 0.843137, 0.843137],
+/* SelectedBrush       */     "SI_Colors11": [1.0, 0.627450, 0.156862],
+/* CameraSelectedBrush */     "SI_Colors12": [1.0, 0.627450, 0.156862],
+/* Clipper             */     "SI_Colors10": [0.501960, 1.0, 1.0],
+/* OrthoViewName       */     "SI_Colors9" : [0.721568, 0.721568, 0.721568],
+}

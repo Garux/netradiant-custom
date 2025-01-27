@@ -358,6 +358,7 @@ menus...
 	* view->filter->sky: Q3 shader based skies (skyParms keyword)
 	* Misc->Colors display colors
 	* Misc->Colors->Viewports Theme: load from .json presets stored in install/themes/_colors/
+	* add Blender Lighter and Green viewports themes by Julius
 
 misc...
 	* removed note to save before going to preferences, project settings
