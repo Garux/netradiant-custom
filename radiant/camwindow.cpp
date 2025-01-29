@@ -798,11 +798,11 @@ private:
 		switch ( i )
 		{
 		case 0:
-			return g_xywindow_globals.AxisColorX;
+			return Vector3( g_colour_x.r, g_colour_x.g, g_colour_x.b ) / 255.f;
 		case 1:
-			return g_xywindow_globals.AxisColorY;
+			return Vector3( g_colour_y.r, g_colour_y.g, g_colour_y.b ) / 255.f;
 		default:
-			return Vector3( g_xywindow_globals.AxisColorZ.x(), 0.7f, g_xywindow_globals.AxisColorZ.z() ); //hack to make default blue visible better
+			return Vector3( g_colour_z.r, 178, g_colour_z.b ) / 255.f; //hack to make default blue visible better
 		}
 	}
 	void updateTex( const std::size_t i, const float extent ){

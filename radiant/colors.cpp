@@ -28,6 +28,7 @@
 #include "xywindow.h"
 #include "camwindow.h"
 #include "texwindow.h"
+#include "render.h"
 #include "mainframe.h"
 #include "brushmodule.h"
 #include "preferences.h"
@@ -109,6 +110,18 @@ void Colour_set( Vector3& colour, const Vector3& other ){
 }
 typedef ReferenceCaller<Vector3, void(const Vector3&), Colour_set> ColourSetCaller;
 
+
+Vector3 Colour4b_get( const Colour4b& colour ){
+	return Vector3( colour.r, colour.g, colour.b ) / 255.f;
+}
+typedef ConstReferenceCaller<Colour4b, Vector3(), Colour4b_get> Colour4bGetCaller;
+
+void Colour4b_set( Colour4b& colour, const Vector3& other ){
+	colour = Colour4b( other[0] * 255.f, other[1] * 255.f, other[2] * 255.f, colour.a );
+}
+typedef ReferenceCaller<Colour4b, void(const Vector3&), Colour4b_set> Colour4bSetCaller;
+
+
 void BrushColour_set( const Vector3& other ){
 	SetWorldspawnColour( g_xywindow_globals.color_brushes = other );
 }
@@ -146,6 +159,10 @@ std::array g_ColoursMenu{
 	ChooseColour( ColourGetCaller( g_camwindow_globals.color_selbrushes3d ), makeCallbackF( SelectedBrush3dColour_set )             , "Selected Brush (Camera)..."       , "SI_Colors12" ),
 	ChooseColour( ColourGetCaller( g_xywindow_globals.color_clipper )      , makeCallbackF( ClipperColour_set )                     , "Clipper..."                       , "SI_Colors10" ),
 	ChooseColour( ColourGetCaller( g_xywindow_globals.color_viewname )     , ColourSetCaller( g_xywindow_globals.color_viewname )   , "Active View Name and Outline..."  , "SI_Colors9" ),
+	ChooseColour( ColourGetCaller( g_xywindow_globals.color_camera )       , ColourSetCaller( g_xywindow_globals.color_camera )     , "Camera Icon..."                   , "ColorCameraIcon" ),
+	ChooseColour( Colour4bGetCaller( g_colour_x )                          , Colour4bSetCaller( g_colour_x )                        , "Axis X..."                        , "ColorsAxisX" ),
+	ChooseColour( Colour4bGetCaller( g_colour_y )                          , Colour4bSetCaller( g_colour_y )                        , "Axis Y..."                        , "ColorsAxisY" ),
+	ChooseColour( Colour4bGetCaller( g_colour_z )                          , Colour4bSetCaller( g_colour_z )                        , "Axis Z..."                        , "ColorsAxisZ" ),
 };
 
 static void load_colors_theme( const char *filepath ){

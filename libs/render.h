@@ -285,6 +285,13 @@ struct Colour4b
 	}
 };
 
+/* note: controlling these via preference system does not affect
+RenderablePivot in entity module (separate module) and
+RenderablePivot in UVManipulator (initialized earlier) */
+inline Colour4b g_colour_x( 255, 0, 0, 255 );
+inline Colour4b g_colour_y( 0, 255, 0, 255 );
+inline Colour4b g_colour_z( 0, 0, 255, 255 );
+
 const Colour4b colour_vertex( 0, 255, 0, 255 );
 const Colour4b colour_occluded( 74, 150, 75, 255 );
 const Colour4b colour_selected( 0, 0, 255, 255 );

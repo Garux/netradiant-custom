@@ -223,15 +223,11 @@ inline void Pivot2World_viewplaneSpace( Matrix4& manip2world, const Matrix4& piv
 #include "cullable.h"
 #include "render.h"
 
-const Colour4b g_colour_x( 255, 0, 0, 255 );
-const Colour4b g_colour_y( 0, 255, 0, 255 );
-const Colour4b g_colour_z( 0, 0, 255, 255 );
-
 class Shader;
 
 class RenderablePivot : public OpenGLRenderable
 {
-	VertexBuffer<PointVertex> m_vertices;
+	const PointVertex m_vertices[6];
 public:
 	mutable Matrix4 m_localToWorld;
 	typedef Static<Shader*, RenderablePivot> StaticShader;
@@ -239,29 +235,21 @@ public:
 		return StaticShader::instance();
 	}
 
-	RenderablePivot( std::size_t size = 16 ){
-		m_vertices.reserve( 6 );
+	RenderablePivot( std::size_t size = 16 ) : m_vertices{
+		PointVertex( Vertex3f( 0, 0, 0 ), g_colour_x ),
+		PointVertex( Vertex3f( size, 0, 0 ), g_colour_x ),
 
-		m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 0 ), g_colour_x ) );
-		m_vertices.push_back( PointVertex( Vertex3f( size, 0, 0 ), g_colour_x ) );
+		PointVertex( Vertex3f( 0, 0, 0 ), g_colour_y ),
+		PointVertex( Vertex3f( 0, size, 0 ), g_colour_y ),
 
-		m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 0 ), g_colour_y ) );
-		m_vertices.push_back( PointVertex( Vertex3f( 0, size, 0 ), g_colour_y ) );
-
-		m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 0 ), g_colour_z ) );
-		m_vertices.push_back( PointVertex( Vertex3f( 0, 0, size ), g_colour_z ) );
-	}
+		PointVertex( Vertex3f( 0, 0, 0 ), g_colour_z ),
+		PointVertex( Vertex3f( 0, 0, size ), g_colour_z ),
+	}{}
 
 	void render( RenderStateFlags state ) const {
-		if ( m_vertices.size() == 0 ) {
-			return;
-		}
-		if ( m_vertices.data() == 0 ) {
-			return;
-		}
-		gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
-		gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices.data()->colour );
-		gl().glDrawArrays( GL_LINES, 0, m_vertices.size() );
+		gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices->vertex );
+		gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices->colour );
+		gl().glDrawArrays( GL_LINES, 0, std::size( m_vertices ) );
 	}
 
 	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld ) const {
