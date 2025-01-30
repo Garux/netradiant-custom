@@ -2087,7 +2087,7 @@ void TextureBrowser_Construct(){
 	GlobalPreferenceSystem().registerPreference( "SearchFromStart", BoolImportStringCaller( g_TextureBrowser_filter_searchFromStart ), BoolExportStringCaller( g_TextureBrowser_filter_searchFromStart ) );
 	GlobalPreferenceSystem().registerPreference( "LoadShaders", IntImportStringCaller( reinterpret_cast<int&>( g_TexBro.m_startupShaders ) ), IntExportStringCaller( reinterpret_cast<int&>( g_TexBro.m_startupShaders ) ) );
 	GlobalPreferenceSystem().registerPreference( "WheelMouseInc", IntImportStringCaller( g_TexBro.m_mouseWheelScrollIncrement ), IntExportStringCaller( g_TexBro.m_mouseWheelScrollIncrement ) );
-	GlobalPreferenceSystem().registerPreference( "SI_Colors0", Vector3ImportStringCaller( g_TexBro.m_color_textureback ), Vector3ExportStringCaller( g_TexBro.m_color_textureback ) );
+	GlobalPreferenceSystem().registerPreference( "ColorTexBroBackground", Vector3ImportStringCaller( g_TexBro.m_color_textureback ), Vector3ExportStringCaller( g_TexBro.m_color_textureback ) );
 	GlobalPreferenceSystem().registerPreference( "HideNonShadersInCommon", BoolImportStringCaller( g_TexBro.m_hideNonShadersInCommon ), BoolExportStringCaller( g_TexBro.m_hideNonShadersInCommon ) );
 
 	g_TexBro.m_shader = texdef_name_default();

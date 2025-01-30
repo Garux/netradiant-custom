@@ -52,7 +52,7 @@
 
 struct entity_globals_t
 {
-	Vector3 color_entity = { 0.0f, 0.0f, 0.0f };
+	Vector3 color_entity = Vector3( 1.0f );
 };
 
 entity_globals_t g_entity_globals;
@@ -730,7 +730,7 @@ void Entity_Construct(){
 
 	GlobalToggles_insert( "ShowLightRadiuses", makeCallbackF( ToggleShowLightRadii ), ToggleItem::AddCallbackCaller( g_show_lightradii_item ) );
 
-	GlobalPreferenceSystem().registerPreference( "SI_Colors5", Vector3ImportStringCaller( g_entity_globals.color_entity ), Vector3ExportStringCaller( g_entity_globals.color_entity ) );
+	GlobalPreferenceSystem().registerPreference( "EntitySelectedColor", Vector3ImportStringCaller( g_entity_globals.color_entity ), Vector3ExportStringCaller( g_entity_globals.color_entity ) );
 	GlobalPreferenceSystem().registerPreference( "LastLightIntensity", IntImportStringCaller( g_iLastLightIntensity ), IntExportStringCaller( g_iLastLightIntensity ) );
 
 	Entity_registerPreferencesPage();

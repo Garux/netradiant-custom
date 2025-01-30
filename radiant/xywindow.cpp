@@ -2308,18 +2308,18 @@ void XYWindow_Construct(){
 	GlobalPreferenceSystem().registerPreference( "SI_ShowAxis", BoolImportStringCaller( g_xywindow_globals_private.show_axis ), BoolExportStringCaller( g_xywindow_globals_private.show_axis ) );
 	GlobalPreferenceSystem().registerPreference( "ShowWorkzone2d", BoolImportStringCaller( g_xywindow_globals_private.show_workzone ), BoolExportStringCaller( g_xywindow_globals_private.show_workzone ) );
 
-	GlobalPreferenceSystem().registerPreference( "ColorsAxisX", Colour4bImportStringCaller( g_colour_x ),Colour4bExportStringCaller( g_colour_x ) );
-	GlobalPreferenceSystem().registerPreference( "ColorsAxisY", Colour4bImportStringCaller( g_colour_y ),Colour4bExportStringCaller( g_colour_y ) );
-	GlobalPreferenceSystem().registerPreference( "ColorsAxisZ", Colour4bImportStringCaller( g_colour_z ),Colour4bExportStringCaller( g_colour_z ) );
-	GlobalPreferenceSystem().registerPreference( "SI_Colors1", Vector3ImportStringCaller( g_xywindow_globals.color_gridback ), Vector3ExportStringCaller( g_xywindow_globals.color_gridback ) );
-	GlobalPreferenceSystem().registerPreference( "SI_Colors2", Vector3ImportStringCaller( g_xywindow_globals.color_gridminor ), Vector3ExportStringCaller( g_xywindow_globals.color_gridminor ) );
-	GlobalPreferenceSystem().registerPreference( "SI_Colors3", Vector3ImportStringCaller( g_xywindow_globals.color_gridmajor ), Vector3ExportStringCaller( g_xywindow_globals.color_gridmajor ) );
-	GlobalPreferenceSystem().registerPreference( "SI_Colors6", Vector3ImportStringCaller( g_xywindow_globals.color_gridblock ), Vector3ExportStringCaller( g_xywindow_globals.color_gridblock ) );
-	GlobalPreferenceSystem().registerPreference( "SI_Colors7", Vector3ImportStringCaller( g_xywindow_globals.color_gridtext ), Vector3ExportStringCaller( g_xywindow_globals.color_gridtext ) );
-	GlobalPreferenceSystem().registerPreference( "SI_Colors8", Vector3ImportStringCaller( g_xywindow_globals.color_brushes ), Vector3ExportStringCaller( g_xywindow_globals.color_brushes ) );
-	GlobalPreferenceSystem().registerPreference( "SI_Colors9", Vector3ImportStringCaller( g_xywindow_globals.color_viewname ), Vector3ExportStringCaller( g_xywindow_globals.color_viewname ) );
-	GlobalPreferenceSystem().registerPreference( "SI_Colors10", Vector3ImportStringCaller( g_xywindow_globals.color_clipper ), Vector3ExportStringCaller( g_xywindow_globals.color_clipper ) );
-	GlobalPreferenceSystem().registerPreference( "SI_Colors11", Vector3ImportStringCaller( g_xywindow_globals.color_selbrushes ), Vector3ExportStringCaller( g_xywindow_globals.color_selbrushes ) );
+	GlobalPreferenceSystem().registerPreference( "ColorAxisX", Colour4bImportStringCaller( g_colour_x ),Colour4bExportStringCaller( g_colour_x ) );
+	GlobalPreferenceSystem().registerPreference( "ColorAxisY", Colour4bImportStringCaller( g_colour_y ),Colour4bExportStringCaller( g_colour_y ) );
+	GlobalPreferenceSystem().registerPreference( "ColorAxisZ", Colour4bImportStringCaller( g_colour_z ),Colour4bExportStringCaller( g_colour_z ) );
+	GlobalPreferenceSystem().registerPreference( "ColorGridBackground", Vector3ImportStringCaller( g_xywindow_globals.color_gridback ), Vector3ExportStringCaller( g_xywindow_globals.color_gridback ) );
+	GlobalPreferenceSystem().registerPreference( "ColorGridMinor", Vector3ImportStringCaller( g_xywindow_globals.color_gridminor ), Vector3ExportStringCaller( g_xywindow_globals.color_gridminor ) );
+	GlobalPreferenceSystem().registerPreference( "ColorGridMajor", Vector3ImportStringCaller( g_xywindow_globals.color_gridmajor ), Vector3ExportStringCaller( g_xywindow_globals.color_gridmajor ) );
+	GlobalPreferenceSystem().registerPreference( "ColorGridBlocks", Vector3ImportStringCaller( g_xywindow_globals.color_gridblock ), Vector3ExportStringCaller( g_xywindow_globals.color_gridblock ) );
+	GlobalPreferenceSystem().registerPreference( "ColorGridText", Vector3ImportStringCaller( g_xywindow_globals.color_gridtext ), Vector3ExportStringCaller( g_xywindow_globals.color_gridtext ) );
+	GlobalPreferenceSystem().registerPreference( "ColorGridWorldspawn", Vector3ImportStringCaller( g_xywindow_globals.color_brushes ), Vector3ExportStringCaller( g_xywindow_globals.color_brushes ) );
+	GlobalPreferenceSystem().registerPreference( "ColorGridActive", Vector3ImportStringCaller( g_xywindow_globals.color_viewname ), Vector3ExportStringCaller( g_xywindow_globals.color_viewname ) );
+	GlobalPreferenceSystem().registerPreference( "ColorClipperSplit", Vector3ImportStringCaller( g_xywindow_globals.color_clipper ), Vector3ExportStringCaller( g_xywindow_globals.color_clipper ) );
+	GlobalPreferenceSystem().registerPreference( "ColorGridSelection", Vector3ImportStringCaller( g_xywindow_globals.color_selbrushes ), Vector3ExportStringCaller( g_xywindow_globals.color_selbrushes ) );
 	GlobalPreferenceSystem().registerPreference( "ColorCameraIcon", Vector3ImportStringCaller( g_xywindow_globals.color_camera ), Vector3ExportStringCaller( g_xywindow_globals.color_camera ) );
 
 
