@@ -540,6 +540,7 @@ public:
 	}
 
 	const int m_MSAA = 8;
+	Vector3 m_background_color = Vector3( .25f );
 
 	QWidget* m_parent = nullptr;
 	QOpenGLWidget* m_gl_widget = nullptr;
@@ -766,7 +767,9 @@ void ModelBrowser_render(){
 	gl().glDepthMask( GL_TRUE );
 	gl().glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-	gl().glClearColor( .25f, .25f, .25f, 0 );
+	gl().glClearColor( g_ModelBrowser.m_background_color[0],
+	                   g_ModelBrowser.m_background_color[1],
+	                   g_ModelBrowser.m_background_color[2], 0 );
 	gl().glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	const unsigned int globalstate = RENDER_DEPTHTEST
@@ -857,7 +860,9 @@ void ModelBrowser_render(){
 		}
 
 		{	// brighter background squares
-			gl().glColor4f( 0.3f, 0.3f, 0.3f, 1.f );
+			gl().glColor4f( g_ModelBrowser.m_background_color[0] + .05f,
+			                g_ModelBrowser.m_background_color[1] + .05f,
+			                g_ModelBrowser.m_background_color[2] + .05f, 1.f );
 			gl().glDepthMask( GL_FALSE );
 			gl().glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 			gl().glDisable( GL_CULL_FACE );
@@ -1322,6 +1327,16 @@ void ModelBrowser_destroyWindow(){
 }
 
 
+const Vector3& ModelBrowser_getBackgroundColour(){
+	return g_ModelBrowser.m_background_color;
+}
+
+void ModelBrowser_setBackgroundColour( const Vector3& colour ){
+	g_ModelBrowser.m_background_color = colour;
+	g_ModelBrowser.queueDraw();
+}
+
+
 #include "preferencesystem.h"
 #include "preferences.h"
 #include "stringio.h"
@@ -1361,6 +1376,7 @@ void ModelBrowser_registerPreferencesPage(){
 void ModelBrowser_Construct(){
 	GlobalPreferenceSystem().registerPreference( "ModelBrowserFolders", CopiedStringImportStringCaller( g_ModelBrowser.m_prefFoldersToLoad ), CopiedStringExportStringCaller( g_ModelBrowser.m_prefFoldersToLoad ) );
 	GlobalPreferenceSystem().registerPreference( "ModelBrowserCellSize", IntImportStringCaller( g_ModelBrowser.m_cellSize ), IntExportStringCaller( g_ModelBrowser.m_cellSize ) );
+	GlobalPreferenceSystem().registerPreference( "ColorModBroBackground", Vector3ImportStringCaller( g_ModelBrowser.m_background_color ), Vector3ExportStringCaller( g_ModelBrowser.m_background_color ) );
 
 	ModelBrowser_registerPreferencesPage();
 

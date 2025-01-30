@@ -1,5 +1,6 @@
 {
     "ColorTexBroBackground": [0.25, 0.25, 0.25],
+    "ColorModBroBackground": [0.25, 0.25, 0.25],
     "ColorCameraBackground": [0.25, 0.25, 0.25],
     "ColorGridBackground"  : [0.0, 0.0, 0.0],
     "ColorGridMajor"       : [0.3, 0.5, 0.5],

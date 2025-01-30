@@ -1,6 +1,7 @@
 /* color scheme to fit the GTK Adwaita Dark theme */
 {
     "ColorTexBroBackground": [0.25, 0.25, 0.25],
+    "ColorModBroBackground": [0.25, 0.25, 0.25],
     "ColorCameraBackground": [0.25, 0.25, 0.25],
     "ColorGridBackground"  : [0.25, 0.25, 0.25],
     "ColorGridMajor"       : [0.14, 0.15, 0.15],

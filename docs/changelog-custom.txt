@@ -360,6 +360,7 @@ menus...
 	* Misc->Colors->Viewports Theme: load from .json presets stored in install/themes/_colors/
 	* add Blender Lighter and Green viewports themes by Julius
 	* Misc->Colors: add CameraIcon, AxisX, AxisY, AxisZ controls
+	* Misc->Colors: add Model Browser Background control
 
 misc...
 	* removed note to save before going to preferences, project settings

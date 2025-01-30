@@ -30,3 +30,9 @@ class QWidget* ModelBrowser_constructWindow( QWidget* toplevel );
 void ModelBrowser_destroyWindow();
 
 void ModelBrowser_flushReferences();
+
+template<typename Element> class BasicVector3;
+typedef BasicVector3<float> Vector3;
+
+const Vector3& ModelBrowser_getBackgroundColour();
+void ModelBrowser_setBackgroundColour( const Vector3& colour );

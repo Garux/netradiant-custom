@@ -28,6 +28,7 @@
 #include "xywindow.h"
 #include "camwindow.h"
 #include "texwindow.h"
+#include "modelwindow.h"
 #include "render.h"
 #include "mainframe.h"
 #include "brushmodule.h"
@@ -145,9 +146,14 @@ Vector3 TextureBrowserColour_get(){
 	return TextureBrowser_getBackgroundColour();
 }
 
+Vector3 ModelBrowserColour_get(){
+	return ModelBrowser_getBackgroundColour();
+}
+
 
 std::array g_ColoursMenu{
 	ChooseColour( makeCallbackF  ( TextureBrowserColour_get )              , makeCallbackF( TextureBrowser_setBackgroundColour )    , "Texture Browser Background..."    , "ColorTexBroBackground" ),
+	ChooseColour( makeCallbackF  ( ModelBrowserColour_get )                , makeCallbackF( ModelBrowser_setBackgroundColour )      , "Model Browser Background..."      , "ColorModBroBackground" ),
 	ChooseColour( ColourGetCaller( g_camwindow_globals.color_cameraback )  , ColourSetCaller( g_camwindow_globals.color_cameraback ), "Camera Background..."             , "ColorCameraBackground" ),
 	ChooseColour( ColourGetCaller( g_xywindow_globals.color_gridback )     , ColourSetCaller( g_xywindow_globals.color_gridback )   , "Grid Background..."               , "ColorGridBackground" ),
 	ChooseColour( ColourGetCaller( g_xywindow_globals.color_gridmajor )    , ColourSetCaller( g_xywindow_globals.color_gridmajor )  , "Grid Major..."                    , "ColorGridMajor" ),

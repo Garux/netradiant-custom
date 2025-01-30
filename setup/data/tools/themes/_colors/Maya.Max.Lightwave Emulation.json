@@ -1,6 +1,7 @@
 /* ydnar: to emulate maya/max/lightwave color schemes */
 {
     "ColorTexBroBackground": [0.25, 0.25, 0.25],
+    "ColorModBroBackground": [0.25, 0.25, 0.25],
     "ColorCameraBackground": [0.25, 0.25, 0.25],
     "ColorGridBackground"  : [0.77, 0.77, 0.77],
     "ColorGridMajor"       : [0.89, 0.89, 0.89],
