@@ -26,6 +26,7 @@
 #pragma once
 
 #include "generic/constant.h"
+#include "generic/vector.h"
 
 
 // ========================================
@@ -64,10 +65,9 @@ typedef EMessageBoxReturn ( *PFN_QERAPP_MESSAGEBOX )( QWidget *parent, const cha
 typedef const char* ( *PFN_QERAPP_FILEDIALOG )( QWidget *parent, bool open, const char* title, const char* path /* = 0*/, const char* pattern /* = 0*/, bool want_load /* = false*/, bool want_import /* = false*/, bool want_save /* = false*/ );
 
 typedef QString ( *PFN_QERAPP_DIRDIALOG )( QWidget *parent, const QString& path /* = {} */ );
+
 // return true if the user closed the dialog with 'Ok'
 // 'color' is used to set the initial value and store the selected value
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
 typedef bool ( *PFN_QERAPP_COLORDIALOG )( QWidget *parent, Vector3& color,
                                           const char* title /* = "Choose Color"*/ );
 
@@ -87,7 +87,6 @@ class ModuleObserver;
 
 #include "signal/signalfwd.h"
 #include "windowobserver.h"
-#include "generic/vector.h"
 
 typedef SignalHandler3<const WindowVector&, ButtonIdentifier, ModifierFlags> MouseEventHandler;
 typedef SignalFwd<MouseEventHandler>::handler_id_type MouseEventHandlerId;

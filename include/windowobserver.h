@@ -70,9 +70,7 @@ const ButtonIdentifier c_buttonMiddle( ButtonEnumeration::MIDDLE );
 const ButtonIdentifier c_buttonRight( ButtonEnumeration::RIGHT );
 
 
-template<typename Element>
-class BasicVector2;
-typedef BasicVector2<float> Vector2;
+#include "math/vectorfwd.h"
 typedef Vector2 WindowVector;
 
 class WindowObserver

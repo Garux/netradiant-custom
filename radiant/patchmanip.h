@@ -22,6 +22,7 @@
 #pragma once
 
 #include "string/stringfwd.h"
+#include "math/vectorfwd.h"
 
 void Patch_registerCommands();
 void Patch_constructToolbar( class QToolBar* toolbar );
@@ -43,11 +44,8 @@ bool Scene_PatchGetShaderTexdef_Selected( scene::Graph& graph, CopiedString& nam
 void Patch_SetTexdef( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
 
 void Scene_PatchCapTexture_Selected( scene::Graph& graph );
-class texdef_t;
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
-void Scene_PatchProjectTexture_Selected( scene::Graph& graph, const texdef_t& texdef, const Vector3* direction );
-class TextureProjection;
+
+void Scene_PatchProjectTexture_Selected( scene::Graph& graph, const class texdef_t& texdef, const Vector3* direction );
 void Scene_PatchProjectTexture_Selected( scene::Graph& graph, const TextureProjection& projection, const Vector3& normal );
 void Scene_PatchNaturalTexture_Selected( scene::Graph& graph );
 void Scene_PatchTileTexture_Selected( scene::Graph& graph, float s, float t );

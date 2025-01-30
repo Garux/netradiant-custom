@@ -46,8 +46,7 @@ public:
 	virtual void setCameraView( CameraView* view, const Callback<void()>& disconnect ) = 0;
 };
 
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
+#include "math/vectorfwd.h"
 
 typedef void ( *PFN_GETCAMERA )( Vector3& origin, Vector3& angles );
 typedef void ( *PFN_SETCAMERA )( const Vector3& origin, const Vector3& angles );

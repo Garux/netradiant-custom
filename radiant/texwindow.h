@@ -23,6 +23,7 @@
 
 #include "generic/callback.h"
 #include "signal/signalfwd.h"
+#include "math/vectorfwd.h"
 
 class QWidget;
 QWidget* TextureBrowser_constructWindow( QWidget* toplevel );
@@ -42,8 +43,6 @@ void TextureBrowser_exportTitle( const StringImportCallback& importer );
 typedef FreeCaller<void(const StringImportCallback&), TextureBrowser_exportTitle> TextureBrowserExportTitleCaller;
 
 
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
 const Vector3& TextureBrowser_getBackgroundColour();
 void TextureBrowser_setBackgroundColour( const Vector3& colour );
 

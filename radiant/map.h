@@ -25,6 +25,7 @@
 #include "generic/callback.h"
 #include "signal/signalfwd.h"
 #include "string/stringfwd.h"
+#include "math/vectorfwd.h"
 
 class Map;
 extern Map g_map;
@@ -90,9 +91,6 @@ class Graph;
 scene::Node* Map_GetWorldspawn( const Map& map );
 scene::Node* Map_FindWorldspawn( Map& map );
 scene::Node& Map_FindOrInsertWorldspawn( Map& map );
-
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
 
 extern Vector3 g_region_mins, g_region_maxs;
 extern bool g_region_active;

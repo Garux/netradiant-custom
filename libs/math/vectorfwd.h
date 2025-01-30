@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 1999-2006 Id Software, Inc. and contributors.
-   For a list of contributors, see the accompanying CONTRIBUTORS file.
+   Copyright (C) 2001-2006, William Joseph.
+   All Rights Reserved.
 
    This file is part of GtkRadiant.
 
@@ -21,8 +21,9 @@
 
 #pragma once
 
-#include "math/vectorfwd.h"
-
-// camera API
-void QERApp_GetCamera( Vector3& origin, Vector3& angles );
-void QERApp_SetCamera( const Vector3& origin, const Vector3& angles );
+template<typename Element> class BasicVector2;
+typedef BasicVector2<float> Vector2;
+template<typename Element> class BasicVector3;
+typedef BasicVector3<float> Vector3;
+template<typename Element> class BasicVector4;
+typedef BasicVector4<float> Vector4;

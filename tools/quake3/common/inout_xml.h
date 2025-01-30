@@ -25,8 +25,7 @@
 typedef struct _xmlNode xmlNode;
 typedef xmlNode *xmlNodePtr;
 
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
+#include "math/vectorfwd.h"
 
 // some useful xml routines
 xmlNodePtr xml_NodeForVec( const Vector3& v );

@@ -39,7 +39,6 @@ public:
 
 SelectionSystemWindowObserver* NewWindowObserver();
 
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
+#include "math/vectorfwd.h"
 
 void Scene_Intersect( const View& view, const Vector2& device_point, const Vector2& device_epsilon, Vector3& intersection );

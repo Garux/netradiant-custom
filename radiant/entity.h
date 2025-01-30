@@ -21,8 +21,8 @@
 
 #pragma once
 
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
+#include "math/vectorfwd.h"
+
 void Entity_createFromSelection( const char* name, const Vector3& origin );
 
 void Scene_EntitySetKeyValue_Selected( const char* key, const char* value );

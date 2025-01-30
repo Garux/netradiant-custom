@@ -52,8 +52,8 @@ QAction* toolbar_append_button( QToolBar* toolbar, const char* description, cons
 // this also sets up the shortcut using command_connect_accelerator
 QAction* toolbar_append_toggle_button( QToolBar* toolbar, const char* description, const char* icon, const char* commandName );
 
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
+#include "math/vectorfwd.h"
+
 bool color_dialog( QWidget *parent, Vector3& color, const char* title = "Choose Color" );
 
 #include "string/stringfwd.h"
