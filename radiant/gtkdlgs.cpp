@@ -414,17 +414,17 @@ bool DoLightIntensityDlg( int *intensity ){
 		return true;
 
 	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
-	dialog.setWindowTitle( "Light intensity" );
+	dialog.setWindowTitle( "Set Light intensity" );
 
 	auto spin = new SpinBox( -99999, 99999, *intensity );
 
-	auto check = new QCheckBox( "Don't Show" );
+	auto check = new QCheckBox( "Don't show this dialog until restart" );
 	QObject::connect( check, &QCheckBox::toggled, []( bool checked ){ g_dontDoLightIntensityDlg = checked; } );
 
 	{
 		auto form = new QFormLayout( &dialog );
 		form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
-		form->addRow( new QLabel( "ESC for default, ENTER to validate" ) );
+		form->addRow( new QLabel( "Tip: ESC for default, ENTER to validate" ) );
 		form->addRow( new SpinBoxLabel( "Intensity:", spin ), spin );
 		form->addWidget( check );
 
