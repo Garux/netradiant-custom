@@ -119,6 +119,7 @@ int g_showNamesRatio = 64;
 bool g_showTargetNames = false;
 bool g_showAngles = true;
 bool g_lightRadii = true;
+bool g_lightColorize = true;
 
 bool g_stupidQuakeBug = false;
 
@@ -149,16 +150,16 @@ inline Entity* ScenePath_getEntity( const scene::Path& path ){
 class Quake3EntityCreator : public EntityCreator
 {
 public:
-	scene::Node& createEntity( EntityClass* eclass ){
+	scene::Node& createEntity( EntityClass* eclass ) override {
 		return node_for_eclass( eclass );
 	}
-	void setKeyValueChangedFunc( KeyValueChangedFunc func ){
+	void setKeyValueChangedFunc( KeyValueChangedFunc func ) override {
 		EntityKeyValues::setKeyValueChangedFunc( func );
 	}
-	void setCounter( Counter* counter ){
+	void setCounter( Counter* counter ) override {
 		EntityKeyValues::setCounter( counter );
 	}
-	void connectEntities( const scene::Path& path, const scene::Path& targetPath, int index ){
+	void connectEntities( const scene::Path& path, const scene::Path& targetPath, int index ) override {
 		Entity* e1 = ScenePath_getEntity( path );
 		Entity* e2 = ScenePath_getEntity( targetPath );
 
@@ -222,56 +223,59 @@ public:
 		}
 		SceneChangeNotify();
 	}
-	void setLightRadii( bool lightRadii ){
+	void setLightColorize( bool lightColorize ) override {
+		g_lightColorize = lightColorize;
+	}
+	void setLightRadii( bool lightRadii ) override {
 		g_lightRadii = lightRadii;
 	}
-	bool getLightRadii(){
+	bool getLightRadii() override {
 		return g_lightRadii;
 	}
-	void setShowNames( bool showNames ){
+	void setShowNames( bool showNames ) override {
 		g_showNames = showNames;
 	}
-	bool getShowNames(){
+	bool getShowNames() override {
 		return g_showNames;
 	}
-	void setShowBboxes( bool showBboxes ){
+	void setShowBboxes( bool showBboxes ) override {
 		g_showBboxes = showBboxes;
 	}
-	bool getShowBboxes(){
+	bool getShowBboxes() override {
 		return g_showBboxes;
 	}
-	void setShowConnections( bool showConnections ){
+	void setShowConnections( bool showConnections ) override {
 		g_showConnections = showConnections;
 	}
-	bool getShowConnections(){
+	bool getShowConnections() override {
 		return g_showConnections;
 	}
-	void setShowNamesDist( int dist ){
+	void setShowNamesDist( int dist ) override {
 		g_showNamesDist = dist;
 	}
-	int getShowNamesDist(){
+	int getShowNamesDist() override {
 		return g_showNamesDist;
 	}
-	void setShowNamesRatio( int ratio ){
+	void setShowNamesRatio( int ratio ) override {
 		g_showNamesRatio = ratio;
 	}
-	int getShowNamesRatio(){
+	int getShowNamesRatio() override {
 		return g_showNamesRatio;
 	}
-	void setShowTargetNames( bool showNames ){
+	void setShowTargetNames( bool showNames ) override {
 		g_showTargetNames = showNames;
 	}
-	bool getShowTargetNames(){
+	bool getShowTargetNames() override {
 		return g_showTargetNames;
 	}
-	void setShowAngles( bool showAngles ){
+	void setShowAngles( bool showAngles ) override {
 		g_showAngles = showAngles;
 	}
-	bool getShowAngles(){
+	bool getShowAngles() override {
 		return g_showAngles;
 	}
 
-	void printStatistics() const {
+	void printStatistics() const override {
 		StringPool_analyse( EntityKeyValues::getPool() );
 	}
 };

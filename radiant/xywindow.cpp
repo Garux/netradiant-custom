@@ -1808,6 +1808,8 @@ void XYWnd::updateModelview(){
 
 void XYWnd::XY_Draw(){
 //		globalOutputStream() << "XY_Draw()\n";
+	/* workaround poorly visible white lights on bright background */
+	GlobalEntityCreator().setLightColorize( vector3_min_component( g_xywindow_globals.color_gridback ) < .9f );
 	//
 	// clear
 	//
@@ -1815,7 +1817,6 @@ void XYWnd::XY_Draw(){
 	gl().glClearColor( g_xywindow_globals.color_gridback[0],
 	                   g_xywindow_globals.color_gridback[1],
 	                   g_xywindow_globals.color_gridback[2], 0 );
-
 	gl().glClear( GL_COLOR_BUFFER_BIT );
 
 	extern void Renderer_ResetStats();

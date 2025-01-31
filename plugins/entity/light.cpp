@@ -1441,7 +1441,9 @@ public:
 	mutable Matrix4 m_projectionOrientation;
 
 	void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const {
-		renderer.SetState( m_colour.state(), Renderer::eWireframeOnly );
+		renderer.SetState( g_lightColorize
+		                   ? m_colour.state()
+		                   : m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
 		renderer.SetState( m_colour.state(), Renderer::eFullMaterials );
 		renderer.addRenderable( *this, localToWorld );
 

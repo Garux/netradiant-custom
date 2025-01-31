@@ -46,5 +46,6 @@ extern int g_showNamesRatio;
 extern bool g_showTargetNames;
 extern bool g_showAngles;
 extern bool g_lightRadii;
+extern bool g_lightColorize;
 
 extern bool g_stupidQuakeBug;
