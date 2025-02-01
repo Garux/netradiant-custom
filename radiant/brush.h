@@ -296,7 +296,19 @@ public:
 	int m_surfaceFlags;
 	int m_contentFlags;
 	int m_value;
-	bool m_specified;
+	bool m_specified; /* this represents Q2 duality, where flags may be absent in .map file = use .wal tex flags
+	                     or present = use them
+	                     in editor runtime this tracks user will regarding this
+	                     in m_contentFlags BRUSH_DETAIL_MASK flag is special, since its presence must be homogenous over faces
+	                     thus we modify the flag only via separate function
+	                     also when modifying other flags it must be immutable
+	                     this is okay; problematic case is when .wal defines flags + detail flag is involved
+	                     we need to store .wal flags in .map then,
+	                     because with 'detail 0 0' in .map it's not clear whether 'detail + .wal' or 'detail + all unset' is implied
+	                     current solution is to treat (!m_specified && detail) as a special state and set/clear flags from .wal immediately
+	                     alternative could be only adding .wal flags during save and display,
+	                     which would solve possible flags mess after texture change,
+	                     but after .map reloading we wont surely say which state is implied anyway (now always treating as m_specified) */
 };
 
 inline void ContentsFlagsValue_assignMasked( ContentsFlagsValue& flags, const ContentsFlagsValue& other ){
@@ -417,15 +429,12 @@ public:
 	}
 	ContentsFlagsValue getFlags() const {
 		ASSERT_MESSAGE( m_realised, "FaceShader::getFlags: flags not valid when unrealised" );
-		if ( !m_flags.m_specified ) {
-			return ContentsFlagsValue(
-			           m_state->getTexture().surfaceFlags,
-			           m_state->getTexture().contentFlags,
-			           m_state->getTexture().value,
-			           true
-			       );
-		}
-		return m_flags;
+		return ( m_flags.m_specified || bitfield_enabled( m_flags.m_contentFlags, BRUSH_DETAIL_MASK ) )
+		         ? m_flags
+		         : ContentsFlagsValue( m_state->getTexture().surfaceFlags,
+		                               m_state->getTexture().contentFlags,
+		                               m_state->getTexture().value,
+		                               true );
 	}
 	void setFlags( const ContentsFlagsValue& flags ){
 		ASSERT_MESSAGE( m_realised, "FaceShader::setFlags: flags not valid when unrealised" );
@@ -1339,12 +1348,22 @@ public:
 	void setDetail( bool detail ){
 		undoSave();
 		if ( detail && !isDetail() ) {
-			m_shader.m_flags.m_contentFlags |= BRUSH_DETAIL_MASK;
+			if( m_shader.m_flags.m_specified )
+				m_shader.m_flags.m_contentFlags |= BRUSH_DETAIL_MASK;
+			else
+				m_shader.m_flags = ContentsFlagsValue( m_shader.m_state->getTexture().surfaceFlags,
+				                                       m_shader.m_state->getTexture().contentFlags | BRUSH_DETAIL_MASK,
+				                                       m_shader.m_state->getTexture().value,
+				                                       false );
 		}
 		else if ( !detail && isDetail() ) {
-			m_shader.m_flags.m_contentFlags &= ~BRUSH_DETAIL_MASK;
+			if( m_shader.m_flags.m_specified )
+				m_shader.m_flags.m_contentFlags &= ~BRUSH_DETAIL_MASK;
+			else
+				m_shader.m_flags = ContentsFlagsValue( 0, 0, 0, false );
 		}
 		m_observer->shaderChanged();
+		Brush_textureChanged();
 	}
 
 	bool contributes() const {
