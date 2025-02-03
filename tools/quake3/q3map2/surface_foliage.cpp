@@ -45,8 +45,7 @@ static foliageInstance_t foliageInstances[ MAX_FOLIAGE_INSTANCES ];
    the desired density, then pseudo-randomly sets a point
  */
 
-static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& foliage, bspDrawVert_t **tri ){
-	bspDrawVert_t mid, *tri2[ 3 ];
+static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& foliage, const TriRef& tri ){
 	int max;
 
 
@@ -106,7 +105,7 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 			}
 			else
 			{
-				alpha = ( (float) tri[ 0 ]->color[ 0 ].alpha() + (float) tri[ 1 ]->color[ 0 ].alpha() + (float) tri[ 2 ]->color[ 0 ].alpha() ) / 765.0f;
+				alpha = ( tri[ 0 ]->color[ 0 ].alpha() + tri[ 1 ]->color[ 0 ].alpha() + tri[ 2 ]->color[ 0 ].alpha() ) / 765.0f;
 				if ( foliage.inverseAlpha == 1 ) {
 					alpha = 1.0f - alpha;
 				}
@@ -135,15 +134,15 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 	}
 
 	/* split the longest edge and map it */
-	LerpDrawVert( tri[ max ], tri[ ( max + 1 ) % 3 ], &mid );
+	const bspDrawVert_t mid = LerpDrawVert( *tri[ max ], *tri[ ( max + 1 ) % 3 ] );
 
 	/* recurse to first triangle */
-	VectorCopy( tri, tri2 );
+	TriRef tri2 = tri;
 	tri2[ max ] = &mid;
 	SubdivideFoliageTriangle_r( ds, foliage, tri2 );
 
 	/* recurse to second triangle */
-	VectorCopy( tri, tri2 );
+	tri2 = tri;
 	tri2[ ( max + 1 ) % 3 ] = &mid;
 	SubdivideFoliageTriangle_r( ds, foliage, tri2 );
 }
@@ -156,11 +155,10 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
  */
 
 void Foliage( mapDrawSurface_t *src, entity_t& entity ){
-	int i, j, x, y, pw[ 5 ], r, oldNumMapDrawSurfs;
-	mapDrawSurface_t    *ds;
+	int oldNumMapDrawSurfs;
 	shaderInfo_t        *si;
 	mesh_t srcMesh, *subdivided, *mesh;
-	bspDrawVert_t       *verts, *dv[ 3 ], *fi;
+	const bspDrawVert_t       *verts;
 
 
 	/* get shader */
@@ -185,13 +183,12 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 			verts = src->verts;
 
 			/* map the triangles */
-			for ( i = 0; i < src->numIndexes; i += 3 )
-			{
-				dv[ 0 ] = &verts[ src->indexes[ i ] ];
-				dv[ 1 ] = &verts[ src->indexes[ i + 1 ] ];
-				dv[ 2 ] = &verts[ src->indexes[ i + 2 ] ];
-				SubdivideFoliageTriangle_r( src, foliage, dv );
-			}
+			for ( int i = 0; i < src->numIndexes; i += 3 )
+				SubdivideFoliageTriangle_r( src, foliage, TriRef{
+					&verts[ src->indexes[ i + 0 ] ],
+					&verts[ src->indexes[ i + 1 ] ],
+					&verts[ src->indexes[ i + 2 ] ]
+				} );
 			break;
 
 		case ESurfaceType::Patch:
@@ -210,31 +207,33 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 			verts = mesh->verts;
 
 			/* map the mesh quads */
-			for ( y = 0; y < ( mesh->height - 1 ); y++ )
+			for ( int y = 0; y < ( mesh->height - 1 ); y++ )
 			{
-				for ( x = 0; x < ( mesh->width - 1 ); x++ )
+				for ( int x = 0; x < ( mesh->width - 1 ); x++ )
 				{
 					/* set indexes */
-					pw[ 0 ] = x + ( y * mesh->width );
-					pw[ 1 ] = x + ( ( y + 1 ) * mesh->width );
-					pw[ 2 ] = x + 1 + ( ( y + 1 ) * mesh->width );
-					pw[ 3 ] = x + 1 + ( y * mesh->width );
-					pw[ 4 ] = x + ( y * mesh->width );      /* same as pw[ 0 ] */
-
+					const int pw[ 5 ] = {
+						x + ( y * mesh->width ),
+						x + ( ( y + 1 ) * mesh->width ),
+						x + 1 + ( ( y + 1 ) * mesh->width ),
+						x + 1 + ( y * mesh->width ),
+						x + ( y * mesh->width )      /* same as pw[ 0 ] */
+					};
 					/* set radix */
-					r = ( x + y ) & 1;
+					const int r = ( x + y ) & 1;
 
 					/* get drawverts and map first triangle */
-					dv[ 0 ] = &verts[ pw[ r + 0 ] ];
-					dv[ 1 ] = &verts[ pw[ r + 1 ] ];
-					dv[ 2 ] = &verts[ pw[ r + 2 ] ];
-					SubdivideFoliageTriangle_r( src, foliage, dv );
-
+					SubdivideFoliageTriangle_r( src, foliage, TriRef{
+						&verts[ pw[ r + 0 ] ],
+						&verts[ pw[ r + 1 ] ],
+						&verts[ pw[ r + 2 ] ]
+					} );
 					/* get drawverts and map second triangle */
-					dv[ 0 ] = &verts[ pw[ r + 0 ] ];
-					dv[ 1 ] = &verts[ pw[ r + 2 ] ];
-					dv[ 2 ] = &verts[ pw[ r + 3 ] ];
-					SubdivideFoliageTriangle_r( src, foliage, dv );
+					SubdivideFoliageTriangle_r( src, foliage, TriRef{
+						&verts[ pw[ r + 0 ] ],
+						&verts[ pw[ r + 2 ] ],
+						&verts[ pw[ r + 3 ] ]
+					} );
 				}
 			}
 
@@ -258,47 +257,47 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 		InsertModel( foliage.model.c_str(), NULL, 0, matrix4_scale_for_vec3( Vector3( foliage.scale ) ), NULL, NULL, entity, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, clipDepthGlobal );
 
 		/* walk each new surface */
-		for ( i = oldNumMapDrawSurfs; i < numMapDrawSurfs; i++ )
+		for ( int i = oldNumMapDrawSurfs; i < numMapDrawSurfs; i++ )
 		{
 			/* get surface */
-			ds = &mapDrawSurfs[ i ];
+			mapDrawSurface_t& ds = mapDrawSurfs[ i ];
 
 			/* set up */
-			ds->type = ESurfaceType::Foliage;
-			ds->numFoliageInstances = numFoliageInstances;
+			ds.type = ESurfaceType::Foliage;
+			ds.numFoliageInstances = numFoliageInstances;
 
 			/* a wee hack */
-			ds->patchWidth = ds->numFoliageInstances;
-			ds->patchHeight = ds->numVerts;
+			ds.patchWidth = ds.numFoliageInstances;
+			ds.patchHeight = ds.numVerts;
 
 			/* set fog to be same as source surface */
-			ds->fogNum = src->fogNum;
+			ds.fogNum = src->fogNum;
 
 			/* add a drawvert for every instance */
-			verts = safe_calloc( ( ds->numVerts + ds->numFoliageInstances ) * sizeof( *verts ) );
-			memcpy( verts, ds->verts, ds->numVerts * sizeof( *verts ) );
-			free( ds->verts );
-			ds->verts = verts;
+			bspDrawVert_t *verts = safe_calloc( ( ds.numVerts + ds.numFoliageInstances ) * sizeof( *verts ) );
+			memcpy( verts, ds.verts, ds.numVerts * sizeof( *verts ) );
+			free( ds.verts );
+			ds.verts = verts;
 
 			/* copy the verts */
-			for ( j = 0; j < ds->numFoliageInstances; j++ )
+			for ( int j = 0; j < ds.numFoliageInstances; j++ )
 			{
 				/* get vert (foliage instance) */
-				fi = &ds->verts[ ds->numVerts + j ];
+				bspDrawVert_t& fi = ds.verts[ ds.numVerts + j ];
 
 				/* copy xyz and normal */
-				fi->xyz = foliageInstances[ j ].xyz;
-				fi->normal = foliageInstances[ j ].normal;
+				fi.xyz = foliageInstances[ j ].xyz;
+				fi.normal = foliageInstances[ j ].normal;
 
 				/* ydnar: set color */
-				for ( auto& color : fi->color )
+				for ( auto& color : fi.color )
 				{
 					color.set( 255 );
 				}
 			}
 
 			/* increment */
-			ds->numVerts += ds->numFoliageInstances;
+			ds.numVerts += ds.numFoliageInstances;
 		}
 	}
 }

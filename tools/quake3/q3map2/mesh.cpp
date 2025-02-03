@@ -38,25 +38,28 @@
    returns an 50/50 interpolated vert
  */
 
-void LerpDrawVert( const bspDrawVert_t *a, const bspDrawVert_t *b, bspDrawVert_t *out ){
+bspDrawVert_t LerpDrawVert( const bspDrawVert_t& a, const bspDrawVert_t& b ){
+	bspDrawVert_t out;
 
-	out->xyz = vector3_mid( a->xyz, b->xyz );
-	out->st = vector2_mid( a->st, b->st );
+	out.xyz = vector3_mid( a.xyz, b.xyz );
+	out.st = vector2_mid( a.st, b.st );
 
 	for ( int k = 0; k < MAX_LIGHTMAPS; k++ )
 	{
-		out->lightmap[ k ] = vector2_mid( a->lightmap[ k ], b->lightmap[ k ] );
+		out.lightmap[ k ] = vector2_mid( a.lightmap[ k ], b.lightmap[ k ] );
 		for( int i = 0; i < 4; ++i )
-			out->color[ k ][ i ] = ( a->color[ k ][ i ] + b->color[ k ][ i ] ) >> 1;
+			out.color[ k ][ i ] = ( a.color[ k ][ i ] + b.color[ k ][ i ] ) >> 1;
 	}
 
 	/* ydnar: added normal interpolation */
-	out->normal = vector3_mid( a->normal, b->normal );
+	out.normal = a.normal + b.normal;
 
 	/* if the interpolant created a bogus normal, just copy the normal from a */
-	if ( VectorNormalize( out->normal ) == 0 ) {
-		out->normal = a->normal;
+	if ( VectorNormalize( out.normal ) == 0 ) {
+		out.normal = a.normal;
 	}
+
+	return out;
 }
 
 
@@ -261,44 +264,28 @@ void MakeMeshNormals( mesh_t in ){
 /*
    PutMeshOnCurve()
    drops the aproximating points onto the curve
-   ydnar: fixme: make this use LerpDrawVert() rather than this complicated mess
  */
 
 void PutMeshOnCurve( mesh_t in ) {
+	const auto lerp3 = []( const bspDrawVert_t& prev, bspDrawVert_t& mid, const bspDrawVert_t& next ){
+		mid.xyz = ( prev.xyz + mid.xyz * 2 + next.xyz ) * .25;
+		/* ydnar: interpolating st coords */
+		mid.st = ( prev.st + mid.st * 2 + next.st ) * .25;
+		for ( int m = 0; m < MAX_LIGHTMAPS; ++m )
+			mid.lightmap[ m ] = ( prev.lightmap[ m ] + mid.lightmap[ m ] * 2 + next.lightmap[ m ] ) * .25;
+	};
 	// put all the aproximating points on the curve
-	for ( int i = 0; i < in.width; ++i ) {
-		for ( int j = 1; j < in.height; j += 2 ) {
-			const int idx = j * in.width + i;
-			const int idprev = ( j + 1 ) * in.width + i;
-			const int idnext = ( j - 1 ) * in.width + i;
-			in.verts[idx].xyz = vector3_mid( vector3_mid( in.verts[idx].xyz, in.verts[idprev].xyz ),
-			                                 vector3_mid( in.verts[idx].xyz, in.verts[idnext].xyz ) );
-			/* ydnar: interpolating st coords */
-			in.verts[idx].st = vector2_mid( vector2_mid( in.verts[idx].st, in.verts[idprev].st ),
-			                                vector2_mid( in.verts[idx].st, in.verts[idnext].st ) );
-			for ( int m = 0; m < MAX_LIGHTMAPS; ++m )
-			{
-				in.verts[idx].lightmap[ m ] = vector2_mid( vector2_mid( in.verts[idx].lightmap[ m ], in.verts[idprev].lightmap[ m ] ),
-				                                           vector2_mid( in.verts[idx].lightmap[ m ], in.verts[idnext].lightmap[ m ] ) );
-			}
-		}
-	}
+	for ( int i = 0; i < in.width; ++i )
+		for ( int j = 1; j < in.height; j += 2 )
+			lerp3( in.verts[( j - 1 ) * in.width + i],
+			       in.verts[( j + 0 ) * in.width + i],
+			       in.verts[( j + 1 ) * in.width + i] );
 
-	for ( int j = 0; j < in.height; ++j ) {
-		for ( int i = 1; i < in.width; i += 2 ) {
-			const int idx = j * in.width + i;
-			in.verts[idx].xyz = vector3_mid( vector3_mid( in.verts[idx].xyz, in.verts[idx + 1].xyz ),
-			                                 vector3_mid( in.verts[idx].xyz, in.verts[idx - 1].xyz ) );
-			/* ydnar: interpolating st coords */
-			in.verts[idx].st = vector2_mid( vector2_mid( in.verts[idx].st, in.verts[idx + 1].st ),
-			                                vector2_mid( in.verts[idx].st, in.verts[idx - 1].st ) );
-			for ( int m = 0; m < MAX_LIGHTMAPS; ++m )
-			{
-				in.verts[idx].lightmap[ m ] = vector2_mid( vector2_mid( in.verts[idx].lightmap[ m ], in.verts[idx + 1].lightmap[ m ] ),
-				                                           vector2_mid( in.verts[idx].lightmap[ m ], in.verts[idx - 1].lightmap[ m ] ) );
-			}
-		}
-	}
+	for ( int j = 0; j < in.height; ++j )
+		for ( int i = 1; i < in.width; i += 2 )
+			lerp3( in.verts[j * in.width + i - 1],
+			       in.verts[j * in.width + i + 0],
+			       in.verts[j * in.width + i + 1] );
 }
 
 
@@ -310,8 +297,6 @@ void PutMeshOnCurve( mesh_t in ) {
  */
 mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 	int i, j, k;
-	bspDrawVert_t prev, next, mid;
-	Vector3 prevxyz, nextxyz, midxyz;
 	mesh_t out;
 
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
@@ -330,9 +315,9 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 	for ( j = 0; j + 2 < out.width; j += 2 ) {
 		// check subdivided midpoints against control points
 		for ( i = 0; i < out.height; ++i ) {
-			prevxyz = expand[i][j + 1].xyz - expand[i][j].xyz;
-			nextxyz = expand[i][j + 2].xyz - expand[i][j + 1].xyz;
-			midxyz = ( expand[i][j].xyz + expand[i][j + 1].xyz * 2 + expand[i][j + 2].xyz ) * 0.25;
+			const Vector3 prevxyz = expand[i][j + 1].xyz - expand[i][j].xyz;
+			const Vector3 nextxyz = expand[i][j + 2].xyz - expand[i][j + 1].xyz;
+			const Vector3 midxyz = ( expand[i][j].xyz + expand[i][j + 1].xyz * 2 + expand[i][j + 2].xyz ) * 0.25;
 
 			// if the span length is too long, force a subdivision
 			if ( vector3_length( prevxyz ) > minLength
@@ -358,16 +343,12 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 		out.width += 2;
 
 		for ( i = 0; i < out.height; ++i ) {
-			LerpDrawVert( &expand[i][j], &expand[i][j + 1], &prev );
-			LerpDrawVert( &expand[i][j + 1], &expand[i][j + 2], &next );
-			LerpDrawVert( &prev, &next, &mid );
-
 			for ( k = out.width - 1; k > j + 3; --k ) {
 				expand[i][k] = expand[i][k - 2];
 			}
-			expand[i][j + 1] = prev;
-			expand[i][j + 2] = mid;
-			expand[i][j + 3] = next;
+			expand[i][j + 3] = LerpDrawVert( expand[i][j + 1], expand[i][j + 2] );
+			expand[i][j + 1] = LerpDrawVert( expand[i][j + 0], expand[i][j + 1] );
+			expand[i][j + 2] = LerpDrawVert( expand[i][j + 1], expand[i][j + 3] );
 		}
 
 		// back up and recheck this set again, it may need more subdivision
@@ -379,9 +360,9 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 	for ( j = 0; j + 2 < out.height; j += 2 ) {
 		// check subdivided midpoints against control points
 		for ( i = 0; i < out.width; ++i ) {
-			prevxyz = expand[j + 1][i].xyz - expand[j][i].xyz;
-			nextxyz = expand[j + 2][i].xyz - expand[j + 1][i].xyz;
-			midxyz = ( expand[j][i].xyz + expand[j + 1][i].xyz * 2 + expand[j + 2][i].xyz ) * 0.25;
+			const Vector3 prevxyz = expand[j + 1][i].xyz - expand[j][i].xyz;
+			const Vector3 nextxyz = expand[j + 2][i].xyz - expand[j + 1][i].xyz;
+			const Vector3 midxyz = ( expand[j][i].xyz + expand[j + 1][i].xyz * 2 + expand[j + 2][i].xyz ) * 0.25;
 
 			// if the span length is too long, force a subdivision
 			if ( vector3_length( prevxyz ) > minLength
@@ -406,16 +387,12 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 		out.height += 2;
 
 		for ( i = 0; i < out.width; ++i ) {
-			LerpDrawVert( &expand[j][i], &expand[j + 1][i], &prev );
-			LerpDrawVert( &expand[j + 1][i], &expand[j + 2][i], &next );
-			LerpDrawVert( &prev, &next, &mid );
-
 			for ( k = out.height - 1; k > j + 3; --k ) {
 				expand[k][i] = expand[k - 2][i];
 			}
-			expand[j + 1][i] = prev;
-			expand[j + 2][i] = mid;
-			expand[j + 3][i] = next;
+			expand[j + 3][i] = LerpDrawVert( expand[j + 1][i], expand[j + 2][i] );
+			expand[j + 1][i] = LerpDrawVert( expand[j + 0][i], expand[j + 1][i] );
+			expand[j + 2][i] = LerpDrawVert( expand[j + 1][i], expand[j + 3][i] );
 		}
 
 		// back up and recheck this set again, it may need more subdivision
@@ -466,7 +443,6 @@ int IterationsForCurve( float len, int subdivisions ){
 
 mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 	int i, j, k;
-	bspDrawVert_t prev, next, mid;
 	mesh_t out;
 
 	bspDrawVert_t expand[ MAX_EXPANDED_AXIS ][ MAX_EXPANDED_AXIS ];
@@ -496,15 +472,12 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 			out.width += 2;
 			for ( i = 0; i < out.height; i++ )
 			{
-				LerpDrawVert( &expand[ i ][ j ], &expand[ i ][ j + 1 ], &prev );
-				LerpDrawVert( &expand[ i ][ j + 1 ], &expand[ i ][ j + 2 ], &next );
-				LerpDrawVert( &prev, &next, &mid );
-
 				for ( k = out.width - 1; k > j + 3; --k )
 					expand [ i ][ k ] = expand[ i ][ k - 2 ];
-				expand[ i ][ j + 1 ] = prev;
-				expand[ i ][ j + 2 ] = mid;
-				expand[ i ][ j + 3 ] = next;
+
+				expand[ i ][ j + 3 ] = LerpDrawVert( expand[ i ][ j + 1 ], expand[ i ][ j + 2 ] );
+				expand[ i ][ j + 1 ] = LerpDrawVert( expand[ i ][ j + 0 ], expand[ i ][ j + 1 ] );
+				expand[ i ][ j + 2 ] = LerpDrawVert( expand[ i ][ j + 1 ], expand[ i ][ j + 3 ] );
 			}
 
 		}
@@ -521,15 +494,12 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 			out.height += 2;
 			for ( i = 0; i < out.width; i++ )
 			{
-				LerpDrawVert( &expand[ j ][ i ], &expand[ j + 1 ][ i ], &prev );
-				LerpDrawVert( &expand[ j + 1 ][ i ], &expand[ j + 2 ][ i ], &next );
-				LerpDrawVert( &prev, &next, &mid );
-
 				for ( k = out.height - 1; k > j + 3; k-- )
 					expand[ k ][ i ] = expand[ k - 2 ][ i ];
-				expand[ j + 1 ][ i ] = prev;
-				expand[ j + 2 ][ i ] = mid;
-				expand[ j + 3 ][ i ] = next;
+
+				expand[ j + 3 ][ i ] = LerpDrawVert( expand[ j + 1 ][ i ], expand[ j + 2 ][ i ] );
+				expand[ j + 1 ][ i ] = LerpDrawVert( expand[ j + 0 ][ i ], expand[ j + 1 ][ i ] );
+				expand[ j + 2 ][ i ] = LerpDrawVert( expand[ j + 1 ][ i ], expand[ j + 3 ][ i ] );
 			}
 		}
 	}

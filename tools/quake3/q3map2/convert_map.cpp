@@ -48,15 +48,14 @@ inline float Det3x3( float a00, float a01, float a02,
 	    +   a02 * ( a10 * a21 - a11 * a20 );
 }
 
-static void GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, const bspDrawVert_t *bestVert[3] ){
+static TriRef GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide ){
 	float best = 0;
 	float thisarea;
-	const bspDrawVert_t *vert[3];
 	const plane_t& buildPlane = mapplanes[buildSide.planenum];
 	int matches = 0;
 
 	// first, start out with NULLs
-	bestVert[0] = bestVert[1] = bestVert[2] = NULL;
+	TriRef bestVert{ nullptr };
 
 	// brute force through all surfaces
 	for ( const bspDrawSurface_t& s : bspDrawSurfaces )
@@ -69,9 +68,11 @@ static void GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, co
 		}
 		for ( int t = 0; t + 3 <= s.numIndexes; t += 3 )
 		{
-			vert[0] = &bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 0]];
-			vert[1] = &bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 1]];
-			vert[2] = &bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 2]];
+			const TriRef vert{
+				&bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 0]],
+				&bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 1]],
+				&bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 2]]
+			};
 			if ( s.surfaceType == MST_PLANAR && VectorCompare( vert[0]->normal, vert[1]->normal ) && VectorCompare( vert[1]->normal, vert[2]->normal ) ) {
 				if ( vector3_length( vert[0]->normal - buildPlane.normal() ) >= normalEpsilon
 				  || vector3_length( vert[1]->normal - buildPlane.normal() ) >= normalEpsilon
@@ -118,9 +119,7 @@ static void GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, co
 			}
 			if ( thisarea > best ) {
 				best = thisarea;
-				bestVert[0] = vert[0];
-				bestVert[1] = vert[1];
-				bestVert[2] = vert[2];
+				bestVert = vert;
 			}
 exwinding:
 			;
@@ -128,6 +127,7 @@ exwinding:
 	}
 	//if(!striEqualPrefix(buildSide.shaderInfo->shader, "textures/common/"))
 	//	fprintf(stderr, "brushside with %s: %d matches (%f area)\n", buildSide.shaderInfo->shader, matches, best);
+	return bestVert;
 }
 
 #define FRAC( x ) ( ( x ) - floor( x ) )
@@ -375,8 +375,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 		//   - meshverts point in pairs of three into verts
 		//   - (triangles)
 		//   - find the triangle that has most in common with our
-		const bspDrawVert_t   *vert[3];
-		GetBestSurfaceTriangleMatchForBrushside( buildSide, vert );
+		const TriRef vert = GetBestSurfaceTriangleMatchForBrushside( buildSide );
 
 		/* get texture name */
 		const char *texture = striEqualPrefix( buildSide.shaderInfo->shader, "textures/" )
@@ -426,7 +425,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 			//Sys_Printf( "not\n" );
 		}
 
-		if ( vert[0] && vert[1] && vert[2] ) {
+		if ( vert[0] !=nullptr && vert[1] !=nullptr && vert[2] !=nullptr ) {
 			if ( brushPrimitives ) {
 				int i;
 				Vector3 texX, texY;

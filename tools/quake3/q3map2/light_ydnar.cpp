@@ -589,8 +589,8 @@ static int ShaderForPointInLeaf( const Vector3& point, int leafNum, float epsilo
    calculates the st tangent vectors for normalmapping
  */
 
-static bool CalcTangentVectors( int numVerts, bspDrawVert_t **dv, Vector3 *stv, Vector3 *ttv ){
-	int i;
+template<std::size_t numVerts>
+bool CalcTangentVectors( const std::array<const bspDrawVert_t *, numVerts>& dv, Vector3 (&stv)[numVerts], Vector3 (&ttv)[numVerts] ){
 	float bb, s, t;
 	Vector3 bary;
 
@@ -602,7 +602,7 @@ static bool CalcTangentVectors( int numVerts, bspDrawVert_t **dv, Vector3 *stv, 
 	}
 
 	/* do each vertex */
-	for ( i = 0; i < numVerts; i++ )
+	for ( std::size_t i = 0; i < numVerts; ++i )
 	{
 		/* calculate s tangent vector */
 		s = dv[ i ]->st[ 0 ] + 10.0f;
@@ -649,13 +649,13 @@ static bool CalcTangentVectors( int numVerts, bspDrawVert_t **dv, Vector3 *stv, 
    perterbs the normal by the shader's normalmap in tangent space
  */
 
-static void PerturbNormal( bspDrawVert_t *dv, const shaderInfo_t *si, Vector3& pNormal, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ] ){
+static void PerturbNormal( const bspDrawVert_t& dv, const shaderInfo_t *si, Vector3& pNormal, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ] ){
 	/* passthrough */
-	pNormal = dv->normal;
+	pNormal = dv.normal;
 
 	/* sample normalmap */
 	Color4f bump;
-	if ( !RadSampleImage( si->normalImage->pixels, si->normalImage->width, si->normalImage->height, dv->st, bump ) ) {
+	if ( !RadSampleImage( si->normalImage->pixels, si->normalImage->width, si->normalImage->height, dv.st, bump ) ) {
 		return;
 	}
 
@@ -663,7 +663,7 @@ static void PerturbNormal( bspDrawVert_t *dv, const shaderInfo_t *si, Vector3& p
 	bump.rgb() = ( bump.rgb() - Vector3( 127.0f ) ) * ( 1.0f / 127.5f );
 
 	/* scale tangent vectors and add to original normal */
-	pNormal = dv->normal + stv[ 0 ] * bump[ 0 ] + ttv[ 0 ] * bump[ 1 ] + dv->normal * bump[ 2 ];
+	pNormal = dv.normal + stv[ 0 ] * bump[ 0 ] + ttv[ 0 ] * bump[ 1 ] + dv.normal * bump[ 2 ];
 
 	/* renormalize and return */
 	VectorNormalize( pNormal );
@@ -679,7 +679,7 @@ static void PerturbNormal( bspDrawVert_t *dv, const shaderInfo_t *si, Vector3& p
 #define NUDGE           0.5f
 #define BOGUS_NUDGE     -99999.0f
 
-static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv, const Plane3f* plane, float pass, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ], const Vector3 worldverts[ 3 ] ){
+static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, const bspDrawVert_t& dv, const Plane3f* plane, float pass, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ], const Vector3 worldverts[ 3 ] ){
 	int i, numClusters, *clusters, pointCluster;
 	float           lightmapSampleOffset;
 	const shaderInfo_t    *si;
@@ -705,8 +705,8 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 
 
 	/* find luxel xy coords (fixme: subtract 0.5?) */
-	const int x = std::clamp( int( dv->lightmap[ 0 ][ 0 ] ), 0, lm->sw - 1 );
-	const int y = std::clamp( int( dv->lightmap[ 0 ][ 1 ] ), 0, lm->sh - 1 );
+	const int x = std::clamp( int( dv.lightmap[ 0 ][ 0 ] ), 0, lm->sw - 1 );
+	const int y = std::clamp( int( dv.lightmap[ 0 ][ 1 ] ), 0, lm->sh - 1 );
 
 	/* set shader and cluster list */
 	if ( info != NULL ) {
@@ -739,7 +739,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 			PerturbNormal( dv, si, pNormal, stv, ttv );
 		}
 		else{
-			pNormal = dv->normal;
+			pNormal = dv.normal;
 		}
 
 		/* add the additional normal data */
@@ -771,7 +771,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 
 	/* non axial lightmap projection (explicit xyz) */
 	else{
-		origin = dv->xyz;
+		origin = dv.xyz;
 	}
 
 	//////////////////////
@@ -822,7 +822,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 			vecs[ 2 ] = plane->normal();
 		}
 		else{
-			vecs[ 2 ] = dv->normal;
+			vecs[ 2 ] = dv.normal;
 		}
 		MakeNormalVectors( vecs[ 2 ], vecs[ 0 ], vecs[ 1 ] );
 	}
@@ -877,7 +877,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 
 	/* as a last resort, if still in solid, try drawvert origin offset by normal (except in dark mode) */
 	if ( pointCluster < 0 && si != NULL && !dark ) {
-		nudged = dv->xyz + dv->normal * lightmapSampleOffset;
+		nudged = dv.xyz + dv.normal * lightmapSampleOffset;
 		pointCluster = ClusterForPointExtFilter( nudged, LUXEL_EPSILON, numClusters, clusters );
 		if ( pointCluster >= 0 ) {
 			origin = nudged;
@@ -902,7 +902,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 		PerturbNormal( dv, si, pNormal, stv, ttv );
 	}
 	else{
-		pNormal = dv->normal;
+		pNormal = dv.normal;
 	}
 
 	/* store the cluster and normal */
@@ -928,16 +928,15 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
    than the distance between two luxels (thanks jc :)
  */
 
-static void MapTriangle_r( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv[ 3 ], Plane3f *plane, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ], const Vector3 worldverts[ 3 ] ){
-	bspDrawVert_t mid, *dv2[ 3 ];
+static void MapTriangle_r( rawLightmap_t *lm, surfaceInfo_t *info, const TriRef& tri, Plane3f *plane, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ], const Vector3 worldverts[ 3 ] ){
 	int max;
 
 
 	/* map the vertexes */
 	#if 0
-	MapSingleLuxel( lm, info, dv[ 0 ], plane, 1, stv, ttv );
-	MapSingleLuxel( lm, info, dv[ 1 ], plane, 1, stv, ttv );
-	MapSingleLuxel( lm, info, dv[ 2 ], plane, 1, stv, ttv );
+	MapSingleLuxel( lm, info, *tri[ 0 ], plane, 1, stv, ttv );
+	MapSingleLuxel( lm, info, *tri[ 1 ], plane, 1, stv, ttv );
+	MapSingleLuxel( lm, info, *tri[ 2 ], plane, 1, stv, ttv );
 	#endif
 
 	/* subdivide calc */
@@ -948,7 +947,7 @@ static void MapTriangle_r( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 		for ( int i = 0; i < 3; i++ )
 		{
 			/* get dist */
-			const float dist = vector2_length_squared( dv[ i ]->lightmap[ 0 ] - dv[ ( i + 1 ) % 3 ]->lightmap[ 0 ] );
+			const float dist = vector2_length_squared( tri[ i ]->lightmap[ 0 ] - tri[ ( i + 1 ) % 3 ]->lightmap[ 0 ] );
 			/* longer? */
 			if ( dist > maxDist ) {
 				maxDist = dist;
@@ -963,21 +962,21 @@ static void MapTriangle_r( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 	}
 
 	/* split the longest edge and map it */
-	LerpDrawVert( dv[ max ], dv[ ( max + 1 ) % 3 ], &mid );
-	MapSingleLuxel( lm, info, &mid, plane, 1, stv, ttv, worldverts );
+	const bspDrawVert_t mid = LerpDrawVert( *tri[ max ], *tri[ ( max + 1 ) % 3 ] );
+	MapSingleLuxel( lm, info, mid, plane, 1, stv, ttv, worldverts );
 
 	/* push the point up a little bit to account for fp creep (fixme: revisit this) */
 	//%	VectorMA( mid.xyz, 2.0f, mid.normal, mid.xyz );
 
 	/* recurse to first triangle */
-	VectorCopy( dv, dv2 );
-	dv2[ max ] = &mid;
-	MapTriangle_r( lm, info, dv2, plane, stv, ttv, worldverts );
+	TriRef tri2 = tri;
+	tri2[ max ] = &mid;
+	MapTriangle_r( lm, info, tri2, plane, stv, ttv, worldverts );
 
 	/* recurse to second triangle */
-	VectorCopy( dv, dv2 );
-	dv2[ ( max + 1 ) % 3 ] = &mid;
-	MapTriangle_r( lm, info, dv2, plane, stv, ttv, worldverts );
+	tri2 = tri;
+	tri2[ ( max + 1 ) % 3 ] = &mid;
+	MapTriangle_r( lm, info, tri2, plane, stv, ttv, worldverts );
 }
 
 
@@ -988,14 +987,14 @@ static void MapTriangle_r( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
    requires a cw ordered triangle
  */
 
-static bool MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv[ 3 ], bool mapNonAxial ){
+static bool MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, const TriRef& tri, bool mapNonAxial ){
 	Plane3f plane;
 	/* get plane if possible */
 	if ( lm->plane != NULL ) {
 		plane = *lm->plane;
 	}
 	/* otherwise make one from the points */
-	else if ( !PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz ) ) {
+	else if ( !PlaneFromPoints( plane, tri[ 0 ]->xyz, tri[ 1 ]->xyz, tri[ 2 ]->xyz ) ) {
 		return false;
 	}
 
@@ -1007,7 +1006,7 @@ static bool MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *
 
 	Vector3          *stv, *ttv, stvStatic[ 3 ], ttvStatic[ 3 ];
 	/* check to see if we need to calculate texture->world tangent vectors */
-	if ( info->si->normalImage != NULL && CalcTangentVectors( 3, dv, stvStatic, ttvStatic ) ) {
+	if ( info->si->normalImage != NULL && CalcTangentVectors( tri, stvStatic, ttvStatic ) ) {
 		stv = stvStatic;
 		ttv = ttvStatic;
 	}
@@ -1017,38 +1016,33 @@ static bool MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *
 		ttv = NULL;
 	}
 
-	const Vector3 worldverts[ 3 ] = { dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz };
+	const Vector3 worldverts[ 3 ] = { tri[ 0 ]->xyz, tri[ 1 ]->xyz, tri[ 2 ]->xyz };
 
 	/* map the vertexes */
-	MapSingleLuxel( lm, info, dv[ 0 ], &plane, 1, stv, ttv, worldverts );
-	MapSingleLuxel( lm, info, dv[ 1 ], &plane, 1, stv, ttv, worldverts );
-	MapSingleLuxel( lm, info, dv[ 2 ], &plane, 1, stv, ttv, worldverts );
+	MapSingleLuxel( lm, info, *tri[ 0 ], &plane, 1, stv, ttv, worldverts );
+	MapSingleLuxel( lm, info, *tri[ 1 ], &plane, 1, stv, ttv, worldverts );
+	MapSingleLuxel( lm, info, *tri[ 2 ], &plane, 1, stv, ttv, worldverts );
 
 	/* 2002-11-20: prefer axial triangle edges */
 	if ( mapNonAxial ) {
 		/* subdivide the triangle */
-		MapTriangle_r( lm, info, dv, &plane, stv, ttv, worldverts );
+		MapTriangle_r( lm, info, tri, &plane, stv, ttv, worldverts );
 		return true;
 	}
 
 	for ( int i = 0; i < 3; i++ )
 	{
-		bspDrawVert_t   *dv2[ 3 ];
-
-
 		/* get verts */
-		const Vector2& a = dv[ i ]->lightmap[ 0 ];
-		const Vector2& b = dv[ ( i + 1 ) % 3 ]->lightmap[ 0 ];
+		const Vector2& a = tri[ i ]->lightmap[ 0 ];
+		const Vector2& b = tri[ ( i + 1 ) % 3 ]->lightmap[ 0 ];
 
 		/* make degenerate triangles for mapping edges */
-		if ( float_equal_epsilon( a[ 0 ], b[ 0 ], 0.01f ) || float_equal_epsilon( a[ 1 ], b[ 1 ], 0.01f ) ) {
-			dv2[ 0 ] = dv[ i ];
-			dv2[ 1 ] = dv[ ( i + 1 ) % 3 ];
-			dv2[ 2 ] = dv[ ( i + 1 ) % 3 ];
-
+		if ( float_equal_epsilon( a[ 0 ], b[ 0 ], 0.01f ) || float_equal_epsilon( a[ 1 ], b[ 1 ], 0.01f ) )
 			/* map the degenerate triangle */
-			MapTriangle_r( lm, info, dv2, &plane, stv, ttv, worldverts );
-		}
+			MapTriangle_r( lm, info, TriRef{
+				tri[ i ],
+				tri[ ( i + 1 ) % 3 ],
+				tri[ ( i + 1 ) % 3 ] }, &plane, stv, ttv, worldverts );
 	}
 
 	return true;
@@ -1062,8 +1056,7 @@ static bool MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *
    than the distance between two luxels
  */
 
-static void MapQuad_r( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv[ 4 ], Plane3f *plane, const Vector3 stv[ 4 ], const Vector3 ttv[ 4 ] ){
-	bspDrawVert_t mid[ 2 ], *dv2[ 4 ];
+static void MapQuad_r( rawLightmap_t *lm, surfaceInfo_t *info, const QuadRef& dv, Plane3f *plane, const Vector3 stv[ 4 ], const Vector3 ttv[ 4 ] ){
 	int max;
 
 
@@ -1093,46 +1086,31 @@ static void MapQuad_r( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv
 	max &= 1;
 
 	/* split the longest edges */
-	LerpDrawVert( dv[ max ], dv[ ( max + 1 ) % 4 ], &mid[ 0 ] );
-	LerpDrawVert( dv[ max + 2 ], dv[ ( max + 3 ) % 4 ], &mid[ 1 ] );
+	const bspDrawVert_t mid[ 2 ] = {
+		LerpDrawVert( *dv[ max + 0 ], *dv[ ( max + 1 ) % 4 ] ),
+		LerpDrawVert( *dv[ max + 2 ], *dv[ ( max + 3 ) % 4 ] ) };
 
 	/* map the vertexes */
-	MapSingleLuxel( lm, info, &mid[ 0 ], plane, 1, stv, ttv, NULL );
-	MapSingleLuxel( lm, info, &mid[ 1 ], plane, 1, stv, ttv, NULL );
+	MapSingleLuxel( lm, info, mid[ 0 ], plane, 1, stv, ttv, NULL );
+	MapSingleLuxel( lm, info, mid[ 1 ], plane, 1, stv, ttv, NULL );
 
 	/* 0 and 2 */
 	if ( max == 0 ) {
 		/* recurse to first quad */
-		dv2[ 0 ] = dv[ 0 ];
-		dv2[ 1 ] = &mid[ 0 ];
-		dv2[ 2 ] = &mid[ 1 ];
-		dv2[ 3 ] = dv[ 3 ];
-		MapQuad_r( lm, info, dv2, plane, stv, ttv );
+		MapQuad_r( lm, info, QuadRef{ dv[ 0 ], &mid[ 0 ], &mid[ 1 ], dv[ 3 ] }, plane, stv, ttv );
 
 		/* recurse to second quad */
-		dv2[ 0 ] = &mid[ 0 ];
-		dv2[ 1 ] = dv[ 1 ];
-		dv2[ 2 ] = dv[ 2 ];
-		dv2[ 3 ] = &mid[ 1 ];
-		MapQuad_r( lm, info, dv2, plane, stv, ttv );
+		MapQuad_r( lm, info, QuadRef{ &mid[ 0 ], dv[ 1 ], dv[ 2 ], &mid[ 1 ] }, plane, stv, ttv );
 	}
 
 	/* 1 and 3 */
 	else
 	{
 		/* recurse to first quad */
-		dv2[ 0 ] = dv[ 0 ];
-		dv2[ 1 ] = dv[ 1 ];
-		dv2[ 2 ] = &mid[ 0 ];
-		dv2[ 3 ] = &mid[ 1 ];
-		MapQuad_r( lm, info, dv2, plane, stv, ttv );
+		MapQuad_r( lm, info, QuadRef{ dv[ 0 ], dv[ 1 ], &mid[ 0 ], &mid[ 1 ] }, plane, stv, ttv );
 
 		/* recurse to second quad */
-		dv2[ 0 ] = &mid[ 1 ];
-		dv2[ 1 ] = &mid[ 0 ];
-		dv2[ 2 ] = dv[ 2 ];
-		dv2[ 3 ] = dv[ 3 ];
-		MapQuad_r( lm, info, dv2, plane, stv, ttv );
+		MapQuad_r( lm, info, QuadRef{ &mid[ 1 ], &mid[ 0 ], dv[ 2 ], dv[ 3 ] }, plane, stv, ttv );
 	}
 }
 
@@ -1146,7 +1124,7 @@ static void MapQuad_r( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv
 
 #define QUAD_PLANAR_EPSILON     0.5f
 
-static bool MapQuad( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv[ 4 ] ){
+static bool MapQuad( rawLightmap_t *lm, surfaceInfo_t *info, const QuadRef& dv ){
 	Plane3f plane;
 	/* get plane if possible */
 	if ( lm->plane != NULL ) {
@@ -1164,7 +1142,7 @@ static bool MapQuad( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv[ 
 
 	Vector3          *stv, *ttv, stvStatic[ 4 ], ttvStatic[ 4 ];
 	/* check to see if we need to calculate texture->world tangent vectors */
-	if ( info->si->normalImage != NULL && CalcTangentVectors( 4, dv, stvStatic, ttvStatic ) ) {
+	if ( info->si->normalImage != NULL && CalcTangentVectors( dv, stvStatic, ttvStatic ) ) {
 		stv = stvStatic;
 		ttv = ttvStatic;
 	}
@@ -1175,10 +1153,10 @@ static bool MapQuad( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv[ 
 	}
 
 	/* map the vertexes */
-	MapSingleLuxel( lm, info, dv[ 0 ], &plane, 1, stv, ttv, NULL );
-	MapSingleLuxel( lm, info, dv[ 1 ], &plane, 1, stv, ttv, NULL );
-	MapSingleLuxel( lm, info, dv[ 2 ], &plane, 1, stv, ttv, NULL );
-	MapSingleLuxel( lm, info, dv[ 3 ], &plane, 1, stv, ttv, NULL );
+	MapSingleLuxel( lm, info, *dv[ 0 ], &plane, 1, stv, ttv, NULL );
+	MapSingleLuxel( lm, info, *dv[ 1 ], &plane, 1, stv, ttv, NULL );
+	MapSingleLuxel( lm, info, *dv[ 2 ], &plane, 1, stv, ttv, NULL );
+	MapSingleLuxel( lm, info, *dv[ 3 ], &plane, 1, stv, ttv, NULL );
 
 	/* subdivide the quad */
 	MapQuad_r( lm, info, dv, &plane, stv, ttv );
@@ -1199,7 +1177,7 @@ void MapRawLightmap( int rawLightmapNum ){
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info;
 	mesh_t src, *subdivided, *mesh;
-	bspDrawVert_t       *verts, *dv[ 4 ], fake;
+	bspDrawVert_t       *verts, fake;
 
 
 	/* bail if this number exceeds the number of raw lightmaps */
@@ -1252,15 +1230,11 @@ void MapRawLightmap( int rawLightmapNum ){
 
 			/* map the triangles */
 			for ( mapNonAxial = 0; mapNonAxial < 2; mapNonAxial++ )
-			{
 				for ( i = 0; i < ds->numIndexes; i += 3 )
-				{
-					dv[ 0 ] = &verts[ bspDrawIndexes[ ds->firstIndex + i ] ];
-					dv[ 1 ] = &verts[ bspDrawIndexes[ ds->firstIndex + i + 1 ] ];
-					dv[ 2 ] = &verts[ bspDrawIndexes[ ds->firstIndex + i + 2 ] ];
-					MapTriangle( lm, info, dv, mapNonAxial );
-				}
-			}
+					MapTriangle( lm, info, TriRef{
+						&verts[ bspDrawIndexes[ ds->firstIndex + i ] ],
+						&verts[ bspDrawIndexes[ ds->firstIndex + i + 1 ] ],
+						&verts[ bspDrawIndexes[ ds->firstIndex + i + 2 ] ] }, mapNonAxial );
 			break;
 
 		case MST_PATCH:
@@ -1280,17 +1254,17 @@ void MapRawLightmap( int rawLightmapNum ){
 			verts = mesh->verts;
 
 			/* debug code */
-				#if 0
+#if 0
 			if ( lm->plane ) {
 				Sys_Printf( "Planar patch: [%1.3f %1.3f %1.3f] [%1.3f %1.3f %1.3f] [%1.3f %1.3f %1.3f]\n",
 				            lm->plane[ 0 ], lm->plane[ 1 ], lm->plane[ 2 ],
 				            lm->vecs[ 0 ][ 0 ], lm->vecs[ 0 ][ 1 ], lm->vecs[ 0 ][ 2 ],
 				            lm->vecs[ 1 ][ 0 ], lm->vecs[ 1 ][ 1 ], lm->vecs[ 1 ][ 2 ] );
 			}
-				#endif
+#endif
 
 			/* map the mesh quads */
-				#if 0
+#if 0
 
 			for ( mapNonAxial = 0; mapNonAxial < 2; mapNonAxial++ )
 			{
@@ -1309,21 +1283,21 @@ void MapRawLightmap( int rawLightmapNum ){
 						r = ( x + y ) & 1;
 
 						/* get drawverts and map first triangle */
-						dv[ 0 ] = &verts[ pw[ r + 0 ] ];
-						dv[ 1 ] = &verts[ pw[ r + 1 ] ];
-						dv[ 2 ] = &verts[ pw[ r + 2 ] ];
-						MapTriangle( lm, info, dv, mapNonAxial );
+						MapTriangle( lm, info, TriRef{
+							&verts[ pw[ r + 0 ] ],
+							&verts[ pw[ r + 1 ] ],
+							&verts[ pw[ r + 2 ] ] }, mapNonAxial );
 
 						/* get drawverts and map second triangle */
-						dv[ 0 ] = &verts[ pw[ r + 0 ] ];
-						dv[ 1 ] = &verts[ pw[ r + 2 ] ];
-						dv[ 2 ] = &verts[ pw[ r + 3 ] ];
-						MapTriangle( lm, info, dv, mapNonAxial );
+						MapTriangle( lm, info, TriRef{
+							&verts[ pw[ r + 0 ] ],
+							&verts[ pw[ r + 2 ] ],
+							&verts[ pw[ r + 3 ] ] }, mapNonAxial );
 					}
 				}
 			}
 
-				#else
+#else
 
 			for ( y = 0; y < ( mesh->height - 1 ); y++ )
 			{
@@ -1340,30 +1314,32 @@ void MapRawLightmap( int rawLightmapNum ){
 					r = ( x + y ) & 1;
 
 					/* attempt to map quad first */
-					dv[ 0 ] = &verts[ pw[ r + 0 ] ];
-					dv[ 1 ] = &verts[ pw[ r + 1 ] ];
-					dv[ 2 ] = &verts[ pw[ r + 2 ] ];
-					dv[ 3 ] = &verts[ pw[ r + 3 ] ];
-					if ( MapQuad( lm, info, dv ) ) {
+					if ( MapQuad( lm, info, QuadRef{
+						&verts[ pw[ r + 0 ] ],
+						&verts[ pw[ r + 1 ] ],
+						&verts[ pw[ r + 2 ] ],
+						&verts[ pw[ r + 3 ] ] } ) ) {
 						continue;
 					}
 
 					for ( mapNonAxial = 0; mapNonAxial < 2; mapNonAxial++ )
 					{
 						/* get drawverts and map first triangle */
-						dv[ 1 ] = &verts[ pw[ r + 1 ] ];
-						dv[ 2 ] = &verts[ pw[ r + 2 ] ];
-						MapTriangle( lm, info, dv, mapNonAxial );
+						MapTriangle( lm, info, TriRef{
+							&verts[ pw[ r + 0 ] ],
+							&verts[ pw[ r + 1 ] ],
+							&verts[ pw[ r + 2 ] ] }, mapNonAxial );
 
 						/* get drawverts and map second triangle */
-						dv[ 1 ] = &verts[ pw[ r + 2 ] ];
-						dv[ 2 ] = &verts[ pw[ r + 3 ] ];
-						MapTriangle( lm, info, dv, mapNonAxial );
+						MapTriangle( lm, info, TriRef{
+							&verts[ pw[ r + 0 ] ],
+							&verts[ pw[ r + 2 ] ],
+							&verts[ pw[ r + 3 ] ] }, mapNonAxial );
 					}
 				}
 			}
 
-				#endif
+#endif
 
 			/* free the mesh */
 			FreeMesh( mesh );
@@ -1468,7 +1444,7 @@ void MapRawLightmap( int rawLightmapNum ){
 				}
 
 				/* map the fake vert */
-				MapSingleLuxel( lm, NULL, &fake, lm->plane, pass, NULL, NULL, NULL );
+				MapSingleLuxel( lm, NULL, fake, lm->plane, pass, NULL, NULL, NULL );
 			}
 		}
 	}

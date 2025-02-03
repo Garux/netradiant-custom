@@ -184,8 +184,7 @@ bool RadSampleImage( const byte *pixels, int width, int height, const Vector2& s
 
 	/* get pixel */
 	pixels += ( y * width * 4 ) + ( x * 4 );
-	VectorCopy( pixels, color.rgb() );
-	color.alpha() = pixels[ 3 ];
+	color = Color4f( pixels[ 0 ], pixels[ 1 ], pixels[ 2 ], pixels[ 3 ] );
 
 	if ( texturesRGB ) {
 		color[0] = Image_LinearFloatFromsRGBFloat( color[0] * ( 1.0 / 255.0 ) ) * 255.0;
@@ -638,11 +637,10 @@ void RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, const sh
 #define PLANAR_EPSILON  0.1f
 
 void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw ){
-	int i, x, y, v, t, pw[ 5 ], r;
+	int i, x, y, v, t, r;
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info;
 	bspDrawVert_t       *bogus;
-	bspDrawVert_t       *dv[ 4 ];
 	mesh_t src, *subdivided, *mesh;
 	bool planar;
 	radWinding_t rw;
@@ -687,21 +685,23 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 		for ( x = 0; x < ( mesh->width - 1 ); x++ )
 		{
 			/* set indexes */
-			pw[ 0 ] = x + ( y * mesh->width );
-			pw[ 1 ] = x + ( ( y + 1 ) * mesh->width );
-			pw[ 2 ] = x + 1 + ( ( y + 1 ) * mesh->width );
-			pw[ 3 ] = x + 1 + ( y * mesh->width );
-			pw[ 4 ] = x + ( y * mesh->width );    /* same as pw[ 0 ] */
-
+			const int pw[ 5 ] = {
+				x + ( y * mesh->width ),
+				x + ( ( y + 1 ) * mesh->width ),
+				x + 1 + ( ( y + 1 ) * mesh->width ),
+				x + 1 + ( y * mesh->width ),
+				x + ( y * mesh->width )    /* same as pw[ 0 ] */
+			};
 			/* set radix */
 			r = ( x + y ) & 1;
 
 			/* get drawverts */
-			dv[ 0 ] = &mesh->verts[ pw[ r + 0 ] ];
-			dv[ 1 ] = &mesh->verts[ pw[ r + 1 ] ];
-			dv[ 2 ] = &mesh->verts[ pw[ r + 2 ] ];
-			dv[ 3 ] = &mesh->verts[ pw[ r + 3 ] ];
-
+			const bspDrawVert_t *dv[ 4 ] = {
+				&mesh->verts[ pw[ r + 0 ] ],
+				&mesh->verts[ pw[ r + 1 ] ],
+				&mesh->verts[ pw[ r + 2 ] ],
+				&mesh->verts[ pw[ r + 3 ] ]
+			};
 			/* planar? */
 			Plane3f plane;
 			planar = PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz );

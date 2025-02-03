@@ -243,7 +243,7 @@ int ImportLightmapsMain( Args& args ){
 		{
 			out = lightmap + ( ( g_game->lightmapSize - y ) * g_game->lightmapSize * 3 );
 			for ( x = 0; x < g_game->lightmapSize; x++, in += 4, out += 3 )
-				VectorCopy( in, out );
+				std::copy_n( in, 3, out );
 		}
 
 		/* free the image */
@@ -1494,10 +1494,10 @@ static bool MergeBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int bN
    determines if a single luxel is can be approximated with the interpolated vertex rgba
  */
 
-static bool ApproximateLuxel( rawLightmap_t *lm, bspDrawVert_t *dv ){
+static bool ApproximateLuxel( rawLightmap_t *lm, const bspDrawVert_t& dv ){
 	/* find luxel xy coords */
-	const int x = std::clamp( int( dv->lightmap[ 0 ][ 0 ] / superSample ), 0, lm->w - 1 );
-	const int y = std::clamp( int( dv->lightmap[ 0 ][ 1 ] / superSample ), 0, lm->h - 1 );
+	const int x = std::clamp( int( dv.lightmap[ 0 ][ 0 ] / superSample ), 0, lm->w - 1 );
+	const int y = std::clamp( int( dv.lightmap[ 0 ][ 1 ] / superSample ), 0, lm->h - 1 );
 
 	/* walk list */
 	for ( int lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
@@ -1517,7 +1517,7 @@ static bool ApproximateLuxel( rawLightmap_t *lm, bspDrawVert_t *dv ){
 
 		/* copy, set min color and compare */
 		Vector3 color = luxel;
-		Vector3 vertexColor = dv->color[ 0 ].rgb();
+		Vector3 vertexColor = dv.color[ 0 ].rgb();
 
 		/* styles are not affected by minlight */
 		if ( lightmapNum == 0 ) {
@@ -1553,19 +1553,18 @@ static bool ApproximateLuxel( rawLightmap_t *lm, bspDrawVert_t *dv ){
    determines if a single triangle can be approximated with vertex rgba
  */
 
-static bool ApproximateTriangle_r( rawLightmap_t *lm, bspDrawVert_t *dv[ 3 ] ){
-	bspDrawVert_t mid, *dv2[ 3 ];
+static bool ApproximateTriangle_r( rawLightmap_t *lm, const TriRef& tri ){
 	int max;
 
 
 	/* approximate the vertexes */
-	if ( !ApproximateLuxel( lm, dv[ 0 ] ) ) {
+	if ( !ApproximateLuxel( lm, *tri[ 0 ] ) ) {
 		return false;
 	}
-	if ( !ApproximateLuxel( lm, dv[ 1 ] ) ) {
+	if ( !ApproximateLuxel( lm, *tri[ 1 ] ) ) {
 		return false;
 	}
-	if ( !ApproximateLuxel( lm, dv[ 2 ] ) ) {
+	if ( !ApproximateLuxel( lm, *tri[ 2 ] ) ) {
 		return false;
 	}
 
@@ -1578,7 +1577,7 @@ static bool ApproximateTriangle_r( rawLightmap_t *lm, bspDrawVert_t *dv[ 3 ] ){
 		float maxDist = 0;
 		for ( i = 0; i < 3; i++ )
 		{
-			const float dist = vector2_length( dv[ i ]->lightmap[ 0 ] - dv[ ( i + 1 ) % 3 ]->lightmap[ 0 ] );
+			const float dist = vector2_length( tri[ i ]->lightmap[ 0 ] - tri[ ( i + 1 ) % 3 ]->lightmap[ 0 ] );
 			if ( dist > maxDist ) {
 				maxDist = dist;
 				max = i;
@@ -1592,22 +1591,22 @@ static bool ApproximateTriangle_r( rawLightmap_t *lm, bspDrawVert_t *dv[ 3 ] ){
 	}
 
 	/* split the longest edge and map it */
-	LerpDrawVert( dv[ max ], dv[ ( max + 1 ) % 3 ], &mid );
-	if ( !ApproximateLuxel( lm, &mid ) ) {
+	const bspDrawVert_t mid = LerpDrawVert( *tri[ max ], *tri[ ( max + 1 ) % 3 ] );
+	if ( !ApproximateLuxel( lm, mid ) ) {
 		return false;
 	}
 
 	/* recurse to first triangle */
-	VectorCopy( dv, dv2 );
-	dv2[ max ] = &mid;
-	if ( !ApproximateTriangle_r( lm, dv2 ) ) {
+	TriRef tri2 = tri;
+	tri2[ max ] = &mid;
+	if ( !ApproximateTriangle_r( lm, tri2 ) ) {
 		return false;
 	}
 
 	/* recurse to second triangle */
-	VectorCopy( dv, dv2 );
-	dv2[ ( max + 1 ) % 3 ] = &mid;
-	return ApproximateTriangle_r( lm, dv2 );
+	tri2 = tri;
+	tri2[ ( max + 1 ) % 3 ] = &mid;
+	return ApproximateTriangle_r( lm, tri2 );
 }
 
 
@@ -1622,7 +1621,7 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info;
 	mesh_t src, *subdivided, *mesh;
-	bspDrawVert_t       *verts, *dv[ 3 ];
+	const bspDrawVert_t       *verts;
 	bool approximated;
 
 
@@ -1691,10 +1690,10 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 			info->approximated = true;
 			for ( i = 0; i < ds->numIndexes && info->approximated; i += 3 )
 			{
-				dv[ 0 ] = &verts[ bspDrawIndexes[ ds->firstIndex + i ] ];
-				dv[ 1 ] = &verts[ bspDrawIndexes[ ds->firstIndex + i + 1 ] ];
-				dv[ 2 ] = &verts[ bspDrawIndexes[ ds->firstIndex + i + 2 ] ];
-				info->approximated = ApproximateTriangle_r( lm, dv );
+				info->approximated = ApproximateTriangle_r( lm, TriRef{
+					&verts[ bspDrawIndexes[ ds->firstIndex + i + 0 ] ],
+					&verts[ bspDrawIndexes[ ds->firstIndex + i + 1 ] ],
+					&verts[ bspDrawIndexes[ ds->firstIndex + i + 2 ] ] } );
 			}
 			break;
 
@@ -1731,17 +1730,17 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 					r = ( x + y ) & 1;
 
 					/* get drawverts and map first triangle */
-					dv[ 0 ] = &verts[ pw[ r + 0 ] ];
-					dv[ 1 ] = &verts[ pw[ r + 1 ] ];
-					dv[ 2 ] = &verts[ pw[ r + 2 ] ];
-					info->approximated = ApproximateTriangle_r( lm, dv );
+					info->approximated = ApproximateTriangle_r( lm, TriRef{
+						&verts[ pw[ r + 0 ] ],
+						&verts[ pw[ r + 1 ] ],
+						&verts[ pw[ r + 2 ] ] } );
 
 					/* get drawverts and map second triangle */
-					dv[ 0 ] = &verts[ pw[ r + 0 ] ];
-					dv[ 1 ] = &verts[ pw[ r + 2 ] ];
-					dv[ 2 ] = &verts[ pw[ r + 3 ] ];
 					if ( info->approximated ) {
-						info->approximated = ApproximateTriangle_r( lm, dv );
+						info->approximated = ApproximateTriangle_r( lm, TriRef{
+							&verts[ pw[ r + 0 ] ],
+							&verts[ pw[ r + 2 ] ],
+							&verts[ pw[ r + 3 ] ] } );
 					}
 				}
 			}

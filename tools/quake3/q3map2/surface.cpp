@@ -2780,8 +2780,7 @@ static void BiasSurfaceTextures( mapDrawSurface_t *ds ){
    adds models to a specified triangle, returns the number of models added
  */
 
-static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceModel_t& model, bspDrawVert_t **tri, entity_t& entity ){
-	bspDrawVert_t mid, *tri2[ 3 ];
+static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceModel_t& model, const TriRef& tri, entity_t& entity ){
 	int max, n, localNumSurfaceModels;
 
 
@@ -2880,10 +2879,10 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceMode
 	}
 
 	/* split the longest edge and map it */
-	LerpDrawVert( tri[ max ], tri[ ( max + 1 ) % 3 ], &mid );
+	const bspDrawVert_t mid = LerpDrawVert( *tri[ max ], *tri[ ( max + 1 ) % 3 ] );
 
 	/* recurse to first triangle */
-	VectorCopy( tri, tri2 );
+	TriRef tri2 = tri;
 	tri2[ max ] = &mid;
 	n = AddSurfaceModelsToTriangle_r( ds, model, tri2, entity );
 	if ( n < 0 ) {
@@ -2892,7 +2891,7 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceMode
 	localNumSurfaceModels += n;
 
 	/* recurse to second triangle */
-	VectorCopy( tri, tri2 );
+	tri2 = tri;
 	tri2[ ( max + 1 ) % 3 ] = &mid;
 	n = AddSurfaceModelsToTriangle_r( ds, model, tri2, entity );
 	if ( n < 0 ) {
@@ -2912,9 +2911,9 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceMode
  */
 
 static int AddSurfaceModels( mapDrawSurface_t *ds, entity_t& entity ){
-	int i, x, y, n, pw[ 5 ], r, localNumSurfaceModels, iterations;
+	int localNumSurfaceModels, iterations;
 	mesh_t src, *mesh, *subdivided;
-	bspDrawVert_t centroid, *tri[ 3 ];
+	bspDrawVert_t centroid;
 	float alpha;
 
 
@@ -2956,18 +2955,14 @@ static int AddSurfaceModels( mapDrawSurface_t *ds, entity_t& entity ){
 			centroid.st /= ds->numVerts;
 			centroid.color[ 0 ] = { 255, 255, 255, color_to_byte( alpha / ds->numVerts ) };
 
-			/* head vert is centroid */
-			tri[ 0 ] = &centroid;
-
 			/* walk fanned triangles */
-			for ( i = 0; i < ds->numVerts; i++ )
+			for ( int i = 0; i < ds->numVerts; i++ )
 			{
-				/* set triangle */
-				tri[ 1 ] = &ds->verts[ i ];
-				tri[ 2 ] = &ds->verts[ ( i + 1 ) % ds->numVerts ];
-
 				/* create models */
-				n = AddSurfaceModelsToTriangle_r( ds, model, tri, entity );
+				const int n = AddSurfaceModelsToTriangle_r( ds, model, TriRef{
+					&centroid, /* head vert is centroid */
+					&ds->verts[ i ],
+					&ds->verts[ ( i + 1 ) % ds->numVerts ] }, entity );
 				if ( n < 0 ) {
 					return n;
 				}
@@ -2991,39 +2986,40 @@ static int AddSurfaceModels( mapDrawSurface_t *ds, entity_t& entity ){
 			FreeMesh( subdivided );
 
 			/* subdivide each quad to place the models */
-			for ( y = 0; y < ( mesh->height - 1 ); y++ )
+			for ( int y = 0; y < ( mesh->height - 1 ); y++ )
 			{
-				for ( x = 0; x < ( mesh->width - 1 ); x++ )
+				for ( int x = 0; x < ( mesh->width - 1 ); x++ )
 				{
 					/* set indexes */
-					pw[ 0 ] = x + ( y * mesh->width );
-					pw[ 1 ] = x + ( ( y + 1 ) * mesh->width );
-					pw[ 2 ] = x + 1 + ( ( y + 1 ) * mesh->width );
-					pw[ 3 ] = x + 1 + ( y * mesh->width );
-					pw[ 4 ] = x + ( y * mesh->width );      /* same as pw[ 0 ] */
-
+					const int pw[ 5 ] = {
+						x + ( y * mesh->width ),
+						x + ( ( y + 1 ) * mesh->width ),
+						x + 1 + ( ( y + 1 ) * mesh->width ),
+						x + 1 + ( y * mesh->width ),
+						x + ( y * mesh->width ),      /* same as pw[ 0 ] */
+					};
 					/* set radix */
-					r = ( x + y ) & 1;
+					const int r = ( x + y ) & 1;
 
 					/* triangle 1 */
-					tri[ 0 ] = &mesh->verts[ pw[ r + 0 ] ];
-					tri[ 1 ] = &mesh->verts[ pw[ r + 1 ] ];
-					tri[ 2 ] = &mesh->verts[ pw[ r + 2 ] ];
-					n = AddSurfaceModelsToTriangle_r( ds, model, tri, entity );
+					const int n = AddSurfaceModelsToTriangle_r( ds, model, TriRef{
+						&mesh->verts[ pw[ r + 0 ] ],
+						&mesh->verts[ pw[ r + 1 ] ],
+						&mesh->verts[ pw[ r + 2 ] ] }, entity );
 					if ( n < 0 ) {
 						return n;
 					}
 					localNumSurfaceModels += n;
 
 					/* triangle 2 */
-					tri[ 0 ] = &mesh->verts[ pw[ r + 0 ] ];
-					tri[ 1 ] = &mesh->verts[ pw[ r + 2 ] ];
-					tri[ 2 ] = &mesh->verts[ pw[ r + 3 ] ];
-					n = AddSurfaceModelsToTriangle_r( ds, model, tri, entity );
-					if ( n < 0 ) {
-						return n;
+					const int n2 = AddSurfaceModelsToTriangle_r( ds, model, TriRef{
+						&mesh->verts[ pw[ r + 0 ] ],
+						&mesh->verts[ pw[ r + 2 ] ],
+						&mesh->verts[ pw[ r + 3 ] ] }, entity );
+					if ( n2 < 0 ) {
+						return n2;
 					}
-					localNumSurfaceModels += n;
+					localNumSurfaceModels += n2;
 				}
 			}
 
@@ -3036,12 +3032,12 @@ static int AddSurfaceModels( mapDrawSurface_t *ds, entity_t& entity ){
 		case ESurfaceType::ForcedMeta:
 		case ESurfaceType::Meta:
 			/* walk the triangle list */
-			for ( i = 0; i < ds->numIndexes; i += 3 )
+			for ( int i = 0; i < ds->numIndexes; i += 3 )
 			{
-				tri[ 0 ] = &ds->verts[ ds->indexes[ i ] ];
-				tri[ 1 ] = &ds->verts[ ds->indexes[ i + 1 ] ];
-				tri[ 2 ] = &ds->verts[ ds->indexes[ i + 2 ] ];
-				n = AddSurfaceModelsToTriangle_r( ds, model, tri, entity );
+				const int n = AddSurfaceModelsToTriangle_r( ds, model, TriRef{
+					&ds->verts[ ds->indexes[ i + 0 ] ],
+					&ds->verts[ ds->indexes[ i + 1 ] ],
+					&ds->verts[ ds->indexes[ i + 2 ] ] }, entity );
 				if ( n < 0 ) {
 					return n;
 				}
