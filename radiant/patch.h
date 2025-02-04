@@ -1091,11 +1091,11 @@ inline bool Patch_importMatrix( Patch& patch, Tokeniser& tokeniser ){
 			{
 				RETURN_FALSE_IF_FAIL( Tokeniser_parseToken( tokeniser, "(" ) );
 
-				RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, patch.ctrlAt( r,c ).m_vertex[0] ) );
-				RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, patch.ctrlAt( r,c ).m_vertex[1] ) );
-				RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, patch.ctrlAt( r,c ).m_vertex[2] ) );
-				RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, patch.ctrlAt( r,c ).m_texcoord[0] ) );
-				RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, patch.ctrlAt( r,c ).m_texcoord[1] ) );
+				RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, patch.ctrlAt( r, c ).m_vertex[0] ) );
+				RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, patch.ctrlAt( r, c ).m_vertex[1] ) );
+				RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, patch.ctrlAt( r, c ).m_vertex[2] ) );
+				RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, patch.ctrlAt( r, c ).m_texcoord[0] ) );
+				RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, patch.ctrlAt( r, c ).m_texcoord[1] ) );
 
 				RETURN_FALSE_IF_FAIL( Tokeniser_parseToken( tokeniser, ")" ) );
 			}
@@ -1212,11 +1212,11 @@ inline void Patch_exportMatrix( const Patch& patch, TokenWriter& writer ){
 		{
 			writer.writeToken( "(" );
 
-			writer.writeFloat( patch.ctrlAt( r,c ).m_vertex[0] );
-			writer.writeFloat( patch.ctrlAt( r,c ).m_vertex[1] );
-			writer.writeFloat( patch.ctrlAt( r,c ).m_vertex[2] );
-			writer.writeFloat( patch.ctrlAt( r,c ).m_texcoord[0] );
-			writer.writeFloat( patch.ctrlAt( r,c ).m_texcoord[1] );
+			writer.writeFloat( patch.ctrlAt( r, c ).m_vertex[0] );
+			writer.writeFloat( patch.ctrlAt( r, c ).m_vertex[1] );
+			writer.writeFloat( patch.ctrlAt( r, c ).m_vertex[2] );
+			writer.writeFloat( patch.ctrlAt( r, c ).m_texcoord[0] );
+			writer.writeFloat( patch.ctrlAt( r, c ).m_texcoord[1] );
 
 			writer.writeToken( ")" );
 		}

@@ -618,7 +618,7 @@ void MakeBevel( vec3_t vMin, vec3_t vMax ){
 	{
 		for ( int j = 0; j < 1; j++ )
 		{
-			PatchControl& p = matrix( i,2 - j );
+			PatchControl& p = matrix( i, 2 - j );
 			PatchControl& q = matrix( i, j );
 			std::swap( p.m_vertex, q.m_vertex );
 			//std::swap(p.m_texcoord, q.m_texcoord);

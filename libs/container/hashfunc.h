@@ -121,7 +121,7 @@ public:
    to choose from.  I only looked at a billion or so.
    --------------------------------------------------------------------
  */
-#define mix( a,b,c ) \
+#define mix( a, b, c ) \
 	{ \
 		a -= b; a -= c; a ^= ( c >> 13 ); \
 		b -= c; b -= a; b ^= ( a << 8 ); \
@@ -135,7 +135,7 @@ public:
 	}
 
 /* same, but slower, works on systems that might have 8 byte ub4's */
-#define mix2( a,b,c ) \
+#define mix2( a, b, c ) \
 	{ \
 		a -= b; a -= c; a ^= ( c >> 13 ); \
 		b -= c; b -= a; b ^= ( a << 8 ); \
@@ -181,7 +181,7 @@ inline ub4 hash(
     const UB1Traits& ub1traits,
     const UB4x1Traits& ub4x1traits
 ){
-	ub4 a,b,c,len;
+	ub4 a, b, c, len;
 
 	/* Set up the internal state */
 	len = length;
@@ -194,7 +194,7 @@ inline ub4 hash(
 		a += ( k[0] + ( ( ub4 ) UB1Traits::as_ub1( k[1] ) << 8 ) + ( ( ub4 ) UB1Traits::as_ub1( k[2] ) << 16 ) + ( ( ub4 ) UB1Traits::as_ub1( k[3] ) << 24 ) );
 		b += ( k[4] + ( ( ub4 ) UB1Traits::as_ub1( k[5] ) << 8 ) + ( ( ub4 ) UB1Traits::as_ub1( k[6] ) << 16 ) + ( ( ub4 ) UB1Traits::as_ub1( k[7] ) << 24 ) );
 		c += ( k[8] + ( ( ub4 ) UB1Traits::as_ub1( k[9] ) << 8 ) + ( ( ub4 ) UB1Traits::as_ub1( k[10] ) << 16 ) + ( ( ub4 ) UB1Traits::as_ub1( k[11] ) << 24 ) );
-		mix( a,b,c );
+		mix( a, b, c );
 		k += 12;
 		len -= 12;
 	}
@@ -217,7 +217,7 @@ inline ub4 hash(
 	case 1: a += UB1Traits::as_ub1( k[0] );
 		/* case 0: nothing left to add */
 	}
-	mix( a,b,c );
+	mix( a, b, c );
 	/*-------------------------------------------- report the result */
 	return c;
 }
@@ -240,7 +240,7 @@ inline ub4 hash2(
     ub4 initval, /* the previous hash, or an arbitrary value */
     const UB4Traits& ub4traits
 ){
-	ub4 a,b,c,len;
+	ub4 a, b, c, len;
 
 	/* Set up the internal state */
 	len = length;
@@ -253,7 +253,7 @@ inline ub4 hash2(
 		a += UB4Traits::as_ub4( k[0] );
 		b += UB4Traits::as_ub4( k[1] );
 		c += UB4Traits::as_ub4( k[2] );
-		mix( a,b,c );
+		mix( a, b, c );
 		k += 3;
 		len -= 3;
 	}
@@ -267,7 +267,7 @@ inline ub4 hash2(
 	case 1: a += UB4Traits::as_ub4( k[0] );
 		/* case 0: nothing left to add */
 	}
-	mix( a,b,c );
+	mix( a, b, c );
 	/*-------------------------------------------- report the result */
 	return c;
 }
@@ -284,7 +284,7 @@ inline hash_t hash_ub1_nocase( const ub1* key, std::size_t len, hash_t previous 
 
 template<typename UB4Traits>
 inline hash_t hash_ub4( const ub4* key, std::size_t len, const UB4Traits& traits, hash_t previous = 0 ){
-	return hash2( key,ub4( len ), previous, traits );
+	return hash2( key, ub4( len ), previous, traits );
 }
 
 inline ub4 hash_combine( ub4 left, ub4 right ){

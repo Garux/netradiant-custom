@@ -1331,11 +1331,6 @@ void XYWnd::XY_DrawGrid() {
 	const float yb = step * floor( std::max( m_vOrigin[nDim2] - h, g_region_mins[nDim2] ) / step );
 	const float ye = step * ceil( std::min( m_vOrigin[nDim2] + h, g_region_maxs[nDim2] ) / step );
 
-#define COLORS_DIFFER( a,b ) \
-	( ( a )[0] != ( b )[0] || \
-	  ( a )[1] != ( b )[1] || \
-	  ( a )[2] != ( b )[2] )
-
 	// djbob
 	// draw minor blocks
 	if ( g_xywindow_globals_private.d_showgrid /*|| a < 1.0f*/ ) {
@@ -1343,7 +1338,7 @@ void XYWnd::XY_DrawGrid() {
 			gl().glEnable( GL_BLEND );
 		}
 
-		if ( COLORS_DIFFER( g_xywindow_globals.color_gridminor, g_xywindow_globals.color_gridback ) ) {
+		if ( g_xywindow_globals.color_gridminor != g_xywindow_globals.color_gridback ) {
 			gl().glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridminor, a ) ) );
 
 			gl().glBegin( GL_LINES );
@@ -1365,7 +1360,7 @@ void XYWnd::XY_DrawGrid() {
 		}
 
 		// draw major blocks
-		if ( COLORS_DIFFER( g_xywindow_globals.color_gridmajor, g_xywindow_globals.color_gridminor ) ) {
+		if ( g_xywindow_globals.color_gridmajor != g_xywindow_globals.color_gridminor ) {
 			gl().glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridmajor, a ) ) );
 
 			gl().glBegin( GL_LINES );
@@ -1392,7 +1387,7 @@ void XYWnd::XY_DrawGrid() {
 
 			gl().glEnable( GL_BLEND );
 			// draw minor blocks
-			if ( COLORS_DIFFER( g_xywindow_globals.color_gridminor, g_xywindow_globals.color_gridback ) ) {
+			if ( g_xywindow_globals.color_gridminor != g_xywindow_globals.color_gridback ) {
 				gl().glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridminor, .5f ) ) );
 
 				gl().glBegin( GL_LINES );
@@ -1414,7 +1409,7 @@ void XYWnd::XY_DrawGrid() {
 			}
 
 			// draw major blocks
-			if ( COLORS_DIFFER( g_xywindow_globals.color_gridmajor, g_xywindow_globals.color_gridminor ) ) {
+			if ( g_xywindow_globals.color_gridmajor != g_xywindow_globals.color_gridminor ) {
 				gl().glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridmajor, .5f ) ) );
 
 				gl().glBegin( GL_LINES );
@@ -1561,7 +1556,7 @@ void XYWnd::XY_DrawBlockGrid(){
 			for ( float y = yb; y < ye; y += bs2 )
 			{
 				gl().glRasterPos2f( x + ( bs1 / 2 ), y + ( bs2 / 2 ) );
-				sprintf( text, "%i,%i",(int)floor( x / bs1 ), (int)floor( y / bs2 ) );
+				sprintf( text, "%i,%i", (int)floor( x / bs1 ), (int)floor( y / bs2 ) );
 				GlobalOpenGL().drawString( text );
 			}
 	}
@@ -1585,12 +1580,12 @@ void XYWnd::DrawCameraIcon( const Vector3& origin, const Vector3& angles ){
 
 	gl().glColor3fv( vector3_to_array( g_xywindow_globals.color_camera ) );
 	gl().glBegin( GL_LINE_STRIP );
-	gl().glVertex3f( x - box,y,0 );
-	gl().glVertex3f( x,y + ( box / 2 ),0 );
-	gl().glVertex3f( x + box,y,0 );
-	gl().glVertex3f( x,y - ( box / 2 ),0 );
-	gl().glVertex3f( x - box,y,0 );
-	gl().glVertex3f( x + box,y,0 );
+	gl().glVertex3f( x - box, y              , 0 );
+	gl().glVertex3f( x      , y + ( box / 2 ), 0 );
+	gl().glVertex3f( x + box, y              , 0 );
+	gl().glVertex3f( x      , y - ( box / 2 ), 0 );
+	gl().glVertex3f( x - box, y              , 0 );
+	gl().glVertex3f( x + box, y              , 0 );
 	gl().glEnd();
 
 	gl().glBegin( GL_LINE_STRIP );
@@ -2309,9 +2304,9 @@ void XYWindow_Construct(){
 	GlobalPreferenceSystem().registerPreference( "SI_ShowAxis", BoolImportStringCaller( g_xywindow_globals_private.show_axis ), BoolExportStringCaller( g_xywindow_globals_private.show_axis ) );
 	GlobalPreferenceSystem().registerPreference( "ShowWorkzone2d", BoolImportStringCaller( g_xywindow_globals_private.show_workzone ), BoolExportStringCaller( g_xywindow_globals_private.show_workzone ) );
 
-	GlobalPreferenceSystem().registerPreference( "ColorAxisX", Colour4bImportStringCaller( g_colour_x ),Colour4bExportStringCaller( g_colour_x ) );
-	GlobalPreferenceSystem().registerPreference( "ColorAxisY", Colour4bImportStringCaller( g_colour_y ),Colour4bExportStringCaller( g_colour_y ) );
-	GlobalPreferenceSystem().registerPreference( "ColorAxisZ", Colour4bImportStringCaller( g_colour_z ),Colour4bExportStringCaller( g_colour_z ) );
+	GlobalPreferenceSystem().registerPreference( "ColorAxisX", Colour4bImportStringCaller( g_colour_x ), Colour4bExportStringCaller( g_colour_x ) );
+	GlobalPreferenceSystem().registerPreference( "ColorAxisY", Colour4bImportStringCaller( g_colour_y ), Colour4bExportStringCaller( g_colour_y ) );
+	GlobalPreferenceSystem().registerPreference( "ColorAxisZ", Colour4bImportStringCaller( g_colour_z ), Colour4bExportStringCaller( g_colour_z ) );
 	GlobalPreferenceSystem().registerPreference( "ColorGridBackground", Vector3ImportStringCaller( g_xywindow_globals.color_gridback ), Vector3ExportStringCaller( g_xywindow_globals.color_gridback ) );
 	GlobalPreferenceSystem().registerPreference( "ColorGridMinor", Vector3ImportStringCaller( g_xywindow_globals.color_gridminor ), Vector3ExportStringCaller( g_xywindow_globals.color_gridminor ) );
 	GlobalPreferenceSystem().registerPreference( "ColorGridMajor", Vector3ImportStringCaller( g_xywindow_globals.color_gridmajor ), Vector3ExportStringCaller( g_xywindow_globals.color_gridmajor ) );

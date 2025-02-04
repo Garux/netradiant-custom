@@ -57,8 +57,8 @@ void Error( const char *error, ... ){
 	va_list argptr;
 	char text[4096];
 
-	va_start( argptr,error );
-	vsprintf( text, error,argptr );
+	va_start( argptr, error );
+	vsprintf( text, error, argptr );
 	va_end( argptr );
 
 	strcat( text, "\n" );

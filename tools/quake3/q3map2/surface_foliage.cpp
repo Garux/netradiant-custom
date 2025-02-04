@@ -155,14 +155,8 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
  */
 
 void Foliage( mapDrawSurface_t *src, entity_t& entity ){
-	int oldNumMapDrawSurfs;
-	shaderInfo_t        *si;
-	mesh_t srcMesh, *subdivided, *mesh;
-	const bspDrawVert_t       *verts;
-
-
 	/* get shader */
-	si = src->shaderInfo;
+	shaderInfo_t *si = src->shaderInfo;
 	if ( si == NULL || si->foliage.empty() ) {
 		return;
 	}
@@ -179,8 +173,9 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 		case ESurfaceType::Meta:
 		case ESurfaceType::ForcedMeta:
 		case ESurfaceType::Triangles:
+		{
 			/* get verts */
-			verts = src->verts;
+			const bspDrawVert_t *verts = src->verts;
 
 			/* map the triangles */
 			for ( int i = 0; i < src->numIndexes; i += 3 )
@@ -190,21 +185,23 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 					&verts[ src->indexes[ i + 2 ] ]
 				} );
 			break;
-
+		}
 		case ESurfaceType::Patch:
+		{
 			/* make a mesh from the drawsurf */
+			mesh_t srcMesh;
 			srcMesh.width = src->patchWidth;
 			srcMesh.height = src->patchHeight;
 			srcMesh.verts = src->verts;
-			subdivided = SubdivideMesh( srcMesh, 8, 512 );
+			mesh_t *subdivided = SubdivideMesh( srcMesh, 8, 512 );
 
 			/* fit it to the curve and remove colinear verts on rows/columns */
 			PutMeshOnCurve( *subdivided );
-			mesh = RemoveLinearMeshColumnsRows( subdivided );
+			mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
 			FreeMesh( subdivided );
 
 			/* get verts */
-			verts = mesh->verts;
+			const bspDrawVert_t *verts = mesh->verts;
 
 			/* map the mesh quads */
 			for ( int y = 0; y < ( mesh->height - 1 ); y++ )
@@ -240,7 +237,7 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 			/* free the mesh */
 			FreeMesh( mesh );
 			break;
-
+		}
 		default:
 			break;
 		}
@@ -251,7 +248,7 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 		}
 
 		/* remember surface count */
-		oldNumMapDrawSurfs = numMapDrawSurfs;
+		const int oldNumMapDrawSurfs = numMapDrawSurfs;
 
 		/* add the model to the bsp */
 		InsertModel( foliage.model.c_str(), NULL, 0, matrix4_scale_for_vec3( Vector3( foliage.scale ) ), NULL, NULL, entity, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, clipDepthGlobal );

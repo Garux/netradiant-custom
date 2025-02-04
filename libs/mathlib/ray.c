@@ -22,7 +22,7 @@
 #include "mathlib.h"
 #include <float.h>
 
-vec3_t identity = { 0,0,0 };
+vec3_t identity = { 0, 0, 0 };
 
 void ray_construct_for_vec3( ray_t *ray, const vec3_t origin, const vec3_t direction ){
 	VectorCopy( origin, ray->origin );
@@ -62,7 +62,7 @@ vec_t ray_intersect_point( const ray_t *ray, const vec3_t point, vec_t epsilon, 
 
 vec_t ray_intersect_triangle( const ray_t *ray, bool bCullBack, const vec3_t vert0, const vec3_t vert1, const vec3_t vert2 ){
 	float edge1[3], edge2[3], tvec[3], pvec[3], qvec[3];
-	float det,inv_det;
+	float det, inv_det;
 	float u, v;
 	vec_t depth = (vec_t)FLT_MAX;
 

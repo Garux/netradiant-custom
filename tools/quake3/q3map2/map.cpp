@@ -167,23 +167,23 @@ static bool SnapNormal( Vector3& normal ){
 
 
 	/*
-	for ( i=0; i<30; i++ )
+	for ( i = 0; i < 30; i++ )
 	{
 		double x, y, z, length;
 		x=(double) 1.0;
 		y=(double) ( 0.00001 * i );
 		z=(double) 0.0;
 
-		Sys_Printf("(%6.18f %6.18f %6.18f)inNormal\n", x,y,z );
+		Sys_Printf( "(%6.18f %6.18f %6.18f)inNormal\n", x, y, z );
 
 		length = sqrt( ( x * x ) + ( y * y ) + ( z * z ) );
-		Sys_Printf("(%6.18f)length\n", length);
+		Sys_Printf( "(%6.18f)length\n", length );
 		x = (vec_t) ( x / length );
 		y = (vec_t) ( y / length );
 		z = (vec_t) ( z / length );
-		Sys_Printf("(%6.18f %6.18f %6.18f)outNormal\n\n", x,y,z );
+		Sys_Printf( "(%6.18f %6.18f %6.18f)outNormal\n\n", x, y, z );
 	}
-	Error("vectorNormalize test completed");
+	Error( "vectorNormalize test completed" );
 	*/
 
 	for ( i = 0; i < 3; i++ )

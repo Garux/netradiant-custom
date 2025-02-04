@@ -1145,10 +1145,10 @@ inline void draw_semicircle( const std::size_t segments, const float radius, ite
 		remap_policy::set( ( *nxpy ),-x, y, 0 );
 		remap_policy::set( ( *nxny ),-x,-y, 0 );
 
-		//remap_policy::set((*pypx), y, x, 0);
-		//remap_policy::set((*pynx), y,-x, 0);
-		//remap_policy::set((*nypx),-y, x, 0);
-		//remap_policy::set((*nynx),-y,-x, 0);
+		//remap_policy::set( ( *pypx), y, x, 0 );
+		//remap_policy::set( ( *pynx), y,-x, 0 );
+		//remap_policy::set( ( *nypx),-y, x, 0 );
+		//remap_policy::set( ( *nynx),-y,-x, 0 );
 	}
 }
 

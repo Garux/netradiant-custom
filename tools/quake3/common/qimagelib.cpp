@@ -106,15 +106,15 @@ typedef enum
 
 typedef struct
 {
-	UWORD w,h;
-	short x,y;
+	UWORD w, h;
+	short x, y;
 	UBYTE nPlanes;
 	UBYTE masking;
 	UBYTE compression;
 	UBYTE pad1;
 	UWORD transparentColor;
-	UBYTE xAspect,yAspect;
-	short pageWidth,pageHeight;
+	UBYTE xAspect, yAspect;
+	short pageWidth, pageHeight;
 } bmhd_t;
 
 extern bmhd_t bmhd;                         // will be in native byte order
@@ -147,9 +147,9 @@ int    Align( int l ){
    Source must be evenly aligned!
    ================
  */
-byte  *LBMRLEDecompress( byte *source,byte *unpacked, int bpwidth ){
+byte  *LBMRLEDecompress( byte *source, byte *unpacked, int bpwidth ){
 	int count;
-	byte b,rept;
+	byte b, rept;
 
 	count = 0;
 
@@ -160,12 +160,12 @@ byte  *LBMRLEDecompress( byte *source,byte *unpacked, int bpwidth ){
 		if ( rept > 0x80 ) {
 			rept = ( rept ^ 0xff ) + 2;
 			b = *source++;
-			memset( unpacked,b,rept );
+			memset( unpacked, b, rept );
 			unpacked += rept;
 		}
 		else if ( rept < 0x80 ) {
 			rept++;
-			memcpy( unpacked,source,rept );
+			memcpy( unpacked, source, rept );
 			unpacked += rept;
 			source += rept;
 		}
@@ -198,8 +198,8 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
 	byte    *pic_p;
 	byte    *body_p;
 
-	int formtype,formlength;
-	int chunktype,chunklength;
+	int formtype, formlength;
+	int chunktype, chunklength;
 
 // qiet compiler warnings
 	picbuffer = NULL;
@@ -226,8 +226,8 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
 	formtype = LittleLong( *(int *)LBM_P );
 
 	if ( formtype != ILBMID && formtype != PBMID ) {
-		Error( "Unrecognized form type: %c%c%c%c\n", formtype & 0xff
-		       ,( formtype >> 8 ) & 0xff,( formtype >> 16 ) & 0xff,( formtype >> 24 ) & 0xff );
+		Error( "Unrecognized form type: %c%c%c%c\n", formtype & 0xff,
+		       ( formtype >> 8 ) & 0xff, ( formtype >> 16 ) & 0xff, ( formtype >> 24 ) & 0xff );
 	}
 
 	LBM_P += 4;
@@ -246,7 +246,7 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
 		switch ( chunktype )
 		{
 		case BMHDID:
-			memcpy( &bmhd,LBM_P,sizeof( bmhd ) );
+			memcpy( &bmhd, LBM_P, sizeof( bmhd ) );
 			bmhd.w = BigShort( bmhd.w );
 			bmhd.h = BigShort( bmhd.h );
 			bmhd.x = BigShort( bmhd.x );
@@ -275,7 +275,7 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
 						                           , pic_p, bmhd.w );
 					}
 					else if ( bmhd.compression == cm_none ) {
-						memcpy( pic_p,body_p,bmhd.w );
+						memcpy( pic_p, body_p, bmhd.w );
 						body_p += Align( bmhd.w );
 					}
 				}
@@ -351,7 +351,7 @@ void WriteLBMfile( const char *filename, byte *data,
 	bmhdlength = (int *)lbmptr;
 	lbmptr += 4;                      // leave space for length
 
-	memset( &basebmhd,0,sizeof( basebmhd ) );
+	memset( &basebmhd, 0, sizeof( basebmhd ) );
 	basebmhd.w = BigShort( (short)width );
 	basebmhd.h = BigShort( (short)height );
 	basebmhd.nPlanes = BigShort( 8 );
@@ -360,7 +360,7 @@ void WriteLBMfile( const char *filename, byte *data,
 	basebmhd.pageWidth = BigShort( (short)width );
 	basebmhd.pageHeight = BigShort( (short)height );
 
-	memcpy( lbmptr,&basebmhd,sizeof( basebmhd ) );
+	memcpy( lbmptr, &basebmhd, sizeof( basebmhd ) );
 	lbmptr += sizeof( basebmhd );
 
 	length = lbmptr - (byte *)bmhdlength - 4;
@@ -380,7 +380,7 @@ void WriteLBMfile( const char *filename, byte *data,
 	cmaplength = (int *)lbmptr;
 	lbmptr += 4;                      // leave space for length
 
-	memcpy( lbmptr,palette,768 );
+	memcpy( lbmptr, palette, 768 );
 	lbmptr += 768;
 
 	length = lbmptr - (byte *)cmaplength - 4;
@@ -400,7 +400,7 @@ void WriteLBMfile( const char *filename, byte *data,
 	bodylength = (int *)lbmptr;
 	lbmptr += 4;                      // leave space for length
 
-	memcpy( lbmptr,data,width * height );
+	memcpy( lbmptr, data, width * height );
 	lbmptr += width * height;
 
 	length = lbmptr - (byte *)bodylength - 4;
@@ -440,8 +440,8 @@ typedef struct
 	char version;
 	char encoding;
 	char bits_per_pixel;
-	unsigned short xmin,ymin,xmax,ymax;
-	unsigned short hres,vres;
+	unsigned short xmin, ymin, xmax, ymax;
+	unsigned short hres, vres;
 	unsigned char palette[48];
 	char reserved;
 	char color_planes;

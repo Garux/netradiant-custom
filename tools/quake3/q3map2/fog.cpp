@@ -44,10 +44,7 @@ static int numFogPatchFragments;
  */
 
 static mesh_t *DrawSurfToMesh( mapDrawSurface_t *ds ){
-	mesh_t      *m;
-
-
-	m = safe_malloc( sizeof( *m ) );
+	mesh_t *m = safe_malloc( sizeof( *m ) );
 	m->width = ds->patchWidth;
 	m->height = ds->patchHeight;
 	m->verts = safe_malloc( sizeof( m->verts[ 0 ] ) * m->width * m->height );
@@ -249,7 +246,6 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t *ds, const brush_t *b ){
 	mesh_t      *outside[MAX_BRUSH_SIDES];
 	int numOutside;
 	mesh_t      *m, *front, *back;
-	mapDrawSurface_t    *newds;
 
 	m = DrawSurfToMesh( ds );
 	numOutside = 0;
@@ -289,7 +285,7 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t *ds, const brush_t *b ){
 		InvertMesh( outside[ i ] );
 
 		/* ydnar: do this the hacky right way */
-		newds = AllocDrawSurface( ESurfaceType::Patch );
+		mapDrawSurface_t *newds = AllocDrawSurface( ESurfaceType::Patch );
 		memcpy( newds, ds, sizeof( *ds ) );
 		newds->patchWidth = outside[ i ]->width;
 		newds->patchHeight = outside[ i ]->height;

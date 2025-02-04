@@ -41,7 +41,7 @@ unsigned char mdl_palette[768];
    ==============
  */
 void Texture_InitPalette( byte *pal ){
-	int r,g,b;
+	int r, g, b;
 	int i;
 	int inf;
 	byte gammatable[256];

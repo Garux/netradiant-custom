@@ -171,7 +171,8 @@ void MakeMeshNormals( mesh_t in ){
 	bool wrapWidth, wrapHeight;
 	int neighbors[8][2] =
 	{
-		{0,1}, {1,1}, {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}
+		{ 0, 1 }, { 1, 1 }, { 1, 0 }, { 1,-1 },
+		{ 0,-1 }, {-1,-1 }, {-1, 0 }, {-1, 1 }
 	};
 
 
@@ -296,23 +297,21 @@ void PutMeshOnCurve( mesh_t in ) {
    =================
  */
 mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
-	int i, j, k;
 	mesh_t out;
-
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
 
 
 	out.width = in.width;
 	out.height = in.height;
 
-	for ( i = 0; i < in.width; ++i ) {
-		for ( j = 0; j < in.height; ++j ) {
+	for ( int i = 0; i < in.width; ++i ) {
+		for ( int j = 0; j < in.height; ++j ) {
 			expand[j][i] = in.verts[j * in.width + i];
 		}
 	}
 
 	// horizontal subdivisions
-	for ( j = 0; j + 2 < out.width; j += 2 ) {
+	for ( int i, j = 0; j + 2 < out.width; j += 2 ) {
 		// check subdivided midpoints against control points
 		for ( i = 0; i < out.height; ++i ) {
 			const Vector3 prevxyz = expand[i][j + 1].xyz - expand[i][j].xyz;
@@ -343,7 +342,7 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 		out.width += 2;
 
 		for ( i = 0; i < out.height; ++i ) {
-			for ( k = out.width - 1; k > j + 3; --k ) {
+			for ( int k = out.width - 1; k > j + 3; --k ) {
 				expand[i][k] = expand[i][k - 2];
 			}
 			expand[i][j + 3] = LerpDrawVert( expand[i][j + 1], expand[i][j + 2] );
@@ -357,7 +356,7 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 	}
 
 	// vertical subdivisions
-	for ( j = 0; j + 2 < out.height; j += 2 ) {
+	for ( int i, j = 0; j + 2 < out.height; j += 2 ) {
 		// check subdivided midpoints against control points
 		for ( i = 0; i < out.width; ++i ) {
 			const Vector3 prevxyz = expand[j + 1][i].xyz - expand[j][i].xyz;
@@ -387,7 +386,7 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 		out.height += 2;
 
 		for ( i = 0; i < out.width; ++i ) {
-			for ( k = out.height - 1; k > j + 3; --k ) {
+			for ( int k = out.height - 1; k > j + 3; --k ) {
 				expand[k][i] = expand[k - 2][i];
 			}
 			expand[j + 3][i] = LerpDrawVert( expand[j + 1][i], expand[j + 2][i] );
@@ -403,7 +402,7 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 	// collapse the verts
 
 	out.verts = &expand[0][0];
-	for ( i = 1; i < out.height; ++i ) {
+	for ( int i = 1; i < out.height; ++i ) {
 		memmove( &out.verts[i * out.width], expand[i], out.width * sizeof( bspDrawVert_t ) );
 	}
 
@@ -442,18 +441,16 @@ int IterationsForCurve( float len, int subdivisions ){
  */
 
 mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
-	int i, j, k;
 	mesh_t out;
-
 	bspDrawVert_t expand[ MAX_EXPANDED_AXIS ][ MAX_EXPANDED_AXIS ];
 
 
 	/* initial setup */
 	out.width = in.width;
 	out.height = in.height;
-	for ( i = 0; i < in.width; i++ )
+	for ( int i = 0; i < in.width; i++ )
 	{
-		for ( j = 0; j < in.height; j++ )
+		for ( int j = 0; j < in.height; j++ )
 			expand[ j ][ i ] = in.verts[ j * in.width + i ];
 	}
 
@@ -461,7 +458,7 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 	for ( ; iterations > 0; --iterations )
 	{
 		/* horizontal subdivisions */
-		for ( j = 0; j + 2 < out.width; j += 4 )
+		for ( int j = 0; j + 2 < out.width; j += 4 )
 		{
 			/* check size limit */
 			if ( out.width + 2 >= MAX_EXPANDED_AXIS ) {
@@ -470,9 +467,9 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 
 			/* insert two columns and replace the peak */
 			out.width += 2;
-			for ( i = 0; i < out.height; i++ )
+			for ( int i = 0; i < out.height; i++ )
 			{
-				for ( k = out.width - 1; k > j + 3; --k )
+				for ( int k = out.width - 1; k > j + 3; --k )
 					expand [ i ][ k ] = expand[ i ][ k - 2 ];
 
 				expand[ i ][ j + 3 ] = LerpDrawVert( expand[ i ][ j + 1 ], expand[ i ][ j + 2 ] );
@@ -483,7 +480,7 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 		}
 
 		/* vertical subdivisions */
-		for ( j = 0; j + 2 < out.height; j += 4 )
+		for ( int j = 0; j + 2 < out.height; j += 4 )
 		{
 			/* check size limit */
 			if ( out.height + 2 >= MAX_EXPANDED_AXIS ) {
@@ -492,9 +489,9 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 
 			/* insert two columns and replace the peak */
 			out.height += 2;
-			for ( i = 0; i < out.width; i++ )
+			for ( int i = 0; i < out.width; i++ )
 			{
-				for ( k = out.height - 1; k > j + 3; k-- )
+				for ( int k = out.height - 1; k > j + 3; k-- )
 					expand[ k ][ i ] = expand[ k - 2 ][ i ];
 
 				expand[ j + 3 ][ i ] = LerpDrawVert( expand[ j + 1 ][ i ], expand[ j + 2 ][ i ] );
@@ -506,7 +503,7 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 
 	/* collapse the verts */
 	out.verts = &expand[ 0 ][ 0 ];
-	for ( i = 1; i < out.height; i++ )
+	for ( int i = 1; i < out.height; i++ )
 		memmove( &out.verts[ i * out.width ], expand[ i ], out.width * sizeof( bspDrawVert_t ) );
 
 	/* return to sender */

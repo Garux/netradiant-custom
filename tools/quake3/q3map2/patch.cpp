@@ -197,7 +197,6 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, const Vector3
 void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 	float info[ 5 ];
 	mesh_t m;
-	bspDrawVert_t   *verts;
 	bool degenerate;
 	float longestCurve;
 	int maxIterations;
@@ -212,7 +211,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 	m.width = info[0];
 	m.height = info[1];
 	const int size = ( m.width * m.height );
-	m.verts = verts = safe_malloc( size * sizeof( m.verts[0] ) );
+	bspDrawVert_t *verts = m.verts = safe_malloc( size * sizeof( m.verts[0] ) );
 
 	if ( m.width < 0 || m.width > MAX_PATCH_SIZE || m.height < 0 || m.height > MAX_PATCH_SIZE ) {
 		Error( "ParsePatch: bad size" );

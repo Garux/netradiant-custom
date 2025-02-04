@@ -679,7 +679,7 @@ static void PerturbNormal( const bspDrawVert_t& dv, const shaderInfo_t *si, Vect
 #define NUDGE           0.5f
 #define BOGUS_NUDGE     -99999.0f
 
-static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, const bspDrawVert_t& dv, const Plane3f* plane, float pass, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ], const Vector3 worldverts[ 3 ] ){
+static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const bspDrawVert_t& dv, const Plane3f* plane, float pass, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ], const Vector3 worldverts[ 3 ] ){
 	int i, numClusters, *clusters, pointCluster;
 	float           lightmapSampleOffset;
 	const shaderInfo_t    *si;
@@ -928,10 +928,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, const bspDraw
    than the distance between two luxels (thanks jc :)
  */
 
-static void MapTriangle_r( rawLightmap_t *lm, surfaceInfo_t *info, const TriRef& tri, Plane3f *plane, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ], const Vector3 worldverts[ 3 ] ){
-	int max;
-
-
+static void MapTriangle_r( rawLightmap_t *lm, const surfaceInfo_t *info, const TriRef& tri, Plane3f *plane, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ], const Vector3 worldverts[ 3 ] ){
 	/* map the vertexes */
 	#if 0
 	MapSingleLuxel( lm, info, *tri[ 0 ], plane, 1, stv, ttv );
@@ -940,9 +937,9 @@ static void MapTriangle_r( rawLightmap_t *lm, surfaceInfo_t *info, const TriRef&
 	#endif
 
 	/* subdivide calc */
+	int max = -1;
 	{
 		/* find the longest edge and split it */
-		max = -1;
 		float maxDist = 0;
 		for ( int i = 0; i < 3; i++ )
 		{
@@ -987,7 +984,7 @@ static void MapTriangle_r( rawLightmap_t *lm, surfaceInfo_t *info, const TriRef&
    requires a cw ordered triangle
  */
 
-static bool MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, const TriRef& tri, bool mapNonAxial ){
+static bool MapTriangle( rawLightmap_t *lm, const surfaceInfo_t *info, const TriRef& tri, bool mapNonAxial ){
 	Plane3f plane;
 	/* get plane if possible */
 	if ( lm->plane != NULL ) {
@@ -1056,19 +1053,16 @@ static bool MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, const TriRef& t
    than the distance between two luxels
  */
 
-static void MapQuad_r( rawLightmap_t *lm, surfaceInfo_t *info, const QuadRef& dv, Plane3f *plane, const Vector3 stv[ 4 ], const Vector3 ttv[ 4 ] ){
-	int max;
-
-
+static void MapQuad_r( rawLightmap_t *lm, const surfaceInfo_t *info, const QuadRef& quad, Plane3f *plane, const Vector3 stv[ 4 ], const Vector3 ttv[ 4 ] ){
 	/* subdivide calc */
+	int max = -1;
 	{
 		/* find the longest edge and split it */
-		max = -1;
 		float maxDist = 0;
 		for ( int i = 0; i < 4; i++ )
 		{
 			/* get dist */
-			const float dist = vector2_length_squared( dv[ i ]->lightmap[ 0 ] - dv[ ( i + 1 ) % 4 ]->lightmap[ 0 ] );
+			const float dist = vector2_length_squared( quad[ i ]->lightmap[ 0 ] - quad[ ( i + 1 ) % 4 ]->lightmap[ 0 ] );
 			/* longer? */
 			if ( dist > maxDist ) {
 				maxDist = dist;
@@ -1087,8 +1081,8 @@ static void MapQuad_r( rawLightmap_t *lm, surfaceInfo_t *info, const QuadRef& dv
 
 	/* split the longest edges */
 	const bspDrawVert_t mid[ 2 ] = {
-		LerpDrawVert( *dv[ max + 0 ], *dv[ ( max + 1 ) % 4 ] ),
-		LerpDrawVert( *dv[ max + 2 ], *dv[ ( max + 3 ) % 4 ] ) };
+		LerpDrawVert( *quad[ max + 0 ], *quad[ ( max + 1 ) % 4 ] ),
+		LerpDrawVert( *quad[ max + 2 ], *quad[ ( max + 3 ) % 4 ] ) };
 
 	/* map the vertexes */
 	MapSingleLuxel( lm, info, mid[ 0 ], plane, 1, stv, ttv, NULL );
@@ -1097,20 +1091,20 @@ static void MapQuad_r( rawLightmap_t *lm, surfaceInfo_t *info, const QuadRef& dv
 	/* 0 and 2 */
 	if ( max == 0 ) {
 		/* recurse to first quad */
-		MapQuad_r( lm, info, QuadRef{ dv[ 0 ], &mid[ 0 ], &mid[ 1 ], dv[ 3 ] }, plane, stv, ttv );
+		MapQuad_r( lm, info, QuadRef{ quad[ 0 ], &mid[ 0 ], &mid[ 1 ], quad[ 3 ] }, plane, stv, ttv );
 
 		/* recurse to second quad */
-		MapQuad_r( lm, info, QuadRef{ &mid[ 0 ], dv[ 1 ], dv[ 2 ], &mid[ 1 ] }, plane, stv, ttv );
+		MapQuad_r( lm, info, QuadRef{ &mid[ 0 ], quad[ 1 ], quad[ 2 ], &mid[ 1 ] }, plane, stv, ttv );
 	}
 
 	/* 1 and 3 */
 	else
 	{
 		/* recurse to first quad */
-		MapQuad_r( lm, info, QuadRef{ dv[ 0 ], dv[ 1 ], &mid[ 0 ], &mid[ 1 ] }, plane, stv, ttv );
+		MapQuad_r( lm, info, QuadRef{ quad[ 0 ], quad[ 1 ], &mid[ 0 ], &mid[ 1 ] }, plane, stv, ttv );
 
 		/* recurse to second quad */
-		MapQuad_r( lm, info, QuadRef{ &mid[ 1 ], &mid[ 0 ], dv[ 2 ], dv[ 3 ] }, plane, stv, ttv );
+		MapQuad_r( lm, info, QuadRef{ &mid[ 1 ], &mid[ 0 ], quad[ 2 ], quad[ 3 ] }, plane, stv, ttv );
 	}
 }
 
@@ -1124,25 +1118,25 @@ static void MapQuad_r( rawLightmap_t *lm, surfaceInfo_t *info, const QuadRef& dv
 
 #define QUAD_PLANAR_EPSILON     0.5f
 
-static bool MapQuad( rawLightmap_t *lm, surfaceInfo_t *info, const QuadRef& dv ){
+static bool MapQuad( rawLightmap_t *lm, const surfaceInfo_t *info, const QuadRef& quad ){
 	Plane3f plane;
 	/* get plane if possible */
 	if ( lm->plane != NULL ) {
 		plane = *lm->plane;
 	}
 	/* otherwise make one from the points */
-	else if ( !PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz ) ) {
+	else if ( !PlaneFromPoints( plane, quad[ 0 ]->xyz, quad[ 1 ]->xyz, quad[ 2 ]->xyz ) ) {
 		return false;
 	}
 
 	/* 4th point must fall on the plane */
-	if ( fabs( plane3_distance_to_point( plane, dv[ 3 ]->xyz ) ) > QUAD_PLANAR_EPSILON ) {
+	if ( fabs( plane3_distance_to_point( plane, quad[ 3 ]->xyz ) ) > QUAD_PLANAR_EPSILON ) {
 		return false;
 	}
 
 	Vector3          *stv, *ttv, stvStatic[ 4 ], ttvStatic[ 4 ];
 	/* check to see if we need to calculate texture->world tangent vectors */
-	if ( info->si->normalImage != NULL && CalcTangentVectors( dv, stvStatic, ttvStatic ) ) {
+	if ( info->si->normalImage != NULL && CalcTangentVectors( quad, stvStatic, ttvStatic ) ) {
 		stv = stvStatic;
 		ttv = ttvStatic;
 	}
@@ -1153,13 +1147,13 @@ static bool MapQuad( rawLightmap_t *lm, surfaceInfo_t *info, const QuadRef& dv )
 	}
 
 	/* map the vertexes */
-	MapSingleLuxel( lm, info, *dv[ 0 ], &plane, 1, stv, ttv, NULL );
-	MapSingleLuxel( lm, info, *dv[ 1 ], &plane, 1, stv, ttv, NULL );
-	MapSingleLuxel( lm, info, *dv[ 2 ], &plane, 1, stv, ttv, NULL );
-	MapSingleLuxel( lm, info, *dv[ 3 ], &plane, 1, stv, ttv, NULL );
+	MapSingleLuxel( lm, info, *quad[ 0 ], &plane, 1, stv, ttv, NULL );
+	MapSingleLuxel( lm, info, *quad[ 1 ], &plane, 1, stv, ttv, NULL );
+	MapSingleLuxel( lm, info, *quad[ 2 ], &plane, 1, stv, ttv, NULL );
+	MapSingleLuxel( lm, info, *quad[ 3 ], &plane, 1, stv, ttv, NULL );
 
 	/* subdivide the quad */
-	MapQuad_r( lm, info, dv, &plane, stv, ttv );
+	MapQuad_r( lm, info, quad, &plane, stv, ttv );
 	return true;
 }
 
@@ -1171,13 +1165,10 @@ static bool MapQuad( rawLightmap_t *lm, surfaceInfo_t *info, const QuadRef& dv )
  */
 
 void MapRawLightmap( int rawLightmapNum ){
-	int n, num, i, x, y, sx, sy, pw[ 5 ], r, mapNonAxial;
+	int n, i, x, y, sx, sy, mapNonAxial;
 	float               samples, radius, pass;
 	rawLightmap_t       *lm;
-	bspDrawSurface_t    *ds;
-	surfaceInfo_t       *info;
-	mesh_t src, *subdivided, *mesh;
-	bspDrawVert_t       *verts, fake;
+	bspDrawVert_t fake;
 
 
 	/* bail if this number exceeds the number of raw lightmaps */
@@ -1211,9 +1202,9 @@ void MapRawLightmap( int rawLightmapNum ){
 		}
 
 		/* get surface */
-		num = lightSurfaces[ lm->firstLightSurface + n ];
-		ds = &bspDrawSurfaces[ num ];
-		info = &surfaceInfos[ num ];
+		const int num = lightSurfaces[ lm->firstLightSurface + n ];
+		const bspDrawSurface_t& ds = bspDrawSurfaces[ num ];
+		const surfaceInfo_t *info = &surfaceInfos[ num ];
 
 		/* bail if no lightmap to calculate */
 		if ( info->lm != lm ) {
@@ -1222,36 +1213,39 @@ void MapRawLightmap( int rawLightmapNum ){
 		}
 
 		/* map the surface onto the lightmap origin/cluster/normal buffers */
-		switch ( ds->surfaceType )
+		switch ( ds.surfaceType )
 		{
 		case MST_PLANAR:
+		{
 			/* get verts */
-			verts = &yDrawVerts[ ds->firstVert ];
+			const bspDrawVert_t *verts = &yDrawVerts[ ds.firstVert ];
 
 			/* map the triangles */
 			for ( mapNonAxial = 0; mapNonAxial < 2; mapNonAxial++ )
-				for ( i = 0; i < ds->numIndexes; i += 3 )
+				for ( i = 0; i < ds.numIndexes; i += 3 )
 					MapTriangle( lm, info, TriRef{
-						&verts[ bspDrawIndexes[ ds->firstIndex + i ] ],
-						&verts[ bspDrawIndexes[ ds->firstIndex + i + 1 ] ],
-						&verts[ bspDrawIndexes[ ds->firstIndex + i + 2 ] ] }, mapNonAxial );
+						&verts[ bspDrawIndexes[ ds.firstIndex + i ] ],
+						&verts[ bspDrawIndexes[ ds.firstIndex + i + 1 ] ],
+						&verts[ bspDrawIndexes[ ds.firstIndex + i + 2 ] ] }, mapNonAxial );
 			break;
-
+		}
 		case MST_PATCH:
+		{
 			/* make a mesh from the drawsurf */
-			src.width = ds->patchWidth;
-			src.height = ds->patchHeight;
-			src.verts = &yDrawVerts[ ds->firstVert ];
-			//%	subdivided = SubdivideMesh( src, 8, 512 );
-			subdivided = SubdivideMesh2( src, info->patchIterations );
+			mesh_t src;
+			src.width = ds.patchWidth;
+			src.height = ds.patchHeight;
+			src.verts = &yDrawVerts[ ds.firstVert ];
+			//%	mesh_t *subdivided = SubdivideMesh( src, 8, 512 );
+			mesh_t *subdivided = SubdivideMesh2( src, info->patchIterations );
 
 			/* fit it to the curve and remove colinear verts on rows/columns */
 			PutMeshOnCurve( *subdivided );
-			mesh = RemoveLinearMeshColumnsRows( subdivided );
+			mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
 			FreeMesh( subdivided );
 
 			/* get verts */
-			verts = mesh->verts;
+			const bspDrawVert_t *verts = mesh->verts;
 
 			/* debug code */
 #if 0
@@ -1273,14 +1267,15 @@ void MapRawLightmap( int rawLightmapNum ){
 					for ( x = 0; x < ( mesh->width - 1 ); x++ )
 					{
 						/* set indexes */
-						pw[ 0 ] = x + ( y * mesh->width );
-						pw[ 1 ] = x + ( ( y + 1 ) * mesh->width );
-						pw[ 2 ] = x + 1 + ( ( y + 1 ) * mesh->width );
-						pw[ 3 ] = x + 1 + ( y * mesh->width );
-						pw[ 4 ] = x + ( y * mesh->width );      /* same as pw[ 0 ] */
-
+						const int pw[ 5 ] = {
+							x + ( y * mesh->width ),
+							x + ( ( y + 1 ) * mesh->width ),
+							x + 1 + ( ( y + 1 ) * mesh->width ),
+							x + 1 + ( y * mesh->width ),
+							x + ( y * mesh->width )      /* same as pw[ 0 ] */
+						};
 						/* set radix */
-						r = ( x + y ) & 1;
+						const int r = ( x + y ) & 1;
 
 						/* get drawverts and map first triangle */
 						MapTriangle( lm, info, TriRef{
@@ -1304,14 +1299,15 @@ void MapRawLightmap( int rawLightmapNum ){
 				for ( x = 0; x < ( mesh->width - 1 ); x++ )
 				{
 					/* set indexes */
-					pw[ 0 ] = x + ( y * mesh->width );
-					pw[ 1 ] = x + ( ( y + 1 ) * mesh->width );
-					pw[ 2 ] = x + 1 + ( ( y + 1 ) * mesh->width );
-					pw[ 3 ] = x + 1 + ( y * mesh->width );
-					pw[ 4 ] = pw[ 0 ];
-
+					const int pw[ 5 ] = {
+						x + ( y * mesh->width ),
+						x + ( ( y + 1 ) * mesh->width ),
+						x + 1 + ( ( y + 1 ) * mesh->width ),
+						x + 1 + ( y * mesh->width ),
+						x + ( y * mesh->width )      /* same as pw[ 0 ] */
+					};
 					/* set radix */
-					r = ( x + y ) & 1;
+					const int r = ( x + y ) & 1;
 
 					/* attempt to map quad first */
 					if ( MapQuad( lm, info, QuadRef{
@@ -1344,7 +1340,7 @@ void MapRawLightmap( int rawLightmapNum ){
 			/* free the mesh */
 			FreeMesh( mesh );
 			break;
-
+		}
 		default:
 			break;
 		}
@@ -3716,7 +3712,7 @@ void SetupFloodLight(){
 	/* floodlight */
 	const char  *value;
 	if ( entities[ 0 ].read_keyvalue( value, "_floodlight" ) ) {
-		double v1,v2,v3,v4,v5,v6;
+		double v1, v2, v3, v4, v5, v6;
 		v1 = v2 = v3 = 0;
 		v4 = floodlightDistance;
 		v5 = floodlightIntensity;

@@ -267,7 +267,7 @@ inline EntityClass* Eclass_Alloc(){
 	memset( e->flagnames, 0, sizeof( e->flagnames ) );
 	memset( e->flagAttributes, 0, sizeof( e->flagAttributes ) );
 
-	e->maxs = Vector3( -1,-1,-1 );
+	e->maxs = Vector3(-1,-1,-1 );
 	e->mins = Vector3( 1, 1, 1 );
 
 	e->free = 0;
@@ -324,7 +324,7 @@ inline EntityClass* EClass_Create_FixedSize( const char* name, const Vector3& co
 }
 
 const Vector3 smallbox[2] = {
-	Vector3( -8,-8,-8 ),
+	Vector3(-8,-8,-8 ),
 	Vector3( 8, 8, 8 ),
 };
 

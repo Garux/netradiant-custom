@@ -100,7 +100,7 @@ Image* LoadHLWBuff( byte* buffer ){
 
 	lpMip = (LPWAD3_MIP)buffer; //!\todo Make endian-safe.
 
-	mipdatasize = GET_MIP_DATA_SIZE( lpMip->width,lpMip->height );
+	mipdatasize = GET_MIP_DATA_SIZE( lpMip->width, lpMip->height );
 
 	palette = buffer + mipdatasize + 2;
 

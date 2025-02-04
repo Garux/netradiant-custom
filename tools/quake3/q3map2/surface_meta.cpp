@@ -343,10 +343,6 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
  */
 
 static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t *ds ){
-	int x, y, pw[ 5 ], r;
-	mapDrawSurface_t    *dsNew;
-	mesh_t src, *subdivided, *mesh;
-
 	/* vortex: _patchMeta, _patchQuality, _patchSubdivide support */
 	const bool forcePatchMeta = e.boolForKey( "_patchMeta", "patchMeta" );
 
@@ -355,14 +351,14 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t *ds ){
 		return;
 	}
 	/* make a mesh from the drawsurf */
+	mesh_t src;
 	src.width = ds->patchWidth;
 	src.height = ds->patchHeight;
 	src.verts = ds->verts;
-	//%	subdivided = SubdivideMesh( src, 8, 999 );
+	//%	mesh_t *subdivided = SubdivideMesh( src, 8, 999 );
 
 	int iterations;
-	int patchSubdivision;
-	if ( e.read_keyvalue( patchSubdivision, "_patchSubdivide", "patchSubdivide" ) ) {
+	if ( int patchSubdivision; e.read_keyvalue( patchSubdivision, "_patchSubdivide", "patchSubdivide" ) ) {
 		iterations = IterationsForCurve( ds->longestCurve, patchSubdivision );
 	}
 	else{
@@ -370,16 +366,16 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t *ds ){
 		iterations = IterationsForCurve( ds->longestCurve, patchSubdivisions / ( patchQuality == 0? 1 : patchQuality ) );
 	}
 
-	subdivided = SubdivideMesh2( src, iterations ); //%	ds->maxIterations
+	mesh_t *subdivided = SubdivideMesh2( src, iterations ); //%	ds->maxIterations
 
 	/* fit it to the curve and remove colinear verts on rows/columns */
 	PutMeshOnCurve( *subdivided );
-	mesh = RemoveLinearMeshColumnsRows( subdivided );
+	mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
 	FreeMesh( subdivided );
 	//% MakeMeshNormals( mesh );
 
 	/* make a copy of the drawsurface */
-	dsNew = AllocDrawSurface( ESurfaceType::Meta );
+	mapDrawSurface_t *dsNew = AllocDrawSurface( ESurfaceType::Meta );
 	memcpy( dsNew, ds, sizeof( *ds ) );
 
 	/* if the patch is nonsolid, then discard it */
@@ -400,19 +396,20 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t *ds ){
 	ds->verts = mesh->verts;
 
 	/* iterate through the mesh quads */
-	for ( y = 0; y < ( mesh->height - 1 ); y++ )
+	for ( int y = 0; y < ( mesh->height - 1 ); y++ )
 	{
-		for ( x = 0; x < ( mesh->width - 1 ); x++ )
+		for ( int x = 0; x < ( mesh->width - 1 ); x++ )
 		{
 			/* set indexes */
-			pw[ 0 ] = x + ( y * mesh->width );
-			pw[ 1 ] = x + ( ( y + 1 ) * mesh->width );
-			pw[ 2 ] = x + 1 + ( ( y + 1 ) * mesh->width );
-			pw[ 3 ] = x + 1 + ( y * mesh->width );
-			pw[ 4 ] = x + ( y * mesh->width );    /* same as pw[ 0 ] */
-
+			const int pw[ 5 ] = {
+				x + ( y * mesh->width ),
+				x + ( ( y + 1 ) * mesh->width ),
+				x + 1 + ( ( y + 1 ) * mesh->width ),
+				x + 1 + ( y * mesh->width ),
+				x + ( y * mesh->width )    /* same as pw[ 0 ] */
+			};
 			/* set radix */
-			r = ( x + y ) & 1;
+			const int r = ( x + y ) & 1;
 
 			/* make first triangle */
 			ds->indexes[ ds->numIndexes++ ] = pw[ r + 0 ];

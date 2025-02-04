@@ -77,7 +77,7 @@ short DDSLittleShort( short src ){
 }
 
 float DDSLittleFloat( float src ){
-	floatSwapUnion in,out;
+	floatSwapUnion in, out;
 	in.f = src;
 	out.c[ 0 ] = in.c[ 3 ];
 	out.c[ 1 ] = in.c[ 2 ];
@@ -105,7 +105,7 @@ short DDSBigShort( short src ){
 }
 
 float DDSBigFloat( float src ){
-	floatSwapUnion in,out;
+	floatSwapUnion in, out;
 	in.f = src;
 	out.c[ 0 ] = in.c[ 3 ];
 	out.c[ 1 ] = in.c[ 2 ];

@@ -43,7 +43,7 @@ static int c_faceLeafs;
  */
 
 static void SelectSplitPlaneNum( const node_t *node, const facelist_t& list, int *splitPlaneNum, int *compileFlags ){
-	//int frontC,backC,splitsC,facingC;
+	//int frontC, backC, splitsC, facingC;
 
 
 	/* ydnar: set some defaults */
@@ -130,10 +130,10 @@ static void SelectSplitPlaneNum( const node_t *node, const facelist_t& list, int
 		if ( value > bestValue ) {
 			bestValue = value;
 			bestSplit = &split;
-			//frontC=front;
-			//backC=back;
-			//splitsC=splits;
-			//facingC=facing;
+			//frontC = front;
+			//backC = back;
+			//splitsC = splits;
+			//facingC = facing;
 		}
 	}
 

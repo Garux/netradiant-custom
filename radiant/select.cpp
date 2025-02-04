@@ -1036,7 +1036,7 @@ void Selection_Flipz(){
 
 void Selection_Rotatex(){
 	UndoableCommand undo( "rotateSelected -axis x -angle -90" );
-	Select_RotateAxis( 0,-90 );
+	Select_RotateAxis( 0, -90 );
 }
 
 void Selection_Rotatey(){
@@ -1046,7 +1046,7 @@ void Selection_Rotatey(){
 
 void Selection_Rotatez(){
 	UndoableCommand undo( "rotateSelected -axis z -angle -90" );
-	Select_RotateAxis( 2,-90 );
+	Select_RotateAxis( 2, -90 );
 }
 #include "xywindow.h"
 void Selection_FlipHorizontally(){
@@ -1489,11 +1489,11 @@ void Texdef_ScaleDown(){
 }
 
 void Texdef_ScaleLeft(){
-	Texdef_Scale( -g_si_globals.scale[0],0 );
+	Texdef_Scale( -g_si_globals.scale[0], 0 );
 }
 
 void Texdef_ScaleRight(){
-	Texdef_Scale( g_si_globals.scale[0],0 );
+	Texdef_Scale( g_si_globals.scale[0], 0 );
 }
 
 void Texdef_Shift( float x, float y ){

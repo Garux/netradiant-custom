@@ -1667,7 +1667,7 @@ int m4x4_invert( m4x4_t matrix ){
 #if 0
 void m4x4_solve_ge( m4x4_t matrix, vec4_t x ){
 	int indx[4];
-	int c,r;
+	int c, r;
 	int i;
 	int best;
 	float scale[4];
@@ -1741,7 +1741,7 @@ void m4x4_solve_ge( m4x4_t matrix, vec4_t x ){
 
 int matrix_solve_ge( vec_t* matrix, vec_t* aug, vec3_t x ){
 	int indx[N];
-	int c,r;
+	int c, r;
 	int i;
 	int best;
 	float scale[N];

@@ -134,7 +134,7 @@ bool g_TextureAnisotropy = true;
 
 byte g_gammatable[256];
 void ResampleGamma( float fGamma ){
-	int i,inf;
+	int i, inf;
 	if ( fGamma == 1.0 ) {
 		for ( i = 0; i < 256; i++ )
 			g_gammatable[i] = i;
@@ -269,7 +269,7 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
    ==============
  */
 void Texture_InitPalette( byte *pal ){
-	int r,g,b;
+	int r, g, b;
 	int i;
 	int inf;
 	byte gammatable[256];

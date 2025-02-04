@@ -33,7 +33,7 @@ class AABB
 public:
 	Vector3 origin, extents;
 
-	AABB() : origin( 0, 0, 0 ), extents( -1,-1,-1 ){
+	AABB() : origin( 0, 0, 0 ), extents( -1, -1, -1 ){
 	}
 	AABB( const Vector3& origin_, const Vector3& extents_ ) :
 		origin( origin_ ), extents( extents_ ){
@@ -244,7 +244,7 @@ const Vector3 aabb_normals[6] = {
 	Vector3( 1, 0, 0 ),
 	Vector3( 0, 1, 0 ),
 	Vector3( 0, 0, 1 ),
-	Vector3( -1, 0, 0 ),
+	Vector3(-1, 0, 0 ),
 	Vector3( 0,-1, 0 ),
 	Vector3( 0, 0,-1 ),
 };

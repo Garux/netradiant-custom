@@ -31,7 +31,7 @@ void WinPrint( const char *str, ... ){
 	va_list argptr;
 	char text[4096];
 
-	va_start( argptr,str );
+	va_start( argptr, str );
 	vsprintf( text, str, argptr );
 	va_end( argptr );
 

@@ -637,35 +637,27 @@ void RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, const sh
 #define PLANAR_EPSILON  0.1f
 
 void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw ){
-	int i, x, y, v, t, r;
-	bspDrawSurface_t    *ds;
-	surfaceInfo_t       *info;
-	bspDrawVert_t       *bogus;
-	mesh_t src, *subdivided, *mesh;
-	bool planar;
-	radWinding_t rw;
-
-
 	/* get surface */
-	ds = &bspDrawSurfaces[ num ];
-	info = &surfaceInfos[ num ];
+	bspDrawSurface_t& ds = bspDrawSurfaces[ num ];
+	const surfaceInfo_t& info = surfaceInfos[ num ];
 
 	/* construct a bogus vert list with color index stuffed into color[ 0 ] */
-	bogus = safe_malloc( ds->numVerts * sizeof( bspDrawVert_t ) );
-	memcpy( bogus, &yDrawVerts[ ds->firstVert ], ds->numVerts * sizeof( bspDrawVert_t ) );
-	for ( i = 0; i < ds->numVerts; i++ )
+	bspDrawVert_t *bogus = safe_malloc( ds.numVerts * sizeof( bspDrawVert_t ) );
+	memcpy( bogus, &yDrawVerts[ ds.firstVert ], ds.numVerts * sizeof( bspDrawVert_t ) );
+	for ( int i = 0; i < ds.numVerts; i++ )
 		bogus[ i ].color[ 0 ][ 0 ] = i;
 
 	/* build a subdivided mesh identical to shadow facets for this patch */
 	/* this MUST MATCH FacetsForPatch() identically! */
-	src.width = ds->patchWidth;
-	src.height = ds->patchHeight;
+	mesh_t src;
+	src.width = ds.patchWidth;
+	src.height = ds.patchHeight;
 	src.verts = bogus;
-	//%	subdivided = SubdivideMesh( src, 8, 512 );
-	subdivided = SubdivideMesh2( src, info->patchIterations );
+	//%	mesh_t *subdivided = SubdivideMesh( src, 8, 512 );
+	mesh_t *subdivided = SubdivideMesh2( src, info.patchIterations );
 	PutMeshOnCurve( *subdivided );
 	//%	MakeMeshNormals( *subdivided );
-	mesh = RemoveLinearMeshColumnsRows( subdivided );
+	mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
 	FreeMesh( subdivided );
 	free( bogus );
 
@@ -674,15 +666,15 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 	/* fix up color indexes */
 	for ( bspDrawVert_t& vert : Span( mesh->verts, mesh->width * mesh->height ) )
 	{
-		if ( vert.color[ 0 ][ 0 ] >= ds->numVerts ) {
-			vert.color[ 0 ][ 0 ] = ds->numVerts - 1;
+		if ( vert.color[ 0 ][ 0 ] >= ds.numVerts ) {
+			vert.color[ 0 ][ 0 ] = ds.numVerts - 1;
 		}
 	}
 
 	/* iterate through the mesh quads */
-	for ( y = 0; y < ( mesh->height - 1 ); y++ )
+	for ( int y = 0; y < ( mesh->height - 1 ); y++ )
 	{
-		for ( x = 0; x < ( mesh->width - 1 ); x++ )
+		for ( int x = 0; x < ( mesh->width - 1 ); x++ )
 		{
 			/* set indexes */
 			const int pw[ 5 ] = {
@@ -693,7 +685,7 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 				x + ( y * mesh->width )    /* same as pw[ 0 ] */
 			};
 			/* set radix */
-			r = ( x + y ) & 1;
+			const int r = ( x + y ) & 1;
 
 			/* get drawverts */
 			const bspDrawVert_t *dv[ 4 ] = {
@@ -704,7 +696,7 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 			};
 			/* planar? */
 			Plane3f plane;
-			planar = PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz );
+			bool planar = PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz );
 			if ( planar ) {
 				if ( fabs( plane3_distance_to_point( plane, dv[ 1 ]->xyz ) ) > PLANAR_EPSILON ) {
 					planar = false;
@@ -713,31 +705,33 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 
 			/* generate a quad */
 			if ( planar ) {
+				radWinding_t rw;
 				rw.numVerts = 4;
-				for ( v = 0; v < 4; v++ )
+				for ( int v = 0; v < 4; v++ )
 				{
 					/* get most everything */
 					memcpy( &rw.verts[ v ], dv[ v ], sizeof( bspDrawVert_t ) );
 
 					/* fix colors */
-					for ( i = 0; i < MAX_LIGHTMAPS; i++ )
+					for ( int i = 0; i < MAX_LIGHTMAPS; i++ )
 					{
-						rw.verts[ v ].color[ i ].rgb() = getRadVertexLuxel( i, ds->firstVert + dv[ v ]->color[ 0 ][ 0 ] );
+						rw.verts[ v ].color[ i ].rgb() = getRadVertexLuxel( i, ds.firstVert + dv[ v ]->color[ 0 ][ 0 ] );
 						rw.verts[ v ].color[ i ].alpha() = dv[ v ]->color[ i ].alpha();
 					}
 				}
 
 				/* subdivide into area lights */
-				RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, &rw, cw );
+				RadSubdivideDiffuseLight( lightmapNum, &ds, lm, si, scale, subdivide, &rw, cw );
 			}
 
 			/* generate 2 tris */
 			else
 			{
+				radWinding_t rw;
 				rw.numVerts = 3;
-				for ( t = 0; t < 2; t++ )
+				for ( int t = 0; t < 2; t++ )
 				{
-					for ( v = 0; v < 3 + t; v++ )
+					for ( int v = 0; v < 3 + t; v++ )
 					{
 						/* get "other" triangle (stupid hacky logic, but whatevah) */
 						if ( v == 1 && t == 1 ) {
@@ -748,15 +742,15 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 						memcpy( &rw.verts[ v ], dv[ v ], sizeof( bspDrawVert_t ) );
 
 						/* fix colors */
-						for ( i = 0; i < MAX_LIGHTMAPS; i++ )
+						for ( int i = 0; i < MAX_LIGHTMAPS; i++ )
 						{
-							rw.verts[ v ].color[ i ].rgb() = getRadVertexLuxel( i, ds->firstVert + dv[ v ]->color[ 0 ][ 0 ] );
+							rw.verts[ v ].color[ i ].rgb() = getRadVertexLuxel( i, ds.firstVert + dv[ v ]->color[ 0 ][ 0 ] );
 							rw.verts[ v ].color[ i ].alpha() = dv[ v ]->color[ i ].alpha();
 						}
 					}
 
 					/* subdivide into area lights */
-					RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, &rw, cw );
+					RadSubdivideDiffuseLight( lightmapNum, &ds, lm, si, scale, subdivide, &rw, cw );
 				}
 			}
 		}

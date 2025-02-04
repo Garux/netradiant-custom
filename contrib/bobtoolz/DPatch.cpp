@@ -99,7 +99,7 @@ void DPatch::BuildInRadiant( scene::Node* entity ){
 
 	b->patchBrush = true;
 	b->pPatch = Patch_Alloc();
-	b->pPatch->setDims( width,height );
+	b->pPatch->setDims( width, height );
 
 	for ( int x = 0; x < width; x++ )
 		for ( int y = 0; y < height; y++ )
@@ -167,7 +167,7 @@ void DPatch::LoadFromPatch( scene::Instance& patch ){
 	{
 		for ( int y = 0; y < width; y++ )
 		{
-			float *p = brush->pPatch->ctrlAt( ROW,x,y );
+			float *p = brush->pPatch->ctrlAt( ROW, x, y );
 			p[0] = points[x][y].xyz[0];
 			p[1] = points[x][y].xyz[1];
 			p[2] = points[x][y].xyz[2];

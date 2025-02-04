@@ -21,7 +21,7 @@
    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
    DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY
-   DIRECT,INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
    ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
@@ -44,7 +44,7 @@ void R_ResampleTextureLerpLine( const byte *in, byte *out, int inwidth, int outw
 	fstep = (int) ( inwidth * 65536.0f / outwidth );
 	endx = ( inwidth - 1 );
 	if ( bytesperpixel == 4 ) {
-		for ( j = 0,f = 0; j < outwidth; j++, f += fstep )
+		for ( j = 0, f = 0; j < outwidth; j++, f += fstep )
 		{
 			xi = f >> 16;
 			if ( xi != oldx ) {
@@ -129,7 +129,7 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 		R_ResampleTextureLerpLine( inrow, row1, inwidth, outwidth, bytesperpixel );
 		R_ResampleTextureLerpLine( inrow + inwidth4, row2, inwidth, outwidth, bytesperpixel );
 
-		for ( i = 0, f = 0; i < outheight; i++,f += fstep )
+		for ( i = 0, f = 0; i < outheight; i++, f += fstep )
 		{
 			yi = f >> 16;
 			if ( yi < endy ) {
@@ -225,7 +225,7 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 		oldy = 0;
 		R_ResampleTextureLerpLine( inrow, row1, inwidth, outwidth, bytesperpixel );
 		R_ResampleTextureLerpLine( inrow + inwidth3, row2, inwidth, outwidth, bytesperpixel );
-		for ( i = 0, f = 0; i < outheight; i++,f += fstep )
+		for ( i = 0, f = 0; i < outheight; i++, f += fstep )
 		{
 			yi = f >> 16;
 			if ( yi < endy ) {

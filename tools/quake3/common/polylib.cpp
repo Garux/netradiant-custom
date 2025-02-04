@@ -643,7 +643,7 @@ inline const MinMax c_worldMinmax( Vector3( MIN_WORLD_COORD ), Vector3( MAX_WORL
  */
 void CheckWinding( const winding_t& w ){
 	if ( w.size() < 3 ) {
-		Error( "CheckWinding: %zu points",w.size() );
+		Error( "CheckWinding: %zu points", w.size() );
 	}
 
 	const float area = WindingArea( w );

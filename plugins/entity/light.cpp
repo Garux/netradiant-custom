@@ -557,11 +557,11 @@ void light_draw( const AABB& aabb_light, RenderStateFlags state ){
 			Vector3( 0, f, f ),
 			Vector3( f, 0, f ),
 			Vector3( 0,-f, f ),
-			Vector3( -f, 0, f ),
+			Vector3(-f, 0, f ),
 			Vector3( 0, f,-f ),
 			Vector3( f, 0,-f ),
 			Vector3( 0,-f,-f ),
-			Vector3( -f, 0,-f ),
+			Vector3(-f, 0,-f ),
 		};
 
 #if !defined( USE_TRIANGLE_FAN )

@@ -143,7 +143,7 @@ ERROR_STRUCT errlist[] = {
 	{WSANO_DATA,         "WSANO_DATA - (or WSANO_ADDRESS) - No data record of requested type"   },
 	{-1,                 NULL                                                                   }
 #else
-	{EACCES, "EACCES - The address is protected,user is not root"},
+	{EACCES, "EACCES - The address is protected, user is not root"},
 	{EAGAIN, "EAGAIN - Operation on non-blocking socket that cannot return immediately"},
 	{EBADF, "EBADF - sockfd is not a valid descriptor"},
 	{EFAULT, "EFAULT - The parameter is not in a writable part of the user address space"},

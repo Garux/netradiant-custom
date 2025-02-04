@@ -285,7 +285,7 @@ void write_stack_trace( PCONTEXT pContext, TextOutputStream& outputStream ){
 
 void write_stack_trace( TextOutputStream& outputStream ){
 	__try {
-		RaiseException( 0,0,0,0 );
+		RaiseException( 0, 0, 0, 0 );
 	}
 	__except( write_stack_trace( ( GetExceptionInformation() )->ContextRecord, outputStream ), EXCEPTION_CONTINUE_EXECUTION ) {
 	}

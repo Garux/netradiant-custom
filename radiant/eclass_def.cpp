@@ -160,7 +160,7 @@ void setSpecialLoad( EntityClass *e, const char* pWhat, CopiedString& p ){
 	const char *pText = 0;
 	const char *where = 0;
 
-	where = strstr( e->comments(),pWhat );
+	where = strstr( e->comments(), pWhat );
 	if ( !where ) {
 		return;
 	}
@@ -170,7 +170,7 @@ void setSpecialLoad( EntityClass *e, const char* pWhat, CopiedString& p ){
 		pText++;
 	}
 
-	where = strchr( pText,'\"' );
+	where = strchr( pText, '\"' );
 	if ( where ) {
 		p = StringRange( pText, where );
 	}
@@ -207,7 +207,7 @@ EntityClass *Eclass_InitFromText( const char *text ){
 
 	{
 		// grab the color, reformat as texture name
-		int r = sscanf( text," (%f %f %f)", &e->color[0], &e->color[1], &e->color[2] );
+		int r = sscanf( text, " (%f %f %f)", &e->color[0], &e->color[1], &e->color[2] );
 		if ( r != 3 ) {
 			return e;
 		}
@@ -227,8 +227,8 @@ EntityClass *Eclass_InitFromText( const char *text ){
 	text = COM_Parse( text );
 	if ( Get_COM_Token()[0] == '(' ) { // parse the size as two vectors
 		e->fixedsize = true;
-		int r = sscanf( text,"%f %f %f) (%f %f %f)", &e->mins[0], &e->mins[1], &e->mins[2],
-		                                             &e->maxs[0], &e->maxs[1], &e->maxs[2] );
+		int r = sscanf( text, "%f %f %f) (%f %f %f)", &e->mins[0], &e->mins[1], &e->mins[2],
+		                                              &e->maxs[0], &e->maxs[1], &e->maxs[2] );
 		if ( r != 6 ) {
 			return 0;
 		}

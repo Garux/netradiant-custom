@@ -279,13 +279,13 @@ struct game_tremulous : game_default
 		homeBasePath = ".tremulous";
 		magic = "tremulous";
 		surfaceParms.insert( surfaceParms.end(), {
-		{"noalienbuild",            TREM_CONT_NOALIENBUILD,0,0,0,0,0},
-		{"nohumanbuild",            TREM_CONT_NOHUMANBUILD,0,0,0,0,0},
-		{"nobuild",                 TREM_CONT_NOBUILD,0,0,0,0,0},
+		{ "noalienbuild",        TREM_CONT_NOALIENBUILD, 0, 0,                             0, 0, 0 },
+		{ "nohumanbuild",        TREM_CONT_NOHUMANBUILD, 0, 0,                             0, 0, 0 },
+		{ "nobuild",             TREM_CONT_NOBUILD,      0, 0,                             0, 0, 0 },
 
-		{"noalienbuildsurface", 0,0,TREM_SURF_NOALIENBUILDSURFACE,0,0,0},
-		{"nohumanbuildsurface", 0,0,TREM_SURF_NOHUMANBUILDSURFACE,0,0,0},
-		{"nobuildsurface",      0,0,TREM_SURF_NOBUILDSURFACE,0,0,0},
+		{ "noalienbuildsurface", 0,                      0, TREM_SURF_NOALIENBUILDSURFACE, 0, 0, 0 },
+		{ "nohumanbuildsurface", 0,                      0, TREM_SURF_NOHUMANBUILDSURFACE, 0, 0, 0 },
+		{ "nobuildsurface",      0,                      0, TREM_SURF_NOBUILDSURFACE,      0, 0, 0 },
 		} );
 	}
 };
@@ -911,7 +911,7 @@ struct game_ja : game_sof2
 		homeBasePath = ".ja";
 		magic = "GameData";
 		flareShader = "gfx/misc/flare";
-		surfaceParms.insert( surfaceParms.end(),{
+		surfaceParms.insert( surfaceParms.end(), {
 		{ "inside",         JA_CONT_INSIDE,             0,                          0,                          0,                          0,                          0 },
 		{ "forcesight",     0,                          0,                          JA_SURF_FORCESIGHT,         0,                          0,                          0 },
 		} );

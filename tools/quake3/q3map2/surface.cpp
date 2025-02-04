@@ -2911,19 +2911,13 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceMode
  */
 
 static int AddSurfaceModels( mapDrawSurface_t *ds, entity_t& entity ){
-	int localNumSurfaceModels, iterations;
-	mesh_t src, *mesh, *subdivided;
-	bspDrawVert_t centroid;
-	float alpha;
-
-
 	/* dummy check */
 	if ( ds == NULL || ds->shaderInfo == NULL || ds->shaderInfo->surfaceModels.empty() ) {
 		return 0;
 	}
 
 	/* init */
-	localNumSurfaceModels = 0;
+	int localNumSurfaceModels = 0;
 
 	/* walk the model list */
 	for ( const auto& model : ds->shaderInfo->surfaceModels )
@@ -2934,9 +2928,11 @@ static int AddSurfaceModels( mapDrawSurface_t *ds, entity_t& entity ){
 		/* handle brush faces and decals */
 		case ESurfaceType::Face:
 		case ESurfaceType::Decal:
+		{
 			/* calculate centroid */
+			bspDrawVert_t centroid;
 			memset( &centroid, 0, sizeof( centroid ) );
-			alpha = 0.0f;
+			float alpha = 0.0f;
 
 			/* walk verts */
 			for ( const bspDrawVert_t& vert : Span( ds->verts, ds->numVerts ) )
@@ -2969,20 +2965,22 @@ static int AddSurfaceModels( mapDrawSurface_t *ds, entity_t& entity ){
 				localNumSurfaceModels += n;
 			}
 			break;
-
+		}
 		/* handle patches */
 		case ESurfaceType::Patch:
+		{
 			/* subdivide the surface */
+			mesh_t src;
 			src.width = ds->patchWidth;
 			src.height = ds->patchHeight;
 			src.verts = ds->verts;
-			//%	subdivided = SubdivideMesh( src, 8.0f, 512 );
-			iterations = IterationsForCurve( ds->longestCurve, patchSubdivisions );
-			subdivided = SubdivideMesh2( src, iterations );
+			//%	mesh_t *subdivided = SubdivideMesh( src, 8.0f, 512 );
+			const int iterations = IterationsForCurve( ds->longestCurve, patchSubdivisions );
+			mesh_t *subdivided = SubdivideMesh2( src, iterations );
 
 			/* fit it to the curve and remove colinear verts on rows/columns */
 			PutMeshOnCurve( *subdivided );
-			mesh = RemoveLinearMeshColumnsRows( subdivided );
+			mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
 			FreeMesh( subdivided );
 
 			/* subdivide each quad to place the models */
@@ -3026,7 +3024,7 @@ static int AddSurfaceModels( mapDrawSurface_t *ds, entity_t& entity ){
 			/* free the subdivided mesh */
 			FreeMesh( mesh );
 			break;
-
+		}
 		/* handle triangle surfaces */
 		case ESurfaceType::Triangles:
 		case ESurfaceType::ForcedMeta:

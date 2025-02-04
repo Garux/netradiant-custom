@@ -819,64 +819,59 @@ static int TriangulateTraceNode_r( int nodeNum ){
  */
 
 static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transform ){
-	int i, j, x, y, pw[ 5 ], r, nodeNum;
-	bspDrawSurface_t    *ds;
-	surfaceInfo_t       *info;
-	const bspDrawVert_t *verts;
-	const int           *indexes;
-	mesh_t srcMesh, *mesh, *subdivided;
+	int nodeNum;
 	traceInfo_t ti;
 	traceWinding_t tw;
 
 
 	/* walk the list of surfaces in this model and fill out the info structs */
-	for ( i = 0; i < model.numBSPSurfaces; i++ )
+	for ( int i = 0; i < model.numBSPSurfaces; i++ )
 	{
 		/* get surface and info */
-		ds = &bspDrawSurfaces[ model.firstBSPSurface + i ];
-		info = &surfaceInfos[ model.firstBSPSurface + i ];
-		if ( info->si == NULL ) {
+		const bspDrawSurface_t& ds = bspDrawSurfaces[ model.firstBSPSurface + i ];
+		const surfaceInfo_t& info = surfaceInfos[ model.firstBSPSurface + i ];
+		if ( info.si == NULL ) {
 			continue;
 		}
 
 		/* no shadows */
-		if ( !info->castShadows ) {
+		if ( !info.castShadows ) {
 			continue;
 		}
 
 		/* patchshadows? */
-		if ( ds->surfaceType == MST_PATCH && !patchShadows ) {
+		if ( ds.surfaceType == MST_PATCH && !patchShadows ) {
 			continue;
 		}
 
 		/* some surfaces in the bsp might have been tagged as nodraw, with a bogus shader */
-		if ( ( bspShaders[ ds->shaderNum ].contentFlags & noDrawContentFlags ) ||
-		     ( bspShaders[ ds->shaderNum ].surfaceFlags & noDrawSurfaceFlags ) ) {
+		if ( ( bspShaders[ ds.shaderNum ].contentFlags & noDrawContentFlags ) ||
+		     ( bspShaders[ ds.shaderNum ].surfaceFlags & noDrawSurfaceFlags ) ) {
 			continue;
 		}
 
 		/* translucent surfaces that are neither alphashadow or lightfilter don't cast shadows */
-		if ( ( info->si->compileFlags & C_NODRAW ) ) {
+		if ( ( info.si->compileFlags & C_NODRAW ) ) {
 			continue;
 		}
-		if ( ( info->si->compileFlags & C_TRANSLUCENT ) &&
-		    !( info->si->compileFlags & C_ALPHASHADOW ) &&
-		    !( info->si->compileFlags & C_LIGHTFILTER ) ) {
+		if ( ( info.si->compileFlags & C_TRANSLUCENT ) &&
+		    !( info.si->compileFlags & C_ALPHASHADOW ) &&
+		    !( info.si->compileFlags & C_LIGHTFILTER ) ) {
 			continue;
 		}
 
 		/* setup trace info */
-		ti.si = info->si;
-		ti.castShadows = info->castShadows;
+		ti.si = info.si;
+		ti.castShadows = info.castShadows;
 		ti.surfaceNum = model.firstBSPBrush + i;
-		ti.skipGrid = ( ds->surfaceType == MST_PATCH );
+		ti.skipGrid = ( ds.surfaceType == MST_PATCH );
 
 		/* choose which node (normal or skybox) */
-		if ( info->parentSurfaceNum >= 0 ) {
+		if ( info.parentSurfaceNum >= 0 ) {
 			nodeNum = skyboxNodeNum;
 
 			/* sky surfaces in portal skies are ignored */
-			if ( info->si->compileFlags & C_SKY ) {
+			if ( info.si->compileFlags & C_SKY ) {
 				continue;
 			}
 		}
@@ -890,47 +885,50 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 		tw.numVerts = 3;
 
 		/* switch on type */
-		switch ( ds->surfaceType )
+		switch ( ds.surfaceType )
 		{
 		/* handle patches */
 		case MST_PATCH:
+		{
 			/* subdivide the surface */
-			srcMesh.width = ds->patchWidth;
-			srcMesh.height = ds->patchHeight;
-			srcMesh.verts = &bspDrawVerts[ ds->firstVert ];
-			//%	subdivided = SubdivideMesh( srcMesh, 8, 512 );
-			subdivided = SubdivideMesh2( srcMesh, info->patchIterations );
+			mesh_t srcMesh;
+			srcMesh.width = ds.patchWidth;
+			srcMesh.height = ds.patchHeight;
+			srcMesh.verts = &bspDrawVerts[ ds.firstVert ];
+			//%	mesh_t *subdivided = SubdivideMesh( srcMesh, 8, 512 );
+			mesh_t *subdivided = SubdivideMesh2( srcMesh, info.patchIterations );
 
 			/* fit it to the curve and remove colinear verts on rows/columns */
 			PutMeshOnCurve( *subdivided );
-			mesh = RemoveLinearMeshColumnsRows( subdivided );
+			mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
 			FreeMesh( subdivided );
 
 			/* set verts */
-			verts = mesh->verts;
+			const bspDrawVert_t *verts = mesh->verts;
 
 			/* subdivide each quad to place the models */
-			for ( y = 0; y < ( mesh->height - 1 ); y++ )
+			for ( int y = 0; y < ( mesh->height - 1 ); y++ )
 			{
-				for ( x = 0; x < ( mesh->width - 1 ); x++ )
+				for ( int x = 0; x < ( mesh->width - 1 ); x++ )
 				{
 					/* set indexes */
-					pw[ 0 ] = x + ( y * mesh->width );
-					pw[ 1 ] = x + ( ( y + 1 ) * mesh->width );
-					pw[ 2 ] = x + 1 + ( ( y + 1 ) * mesh->width );
-					pw[ 3 ] = x + 1 + ( y * mesh->width );
-					pw[ 4 ] = x + ( y * mesh->width );      /* same as pw[ 0 ] */
-
+					const int pw[ 5 ] = {
+						x + ( y * mesh->width ),
+						x + ( ( y + 1 ) * mesh->width ),
+						x + 1 + ( ( y + 1 ) * mesh->width ),
+						x + 1 + ( y * mesh->width ),
+						x + ( y * mesh->width )      /* same as pw[ 0 ] */
+					};
 					/* set radix */
-					r = ( x + y ) & 1;
+					const int r = ( x + y ) & 1;
 
 					/* make first triangle */
 					tw.v[ 0 ].xyz = verts[ pw[ r + 0 ] ].xyz;
-					tw.v[ 0 ].st = verts[ pw[ r + 0 ] ].st;
+					tw.v[ 0 ].st  = verts[ pw[ r + 0 ] ].st;
 					tw.v[ 1 ].xyz = verts[ pw[ r + 1 ] ].xyz;
-					tw.v[ 1 ].st = verts[ pw[ r + 1 ] ].st;
+					tw.v[ 1 ].st  = verts[ pw[ r + 1 ] ].st;
 					tw.v[ 2 ].xyz = verts[ pw[ r + 2 ] ].xyz;
-					tw.v[ 2 ].st = verts[ pw[ r + 2 ] ].st;
+					tw.v[ 2 ].st  = verts[ pw[ r + 2 ] ].st;
 					matrix4_transform_point( transform, tw.v[ 0 ].xyz );
 					matrix4_transform_point( transform, tw.v[ 1 ].xyz );
 					matrix4_transform_point( transform, tw.v[ 2 ].xyz );
@@ -938,11 +936,11 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 
 					/* make second triangle */
 					tw.v[ 0 ].xyz = verts[ pw[ r + 0 ] ].xyz;
-					tw.v[ 0 ].st = verts[ pw[ r + 0 ] ].st;
+					tw.v[ 0 ].st  = verts[ pw[ r + 0 ] ].st;
 					tw.v[ 1 ].xyz = verts[ pw[ r + 2 ] ].xyz;
-					tw.v[ 1 ].st = verts[ pw[ r + 2 ] ].st;
+					tw.v[ 1 ].st  = verts[ pw[ r + 2 ] ].st;
 					tw.v[ 2 ].xyz = verts[ pw[ r + 3 ] ].xyz;
-					tw.v[ 2 ].st = verts[ pw[ r + 3 ] ].st;
+					tw.v[ 2 ].st  = verts[ pw[ r + 3 ] ].st;
 					matrix4_transform_point( transform, tw.v[ 0 ].xyz );
 					matrix4_transform_point( transform, tw.v[ 1 ].xyz );
 					matrix4_transform_point( transform, tw.v[ 2 ].xyz );
@@ -953,30 +951,31 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 			/* free the subdivided mesh */
 			FreeMesh( mesh );
 			break;
-
+		}
 		/* handle triangle surfaces */
 		case MST_TRIANGLE_SOUP:
 		case MST_PLANAR:
+		{
 			/* set verts and indexes */
-			verts = &bspDrawVerts[ ds->firstVert ];
-			indexes = &bspDrawIndexes[ ds->firstIndex ];
+			const bspDrawVert_t *verts = &bspDrawVerts[ ds.firstVert ];
+			const int *indexes = &bspDrawIndexes[ ds.firstIndex ];
 
 			/* walk the triangle list */
-			for ( j = 0; j < ds->numIndexes; j += 3 )
+			for ( int j = 0; j < ds.numIndexes; j += 3 )
 			{
-				tw.v[ 0 ].xyz = verts[ indexes[ j ] ].xyz;
-				tw.v[ 0 ].st = verts[ indexes[ j ] ].st;
+				tw.v[ 0 ].xyz = verts[ indexes[ j + 0 ] ].xyz;
+				tw.v[ 0 ].st  = verts[ indexes[ j + 0 ] ].st;
 				tw.v[ 1 ].xyz = verts[ indexes[ j + 1 ] ].xyz;
-				tw.v[ 1 ].st = verts[ indexes[ j + 1 ] ].st;
+				tw.v[ 1 ].st  = verts[ indexes[ j + 1 ] ].st;
 				tw.v[ 2 ].xyz = verts[ indexes[ j + 2 ] ].xyz;
-				tw.v[ 2 ].st = verts[ indexes[ j + 2 ] ].st;
+				tw.v[ 2 ].st  = verts[ indexes[ j + 2 ] ].st;
 				matrix4_transform_point( transform, tw.v[ 0 ].xyz );
 				matrix4_transform_point( transform, tw.v[ 1 ].xyz );
 				matrix4_transform_point( transform, tw.v[ 2 ].xyz );
 				FilterTraceWindingIntoNodes_r( &tw, nodeNum );
 			}
 			break;
-
+		}
 		/* other surface types do not cast shadows */
 		default:
 			break;

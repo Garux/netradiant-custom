@@ -62,7 +62,7 @@ struct select_workzone_t
 	Vector3 d_work_min, d_work_max;
 
 	select_workzone_t() :
-		d_work_min( -64.0f,-64.0f,-64.0f ),
+		d_work_min(-64.0f,-64.0f,-64.0f ),
 		d_work_max( 64.0f, 64.0f, 64.0f ){
 	}
 };
