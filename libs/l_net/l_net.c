@@ -55,7 +55,7 @@ int Net_Send( socket_t *sock, netmessage_t *msg ){
 	msg->size = 0;
 	NMSG_WriteLong( msg, size - 4 );
 	msg->size = size;
-	//WinPrint("Net_Send: message of size %d\n", sendmsg.size);
+	//WinPrint( "Net_Send: message of size %d\n", sendmsg.size );
 	return WINS_Write( sock->socket, msg->data, msg->size, NULL );
 } //end of the function Net_SendSocketReliable
 //===========================================================================
@@ -93,7 +93,7 @@ int Net_Receive( socket_t *sock, netmessage_t *msg ){
 		WinPrint( "Net_Receive: size header read error\n" );
 		return -1;
 	} //end if
-	  //WinPrint("Net_Receive: message size header %d\n", msg->size);
+	  //WinPrint( "Net_Receive: message size header %d\n", msg->size );
 	sock->msg.read = 0;
 	sock->remaining = NMSG_ReadLong( &sock->msg );
 	if ( sock->remaining == 0 ) {

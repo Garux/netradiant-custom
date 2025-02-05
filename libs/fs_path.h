@@ -38,7 +38,7 @@ class UnixPath
 	}
 
 public:
-/// \brief Constructs with the directory \p root.
+	/// \brief Constructs with the directory \p root.
 	UnixPath( const char* root )
 		: m_string( root ){
 		check_separator();
@@ -52,21 +52,21 @@ public:
 		return m_string.c_str();
 	}
 
-/// \brief Appends the directory \p name.
+	/// \brief Appends the directory \p name.
 	void push( const char* name ){
 		m_string.push_string( name );
 		check_separator();
 	}
-/// \brief Appends the directory [\p first, \p last).
+	/// \brief Appends the directory [\p first, \p last).
 	void push( const char* first, const char* last ){
 		m_string.push_range( first, last );
 		check_separator();
 	}
-/// \brief Appends the filename \p name.
+	/// \brief Appends the filename \p name.
 	void push_filename( const char* name ){
 		m_string.push_string( name );
 	}
-/// \brief Removes the last directory or filename appended.
+	/// \brief Removes the last directory or filename appended.
 	void pop(){
 		if ( m_string.back() == '/' ) {
 			m_string.pop_back();

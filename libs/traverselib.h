@@ -175,7 +175,7 @@ public:
 		notifyEraseAll();
 		m_observer = 0;
 	}
-/// \brief \copydoc scene::Traversable::insert()
+	/// \brief \copydoc scene::Traversable::insert()
 	void insert( scene::Node& node ){
 		ASSERT_MESSAGE( (volatile intptr_t)&node != 0, "TraversableNodeSet::insert: sanity check failed" );
 		m_undo.save();
@@ -188,7 +188,7 @@ public:
 			m_observer->insert( node );
 		}
 	}
-/// \brief \copydoc scene::Traversable::erase()
+	/// \brief \copydoc scene::Traversable::erase()
 	void erase( scene::Node& node ){
 		ASSERT_MESSAGE( (volatile intptr_t)&node != 0, "TraversableNodeSet::erase: sanity check failed" );
 		m_undo.save();
@@ -201,7 +201,7 @@ public:
 
 		m_children.erase( NodeSmartReference( node ) );
 	}
-/// \brief \copydoc scene::Traversable::traverse()
+	/// \brief \copydoc scene::Traversable::traverse()
 	void traverse( const Walker& walker ){
 		UnsortedNodeSet::iterator i = m_children.begin();
 		while ( i != m_children.end() )
@@ -212,7 +212,7 @@ public:
 			// this container without invalidating the iterator
 		}
 	}
-/// \brief \copydoc scene::Traversable::empty()
+	/// \brief \copydoc scene::Traversable::empty()
 	bool empty() const {
 		return m_children.empty();
 	}

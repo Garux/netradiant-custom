@@ -57,7 +57,7 @@ inline void plotBasisFunction( std::size_t numSegments, int point, int degree ){
 	globalOutputStream() << "t=0 basis=" << BSpline_basis( knots, point, degree, 0.0 ) << '\n';
 	for ( std::size_t i = 1; i < numSegments; ++i )
 	{
-		double t = ( 1.0 / double(numSegments) ) * double(i);
+		double t = ( 1.0 / double( numSegments ) ) * double( i );
 		globalOutputStream() << "t=" << t << " basis=" << BSpline_basis( knots, point, degree, t ) << '\n';
 	}
 	globalOutputStream() << "t=1 basis=" << BSpline_basis( knots, point, degree, 1.0 ) << '\n';
@@ -292,7 +292,7 @@ public:
 			m_renderCurve.m_vertices[0].vertex = vertex3f_for_vector3( m_controlPointsTransformed[0] );
 			for ( std::size_t i = 1; i < numSegments; ++i )
 			{
-				m_renderCurve.m_vertices[i].vertex = vertex3f_for_vector3( NURBS_evaluate( m_controlPointsTransformed, m_weights, m_knots, NURBS_degree, ( 1.0 / double(numSegments) ) * double(i) ) );
+				m_renderCurve.m_vertices[i].vertex = vertex3f_for_vector3( NURBS_evaluate( m_controlPointsTransformed, m_weights, m_knots, NURBS_degree, ( 1.0 / double( numSegments ) ) * double( i ) ) );
 			}
 			m_renderCurve.m_vertices[numSegments].vertex = vertex3f_for_vector3( m_controlPointsTransformed[m_controlPointsTransformed.size() - 1] );
 		}
@@ -328,7 +328,7 @@ public:
 
 		KnotVector_openUniform( m_knots, m_controlPoints.size(), NURBS_degree );
 
-		//plotBasisFunction(8, 0, NURBS_degree);
+		//plotBasisFunction( 8, 0, NURBS_degree );
 
 		return true;
 	}
@@ -376,7 +376,7 @@ public:
 			m_renderCurve.m_vertices[0].vertex = vertex3f_for_vector3( m_controlPointsTransformed[0] );
 			for ( std::size_t i = 1; i < numSegments; ++i )
 			{
-				m_renderCurve.m_vertices[i].vertex = vertex3f_for_vector3( CatmullRom_evaluate( m_controlPointsTransformed, ( 1.0 / double(numSegments) ) * double(i) ) );
+				m_renderCurve.m_vertices[i].vertex = vertex3f_for_vector3( CatmullRom_evaluate( m_controlPointsTransformed, ( 1.0 / double( numSegments ) ) * double( i ) ) );
 			}
 			m_renderCurve.m_vertices[numSegments].vertex = vertex3f_for_vector3( m_controlPointsTransformed[m_controlPointsTransformed.size() - 1] );
 		}

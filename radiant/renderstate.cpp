@@ -58,13 +58,13 @@
 #define DEBUG_RENDER 0
 
 inline void debug_string( const char* string ){
-#if (DEBUG_RENDER)
+#if ( DEBUG_RENDER )
 	globalOutputStream() << string << '\n';
 #endif
 }
 
 inline void debug_int( const char* comment, int i ){
-#if (DEBUG_RENDER)
+#if ( DEBUG_RENDER )
 	globalOutputStream() << comment << ' ' << i << '\n';
 #endif
 }
@@ -882,13 +882,13 @@ public:
 		gl().glMatrixMode( GL_PROJECTION );
 		gl().glLoadMatrixf( reinterpret_cast<const float*>( &projection ) );
 #if 0
-		//qglGetFloatv(GL_PROJECTION_MATRIX, reinterpret_cast<float*>(&projection));
+		//qglGetFloatv( GL_PROJECTION_MATRIX, reinterpret_cast<float*>( &projection ) );
 #endif
 
 		gl().glMatrixMode( GL_MODELVIEW );
 		gl().glLoadMatrixf( reinterpret_cast<const float*>( &modelview ) );
 #if 0
-		//qglGetFloatv(GL_MODELVIEW_MATRIX, reinterpret_cast<float*>(&modelview));
+		//qglGetFloatv( GL_MODELVIEW_MATRIX, reinterpret_cast<float*>( &modelview ) );
 #endif
 
 		ASSERT_MESSAGE( realised(), "render states are not realised" );
@@ -1222,10 +1222,10 @@ inline void setState( unsigned int state, unsigned int delta, unsigned int flag,
 }
 
 void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned int globalstate ){
-	debug_int( "sort", int(self.m_sort) );
+	debug_int( "sort", int( self.m_sort ) );
 	debug_int( "texture", self.m_texture );
 	debug_int( "state", self.m_state );
-	debug_int( "address", int(std::size_t( &self ) ) );
+	debug_int( "address", int( std::size_t( &self ) ) );
 
 	count_state();
 
@@ -1282,8 +1282,8 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 	}
 
 	if ( delta & state & RENDER_FILL ) {
-		//qglPolygonMode (GL_BACK, GL_LINE);
-		//qglPolygonMode (GL_FRONT, GL_FILL);
+		//qglPolygonMode ( GL_BACK, GL_LINE );
+		//qglPolygonMode ( GL_FRONT, GL_FILL );
 		gl().glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		GlobalOpenGL_debugAssertNoErrors();
 	}
@@ -1474,7 +1474,7 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 		GLint texture5 = 0;
 		GLint texture6 = 0;
 		GLint texture7 = 0;
-		//if(state & RENDER_TEXTURE) != 0)
+		//if( state & RENDER_TEXTURE ) != 0)
 		{
 			texture0 = self.m_texture;
 			texture1 = self.m_texture1;
@@ -1558,7 +1558,7 @@ void Renderables_flush( OpenGLStateBucket::Renderables& renderables, OpenGLState
 
 	for ( OpenGLStateBucket::Renderables::const_iterator i = renderables.begin(); i != renderables.end(); ++i )
 	{
-		//qglLoadMatrixf(i->m_transform);
+		//qglLoadMatrixf( i->m_transform );
 		if ( !transform || ( transform != ( *i ).m_transform && !matrix4_affine_equal( *transform, *( *i ).m_transform ) ) ) {
 			count_transform();
 			transform = ( *i ).m_transform;

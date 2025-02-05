@@ -185,7 +185,7 @@ void Grid_registerCommands(){
 	GlobalCommands_insert( "GridDown", makeCallbackF( GridPrev ), QKeySequence( "[" ) );
 	GlobalCommands_insert( "GridUp", makeCallbackF( GridNext ), QKeySequence( "]" ) );
 
-	GlobalCommands_insert( "ToggleGridSnap", makeCallbackF(ToggleGridSnap) );
+	GlobalCommands_insert( "ToggleGridSnap", makeCallbackF( ToggleGridSnap ) );
 
 	GlobalCommands_insert( "SetGrid0.125", makeCallbackF( setGridPower<GRIDPOWER_0125> ) );
 	GlobalCommands_insert( "SetGrid0.25", makeCallbackF( setGridPower<GRIDPOWER_025> ) );

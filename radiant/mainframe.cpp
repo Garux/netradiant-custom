@@ -1410,7 +1410,7 @@ void create_main_toolbar( QToolBar *toolbar,  MainFrame::EViewStyle style ){
 	}
 
 	// TODO: call light inspector
-	//QAction* g_view_lightinspector_button = toolbar_append_button(toolbar, "Light Inspector", "lightinspector.png", "ToggleLightInspector");
+	//QAction* g_view_lightinspector_button = toolbar_append_button( toolbar, "Light Inspector", "lightinspector.png", "ToggleLightInspector" );
 
 	toolbar->addSeparator();
 	toolbar_append_button( toolbar, "Refresh Models", "refresh_models.png", "RefreshReferences" );

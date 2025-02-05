@@ -245,7 +245,7 @@ public:
 		m_data.reserve( max_vertices );
 		m_btree.reserve( max_vertices );
 	}
-/// \brief Returns the index of the element equal to \p vertex.
+	/// \brief Returns the index of the element equal to \p vertex.
 	RenderIndex insert( const Vertex& vertex ){
 		if ( m_data.empty() ) {
 			m_data.push_back( vertex );
@@ -698,7 +698,7 @@ inline spherical_t spherical_from_uniformspherical( const uniformspherical_t& un
 
 inline uniformspherical_t uniformspherical_from_normal3f( const Normal3f& normal ){
 	return uniformspherical_from_spherical( spherical_from_normal3f( normal ) );
-	//return uniformspherical_t(atan2(normal.y / normal.x) * c_inv_2pi, (normal.z + 1) * 0.5);
+	//return uniformspherical_t( atan2( normal.y / normal.x ) * c_inv_2pi, ( normal.z + 1 ) * 0.5 );
 }
 
 inline Normal3f normal3f_from_uniformspherical( const uniformspherical_t& uniformspherical ){
@@ -731,9 +731,9 @@ inline Vertex3f vertex3f_quantised( const Vertex3f& vertex, float precision ){
 /// \brief Returns a \p normal quantised to a fixed precision.
 inline Normal3f normal3f_quantised( const Normal3f& normal ){
 	return normal3f_quantised_custom( normal );
-	//return normal3f_from_spherical(spherical_quantised(spherical_from_normal3f(normal), snap));
-	//return normal3f_from_uniformspherical(uniformspherical_quantised(uniformspherical_from_normal3f(normal), snap));
-	//  float_quantise(normal.x, snap), float_quantise(normal.y, snap), float_quantise(normal.y, snap));
+	//return normal3f_from_spherical( spherical_quantised( spherical_from_normal3f( normal ), snap ) );
+	//return normal3f_from_uniformspherical( uniformspherical_quantised( uniformspherical_from_normal3f( normal ), snap ) );
+	//  float_quantise( normal.x, snap ), float_quantise( normal.y, snap ), float_quantise( normal.y, snap ) );
 }
 
 /// \brief Returns a \p texcoord quantised to \p precision.
@@ -1026,7 +1026,7 @@ public:
 
 template<typename remap_policy>
 inline void draw_circle( const std::size_t segments, const float radius, PointVertex* vertices, remap_policy remap ){
-	const double increment = c_pi / double(segments << 2);
+	const double increment = c_pi / double( segments << 2 );
 
 	std::size_t count = 0;
 	float x = radius;

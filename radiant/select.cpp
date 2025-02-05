@@ -1385,8 +1385,8 @@ void Selection_Clone(){
 		Scene_Clone_Selected( GlobalSceneGraph(), false );
 
 		if( g_bNudgeAfterClone ){
-			NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
-			NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+			NudgeSelection( eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType() );
+			NudgeSelection( eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType() );
 		}
 	}
 }
@@ -1398,8 +1398,8 @@ void Selection_Clone_MakeUnique(){
 		Scene_Clone_Selected( GlobalSceneGraph(), true );
 
 		if( g_bNudgeAfterClone ){
-			NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
-			NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+			NudgeSelection( eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType() );
+			NudgeSelection( eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType() );
 		}
 	}
 }

@@ -1234,7 +1234,7 @@ public:
 		return ctrlAt( m_row, m_col );
 	}
 	operator bool() const {
-		return m_row >=0 && m_row < m_height && m_col >=0 && m_col < m_width;
+		return m_row >= 0 && m_row < m_height && m_col >= 0 && m_col < m_width;
 	}
 	void operator++(){
 		operator+=( 1 );

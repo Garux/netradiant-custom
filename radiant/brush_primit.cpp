@@ -285,7 +285,7 @@ void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::si
 
 	Matrix4 local2tex;
 	Texdef_toTransform( projection, (float)width, (float)height, local2tex );
-	//globalOutputStream() << "texdef: " << static_cast<const Vector3&>(local2tex.x()) << static_cast<const Vector3&>(local2tex.y()) << '\n';
+	//globalOutputStream() << "texdef: " << static_cast<const Vector3&>( local2tex.x() ) << static_cast<const Vector3&>( local2tex.y() ) << '\n';
 
 #if 0
 	{
@@ -301,7 +301,7 @@ void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::si
 		Matrix4 xyz2st;
 		// we don't care if it's not normalised...
 		Texdef_basisForNormal( projection, matrix4_transformed_direction( localToWorld, normal ), xyz2st );
-		//globalOutputStream() << "basis: " << static_cast<const Vector3&>(xyz2st.x()) << static_cast<const Vector3&>(xyz2st.y()) << static_cast<const Vector3&>(xyz2st.z()) << '\n';
+		//globalOutputStream() << "basis: " << static_cast<const Vector3&>( xyz2st.x() ) << static_cast<const Vector3&>( xyz2st.y() ) << static_cast<const Vector3&>( xyz2st.z() ) << '\n';
 		matrix4_multiply_by_matrix4( local2tex, xyz2st );
 	}
 

@@ -429,7 +429,7 @@ public:
 	}
 	std::size_t write( const char* buffer, std::size_t length ){
 		if ( m_data->pGeometry != 0 ) {
-			m_data->pGeometry->saxCharacters( m_data, reinterpret_cast<const xmlChar*>( buffer ), int(length) );
+			m_data->pGeometry->saxCharacters( m_data, reinterpret_cast<const xmlChar*>( buffer ), int( length ) );
 		}
 		else
 		{

@@ -124,7 +124,7 @@ bool EntityClassDoom3_parseUnknown( Tokeniser& tokeniser ){
 	//const char* name =
 	PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser ) );
 
-	//globalOutputStream() << "parsing unknown block " << makeQuoted(name) << '\n';
+	//globalOutputStream() << "parsing unknown block " << makeQuoted( name ) << '\n';
 
 	PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser, "{" ) );
 	tokeniser.nextLine();
@@ -371,7 +371,7 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 			}
 		}
 		else if ( string_equal( key, "editor_ragdoll" ) ) {
-			//bool ragdoll = atoi(tokeniser.getToken()) != 0;
+			//bool ragdoll = atoi( tokeniser.getToken() ) != 0;
 			PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser ) );
 		}
 		else if ( string_equal( key, "editor_mins" ) ) {
@@ -634,7 +634,7 @@ EntityClass* EntityClassDoom3_findOrInsert( const char *name, bool has_brushes )
 
 	EntityClasses::iterator i = g_EntityClassDoom3_classes.find( name );
 	if ( i != g_EntityClassDoom3_classes.end()
-	     //&& string_equal((*i).first, name)
+	     //&& string_equal( ( *i ).first, name )
 	   ) {
 		return ( *i ).second;
 	}

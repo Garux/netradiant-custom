@@ -139,19 +139,19 @@ void BPTexdef_Assign( brushprimit_texdef_t& bp_td, const float* hShift, const fl
 
 //++timo replace everywhere texX by texS etc. ( ----> and in q3map !)
 // NOTE : ComputeAxisBase here and in q3map code must always BE THE SAME !
-// WARNING : special case behaviour of atan2(y,x) <-> atan(y/x) might not be the same everywhere when x == 0
-// rotation by (0,RotY,RotZ) assigns X to normal
+// WARNING : special case behaviour of atan2( y, x ) <-> atan( y / x ) might not be the same everywhere when x == 0
+// rotation by ( 0, RotY, RotZ ) assigns X to normal
 template <typename Element, typename OtherElement>
 inline void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<OtherElement>& texS, BasicVector3<OtherElement>& texT ){
 #if 1
 	const BasicVector3<Element> up( 0, 0, 1 );
 	const BasicVector3<Element> down( 0, 0, -1 );
 
-	if ( vector3_equal_epsilon( normal, up, Element(1e-6) ) ) {
+	if ( vector3_equal_epsilon( normal, up, Element( 1e-6 ) ) ) {
 		texS = BasicVector3<OtherElement>( 0, 1, 0 );
 		texT = BasicVector3<OtherElement>( 1, 0, 0 );
 	}
-	else if ( vector3_equal_epsilon( normal, down, Element(1e-6) ) ) {
+	else if ( vector3_equal_epsilon( normal, down, Element( 1e-6 ) ) ) {
 		texS = BasicVector3<OtherElement>( 0, 1, 0 );
 		texT = BasicVector3<OtherElement>( -1, 0, 0 );
 	}

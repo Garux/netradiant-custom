@@ -63,7 +63,7 @@ DBrush::~DBrush(){
 
 DPlane* DBrush::AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, const _QERFaceData* texData ){
 #ifdef _DEBUG
-//	Sys_Printf("(%f %f %f) (%f %f %f) (%f %f %f)\n", va[0], va[1], va[2], vb[0], vb[1], vb[2], vc[0], vc[1], vc[2]);
+//	Sys_Printf( "(%f %f %f) (%f %f %f) (%f %f %f)\n", va[0], va[1], va[2], vb[0], vb[1], vb[2], vc[0], vc[1], vc[2] );
 #endif
 	bBoundsBuilt = false;
 	DPlane* newFace = new DPlane( va, vb, vc, texData );
@@ -99,20 +99,20 @@ int DBrush::BuildPoints(){
 							AddPoint( pnt );
 						}
 /*						else
-                            Sys_Printf("Duplicate Point Found, pyramids ahoy!!!!!\n");*/
+                            Sys_Printf( "Duplicate Point Found, pyramids ahoy!!!!!\n" );*/
 						// point lies on more that 3 planes
 					}
 
 					// otherwise point is removed due to another plane..
 
-					// Sys_Printf("(%f, %f, %f)\n", pnt[0], pnt[1], pnt[2]);
+					// Sys_Printf( "(%f, %f, %f)\n", pnt[0], pnt[1], pnt[2] );
 				}
 			}
 		}
 	}
 
 #ifdef _DEBUG
-//	Sys_Printf("%i points on brush\n", pointList.size());
+//	Sys_Printf( "%i points on brush\n", pointList.size() );
 #endif
 
 	return static_cast<int>( pointList.size() );
@@ -240,7 +240,7 @@ int DBrush::RemoveRedundantPlanes(){
 	//-djbob
 
 	if ( pointList.size() == 0 ) { // if points may not have been built, build them
-/*		if(BuildPoints() == 0)	// just let the planes die if they are all bad
+/*		if( BuildPoints() == 0 )	// just let the planes die if they are all bad
 			return cnt;*/
 		BuildPoints();
 	}

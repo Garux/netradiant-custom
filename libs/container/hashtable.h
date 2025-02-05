@@ -322,7 +322,7 @@ public:
 		return m_size;
 	}
 
-/// \brief Returns an iterator pointing to the value associated with \p key if it is contained by the hash-table, else \c end().
+	/// \brief Returns an iterator pointing to the value associated with \p key if it is contained by the hash-table, else \c end().
 	iterator find( const Key& key ){
 		hash_type hash = hashKey( key );
 		if ( m_bucketCount != 0 ) {
@@ -337,7 +337,7 @@ public:
 
 		return end();
 	}
-/// \brief Adds \p value to the hash-table associated with \p key if it does not exist.
+	/// \brief Adds \p value to the hash-table associated with \p key if it does not exist.
 	iterator insert( const Key& key, const Value& value ){
 		hash_type hash = hashKey( key );
 		if ( m_bucketCount != 0 ) {
@@ -354,9 +354,9 @@ public:
 		return iterator( bucket_insert( getBucket( hash ), node_create( hash, key, value ) ) );
 	}
 
-/// \brief Removes the value pointed to by \p i from the hash-table.
-///
-/// \p i must be a deferenceable iterator into the hash-table.
+	/// \brief Removes the value pointed to by \p i from the hash-table.
+	///
+	/// \p i must be a deferenceable iterator into the hash-table.
 	void erase( iterator i ){
 		Bucket& bucket = getBucket( i.node()->m_hash );
 		BucketNode* node = i.node();
@@ -373,7 +373,7 @@ public:
 		size_decrement();
 	}
 
-/// \brief Returns the value identified by \p key if it is contained by the hash-table, else inserts and returns a new default-constructed value associated with \p key.
+	/// \brief Returns the value identified by \p key if it is contained by the hash-table, else inserts and returns a new default-constructed value associated with \p key.
 	Value& operator[]( const Key& key ){
 		hash_type hash = hashKey( key );
 		if ( m_bucketCount != 0 ) {
@@ -388,18 +388,18 @@ public:
 		size_increment();
 		return bucket_insert( getBucket( hash ), node_create( hash, key, Value() ) )->m_value.value;
 	}
-/// \brief Removes the value associated with \p key from the hash-table.
+	/// \brief Removes the value associated with \p key from the hash-table.
 	void erase( const Key& key ){
 		erase( find( key ) );
 	}
-/// \brief Swaps the contents of the hash-table with \p other.
+	/// \brief Swaps the contents of the hash-table with \p other.
 	void swap( HashTable& other ){
 		std::swap( m_buckets, other.m_buckets );
 		std::swap( m_bucketCount, other.m_bucketCount );
 		std::swap( m_size, other.m_size );
 		HashTableDetail::list_swap( m_list, other.m_list );
 	}
-/// \brief Removes all values from the hash-table.
+	/// \brief Removes all values from the hash-table.
 	void clear(){
 		HashTable tmp;
 		tmp.swap( *this );

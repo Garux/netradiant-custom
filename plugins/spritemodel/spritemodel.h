@@ -53,7 +53,7 @@ public:
 	}
 
 //ISelect
-//bool TestRay (const ray_t *ray, vec_t *dist) const;
+//bool TestRay( const ray_t *ray, vec_t *dist ) const;
 
 	void Construct( IShader *pShader );
 

@@ -160,10 +160,10 @@ static void ClusterMerge( int leafnum ){
 	// convert portal bits to leaf bits
 	numvis = LeafVectorFromPortalVector( portalvector, uncompressed );
 
-//	if (uncompressed[leafnum>>3] & (1<<(leafnum&7)))
+//	if ( uncompressed[leafnum >> 3] & ( 1 << ( leafnum & 7 ) ) )
 //		Sys_Warning( "Leaf portals saw into leaf\n" );
 
-//	uncompressed[leafnum>>3] |= (1<<(leafnum&7));
+//	uncompressed[leafnum >> 3] |= ( 1 << ( leafnum & 7 ) );
 
 	numvis++;       // count the leaf itself
 
@@ -282,7 +282,7 @@ static void CalcVis(){
 	Sys_Printf( "\n--- BasePortalVis (%d) ---\n", numportals * 2 );
 	RunThreadsOnIndividual( numportals * 2, true, BasePortalVis );
 
-//	RunThreadsOnIndividual (numportals*2, true, BetterPortalVis);
+//	RunThreadsOnIndividual( numportals * 2, true, BetterPortalVis );
 
 	SortPortals();
 
@@ -534,10 +534,10 @@ static fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, 
 			p4 = &f2->points[( j + 1 ) % f2->numpoints];
 			for ( k = 0; k < 3; k++ )
 			{
-				if ( fabs( (*p1)[k] - (*p4)[k] ) > 0.1 ) { //EQUAL_EPSILON) //ME
+				if ( fabs( ( *p1 )[k] - ( *p4 )[k] ) > 0.1 ) { //EQUAL_EPSILON) //ME
 					break;
 				}
-				if ( fabs( (*p2)[k] - (*p3)[k] ) > 0.1 ) { //EQUAL_EPSILON) //ME
+				if ( fabs( ( *p2 )[k] - ( *p3 )[k] ) > 0.1 ) { //EQUAL_EPSILON) //ME
 					break;
 				}
 			}
@@ -641,7 +641,7 @@ static void MergeLeafPortals(){
 				if ( p1->leaf == p2->leaf ) {
 					w = TryMergeWinding( p1->winding, p2->winding, p1->plane.normal() );
 					if ( w ) {
-						free( p1->winding );    //% FreeWinding(p1->winding);
+						free( p1->winding );    //% FreeWinding( p1->winding );
 						p1->winding = w;
 						if ( p1->hint && p2->hint ) {
 							hintsmerged++;
@@ -778,8 +778,8 @@ static void LoadPortals( char *name ){
 		{
 			vportal_t& p = portals[i * 2];
 			p.num = i + 1;
-			p.hint = ((flags & 1) != 0);
-			p.sky = ((flags & 2) != 0);
+			p.hint = ( ( flags & 1 ) != 0 );
+			p.sky = ( ( flags & 2 ) != 0 );
 			p.winding = w;
 			p.plane = plane3_flipped( plane );
 			p.leaf = leafnums[1];

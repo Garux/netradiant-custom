@@ -121,9 +121,9 @@ void ParseFromMemory( char *buffer, size_t size ){
    Signals that the current token was not used, and should be reported
    for the next GetToken.  Note that
 
-   GetToken (true);
-   UnGetToken ();
-   GetToken (false);
+   GetToken( true );
+   UnGetToken();
+   GetToken( false );
 
    could cross a line boundary.
    ==============

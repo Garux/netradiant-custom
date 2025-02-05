@@ -175,9 +175,9 @@ Image* LoadMIPBuff( byte* buffer ){
 
 	RGBAImage* image = new RGBAImage( columns, rows );
 
-	//Sys_Printf("lpMip->width = %i, lpMip->height = %i, lpMip->offsets[0] = %i, lpMip->offsets[1] = %i, lpMip->offsets[2] = %i, lpMip->offsets[3] = %i, numPixels = %i\n", lpMip->width, lpMip->height, lpMip->offsets[0], lpMip->offsets[1], lpMip->offsets[2], lpMip->offsets[3], numPixels);
-	//for (i = 0; i < sizeof(*lpMip); i++)
-	//  Sys_Printf("%02x", (int) ((unsigned char *)lpMip)[i]);
+	//Sys_Printf( "lpMip->width = %i, lpMip->height = %i, lpMip->offsets[0] = %i, lpMip->offsets[1] = %i, lpMip->offsets[2] = %i, lpMip->offsets[3] = %i, numPixels = %i\n", lpMip->width, lpMip->height, lpMip->offsets[0], lpMip->offsets[1], lpMip->offsets[2], lpMip->offsets[3], numPixels );
+	//for ( i = 0; i < sizeof( *lpMip ); i++ )
+	//  Sys_Printf( "%02x", (int) ( (unsigned char *)lpMip )[i] );
 
 	pixbuf = image->getRGBAPixels();
 

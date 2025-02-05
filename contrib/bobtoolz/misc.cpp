@@ -167,13 +167,13 @@ const char* ExtractFilename( const char* path ){
 }
 
 extern char* PLUGIN_NAME;
-/*char* GetGameFilename(char* buffer, const char* filename)
+/*char* GetGameFilename( char* buffer, const char* filename )
    {
-    strcpy(buffer, g_FuncTable.m_pfnGetGamePath());
-    char* p = strrchr(buffer, '/');
+    strcpy( buffer, g_FuncTable.m_pfnGetGamePath() );
+    char* p = strrchr( buffer, '/' );
    *++p = '\0';
-    strcat(buffer, filename);
-    buffer = UnixToDosPath(buffer);
+    strcat( buffer, filename );
+    buffer = UnixToDosPath( buffer );
     return buffer;
    }*/
 

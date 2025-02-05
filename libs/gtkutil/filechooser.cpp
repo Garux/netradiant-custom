@@ -130,7 +130,7 @@ const char* file_dialog( QWidget* parent, bool open, const char* title, const ch
 	}
 
 	// we should add all important paths as shortcut folder...
-	// gtk_file_chooser_add_shortcut_folder(GTK_FILE_CHOOSER(dialog), "/tmp/", NULL);
+	// gtk_file_chooser_add_shortcut_folder( GTK_FILE_CHOOSER( dialog ), "/tmp/", NULL );
 
 	QString filter;
 

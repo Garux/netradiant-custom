@@ -63,7 +63,7 @@ void TestNewDelete(){
 	}
 
 	{
-		int* p = New<int>().scalar( int(15.9) );
+		int* p = New<int>().scalar( int( 15.9 ) );
 		Delete<int>().scalar( p );
 	}
 

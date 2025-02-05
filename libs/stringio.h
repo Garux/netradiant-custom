@@ -151,7 +151,7 @@ inline bool string_parse_float( const char* string, float& f ){
 	if ( string_empty( string ) ) {
 		return false;
 	}
-	f = float(buffer_parse_floating_literal( string ) );
+	f = float( buffer_parse_floating_literal( string ) );
 	return string_empty( string );
 }
 
@@ -170,15 +170,15 @@ inline bool string_parse_vector3( const char* string, BasicVector3<Element>& v )
 	if ( string_empty( string ) || *string == ' ' ) {
 		return false;
 	}
-	v[0] = float(buffer_parse_floating_literal( string ) );
+	v[0] = float( buffer_parse_floating_literal( string ) );
 	if ( *string++ != ' ' ) {
 		return false;
 	}
-	v[1] = float(buffer_parse_floating_literal( string ) );
+	v[1] = float( buffer_parse_floating_literal( string ) );
 	if ( *string++ != ' ' ) {
 		return false;
 	}
-	v[2] = float(buffer_parse_floating_literal( string ) );
+	v[2] = float( buffer_parse_floating_literal( string ) );
 	return string_empty( string );
 }
 
@@ -189,7 +189,7 @@ inline bool string_parse_vector( const char* string, Float* first, Float* last )
 	}
 	for (;; )
 	{
-		*first = float(buffer_parse_floating_literal( string ) );
+		*first = float( buffer_parse_floating_literal( string ) );
 		if ( ++first == last ) {
 			return string_empty( string );
 		}

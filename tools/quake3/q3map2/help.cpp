@@ -63,7 +63,7 @@ static void HelpOptions( const char* group_name, int indentation, int width, con
 			int fragment = width - printed;
 			while ( fragment > 0 && option.description[j + fragment - 1] != ' ' )
 				fragment--;
-			j += fwrite( option.description + j, sizeof(char), fragment, stdout );
+			j += fwrite( option.description + j, sizeof( char ), fragment, stdout );
 			putchar( '\n' );
 			printed = indentation + 26;
 		}
@@ -476,7 +476,7 @@ void HelpGames(){
 		Sys_Printf( "  %s\n", game.arg );
 }
 
-void HelpMain(const char* arg)
+void HelpMain( const char* arg )
 {
 	printf( "Usage: q3map2 [stage] [common options...] [stage options...] [stage source file]\n" );
 	printf( "       q3map2 -help [stage]\n\n" );

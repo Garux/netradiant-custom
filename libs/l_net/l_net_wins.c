@@ -233,7 +233,7 @@ void WINS_Shutdown( void ){
 	WSACleanup();
 #endif
 	//
-	//WinPrint("Winsock Shutdown\n");
+	//WinPrint( "Winsock Shutdown\n" );
 }
 
 int WINS_OpenReliableSocket( int port ){

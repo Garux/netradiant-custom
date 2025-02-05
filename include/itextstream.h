@@ -31,8 +31,8 @@
 class TextInputStream
 {
 public:
-/// \brief Attempts to read the next \p length characters from the stream to \p buffer.
-/// Returns the number of characters actually stored in \p buffer.
+	/// \brief Attempts to read the next \p length characters from the stream to \p buffer.
+	/// Returns the number of characters actually stored in \p buffer.
 	virtual std::size_t read( char* buffer, std::size_t length ) = 0;
 };
 
@@ -40,8 +40,8 @@ public:
 class TextOutputStream
 {
 public:
-/// \brief Attempts to write \p length characters to the stream from \p buffer.
-/// Returns the number of characters actually read from \p buffer.
+	/// \brief Attempts to write \p length characters to the stream from \p buffer.
+	/// Returns the number of characters actually read from \p buffer.
 	virtual std::size_t write( const char* buffer, std::size_t length ) = 0;
 };
 
@@ -50,14 +50,14 @@ public:
    To support writing a custom type MyClass to any kind of text-output-stream with operator<<:
    \code
    template<typename TextOutputStreamType>
-   TextOutputStreamType& ostream_write(TextOutputStreamType& ostream, const MyClass& myClass)
+   TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const MyClass& myClass )
    {
    return ostream << myClass.getName() << ' ' << myClass.getText();
    }
    \endcode
    Expressing this as a template allows it to be used directly with any concrete text-output-stream type, not just the abstract TextOutputStream\n
    \n
-   This overload writes a single character to any text-output-stream - ostream_write(TextOutputStreamType& ostream, char c).
+   This overload writes a single character to any text-output-stream - ostream_write( TextOutputStreamType& ostream, char c ).
  */
 template<typename T>
 inline TextOutputStream& operator<<( TextOutputStream& ostream, const T& t ){

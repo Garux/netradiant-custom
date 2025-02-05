@@ -453,8 +453,8 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 		const auto doc = load_json( StringStream( directory, "models.json" ) );
 		for( auto&& obj : doc.GetObj() ){
 			auto&& item = bspModels.emplace_back();
-			value_to( obj.value["minmax"].GetObj().operator[]("mins"), item.minmax.mins );
-			value_to( obj.value["minmax"].GetObj().operator[]("maxs"), item.minmax.maxs );
+			value_to( obj.value["minmax"].GetObj().operator[]( "mins" ), item.minmax.mins );
+			value_to( obj.value["minmax"].GetObj().operator[]( "maxs" ), item.minmax.maxs );
 			item.firstBSPSurface = obj.value["firstBSPSurface"].GetInt();
 			item.numBSPSurfaces = obj.value["numBSPSurfaces"].GetInt();
 			item.firstBSPBrush = obj.value["firstBSPBrush"].GetInt();
@@ -477,8 +477,8 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 			auto&& item = bspLeafs.emplace_back();
 			item.cluster = obj.value["cluster"].GetInt();
 			item.area = obj.value["area"].GetInt();
-			value_to( obj.value["minmax"].GetObj().operator[]("mins"), item.minmax.mins );
-			value_to( obj.value["minmax"].GetObj().operator[]("maxs"), item.minmax.maxs );
+			value_to( obj.value["minmax"].GetObj().operator[]( "mins" ), item.minmax.mins );
+			value_to( obj.value["minmax"].GetObj().operator[]( "maxs" ), item.minmax.maxs );
 			item.firstBSPLeafSurface = obj.value["firstBSPLeafSurface"].GetInt();
 			item.numBSPLeafSurfaces = obj.value["numBSPLeafSurfaces"].GetInt();
 			item.firstBSPLeafBrush = obj.value["firstBSPLeafBrush"].GetInt();
@@ -492,8 +492,8 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 			item.planeNum = obj.value["planeNum"].GetInt();
 			item.children[0] = obj.value["children"].operator[]( 0 ).GetInt();
 			item.children[1] = obj.value["children"].operator[]( 1 ).GetInt();
-			value_to( obj.value["minmax"].GetObj().operator[]("mins"), item.minmax.mins );
-			value_to( obj.value["minmax"].GetObj().operator[]("maxs"), item.minmax.maxs );
+			value_to( obj.value["minmax"].GetObj().operator[]( "mins" ), item.minmax.mins );
+			value_to( obj.value["minmax"].GetObj().operator[]( "maxs" ), item.minmax.maxs );
 		}
 	}
 	{

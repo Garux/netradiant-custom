@@ -31,7 +31,7 @@ class TransformNode
 {
 public:
 	STRING_CONSTANT( Name, "TransformNode" );
-/// \brief Returns the transform which maps the node's local-space into the local-space of its parent node.
+	/// \brief Returns the transform which maps the node's local-space into the local-space of its parent node.
 	virtual const Matrix4& localToParent() const  = 0;
 };
 
@@ -39,7 +39,7 @@ public:
 class IdentityTransform : public TransformNode
 {
 public:
-/// \brief Returns the identity matrix.
+	/// \brief Returns the identity matrix.
 	const Matrix4& localToParent() const {
 		return g_matrix4_identity;
 	}
@@ -56,7 +56,7 @@ public:
 	Matrix4& localToParent(){
 		return m_localToParent;
 	}
-/// \brief Returns the stored local->parent transform.
+	/// \brief Returns the stored local->parent transform.
 	const Matrix4& localToParent() const {
 		return m_localToParent;
 	}

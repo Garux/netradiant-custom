@@ -226,7 +226,7 @@ private:
 						globalOutputStream() << "matname: " << matname.C_Str() << '\n';
 #endif
 			if( aiString texname;
-			    aiReturn_SUCCESS == material->Get( AI_MATKEY_TEXTURE_DIFFUSE(0), texname )
+			    aiReturn_SUCCESS == material->Get( AI_MATKEY_TEXTURE_DIFFUSE( 0 ), texname )
 			 && texname.length != 0
 			 && !string_equal_prefix_nocase( matname.C_Str(), "textures/" ) /* matname looks intentionally named as ingame shader */
 			 && !string_equal_prefix_nocase( matname.C_Str(), "textures\\" )
@@ -283,7 +283,7 @@ private:
 			}
 #endif
 #if 0
-			picoVec_t* color = PicoGetSurfaceColor( surface, 0, int(i) );
+			picoVec_t* color = PicoGetSurfaceColor( surface, 0, int( i ) );
 			m_vertices[i].colour = Colour4b( color[0], color[1], color[2], color[3] );
 #endif
 		}

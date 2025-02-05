@@ -225,11 +225,11 @@ static void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, 
 
 	/*
 	   PrintMesh( in );
-	   Sys_Printf("\n");
+	   Sys_Printf( "\n" );
 	   PrintMesh( f );
-	   Sys_Printf("\n");
+	   Sys_Printf( "\n" );
 	   PrintMesh( b );
-	   Sys_Printf("\n");
+	   Sys_Printf( "\n" );
 	 */
 
 	FreeMesh( in );

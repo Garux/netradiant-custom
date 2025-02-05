@@ -39,7 +39,7 @@ void user_warning_fn( png_structp png_ptr, png_const_charp warning_msg ){
 
 void user_error_fn( png_structp png_ptr, png_const_charp error_msg ){
 	globalErrorStream() << "libpng error: " << error_msg << '\n';
-	longjmp( png_jmpbuf(png_ptr), 0 );
+	longjmp( png_jmpbuf( png_ptr ), 0 );
 }
 
 void user_read_data( png_structp png_ptr, png_bytep data, size_t length ){
@@ -82,7 +82,7 @@ Image* LoadPNGBuff( unsigned char* fbuffer ){
 	// configure the read function
 	png_set_read_fn( png_ptr, ( png_voidp ) & p_fbuffer, ( png_rw_ptr ) & user_read_data );
 
-	if ( setjmp( png_jmpbuf(png_ptr) ) ) {
+	if ( setjmp( png_jmpbuf( png_ptr ) ) ) {
 		png_destroy_read_struct( &png_ptr, &info_ptr, &end_info );
 		return 0;
 	}

@@ -194,11 +194,11 @@ struct FixedWinding
 	}
 
 	FixedWindingVertex& operator[]( std::size_t index ){
-		//ASSERT_MESSAGE(index < MAX_POINTS_ON_WINDING, "winding: index out of bounds");
+		//ASSERT_MESSAGE( index < MAX_POINTS_ON_WINDING, "winding: index out of bounds" );
 		return points[index];
 	}
 	const FixedWindingVertex& operator[]( std::size_t index ) const {
-		//ASSERT_MESSAGE(index < MAX_POINTS_ON_WINDING, "winding: index out of bounds");
+		//ASSERT_MESSAGE( index < MAX_POINTS_ON_WINDING, "winding: index out of bounds" );
 		return points[index];
 	}
 
@@ -231,7 +231,7 @@ void Winding_createInfinite( FixedWinding& w, const Plane3& plane, double infini
 
 const double ON_EPSILON = 1.0 / ( 1 << 8 );
 
-/// \brief Returns true if edge (\p x, \p y) is smaller than the epsilon used to classify winding points against a plane.
+/// \brief Returns true if edge ( \p x, \p y ) is smaller than the epsilon used to classify winding points against a plane.
 inline bool Edge_isDegenerate( const DoubleVector3& x, const DoubleVector3& y ){
 	return vector3_length_squared( y - x ) < ( ON_EPSILON * ON_EPSILON );
 }

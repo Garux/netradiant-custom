@@ -372,7 +372,7 @@ bool vfsPackFile_Absolute_Path( const char *filepath, const char *filename, cons
 	if ( FileExists( filepath ) ) {
 		if ( FileExists( packname ) ) {
 			mz_zip_archive zip;
-			memset( &zip, 0, sizeof(zip) );
+			memset( &zip, 0, sizeof( zip ) );
 
 			if ( !mz_zip_reader_init_file( &zip, packname, 0 )
 			  || !mz_zip_writer_init_from_reader( &zip, packname )
@@ -385,7 +385,7 @@ bool vfsPackFile_Absolute_Path( const char *filepath, const char *filename, cons
 		}
 		else{
 			mz_zip_archive zip;
-			memset( &zip, 0, sizeof(zip) );
+			memset( &zip, 0, sizeof( zip ) );
 
 			if ( !mz_zip_writer_init_file( &zip, packname, 0 )
 			  || !mz_zip_writer_add_file( &zip, filename, filepath, 0, 0, compLevel )

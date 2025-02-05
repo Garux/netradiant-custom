@@ -336,9 +336,9 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 	//%	VectorSubtract( minmax.maxs, minmax.mins, delta );
 
 	/* new: color gradient will always be 0-1.0, expressed as the range of light relative to overall light */
-	//%	gradient[ 0 ] = minmax.maxs[ 0 ] > 0.0f ? (minmax.maxs[ 0 ] - minmax.mins[ 0 ]) / minmax.maxs[ 0 ] : 0.0f;
-	//%	gradient[ 1 ] = minmax.maxs[ 1 ] > 0.0f ? (minmax.maxs[ 1 ] - minmax.mins[ 1 ]) / minmax.maxs[ 1 ] : 0.0f;
-	//%	gradient[ 2 ] = minmax.maxs[ 2 ] > 0.0f ? (minmax.maxs[ 2 ] - minmax.mins[ 2 ]) / minmax.maxs[ 2 ] : 0.0f;
+	//%	gradient[ 0 ] = minmax.maxs[ 0 ] > 0.0f ? ( minmax.maxs[ 0 ] - minmax.mins[ 0 ] ) / minmax.maxs[ 0 ] : 0.0f;
+	//%	gradient[ 1 ] = minmax.maxs[ 1 ] > 0.0f ? ( minmax.maxs[ 1 ] - minmax.mins[ 1 ] ) / minmax.maxs[ 1 ] : 0.0f;
+	//%	gradient[ 2 ] = minmax.maxs[ 2 ] > 0.0f ? ( minmax.maxs[ 2 ] - minmax.mins[ 2 ] ) / minmax.maxs[ 2 ] : 0.0f;
 
 	/* newer: another contrast function */
 	gradient = ( minmax.maxs - minmax.mins ) * minmax.maxs;
@@ -435,7 +435,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 	}
 
 	/* debug code */
-	//%	Sys_Printf( "Size: %d %d %d\n", (int) (minmax.maxs[ 0 ] - minmax.mins[ 0 ]), (int) (minmax.maxs[ 1 ] - minmax.mins[ 1 ]), (int) (minmax.maxs[ 2 ] - minmax.mins[ 2 ]) );
+	//%	Sys_Printf( "Size: %d %d %d\n", (int)( minmax.maxs[ 0 ] - minmax.mins[ 0 ] ), (int)( minmax.maxs[ 1 ] - minmax.mins[ 1 ] ), (int)( minmax.maxs[ 2 ] - minmax.mins[ 2 ] ) );
 	//%	Sys_Printf( "Grad: %f %f %f\n", gradient[ 0 ], gradient[ 1 ], gradient[ 2 ] );
 
 	/* increment counts */
@@ -572,7 +572,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 		light.dist = vector3_dot( light.origin, normal );
 	}
 
-	if (light.photons < 0 || light.add < 0 || light.color[0] < 0 || light.color[1] < 0 || light.color[2] < 0)
+	if ( light.photons < 0 || light.add < 0 || light.color[0] < 0 || light.color[1] < 0 || light.color[2] < 0 )
 		Sys_Printf( "BUG: RadSubdivideDiffuseLight created a darkbulb\n" );
 
 	/* emit light from both sides? */

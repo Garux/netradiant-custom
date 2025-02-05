@@ -105,9 +105,9 @@ void DPatch::BuildInRadiant( scene::Node* entity ){
 		for ( int y = 0; y < height; y++ )
 			CopyDrawVert( &points[x][y], &pm->ctrl[x][y] );
 
-/*	if(entity)
+/*	if( entity )
 	{
-	//	strcpy(pm->d_texture->name, texture);
+	//	strcpy( pm->d_texture->name, texture );
 
 		brush_t* brush = (brush_t*)g_FuncTable.m_pfnCreateBrushHandle();
 		brush->patchBrush = true;
@@ -119,7 +119,7 @@ void DPatch::BuildInRadiant( scene::Node* entity ){
 		pm->bDirty = true;		// or get my own patch out....
 		pm->nListID = -1;
 
-		g_FuncTable.m_pfnCommitBrushHandleToEntity(brush, entity);
+		g_FuncTable.m_pfnCommitBrushHandleToEntity( brush, entity );
 	}
 	else*/              // patch to entity just plain dont work atm
 
@@ -335,7 +335,7 @@ void DPatch::Invert(){
 }
 /*
    //Was used for debugging, obsolete function
-   DPatch* DPatch::TransposePatch(DPatch *p1)
+   DPatch* DPatch::TransposePatch( DPatch *p1 )
    {
     globalOutputStream() << "Source patch ";
     p1->DebugPrint();
@@ -346,11 +346,11 @@ void DPatch::Invert(){
     DPatch* newPatch = new DPatch();
     newPatch->height	= p1->height;
     newPatch->width		= p1->width;
-    newPatch->SetTexture(p1->texture);
+    newPatch->SetTexture( p1->texture );
 
-    for(int x = 0; x < p1->height; x++)
+    for( int x = 0; x < p1->height; x++ )
     {
-        for(int y = 0; y < p1->width; y++)
+        for( int y = 0; y < p1->width; y++ )
         {
             newPatch->points[x][y] = p1->points[x][y];
         }
@@ -362,9 +362,9 @@ void DPatch::Invert(){
    void DPatch::DebugPrint()
    {
     globalOutputStream() << "width: " << width << "\theight: " << height << '\n';
-    for(int x = 0; x < height; x++)
+    for( int x = 0; x < height; x++ )
     {
-        for(int y = 0; y < width; y++)
+        for( int y = 0; y < width; y++ )
         {
             globalOutputStream() << "\t(" << points[x][y].xyz[0] << ' ' << points[x][y].xyz[1] << ' ' << points[x][y].xyz[2] << ")\t";
         }

@@ -345,7 +345,7 @@ public:
 	~StringTokeniser(){
 		string_release( m_string, m_length );
 	}
-/// \brief Returns the next token or "" if there are no more tokens available.
+	/// \brief Returns the next token or "" if there are no more tokens available.
 	const char* getToken(){
 		return advance();
 	}

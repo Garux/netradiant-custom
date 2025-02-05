@@ -190,7 +190,7 @@ vec_t VectorFastNormalize_( const vec3_t in, vec3_t out ) {
 	if ( length ) {
 		/* writing it this way allows gcc to recognize that rsqrt can be used */
 		ilength = 1 / (float)sqrt( length );
-		/* sqrt(length) = length * (1 / sqrt(length)) */
+		/* sqrt( length ) = length * ( 1 / sqrt( length ) ) */
 		length *= ilength;
 		out[0] = in[0] * ilength;
 		out[1] = in[1] * ilength;
@@ -233,13 +233,13 @@ void VectorInverse( vec3_t v ){
 }
 
 /*
-   void VectorScale (vec3_t v, vec_t scale, vec3_t out)
-   {
-    out[0] = v[0] * scale;
-    out[1] = v[1] * scale;
-    out[2] = v[2] * scale;
-   }
- */
+void VectorScale ( vec3_t v, vec_t scale, vec3_t out )
+{
+	out[0] = v[0] * scale;
+	out[1] = v[1] * scale;
+	out[2] = v[2] * scale;
+}
+*/
 
 void VectorRotate( vec3_t vIn, vec3_t vRotation, vec3_t out ){
 	vec3_t vWork, va;

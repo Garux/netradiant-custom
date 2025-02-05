@@ -1737,7 +1737,7 @@ public:
 	}
 	int lineNumberAreaWidth() const {
 		const int digits = 1 + std::log10( std::max( 1, m_textEdit->blockCount() ) );
-		return 3 + 10 + m_textEdit->fontMetrics().horizontalAdvance( QLatin1Char('9') ) * digits;
+		return 3 + 10 + m_textEdit->fontMetrics().horizontalAdvance( QLatin1Char( '9' ) ) * digits;
 	}
 	void updateLineNumberArea( const QRect &rect, int dy ){
 		if( dy )
@@ -1975,7 +1975,7 @@ protected:
 			updateTabStopDistance();
 			return;
 		}
-		QPlainTextEdit::wheelEvent(e);
+		QPlainTextEdit::wheelEvent( e );
 	}
 	void paintEvent( QPaintEvent* pEvent ) override {
 		static QRect rect;

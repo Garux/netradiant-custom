@@ -139,8 +139,8 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 		for ( i = 0; i < 2; i++ )
 			for ( j = 0; j < 3; j++ )
 				dp->texMat[ i ][ j ] = lengths[ i ] != 0.0 ? ( axis[ i ][ j ] / lengths[ i ] ) : 0.0;
-		//%	dp->texMat[ i ][ j ] = fabs( vecs[ i ][ j ] ) > 0.0 ? (1.0 / vecs[ i ][ j ]) : 0.0;
-		//%	dp->texMat[ i ][ j ] = axis[ i ][ j ] > 0.0 ? (1.0 / axis[ i ][ j ]) : 0.0;
+		//%	dp->texMat[ i ][ j ] = fabs( vecs[ i ][ j ] ) > 0.0 ? ( 1.0 / vecs[ i ][ j ] ) : 0.0;
+		//%	dp->texMat[ i ][ j ] = axis[ i ][ j ] > 0.0 ? ( 1.0 / axis[ i ][ j ] ) : 0.0;
 
 		/* calculalate translation component */
 		dp->texMat[ 0 ][ 3 ] = a->st[ 0 ] - vector3_dot( a->xyz, dp->texMat[ 0 ].vec3() );

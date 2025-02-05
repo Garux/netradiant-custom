@@ -98,7 +98,7 @@ NodeSmartReference MapResource_load( const MapFormat& format, const char* path, 
 }
 
 bool MapResource_saveFile( const MapFormat& format, scene::Node& root, GraphTraversalFunc traverse, const char* filename ){
-	//ASSERT_MESSAGE(path_is_absolute(filename), "MapResource_saveFile: path is not absolute: " << makeQuoted(filename));
+	//ASSERT_MESSAGE( path_is_absolute( filename ), "MapResource_saveFile: path is not absolute: " << makeQuoted( filename ) );
 	globalOutputStream() << "Open file " << filename << " for write...";
 	TextFileOutputStream file( filename );
 	if ( !file.failed() ) {
@@ -267,7 +267,7 @@ ModelCache::iterator ModelCache_insert( const char* path, const char* name, scen
 void ModelCache_flush( const char* path, const char* name ){
 	ModelCache::iterator i = g_modelCache.find( ModelKey( path, name ) );
 	if ( i != g_modelCache.end() ) {
-		//ASSERT_MESSAGE((*i).value.getCount() == 0, "resource flushed while still in use: " << (*i).key.first.c_str() << (*i).key.second.c_str());
+		//ASSERT_MESSAGE( ( *i ).value.getCount() == 0, "resource flushed while still in use: " << ( *i ).key.first.c_str() << ( *i ).key.second.c_str() );
 		g_modelCache.erase( i );
 	}
 }
@@ -416,7 +416,7 @@ struct ModelResource final : public Resource
 		}
 	}
 	scene::Node* getNode() override {
-		//if(m_model != g_nullModel)
+		//if( m_model != g_nullModel )
 		{
 			return m_model.get_pointer();
 		}

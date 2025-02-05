@@ -105,16 +105,16 @@ void DoSwapLights(){
 /*	DMap world;
 	world.LoadAll();
 
-	for(list<DEntity*>::const_iterator loopEnt = world.entityList.begin(); loopEnt != world.entityList.end(); loopEnt++)
+	for( list<DEntity*>::const_iterator loopEnt = world.entityList.begin(); loopEnt != world.entityList.end(); loopEnt++ )
 	{
 		DEntity* e = (*loopEnt);
-		DEPair* epLightColour = e->FindEPairByKey("_color");
-		if(epLightColour)
+		DEPair* epLightColour = e->FindEPairByKey( "_color" );
+		if( epLightColour )
 		{
 			float r, g, b;
-			sscanf(epLightColour->value, "%f %f %f", &r, &g, &b);
-			sprintf(epLightColour->value, "%f %f %f", b, g, r);
-			DMap::RebuildEntity(e);
+			sscanf( epLightColour->value, "%f %f %f", &r, &g, &b );
+			sprintf( epLightColour->value, "%f %f %f", b, g, r );
+			DMap::RebuildEntity( e );
 		}
 	}*/
 
@@ -200,12 +200,13 @@ void DoSwapSpawns(){
 }
 
 /*void test()
-   {
-    DMap world;
-    world.LoadAll();
+{
+	DMap world;
+	world.LoadAll();
 
-    for(list<DEntity*>::const_iterator ents = world.entityList.begin(); ents != world.entityList.end(); ents++)
-    {
-        (*ents)->RemoveFromRadiant();
-    }
-   }*/
+	for( list<DEntity*>::const_iterator ents = world.entityList.begin(); ents != world.entityList.end(); ents++ )
+	{
+		(*ents)->RemoveFromRadiant();
+	}
+}
+*/

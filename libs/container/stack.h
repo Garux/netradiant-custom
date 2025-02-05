@@ -127,7 +127,7 @@ public:
 	Type operator[]( const std::size_t i ) const {
 		return m_data[i];
 	}
-/// \brief Pushes \p value onto the stack at the top element. If reserved storage is insufficient for the new element, this will invalidate all iterators.
+	/// \brief Pushes \p value onto the stack at the top element. If reserved storage is insufficient for the new element, this will invalidate all iterators.
 	void push( const Type& value ){
 		if ( size() == m_capacity ) {
 			insert_overflow( value );
@@ -137,27 +137,27 @@ public:
 			insert( value );
 		}
 	}
-/// \brief Removes the top element of the stack.
+	/// \brief Removes the top element of the stack.
 	void pop(){
 		Allocator::destroy( --m_end );
 	}
-/// \brief Returns the top element of the mutable stack.
+	/// \brief Returns the top element of the mutable stack.
 	Type& top(){
 		return *( m_end - 1 );
 	}
-/// \brief Returns the top element of the non-mutable stack.
+	/// \brief Returns the top element of the non-mutable stack.
 	const Type& top() const {
 		return *( m_end - 1 );
 	}
-/// \brief Returns the element below the top element of the mutable stack.
+	/// \brief Returns the element below the top element of the mutable stack.
 	Type& parent(){
 		return *( m_end - 2 );
 	}
-/// \brief Returns the element below the top element of the non-mutable stack.
+	/// \brief Returns the element below the top element of the non-mutable stack.
 	const Type& parent() const {
 		return *( m_end - 2 );
 	}
-/// \brief Swaps the values of this stack and \p other.
+	/// \brief Swaps the values of this stack and \p other.
 	void swap( Stack& other ){
 		std::swap( m_data, other.m_data );
 		std::swap( m_end, other.m_end );

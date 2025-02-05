@@ -34,8 +34,8 @@ public:
 class InputStream : public StreamBase
 {
 public:
-/// \brief Attempts to read the next \p length bytes from the stream to \p buffer.
-/// Returns the number of bytes actually stored in \p buffer.
+	/// \brief Attempts to read the next \p length bytes from the stream to \p buffer.
+	/// Returns the number of bytes actually stored in \p buffer.
 	virtual size_type read( byte_type* buffer, size_type length ) = 0;
 };
 
@@ -43,8 +43,8 @@ public:
 class OutputStream : public StreamBase
 {
 public:
-/// \brief Attempts to write \p length bytes to the stream from \p buffer.
-/// Returns the number of bytes actually read from \p buffer.
+	/// \brief Attempts to write \p length bytes to the stream from \p buffer.
+	/// Returns the number of bytes actually read from \p buffer.
 	virtual size_type write( const byte_type* buffer, size_type length ) = 0;
 };
 
@@ -61,11 +61,11 @@ public:
 		end,
 	};
 
-/// \brief Sets the current \p position of the stream relative to the start.
+	/// \brief Sets the current \p position of the stream relative to the start.
 	virtual position_type seek( position_type position ) = 0;
-/// \brief Sets the current \p position of the stream relative to either the start, end or current position.
+	/// \brief Sets the current \p position of the stream relative to either the start, end or current position.
 	virtual position_type seek( offset_type offset, seekdir direction ) = 0;
-/// \brief Returns the current position of the stream.
+	/// \brief Returns the current position of the stream.
 	virtual position_type tell() const = 0;
 };
 

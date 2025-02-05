@@ -285,7 +285,7 @@ public:
 	   for prefs, we hook the frame in the main notebook
 	   build the frame on-demand (only once)
 	 */
-/// \brief \p global controls if to use LatchedValue assignment callback (global settings dialog) or import (preferences dialog).
+	/// \brief \p global controls if to use LatchedValue assignment callback (global settings dialog) or import (preferences dialog).
 	void CreateGlobalFrame( PreferencesPage& page, bool global );
 
 	/*!

@@ -85,13 +85,13 @@ class NameObserver
 
 	void construct(){
 		if ( !empty() ) {
-			//globalOutputStream() << "construct " << makeQuoted(c_str()) << '\n';
+			//globalOutputStream() << "construct " << makeQuoted( c_str() ) << '\n';
 			m_names.insert( name_read( c_str() ) );
 		}
 	}
 	void destroy(){
 		if ( !empty() ) {
-			//globalOutputStream() << "destroy " << makeQuoted(c_str()) << '\n';
+			//globalOutputStream() << "destroy " << makeQuoted( c_str() ) << '\n';
 			m_names.erase( name_read( c_str() ) );
 		}
 	}
@@ -133,12 +133,12 @@ public:
 		std::pair<Names::iterator, bool> result = m_names.insert( Names::value_type( setName, m_uniqueNames ) );
 		ASSERT_MESSAGE( result.second, "cannot attach name" );
 		attachObserver( NameObserver::NameChangedCaller( ( *result.first ).second ) );
-		//globalOutputStream() << "attach: " << reinterpret_cast<const unsigned int&>(setName) << '\n';
+		//globalOutputStream() << "attach: " << reinterpret_cast<const unsigned int&>( setName ) << '\n';
 	}
 	void detach( const NameCallback& setName, const NameCallbackCallback& detachObserver ){
 		Names::iterator i = m_names.find( setName );
 		ASSERT_MESSAGE( i != m_names.end(), "cannot detach name" );
-		//globalOutputStream() << "detach: " << reinterpret_cast<const unsigned int&>(setName) << '\n';
+		//globalOutputStream() << "detach: " << reinterpret_cast<const unsigned int&>( setName ) << '\n';
 		detachObserver( NameObserver::NameChangedCaller( ( *i ).second ) );
 		m_names.erase( i );
 	}
@@ -169,7 +169,7 @@ public:
 			char buffer[1024];
 			name_write( buffer, uniqueName );
 
-			//globalOutputStream() << "renaming " << makeQuoted(name.c_str()) << " to " << makeQuoted(buffer) << '\n';
+			//globalOutputStream() << "renaming " << makeQuoted( name.c_str() ) << " to " << makeQuoted( buffer ) << '\n';
 
 			for ( const NameCallback& nameCallback : setNameCallbacks )
 			{
@@ -1173,7 +1173,7 @@ void Map_RenameAbsolute( const char* absolute ){
 	resource->setNode( clone.get_pointer() );
 
 	{
-		//ScopeTimer timer("clone subgraph");
+		//ScopeTimer timer( "clone subgraph" );
 		Node_getTraversable( GlobalSceneGraph().root() )->traverse( CloneAll( clone ) );
 	}
 
@@ -1228,7 +1228,7 @@ void Map_New(){
 
 	{
 		g_map.m_resource = GlobalReferenceCache().capture( g_map.m_name.c_str() );
-//    ASSERT_MESSAGE(g_map.m_resource->getNode() == 0, "bleh");
+//		ASSERT_MESSAGE( g_map.m_resource->getNode() == 0, "bleh" );
 		g_map.m_resource->attach( g_map );
 
 		SceneChangeNotify();

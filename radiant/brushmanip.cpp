@@ -242,7 +242,7 @@ void Brush_ConstructSphere( Brush& brush, const AABB& bounds, std::size_t sides,
 		for ( std::size_t j = 0; j < sides - 1; j++ )
 		{
 			double t = i * dt;
-			double p = float(j * dp - c_pi / 2);
+			double p = float( j * dp - c_pi / 2 );
 
 			planepts[0] = vector3_added( mid, vector3_scaled( vector3_for_spherical( t, p ), radius ) );
 			planepts[1] = vector3_added( mid, vector3_scaled( vector3_for_spherical( t, p + dp ), radius ) );

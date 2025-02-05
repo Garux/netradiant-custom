@@ -352,7 +352,7 @@ public:
 	}
 
 //  char& operator *() { return *m_pStr; }
-//  char& operator *() const { return *const_cast<Str*>(this)->m_pStr; }
+//  char& operator *() const { return *const_cast<Str*>( this )->m_pStr; }
 	operator void*() {
 		return m_pStr;
 	}

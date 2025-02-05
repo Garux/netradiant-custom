@@ -566,11 +566,11 @@ public:
 		Texdef_Rotate( m_projection, angle );
 		addScale();
 	}
-///ProjectTexture along 'direction' with parameters, defined by texdef_t
+	///ProjectTexture along 'direction' with parameters, defined by texdef_t
 	void ProjectTexture( const Plane3& plane, const texdef_t& texdef, const Vector3* direction ){
 		Texdef_ProjectTexture( m_projection, m_shader.width(), m_shader.height(), plane, texdef, direction );
 	}
-///ProjectTexture along 'normal' with parameters, defined by TextureProjection
+	///ProjectTexture along 'normal' with parameters, defined by TextureProjection
 	void ProjectTexture( const Plane3& plane, const TextureProjection& projection, const Vector3& normal ){
 		Texdef_ProjectTexture( m_projection, m_shader.width(), m_shader.height(), plane, projection, normal );
 	}
@@ -1137,7 +1137,7 @@ public:
 		m_observer->planeChanged();
 	}
 
-/// \brief Reverts the transformable state of the brush to identity.
+	/// \brief Reverts the transformable state of the brush to identity.
 	void revertTransform(){
 		m_planeTransformed = m_plane;
 		planepts_assign( m_move_planeptsTransformed, m_move_planepts );
@@ -1932,7 +1932,7 @@ public:
 	void vertexModeBuildHull( bool allTransformed = false );
 	void vertexModeSnap( const float snap, bool all );
 
-/// \brief Returns the absolute index of the \p faceVertex.
+	/// \brief Returns the absolute index of the \p faceVertex.
 	std::size_t absoluteIndex( FaceVertexId faceVertex ){
 		std::size_t index = 0;
 		for ( std::size_t i = 0; i < faceVertex.getFace(); ++i )
@@ -1950,7 +1950,7 @@ public:
 		}
 	}
 
-/// \brief The undo memento for a brush stores only the list of face references - the faces are not copied.
+	/// \brief The undo memento for a brush stores only the list of face references - the faces are not copied.
 	class BrushUndoMemento : public UndoMemento
 	{
 	public:
@@ -1991,7 +1991,7 @@ public:
 		return !m_faces.empty() && m_faces.front()->isDetail();
 	}
 
-/// \brief Appends a copy of \p face to the end of the face list.
+	/// \brief Appends a copy of \p face to the end of the face list.
 	Face* addFace( const Face& face ){
 		if ( m_faces.size() == c_brush_maxFaces ) {
 			return 0;
@@ -2003,7 +2003,7 @@ public:
 		return m_faces.back();
 	}
 
-/// \brief Appends a new face constructed from the parameters to the end of the face list.
+	/// \brief Appends a new face constructed from the parameters to the end of the face list.
 	Face* addPlane( const DoubleVector3& p0, const DoubleVector3& p1, const DoubleVector3& p2, const char* shader, const TextureProjection& projection ){
 		if ( m_faces.size() == c_brush_maxFaces ) {
 			return 0;
@@ -2116,7 +2116,7 @@ public:
 		return m_faces.empty();
 	}
 
-/// \brief Returns true if any face of the brush contributes to the final B-Rep.
+	/// \brief Returns true if any face of the brush contributes to the final B-Rep.
 	bool hasContributingFaces() const {
 		for ( const_iterator i = begin(); i != end(); ++i )
 		{
@@ -2127,8 +2127,8 @@ public:
 		return false;
 	}
 
-/// \brief Removes faces that do not contribute to the brush. This is useful for cleaning up after CSG operations on the brush.
-/// Note: removal of empty faces is not performed during direct brush manipulations, because it would make a manipulation irreversible if it created an empty face.
+	/// \brief Removes faces that do not contribute to the brush. This is useful for cleaning up after CSG operations on the brush.
+	/// Note: removal of empty faces is not performed during direct brush manipulations, because it would make a manipulation irreversible if it created an empty face.
 	void removeEmptyFaces(){
 		evaluateBRep();
 
@@ -2148,7 +2148,7 @@ public:
 		}
 	}
 
-/// \brief Constructs \p winding from the intersection of \p plane with the other planes of the brush.
+	/// \brief Constructs \p winding from the intersection of \p plane with the other planes of the brush.
 	void windingForClipPlane( Winding& winding, const Plane3& plane ) const {
 		FixedWinding buffer[2];
 		bool swap = false;
@@ -2194,7 +2194,7 @@ public:
 				}
 #endif
 
-				//ASSERT_MESSAGE(buffer[!swap].numpoints != 1, "created single-point winding");
+				//ASSERT_MESSAGE( buffer[!swap].numpoints != 1, "created single-point winding" );
 
 				swap = !swap;
 			}
@@ -2247,7 +2247,7 @@ public:
 		}
 	}
 
-/// \brief Makes this brush a deep-copy of the \p other.
+	/// \brief Makes this brush a deep-copy of the \p other.
 	void copy( const Brush& other ){
 		for ( Faces::const_iterator i = other.m_faces.begin(); i != other.m_faces.end(); ++i )
 		{
@@ -2256,7 +2256,7 @@ public:
 		planeChanged();
 	}
 
-/// for the only use to quickly check, if about to be transformed brush makes sense
+	/// for the only use to quickly check, if about to be transformed brush makes sense
 	bool contributes() const {
 		/* plane_unique() ripoff, calling no evaluation */
 		auto plane_unique_ = [this]( std::size_t index ) -> bool {
@@ -2354,7 +2354,7 @@ private:
 		}
 	}
 
-/// \brief Returns true if the face identified by \p index is preceded by another plane that takes priority over it.
+	/// \brief Returns true if the face identified by \p index is preceded by another plane that takes priority over it.
 	bool plane_unique( std::size_t index ) const {
 		// duplicate plane
 		for ( std::size_t i = 0; i < m_faces.size(); ++i )
@@ -2366,7 +2366,7 @@ private:
 		return true;
 	}
 
-/// \brief Removes edges that are smaller than the tolerance used when generating brush windings.
+	/// \brief Removes edges that are smaller than the tolerance used when generating brush windings.
 	void removeDegenerateEdges(){
 		for ( std::size_t i = 0; i < m_faces.size(); ++i )
 		{
@@ -2394,7 +2394,7 @@ private:
 		}
 	}
 
-/// \brief Invalidates faces that have only two vertices in their winding, while preserving edge-connectivity information.
+	/// \brief Invalidates faces that have only two vertices in their winding, while preserving edge-connectivity information.
 	void removeDegenerateFaces(){
 		// save adjacency info for degenerate faces
 		for ( std::size_t i = 0; i < m_faces.size(); ++i )
@@ -2433,12 +2433,12 @@ private:
 		}
 	}
 
-/// \brief Removes edges that have the same adjacent-face as their immediate neighbour.
+	/// \brief Removes edges that have the same adjacent-face as their immediate neighbour.
 	void removeDuplicateEdges(){
 		// verify face connectivity graph
 		for ( std::size_t i = 0; i < m_faces.size(); ++i )
 		{
-			//if(m_faces[i]->contributes())
+			//if( m_faces[i]->contributes() )
 			{
 				Winding& winding = m_faces[i]->getWinding();
 				for ( std::size_t j = 0; j != winding.numpoints; )
@@ -2459,12 +2459,12 @@ private:
 		}
 	}
 
-/// \brief Removes edges that do not have a matching pair in their adjacent-face.
+	/// \brief Removes edges that do not have a matching pair in their adjacent-face.
 	void verifyConnectivityGraph(){
 		// verify face connectivity graph
 		for ( std::size_t i = 0; i < m_faces.size(); ++i )
 		{
-			//if(m_faces[i]->contributes())
+			//if( m_faces[i]->contributes() )
 			{
 				Winding& winding = m_faces[i]->getWinding();
 				for ( Winding::iterator j = winding.begin(); j != winding.end(); )
@@ -2489,7 +2489,7 @@ private:
 		}
 	}
 
-/// \brief Returns true if the brush is a finite volume. A brush without a finite volume extends past the maximum world bounds and is not valid.
+	/// \brief Returns true if the brush is a finite volume. A brush without a finite volume extends past the maximum world bounds and is not valid.
 	bool isBounded(){
 		for ( const_iterator i = begin(); i != end(); ++i )
 		{
@@ -2500,7 +2500,7 @@ private:
 		return true;
 	}
 
-/// \brief Constructs the polygon windings for each face of the brush. Also updates the brush bounding-box and face texture-coordinates.
+	/// \brief Constructs the polygon windings for each face of the brush. Also updates the brush bounding-box and face texture-coordinates.
 	bool buildWindings(){
 
 		{
@@ -2550,7 +2550,7 @@ private:
 		return degenerate;
 	}
 
-/// \brief Constructs the face windings and updates anything that depends on them.
+	/// \brief Constructs the face windings and updates anything that depends on them.
 	void buildBRep();
 };
 
@@ -3642,7 +3642,7 @@ public:
 	}
 
 	void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld ) const {
-		//renderCommon(renderer, volume);
+		//renderCommon( renderer, volume );
 
 		m_lightList->evaluateLights();
 
@@ -3656,7 +3656,7 @@ public:
 	}
 
 	void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld ) const {
-		//renderCommon(renderer, volume);
+		//renderCommon( renderer, volume );
 
 		evaluateViewDependent( volume, localToWorld );
 

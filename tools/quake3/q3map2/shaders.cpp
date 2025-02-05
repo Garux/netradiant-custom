@@ -557,7 +557,7 @@ static shaderInfo_t *AllocShaderInfo(){
 
 	/* ydnar: clear to 0 first */
 //	memset( si, 0, sizeof( shaderInfo_t ) );
-	new (si) shaderInfo_t{}; // placement new
+	new( si ) shaderInfo_t{}; // placement new
 
 	/* set defaults */
 	ApplySurfaceParm( "default", &si->contentFlags, &si->surfaceFlags, &si->compileFlags );

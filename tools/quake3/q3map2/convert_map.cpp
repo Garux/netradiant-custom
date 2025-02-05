@@ -125,8 +125,8 @@ exwinding:
 			;
 		}
 	}
-	//if(!striEqualPrefix(buildSide.shaderInfo->shader, "textures/common/"))
-	//	fprintf(stderr, "brushside with %s: %d matches (%f area)\n", buildSide.shaderInfo->shader, matches, best);
+	//if( !striEqualPrefix( buildSide.shaderInfo->shader, "textures/common/" ) )
+	//	fprintf( stderr, "brushside with %s: %d matches (%f area)\n", buildSide.shaderInfo->shader, matches, best );
 	return bestVert;
 }
 
@@ -424,7 +424,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 			//Sys_Printf( "not\n" );
 		}
 
-		if ( vert[0] !=nullptr && vert[1] !=nullptr && vert[2] !=nullptr ) {
+		if ( vert[0] != nullptr && vert[1] != nullptr && vert[2] != nullptr ) {
 			if ( brushPrimitives ) {
 				int i;
 				Vector3 texX, texY;
@@ -570,8 +570,8 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				// now we must solve:
 				//	// now we must invert:
 				//	ang = degrees_to_radians( rotate );
-				//	sinv = sin(ang);
-				//	cosv = cos(ang);
+				//	sinv = sin( ang );
+				//	cosv = cos( ang );
 				//	ns = cosv * vecs[0][sv];
 				//	nt = sinv * vecs[0][sv];
 				//	vecsrotscaled[0][sv] = ns / scale[0];

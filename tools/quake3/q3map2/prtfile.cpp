@@ -107,7 +107,7 @@ static void WritePortalFile_r( const node_t *node ){
 		return;
 	}
 
-	for (const portal_t *p = node->portals; p; p = p->next[s] )
+	for ( const portal_t *p = node->portals; p; p = p->next[s] )
 	{
 		const winding_t& w = p->winding;
 		s = ( p->nodes[1] == node );

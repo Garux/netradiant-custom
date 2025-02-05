@@ -750,7 +750,7 @@ float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, con
 	}
 
 	/* now in the range of 0 to 1 over the entire incoming hemisphere */
-	//%	total /= (2.0f * 3.141592657f);
+	//%	total /= ( 2.0f * 3.141592657f );
 	return total * c_inv_2pi;
 }
 
@@ -1756,7 +1756,7 @@ static void SetupGrid(){
 	if ( !VectorCompare( gridSize, oldGridSize ) ) {
 		char temp[ 64 ];
 		sprintf( temp, "%.0f %.0f %.0f", gridSize[ 0 ], gridSize[ 1 ], gridSize[ 2 ] );
-		entities[ 0 ].setKeyValue( "gridsize", (const char*) temp );
+		entities[ 0 ].setKeyValue( "gridsize", temp );
 		Sys_FPrintf( SYS_VRB, "Storing adjusted grid size\n" );
 	}
 

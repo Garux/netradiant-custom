@@ -355,7 +355,7 @@ static void FinishRawLightmap( rawLightmap_t *lm ){
 		/* old code that only worked with a value of 2 */
 		lm->vecs[ 0 ] *= is;
 		lm->vecs[ 1 ] *= is;
-		lm->origin -=  (lm->vecs[ 0 ] + lm->vecs[ 1 ] ) * is;
+		lm->origin -=  ( lm->vecs[ 0 ] + lm->vecs[ 1 ] ) * is;
 		#endif
 	}
 
@@ -545,10 +545,10 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
 
 	/* debug code: */
 	//%	Sys_Printf( "wrap S: %d wrap T: %d\n", lm->wrap[ 0 ], lm->wrap[ 1 ] );
-	//% if( lm->w > (ds.lightmapWidth & 0xFF) || lm->h > (ds.lightmapHeight & 0xFF) )
+	//% if( lm->w > ( ds.lightmapWidth & 0xFF ) || lm->h > ( ds.lightmapHeight & 0xFF ) )
 	//%		Sys_Printf( "Patch lightmap: (%3d %3d) > (%3d, %3d)\n", lm->w, lm->h, ds.lightmapWidth & 0xFF, ds.lightmapHeight & 0xFF );
-	//% ds.lightmapWidth = lm->w | (ds.lightmapWidth & 0xFFFF0000);
-	//% ds.lightmapHeight = lm->h | (ds.lightmapHeight & 0xFFFF0000);
+	//% ds.lightmapWidth = lm->w | ( ds.lightmapWidth & 0xFFFF0000 );
+	//% ds.lightmapHeight = lm->h | ( ds.lightmapHeight & 0xFFFF0000 );
 
 	/* add to counts */
 	numPatchesLightmapped++;
@@ -1964,7 +1964,7 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 
 				/* if fast allocation, skip lightmap files that are more than 90% complete */
 				if ( fastAllocate ) {
-					if (olm->freeLuxels < (olm->customWidth * olm->customHeight) / 10) {
+					if ( olm->freeLuxels < ( olm->customWidth * olm->customHeight ) / 10 ) {
 						continue;
 					}
 				}
@@ -2217,12 +2217,12 @@ static void FillOutLightmap( outLightmap_t *olm ){
 	}
 
 	/*
-	   memset(olm->lightBits, 0, (olm->customWidth * olm->customHeight + 8) / 8);
+	   memset( olm->lightBits, 0, ( olm->customWidth * olm->customHeight + 8 ) / 8 );
 	    olm->lightBits[0] |= 1;
-	    olm->lightBits[(10 * olm->customWidth + 30) >> 3] |= 1 << ((10 * olm->customWidth + 30) & 7);
-	   memset(olm->bspLightBytes, 0, olm->customWidth * olm->customHeight * 3);
+	    olm->lightBits[( 10 * olm->customWidth + 30 ) >> 3] |= 1 << ( ( 10 * olm->customWidth + 30 ) & 7 );
+	   memset( olm->bspLightBytes, 0, olm->customWidth * olm->customHeight * 3 );
 	    olm->bspLightBytes[0] = 255;
-	    olm->bspLightBytes[(10 * olm->customWidth + 30) * 3 + 2] = 255;
+	    olm->bspLightBytes[( 10 * olm->customWidth + 30 ) * 3 + 2] = 255;
 	 */
 
 	memcpy( lightBitsNew, olm->lightBits, ( olm->customWidth * olm->customHeight + 8 ) / 8 );

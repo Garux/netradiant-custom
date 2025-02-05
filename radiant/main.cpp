@@ -109,7 +109,7 @@ void qute_messageHandler( QtMsgType type, const QMessageLogContext &context, con
 {
 	static StringOutputStream buf( 256 );
 	buf.clear();
-	switch (type)
+	switch ( type )
 	{
 	case QtInfoMsg:     buf << "QT INF "; break;
 	case QtDebugMsg:    buf << "QT DBG "; break;
@@ -118,7 +118,7 @@ void qute_messageHandler( QtMsgType type, const QMessageLogContext &context, con
 	case QtFatalMsg:    buf << "QT FTL "; break;
 	}
 	buf << context.category << ": " << msg.toLatin1().constData() << '\n';
-	switch (type)
+	switch ( type )
 	{
 	case QtInfoMsg:
 	case QtDebugMsg:    globalOutputStream() << buf; break;
@@ -405,7 +405,7 @@ int main( int argc, char* argv[] ){
 	// Mouse pointer warping functions do not work with the Wayland backend.
 	// Forcing the backend to X11 will let us run using XWayland
 	// which does provide emulation of this functionality.
-	setenv("QT_QPA_PLATFORM", "xcb", 0);
+	setenv( "QT_QPA_PLATFORM", "xcb", 0 );
 #endif
 
 	crt_init();
@@ -413,7 +413,7 @@ int main( int argc, char* argv[] ){
 	streams_init();
 
 #ifdef WIN32
-	_setmaxstdio(2048);
+	_setmaxstdio( 2048 );
 #endif
 
 	glwidget_setDefaultFormat(); // must go before QApplication instantiation

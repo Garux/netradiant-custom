@@ -126,7 +126,7 @@ inline void mdfour_tail( md4& m, const unsigned char *in, int n ){
 inline void mdfour_update( md4& m, const unsigned char *in, int n ){
 // start of edit by Forest 'LordHavoc' Hale
 // commented out to prevent crashing when length is 0
-//	if (n == 0) mdfour_tail(in, n);
+//	if ( n == 0 ) mdfour_tail( in, n );
 // end of edit by Forest 'LordHavoc' Hale
 
 	while ( n >= 64 ) {

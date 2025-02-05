@@ -923,8 +923,8 @@ public:
 	void Calculate_AvgAxes( Vector3& wDir, Vector3& hDir ) const;
 	void ProjectTexture( TextureProjection projection, const Vector3& normal );
 	void ProjectTexture( const texdef_t& texdef, const Vector3* direction );
-	void createThickenedOpposite(const Patch& sourcePatch, const float thickness, const int axis, bool& no12, bool& no34 );
-	void createThickenedWall(const Patch& sourcePatch, const Patch& targetPatch, const int wallIndex);
+	void createThickenedOpposite( const Patch& sourcePatch, const float thickness, const int axis, bool& no12, bool& no34 );
+	void createThickenedWall( const Patch& sourcePatch, const Patch& targetPatch, const int wallIndex );
 
 	void undoSave(){
 		if ( m_map != 0 ) {

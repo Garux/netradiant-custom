@@ -360,17 +360,17 @@ public:
 
 			//Now we just setup some texture parameters.
 			gl().glBindTexture( GL_TEXTURE_2D, tex );
-			gl().glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			gl().glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			gl().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			gl().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 			gl().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 			gl().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 
-//		gl().glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//		gl().glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-//		gl().glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+//		gl().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+//		gl().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//		gl().glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
 
-			gl().glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-			gl().glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+			gl().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0 );
+			gl().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0 );
 //		gl().glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 			//Here we actually create the texture itself
 			gl().glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, wid * 3, hei,
@@ -565,7 +565,7 @@ public:
 #endif
 
 		font_desc = pango_font_description_from_string( font_string );
-		//pango_font_description_set_size(font_desc, 10 * PANGO_SCALE);
+		//pango_font_description_set_size( font_desc, 10 * PANGO_SCALE );
 		pango_context_set_font_description( ft2_context, font_desc );
 		pango_font_description_free( font_desc );
 		// TODO fallback to fixed 8, courier new 8

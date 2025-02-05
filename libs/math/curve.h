@@ -84,13 +84,13 @@ inline Vector3 CubicBezier_evaluateMid( const Vector3* firstPoint ){
 
 inline Vector3 CatmullRom_evaluate( const ControlPoints& controlPoints, double t ){
 	// scale t to be segment-relative
-	t *= double(controlPoints.size() - 1);
+	t *= double( controlPoints.size() - 1 );
 
 	// subtract segment index;
 	std::size_t segment = 0;
 	for ( std::size_t i = 0; i < controlPoints.size() - 1; ++i )
 	{
-		if ( t <= double(i + 1) ) {
+		if ( t <= double( i + 1 ) ) {
 			segment = i;
 			break;
 		}
@@ -166,6 +166,6 @@ inline void KnotVector_openUniform( Knots& knots, std::size_t count, std::size_t
 	std::size_t difference = knots.size() - 2 * ( equalKnots );
 	for ( std::size_t i = 0; i < difference; ++i )
 	{
-		knots[i + equalKnots] = Knots::value_type( double(i + 1) * 1.0 / double(difference + 1) );
+		knots[i + equalKnots] = Knots::value_type( double( i + 1 ) * 1.0 / double( difference + 1 ) );
 	}
 }

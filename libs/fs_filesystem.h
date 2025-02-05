@@ -98,9 +98,9 @@ public:
 		return m_entries.end();
 	}
 
-/// \brief Returns the file at \p path.
-/// Creates all directories below \p path if they do not exist.
-/// O(log n) on average.
+	/// \brief Returns the file at \p path.
+	/// Creates all directories below \p path if they do not exist.
+	/// O(log n) on average.
 	entry_type& operator[]( const Path& path ){
 		{
 			const char* end = path_remove_directory( path.c_str() );
@@ -115,7 +115,7 @@ public:
 		return m_entries[path];
 	}
 
-/// \brief Returns the file at \p path or end() if not found.
+	/// \brief Returns the file at \p path or end() if not found.
 	iterator find( const Path& path ){
 		return m_entries.find( path );
 	}
@@ -131,10 +131,10 @@ public:
 		return ++i;
 	}
 
-/// \brief Performs a depth-first traversal of the file-system subtree rooted at \p root.
-/// Traverses the entire tree if \p root is "".
-/// Calls \p visitor.file() with the path to each file relative to the filesystem root.
-/// Calls \p visitor.directory() with the path to each directory relative to the filesystem root.
+	/// \brief Performs a depth-first traversal of the file-system subtree rooted at \p root.
+	/// Traverses the entire tree if \p root is "".
+	/// Calls \p visitor.file() with the path to each file relative to the filesystem root.
+	/// Calls \p visitor.directory() with the path to each directory relative to the filesystem root.
 	template<typename visitor_type>
 	void traverse( visitor_type visitor, const char* root ){
 		unsigned int start_depth = path_get_depth( root );

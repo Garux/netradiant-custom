@@ -121,8 +121,8 @@ struct _QERFuncTable_1
 	scene::Node& ( *getMapWorldEntity )( );
 	float ( *getGridSize )();
 
-	const char* ( *getGameDescriptionKeyValue )(const char* key);
-	const char* ( *getRequiredGameDescriptionKeyValue )(const char* key);
+	const char* ( *getGameDescriptionKeyValue )( const char* key );
+	const char* ( *getRequiredGameDescriptionKeyValue )( const char* key );
 
 	void ( *attachGameToolsPathObserver )( ModuleObserver& observer );
 	void ( *detachGameToolsPathObserver )( ModuleObserver& observer );

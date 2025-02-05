@@ -569,7 +569,7 @@ public:
 	StrList getDirList( const char *basedir ){
 		return GetDirList( basedir, 1 );
 	}
-	/// \brief Returns a list containing the relative names of the files under \p basedir (\p extension can be "*" for all files).
+	/// \brief Returns a list containing the relative names of the files under \p basedir ( \p extension can be "*" for all files ).
 	/// \deprecated Deprecated - use \c forEachFile.
 	StrList getFileList( const char *basedir, const char *extension ){
 		return GetFileList( basedir, extension, 1 );

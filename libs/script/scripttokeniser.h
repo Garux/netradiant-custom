@@ -258,7 +258,7 @@ class ScriptTokeniser final : public Tokeniser
 		return true;
 	}
 
-/// Returns true if a token was successfully parsed.
+	/// Returns true if a token was successfully parsed.
 	bool tokenise(){
 		m_write = m_token;
 		while ( !eof() )

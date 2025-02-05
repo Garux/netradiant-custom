@@ -2068,11 +2068,11 @@ void TextureBrowser_Construct(){
 	                                             SizeExportStringCaller( g_TexBro.m_textureScale )
 	                                           );
 	GlobalPreferenceSystem().registerPreference( "UniformTextureSize",
-	                                             makeIntStringImportCallback(UniformTextureSizeImportCaller(g_TexBro)),
-	                                             IntExportStringCaller(g_TexBro.m_uniformTextureSize) );
+	                                             makeIntStringImportCallback( UniformTextureSizeImportCaller( g_TexBro ) ),
+	                                             IntExportStringCaller( g_TexBro.m_uniformTextureSize ) );
 	GlobalPreferenceSystem().registerPreference( "UniformTextureMinSize",
-	                                             makeIntStringImportCallback(UniformTextureMinSizeImportCaller(g_TexBro)),
-	                                             IntExportStringCaller(g_TexBro.m_uniformTextureMinSize) );
+	                                             makeIntStringImportCallback( UniformTextureMinSizeImportCaller( g_TexBro ) ),
+	                                             IntExportStringCaller( g_TexBro.m_uniformTextureMinSize ) );
 	GlobalPreferenceSystem().registerPreference( "TextureScrollbar",
 	                                             makeBoolStringImportCallback( TextureBrowserImportShowScrollbarCaller( g_TexBro ) ),
 	                                             BoolExportStringCaller( g_TexBro.m_showTextureScrollbar )

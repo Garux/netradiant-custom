@@ -151,22 +151,22 @@ void CSpriteModel::Draw( int state, int rflags ) const {
 }
 
 /*
-   bool CSpriteModel::TestRay(const ray_t *ray, vec_t *dist) const
-   {
-   vec_t depth_start = *dist;
-   vec_t depth_local = *dist;
+bool CSpriteModel::TestRay( const ray_t *ray, vec_t *dist ) const
+{
+	vec_t depth_start = *dist;
+	vec_t depth_local = *dist;
 
-   if (aabb_test_ray(&m_BBox, ray) == 0)
-    return false;
+	if ( aabb_test_ray( &m_BBox, ray ) == 0 )
+		return false;
 
-   for(int i=0; i<m_nSurfaces; i++)
-   {
-    if(m_children[i].TestRay(ray, &depth_local))
-    {
-      if (depth_local < *dist) *dist = depth_local;
-    }
-   }
+	for( int i = 0; i < m_nSurfaces; i++ )
+	{
+		if( m_children[i].TestRay( ray, &depth_local ) )
+		{
+			if ( depth_local < *dist ) *dist = depth_local;
+		}
+	}
 
-   return *dist < depth_start;
-   }
+	return *dist < depth_start;
+}
  */

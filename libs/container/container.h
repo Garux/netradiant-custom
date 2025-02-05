@@ -46,11 +46,11 @@ public:
 		m_value = 0;
 	}
 	Type& get(){
-		//ASSERT_MESSAGE(!empty(), "Single: must be initialised before being accessed");
+		//ASSERT_MESSAGE( !empty(), "Single: must be initialised before being accessed" );
 		return *m_value;
 	}
 	const Type& get() const {
-		//ASSERT_MESSAGE(!empty(), "Single: must be initialised before being accessed");
+		//ASSERT_MESSAGE( !empty(), "Single: must be initialised before being accessed" );
 		return *m_value;
 	}
 };

@@ -621,12 +621,12 @@ void MakeBevel( vec3_t vMin, vec3_t vMax ){
 			PatchControl& p = matrix( i, 2 - j );
 			PatchControl& q = matrix( i, j );
 			std::swap( p.m_vertex, q.m_vertex );
-			//std::swap(p.m_texcoord, q.m_texcoord);
+			//std::swap( p.m_texcoord, q.m_texcoord );
 		}
 	}
 	GlobalPatchCreator().Patch_controlPointsChanged( patch );
 	//TODO - the patch has textures weird, patchmanip.h has all function it needs.. lots of duplicate code..
-	//NaturalTexture(patch);
+	//NaturalTexture( patch );
 	Node_getTraversable( GlobalRadiant().getMapWorldEntity() )->insert( patch );
 }
 

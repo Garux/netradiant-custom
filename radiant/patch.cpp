@@ -573,19 +573,19 @@ void Patch::SetTextureRepeat( float s, float t ){
 }
 
 /*
-   void Patch::SetTextureInfo(texdef_t *pt)
-   {
-   if(pt->getShift()[0] || pt->getShift()[1])
-    TranslateTexture (pt->getShift()[0], pt->getShift()[1]);
-   else if(pt->getScale()[0] || pt->getScale()[1])
-   {
-    if(pt->getScale()[0] == 0.0f) pt->setScale(0, 1.0f);
-    if(pt->getScale()[1] == 0.0f) pt->setScale(1, 1.0f);
-    ScaleTexture (pt->getScale()[0], pt->getScale()[1]);
-   }
-   else if(pt->rotate)
-    RotateTexture (pt->rotate);
-   }
+	void Patch::SetTextureInfo( texdef_t *pt )
+	{
+	if( pt->getShift()[0] || pt->getShift()[1] )
+		TranslateTexture( pt->getShift()[0], pt->getShift()[1] );
+	else if( pt->getScale()[0] || pt->getScale()[1] )
+	{
+		if( pt->getScale()[0] == 0.0f ) pt->setScale( 0, 1.0f );
+		if( pt->getScale()[1] == 0.0f ) pt->setScale( 1, 1.0f );
+		ScaleTexture ( pt->getScale()[0], pt->getScale()[1] );
+	}
+	else if( pt->rotate )
+		RotateTexture( pt->rotate );
+	}
  */
 
 void Patch::Calculate_AvgAxes( Vector3& wDir, Vector3& hDir ) const {
@@ -805,13 +805,13 @@ void Patch::InsertPoints( EMatrixMajor mt, bool bFirst ){
 	{
 		PatchControl* p1 = m_ctrl.data();
 		/*
-		   if(GlobalSelectionSystem().countSelected() != 0)
-		   {
-		      scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
-		      PatchInstance* patch = Instance_getPatch(instance);
-		      patch->m_selectable.isSelected();
-		   }
-		 */
+			if( GlobalSelectionSystem().countSelected() != 0 )
+			{
+				scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
+				PatchInstance* patch = Instance_getPatch( instance );
+				patch->m_selectable.isSelected();
+			}
+		*/
 		for ( std::size_t w = 0; w != width; ++w, p1 += col_stride )
 		{
 			{
@@ -1452,9 +1452,9 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		int n = ( width - 1 ) / 2; // n = number of segments
 		setDims( width, height );
 
-		// vPos[0] = vector3_subtracted(aabb.origin, aabb.extents);
+		// vPos[0] = vector3_subtracted( aabb.origin, aabb.extents );
 		// vPos[1] = aabb.origin;
-		// vPos[2] = vector3_added(aabb.origin, aabb.extents);
+		// vPos[2] = vector3_added( aabb.origin, aabb.extents );
 
 		unsigned int i, j;
 		float f = 1 / cos( M_PI / n );
@@ -1478,9 +1478,9 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		int n = ( width - 1 ) / 2; // n = number of segments
 		setDims( width, height );
 
-		// vPos[0] = vector3_subtracted(aabb.origin, aabb.extents);
+		// vPos[0] = vector3_subtracted( aabb.origin, aabb.extents );
 		// vPos[1] = aabb.origin;
-		// vPos[2] = vector3_added(aabb.origin, aabb.extents);
+		// vPos[2] = vector3_added( aabb.origin, aabb.extents );
 
 		unsigned int i, j;
 		float f = 1 / cos( M_PI / n );
@@ -1505,9 +1505,9 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		int m = ( height - 1 ) / 2; // m = number of segments (pitch)
 		setDims( width, height );
 
-		// vPos[0] = vector3_subtracted(aabb.origin, aabb.extents);
+		// vPos[0] = vector3_subtracted( aabb.origin, aabb.extents );
 		// vPos[1] = aabb.origin;
-		// vPos[2] = vector3_added(aabb.origin, aabb.extents);
+		// vPos[2] = vector3_added( aabb.origin, aabb.extents );
 
 		unsigned int i, j;
 		float f = 1 / cos( M_PI / n );
@@ -2173,8 +2173,8 @@ void Patch::TesselateSubMatrix( const BezierCurveTree *BX, const BezierCurveTree
 	}
 
 
-	//if((nFlagsX & DEGEN_0a) && (nFlagsX & DEGEN_1a) && (nFlagsX & DEGEN_2a)) { newFlagsX |= DEGEN_0a; newFlagsX |= DEGEN_1a; newFlagsX |= DEGEN_2a; }
-	//if((nFlagsX & DEGEN_0b) && (nFlagsX & DEGEN_1b) && (nFlagsX & DEGEN_2b)) { newFlagsX |= DEGEN_0b; newFlagsX |= DEGEN_1b; newFlagsX |= DEGEN_2b; }
+	//if( ( nFlagsX & DEGEN_0a ) && ( nFlagsX & DEGEN_1a ) && ( nFlagsX & DEGEN_2a ) ) { newFlagsX |= DEGEN_0a; newFlagsX |= DEGEN_1a; newFlagsX |= DEGEN_2a; }
+	//if( ( nFlagsX & DEGEN_0b ) && ( nFlagsX & DEGEN_1b ) && ( nFlagsX & DEGEN_2b ) ) { newFlagsX |= DEGEN_0b; newFlagsX |= DEGEN_1b; newFlagsX |= DEGEN_2b; }
 
 	newFlagsX |= ( nFlagsX & SPLIT );
 	newFlagsX |= ( nFlagsX & AVERAGE );
@@ -2606,8 +2606,8 @@ void Patch::BuildVertexArray(){
 				m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2] = RenderIndex( j * m_tess.m_nArrayWidth + i );
 				m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2 + 1] = RenderIndex( ( j + 1 ) * m_tess.m_nArrayWidth + i );
 				// reverse because radiant uses CULL_FRONT
-				//m_tess.m_indices[(j*m_tess.m_lenStrips)+i*2+1] = RenderIndex(j*m_tess.m_nArrayWidth+i);
-				//m_tess.m_indices[(j*m_tess.m_lenStrips)+i*2] = RenderIndex((j+1)*m_tess.m_nArrayWidth+i);
+				//m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2 + 1] = RenderIndex( j * m_tess.m_nArrayWidth + i );
+				//m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2] = RenderIndex( ( j + 1 ) * m_tess.m_nArrayWidth + i );
 			}
 		}
 	}
@@ -2623,8 +2623,8 @@ void Patch::BuildVertexArray(){
 				m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2] = RenderIndex( ( ( m_tess.m_nArrayHeight - 1 ) - i ) * m_tess.m_nArrayWidth + j );
 				m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2 + 1] = RenderIndex( ( ( m_tess.m_nArrayHeight - 1 ) - i ) * m_tess.m_nArrayWidth + j + 1 );
 				// reverse because radiant uses CULL_FRONT
-				//m_tess.m_indices[(j*m_tess.m_lenStrips)+i*2+1] = RenderIndex(((m_tess.m_nArrayHeight-1)-i)*m_tess.m_nArrayWidth+j);
-				//m_tess.m_indices[(j*m_tess.m_lenStrips)+i*2] = RenderIndex(((m_tess.m_nArrayHeight-1)-i)*m_tess.m_nArrayWidth+j+1);
+				//m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2 + 1] = RenderIndex( ( ( m_tess.m_nArrayHeight - 1 ) - i ) * m_tess.m_nArrayWidth + j );
+				//m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2 ] = RenderIndex( ( ( m_tess.m_nArrayHeight - 1 ) - i ) * m_tess.m_nArrayWidth + j + 1 );
 
 			}
 		}
@@ -2919,7 +2919,7 @@ void Patch::createThickenedOpposite( const Patch& sourcePatch,
 	setDims( sourcePatch.getWidth(), sourcePatch.getHeight() );
 
 	// Also inherit the tesselation from the source patch
-	//setFixedSubdivisions(sourcePatch.subdivionsFixed(), sourcePatch.getSubdivisions());
+	//setFixedSubdivisions( sourcePatch.subdivionsFixed(), sourcePatch.getSubdivisions() );
 
 	// Copy the shader from the source patch
 	SetShader( sourcePatch.GetShader() );
@@ -2927,7 +2927,7 @@ void Patch::createThickenedOpposite( const Patch& sourcePatch,
 	// if extrudeAxis == 0,0,0 the patch is extruded along its vertex normals
 	Vector3 extrudeAxis( 0 );
 
-	switch (axis) {
+	switch ( axis ) {
 	case 0: // X-Axis
 		extrudeAxis = Vector3( 1, 0, 0 );
 		break;
@@ -3235,7 +3235,7 @@ void Patch::createThickenedWall( const Patch& sourcePatch,
 		break;
 	case 1:
 		cols = sourceWidth;
-		start = sourceWidth * (sourceHeight-1);
+		start = sourceWidth * ( sourceHeight - 1 );
 		end = sourceWidth*sourceHeight - 1;
 		incr = 1;
 		//setFixedSubdivisions( sourceTesselationFixed, sourceTesselationX );
@@ -3243,14 +3243,14 @@ void Patch::createThickenedWall( const Patch& sourcePatch,
 	case 2:
 		cols = sourceHeight;
 		start = 0;
-		end = sourceWidth*(sourceHeight-1);
+		end = sourceWidth * ( sourceHeight - 1 );
 		incr = sourceWidth;
 		//setFixedSubdivisions( sourceTesselationFixed, sourceTesselationY );
 		break;
 	case 3:
 		cols = sourceHeight;
 		start = sourceWidth - 1;
-		end = sourceWidth*sourceHeight - 1;
+		end = sourceWidth * sourceHeight - 1;
 		incr = sourceWidth;
 		//setFixedSubdivisions( sourceTesselationFixed, sourceTesselationY );
 		break;

@@ -30,16 +30,16 @@ class InputStream;
 class ArchiveFile
 {
 public:
-/// \brief Destroys the file object.
+	/// \brief Destroys the file object.
 	virtual void release() = 0;
-/// \brief Returns the size of the file data in bytes.
+	/// \brief Returns the size of the file data in bytes.
 	virtual std::size_t size() const = 0;
-/// \brief Returns the path to this file (relative to the filesystem root)
+	/// \brief Returns the path to this file (relative to the filesystem root)
 	virtual const char* getName() const = 0;
-/// \brief Returns the stream associated with this file.
-/// Subsequent calls return the same stream.
-/// The stream may be read forwards until it is exhausted.
-/// The stream remains valid for the lifetime of the file.
+	/// \brief Returns the stream associated with this file.
+	/// Subsequent calls return the same stream.
+	/// The stream may be read forwards until it is exhausted.
+	/// The stream remains valid for the lifetime of the file.
 	virtual InputStream& getInputStream() = 0;
 };
 
@@ -49,12 +49,12 @@ class TextInputStream;
 class ArchiveTextFile
 {
 public:
-/// \brief Destroys the file object.
+	/// \brief Destroys the file object.
 	virtual void release() = 0;
-/// \brief Returns the stream associated with this file.
-/// Subsequent calls return the same stream.
-/// The stream may be read forwards until it is exhausted.
-/// The stream remains valid for the lifetime of the file.
+	/// \brief Returns the stream associated with this file.
+	/// Subsequent calls return the same stream.
+	/// The stream may be read forwards until it is exhausted.
+	/// The stream remains valid for the lifetime of the file.
 	virtual TextInputStream& getInputStream() = 0;
 };
 
@@ -90,25 +90,25 @@ public:
 		eFilesAndDirectories = 0x03,
 	};
 
-/// \brief Destroys the archive object.
-/// Any unreleased file object associated with the archive remains valid. */
+	/// \brief Destroys the archive object.
+	/// Any unreleased file object associated with the archive remains valid. */
 	virtual void release() = 0;
-/// \brief Returns a new object associated with the file identified by \p name, or 0 if the file cannot be opened.
-/// Name comparisons are case-insensitive.
+	/// \brief Returns a new object associated with the file identified by \p name, or 0 if the file cannot be opened.
+	/// Name comparisons are case-insensitive.
 	virtual ArchiveFile* openFile( const char* name ) = 0;
-/// \brief Returns a new object associated with the file identified by \p name, or 0 if the file cannot be opened.
-/// Name comparisons are case-insensitive.
+	/// \brief Returns a new object associated with the file identified by \p name, or 0 if the file cannot be opened.
+	/// Name comparisons are case-insensitive.
 	virtual ArchiveTextFile* openTextFile( const char* name ) = 0;
-/// Returns true if the file identified by \p name can be opened.
-/// Name comparisons are case-insensitive.
+	/// Returns true if the file identified by \p name can be opened.
+	/// Name comparisons are case-insensitive.
 	virtual bool containsFile( const char* name ) = 0;
-/// \brief Performs a depth-first traversal of the archive tree starting at \p root.
-/// Traverses the entire tree if \p root is "".
-/// When a file is encountered, calls \c visitor.file passing the file name.
-/// When a directory is encountered, calls \c visitor.directory passing the directory name.
-/// Skips the directory if \c visitor.directory returned true.
-/// Root comparisons are case-insensitive.
-/// Names are mixed-case.
+	/// \brief Performs a depth-first traversal of the archive tree starting at \p root.
+	/// Traverses the entire tree if \p root is "".
+	/// When a file is encountered, calls \c visitor.file passing the file name.
+	/// When a directory is encountered, calls \c visitor.directory passing the directory name.
+	/// Skips the directory if \c visitor.directory returned true.
+	/// Root comparisons are case-insensitive.
+	/// Names are mixed-case.
 	virtual void forEachFile( VisitorFunc visitor, const char* root ) = 0;
 };
 

@@ -40,7 +40,7 @@ namespace TextOutputDetail
 inline char* write_unsigned_nonzero_decimal_backward( char* ptr, unsigned int decimal ){
 	for (; decimal != 0; decimal /= 10 )
 	{
-		*--ptr = char('0' + int(decimal % 10) );
+		*--ptr = char( '0' + int( decimal % 10 ) );
 	}
 	return ptr;
 }
@@ -49,7 +49,7 @@ inline char* write_unsigned_nonzero_decimal_backward( char* ptr, unsigned int de
 inline char* write_size_t_nonzero_decimal_backward( char* ptr, size_t decimal ){
 	for (; decimal != 0; decimal /= 10 )
 	{
-		*--ptr = char('0' + (size_t)( decimal % 10 ) );
+		*--ptr = char( '0' + (size_t)( decimal % 10 ) );
 	}
 	return ptr;
 }

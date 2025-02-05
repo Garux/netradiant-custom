@@ -53,7 +53,7 @@ inline int float_to_integer( const Element& f ){
 /// \brief Returns \p f rounded to the nearest multiple of \p snap.
 template<typename Element, typename OtherElement>
 inline Element float_snapped( const Element& f, const OtherElement& snap ){
-	//return Element(float_to_integer(f / snap) * snap);
+	//return Element( float_to_integer( f / snap ) * snap );
 	if ( snap == 0 ) {
 		return f;
 	}
@@ -251,7 +251,7 @@ inline double vector2_cross( const BasicVector2<Element>& self, const BasicVecto
 
 template<typename Element>
 inline Element float_divided( Element f, Element other ){
-	//ASSERT_MESSAGE(other != 0, "float_divided: invalid divisor");
+	//ASSERT_MESSAGE( other != 0, "float_divided: invalid divisor" );
 	return f / other;
 }
 
@@ -582,10 +582,10 @@ inline bool vector4_equal_epsilon( const BasicVector4<Element>& self, const Basi
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> vector4_added( const BasicVector4<Element>& self, const BasicVector4<OtherElement>& other ){
 	return BasicVector4<Element>(
-	           float(self.x() + other.x() ),
-	           float(self.y() + other.y() ),
-	           float(self.z() + other.z() ),
-	           float(self.w() + other.w() )
+	           float( self.x() + other.x() ),
+	           float( self.y() + other.y() ),
+	           float( self.z() + other.z() ),
+	           float( self.w() + other.w() )
 	       );
 }
 template<typename Element, typename OtherElement>
@@ -607,10 +607,10 @@ inline void operator+=( BasicVector4<Element>& self, const BasicVector4<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> vector4_subtracted( const BasicVector4<Element>& self, const BasicVector4<OtherElement>& other ){
 	return BasicVector4<Element>(
-	           float(self.x() - other.x() ),
-	           float(self.y() - other.y() ),
-	           float(self.z() - other.z() ),
-	           float(self.w() - other.w() )
+	           float( self.x() - other.x() ),
+	           float( self.y() - other.y() ),
+	           float( self.z() - other.z() ),
+	           float( self.w() - other.w() )
 	       );
 }
 template<typename Element, typename OtherElement>
@@ -632,10 +632,10 @@ inline void operator-=( BasicVector4<Element>& self, const BasicVector4<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> vector4_scaled( const BasicVector4<Element>& self, const BasicVector4<OtherElement>& other ){
 	return BasicVector4<Element>(
-	           float(self.x() * other.x() ),
-	           float(self.y() * other.y() ),
-	           float(self.z() * other.z() ),
-	           float(self.w() * other.w() )
+	           float( self.x() * other.x() ),
+	           float( self.y() * other.y() ),
+	           float( self.z() * other.z() ),
+	           float( self.w() * other.w() )
 	       );
 }
 template<typename Element, typename OtherElement>
@@ -657,10 +657,10 @@ inline void operator*=( BasicVector4<Element>& self, const BasicVector4<OtherEle
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> vector4_scaled( const BasicVector4<Element>& self, OtherElement scale ){
 	return BasicVector4<Element>(
-	           float(self.x() * scale),
-	           float(self.y() * scale),
-	           float(self.z() * scale),
-	           float(self.w() * scale)
+	           float( self.x() * scale ),
+	           float( self.y() * scale ),
+	           float( self.z() * scale ),
+	           float( self.w() * scale )
 	       );
 }
 template<typename Element, typename OtherElement>
@@ -682,10 +682,10 @@ inline void operator*=( BasicVector4<Element>& self, OtherElement scale ){
 template<typename Element, typename OtherElement>
 inline BasicVector4<Element> vector4_divided( const BasicVector4<Element>& self, OtherElement divisor ){
 	return BasicVector4<Element>(
-	           float(self.x() / divisor),
-	           float(self.y() / divisor),
-	           float(self.z() / divisor),
-	           float(self.w() / divisor)
+	           float( self.x() / divisor ),
+	           float( self.y() / divisor ),
+	           float( self.z() / divisor ),
+	           float( self.w() / divisor )
 	       );
 }
 template<typename Element, typename OtherElement>

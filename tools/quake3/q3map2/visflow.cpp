@@ -39,7 +39,7 @@
 
    each portal will have a list of all possible to see from first portal
 
-   if (!thread->portalmightsee[portalnum])
+   if ( !thread->portalmightsee[portalnum] )
 
    portal mightsee
 
@@ -51,7 +51,7 @@
     save as passagemightsee
 
 
-   void CalcMightSee (leaf_t *leaf,
+   void CalcMightSee( leaf_t *leaf,
  */
 
 int CountBits( const byte *bits, int numbits ){
@@ -68,7 +68,7 @@ int CountBits( const byte *bits, int numbits ){
 static void CheckStack( leaf_t *leaf, threaddata_t *thread ){
 	for ( pstack_t *p = thread->pstack_head.next; p; p = p->next )
 	{
-//		Sys_Printf ("=");
+//		Sys_Printf( "=" );
 		if ( p->leaf == leaf ) {
 			Error( "CheckStack: leaf recursion" );
 		}
@@ -77,7 +77,7 @@ static void CheckStack( leaf_t *leaf, threaddata_t *thread ){
 				Error( "CheckStack: late leaf recursion" );
 			}
 	}
-//	Sys_Printf ("\n");
+//	Sys_Printf( "\n" );
 }
 
 
@@ -385,7 +385,7 @@ static void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prev
 	thread->c_chains++;
 
 	leaf = &leafs[leafnum];
-//	CheckStack (leaf, thread);
+//	CheckStack( leaf, thread );
 
 	prevstack->next = &stack;
 
@@ -412,18 +412,18 @@ static void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prev
 
 		/* MrE: portal trace debug code
 		   {
-		    int portaltrace[] = {13, 16, 17, 37};
+		    int portaltrace[] = { 13, 16, 17, 37 };
 		    pstack_t *s;
 
 		    s = &thread->pstack_head;
-		    for (j = 0; s->next && j < sizeof(portaltrace)/sizeof(int) - 1; j++, s = s->next)
+		    for ( j = 0; s->next && j < sizeof( portaltrace ) / sizeof( int ) - 1; j++, s = s->next )
 		    {
-		        if (s->portal->num != portaltrace[j])
+		        if ( s->portal->num != portaltrace[j] )
 		            break;
 		    }
-		    if (j >= sizeof(portaltrace)/sizeof(int) - 1)
+		    if ( j >= sizeof( portaltrace ) / sizeof( int ) - 1 )
 		    {
-		        if (p->num == portaltrace[j])
+		        if ( p->num == portaltrace[j] )
 		            n = 0; //traced through all the portals
 		    }
 		   }
@@ -494,12 +494,12 @@ static void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prev
 		{
 			const float d = plane3_distance_to_point( p->plane, thread->base->origin );
 			//MrE: vis-bug fix
-			//if (d > p->radius)
+			//if ( d > p->radius )
 			if ( d > thread->base->radius ) {
 				continue;
 			}
 			//MrE: vis-bug fix
-			//if (d < -p->radius)
+			//if ( d < -p->radius )
 			else if ( d < -thread->base->radius ) {
 				stack.source = prevstack->source;
 			}
@@ -712,7 +712,7 @@ static void RecursivePassageFlow( vportal_t *portal, threaddata_t *thread, pstac
 void PassageFlow( int portalnum ){
 	threaddata_t data;
 	vportal_t       *p;
-//	int				c_might, c_can;
+//	int             c_might, c_can;
 
 #ifdef MREDEBUG
 	Sys_Printf( "\r%6d", portalnum );
@@ -727,7 +727,7 @@ void PassageFlow( int portalnum ){
 
 	p->status = EVStatus::Working;
 
-//	c_might = CountBits (p->portalflood, numportals*2);
+//	c_might = CountBits( p->portalflood, numportals * 2 );
 
 	memset( &data, 0, sizeof( data ) );
 	data.base = p;
@@ -743,10 +743,10 @@ void PassageFlow( int portalnum ){
 	p->status = EVStatus::Done;
 
 	/*
-	   c_can = CountBits (p->portalvis, numportals*2);
+	   c_can = CountBits( p->portalvis, numportals * 2 );
 
 	   Sys_FPrintf( SYS_VRB, "portal:%4i  mightsee:%4i  cansee:%4i (%i chains)\n",
-	    (int)(p - portals),	c_might, c_can, data.c_chains );
+	    (int)( p - portals ), c_might, c_can, data.c_chains );
 	 */
 }
 
@@ -767,7 +767,7 @@ static void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread,
 //	thread->c_chains++;
 
 	leaf = &leafs[portal->leaf];
-//	CheckStack (leaf, thread);
+//	CheckStack( leaf, thread );
 
 	prevstack->next = &stack;
 
@@ -864,12 +864,12 @@ static void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread,
 		{
 			const float d = plane3_distance_to_point( p->plane, thread->base->origin );
 			//MrE: vis-bug fix
-			//if (d > p->radius)
+			//if ( d > p->radius )
 			if ( d > thread->base->radius ) {
 				continue;
 			}
 			//MrE: vis-bug fix
-			//if (d < -p->radius)
+			//if ( d < -p->radius )
 			else if ( d < -thread->base->radius ) {
 				stack.source = prevstack->source;
 			}
@@ -976,7 +976,7 @@ void PassagePortalFlow( int portalnum ){
 
 	p->status = EVStatus::Working;
 
-//	c_might = CountBits (p->portalflood, numportals*2);
+//	c_might = CountBits( p->portalflood, numportals * 2 );
 
 	memset( &data, 0, sizeof( data ) );
 	data.base = p;
@@ -992,10 +992,10 @@ void PassagePortalFlow( int portalnum ){
 	p->status = EVStatus::Done;
 
 	/*
-	   c_can = CountBits (p->portalvis, numportals*2);
+	   c_can = CountBits( p->portalvis, numportals * 2 );
 
 	   Sys_FPrintf( SYS_VRB, "portal:%4i  mightsee:%4i  cansee:%4i (%i chains)\n",
-	    (int)(p - portals),	c_might, c_can, data.c_chains );
+	    (int)( p - portals ), c_might, c_can, data.c_chains );
 	 */
 }
 
@@ -1462,11 +1462,11 @@ void BasePortalVis( int portalnum ){
 
 		/* ydnar: this is old farplane vis code from mre */
 		/*
-		   if (farplanedist >= 0)
+		   if ( farplanedist >= 0 )
 		   {
 		    vec3_t dir;
-		    VectorSubtract(p->origin, tp->origin, dir);
-		    if (VectorLength(dir) > farplanedist - p->radius - tp->radius)
+		    VectorSubtract( p->origin, tp->origin, dir );
+		    if ( VectorLength( dir ) > farplanedist - p->radius - tp->radius )
 		        continue;
 		   }
 		 */
@@ -1520,7 +1520,7 @@ void BasePortalVis( int portalnum ){
 	SimpleFlood( p, p->leaf );
 
 	p->nummightsee = CountBits( p->portalflood, numportals * 2 );
-//	Sys_Printf ("portal %i: %i mightsee\n", portalnum, p->nummightsee);
+//	Sys_Printf( "portal %i: %i mightsee\n", portalnum, p->nummightsee );
 }
 
 

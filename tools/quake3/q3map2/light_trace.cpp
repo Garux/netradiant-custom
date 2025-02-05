@@ -162,7 +162,7 @@ static int AllocTraceNode(){
 	traceNodes[ numTraceNodes ].type = TRACE_LEAF;
 	traceNodes[ numTraceNodes ].minmax.clear();
 
-	/* Sys_Printf("alloc node %d\n", numTraceNodes); */
+	/* Sys_Printf( "alloc node %d\n", numTraceNodes ); */
 
 	numTraceNodes++;
 
@@ -339,7 +339,7 @@ static int SetupTraceNodes_r( int bspNodeNum ){
 		}
 	}
 
-	/* Sys_Printf("node %d children: %d %d\n", nodeNum, traceNodes[ nodeNum ].children[0], traceNodes[ nodeNum ].children[1]); */
+	/* Sys_Printf( "node %d children: %d %d\n", nodeNum, traceNodes[ nodeNum ].children[0], traceNodes[ nodeNum ].children[1] ); */
 
 	/* return node number */
 	return nodeNum;
@@ -613,7 +613,7 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 	/* check triangle limit */
 	//%	if( node->numItems <= MAX_NODE_ITEMS )
 	if ( ( count - ( node->numItems * 2 ) ) < MAX_NODE_TRIANGLES ) {
-		//%	Sys_Printf( "Limit: (%d triangles)\n", (count - (node->numItems * 2)) );
+		//%	Sys_Printf( "Limit: (%d triangles)\n", ( count - ( node->numItems * 2 ) ) );
 		numTraceLeafNodes++;
 		return;
 	}

@@ -1385,7 +1385,7 @@ inline float Random(){ /* returns a pseudorandom number between 0 and 1 */
 }
 
 /* help.c */
-void                        HelpMain(const char* arg);
+void                        HelpMain( const char* arg );
 void                        HelpGames();
 
 /* path_init.c */

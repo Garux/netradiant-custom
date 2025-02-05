@@ -497,7 +497,7 @@ static int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 			}
 
 	/*
-		if(bestV < 0)
+		if( bestV < 0 )
 			Sys_FPrintf( SYS_WRN, "value was REALLY bad\n" );
 	 */
 
@@ -547,7 +547,7 @@ static int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 
 		/* identify the other fragments */
 
-		/* full polygon without triangle (bestR,bestS,bestT) = three new polygons:
+		/* full polygon without triangle ( bestR, bestS, bestT ) = three new polygons:
 		 * 1. bestR..bestS
 		 * 2. bestS..bestT
 		 * 3. bestT..bestR
@@ -560,7 +560,7 @@ static int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 		j += i;
 		for (; i < j; ++i )
 			indexes[i] += bestR;
-		/* uses 3*(bestS-bestR+1)-6 */
+		/* uses 3 * ( bestS - bestR + 1 ) - 6 */
 		j = MaxAreaIndexes( vert + bestS, bestT - bestS + 1, indexes + i );
 		if ( j < 0 ) {
 			continue;
@@ -568,7 +568,7 @@ static int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 		j += i;
 		for (; i < j; ++i )
 			indexes[i] += bestS;
-		/* uses 3*(bestT-bestS+1)-6 */
+		/* uses 3 * ( bestT - bestS + 1 ) - 6 */
 
 		/* can'bestT recurse this one directly... therefore, buffering */
 		if ( cnt + bestR - bestT + 1 >= 3 ) {
@@ -583,11 +583,11 @@ static int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 			j += i;
 			for (; i < j; ++i )
 				indexes[i] = ( indexes[i] + bestT ) % cnt;
-			/* uses 3*(cnt+bestR-bestT+1)-6 */
+			/* uses 3 * ( cnt + bestR - bestT + 1 ) - 6 */
 			free( buf );
 		}
 
-		/* together 3 + 3*(cnt+3) - 18 = 3*cnt-6 q.e.d. */
+		/* together 3 + 3 * ( cnt + 3 ) - 18 = 3 * cnt - 6 q.e.d. */
 		return i;
 	}
 

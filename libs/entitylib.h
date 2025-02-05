@@ -616,7 +616,7 @@ public:
 	}
 	void setKeyValue( const char* key, const char* value ) override {
 		if ( string_empty( value )
-		     /*|| string_equal(EntityClass_valueForKey(*m_eclass, key), value)*/ ) { // don't delete values equal to default
+		     /*|| string_equal( EntityClass_valueForKey( *m_eclass, key ), value )*/ ) { // don't delete values equal to default
 			erase( key );
 		}
 		else

@@ -968,7 +968,7 @@ public:
 
 	bool m_drawing;
 	void queue_draw(){
-		//ASSERT_MESSAGE(!m_drawing, "CamWnd::queue_draw(): called while draw is already in progress");
+		//ASSERT_MESSAGE( !m_drawing, "CamWnd::queue_draw(): called while draw is already in progress" );
 		if ( m_drawing ) {
 			return;
 		}

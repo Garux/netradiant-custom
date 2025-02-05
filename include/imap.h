@@ -61,9 +61,9 @@ public:
 	INTEGER_CONSTANT( Version, 2 );
 	STRING_CONSTANT( Name, "map" );
 
-/// \brief Read a map graph into \p root from \p outputStream, using \p entityTable to create entities.
+	/// \brief Read a map graph into \p root from \p outputStream, using \p entityTable to create entities.
 	virtual void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const = 0;
-/// \brief Write the map graph obtained by applying \p traverse to \p root into \p outputStream.
+	/// \brief Write the map graph obtained by applying \p traverse to \p root into \p outputStream.
 	virtual void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const = 0;
 };
 

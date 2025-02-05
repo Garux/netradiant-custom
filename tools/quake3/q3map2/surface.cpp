@@ -647,8 +647,8 @@ static shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMa
 
 	/* get the shader */
 	shaderInfo_t *si = ShaderInfoForShader( ( minShaderIndex == maxShaderIndex )?
-	                            String64( "textures/", im->shader, '_', int(maxShaderIndex) ):
-	                            String64( "textures/", im->shader, '_', int(minShaderIndex), "to", int(maxShaderIndex) ) );
+	                            String64( "textures/", im->shader, '_', int( maxShaderIndex ) ):
+	                            String64( "textures/", im->shader, '_', int( minShaderIndex ), "to", int( maxShaderIndex ) ) );
 
 	/* inherit a few things from parent shader */
 	if ( parent->globalTexture ) {

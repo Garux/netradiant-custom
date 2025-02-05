@@ -76,20 +76,20 @@ inline void debug_count_oriented_bbox(){
 /// \brief View-volume culling and transformations.
 class View : public VolumeTest
 {
-/// modelview matrix
+	/// modelview matrix
 	Matrix4 m_modelview;
-/// projection matrix
+	/// projection matrix
 	Matrix4 m_projection;
-/// device-to-screen transform
+	/// device-to-screen transform
 	Matrix4 m_viewport;
 
 	Matrix4 m_scissor;
 
-/// combined modelview and projection matrix
+	/// combined modelview and projection matrix
 	Matrix4 m_viewproj;
-/// camera position in world space
+	/// camera position in world space
 	Vector4 m_viewer;
-/// view frustum in world space
+	/// view frustum in world space
 	Frustum m_frustum;
 
 	Vector3 m_viewdir;
@@ -119,8 +119,8 @@ public:
 
 		// viewport
 		m_viewport = g_matrix4_identity;
-		m_viewport[0] = float(width / 2);
-		m_viewport[5] = float(height / 2);
+		m_viewport[0] = float( width / 2 );
+		m_viewport[5] = float( height / 2 );
 		if ( fabs( m_projection[11] ) > 0.0000001 ) {
 			m_viewport[10] = m_projection[0] * m_viewport[0];
 		}
@@ -132,10 +132,10 @@ public:
 	}
 	void EnableScissor( float min_x, float max_x, float min_y, float max_y ){
 		m_scissor = g_matrix4_identity;
-		m_scissor[0] = static_cast<float>( ( max_x - min_x ) * 0.5 );
-		m_scissor[5] = static_cast<float>( ( max_y - min_y ) * 0.5 );
-		m_scissor[12] = static_cast<float>( ( min_x + max_x ) * 0.5 );
-		m_scissor[13] = static_cast<float>( ( min_y + max_y ) * 0.5 );
+		m_scissor[0] = ( max_x - min_x ) * 0.5;
+		m_scissor[5] = ( max_y - min_y ) * 0.5;
+		m_scissor[12] = ( min_x + max_x ) * 0.5;
+		m_scissor[13] = ( min_y + max_y ) * 0.5;
 		matrix4_full_invert( m_scissor );
 
 		construct();

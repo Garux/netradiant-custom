@@ -170,7 +170,7 @@ static void LoadPNGBuffer( byte *buffer, int size, byte **pixels, int *width, in
 	//png->io_ptr = &pb; /* hack! */
 
 	/* set error longjmp */
-	if ( setjmp( png_jmpbuf(png) ) ) {
+	if ( setjmp( png_jmpbuf( png ) ) ) {
 		Sys_Warning( "An error occurred reading PNG image\n" );
 		png_destroy_read_struct( &png, &info, &end );
 		return;

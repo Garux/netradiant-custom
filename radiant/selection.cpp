@@ -101,9 +101,9 @@ inline Vector3 sphere_intersect_ray( const Vector3& origin, float radius, const 
 
 inline Vector3 ray_intersect_ray( const Ray& ray, const Ray& other ){
 	const Vector3 intersection = vector3_subtracted( ray.origin, other.origin );
-	//float a = 1;//vector3_dot(ray.direction, ray.direction);        // always >= 0
+	//float a = 1;//vector3_dot( ray.direction, ray.direction );        // always >= 0
 	const double dot = vector3_dot( ray.direction, other.direction );
-	//float c = 1;//vector3_dot(other.direction, other.direction);        // always >= 0
+	//float c = 1;//vector3_dot( other.direction, other.direction );        // always >= 0
 	const double d = vector3_dot( ray.direction, intersection );
 	const double e = vector3_dot( other.direction, intersection );
 	const double D = 1 - dot * dot; //a*c - dot*dot;       // always >= 0
@@ -291,7 +291,7 @@ public:
 			constrain_to_axis( m_start, m_axis );
 		}
 	}
-/// \brief Converts current position to a normalised vector orthogonal to axis.
+	/// \brief Converts current position to a normalised vector orthogonal to axis.
 	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point ) override {
 		Vector3 current;
 		if( m_plane_way ){
@@ -1898,7 +1898,7 @@ inline const Colour4b& colourSelected( const Colour4b& colour, bool selected ){
 
 template<typename remap_policy>
 inline void draw_semicircle( const std::size_t segments, const float radius, PointVertex* vertices, remap_policy remap ){
-	const double increment = c_pi / double(segments << 2);
+	const double increment = c_pi / double( segments << 2 );
 
 	std::size_t count = 0;
 	float x = radius;
@@ -2849,7 +2849,7 @@ public:
 		for ( int i = 0; i < 3; ++i ){
 			for ( int j = 0; j < 2; ++j ){
 				const int x = i;
-				const int y = ( i + j + 1 )%3;
+				const int y = ( i + j + 1 ) % 3;
 				Vertex3f& xy_ = m_lines[i][j][0].m_line[0].vertex;
 				Vertex3f& x_y_ = m_lines[i][j][0].m_line[1].vertex;
 				Vertex3f& xy = m_lines[i][j][1].m_line[0].vertex;
@@ -2874,8 +2874,8 @@ public:
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j )
 				if( m_selectables_scale.getSelectables()[i * 2 + j].isSelected() ){
-					m_lines[(i + 1)%3][1][j ^ 1].setColour( g_colour_selected );
-					m_lines[(i + 2)%3][0][j ^ 1].setColour( g_colour_selected );
+					m_lines[( i + 1 ) % 3][1][j ^ 1].setColour( g_colour_selected );
+					m_lines[( i + 2 ) % 3][0][j ^ 1].setColour( g_colour_selected );
 				}
 	}
 
@@ -2990,8 +2990,8 @@ public:
 			for ( int j = 0; j < 2; ++j )
 				for ( int k = 0; k < 2; ++k ){
 					m_point.m_point.vertex[i] = 0;
-					m_point.m_point.vertex[(i + 1)%3] = j? 1 : -1;
-					m_point.m_point.vertex[(i + 2)%3] = k? 1 : -1;
+					m_point.m_point.vertex[( i + 1 ) % 3] = j? 1 : -1;
+					m_point.m_point.vertex[( i + 2 ) % 3] = k? 1 : -1;
 					SelectionIntersection best;
 					Point_BestPoint( local2view, m_point.m_point, best );
 					selector.addSelectable( best, &m_selectables_rotate[i][j][k] );
@@ -3003,8 +3003,8 @@ public:
 					for ( int k = 0; k < 2; ++k )
 						if( m_selectables_rotate[i][j][k].isSelected() ){
 							m_point.m_point.vertex[i] = 0;
-							m_point.m_point.vertex[(i + 1)%3] = j? 1 : -1;
-							m_point.m_point.vertex[(i + 2)%3] = k? 1 : -1;
+							m_point.m_point.vertex[( i + 1 ) % 3] = j? 1 : -1;
+							m_point.m_point.vertex[( i + 2 ) % 3] = k? 1 : -1;
 							if( !m_pivotIsCustom ){
 								const Vector3 origin = m_bounds.origin + m_point.m_point.vertex * -1 * m_bounds.extents;
 								m_pivot2world = matrix4_translation_for_vec3( origin );
@@ -3115,7 +3115,7 @@ testSelectBboxPlanes:
 			for ( int i = 0; i < 3; ++i )
 				for ( int j = 0; j < 2; ++j )
 					if( m_selectables_scale.getSelectables()[i * 2 + j].isSelected() )
-						(*axis++)[i] = j? -1 : 1;
+						( *axis++ )[i] = j? -1 : 1;
 			if( axis - axes == 2 ){
 				m_scaleFree.SetAxes( axes[0], axes[1] );
 				return &m_scaleFree;
@@ -3614,7 +3614,7 @@ void translation_for_pivoted_matrix_transform( Vector3& parent_translation, cons
 	        )
 	        /*
 	            matrix4_transformed_point(
-	                matrix4_full_inverse(local_transform),
+	                matrix4_full_inverse( local_transform ),
 	                local_pivot
 	            ),
 	            local_pivot
@@ -3628,7 +3628,7 @@ void translation_for_pivoted_matrix_transform( Vector3& parent_translation, cons
 	   // verify it!
 	   globalOutputStream() << "World pivot is at " << world_pivot << '\n';
 	   globalOutputStream() << "Local pivot is at " << local_pivot << '\n';
-	   globalOutputStream() << "Transformation " << local_transform << " moves it to: " << matrix4_transformed_point(local_transform, local_pivot) << '\n';
+	   globalOutputStream() << "Transformation " << local_transform << " moves it to: " << matrix4_transformed_point( local_transform, local_pivot ) << '\n';
 	   globalOutputStream() << "Must move by " << local_translation << " in the local system" << '\n';
 	   globalOutputStream() << "Must move by " << parent_translation << " in the parent system" << '\n';
 	 */
@@ -6706,8 +6706,8 @@ public:
 
 		if( g_modifiers.shift() ){ // snap to axis
 			for ( std::size_t i = 0; i < 3; ++i ){
-				if( fabs( current[i] ) >= fabs( current[(i + 1) % 3] ) ){
-					current[(i + 1) % 3] = 0.f;
+				if( fabs( current[i] ) >= fabs( current[( i + 1 ) % 3] ) ){
+					current[( i + 1 ) % 3] = 0.f;
 				}
 				else{
 					current[i] = 0.f;
@@ -7464,7 +7464,7 @@ public:
 
 	void translate( const Vector3& translation ) override {
 		if ( !nothingSelected() ) {
-			//ASSERT_MESSAGE(!m_pivotChanged, "pivot is invalid");
+			//ASSERT_MESSAGE( !m_pivotChanged, "pivot is invalid" );
 
 			m_translation = translation;
 			m_repeatableTransforms.setTranslation( translation );
@@ -7488,7 +7488,7 @@ public:
 	}
 	void rotate( const Quaternion& rotation ) override {
 		if ( !nothingSelected() ) {
-			//ASSERT_MESSAGE(!m_pivotChanged, "pivot is invalid");
+			//ASSERT_MESSAGE( !m_pivotChanged, "pivot is invalid" );
 
 			m_rotation = rotation;
 			m_repeatableTransforms.setRotation( rotation );
@@ -7634,11 +7634,11 @@ public:
 		}
 	}
 
-/// \todo Support view-dependent nudge.
+	/// \todo Support view-dependent nudge.
 	void NudgeManipulator( const Vector3& nudge, const Vector3& view ) override {
-//	if ( ManipulatorMode() == eTranslate || ManipulatorMode() == eDrag ) {
+	//	if ( ManipulatorMode() == eTranslate || ManipulatorMode() == eDrag ) {
 		translateSelected( nudge );
-//	}
+	//	}
 	}
 
 	bool endMove();
@@ -8152,7 +8152,7 @@ AABB RadiantSelectionSystem::getSelectionAABB() const {
 }
 
 void RadiantSelectionSystem::renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
-	//if(view->TestPoint(m_object_pivot))
+	//if( view->TestPoint( m_object_pivot ) )
 	if ( !nothingSelected()
 	     || ManipulatorMode() == eClip
 	     || ManipulatorMode() == eBuild

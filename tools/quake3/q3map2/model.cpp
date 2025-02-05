@@ -203,7 +203,7 @@ struct AssModel
 						Sys_Printf( "matname: %s\n", matname.C_Str() );
 #endif
 			if( aiString texname;
-			    aiReturn_SUCCESS == material->Get( AI_MATKEY_TEXTURE_DIFFUSE(0), texname )
+			    aiReturn_SUCCESS == material->Get( AI_MATKEY_TEXTURE_DIFFUSE( 0 ), texname )
 			 && texname.length != 0
 			 && !string_equal_prefix_nocase( matname.C_Str(), "textures/" ) /* matname looks intentionally named as ingame shader */
 			 && !string_equal_prefix_nocase( matname.C_Str(), "textures\\" )
@@ -518,7 +518,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 					if ( fabs( plane.normal()[j] ) < 0.00025 && fabs( plane.normal()[( j + 1) % 3] ) < 0.00025
 					&& ( plane.normal()[j] != 0.0 || plane.normal()[( j + 1 ) % 3] != 0.0 ) ){
 						const Vector3 cnt = ( points[0] + points[1] + points[2] ) / 3.0;
-						points[0][( j + 2 ) % 3] = points[1][(j + 2 ) % 3] = points[2][( j + 2 ) % 3] = cnt[( j + 2 ) % 3];
+						points[0][( j + 2 ) % 3] = points[1][( j + 2 ) % 3] = points[2][( j + 2 ) % 3] = cnt[( j + 2 ) % 3];
 						snpd = true;
 						break;
 					}
@@ -645,7 +645,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 						}
 						value_minimize( mindist, bestdist );
 					}
-					if ( (limDepth != 0.0) && (mindist > limDepth) )
+					if ( ( limDepth != 0.0 ) && ( mindist > limDepth ) )
 						goto default_CLIPMODEL;
 
 					nonax_clip_dbg( p );
@@ -905,15 +905,15 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 					    PlaneFromPoints( p[2], points[0], points[2], cnt ) ) {
 
 						//check for dangerous planes
-						while( (( p[0].a != 0.0 || p[0].b != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].b ) < 0.00025) ||
-						       (( p[0].a != 0.0 || p[0].c != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].c ) < 0.00025) ||
-						       (( p[0].c != 0.0 || p[0].b != 0.0 ) && fabs( p[0].c ) < 0.00025 && fabs( p[0].b ) < 0.00025) ||
-						       (( p[1].a != 0.0 || p[1].b != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].b ) < 0.00025) ||
-						       (( p[1].a != 0.0 || p[1].c != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].c ) < 0.00025) ||
-						       (( p[1].c != 0.0 || p[1].b != 0.0 ) && fabs( p[1].c ) < 0.00025 && fabs( p[1].b ) < 0.00025) ||
-						       (( p[2].a != 0.0 || p[2].b != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].b ) < 0.00025) ||
-						       (( p[2].a != 0.0 || p[2].c != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].c ) < 0.00025) ||
-						       (( p[2].c != 0.0 || p[2].b != 0.0 ) && fabs( p[2].c ) < 0.00025 && fabs( p[2].b ) < 0.00025) ) {
+						while( ( ( p[0].a != 0.0 || p[0].b != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].b ) < 0.00025 ) ||
+						       ( ( p[0].a != 0.0 || p[0].c != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].c ) < 0.00025 ) ||
+						       ( ( p[0].c != 0.0 || p[0].b != 0.0 ) && fabs( p[0].c ) < 0.00025 && fabs( p[0].b ) < 0.00025 ) ||
+						       ( ( p[1].a != 0.0 || p[1].b != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].b ) < 0.00025 ) ||
+						       ( ( p[1].a != 0.0 || p[1].c != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].c ) < 0.00025 ) ||
+						       ( ( p[1].c != 0.0 || p[1].b != 0.0 ) && fabs( p[1].c ) < 0.00025 && fabs( p[1].b ) < 0.00025 ) ||
+						       ( ( p[2].a != 0.0 || p[2].b != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].b ) < 0.00025 ) ||
+						       ( ( p[2].a != 0.0 || p[2].c != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].c ) < 0.00025 ) ||
+						       ( ( p[2].c != 0.0 || p[2].b != 0.0 ) && fabs( p[2].c ) < 0.00025 && fabs( p[2].b ) < 0.00025 ) ) {
 							cnt -= plane.normal() * 0.1f;
 							//	Sys_Printf( "shifting pyramid point\n" );
 							PlaneFromPoints( p[0], points[1], points[0], cnt );

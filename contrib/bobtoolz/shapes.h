@@ -52,7 +52,7 @@ void Build_StairStep_Wedge( int dir, vec3_t min, vec3_t max, const char* mainTex
 void BuildCornerStairs( vec3_t vMin, vec3_t vMax, int nSteps, const char* mainTexture, const char* riserTex );
 // stairs stuff.
 
-//void Build_Prism_Border(vec3_t min, vec3_t max, int nSides, int nBorder, bool bAlignTop = FALSE); //moved to DShape
-//void Build_Prism_Ordinary(vec3_t min, vec3_t max, int nSides, bool bAlignTop = FALSE); //moved to DShape
-//void Build_Prism_Efficient(vec3_t min, vec3_t max, int nSides, bool bAlignTop = FALSE); //moved to DShape
+//void Build_Prism_Border( vec3_t min, vec3_t max, int nSides, int nBorder, bool bAlignTop = FALSE ); //moved to DShape
+//void Build_Prism_Ordinary( vec3_t min, vec3_t max, int nSides, bool bAlignTop = FALSE ); //moved to DShape
+//void Build_Prism_Efficient( vec3_t min, vec3_t max, int nSides, bool bAlignTop = FALSE ); //moved to DShape
 // polygon stuff.

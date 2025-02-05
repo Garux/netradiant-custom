@@ -254,7 +254,7 @@ void MakeMeshNormals( mesh_t in ){
 				count++;
 			}
 			if ( count == 0 ) {
-//Sys_Printf("bad normal\n");
+//Sys_Printf( "bad normal\n" );
 				count = 1;
 			}
 			dv->normal = VectorNormalized( sum );

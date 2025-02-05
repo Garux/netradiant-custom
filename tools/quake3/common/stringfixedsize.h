@@ -41,7 +41,7 @@ public:
 	template<typename ... Args>
 		// prevent override of copy constructor
 		requires ( !std::is_same_v<std::tuple<std::decay_t<Args>...>, std::tuple<StringFixedSize>> )
-	explicit StringFixedSize(Args&& ... args) {
+	explicit StringFixedSize( Args&& ... args ) {
 		operator()( std::forward<Args>( args ) ... );
 	}
 	std::size_t write( const char* buffer, std::size_t length ) override {

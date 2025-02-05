@@ -159,8 +159,8 @@ public:
 			std::sort( m_encodeMap, m_encodeMap + 128 );
 		}
 	}
-/// \brief Prints the (up to) 128 characters in the current extended-ascii character set.
-/// Useful for debugging.
+	/// \brief Prints the (up to) 128 characters in the current extended-ascii character set.
+	/// Useful for debugging.
 	void print() const {
 		globalOutputStream() << "UTF-8 conversion required from charset: " << globalCharacterSet().get() << '\n';
 		for ( std::size_t i = 1; i < 128; ++i )
@@ -170,16 +170,16 @@ public:
 			}
 		}
 	}
-/// \brief Returns \p c decoded from extended-ascii to UTF-8.
-/// \p c must be an extended-ascii character.
+	/// \brief Returns \p c decoded from extended-ascii to UTF-8.
+	/// \p c must be an extended-ascii character.
 	const UTF8Character& decode( char c ) const {
 		ASSERT_MESSAGE( !globalCharacterSet().isUTF8(), "locale is utf8, no conversion required" );
 		ASSERT_MESSAGE( !char_is_ascii( c ), "decode: ascii character" );
 		ASSERT_MESSAGE( m_decodeMap[extended_ascii_to_index( c )].buffer != 0, "decode: invalid character: " << HexChar( c ) );
 		return m_decodeMap[extended_ascii_to_index( c )];
 	}
-/// \brief Returns \p c encoded to extended-ascii from UTF-8.
-/// \p c must map to an extended-ascii character.
+	/// \brief Returns \p c encoded to extended-ascii from UTF-8.
+	/// \p c must map to an extended-ascii character.
 	char encode( const UTF8Character& c ) const {
 		ASSERT_MESSAGE( !globalCharacterSet().isUTF8(), "locale is utf8, no conversion required" );
 		ASSERT_MESSAGE( !char_is_ascii( *c.buffer ), "encode: ascii character" );

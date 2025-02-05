@@ -101,13 +101,13 @@ class SignalHandler1 : public SignalHandlerN<Callback<SignalHandlerResult(FirstA
 };
 
 template<typename Caller>
-inline SignalHandler1<get_argument<Caller, 1>> makeSignalHandler1(const BindFirstOpaque<Caller>& caller){
+inline SignalHandler1<get_argument<Caller, 1>> makeSignalHandler1( const BindFirstOpaque<Caller>& caller ){
 	return SignalHandler1<get_argument<Caller, 1>>( caller );
 }
 template<typename Caller>
 inline SignalHandler1<get_argument<Caller, 1>>
-makeSignalHandler1(const Caller &caller, get_argument<Caller, 0> callee) {
-    return SignalHandler1<get_argument<Caller, 1>>(BindFirstOpaque<Caller>(callee));
+makeSignalHandler1( const Caller &caller, get_argument<Caller, 0> callee ) {
+    return SignalHandler1<get_argument<Caller, 1>>( BindFirstOpaque<Caller>( callee ) );
 }
 
 template<typename FirstArgument, typename SecondArgument>

@@ -321,7 +321,7 @@ bool ClusterVisible( int a, int b ){
 	}
 
 	/* get pvs data */
-	/* portalClusters = ((int *) bspVisBytes)[ 0 ]; */
+	/* portalClusters = ( (int *) bspVisBytes )[ 0 ]; */
 	const int leafBytes = ( (int*) bspVisBytes.data() )[ 1 ];
 	const byte *pvs = bspVisBytes.data() + VIS_HEADER_SIZE + ( a * leafBytes );
 
@@ -2436,7 +2436,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				if ( lm->superFlags == NULL ) {
 					lm->superFlags = safe_malloc( size );
 				}
-				memset( (void *) lm->superFlags, 0, size );
+				memset( lm->superFlags, 0, size );
 			}
 
 			/* initial pass, one sample per luxel */
@@ -2564,7 +2564,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 								const Vector3& origin = lm->getSuperOrigin( sx, sy );
 
 								/* only subsample shadowed luxels */
-								//%	if( (lightLuxel[ 0 ] + lightLuxel[ 1 ] + lightLuxel[ 2 ]) <= 0.0f )
+								//%	if( ( lightLuxel[ 0 ] + lightLuxel[ 1 ] + lightLuxel[ 2 ] ) <= 0.0f )
 								//%		continue;
 
 								/* subsample it */
@@ -3833,8 +3833,8 @@ float FloodLightForSample( trace_t *trace, float floodLightDistance, bool floodL
 			else if ( trace->opaque ) {
 				const float d = vector3_length( trace->hit - trace->origin );
 
-				// d=trace->distance;
-				//if (d>256) gatherDirt+=1;
+				// d = trace->distance;
+				//if ( d > 256 ) gatherDirt += 1;
 				contribution = std::min( 1.f, d / dd );
 
 				//gatherDirt += 1.0f - ooDepth * VectorLength( displacement );

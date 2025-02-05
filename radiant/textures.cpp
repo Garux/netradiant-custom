@@ -303,8 +303,8 @@ void Texture_InitPalette( byte *pal ){
 		b = gammatable[pal[2]];
 		pal += 3;
 
-		//v = (r<<24) + (g<<16) + (b<<8) + 255;
-		//v = BigLong (v);
+		//v = ( r << 24 ) + ( g << 16 ) + ( b << 8 ) + 255;
+		//v = BigLong( v );
 
 		//tex_palette[i] = v;
 		tex_palette[i * 3 + 0] = r;

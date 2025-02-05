@@ -172,26 +172,26 @@ void GlobalPressedKeys_connect( QWidget* window ){
 
 
 void keydown_accelerators_add( QKeySequence accelerator, const Callback<void()>& callback ){
-	//globalOutputStream() << "keydown_accelerators_add: " << makeQuoted(accelerator) << '\n';
+	//globalOutputStream() << "keydown_accelerators_add: " << makeQuoted( accelerator ) << '\n';
 	if ( !accelerator_map_insert( g_keydown_accelerators, accelerator, callback ) ) {
 		globalErrorStream() << "keydown_accelerators_add: already exists: " << makeQuoted( accelerator ) << '\n';
 	}
 }
 void keydown_accelerators_remove( QKeySequence accelerator ){
-	//globalOutputStream() << "keydown_accelerators_remove: " << makeQuoted(accelerator) << '\n';
+	//globalOutputStream() << "keydown_accelerators_remove: " << makeQuoted( accelerator ) << '\n';
 	if ( !accelerator_map_erase( g_keydown_accelerators, accelerator ) ) {
 		globalErrorStream() << "keydown_accelerators_remove: not found: " << makeQuoted( accelerator ) << '\n';
 	}
 }
 
 void keyup_accelerators_add( QKeySequence accelerator, const Callback<void()>& callback ){
-	//globalOutputStream() << "keyup_accelerators_add: " << makeQuoted(accelerator) << '\n';
+	//globalOutputStream() << "keyup_accelerators_add: " << makeQuoted( accelerator ) << '\n';
 	if ( !accelerator_map_insert( g_keyup_accelerators, accelerator, callback ) ) {
 		globalErrorStream() << "keyup_accelerators_add: already exists: " << makeQuoted( accelerator ) << '\n';
 	}
 }
 void keyup_accelerators_remove( QKeySequence accelerator ){
-	//globalOutputStream() << "keyup_accelerators_remove: " << makeQuoted(accelerator) << '\n';
+	//globalOutputStream() << "keyup_accelerators_remove: " << makeQuoted( accelerator ) << '\n';
 	if ( !accelerator_map_erase( g_keyup_accelerators, accelerator ) ) {
 		globalErrorStream() << "keyup_accelerators_remove: not found: " << makeQuoted( accelerator ) << '\n';
 	}

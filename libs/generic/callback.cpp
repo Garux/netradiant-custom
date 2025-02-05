@@ -85,7 +85,7 @@ void example(){
 		Callback<void()> bar = ConstReferenceCaller<int, void(), Int_printValue>( foo );
 
 		// invoke the callback
-		bar(); // Int_printValue(foo)
+		bar(); // Int_printValue( foo )
 	}
 
 
@@ -94,7 +94,7 @@ void example(){
 		Callback<void()> bar = IntSetValueCaller( foo );
 
 		// invoke the callback
-		bar(); // Int_setValue(foo)
+		bar(); // Int_setValue( foo )
 	}
 }
 // end example

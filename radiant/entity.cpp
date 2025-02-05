@@ -260,7 +260,7 @@ public:
 					Node_getTraversable( group )->insert( child );
 
 					if ( Node_getTraversable( parent )->empty() ) {
-						//deleteme.push(DeletionPair(parentparent, parent));
+						//deleteme.push( DeletionPair( parentparent, parent ) );
 						Node_getTraversable( parentparent )->erase( parent );
 					}
 				}

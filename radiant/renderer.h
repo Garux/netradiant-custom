@@ -147,7 +147,7 @@ public:
 				else if ( renderable ) {
 					renderable->renderComponents( m_renderer, m_volume );
 				}
-				//if( !(GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && path.size() == 2) )
+				//if( !( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && path.size() == 2 ) )
 				//if( !( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && node_is_group( path.top() ) ) )
 				if( !( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && Node_isEntity( path.top() ) ) )
 					m_renderer.Highlight( Renderer::ePrimitive );

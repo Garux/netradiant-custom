@@ -75,39 +75,39 @@ public:
 	class Walker
 	{
 	public:
-/// \brief Called before traversing the first child-instance of 'instance'. If the return value is false, the children of the current instance are not traversed.
+		/// \brief Called before traversing the first child-instance of 'instance'. If the return value is false, the children of the current instance are not traversed.
 		virtual bool pre( const Path& path, Instance& instance ) const = 0;
-/// \brief Called after traversing the last child-instance of 'instance'.
+		/// \brief Called after traversing the last child-instance of 'instance'.
 		virtual void post( const Path& path, Instance& instance ) const {
 		}
 	};
 
-/// \brief Returns the root-node of the graph.
+	/// \brief Returns the root-node of the graph.
 	virtual Node& root() = 0;
-/// \brief Sets the root-node of the graph to be 'node'.
+	/// \brief Sets the root-node of the graph to be 'node'.
 	virtual void insert_root( Node& root ) = 0;
-/// \brief Clears the root-node of the graph.
+	/// \brief Clears the root-node of the graph.
 	virtual void erase_root() = 0;
-/// \brief Traverses all nodes in the graph depth-first, starting from the root node.
+	/// \brief Traverses all nodes in the graph depth-first, starting from the root node.
 	virtual void traverse( const Walker& walker ) = 0;
-/// \brief Traverses all nodes in the graph depth-first, starting from 'start'.
+	/// \brief Traverses all nodes in the graph depth-first, starting from 'start'.
 	virtual void traverse_subgraph( const Walker& walker, const Path& start ) = 0;
-/// \brief Returns the instance at the location identified by 'path', or 0 if it does not exist.
+	/// \brief Returns the instance at the location identified by 'path', or 0 if it does not exist.
 	virtual scene::Instance* find( const Path& path ) = 0;
 
-/// \brief Invokes all scene-changed callbacks. Called when any part of the scene changes the way it will appear when the scene is rendered.
-/// \todo Move to a separate class.
+	/// \brief Invokes all scene-changed callbacks. Called when any part of the scene changes the way it will appear when the scene is rendered.
+	/// \todo Move to a separate class.
 	virtual void sceneChanged() = 0;
-/// \brief Add a \p callback to be invoked when the scene changes.
-/// \todo Move to a separate class.
+	/// \brief Add a \p callback to be invoked when the scene changes.
+	/// \todo Move to a separate class.
 	virtual void addSceneChangedCallback( const SignalHandler& handler ) = 0;
 
-/// \brief Invokes all bounds-changed callbacks. Called when the bounds of any instance in the scene change.
-/// \todo Move to a separate class.
+	/// \brief Invokes all bounds-changed callbacks. Called when the bounds of any instance in the scene change.
+	/// \todo Move to a separate class.
 	virtual void boundsChanged() = 0;
-/// \brief Add a \p callback to be invoked when the bounds of any instance in the scene change.
+	/// \brief Add a \p callback to be invoked when the bounds of any instance in the scene change.
 	virtual SignalHandlerId addBoundsChangedCallback( const SignalHandler& boundsChanged ) = 0;
-/// \brief Remove a \p callback to be invoked when the bounds of any instance in the scene change.
+	/// \brief Remove a \p callback to be invoked when the bounds of any instance in the scene change.
 	virtual void removeBoundsChangedCallback( SignalHandlerId id ) = 0;
 
 	virtual TypeId getNodeTypeId( const char* name ) = 0;
@@ -122,28 +122,28 @@ public:
 	class Observer
 	{
 	public:
-/// \brief Called when a node is added to the container.
+		/// \brief Called when a node is added to the container.
 		virtual void insert( Node& node ) = 0;
-/// \brief Called when a node is removed from the container.
+		/// \brief Called when a node is removed from the container.
 		virtual void erase( Node& node ) = 0;
 	};
 
 	class Walker
 	{
 	public:
-/// \brief Called before traversing the first child-node of 'node'. If the return value is false, the children of the current node are not traversed.
+		/// \brief Called before traversing the first child-node of 'node'. If the return value is false, the children of the current node are not traversed.
 		virtual bool pre( Node& node ) const = 0;
-/// \brief Called after traversing the last child-node of 'node'.
+		/// \brief Called after traversing the last child-node of 'node'.
 		virtual void post( Node& node ) const {
 		}
 	};
-/// \brief Adds a node to the container.
+	/// \brief Adds a node to the container.
 	virtual void insert( Node& node ) = 0;
-/// \brief Removes a node from the container.
+	/// \brief Removes a node from the container.
 	virtual void erase( Node& node ) = 0;
-/// \brief Traverses the subgraphs rooted at each node in the container, depth-first.
+	/// \brief Traverses the subgraphs rooted at each node in the container, depth-first.
 	virtual void traverse( const Walker& walker ) = 0;
-/// \brief Returns true if the container contains no nodes.
+	/// \brief Returns true if the container contains no nodes.
 	virtual bool empty() const = 0;
 };
 
@@ -155,9 +155,9 @@ public:
 	class Observer
 	{
 	public:
-/// \brief Called when an instance is added to the container.
+		/// \brief Called when an instance is added to the container.
 		virtual void insert( scene::Instance* instance ) = 0;
-/// \brief Called when an instance is removed from the container.
+		/// \brief Called when an instance is removed from the container.
 		virtual void erase( scene::Instance* instance ) = 0;
 	};
 
@@ -167,13 +167,13 @@ public:
 		virtual void visit( Instance& instance ) const = 0;
 	};
 
-/// \brief Returns a new instance uniquely identified by 'path'.
+	/// \brief Returns a new instance uniquely identified by 'path'.
 	virtual scene::Instance* create( const scene::Path& path, scene::Instance* parent ) = 0;
-/// \brief Calls Visitor::visit(instance) for each instance in the container.
+	/// \brief Calls Visitor::visit(instance) for each instance in the container.
 	virtual void forEachInstance( const Visitor& visitor ) = 0;
-/// \brief Adds an instance to the container.
+	/// \brief Adds an instance to the container.
 	virtual void insert( Observer* observer, const Path& path, scene::Instance* instance ) = 0;
-/// \brief Returns an instance removed from the container.
+	/// \brief Returns an instance removed from the container.
 	virtual scene::Instance* erase( Observer* observer, const Path& path ) = 0;
 };
 
@@ -182,7 +182,7 @@ class Cloneable
 public:
 	STRING_CONSTANT( Name, "scene::Cloneable" );
 
-/// \brief Returns a copy of itself.
+	/// \brief Returns a copy of itself.
 	virtual scene::Node& clone() const = 0;
 };
 }

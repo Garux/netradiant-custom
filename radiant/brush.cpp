@@ -78,7 +78,7 @@ public:
 				return true;
 			}
 			v = v->m_next;
-			//ASSERT_MESSAGE(DEBUG_LOOP < c_brush_maxFaces, "infinite loop");
+			//ASSERT_MESSAGE DEBUG_LOOP < c_brush_maxFaces, "infinite loop" );
 			if ( !( DEBUG_LOOP < c_brush_maxFaces ) ) {
 				break;
 			}
@@ -496,7 +496,7 @@ void Brush::vertexModeBuildHull( bool allTransformed /*= false*/ ){
 		}
 	}
 
-	if( vertexModePlanes.size() >=4 ){ //avoid obvious transform to degenerate
+	if( vertexModePlanes.size() >= 4 ){ //avoid obvious transform to degenerate
 		const bool isdetail = isDetail();
 		clear();
 		for( const auto& i : vertexModePlanes ){

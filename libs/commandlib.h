@@ -29,7 +29,7 @@
 // TTimo started adding portability code:
 // return true if spawning was successful, false otherwise
 // on win32 we have a bCreateConsole flag to create a new console or run inside the current one
-//boolean Q_Exec(const char* pCmd, boolean bCreateConsole);
+//boolean Q_Exec( const char* pCmd, boolean bCreateConsole );
 // execute a system command:
 //   cmd: the command to run
 //   cmdline: the command line

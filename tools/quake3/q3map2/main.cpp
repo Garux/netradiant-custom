@@ -61,7 +61,7 @@ int main( int argc, char **argv ){
 	int r;
 
 #ifdef WIN32
-	_setmaxstdio(2048);
+	_setmaxstdio( 2048 );
 #endif
 
 	/* we want consistent 'randomness' */

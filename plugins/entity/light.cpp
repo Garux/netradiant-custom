@@ -182,7 +182,7 @@ void sphere_construct_fill( Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
 	const double step = c_pi / static_cast<double>( SPHERE_FILL_SIDES );
 
 	radiiPoints[k++] = Vector3( 0.0, 0.0, -1.0 );
-	for( int i = 0; i < SPHERE_FILL_SIDES * 2; i+=2 ) {
+	for( int i = 0; i < SPHERE_FILL_SIDES * 2; i += 2 ) {
 		for( int j = -SPHERE_FILL_SIDES / 2 + 1; j < SPHERE_FILL_SIDES / 2; ++j ) {
 			cartesian( step * i, step * j, cart );
 			radiiPoints[k++] = Vector3( cart[0], cart[1], cart[2] );
@@ -1776,7 +1776,7 @@ public:
 		m_doom3Frustum.back = plane3_normalised( m_doom3Frustum.back );
 		m_doom3Frustum.front = plane3_normalised( m_doom3Frustum.front );
 #endif
-		//matrix4_scale_by_vec3(m_doom3Projection, Vector3(1.0 / 128, 1.0 / 128, 1.0 / 128));
+		//matrix4_scale_by_vec3( m_doom3Projection, Vector3( 1.0 / 128, 1.0 / 128, 1.0 / 128 ) );
 		return m_doom3Projection;
 	}
 
@@ -1801,7 +1801,7 @@ class LightInstance :
 		TypeCasts(){
 			m_casts = TargetableInstance::StaticTypeCasts::instance().get();
 			InstanceContainedCast<LightInstance, Bounded>::install( m_casts );
-			//InstanceContainedCast<LightInstance, Cullable>::install(m_casts);
+			//InstanceContainedCast<LightInstance, Cullable>::install( m_casts );
 			InstanceStaticCast<LightInstance, Renderable>::install( m_casts );
 			InstanceStaticCast<LightInstance, SelectionTestable>::install( m_casts );
 			InstanceStaticCast<LightInstance, Transformable>::install( m_casts );

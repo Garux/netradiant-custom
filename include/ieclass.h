@@ -92,7 +92,7 @@ struct EntityClassManager
 	STRING_CONSTANT( Name, "eclassmanager" );
 
 	EntityClass* ( *findOrInsert )( const char* name, bool has_brushes );
-	const ListAttributeType* ( *findListType )(const char* name);
+	const ListAttributeType* ( *findListType )( const char* name );
 	void ( *forEach )( EntityClassVisitor& visitor );
 	void ( *attach )( ModuleObserver& observer );
 	void ( *detach )( ModuleObserver& observer );

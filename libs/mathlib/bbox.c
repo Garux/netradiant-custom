@@ -294,14 +294,14 @@ void aabb_orthogonal_transform( aabb_t* dst, const aabb_t* src, const m4x4_t tra
 	m4x4_transform_point( transform, dst->origin );
 
 	dst->extents[0] = (vec_t)( fabs( transform[0]  * src->extents[0] )
-							   + fabs( transform[4]  * src->extents[1] )
-							   + fabs( transform[8]  * src->extents[2] ) );
+	                         + fabs( transform[4]  * src->extents[1] )
+	                         + fabs( transform[8]  * src->extents[2] ) );
 	dst->extents[1] = (vec_t)( fabs( transform[1]  * src->extents[0] )
-							   + fabs( transform[5]  * src->extents[1] )
-							   + fabs( transform[9]  * src->extents[2] ) );
+	                         + fabs( transform[5]  * src->extents[1] )
+	                         + fabs( transform[9]  * src->extents[2] ) );
 	dst->extents[2] = (vec_t)( fabs( transform[2]  * src->extents[0] )
-							   + fabs( transform[6]  * src->extents[1] )
-							   + fabs( transform[10] * src->extents[2] ) );
+	                         + fabs( transform[6]  * src->extents[1] )
+	                         + fabs( transform[10] * src->extents[2] ) );
 }
 
 void aabb_for_bbox( aabb_t *aabb, const bbox_t *bbox ){
@@ -332,8 +332,8 @@ int aabb_oriented_intersect_plane( const aabb_t *aabb, const m4x4_t transform, c
 
 	// calc extents distance relative to plane normal
 	fIntersect = (vec_t)( fabs( aabb->extents[0] * DotProduct( plane, transform ) )
-						  + fabs( aabb->extents[1] * DotProduct( plane, transform + 4 ) )
-						  + fabs( aabb->extents[2] * DotProduct( plane, transform + 8 ) ) );
+	                    + fabs( aabb->extents[1] * DotProduct( plane, transform + 4 ) )
+	                    + fabs( aabb->extents[2] * DotProduct( plane, transform + 8 ) ) );
 	// accept if origin is less than this distance
 	if ( fabs( fDist ) < fIntersect ) {
 		return 1;                         // partially inside
@@ -375,14 +375,14 @@ void aabb_for_transformed_aabb( aabb_t* dst, const aabb_t* src, const m4x4_t tra
 	m4x4_transform_point( transform, dst->origin );
 
 	dst->extents[0] = (vec_t)( fabs( transform[0]  * src->extents[0] )
-							   + fabs( transform[4]  * src->extents[1] )
-							   + fabs( transform[8]  * src->extents[2] ) );
+	                         + fabs( transform[4]  * src->extents[1] )
+	                         + fabs( transform[8]  * src->extents[2] ) );
 	dst->extents[1] = (vec_t)( fabs( transform[1]  * src->extents[0] )
-							   + fabs( transform[5]  * src->extents[1] )
-							   + fabs( transform[9]  * src->extents[2] ) );
+	                         + fabs( transform[5]  * src->extents[1] )
+	                         + fabs( transform[9]  * src->extents[2] ) );
 	dst->extents[2] = (vec_t)( fabs( transform[2]  * src->extents[0] )
-							   + fabs( transform[6]  * src->extents[1] )
-							   + fabs( transform[10] * src->extents[2] ) );
+	                         + fabs( transform[6]  * src->extents[1] )
+	                         + fabs( transform[10] * src->extents[2] ) );
 }
 
 void bbox_for_oriented_aabb( bbox_t *bbox, const aabb_t *aabb, const m4x4_t matrix, const vec3_t euler, const vec3_t scale ){
@@ -443,8 +443,8 @@ int bbox_intersect_plane( const bbox_t *bbox, const vec_t* plane ){
 
 	// calc extents distance relative to plane normal
 	fIntersect = (vec_t)( fabs( bbox->aabb.extents[0] * DotProduct( plane, bbox->axes[0] ) )
-						  + fabs( bbox->aabb.extents[1] * DotProduct( plane, bbox->axes[1] ) )
-						  + fabs( bbox->aabb.extents[2] * DotProduct( plane, bbox->axes[2] ) ) );
+	                    + fabs( bbox->aabb.extents[1] * DotProduct( plane, bbox->axes[1] ) )
+	                    + fabs( bbox->aabb.extents[2] * DotProduct( plane, bbox->axes[2] ) ) );
 	// accept if origin is less than this distance
 	if ( fabs( fDist ) < fIntersect ) {
 		return 1;                         // partially inside

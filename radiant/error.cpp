@@ -89,7 +89,7 @@ void Error( const char *error, ... ){
 			scan = next;
 			text[strlen( text ) + 1] = '\0';
 			if ( scan[0] >= 0 ) {
-				text[strlen( text )] = char(scan[0]);
+				text[strlen( text )] = char( scan[0] );
 			}
 			else{
 				text[strlen( text )] = '?';
