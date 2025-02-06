@@ -39,6 +39,8 @@ public:
 
 SelectionSystemWindowObserver* NewWindowObserver();
 
+void SelectionSystem_connectTransformsCallbacks( const std::array<Callback<void(const char*)>, 4>& callbacks );
+
 #include "math/vectorfwd.h"
 
 void Scene_Intersect( const View& view, const Vector2& device_point, const Vector2& device_epsilon, Vector3& intersection );

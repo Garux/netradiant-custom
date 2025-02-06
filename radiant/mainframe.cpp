@@ -108,6 +108,7 @@
 #include "qe3.h"
 #include "qgl.h"
 #include "select.h"
+#include "selection.h"
 #include "server.h"
 #include "surfacedialog.h"
 #include "textures.h"
@@ -1114,7 +1115,26 @@ void create_selection_menu( QMenuBar *menubar ){
 	menu->addSeparator();
 	create_menu_item_with_mnemonic( menu, "Arbitrary rotation...", "ArbitraryRotation" );
 	create_menu_item_with_mnemonic( menu, "Arbitrary scale...", "ArbitraryScale" );
-	create_menu_item_with_mnemonic( menu, "Repeat Transforms", "RepeatTransforms" );
+	menu->addSeparator();
+	{
+		QMenu* submenu = menu->addMenu( "Repeat" );
+
+		submenu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
+
+		create_menu_item_with_mnemonic( submenu, "Repeat Transforms", "RepeatTransforms" );
+
+		using SetTextCB = PointerCaller<QAction, void(const char*), +[]( QAction *action, const char *text ){ action->setText( text ); }>;
+		const auto addItem = [submenu]<SelectionSystem::EManipulatorMode mode>() -> SetTextCB {
+			return SetTextCB( create_menu_item_with_mnemonic( submenu, "", makeCallbackF( +[](){ GlobalSelectionSystem().resetTransforms( mode ); } ) ) );
+		};
+		SelectionSystem_connectTransformsCallbacks( { addItem.operator()<SelectionSystem::eTranslate>(),
+		                                              addItem.operator()<SelectionSystem::eRotate>(),
+		                                              addItem.operator()<SelectionSystem::eScale>(),
+		                                              addItem.operator()<SelectionSystem::eSkew>() } );
+		GlobalSelectionSystem().resetTransforms(); // init texts immediately
+
+		create_menu_item_with_mnemonic( submenu, "Reset Transforms", "ResetTransforms" );
+	}
 }
 
 void create_bsp_menu( QMenuBar *menubar ){
@@ -1171,7 +1191,7 @@ void create_entity_menu( QMenuBar *menubar ){
 
 void create_brush_menu( QMenuBar *menubar ){
 	// Brush menu
-	QMenu *menu = menubar->addMenu( "B&rush" );
+	QMenu *menu = menubar->addMenu( "Brush" );
 
 	menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
 

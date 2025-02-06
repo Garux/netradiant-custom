@@ -361,6 +361,8 @@ menus...
 	* add Blender Lighter and Green viewports themes by Julius
 	* Misc->Colors: add CameraIcon, AxisX, AxisY, AxisZ controls
 	* Misc->Colors: add Model Browser Background control
+	* Modify->Repeat: saved transforms feedback and individual resets
+	* Modify->Repeat->Reset Transforms (alt + r)
 
 misc...
 	* removed note to save before going to preferences, project settings

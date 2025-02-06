@@ -1269,10 +1269,6 @@ static QMenu* TextureBrowser_constructViewMenu(){
 	return menu;
 }
 
-void Popup_View_Menu( QMenu *menu ){
-	menu->popup( QCursor::pos() );
-}
-
 
 #include "xml/xmltextags.h"
 XmlTagBuilder TagBuilder;
@@ -1736,7 +1732,7 @@ QWidget* TextureBrowser_constructWindow( QWidget* toplevel ){
 		menu_view->setParent( toolbar, menu_view->windowFlags() ); //don't reset windowFlags
 
 		//view menu button
-		toolbar_append_button( toolbar, "View", "texbro_view.png", PointerCaller<QMenu, void(), Popup_View_Menu>( menu_view ) );
+		toolbar_append_button( toolbar, "View", "texbro_view.png", PointerCaller<QMenu, void(), +[]( QMenu *menu ){ menu->popup( QCursor::pos() ); }>( menu_view ) );
 
 		toolbar_append_button( toolbar, "Find / Replace...", "texbro_gtk-find-and-replace.png", "FindReplaceTextures" );
 

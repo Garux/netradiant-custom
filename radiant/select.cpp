@@ -1432,10 +1432,6 @@ void Scene_Clone_Selected(){
 	Scene_Clone_Selected( GlobalSceneGraph(), false );
 }
 
-void RepeatTransforms(){
-	GlobalSelectionSystem().repeatTransforms( FreeCaller<void(), Scene_Clone_Selected>() );
-}
-
 
 void Selection_NudgeUp(){
 	UndoableCommand undo( "nudgeSelectedUp" );
@@ -1877,7 +1873,8 @@ void Select_registerCommands(){
 	GlobalCommands_insert( "CloneSelectionAndMakeUnique", makeCallbackF( Selection_Clone_MakeUnique ), QKeySequence( "Shift+Space" ) );
 	GlobalCommands_insert( "DeleteSelection2", makeCallbackF( deleteSelection ), QKeySequence( "Backspace" ) );
 	GlobalCommands_insert( "DeleteSelection", makeCallbackF( deleteSelection ), QKeySequence( "Z" ) );
-	GlobalCommands_insert( "RepeatTransforms", makeCallbackF( RepeatTransforms ), QKeySequence( "Ctrl+R" ) );
+	GlobalCommands_insert( "RepeatTransforms", makeCallbackF( +[](){ GlobalSelectionSystem().repeatTransforms(); } ), QKeySequence( "Ctrl+R" ) );
+	GlobalCommands_insert( "ResetTransforms", makeCallbackF( +[](){ GlobalSelectionSystem().resetTransforms(); } ), QKeySequence( "Alt+R" ) );
 //	GlobalCommands_insert( "ParentSelection", makeCallbackF( Scene_parentSelected ) );
 	GlobalCommands_insert( "UnSelectSelection2", makeCallbackF( Selection_Deselect ), QKeySequence( "Escape" ) );
 	GlobalCommands_insert( "UnSelectSelection", makeCallbackF( Selection_Deselect ), QKeySequence( "C" ) );

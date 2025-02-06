@@ -6816,6 +6816,37 @@ public:
 };
 Shader* TransformOriginManipulator::m_state;
 
+class TransformsObserved : public Transforms
+{
+public:
+	void setTranslation( const Translation& value ){
+		Transforms::setTranslation( value );
+		m_changedCallbacks[SelectionSystem::eTranslate]( StringStream<64>( m_translation == c_translation_identity? ' ' : 'x',
+			" Translate ", m_translation.x(), ' ', m_translation.y(), ' ', m_translation.z() ) );
+	}
+	void setRotation( const Rotation& value ){
+		Transforms::setRotation( value );
+		m_changedCallbacks[SelectionSystem::eRotate]( StringStream<64>( m_rotation == c_rotation_identity? ' ' : 'x',
+			" Rotate ", m_rotation.x(), ' ', m_rotation.y(), ' ', m_rotation.z() ) );
+	}
+	void setScale( const Scale& value ){
+		Transforms::setScale( value );
+		m_changedCallbacks[SelectionSystem::eScale]( StringStream<64>( m_scale == c_scale_identity? ' ' : 'x',
+			" Scale ", m_scale.x(), ' ', m_scale.y(), ' ', m_scale.z() ) );
+	}
+	void setSkew( const Skew& value ){
+		Transforms::setSkew( value );
+		m_changedCallbacks[SelectionSystem::eSkew]( StringStream<64>( m_skew == c_skew_identity? ' ' : 'x',
+			" Skew ", m_skew.index, ' ', m_skew.amount ) );
+	}
+
+	std::array<Callback<void(const char*)>, 4> m_changedCallbacks;
+	static_assert( SelectionSystem::eTranslate == 0
+	            && SelectionSystem::eRotate == 1
+				&& SelectionSystem::eScale == 2
+				&& SelectionSystem::eSkew == 3 );
+};
+
 class select_all : public scene::Graph::Walker
 {
 	bool m_select;
@@ -7020,7 +7051,7 @@ public:
 		case eScale: m_manipulator = &m_scale_manipulator; break;
 		case eSkew: m_manipulator = &m_skew_manipulator; break;
 		case eDrag: m_manipulator = &m_drag_manipulator; break;
-		case eClip: m_manipulator = &m_clip_manipulator; m_repeatableTransforms.setIdentity(); break;
+		case eClip: m_manipulator = &m_clip_manipulator; resetTransforms( eClip ); break;
 		case eBuild:
 			{
 				m_build_manipulator.initialise();
@@ -7590,17 +7621,29 @@ public:
 		freezeTransforms();
 	}
 
-	Transforms m_repeatableTransforms;
+	TransformsObserved m_repeatableTransforms;
 
-	void repeatTransforms( const Callback<void()>& clone ) override {
+	void repeatTransforms() override {
+		extern void Scene_Clone_Selected();
 		if ( !nothingSelected() && !m_repeatableTransforms.isIdentity() ) {
 			startMove();
 			UndoableCommand undo( "repeatTransforms" );
 			if( Mode() == ePrimitive )
-				clone();
+				Scene_Clone_Selected();
 			alltransform( m_repeatableTransforms, m_pivot2world.t().vec3() );
 			freezeTransforms();
 		}
+	}
+	void resetTransforms( EManipulatorMode which ) override {
+		const bool all = ( which != eTranslate && which != eRotate && which != eScale && which != eSkew );
+		if( which == eTranslate || all )
+			m_repeatableTransforms.setTranslation( c_translation_identity );
+		if( which == eRotate || all )
+			m_repeatableTransforms.setRotation( c_rotation_identity );
+		if( which == eScale || all )
+			m_repeatableTransforms.setScale( c_scale_identity );
+		if( which == eSkew || all )
+			m_repeatableTransforms.setSkew( c_skew_identity );
 	}
 
 	bool transformOrigin_isTranslatable() const {
@@ -8202,6 +8245,10 @@ void SelectionSystem_registerPreferencesPage(){
 	PreferencesDialog_addSettingsPage( makeCallbackF( SelectionSystem_constructPage ) );
 }
 
+
+void SelectionSystem_connectTransformsCallbacks( const std::array<Callback<void(const char*)>, 4>& callbacks ){
+	getSelectionSystem().m_repeatableTransforms.m_changedCallbacks = callbacks;
+}
 
 
 void SelectionSystem_OnBoundsChanged(){
