@@ -927,7 +927,7 @@ void create_edit_menu( QMenuBar *menubar ){
 	create_menu_item_with_mnemonic( menu, "Select Connected Entities", "SelectConnectedEntities" );
 
 	menu->addSeparator();
-	create_menu_item_with_mnemonic( menu, "&Shortcuts...", makeCallbackF( DoCommandListDlg ) );
+	create_menu_item_with_mnemonic( menu, "&Shortcuts...", "Shortcuts" );
 	create_menu_item_with_mnemonic( menu, "Pre&ferences...", "Preferences" );
 }
 
@@ -2049,6 +2049,7 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "CheckForUpdate", makeCallbackF( OpenUpdateURL ) );
 	GlobalCommands_insert( "Exit", makeCallbackF( Exit ) );
 
+	GlobalCommands_insert( "Shortcuts", makeCallbackF( DoCommandListDlg ), QKeySequence( "Ctrl+Shift+P" ) );
 	GlobalCommands_insert( "Preferences", makeCallbackF( PreferencesDialog_showDialog ), QKeySequence( "P" ) );
 
 	GlobalCommands_insert( "ToggleConsole", makeCallbackF( Console_ToggleShow ), QKeySequence( "O" ) );
