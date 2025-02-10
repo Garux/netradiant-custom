@@ -66,6 +66,7 @@ constexpr char PLUGIN_COMMANDS[] = "About...,"
                                    "Polygon Builder,"
                                    "Caulk Selection,"
                                    "-,"
+                                   "Explode Entity,"
                                    "Tree Planter,"
                                    "Drop Entity,"
                                    "Plot Splines,"
@@ -162,6 +163,9 @@ extern "C" void QERPlug_Dispatch( const char *p, vec3_t vMin, vec3_t vMax, bool 
 	}
 	else if ( string_equal_nocase( p, "path plotter..." ) ) {
 		DoPathPlotter();
+	}
+	else if ( string_equal_nocase( p, "explode entity" ) ) {
+		DoExplodeEntity();
 	}
 	else if ( string_equal_nocase( p, "about..." ) ) {
 		DoMessageBox( PLUGIN_ABOUT, "About" );

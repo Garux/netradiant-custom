@@ -865,5 +865,69 @@ void DoFlipTerrain() {
 		Path_deleteTop( brushes[i]->path() );
 		delete newBrushes[i];
 	}
+}
 
+
+class ExplodeWalker : public scene::Traversable::Walker
+{
+	scene::Node* m_entitynode;
+	scene::Cloneable* m_entitycloneable;
+	scene::Traversable* m_traversableroot;
+public:
+	ExplodeWalker( scene::Node* entitynode, scene::Cloneable* entitycloneable, scene::Traversable* traversableroot )
+	: m_entitynode( entitynode ), m_entitycloneable( entitycloneable ), m_traversableroot( traversableroot ){
+	}
+	bool pre( scene::Node& node ) const {
+		return false;
+	}
+	void post( scene::Node& node ) const {
+		NodeSmartReference clone( m_entitycloneable->clone() ); // duplicate entity
+		m_traversableroot->insert( clone );
+
+		NodeSmartReference brush( node ); // move primitive
+		Node_getTraversable( *m_entitynode )->erase( node );
+		Node_getTraversable( clone )->insert( node );
+	}
+};
+
+void DoExplodeEntity(){
+	scene::Node* entitynode = nullptr;
+	scene::Node* rootnode = nullptr;
+	{
+		if( GlobalSelectionSystem().countSelected() == 0 ){
+			globalErrorStream() << "nothing selected\n";
+			return;
+		}
+		scene::Path path = GlobalSelectionSystem().ultimateSelected().path();
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity == nullptr && path.size() >= 3 ) { // path.size() = 3 as in root.entity.brush, guarantees getting `rootnode` later
+			path.pop();
+			entity = Node_getEntity( path.top() );
+		}
+		if( entity == nullptr ){
+			globalErrorStream() << "no entity selected\n";
+			return;
+		}
+		if( !entity->isContainer() ){
+			globalErrorStream() << "!entity->isContainer()\n";
+			return;
+		}
+		if( string_equal_nocase( entity->getClassName(), "worldspawn" ) ){
+			globalErrorStream() << "can't explode worldspawn\n";
+			return;
+		}
+		entitynode = path.top().get_pointer();
+		rootnode = path.parent().get_pointer();
+	}
+
+	if( scene::Traversable* traversable = Node_getTraversable( *entitynode ) ){
+		if( scene::Traversable* traversableroot = Node_getTraversable( *rootnode ) ){
+			if( scene::Cloneable* entitycloneable = NodeTypeCast<scene::Cloneable>::cast( *entitynode ) ){
+				UndoableCommand undo( "bobToolz.explodeEntity" );
+				ExplodeWalker walker( entitynode, entitycloneable, traversableroot );
+				traversable->traverse( walker );
+				traversableroot->erase( *entitynode ); // remove original entity
+			}
+		}
+	}
 }

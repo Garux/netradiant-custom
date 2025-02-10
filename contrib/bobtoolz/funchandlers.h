@@ -72,3 +72,4 @@ void DoTreePlanter();
 void DoDropEnts();
 void DoMakeChain();
 void DoFlipTerrain();
+void DoExplodeEntity();
