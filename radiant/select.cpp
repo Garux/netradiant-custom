@@ -241,9 +241,8 @@ public:
 			m_removedChild = false;
 
 			// delete empty entities
-			Entity* entity = Node_getEntity( path.top() );
-			if ( entity != 0
-			     && path.top().get_pointer() != Map_FindWorldspawn( g_map )
+			if ( Node_isEntity( path.top() )
+			     && path.top().get_pointer() != Map_FindWorldspawn( g_map ) // direct worldspawn deletion is permitted, so do find it each time
 			     && Node_getTraversable( path.top() )->empty() ) {
 				Path_deleteTop( path );
 			}
@@ -334,11 +333,9 @@ void Select_Invert(){
 //interesting printings
 class ExpandSelectionToEntitiesWalker_dbg : public scene::Graph::Walker
 {
-	mutable std::size_t m_depth;
-	const scene::Node* m_world;
+	mutable std::size_t m_depth = 0;
+	const scene::Node* m_world = Map_FindWorldspawn( g_map );
 public:
-	ExpandSelectionToEntitiesWalker_dbg() : m_depth( 0 ), m_world( Map_FindWorldspawn( g_map ) ){
-	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		++m_depth;
 		globalOutputStream() << "pre depth_" << m_depth;
@@ -385,11 +382,9 @@ public:
 
 class ExpandSelectionToPrimitivesWalker : public scene::Graph::Walker
 {
-	mutable std::size_t m_depth;
-	const scene::Node* m_world;
+	mutable std::size_t m_depth = 0;
+	const scene::Node* m_world = Map_FindWorldspawn( g_map );
 public:
-	ExpandSelectionToPrimitivesWalker() : m_depth( 0 ), m_world( Map_FindWorldspawn( g_map ) ){
-	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		++m_depth;
 
@@ -426,11 +421,9 @@ void Scene_ExpandSelectionToPrimitives(){
 
 class ExpandSelectionToEntitiesWalker : public scene::Graph::Walker
 {
-	mutable std::size_t m_depth;
-	const scene::Node* m_world;
+	mutable std::size_t m_depth = 0;
+	const scene::Node* m_world = Map_FindWorldspawn( g_map );
 public:
-	ExpandSelectionToEntitiesWalker() : m_depth( 0 ), m_world( Map_FindWorldspawn( g_map ) ){
-	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		++m_depth;
 
@@ -731,10 +724,9 @@ template<typename EntityMatcher>
 class EntityFindByPropertyValueWalker : public scene::Graph::Walker
 {
 	const EntityMatcher& m_entityMatcher;
-	const scene::Node* m_world;
+	const scene::Node* m_world = Map_FindWorldspawn( g_map );
 public:
-	EntityFindByPropertyValueWalker( const EntityMatcher& entityMatcher )
-		: m_entityMatcher( entityMatcher ), m_world( Map_FindWorldspawn( g_map ) ){
+	EntityFindByPropertyValueWalker( const EntityMatcher& entityMatcher ) : m_entityMatcher( entityMatcher ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		if( !path.top().get().visible() ){
@@ -777,14 +769,13 @@ class EntityGetSelectedPropertyValuesWalker : public scene::Graph::Walker
 {
 	PropertyValues& m_propertyvalues;
 	const char *m_prop;
-	const scene::Node* m_world;
+	const scene::Node* m_world = Map_FindWorldspawn( g_map );
 public:
 	EntityGetSelectedPropertyValuesWalker( const char *prop, PropertyValues& propertyvalues )
-		: m_propertyvalues( propertyvalues ), m_prop( prop ), m_world( Map_FindWorldspawn( g_map ) ){
+		: m_propertyvalues( propertyvalues ), m_prop( prop ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
-		Entity* entity = Node_getEntity( path.top() );
-		if ( entity != 0 ){
+		if ( Entity* entity = Node_getEntity( path.top() ) ){
 			if( path.top().get_pointer() != m_world ){
 				if ( Instance_isSelected( instance ) || instance.childSelected() ) {
 					if ( !propertyvalues_contain( m_propertyvalues, entity->getKeyValue( m_prop ) ) ) {
@@ -1235,10 +1226,10 @@ void MoveToCamera(){
 class CloneSelected : public scene::Graph::Walker
 {
 	const bool m_makeUnique;
-	const scene::Node* m_world;
+	const scene::Node* m_world = Map_FindWorldspawn( g_map );
 public:
 	mutable std::vector<scene::Node*> m_cloned;
-	CloneSelected( bool makeUnique ) : m_makeUnique( makeUnique ), m_world( Map_FindWorldspawn( g_map ) ){
+	CloneSelected( bool makeUnique ) : m_makeUnique( makeUnique ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		if ( path.size() == 1 ) {
@@ -1771,10 +1762,10 @@ class EntityGetSelectedPropertyValuesWalker_nonEmpty : public scene::Graph::Walk
 {
 	PropertyValues& m_propertyvalues;
 	const char *m_prop;
-	const scene::Node* m_world;
+	const scene::Node* m_world = Map_FindWorldspawn( g_map );
 public:
 	EntityGetSelectedPropertyValuesWalker_nonEmpty( const char *prop, PropertyValues& propertyvalues )
-		: m_propertyvalues( propertyvalues ), m_prop( prop ), m_world( Map_FindWorldspawn( g_map ) ){
+		: m_propertyvalues( propertyvalues ), m_prop( prop ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		Entity* entity = Node_getEntity( path.top() );

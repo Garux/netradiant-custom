@@ -380,13 +380,9 @@ public:
 		: m_brushlist( brushlist ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
-		if ( path.top().get().visible() ) {
-			Brush* brush = Node_getBrush( path.top() );
-			if ( brush != 0
-			  && Instance_isSelected( instance ) ) {
+		if ( path.top().get().visible() && Instance_isSelected( instance ) )
+			if ( Brush* brush = Node_getBrush( path.top() ) )
 				m_brushlist.push_back( brush );
-			}
-		}
 		return true;
 	}
 };
@@ -414,41 +410,28 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 class BrushDeleteSelected : public scene::Graph::Walker
 {
 	scene::Node* m_keepNode;
-	mutable bool m_eraseParent;
+	scene::Node* m_world = Map_FindWorldspawn( g_map );
+	mutable bool m_eraseParent = false;
 public:
-	BrushDeleteSelected( scene::Node* keepNode ): m_keepNode( keepNode ), m_eraseParent( false ){
-	}
-	BrushDeleteSelected(): m_keepNode( NULL ), m_eraseParent( false ){
+	BrushDeleteSelected( scene::Node* keepNode = nullptr ): m_keepNode( keepNode ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		return true;
 	}
 	void post( const scene::Path& path, scene::Instance& instance ) const {
-		//globalOutputStream() << path.size() << '\n';
-		if ( path.top().get().visible() ) {
-			Brush* brush = Node_getBrush( path.top() );
-			if ( brush != 0
+		if ( Brush* brush = Node_getBrush( path.top() ) ) {
+			if ( path.top().get().visible()
 			  && Instance_isSelected( instance )
-			  && path.size() > 1
 			  && path.top().get_pointer() != m_keepNode ) {
 				scene::Node& parent = path.parent();
 				Path_deleteTop( path );
-				if( Node_getTraversable( parent )->empty() ){
-					m_eraseParent = true;
-					//globalOutputStream() << "Empty node?!.\n";
-				}
-				return;
+				m_eraseParent = Node_getTraversable( parent )->empty();
 			}
 		}
-		if( m_eraseParent && !Node_isPrimitive( path.top() ) && path.size() > 1 ){
-			//globalOutputStream() << "about to Delete empty node!.\n";
+		else if( m_eraseParent ){
 			m_eraseParent = false;
-			Entity* entity = Node_getEntity( path.top() );
-			if ( entity != 0 && path.top().get_pointer() != Map_FindWorldspawn( g_map )
-			  && Node_getTraversable( path.top() )->empty() && path.top().get_pointer() != m_keepNode ) {
-				//globalOutputStream() << "now Deleting empty node!.\n";
+			if ( path.top().get_pointer() != m_world && path.top().get_pointer() != m_keepNode )
 				Path_deleteTop( path );
-			}
 		}
 	}
 };
@@ -605,46 +588,40 @@ class SubtractBrushesFromUnselected : public scene::Graph::Walker
 	const brush_vector_t& m_brushlist;
 	std::size_t& m_before;
 	std::size_t& m_after;
-	mutable bool m_eraseParent;
+	mutable bool m_eraseParent = false;
+	scene::Node* m_world = Map_FindWorldspawn( g_map );
 public:
 	SubtractBrushesFromUnselected( const brush_vector_t& brushlist, std::size_t& before, std::size_t& after )
-		: m_brushlist( brushlist ), m_before( before ), m_after( after ), m_eraseParent( false ){
+		: m_brushlist( brushlist ), m_before( before ), m_after( after ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
-		if ( path.top().get().visible() ) {
-			return true;
-		}
-		return false;
+		return path.top().get().visible();
 	}
 	void post( const scene::Path& path, scene::Instance& instance ) const {
-		if ( path.top().get().visible() ) {
-			Brush* brush = Node_getBrush( path.top() );
-			if ( brush != 0
-			  && !Instance_isSelected( instance ) ) {
+		if ( Brush* thebrush = Node_getBrush( path.top() ) ) {
+			if ( path.top().get().visible() && !Instance_isSelected( instance ) ) {
 				brush_vector_t buffer[2];
 				bool swap = false;
-				Brush* original = new Brush( *brush );
-				buffer[static_cast<std::size_t>( swap )].push_back( original );
+				Brush* original = new Brush( *thebrush );
+				buffer[swap].push_back( original );
 
+				for ( const Brush *subbrush : m_brushlist )
 				{
-					for ( brush_vector_t::const_iterator i( m_brushlist.begin() ); i != m_brushlist.end(); ++i )
+					for ( Brush *brush : buffer[swap] )
 					{
-						for ( brush_vector_t::iterator j( buffer[static_cast<std::size_t>( swap )].begin() ); j != buffer[static_cast<std::size_t>( swap )].end(); ++j )
-						{
-							if ( Brush_subtract( *( *j ), *( *i ), buffer[static_cast<std::size_t>( !swap )] ) ) {
-								delete ( *j );
-							}
-							else
-							{
-								buffer[static_cast<std::size_t>( !swap )].push_back( ( *j ) );
-							}
+						if ( Brush_subtract( *brush, *subbrush, buffer[!swap] ) ) {
+							delete brush;
 						}
-						buffer[static_cast<std::size_t>( swap )].clear();
-						swap = !swap;
+						else
+						{
+							buffer[!swap].push_back( brush );
+						}
 					}
+					buffer[swap].clear();
+					swap = !swap;
 				}
 
-				brush_vector_t& out = buffer[static_cast<std::size_t>( swap )];
+				brush_vector_t& out = buffer[swap];
 
 				if ( out.size() == 1 && out.back() == original ) {
 					delete original;
@@ -652,35 +629,30 @@ public:
 				else
 				{
 					++m_before;
-					for ( brush_vector_t::const_iterator i = out.begin(); i != out.end(); ++i )
+					for ( Brush *brush : out )
 					{
 						++m_after;
-						( *i )->removeEmptyFaces();
-						if ( !( *i )->empty() ) {
+						brush->removeEmptyFaces();
+						if ( !brush->empty() ) {
 							NodeSmartReference node( ( new BrushNode() )->node() );
-							Node_getBrush( node )->copy( *( *i ) );
-							delete ( *i );
+							Node_getBrush( node )->copy( *brush );
+							delete brush;
 							Node_getTraversable( path.parent() )->insert( node );
 						}
 						else{
-							delete ( *i );
+							delete brush;
 						}
 					}
 					scene::Node& parent = path.parent();
 					Path_deleteTop( path );
-					if( Node_getTraversable( parent )->empty() ){
-						m_eraseParent = true;
-					}
+					m_eraseParent = Node_getTraversable( parent )->empty();
 				}
 			}
 		}
-		if( m_eraseParent && !Node_isPrimitive( path.top() ) && path.size() > 1 ){
+		else if( m_eraseParent ){
 			m_eraseParent = false;
-			Entity* entity = Node_getEntity( path.top() );
-			if ( entity != 0 && path.top().get_pointer() != Map_FindWorldspawn( g_map )
-			  && Node_getTraversable( path.top() )->empty() ) {
+			if ( path.top().get_pointer() != m_world )
 				Path_deleteTop( path );
-			}
 		}
 	}
 };
@@ -703,8 +675,8 @@ void CSG_Subtract(){
 		std::size_t after = 0;
 		GlobalSceneGraph().traverse( SubtractBrushesFromUnselected( selected_brushes, before, after ) );
 		globalOutputStream() << "CSG Subtract: Result: "
-		                     << after << " fragment" << ( after == 1 ? "" : "s" )
-		                     << " from " << before << " brush" << ( before == 1 ? "" : "es" ) << ".\n";
+		                     << after << ( after == 1 ? " fragment" : " fragments" )
+		                     << " from " << before << ( before == 1 ? " brush.\n" : " brushes.\n" );
 
 		SceneChangeNotify();
 	}

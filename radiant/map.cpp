@@ -1611,10 +1611,10 @@ bool Map_SaveSelected( const char* filename ){
 class ParentSelectedBrushesToEntityWalker : public scene::Graph::Walker
 {
 	scene::Node& m_parent;
-	scene::Node* m_world;
-	mutable bool m_emptyOldParent;
+	scene::Node* m_world = Map_FindWorldspawn( g_map );
+	mutable bool m_emptyOldParent = false;
 public:
-	ParentSelectedBrushesToEntityWalker( scene::Node& parent ) : m_parent( parent ), m_world( Map_FindWorldspawn( g_map ) ), m_emptyOldParent( false ){
+	ParentSelectedBrushesToEntityWalker( scene::Node& parent ) : m_parent( parent ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		return path.top().get_pointer() != &m_parent; /* skip traverse of target node */
@@ -1631,7 +1631,7 @@ public:
 		}
 		else if ( m_emptyOldParent ){
 			m_emptyOldParent = false;
-			if ( Node_isEntity( path.top() ) && path.top().get_pointer() != m_world	&& Node_getTraversable( path.top() )->empty() ) /* delete empty entity left */
+			if ( path.top().get_pointer() != m_world ) /* delete empty entity left */
 				Path_deleteTop( path );
 		}
 	}

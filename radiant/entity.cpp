@@ -383,13 +383,14 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 		return;
 	}
 #else
-	const scene::Node* world_node = Map_FindWorldspawn( g_map );
-	if ( world_node && string_equal( name, "worldspawn" ) ) {
-//		GlobalRadiant().m_pfnMessageBox( MainFrame_getWindow(), "There's already a worldspawn in your map!", "Info", EMessageBoxType::Info, 0 );
-		UndoableCommand undo( "ungroupSelectedPrimitives" );
-		Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), Map_FindOrInsertWorldspawn( g_map ) ); //=no action, if no worldspawn (but one inserted) (since insertion deselects everything)
-		//Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), *Map_FindWorldspawn( g_map ) ); = crash, if no worldspawn
-		return;
+	if ( string_equal( name, "worldspawn" ) ) {
+		// only process if worldspawn is present
+		// Map_FindOrInsertWorldspawn( g_map ) ) would be no action (since worldspawn insertion deselects everything)
+		if( scene::Node* world_node = Map_FindWorldspawn( g_map ) ){
+			UndoableCommand undo( "ungroupSelectedPrimitives" );
+			Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), *world_node );
+			return;
+		}
 	}
 #endif
 
