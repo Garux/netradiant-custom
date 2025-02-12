@@ -1706,21 +1706,16 @@ static int FilterPointIntoTree_r( const Vector3& point, mapDrawSurface_t *ds, no
    filters the convex hull of multiple points from a surface into the tree
  */
 
-static int FilterPointConvexHullIntoTree_r( Vector3 *points[], const int npoints, mapDrawSurface_t *ds, node_t *node ){
-	if ( !points ) {
-		return 0;
-	}
-
+static int FilterPointConvexHullIntoTree_r( const std::array<Vector3, 16>& points, mapDrawSurface_t *ds, node_t *node ){
 	/* is this a decision node? */
 	if ( node->planenum != PLANENUM_LEAF ) {
 		/* classify the point in relation to the plane */
 		const Plane3f& plane = mapplanes[ node->planenum ].plane;
 
-		float dmin, dmax;
-		dmin = dmax = plane3_distance_to_point( plane, *points[0] );
-		for ( int i = 1; i < npoints; ++i )
+		float dmin = std::numeric_limits<float>::max(), dmax = std::numeric_limits<float>::lowest();
+		for ( const Vector3& point : points )
 		{
-			const float d = plane3_distance_to_point( plane, *points[i] );
+			const float d = plane3_distance_to_point( plane, point );
 			value_maximize( dmax, d );
 			value_minimize( dmin, d );
 		}
@@ -1728,10 +1723,10 @@ static int FilterPointConvexHullIntoTree_r( Vector3 *points[], const int npoints
 		/* filter by this plane */
 		int refs = 0;
 		if ( dmax >= -ON_EPSILON ) {
-			refs += FilterPointConvexHullIntoTree_r( points, npoints, ds, node->children[ 0 ] );
+			refs += FilterPointConvexHullIntoTree_r( points, ds, node->children[ 0 ] );
 		}
 		if ( dmin <= ON_EPSILON ) {
-			refs += FilterPointConvexHullIntoTree_r( points, npoints, ds, node->children[ 1 ] );
+			refs += FilterPointConvexHullIntoTree_r( points, ds, node->children[ 1 ] );
 		}
 
 		/* return */
@@ -1877,17 +1872,41 @@ static int FilterPatchIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
 	for ( int y = 0; y + 2 < ds->patchHeight; y += 2 )
 		for ( int x = 0; x + 2 < ds->patchWidth; x += 2 )
 		{
-			Vector3 *points[9];
-			points[0] = &ds->verts[( y + 0 ) * ds->patchWidth + ( x + 0 )].xyz;
-			points[1] = &ds->verts[( y + 0 ) * ds->patchWidth + ( x + 1 )].xyz;
-			points[2] = &ds->verts[( y + 0 ) * ds->patchWidth + ( x + 2 )].xyz;
-			points[3] = &ds->verts[( y + 1 ) * ds->patchWidth + ( x + 0 )].xyz;
-			points[4] = &ds->verts[( y + 1 ) * ds->patchWidth + ( x + 1 )].xyz;
-			points[5] = &ds->verts[( y + 1 ) * ds->patchWidth + ( x + 2 )].xyz;
-			points[6] = &ds->verts[( y + 2 ) * ds->patchWidth + ( x + 0 )].xyz;
-			points[7] = &ds->verts[( y + 2 ) * ds->patchWidth + ( x + 1 )].xyz;
-			points[8] = &ds->verts[( y + 2 ) * ds->patchWidth + ( x + 2 )].xyz;
-			refs += FilterPointConvexHullIntoTree_r( points, 9, ds, tree.headnode );
+			const Vector3& p0 = ds->verts[( y + 0 ) * ds->patchWidth + ( x + 0 )].xyz;
+			const Vector3& p1 = ds->verts[( y + 0 ) * ds->patchWidth + ( x + 1 )].xyz;
+			const Vector3& p2 = ds->verts[( y + 0 ) * ds->patchWidth + ( x + 2 )].xyz;
+			const Vector3& p3 = ds->verts[( y + 1 ) * ds->patchWidth + ( x + 0 )].xyz;
+			const Vector3& p4 = ds->verts[( y + 1 ) * ds->patchWidth + ( x + 1 )].xyz;
+			const Vector3& p5 = ds->verts[( y + 1 ) * ds->patchWidth + ( x + 2 )].xyz;
+			const Vector3& p6 = ds->verts[( y + 2 ) * ds->patchWidth + ( x + 0 )].xyz;
+			const Vector3& p7 = ds->verts[( y + 2 ) * ds->patchWidth + ( x + 1 )].xyz;
+			const Vector3& p8 = ds->verts[( y + 2 ) * ds->patchWidth + ( x + 2 )].xyz;
+
+			// add 4 invariant points 12 of those which are used to calculate subdivisionless patch LoD
+			// convex hull defined by them guaranteedly encompasses any patch LoD
+			std::array<Vector3, 16> points = { p0, p2, p6, p8,
+				vector3_mid( p0, p1 ), vector3_mid( p1, p2 ),
+				vector3_mid( p6, p7 ), vector3_mid( p7, p8 ),
+				vector3_mid( p0, p3 ), vector3_mid( p3, p6 ),
+				vector3_mid( p2, p5 ), vector3_mid( p5, p8 ) };
+			// final curve points
+			const Vector3 p1_ = vector3_mid( points[4], points[5] );
+			const Vector3 p7_ = vector3_mid( points[6], points[7] );
+			const Vector3 p3_ = vector3_mid( points[8], points[9] );
+			const Vector3 p5_ = vector3_mid( points[10], points[11] );
+			const Vector3 p4_ = ( p1 + p4 * 2 + p7 ) * .25; // PutPointsOnCurve() lerps colums 1st
+			// then row pass
+			points[12] = vector3_mid( p3_, p4_ );
+			points[13] = vector3_mid( p4_, p5_ );
+			const Vector3 p4__ = vector3_mid( points[12], points[13] ); // final central point
+			// find original central point as if column lerp occured last and produced the final point
+			// (a + 2c + b )/4 = f
+			// c = (4f - a - b)/2
+			const Vector3 p4o = p4__ * 2 - vector3_mid( p1_, p7_ );
+			points[14] = vector3_mid( p1_, p4o );
+			points[15] = vector3_mid( p4o, p7_ );
+
+			refs += FilterPointConvexHullIntoTree_r( points, ds, tree.headnode );
 		}
 
 	return refs;
