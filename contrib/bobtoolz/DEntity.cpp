@@ -344,13 +344,13 @@ bool DEntity::LoadFromEntity( scene::Node& ent, const LoadOptions options ) {
 }
 
 void DEntity::RemoveNonCheckBrushes( const std::vector<CopiedString>& exclusionList ){
-	brushList.erase( std::remove_if( brushList.begin(), brushList.end(), [&]( DBrush *brush ){
+	std::erase_if( brushList, [&]( DBrush *brush ){
 		if ( std::any_of( exclusionList.cbegin(), exclusionList.cend(), [brush]( const CopiedString& tex ){ return brush->HasTexture( tex.c_str() ); } ) ) {
 			delete brush;
 			return true;
 		}
 		return false;
-	} ), brushList.end() );
+	} );
 }
 
 void DEntity::ResetChecks( const std::vector<CopiedString>& exclusionList ){
