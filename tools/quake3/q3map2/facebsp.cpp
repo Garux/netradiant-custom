@@ -47,7 +47,7 @@ static void SelectSplitPlaneNum( const node_t *node, const facelist_t& list, int
 
 
 	/* ydnar: set some defaults */
-	*splitPlaneNum = -1; /* leaf */
+	*splitPlaneNum = PLANENUM_LEAF; /* leaf */
 	*compileFlags = 0;
 
 	/* ydnar 2002-06-24: changed this to split on z-axis as well */
@@ -184,7 +184,7 @@ static void BuildFaceTree_r( node_t *node, facelist_t& list ){
 	SelectSplitPlaneNum( node, list, &splitPlaneNum, &compileFlags );
 
 	/* if we don't have any more faces, this is a node */
-	if ( splitPlaneNum == -1 ) {
+	if ( splitPlaneNum == PLANENUM_LEAF ) {
 		node->planenum = PLANENUM_LEAF;
 		node->has_structural_children = false;
 		c_faceLeafs++;
@@ -343,6 +343,12 @@ facelist_t MakeStructuralBSPFaceList( const brushlist_t& list ){
 	for ( const brush_t &b : list )
 	{
 		if ( !deepBSP && b.detail ) {
+			continue;
+		}
+
+		if( std::ranges::count_if( b.sides, []( const side_t& side ){ return !side.winding.empty(); } ) < 4 ){
+			xml_Select( "ignoring malformed structural brush: sides < 4: would break bsp tree", b.entityNum, b.brushNum, false );
+			const_cast<brush_t&>( b ).detail = true;
 			continue;
 		}
 

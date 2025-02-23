@@ -487,20 +487,16 @@ static int FilterBrushIntoTree_r( brush_t&& b, node_t *node ){
 void FilterDetailBrushesIntoTree( const entity_t& e, tree_t& tree ){
 	int c_unique = 0, c_clusters = 0;
 
-
 	/* note it */
 	Sys_FPrintf( SYS_VRB,  "--- FilterDetailBrushesIntoTree ---\n" );
 
 	/* walk the list of brushes */
-	c_unique = 0;
-	c_clusters = 0;
 	for ( const brush_t& b : e.brushes )
 	{
-		if ( !b.detail ) {
-			continue;
+		if ( b.detail ) {
+			c_unique++;
+			c_clusters += FilterBrushIntoTree_r( brush_t( b ), tree.headnode );
 		}
-		c_unique++;
-		c_clusters += FilterBrushIntoTree_r( brush_t( b ), tree.headnode );
 	}
 
 	/* emit some statistics */
@@ -521,11 +517,10 @@ void FilterStructuralBrushesIntoTree( const entity_t& e, tree_t& tree ) {
 	Sys_FPrintf( SYS_VRB, "--- FilterStructuralBrushesIntoTree ---\n" );
 
 	for ( const brush_t& b : e.brushes ) {
-		if ( b.detail ) {
-			continue;
+		if ( !b.detail ) {
+			c_unique++;
+			c_clusters += FilterBrushIntoTree_r( brush_t( b ), tree.headnode );
 		}
-		c_unique++;
-		c_clusters += FilterBrushIntoTree_r( brush_t( b ), tree.headnode );
 	}
 
 	/* emit some statistics */

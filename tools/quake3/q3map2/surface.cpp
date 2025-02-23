@@ -1882,7 +1882,7 @@ static int FilterPatchIntoTree( mapDrawSurface_t *ds, tree_t& tree ){
 			const Vector3& p7 = ds->verts[( y + 2 ) * ds->patchWidth + ( x + 1 )].xyz;
 			const Vector3& p8 = ds->verts[( y + 2 ) * ds->patchWidth + ( x + 2 )].xyz;
 
-			// add 4 invariant points 12 of those which are used to calculate subdivisionless patch LoD
+			// add 4 invariant points + 12 of those which are used to calculate subdivisionless patch LoD
 			// convex hull defined by them guaranteedly encompasses any patch LoD
 			std::array<Vector3, 16> points = { p0, p2, p6, p8,
 				vector3_mid( p0, p1 ), vector3_mid( p1, p2 ),

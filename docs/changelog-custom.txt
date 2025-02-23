@@ -180,6 +180,7 @@ Q3map2:
 	* -globalflag <surfaceparm>: add surface flag to every bsp shader. Reusable, e.g. -globalflag slick -globalflag nodamage.
 	* fix deformvertexes autosprite2 on brushes and models
 	* tighten FilterPatchIntoTree() regarding to even (pink) points
+	* fix tiny structural brushes breaking bsp tree
 
 
 

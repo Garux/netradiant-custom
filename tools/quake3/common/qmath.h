@@ -79,7 +79,7 @@ struct MinMax___
 		return other.maxs.x() >= mins.x() && other.maxs.y() >= mins.y() && other.maxs.z() >= mins.z()
 		    && other.mins.x() <= maxs.x() && other.mins.y() <= maxs.y() && other.mins.z() <= maxs.z();
 	}
-	// true, if other is completely enclosed by this
+	// true, if other is completely enclosed by this //! implicitly requires this->valid() or zero volume
 	template<typename U>
 	bool surrounds( const MinMax___<U>& other ) const {
 		return other.mins.x() >= mins.x() && other.mins.y() >= mins.y() && other.mins.z() >= mins.z()
