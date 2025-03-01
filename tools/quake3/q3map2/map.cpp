@@ -801,8 +801,8 @@ static void FinishBrush( bool noCollapseGroups, entity_t& mapEnt ){
 
 	/* determine if the brush is an area portal */
 	if ( buildBrush.compileFlags & C_AREAPORTAL ) {
-		if ( entities.size() != 1 ) {
-			Sys_FPrintf( SYS_WRN, "Entity %i (%s), Brush %i: areaportals only allowed in world\n", mapEnt.mapEntityNum, mapEnt.classname(), buildBrush.brushNum );
+		if ( entities.size() != 1 && ( noCollapseGroups || !mapEnt.classname_is( "func_group" ) ) ) {
+			xml_Select( "areaportals only allowed in world", mapEnt.mapEntityNum, buildBrush.brushNum, false );
 			return;
 		}
 	}
