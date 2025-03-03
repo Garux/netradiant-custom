@@ -217,10 +217,10 @@ public:
 	void disable( unsigned int state ){
 		m_state &= ~state;
 	}
-	bool visible(){
+	bool visible() const {
 		return m_state == eVisible;
 	}
-	bool excluded(){
+	bool excluded() const {
 		return ( m_state & eExcluded ) != 0;
 	}
 	bool operator<( const scene::Node& other ){

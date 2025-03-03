@@ -1415,7 +1415,7 @@ void Map_ApplyRegion(){
 	g_region_item.update();
 
 	Scene_Exclude_Region( false );
-	/* newly created brushes have to be visible! */
+	/* not hiding worldspawn node so that newly created brushes are visible */
 	if( scene::Node* w = Map_FindWorldspawn( g_map ) )
 		exclude_node( *w, false );
 }
@@ -1436,7 +1436,7 @@ void Map_RegionSelectedBrushes(){
 		Select_GetBounds( g_region_mins, g_region_maxs );
 
 		Scene_Exclude_Selected( false );
-		/* newly created brushes have to be visible! */
+		/* not hiding worldspawn node so that newly created brushes are visible */
 		if( scene::Node* w = Map_FindWorldspawn( g_map ) )
 			exclude_node( *w, false );
 

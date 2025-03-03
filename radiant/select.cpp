@@ -941,6 +941,26 @@ void Select_FitTexture( float horizontal, float vertical, bool only_dimension ){
 #include "commands.h"
 #include "dialog.h"
 
+template<class Check>
+bool Traversable_all_of_children( scene::Traversable* traversable, const Check&& check ){
+	class Check_all : public scene::Traversable::Walker
+	{
+		const Check m_check;
+	public:
+		mutable bool m_all = true; // true for empty container
+		Check_all( Check check ) : m_check( check ){
+		}
+		bool pre( scene::Node& node ) const override {
+			if( !m_check( node ) )
+				m_all = false;
+			return m_all;
+		}
+	} check_all( check );
+
+	traversable->traverse( check_all );
+	return check_all.m_all;
+}
+
 inline void hide_node( scene::Node& node, bool hide ){
 	hide
 	? node.enable( scene::Node::eHidden )
@@ -953,17 +973,23 @@ ToggleItem g_hidden_item{ BoolExportCaller( g_nodes_be_hidden ) };
 
 class HideSelectedWalker : public scene::Graph::Walker
 {
-	bool m_hide;
+	const bool m_hide;
 public:
 	HideSelectedWalker( bool hide )
 		: m_hide( hide ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( Instance_isSelected( instance ) ) {
 			g_nodes_be_hidden = m_hide;
 			hide_node( path.top(), m_hide );
 		}
 		return true;
+	}
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
+		if( m_hide && Node_isEntity( path.top().get() ) ) // hide group entity labels, when their content is entirely hidden
+			if( scene::Traversable* traversable = Node_getTraversable( path.top().get() ) )
+				if( Traversable_all_of_children( traversable, []( const scene::Node& node ){ return !node.visible(); } ) )
+					hide_node( path.top(), true );
 	}
 };
 
@@ -973,6 +999,9 @@ void Scene_Hide_Selected( bool hide ){
 
 void Select_Hide(){
 	Scene_Hide_Selected( true );
+	/* not hiding worldspawn node so that newly created brushes are visible */
+	if( scene::Node* w = Map_FindWorldspawn( g_map ) )
+		hide_node( *w, false );
 	SceneChangeNotify();
 }
 

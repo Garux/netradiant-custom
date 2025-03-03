@@ -1114,6 +1114,7 @@ misc...
 	* add prefs->Build->Region Box Shader (shader to use on the box generated around region)
 	* add bobToolz.explodeEntity: create group entity from each primitive of existing group entity
 	* improve CSG Subtract results via more defined splits order
+	* hide group entity node when all its children get hidden
 
 
 
