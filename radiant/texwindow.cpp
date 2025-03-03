@@ -1045,12 +1045,7 @@ void TextureBrowser::draw(){
 			gl().glRasterPos2i( x, y - fontHeight - fontDescent + 3 );//+5
 
 			// don't draw the directory name
-			const char* name = shader->getName();
-			name += strlen( name );
-			while ( name != shader->getName() && *( name - 1 ) != '/' && *( name - 1 ) != '\\' )
-				name--;
-
-			GlobalOpenGL().drawString( name );
+			GlobalOpenGL().drawString( path_get_filename_start( shader->getName() ) );
 		}
 	}
 

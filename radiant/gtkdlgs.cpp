@@ -351,7 +351,6 @@ void DoAbout(){
 				auto label = new QLabel( "NetRadiant " RADIANT_VERSION "\n"
 				                         __DATE__ "\n\n"
 				                         RADIANT_ABOUTMSG "\n\n"
-				                         "By alientrap.org\n\n"
 				                         "This program is free software\n"
 				                         "licensed under the GNU GPL.\n"
 				                       );
