@@ -5250,7 +5250,9 @@ private:
 		       || !std::isfinite( m_tex2local[0] ) //nan
 		       || fabs( vector3_dot( m_plane.normal(), m_tex2local.z().vec3() ) ) < 1e-6 //projected along face
 		       || vector3_length_squared( m_tex2local.x().vec3() ) < .01 //srsly scaled down, limit at max 10 textures per world unit
-		       || vector3_length_squared( m_tex2local.y().vec3() ) < .01 );
+		       || vector3_length_squared( m_tex2local.y().vec3() ) < .01
+		       || vector3_length_squared( m_tex2local.x().vec3() ) > 1e9 //very upscaled or product of nearly nan
+		       || vector3_length_squared( m_tex2local.y().vec3() ) > 1e9 );
 	}
 	void UpdateFaceData( bool updateOrigin, bool updateLines = true ) {
 		//!? todo fewer outer quads for large textures
@@ -5574,7 +5576,7 @@ private:
 			else if( memcmp( &m_projection, &m_face->getTexdef().m_projection, sizeof( TextureProjection ) ) != 0
 			         || m_width != m_face->getShader().width()
 			         || m_height != m_face->getShader().height() ) {
-				UpdateFaceData( false );
+				UpdateFaceData( !projection_valid() ); // updateOrigin when prev state was invalid on the same face
 			}
 			return projection_valid();
 		}
@@ -5590,7 +5592,7 @@ private:
 				      || m_patchHeight != m_patch->getHeight()
 				      || memcmp( m_patchCtrl.data(), m_patch->getControlPoints().data(), sizeof( *m_patchCtrl.data() ) * m_patchCtrl.size() ) != 0
 				      || m_state_patch_raw != m_patch->getShader() ){
-					UpdateFaceData( false );
+					UpdateFaceData( !projection_valid() ); // updateOrigin when prev state was invalid on the same patch
 				}
 				return projection_valid();
 			}
