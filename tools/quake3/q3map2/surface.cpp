@@ -2574,7 +2574,7 @@ static void EmitTriangleSurface( mapDrawSurface_t *ds ){
 	out.lightmapStyles[ 0 ] = LS_NORMAL;
 	out.vertexStyles[ 0 ] = LS_NORMAL;
 
-	/* lightmap vectors (lod bounds for patches */
+	/* lightmap vectors (lod bounds for patches) */
 	out.lightmapOrigin = ds->lightmapOrigin;
 	out.lightmapVecs[ 0 ] = ds->lightmapVecs[ 0 ];
 	out.lightmapVecs[ 1 ] = ds->lightmapVecs[ 1 ];

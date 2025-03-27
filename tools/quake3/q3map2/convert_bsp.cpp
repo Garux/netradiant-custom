@@ -350,7 +350,7 @@ int ScaleBSPMain( Args& args ){
 	Vector3 scale;
 	Vector3 vec;
 	char str[ 1024 ];
-	int uniform, axis;
+	int axis;
 	bool texscale;
 	std::vector<bspDrawVert_t> old_xyzst;
 	float spawn_ref = 0;
@@ -382,8 +382,6 @@ int ScaleBSPMain( Args& args ){
 	if ( !args.empty() ) {
 		scale[0] = atof( args.takeBack() );
 	}
-
-	uniform = ( ( scale[0] == scale[1] ) && ( scale[1] == scale[2] ) );
 
 	if ( scale == g_vector3_identity ) {
 		Sys_Printf( "Usage: q3map2 [-v] -scale [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
@@ -523,7 +521,7 @@ int ScaleBSPMain( Args& args ){
 	}
 
 	/* scale planes */
-	if ( uniform ) {
+	if ( ( scale[0] == scale[1] ) && ( scale[1] == scale[2] ) ) { // uniform scale
 		for ( bspPlane_t& plane : bspPlanes )
 		{
 			plane.dist() *= scale[0];

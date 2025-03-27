@@ -82,7 +82,7 @@ struct ibspBrushSide_t
 	int planeNum;
 	int shaderNum;
 	ibspBrushSide_t( const bspBrushSide_t& other ) :
-		planeNum( other.planeNum ),
+		planeNum ( other.planeNum ),
 		shaderNum( other.shaderNum ){}
 	operator bspBrushSide_t() const {
 		return { planeNum, shaderNum, -1 };
@@ -114,22 +114,22 @@ struct ibspDrawSurface_t
 	int patchWidth;
 	int patchHeight;
 	ibspDrawSurface_t( const bspDrawSurface_t& other ) :
-		shaderNum( other.shaderNum ),
-		fogNum( other.fogNum ),
-		surfaceType( other.surfaceType ),
-		firstVert( other.firstVert ),
-		numVerts( other.numVerts ),
-		firstIndex( other.firstIndex ),
-		numIndexes( other.numIndexes ),
-		lightmapNum( other.lightmapNum[0] ),
-		lightmapX( other.lightmapX[0] ),
-		lightmapY( other.lightmapY[0] ),
-		lightmapWidth( other.lightmapWidth ),
+		shaderNum     ( other.shaderNum ),
+		fogNum        ( other.fogNum ),
+		surfaceType   ( other.surfaceType ),
+		firstVert     ( other.firstVert ),
+		numVerts      ( other.numVerts ),
+		firstIndex    ( other.firstIndex ),
+		numIndexes    ( other.numIndexes ),
+		lightmapNum   ( other.lightmapNum[0] ),
+		lightmapX     ( other.lightmapX[0] ),
+		lightmapY     ( other.lightmapY[0] ),
+		lightmapWidth ( other.lightmapWidth ),
 		lightmapHeight( other.lightmapHeight ),
 		lightmapOrigin( other.lightmapOrigin ),
-		lightmapVecs{ other.lightmapVecs[0], other.lightmapVecs[1], other.lightmapVecs[2] },
-		patchWidth( other.patchWidth ),
-		patchHeight( other.patchHeight ) {}
+		lightmapVecs  { other.lightmapVecs[0], other.lightmapVecs[1], other.lightmapVecs[2] },
+		patchWidth    ( other.patchWidth ),
+		patchHeight   ( other.patchHeight ) {}
 	operator bspDrawSurface_t() const {
 		static_assert( MAX_LIGHTMAPS == 4 );
 		return{
@@ -166,11 +166,11 @@ struct ibspDrawVert_t
 	Vector3 normal;
 	Color4b color;
 	ibspDrawVert_t( const bspDrawVert_t& other ) :
-		xyz( other.xyz ),
-		st( other.st ),
+		xyz     ( other.xyz ),
+		st      ( other.st ),
 		lightmap( other.lightmap[0] ),
-		normal( other.normal ),
-		color( other.color[0] ) {}
+		normal  ( other.normal ),
+		color   ( other.color[0] ) {}
 	operator bspDrawVert_t() const {
 		static_assert( MAX_LIGHTMAPS == 4 );
 		return {
@@ -192,9 +192,9 @@ struct ibspGridPoint_t
 	Vector3b directed;
 	byte latLong[ 2 ];
 	ibspGridPoint_t( const bspGridPoint_t& other ) :
-		ambient( other.ambient[0] ),
+		ambient ( other.ambient[0] ),
 		directed( other.directed[0] ),
-		latLong{ other.latLong[0], other.latLong[1] } {}
+		latLong { other.latLong[0], other.latLong[1] } {}
 	operator bspGridPoint_t() const {
 		static_assert( MAX_LIGHTMAPS == 4 );
 		return {

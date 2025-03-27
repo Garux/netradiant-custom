@@ -315,11 +315,7 @@ void Patch::TransposeMatrix(){
 		}
 	}
 
-	{
-		std::size_t tmp = m_width;
-		m_width = m_height;
-		m_height = tmp;
-	}
+	std::swap( m_width, m_height );
 
 	controlPointsChanged();
 }
