@@ -469,6 +469,15 @@ int ScaleBSPMain( Args& args ){
 		leaf.minmax.maxs = scale * leaf.minmax.maxs;
 	}
 
+	/* scale patch lodbounds */
+	for ( bspDrawSurface_t& surf : bspDrawSurfaces )
+	{
+		if ( surf.surfaceType == MST_PATCH ){
+			surf.lightmapVecs[0] *= scale;
+			surf.lightmapVecs[1] *= scale;
+		}
+	}
+
 	if ( texscale ) {
 		Sys_Printf( "Using texture unlocking (and probably breaking texture alignment a lot)\n" );
 		old_xyzst = bspDrawVerts;
@@ -626,6 +635,15 @@ int ShiftBSPMain( Args& args ){
 	{
 		leaf.minmax.mins += shift;
 		leaf.minmax.maxs += shift;
+	}
+
+	/* shift patch lodbounds */
+	for ( bspDrawSurface_t& surf : bspDrawSurfaces )
+	{
+		if ( surf.surfaceType == MST_PATCH ){
+			surf.lightmapVecs[0] += shift;
+			surf.lightmapVecs[1] += shift;
+		}
 	}
 
 	/* shift drawverts */

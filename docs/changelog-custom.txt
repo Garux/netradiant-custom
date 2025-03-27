@@ -181,6 +181,7 @@ Q3map2:
 	* fix deformvertexes autosprite2 on brushes and models
 	* tighten FilterPatchIntoTree() regarding to even (pink) points
 	* fix tiny structural brushes breaking bsp tree
+	* handle patch lodbounds in -shift and -scale
 
 
 
