@@ -1116,6 +1116,13 @@ misc...
 	* add bobToolz.explodeEntity: create group entity from each primitive of existing group entity
 	* improve CSG Subtract results via more defined splits order
 	* hide group entity node when all its children get hidden
+	* bobToolz::Vis Viewer add sortable leafs chart (visible leafs, surfaces, shaders)
+		add rendering of MST_PATCH, MST_TRIANGLE_SOUP
+		use consistent color per colorable object
+		option to assing color per surface, not leaf (to debug surfaces)(current leaf surfs are always green anyway)
+		render current leaf convex volume, in white
+		support bsp without vis data
+		add RBSP, FBSP support
 
 
 

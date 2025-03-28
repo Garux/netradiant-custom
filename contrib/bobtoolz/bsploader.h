@@ -67,6 +67,26 @@ typedef struct {
 	byte color[4];
 } qdrawVert_t;
 
+#define MAX_LIGHTMAPS 4
+
+struct rbspDrawVert_t
+{
+	vec3_t xyz;
+	float st[2];
+	float lightmap[ MAX_LIGHTMAPS ][2];         /* RBSP */
+	vec3_t normal;
+	byte color[ MAX_LIGHTMAPS ][4];             /* RBSP */
+	operator qdrawVert_t() const {
+		return{
+			{ xyz[0], xyz[1], xyz[2] },
+			{ st[0], st[1] },
+			{ lightmap[0][0], lightmap[0][1] },
+			{ normal[0], normal[1], normal[2] },
+			{ color[0][0], color[0][1], color[0][2], color[0][3] }
+		};
+	}
+};
+
 typedef struct {
 	int shaderNum;
 	int fogNum;
@@ -89,10 +109,65 @@ typedef struct {
 	int patchHeight;
 } dsurface_t;
 
+struct rbspDrawSurface_t
+{
+	int shaderNum;
+	int fogNum;
+	int surfaceType;
+
+	int firstVert;
+	int numVerts;
+
+	int firstIndex;
+	int numIndexes;
+
+	byte lightmapStyles[ MAX_LIGHTMAPS ];                               /* RBSP */
+	byte vertexStyles[ MAX_LIGHTMAPS ];                                 /* RBSP */
+	int lightmapNum[ MAX_LIGHTMAPS ];                                   /* RBSP */
+	int lightmapX[ MAX_LIGHTMAPS ], lightmapY[ MAX_LIGHTMAPS ];         /* RBSP */
+	int lightmapWidth, lightmapHeight;
+
+	vec3_t lightmapOrigin;
+	vec3_t lightmapVecs[ 3 ];       /* on patches, [ 0 ] and [ 1 ] are lodbounds */
+
+	int patchWidth;
+	int patchHeight;
+	operator dsurface_t() const {
+		return{
+			shaderNum,
+			fogNum,
+			surfaceType,
+			firstVert,
+			numVerts,
+			firstIndex,
+			numIndexes,
+			lightmapNum[0],
+			lightmapX[0], lightmapY[0],
+			lightmapWidth, lightmapHeight,
+			{ lightmapOrigin[0], lightmapOrigin[1], lightmapOrigin[2] },
+			{ { lightmapVecs[0][0], lightmapVecs[0][1], lightmapVecs[0][2] },
+			  { lightmapVecs[1][0], lightmapVecs[1][1], lightmapVecs[1][2] },
+			  { lightmapVecs[2][0], lightmapVecs[2][1], lightmapVecs[2][2] } },
+			patchWidth,
+			patchHeight
+		};
+	}
+};
+
 typedef struct {
 	int planeNum;                   // positive plane side faces out of the leaf
 	int shaderNum;
 } dbrushside_t;
+
+struct rbspBrushSide_t
+{
+	int planeNum;                   /* positive plane side faces out of the leaf */
+	int shaderNum;
+	int surfaceNum;                 /* RBSP */
+	operator dbrushside_t() const {
+		return { planeNum, shaderNum };
+	}
+};
 
 typedef struct {
 	int firstSide;

@@ -26,9 +26,15 @@ dbrush_t      *dbrushes =         NULL;
 dbrushside_t  *dbrushsides =      NULL;
 int           *dleafbrushes =     NULL;
 
-#define BSP_IDENT   ( ( 'P' << 24 ) + ( 'S' << 16 ) + ( 'B' << 8 ) + 'I' )
-#define Q3_BSP_VERSION          46
-#define WOLF_BSP_VERSION            47
+#define IBSP_IDENT   ( ( 'P' << 24 ) + ( 'S' << 16 ) + ( 'B' << 8 ) + 'I' )
+#define IBSP_VERSION_Q3         46
+#define IBSP_VERSION_WOLF       47   // also quakelive
+// jka, jk2, sof2
+#define RBSP_IDENT   ( ( 'P' << 24 ) + ( 'S' << 16 ) + ( 'B' << 8 ) + 'R' )
+#define RBSP_VERSION             1
+// warsow
+#define FBSP_IDENT   ( ( 'P' << 24 ) + ( 'S' << 16 ) + ( 'B' << 8 ) + 'F' )
+#define FBSP_VERSION             1
 
 /*
    ================
@@ -204,33 +210,55 @@ bool    LoadBSPFile( const char *filename ) {
 
 	// load the file header
 	if ( !LoadFile( filename, (byte **)&header ) ) {
+		DoMessageBox( "BSP file not found", "Error", EMessageBoxType::Error );
 		return false;
 	}
 
 	// swap the header
 	SwapBlock( (int *)header, sizeof( *header ) );
 
-	if ( header->ident != BSP_IDENT ) {
-		DoMessageBox( "Cant find a valid IBSP file", "Error", EMessageBoxType::Error );
-		return false;
-	}
-	if ( ( header->version != Q3_BSP_VERSION ) &&
-	     ( header->version != WOLF_BSP_VERSION ) ) {
-		DoMessageBox( "File is incorrect version", "Error", EMessageBoxType::Error );
+	if ( header->ident != IBSP_IDENT
+	  && header->ident != RBSP_IDENT
+	  && header->ident != FBSP_IDENT ) {
+		DoMessageBox( "Cant find a valid IBSP/RBSP/FBSP file", "Error", EMessageBoxType::Error );
+		delete[] header;
 		return false;
 	}
 
-	numbrushsides =       CopyLump( header, LUMP_BRUSHES,         (void**)&dbrushsides,      sizeof( dbrushside_t ) );
-	numbrushes =          CopyLump( header, LUMP_BRUSHES,         (void**)&dbrushes,         sizeof( dbrush_t ) );
-	numplanes =           CopyLump( header, LUMP_PLANES,          (void**)&dplanes,          sizeof( dplane_t ) );
-	numleafs =            CopyLump( header, LUMP_LEAFS,           (void**)&dleafs,           sizeof( dleaf_t ) );
-	numnodes =            CopyLump( header, LUMP_NODES,           (void**)&dnodes,           sizeof( dnode_t ) );
-	numDrawVerts =        CopyLump( header, LUMP_DRAWVERTS,       (void**)&drawVerts,        sizeof( qdrawVert_t ) );
+	if ( !( header->ident == IBSP_IDENT && ( header->version == IBSP_VERSION_Q3 || header->version == IBSP_VERSION_WOLF ) )
+	  && !( header->ident == RBSP_IDENT && header->version == RBSP_VERSION )
+	  && !( header->ident == FBSP_IDENT && header->version == FBSP_VERSION ) ) {
+		DoMessageBox( "File is incorrect version", "Error", EMessageBoxType::Error );
+		delete[] header;
+		return false;
+	}
+
+if( header->ident == IBSP_IDENT )
+	numbrushsides       = CopyLump( header, LUMP_BRUSHES,         (void**)&dbrushsides,      sizeof( dbrushside_t ) );
+else{
+	numbrushsides       = CopyLump( header, LUMP_BRUSHES,         (void**)&dbrushsides,      sizeof( rbspBrushSide_t ) );
+	std::copy_n( (rbspBrushSide_t*)dbrushsides, numbrushes, dbrushsides );
+}
+	numbrushes          = CopyLump( header, LUMP_BRUSHES,         (void**)&dbrushes,         sizeof( dbrush_t ) );
+	numplanes           = CopyLump( header, LUMP_PLANES,          (void**)&dplanes,          sizeof( dplane_t ) );
+	numleafs            = CopyLump( header, LUMP_LEAFS,           (void**)&dleafs,           sizeof( dleaf_t ) );
+	numnodes            = CopyLump( header, LUMP_NODES,           (void**)&dnodes,           sizeof( dnode_t ) );
+if( header->ident == IBSP_IDENT )
+	numDrawVerts        = CopyLump( header, LUMP_DRAWVERTS,       (void**)&drawVerts,        sizeof( qdrawVert_t ) );
+else{
+	numDrawVerts        = CopyLump( header, LUMP_DRAWVERTS,       (void**)&drawVerts,        sizeof( rbspDrawVert_t ) );
+	std::copy_n( (rbspDrawVert_t*)drawVerts, numDrawVerts, drawVerts );
+}
 	numDrawVertsIndices = CopyLump( header, LUMP_DRAWINDEXES,     (void**)&drawVertsIndices, sizeof( int ) );
-	numDrawSurfaces =     CopyLump( header, LUMP_SURFACES,        (void**)&drawSurfaces,     sizeof( dsurface_t ) );
-	numleafsurfaces =     CopyLump( header, LUMP_LEAFSURFACES,    (void**)&dleafsurfaces,    sizeof( int ) );
-	numVisBytes =         CopyLump( header, LUMP_VISIBILITY,      (void**)&visBytes,         1 );
-	numleafbrushes =      CopyLump( header, LUMP_LEAFBRUSHES,     (void**)&dleafbrushes,     sizeof( int ) );
+if( header->ident == IBSP_IDENT )
+	numDrawSurfaces     = CopyLump( header, LUMP_SURFACES,        (void**)&drawSurfaces,     sizeof( dsurface_t ) );
+else{
+	numDrawSurfaces     = CopyLump( header, LUMP_SURFACES,        (void**)&drawSurfaces,     sizeof( rbspDrawSurface_t ) );
+	std::copy_n( (rbspDrawSurface_t*)drawSurfaces, numDrawSurfaces, drawSurfaces );
+}
+	numleafsurfaces     = CopyLump( header, LUMP_LEAFSURFACES,    (void**)&dleafsurfaces,    sizeof( int ) );
+	numVisBytes         = CopyLump( header, LUMP_VISIBILITY,      (void**)&visBytes,         1 );
+	numleafbrushes      = CopyLump( header, LUMP_LEAFBRUSHES,     (void**)&dleafbrushes,     sizeof( int ) );
 
 	delete[] header;      // everything has been copied out
 

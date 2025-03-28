@@ -22,6 +22,8 @@
 #include "dialogs/dialogs-gtk.h"
 
 #include "string/string.h"
+#include "stream/stringstream.h"
+#include "os/path.h"
 
 #include "DPoint.h"
 #include "DPlane.h"
@@ -616,31 +618,17 @@ void DoVisAnalyse(){
 		return;
 	}
 
-	char filename[1024];
-	strcpy( filename, rad_filename );
-
-	char* ext = strrchr( filename, '.' ) + 1;
-	strcpy( ext, "bsp" ); // rename the extension
+	const auto filename = StringStream<256>( PathExtensionless( rad_filename ), ".bsp" );
 
 	vec3_t origin;
 	if ( GlobalSelectionSystem().countSelected() == 0 ) {
-		memcpy( origin, GlobalRadiant().Camera_getOrigin().data(), 3 * sizeof( Vector3().x() ) );
+		std::copy_n( GlobalRadiant().Camera_getOrigin().data(), 3, origin );
 	}
 	else{
-		memcpy( origin, GlobalSelectionSystem().getBoundsSelected().origin.data(), 3 * sizeof( Vector3().x() ) );
+		std::copy_n( GlobalSelectionSystem().getBoundsSelected().origin.data(), 3, origin );
 	}
 
-	DMetaSurfaces* pointList = BuildTrace( filename, origin );
-
-	if( pointList && pointList->size() )
-		globalOutputStream() << "bobToolz VisAnalyse: " << pointList->size() << " drawsurfaces loaded\n";
-
-	if ( !g_VisView ) {
-		g_VisView = std::make_unique<DVisDrawer>();
-	}
-
-	g_VisView->SetList( pointList );
-	SceneChangeNotify();
+	SetupVisView( filename, origin );
 }
 
 void DoTrainPathPlot() {

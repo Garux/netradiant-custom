@@ -30,13 +30,28 @@
 
 #include "misc.h"
 #include "funchandlers.h"
+#include "bsploader.h"
+
+#include "bobToolz-GTK.h"
+#include <QDialog>
+#include <QCloseEvent>
+#include <QVBoxLayout>
+#include <QTableWidget>
+#include <QHeaderView>
+#include <QPushButton>
+#include <QCheckBox>
+#include "visfind.h"
+
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
 DVisDrawer::DVisDrawer(){
-	m_list = NULL;
+	m_list = nullptr;
+	m_colorPerSurf = false;
+
+	ui_create();
 
 	constructShaders();
 	GlobalShaderCache().attachRenderable( *this );
@@ -46,7 +61,11 @@ DVisDrawer::~DVisDrawer(){
 	GlobalShaderCache().detachRenderable( *this );
 	destroyShaders();
 
-	ClearPoints();
+	delete m_list;
+	delete m_dialog;
+	FreeBSPData();
+
+	SceneChangeNotify();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -83,11 +102,15 @@ void DVisDrawer::destroyShaders(){
 
 void DVisDrawer::render( RenderStateFlags state ) const {
 	gl().glEnable( GL_POLYGON_OFFSET_FILL );
-	for( const auto surf : *m_list ){
-		const DMetaSurf& s = *surf;
-		gl().glColor4f( s.colour[0], s.colour[1], s.colour[2], 0.5f );
-		gl().glVertexPointer( 3, GL_FLOAT, sizeof( vec3_t ), s.verts );
-		gl().glDrawElements( GL_TRIANGLES, GLsizei( s.indicesN ), GL_UNSIGNED_INT, s.indices );
+	for( const DMetaSurf& surf : *m_list ){
+		gl().glColor4f( surf.colour[0], surf.colour[1], surf.colour[2], 0.5f );
+		gl().glVertexPointer( 3, GL_FLOAT, sizeof( vec3_t ), surf.verts );
+		gl().glDrawElements( GL_TRIANGLES, GLsizei( surf.indicesN ), GL_UNSIGNED_INT, surf.indices );
+	}
+	for( const DWinding& w : m_windings ){
+		gl().glColor4f( 1, 1, 1, 0.5f );
+		gl().glVertexPointer( 3, GL_FLOAT, sizeof( *w.p ), w.p );
+		gl().glDrawArrays( GL_POLYGON, 0, GLsizei( w.numpoints ) );
 	}
 	gl().glDisable( GL_POLYGON_OFFSET_FILL );
 	gl().glColor4f( 1, 1, 1, 1 );
@@ -115,16 +138,104 @@ void DVisDrawer::renderSolid( Renderer& renderer, const VolumeTest& volume ) con
 }
 
 void DVisDrawer::SetList( DMetaSurfaces* pointList ){
-	ClearPoints();
-	m_list = pointList;
+	delete std::exchange( m_list, pointList );
+	SceneChangeNotify();
 }
 
 void DVisDrawer::ClearPoints(){
-	if ( m_list ) {
-		for ( auto deadPoint : *m_list )
-			delete deadPoint;
-		m_list->clear();
-		delete m_list;
-		m_list = 0;
+	SetList( nullptr );
+	m_windings.clear();
+	m_table->setCurrentCell( -1, -1 ); // unset current item, so QTableWidget::currentCellChanged will be triggered for the same valid index later
+}
+
+
+class VisDialog : public QDialog
+{
+protected:
+	void closeEvent( QCloseEvent *event ) override {
+		event->ignore();
+		g_VisView.reset();
 	}
+	using QDialog::QDialog;
+	// excess, intent is to have arrows working in the table
+	bool event( QEvent *event ) override {
+		if( event->type() == QEvent::ShortcutOverride ){
+			event->accept();
+			return true;
+		}
+		return QDialog::event( event );
+	}
+};
+
+void DVisDrawer::ui_create(){
+	m_dialog = new VisDialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
+	m_dialog->setWindowTitle( "BSP leafs" );
+
+	{
+		auto vbox = new QVBoxLayout( m_dialog );
+		{
+			m_table = new QTableWidget( 0, 4 );
+			vbox->addWidget( m_table );
+			m_table->setHorizontalHeaderLabels( { "leaf #", "leafs visible", "surfs visible", "shaders visible" } );
+			m_table->horizontalHeader()->setSortIndicator( 2, Qt::SortOrder::DescendingOrder ); // sort by nsurfs
+			m_table->setSizeAdjustPolicy( QAbstractScrollArea::SizeAdjustPolicy::AdjustToContentsOnFirstShow );
+			m_table->setHorizontalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
+			QObject::connect( m_table, &QTableWidget::currentCellChanged, [this]( int currentRow, int currentColumn, int previousRow, int previousColumn ){
+				// globalOutputStream() << previousRow << "->" << currentRow << ";" << previousColumn << "->" << currentColumn << "\n";
+				if( currentRow != previousRow && currentRow >= 0 ){
+					const int leafnum = m_table->item( currentRow, 0 )->data( Qt::ItemDataRole::DisplayRole ).toInt();
+					SetList( BuildTrace( leafnum, m_colorPerSurf ) );
+					m_windings = BuildLeafWindings( leafnum );
+				}
+			} );
+			m_table->setSelectionBehavior( QAbstractItemView::SelectionBehavior::SelectRows );
+			m_table->setSelectionMode( QAbstractItemView::SelectionMode::SingleSelection );
+		}
+		{
+			auto *check = new QCheckBox( "Color per leaf" );
+			vbox->addWidget( check );
+			QObject::connect( check, &QCheckBox::stateChanged, [check, this]( int on ){
+				if( on )
+					check->setText( "Color per surface" );
+				else
+					check->setText( "Color per leaf" );
+				m_colorPerSurf = on;
+				const int row = m_table->currentRow();
+				ClearPoints();
+				m_table->setCurrentCell( row, 0 );
+			} );
+		}
+		{
+			auto *butt = new QPushButton( "From Cam or Selection" );
+			vbox->addWidget( butt );
+			QObject::connect( butt, &QPushButton::clicked, []( bool ){ DoVisAnalyse(); } );
+		}
+	}
+
+}
+
+void DVisDrawer::ui_leaf_add( int leafnum, int nleafs, int nsurfs, int nshaders ){
+	const int row = m_table->rowCount();
+	m_table->insertRow( row );
+	auto setColData = [&]( int col, int num ){
+		auto *item = new QTableWidgetItem();
+		item->setFlags( Qt::ItemFlag::ItemIsEnabled | Qt::ItemFlag::ItemIsSelectable );
+		item->setData( Qt::ItemDataRole::DisplayRole, num );
+		m_table->setItem( row, col, item );
+	};
+	setColData( 0, leafnum );
+	setColData( 1, nleafs );
+	setColData( 2, nsurfs );
+	setColData( 3, nshaders );
+}
+
+void DVisDrawer::ui_show(){
+	m_table->setSortingEnabled( true ); // enable once after construction for performance
+	m_dialog->show();
+}
+
+void DVisDrawer::ui_leaf_show( int leafnum ){
+	for( int i = 0; i < m_table->rowCount(); ++i )
+		if( m_table->item( i, 0 )->data( Qt::ItemDataRole::DisplayRole ).toInt() == leafnum )
+			return m_table->setCurrentCell( i, 0 );
 }

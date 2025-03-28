@@ -27,20 +27,16 @@
 #include "ibrush.h"
 #include "string/string.h"
 #include "mathlib.h"
-
-class Brush;
-class DPoint;
+#include "DWinding.h"
 
 #define FACE_DETAIL 0x8000000
-
-class DWinding;
 
 class DPlane
 {
 public:
 	DPlane( const vec3_t va, const vec3_t vb, const vec3_t vc, const char* textureName, bool bDetail );
 	void ScaleTexture();
-	DWinding* BaseWindingForPlane();
+	DWinding BaseWindingForPlane();
 
 	void Rebuild();
 
@@ -48,7 +44,7 @@ public:
 	bool operator !=( DPlane& other );
 	bool operator ==( const DPlane& other ) const;
 
-	bool IsRedundant( std::list<DPoint*>& pointList );
+	bool IsRedundant( std::list<class DPoint*>& pointList );
 	bool PlaneIntersection( DPlane* pl1, DPlane* pl2, vec3_t out );;
 
 	vec_t DistanceToPoint( vec3_t pnt );
@@ -64,5 +60,3 @@ public:
 	vec3_t normal;
 	float _d;
 };
-
-//typedef CList<DPlane*, DPlane*> DPlaneList;

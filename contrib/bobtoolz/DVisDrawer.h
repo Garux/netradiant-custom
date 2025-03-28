@@ -23,7 +23,8 @@
 
 #pragma once
 
-#include <list>
+#include <vector>
+#include <utility>
 #include "renderable.h"
 #include "irender.h"
 #include "mathlib.h"
@@ -31,12 +32,17 @@
 class DMetaSurf
 {
 public:
-	DMetaSurf() = delete;
-	DMetaSurf( int numverts, int numindices ){
-		verts = new vec3_t[numverts];
-		indices = new unsigned int[numindices];
-		indicesN = numindices;
-	}
+	DMetaSurf( int numverts, int numindices )
+	:	verts( new vec3_t[numverts] ),
+		indices( new unsigned int[numindices] ),
+		indicesN( numindices )
+	{}
+	DMetaSurf( DMetaSurf&& other ) noexcept
+	:	verts( std::exchange( other.verts, nullptr ) ),
+		indices( std::exchange( other.indices, nullptr ) ),
+		indicesN( other.indicesN ),
+		colour{ other.colour[0], other.colour[1], other.colour[2] }
+	{}
 	~DMetaSurf(){
 		delete[] verts;
 		delete[] indices;
@@ -47,28 +53,34 @@ public:
 	vec3_t colour;
 };
 
-typedef std::list<DMetaSurf*> DMetaSurfaces;
+using DMetaSurfaces = std::vector<DMetaSurf>;
 
 class DVisDrawer : public Renderable, public OpenGLRenderable
 {
 	Shader* m_shader_solid;
 	Shader* m_shader_wireframe;
+	class QDialog *m_dialog;
+	class QTableWidget *m_table;
+	DMetaSurfaces* m_list;
+	std::vector<class DWinding> m_windings;
+	bool m_colorPerSurf;
 public:
 	DVisDrawer();
 	virtual ~DVisDrawer();
 
-protected:
-	DMetaSurfaces* m_list;
-	int refCount;
-public:
 	void ClearPoints();
+private:
 	void SetList( DMetaSurfaces* pointList );
+	void ui_create();
+public:
+	void ui_leaf_add( int leafnum, int nleafs, int nsurfs, int nshaders );
+	void ui_show();
+	void ui_leaf_show( int leafnum );
 
-	void render( RenderStateFlags state ) const;
-	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const;
-	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const;
-
+	void render( RenderStateFlags state ) const override;
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const override;
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const override;
+private:
 	void constructShaders();
 	void destroyShaders();
-
 };

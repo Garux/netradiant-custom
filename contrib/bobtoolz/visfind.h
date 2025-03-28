@@ -1,10 +1,10 @@
 
 #pragma once
 
-#include <list>
-#include "mathlib.h"
+#include "DVisDrawer.h"
+#include "bsploader.h"
+#include "DWinding.h"
 
-class DMetaSurf;
-typedef std::list<DMetaSurf*> DMetaSurfaces;
-
-DMetaSurfaces* BuildTrace( char* filename, vec3_t v_origin );
+void SetupVisView( const char* filename, vec3_t v_origin );
+DMetaSurfaces* BuildTrace( int leafnum, bool colorPerSurf );
+std::vector<DWinding> BuildLeafWindings( int leafnum );

@@ -31,6 +31,8 @@ class DWinding
 {
 public:
 	DWinding();
+	DWinding( DWinding&& other ) noexcept;
+	DWinding& operator=( DWinding&& other ) noexcept;
 	virtual ~DWinding();
 
 	void AllocWinding( int points );
@@ -55,9 +57,8 @@ public:
 //	members
 	int numpoints;
 	vec3_t* p;
-	vec3_t clr;
 };
 
-#define MAX_POINTS_ON_WINDING   64
+#define MAX_POINTS_ON_WINDING   256
 
 #define ON_EPSILON  0.01
