@@ -1042,6 +1042,12 @@ public:
 	filter_brush_any_face( FaceFilter* filter ) : m_filter( filter ){
 	}
 	bool filter( const Brush& brush ) const {
+#if 1
+		for( const auto& face : brush )
+			if( m_filter->filter( *face ) )
+				return true;
+		return false;
+#else
 		bool filtered = false;
 		Brush_forEachFace( brush, [&]( Face& face ){
 			if ( m_filter->filter( face ) ) {
@@ -1049,6 +1055,7 @@ public:
 			}
 		});
 		return filtered;
+#endif
 	}
 };
 
@@ -1059,13 +1066,20 @@ public:
 	filter_brush_all_faces( FaceFilter* filter ) : m_filter( filter ){
 	}
 	bool filter( const Brush& brush ) const {
-		bool filtered = true;
+#if 1
+		for( const auto& face : brush )
+			if( !m_filter->filter( *face ) )
+				return false;
+		return !brush.empty(); // don't filter empty brushes
+#else
+		bool filtered = !brush.empty(); // don't filter empty brushes
 		Brush_forEachFace( brush, [&]( Face& face ){
 			if ( !m_filter->filter( face ) ) {
 				filtered = false;
 			}
 		});
 		return filtered;
+#endif
 	}
 };
 
