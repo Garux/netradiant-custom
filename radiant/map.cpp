@@ -1155,7 +1155,7 @@ class RegionExcluder : public Excluder
 {
 public:
 	bool excluded( scene::Node& node ) const {
-		return node.excluded();
+		return node.excluded( scene::Node::eExcluded );
 	}
 };
 

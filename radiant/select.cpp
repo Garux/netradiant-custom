@@ -988,7 +988,7 @@ public:
 	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		if( m_hide && Node_isEntity( path.top().get() ) ) // hide group entity labels, when their content is entirely hidden
 			if( scene::Traversable* traversable = Node_getTraversable( path.top().get() ) )
-				if( Traversable_all_of_children( traversable, []( const scene::Node& node ){ return !node.visible(); } ) )
+				if( Traversable_all_of_children( traversable, []( const scene::Node& node ){ return node.excluded( scene::Node::eHidden ); } ) )
 					hide_node( path.top(), true );
 	}
 };
