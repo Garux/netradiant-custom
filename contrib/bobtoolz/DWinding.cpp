@@ -262,7 +262,7 @@ DWinding* DWinding::ReverseWinding(){
 	return c;
 }
 
-bool DWinding::ChopWindingInPlace( DPlane* chopPlane, vec_t epsilon ){
+bool DWinding::ChopWindingInPlace( const DPlane* chopPlane, vec_t epsilon ){
 	vec_t dists[MAX_POINTS_ON_WINDING + 4];
 	int sides[MAX_POINTS_ON_WINDING + 4];
 	int counts[3] = {0};

@@ -305,7 +305,7 @@ bool DoDoorsBox( DoorRS* rs ){
 
 		rs->nOrientation = radioNS->isChecked()
 		                 ? DIRECTION_NS
-						 : DIRECTION_EW;
+		                 : DIRECTION_EW;
 		return true;
 	}
 	return false;

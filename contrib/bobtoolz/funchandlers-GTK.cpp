@@ -348,7 +348,6 @@ void DoBuildStairs(){
 }
 
 void DoBuildDoors(){
-	UndoableCommand undo( "bobToolz.buildDoors" );
 	// ensure we have something selected
 	if ( GlobalSelectionSystem().countSelected() != 1 ) {
 		//DoMessageBox( "Invalid number of brushes selected, choose 1 only", "Error", EMessageBoxType::Error );
@@ -360,11 +359,12 @@ void DoBuildDoors(){
 	{
 		const char *tex = GetCurrentTexture();
 		strcpy( rs.mainTexture, tex + ( string_equal_prefix_nocase( tex, "textures/" )
-									  ? strlen( "textures/" )
-									  : 0 ) );
+		                              ? strlen( "textures/" )
+		                              : 0 ) );
 	}
 
 	if ( DoDoorsBox( &rs ) ) {
+		UndoableCommand undo( "bobToolz.buildDoors" );
 		vec3_t vMin, vMax;
 
 		{

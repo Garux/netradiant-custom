@@ -317,10 +317,9 @@ std::pair<winding_t, winding_t>    ClipWindingEpsilonStrict( const winding_t& in
 	float dists[MAX_POINTS_ON_WINDING + 4];
 	EPlaneSide sides[MAX_POINTS_ON_WINDING + 4];
 	int counts[3] = { 0 };
-	size_t i, j;
 
 // determine sides for each point
-	for ( i = 0; i < in.size(); i++ )
+	for ( size_t i = 0; i < in.size(); i++ )
 	{
 
 		dists[i] = plane3_distance_to_point( plane, in[i] );
@@ -336,8 +335,8 @@ std::pair<winding_t, winding_t>    ClipWindingEpsilonStrict( const winding_t& in
 		}
 		counts[sides[i]]++;
 	}
-	sides[i] = sides[0];
-	dists[i] = dists[0];
+	sides[in.size()] = sides[0];
+	dists[in.size()] = dists[0];
 
 	if ( !counts[eSideFront] && !counts[eSideBack] ) {
 		return {};
@@ -355,7 +354,7 @@ std::pair<winding_t, winding_t>    ClipWindingEpsilonStrict( const winding_t& in
 	winding_t front = AllocWinding( maxpts );
 	winding_t back = AllocWinding( maxpts );
 
-	for ( i = 0; i < in.size(); i++ )
+	for ( size_t i = 0; i < in.size(); i++ )
 	{
 		const Vector3& p1 = in[i];
 
@@ -380,7 +379,7 @@ std::pair<winding_t, winding_t>    ClipWindingEpsilonStrict( const winding_t& in
 		const Vector3& p2 = in[winding_next( in, i )];
 		const double dot = dists[i] / ( dists[i] - dists[i + 1] );
 		Vector3 mid;
-		for ( j = 0; j < 3; j++ )
+		for ( size_t j = 0; j < 3; j++ )
 		{	// avoid round off error when possible
 			if ( plane.normal()[j] == 1 ) {
 				mid[j] = plane.dist();
@@ -427,7 +426,6 @@ std::pair<winding_t, winding_t>    ClipWindingEpsilon( const winding_t& in, cons
  */
 void ChopWindingInPlaceAccu( winding_accu_t& inout, const Plane3& plane, float crudeEpsilon ){
 	size_t counts[3] = { 0 };
-	size_t i, j;
 	double dists[MAX_POINTS_ON_WINDING + 1];
 	EPlaneSide sides[MAX_POINTS_ON_WINDING + 1];
 
@@ -466,7 +464,7 @@ void ChopWindingInPlaceAccu( winding_accu_t& inout, const Plane3& plane, float c
 	static const double smallestEpsilonAllowed = ( (double) VEC_SMALLEST_EPSILON_AROUND_ONE ) * 0.5;
 	const double fineEpsilon = std::max( smallestEpsilonAllowed, (double) crudeEpsilon );
 
-	for ( i = 0; i < inout.size(); i++ )
+	for ( size_t i = 0; i < inout.size(); i++ )
 	{
 		dists[i] = plane3_distance_to_point( plane, inout[i] );
 		if ( dists[i] > fineEpsilon ) {
@@ -480,8 +478,8 @@ void ChopWindingInPlaceAccu( winding_accu_t& inout, const Plane3& plane, float c
 		}
 		counts[sides[i]]++;
 	}
-	sides[i] = sides[0];
-	dists[i] = dists[0];
+	sides[inout.size()] = sides[0];
+	dists[inout.size()] = dists[0];
 
 	// I'm wondering if whatever code that handles duplicate planes is robust enough
 	// that we never get a case where two nearly equal planes result in 2 NULL windings
@@ -500,7 +498,7 @@ void ChopWindingInPlaceAccu( winding_accu_t& inout, const Plane3& plane, float c
 	winding_accu_t f;
 	f.reserve( counts[eSideFront] + 2 );
 
-	for ( i = 0; i < inout.size(); i++ )
+	for ( size_t i = 0; i < inout.size(); i++ )
 	{
 		const DoubleVector3& p1 = inout[i];
 
@@ -524,7 +522,7 @@ void ChopWindingInPlaceAccu( winding_accu_t& inout, const Plane3& plane, float c
 		// w is in the range (0,1).
 		const double w = dists[i] / ( dists[i] - dists[i + 1] );
 		DoubleVector3 mid;
-		for ( j = 0; j < 3; j++ )
+		for ( size_t j = 0; j < 3; j++ )
 		{
 			// Avoid round-off error when possible.  Check axis-aligned normal.
 			if ( plane.normal()[j] == 1 ) {
@@ -556,10 +554,9 @@ void ChopWindingInPlace( winding_t& inout, const Plane3f& plane, float epsilon )
 	float dists[MAX_POINTS_ON_WINDING + 4];
 	EPlaneSide sides[MAX_POINTS_ON_WINDING + 4];
 	int counts[3] = { 0 };
-	size_t i, j;
 
 // determine sides for each point
-	for ( i = 0; i < in.size(); i++ )
+	for ( size_t i = 0; i < in.size(); i++ )
 	{
 		dists[i] = plane3_distance_to_point( plane, in[i] );
 		if ( dists[i] > epsilon ) {
@@ -574,8 +571,8 @@ void ChopWindingInPlace( winding_t& inout, const Plane3f& plane, float epsilon )
 		}
 		counts[sides[i]]++;
 	}
-	sides[i] = sides[0];
-	dists[i] = dists[0];
+	sides[in.size()] = sides[0];
+	dists[in.size()] = dists[0];
 
 	if ( !counts[eSideFront] ) {
 		inout.clear();
@@ -588,7 +585,7 @@ void ChopWindingInPlace( winding_t& inout, const Plane3f& plane, float epsilon )
 
 	winding_t f = AllocWinding( in.size() + 4 ); // cant use counts[0]+2 because of fp grouping errors
 
-	for ( i = 0; i < in.size(); i++ )
+	for ( size_t i = 0; i < in.size(); i++ )
 	{
 		const Vector3& p1 = in[i];
 
@@ -610,7 +607,7 @@ void ChopWindingInPlace( winding_t& inout, const Plane3f& plane, float epsilon )
 
 		const double dot = dists[i] / ( dists[i] - dists[i + 1] );
 		Vector3 mid;
-		for ( j = 0; j < 3; j++ )
+		for ( size_t j = 0; j < 3; j++ )
 		{	// avoid round off error when possible
 			if ( plane.normal()[j] == 1 ) {
 				mid[j] = plane.dist();

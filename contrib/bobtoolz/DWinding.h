@@ -38,7 +38,7 @@ public:
 	void AllocWinding( int points );
 
 	bool ChopWinding( DPlane* chopPlane );
-	bool ChopWindingInPlace( DPlane* chopPlane, vec_t ON_EPSILON );
+	bool ChopWindingInPlace( const DPlane* chopPlane, vec_t ON_EPSILON );
 	void ClipWindingEpsilon( DPlane* chopPlane, vec_t epsilon, DWinding** front, DWinding** back );
 
 	void CheckWinding();

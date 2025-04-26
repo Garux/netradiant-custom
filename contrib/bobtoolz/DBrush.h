@@ -93,6 +93,7 @@ public:
 	int FindPointsForPlane( DPlane* plane, DPoint** pnts, int maxpnts );
 
 	DBrush();
+	DBrush( DBrush&& ) noexcept = delete;
 	virtual ~DBrush();
 
 	bool operator==( const DBrush* other ) const;

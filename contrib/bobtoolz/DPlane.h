@@ -36,7 +36,7 @@ class DPlane
 public:
 	DPlane( const vec3_t va, const vec3_t vb, const vec3_t vc, const char* textureName, bool bDetail );
 	void ScaleTexture();
-	DWinding BaseWindingForPlane();
+	DWinding BaseWindingForPlane() const ;
 
 	void Rebuild();
 

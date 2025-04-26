@@ -142,7 +142,7 @@ bool DPlane::operator !=( DPlane& other ){
 	return true;
 }
 
-DWinding DPlane::BaseWindingForPlane(){
+DWinding DPlane::BaseWindingForPlane() const {
 	int i, x;
 	vec_t max, v;
 	vec3_t org, vright, vup;

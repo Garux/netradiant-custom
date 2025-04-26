@@ -172,7 +172,7 @@ static void HelpLight()
 		{ "-bouncescale <F>", "Scaling factor for radiosity" },
 		{ "-bounce <N>", "Maximal number of bounces for radiosity" },
 		{ "-brightness <F>", "Scaling factor for resulting lightmaps brightness" },
-		{ "-cheapgrid", "Use `-cheap` style lighting for radiosity" },
+		{ "-cheapgrid", "Use `-cheap` style lighting for light grid" },
 		{ "-cheap", "Abort vertex light calculations when white is reached" },
 		{ "-compensate <F>", "Lightmap compensate (darkening factor applied after everything else)" },
 		{ "-contrast <F>", "-255 .. 255 lighting contrast, default = 0" },
