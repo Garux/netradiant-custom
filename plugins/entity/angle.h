@@ -78,9 +78,13 @@ public:
 	}
 };
 
-inline float float_snapped_to_zero( float value ){
-	return fabs( value ) < 1e-6 ? 0.f : value;
-}
+/*
+zero snap angle value to avoid scientific notation after sprinf %g
+it's not supported in e.g. Q3:
+https://github.com/id-Software/Quake-III-Arena/blob/master/code/game/bg_lib.c#L910
+0.0001f is least value, which produces no scientific notation, must be good nuff precision too 🤞🏿
+*/
+const float ANGLEKEY_SMALLEST = 0.0001f;
 
 inline float angle_rotated( float angle, const Quaternion& rotation ){
 	return float_snapped_to_zero(
@@ -89,6 +93,7 @@ inline float angle_rotated( float angle, const Quaternion& rotation ){
 	                   matrix4_rotation_for_quaternion_quantised( rotation ),
 	                   matrix4_rotation_for_z_degrees( angle )
 	               )
-	           ).z()
+	           ).z(),
+	           ANGLEKEY_SMALLEST
 	       );
 }

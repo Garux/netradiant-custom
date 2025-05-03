@@ -60,6 +60,12 @@ inline Element float_snapped( const Element& f, const OtherElement& snap ){
 	return Element( std::llrint( f / snap ) * snap ); // llrint has more significant bits
 }
 
+/// \brief Returns \p f rounded to zero if less than \p snap.
+template<typename Element, typename OtherElement>
+inline Element float_snapped_to_zero( const Element& f, const OtherElement& snap ){
+	return std::fabs( f ) < snap? 0 : f;
+}
+
 /// \brief Returns true if \p f has no decimal fraction part.
 template<typename Element>
 inline bool float_is_integer( const Element& f ){
@@ -523,6 +529,18 @@ inline BasicVector3<Element> vector3_snapped( const BasicVector3<Element>& self,
 template<typename Element, typename OtherElement>
 inline void vector3_snap( BasicVector3<Element>& self, const OtherElement& snap ){
 	self = vector3_snapped( self, snap );
+}
+template<typename Element, typename OtherElement>
+inline BasicVector3<Element> vector3_snapped_to_zero( const BasicVector3<Element>& self, const OtherElement& snap ){
+	return BasicVector3<Element>(
+	           Element( float_snapped_to_zero( self.x(), snap ) ),
+	           Element( float_snapped_to_zero( self.y(), snap ) ),
+	           Element( float_snapped_to_zero( self.z(), snap ) )
+	       );
+}
+template<typename Element, typename OtherElement>
+inline void vector3_snap_to_zero( BasicVector3<Element>& self, const OtherElement& snap ){
+	self = vector3_snapped_to_zero( self, snap );
 }
 
 inline Vector3 vector3_for_spherical( double theta, double phi ){

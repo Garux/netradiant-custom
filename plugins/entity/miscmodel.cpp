@@ -339,7 +339,7 @@ public:
 
 		m_scale = matrix4_get_scale_vec3( mat );
 #endif
-		//m_angles = angles_snapped_to_zero( matrix4_get_rotation_euler_xyz_degrees( mat ) );
+		//m_angles = vector3_snapped_to_zero( matrix4_get_rotation_euler_xyz_degrees( mat ), ANGLEKEY_SMALLEST );
 	}
 	void snapto( float snap ){
 		m_originKey.m_origin = origin_snapped( m_originKey.m_origin, snap );
