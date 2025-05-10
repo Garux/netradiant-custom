@@ -32,6 +32,8 @@
 #include "qstringops.h"
 #include "inout.h"
 
+#define PRAGMA_MAP 1 // braxi -- pragma support
+
 struct game_default : game_t
 {
 	/* game flags */
@@ -918,26 +920,74 @@ struct game_ja : game_sof2
 	}
 };
 
+#ifdef PRAGMA_MAP
+struct game_pragma : game_default
+{
+	game_pragma()
+	{
+		arg = "pragma";
 
+		gamePath = "main";
+		homeBasePath = ".pragma";
+		magic = "pragma";
 
-const std::vector<game_t> g_games = { game_quake3(),
-                                      game_quakelive(),
-                                      game_nexuiz(),
-                                      game_xonotic(),
-                                      game_tremulous(),
-                                      game_unvanquished(),
-                                      game_tenebrae(),
-                                      game_wolf(),
-                                      game_wolfet(),
-                                      game_etut(),
-                                      game_ef(),
-                                      game_qfusion(),
-                                      game_reaction(),
-                                      game_darkplaces(),
-                                      game_dq(),
-                                      game_prophecy(),
-                                      game_sof2(),
-                                      game_jk2(),
-                                      game_ja(),
-                                    };
+		shaderPath = "materials";
+
+		maxLMSurfaceVerts = 4096; 
+		maxSurfaceVerts = 4096;
+		maxSurfaceIndexes = 4096 * 6;
+
+		emitFlares = true;
+		flareShader = "gfx_flare";
+
+		lightmapSize = 1024;
+		lightmapsRGB = false;
+
+		//texturesRGB = true;
+		//colorsRGB = true;
+
+		lightAngleHL = true;
+		noStyles = true;
+
+		keepLights = true;
+
+		patchSubdivisions = 4;
+		patchShadows = false;
+
+		miniMapBorder = 1.0f / 66.0f;
+		miniMapNameFormat = "../minimaps/%s.tga";
+
+		bspIdent = "BBSP";
+		bspVersion = 1;
+	}
+};
+#endif
+
+const std::vector<game_t> g_games =
+{
+#ifdef PRAGMA_MAP
+	game_pragma(),
+#else
+	game_quake3(),
+	game_quakelive(),
+	game_nexuiz(),
+	game_xonotic(),
+	game_tremulous(),
+	game_unvanquished(),
+	game_tenebrae(),
+	game_wolf(),
+	game_wolfet(),
+	game_etut(),
+	game_ef(),
+	game_qfusion(),
+	game_reaction(),
+	game_darkplaces(),
+	game_dq(),
+	game_prophecy(),
+	game_sof2(),
+	game_jk2(),
+	game_ja(),
+#endif
+};
+
 const game_t *g_game = &g_games[0];
