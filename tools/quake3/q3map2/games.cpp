@@ -946,7 +946,7 @@ struct game_pragma : game_default
 		//texturesRGB = true;
 		//colorsRGB = true;
 
-		delux`eMap = true;
+		deluxeMap = true;
 		deluxeMode = 0; // 0 - modelspace, 1 - tangentspace with renormalization, 2 - tangentspace without renormalization
 
 		lightAngleHL = true;
