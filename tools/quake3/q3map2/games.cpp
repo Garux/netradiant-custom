@@ -946,13 +946,16 @@ struct game_pragma : game_default
 		//texturesRGB = true;
 		//colorsRGB = true;
 
+		delux`eMap = true;
+		deluxeMode = 0; // 0 - modelspace, 1 - tangentspace with renormalization, 2 - tangentspace without renormalization
+
 		lightAngleHL = true;
 		noStyles = true;
 
 		keepLights = true;
 
 		patchSubdivisions = 4;
-		patchShadows = false;
+		patchShadows = true;
 
 		miniMapBorder = 1.0f / 66.0f;
 		miniMapNameFormat = "../minimaps/%s.tga";
