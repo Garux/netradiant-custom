@@ -25,7 +25,7 @@ endif
 #--------------------------------------------------------------------
 
 ifeq ($(PLATFORM),linux)
-  MNT_DIR = /home/kevin/GitHub/netradiant-custom/tools/mbspc
+  MNT_DIR = $(PWD)
   BLD_DIR = $(MNT_DIR)/build/linux
   OS_CFLAGS = -D__linux__
   LIBS = -ldl -lm
