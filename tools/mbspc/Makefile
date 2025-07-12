@@ -25,7 +25,7 @@ endif
 #--------------------------------------------------------------------
 
 ifeq ($(PLATFORM),linux)
-  MNT_DIR = /root/Progdev/mbspc
+  MNT_DIR = $(PWD)
   BLD_DIR = $(MNT_DIR)/build/linux
   OS_CFLAGS = -D__linux__
   LIBS = -ldl -lm
@@ -56,7 +56,7 @@ OBJ_DIR = $(BLD_DIR)/obj
 BASE_CFLAGS = -c -O3 -Wall -Wstrict-prototypes -fno-strict-aliasing \
               -MMD -DNDEBUG -DBSPC -DBSPCINCLUDE
 
-CFLAGS = $(BASE_CFLAGS) $(OS_CFLAGS)
+CFLAGS = $(BASE_CFLAGS) $(OS_CFLAGS) -I$(MNT_DIR)/../../libs
 
 #--------------------------------------------------------------------
 # Compile commands
@@ -90,36 +90,36 @@ BSP_OBJ = \
   $(OBJ_DIR)/aas_store.o \
   $(OBJ_DIR)/be_aas_bspc.o \
   $(OBJ_DIR)/brushbsp.o \
-  $(OBJ_DIR)/bsp_ent.o \
-  $(OBJ_DIR)/bsp_hl.o \
-  $(OBJ_DIR)/bsp_q1.o \
-  $(OBJ_DIR)/bsp_q2.o \
-  $(OBJ_DIR)/bsp_q3.o \
-  $(OBJ_DIR)/bsp_sin.o \
+  $(OBJ_DIR)/l_bsp_ent.o \
+  $(OBJ_DIR)/l_bsp_hl.o \
+  $(OBJ_DIR)/l_bsp_q1.o \
+  $(OBJ_DIR)/l_bsp_q2.o \
+  $(OBJ_DIR)/l_bsp_q3.o \
+  $(OBJ_DIR)/l_bsp_sin.o \
   $(OBJ_DIR)/bspc.o \
-  $(OBJ_DIR)/bspcmd.o \
+  $(OBJ_DIR)/l_cmd.o \
   $(OBJ_DIR)/csg.o \
   $(OBJ_DIR)/faces.o \
   $(OBJ_DIR)/glfile.o \
   $(OBJ_DIR)/leakfile.o \
-  $(OBJ_DIR)/log.o \
+  $(OBJ_DIR)/l_log.o \
   $(OBJ_DIR)/map.o \
   $(OBJ_DIR)/map_hl.o \
   $(OBJ_DIR)/map_q1.o \
   $(OBJ_DIR)/map_q2.o \
   $(OBJ_DIR)/map_q3.o \
   $(OBJ_DIR)/map_sin.o \
-  $(OBJ_DIR)/math.o \
-  $(OBJ_DIR)/mem.o \
+  $(OBJ_DIR)/l_math.o \
+  $(OBJ_DIR)/l_mem.o \
   $(OBJ_DIR)/nodraw.o \
-  $(OBJ_DIR)/poly.o \
+  $(OBJ_DIR)/l_poly.o \
   $(OBJ_DIR)/portals.o \
   $(OBJ_DIR)/prtfile.o \
-  $(OBJ_DIR)/qfiles.o \
+  $(OBJ_DIR)/l_qfiles.o \
   $(OBJ_DIR)/textures.o \
-  $(OBJ_DIR)/threads.o \
+  $(OBJ_DIR)/l_threads.o \
   $(OBJ_DIR)/tree.o \
-  $(OBJ_DIR)/utils.o \
+  $(OBJ_DIR)/l_utils.o \
   $(OBJ_DIR)/writebsp.o \
   \
   $(OBJ_DIR)/be_aas_bspq3.o \
