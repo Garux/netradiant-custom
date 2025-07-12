@@ -57,6 +57,7 @@ void DoFixBrushes();
 void DoResetTextures();
 void DoBuildStairs();
 void DoBuildDoors();
+void DoBuildApertureDoors();
 void DoPathPlotter();
 void DoPitBuilder();
 void DoCTFColourChanger();

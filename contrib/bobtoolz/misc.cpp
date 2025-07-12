@@ -277,7 +277,7 @@ const scene::Path* FindEntityFromTargetname( const char* targetname ){
 	return Scene_forEachEntity( EntityFindByKeyValue( "targetname", targetname ) ).result;
 }
 
-void FillDefaultTexture( _QERFaceData* faceData, vec3_t va, vec3_t vb, vec3_t vc, const char* texture ){
+void FillDefaultTexture( _QERFaceData* faceData, const vec3_accu_t va, const vec3_accu_t vb, const vec3_accu_t vc, const char* texture ){
 	faceData->m_texdef.rotate = 0;
 	faceData->m_texdef.scale[0] = 0.5;
 	faceData->m_texdef.scale[1] = 0.5;

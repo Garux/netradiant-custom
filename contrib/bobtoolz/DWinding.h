@@ -43,6 +43,7 @@ public:
 
 	void CheckWinding();
 	void WindingCentre( vec3_t centre );
+	void WindingCentroid( vec3_t centroid ) const;
 	void WindingBounds( vec3_t mins, vec3_t maxs );
 	void RemoveColinearPoints();
 

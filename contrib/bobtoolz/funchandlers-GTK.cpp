@@ -382,6 +382,22 @@ void DoBuildDoors(){
 	}
 }
 
+void DoBuildApertureDoors(){
+	// ensure we have something selected
+	if ( !( GlobalSelectionSystem().countSelected() > 0 && Node_isBrush( GlobalSelectionSystem().ultimateSelected().path().top() ) ) ) {
+		//DoMessageBox( "Invalid number of brushes selected, choose 1 only", "Error", EMessageBoxType::Error );
+		globalErrorStream() << "bobToolz BuildDoors: Invalid number of brushes selected, choose 1 only.\n";
+		return;
+	}
+
+	static ApertureDoorRS rs;
+	// rs.textureMain = GetCurrentTexture();
+
+	if ( DoApertureDoorsBox( &rs ) ) {
+		BuildApertureDoors( GlobalSelectionSystem().ultimateSelected(), rs );
+	}
+}
+
 void DoPathPlotter(){
 	UndoableCommand undo( "bobToolz.pathPlotter" );
 	PathPlotterRS rs;

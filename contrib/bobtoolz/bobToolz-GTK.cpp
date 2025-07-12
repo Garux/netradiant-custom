@@ -52,6 +52,7 @@ const char* PLUGIN_NAME = "bobToolz";
 constexpr char PLUGIN_COMMANDS[] = "About...,"
                                    "-,"
                                    "Stair Builder...,"
+                                   "Aperture Door...,"
                                    "Door Builder...,"
                                    "Find Duplicates,"
                                    "Intersect...,"
@@ -151,6 +152,9 @@ extern "C" void QERPlug_Dispatch( const char *p, vec3_t vMin, vec3_t vMax, bool 
 	}
 	else if ( string_equal_nocase( p, "door builder..." ) ) {
 		DoBuildDoors();
+	}
+	else if ( string_equal_nocase( p, "aperture door..." ) ) {
+		DoBuildApertureDoors();
 	}
 	else if ( string_equal_nocase( p, "intersect..." ) ) {
 		DoIntersect();
