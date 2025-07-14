@@ -3230,8 +3230,8 @@ void IlluminateVertexes( int num ){
 			}
 
 			/* get luxel coords */
-			x = std::clamp( int( verts[ i ].lightmap[ lightmapNum ][ 0 ] ), 0, lm->sw - 1 );
-			y = std::clamp( int( verts[ i ].lightmap[ lightmapNum ][ 1 ] ), 0, lm->sh - 1 );
+			x = std::clamp( int( verts[ i ].lightmap[ 0 ][ 0 ] ), 0, lm->sw - 1 );
+			y = std::clamp( int( verts[ i ].lightmap[ 0 ][ 1 ] ), 0, lm->sh - 1 );
 
 			/* get vertex luxels */
 			Vector3& vertLuxel = getVertexLuxel( lightmapNum, ds->firstVert + i );
