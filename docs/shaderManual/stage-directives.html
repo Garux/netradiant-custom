@@ -283,10 +283,10 @@ textures/obsidian_video/intro
 <p>As rgbGen entity, but inverted.</p>
 
 <h3>rgbGen lightingDiffuse</h3>
-<p>Colors are computed using a standard diffuse lighting equation. It uses the vertex normals to illuminate the object correctly.</p>
+<p>Vertex colors are dynamically computed from lightgrid BSP data using a standard diffuse lighting equation. It also uses the vertex normals to illuminate the object correctly.</p>
 <blockquote>
 	<h4>Design Notes:</h4>
-	<p>rgbGen lightingDiffuse is used when you want the RGB values to be computed for a dynamic model (i.e. non-map object) in the world using regular in-game lighting. For example, you would specify on shaders for items, characters, weapons, etc.</p>
+	<p>rgbGen lightingDiffuse is used when you want the RGB values to be computed for a dynamic model. It only functions on MD3 gamemodels (those loaded directly by the game, not baked into the BSP). They are namely items, characters, weapons, and models which are attached to movers via model2 key. rgbGen lightingDiffuse is the default lighting mode for these.</p>
 </blockquote>
 
 <h3 id="rgbGenWave">rgbGen wave <em>func base amplitude phase freq</em></h3>
