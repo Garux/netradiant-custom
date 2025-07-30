@@ -61,8 +61,11 @@ public:
 		eSortOverbrighten = 1024,
 		eSortFullbright = 1025,
 		eSortTranslucent = 1026,
-		eSortHighlight = 1027,
-		eSortOverlayFirst = 1028,
+		// BRAXI BEGIN
+		eSortDecal = 1027,
+		eSortHighlight = 1028, // was 1027
+		eSortOverlayFirst = 1029, // was 1028
+		// BRAXI END
 		eSortOverlayLast = 2047,
 		eSortText = 2048,
 		eSortControlFirst = 2050,

@@ -1338,6 +1338,19 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 		g_texcoordArray_enabled = false;
 	}
 
+	// BRAXI BEGIN
+	if (delta & state & RENDER_POLYGONOFFSET) {
+		gl().glEnable(GL_POLYGON_OFFSET_FILL);
+		gl().glPolygonOffset(-1, -2); // values match retail quake3
+		GlobalOpenGL_debugAssertNoErrors();
+	}
+	else if (delta & ~state & RENDER_POLYGONOFFSET) {
+		gl().glDisable(GL_POLYGON_OFFSET_FILL);
+		gl().glPolygonOffset(0,0); // not too neseccasy but "in case" someone ever does offsets somewhere else
+		GlobalOpenGL_debugAssertNoErrors();
+	}
+	// BRAXI END
+
 	if ( delta & state & RENDER_BLEND ) {
 // FIXME: some .TGA are buggy, have a completely empty alpha channel
 // if such brushes are rendered in this loop they would be totally transparent with GL_MODULATE
@@ -2044,10 +2057,21 @@ void OpenGLShader::construct( const char* name ){
 			}
 			state.m_colour = Vector4( m_shader->getTexture()->color, 1 );
 
+
 			if ( ( m_shader->getFlags() & QER_TRANS ) != 0 ) {
 				state.m_state |= RENDER_BLEND;
+
+				// BRAXI BEGIN
+				if ((m_shader->getFlags() & QER_DECAL) != 0) {
+					state.m_sort = OpenGLState::eSortDecal;
+					state.m_state |= RENDER_POLYGONOFFSET;
+				}
+				else {
+					state.m_sort = OpenGLState::eSortTranslucent;
+				}
+				//BRAXI END
+
 				state.m_colour[3] = m_shader->getTrans();
-				state.m_sort = OpenGLState::eSortTranslucent;
 				BlendFunc blendFunc = m_shader->getBlendFunc();
 				state.m_blend_src = convertBlendFactor( blendFunc.m_src );
 				state.m_blend_dst = convertBlendFactor( blendFunc.m_dst );
