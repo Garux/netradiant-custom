@@ -927,11 +927,11 @@ struct game_pragma : game_default
 	{
 		arg = "pragma";
 
-		gamePath = "main";
-		homeBasePath = ".pragma";
-		magic = "pragma";
+		gamePath = "ncftu";
+		homeBasePath = ".ncftu";
+		magic = "ncftu";
 
-		shaderPath = "materials";
+		shaderPath = "devtools_scripts";
 
 		maxLMSurfaceVerts = 4096; 
 		maxSurfaceVerts = 4096;
