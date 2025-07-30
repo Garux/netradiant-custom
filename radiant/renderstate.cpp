@@ -2069,7 +2069,7 @@ void OpenGLShader::construct( const char* name ){
 				else {
 					state.m_sort = OpenGLState::eSortTranslucent;
 				}
-				//BRAXI END
+				
 
 				state.m_colour[3] = m_shader->getTrans();
 				BlendFunc blendFunc = m_shader->getBlendFunc();
@@ -2080,6 +2080,30 @@ void OpenGLShader::construct( const char* name ){
 //					state.m_state |= RENDER_DEPTHWRITE;
 //				}
 			}
+
+			if ((m_shader->getFlags() & QER_DECAL) != 0) {
+
+				if (!(state.m_state & RENDER_BLEND)) {
+					state.m_state |= RENDER_BLEND;
+				}
+
+				if (!(state.m_state & RENDER_POLYGONOFFSET)) {
+					state.m_state |= RENDER_POLYGONOFFSET;
+				}
+
+				state.m_sort = OpenGLState::eSortDecal;
+					
+				state.m_colour[3] = m_shader->getTrans();
+				BlendFunc blendFunc = m_shader->getBlendFunc();
+				state.m_blend_src = GL_SRC_ALPHA;
+				state.m_blend_dst = GL_ONE_MINUS_SRC_ALPHA;
+				state.m_depthfunc = GL_LEQUAL;
+				//				if ( state.m_blend_src == GL_SRC_ALPHA || state.m_blend_dst == GL_SRC_ALPHA ) {
+				//					state.m_state |= RENDER_DEPTHWRITE;
+				//				}
+			}
+			//BRAXI END
+
 			else
 			{
 				state.m_state |= RENDER_DEPTHWRITE;
