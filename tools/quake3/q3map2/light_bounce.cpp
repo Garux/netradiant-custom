@@ -283,7 +283,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 						for ( l = 0; l < 3; l++ )
 						{
 							st += rv[ l ]->st * blend[ l ];
-							lightmap += rv[ l ]->lightmap[ lightmapNum ] * blend[ l ];
+							lightmap += rv[ l ]->lightmap[ 0 ] * blend[ l ];
 							alphaI += rv[ l ]->color[ lightmapNum ].alpha() * blend[ l ];
 						}
 
