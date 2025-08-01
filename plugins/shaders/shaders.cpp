@@ -1302,6 +1302,32 @@ bool ShaderTemplate::parseQuake3( Tokeniser& tokeniser ){
 					m_nFlags |= QER_BOTCLIP;
 				}
 			}
+			// BRAXI BEGIN
+			else if (string_equal_nocase(token, "sort")) {
+				const char* sort = tokeniser.getToken();
+
+				if (sort == 0) {
+					Tokeniser_unexpectedError(tokeniser, sort, "#sort");
+					return false;
+				}
+
+				if (string_equal_nocase(sort, "decal")) {
+					m_nFlags |= QER_TRANS;
+					m_nFlags |= QER_DECAL;
+					if (m_fTrans == 1.0f) { // has not been explicitly set by qer_trans
+						m_fTrans = 0.99f;
+					}
+				}
+			}
+			// BRAXI BEGIN
+			else if (string_equal_nocase(token, "polygonOffset")) {
+				m_nFlags |= QER_TRANS;
+				m_nFlags |= QER_DECAL;
+					if (m_fTrans == 1.0f) { // has not been explicitly set by qer_trans
+						m_fTrans = 0.99f;
+					}
+				}
+			// BRAXI END
 		}
 	}
 
