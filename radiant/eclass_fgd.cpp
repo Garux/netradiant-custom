@@ -60,18 +60,20 @@ void EntityClassFGD_clear(){
 	g_listTypesFGD.clear();
 }
 
-EntityClass* EntityClassFGD_insertUniqueBase( EntityClass* entityClass ){
+EntityClass* EntityClassFGD_insertUniqueBase( EntityClass* entityClass, bool allowfree = true ){
 	std::pair<BaseClasses::iterator, bool> result = g_EntityClassFGD_bases.insert( BaseClasses::value_type( entityClass->name(), entityClass ) );
 	if ( !result.second ) {
 		globalErrorStream() << "duplicate base class: " << makeQuoted( entityClass->name() ) << '\n';
-		//eclass_capture_state( entityClass );
-		//entityClass->free( entityClass );
+		if( allowfree ){
+			eclass_capture_state( entityClass );
+			entityClass->free( entityClass );
+		}
 	}
 	return ( *result.first ).second;
 }
 
 EntityClass* EntityClassFGD_insertUnique( EntityClass* entityClass ){
-	EntityClassFGD_insertUniqueBase( entityClass );
+	EntityClassFGD_insertUniqueBase( entityClass, false );
 	std::pair<EntityClasses::iterator, bool> result = g_EntityClassFGD_classes.insert( EntityClasses::value_type( entityClass->name(), entityClass ) );
 	if ( !result.second ) {
 		globalErrorStream() << "duplicate entity class: " << makeQuoted( entityClass->name() ) << '\n';
