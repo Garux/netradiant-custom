@@ -544,9 +544,9 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 	}
 }
 
-void EntityClassFGD_loadFile( const char* filename );
+using LoadInclude = std::function<void(const char *)>;
 
-void EntityClassFGD_parse( TextInputStream& inputStream, const char* path ){
+void EntityClassFGD_parse( TextInputStream& inputStream, const char* path, const LoadInclude& loadInclude ){
 	Tokeniser& tokeniser = GlobalScriptLibrary().m_pfnNewScriptTokeniser( inputStream );
 
 	tokeniser.nextLine();
@@ -573,7 +573,7 @@ void EntityClassFGD_parse( TextInputStream& inputStream, const char* path ){
 		}
 		// hl2 below
 		else if ( string_equal( blockType, "@include" ) ) {
-			EntityClassFGD_loadFile( StringStream( PathFilenameless( path ), tokeniser.getToken() ) );
+			loadInclude( tokeniser.getToken() );
 		}
 		else if ( string_equal( blockType, "@mapsize" ) ) {
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "(" ), PARSE_ERROR );
@@ -594,12 +594,12 @@ void EntityClassFGD_parse( TextInputStream& inputStream, const char* path ){
 }
 
 
-void EntityClassFGD_loadFile( const char* filename ){
+void EntityClassFGD_loadFile( const char* filename, const LoadInclude& loadInclude ){
 	TextFileInputStream file( filename );
 	if ( !file.failed() ) {
 		globalOutputStream() << "parsing entity classes from " << makeQuoted( filename ) << '\n';
 
-		EntityClassFGD_parse( file, filename );
+		EntityClassFGD_parse( file, filename, loadInclude );
 	}
 }
 
@@ -701,8 +701,14 @@ public:
 					constructDirectory( gameDirectory, "fgd" );
 				}
 
-				for( const auto& [ name, path ] : name_path ){
-					EntityClassFGD_loadFile( StringStream( path, name ) );
+				const LoadInclude loadInclude = [&]( const char *name ){
+					if( auto it = name_path.find( name ); it != name_path.end() && it->second != nullptr ) // null path == loaded
+						EntityClassFGD_loadFile( StringStream( std::exchange( it->second, nullptr ), name ), loadInclude );
+				};
+
+				for( auto& [ name, path ] : name_path ){
+					if( path != nullptr ) // null path == loaded
+						EntityClassFGD_loadFile( StringStream( std::exchange( path, nullptr ), name ), loadInclude );
 				}
 			}
 
