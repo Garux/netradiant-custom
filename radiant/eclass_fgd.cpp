@@ -52,41 +52,41 @@ ListAttributeTypes g_listTypesFGD;
 
 void EntityClassFGD_clear(){
 	g_EntityClassFGD_classes.clear();
-	for ( BaseClasses::iterator i = g_EntityClassFGD_bases.begin(); i != g_EntityClassFGD_bases.end(); ++i )
+	for ( auto [ name, eclass ] : g_EntityClassFGD_bases )
 	{
-		( *i ).second->free( ( *i ).second );
+		eclass->free( eclass );
 	}
 	g_EntityClassFGD_bases.clear();
 	g_listTypesFGD.clear();
 }
 
 EntityClass* EntityClassFGD_insertUniqueBase( EntityClass* entityClass, bool allowfree = true ){
-	std::pair<BaseClasses::iterator, bool> result = g_EntityClassFGD_bases.insert( BaseClasses::value_type( entityClass->name(), entityClass ) );
-	if ( !result.second ) {
+	auto [ it, inserted ] = g_EntityClassFGD_bases.insert( BaseClasses::value_type( entityClass->name(), entityClass ) );
+	if ( !inserted ) {
 		globalErrorStream() << "duplicate base class: " << makeQuoted( entityClass->name() ) << '\n';
 		if( allowfree ){
 			eclass_capture_state( entityClass );
 			entityClass->free( entityClass );
 		}
 	}
-	return ( *result.first ).second;
+	return it->second;
 }
 
 EntityClass* EntityClassFGD_insertUnique( EntityClass* entityClass ){
 	EntityClassFGD_insertUniqueBase( entityClass, false );
-	std::pair<EntityClasses::iterator, bool> result = g_EntityClassFGD_classes.insert( EntityClasses::value_type( entityClass->name(), entityClass ) );
-	if ( !result.second ) {
+	auto [ it, inserted ] = g_EntityClassFGD_classes.insert( EntityClasses::value_type( entityClass->name(), entityClass ) );
+	if ( !inserted ) {
 		globalErrorStream() << "duplicate entity class: " << makeQuoted( entityClass->name() ) << '\n';
 		eclass_capture_state( entityClass );
 		entityClass->free( entityClass );
 	}
-	return ( *result.first ).second;
+	return it->second;
 }
 
 void EntityClassFGD_forEach( EntityClassVisitor& visitor ){
-	for ( EntityClasses::iterator i = g_EntityClassFGD_classes.begin(); i != g_EntityClassFGD_classes.end(); ++i )
+	for ( auto [ name, eclass ] : g_EntityClassFGD_classes )
 	{
-		visitor.visit( ( *i ).second );
+		visitor.visit( eclass );
 	}
 }
 
@@ -448,10 +448,10 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 				tokeniser.nextLine();
 			}
 
-			for ( ListAttributeType::const_iterator i = listType.begin(); i != listType.end(); ++i )
+			for ( const auto& [ name, value ] : listType )
 			{
-				if ( string_equal( attribute.m_value.c_str(), ( *i ).first.c_str() ) ) {
-					attribute.m_value = ( *i ).second;
+				if ( string_equal( attribute.m_value.c_str(), name.c_str() ) ) {
+					attribute.m_value = value;
 				}
 			}
 
@@ -634,11 +634,11 @@ const ListAttributeType* EntityClassFGD_findListType( const char *name ){
 void EntityClassFGD_resolveInheritance( EntityClass* derivedClass ){
 	if ( derivedClass->inheritanceResolved == false ) {
 		derivedClass->inheritanceResolved = true;
-		for ( StringList::iterator j = derivedClass->m_parent.begin(); j != derivedClass->m_parent.end(); ++j )
+		for ( const auto& parentName : derivedClass->m_parent )
 		{
-			BaseClasses::iterator i = g_EntityClassFGD_bases.find( ( *j ).c_str() );
+			BaseClasses::iterator i = g_EntityClassFGD_bases.find( parentName.c_str() );
 			if ( i == g_EntityClassFGD_bases.end() ) {
-				globalErrorStream() << "failed to find entityDef " << makeQuoted( ( *j ).c_str() ) << " inherited by "  << makeQuoted( derivedClass->name() ) << '\n';
+				globalErrorStream() << "failed to find entityDef " << makeQuoted( parentName.c_str() ) << " inherited by " << makeQuoted( derivedClass->name() ) << '\n';
 			}
 			else
 			{
@@ -654,9 +654,9 @@ void EntityClassFGD_resolveInheritance( EntityClass* derivedClass ){
 					derivedClass->maxs = parentClass->maxs;
 				}
 
-				for ( EntityClassAttributes::iterator k = parentClass->m_attributes.begin(); k != parentClass->m_attributes.end(); ++k )
+				for ( const auto& [ key, attr ] : parentClass->m_attributes )
 				{
-					EntityClass_insertAttribute( *derivedClass, ( *k ).first.c_str(), ( *k ).second );
+					EntityClass_insertAttribute( *derivedClass, key.c_str(), attr );
 				}
 
 				for( size_t flag = 0; flag < MAX_FLAGS; ++flag ){
@@ -713,23 +713,23 @@ public:
 			}
 
 			{
-				for ( EntityClasses::iterator i = g_EntityClassFGD_classes.begin(); i != g_EntityClassFGD_classes.end(); ++i )
+				for ( auto [ name, eclass ] : g_EntityClassFGD_classes )
 				{
-					EntityClassFGD_resolveInheritance( ( *i ).second );
-					if ( ( *i ).second->fixedsize && ( *i ).second->m_modelpath.empty() ) {
-						if ( !( *i ).second->sizeSpecified ) {
-							globalErrorStream() << "size not specified for entity class: " << makeQuoted( ( *i ).second->name() ) << '\n';
+					EntityClassFGD_resolveInheritance( eclass );
+					if ( eclass->fixedsize && eclass->m_modelpath.empty() ) {
+						if ( !eclass->sizeSpecified ) {
+							globalErrorStream() << "size not specified for entity class: " << makeQuoted( eclass->name() ) << '\n';
 						}
-						if ( !( *i ).second->colorSpecified ) {
-							globalErrorStream() << "color not specified for entity class: " << makeQuoted( ( *i ).second->name() ) << '\n';
+						if ( !eclass->colorSpecified ) {
+							globalErrorStream() << "color not specified for entity class: " << makeQuoted( eclass->name() ) << '\n';
 						}
 					}
 				}
 			}
 			{
-				for ( BaseClasses::iterator i = g_EntityClassFGD_bases.begin(); i != g_EntityClassFGD_bases.end(); ++i )
+				for ( auto [ name, eclass ] : g_EntityClassFGD_bases )
 				{
-					eclass_capture_state( ( *i ).second );
+					eclass_capture_state( eclass );
 				}
 			}
 

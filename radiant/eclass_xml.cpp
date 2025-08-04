@@ -529,6 +529,8 @@ const char* GetExtension(){
 void ScanFile( EntityClassCollector& collector, const char *filename ){
 	TextFileInputStream inputFile( filename );
 	if ( !inputFile.failed() ) {
+		globalOutputStream() << "parsing entity classes from " << makeQuoted( filename ) << '\n';
+
 		XMLStreamParser parser( inputFile );
 
 		EclassXMLImporter importer( collector );
