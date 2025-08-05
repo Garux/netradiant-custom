@@ -5,7 +5,7 @@ on: [workflow_dispatch]
 jobs:
   windows-msys:
     name: ${{ matrix.config }} Windows ${{ matrix.arch }}
-    runs-on: windows-2019
+    runs-on: windows-2022
     strategy:
       fail-fast: false
       matrix:
@@ -27,7 +27,7 @@ jobs:
     steps:
     - uses: msys2/setup-msys2@v2
       with:
-        install: ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-libxml2 git p7zip
+        install: base-devel ${{ matrix.prefix }}-toolchain ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-libxml2 git unzip p7zip
         msystem: ${{ matrix.msystem }}
         path-type: minimal
         release: false
@@ -69,7 +69,7 @@ jobs:
 
     - name: Build
       run: |
-        make CXXFLAGS="-Wno-deprecated-copy" -j4
+        make CC=gcc-14 CXX=g++-14 CXXFLAGS="-Wno-deprecated-copy" -j4
         7z a Linux-${{ matrix.arch }}.7z ./install/*
 #       7z to preserve file permissions
 
