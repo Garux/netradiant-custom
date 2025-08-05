@@ -824,11 +824,9 @@ static const std::vector<ShaderFormat> g_shaderGeneralFormats{
 			"metalsteps",
 			"monsterclip",
 			"nodamage",
-			"nodlight",
 			"nodraw",
 			"nodrop",
 			"noimpact",
-			"nomarks",
 			"nolightmap",
 			"nosteps",
 			"nonsolid",
@@ -843,6 +841,12 @@ static const std::vector<ShaderFormat> g_shaderGeneralFormats{
 			"trans",
 			"trigger",
 			"water",
+		}
+	},
+	{
+		"surfaceparm %s", c_pageSurf, c_colorKeyLv1E, { // these take effect w/o bsp rebuild
+			"nodlight",
+			"nomarks",
 		}
 	},
 	{
