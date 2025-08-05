@@ -601,6 +601,14 @@ const char* misc_model_dialog( QWidget* parent, const char* filepath ){
 	}
 	return 0;
 }
+
+void Entity_reloadDefinitions(){
+	if( ConfirmModified( "Reload Entity Definitions" ) ){
+		GlobalEntityClassManager().unrealise();
+		GlobalEntityClassManager().realise();
+	}
+}
+
 /*
 void LightRadiiImport( EntityCreator& self, bool value ){
 	self.setLightRadii( value );
@@ -705,6 +713,8 @@ void Entity_constructMenu( QMenu* menu ){
 	create_menu_item_with_mnemonic( menu, "&Move Primitives to Entity", "EntityMovePrimitivesToLast" );
 	create_menu_item_with_mnemonic( menu, "&Select Color...", "EntityColorSet" );
 	create_menu_item_with_mnemonic( menu, "&Normalize Color", "EntityColorNormalize" );
+	menu->addSeparator();
+	create_menu_item_with_mnemonic( menu, "Reload Entity Definitions", "EntityReloadDefinitions" );
 }
 
 void Entity_registerShortcuts(){
@@ -728,6 +738,7 @@ void Entity_Construct(){
 	GlobalCommands_insert( "EntityMovePrimitivesToFirst", makeCallbackF( Entity_moveSelectedPrimitivesToFirst ) );
 	GlobalCommands_insert( "EntityUngroup", makeCallbackF( Entity_ungroup ) );
 	GlobalCommands_insert( "EntityUngroupPrimitives", makeCallbackF( Entity_ungroupSelectedPrimitives ) );
+	GlobalCommands_insert( "EntityReloadDefinitions", makeCallbackF( Entity_reloadDefinitions ) );
 
 	GlobalToggles_insert( "ShowLightRadiuses", makeCallbackF( ToggleShowLightRadii ), ToggleItem::AddCallbackCaller( g_show_lightradii_item ) );
 

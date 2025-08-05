@@ -367,6 +367,7 @@ menus...
 	* Misc->Colors: add Model Browser Background control
 	* Modify->Repeat: saved transforms feedback and individual resets
 	* Modify->Repeat->Reset Transforms (alt + r)
+	* Entity->Reload Entity Definitions
 
 misc...
 	* removed note to save before going to preferences, project settings

@@ -2048,10 +2048,7 @@ public:
 	}
 	void unrealise(){
 		if ( ++m_unrealised == 1 ) {
-			if ( XYWnd::m_mnuDrop != 0 ) {
-				delete XYWnd::m_mnuDrop;
-				XYWnd::m_mnuDrop = 0;
-			}
+			delete std::exchange( XYWnd::m_mnuDrop, nullptr );
 		}
 	}
 };
