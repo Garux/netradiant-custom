@@ -1124,6 +1124,7 @@ misc...
 		support bsp without vis data
 		add RBSP, FBSP support
 	* bobToolz: new Aperture Door builder
+	* .def .ent .fgd can be used simultaneously (removed entityclass="halflife")
 
 
 

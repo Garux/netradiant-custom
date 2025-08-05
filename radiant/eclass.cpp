@@ -157,9 +157,7 @@ public:
 			}
 		}
 
-		const auto relPath = StringStream( m_directory, name );
-
-		scanner.scanFile( g_collector, relPath );
+		scanner.scanFile( g_collector, StringStream( m_directory, name ) );
 	}
 };
 
@@ -181,7 +179,7 @@ void EntityClassQuake3_constructDirectory( const char* directory, const char* ex
 
 
 /* facts:
-   modules are alpha sorted, so .def .ent loading order
+   modules are alpha sorted, so .def .fgd .ent (xml) loading order
    all base & mod files of the same type are alpha sorted together
    equal file name in mod is ignored
    equal eclass name inserted later is ignored
@@ -209,6 +207,8 @@ void EntityClassQuake3_Construct(){
 			{
 				EntityClassesLoadFile( table, path ) ( name.c_str() );
 			}
+
+			table.finalize( g_collector );
 		}
 	};
 

@@ -56,6 +56,7 @@ struct EntityClassScanner
 
 	void ( *scanFile )( EntityClassCollector& collector, const char* filename );
 	const char* ( *getExtension )( );
+	void ( *finalize )( EntityClassCollector& collector ) = []( EntityClassCollector& collector ){};
 };
 
 #include "modulesystem.h"
