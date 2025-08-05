@@ -648,7 +648,7 @@ inline QTreeWidgetItem* new_item( const char *text ){
 	return item;
 }
 
-#define LAST_ITER_STRING "..."
+#define LAST_ITER_STRING "+"
 inline void last_iter_append( QTreeWidget* tree ){
 	tree->addTopLevelItem( new_item( LAST_ITER_STRING ) );
 }
