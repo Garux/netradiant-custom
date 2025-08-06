@@ -604,7 +604,7 @@ retry:
 ?save font size
 	ctrl+d duplicate line, selection
 	find and replace
-f3, shift+f3, ctrl+f
+	f3, shift+f3, ctrl+f
 	ctrl+s
 	move selected text block with alt+arrows
 	move line up/dn too
@@ -1639,12 +1639,12 @@ protected:
 		}
 		QLineEdit::keyPressEvent( event );
 	}
-private:
+public:
 	void search( const QString &text, bool reverse = false, bool words = false, bool casesens = false ){
 		QTextDocument::FindFlags flag;
-		if( reverse ) flag |= QTextDocument::FindBackward;
+		if( reverse )  flag |= QTextDocument::FindBackward;
 		if( casesens ) flag |= QTextDocument::FindCaseSensitively;
-		if( words ) flag |= QTextDocument::FindWholeWords;
+		if( words )    flag |= QTextDocument::FindWholeWords;
 
 		QTextCursor cursor = m_textEdit.textCursor();
 		QTextCursor cursorSaved = cursor; // save the cursor position
@@ -2255,6 +2255,7 @@ class TextEditor : public QObject
 	QWidget *m_window = 0;
 	QPlainTextEdit *m_textView; // slave, text widget from the gtk editor
 	QPushButton *m_button; // save button
+	QLineEdit_search *m_searchEntry;
 	CopiedString m_filename;
 
 	void construct(){
@@ -2336,8 +2337,8 @@ class TextEditor : public QObject
 			QObject::connect( m_textView, &QPlainTextEdit::textChanged, cb );
 		}
 
-		auto *search = new QLineEdit_search( *m_textView );
-		hbox->addWidget( search );
+		m_searchEntry = new QLineEdit_search( *m_textView );
+		hbox->addWidget( m_searchEntry );
 	}
 	void editor_save(){
 		FILE *f = fopen( m_filename.c_str(), "wb" ); //write in binary mode to preserve line feeds
@@ -2411,16 +2412,31 @@ protected:
 				return true;
 			}
 		}
-		// save
 		if( event->type() == QEvent::ShortcutOverride ){
 			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
 			if( keyEvent == QKeySequence::StandardKey::Save ){
-				if( !keyEvent->isAutoRepeat() && m_textView->document()->isModified() ){
+				if( !keyEvent->isAutoRepeat() && m_textView->document()->isModified() )
 					editor_save();
-				}
-				event->accept();
-				return true;
 			}
+			else if( keyEvent == QKeySequence::StandardKey::Find ){
+				if( auto cursor = m_textView->textCursor(); cursor.hasSelection() )
+					m_searchEntry->setText( cursor.selectedText() );
+				m_searchEntry->setFocus();
+			}
+			else if( keyEvent == QKeySequence::StandardKey::FindNext ){
+				if( !m_searchEntry->text().isEmpty() )
+					m_searchEntry->search( m_searchEntry->text() );
+			}
+			else if( keyEvent == QKeySequence::StandardKey::FindPrevious ){
+				if( !m_searchEntry->text().isEmpty() )
+					m_searchEntry->search( m_searchEntry->text(), true );
+			}
+			else{
+				return QObject::eventFilter( obj, event ); // standard event processing
+			}
+			// handled
+			event->accept();
+			return true;
 		}
 		return QObject::eventFilter( obj, event ); // standard event processing
 	}

@@ -1127,6 +1127,7 @@ misc...
 	* bobToolz: new Aperture Door builder
 	* .def .ent .fgd can be used simultaneously (removed entityclass="halflife")
 	* shader editor: save on ctrl + s
+	* shader editor: Find, FindNext, FindPrevious OS dependent binds; Find fills search entry from selection
 
 
 
