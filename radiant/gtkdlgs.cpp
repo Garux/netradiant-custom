@@ -605,7 +605,7 @@ retry:
 	ctrl+d duplicate line, selection
 	find and replace
 f3, shift+f3, ctrl+f
-ctrl+s
+	ctrl+s
 	move selected text block with alt+arrows
 	move line up/dn too
 	ctrl+x to cut whole line
@@ -2361,7 +2361,7 @@ class TextEditor : public QObject
 			if( ret == EMessageBoxReturn::eIDYES ){
 				editor_save();
 			}
-			if( ret == EMessageBoxReturn::eIDNO ){ // discard changes
+			else if( ret == EMessageBoxReturn::eIDNO ){ // discard changes
 				m_textView->clear(); // unset isModified flag this way to avoid messagebox on next opening
 			}
 			else if( ret == EMessageBoxReturn::eIDCANCEL ){
@@ -2408,6 +2408,17 @@ protected:
 		if( event->type() == QEvent::Close ) {
 			if( !ensure_saved() ){ // keep editor opened
 				event->ignore();
+				return true;
+			}
+		}
+		// save
+		if( event->type() == QEvent::ShortcutOverride ){
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			if( keyEvent == QKeySequence::StandardKey::Save ){
+				if( !keyEvent->isAutoRepeat() && m_textView->document()->isModified() ){
+					editor_save();
+				}
+				event->accept();
 				return true;
 			}
 		}

@@ -1126,6 +1126,7 @@ misc...
 		add RBSP, FBSP support
 	* bobToolz: new Aperture Door builder
 	* .def .ent .fgd can be used simultaneously (removed entityclass="halflife")
+	* shader editor: save on ctrl + s
 
 
 
