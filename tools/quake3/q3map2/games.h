@@ -27,7 +27,6 @@
 
 #include <vector>
 
-
 /* ydnar: compiler flags, because games have widely varying content/surface flags */
 const int C_SOLID                = 0x00000001;
 const int C_TRANSLUCENT          = 0x00000002;

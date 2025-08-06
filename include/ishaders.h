@@ -38,6 +38,7 @@ enum
 	QER_CLIP = 1 << 9,
 	QER_BOTCLIP = 1 << 10,
 	QER_SKY = 1 << 11,
+	QER_DECAL = 1 << 12, // BRAXI
 };
 
 struct qtexture_t;

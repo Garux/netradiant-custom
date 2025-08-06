@@ -1996,6 +1996,7 @@ void CamWnd::Cam_Draw(){
 							 | RENDER_DEPTHWRITE
 							 | RENDER_ALPHATEST
 							 | RENDER_BLEND
+							 | RENDER_POLYGONOFFSET // braxi -- is this necessary? (without it decals zfight)
 							 | RENDER_CULLFACE
 							 | RENDER_COLOURARRAY
 							 | RENDER_OFFSETLINE
