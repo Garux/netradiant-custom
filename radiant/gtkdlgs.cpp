@@ -1824,6 +1824,18 @@ protected:
 			 || keyEvent == QKeySequence::StandardKey::DeleteEndOfWord
 			 || keyEvent == QKeySequence::StandardKey::DeleteStartOfWord )
 				event->accept();
+			// Copy reimplementation to make it work in readonly mode
+			if( keyEvent == QKeySequence::StandardKey::Copy && textCursor().hasSelection() && !keyEvent->isAutoRepeat() ){
+				this->copy();
+				event->accept();
+				return true;
+			}
+			// SelectAll reimplementation to make it work in readonly mode
+			if( keyEvent == QKeySequence::StandardKey::SelectAll && !keyEvent->isAutoRepeat() ){
+				this->selectAll();
+				event->accept();
+				return true;
+			}
 			// cut current line w/o selection
 			if( keyEvent == QKeySequence::StandardKey::Cut && !textCursor().hasSelection() ){
 				auto cursor = textCursor();
