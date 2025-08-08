@@ -52,10 +52,10 @@
                      m1             select texture + apply to selection
              shift + m1             open shader in internal editor
       ctrl + shift + m1             open shader in external editor
+                     m2             context menu
                      m2 drag        scroll pan
                 drag m2 + shift     scroll pan 4x faster
                      m1 x2          load directory, selected texture belongs to
-                     m2 x2          load common/ directory
                      m3             select texture, don't apply to selection
 
 
