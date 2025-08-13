@@ -3994,11 +3994,11 @@ public:
 					v.pop_back();
 			}
 			std::vector<bool> ok( v.size(), true );
-			gatherSelectedComponents( [&]( const DoubleVector3 & value ) {
+			gatherSelectedComponents( makeCallback( [&]( const DoubleVector3 & value ) {
 				for( std::size_t i = 0; i < v.size(); ++i )
 					if( vector3_length_squared( v[i].m_vertex - value ) < 0.05 * 0.05 )
 						ok[i] = false;
-			} );
+			} ) );
 
 			m_brush.m_vertexModeVertices.reserve( v.size() );
 			for( std::size_t i = 0; i < v.size(); ++i ){

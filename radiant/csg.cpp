@@ -1025,16 +1025,15 @@ public:
 class Scene_gatherSelectedComponents : public scene::Graph::Walker
 {
 	MergeVertices& m_mergeVertices;
-	const Vector3Callback m_callback;
 public:
 	Scene_gatherSelectedComponents( MergeVertices& mergeVertices )
-		: m_mergeVertices( mergeVertices ), m_callback( [this]( const DoubleVector3& value ){ m_mergeVertices.insert( value ); } ){
+		: m_mergeVertices( mergeVertices ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		if ( path.top().get().visible() ) {
 			ComponentEditable* componentEditable = Instance_getComponentEditable( instance );
 			if ( componentEditable ) {
-				componentEditable->gatherSelectedComponents( m_callback );
+				componentEditable->gatherSelectedComponents( makeCallback( [this]( const DoubleVector3& value ){ m_mergeVertices.insert( value ); } ) );
 			}
 			return true;
 		}

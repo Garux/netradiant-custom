@@ -34,8 +34,6 @@
 #include "container/stack.h"
 #include "typesystem.h"
 
-#include <functional>
-
 class Selector;
 class SelectionTest;
 class SelectionIntersection;
@@ -51,7 +49,7 @@ public:
 	virtual void gatherComponentsHighlight( std::vector<std::vector<Vector3>>& polygons, SelectionIntersection& intersection, SelectionTest& test, SelectionSystem::EComponentMode mode ) const = 0;
 };
 
-typedef std::function<void( const DoubleVector3& )> Vector3Callback;
+typedef Callback<void( const DoubleVector3& )> Vector3Callback;
 
 class ComponentEditable
 {
