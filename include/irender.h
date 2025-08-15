@@ -52,6 +52,7 @@ const unsigned int RENDER_PROGRAM        = 1 << 18;
 const unsigned int RENDER_SCREEN         = 1 << 19;
 const unsigned int RENDER_TEXT           = 1 << 20; // override: globalstate |= RENDER_TEXTURE | RENDER_BLEND | RENDER_FILL
 const unsigned int RENDER_OVERRIDE       = 1 << 21; // override: globalstate |= RENDER_FILL
+const unsigned int RENDER_POLYGONOFFSET	 = 1 << 22; // braxi -- for decals : glEnable( GL_POLYGON_OFFSET_FILL )
 typedef unsigned int RenderStateFlags;
 
 

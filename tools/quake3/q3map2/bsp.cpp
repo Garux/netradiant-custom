@@ -654,6 +654,21 @@ int BSPMain( Args& args ){
 		Error( "usage: q3map2 [options] mapfile" );
 	}
 
+#ifdef PRAGMA_MAP
+	// write light and misc_model entities
+	keepLights = true;
+	keepModels = true;
+
+	// emit flare surfs
+	emitFlares = true;
+
+	// create meta surfaces
+	meta = true;
+	patchMeta = true;
+
+	// disable celshader
+#endif
+
 	const char *fileName = args.takeBack();
 	auto argsToInject = args.getVector();
 	{
@@ -668,6 +683,7 @@ int BSPMain( Args& args ){
 			Sys_Printf( "Disabling water\n" );
 			nowater = true;
 		}
+#ifndef PRAGMA_MAP
 		while ( args.takeArg( "-keeplights" ) ) {
 			keepLights = true;
 			Sys_Printf( "Leaving light entities on map after compile\n" );
@@ -676,6 +692,7 @@ int BSPMain( Args& args ){
 			keepModels = true;
 			Sys_Printf( "Leaving misc_model entities on map after compile\n" );
 		}
+#endif
 		while ( args.takeArg( "-nodetail" ) ) {
 			Sys_Printf( "Ignoring detail brushes\n" );
 			nodetail = true;
@@ -773,6 +790,7 @@ int BSPMain( Args& args ){
 			Sys_Printf( "Flatshading enabled\n" );
 			flat = true;
 		}
+#ifndef PRAGMA_MAP
 		while ( args.takeArg( "-celshader" ) ) {
 			globalCelShader( "textures/", args.takeNext() );
 			Sys_Printf( "Global cel shader set to \"%s\"\n", globalCelShader.c_str() );
@@ -781,6 +799,7 @@ int BSPMain( Args& args ){
 			Sys_Printf( "Creating meta surfaces from brush faces\n" );
 			meta = true;
 		}
+#endif
 		while ( args.takeArg( "-metaadequatescore" ) ) {
 			metaAdequateScore = std::max( -1, atoi( args.takeNext() ) );
 			if ( metaAdequateScore >= 0 ) {
@@ -793,6 +812,7 @@ int BSPMain( Args& args ){
 				Sys_Printf( "Setting GOOD meta score to %d (see surface_meta.c)\n", metaGoodScore );
 			}
 		}
+#ifndef PRAGMA_MAP
 		while ( args.takeArg( "-patchmeta" ) ) {
 			Sys_Printf( "Creating meta surfaces from patches\n" );
 			patchMeta = true;
@@ -805,6 +825,7 @@ int BSPMain( Args& args ){
 			Sys_Printf( "Flare surfaces disabled\n" );
 			emitFlares = false;
 		}
+#endif
 		while ( args.takeArg( "-skyfix" ) ) {
 			Sys_Printf( "GL_CLAMP sky fix/hack/workaround enabled\n" );
 			skyFixHack = true;
