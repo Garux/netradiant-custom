@@ -202,12 +202,14 @@ void sphere_construct_fill( Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
 }
 
 void sphere_draw_fill( const Vector3& origin, float radius, const Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
-	gl().glBegin( GL_TRIANGLE_STRIP );
-	for ( int i = 0; i < SPHERE_FILL_POINTS; ++i )
-	{
-		gl().glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[i], radius ) ) ) );
+	if( radius > 0 ){
+		gl().glBegin( GL_TRIANGLE_STRIP );
+		for ( int i = 0; i < SPHERE_FILL_POINTS; ++i )
+		{
+			gl().glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[i], radius ) ) ) );
+		}
+		gl().glEnd();
 	}
-	gl().glEnd();
 }
 
 	#elif 0 // triangles
@@ -320,18 +322,9 @@ void sphere_draw_fill( const Vector3& origin, float radius, const Vector3 radiiP
 
 	#endif
 
-void light_draw_radius_fill( const Vector3& origin, const std::array<float, 3>& envelope, const Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
-#ifdef RADII_RENDER_BIG_RADIUS
-	if ( envelope[0] > 0 ) {
-		sphere_draw_fill( origin, envelope[0], radiiPoints );
-	}
-#endif
-	if ( envelope[1] > 0 ) {
-		sphere_draw_fill( origin, envelope[1], radiiPoints );
-	}
-	if ( envelope[2] > 0 ) {
-		sphere_draw_fill( origin, envelope[2], radiiPoints );
-	}
+void light_draw_radius_fill( const Vector3& origin, const float envelopes[ 2 ], const Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
+	sphere_draw_fill( origin, envelopes[ 0 ], radiiPoints );
+	sphere_draw_fill( origin, envelopes[ 1 ], radiiPoints );
 }
 #endif
 
@@ -455,32 +448,24 @@ void sphere_construct_wire( Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
 }
 
 void sphere_draw_wire( const Vector3& origin, float radius, const Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
-	int k = 0;
-	for( int j = 0; j < 3; j++ )
-	{
-		gl().glBegin( GL_LINE_LOOP );
-
-		for ( int i = 0; i < SPHERE_WIRE_SIDES; i++ )
+	if( radius > 0 ){
+		for( int j = 0, k = 0; j < 3; ++j )
 		{
-			gl().glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[k++], radius ) ) ) );
-		}
+			gl().glBegin( GL_LINE_LOOP );
 
-		gl().glEnd();
+			for ( int i = 0; i < SPHERE_WIRE_SIDES; i++ )
+			{
+				gl().glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[k++], radius ) ) ) );
+			}
+
+			gl().glEnd();
+		}
 	}
 }
 
-void light_draw_radius_wire( const Vector3& origin, const std::array<float, 3>& envelope, const Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
-#ifdef RADII_RENDER_BIG_RADIUS
-	if ( envelope[0] > 0 ) {
-		sphere_draw_wire( origin, envelope[0], radiiPoints );
-	}
-#endif
-	if ( envelope[1] > 0 ) {
-		sphere_draw_wire( origin, envelope[1], radiiPoints );
-	}
-	if ( envelope[2] > 0 ) {
-		sphere_draw_wire( origin, envelope[2], radiiPoints );
-	}
+void light_draw_radius_wire( const Vector3& origin, const float envelopes[ 2 ], const Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
+	sphere_draw_wire( origin, envelopes[ 0 ], radiiPoints );
+	sphere_draw_wire( origin, envelopes[ 1 ], radiiPoints );
 }
 #endif
 
@@ -725,7 +710,7 @@ inline float light_intensity( float radius, float falloffTolerance ){
 LightType g_lightType = LIGHTTYPE_DEFAULT;
 
 
-bool spawnflags_linear( int flags ){
+inline bool spawnflags_linear( int flags ){
 	if ( g_lightType == LIGHTTYPE_RTCW ) {
 		// Spawnflags :
 		// 1: nonlinear
@@ -764,7 +749,7 @@ private:
 	void calculateRadii(){
 		const float intensity = std::fabs( getIntensity() * m_scale ); // support either intensity sign
 
-		if ( spawnflags_linear( m_flags ) ) {
+		if ( isLinear() ) {
 			m_radii_transformed[0] = m_radii[0] = light_radius_linear( intensity, 1.0f ) / m_fade;
 			m_radii_transformed[1] = m_radii[1] = light_radius_linear( intensity, 48.0f ) / m_fade;
 			m_radii_transformed[2] = m_radii[2] = light_radius_linear( intensity, 255.0f ) / m_fade;
@@ -823,7 +808,7 @@ public:
 
 		auto& r = m_radii_transformed;
 
-		if ( spawnflags_linear( m_flags ) ) {
+		if ( isLinear() ) {
 			r[0] = radius + 47.0f / m_fade;
 			if( r[0] < 1.f ){ // prevent transform to <=0, as we use r[0] to calculate intensity
 				r[0] = 1.f;
@@ -849,10 +834,13 @@ public:
 //		globalOutputStream() << r[0] << ' ' << r[1] << ' ' << r[2] << " m_radii_transformed\n";
 	}
 	float calculateIntensityFromRadii() const {
-		return std::copysign( spawnflags_linear( m_flags ) // keep intensity sign, while adjusting it via radii
+		return std::copysign( isLinear() // keep intensity sign, while adjusting it via radii
 		                      ? light_intensity_linear( m_radii_transformed[0] * m_fade, 1.f ) / m_scale
 		                      : light_intensity( m_radii_transformed[0], 1.f ) / m_scale
 		                      , getIntensity() );
+	}
+	bool isLinear() const {
+		return spawnflags_linear( m_flags );
 	}
 };
 
@@ -906,7 +894,8 @@ public:
 	}
 	void render( RenderStateFlags state ) const {
 		//light_draw_radius_wire( m_origin, m_radii.m_radii );
-		light_draw_radius_wire( m_origin, m_radii.m_radii_transformed, m_radiiPoints );
+		// draw two practically useful radiuses
+		light_draw_radius_wire( m_origin, m_radii.m_radii_transformed.data() + !m_radii.isLinear(), m_radiiPoints );
 	}
 };
 Vector3 RenderLightRadiiWire::m_radiiPoints[SPHERE_WIRE_POINTS] = {g_vector3_identity};
@@ -923,7 +912,8 @@ public:
 	}
 	void render( RenderStateFlags state ) const {
 		//light_draw_radius_fill( m_origin, m_radii.m_radii );
-		light_draw_radius_fill( m_origin, m_radii.m_radii_transformed, m_radiiPoints );
+		// draw two practically useful radiuses
+		light_draw_radius_fill( m_origin, m_radii.m_radii_transformed.data() + !m_radii.isLinear(), m_radiiPoints );
 	}
 };
 //Shader* RenderLightRadiiFill::m_state = 0;
