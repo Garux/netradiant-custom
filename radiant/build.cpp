@@ -641,16 +641,21 @@ void build_commands_write( const char* filename ){
 
 void Build_refreshMenu( QMenu* menu );
 
+constexpr Qt::ItemFlags c_itemFlags = Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
+constexpr Qt::ItemFlags c_itemFlagsDraggable = c_itemFlags | Qt::ItemIsDragEnabled;
+
 inline QTreeWidgetItem* new_item( const char *text ){
 	auto item = new QTreeWidgetItem;
 	item->setText( 0, text );
-	item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren );
+	item->setFlags( c_itemFlagsDraggable );
 	return item;
 }
 
 #define LAST_ITER_STRING "+"
 inline void last_iter_append( QTreeWidget* tree ){
-	tree->addTopLevelItem( new_item( LAST_ITER_STRING ) );
+	QTreeWidgetItem *item = new_item( LAST_ITER_STRING );
+	item->setFlags( c_itemFlags );
+	tree->addTopLevelItem( item );
 }
 
 
@@ -688,13 +693,14 @@ void project_cell_edited( QTreeWidgetItem *item, ProjectList& projectList ){
 		}
 		else
 		{
-			( *i ).first = new_text.constData();
+			i->first = new_text.constData();
 		}
 	}
 	else if ( !new_text.isEmpty() && !string_equal( new_text, LAST_ITER_STRING ) ) { // add new
 		projectList.m_changed = true;
 		project.push_back( Project::value_type( new_text.constData(), Build() ) );
 
+		item->setFlags( c_itemFlagsDraggable ); // note: calls this function again with upper condition
 		last_iter_append( projectList.m_buildView );
 		//refresh command field
 		item->treeWidget()->currentItemChanged( item, nullptr );
@@ -703,48 +709,6 @@ void project_cell_edited( QTreeWidgetItem *item, ProjectList& projectList ){
 	Build_refreshMenu( g_bsp_menu );
 }
 
-
-BuildPair g_buildpair_copied;
-BuildCommand g_buildcommand_copied;
-
-class Project_key_press : public QObject
-{
-	ProjectList& m_projectList;
-public:
-	Project_key_press( ProjectList& projectList ) : QObject( projectList.m_buildView ), m_projectList( projectList ){}
-protected:
-	bool eventFilter( QObject *obj, QEvent *event ) override {
-		if( event->type() == QEvent::KeyPress ) {
-			Project& project = m_projectList.m_project;
-			if( QTreeWidgetItem *item = m_projectList.m_buildView->currentItem() ){
-				Project::iterator x = Project_find( project, item->treeWidget()->indexOfTopLevelItem( item ) );
-				QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
-				if ( keyEvent->matches( QKeySequence::StandardKey::Delete ) && x != project.end() ) {
-					m_projectList.m_changed = true;
-					project.erase( x );
-					Build_refreshMenu( g_bsp_menu );
-
-					const int id = item->treeWidget()->indexOfTopLevelItem( item );
-					delete item;
-					m_projectList.m_buildView->currentItemChanged( m_projectList.m_buildView->topLevelItem( id ), nullptr ); //refresh command field
-				}
-				else if ( keyEvent->matches( QKeySequence::StandardKey::Copy ) && x != project.end() ) {
-					g_buildpair_copied = ( *x );
-				}
-				else if ( keyEvent->matches( QKeySequence::StandardKey::Paste ) && !g_buildpair_copied.first.empty() ) {
-					m_projectList.m_changed = true;
-					project.insert( x, g_buildpair_copied );
-					Build_refreshMenu( g_bsp_menu );
-
-					item->treeWidget()->insertTopLevelItem( item->treeWidget()->indexOfTopLevelItem( item ), new_item( g_buildpair_copied.first.c_str() ) );
-				}
-
-				event->accept();
-			}
-		}
-		return QObject::eventFilter( obj, event ); // standard event processing
-	}
-};
 
 Build* g_current_build = 0;
 
@@ -787,50 +751,193 @@ void commands_cell_edited( QTreeWidgetItem *item ){
 	Build::iterator i = Build_find( build, item->treeWidget()->indexOfTopLevelItem( item ) );
 	if ( i != build.end() ) { // edit
 		g_build_changed = true;
-		( *i ).setString( new_text );
+		if ( new_text.isEmpty() ) { // empty = delete
+			build.erase( i );
+			delete item;
+		}
+		else
+		{
+			i->setString( new_text );
+		}
 	}
 	else if ( !new_text.isEmpty() && !string_equal( new_text, LAST_ITER_STRING ) ) { // add new
 		g_build_changed = true;
 		build.push_back( Build::value_type( VariableString( new_text ) ) );
 
+		item->setFlags( c_itemFlagsDraggable ); // note: calls this function again with upper condition
 		last_iter_append( item->treeWidget() );
 	}
 
 	Build_refreshMenu( g_bsp_menu );
 }
 
-class Commands_key_press : public QObject
+class QTreeWidget_drag : public QTreeWidget
 {
-	QTreeWidget* m_tree;
 public:
-	Commands_key_press( QTreeWidget* tree ) : QObject( tree ), m_tree( tree ){}
+	QTreeWidget_drag(){
+		setColumnCount( 1 );
+		setUniformRowHeights( true ); // optimization
+		setSizeAdjustPolicy( QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents ); // scroll area will inherit column size
+		header()->setStretchLastSection( false ); // non greedy column sizing
+		header()->setSectionResizeMode( QHeaderView::ResizeMode::ResizeToContents ); // no text elision
+		setHeaderHidden( true );
+		setRootIsDecorated( false );
+		setDragDropMode( QAbstractItemView::DragDropMode::InternalMove );
+	}
 protected:
-	bool eventFilter( QObject *obj, QEvent *event ) override {
-		if( event->type() == QEvent::KeyPress && g_current_build != nullptr ) {
-			Build& build = *g_current_build;
-			if( QTreeWidgetItem *item = m_tree->currentItem() ){
-				Build::iterator x = Build_find( build, item->treeWidget()->indexOfTopLevelItem( item ) );
-				QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
-				if ( keyEvent->matches( QKeySequence::StandardKey::Delete ) && x != build.end() ) {
-					g_build_changed = true;
-					build.erase( x );
+	void mousePressEvent( QMouseEvent* event ) override {
+		setDragDropMode( event->modifiers() == Qt::KeyboardModifier::ControlModifier
+		                 ? QAbstractItemView::DragDropMode::DragDrop
+		                 : QAbstractItemView::DragDropMode::InternalMove );
 
-					delete item;
-				}
-				else if ( keyEvent->matches( QKeySequence::StandardKey::Copy ) && x != build.end() ) {
-					g_buildcommand_copied = ( *x );
-				}
-				else if ( keyEvent->matches( QKeySequence::StandardKey::Paste ) && !string_empty( g_buildcommand_copied.c_str() ) ) {
-					g_build_changed = true;
-					build.insert( x, g_buildcommand_copied );
+		event->setModifiers( Qt::KeyboardModifier::NoModifier ); // allows to start drag of selected item too
 
-					item->treeWidget()->insertTopLevelItem( item->treeWidget()->indexOfTopLevelItem( item ), new_item( g_buildcommand_copied.c_str() ) );
-				}
+		QTreeWidget::mousePressEvent( event );
+	}
 
-				event->accept();
+	bool positionBelowLast( const QPoint& pos ) const {
+		const QModelIndex index = indexAt( pos );
+		return !index.isValid() || // root
+		      ( index.row() + 1 == topLevelItemCount() && pos.y() > visualRect( index ).center().y() ); // last item
+	}
+	void dragMoveEvent( QDragMoveEvent* event ) override {
+		if( positionBelowLast( event->pos() ) ){
+			event->ignore();
+			return;
+		}
+		QTreeWidget::dragMoveEvent( event );
+	}
+	bool m_drop = false;
+	void dropEvent( QDropEvent* event ) override {
+		if( positionBelowLast( event->pos() ) ){
+			event->ignore();
+			return;
+		}
+		ASSERT_MESSAGE( !m_drop, "dropEvent() without rowsInserted()" );
+		m_drop = true;
+		QTreeWidget::dropEvent( event );
+	}
+};
+
+class QTreeWidget_project : public QTreeWidget_drag
+{
+	ProjectList& m_projectList;
+public:
+	QTreeWidget_project( ProjectList& projectList ) : m_projectList( projectList ){
+	}
+protected:
+	BuildPair m_buildpair_copied;
+	Project::iterator m_buildpair_dragged;
+	void startDrag( Qt::DropActions supportedActions ) override {
+		m_buildpair_dragged = Project_find( m_projectList.m_project, indexOfTopLevelItem( currentItem() ) );
+		QTreeWidget::startDrag( supportedActions );
+	}
+	void rowsInserted( const QModelIndex& parent, int start, int end ) override {
+		if( std::exchange( m_drop, false ) ){ // insertion source is drop
+			auto& list = m_projectList.m_project;
+			if( dragDropMode() == QAbstractItemView::DragDropMode::InternalMove ){
+				// move to the end of list 1st, so that resulting 'start' index can be used correctly, when moving inside a list farther
+				list.splice( list.cend(), list, m_buildpair_dragged );
+				list.splice( std::next( list.cbegin(), start ), list, --list.cend() );
+			} // note: copy drop emits itemChanged() signal after this function; here text is yet empty
+			else if( dragDropMode() == QAbstractItemView::DragDropMode::DragDrop ){
+				list.insert( std::next( list.cbegin(), start ), *m_buildpair_dragged );
+				// fix item flags, copied item has Qt::ItemIsDropEnabled
+				blockSignals( true ); // block itemChanged() with empty text
+				topLevelItem( start )->setFlags( c_itemFlagsDraggable );
+				blockSignals( false );
+			}
+			m_projectList.m_changed = true;
+			Build_refreshMenu( g_bsp_menu );
+		}
+
+		QTreeWidget::rowsInserted( parent, start, end );
+	}
+	void keyPressEvent( QKeyEvent *event ) override {
+		if( QTreeWidgetItem *item = currentItem() ){
+			Project& project = m_projectList.m_project;
+			Project::iterator x = Project_find( project, indexOfTopLevelItem( item ) );
+			if ( event->matches( QKeySequence::StandardKey::Delete ) && x != project.end() ) {
+				m_projectList.m_changed = true;
+				project.erase( x );
+				Build_refreshMenu( g_bsp_menu );
+
+				const int id = indexOfTopLevelItem( item );
+				delete item;
+				currentItemChanged( topLevelItem( id ), nullptr ); //refresh command field
+			}
+			else if ( event->matches( QKeySequence::StandardKey::Copy ) && x != project.end() ) {
+				m_buildpair_copied = ( *x );
+			}
+			else if ( event->matches( QKeySequence::StandardKey::Paste ) && !m_buildpair_copied.first.empty() ) {
+				m_projectList.m_changed = true;
+				project.insert( x, m_buildpair_copied );
+				Build_refreshMenu( g_bsp_menu );
+
+				insertTopLevelItem( indexOfTopLevelItem( item ), new_item( m_buildpair_copied.first.c_str() ) );
 			}
 		}
-		return QObject::eventFilter( obj, event ); // standard event processing
+
+		QTreeWidget::keyPressEvent( event );
+	}
+};
+
+class QTreeWidget_commands : public QTreeWidget_drag
+{
+protected:
+	BuildCommand m_buildcommand_copied;
+	Build::iterator m_buildcommand_dragged;
+	void startDrag( Qt::DropActions supportedActions ) override {
+		ASSERT_NOTNULL( g_current_build );
+		m_buildcommand_dragged = Build_find( *g_current_build, indexOfTopLevelItem( currentItem() ) );
+		QTreeWidget::startDrag( supportedActions );
+	}
+	void rowsInserted( const QModelIndex& parent, int start, int end ) override {
+		setFixedHeight( sizeHintForRow( 0 ) * std::max( topLevelItemCount(), 4 ) // custom height management
+			+ horizontalScrollBar()->sizeHint().height() + frameWidth() * 2 );
+
+		if( std::exchange( m_drop, false ) ){ // insertion source is drop
+			ASSERT_NOTNULL( g_current_build );
+			Build& list = *g_current_build;
+			if( dragDropMode() == QAbstractItemView::DragDropMode::InternalMove ){
+				// move to the end of list 1st, so that resulting 'start' index can be used correctly, when moving inside a list farther
+				list.splice( list.cend(), list, m_buildcommand_dragged );
+				list.splice( std::next( list.cbegin(), start ), list, --list.cend() );
+			} // note: copy drop emits itemChanged() signal after this function; here text is yet empty
+			else if( dragDropMode() == QAbstractItemView::DragDropMode::DragDrop ){
+				list.insert( std::next( list.cbegin(), start ), *m_buildcommand_dragged );
+				// fix item flags, copied item has Qt::ItemIsDropEnabled
+				blockSignals( true ); // block itemChanged() with empty text
+				topLevelItem( start )->setFlags( c_itemFlagsDraggable );
+				blockSignals( false );
+			}
+			g_build_changed = true;
+		}
+
+		QTreeWidget::rowsInserted( parent, start, end );
+	}
+	void keyPressEvent( QKeyEvent *event ) override {
+		if( g_current_build != nullptr ) {
+			Build& build = *g_current_build;
+			if( QTreeWidgetItem *item = currentItem() ){
+				Build::iterator x = Build_find( build, indexOfTopLevelItem( item ) );
+				if ( event->matches( QKeySequence::StandardKey::Delete ) && x != build.end() ) {
+					g_build_changed = true;
+					build.erase( x );
+					delete item;
+				}
+				else if ( event->matches( QKeySequence::StandardKey::Copy ) && x != build.end() ) {
+					m_buildcommand_copied = ( *x );
+				}
+				else if ( event->matches( QKeySequence::StandardKey::Paste ) && !string_empty( m_buildcommand_copied.c_str() ) ) {
+					g_build_changed = true;
+					build.insert( x, m_buildcommand_copied );
+					insertTopLevelItem( indexOfTopLevelItem( item ), new_item( m_buildcommand_copied.c_str() ) );
+				}
+			}
+		}
+
+		QTreeWidget::keyPressEvent( event );
 	}
 };
 
@@ -871,55 +978,29 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 			grid->addWidget( frame, 0, 0 );
 			grid->setRowStretch( 0, 1 );
 			{
-				auto tree = projectList.m_buildView = buildView = new QTreeWidget;
-				tree->setColumnCount( 1 );
-				tree->setUniformRowHeights( true ); // optimization
+				auto tree = projectList.m_buildView = buildView = new QTreeWidget_project( projectList );
 				tree->setHorizontalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
-				tree->setSizeAdjustPolicy( QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents ); // scroll area will inherit column size
-				tree->header()->setStretchLastSection( false ); // non greedy column sizing
-				tree->header()->setSectionResizeMode( QHeaderView::ResizeMode::ResizeToContents ); // no text elision
-				tree->setHeaderHidden( true );
-				tree->setRootIsDecorated( false );
 				( new QHBoxLayout( frame ) )->addWidget( tree );
-				{
-					QObject::connect( tree, &QTreeWidget::itemChanged, [&projectList]( QTreeWidgetItem *item, int column ){
-						project_cell_edited( item, projectList );
-					} );
 
-					tree->installEventFilter( new Project_key_press( projectList ) );
-				}
+				QObject::connect( tree, &QTreeWidget::itemChanged, [&projectList]( QTreeWidgetItem *item, int column ){
+					project_cell_edited( item, projectList );
+				} );
 			}
 		}
 		{
 			auto frame = new QGroupBox( "Commandline" );
 			grid->addWidget( frame, 1, 0 );
 			{
-				auto tree = new QTreeWidget;
-				tree->setColumnCount( 1 );
-				tree->setUniformRowHeights( true ); // optimization
+				auto tree = new QTreeWidget_commands;
 				tree->setVerticalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
-				tree->setSizeAdjustPolicy( QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents ); // scroll area will inherit column size
-				tree->header()->setStretchLastSection( false ); // non greedy column sizing
-				tree->header()->setSectionResizeMode( QHeaderView::ResizeMode::ResizeToContents ); // no text elision
-				tree->setHeaderHidden( true );
-				tree->setRootIsDecorated( false );
 				( new QHBoxLayout( frame ) )->addWidget( tree );
-				{
-					QObject::connect( tree, &QTreeWidget::itemChanged, []( QTreeWidgetItem *item, int column ){
-						commands_cell_edited( item );
-					} );
 
-					QObject::connect( buildView, &QTreeWidget::currentItemChanged, [tree]( QTreeWidgetItem *current, QTreeWidgetItem *previous ){
-						project_selection_changed( current, tree );
-					} );
-
-					tree->installEventFilter( new Commands_key_press( tree ) );
-
-					QObject::connect( tree->model(), &QAbstractItemModel::rowsInserted, [tree]( const QModelIndex &parent, int first, int last ){
-						tree->setFixedHeight( tree->sizeHintForRow( 0 ) * std::max( tree->model()->rowCount(), 4 )
-							+ tree->horizontalScrollBar()->sizeHint().height() + tree->frameWidth() * 2 );
-					} );
-				}
+				QObject::connect( tree, &QTreeWidget::itemChanged, []( QTreeWidgetItem *item, int column ){
+					commands_cell_edited( item );
+				} );
+				QObject::connect( buildView, &QTreeWidget::currentItemChanged, [tree]( QTreeWidgetItem *current, QTreeWidgetItem *previous ){
+					project_selection_changed( current, tree );
+				} );
 			}
 		}
 		{

@@ -1130,6 +1130,8 @@ misc...
 	* shader editor: save on ctrl + s
 	* shader editor: Find, FindNext, FindPrevious OS dependent binds; Find fills search entry from selection
 	* shader editor: make Copy and SelectAll binds work in read only mode
+	* build menu.customize: drag and drop items; ctrl + drag = copy
+	* build menu.customize: remove command line item when set empty
 
 
 
