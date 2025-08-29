@@ -34,11 +34,14 @@
 #ifndef Q3MAP_VERSION
 #error no Q3MAP_VERSION defined
 #endif
-#define Q3MAP_MOTD      "Your map saw the pretty lights from q3map2's BFG"
 
+#define PRAGMA_MAP 1 // braxi -- pragma support
 
-
-
+#ifdef PRAGMA_MAP
+	#define Q3MAP_MOTD      "Your map is coughing, hopefuly not due to virus infection?"
+#else
+	#define Q3MAP_MOTD      "Your map saw the pretty lights from q3map2's BFG"
+#endif
 /* -------------------------------------------------------------------------------
 
    dependencies
@@ -120,7 +123,12 @@
 
 
 /* bsp */
-#define MAX_PATCH_SIZE          32
+#ifdef PRAGMA_MAP
+	#define MAX_PATCH_SIZE          2048 // braxi -- [pragma] to allow large terrains out of patches
+#else
+	#define MAX_PATCH_SIZE          32
+#endif
+
 #define MAX_BRUSH_SIDES         1024
 #define MAX_BUILD_SIDES         1024
 

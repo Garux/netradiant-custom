@@ -5,3 +5,9 @@ install
 .vscode
 .idea
 /.cache
+/.vs
+/icons
+/tools/quake3/q3map2/.vs
+/radiant/radiant.aps
+/nrc-ncftu.rar
+/nrc.rar
