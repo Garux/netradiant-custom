@@ -61,4 +61,4 @@ extern SimpleCounter g_brushCount;
 extern SimpleCounter g_patchCount;
 extern SimpleCounter g_entityCount;
 
-void bsp_init();
+void build_init_variables();

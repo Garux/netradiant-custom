@@ -1132,6 +1132,7 @@ misc...
 	* shader editor: make Copy and SelectAll binds work in read only mode
 	* build menu.customize: drag and drop items; ctrl + drag = copy
 	* build menu.customize: remove command line item when set empty
+	* build menu.customize.build variables: are editable
 
 
 

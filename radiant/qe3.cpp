@@ -154,7 +154,7 @@ bool ConfirmModified( const char* title ){
 	return true; // QMessageBox::StandardButton::Discard
 }
 
-void bsp_init(){
+void build_init_variables(){
 	StringOutputStream stream( 256 );
 
 	build_set_variable( "RadiantPath", AppPath_get() );
@@ -225,8 +225,6 @@ void RunBSP( size_t buildIdx ){
 	}
 
 	Pointfile_Delete();
-
-	bsp_init();
 
 	const std::vector<CopiedString> commands = build_construct_commands( buildIdx );
 	const bool monitor = std::any_of( commands.cbegin(), commands.cend(), []( const CopiedString& command ){
