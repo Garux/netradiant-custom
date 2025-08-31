@@ -25,6 +25,8 @@
 #include <QApplication>
 #include <QTreeWidget>
 #include <QHeaderView>
+#include <QBoxLayout>
+#include <QToolButton>
 #include <QDropEvent>
 #include <QMimeData>
 #include <QIcon>
@@ -57,8 +59,8 @@
 ? feedback which layers are selected //highlight tree items
 ? feedback items count in a layer
 ? undo
-button to add a layer
-buttons to hide/show all layers
+	button to add a layer
+	buttons to hide/show all layers
 */
 
 class LayerAssignVisitor : public SelectionSystem::Visitor
@@ -343,11 +345,28 @@ public:
 };
 
 
+void layer_new( QTreeWidgetItem *parentItem, Layer *parentLayer, Layers& layers, QTreeWidget *tree ){
+	bool ok;
+	QString text = QInputDialog::getText( tree, "Layer Name", "Enter layer name:", QLineEdit::EchoMode::Normal,
+	                                      "UnnamedpLayer", &ok );
+	text.remove( '"' ); // remove token bounds symbol
+	if( ok && !text.isEmpty() ){
+		parentItem = parentItem? parentItem : tree->invisibleRootItem();
+		parentLayer = parentLayer? parentLayer : &layers;
+
+		parentLayer->m_children.emplace_back( text.toLatin1().constData(), parentLayer );
+		auto *newItem = new QTreeWidgetItem( parentItem );
+		item_construct( newItem, --parentLayer->m_children.end() );
+		item_setCurrent( newItem );
+	}
+}
+
 void context_menu( const QPoint& pos ){
-	auto *menu = new QMenu( g_lbro.m_tree );
+	QTreeWidget *tree = g_lbro.m_tree;
+	auto *menu = new QMenu( tree );
 	menu->setAttribute( Qt::WA_DeleteOnClose );
 
-	QTreeWidgetItem *item = g_lbro.m_tree->itemAt( pos );
+	QTreeWidgetItem *item = tree->itemAt( pos );
 	Layer *layer = item? item_getLayer( item ) : nullptr;
 	Layers& layers = *Node_getLayers( GlobalSceneGraph().root() );
 
@@ -356,23 +375,8 @@ void context_menu( const QPoint& pos ){
 	} )->setDisabled( item == nullptr );
 
 	menu->addAction( g_lbro.m_iconSelectAdd, "New Layer", [&](){
-		bool ok;
-		QString text = QInputDialog::getText( g_lbro.m_tree, "Layer Name", "Enter layer name:", QLineEdit::EchoMode::Normal,
-		                                      "UnnamedpLayer", &ok );
-		text.remove( '"' ); // remove token bounds symbol
-		if( ok && !text.isEmpty() ){
-			QTreeWidgetItem *parentItem = item? item : g_lbro.m_tree->invisibleRootItem();
-			Layer *parentLayer = layer? layer : &layers;
-
-			parentLayer->m_children.emplace_back( text.toLatin1().constData(), parentLayer );
-			auto *newItem = new QTreeWidgetItem( parentItem );
-			item_construct( newItem, --parentLayer->m_children.end() );
-			item_setCurrent( newItem );
-		}
+		layer_new( item, layer, layers, tree );
 	} );
-
-	int layersCount = 0;
-	layers.forEach( [&]( Layer& ){ ++layersCount; } );
 
 	menu->addAction( QApplication::style()->standardIcon( QStyle::SP_DialogCloseButton ), "Delete", [&](){
 		auto dels = item_getLayers( item );
@@ -383,13 +387,14 @@ void context_menu( const QPoint& pos ){
 		delete item;
 
 		if( std::ranges::find( dels, layers.m_currentLayer ) != dels.cend() ){
-			item_setCurrent( g_lbro.m_tree->topLevelItem( LAYERIDX0 ) );
+			item_setCurrent( tree->topLevelItem( LAYERIDX0 ) );
 		}
-	} )->setDisabled( item == nullptr || layersCount < 2 );
+	} )->setDisabled( item == nullptr
+	             || ( item->parent() == nullptr && tree->topLevelItemCount() == 1 ) ); // trying to delete the only toplevel item
 
 	menu->addAction( "Rename", [&](){
 		bool ok;
-		QString text = QInputDialog::getText( g_lbro.m_tree, "Layer Name", "Enter layer name:", QLineEdit::EchoMode::Normal,
+		QString text = QInputDialog::getText( tree, "Layer Name", "Enter layer name:", QLineEdit::EchoMode::Normal,
 		                                      item->text( Column::name ), &ok );
 		text.remove( '"' ); // remove token bounds symbol
 		if( ok && !text.isEmpty() ){
@@ -400,7 +405,7 @@ void context_menu( const QPoint& pos ){
 
 	menu->addAction( "Color", [&](){
 		Vector3 color( layer->m_color[ 0 ] / 255.f, layer->m_color[ 1 ] / 255.f, layer->m_color[ 2 ] / 255.f );
-		if( color_dialog( g_lbro.m_tree, color ) ){
+		if( color_dialog( tree, color ) ){
 			layer->m_color[ 0 ] = color[ 0 ] * 255;
 			layer->m_color[ 1 ] = color[ 1 ] * 255;
 			layer->m_color[ 2 ] = color[ 2 ] * 255;
@@ -408,7 +413,7 @@ void context_menu( const QPoint& pos ){
 		}
 	} )->setDisabled( item == nullptr );
 
-	menu->exec( g_lbro.m_tree->mapToGlobal( pos ) );
+	menu->exec( tree->mapToGlobal( pos ) );
 }
 
 void context_moveto_menu(){
@@ -425,6 +430,41 @@ void context_moveto_menu(){
 	}
 }
 
+class LayersSetVisible
+{
+	const bool m_setVisible;
+	std::vector<Layer *> m_layers;
+public:
+	LayersSetVisible( bool setVisible ) : m_setVisible( setVisible ){
+	}
+	void operator()( QTreeWidgetItem *item ){
+		m_layers.push_back( item_getLayer( item ) );
+		item->setData( Column::visible, Qt::ItemDataRole::UserRole, m_setVisible );
+		item_setIcons( item );
+	}
+	void setVisible() const {
+		if( m_setVisible ){
+			GlobalSceneGraph().traverse( LayerShowWalker( m_layers ) );
+		}
+		else{
+			GlobalSceneGraph().traverse( LayerHideWalker( m_layers ) );
+			/* not hiding worldspawn node so that newly created brushes are visible */
+			if( scene::Node* w = Map_FindWorldspawn( g_map ) )
+				w->disable( scene::Node::eLayerHidden );
+			if( GlobalSelectionSystem().countSelectedComponents() != 0 )
+				GlobalSelectionSystem().setSelectedAllComponents( false );
+		}
+		SceneChangeNotify();
+	}
+};
+
+void layers_setVisible_all( bool setVisible ){
+	LayersSetVisible layersSetVisible( setVisible );
+	for( QTreeWidgetItemIterator it( g_lbro.m_tree ); *it; ++it )
+		layersSetVisible( *it );
+	layersSetVisible.setVisible();
+}
+
 void itemClicked( QTreeWidgetItem *item, int column ){
 	if( item != nullptr ){
 		if( column == Column::select ){
@@ -439,24 +479,9 @@ void itemClicked( QTreeWidgetItem *item, int column ){
 			}
 		}
 		else if( column == Column::visible ){
-			const bool visible = item->data( Column::visible, Qt::ItemDataRole::UserRole ).toBool();
-			items_iterate_recursively( item, [&]( QTreeWidgetItem *item ){
-				item->setData( Column::visible, Qt::ItemDataRole::UserRole, !visible );
-				item_setIcons( item );
-			} );
-
-			if( visible ){
-				GlobalSceneGraph().traverse( LayerHideWalker( item_getLayers( item ) ) );
-				/* not hiding worldspawn node so that newly created brushes are visible */
-				if( scene::Node* w = Map_FindWorldspawn( g_map ) )
-					w->disable( scene::Node::eLayerHidden );
-				if( GlobalSelectionSystem().countSelectedComponents() != 0 )
-					GlobalSelectionSystem().setSelectedAllComponents( false );
-			}
-			else{
-				GlobalSceneGraph().traverse( LayerShowWalker( item_getLayers( item ) ) );
-			}
-			SceneChangeNotify();
+			LayersSetVisible layersSetVisible( !item->data( Column::visible, Qt::ItemDataRole::UserRole ).toBool() );
+			items_iterate_recursively( item, layersSetVisible );
+			layersSetVisible.setVisible();
 		}
 		else if( column == Column::current ){
 			item_setCurrent( item );
@@ -465,8 +490,13 @@ void itemClicked( QTreeWidgetItem *item, int column ){
 }
 
 class QWidget* LayersBrowser_constructWindow( QWidget* toplevel ){
+	auto *containerWidget = new QWidget;
+	auto *vbox = new QVBoxLayout( containerWidget );
+	vbox->setContentsMargins( 0, 0, 0, 0 );
+
 	auto *tree = new QTreeWidget_layers;
 	g_lbro.m_tree = tree;
+	vbox->addWidget( tree );
 
 	tree->setColumnCount( 4 );
 	tree->setUniformRowHeights( true ); // optimization
@@ -502,10 +532,28 @@ class QWidget* LayersBrowser_constructWindow( QWidget* toplevel ){
 	g_lbro.m_iconVisibleOn = new_local_icon( "eye_opened.png" );
 	g_lbro.m_iconVisibleOff = new_local_icon( "eye_closed.png" );
 
+	{
+		auto *hbox = new QHBoxLayout;
+		vbox->addLayout( hbox );
+		hbox->setAlignment( Qt::AlignmentFlag::AlignRight );
+		auto newButton = [&]( const QIcon& icon, const char *tooltip ){
+			auto *butt = new QToolButton;
+			butt->setIcon( icon );
+			butt->setToolTip( tooltip );
+			hbox->addWidget( butt );
+			return butt;
+		};
+		QObject::connect( newButton( g_lbro.m_iconSelectAdd, "New Layer" ), &QToolButton::clicked, [](){
+			layer_new( nullptr, nullptr, *Node_getLayers( GlobalSceneGraph().root() ), g_lbro.m_tree );
+		} );
+		QObject::connect( newButton( g_lbro.m_iconVisibleOn, "Show All Layers" ), &QToolButton::clicked, [](){ layers_setVisible_all( true ); } );
+		QObject::connect( newButton( g_lbro.m_iconVisibleOff, "Hide All Layers" ), &QToolButton::clicked, [](){ layers_setVisible_all( false ); } );
+	}
+
 	GlobalWindowObservers_add( tree ); // track modifiers for Column::select icons toggle
 	Map_addValidCallback( g_map, PointerCaller<QTreeWidget, void(), LayersBrowser_constructTree>( g_lbro.m_tree ) );
 
-	return g_lbro.m_tree;
+	return containerWidget;
 }
 
 void LayersBrowser_destroyWindow(){
