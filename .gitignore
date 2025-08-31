@@ -1,7 +1,9 @@
 *.[oda]
-.settings
-games
-install
-.vscode
-.idea
-/.cache
+/.settings/
+/games/
+/install/
+/.vscode/
+/.idea/
+/.cache/
+/.clangd
+/compile_commands.json
