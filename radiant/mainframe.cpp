@@ -114,6 +114,7 @@
 #include "textures.h"
 #include "texwindow.h"
 #include "modelwindow.h"
+#include "layerswindow.h"
 #include "url.h"
 #include "xywindow.h"
 #include "windowobservers.h"
@@ -727,6 +728,12 @@ void ModelBrowser_ToggleShow(){
 	GroupDialog_showPage( g_page_models );
 }
 
+QWidget* g_page_layers;
+
+void LayersBrowser_ToggleShow(){
+	GroupDialog_showPage( g_page_layers);
+}
+
 
 static class EverySecondTimer
 {
@@ -924,6 +931,7 @@ void create_edit_menu( QMenuBar *menubar ){
 	create_menu_item_with_mnemonic( menu, "Select Textured", "SelectTextured" );
 	create_menu_item_with_mnemonic( menu, "&Expand Selection To Primitives", "ExpandSelectionToPrimitives" );
 	create_menu_item_with_mnemonic( menu, "&Expand Selection To Entities", "ExpandSelectionToEntities" );
+	create_menu_item_with_mnemonic( menu, "&Expand Selection To Layers", "ExpandSelectionToLayers" );
 	create_menu_item_with_mnemonic( menu, "Select Connected Entities", "SelectConnectedEntities" );
 
 	menu->addSeparator();
@@ -951,8 +959,9 @@ void create_view_menu( QMenuBar *menubar, MainFrame::EViewStyle style ){
 	}
 	create_menu_item_with_mnemonic( menu, "Model Browser", "ToggleModelBrowser" );
 	create_menu_item_with_mnemonic( menu, "Entity Inspector", "ToggleEntityInspector" );
+	create_menu_item_with_mnemonic( menu, "Layers Browser", "ToggleLayersBrowser" );
 	create_menu_item_with_mnemonic( menu, "&Surface Inspector", "SurfaceInspector" );
-	create_menu_item_with_mnemonic( menu, "Entity List", "EntityList" );
+	create_menu_item_with_mnemonic( menu, "Entity List", "ToggleEntityList" );
 
 	menu->addSeparator();
 	{
@@ -1322,6 +1331,7 @@ void register_shortcuts(){
 	TexBro_registerShortcuts();
 	Misc_registerShortcuts();
 	Entity_registerShortcuts();
+	Layers_registerShortcuts();
 }
 
 void File_constructToolbar( QToolBar* toolbar ){
@@ -1693,6 +1703,8 @@ void MainFrame::Create(){
 
 	g_page_models = GroupDialog_addPage( "Models", ModelBrowser_constructWindow( GroupDialog_getWindow() ), RawStringExportCaller( "Models" ) );
 
+	g_page_layers = GroupDialog_addPage( "Layers", LayersBrowser_constructWindow( GroupDialog_getWindow() ), RawStringExportCaller( "Layers" ) );
+
 	window->show();
 
 	if ( CurrentStyle() == eRegular || CurrentStyle() == eRegularLeft ) {
@@ -1841,6 +1853,9 @@ void MainFrame::Create(){
 		m_hSplit->setStretchFactor( 1, 2222 );
 		m_hSplit->setStretchFactor( 2, 0 );
 	}
+	else{ // floating group dialog
+		GlobalWindowObservers_connectTopLevel( GroupDialog_getWindow() ); // for layers browser icons toggle
+	}
 
 	EntityList_constructWindow( window );
 	PreferencesDialog_constructWindow( window );
@@ -1888,6 +1903,7 @@ void MainFrame::Shutdown(){
 	delete std::exchange( m_pXZWnd, nullptr );
 
 	ModelBrowser_destroyWindow();
+	LayersBrowser_destroyWindow();
 	TextureBrowser_destroyWindow();
 
 	DeleteCamWnd( m_pCamWnd );
@@ -2055,9 +2071,11 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "ToggleConsole", makeCallbackF( Console_ToggleShow ), QKeySequence( "O" ) );
 	GlobalCommands_insert( "ToggleEntityInspector", makeCallbackF( EntityInspector_ToggleShow ), QKeySequence( "N" ) );
 	GlobalCommands_insert( "ToggleModelBrowser", makeCallbackF( ModelBrowser_ToggleShow ), QKeySequence( "/" ) );
-	GlobalCommands_insert( "EntityList", makeCallbackF( EntityList_toggleShown ), QKeySequence( "L" ) );
+	GlobalCommands_insert( "ToggleLayersBrowser", makeCallbackF( LayersBrowser_ToggleShow ), QKeySequence( "L" ) );
+	GlobalCommands_insert( "ToggleEntityList", makeCallbackF( EntityList_toggleShown ), QKeySequence( "Shift+L" ) );
 
 	Select_registerCommands();
+	Layers_registerCommands();
 
 	Tools_registerCommands();
 

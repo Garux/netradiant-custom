@@ -657,7 +657,7 @@ public:
 	}
 
 	Doom3GroupNode( EntityClass* eclass ) :
-		m_node( this, this, StaticTypeCasts::instance().get() ),
+		m_node( this, this, StaticTypeCasts::instance().get(), nullptr ),
 		m_contained( eclass, m_node, InstanceSet::TransformChangedCaller( m_instances ), InstanceSet::BoundsChangedCaller( m_instances ), InstanceSetEvaluateTransform<Doom3GroupInstance>::Caller( m_instances ) ){
 		construct();
 	}
@@ -666,7 +666,7 @@ public:
 		scene::Instantiable( other ),
 		scene::Cloneable( other ),
 		scene::Traversable::Observer( other ),
-		m_node( this, this, StaticTypeCasts::instance().get() ),
+		m_node( this, this, StaticTypeCasts::instance().get(), nullptr ),
 		m_contained( other.m_contained, m_node, InstanceSet::TransformChangedCaller( m_instances ), InstanceSet::BoundsChangedCaller( m_instances ), InstanceSetEvaluateTransform<Doom3GroupInstance>::Caller( m_instances ) ){
 		construct();
 	}

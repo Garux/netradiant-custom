@@ -585,9 +585,9 @@ class PicoModelNode : public scene::Node::Symbiot, public scene::Instantiable
 public:
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-	PicoModelNode() : m_node( this, this, StaticTypeCasts::instance().get() ){
+	PicoModelNode() : m_node( this, this, StaticTypeCasts::instance().get(), nullptr ){
 	}
-	PicoModelNode( picoModel_t* model ) : m_node( this, this, StaticTypeCasts::instance().get() ), m_picomodel( model ){
+	PicoModelNode( picoModel_t* model ) : m_node( this, this, StaticTypeCasts::instance().get(), nullptr ), m_picomodel( model ){
 	}
 
 	void release(){

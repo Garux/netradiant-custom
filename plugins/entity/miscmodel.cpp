@@ -491,7 +491,7 @@ public:
 	}
 
 	MiscModelNode( EntityClass* eclass ) :
-		m_node( this, this, StaticTypeCasts::instance().get() ),
+		m_node( this, this, StaticTypeCasts::instance().get(), GlobalSceneGraph().currentLayer() ),
 		m_contained( eclass, m_node, InstanceSet::TransformChangedCaller( m_instances ), InstanceSetEvaluateTransform<MiscModelInstance>::Caller( m_instances ) ){
 		construct();
 	}
@@ -500,7 +500,7 @@ public:
 		scene::Instantiable( other ),
 		scene::Cloneable( other ),
 		scene::Traversable::Observer( other ),
-		m_node( this, this, StaticTypeCasts::instance().get() ),
+		m_node( this, this, StaticTypeCasts::instance().get(), other.m_node.m_layer ),
 		m_contained( other.m_contained, m_node, InstanceSet::TransformChangedCaller( m_instances ), InstanceSetEvaluateTransform<MiscModelInstance>::Caller( m_instances ) ){
 		construct();
 	}

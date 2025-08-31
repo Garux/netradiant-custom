@@ -564,6 +564,46 @@ scene::Node& Map_FindOrInsertWorldspawn( Map& map ){
 }
 
 
+// assigns layers to ones from the other layers set of the same size
+class LayersMergeWalker : public scene::Traversable::Walker
+{
+	std::vector<Layer *> m_layersVec;
+public:
+	LayersMergeWalker( Layers *currentLayers ){
+		currentLayers->forEach( [this]( Layer& layer ){ m_layersVec.push_back( &layer ); } );
+	}
+	bool pre( scene::Node& node ) const {
+		if( node.m_layer != nullptr )
+			node.m_layer = m_layersVec[ node.m_layer->m_ownIndex ];
+		return true;
+	}
+};
+
+class LayersAssignWalker : public scene::Traversable::Walker
+{
+	Layer *m_current;
+public:
+	LayersAssignWalker( Layer *current ) : m_current( current ){
+	}
+	bool pre( scene::Node& node ) const {
+		if( Entity *entity; !( ( entity = Node_getEntity( node ) ) && entity->isContainer() ) )
+			node.m_layer = m_current;
+		return true;
+	}
+};
+
+void Map_mergeLayers( scene::Node& newRoot, Layers *newLayers ){
+	Layers *currLayers = Node_getLayers( GlobalSceneGraph().root() );
+	newLayers->update_ownIndices();
+	currLayers->update_ownIndices();
+	if( newLayers->m_children == currLayers->m_children ){ // merge, likely same map copypaste or just one layer in total
+		Node_getTraversable( newRoot )->traverse( LayersMergeWalker( currLayers ) );
+	}
+	else{ // set current
+		Node_getTraversable( newRoot )->traverse( LayersAssignWalker( GlobalSceneGraph().currentLayer() ) );
+	}
+}
+
 class MapMergeAll : public scene::Traversable::Walker
 {
 	mutable scene::Path m_path;
@@ -631,6 +671,7 @@ class BasicContainer : public scene::Node::Symbiot
 	public:
 		TypeCasts(){
 			NodeContainedCast<BasicContainer, scene::Traversable>::install( m_casts );
+			NodeContainedCast<BasicContainer, Layers>::install( m_casts );
 		}
 		NodeTypeCastTable& get(){
 			return m_casts;
@@ -639,6 +680,7 @@ class BasicContainer : public scene::Node::Symbiot
 
 	scene::Node m_node;
 	TraversableNodeSet m_traverse;
+	Layers m_layers;
 public:
 
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
@@ -646,8 +688,11 @@ public:
 	scene::Traversable& get( NullType<scene::Traversable>){
 		return m_traverse;
 	}
+	Layers& get( NullType<Layers>){
+		return m_layers;
+	}
 
-	BasicContainer() : m_node( this, this, StaticTypeCasts::instance().get() ){
+	BasicContainer() : m_node( this, this, StaticTypeCasts::instance().get(), nullptr ){
 	}
 	void release(){
 		delete this;
@@ -703,6 +748,7 @@ void Map_ImportSelected( TextInputStream& in, const MapFormat& format ){
 		Node_getTraversable( node )->traverse( Convert_Brushes( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ), BrushType_getTexdefType( brush_type ) ) );
 		GlobalBrushCreator().toggleFormat( brush_type );
 	}
+	Map_mergeLayers( node, Node_getLayers( node ) );
 	Map_gatherNamespaced( node );
 	Map_mergeClonedNames();
 	MergeMap( node );
@@ -1167,11 +1213,17 @@ void Map_Traverse_Region( scene::Node& root, const scene::Traversable::Walker& w
 }
 
 
+inline void swap_layers( Layers *from, Layers *to ){
+	std::swap( from->m_children, to->m_children );
+	to->forEach( [&]( Layer& layer ){ if( layer.m_parent == from ) layer.m_parent = to; } );
+}
+
 void Map_RenameAbsolute( const char* absolute ){
 	Resource* resource = GlobalReferenceCache().capture( absolute );
 	NodeSmartReference clone( NewMapRoot( path_make_relative( absolute, GlobalFileSystem().findRoot( absolute ) ) ) );
 	resource->setNode( clone.get_pointer() );
 
+	swap_layers( Node_getLayers( GlobalSceneGraph().root() ), Node_getLayers( clone ) );
 	{
 		//ScopeTimer timer( "clone subgraph" );
 		Node_getTraversable( GlobalSceneGraph().root() )->traverse( CloneAll( clone ) );
@@ -1523,6 +1575,7 @@ bool Map_ImportFile( const char* filename ){
 		}
 		NodeSmartReference clone( NewMapRoot( "" ) );
 		Node_getTraversable( *resource->getNode() )->traverse( CloneAll( clone ) );
+		Map_mergeLayers( clone, Node_getLayers( *resource->getNode() ) );
 		resource->flush(); /* wipe map from cache to not spoil namespace */
 		GlobalReferenceCache().release( filename );
 		Map_gatherNamespaced( clone );
@@ -1575,6 +1628,7 @@ tryDecompile:
 		}
 		NodeSmartReference clone( NewMapRoot( "" ) );
 		Node_getTraversable( *resource->getNode() )->traverse( CloneAll( clone ) );
+		Map_mergeLayers( clone, Node_getLayers( *resource->getNode() ) );
 		resource->flush(); /* wipe map from cache to not spoil namespace */
 		GlobalReferenceCache().release( filename );
 		Map_gatherNamespaced( clone );

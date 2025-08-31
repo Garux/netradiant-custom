@@ -55,6 +55,8 @@ const TypeId NODETYPEID_NONE = NODETYPEID_MAX;
 const TypeId INSTANCETYPEID_MAX = 64;
 const TypeId INSTANCETYPEID_NONE = INSTANCETYPEID_MAX;
 
+class Layer;
+
 namespace scene
 {
 /// \brief A unique key to an instance of a node in the scene-graph.
@@ -88,6 +90,8 @@ public:
 	virtual void insert_root( Node& root ) = 0;
 	/// \brief Clears the root-node of the graph.
 	virtual void erase_root() = 0;
+	/// \brief Returns current layer or 0 when no root is inserted.
+	virtual Layer* currentLayer() = 0;
 	/// \brief Traverses all nodes in the graph depth-first, starting from the root node.
 	virtual void traverse( const Walker& walker ) = 0;
 	/// \brief Traverses all nodes in the graph depth-first, starting from 'start'.

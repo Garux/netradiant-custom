@@ -941,26 +941,6 @@ void Select_FitTexture( float horizontal, float vertical, bool only_dimension ){
 #include "commands.h"
 #include "dialog.h"
 
-template<class Check>
-bool Traversable_all_of_children( scene::Traversable* traversable, const Check&& check ){
-	class Check_all : public scene::Traversable::Walker
-	{
-		const Check m_check;
-	public:
-		mutable bool m_all = true; // true for empty container
-		Check_all( Check check ) : m_check( check ){
-		}
-		bool pre( scene::Node& node ) const override {
-			if( !m_check( node ) )
-				m_all = false;
-			return m_all;
-		}
-	} check_all( check );
-
-	traversable->traverse( check_all );
-	return check_all.m_all;
-}
-
 inline void hide_node( scene::Node& node, bool hide ){
 	hide
 	? node.enable( scene::Node::eHidden )

@@ -63,6 +63,7 @@ struct _QERScripLibTable
 	STRING_CONSTANT( Name, "scriptlib" );
 
 	Tokeniser& ( *m_pfnNewScriptTokeniser )( TextInputStream & istream );
+	Tokeniser& ( *m_pfnNewMapTokeniser )( TextInputStream & istream );
 	Tokeniser& ( *m_pfnNewSimpleTokeniser )( TextInputStream & istream );
 	TokenWriter& ( *m_pfnNewSimpleTokenWriter )( TextOutputStream & ostream );
 };

@@ -32,6 +32,7 @@
 #include "scenelib.h"
 #include "instancelib.h"
 #include "treemodel.h"
+#include "layers.h"
 
 template<std::size_t SIZE>
 class TypeIdMap
@@ -63,6 +64,8 @@ class CompiledGraph final : public scene::Graph, public scene::Instantiable::Obs
 	Signal0 m_boundsChanged;
 	scene::Path m_rootpath;
 	Signal0 m_sceneChangedCallbacks;
+	Layer *m_currentLayer0 = nullptr;
+	Layer **m_currentLayer = &m_currentLayer0;
 
 	TypeIdMap<NODETYPEID_MAX> m_nodeTypeIds;
 	TypeIdMap<INSTANCETYPEID_MAX> m_instanceTypeIds;
@@ -94,6 +97,8 @@ public:
 		Node_traverseSubgraph( root, InstanceSubgraphWalker( this, scene::Path(), 0 ) );
 
 		m_rootpath.push( makeReference( root ) );
+
+		m_currentLayer = &Node_getLayers( root )->m_currentLayer;
 	}
 	void erase_root(){
 		//globalOutputStream() << "erase_root\n";
@@ -107,6 +112,11 @@ public:
 		Node_traverseSubgraph( root, UninstanceSubgraphWalker( this, scene::Path() ) );
 
 		root.DecRef();
+
+		m_currentLayer = &m_currentLayer0;
+	}
+	Layer* currentLayer(){
+		return *m_currentLayer;
 	}
 	void boundsChanged(){
 		m_boundsChanged();

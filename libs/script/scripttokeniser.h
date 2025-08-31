@@ -53,7 +53,10 @@ class ScriptTokeniser final : public Tokeniser
 	bool m_unget;
 	bool m_emit;
 
-	bool m_special;
+	const bool m_special;
+	const bool m_specialComments;
+	const char m_specialCommentSig[4] = "@$&";
+	const char *m_specialCommentRead;
 
 	CharType charType( const char c ){
 		switch ( c )
@@ -144,7 +147,8 @@ class ScriptTokeniser final : public Tokeniser
 			m_emit = true; // emit token
 			break;
 		case eCharSolidus:
-#if 0 //SPoG: ignore comments in the middle of tokens.
+#define MID_TOKEN_COMMENTS 0
+#if MID_TOKEN_COMMENTS //SPoG: ignore comments in the middle of tokens.
 			push( Tokenise( &ScriptTokeniser::tokeniseSolidus ) );
 			break;
 #endif
@@ -200,7 +204,12 @@ class ScriptTokeniser final : public Tokeniser
 			break;
 		case eCharSolidus:
 			pop();
-			push( Tokenise( &ScriptTokeniser::tokeniseComment ) );
+			if( m_specialComments ){
+				push( Tokenise( &ScriptTokeniser::tokeniseCommentSpecialSig ) );
+				m_specialCommentRead = m_specialCommentSig;
+			}
+			else
+				push( Tokenise( &ScriptTokeniser::tokeniseComment ) );
 			break; // dont emit single slash
 		case eCharStar:
 			pop();
@@ -214,12 +223,24 @@ class ScriptTokeniser final : public Tokeniser
 	bool tokeniseComment( char c ){
 		if ( c == '\n' ) {
 			pop();
+#if MID_TOKEN_COMMENTS
 			if ( state() == Tokenise( &ScriptTokeniser::tokeniseToken ) ) {
 				pop();
 				m_emit = true; // emit token immediately preceding comment
 			}
+#endif
 		}
 		return true;
+	}
+	bool tokeniseCommentSpecialSig( char c ){ // test for '//@$&' signature
+		if( *m_specialCommentRead++ == c ){
+			if( *m_specialCommentRead == '\0' ) // match, do tokeniseDefault
+				pop(); // note no MID_TOKEN_COMMENTS support
+			return true;
+		}
+		pop();
+		push( Tokenise( &ScriptTokeniser::tokeniseComment ) );
+		return tokeniseComment( c );
 	}
 	bool tokeniseBlockComment( char c ){
 		if ( c == '*' ) {
@@ -233,10 +254,12 @@ class ScriptTokeniser final : public Tokeniser
 		{
 		case '/':
 			pop();
+#if MID_TOKEN_COMMENTS
 			if ( state() == Tokenise( &ScriptTokeniser::tokeniseToken ) ) {
 				pop();
 				m_emit = true; // emit token immediately preceding comment
 			}
+#endif
 			break; // dont emit comment
 		case '*':
 			break; // no state change
@@ -303,7 +326,7 @@ class ScriptTokeniser final : public Tokeniser
 	}
 
 public:
-	ScriptTokeniser( TextInputStream& istream, bool special ) :
+	ScriptTokeniser( TextInputStream& istream, bool special, bool specialComments ) :
 		m_state( m_stack ),
 		m_istream( istream ),
 		m_scriptline( 1 ),
@@ -311,7 +334,8 @@ public:
 		m_crossline( false ),
 		m_unget( false ),
 		m_emit( false ),
-		m_special( special ){
+		m_special( special ),
+		m_specialComments( specialComments ){
 		m_stack[0] = Tokenise( &ScriptTokeniser::tokeniseDefault );
 		m_eof = !m_istream.readChar( m_current );
 		m_token[MAXTOKEN - 1] = '\0';
@@ -347,9 +371,13 @@ public:
 
 
 inline Tokeniser& NewScriptTokeniser( TextInputStream& istream ){
-	return *( new ScriptTokeniser( istream, true ) );
+	return *( new ScriptTokeniser( istream, true, false ) );
+}
+
+inline Tokeniser& NewMapTokeniser( TextInputStream& istream ){
+	return *( new ScriptTokeniser( istream, false, true ) );
 }
 
 inline Tokeniser& NewSimpleTokeniser( TextInputStream& istream ){
-	return *( new ScriptTokeniser( istream, false ) );
+	return *( new ScriptTokeniser( istream, false, false ) );
 }

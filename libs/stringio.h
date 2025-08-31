@@ -287,6 +287,21 @@ inline bool Tokeniser_nextTokenIsDigit( Tokeniser& tokeniser ){
 	return std::isdigit( c ) != 0;
 }
 
+inline bool Tokeniser_inlineTokenAvailable( Tokeniser& tokeniser ){
+	const size_t line = tokeniser.getLine();
+	if ( tokeniser.getToken() ) {
+		tokeniser.ungetToken();
+		return line == tokeniser.getLine();
+	}
+	return false;
+}
+
+inline void Tokeniser_skipToNextLine( Tokeniser& tokeniser ){
+	const size_t line = tokeniser.getLine();
+	while ( tokeniser.getToken() && line == tokeniser.getLine() ) {}
+	tokeniser.ungetToken();
+}
+
 
 
 

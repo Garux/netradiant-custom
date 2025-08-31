@@ -1756,7 +1756,7 @@ public:
 	}
 
 	PatchNode( bool patchDef3 = false ) :
-		m_node( this, this, StaticTypeCasts::instance().get() ),
+		m_node( this, this, StaticTypeCasts::instance().get(), GlobalSceneGraph().currentLayer() ),
 		m_patch( m_node, InstanceSetEvaluateTransform<PatchInstance>::Caller( m_instances ), InstanceSet::BoundsChangedCaller( m_instances ) ),
 		m_importMap( m_patch ),
 		m_exportMap( m_patch ){
@@ -1766,7 +1766,7 @@ public:
 		scene::Node::Symbiot( other ),
 		scene::Instantiable( other ),
 		scene::Cloneable( other ),
-		m_node( this, this, StaticTypeCasts::instance().get() ),
+		m_node( this, this, StaticTypeCasts::instance().get(), other.m_node.m_layer ),
 		m_patch( other.m_patch, m_node, InstanceSetEvaluateTransform<PatchInstance>::Caller( m_instances ), InstanceSet::BoundsChangedCaller( m_instances ) ),
 		m_importMap( m_patch ),
 		m_exportMap( m_patch ){

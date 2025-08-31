@@ -23,6 +23,7 @@
 
 #include "nameable.h"
 #include "mapfile.h"
+#include "layers.h"
 
 #include "traverselib.h"
 #include "transformlib.h"
@@ -136,6 +137,7 @@ class MapRoot : public scene::Node::Symbiot, public scene::Instantiable, public 
 			NodeContainedCast<MapRoot, TransformNode>::install( m_casts );
 			NodeContainedCast<MapRoot, Nameable>::install( m_casts );
 			NodeContainedCast<MapRoot, MapFile>::install( m_casts );
+			NodeContainedCast<MapRoot, Layers>::install( m_casts );
 		}
 		NodeTypeCastTable& get(){
 			return m_casts;
@@ -149,6 +151,7 @@ class MapRoot : public scene::Node::Symbiot, public scene::Instantiable, public 
 	typedef SelectableInstance Instance;
 	NameableString m_name;
 	UndoFileChangeTracker m_changeTracker;
+	Layers m_layers;
 public:
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
@@ -164,8 +167,11 @@ public:
 	MapFile& get( NullType<MapFile>){
 		return m_changeTracker;
 	}
+	Layers& get( NullType<Layers>){
+		return m_layers;
+	}
 
-	MapRoot( const char* name ) : m_node( this, this, StaticTypeCasts::instance().get() ), m_name( name ){
+	MapRoot( const char* name ) : m_node( this, this, StaticTypeCasts::instance().get(), nullptr ), m_name( name ){
 		m_node.m_isRoot = true;
 
 		m_traverse.attach( this );
@@ -174,6 +180,7 @@ public:
 	}
 	~MapRoot(){
 	}
+	MapRoot( MapRoot&& ) noexcept = default; // no copy: Layers use m_parent pointer
 	void release(){
 		GlobalUndoSystem().trackerDetach( m_changeTracker );
 
@@ -203,9 +210,9 @@ public:
 		m_instances.erase( child );
 	}
 
-	scene::Node& clone() const {
-		return ( new MapRoot( *this ) )->node();
-	}
+	// scene::Node& clone() const {
+	// 	return ( new MapRoot( *this ) )->node();
+	// }
 
 	scene::Instance* create( const scene::Path& path, scene::Instance* parent ){
 		return new Instance( path, parent );

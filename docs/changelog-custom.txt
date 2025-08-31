@@ -369,6 +369,9 @@ menus...
 	* Modify->Repeat: saved transforms feedback and individual resets
 	* Modify->Repeat->Reset Transforms (alt + r)
 	* Entity->Reload Entity Definitions
+	* View->Layers Browser (L)
+	* Edit->Expand Selection To Layers (ctrl + q)
+	* shift + q: move-to LayersMenu
 
 misc...
 	* removed note to save before going to preferences, project settings
@@ -1133,6 +1136,7 @@ misc...
 	* build menu.customize: drag and drop items; ctrl + drag = copy
 	* build menu.customize: remove command line item when set empty
 	* build menu.customize.build variables: are editable
+	* layers system (stored in comments of .map file)
 
 
 

@@ -95,7 +95,7 @@ public:
 	}
 
 	BrushNode() :
-		m_node( this, this, StaticTypeCasts::instance().get() ),
+		m_node( this, this, StaticTypeCasts::instance().get(), GlobalSceneGraph().currentLayer() ),
 		m_brush( m_node, InstanceSetEvaluateTransform<BrushInstance>::Caller( m_instances ), InstanceSet::BoundsChangedCaller( m_instances ) ),
 		m_mapImporter( m_brush ),
 		m_mapExporter( m_brush ),
@@ -106,7 +106,7 @@ public:
 		scene::Node::Symbiot( other ),
 		scene::Instantiable( other ),
 		scene::Cloneable( other ),
-		m_node( this, this, StaticTypeCasts::instance().get() ),
+		m_node( this, this, StaticTypeCasts::instance().get(), other.m_node.m_layer ),
 		m_brush( other.m_brush, m_node, InstanceSetEvaluateTransform<BrushInstance>::Caller( m_instances ), InstanceSet::BoundsChangedCaller( m_instances ) ),
 		m_mapImporter( m_brush ),
 		m_mapExporter( m_brush ),

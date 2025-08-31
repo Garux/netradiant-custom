@@ -24,6 +24,31 @@
 #include "ientity.h"
 #include "iscriplib.h"
 #include "scenelib.h"
+#include "layers.h"
+
+void Layers_Write( Layers& layers, TokenWriter& writer ){
+	layers.forEach( [&]( Layer& layer ){
+		writer.writeToken( "//@$&" );
+		writer.writeToken( "layerdef" );
+		writer.writeString( layer.m_name.c_str() );
+		writer.writeInteger( layer.m_parent->m_ownIndex );
+		writer.writeInteger( layer.m_color[ 0 ] );
+		writer.writeInteger( layer.m_color[ 1 ] );
+		writer.writeInteger( layer.m_color[ 2 ] );
+		writer.nextLine();
+	} );
+}
+
+void Layer_Write( const Layer *layer, int& currentLayer, TokenWriter& writer ){
+	if( layer != nullptr && currentLayer != layer->m_ownIndex ){
+		currentLayer = layer->m_ownIndex;
+		writer.writeToken( "//@$&" );
+		writer.writeToken( "layer" );
+		writer.writeInteger( currentLayer );
+		writer.nextLine();
+	}
+}
+
 
 inline MapExporter* Node_getMapExporter( scene::Node& node ){
 	return NodeTypeCast<MapExporter>::cast( node );
@@ -61,9 +86,13 @@ class WriteTokensWalker : public scene::Traversable::Walker
 	mutable Stack<bool> m_stack;
 	TokenWriter& m_writer;
 	bool m_ignorePatches;
+	mutable int m_currentLayer = LAYERIDX0;
 public:
-	WriteTokensWalker( TokenWriter& writer, bool ignorePatches )
-		: m_writer( writer ), m_ignorePatches( ignorePatches ){
+	WriteTokensWalker( TokenWriter& writer, bool ignorePatches, Layers& layers )
+		: m_writer( writer ), m_ignorePatches( ignorePatches )
+	{
+		layers.update_ownIndices();
+		Layers_Write( layers, m_writer );
 	}
 	bool pre( scene::Node& node ) const {
 		m_stack.push( false );
@@ -80,6 +109,8 @@ public:
 			m_writer.writeUnsigned( g_count_entities++ );
 			m_writer.nextLine();
 
+			Layer_Write( node.m_layer, m_currentLayer, m_writer );
+
 			m_writer.writeToken( "{" );
 			m_writer.nextLine();
 			m_stack.top() = true;
@@ -95,6 +126,8 @@ public:
 				m_writer.writeToken( "brush" );
 				m_writer.writeUnsigned( g_count_brushes++ );
 				m_writer.nextLine();
+
+				Layer_Write( node.m_layer, m_currentLayer, m_writer );
 
 				exporter->exportTokens( m_writer );
 			}
@@ -113,5 +146,5 @@ public:
 
 void Map_Write( scene::Node& root, GraphTraversalFunc traverse, TokenWriter& writer, bool ignorePatches ){
 	g_count_entities = 0;
-	traverse( root, WriteTokensWalker( writer, ignorePatches ) );
+	traverse( root, WriteTokensWalker( writer, ignorePatches, *Node_getLayers( root ) ) );
 }

@@ -354,7 +354,7 @@ public:
 				for( Brush* b : out ) {
 					b->removeEmptyFaces();
 					if( b->hasContributingFaces() ) {
-						NodeSmartReference node( ( new BrushNode() )->node() );
+						NodeSmartReference node( GlobalBrushCreator().createBrush() );
 						Node_getBrush( node )->copy( *b );
 						Node_getTraversable( path.parent() )->insert( node );
 						//path.push( makeReference( node.get() ) );
@@ -690,7 +690,7 @@ public:
 						++m_after;
 						brush->removeEmptyFaces();
 						if ( !brush->empty() ) {
-							NodeSmartReference node( ( new BrushNode() )->node() );
+							NodeSmartReference node( GlobalBrushCreator().createBrush() );
 							Node_getBrush( node )->copy( *brush );
 							delete brush;
 							Node_getTraversable( path.parent() )->insert( node );
@@ -766,7 +766,7 @@ public:
 					// the plane intersects this brush
 					m_gj = true;
 					if ( m_split ) {
-						NodeSmartReference node( ( new BrushNode() )->node() );
+						NodeSmartReference node( GlobalBrushCreator().createBrush() );
 						Brush* fragment = Node_getBrush( node );
 						fragment->copy( *brush );
 						fragment->addPlane( m_points[0], m_points[2], m_points[1], m_shader, m_projection );
@@ -960,7 +960,7 @@ void CSG_Merge(){
 
 	UndoableCommand undo( "brushMerge" );
 
-	NodeSmartReference node( ( new BrushNode() )->node() );
+	NodeSmartReference node( GlobalBrushCreator().createBrush() );
 	Brush* brush = Node_getBrush( node );
 	// if the new brush would not be convex
 	if ( !Brush_merge( *brush, selected_brushes, true ) ) {
@@ -1166,7 +1166,7 @@ void CSG_WrapMerge( const ClipperPoints& clipperPoints ){
 		return;
 	}
 
-	NodeSmartReference node( ( new BrushNode() )->node() );
+	NodeSmartReference node( GlobalBrushCreator().createBrush() );
 	Brush* brush = GlobalSelectionSystem().countSelected() > 0? Node_getBrush( GlobalSelectionSystem().ultimateSelected().path().top() ) : 0;
 	const bool oldbrush = brush && primit;
 	if( oldbrush )

@@ -101,7 +101,7 @@ public:
 		return g_nullNode;
 	}
 	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewMapTokeniser( inputStream );
 		tokeniser.nextLine();
 		if ( !Tokeniser_parseToken( tokeniser, "Version" ) ) {
 			return;
@@ -172,7 +172,7 @@ public:
 		return g_nullNode;
 	}
 	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewMapTokeniser( inputStream );
 		tokeniser.nextLine();
 		if ( !Tokeniser_parseToken( tokeniser, "Version" ) ) {
 			return;
@@ -291,7 +291,7 @@ public:
 	}
 
 	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewMapTokeniser( inputStream );
 		m_formatDetected = false;
 		Map_Read( root, tokeniser, entityTable, *this );
 		tokeniser.release();
@@ -368,7 +368,7 @@ public:
 		return g_nullNode;
 	}
 	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewMapTokeniser( inputStream );
 		m_formatDetected = false;
 		Map_Read( root, tokeniser, entityTable, *this );
 		tokeniser.release();
@@ -412,7 +412,7 @@ public:
 		return g_nullNode;
 	}
 	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewMapTokeniser( inputStream );
 		Map_Read( root, tokeniser, entityTable, *this );
 		tokeniser.release();
 	}
@@ -487,7 +487,7 @@ public:
 		return g_nullNode;
 	}
 	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewMapTokeniser( inputStream );
 		m_formatDetected = false;
 		Map_Read( root, tokeniser, entityTable, *this );
 		tokeniser.release();

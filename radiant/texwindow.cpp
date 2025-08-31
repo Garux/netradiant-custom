@@ -1401,7 +1401,7 @@ protected:
 		}
 	}
 	bool editorEvent( QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index ) override {
-		/* let's do some infamous juggling to track user unduced CheckState change */
+		/* let's do some infamous juggling to track user induced CheckState change */
 		if( event->type() == QEvent::MouseButtonRelease || event->type() == QEvent::KeyPress ){
 			if( const QVariant value = index.data( Qt::ItemDataRole::CheckStateRole ); value.isValid() ){
 				const bool ret = QItemDelegate::editorEvent( event, model, option, index );

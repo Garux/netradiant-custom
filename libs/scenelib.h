@@ -146,6 +146,8 @@ class NodeIdentityCast :
 {
 };
 
+class Layer;
+
 namespace scene
 {
 class Node
@@ -156,6 +158,7 @@ public:
 		eHidden = 1 << 0,
 		eFiltered = 1 << 1,
 		eExcluded = 1 << 2,
+		eLayerHidden = 1 << 3,
 	};
 
 	class Symbiot
@@ -175,18 +178,20 @@ private:
 
 public:
 	bool m_isRoot;
+	Layer *m_layer; // nullptr for group entity node; they are not finely manageable and affect children visibility
 
 	bool isRoot(){
 		return m_isRoot;
 	}
 
-	Node( Symbiot* symbiot, void* node, NodeTypeCastTable& casts ) :
+	Node( Symbiot* symbiot, void* node, NodeTypeCastTable& casts, Layer *layer ) :
 		m_state( eVisible ),
 		m_refcount( 0 ),
 		m_symbiot( symbiot ),
 		m_node( node ),
 		m_casts( casts ),
-		m_isRoot( false ){
+		m_isRoot( false ),
+		m_layer( layer ){
 	}
 	~Node(){
 	}
@@ -238,7 +243,7 @@ class NullNode : public Node::Symbiot
 	NodeTypeCastTable m_casts;
 	Node m_node;
 public:
-	NullNode() : m_node( this, 0, m_casts ){
+	NullNode() : m_node( this, 0, m_casts, nullptr ){
 	}
 	void release(){
 		delete this;
@@ -918,6 +923,47 @@ inline bool Entity_isSelected( scene::Instance& entity ){
 		return entity.childSelected();
 	}
 	return Instance_isSelected( entity );
+}
+
+
+template<class Check>
+bool Traversable_all_of_children( scene::Traversable* traversable, const Check&& check ){
+	class Check_all : public scene::Traversable::Walker
+	{
+		const Check m_check;
+	public:
+		mutable bool m_all = true; // true for empty container
+		Check_all( Check check ) : m_check( check ){
+		}
+		bool pre( scene::Node& node ) const override {
+			if( m_all && !m_check( node ) )
+				m_all = false;
+			return m_all;
+		}
+	} check_all( check );
+
+	traversable->traverse( check_all );
+	return check_all.m_all;
+}
+
+template<class Check>
+bool Traversable_any_of_children( scene::Traversable* traversable, const Check&& check ){
+	class Check_all : public scene::Traversable::Walker
+	{
+		const Check m_check;
+	public:
+		mutable bool m_any = false; // false for empty container
+		Check_all( Check check ) : m_check( check ){
+		}
+		bool pre( scene::Node& node ) const override {
+			if( !m_any && m_check( node ) )
+				m_any = true;
+			return !m_any;
+		}
+	} check_all( check );
+
+	traversable->traverse( check_all );
+	return check_all.m_any;
 }
 
 

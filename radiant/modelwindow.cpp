@@ -116,6 +116,10 @@ public:
 
 		root.DecRef();
 	}
+	class Layer* currentLayer(){
+		ASSERT_MESSAGE( 0, "Reached unreachable: currentLayer()" );
+		return nullptr;
+	}
 	void boundsChanged(){
 		ASSERT_MESSAGE( 0, "Reached unreachable: boundsChanged()" );
 	}
@@ -303,7 +307,7 @@ public:
 		return m_transform;
 	}
 
-	ModelGraphRoot() : m_node( this, this, StaticTypeCasts::instance().get() ){
+	ModelGraphRoot() : m_node( this, this, StaticTypeCasts::instance().get(), nullptr ){
 		m_node.m_isRoot = true;
 
 		m_traverse.attach( this );
@@ -392,14 +396,14 @@ public:
 	}
 
 	ModelNode() :
-		m_node( this, this, StaticTypeCasts::instance().get() ){
+		m_node( this, this, StaticTypeCasts::instance().get(), nullptr ){
 		construct();
 	}
 	ModelNode( const ModelNode& other ) :
 		scene::Node::Symbiot( other ),
 		scene::Instantiable( other ),
 		scene::Traversable::Observer( other ),
-		m_node( this, this, StaticTypeCasts::instance().get() ){
+		m_node( this, this, StaticTypeCasts::instance().get(), nullptr ){
 		construct();
 	}
 	~ModelNode(){

@@ -388,14 +388,14 @@ public:
 	}
 
 	GenericEntityNode( EntityClass* eclass ) :
-		m_node( this, this, StaticTypeCasts::instance().get() ),
+		m_node( this, this, StaticTypeCasts::instance().get(), GlobalSceneGraph().currentLayer() ),
 		m_contained( eclass, m_node, InstanceSet::TransformChangedCaller( m_instances ), InstanceSetEvaluateTransform<GenericEntityInstance>::Caller( m_instances ) ){
 	}
 	GenericEntityNode( const GenericEntityNode& other ) :
 		scene::Node::Symbiot( other ),
 		scene::Instantiable( other ),
 		scene::Cloneable( other ),
-		m_node( this, this, StaticTypeCasts::instance().get() ),
+		m_node( this, this, StaticTypeCasts::instance().get(), other.m_node.m_layer ),
 		m_contained( other.m_contained, m_node, InstanceSet::TransformChangedCaller( m_instances ), InstanceSetEvaluateTransform<GenericEntityInstance>::Caller( m_instances ) ){
 	}
 	void release(){

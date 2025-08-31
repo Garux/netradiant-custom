@@ -150,7 +150,7 @@ public:
 
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-	NullModelNode() : m_node( this, this, StaticTypeCasts::instance().get() ){
+	NullModelNode() : m_node( this, this, StaticTypeCasts::instance().get(), nullptr ){
 		m_node.m_isRoot = true;
 	}
 

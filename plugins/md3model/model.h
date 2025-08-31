@@ -456,7 +456,7 @@ public:
 
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-	ModelNode() : m_node( this, this, StaticTypeCasts::instance().get() ){
+	ModelNode() : m_node( this, this, StaticTypeCasts::instance().get(), nullptr ){
 	}
 
 	Model& model(){
