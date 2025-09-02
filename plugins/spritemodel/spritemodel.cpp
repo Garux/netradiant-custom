@@ -38,7 +38,7 @@ void LoadSpriteModel( entity_interfaces_t *interfaces, const char *name ){
 		return; // NULL;
 	}
 
-	CSpriteModel *model = new CSpriteModel();
+	auto *model = new CSpriteModel();
 	model->Construct( pShader );
 	interfaces->pRender = (IRender*)model;
 	interfaces->pRender->IncRef();

@@ -31,6 +31,7 @@
 /* dependencies */
 #include "q3map2.h"
 #include "tjunction.h"
+#include <ranges>
 
 
 
@@ -331,22 +332,22 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 		};
 
 		if( start < end ){
-			for( auto p = e.points.cbegin(); p != e.points.cend(); ++p ){
-				if( p->intercept > start + ON_EPSILON ){
-					if ( p->intercept > end - ON_EPSILON )
+			for( const auto& p : e.points ){
+				if( p.intercept > start + ON_EPSILON ){
+					if ( p.intercept > end - ON_EPSILON )
 						break;
 					else
-						insert_this_point( *p );
+						insert_this_point( p );
 				}
 			}
 		}
 		else{
-			for( auto p = e.points.crbegin(); p != e.points.crend(); ++p ){
-				if( p->intercept < start - ON_EPSILON ){
-					if( p->intercept < end + ON_EPSILON )
+			for( const auto& p : std::ranges::reverse_view( e.points ) ){
+				if( p.intercept < start - ON_EPSILON ){
+					if( p.intercept < end + ON_EPSILON )
 						break;
 					else
-						insert_this_point( *p );
+						insert_this_point( p );
 				}
 			}
 		}
@@ -542,7 +543,7 @@ void FixTJunctions( const entity_t& ent ){
 	const size_t axialEdgeLines = edgeLines.size();
 
 	// sort the non-axial edges by length
-	std::sort( originalEdges.begin(), originalEdges.end(), []( const originalEdge_t& a, const originalEdge_t& b ){
+	std::ranges::sort( originalEdges, []( const originalEdge_t& a, const originalEdge_t& b ){
 		return a.length < b.length;
 	} );
 

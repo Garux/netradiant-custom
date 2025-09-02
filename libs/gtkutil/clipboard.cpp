@@ -43,13 +43,13 @@ void clipboard_copy( ClipboardCopyFunc copy ){
 	*reinterpret_cast<std::size_t*>( array.data() ) = length;
 	memcpy( array.data() + sizeof( std::size_t ), ostream.data(), length );
 
-	auto mimedata = new QMimeData;
+	auto *mimedata = new QMimeData;
 	mimedata->setData( c_clipboard_format, array );
 	QGuiApplication::clipboard()->setMimeData( mimedata );
 }
 
 void clipboard_paste( ClipboardPasteFunc paste ){
-	if( const auto mimedata = QGuiApplication::clipboard()->mimeData() ){
+	if( const auto *mimedata = QGuiApplication::clipboard()->mimeData() ){
 		if( const auto array = mimedata->data( c_clipboard_format ); !array.isEmpty() ){
 			/* 32 & 64 bit radiants use the same clipboard signature 👀
 			   handle varying sizeof( std::size_t ), also try to be safe

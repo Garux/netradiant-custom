@@ -273,7 +273,7 @@ const image_t *ImageLoad( const char *name ){
 	}
 
 	/* try to find existing image */
-	if ( auto img = ImageFind( name ) ) {
+	if ( const auto *img = ImageFind( name ) ) {
 		return img;
 	}
 

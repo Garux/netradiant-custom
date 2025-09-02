@@ -98,23 +98,23 @@ GeneralFunctionDialog::GeneralFunctionDialog(const std::string& key) :
 
    // Create the contained widgets.
    {
-      auto grid = new QGridLayout( _dialog ); // 6 x 13
+      auto *grid = new QGridLayout( _dialog ); // 6 x 13
       grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
       grid->setColumnStretch( 0, 1 );
       grid->setColumnStretch( 3, 1 );
       {
          // Mutually exclusive "Surface values" and "Control values" radio buttons.
          {
-            auto radio = surface = new QRadioButton( DIALOG_GEN_FUNC_SURFACE_VALUES );
+            auto *radio = surface = new QRadioButton( DIALOG_GEN_FUNC_SURFACE_VALUES );
             grid->addWidget( radio, 0, 1 );
             radio->setChecked( true );
          }
          {
-            auto radio = new QRadioButton( DIALOG_GEN_FUNC_CONTROL_VALUES );
+            auto *radio = new QRadioButton( DIALOG_GEN_FUNC_CONTROL_VALUES );
             grid->addWidget( radio, 0, 2 );
          }
          {
-            auto line = new QFrame;
+            auto *line = new QFrame;
 				line->setFrameShape( QFrame::Shape::HLine );
 				line->setFrameShadow( QFrame::Shadow::Raised );
 				grid->addWidget( line, 1, 0, 1, 4 );
@@ -123,18 +123,18 @@ GeneralFunctionDialog::GeneralFunctionDialog(const std::string& key) :
          // will have a dependence registered on this checkbox; i.e. they will only
          // be active when it is checked.
          {
-            auto hbox = new QHBoxLayout;
+            auto *hbox = new QHBoxLayout;
             grid->addLayout( hbox, 2, 0, 1, 4 );
 
-            auto check = s_apply = new QCheckBox;
+            auto *check = s_apply = new QCheckBox;
             check->setChecked( true );
             hbox->addWidget( check );
 
-            auto container = new QWidget;
+            auto *container = new QWidget;
             hbox->addWidget( container );
             UIInstance().RegisterWidgetDependence( check, container );
 
-            auto container_hbox = new QHBoxLayout( container );
+            auto *container_hbox = new QHBoxLayout( container );
             container_hbox->setContentsMargins( 0, 0, 0, 0 );
             {
                const struct{ const char* name; QDoubleSpinBox *&spin; } data[] = {
@@ -157,18 +157,18 @@ GeneralFunctionDialog::GeneralFunctionDialog(const std::string& key) :
          // will have a dependence registered on this checkbox; i.e. they will only
          // be active when it is checked.
          {
-            auto hbox = new QHBoxLayout;
+            auto *hbox = new QHBoxLayout;
             grid->addLayout( hbox, 3, 0, 1, 4 );
 
-            auto check = t_apply = new QCheckBox;
+            auto *check = t_apply = new QCheckBox;
             check->setChecked( true );
             hbox->addWidget( check );
 
-            auto container = new QWidget;
+            auto *container = new QWidget;
             hbox->addWidget( container );
             UIInstance().RegisterWidgetDependence( check, container );
 
-            auto container_hbox = new QHBoxLayout( container );
+            auto *container_hbox = new QHBoxLayout( container );
             container_hbox->setContentsMargins( 0, 0, 0, 0 );
             {
                const struct{ const char* name; QDoubleSpinBox *&spin; } data[] = {
@@ -189,100 +189,100 @@ GeneralFunctionDialog::GeneralFunctionDialog(const std::string& key) :
          }
          {
             // Widgets for specifying the alignment column.
-            auto group = new QGroupBox( DIALOG_GEN_FUNC_COL_ALIGN_FRAME_LABEL );
+            auto *group = new QGroupBox( DIALOG_GEN_FUNC_COL_ALIGN_FRAME_LABEL );
             grid->addWidget( group, 4, 1 );
 
-            auto grid = new QGridLayout( group );
+            auto *grid = new QGridLayout( group );
             grid->setColumnStretch( 2, 1 );
             {
-               auto radio = new QRadioButton;
+               auto *radio = new QRadioButton;
                grid->addWidget( radio, 0, 0 );
-               auto spin = col_num_align = new SpinBox( 0, 30 );
+               auto *spin = col_num_align = new SpinBox( 0, 30 );
                grid->addWidget( spin, 0, 1 );
                UIInstance().RegisterWidgetDependence( radio, spin );
                radio->setChecked( true );
             }
             {
-               auto radio = new QRadioButton( DIALOG_GEN_FUNC_MAX_OPT_LABEL );
+               auto *radio = new QRadioButton( DIALOG_GEN_FUNC_MAX_OPT_LABEL );
                grid->addWidget( radio, 0, 2, Qt::AlignmentFlag::AlignRight );
             }
          }
          {
             // Widgets for specifying the reference row & usage.
-            auto group = row_ref = new QGroupBox( DIALOG_GEN_FUNC_REF_ROW_FRAME_LABEL );
+            auto *group = row_ref = new QGroupBox( DIALOG_GEN_FUNC_REF_ROW_FRAME_LABEL );
             group->setCheckable( true );
             group->setChecked( true );
             grid->addWidget( group, 5, 1 );
 
-            auto grid = new QGridLayout( group );
+            auto *grid = new QGridLayout( group );
             grid->setColumnStretch( 2, 1 );
             {
-               auto radio = new QRadioButton;
+               auto *radio = new QRadioButton;
                grid->addWidget( radio, 0, 0 );
-               auto spin = row_num_ref = new SpinBox( 0, 30 );
+               auto *spin = row_num_ref = new SpinBox( 0, 30 );
                grid->addWidget( spin, 0, 1 );
                UIInstance().RegisterWidgetDependence( radio, spin );
                radio->setChecked( true );
             }
             {
-               auto radio = new QRadioButton( DIALOG_GEN_FUNC_MAX_OPT_LABEL );
+               auto *radio = new QRadioButton( DIALOG_GEN_FUNC_MAX_OPT_LABEL );
                grid->addWidget( radio, 0, 2, Qt::AlignmentFlag::AlignRight );
             }
             {
-               auto check = row_ref_total = new QCheckBox( DIALOG_GEN_FUNC_REF_TOTAL_OPT_LABEL );
+               auto *check = row_ref_total = new QCheckBox( DIALOG_GEN_FUNC_REF_TOTAL_OPT_LABEL );
                grid->addWidget( check, 1, 0, 1, 3 );
                check->setChecked( true );
             }
          }
          {
             // Widgets for specifying the alignment row.
-            auto group = new QGroupBox( DIALOG_GEN_FUNC_ROW_ALIGN_FRAME_LABEL );
+            auto *group = new QGroupBox( DIALOG_GEN_FUNC_ROW_ALIGN_FRAME_LABEL );
             grid->addWidget( group, 4, 2 );
 
-            auto grid = new QGridLayout( group );
+            auto *grid = new QGridLayout( group );
             grid->setColumnStretch( 2, 1 );
             {
-               auto radio = new QRadioButton;
+               auto *radio = new QRadioButton;
                grid->addWidget( radio, 0, 0 );
-               auto spin = row_num_align = new SpinBox( 0, 30 );
+               auto *spin = row_num_align = new SpinBox( 0, 30 );
                grid->addWidget( spin, 0, 1 );
                UIInstance().RegisterWidgetDependence( radio, spin );
                radio->setChecked( true );
             }
             {
-               auto radio = new QRadioButton( DIALOG_GEN_FUNC_MAX_OPT_LABEL );
+               auto *radio = new QRadioButton( DIALOG_GEN_FUNC_MAX_OPT_LABEL );
                grid->addWidget( radio, 0, 2, Qt::AlignmentFlag::AlignRight );
             }
          }
          {
             // Widgets for specifying the reference column & usage.
-            auto group = col_ref = new QGroupBox( DIALOG_GEN_FUNC_REF_COL_FRAME_LABEL );
+            auto *group = col_ref = new QGroupBox( DIALOG_GEN_FUNC_REF_COL_FRAME_LABEL );
             group->setCheckable( true );
             group->setChecked( true );
             grid->addWidget( group, 5, 2 );
 
-            auto grid = new QGridLayout( group );
+            auto *grid = new QGridLayout( group );
             grid->setColumnStretch( 2, 1 );
             {
-               auto radio = new QRadioButton;
+               auto *radio = new QRadioButton;
                grid->addWidget( radio, 0, 0 );
-               auto spin = col_num_ref = new SpinBox( 0, 30 );
+               auto *spin = col_num_ref = new SpinBox( 0, 30 );
                grid->addWidget( spin, 0, 1 );
                UIInstance().RegisterWidgetDependence( radio, spin );
                radio->setChecked( true );
             }
             {
-               auto radio = new QRadioButton( DIALOG_GEN_FUNC_MAX_OPT_LABEL );
+               auto *radio = new QRadioButton( DIALOG_GEN_FUNC_MAX_OPT_LABEL );
                grid->addWidget( radio, 0, 2, Qt::AlignmentFlag::AlignRight );
             }
             {
-               auto check = col_ref_total = new QCheckBox( DIALOG_GEN_FUNC_REF_TOTAL_OPT_LABEL );
+               auto *check = col_ref_total = new QCheckBox( DIALOG_GEN_FUNC_REF_TOTAL_OPT_LABEL );
                grid->addWidget( check, 1, 0, 1, 3 );
                check->setChecked( true );
             }
          }
          {
-            auto buttons = new QDialogButtonBox;
+            auto *buttons = new QDialogButtonBox;
             grid->addWidget( buttons, 6, 0, 1, 4 );
             CreateOkButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Ok ) );
             CreateApplyButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Apply ) );

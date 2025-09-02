@@ -98,7 +98,7 @@ void OnAddMaterial(){
 
 	const char* name = path_get_filename_start( text.constData() );
 	if ( strlen( name ) > 0 ) {
-		auto item = new QListWidgetItem( name );
+		auto *item = new QListWidgetItem( name );
 		item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren );
 		g_dialog.t_materialist->addItem( item );
 	}

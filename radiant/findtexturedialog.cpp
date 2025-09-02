@@ -108,7 +108,7 @@ class : public QObject
 protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		if( event->type() == QEvent::ShortcutOverride ) {
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			if( keyEvent->key() == Qt::Key_Tab ){
 				event->accept();
 			}
@@ -137,20 +137,20 @@ void FindTextureDialog::BuildDialog(){
 
 	g_guiSettings.addWindow( GetWidget(), "TextureBrowser/FindReplace" );
 
-	auto hbox = new QHBoxLayout( GetWidget() );
-	auto form = new QFormLayout;
+	auto *hbox = new QHBoxLayout( GetWidget() );
+	auto *form = new QFormLayout;
 	hbox->addLayout( form );
 
 	{
-		auto entry = new LineEdit;
+		auto *entry = new LineEdit;
 		form->addRow( "Find:", entry );
 		AddDialogData( *entry, m_strFind );
 		entry->installEventFilter( &s_find_focus_in );
 		GlobalTextureEntryCompletion::instance().connect( entry );
 	}
 	{
-		auto entry = new LineEdit;
-		auto label = new QLabel( "Replace:" );
+		auto *entry = new LineEdit;
+		auto *label = new QLabel( "Replace:" );
 		form->addRow( label, entry );
 		entry->setPlaceholderText( "Empty = search mode" );
 		AddDialogData( *entry, m_strReplace );
@@ -158,13 +158,13 @@ void FindTextureDialog::BuildDialog(){
 		GlobalTextureEntryCompletion::instance().connect( entry );
 	}
 	{
-		auto check = new QCheckBox( "Within selected brushes only" );
+		auto *check = new QCheckBox( "Within selected brushes only" );
 		form->addWidget( check );
 		AddDialogData( *check, m_bSelectedOnly );
 	}
 
 	{
-		auto buttons = new QDialogButtonBox( Qt::Orientation::Vertical );
+		auto *buttons = new QDialogButtonBox( Qt::Orientation::Vertical );
 		hbox->addWidget( buttons );
 		QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Apply ), &QPushButton::clicked, [](){
 			g_FindTextureDialog.exportData();

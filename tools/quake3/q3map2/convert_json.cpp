@@ -36,6 +36,7 @@
 #include "rapidjson/prettywriter.h"
 
 #include <map>
+#include <ranges>
 
 #define for_indexed(...) for_indexed_v(i, __VA_ARGS__)
 #define for_indexed_v(v, ...) if (std::size_t v = -1) for (__VA_ARGS__) if ((++v, true))
@@ -137,10 +138,10 @@ static void write_json( const char *directory ){
 			{
 				int flags = shader.surfaceFlags;
 				std::map<uint32_t, const char*> map; // decompose flags
-				for( auto parm = g_game->surfaceParms.crbegin(); parm != g_game->surfaceParms.crend(); ++parm  ){ // find known flags // traverse backwards to try fatter material flags 1st
-					if( parm->surfaceFlags == ( flags & parm->surfaceFlags ) && parm->surfaceFlags != 0 ){
-						flags &= ~parm->surfaceFlags;
-						map.emplace( parm->surfaceFlags, parm->name );
+				for( const auto& parm : std::ranges::reverse_view( g_game->surfaceParms ) ){ // find known flags // traverse backwards to try fatter material flags 1st
+					if( parm.surfaceFlags == ( flags & parm.surfaceFlags ) && parm.surfaceFlags != 0 ){
+						flags &= ~parm.surfaceFlags;
+						map.emplace( parm.surfaceFlags, parm.name );
 					}
 				}
 				for( int bit = 0; bit < 32; ++bit ){ // handle unknown flags
@@ -159,10 +160,10 @@ static void write_json( const char *directory ){
 			{
 				int flags = shader.contentFlags;
 				std::map<uint32_t, const char*> map; // decompose flags
-				for( auto parm = g_game->surfaceParms.crbegin(); parm != g_game->surfaceParms.crend(); ++parm  ){ // find known flags // traverse backwards to try fatter material flags 1st
-					if( parm->contentFlags == ( flags & parm->contentFlags ) && parm->contentFlags != 0 ){
-						flags &= ~parm->contentFlags;
-						map.emplace( parm->contentFlags, parm->name );
+				for( const auto& parm : std::ranges::reverse_view( g_game->surfaceParms ) ){ // find known flags // traverse backwards to try fatter material flags 1st
+					if( parm.contentFlags == ( flags & parm.contentFlags ) && parm.contentFlags != 0 ){
+						flags &= ~parm.contentFlags;
+						map.emplace( parm.contentFlags, parm.name );
 					}
 				}
 				for( int bit = 0; bit < 32; ++bit ){ // handle unknown flags
@@ -408,11 +409,11 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 			auto&& item = bspShaders.emplace_back();
 			strcpy( item.shader, obj.value["shader"].GetString() );
 			for( auto&& flag : obj.value["surfaceFlags"].GetObj() ){
-				auto name = flag.name.GetString();
-				auto value = flag.value.GetString();
+				const auto *name = flag.name.GetString();
+				const auto *value = flag.value.GetString();
 				if( useFlagNames ){
 					auto&& parms = g_game->surfaceParms;
-					auto found = std::find_if( parms.begin(), parms.end(), [name]( const auto& parm ){ return striEqual( parm.name, name ); } );
+					auto found = std::ranges::find_if( parms, [name]( const auto& parm ){ return striEqual( parm.name, name ); } );
 					if( found != parms.end() ){
 						item.surfaceFlags |= found->surfaceFlags;
 					}
@@ -428,11 +429,11 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 					item.surfaceFlags |= strtoul( value, nullptr, 0 );
 			}
 			for( auto&& flag : obj.value["contentFlags"].GetObj() ){
-				auto name = flag.name.GetString();
-				auto value = flag.value.GetString();
+				const auto *name = flag.name.GetString();
+				const auto *value = flag.value.GetString();
 				if( useFlagNames ){
 					auto&& parms = g_game->surfaceParms;
-					auto found = std::find_if( parms.begin(), parms.end(), [name]( const auto& parm ){ return striEqual( parm.name, name ); } );
+					auto found = std::ranges::find_if( parms, [name]( const auto& parm ){ return striEqual( parm.name, name ); } );
 					if( found != parms.end() ){
 						item.contentFlags |= found->contentFlags;
 					}

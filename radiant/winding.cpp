@@ -230,13 +230,9 @@ inline PlaneClassification Winding_ClassifyDistance( const double distance, cons
 /// or flipped && winding is completely FRONT or ON
 bool Winding_TestPlane( const Winding& winding, const Plane3& plane, bool flipped ){
 	const int test = ( flipped ) ? ePlaneBack : ePlaneFront;
-	for ( Winding::const_iterator i = winding.begin(); i != winding.end(); ++i )
-	{
-		if ( test == Winding_ClassifyDistance( plane3_distance_to_point( plane, ( *i ).vertex ), ON_EPSILON ) ) {
-			return false;
-		}
-	}
-	return true;
+	return std::ranges::none_of( winding, [&]( const WindingVertex& v ){
+		return test == Winding_ClassifyDistance( plane3_distance_to_point( plane, v.vertex ), ON_EPSILON );
+	} );
 }
 
 /// \brief Returns true if any point in \p w1 is in front of plane2, or any point in \p w2 is in front of plane1
@@ -246,9 +242,9 @@ bool Winding_PlanesConcave( const Winding& w1, const Winding& w2, const Plane3& 
 
 brushsplit_t Winding_ClassifyPlane( const Winding& winding, const Plane3& plane ){
 	brushsplit_t split;
-	for ( Winding::const_iterator i = winding.begin(); i != winding.end(); ++i )
+	for ( const auto& v : winding )
 	{
-		++split.counts[Winding_ClassifyDistance( plane3_distance_to_point( plane, ( *i ).vertex ), ON_EPSILON )];
+		++split.counts[Winding_ClassifyDistance( plane3_distance_to_point( plane, v.vertex ), ON_EPSILON )];
 	}
 	return split;
 }

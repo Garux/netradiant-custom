@@ -114,7 +114,7 @@ void DWinding::RemoveColinearPoints(){
 }
 
 DPlane* DWinding::WindingPlane(){
-	DPlane* newPlane = new DPlane( p[0], p[1], p[2], NULL );
+	auto *newPlane = new DPlane( p[0], p[1], p[2], NULL );
 	return newPlane;
 }
 
@@ -168,7 +168,7 @@ void DWinding::WindingCentroid( vec3_t centroid ) const {
 }
 
 DWinding* DWinding::CopyWinding(){
-	DWinding* c = new DWinding;
+	auto *c = new DWinding;
 	c->AllocWinding( numpoints );
 	memcpy( c->p, p, numpoints * sizeof( vec3_t ) );
 	return c;
@@ -271,7 +271,7 @@ void DWinding::CheckWinding(){
 }
 
 DWinding* DWinding::ReverseWinding(){
-	DWinding* c = new DWinding;
+	auto *c = new DWinding;
 	c->AllocWinding( numpoints );
 
 	for ( int i = 0; i < numpoints; i++ )
@@ -424,8 +424,8 @@ void DWinding::ClipWindingEpsilon( DPlane* chopPlane, vec_t epsilon, DWinding **
 	int maxpts = numpoints + 4;   // cant use counts[0]+2 because
 	                              // of fp grouping errors
 
-	DWinding* f = new DWinding;
-	DWinding* b = new DWinding;
+	auto *f = new DWinding;
+	auto *b = new DWinding;
 
 	f->AllocWinding( maxpts );
 	f->numpoints = 0;

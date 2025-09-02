@@ -347,9 +347,8 @@ std::vector<const AssMeshWalker*> LoadModelWalker( const char *name, int frame )
 	AssModel *model = LoadModel( name, frame );
 	std::vector<const AssMeshWalker*> vector;
 	if( model != nullptr )
-		std::for_each( model->m_meshes.begin(), model->m_meshes.end(), [&vector]( const auto& val ){
+		for( const auto& val : model->m_meshes )
 			vector.push_back( &val );
-		} );
 	return vector;
 }
 

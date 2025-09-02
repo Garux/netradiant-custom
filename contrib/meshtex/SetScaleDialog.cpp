@@ -91,36 +91,36 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
 
    // Create the contained widgets.
    {
-      auto dialog_grid = new QGridLayout( _dialog );
+      auto *dialog_grid = new QGridLayout( _dialog );
       dialog_grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
       {
          // Checkbox for the "S" grouping of widgets. All the widgets in that
          // grouping will have a dependence registered on this checkbox; i.e. they
          // will only be active when it is checked.
-         auto group = s_apply = new QGroupBox( DIALOG_SET_SCALE_S_ACTIVE_OPT_LABEL );
+         auto *group = s_apply = new QGroupBox( DIALOG_SET_SCALE_S_ACTIVE_OPT_LABEL );
          dialog_grid->addWidget( group, 0, 0 );
          group->setCheckable( true );
          group->setChecked( true );
          {
-            auto vbox = new QVBoxLayout( group );
+            auto *vbox = new QVBoxLayout( group );
             {
                // Widgets for specifying S scaling.
-               auto group = new QGroupBox( DIALOG_SET_SCALE_METHOD_FRAME_TITLE );
+               auto *group = new QGroupBox( DIALOG_SET_SCALE_METHOD_FRAME_TITLE );
                vbox->addWidget( group );
 
-               auto grid = new QGridLayout( group );
+               auto *grid = new QGridLayout( group );
                {
-                  auto radio = new QRadioButton( DIALOG_SET_SCALE_NATURAL_OPT_LABEL );
+                  auto *radio = new QRadioButton( DIALOG_SET_SCALE_NATURAL_OPT_LABEL );
                   grid->addWidget( radio, 0, 0 );
-                  auto spin = s_scale = new DoubleSpinBox( -999, 999, 1, 3 );
+                  auto *spin = s_scale = new DoubleSpinBox( -999, 999, 1, 3 );
                   grid->addWidget( spin, 0, 1 );
                   UIInstance().RegisterWidgetDependence( radio, spin );
                   radio->setChecked( true );
                }
                {
-                  auto radio = new QRadioButton( DIALOG_SET_SCALE_TILES_OPT_LABEL );
+                  auto *radio = new QRadioButton( DIALOG_SET_SCALE_TILES_OPT_LABEL );
                   grid->addWidget( radio, 1, 0 );
-                  auto spin = s_tiles = new DoubleSpinBox( -999, 999, 1, 3 );
+                  auto *spin = s_tiles = new DoubleSpinBox( -999, 999, 1, 3 );
                   grid->addWidget( spin, 1, 1 );
                   UIInstance().RegisterWidgetDependence( radio, spin );
                   spin->setEnabled( false );
@@ -128,47 +128,47 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
             }
             {
                // Widgets for specifying the alignment column.
-               auto group = new QGroupBox( DIALOG_SET_SCALE_S_ALIGN_FRAME_TITLE );
+               auto *group = new QGroupBox( DIALOG_SET_SCALE_S_ALIGN_FRAME_TITLE );
                vbox->addWidget( group );
 
-               auto grid = new QGridLayout( group );
+               auto *grid = new QGridLayout( group );
                grid->setColumnStretch( 2, 1 );
                {
-                  auto radio = new QRadioButton;
+                  auto *radio = new QRadioButton;
                   grid->addWidget( radio, 0, 0 );
-                  auto spin = col_num_align = new SpinBox( 0, 30 );
+                  auto *spin = col_num_align = new SpinBox( 0, 30 );
                   grid->addWidget( spin, 0, 1 );
                   UIInstance().RegisterWidgetDependence( radio, spin );
                   radio->setChecked( true );
                }
                {
-                  auto radio = new QRadioButton( DIALOG_SET_SCALE_MAX_OPT_LABEL );
+                  auto *radio = new QRadioButton( DIALOG_SET_SCALE_MAX_OPT_LABEL );
                   grid->addWidget( radio, 0, 2, Qt::AlignmentFlag::AlignRight );
                }
             }
             {
                // Widgets for specifying the reference row & usage.
-               auto group = row_ref = new QGroupBox( DIALOG_SET_SCALE_S_REF_ROW_OPT_LABEL );
+               auto *group = row_ref = new QGroupBox( DIALOG_SET_SCALE_S_REF_ROW_OPT_LABEL );
                group->setCheckable( true );
                group->setChecked( true );
                vbox->addWidget( group );
 
-               auto grid = new QGridLayout( group );
+               auto *grid = new QGridLayout( group );
                grid->setColumnStretch( 2, 1 );
                {
-                  auto radio = new QRadioButton;
+                  auto *radio = new QRadioButton;
                   grid->addWidget( radio, 0, 0 );
-                  auto spin = row_num_ref = new SpinBox( 0, 30 );
+                  auto *spin = row_num_ref = new SpinBox( 0, 30 );
                   grid->addWidget( spin, 0, 1 );
                   UIInstance().RegisterWidgetDependence( radio, spin );
                   radio->setChecked( true );
                }
                {
-                  auto radio = new QRadioButton( DIALOG_SET_SCALE_MAX_OPT_LABEL );
+                  auto *radio = new QRadioButton( DIALOG_SET_SCALE_MAX_OPT_LABEL );
                   grid->addWidget( radio, 0, 2, Qt::AlignmentFlag::AlignRight );
                }
                {
-                  auto check = row_ref_total = new QCheckBox( DIALOG_SET_SCALE_REF_TOTAL_OPT_LABEL );
+                  auto *check = row_ref_total = new QCheckBox( DIALOG_SET_SCALE_REF_TOTAL_OPT_LABEL );
                   grid->addWidget( check, 1, 0, 1, 3 );
                   check->setChecked( true );
                }
@@ -179,30 +179,30 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
          // Checkbox for the "T" grouping of widgets. All the widgets in that
          // grouping will have a dependence registered on this checkbox; i.e. they
          // will only be active when it is checked.
-         auto group = t_apply = new QGroupBox( DIALOG_SET_SCALE_T_ACTIVE_OPT_LABEL );
+         auto *group = t_apply = new QGroupBox( DIALOG_SET_SCALE_T_ACTIVE_OPT_LABEL );
          dialog_grid->addWidget( group, 0, 1 );
          group->setCheckable( true );
          group->setChecked( true );
          {
-            auto vbox = new QVBoxLayout( group );
+            auto *vbox = new QVBoxLayout( group );
             {
                // Widgets for specifying T scaling.
-               auto group = new QGroupBox( DIALOG_SET_SCALE_METHOD_FRAME_TITLE );
+               auto *group = new QGroupBox( DIALOG_SET_SCALE_METHOD_FRAME_TITLE );
                vbox->addWidget( group );
 
-               auto grid = new QGridLayout( group );
+               auto *grid = new QGridLayout( group );
                {
-                  auto radio = new QRadioButton( DIALOG_SET_SCALE_NATURAL_OPT_LABEL );
+                  auto *radio = new QRadioButton( DIALOG_SET_SCALE_NATURAL_OPT_LABEL );
                   grid->addWidget( radio, 0, 0 );
-                  auto spin = t_scale = new DoubleSpinBox( -999, 999, 1, 3 );
+                  auto *spin = t_scale = new DoubleSpinBox( -999, 999, 1, 3 );
                   grid->addWidget( spin, 0, 1 );
                   UIInstance().RegisterWidgetDependence( radio, spin );
                   radio->setChecked( true );
                }
                {
-                  auto radio = new QRadioButton( DIALOG_SET_SCALE_TILES_OPT_LABEL );
+                  auto *radio = new QRadioButton( DIALOG_SET_SCALE_TILES_OPT_LABEL );
                   grid->addWidget( radio, 1, 0 );
-                  auto spin = t_tiles = new DoubleSpinBox( -999, 999, 1, 3 );
+                  auto *spin = t_tiles = new DoubleSpinBox( -999, 999, 1, 3 );
                   grid->addWidget( spin, 1, 1 );
                   UIInstance().RegisterWidgetDependence( radio, spin );
                   spin->setEnabled( false );
@@ -210,47 +210,47 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
             }
             {
                // Widgets for specifying the alignment row.
-               auto group = new QGroupBox( DIALOG_SET_SCALE_T_ALIGN_FRAME_TITLE );
+               auto *group = new QGroupBox( DIALOG_SET_SCALE_T_ALIGN_FRAME_TITLE );
                vbox->addWidget( group );
 
-               auto grid = new QGridLayout( group );
+               auto *grid = new QGridLayout( group );
                grid->setColumnStretch( 2, 1 );
                {
-                  auto radio = new QRadioButton;
+                  auto *radio = new QRadioButton;
                   grid->addWidget( radio, 0, 0 );
-                  auto spin = row_num_align = new SpinBox( 0, 30 );
+                  auto *spin = row_num_align = new SpinBox( 0, 30 );
                   grid->addWidget( spin, 0, 1 );
                   UIInstance().RegisterWidgetDependence( radio, spin );
                   radio->setChecked( true );
                }
                {
-                  auto radio = new QRadioButton( DIALOG_SET_SCALE_MAX_OPT_LABEL );
+                  auto *radio = new QRadioButton( DIALOG_SET_SCALE_MAX_OPT_LABEL );
                   grid->addWidget( radio, 0, 2, Qt::AlignmentFlag::AlignRight );
                }
             }
             {
                // Widgets for specifying the reference column & usage.
-               auto group = col_ref = new QGroupBox( DIALOG_SET_SCALE_T_REF_COL_OPT_LABEL );
+               auto *group = col_ref = new QGroupBox( DIALOG_SET_SCALE_T_REF_COL_OPT_LABEL );
                group->setCheckable( true );
                group->setChecked( true );
                vbox->addWidget( group );
 
-               auto grid = new QGridLayout( group );
+               auto *grid = new QGridLayout( group );
                grid->setColumnStretch( 2, 1 );
                {
-                  auto radio = new QRadioButton;
+                  auto *radio = new QRadioButton;
                   grid->addWidget( radio, 0, 0 );
-                  auto spin = col_num_ref = new SpinBox( 0, 30 );
+                  auto *spin = col_num_ref = new SpinBox( 0, 30 );
                   grid->addWidget( spin, 0, 1 );
                   UIInstance().RegisterWidgetDependence( radio, spin );
                   radio->setChecked( true );
                }
                {
-                  auto radio = new QRadioButton( DIALOG_SET_SCALE_MAX_OPT_LABEL );
+                  auto *radio = new QRadioButton( DIALOG_SET_SCALE_MAX_OPT_LABEL );
                   grid->addWidget( radio, 0, 2, Qt::AlignmentFlag::AlignRight );
                }
                {
-                  auto check = col_ref_total = new QCheckBox( DIALOG_SET_SCALE_REF_TOTAL_OPT_LABEL );
+                  auto *check = col_ref_total = new QCheckBox( DIALOG_SET_SCALE_REF_TOTAL_OPT_LABEL );
                   grid->addWidget( check, 1, 0, 1, 3 );
                   check->setChecked( true );
                }
@@ -258,7 +258,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
          }
       }
       {
-         auto buttons = new QDialogButtonBox;
+         auto *buttons = new QDialogButtonBox;
          dialog_grid->addWidget( buttons, 1, 0, 1, 2 );
          CreateOkButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Ok ) );
          CreateApplyButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Apply ) );

@@ -356,19 +356,19 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 				data->pGeometry->saxStartElement( data, name, attrs );
 			}
 			else if ( strcmp( reinterpret_cast<const char*>( name ), "select" ) == 0 ) {
-				CSelectMsg *pSelect = new CSelectMsg();
+				auto *pSelect = new CSelectMsg();
 				data->geometry_depth = data->recurse;
 				data->pGeometry = pSelect;
 				data->pGeometry->saxStartElement( data, name, attrs );
 			}
 			else if ( strcmp( reinterpret_cast<const char*>( name ), "pointmsg" ) == 0 ) {
-				CPointMsg *pPoint = new CPointMsg();
+				auto *pPoint = new CPointMsg();
 				data->geometry_depth = data->recurse;
 				data->pGeometry = pPoint;
 				data->pGeometry->saxStartElement( data, name, attrs );
 			}
 			else if ( strcmp( reinterpret_cast<const char*>( name ), "windingmsg" ) == 0 ) {
-				CWindingMsg *pWinding = new CWindingMsg();
+				auto *pWinding = new CWindingMsg();
 				data->geometry_depth = data->recurse;
 				data->pGeometry = pWinding;
 				data->pGeometry->saxStartElement( data, name, attrs );
@@ -697,7 +697,7 @@ void CWatchBSP::RoutineProcessing(){
 							// this is game dependant
 							const auto [exe, args] = [&](){
 								if( string_equal( gamemode_get(), "mp" ) ){
-									if( const auto exe = g_engineExecutableMP.string(); !exe.empty() )
+									if( auto exe = g_engineExecutableMP.string(); !exe.empty() )
 										return std::pair( std::move( exe ), g_engineArgsMP.string() );
 								}
 								return std::pair( g_engineExecutable.string(), g_engineArgs.string() );

@@ -317,7 +317,7 @@ protected:
 };
 
 void accelerator_edit( QTreeWidgetItem *item ){
-		auto edit = new Single_QKeySequenceEdit;
+		auto *edit = new Single_QKeySequenceEdit;
 		QObject::connect( edit, &QKeySequenceEdit::editingFinished, [item, edit](){
 			const QKeySequence accelerator = edit->keySequence();
 			item->treeWidget()->setItemWidget( item, 1, nullptr );
@@ -332,9 +332,9 @@ void DoCommandListDlg(){
 	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Mapped Commands" );
 
-	auto grid = new QGridLayout( &dialog );
+	auto *grid = new QGridLayout( &dialog );
 
-	auto tree = new QTreeWidget;
+	auto *tree = new QTreeWidget;
 	grid->addWidget( tree, 1, 0, 1, 2 );
 	tree->setColumnCount( 2 );
 	tree->setSortingEnabled( true );
@@ -361,7 +361,7 @@ void DoCommandListDlg(){
 
 		for( const auto&[ name, value ] : g_shortcuts )
 		{
-			auto item = new QTreeWidgetItem( tree, { name.c_str(), value.accelerator.toString() } );
+			auto *item = new QTreeWidgetItem( tree, { name.c_str(), value.accelerator.toString() } );
 			accelerator_item_set_icon( item, value );
 
 			if ( !commandList.failed() ) {
@@ -375,12 +375,12 @@ void DoCommandListDlg(){
 	}
 
 	{
-		auto commandLine = new QLineEdit;
+		auto *commandLine = new QLineEdit;
 		grid->addWidget( commandLine, 0, 0 );
 		commandLine->setClearButtonEnabled( true );
 		commandLine->setPlaceholderText( QString::fromUtf8( "🔍 by command name" ) );
 
-		auto keyLine = new QLineEdit;
+		auto *keyLine = new QLineEdit;
 		grid->addWidget( keyLine, 0, 1 );
 		keyLine->setClearButtonEnabled( true );
 		keyLine->setPlaceholderText( QString::fromUtf8( "🔍 by keys" ) );
@@ -396,7 +396,7 @@ void DoCommandListDlg(){
 	}
 
 	{
-		auto buttons = new QDialogButtonBox( Qt::Orientation::Vertical );
+		auto *buttons = new QDialogButtonBox( Qt::Orientation::Vertical );
 		grid->addWidget( buttons, 1, 2, 1, 1 );
 
 		QPushButton *editbutton = buttons->addButton( "Edit", QDialogButtonBox::ButtonRole::ActionRole );

@@ -20,6 +20,7 @@
 #include "DTrainDrawer.h"
 
 #include <list>
+#include <ranges>
 
 #include "DPoint.h"
 #include "DPlane.h"
@@ -269,13 +270,13 @@ void DTrainDrawer::BuildPaths() {
 		}
 
 		std::size_t count = pSP->m_pointList.size() + 2;
-		vec3_t* v = new vec3_t[count];
+		auto *v = new vec3_t[count];
 
 		VectorCopy( pSP->point.vOrigin, v[0] );
 
 		int i = 1;
-		for ( std::list<controlPoint_t>::reverse_iterator cp = pSP->m_pointList.rbegin(); cp != pSP->m_pointList.rend(); cp++ ) {
-			VectorCopy( ( *cp ).vOrigin, v[i] );
+		for ( const auto& cp : std::ranges::reverse_view( pSP->m_pointList ) ) {
+			VectorCopy( cp.vOrigin, v[i] );
 			i++;
 		}
 		VectorCopy( pSP->pTarget->vOrigin, v[i] );
@@ -295,7 +296,7 @@ void DTrainDrawer::BuildPaths() {
 }
 
 void DTrainDrawer::AddControlPoint( const char* name, vec_t* origin ){
-	controlPoint_t* pCP = new controlPoint_t;
+	auto *pCP = new controlPoint_t;
 
 	strncpy( pCP->strName, name, std::size( pCP->strName ) - 1 );
 	pCP->strName[ std::size( pCP->strName ) - 1 ] = '\0';
@@ -305,7 +306,7 @@ void DTrainDrawer::AddControlPoint( const char* name, vec_t* origin ){
 }
 
 splinePoint_t* DTrainDrawer::AddSplinePoint( const char* name, const char* target, vec_t* origin ){
-	splinePoint_t* pSP = new splinePoint_t;
+	auto *pSP = new splinePoint_t;
 
 	strncpy( pSP->point.strName, name, std::size( pSP->point.strName ) - 1 );
 	pSP->point.strName[ std::size( pSP->point.strName ) - 1 ] = '\0';

@@ -144,7 +144,7 @@ Image* LoadPNGBuff( unsigned char* fbuffer ){
 	int height = png_get_image_height( png_ptr, info_ptr );
 
 	// allocate the pixel buffer, and the row pointers
-	RGBAImage* image = new RGBAImage( width, height );
+	auto *image = new RGBAImage( width, height );
 
 	row_pointers = (png_byte**) malloc( ( height ) * sizeof( png_byte* ) );
 

@@ -332,13 +332,13 @@ public:
 					if( !m_settings.m_removeInner && m_settings.m_caulk ) {
 						Brush_forEachFace( *brush, CaulkFace( m_settings ) );
 					}
-					Brush* tmpbrush = new Brush( *brush );
+					auto *tmpbrush = new Brush( *brush );
 					tmpbrush->removeEmptyFaces();
 					Brush_forEachFace( *tmpbrush, FaceMakeBrush( *tmpbrush, out, m_settings ) );
 					delete tmpbrush;
 				}
 				else if( m_settings.m_hollowType == eDiag ) {
-					Brush* tmpbrush = new Brush( *brush );
+					auto *tmpbrush = new Brush( *brush );
 					Brush_forEachFace( *tmpbrush, FaceOffset( m_settings ) );
 					tmpbrush->evaluateBRep();
 					brush_extrudeDiag( *brush, *tmpbrush, out, m_settings );
@@ -657,7 +657,7 @@ public:
 			[thebrush]( const Brush *b ){ return aabb_intersects_aabb( thebrush->localAABB(), b->localAABB() ); } ) ) {
 				brush_vector_t buffer[2];
 				bool swap = false;
-				Brush* original = new Brush( *thebrush );
+				auto *original = new Brush( *thebrush );
 				buffer[swap].push_back( original );
 
 				for ( size_t i = 0; i < m_brushlist.size(); ++i )
@@ -1491,39 +1491,39 @@ void CSG_Tool(){
 		g_guiSettings.addWindow( g_csgtool_dialog.window, "CSGTool/geometry" );
 
 		{
-			auto grid = new QGridLayout( g_csgtool_dialog.window ); // 3 x 8
+			auto *grid = new QGridLayout( g_csgtool_dialog.window ); // 3 x 8
 			grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 			{
-				auto spin = g_csgtool_dialog.spin = new DoubleSpinBox( 0, 9999, 16, 3, 16 );
+				auto *spin = g_csgtool_dialog.spin = new DoubleSpinBox( 0, 9999, 16, 3, 16 );
 				spin->setToolTip( "Thickness" );
 				grid->addWidget( spin, 0, 1 );
 			}
 			{
-				auto label = new CSG_SpinBoxLabel( "Grid->", g_csgtool_dialog.spin );
+				auto *label = new CSG_SpinBoxLabel( "Grid->", g_csgtool_dialog.spin );
 				grid->addWidget( label, 0, 0 );
 			}
 			{
 				//radio button group for choosing the exclude axis
-				auto radFaces = g_csgtool_dialog.radFaces = new QRadioButton( "-faces" );
+				auto *radFaces = g_csgtool_dialog.radFaces = new QRadioButton( "-faces" );
 				radFaces->setToolTip( "Exclude selected faces" );
 				grid->addWidget( radFaces, 0, 2 );
 
-				auto radPlusFaces = g_csgtool_dialog.radPlusFaces = new QRadioButton( "+faces" );
+				auto *radPlusFaces = g_csgtool_dialog.radPlusFaces = new QRadioButton( "+faces" );
 				radPlusFaces->setToolTip( "Only process selected faces" );
 				grid->addWidget( radPlusFaces, 0, 3 );
 
-				auto radProj = g_csgtool_dialog.radProj = new QRadioButton( "-proj" );
+				auto *radProj = g_csgtool_dialog.radProj = new QRadioButton( "-proj" );
 				radProj->setToolTip( "Exclude faces, most orthogonal to active projection" );
 				grid->addWidget( radProj, 0, 4 );
 
-				auto radCam = g_csgtool_dialog.radCam = new QRadioButton( "-cam" );
+				auto *radCam = g_csgtool_dialog.radCam = new QRadioButton( "-cam" );
 				radCam->setToolTip( "Exclude faces, most orthogonal to camera view" );
 				grid->addWidget( radCam, 0, 5 );
 
 				radFaces->setChecked( true );
 			}
 			{
-				auto button = g_csgtool_dialog.caulk = new QToolButton;
+				auto *button = g_csgtool_dialog.caulk = new QToolButton;
 				auto pix = new_local_image( "f-caulk.png" );
 				button->setIcon( pix );
 				button->setIconSize( pix.size() + QSize( 8, 8 ) );
@@ -1533,7 +1533,7 @@ void CSG_Tool(){
 				grid->addWidget( button, 0, 6 );
 			}
 			{
-				auto button = g_csgtool_dialog.removeInner = new QToolButton;
+				auto *button = g_csgtool_dialog.removeInner = new QToolButton;
 				auto pix = new_local_image( "csgtool_removeinner.png" );
 				button->setIcon( pix );
 				button->setIconSize( pix.size() + QSize( 8, 8 ) );
@@ -1543,13 +1543,13 @@ void CSG_Tool(){
 				grid->addWidget( button, 0, 7 );
 			}
 			{
-				auto line = new QFrame;
+				auto *line = new QFrame;
 				line->setFrameShape( QFrame::Shape::HLine );
 				line->setFrameShadow( QFrame::Shadow::Raised );
 				grid->addWidget( line, 1, 0, 1, 8 );
 			}
 			{
-				auto button = new QToolButton;
+				auto *button = new QToolButton;
 				auto pix = new_local_image( "csgtool_shrink.png" );
 				button->setIcon( pix );
 				button->setIconSize( pix.size() + QSize( 8, 8 ) );
@@ -1558,7 +1558,7 @@ void CSG_Tool(){
 				QObject::connect( button, &QAbstractButton::clicked, CSGdlg_BrushShrink );
 			}
 			{
-				auto button = new QToolButton;
+				auto *button = new QToolButton;
 				auto pix = new_local_image( "csgtool_expand.png" );
 				button->setIcon( pix );
 				button->setIconSize( pix.size() + QSize( 8, 8 ) );
@@ -1567,7 +1567,7 @@ void CSG_Tool(){
 				QObject::connect( button, &QAbstractButton::clicked, CSGdlg_BrushExpand );
 			}
 			{
-				auto button = new QToolButton;
+				auto *button = new QToolButton;
 				auto pix = new_local_image( "csgtool_diagonal.png" );
 				button->setIcon( pix );
 				button->setIconSize( pix.size() + QSize( 8, 8 ) );
@@ -1576,7 +1576,7 @@ void CSG_Tool(){
 				QObject::connect( button, &QAbstractButton::clicked, [](){ CSG_Hollow( eDiag, "brushHollow::Diag", g_csgtool_dialog ); } );
 			}
 			{
-				auto button = new QToolButton;
+				auto *button = new QToolButton;
 				auto pix = new_local_image( "csgtool_wrap.png" );
 				button->setIcon( pix );
 				button->setIconSize( pix.size() + QSize( 8, 8 ) );
@@ -1585,7 +1585,7 @@ void CSG_Tool(){
 				QObject::connect( button, &QAbstractButton::clicked, [](){ CSG_Hollow( eWrap, "brushHollow::Wrap", g_csgtool_dialog ); } );
 			}
 			{
-				auto button = new QToolButton;
+				auto *button = new QToolButton;
 				auto pix = new_local_image( "csgtool_extrude.png" );
 				button->setIcon( pix );
 				button->setIconSize( pix.size() + QSize( 8, 8 ) );
@@ -1594,7 +1594,7 @@ void CSG_Tool(){
 				QObject::connect( button, &QAbstractButton::clicked, [](){ CSG_Hollow( eExtrude, "brushHollow::Extrude", g_csgtool_dialog ); } );
 			}
 			{
-				auto button = new QToolButton;
+				auto *button = new QToolButton;
 				auto pix = new_local_image( "csgtool_pull.png" );
 				button->setIcon( pix );
 				button->setIconSize( pix.size() + QSize( 8, 8 ) );

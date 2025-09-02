@@ -1111,7 +1111,7 @@ static void TreeView_onRowActivated( const QModelIndex& index ){
 
 		for( const CopiedString& filename : g_ModelBrowser.m_currentFolder->m_files ){
 			sstream( g_ModelBrowser.m_currentFolderPath, filename );
-			ModelNode *modelNode = new ModelNode;
+			auto *modelNode = new ModelNode;
 			modelNode->setModel( sstream );
 			NodeSmartReference node( modelNode->node() );
 			Node_getTraversable( g_modelGraph->root() )->insert( node );
@@ -1142,7 +1142,7 @@ void modelFS_traverse( const ModelFS& modelFS ){
 }
 #endif
 void ModelBrowser_constructTreeModel( const ModelFS& modelFS, QStandardItemModel* model, QStandardItem* parent ){
-	auto item = new QStandardItem( modelFS.m_folderName.c_str() );
+	auto *item = new QStandardItem( modelFS.m_folderName.c_str() );
 	parent->appendRow( item );
 	for( const ModelFS& m : modelFS.m_folders )
 		ModelBrowser_constructTreeModel( m, model, item ); //recursion
@@ -1241,7 +1241,7 @@ void ModelBrowser_constructTree(){
 //%	modelFS_traverse( g_ModelBrowser.m_modelFS );
 
 
-	auto model = new QStandardItemModel( g_ModelBrowser.m_treeView ); //. ? delete old or clear() & reuse
+	auto *model = new QStandardItemModel( g_ModelBrowser.m_treeView ); //. ? delete old or clear() & reuse
 
 	{
 		if( !g_ModelBrowser.m_modelFS.m_files.empty() ){ // models in the root: add blank item for access
@@ -1270,13 +1270,13 @@ protected:
 QWidget* ModelBrowser_constructWindow( QWidget* toplevel ){
 	g_ModelBrowser.m_parent = toplevel;
 
-	QSplitter *splitter = new QSplitter;
-	QWidget *containerWidgetLeft = new QWidget; // Adding a QLayout to a QSplitter is not supported, use proxy widget
-	QWidget *containerWidgetRight = new QWidget; // Adding a QLayout to a QSplitter is not supported, use proxy widget
+	auto *splitter = new QSplitter;
+	auto *containerWidgetLeft = new QWidget; // Adding a QLayout to a QSplitter is not supported, use proxy widget
+	auto *containerWidgetRight = new QWidget; // Adding a QLayout to a QSplitter is not supported, use proxy widget
 	splitter->addWidget( containerWidgetLeft );
 	splitter->addWidget( containerWidgetRight );
-	QVBoxLayout *vbox = new QVBoxLayout( containerWidgetLeft );
-	QHBoxLayout *hbox = new QHBoxLayout( containerWidgetRight );
+	auto *vbox = new QVBoxLayout( containerWidgetLeft );
+	auto *hbox = new QHBoxLayout( containerWidgetRight );
 
 	hbox->setContentsMargins( 0, 0, 0, 0 );
 	vbox->setContentsMargins( 0, 0, 0, 0 );
@@ -1284,7 +1284,7 @@ QWidget* ModelBrowser_constructWindow( QWidget* toplevel ){
 	vbox->setSpacing( 0 );
 
 	{	// menu bar
-		QToolBar* toolbar = new QToolBar;
+		auto *toolbar = new QToolBar;
 		vbox->addWidget( toolbar );
 
 		toolbar_append_button( toolbar, "Reload Model Folders Tree View", "texbro_refresh.png", FreeCaller<void(), ModelBrowser_constructTree>() );
@@ -1311,7 +1311,7 @@ QWidget* ModelBrowser_constructWindow( QWidget* toplevel ){
 		hbox->addWidget( g_ModelBrowser.m_gl_widget );
 	}
 	{	// gl_widget scrollbar
-		auto scroll = g_ModelBrowser.m_gl_scroll = new QScrollBar;
+		auto *scroll = g_ModelBrowser.m_gl_scroll = new QScrollBar;
 		hbox->addWidget( scroll );
 
 		QObject::connect( scroll, &QAbstractSlider::valueChanged, []( int value ){

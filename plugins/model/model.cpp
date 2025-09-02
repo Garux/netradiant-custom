@@ -386,13 +386,13 @@ private:
 			/* fix the surface's normals */
 			PicoFixSurfaceNormals( surface );
 
-			PicoSurface* picosurface = new PicoSurface( surface );
+			auto *picosurface = new PicoSurface( surface );
 			aabb_extend_by_aabb_safe( m_aabb_local, picosurface->localAABB() );
 			m_surfaces.push_back( picosurface );
 		}
 	}
 	void constructNull(){
-		PicoSurface* picosurface = new PicoSurface();
+		auto *picosurface = new PicoSurface();
 		m_aabb_local = picosurface->localAABB();
 		m_surfaces.push_back( picosurface );
 	}
@@ -926,7 +926,7 @@ size_t picoInputStreamReam( void* inputStream, unsigned char* buffer, size_t len
 
 scene::Node& loadPicoModel( const picoModule_t* module, ArchiveFile& file ){
 	picoModel_t* model = PicoModuleLoadModelStream( module, &file.getInputStream(), picoInputStreamReam, file.size(), 0, file.getName() );
-	PicoModelNode* modelNode = new PicoModelNode( model );
+	auto *modelNode = new PicoModelNode( model );
 	PicoFreeModel( model );
 	return modelNode->node();
 }

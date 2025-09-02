@@ -373,7 +373,7 @@ static void SplitNodePortals( node_t *node ){
 
 		// the winding is split
 		p->winding.clear();
-		portal_t *new_portal = new portal_t( *p ); // AllocPortal()
+		auto *new_portal = new portal_t( *p ); // AllocPortal()
 		new_portal->winding.swap( backwinding );
 		p->winding.swap( frontwinding );
 

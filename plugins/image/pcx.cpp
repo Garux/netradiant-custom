@@ -192,7 +192,7 @@ Image* LoadPCX32Buff( byte* buffer, std::size_t length ){
 		return 0;
 	}
 
-	RGBAImage* image = new RGBAImage( width, height );
+	auto *image = new RGBAImage( width, height );
 	c = ( width ) * ( height );
 	pic32 = image->getRGBAPixels();
 	for ( i = 0; i < c; i++ )

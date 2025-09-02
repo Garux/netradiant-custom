@@ -75,7 +75,7 @@ Image* LoadM32Buff( byte* buffer ){
 	int contents = istream_read_uint32_le( inputStream );
 	int value = istream_read_uint32_le( inputStream );
 
-	RGBAImageFlags* image = new RGBAImageFlags( w, h, flags, contents, value );
+	auto *image = new RGBAImageFlags( w, h, flags, contents, value );
 
 	const byte* source = buffer + offset;
 	std::copy( source, source + ( w * h * 4 ), image->getRGBAPixels() );

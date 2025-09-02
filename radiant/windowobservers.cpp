@@ -38,7 +38,7 @@ WindowObservers g_window_observers;
 
 inline void WindowObservers_OnModifierDown( WindowObservers& observers, ModifierFlags type ){
 	g_modifier_state = bitfield_enable( g_modifier_state, type );
-	for ( auto observer : observers )
+	for ( auto *observer : observers )
 	{
 		observer->onModifierDown( type );
 	}
@@ -46,7 +46,7 @@ inline void WindowObservers_OnModifierDown( WindowObservers& observers, Modifier
 
 inline void WindowObservers_OnModifierUp( WindowObservers& observers, ModifierFlags type ){
 	g_modifier_state = bitfield_disable( g_modifier_state, type );
-	for ( auto observer : observers )
+	for ( auto *observer : observers )
 	{
 		observer->onModifierUp( type );
 	}
@@ -58,7 +58,7 @@ class : public QObject
 protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		if( event->type() == QEvent::KeyPress ) {
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			switch ( keyEvent->key() )
 			{
 			case Qt::Key_Alt:
@@ -76,7 +76,7 @@ protected:
 			}
 		}
 		else if( event->type() == QEvent::KeyRelease ) {
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			switch ( keyEvent->key() )
 			{
 			case Qt::Key_Alt:
@@ -121,7 +121,7 @@ protected:
 		if( event->type() == QEvent::MouseButtonPress
 		 || event->type() == QEvent::MouseMove
 		 || event->type() == QEvent::MouseButtonRelease ) {
-			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>( event );
+			auto *mouseEvent = static_cast<QMouseEvent *>( event );
 			WindowObservers_UpdateModifiers( g_window_observers, modifiers_for_state( mouseEvent->modifiers() ) );
 		}
 		return QObject::eventFilter( obj, event ); // standard event processing

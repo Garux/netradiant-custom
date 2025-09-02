@@ -99,7 +99,7 @@ class FilterToolbarHandler : public QObject
 protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		if( event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonDblClick ){
-			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>( event );
+			auto *mouseEvent = static_cast<QMouseEvent *>( event );
 			if( mouseEvent->button() == Qt::MouseButton::RightButton ){
 				QAction *action = m_toolbar->actionAt( mouseEvent->pos() );
 				if( action != nullptr ){

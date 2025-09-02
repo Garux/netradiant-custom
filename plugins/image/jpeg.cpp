@@ -368,7 +368,7 @@ static Image* LoadJPGBuff_( const void *src_buffer, int src_size ){
 
 	int row_stride = cinfo.output_width * cinfo.output_components;
 
-	RGBAImage* image = new RGBAImage( cinfo.output_width, cinfo.output_height );
+	auto *image = new RGBAImage( cinfo.output_width, cinfo.output_height );
 
 	JSAMPARRAY buffer = ( *cinfo.mem->alloc_sarray )( ( j_common_ptr ) & cinfo, JPOOL_IMAGE, row_stride, 1 );
 

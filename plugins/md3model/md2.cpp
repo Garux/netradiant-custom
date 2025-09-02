@@ -269,13 +269,13 @@ void MD2Model_read( Model& model, const byte* buffer, ArchiveFile& file ){
 }
 
 scene::Node& MD2Model_new( const byte* buffer, ArchiveFile& file ){
-	ModelNode* modelNode = new ModelNode();
+	auto *modelNode = new ModelNode();
 	MD2Model_read( modelNode->model(), buffer, file );
 	return modelNode->node();
 }
 
 scene::Node& MD2Model_default(){
-	ModelNode* modelNode = new ModelNode();
+	auto *modelNode = new ModelNode();
 	Model_constructNull( modelNode->model() );
 	return modelNode->node();
 }

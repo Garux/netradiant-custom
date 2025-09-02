@@ -1877,10 +1877,7 @@ void LoadShaderInfo(){
 		{
 			/* check for duplicate entries */
 			const auto contains = [&shaderFiles]( const char *file ){
-				for( const CopiedString& str : shaderFiles )
-					if( striEqual( str.c_str(), file ) )
-						return true;
-				return false;
+				return std::ranges::any_of( shaderFiles, [file]( const CopiedString& str ){ return striEqual( str.c_str(), file ); } );
 			};
 
 			if( !path_extension_is( token , "shader" ) )

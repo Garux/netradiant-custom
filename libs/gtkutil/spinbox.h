@@ -46,7 +46,7 @@ public:
 protected:
 	bool event( QEvent *event ) override {
 		if( event->type() == QEvent::ShortcutOverride ){
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			// don't pass undo/redo to be eaten by underlying lineedit
 			// it's more useful to have working undo of editor
 			if( keyEvent == QKeySequence::StandardKey::Undo

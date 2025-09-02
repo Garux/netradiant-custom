@@ -197,7 +197,7 @@ protected:
 	}
 	bool event( QEvent *event ) override {
 		if( event->type() == QEvent::ShortcutOverride ){
-			QKeyEvent *keyEvent = static_cast<QKeyEvent*>( event );
+			auto *keyEvent = static_cast<QKeyEvent*>( event );
 			if( keyEvent->key() == Qt::Key_Escape ){
 				clear();
 				event->accept();
@@ -274,7 +274,7 @@ void DetachEntityTreeModel(){
 void EntityList_constructWindow( QWidget* main_window ){
 	ASSERT_MESSAGE( getEntityList().m_window == 0, "error" );
 
-	auto window = getEntityList().m_window = new QWidget( main_window, Qt::Dialog | Qt::WindowCloseButtonHint );
+	auto *window = getEntityList().m_window = new QWidget( main_window, Qt::Dialog | Qt::WindowCloseButtonHint );
 	window->setWindowTitle( "Entity List" );
 
 	g_guiSettings.addWindow( window, "EntityList/geometry", 350, 500 );

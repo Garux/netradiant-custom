@@ -254,7 +254,7 @@ inline void eclass_release_state( EntityClass* eclass ){
 
 // eclass constructor
 inline EntityClass* Eclass_Alloc(){
-	EntityClass* e = new EntityClass;
+	auto *e = new EntityClass;
 
 	e->fixedsize = false;
 	e->unknown = false;

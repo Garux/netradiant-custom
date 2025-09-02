@@ -958,8 +958,8 @@ void MakeBevel( vec3_t vMin, vec3_t vMax ){
 }
 
 void BuildCornerStairs( vec3_t vMin, vec3_t vMax, int nSteps, const char* mainTexture, const char* riserTex ){
-	vec3_t* topPoints = new vec3_t[nSteps + 1];
-	vec3_t* botPoints = new vec3_t[nSteps + 1];
+	auto *topPoints = new vec3_t[nSteps + 1];
+	auto *botPoints = new vec3_t[nSteps + 1];
 
 	//bool bFacesUse[6] = {true, true, false, true, false, false};
 

@@ -137,21 +137,21 @@ class PressedKeysHandler : public QObject
 protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		if( event->type() == QEvent::ShortcutOverride ) {
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			if( PressedKeys_key_press( keyEvent, g_pressedKeys ) ){ // note autorepeat fires this too
 				event->accept();
 				return true;
 			}
 		}
 		else if( event->type() == QEvent::KeyPress ) {
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			if( PressedKeys_key_press( keyEvent, g_pressedKeys ) ){ // note autorepeat fires this too
 				event->accept();
 				return true;
 			}
 		}
 		else if( event->type() == QEvent::KeyRelease ) {
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			if( !keyEvent->isAutoRepeat() && PressedKeys_key_release( keyEvent, g_pressedKeys ) ){
 				event->accept();
 				return true;

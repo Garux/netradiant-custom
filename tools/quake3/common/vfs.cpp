@@ -141,10 +141,9 @@ void vfsInitDirectory( const char *path ){
 	GDir *dir;
 
 	const auto path_is_forbidden = []( const char *path ){
-		for ( const auto& forbidden : g_strForbiddenDirs )
-			if ( matchpattern( path_get_filename_start( path ), forbidden.c_str(), TRUE ) )
-				return true;
-		return false;
+		return std::ranges::any_of( g_strForbiddenDirs, [path]( const CopiedString& forbidden ){
+			return matchpattern( path_get_filename_start( path ), forbidden.c_str(), TRUE );
+		} );
 	};
 
 	{
@@ -183,7 +182,7 @@ void vfsInitDirectory( const char *path ){
 			// sort paks in ascending order
 			// pakFiles are then prepended to the list, reversing the order
 			// thus later (zzz) pak content have priority over earlier, just like in engine
-			std::sort( paks.begin(), paks.end(),
+			std::ranges::sort( paks,
 			[]( const char* a, const char* b ){
 				return string_compare_nocase_upper( a, b ) < 0;
 			} );
@@ -199,10 +198,10 @@ void vfsInitDirectory( const char *path ){
 std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath ){
 	std::vector<CopiedString> list;
 	const auto insert = [&list]( const char *name ){
-		for( const CopiedString& str : list )
-			if( striEqual( str.c_str(), name ) )
-				return;
-		list.emplace_back( name );
+		if( std::ranges::none_of( list, [name]( const CopiedString& str ){
+			return striEqual( str.c_str(), name );
+		} ) )
+			list.emplace_back( name );
 	};
 	/* search in dirs */
 	for ( const auto& strdir : g_strDirs ){

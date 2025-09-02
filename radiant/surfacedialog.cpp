@@ -470,7 +470,7 @@ class : public QObject
 protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		if( event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonDblClick ){
-			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>( event );
+			auto *mouseEvent = static_cast<QMouseEvent *>( event );
 			if( mouseEvent->button() == Qt::MouseButton::RightButton ){
 				SurfaceInspector_FaceFitWidthOnly();
 				return true;
@@ -486,7 +486,7 @@ class : public QObject
 protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		if( event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonDblClick ){
-			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>( event );
+			auto *mouseEvent = static_cast<QMouseEvent *>( event );
 			if( mouseEvent->button() == Qt::MouseButton::RightButton ){
 				SurfaceInspector_FaceFitHeightOnly();
 				return true;
@@ -597,7 +597,7 @@ protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		// QEvent::KeyPress & return true: override QDialog keyPressEvent also
 		if( event->type() == QEvent::ShortcutOverride || event->type() == QEvent::KeyPress ) {
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			if( keyEvent->key() == Qt::Key_Return
 			 || keyEvent->key() == Qt::Key_Enter
 			 || keyEvent->key() == Qt::Key_Escape
@@ -677,19 +677,19 @@ void SurfaceInspector::BuildDialog(){
 				GridRowAdder adder{ grid, 0, 2 };
 				adder.m_grid->setColumnStretch( adder.m_colField, 1 );
 				{
-					auto spin = new NonModalSpinner( -8192, 8192, 0, 2, 2 );
+					auto *spin = new NonModalSpinner( -8192, 8192, 0, 2, 2 );
 					spin->setCallbacks( ApplyTexdef_HShiftCaller( *this ), UpdateCaller( *this ) );
 					m_hshiftIncrement.m_spin = spin;
 					adder.addRow( new SpinBoxLabel( "Horizontal shift", spin ), spin );
 				}
 				{
-					auto spin = new NonModalSpinner( -8192, 8192, 0, 2, 2 );
+					auto *spin = new NonModalSpinner( -8192, 8192, 0, 2, 2 );
 					spin->setCallbacks( ApplyTexdef_VShiftCaller( *this ), UpdateCaller( *this ) );
 					m_vshiftIncrement.m_spin = spin;
 					adder.addRow( new SpinBoxLabel( "Vertical shift", spin ), spin );
 				}
 				{
-					auto spin = new NonModalSpinner( -8192, 8192, .5, 5, .5 );
+					auto *spin = new NonModalSpinner( -8192, 8192, .5, 5, .5 );
 					spin->setCallbacks( ApplyTexdef_HScaleCaller( *this ), UpdateCaller( *this ) );
 					m_hscaleIncrement.m_spin = spin;
 					adder.addRow( new SpinBoxLabel( "Horizontal stretch", spin ), spin );
@@ -700,7 +700,7 @@ void SurfaceInspector::BuildDialog(){
 					QObject::connect( b, &QAbstractButton::clicked, SurfaceInspector_InvertTextureHorizontally );
 				}
 				{
-					auto spin = new NonModalSpinner( -8192, 8192, .5, 5, .5 );
+					auto *spin = new NonModalSpinner( -8192, 8192, .5, 5, .5 );
 					spin->setCallbacks( ApplyTexdef_VScaleCaller( *this ), UpdateCaller( *this ) );
 					m_vscaleIncrement.m_spin = spin;
 					adder.addRow( new SpinBoxLabel( "Vertical stretch", spin ), spin );
@@ -711,7 +711,7 @@ void SurfaceInspector::BuildDialog(){
 					QObject::connect( b, &QAbstractButton::clicked, SurfaceInspector_InvertTextureVertically );
 				}
 				{
-					auto spin = new NonModalSpinner( -360, 360, 0, 2, 45, true );
+					auto *spin = new NonModalSpinner( -360, 360, 0, 2, 45, true );
 					spin->setCallbacks( ApplyTexdef_RotationCaller( *this ), UpdateCaller( *this ) );
 					m_rotateIncrement.m_spin = spin;
 					adder.addRow( new SpinBoxLabel( "Rotate", spin ), spin );
@@ -720,27 +720,27 @@ void SurfaceInspector::BuildDialog(){
 			{
 				GridRowAdder adder{ grid, 3, 4 };
 				{
-					auto entry = new NonModalEntry( Increment::ApplyCaller( m_hshiftIncrement ), Increment::CancelCaller( m_hshiftIncrement ) );
+					auto *entry = new NonModalEntry( Increment::ApplyCaller( m_hshiftIncrement ), Increment::CancelCaller( m_hshiftIncrement ) );
 					m_hshiftIncrement.m_entry = entry;
 					adder.addRow( "Step", entry );
 				}
 				{
-					auto entry = new NonModalEntry( Increment::ApplyCaller( m_vshiftIncrement ), Increment::CancelCaller( m_vshiftIncrement ) );
+					auto *entry = new NonModalEntry( Increment::ApplyCaller( m_vshiftIncrement ), Increment::CancelCaller( m_vshiftIncrement ) );
 					m_vshiftIncrement.m_entry = entry;
 					adder.addRow( "Step", entry );
 				}
 				{
-					auto entry = new NonModalEntry( Increment::ApplyCaller( m_hscaleIncrement ), Increment::CancelCaller( m_hscaleIncrement ) );
+					auto *entry = new NonModalEntry( Increment::ApplyCaller( m_hscaleIncrement ), Increment::CancelCaller( m_hscaleIncrement ) );
 					m_hscaleIncrement.m_entry = entry;
 					adder.addRow( "Step", entry );
 				}
 				{
-					auto entry = new NonModalEntry( Increment::ApplyCaller( m_vscaleIncrement ), Increment::CancelCaller( m_vscaleIncrement ) );
+					auto *entry = new NonModalEntry( Increment::ApplyCaller( m_vscaleIncrement ), Increment::CancelCaller( m_vscaleIncrement ) );
 					m_vscaleIncrement.m_entry = entry;
 					adder.addRow( "Step", entry );
 				}
 				{
-					auto entry = new NonModalEntry( Increment::ApplyCaller( m_rotateIncrement ), Increment::CancelCaller( m_rotateIncrement ) );
+					auto *entry = new NonModalEntry( Increment::ApplyCaller( m_rotateIncrement ), Increment::CancelCaller( m_rotateIncrement ) );
 					m_rotateIncrement.m_entry = entry;
 					adder.addRow( "Step", entry );
 				}
@@ -1292,7 +1292,7 @@ static std::vector<const PatchControl*> Patch_getClosestTriangle( const PatchDat
 	std::vector<const PatchControl*> ret;
 
 	const auto find_triangle = [&ret, &patch, triangle_ok, eps]( const auto& check_func ){
-		for( auto& iter : {
+		for( const auto& iter : {
 			PatchEdgeIter( patch, PatchEdgeIter::eRowBack, 0 ),
 			PatchEdgeIter( patch, PatchEdgeIter::eRowForward, patch.getHeight() - 1 ),
 			PatchEdgeIter( patch, PatchEdgeIter::eColBack, patch.getWidth() - 1 ),

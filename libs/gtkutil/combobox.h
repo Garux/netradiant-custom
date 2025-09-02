@@ -48,7 +48,7 @@ protected:
 		// it very bad, can interact with the editor while in modal dialog and crash it
 		// filter them all besides ones, taken by the other filter
 		if( event->type() == QEvent::ShortcutOverride ) {
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			if( keyEvent->key() != Qt::Key_Return
 			 && keyEvent->key() != Qt::Key_Enter
 			 && !keyEvent->matches( QKeySequence::Cancel ) ){

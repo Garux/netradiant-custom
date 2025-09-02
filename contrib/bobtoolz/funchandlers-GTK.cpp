@@ -527,7 +527,7 @@ void DoMergePatches(){
 		}
 	}
 
-	for( auto instance : patches.instances_erase )
+	for( auto *instance : patches.instances_erase )
 	{
 		scene::Instance* parent = instance->parent();
 		Path_deleteTop( instance->path() );

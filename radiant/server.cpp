@@ -219,7 +219,7 @@ public:
 		release();
 	}
 	void registerLibrary( const char* filename, ModuleServer& server ){
-		DynamicLibraryModule* library = new DynamicLibraryModule( filename );
+		auto *library = new DynamicLibraryModule( filename );
 
 		if ( library->failed() ) {
 			delete library;

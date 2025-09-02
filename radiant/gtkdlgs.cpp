@@ -273,10 +273,10 @@ void DoSides( EBrushPrefab type ){
 	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Arbitrary sides" );
 
-	auto spin = new SpinBox;
-	auto check = new QCheckBox( "Truncate" );
+	auto *spin = new SpinBox;
+	auto *check = new QCheckBox( "Truncate" );
 	{
-		auto form = new QFormLayout( &dialog );
+		auto *form = new QFormLayout( &dialog );
 		form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 
 		QLabel* label = new SpinBoxLabel( "Sides:", spin );
@@ -311,7 +311,7 @@ void DoSides( EBrushPrefab type ){
 		}
 		spin->selectAll();
 		{
-			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
 			form->addWidget( buttons );
 			QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
 			QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );
@@ -333,18 +333,18 @@ void DoAbout(){
 	dialog.setWindowTitle( "About NetRadiant" );
 
 	{
-		auto vbox = new QVBoxLayout( &dialog );
+		auto *vbox = new QVBoxLayout( &dialog );
 		{
-			auto hbox = new QHBoxLayout;
+			auto *hbox = new QHBoxLayout;
 			vbox->addLayout( hbox );
 			{
-				auto label = new QLabel;
+				auto *label = new QLabel;
 				label->setPixmap( new_local_image( "logo.png" ) );
 				hbox->addWidget( label );
 			}
 
 			{
-				auto label = new QLabel( "NetRadiant " RADIANT_VERSION "\n"
+				auto *label = new QLabel( "NetRadiant " RADIANT_VERSION "\n"
 				                         __DATE__ "\n\n"
 				                         RADIANT_ABOUTMSG "\n\n"
 				                         "This program is free software\n"
@@ -354,42 +354,42 @@ void DoAbout(){
 			}
 
 			{
-				auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok, Qt::Orientation::Vertical );
+				auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok, Qt::Orientation::Vertical );
 				QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
 				hbox->addWidget( buttons );
 				{
-					auto button = buttons->addButton( "Credits", QDialogButtonBox::ButtonRole::NoRole );
+					auto *button = buttons->addButton( "Credits", QDialogButtonBox::ButtonRole::NoRole );
 					QObject::connect( button, &QPushButton::clicked, [](){ OpenURL( StringStream( AppPath_get(), "credits.html" ) ); } );
 					button->setEnabled( false );
 				}
 				{
-					auto button = buttons->addButton( "Changelog", QDialogButtonBox::ButtonRole::NoRole );
+					auto *button = buttons->addButton( "Changelog", QDialogButtonBox::ButtonRole::NoRole );
 					QObject::connect( button, &QPushButton::clicked, [](){ OpenURL( StringStream( AppPath_get(), "docs/changelog-custom.txt" ) ); } );
 				}
 				{
-					auto button = buttons->addButton( "About Qt", QDialogButtonBox::ButtonRole::NoRole );
+					auto *button = buttons->addButton( "About Qt", QDialogButtonBox::ButtonRole::NoRole );
 					QObject::connect( button, &QPushButton::clicked, &QApplication::aboutQt );
 				}
 			}
 		}
 		{
 			{
-				auto frame = new QGroupBox( "OpenGL Properties" );
+				auto *frame = new QGroupBox( "OpenGL Properties" );
 				vbox->addWidget( frame );
 				{
-					auto form = new QFormLayout( frame );
+					auto *form = new QFormLayout( frame );
 					form->addRow( "Vendor:", new QLabel( reinterpret_cast<const char*>( gl().glGetString( GL_VENDOR ) ) ) );
 					form->addRow( "Version:", new QLabel( reinterpret_cast<const char*>( gl().glGetString( GL_VERSION ) ) ) );
 					form->addRow( "Renderer:", new QLabel( reinterpret_cast<const char*>( gl().glGetString( GL_RENDERER ) ) ) );
 				}
 			}
 			{
-				auto frame = new QGroupBox( "OpenGL Extensions" );
+				auto *frame = new QGroupBox( "OpenGL Extensions" );
 				vbox->addWidget( frame );
 				{
-					auto textView = new QPlainTextEdit( reinterpret_cast<const char*>( gl().glGetString( GL_EXTENSIONS ) ) );
+					auto *textView = new QPlainTextEdit( reinterpret_cast<const char*>( gl().glGetString( GL_EXTENSIONS ) ) );
 					textView->setReadOnly( true );
-					auto box = new QVBoxLayout( frame );
+					auto *box = new QVBoxLayout( frame );
 					box->addWidget( textView );
 				}
 			}
@@ -411,20 +411,20 @@ bool DoLightIntensityDlg( int *intensity ){
 	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Set Light intensity" );
 
-	auto spin = new SpinBox( -99999, 99999, *intensity );
+	auto *spin = new SpinBox( -99999, 99999, *intensity );
 
-	auto check = new QCheckBox( "Don't show this dialog until restart" );
+	auto *check = new QCheckBox( "Don't show this dialog until restart" );
 	QObject::connect( check, &QCheckBox::toggled, []( bool checked ){ g_dontDoLightIntensityDlg = checked; } );
 
 	{
-		auto form = new QFormLayout( &dialog );
+		auto *form = new QFormLayout( &dialog );
 		form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 		form->addRow( new QLabel( "Tip: ESC for default, ENTER to validate" ) );
 		form->addRow( new SpinBoxLabel( "Intensity:", spin ), spin );
 		form->addWidget( check );
 
 		{
-			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
 			form->addWidget( buttons );
 			QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
 			QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );
@@ -1398,7 +1398,7 @@ ShaderHighlighter::ShaderHighlighter( QTextDocument *parent )
 				else if( string_equal_prefix( c, "%s" ) ){ // string
 					++c;
 					pattern += ")((?:"; // extra inner non capturing group, as space may be added
-					for( const auto value : format.values ){
+					for( const auto *value : format.values ){
 						pattern += value;
 						pattern += '|';
 					}
@@ -1612,7 +1612,7 @@ public:
 protected:
 	bool event( QEvent *event ) override {
 		if( event->type() == QEvent::ShortcutOverride ){
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			// fix leaking keys
 			if( keyEvent->key() == Qt::Key_Enter
 			 || keyEvent->key() == Qt::Key_Return
@@ -1810,7 +1810,7 @@ public:
 protected:
 	bool event( QEvent *event ) override {
 		if( event->type() == QEvent::ShortcutOverride ){
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			// fix leaking shortcuts
 			if( keyEvent->key() == Qt::Key_PageUp
 			 || keyEvent->key() == Qt::Key_PageDown
@@ -2111,7 +2111,7 @@ private:
 						};
 						if( i < tokens.size() ){ // token is available
 							if( tokens[i] == "%s" ){
-								for( const auto value : format.values ){
+								for( const auto *value : format.values ){
 									push_token( value );
 								}
 							}
@@ -2133,11 +2133,10 @@ private:
 						}
 					};
 
-					const auto values_contain = []( const std::vector<const char*> values, const QString& string ){
-						for( const auto value : values )
-							if( string.compare( value, Qt::CaseSensitivity::CaseInsensitive ) == 0 )
-								return true;
-						return false;
+					const auto values_contain = []( const std::vector<const char*>& values, const QString& string ){
+						return std::ranges::any_of( values, [&string]( const char *value ){
+							return string.compare( value, Qt::CaseSensitivity::CaseInsensitive ) == 0;
+						} );
 					};
 
 					if( i == line.size() - 1 ){ // last word, partial match is okay
@@ -2147,7 +2146,7 @@ private:
 							}
 							else{ // partial match
 								if( !selectedText.back().isSpace() ){
-									for( const auto v : format.values ){
+									for( const auto *v : format.values ){
 										QString value( v );
 										if( value.startsWith( word, Qt::CaseSensitivity::CaseInsensitive ) ){
 											if( i + 1 < tokens.size() ) // there is next token, add space
@@ -2294,7 +2293,7 @@ class TextEditor : public QObject
 		QObject::connect( m_button, &QAbstractButton::clicked, [this](){ editor_save(); } );
 
 		{
-			QLabel *label = new QLabel;
+			auto *label = new QLabel;
 			// label->setOpenExternalLinks( true );
 			hbox->addWidget( label );
 			QObject::connect( label, &QLabel::linkActivated, []( const QString& link ){
@@ -2326,7 +2325,7 @@ class TextEditor : public QObject
 						else if( page.back() == '$' ){ // no explicit id, id = one of values
 							page.back() = '#';
 							const QString txt = m_textView->textCursor().block().text();
-							for( const auto value : shaderFormat->values ){
+							for( const auto *value : shaderFormat->values ){
 								if( txt.contains( QRegularExpression( QString( "\\b" ) + value + "\\b" ) ) ){
 									page += value;
 									break;
@@ -2421,7 +2420,7 @@ protected:
 			}
 		}
 		if( event->type() == QEvent::ShortcutOverride ){
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			if( keyEvent == QKeySequence::StandardKey::Save ){
 				if( !keyEvent->isAutoRepeat() && m_textView->document()->isModified() )
 					editor_save();

@@ -250,13 +250,13 @@ void MDCModel_read( Model& model, const byte* buffer ){
 }
 
 scene::Node& MDCModel_new( const byte* buffer ){
-	ModelNode* modelNode = new ModelNode();
+	auto *modelNode = new ModelNode();
 	MDCModel_read( modelNode->model(), buffer );
 	return modelNode->node();
 }
 
 scene::Node& MDCModel_default(){
-	ModelNode* modelNode = new ModelNode();
+	auto *modelNode = new ModelNode();
 	Model_constructNull( modelNode->model() );
 	return modelNode->node();
 }

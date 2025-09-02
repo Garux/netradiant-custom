@@ -159,7 +159,7 @@ Image* LoadIDSPBuff( byte *buffer ){
 	// palette = buffer+mipdatasize+2;
 	// buf_p = buffer+lpMip->offsets[0];
 
-	RGBAImage* image = new RGBAImage( columns, rows );
+	auto *image = new RGBAImage( columns, rows );
 
 #ifdef DEBUG
 	frametype = spriteframetype_t( pframetype->type );

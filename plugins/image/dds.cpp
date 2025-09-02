@@ -37,7 +37,7 @@ Image* LoadDDSBuff( const byte* buffer ){
 		return 0;
 	}
 
-	RGBAImage* image = new RGBAImage( width, height );
+	auto *image = new RGBAImage( width, height );
 
 	if ( DDSDecompress( reinterpret_cast<ddsBuffer_t*>( const_cast<byte*>( buffer ) ), image->getRGBAPixels() ) == -1 ) {
 		image->release();

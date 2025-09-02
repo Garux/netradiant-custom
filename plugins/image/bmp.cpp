@@ -164,7 +164,7 @@ Image* LoadBMPBuff( PointerInputStream& inputStream, std::size_t length ){
 		rows = -rows;
 	}
 
-	RGBAImage* image = new RGBAImage( columns, rows );
+	auto *image = new RGBAImage( columns, rows );
 
 	switch ( bmpHeader.bitsPerPixel )
 	{

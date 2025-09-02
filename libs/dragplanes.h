@@ -26,6 +26,7 @@
 #include "selectionlib.h"
 #include "math/aabb.h"
 #include "math/line.h"
+#include "math/frustum.h"
 
 // local must be a pure rotation
 inline Vector3 translation_to_local( const Vector3& translation, const Matrix4& local ){

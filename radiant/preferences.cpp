@@ -284,13 +284,13 @@ void CGameDialog::CreateGlobalFrame( PreferencesPage& page, bool global ){
 void CGameDialog::BuildDialog(){
 	GetWidget()->setWindowTitle( "Global Preferences" );
 
-	auto vbox = new QVBoxLayout( GetWidget() );
+	auto *vbox = new QVBoxLayout( GetWidget() );
 	vbox->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 	{
-		auto frame = new QGroupBox( "Game settings" );
+		auto *frame = new QGroupBox( "Game settings" );
 		vbox->addWidget( frame );
 
-		auto grid = new QGridLayout( frame );
+		auto *grid = new QGridLayout( frame );
 		grid->setAlignment( Qt::AlignmentFlag::AlignTop );
 		grid->setColumnStretch( 0, 111 );
 		grid->setColumnStretch( 1, 333 );
@@ -301,7 +301,7 @@ void CGameDialog::BuildDialog(){
 		}
 	}
 	{
-		auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok );
+		auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok );
 		vbox->addWidget( buttons );
 		QObject::connect( buttons, &QDialogButtonBox::accepted, GetWidget(), &QDialog::accept );
 	}
@@ -563,15 +563,15 @@ void Widget_connectToggleDependency( QCheckBox* self, QCheckBox* toggleButton ){
 
 
 QStandardItem* PreferenceTree_appendPage( QStandardItemModel* model, QStandardItem* parent, const char* name, int pageIndex ){
-	auto item = new QStandardItem( name );
+	auto *item = new QStandardItem( name );
 	item->setData( pageIndex, Qt::ItemDataRole::UserRole );
 	parent->appendRow( item );
 	return item;
 }
 
 auto PreferencePages_addPage( QStackedWidget* notebook, const char* name ){
-	auto frame = new QGroupBox( name );
-	auto grid = new QGridLayout( frame );
+	auto *frame = new QGroupBox( name );
+	auto *grid = new QGridLayout( frame );
 	grid->setAlignment( Qt::AlignmentFlag::AlignTop );
 	grid->setColumnStretch( 0, 111 );
 	grid->setColumnStretch( 1, 333 );
@@ -604,10 +604,10 @@ void PrefsDlg::BuildDialog(){
 	GetWidget()->setWindowTitle( "NetRadiant Preferences" );
 
 	{
-		auto grid = new QGridLayout( GetWidget() );
+		auto *grid = new QGridLayout( GetWidget() );
 		grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 		{
-			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
 			grid->addWidget( buttons, 1, 1 );
 			QObject::connect( buttons, &QDialogButtonBox::accepted, GetWidget(), &QDialog::accept );
 			QObject::connect( buttons, &QDialogButtonBox::rejected, GetWidget(), &QDialog::reject );
@@ -632,7 +632,7 @@ void PrefsDlg::BuildDialog(){
 					grid->addWidget( m_treeview, 0, 0, 2, 1 );
 
 					// store display name in column #0 and page index in data( Qt::ItemDataRole::UserRole )
-					auto model = new QStandardItemModel( m_treeview );
+					auto *model = new QStandardItemModel( m_treeview );
 					m_treeview->setModel( model );
 
 					QObject::connect( m_treeview->selectionModel(), &QItemSelectionModel::currentChanged, [this]( const QModelIndex& current ){
@@ -809,7 +809,7 @@ void PreferencesDialog_showDialog(){
 	if ( g_Preferences.DoModal() == QDialog::DialogCode::Accepted ) {
 		if ( !g_restart_required.empty() ) {
 			auto message = StringStream( "Preference changes require a restart:\n\n" );
-			for ( const auto i : g_restart_required )
+			for ( const auto *i : g_restart_required )
 				message << i << '\n';
 			g_restart_required.clear();
 			message << "\nRestart now?";

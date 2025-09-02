@@ -295,13 +295,13 @@ void MD3Model_read( Model& model, unsigned char* buffer ){
 }
 
 scene::Node& MD3Model_new( unsigned char* buffer ){
-	ModelNode* modelNode = new ModelNode();
+	auto *modelNode = new ModelNode();
 	MD3Model_read( modelNode->model(), buffer );
 	return modelNode->node();
 }
 
 scene::Node& MD3Model_default(){
-	ModelNode* modelNode = new ModelNode();
+	auto *modelNode = new ModelNode();
 	Model_constructNull( modelNode->model() );
 	return modelNode->node();
 }

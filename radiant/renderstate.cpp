@@ -826,7 +826,7 @@ class OpenGLShaderCache final : public ShaderCache, public TexturesCacheObserver
 			: m_cache( cache ){
 		}
 		OpenGLShader* construct( const CopiedString& name ){
-			OpenGLShader* shader = new OpenGLShader;
+			auto *shader = new OpenGLShader;
 			if ( m_cache->realised() ) {
 				shader->realise( name );
 			}

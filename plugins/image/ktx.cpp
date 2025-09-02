@@ -321,7 +321,7 @@ Image* LoadKTXBuff( PointerInputStream& istream ){
 	}
 	istream.seek( bytesOfKeyValueData + sizeof( uint32_t ) );
 
-	RGBAImage* image = new RGBAImage( width, height );
+	auto *image = new RGBAImage( width, height );
 
 	if ( type ) {
 		KTX_Decoder* decoder = NULL;

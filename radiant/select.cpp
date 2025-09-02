@@ -1593,7 +1593,7 @@ class RotateDialog : public QObject
 		m_window->setWindowTitle( "Arbitrary rotation" );
 		m_window->installEventFilter( this );
 
-		auto grid = new QGridLayout( m_window );
+		auto *grid = new QGridLayout( m_window );
 		grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 
 		{
@@ -1607,7 +1607,7 @@ class RotateDialog : public QObject
 			grid->addWidget( new SpinBoxLabel( "  Z  ", m_z ), 2, 0 );
 		}
 		{
-			auto buttons = new QDialogButtonBox( Qt::Orientation::Vertical );
+			auto *buttons = new QDialogButtonBox( Qt::Orientation::Vertical );
 			grid->addWidget( buttons, 0, 2, 3, 1 );
 			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Ok ), &QPushButton::clicked, [this](){ ok(); } );
 			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Cancel ), &QPushButton::clicked, [this](){ cancel(); } );
@@ -1637,7 +1637,7 @@ class RotateDialog : public QObject
 protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		if( event->type() == QEvent::ShortcutOverride ) {
-			QKeyEvent *keyEvent = static_cast<QKeyEvent*>( event );
+			auto *keyEvent = static_cast<QKeyEvent*>( event );
 			if( keyEvent->key() == Qt::Key_Escape ){
 				cancel();
 				event->accept();
@@ -1685,7 +1685,7 @@ class ScaleDialog : public QObject
 		m_window->setWindowTitle( "Arbitrary scale" );
 		m_window->installEventFilter( this );
 
-		auto grid = new QGridLayout( m_window );
+		auto *grid = new QGridLayout( m_window );
 		grid->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 
 		{
@@ -1699,7 +1699,7 @@ class ScaleDialog : public QObject
 			grid->addWidget( new SpinBoxLabel( "  Z  ", m_z ), 2, 0 );
 		}
 		{
-			auto buttons = new QDialogButtonBox( Qt::Orientation::Vertical );
+			auto *buttons = new QDialogButtonBox( Qt::Orientation::Vertical );
 			grid->addWidget( buttons, 0, 2, 3, 1 );
 			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Ok ), &QPushButton::clicked, [this](){ ok(); } );
 			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Cancel ), &QPushButton::clicked, [this](){ cancel(); } );
@@ -1729,7 +1729,7 @@ class ScaleDialog : public QObject
 protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		if( event->type() == QEvent::ShortcutOverride ) {
-			QKeyEvent *keyEvent = static_cast<QKeyEvent*>( event );
+			auto *keyEvent = static_cast<QKeyEvent*>( event );
 			if( keyEvent->key() == Qt::Key_Escape ){
 				cancel();
 				event->accept();

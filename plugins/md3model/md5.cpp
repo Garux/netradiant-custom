@@ -429,7 +429,7 @@ void MD5Model_construct( Model& model, TextInputStream& inputStream ){
 }
 
 scene::Node& MD5Model_new( TextInputStream& inputStream ){
-	ModelNode* modelNode = new ModelNode();
+	auto *modelNode = new ModelNode();
 	MD5Model_construct( modelNode->model(), inputStream );
 	return modelNode->node();
 }

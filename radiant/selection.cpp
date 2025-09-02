@@ -1083,7 +1083,7 @@ public:
 			for( ExtrudeSource& source : m_extrudeSources ){
 				Brush& brush0 = source.m_brushInstance->getBrush();
 				if( source.m_faces.size() > 1 ){
-					Brush* tmpbrush = new Brush( brush0 );
+					auto *tmpbrush = new Brush( brush0 );
 					offsetFaces( source, *tmpbrush, offset );
 					brush_extrudeDiag( brush0, *tmpbrush, source );
 					delete tmpbrush;
@@ -1129,7 +1129,7 @@ public:
 					face->planeChanged();
 				}
 				if( source.m_faces.size() > 1 ){
-					Brush* tmpbrush = new Brush( brush0 );
+					auto *tmpbrush = new Brush( brush0 );
 					tmpbrush->evaluateBRep();
 					offsetFaces( source, brush0, offset );
 					if( brush0.hasContributingFaces() )
@@ -6500,15 +6500,15 @@ public:
 				float snapMoveV = 0;
 				// snap uvmove
 				const auto functor = [&]( const Vector3& point ){
-					for( std::vector<PointVertex>::const_iterator i = m_Ulines.m_lines.begin(); i != m_Ulines.m_lines.end(); ++++i ){
-						const float dist = point.y() - ( ( *i ).vertex.y() + uvmove.y() );
+					for( auto it = m_Ulines.m_lines.cbegin(); it != m_Ulines.m_lines.cend(); ++++it ){
+						const float dist = point.y() - ( ( *it ).vertex.y() + uvmove.y() );
 						if( fabs( dist ) < bestDistU ){
 							bestDistU = fabs( dist );
 							snapMoveU = uvmove.y() + dist;
 						}
 					}
-					for( std::vector<PointVertex>::const_iterator i = m_Vlines.m_lines.begin(); i != m_Vlines.m_lines.end(); ++++i ){
-						const float dist = point.x() - ( ( *i ).vertex.x() + uvmove.x() );
+					for( auto it = m_Vlines.m_lines.cbegin(); it != m_Vlines.m_lines.cend(); ++++it ){
+						const float dist = point.x() - ( ( *it ).vertex.x() + uvmove.x() );
 						if( fabs( dist ) < bestDistV ){
 							bestDistV = fabs( dist );
 							snapMoveV = uvmove.x() + dist;

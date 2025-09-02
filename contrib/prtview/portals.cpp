@@ -475,7 +475,7 @@ void CPortalsDrawSolid::render( RenderStateFlags state ) const {
 			return a->dist < b->dist;
 		} );
 
-		for ( const auto prt : portals.portal_sort )
+		for ( const auto *prt : portals.portal_sort )
 		{
 			if( ( !prt->hint && portals.draw_nonhints )
 			  || ( prt->hint && portals.draw_hints ) )

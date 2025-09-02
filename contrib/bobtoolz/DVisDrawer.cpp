@@ -172,7 +172,7 @@ void DVisDrawer::ui_create(){
 	m_dialog->setWindowTitle( "BSP leafs" );
 
 	{
-		auto vbox = new QVBoxLayout( m_dialog );
+		auto *vbox = new QVBoxLayout( m_dialog );
 		{
 			m_table = new QTableWidget( 0, 4 );
 			vbox->addWidget( m_table );

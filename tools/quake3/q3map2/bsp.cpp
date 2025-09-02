@@ -54,7 +54,7 @@ static void autocaulk_write(){
 		fprintf( file, "%i ", b.brushNum );
 		const shaderInfo_t* contentShader = b.contentShader;
 		const bool globalFog = ( contentShader->compileFlags & C_FOG )
-			&& std::all_of( b.sides.cbegin(), b.sides.cend(), []( const side_t& side ){ return side.visibleHull.empty(); } );
+			&& std::ranges::all_of( b.sides, []( const side_t& side ){ return side.visibleHull.empty(); } );
 		for( const side_t& side : b.sides ){
 			if( !side.visibleHull.empty() || ( side.compileFlags & C_NODRAW ) || globalFog ){
 				fprintf( file, "-" );
@@ -206,7 +206,7 @@ static void SetCloneModelNumbers(){
 				entities[ i ].setKeyValue( "model", modelValue );
 
 				/* nuke the brushes/patches for this entity (fixme: leak!) */
-				brushlist_t *leak = new brushlist_t( std::move( entities[ i ].brushes ) ); // are brushes referenced elsewhere, so we do not nuke them really?
+				auto *leak = new brushlist_t( std::move( entities[ i ].brushes ) ); // are brushes referenced elsewhere, so we do not nuke them really?
 				entities[ i ].patches = NULL;
 			}
 		}

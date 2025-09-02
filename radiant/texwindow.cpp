@@ -1102,7 +1102,7 @@ void TextureBrowser_ToggleHideUnused(){
 }
 
 void TextureGroups_constructTreeModel( TextureGroups groups, QStandardItemModel* model ){
-	auto root = model->invisibleRootItem();
+	auto *root = model->invisibleRootItem();
 
 	TextureGroups::const_iterator i = groups.begin();
 	while ( i != groups.end() )
@@ -1115,13 +1115,13 @@ void TextureGroups_constructTreeModel( TextureGroups groups, QStandardItemModel*
 		if ( firstUnderscore != 0
 		  && next != groups.end()
 		  && string_equal_start( ( *next ).c_str(), dirRoot ) ) {
-			auto subroot = new QStandardItem( CopiedString( StringRange( dirName, firstUnderscore ) ).c_str() );
+			auto *subroot = new QStandardItem( CopiedString( StringRange( dirName, firstUnderscore ) ).c_str() );
 			root->appendRow( subroot );
 
 			// keep going...
 			while ( i != groups.end() && string_equal_start( ( *i ).c_str(), dirRoot ) )
 			{
-				auto item = new QStandardItem( ( *i ).c_str() );
+				auto *item = new QStandardItem( ( *i ).c_str() );
 				item->setData( ( *i ).c_str(), Qt::ItemDataRole::ToolTipRole );
 				subroot->appendRow( item );
 				++i;
@@ -1129,7 +1129,7 @@ void TextureGroups_constructTreeModel( TextureGroups groups, QStandardItemModel*
 		}
 		else
 		{
-			auto item = new QStandardItem( dirName );
+			auto *item = new QStandardItem( dirName );
 			item->setData( dirName, Qt::ItemDataRole::ToolTipRole );
 			root->appendRow( item );
 			++i;
@@ -1138,7 +1138,7 @@ void TextureGroups_constructTreeModel( TextureGroups groups, QStandardItemModel*
 }
 
 void TextureGroups_constructTreeModel_childless( TextureGroups groups, QStandardItemModel* model ){
-	auto root = model->invisibleRootItem();
+	auto *root = model->invisibleRootItem();
 
 	TextureGroups::const_iterator i = groups.begin();
 	while ( i != groups.end() )
@@ -1148,7 +1148,7 @@ void TextureGroups_constructTreeModel_childless( TextureGroups groups, QStandard
 		const char* pakNameEnd = strrchr( dirName, '.' );
 		ASSERT_MESSAGE( pakName != 0 && pakNameEnd != 0 && pakNameEnd > pakName, "interesting wad path" );
 		{
-			auto item = new QStandardItem( CopiedString( StringRange( pakName + 1, pakNameEnd ) ).c_str() );
+			auto *item = new QStandardItem( CopiedString( StringRange( pakName + 1, pakNameEnd ) ).c_str() );
 			item->setData( dirName, Qt::ItemDataRole::ToolTipRole );
 			root->appendRow( item );
 			++i;
@@ -1175,7 +1175,7 @@ void TextureBrowser_constructTreeStore(){
 	TextureGroups groups;
 	TextureGroups_constructTreeView( groups );
 
-	auto model = new QStandardItemModel( g_TexBro.m_treeView ); //. ? delete old or clear() & reuse
+	auto *model = new QStandardItemModel( g_TexBro.m_treeView ); //. ? delete old or clear() & reuse
 
 	// store display name in column #0 and load path in data( Qt::ItemDataRole::ToolTipRole )
 	// tooltips are only wanted for TextureBrowser::wads, but well
@@ -1232,7 +1232,7 @@ void TextureBrowser_createTreeViewTree(){
 }
 
 static QMenu* TextureBrowser_constructViewMenu(){
-	QMenu *menu = new QMenu( "View" );
+	auto *menu = new QMenu( "View" );
 
 	menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
 
@@ -1275,7 +1275,7 @@ XmlTagBuilder TagBuilder;
 
 
 static QMenu* TextureBrowser_constructTagsMenu(){
-	auto menu = new QMenu( "Tags" );
+	auto *menu = new QMenu( "Tags" );
 
 	menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
 
@@ -1330,7 +1330,7 @@ void TextureBrowser_tagsSetCheckboxesForShader( const char *shader ){
 
 	for( int i = 0; i < g_TexBro.m_tagsListWidget->count(); ++i )
 	{
-		auto item = g_TexBro.m_tagsListWidget->item( i );
+		auto *item = g_TexBro.m_tagsListWidget->item( i );
 		item->setCheckState( contains( item->data( Qt::ItemDataRole::DisplayRole ).toByteArray() )? Qt::CheckState::Checked : Qt::CheckState::Unchecked );
 	}
 }
@@ -1500,7 +1500,7 @@ void TextureBrowser_addTag(){
 	while( g_TexBro.m_all_tags.contains( tag.c_str() ) )
 		tag( "NewTag", ++index );
 
-	auto item = new QListWidgetItem( tag.c_str() );
+	auto *item = new QListWidgetItem( tag.c_str() );
 	item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren );
 	item->setCheckState( Qt::CheckState::Unchecked ); // is needed to see checkbox
 	g_TexBro.m_tagsListWidget->addItem( item );
@@ -1523,7 +1523,7 @@ void TextureBrowser_deleteTag(){
 	const auto selected = g_TexBro.m_tagsListWidget->selectedItems();
 	if ( !selected.empty() ) {
 		if ( eIDYES == qt_MessageBox( g_TexBro.m_parent, "Are you sure you want to delete the selected tags?", "Delete Tag", EMessageBoxType::Question ) ) {
-			for( auto item : selected ){
+			for( auto *item : selected ){
 				auto tag = item->text().toLatin1();
 				delete item;
 				TagBuilder.DeleteTag( tag.constData() );
@@ -1650,7 +1650,7 @@ protected:
 	}
 	bool event( QEvent *event ) override {
 		if( event->type() == QEvent::ShortcutOverride ){
-			QKeyEvent *keyEvent = static_cast<QKeyEvent*>( event );
+			auto *keyEvent = static_cast<QKeyEvent*>( event );
 			if( keyEvent->key() == Qt::Key_Escape ){
 				clear();
 				event->accept();
@@ -1758,13 +1758,13 @@ QWidget* TextureBrowser_constructWindow( QWidget* toplevel ){
 
 	g_TexBro.m_parent = toplevel;
 
-	QSplitter *splitter = new QSplitter;
-	QWidget *containerWidgetLeft = new QWidget; // Adding a QLayout to a QSplitter is not supported, use proxy widget
-	QWidget *containerWidgetRight = new QWidget; // Adding a QLayout to a QSplitter is not supported, use proxy widget
+	auto *splitter = new QSplitter;
+	auto *containerWidgetLeft = new QWidget; // Adding a QLayout to a QSplitter is not supported, use proxy widget
+	auto *containerWidgetRight = new QWidget; // Adding a QLayout to a QSplitter is not supported, use proxy widget
 	splitter->addWidget( containerWidgetLeft );
 	splitter->addWidget( containerWidgetRight );
-	QVBoxLayout *vbox = new QVBoxLayout( containerWidgetLeft );
-	QHBoxLayout *hbox = new QHBoxLayout( containerWidgetRight );
+	auto *vbox = new QVBoxLayout( containerWidgetLeft );
+	auto *hbox = new QHBoxLayout( containerWidgetRight );
 
 	hbox->setContentsMargins( 0, 0, 0, 0 );
 	vbox->setContentsMargins( 0, 0, 0, 0 );
@@ -1773,7 +1773,7 @@ QWidget* TextureBrowser_constructWindow( QWidget* toplevel ){
 
 
 	{	// menu bar
-		QToolBar *toolbar = new QToolBar;
+		auto *toolbar = new QToolBar;
 		vbox->addWidget( toolbar );
 
 		QMenu* menu_view = TextureBrowser_constructViewMenu();
@@ -1814,7 +1814,7 @@ QWidget* TextureBrowser_constructWindow( QWidget* toplevel ){
 		hbox->addWidget( g_TexBro.m_gl_widget );
 	}
 	{	// gl_widget scrollbar
-		auto scroll = g_TexBro.m_texture_scroll = new QScrollBar;
+		auto *scroll = g_TexBro.m_texture_scroll = new QScrollBar;
 		hbox->addWidget( scroll );
 
 		QObject::connect( scroll, &QAbstractSlider::valueChanged, []( int value ){
@@ -1838,7 +1838,7 @@ QWidget* TextureBrowser_constructWindow( QWidget* toplevel ){
 
 		TagBuilder.GetAllTags( g_TexBro.m_all_tags );
 		for ( const CopiedString& tag : g_TexBro.m_all_tags ){
-			auto item = new QListWidgetItem( tag.c_str() );
+			auto *item = new QListWidgetItem( tag.c_str() );
 			item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren );
 			item->setCheckState( Qt::CheckState::Unchecked ); // is needed to see checkbox
 			g_TexBro.m_tagsListWidget->addItem( item );

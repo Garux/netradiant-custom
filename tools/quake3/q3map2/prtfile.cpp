@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include <ranges>
 
 
 
@@ -239,12 +240,12 @@ static void WriteFaceFile_r( const node_t *node ){
 			else
 			{
 				fprintf( pf, "%zu %i ", w.size(), p->nodes[1]->cluster );
-				for ( winding_t::const_reverse_iterator point = w.crbegin(); point != w.crend(); ++point )
+				for ( const Vector3& point : std::ranges::reverse_view( w ) )
 				{
 					fprintf( pf, "(" );
-					WriteFloat( pf, point->x() );
-					WriteFloat( pf, point->y() );
-					WriteFloat( pf, point->z() );
+					WriteFloat( pf, point.x() );
+					WriteFloat( pf, point.y() );
+					WriteFloat( pf, point.z() );
 					fprintf( pf, ") " );
 				}
 				fprintf( pf, "\n" );

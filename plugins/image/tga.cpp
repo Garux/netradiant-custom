@@ -282,7 +282,7 @@ inline void targa_header_read_istream( TargaHeader& targa_header, PointerInputSt
 
 template<typename Flip>
 Image* Targa_decodeImageData( const TargaHeader& targa_header, PointerInputStream& istream, const Flip& flip ){
-	RGBAImage* image = new RGBAImage( targa_header.width, targa_header.height );
+	auto *image = new RGBAImage( targa_header.width, targa_header.height );
 
 	if ( targa_header.image_type == 2 || targa_header.image_type == 3 ) {
 		switch ( targa_header.pixel_size )

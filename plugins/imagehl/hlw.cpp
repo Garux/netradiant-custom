@@ -109,7 +109,7 @@ Image* LoadHLWBuff( byte* buffer ){
 	columns = lpMip->width;
 	rows = lpMip->height;
 
-	RGBAImage* image = new RGBAImage( columns, rows );
+	auto *image = new RGBAImage( columns, rows );
 
 	for ( row = 0; row < rows; row++ )
 	{

@@ -212,19 +212,19 @@ void MapCoordinator(){
 			QDialog dialog( SunPlug::main_window, Qt::Dialog | Qt::WindowCloseButtonHint );
 			dialog.setWindowTitle( "ET-MapCoordinator" );
 			{
-				auto form = new QFormLayout( &dialog );
+				auto *form = new QFormLayout( &dialog );
 				form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 				{
-					auto spin_minX = new SpinBox( -65536, 65536, min.x() );
-					auto spin_minY = new SpinBox( -65536, 65536, min.y() );
-					auto spin_maxX = new SpinBox( -65536, 65536, max.x() );
-					auto spin_maxY = new SpinBox( -65536, 65536, max.y() );
+					auto *spin_minX = new SpinBox( -65536, 65536, min.x() );
+					auto *spin_minY = new SpinBox( -65536, 65536, min.y() );
+					auto *spin_maxX = new SpinBox( -65536, 65536, max.x() );
+					auto *spin_maxY = new SpinBox( -65536, 65536, max.y() );
 					spin_minX->setPrefix( "X: " );
 					spin_minY->setPrefix( "Y: " );
 					spin_maxX->setPrefix( "X: " );
 					spin_maxY->setPrefix( "Y: " );
 					{
-						auto button = new QPushButton( "Get optimal mapcoords" );
+						auto *button = new QPushButton( "Get optimal mapcoords" );
 						form->addWidget( button );
 						QObject::connect( button, &QPushButton::clicked, [&, calc_min = calc_min, calc_max = calc_max](){
 							spin_minX->setValue( calc_min.x() );
@@ -234,25 +234,25 @@ void MapCoordinator(){
 						} );
 					}
 					{
-						auto line = new QFrame;
+						auto *line = new QFrame;
 						line->setFrameShape( QFrame::Shape::HLine );
 						line->setFrameShadow( QFrame::Shadow::Raised );
 						form->addRow( line );
 					}
 					{
-						auto hbox = new QHBoxLayout;
+						auto *hbox = new QHBoxLayout;
 						hbox->addWidget( spin_minX );
 						hbox->addWidget( spin_minY );
 						form->addRow( new QLabel( "MapCoordsMins" ), hbox );
 					}
 					{
-						auto hbox = new QHBoxLayout;
+						auto *hbox = new QHBoxLayout;
 						hbox->addWidget( spin_maxX );
 						hbox->addWidget( spin_maxY );
 						form->addRow( new QLabel( "MapCoordsMaxs" ), hbox );
 					}
 					{
-						auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+						auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
 						form->addWidget( buttons );
 						QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
 						QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );

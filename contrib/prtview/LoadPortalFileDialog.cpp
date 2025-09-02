@@ -48,10 +48,10 @@ bool DoLoadPortalFileDialog(){
 	QCheckBox *check3d, *check2d;
 
 	{
-		auto vbox = new QVBoxLayout( &dialog );
+		auto *vbox = new QVBoxLayout( &dialog );
 		{
 			vbox->addWidget( line = new QLineEdit );
-			auto button = line->addAction( QApplication::style()->standardIcon( QStyle::SP_DialogOpenButton ), QLineEdit::ActionPosition::TrailingPosition );
+			auto *button = line->addAction( QApplication::style()->standardIcon( QStyle::SP_DialogOpenButton ), QLineEdit::ActionPosition::TrailingPosition );
 			QObject::connect( button, &QAction::triggered, [line](){
 				if ( const char* filename = GlobalRadiant().m_pfnFileDialog( g_pRadiantWnd, true, "Locate portal (.prt) file", line->text().toLatin1().constData(), 0, true, false, false ) )
 					line->setText( filename );
@@ -62,7 +62,7 @@ bool DoLoadPortalFileDialog(){
 			vbox->addWidget( check2d = new QCheckBox( "Show 2D" ) );
 		}
 		{
-			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
 			vbox->addWidget( buttons );
 			QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
 			QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );

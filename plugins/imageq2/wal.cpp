@@ -128,7 +128,7 @@ Image* LoadMipTex( byte* buffer, byte TypeofTex ){
 		source = buffer + offset;
 	}
 
-	RGBAImageFlags* image = new RGBAImageFlags( w, h, flags, contents, value );
+	auto *image = new RGBAImageFlags( w, h, flags, contents, value );
 
 	byte* dest = image->getRGBAPixels();
 	byte* end = source + ( w * h );

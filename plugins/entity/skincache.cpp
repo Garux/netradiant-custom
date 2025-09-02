@@ -225,7 +225,7 @@ class Doom3ModelSkinCache final : public ModelSkinCache, public ModuleObserver
 			: m_cache( cache ){
 		}
 		Doom3ModelSkinCacheElement* construct( const CopiedString& name ){
-			Doom3ModelSkinCacheElement* skin = new Doom3ModelSkinCacheElement;
+			auto *skin = new Doom3ModelSkinCacheElement;
 			if ( m_cache.realised() ) {
 				skin->realise( name.c_str() );
 			}

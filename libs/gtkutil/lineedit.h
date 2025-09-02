@@ -34,7 +34,7 @@ class LineEdit : public QLineEdit
 protected:
 	bool event( QEvent *event ) override {
 		if( event->type() == QEvent::ShortcutOverride ){
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>( event );
+			auto *keyEvent = static_cast<QKeyEvent *>( event );
 			if( keyEvent == QKeySequence::StandardKey::Undo
 			 || keyEvent == QKeySequence::StandardKey::Redo )
 				return false;

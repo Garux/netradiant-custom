@@ -484,7 +484,7 @@ int pk3BSPMain( Args& args ){
 					/* ignore bogus paths */
 					if ( !strEqual( token, "-" ) && !striEqual( token, "full" ) ) {
 						char* const skysidestring = token + strcatQ( token, "_@@.tga", std::size( token ) ) - 6;
-						for( const auto side : { "up", "dn", "lf", "rt", "bk", "ft" } ){
+						for( const auto *side : { "up", "dn", "lf", "rt", "bk", "ft" } ){
 							memcpy( skysidestring, side, 2 );
 							tex2list( pk3Textures, ex.textures, NULL );
 						}
@@ -866,7 +866,7 @@ int repackBSPMain( Args& args ){
 					/* ignore bogus paths */
 					if ( !strEqual( token, "-" ) && !striEqual( token, "full" ) ) {
 						char* const skysidestring = token + strcatQ( token, "_@@.tga", std::size( token ) ) - 6;
-						for( const auto side : { "up", "dn", "lf", "rt", "bk", "ft" } ){
+						for( const auto *side : { "up", "dn", "lf", "rt", "bk", "ft" } ){
 							memcpy( skysidestring, side, 2 );
 							tex2list( pk3Textures, ex.textures, &rex.textures );
 						}

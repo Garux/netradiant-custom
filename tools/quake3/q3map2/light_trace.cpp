@@ -1001,7 +1001,7 @@ static void PopulateWithPicoModel( int castShadows, const std::vector<const AssM
 	}
 
 	/* walk the list of surfaces in this model and fill out the info structs */
-	for ( const auto mesh : model )
+	for ( const auto *mesh : model )
 	{
 		/* get shader (fixme: support shader remapping) */
 		ti.si = ShaderInfoForShaderNull( mesh->getShaderName() );

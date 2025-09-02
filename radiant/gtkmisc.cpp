@@ -115,14 +115,14 @@ void toggle_remove_accelerator( const char* name ){
 
 
 QAction* create_check_menu_item_with_mnemonic( QMenu* menu, const char* mnemonic, const char* commandName ){
-	auto action = toggle_add_accelerator_( commandName );
+	auto *action = toggle_add_accelerator_( commandName );
 	action->setText( mnemonic );
 	menu->addAction( action );
 	return action;
 }
 
 QAction* create_menu_item_with_mnemonic( QMenu *menu, const char *mnemonic, const char* commandName ){
-	auto action = command_connect_accelerator_( commandName );
+	auto *action = command_connect_accelerator_( commandName );
 	action->setText( mnemonic );
 	menu->addAction( action );
 	return action;
@@ -149,7 +149,7 @@ static void toolbar_action_set_tooltip( QAction *action, const char *description
 }
 
 QAction* toolbar_append_button( QToolBar* toolbar, const char* description, const char* icon, const char* commandName ){
-	auto action = command_connect_accelerator_( commandName );
+	auto *action = command_connect_accelerator_( commandName );
 	action->setIcon( new_local_icon( icon ) );
 	toolbar_action_set_tooltip( action, description );
 	toolbar->addAction( action );
@@ -157,7 +157,7 @@ QAction* toolbar_append_button( QToolBar* toolbar, const char* description, cons
 }
 
 QAction* toolbar_append_toggle_button( QToolBar* toolbar, const char* description, const char* icon, const char* commandName ){
-	auto action = toggle_add_accelerator_( commandName );
+	auto *action = toggle_add_accelerator_( commandName );
 	action->setIcon( new_local_icon( icon ) );
 	toolbar_action_set_tooltip( action, description );
 	toolbar->addAction( action );

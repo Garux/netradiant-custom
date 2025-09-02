@@ -908,14 +908,14 @@ void DoMapInfo(){
 	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Map Info" );
 
-	auto w_brushes = new QLabel;
-	auto w_patches = new QLabel;
-	auto w_ents = new QLabel;
-	auto w_ents_ingame = new QLabel;
-	auto w_groupents = new QLabel;
-	auto w_groupents_ingame = new QLabel;
+	auto *w_brushes = new QLabel;
+	auto *w_patches = new QLabel;
+	auto *w_ents = new QLabel;
+	auto *w_ents_ingame = new QLabel;
+	auto *w_groupents = new QLabel;
+	auto *w_groupents_ingame = new QLabel;
 
-	auto tree = new QTreeWidget;
+	auto *tree = new QTreeWidget;
 	tree->setColumnCount( 2 );
 	tree->setSortingEnabled( true );
 	tree->sortByColumn( 0, Qt::SortOrder::AscendingOrder );
@@ -928,7 +928,7 @@ void DoMapInfo(){
 	tree->setHeaderLabels( { "Entity", "Count" } );
 
 	{
-		auto grid = new QGridLayout( &dialog );
+		auto *grid = new QGridLayout( &dialog );
 
 		grid->addWidget( new QLabel( "Total Brushes:" ), 0, 0 );
 		grid->addWidget( w_brushes, 0, 1 );
@@ -956,7 +956,7 @@ void DoMapInfo(){
 
 		for ( const auto&[name, count] : entitymap )
 		{
-			auto item = new QTreeWidgetItem( tree );
+			auto *item = new QTreeWidgetItem( tree );
 			item->setData( 0, Qt::ItemDataRole::DisplayRole, name.c_str() );
 			item->setData( 1, Qt::ItemDataRole::DisplayRole, int( count ) );
 		}
@@ -2085,18 +2085,18 @@ void DoFind(){
 	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Find Brush" );
 
-	auto entity = new SpinBox( 0, 999999 );
+	auto *entity = new SpinBox( 0, 999999 );
 	entity->setButtonSymbols( QAbstractSpinBox::ButtonSymbols::NoButtons );
-	auto brush = new SpinBox( 0, 999999 );
+	auto *brush = new SpinBox( 0, 999999 );
 	brush->setButtonSymbols( QAbstractSpinBox::ButtonSymbols::NoButtons );
 	{
-		auto form = new QFormLayout( &dialog );
+		auto *form = new QFormLayout( &dialog );
 		form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 
 		form->addRow( new SpinBoxLabel( "Entity number", entity ), entity );
 		form->addRow( new SpinBoxLabel( "Brush number", brush ), brush );
 		{
-			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Close );
+			auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Close );
 			buttons->addButton( "Find", QDialogButtonBox::ButtonRole::AcceptRole );
 			form->addWidget( buttons );
 			QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );

@@ -97,7 +97,7 @@ protected:
 		if( event->type() == QEvent::Close ) {
 			m_shownDeferred = false;
 			/* HACK */ //.  because widget isVisible() at this point
-			const auto tmp = std::exchange( m_widget, nullptr );
+			auto *tmp = std::exchange( m_widget, nullptr );
 			update();
 			m_widget = tmp;
 		}

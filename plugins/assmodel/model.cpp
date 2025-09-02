@@ -429,7 +429,7 @@ private:
 		for( size_t n = 0; n < node->mNumMeshes; ++n ){
 			const aiMesh *mesh = scene.m_scene->mMeshes[node->mMeshes[n]];
 			if( mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE ){
-				PicoSurface* picosurface = new PicoSurface( scene, mesh );
+				auto *picosurface = new PicoSurface( scene, mesh );
 				aabb_extend_by_aabb_safe( m_aabb_local, picosurface->localAABB() );
 				m_surfaces.push_back( picosurface );
 			}
@@ -441,7 +441,7 @@ private:
 		}
 	}
 	void constructNull(){
-		PicoSurface* picosurface = new PicoSurface();
+		auto *picosurface = new PicoSurface();
 		m_aabb_local = picosurface->localAABB();
 		m_surfaces.push_back( picosurface );
 	}

@@ -23,6 +23,7 @@
 
 #include "debugging/debugging.h"
 #include <set>
+#include <ranges>
 #include "moduleobserver.h"
 
 class ModuleObservers
@@ -42,15 +43,15 @@ public:
 		ASSERT_MESSAGE( erased, "ModuleObservers::detach: cannot detach observer" );
 	}
 	void realise(){
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( auto *o : m_observers )
 		{
-			( *i )->realise();
+			o->realise();
 		}
 	}
 	void unrealise(){
-		for ( Observers::reverse_iterator i = m_observers.rbegin(); i != m_observers.rend(); ++i )
+		for ( auto *o : std::ranges::reverse_view( m_observers ) )
 		{
-			( *i )->unrealise();
+			o->unrealise();
 		}
 	}
 };

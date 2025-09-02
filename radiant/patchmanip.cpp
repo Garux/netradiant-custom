@@ -134,7 +134,7 @@ public:
 void Scene_PatchDoCap_Selected( scene::Graph& graph, const char* shader, EPatchCap type ){
 	InstanceVector instances;
 	Scene_forEachVisibleSelectedPatchInstance( PatchStoreInstance( instances ) );
-	for ( auto i : instances )
+	for ( auto *i : instances )
 	{
 		Patch_makeCaps( *Node_getPatch( i->path().top() ), *i, type, shader );
 	}
@@ -156,7 +156,7 @@ void Scene_PatchDeform( scene::Graph& graph, const int deform, const int axis )
 {
 	InstanceVector instances;
 	Scene_forEachVisibleSelectedPatchInstance( PatchStoreInstance( instances ) );
-	for ( auto i : instances )
+	for ( auto *i : instances )
 	{
 		Patch_deform( *Node_getPatch( i->path().top() ), *i, deform, axis );
 	}
@@ -231,7 +231,7 @@ void Scene_PatchThicken( scene::Graph& graph, const int thickness, bool seams, c
 {
 	InstanceVector instances;
 	Scene_forEachVisibleSelectedPatchInstance( PatchStoreInstance( instances ) );
-	for ( auto i : instances )
+	for ( auto *i : instances )
 	{
 		Patch_thicken( *Node_getPatch( i->path().top() ), *i, thickness, seams, axis );
 	}
@@ -830,12 +830,12 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Patch density" );
 
-	auto width = new ComboBox;
-	auto height = new ComboBox;
-	auto redisperseCheckBox = new QCheckBox( "Square" );
+	auto *width = new ComboBox;
+	auto *height = new ComboBox;
+	auto *redisperseCheckBox = new QCheckBox( "Square" );
 
 	{
-		auto form = new QFormLayout( &dialog );
+		auto *form = new QFormLayout( &dialog );
 		form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 		{
 			{
@@ -885,7 +885,7 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 			}
 		}
 		{
-			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
 			form->addWidget( buttons );
 			QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
 			QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );
@@ -909,18 +909,18 @@ void DoPatchDeformDlg(){
 	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Patch deform" );
 
-	auto spin = new SpinBox( -9999, 9999, 64 );
+	auto *spin = new SpinBox( -9999, 9999, 64 );
 
 	RadioHBox radioBox = RadioHBox_new( (const char*[]){ "X", "Y", "Z" } );
 	radioBox.m_radio->button( 2 )->setChecked( true );
 
 	{
-		auto form = new QFormLayout( &dialog );
+		auto *form = new QFormLayout( &dialog );
 		form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 		form->addRow( new SpinBoxLabel( "Max deform:", spin ), spin );
 		form->addRow( "", radioBox.m_hbox );
 		{
-			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
 			form->addWidget( buttons );
 			QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
 			QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );
@@ -940,9 +940,9 @@ void DoCapDlg(){
 	QDialog dialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog.setWindowTitle( "Cap" );
 
-	auto group = new QButtonGroup( &dialog );
+	auto *group = new QButtonGroup( &dialog );
 	{
-		auto form = new QFormLayout( &dialog );
+		auto *form = new QFormLayout( &dialog );
 		form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 		{
 			const char* iconlabel[][2] = { { "cap_bevel.png", "Bevel" },
@@ -952,9 +952,9 @@ void DoCapDlg(){
 			                               { "cap_cylinder.png", "Cylinder" } };
 			for( size_t i = 0; i < std::size( iconlabel ); ++i ){
 				const auto [ stricon, strlabel ] = iconlabel[i];
-				auto label = new QLabel;
+				auto *label = new QLabel;
 				label->setPixmap( new_local_image( stricon ) );
-				auto button = new QRadioButton( strlabel );
+				auto *button = new QRadioButton( strlabel );
 				group->addButton( button, i ); // set ids 0+, default ones are negative
 				form->addRow( label, button );
 			}
@@ -962,7 +962,7 @@ void DoCapDlg(){
 				form->itemAt( i )->setAlignment( Qt::AlignmentFlag::AlignVCenter );
 		}
 		{
-			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
 			form->addWidget( buttons );
 			QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
 			QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );
@@ -983,22 +983,22 @@ void DoPatchThickenDlg(){
 	dialog.setWindowTitle( "Patch thicken" );
 
 	const int grid = std::max( GetGridSize(), 1.f );
-	auto spin = new SpinBox( -9999, 9999, grid, 2, grid );
+	auto *spin = new SpinBox( -9999, 9999, grid, 2, grid );
 
 	RadioHBox radioBox = RadioHBox_new( (const char*[]){ "X", "Y", "Z", "Normal" } );
 	radioBox.m_radio->button( 3 )->setChecked( true );
 
-	auto check = new QCheckBox( "Side walls" );
+	auto *check = new QCheckBox( "Side walls" );
 	check->setChecked( true );
 
 	{
-		auto form = new QFormLayout( &dialog );
+		auto *form = new QFormLayout( &dialog );
 		form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 		form->addRow( new SpinBoxLabel( "Thickness:", spin ), spin );
 		form->addRow( "", radioBox.m_hbox );
 		form->addWidget( check );
 		{
-			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
+			auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel );
 			form->addWidget( buttons );
 			QObject::connect( buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept );
 			QObject::connect( buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject );

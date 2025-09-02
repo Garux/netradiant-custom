@@ -48,20 +48,20 @@ static void OnColor( PackedColour& clr ){
 }
 
 static void form_add_color( QFormLayout *form, PackedColour& color ){
-	auto button = new QPushButton( "Color" );
+	auto *button = new QPushButton( "Color" );
 	QObject::connect( button, &QAbstractButton::clicked, [&color](){ OnColor( color ); } );
 
-	auto hbox = new QHBoxLayout;
+	auto *hbox = new QHBoxLayout;
 	form->addRow( hbox );
 	hbox->addStretch();
 	hbox->addWidget( button );
 }
 
 static void form_add_slider( QFormLayout *form, int& param, int min, int max, const char *prefix, const char *suffix, bool changeShaders ){
-	auto slider = new QSlider( Qt::Orientation::Horizontal );
+	auto *slider = new QSlider( Qt::Orientation::Horizontal );
 	slider->setRange( min, max );
 
-	auto label = new QLabel;
+	auto *label = new QLabel;
 	label->setMinimumWidth( label->fontMetrics().horizontalAdvance( QString( prefix ) + QString::number( max ) + suffix ) );
 	const auto label_set_text = [label, prefix, suffix]( int value ){
 		label->setText( QString( prefix ) + QString::number( value ) + suffix );
@@ -80,7 +80,7 @@ static void form_add_slider( QFormLayout *form, int& param, int min, int max, co
 }
 
 static QGroupBox* vbox_add_group( QVBoxLayout *vbox, const char *name, bool& param, bool changeShaders ){
-	auto group = new QGroupBox( name );
+	auto *group = new QGroupBox( name );
 	vbox->addWidget( group );
 	group->setCheckable( true );
 	group->setChecked( param );
@@ -95,7 +95,7 @@ static QGroupBox* vbox_add_group( QVBoxLayout *vbox, const char *name, bool& par
 }
 
 static QCheckBox* new_checkbox( const char *name, bool& param ){
-	auto check = new QCheckBox( name );
+	auto *check = new QCheckBox( name );
 	check->setChecked( param );
 	QObject::connect( check, &QAbstractButton::toggled, [&param]( bool checked ){
 		param = checked;
@@ -105,34 +105,34 @@ static QCheckBox* new_checkbox( const char *name, bool& param ){
 }
 
 void DoConfigDialog(){
-	auto dialog = new QDialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
+	auto *dialog = new QDialog( g_pRadiantWnd, Qt::Dialog | Qt::WindowCloseButtonHint );
 	dialog->setWindowTitle( "Portal Viewer Configuration" );
 	dialog->setAttribute( Qt::WidgetAttribute::WA_DeleteOnClose );
 
 	{
-		auto dialog_vbox = new QVBoxLayout( dialog );
+		auto *dialog_vbox = new QVBoxLayout( dialog );
 		dialog_vbox->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 		{
-			auto vbox = new QVBoxLayout( vbox_add_group( dialog_vbox, "3D View", portals.show_3d, false ) );
+			auto *vbox = new QVBoxLayout( vbox_add_group( dialog_vbox, "3D View", portals.show_3d, false ) );
 			{
-				auto form = new QFormLayout( vbox_add_group( vbox, "Lines", portals.lines, false ) );
+				auto *form = new QFormLayout( vbox_add_group( vbox, "Lines", portals.lines, false ) );
 				form_add_slider( form, portals.width_3d, 1, 10, "Width = ", "", true );
 				form_add_color( form, portals.color_3d );
 			}
 			{
-				auto form = new QFormLayout( vbox_add_group( vbox, "Polygons", portals.polygons, false ) );
+				auto *form = new QFormLayout( vbox_add_group( vbox, "Polygons", portals.polygons, false ) );
 				form_add_slider( form, portals.opacity_3d, 0, 100, "Opacity = ", "%", false );
 			}
 			{
-				auto form = new QFormLayout( vbox_add_group( vbox, "Fog", portals.fog, true ) );
+				auto *form = new QFormLayout( vbox_add_group( vbox, "Fog", portals.fog, true ) );
 				form_add_color( form, portals.color_fog );
 			}
 			{
-				auto form = new QFormLayout( vbox_add_group( vbox, "Cubic clipper", portals.clip, false ) );
+				auto *form = new QFormLayout( vbox_add_group( vbox, "Cubic clipper", portals.clip, false ) );
 				form_add_slider( form, portals.clip_range, 64, 8192, "Clip range = ", "", false );
 			}
 			{
-				auto combo = new ComboBox;
+				auto *combo = new ComboBox;
 				vbox->addWidget( combo );
 				combo->addItem( "Z-Buffer Test and Write (recommended for solid or no polygons)" );
 				combo->addItem( "Z-Buffer Test Only (recommended for transparent polygons)" );
@@ -150,7 +150,7 @@ void DoConfigDialog(){
 			dialog_vbox->addWidget( new_checkbox( "Draw Regular Portals", portals.draw_nonhints ), 0, Qt::AlignmentFlag::AlignHCenter );
 		}
 		{
-			auto form = new QFormLayout( vbox_add_group( dialog_vbox, "2D View Lines", portals.show_2d, false ) );
+			auto *form = new QFormLayout( vbox_add_group( dialog_vbox, "2D View Lines", portals.show_2d, false ) );
 			form_add_slider( form, portals.width_2d, 1, 10, "Width = ", "", true );
 			form_add_color( form, portals.color_2d );
 		}

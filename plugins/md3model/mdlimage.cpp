@@ -128,7 +128,7 @@ Image* LoadMDLImageBuff( byte* buffer ){
 		break;
 	}
 
-	RGBAImage* image = new RGBAImage( skinwidth, skinheight );
+	auto *image = new RGBAImage( skinwidth, skinheight );
 	unsigned char* pRGBA = image->getRGBAPixels();
 
 	for ( int i = 0; i < ( skinheight ); i++ )

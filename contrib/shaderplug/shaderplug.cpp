@@ -23,6 +23,7 @@
 
 #include "debugging/debugging.h"
 
+#include <ranges>
 #include <vector>
 #include "string/string.h"
 #include "modulesystem/singletonmodule.h"
@@ -141,14 +142,14 @@ void CreateTagFile(){
 
 		TagBuilder.CreateXmlDocument();
 
-		for ( auto r_iter = textures.crbegin(); r_iter != textures.crend(); ++r_iter )
+		for ( const auto& texture : std::ranges::reverse_view( textures ) )
 		{
-			TagBuilder.AddShaderNode( r_iter->c_str(), TextureType::STOCK, NodeShaderType::TEXTURE );
+			TagBuilder.AddShaderNode( texture.c_str(), TextureType::STOCK, NodeShaderType::TEXTURE );
 		}
 
-		for ( auto r_iter = shaders.crbegin(); r_iter != shaders.crend(); ++r_iter )
+		for ( const auto& shader : std::ranges::reverse_view( shaders ) )
 		{
-			TagBuilder.AddShaderNode( r_iter->c_str(), TextureType::STOCK, NodeShaderType::SHADER );
+			TagBuilder.AddShaderNode( shader.c_str(), TextureType::STOCK, NodeShaderType::SHADER );
 		}
 
 		// Get the tag file
@@ -178,7 +179,7 @@ void CreateTagFile(){
 		                                 EMessageBoxType::Error, 0 );
 	}
 }
-} // namespace
+} // namespace Shaderplug
 
 class ShaderPluginModule
 {

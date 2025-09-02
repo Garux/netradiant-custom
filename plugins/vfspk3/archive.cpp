@@ -53,7 +53,7 @@ public:
 	virtual ArchiveFile* openFile( const char* name ) override {
 		UnixPath path( m_root.c_str() );
 		path.push_filename( name );
-		DirectoryArchiveFile* file = new DirectoryArchiveFile( name, path.c_str() );
+		auto *file = new DirectoryArchiveFile( name, path.c_str() );
 		if ( !file->failed() ) {
 			return file;
 		}
@@ -63,7 +63,7 @@ public:
 	virtual ArchiveTextFile* openTextFile( const char* name ) override {
 		UnixPath path( m_root.c_str() );
 		path.push_filename( name );
-		DirectoryArchiveTextFile* file = new DirectoryArchiveTextFile( name, path.c_str() );
+		auto *file = new DirectoryArchiveTextFile( name, path.c_str() );
 		if ( !file->failed() ) {
 			return file;
 		}

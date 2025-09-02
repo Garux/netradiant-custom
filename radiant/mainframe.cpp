@@ -223,7 +223,7 @@ void HomePaths_Realise(){
 
 		g_qeglobals.m_userEnginePath = EnginePath_get();
 	}
-	while ( 0 );
+	while ( false );
 
 	Q_mkdir( g_qeglobals.m_userEnginePath.c_str() );
 
@@ -422,12 +422,12 @@ public:
 	void BuildDialog() override {
 		GetWidget()->setWindowTitle( "Engine Path Configuration" );
 
-		auto vbox = new QVBoxLayout( GetWidget() );
+		auto *vbox = new QVBoxLayout( GetWidget() );
 		{
-			auto frame = new QGroupBox( "Path settings" );
+			auto *frame = new QGroupBox( "Path settings" );
 			vbox->addWidget( frame );
 
-			auto grid = new QGridLayout( frame );
+			auto *grid = new QGridLayout( frame );
 			grid->setAlignment( Qt::AlignmentFlag::AlignTop );
 			grid->setColumnStretch( 0, 111 );
 			grid->setColumnStretch( 1, 333 );
@@ -451,7 +451,7 @@ public:
 			}
 		}
 		{
-			auto buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok );
+			auto *buttons = new QDialogButtonBox( QDialogButtonBox::StandardButton::Ok );
 			vbox->addWidget( buttons );
 			QObject::connect( buttons, &QDialogButtonBox::accepted, GetWidget(), &QDialog::accept );
 		}
@@ -760,20 +760,20 @@ WaitDialog create_wait_dialog( const char* title, const char* text ){
 	/* Qt::Tool window type doesn't steal focus, which saves e.g. from losing freelook camera mode on autosave
 	   or entity menu from hiding, while clicked with ctrl, by tex/model loading popup.
 	   Qt::WidgetAttribute::WA_ShowWithoutActivating is implied, but lets have it set too. */
-	auto window = new QWidget( MainFrame_getWindow(), Qt::Tool | Qt::WindowTitleHint );
+	auto *window = new QWidget( MainFrame_getWindow(), Qt::Tool | Qt::WindowTitleHint );
 	window->setWindowTitle( title );
 	window->setWindowModality( Qt::WindowModality::ApplicationModal );
 	window->setAttribute( Qt::WidgetAttribute::WA_ShowWithoutActivating );
 
-	auto label = new QLabel( text );
+	auto *label = new QLabel( text );
 	{
-		auto box = new QHBoxLayout( window );
+		auto *box = new QHBoxLayout( window );
 		box->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
 		box->setContentsMargins( 20, 5, 20, 3 );
 		box->addWidget( label );
 		label->setMinimumWidth( 200 );
 	}
-	return WaitDialog{ window, label };
+	return WaitDialog{ .m_window = window, .m_label = label };
 }
 
 namespace
@@ -1442,7 +1442,7 @@ void create_main_toolbar( QToolBar *toolbar,  MainFrame::EViewStyle style ){
 void create_main_statusbar( QStatusBar *statusbar, QLabel *pStatusLabel[c_status__count] ){
 	statusbar->setSizeGripEnabled( false );
 	{
-		QLabel *label = new QLabel;
+		auto *label = new QLabel;
 		statusbar->addPermanentWidget( label, 1 );
 		pStatusLabel[c_status_command] = label;
 	}
@@ -1450,13 +1450,13 @@ void create_main_statusbar( QStatusBar *statusbar, QLabel *pStatusLabel[c_status
 	for ( int i = 1; i < c_status__count; ++i )
 	{
 		if( i == c_status_brushcount ){
-			QWidget *widget = new QWidget;
-			QHBoxLayout *hbox = new QHBoxLayout( widget );
+			auto *widget = new QWidget;
+			auto *hbox = new QHBoxLayout( widget );
 			hbox->setMargin( 0 );
 			statusbar->addPermanentWidget( widget, 0 );
 			const char* imgs[3] = { "status_brush.png", "patch_wireframe.png", "status_entity.png" };
 			for( ; i < c_status_brushcount + 3; ++i ){
-				QLabel *label = new QLabel();
+				auto *label = new QLabel();
 				label->setPixmap( new_local_image( imgs[i - c_status_brushcount] ) );
 				hbox->addWidget( label );
 
@@ -1468,7 +1468,7 @@ void create_main_statusbar( QStatusBar *statusbar, QLabel *pStatusLabel[c_status
 			--i;
 		}
 		else{
-			QLabel *label = new QLabel;
+			auto *label = new QLabel;
 			if( i == c_status_grid ){
 				statusbar->addPermanentWidget( label, 0 );
 				label->setToolTip( " <b>G</b>: <u>G</u>rid size<br> <b>F</b>: map <u>F</u>ormat<br> <b>C</b>: camera <u>C</u>lip distance <br> <b>L</b>: texture <u>L</u>ock" );
@@ -1583,7 +1583,7 @@ public:
 		}
 	}
 	void toggle(){
-		return m_maximized ? unmaximize() : maximize();
+		m_maximized ? unmaximize() : maximize();
 	}
 };
 
@@ -1613,7 +1613,7 @@ protected:
 
 
 QSplashScreen *create_splash(){
-	QSplashScreen *splash = new QSplashScreen( new_local_image( "splash.png" ) );
+	auto *splash = new QSplashScreen( new_local_image( "splash.png" ) );
 	splash->show();
 	return splash;
 }
@@ -1736,7 +1736,7 @@ void MainFrame::Create(){
 	}
 	else if ( CurrentStyle() == eFloating ) {
 		{
-			QWidget* window = new QWidget( m_window, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
+			auto *window = new QWidget( m_window, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
 			window->setWindowTitle( "Camera" );
 			g_guiSettings.addWindow( window, "floating/cam", 400, 300, 50, 100 );
 
@@ -1744,7 +1744,7 @@ void MainFrame::Create(){
 			GlobalCamera_setCamWnd( *m_pCamWnd );
 
 			{
-				auto box = new QHBoxLayout( window );
+				auto *box = new QHBoxLayout( window );
 				box->setContentsMargins( 1, 1, 1, 1 );
 				box->addWidget( CamWnd_getWidget( *m_pCamWnd ) );
 			}
@@ -1756,7 +1756,7 @@ void MainFrame::Create(){
 		}
 
 		{
-			QWidget* window = new QWidget( m_window, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
+			auto *window = new QWidget( m_window, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
 			g_guiSettings.addWindow( window, "floating/xy", 400, 300, 500, 100 );
 
 			m_pXYWnd = new XYWnd();
@@ -1764,7 +1764,7 @@ void MainFrame::Create(){
 			m_pXYWnd->SetViewType( XY );
 
 			{
-				auto box = new QHBoxLayout( window );
+				auto *box = new QHBoxLayout( window );
 				box->setContentsMargins( 1, 1, 1, 1 );
 				box->addWidget( m_pXYWnd->GetWidget() );
 			}
@@ -1774,7 +1774,7 @@ void MainFrame::Create(){
 		}
 
 		{
-			QWidget* window = new QWidget( m_window, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
+			auto *window = new QWidget( m_window, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
 			g_guiSettings.addWindow( window, "floating/xz", 400, 300, 500, 450 );
 
 			m_pXZWnd = new XYWnd();
@@ -1782,7 +1782,7 @@ void MainFrame::Create(){
 			m_pXZWnd->SetViewType( XZ );
 
 			{
-				auto box = new QHBoxLayout( window );
+				auto *box = new QHBoxLayout( window );
 				box->setContentsMargins( 1, 1, 1, 1 );
 				box->addWidget( m_pXZWnd->GetWidget() );
 			}
@@ -1792,7 +1792,7 @@ void MainFrame::Create(){
 		}
 
 		{
-			QWidget* window = new QWidget( m_window, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
+			auto *window = new QWidget( m_window, Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint );
 			g_guiSettings.addWindow( window, "floating/yz", 400, 300, 50, 450 );
 
 			m_pYZWnd = new XYWnd();
@@ -1800,7 +1800,7 @@ void MainFrame::Create(){
 			m_pYZWnd->SetViewType( YZ );
 
 			{
-				auto box = new QHBoxLayout( window );
+				auto *box = new QHBoxLayout( window );
 				box->setContentsMargins( 1, 1, 1, 1 );
 				box->addWidget( m_pYZWnd->GetWidget() );
 			}

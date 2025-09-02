@@ -63,7 +63,7 @@ struct DialogSliderRow
 		m_slider->setSingleStep( step_increment );
 		m_slider->setPageStep( page_increment );
 
-		auto label = new QLabel;
+		auto *label = new QLabel;
 		label->setMinimumWidth( label->fontMetrics().horizontalAdvance( QString::number( upper ) ) );
 		QObject::connect( m_slider, &QSlider::valueChanged,
 			[label]( int value ){
@@ -81,7 +81,7 @@ struct DialogSliderRow
 		m_slider->setSingleStep( step_increment * 10 );
 		m_slider->setPageStep( page_increment * 10 );
 
-		auto label = new QLabel;
+		auto *label = new QLabel;
 		label->setMinimumWidth( label->fontMetrics().horizontalAdvance( QString::number( upper, 'f', 1 ) ) );
 		QObject::connect( m_slider, &QSlider::valueChanged,
 			[label]( int value ){
@@ -398,7 +398,7 @@ QDialog::DialogCode Dialog::DoModal(){
 
 
 QCheckBox* Dialog::addCheckBox( QGridLayout* grid, const char* name, const char* flag, const BoolImportCallback& importViewer, const BoolExportCallback& exportViewer ){
-	auto check = new QCheckBox( flag );
+	auto *check = new QCheckBox( flag );
 	AddBoolToggleData( *check, importViewer, exportViewer );
 	DialogGrid_packRow( grid, check, name );
 	return check;
@@ -409,7 +409,7 @@ QCheckBox* Dialog::addCheckBox( QGridLayout* grid, const char* name, const char*
 }
 
 QComboBox* Dialog::addCombo( QGridLayout* grid, const char* name, StringArrayRange values, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	auto combo = new ComboBox;
+	auto *combo = new ComboBox;
 
 	for ( const char *value : values )
 		combo->addItem( value );
@@ -453,16 +453,16 @@ void Dialog::addRadio( QGridLayout* grid, const char* name, int& data, StringArr
 }
 
 void Dialog::addRadioIcons( QGridLayout* grid, const char* name, StringArrayRange icons, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	auto subgrid = new QGridLayout;
-	auto buttons = new QButtonGroup( subgrid );
+	auto *subgrid = new QGridLayout;
+	auto *buttons = new QButtonGroup( subgrid );
 
 	for ( size_t i = 0; i < icons.size(); ++i )
 	{
-		auto label = new QLabel;
+		auto *label = new QLabel;
 		label->setPixmap( new_local_image( icons[i] ) );
 		subgrid->addWidget( label, 0, i, Qt::AlignmentFlag::AlignHCenter );
 
-		auto button = new QRadioButton;
+		auto *button = new QRadioButton;
 		buttons->addButton( button, i ); // set ids 0+, default ones are negative
 		subgrid->addWidget( button, 1, i, Qt::AlignmentFlag::AlignHCenter );
 	}
@@ -477,7 +477,7 @@ void Dialog::addRadioIcons( QGridLayout* grid, const char* name, int& data, Stri
 }
 
 QWidget* Dialog::addTextEntry( QGridLayout* grid, const char* name, const StringImportCallback& importViewer, const StringExportCallback& exportViewer ){
-	auto entry = new QLineEdit;
+	auto *entry = new QLineEdit;
 	AddTextEntryData( *entry, importViewer, exportViewer );
 
 	DialogGrid_packRow( grid, entry, name );
@@ -502,7 +502,7 @@ void Dialog::addPathEntry( QGridLayout* grid, const char* name, CopiedString& da
 }
 
 QWidget* Dialog::addSpinner( QGridLayout* grid, const char* name, int lower, int upper, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	auto spin = new SpinBox( lower, upper );
+	auto *spin = new SpinBox( lower, upper );
 	spin->setStepType( QAbstractSpinBox::StepType::AdaptiveDecimalStepType );
 	AddIntSpinnerData( *spin, importViewer, exportViewer );
 	DialogGrid_packRow( grid, spin, new SpinBoxLabel( name, spin ) );
@@ -514,7 +514,7 @@ QWidget* Dialog::addSpinner( QGridLayout* grid, const char* name, int& data, int
 }
 
 QWidget* Dialog::addSpinner( QGridLayout* grid, const char* name, double lower, double upper, const FloatImportCallback& importViewer, const FloatExportCallback& exportViewer, int decimals ){
-	auto spin = new DoubleSpinBox( lower, upper, 0, decimals );
+	auto *spin = new DoubleSpinBox( lower, upper, 0, decimals );
 	spin->setStepType( QAbstractSpinBox::StepType::AdaptiveDecimalStepType );
 	AddFloatSpinnerData( *spin, importViewer, exportViewer );
 	DialogGrid_packRow( grid, spin, new SpinBoxLabel( name, spin ) );

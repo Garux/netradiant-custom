@@ -239,7 +239,7 @@ public:
 	XMLElementParser& pushElement( const XMLElement& element ) override {
 		if ( string_equal( element.name(), "cond" ) ) {
 			flush();
-			auto* conditional = new Conditional( VariableString( element.attribute( "value" ) ) );
+			auto *conditional = new Conditional( VariableString( element.attribute( "value" ) ) );
 			m_tool.push_back( conditional );
 			m_conditional = new ConditionalXMLConstructor( *conditional );
 			return *m_conditional;
@@ -1023,7 +1023,7 @@ public:
 
 EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 	static auto [dialog, rootLayout] = [](){
-		QDialog *dialog = new QDialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
+		auto *dialog = new QDialog( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
 		dialog->setWindowTitle( "Build Menu" );
 		g_guiSettings.addWindow( dialog, "BuildMenu/geometry", 700, 500 );
 		auto *rootLayout = new QHBoxLayout( dialog );

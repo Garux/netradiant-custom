@@ -33,12 +33,12 @@
 
 
 RadioHBox RadioHBox_new( StringArrayRange names ){
-	auto hbox = new QHBoxLayout;
-	auto group = new QButtonGroup( hbox );
+	auto *hbox = new QHBoxLayout;
+	auto *group = new QButtonGroup( hbox );
 
 	for ( size_t i = 0; i < names.size(); ++i )
 	{
-		auto button = new QRadioButton( names[i] );
+		auto *button = new QRadioButton( names[i] );
 		group->addButton( button, i ); // set ids 0+, default ones are negative
 		hbox->addWidget( button );
 	}
@@ -48,8 +48,8 @@ RadioHBox RadioHBox_new( StringArrayRange names ){
 
 
 PathEntry PathEntry_new(){
-	auto entry = new QLineEdit;
-	auto button = entry->addAction( QApplication::style()->standardIcon( QStyle::SP_DialogOpenButton ), QLineEdit::ActionPosition::TrailingPosition );
+	auto *entry = new QLineEdit;
+	auto *button = entry->addAction( QApplication::style()->standardIcon( QStyle::SP_DialogOpenButton ), QLineEdit::ActionPosition::TrailingPosition );
 	return PathEntry( entry, button );
 }
 

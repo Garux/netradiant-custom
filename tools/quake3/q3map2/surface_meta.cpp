@@ -33,7 +33,6 @@
 #include "tjunction.h"
 #include "timer.h"
 #include <map>
-#include <set>
 
 
 const Plane3f c_spatial_sort_plane( 0.786868, 0.316861, 0.529564, 0 );
@@ -253,10 +252,10 @@ static void metaTriangle_insert( metaTriangle_t& src, std::array<bspDrawVert_t, 
 	 && !src.m_vertices[1]->m_triangles.empty()
 	 && !src.m_vertices[2]->m_triangles.empty() ) {
 		/* find common triangle */
-		for( const auto t1 : src.m_vertices[0]->m_triangles ){
-			for( const auto t2 : src.m_vertices[1]->m_triangles ){
+		for( const auto *t1 : src.m_vertices[0]->m_triangles ){
+			for( const auto *t2 : src.m_vertices[1]->m_triangles ){
 				if( t1 == t2 ){
-					for( const auto t3 : src.m_vertices[2]->m_triangles ){
+					for( const auto *t3 : src.m_vertices[2]->m_triangles ){
 						if( t1 == t3 ){
 							if( CompareMetaTriangles<false>::equal( src, *t1 ) ){ // equal to src
 								Sys_Warning( "Duplicate or Flipped triangle: (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f)\n",
@@ -275,7 +274,7 @@ static void metaTriangle_insert( metaTriangle_t& src, std::array<bspDrawVert_t, 
 	/* add the triangle */
 	auto& newTriangle = metaTriangles.emplace_back( src );
 	/* reference it */
-	for( auto ve : newTriangle.m_vertices )
+	for( auto *ve : newTriangle.m_vertices )
 		ve->m_triangles.push_back( &newTriangle );
 }
 
@@ -1166,7 +1165,7 @@ void SmoothMetaTriangles(){
 			struct VT{ metaVertex_t *vertex; metaTriangle_t *triangle; float angle{}; bool skipped{}; bool smoothed{}; Vector3 newnormal{ 0 }; };
 			std::vector<VT> verts;
 			for( auto& v : list )
-				for( auto* t : v.m_triangles )
+				for( auto *t : v.m_triangles )
 					verts.push_back( VT{ &v, t } );
 			/* get per-vertex smoothing angle */
 			for( auto& v : verts )
@@ -1223,7 +1222,7 @@ void SmoothMetaTriangles(){
 						smoothedVerts.push_back( v2.operator->() );
 
 						/* see if this normal has already been voted */
-						if( std::none_of( votes.begin(), votes.end(),
+						if( std::ranges::none_of( votes,
 							[normal = v2->vertex->normal]( const Vector3& vote ){
 								return vector3_equal_epsilon( normal, vote, EQUAL_NORMAL_EPSILON );
 							} ) )
@@ -1249,14 +1248,14 @@ void SmoothMetaTriangles(){
 					}
 				}
 				/* reconstruct meta data from smoothed verts */
-				if( std::any_of( verts.cbegin(), verts.cend(), []( const VT& vt ){ return vt.smoothed; } ) ){
+				if( std::ranges::any_of( verts, std::identity{}, &VT::smoothed ) ){
 					decltype( list ) newlist;
 					for( auto& v : verts ){
 						bspDrawVert_t newv = *v.vertex;
 						if( v.smoothed )
 							newv.normal = v.newnormal;
 
-						auto it = std::find_if( newlist.begin(), newlist.end(), [&newv]( const metaVertex_t& v ){
+						auto it = std::ranges::find_if( newlist, [&newv]( const metaVertex_t& v ){
 							return bspDrawVert_equal( newv, v );
 						} );
 						if( it == newlist.end() ){ /* insert vertex */
@@ -1266,7 +1265,7 @@ void SmoothMetaTriangles(){
 						}
 						/* link vertex <> triangle */
 						it->m_triangles.push_back( v.triangle );
-						*std::find( v.triangle->m_vertices.begin(), v.triangle->m_vertices.end(), v.vertex ) = it.operator->();
+						*std::ranges::find( v.triangle->m_vertices, v.vertex ) = it.operator->();
 					}
 					list.swap( newlist );
 				}
@@ -1569,7 +1568,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 					for( metaTriangle_t *tri : groupvert.m_triangles ){
 						if( tri->si != nullptr
 						&& CompareMetaTriangles<false>::equal( *tri, triangle )    // note: triangle.si must be still there for comparison
-						&& std::find( testCloud.cbegin(), testCloud.cend(), tri ) == testCloud.cend() ){
+						&& std::ranges::find( testCloud, tri ) == testCloud.cend() ){
 							testCloud.push_back( tri );
 						}
 					}
@@ -1578,7 +1577,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 			/* mark triangle as used */
 			triangle.si = NULL;
 			/* remove from cloud */
-			if( auto it = std::find( testCloud.cbegin(), testCloud.cend(), &triangle ); it != testCloud.cend() ){
+			if( auto it = std::ranges::find( testCloud, &triangle ); it != testCloud.cend() ){
 				testCloud.erase( it );
 			}
 #if 0

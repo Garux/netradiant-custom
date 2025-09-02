@@ -206,13 +206,13 @@ void MDLModel_read( Model& model, const byte* buffer, const char* name ){
 }
 
 scene::Node& MDLModel_new( const byte* buffer, const char* name ){
-	ModelNode* modelNode = new ModelNode();
+	auto *modelNode = new ModelNode();
 	MDLModel_read( modelNode->model(), buffer, name );
 	return modelNode->node();
 }
 
 scene::Node& MDLModel_default(){
-	ModelNode* modelNode = new ModelNode();
+	auto *modelNode = new ModelNode();
 	Model_constructNull( modelNode->model() );
 	return modelNode->node();
 }

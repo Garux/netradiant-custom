@@ -741,7 +741,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 	/* ydnar: sky hack/fix for GL_CLAMP borders on ati cards */
 	if ( skyFixHack && !si->skyParmsImageBase.empty() ) {
 		//%	Sys_FPrintf( SYS_VRB, "Enabling sky hack for shader %s using env %s\n", si->shader, si->skyParmsImageBase );
-		for( const auto suffix : { "_lf", "_rt", "_ft", "_bk", "_up", "_dn" } )
+		for( const auto *suffix : { "_lf", "_rt", "_ft", "_bk", "_up", "_dn" } )
 			DrawSurfaceForShader( String64( si->skyParmsImageBase, suffix ) );
 	}
 
@@ -3112,7 +3112,7 @@ static void VolumeColorMods( const entity_t& e, mapDrawSurface_t *ds ){
 		/* iterate verts */
 		for ( bspDrawVert_t& vert : Span( ds->verts, ds->numVerts ) )
 		{
-			if( std::none_of( b->sides.cbegin(), b->sides.cend(), [&vert]( const side_t& side ){
+			if( std::ranges::none_of( b->sides, [&vert]( const side_t& side ){
 				return plane3_distance_to_point( mapplanes[ side.planenum ].plane, vert.xyz ) > 1.0f; } ) ) /* point-plane test */
 				/* apply colormods */
 				ColorMod( b->contentShader->colorMod, 1, &vert );

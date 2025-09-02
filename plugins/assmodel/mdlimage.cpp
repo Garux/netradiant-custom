@@ -32,7 +32,7 @@ Image* LoadMDLImage( Assimp::Importer& importer, ArchiveFile& file ){
 	if( scene != nullptr && scene->HasTextures() ){
 		const aiTexture *tex = scene->mTextures[0];
 		if( tex->mWidth != 0 ){ // not compressed
-			RGBAImage* image = new RGBAImage( tex->mWidth, tex->mHeight );
+			auto *image = new RGBAImage( tex->mWidth, tex->mHeight );
 			unsigned char* pRGBA = image->getRGBAPixels();
 			const aiTexel *texel = tex->pcData;
 			for( size_t i = 0; i < tex->mWidth * tex->mHeight; ++i, ++texel ){

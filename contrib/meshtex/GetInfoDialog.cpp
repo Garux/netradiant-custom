@@ -91,31 +91,31 @@ GetInfoDialog::GetInfoDialog(const std::string& key,
 
    // Create the contained widgets.
    {
-      auto form = new QFormLayout( _dialog );
+      auto *form = new QFormLayout( _dialog );
       form->setSizeConstraint( QLayout::SizeConstraint::SetFixedSize );
       {
          // Widgets for specifying the reference row if any.
-         auto check = new QCheckBox( DIALOG_GET_INFO_S_ROW_HEADER );
+         auto *check = new QCheckBox( DIALOG_GET_INFO_S_ROW_HEADER );
          check->setChecked( true );
-         auto spin = s_ref_row = new SpinBox( 0, 30 );
+         auto *spin = s_ref_row = new SpinBox( 0, 30 );
          form->addRow( check, spin );
          UIInstance().RegisterWidgetDependence( check, spin );
       }
       {
          // Widgets for specifying the reference column if any.
-         auto check = new QCheckBox( DIALOG_GET_INFO_T_COL_HEADER );
+         auto *check = new QCheckBox( DIALOG_GET_INFO_T_COL_HEADER );
          check->setChecked( true );
-         auto spin = t_ref_col = new SpinBox( 0, 30 );
+         auto *spin = t_ref_col = new SpinBox( 0, 30 );
          form->addRow( check, spin );
          UIInstance().RegisterWidgetDependence( check, spin );
       }
       {
          // Checkbox to enable the callbacks to Set S/T Scale.
-         auto check = check_transfer = new QCheckBox( DIALOG_GET_INFO_XFER_OPT_LABEL );
+         auto *check = check_transfer = new QCheckBox( DIALOG_GET_INFO_XFER_OPT_LABEL );
          form->addRow( check );
       }
       {
-         auto buttons = new QDialogButtonBox;
+         auto *buttons = new QDialogButtonBox;
          form->addWidget( buttons );
          CreateOkButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Ok ) );
          CreateApplyButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Apply ) );

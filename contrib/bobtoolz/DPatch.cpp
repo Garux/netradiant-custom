@@ -304,7 +304,7 @@ DPatch* DPatch::MergePatches( patch_merge_t merge_info, DPatch& p1, DPatch& p2 )
 		return 0;
 	}
 
-	DPatch* newPatch = new DPatch();
+	auto *newPatch = new DPatch();
 
 	newPatch->height    = newHeight;
 	newPatch->width     = p1.width;

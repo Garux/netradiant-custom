@@ -306,7 +306,7 @@ public:
 	TraceCluster( TraceCluster&& ) noexcept = delete;
 
 	DMetaSurfaces* doTraceCluster( int leafnum, bool colorPerSurf ) const {
-		DMetaSurfaces* pointlist = new DMetaSurfaces;
+		auto *pointlist = new DMetaSurfaces;
 
 		repeatlist_clear();
 

@@ -371,7 +371,7 @@ void qtexture_realise( qtexture_t& texture, const TextureKey& key ){
 				gl().glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0); //this or mipmaps are required for samplerCube to work
 				// fix non quadratic, varying sizes; GL_TEXTURE_CUBE_MAP requires this
 				unsigned int size = 0;
-				for( const auto img : images )
+				for( const auto *img : images )
 					size = std::max( { size, img->getWidth(), img->getHeight() } );
 				for( int i = 0; i < 6; ++i ){
 					const Image& img = *images[i];
@@ -435,7 +435,7 @@ class TexturesMap final : public TexturesCache
 			: m_cache( cache ){
 		}
 		qtexture_t* construct( const TextureKey& key ){
-			qtexture_t* texture = new qtexture_t( key.first, key.second.c_str() );
+			auto *texture = new qtexture_t( key.first, key.second.c_str() );
 			if ( m_cache->realised() ) {
 				qtexture_realise( *texture, key );
 			}

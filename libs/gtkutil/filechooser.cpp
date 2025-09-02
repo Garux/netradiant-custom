@@ -164,7 +164,7 @@ const char* file_dialog( QWidget* parent, bool open, const char* title, const ch
 		const char* extension = path_get_extension( g_file_dialog_file.constData() );
 		if( !string_empty( extension ) ){ // validate it
 			const auto check = [extension]( const CopiedString& filter ){ return extension_equal( extension, path_get_extension( filter.c_str() ) ); };
-			if( !std::any_of( masks.m_filters.cbegin(), masks.m_filters.cend(), check ) ) {
+			if( !std::ranges::any_of( masks.m_filters, check ) ) {
 				qt_MessageBox( parent, StringStream<64>( makeQuoted( extension ), " is unsupported file type for requested operation\n" ), extension, EMessageBoxType::Error );
 				g_file_dialog_file.clear();
 			}

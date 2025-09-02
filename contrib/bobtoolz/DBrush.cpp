@@ -66,7 +66,7 @@ DPlane* DBrush::AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, cons
 //	Sys_Printf( "(%f %f %f) (%f %f %f) (%f %f %f)\n", va[0], va[1], va[2], vb[0], vb[1], vb[2], vc[0], vc[1], vc[2] );
 #endif
 	bBoundsBuilt = false;
-	DPlane* newFace = new DPlane( va, vb, vc, texData );
+	auto *newFace = new DPlane( va, vb, vc, texData );
 	faceList.push_back( newFace );
 
 	return newFace;
@@ -174,7 +174,7 @@ void DBrush::ClearFaces(){
 }
 
 void DBrush::AddPoint( vec3_t pnt ){
-	DPoint* newPoint = new DPoint;
+	auto *newPoint = new DPoint;
 	VectorCopy( pnt, newPoint->_pnt );
 	pointList.push_back( newPoint );
 }
@@ -425,8 +425,8 @@ void DBrush::CutByPlane( DPlane *cutPlane, DBrush **newBrush1, DBrush **newBrush
 		return;
 	}
 
-	DBrush* b1 = new DBrush;
-	DBrush* b2 = new DBrush;
+	auto *b1 = new DBrush;
+	auto *b2 = new DBrush;
 
 	for ( DPlane *plane : faceList )
 	{

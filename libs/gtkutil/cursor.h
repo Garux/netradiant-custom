@@ -144,7 +144,7 @@ class FreezePointer : public QObject
 protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		if( event->type() == QEvent::MouseMove ) {
-			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>( event );
+			auto *mouseEvent = static_cast<QMouseEvent *>( event );
 			const QPoint center = getCenter();
 			/* QCursor::setPos( center ) effect may happen not immediately; suspend processing till then, otherwise start dash will happen */
 			if( !m_trackingEstablished ){

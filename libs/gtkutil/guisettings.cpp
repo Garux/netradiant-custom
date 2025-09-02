@@ -121,11 +121,11 @@ public:
 
 
 GuiSettings::~GuiSettings(){
-	for( auto setting : m_settings )
+	for( const auto *setting : m_settings )
 		delete setting;
 }
 void GuiSettings::save(){
-	for( const auto setting : m_settings )
+	for( const auto *setting : m_settings )
 		setting->save();
 }
 void GuiSettings::addWindow( QWidget *window, const char *path, int w /* = 0 */, int h /* = 0 */, int x /* = 0 */, int y /* = 0 */ ){

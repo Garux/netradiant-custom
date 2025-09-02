@@ -256,7 +256,7 @@ void DShape::BuildBorderedPrism( vec3_t min, vec3_t max, int nSides, int nBorder
 }
 
 DBrush* DShape::GetBoundingCube_Ext( vec3_t min, vec3_t max, const char *textureName, bool* bUseFaces, bool detail ){
-	DBrush* pB = new DBrush;
+	auto *pB = new DBrush;
 	//----- Build Outer Bounds ---------
 
 	vec3_t v1, v2, v3, v5, v6, v7;
