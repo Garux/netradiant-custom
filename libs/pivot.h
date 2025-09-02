@@ -246,7 +246,7 @@ public:
 		PointVertex( Vertex3f( 0, 0, size ), g_colour_z ),
 	}{}
 
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices->vertex );
 		gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices->colour );
 		gl().glDrawArrays( GL_LINES, 0, std::size( m_vertices ) );

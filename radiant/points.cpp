@@ -37,10 +37,8 @@
 #include "stream/stringstream.h"
 #include "os/path.h"
 #include "os/file.h"
-#include "commandlib.h"
 
 #include "map.h"
-#include "qe3.h"
 #include "camwindow.h"
 #include "xywindow.h"
 #include "xmlstuff.h"
@@ -68,13 +66,13 @@ public:
 	void PushPoint( const Vector3& v );
 	void GenerateDisplayList();
 // SAX interface
-	void Release(){
+	void Release() override {
 		// blank because not heap-allocated
 	}
-	void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs );
-	void saxEndElement( message_info_t *ctx, const xmlChar *name );
-	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
-	const char* getName();
+	void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs ) override;
+	void saxEndElement( message_info_t *ctx, const xmlChar *name ) override;
+	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len ) override;
+	const char* getName() override;
 
 	typedef const Vector3* const_iterator;
 
@@ -103,18 +101,18 @@ public:
 		}
 	}
 
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		gl().glCallList( m_displaylist );
 	}
 
-	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const override {
 		if ( shown() ) {
 			renderer.SetState( m_renderstate, Renderer::eWireframeOnly );
 			renderer.SetState( m_renderstate, Renderer::eFullMaterials );
 			renderer.addRenderable( *this, g_matrix4_identity );
 		}
 	}
-	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const override {
 		renderSolid( renderer, volume );
 	}
 

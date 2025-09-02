@@ -20,15 +20,8 @@
  */
 
 #include "pluginapi.h"
-
-#include "modulesystem.h"
-#include "qerplugin.h"
-
-#include "generic/callback.h"
-#include "math/vector.h"
-
+#include "math/vectorfwd.h"
 #include "camwindow.h"
-
 #include "mainframe.h"
 
 

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "math/vector.h"
+#include "generic/vector.h"
 #include "signal/signalfwd.h"
 
 class QWidget;

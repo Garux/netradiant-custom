@@ -40,7 +40,7 @@ class IdentityTransform : public TransformNode
 {
 public:
 	/// \brief Returns the identity matrix.
-	const Matrix4& localToParent() const {
+	const Matrix4& localToParent() const override {
 		return g_matrix4_identity;
 	}
 };
@@ -57,7 +57,7 @@ public:
 		return m_localToParent;
 	}
 	/// \brief Returns the stored local->parent transform.
-	const Matrix4& localToParent() const {
+	const Matrix4& localToParent() const override {
 		return m_localToParent;
 	}
 };

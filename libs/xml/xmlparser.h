@@ -35,10 +35,10 @@ public:
 	SAXElement( const char* name, const char** atts )
 		: m_name( name ), m_atts( atts ){
 	}
-	const char* name() const {
+	const char* name() const override {
 		return m_name;
 	}
-	const char* attribute( const char* name ) const {
+	const char* attribute( const char* name ) const override {
 		if ( m_atts != 0 ) {
 			for ( const char** att = m_atts; *att != 0; att += 2 )
 			{
@@ -49,7 +49,7 @@ public:
 		}
 		return "";
 	}
-	void forEachAttribute( XMLAttrVisitor& visitor ) const {
+	void forEachAttribute( XMLAttrVisitor& visitor ) const override {
 		if ( m_atts != 0 ) {
 			for ( const char** att = m_atts; *att != 0; att += 2 )
 			{
@@ -184,7 +184,7 @@ public:
 	XMLStreamParser( TextInputStream& istream )
 		: m_istream( istream ){
 	}
-	virtual void exportXML( XMLImporter& importer ){
+	virtual void exportXML( XMLImporter& importer ) override {
 		//bool wellFormed = false;
 
 		char chars[1024];

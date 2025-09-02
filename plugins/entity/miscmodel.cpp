@@ -341,7 +341,7 @@ public:
 #endif
 		//m_angles = vector3_snapped_to_zero( matrix4_get_rotation_euler_xyz_degrees( mat ), ANGLEKEY_SMALLEST );
 	}
-	void snapto( float snap ){
+	void snapto( float snap ) override {
 		m_originKey.m_origin = origin_snapped( m_originKey.m_origin, snap );
 		m_originKey.write( &m_entity );
 	}
@@ -402,10 +402,10 @@ public:
 		StaticRenderableConnectionLines::instance().detach( *this );
 		m_contained.instanceDetach( Instance::path() );
 	}
-	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const override {
 		m_contained.renderSolid( renderer, volume, Instance::localToWorld(), getSelectable().isSelected() );
 	}
-	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const override {
 		m_contained.renderWireframe( renderer, volume, Instance::localToWorld(), getSelectable().isSelected() );
 	}
 	void evaluateTransform(){
@@ -508,34 +508,34 @@ public:
 		destroy();
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
 	scene::Node& node(){
 		return m_node;
 	}
 
-	scene::Node& clone() const {
+	scene::Node& clone() const override {
 		return ( new MiscModelNode( *this ) )->node();
 	}
 
-	void insert( scene::Node& child ){
+	void insert( scene::Node& child ) override {
 		m_instances.insert( child );
 	}
-	void erase( scene::Node& child ){
+	void erase( scene::Node& child ) override {
 		m_instances.erase( child );
 	}
 
-	scene::Instance* create( const scene::Path& path, scene::Instance* parent ){
+	scene::Instance* create( const scene::Path& path, scene::Instance* parent ) override {
 		return new MiscModelInstance( path, parent, m_contained );
 	}
-	void forEachInstance( const scene::Instantiable::Visitor& visitor ){
+	void forEachInstance( const scene::Instantiable::Visitor& visitor ) override {
 		m_instances.forEachInstance( visitor );
 	}
-	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ){
+	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ) override {
 		m_instances.insert( observer, path, instance );
 	}
-	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ){
+	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ) override {
 		return m_instances.erase( observer, path );
 	}
 };

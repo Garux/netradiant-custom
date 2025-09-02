@@ -34,13 +34,11 @@
 
 #include "gtkmisc.h"
 
-#include "math/vector.h"
+#include "generic/vector.h"
 #include "os/path.h"
 
 #include "gtkutil/dialog.h"
 #include "gtkutil/filechooser.h"
-#include "gtkutil/menu.h"
-#include "gtkutil/toolbar.h"
 #include "gtkutil/image.h"
 #include "commands.h"
 

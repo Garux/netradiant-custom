@@ -79,7 +79,7 @@ public:
 		: m_volume( volume ), m_walker( walker ){
 		m_state.push_back( c_volumePartial );
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		VolumeIntersectionValue visible = ( path.top().get().visible() ) ? m_state.back() : c_volumeOutside;
 
 		if ( visible == c_volumePartial ) {
@@ -96,7 +96,7 @@ public:
 			return m_walker.pre( path, instance, m_state.back() );
 		}
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( m_state.back() != c_volumeOutside ) {
 			m_walker.post( path, instance, m_state.back() );
 		}

@@ -31,7 +31,6 @@
 
 #include "ientity.h"
 #include "igl.h"
-#include "ibrush.h"
 #include "iundo.h"
 #include "iimage.h"
 #include "ifilesystem.h"
@@ -47,15 +46,14 @@
 #include "string/string.h"
 #include "stream/stringstream.h"
 
-#include "scenelib.h"
 #include "eclasslib.h"
 #include "renderer.h"
 #include "moduleobserver.h"
 
-#include "gtkutil/menu.h"
 #include "gtkutil/widget.h"
 #include "gtkutil/glwidget.h"
 #include "gtkutil/filechooser.h"
+#include "gtkutil/cursor.h"
 #include "gtkutil/fbo.h"
 #include "gtkmisc.h"
 #include "select.h"
@@ -831,7 +829,7 @@ public:
 			addItem( m_previous.c_str(), "" );
 		}
 	}
-	void visit( EntityClass* e ){
+	void visit( EntityClass* e ) override {
 		ASSERT_MESSAGE( !string_empty( e->name() ), "entity-class has no name" );
 		if ( !m_previous.empty() ) {
 			addItem( m_previous.c_str(), e->name() );
@@ -1676,28 +1674,28 @@ public:
 		m_state_stack.push_back( state_type() );
 	}
 
-	void SetState( Shader* state, EStyle style ){
+	void SetState( Shader* state, EStyle style ) override {
 		ASSERT_NOTNULL( state );
 		if ( style == eWireframeOnly ) {
 			m_state_stack.back().m_state = state;
 		}
 	}
-	EStyle getStyle() const {
+	EStyle getStyle() const override {
 		return eWireframeOnly;
 	}
-	void PushState(){
+	void PushState() override {
 		m_state_stack.push_back( m_state_stack.back() );
 	}
-	void PopState(){
+	void PopState() override {
 		ASSERT_MESSAGE( !m_state_stack.empty(), "popping empty stack" );
 		m_state_stack.pop_back();
 	}
-	void Highlight( EHighlightMode mode, bool bEnable = true ){
+	void Highlight( EHighlightMode mode, bool bEnable = true ) override {
 		( bEnable )
 		? m_state_stack.back().m_highlight |= mode
 		: m_state_stack.back().m_highlight &= ~mode;
 	}
-	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& localToWorld ){
+	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& localToWorld ) override {
 		if ( m_state_stack.back().m_highlight & ePrimitive ) {
 			m_state_selected->addRenderable( renderable, localToWorld );
 		}
@@ -2042,11 +2040,11 @@ class EntityClassMenu : public ModuleObserver
 public:
 	EntityClassMenu() : m_unrealised( 1 ){
 	}
-	void realise(){
+	void realise() override {
 		if ( --m_unrealised == 0 ) {
 		}
 	}
-	void unrealise(){
+	void unrealise() override {
 		if ( ++m_unrealised == 1 ) {
 			delete std::exchange( XYWnd::m_mnuDrop, nullptr );
 		}

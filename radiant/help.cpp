@@ -23,7 +23,6 @@
 
 #include "debugging/debugging.h"
 
-#include <vector>
 #include <list>
 
 #include <libxml/parser.h>

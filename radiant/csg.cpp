@@ -57,7 +57,6 @@ void Face_extrude( Face& face, const Brush& brush, brush_vector_t& out, float of
 	}
 }
 */
-#include "preferences.h"
 #include "texwindow.h"
 #include "filterbar.h"
 
@@ -321,7 +320,7 @@ public:
 	BrushHollowSelectedWalker( HollowSettings& settings )
 		: m_settings( settings ) {
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if( path.top().get().visible() ) {
 			Brush* brush = Node_getBrush( path.top() );
 			if( brush != 0
@@ -379,7 +378,7 @@ public:
 	BrushGatherSelected( brush_vector_t& brushlist )
 		: m_brushlist( brushlist ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( path.top().get().visible() && Instance_isSelected( instance ) )
 			if ( Brush* brush = Node_getBrush( path.top() ) )
 				m_brushlist.push_back( brush );
@@ -390,10 +389,10 @@ public:
 class BrushDeleteSelected : public scene::Graph::Walker
 {
 public:
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
+bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 	return true;
 }
-void post( const scene::Path& path, scene::Instance& instance ) const {
+void post( const scene::Path& path, scene::Instance& instance ) const override {
 	if ( path.top().get().visible() ) {
 		Brush* brush = Node_getBrush( path.top() );
 		if ( brush != 0
@@ -415,10 +414,10 @@ class BrushDeleteSelected : public scene::Graph::Walker
 public:
 	BrushDeleteSelected( scene::Node* keepNode = nullptr ): m_keepNode( keepNode ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		return true;
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( Node_isBrush( path.top() ) ) {
 			if ( path.top().get().visible()
 			  && Instance_isSelected( instance )
@@ -648,10 +647,10 @@ public:
 			}
 		}
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		return path.top().get().visible();
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( Brush* thebrush = Node_getBrush( path.top() ) ) {
 			if ( path.top().get().visible() && !Instance_isSelected( instance )
 			&& std::any_of( m_brushlist.cbegin(), m_brushlist.cend(),
@@ -753,10 +752,10 @@ public:
 		m_plane( plane3_for_points( m_points[0], m_points[1], m_points[2] ) ),
 		m_shader( shader ), m_projection( projection ), m_split( split ), m_gj( false ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		return true;
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( path.top().get().visible() ) {
 			Brush* brush = Node_getBrush( path.top() );
 			if ( brush != 0
@@ -822,7 +821,7 @@ public:
 		             ? plane3_for_points( points[0], points[2], points[1] )
 		             : plane3_for_points( points[0], points[1], points[2] ) ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		BrushInstance* brush = Instance_getBrush( instance );
 		if ( brush != 0
 		     && path.top().get().visible()
@@ -1029,7 +1028,7 @@ public:
 	Scene_gatherSelectedComponents( MergeVertices& mergeVertices )
 		: m_mergeVertices( mergeVertices ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( path.top().get().visible() ) {
 			ComponentEditable* componentEditable = Instance_getComponentEditable( instance );
 			if ( componentEditable ) {
@@ -1361,7 +1360,6 @@ void CSG_DeleteComponents(){
  */
 #include "mainframe.h"
 #include "gtkutil/dialog.h"
-#include "gtkutil/accelerator.h"
 #include "gtkutil/image.h"
 #include "gtkutil/spinbox.h"
 #include "gtkutil/guisettings.h"

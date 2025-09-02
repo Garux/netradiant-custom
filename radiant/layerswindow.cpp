@@ -71,7 +71,7 @@ public:
 	}
 	void visit( scene::Instance& instance ) const override {
 		scene::Node& node = instance.path().top().get();
-		if( Entity *entity; !( ( entity = Node_getEntity( node ) ) && entity->isContainer() ) )
+		if( Entity *entity = Node_getEntity( node ); entity == nullptr || !entity->isContainer() )
 			node.m_layer = m_layer;
 	}
 };
@@ -200,7 +200,7 @@ template<class Functor>
 void items_iterate_recursively( QTreeWidgetItem *item, Functor&& functor ){
 	functor( item );
 	for( int i = 0; i < item->childCount(); ++i )
-		items_iterate_recursively( item->child( i ), functor );
+		items_iterate_recursively( item->child( i ), std::forward<Functor>( functor ) );
 }
 
 Layer::iterator item_getLayerIterator( QTreeWidgetItem *item ){

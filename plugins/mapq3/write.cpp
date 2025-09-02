@@ -70,7 +70,7 @@ void Entity_ExportTokens( const Entity& entity, TokenWriter& writer ){
 			: m_writer( writer ){
 		}
 
-		void visit( const char* key, const char* value ){
+		void visit( const char* key, const char* value ) override {
 			m_writer.writeString( key );
 			m_writer.writeString( value );
 			m_writer.nextLine();
@@ -94,7 +94,7 @@ public:
 		layers.update_ownIndices();
 		Layers_Write( layers, m_writer );
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		m_stack.push( false );
 
 		Entity* entity = Node_getEntity( node );
@@ -135,7 +135,7 @@ public:
 
 		return true;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		if ( m_stack.top() ) {
 			m_writer.writeToken( "}" );
 			m_writer.nextLine();

@@ -294,7 +294,7 @@ class filter_entity_classname : public EntityFilter
 public:
 	filter_entity_classname( const char* classname ) : m_classname( classname ){
 	}
-	bool filter( const Entity& entity ) const {
+	bool filter( const Entity& entity ) const override {
 		return string_equal( entity.getClassName(), m_classname );
 	}
 };
@@ -306,7 +306,7 @@ class filter_entity_classgroup : public EntityFilter
 public:
 	filter_entity_classgroup( const char* classgroup ) : m_classgroup( classgroup ), m_length( string_length( m_classgroup ) ){
 	}
-	bool filter( const Entity& entity ) const {
+	bool filter( const Entity& entity ) const override {
 		return string_equal_n( entity.getClassName(), m_classgroup, m_length );
 	}
 };
@@ -320,7 +320,7 @@ filter_entity_classgroup g_filter_entity_path( "path_" );
 class filter_entity_misc_model : public EntityFilter
 {
 public:
-	bool filter( const Entity& entity ) const {
+	bool filter( const Entity& entity ) const override {
 		return entity.getEntityClass().miscmodel_is;
 	}
 };
@@ -329,7 +329,7 @@ filter_entity_misc_model g_filter_entity_misc_model;
 class filter_entity_doom3model : public EntityFilter
 {
 public:
-	bool filter( const Entity& entity ) const {
+	bool filter( const Entity& entity ) const override {
 		return string_equal( entity.getClassName(), "func_static" )
 		    && !string_equal( entity.getKeyValue( "model" ), entity.getKeyValue( "name" ) );
 	}
@@ -341,7 +341,7 @@ filter_entity_doom3model g_filter_entity_doom3model;
 class filter_entity_not_func_detail : public EntityFilter
 {
 public:
-	bool filter( const Entity& entity ) const {
+	bool filter( const Entity& entity ) const override {
 		return entity.isContainer()
 		    && !string_equal_n( entity.getClassName(), "func_detail", 11 );
 	}
@@ -352,7 +352,7 @@ filter_entity_not_func_detail g_filter_entity_not_func_detail;
 class filter_entity_world : public EntityFilter
 {
 public:
-	bool filter( const Entity& entity ) const {
+	bool filter( const Entity& entity ) const override {
 		const char* value = entity.getClassName();
 		return string_equal( value, "worldspawn" )
 		    || string_equal( value, "func_group" )
@@ -365,7 +365,7 @@ filter_entity_world g_filter_entity_world;
 class filter_entity_point : public EntityFilter
 {
 public:
-	bool filter( const Entity& entity ) const {
+	bool filter( const Entity& entity ) const override {
 		return !entity.isContainer()
 		    && !entity.getEntityClass().miscmodel_is
 		    && !string_equal_prefix( entity.getClassName(), "light" );

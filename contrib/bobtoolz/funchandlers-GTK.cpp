@@ -881,10 +881,10 @@ public:
 	ExplodeWalker( scene::Node* entitynode, scene::Cloneable* entitycloneable, scene::Traversable* traversableroot )
 	: m_entitynode( entitynode ), m_entitycloneable( entitycloneable ), m_traversableroot( traversableroot ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		return false;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		NodeSmartReference clone( m_entitycloneable->clone() ); // duplicate entity
 		m_traversableroot->insert( clone );
 

@@ -27,26 +27,17 @@
 #include "iselection.h"
 #include "iundo.h"
 #include "ibrush.h"
-#include "ifilter.h"
 #include "ireference.h"
-#include "ifiletypes.h"
 #include "ieclass.h"
 #include "irender.h"
 #include "ientity.h"
-#include "editable.h"
 #include "ifilesystem.h"
 #include "namespace.h"
 #include "moduleobserver.h"
 
-#include <set>
-
 #include "scenelib.h"
-#include "transformlib.h"
-#include "selectionlib.h"
-#include "instancelib.h"
 #include "traverselib.h"
 #include "maplib.h"
-#include "eclasslib.h"
 #include "commandlib.h"
 #include "stream/textfilestream.h"
 #include "os/path.h"
@@ -57,12 +48,12 @@
 #include "signal/signal.h"
 
 #include "gtkutil/filechooser.h"
+#include "gtkutil/widget.h"
 #include "timer.h"
 #include "select.h"
 #include "plugin.h"
 #include "filetypes.h"
 #include "gtkdlgs.h"
-#include "entityinspector.h"
 #include "points.h"
 #include "qe3.h"
 #include "camwindow.h"
@@ -75,7 +66,6 @@
 #include "autosave.h"
 #include "brushmodule.h"
 #include "brush.h"
-#include "patch.h"
 #include "grid.h"
 
 class NameObserver
@@ -129,13 +119,13 @@ public:
 	~BasicNamespace(){
 		ASSERT_MESSAGE( m_names.empty(), "namespace: names still registered at shutdown" );
 	}
-	void attach( const NameCallback& setName, const NameCallbackCallback& attachObserver ){
+	void attach( const NameCallback& setName, const NameCallbackCallback& attachObserver ) override {
 		std::pair<Names::iterator, bool> result = m_names.insert( Names::value_type( setName, m_uniqueNames ) );
 		ASSERT_MESSAGE( result.second, "cannot attach name" );
 		attachObserver( NameObserver::NameChangedCaller( ( *result.first ).second ) );
 		//globalOutputStream() << "attach: " << reinterpret_cast<const unsigned int&>( setName ) << '\n';
 	}
-	void detach( const NameCallback& setName, const NameCallbackCallback& detachObserver ){
+	void detach( const NameCallback& setName, const NameCallbackCallback& detachObserver ) override {
 		Names::iterator i = m_names.find( setName );
 		ASSERT_MESSAGE( i != m_names.end(), "cannot detach name" );
 		//globalOutputStream() << "detach: " << reinterpret_cast<const unsigned int&>( setName ) << '\n';
@@ -143,7 +133,7 @@ public:
 		m_names.erase( i );
 	}
 
-	void makeUnique( const char* name, const NameCallback& setName ) const {
+	void makeUnique( const char* name, const NameCallback& setName ) const override {
 		char buffer[1024];
 		name_write( buffer, m_uniqueNames.make_unique( name_read( name ) ) );
 		setName( buffer );
@@ -218,7 +208,7 @@ void Node_gatherNamespaced( scene::Node& node ){
 class GatherNamespaced : public scene::Traversable::Walker
 {
 public:
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		Node_gatherNamespaced( node );
 		return true;
 	}
@@ -288,7 +278,7 @@ public:
 	Map() : m_resource( 0 ), m_valid( false ), m_modified_changed( Map_UpdateTitle ){
 	}
 
-	void realise(){
+	void realise() override {
 		if ( m_resource != 0 ) {
 			if ( Map_Unnamed( *this ) ) {
 				g_map.m_resource->setNode( NewMapRoot( "" ).get_pointer() );
@@ -309,7 +299,7 @@ public:
 			Map_SetValid( g_map, true );
 		}
 	}
-	void unrealise(){
+	void unrealise() override {
 		if ( m_resource != 0 ) {
 			Map_SetValid( g_map, false );
 			Map_SetWorldspawn( g_map, 0 );
@@ -419,7 +409,7 @@ public:
 	EntityFindByClassname( const char* name, Entity*& entity ) : m_name( name ), m_entity( entity ){
 		m_entity = 0;
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( m_entity == 0 ) {
 			Entity* entity = Node_getEntity( path.top() );
 			if ( entity != 0
@@ -502,7 +492,7 @@ inline bool node_is_worldspawn( scene::Node& node ){
 class entity_updateworldspawn : public scene::Traversable::Walker
 {
 public:
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if ( node_is_worldspawn( node ) ) {
 			if ( Map_GetWorldspawn( g_map ) == 0 ) {
 				Map_SetWorldspawn( g_map, &node );
@@ -528,7 +518,7 @@ class CollectAllWalker : public scene::Traversable::Walker
 public:
 	CollectAllWalker( scene::Node& root, UnsortedNodeSet& nodes ) : m_root( root ), m_nodes( nodes ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		m_nodes.insert( NodeSmartReference( node ) );
 		Node_getTraversable( m_root )->erase( node );
 		return false;
@@ -572,7 +562,7 @@ public:
 	LayersMergeWalker( Layers *currentLayers ){
 		currentLayers->forEach( [this]( Layer& layer ){ m_layersVec.push_back( &layer ); } );
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if( node.m_layer != nullptr )
 			node.m_layer = m_layersVec[ node.m_layer->m_ownIndex ];
 		return true;
@@ -585,7 +575,7 @@ class LayersAssignWalker : public scene::Traversable::Walker
 public:
 	LayersAssignWalker( Layer *current ) : m_current( current ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if( Entity *entity; !( ( entity = Node_getEntity( node ) ) && entity->isContainer() ) )
 			node.m_layer = m_current;
 		return true;
@@ -611,13 +601,13 @@ public:
 	MapMergeAll( const scene::Path& root )
 		: m_path( root ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		Node_getTraversable( m_path.top() )->insert( node );
 		m_path.push( makeReference( node ) );
 		selectPath( m_path, true );
 		return false;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		m_path.pop();
 	}
 };
@@ -629,7 +619,7 @@ public:
 	MapMergeEntities( const scene::Path& root )
 		: m_path( root ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if ( node_is_worldspawn( node ) ) {
 			scene::Node* world_node = Map_FindWorldspawn( g_map );
 			if ( world_node == 0 ) {
@@ -658,7 +648,7 @@ public:
 		}
 		return false;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		m_path.pop();
 	}
 };
@@ -694,7 +684,7 @@ public:
 
 	BasicContainer() : m_node( this, this, StaticTypeCasts::instance().get(), nullptr ){
 	}
-	void release(){
+	void release() override {
 		delete this;
 	}
 	scene::Node& node(){
@@ -725,7 +715,7 @@ public:
 	Convert_Brushes( TexdefTypeId in, TexdefTypeId out )
 		: _convert_faces( in, out ) {
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if( node.isRoot() ) {
 			return false;
 		}
@@ -735,7 +725,7 @@ public:
 		}
 		return true;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 	}
 };
 
@@ -774,7 +764,7 @@ public:
 	CloneAll( scene::Node& root )
 		: m_path( makeReference( root ) ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if ( node.isRoot() ) {
 			return false;
 		}
@@ -784,7 +774,7 @@ public:
 
 		return true;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		if ( node.isRoot() ) {
 			return;
 		}
@@ -814,7 +804,7 @@ public:
 	CloneAllSelected( scene::Node& root )
 		: m_path( makeReference( root ) ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if ( node.isRoot() ) {
 			return false;
 		}
@@ -826,7 +816,7 @@ public:
 
 		return true;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		if ( node.isRoot() ) {
 			return;
 		}
@@ -859,7 +849,7 @@ public:
 	EntityBreakdownWalker( EntityBreakdown& entitymap )
 		: m_entitymap( entitymap ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0 ) {
 			++m_entitymap[entity->getClassName()];
@@ -881,7 +871,7 @@ public:
 	CountStuffWalker( int& ents_ingame, int& groupents, int& groupents_ingame )
 		: m_ents_ingame( ents_ingame ), m_groupents( groupents ), m_groupents_ingame( groupents_ingame ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0 ){
 			const char* classname = entity->getClassName();
@@ -1053,7 +1043,7 @@ public:
 	ExcludeWalker( const scene::Traversable::Walker& walker, const Excluder& exclude )
 		: m_walker( walker ), m_exclude( &exclude ), m_skip( false ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if ( m_exclude->excluded( node ) || node.isRoot() ) {
 			m_skip = true;
 			return false;
@@ -1064,7 +1054,7 @@ public:
 		}
 		return true;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		if ( m_skip ) {
 			m_skip = false;
 		}
@@ -1082,7 +1072,7 @@ public:
 	AnyInstanceSelected( bool& selected ) : m_selected( selected ){
 		m_selected = false;
 	}
-	void visit( scene::Instance& instance ) const {
+	void visit( scene::Instance& instance ) const override {
 		if ( Instance_isSelected( instance ) ) {
 			m_selected = true;
 		}
@@ -1105,7 +1095,7 @@ public:
 		m_selected = false;
 	}
 
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if ( node.isRoot() ) {
 			return false;
 		}
@@ -1127,7 +1117,7 @@ bool Node_selectedDescendant( scene::Node& node ){
 class SelectionExcluder : public Excluder
 {
 public:
-	bool excluded( scene::Node& node ) const {
+	bool excluded( scene::Node& node ) const override {
 		return !Node_selectedDescendant( node );
 	}
 };
@@ -1145,7 +1135,7 @@ public:
 	IncludeSelectedWalker( const scene::Traversable::Walker& walker )
 		: m_walker( walker ), m_selected( 0 ), m_skip( false ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		// include node if:
 		// node is not a 'root' AND ( node is selected OR any child of node is selected OR any parent of node is selected )
 		if ( !node.isRoot() && ( Node_selectedDescendant( node ) || selectedParent() ) ) {
@@ -1161,7 +1151,7 @@ public:
 			return false;
 		}
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		if ( m_skip ) {
 			m_skip = false;
 		}
@@ -1200,7 +1190,7 @@ void Map_Traverse( scene::Node& root, const scene::Traversable::Walker& walker )
 class RegionExcluder : public Excluder
 {
 public:
-	bool excluded( scene::Node& node ) const {
+	bool excluded( scene::Node& node ) const override {
 		return node.excluded( scene::Node::eExcluded );
 	}
 };
@@ -1391,7 +1381,7 @@ public:
 	ExcludeAllWalker( bool exclude )
 		: m_exclude( exclude ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		exclude_node( path.top(), m_exclude );
 
 		return true;
@@ -1409,7 +1399,7 @@ public:
 	ExcludeSelectedWalker( bool exclude )
 		: m_exclude( exclude ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if( !path.top().get().isRoot() ) /* don't touch model node: disabling one will disable all instances! */
 			exclude_node( path.top(), ( instance.isSelected() || instance.childSelected() || instance.parentSelected() ) == m_exclude );
 		return true;
@@ -1428,7 +1418,7 @@ public:
 	ExcludeRegionedWalker( bool exclude )
 		: m_exclude( exclude ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if( !path.top().get().isRoot() ){ /* don't touch model node: disabling one will disable all its instances! */
 			const bool exclude = m_exclude == aabb_intersects_aabb( instance.worldAABB(), m_region );
 			exclude_node( path.top(), exclude );
@@ -1670,10 +1660,10 @@ class ParentSelectedBrushesToEntityWalker : public scene::Graph::Walker
 public:
 	ParentSelectedBrushesToEntityWalker( scene::Node& parent ) : m_parent( parent ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		return path.top().get_pointer() != &m_parent; /* skip traverse of target node */
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( Node_isPrimitive( path.top() ) ){
 			if ( Instance_isSelected( instance ) ){
 				NodeSmartReference node( path.top().get() );
@@ -1707,7 +1697,7 @@ public:
 	CountSelectedBrushes( std::size_t& count ) : m_count( count ), m_depth( 0 ){
 		m_count = 0;
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( ++m_depth != 1 && path.top().get().isRoot() ) {
 			return false;
 		}
@@ -1717,7 +1707,7 @@ public:
 		}
 		return true;
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		--m_depth;
 	}
 };
@@ -1957,7 +1947,7 @@ public:
 	BrushFindByIndexWalker( std::size_t index, scene::Path& path )
 		: m_index( index ), m_path( path ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if ( Node_isPrimitive( node ) && m_index-- == 0 ) {
 			m_path.push( makeReference( node ) );
 		}
@@ -1973,7 +1963,7 @@ public:
 	EntityFindByIndexWalker( std::size_t index, scene::Path& path )
 		: m_index( index ), m_path( path ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if ( Node_isEntity( node ) && m_index-- == 0 ) {
 			m_path.push( makeReference( node ) );
 		}
@@ -2023,7 +2013,7 @@ public:
 	BrushFindIndexWalker( const scene::Node& node, std::size_t& count )
 		: m_node( &node ), m_count( count ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if ( Node_isPrimitive( node ) ) {
 			if ( m_node == &node ) {
 				m_node = 0;
@@ -2044,7 +2034,7 @@ public:
 	EntityFindIndexWalker( const scene::Node& node, std::size_t& count )
 		: m_node( &node ), m_count( count ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if ( Node_isEntity( node ) ) {
 			if ( m_node == &node ) {
 				m_node = 0;
@@ -2140,7 +2130,7 @@ void map_autocaulk_selected(){
 		{
 			mutable const scene::Instance* m_trigger = 0;
 		public:
-			bool pre( const scene::Path& path, scene::Instance& instance ) const {
+			bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 				if( path.size() == 2 ){
 					Entity* entity = Node_getEntity( path.top() );
 					if( entity != 0 && entity->isContainer() && string_equal_nocase_n( entity->getClassName(), "trigger_", 8 )
@@ -2151,7 +2141,7 @@ void map_autocaulk_selected(){
 				}
 				return true;
 			}
-			void post( const scene::Path& path, scene::Instance& instance ) const {
+			void post( const scene::Path& path, scene::Instance& instance ) const override {
 				if( m_trigger )
 					Instance_setSelected( instance, false );
 				if( m_trigger == &instance )
@@ -2199,7 +2189,7 @@ void map_autocaulk_selected(){
 			WriteBrushesWalker( TokenWriter& writer )
 				: m_writer( writer ){
 			}
-			bool pre( scene::Node& node ) const {
+			bool pre( scene::Node& node ) const override {
 				if( Node_getBrush( node ) ){
 					NodeTypeCast<MapExporter>::cast( node )->exportTokens( m_writer );
 				}
@@ -2238,7 +2228,7 @@ void map_autocaulk_selected(){
 					selected_point_entities_walker( const scene::Traversable::Walker& walker )
 						: m_walker( walker ), m_skip( false ){
 					}
-					bool pre( scene::Node& node ) const {
+					bool pre( scene::Node& node ) const override {
 						Entity* entity = Node_getEntity( node );
 						if( !node.isRoot() && entity != 0 && !entity->isContainer() && Node_instanceSelected( node ) ) {
 							m_walker.pre( node );
@@ -2248,7 +2238,7 @@ void map_autocaulk_selected(){
 						}
 						return false;
 					}
-					void post( scene::Node& node ) const {
+					void post( scene::Node& node ) const override {
 						if( m_skip )
 							m_skip = false;
 						else
@@ -2321,7 +2311,7 @@ void map_autocaulk_selected(){
 			CaulkBrushesWalker( CaulkMap& map )
 				: m_map( map ){
 			}
-			bool pre( scene::Node& node ) const {
+			bool pre( scene::Node& node ) const override {
 				Brush* brush = Node_getBrush( node );
 				if( brush ){
 					CaulkMap::const_iterator iter = m_map.find( m_brushIndex );
@@ -2388,7 +2378,7 @@ class MapEntityClasses : public ModuleObserver
 public:
 	MapEntityClasses() : m_unrealised( 1 ){
 	}
-	void realise(){
+	void realise() override{
 		if ( --m_unrealised == 0 ) {
 			if ( g_map.m_resource != 0 ) {
 				ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Loading Map" );
@@ -2396,7 +2386,7 @@ public:
 			}
 		}
 	}
-	void unrealise(){
+	void unrealise() override{
 		if ( ++m_unrealised == 1 ) {
 			if ( g_map.m_resource != 0 ) {
 				g_map.m_resource->flush();
@@ -2415,14 +2405,14 @@ class MapModuleObserver : public ModuleObserver
 public:
 	MapModuleObserver() : m_unrealised( 1 ){
 	}
-	void realise(){
+	void realise() override{
 		if ( --m_unrealised == 0 ) {
 			ASSERT_MESSAGE( !g_qeglobals.m_userGamePath.empty(), "maps_directory: user-game-path is empty" );
 			g_mapsPath = StringStream( g_qeglobals.m_userGamePath, "maps/" );
 			Q_mkdir( g_mapsPath.c_str() );
 		}
 	}
-	void unrealise(){
+	void unrealise() override{
 		if ( ++m_unrealised == 1 ) {
 			g_mapsPath = "";
 		}

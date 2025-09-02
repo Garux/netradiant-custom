@@ -128,27 +128,27 @@ public:
 		}
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
-	ArchiveFile* openFile( const char* name ){
+	ArchiveFile* openFile( const char* name ) override {
 		files_t::iterator i = m_files.find( name );
 		if ( i != m_files.end() ) {
 			return StoredArchiveFile::create( name, m_name.c_str(), i->second.m_position, i->second.m_stream_size, i->second.m_file_size );
 		}
 		return 0;
 	}
-	virtual ArchiveTextFile* openTextFile( const char* name ){
+	virtual ArchiveTextFile* openTextFile( const char* name ) override {
 		files_t::iterator i = m_files.find( name );
 		if ( i != m_files.end() ) {
 			return StoredArchiveTextFile::create( name, m_name.c_str(), i->second.m_position, i->second.m_stream_size );
 		}
 		return 0;
 	}
-	bool containsFile( const char* name ){
+	bool containsFile( const char* name ) override {
 		return m_files.contains( name );
 	}
-	void forEachFile( VisitorFunc visitor, const char* root ){
+	void forEachFile( VisitorFunc visitor, const char* root ) override {
 		if ( root[0] == '\0' ) {
 			if ( visitor.directory( "textures/", 1 ) ) {
 				return;

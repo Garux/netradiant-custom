@@ -23,7 +23,6 @@
 
 #include "igtkgl.h"
 #include "modulesystem.h"
-#include "gtkutil/glwidget.h"
 
 class GtkGLAPI
 {

@@ -396,7 +396,7 @@ public:
 		}
 		*m_pos++ = c;
 	}
-	std::size_t write( const char* buffer, std::size_t length ){
+	std::size_t write( const char* buffer, std::size_t length ) override {
 		const char*const end = buffer + length;
 		for ( const char* p = buffer; p != end; ++p )
 		{

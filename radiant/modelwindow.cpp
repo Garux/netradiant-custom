@@ -30,7 +30,6 @@
 #include "igl.h"
 #include "irender.h"
 #include "renderable.h"
-#include "render.h"
 #include "renderer.h"
 #include "view.h"
 #include "os/path.h"
@@ -42,10 +41,10 @@
 #include "gtkutil/glwidget.h"
 #include "gtkutil/toolbar.h"
 #include "gtkutil/cursor.h"
-#include "gtkmisc.h"
 #include "gtkutil/fbo.h"
 #include "gtkutil/mousepresses.h"
 #include "gtkutil/guisettings.h"
+#include "gtkutil/widget.h"
 
 #include <QWidget>
 #include <QToolBar>
@@ -81,18 +80,18 @@ public:
 	ModelGraph( scene::Instantiable::Observer& observer ) : m_observer( observer ){
 	}
 
-	void addSceneChangedCallback( const SignalHandler& handler ){
+	void addSceneChangedCallback( const SignalHandler& handler ) override {
 		ASSERT_MESSAGE( 0, "Reached unreachable: addSceneChangedCallback()" );
 	}
-	void sceneChanged(){
+	void sceneChanged() override {
 		ASSERT_MESSAGE( 0, "Reached unreachable: sceneChanged()" );
 	}
 
-	scene::Node& root(){
+	scene::Node& root() override {
 		ASSERT_MESSAGE( !m_rootpath.empty(), "scenegraph root does not exist" );
 		return m_rootpath.top();
 	}
-	void insert_root( scene::Node& root ){
+	void insert_root( scene::Node& root ) override {
 		//globalOutputStream() << "insert_root\n";
 
 		ASSERT_MESSAGE( m_rootpath.empty(), "scenegraph root already exists" );
@@ -103,7 +102,7 @@ public:
 
 		m_rootpath.push( makeReference( root ) );
 	}
-	void erase_root(){
+	void erase_root() override {
 		//globalOutputStream() << "erase_root\n";
 
 		ASSERT_MESSAGE( !m_rootpath.empty(), "scenegraph root does not exist" );
@@ -116,50 +115,50 @@ public:
 
 		root.DecRef();
 	}
-	class Layer* currentLayer(){
+	class Layer* currentLayer() override {
 		ASSERT_MESSAGE( 0, "Reached unreachable: currentLayer()" );
 		return nullptr;
 	}
-	void boundsChanged(){
+	void boundsChanged() override {
 		ASSERT_MESSAGE( 0, "Reached unreachable: boundsChanged()" );
 	}
 
-	void traverse( const Walker& walker ){
+	void traverse( const Walker& walker ) override {
 		ASSERT_MESSAGE( 0, "Reached unreachable: traverse()" );
 	}
 
-	void traverse_subgraph( const Walker& walker, const scene::Path& start ){
+	void traverse_subgraph( const Walker& walker, const scene::Path& start ) override {
 		ASSERT_MESSAGE( 0, "Reached unreachable: traverse_subgraph()" );
 	}
 
-	scene::Instance* find( const scene::Path& path ){
+	scene::Instance* find( const scene::Path& path ) override {
 		ASSERT_MESSAGE( 0, "Reached unreachable: find()" );
 		return nullptr;
 	}
 
-	void insert( scene::Instance* instance ){
+	void insert( scene::Instance* instance ) override {
 		m_instances.insert( InstanceMap::value_type( PathConstReference( instance->path() ), instance ) );
 		m_observer.insert( instance );
 	}
-	void erase( scene::Instance* instance ){
+	void erase( scene::Instance* instance ) override {
 		m_instances.erase( PathConstReference( instance->path() ) );
 		m_observer.erase( instance );
 	}
 
-	SignalHandlerId addBoundsChangedCallback( const SignalHandler& boundsChanged ){
+	SignalHandlerId addBoundsChangedCallback( const SignalHandler& boundsChanged ) override {
 		ASSERT_MESSAGE( 0, "Reached unreachable: addBoundsChangedCallback()" );
 		return Handle<Opaque<SignalHandler>>( nullptr );
 	}
-	void removeBoundsChangedCallback( SignalHandlerId id ){
+	void removeBoundsChangedCallback( SignalHandlerId id ) override {
 		ASSERT_MESSAGE( 0, "Reached unreachable: removeBoundsChangedCallback()" );
 	}
 
-	TypeId getNodeTypeId( const char* name ){
+	TypeId getNodeTypeId( const char* name ) override {
 		ASSERT_MESSAGE( 0, "Reached unreachable: getNodeTypeId()" );
 		return 0;
 	}
 
-	TypeId getInstanceTypeId( const char* name ){
+	TypeId getInstanceTypeId( const char* name ) override {
 		ASSERT_MESSAGE( 0, "Reached unreachable: getInstanceTypeId()" );
 		return 0;
 	}
@@ -236,7 +235,7 @@ public:
 		m_observer = 0;
 	}
 	/// \brief \copydoc scene::Traversable::insert()
-	void insert( scene::Node& node ){
+	void insert( scene::Node& node ) override {
 		ASSERT_MESSAGE( (volatile intptr_t)&node != 0, "TraversableModelNodeSet::insert: sanity check failed" );
 
 		ASSERT_MESSAGE( m_children.find( NodeSmartReference( node ) ) == m_children.end(), "TraversableModelNodeSet::insert - element already exists" );
@@ -248,7 +247,7 @@ public:
 		}
 	}
 	/// \brief \copydoc scene::Traversable::erase()
-	void erase( scene::Node& node ){
+	void erase( scene::Node& node ) override {
 		ASSERT_MESSAGE( (volatile intptr_t)&node != 0, "TraversableModelNodeSet::erase: sanity check failed" );
 
 		ASSERT_MESSAGE( m_children.find( NodeSmartReference( node ) ) != m_children.end(), "TraversableModelNodeSet::erase - failed to find element" );
@@ -260,7 +259,7 @@ public:
 		m_children.erase( NodeSmartReference( node ) );
 	}
 	/// \brief \copydoc scene::Traversable::traverse()
-	void traverse( const Walker& walker ){
+	void traverse( const Walker& walker ) override {
 		UnsortedNodeSet::iterator i = m_children.begin();
 		while ( i != m_children.end() )
 		{
@@ -271,7 +270,7 @@ public:
 		}
 	}
 	/// \brief \copydoc scene::Traversable::empty()
-	bool empty() const {
+	bool empty() const override {
 		return m_children.empty();
 	}
 };
@@ -314,7 +313,7 @@ public:
 	}
 	~ModelGraphRoot(){
 	}
-	void release(){
+	void release() override {
 		m_traverse.detach( this );
 		delete this;
 	}
@@ -322,10 +321,10 @@ public:
 		return m_node;
 	}
 
-	void insert( scene::Node& child ){
+	void insert( scene::Node& child ) override {
 		m_instances.insert( child );
 	}
-	void erase( scene::Node& child ){
+	void erase( scene::Node& child ) override {
 		m_instances.erase( child );
 	}
 
@@ -333,16 +332,16 @@ public:
 		return ( new ModelGraphRoot( *this ) )->node();
 	}
 
-	scene::Instance* create( const scene::Path& path, scene::Instance* parent ){
+	scene::Instance* create( const scene::Path& path, scene::Instance* parent ) override {
 		return new SelectableInstance( path, parent );
 	}
-	void forEachInstance( const scene::Instantiable::Visitor& visitor ){
+	void forEachInstance( const scene::Instantiable::Visitor& visitor ) override {
 		m_instances.forEachInstance( visitor );
 	}
-	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ){
+	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ) override {
 		m_instances.insert( observer, path, instance );
 	}
-	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ){
+	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ) override {
 		return m_instances.erase( observer, path );
 	}
 };
@@ -410,30 +409,30 @@ public:
 		destroy();
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
 	scene::Node& node(){
 		return m_node;
 	}
 
-	void insert( scene::Node& child ){
+	void insert( scene::Node& child ) override {
 		m_instances.insert( child );
 	}
-	void erase( scene::Node& child ){
+	void erase( scene::Node& child ) override {
 		m_instances.erase( child );
 	}
 
-	scene::Instance* create( const scene::Path& path, scene::Instance* parent ){
+	scene::Instance* create( const scene::Path& path, scene::Instance* parent ) override {
 		return new SelectableInstance( path, parent );
 	}
-	void forEachInstance( const scene::Instantiable::Visitor& visitor ){
+	void forEachInstance( const scene::Instantiable::Visitor& visitor ) override {
 		m_instances.forEachInstance( visitor );
 	}
-	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ){
+	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ) override {
 		m_instances.insert( observer, path, instance );
 	}
-	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ){
+	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ) override {
 		return m_instances.erase( observer, path );
 	}
 
@@ -722,25 +721,25 @@ public:
 		m_state_stack.push_back( state_type() );
 	}
 
-	void SetState( Shader* state, EStyle style ){
+	void SetState( Shader* state, EStyle style ) override {
 		ASSERT_NOTNULL( state );
 		if ( style == eFullMaterials ) {
 			m_state_stack.back().m_state = state;
 		}
 	}
-	EStyle getStyle() const {
+	EStyle getStyle() const override {
 		return eFullMaterials;
 	}
-	void PushState(){
+	void PushState() override {
 		m_state_stack.push_back( m_state_stack.back() );
 	}
-	void PopState(){
+	void PopState() override {
 		ASSERT_MESSAGE( !m_state_stack.empty(), "popping empty stack" );
 		m_state_stack.pop_back();
 	}
-	void Highlight( EHighlightMode mode, bool bEnable = true ){
+	void Highlight( EHighlightMode mode, bool bEnable = true ) override {
 	}
-	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& localToWorld ){
+	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& localToWorld ) override {
 		m_state_stack.back().m_state->addRenderable( renderable, localToWorld );
 	}
 

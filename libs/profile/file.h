@@ -81,10 +81,10 @@ public:
 	virtual ~MemStream();
 
 	int refCount;
-	void IncRef() {
+	void IncRef() override {
 		refCount++;
 	}
-	void DecRef() {
+	void DecRef() override {
 		refCount--;
 		if ( refCount <= 0 ) {
 			delete this;
@@ -102,28 +102,28 @@ protected:
 	void GrowFile( size_type nNewLen );
 
 public:
-	position_type GetPosition() const;
-	int Seek( offset_type lOff, int nFrom );
-	void SetLength( size_type nNewLen );
-	size_type GetLength() const;
+	position_type GetPosition() const override;
+	int Seek( offset_type lOff, int nFrom ) override;
+	void SetLength( size_type nNewLen ) override;
+	size_type GetLength() const override;
 
 	unsigned char* GetBuffer() const
 	{
 		return m_pBuffer;
 	}
 
-	size_type read( byte_type* buffer, size_type length );
-	size_type write( const byte_type* buffer, size_type length );
+	size_type read( byte_type* buffer, size_type length ) override;
+	size_type write( const byte_type* buffer, size_type length ) override;
 
-	char* ReadString( char* pBuf, size_type nMax );
-	int GetChar();
+	char* ReadString( char* pBuf, size_type nMax ) override;
+	int GetChar() override;
 
-	int PutChar( int c );
-	void printf( const char*, ... ); ///< \todo implement on MemStream
+	int PutChar( int c ) override;
+	void printf( const char*, ... ) override; ///< \todo implement on MemStream
 
-	void Abort();
-	void Flush();
-	void Close();
+	void Abort() override;
+	void Flush() override;
+	void Close() override;
 	bool Open( const char *filename, const char *mode );
 };
 
@@ -134,10 +134,10 @@ public:
 	virtual ~FileStream();
 
 	int refCount;
-	void IncRef() {
+	void IncRef() override {
 		refCount++;
 	}
-	void DecRef() {
+	void DecRef() override {
 		refCount--;
 		if ( refCount <= 0 ) {
 			delete this;
@@ -150,22 +150,22 @@ protected:
 	bool m_bCloseOnDelete;
 
 public:
-	position_type GetPosition() const;
-	int Seek( offset_type lOff, int nFrom );
-	void SetLength( size_type nNewLen );
-	size_type GetLength() const;
+	position_type GetPosition() const override;
+	int Seek( offset_type lOff, int nFrom ) override;
+	void SetLength( size_type nNewLen ) override;
+	size_type GetLength() const override;
 
-	size_type read( byte_type* buffer, size_type length );
-	size_type write( const byte_type* buffer, size_type length );
+	size_type read( byte_type* buffer, size_type length ) override;
+	size_type write( const byte_type* buffer, size_type length ) override;
 
-	char* ReadString( char* pBuf, size_type nMax );
-	int GetChar();
+	char* ReadString( char* pBuf, size_type nMax ) override;
+	int GetChar() override;
 
-	int PutChar( int c );
-	void printf( const char*, ... ); ///< completely matches the usual printf behaviour
+	int PutChar( int c ) override;
+	void printf( const char*, ... ) override; ///< completely matches the usual printf behaviour
 
-	void Abort();
-	void Flush();
-	void Close();
+	void Abort() override;
+	void Flush() override;
+	void Close() override;
 	bool Open( const char *filename, const char *mode );
 };

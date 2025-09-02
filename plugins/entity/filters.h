@@ -55,7 +55,7 @@ public:
 		GlobalFilterSystem().unregisterFilterable( *this );
 	}
 
-	void updateFiltered(){
+	void updateFiltered() override {
 		if ( entity_filtered( m_entity ) ) {
 			m_node.enable( scene::Node::eFiltered );
 		}

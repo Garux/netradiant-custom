@@ -76,7 +76,7 @@ private: // private types
       SetScaleVisitor(const SliceArgs *rowArgs,
                       const SliceArgs *colArgs);
    private:
-      bool Execute(MeshEntity& meshEntity) const;
+      bool Execute(MeshEntity& meshEntity) const override;
    private:
       const SliceArgs *_rowArgs;
       const SliceArgs *_colArgs;
@@ -86,7 +86,7 @@ public: // public methods
 
    SetScaleDialog(const std::string& key);
    ~SetScaleDialog();
-   bool Apply();
+   bool Apply() override;
    void PopulateSWidgets(float scale,
                          float tiles);
    void PopulateTWidgets(float scale,

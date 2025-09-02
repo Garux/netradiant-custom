@@ -24,8 +24,8 @@
 #include "patch.h"
 
 #include <forward_list>
-#include "preferences.h"
 #include "brush_primit.h"
+#include "texturelib.h"
 #include "signal/signal.h"
 
 

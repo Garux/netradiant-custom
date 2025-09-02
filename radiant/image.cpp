@@ -26,8 +26,6 @@
 #include "ifilesystem.h"
 #include "iarchive.h"
 
-#include "generic/reference.h"
-#include "os/path.h"
 #include "stream/stringstream.h"
 
 
@@ -45,7 +43,7 @@ Image* QERApp_LoadImage( void* environment, const char* name ){
 		LoadImageVisitor( const char* name, Image*& image )
 			: m_name( name ), m_image( image ){
 		}
-		void visit( const char* name, const _QERPlugImageTable& table ) const {
+		void visit( const char* name, const _QERPlugImageTable& table ) const override {
 			if ( m_image == 0 ) {
 				ArchiveFile* file = GlobalFileSystem().openFile( StringStream( m_name, '.', name ) );
 				if ( file != 0 ) {

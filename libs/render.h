@@ -863,7 +863,7 @@ public:
 	RenderablePointArray( const Array<PointVertex_t>& array, GLenum mode )
 		: m_array( array ), m_mode( mode ){
 	}
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 #define NV_DRIVER_BUG 0
 #if NV_DRIVER_BUG
 		gl().glColorPointer( 4, GL_UNSIGNED_BYTE, 0, 0 );
@@ -884,7 +884,7 @@ public:
 		: m_mode( mode ){
 	}
 
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		pointvertex_gl_array( &m_vector.front() );
 		gl().glDrawArrays( m_mode, 0, GLsizei( m_vector.size() ) );
 	}
@@ -916,7 +916,7 @@ public:
 		: m_mode( mode ), m_vertices( vertices ){
 	}
 
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		pointvertex_gl_array( m_vertices.data() );
 		gl().glDrawArrays( m_mode, 0, m_vertices.size() );
 	}
@@ -932,7 +932,7 @@ public:
 		: m_mode( mode ), m_indices( indices ), m_vertices( vertices ){
 	}
 
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 #if 1
 		pointvertex_gl_array( m_vertices.data() );
 		gl().glDrawElements( m_mode, GLsizei( m_indices.size() ), RenderIndexTypeID, m_indices.data() );
@@ -965,7 +965,7 @@ public:
 	RenderableDepthTestedPointArray( Array<DepthTestedPointVertex>& array, GLenum mode )
 		: m_array( array ), m_mode( mode ){
 	}
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		if( state & RENDER_COLOURWRITE ){ // render depending on visibility
 			for( auto& p : m_array ){
 				GLuint sampleCount;
@@ -1287,7 +1287,7 @@ public:
 			tex = 0;
 		}
 	}
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		if( tex > 0 ){
 			gl().glBindTexture( GL_TEXTURE_2D, tex );
 			//Here we draw the texturemaped quads.

@@ -27,15 +27,14 @@
 #include <set>
 
 #include "iscriplib.h"
-#include "qerplugin.h"
 
 #include "string/string.h"
 #include "eclasslib.h"
 #include "os/path.h"
 #include "stream/stringstream.h"
-#include "moduleobservers.h"
 #include "stringio.h"
 #include "stream/textfilestream.h"
+#include "math/vector.h"
 
 namespace
 {

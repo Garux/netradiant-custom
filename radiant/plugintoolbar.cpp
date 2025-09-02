@@ -27,8 +27,7 @@
 
 #include "stream/stringstream.h"
 #include "os/file.h"
-#include "gtkutil/image.h"
-#include "gtkutil/toolbar.h"
+#include <QToolBar>
 
 #include "mainframe.h"
 #include "plugin.h"
@@ -93,7 +92,7 @@ void PluginToolbar_populate(){
 		AddToolbarItemVisitor( QToolBar* toolbar )
 			: m_toolbar( toolbar ){
 		}
-		void visit( const char* name, const _QERPlugToolbarTable& table ) const {
+		void visit( const char* name, const _QERPlugToolbarTable& table ) const override {
 			const std::size_t count = table.m_pfnToolbarButtonCount();
 			for ( std::size_t i = 0; i < count; ++i )
 			{

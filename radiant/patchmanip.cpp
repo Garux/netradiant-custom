@@ -31,7 +31,7 @@
 #include "math/aabb.h"
 #include "generic/callback.h"
 
-#include "gtkutil/menu.h"
+#include "texturelib.h"
 #include "gtkutil/image.h"
 #include "map.h"
 #include "mainframe.h"
@@ -615,7 +615,7 @@ void Patch_Thicken(){
 class filter_patch_all : public PatchFilter
 {
 public:
-	bool filter( const Patch& patch ) const {
+	bool filter( const Patch& patch ) const override {
 		return true;
 	}
 };
@@ -626,7 +626,7 @@ class filter_patch_shader : public PatchFilter
 public:
 	filter_patch_shader( const char* shader ) : m_shader( shader ){
 	}
-	bool filter( const Patch& patch ) const {
+	bool filter( const Patch& patch ) const override {
 		return shader_equal( patch.GetShader(), m_shader );
 	}
 };
@@ -637,7 +637,7 @@ class filter_patch_flags : public PatchFilter
 public:
 	filter_patch_flags( int flags ) : m_flags( flags ){
 	}
-	bool filter( const Patch& patch ) const {
+	bool filter( const Patch& patch ) const override {
 		return ( patch.getShaderFlags() & m_flags ) != 0;
 	}
 };
@@ -816,7 +816,6 @@ void Patch_constructMenu( QMenu* menu ){
 
 
 #include "gtkutil/dialog.h"
-#include "gtkutil/widget.h"
 #include "gtkutil/spinbox.h"
 
 #include <QDialog>

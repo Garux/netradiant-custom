@@ -61,7 +61,7 @@ public:
 	EntityFindByName( const char* name, entitylist_t& entitylist, int flag, bool hide )
 		: m_name( name ), m_entitylist( entitylist ), m_flag( flag ), m_hide( hide ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		int spawnflagsInt;
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0 ) {
@@ -97,7 +97,7 @@ public:
 		m_surfaceFlagsVis = -1;
 	}
 
-	void visit( Face& face ) const {
+	void visit( Face& face ) const override {
 #if _DEBUG
 		if ( m_surfaceFlagsVis < 0 ) {
 			m_surfaceFlagsVis = face.getShader().m_flags.m_surfaceFlags;
@@ -131,7 +131,7 @@ public:
 	BrushGetLevel( brushlist_t& brushlist, int flag, bool content, bool notset, bool hide )
 		: m_brushlist( brushlist ), m_flag( flag ), m_content( content ), m_notset( notset ), m_hide( hide ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		Brush* brush = Node_getBrush( path.top() );
 		if ( brush != 0 ) {
 			ForEachFace faces;

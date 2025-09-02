@@ -74,10 +74,10 @@ public:
 		return this;
 	}
 
-	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const override {
 		Map_Read( root, inputStream, entityTable );
 	}
-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const override {
 		Map_Write( root, traverse, outputStream );
 	}
 };

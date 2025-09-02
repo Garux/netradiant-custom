@@ -26,7 +26,6 @@
 #include "imodel.h"
 #include "ifilesystem.h"
 #include "iundo.h"
-#include "editable.h"
 
 #include "eclasslib.h"
 #include "scenelib.h"
@@ -36,6 +35,7 @@
 #include "stringio.h"
 
 #include "gtkutil/filechooser.h"
+#include "gtkutil/widget.h"
 #include "gtkmisc.h"
 #include "select.h"
 #include "map.h"
@@ -65,10 +65,10 @@ public:
 	EntitySetKeyValueSelected( const char* key, const char* value )
 		: m_key( key ), m_value( value ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		return true;
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0
 		     && ( instance.childSelected() || Instance_isSelected( instance ) ) ) {
@@ -86,10 +86,10 @@ public:
 	EntitySetClassnameSelected( const char* classname )
 		: m_classname( classname ), m_world( Map_FindWorldspawn( g_map ) ), m_2world( m_world && string_equal( m_classname, "worldspawn" ) ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		return true;
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0 && ( instance.childSelected() || Instance_isSelected( instance ) ) ) {
 			if( path.top().get_pointer() == m_world ){ /* do not want to convert whole worldspawn entity */

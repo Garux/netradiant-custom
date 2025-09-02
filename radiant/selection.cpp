@@ -37,7 +37,6 @@
 
 #include "math/frustum.h"
 #include "signal/signal.h"
-#include "generic/object.h"
 #include "selectionlib.h"
 #include "render.h"
 #include "view.h"

@@ -40,7 +40,7 @@ class write_all : public scene::Traversable::Walker
 public:
 	write_all( XMLImporter& importer ) : m_importer( importer ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		Entity* entity = Node_getEntity( node );
 		if ( entity != 0 ) {
 			m_importer.write( "\n", 1 );
@@ -60,7 +60,7 @@ public:
 		}
 		return true;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		if ( Node_getEntity( node ) != 0 ) {
 			m_importer.write( "\n", 1 );
 			m_importer.popElement( "entity" );

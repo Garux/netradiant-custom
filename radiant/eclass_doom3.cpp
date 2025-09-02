@@ -34,7 +34,6 @@
 #include "string/string.h"
 #include "eclasslib.h"
 #include "os/path.h"
-#include "os/dir.h"
 #include "stream/stringstream.h"
 #include "moduleobservers.h"
 #include "stringio.h"
@@ -687,7 +686,7 @@ class EntityClassDoom3 : public ModuleObserver
 public:
 	EntityClassDoom3() : m_unrealised( 2 ){
 	}
-	void realise(){
+	void realise() override {
 		if ( --m_unrealised == 0 ) {
 			globalOutputStream() << "searching vfs directory " << makeQuoted( "def" ) << " for *.def\n";
 			GlobalFileSystem().forEachFile( "def/", "def", makeCallbackF( EntityClassDoom3_loadFile ) );
@@ -737,7 +736,7 @@ public:
 			m_observers.realise();
 		}
 	}
-	void unrealise(){
+	void unrealise() override {
 		if ( ++m_unrealised == 1 ) {
 			m_observers.unrealise();
 			EntityClassDoom3_clear();

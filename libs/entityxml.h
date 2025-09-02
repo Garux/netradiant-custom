@@ -32,14 +32,14 @@ public:
 	entity_import( Entity& entity )
 		: m_entity( entity ){
 	}
-	void pushElement( const XMLElement& element ){
+	void pushElement( const XMLElement& element ) override {
 		if ( strcmp( element.name(), "epair" ) == 0 ) {
 			m_entity.setKeyValue( element.attribute( "key" ), element.attribute( "value" ) );
 		}
 	}
-	void popElement( const char* name ){
+	void popElement( const char* name ) override {
 	}
-	std::size_t write( const char* data, std::size_t length ){
+	std::size_t write( const char* data, std::size_t length ) override {
 		return length;
 	}
 };
@@ -52,7 +52,7 @@ class entity_export : public XMLExporter
 	public:
 		ExportXMLVisitor( XMLImporter& importer ) : m_importer( importer ){
 		}
-		void visit( const char* key, const char* value ){
+		void visit( const char* key, const char* value ) override {
 			StaticElement element( "epair" );
 			element.insertAttribute( "key", key );
 			element.insertAttribute( "value", value );
@@ -66,7 +66,7 @@ class entity_export : public XMLExporter
 public:
 	entity_export( const Entity& entity ) : m_entity( entity ){
 	}
-	void exportXML( XMLImporter& observer ){
+	void exportXML( XMLImporter& observer ) override {
 		ExportXMLVisitor visitor( observer );
 
 		m_entity.forEachKeyValue( visitor );

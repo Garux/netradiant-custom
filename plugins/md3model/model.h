@@ -48,11 +48,11 @@ public:
 	void clear(){
 		m_lights.clear();
 	}
-	void evaluateLights() const {
+	void evaluateLights() const override {
 	}
-	void lightsChanged() const {
+	void lightsChanged() const override {
 	}
-	void forEachLight( const RendererLightCallback& callback ) const {
+	void forEachLight( const RendererLightCallback& callback ) const override {
 		for ( Lights::const_iterator i = m_lights.begin(); i != m_lights.end(); ++i )
 		{
 			callback( *( *i ) );
@@ -142,7 +142,7 @@ public:
 		}
 	}
 
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 #if 1
 		if ( ( state & RENDER_BUMP ) != 0 ) {
 			gl().glNormalPointer( GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->normal );
@@ -256,11 +256,11 @@ public:
 		}
 	}
 
-	VolumeIntersectionValue intersectVolume( const VolumeTest& test, const Matrix4& localToWorld ) const {
+	VolumeIntersectionValue intersectVolume( const VolumeTest& test, const Matrix4& localToWorld ) const override {
 		return test.TestAABB( m_aabb_local, localToWorld );
 	}
 
-	virtual const AABB& localAABB() const {
+	virtual const AABB& localAABB() const override {
 		return m_aabb_local;
 	}
 
@@ -363,7 +363,7 @@ public:
 			}
 		}
 	}
-	void skinChanged(){
+	void skinChanged() override {
 		ASSERT_MESSAGE( m_skins.size() == m_model.size(), "ERROR" );
 		destroyRemaps();
 		constructRemaps();
@@ -402,23 +402,23 @@ public:
 		}
 	}
 
-	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const override {
 		m_lightList->evaluateLights();
 
 		render( renderer, volume, Instance::localToWorld() );
 	}
-	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const override {
 		renderSolid( renderer, volume );
 	}
 
-	void testSelect( Selector& selector, SelectionTest& test ){
+	void testSelect( Selector& selector, SelectionTest& test ) override {
 		m_model.testSelect( selector, test, Instance::localToWorld() );
 	}
 
-	bool testLight( const RendererLight& light ) const {
+	bool testLight( const RendererLight& light ) const override {
 		return light.testAABB( worldAABB() );
 	}
-	void insertLight( const RendererLight& light ){
+	void insertLight( const RendererLight& light ) override {
 		const Matrix4& localToWorld = Instance::localToWorld();
 		SurfaceLightLists::iterator j = m_surfaceLightLists.begin();
 		for ( Model::const_iterator i = m_model.begin(); i != m_model.end(); ++i )
@@ -426,7 +426,7 @@ public:
 			Surface_addLight( *( *i ), *j++, localToWorld, light );
 		}
 	}
-	void clearLights(){
+	void clearLights() override {
 		for ( SurfaceLightLists::iterator i = m_surfaceLightLists.begin(); i != m_surfaceLightLists.end(); ++i )
 		{
 			( *i ).clear();
@@ -463,23 +463,23 @@ public:
 		return m_model;
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
 	scene::Node& node(){
 		return m_node;
 	}
 
-	scene::Instance* create( const scene::Path& path, scene::Instance* parent ){
+	scene::Instance* create( const scene::Path& path, scene::Instance* parent ) override {
 		return new ModelInstance( path, parent, m_model );
 	}
-	void forEachInstance( const scene::Instantiable::Visitor& visitor ){
+	void forEachInstance( const scene::Instantiable::Visitor& visitor ) override {
 		m_instances.forEachInstance( visitor );
 	}
-	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ){
+	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ) override {
 		m_instances.insert( observer, path, instance );
 	}
-	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ){
+	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ) override {
 		return m_instances.erase( observer, path );
 	}
 };

@@ -59,10 +59,10 @@ public:
 class NullDebugMessageHandler : public NullOutputStream, public DebugMessageHandler
 {
 public:
-	virtual TextOutputStream& getOutputStream(){
+	TextOutputStream& getOutputStream() override {
 		return *this;
 	}
-	virtual bool handleMessage(){
+	bool handleMessage() override {
 		return false;
 	}
 };
@@ -70,10 +70,10 @@ public:
 class DefaultDebugMessageHandler : public DebugMessageHandler
 {
 public:
-	virtual TextOutputStream& getOutputStream(){
+	TextOutputStream& getOutputStream() override {
 		return globalErrorStream();
 	}
-	virtual bool handleMessage(){
+	bool handleMessage() override {
 #if defined( _DEBUG )
 		return false; // send debug-break
 #else

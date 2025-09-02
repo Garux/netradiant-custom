@@ -111,7 +111,6 @@
 #include "ieclass.h"
 #include "irender.h"
 #include "ifilesystem.h"
-#include "iarchive.h"
 
 #include "xml/xmlparser.h"
 #include "generic/object.h"
@@ -122,6 +121,7 @@
 #include "eclasslib.h"
 #include "modulesystem/moduleregistry.h"
 #include "stringio.h"
+#include <map>
 
 #define PARSE_ERROR( elementName, name ) makeQuoted( elementName ) << " is not a valid child of " << makeQuoted( name )
 

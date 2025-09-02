@@ -65,8 +65,7 @@ class VariableString final : public Evaluatable
 {
 	CopiedString m_string;
 public:
-	VariableString() : m_string(){
-	}
+	VariableString() = default;
 	VariableString( const char* string ) : m_string( string ){
 	}
 	Evaluatable* clone() const override {
@@ -121,7 +120,7 @@ class Conditional final : public Evaluatable
 	VariableString m_test;
 public:
 	VariableString m_result;
-	Conditional( VariableString&& test ) : m_test( test ){
+	Conditional( VariableString&& test ) : m_test( std::move( test ) ){
 	}
 	Evaluatable* clone() const override {
 		return new Conditional( *this );
@@ -130,7 +129,7 @@ public:
 		if ( !m_test.evaluate().empty() ) {
 			return m_result.evaluate();
 		}
-		return StringBuffer();
+		return {};
 	}
 	void exportXML( XMLImporter& importer ) const override {
 		StaticElement conditionElement( "cond" );
@@ -170,7 +169,6 @@ public:
 	}
 };
 
-#include "xml/ixml.h"
 
 class XMLElementParser : public TextOutputStream
 {
@@ -241,7 +239,7 @@ public:
 	XMLElementParser& pushElement( const XMLElement& element ) override {
 		if ( string_equal( element.name(), "cond" ) ) {
 			flush();
-			Conditional* conditional = new Conditional( VariableString( element.attribute( "value" ) ) );
+			auto* conditional = new Conditional( VariableString( element.attribute( "value" ) ) );
 			m_tool.push_back( conditional );
 			m_conditional = new ConditionalXMLConstructor( *conditional );
 			return *m_conditional;
@@ -302,18 +300,10 @@ public:
 };
 
 typedef std::pair<CopiedString, Build> BuildPair;
-#define SEPARATOR_STRING "-"
+constexpr char SEPARATOR_STRING[] = "-";
 inline bool is_separator( const CopiedString& name, const Build& commands ){
-	if ( !string_equal( name.c_str(), SEPARATOR_STRING ) ) {
-		return false;
-	}
-	for ( const BuildCommand& cmd : commands )
-	{
-		if ( !string_empty( cmd.c_str() ) ) {
-			return false;
-		}
-	}
-	return true;
+	return string_equal( name.c_str(), SEPARATOR_STRING )
+		&& std::ranges::all_of( commands, string_empty, &BuildCommand::c_str ); // true for empty range
 }
 
 
@@ -527,7 +517,7 @@ public:
 #include "stream/textfilestream.h"
 #include "xml/xmlparser.h"
 
-const char* const BUILDMENU_VERSION = "2.0";
+constexpr char BUILDMENU_VERSION[] = "2.0";
 
 bool build_commands_parse( const char* filename ){
 	TextFileInputStream projectFile( filename );
@@ -650,13 +640,13 @@ constexpr Qt::ItemFlags c_itemFlags = Qt::ItemIsSelectable | Qt::ItemIsEditable 
 constexpr Qt::ItemFlags c_itemFlagsDraggable = c_itemFlags | Qt::ItemIsDragEnabled;
 
 inline QTreeWidgetItem* new_item( const char *text ){
-	auto item = new QTreeWidgetItem;
+	auto *item = new QTreeWidgetItem;
 	item->setText( 0, text );
 	item->setFlags( c_itemFlagsDraggable );
 	return item;
 }
 
-const char LAST_ITER_STRING[] = "+";
+constexpr char LAST_ITER_STRING[] = "+";
 inline void last_iter_append( QTreeWidget* tree ){
 	QTreeWidgetItem *item = new_item( LAST_ITER_STRING );
 	item->setFlags( c_itemFlags );
@@ -675,13 +665,12 @@ void BSPCommandList_Construct( QTreeWidget* tree, Project& project ){
 	last_iter_append( tree );
 }
 
-class ProjectList
+struct ProjectList
 {
-public:
 	Project& m_project;
 	QTreeWidget* m_buildView;
-	bool m_changed;
-	ProjectList( Project& project ) : m_project( project ), m_changed( false ){
+	bool m_changed{};
+	ProjectList( Project& project ) : m_project( project ){
 	}
 };
 
@@ -827,12 +816,12 @@ protected:
 class QTreeWidget_project : public QTreeWidget_drag
 {
 	ProjectList& m_projectList;
+	BuildPair m_buildpair_copied;
+	Project::iterator m_buildpair_dragged;
 public:
 	QTreeWidget_project( ProjectList& projectList ) : m_projectList( projectList ){
 	}
 protected:
-	BuildPair m_buildpair_copied;
-	Project::iterator m_buildpair_dragged;
 	void startDrag( Qt::DropActions supportedActions ) override {
 		m_buildpair_dragged = Project_find( m_projectList.m_project, indexOfTopLevelItem( currentItem() ) );
 		QTreeWidget::startDrag( supportedActions );
@@ -889,9 +878,9 @@ protected:
 
 class QTreeWidget_commands : public QTreeWidget_drag
 {
-protected:
 	BuildCommand m_buildcommand_copied;
 	Build::iterator m_buildcommand_dragged;
+protected:
 	void startDrag( Qt::DropActions supportedActions ) override {
 		ASSERT_NOTNULL( g_current_build );
 		m_buildcommand_dragged = Build_find( *g_current_build, indexOfTopLevelItem( currentItem() ) );
@@ -1046,9 +1035,9 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 	rootLayout->addWidget( container );
 
 	{
-		auto grid = new QGridLayout( container );
+		auto *grid = new QGridLayout( container );
 		{
-			auto buttons = new QDialogButtonBox;
+			auto *buttons = new QDialogButtonBox;
 			buttons->setOrientation( Qt::Orientation::Vertical );
 			// rejection via dialog means will return DialogCode::Rejected (0), eID* > 0
 			QObject::connect( buttons->addButton( QDialogButtonBox::StandardButton::Ok ),
@@ -1062,11 +1051,11 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 		}
 		QTreeWidget* buildView = nullptr;
 		{
-			auto frame = new QGroupBox( "Build menu" );
+			auto *frame = new QGroupBox( "Build menu" );
 			grid->addWidget( frame, 0, 0 );
 			grid->setRowStretch( 0, 1 );
 			{
-				auto tree = projectList.m_buildView = buildView = new QTreeWidget_project( projectList );
+				auto *tree = projectList.m_buildView = buildView = new QTreeWidget_project( projectList );
 				tree->setHorizontalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
 				( new QHBoxLayout( frame ) )->addWidget( tree );
 
@@ -1076,10 +1065,10 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 			}
 		}
 		{
-			auto frame = new QGroupBox( "Commandline" );
+			auto *frame = new QGroupBox( "Commandline" );
 			grid->addWidget( frame, 1, 0 );
 			{
-				auto tree = new QTreeWidget_commands;
+				auto *tree = new QTreeWidget_commands;
 				tree->setVerticalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
 				( new QHBoxLayout( frame ) )->addWidget( tree );
 
@@ -1092,7 +1081,7 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 			}
 		}
 		{
-			auto expander = new QGroupBox( "Build Variables" );
+			auto *expander = new QGroupBox( "Build Variables" );
 			expander->setFlat( true );
 			expander->setCheckable( true );
 			expander->setChecked( false );
@@ -1214,9 +1203,8 @@ class BuildMenuItem
 	   using build name before was faulty design, as builds may have equal names */
 	const size_t m_buildIdx;
 public:
-	QAction* m_item;
-	BuildMenuItem( size_t buildIdx )
-		: m_buildIdx( buildIdx ), m_item( nullptr ){
+	QAction* m_item{};
+	BuildMenuItem( size_t buildIdx ) : m_buildIdx( buildIdx ){
 	}
 	void run() const {
 		RunBSP( m_buildIdx );

@@ -40,7 +40,7 @@ public:
 	EntityFindByClassname( const char* name, Entity*& entity ) : m_name( name ), m_entity( entity ){
 		m_entity = 0;
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( m_entity == 0 ) {
 			Entity* entity = Node_getEntity( path.top() );
 			if ( entity != 0 && string_equal( m_name, entity->getClassName() ) ) {
@@ -72,7 +72,7 @@ class EntityFindFlags : public scene::Graph::Walker
 public:
 	EntityFindFlags( const char *classname, const char *flag, int *count ) : m_classname( classname ), m_flag( flag ), m_count( count ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0 && string_equal( m_classname, entity->getClassName() ) && !entity->hasKeyValue( m_flag ) ) {
 			( *m_count )++;
@@ -94,7 +94,7 @@ class EntityFindTeams : public scene::Graph::Walker
 public:
 	EntityFindTeams( const char *classname, int *count, int *team ) : m_classname( classname ), m_count( count ), m_team( team ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0 && string_equal( m_classname, entity->getClassName() ) ) {
 			if ( m_count ) {

@@ -68,17 +68,17 @@ public:
 	}
 	typedef MemberCaller<ModelSkinKey, void(const char*), &ModelSkinKey::skinChanged> SkinChangedCaller;
 
-	void realise(){
+	void realise() override {
 		m_skinChangedCallback();
 	}
-	void unrealise(){
+	void unrealise() override {
 	}
 };
 
 class InstanceSkinChanged : public scene::Instantiable::Visitor
 {
 public:
-	void visit( scene::Instance& instance ) const {
+	void visit( scene::Instance& instance ) const override {
 		//\todo don't do this for instances that are not children of the entity setting the skin
 		SkinnedModel* skinned = InstanceTypeCast<SkinnedModel>::cast( instance );
 		if ( skinned != 0 ) {

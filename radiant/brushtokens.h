@@ -467,7 +467,7 @@ class BrushTokenImporter : public MapImporter
 public:
 	BrushTokenImporter( Brush& brush ) : m_brush( brush ){
 	}
-	bool importTokens( Tokeniser& tokeniser ){
+	bool importTokens( Tokeniser& tokeniser ) override {
 		if ( Brush::m_type == eBrushTypeQuake3BP || Brush::m_type == eBrushTypeQuake2BP || Brush::m_type == eBrushTypeDoom3 || Brush::m_type == eBrushTypeQuake4 ) {
 			tokeniser.nextLine();
 			RETURN_FALSE_IF_FAIL( Tokeniser_parseToken( tokeniser, "{" ) );
@@ -550,7 +550,7 @@ class BrushTokenExporter : public MapExporter
 public:
 	BrushTokenExporter( const Brush& brush ) : m_brush( brush ){
 	}
-	void exportTokens( TokenWriter& writer ) const {
+	void exportTokens( TokenWriter& writer ) const override {
 		m_brush.evaluateBRep(); // ensure b-rep is up-to-date, so that non-contributing faces can be identified.
 
 		if ( !m_brush.hasContributingFaces() ) {

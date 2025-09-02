@@ -23,8 +23,6 @@
 
 #include "debugging/debugging.h"
 
-#include <map>
-
 #include <QAbstractItemModel>
 #include <QBrush>
 #include <QApplication>

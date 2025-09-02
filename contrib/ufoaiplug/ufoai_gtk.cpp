@@ -44,7 +44,7 @@ std::size_t ToolbarNoButtons( void ){
 class CUFOAIToolbarButton : public IToolbarButton
 {
 public:
-	virtual const char* getImage() const {
+	virtual const char* getImage() const override {
 		switch ( mIndex )
 		{
 		case 0: return "ufoai_level1.png";
@@ -62,7 +62,7 @@ public:
 		}
 		return NULL;
 	}
-	virtual EType getType() const {
+	virtual EType getType() const override {
 		switch ( mIndex )
 		{
 /*		case 3: return eButton;*/
@@ -73,7 +73,7 @@ public:
 		default: return eButton;
 		}
 	}
-	virtual const char* getText() const {
+	virtual const char* getText() const override {
 		switch ( mIndex )
 		{
 		case 0: return "Level 1";
@@ -91,7 +91,7 @@ public:
 		}
 		return NULL;
 	}
-	virtual const char* getTooltip() const {
+	virtual const char* getTooltip() const override {
 		switch ( mIndex )
 		{
 		case 0: return "Show only level 1";
@@ -110,7 +110,7 @@ public:
 		return NULL;
 	}
 
-	virtual void activate() const {
+	virtual void activate() const override {
 		switch ( mIndex )
 		{
 		case 0: filter_level( CONTENTS_LEVEL1 ); break;

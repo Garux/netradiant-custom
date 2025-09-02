@@ -47,16 +47,16 @@ public:
 		: m_name( name ), m_istream( archiveName ), m_substream( m_istream, position, stream_size ), m_zipstream( m_substream ), m_size( file_size ){
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
-	size_type size() const {
+	size_type size() const override {
 		return m_size;
 	}
-	const char* getName() const {
+	const char* getName() const override {
 		return m_name.c_str();
 	}
-	InputStream& getInputStream(){
+	InputStream& getInputStream() override {
 		return m_zipstream;
 	}
 };
@@ -76,10 +76,10 @@ public:
 		: m_name( name ), m_istream( archiveName ), m_substream( m_istream, position, stream_size ), m_zipstream( m_substream ), m_textStream( m_zipstream ){
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
-	TextInputStream& getInputStream(){
+	TextInputStream& getInputStream() override {
 		return m_textStream;
 	}
 };
@@ -213,10 +213,10 @@ public:
 		return m_istream.failed();
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
-	ArchiveFile* openFile( const char* name ){
+	ArchiveFile* openFile( const char* name ) override {
 		ZipFileSystem::iterator i = m_filesystem.find( name );
 		if ( i != m_filesystem.end() && !i->second.is_directory() ) {
 			ZipRecord* file = i->second.file();
@@ -239,7 +239,7 @@ public:
 		}
 		return 0;
 	}
-	ArchiveTextFile* openTextFile( const char* name ){
+	ArchiveTextFile* openTextFile( const char* name ) override {
 		ZipFileSystem::iterator i = m_filesystem.find( name );
 		if ( i != m_filesystem.end() && !i->second.is_directory() ) {
 			ZipRecord* file = i->second.file();
@@ -262,11 +262,11 @@ public:
 		}
 		return 0;
 	}
-	bool containsFile( const char* name ){
+	bool containsFile( const char* name ) override {
 		ZipFileSystem::iterator i = m_filesystem.find( name );
 		return i != m_filesystem.end() && !i->second.is_directory();
 	}
-	void forEachFile( VisitorFunc visitor, const char* root ){
+	void forEachFile( VisitorFunc visitor, const char* root ) override {
 		m_filesystem.traverse( visitor, root );
 	}
 };

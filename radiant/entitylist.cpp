@@ -35,11 +35,8 @@
 
 #include "string/string.h"
 #include "scenelib.h"
-#include "nameable.h"
 #include "signal/isignal.h"
-#include "generic/object.h"
 
-#include "gtkutil/widget.h"
 #include "gtkutil/idledraw.h"
 #include "gtkutil/accelerator.h"
 #include "gtkutil/guisettings.h"

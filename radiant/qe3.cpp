@@ -38,8 +38,6 @@
 
 #include "ifilesystem.h"
 
-#include <map>
-
 #include <QWidget>
 #include <QMessageBox>
 
@@ -49,7 +47,6 @@
 #include "os/path.h"
 #include "scenelib.h"
 
-#include "gtkutil/messagebox.h"
 #include "error.h"
 #include "map.h"
 #include "build.h"

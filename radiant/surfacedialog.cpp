@@ -45,7 +45,6 @@
 #include <QCheckBox>
 
 #include "signal/isignal.h"
-#include "generic/object.h"
 #include "math/vector.h"
 #include "texturelib.h"
 #include "shaderlib.h"
@@ -56,7 +55,6 @@
 #include "gtkutil/dialog.h"
 #include "gtkutil/entry.h"
 #include "gtkutil/nonmodal.h"
-#include "gtkutil/glwidget.h"           //Shamus: For Textool
 #include "gtkutil/guisettings.h"
 #include "gtkutil/spinbox.h"
 #include "map.h"
@@ -68,9 +66,8 @@
 #include "brush_primit.h"
 #include "xywindow.h"
 #include "mainframe.h"
-#include "gtkdlgs.h"
 #include "dialog.h"
-#include "brush.h"              //Shamus: for Textool
+#include "brush.h"
 #include "patch.h"
 #include "commands.h"
 #include "stream/stringstream.h"
@@ -1574,11 +1571,11 @@ public:
 	OccludeSelector( SelectionIntersection& bestIntersection, bool& occluded ) : m_bestIntersection( bestIntersection ), m_occluded( occluded ){
 		m_occluded = false;
 	}
-	void pushSelectable( Selectable& selectable ){
+	void pushSelectable( Selectable& selectable ) override {
 	}
-	void popSelectable(){
+	void popSelectable() override {
 	}
-	void addIntersection( const SelectionIntersection& intersection ){
+	void addIntersection( const SelectionIntersection& intersection ) override {
 		if ( SelectionIntersection_closer( intersection, m_bestIntersection ) ) {
 			m_bestIntersection = intersection;
 			m_occluded = true;
@@ -1594,7 +1591,7 @@ class BrushGetClosestFaceVisibleWalker : public scene::Graph::Walker
 public:
 	BrushGetClosestFaceVisibleWalker( SelectionTest& test, Texturable& texturable ) : m_test( test ), m_texturable( texturable ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( !path.top().get().visible() )
 			return false;
 		BrushInstance* brush = Instance_getBrush( instance );

@@ -24,8 +24,6 @@
 #include "debugging/debugging.h"
 
 #include "iscenegraph.h"
-#include "iselection.h"
-#include "iundo.h"
 #include "imap.h"
 MapModules& ReferenceAPI_getMapModules();
 #include "imodel.h"
@@ -153,7 +151,7 @@ NodeSmartReference g_nullModel( g_nullNode );
 class NullModelLoader : public ModelLoader
 {
 public:
-	scene::Node& loadModel( ArchiveFile& file ){
+	scene::Node& loadModel( ArchiveFile& file ) override {
 		return g_nullModel;
 	}
 };
@@ -557,23 +555,23 @@ public:
 		m_references.clear();
 	}
 
-	Resource* capture( const char* path ){
+	Resource* capture( const char* path ) override {
 		//globalOutputStream() << "capture: \"" << path << "\"\n";
 		return m_references.capture( CopiedString( path ) ).get();
 	}
-	void release( const char* path ){
+	void release( const char* path ) override {
 		m_references.release( CopiedString( path ) );
 		//globalOutputStream() << "release: \"" << path << "\"\n";
 	}
 
-	void setEntityCreator( EntityCreator& entityCreator ){
+	void setEntityCreator( EntityCreator& entityCreator ) override {
 		g_entityCreator = &entityCreator;
 	}
 
 	bool realised() const {
 		return m_unrealised == 0;
 	}
-	void realise(){
+	void realise() override {
 		ASSERT_MESSAGE( m_unrealised != 0, "HashtableReferenceCache::realise: already realised" );
 		if ( --m_unrealised == 0 ) {
 			g_realised = true;
@@ -590,7 +588,7 @@ public:
 			}
 		}
 	}
-	void unrealise(){
+	void unrealise() override {
 		if ( ++m_unrealised == 1 ) {
 			g_realised = false;
 

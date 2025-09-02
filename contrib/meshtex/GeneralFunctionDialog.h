@@ -55,7 +55,7 @@ private: // private types
                              const MeshEntity::RefSliceDescriptor *refCol,
                              bool surfaceValues);
    private:
-      bool Execute(MeshEntity& meshEntity) const;
+      bool Execute(MeshEntity& meshEntity) const override;
    private:
       const MeshEntity::GeneralFunctionFactors *_sFactors;
       const MeshEntity::GeneralFunctionFactors *_tFactors;
@@ -70,7 +70,7 @@ public: // public methods
 
    GeneralFunctionDialog(const std::string& key);
    ~GeneralFunctionDialog();
-   bool Apply();
+   bool Apply() override;
 
 private: // private member vars
 

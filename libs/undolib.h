@@ -34,7 +34,7 @@ public:
 		: m_data( data ){
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
 
@@ -85,10 +85,10 @@ public:
 		}
 	}
 
-	UndoMemento* exportState() const {
+	UndoMemento* exportState() const override {
 		return new BasicUndoMemento<Copyable>( m_object );
 	}
-	void importState( const UndoMemento* state ){
+	void importState( const UndoMemento* state ) override {
 		save();
 		m_importCallback( ( static_cast<const BasicUndoMemento<Copyable>*>( state ) )->get() );
 	}
@@ -127,10 +127,10 @@ public:
 		}
 	}
 
-	UndoMemento* exportState() const {
+	UndoMemento* exportState() const override {
 		return new BasicUndoMemento<Copyable>( m_object );
 	}
-	void importState( const UndoMemento* state ){
+	void importState( const UndoMemento* state ) override {
 		save();
 		m_object = ( static_cast<const BasicUndoMemento<Copyable>*>( state ) )->get();
 	}

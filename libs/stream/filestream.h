@@ -63,17 +63,17 @@ public:
 		return m_file == 0;
 	}
 
-	size_type read( byte_type* buffer, size_type length ){
+	size_type read( byte_type* buffer, size_type length ) override {
 		return fread( buffer, 1, length, m_file );
 	}
 
-	size_type seek( size_type position ){
+	size_type seek( size_type position ) override {
 		return fseek( m_file, static_cast<long>( position ), SEEK_SET );
 	}
-	size_type seek( offset_type offset, seekdir direction ){
+	size_type seek( offset_type offset, seekdir direction ) override {
 		return fseek( m_file, offset, FileStreamDetail::whence_for_seekdir( direction ) );
 	}
-	size_type tell() const {
+	size_type tell() const override {
 		return ftell( m_file );
 	}
 
@@ -98,7 +98,7 @@ public:
 		m_istream.seek( offset );
 	}
 
-	size_type read( byte_type* buffer, size_type length ){
+	size_type read( byte_type* buffer, size_type length ) override {
 		size_type result = m_istream.read( buffer, std::min( length, m_remaining ) );
 		m_remaining -= result;
 		return result;
@@ -127,17 +127,17 @@ public:
 		return m_file == 0;
 	}
 
-	size_type write( const byte_type* buffer, size_type length ){
+	size_type write( const byte_type* buffer, size_type length ) override {
 		return fwrite( buffer, 1, length, m_file );
 	}
 
-	size_type seek( size_type position ){
+	size_type seek( size_type position ) override {
 		return fseek( m_file, static_cast<long>( position ), SEEK_SET );
 	}
-	size_type seek( offset_type offset, seekdir direction ){
+	size_type seek( offset_type offset, seekdir direction ) override {
 		return fseek( m_file, offset, FileStreamDetail::whence_for_seekdir( direction ) );
 	}
-	size_type tell() const {
+	size_type tell() const override {
 		return ftell( m_file );
 	}
 };

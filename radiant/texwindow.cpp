@@ -30,7 +30,6 @@
 #include "debugging/debugging.h"
 
 #include "ifilesystem.h"
-#include "iundo.h"
 #include "igl.h"
 #include "iarchive.h"
 #include "moduleobserver.h"
@@ -63,15 +62,9 @@
 #include "shaderlib.h"
 #include "os/file.h"
 #include "os/path.h"
-#include "stream/memstream.h"
-#include "stream/textfilestream.h"
 #include "stream/stringstream.h"
-#include "commandlib.h"
-#include "texmanip.h"
 #include "textures.h"
 
-#include "gtkutil/menu.h"
-#include "gtkutil/nonmodal.h"
 #include "gtkutil/cursor.h"
 #include "gtkutil/widget.h"
 #include "gtkutil/glwidget.h"
@@ -82,20 +75,13 @@
 #include "gtkutil/guisettings.h"
 
 #include "error.h"
-#include "map.h"
 #include "qgl.h"
 #include "select.h"
-#include "brush_primit.h"
-#include "brushmanip.h"
-#include "patchmanip.h"
 #include "plugin.h"
-#include "qe3.h"
 #include "gtkdlgs.h"
 #include "gtkmisc.h"
 #include "mainframe.h"
 #include "findtexturedialog.h"
-#include "surfacedialog.h"
-#include "patchdialog.h"
 #include "groupdialog.h"
 #include "preferences.h"
 #include "commands.h"
@@ -549,10 +535,10 @@ class ShadersObserver : public ModuleObserver
 {
 	Signal0 m_realiseCallbacks;
 public:
-	void realise(){
+	void realise() override {
 		m_realiseCallbacks();
 	}
-	void unrealise(){
+	void unrealise() override {
 	}
 	void insert( const SignalHandler& handler ){
 		m_realiseCallbacks.connectLast( handler );
@@ -624,7 +610,7 @@ inline bool texture_name_ignore( const char* name ){
 class LoadShaderVisitor : public Archive::Visitor
 {
 public:
-	void visit( const char* name ){
+	void visit( const char* name ) override {
 		IShader* shader = QERApp_Shader_ForName( CopiedString( PathExtensionless( name ) ).c_str() );
 		shader->DecRef();
 	}
@@ -710,7 +696,7 @@ public:
 	LoadTexturesByTypeVisitor( const char* dirstring )
 		: m_dirstring( dirstring ){
 	}
-	void visit( const char* minor, const _QERPlugImageTable& table ) const {
+	void visit( const char* minor, const _QERPlugImageTable& table ) const override {
 		GlobalFileSystem().forEachFile( m_dirstring, minor, TextureDirectoryLoadTextureCaller( m_dirstring ) );
 	}
 };

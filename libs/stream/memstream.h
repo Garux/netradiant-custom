@@ -29,7 +29,7 @@ class BufferOutputStream : public TextOutputStream
 {
 	std::vector<char> m_buffer;
 public:
-	std::size_t write( const char* buffer, std::size_t length ){
+	std::size_t write( const char* buffer, std::size_t length ) override {
 		m_buffer.insert( m_buffer.end(), buffer, buffer + length );
 		return length;
 	}
@@ -59,7 +59,7 @@ public:
 	BufferInputStream( const char* buffer, std::size_t length )
 		: m_read( buffer ), m_end( buffer + length ){
 	}
-	std::size_t read( char* buffer, std::size_t length ){
+	std::size_t read( char* buffer, std::size_t length ) override {
 		std::size_t count = std::min( std::size_t( m_end - m_read ), length );
 		const char* end = m_read + count;
 		while ( m_read != end )

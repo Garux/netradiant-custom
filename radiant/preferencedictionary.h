@@ -65,7 +65,7 @@ public:
 		return m_preferences.find( name );
 	}
 
-	void registerPreference( const char* name, const StringImportCallback& importer, const StringExportCallback& exporter ){
+	void registerPreference( const char* name, const StringImportCallback& importer, const StringExportCallback& exporter ) override {
 		m_preferences.insert( PreferenceEntries::value_type( name, PreferenceEntry( importer, exporter ) ) );
 		PreferenceCache::iterator i = m_cache.find( name );
 		if ( i != m_cache.end() ) {
@@ -100,16 +100,16 @@ class XMLPreferenceDictionaryExporter : public XMLExporter
 	public:
 		XMLQPrefElement( const char* version ) : m_version( version ){
 		}
-		const char* name() const {
+		const char* name() const override {
 			return "qpref";
 		}
-		const char* attribute( const char* name ) const {
+		const char* attribute( const char* name ) const override {
 			if ( string_equal( name, "version" ) ) {
 				return m_version;
 			}
 			return "";
 		}
-		void forEachAttribute( XMLAttrVisitor& visitor ) const {
+		void forEachAttribute( XMLAttrVisitor& visitor ) const override {
 			visitor.visit( "version", m_version );
 		}
 	};
@@ -121,16 +121,16 @@ class XMLPreferenceDictionaryExporter : public XMLExporter
 		XMLPreferenceElement( const char* name )
 			: m_name( name ){
 		}
-		const char* name() const {
+		const char* name() const override {
 			return "epair";
 		}
-		const char* attribute( const char* name ) const {
+		const char* attribute( const char* name ) const override {
 			if ( string_equal( name, "name" ) ) {
 				return m_name;
 			}
 			return "";
 		}
-		void forEachAttribute( XMLAttrVisitor& visitor ) const {
+		void forEachAttribute( XMLAttrVisitor& visitor ) const override {
 			visitor.visit( "name", m_name );
 		}
 	};
@@ -143,7 +143,7 @@ public:
 		: m_preferences( preferences ), m_version( version ){
 	}
 
-	void exportXML( XMLImporter& importer ){
+	void exportXML( XMLImporter& importer ) override {
 		importer.write( "\n", 1 );
 
 		XMLQPrefElement qpref_element( m_version );
@@ -199,7 +199,7 @@ public:
 		: m_preferences( preferences ), m_version( version_parse( version ) ){
 	}
 
-	void pushElement( const XMLElement& element ){
+	void pushElement( const XMLElement& element ) override {
 		if ( m_xml_stack.empty() ) {
 			if ( string_equal( element.name(), "qpref" ) ) {
 				Version dataVersion( version_parse( element.attribute( "version" ) ) );
@@ -249,13 +249,13 @@ public:
 		}
 
 	}
-	void popElement( const char* name ){
+	void popElement( const char* name ) override {
 		if ( m_xml_stack.back().m_tag == xml_state_t::tag_epair ) {
 			m_preferences.importPref( m_xml_stack.back().m_name.c_str(), m_xml_stack.back().m_ostream.c_str() );
 		}
 		m_xml_stack.pop_back();
 	}
-	std::size_t write( const char* buffer, std::size_t length ){
+	std::size_t write( const char* buffer, std::size_t length ) override {
 		return m_xml_stack.back().m_ostream.write( buffer, length );
 	}
 };

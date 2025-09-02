@@ -265,7 +265,7 @@ public:
 		m_targetsChanged();
 	}
 
-	void insert( const char* key, EntityKeyValue& value ){
+	void insert( const char* key, EntityKeyValue& value ) override {
 		std::size_t index;
 		if ( readTargetKey( key, index ) ) {
 			TargetingEntities::iterator i = m_targetingEntities.insert( TargetingEntities::value_type( index, TargetingEntity() ) ).first;
@@ -273,7 +273,7 @@ public:
 			targetsChanged();
 		}
 	}
-	void erase( const char* key, EntityKeyValue& value ){
+	void erase( const char* key, EntityKeyValue& value ) override {
 		std::size_t index;
 		if ( readTargetKey( key, index ) ) {
 			TargetingEntities::iterator i = m_targetingEntities.find( index );
@@ -378,18 +378,18 @@ public:
 		m_targeting.targetsChanged();
 	}
 
-	void insert( const char* key, EntityKeyValue& value ){
+	void insert( const char* key, EntityKeyValue& value ) override {
 		if ( string_equal( key, g_targetable_nameKey ) ) {
 			value.attach( TargetedEntity::TargetnameChangedCaller( m_targeted ) );
 		}
 	}
-	void erase( const char* key, EntityKeyValue& value ){
+	void erase( const char* key, EntityKeyValue& value ) override {
 		if ( string_equal( key, g_targetable_nameKey ) ) {
 			value.detach( TargetedEntity::TargetnameChangedCaller( m_targeted ) );
 		}
 	}
 
-	const Vector3& world_position() const {
+	const Vector3& world_position() const override {
 #if 1
 		const AABB& bounds = Instance::worldAABB();
 		if ( aabb_valid( bounds ) ) {
@@ -431,7 +431,7 @@ public:
 		ASSERT_MESSAGE( erased, "cannot detach instance" );
 	}
 
-	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const override {
 		if( g_showConnections ){
 			for ( TargetableInstances::const_iterator i = m_instances.begin(); i != m_instances.end(); ++i )
 			{
@@ -441,7 +441,7 @@ public:
 			}
 		}
 	}
-	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const override {
 		renderSolid( renderer, volume );
 	}
 };

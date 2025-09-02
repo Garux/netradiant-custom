@@ -166,7 +166,7 @@ public:
 		  weld( _weld ){
 	}
 
-	bool WriteToFile( const std::string& path, collapsemode mode ) const;
+	bool WriteToFile( const std::string& path, collapsemode mode ) const override;
 };
 
 bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode mode ) const {
@@ -338,7 +338,7 @@ public:
 		: exporter( _exporter )
 	{}
 
-	void visit( Face& face ) const {
+	void visit( Face& face ) const override {
 		if( face.contributes() )
 			exporter.AddBrushFace( face );
 	}
@@ -354,7 +354,7 @@ public:
 		: exporter( _exporter )
 	{}
 
-	void visit( scene::Instance& instance ) const {
+	void visit( scene::Instance& instance ) const override {
 		BrushInstance* bptr = InstanceTypeCast<BrushInstance>::cast( instance );
 		if ( bptr ) {
 			Brush& brush( bptr->getBrush() );

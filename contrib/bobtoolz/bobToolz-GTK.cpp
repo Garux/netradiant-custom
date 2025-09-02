@@ -190,7 +190,7 @@ std::size_t ToolbarButtonCount( void ) {
 class CBobtoolzToolbarButton : public IToolbarButton
 {
 public:
-	virtual const char* getImage() const {
+	virtual const char* getImage() const override {
 		switch ( mIndex ) {
 		case 0: return "bobtoolz_cleanup.png";
 		case 1: return "bobtoolz_poly.png";
@@ -209,7 +209,7 @@ public:
 		}
 		return NULL;
 	}
-	virtual EType getType() const {
+	virtual EType getType() const override {
 		switch ( mIndex ) {
 		case 2: return eSpace;
 		case 3: return eToggleButton;
@@ -218,7 +218,7 @@ public:
 		default: return eButton;
 		}
 	}
-	virtual const char* getText() const {
+	virtual const char* getText() const override {
 		switch ( mIndex ) {
 		case 0: return "Cleanup";
 		case 1: return "Polygons";
@@ -234,7 +234,7 @@ public:
 		}
 		return NULL;
 	}
-	virtual const char* getTooltip() const {
+	virtual const char* getTooltip() const override {
 		switch ( mIndex ) {
 		case 0: return "Brush Cleanup";
 		case 1: return "Polygons";
@@ -251,7 +251,7 @@ public:
 		return NULL;
 	}
 
-	virtual void activate() const {
+	virtual void activate() const override {
 		LoadLists();
 
 		switch ( mIndex ) {

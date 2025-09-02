@@ -340,13 +340,13 @@ public:
 		m_eof = !m_istream.readChar( m_current );
 		m_token[MAXTOKEN - 1] = '\0';
 	}
-	void release(){
+	void release() override {
 		delete this;
 	}
-	void nextLine(){
+	void nextLine() override {
 		m_crossline = true;
 	}
-	const char* getToken(){
+	const char* getToken() override {
 		if ( m_unget ) {
 			m_unget = false;
 			return m_token;
@@ -354,17 +354,17 @@ public:
 
 		return fillToken();
 	}
-	void ungetToken(){
+	void ungetToken() override {
 		ASSERT_MESSAGE( !m_unget, "can't unget more than one token" );
 		m_unget = true;
 	}
-	std::size_t getLine() const {
+	std::size_t getLine() const override {
 		return m_scriptline;
 	}
-	std::size_t getColumn() const {
+	std::size_t getColumn() const override {
 		return m_scriptcolumn;
 	}
-	bool bufferContains( const char* str ){
+	bool bufferContains( const char* str ) override {
 		return m_istream.bufferContains( str );
 	}
 };

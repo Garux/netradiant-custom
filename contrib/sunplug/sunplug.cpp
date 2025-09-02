@@ -143,7 +143,7 @@ public:
 	EntityFindByClassname( const char* name, Entity*& entity ) : m_name( name ), m_entity( entity ){
 		m_entity = 0;
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( m_entity == 0 ) {
 			Entity* entity = Node_getEntity( path.top() );
 			if ( entity != 0

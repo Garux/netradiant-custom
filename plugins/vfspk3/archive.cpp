@@ -47,10 +47,10 @@ public:
 	DirectoryArchive( const char* root ) : m_root( root ){
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
-	virtual ArchiveFile* openFile( const char* name ){
+	virtual ArchiveFile* openFile( const char* name ) override {
 		UnixPath path( m_root.c_str() );
 		path.push_filename( name );
 		DirectoryArchiveFile* file = new DirectoryArchiveFile( name, path.c_str() );
@@ -60,7 +60,7 @@ public:
 		file->release();
 		return 0;
 	}
-	virtual ArchiveTextFile* openTextFile( const char* name ){
+	virtual ArchiveTextFile* openTextFile( const char* name ) override {
 		UnixPath path( m_root.c_str() );
 		path.push_filename( name );
 		DirectoryArchiveTextFile* file = new DirectoryArchiveTextFile( name, path.c_str() );
@@ -70,12 +70,12 @@ public:
 		file->release();
 		return 0;
 	}
-	virtual bool containsFile( const char* name ){
+	virtual bool containsFile( const char* name ) override {
 		UnixPath path( m_root.c_str() );
 		path.push_filename( name );
 		return file_readable( path.c_str() );
 	}
-	virtual void forEachFile( VisitorFunc visitor, const char* root ){
+	virtual void forEachFile( VisitorFunc visitor, const char* root ) override {
 		std::vector<Directory*> dirs;
 		UnixPath path( m_root.c_str() );
 		path.push( root );

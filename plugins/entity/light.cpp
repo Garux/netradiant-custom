@@ -892,7 +892,7 @@ public:
 
 	RenderLightRadiiWire( LightRadii& radii, const Vector3& origin ) : m_radii( radii ), m_origin( origin ){
 	}
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		//light_draw_radius_wire( m_origin, m_radii.m_radii );
 		// draw two practically useful radiuses
 		light_draw_radius_wire( m_origin, m_radii.m_radii_transformed.data() + !m_radii.isLinear(), m_radiiPoints );
@@ -910,7 +910,7 @@ public:
 
 	RenderLightRadiiFill( LightRadii& radii, const Vector3& origin ) : m_radii( radii ), m_origin( origin ){
 	}
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		//light_draw_radius_fill( m_origin, m_radii.m_radii );
 		// draw two practically useful radiuses
 		light_draw_radius_fill( m_origin, m_radii.m_radii_transformed.data() + !m_radii.isLinear(), m_radiiPoints );
@@ -928,7 +928,7 @@ public:
 
 	RenderLightRadiiBox( const Vector3& origin ) : m_origin( origin ){
 	}
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		//draw the bounding box of light based on light_radius key
 		if ( ( state & RENDER_FILL ) != 0 ) {
 			aabb_draw_flatshade( m_points );
@@ -953,7 +953,7 @@ public:
 
 	RenderLightCenter( const Vector3& center, EntityClass& eclass ) : m_center( center ), m_eclass( eclass ){
 	}
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		gl().glBegin( GL_POINTS );
 		gl().glColor3fv( vector3_to_array( m_eclass.color ) );
 		gl().glVertex3fv( vector3_to_array( m_center ) );
@@ -970,7 +970,7 @@ public:
 
 	RenderLightProjection( const Matrix4& projection ) : m_projection( projection ){
 	}
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		Matrix4 unproject( matrix4_full_inverse( m_projection ) );
 		std::array<Vector3, 8> points = aabb_corners( AABB( Vector3( 0.5f, 0.5f, 0.5f ), Vector3( 0.5f, 0.5f, 0.5f ) ) );
 		points[0] = vector4_projected( matrix4_transformed_vector4( unproject, Vector4( points[0], 1 ) ) );
@@ -1414,16 +1414,16 @@ public:
 		m_traverseObservers.detach( *observer );
 	}
 
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		light_draw( m_aabb_light, state );
 	}
 
-	VolumeIntersectionValue intersectVolume( const VolumeTest& volume, const Matrix4& localToWorld ) const {
+	VolumeIntersectionValue intersectVolume( const VolumeTest& volume, const Matrix4& localToWorld ) const override {
 		return volume.TestAABB( m_aabb_light, localToWorld );
 	}
 
 // cache
-	const AABB& localAABB() const {
+	const AABB& localAABB() const override {
 		return m_aabb_light;
 	}
 
@@ -1503,7 +1503,7 @@ public:
 	void rotate( const Quaternion& rotation ){
 		rotation_rotate( m_rotation, rotation );
 	}
-	void snapto( float snap ){
+	void snapto( float snap ) override {
 		if ( g_lightType == LIGHTTYPE_DOOM3 && !m_useLightOrigin && !m_traverse.empty() ) {
 			m_useLightOrigin = true;
 			m_lightOrigin = m_originKey.m_origin;
@@ -1579,7 +1579,7 @@ public:
 	typedef MemberCaller<Light, void(), &Light::transformChanged> TransformChangedCaller;
 
 	mutable Matrix4 m_localPivot;
-	const Matrix4& getLocalPivot() const {
+	const Matrix4& getLocalPivot() const override {
 		m_localPivot = rotation_toMatrix( m_rotation );
 		m_localPivot.t().vec3() = m_aabb_light.origin;
 		return m_localPivot;
@@ -1841,13 +1841,13 @@ public:
 
 		m_contained.instanceDetach( Instance::path() );
 	}
-	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const override {
 		m_contained.renderSolid( renderer, volume, Instance::localToWorld(), getSelectable().isSelected() );
 	}
-	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const override {
 		m_contained.renderWireframe( renderer, volume, Instance::localToWorld(), getSelectable().isSelected() );
 	}
-	void testSelect( Selector& selector, SelectionTest& test ){
+	void testSelect( Selector& selector, SelectionTest& test ) override {
 		m_contained.testSelect( selector, test, Instance::localToWorld() );
 	}
 
@@ -1890,7 +1890,7 @@ public:
 	}
 
 
-	bool isSelectedComponents() const {
+	bool isSelectedComponents() const override {
 		if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 			return m_dragPlanes.isSelected();
 		}
@@ -1898,7 +1898,7 @@ public:
 			return m_scaleRadius.isSelected();
 		}
 	}
-	void setSelectedComponents( bool select, SelectionSystem::EComponentMode mode ){
+	void setSelectedComponents( bool select, SelectionSystem::EComponentMode mode ) override {
 		if ( mode == SelectionSystem::eFace ) {
 			if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 				m_dragPlanes.setSelected( false );
@@ -1908,9 +1908,9 @@ public:
 			}
 		}
 	}
-	void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ){
+	void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ) override {
 	}
-	void gatherComponentsHighlight( std::vector<std::vector<Vector3>>& polygons, SelectionIntersection& intersection, SelectionTest& test, SelectionSystem::EComponentMode mode ) const {
+	void gatherComponentsHighlight( std::vector<std::vector<Vector3>>& polygons, SelectionIntersection& intersection, SelectionTest& test, SelectionSystem::EComponentMode mode ) const override {
 	}
 
 	void selectedChangedComponent( const Selectable& selectable ){
@@ -1948,29 +1948,29 @@ public:
 	}
 	typedef MemberCaller<LightInstance, void(), &LightInstance::lightChanged> LightChangedCaller;
 
-	Shader* getShader() const {
+	Shader* getShader() const override {
 		return m_contained.getShader();
 	}
-	const AABB& aabb() const {
+	const AABB& aabb() const override {
 		return m_contained.aabb();
 	}
-	bool testAABB( const AABB& other ) const {
+	bool testAABB( const AABB& other ) const override {
 		return m_contained.testAABB( other );
 	}
-	const Matrix4& rotation() const {
+	const Matrix4& rotation() const override {
 		return m_contained.rotation();
 	}
-	const Vector3& offset() const {
+	const Vector3& offset() const override {
 		return m_contained.offset();
 	}
-	const Vector3& colour() const {
+	const Vector3& colour() const override {
 		return m_contained.colour();
 	}
 
-	bool isProjected() const {
+	bool isProjected() const override {
 		return m_contained.isProjected();
 	}
-	const Matrix4& projection() const {
+	const Matrix4& projection() const override {
 		return m_contained.projection();
 	}
 };
@@ -2061,34 +2061,34 @@ public:
 		destroy();
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
 	scene::Node& node(){
 		return m_node;
 	}
 
-	scene::Node& clone() const {
+	scene::Node& clone() const override {
 		return ( new LightNode( *this ) )->node();
 	}
 
-	void insert( scene::Node& child ){
+	void insert( scene::Node& child ) override {
 		m_instances.insert( child );
 	}
-	void erase( scene::Node& child ){
+	void erase( scene::Node& child ) override {
 		m_instances.erase( child );
 	}
 
-	scene::Instance* create( const scene::Path& path, scene::Instance* parent ){
+	scene::Instance* create( const scene::Path& path, scene::Instance* parent ) override {
 		return new LightInstance( path, parent, m_contained );
 	}
-	void forEachInstance( const scene::Instantiable::Visitor& visitor ){
+	void forEachInstance( const scene::Instantiable::Visitor& visitor ) override {
 		m_instances.forEachInstance( visitor );
 	}
-	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ){
+	void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ) override {
 		m_instances.insert( observer, path, instance );
 	}
-	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ){
+	scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ) override {
 		return m_instances.erase( observer, path );
 	}
 };

@@ -207,7 +207,7 @@ class RadiantUndoSystem : public UndoSystem
 		UndoStackFiller()
 			: m_stack( 0 ){
 		}
-		void save( Undoable* undoable ){
+		void save( Undoable* undoable ) override {
 			ASSERT_NOTNULL( undoable );
 
 			if ( m_stack != 0 ) {
@@ -241,12 +241,12 @@ public:
 	~RadiantUndoSystem(){
 		clear();
 	}
-	UndoObserver* observer( Undoable* undoable ){
+	UndoObserver* observer( Undoable* undoable ) override {
 		ASSERT_NOTNULL( undoable );
 
 		return &m_undoables[undoable];
 	}
-	void release( Undoable* undoable ){
+	void release( Undoable* undoable ) override {
 		ASSERT_NOTNULL( undoable );
 
 		m_undoables.erase( undoable );
@@ -265,7 +265,7 @@ public:
 	std::size_t getLevels() const {
 		return m_undo_levels;
 	}
-	std::size_t size() const {
+	std::size_t size() const override {
 		return m_undo_stack.size();
 	}
 	void startUndo(){
@@ -286,7 +286,7 @@ public:
 		mark_undoables( 0 );
 		return changed;
 	}
-	void start(){
+	void start() override {
 		m_redo_stack.clear();
 		if ( m_undo_stack.size() == m_undo_levels ) {
 			m_undo_stack.pop_front();
@@ -294,12 +294,12 @@ public:
 		startUndo();
 		trackersBegin();
 	}
-	void finish( const char* command ){
+	void finish( const char* command ) override {
 		if ( finishUndo( command ) ) {
 			globalOutputStream() << command << '\n';
 		}
 	}
-	void undo(){
+	void undo() override {
 		if ( m_undo_stack.empty() ) {
 			globalOutputStream() << "Undo: no undo available\n";
 		}
@@ -315,7 +315,7 @@ public:
 			m_undo_stack.pop_back();
 		}
 	}
-	void redo(){
+	void redo() override {
 		if ( m_redo_stack.empty() ) {
 			globalOutputStream() << "Redo: no redo available\n";
 		}
@@ -331,17 +331,17 @@ public:
 			m_redo_stack.pop_back();
 		}
 	}
-	void clear(){
+	void clear() override {
 		mark_undoables( 0 );
 		m_undo_stack.clear();
 		m_redo_stack.clear();
 		trackersClear();
 	}
-	void trackerAttach( UndoTracker& tracker ){
+	void trackerAttach( UndoTracker& tracker ) override {
 		const bool inserted = m_trackers.insert( &tracker ).second;
 		ASSERT_MESSAGE( inserted, "undo tracker already attached" );
 	}
-	void trackerDetach( UndoTracker& tracker ){
+	void trackerDetach( UndoTracker& tracker ) override {
 		const bool erased = m_trackers.erase( &tracker );
 		ASSERT_MESSAGE( erased, "undo tracker cannot be detached" );
 	}

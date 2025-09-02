@@ -24,13 +24,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <list>
-#include <map>
 #include <vector>
 
 #include "ieclass.h"
 #include "irender.h"
 
-#include "math/vector.h"
+#include "generic/vector.h"
 #include "string/string.h"
 
 typedef Vector3 Colour3;

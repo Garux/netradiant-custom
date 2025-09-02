@@ -74,7 +74,7 @@ class BinaryToTextInputStream : public TextInputStream
 public:
 	BinaryToTextInputStream( BinaryInputStreamType& inputStream ) : m_inputStream( inputStream ){
 	}
-	std::size_t read( char* buffer, std::size_t length ){
+	std::size_t read( char* buffer, std::size_t length ) override{
 		char* p = buffer;
 		for (;; )
 		{
@@ -180,16 +180,16 @@ public:
 		return m_istream.failed();
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
-	size_type size() const {
+	size_type size() const override {
 		return m_size;
 	}
-	const char* getName() const {
+	const char* getName() const override {
 		return m_name.c_str();
 	}
-	InputStream& getInputStream(){
+	InputStream& getInputStream() override {
 		return m_istream;
 	}
 };
@@ -208,13 +208,13 @@ public:
 		return m_inputStream.failed();
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
 	const char* getName() const {
 		return m_name.c_str();
 	}
-	TextInputStream& getInputStream(){
+	TextInputStream& getInputStream() override {
 		return m_inputStream;
 	}
 };

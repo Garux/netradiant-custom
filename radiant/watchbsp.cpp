@@ -35,7 +35,6 @@
 
 #include "watchbsp.h"
 
-#include <algorithm>
 #include <QTimer>
 
 #include "commandlib.h"
@@ -51,7 +50,6 @@
 #include "mainframe.h"
 #include "sockets.h"
 #include "timer.h"
-#include "xmlstuff.h"
 
 class CWatchBSP
 {
@@ -427,7 +425,7 @@ class MessageOutputStream : public TextOutputStream
 public:
 	MessageOutputStream( message_info_t* data ) : m_data( data ){
 	}
-	std::size_t write( const char* buffer, std::size_t length ){
+	std::size_t write( const char* buffer, std::size_t length ) override {
 		if ( m_data->pGeometry != 0 ) {
 			m_data->pGeometry->saxCharacters( m_data, reinterpret_cast<const xmlChar*>( buffer ), int( length ) );
 		}

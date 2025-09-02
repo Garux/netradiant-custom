@@ -37,13 +37,6 @@
 #include <QVBoxLayout>
 
 #include "gtkutil/guisettings.h"
-#include "gtkutil/widget.h"
-#include "gtkutil/accelerator.h"
-#include "entityinspector.h"
-#include "gtkmisc.h"
-#include "console.h"
-#include "commands.h"
-
 
 class GroupDlg
 {

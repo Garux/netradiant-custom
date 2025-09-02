@@ -27,11 +27,11 @@
 
 #pragma once
 
-#include "math/vector.h"
+#include "generic/vector.h"
 #include "stream/stringstream.h"
 #include "xmlstuff.h"
 #include "dialog.h"
-#include "xywindow.h"
+#include "qerplugin.h"
 
 // we use these classes to let plugins draw inside the Radiant windows
 // 2D window like YZ XZ XY
@@ -67,15 +67,15 @@ public:
 		ESelectState = SELECT_MESSAGE;
 	}
 // SAX interface
-	void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs );
-	void saxEndElement( message_info_t *ctx, const xmlChar *name );
-	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
+	void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs ) override;
+	void saxEndElement( message_info_t *ctx, const xmlChar *name ) override;
+	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len ) override;
 // for use in the dialog window
-	const char* getName() {
+	const char* getName() override {
 		return message;
 	}
-	IGL2DWindow* Highlight();
-	void DropHighlight() { }
+	IGL2DWindow* Highlight() override;
+	void DropHighlight() override { }
 };
 
 class CPointMsg final : public ISAXHandler, public IGL2DWindow
@@ -91,32 +91,32 @@ public:
 		refCount = 0;
 	}
 // SAX interface
-	void Release(){
+	void Release() override {
 		delete this;
 	}
-	void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs );
-	void saxEndElement( message_info_t *ctx, const xmlChar *name );
-	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
+	void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs ) override;
+	void saxEndElement( message_info_t *ctx, const xmlChar *name ) override;
+	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len ) override;
 // for use in the dialog window
-	const char* getName() {
+	const char* getName() override {
 		return message;
 	}
-	IGL2DWindow* Highlight();
-	void DropHighlight();
+	IGL2DWindow* Highlight() override;
+	void DropHighlight() override;
 
 // IGL2DWindow interface --------------------------------
 // Increment the number of references to this object
-	void IncRef() {
+	void IncRef() override {
 		refCount++;
 	}
 // Decrement the reference count
-	void DecRef() {
+	void DecRef() override {
 		refCount--;
 		if ( refCount <= 0 ) {
 			delete this;
 		}
 	}
-	void Draw2D( VIEWTYPE vt );
+	void Draw2D( VIEWTYPE vt ) override;
 };
 
 class CWindingMsg final : public ISAXHandler, public IGL2DWindow
@@ -134,32 +134,32 @@ public:
 		numpoints = 0;
 	}
 // SAX interface
-	void Release(){
+	void Release() override {
 		delete this;
 	}
-	void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs );
-	void saxEndElement( message_info_t *ctx, const xmlChar *name );
-	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len );
+	void saxStartElement( message_info_t *ctx, const xmlChar *name, const xmlChar **attrs ) override;
+	void saxEndElement( message_info_t *ctx, const xmlChar *name ) override;
+	void saxCharacters( message_info_t *ctx, const xmlChar *ch, int len ) override;
 // for use in the dialog window
-	const char* getName() {
+	const char* getName() override {
 		return message;
 	}
-	IGL2DWindow* Highlight();
-	void DropHighlight();
+	IGL2DWindow* Highlight() override;
+	void DropHighlight() override;
 
 // IGL2DWindow interface --------------------------------
 // Increment the number of references to this object
-	void IncRef() {
+	void IncRef() override {
 		refCount++;
 	}
 // Decrement the reference count
-	void DecRef() {
+	void DecRef() override {
 		refCount--;
 		if ( refCount <= 0 ) {
 			delete this;
 		}
 	}
-	void Draw2D( VIEWTYPE vt );
+	void Draw2D( VIEWTYPE vt ) override;
 };
 
 class CDbgDlg : public Dialog

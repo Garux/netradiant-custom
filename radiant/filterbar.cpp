@@ -1,7 +1,5 @@
 #include "filterbar.h"
 #include "gtkmisc.h"
-#include "gtkutil/widget.h"
-#include "gtkutil/toolbar.h"
 #include "stream/stringstream.h"
 #include "select.h"
 #include "iundo.h"
@@ -10,6 +8,7 @@
 #include "commands.h"
 #include "gtkutil/accelerator.h"
 #include "generic/callback.h"
+#include "math/vector.h"
 
 #include <QEvent>
 #include <QMouseEvent>

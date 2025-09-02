@@ -37,7 +37,6 @@
 
 #include "stream/stringstream.h"
 #include "gtkutil/dialog.h"
-#include "gtkutil/entry.h"
 #include "gtkutil/image.h"
 #include "gtkutil/spinbox.h"
 
@@ -209,13 +208,13 @@ public:
 	CallbackDialogData( const ImportCallback& importWidget, const ExportCallback& exportWidget, const ImportCallback& importViewer, const ExportCallback& exportViewer )
 		: m_importWidget( importWidget ), m_exportWidget( exportWidget ), m_importViewer( importViewer ), m_exportViewer( exportViewer ){
 	}
-	void release(){
+	void release() override{
 		delete this;
 	}
-	void importData() const {
+	void importData() const override {
 		m_exportViewer( m_importWidget );
 	}
-	void exportData() const {
+	void exportData() const override {
 		m_exportWidget( m_importViewer );
 	}
 };

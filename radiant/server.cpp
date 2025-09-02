@@ -41,27 +41,27 @@ public:
 	RadiantModuleServer() : m_error( false ){
 	}
 
-	void setError( bool error ){
+	void setError( bool error ) override {
 		m_error = error;
 	}
-	bool getError() const {
+	bool getError() const override {
 		return m_error;
 	}
 
-	TextOutputStream& getOutputStream(){
+	TextOutputStream& getOutputStream() override {
 		return globalOutputStream();
 	}
-	TextOutputStream& getWarningStream(){
+	TextOutputStream& getWarningStream() override {
 		return globalWarningStream();
 	}
-	TextOutputStream& getErrorStream(){
+	TextOutputStream& getErrorStream() override {
 		return globalErrorStream();
 	}
-	DebugMessageHandler& getDebugMessageHandler(){
+	DebugMessageHandler& getDebugMessageHandler() override {
 		return globalDebugMessageHandler();
 	}
 
-	void registerModule( const char* type, int version, const char* name, Module& module ){
+	void registerModule( const char* type, int version, const char* name, Module& module ) override {
 		ASSERT_NOTNULL( (volatile intptr_t)&module );
 		if ( !m_modules.insert( Modules_::value_type( ModuleKey( ModuleType( type, version ), name ), &module ) ).second ) {
 			globalErrorStream() << "module already registered: type=" << makeQuoted( type ) << " name=" << makeQuoted( name ) << '\n';
@@ -72,7 +72,7 @@ public:
 		}
 	}
 
-	Module* findModule( const char* type, int version, const char* name ) const {
+	Module* findModule( const char* type, int version, const char* name ) const override {
 		Modules_::const_iterator i = m_modules.find( ModuleKey( ModuleType( type, version ), name ) );
 		if ( i != m_modules.end() ) {
 			return ( *i ).second;
@@ -80,7 +80,7 @@ public:
 		return 0;
 	}
 
-	void foreachModule( const char* type, int version, const Visitor& visitor ){
+	void foreachModule( const char* type, int version, const Visitor& visitor ) override {
 		for ( Modules_::const_iterator i = m_modules.begin(); i != m_modules.end(); ++i )
 		{
 			if ( string_equal( ( *i ).first.first.first.c_str(), type ) ) {

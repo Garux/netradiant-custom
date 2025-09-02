@@ -1716,51 +1716,51 @@ void Shaders_Refresh(){
 class Quake3ShaderSystem : public ShaderSystem, public ModuleObserver
 {
 public:
-	void realise(){
+	void realise() override {
 		Shaders_Realise();
 	}
-	void unrealise(){
+	void unrealise() override {
 		Shaders_Unrealise();
 	}
-	void refresh(){
+	void refresh() override {
 		Shaders_Refresh();
 	}
 
-	IShader* getShaderForName( const char* name ){
+	IShader* getShaderForName( const char* name ) override {
 		return Shader_ForName( name );
 	}
 
-	void foreachShaderName( const ShaderNameCallback& callback ){
+	void foreachShaderName( const ShaderNameCallback& callback ) override {
 		for ( ShaderDefinitionMap::const_iterator i = g_shaderDefinitions.begin(); i != g_shaderDefinitions.end(); ++i )
 		{
 			callback( ( *i ).first.c_str() );
 		}
 	}
 
-	void beginActiveShadersIterator(){
+	void beginActiveShadersIterator() override {
 		ActiveShaders_IteratorBegin();
 	}
-	bool endActiveShadersIterator(){
+	bool endActiveShadersIterator() override {
 		return ActiveShaders_IteratorAtEnd();
 	}
-	IShader* dereferenceActiveShadersIterator(){
+	IShader* dereferenceActiveShadersIterator() override {
 		return ActiveShaders_IteratorCurrent();
 	}
-	void incrementActiveShadersIterator(){
+	void incrementActiveShadersIterator() override {
 		ActiveShaders_IteratorIncrement();
 	}
-	void setActiveShadersChangedNotify( const Callback<void()>& notify ){
+	void setActiveShadersChangedNotify( const Callback<void()>& notify ) override {
 		g_ActiveShadersChangedNotify = notify;
 	}
 
-	void attach( ModuleObserver& observer ){
+	void attach( ModuleObserver& observer ) override {
 		g_observers.attach( observer );
 	}
-	void detach( ModuleObserver& observer ){
+	void detach( ModuleObserver& observer ) override {
 		g_observers.detach( observer );
 	}
 
-	void setLightingEnabled( bool enabled ){
+	void setLightingEnabled( bool enabled ) override {
 		if ( CShader::m_lightingEnabled != enabled ) {
 			for ( shaders_t::const_iterator i = g_ActiveShaders.begin(); i != g_ActiveShaders.end(); ++i )
 			{
@@ -1774,7 +1774,7 @@ public:
 		}
 	}
 
-	const char* getTexturePrefix() const {
+	const char* getTexturePrefix() const override {
 		return g_texturePrefix;
 	}
 };

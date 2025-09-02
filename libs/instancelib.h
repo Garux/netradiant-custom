@@ -39,7 +39,7 @@ public:
 	InstanceSubgraphWalker( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* parent )
 		: m_observer( observer ), m_path( path ), m_parent( parent ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		m_path.push( makeReference( node ) );
 		scene::Instance* instance = Node_getInstantiable( node )->create( m_path, m_parent.top() );
 		m_observer->insert( instance );
@@ -47,7 +47,7 @@ public:
 		m_parent.push( instance );
 		return true;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		m_path.pop();
 		m_parent.pop();
 	}
@@ -61,11 +61,11 @@ public:
 	UninstanceSubgraphWalker( scene::Instantiable::Observer* observer, const scene::Path& parent )
 		: m_observer( observer ), m_path( parent ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		m_path.push( makeReference( node ) );
 		return true;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		scene::Instance* instance = Node_getInstantiable( node )->erase( m_observer, m_path );
 		m_observer->erase( instance );
 		delete instance;
@@ -93,14 +93,14 @@ public:
 	}
 
 // traverse observer
-	void insert( scene::Node& child ){
+	void insert( scene::Node& child ) override {
 		for ( iterator i = begin(); i != end(); ++i )
 		{
 			Node_traverseSubgraph( child, InstanceSubgraphWalker( ( *i ).first.first, ( *i ).first.second, ( *i ).second ) );
 			( *i ).second->boundsChanged();
 		}
 	}
-	void erase( scene::Node& child ){
+	void erase( scene::Node& child ) override {
 		for ( iterator i = begin(); i != end(); ++i )
 		{
 			Node_traverseSubgraph( child, UninstanceSubgraphWalker( ( *i ).first.first, ( *i ).first.second ) );

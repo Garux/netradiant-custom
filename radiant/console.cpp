@@ -25,17 +25,15 @@
 
 #include "gtkutil/accelerator.h"
 #include "gtkutil/messagebox.h"
-#include "gtkutil/menu.h"
-#include "gtkutil/nonmodal.h"
 #include "stream/stringstream.h"
 
 #include "version.h"
 #include "aboutmsg.h"
-#include "gtkmisc.h"
 #include "mainframe.h"
 
 #include <QPlainTextEdit>
 #include <QContextMenuEvent>
+#include <QMenu>
 
 #ifndef WIN32
 #include <unistd.h> // write()
@@ -129,7 +127,7 @@ public:
 #ifdef __GNUC__
 //__attribute__((optimize("O0")))
 #endif
-	write( const char* buffer, std::size_t length ){
+	write( const char* buffer, std::size_t length ) override {
 		textBuffer->insertPlainText( QString::fromLatin1( buffer, length ) );
 		return length;
 	}
@@ -214,7 +212,7 @@ template<int level>
 class SysPrintStream : public TextOutputStream
 {
 public:
-	std::size_t write( const char* buffer, std::size_t length ){
+	std::size_t write( const char* buffer, std::size_t length ) override {
 		return Sys_Print( level, buffer, length );
 	}
 };

@@ -56,7 +56,7 @@ private: // private types
                      const MeshEntity::TexInfoCallback *rowTexInfoCallback,
                      const MeshEntity::TexInfoCallback *colTexInfoCallback);
    private:
-      bool Execute(MeshEntity& meshEntity) const;
+      bool Execute(MeshEntity& meshEntity) const override;
    private:
       const int *_refRow;
       const int *_refCol;
@@ -69,7 +69,7 @@ public: // public methods
    GetInfoDialog(const std::string& key,
                  SmartPointer<SetScaleDialog>& setScaleDialog);
    ~GetInfoDialog();
-   bool Apply();
+   bool Apply() override;
 
 private: // private member vars
 

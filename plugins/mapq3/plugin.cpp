@@ -83,7 +83,7 @@ public:
 		return this;
 	}
 
-	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
+	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const override {
 		const char* primitive = tokeniser.getToken();
 		if ( primitive != 0 ) {
 			if ( string_equal( primitive, "patchDef3" ) ) {
@@ -100,7 +100,7 @@ public:
 		Tokeniser_unexpectedError( tokeniser, primitive, "#doom3-primitive" );
 		return g_nullNode;
 	}
-	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const override {
 		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewMapTokeniser( inputStream );
 		tokeniser.nextLine();
 		if ( !Tokeniser_parseToken( tokeniser, "Version" ) ) {
@@ -118,7 +118,7 @@ public:
 		Map_Read( root, tokeniser, entityTable, *this );
 		tokeniser.release();
 	}
-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const override {
 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
 		writer.writeToken( "Version" );
 		writer.writeInteger( MapVersion );
@@ -154,7 +154,7 @@ public:
 		return this;
 	}
 
-	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
+	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const override {
 		const char* primitive = tokeniser.getToken();
 		if ( primitive != 0 ) {
 			if ( string_equal( primitive, "patchDef3" ) ) {
@@ -171,7 +171,7 @@ public:
 		Tokeniser_unexpectedError( tokeniser, primitive, "#quake4-primitive" );
 		return g_nullNode;
 	}
-	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const override {
 		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewMapTokeniser( inputStream );
 		tokeniser.nextLine();
 		if ( !Tokeniser_parseToken( tokeniser, "Version" ) ) {
@@ -189,7 +189,7 @@ public:
 		Map_Read( root, tokeniser, entityTable, *this );
 		tokeniser.release();
 	}
-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const override {
 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
 		writer.writeToken( "Version" );
 		writer.writeInteger( MapVersion );
@@ -242,7 +242,7 @@ public:
 		return this;
 	}
 
-	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
+	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const override {
 		const char* primitive = tokeniser.getToken();
 		if ( primitive != 0 ) {
 			if ( string_equal( primitive, "patchDef2" ) ) {
@@ -290,13 +290,13 @@ public:
 		return g_nullNode;
 	}
 
-	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const override {
 		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewMapTokeniser( inputStream );
 		m_formatDetected = false;
 		Map_Read( root, tokeniser, entityTable, *this );
 		tokeniser.release();
 	}
-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const override {
 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
 		Map_Write( root, traverse, writer, false );
 		writer.release();
@@ -323,7 +323,7 @@ public:
 		return this;
 	}
 
-	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
+	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const override {
 		const char* primitive = tokeniser.getToken();
 		if ( primitive != 0 ) {
 			if( !m_formatDetected ){
@@ -367,13 +367,13 @@ public:
 		Tokeniser_unexpectedError( tokeniser, primitive, "#quake-primitive" );
 		return g_nullNode;
 	}
-	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const override {
 		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewMapTokeniser( inputStream );
 		m_formatDetected = false;
 		Map_Read( root, tokeniser, entityTable, *this );
 		tokeniser.release();
 	}
-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const override {
 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
 		Map_Write( root, traverse, writer, true );
 		writer.release();
@@ -399,7 +399,7 @@ public:
 		return this;
 	}
 
-	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
+	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const override {
 		const char* primitive = tokeniser.getToken();
 		if ( primitive != 0 ) {
 			if ( string_equal( primitive, "(" ) ) {
@@ -411,12 +411,12 @@ public:
 		Tokeniser_unexpectedError( tokeniser, primitive, "#halflife-primitive" );
 		return g_nullNode;
 	}
-	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const override {
 		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewMapTokeniser( inputStream );
 		Map_Read( root, tokeniser, entityTable, *this );
 		tokeniser.release();
 	}
-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const override {
 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
 		Map_Write( root, traverse, writer, true );
 		writer.release();
@@ -442,7 +442,7 @@ public:
 	MapFormat* getTable(){
 		return this;
 	}
-	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
+	scene::Node& parsePrimitive( Tokeniser& tokeniser ) const override {
 		const char* primitive = tokeniser.getToken();
 		if ( primitive != 0 ) {
 			if( !m_formatDetected ){
@@ -486,13 +486,13 @@ public:
 		Tokeniser_unexpectedError( tokeniser, primitive, "#quake2-primitive" );
 		return g_nullNode;
 	}
-	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const override {
 		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewMapTokeniser( inputStream );
 		m_formatDetected = false;
 		Map_Read( root, tokeniser, entityTable, *this );
 		tokeniser.release();
 	}
-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const override {
 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
 		Map_Write( root, traverse, writer, true );
 		writer.release();
@@ -635,12 +635,12 @@ public:
 		return this;
 	}
 
-	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const override {
 		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
 		VMF_Read( root, tokeniser, entityTable );
 		tokeniser.release();
 	}
-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
+	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const override {
 	}
 };
 

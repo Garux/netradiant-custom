@@ -77,7 +77,7 @@ public:
 		: m_entity( entity ){
 	}
 
-	void visit( const char* key, const char* value ){
+	void visit( const char* key, const char* value ) override {
 		if ( !string_equal( key, "classname" ) ) {
 			m_entity.setKeyValue( key, value );
 		}

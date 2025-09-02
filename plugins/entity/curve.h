@@ -25,8 +25,6 @@
 #include "selectable.h"
 #include "renderable.h"
 
-#include <set>
-
 #include "math/curve.h"
 #include "stream/stringstream.h"
 #include "signal/signal.h"
@@ -38,7 +36,7 @@ class RenderableCurve : public OpenGLRenderable
 {
 public:
 	std::vector<PointVertex> m_vertices;
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		pointvertex_gl_array( &m_vertices.front() );
 		gl().glDrawArrays( GL_LINE_STRIP, 0, GLsizei( m_vertices.size() ) );
 	}

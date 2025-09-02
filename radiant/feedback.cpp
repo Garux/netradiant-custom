@@ -37,7 +37,6 @@
 #include <QVBoxLayout>
 
 #include "map.h"
-#include "dialog.h"
 #include "mainframe.h"
 
 

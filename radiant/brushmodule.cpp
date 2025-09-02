@@ -222,19 +222,19 @@ typedef Callback<void(Face&)> FaceCallback;
 class Quake3BrushCreator : public BrushCreator
 {
 public:
-	scene::Node& createBrush(){
+	scene::Node& createBrush() override {
 		return ( new BrushNode )->node();
 	}
-	EBrushType getFormat() const {
+	EBrushType getFormat() const override {
 		return Brush::m_type;
 	}
-	void toggleFormat( EBrushType type ) const {
+	void toggleFormat( EBrushType type ) const override {
 		Brush_toggleFormat( type );
 	}
-	void Brush_forEachFace( scene::Node& brush, const BrushFaceDataCallback& callback ){
+	void Brush_forEachFace( scene::Node& brush, const BrushFaceDataCallback& callback ) override {
 		::Brush_forEachFace( *Node_getBrush( brush ), FaceCallback( BrushFaceDataFromFaceCaller( callback ) ) );
 	}
-	bool Brush_addFace( scene::Node& brush, const _QERFaceData& faceData ){
+	bool Brush_addFace( scene::Node& brush, const _QERFaceData& faceData ) override {
 		Node_getBrush( brush )->undoSave();
 		return Node_getBrush( brush )->addPlane( faceData.m_p0, faceData.m_p1, faceData.m_p2, faceData.m_shader, TextureProjection( faceData.m_texdef, brushprimit_texdef_t(), Vector3( 0, 0, 0 ), Vector3( 0, 0, 0 ) ) ) != 0;
 	}

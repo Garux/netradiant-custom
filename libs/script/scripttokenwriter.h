@@ -32,30 +32,30 @@ public:
 	~SimpleTokenWriter(){
 		writeSeparator();
 	}
-	void release(){
+	void release() override {
 		delete this;
 	}
-	void nextLine(){
+	void nextLine() override {
 		m_separator = '\n';
 	}
-	void writeToken( const char* token ){
+	void writeToken( const char* token ) override {
 		ASSERT_MESSAGE( strchr( token, ' ' ) == 0, "token contains whitespace: " );
 		writeSeparator();
 		m_ostream << token;
 	}
-	void writeString( const char* string ){
+	void writeString( const char* string ) override {
 		writeSeparator();
 		m_ostream << '"' << string << '"';
 	}
-	void writeInteger( int i ){
+	void writeInteger( int i ) override {
 		writeSeparator();
 		m_ostream << i;
 	}
-	void writeUnsigned( std::size_t i ){
+	void writeUnsigned( std::size_t i ) override {
 		writeSeparator();
 		m_ostream << i;
 	}
-	void writeFloat( double f ){
+	void writeFloat( double f ) override {
 		writeSeparator();
 		m_ostream << Decimal( f );
 	}

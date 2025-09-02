@@ -245,7 +245,7 @@ class NullNode : public Node::Symbiot
 public:
 	NullNode() : m_node( this, 0, m_casts, nullptr ){
 	}
-	void release(){
+	void release() override {
 		delete this;
 	}
 	scene::Node& node(){
@@ -308,10 +308,10 @@ class delete_all : public scene::Traversable::Walker
 public:
 	delete_all( scene::Node& parent ) : m_parent( parent ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		return false;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		Node_getTraversable( m_parent )->erase( node );
 	}
 };
@@ -338,7 +338,7 @@ class EntityWalker : public scene::Graph::Walker
 public:
 	EntityWalker( const Functor& functor ) : functor( functor ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( Node_isEntity( path.top() ) ) {
 			functor( instance );
 			return false;
@@ -388,10 +388,10 @@ public:
 	ParentBrushes( scene::Node& parent )
 		: m_parent( parent ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		return false;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		if ( Node_isPrimitive( node ) ) {
 			Node_getTraversable( m_parent )->insert( node );
 		}
@@ -410,7 +410,7 @@ public:
 		: m_hasBrushes( hasBrushes ){
 		m_hasBrushes = true;
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		if ( !Node_isPrimitive( node ) ) {
 			m_hasBrushes = false;
 		}
@@ -505,13 +505,13 @@ class Instance
 	public:
 		AABBAccumulateWalker( AABB& aabb ) : m_aabb( aabb ), m_depth( 0 ){
 		}
-		bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 			if ( m_depth == 1 ) {
 				aabb_extend_by_aabb_safe( m_aabb, instance.worldAABB() );
 			}
 			return ++m_depth != 2;
 		}
-		void post( const scene::Path& path, scene::Instance& instance ) const {
+		void post( const scene::Path& path, scene::Instance& instance ) const override {
 			--m_depth;
 		}
 	};
@@ -520,7 +520,7 @@ class Instance
 	class TransformChangedWalker : public scene::Graph::Walker
 	{
 	public:
-		bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 			instance.transformChangedLocal();
 			return true;
 		}
@@ -529,7 +529,7 @@ class Instance
 	class ParentSelectedChangedWalker : public scene::Graph::Walker
 	{
 	public:
-		bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 			instance.parentSelectedChanged();
 			return true;
 		}
@@ -543,13 +543,13 @@ class Instance
 		ChildSelectedWalker( bool& childSelected ) : m_childSelected( childSelected ), m_depth( 0 ){
 			m_childSelected = false;
 		}
-		bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 			if ( m_depth == 1 && !m_childSelected ) {
 				m_childSelected = instance.isSelected() || instance.childSelected();
 			}
 			return ++m_depth != 2;
 		}
-		void post( const scene::Path& path, scene::Instance& instance ) const {
+		void post( const scene::Path& path, scene::Instance& instance ) const override {
 			--m_depth;
 		}
 	};
@@ -765,7 +765,7 @@ class InstanceWalker : public scene::Graph::Walker
 public:
 	InstanceWalker( const Functor& functor ) : m_functor( functor ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		//m_functor( instance );
 		//return true;
 		if ( path.top().get().visible() ) {
@@ -786,13 +786,13 @@ class ChildInstanceWalker : public scene::Graph::Walker
 public:
 	ChildInstanceWalker( const Functor& functor ) : m_functor( functor ), m_depth( 0 ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( m_depth == 1 ) {
 			m_functor( instance );
 		}
 		return ++m_depth != 2;
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		--m_depth;
 	}
 };
@@ -897,12 +897,12 @@ public:
 	SelectChildren( const scene::Path& root )
 		: m_path( root ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		m_path.push( makeReference( node ) );
 		selectPath( m_path, true );
 		return false;
 	}
-	void post( scene::Node& node ) const {
+	void post( scene::Node& node ) const override {
 		m_path.pop();
 	}
 };
@@ -992,11 +992,11 @@ public:
 	void setCountChangedCallback( const Callback<void()>& countChanged ){
 		m_countChanged = countChanged;
 	}
-	void increment(){
+	void increment() override {
 		++m_count;
 		m_countChanged();
 	}
-	void decrement(){
+	void decrement() override {
 		--m_count;
 		m_countChanged();
 	}

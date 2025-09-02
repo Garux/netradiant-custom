@@ -44,14 +44,14 @@ public:
 		m_resource.detach( *this );
 	}
 
-	void realise(){
+	void realise() override {
 		m_resource.get()->load();
 		m_node = m_resource.get()->getNode();
 		if ( m_node != 0 ) {
 			m_traverse.insert( *m_node );
 		}
 	}
-	void unrealise(){
+	void unrealise() override {
 		if ( m_node != 0 ) {
 			m_traverse.erase( *m_node );
 		}

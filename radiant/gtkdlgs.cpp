@@ -42,7 +42,6 @@
 
 #include "igl.h"
 #include "iscenegraph.h"
-#include "iselection.h"
 
 #include <QDialog>
 #include <QVBoxLayout>
@@ -59,8 +58,6 @@
 #include <QComboBox>
 
 #include "os/path.h"
-#include "math/aabb.h"
-#include "container/array.h"
 #include "generic/static.h"
 #include "stream/stringstream.h"
 #include "gtkutil/messagebox.h"
@@ -68,7 +65,6 @@
 
 #include "gtkmisc.h"
 #include "brushmanip.h"
-#include "build.h"
 #include "qe3.h"
 #include "texwindow.h"
 #include "xywindow.h"
@@ -2045,7 +2041,7 @@ private:
 			LoadTexturesByTypeVisitor( const char* dirstring, TexTree& texTree ) :
 				m_dirstring( dirstring ), m_texTree( texTree ), m_stringStream( 64 )
 			{}
-			void visit( const char* minor, const _QERPlugImageTable& table ) const {
+			void visit( const char* minor, const _QERPlugImageTable& table ) const override {
 				GlobalFileSystem().forEachFile( m_dirstring, minor, InsertCaller( *this ), 99 );
 			}
 		};

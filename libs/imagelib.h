@@ -47,16 +47,16 @@ public:
 		delete[] pixels;
 	}
 
-	void release(){
+	void release() override {
 		delete this;
 	}
-	byte* getRGBAPixels() const {
+	byte* getRGBAPixels() const override {
 		return reinterpret_cast<byte*>( pixels );
 	}
-	unsigned int getWidth() const {
+	unsigned int getWidth() const override {
 		return width;
 	}
-	unsigned int getHeight() const {
+	unsigned int getHeight() const override {
 		return height;
 	}
 };
@@ -71,13 +71,13 @@ public:
 		RGBAImage( _width, _height ), m_surfaceFlags( surfaceFlags ), m_contentFlags( contentFlags ), m_value( value ){
 	}
 
-	int getSurfaceFlags() const {
+	int getSurfaceFlags() const override {
 		return m_surfaceFlags;
 	}
-	int getContentFlags() const {
+	int getContentFlags() const override {
 		return m_contentFlags;
 	}
-	int getValue() const {
+	int getValue() const override {
 		return m_value;
 	}
 };
@@ -115,7 +115,7 @@ public:
 	PointerInputStream( const byte* pointer )
 		: m_read( pointer ){
 	}
-	std::size_t read( byte* buffer, std::size_t length ){
+	std::size_t read( byte* buffer, std::size_t length ) override {
 		const byte* end = m_read + length;
 		while ( m_read != end )
 		{

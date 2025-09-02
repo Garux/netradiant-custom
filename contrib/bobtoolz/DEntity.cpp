@@ -166,7 +166,7 @@ class BrushSelectedVisitor : public SelectionSystem::Visitor
 public:
 	BrushSelectedVisitor( const Functor& functor ) : m_functor( functor ){
 	}
-	void visit( scene::Instance& instance ) const {
+	void visit( scene::Instance& instance ) const override {
 		if ( Node_isBrush( instance.path().top() ) ) {
 			m_functor( instance );
 		}
@@ -198,7 +198,7 @@ class PatchSelectedVisitor : public SelectionSystem::Visitor
 public:
 	PatchSelectedVisitor( const Functor& functor ) : m_functor( functor ){
 	}
-	void visit( scene::Instance& instance ) const {
+	void visit( scene::Instance& instance ) const override {
 		if ( Node_isPatch( instance.path().top() ) ) {
 			m_functor( instance );
 		}
@@ -310,7 +310,7 @@ bool DEntity::LoadFromEntity( scene::Node& ent, const LoadOptions options ) {
 			load_brushes_t( DEntity* entity, const LoadOptions options )
 				: m_entity( entity ), m_options( options ){
 			}
-			bool pre( scene::Node& node ) const {
+			bool pre( scene::Node& node ) const override {
 				if( !( m_options.loadVisibleOnly && !node.visible() ) ){
 					scene::Path path( NodeReference( GlobalSceneGraph().root() ) );
 					path.push( NodeReference( *m_entity->QER_Entity ) );
@@ -447,7 +447,7 @@ void DEntity::LoadEPairList( Entity *epl ){
 		load_epairs_t( DEntity* entity )
 			: m_entity( entity ){
 		}
-		void visit( const char* key, const char* value ){
+		void visit( const char* key, const char* value ) override {
 			if ( strcmp( key, "classname" ) == 0 ) {
 				m_entity->SetClassname( value );
 			}

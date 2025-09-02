@@ -129,7 +129,7 @@ public:
 		m_ostream.write( '>' );
 	}
 
-	void pushElement( const XMLElement& element ){
+	void pushElement( const XMLElement& element ) override {
 		if ( m_elements.back().m_state == state_t::eStartElement ) {
 			m_elements.back().m_state = state_t::eContent;
 			m_ostream.write( '>' );
@@ -141,7 +141,7 @@ public:
 		write_string( element.name() );
 		element.forEachAttribute( *this );
 	}
-	void popElement( const char* name ){
+	void popElement( const char* name ) override {
 		if ( m_elements.back().m_state == state_t::eStartElement ) {
 			m_ostream.write( '/' );
 			m_ostream.write( '>' );
@@ -156,7 +156,7 @@ public:
 			m_elements.pop_back();
 		}
 	}
-	std::size_t write( const char* data, std::size_t length ){
+	std::size_t write( const char* data, std::size_t length ) override {
 		if ( m_elements.back().m_state == state_t::eStartElement ) {
 			m_elements.back().m_state = state_t::eContent;
 			m_ostream.write( '>' );
@@ -165,7 +165,7 @@ public:
 		return length;
 	}
 
-	void visit( const char* name, const char* value ){
+	void visit( const char* name, const char* value ) override {
 		m_ostream.write( ' ' );
 		write_string( name );
 		m_ostream.write( '=' );

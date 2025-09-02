@@ -38,16 +38,14 @@
 #include "preferencesystem.h"
 
 #include "signal/signal.h"
-#include "container/array.h"
 #include "scenelib.h"
 #include "render.h"
-#include "commandlib.h"
 #include "math/frustum.h"
 
 #include "gtkutil/widget.h"
-#include "gtkutil/toolbar.h"
 #include "gtkutil/glwidget.h"
 #include "gtkutil/xorrectangle.h"
+#include "gtkutil/cursor.h"
 #include "gtkutil/fbo.h"
 #include "gtkmisc.h"
 #include "selection.h"
@@ -704,14 +702,14 @@ public:
 		m_view->Construct( m_camera.projection, m_camera.modelview, m_camera.width, m_camera.height );
 		m_update();
 	}
-	void setModelview( const Matrix4& modelview ){
+	void setModelview( const Matrix4& modelview ) override {
 		m_camera.modelview = modelview;
 		matrix4_multiply_by_matrix4( m_camera.modelview, g_radiant2opengl );
 		matrix4_affine_invert( m_camera.modelview );
 		Camera_updateVectors( m_camera );
 		update();
 	}
-	void setFieldOfView( float fieldOfView ){
+	void setFieldOfView( float fieldOfView ) override {
 		float farClip = Camera_getFarClipPlane( m_camera );
 		m_camera.projection = projection_for_camera( camera_t::near_z, farClip, fieldOfView, m_camera.width, m_camera.height );
 		update();
@@ -822,7 +820,7 @@ class RenderableCamWorkzone : public OpenGLRenderable
 	mutable std::array<Colour4b, 9999> m_colorarr0[3];
 	mutable std::array<Colour4b, 9999> m_colorarr1[3];
 public:
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		gl().glEnableClientState( GL_EDGE_FLAG_ARRAY );
 
 		const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
@@ -1722,7 +1720,7 @@ public:
 	FloorHeightWalker( const Vector3& current ) :
 		m_current( current ), m_bestUp( g_MaxWorldCoord ), m_bestDown( g_MinWorldCoord ), m_bottom( g_MaxWorldCoord ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if( !path.top().get().visible() )
 			return false;
 		if ( !path.top().get().isRoot() && !node_is_group( path.top() ) ) {
@@ -1844,31 +1842,31 @@ public:
 		m_state_stack.push_back( state_type() );
 	}
 
-	void SetState( Shader* state, EStyle style ){
+	void SetState( Shader* state, EStyle style ) override {
 		ASSERT_NOTNULL( state );
 		if ( style == eFullMaterials ) {
 			m_state_stack.back().m_state = state;
 		}
 	}
-	EStyle getStyle() const {
+	EStyle getStyle() const override {
 		return eFullMaterials;
 	}
-	void PushState(){
+	void PushState() override {
 		m_state_stack.push_back( m_state_stack.back() );
 	}
-	void PopState(){
+	void PopState() override {
 		ASSERT_MESSAGE( !m_state_stack.empty(), "popping empty stack" );
 		m_state_stack.pop_back();
 	}
-	void Highlight( EHighlightMode mode, bool bEnable = true ){
+	void Highlight( EHighlightMode mode, bool bEnable = true ) override {
 		( bEnable )
 		? m_state_stack.back().m_highlight |= mode
 		: m_state_stack.back().m_highlight &= ~mode;
 	}
-	void setLights( const LightList& lights ){
+	void setLights( const LightList& lights ) override {
 		m_state_stack.back().m_lights = &lights;
 	}
-	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& world ){
+	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& world ) override {
 		if ( m_state_stack.back().m_highlight & ePrimitive ) {
 			m_state_select0->addRenderable( renderable, world, m_state_stack.back().m_lights );
 		}

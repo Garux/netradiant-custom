@@ -116,7 +116,7 @@ void DMap::LoadAll( const LoadOptions options ){
 		load_entities_t( DMap* map, const LoadOptions options )
 			: m_map( map ), m_options( options ){
 		}
-		bool pre( scene::Node& node ) const {
+		bool pre( scene::Node& node ) const override {
 			if ( Node_isEntity( node ) && !( m_options.loadVisibleOnly && !node.visible() ) ) {
 				m_map->AddEntity( "", 0 )->LoadFromEntity( node, m_options );
 			}

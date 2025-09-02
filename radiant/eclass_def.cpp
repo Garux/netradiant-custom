@@ -22,8 +22,6 @@
 #include "eclass_def.h"
 
 #include "iscriplib.h"
-#include "ifilesystem.h"
-#include "iarchive.h"
 
 #include "eclasslib.h"
 #include "stream/stringstream.h"

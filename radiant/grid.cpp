@@ -27,7 +27,6 @@
 
 #include "preferencesystem.h"
 
-#include "gtkutil/widget.h"
 #include "signal/signal.h"
 #include "stringio.h"
 

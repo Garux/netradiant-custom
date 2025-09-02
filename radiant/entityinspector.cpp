@@ -25,14 +25,12 @@
 
 #include "ientity.h"
 #include "ifilesystem.h"
-#include "imodel.h"
 #include "iscenegraph.h"
 #include "iselection.h"
 #include "iundo.h"
 
 #include <map>
 #include <set>
-#include <variant>
 
 #include <gtkutil/guisettings.h>
 #include <QSplitter>
@@ -66,13 +64,11 @@
 #include "gtkutil/accelerator.h"
 #include "gtkutil/dialog.h"
 #include "gtkutil/filechooser.h"
-#include "gtkutil/messagebox.h"
 #include "gtkutil/nonmodal.h"
 #include "gtkutil/entry.h"
 
 #include "qe3.h"
 #include "gtkmisc.h"
-#include "gtkdlgs.h"
 #include "entity.h"
 #include "mainframe.h"
 #include "textureentry.h"
@@ -768,7 +764,7 @@ public:
 		: m_keyvalues( keyvalues ){
 	}
 
-	void visit( const char* key, const char* value ){
+	void visit( const char* key, const char* value ) override {
 		m_keyvalues.insert( KeyValues::value_type( CopiedString( key ), CopiedString( value ) ) );
 	}
 
@@ -797,7 +793,7 @@ void Entity_GetKeyValues_Selected( KeyValues& keyvalues, KeyValues& defaultValue
 		EntityGetKeyValues( KeyValues& keyvalues, KeyValues& defaultValues )
 			: m_keyvalues( keyvalues ), m_defaultValues( defaultValues ){
 		}
-		void visit( scene::Instance& instance ) const {
+		void visit( scene::Instance& instance ) const override {
 			Entity* entity = Node_getEntity( instance.path().top() );
 			if ( entity == 0 && instance.path().size() != 1 ) {
 				entity = Node_getEntity( instance.path().parent() );
@@ -826,7 +822,7 @@ class EntityClassListStoreAppend : public EntityClassVisitor
 public:
 	EntityClassListStoreAppend( QTreeWidget* tree_ ) : tree( tree_ ){
 	}
-	void visit( EntityClass* e ){
+	void visit( EntityClass* e ) override {
 		auto item = new QTreeWidgetItem( tree );
 		item->setData( 0, Qt::ItemDataRole::DisplayRole, e->name() );
 		item->setData( 0, Qt::ItemDataRole::UserRole, QVariant::fromValue( e ) );
@@ -1396,7 +1392,7 @@ class EntityInspector : public ModuleObserver
 public:
 	EntityInspector() : m_unrealised( 1 ){
 	}
-	void realise(){
+	void realise() override {
 		if ( --m_unrealised == 0 ) {
 			if ( g_entityInspector_windowConstructed ) {
 				//globalOutputStream() << "Entity Inspector: realise\n";
@@ -1404,7 +1400,7 @@ public:
 			}
 		}
 	}
-	void unrealise(){
+	void unrealise() override {
 		if ( ++m_unrealised == 1 ) {
 			if ( g_entityInspector_windowConstructed ) {
 				//globalOutputStream() << "Entity Inspector: unrealise\n";
@@ -1416,7 +1412,6 @@ public:
 
 EntityInspector g_EntityInspector;
 
-#include "preferencesystem.h"
 #include "stringio.h"
 
 void EntityInspector_construct(){

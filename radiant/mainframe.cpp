@@ -31,12 +31,10 @@
 #include "version.h"
 
 #include "ifilesystem.h"
-#include "iundo.h"
-#include "ifilter.h"
-#include "itoolbar.h"
-#include "editable.h"
 #include "ientity.h"
 #include "ishaders.h"
+#include "ieclass.h"
+#include "irender.h"
 #include "igl.h"
 #include "moduleobserver.h"
 
@@ -66,21 +64,17 @@
 #include "os/path.h"
 #include "os/file.h"
 #include <glib.h>
-#include "eclasslib.h"
 #include "moduleobservers.h"
 
 #include "gtkutil/glfont.h"
 #include "gtkutil/glwidget.h"
 #include "gtkutil/image.h"
 #include "gtkutil/menu.h"
-#include "gtkutil/toolbar.h"
-#include "gtkutil/widget.h"
 #include "gtkutil/guisettings.h"
 
 #include "autosave.h"
 #include "build.h"
 #include "brushmanip.h"
-#include "brushmodule.h"
 #include "camwindow.h"
 #include "csg.h"
 #include "commands.h"
@@ -97,13 +91,11 @@
 #include "help.h"
 #include "map.h"
 #include "mru.h"
-#include "patchdialog.h"
 #include "patchmanip.h"
 #include "plugin.h"
 #include "pluginmanager.h"
 #include "pluginmenu.h"
 #include "plugintoolbar.h"
-#include "points.h"
 #include "preferences.h"
 #include "qe3.h"
 #include "qgl.h"
@@ -135,13 +127,13 @@ class VFSModuleObserver : public ModuleObserver
 public:
 	VFSModuleObserver() : m_unrealised( 1 ){
 	}
-	void realise(){
+	void realise() override {
 		if ( --m_unrealised == 0 ) {
 			QE_InitVFS();
 			GlobalFileSystem().initialise();
 		}
 	}
-	void unrealise(){
+	void unrealise() override {
 		if ( ++m_unrealised == 1 ) {
 			GlobalFileSystem().shutdown();
 		}
@@ -256,13 +248,13 @@ class HomePathsModuleObserver : public ModuleObserver
 public:
 	HomePathsModuleObserver() : m_unrealised( 1 ){
 	}
-	void realise(){
+	void realise() override {
 		if ( --m_unrealised == 0 ) {
 			HomePaths_Realise();
 			g_homePathObservers.realise();
 		}
 	}
-	void unrealise(){
+	void unrealise() override {
 		if ( ++m_unrealised == 1 ) {
 			g_homePathObservers.unrealise();
 		}
@@ -573,12 +565,12 @@ class WorldspawnColourEntityClassObserver : public ModuleObserver
 public:
 	WorldspawnColourEntityClassObserver() : m_unrealised( 1 ){
 	}
-	void realise(){
+	void realise() override {
 		if ( --m_unrealised == 0 ) {
 			SetWorldspawnColour( g_xywindow_globals.color_brushes );
 		}
 	}
-	void unrealise(){
+	void unrealise() override {
 		if ( ++m_unrealised == 1 ) {
 		}
 	}

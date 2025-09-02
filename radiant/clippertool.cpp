@@ -29,6 +29,7 @@
 #include "mainframe.h"
 #include "camwindow.h"
 #include "xywindow.h"
+#include <QWidget>
 
 ClipperPoints g_clipper_points;
 bool g_clipper_flipped = false;

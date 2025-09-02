@@ -24,7 +24,6 @@
 #include "math/matrix.h"
 #include "signal/signal.h"
 
-#include "gtkutil/cursor.h"
 #include "gtkutil/xorrectangle.h"
 #include "view.h"
 #include "map.h"

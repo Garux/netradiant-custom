@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "math/vector.h"
+#include "generic/vector.h"
 
 void Select_GetBounds( Vector3& mins, Vector3& maxs );
 

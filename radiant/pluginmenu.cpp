@@ -25,8 +25,6 @@
 
 #include <QMenuBar>
 
-#include "gtkutil/menu.h"
-
 #include "pluginmanager.h"
 #include "mainframe.h"
 #include "preferences.h"
@@ -108,7 +106,7 @@ void PluginsMenu_populate(){
 	public:
 		PluginsMenuConstructor( QMenu* menu ) : m_menu( menu ){
 		}
-		void visit( IPlugIn& plugin ){
+		void visit( IPlugIn& plugin ) override {
 			PlugInMenu_Add( m_menu, &plugin );
 		}
 	};

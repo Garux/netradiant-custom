@@ -189,7 +189,7 @@ public:
 	/// \brief Returns a copy of itself.
 	virtual scene::Node& clone() const = 0;
 };
-}
+} // namespace scene
 
 #include "modulesystem.h"
 

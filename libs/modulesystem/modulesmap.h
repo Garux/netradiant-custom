@@ -24,7 +24,6 @@
 #include "modulesystem.h"
 #include "string/string.h"
 #include <map>
-#include <set>
 
 template<typename Type>
 class ModulesMap : public Modules<Type>
@@ -68,10 +67,10 @@ public:
 		return 0;
 	}
 
-	Type* findModule( const char* name ){
+	Type* findModule( const char* name ) override {
 		return find( name );
 	}
-	void foreachModule( const typename Modules<Type>::Visitor& visitor ){
+	void foreachModule( const typename Modules<Type>::Visitor& visitor ) override {
 		for ( modules_t::iterator i = m_modules.begin(); i != m_modules.end(); ++i )
 		{
 			visitor.visit( ( *i ).first.c_str(), *static_cast<const Type*>( Module_getTable( *( *i ).second ) ) );
@@ -87,7 +86,7 @@ public:
 	InsertModules( ModulesMap<Type>& modules )
 		: m_modules( modules ){
 	}
-	void visit( const char* name, Module& module ) const {
+	void visit( const char* name, Module& module ) const override {
 		m_modules.insert( name, module );
 	}
 };

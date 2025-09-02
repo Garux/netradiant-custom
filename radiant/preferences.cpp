@@ -31,13 +31,11 @@
 #include "debugging/debugging.h"
 
 #include "generic/callback.h"
-#include "math/vector.h"
 #include "string/string.h"
 #include "stream/stringstream.h"
 #include "os/file.h"
 #include "os/path.h"
 #include "os/dir.h"
-#include "gtkutil/filechooser.h"
 #include "gtkutil/messagebox.h"
 #include "commandlib.h"
 
@@ -45,7 +43,6 @@
 #include "console.h"
 #include "xywindow.h"
 #include "mainframe.h"
-#include "qe3.h"
 #include "gtkdlgs.h"
 
 #include <QCoreApplication>
@@ -131,8 +128,6 @@ CGameDescription *g_pGameDescription;
 
 
 #include "stream/textfilestream.h"
-#include "container/array.h"
-#include "xml/ixml.h"
 #include "xml/xmlparser.h"
 #include "xml/xmlwriter.h"
 

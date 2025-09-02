@@ -45,7 +45,7 @@ public: // public methods
    virtual ~MeshVisitor();
    void ResetVisitedCount();
    unsigned GetVisitedCount();
-   void visit(scene::Instance& instance) const;
+   void visit(scene::Instance& instance) const override;
 
 protected: // protected methods
 

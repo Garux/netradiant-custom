@@ -67,7 +67,7 @@ inline TextOutputStream& operator<<( TextOutputStream& ostream, const T& t ){
 class NullOutputStream : public TextOutputStream
 {
 public:
-	std::size_t write( const char*, std::size_t length ){
+	std::size_t write( const char*, std::size_t length ) override {
 		return length;
 	}
 };

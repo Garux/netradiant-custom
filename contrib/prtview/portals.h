@@ -110,20 +110,20 @@ class CPortalsDrawSolid : public OpenGLRenderable
 {
 public:
 	mutable CubicClipVolume clip;
-	void render( RenderStateFlags state ) const;
+	void render( RenderStateFlags state ) const override;
 };
 
 class CPortalsDrawSolidOutline : public OpenGLRenderable
 {
 public:
 	mutable CubicClipVolume clip;
-	void render( RenderStateFlags state ) const;
+	void render( RenderStateFlags state ) const override;
 };
 
 class CPortalsDrawWireframe : public OpenGLRenderable
 {
 public:
-	void render( RenderStateFlags state ) const;
+	void render( RenderStateFlags state ) const override;
 };
 
 class CPortalsRender : public Renderable
@@ -133,8 +133,8 @@ public:
 	CPortalsDrawSolidOutline m_drawSolidOutline;
 	CPortalsDrawWireframe m_drawWireframe;
 
-	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const;
-	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const;
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const override;
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const override;
 };
 
 extern CPortals portals;

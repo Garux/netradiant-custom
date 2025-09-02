@@ -31,7 +31,6 @@
 
 #include "stream/stringstream.h"
 #include "signal/isignal.h"
-#include "signal/isignal.h"
 #include "shaderlib.h"
 #include "scenelib.h"
 
@@ -51,7 +50,6 @@
 #include "tools.h"
 #include "grid.h"
 #include "map.h"
-#include "entityinspector.h"
 #include "csg.h"
 
 
@@ -77,7 +75,7 @@ public:
 		m_count = 0;
 	}
 
-	void visit( scene::Instance& instance ) const {
+	void visit( scene::Instance& instance ) const override {
 		ASSERT_MESSAGE( m_count <= m_max, "Invalid m_count in CollectSelectedBrushesBounds" );
 
 		// stop if the array is already full
@@ -112,7 +110,7 @@ public:
 		m_count( count ){
 	}
 
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if( path.top().get().visible() ){
 			Selectable* selectable = Instance_getSelectable( instance );
 
@@ -223,7 +221,7 @@ public:
 	DeleteSelected()
 		: m_remove( false ), m_removedChild( false ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		m_removedChild = false;
 
 		if ( Instance_isSelected( instance )
@@ -235,7 +233,7 @@ public:
 		}
 		return true;
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 
 		if ( m_removedChild ) {
 			m_removedChild = false;
@@ -278,7 +276,7 @@ public:
 	InvertSelectionWalker( SelectionSystem::EMode mode, SelectionSystem::EComponentMode compmode )
 		: m_mode( mode ), m_compmode( compmode ), m_selectable( 0 ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if( !path.top().get().visible() ){
 			m_selectable = 0;
 			return false;
@@ -313,7 +311,7 @@ public:
 		}
 		return true;
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( m_selectable != 0 ) {
 			m_selectable->setSelected( !m_selectable->isSelected() );
 			m_selectable = 0;
@@ -385,7 +383,7 @@ class ExpandSelectionToPrimitivesWalker : public scene::Graph::Walker
 	mutable std::size_t m_depth = 0;
 	const scene::Node* m_world = Map_FindWorldspawn( g_map );
 public:
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		++m_depth;
 
 		if( !path.top().get().visible() )
@@ -410,7 +408,7 @@ public:
 		}
 		return true;
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		--m_depth;
 	}
 };
@@ -424,7 +422,7 @@ class ExpandSelectionToEntitiesWalker : public scene::Graph::Walker
 	mutable std::size_t m_depth = 0;
 	const scene::Node* m_world = Map_FindWorldspawn( g_map );
 public:
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		++m_depth;
 
 		if( !path.top().get().visible() )
@@ -450,7 +448,7 @@ public:
 		}
 		return true;
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		--m_depth;
 	}
 };
@@ -728,7 +726,7 @@ class EntityFindByPropertyValueWalker : public scene::Graph::Walker
 public:
 	EntityFindByPropertyValueWalker( const EntityMatcher& entityMatcher ) : m_entityMatcher( entityMatcher ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if( !path.top().get().visible() ){
 			return false;
 		}
@@ -774,7 +772,7 @@ public:
 	EntityGetSelectedPropertyValuesWalker( const char *prop, PropertyValues& propertyvalues )
 		: m_propertyvalues( propertyvalues ), m_prop( prop ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( Entity* entity = Node_getEntity( path.top() ) ){
 			if( path.top().get_pointer() != m_world ){
 				if ( Instance_isSelected( instance ) || instance.childSelected() ) {
@@ -881,7 +879,7 @@ void Select_EntitiesByKeyValue( const char* key, const char* value ){
 					bool m_found = false;
 					Visitor( const char* value ) : m_value( value ){
 					}
-					void visit( const char* key, const char* value ){
+					void visit( const char* key, const char* value ) override {
 						if ( string_equal_nocase( m_value, value ) ) {
 							m_found = true;
 						}
@@ -1001,7 +999,7 @@ public:
 	HideAllWalker( bool hide )
 		: m_hide( hide ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		hide_node( path.top(), m_hide );
 		return true;
 	}
@@ -1240,7 +1238,7 @@ public:
 	mutable std::vector<scene::Node*> m_cloned;
 	CloneSelected( bool makeUnique ) : m_makeUnique( makeUnique ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( path.size() == 1 ) {
 			return true;
 		}
@@ -1260,7 +1258,7 @@ public:
 
 		return true;
 	}
-	void post( const scene::Path& path, scene::Instance& instance ) const {
+	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( path.size() == 1 ) {
 			return;
 		}
@@ -1523,7 +1521,7 @@ public:
 	SnappableSnapToGridSelected( float snap )
 		: m_snap( snap ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( path.top().get().visible() ) {
 			Snappable* snappable = Node_getSnappable( path.top() );
 			if ( snappable != 0
@@ -1546,7 +1544,7 @@ public:
 	ComponentSnappableSnapToGridSelected( float snap )
 		: m_snap( snap ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( path.top().get().visible() ) {
 			ComponentSnappable* componentSnappable = Instance_getComponentSnappable( instance );
 			if ( componentSnappable != 0
@@ -1776,7 +1774,7 @@ public:
 	EntityGetSelectedPropertyValuesWalker_nonEmpty( const char *prop, PropertyValues& propertyvalues )
 		: m_propertyvalues( propertyvalues ), m_prop( prop ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0 ){
 			if( path.top().get_pointer() != m_world ){

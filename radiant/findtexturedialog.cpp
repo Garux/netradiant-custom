@@ -29,8 +29,6 @@
 
 #include "debugging/debugging.h"
 
-#include "ishaders.h"
-
 #include <QHBoxLayout>
 #include <QFormLayout>
 #include "gtkutil/lineedit.h"

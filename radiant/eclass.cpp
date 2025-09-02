@@ -34,8 +34,6 @@
 #include "stream/stringstream.h"
 #include "moduleobservers.h"
 
-#include "commandlib.h"
-
 #include "preferences.h"
 #include "mainframe.h"
 
@@ -196,7 +194,7 @@ void EntityClassQuake3_Construct(){
 		LoadEntityDefinitionsVisitor( const char* baseDirectory, const char* gameDirectory )
 			: baseDirectory( baseDirectory ), gameDirectory( gameDirectory ){
 		}
-		void visit( const char* name, const EntityClassScanner& table ) const {
+		void visit( const char* name, const EntityClassScanner& table ) const override {
 			Paths paths;
 			EntityClassQuake3_constructDirectory( baseDirectory, table.getExtension(), paths );
 			if ( !string_equal( baseDirectory, gameDirectory ) ) {
@@ -238,14 +236,14 @@ class EntityClassQuake3 : public ModuleObserver
 public:
 	EntityClassQuake3() : m_unrealised( 4 ){
 	}
-	void realise(){
+	void realise() override{
 		if ( --m_unrealised == 0 ) {
 			//globalOutputStream() << "Entity Classes: realise\n";
 			EntityClassQuake3_Construct();
 			m_observers.realise();
 		}
 	}
-	void unrealise(){
+	void unrealise() override{
 		if ( ++m_unrealised == 1 ) {
 			m_observers.unrealise();
 			//globalOutputStream() << "Entity Classes: unrealise\n";

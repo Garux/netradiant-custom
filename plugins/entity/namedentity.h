@@ -56,7 +56,7 @@ class NamedEntity : public Nameable
 public:
 	NamedEntity( EntityKeyValues& entity ) : m_entity( entity ){
 	}
-	const char* name() const {
+	const char* name() const override {
 		if ( m_name.empty() ) {
 			return m_entity.getClassName();
 		}
@@ -68,10 +68,10 @@ public:
 	const Colour3& color() const {
 		return m_entity.getEntityClass().color;
 	}
-	void attach( const NameCallback& callback ){
+	void attach( const NameCallback& callback ) override {
 		m_changed.insert( callback );
 	}
-	void detach( const NameCallback& callback ){
+	void detach( const NameCallback& callback ) override {
 		m_changed.erase( callback );
 	}
 

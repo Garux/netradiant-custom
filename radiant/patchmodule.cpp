@@ -73,23 +73,23 @@ void Patch_Destroy(){
 class CommonPatchCreator : public PatchCreator
 {
 public:
-	void Patch_undoSave( scene::Node& patch ) const {
+	void Patch_undoSave( scene::Node& patch ) const override {
 		Node_getPatch( patch )->undoSave();
 	}
-	void Patch_resize( scene::Node& patch, std::size_t width, std::size_t height ) const {
+	void Patch_resize( scene::Node& patch, std::size_t width, std::size_t height ) const override {
 		Node_getPatch( patch )->setDims( width, height );
 	}
-	PatchControlMatrix Patch_getControlPoints( scene::Node& node ) const {
+	PatchControlMatrix Patch_getControlPoints( scene::Node& node ) const override {
 		Patch& patch = *Node_getPatch( node );
 		return PatchControlMatrix( patch.getHeight(), patch.getWidth(), patch.getControlPoints().data() );
 	}
-	void Patch_controlPointsChanged( scene::Node& patch ) const {
+	void Patch_controlPointsChanged( scene::Node& patch ) const override {
 		return Node_getPatch( patch )->controlPointsChanged();
 	}
-	const char* Patch_getShader( scene::Node& patch ) const {
+	const char* Patch_getShader( scene::Node& patch ) const override {
 		return Node_getPatch( patch )->GetShader();
 	}
-	void Patch_setShader( scene::Node& patch, const char* shader ) const {
+	void Patch_setShader( scene::Node& patch, const char* shader ) const override {
 		Node_getPatch( patch )->SetShader( shader );
 	}
 };
@@ -97,7 +97,7 @@ public:
 class Quake3PatchCreator : public CommonPatchCreator
 {
 public:
-	scene::Node& createPatch(){
+	scene::Node& createPatch() override {
 		return ( new PatchNodeQuake3() )->node();
 	}
 };
@@ -111,7 +111,7 @@ PatchCreator& GetQuake3PatchCreator(){
 class Doom3PatchCreator : public CommonPatchCreator
 {
 public:
-	scene::Node& createPatch(){
+	scene::Node& createPatch() override {
 		return ( new PatchNodeDoom3( true ) )->node();
 	}
 };
@@ -125,7 +125,7 @@ PatchCreator& GetDoom3PatchCreator(){
 class Doom3PatchDef2Creator : public CommonPatchCreator
 {
 public:
-	scene::Node& createPatch(){
+	scene::Node& createPatch() override {
 		return ( new PatchNodeDoom3() )->node();
 	}
 };

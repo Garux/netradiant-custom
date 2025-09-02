@@ -24,8 +24,6 @@
 #include "debugging/debugging.h"
 
 #include <map>
-#include <set>
-#include <vector>
 
 #include "string/string.h"
 #include "signal/signal.h"
@@ -76,18 +74,18 @@ public:
 		: m_observer( observer ){
 	}
 
-	void addSceneChangedCallback( const SignalHandler& handler ){
+	void addSceneChangedCallback( const SignalHandler& handler ) override {
 		m_sceneChangedCallbacks.connectLast( handler );
 	}
-	void sceneChanged(){
+	void sceneChanged() override {
 		m_sceneChangedCallbacks();
 	}
 
-	scene::Node& root(){
+	scene::Node& root() override {
 		ASSERT_MESSAGE( !m_rootpath.empty(), "scenegraph root does not exist" );
 		return m_rootpath.top();
 	}
-	void insert_root( scene::Node& root ){
+	void insert_root( scene::Node& root ) override {
 		//globalOutputStream() << "insert_root\n";
 
 		ASSERT_MESSAGE( m_rootpath.empty(), "scenegraph root already exists" );
@@ -100,7 +98,7 @@ public:
 
 		m_currentLayer = &Node_getLayers( root )->m_currentLayer;
 	}
-	void erase_root(){
+	void erase_root() override {
 		//globalOutputStream() << "erase_root\n";
 
 		ASSERT_MESSAGE( !m_rootpath.empty(), "scenegraph root does not exist" );
@@ -115,24 +113,24 @@ public:
 
 		m_currentLayer = &m_currentLayer0;
 	}
-	Layer* currentLayer(){
+	Layer* currentLayer() override {
 		return *m_currentLayer;
 	}
-	void boundsChanged(){
+	void boundsChanged() override {
 		m_boundsChanged();
 	}
 
-	void traverse( const Walker& walker ){
+	void traverse( const Walker& walker ) override {
 		traverse_subgraph( walker, m_instances.begin() );
 	}
 
-	void traverse_subgraph( const Walker& walker, const scene::Path& start ){
+	void traverse_subgraph( const Walker& walker, const scene::Path& start ) override {
 		if ( !m_instances.empty() ) {
 			traverse_subgraph( walker, m_instances.find( PathConstReference( start ) ) );
 		}
 	}
 
-	scene::Instance* find( const scene::Path& path ){
+	scene::Instance* find( const scene::Path& path ) override {
 		InstanceMap::iterator i = m_instances.find( PathConstReference( path ) );
 		if ( i == m_instances.end() ) {
 			return 0;
@@ -140,29 +138,29 @@ public:
 		return ( *i ).second;
 	}
 
-	void insert( scene::Instance* instance ){
+	void insert( scene::Instance* instance ) override {
 		m_instances.insert( InstanceMap::value_type( PathConstReference( instance->path() ), instance ) );
 
 		m_observer->insert( instance );
 	}
-	void erase( scene::Instance* instance ){
+	void erase( scene::Instance* instance ) override {
 		m_observer->erase( instance );
 
 		m_instances.erase( PathConstReference( instance->path() ) );
 	}
 
-	SignalHandlerId addBoundsChangedCallback( const SignalHandler& boundsChanged ){
+	SignalHandlerId addBoundsChangedCallback( const SignalHandler& boundsChanged ) override {
 		return m_boundsChanged.connectLast( boundsChanged );
 	}
-	void removeBoundsChangedCallback( SignalHandlerId id ){
+	void removeBoundsChangedCallback( SignalHandlerId id ) override {
 		m_boundsChanged.disconnect( id );
 	}
 
-	TypeId getNodeTypeId( const char* name ){
+	TypeId getNodeTypeId( const char* name ) override {
 		return m_nodeTypeIds.getTypeId( name );
 	}
 
-	TypeId getInstanceTypeId( const char* name ){
+	TypeId getInstanceTypeId( const char* name ) override {
 		return m_instanceTypeIds.getTypeId( name );
 	}
 
@@ -220,11 +218,11 @@ GraphTreeModel* scene_graph_get_tree_model(){
 class SceneGraphObserver : public scene::Instantiable::Observer
 {
 public:
-	void insert( scene::Instance* instance ){
+	void insert( scene::Instance* instance ) override {
 		g_sceneGraph->sceneChanged();
 		graph_tree_model_insert( g_tree_model, *instance );
 	}
-	void erase( scene::Instance* instance ){
+	void erase( scene::Instance* instance ) override {
 		g_sceneGraph->sceneChanged();
 		graph_tree_model_erase( g_tree_model, *instance );
 	}

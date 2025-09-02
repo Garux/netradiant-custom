@@ -23,7 +23,6 @@
 
 
 #include "gtkutil/widget.h"
-#include "gtkutil/menu.h"
 #include "gtkmisc.h"
 #include "brushnode.h"
 #include "map.h"
@@ -34,8 +33,6 @@
 #include "dialog.h"
 #include "xywindow.h"
 #include "preferences.h"
-
-#include <list>
 
 void Brush_ConstructCuboid( Brush& brush, const AABB& bounds, const char* shader, const TextureProjection& projection ){
 	const unsigned char box[3][2] = { { 0, 1 }, { 2, 0 }, { 1, 2 } };
@@ -867,7 +864,7 @@ public:
 	BrushSelectByShaderWalker( const char* name )
 		: m_name( name ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( path.top().get().visible() ) {
 			Brush* brush = Node_getBrush( path.top() );
 			if ( brush != 0 && Brush_hasShader( *brush, m_name ) ) {
@@ -995,7 +992,7 @@ class filter_face_shader : public FaceFilter
 public:
 	filter_face_shader( const char* shader ) : m_shader( shader ){
 	}
-	bool filter( const Face& face ) const {
+	bool filter( const Face& face ) const override {
 		return shader_equal( face.GetShader(), m_shader );
 	}
 };
@@ -1006,7 +1003,7 @@ class filter_face_shader_prefix : public FaceFilter
 public:
 	filter_face_shader_prefix( const char* prefix ) : m_prefix( prefix ){
 	}
-	bool filter( const Face& face ) const {
+	bool filter( const Face& face ) const override {
 		return shader_equal_n( face.GetShader(), m_prefix, strlen( m_prefix ) );
 	}
 };
@@ -1017,7 +1014,7 @@ class filter_face_flags : public FaceFilter
 public:
 	filter_face_flags( int flags ) : m_flags( flags ){
 	}
-	bool filter( const Face& face ) const {
+	bool filter( const Face& face ) const override {
 		return ( face.getShader().shaderFlags() & m_flags ) != 0;
 	}
 };
@@ -1028,7 +1025,7 @@ class filter_face_contents : public FaceFilter
 public:
 	filter_face_contents( int contents ) : m_contents( contents ){
 	}
-	bool filter( const Face& face ) const {
+	bool filter( const Face& face ) const override {
 		return ( face.getShader().m_flags.m_contentFlags & m_contents ) != 0;
 	}
 };
@@ -1041,7 +1038,7 @@ class filter_brush_any_face : public BrushFilter
 public:
 	filter_brush_any_face( FaceFilter* filter ) : m_filter( filter ){
 	}
-	bool filter( const Brush& brush ) const {
+	bool filter( const Brush& brush ) const override {
 #if 1
 		for( const auto& face : brush )
 			if( m_filter->filter( *face ) )
@@ -1065,7 +1062,7 @@ class filter_brush_all_faces : public BrushFilter
 public:
 	filter_brush_all_faces( FaceFilter* filter ) : m_filter( filter ){
 	}
-	bool filter( const Brush& brush ) const {
+	bool filter( const Brush& brush ) const override {
 #if 1
 		for( const auto& face : brush )
 			if( !m_filter->filter( *face ) )

@@ -29,14 +29,11 @@
 #include "qerplugin.h"
 #include "iplugin.h"
 
-#include "math/vector.h"
 #include "string/string.h"
 
 #include "error.h"
 #include "select.h"
 #include "plugin.h"
-
-#include "modulesystem.h"
 
 #include "stream/stringstream.h"
 #include "commands.h"
@@ -76,11 +73,11 @@ public:
 	void Dispatch( const char *p );
 
 // IPlugIn ------------------------------------------------------------
-	const char* getMenuName();
-	std::size_t getCommandCount();
-	const char* getCommand( std::size_t n );
-	const char* getCommandTitle( std::size_t n );
-	const char* getGlobalCommand( std::size_t n );
+	const char* getMenuName() override;
+	std::size_t getCommandCount() override;
+	const char* getCommand( std::size_t n ) override;
+	const char* getCommandTitle( std::size_t n ) override;
+	const char* getGlobalCommand( std::size_t n ) override;
 };
 
 CPluginSlot::CPluginSlot( QWidget* main_window, const char* name, const _QERPluginTable& table ){
@@ -218,7 +215,7 @@ void FillPluginSlots( CPluginSlots& slots, QWidget* main_window ){
 		AddPluginVisitor( CPluginSlots& slots, QWidget* main_window )
 			: m_slots( slots ), m_main_window( main_window ){
 		}
-		void visit( const char* name, const _QERPluginTable& table ) const {
+		void visit( const char* name, const _QERPluginTable& table ) const override {
 			m_slots.AddPluginSlot( m_main_window, name, table );
 		}
 	} visitor( slots, main_window );

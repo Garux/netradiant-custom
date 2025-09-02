@@ -47,7 +47,7 @@ public:
 	~DeflatedInputStream(){
 		inflateEnd( &m_zipstream );
 	}
-	size_type read( byte_type* buffer, size_type length ){
+	size_type read( byte_type* buffer, size_type length ) override {
 		m_zipstream.next_out = buffer;
 		m_zipstream.avail_out = static_cast<uInt>( length );
 		while ( m_zipstream.avail_out != 0 )

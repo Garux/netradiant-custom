@@ -22,7 +22,6 @@
 #pragma once
 
 #include "gtkutil/idledraw.h"
-#include "gtkutil/widget.h"
 #include "string/string.h"
 
 #include "qerplugin.h"

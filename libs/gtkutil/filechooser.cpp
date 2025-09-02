@@ -73,7 +73,7 @@ public:
 		return m_types.size();
 	}
 
-	void addType( const char* moduleName, filetype_t type ){
+	void addType( const char* moduleName, filetype_t type ) override {
 		m_types.push_back( filetype_pair_t( moduleName, type ) );
 	}
 };

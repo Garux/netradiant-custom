@@ -110,7 +110,7 @@ public:
 		gl().glDeleteLists( m_displayList, 128 );
 		gl().glDeleteTextures( 1, &m_atlas );
 	}
-	void printString( const char *s ){
+	void printString( const char *s ) override {
 		GLboolean rasterPosValid;
 		gl().glGetBooleanv( GL_CURRENT_RASTER_POSITION_VALID, &rasterPosValid );
 		if( !rasterPosValid )
@@ -150,7 +150,7 @@ public:
 		gl().glPopMatrix();
 	}
 
-	void renderString( const char *s, const GLuint& tex, const unsigned char colour[3], unsigned int& out_wid, unsigned int& out_hei ){
+	void renderString( const char *s, const GLuint& tex, const unsigned char colour[3], unsigned int& out_wid, unsigned int& out_hei ) override {
 		// proper way would be using painter.metrics, however this requires it being active()...
 		// same for painter.boundingRect() + result is not correct wrt width for some reason
 		const QRect rect = m_metrics.boundingRect( s );
@@ -400,13 +400,13 @@ public:
 			out_hei = hei;
 		}
 	}
-	int getPixelAscent() const {
+	int getPixelAscent() const override {
 		return m_pixelAscent;
 	}
-	int getPixelDescent() const {
+	int getPixelDescent() const override {
 		return m_pixelDescent;
 	}
-	int getPixelHeight() const {
+	int getPixelHeight() const override {
 		return m_pixelHeight;
 	}
 };

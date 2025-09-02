@@ -45,8 +45,6 @@
 #include "nameable.h"
 #include "moduleobserver.h"
 
-#include <set>
-
 #include "cullable.h"
 #include "renderable.h"
 #include "selectable.h"
@@ -285,8 +283,7 @@ typedef ReferencePair<FaceShaderObserver> FaceShaderObserverPair;
 class ContentsFlagsValue
 {
 public:
-	ContentsFlagsValue(){
-	}
+	ContentsFlagsValue() = default;
 	ContentsFlagsValue( int surfaceFlags, int contentFlags, int value, bool specified ) :
 		m_surfaceFlags( surfaceFlags ),
 		m_contentFlags( contentFlags ),
@@ -333,9 +330,9 @@ public:
 		CopiedString m_shader;
 		ContentsFlagsValue m_flags;
 
-		SavedState( const FaceShader& faceShader ){
-			m_shader = faceShader.getShader();
-			m_flags = faceShader.m_flags;
+		SavedState( const FaceShader& faceShader )
+		:	m_shader( faceShader.getShader() ),
+			m_flags( faceShader.m_flags ){
 		}
 
 		void exportState( FaceShader& faceShader ) const {
@@ -388,12 +385,12 @@ public:
 		m_state = 0;
 	}
 
-	void realise(){
+	void realise() override{
 		ASSERT_MESSAGE( !m_realised, "FaceTexdef::realise: already realised" );
 		m_realised = true;
 		m_observers.forEach( []( FaceShaderObserver& observer ){ observer.realiseShader(); } );
 	}
-	void unrealise(){
+	void unrealise() override{
 		ASSERT_MESSAGE( m_realised, "FaceTexdef::unrealise: already unrealised" );
 		m_observers.forEach( []( FaceShaderObserver& observer ){ observer.unrealiseShader(); } );
 		m_realised = false;
@@ -476,8 +473,7 @@ public:
 	public:
 		TextureProjection m_projection;
 
-		SavedState( const FaceTexdef& faceTexdef ){
-			m_projection = faceTexdef.m_projection;
+		SavedState( const FaceTexdef& faceTexdef ) : m_projection( faceTexdef.m_projection ){
 		}
 
 		void exportState( FaceTexdef& faceTexdef ) const {
@@ -521,12 +517,12 @@ public:
 		m_projection.m_brushprimit_texdef.removeScale( m_shader.width(), m_shader.height() );
 	}
 
-	void realiseShader(){
+	void realiseShader() override{
 		if ( m_projectionInitialised && !m_scaleApplied ) {
 			addScale();
 		}
 	}
-	void unrealiseShader(){
+	void unrealiseShader() override{
 		if ( m_projectionInitialised && m_scaleApplied ) {
 			removeScale();
 		}
@@ -584,7 +580,7 @@ public:
 		Texdef_FitTexture( m_projection, m_shader.width(), m_shader.height(), normal, winding, s_repeat, t_repeat, only_dimension );
 	}
 
-	void emitTextureCoordinates( Winding& winding, const Vector3& normal, const Matrix4& localToWorld ){
+	void emitTextureCoordinates( Winding& winding, const Vector3& normal, const Matrix4& localToWorld ) const {
 		Texdef_EmitTextureCoordinates( m_projection, m_shader.width(), m_shader.height(), winding, normal, localToWorld );
 	}
 
@@ -654,7 +650,7 @@ public:
 		Plane3 m_plane;
 
 		SavedState( const FacePlane& facePlane ){
-			if ( facePlane.isDoom3Plane() ) {
+			if ( FacePlane::isDoom3Plane() ) {
 				m_plane = facePlane.m_plane;
 			}
 			else
@@ -664,7 +660,7 @@ public:
 		}
 
 		void exportState( FacePlane& facePlane ) const {
-			if ( facePlane.isDoom3Plane() ) {
+			if ( FacePlane::isDoom3Plane() ) {
 				facePlane.m_plane = m_plane;
 				facePlane.updateTranslated();
 			}
@@ -921,7 +917,7 @@ class Face :
 			m_texdefState.exportState( face.getTexdef() );
 		}
 
-		void release(){
+		void release() override {
 			delete this;
 		}
 	};
@@ -1011,10 +1007,10 @@ public:
 		m_observer->planeChanged();
 	}
 
-	void realiseShader(){
+	void realiseShader() override {
 		m_observer->shaderChanged();
 	}
-	void unrealiseShader(){
+	void unrealiseShader() override {
 	}
 
 	void instanceAttach( MapFile* map ){
@@ -1031,11 +1027,11 @@ public:
 		m_shader.instanceDetach();
 	}
 
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		Winding_Draw( m_winding, m_planeTransformed.plane3().normal(), state );
 	}
 
-	void updateFiltered(){
+	void updateFiltered() override {
 		m_filtered = face_filtered( *this );
 	}
 	bool isFiltered() const {
@@ -1052,10 +1048,10 @@ public:
 	}
 
 // undoable
-	UndoMemento* exportState() const {
+	UndoMemento* exportState() const override {
 		return new SavedState( *this );
 	}
-	void importState( const UndoMemento* data ){
+	void importState( const UndoMemento* data ) override {
 		undoSave();
 
 		static_cast<const SavedState*>( data )->exportState( *this );
@@ -1430,7 +1426,7 @@ struct EdgeFaces
 class RenderableWireframe : public OpenGLRenderable
 {
 public:
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 #if 1
 		gl().glVertexPointer( 3, GL_FLOAT, sizeof( DepthTestedPointVertex ), &m_vertices->vertex );
 		gl().glDrawElements( GL_LINES, GLsizei( m_size << 1 ), RenderIndexTypeID, m_faceVertex.data() );
@@ -1539,7 +1535,7 @@ public:
 		return *m_faces[m_faceVertex.getFace()];
 	}
 
-	void testSelect( SelectionTest& test, SelectionIntersection& best ){
+	void testSelect( SelectionTest& test, SelectionIntersection& best ) const {
 		test.TestPoint( getVertex(), best );
 	}
 };
@@ -1692,31 +1688,31 @@ public:
 // assignment not supported
 	Brush& operator=( const Brush& other ) = delete;
 
-	void setDoom3GroupOrigin( const Vector3& origin ){
+	void setDoom3GroupOrigin( const Vector3& origin ) override {
 		//globalOutputStream() << "func_static origin before: " << m_funcStaticOrigin << " after: " << origin << '\n';
-		for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+		for ( auto& face : m_faces )
 		{
-			( *i )->getPlane().m_funcStaticOrigin = origin;
-			( *i )->getPlane().updateTranslated();
-			( *i )->planeChanged();
+			face->getPlane().m_funcStaticOrigin = origin;
+			face->getPlane().updateTranslated();
+			face->planeChanged();
 		}
 		planeChanged();
 	}
 
 	void attach( BrushObserver& observer ){
-		for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+		for ( auto& face : m_faces )
 		{
-			observer.push_back( *( *i ) );
+			observer.push_back( *face );
 		}
 
-		for ( SelectableEdges::iterator i = m_select_edges.begin(); i != m_select_edges.end(); ++i )
+		for ( auto& edge : m_select_edges )
 		{
-			observer.edge_push_back( *i );
+			observer.edge_push_back( edge );
 		}
 
-		for ( SelectableVertices::iterator i = m_select_vertices.begin(); i != m_select_vertices.end(); ++i )
+		for ( auto& vertex : m_select_vertices )
 		{
-			observer.vertex_push_back( *i );
+			observer.vertex_push_back( vertex );
 		}
 
 		m_observers.insert( &observer );
@@ -1726,22 +1722,22 @@ public:
 	}
 
 	void forEachFace( const BrushVisitor& visitor ) const {
-		for ( Faces::const_iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+		for ( const auto& face : m_faces )
 		{
-			visitor.visit( *( *i ) );
+			visitor.visit( *face );
 		}
 	}
 
 	void forEachFace_instanceAttach( MapFile* map ) const {
-		for ( Faces::const_iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+		for ( const auto& face : m_faces )
 		{
-			( *i )->instanceAttach( map );
+			face->instanceAttach( map );
 		}
 	}
 	void forEachFace_instanceDetach( MapFile* map ) const {
-		for ( Faces::const_iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+		for ( const auto& face : m_faces )
 		{
-			( *i )->instanceDetach( map );
+			face->instanceDetach( map );
 		}
 	}
 
@@ -1769,16 +1765,16 @@ public:
 	}
 
 // nameable
-	const char* name() const {
+	const char* name() const override {
 		return "brush";
 	}
-	void attach( const NameCallback& callback ){
+	void attach( const NameCallback& callback ) override {
 	}
-	void detach( const NameCallback& callback ){
+	void detach( const NameCallback& callback ) override {
 	}
 
 // filterable
-	void updateFiltered(){
+	void updateFiltered() override {
 		if ( m_node != 0 ) {
 			if ( brush_filtered( *this ) ) {
 				m_node->enable( scene::Node::eFiltered );
@@ -1791,7 +1787,7 @@ public:
 	}
 
 // observer
-	void planeChanged(){
+	void planeChanged() override {
 		/* m_BRep_evaluation mutex prevents cyclic dependency:
 		transformModifier.set ; transformChanged() ; planeChanged() ; pivotChanged() ; sceneChangeNotify() ;
 		sceneRender() ; localAABB ; evaluateBRep ; buildBRep() ; evaluateTransform ; !!!problem starts here!!!! planeChanged() ; pivotChanged() ; sceneChangeNotify() ;
@@ -1802,7 +1798,7 @@ public:
 			m_lightsChanged();
 		}
 	}
-	void shaderChanged(){
+	void shaderChanged() override {
 		updateFiltered();
 		planeChanged(); ///isn't too much for shader changed only?
 	}
@@ -1820,25 +1816,25 @@ public:
 	}
 	typedef MemberCaller<Brush, void(), &Brush::transformChanged> TransformChangedCaller;
 
-	void evaluateTransform(){
+	void evaluateTransform() override {
 		if ( m_transformChanged ) {
 			revertTransform();
 			m_evaluateTransform();
 			m_transformChanged = false;
 		}
 	}
-	const Matrix4& localToParent() const {
+	const Matrix4& localToParent() const override {
 		return g_matrix4_identity;
 	}
 	void aabbChanged(){
 		m_boundsChanged();
 	}
-	const AABB& localAABB() const {
+	const AABB& localAABB() const override {
 		evaluateBRep();
 		return m_aabb_local;
 	}
 
-	VolumeIntersectionValue intersectVolume( const VolumeTest& test, const Matrix4& localToWorld ) const {
+	VolumeIntersectionValue intersectVolume( const VolumeTest& test, const Matrix4& localToWorld ) const override {
 		return test.TestAABB( m_aabb_local, localToWorld );
 	}
 
@@ -1870,33 +1866,33 @@ public:
 	}
 
 	void transform( const Matrix4& matrix ){
-		bool mirror = matrix4_handedness( matrix ) == MATRIX4_LEFTHANDED;
+		const bool mirror = matrix4_handedness( matrix ) == MATRIX4_LEFTHANDED;
 
-		for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+		for ( auto& face : m_faces )
 		{
-			( *i )->transform( matrix, mirror );
+			face->transform( matrix, mirror );
 		}
 	}
-	void snapto( float snap ){
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+	void snapto( float snap ) override {
+		for ( auto *observer : m_observers )
 		{
-			( *i )->vertex_snap( snap );
+			observer->vertex_snap( snap );
 		}
-//		for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+//		for ( auto& face : m_faces )
 //		{
-//			( *i )->snapto( snap );
+//			face->snapto( snap );
 //		}
 	}
 	void revertTransform(){
-		for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+		for ( auto& face : m_faces )
 		{
-			( *i )->revertTransform();
+			face->revertTransform();
 		}
 	}
 	void freezeTransform(){
-		for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+		for ( auto& face : m_faces )
 		{
-			( *i )->freezeTransform();
+			face->freezeTransform();
 		}
 		m_transformChanged = false;
 	}
@@ -1944,9 +1940,9 @@ public:
 
 	void appendFaces( const Faces& other ){
 		clear();
-		for ( Faces::const_iterator i = other.begin(); i != other.end(); ++i )
+		for ( const auto& face : other )
 		{
-			push_back( *i );
+			push_back( face );
 		}
 	}
 
@@ -1956,7 +1952,7 @@ public:
 	public:
 		BrushUndoMemento( const Faces& faces ) : m_faces( faces ){
 		}
-		void release(){
+		void release() override {
 			delete this;
 		}
 
@@ -1972,18 +1968,18 @@ public:
 		}
 	}
 
-	UndoMemento* exportState() const {
+	UndoMemento* exportState() const override {
 		return new BrushUndoMemento( m_faces );
 	}
 
-	void importState( const UndoMemento* state ){
+	void importState( const UndoMemento* state ) override {
 		undoSave();
 		appendFaces( static_cast<const BrushUndoMemento*>( state )->m_faces );
 		planeChanged();
 
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( auto *observer : m_observers )
 		{
-			( *i )->DEBUG_verify();
+			observer->DEBUG_verify();
 		}
 	}
 
@@ -2051,9 +2047,9 @@ public:
 	}
 	void reserve( std::size_t count ){
 		m_faces.reserve( count );
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( auto *observer : m_observers )
 		{
-			( *i )->reserve( count );
+			observer->reserve( count );
 		}
 	}
 	void push_back( Faces::value_type face ){
@@ -2061,10 +2057,10 @@ public:
 		if ( m_instanceCounter.m_count != 0 ) {
 			m_faces.back()->instanceAttach( m_map );
 		}
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( auto *observer : m_observers )
 		{
-			( *i )->push_back( *face );
-			( *i )->DEBUG_verify();
+			observer->push_back( *face );
+			observer->DEBUG_verify();
 		}
 	}
 	void pop_back(){
@@ -2072,10 +2068,10 @@ public:
 			m_faces.back()->instanceDetach( m_map );
 		}
 		m_faces.pop_back();
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( auto *observer : m_observers )
 		{
-			( *i )->pop_back();
-			( *i )->DEBUG_verify();
+			observer->pop_back();
+			observer->DEBUG_verify();
 		}
 	}
 	void erase( std::size_t index ){
@@ -2083,16 +2079,16 @@ public:
 			m_faces[index]->instanceDetach( m_map );
 		}
 		m_faces.erase( m_faces.begin() + index );
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( auto *observer : m_observers )
 		{
-			( *i )->erase( index );
-			( *i )->DEBUG_verify();
+			observer->erase( index );
+			observer->DEBUG_verify();
 		}
 	}
-	void connectivityChanged(){
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+	void connectivityChanged() override {
+		for ( auto *observer : m_observers )
 		{
-			( *i )->connectivityChanged();
+			observer->connectivityChanged();
 		}
 	}
 
@@ -2103,10 +2099,10 @@ public:
 			forEachFace_instanceDetach( m_map );
 		}
 		m_faces.clear();
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( auto *observer : m_observers )
 		{
-			( *i )->clear();
-			( *i )->DEBUG_verify();
+			observer->clear();
+			observer->DEBUG_verify();
 		}
 	}
 	std::size_t size() const {
@@ -2118,13 +2114,7 @@ public:
 
 	/// \brief Returns true if any face of the brush contributes to the final B-Rep.
 	bool hasContributingFaces() const {
-		for ( const_iterator i = begin(); i != end(); ++i )
-		{
-			if ( ( *i )->contributes() ) {
-				return true;
-			}
-		}
-		return false;
+		return std::ranges::any_of( *this, []( const FaceSmartPointer& face ){ return face->contributes(); } );
 	}
 
 	/// \brief Removes faces that do not contribute to the brush. This is useful for cleaning up after CSG operations on the brush.
@@ -2214,7 +2204,7 @@ public:
 #endif
 	}
 
-	void update_wireframe( RenderableWireframe& wire, const bool* faces_visible ) const {
+	void update_wireframe( RenderableWireframe& wire, const bool (&faces_visible)[ c_brush_maxFaces ] ) const {
 		wire.m_faceVertex.resize( m_edge_indices.size() );
 		wire.m_vertices = m_uniqueVertexPoints.data();
 		wire.m_size = 0;
@@ -2228,7 +2218,7 @@ public:
 	}
 
 
-	void update_faces_wireframe( Array<PointVertex>& wire, const bool* faces_visible ) const {
+	void update_faces_wireframe( Array<PointVertex>& wire, const bool (&faces_visible)[ c_brush_maxFaces ] ) const {
 		std::size_t count = 0;
 		for ( std::size_t i = 0; i < m_faceCentroidPoints.size(); ++i )
 		{
@@ -2249,9 +2239,9 @@ public:
 
 	/// \brief Makes this brush a deep-copy of the \p other.
 	void copy( const Brush& other ){
-		for ( Faces::const_iterator i = other.m_faces.begin(); i != other.m_faces.end(); ++i )
+		for ( const auto& face : other.m_faces )
 		{
-			addFace( *( *i ) );
+			addFace( *face );
 		}
 		planeChanged();
 	}
@@ -2327,30 +2317,30 @@ public:
 private:
 	void edge_push_back( FaceVertexId faceVertex ){
 		m_select_edges.push_back( SelectableEdge( m_faces, faceVertex ) );
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( auto *observer : m_observers )
 		{
-			( *i )->edge_push_back( m_select_edges.back() );
+			observer->edge_push_back( m_select_edges.back() );
 		}
 	}
 	void edge_clear(){
 		m_select_edges.clear();
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( auto *observer : m_observers )
 		{
-			( *i )->edge_clear();
+			observer->edge_clear();
 		}
 	}
 	void vertex_push_back( FaceVertexId faceVertex ){
 		m_select_vertices.push_back( SelectableVertex( m_faces, faceVertex ) );
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( auto *observer : m_observers )
 		{
-			( *i )->vertex_push_back( m_select_vertices.back() );
+			observer->vertex_push_back( m_select_vertices.back() );
 		}
 	}
 	void vertex_clear(){
 		m_select_vertices.clear();
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( auto *observer : m_observers )
 		{
-			( *i )->vertex_clear();
+			observer->vertex_clear();
 		}
 	}
 
@@ -2490,10 +2480,10 @@ private:
 	}
 
 	/// \brief Returns true if the brush is a finite volume. A brush without a finite volume extends past the maximum world bounds and is not valid.
-	bool isBounded(){
-		for ( const_iterator i = begin(); i != end(); ++i )
+	bool isBounded(){ // fixme: should return false for 0 faces?
+		for ( const auto& face : *this )
 		{
-			if ( !( *i )->is_bounded() ) {
+			if ( !face->is_bounded() ) {
 				return false;
 			}
 		}
@@ -2506,7 +2496,7 @@ private:
 		{
 			m_aabb_local = AABB();
 
-			if( m_faces.size() )
+			if( m_faces.size() != 0 )
 				m_faces[0]->plane3(); //force evaluateTransform() first, as m_faces is changed during vertexModeTransform
 
 			for ( std::size_t i = 0; i < m_faces.size(); ++i )
@@ -2524,10 +2514,9 @@ private:
 					windingForClipPlane( f.getWinding(), f.plane3() );
 
 					// update brush bounds
-					const Winding& winding = f.getWinding();
-					for ( Winding::const_iterator i = winding.begin(); i != winding.end(); ++i )
+					for ( const auto& v : f.getWinding() )
 					{
-						aabb_extend_by_point_safe( m_aabb_local, ( *i ).vertex );
+						aabb_extend_by_point_safe( m_aabb_local, v.vertex );
 					}
 
 					// update texture coordinates
@@ -2536,7 +2525,7 @@ private:
 			}
 		}
 
-		bool degenerate = !isBounded();
+		const bool degenerate = !isBounded();
 
 		if ( !degenerate ) {
 			// clean up connectivity information.
@@ -2572,9 +2561,9 @@ public:
 
 	template<typename Functor>
 	void foreach( Functor functor ){
-		for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+		for ( auto *fi : m_faceInstances )
 		{
-			functor( *( *i ) );
+			functor( *fi );
 		}
 	}
 
@@ -2637,14 +2626,14 @@ public:
 	void clear(){
 		m_lights.clear();
 	}
-	void evaluateLights() const {
+	void evaluateLights() const override {
 	}
-	void lightsChanged() const {
+	void lightsChanged() const override {
 	}
-	void forEachLight( const RendererLightCallback& callback ) const {
-		for ( Lights::const_iterator i = m_lights.begin(); i != m_lights.end(); ++i )
+	void forEachLight( const RendererLightCallback& callback ) const override {
+		for ( const auto *light : m_lights )
 		{
-			callback( *( *i ) );
+			callback( *light );
 		}
 	}
 };
@@ -3104,7 +3093,7 @@ public:
 		}
 	}
 
-	void render( RenderStateFlags state ) const {
+	void render( RenderStateFlags state ) const override {
 		if ( ( state & RENDER_FILL ) != 0 ) {
 			Winding_Draw( m_winding, m_plane.normal(), state );
 		}
@@ -3464,9 +3453,9 @@ public:
 	typedef MemberCaller<BrushInstance, void(const Selectable&), &BrushInstance::selectedChangedComponent> SelectedChangedComponentCaller;
 
 	const BrushInstanceVisitor& forEachFaceInstance( const BrushInstanceVisitor& visitor ){
-		for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+		for ( auto& fi : m_faceInstances )
 		{
-			visitor.visit( *i );
+			visitor.visit( fi );
 		}
 		return visitor;
 	}
@@ -3478,46 +3467,46 @@ public:
 		GlobalShaderCache().release( "$SELPOINT" );
 	}
 
-	void clear(){
+	void clear() override {
 		m_faceInstances.clear();
 	}
-	void reserve( std::size_t size ){
+	void reserve( std::size_t size ) override {
 		m_faceInstances.reserve( size );
 	}
 
-	void push_back( Face& face ){
+	void push_back( Face& face ) override {
 		m_faceInstances.push_back( FaceInstance( face, SelectedChangedComponentCaller( *this ) ) );
 	}
-	void pop_back(){
+	void pop_back() override {
 		ASSERT_MESSAGE( !m_faceInstances.empty(), "erasing invalid element" );
 		m_faceInstances.pop_back();
 	}
-	void erase( std::size_t index ){
+	void erase( std::size_t index ) override {
 		ASSERT_MESSAGE( index < m_faceInstances.size(), "erasing invalid element" );
 		m_faceInstances.erase( m_faceInstances.begin() + index );
 	}
-	void connectivityChanged(){
-		for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+	void connectivityChanged() override {
+		for ( auto& fi : m_faceInstances )
 		{
-			( *i ).connectivityChanged();
+			fi.connectivityChanged();
 		}
 	}
 
-	void edge_clear(){
+	void edge_clear() override {
 		m_edgeInstances.clear();
 	}
-	void edge_push_back( SelectableEdge& edge ){
+	void edge_push_back( SelectableEdge& edge ) override {
 		m_edgeInstances.push_back( EdgeInstance( m_faceInstances, edge ) );
 	}
 
-	void vertex_clear(){
+	void vertex_clear() override {
 		m_vertexInstances.clear();
 	}
-	void vertex_push_back( SelectableVertex& vertex ){
+	void vertex_push_back( SelectableVertex& vertex ) override {
 		m_vertexInstances.push_back( VertexInstance( m_faceInstances, vertex ) );
 	}
 
-	void vertex_select(){
+	void vertex_select() override {
 		bool src_selected = false;
 		bool dst_selected = false;
 		for( const auto& v : m_brush.m_vertexModeVertices )
@@ -3542,18 +3531,18 @@ public:
 		m_brush.freezeTransform();
 	}
 
-	void vertex_snap( const float snap ){
+	void vertex_snap( const float snap ) override {
 		vertex_snap( snap, true );
 	}
 
-	void DEBUG_verify() const {
+	void DEBUG_verify() const override {
 		ASSERT_MESSAGE( m_faceInstances.size() == m_brush.DEBUG_size(), "FATAL: mismatch" );
 	}
 
-	bool isSelected() const {
+	bool isSelected() const override {
 		return m_selectable.isSelected();
 	}
-	void setSelected( bool select ){
+	void setSelected( bool select ) override {
 		m_selectable.setSelected( select );
 		if ( !select && parent() ){
 			Selectable* sel_parent = Instance_getSelectable( *parent() );
@@ -3564,10 +3553,10 @@ public:
 
 	void update_selected() const {
 		m_render_selected.clear();
-		for ( FaceInstances::const_iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+		for ( const auto& fi : m_faceInstances )
 		{
-			if ( ( *i ).getFace().contributes() ) {
-				( *i ).iterate_selected( m_render_selected );
+			if ( fi.getFace().contributes() ) {
+				fi.iterate_selected( m_render_selected );
 			}
 		}
 	}
@@ -3602,13 +3591,13 @@ public:
 		}
 	}
 
-	void renderComponents( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderComponents( Renderer& renderer, const VolumeTest& volume ) const override {
 		m_brush.evaluateBRep();
 
 		const Matrix4& localToWorld = Instance::localToWorld();
 
-		renderer.SetState( m_brush.m_state_point, Renderer::eWireframeOnly );
-		renderer.SetState( m_brush.m_state_point, Renderer::eFullMaterials );
+		renderer.SetState( Brush::m_state_point, Renderer::eWireframeOnly );
+		renderer.SetState( Brush::m_state_point, Renderer::eFullMaterials );
 
 		if ( volume.fill() && GlobalSelectionSystem().ComponentMode() == SelectionSystem::eFace ) {
 			evaluateViewDependent( volume, localToWorld );
@@ -3646,10 +3635,10 @@ public:
 
 		m_lightList->evaluateLights();
 
-		for ( FaceInstances::const_iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+		for ( const auto& fi : m_faceInstances )
 		{
-			renderer.setLights( ( *i ).m_lights );
-			( *i ).render( renderer, volume, localToWorld );
+			renderer.setLights( fi.m_lights );
+			fi.render( renderer, volume, localToWorld );
 		}
 
 		renderComponentsSelected( renderer, volume, localToWorld );
@@ -3667,7 +3656,7 @@ public:
 		renderComponentsSelected( renderer, volume, localToWorld );
 	}
 
-	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const override {
 		m_brush.evaluateBRep();
 
 		renderClipPlane( renderer, volume );
@@ -3675,7 +3664,7 @@ public:
 		renderSolid( renderer, volume, localToWorld() );
 	}
 
-	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
+	void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const override {
 		m_brush.evaluateBRep();
 
 		renderClipPlane( renderer, volume );
@@ -3683,72 +3672,66 @@ public:
 		renderWireframe( renderer, volume, localToWorld() );
 	}
 
-	void viewChanged() const {
+	void viewChanged() const override {
 		m_viewChanged = true;
 	}
 
-	void testSelect( Selector& selector, SelectionTest& test ){
+	void testSelect( Selector& selector, SelectionTest& test ) override {
 		test.BeginMesh( localToWorld() );
 
 		SelectionIntersection best;
-		for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+		for ( auto& fi : m_faceInstances )
 		{
-			( *i ).testSelect( test, best );
+			fi.testSelect( test, best );
 		}
 		if ( best.valid() ) {
 			selector.addIntersection( best );
 		}
 	}
 
-	bool isSelectedComponents() const {
-		for ( FaceInstances::const_iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
-		{
-			if ( ( *i ).selectedComponents() ) {
-				return true;
-			}
-		}
-		return false;
+	bool isSelectedComponents() const override {
+		return std::ranges::any_of( m_faceInstances, []( const FaceInstance& fi ){ return fi.selectedComponents(); } );
 	}
-	void setSelectedComponents( bool select, SelectionSystem::EComponentMode mode ){
-		for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+	void setSelectedComponents( bool select, SelectionSystem::EComponentMode mode ) override {
+		for ( auto& fi : m_faceInstances )
 		{
-			( *i ).setSelected( mode, select );
+			fi.setSelected( mode, select );
 		}
 	}
-	void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ){
+	void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ) override {
 		test.BeginMesh( localToWorld() );
 
 		switch ( mode )
 		{
 		case SelectionSystem::eVertex:
 			{
-				for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i )
+				for ( auto& vi : m_vertexInstances )
 				{
-					( *i ).testSelect( selector, test );
+					vi.testSelect( selector, test );
 				}
 			}
 			break;
 		case SelectionSystem::eEdge:
 			{
-				for ( EdgeInstances::iterator i = m_edgeInstances.begin(); i != m_edgeInstances.end(); ++i )
+				for ( auto& ei : m_edgeInstances )
 				{
-					( *i ).testSelect( selector, test );
+					ei.testSelect( selector, test );
 				}
 			}
 			break;
 		case SelectionSystem::eFace:
 			{
 				if ( test.getVolume().fill() ) {
-					for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+					for ( auto& fi : m_faceInstances )
 					{
-						( *i ).testSelect( selector, test );
+						fi.testSelect( selector, test );
 					}
 				}
 				else
 				{
-					for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+					for ( auto& fi : m_faceInstances )
 					{
-						( *i ).testSelect_centroid( selector, test );
+						fi.testSelect_centroid( selector, test );
 					}
 				}
 			}
@@ -3757,7 +3740,7 @@ public:
 			break;
 		}
 	}
-	void gatherComponentsHighlight( std::vector<std::vector<Vector3>>& polygons, SelectionIntersection& intersection, SelectionTest& test, SelectionSystem::EComponentMode mode ) const {
+	void gatherComponentsHighlight( std::vector<std::vector<Vector3>>& polygons, SelectionIntersection& intersection, SelectionTest& test, SelectionSystem::EComponentMode mode ) const override {
 		m_brush.evaluateBRep(); // highlight() may happen right next to undo(), hence care to evaluate; normally render() triggers this beforehand
 		test.BeginMesh( localToWorld() );
 
@@ -3829,26 +3812,26 @@ public:
 		{
 		case SelectionSystem::eVertex:
 			{
-				for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i )
+				for ( auto& vi : m_vertexInstances )
 				{
-					( *i ).setSelected( !( *i ).isSelected() );
+					vi.setSelected( !vi.isSelected() );
 				}
 			}
 			break;
 		case SelectionSystem::eEdge:
 			{
-				for ( EdgeInstances::iterator i = m_edgeInstances.begin(); i != m_edgeInstances.end(); ++i )
+				for ( auto& ei : m_edgeInstances )
 				{
-					( *i ).setSelected( !( *i ).isSelected() );
+					ei.setSelected( !ei.isSelected() );
 				}
 			}
 			break;
 		case SelectionSystem::eFace:
 			{
-				for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+				for ( auto& fi : m_faceInstances )
 				{
-					if( !( *i ).getFace().isFiltered() )
-						( *i ).setSelected( mode, !( *i ).isSelected() );
+					if( !fi.getFace().isFiltered() )
+						fi.setSelected( mode, !fi.isSelected() );
 				}
 			}
 			break;
@@ -3863,20 +3846,20 @@ public:
 		const Vector3 viewdir( test.getVolume().getViewDir() );
 		double bestDot = 1;
 
-		for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+		for ( auto& fi : m_faceInstances )
 		{
-			if( !( *i ).trySelectPlane( test ) ){
+			if( !fi.trySelectPlane( test ) ){
 				continue;
 			}
-			const double dot = fabs( vector3_dot( ( *i ).getFace().plane3().normal(), viewdir ) );
+			const double dot = fabs( vector3_dot( fi.getFace().plane3().normal(), viewdir ) );
 			const double diff = bestDot - dot;
 			if( diff > 0.03 ){
 				bestDot = dot;
 				bestInstances.clear();
-				bestInstances.push_back( &( *i ) );
+				bestInstances.push_back( &fi );
 			}
 			else if( fabs( diff ) <= 0.03 ){
-				bestInstances.push_back( &( *i ) );
+				bestInstances.push_back( &fi );
 			}
 		}
 	}
@@ -3884,17 +3867,17 @@ public:
 		FaceInstances_ptrs bestInstances;
 		selectPlanes( test, bestInstances );
 
-		for ( FaceInstances_ptrs::iterator i = bestInstances.begin(); i != bestInstances.end(); ++i ){
-			( *i )->addSelectable( selector );
-			selectedPlaneCallback( ( *i )->getFace().plane3() );
+		for ( auto *fi : bestInstances ){
+			fi->addSelectable( selector );
+			selectedPlaneCallback( fi->getFace().plane3() );
 			if( test.getVolume().fill() )
 				return; // select only plane in camera
 		}
 	}
 	void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ) override {
-		for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+		for ( FaceInstance& fi : m_faceInstances )
 		{
-			( *i ).selectReversedPlane( selector, selectedPlanes );
+			fi.selectReversedPlane( selector, selectedPlanes );
 		}
 	}
 
@@ -3947,20 +3930,20 @@ public:
 
 	void transformComponents( const Matrix4& matrix );
 
-	const AABB& getSelectedComponentsBounds() const {
+	const AABB& getSelectedComponentsBounds() const override {
 		m_aabb_component = AABB();
 
-		for ( FaceInstances::const_iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+		for ( const auto& fi : m_faceInstances )
 		{
-			( *i ).iterate_selected( m_aabb_component );
+			fi.iterate_selected( m_aabb_component );
 		}
 
 		return m_aabb_component;
 	}
-	void gatherSelectedComponents( const Vector3Callback& callback ) const {
-		for ( FaceInstances::const_iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+	void gatherSelectedComponents( const Vector3Callback& callback ) const override {
+		for ( const auto& fi : m_faceInstances )
 		{
-			( *i ).gatherSelectedComponents( callback );
+			fi.gatherSelectedComponents( callback );
 		}
 	}
 
@@ -4012,7 +3995,7 @@ public:
 		}
 	}
 
-	void snapComponents( float snap ){
+	void snapComponents( float snap ) override {
 		for ( const auto& fi : m_faceInstances ){
 			if( fi.selectedComponents( SelectionSystem::eVertex ) ){
 				vertex_snap( snap, false );
@@ -4083,20 +4066,20 @@ public:
 		m_clipPlane.setPlane( m_brush, plane );
 	}
 
-	bool testLight( const RendererLight& light ) const {
+	bool testLight( const RendererLight& light ) const override {
 		return light.testAABB( worldAABB() );
 	}
-	void insertLight( const RendererLight& light ){
+	void insertLight( const RendererLight& light ) override {
 		const Matrix4& localToWorld = Instance::localToWorld();
-		for ( FaceInstances::const_iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+		for ( const auto& fi : m_faceInstances )
 		{
-			Face_addLight( *i, localToWorld, light );
+			Face_addLight( fi, localToWorld, light );
 		}
 	}
-	void clearLights(){
-		for ( FaceInstances::const_iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+	void clearLights() override {
+		for ( auto& fi : m_faceInstances )
 		{
-			( *i ).m_lights.clear();
+			fi.m_lights.clear();
 		}
 	}
 };
@@ -4113,7 +4096,7 @@ class BrushSelectedVisitor : public SelectionSystem::Visitor
 public:
 	BrushSelectedVisitor( const Functor& functor ) : m_functor( functor ){
 	}
-	void visit( scene::Instance& instance ) const {
+	void visit( scene::Instance& instance ) const override {
 		BrushInstance* brush = Instance_getBrush( instance );
 		if ( brush != 0 ) {
 			m_functor( *brush );
@@ -4134,7 +4117,7 @@ class BrushVisibleSelectedVisitor : public SelectionSystem::Visitor
 public:
 	BrushVisibleSelectedVisitor( const Functor& functor ) : m_functor( functor ){
 	}
-	void visit( scene::Instance& instance ) const {
+	void visit( scene::Instance& instance ) const override {
 		BrushInstance* brush = Instance_getBrush( instance );
 		if ( brush != 0
 		  && instance.path().top().get().visible() ) {
@@ -4168,7 +4151,7 @@ public:
 	FaceInstanceVisitFace( const Functor& functor )
 		: functor( functor ){
 	}
-	void visit( FaceInstance& face ) const {
+	void visit( FaceInstance& face ) const override {
 		functor( face.getFace() );
 	}
 };
@@ -4187,7 +4170,7 @@ public:
 	FaceVisitAll( const Functor& functor )
 		: functor( functor ){
 	}
-	void visit( Face& face ) const {
+	void visit( Face& face ) const override {
 		functor( face );
 	}
 };
@@ -4212,7 +4195,7 @@ public:
 	FaceInstanceVisitAll( const Functor& functor )
 		: functor( functor ){
 	}
-	void visit( FaceInstance& face ) const {
+	void visit( FaceInstance& face ) const override {
 		functor( face );
 	}
 };
@@ -4249,7 +4232,7 @@ class BrushVisibleWalker : public scene::Graph::Walker
 public:
 	BrushVisibleWalker( const Functor& functor ) : m_functor( functor ){
 	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( path.top().get().visible() ) {
 			BrushInstance* brush = Instance_getBrush( instance );
 			if ( brush != 0 ) {

@@ -32,13 +32,13 @@ public:
 	void insert( const char* key, const KeyObserver& observer ){
 		m_keyObservers.insert( KeyObservers::value_type( key, observer ) );
 	}
-	void insert( const char* key, EntityKeyValue& value ){
+	void insert( const char* key, EntityKeyValue& value ) override {
 		for ( KeyObservers::const_iterator i = m_keyObservers.find( key ); i != m_keyObservers.end() && string_equal( ( *i ).first, key ); ++i )
 		{
 			value.attach( ( *i ).second );
 		}
 	}
-	void erase( const char* key, EntityKeyValue& value ){
+	void erase( const char* key, EntityKeyValue& value ) override {
 		for ( KeyObservers::const_iterator i = m_keyObservers.find( key ); i != m_keyObservers.end() && string_equal( ( *i ).first, key ); ++i )
 		{
 			value.detach( ( *i ).second );

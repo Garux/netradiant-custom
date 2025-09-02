@@ -25,15 +25,13 @@
 
 #include "ifilter.h"
 
-#include "scenelib.h"
+#include "iscenegraph.h"
 
 #include <list>
 #include <set>
 
 #include "gtkutil/widget.h"
-#include "gtkutil/menu.h"
 #include "gtkmisc.h"
-#include "mainframe.h"
 #include "commands.h"
 #include "preferences.h"
 
@@ -87,16 +85,16 @@ void UpdateFilters(){
 class BasicFilterSystem : public FilterSystem
 {
 public:
-	void addFilter( Filter& filter, int mask ){
+	void addFilter( Filter& filter, int mask ) override {
 		g_filters.push_back( FilterWrapper( filter, mask ) );
 		g_filters.back().update();
 	}
-	void registerFilterable( Filterable& filterable ){
+	void registerFilterable( Filterable& filterable ) override {
 		filterable.updateFiltered();
 		const bool inserted = g_filterables.insert( &filterable ).second;
 		ASSERT_MESSAGE( inserted, "filterable already registered" );
 	}
-	void unregisterFilterable( Filterable& filterable ){
+	void unregisterFilterable( Filterable& filterable ) override {
 		const bool erased = g_filterables.erase( &filterable );
 		ASSERT_MESSAGE( erased, "filterable not registered" );
 	}

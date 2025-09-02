@@ -466,32 +466,32 @@ public:
 		return m_qtextures.end();
 	}
 
-	LoadImageCallback defaultLoader() const {
+	LoadImageCallback defaultLoader() const override {
 		return LoadImageCallback( 0, QERApp_LoadImage );
 	}
-	Image* loadImage( const char* name ){
+	Image* loadImage( const char* name ) override {
 		return defaultLoader().loadImage( name );
 	}
-	qtexture_t* capture( const char* name ){
+	qtexture_t* capture( const char* name ) override {
 		return capture( defaultLoader(), name );
 	}
-	qtexture_t* capture( const LoadImageCallback& loader, const char* name ){
+	qtexture_t* capture( const LoadImageCallback& loader, const char* name ) override {
 #if DEBUG_TEXTURES
 		globalOutputStream() << "textures capture: " << makeQuoted( name ) << '\n';
 #endif
 		return m_qtextures.capture( TextureKey( loader, name ) ).get();
 	}
-	void release( qtexture_t* texture ){
+	void release( qtexture_t* texture ) override {
 #if DEBUG_TEXTURES
 		globalOutputStream() << "textures release: " << makeQuoted( texture->name ) << '\n';
 #endif
 		m_qtextures.release( TextureKey( texture->load, texture->name ) );
 	}
-	void attach( TexturesCacheObserver& observer ){
+	void attach( TexturesCacheObserver& observer ) override {
 		ASSERT_MESSAGE( m_observer == 0, "TexturesMap::attach: cannot attach observer" );
 		m_observer = &observer;
 	}
-	void detach( TexturesCacheObserver& observer ){
+	void detach( TexturesCacheObserver& observer ) override {
 		ASSERT_MESSAGE( m_observer == &observer, "TexturesMap::detach: cannot detach observer" );
 		m_observer = 0;
 	}

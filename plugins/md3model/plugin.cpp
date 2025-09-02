@@ -46,7 +46,7 @@
 class MD3ModelLoader : public ModelLoader
 {
 public:
-	scene::Node& loadModel( ArchiveFile& file ){
+	scene::Node& loadModel( ArchiveFile& file ) override {
 		return loadMD3Model( file );
 	}
 };
@@ -86,7 +86,7 @@ ModelMD3Module g_ModelMD3Module;
 class MD2ModelLoader : public ModelLoader
 {
 public:
-	scene::Node& loadModel( ArchiveFile& file ){
+	scene::Node& loadModel( ArchiveFile& file ) override {
 		return loadMD2Model( file );
 	}
 };
@@ -113,7 +113,7 @@ ModelMD2Module g_ModelMD2Module;
 class MDLModelLoader : public ModelLoader
 {
 public:
-	scene::Node& loadModel( ArchiveFile& file ){
+	scene::Node& loadModel( ArchiveFile& file ) override {
 		return loadMDLModel( file );
 	}
 };
@@ -140,7 +140,7 @@ ModelMDLModule g_ModelMDLModule;
 class MDCModelLoader : public ModelLoader
 {
 public:
-	scene::Node& loadModel( ArchiveFile& file ){
+	scene::Node& loadModel( ArchiveFile& file ) override {
 		return loadMDCModel( file );
 	}
 };
@@ -188,7 +188,7 @@ ImageMDLModule g_ImageMDLModule;
 class MD5ModelLoader : public ModelLoader
 {
 public:
-	scene::Node& loadModel( ArchiveFile& file ){
+	scene::Node& loadModel( ArchiveFile& file ) override {
 		return loadMD5Model( file );
 	}
 };

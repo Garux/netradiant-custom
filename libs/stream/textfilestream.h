@@ -42,7 +42,7 @@ public:
 		return m_file == 0;
 	}
 
-	std::size_t read( char* buffer, std::size_t length ){
+	std::size_t read( char* buffer, std::size_t length ) override {
 		return fread( buffer, 1, length, m_file );
 	}
 };
@@ -65,7 +65,7 @@ public:
 		return m_file == 0;
 	}
 
-	std::size_t write( const char* buffer, std::size_t length ){
+	std::size_t write( const char* buffer, std::size_t length ) override {
 		return fwrite( buffer, 1, length, m_file );
 	}
 };

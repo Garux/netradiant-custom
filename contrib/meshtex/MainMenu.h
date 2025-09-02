@@ -54,7 +54,7 @@ private: // private types
       PresetFuncVisitor(const VisitorFunctor& visitorFunctor,
                         MeshEntity::TextureAxisSelection axes);
    private:
-      bool Execute(MeshEntity& meshEntity) const;
+      bool Execute(MeshEntity& meshEntity) const override;
 
    private:
       const VisitorFunctor _visitorFunctor;

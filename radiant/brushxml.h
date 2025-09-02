@@ -340,7 +340,7 @@ public:
 	BrushXMLImporter( Brush& brush ) : m_brush( brush ){
 		m_xml_state.push_back( xml_state_t::eDefault );
 	}
-	void pushElement( const XMLElement& element ){
+	void pushElement( const XMLElement& element ) override {
 		switch ( m_xml_state.back().state() )
 		{
 		case xml_state_t::eDefault:
@@ -361,7 +361,7 @@ public:
 			break;
 		}
 	}
-	void popElement( const char* name ){
+	void popElement( const char* name ) override {
 		ASSERT_MESSAGE( !m_xml_state.empty(), "parse error" );
 		m_xml_state.pop_back();
 
@@ -377,7 +377,7 @@ public:
 			break;
 		}
 	}
-	std::size_t write( const char* data, std::size_t length ){
+	std::size_t write( const char* data, std::size_t length ) override {
 		switch ( m_xml_state.back().state() )
 		{
 		case xml_state_t::eFace:
@@ -397,7 +397,7 @@ class BrushXMLExporter : public XMLExporter
 public:
 	BrushXMLExporter( const Brush& brush ) : m_brush( brush ){
 	}
-	void exportXML( XMLImporter& importer ){
+	void exportXML( XMLImporter& importer ) override {
 		m_brush.evaluateBRep(); // ensure b-rep is up-to-date, so that non-contributing faces can be identified.
 		ASSERT_MESSAGE( m_brush.hasContributingFaces(), "exporting an empty brush" );
 

@@ -102,7 +102,7 @@ class SetDoom3GroupOriginWalker : public scene::Traversable::Walker
 public:
 	SetDoom3GroupOriginWalker( const Vector3& origin ) : m_origin( origin ){
 	}
-	bool pre( scene::Node& node ) const {
+	bool pre( scene::Node& node ) const override {
 		BrushDoom3_setDoom3GroupOrigin( node, m_origin );
 		return true;
 	}
@@ -132,12 +132,12 @@ public:
 		}
 	}
 
-	void insert( scene::Node& node ){
+	void insert( scene::Node& node ) override {
 		if ( m_enabled ) {
 			BrushDoom3_setDoom3GroupOrigin( node, m_origin );
 		}
 	}
-	void erase( scene::Node& node ){
+	void erase( scene::Node& node ) override {
 		if ( m_enabled ) {
 			BrushDoom3_setDoom3GroupOrigin( node, Vector3( 0, 0, 0 ) );
 		}

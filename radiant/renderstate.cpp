@@ -271,7 +271,7 @@ public:
 		m_program = 0;
 	}
 
-	void enable(){
+	void enable() override {
 		gl().glUseProgram( m_program );
 
 		gl().glEnableVertexAttribArray( c_attr_TexCoord0 );
@@ -284,7 +284,7 @@ public:
 		g_bumpGLSLPass_enabled = true;
 	}
 
-	void disable(){
+	void disable() override {
 		gl().glUseProgram( 0 );
 
 		gl().glDisableVertexAttribArray( c_attr_TexCoord0 );
@@ -297,7 +297,7 @@ public:
 		g_bumpGLSLPass_enabled = false;
 	}
 
-	void setParameters( const Vector3& viewer, const Matrix4& localToWorld, const Vector3& origin, const Vector3& colour, const Matrix4& world2light ){
+	void setParameters( const Vector3& viewer, const Matrix4& localToWorld, const Vector3& origin, const Vector3& colour, const Matrix4& world2light ) override {
 		Matrix4 world2local( localToWorld );
 		matrix4_affine_invert( world2local );
 
@@ -356,19 +356,19 @@ public:
 		gl().glDeleteProgram( m_program );
 		m_program = 0;
 	}
-	void enable(){
+	void enable() override {
 		gl().glUseProgram( m_program );
 		GlobalOpenGL_debugAssertNoErrors();
 		debug_string( "enable depthfill" );
 		g_depthfillPass_enabled = true;
 	}
-	void disable(){
+	void disable() override {
 		gl().glUseProgram( 0 );
 		GlobalOpenGL_debugAssertNoErrors();
 		debug_string( "disable depthfill" );
 		g_depthfillPass_enabled = false;
 	}
-	void setParameters( const Vector3& viewer, const Matrix4& localToWorld, const Vector3& origin, const Vector3& colour, const Matrix4& world2light ){
+	void setParameters( const Vector3& viewer, const Matrix4& localToWorld, const Vector3& origin, const Vector3& colour, const Matrix4& world2light ) override {
 	}
 };
 
@@ -412,7 +412,7 @@ public:
 		m_program = 0;
 	}
 
-	void enable(){
+	void enable() override {
 		gl().glUseProgram( m_program );
 
 		GlobalOpenGL_debugAssertNoErrors();
@@ -420,7 +420,7 @@ public:
 		debug_string( "enable skybox" );
 	}
 
-	void disable(){
+	void disable() override {
 		gl().glUseProgram( 0 );
 
 		GlobalOpenGL_debugAssertNoErrors();
@@ -428,7 +428,7 @@ public:
 		debug_string( "disable skybox" );
 	}
 
-	void setParameters( const Vector3& viewer, const Matrix4& localToWorld, const Vector3& origin, const Vector3& colour, const Matrix4& world2light ){
+	void setParameters( const Vector3& viewer, const Matrix4& localToWorld, const Vector3& origin, const Vector3& colour, const Matrix4& world2light ) override {
 		gl().glUniform3f( u_view_origin, viewer.x(), viewer.y(), viewer.z() );
 
 		GlobalOpenGL_debugAssertNoErrors();
@@ -636,7 +636,7 @@ public:
 		}
 		m_passes.clear();
 	}
-	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& modelview, const LightList* lights ){
+	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& modelview, const LightList* lights ) override {
 		for ( Passes::iterator i = m_passes.begin(); i != m_passes.end(); ++i )
 		{
 #if LIGHT_SHADER_DEBUG
@@ -666,12 +666,12 @@ public:
 			}
 		}
 	}
-	void incrementUsed(){
+	void incrementUsed() override {
 		if ( ++m_used == 1 && m_shader != 0 ) {
 			m_shader->SetInUse( true );
 		}
 	}
-	void decrementUsed(){
+	void decrementUsed() override {
 		if ( --m_used == 0 && m_shader != 0 ) {
 			m_shader->SetInUse( false );
 		}
@@ -679,13 +679,13 @@ public:
 	bool realised() const {
 		return m_shader != 0;
 	}
-	void attach( ModuleObserver& observer ){
+	void attach( ModuleObserver& observer ) override {
 		if ( realised() ) {
 			observer.realise();
 		}
 		m_observers.attach( observer );
 	}
-	void detach( ModuleObserver& observer ){
+	void detach( ModuleObserver& observer ) override {
 		if ( realised() ) {
 			observer.unrealise();
 		}
@@ -715,11 +715,11 @@ public:
 
 		destroy();
 	}
-	qtexture_t& getTexture() const {
+	qtexture_t& getTexture() const override {
 		ASSERT_NOTNULL( m_shader );
 		return *m_shader->getTexture();
 	}
-	unsigned int getFlags() const {
+	unsigned int getFlags() const override {
 		ASSERT_NOTNULL( m_shader );
 		return m_shader->getFlags();
 	}
@@ -758,7 +758,7 @@ public:
 		m_cullable( cullable ), m_allLights( lights ), m_evaluateChanged( evaluateChanged ){
 		m_lightsChanged = true;
 	}
-	void evaluateLights() const {
+	void evaluateLights() const override {
 		m_evaluateChanged();
 		if ( m_lightsChanged ) {
 			m_lightsChanged = false;
@@ -791,7 +791,7 @@ public:
 		}
 #endif
 	}
-	void forEachLight( const RendererLightCallback& callback ) const {
+	void forEachLight( const RendererLightCallback& callback ) const override {
 		evaluateLights();
 
 		for ( Lights::const_iterator i = m_lights.begin(); i != m_lights.end(); ++i )
@@ -799,7 +799,7 @@ public:
 			callback( *( *i ) );
 		}
 	}
-	void lightsChanged() const {
+	void lightsChanged() const override {
 		m_lightsChanged = true;
 	}
 };
@@ -860,7 +860,7 @@ public:
 			globalOutputStream() << "leaked shader: " << makeQuoted( ( *i ).key ) << '\n';
 		}
 	}
-	Shader* capture( const char* name ){
+	Shader* capture( const char* name ) override {
 		ASSERT_MESSAGE( name[0] == '$'
 		                || *name == '['
 		                || *name == '<'
@@ -872,13 +872,13 @@ public:
 #endif
 		return m_shaders.capture( name ).get();
 	}
-	void release( const char *name ){
+	void release( const char *name ) override {
 #if DEBUG_SHADERS
 		globalOutputStream() << "shaders release: " << makeQuoted( name ) << '\n';
 #endif
 		m_shaders.release( name );
 	}
-	void render( RenderStateFlags globalstate, const Matrix4& modelview, const Matrix4& projection, const Vector3& viewer ){
+	void render( RenderStateFlags globalstate, const Matrix4& modelview, const Matrix4& projection, const Vector3& viewer ) override {
 		gl().glMatrixMode( GL_PROJECTION );
 		gl().glLoadMatrixf( reinterpret_cast<const float*>( &projection ) );
 #if 0
@@ -987,7 +987,7 @@ public:
 		reset.m_program = nullptr; /* disable shader */
 		OpenGLState_apply( reset, current, globalstate );
 	}
-	void realise(){
+	void realise() override {
 		if ( --m_unrealised == 0 ) {
 			if ( lightingEnabled() ) {
 				g_bumpGLSL.create();
@@ -1004,7 +1004,7 @@ public:
 			}
 		}
 	}
-	void unrealise(){
+	void unrealise() override {
 		if ( ++m_unrealised == 1 ) {
 			for ( Shaders::iterator i = m_shaders.begin(); i != m_shaders.end(); ++i )
 			{
@@ -1053,28 +1053,28 @@ public:
 	typedef std::map<LightCullable*, LinearLightList> LightLists;
 	LightLists m_lightLists;
 
-	const LightList& attach( LightCullable& cullable ){
+	const LightList& attach( LightCullable& cullable ) override {
 		return ( *m_lightLists.insert( LightLists::value_type( &cullable, LinearLightList( cullable, m_lights, EvaluateChangedCaller( *this ) ) ) ).first ).second;
 	}
-	void detach( LightCullable& cullable ){
+	void detach( LightCullable& cullable ) override {
 		m_lightLists.erase( &cullable );
 	}
-	void changed( LightCullable& cullable ){
+	void changed( LightCullable& cullable ) override {
 		LightLists::iterator i = m_lightLists.find( &cullable );
 		ASSERT_MESSAGE( i != m_lightLists.end(), "cullable not attached" );
 		( *i ).second.lightsChanged();
 	}
-	void attach( RendererLight& light ){
+	void attach( RendererLight& light ) override {
 		const bool inserted = m_lights.insert( &light ).second;
 		ASSERT_MESSAGE( inserted, "light could not be attached" );
 		changed( light );
 	}
-	void detach( RendererLight& light ){
+	void detach( RendererLight& light ) override {
 		const bool erased = m_lights.erase( &light );
 		ASSERT_MESSAGE( erased, "light could not be detached" );
 		changed( light );
 	}
-	void changed( RendererLight& light ){
+	void changed( RendererLight& light ) override {
 		m_lightsChanged = true;
 	}
 	void evaluateChanged(){
@@ -1093,17 +1093,17 @@ public:
 	mutable bool m_traverseRenderablesMutex;
 
 // renderables
-	void attachRenderable( const Renderable& renderable ){
+	void attachRenderable( const Renderable& renderable ) override {
 		ASSERT_MESSAGE( !m_traverseRenderablesMutex, "attaching renderable during traversal" );
 		const bool inserted = m_renderables.insert( &renderable ).second;
 		ASSERT_MESSAGE( inserted, "renderable could not be attached" );
 	}
-	void detachRenderable( const Renderable& renderable ){
+	void detachRenderable( const Renderable& renderable ) override {
 		ASSERT_MESSAGE( !m_traverseRenderablesMutex, "detaching renderable during traversal" );
 		const bool erased = m_renderables.erase( &renderable );
 		ASSERT_MESSAGE( erased, "renderable could not be detached" );
 	}
-	void forEachRenderable( const RenderableCallback& callback ) const {
+	void forEachRenderable( const RenderableCallback& callback ) const override {
 		ASSERT_MESSAGE( !m_traverseRenderablesMutex, "for-each during traversal" );
 		m_traverseRenderablesMutex = true;
 		for ( Renderables::const_iterator i = m_renderables.begin(); i != m_renderables.end(); ++i )
@@ -1669,15 +1669,15 @@ public:
 		return m_states.end();
 	}
 
-	void getDefaultState( OpenGLState& state ) const {
+	void getDefaultState( OpenGLState& state ) const override {
 		OpenGLState_constructDefault( state );
 	}
 
-	void insert( const char* name, const OpenGLState& state ){
+	void insert( const char* name, const OpenGLState& state ) override {
 		bool inserted = m_states.insert( States::value_type( name, state ) ).second;
 		ASSERT_MESSAGE( inserted, "OpenGLStateMap::insert: " << name << " already exists" );
 	}
-	void erase( const char* name ){
+	void erase( const char* name ) override {
 		std::size_t count = m_states.erase( name );
 		ASSERT_MESSAGE( count == 1, "OpenGLStateMap::erase: " << name << " does not exist" );
 	}

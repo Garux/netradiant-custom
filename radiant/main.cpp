@@ -67,8 +67,6 @@
 
 #include "debugging/debugging.h"
 
-#include "iundo.h"
-
 #include "commandlib.h"
 #include "os/file.h"
 #include "os/path.h"
@@ -164,7 +162,7 @@ public:
 	LineLimitedTextOutputStream( TextOutputStream& outputStream, std::size_t count )
 		: outputStream( outputStream ), count( count ){
 	}
-	std::size_t write( const char* buffer, std::size_t length ){
+	std::size_t write( const char* buffer, std::size_t length ) override {
 		if ( count != 0 ) {
 			const char* p = buffer;
 			const char* end = buffer + length;
@@ -191,13 +189,13 @@ class PopupDebugMessageHandler : public DebugMessageHandler
 	StringOutputStream m_buffer;
 	Lock m_lock;
 public:
-	TextOutputStream& getOutputStream(){
+	TextOutputStream& getOutputStream() override {
 		if ( !m_lock.locked() ) {
 			return m_buffer;
 		}
 		return globalErrorStream();
 	}
-	bool handleMessage(){
+	bool handleMessage() override {
 		getOutputStream() << "----------------\n";
 		LineLimitedTextOutputStream outputStream( getOutputStream(), 24 );
 		write_stack_trace( outputStream );

@@ -92,7 +92,7 @@ public:
 	~NameKeys(){
 		m_entity.detach( *this );
 	}
-	void setNamespace( Namespace& space ){
+	void setNamespace( Namespace& space ) override {
 		eraseAll();
 		m_namespace = &space;
 		insertAll();
@@ -102,11 +102,11 @@ public:
 		m_keyIsName = keyIsName;
 		insertAll();
 	}
-	void insert( const char* key, EntityKeyValue& value ){
+	void insert( const char* key, EntityKeyValue& value ) override {
 		m_keyValues.insert( KeyValues::value_type( key, &value ) );
 		insertName( key, value );
 	}
-	void erase( const char* key, EntityKeyValue& value ){
+	void erase( const char* key, EntityKeyValue& value ) override {
 		eraseName( key, value );
 		m_keyValues.erase( key );
 	}

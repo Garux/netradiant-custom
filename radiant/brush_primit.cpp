@@ -24,18 +24,12 @@
 #include "debugging/debugging.h"
 
 #include "itexdef.h"
-#include "itextures.h"
 
-#include <algorithm>
-
-#include "stringio.h"
-#include "texturelib.h"
 #include "math/matrix.h"
 #include "math/plane.h"
 #include "math/aabb.h"
 
 #include "winding.h"
-#include "preferences.h"
 
 
 bp_globals_t g_bp_globals;
