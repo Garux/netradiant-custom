@@ -382,13 +382,13 @@ void context_menu( const QPoint& pos ){
 		auto dels = item_getLayers( item );
 		auto it = item_getLayerIterator( item );
 
+		delete item;
+		// handle possible deletion of layers.m_currentLayer 1st, as it will be used as a destination later
+		if( std::ranges::find( dels, layers.m_currentLayer ) != dels.cend() )
+			item_setCurrent( tree->topLevelItem( LAYERIDX0 ) );
+
 		GlobalSceneGraph().traverse( LayerDeletetWalker( dels, layers.m_currentLayer ) );
 		it->m_parent->m_children.erase( it );
-		delete item;
-
-		if( std::ranges::find( dels, layers.m_currentLayer ) != dels.cend() ){
-			item_setCurrent( tree->topLevelItem( LAYERIDX0 ) );
-		}
 	} )->setDisabled( item == nullptr
 	             || ( item->parent() == nullptr && tree->topLevelItemCount() == 1 ) ); // trying to delete the only toplevel item
 
