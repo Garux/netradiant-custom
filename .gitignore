@@ -5,5 +5,5 @@
 /.vscode/
 /.idea/
 /.cache/
-/.clangd
+/.clang*
 /compile_commands.json
