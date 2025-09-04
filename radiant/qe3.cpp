@@ -81,7 +81,7 @@ void QE_InitVFS(){
 	std::vector<CopiedString> paths;
 	const auto paths_push = [&paths]( const char* newPath ){ // collects unique paths
 		if( !string_empty( newPath )
-		&& std::none_of( paths.cbegin(), paths.cend(), [newPath]( const CopiedString& path ){ return path_equal( path.c_str(), newPath ); } ) )
+		&& std::ranges::none_of( paths, [newPath]( const CopiedString& path ){ return path_equal( path.c_str(), newPath ); } ) )
 			paths.emplace_back( newPath );
 	};
 
@@ -224,7 +224,7 @@ void RunBSP( size_t buildIdx ){
 	Pointfile_Delete();
 
 	const std::vector<CopiedString> commands = build_construct_commands( buildIdx );
-	const bool monitor = std::any_of( commands.cbegin(), commands.cend(), []( const CopiedString& command ){
+	const bool monitor = std::ranges::any_of( commands, []( const CopiedString& command ){
 		return strstr( command.c_str(), RADIANT_MONITOR_ADDRESS ) != 0;
 	} );
 

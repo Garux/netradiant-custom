@@ -988,9 +988,9 @@ public:
 			m_pSpecular = evaluateTexture( m_template.m_specular, m_template.m_params, m_args );
 			m_pLightFalloffImage = evaluateTexture( m_template.m_lightFalloffImage, m_template.m_params, m_args );
 
-			for ( ShaderTemplate::MapLayers::const_iterator i = m_template.m_layers.begin(); i != m_template.m_layers.end(); ++i )
+			for ( const auto& layer : m_template.m_layers )
 			{
-				m_layers.push_back( evaluateLayer( *i, m_template.m_params, m_args ) );
+				m_layers.push_back( evaluateLayer( layer, m_template.m_params, m_args ) );
 			}
 
 			if ( m_layers.size() == 1 ) {
@@ -1031,9 +1031,9 @@ public:
 
 			GlobalTexturesCache().release( m_pLightFalloffImage );
 
-			for ( MapLayers::iterator i = m_layers.begin(); i != m_layers.end(); ++i )
+			for ( auto& layer : m_layers )
 			{
-				GlobalTexturesCache().release( ( *i ).texture() );
+				GlobalTexturesCache().release( layer.texture() );
 			}
 			m_layers.clear();
 
@@ -1092,9 +1092,9 @@ public:
 		return &m_layers.front();
 	}
 	void forEachLayer( const ShaderLayerCallback& callback ) const override {
-		for ( MapLayers::const_iterator i = m_layers.begin(); i != m_layers.end(); ++i )
+		for ( const auto& layer : m_layers )
 		{
-			callback( *i );
+			callback( layer );
 		}
 	}
 
@@ -1132,9 +1132,9 @@ void ActiveShaders_IteratorIncrement(){
 }
 
 void debug_check_shaders( shaders_t& shaders ){
-	for ( shaders_t::iterator i = shaders.begin(); i != shaders.end(); ++i )
+	for ( const auto& [ name, shader ] : shaders )
 	{
-		ASSERT_MESSAGE( i->second->refcount() == 1, "orphan shader still referenced" );
+		ASSERT_MESSAGE( shader->refcount() == 1, "orphan shader still referenced" );
 	}
 }
 
@@ -1731,9 +1731,9 @@ public:
 	}
 
 	void foreachShaderName( const ShaderNameCallback& callback ) override {
-		for ( ShaderDefinitionMap::const_iterator i = g_shaderDefinitions.begin(); i != g_shaderDefinitions.end(); ++i )
+		for ( const auto& [ name, shader ] : g_shaderDefinitions )
 		{
-			callback( ( *i ).first.c_str() );
+			callback( name.c_str() );
 		}
 	}
 
@@ -1762,14 +1762,14 @@ public:
 
 	void setLightingEnabled( bool enabled ) override {
 		if ( CShader::m_lightingEnabled != enabled ) {
-			for ( shaders_t::const_iterator i = g_ActiveShaders.begin(); i != g_ActiveShaders.end(); ++i )
+			for ( const auto& [ name, shader ] : g_ActiveShaders )
 			{
-				( *i ).second->unrealiseLighting();
+				shader->unrealiseLighting();
 			}
 			CShader::m_lightingEnabled = enabled;
-			for ( shaders_t::const_iterator i = g_ActiveShaders.begin(); i != g_ActiveShaders.end(); ++i )
+			for ( const auto& [ name, shader ] : g_ActiveShaders )
 			{
-				( *i ).second->realiseLighting();
+				shader->realiseLighting();
 			}
 		}
 	}

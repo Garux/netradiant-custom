@@ -1222,10 +1222,9 @@ void SmoothMetaTriangles(){
 						smoothedVerts.push_back( v2.operator->() );
 
 						/* see if this normal has already been voted */
-						if( std::ranges::none_of( votes,
-							[normal = v2->vertex->normal]( const Vector3& vote ){
-								return vector3_equal_epsilon( normal, vote, EQUAL_NORMAL_EPSILON );
-							} ) )
+						if( std::ranges::none_of( votes, [normal = v2->vertex->normal]( const Vector3& vote ){
+							return vector3_equal_epsilon( normal, vote, EQUAL_NORMAL_EPSILON );
+						} ) )
 						{ /* add a new vote */
 							average += v2->vertex->normal;
 							votes.push_back( v2->vertex->normal );

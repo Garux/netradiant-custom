@@ -471,9 +471,7 @@ void CPortalsDrawSolid::render( RenderStateFlags state ) const {
 			portals.portal_sort.push_back( &prt );
 		}
 
-		std::sort( portals.portal_sort.begin(), portals.portal_sort.end(), []( const CBspPortal *a, const CBspPortal *b ){
-			return a->dist < b->dist;
-		} );
+		std::ranges::sort( portals.portal_sort, {}, &CBspPortal::dist );
 
 		for ( const auto *prt : portals.portal_sort )
 		{

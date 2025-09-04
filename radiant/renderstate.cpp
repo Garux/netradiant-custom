@@ -630,17 +630,17 @@ public:
 		}
 		m_shader = 0;
 
-		for ( Passes::iterator i = m_passes.begin(); i != m_passes.end(); ++i )
+		for ( auto *bucket : m_passes )
 		{
-			delete *i;
+			delete bucket;
 		}
 		m_passes.clear();
 	}
 	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& modelview, const LightList* lights ) override {
-		for ( Passes::iterator i = m_passes.begin(); i != m_passes.end(); ++i )
+		for ( auto *bucket : m_passes )
 		{
 #if LIGHT_SHADER_DEBUG
-			if ( ( ( *i )->state().m_state & RENDER_BUMP ) != 0 ) {
+			if ( ( bucket->state().m_state & RENDER_BUMP ) != 0 ) {
 				if ( lights != 0 ) {
 					CountLights counter;
 					lights->forEachLight( makeCallback( counter ) );
@@ -653,16 +653,16 @@ public:
 			}
 			else
 #else
-			if ( ( ( *i )->state().m_state & RENDER_BUMP ) != 0 ) {
+			if ( ( bucket->state().m_state & RENDER_BUMP ) != 0 ) {
 				if ( lights != 0 ) {
-					OpenGLStateBucketAdd add( *( *i ), renderable, modelview );
+					OpenGLStateBucketAdd add( *bucket, renderable, modelview );
 					lights->forEachLight( makeCallback( add ) );
 				}
 			}
 			else
 #endif
 			{
-				( *i )->addRenderable( renderable, modelview );
+				bucket->addRenderable( renderable, modelview );
 			}
 		}
 	}
@@ -698,9 +698,9 @@ public:
 			m_shader->SetInUse( true );
 		}
 
-		for ( Passes::iterator i = m_passes.begin(); i != m_passes.end(); ++i )
+		for ( auto *bucket : m_passes )
 		{
-			g_state_sorted.insert( OpenGLStates::value_type( OpenGLStateReference( ( *i )->state() ), *i ) );
+			g_state_sorted.insert( OpenGLStates::value_type( OpenGLStateReference( bucket->state() ), bucket ) );
 		}
 
 		m_observers.realise();
@@ -708,9 +708,9 @@ public:
 	void unrealise(){
 		m_observers.unrealise();
 
-		for ( Passes::iterator i = m_passes.begin(); i != m_passes.end(); ++i )
+		for ( auto *bucket : m_passes )
 		{
-			g_state_sorted.erase( OpenGLStateReference( ( *i )->state() ) );
+			g_state_sorted.erase( OpenGLStateReference( bucket->state() ) );
 		}
 
 		destroy();
@@ -765,11 +765,11 @@ public:
 
 			m_lights.clear();
 			m_cullable.clearLights();
-			for ( RendererLights::const_iterator i = m_allLights.begin(); i != m_allLights.end(); ++i )
+			for ( auto *light : m_allLights )
 			{
-				if ( lightEnabled( *( *i ), m_cullable ) ) {
-					m_lights.push_back( *i );
-					m_cullable.insertLight( *( *i ) );
+				if ( lightEnabled( *light, m_cullable ) ) {
+					m_lights.push_back( light );
+					m_cullable.insertLight( *light );
 				}
 			}
 		}
@@ -777,10 +777,10 @@ public:
 		else
 		{
 			Lights lights;
-			for ( RendererLights::const_iterator i = m_allLights.begin(); i != m_allLights.end(); ++i )
+			for ( auto *light : m_allLights )
 			{
-				if ( lightEnabled( *( *i ), m_cullable ) ) {
-					lights.push_back( *i );
+				if ( lightEnabled( *light, m_cullable ) ) {
+					lights.push_back( light );
 				}
 			}
 			ASSERT_MESSAGE(
@@ -794,9 +794,9 @@ public:
 	void forEachLight( const RendererLightCallback& callback ) const override {
 		evaluateLights();
 
-		for ( Lights::const_iterator i = m_lights.begin(); i != m_lights.end(); ++i )
+		for ( const auto *light : m_lights )
 		{
-			callback( *( *i ) );
+			callback( *light );
 		}
 	}
 	void lightsChanged() const override {
@@ -855,9 +855,9 @@ public:
 		m_traverseRenderablesMutex( false ){
 	}
 	~OpenGLShaderCache(){
-		for ( Shaders::iterator i = m_shaders.begin(); i != m_shaders.end(); ++i )
+		for ( auto& shader : m_shaders )
 		{
-			globalOutputStream() << "leaked shader: " << makeQuoted( ( *i ).key ) << '\n';
+			globalOutputStream() << "leaked shader: " << makeQuoted( shader.key ) << '\n';
 		}
 	}
 	Shader* capture( const char* name ) override {
@@ -976,9 +976,9 @@ public:
 		GlobalOpenGL_debugAssertNoErrors();
 
 		debug_string( "begin rendering" );
-		for ( OpenGLStates::iterator i = g_state_sorted.begin(); i != g_state_sorted.end(); ++i )
+		for ( auto& [ state, bucket ] : g_state_sorted )
 		{
-			( *i ).second->render( current, globalstate, viewer );
+			bucket->render( current, globalstate, viewer );
 		}
 		debug_string( "end rendering" );
 
@@ -996,20 +996,20 @@ public:
 
 			g_skyboxGLSL.create();
 
-			for ( Shaders::iterator i = m_shaders.begin(); i != m_shaders.end(); ++i )
+			for ( auto& shader : m_shaders )
 			{
-				if ( !( *i ).value.empty() ) {
-					( *i ).value->realise( i->key );
+				if ( !shader.value.empty() ) {
+					shader.value->realise( shader.key );
 				}
 			}
 		}
 	}
 	void unrealise() override {
 		if ( ++m_unrealised == 1 ) {
-			for ( Shaders::iterator i = m_shaders.begin(); i != m_shaders.end(); ++i )
+			for ( auto& shader : m_shaders )
 			{
-				if ( !( *i ).value.empty() ) {
-					( *i ).value->unrealise();
+				if ( !shader.value.empty() ) {
+					shader.value->unrealise();
 				}
 			}
 			if ( GlobalOpenGL().contextValid && lightingEnabled() ) {
@@ -1080,9 +1080,9 @@ public:
 	void evaluateChanged(){
 		if ( m_lightsChanged ) {
 			m_lightsChanged = false;
-			for ( LightLists::iterator i = m_lightLists.begin(); i != m_lightLists.end(); ++i )
+			for ( auto& [ cullable, lightList ] : m_lightLists )
 			{
-				( *i ).second.lightsChanged();
+				lightList.lightsChanged();
 			}
 		}
 	}
@@ -1106,9 +1106,9 @@ public:
 	void forEachRenderable( const RenderableCallback& callback ) const override {
 		ASSERT_MESSAGE( !m_traverseRenderablesMutex, "for-each during traversal" );
 		m_traverseRenderablesMutex = true;
-		for ( Renderables::const_iterator i = m_renderables.begin(); i != m_renderables.end(); ++i )
+		for ( const auto *rend : m_renderables )
 		{
-			callback( *( *i ) );
+			callback( *rend );
 		}
 		m_traverseRenderablesMutex = false;
 	}
@@ -1556,12 +1556,12 @@ void Renderables_flush( OpenGLStateBucket::Renderables& renderables, OpenGLState
 		current.m_program->setParameters( viewer, g_matrix4_identity, g_vector3_identity, g_vector3_identity, g_matrix4_identity );
 	}
 
-	for ( OpenGLStateBucket::Renderables::const_iterator i = renderables.begin(); i != renderables.end(); ++i )
+	for ( const auto& rend : renderables )
 	{
 		//qglLoadMatrixf( i->m_transform );
-		if ( !transform || ( transform != ( *i ).m_transform && !matrix4_affine_equal( *transform, *( *i ).m_transform ) ) ) {
+		if ( !transform || ( transform != rend.m_transform && !matrix4_affine_equal( *transform, *rend.m_transform ) ) ) {
 			count_transform();
-			transform = ( *i ).m_transform;
+			transform = rend.m_transform;
 			gl().glPopMatrix();
 			gl().glPushMatrix();
 			gl().glMultMatrixf( reinterpret_cast<const float*>( transform ) );
@@ -1570,8 +1570,8 @@ void Renderables_flush( OpenGLStateBucket::Renderables& renderables, OpenGLState
 
 		count_prim();
 
-		if ( current.m_program != 0 && ( *i ).m_light != 0 ) {
-			const IShader& lightShader = static_cast<OpenGLShader*>( ( *i ).m_light->getShader() )->getShader();
+		if ( current.m_program != 0 && rend.m_light != 0 ) {
+			const IShader& lightShader = static_cast<OpenGLShader*>( rend.m_light->getShader() )->getShader();
 			if ( lightShader.firstLayer() != 0 ) {
 				GLuint attenuation_xy = lightShader.firstLayer()->texture()->texture_number;
 				GLuint attenuation_z = lightShader.lightFalloffImage() != 0
@@ -1591,29 +1591,29 @@ void Renderables_flush( OpenGLStateBucket::Renderables& renderables, OpenGLState
 				gl().glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
 
-				AABB lightBounds( ( *i ).m_light->aabb() );
+				AABB lightBounds( rend.m_light->aabb() );
 
 				Matrix4 world2light( g_matrix4_identity );
 
-				if ( ( *i ).m_light->isProjected() ) {
-					world2light = ( *i ).m_light->projection();
-					matrix4_multiply_by_matrix4( world2light, matrix4_transposed( ( *i ).m_light->rotation() ) );
+				if ( rend.m_light->isProjected() ) {
+					world2light = rend.m_light->projection();
+					matrix4_multiply_by_matrix4( world2light, matrix4_transposed( rend.m_light->rotation() ) );
 					matrix4_translate_by_vec3( world2light, vector3_negated( lightBounds.origin ) ); // world->lightBounds
 				}
-				if ( !( *i ).m_light->isProjected() ) {
+				if ( !rend.m_light->isProjected() ) {
 					matrix4_translate_by_vec3( world2light, Vector3( 0.5f, 0.5f, 0.5f ) );
 					matrix4_scale_by_vec3( world2light, Vector3( 0.5f, 0.5f, 0.5f ) );
 					matrix4_scale_by_vec3( world2light, Vector3( 1.0f / lightBounds.extents.x(), 1.0f / lightBounds.extents.y(), 1.0f / lightBounds.extents.z() ) );
-					matrix4_multiply_by_matrix4( world2light, matrix4_transposed( ( *i ).m_light->rotation() ) );
+					matrix4_multiply_by_matrix4( world2light, matrix4_transposed( rend.m_light->rotation() ) );
 					matrix4_translate_by_vec3( world2light, vector3_negated( lightBounds.origin ) ); // world->lightBounds
 				}
 
-				current.m_program->setParameters( viewer, *( *i ).m_transform, lightBounds.origin + ( *i ).m_light->offset(), ( *i ).m_light->colour(), world2light );
+				current.m_program->setParameters( viewer, *rend.m_transform, lightBounds.origin + rend.m_light->offset(), rend.m_light->colour(), world2light );
 				debug_string( "set lightBounds parameters" );
 			}
 		}
 
-		( *i ).m_renderable->render( current.m_state );
+		rend.m_renderable->render( current.m_state );
 	}
 	gl().glPopMatrix();
 	renderables.clear();

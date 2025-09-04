@@ -118,9 +118,9 @@ CGameDescription::CGameDescription( xmlDocPtr pDoc, const CopiedString& gameFile
 
 void CGameDescription::Dump(){
 	globalOutputStream() << "game description file: " << makeQuoted( mGameFile ) << '\n';
-	for ( GameDescription::iterator i = m_gameDescription.begin(); i != m_gameDescription.end(); ++i )
+	for ( const auto& [ key, value ] : m_gameDescription )
 	{
-		globalOutputStream() << ( *i ).first << " = " << makeQuoted( ( *i ).second ) << '\n';
+		globalOutputStream() << key << " = " << makeQuoted( value ) << '\n';
 	}
 }
 
@@ -250,11 +250,10 @@ void CGameDialog::GameFileImport( int value ){
 
 void CGameDialog::GameFileExport( const IntImportCallback& importCallback ) const {
 	// use m_sGameFile to set value
-	std::list<CGameDescription *>::const_iterator iGame;
 	int i = 0;
-	for ( iGame = mGames.begin(); iGame != mGames.end(); ++iGame )
+	for ( const auto *game : mGames )
 	{
-		if ( ( *iGame )->mGameFile == m_sGameFile.m_latched ) {
+		if ( game->mGameFile == m_sGameFile.m_latched ) {
 			m_nComboSelect = i;
 			break;
 		}
@@ -266,9 +265,9 @@ void CGameDialog::GameFileExport( const IntImportCallback& importCallback ) cons
 void CGameDialog::CreateGlobalFrame( PreferencesPage& page, bool global ){
 	std::vector<const char*> games;
 	games.reserve( mGames.size() );
-	for ( std::list<CGameDescription *>::iterator i = mGames.begin(); i != mGames.end(); ++i )
+	for ( const auto *game : mGames )
 	{
-		games.push_back( ( *i )->getRequiredKeyValue( "name" ) );
+		games.push_back( game->getRequiredKeyValue( "name" ) );
 	}
 	page.appendCombo(
 	    "Select the game",
@@ -367,11 +366,10 @@ void CGameDialog::Init(){
 
 	if ( !m_bGamePrompt ) {
 		// search by .game name
-		std::list<CGameDescription *>::iterator iGame;
-		for ( iGame = mGames.begin(); iGame != mGames.end(); ++iGame )
+		for ( auto *game : mGames )
 		{
-			if ( ( *iGame )->mGameFile == m_sGameFile.m_value ) {
-				currentGameDescription = ( *iGame );
+			if ( game->mGameFile == m_sGameFile.m_value ) {
+				currentGameDescription = game;
 				break;
 			}
 		}
@@ -390,11 +388,9 @@ void CGameDialog::Init(){
 
 CGameDialog::~CGameDialog(){
 	// free all the game descriptions
-	std::list<CGameDescription *>::iterator iGame;
-	for ( iGame = mGames.begin(); iGame != mGames.end(); ++iGame )
+	for ( auto& game : mGames )
 	{
-		delete ( *iGame );
-		*iGame = 0;
+		delete std::exchange( game, nullptr );
 	}
 	if ( GetWidget() != 0 ) {
 		Destroy();
@@ -474,9 +470,9 @@ void PrefsDlg::Init(){
 typedef std::list<PreferenceGroupCallback> PreferenceGroupCallbacks;
 
 inline void PreferenceGroupCallbacks_constructGroup( const PreferenceGroupCallbacks& callbacks, PreferenceGroup& group ){
-	for ( PreferenceGroupCallbacks::const_iterator i = callbacks.begin(); i != callbacks.end(); ++i )
+	for ( const auto& cb : callbacks )
 	{
-		( *i )( group );
+		cb( group );
 	}
 }
 
@@ -488,9 +484,9 @@ inline void PreferenceGroupCallbacks_pushBack( PreferenceGroupCallbacks& callbac
 typedef std::list<PreferencesPageCallback> PreferencesPageCallbacks;
 
 inline void PreferencesPageCallbacks_constructPage( const PreferencesPageCallbacks& callbacks, PreferencesPage& page ){
-	for ( PreferencesPageCallbacks::const_iterator i = callbacks.begin(); i != callbacks.end(); ++i )
+	for ( const auto& cb : callbacks )
 	{
-		( *i )( page );
+		cb( page );
 	}
 }
 

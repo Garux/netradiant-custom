@@ -17,17 +17,17 @@ inline void StringPool_analyse( StringPool& pool ){
 	Ordered ordered;
 	std::size_t total = 0;
 	std::size_t pooled = 0;
-	for ( StringPool::iterator i = pool.begin(); i != pool.end(); ++i )
+	for ( const auto& str : pool )
 	{
-		std::size_t size =  string_length( ( *i ).key ) + 1;
-		total += size * ( *i ).value;
+		std::size_t size =  string_length( str.key ) + 1;
+		total += size * str.value;
 		pooled += size + 20;
-		ordered.insert( Ordered::value_type( ( *i ).value, ( *i ).key ) );
+		ordered.insert( Ordered::value_type( str.value, str.key ) );
 	}
 	globalOutputStream() << "total: " << total << " pooled:" << pooled << '\n';
-	for ( Ordered::iterator i = ordered.begin(); i != ordered.end(); ++i )
+	for ( const auto& [ num, string ] : ordered )
 	{
-		globalOutputStream() << ( *i ).second << ' ' << ( *i ).first << '\n';
+		globalOutputStream() << string << ' ' << num << '\n';
 	}
 }
 

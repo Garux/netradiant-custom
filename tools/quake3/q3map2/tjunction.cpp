@@ -543,9 +543,7 @@ void FixTJunctions( const entity_t& ent ){
 	const size_t axialEdgeLines = edgeLines.size();
 
 	// sort the non-axial edges by length
-	std::ranges::sort( originalEdges, []( const originalEdge_t& a, const originalEdge_t& b ){
-		return a.length < b.length;
-	} );
+	std::ranges::sort( originalEdges, {}, &originalEdge_t::length );
 
 	// add the non-axial edges, longest first
 	// this gives the most accurate edge description

@@ -30,7 +30,7 @@
 #include "model.h"
 
 //#define MD5_RETURN_FALSE_IF_FAIL( expression ) if ( !( expression ) ) { globalErrorStream() << "md5 parse failed: " # expression "\n"; return false; } else
-#define MD5_RETURN_FALSE_IF_FAIL( expression ) do{ if ( !( expression ) ) { globalErrorStream() << "md5 parse failed: " # expression "\n"; return false; } }while( 0 )
+#define MD5_RETURN_FALSE_IF_FAIL( expression ) do{ if ( !( expression ) ) { globalErrorStream() << "md5 parse failed: " # expression "\n"; return false; } }while( false )
 
 bool MD5_parseToken( Tokeniser& tokeniser, const char* string ){
 	const char* token = tokeniser.getToken();
@@ -281,14 +281,14 @@ bool MD5Model_parse( Model& model, Tokeniser& tokeniser ){
 	MD5_RETURN_FALSE_IF_FAIL( MD5_parseToken( tokeniser, "{" ) );
 	tokeniser.nextLine();
 
-	for ( MD5Joints::iterator i = joints.begin(); i != joints.end(); ++i )
+	for ( auto& joint : joints )
 	{
 		const char* jointName;
 		MD5_RETURN_FALSE_IF_FAIL( MD5_parseString( tokeniser, jointName ) );
-		MD5_RETURN_FALSE_IF_FAIL( MD5_parseInteger( tokeniser, ( *i ).parent ) );
-		MD5_RETURN_FALSE_IF_FAIL( MD5_parseVector3( tokeniser, ( *i ).position ) );
-		MD5_RETURN_FALSE_IF_FAIL( MD5_parseVector3( tokeniser, ( *i ).rotation.vec3() ) );
-		( *i ).rotation.w() = -static_cast<float>( sqrt( 1.0f - ( float_squared( ( *i ).rotation.x() ) + float_squared( ( *i ).rotation.y() ) + float_squared( ( *i ).rotation.z() ) ) ) );
+		MD5_RETURN_FALSE_IF_FAIL( MD5_parseInteger( tokeniser, joint.parent ) );
+		MD5_RETURN_FALSE_IF_FAIL( MD5_parseVector3( tokeniser, joint.position ) );
+		MD5_RETURN_FALSE_IF_FAIL( MD5_parseVector3( tokeniser, joint.rotation.vec3() ) );
+		joint.rotation.w() = -static_cast<float>( sqrt( 1.0f - ( float_squared( joint.rotation.x() ) + float_squared( joint.rotation.y() ) + float_squared( joint.rotation.z() ) ) ) );
 		tokeniser.nextLine();
 	}
 
@@ -369,10 +369,8 @@ bool MD5Model_parse( Model& model, Tokeniser& tokeniser ){
 		MD5_RETURN_FALSE_IF_FAIL( MD5_parseToken( tokeniser, "}" ) );
 		tokeniser.nextLine();
 
-		for ( MD5Verts::iterator j = verts.begin(); j != verts.end(); ++j )
+		for ( const auto& vert : verts )
 		{
-			MD5Vert& vert = ( *j );
-
 			Vector3 skinned( 0, 0, 0 );
 			for ( std::size_t k = 0; k != vert.weight_count; ++k )
 			{
@@ -385,9 +383,8 @@ bool MD5Model_parse( Model& model, Tokeniser& tokeniser ){
 			surface.vertices().push_back( ArbitraryMeshVertex( vertex3f_for_vector3( skinned ), Normal3f( 0, 0, 0 ), TexCoord2f( vert.u, vert.v ) ) );
 		}
 
-		for ( MD5Tris::iterator j = tris.begin(); j != tris.end(); ++j )
+		for ( const auto& tri : tris )
 		{
-			MD5Tri& tri = ( *j );
 			surface.indices().insert( RenderIndex( tri.a ) );
 			surface.indices().insert( RenderIndex( tri.b ) );
 			surface.indices().insert( RenderIndex( tri.c ) );
@@ -409,9 +406,9 @@ bool MD5Model_parse( Model& model, Tokeniser& tokeniser ){
 			reinterpret_cast<Vector3&>( c.normal ) += weightedNormal;
 		}
 
-		for ( Surface::vertices_t::iterator j = surface.vertices().begin(); j != surface.vertices().end(); ++j )
+		for ( auto& v : surface.vertices() )
 		{
-			vector3_normalise( reinterpret_cast<Vector3&>( ( *j ).normal ) );
+			vector3_normalise( reinterpret_cast<Vector3&>( v.normal ) );
 		}
 
 		surface.updateAABB();

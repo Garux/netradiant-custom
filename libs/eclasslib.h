@@ -53,13 +53,7 @@ public:
 		return m_items[i];
 	}
 	const_iterator findValue( const char* value ) const {
-		for ( ListItems::const_iterator i = m_items.begin(); i != m_items.end(); ++i )
-		{
-			if ( string_equal( value, ( *i ).second.c_str() ) ) {
-				return i;
-			}
-		}
-		return m_items.end();
+		return std::ranges::find_if( m_items, [value]( const ListItem& kv ){ return string_equal( value, kv.second.c_str() ); } );
 	}
 
 	void push_back( const char* name, const char* value ){
@@ -161,10 +155,10 @@ public:
 };
 
 inline const char* EntityClass_valueForKey( const EntityClass& entityClass, const char* key ){
-	for ( EntityClassAttributes::const_iterator i = entityClass.m_attributes.begin(); i != entityClass.m_attributes.end(); ++i )
+	for ( const auto& [ k, attr ] : entityClass.m_attributes )
 	{
-		if ( string_equal( key, ( *i ).first.c_str() ) ) {
-			return ( *i ).second.m_value.c_str();
+		if ( string_equal( key, k.c_str() ) ) {
+			return attr.m_value.c_str();
 		}
 	}
 	return "";

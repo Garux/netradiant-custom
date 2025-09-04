@@ -143,8 +143,7 @@ void Scene_PatchDoCap_Selected( scene::Graph& graph, const char* shader, EPatchC
 void Patch_deform( Patch& patch, scene::Instance& instance, const int deform, const int axis ){
 	patch.undoSave();
 
-	for ( PatchControlIter i = patch.begin(); i != patch.end(); ++i ){
-		PatchControl& control = *i;
+	for ( PatchControl& control : patch ){
 		int randomNumber = int( deform * ( float( std::rand() ) / float( RAND_MAX ) ) );
 		control.m_vertex[ axis ] += randomNumber;
 	}

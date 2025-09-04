@@ -137,9 +137,9 @@ NodeSmartReference g_nullNode( NewNullNode() );
 
 NodeSmartReference Entity_create( EntityCreator& entityTable, EntityClass* entityClass, const KeyValues& keyValues ){
 	scene::Node& entity( entityTable.createEntity( entityClass ) );
-	for ( KeyValues::const_iterator i = keyValues.begin(); i != keyValues.end(); ++i )
+	for ( const auto& [ key, value ] : keyValues )
 	{
-		Node_getEntity( entity )->setKeyValue( ( *i ).first.c_str(), ( *i ).second.c_str() );
+		Node_getEntity( entity )->setKeyValue( key.c_str(), value.c_str() );
 	}
 	return NodeSmartReference( entity );
 }

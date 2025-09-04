@@ -181,12 +181,12 @@ public:
 		name_write( buf, name );
 		globalErrorStream() << "find unique name for " << buf << '\n';
 		globalErrorStream() << "> currently registered names:\n";
-		for ( names_t::const_iterator i = m_names.begin(); i != m_names.end(); ++i )
+		for ( const auto& [ name, postfixes ] : m_names )
 		{
-			globalErrorStream() << ">> " << i->first.c_str() << ": ";
-			for ( PostFixes::postfixes_t::const_iterator j = i->second.m_postfixes.begin(); j != i->second.m_postfixes.end(); ++j )
+			globalErrorStream() << ">> " << name.c_str() << ": ";
+			for ( const auto& [ postfix, index ] : postfixes.m_postfixes )
 			{
-				j->first.write( buf );
+				postfix.write( buf );
 				globalErrorStream() << " '" << buf << "'";
 			}
 			globalErrorStream() << '\n';

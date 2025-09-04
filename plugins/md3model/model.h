@@ -53,9 +53,9 @@ public:
 	void lightsChanged() const override {
 	}
 	void forEachLight( const RendererLightCallback& callback ) const override {
-		for ( Lights::const_iterator i = m_lights.begin(); i != m_lights.end(); ++i )
+		for ( const auto *light : m_lights )
 		{
-			callback( *( *i ) );
+			callback( *light );
 		}
 	}
 };
@@ -121,8 +121,8 @@ public:
 	}
 	void updateAABB(){
 		m_aabb_local = AABB();
-		for ( vertices_t::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
-			aabb_extend_by_point_safe( m_aabb_local, reinterpret_cast<const Vector3&>( ( *i ).vertex ) );
+		for ( const auto& v : m_vertices )
+			aabb_extend_by_point_safe( m_aabb_local, reinterpret_cast<const Vector3&>( v.vertex ) );
 
 
 
@@ -135,10 +135,10 @@ public:
 			ArbitraryMeshTriangle_sumTangents( a, b, c );
 		}
 
-		for ( Surface::vertices_t::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
+		for ( auto& v : m_vertices )
 		{
-			vector3_normalise( reinterpret_cast<Vector3&>( ( *i ).tangent ) );
-			vector3_normalise( reinterpret_cast<Vector3&>( ( *i ).bitangent ) );
+			vector3_normalise( reinterpret_cast<Vector3&>( v.tangent ) );
+			vector3_normalise( reinterpret_cast<Vector3&>( v.bitangent ) );
 		}
 	}
 
@@ -171,10 +171,10 @@ public:
 #if defined( _DEBUG ) && !defined( _DEBUG_QUICKER )
 		gl().glBegin( GL_LINES );
 
-		for ( VertexBuffer<ArbitraryMeshVertex>::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
+		for ( const auto& v : m_vertices )
 		{
-			Vector3 normal = vector3_added( vertex3f_to_vector3( ( *i ).vertex ), vector3_scaled( normal3f_to_vector3( ( *i ).normal ), 8 ) );
-			gl().glVertex3fv( vertex3f_to_array( ( *i ).vertex ) );
+			Vector3 normal = vector3_added( vertex3f_to_vector3( v.vertex ), vector3_scaled( normal3f_to_vector3( v.normal ), 8 ) );
+			gl().glVertex3fv( vertex3f_to_array( v.vertex ) );
 			gl().glVertex3fv( vector3_to_array( normal ) );
 		}
 		gl().glEnd();
@@ -226,9 +226,9 @@ public:
 	Callback<void()> m_lightsChanged;
 
 	~Model(){
-		for ( surfaces_t::iterator i = m_surfaces.begin(); i != m_surfaces.end(); ++i )
+		for ( auto *surf : m_surfaces )
 		{
-			delete *i;
+			delete surf;
 		}
 	}
 
@@ -250,9 +250,9 @@ public:
 	}
 	void updateAABB(){
 		m_aabb_local = AABB();
-		for ( surfaces_t::iterator i = m_surfaces.begin(); i != m_surfaces.end(); ++i )
+		for ( const auto *surf : m_surfaces )
 		{
-			aabb_extend_by_aabb_safe( m_aabb_local, ( *i )->localAABB() );
+			aabb_extend_by_aabb_safe( m_aabb_local, surf->localAABB() );
 		}
 	}
 
@@ -265,10 +265,10 @@ public:
 	}
 
 	void testSelect( Selector& selector, SelectionTest& test, const Matrix4& localToWorld ){
-		for ( surfaces_t::iterator i = m_surfaces.begin(); i != m_surfaces.end(); ++i )
+		for ( auto *surf : m_surfaces )
 		{
-			if ( ( *i )->intersectVolume( test.getVolume(), localToWorld ) != c_volumeOutside ) {
-				( *i )->testSelect( selector, test, localToWorld );
+			if ( surf->intersectVolume( test.getVolume(), localToWorld ) != c_volumeOutside ) {
+				surf->testSelect( selector, test, localToWorld );
 			}
 		}
 	}
@@ -355,11 +355,11 @@ public:
 		}
 	}
 	void destroyRemaps(){
-		for ( SurfaceRemaps::iterator i = m_skins.begin(); i != m_skins.end(); ++i )
+		for ( auto& [ name, shader ] : m_skins )
 		{
-			if ( ( *i ).second != 0 ) {
-				GlobalShaderCache().release( ( *i ).first.c_str() );
-				( *i ).second = 0;
+			if ( shader != 0 ) {
+				GlobalShaderCache().release( name.c_str() );
+				shader = 0;
 			}
 		}
 	}
@@ -427,9 +427,9 @@ public:
 		}
 	}
 	void clearLights() override {
-		for ( SurfaceLightLists::iterator i = m_surfaceLightLists.begin(); i != m_surfaceLightLists.end(); ++i )
+		for ( auto& lightList : m_surfaceLightLists )
 		{
-			( *i ).clear();
+			lightList.clear();
 		}
 	}
 };

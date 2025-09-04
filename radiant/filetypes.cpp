@@ -62,19 +62,18 @@ public:
 		m_typelists[moduleType].push_back( filetype_copy_t( moduleName, type ) );
 	}
 	void getTypeList( const char* moduleType, IFileTypeList* typelist, bool want_load, bool want_import, bool want_save ) override {
-		filetype_list_t& list_ref = m_typelists[moduleType];
-		for ( filetype_list_t::iterator i = list_ref.begin(); i != list_ref.end(); ++i )
+		for ( const auto& type : m_typelists[ moduleType ] )
 		{
-			if ( want_load && !( *i ).m_can_load ) {
+			if ( want_load && !type.m_can_load ) {
 				return;
 			}
-			if ( want_import && !( *i ).m_can_import ) {
+			if ( want_import && !type.m_can_import ) {
 				return;
 			}
-			if ( want_save && !( *i ).m_can_save ) {
+			if ( want_save && !type.m_can_save ) {
 				return;
 			}
-			typelist->addType( ( *i ).getModuleName(), ( *i ).getType() );
+			typelist->addType( type.getModuleName(), type.getType() );
 		}
 	}
 };

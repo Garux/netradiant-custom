@@ -198,13 +198,13 @@ bool Patch::isValid() const {
 		return false;
 	}
 
-	for ( const_iterator i = m_ctrl.begin(); i != m_ctrl.end(); ++i )
+	for ( const auto& control : m_ctrl )
 	{
-		if ( !float_valid( ( *i ).m_vertex.x() )
-		  || !float_valid( ( *i ).m_vertex.y() )
-		  || !float_valid( ( *i ).m_vertex.z() )
-		  || !float_valid( ( *i ).m_texcoord.x() )
-		  || !float_valid( ( *i ).m_texcoord.y() ) ) {
+		if ( !float_valid( control.m_vertex.x() )
+		  || !float_valid( control.m_vertex.y() )
+		  || !float_valid( control.m_vertex.z() )
+		  || !float_valid( control.m_texcoord.x() )
+		  || !float_valid( control.m_texcoord.y() ) ) {
 			globalErrorStream() << "patch has invalid control points\n";
 			return false;
 		}
@@ -277,10 +277,10 @@ void Patch::UpdateCachedData(){
 			first = last;
 		}
 
-		for ( Array<ArbitraryMeshVertex>::iterator i = m_tess.m_vertices.begin(); i != m_tess.m_vertices.end(); ++i )
+		for ( auto& v : m_tess.m_vertices )
 		{
-			vector3_normalise( reinterpret_cast<Vector3&>( ( *i ).tangent ) );
-			vector3_normalise( reinterpret_cast<Vector3&>( ( *i ).bitangent ) );
+			vector3_normalise( reinterpret_cast<Vector3&>( v.tangent ) );
+			vector3_normalise( reinterpret_cast<Vector3&>( v.bitangent ) );
 		}
 	}
 #endif
@@ -765,9 +765,9 @@ void Patch::NaturalTexture(){
 void Patch::AccumulateBBox(){
 	m_aabb_local = AABB();
 
-	for ( PatchControlArray::iterator i = m_ctrlTransformed.begin(); i != m_ctrlTransformed.end(); ++i )
+	for ( const auto& control : m_ctrlTransformed )
 	{
-		aabb_extend_by_point_safe( m_aabb_local, ( *i ).m_vertex );
+		aabb_extend_by_point_safe( m_aabb_local, control.m_vertex );
 	}
 
 	if( !m_transformChanged ) //experimental! fixing extra sceneChangeNotify call during scene rendering
@@ -2282,10 +2282,10 @@ void Patch::BuildTesselationCurves( EMatrixMajor major ){
 	std::size_t nArrayLength = 1;
 
 	if ( m_patchDef3 ) {
-		for ( Array<std::size_t>::iterator i = arrayLength.begin(); i != arrayLength.end(); ++i )
+		for ( auto& len : arrayLength )
 		{
-			*i = Array<std::size_t>::value_type( ( major == ROW ) ? m_subdivisions_x : m_subdivisions_y );
-			nArrayLength += *i;
+			len = ( major == ROW ) ? m_subdivisions_x : m_subdivisions_y;
+			nArrayLength += len;
 		}
 	}
 	else
@@ -3314,11 +3314,7 @@ void add_patch_filter( PatchFilter& filter, int mask, bool invert ){
 }
 
 bool patch_filtered( Patch& patch ){
-	for ( PatchFilters::iterator i = g_patchFilters.begin(); i != g_patchFilters.end(); ++i )
-	{
-		if ( ( *i ).active() && ( *i ).filter( patch ) ) {
-			return true;
-		}
-	}
-	return false;
+	return std::ranges::any_of( g_patchFilters, [&patch]( PatchFilterWrapper& filter ){
+		return filter.active() && filter.filter( patch );
+	} );
 }

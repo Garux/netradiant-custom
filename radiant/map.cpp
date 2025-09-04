@@ -530,9 +530,9 @@ void Node_insertChildFirst( scene::Node& parent, scene::Node& child ){
 	Node_getTraversable( parent )->traverse( CollectAllWalker( parent, nodes ) );
 	Node_getTraversable( parent )->insert( child );
 
-	for ( UnsortedNodeSet::iterator i = nodes.begin(); i != nodes.end(); ++i )
+	for ( auto& node : nodes )
 	{
-		Node_getTraversable( parent )->insert( ( *i ) );
+		Node_getTraversable( parent )->insert( node );
 	}
 }
 
@@ -2278,7 +2278,7 @@ void map_autocaulk_selected(){
 		}
 
 		Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( file );
-		while( 1 ){
+		while( true ){
 			const char* num = tokeniser.getToken();
 			if( !num )
 				break;

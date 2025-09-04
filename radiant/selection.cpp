@@ -991,14 +991,10 @@ public:
 		};
 		std::vector<InFaceOutBrush> m_faces;
 		std::vector<InFaceOutBrush>::iterator faceFind( const Face* face ){
-			return std::find_if( m_faces.begin(), m_faces.end(), [face]( const InFaceOutBrush& infaceoutbrush ){
-				return face == infaceoutbrush.m_face;
-			} );
+			return std::ranges::find( m_faces, face, &InFaceOutBrush::m_face );
 		}
 		std::vector<InFaceOutBrush>::const_iterator faceFind( const Face* face ) const {
-			return std::find_if( m_faces.begin(), m_faces.end(), [face]( const InFaceOutBrush& infaceoutbrush ){
-				return face == infaceoutbrush.m_face;
-			} );
+			return std::ranges::find( m_faces, face, &InFaceOutBrush::m_face );
 		}
 		bool faceExcluded( const Face* face ) const {
 			return faceFind( face ) == m_faces.end();
@@ -1006,8 +1002,7 @@ public:
 	};
 	std::vector<ExtrudeSource> m_extrudeSources;
 
-	DragExtrudeFaces(){
-	}
+	DragExtrudeFaces() = default;
 	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
 		m_axisZ = vector3_max_abs_component_index( m_planeSelected.normal() );
 		Vector3 xydir( m_view->getViewer() - m_0 );
@@ -1976,9 +1971,9 @@ class RotateManipulator : public Manipulator, public ManipulatorSelectionChangea
 			gl().glDrawArrays( GL_LINE_LOOP, 0, GLsizei( m_vertices.size() ) );
 		}
 		void setColour( const Colour4b& colour ){
-			for ( Array<PointVertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
+			for ( auto& v : m_vertices )
 			{
-				( *i ).colour = colour;
+				v.colour = colour;
 			}
 		}
 	};
@@ -1995,9 +1990,9 @@ class RotateManipulator : public Manipulator, public ManipulatorSelectionChangea
 			gl().glDrawArrays( GL_LINE_STRIP, 0, GLsizei( m_vertices.size() ) );
 		}
 		void setColour( const Colour4b& colour ){
-			for ( Array<PointVertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
+			for ( auto& v : m_vertices )
 			{
-				( *i ).colour = colour;
+				v.colour = colour;
 			}
 		}
 	};
@@ -2377,9 +2372,9 @@ class TranslateManipulator : public Manipulator, public ManipulatorSelectionChan
 			gl().glDrawArrays( GL_TRIANGLES, 0, GLsizei( m_vertices.size() ) );
 		}
 		void setColour( const Colour4b& colour ){
-			for ( Array<FlatShadedVertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
+			for ( auto& v : m_vertices )
 			{
-				( *i ).colour = colour;
+				v.colour = colour;
 			}
 		}
 	};
@@ -2775,8 +2770,8 @@ class SkewManipulator : public Manipulator, public ManipulatorSelectionChangeabl
 			gl().glDrawArrays( GL_TRIANGLES, 0, GLsizei( m_vertices.size() ) );
 		}
 		void setColour( const Colour4b & colour ) {
-			for( Array<FlatShadedVertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i ) {
-				( *i ).colour = colour;
+			for( auto& v : m_vertices ) {
+				v.colour = colour;
 			}
 		}
 	};
@@ -4117,8 +4112,7 @@ namespace detail
 {
 inline void testselect_scene_point__brush( BrushInstance* brush, ScenePointSelector& m_selector, SelectionTest& m_test ){
 	m_test.BeginMesh( brush->localToWorld() );
-	for( Brush::const_iterator i = brush->getBrush().begin(); i != brush->getBrush().end(); ++i ) {
-		Face* face = *i;
+	for( const auto& face : brush->getBrush() ) {
 		if( !face->isFiltered() ) {
 			SelectionIntersection intersection;
 			face->testSelect( m_test, intersection );
@@ -5031,9 +5025,9 @@ class UVManipulator : public Manipulator, public Manipulatable
 			gl().glDrawArrays( GL_LINE_LOOP, 0, GLsizei( m_vertices.size() ) );
 		}
 		void setColour( const Colour4b& colour ){
-			for ( Array<PointVertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
+			for ( auto& v : m_vertices )
 			{
-				( *i ).colour = colour;
+				v.colour = colour;
 			}
 		}
 	};
@@ -7487,9 +7481,11 @@ public:
 			Scene_TestSelect( pool, volume, scissored, Mode(), ComponentMode() );
 		}
 
-		for ( SelectionPool::iterator i = pool.begin(); i != pool.end(); ++i )
+		for ( auto& [ intersection, selectable ] : pool )
 		{
-			( *i ).second->setSelected( rect.modifier == rect_t::eSelect? true : rect.modifier == rect_t::eDeselect? false : !( *i ).second->isSelected() );
+			selectable->setSelected( rect.modifier == rect_t::eSelect? true
+			                       : rect.modifier == rect_t::eDeselect? false
+			                       : !selectable->isSelected() );
 		}
 	}
 

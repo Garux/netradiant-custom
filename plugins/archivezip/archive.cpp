@@ -203,9 +203,9 @@ public:
 		}
 	}
 	~ZipArchive(){
-		for ( ZipFileSystem::iterator i = m_filesystem.begin(); i != m_filesystem.end(); ++i )
+		for ( auto& [ path, entry ] : m_filesystem )
 		{
-			delete i->second.file();
+			delete entry.file();
 		}
 	}
 

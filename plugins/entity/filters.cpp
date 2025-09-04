@@ -57,11 +57,5 @@ void add_entity_filter( EntityFilter& filter, int mask, bool invert ){
 }
 
 bool entity_filtered( Entity& entity ){
-	for ( EntityFilters::iterator i = g_entityFilters.begin(); i != g_entityFilters.end(); ++i )
-	{
-		if ( ( *i ).active() && ( *i ).filter( entity ) ) {
-			return true;
-		}
-	}
-	return false;
+	return std::ranges::any_of( g_entityFilters, [&entity]( EntityFilterWrapper& f ){ return f.active() && f.filter( entity ); } );
 }

@@ -90,7 +90,7 @@ public:
 			return dot < m_mindot + 0.001 || dot > m_maxdot - 0.001;
 		}
 		else{ // note: straight equality check: may explode, when used with modified faces (e.g. ePull tmpbrush offset faces forth and back) (works so far)
-			return std::find( m_exclude_vec.begin(), m_exclude_vec.end(), face.getPlane().plane3().normal() ) != m_exclude_vec.end();
+			return std::ranges::find( m_exclude_vec, face.getPlane().plane3().normal() ) != m_exclude_vec.end();
 		}
 	}
 	void excludeFaces( BrushInstance& brushInstance ){
@@ -524,13 +524,7 @@ typedef Function<bool(const Face&, const Plane3&, bool), Face_testPlane> FaceTes
 bool Brush_testPlane( const Brush& brush, const Plane3& plane, bool flipped ){
 	brush.evaluateBRep();
 #if 1
-	for ( Brush::const_iterator i( brush.begin() ); i != brush.end(); ++i )
-	{
-		if ( Face_testPlane( *( *i ), plane, flipped ) ) {
-			return false;
-		}
-	}
-	return true;
+	return std::ranges::none_of( brush, [&]( const FaceSmartPointer& face ){ return Face_testPlane( *face, plane, flipped ); } );
 #else
 	return Brush_findIf( brush, bindArguments( FaceTestPlane(), makeReference( plane ), flipped ) ) == 0;
 #endif
@@ -539,10 +533,10 @@ bool Brush_testPlane( const Brush& brush, const Plane3& plane, bool flipped ){
 brushsplit_t Brush_classifyPlane( const Brush& brush, const Plane3& plane ){
 	brush.evaluateBRep();
 	brushsplit_t split;
-	for ( Brush::const_iterator i( brush.begin() ); i != brush.end(); ++i )
+	for ( const auto& face : brush )
 	{
-		if ( ( *i )->contributes() ) {
-			split += Winding_ClassifyPlane( ( *i )->getWinding(), plane );
+		if ( face->contributes() ) {
+			split += Winding_ClassifyPlane( face->getWinding(), plane );
 		}
 	}
 	return split;
@@ -653,8 +647,9 @@ public:
 	void post( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( Brush* thebrush = Node_getBrush( path.top() ) ) {
 			if ( path.top().get().visible() && !Instance_isSelected( instance )
-			&& std::any_of( m_brushlist.cbegin(), m_brushlist.cend(),
-			[thebrush]( const Brush *b ){ return aabb_intersects_aabb( thebrush->localAABB(), b->localAABB() ); } ) ) {
+			  && std::ranges::any_of( m_brushlist, [thebrush]( const Brush *b ){
+					return aabb_intersects_aabb( thebrush->localAABB(), b->localAABB() );
+			} ) ) {
 				brush_vector_t buffer[2];
 				bool swap = false;
 				auto *original = new Brush( *thebrush );
@@ -907,9 +902,9 @@ bool Brush_merge( Brush& brush, const brush_vector_t& in, bool onlyshape ){
 				}
 			}
 		}
-		for ( Faces::const_iterator i = faces.begin(); i != faces.end(); ++i )
+		for ( const auto *face : faces )
 		{
-			if ( !brush.addFace( *( *i ) ) ) {
+			if ( !brush.addFace( *face ) ) {
 				// result would have too many sides
 				return false;
 			}
@@ -996,7 +991,7 @@ public:
 			m_vertices.push_back( vertex );
 	}
 	bool contains( const DoubleVector3& vertex ) const {
-		return std::any_of( begin(), end(), [&vertex]( const DoubleVector3& v ){ return Edge_isDegenerate( vertex, v ); } );
+		return std::ranges::any_of( m_vertices, [&vertex]( const DoubleVector3& v ){ return Edge_isDegenerate( vertex, v ); } );
 	}
 	const_iterator begin() const {
 		return m_vertices.begin();
@@ -1058,7 +1053,7 @@ class MergePlanes
 public:
 	typedef Planes::const_iterator const_iterator;
 	void insert( const MergePlane& plane ){
-		if( std::none_of( begin(), end(), [&plane]( const MergePlane& pla ){ return plane3_equal( plane.m_plane, pla.m_plane ); } ) )
+		if( std::ranges::none_of( m_planes, [&plane]( const MergePlane& pla ){ return plane3_equal( plane.m_plane, pla.m_plane ); } ) )
 			m_planes.push_back( plane );
 	}
 	const_iterator begin() const {

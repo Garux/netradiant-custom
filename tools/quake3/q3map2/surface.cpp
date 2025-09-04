@@ -3113,7 +3113,8 @@ static void VolumeColorMods( const entity_t& e, mapDrawSurface_t *ds ){
 		for ( bspDrawVert_t& vert : Span( ds->verts, ds->numVerts ) )
 		{
 			if( std::ranges::none_of( b->sides, [&vert]( const side_t& side ){
-				return plane3_distance_to_point( mapplanes[ side.planenum ].plane, vert.xyz ) > 1.0f; } ) ) /* point-plane test */
+				return plane3_distance_to_point( mapplanes[ side.planenum ].plane, vert.xyz ) > 1.0f; /* point-plane test */
+			} ) )
 				/* apply colormods */
 				ColorMod( b->contentShader->colorMod, 1, &vert );
 		}

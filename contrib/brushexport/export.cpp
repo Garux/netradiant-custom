@@ -103,11 +103,10 @@ void ExportData::AddBrushFace( Face& f ){
 	if ( mode == COLLAPSE_BY_MATERIAL ) {
 		// find a group for this material
 		current = 0;
-		const std::list<group>::iterator end( groups.end() );
-		for ( std::list<group>::iterator it( groups.begin() ); it != end; ++it )
+		for ( auto& group : groups )
 		{
-			if ( it->name == shadername ) {
-				current = &( *it );
+			if ( group.name == shadername ) {
+				current = &group;
 			}
 		}
 
@@ -238,7 +237,7 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 				std::size_t vertexN = 0; // vertex index to use, 0 is special value = no vertex to weld to found
 				const DoubleVector3& vertex = w[i].vertex;
 				if( weld ){
-					auto found = std::find_if( vertices.begin(), vertices.end(), [&vertex]( const DoubleVector3& othervertex ){
+					auto found = std::ranges::find_if( vertices, [&vertex]( const DoubleVector3& othervertex ){
 						return Edge_isDegenerate( vertex, othervertex );
 					} );
 					if( found == vertices.end() ){ // unique vertex, add to the list

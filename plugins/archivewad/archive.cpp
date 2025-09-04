@@ -158,8 +158,8 @@ public:
 			return;
 		}
 
-		for ( files_t::iterator i = m_files.begin(); i != m_files.end(); ++i )
-			visitor.file( i->first.c_str() );
+		for ( const auto& [ name, wad ] : m_files )
+			visitor.file( name.c_str() );
 	}
 };
 

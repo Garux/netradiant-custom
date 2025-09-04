@@ -39,9 +39,9 @@ public:
 		m_modules.push_back( &module );
 	}
 	void registerModules() const {
-		for ( RegisterableModules::const_iterator i = m_modules.begin(); i != m_modules.end(); ++i )
+		for ( auto *module : m_modules )
 		{
-			( *i )->selfRegister();
+			module->selfRegister();
 		}
 	}
 };

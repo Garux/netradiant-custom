@@ -1219,9 +1219,9 @@ void Texdef_FitTexture( TextureProjection& projection, std::size_t width, std::s
 
 	// the bounds of the current texture transform
 	AABB bounds;
-	for ( Winding::const_iterator i = w.begin(); i != w.end(); ++i )
+	for ( const auto& v : w )
 	{
-		Vector3 texcoord = matrix4_transformed_point( local2tex, ( *i ).vertex );
+		Vector3 texcoord = matrix4_transformed_point( local2tex, v.vertex );
 		aabb_extend_by_point_safe( bounds, texcoord );
 	}
 	bounds.origin.z() = 0;

@@ -394,7 +394,7 @@ void Brush_ConstructIcosahedron( Brush& brush, const AABB& bounds, std::size_t s
 		}
 		const Plane3 plane = plane3_for_points( p );
 		if( plane3_valid( plane ) ){
-			if( std::none_of( planes.begin(), planes.end(), [&plane]( const Plane3& pla ){ return plane3_equal( plane, pla ); } ) ){
+			if( std::ranges::none_of( planes, [&plane]( const Plane3& pla ){ return plane3_equal( plane, pla ); } ) ){
 				planes.push_back( plane );
 				brush.addPlane( p[0] * radius + mid, p[1] * radius + mid, p[2] * radius + mid, shader, projection );
 			}
@@ -848,13 +848,7 @@ void Brush_ConstructPlacehoderCuboid( scene::Node& node, const AABB& bounds ){
 }
 
 bool Brush_hasShader( const Brush& brush, const char* name ){
-	for ( Brush::const_iterator i = brush.begin(); i != brush.end(); ++i )
-	{
-		if ( shader_equal( ( *i )->GetShader(), name ) ) {
-			return true;
-		}
-	}
-	return false;
+	return std::ranges::any_of( brush, [name]( const FaceSmartPointer& face ){ return shader_equal( face->GetShader(), name ); } );
 }
 
 class BrushSelectByShaderWalker : public scene::Graph::Walker

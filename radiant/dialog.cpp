@@ -265,9 +265,9 @@ public:
 // Dialog class
 
 Dialog::~Dialog(){
-	for ( DialogDataList::iterator i = m_data.begin(); i != m_data.end(); ++i )
+	for ( auto *data : m_data )
 	{
-		( *i )->release();
+		data->release();
 	}
 
 	ASSERT_MESSAGE( m_window == 0, "dialog window not destroyed" );
@@ -361,16 +361,16 @@ void Dialog::AddDialogData( QComboBox& widget, int& data ){
 }
 
 void Dialog::exportData(){
-	for ( DialogDataList::iterator i = m_data.begin(); i != m_data.end(); ++i )
+	for ( const auto *data : m_data )
 	{
-		( *i )->exportData();
+		data->exportData();
 	}
 }
 
 void Dialog::importData(){
-	for ( DialogDataList::iterator i = m_data.begin(); i != m_data.end(); ++i )
+	for ( const auto *data : m_data )
 	{
-		( *i )->importData();
+		data->importData();
 	}
 }
 

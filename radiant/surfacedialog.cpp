@@ -1598,9 +1598,9 @@ public:
 		if ( brush != 0 ) {
 			m_test.BeginMesh( brush->localToWorld() );
 
-			for ( Brush::const_iterator i = brush->getBrush().begin(); i != brush->getBrush().end(); ++i )
+			for ( const auto& face : brush->getBrush() )
 			{
-				Face_getClosest( *( *i ), m_test, m_bestIntersection, m_texturable );
+				Face_getClosest( *face, m_test, m_bestIntersection, m_texturable );
 			}
 		}
 		else

@@ -1366,13 +1366,7 @@ public:
 		return m_winding.numpoints > 2;
 	}
 	bool is_bounded() const {
-		for ( Winding::const_iterator i = m_winding.begin(); i != m_winding.end(); ++i )
-		{
-			if ( ( *i ).adjacent == c_brush_maxFaces ) {
-				return false;
-			}
-		}
-		return true;
+		return std::ranges::find( m_winding, c_brush_maxFaces, &WindingVertex::adjacent ) == m_winding.end();
 	}
 };
 
@@ -2580,11 +2574,11 @@ extern FaceInstanceSet g_SelectedFaceInstances;
 typedef std::list<std::size_t> VertexSelection;
 
 inline VertexSelection::iterator VertexSelection_find( VertexSelection& self, std::size_t value ){
-	return std::find( self.begin(), self.end(), value );
+	return std::ranges::find( self, value );
 }
 
 inline VertexSelection::const_iterator VertexSelection_find( const VertexSelection& self, std::size_t value ){
-	return std::find( self.begin(), self.end(), value );
+	return std::ranges::find( self, value );
 }
 
 inline VertexSelection::iterator VertexSelection_insert( VertexSelection& self, std::size_t value ){
@@ -2742,9 +2736,9 @@ public:
 
 	template<typename Functor>
 	void SelectedVertices_foreach( Functor functor ) const {
-		for ( VertexSelection::const_iterator i = m_vertexSelection.begin(); i != m_vertexSelection.end(); ++i )
+		for ( auto face : m_vertexSelection )
 		{
-			std::size_t index = Winding_FindAdjacent( getFace().getWinding(), *i );
+			std::size_t index = Winding_FindAdjacent( getFace().getWinding(), face );
 			if ( index != c_brush_maxFaces ) {
 				functor( getFace().getWinding()[index].vertex );
 			}
@@ -2752,9 +2746,9 @@ public:
 	}
 	template<typename Functor>
 	void SelectedEdges_foreach( Functor functor ) const {
-		for ( VertexSelection::const_iterator i = m_edgeSelection.begin(); i != m_edgeSelection.end(); ++i )
+		for ( auto face : m_edgeSelection )
 		{
-			std::size_t index = Winding_FindAdjacent( getFace().getWinding(), *i );
+			std::size_t index = Winding_FindAdjacent( getFace().getWinding(), face );
 			if ( index != c_brush_maxFaces ) {
 				const Winding& winding = getFace().getWinding();
 				std::size_t adjacent = Winding_next( winding, index );
@@ -2783,16 +2777,16 @@ public:
 	void gatherSelectedComponents( const Vector3Callback& callback ) const {
 		const Winding& winding = getFace().getWinding();
 		if( isSelected() )
-			for ( std::size_t i = 0; i != winding.numpoints; ++i )
-				callback( winding[i].vertex );
-		for ( VertexSelection::const_iterator i = m_vertexSelection.begin(); i != m_vertexSelection.end(); ++i ){
-			std::size_t index = Winding_FindAdjacent( winding, *i );
+			for ( const auto& v : winding )
+				callback( v.vertex );
+		for ( auto face : m_vertexSelection ){
+			std::size_t index = Winding_FindAdjacent( winding, face );
 			if ( index != c_brush_maxFaces ) {
 				callback( winding[index].vertex );
 			}
 		}
-		for ( VertexSelection::const_iterator i = m_edgeSelection.begin(); i != m_edgeSelection.end(); ++i ){
-			std::size_t index = Winding_FindAdjacent( winding, *i );
+		for ( auto face : m_edgeSelection ){
+			std::size_t index = Winding_FindAdjacent( winding, face );
 			if ( index != c_brush_maxFaces ) {
 				std::size_t adjacent = Winding_next( winding, index );
 				callback( winding[index].vertex );
@@ -2858,11 +2852,9 @@ public:
 	bool trySelectPlane( const SelectionTest& test ){
 		const Vector3 projected = vector4_projected( matrix4_transformed_vector4( test.getVolume().GetViewMatrix(), Vector4( getFace().centroid(), 1 ) ) );
 		const Vector3 closest_point = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, projected[2], 1 ) ) );
-		for ( Winding::const_iterator i = getFace().getWinding().begin(); i != getFace().getWinding().end(); ++i ){
-			if ( vector3_dot( getFace().plane3().normal(), closest_point - ( *i ).vertex ) < 0.005 ) /* epsilon to prevent almost perpendicular faces pickup */
-				return false;
-		}
-		return true;
+		return std::ranges::none_of( getFace().getWinding(), [&]( const WindingVertex& v ){
+			return vector3_dot( getFace().plane3().normal(), closest_point - v.vertex ) < 0.005;
+		} ); /* epsilon to prevent almost perpendicular faces pickup */
 	}
 
 	void transformComponents( const Matrix4& matrix ){

@@ -460,11 +460,10 @@ bool XmlTagBuilder::DeleteTag( const char* tag ){
 
 	std::set<CopiedString> dellist;
 	TagSearch( expression, dellist );
-	std::set<CopiedString>::iterator iter;
 
-	for ( iter = dellist.begin(); iter != dellist.end(); iter++ )
+	for ( const auto& del : dellist )
 	{
-		DeleteShaderTag( iter->c_str(), tag );
+		DeleteShaderTag( del.c_str(), tag );
 	}
 
 	return true;

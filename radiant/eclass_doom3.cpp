@@ -59,9 +59,9 @@ EntityClass *g_EntityClassDoom3_bad = 0;
 
 
 void EntityClassDoom3_clear(){
-	for ( EntityClasses::iterator i = g_EntityClassDoom3_classes.begin(); i != g_EntityClassDoom3_classes.end(); ++i )
+	for ( auto& [ name, eclass ] : g_EntityClassDoom3_classes )
 	{
-		( *i ).second->free( ( *i ).second );
+		eclass->free( eclass );
 	}
 	g_EntityClassDoom3_classes.clear();
 }
@@ -73,9 +73,9 @@ EntityClass* EntityClassDoom3_insertUnique( EntityClass* entityClass ){
 }
 
 void EntityClassDoom3_forEach( EntityClassVisitor& visitor ){
-	for ( EntityClasses::iterator i = g_EntityClassDoom3_classes.begin(); i != g_EntityClassDoom3_classes.end(); ++i )
+	for ( auto& [ name, eclass ] : g_EntityClassDoom3_classes )
 	{
-		visitor.visit( ( *i ).second );
+		visitor.visit( eclass );
 	}
 }
 
@@ -84,7 +84,7 @@ inline void printParseError( const char* message ){
 }
 
 //#define PARSE_RETURN_FALSE_IF_FAIL( expression ) if ( !( expression ) ) { printParseError( FILE_LINE "\nparse failed: " # expression "\n" ); return false; } else
-#define PARSE_RETURN_FALSE_IF_FAIL( expression ) do{ if ( !( expression ) ) { printParseError( FILE_LINE "\nparse failed: " # expression "\n" ); return false; } }while( 0 )
+#define PARSE_RETURN_FALSE_IF_FAIL( expression ) do{ if ( !( expression ) ) { printParseError( FILE_LINE "\nparse failed: " # expression "\n" ); return false; } }while( false )
 
 bool EntityClassDoom3_parseToken( Tokeniser& tokeniser ){
 	const char* token = tokeniser.getToken();
@@ -671,9 +671,9 @@ void EntityClass_resolveInheritance( EntityClass* derivedClass ){
 				derivedClass->fixedsize = parentClass->fixedsize;
 			}
 
-			for ( EntityClassAttributes::iterator j = parentClass->m_attributes.begin(); j != parentClass->m_attributes.end(); ++j )
+			for ( const auto& [ name, attr ] : parentClass->m_attributes )
 			{
-				EntityClass_insertAttribute( *derivedClass, ( *j ).first.c_str(), ( *j ).second );
+				EntityClass_insertAttribute( *derivedClass, name.c_str(), attr );
 			}
 		}
 	}
@@ -692,44 +692,44 @@ public:
 			GlobalFileSystem().forEachFile( "def/", "def", makeCallbackF( EntityClassDoom3_loadFile ) );
 
 			{
-				for ( Models::iterator i = g_models.begin(); i != g_models.end(); ++i )
+				for ( auto& [ name, model ] : g_models )
 				{
-					Model_resolveInheritance( ( *i ).first.c_str(), ( *i ).second );
+					Model_resolveInheritance( name.c_str(), model );
 				}
 			}
 			{
-				for ( EntityClasses::iterator i = g_EntityClassDoom3_classes.begin(); i != g_EntityClassDoom3_classes.end(); ++i )
+				for ( auto& [ name, eclass ] : g_EntityClassDoom3_classes )
 				{
-					EntityClass_resolveInheritance( ( *i ).second );
-					if ( !( *i ).second->m_modelpath.empty() ) {
-						Models::iterator j = g_models.find( ( *i ).second->m_modelpath );
+					EntityClass_resolveInheritance( eclass );
+					if ( !eclass->m_modelpath.empty() ) {
+						Models::iterator j = g_models.find( eclass->m_modelpath );
 						if ( j != g_models.end() ) {
-							( *i ).second->m_modelpath = ( *j ).second.m_mesh;
-							( *i ).second->m_skin = ( *j ).second.m_skin;
+							eclass->m_modelpath = ( *j ).second.m_mesh;
+							eclass->m_skin = ( *j ).second.m_skin;
 						}
 					}
-					eclass_capture_state( ( *i ).second );
+					eclass_capture_state( eclass );
 
 					StringOutputStream usage( 256 );
 
 					usage << "-------- NOTES --------\n";
 
-					if ( !( *i ).second->m_comments.empty() ) {
-						usage << ( *i ).second->m_comments << '\n';
+					if ( !eclass->m_comments.empty() ) {
+						usage << eclass->m_comments << '\n';
 					}
 
 					usage << "\n-------- KEYS --------\n";
 
-					for ( EntityClassAttributes::iterator j = ( *i ).second->m_attributes.begin(); j != ( *i ).second->m_attributes.end(); ++j )
+					for ( const auto& pair : eclass->m_attributes )
 					{
-						const char* name = EntityClassAttributePair_getName( *j );
-						const char* description = EntityClassAttributePair_getDescription( *j );
+						const char* name = EntityClassAttributePair_getName( pair );
+						const char* description = EntityClassAttributePair_getDescription( pair );
 						if ( !string_equal( name, description ) ) {
-							usage << EntityClassAttributePair_getName( *j ) << " : " << EntityClassAttributePair_getDescription( *j ) << '\n';
+							usage << name << " : " << description << '\n';
 						}
 					}
 
-					( *i ).second->m_comments = usage;
+					eclass->m_comments = usage;
 				}
 			}
 

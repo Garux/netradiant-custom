@@ -404,12 +404,12 @@ public:
 		const StaticElement brushElement( "brush" );
 		importer.pushElement( brushElement );
 
-		for ( Brush::const_iterator i = m_brush.begin(); i != m_brush.end(); ++i )
+		for ( const auto& face : m_brush )
 		{
-			if ( ( *i )->contributes() ) {
+			if ( face->contributes() ) {
 				const StaticElement element( "plane" );
 				importer.pushElement( element );
-				FaceXMLExporter( *( *i ) ).exportXML( importer );
+				FaceXMLExporter( *face ).exportXML( importer );
 				importer.popElement( element.name() );
 			}
 		}

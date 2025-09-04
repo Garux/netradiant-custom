@@ -97,13 +97,7 @@ std::size_t ProximalVertexArray_index( const ProximalVertexArray& array, const P
 
 
 inline bool Brush_isBounded( const Brush& brush ){
-	for ( Brush::const_iterator i = brush.begin(); i != brush.end(); ++i )
-	{
-		if ( !( *i )->is_bounded() ) {
-			return false;
-		}
-	}
-	return true;
+	return std::ranges::all_of( brush, std::identity{}, &Face::is_bounded );
 }
 
 void Brush::buildBRep(){
@@ -113,12 +107,12 @@ void Brush::buildBRep(){
 
 	std::size_t faces_size = 0;
 	std::size_t faceVerticesCount = 0;
-	for ( Faces::const_iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+	for ( const auto& face : m_faces )
 	{
-		if ( ( *i )->contributes() ) {
+		if ( face->contributes() ) {
 			++faces_size;
 		}
-		faceVerticesCount += ( *i )->getWinding().numpoints;
+		faceVerticesCount += face->getWinding().numpoints;
 	}
 
 	if ( degenerate || faces_size < 4 || faceVerticesCount != ( faceVerticesCount >> 1 ) << 1 ) { // sum of vertices for each face of a valid polyhedron is always even
@@ -134,9 +128,9 @@ void Brush::buildBRep(){
 		m_uniqueEdgePoints.resize( 0 );
 		m_uniqueVertexPoints.resize( 0 );
 
-		for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+		for ( auto& face : m_faces )
 		{
-			( *i )->getWinding().resize( 0 );
+			face->getWinding().resize( 0 );
 		}
 	}
 	else
@@ -176,18 +170,18 @@ void Brush::buildBRep(){
 
 				{
 					UniqueVertexBuffer<ProximalVertex> inserter( uniqueEdges );
-					for ( ProximalVertexArray::iterator i = edgePairs.begin(); i != edgePairs.end(); ++i )
+					for ( const auto& node : edgePairs )
 					{
-						uniqueEdgeIndices.insert( inserter.insert( ProximalVertex( &( *i ) ) ) );
+						uniqueEdgeIndices.insert( inserter.insert( ProximalVertex( &node ) ) );
 					}
 				}
 
 				{
 					edge_clear();
 					m_select_edges.reserve( uniqueEdges.size() );
-					for ( UniqueEdges::iterator i = uniqueEdges.begin(); i != uniqueEdges.end(); ++i )
+					for ( const auto& v : uniqueEdges )
 					{
-						edge_push_back( faceVertices[ProximalVertexArray_index( edgePairs, *i )] );
+						edge_push_back( faceVertices[ProximalVertexArray_index( edgePairs, v )] );
 					}
 				}
 
@@ -235,18 +229,18 @@ void Brush::buildBRep(){
 
 				{
 					UniqueVertexBuffer<ProximalVertex> inserter( uniqueVertices );
-					for ( ProximalVertexArray::iterator i = vertexRings.begin(); i != vertexRings.end(); ++i )
+					for ( auto& node : vertexRings )
 					{
-						uniqueVertexIndices.insert( inserter.insert( ProximalVertex( &( *i ) ) ) );
+						uniqueVertexIndices.insert( inserter.insert( ProximalVertex( &node ) ) );
 					}
 				}
 
 				{
 					vertex_clear();
 					m_select_vertices.reserve( uniqueVertices.size() );
-					for ( UniqueVertices::iterator i = uniqueVertices.begin(); i != uniqueVertices.end(); ++i )
+					for ( const auto& v : uniqueVertices )
 					{
-						vertex_push_back( faceVertices[ProximalVertexArray_index( vertexRings, ( *i ) )] );
+						vertex_push_back( faceVertices[ProximalVertexArray_index( vertexRings, v )] );
 					}
 				}
 
@@ -310,8 +304,8 @@ void Brush::buildBRep(){
 		}
 
 		if( m_vertexModeOn ){
-			for ( Observers::iterator o = m_observers.begin(); o != m_observers.end(); ++o )
-				( *o )->vertex_select();
+			for ( auto *observer : m_observers )
+				observer->vertex_select();
 		}
 	}
 	m_BRep_evaluation = false;
@@ -350,13 +344,7 @@ void add_face_filter( FaceFilter& filter, int mask, bool invert ){
 }
 
 bool face_filtered( Face& face ){
-	for ( FaceFilters::iterator i = g_faceFilters.begin(); i != g_faceFilters.end(); ++i )
-	{
-		if ( ( *i ).active() && ( *i ).filter( face ) ) {
-			return true;
-		}
-	}
-	return false;
+	return std::ranges::any_of( g_faceFilters, [&face]( FaceFilterWrapper& f ){ return f.active() && f.filter( face ); } );
 }
 
 
@@ -392,13 +380,7 @@ void add_brush_filter( BrushFilter& filter, int mask, bool invert ){
 }
 
 bool brush_filtered( Brush& brush ){
-	for ( BrushFilters::iterator i = g_brushFilters.begin(); i != g_brushFilters.end(); ++i )
-	{
-		if ( ( *i ).active() && ( *i ).filter( brush ) ) {
-			return true;
-		}
-	}
-	return false;
+	return std::ranges::any_of( g_brushFilters, [&brush]( BrushFilterWrapper& f ){ return f.active() && f.filter( brush ); } );
 }
 
 
@@ -426,7 +408,7 @@ public:
 		m_planes.push_back( plane );
 	}
 	iterator find( const Plane3& plane ){
-		return std::find_if( begin(), end(), [&plane]( const VertexModePlane& pla ){ return plane3_equal( plane, pla.m_plane ); } );
+		return std::ranges::find_if( m_planes, [&plane]( const VertexModePlane& pla ){ return plane3_equal( plane, pla.m_plane ); } );
 	}
 	const_iterator begin() const {
 		return m_planes.begin();
@@ -447,8 +429,8 @@ public:
 
 const Face* vertex_mode_find_common_face( const Brush::VertexModeVertex& v1, const Brush::VertexModeVertex& v2, const Brush::VertexModeVertex& v3 ){
 	for( const Face* face : v1.m_faces ){
-		if( std::find( v2.m_faces.begin(), v2.m_faces.end(), face ) != v2.m_faces.end()
-		 && std::find( v3.m_faces.begin(), v3.m_faces.end(), face ) != v3.m_faces.end() ){
+		if( std::ranges::find( v2.m_faces, face ) != v2.m_faces.end()
+		 && std::ranges::find( v3.m_faces, face ) != v3.m_faces.end() ){
 			return face;
 		}
 	}

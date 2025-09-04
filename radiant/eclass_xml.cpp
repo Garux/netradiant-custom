@@ -321,9 +321,9 @@ public:
 		m_eclass->m_comments = m_comment;
 		m_collector.insert( m_eclass );
 
-		for ( ListAttributeTypes::iterator i = m_listTypes.begin(); i != m_listTypes.end(); ++i )
+		for ( const auto& [ name, list ] : m_listTypes )
 		{
-			m_collector.insert( ( *i ).first.c_str(), ( *i ).second );
+			m_collector.insert( name.c_str(), list );
 		}
 	}
 	static const char* name(){

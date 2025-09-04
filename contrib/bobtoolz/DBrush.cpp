@@ -141,7 +141,7 @@ void DBrush::LoadFromBrush( scene::Instance& brush, bool textured ){
 int DBrush::PointPosition( vec3_t pnt ){
 	int state = POINT_IN_BRUSH; // if nothing happens point is inside brush
 
-	for ( DPlane *plane : faceList )
+	for ( const DPlane *plane : faceList )
 	{
 		float dist = plane->DistanceToPoint( pnt );
 
@@ -461,7 +461,7 @@ bool DBrush::IntersectsWith( DBrush *chkBrush ){
 		return false;
 	}
 
-	for ( DPlane *plane : faceList )
+	for ( const DPlane *plane : faceList )
 	{
 
 		bool allInFront = true;
@@ -477,7 +477,7 @@ bool DBrush::IntersectsWith( DBrush *chkBrush ){
 		}
 	}
 
-	for ( DPlane *plane : chkBrush->faceList )
+	for ( const DPlane *plane : chkBrush->faceList )
 	{
 		bool allInFront = true;
 		for ( DPoint *point : pointList )
@@ -621,10 +621,9 @@ bool DBrush::BBoxTouch( DBrush *chkBrush ){
 void DBrush::ResetChecks( const std::vector<CopiedString>& exclusionList ){
 	for ( DPlane *plane : faceList )
 	{
-		plane->m_bChkOk = std::any_of( exclusionList.cbegin(), exclusionList.cend(),
-			[plane]( const CopiedString& texture ){
-				return strstr( plane->m_shader.c_str(), texture.c_str() ) != nullptr;
-			} );
+		plane->m_bChkOk = std::ranges::any_of( exclusionList, [plane]( const CopiedString& texture ){
+			return strstr( plane->m_shader.c_str(), texture.c_str() ) != nullptr;
+		} );
 	}
 }
 
@@ -814,7 +813,7 @@ bool DBrush::operator ==( const DBrush* other ) const {
 
 DPlane* DBrush::AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, const char *textureName, bool bDetail ){
 	bBoundsBuilt = false;
-	DPlane* newFace = new DPlane( va, vb, vc, textureName, bDetail );
+	auto *newFace = new DPlane( va, vb, vc, textureName, bDetail );
 	faceList.push_back( newFace );
 
 	return newFace;

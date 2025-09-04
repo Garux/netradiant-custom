@@ -163,9 +163,9 @@ void Patch_addTextureChangedCallback( const SignalHandler& handler );
 void Patch_textureChanged();
 
 inline void BezierCurveTreeArray_deleteAll( Array<BezierCurveTree*>& curveTrees ){
-	for ( Array<BezierCurveTree*>::iterator i = curveTrees.begin(); i != curveTrees.end(); ++i )
+	for ( auto *curve : curveTrees )
 	{
-		BezierCurveTree_Delete( *i );
+		BezierCurveTree_Delete( curve );
 	}
 }
 
@@ -596,9 +596,9 @@ public:
 	}
 
 	void onAllocate( std::size_t size ){
-		for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
+		for ( auto *observer : m_observers )
 		{
-			( *i )->allocate( size );
+			observer->allocate( size );
 		}
 	}
 
@@ -1414,9 +1414,9 @@ public:
 	void allocate( std::size_t size ) override {
 		m_ctrl_instances.clear();
 		m_ctrl_instances.reserve( size );
-		for ( Patch::iterator i = m_patch.begin(); i != m_patch.end(); ++i )
+		for ( auto& control : m_patch )
 		{
-			m_ctrl_instances.push_back( PatchControlInstance( &( *i ), SelectedChangedComponentCaller( *this ) ) );
+			m_ctrl_instances.push_back( PatchControlInstance( &control, SelectedChangedComponentCaller( *this ) ) );
 		}
 	}
 
@@ -1436,13 +1436,14 @@ public:
 	void update_selected() const {
 		m_render_selected.clear();
 		Patch::iterator ctrl = m_patch.getControlPointsTransformed().begin();
-		for ( PatchControlInstances::const_iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i, ++ctrl )
+		for ( const auto& instance : m_ctrl_instances )
 		{
-			if ( ( *i ).m_selectable.isSelected() ) {
+			if ( instance.m_selectable.isSelected() ) {
 				const Colour4b colour_selected( 0, 0, 255, 255 );
-				m_render_selected.push_back( PointVertex( reinterpret_cast<Vertex3f&>( ( *ctrl ).m_vertex ), colour_selected ) );
+				m_render_selected.push_back( PointVertex( reinterpret_cast<Vertex3f&>( ctrl->m_vertex ), colour_selected ) );
 			}
 		}
+		++ctrl;
 	}
 
 #if 0
@@ -1506,19 +1507,13 @@ public:
 	}
 
 	void selectCtrl( bool select ){
-		for ( PatchControlInstances::iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i )
+		for ( auto& instance : m_ctrl_instances )
 		{
-			( *i ).m_selectable.setSelected( select );
+			instance.m_selectable.setSelected( select );
 		}
 	}
 	bool isSelectedComponents() const override {
-		for ( PatchControlInstances::const_iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i )
-		{
-			if ( ( *i ).m_selectable.isSelected() ) {
-				return true;
-			}
-		}
-		return false;
+		return std::ranges::any_of( m_ctrl_instances, []( const PatchControlInstance& instance ){ return instance.m_selectable.isSelected(); } );
 	}
 	void setSelectedComponents( bool select, SelectionSystem::EComponentMode mode ) override {
 		if ( mode == SelectionSystem::eVertex ) {
@@ -1535,9 +1530,9 @@ public:
 		{
 		case SelectionSystem::eVertex:
 			{
-				for ( PatchControlInstances::iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i )
+				for ( auto& instance : m_ctrl_instances )
 				{
-					( *i ).testSelect( selector, test );
+					instance.testSelect( selector, test );
 				}
 			}
 			break;
@@ -1572,42 +1567,37 @@ public:
 	const AABB& getSelectedComponentsBounds() const override {
 		m_aabb_component = AABB();
 
-		for ( PatchControlInstances::const_iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i )
+		for ( const auto& instance : m_ctrl_instances )
 		{
-			if ( ( *i ).m_selectable.isSelected() ) {
-				aabb_extend_by_point_safe( m_aabb_component, ( *i ).m_ctrl->m_vertex );
+			if ( instance.m_selectable.isSelected() ) {
+				aabb_extend_by_point_safe( m_aabb_component, instance.m_ctrl->m_vertex );
 			}
 		}
 
 		return m_aabb_component;
 	}
 	void gatherSelectedComponents( const Vector3Callback& callback ) const override {
-		for ( PatchControlInstances::const_iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i )
+		for ( const auto& instance : m_ctrl_instances )
 		{
-			if ( ( *i ).m_selectable.isSelected() ) {
-				callback( ( *i ).m_ctrl->m_vertex );
+			if ( instance.m_selectable.isSelected() ) {
+				callback( instance.m_ctrl->m_vertex );
 			}
 		}
 	}
 
 	bool selectedVertices() const {
-		for ( PatchControlInstances::const_iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i )
-		{
-			if ( ( *i ).m_selectable.isSelected() ) {
-				return true;
-			}
-		}
-		return false;
+		return std::ranges::any_of( m_ctrl_instances, []( const PatchControlInstance& instance ){ return instance.m_selectable.isSelected(); } );
 	}
 
 	void transformComponents( const Matrix4& matrix ){
 		if ( selectedVertices() ) {
 			PatchControlIter ctrl = m_patch.getControlPointsTransformed().begin();
-			for ( PatchControlInstances::iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i, ++ctrl )
+			for ( const auto& instance : m_ctrl_instances )
 			{
-				if ( ( *i ).m_selectable.isSelected() ) {
-					matrix4_transform_point( matrix, ( *ctrl ).m_vertex );
+				if ( instance.m_selectable.isSelected() ) {
+					matrix4_transform_point( matrix, ctrl->m_vertex );
 				}
+				++ctrl;
 			}
 			m_patch.UpdateCachedData();
 		}
@@ -1618,9 +1608,9 @@ public:
 	}
 
 	void invertComponentSelection(){
-		for ( PatchControlInstances::iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i )
+		for ( auto& instance : m_ctrl_instances )
 		{
-			( *i ).m_selectable.setSelected( !( *i ).m_selectable.isSelected() );
+			instance.m_selectable.setSelected( !instance.m_selectable.isSelected() );
 		}
 	}
 
@@ -1653,10 +1643,10 @@ public:
 	void snapComponents( float snap ) override {
 		if ( selectedVertices() ) {
 			m_patch.undoSave();
-			for ( PatchControlInstances::iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i )
+			for ( auto& instance : m_ctrl_instances )
 			{
-				if ( ( *i ).m_selectable.isSelected() ) {
-					( *i ).snapto( snap );
+				if ( instance.m_selectable.isSelected() ) {
+					instance.snapto( snap );
 				}
 			}
 			m_patch.controlPointsChanged();

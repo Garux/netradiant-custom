@@ -38,9 +38,9 @@ public:
 	}
 
 	void update(){
-		for ( ImportCallbacks::iterator i = m_importCallbacks.begin(); i != m_importCallbacks.end(); ++i )
+		for ( const auto& cb : m_importCallbacks )
 		{
-			m_exportCallback( *i );
+			m_exportCallback( cb );
 		}
 	}
 

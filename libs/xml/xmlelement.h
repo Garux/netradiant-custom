@@ -51,9 +51,9 @@ public:
 		}
 	}
 	void forEachAttribute( XMLAttrVisitor& visitor ) const override {
-		for ( attrs_t::const_iterator i = m_attrs.begin(); i != m_attrs.end(); ++i )
+		for ( const auto& [ name, value ] : m_attrs )
 		{
-			visitor.visit( i->first, i->second );
+			visitor.visit( name, value );
 		}
 	}
 private:
@@ -85,9 +85,9 @@ public:
 		}
 	}
 	void forEachAttribute( XMLAttrVisitor& visitor ) const override {
-		for ( attrs_t::const_iterator i = m_attrs.begin(); i != m_attrs.end(); ++i )
+		for ( const auto& [ name, value ] : m_attrs )
 		{
-			visitor.visit( i->first.c_str(), i->second.c_str() );
+			visitor.visit( name.c_str(), value.c_str() );
 		}
 	}
 private:

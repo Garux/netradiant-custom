@@ -709,13 +709,7 @@ void FindReplaceTextures( const char* pFind, const char* pReplace, bool bSelecte
 typedef std::vector<const char*> PropertyValues;
 
 bool propertyvalues_contain( const PropertyValues& propertyvalues, const char *str ){
-	for ( PropertyValues::const_iterator i = propertyvalues.begin(); i != propertyvalues.end(); ++i )
-	{
-		if ( string_equal( str, *i ) ) {
-			return true;
-		}
-	}
-	return false;
+	return std::ranges::any_of( propertyvalues, [str]( const char *prop ){ return string_equal( str, prop ); } );
 }
 
 template<typename EntityMatcher>

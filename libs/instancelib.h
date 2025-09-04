@@ -94,25 +94,25 @@ public:
 
 // traverse observer
 	void insert( scene::Node& child ) override {
-		for ( iterator i = begin(); i != end(); ++i )
+		for ( auto& [ key, instance ] : m_instances )
 		{
-			Node_traverseSubgraph( child, InstanceSubgraphWalker( ( *i ).first.first, ( *i ).first.second, ( *i ).second ) );
-			( *i ).second->boundsChanged();
+			Node_traverseSubgraph( child, InstanceSubgraphWalker( key.first, key.second, instance ) );
+			instance->boundsChanged();
 		}
 	}
 	void erase( scene::Node& child ) override {
-		for ( iterator i = begin(); i != end(); ++i )
+		for ( auto& [ key, instance ] : m_instances )
 		{
-			Node_traverseSubgraph( child, UninstanceSubgraphWalker( ( *i ).first.first, ( *i ).first.second ) );
-			( *i ).second->boundsChanged();
+			Node_traverseSubgraph( child, UninstanceSubgraphWalker( key.first, key.second ) );
+			instance->boundsChanged();
 		}
 	}
 
 // instance
 	void forEachInstance( const scene::Instantiable::Visitor& visitor ){
-		for ( iterator i = begin(); i != end(); ++i )
+		for ( auto& i : m_instances )
 		{
-			visitor.visit( *( *i ).second );
+			visitor.visit( *i.second );
 		}
 	}
 
@@ -129,16 +129,16 @@ public:
 	}
 
 	void transformChanged(){
-		for ( InstanceMap::iterator i = m_instances.begin(); i != m_instances.end(); ++i )
+		for ( auto& i : m_instances )
 		{
-			( *i ).second->transformChanged();
+			i.second->transformChanged();
 		}
 	}
 	typedef MemberCaller<InstanceSet, void(), &InstanceSet::transformChanged> TransformChangedCaller;
 	void boundsChanged(){
-		for ( InstanceMap::iterator i = m_instances.begin(); i != m_instances.end(); ++i )
+		for ( auto& i : m_instances )
 		{
-			( *i ).second->boundsChanged();
+			i.second->boundsChanged();
 		}
 	}
 	typedef MemberCaller<InstanceSet, void(), &InstanceSet::boundsChanged> BoundsChangedCaller;

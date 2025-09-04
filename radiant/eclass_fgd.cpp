@@ -106,7 +106,7 @@ do{\
 		ERROR_MESSAGE( message );\
 		s_fgd_warned = true;\
 	}\
-}while( 0 )
+}while( false )
 
 
 void EntityClassFGD_parseSplitString( Tokeniser& tokeniser, CopiedString& string ){

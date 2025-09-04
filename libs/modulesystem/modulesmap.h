@@ -32,9 +32,9 @@ class ModulesMap : public Modules<Type>
 	modules_t m_modules;
 public:
 	~ModulesMap(){
-		for ( modules_t::iterator i = m_modules.begin(); i != m_modules.end(); ++i )
+		for ( auto& [ name, module ] : m_modules )
 		{
-			( *i ).second->release();
+			module->release();
 		}
 	}
 
@@ -71,9 +71,9 @@ public:
 		return find( name );
 	}
 	void foreachModule( const typename Modules<Type>::Visitor& visitor ) override {
-		for ( modules_t::iterator i = m_modules.begin(); i != m_modules.end(); ++i )
+		for ( auto& [ name, module ] : m_modules )
 		{
-			visitor.visit( ( *i ).first.c_str(), *static_cast<const Type*>( Module_getTable( *( *i ).second ) ) );
+			visitor.visit( name.c_str(), *static_cast<const Type*>( Module_getTable( *module ) ) );
 		}
 	}
 };

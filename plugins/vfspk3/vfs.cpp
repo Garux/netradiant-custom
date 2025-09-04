@@ -142,8 +142,7 @@ static void InitPakFile( ArchiveModules& archiveModules, const char *filename ){
 }
 
 inline void pathlist_append_unique( StrList& pathlist, CopiedString path ){
-	if( std::none_of( pathlist.cbegin(), pathlist.cend(),
-	[&path]( const CopiedString& str ){ return path_compare( str.c_str(), path.c_str() ) == 0; } ) )
+	if( std::ranges::none_of( pathlist, [&path]( const CopiedString& str ){ return path_compare( str.c_str(), path.c_str() ) == 0; } ) )
 		pathlist.emplace_back( std::move( path ) );
 }
 
@@ -364,18 +363,18 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 			g_dir_close( dir );
 
 			// add the entries to the vfs
-			for ( Archives::iterator i = archivesOverride.begin(); i != archivesOverride.end(); ++i )
+			for ( const auto& archive : archivesOverride )
 			{
 				char filename[PATH_MAX];
 				strcpy( filename, path );
-				strcat( filename, ( *i ).c_str() );
+				strcat( filename, archive.c_str() );
 				InitPakFile( archiveModules, filename );
 			}
-			for ( Archives::iterator i = archives.begin(); i != archives.end(); ++i )
+			for ( const auto& archive : archives )
 			{
 				char filename[PATH_MAX];
 				strcpy( filename, path );
-				strcat( filename, ( *i ).c_str() );
+				strcat( filename, archive.c_str() );
 				InitPakFile( archiveModules, filename );
 			}
 		}

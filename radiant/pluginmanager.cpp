@@ -146,24 +146,15 @@ std::size_t CPluginSlot::getCommandCount(){
 }
 
 const char* CPluginSlot::getCommand( std::size_t n ){
-	std::list<CopiedString>::iterator i = m_CommandStrings.begin();
-	while ( n-- != 0 )
-		++i;
-	return ( *i ).c_str();
+	return std::next( m_CommandStrings.begin(), n )->c_str();
 }
 
 const char* CPluginSlot::getCommandTitle( std::size_t n ){
-	std::list<CopiedString>::iterator i = m_CommandTitleStrings.begin();
-	while ( n-- != 0 )
-		++i;
-	return ( *i ).c_str();
+	return std::next( m_CommandTitleStrings.begin(), n )->c_str();
 }
 
 const char* CPluginSlot::getGlobalCommand( std::size_t n ){
-	std::list<CopiedString>::iterator i = m_globalCommandNames.begin();
-	while ( n-- != 0 )
-		++i;
-	return ( *i ).c_str();
+	return std::next( m_globalCommandNames.begin(), n )->c_str();
 }
 
 void CPluginSlot::Dispatch( const char *p ){
@@ -187,19 +178,16 @@ public:
 };
 
 CPluginSlots::~CPluginSlots(){
-	std::list<CPluginSlot *>::iterator iSlot;
-	for ( iSlot = mSlots.begin(); iSlot != mSlots.end(); ++iSlot )
+	for ( auto& pluginSlot : mSlots )
 	{
-		delete *iSlot;
-		*iSlot = 0;
+		delete std::exchange( pluginSlot, nullptr );
 	}
 }
 
 void CPluginSlots::PopulateMenu( PluginsVisitor& menu ){
-	std::list<CPluginSlot *>::iterator iPlug;
-	for ( iPlug = mSlots.begin(); iPlug != mSlots.end(); ++iPlug )
+	for ( auto *pluginSlot : mSlots )
 	{
-		menu.visit( *( *iPlug ) );
+		menu.visit( *pluginSlot );
 	}
 }
 

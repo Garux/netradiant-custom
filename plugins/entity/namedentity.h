@@ -41,9 +41,9 @@ public:
 		m_callbacks.erase( callback );
 	}
 	void changed( const char* name ) const {
-		for ( NameCallbacks::const_iterator i = m_callbacks.begin(); i != m_callbacks.end(); ++i )
+		for ( const auto& cb : m_callbacks )
 		{
-			( *i )( name );
+			cb( name );
 		}
 	}
 };

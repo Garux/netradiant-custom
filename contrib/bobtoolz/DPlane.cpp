@@ -66,7 +66,7 @@ DPlane::~DPlane(){
 // Implementation
 //////////////////////////////////////////////////////////////////////
 
-vec_t DPlane::DistanceToPoint( vec3_t pnt ){
+vec_t DPlane::DistanceToPoint( const vec3_t pnt ) const {
 	vec3_t tmp;
 	VectorSubtract( pnt, points[0], tmp );
 	return DotProduct( tmp, normal );
@@ -105,9 +105,9 @@ bool DPlane::PlaneIntersection( DPlane *pl1, DPlane *pl2, vec3_t out ){
 bool DPlane::IsRedundant( std::list<DPoint*>& pointList ){
 	int cnt = 0;
 
-	for ( std::list<DPoint *>::const_iterator point = pointList.begin(); point != pointList.end(); point++ )
+	for ( const auto *point : pointList )
 	{
-		if ( fabs( DistanceToPoint( ( *point )->_pnt ) ) < MAX_ROUND_ERROR ) {
+		if ( fabs( DistanceToPoint( point->_pnt ) ) < MAX_ROUND_ERROR ) {
 			cnt++;
 		}
 

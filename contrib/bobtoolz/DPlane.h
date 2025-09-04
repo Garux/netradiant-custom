@@ -47,10 +47,10 @@ public:
 	bool IsRedundant( std::list<class DPoint*>& pointList );
 	bool PlaneIntersection( DPlane* pl1, DPlane* pl2, vec3_t out );;
 
-	vec_t DistanceToPoint( vec3_t pnt );
+	vec_t DistanceToPoint( const vec3_t pnt ) const;
 
 	DPlane( const vec3_t va, const vec3_t vb, const vec3_t vc, const _QERFaceData* texData );
-	DPlane() { }
+	DPlane() = default;
 	virtual ~DPlane();
 
 	bool m_bChkOk;

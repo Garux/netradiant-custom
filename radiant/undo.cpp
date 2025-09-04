@@ -92,15 +92,15 @@ class RadiantUndoSystem : public UndoSystem
 			m_states.push_front( StateApplicator( undoable, undoable->exportState() ) );
 		}
 		void restore(){
-			for ( states_t::iterator i = m_states.begin(); i != m_states.end(); ++i )
+			for ( auto& stateApplicator : m_states )
 			{
-				( *i ).restore();
+				stateApplicator.restore();
 			}
 		}
 		void release(){
-			for ( states_t::iterator i = m_states.begin(); i != m_states.end(); ++i )
+			for ( auto& stateApplicator : m_states )
 			{
-				( *i ).release();
+				stateApplicator.release();
 			}
 		}
 	};
@@ -161,9 +161,9 @@ class RadiantUndoSystem : public UndoSystem
 		}
 		void clear(){
 			if ( !m_stack.empty() ) {
-				for ( Operations::iterator i = m_stack.begin(); i != m_stack.end(); ++i )
+				for ( auto *operation : m_stack )
 				{
-					delete *i;
+					delete operation;
 				}
 				m_stack.clear();
 			}
@@ -224,9 +224,9 @@ class RadiantUndoSystem : public UndoSystem
 	undoables_t m_undoables;
 
 	void mark_undoables( UndoStack* stack ){
-		for ( undoables_t::iterator i = m_undoables.begin(); i != m_undoables.end(); ++i )
+		for ( auto& u : m_undoables )
 		{
-			( *i ).second.setStack( stack );
+			u.second.setStack( stack );
 		}
 	}
 
@@ -346,27 +346,27 @@ public:
 		ASSERT_MESSAGE( erased, "undo tracker cannot be detached" );
 	}
 	void trackersClear() const {
-		for ( Trackers::const_iterator i = m_trackers.begin(); i != m_trackers.end(); ++i )
+		for ( auto *tr : m_trackers )
 		{
-			( *i )->clear();
+			tr->clear();
 		}
 	}
 	void trackersBegin() const {
-		for ( Trackers::const_iterator i = m_trackers.begin(); i != m_trackers.end(); ++i )
+		for ( auto *tr : m_trackers )
 		{
-			( *i )->begin();
+			tr->begin();
 		}
 	}
 	void trackersUndo() const {
-		for ( Trackers::const_iterator i = m_trackers.begin(); i != m_trackers.end(); ++i )
+		for ( auto *tr : m_trackers )
 		{
-			( *i )->undo();
+			tr->undo();
 		}
 	}
 	void trackersRedo() const {
-		for ( Trackers::const_iterator i = m_trackers.begin(); i != m_trackers.end(); ++i )
+		for ( auto *tr : m_trackers )
 		{
-			( *i )->redo();
+			tr->redo();
 		}
 	}
 };

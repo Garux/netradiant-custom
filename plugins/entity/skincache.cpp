@@ -87,9 +87,9 @@ public:
 		return "";
 	}
 	void forEachRemap( const SkinRemapCallback& callback ) const {
-		for ( Remaps::const_iterator i = m_remaps.begin(); i != m_remaps.end(); ++i )
+		for ( const auto& [ from, to ] : m_remaps )
 		{
-			callback( SkinRemap( ( *i ).first.c_str(), ( *i ).second.c_str() ) );
+			callback( SkinRemap( from.c_str(), to.c_str() ) );
 		}
 	}
 };
@@ -270,16 +270,16 @@ public:
 	void realise() override {
 		g_skins.realise();
 		m_realised = true;
-		for ( Cache::iterator i = m_cache.begin(); i != m_cache.end(); ++i )
+		for ( auto& skin : m_cache )
 		{
-			( *i ).value->realise( ( *i ).key.c_str() );
+			skin.value->realise( skin.key.c_str() );
 		}
 	}
 	void unrealise() override {
 		m_realised = false;
-		for ( Cache::iterator i = m_cache.begin(); i != m_cache.end(); ++i )
+		for ( auto& skin : m_cache )
 		{
-			( *i ).value->unrealise();
+			skin.value->unrealise();
 		}
 		g_skins.unrealise();
 	}

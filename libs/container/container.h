@@ -224,22 +224,10 @@ public:
 		m_values.erase( i );
 	}
 	iterator find( const Key& key ){
-		for ( iterator i = m_values.begin(); i != m_values.end(); ++i )
-		{
-			if ( ( *i ).first == key ) {
-				return i;
-			}
-		}
-		return m_values.end();
+		return std::ranges::find( m_values, key, &value_type::first );
 	}
 	const_iterator find( const Key& key ) const {
-		for ( const_iterator i = m_values.begin(); i != m_values.end(); ++i )
-		{
-			if ( ( *i ).first == key ) {
-				return i;
-			}
-		}
-		return m_values.end();
+		return std::ranges::find( m_values, key, &value_type::first );
 	}
 
 	Value& operator[]( const Key& key ){

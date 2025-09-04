@@ -122,17 +122,17 @@ class TraversableNodeSet : public scene::Traversable
 	}
 	void notifyInsertAll(){
 		if ( m_observer ) {
-			for ( UnsortedNodeSet::iterator i = m_children.begin(); i != m_children.end(); ++i )
+			for ( auto& node : m_children )
 			{
-				m_observer->insert( *i );
+				m_observer->insert( node );
 			}
 		}
 	}
 	void notifyEraseAll(){
 		if ( m_observer ) {
-			for ( UnsortedNodeSet::iterator i = m_children.begin(); i != m_children.end(); ++i )
+			for ( auto& node : m_children )
 			{
-				m_observer->erase( *i );
+				m_observer->erase( node );
 			}
 		}
 	}
@@ -341,9 +341,9 @@ public:
 	}
 	template<typename Functor>
 	void forEach( const Functor& functor ){
-		for ( typename Values::iterator i = m_values.begin(); i != m_values.end(); ++i )
+		for ( auto *value : m_values )
 		{
-			functor( *( *i ) );
+			functor( *value );
 		}
 	}
 };

@@ -181,17 +181,17 @@ class TraversableModelNodeSet : public scene::Traversable
 	}
 	void notifyInsertAll(){
 		if ( m_observer ) {
-			for ( UnsortedNodeSet::iterator i = m_children.begin(); i != m_children.end(); ++i )
+			for ( auto& node : m_children )
 			{
-				m_observer->insert( *i );
+				m_observer->insert( node );
 			}
 		}
 	}
 	void notifyEraseAll(){
 		if ( m_observer ) {
-			for ( UnsortedNodeSet::iterator i = m_children.begin(); i != m_children.end(); ++i )
+			for ( auto& node : m_children )
 			{
-				m_observer->erase( *i );
+				m_observer->erase( node );
 			}
 		}
 	}
@@ -1160,7 +1160,7 @@ public:
 		const auto str = StringStream<128>( PathCleaned( pathsString ) );
 
 		const char* start = str.c_str();
-		while( 1 ){
+		while( true ){
 			while( *start == '*' )
 				++start;
 			const char* end = start;

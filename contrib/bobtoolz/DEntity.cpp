@@ -345,7 +345,7 @@ bool DEntity::LoadFromEntity( scene::Node& ent, const LoadOptions options ) {
 
 void DEntity::RemoveNonCheckBrushes( const std::vector<CopiedString>& exclusionList ){
 	std::erase_if( brushList, [&]( DBrush *brush ){
-		if ( std::any_of( exclusionList.cbegin(), exclusionList.cend(), [brush]( const CopiedString& tex ){ return brush->HasTexture( tex.c_str() ); } ) ) {
+		if ( std::ranges::any_of( exclusionList, [brush]( const CopiedString& tex ){ return brush->HasTexture( tex.c_str() ); } ) ) {
 			delete brush;
 			return true;
 		}

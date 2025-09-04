@@ -130,20 +130,20 @@ void MDLSurface_read( Surface& surface, const byte* buffer, const char* name ){
 	}
 
 	Array<mdlSt_t> mdlSts( header.numverts );
-	for ( Array<mdlSt_t>::iterator i = mdlSts.begin(); i != mdlSts.end(); ++i )
+	for ( auto& st : mdlSts )
 	{
-		( *i ).onseam = istream_read_int32_le( inputStream );
-		( *i ).s = istream_read_int32_le( inputStream );
-		( *i ).t = istream_read_int32_le( inputStream );
+		st.onseam = istream_read_int32_le( inputStream );
+		st.s = istream_read_int32_le( inputStream );
+		st.t = istream_read_int32_le( inputStream );
 	}
 
 	Array<mdlTriangle_t> mdlTriangles( header.numtris );
-	for ( Array<mdlTriangle_t>::iterator i = mdlTriangles.begin(); i != mdlTriangles.end(); ++i )
+	for ( auto& tri : mdlTriangles )
 	{
-		( *i ).facesfront = istream_read_int32_le( inputStream );
-		( *i ).vertindex[0] = istream_read_int32_le( inputStream );
-		( *i ).vertindex[1] = istream_read_int32_le( inputStream );
-		( *i ).vertindex[2] = istream_read_int32_le( inputStream );
+		tri.facesfront   = istream_read_int32_le( inputStream );
+		tri.vertindex[0] = istream_read_int32_le( inputStream );
+		tri.vertindex[1] = istream_read_int32_le( inputStream );
+		tri.vertindex[2] = istream_read_int32_le( inputStream );
 	}
 
 	{
@@ -167,10 +167,10 @@ void MDLSurface_read( Surface& surface, const byte* buffer, const char* name ){
 	}
 
 	Array<mdlXyzNormal_t> mdlXyzNormals( header.numverts );
-	for ( Array<mdlXyzNormal_t>::iterator i = mdlXyzNormals.begin(); i != mdlXyzNormals.end(); ++i )
+	for ( auto& norm : mdlXyzNormals )
 	{
-		inputStream.read( ( *i ).v, 3 );
-		inputStream.read( &( *i ).lightnormalindex, 1 );
+		inputStream.read( norm.v, 3 );
+		inputStream.read( &norm.lightnormalindex, 1 );
 	}
 
 	{
@@ -178,20 +178,20 @@ void MDLSurface_read( Surface& surface, const byte* buffer, const char* name ){
 
 		{
 			UniqueVertexBuffer<mdlVertex_t> inserter( mdl_vertices );
-			for ( Array<mdlTriangle_t>::iterator i = mdlTriangles.begin(); i != mdlTriangles.end(); ++i )
+			for ( const auto& tri : mdlTriangles )
 			{
-				surface.indices().insert( inserter.insert( mdlVertex_t( ( *i ).vertindex[0], ( *i ).facesfront ) ) );
-				surface.indices().insert( inserter.insert( mdlVertex_t( ( *i ).vertindex[1], ( *i ).facesfront ) ) );
-				surface.indices().insert( inserter.insert( mdlVertex_t( ( *i ).vertindex[2], ( *i ).facesfront ) ) );
+				surface.indices().insert( inserter.insert( mdlVertex_t( tri.vertindex[0], tri.facesfront ) ) );
+				surface.indices().insert( inserter.insert( mdlVertex_t( tri.vertindex[1], tri.facesfront ) ) );
+				surface.indices().insert( inserter.insert( mdlVertex_t( tri.vertindex[2], tri.facesfront ) ) );
 			}
 		}
 
 		{
 			surface.vertices().reserve( mdl_vertices.size() );
 
-			for ( VertexBuffer<mdlVertex_t>::iterator i = mdl_vertices.begin(); i != mdl_vertices.end(); ++i )
+			for ( const auto& v : mdl_vertices )
 			{
-				surface.vertices().push_back( MDLVertex_construct( header, mdlXyzNormals[( *i ).m_vertindex], mdlSts[( *i ).m_vertindex], ( *i ).m_facesfront == MDL_FACES_FRONT ) );
+				surface.vertices().push_back( MDLVertex_construct( header, mdlXyzNormals[v.m_vertindex], mdlSts[v.m_vertindex], v.m_facesfront == MDL_FACES_FRONT ) );
 			}
 		}
 	}

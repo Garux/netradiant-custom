@@ -108,7 +108,7 @@ public:
 	IdleDraw2( const Callback<void()>& redrawCallback ) : m_redraw( redrawCallback ){}
 	void queueDraw( const Callback<void()>& func, bool redrawDo ){
 		if( !m_running ){
-			if( std::find( m_funcs.cbegin(), m_funcs.cend(), func ) == m_funcs.cend() ){
+			if( std::ranges::find( m_funcs, func ) == m_funcs.cend() ){
 				m_funcs.push_back( func );
 				// globalOutputStream() << m_funcs.size() << " m_funcs.size()\n";
 			}

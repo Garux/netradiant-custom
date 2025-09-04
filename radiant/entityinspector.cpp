@@ -775,11 +775,9 @@ void Entity_GetKeyValues( const Entity& entity, KeyValues& keyvalues, KeyValues&
 
 	entity.forEachKeyValue( visitor );
 
-	const EntityClassAttributes& attributes = entity.getEntityClass().m_attributes;
-
-	for ( EntityClassAttributes::const_iterator i = attributes.begin(); i != attributes.end(); ++i )
+	for ( const auto& [ key, value ] : entity.getEntityClass().m_attributes )
 	{
-		defaultValues.insert( KeyValues::value_type( ( *i ).first, ( *i ).second.m_value ) );
+		defaultValues.insert( KeyValues::value_type( key, value.m_value ) );
 	}
 }
 

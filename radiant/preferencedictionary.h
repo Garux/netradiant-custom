@@ -150,13 +150,13 @@ public:
 		importer.pushElement( qpref_element );
 		importer.write( "\n", 1 );
 
-		for ( PreferenceEntries::iterator i = m_preferences.begin(); i != m_preferences.end(); ++i )
+		for ( auto& [ key, value ] : m_preferences )
 		{
-			XMLPreferenceElement epair_element( ( *i ).first.c_str() );
+			XMLPreferenceElement epair_element( key.c_str() );
 
 			importer.pushElement( epair_element );
 
-			( *i ).second.exportString( XMLPreferenceImportStringCaller( importer ) );
+			value.exportString( XMLPreferenceImportStringCaller( importer ) );
 
 			importer.popElement( epair_element.name() );
 			importer.write( "\n", 1 );

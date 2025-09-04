@@ -524,9 +524,9 @@ class HashtableReferenceCache : public ReferenceCache, public ModuleObserver
 			}
 		}
 		~ModelReferencesSnapshot(){
-			for ( Iterators::iterator i = m_iterators.begin(); i != m_iterators.end(); ++i )
+			for ( auto& it : m_iterators )
 			{
-				m_references.release( *i );
+				m_references.release( it );
 			}
 		}
 		iterator begin(){
@@ -578,11 +578,10 @@ public:
 
 			{
 				ModelReferencesSnapshot snapshot( m_references );
-				for ( ModelReferencesSnapshot::iterator i = snapshot.begin(); i != snapshot.end(); ++i )
+				for ( auto& ref : snapshot )
 				{
-					ModelReferences::value_type& value = *( *i );
-					if ( value.value.count() != 1 ) {
-						value.value.get()->realise();
+					if ( ref->value.count() != 1 ) {
+						ref->value->realise();
 					}
 				}
 			}
@@ -594,11 +593,10 @@ public:
 
 			{
 				ModelReferencesSnapshot snapshot( m_references );
-				for ( ModelReferencesSnapshot::iterator i = snapshot.begin(); i != snapshot.end(); ++i )
+				for ( auto& ref : snapshot )
 				{
-					ModelReferences::value_type& value = *( *i );
-					if ( value.value.count() != 1 ) {
-						value.value.get()->unrealise();
+					if ( ref->value.count() != 1 ) {
+						ref->value->unrealise();
 					}
 				}
 			}
@@ -608,9 +606,9 @@ public:
 	}
 	void refresh(){
 		ModelReferencesSnapshot snapshot( m_references );
-		for ( ModelReferencesSnapshot::iterator i = snapshot.begin(); i != snapshot.end(); ++i )
+		for ( auto& ref : snapshot )
 		{
-			ModelResource* resource = ( *( *i ) ).value.get();
+			ModelResource* resource = ref->value.get();
 			if ( !resource->isMap() ) {
 				resource->refresh();
 			}
@@ -633,17 +631,17 @@ public:
 
 void SaveReferences(){
 	ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Saving Map" );
-	for ( HashtableReferenceCache::iterator i = g_referenceCache.begin(); i != g_referenceCache.end(); ++i )
+	for ( auto& ref : g_referenceCache )
 	{
-		( *i ).value->save();
+		ref.value->save();
 	}
 	MapChanged();
 }
 
 bool References_Saved(){
-	for ( HashtableReferenceCache::iterator i = g_referenceCache.begin(); i != g_referenceCache.end(); ++i )
+	for ( auto& ref : g_referenceCache )
 	{
-		scene::Node* node = ( *i ).value->getNode();
+		scene::Node* node = ref.value->getNode();
 		if ( node != 0 ) {
 			MapFile* map = Node_getMapFile( *node );
 			if ( map != 0 && !map->saved() ) {

@@ -66,18 +66,14 @@ typedef std::set<Filterable*> Filterables;
 Filterables g_filterables;
 
 void UpdateFilters(){
+	for ( auto& filter : g_filters )
 	{
-		for ( Filters::iterator i = g_filters.begin(); i != g_filters.end(); ++i )
-		{
-			( *i ).update();
-		}
+		filter.update();
 	}
 
+	for ( auto *filterable : g_filterables )
 	{
-		for ( Filterables::iterator i = g_filterables.begin(); i != g_filterables.end(); ++i )
-		{
-			( *i )->updateFiltered();
-		}
+		filterable->updateFiltered();
 	}
 }
 
@@ -148,20 +144,16 @@ void add_filter_command( unsigned int flag, const char* command, const QKeySeque
 }
 
 void InvertFilters(){
-	std::list<ToggleFilterFlag>::iterator iter;
-
-	for ( iter = g_filter_items.begin(); iter != g_filter_items.end(); ++iter )
+	for ( auto& toggle : g_filter_items )
 	{
-		iter->toggle();
+		toggle.toggle();
 	}
 }
 
 void ResetFilters(){
-	std::list<ToggleFilterFlag>::iterator iter;
-
-	for ( iter = g_filter_items.begin(); iter != g_filter_items.end(); ++iter )
+	for ( auto& toggle : g_filter_items )
 	{
-		iter->reset();
+		toggle.reset();
 	}
 }
 

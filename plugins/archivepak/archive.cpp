@@ -104,8 +104,8 @@ public:
 	}
 
 	~PakArchive(){
-		for ( PakFileSystem::iterator i = m_filesystem.begin(); i != m_filesystem.end(); ++i )
-			delete i->second.file();
+		for ( auto& [ path, entry ] : m_filesystem )
+			delete entry.file();
 	}
 
 	void release() override {

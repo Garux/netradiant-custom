@@ -157,9 +157,9 @@ public:
 
 template<typename Functor>
 void TargetingEntity_forEach( const TargetingEntity& targets, const Functor& functor ){
-	for ( TargetingEntity::iterator i = targets.begin(); i != targets.end(); ++i )
+	for ( const auto *targetable : targets )
 	{
-		functor( ( *i )->world_position() );
+		functor( targetable->world_position() );
 	}
 }
 
@@ -167,9 +167,9 @@ typedef std::map<std::size_t, TargetingEntity> TargetingEntities;
 
 template<typename Functor>
 void TargetingEntities_forEach( const TargetingEntities& targetingEntities, const Functor& functor ){
-	for ( TargetingEntities::const_iterator i = targetingEntities.begin(); i != targetingEntities.end(); ++i )
+	for ( const auto& [ index, entity ] : targetingEntities )
 	{
-		TargetingEntity_forEach( ( *i ).second, functor );
+		TargetingEntity_forEach( entity, functor );
 	}
 }
 
@@ -433,10 +433,10 @@ public:
 
 	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const override {
 		if( g_showConnections ){
-			for ( TargetableInstances::const_iterator i = m_instances.begin(); i != m_instances.end(); ++i )
+			for ( const auto *instance : m_instances )
 			{
-				if ( ( *i )->path().top().get().visible() ) {
-					( *i )->render( renderer, volume );
+				if ( instance->path().top().get().visible() ) {
+					instance->render( renderer, volume );
 				}
 			}
 		}

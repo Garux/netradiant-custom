@@ -549,10 +549,10 @@ public:
 				max_tex_size = 1024;
 			}
 
-			for ( qtextures_t::iterator i = m_qtextures.begin(); i != m_qtextures.end(); ++i )
+			for ( auto& tex : m_qtextures )
 			{
-				if ( !( *i ).value.empty() ) {
-					qtexture_realise( *( *i ).value, ( *i ).key );
+				if ( !tex.value.empty() ) {
+					qtexture_realise( *tex.value, tex.key );
 				}
 			}
 			if ( m_observer != 0 ) {
@@ -565,10 +565,10 @@ public:
 			if ( m_observer != 0 ) {
 				m_observer->unrealise();
 			}
-			for ( qtextures_t::iterator i = m_qtextures.begin(); i != m_qtextures.end(); ++i )
+			for ( auto& tex : m_qtextures )
 			{
-				if ( !( *i ).value.empty() ) {
-					qtexture_unrealise( *( *i ).value );
+				if ( !tex.value.empty() ) {
+					qtexture_unrealise( *tex.value );
 				}
 			}
 		}
@@ -605,9 +605,9 @@ void Textures_ModeChanged(){
 		SetTexParameters( g_texture_mode );
 		SetTexAnisotropy( g_TextureAnisotropy );
 
-		for ( TexturesMap::iterator i = g_texturesmap->begin(); i != g_texturesmap->end(); ++i )
+		for ( const auto& tex : *g_texturesmap )
 		{
-			gl().glBindTexture( GL_TEXTURE_2D, ( *i ).value->texture_number );
+			gl().glBindTexture( GL_TEXTURE_2D, tex.value->texture_number );
 			SetTexParameters( g_texture_mode );
 			SetTexAnisotropy( g_TextureAnisotropy );
 		}

@@ -573,13 +573,7 @@ int g_vmf_entities;
 int g_vmf_brushes;
 
 inline VMFBlock::const_iterator VMFBlock_find( const VMFBlock& block, const char* name ){
-	for ( VMFBlock::const_iterator i = block.begin(); i != block.end(); ++i )
-	{
-		if ( string_equal( name, ( *i )->name() ) ) {
-			return i;
-		}
-	}
-	return block.end();
+	return std::ranges::find_if( block, [name]( const VMFBlock *block ){ return string_equal( name, block->name() ); } );
 }
 
 void VMF_parseBlock( Tokeniser& tokeniser, const VMFBlock& block ){

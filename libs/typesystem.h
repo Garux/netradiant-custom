@@ -42,9 +42,9 @@ public:
 		if ( !m_initialised ) {
 			m_initialised = true;
 
-			for ( Initialisers::const_iterator i = m_initialisers.begin(); i != m_initialisers.end(); ++i )
+			for ( const auto& cb : m_initialisers )
 			{
-				( *i )( );
+				cb( );
 			}
 		}
 	}
