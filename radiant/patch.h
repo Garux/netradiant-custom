@@ -1442,8 +1442,8 @@ public:
 				const Colour4b colour_selected( 0, 0, 255, 255 );
 				m_render_selected.push_back( PointVertex( reinterpret_cast<Vertex3f&>( ctrl->m_vertex ), colour_selected ) );
 			}
+			++ctrl;
 		}
-		++ctrl;
 	}
 
 #if 0
