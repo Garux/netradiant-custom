@@ -41,7 +41,7 @@ double BernsteinPolynomial( double t ){
 	else if constexpr( I == 1 && Degree == 3 ) return 3 * ( 1 - t ) * ( 1 - t ) * t;
 	else if constexpr( I == 2 && Degree == 3 ) return 3 * ( 1 - t ) * t * t;
 	else if constexpr( I == 3 && Degree == 3 ) return t * t * t;
-	else static_assert( I != I, "general case not implemented" ); // assert on something false
+	else static_assert( false, "general case not implemented" ); // assert on something false
 }
 
 
