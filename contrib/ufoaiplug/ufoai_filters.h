@@ -19,10 +19,10 @@
 #pragma once
 
 void filter_level( int flag );
-void filter_stepon( void );
-void filter_actorclip( void );
-void filter_weaponclip( void );
-void filter_nodraw( void );
+void filter_stepon();
+void filter_actorclip();
+void filter_weaponclip();
+void filter_nodraw();
 
 #define SURF_NODRAW 0x80
 

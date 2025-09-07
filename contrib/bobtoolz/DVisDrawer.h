@@ -66,7 +66,7 @@ class DVisDrawer : public Renderable, public OpenGLRenderable
 	bool m_colorPerSurf;
 public:
 	DVisDrawer();
-	virtual ~DVisDrawer();
+	~DVisDrawer();
 
 	void ClearPoints();
 private:

@@ -37,7 +37,7 @@
 
 #include "typesystem.h"
 
-void CreateWindow( void );
+void CreateWindow();
 
 QWidget *g_pRadiantWnd = nullptr;
 
@@ -83,7 +83,7 @@ class BrushExportDependencies :
 	public GlobalSelectionModuleRef
 {
 public:
-	BrushExportDependencies( void )
+	BrushExportDependencies()
 		: GlobalBrushModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ) )
 	{}
 };

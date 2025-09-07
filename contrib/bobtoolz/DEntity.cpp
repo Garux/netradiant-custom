@@ -550,7 +550,7 @@ void DEntity::SpawnVector( const char* key, const char* defaultstring, vec_t* ou
 	}
 }
 
-int DEntity::GetBrushCount( void ) {
+int DEntity::GetBrushCount() {
 	return static_cast<int>( brushList.size() );
 }
 

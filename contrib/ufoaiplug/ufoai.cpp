@@ -49,7 +49,7 @@ class UFOAIPluginDependencies :
 	public GlobalEntityClassManagerModuleRef
 {
 public:
-	UFOAIPluginDependencies( void ) :
+	UFOAIPluginDependencies() :
 		GlobalEntityModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ) ),
 		GlobalEntityClassManagerModuleRef( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entityclass" ) ){
 	}

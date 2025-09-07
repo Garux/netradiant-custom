@@ -85,7 +85,7 @@ public:
 		m_destroyed = GlobalRadiant().XYWindowDestroyed_connect( makeSignalHandler( DestroyedCaller(), *this ) );
 	}
 
-	virtual ~DTreePlanter(){
+	~DTreePlanter(){
 		if ( !m_mouseDown.isNull() ) {
 			GlobalRadiant().XYWindowMouseDown_disconnect( m_mouseDown );
 		}

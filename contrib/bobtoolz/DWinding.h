@@ -33,7 +33,7 @@ public:
 	DWinding();
 	DWinding( DWinding&& other ) noexcept;
 	DWinding& operator=( DWinding&& other ) noexcept;
-	virtual ~DWinding();
+	~DWinding();
 
 	void AllocWinding( int points );
 

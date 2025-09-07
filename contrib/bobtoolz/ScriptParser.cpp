@@ -20,7 +20,7 @@
 #include "ScriptParser.h"
 #include <cstring>
 
-CScriptParser::CScriptParser( void ) :
+CScriptParser::CScriptParser() :
 	m_pScript( NULL ),
 	m_pScriptSection( NULL ),
 	m_pLastScriptSection( NULL ),
@@ -28,11 +28,11 @@ CScriptParser::CScriptParser( void ) :
 	ClearBuffer();
 }
 
-CScriptParser::~CScriptParser( void ) {
+CScriptParser::~CScriptParser() {
 	ClearBuffer();
 }
 
-void CScriptParser::ClearBuffer( void ) {
+void CScriptParser::ClearBuffer() {
 	if ( m_pScript ) {
 		delete[] m_pScript;
 		m_pScript = NULL;
@@ -171,7 +171,7 @@ void CScriptParser::SkipWhitespace( bool* pbNewLines ) {
 	}
 }
 
-void CScriptParser::SkipBracedSection( void ) {
+void CScriptParser::SkipBracedSection() {
 	const char      *token;
 	int depth;
 
@@ -189,7 +189,7 @@ void CScriptParser::SkipBracedSection( void ) {
 	} while ( depth && *m_pScriptSection );
 }
 
-void CScriptParser::SkipRestOfLine( void ) {
+void CScriptParser::SkipRestOfLine() {
 	char    *p;
 	int c;
 
@@ -202,7 +202,7 @@ void CScriptParser::SkipRestOfLine( void ) {
 	m_pScriptSection = p;
 }
 
-void CScriptParser::UndoGetToken( void ) {
+void CScriptParser::UndoGetToken() {
 	if ( !m_pLastScriptSection ) {
 		return;
 	}
@@ -210,7 +210,7 @@ void CScriptParser::UndoGetToken( void ) {
 	m_pLastScriptSection = NULL;
 }
 
-void CScriptParser::ResetParseSession( void ) {
+void CScriptParser::ResetParseSession() {
 	if ( !m_pScript ) {
 		return;
 	}
@@ -219,7 +219,7 @@ void CScriptParser::ResetParseSession( void ) {
 	m_pLastScriptSection = NULL;
 }
 
-char* CScriptParser::GetBufferCopy( void ) {
+char* CScriptParser::GetBufferCopy() {
 	if ( !m_pScript ) {
 		return NULL;
 	}
@@ -230,7 +230,7 @@ char* CScriptParser::GetBufferCopy( void ) {
 	return pBuffer;
 }
 
-int CScriptParser::GetTokenOffset( void ) {
+int CScriptParser::GetTokenOffset() {
 	if ( !m_pScript || !m_pScriptSection ) {
 		return 0;
 	}

@@ -233,7 +233,7 @@ void filter_level( int flag ){
 #endif
 }
 
-void filter_stepon( void ){
+void filter_stepon(){
 	if ( stepon_active ) {
 		stepon_active = false;
 	}
@@ -252,7 +252,7 @@ void filter_stepon( void ){
 	}
 }
 
-void filter_nodraw( void ){
+void filter_nodraw(){
 	if ( nodraw_active ) {
 		nodraw_active = false;
 	}
@@ -273,7 +273,7 @@ void filter_nodraw( void ){
 #endif
 }
 
-void filter_actorclip( void ){
+void filter_actorclip(){
 	if ( actorclip_active ) {
 		actorclip_active = false;
 	}
@@ -294,7 +294,7 @@ void filter_actorclip( void ){
 #endif
 }
 
-void filter_weaponclip( void ){
+void filter_weaponclip(){
 	if ( weaponclip_active ) {
 		weaponclip_active = false;
 	}

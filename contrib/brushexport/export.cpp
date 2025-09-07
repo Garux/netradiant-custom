@@ -23,11 +23,11 @@ class ExportData
 {
 public:
 	ExportData( const StringSetWithLambda& ignorelist, collapsemode mode );
-	virtual ~ExportData( void );
+	virtual ~ExportData() = default;
 
 	virtual void BeginBrush( Brush& b );
 	virtual void AddBrushFace( Face& f );
-	virtual void EndBrush( void );
+	virtual void EndBrush();
 
 	virtual bool WriteToFile( const std::string& path, collapsemode mode ) const = 0;
 
@@ -66,10 +66,6 @@ ExportData::ExportData( const StringSetWithLambda& _ignorelist, collapsemode _mo
 	}
 }
 
-ExportData::~ExportData( void ){
-
-}
-
 void ExportData::BeginBrush( Brush& b ){
 	// create a new group for each brush
 	if ( mode == COLLAPSE_NONE ) {
@@ -80,7 +76,7 @@ void ExportData::BeginBrush( Brush& b ){
 	}
 }
 
-void ExportData::EndBrush( void ){
+void ExportData::EndBrush(){
 	// all faces of this brush were on the ignorelist, discard the emptygroup
 	if ( mode == COLLAPSE_NONE ) {
 		ASSERT_NOTNULL( current );
@@ -131,7 +127,7 @@ void ExportData::AddBrushFace( Face& f ){
 void ExportData::GetShaderNameFromShaderPath( const char* path, std::string& name ){
 	std::string tmp( path );
 
-	size_t last_slash = tmp.find_last_of( "/" );
+	size_t last_slash = tmp.find_last_of( '/' );
 
 	if ( last_slash == std::string::npos || last_slash == ( tmp.length() - 1 ) ) {
 		name = path;

@@ -46,7 +46,7 @@ DTrainDrawer::DTrainDrawer() {
 	GlobalShaderCache().attachRenderable( *this );
 }
 
-DTrainDrawer::~DTrainDrawer( void ) {
+DTrainDrawer::~DTrainDrawer() {
 	GlobalShaderCache().detachRenderable( *this );
 	destroyShaders();
 

@@ -27,14 +27,14 @@
 /**
  * @brief
  */
-std::size_t ToolbarButtonCount( void ){
+std::size_t ToolbarButtonCount(){
 	return NUM_TOOLBARBUTTONS;
 }
 
 /**
  * @brief Used if the ufo plugin should not be visible (at least the toolbar stuff)
  */
-std::size_t ToolbarNoButtons( void ){
+std::size_t ToolbarNoButtons(){
 	return 0;
 }
 

@@ -51,7 +51,7 @@ public:
 
 	DPlane( const vec3_t va, const vec3_t vb, const vec3_t vc, const _QERFaceData* texData );
 	DPlane() = default;
-	virtual ~DPlane();
+	~DPlane();
 
 	bool m_bChkOk;
 	_QERFaceData texInfo;

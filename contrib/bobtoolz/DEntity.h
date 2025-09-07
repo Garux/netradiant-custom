@@ -49,7 +49,7 @@ public:
 
 //	Constrcution/Destruction
 	DEntity( const char* classname = "worldspawn", int ID = -1 );   // sets classname
-	virtual ~DEntity();
+	~DEntity();
 //	---------------------------------------------
 
 //	epair functions........
@@ -68,7 +68,7 @@ public:
 	void ResetChecks( const std::vector<CopiedString>& exclusionList );
 	void RemoveNonCheckBrushes( const std::vector<CopiedString>& exclusionList );
 
-	int GetBrushCount( void );
+	int GetBrushCount();
 	DBrush* FindBrushByPointer( scene::Node& brush );
 //	---------------------------------------------
 

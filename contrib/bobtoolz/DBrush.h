@@ -79,7 +79,7 @@ public:
 	void ClearFaces();
 	void ClearPoints();
 
-	int RemoveRedundantPlanes( void );
+	int RemoveRedundantPlanes();
 	void RemovePlane( DPlane* plane );
 	int PointPosition( vec3_t pnt );
 
@@ -94,7 +94,7 @@ public:
 
 	DBrush();
 	DBrush( DBrush&& ) noexcept = delete;
-	virtual ~DBrush();
+	~DBrush();
 
 	bool operator==( const DBrush* other ) const;
 

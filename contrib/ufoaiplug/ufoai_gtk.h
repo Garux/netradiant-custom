@@ -22,5 +22,5 @@
 
 const IToolbarButton* GetToolbarButton( std::size_t index );
 const IToolbarButton* GetToolbarNoButton( std::size_t index );
-std::size_t ToolbarButtonCount( void );
-std::size_t ToolbarNoButtons( void );
+std::size_t ToolbarButtonCount();
+std::size_t ToolbarNoButtons();

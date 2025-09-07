@@ -115,7 +115,7 @@ void SwapBlock( int *block, int sizeOfBlock ) {
    Byte swaps all data in a bsp file.
    =============
  */
-void SwapBSPFile( void ) {
+void SwapBSPFile() {
 	int i;
 
 	// models

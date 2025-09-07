@@ -36,7 +36,7 @@ class DBobView : public Renderable, public OpenGLRenderable, public Entity::Obse
 	Shader* m_shader_box;
 public:
 	DBobView();
-	virtual ~DBobView();
+	~DBobView();
 
 protected:
 	std::unique_ptr<vec3_t[]> path;

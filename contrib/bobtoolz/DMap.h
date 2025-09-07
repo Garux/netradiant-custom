@@ -53,7 +53,7 @@ public:
 	std::list<DEntity*> entityList;
 
 	DMap();
-	virtual ~DMap();
+	~DMap();
 
 	int FixBrushes();
 };

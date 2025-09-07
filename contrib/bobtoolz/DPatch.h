@@ -73,6 +73,6 @@ public:
 	int width, height;
 	drawVert_t points[MAX_PATCH_WIDTH][MAX_PATCH_HEIGHT];
 	DPatch();
-	virtual ~DPatch();
+	~DPatch();
 
 };

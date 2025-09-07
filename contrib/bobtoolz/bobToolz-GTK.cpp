@@ -183,7 +183,7 @@ const char* QERPlug_GetCommandTitleList(){
 
 #define NUM_TOOLBARBUTTONS 13
 
-std::size_t ToolbarButtonCount( void ) {
+std::size_t ToolbarButtonCount() {
 	return NUM_TOOLBARBUTTONS;
 }
 

@@ -46,7 +46,7 @@ public:
 	static DBrush* GetBoundingCube_Ext( vec3_t min, vec3_t max, const char* textureName, bool* bUseFaces = bFacesAll, bool detail = false );
 
 	DShape();
-	virtual ~DShape();
+	~DShape();
 
 	void Commit();
 private:

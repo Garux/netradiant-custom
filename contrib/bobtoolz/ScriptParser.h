@@ -27,8 +27,8 @@
 class CScriptParser //: public IScriptParser
 {
 public:
-	CScriptParser( void );
-	~CScriptParser( void );
+	CScriptParser();
+	~CScriptParser();
 private:
 	char m_breakChars[SP_MAX_BREAKCHARS];
 	char*   m_pScript;
@@ -37,18 +37,18 @@ private:
 	char*   m_pToken;
 
 	void SkipWhitespace( bool* pbNewLines );
-	void ClearBuffer( void );
+	void ClearBuffer();
 	const char* MakeToken( const char* pToken );
 	bool IsBreakChar( char c );
 public:
 	const char* GetToken( bool bAllowLinebreaks );
-	void SkipBracedSection( void );
-	void SkipRestOfLine( void );
-	void UndoGetToken( void );
-	void ResetParseSession( void );
+	void SkipBracedSection();
+	void SkipRestOfLine();
+	void UndoGetToken();
+	void ResetParseSession();
 
-	char* GetBufferCopy( void );
-	int GetTokenOffset( void );
+	char* GetBufferCopy();
+	int GetTokenOffset();
 
 	void LoadScript( const char* pScript );
 	void SetScript( char* pScript );

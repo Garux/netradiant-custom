@@ -62,7 +62,7 @@ private:
 public:
 
 	DTrainDrawer();
-	virtual ~DTrainDrawer( void );
+	~DTrainDrawer();
 
 	void render( RenderStateFlags state ) const override;
 	void renderSolid( Renderer& renderer, const VolumeTest& volume ) const override;
