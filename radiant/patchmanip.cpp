@@ -700,12 +700,12 @@ void Patch_registerCommands(){
 	GlobalCommands_insert( "SimplePatchMesh", makeCallbackF( Patch_Plane ), QKeySequence( "Shift+P" ) );
 	GlobalCommands_insert( "PatchInsertFirstColumn", makeCallbackF( Patch_InsertFirstColumn ), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_Plus + Qt::KeypadModifier ) );
 	GlobalCommands_insert( "PatchInsertLastColumn", makeCallbackF( Patch_InsertLastColumn ) );
-	GlobalCommands_insert( "PatchInsertFirstRow", makeCallbackF( Patch_InsertFirstRow ), QKeySequence( Qt::CTRL + Qt::Key_Plus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "PatchInsertFirstRow", makeCallbackF( Patch_InsertFirstRow ), QKeySequence( +Qt::CTRL + Qt::Key_Plus + Qt::KeypadModifier ) );
 	GlobalCommands_insert( "PatchInsertLastRow", makeCallbackF( Patch_InsertLastRow ) );
 	GlobalCommands_insert( "PatchDeleteFirstColumn", makeCallbackF( Patch_DeleteFirstColumn ) );
 	GlobalCommands_insert( "PatchDeleteLastColumn", makeCallbackF( Patch_DeleteLastColumn ), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_Minus + Qt::KeypadModifier ) );
 	GlobalCommands_insert( "PatchDeleteFirstRow", makeCallbackF( Patch_DeleteFirstRow ) );
-	GlobalCommands_insert( "PatchDeleteLastRow", makeCallbackF( Patch_DeleteLastRow ), QKeySequence( Qt::CTRL + Qt::Key_Minus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "PatchDeleteLastRow", makeCallbackF( Patch_DeleteLastRow ), QKeySequence( +Qt::CTRL + Qt::Key_Minus + Qt::KeypadModifier ) );
 	GlobalCommands_insert( "InvertCurve", makeCallbackF( Patch_Invert ), QKeySequence( "Ctrl+I" ) );
 	//GlobalCommands_insert( "RedisperseRows", makeCallbackF( Patch_RedisperseRows ), QKeySequence( "Ctrl+E" ) );
 	GlobalCommands_insert( "RedisperseRows", makeCallbackF( Patch_RedisperseRows ) );

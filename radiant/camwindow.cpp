@@ -2501,8 +2501,8 @@ void CamWnd_Construct(){
 	GlobalCommands_insert( "CameraModeNext", makeCallbackF( CameraModeNext ), QKeySequence( "Shift+]" ) );
 	GlobalCommands_insert( "CameraModePrev", makeCallbackF( CameraModePrev ), QKeySequence( "Shift+[" ) );
 
-	GlobalCommands_insert( "CameraSpeedInc", makeCallbackF( CameraSpeed_increase ), QKeySequence( Qt::SHIFT + Qt::Key_Plus + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "CameraSpeedDec", makeCallbackF( CameraSpeed_decrease ), QKeySequence( Qt::SHIFT + Qt::Key_Minus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "CameraSpeedInc", makeCallbackF( CameraSpeed_increase ), QKeySequence( +Qt::SHIFT + Qt::Key_Plus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "CameraSpeedDec", makeCallbackF( CameraSpeed_decrease ), QKeySequence( +Qt::SHIFT + Qt::Key_Minus + Qt::KeypadModifier ) );
 
 	GlobalShortcuts_insert( "CameraForward", QKeySequence( "Up" ) );
 	GlobalShortcuts_insert( "CameraBack", QKeySequence( "Down" ) );

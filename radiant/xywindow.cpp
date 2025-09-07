@@ -2281,9 +2281,9 @@ void XYWindow_Construct(){
 	GlobalCommands_insert( "NextView", makeCallbackF( XY_NextView ), QKeySequence( "Ctrl+Tab" ) );
 	GlobalCommands_insert( "ZoomIn", makeCallbackF( XY_ZoomIn ), QKeySequence( "Delete" ) );
 	GlobalCommands_insert( "ZoomOut", makeCallbackF( XY_ZoomOut ), QKeySequence( "Insert" ) );
-	GlobalCommands_insert( "ViewTop", makeCallbackF( XY_Top ), QKeySequence( Qt::Key_7 + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "ViewFront", makeCallbackF( XY_Front ), QKeySequence( Qt::Key_1 + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "ViewSide", makeCallbackF( XY_Side ), QKeySequence( Qt::Key_3 + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "ViewTop", makeCallbackF( XY_Top ), QKeySequence( +Qt::Key_7 + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "ViewFront", makeCallbackF( XY_Front ), QKeySequence( +Qt::Key_1 + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "ViewSide", makeCallbackF( XY_Side ), QKeySequence( +Qt::Key_3 + Qt::KeypadModifier ) );
 	GlobalCommands_insert( "Zoom100", makeCallbackF( XY_Zoom100 ) );
 	GlobalCommands_insert( "CenterXYView", makeCallbackF( XY_Centralize ), QKeySequence( "Ctrl+Shift+Tab" ) );
 	GlobalCommands_insert( "XYFocusOnSelected", makeCallbackF( XY_Focus ), QKeySequence( "`" ) );

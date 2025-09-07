@@ -1895,8 +1895,8 @@ void Select_registerCommands(){
 	GlobalCommands_insert( "TexShiftLeft", makeCallbackF( Texdef_ShiftLeft ), QKeySequence( "Shift+Left" ) );
 	GlobalCommands_insert( "TexShiftRight", makeCallbackF( Texdef_ShiftRight ), QKeySequence( "Shift+Right" ) );
 
-	GlobalCommands_insert( "MoveSelectionDOWN", makeCallbackF( Selection_MoveDown ), QKeySequence( Qt::Key_Minus + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "MoveSelectionUP", makeCallbackF( Selection_MoveUp ), QKeySequence( Qt::Key_Plus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "MoveSelectionDOWN", makeCallbackF( Selection_MoveDown ), QKeySequence( +Qt::Key_Minus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "MoveSelectionUP", makeCallbackF( Selection_MoveUp ), QKeySequence( +Qt::Key_Plus + Qt::KeypadModifier ) );
 
 	GlobalCommands_insert( "SelectNudgeLeft", makeCallbackF( Selection_NudgeLeft ), QKeySequence( "Alt+Left" ) );
 	GlobalCommands_insert( "SelectNudgeRight", makeCallbackF( Selection_NudgeRight ), QKeySequence( "Alt+Right" ) );
