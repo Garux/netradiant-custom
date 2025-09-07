@@ -96,7 +96,7 @@ public:
 		m_selectable( SelectedChangedCaller( *this ) ){
 	}
 
-	Selectable& get( NullType<Selectable>){
+	Selectable& get( NullType<Selectable> ){
 		return m_selectable;
 	}
 

@@ -3408,13 +3408,13 @@ public:
 		return m_brush;
 	}
 
-	Bounded& get( NullType<Bounded>){
+	Bounded& get( NullType<Bounded> ){
 		return m_brush;
 	}
-	Cullable& get( NullType<Cullable>){
+	Cullable& get( NullType<Cullable> ){
 		return m_brush;
 	}
-	Transformable& get( NullType<Transformable>){
+	Transformable& get( NullType<Transformable> ){
 		return m_transform;
 	}
 

@@ -155,19 +155,19 @@ class MapRoot : public scene::Node::Symbiot, public scene::Instantiable, public 
 public:
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-	scene::Traversable& get( NullType<scene::Traversable>){
+	scene::Traversable& get( NullType<scene::Traversable> ){
 		return m_traverse;
 	}
-	TransformNode& get( NullType<TransformNode>){
+	TransformNode& get( NullType<TransformNode> ){
 		return m_transform;
 	}
-	Nameable& get( NullType<Nameable>){
+	Nameable& get( NullType<Nameable> ){
 		return m_name;
 	}
-	MapFile& get( NullType<MapFile>){
+	MapFile& get( NullType<MapFile> ){
 		return m_changeTracker;
 	}
-	Layers& get( NullType<Layers>){
+	Layers& get( NullType<Layers> ){
 		return m_layers;
 	}
 

@@ -675,10 +675,10 @@ public:
 
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-	scene::Traversable& get( NullType<scene::Traversable>){
+	scene::Traversable& get( NullType<scene::Traversable> ){
 		return m_traverse;
 	}
-	Layers& get( NullType<Layers>){
+	Layers& get( NullType<Layers> ){
 		return m_layers;
 	}
 

@@ -289,10 +289,10 @@ public:
 
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-	Bounded& get( NullType<Bounded>){
+	Bounded& get( NullType<Bounded> ){
 		return m_contained;
 	}
-	Cullable& get( NullType<Cullable>){
+	Cullable& get( NullType<Cullable> ){
 		return m_contained;
 	}
 
@@ -371,19 +371,19 @@ class GenericEntityNode :
 public:
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-	Snappable& get( NullType<Snappable>){
+	Snappable& get( NullType<Snappable> ){
 		return m_contained;
 	}
-	TransformNode& get( NullType<TransformNode>){
+	TransformNode& get( NullType<TransformNode> ){
 		return m_contained.getTransformNode();
 	}
-	Entity& get( NullType<Entity>){
+	Entity& get( NullType<Entity> ){
 		return m_contained.getEntity();
 	}
-	Nameable& get( NullType<Nameable>){
+	Nameable& get( NullType<Nameable> ){
 		return m_contained.getNameable();
 	}
-	Namespaced& get( NullType<Namespaced>){
+	Namespaced& get( NullType<Namespaced> ){
 		return m_contained.getNamespaced();
 	}
 

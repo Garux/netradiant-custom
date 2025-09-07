@@ -1392,13 +1392,13 @@ public:
 	Patch& getPatch(){
 		return m_patch;
 	}
-	Bounded& get( NullType<Bounded>){
+	Bounded& get( NullType<Bounded> ){
 		return m_patch;
 	}
-	Cullable& get( NullType<Cullable>){
+	Cullable& get( NullType<Cullable> ){
 		return m_patch;
 	}
-	Transformable& get( NullType<Transformable>){
+	Transformable& get( NullType<Transformable> ){
 		return m_transform;
 	}
 
@@ -1718,28 +1718,28 @@ public:
 
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-	Snappable& get( NullType<Snappable>){
+	Snappable& get( NullType<Snappable> ){
 		return m_patch;
 	}
-	TransformNode& get( NullType<TransformNode>){
+	TransformNode& get( NullType<TransformNode> ){
 		return m_patch;
 	}
-	Patch& get( NullType<Patch>){
+	Patch& get( NullType<Patch> ){
 		return m_patch;
 	}
-	XMLImporter& get( NullType<XMLImporter>){
+	XMLImporter& get( NullType<XMLImporter> ){
 		return m_patch;
 	}
-	XMLExporter& get( NullType<XMLExporter>){
+	XMLExporter& get( NullType<XMLExporter> ){
 		return m_patch;
 	}
-	MapImporter& get( NullType<MapImporter>){
+	MapImporter& get( NullType<MapImporter> ){
 		return m_importMap;
 	}
-	MapExporter& get( NullType<MapExporter>){
+	MapExporter& get( NullType<MapExporter> ){
 		return m_exportMap;
 	}
-	Nameable& get( NullType<Nameable>){
+	Nameable& get( NullType<Nameable> ){
 		return m_patch;
 	}
 

@@ -468,25 +468,25 @@ class MiscModelNode :
 public:
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-	scene::Traversable& get( NullType<scene::Traversable>){
+	scene::Traversable& get( NullType<scene::Traversable> ){
 		return m_contained.getTraversable();
 	}
-	Snappable& get( NullType<Snappable>){
+	Snappable& get( NullType<Snappable> ){
 		return m_contained;
 	}
-	TransformNode& get( NullType<TransformNode>){
+	TransformNode& get( NullType<TransformNode> ){
 		return m_contained.getTransformNode();
 	}
-	Entity& get( NullType<Entity>){
+	Entity& get( NullType<Entity> ){
 		return m_contained.getEntity();
 	}
-	Nameable& get( NullType<Nameable>){
+	Nameable& get( NullType<Nameable> ){
 		return m_contained.getNameable();
 	}
-	Namespaced& get( NullType<Namespaced>){
+	Namespaced& get( NullType<Namespaced> ){
 		return m_contained.getNamespaced();
 	}
-	ModelSkin& get( NullType<ModelSkin>){
+	ModelSkin& get( NullType<ModelSkin> ){
 		return m_contained.getModelSkin();
 	}
 

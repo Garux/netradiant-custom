@@ -66,31 +66,31 @@ public:
 
 	typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
-	Snappable& get( NullType<Snappable>){
+	Snappable& get( NullType<Snappable> ){
 		return m_brush;
 	}
-	TransformNode& get( NullType<TransformNode>){
+	TransformNode& get( NullType<TransformNode> ){
 		return m_brush;
 	}
-	Brush& get( NullType<Brush>){
+	Brush& get( NullType<Brush> ){
 		return m_brush;
 	}
-	XMLImporter& get( NullType<XMLImporter>){
+	XMLImporter& get( NullType<XMLImporter> ){
 		return m_xmlImporter;
 	}
-	XMLExporter& get( NullType<XMLExporter>){
+	XMLExporter& get( NullType<XMLExporter> ){
 		return m_xmlExporter;
 	}
-	MapImporter& get( NullType<MapImporter>){
+	MapImporter& get( NullType<MapImporter> ){
 		return m_mapImporter;
 	}
-	MapExporter& get( NullType<MapExporter>){
+	MapExporter& get( NullType<MapExporter> ){
 		return m_mapExporter;
 	}
-	Nameable& get( NullType<Nameable>){
+	Nameable& get( NullType<Nameable> ){
 		return m_brush;
 	}
-	BrushDoom3& get( NullType<BrushDoom3>){
+	BrushDoom3& get( NullType<BrushDoom3> ){
 		return m_brush;
 	}
 

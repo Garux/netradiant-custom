@@ -448,10 +448,10 @@ public:
 
 	void* m_test;
 
-	Bounded& get( NullType<Bounded>){
+	Bounded& get( NullType<Bounded> ){
 		return m_picomodel;
 	}
-	Cullable& get( NullType<Cullable>){
+	Cullable& get( NullType<Cullable> ){
 		return m_picomodel;
 	}
 
