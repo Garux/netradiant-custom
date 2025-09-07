@@ -491,7 +491,7 @@ void Brush::vertexModeBuildHull( bool allTransformed /*= false*/ ){
 					const DoubleVector3 st[3]{ matrix4_transformed_point( local2tex, i.m_v[0]->m_vertex ),
 					                           matrix4_transformed_point( local2tex, i.m_v[1]->m_vertex ),
 					                           matrix4_transformed_point( local2tex, i.m_v[2]->m_vertex ) };
-					const DoubleVector3 points[3]{ i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed };
+					const PlanePoints points{ i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed };
 					Texdef_from_ST( projection, points, st, face.getShader().width(), face.getShader().height() );
 				}
 				Face* newFace = addPlane( i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed, face.GetShader(), TextureProjection() );

@@ -1406,7 +1406,7 @@ void Face_setTexture( Face& face, const char* shader, const FaceTexture& clipboa
 			// todo in patch->brush, brush->patch shall we apply texture, if alignment part fails?
 			if( pc.empty() )
 				return;
-			DoubleVector3 vertices[3]{ pc[0]->m_vertex, pc[1]->m_vertex, pc[2]->m_vertex };
+			PlanePoints vertices{ pc[0]->m_vertex, pc[1]->m_vertex, pc[2]->m_vertex };
 			const DoubleVector3 sts[3]{ DoubleVector3( pc[0]->m_texcoord ),
 		                                DoubleVector3( pc[1]->m_texcoord ),
 		                                DoubleVector3( pc[2]->m_texcoord ) };
@@ -1463,7 +1463,7 @@ void Patch_setTexture( Patch& patch, const char* shader, const FaceTexture& clip
 		if( pc.empty() )
 			return;
 
-		DoubleVector3 vertices[3]{ pc[0]->m_vertex, pc[1]->m_vertex, pc[2]->m_vertex };
+		PlanePoints vertices{ pc[0]->m_vertex, pc[1]->m_vertex, pc[2]->m_vertex };
 		const DoubleVector3 sts[3]{ DoubleVector3( pc[0]->m_texcoord ),
 		                            DoubleVector3( pc[1]->m_texcoord ),
 		                            DoubleVector3( pc[2]->m_texcoord ) };

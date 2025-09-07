@@ -1104,7 +1104,7 @@ public:
 					std::swap( v0, v1 );
 				}
 			}
-			const DoubleVector3 vertices[3]{ v0, v1, v2 };
+			const PlanePoints vertices{ v0, v1, v2 };
 			const DoubleVector3 sts[3]{ DoubleVector3( p0->m_texcoord ),
 										DoubleVector3( p1->m_texcoord ),
 										DoubleVector3( p2->m_texcoord ) };

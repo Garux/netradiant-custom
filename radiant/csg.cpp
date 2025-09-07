@@ -744,7 +744,7 @@ public:
 	mutable bool m_gj;
 	BrushSplitByPlaneSelected( const ClipperPoints& points, bool flip, const char* shader, const TextureProjection& projection, bool split ) :
 		m_points( flip? ClipperPoints( points[0], points[2], points[1], points._count ) : points ),
-		m_plane( plane3_for_points( m_points[0], m_points[1], m_points[2] ) ),
+		m_plane( plane3_for_points( m_points._points ) ),
 		m_shader( shader ), m_projection( projection ), m_split( split ), m_gj( false ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
@@ -1039,10 +1039,10 @@ struct MergePlane
 {
 	const Plane3 m_plane;
 	const Face *const m_face;
-	const DoubleVector3 m_verts[3];
+	const PlanePoints m_verts;
 	MergePlane( const Plane3& plane, const Face* face ) : m_plane( plane ), m_face( face ){
 	}
-	MergePlane( const Plane3& plane, const DoubleVector3 verts[3] ) : m_plane( plane ), m_face( 0 ), m_verts{ verts[0], verts[1], verts[2] } {
+	MergePlane( const Plane3& plane, const PlanePoints& verts ) : m_plane( plane ), m_face( 0 ), m_verts{ verts } {
 	}
 };
 
@@ -1100,7 +1100,7 @@ void CSG_build_hull( const MergeVertices& mergeVertices, MergePlanes& mergePlane
 		const auto& indexBuffer = hull.getIndexBuffer();
 		const size_t triangleCount = indexBuffer.size() / 3;
 		for( size_t i = 0; i < triangleCount; ++i ) {
-			DoubleVector3 points[3];
+			PlanePoints points;
 			for( size_t j = 0; j < 3; ++j ){
 				points[j] = mergeVertices[indexBuffer[i * 3 + j]];
 			}

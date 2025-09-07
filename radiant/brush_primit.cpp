@@ -1529,7 +1529,7 @@ double Det3x3( double a00, double a01, double a02,
 	    +   a02 * ( a10 * a21 - a11 * a20 );
 }
 
-void BP_from_ST( brushprimit_texdef_t& bp, const DoubleVector3 points[3], const DoubleVector3 st[3], const DoubleVector3& normal, const bool normalize /*= true*/ ){
+void BP_from_ST( brushprimit_texdef_t& bp, const PlanePoints& points, const DoubleVector3 st[3], const DoubleVector3& normal, const bool normalize /*= true*/ ){
 	double xyI[2], xyJ[2], xyK[2];
 	double stI[2], stJ[2], stK[2];
 	double D, D0, D1, D2;
@@ -1695,7 +1695,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		ComputeAxisBase( plane.normal(), texX, texY );
 
 		const DoubleVector3 anchor = plane.normal() * plane.dist();
-		DoubleVector3 points[3] = { anchor, anchor + texX, anchor + texY };
+		PlanePoints points = { anchor, anchor + texX, anchor + texY };
 		DoubleVector3 st[3];
 
 		Matrix4 local2tex;
@@ -1733,7 +1733,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		DoubleVector3 texX, texY;
 		ComputeAxisBase( plane.normal(), texX, texY );
 		const DoubleVector3 anchor = plane.normal() * plane.dist();
-		DoubleVector3 points[3] = { anchor, anchor + texX, anchor + texY };
+		PlanePoints points = { anchor, anchor + texX, anchor + texY };
 		for ( std::size_t i = 0; i < 3; ++i )
 			matrix4_transform_point( identity2transformed, points[i] );
 		Vector3 newNormal( plane3_for_points( points ).normal() );
@@ -2102,7 +2102,7 @@ void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, Tex
 	}
 }
 
-void Texdef_from_ST( TextureProjection& projection, const DoubleVector3 points[3], const DoubleVector3 st[3], std::size_t width, std::size_t height ){
+void Texdef_from_ST( TextureProjection& projection, const PlanePoints& points, const DoubleVector3 st[3], std::size_t width, std::size_t height ){
 	const Plane3 plane( plane3_for_points( points ) );
 	brushprimit_texdef_t bp;
 	BP_from_ST( bp, points, st, plane.normal() );
@@ -2121,7 +2121,7 @@ void Texdef_from_ST( TextureProjection& projection, const DoubleVector3 points[3
 	}
 }
 
-void Texdef_Construct_local2tex_from_ST( const DoubleVector3 points[3], const DoubleVector3 st[3], Matrix4& local2tex ){
+void Texdef_Construct_local2tex_from_ST( const PlanePoints& points, const DoubleVector3 st[3], Matrix4& local2tex ){
 	const Plane3 plane( plane3_for_points( points ) );
 	brushprimit_texdef_t bp;
 	BP_from_ST( bp, points, st, plane.normal(), false );

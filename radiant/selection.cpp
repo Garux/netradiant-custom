@@ -1653,11 +1653,12 @@ public:
 			best = select_point_from_clipped( clipped );
 		}
 	}
-	void TestPolygon( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best, const DoubleVector3 planepoints[3] ) override {
-		DoubleVector3 pts[3];
-		pts[0] = vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[0], 1 ) ) );
-		pts[1] = vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[1], 1 ) ) );
-		pts[2] = vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[2], 1 ) ) );
+	void TestPolygon( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best, const PlanePoints& planepoints ) override {
+		const PlanePoints pts {
+			vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[0], 1 ) ) ),
+			vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[1], 1 ) ) ),
+			vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[2], 1 ) ) )
+		};
 		const Plane3 planeTransformed( plane3_for_points( pts ) );
 
 		Vector4 clipped[9];
@@ -3397,7 +3398,7 @@ bool Scene_forEachBrush_setupExtrude( SelectionTest& test, DragExtrudeFaces& ext
 						}
 						extrudeFaces.m_extrudeSources.back().m_faces.emplace_back();
 						extrudeFaces.m_extrudeSources.back().m_faces.back().m_face = &face.getFace();
-						planepts_assign( extrudeFaces.m_extrudeSources.back().m_faces.back().m_planepoints, face.getFace().getPlane().getPlanePoints() );
+						extrudeFaces.m_extrudeSources.back().m_faces.back().m_planepoints = face.getFace().getPlane().getPlanePoints();
 					}
 				};
 				Brush_ForEachFaceInstance( brushInstance, gatherFaceInstances );
@@ -5351,7 +5352,7 @@ private:
 						std::swap( v0, v1 );
 					}
 				}
-				const DoubleVector3 vertices[3]{ v0, v1, v2 };
+				const PlanePoints vertices{ v0, v1, v2 };
 				const DoubleVector3 sts[3]{ DoubleVector3( p0->m_texcoord ),
 				                            DoubleVector3( p1->m_texcoord ),
 				                            DoubleVector3( p2->m_texcoord ) };

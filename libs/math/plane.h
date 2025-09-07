@@ -157,6 +157,13 @@ inline Plane3 plane3_for_points( const BasicVector3<Element> planepts[3] ){
 	return plane3_for_points( planepts[0], planepts[1], planepts[2] );
 }
 
+#include <array>
+using PlanePoints = std::array<DoubleVector3, 3>;
+
+inline Plane3 plane3_for_points( const PlanePoints& planepts ){
+	return plane3_for_points( planepts[0], planepts[1], planepts[2] );
+}
+
 template<typename P, typename V>
 inline double plane3_distance_to_point( const Plane3___<P>& plane, const BasicVector3<V>& point ){
 	return vector3_dot( point, plane.normal() ) - plane.dist();

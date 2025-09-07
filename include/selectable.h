@@ -234,7 +234,7 @@ public:
 //	virtual const Vector3& getFar() const = 0;
 	virtual const Matrix4& getScreen2world() const = 0;
 	virtual void TestPoint( const Vector3& point, SelectionIntersection& best ) = 0;
-	virtual void TestPolygon( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best, const DoubleVector3 planepoints[3] ) = 0;
+	virtual void TestPolygon( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best, const PlanePoints& planepoints ) = 0;
 	virtual void TestLineLoop( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) = 0;
 	virtual void TestLineStrip( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) = 0;
 	virtual void TestLines( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) = 0;

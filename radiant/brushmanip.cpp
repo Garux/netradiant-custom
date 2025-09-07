@@ -386,7 +386,7 @@ void Brush_ConstructIcosahedron( Brush& brush, const AABB& bounds, std::size_t s
 	const size_t triangleCount = indexBuffer.size() / 3;
 	std::vector<Plane3> planes;
 	for( size_t i = 0; i < triangleCount; ++i ) {
-		DoubleVector3 p[3];
+		PlanePoints p;
 		for( size_t j = 0; j < 3; ++j ){
 			p[j] = DoubleVector3( pointCloud[indexBuffer[i * 3 + j]].x,
 			                      pointCloud[indexBuffer[i * 3 + j]].y,

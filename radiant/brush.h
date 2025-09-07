@@ -153,19 +153,7 @@ inline void Winding_Draw( const Winding& winding, const Vector3& normal, RenderS
 
 #include "shaderlib.h"
 
-typedef DoubleVector3 PlanePoints[3];
-
-inline bool planepts_equal( const PlanePoints planepts, const PlanePoints other ){
-	return planepts[0] == other[0] && planepts[1] == other[1] && planepts[2] == other[2];
-}
-
-inline void planepts_assign( PlanePoints planepts, const PlanePoints other ){
-	planepts[0] = other[0];
-	planepts[1] = other[1];
-	planepts[2] = other[2];
-}
-
-inline void planepts_quantise( PlanePoints planepts, double snap ){
+inline void planepts_quantise( PlanePoints& planepts, double snap ){
 	vector3_snap( planepts[0], snap );
 	vector3_snap( planepts[1], snap );
 	vector3_snap( planepts[2], snap );
@@ -183,7 +171,7 @@ inline void edge_snap( Vector3& edge, double snap ){
 	vector3_snap( edge, snap );
 }
 
-inline void planepts_snap( PlanePoints planepts, double snap ){
+inline void planepts_snap( PlanePoints& planepts, double snap ){
 	Vector3 edge01( vector3_subtracted( planepts[1], planepts[0] ) );
 	Vector3 edge12( vector3_subtracted( planepts[2], planepts[1] ) );
 	Vector3 edge20( vector3_subtracted( planepts[0], planepts[2] ) );
@@ -655,7 +643,7 @@ public:
 			}
 			else
 			{
-				planepts_assign( m_planepts, facePlane.planePoints() );
+				m_planepts = facePlane.planePoints();
 			}
 		}
 
@@ -666,7 +654,7 @@ public:
 			}
 			else
 			{
-				planepts_assign( facePlane.planePoints(), m_planepts );
+				facePlane.planePoints() = m_planepts;
 				facePlane.MakePlane();
 			}
 		}
@@ -676,7 +664,7 @@ public:
 	}
 	FacePlane( const FacePlane& other ) : m_funcStaticOrigin( 0, 0, 0 ){
 		if ( !isDoom3Plane() ) {
-			planepts_assign( m_planepts, other.m_planepts );
+			m_planepts = other.m_planepts;
 			MakePlane();
 		}
 		else
@@ -794,7 +782,7 @@ public:
 
 	void copy( const FacePlane& other ){
 		if ( !isDoom3Plane() ) {
-			planepts_assign( m_planepts, other.m_planepts );
+			m_planepts = other.m_planepts;
 			MakePlane();
 		}
 		else
@@ -816,9 +804,9 @@ public:
 			updateSource();
 		}
 	}
-	void copy( const PlanePoints planepoints ){
+	void copy( const PlanePoints& planepoints ){
 		if ( !isDoom3Plane() ) {
-			planepts_assign( m_planepts, planepoints );
+			m_planepts = planepoints;
 			MakePlane();
 		}
 		else
@@ -829,7 +817,7 @@ public:
 	}
 };
 
-inline void Winding_testSelect( Winding& winding, SelectionTest& test, SelectionIntersection& best, const DoubleVector3 planepoints[3] ){
+inline void Winding_testSelect( Winding& winding, SelectionTest& test, SelectionIntersection& best, const PlanePoints& planepoints ){
 	test.TestPolygon( VertexPointer( reinterpret_cast<VertexPointer::pointer>( &winding.points.data()->vertex ), sizeof( WindingVertex ) ), winding.numpoints, best, planepoints );
 }
 
@@ -986,6 +974,7 @@ public:
 	}
 	Face( const Face& other, FaceObserver* observer ) :
 		m_refcount( 0 ),
+		m_move_planepts( other.m_move_planepts ),
 		m_shader( other.m_shader.getShader(), other.m_shader.m_flags ),
 		m_texdef( m_shader, other.getTexdef().normalised() ),
 		m_observer( observer ),
@@ -993,7 +982,6 @@ public:
 		m_map( 0 ){
 		m_shader.attach( *this );
 		m_plane.copy( other.m_plane );
-		planepts_assign( m_move_planepts, other.m_move_planepts );
 //		m_texdef.setBasis( m_plane.plane3().normal() ); //don't reset basis on face clone
 		planeChanged();
 		updateFiltered();
@@ -1128,7 +1116,7 @@ public:
 		m_observer->planeChanged();
 	}
 
-	void assign_planepts( const PlanePoints planepts ){
+	void assign_planepts( const PlanePoints& planepts ){
 		m_planeTransformed.copy( planepts );
 		m_observer->planeChanged();
 	}
@@ -1136,17 +1124,17 @@ public:
 	/// \brief Reverts the transformable state of the brush to identity.
 	void revertTransform(){
 		m_planeTransformed = m_plane;
-		planepts_assign( m_move_planeptsTransformed, m_move_planepts );
+		m_move_planeptsTransformed = m_move_planepts;
 		m_texdefTransformed = m_texdef.m_projection;
 	}
 	void freezeTransform(){
 		undoSave();
 		m_plane = m_planeTransformed;
-		planepts_assign( m_move_planepts, m_move_planeptsTransformed );
+		m_move_planepts = m_move_planeptsTransformed;
 		m_texdef.m_projection = m_texdefTransformed;
 	}
 
-	void update_move_planepts_vertex( std::size_t index, PlanePoints planePoints ){
+	void update_move_planepts_vertex( std::size_t index, PlanePoints& planePoints ){
 		if( contributes() ){
 			std::size_t numpoints = getWinding().numpoints;
 			ASSERT_MESSAGE( index < numpoints, "update_move_planepts_vertex: invalid index" );
@@ -2909,7 +2897,7 @@ public:
 			vector3_snap( m_face->m_move_planepts[1], snap );
 			vector3_snap( m_face->m_move_planepts[2], snap );
 			m_face->assign_planepts( m_face->m_move_planepts );
-			planepts_assign( m_face->m_move_planeptsTransformed, m_face->m_move_planepts );
+			m_face->m_move_planeptsTransformed = m_face->m_move_planepts;
 			m_face->freezeTransform();
 		}
 		if ( selectedEdges() ) {
@@ -2917,7 +2905,7 @@ public:
 			vector3_snap( m_face->m_move_planepts[1], snap );
 			vector3_snap( m_face->m_move_planepts[2], snap );
 			m_face->assign_planepts( m_face->m_move_planepts );
-			planepts_assign( m_face->m_move_planeptsTransformed, m_face->m_move_planepts );
+			m_face->m_move_planeptsTransformed = m_face->m_move_planepts;
 			m_face->freezeTransform();
 		}
 	}
