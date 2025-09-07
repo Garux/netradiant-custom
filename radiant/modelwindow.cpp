@@ -240,7 +240,7 @@ public:
 
 		ASSERT_MESSAGE( m_children.find( NodeSmartReference( node ) ) == m_children.end(), "TraversableModelNodeSet::insert - element already exists" );
 
-		m_children.insert( NodeSmartReference( node ) );
+		m_children.push_back( NodeSmartReference( node ) );
 
 		if ( m_observer ) {
 			m_observer->insert( node );

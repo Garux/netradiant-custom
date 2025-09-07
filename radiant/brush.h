@@ -2543,14 +2543,14 @@ class FaceInstance;
 
 class FaceInstanceSet
 {
-	typedef SelectionList<FaceInstance> FaceInstances;
+	typedef UnsortedSet<FaceInstance*, false> FaceInstances;
 	FaceInstances m_faceInstances;
 public:
 	void insert( FaceInstance& faceInstance ){
-		m_faceInstances.append( faceInstance );
+		m_faceInstances.push_back( &faceInstance );
 	}
 	void erase( FaceInstance& faceInstance ){
-		m_faceInstances.erase( faceInstance );
+		m_faceInstances.erase( &faceInstance );
 	}
 
 	template<typename Functor>
@@ -2565,7 +2565,7 @@ public:
 		return m_faceInstances.empty();
 	}
 	FaceInstance& last() const {
-		return m_faceInstances.back();
+		return *m_faceInstances.back();
 	}
 };
 

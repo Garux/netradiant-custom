@@ -25,6 +25,7 @@
 #include <set>
 
 #include "generic/static.h"
+#include "debugging/debugging.h"
 
 /// \brief A single-value container, which can either be empty or full.
 template<typename Type>
@@ -56,111 +57,199 @@ public:
 };
 
 
-/// \brief An adaptor to make std::list into a Unique Sequence - which cannot contain the same value more than once.
+/// \brief An adaptor to make std::set or std::multiset into a SequenceContainer.
 /// It's illegal to modify inserted values directly!
 /// \param Value Uniquely identifies itself. Must provide a copy-constructor and an equality operator.
-template<typename Value>
+template<typename Value, bool UniqueValues>
 class UnsortedSet
 {
-	typedef typename std::list<Value> Values;
-	Values m_values;
+	struct Node
+	{
+		Node *m_prev;
+		Node *m_next;
+		Value m_value;
+		Node( const Value& value ) : m_value( value ){
+		}
+		static void link( Node *prev, Node *next ){
+			prev->m_next = next;
+			next->m_prev = prev;
+		}
+	};
+	/// special thin sentinel node to avoid DefaultConstructible \param Value requirement
+	struct SentinelNode
+	{
+		Node *m_prev;
+		Node *m_next;
+		SentinelNode(){
+			selfLink();
+		}
+		void selfLink(){
+			m_prev = m_next = asNode();
+		}
+		Node* asNode(){
+			return reinterpret_cast<Node*>( this );
+		}
+		const Node* asNode() const {
+			return reinterpret_cast<const Node*>( this );
+		}
+	};
+	static_assert( offsetof( SentinelNode, m_next ) == offsetof( Node, m_next ) &&
+	               offsetof( SentinelNode, m_prev ) == offsetof( Node, m_prev ),
+	               "Node layouts must be compatible for reinterpret_cast" );
+	SentinelNode m_end;
+
+	template<bool IsConst, bool IsReverse>
+	class Iterator
+	{
+	public:
+		using iterator_category = std::bidirectional_iterator_tag;
+		using value_type        = Value;
+		using difference_type   = std::ptrdiff_t;
+		using pointer           = std::conditional_t<IsConst, const Value*, Value*>;
+		using reference         = std::conditional_t<IsConst, const Value&, Value&>;
+		using node_ptr          = std::conditional_t<IsConst, const Node*, Node*>;
+	private:
+		node_ptr m_node;
+	public:
+		Iterator( node_ptr node = nullptr ) : m_node( node ){
+		}
+		reference operator*() const {
+			return m_node->m_value;
+		}
+		pointer operator->() const {
+			return &m_node->m_value;
+		}
+		Iterator& operator++(){
+			if constexpr ( IsReverse )
+				m_node = m_node->m_prev;
+			else
+				m_node = m_node->m_next;
+			return *this;
+		}
+		Iterator& operator--(){
+			if constexpr ( IsReverse )
+				m_node = m_node->m_next;
+			else
+				m_node = m_node->m_prev;
+			return *this;
+		}
+		Iterator operator++( int ){
+			auto ret = *this;
+			++( *this );
+			return ret;
+		}
+		Iterator operator--( int ){
+			auto ret = *this;
+			--( *this );
+			return ret;
+		}
+
+		friend bool operator==( const Iterator& lhs, const Iterator& rhs ) {
+			return lhs.m_node == rhs.m_node;
+		}
+
+		// Conversion from non-const to const iterator
+		template <bool OtherIsConst, bool OtherIsReverse>
+			requires ( OtherIsConst && !IsConst && ( OtherIsReverse == IsReverse ) )
+		operator Iterator<OtherIsConst, OtherIsReverse>() const {
+			return Iterator<OtherIsConst, OtherIsReverse>( m_node );
+		}
+	};
+
 public:
-	typedef typename Values::iterator iterator;
-	typedef typename Values::const_iterator const_iterator;
-	typedef typename Values::reverse_iterator reverse_iterator;
-	typedef typename Values::const_reverse_iterator const_reverse_iterator;
+	using iterator = Iterator<false, false>;
+	using const_iterator = Iterator<true, false>;
+	using reverse_iterator = Iterator<false, true>;
+	using const_reverse_iterator = Iterator<true, true>;
+
+	iterator               begin()        { return m_end.m_next; }
+	const_iterator         begin()  const { return m_end.m_next; }
+	iterator               end()          { return m_end.asNode(); }
+	const_iterator         end()    const { return m_end.asNode(); }
+	reverse_iterator       rbegin()       { return m_end.m_prev; }
+	const_reverse_iterator rbegin() const { return m_end.m_prev; }
+	reverse_iterator       rend()         { return m_end.asNode(); }
+	const_reverse_iterator rend()   const { return m_end.asNode(); }
 private:
 	struct Compare{
 		using is_transparent = void;
 
-		bool operator()( const const_iterator& one, const const_iterator& other ) const {
-			return *one < *other;
+		bool operator()( const Node& one, const Node& other ) const {
+			return one.m_value < other.m_value;
 		}
-		bool operator()( const Value& va, const const_iterator& it ) const {
-			return va < *it;
+		bool operator()( const Value& va, const Node& node ) const {
+			return va < node.m_value;
 		}
-		bool operator()( const const_iterator& it, const Value& va ) const {
-			return *it < va;
+		bool operator()( const Node& node, const Value& va ) const {
+			return node.m_value < va;
 		}
 	};
-	std::set<const_iterator, Compare> m_set; // store sorted iterators for fast lookup
-	void init_set(){ // only load set, when lookup is needed
-		if( m_set.empty() )
-			for( const_iterator it = begin(); it != end(); ++it )
-				m_set.emplace( it );
-	}
+	std::conditional_t<UniqueValues, std::set<Node, Compare>, std::multiset<Node, Compare>> m_set;
 public:
-
 	UnsortedSet() = default;
-	UnsortedSet( const UnsortedSet& other ) : m_values( other.m_values ), m_set(){
-	}
-	UnsortedSet( UnsortedSet&& ) noexcept = default;
+	UnsortedSet( const UnsortedSet& other ) = delete;
+	UnsortedSet( UnsortedSet&& ) noexcept = delete;
 	UnsortedSet& operator=( const UnsortedSet& other ){
-		m_values = other.m_values;
-		m_set.clear();
+		clear();
+		for( const auto& value : other )
+			push_back( value );
 		return *this;
-	}
-	UnsortedSet& operator=( UnsortedSet&& ) noexcept = default;
-
-	iterator begin(){
-		return m_values.begin();
-	}
-	const_iterator begin() const {
-		return m_values.begin();
-	}
-	iterator end(){
-		return m_values.end();
-	}
-	const_iterator end() const {
-		return m_values.end();
-	}
-	reverse_iterator rbegin(){
-		return m_values.rbegin();
-	}
-	const_reverse_iterator rbegin() const {
-		return m_values.rbegin();
-	}
-	reverse_iterator rend(){
-		return m_values.rend();
-	}
-	const_reverse_iterator rend() const {
-		return m_values.rend();
-	}
+	};
+	UnsortedSet& operator=( UnsortedSet&& ) noexcept = delete;
 
 	bool empty() const {
-		return m_values.empty();
+		return m_set.empty();
 	}
 	std::size_t size() const {
-		return m_values.size();
+		return m_set.size();
 	}
 	void clear(){
-		m_values.clear();
+		m_end.selfLink();
 		m_set.clear();
 	}
 
 	void swap( UnsortedSet& other ){
-		std::swap( m_values, other.m_values );
 		std::swap( m_set, other.m_set );
+		std::swap( m_end.m_next, other.m_end.m_next );
+		std::swap( m_end.m_prev, other.m_end.m_prev );
+		for( auto *set : { this, &other } ){ // note: would be trivial swap with allocated end node; unused function
+			if( set->empty() )
+				set->m_end.selfLink();
+			else
+				set->m_end.m_prev->m_next = set->m_end.m_next->m_prev = set->m_end.asNode();
+		}
 	}
 
-	iterator insert( const Value& value ){
-		init_set();
-		m_values.push_back( value );
-		const bool inserted = m_set.emplace( --end() ).second;
-		ASSERT_MESSAGE( inserted, "UnsortedSet::insert: already added" );
-		return --end();
+	iterator push_back( const Value& value ){
+		typename decltype( m_set )::iterator it;
+		if constexpr ( UniqueValues ){
+			bool inserted;
+			std::tie( it, inserted ) = m_set.emplace( value );
+			ASSERT_MESSAGE( inserted, "UnsortedSet::insert: already added" );
+		}
+		else{
+			it = m_set.emplace( value );
+		}
+		Node *newNode = &const_cast<Node&>( *it );
+		Node::link( m_end.m_prev, newNode );
+		Node::link( newNode, m_end.asNode() );
+		return iterator( newNode );
 	}
 	void erase( const Value& value ){
-		init_set();
 		const auto it = m_set.find( value );
 		ASSERT_MESSAGE( it != m_set.cend(), "UnsortedSet::erase: not found" );
-		m_values.erase( *it );
+		Node::link( it->m_prev, it->m_next );
 		m_set.erase( it );
 	}
-	const_iterator find( const Value& value ){
-		init_set();
+	const_iterator find( const Value& value ) const {
 		const auto it = m_set.find( value );
-		return it == m_set.cend()? end() : *it;
+		return ( it == m_set.cend() )? end() : const_iterator( &( *it ) );
+	}
+	Value& back(){
+		return m_end.m_prev->m_value;
+	}
+	const Value& back() const {
+		return m_end.m_prev->m_value;
 	}
 };
 
@@ -168,8 +257,8 @@ namespace std
 {
 /// \brief Swaps the values of \p self and \p other.
 /// Overloads std::swap.
-template<typename Value>
-inline void swap( UnsortedSet<Value>& self, UnsortedSet<Value>& other ){
+template<typename Value, bool UniqueValues>
+inline void swap( UnsortedSet<Value, UniqueValues>& self, UnsortedSet<Value, UniqueValues>& other ){
 	self.swap( other );
 }
 }

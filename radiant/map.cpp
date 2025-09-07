@@ -519,7 +519,7 @@ public:
 	CollectAllWalker( scene::Node& root, UnsortedNodeSet& nodes ) : m_root( root ), m_nodes( nodes ){
 	}
 	bool pre( scene::Node& node ) const override {
-		m_nodes.insert( NodeSmartReference( node ) );
+		m_nodes.push_back( NodeSmartReference( node ) );
 		Node_getTraversable( m_root )->erase( node );
 		return false;
 	}

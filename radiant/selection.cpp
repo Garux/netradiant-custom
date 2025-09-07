@@ -6946,7 +6946,7 @@ private:
 	UVManipulator m_uv_manipulator;
 	mutable TransformOriginManipulator m_transformOrigin_manipulator;
 
-	typedef SelectionList<scene::Instance> selection_t;
+	typedef UnsortedSet<scene::Instance*, false> selection_t;
 	selection_t m_selection;
 	selection_t m_component_selection;
 
@@ -7080,12 +7080,12 @@ public:
 	}
 	void onSelectedChanged( scene::Instance& instance, const Selectable& selectable ) override {
 		if ( selectable.isSelected() ) {
-			m_selection.append( instance );
+			m_selection.push_back( &instance );
 			m_count_stuff.increment( instance.path().top() );
 		}
 		else
 		{
-			m_selection.erase( instance );
+			m_selection.erase( &instance );
 			m_count_stuff.decrement( instance.path().top() );
 		}
 
@@ -7093,11 +7093,11 @@ public:
 	}
 	void onComponentSelection( scene::Instance& instance, const Selectable& selectable ) override {
 		if ( selectable.isSelected() ) {
-			m_component_selection.append( instance );
+			m_component_selection.push_back( &instance );
 		}
 		else
 		{
-			m_component_selection.erase( instance );
+			m_component_selection.erase( &instance );
 		}
 
 		ASSERT_MESSAGE( m_component_selection.size() == m_count_component.size(), "selection-tracking error" );
@@ -7108,7 +7108,7 @@ public:
 	}
 	scene::Instance& ultimateSelected() const override {
 		ASSERT_MESSAGE( m_selection.size() > 0, "no instance selected" );
-		return m_selection.back();
+		return *m_selection.back();
 	}
 	scene::Instance& penultimateSelected() const override {
 		ASSERT_MESSAGE( m_selection.size() > 1, "only one instance selected" );
@@ -7524,13 +7524,13 @@ public:
 			if ( Mode() == eComponent ) {
 				Scene_Rotate_Component_Selected( GlobalSceneGraph(), m_rotation, m_pivot2world.t().vec3() );
 
-				matrix4_assign_rotation_for_pivot( m_pivot2world, m_component_selection.back() );
+				matrix4_assign_rotation_for_pivot( m_pivot2world, *m_component_selection.back() );
 			}
 			else
 			{
 				Scene_Rotate_Selected( GlobalSceneGraph(), m_rotation, m_pivot2world.t().vec3() );
 
-				matrix4_assign_rotation_for_pivot( m_pivot2world, m_selection.back() );
+				matrix4_assign_rotation_for_pivot( m_pivot2world, *m_selection.back() );
 			}
 #ifdef SELECTIONSYSTEM_AXIAL_PIVOTS
 			matrix4_assign_rotation( m_pivot2world, matrix4_rotation_for_quaternion_quantised( m_rotation ) );
@@ -8095,20 +8095,20 @@ void RadiantSelectionSystem::ConstructPivotRotation() const {
 		break;
 	case eRotate:
 		if ( Mode() == eComponent ) {
-			matrix4_assign_rotation_for_pivot( m_pivot2world, m_component_selection.back() );
+			matrix4_assign_rotation_for_pivot( m_pivot2world, *m_component_selection.back() );
 		}
 		else
 		{
-			matrix4_assign_rotation_for_pivot( m_pivot2world, m_selection.back() );
+			matrix4_assign_rotation_for_pivot( m_pivot2world, *m_selection.back() );
 		}
 		break;
 	case eScale:
 		if ( Mode() == eComponent ) {
-			matrix4_assign_rotation_for_pivot( m_pivot2world, m_component_selection.back() );
+			matrix4_assign_rotation_for_pivot( m_pivot2world, *m_component_selection.back() );
 		}
 		else
 		{
-			matrix4_assign_rotation_for_pivot( m_pivot2world, m_selection.back() );
+			matrix4_assign_rotation_for_pivot( m_pivot2world, *m_selection.back() );
 		}
 		break;
 	default:

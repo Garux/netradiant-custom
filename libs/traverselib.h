@@ -96,7 +96,7 @@ public:
 		return *this;
 	}
 };
-typedef UnsortedSet<NodeSmartReference> UnsortedNodeSet;
+typedef UnsortedSet<NodeSmartReference, true> UnsortedNodeSet;
 
 /// \brief Calls \p observer->\c insert for each node that exists only in \p other and \p observer->\c erase for each node that exists only in \p self
 inline void nodeset_diff( const UnsortedNodeSet& self, const UnsortedNodeSet& other, scene::Traversable::Observer* observer ){
@@ -182,7 +182,7 @@ public:
 
 		ASSERT_MESSAGE( m_children.find( NodeSmartReference( node ) ) == m_children.end(), "TraversableNodeSet::insert - element already exists" );
 
-		m_children.insert( NodeSmartReference( node ) );
+		m_children.push_back( NodeSmartReference( node ) );
 
 		if ( m_observer ) {
 			m_observer->insert( node );
