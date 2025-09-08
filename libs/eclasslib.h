@@ -68,8 +68,8 @@ public:
 	CopiedString m_name;
 	CopiedString m_value;
 	CopiedString m_description;
-	EntityClassAttribute(){
-	}
+
+	EntityClassAttribute() = default;
 	EntityClassAttribute( const char* type, const char* name, const char* value = "", const char* description = "" ) : m_type( type ), m_name( name ), m_value( value ), m_description( description ){
 	}
 };

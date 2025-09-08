@@ -1040,7 +1040,7 @@ struct MergePlane
 	const Plane3 m_plane;
 	const Face *const m_face;
 	const PlanePoints m_verts;
-	MergePlane( const Plane3& plane, const Face* face ) : m_plane( plane ), m_face( face ){
+	MergePlane( const Plane3& plane, const Face* face ) : m_plane( plane ), m_face( face ), m_verts(){
 	}
 	MergePlane( const Plane3& plane, const PlanePoints& verts ) : m_plane( plane ), m_face( 0 ), m_verts{ verts } {
 	}

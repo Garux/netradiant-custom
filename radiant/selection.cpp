@@ -912,8 +912,6 @@ private:
 	float m_setSizeZ; /* store separately for fine square/cube modes handling */
 	scene::Node* m_newBrushNode;
 public:
-	DragNewBrush(){
-	}
 	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
 		m_setSizeZ = m_size[0] = m_size[1] = m_size[2] = GetGridSize();
 		m_newBrushNode = 0;
@@ -1560,9 +1558,6 @@ struct FlatShadedVertex
 	Vertex3f vertex;
 	Colour4b colour;
 	Normal3f normal;
-
-	FlatShadedVertex(){
-	}
 };
 
 
@@ -2347,8 +2342,6 @@ class TranslateManipulator : public Manipulator, public ManipulatorSelectionChan
 	{
 		PointVertex m_line[2];
 
-		RenderableArrowLine(){
-		}
 		void render( RenderStateFlags state ) const override {
 			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_line[0].colour );
 			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_line[0].vertex );
@@ -4993,8 +4986,6 @@ class UVManipulator : public Manipulator, public Manipulatable
 	struct RenderablePoints : public OpenGLRenderable
 	{
 		std::vector<PointVertex> m_points;
-		RenderablePoints(){
-		}
 		void render( RenderStateFlags state ) const override {
 			gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_points[0].colour );
 			gl().glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_points[0].vertex );
@@ -5004,8 +4995,7 @@ class UVManipulator : public Manipulator, public Manipulatable
 	struct RenderableLines : public OpenGLRenderable
 	{
 		std::vector<PointVertex> m_lines;
-		RenderableLines(){
-		}
+
 		void render( RenderStateFlags state ) const override {
 			if( m_lines.size() != 0 ){
 				gl().glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_lines[0].colour );
@@ -5037,8 +5027,7 @@ class UVManipulator : public Manipulator, public Manipulatable
 	{
 		std::vector<RenderIndex> m_trianglesIndices;
 		const PatchControlArray* m_patchControlArray;
-		RenderablePatchTexture(){
-		}
+
 		void render( RenderStateFlags state ) const override {
 			if( state & RENDER_FILL ){
 				const std::vector<Vector3> normals( m_patchControlArray->size(), g_vector3_axis_z );

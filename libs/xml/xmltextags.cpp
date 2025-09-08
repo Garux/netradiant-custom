@@ -25,9 +25,6 @@
 #include "stream/stringstream.h"
 #include <libxml/parser.h>
 
-XmlTagBuilder::XmlTagBuilder(){
-}
-
 XmlTagBuilder::~XmlTagBuilder(){
 	// clean up
 	xmlFreeDoc( doc );

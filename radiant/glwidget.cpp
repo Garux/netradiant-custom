@@ -31,8 +31,6 @@ public:
 	typedef _QERGtkGLTable Type;
 	STRING_CONSTANT( Name, "*" );
 
-	GtkGLAPI(){
-	}
 	_QERGtkGLTable* getTable(){
 		return &m_gtkgl;
 	}

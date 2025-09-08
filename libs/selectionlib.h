@@ -28,13 +28,9 @@
 
 class SelectableBool : public Selectable
 {
-	bool m_selected;
+	bool m_selected{};
 public:
-	SelectableBool()
-		: m_selected( false )
-	{}
-
-	void setSelected( bool select = true ) override {
+	void setSelected( bool select ) override {
 		m_selected = select;
 	}
 	bool isSelected() const override {

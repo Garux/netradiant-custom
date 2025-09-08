@@ -74,11 +74,12 @@ typedef Vector3 Scale;
 /// [1]y(x) [5]      [9]y(z) [13]
 /// [2]z(x) [6]z(y)  [10]    [14]
 /// [3]     [7]      [11]    [15]
-struct Skew{
+struct Skew
+{
 	std::size_t index;
 	float amount;
-	Skew(){
-	}
+
+	Skew() = default;
 	Skew( std::size_t index_, float amount_ ) : index( index_ ), amount( amount_ ){
 	}
 	bool operator!= ( const Skew& other ) const {

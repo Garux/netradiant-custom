@@ -414,8 +414,7 @@ struct Frustum
 {
 	Plane3 right, left, bottom, top, back, front;
 
-	Frustum(){
-	}
+	Frustum() = default;
 	Frustum( const Plane3& _right,
 	         const Plane3& _left,
 	         const Plane3& _bottom,

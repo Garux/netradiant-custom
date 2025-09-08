@@ -80,7 +80,7 @@ private:
 	}
 
 public:
-	XmlTagBuilder();
+	XmlTagBuilder() = default;
 	~XmlTagBuilder();
 
 	bool CreateXmlDocument( const char* savefile = nullptr );

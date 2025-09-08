@@ -38,30 +38,16 @@ class Matrix4
 {
 	float m_elements[16];
 public:
-
-	Matrix4(){
-	}
+	Matrix4() = default;
 	Matrix4( float xx_, float xy_, float xz_, float xw_,
 	         float yx_, float yy_, float yz_, float yw_,
 	         float zx_, float zy_, float zz_, float zw_,
-	         float tx_, float ty_, float tz_, float tw_ ){
-		xx() = xx_;
-		xy() = xy_;
-		xz() = xz_;
-		xw() = xw_;
-		yx() = yx_;
-		yy() = yy_;
-		yz() = yz_;
-		yw() = yw_;
-		zx() = zx_;
-		zy() = zy_;
-		zz() = zz_;
-		zw() = zw_;
-		tx() = tx_;
-		ty() = ty_;
-		tz() = tz_;
-		tw() = tw_;
-	}
+	         float tx_, float ty_, float tz_, float tw_ )
+	: m_elements{ xx_, xy_, xz_, xw_,
+	              yx_, yy_, yz_, yw_,
+	              zx_, zy_, zz_, zw_,
+	              tx_, ty_, tz_, tw_ }
+	{}
 
 	float& xx(){
 		return m_elements[0];

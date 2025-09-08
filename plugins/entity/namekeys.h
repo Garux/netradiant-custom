@@ -39,9 +39,6 @@ class KeyIsName
 public:
 	KeyIsNameFunc m_keyIsName;
 	const char* m_nameKey;
-
-	KeyIsName(){
-	}
 };
 
 

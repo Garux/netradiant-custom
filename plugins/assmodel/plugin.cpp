@@ -213,8 +213,6 @@ void pico_initialise(){
 class PicoModelLoader : public ModelLoader
 {
 public:
-	PicoModelLoader(){
-	}
 	scene::Node& loadModel( ArchiveFile& file ) override {
 		return loadPicoModel( *s_assImporter, file );
 	}

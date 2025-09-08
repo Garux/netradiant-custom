@@ -51,8 +51,7 @@ public:
 		typedef DefaultAllocator<Other> other;
 	};
 
-	DefaultAllocator(){
-	}
+	DefaultAllocator() = default;
 	DefaultAllocator( const DefaultAllocator<Type>& ){
 	}
 	template<typename Other> DefaultAllocator( const DefaultAllocator<Other>& ){
@@ -199,8 +198,7 @@ template<typename Type, typename Allocator = DefaultAllocator<Type> >
 class New : public Allocator
 {
 public:
-	New(){
-	}
+	New() = default;
 	explicit New( const Allocator& allocator ) : Allocator( allocator ){
 	}
 
@@ -249,8 +247,7 @@ template<typename Type, typename Allocator = DefaultAllocator<Type> >
 class Delete : public Allocator
 {
 public:
-	Delete(){
-	}
+	Delete() = default;
 	explicit Delete( const Allocator& allocator ) : Allocator( allocator ){
 	}
 

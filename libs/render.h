@@ -277,8 +277,7 @@ struct Colour4b
 {
 	unsigned char r, g, b, a;
 
-	Colour4b(){
-	}
+	Colour4b() = default;
 
 	Colour4b( unsigned char _r, unsigned char _g, unsigned char _b, unsigned char _a )
 		: r( _r ), g( _g ), b( _b ), a( _a ){
@@ -323,9 +322,7 @@ inline bool operator!=( const Colour4b& self, const Colour4b& other ){
 /// \brief A 3-float vertex.
 struct Vertex3f : public Vector3
 {
-	Vertex3f(){
-	}
-
+	Vertex3f() = default;
 	Vertex3f( float _x, float _y, float _z )
 		: Vector3( _x, _y, _z ){
 	}
@@ -383,9 +380,7 @@ inline Vector3& vertex3f_to_vector3( Vertex3f& vertex ){
 /// \brief A 3-float normal.
 struct Normal3f : public Vector3
 {
-	Normal3f(){
-	}
-
+	Normal3f() = default;
 	Normal3f( float _x, float _y, float _z )
 		: Vector3( _x, _y, _z ){
 	}
@@ -441,9 +436,7 @@ inline Vector3& normal3f_to_vector3( Normal3f& normal ){
 /// \brief A 2-float texture-coordinate set.
 struct TexCoord2f : public Vector2
 {
-	TexCoord2f(){
-	}
-
+	TexCoord2f() = default;
 	TexCoord2f( float _s, float _t )
 		: Vector2( _s, _t ){
 	}
@@ -747,8 +740,7 @@ struct PointVertex
 	Colour4b colour;
 	Vertex3f vertex;
 
-	PointVertex(){
-	}
+	PointVertex() = default;
 	PointVertex( Vertex3f _vertex )
 		: colour( Colour4b( 255, 255, 255, 255 ) ), vertex( _vertex ){
 	}
@@ -781,8 +773,7 @@ struct DepthTestedPointVertex
 	Vertex3f vertex;
 	GLuint query = 0;
 
-	DepthTestedPointVertex(){
-	}
+	DepthTestedPointVertex() = default;
 	~DepthTestedPointVertex(){
 		if( query != 0 )
 			gl().glDeleteQueries( 1, &query );

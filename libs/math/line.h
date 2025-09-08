@@ -34,8 +34,7 @@ class Line___
 public:
 	BasicVector3<T> start, end;
 
-	Line___(){
-	}
+	Line___() = default;
 	Line___( const BasicVector3<T>& start_, const BasicVector3<T>& end_ ) : start( start_ ), end( end_ ){
 	}
 };
@@ -67,8 +66,7 @@ class Segment
 public:
 	Vector3 origin, extents;
 
-	Segment(){
-	}
+	Segment() = default;
 	Segment( const Vector3& origin_, const Vector3& extents_ ) :
 		origin( origin_ ), extents( extents_ ){
 	}
@@ -101,8 +99,7 @@ class BasicRay
 public:
 	BasicVector3<T> origin, direction;
 
-	BasicRay(){
-	}
+	BasicRay() = default;
 	BasicRay( const BasicVector3<T>& origin_, const BasicVector3<T>& direction_ ) :
 		origin( origin_ ), direction( direction_ ){
 	}

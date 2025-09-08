@@ -547,8 +547,6 @@ private:
 	Renderables m_renderables;
 
 public:
-	OpenGLStateBucket(){
-	}
 	void addRenderable( const OpenGLRenderable& renderable, const Matrix4& modelview, const RendererLight* light = 0 ){
 		m_renderables.push_back( RenderTransform( renderable, modelview, light ) );
 	}
