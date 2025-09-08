@@ -52,7 +52,7 @@ public:
 };
 
 
-class UndoFileChangeTracker : public UndoTracker, public MapFile
+class UndoFileChangeTracker final : public UndoTracker, public MapFile
 {
 	std::size_t m_size;
 	std::size_t m_saved;
@@ -125,7 +125,7 @@ public:
 };
 
 
-class MapRoot : public scene::Node::Symbiot, public scene::Instantiable, public scene::Traversable::Observer
+class MapRoot final : public scene::Node::Symbiot, public scene::Instantiable, public scene::Traversable::Observer
 {
 	class TypeCasts
 	{
@@ -178,8 +178,7 @@ public:
 
 		GlobalUndoSystem().trackerAttach( m_changeTracker );
 	}
-	~MapRoot(){
-	}
+	~MapRoot() = default;
 	MapRoot( MapRoot&& ) noexcept = default; // no copy: Layers use m_parent pointer
 	void release() override {
 		GlobalUndoSystem().trackerDetach( m_changeTracker );

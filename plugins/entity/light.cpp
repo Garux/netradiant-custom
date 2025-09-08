@@ -1975,7 +1975,7 @@ public:
 	}
 };
 
-class LightNode :
+class LightNode final :
 	public scene::Node::Symbiot,
 	public scene::Instantiable,
 	public scene::Cloneable,

@@ -41,7 +41,7 @@
 #include <list>
 
 /* plugin manager --------------------------------------- */
-class CPluginSlot : public IPlugIn
+class CPluginSlot final : public IPlugIn
 {
 	CopiedString m_menu_name;
 	const _QERPluginTable *mpTable;
@@ -168,28 +168,20 @@ class CPluginSlots
 {
 	std::list<CPluginSlot *> mSlots;
 public:
-	virtual ~CPluginSlots();
+	~CPluginSlots(){
+		for ( auto& pluginSlot : mSlots )
+			delete std::exchange( pluginSlot, nullptr );
+	}
 
 	void AddPluginSlot( QWidget* main_window, const char* name, const _QERPluginTable& table ){
 		mSlots.push_back( new CPluginSlot( main_window, name, table ) );
 	}
 
-	void PopulateMenu( PluginsVisitor& menu );
+	void PopulateMenu( PluginsVisitor& menu ){
+		for ( auto *pluginSlot : mSlots )
+			menu.visit( *pluginSlot );
+	}
 };
-
-CPluginSlots::~CPluginSlots(){
-	for ( auto& pluginSlot : mSlots )
-	{
-		delete std::exchange( pluginSlot, nullptr );
-	}
-}
-
-void CPluginSlots::PopulateMenu( PluginsVisitor& menu ){
-	for ( auto *pluginSlot : mSlots )
-	{
-		menu.visit( *pluginSlot );
-	}
-}
 
 CPluginSlots g_plugin_slots;
 

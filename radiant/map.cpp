@@ -653,7 +653,7 @@ public:
 	}
 };
 
-class BasicContainer : public scene::Node::Symbiot
+class BasicContainer final : public scene::Node::Symbiot
 {
 	class TypeCasts
 	{

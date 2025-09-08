@@ -28,9 +28,6 @@
 class DPoint
 {
 public:
-	DPoint();
-	~DPoint();
-
 	bool operator ==( vec3_t other );
 
 	vec3_t _pnt;

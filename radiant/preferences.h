@@ -330,8 +330,7 @@ public:
 	class QStackedWidget *m_notebook;
 	class QTreeView *m_treeview;
 
-	virtual ~PrefsDlg(){
-	}
+	virtual ~PrefsDlg() = default;
 
 	/*!
 	   path for global settings

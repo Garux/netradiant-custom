@@ -621,8 +621,7 @@ class OpenGLShader final : public Shader
 public:
 	OpenGLShader() : m_shader( 0 ), m_used( 0 ){
 	}
-	~OpenGLShader(){
-	}
+	~OpenGLShader() = default;
 	void construct( const char* name );
 	void destroy(){
 		if ( m_shader ) {

@@ -165,8 +165,6 @@ public:
 	{
 	public:
 		virtual void release() = 0;
-		virtual ~Symbiot(){
-		}
 	};
 
 private:
@@ -180,7 +178,7 @@ public:
 	bool m_isRoot;
 	Layer *m_layer; // nullptr for group entity node; they are not finely manageable and affect children visibility
 
-	bool isRoot(){
+	bool isRoot() const {
 		return m_isRoot;
 	}
 
@@ -193,8 +191,7 @@ public:
 		m_isRoot( false ),
 		m_layer( layer ){
 	}
-	~Node(){
-	}
+	~Node() = default;
 
 	void IncRef(){
 		ASSERT_MESSAGE( m_refcount < ( 1 << 24 ), "Node::decref: uninitialised refcount" );
@@ -226,19 +223,19 @@ public:
 	bool excluded( unsigned int state ) const {
 		return ( m_state & state ) != 0;
 	}
-	bool operator<( const scene::Node& other ){
+	bool operator<( const scene::Node& other ) const {
 		return this < &other;
 	}
-	bool operator==( const scene::Node& other ){
+	bool operator==( const scene::Node& other ) const {
 		return this == &other;
 	}
-	bool operator!=( const scene::Node& other ){
+	bool operator!=( const scene::Node& other ) const {
 		return this != &other;
 	}
 };
 
 
-class NullNode : public Node::Symbiot
+class NullNode final : public Node::Symbiot
 {
 	NodeTypeCastTable m_casts;
 	Node m_node;
@@ -626,10 +623,7 @@ class Instance
 		}
 	}
 
-	Instance( const scene::Instance& other );
-	Instance& operator=( const scene::Instance& other );
 public:
-
 	Instance( const scene::Path& path, Instance* parent, void* instance, InstanceTypeCastTable& casts ) :
 		m_path( path ),
 		m_parent( parent ),
@@ -647,8 +641,9 @@ public:
 		m_parentSelectedChanged( true ){
 		ASSERT_MESSAGE( ( parent == 0 ) == ( path.size() == 1 ), "instance has invalid parent" );
 	}
-	virtual ~Instance(){
-	}
+	virtual ~Instance() = default;
+	Instance( const scene::Instance& other ) = delete;
+	Instance& operator=( const scene::Instance& other ) = delete;
 
 	const scene::Path& path() const {
 		return m_path;

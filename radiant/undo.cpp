@@ -53,7 +53,7 @@ public:
 };
 
 
-class RadiantUndoSystem : public UndoSystem
+class RadiantUndoSystem final : public UndoSystem
 {
 	INTEGER_CONSTANT( MAX_UNDO_LEVELS, 4096 );
 
@@ -199,7 +199,7 @@ class RadiantUndoSystem : public UndoSystem
 	UndoStack m_undo_stack;
 	UndoStack m_redo_stack;
 
-	class UndoStackFiller : public UndoObserver
+	class UndoStackFiller final : public UndoObserver
 	{
 		UndoStack* m_stack;
 	public:

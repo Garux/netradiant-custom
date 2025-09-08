@@ -31,9 +31,6 @@
 class IPlugIn
 {
 public:
-	IPlugIn() { }
-	virtual ~IPlugIn() { }
-
 	virtual const char* getMenuName() = 0;
 	virtual std::size_t getCommandCount() = 0;
 	virtual const char* getCommand( std::size_t ) = 0;

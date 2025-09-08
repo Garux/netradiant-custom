@@ -64,15 +64,12 @@ public:
 	DPatch* MergePatches( patch_merge_t merge_info, DPatch& p1, DPatch& p2 );
 	patch_merge_t IsMergable( const DPatch& other );
 	bool ResetTextures( const char *oldTextureName, const char *newTextureName );
-	scene::Node* QER_entity;
-	scene::Node* QER_brush;
+	scene::Node* QER_entity{};
+	scene::Node* QER_brush{};
 	void LoadFromPatch( scene::Instance& patch );
 	void BuildInRadiant( scene::Node* entity = NULL );
 	void SetTexture( const char* textureName );
 	char texture[256];
-	int width, height;
+	int width = MIN_PATCH_WIDTH, height = MIN_PATCH_HEIGHT;
 	drawVert_t points[MAX_PATCH_WIDTH][MAX_PATCH_HEIGHT];
-	DPatch();
-	~DPatch();
-
 };

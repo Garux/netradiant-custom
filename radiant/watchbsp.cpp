@@ -99,7 +99,7 @@ public:
 		m_monitoring_timer.callOnTimeout( [this](){ RoutineProcessing(); } );
 		m_monitoring_timer.setInterval( 25 );
 	}
-	virtual ~CWatchBSP(){
+	~CWatchBSP(){
 		EndMonitoringLoop();
 		Net_Shutdown();
 	}

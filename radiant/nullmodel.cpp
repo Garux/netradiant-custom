@@ -126,7 +126,7 @@ public:
 	}
 };
 
-class NullModelNode : public scene::Node::Symbiot, public scene::Instantiable
+class NullModelNode final : public scene::Node::Symbiot, public scene::Instantiable
 {
 	class TypeCasts
 	{

@@ -26,7 +26,7 @@
 #include "brushtokens.h"
 #include "brushxml.h"
 
-class BrushNode :
+class BrushNode final :
 	public scene::Node::Symbiot,
 	public scene::Instantiable,
 	public scene::Cloneable

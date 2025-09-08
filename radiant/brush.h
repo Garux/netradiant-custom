@@ -881,7 +881,7 @@ public:
 	virtual void evaluateTransform() = 0;
 };
 
-class Face :
+class Face final :
 	public OpenGLRenderable,
 	public Filterable,
 	public Undoable,
@@ -889,7 +889,7 @@ class Face :
 {
 	std::size_t m_refcount;
 
-	class SavedState : public UndoMemento
+	class SavedState final : public UndoMemento
 	{
 	public:
 		FacePlane::SavedState m_planeState;
@@ -1550,7 +1550,7 @@ public:
 	virtual void visit( Face& face ) const = 0;
 };
 
-class Brush :
+class Brush final :
 	public TransformNode,
 	public Bounded,
 	public Cullable,
@@ -1929,7 +1929,7 @@ public:
 	}
 
 	/// \brief The undo memento for a brush stores only the list of face references - the faces are not copied.
-	class BrushUndoMemento : public UndoMemento
+	class BrushUndoMemento final : public UndoMemento
 	{
 	public:
 		BrushUndoMemento( const Faces& faces ) : m_faces( faces ){

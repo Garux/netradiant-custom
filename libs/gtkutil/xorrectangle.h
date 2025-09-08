@@ -34,10 +34,6 @@ class XORRectangle {
 		gl().glEnd();
 	}
 public:
-	XORRectangle() {
-	}
-	~XORRectangle() {
-	}
 	void render( rect_t rect, int viewWidth, int viewHeight ) {
 		if( rect.max[0] != rect.min[0] && rect.max[1] != rect.min[1] ) {
 			GlobalOpenGL_debugAssertNoErrors();

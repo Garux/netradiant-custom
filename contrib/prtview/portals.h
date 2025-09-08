@@ -28,12 +28,6 @@
 
 class CBspPortal {
 public:
-	CBspPortal();
-	~CBspPortal();
-
-protected:
-
-public:
 	Vector3 center{ 0 };
 	std::vector<Vector3> point;
 	std::vector<Vector3> inner_point;
@@ -61,10 +55,6 @@ class CPortals {
 	} format;
 
 public:
-
-	CPortals();
-	~CPortals();
-
 	void Load();     // use filename in fn
 	void Purge();
 

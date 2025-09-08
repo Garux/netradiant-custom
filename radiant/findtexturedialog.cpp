@@ -60,7 +60,7 @@ public:
 	static void updateTextures( const char* name );
 
 	FindTextureDialog();
-	virtual ~FindTextureDialog();
+	~FindTextureDialog() = default;
 	void BuildDialog() override;
 
 	void constructWindow( QWidget* parent ){
@@ -125,9 +125,6 @@ s_pressedKeysFilter;
 // FindTextureDialog class
 
 FindTextureDialog::FindTextureDialog() : m_bSelectedOnly( false ){
-}
-
-FindTextureDialog::~FindTextureDialog(){
 }
 
 void FindTextureDialog::BuildDialog(){

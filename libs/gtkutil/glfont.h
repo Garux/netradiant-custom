@@ -31,8 +31,7 @@ public:
 	virtual int getPixelDescent() const = 0;
 	virtual void printString( const char *s ) = 0;
 	virtual void renderString( const char *s, const GLuint& tex, const unsigned char colour[3], unsigned int& out_wid, unsigned int& out_hei ) = 0;
-	virtual ~GLFont(){
-	}
+	virtual ~GLFont() = default;
 };
 
 GLFont *glfont_create( const char* family, int fontSize, const char* appPath );

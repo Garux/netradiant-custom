@@ -58,10 +58,8 @@ class CPointfile : public ISAXHandler, public Renderable, public OpenGLRenderabl
 	static Shader* m_renderstate;
 	StringOutputStream m_characters;
 public:
-	CPointfile(){
-	}
-	~CPointfile(){
-	}
+	CPointfile() = default;
+	~CPointfile() = default;
 	void Init();
 	void PushPoint( const Vector3& v );
 	void GenerateDisplayList();

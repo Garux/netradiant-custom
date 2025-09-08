@@ -57,8 +57,7 @@ public:
 	}
 	template<typename Other> DefaultAllocator( const DefaultAllocator<Other>& ){
 	}
-	~DefaultAllocator(){
-	}
+	~DefaultAllocator() = default;
 
 	pointer address( reference instance ) const {
 		return &instance;
@@ -123,8 +122,7 @@ public:
 	}
 	template<typename Other> NamedAllocator( const NamedAllocator<Other>& other ) : m_name( other.m_name ){
 	}
-	~NamedAllocator(){
-	}
+	~NamedAllocator() = default;
 
 	pointer address( reference instance ) const {
 		return allocator_type::address( instance );

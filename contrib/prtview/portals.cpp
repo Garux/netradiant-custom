@@ -36,12 +36,6 @@ CPortals portals;
 CPortalsRender render;
 
 
-CBspPortal::CBspPortal(){
-}
-
-CBspPortal::~CBspPortal(){
-}
-
 bool CBspPortal::Build( char *def ){
 	char *c = def;
 	unsigned int point_count;
@@ -105,12 +99,6 @@ bool CBspPortal::Build( char *def ){
 	fp_color_random[3] = 1.0f;
 
 	return true;
-}
-
-CPortals::CPortals(){
-}
-
-CPortals::~CPortals(){
 }
 
 void CPortals::Purge(){

@@ -230,8 +230,6 @@ public:
 		m_comment << key;
 		m_comment << " : ";
 	}
-	~AttributeImporter(){
-	}
 	TreeXMLImporter& pushElement( const XMLElement& element ) override {
 		ERROR_MESSAGE( PARSE_ERROR( element.name(), "attribute" ) );
 		return *this;

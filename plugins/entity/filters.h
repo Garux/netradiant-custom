@@ -45,8 +45,7 @@ public:
 
 	ClassnameFilter( Entity& entity, scene::Node& node ) : m_node( node ), m_entity( entity ){
 	}
-	~ClassnameFilter(){
-	}
+	~ClassnameFilter() = default;
 
 	void instanceAttach(){
 		GlobalFilterSystem().registerFilterable( *this );

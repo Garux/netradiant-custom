@@ -373,7 +373,7 @@ public:
 	typedef MemberCaller<EclassModelInstance, void(), &EclassModelInstance::applyTransform> ApplyTransformCaller;
 };
 
-class EclassModelNode :
+class EclassModelNode final :
 	public scene::Node::Symbiot,
 	public scene::Instantiable,
 	public scene::Cloneable,

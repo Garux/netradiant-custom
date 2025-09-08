@@ -276,7 +276,7 @@ public:
 };
 
 /* specialized copy of class MapRoot */
-class ModelGraphRoot : public scene::Node::Symbiot, public scene::Instantiable, public scene::Traversable::Observer
+class ModelGraphRoot final : public scene::Node::Symbiot, public scene::Instantiable, public scene::Traversable::Observer
 {
 	class TypeCasts
 	{
@@ -311,8 +311,7 @@ public:
 
 		m_traverse.attach( this );
 	}
-	~ModelGraphRoot(){
-	}
+	~ModelGraphRoot() = default;
 	void release() override {
 		m_traverse.detach( this );
 		delete this;
@@ -352,7 +351,7 @@ public:
 
 #include "../plugins/entity/model.h"
 
-class ModelNode :
+class ModelNode final :
 	public scene::Node::Symbiot,
 	public scene::Instantiable,
 	public scene::Traversable::Observer
@@ -526,7 +525,7 @@ public:
 	}
 };
 
-class ModelBrowser : public scene::Instantiable::Observer
+class ModelBrowser final : public scene::Instantiable::Observer
 {
 	// track instances in the order of insertion
 	std::vector<scene::Instance*> m_modelInstances;
@@ -537,10 +536,8 @@ public:
 		//globalOutputStream() << "vertical scroll\n";
 		setOriginZ( -value );
 	} )
-	{
-	}
-	~ModelBrowser(){
-	}
+	{}
+	~ModelBrowser() = default;
 
 	const int m_MSAA = 8;
 	Vector3 m_background_color = Vector3( .25f );

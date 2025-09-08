@@ -339,7 +339,7 @@ public:
 	typedef MemberCaller<GenericEntityInstance, void(), &GenericEntityInstance::applyTransform> ApplyTransformCaller;
 };
 
-class GenericEntityNode :
+class GenericEntityNode final :
 	public scene::Node::Symbiot,
 	public scene::Instantiable,
 	public scene::Cloneable

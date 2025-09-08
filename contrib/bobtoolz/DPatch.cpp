@@ -32,25 +32,12 @@
 #include "./dialogs/dialogs-gtk.h"
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 //		Added patch merging, wahey!
 
 //
 //		problem is, you cant put patches into entities as yet :(
 //
-
-DPatch::DPatch(){
-	width = MIN_PATCH_WIDTH;
-	height = MIN_PATCH_HEIGHT;
-	QER_entity = NULL;
-	QER_brush = NULL;
-}
-
-DPatch::~DPatch(){
-
-}
 
 void DPatch::SetTexture( const char *textureName ){
 	strcpy( texture, textureName );

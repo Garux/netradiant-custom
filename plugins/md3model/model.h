@@ -434,7 +434,7 @@ public:
 	}
 };
 
-class ModelNode : public scene::Node::Symbiot, public scene::Instantiable
+class ModelNode final : public scene::Node::Symbiot, public scene::Instantiable
 {
 	class TypeCasts
 	{

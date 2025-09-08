@@ -427,7 +427,7 @@ public:
 	typedef MemberCaller<MiscModelInstance, void(), &MiscModelInstance::applyTransform> ApplyTransformCaller;
 };
 
-class MiscModelNode :
+class MiscModelNode final :
 	public scene::Node::Symbiot,
 	public scene::Instantiable,
 	public scene::Cloneable,

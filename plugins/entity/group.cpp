@@ -388,7 +388,7 @@ public:
 	typedef MemberCaller<GroupInstance, void(), &GroupInstance::applyTransform> ApplyTransformCaller;
 };
 
-class GroupNode :
+class GroupNode final :
 	public scene::Node::Symbiot,
 	public scene::Instantiable,
 	public scene::Cloneable,

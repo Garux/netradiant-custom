@@ -824,7 +824,7 @@ BlendFactor evaluateBlendFactor( const ShaderValue& value, const ShaderParameter
 	return BLEND_ZERO;
 }
 
-class CShader : public IShader
+class CShader final : public IShader
 {
 	std::size_t m_refcount;
 
@@ -867,7 +867,7 @@ public:
 
 		realise();
 	}
-	virtual ~CShader(){
+	~CShader(){
 		unrealise();
 
 		ASSERT_MESSAGE( m_refcount == 0, "deleting active shader" );

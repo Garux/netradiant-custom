@@ -415,8 +415,7 @@ class BufferedTextOutputStream : public TextOutputStream
 public:
 	BufferedTextOutputStream( TextOutputStreamType& outputStream ) : outputStream( outputStream ) {
 	}
-	~BufferedTextOutputStream(){
-	}
+	~BufferedTextOutputStream() = default;
 	std::size_t write( const char* buffer, std::size_t length ){
 		std::size_t remaining = length;
 		for (;; )

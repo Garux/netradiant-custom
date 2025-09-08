@@ -35,18 +35,7 @@
 #include "misc.h"
 #include "shapes.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 bool bFacesAll[6] = {true, true, true, true, true, true};
-
-DShape::DShape(){
-}
-
-DShape::~DShape(){
-
-}
 
 void DShape::BuildRegularPrism( vec3_t min, vec3_t max, int nSides, bool bAlignTop ){
 	vec3_t vc[MAX_POLYGON_FACES + 2], vd[MAX_POLYGON_FACES + 2];

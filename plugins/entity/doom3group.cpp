@@ -592,7 +592,7 @@ public:
 	typedef MemberCaller<Doom3GroupInstance, void(const Selectable&), &Doom3GroupInstance::selectionChangedComponent> SelectionChangedComponentCaller;
 };
 
-class Doom3GroupNode :
+class Doom3GroupNode final :
 	public scene::Node::Symbiot,
 	public scene::Instantiable,
 	public scene::Cloneable,

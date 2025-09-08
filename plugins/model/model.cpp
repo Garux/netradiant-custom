@@ -563,7 +563,7 @@ public:
 	}
 };
 
-class PicoModelNode : public scene::Node::Symbiot, public scene::Instantiable
+class PicoModelNode final : public scene::Node::Symbiot, public scene::Instantiable
 {
 	class TypeCasts
 	{

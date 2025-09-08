@@ -314,7 +314,7 @@ public:
 };
 
 // parametric surface defined by quadratic bezier control curves
-class Patch :
+class Patch final :
 	public XMLImporter,
 	public XMLExporter,
 	public TransformNode,
@@ -356,7 +356,7 @@ class Patch :
 
 	typedef Array<PatchControl> PatchControlArray;
 
-	class SavedState : public UndoMemento
+	class SavedState final : public UndoMemento
 	{
 	public:
 		SavedState(
@@ -1679,7 +1679,7 @@ public:
 
 
 template<typename TokenImporter, typename TokenExporter>
-class PatchNode :
+class PatchNode final :
 	public scene::Node::Symbiot,
 	public scene::Instantiable,
 	public scene::Cloneable
