@@ -28,6 +28,7 @@ environment:
 
 dependencies:
 - qt5
+- qt5-svg
 - glib
 - libxml2 >= 2.0.0
 - zlib >= 1.2.0 (for archivezip module)
@@ -75,9 +76,9 @@ environment:
 - from MSYS2 MINGW32 or MSYS2 MINGW64 shell:
   pacman -S --needed base-devel
     32 bit:
-  pacman -S --needed mingw-w64-i686-{toolchain,qt5-base,libxml2}
+  pacman -S --needed mingw-w64-i686-{toolchain,qt5-base,qt5-svg,libxml2}
     64 bit:
-  pacman -S --needed mingw-w64-x86_64-{toolchain,qt5-base,libxml2}
+  pacman -S --needed mingw-w64-x86_64-{toolchain,qt5-base,qt5-svg,libxml2}
     these are only strictly required for gamepacks:
   pacman -S --needed unzip svn git
 

@@ -27,6 +27,7 @@
 
 #include "stream/stringstream.h"
 #include "os/file.h"
+#include "os/path.h"
 #include <QToolBar>
 
 #include "mainframe.h"
@@ -35,17 +36,12 @@
 QIcon new_plugin_icon( const char* filename ){
 	StringOutputStream fullpath( 256 );
 
-	fullpath( AppPath_get(), g_pluginsDir, "bitmaps/", filename );
-	if( file_exists( fullpath ) )
-		return QIcon( fullpath.c_str() );
+	const char *rootdir[][ 2 ] = { { AppPath_get(), g_pluginsDir }, { GameToolsPath_get(), g_pluginsDir }, { AppPath_get(), g_modulesDir } };
 
-	fullpath( GameToolsPath_get(), g_pluginsDir, "bitmaps/", filename );
-	if( file_exists( fullpath ) )
-		return QIcon( fullpath.c_str() );
-
-	fullpath( AppPath_get(), g_modulesDir, "bitmaps/", filename );
-	if( file_exists( fullpath ) )
-		return QIcon( fullpath.c_str() );
+	for( const auto [ root, dir ] : rootdir )
+		for( const auto *ext : { ".svg", ".png" } )
+			if( file_exists( fullpath( root, dir, "bitmaps/", PathExtensionless( filename ), ext ) ) )
+				return QIcon( fullpath.c_str() );
 
 	return {};
 }

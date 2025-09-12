@@ -143,7 +143,7 @@ void create_filter_toolbar( QToolBar *toolbar ){
 	button = toolbar_append_toggle_button( toolbar, "Func_Groups\nRightClick: create func_group", "f-funcgroups.png", "FilterFuncGroups" );
 	g_filter_toolbar_handler.m_actions.emplace( button, new CommonFunc_group );
 
-	toolbar_append_toggle_button( toolbar, "Patches", "patch_wireframe.png", "FilterPatches" );
+	toolbar_append_toggle_button( toolbar, "Patches", "f-patches.png", "FilterPatches" );
 	toolbar->addSeparator();
 
 //	if ( g_pGameDescription->mGameType == "doom3" ) {
@@ -173,7 +173,7 @@ void create_filter_toolbar( QToolBar *toolbar ){
 	//toolbar_append_toggle_button( toolbar, "Paths", "texture_lock.png", "FilterPaths" );
 	toolbar->addSeparator();
 	toolbar_append_toggle_button( toolbar, "Entities", "f-entities.png", "FilterEntities" );
-	toolbar_append_toggle_button( toolbar, "Point Entities", "status_entity.png", "FilterPointEntities" );
+	toolbar_append_toggle_button( toolbar, "Point Entities", "f-pointentities.png", "FilterPointEntities" );
 	toolbar_append_toggle_button( toolbar, "Lights", "f-lights.png", "FilterLights" );
 	toolbar_append_toggle_button( toolbar, "Models", "f-models.png", "FilterModels" );
 

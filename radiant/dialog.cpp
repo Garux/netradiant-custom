@@ -459,7 +459,10 @@ void Dialog::addRadioIcons( QGridLayout* grid, const char* name, StringArrayRang
 	for ( size_t i = 0; i < icons.size(); ++i )
 	{
 		auto *label = new QLabel;
-		label->setPixmap( new_local_image( icons[i] ) );
+		auto pixmap = new_local_image( icons[i] );
+		pixmap.setDevicePixelRatio( label->devicePixelRatio() );
+		// target 0.5 of the image size; has only usecase atm
+		label->setPixmap( pixmap.scaledToHeight( pixmap.height() * label->devicePixelRatio() * pixmap.logicalDpiX() / ( 96 * 2 ), Qt::TransformationMode::SmoothTransformation ) );
 		subgrid->addWidget( label, 0, i, Qt::AlignmentFlag::AlignHCenter );
 
 		auto *button = new QRadioButton;

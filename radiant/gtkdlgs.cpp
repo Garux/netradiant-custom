@@ -339,7 +339,10 @@ void DoAbout(){
 			vbox->addLayout( hbox );
 			{
 				auto *label = new QLabel;
-				label->setPixmap( new_local_image( "logo.png" ) );
+				auto pixmap = new_local_image( "logo.png" );
+				pixmap.setDevicePixelRatio( label->devicePixelRatio() );
+				// target 0.5 of the image size
+				label->setPixmap( pixmap.scaledToHeight( pixmap.height() * label->devicePixelRatio() * pixmap.logicalDpiX() / ( 96 * 2 ), Qt::TransformationMode::SmoothTransformation ) );
 				hbox->addWidget( label );
 			}
 

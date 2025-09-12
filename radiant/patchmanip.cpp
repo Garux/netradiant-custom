@@ -952,7 +952,10 @@ void DoCapDlg(){
 			for( size_t i = 0; i < std::size( iconlabel ); ++i ){
 				const auto [ stricon, strlabel ] = iconlabel[i];
 				auto *label = new QLabel;
-				label->setPixmap( new_local_image( stricon ) );
+				const int iconSize = label->style()->pixelMetric( QStyle::PixelMetric::PM_LargeIconSize );
+				auto pixmap = new_local_image( stricon );
+				pixmap.setDevicePixelRatio( label->devicePixelRatio() );
+				label->setPixmap( pixmap.scaledToHeight( iconSize * label->devicePixelRatio(), Qt::TransformationMode::SmoothTransformation ) );
 				auto *button = new QRadioButton( strlabel );
 				group->addButton( button, i ); // set ids 0+, default ones are negative
 				form->addRow( label, button );

@@ -73,6 +73,7 @@ for EXTRAPATH in \
     './share/qt5/plugins/imageformats/*.dll' \
     './share/qt5/plugins/platforms/*.dll' \
     './share/qt5/plugins/styles/*.dll' \
+    './share/qt5/plugins/iconengines/*.dll' \
 ; do
     cp --parent -v `find $EXTRAPATH -type f` "$INSTALLDIR"
 done

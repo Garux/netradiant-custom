@@ -1775,6 +1775,8 @@ QWidget* TextureBrowser_constructWindow( QWidget* toplevel ){
 	{	// menu bar
 		auto *toolbar = new QToolBar;
 		vbox->addWidget( toolbar );
+		const int iconSize = toolbar->style()->pixelMetric( QStyle::PixelMetric::PM_SmallIconSize );
+		toolbar->setIconSize( QSize( iconSize, iconSize ) );
 
 		QMenu* menu_view = TextureBrowser_constructViewMenu();
 
@@ -1784,7 +1786,7 @@ QWidget* TextureBrowser_constructWindow( QWidget* toplevel ){
 		//view menu button
 		toolbar_append_button( toolbar, "View", "texbro_view.png", PointerCaller<QMenu, void(), +[]( QMenu *menu ){ menu->popup( QCursor::pos() ); }>( menu_view ) );
 
-		toolbar_append_button( toolbar, "Find / Replace...", "texbro_gtk-find-and-replace.png", "FindReplaceTextures" );
+		toolbar_append_button( toolbar, "Find / Replace...", "texbro_find-replace.png", "FindReplaceTextures" );
 
 		toolbar_append_button( toolbar, "Flush & Reload Shaders", "texbro_refresh.png", "RefreshShaders" );
 	}

@@ -1367,6 +1367,7 @@ void CSG_DeleteComponents(){
 #include <QButtonGroup>
 #include <QGridLayout>
 #include <QFrame>
+#include <QStyle>
 
 struct CSGToolDialog
 {
@@ -1517,24 +1518,22 @@ void CSG_Tool(){
 
 				radFaces->setChecked( true );
 			}
-			{
-				auto *button = g_csgtool_dialog.caulk = new QToolButton;
-				auto pix = new_local_image( "f-caulk.png" );
-				button->setIcon( pix );
-				button->setIconSize( pix.size() + QSize( 8, 8 ) );
-				button->setToolTip( "Caulk some faces" );
+			auto newCheckButton = []( const char *icon, const char *tooltip ){
+				auto *button = new QToolButton;
+				const int iconSize = button->style()->pixelMetric( QStyle::PixelMetric::PM_ToolBarIconSize );
+				button->setIconSize( QSize( iconSize, iconSize ) );
+				button->setIcon( new_local_icon( icon ) );
+				button->setToolTip( tooltip );
 				button->setCheckable( true );
 				button->setChecked( true );
+				return button;
+			};
+			{
+				auto *button = g_csgtool_dialog.caulk = newCheckButton( "f-caulk.png", "Caulk some faces" );
 				grid->addWidget( button, 0, 6 );
 			}
 			{
-				auto *button = g_csgtool_dialog.removeInner = new QToolButton;
-				auto pix = new_local_image( "csgtool_removeinner.png" );
-				button->setIcon( pix );
-				button->setIconSize( pix.size() + QSize( 8, 8 ) );
-				button->setToolTip( "Remove inner brush" );
-				button->setCheckable( true );
-				button->setChecked( true );
+				auto *button = g_csgtool_dialog.removeInner = newCheckButton( "csgtool_removeinner.png", "Remove inner brush" );
 				grid->addWidget( button, 0, 7 );
 			}
 			{
@@ -1543,57 +1542,41 @@ void CSG_Tool(){
 				line->setFrameShadow( QFrame::Shadow::Raised );
 				grid->addWidget( line, 1, 0, 1, 8 );
 			}
-			{
+			auto newButton = []( const char *icon, const char *tooltip ){
 				auto *button = new QToolButton;
-				auto pix = new_local_image( "csgtool_shrink.png" );
-				button->setIcon( pix );
-				button->setIconSize( pix.size() + QSize( 8, 8 ) );
-				button->setToolTip( "Shrink brush" );
+				const int iconSize = button->style()->pixelMetric( QStyle::PixelMetric::PM_LargeIconSize );
+				button->setIconSize( QSize( iconSize, iconSize ) );
+				button->setIcon( new_local_icon( icon ) );
+				button->setToolTip( tooltip );
+				return button;
+			};
+			{
+				auto *button = newButton( "csgtool_shrink.png", "Shrink brush" );
 				grid->addWidget( button, 2, 0 );
 				QObject::connect( button, &QAbstractButton::clicked, CSGdlg_BrushShrink );
 			}
 			{
-				auto *button = new QToolButton;
-				auto pix = new_local_image( "csgtool_expand.png" );
-				button->setIcon( pix );
-				button->setIconSize( pix.size() + QSize( 8, 8 ) );
-				button->setToolTip( "Expand brush" );
+				auto *button = newButton( "csgtool_expand.png", "Expand brush" );
 				grid->addWidget( button, 2, 1 );
 				QObject::connect( button, &QAbstractButton::clicked, CSGdlg_BrushExpand );
 			}
 			{
-				auto *button = new QToolButton;
-				auto pix = new_local_image( "csgtool_diagonal.png" );
-				button->setIcon( pix );
-				button->setIconSize( pix.size() + QSize( 8, 8 ) );
-				button->setToolTip( "Hollow::diagonal joints" );
+				auto *button = newButton( "csgtool_diagonal.png", "Hollow::diagonal joints" );
 				grid->addWidget( button, 2, 3 );
 				QObject::connect( button, &QAbstractButton::clicked, [](){ CSG_Hollow( eDiag, "brushHollow::Diag", g_csgtool_dialog ); } );
 			}
 			{
-				auto *button = new QToolButton;
-				auto pix = new_local_image( "csgtool_wrap.png" );
-				button->setIcon( pix );
-				button->setIconSize( pix.size() + QSize( 8, 8 ) );
-				button->setToolTip( "Hollow::wrap" );
+				auto *button = newButton( "csgtool_wrap.png", "Hollow::wrap" );
 				grid->addWidget( button, 2, 4 );
 				QObject::connect( button, &QAbstractButton::clicked, [](){ CSG_Hollow( eWrap, "brushHollow::Wrap", g_csgtool_dialog ); } );
 			}
 			{
-				auto *button = new QToolButton;
-				auto pix = new_local_image( "csgtool_extrude.png" );
-				button->setIcon( pix );
-				button->setIconSize( pix.size() + QSize( 8, 8 ) );
-				button->setToolTip( "Hollow::extrude faces" );
+				auto *button = newButton( "csgtool_extrude.png", "Hollow::extrude faces" );
 				grid->addWidget( button, 2, 5 );
 				QObject::connect( button, &QAbstractButton::clicked, [](){ CSG_Hollow( eExtrude, "brushHollow::Extrude", g_csgtool_dialog ); } );
 			}
 			{
-				auto *button = new QToolButton;
-				auto pix = new_local_image( "csgtool_pull.png" );
-				button->setIcon( pix );
-				button->setIconSize( pix.size() + QSize( 8, 8 ) );
-				button->setToolTip( "Hollow::pull faces" );
+				auto *button = newButton( "csgtool_pull.png", "Hollow::pull faces" );
 				grid->addWidget( button, 2, 6 );
 				QObject::connect( button, &QAbstractButton::clicked, [](){ CSG_Hollow( ePull, "brushHollow::Pull", g_csgtool_dialog ); } );
 			}

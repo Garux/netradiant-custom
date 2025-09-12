@@ -507,7 +507,7 @@ class QWidget* LayersBrowser_constructWindow( QWidget* toplevel ){
 	tree->setHeaderHidden( true );
 	tree->setAutoScroll( true );
 	tree->setAlternatingRowColors( true );
-	const int iconSize = tree->style()->pixelMetric( QStyle::PixelMetric::PM_SmallIconSize, nullptr, tree ) * 1.3;
+	const int iconSize = tree->style()->pixelMetric( QStyle::PixelMetric::PM_SmallIconSize ) * 1.3;
 	tree->setIconSize( QSize( iconSize, iconSize) );
 	// tree->setStyleSheet( "QTreeWidget::item { border-bottom: 1px solid gray; }" );
 	tree->setDragDropMode( QAbstractItemView::DragDropMode::InternalMove );

@@ -1283,8 +1283,10 @@ QWidget* ModelBrowser_constructWindow( QWidget* toplevel ){
 	{	// menu bar
 		auto *toolbar = new QToolBar;
 		vbox->addWidget( toolbar );
+		const int iconSize = toolbar->style()->pixelMetric( QStyle::PixelMetric::PM_SmallIconSize );
+		toolbar->setIconSize( QSize( iconSize, iconSize ) );
 
-		toolbar_append_button( toolbar, "Reload Model Folders Tree View", "texbro_refresh.png", FreeCaller<void(), ModelBrowser_constructTree>() );
+		toolbar_append_button( toolbar, "Reload Model Folders Tree View", "refresh_modelstree.png", FreeCaller<void(), ModelBrowser_constructTree>() );
 	}
 	{	// TreeView
 		g_ModelBrowser.m_treeView = new TexBro_QTreeView;

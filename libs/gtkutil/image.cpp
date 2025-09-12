@@ -21,9 +21,10 @@
 
 #include "image.h"
 
+#include "os/file.h"
+#include "os/path.h"
 #include "string/string.h"
 #include "stream/stringstream.h"
-#include "stream/textstream.h"
 
 
 namespace
@@ -36,11 +37,21 @@ void BitmapsPath_set( const char* path ){
 }
 
 QPixmap new_local_image( const char* filename ){
-	const auto fullPath = StringStream( g_bitmapsPath, filename );
-	return QPixmap( QString( fullPath.c_str() ) );
+	StringOutputStream fullpath( 256 );
+
+	for( const auto *ext : { ".svg", ".png" } )
+		if( file_exists( fullpath( g_bitmapsPath, PathExtensionless( filename ), ext ) ) )
+			return QPixmap( fullpath.c_str() );
+
+	return {};
 }
 
 QIcon new_local_icon( const char* filename ){
-	const auto fullPath = StringStream( g_bitmapsPath, filename );
-	return QIcon( fullPath.c_str() );
+	StringOutputStream fullpath( 256 );
+
+	for( const auto *ext : { ".svg", ".png", ".ico" } )
+		if( file_exists( fullpath( g_bitmapsPath, PathExtensionless( filename ), ext ) ) )
+			return QIcon( fullpath.c_str() );
+
+	return {};
 }

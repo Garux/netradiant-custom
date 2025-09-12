@@ -1383,7 +1383,10 @@ void Manipulators_constructToolbar( QToolBar* toolbar ){
 	toolbar_append_toggle_button( toolbar, "UV Tool", "select_mouseuv.png", "MouseUV" );
 }
 
+#include <QSvgGenerator>
 void create_main_toolbar( QToolBar *toolbar,  MainFrame::EViewStyle style ){
+	QSvgGenerator dummy; // reference symbol, so that Qt5Svg.dll required dependency is explicit, also install-dlls-msys2-mingw.sh will find it
+
  	File_constructToolbar( toolbar );
 	toolbar->addSeparator();
 
@@ -1454,10 +1457,12 @@ void create_main_statusbar( QStatusBar *statusbar, QLabel *pStatusLabel[c_status
 			auto *hbox = new QHBoxLayout( widget );
 			hbox->setMargin( 0 );
 			statusbar->addPermanentWidget( widget, 0 );
-			const char* imgs[3] = { "status_brush.png", "patch_wireframe.png", "status_entity.png" };
+			const char* imgs[3] = { "status_brush.png", "status_patch.png", "status_entity.png" };
 			for( ; i < c_status_brushcount + 3; ++i ){
 				auto *label = new QLabel();
-				label->setPixmap( new_local_image( imgs[i - c_status_brushcount] ) );
+				auto pixmap = new_local_image( imgs[i - c_status_brushcount] );
+				pixmap.setDevicePixelRatio( label->devicePixelRatio() );
+				label->setPixmap( pixmap.scaledToHeight( 16 * label->devicePixelRatio() * label->logicalDpiX() / 96, Qt::TransformationMode::SmoothTransformation ) );
 				hbox->addWidget( label );
 
 				label = new QLabel();

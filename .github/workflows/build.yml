@@ -27,7 +27,7 @@ jobs:
     steps:
     - uses: msys2/setup-msys2@v2
       with:
-        install: base-devel ${{ matrix.prefix }}-toolchain ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-libxml2 git unzip p7zip
+        install: base-devel ${{ matrix.prefix }}-toolchain ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-qt5-svg ${{ matrix.prefix }}-libxml2 git unzip p7zip
         msystem: ${{ matrix.msystem }}
         path-type: minimal
         release: false
