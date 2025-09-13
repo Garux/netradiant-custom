@@ -22,7 +22,7 @@
 --------------------
 ----------
 
-- added "-gridscale X" and "-gridambientscale X" to scale grid lightning, note that ambient grid receive
+- added "-gridscale X" and "-gridambientscale X" to scale grid lighting, note that ambient grid receive
 both "-gridscale" and "-gridambientscale". For -darkplaces, -dq and -prophecy game mode added
 default game-specific values: -gridscale 0.3 -gridambientscale 0.4
 

@@ -2151,17 +2151,17 @@ int LightMain( Args& args ){
 	/* set standard game flags */
 	wolfLight = g_game->wolfLight;
 	if ( wolfLight ) {
-		Sys_Printf( " lightning model: wolf\n" );
+		Sys_Printf( " lighting model: wolf\n" );
 	}
 	else{
-		Sys_Printf( " lightning model: quake3\n" );
+		Sys_Printf( " lighting model: quake3\n" );
 	}
 
 	lmCustomSizeW = lmCustomSizeH = g_game->lightmapSize;
 	Sys_Printf( " lightmap size: %d x %d pixels\n", lmCustomSizeW, lmCustomSizeH );
 
 	lightmapGamma = g_game->lightmapGamma;
-	Sys_Printf( " lightning gamma: %f\n", lightmapGamma );
+	Sys_Printf( " lighting gamma: %f\n", lightmapGamma );
 
 	lightmapsRGB = g_game->lightmapsRGB;
 	if ( lightmapsRGB ) {
@@ -2188,10 +2188,10 @@ int LightMain( Args& args ){
 	}
 
 	lightmapCompensate = g_game->lightmapCompensate;
-	Sys_Printf( " lightning compensation: %f\n", lightmapCompensate );
+	Sys_Printf( " lighting compensation: %f\n", lightmapCompensate );
 
 	lightmapExposure = g_game->lightmapExposure;
-	Sys_Printf( " lightning exposure: %f\n", lightmapExposure );
+	Sys_Printf( " lighting exposure: %f\n", lightmapExposure );
 
 	gridScale = g_game->gridScale;
 	Sys_Printf( " lightgrid scale: %f\n", gridScale );
@@ -2316,13 +2316,13 @@ int LightMain( Args& args ){
 
 		while ( args.takeArg( "-gridscale" ) ) {
 			f = atof( args.takeNext() );
-			Sys_Printf( "Grid lightning scaled by %f\n", f );
+			Sys_Printf( "Grid lighting scaled by %f\n", f );
 			gridScale *= f;
 		}
 
 		while ( args.takeArg( "-gridambientscale" ) ) {
 			f = atof( args.takeNext() );
-			Sys_Printf( "Grid ambient lightning scaled by %f\n", f );
+			Sys_Printf( "Grid ambient lighting scaled by %f\n", f );
 			gridAmbientScale *= f;
 		}
 
