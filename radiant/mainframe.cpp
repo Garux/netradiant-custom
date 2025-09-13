@@ -884,8 +884,6 @@ void create_file_menu( QMenuBar *menubar ){
 	create_menu_item_with_mnemonic( menu, "Save s&elected...", "SaveSelected" );
 	create_menu_item_with_mnemonic( menu, "Save re&gion...", "SaveRegion" );
 	menu->addSeparator();
-//	create_menu_item_with_mnemonic( menu, "&Refresh models", "RefreshReferences" );
-//	menu->addSeparator();
 	create_menu_item_with_mnemonic( menu, "&Pointfile", "TogglePointfile" );
 	menu->addSeparator();
 	MRU_constructMenu( menu );
@@ -1176,6 +1174,7 @@ void create_misc_menu( QMenuBar *menubar ){
 
 	create_menu_item_with_mnemonic( menu, "Find brush...", "FindBrush" );
 	create_menu_item_with_mnemonic( menu, "Map Info...", "MapInfo" );
+	create_menu_item_with_mnemonic( menu, "&Refresh models", "RefreshReferences" );
 	create_menu_item_with_mnemonic( menu, "Set 2D &Background image...", makeCallbackF( WXY_SetBackgroundImage ) );
 	create_menu_item_with_mnemonic( menu, "Fullscreen", "Fullscreen" );
 	create_menu_item_with_mnemonic( menu, "Maximize view", "MaximizeView" );
@@ -1383,47 +1382,49 @@ void Manipulators_constructToolbar( QToolBar* toolbar ){
 	toolbar_append_toggle_button( toolbar, "UV Tool", "select_mouseuv.png", "MouseUV" );
 }
 
+extern CopiedString g_toolbarHiddenButtons;
+
 #include <QSvgGenerator>
 void create_main_toolbar( QToolBar *toolbar,  MainFrame::EViewStyle style ){
 	QSvgGenerator dummy; // reference symbol, so that Qt5Svg.dll required dependency is explicit, also install-dlls-msys2-mingw.sh will find it
 
  	File_constructToolbar( toolbar );
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 
 	UndoRedo_constructToolbar( toolbar );
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 
 	RotateFlip_constructToolbar( toolbar );
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 
 	Select_constructToolbar( toolbar );
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 
 	CSG_constructToolbar( toolbar );
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 
 	ComponentModes_constructToolbar( toolbar );
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 
 	if ( style != MainFrame::eSplit ) {
 		XYWnd_constructToolbar( toolbar );
-		toolbar->addSeparator();
+		toolbar_append_separator( toolbar );
 	}
 
 	CamWnd_constructToolbar( toolbar );
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 
 	Manipulators_constructToolbar( toolbar );
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 
 	if ( !string_equal( g_pGameDescription->getKeyValue( "no_patch" ), "1" ) ) {
 		Patch_constructToolbar( toolbar );
-		toolbar->addSeparator();
+		toolbar_append_separator( toolbar );
 	}
 
 	toolbar_append_toggle_button( toolbar, "Texture Lock", "texture_lock.png", "TogTexLock" );
 	toolbar_append_toggle_button( toolbar, "Texture Vertex Lock", "texture_vertexlock.png", "TogTexVertexLock" );
- 	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 
 	toolbar_append_button( toolbar, "Entities", "entities.png", "ToggleEntityInspector" );
 	// disable the console and texture button in the regular layouts
@@ -1437,7 +1438,7 @@ void create_main_toolbar( QToolBar *toolbar,  MainFrame::EViewStyle style ){
 	// TODO: call light inspector
 	//QAction* g_view_lightinspector_button = toolbar_append_button( toolbar, "Light Inspector", "lightinspector.png", "ToggleLightInspector" );
 
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 	toolbar_append_button( toolbar, "Refresh Models", "refresh_models.png", "RefreshReferences" );
 }
 
@@ -1613,6 +1614,16 @@ protected:
 			event->accept(); // block shortcuts while mouse buttons are pressed
 		}
 		return QMainWindow::event( event );
+	}
+public:
+	QMenu* createPopupMenu() override {
+		auto *menu = QMainWindow::createPopupMenu();
+		if( menu == nullptr )
+			menu = new QMenu;
+		else
+			menu->addSeparator();
+		toolbar_construct_control_menu( menu );
+		return menu;
 	}
 };
 
@@ -1867,6 +1878,7 @@ void MainFrame::Create(){
 
 	s_qe_every_second_timer.enable();
 
+	toolbar_importState( g_toolbarHiddenButtons.c_str() );
 	RestoreGuiState();
 
 	//GlobalShortcuts_reportUnregistered();
@@ -2096,6 +2108,7 @@ void MainFrame_Construct(){
 	GlobalPreferenceSystem().registerPreference( "DetachableMenus", makeBoolStringImportCallback( LatchedAssignCaller( g_Layout_enableDetachableMenus ) ), BoolExportStringCaller( g_Layout_enableDetachableMenus.m_latched ) );
 	GlobalPreferenceSystem().registerPreference( "QE4StyleWindows", makeIntStringImportCallback( LatchedAssignCaller( g_Layout_viewStyle ) ), IntExportStringCaller( g_Layout_viewStyle.m_latched ) );
 	GlobalPreferenceSystem().registerPreference( "BuiltInGroupDialog", makeBoolStringImportCallback( LatchedAssignCaller( g_Layout_builtInGroupDialog ) ), BoolExportStringCaller( g_Layout_builtInGroupDialog.m_latched ) );
+	GlobalPreferenceSystem().registerPreference( "ToolbarHiddenButtons", CopiedStringImportStringCaller( g_toolbarHiddenButtons ), CopiedStringExportStringCaller( g_toolbarHiddenButtons ) );
 	GlobalPreferenceSystem().registerPreference( "OpenGLFont", CopiedStringImportStringCaller( g_OpenGLFont ), CopiedStringExportStringCaller( g_OpenGLFont ) );
 	GlobalPreferenceSystem().registerPreference( "OpenGLFontSize", IntImportStringCaller( g_OpenGLFontSize ), IntExportStringCaller( g_OpenGLFontSize ) );
 

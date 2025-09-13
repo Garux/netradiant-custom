@@ -73,10 +73,10 @@ constexpr char PLUGIN_COMMANDS[] = "About...,"
                                    "Plot Splines,"
                                    "-,"
                                    "Merge Patches,"
-                                   "Split patches,"
-                                   "Split patches cols,"
-                                   "Split patches rows,"
-                                   "Turn edge"
+                                   "Split patch,"
+                                   "Split patch columns,"
+                                   "Split patch rows,"
+                                   "Flip terrain"
                                     ;
 
 // globals
@@ -126,16 +126,16 @@ extern "C" void QERPlug_Dispatch( const char *p, vec3_t vMin, vec3_t vMax, bool 
 	else if ( string_equal_nocase( p, "merge patches" ) ) {
 		DoMergePatches();
 	}
-	else if ( string_equal_nocase( p, "split patches" ) ) {
+	else if ( string_equal_nocase( p, "split patch" ) ) {
 		DoSplitPatch();
 	}
-	else if ( string_equal_nocase( p, "split patches rows" ) ) {
+	else if ( string_equal_nocase( p, "split patch rows" ) ) {
 		DoSplitPatchRows();
 	}
-	else if ( string_equal_nocase( p, "split patches cols" ) ) {
+	else if ( string_equal_nocase( p, "split patch columns" ) ) {
 		DoSplitPatchCols();
 	}
-	else if ( string_equal_nocase( p, "turn edge" ) ) {
+	else if ( string_equal_nocase( p, "flip terrain" ) ) {
 		DoFlipTerrain();
 	}
 	else if ( string_equal_nocase( p, "reset textures..." ) ) {
@@ -192,7 +192,8 @@ class CBobtoolzToolbarButton : public IToolbarButton
 public:
 	virtual const char* getImage() const override {
 		switch ( mIndex ) {
-		case 0: return "bobtoolz_cleanup.png";
+	//	case 0: return "bobtoolz_cleanup.png";
+		case 0: return "";
 		case 1: return "bobtoolz_poly.png";
 	//	case 2: return "bobtoolz_caulk.png";
 		case 2: return "";
@@ -211,6 +212,7 @@ public:
 	}
 	virtual EType getType() const override {
 		switch ( mIndex ) {
+		case 0: return eSpace;
 		case 2: return eSpace;
 		case 3: return eToggleButton;
 		case 6: return eSpace;
@@ -220,13 +222,13 @@ public:
 	}
 	virtual const char* getText() const override {
 		switch ( mIndex ) {
-		case 0: return "Cleanup";
-		case 1: return "Polygons";
+	//	case 0: return "Cleanup";
+		case 1: return "Polygon Builder";
 	//	case 2: return "Caulk";
 		case 3: return "Tree Planter";
 		case 4: return "Plot Splines";
 		case 5: return "Drop Entity";
-		case 7: return "Merge 2 Patches";
+		case 7: return "Merge Patches";
 		case 8: return "Split Patch";
 		case 9: return "Split Patch Rows";
 		case 10: return "Split Patch Columns";
@@ -236,13 +238,13 @@ public:
 	}
 	virtual const char* getTooltip() const override {
 		switch ( mIndex ) {
-		case 0: return "Brush Cleanup";
+	//	case 0: return "Brush Cleanup";
 		case 1: return "Polygons";
 	//	case 2: return "Caulk selection";
 		case 3: return "Tree Planter";
 		case 4: return "Plot Splines";
 		case 5: return "Drop Entity";
-		case 7: return "Merge 2 Patches";
+		case 7: return "Merge Patches";
 		case 8: return "Split Patch";
 		case 9: return "Split Patch Rows";
 		case 10: return "Split Patch Columns";
@@ -255,7 +257,7 @@ public:
 		LoadLists();
 
 		switch ( mIndex ) {
-		case 0: DoFixBrushes(); break;
+	//	case 0: DoFixBrushes(); break;
 		case 1: DoPolygonsTB(); break;
 	//	case 2: DoCaulkSelection(); break;
 		case 3: DoTreePlanter(); break;

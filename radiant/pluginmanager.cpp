@@ -40,6 +40,38 @@
 
 #include <list>
 
+StringBuffer plugin_construct_command_name( const char *pluginName, const char *commandName ){
+	StringBuffer str( 64 );
+
+	if( !string_equal_prefix_nocase( commandName, pluginName ) ){ //plugin name is not part of command name
+		str.push_string( pluginName );
+		str.push_string( "::" );
+	}
+	/* remove spaces + camelcasify */
+	const char* p = commandName;
+	bool wasspace = false;
+	while( *p ){
+		if( *p == ' ' ){
+			wasspace = true;
+		}
+		else if( wasspace ){
+			wasspace = false;
+			str.push_back( std::toupper( *p ) );
+		}
+		else{
+			str.push_back( *p );
+		}
+		++p;
+	}
+	/* del trailing periods */
+	while( !str.empty() && str.back() == '.' ){
+		str.pop_back();
+	}
+	*str.c_str() = std::tolower( *str.c_str() ); //put to the end of the list this way //not in Qt 🤔
+
+	return str;
+}
+
 /* plugin manager --------------------------------------- */
 class CPluginSlot final : public IPlugIn
 {
@@ -90,7 +122,7 @@ CPluginSlot::CPluginSlot( QWidget* main_window, const char* name, const _QERPlug
 	StringTokeniser commandTokeniser( commands, ",;" );
 	StringTokeniser titleTokeniser( titles, ",;" );
 
-	while ( 1 ) {
+	while ( true ) {
 		const char* cmdToken = commandTokeniser.getToken();
 		const char *titleToken = titleTokeniser.getToken();
 		if( string_empty( cmdToken ) )
@@ -102,34 +134,8 @@ CPluginSlot::CPluginSlot( QWidget* main_window, const char* name, const _QERPlug
 			m_CommandTitleStrings.push_back( titleToken );
 
 		m_callbacks.emplace_back( PluginCaller( this, m_CommandStrings.back().c_str() ) );
-		StringBuffer str( 64 );
-		{
-			if( !string_equal_prefix_nocase( cmdToken, getMenuName() ) ){ //plugin name is not part of command name
-				str.push_string( getMenuName() );
-				str.push_string( "::" );
-			}
-			/* remove spaces + camelcasify */
-			const char* p = cmdToken;
-			bool wasspace = false;
-			while( *p ){
-				if( *p == ' ' ){
-					wasspace = true;
-				}
-				else if( wasspace ){
-					wasspace = false;
-					str.push_back( std::toupper( *p ) );
-				}
-				else{
-					str.push_back( *p );
-				}
-				++p;
-			}
-			/* del trailing periods */
-			while( !str.empty() && str.back() == '.' ){
-				str.pop_back();
-			}
-			*str.c_str() = std::tolower( *str.c_str() ); //put to the end of the list this way //not in Qt 🤔
-		}
+
+		const auto str = plugin_construct_command_name( getMenuName(), cmdToken );
 		m_globalCommandNames.emplace_back( str.c_str() );
 		if ( !plugin_menu_special( cmdToken ) ) //ain't special
 			GlobalCommands_insert( str.c_str(), makeCallback( m_callbacks.back() ) );

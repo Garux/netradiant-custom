@@ -372,6 +372,7 @@ menus...
 	* View->Layers Browser (L)
 	* Edit->Expand Selection To Layers (ctrl + q)
 	* shift + q: move-to LayersMenu
+	* context menu for toolbar buttons configuration
 
 misc...
 	* removed note to save before going to preferences, project settings

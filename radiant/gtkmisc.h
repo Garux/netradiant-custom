@@ -32,6 +32,8 @@
 
 #include <QMenu>
 #include <QToolBar>
+#include "math/vectorfwd.h"
+#include "string/stringfwd.h"
 
 void process_gui();
 
@@ -49,14 +51,18 @@ QAction* create_check_menu_item_with_mnemonic( QMenu* menu, const char* mnemonic
 
 // this also sets up the shortcut using command_connect_accelerator
 QAction* toolbar_append_button( QToolBar* toolbar, const char* description, const char* icon, const char* commandName );
+QAction* toolbar_append_button( QToolBar* toolbar, const char* description, const class QIcon& icon, const char* commandName );
 // this also sets up the shortcut using command_connect_accelerator
 QAction* toolbar_append_toggle_button( QToolBar* toolbar, const char* description, const char* icon, const char* commandName );
 
-#include "math/vectorfwd.h"
+void toolbar_append_separator( QToolBar* toolbar );
+
+void toolbar_construct_control_menu( QMenu *menu );
+void toolbar_importState( const char *commandNames );
+
 
 bool color_dialog( QWidget *parent, Vector3& color, const char* title = "Choose Color" );
 
-#include "string/stringfwd.h"
 bool OpenGLFont_dialog( QWidget *parent, const char* font, const int size, CopiedString &newfont, int &newsize );
 
 class QLineEdit;

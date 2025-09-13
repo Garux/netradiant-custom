@@ -144,7 +144,7 @@ void create_filter_toolbar( QToolBar *toolbar ){
 	g_filter_toolbar_handler.m_actions.emplace( button, new CommonFunc_group );
 
 	toolbar_append_toggle_button( toolbar, "Patches", "f-patches.png", "FilterPatches" );
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 
 //	if ( g_pGameDescription->mGameType == "doom3" ) {
 //		button = toolbar_append_toggle_button( toolbar, "Visportals", "f-areaportal.png", "FilterVisportals" );
@@ -171,7 +171,7 @@ void create_filter_toolbar( QToolBar *toolbar ){
 	button = toolbar_append_toggle_button( toolbar, "Sky", "f-sky.png", "FilterSky" );
 
 	//toolbar_append_toggle_button( toolbar, "Paths", "texture_lock.png", "FilterPaths" );
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 	toolbar_append_toggle_button( toolbar, "Entities", "f-entities.png", "FilterEntities" );
 	toolbar_append_toggle_button( toolbar, "Point Entities", "f-pointentities.png", "FilterPointEntities" );
 	toolbar_append_toggle_button( toolbar, "Lights", "f-lights.png", "FilterLights" );
@@ -181,12 +181,12 @@ void create_filter_toolbar( QToolBar *toolbar ){
 	g_filter_toolbar_handler.m_actions.emplace( button, new CommonFunc_tex( std::vector<const char*>{ "trigger" } ) );
 
 	//toolbar_append_toggle_button( toolbar, "Decals", "f-decals.png", "FilterDecals" );
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 	//toolbar_append_button( toolbar, "InvertFilters", "f-invert.png", "InvertFilters" );
 
 	toolbar_append_button( toolbar, "ResetFilters", "f-reset.png", "ResetFilters" );
 
-	toolbar->addSeparator();
+	toolbar_append_separator( toolbar );
 	button = toolbar_append_toggle_button( toolbar, "Region Set Selection\nRightClick: Region Off", "f-region.png", "RegionSetSelection" );
 	g_filter_toolbar_handler.m_actions.emplace( button, new CommonFunc_command( "RegionOff" ) );
 

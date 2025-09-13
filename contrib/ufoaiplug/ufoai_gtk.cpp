@@ -84,10 +84,10 @@ public:
 		case 5: return "Level 6";
 		case 6: return "Level 7";
 		case 7: return "Level 8";
-		case 8: return "Stepon";
-		case 9: return "Actorclip";
-		case 10: return "Weaponclip";
-		case 11: return "Nodraw";
+		case 8: return "StepOn";
+		case 9: return "ActorClip";
+		case 10: return "WeaponClip";
+		case 11: return "NoDraw";
 		}
 		return NULL;
 	}
@@ -102,10 +102,10 @@ public:
 		case 5: return "Show only level 6";
 		case 6: return "Show only level 7";
 		case 7: return "Show only level 8";
-		case 8: return "Hide stepon brushes";
-		case 9: return "Hide actorclip brushes";
-		case 10: return "Hide weaponclip brushes";
-		case 11: return "Hide nodraw brushes";
+		case 8: return "Hide stepOn brushes";
+		case 9: return "Hide actorClip brushes";
+		case 10: return "Hide weaponClip brushes";
+		case 11: return "Hide noDraw brushes";
 		}
 		return NULL;
 	}

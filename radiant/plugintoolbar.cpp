@@ -23,15 +23,16 @@
 
 
 #include "itoolbar.h"
+#include "gtkmisc.h"
 #include "modulesystem.h"
 
 #include "stream/stringstream.h"
 #include "os/file.h"
 #include "os/path.h"
-#include <QToolBar>
 
 #include "mainframe.h"
 #include "plugin.h"
+#include "pluginmanager.h"
 
 QIcon new_plugin_icon( const char* filename ){
 	StringOutputStream fullpath( 256 );
@@ -46,23 +47,29 @@ QIcon new_plugin_icon( const char* filename ){
 	return {};
 }
 
-void toolbar_insert( QToolBar *toolbar, const char* icon, const char* text, const char* tooltip, IToolbarButton::EType type, const IToolbarButton* ibutton ){
+void toolbar_insert( QToolBar *toolbar, const char* icon, const char* text, const char* tooltip, IToolbarButton::EType type, const IToolbarButton* ibutton, const char *pluginName ){
 	switch ( type )
 	{
 	case IToolbarButton::eSpace:
-		toolbar->addSeparator();
+		toolbar_append_separator( toolbar );
 		return;
 	case IToolbarButton::eButton:
 		{
-			QAction *button = toolbar->addAction( new_plugin_icon( icon ), text, [ibutton](){ ibutton->activate(); } );
-			button->setToolTip( tooltip );
+			toolbar_append_button( toolbar, tooltip, new_plugin_icon( icon ), plugin_construct_command_name( pluginName, text ).c_str() );
+			// QAction *button = toolbar->addAction( new_plugin_icon( icon ), text, [ibutton](){ ibutton->activate(); } );
+			// button->setToolTip( tooltip );
 		}
 		return;
 	case IToolbarButton::eToggleButton:
 		{
-			QAction *button = toolbar->addAction( new_plugin_icon( icon ), text, [ibutton](){ ibutton->activate(); } );
-			button->setToolTip( tooltip );
-			button->setCheckable( true );
+			//. fixme need consistent plugin command names (same in menu and toolbar) for the current command system
+			// now they are defined in 3 places, also must be used in menu to work in toolbar
+			// also no defined toggle menu item support (->setCheckable( true ) is some workaround now)
+			toolbar_append_button( toolbar, tooltip, new_plugin_icon( icon ), plugin_construct_command_name( pluginName, text ).c_str() )->setCheckable( true );
+			// toolbar_append_toggle_button( toolbar, tooltip, new_plugin_icon( icon ), plugin_construct_command_name( pluginName, text ).c_str() );
+			// QAction *button = toolbar->addAction( new_plugin_icon( icon ), text, [ibutton](){ ibutton->activate(); } );
+			// button->setToolTip( tooltip );
+			// button->setCheckable( true );
 		}
 		return;
 	case IToolbarButton::eRadioButton:
@@ -74,8 +81,8 @@ void toolbar_insert( QToolBar *toolbar, const char* icon, const char* text, cons
 	}
 }
 
-void PlugInToolbar_AddButton( QToolBar* toolbar, const IToolbarButton* button ){
-	toolbar_insert( toolbar, button->getImage(), button->getText(), button->getTooltip(), button->getType(), button );
+void PlugInToolbar_AddButton( QToolBar* toolbar, const IToolbarButton* button, const char *pluginName ){
+	toolbar_insert( toolbar, button->getImage(), button->getText(), button->getTooltip(), button->getType(), button, pluginName );
 }
 
 QToolBar* g_plugin_toolbar = 0;
@@ -92,7 +99,7 @@ void PluginToolbar_populate(){
 			const std::size_t count = table.m_pfnToolbarButtonCount();
 			for ( std::size_t i = 0; i < count; ++i )
 			{
-				PlugInToolbar_AddButton( m_toolbar, table.m_pfnGetToolbarButton( i ) );
+				PlugInToolbar_AddButton( m_toolbar, table.m_pfnGetToolbarButton( i ), name );
 			}
 		}
 
