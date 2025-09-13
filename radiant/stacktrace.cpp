@@ -210,7 +210,7 @@ void write_stack_trace( PCONTEXT pContext, TextOutputStream& outputStream ){
 
 	const unsigned int max_sym_name = 1024; // should be enough
 
-	while ( 1 )
+	while ( true )
 	{
 		// Get the next stack frame
 		if ( !StackWalk64( dwMachineType,

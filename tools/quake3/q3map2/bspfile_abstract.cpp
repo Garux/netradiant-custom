@@ -389,7 +389,7 @@ static bool ParseEntity(){
 	entity_t& e = entities.emplace_back();
 
 	/* parse */
-	while ( 1 )
+	while ( true )
 	{
 		if ( !GetToken( true ) ) {
 			Error( "ParseEntity: EOF without closing brace" );

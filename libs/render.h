@@ -173,7 +173,7 @@ class UniqueVertexBuffer
 	RenderIndex find_or_insert( const Vertex& vertex ){
 		RenderIndex index = 0;
 
-		while ( 1 )
+		while ( true )
 		{
 			if ( vertex < m_data[index] ) {
 				bnode& node = m_btree[index];

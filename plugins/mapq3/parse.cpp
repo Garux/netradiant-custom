@@ -150,7 +150,7 @@ NodeSmartReference Entity_parseTokens( Tokeniser& tokeniser, EntityCreator& enti
 	const char* classname = "";
 
 	int count_primitives = 0;
-	while ( 1 )
+	while ( true )
 	{
 		tokeniser.nextLine();
 		const char* token;

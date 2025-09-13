@@ -117,7 +117,7 @@ skipwhite:
 			}
 			com_token[len] = c;
 			len++;
-		} while ( 1 );
+		} while ( true );
 	}
 
 // parse single characters

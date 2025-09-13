@@ -76,7 +76,7 @@ int GetThreadWork(){
 void ( *workfunction )( int );
 
 void ThreadWorkerFunction( int threadnum ){
-	while ( 1 )
+	while ( true )
 	{
 		const int work = GetThreadWork();
 		if ( work == -1 ) {
@@ -512,7 +512,7 @@ void ThreadLock(){
 		}
 		else
 		{
-			while ( 1 )
+			while ( true )
 			{
 				pthread_cond_wait( &pt_mutex->cond, &pt_mutex->a_mutex );
 				if ( ( !pt_mutex->owner ) && ( pt_mutex->lock == 0 ) ) {

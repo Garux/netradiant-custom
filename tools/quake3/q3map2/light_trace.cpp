@@ -1474,7 +1474,7 @@ static bool TraceLine_r( int nodeNum, const Vector3& origin, const Vector3& end,
 #if TRACELINE_R_HALF_ITERATIVE
 	Vector3 origin( start );
 
-	while ( 1 )
+	while ( true )
 #endif
 	{
 		/* bogus node number means solid, end tracing unless testing all */

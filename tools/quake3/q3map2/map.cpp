@@ -1486,7 +1486,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 	mapEnt.mapEntityNum = mapEntityNum;
 
 	/* loop */
-	while ( 1 )
+	while ( true )
 	{
 		/* get initial token */
 		if ( !GetToken( true ) ) {
