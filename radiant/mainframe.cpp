@@ -1372,12 +1372,12 @@ void XYWnd_constructToolbar( QToolBar* toolbar ){
 }
 
 void Manipulators_constructToolbar( QToolBar* toolbar ){
+	toolbar_append_toggle_button( toolbar, "Resize (Q)", "select_mouseresize.png", "MouseDrag" ); // hardcoded shortcut tip of "MouseDragOrTransform"...
+	toolbar_append_toggle_button( toolbar, "Clipper", "select_clipper.png", "ToggleClipper" );
 	toolbar_append_toggle_button( toolbar, "Translate", "select_mousetranslate.png", "MouseTranslate" );
 	toolbar_append_toggle_button( toolbar, "Rotate", "select_mouserotate.png", "MouseRotate" );
 	toolbar_append_toggle_button( toolbar, "Scale", "select_mousescale.png", "MouseScale" );
 	toolbar_append_toggle_button( toolbar, "Transform (Q)", "select_mousetransform.png", "MouseTransform" ); // hardcoded shortcut tip of "MouseDragOrTransform"...
-	toolbar_append_toggle_button( toolbar, "Resize (Q)", "select_mouseresize.png", "MouseDrag" ); // hardcoded shortcut tip of "MouseDragOrTransform"...
-	toolbar_append_toggle_button( toolbar, "Clipper", "select_clipper.png", "ToggleClipper" );
 //	toolbar_append_toggle_button( toolbar, "Build", "select_mouserotate.png", "MouseBuild" );
 	toolbar_append_toggle_button( toolbar, "UV Tool", "select_mouseuv.png", "MouseUV" );
 }

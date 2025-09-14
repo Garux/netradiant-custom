@@ -1140,6 +1140,7 @@ misc...
 	* layers system (stored in comments of .map file)
 	* Layers Browser: New Layer, Show All Layers, Hide All Layers buttons
 	* new icons by Julius, high dpi scaling support
+	* improved GUI themes, new unmodified Fusion theme, external .qss file
 
 
 
