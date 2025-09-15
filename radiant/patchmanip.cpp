@@ -48,11 +48,24 @@
 PatchCreator* g_patchCreator = 0;
 
 void Scene_PatchConstructPrefab( scene::Graph& graph, const AABB aabb, const char* shader, EPatchPrefab eType, int axis, std::size_t width = 3, std::size_t height = 3, bool redisperse = false ){
-	Select_Delete();
-	GlobalSelectionSystem().setSelectedAll( false );
+	scene::Path path;
+	if( GlobalSelectionSystem().countSelected() != 0 ){ // find container from selection
+		scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
+		if( Node_isPrimitive( instance.path().top().get() ) ){
+			scene::Instance *parent = instance.parent();
+			if( Selectable *selectable = Instance_getSelectable( *parent ) ){
+				selectable->setSelected( false ); // avoid container deletion
+			}
+			path = parent->path();
+		}
+	}
+	if( path.empty() ){ // fallback to worldspawn
+		path.push( makeReference( GlobalSceneGraph().root() ) );
+		path.push( makeReference( Map_FindOrInsertWorldspawn( g_map ) ) );
+	}
 
 	NodeSmartReference node( g_patchCreator->createPatch() );
-	Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( node );
+	Node_getTraversable( path.top() )->insert( node );
 
 	Patch* patch = Node_getPatch( node );
 	patch->SetShader( shader );
@@ -64,12 +77,11 @@ void Scene_PatchConstructPrefab( scene::Graph& graph, const AABB aabb, const cha
 	}
 	patch->controlPointsChanged();
 
-	{
-		scene::Path patchpath( makeReference( GlobalSceneGraph().root() ) );
-		patchpath.push( makeReference( *Map_GetWorldspawn( g_map ) ) );
-		patchpath.push( makeReference( node.get() ) );
-		Instance_getSelectable( *graph.find( patchpath ) )->setSelected( true );
-	}
+	path.push( makeReference( node.get() ) );
+	// delete last to avoid empty container deletion
+	Select_Delete();
+	GlobalSelectionSystem().setSelectedAll( false );
+	Instance_getSelectable( *graph.find( path ) )->setSelected( true );
 }
 
 
@@ -312,7 +324,7 @@ class PatchSelectByShader
 {
 	const char* m_name;
 public:
-	inline PatchSelectByShader( const char* name )
+	PatchSelectByShader( const char* name )
 		: m_name( name ){
 	}
 	void operator()( PatchInstance& patch ) const {
