@@ -34,6 +34,8 @@
 #include <QPlainTextEdit>
 #include <QContextMenuEvent>
 #include <QMenu>
+#include <QApplication>
+#include <QClipboard>
 
 #ifndef WIN32
 #include <unistd.h> // write()
@@ -88,8 +90,8 @@ class QPlainTextEdit_console : public QPlainTextEdit
 protected:
 	void contextMenuEvent( QContextMenuEvent *event ) override {
 		QMenu *menu = createStandardContextMenu();
-		QAction *action = menu->addAction( "Clear" );
-		connect( action, &QAction::triggered, this, &QPlainTextEdit::clear );
+		connect( menu->addAction( "Copy All" ), &QAction::triggered, [this](){ QApplication::clipboard()->setText( toPlainText() ); } );
+		connect( menu->addAction( "Clear" ), &QAction::triggered, this, &QPlainTextEdit::clear );
 		menu->exec( event->globalPos() );
 		delete menu;
 	}

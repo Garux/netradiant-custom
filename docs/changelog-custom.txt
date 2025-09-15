@@ -373,6 +373,7 @@ menus...
 	* Edit->Expand Selection To Layers (ctrl + q)
 	* shift + q: move-to LayersMenu
 	* context menu for toolbar buttons configuration
+	* Copy All in console context menu
 
 misc...
 	* removed note to save before going to preferences, project settings
