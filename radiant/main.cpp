@@ -430,6 +430,8 @@ int main( int argc, char* argv[] ){
 
 	Sys_LogFile( true );
 
+	QApplication::setWindowIcon( new_local_icon( "radiant.ico" ) ); // before any windows, after paths_init()
+
 	show_splash();
 
 	create_global_pid();
@@ -450,7 +452,6 @@ int main( int argc, char* argv[] ){
 
 //	user_shortcuts_init();
 
-	g_pParentWnd = 0;
 	g_pParentWnd = new MainFrame();
 
 	hide_splash();
@@ -468,7 +469,7 @@ int main( int argc, char* argv[] ){
 
 	remove_local_pid();
 
-	qapplication.exec();
+	QApplication::exec();
 
 	Map_Free();
 

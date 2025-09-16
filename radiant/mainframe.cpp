@@ -1665,8 +1665,6 @@ void MainFrame::Create(){
 
 	GlobalWindowObservers_connectTopLevel( window );
 
-	QApplication::setWindowIcon( new_local_icon( "radiant.ico" ) );
-
 	/* GlobalCommands_insert plugins commands */
 	GetPlugInMgr().Init( window );
 	/* then load shortcuts cfg */
