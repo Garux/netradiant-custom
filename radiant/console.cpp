@@ -47,16 +47,14 @@ namespace
 FILE* g_hLogFile;
 }
 
-bool g_Console_enableLogging = true;
-
 // called whenever we need to open/close/check the console log file
 void Sys_LogFile( bool enable ){
 	if ( enable && !g_hLogFile ) {
-		// settings say we should be logging and we don't have a log file .. so create it
-		if ( !SettingsPath_get()[0] ) {
+		// we should be logging and we don't have a log file .. so create it
+		if ( string_empty( SettingsPath_get() ) ) {
 			return; // cannot open a log file yet
 		}
-		// open a file to log the console (if user prefs say so)
+		// open a file to log the console
 		// the file handle is g_hLogFile
 		// the log file is erased
 		const auto name = StringStream( SettingsPath_get(), "radiant.log" );
@@ -74,7 +72,7 @@ void Sys_LogFile( bool enable ){
 		}
 	}
 	else if ( !enable && g_hLogFile != 0 ) {
-		// settings say we should not be logging but still we have an active logfile .. close it
+		// we should not be logging but still we have an active logfile .. close it
 		time_t localtime;
 		time( &localtime );
 		globalOutputStream() << "Closing log file at " << ctime( &localtime ) << '\n';

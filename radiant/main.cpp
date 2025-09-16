@@ -309,7 +309,7 @@ void create_global_pid(){
 			qt_MessageBox( 0, StringStream( "WARNING: Could not delete ", g_pidFile ), "Radiant", EMessageBoxType::Error );
 		}
 
-		// in debug, never prompt to clean registry, turn console logging auto after a failed start
+		// in debug, never prompt to clean registry
 #if !defined( _DEBUG )
 		const char msg[] = "Radiant failed to start properly the last time it was run.\n"
 		                   "The failure may be related to current global preferences.\n"
@@ -323,11 +323,6 @@ void create_global_pid(){
 		                                "radiant.log\nRefer to the log if Radiant fails to start again." );
 		qt_MessageBox( 0, msg2, "Radiant - Console Log" );
 #endif
-
-		// set without saving, the class is not in a coherent state yet
-		// just do the value change and call to start logging, CGamesDialog will pickup when relevant
-		g_GamesDialog.m_bForceLogConsole = true;
-		Sys_LogFile( true );
 	}
 
 	// create a primary .pid for global init run
@@ -359,7 +354,7 @@ void create_local_pid(){
 			qt_MessageBox( 0, StringStream( "WARNING: Could not delete ", g_pidGameFile ), "Radiant", EMessageBoxType::Error );
 		}
 
-		// in debug, never prompt to clean registry, turn console logging auto after a failed start
+		// in debug, never prompt to clean registry
 #if !defined( _DEBUG )
 		const char msg[] = "Radiant failed to start properly the last time it was run.\n"
 		                   "The failure may be caused by current preferences.\n"
@@ -373,10 +368,6 @@ void create_local_pid(){
 		                                "radiant.log\nRefer to the log if Radiant fails to start again." );
 		qt_MessageBox( 0, msg2, "Radiant - Console Log" );
 #endif
-
-		// force console logging on! (will go in prefs too)
-		g_GamesDialog.m_bForceLogConsole = true;
-		Sys_LogFile( true );
 	}
 	else
 	{
@@ -437,6 +428,8 @@ int main( int argc, char* argv[] ){
 		return EXIT_FAILURE;
 	}
 
+	Sys_LogFile( true );
+
 	show_splash();
 
 	create_global_pid();
@@ -452,16 +445,6 @@ int main( int argc, char* argv[] ){
 	g_Preferences.Init(); // must occur before create_local_pid() to allow preferences to be reset
 
 	create_local_pid();
-
-	// in a very particular post-.pid startup
-	// we may have the console turned on and want to keep it that way
-	// so we use a latching system
-	if ( g_GamesDialog.m_bForceLogConsole ) {
-		Sys_LogFile( true );
-		g_Console_enableLogging = true;
-		g_GamesDialog.m_bForceLogConsole = false;
-	}
-
 
 	Radiant_Initialise();
 

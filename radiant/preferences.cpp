@@ -58,7 +58,6 @@
 
 
 void Global_constructPreferences( PreferencesPage& page ){
-	page.appendCheckBox( "Console", "Enable Logging", g_Console_enableLogging );
 }
 
 void Interface_constructPreferences( PreferencesPage& page ){
@@ -179,17 +178,9 @@ bool Preferences_Save_Safe( PreferenceDictionary& preferences, const char* filen
 }
 
 
-void LogConsole_importString( const char* string ){
-	g_Console_enableLogging = string_equal( string, "true" );
-	Sys_LogFile( g_Console_enableLogging );
-}
-typedef FreeCaller<void(const char*), LogConsole_importString> LogConsoleImportStringCaller;
-
-
 void RegisterGlobalPreferences( PreferenceSystem& preferences ){
 	preferences.registerPreference( "gamefile", makeCopiedStringStringImportCallback( LatchedAssignCaller( g_GamesDialog.m_sGameFile ) ), CopiedStringExportStringCaller( g_GamesDialog.m_sGameFile.m_latched ) );
 	preferences.registerPreference( "gamePrompt", BoolImportStringCaller( g_GamesDialog.m_bGamePrompt ), BoolExportStringCaller( g_GamesDialog.m_bGamePrompt ) );
-	preferences.registerPreference( "log console", LogConsoleImportStringCaller(), BoolExportStringCaller( g_Console_enableLogging ) );
 }
 
 

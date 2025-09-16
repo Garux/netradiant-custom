@@ -231,11 +231,6 @@ public:
 	   prompt which game to load on startup
 	 */
 	bool m_bGamePrompt;
-	/*!
-	   log console to radiant.log
-	   m_bForceLogConsole is an obscure forced latching situation
-	 */
-	bool m_bForceLogConsole;
 	/*@}*/
 
 	/*!
@@ -245,8 +240,7 @@ public:
 
 	CGameDialog() :
 		m_sGameFile( "", "Selected Game" ),
-		m_bGamePrompt( false ),
-		m_bForceLogConsole( false ){
+		m_bGamePrompt( false ){
 	}
 	virtual ~CGameDialog();
 
