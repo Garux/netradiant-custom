@@ -255,12 +255,14 @@ public:
 			bool eventFilter( QObject *obj, QEvent *event ) override {
 				if( event->type() == QEvent::MouseButtonRelease ) {
 					auto *mouseEvent = static_cast<QMouseEvent *>( event );
-					auto *menu = static_cast<QMenu *>( obj );
-					if( QAction *action = menu->actionAt( mouseEvent->pos() ) ){
-						action->trigger();
+					if( mouseEvent->button() == Qt::MouseButton::LeftButton ){
+						auto *menu = static_cast<QMenu *>( obj );
+						if( QAction *action = menu->actionAt( mouseEvent->pos() ) ){
+							action->trigger();
+						}
+						event->accept();
+						return true;
 					}
-					event->accept();
-					return true;
 				}
 				return QObject::eventFilter( obj, event ); // standard event processing
 			}
