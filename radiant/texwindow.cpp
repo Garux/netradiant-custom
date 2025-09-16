@@ -1661,10 +1661,10 @@ protected:
 };
 
 void TextureBrowser_filterSetModeIcon( QAction *action ){
-	action->setIcon( QApplication::style()->standardIcon(
+	action->setIcon( new_local_icon(
 		g_TextureBrowser_filter_searchFromStart
-		? QStyle::StandardPixmap::SP_CommandLink
-		: QStyle::StandardPixmap::SP_FileDialogContentsView ) );
+		? "search_from_start.png"
+		: "search.png" ) );
 }
 
 
@@ -1796,7 +1796,7 @@ QWidget* TextureBrowser_constructWindow( QWidget* toplevel ){
 		entry->setClearButtonEnabled( true );
 		entry->setFocusPolicy( Qt::FocusPolicy::ClickFocus );
 
-		QAction *action = g_TexBro.m_filter_action = entry->addAction( QApplication::style()->standardIcon( QStyle::StandardPixmap::SP_CommandLink ), QLineEdit::LeadingPosition );
+		QAction *action = g_TexBro.m_filter_action = entry->addAction( QIcon(), QLineEdit::LeadingPosition );
 		TextureBrowser_filterSetModeIcon( action );
 		action->setToolTip( "toggle match mode ( start / any position )" );
 
