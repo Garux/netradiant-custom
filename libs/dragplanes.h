@@ -63,7 +63,7 @@ public:
 		               ObservedSelectable( onchanged ) }{
 	}
 	bool isSelected() const {
-		return std::ranges::any_of( m_selectables, std::identity{}, &ObservedSelectable::isSelected );
+		return std::ranges::any_of( m_selectables, &ObservedSelectable::isSelected );
 	}
 	void setSelected( bool selected ){
 		for ( auto& se : m_selectables )

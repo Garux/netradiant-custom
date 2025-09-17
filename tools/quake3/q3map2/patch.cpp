@@ -404,8 +404,8 @@ void PatchMapDrawSurfs( entity_t& e ){
 
 			meshes[m1].bordering[m2] =
 			meshes[m2].bordering[m1] =
-				std::any_of( mesh1.verts, mesh1.verts + mesh1.width * mesh1.height, [mesh2]( const bspDrawVert_t& v1 ){
-					return std::any_of( mesh2.verts, mesh2.verts + mesh2.width * mesh2.height, [v1]( const bspDrawVert_t& v2 ){
+				std::ranges::any_of( Span( mesh1.verts, mesh1.width * mesh1.height ), [mesh2]( const bspDrawVert_t& v1 ){
+					return std::ranges::any_of( Span( mesh2.verts, mesh2.width * mesh2.height ), [v1]( const bspDrawVert_t& v2 ){
 						return vector3_equal_epsilon( v1.xyz, v2.xyz, 1.f );
 					} );
 				} );

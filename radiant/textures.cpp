@@ -357,7 +357,7 @@ void qtexture_realise( qtexture_t& texture, const TextureKey& key ){
 			for( int i = 0; i < 6; ++i ){
 				images[i] = key.first.loadImage( StringStream<64>( key.second, suffixes[i] ) );
 			}
-			if( std::all_of( images, images + std::size( images ), []( const Image *img ){ return img != nullptr; } ) ){
+			if( std::ranges::all_of( images, std::identity{} ) ){
 				gl().glGenTextures( 1, &texture.texture_number );
 				gl().glBindTexture( GL_TEXTURE_CUBE_MAP, texture.texture_number );
 				gl().glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_GENERATE_MIPMAP, GL_FALSE );

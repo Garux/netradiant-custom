@@ -292,7 +292,7 @@ void WriteMapShaderFile(){
 	}
 
 	/* are there any custom shaders? */
-	if( std::none_of( shaderInfo, shaderInfo + numShaderInfo, []( const shaderInfo_t& si ){ return si.custom; } ) )
+	if( std::ranges::none_of( Span( shaderInfo, numShaderInfo ), &shaderInfo_t::custom ) )
 		return;
 
 	/* note it */

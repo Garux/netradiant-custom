@@ -97,7 +97,7 @@ std::size_t ProximalVertexArray_index( const ProximalVertexArray& array, const P
 
 
 inline bool Brush_isBounded( const Brush& brush ){
-	return std::ranges::all_of( brush, std::identity{}, &Face::is_bounded );
+	return std::ranges::all_of( brush, &Face::is_bounded );
 }
 
 void Brush::buildBRep(){

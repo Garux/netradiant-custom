@@ -1247,7 +1247,7 @@ void SmoothMetaTriangles(){
 					}
 				}
 				/* reconstruct meta data from smoothed verts */
-				if( std::ranges::any_of( verts, std::identity{}, &VT::smoothed ) ){
+				if( std::ranges::any_of( verts, &VT::smoothed ) ){
 					decltype( list ) newlist;
 					for( auto& v : verts ){
 						bspDrawVert_t newv = *v.vertex;

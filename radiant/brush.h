@@ -2096,7 +2096,7 @@ public:
 
 	/// \brief Returns true if any face of the brush contributes to the final B-Rep.
 	bool hasContributingFaces() const {
-		return std::ranges::any_of( *this, []( const FaceSmartPointer& face ){ return face->contributes(); } );
+		return std::ranges::any_of( *this, &Face::contributes );
 	}
 
 	/// \brief Removes faces that do not contribute to the brush. This is useful for cleaning up after CSG operations on the brush.
