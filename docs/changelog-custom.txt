@@ -1143,6 +1143,7 @@ misc...
 	* Layers Browser: New Layer, Show All Layers, Hide All Layers buttons
 	* new icons by Julius, high dpi scaling support
 	* improved GUI themes, new unmodified Fusion theme, external .qss file
+	* render camera crosshair sharply independently of viewport size, with shadow
 
 
 

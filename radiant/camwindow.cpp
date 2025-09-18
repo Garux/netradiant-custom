@@ -2084,16 +2084,24 @@ void CamWnd::Cam_Draw(){
 
 	// draw the crosshair
 	if ( m_bFreeMove ) {
-		gl().glBegin( GL_LINES );
-		gl().glVertex2f( (float)m_Camera.width / 2.f, (float)m_Camera.height / 2.f + 6 );
-		gl().glVertex2f( (float)m_Camera.width / 2.f, (float)m_Camera.height / 2.f + 2 );
-		gl().glVertex2f( (float)m_Camera.width / 2.f, (float)m_Camera.height / 2.f - 6 );
-		gl().glVertex2f( (float)m_Camera.width / 2.f, (float)m_Camera.height / 2.f - 2 );
-		gl().glVertex2f( (float)m_Camera.width / 2.f + 6, (float)m_Camera.height / 2.f );
-		gl().glVertex2f( (float)m_Camera.width / 2.f + 2, (float)m_Camera.height / 2.f );
-		gl().glVertex2f( (float)m_Camera.width / 2.f - 6, (float)m_Camera.height / 2.f );
-		gl().glVertex2f( (float)m_Camera.width / 2.f - 2, (float)m_Camera.height / 2.f );
-		gl().glEnd();
+		 // .5 coords for exact pixel rendering
+		const Vector2 cent( ( m_Camera.width + 1 ) / 2 + .5f, ( m_Camera.height + 1 ) / 2 + .5f );
+		constexpr float a = 6.5, b = 2.5;
+		for( float f : { 0.f, 1.f } )
+		{
+			gl().glColor3f( f, f, f );
+			const Vector2 verts[]{
+				cent + Vector2(  0,  a ) - Vector2( f, f ),
+				cent + Vector2(  0,  b ) - Vector2( f, f ),
+				cent + Vector2(  0, -a ) - Vector2( f, f ),
+				cent + Vector2(  0, -b ) - Vector2( f, f ),
+				cent + Vector2(  a,  0 ) - Vector2( f, f ),
+				cent + Vector2(  b,  0 ) - Vector2( f, f ),
+				cent + Vector2( -a,  0 ) - Vector2( f, f ),
+				cent + Vector2( -b,  0 ) - Vector2( f, f ) };
+			gl().glVertexPointer( 2, GL_FLOAT, sizeof( *verts ), verts->data() );
+			gl().glDrawArrays( GL_LINES, 0, std::size( verts ) );
+		}
 	}
 
 	if ( g_camwindow_globals.m_showStats ) {
