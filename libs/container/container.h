@@ -221,27 +221,22 @@ public:
 	}
 
 	iterator push_back( const Value& value ){
-		typename decltype( m_set )::iterator it;
+		std::tuple tuple = m_set.emplace( value );
 		if constexpr ( UniqueValues ){
-			bool inserted;
-			std::tie( it, inserted ) = m_set.emplace( value );
-			ASSERT_MESSAGE( inserted, "UnsortedSet::insert: already added" );
+			ASSERT_MESSAGE( std::get<1>( tuple ), "UnsortedSet::insert: already added" );
 		}
-		else{
-			it = m_set.emplace( value );
-		}
-		Node *newNode = &const_cast<Node&>( *it );
+		Node *newNode = &const_cast<Node&>( *std::get<0>( tuple ) );
 		Node::link( m_end.m_prev, newNode );
 		Node::link( newNode, m_end.asNode() );
 		return iterator( newNode );
 	}
 	void erase( const Value& value ){
-		const auto it = m_set.find( value );
+		const auto it = m_set.find( value ); // note: multiset finds w/e value from equals
 		ASSERT_MESSAGE( it != m_set.cend(), "UnsortedSet::erase: not found" );
 		Node::link( it->m_prev, it->m_next );
 		m_set.erase( it );
 	}
-	const_iterator find( const Value& value ) const {
+	const_iterator find( const Value& value ) const { // note: multiset finds w/e value from equals
 		const auto it = m_set.find( value );
 		return ( it == m_set.cend() )? end() : const_iterator( &( *it ) );
 	}

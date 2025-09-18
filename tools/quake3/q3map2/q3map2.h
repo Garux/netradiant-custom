@@ -69,6 +69,7 @@
 #include <forward_list>
 #include <algorithm>
 #include "qmath.h"
+#include "unsortedset.h"
 
 #include <cstddef>
 #include <cstdlib>
@@ -489,7 +490,7 @@ enum class EImplicitMap
 };
 
 
-struct shaderInfo_t
+struct shaderInfo_t_data
 {
 	String64 shader;
 	int surfaceFlags;
@@ -599,6 +600,16 @@ struct shaderInfo_t
 	char                *shaderText;                    /* ydnar */
 	bool custom;
 	bool finished;
+};
+
+struct shaderInfo_t : public shaderInfo_t_data
+{
+	const String64 shader;
+	shaderInfo_t( const char *shaderName ) : shaderInfo_t_data{}, shader( shaderName ){ // zero-initialze shaderInfo_t_data
+	}
+	void copyData( const shaderInfo_t& other ) noexcept {
+		static_cast<shaderInfo_t_data&>( *this ) = static_cast<const shaderInfo_t_data&>( other );
+	}
 };
 
 
@@ -1720,10 +1731,21 @@ void                        InjectCommandLine( const char *stage, const std::vec
 
    ------------------------------------------------------------------------------- */
 
+struct shaderInfo_t_compare
+{
+	bool operator()( const shaderInfo_t& si, const shaderInfo_t& si2 ) const {
+		return RawStringLessNoCase()( si.shader, si2.shader );
+	}
+	bool operator()( const shaderInfo_t& si, const char *si2 ) const {
+		return RawStringLessNoCase()( si.shader, si2 );
+	}
+	bool operator()( const char *si, const shaderInfo_t& si2 ) const {
+		return RawStringLessNoCase()( si, si2.shader );
+	}
+};
+
 /* general */
-inline shaderInfo_t       *shaderInfo;
-inline int numShaderInfo;
-inline int max_shader_info = 8192;
+inline UnsortedSet<shaderInfo_t, false, shaderInfo_t_compare>       shaderInfo;
 
 inline String64 mapName;                 /* ydnar: per-map custom shaders for larger lightmaps */
 inline CopiedString mapShaderFile;

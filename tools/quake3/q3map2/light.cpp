@@ -1792,7 +1792,7 @@ static void WriteBSPFileAfterLight( const char *bspFileName ){
 	// stupidly search in shader text, ( numExtLightmaps > 0 ) check wont work when e.g. deluxemaps
 	// also would excessively include lightstyles using $lightmap reference
 	if( !externalLightmaps ){ // unless native ext lms: e.g. in ET with lightstyles hack preloading lm imgs breaks r_mapOverbrightBits
-		for ( const shaderInfo_t& si : Span( shaderInfo, numShaderInfo ) )
+		for ( const shaderInfo_t& si : shaderInfo )
 		{
 			if ( si.custom && !strEmptyOrNull( si.shaderText ) ) {
 				const char *txt = si.shaderText;

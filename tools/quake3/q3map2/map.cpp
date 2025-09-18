@@ -1003,7 +1003,7 @@ static void ParseRawBrush( bool onlyLights ){
 		const String64 shader( "textures/", token );
 
 		/* set default flags and values */
-		shaderInfo_t *si = onlyLights? &shaderInfo[ 0 ]
+		shaderInfo_t *si = onlyLights? shaderInfo.begin().operator->()
 		                             : ShaderInfoForShader( shader );
 		side.shaderInfo = si;
 		side.surfaceFlags = si->surfaceFlags;

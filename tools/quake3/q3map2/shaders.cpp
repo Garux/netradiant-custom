@@ -292,7 +292,7 @@ void WriteMapShaderFile(){
 	}
 
 	/* are there any custom shaders? */
-	if( std::ranges::none_of( Span( shaderInfo, numShaderInfo ), &shaderInfo_t::custom ) )
+	if( std::ranges::none_of( shaderInfo, &shaderInfo_t::custom ) )
 		return;
 
 	/* note it */
@@ -315,7 +315,7 @@ void WriteMapShaderFile(){
 
 	/* walk the shader list */
 	int num = 0;
-	for ( const shaderInfo_t& si : Span( shaderInfo, numShaderInfo ) )
+	for ( const shaderInfo_t& si : shaderInfo )
 	{
 		if ( si.custom && !strEmptyOrNull( si.shaderText ) ) {
 			num++;
@@ -485,9 +485,8 @@ const shaderInfo_t *CustomShader( const shaderInfo_t *si, const char *find, char
 		return csi;
 	}
 
-	/* clone the existing shader and rename */
-	*csi = *si;
-	csi->shader = shader;
+	/* clone the existing shader data */
+	csi->copyData( *si );
 	csi->custom = true;
 
 	/* store new shader text */
@@ -537,27 +536,11 @@ void EmitVertexRemapShader( char *from, char *to ){
    allocates and initializes a new shader
  */
 
-static shaderInfo_t *AllocShaderInfo(){
-	shaderInfo_t    *si;
-
-
-	/* allocate? */
-	if ( shaderInfo == NULL ) {
-		shaderInfo = safe_malloc( sizeof( shaderInfo_t ) * max_shader_info );
-		numShaderInfo = 0;
-	}
-
-	/* bounds check */
-	if ( numShaderInfo == max_shader_info ) {
-		Error( "max_shader_info (%d) exceeded. Remove some PK3 files or shader scripts from shaderlist.txt and try again."
-		       " Or consider -maxshaderinfo to increase.", max_shader_info );
-	}
-	si = &shaderInfo[ numShaderInfo ];
-	numShaderInfo++;
+static shaderInfo_t *AllocShaderInfo( const char *shaderName ){
+	shaderInfo_t    *si = shaderInfo.emplace_back( shaderName ).operator->();
 
 	/* ydnar: clear to 0 first */
-//	memset( si, 0, sizeof( shaderInfo_t ) );
-	new( si ) shaderInfo_t{}; // placement new
+	// new( si ) shaderInfo_t{}; // placement new
 
 	/* set defaults */
 	ApplySurfaceParm( "default", &si->contentFlags, &si->surfaceFlags, &si->compileFlags );
@@ -750,10 +733,6 @@ shaderInfo_t *ShaderInfoForShaderNull( const char *shaderName ){
 }
 
 shaderInfo_t *ShaderInfoForShader( const char *shaderName ){
-	int i;
-	int deprecationDepth;
-	shaderInfo_t    *si;
-
 	/* dummy check */
 	if ( strEmptyOrNull( shaderName ) ) {
 		Sys_Warning( "Null or empty shader name\n" );
@@ -764,39 +743,37 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName ){
 	String64 shader( PathExtensionless( shaderName ) );
 
 	/* search for it */
-	deprecationDepth = 0;
-	for ( i = 0; i < numShaderInfo; i++ )
+	int deprecationDepth = 0;
+
+	while( true )
 	{
-		si = &shaderInfo[ i ];
-		if ( striEqual( shader, si->shader ) ) {
+		auto si = shaderInfo.find_first( shader );
+		if ( si != shaderInfo.end() ) {
 			/* check if shader is deprecated */
 			if ( deprecationDepth < MAX_SHADER_DEPRECATION_DEPTH && !strEmptyOrNull( si->deprecateShader ) ) {
 				/* override name */
 				shader( PathExtensionless( si->deprecateShader ) );
-				/* increase deprecation depth */
-				deprecationDepth++;
-				if ( deprecationDepth == MAX_SHADER_DEPRECATION_DEPTH ) {
+				if ( ++deprecationDepth == MAX_SHADER_DEPRECATION_DEPTH ) {
 					Sys_Warning( "Max deprecation depth of %i is reached on shader '%s'\n", MAX_SHADER_DEPRECATION_DEPTH, shader.c_str() );
 				}
 				/* search again from beginning */
-				i = -1;
 				continue;
 			}
 
 			/* load image if necessary */
 			if ( !si->finished ) {
-				LoadShaderImages( si );
-				FinishShader( si );
+				LoadShaderImages( si.operator->() );
+				FinishShader( si.operator->() );
 			}
 
 			/* return it */
-			return si;
+			return si.operator->();
 		}
+		break;
 	}
 
 	/* allocate a default shader */
-	si = AllocShaderInfo();
-	si->shader = shader;
+	shaderInfo_t *si = AllocShaderInfo( shader );
 	LoadShaderImages( si );
 	FinishShader( si );
 
@@ -840,14 +817,12 @@ static void ParseShaderFile( const char *filename ){
 	while ( GetToken( true ) ) /* test for end of file */
 	{
 		/* shader name is initial token */
-		shaderInfo_t *si = AllocShaderInfo();
-
 		/* ignore ":q3map" suffix */
 		const bool isQ3mapOnlyShader = striEqualSuffix( token, ":q3map" );
 		if( isQ3mapOnlyShader )
-			si->shader << StringRange( token, strlen( token ) - strlen( ":q3map" ) );
-		else
-			si->shader << token;
+			strClear( token + strlen( token ) - strlen( ":q3map" ) );
+
+		shaderInfo_t *si = AllocShaderInfo( token );
 
 		/* handle { } section */
 		if ( !( text.GetToken( true ) && strEqual( token, "{" ) ) ) {
@@ -1147,14 +1122,10 @@ static void ParseShaderFile( const char *filename ){
 
 					/* subclass it */
 					if ( si2 != NULL ) {
-						/* preserve name */
-						const String64 temp = si->shader;
+						/* copy shader data */
+						si->copyData( *si2 );
 
-						/* copy shader */
-						*si = *si2;
-
-						/* restore name and set to unfinished */
-						si->shader = temp;
+						/* set to unfinished */
 						si->shaderWidth = 0;
 						si->shaderHeight = 0;
 						si->finished = false;
@@ -1901,5 +1872,5 @@ void LoadShaderInfo(){
 	}
 
 	/* emit some statistics */
-	Sys_FPrintf( SYS_VRB, "%9d shaderInfo\n", numShaderInfo );
+	Sys_FPrintf( SYS_VRB, "%9zu shaderInfo\n", shaderInfo.size() );
 }
