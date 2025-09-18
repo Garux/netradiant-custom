@@ -1698,11 +1698,11 @@ const surfaceParm_t         &GetRequiredSurfaceParm(){
 
 void                        BeginMapShaderFile( const char *mapFile );
 void                        WriteMapShaderFile();
-const shaderInfo_t          *CustomShader( const shaderInfo_t *si, const char *find, char *replace );
+const shaderInfo_t          &CustomShader( const shaderInfo_t *si, const char *find, char *replace );
 void                        EmitVertexRemapShader( char *from, char *to );
 
 void                        LoadShaderInfo();
-shaderInfo_t                *ShaderInfoForShader( const char *shader );
+shaderInfo_t                &ShaderInfoForShader( const char *shader );
 shaderInfo_t                *ShaderInfoForShaderNull( const char *shader );
 
 

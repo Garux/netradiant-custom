@@ -1003,13 +1003,13 @@ static void ParseRawBrush( bool onlyLights ){
 		const String64 shader( "textures/", token );
 
 		/* set default flags and values */
-		shaderInfo_t *si = onlyLights? shaderInfo.begin().operator->()
+		shaderInfo_t& si = onlyLights? *shaderInfo.begin()
 		                             : ShaderInfoForShader( shader );
-		side.shaderInfo = si;
-		side.surfaceFlags = si->surfaceFlags;
-		side.contentFlags = si->contentFlags;
-		side.compileFlags = si->compileFlags;
-		side.value = si->value;
+		side.shaderInfo = &si;
+		side.surfaceFlags = si.surfaceFlags;
+		side.contentFlags = si.contentFlags;
+		side.compileFlags = si.compileFlags;
+		side.value = si.value;
 
 		/* AP or 220? */
 		if ( g_brushType == EBrushType::Undefined ){
@@ -1040,9 +1040,9 @@ static void ParseRawBrush( bool onlyLights ){
 			scale[ 1 ] = atof( token );
 
 			/* ydnar: gs mods: bias texture shift */
-			if ( !si->globalTexture ) {
-				shift[ 0 ] -= ( floor( shift[ 0 ] / si->shaderWidth ) * si->shaderWidth );
-				shift[ 1 ] -= ( floor( shift[ 1 ] / si->shaderHeight ) * si->shaderHeight );
+			if ( !si.globalTexture ) {
+				shift[ 0 ] -= ( floor( shift[ 0 ] / si.shaderWidth ) * si.shaderWidth );
+				shift[ 1 ] -= ( floor( shift[ 1 ] / si.shaderHeight ) * si.shaderHeight );
 			}
 
 			/* get the texture mapping for this texturedef / plane combination */
@@ -1574,11 +1574,11 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 	const char *value;
 	if( mapEnt.read_keyvalue( value, "_celshader" ) ||
 	    entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
-		celShader = ShaderInfoForShader( String64( "textures/", value ) );
+		celShader = &ShaderInfoForShader( String64( "textures/", value ) );
 		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt.mapEntityNum, classname, celShader->shader.c_str() );
 	}
 	else{
-		celShader = globalCelShader.empty() ? NULL : ShaderInfoForShader( globalCelShader );
+		celShader = globalCelShader.empty() ? nullptr : &ShaderInfoForShader( globalCelShader );
 	}
 
 	/* jal : entity based _shadeangle */

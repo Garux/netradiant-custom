@@ -86,12 +86,12 @@ static void FinishSurface( mapDrawSurface_t *ds ){
 
 	/* ydnar: rocking surface cloning (fur baby yeah!) */
 	if ( !strEmptyOrNull( ds->shaderInfo->cloneShader ) ) {
-		CloneSurface( ds, ShaderInfoForShader( ds->shaderInfo->cloneShader ) );
+		CloneSurface( ds, &ShaderInfoForShader( ds->shaderInfo->cloneShader ) );
 	}
 
 	/* ydnar: q3map_backShader support */
 	if ( !strEmptyOrNull( ds->shaderInfo->backShader ) ) {
-		ds2 = CloneSurface( ds, ShaderInfoForShader( ds->shaderInfo->backShader ) );
+		ds2 = CloneSurface( ds, &ShaderInfoForShader( ds->shaderInfo->backShader ) );
 		ds2->backSide = true;
 	}
 }
@@ -618,7 +618,7 @@ static byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax,
    this combines a couple different functions from terrain.c
  */
 
-static shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im, int numPoints, byte *shaderIndexes ){
+static shaderInfo_t& GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im, int numPoints, byte *shaderIndexes ){
 	/* early out if bad data */
 	if ( im == NULL || numPoints <= 0 || shaderIndexes == NULL ) {
 		return ShaderInfoForShader( "default" );
@@ -646,32 +646,32 @@ static shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMa
 	}
 
 	/* get the shader */
-	shaderInfo_t *si = ShaderInfoForShader( ( minShaderIndex == maxShaderIndex )?
-	                            String64( "textures/", im->shader, '_', int( maxShaderIndex ) ):
-	                            String64( "textures/", im->shader, '_', int( minShaderIndex ), "to", int( maxShaderIndex ) ) );
+	shaderInfo_t& si = ShaderInfoForShader( ( minShaderIndex == maxShaderIndex )
+	                          ? String64( "textures/", im->shader, '_', int( maxShaderIndex ) )
+	                          : String64( "textures/", im->shader, '_', int( minShaderIndex ), "to", int( maxShaderIndex ) ) );
 
 	/* inherit a few things from parent shader */
 	if ( parent->globalTexture ) {
-		si->globalTexture = true;
+		si.globalTexture = true;
 	}
 	if ( parent->forceMeta ) {
-		si->forceMeta = true;
+		si.forceMeta = true;
 	}
 	if ( parent->nonplanar ) {
-		si->nonplanar = true;
+		si.nonplanar = true;
 	}
-	if ( si->shadeAngleDegrees == 0.0 ) {
-		si->shadeAngleDegrees = parent->shadeAngleDegrees;
+	if ( si.shadeAngleDegrees == 0.0 ) {
+		si.shadeAngleDegrees = parent->shadeAngleDegrees;
 	}
-	if ( parent->tcGen && !si->tcGen ) {
+	if ( parent->tcGen && !si.tcGen ) {
 		/* set xy texture projection */
-		si->tcGen = true;
-		si->vecs[ 0 ] = parent->vecs[ 0 ];
-		si->vecs[ 1 ] = parent->vecs[ 1 ];
+		si.tcGen = true;
+		si.vecs[ 0 ] = parent->vecs[ 0 ];
+		si.vecs[ 1 ] = parent->vecs[ 1 ];
 	}
-	if ( parent->lightmapAxis != g_vector3_identity && si->lightmapAxis == g_vector3_identity ) {
+	if ( parent->lightmapAxis != g_vector3_identity && si.lightmapAxis == g_vector3_identity ) {
 		/* set lightmap projection axis */
-		si->lightmapAxis = parent->lightmapAxis;
+		si.lightmapAxis = parent->lightmapAxis;
 	}
 
 	/* return the shader */
@@ -732,7 +732,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 
 		/* get matching shader and set alpha */
 		parent = si;
-		si = GetIndexedShader( parent, b.im, w.size(), shaderIndexes );
+		si = &GetIndexedShader( parent, b.im, w.size(), shaderIndexes );
 	}
 	else{
 		indexed = false;
@@ -914,7 +914,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t *p, mesh_t 
 
 		/* get matching shader and set alpha */
 		parent = si;
-		si = GetIndexedShader( parent, p->im, numVerts, shaderIndexes );
+		si = &GetIndexedShader( parent, p->im, numVerts, shaderIndexes );
 	}
 	else{
 		indexed = false;
@@ -1028,25 +1028,17 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t *p, mesh_t 
  */
 
 mapDrawSurface_t *DrawSurfaceForFlare( int entNum, const Vector3& origin, const Vector3& normal, const Vector3& color, const char *flareShader, int lightStyle ){
-	mapDrawSurface_t    *ds;
-
-
 	/* emit flares? */
 	if ( !emitFlares ) {
 		return NULL;
 	}
 
 	/* allocate drawsurface */
-	ds = AllocDrawSurface( ESurfaceType::Flare );
+	mapDrawSurface_t *ds = AllocDrawSurface( ESurfaceType::Flare );
 	ds->entityNum = entNum;
 
 	/* set it up */
-	if ( !strEmptyOrNull( flareShader ) ) {
-		ds->shaderInfo = ShaderInfoForShader( flareShader );
-	}
-	else{
-		ds->shaderInfo = ShaderInfoForShader( g_game->flareShader );
-	}
+	ds->shaderInfo = &ShaderInfoForShader( !strEmptyOrNull( flareShader )? flareShader : g_game->flareShader );
 	ds->lightmapOrigin = origin;
 	ds->lightmapVecs[ 2 ] = normal;
 	ds->lightmapVecs[ 0 ] = color;
@@ -1069,7 +1061,7 @@ mapDrawSurface_t *DrawSurfaceForFlare( int entNum, const Vector3& origin, const 
 
 static mapDrawSurface_t *DrawSurfaceForShader( const char *shader ){
 	/* get shader */
-	shaderInfo_t *si = ShaderInfoForShader( shader );
+	shaderInfo_t *si = &ShaderInfoForShader( shader );
 
 	/* find existing surface */
 	for ( mapDrawSurface_t& ds : Span( mapDrawSurfs, numMapDrawSurfs ) )
@@ -2620,11 +2612,9 @@ static void EmitFaceSurface( mapDrawSurface_t *ds ){
    generates drawsurfaces for passable portals in the bsp
  */
 
-static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t *si ){
+static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t& si ){
 	int i, c, s;
 	const portal_t      *p;
-	mapDrawSurface_t    *ds;
-	bspDrawVert_t       *dv;
 
 
 	/* recurse if decision node */
@@ -2659,8 +2649,8 @@ static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t *si ){
 			}
 
 			/* allocate a drawsurface */
-			ds = AllocDrawSurface( ESurfaceType::Face );
-			ds->shaderInfo = si;
+			mapDrawSurface_t *ds = AllocDrawSurface( ESurfaceType::Face );
+			ds->shaderInfo = &si;
 			ds->planar = true;
 			ds->planeNum = FindFloatPlane( p->plane.plane, 0, NULL );
 			ds->lightmapVecs[ 2 ] = p->plane.normal();
@@ -2672,7 +2662,7 @@ static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t *si ){
 			for ( i = 0; i < ds->numVerts; i++ )
 			{
 				/* get vert */
-				dv = ds->verts + i;
+				bspDrawVert_t *dv = ds->verts + i;
 
 				/* set it */
 				dv->xyz = w[ i ];
@@ -2696,17 +2686,11 @@ static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t *si ){
  */
 
 void MakeDebugPortalSurfs( const tree_t& tree ){
-	shaderInfo_t    *si;
-
-
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- MakeDebugPortalSurfs ---\n" );
 
-	/* get portal debug shader */
-	si = ShaderInfoForShader( "debugportals" );
-
 	/* walk the tree */
-	MakeDebugPortalSurfs_r( tree.headnode, si );
+	MakeDebugPortalSurfs_r( tree.headnode, ShaderInfoForShader( "debugportals" ) );
 }
 
 
@@ -2717,8 +2701,6 @@ void MakeDebugPortalSurfs( const tree_t& tree ){
  */
 
 void MakeFogHullSurfs( const char *shader ){
-	shaderInfo_t        *si;
-	mapDrawSurface_t    *ds;
 	int indexes[] =
 	{
 		0, 1, 2, 0, 2, 3,
@@ -2742,12 +2724,9 @@ void MakeFogHullSurfs( const char *shader ){
 	const Vector3 fogMins = g_mapMinmax.mins - Vector3( 128 );
 	const Vector3 fogMaxs = g_mapMinmax.maxs + Vector3( 128 );
 
-	/* get foghull shader */
-	si = ShaderInfoForShader( shader );
-
 	/* allocate a drawsurface */
-	ds = AllocDrawSurface( ESurfaceType::Foghull );
-	ds->shaderInfo = si;
+	mapDrawSurface_t *ds = AllocDrawSurface( ESurfaceType::Foghull );
+	ds->shaderInfo = &ShaderInfoForShader( shader );
 	ds->fogNum = -1;
 	ds->numVerts = 8;
 	ds->verts = safe_calloc( ds->numVerts * sizeof( *ds->verts ) );
@@ -3212,7 +3191,7 @@ void FilterDrawsurfsIntoTree( entity_t& e, tree_t& tree ){
 
 		/* ydnar: remap shader */
 /*		if ( !strEmptyOrNull( ds->shaderInfo->remapShader ) ) {
-			ds->shaderInfo = ShaderInfoForShader( ds->shaderInfo->remapShader );
+			ds->shaderInfo = &ShaderInfoForShader( ds->shaderInfo->remapShader );
 		}
 */
 		/* ydnar: gs mods: handle the various types of surfaces */

@@ -97,10 +97,10 @@ static void SwapBSPFile(){
 	for ( bspShader_t& shader : bspShaders )
 	{
 		if ( doingBSP ){
-			const shaderInfo_t *si = ShaderInfoForShader( shader.shader );
-			if ( !strEmptyOrNull( si->remapShader ) ) {
+			const shaderInfo_t& si = ShaderInfoForShader( shader.shader );
+			if ( !strEmptyOrNull( si.remapShader ) ) {
 				// copy and clear the rest of memory // check for overflow by String64
-				const String64 remap( si->remapShader );
+				const String64 remap( si.remapShader );
 				strncpy( shader.shader, remap, sizeof( shader.shader ) );
 			}
 		}

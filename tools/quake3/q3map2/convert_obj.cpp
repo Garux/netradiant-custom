@@ -143,34 +143,23 @@ static void ConvertModelToOBJ( FILE *f, int modelNum, const Vector3& origin, con
  */
 
 static void ConvertShaderToMTL( FILE *f, const bspShader_t& shader ){
-	shaderInfo_t    *si;
-	char filename[ 1024 ];
-
-
 	/* get shader */
-	si = ShaderInfoForShader( shader.shader );
-	if ( si == NULL ) {
-		Sys_Warning( "NULL shader in BSP\n" );
-		return;
-	}
+	shaderInfo_t& si = ShaderInfoForShader( shader.shader );
 
 	/* set bitmap filename */
-	if ( si->shaderImage->filename.c_str()[ 0 ] != '*' ) {
-		strcpy( filename, si->shaderImage->filename.c_str() );
-	}
-	else{
-		sprintf( filename, "%s.tga", si->shader.c_str() );
-	}
+	auto filename = si.shaderImage->filename.c_str()[ 0 ] == '*'
+	                ? StringStream<64>( si.shader, ".tga" )
+	                : StringStream<64>( si.shaderImage->filename );
 
 	/* blender hates this, so let's not do it
-	for( c = filename; *c; c++ )
+	for( char *c = filename; *c; c++ )
 		if( *c == '/' )
 			*c = '\\';
 	*/
 
 	/* print shader info */
 	fprintf( f, "newmtl %s\r\n", shader.shader );
-	fprintf( f, "Kd %f %f %f\r\n", si->color[ 0 ], si->color[ 1 ], si->color[ 2 ] );
+	fprintf( f, "Kd %f %f %f\r\n", si.color[ 0 ], si.color[ 1 ], si.color[ 2 ] );
 	if ( shadersAsBitmap ) {
 		fprintf( f, "map_Kd %s\r\n", shader.shader );
 	}
@@ -178,7 +167,7 @@ static void ConvertShaderToMTL( FILE *f, const bspShader_t& shader ){
 		/* blender hates this, so let's not do it
 		    fprintf( f, "map_Kd ..\\%s\r\n", filename );
 		 */
-		fprintf( f, "map_Kd ../%s\r\n", filename );
+		fprintf( f, "map_Kd ../%s\r\n", filename.c_str() );
 	}
 }
 

@@ -391,19 +391,19 @@ inline size_t normal_make_axial( Vector3& normal ){
 }
 
 template<size_t N> // N = 4 or 5
-static void make_brush_sides( const Plane3f plane, const Plane3f (&p)[3], const Plane3f& reverse, Vector3 (&points)[4], shaderInfo_t *si ){
+static void make_brush_sides( const Plane3f plane, const Plane3f (&p)[3], const Plane3f& reverse, Vector3 (&points)[4], shaderInfo_t& si ){
 	/* set up brush sides */
 	buildBrush.sides.clear(); // clear, so resize() will value-initialize elements
 	buildBrush.sides.resize( N );
 
 	if( debugClip ){
-		buildBrush.sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
+		buildBrush.sides[ 0 ].shaderInfo = &ShaderInfoForShader( "debugclip2" );
 		for ( size_t i = 1; i < N; ++i )
-			buildBrush.sides[i].shaderInfo = ShaderInfoForShader( "debugclip" );
+			buildBrush.sides[i].shaderInfo = &ShaderInfoForShader( "debugclip" );
 	}
 	else{
-		buildBrush.sides[0].shaderInfo = si;
-		buildBrush.sides[0].surfaceFlags = si->surfaceFlags;
+		buildBrush.sides[0].shaderInfo = &si;
+		buildBrush.sides[0].surfaceFlags = si.surfaceFlags;
 		for ( size_t i = 1; i < N; ++i )
 			buildBrush.sides[i].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 	}
@@ -418,11 +418,11 @@ static void make_brush_sides( const Plane3f plane, const Plane3f (&p)[3], const 
 		buildBrush.sides[4].planenum = FindFloatPlane( reverse, 0, NULL );
 }
 
-static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const mapDrawSurface_t *ds, const char *modelName, entity_t& entity ){
+static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const mapDrawSurface_t *ds, const char *modelName, entity_t& entity ){
 	const int spf = ( spawnFlags & ( eClipFlags & ~eClipModel ) );
 
 	/* ydnar: giant hack land: generate clipping brushes for model triangles */
-	if ( ( si->clipModel && spf == 0 ) // default CLIPMODEL
+	if ( ( si.clipModel && spf == 0 ) // default CLIPMODEL
 	  || ( spawnFlags & eClipFlags ) == eClipModel //default CLIPMODEL
 	  || spf == eExtrudeFaceNormals
 	  || spf == eExtrudeTerrain
@@ -457,7 +457,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 		int axis;
 
 		/* temp hack */
-		if ( !si->clipModel && !( si->compileFlags & C_SOLID ) ) {
+		if ( !si.clipModel && !( si.compileFlags & C_SOLID ) ) {
 			return;
 		}
 
@@ -493,9 +493,9 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 		/* prepare a brush */
 		buildBrush.sides.reserve( MAX_BUILD_SIDES );
 		buildBrush.entityNum = entity.mapEntityNum;
-		buildBrush.contentShader = si;
-		buildBrush.compileFlags = si->compileFlags;
-		buildBrush.contentFlags = si->contentFlags;
+		buildBrush.contentShader = &si;
+		buildBrush.compileFlags = si.compileFlags;
+		buildBrush.contentFlags = si.contentFlags;
 		buildBrush.detail = true;
 
 		/* walk triangle list */
@@ -933,7 +933,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t *si, const 
 				}
 
 
-				else if ( ( si->clipModel && spf == 0 ) || ( spawnFlags & eClipFlags ) == eClipModel ){	//default CLIPMODEL
+				else if ( ( si.clipModel && spf == 0 ) || ( spawnFlags & eClipFlags ) == eClipModel ){	//default CLIPMODEL
 
 default_CLIPMODEL:
 					// axial normal
@@ -988,7 +988,6 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 	const Matrix4 nTransform( matrix4_for_normal_transform( transform ) );
 	const bool transform_lefthanded = MATRIX4_LEFTHANDED == matrix4_handedness( transform );
 	AssModel            *model;
-	shaderInfo_t        *si;
 	mapDrawSurface_t    *ds;
 	const char          *picoShaderName;
 
@@ -1117,12 +1116,9 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		}
 
 		/* shader renaming for sof2 */
-		if ( renameModelShaders ) {
-			si = ShaderInfoForShader( String64( PathExtensionless( picoShaderName ), ( spawnFlags & eRMG_BSP )? "_RMG_BSP" : "_BSP" ) );
-		}
-		else{
-			si = ShaderInfoForShader( picoShaderName );
-		}
+		shaderInfo_t& si = renameModelShaders
+			? ShaderInfoForShader( String64( PathExtensionless( picoShaderName ), ( spawnFlags & eRMG_BSP )? "_RMG_BSP" : "_BSP" ) )
+			: ShaderInfoForShader( picoShaderName );
 
 		/* allocate a surface (ydnar: gs mods) */
 		ds = AllocDrawSurface( ESurfaceType::Triangles );
@@ -1131,10 +1127,10 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		ds->recvShadows = recvShadows;
 
 		/* set shader */
-		ds->shaderInfo = si;
+		ds->shaderInfo = &si;
 
 		/* force to meta? */
-		if ( ( si != NULL && si->forceMeta ) || ( spawnFlags & eForceMeta ) ) { /* 3rd bit */
+		if ( si.forceMeta || ( spawnFlags & eForceMeta ) ) { /* 3rd bit */
 			ds->type = ESurfaceType::ForcedMeta;
 		}
 
@@ -1183,14 +1179,14 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 
 			/* ydnar: tek-fu celshading support for flat shaded shit */
 			if ( flat ) {
-				dv.st = si->stFlat;
+				dv.st = si.stFlat;
 			}
 
 			/* ydnar: gs mods: added support for explicit shader texcoord generation */
-			else if ( si->tcGen ) {
+			else if ( si.tcGen ) {
 				/* project the texture */
-				dv.st[ 0 ] = vector3_dot( si->vecs[ 0 ], dv.xyz );
-				dv.st[ 1 ] = vector3_dot( si->vecs[ 1 ], dv.xyz );
+				dv.st[ 0 ] = vector3_dot( si.vecs[ 0 ], dv.xyz );
+				dv.st[ 1 ] = vector3_dot( si.vecs[ 1 ], dv.xyz );
 			}
 
 			/* normal texture coordinates */
@@ -1366,10 +1362,10 @@ void AddTriangleModels( entity_t& eparent ){
 		shaderInfo_t *celShader;
 		if( const char *value; e.read_keyvalue( value, "_celshader" ) ||
 		    entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
-			celShader = ShaderInfoForShader( String64( "textures/", value ) );
+			celShader = &ShaderInfoForShader( String64( "textures/", value ) );
 		}
 		else{
-			celShader = globalCelShader.empty() ? NULL : ShaderInfoForShader( globalCelShader );
+			celShader = globalCelShader.empty() ? nullptr : &ShaderInfoForShader( globalCelShader );
 		}
 
 		/* jal : entity based _samplesize */

@@ -234,34 +234,23 @@ static void ConvertModel( FILE *f, int modelNum, const Vector3& origin, const st
  */
 
 static void ConvertShader( FILE *f, const bspShader_t& shader ){
-	shaderInfo_t    *si;
-	char            *c, filename[ 1024 ];
-
-
 	/* get shader */
-	si = ShaderInfoForShader( shader.shader );
-	if ( si == NULL ) {
-		Sys_Warning( "NULL shader in BSP\n" );
-		return;
-	}
+	shaderInfo_t& si = ShaderInfoForShader( shader.shader );
 
 	/* set bitmap filename */
-	if ( si->shaderImage->filename.c_str()[ 0 ] != '*' ) {
-		strcpy( filename, si->shaderImage->filename.c_str() );
-	}
-	else{
-		sprintf( filename, "%s.tga", si->shader.c_str() );
-	}
-	for ( c = filename; *c; c++ )
-		if ( *c == '/' ) {
+	auto filename = si.shaderImage->filename.c_str()[ 0 ] == '*'
+	                ? StringStream<64>( si.shader, ".tga" )
+	                : StringStream<64>( si.shaderImage->filename );
+
+	for ( char *c = filename.c_str(); !strEmpty( c ); ++c )
+		if ( *c == '/' )
 			*c = '\\';
-		}
 
 	/* print shader info */
 	fprintf( f, "\t*MATERIAL\t%d\t{\r\n", int( &shader - bspShaders.data() ) );
 	fprintf( f, "\t\t*MATERIAL_NAME\t\"%s\"\r\n", shader.shader );
 	fprintf( f, "\t\t*MATERIAL_CLASS\t\"Standard\"\r\n" );
-	fprintf( f, "\t\t*MATERIAL_DIFFUSE\t%f\t%f\t%f\r\n", si->color[ 0 ], si->color[ 1 ], si->color[ 2 ] );
+	fprintf( f, "\t\t*MATERIAL_DIFFUSE\t%f\t%f\t%f\r\n", si.color[ 0 ], si.color[ 1 ], si.color[ 2 ] );
 	fprintf( f, "\t\t*MATERIAL_SHADING Phong\r\n" );
 
 	/* print map info */
@@ -275,7 +264,7 @@ static void ConvertShader( FILE *f, const bspShader_t& shader ){
 		fprintf( f, "\t\t\t*BITMAP\t\"%s\"\r\n", shader.shader );
 	}
 	else{
-		fprintf( f, "\t\t\t*BITMAP\t\"..\\%s\"\r\n", filename );
+		fprintf( f, "\t\t\t*BITMAP\t\"..\\%s\"\r\n", filename.c_str() );
 	}
 	fprintf( f, "\t\t\t*BITMAP_FILTER\tPyramidal\r\n" );
 	fprintf( f, "\t\t}\r\n" );

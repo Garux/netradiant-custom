@@ -993,7 +993,7 @@ void SetupSurfaceLightmaps(){
 				const surfaceExtra_t& se = GetSurfaceExtra( num );
 				info->si = se.si;
 				if ( info->si == NULL ) {
-					info->si = ShaderInfoForShader( bspShaders[ ds->shaderNum ].shader );
+					info->si = &ShaderInfoForShader( bspShaders[ ds->shaderNum ].shader );
 				}
 				info->parentSurfaceNum = se.parentSurfaceNum;
 				info->entityNum = se.entityNum;
@@ -2331,7 +2331,6 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 	outLightmap_t       *olm;
 	bspDrawVert_t       *dv, *ydv, *dvParent;
 	char dirname[ 1024 ], filename[ 1024 ];
-	const shaderInfo_t  *csi;
 	char lightmapName[ 128 ];
 	const char              *rgbGenValues[ 256 ] = {0};
 	const char              *alphaGenValues[ 256 ] = {0};
@@ -3285,21 +3284,16 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 				}
 
 				/* create custom shader */
-				if ( info->si->styleMarker == 2 ) {
-					csi = CustomShader( info->si, "q3map_styleMarker2", styleStages );
-				}
-				else{
-					csi = CustomShader( info->si, "q3map_styleMarker", styleStages );
-				}
+				const shaderInfo_t& csi = CustomShader( info->si, info->si->styleMarker == 2? "q3map_styleMarker2" : "q3map_styleMarker", styleStages );
 
 				/* emit remap command */
-				//%	EmitVertexRemapShader( csi->shader, info->si->shader );
+				//%	EmitVertexRemapShader( csi.shader, info->si->shader );
 
 				/* store it */
-				//%	Sys_Printf( "Emitting: %s (%d", csi->shader, strlen( csi->shader ) );
+				//%	Sys_Printf( "Emitting: %s (%d", csi.shader, strlen( csi.shader ) );
 				const int cont = bspShaders[ ds->shaderNum ].contentFlags;
 				const int surf = bspShaders[ ds->shaderNum ].surfaceFlags;
-				ds->shaderNum = EmitShader( csi->shader, &cont, &surf );
+				ds->shaderNum = EmitShader( csi.shader, &cont, &surf );
 				//%	Sys_Printf( ")\n" );
 			}
 
@@ -3313,13 +3307,13 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 				sprintf( lightmapName, "maps/%s/" EXTERNAL_LIGHTMAP "\n\t\ttcgen lightmap", mapName.c_str(), olm->extLightmapNum );
 
 				/* create custom shader */
-				csi = CustomShader( info->si, "$lightmap", lightmapName );
+				const shaderInfo_t& csi = CustomShader( info->si, "$lightmap", lightmapName );
 
 				/* store it */
-				//%	Sys_Printf( "Emitting: %s (%d", csi->shader, strlen( csi->shader ) );
+				//%	Sys_Printf( "Emitting: %s (%d", csi.shader, strlen( csi.shader ) );
 				const int cont = bspShaders[ ds->shaderNum ].contentFlags;
 				const int surf = bspShaders[ ds->shaderNum ].surfaceFlags;
-				ds->shaderNum = EmitShader( csi->shader, &cont, &surf );
+				ds->shaderNum = EmitShader( csi.shader, &cont, &surf );
 				//%	Sys_Printf( ")\n" );
 			}
 

@@ -318,7 +318,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 	pm->brushNum = mapPrimitiveNum;
 
 	/* set shader */
-	pm->shaderInfo = ShaderInfoForShader( shader );
+	pm->shaderInfo = &ShaderInfoForShader( shader );
 
 	/* set mesh */
 	pm->mesh = m;

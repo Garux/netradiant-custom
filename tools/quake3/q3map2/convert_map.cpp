@@ -239,7 +239,7 @@ static void bspBrush_to_buildBrush( const bspBrush_t& brush ){
 		buildBrush.sides.emplace_back();
 
 		/* tag it */
-		buildBrush.sides.back().shaderInfo = ShaderInfoForShader( shader.shader );
+		buildBrush.sides.back().shaderInfo = &ShaderInfoForShader( shader.shader );
 		buildBrush.sides.back().planenum = side.planeNum;
 	}
 }

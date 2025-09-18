@@ -40,9 +40,6 @@
  */
 
 int EmitShader( const char *shader, const int *contentFlags, const int *surfaceFlags ){
-	shaderInfo_t    *si;
-
-
 	/* handle special cases */
 	if ( shader == NULL ) {
 		shader = "noshader";
@@ -59,9 +56,9 @@ int EmitShader( const char *shader, const int *contentFlags, const int *surfaceF
 			continue;
 		}
 		if ( !doingBSP ){
-			si = ShaderInfoForShader( shader );
-			if ( !strEmptyOrNull( si->remapShader ) ) {
-				shader = si->remapShader;
+			const shaderInfo_t& si = ShaderInfoForShader( shader );
+			if ( !strEmptyOrNull( si.remapShader ) ) {
+				shader = si.remapShader;
 			}
 		}
 		/* compare name */
@@ -71,21 +68,21 @@ int EmitShader( const char *shader, const int *contentFlags, const int *surfaceF
 	}
 
 	/* get shaderinfo */
-	si = ShaderInfoForShader( shader );
+	const shaderInfo_t& si = ShaderInfoForShader( shader );
 
 	/* emit a new shader */
 	const int i = bspShaders.size(); // store index
 	bspShader_t& bspShader = bspShaders.emplace_back();
 
-	strcpy( bspShader.shader, si->shader );
+	strcpy( bspShader.shader, si.shader );
 	/* handle custom content/surface flags */
-	bspShader.surfaceFlags = ( surfaceFlags != NULL )? *surfaceFlags : si->surfaceFlags;
-	bspShader.contentFlags = ( contentFlags != NULL )? *contentFlags : si->contentFlags;
+	bspShader.surfaceFlags = ( surfaceFlags != NULL )? *surfaceFlags : si.surfaceFlags;
+	bspShader.contentFlags = ( contentFlags != NULL )? *contentFlags : si.contentFlags;
 
 	/* recursively emit any damage shaders */
-	if ( !strEmptyOrNull( si->damageShader ) ) {
-		Sys_FPrintf( SYS_VRB, "Shader %s has damage shader %s\n", si->shader.c_str(), si->damageShader );
-		EmitShader( si->damageShader, NULL, NULL );
+	if ( !strEmptyOrNull( si.damageShader ) ) {
+		Sys_FPrintf( SYS_VRB, "Shader %s has damage shader %s\n", si.shader.c_str(), si.damageShader );
+		EmitShader( si.damageShader, NULL, NULL );
 	}
 
 	/* return index */

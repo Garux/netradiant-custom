@@ -246,7 +246,7 @@ void LoadSurfaceExtraFile( const char *path ){
 			/* shader */
 			if ( striEqual( token, "shader" ) ) {
 				GetToken( false );
-				se->si = ShaderInfoForShader( token );
+				se->si = &ShaderInfoForShader( token );
 			}
 
 			/* parent surface number */
