@@ -274,7 +274,7 @@ static void NumberLeafs_r( node_t *node, int c ){
 		return;
 	}
 
-	node->area = -1;
+	node->area = AREA_INVALID;
 
 	if ( node->opaque ) {
 		// solid block, viewpoint never inside

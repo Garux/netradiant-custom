@@ -130,6 +130,7 @@
 #define CLIP_EPSILON            0.1f
 #define PLANESIDE_EPSILON       0.001f
 #define PLANENUM_LEAF           -1
+constexpr int AREA_INVALID    = -1;
 
 enum class EBrushType
 {
@@ -1891,7 +1892,7 @@ inline const Vector3b debugColors[ 12 ] =
 		{ 128, 192, 128 }
 	};
 
-inline int skyboxArea = -1;
+inline int skyboxArea = AREA_INVALID;
 inline Matrix4 skyboxTransform;
 
 

@@ -630,7 +630,7 @@ static int c_areas;
  */
 
 static void FloodAreas_r( node_t *node ){
-	if ( node->area != -1 ) {
+	if ( node->area != AREA_INVALID ) {
 		return;
 	}
 	if ( node->cluster == -1 ) {
@@ -678,7 +678,7 @@ static void FindAreas_r( node_t *node ){
 		return;
 	}
 
-	if ( node->opaque || node->area != -1 ) {
+	if ( node->opaque || node->area != AREA_INVALID ) {
 		return;
 	}
 
@@ -703,7 +703,7 @@ static void CheckAreas_r( const node_t *node ){
 	}
 
 	if ( node->cluster != -1 ) {
-		if ( node->area == -1 ) {
+		if ( node->area == AREA_INVALID ) {
 			Sys_Warning( "cluster %d has area set to -1\n", node->cluster );
 		}
 	}
@@ -717,7 +717,7 @@ static void CheckAreas_r( const node_t *node ){
  */
 
 static void FloodSkyboxArea_r( node_t *node ){
-	if ( skyboxArea < 0 ) {
+	if ( skyboxArea == AREA_INVALID ) {
 		return;
 	}
 
