@@ -994,6 +994,16 @@ struct portal_t
 
 	bool sidefound;                     /* false if ->side hasn't been checked */
 	int compileFlags;                   /* from original face that caused the split */
+
+	ESide thisSide( const node_t *node ) const {
+		return nodes[ eBack ] == node;
+	}
+	portal_t* nextPortal( const node_t *node ) const {
+		return next[ thisSide( node ) ];
+	}
+	node_t* otherNode( const node_t *node ) const {
+		return nodes[ !thisSide( node ) ];
+	}
 };
 
 

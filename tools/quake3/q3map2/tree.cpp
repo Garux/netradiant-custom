@@ -38,10 +38,10 @@ static node_t *NodeForPoint( node_t *node, const Vector3& origin ){
 	while ( node->planenum != PLANENUM_LEAF )
 	{
 		if ( plane3_distance_to_point( mapplanes[node->planenum].plane, origin ) >= 0 ) {
-			node = node->children[0];
+			node = node->children[eFront];
 		}
 		else{
-			node = node->children[1];
+			node = node->children[eBack];
 		}
 	}
 
@@ -56,9 +56,6 @@ static node_t *NodeForPoint( node_t *node, const Vector3& origin ){
    =============
  */
 static void FreeTreePortals_r( node_t *node ){
-	portal_t    *p, *nextp;
-	int s;
-
 	// free children
 	if ( node->planenum != PLANENUM_LEAF ) {
 		FreeTreePortals_r( node->children[0] );
@@ -66,15 +63,14 @@ static void FreeTreePortals_r( node_t *node ){
 	}
 
 	// free portals
-	for ( p = node->portals; p; p = nextp )
+	for ( portal_t *p = node->portals, *nextp; p; p = nextp )
 	{
-		s = ( p->nodes[1] == node );
-		nextp = p->next[s];
+		nextp = p->nextPortal( node );
 
-		RemovePortalFromNode( p, p->nodes[!s] );
+		RemovePortalFromNode( p, p->otherNode( node ) );
 		FreePortal( p );
 	}
-	node->portals = NULL;
+	node->portals = nullptr;
 }
 
 /*

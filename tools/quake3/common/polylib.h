@@ -50,6 +50,22 @@ enum EPlaneSide
 	eSideCross = 3,
 };
 
+enum : bool
+{
+	eFront = false,
+	eBack = true,
+};
+class ESide
+{
+	bool m_value;
+public:
+	ESide() = default;
+	ESide( bool value ) : m_value( value ){}
+	operator bool() const {
+		return m_value;
+	}
+};
+
 winding_t   AllocWinding( int points );
 float   WindingArea( const winding_t& w );
 Vector3 WindingCenter( const winding_t& w );

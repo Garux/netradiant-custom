@@ -247,21 +247,21 @@ static void BuildFaceTree_r( node_t *node, facelist_t& list ){
 
 
 	// recursively process children
-	for ( int i = 0; i < 2; i++ ) {
+	for ( int i = 0; i < 2; ++i ) {
 		node->children[i] = AllocNode();
 		node->children[i]->parent = node;
 		node->children[i]->minmax = node->minmax;
 	}
 
-	for ( int i = 0; i < 3; i++ ) {
+	for ( int i = 0; i < 3; ++i ) {
 		if ( plane.normal()[i] == 1 ) {
-			node->children[0]->minmax.mins[i] = plane.dist();
-			node->children[1]->minmax.maxs[i] = plane.dist();
+			node->children[eFront]->minmax.mins[i] = plane.dist();
+			node->children[eBack]->minmax.maxs[i] = plane.dist();
 			break;
 		}
 		if ( plane.normal()[i] == -1 ) {
-			node->children[0]->minmax.maxs[i] = -plane.dist();
-			node->children[1]->minmax.mins[i] = -plane.dist();
+			node->children[eFront]->minmax.maxs[i] = -plane.dist();
+			node->children[eBack]->minmax.mins[i] = -plane.dist();
 			break;
 		}
 	}
@@ -272,7 +272,7 @@ static void BuildFaceTree_r( node_t *node, facelist_t& list ){
 	}
 #endif
 
-	for ( int i = 0; i < 2; i++ ) {
+	for ( int i = 0; i < 2; ++i ) {
 		BuildFaceTree_r( node->children[i], childLists[i] );
 		node->has_structural_children |= node->children[i]->has_structural_children;
 	}

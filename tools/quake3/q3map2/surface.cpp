@@ -1241,11 +1241,11 @@ static void ClipSideIntoTree_r( const winding_t& w, side_t& side, const node_t *
 
 	if ( node->planenum != PLANENUM_LEAF ) {
 		if ( side.planenum == node->planenum ) {
-			ClipSideIntoTree_r( w, side, node->children[0] );
+			ClipSideIntoTree_r( w, side, node->children[eFront] );
 			return;
 		}
 		if ( side.planenum == ( node->planenum ^ 1 ) ) {
-			ClipSideIntoTree_r( w, side, node->children[1] );
+			ClipSideIntoTree_r( w, side, node->children[eBack] );
 			return;
 		}
 
@@ -1253,12 +1253,12 @@ static void ClipSideIntoTree_r( const winding_t& w, side_t& side, const node_t *
 		auto [front, back] = ClipWindingEpsilonStrict( w, plane, ON_EPSILON ); /* strict, we handle the "winding disappeared" case */
 		if ( front.empty() && back.empty() ) {
 			/* in doubt, register it in both nodes */
-			ClipSideIntoTree_r( w, side, node->children[0] );
-			ClipSideIntoTree_r( w, side, node->children[1] );
+			ClipSideIntoTree_r( w, side, node->children[eFront] );
+			ClipSideIntoTree_r( w, side, node->children[eBack] );
 		}
 		else{
-			ClipSideIntoTree_r( front, side, node->children[0] );
-			ClipSideIntoTree_r( back, side, node->children[1] );
+			ClipSideIntoTree_r( front, side, node->children[eFront] );
+			ClipSideIntoTree_r( back, side, node->children[eBack] );
 		}
 
 		return;
@@ -1679,10 +1679,10 @@ static int FilterPointIntoTree_r( const Vector3& point, mapDrawSurface_t *ds, no
 		/* filter by this plane */
 		refs = 0;
 		if ( d >= -ON_EPSILON ) {
-			refs += FilterPointIntoTree_r( point, ds, node->children[ 0 ] );
+			refs += FilterPointIntoTree_r( point, ds, node->children[eFront] );
 		}
 		if ( d <= ON_EPSILON ) {
-			refs += FilterPointIntoTree_r( point, ds, node->children[ 1 ] );
+			refs += FilterPointIntoTree_r( point, ds, node->children[eBack] );
 		}
 
 		/* return */
@@ -1715,10 +1715,10 @@ static int FilterPointConvexHullIntoTree_r( const std::array<Vector3, 16>& point
 		/* filter by this plane */
 		int refs = 0;
 		if ( dmax >= -ON_EPSILON ) {
-			refs += FilterPointConvexHullIntoTree_r( points, ds, node->children[ 0 ] );
+			refs += FilterPointConvexHullIntoTree_r( points, ds, node->children[eFront] );
 		}
 		if ( dmin <= ON_EPSILON ) {
-			refs += FilterPointConvexHullIntoTree_r( points, ds, node->children[ 1 ] );
+			refs += FilterPointConvexHullIntoTree_r( points, ds, node->children[eBack] );
 		}
 
 		/* return */
@@ -1800,10 +1800,10 @@ static int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t *ds, node_t *
 
 			/* the drawsurf might have an associated plane, if so, force a filter here */
 			if ( ds->planeNum == node->planenum ) {
-				return FilterWindingIntoTree_r( w, ds, node->children[ 0 ] );
+				return FilterWindingIntoTree_r( w, ds, node->children[eFront] );
 			}
 			if ( ds->planeNum == ( node->planenum ^ 1 ) ) {
-				return FilterWindingIntoTree_r( w, ds, node->children[ 1 ] );
+				return FilterWindingIntoTree_r( w, ds, node->children[eBack] );
 			}
 			#endif
 		}
@@ -1817,14 +1817,14 @@ static int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t *ds, node_t *
 			/* same plane, this is an ugly hack */
 			/* but better too many than too few refs */
 			winding_t wcopy( w );
-			refs += FilterWindingIntoTree_r( wcopy, ds, node->children[ 0 ] );
-			refs += FilterWindingIntoTree_r( w, ds, node->children[ 1 ] );
+			refs += FilterWindingIntoTree_r( wcopy, ds, node->children[eFront] );
+			refs += FilterWindingIntoTree_r( w, ds, node->children[eBack] );
 		}
 		if ( !front.empty() ) {
-			refs += FilterWindingIntoTree_r( front, ds, node->children[ 0 ] );
+			refs += FilterWindingIntoTree_r( front, ds, node->children[eFront] );
 		}
 		if ( !back.empty() ) {
-			refs += FilterWindingIntoTree_r( back, ds, node->children[ 1 ] );
+			refs += FilterWindingIntoTree_r( back, ds, node->children[eBack] );
 		}
 
 		/* return */
@@ -2613,10 +2613,6 @@ static void EmitFaceSurface( mapDrawSurface_t *ds ){
  */
 
 static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t& si ){
-	int i, c, s;
-	const portal_t      *p;
-
-
 	/* recurse if decision node */
 	if ( node->planenum != PLANENUM_LEAF ) {
 		MakeDebugPortalSurfs_r( node->children[ 0 ], si );
@@ -2630,14 +2626,14 @@ static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t& si ){
 	}
 
 	/* walk the list of portals */
-	for ( c = 0, p = node->portals; p != NULL; c++, p = p->next[ s ] )
+	int c = 0;
+	for ( const portal_t *p = node->portals; p != nullptr; ++c, p = p->nextPortal( node ) )
 	{
 		/* get winding and side even/odd */
 		const winding_t& w = p->winding;
-		s = ( p->nodes[ 1 ] == node );
 
 		/* is this a valid portal for this leaf? */
-		if ( !w.empty() && p->nodes[ 0 ] == node ) {
+		if ( !w.empty() && p->nodes[eFront] == node ) {
 			/* is this portal passable? */
 			if ( !PortalPassable( p ) ) {
 				continue;
@@ -2659,7 +2655,7 @@ static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t& si ){
 			ds->verts = safe_calloc( ds->numVerts * sizeof( *ds->verts ) );
 
 			/* walk the winding */
-			for ( i = 0; i < ds->numVerts; i++ )
+			for ( int i = 0; i < ds->numVerts; ++i )
 			{
 				/* get vert */
 				bspDrawVert_t *dv = ds->verts + i;

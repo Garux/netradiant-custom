@@ -311,7 +311,7 @@ static int SetupTraceNodes_r( int bspNodeNum ){
 	traceNodes[ nodeNum ].plane = plane;
 
 	/* setup children */
-	for ( i = 0; i < 2; i++ )
+	for ( i = 0; i < 2; ++i )
 	{
 		/* leafnode */
 		if ( bspNode.children[ i ] < 0 ) {

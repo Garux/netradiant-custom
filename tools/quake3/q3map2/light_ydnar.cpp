@@ -345,18 +345,18 @@ static int PointInLeafNum_r( const Vector3& point, int nodenum ){
 		const bspPlane_t& plane = bspPlanes[ node.planeNum ];
 		const double dist = plane3_distance_to_point( plane, point );
 		if ( dist > 0.1 ) {
-			nodenum = node.children[ 0 ];
+			nodenum = node.children[eFront];
 		}
 		else if ( dist < -0.1 ) {
-			nodenum = node.children[ 1 ];
+			nodenum = node.children[eBack];
 		}
 		else
 		{
-			leafnum = PointInLeafNum_r( point, node.children[ 0 ] );
+			leafnum = PointInLeafNum_r( point, node.children[eFront] );
 			if ( bspLeafs[ leafnum ].cluster != -1 ) {
 				return leafnum;
 			}
-			nodenum = node.children[ 1 ];
+			nodenum = node.children[eBack];
 		}
 	}
 

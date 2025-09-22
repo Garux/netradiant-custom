@@ -80,20 +80,19 @@ static xmlNodePtr LeakFile( const tree_t& tree ){
 	node = &tree.outside_node;
 	while ( node->occupied > 1 )
 	{
-		int next;
-		const portal_t    *p, *nextportal = NULL;
-		const node_t      *nextnode = NULL;
-		int s;
+		int next = node->occupied;
+		const portal_t    *nextportal = nullptr;
+		const node_t      *nextnode = nullptr;
 
 		// find the best portal exit
-		next = node->occupied;
-		for ( p = node->portals; p; p = p->next[!s] )
+		ESide side;
+		for ( const portal_t *p = node->portals; p; p = p->next[!side] )
 		{
-			s = ( p->nodes[0] == node );
-			if ( p->nodes[s]->occupied
-			     && p->nodes[s]->occupied < next ) {
+			side = ( p->nodes[eFront] == node );
+			if ( p->nodes[side]->occupied
+			  && p->nodes[side]->occupied < next ) {
 				nextportal = p;
-				nextnode = p->nodes[s];
+				nextnode = p->nodes[side];
 				next = nextnode->occupied;
 			}
 		}

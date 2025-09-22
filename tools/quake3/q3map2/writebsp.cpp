@@ -180,7 +180,7 @@ static int EmitDrawNode_r( node_t *node ){
 	//
 	// recursively output the other nodes
 	//
-	for ( int i = 0; i < 2; i++ )
+	for ( int i = 0; i < 2; ++i )
 	{
 		// reference node by id, as it may be reallocated
 		if ( node->children[i]->planenum == PLANENUM_LEAF ) {

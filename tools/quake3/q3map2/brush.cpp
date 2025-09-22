@@ -457,10 +457,9 @@ static int FilterBrushIntoTree_r( brush_t&& b, node_t *node ){
 			}
 			else if ( b.compileFlags & C_AREAPORTAL ) { // find and flag C_AREAPORTAL portals, this is not always passed through node->compileFlags
 				const auto side = std::ranges::find_if( b.original->sides, []( const side_t& side ){ return side.compileFlags & C_AREAPORTAL; } );
-				int s;
-				for ( portal_t *p = node->portals; p; p = p->next[ s ] )
+
+				for ( portal_t *p = node->portals; p; p = p->nextPortal( node ) )
 				{
-					s = ( p->nodes[1] == node );
 					if( p->onnode != nullptr && ( p->onnode->planenum | 1 ) == ( side->planenum | 1 ) )
 						if( windings_intersect_coplanar( ( p->onnode->planenum == side->planenum )
 						                                 ? p->winding : ReverseWinding( p->winding ), side->winding, side->plane ) )
@@ -476,8 +475,8 @@ static int FilterBrushIntoTree_r( brush_t&& b, node_t *node ){
 	auto [front, back] = SplitBrush( b, node->planenum );
 
 	int c = 0;
-	c += FilterBrushIntoTree_r( std::move( front ), node->children[ 0 ] );
-	c += FilterBrushIntoTree_r( std::move( back ), node->children[ 1 ] );
+	c += FilterBrushIntoTree_r( std::move( front ), node->children[eFront] );
+	c += FilterBrushIntoTree_r( std::move( back ), node->children[eBack] );
 
 	return c;
 }
