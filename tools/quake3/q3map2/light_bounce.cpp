@@ -59,7 +59,7 @@ static void RadClipWindingEpsilon( radWinding_t *in, const Vector3& normal, floa
 	counts[ 0 ] = counts[ 1 ] = counts[ 2 ] = 0;
 
 	/* determine sides for each point */
-	for ( i = 0; i < in->numVerts; i++ )
+	for ( i = 0; i < in->numVerts; ++i )
 	{
 		dists[ i ] = vector3_dot( in->verts[ i ].xyz, normal ) - dist;
 		if ( dists[ i ] > epsilon ) {
@@ -93,7 +93,7 @@ static void RadClipWindingEpsilon( radWinding_t *in, const Vector3& normal, floa
 	maxPoints = in->numVerts + 4;
 
 	/* do individual verts */
-	for ( i = 0; i < in->numVerts; i++ )
+	for ( i = 0; i < in->numVerts; ++i )
 	{
 		/* do simple vertex copies first */
 		const radVert_t& v1 = in->verts[ i ];
@@ -124,7 +124,7 @@ static void RadClipWindingEpsilon( radWinding_t *in, const Vector3& normal, floa
 		/* average vertex values */
 		radVert_t mid;
 		/* color */
-		for ( k = 0; k < MAX_LIGHTMAPS; k++ ){
+		for ( k = 0; k < MAX_LIGHTMAPS; ++k ){
 			mid.color[ k ] = v1.color[ k ] + ( v2.color[ k ] - v1.color[ k ] ) * dot;
 		}
 		/* xyz, normal */
@@ -132,7 +132,7 @@ static void RadClipWindingEpsilon( radWinding_t *in, const Vector3& normal, floa
 		mid.normal = v1.normal + ( v2.normal - v1.normal ) * dot;
 		/* st, lightmap */
 		mid.st = v1.st + ( v2.st - v1.st ) * dot;
-		for ( k = 0; k < MAX_LIGHTMAPS; k++ )
+		for ( k = 0; k < MAX_LIGHTMAPS; ++k )
 			mid.lightmap[ k ] = v1.lightmap[ k ] + ( v2.lightmap[ k ] - v1.lightmap[ k ] ) * dot;
 
 		/* normalize the averaged normal */
@@ -232,7 +232,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 
 	/* sample vertex colors if no lightmap or this is the initial pass */
 	if ( lm == NULL || lm->radLuxels[ lightmapNum ] == NULL || !bouncing ) {
-		for ( samples = 0; samples < rw->numVerts; samples++ )
+		for ( samples = 0; samples < rw->numVerts; ++samples )
 		{
 			/* multiply by texture color */
 			if ( !RadSampleImage( si->lightImage->pixels, si->lightImage->width, si->lightImage->height, rw->verts[ samples ].st, textureColor ) ) {
@@ -258,7 +258,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 	else
 	{
 		/* fracture the winding into a fan (including degenerate tris) */
-		for ( v = 1; v < ( rw->numVerts - 1 ) && samples < MAX_SAMPLES; v++ )
+		for ( v = 1; v < ( rw->numVerts - 1 ) && samples < MAX_SAMPLES; ++v )
 		{
 			/* get a triangle */
 			rv[ 0 ] = &rw->verts[ 0 ];
@@ -266,11 +266,11 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 			rv[ 2 ] = &rw->verts[ v + 1 ];
 
 			/* this code is embarrassing (really should just rasterize the triangle) */
-			for ( i = 1; i < SAMPLE_GRANULARITY && samples < MAX_SAMPLES; i++ )
+			for ( i = 1; i < SAMPLE_GRANULARITY && samples < MAX_SAMPLES; ++i )
 			{
-				for ( j = 1; j < SAMPLE_GRANULARITY && samples < MAX_SAMPLES; j++ )
+				for ( j = 1; j < SAMPLE_GRANULARITY && samples < MAX_SAMPLES; ++j )
 				{
-					for ( k = 1; k < SAMPLE_GRANULARITY && samples < MAX_SAMPLES; k++ )
+					for ( k = 1; k < SAMPLE_GRANULARITY && samples < MAX_SAMPLES; ++k )
 					{
 						/* create a blend vector (barycentric coordinates) */
 						DoubleVector3 blend( i, j, k );
@@ -280,7 +280,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 						Vector2 st( 0, 0 );
 						Vector2 lightmap( 0, 0 );
 						alphaI = 0.0f;
-						for ( l = 0; l < 3; l++ )
+						for ( l = 0; l < 3; ++l )
 						{
 							st += rv[ l ]->st * blend[ l ];
 							lightmap += rv[ l ]->lightmap[ 0 ] * blend[ l ];
@@ -376,7 +376,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 		minmax.extend( vert.xyz );
 
 	/* subdivide if necessary */
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		if ( minmax.maxs[ i ] - minmax.mins[ i ] > subdivide ) {
 			auto front = std::make_unique<radWinding_t>();
@@ -397,7 +397,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 
 	/* check area */
 	area = 0.0f;
-	for ( i = 2; i < rw->numVerts; i++ )
+	for ( i = 2; i < rw->numVerts; ++i )
 	{
 		area += 0.5f * vector3_length( vector3_cross( rw->verts[ i - 1 ].xyz - rw->verts[ 0 ].xyz, rw->verts[ i ].xyz - rw->verts[ 0 ].xyz ) );
 	}
@@ -542,7 +542,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 
 			/* create a regular winding */
 			splash.w = AllocWinding( rw->numVerts );
-			for ( i = 0; i < rw->numVerts; i++ )
+			for ( i = 0; i < rw->numVerts; ++i )
 				splash.w.push_back( rw->verts[rw->numVerts - 1 - i].xyz + normal * si->backsplashDistance );
 
 			splash.origin = normal * si->backsplashDistance + light.origin;
@@ -606,7 +606,7 @@ void RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, const sh
 	for ( i = 0; i < ds->numIndexes; i += 3 )
 	{
 		/* copy each vert */
-		for ( j = 0; j < 3; j++ )
+		for ( j = 0; j < 3; ++j )
 		{
 			/* get vertex index and rad vertex luxel */
 			v = ds->firstVert + bspDrawIndexes[ ds->firstIndex + i + j ];
@@ -615,7 +615,7 @@ void RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, const sh
 			memcpy( &rw.verts[ j ], &yDrawVerts[ v ], sizeof( bspDrawVert_t ) );
 
 			/* fix colors */
-			for ( k = 0; k < MAX_LIGHTMAPS; k++ )
+			for ( k = 0; k < MAX_LIGHTMAPS; ++k )
 			{
 				rw.verts[ j ].color[ k ].rgb() = getRadVertexLuxel( k, ds->firstVert + bspDrawIndexes[ ds->firstIndex + i + j ] );
 				rw.verts[ j ].color[ k ].alpha() = yDrawVerts[ v ].color[ k ].alpha();
@@ -644,7 +644,7 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 	/* construct a bogus vert list with color index stuffed into color[ 0 ] */
 	bspDrawVert_t *bogus = safe_malloc( ds.numVerts * sizeof( bspDrawVert_t ) );
 	memcpy( bogus, &yDrawVerts[ ds.firstVert ], ds.numVerts * sizeof( bspDrawVert_t ) );
-	for ( int i = 0; i < ds.numVerts; i++ )
+	for ( int i = 0; i < ds.numVerts; ++i )
 		bogus[ i ].color[ 0 ][ 0 ] = i;
 
 	/* build a subdivided mesh identical to shadow facets for this patch */
@@ -672,9 +672,9 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 	}
 
 	/* iterate through the mesh quads */
-	for ( int y = 0; y < ( mesh->height - 1 ); y++ )
+	for ( int y = 0; y < ( mesh->height - 1 ); ++y )
 	{
-		for ( int x = 0; x < ( mesh->width - 1 ); x++ )
+		for ( int x = 0; x < ( mesh->width - 1 ); ++x )
 		{
 			/* set indexes */
 			const int pw[ 5 ] = {
@@ -707,13 +707,13 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 			if ( planar ) {
 				radWinding_t rw;
 				rw.numVerts = 4;
-				for ( int v = 0; v < 4; v++ )
+				for ( int v = 0; v < 4; ++v )
 				{
 					/* get most everything */
 					memcpy( &rw.verts[ v ], dv[ v ], sizeof( bspDrawVert_t ) );
 
 					/* fix colors */
-					for ( int i = 0; i < MAX_LIGHTMAPS; i++ )
+					for ( int i = 0; i < MAX_LIGHTMAPS; ++i )
 					{
 						rw.verts[ v ].color[ i ].rgb() = getRadVertexLuxel( i, ds.firstVert + dv[ v ]->color[ 0 ][ 0 ] );
 						rw.verts[ v ].color[ i ].alpha() = dv[ v ]->color[ i ].alpha();
@@ -729,9 +729,9 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 			{
 				radWinding_t rw;
 				rw.numVerts = 3;
-				for ( int t = 0; t < 2; t++ )
+				for ( int t = 0; t < 2; ++t )
 				{
-					for ( int v = 0; v < 3 + t; v++ )
+					for ( int v = 0; v < 3 + t; ++v )
 					{
 						/* get "other" triangle (stupid hacky logic, but whatevah) */
 						if ( v == 1 && t == 1 ) {
@@ -742,7 +742,7 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 						memcpy( &rw.verts[ v ], dv[ v ], sizeof( bspDrawVert_t ) );
 
 						/* fix colors */
-						for ( int i = 0; i < MAX_LIGHTMAPS; i++ )
+						for ( int i = 0; i < MAX_LIGHTMAPS; ++i )
 						{
 							rw.verts[ v ].color[ i ].rgb() = getRadVertexLuxel( i, ds.firstVert + dv[ v ]->color[ 0 ][ 0 ] );
 							rw.verts[ v ].color[ i ].alpha() = dv[ v ]->color[ i ].alpha();
@@ -812,7 +812,7 @@ static void RadLight( int num ){
 	numDiffuseSurfaces++;
 
 	/* iterate through styles (this could be more efficient, yes) */
-	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 	{
 		/* switch on type */
 		if ( ds->lightmapStyles[ lightmapNum ] != LS_NONE && ds->lightmapStyles[ lightmapNum ] != LS_UNUSED ) {

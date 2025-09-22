@@ -148,7 +148,7 @@ void MDLSurface_read( Surface& surface, const byte* buffer, const char* name ){
 
 	{
 		bool found = false;
-		for ( int i = 0; i < header.numframes && found == false; i++ )
+		for ( int i = 0; i < header.numframes && found == false; ++i )
 		{
 			switch ( istream_read_int32_le( inputStream ) )
 			{

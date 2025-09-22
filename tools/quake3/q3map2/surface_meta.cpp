@@ -395,9 +395,9 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t *ds ){
 	ds->verts = mesh->verts;
 
 	/* iterate through the mesh quads */
-	for ( int y = 0; y < ( mesh->height - 1 ); y++ )
+	for ( int y = 0; y < ( mesh->height - 1 ); ++y )
 	{
-		for ( int x = 0; x < ( mesh->width - 1 ); x++ )
+		for ( int x = 0; x < ( mesh->width - 1 ); ++x )
 		{
 			/* set indexes */
 			const int pw[ 5 ] = {
@@ -666,12 +666,12 @@ static void FanFaceSurface( mapDrawSurface_t *ds ){
 
 	/* add up the drawverts to create a centroid */
 	centroid = &verts[ 0 ];
-	for ( i = 1, dv = &verts[ 1 ]; i < ( ds->numVerts + 1 ); i++, dv++ )
+	for ( i = 1, dv = &verts[ 1 ]; i < ( ds->numVerts + 1 ); ++i, ++dv )
 	{
 		centroid->xyz += dv->xyz;
 		centroid->normal += dv->normal;
 		centroid->st += dv->st;
-		for ( k = 0; k < MAX_LIGHTMAPS; k++ ){
+		for ( k = 0; k < MAX_LIGHTMAPS; ++k ){
 			color[ k ] += dv->color[ k ];
 			centroid->lightmap[ k ] += dv->lightmap[ k ];
 		}
@@ -684,7 +684,7 @@ static void FanFaceSurface( mapDrawSurface_t *ds ){
 		centroid->normal = verts[ 1 ].normal;
 	}
 	centroid->st *= iv;
-	for ( k = 0; k < MAX_LIGHTMAPS; k++ ){
+	for ( k = 0; k < MAX_LIGHTMAPS; ++k ){
 		centroid->lightmap[ k ] *= iv;
 		centroid->color[ k ] = color_to_byte( color[ k ] / ds->numVerts );
 	}
@@ -695,7 +695,7 @@ static void FanFaceSurface( mapDrawSurface_t *ds ){
 	/* fill indexes in triangle fan order */
 	ds->numIndexes = 0;
 	ds->indexes = safe_malloc( ds->numVerts * 3 * sizeof( int ) );
-	for ( i = 1; i < ds->numVerts; i++ )
+	for ( i = 1; i < ds->numVerts; ++i )
 	{
 		a = 0;
 		b = i;
@@ -743,7 +743,7 @@ void StripFaceSurface( mapDrawSurface_t *ds ){
 		/* ydnar: find smallest coordinate */
 		int least = 0;
 		if ( ds->shaderInfo != NULL && !ds->shaderInfo->autosprite ) {
-			for ( int i = 0; i < ds->numVerts; i++ )
+			for ( int i = 0; i < ds->numVerts; ++i )
 			{
 				/* get points */
 				const Vector3& v1 = ds->verts[ i ].xyz;
@@ -998,7 +998,7 @@ void FixMetaTJunctions(){
 
 	/* walk triangle list */
 	numTJuncs = 0;
-	for ( i = 0; i < numMetaTriangles; i++ )
+	for ( i = 0; i < numMetaTriangles; ++i )
 	{
 		/* get triangle */
 		tri = &metaTriangles[ i ];
@@ -1022,7 +1022,7 @@ void FixMetaTJunctions(){
 		CreateEdge( plane, metaVerts[ tri->indexes[ 2 ] ].xyz, metaVerts[ tri->indexes[ 0 ] ].xyz, &edges[ 2 ] );
 
 		/* walk meta vert list */
-		for ( j = 0; j < numMetaVerts; j++ )
+		for ( j = 0; j < numMetaVerts; ++j )
 		{
 			/* get vert */
 			const Vector3 pt = metaVerts[ j ].xyz;
@@ -1033,7 +1033,7 @@ void FixMetaTJunctions(){
 			}
 
 			/* skip this point if it already exists in the triangle */
-			for ( k = 0; k < 3; k++ )
+			for ( k = 0; k < 3; ++k )
 			{
 				if ( vector3_equal_epsilon( pt, metaVerts[ tri->indexes[ k ] ].xyz, TJ_POINT_EPSILON ) ) {
 					break;
@@ -1044,7 +1044,7 @@ void FixMetaTJunctions(){
 			}
 
 			/* walk edges */
-			for ( k = 0; k < 3; k++ )
+			for ( k = 0; k < 3; ++k )
 			{
 				/* ignore bogus edges */
 				if ( fabs( edges[ k ].kingpinLength ) < TJ_EDGE_EPSILON ) {
@@ -1424,7 +1424,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, const metaTriangle_t&
 		/* 2004-02-24: scale lightmap test size by 2 to catch larger brush faces */
 		/* 2004-04-11: reverting to actual lightmap size */
 		const float lmMax = ( ds->sampleSize * ( ds->shaderInfo->lmCustomWidth - 1 ) );
-		for ( i = 0; i < 3; i++ )
+		for ( i = 0; i < 3; ++i )
 		{
 			if ( ( minmax.maxs[ i ] - minmax.mins[ i ] ) > lmMax ) {
 				memcpy( ds, &old, sizeof( *ds ) );

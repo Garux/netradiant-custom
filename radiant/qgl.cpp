@@ -58,8 +58,7 @@ GLU_ERROR_STRUCT glu_errlist[] = {
 };
 
 const GLubyte* qgluErrorString( GLenum errCode ){
-	int search = 0;
-	for ( search = 0; glu_errlist[search].errstr; search++ )
+	for ( int search = 0; glu_errlist[search].errstr; ++search )
 	{
 		if ( errCode == glu_errlist[search].errnum ) {
 			return (const GLubyte *)glu_errlist[search].errstr;

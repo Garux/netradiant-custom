@@ -61,9 +61,9 @@ void DPatch::BuildInRadiant( scene::Node* entity ){
 	GlobalPatchCreator().Patch_setShader( patch, texture );
 	GlobalPatchCreator().Patch_resize( patch, height, width );
 	PatchControlMatrix matrix = GlobalPatchCreator().Patch_getControlPoints( patch );
-	for ( int x = 0; x < width; x++ )
+	for ( int x = 0; x < width; ++x )
 	{
-		for ( int y = 0; y < height; y++ )
+		for ( int y = 0; y < height; ++y )
 		{
 			PatchControl& p = matrix( x, y );
 			p.m_vertex[0] = points[x][y].xyz[0];
@@ -88,8 +88,8 @@ void DPatch::BuildInRadiant( scene::Node* entity ){
 	b->pPatch = Patch_Alloc();
 	b->pPatch->setDims( width, height );
 
-	for ( int x = 0; x < width; x++ )
-		for ( int y = 0; y < height; y++ )
+	for ( int x = 0; x < width; ++x )
+		for ( int y = 0; y < height; ++y )
 			CopyDrawVert( &points[x][y], &pm->ctrl[x][y] );
 
 /*	if( entity )
@@ -130,9 +130,9 @@ void DPatch::LoadFromPatch( scene::Instance& patch ){
 	width = static_cast<int>( matrix.x() );
 	height = static_cast<int>( matrix.y() );
 
-	for ( int x = 0; x < width; x++ )
+	for ( int x = 0; x < width; ++x )
 	{
-		for ( int y = 0; y < height; y++ )
+		for ( int y = 0; y < height; ++y )
 		{
 			PatchControl& p = matrix( x, y );
 			points[x][y].xyz[0] = p.m_vertex[0];
@@ -150,9 +150,9 @@ void DPatch::LoadFromPatch( scene::Instance& patch ){
 	width = brush->pPatch->getWidth();
 	height = brush->pPatch->getHeight();
 
-	for ( int x = 0; x < height; x++ )
+	for ( int x = 0; x < height; ++x )
 	{
-		for ( int y = 0; y < width; y++ )
+		for ( int y = 0; y < width; ++y )
 		{
 			float *p = brush->pPatch->ctrlAt( ROW, x, y );
 			p[0] = points[x][y].xyz[0];
@@ -185,7 +185,7 @@ void Build1dArray( vec3_t* array, const drawVert_t points[MAX_PATCH_WIDTH][MAX_P
 		step = 1;
 	}
 
-	for ( i = 0; i < number; i++ )
+	for ( i = 0; i < number; ++i )
 	{
 		VectorCopy( points[x][y].xyz, array[i] );
 
@@ -199,7 +199,7 @@ void Build1dArray( vec3_t* array, const drawVert_t points[MAX_PATCH_WIDTH][MAX_P
 }
 
 void Print1dArray( vec3_t* array, int size ){
-	for ( int i = 0; i < size; i++ )
+	for ( int i = 0; i < size; ++i )
 		globalOutputStream() << '(' << array[i][0] << ' ' << array[i][1] << ' ' << array[i][2] << ")\t";
 	globalOutputStream() << '\n';
 }
@@ -208,7 +208,7 @@ bool Compare1dArrays( vec3_t* a1, vec3_t* a2, int size ){
 	int i;
 	bool equal = true;
 
-	for ( i = 0; i < size; i++ )
+	for ( i = 0; i < size; ++i )
 	{
 		if ( !VectorCompare( a1[i], a2[size - i - 1] ) ) {
 			equal = false;
@@ -248,9 +248,9 @@ patch_merge_t DPatch::IsMergable( const DPatch& other ){
 	p2ArraySizes[2] = other.width;
 	p2ArraySizes[3] = other.height;
 
-	for ( i = 0; i < 4; i++ )
+	for ( i = 0; i < 4; ++i )
 	{
-		for ( j = 0; j < 4; j++ )
+		for ( j = 0; j < 4; ++j )
 		{
 			if ( p1ArraySizes[i] == p2ArraySizes[j] ) {
 				if ( Compare1dArrays( p1Array[i], p2Array[j], p1ArraySizes[i] ) ) {
@@ -297,12 +297,12 @@ DPatch* DPatch::MergePatches( patch_merge_t merge_info, DPatch& p1, DPatch& p2 )
 	newPatch->width     = p1.width;
 	newPatch->SetTexture( p1.texture );
 
-	for ( int y = 0; y < p1.height; y++ )
-		for ( int x = 0; x < p1.width; x++ )
+	for ( int y = 0; y < p1.height; ++y )
+		for ( int x = 0; x < p1.width; ++x )
 			newPatch->points[x][y] = p1.points[x][y];
 
-	for ( int y = 1; y < p2.height; y++ )
-		for ( int x = 0; x < p2.width; x++ )
+	for ( int y = 1; y < p2.height; ++y )
+		for ( int x = 0; x < p2.width; ++x )
 			newPatch->points[x][( y + p1.height - 1 )] = p2.points[x][y];
 
 //	newPatch->Invert();
@@ -312,9 +312,9 @@ DPatch* DPatch::MergePatches( patch_merge_t merge_info, DPatch& p1, DPatch& p2 )
 void DPatch::Invert(){
 	int i, j;
 
-	for ( i = 0; i < width; i++ )
+	for ( i = 0; i < width; ++i )
 	{
-		for ( j = 0; j < height / 2; j++ )
+		for ( j = 0; j < height / 2; ++j )
 		{
 			std::swap( points[i][height - 1 - j], points[i][j] );
 		}
@@ -335,9 +335,9 @@ void DPatch::Invert(){
     newPatch->width		= p1->width;
     newPatch->SetTexture( p1->texture );
 
-    for( int x = 0; x < p1->height; x++ )
+    for( int x = 0; x < p1->height; ++x )
     {
-        for( int y = 0; y < p1->width; y++ )
+        for( int y = 0; y < p1->width; ++y )
         {
             newPatch->points[x][y] = p1->points[x][y];
         }
@@ -349,9 +349,9 @@ void DPatch::Invert(){
    void DPatch::DebugPrint()
    {
     globalOutputStream() << "width: " << width << "\theight: " << height << '\n';
-    for( int x = 0; x < height; x++ )
+    for( int x = 0; x < height; ++x )
     {
-        for( int y = 0; y < width; y++ )
+        for( int y = 0; y < width; ++y )
         {
             globalOutputStream() << "\t(" << points[x][y].xyz[0] << ' ' << points[x][y].xyz[1] << ' ' << points[x][y].xyz[2] << ")\t";
         }
@@ -364,9 +364,9 @@ void DPatch::Transpose(){
 	int i, j;
 
 	if ( width > height ) {
-		for ( i = 0; i < height; i++ )
+		for ( i = 0; i < height; ++i )
 		{
-			for ( j = i + 1; j < width; j++ )
+			for ( j = i + 1; j < width; ++j )
 			{
 				if ( j < height ) {
 					// swap the value
@@ -382,9 +382,9 @@ void DPatch::Transpose(){
 	}
 	else
 	{
-		for ( i = 0; i < width; i++ )
+		for ( i = 0; i < width; ++i )
 		{
-			for ( j = i + 1; j < height; j++ )
+			for ( j = i + 1; j < height; ++j )
 			{
 				if ( j < width ) {
 					// swap the value
@@ -410,16 +410,16 @@ std::list<DPatch> DPatch::SplitCols(){
 	int x, y;
 
 	if ( height >= 5 ) {
-		for ( i = 0; i < ( height - 1 ) / 2; i++ )
+		for ( i = 0; i < ( height - 1 ) / 2; ++i )
 		{
 			DPatch p;
 
 			p.width = width;
 			p.height = MIN_PATCH_HEIGHT;
 			p.SetTexture( texture );
-			for ( x = 0; x < p.width; x++ )
+			for ( x = 0; x < p.width; ++x )
 			{
-				for ( y = 0; y < MIN_PATCH_HEIGHT; y++ )
+				for ( y = 0; y < MIN_PATCH_HEIGHT; ++y )
 				{
 					p.points[x][y] = points[x][( i * 2 ) + y];
 				}
@@ -440,7 +440,7 @@ std::list<DPatch> DPatch::SplitRows(){
 	int x, y;
 
 	if ( width >= 5 ) {
-		for ( i = 0; i < ( width - 1 ) / 2; i++ )
+		for ( i = 0; i < ( width - 1 ) / 2; ++i )
 		{
 			DPatch p;
 
@@ -448,9 +448,9 @@ std::list<DPatch> DPatch::SplitRows(){
 			p.height = height;
 			p.SetTexture( texture );
 
-			for ( x = 0; x < MIN_PATCH_WIDTH; x++ )
+			for ( x = 0; x < MIN_PATCH_WIDTH; ++x )
 			{
-				for ( y = 0; y < p.height; y++ )
+				for ( y = 0; y < p.height; ++y )
 				{
 					p.points[x][y] = points[( i * 2 ) + x][y];
 				}

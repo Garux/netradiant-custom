@@ -200,7 +200,7 @@ static void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, 
 	}
 
 	// clip the crossing line
-	for ( h = 0; h < in->height; h++ )
+	for ( h = 0; h < in->height; ++h )
 	{
 		dv = &f->verts[ h * f->width + split + 1 ];
 		v1 = &in->verts[ h * in->width + split ];
@@ -209,7 +209,7 @@ static void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, 
 		frac = d[h][split] / ( d[h][split] - d[h][split + 1] );
 
 		/* interpolate */
-		//%	for( i = 0; i < 10; i++ )
+		//%	for( i = 0; i < 10; ++i )
 		//%		dv->xyz[ i ] = v1->xyz[ i ] + frac * (v2->xyz[ i ] - v1->xyz[ i ]);
 		//%	dv->xyz[10] = 0;	// set all 4 colors to 0
 		LerpDrawVertAmount( v1, v2, frac, dv );
@@ -278,7 +278,7 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t *ds, const brush_t *b ){
 
 	/* all of outside fragments become separate drawsurfs */
 	numFogPatchFragments += numOutside;
-	for ( i = 0; i < numOutside; i++ )
+	for ( i = 0; i < numOutside; ++i )
 	{
 		/* transpose and invert the chopped patch (fixes potential crash. fixme: why?) */
 		outside[ i ] = TransposeMesh( outside[ i ] );
@@ -332,7 +332,7 @@ winding_t WindingFromDrawSurf( const mapDrawSurface_t *ds ){
 		const int max = std::min( ds->numVerts, 256 );
 		Vector3 p[256];
 
-		for ( int i = 0; i < max; i++ ) {
+		for ( int i = 0; i < max; ++i ) {
 			p[i] = ds->verts[i].xyz;
 		}
 
@@ -459,7 +459,7 @@ void FogDrawSurfaces( const entity_t& e ){
 
 		/* clip each surface into this, but don't clip any of the resulting fragments to the same brush */
 		numBaseDrawSurfs = numMapDrawSurfs;
-		for ( int i = 0; i < numBaseDrawSurfs; i++ )
+		for ( int i = 0; i < numBaseDrawSurfs; ++i )
 		{
 			/* get the drawsurface */
 			mapDrawSurface_t *ds = &mapDrawSurfs[ i ];

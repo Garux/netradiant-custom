@@ -199,7 +199,7 @@ static void bspBrush_to_buildBrush( const bspBrush_t& brush ){
 	if ( force ){
 		int notNoShader = 0;
 		modelclip = true;
-		for ( int i = 0; i < brush.numSides; i++ )
+		for ( int i = 0; i < brush.numSides; ++i )
 		{
 			/* get side */
 			const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + i ];
@@ -221,7 +221,7 @@ static void bspBrush_to_buildBrush( const bspBrush_t& brush ){
 	}
 
 	/* iterate through bsp brush sides */
-	for ( int i = 0; i < brush.numSides; i++ )
+	for ( int i = 0; i < brush.numSides; ++i )
 	{
 		/* get side */
 		const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + i ];
@@ -643,7 +643,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 
 #if 0
 /* iterate through the brush sides (ignore the first 6 bevel planes) */
-for ( i = 0; i < brush->numSides; i++ )
+for ( i = 0; i < brush->numSides; ++i )
 {
 	/* get side */
 	side = &bspBrushSides[ brush->firstSide + i ];
@@ -680,7 +680,7 @@ for ( i = 0; i < brush->numSides; i++ )
 	}
 
 	/* offset by origin */
-	for ( j = 0; j < 3; j++ )
+	for ( j = 0; j < 3; ++j )
 		VectorAdd( pts[ j ], origin, pts[ j ] );
 
 	/* print brush side */
@@ -744,13 +744,13 @@ static void ConvertPatch( FILE *f, int num, const bspDrawSurface_t& ds, const Ve
 	fprintf( f, "\t\t\t(\n" );
 
 	/* iterate through the verts */
-	for ( int x = 0; x < ds.patchWidth; x++ )
+	for ( int x = 0; x < ds.patchWidth; ++x )
 	{
 		/* start row */
 		fprintf( f, "\t\t\t\t(" );
 
 		/* iterate through the row */
-		for ( int y = 0; y < ds.patchHeight; y++ )
+		for ( int y = 0; y < ds.patchHeight; ++y )
 		{
 			/* get vert */
 			const bspDrawVert_t& dv = bspDrawVerts[ ds.firstVert + ( y * ds.patchWidth ) + x ];
@@ -785,7 +785,7 @@ static void ConvertModel( FILE *f, const bspModel_t& model, const Vector3& origi
 	}
 
 	/* go through each brush in the model */
-	for ( int i = 0; i < model.numBSPBrushes; i++ )
+	for ( int i = 0; i < model.numBSPBrushes; ++i )
 	{
 		if( fast )
 			ConvertBrushFast( f, model.firstBSPBrush + i, origin, brushPrimitives );
@@ -794,7 +794,7 @@ static void ConvertModel( FILE *f, const bspModel_t& model, const Vector3& origi
 	}
 
 	/* go through each drawsurf in the model */
-	for ( int i = 0; i < model.numBSPSurfaces; i++ )
+	for ( int i = 0; i < model.numBSPSurfaces; ++i )
 	{
 		const int num = i + model.firstBSPSurface;
 		const bspDrawSurface_t& ds = bspDrawSurfaces[ num ];

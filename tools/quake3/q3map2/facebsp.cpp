@@ -54,7 +54,7 @@ static void SelectSplitPlaneNum( const node_t *node, const facelist_t& list, int
 	/* ydnar 2002-09-21: changed blocksize to be a vector, so mappers can specify a 3 element value */
 
 	/* if it is crossing a block boundary, force a split */
-	for ( int i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; ++i )
 	{
 		if ( blockSize[ i ] <= 0 ) {
 			continue;

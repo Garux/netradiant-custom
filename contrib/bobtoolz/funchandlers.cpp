@@ -230,7 +230,7 @@ void StairBuilder( vec3_t vMin, vec3_t vMax ){
 
 
 				// Build The Steps
-				for ( int i = 0; i < numSteps; i++ )
+				for ( int i = 0; i < numSteps; ++i )
 				{
 					if ( style == STYLE_BOB ) {
 						Build_StairStep_Wedge( direction, vMin, vMax, "textures/common/caulk", (LPCTSTR)stairDlg.m_riserTexture, stairDlg.m_bDetail );

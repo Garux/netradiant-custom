@@ -167,7 +167,7 @@ static bool SnapNormal( Vector3& normal ){
 
 
 	/*
-	for ( i = 0; i < 30; i++ )
+	for ( i = 0; i < 30; ++i )
 	{
 		double x, y, z, length;
 		x = (double) 1.0;
@@ -186,7 +186,7 @@ static bool SnapNormal( Vector3& normal ){
 	Error( "vectorNormalize test completed" );
 	*/
 
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		if ( normal[i] != 0.0 && -normalEpsilon < normal[i] && normal[i] < normalEpsilon ) {
 			normal[i] = 0.0;
@@ -207,7 +207,7 @@ static bool SnapNormal( Vector3& normal ){
 
 	/*
 	   Sys_Printf( "normalEpsilon is %f\n", normalEpsilon );
-	   for ( i = 0;; i++ )
+	   for ( i = 0;; ++i )
 	   {
 	    normal[0] = 1.0;
 	    normal[1] = 0.0;
@@ -235,7 +235,7 @@ static bool SnapNormal( Vector3& normal ){
 	// We may consider adjusting the epsilon to a larger value when we make this
 	// code fix.
 
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		if ( fabs( normal[ i ] - 1 ) < normalEpsilon ) {
 			normal.set( 0 );
@@ -346,7 +346,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 	const int hash = ( PLANE_HASHES - 1 ) & (int) fabs( plane.dist() );
 
 	/* search the border bins as well */
-	for ( int i = -1; i <= 1; i++ )
+	for ( int i = -1; i <= 1; ++i )
 	{
 		const int h = ( hash + i ) & ( PLANE_HASHES - 1 );
 		for ( int pidx = planehash[ h ] - 1; pidx != -1; pidx = mapplanes[pidx].hash_chain - 1 )
@@ -363,7 +363,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 
 			/* ydnar: test supplied points against this plane */
 			int j;
-			for ( j = 0; j < numPoints; j++ )
+			for ( j = 0; j < numPoints; ++j )
 			{
 				// NOTE: When dist approaches 2^16, the resolution of 32 bit floating
 				// point number is greatly decreased.  The distanceEpsilon cannot be
@@ -399,7 +399,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 #else
 	SnapPlane( plane );
 #endif
-	for ( i = 0, p = mapplanes; i < nummapplanes; i++, p++ )
+	for ( i = 0, p = mapplanes; i < nummapplanes; ++i, ++p )
 	{
 		if ( !PlaneEqual( *p, plane ) ) {
 			continue;
@@ -409,7 +409,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 		//%	return i;
 
 		/* ydnar: test supplied points against this plane */
-		for ( j = 0; j < numPoints; j++ )
+		for ( j = 0; j < numPoints; ++j )
 		{
 			if ( fabs( plane3_distance_to_point( p->plane, points[ j ] ) ) > distanceEpsilon ) {
 				break;
@@ -571,8 +571,8 @@ void AddBrushBevels(){
 	// add the axial planes
 	//
 	size_t order = 0;
-	for ( size_t axis = 0; axis < 3; axis++ ) {
-		for ( int dir = -1; dir <= 1; dir += 2, order++ ) {
+	for ( size_t axis = 0; axis < 3; ++axis ) {
+		for ( int dir = -1; dir <= 1; dir += 2, ++order ) {
 			// see if the plane is already present
 			size_t i = 0;
 			for ( ; i < sides.size(); ++i )
@@ -658,7 +658,7 @@ void AddBrushBevels(){
 
 	// test the non-axial plane edges
 	for ( size_t i = 6; i < sides.size(); ++i ) {
-		for ( size_t j = 0; j < sides[i].winding.size(); j++ ) {
+		for ( size_t j = 0; j < sides[i].winding.size(); ++j ) {
 			Vector3 vec = sides[i].winding[j] - sides[i].winding[winding_next( sides[i].winding, j )];
 			if ( VectorNormalize( vec ) < 0.5f ) {
 				continue;
@@ -674,7 +674,7 @@ void AddBrushBevels(){
 			//%	Sys_Printf( "-------------\n" );
 
 			// try the six possible slanted axials from this edge
-			for ( int axis = 0; axis < 3; axis++ ) {
+			for ( int axis = 0; axis < 3; ++axis ) {
 				for ( int dir = -1; dir <= 1; dir += 2 ) {
 					// construct a plane
 					Vector3 vec2( 0 );
@@ -1386,7 +1386,7 @@ static void LoadEntityIndexMap( entity_t& e ){
 		/* convert to bytes */
 		const int size = w * h;
 		pixels = safe_malloc( size );
-		for ( int i = 0; i < size; i++ )
+		for ( int i = 0; i < size; ++i )
 		{
 			pixels[ i ] = ( ( pixels32[ i ] & 0xFF ) * numLayers ) / 256;
 			if ( pixels[ i ] >= numLayers ) {
@@ -1407,7 +1407,7 @@ static void LoadEntityIndexMap( entity_t& e ){
 
 		/* fix up out-of-range values */
 		const int size = w * h;
-		for ( int i = 0; i < size; i++ )
+		for ( int i = 0; i < size; ++i )
 		{
 			if ( pixels[ i ] >= numLayers ) {
 				pixels[ i ] = numLayers - 1;

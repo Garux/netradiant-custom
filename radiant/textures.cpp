@@ -136,12 +136,12 @@ byte g_gammatable[256];
 void ResampleGamma( float fGamma ){
 	int i, inf;
 	if ( fGamma == 1.0 ) {
-		for ( i = 0; i < 256; i++ )
+		for ( i = 0; i < 256; ++i )
 			g_gammatable[i] = i;
 	}
 	else
 	{
-		for ( i = 0; i < 256; i++ )
+		for ( i = 0; i < 256; ++i )
 		{
 			inf = (int)( 255 * pow( static_cast<double>( ( i + 0.5 ) / 255.5 ), static_cast<double>( fGamma ) ) + 0.5 );
 			if ( inf < 0 ) {
@@ -178,7 +178,7 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
 	// resample texture gamma according to user settings
 	for ( int i = 0; i < ( nCount * 4 ); i += 4 )
 	{
-		for ( int j = 0; j < 3; j++ )
+		for ( int j = 0; j < 3; ++j )
 		{
 			total[j] += ( pPixels + i )[j];
 			byte b = ( pPixels + i )[j];
@@ -278,12 +278,12 @@ void Texture_InitPalette( byte *pal ){
 	gamma = g_texture_globals.fGamma;
 
 	if ( gamma == 1.0 ) {
-		for ( i = 0; i < 256; i++ )
+		for ( i = 0; i < 256; ++i )
 			gammatable[i] = i;
 	}
 	else
 	{
-		for ( i = 0; i < 256; i++ )
+		for ( i = 0; i < 256; ++i )
 		{
 			inf = (int)( 255 * pow( ( i + 0.5 ) / 255.5, gamma ) + 0.5 );
 			if ( inf < 0 ) {
@@ -296,7 +296,7 @@ void Texture_InitPalette( byte *pal ){
 		}
 	}
 
-	for ( i = 0; i < 256; i++ )
+	for ( i = 0; i < 256; ++i )
 	{
 		r = gammatable[pal[0]];
 		g = gammatable[pal[1]];

@@ -305,12 +305,12 @@ static void DDSDecodeColorBlock( unsigned int *pixel, ddsColorBlock_t *block, in
 
 
 	/* r steps through lines in y */
-	for ( r = 0; r < 4; r++, pixel += ( width - 4 ) )  /* no width * 4 as unsigned int ptr inc will * 4 */
+	for ( r = 0; r < 4; ++r, pixel += ( width - 4 ) )  /* no width * 4 as unsigned int ptr inc will * 4 */
 	{
 		/* width * 4 bytes per pixel per line, each j dxtc row is 4 lines of pixels */
 
 		/* n steps through pixels */
-		for ( n = 0; n < 4; n++ )
+		for ( n = 0; n < 4; ++n )
 		{
 			bits = block->row[ r ] & masks[ n ];
 			bits >>= shift[ n ];
@@ -365,12 +365,12 @@ static void DDSDecodeAlphaExplicit( unsigned int *pixel, ddsAlphaBlockExplicit_t
 	color.b = 0;
 
 	/* walk rows */
-	for ( row = 0; row < 4; row++, pixel += ( width - 4 ) )
+	for ( row = 0; row < 4; ++row, pixel += ( width - 4 ) )
 	{
 		word = DDSLittleShort( alphaBlock->row[ row ] );
 
 		/* walk pixels */
-		for ( pix = 0; pix < 4; pix++ )
+		for ( pix = 0; pix < 4; ++pix )
 		{
 			/* zero the alpha bits of image pixel */
 			*pixel &= alphaZero;
@@ -468,9 +468,9 @@ static void DDSDecodeAlpha3BitLinear( unsigned int *pixel, ddsAlphaBlock3BitLine
 	bits[ 3 ][ 3 ] = (unsigned char) ( stuff & 0x00000007 );
 
 	/* decode the codes into alpha values */
-	for ( row = 0; row < 4; row++ )
+	for ( row = 0; row < 4; ++row )
 	{
-		for ( pix = 0; pix < 4; pix++ )
+		for ( pix = 0; pix < 4; ++pix )
 		{
 			aColors[ row ][ pix ].r = 0;
 			aColors[ row ][ pix ].g = 0;
@@ -480,9 +480,9 @@ static void DDSDecodeAlpha3BitLinear( unsigned int *pixel, ddsAlphaBlock3BitLine
 	}
 
 	/* write out alpha values to the image bits */
-	for ( row = 0; row < 4; row++, pixel += width - 4 )
+	for ( row = 0; row < 4; ++row, pixel += width - 4 )
 	{
-		for ( pix = 0; pix < 4; pix++ )
+		for ( pix = 0; pix < 4; ++pix )
 		{
 			/* zero the alpha bits of image pixel */
 			*pixel &= alphaZero;
@@ -513,13 +513,13 @@ static int DDSDecompressDXT1( ddsBuffer_t *dds, int width, int height, unsigned 
 	yBlocks = height / 4;
 
 	/* walk y */
-	for ( y = 0; y < yBlocks; y++ )
+	for ( y = 0; y < yBlocks; ++y )
 	{
 		/* 8 bytes per block */
 		block = (ddsColorBlock_t*) ( (char *) dds->data + y * xBlocks * 8 );
 
 		/* walk x */
-		for ( x = 0; x < xBlocks; x++, block++ )
+		for ( x = 0; x < xBlocks; ++x, ++block )
 		{
 			DDSGetColorBlockColors( block, colors );
 			pixel = (unsigned int*) ( pixels + x * 16 + ( y * 4 ) * width * 4 );
@@ -558,13 +558,13 @@ static int DDSDecompressDXT3( ddsBuffer_t *dds, int width, int height, unsigned 
 	alphaZero = *( (unsigned int*) &colors[ 0 ] );
 
 	/* walk y */
-	for ( y = 0; y < yBlocks; y++ )
+	for ( y = 0; y < yBlocks; ++y )
 	{
 		/* 8 bytes per block, 1 block for alpha, 1 block for color */
 		block = (ddsColorBlock_t*) ( (char *) dds->data + y * xBlocks * 16 );
 
 		/* walk x */
-		for ( x = 0; x < xBlocks; x++, block++ )
+		for ( x = 0; x < xBlocks; ++x, ++block )
 		{
 			/* get alpha block */
 			alphaBlock = (ddsAlphaBlockExplicit_t*) block;
@@ -613,13 +613,13 @@ static int DDSDecompressDXT5( ddsBuffer_t *dds, int width, int height, unsigned 
 	alphaZero = *( (unsigned int*) &colors[ 0 ] );
 
 	/* walk y */
-	for ( y = 0; y < yBlocks; y++ )
+	for ( y = 0; y < yBlocks; ++y )
 	{
 		/* 8 bytes per block, 1 block for alpha, 1 block for color */
 		block = (ddsColorBlock_t*) ( (char *) dds->data + y * xBlocks * 16 );
 
 		/* walk x */
-		for ( x = 0; x < xBlocks; x++, block++ )
+		for ( x = 0; x < xBlocks; ++x, ++block )
 		{
 			/* get alpha block */
 			alphaBlock = (ddsAlphaBlock3BitLinear_t*) block;
@@ -694,10 +694,10 @@ static int DDSDecompressARGB8888( ddsBuffer_t *dds, int width, int height, unsig
 	out = pixels;
 
 	/* walk y */
-	for ( y = 0; y < height; y++ )
+	for ( y = 0; y < height; ++y )
 	{
 		/* walk x */
-		for ( x = 0; x < width; x++ )
+		for ( x = 0; x < width; ++x )
 		{
 			*out++ = *in++;
 			*out++ = *in++;

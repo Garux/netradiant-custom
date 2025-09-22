@@ -423,7 +423,7 @@ void AddPointToBounds( const Vector3& v, Vector3& mins, Vector3& maxs ){
 	int i;
 	float val;
 
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		val = v[i];
 		if ( val < mins[i] ) {
@@ -558,7 +558,7 @@ void EmitBrushPrimitTextureCoordinates( face_t * f, Winding * w ){
 		ConvertTexMatWithQTexture( &f->brushprimit_texdef, 0, &f->brushprimit_texdef, f->pShader->getTexture() );
 	}
 	int i;
-	for ( i = 0; i < w.numpoints; i++ )
+	for ( i = 0; i < w.numpoints; ++i )
 	{
 		x = vector3_dot( w.point_at( i ),texX );
 		y = vector3_dot( w.point_at( i ),texY );
@@ -836,14 +836,14 @@ void TextureLockTransformation_BrushPrimit( face_t *f ){
 	}
 	else
 	{
-		for ( j = 0; j < 3; j++ )
+		for ( j = 0; j < 3; ++j )
 			rOrig[j] = vector3_dot( vector3_subtracted( Orig, txl_origin ), txl_matrix[j] ) + txl_origin[j];
-		for ( j = 0; j < 3; j++ )
+		for ( j = 0; j < 3; ++j )
 			rvecS[j] = vector3_dot( vector3_subtracted( texS, txl_origin ), txl_matrix[j] ) + txl_origin[j];
-		for ( j = 0; j < 3; j++ )
+		for ( j = 0; j < 3; ++j )
 			rvecT[j] = vector3_dot( vector3_subtracted( texT, txl_origin ), txl_matrix[j] ) + txl_origin[j];
 		// we also need the axis base of the target plane, apply the transformation matrix to the normal too..
-		for ( j = 0; j < 3; j++ )
+		for ( j = 0; j < 3; ++j )
 			rNormal[j] = vector3_dot( f->plane.normal, txl_matrix[j] );
 	}
 
@@ -985,7 +985,7 @@ void ShiftTextureRelative_Camera( face_t *f, int x, int y ){
 	Vector3 C;
 	VectorClear( C );
 	int i;
-	for ( i = 0; i < f->face_winding->numpoints; i++ )
+	for ( i = 0; i < f->face_winding->numpoints; ++i )
 	{
 		VectorAdd( C,f->face_winding->point_at( i ),C );
 	}

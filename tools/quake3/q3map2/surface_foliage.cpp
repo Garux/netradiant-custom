@@ -79,7 +79,7 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 		float maxDist = 0.0f;
 		fi->xyz.set( 0 );
 		fi->normal.set( 0 );
-		for ( int i = 0; i < 3; i++ )
+		for ( int i = 0; i < 3; ++i )
 		{
 			const float dist = vector3_length_squared( tri[ i ]->xyz - tri[ ( i + 1 ) % 3 ]->xyz );
 
@@ -204,9 +204,9 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 			const bspDrawVert_t *verts = mesh->verts;
 
 			/* map the mesh quads */
-			for ( int y = 0; y < ( mesh->height - 1 ); y++ )
+			for ( int y = 0; y < ( mesh->height - 1 ); ++y )
 			{
-				for ( int x = 0; x < ( mesh->width - 1 ); x++ )
+				for ( int x = 0; x < ( mesh->width - 1 ); ++x )
 				{
 					/* set indexes */
 					const int pw[ 5 ] = {
@@ -254,7 +254,7 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 		InsertModel( foliage.model.c_str(), NULL, 0, matrix4_scale_for_vec3( Vector3( foliage.scale ) ), NULL, NULL, entity, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, clipDepthGlobal );
 
 		/* walk each new surface */
-		for ( int i = oldNumMapDrawSurfs; i < numMapDrawSurfs; i++ )
+		for ( int i = oldNumMapDrawSurfs; i < numMapDrawSurfs; ++i )
 		{
 			/* get surface */
 			mapDrawSurface_t& ds = mapDrawSurfs[ i ];
@@ -277,7 +277,7 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 			ds.verts = verts;
 
 			/* copy the verts */
-			for ( int j = 0; j < ds.numFoliageInstances; j++ )
+			for ( int j = 0; j < ds.numFoliageInstances; ++j )
 			{
 				/* get vert (foliage instance) */
 				bspDrawVert_t& fi = ds.verts[ ds.numVerts + j ];

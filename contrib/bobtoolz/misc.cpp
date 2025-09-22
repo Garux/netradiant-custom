@@ -124,7 +124,7 @@ char* TranslateString( char *buf ){
 
 	std::size_t l = strlen( buf );
 	char* out = buf2;
-	for ( std::size_t i = 0; i < l; i++ )
+	for ( std::size_t i = 0; i < l; ++i )
 	{
 		if ( buf[i] == '\n' ) {
 			*out++ = '\r';
@@ -144,7 +144,7 @@ char* UnixToDosPath( char* path ){
 #ifndef WIN32
 	return path;
 #else
-	for ( char* p = path; *p; p++ )
+	for ( char* p = path; *p; ++p )
 	{
 		if ( *p == '/' ) {
 			*p = '\\';

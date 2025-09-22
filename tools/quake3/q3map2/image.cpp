@@ -211,7 +211,7 @@ static void LoadPNGBuffer( byte *buffer, int size, byte **pixels, int *width, in
 
 	/* create row pointers */
 	rowPointers = safe_malloc( h * sizeof( byte* ) );
-	for ( i = 0; i < h; i++ )
+	for ( i = 0; i < h; ++i )
 		rowPointers[ i ] = *pixels + ( i * w * 4 );
 
 	/* read the png */

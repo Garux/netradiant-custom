@@ -160,13 +160,11 @@ ERROR_STRUCT errlist[] = {
 
 
 const char *WINS_ErrorMessage( int error ){
-	int search = 0;
-
 	if ( !error ) {
 		return "No error occurred";
 	}
 
-	for ( search = 0; errlist[search].errstr; search++ ) {
+	for ( int search = 0; errlist[search].errstr; ++search ) {
 		if ( error == errlist[search].errnum ) {
 			return errlist[search].errstr;
 		}
@@ -208,14 +206,14 @@ bool WINS_Init( void ){
 
 	{
 		// see if it's a text IP address (well, close enough)
-		for ( p = buff; *p; p++ )
+		for ( p = buff; *p; ++p )
 			if ( ( *p < '0' || *p > '9' ) && *p != '.' ) {
 				break;
 			}
 
 		// if it is a real name, strip off the domain; we only want the host
 		if ( *p ) {
-			for ( i = 0; i < 15; i++ )
+			for ( i = 0; i < 15; ++i )
 				if ( buff[i] == '.' ) {
 					break;
 				}

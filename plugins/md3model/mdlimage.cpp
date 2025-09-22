@@ -50,12 +50,12 @@ void Texture_InitPalette( byte *pal ){
 	gamma = 1.0; //g_qeglobals.d_savedinfo.fGamma;
 
 	if ( gamma == 1.0 ) {
-		for ( i = 0; i < 256; i++ )
+		for ( i = 0; i < 256; ++i )
 			gammatable[i] = i;
 	}
 	else
 	{
-		for ( i = 0; i < 256; i++ )
+		for ( i = 0; i < 256; ++i )
 		{
 			inf = (int)( 255 * pow( ( i + 0.5 ) / 255.5, gamma ) + 0.5 );
 			if ( inf < 0 ) {
@@ -68,7 +68,7 @@ void Texture_InitPalette( byte *pal ){
 		}
 	}
 
-	for ( i = 0; i < 256; i++ )
+	for ( i = 0; i < 256; ++i )
 	{
 		r = gammatable[pal[0]];
 		g = gammatable[pal[1]];
@@ -131,9 +131,9 @@ Image* LoadMDLImageBuff( byte* buffer ){
 	auto *image = new RGBAImage( skinwidth, skinheight );
 	unsigned char* pRGBA = image->getRGBAPixels();
 
-	for ( int i = 0; i < ( skinheight ); i++ )
+	for ( int i = 0; i < ( skinheight ); ++i )
 	{
-		for ( int j = 0; j < ( skinwidth ); j++ )
+		for ( int j = 0; j < ( skinwidth ); ++j )
 		{
 			byte index = istream_read_byte( inputStream );
 			*pRGBA++ = mdl_palette[index * 3 + 0];

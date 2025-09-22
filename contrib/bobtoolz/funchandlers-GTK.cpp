@@ -326,7 +326,7 @@ void DoBuildStairs(){
 
 
 				// Build The Steps
-				for ( int i = 0; i < numSteps; i++ )
+				for ( int i = 0; i < numSteps; ++i )
 				{
 					if ( rs.style == STYLE_BOB ) {
 						Build_StairStep_Wedge( rs.direction, vMin, vMax, rs.mainTexture, rs.riserTexture, rs.bUseDetail );
@@ -716,7 +716,7 @@ void DoFlipTerrain() {
 	brushes[0] = &GlobalSelectionSystem().ultimateSelected();
 	brushes[1] = &GlobalSelectionSystem().penultimateSelected();
 	//ensure we have only Brushes selected.
-	for ( i = 0; i < 2; i++ )
+	for ( i = 0; i < 2; ++i )
 	{
 		if ( !Node_isBrush( brushes[i]->path().top() ) ) {
 			//DoMessageBox( "No brushes selected, select ONLY brushes", "Error", EMessageBoxType::Error );
@@ -727,7 +727,7 @@ void DoFlipTerrain() {
 	DBrush Brushes[2];
 	DPlane* Planes[2];
 	pntTripple Points[2];
-	for ( i = 0; i < 2; i++ ) {
+	for ( i = 0; i < 2; ++i ) {
 		Brushes[i].LoadFromBrush( *brushes[i], false );
 		if ( !( Planes[i] = Brushes[i].FindPlaneWithClosestNormal( vUp ) ) || Brushes[i].FindPointsForPlane( Planes[i], Points[i], 3 ) != 3 ) {
 			//DoMessageBox( "Error", "Error", EMessageBoxType::Error );
@@ -744,8 +744,8 @@ void DoFlipTerrain() {
 
 	int dontmatch[2] = { -1, -1 };
 	bool found = false;
-	for ( i = 0; i < 3; i++ ) {
-		for ( int j = 0; j < 3 && !found; j++ ) {
+	for ( i = 0; i < 3; ++i ) {
+		for ( int j = 0; j < 3 && !found; ++j ) {
 			if ( VectorCompare( ( Points[0] )[i]->_pnt, ( Points[1] )[j]->_pnt ) ) {
 				found = true;
 				break;
@@ -763,8 +763,8 @@ void DoFlipTerrain() {
 		return;
 	}
 
-	for ( i = 0; i < 3; i++ ) {
-		for ( int j = 0; j < 3 && !found; j++ ) {
+	for ( i = 0; i < 3; ++i ) {
+		for ( int j = 0; j < 3 && !found; ++j ) {
 			if ( VectorCompare( ( Points[1] )[i]->_pnt, ( Points[0] )[j]->_pnt ) ) {
 				found = true;
 				break;
@@ -787,7 +787,7 @@ void DoFlipTerrain() {
 	vec3_t plnpntsshr[3];
 
 	VectorCopy( ( Points[0] )[dontmatch[0]]->_pnt, plnpnts1[0] );
-	for ( i = 0; i < 3; i++ ) {
+	for ( i = 0; i < 3; ++i ) {
 		if ( dontmatch[0] != i ) {
 			VectorCopy( ( Points[0] )[i]->_pnt, plnpnts1[1] );
 			break;
@@ -796,7 +796,7 @@ void DoFlipTerrain() {
 	VectorCopy( ( Points[1] )[dontmatch[1]]->_pnt, plnpnts1[2] );
 
 	VectorCopy( ( Points[1] )[dontmatch[1]]->_pnt, plnpnts2[0] );
-	for ( i = 0; i < 3; i++ ) {
+	for ( i = 0; i < 3; ++i ) {
 		if ( dontmatch[1] != i && !VectorCompare( ( Points[1] )[i]->_pnt, plnpnts1[1] ) ) {
 			VectorCopy( ( Points[1] )[i]->_pnt, plnpnts2[1] );
 			break;
@@ -814,7 +814,7 @@ void DoFlipTerrain() {
 	}
 	plnpntsshr[2][2] -= 16;
 
-	for ( i = 0; i < 3; i++ ) {
+	for ( i = 0; i < 3; ++i ) {
 		if ( mins2[i] < mins1[i] ) {
 			mins1[i] = mins2[i];
 		}
@@ -863,7 +863,7 @@ void DoFlipTerrain() {
 		newBrushes[1]->AddFace( plnpntsshr[2], plnpntsshr[1], plnpntsshr[0], "textures/common/caulk", true );
 	}
 
-	for ( i = 0; i < 2; i++ ) {
+	for ( i = 0; i < 2; ++i ) {
 		newBrushes[i]->RemoveRedundantPlanes();
 		newBrushes[i]->BuildInRadiant( false, NULL, brushes[i]->path().parent().get_pointer() );
 		Path_deleteTop( brushes[i]->path() );

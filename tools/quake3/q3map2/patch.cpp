@@ -71,7 +71,7 @@ static void ExpandLongestCurve( float *longestCurve, const Vector3& a, const Vec
 
 	/* determine length */
 	last = a;
-	for ( i = 0, len = 0.0f, t = 0.0f; i < APPROX_SUBDIVISION; i++, t += ( 1.0f / APPROX_SUBDIVISION ) )
+	for ( i = 0, len = 0.0f, t = 0.0f; i < APPROX_SUBDIVISION; ++i, t += ( 1.0f / APPROX_SUBDIVISION ) )
 	{
 		/* calculate delta */
 		delta = ab * ( 1.0f - t ) + bc * t;
@@ -136,7 +136,7 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, const Vector3
 		mid = ( prev + next ) * 0.5f;
 
 		/* push points out */
-		for ( j = numPoints - 1; j > i + 3; j-- )
+		for ( j = numPoints - 1; j > i + 3; --j )
 			points[ j ] = points[ j - 2 ];
 
 		/* insert new points */
@@ -157,7 +157,7 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, const Vector3
 	}
 
 	/* eliminate linear sections */
-	for ( i = 0; i + 2 < numPoints; i++ )
+	for ( i = 0; i + 2 < numPoints; ++i )
 	{
 		/* create vectors */
 		Vector3 delta = points[ i + 1 ] - points[ i ];
@@ -167,7 +167,7 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, const Vector3
 
 		/* if either edge is degenerate, then eliminate it */
 		if ( len < 0.0625f || len2 < 0.0625f || vector3_dot( delta, delta2 ) >= 1.0f ) {
-			for ( j = i + 1; j + 1 < numPoints; j++ )
+			for ( j = i + 1; j + 1 < numPoints; ++j )
 				points[ j ] = points[ j + 1 ];
 			numPoints--;
 			continue;

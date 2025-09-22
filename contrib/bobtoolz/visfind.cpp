@@ -145,7 +145,7 @@ void bsp_bitvectorsubtract( byte *first, byte *second, byte *out, int length ){
 
 	int i;
 
-	for ( i = 0; i < length; i++ )
+	for ( i = 0; i < length; ++i )
 		*( out + i ) = *( first + i ) & ~( *( second + i ) );
 }
 
@@ -153,8 +153,8 @@ int bsp_countclusters( byte *bitvector, int length ){
 	int i, j, c;
 
 	c = 0;
-	for ( i = 0; i < length; i++ )
-		for ( j = 0; j < 8; j++ )
+	for ( i = 0; i < length; ++i )
+		for ( j = 0; j < 8; ++j )
 			if ( ( *( bitvector + i ) & ( 1 << j ) ) ) {
 				c++;
 			}
@@ -165,8 +165,8 @@ int bsp_countclusters_mask( byte *bitvector, byte *maskvector, int length ){
 	int i, j, c;
 
 	c = 0;
-	for ( i = 0; i < length; i++ )
-		for ( j = 0; j < 8; j++ )
+	for ( i = 0; i < length; ++i )
+		for ( j = 0; j < 8; ++j )
 			if ( ( *( bitvector + i ) & ( 1 << j ) ) && ( *( maskvector + i ) & ( 1 << j ) ) ) {
 				c++;
 			}

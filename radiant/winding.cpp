@@ -128,7 +128,7 @@ void Winding_createInfinite( FixedWinding& winding, const Plane3& plane, double 
 #if 0
 	double max = -infinity;
 	int x = -1;
-	for ( int i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; ++i )
 	{
 		double d = fabs( plane.normal()[i] );
 		if ( d > max ) {

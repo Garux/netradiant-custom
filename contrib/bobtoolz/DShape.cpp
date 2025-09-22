@@ -59,7 +59,7 @@ void DShape::BuildRegularPrism( vec3_t min, vec3_t max, int nSides, bool bAlignT
 	//----- Build Polygon Vertices -----
 
 	int i;
-	for ( i = 0; i < nSides; i++ )
+	for ( i = 0; i < nSides; ++i )
 	{
 		VectorCopy( origin, vc[i] );
 		VectorCopy( origin, vd[i] );
@@ -83,7 +83,7 @@ void DShape::BuildRegularPrism( vec3_t min, vec3_t max, int nSides, bool bAlignT
 
 	DBrush* pB = m_Container.GetWorldSpawn()->NewBrush();
 
-	for ( i = 1; i <= nSides; i++ )
+	for ( i = 1; i <= nSides; ++i )
 		pB->AddFace( vc[i - 1], vc[i], vd[i], GetCurrentTexture(), false );
 
 	pB->AddFace( vc[2], vc[1], vc[0], "textures/common/caulk", false );
@@ -116,7 +116,7 @@ void DShape::BuildInversePrism( vec3_t min, vec3_t max, int nSides, bool bAlignT
 	//----- Build Polygon Vertices -----
 
 	int i;
-	for ( i = 0; i < nSides; i++ )
+	for ( i = 0; i < nSides; ++i )
 	{
 		VectorCopy( origin, va[i] );
 		VectorCopy( origin, vb[i] );
@@ -136,7 +136,7 @@ void DShape::BuildInversePrism( vec3_t min, vec3_t max, int nSides, bool bAlignT
 
 	//----------------------------------
 
-	for ( i = 1; i <= nSides; i++ )
+	for ( i = 1; i <= nSides; ++i )
 	{
 		DBrush* pB = GetBoundingCube( min, max, "textures/common/caulk" );
 
@@ -192,7 +192,7 @@ void DShape::BuildBorderedPrism( vec3_t min, vec3_t max, int nSides, int nBorder
 	//----- Build Polygon Vertices -----
 
 	int i;
-	for ( i = 0; i < nSides; i++ )
+	for ( i = 0; i < nSides; ++i )
 	{
 		VectorCopy( origin, va[i] );
 		VectorCopy( origin, vb[i] );
@@ -232,7 +232,7 @@ void DShape::BuildBorderedPrism( vec3_t min, vec3_t max, int nSides, int nBorder
 
 	//----------------------------------
 
-	for ( i = 1; i <= nSides; i++ )
+	for ( i = 1; i <= nSides; ++i )
 	{
 		DBrush* pB = GetBoundingCube( min, max, "textures/common/caulk" );
 

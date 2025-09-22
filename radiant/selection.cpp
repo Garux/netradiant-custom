@@ -739,7 +739,7 @@ public:
 		    start[2] == 0 ? 1 : 1 + delta[2] / start[2]
 		);
 		/* try bbox way */
-		for( std::size_t i = 0; i < 3; i++ ){
+		for( std::size_t i = 0; i < 3; ++i ){
 			if( m_chosen_extent[i] > 0.0625f && m_axis[i] != 0.f ){ //epsilon to prevent super high scale for set of models, having really small extent, formed by origins
 				scale[i] = ( m_chosen_extent[i] + delta[i] ) / m_chosen_extent[i];
 				if( g_modifiers.ctrl() ){ // snap bbox dimension size to grid
@@ -749,7 +749,7 @@ public:
 			}
 		}
 		if( g_modifiers.shift() ){ // scale all axes equally
-			for( std::size_t i = 0; i < 3; i++ ){
+			for( std::size_t i = 0; i < 3; ++i ){
 				if( m_axis[i] == 0.f ){
 					scale[i] = vector3_dot( scale, vector3_scaled( m_axis, m_axis ) );
 				}
@@ -816,7 +816,7 @@ public:
 		);
 
 		//globalOutputStream() << "m_start: " << m_start << "   start: " << start << "   delta: " << delta << '\n';
-		for( std::size_t i = 0; i < 3; i++ ){
+		for( std::size_t i = 0; i < 3; ++i ){
 			if( m_chosen_extent[i] > 0.0625f && start[i] != 0.f ){
 				scale[i] = ( m_chosen_extent[i] + delta[i] ) / m_chosen_extent[i];
 				if( g_modifiers.ctrl() ){ // snap bbox dimension size to grid
@@ -828,13 +828,13 @@ public:
 		//globalOutputStream() << "pre snap scale: " << scale << '\n';
 		if( g_modifiers.shift() ){ // snap 2 axes equally
 			float bestscale = ignore_axis != 0 ? scale[0] : scale[1];
-			for( std::size_t i = ignore_axis != 0 ? 1 : 2; i < 3; i++ ){
+			for( std::size_t i = ignore_axis != 0 ? 1 : 2; i < 3; ++i ){
 				if( ignore_axis != i && fabs( scale[i] ) < fabs( bestscale ) ){
 					bestscale = scale[i];
 				}
 				//globalOutputStream() << "bestscale: " << bestscale << '\n';
 			}
-			for( std::size_t i = 0; i < 3; i++ ){
+			for( std::size_t i = 0; i < 3; ++i ){
 				if( ignore_axis != i ){
 					scale[i] = ( scale[i] < 0.f ) ? -fabs( bestscale ) : fabs( bestscale );
 				}
@@ -8134,7 +8134,7 @@ void RadiantSelectionSystem::setCustomTransformOrigin( const Vector3& origin, co
 	if ( !nothingSelected() && transformOrigin_isTranslatable() ) {
 
 		//globalOutputStream() << origin << '\n';
-		for( std::size_t i = 0; i < 3; i++ ){
+		for( std::size_t i = 0; i < 3; ++i ){
 			float value = origin[i];
 			if( set[i] ){
 				float bestsnapDist = fabs( m_bounds.origin[i] - value );

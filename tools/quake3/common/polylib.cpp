@@ -58,7 +58,7 @@ winding_t   AllocWinding( int points ){
 void    RemoveColinearPoints( winding_t& w ){
 	winding_t p = AllocWinding( w.size() );
 
-	for ( size_t i = 0; i < w.size(); i++ )
+	for ( size_t i = 0; i < w.size(); ++i )
 	{
 		const size_t j = winding_next( w, i );
 		const size_t k = winding_next( w, j );
@@ -91,7 +91,7 @@ Plane3f WindingPlane( const winding_t& w ){
 float   WindingArea( const winding_t& w ){
 	float total = 0;
 
-	for ( size_t i = 2; i < w.size(); i++ )
+	for ( size_t i = 2; i < w.size(); ++i )
 	{
 		total += 0.5 * vector3_length( vector3_cross( w[i - 1] - w[0], w[i] - w[0] ) );
 	}
@@ -148,7 +148,7 @@ winding_accu_t BaseWindingForPlaneAccu( const Plane3& plane ){
 	max = 0.56; // 1 / sqrt( 1^2 + 1^2 + 1^2 ) = 0.577350269
 
 	x = -1;
-	for ( i = 0; i < 3; i++ ) {
+	for ( i = 0; i < 3; ++i ) {
 		v = fabs( plane.normal()[i] );
 		if ( v > max ) {
 			x = i;
@@ -319,7 +319,7 @@ std::pair<winding_t, winding_t>    ClipWindingEpsilonStrict( const winding_t& in
 	int counts[3] = { 0 };
 
 // determine sides for each point
-	for ( size_t i = 0; i < in.size(); i++ )
+	for ( size_t i = 0; i < in.size(); ++i )
 	{
 
 		dists[i] = plane3_distance_to_point( plane, in[i] );
@@ -354,7 +354,7 @@ std::pair<winding_t, winding_t>    ClipWindingEpsilonStrict( const winding_t& in
 	winding_t front = AllocWinding( maxpts );
 	winding_t back = AllocWinding( maxpts );
 
-	for ( size_t i = 0; i < in.size(); i++ )
+	for ( size_t i = 0; i < in.size(); ++i )
 	{
 		const Vector3& p1 = in[i];
 
@@ -379,7 +379,7 @@ std::pair<winding_t, winding_t>    ClipWindingEpsilonStrict( const winding_t& in
 		const Vector3& p2 = in[winding_next( in, i )];
 		const double dot = dists[i] / ( dists[i] - dists[i + 1] );
 		Vector3 mid;
-		for ( size_t j = 0; j < 3; j++ )
+		for ( size_t j = 0; j < 3; ++j )
 		{	// avoid round off error when possible
 			if ( plane.normal()[j] == 1 ) {
 				mid[j] = plane.dist();
@@ -464,7 +464,7 @@ void ChopWindingInPlaceAccu( winding_accu_t& inout, const Plane3& plane, float c
 	static const double smallestEpsilonAllowed = ( (double) VEC_SMALLEST_EPSILON_AROUND_ONE ) * 0.5;
 	const double fineEpsilon = std::max( smallestEpsilonAllowed, (double) crudeEpsilon );
 
-	for ( size_t i = 0; i < inout.size(); i++ )
+	for ( size_t i = 0; i < inout.size(); ++i )
 	{
 		dists[i] = plane3_distance_to_point( plane, inout[i] );
 		if ( dists[i] > fineEpsilon ) {
@@ -498,7 +498,7 @@ void ChopWindingInPlaceAccu( winding_accu_t& inout, const Plane3& plane, float c
 	winding_accu_t f;
 	f.reserve( counts[eSideFront] + 2 );
 
-	for ( size_t i = 0; i < inout.size(); i++ )
+	for ( size_t i = 0; i < inout.size(); ++i )
 	{
 		const DoubleVector3& p1 = inout[i];
 
@@ -522,7 +522,7 @@ void ChopWindingInPlaceAccu( winding_accu_t& inout, const Plane3& plane, float c
 		// w is in the range (0,1).
 		const double w = dists[i] / ( dists[i] - dists[i + 1] );
 		DoubleVector3 mid;
-		for ( size_t j = 0; j < 3; j++ )
+		for ( size_t j = 0; j < 3; ++j )
 		{
 			// Avoid round-off error when possible.  Check axis-aligned normal.
 			if ( plane.normal()[j] == 1 ) {
@@ -556,7 +556,7 @@ void ChopWindingInPlace( winding_t& inout, const Plane3f& plane, float epsilon )
 	int counts[3] = { 0 };
 
 // determine sides for each point
-	for ( size_t i = 0; i < in.size(); i++ )
+	for ( size_t i = 0; i < in.size(); ++i )
 	{
 		dists[i] = plane3_distance_to_point( plane, in[i] );
 		if ( dists[i] > epsilon ) {
@@ -585,7 +585,7 @@ void ChopWindingInPlace( winding_t& inout, const Plane3f& plane, float epsilon )
 
 	winding_t f = AllocWinding( in.size() + 4 ); // cant use counts[0]+2 because of fp grouping errors
 
-	for ( size_t i = 0; i < in.size(); i++ )
+	for ( size_t i = 0; i < in.size(); ++i )
 	{
 		const Vector3& p1 = in[i];
 
@@ -607,7 +607,7 @@ void ChopWindingInPlace( winding_t& inout, const Plane3f& plane, float epsilon )
 
 		const double dot = dists[i] / ( dists[i] - dists[i + 1] );
 		Vector3 mid;
-		for ( size_t j = 0; j < 3; j++ )
+		for ( size_t j = 0; j < 3; ++j )
 		{	// avoid round off error when possible
 			if ( plane.normal()[j] == 1 ) {
 				mid[j] = plane.dist();
@@ -757,12 +757,12 @@ void    AddWindingToConvexHull( const winding_t& w, winding_t& hull, const Vecto
 			return id >= numHullPoints? id - numHullPoints : id;
 		};
 		// calculate hull side vectors
-		for ( j = 0; j < numHullPoints; j++ ) {
+		for ( j = 0; j < numHullPoints; ++j ) {
 			hullDirs[j] = vector3_cross( normal, VectorNormalized( hullPoints[wrap( j + 1 )] - hullPoints[j] ) );
 		}
 
 		outside = false;
-		for ( j = 0; j < numHullPoints; j++ ) {
+		for ( j = 0; j < numHullPoints; ++j ) {
 			const double d = vector3_dot( p - hullPoints[j], hullDirs[j] );
 			if ( d >= ON_EPSILON ) {
 				outside = true;
@@ -776,7 +776,7 @@ void    AddWindingToConvexHull( const winding_t& w, winding_t& hull, const Vecto
 		}
 
 		// find the back side to front side transition
-		for ( j = 0; j < numHullPoints; j++ ) {
+		for ( j = 0; j < numHullPoints; ++j ) {
 			if ( !hullSide[ j ] && hullSide[ wrap( j + 1 ) ] ) {
 				break;
 			}
@@ -791,7 +791,7 @@ void    AddWindingToConvexHull( const winding_t& w, winding_t& hull, const Vecto
 
 		// copy over all points that aren't double fronts
 		j = wrap( j + 1 );
-		for ( k = 0; k < numHullPoints; k++ ) {
+		for ( k = 0; k < numHullPoints; ++k ) {
 			if ( hullSide[ wrap( j + k ) ] && hullSide[ wrap( j + k + 1 ) ] ) {
 				continue;
 			}

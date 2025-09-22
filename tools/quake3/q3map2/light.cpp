@@ -550,7 +550,7 @@ static void CreateEntityLights(){
 		}
 
 		/* jitter the light */
-		for ( int j = 1; j < numSamples; j++ )
+		for ( int j = 1; j < numSamples; ++j )
 		{
 			/* create a light */
 			light_t& light2 = lights.emplace_front( light );
@@ -588,7 +588,7 @@ static void CreateSurfaceLights(){
 	const bool nss = entities[ 0 ].boolForKey( "_noshadersun" );
 
 	/* walk the list of surfaces */
-	for ( size_t i = 0; i < bspDrawSurfaces.size(); i++ )
+	for ( size_t i = 0; i < bspDrawSurfaces.size(); ++i )
 	{
 		/* get surface and other bits */
 		bspDrawSurface_t *ds = &bspDrawSurfaces[ i ];
@@ -687,13 +687,13 @@ static void SetEntityOrigins(){
 		}
 
 		/* set origin for all surfaces for this model */
-		for ( int j = 0; j < dm.numBSPSurfaces; j++ )
+		for ( int j = 0; j < dm.numBSPSurfaces; ++j )
 		{
 			/* get drawsurf */
 			const bspDrawSurface_t& ds = bspDrawSurfaces[ dm.firstBSPSurface + j ];
 
 			/* set its verts */
-			for ( int k = 0; k < ds.numVerts; k++ )
+			for ( int k = 0; k < ds.numVerts; ++k )
 			{
 				yDrawVerts[ ds.firstVert + k ].xyz += origin;
 			}
@@ -1174,7 +1174,7 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&c
 
 
 	/* clear colors */
-	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		colors[ lightmapNum ].set( 0 );
 
 	/* ydnar: normalmap */
@@ -1189,13 +1189,13 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&c
 	}
 
 	/* ydnar: trace to all the list of lights pre-stored in tw */
-	for ( i = 0; i < trace->numLights && trace->lights[ i ] != NULL; i++ )
+	for ( i = 0; i < trace->numLights && trace->lights[ i ] != NULL; ++i )
 	{
 		/* set light */
 		trace->light = trace->lights[ i ];
 
 		/* style check */
-		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		{
 			if ( styles[ lightmapNum ] == trace->light->style ||
 			     styles[ lightmapNum ] == LS_NONE ) {
@@ -1565,7 +1565,7 @@ static void TraceGrid( int num ){
 		trace.inhibitRadius = DEFAULT_INHIBIT_RADIUS;
 		trace.testAll = true;
 
-		for ( k = 0; k < 2; k++ )
+		for ( k = 0; k < 2; ++k )
 		{
 			if ( k == 0 ) { // upper hemisphere
 				trace.normal = g_vector3_axis_z;
@@ -1602,7 +1602,7 @@ static void TraceGrid( int num ){
 	   go back and separate all the light into directed and ambient */
 
 	numStyles = 1;
-	for ( i = 0; i < numCon; i++ )
+	for ( i = 0; i < numCon; ++i )
 	{
 		/* get relative directed strength */
 		d = vector3_dot( contributions[ i ].dir, thisdir );
@@ -1610,7 +1610,7 @@ static void TraceGrid( int num ){
 		d = std::max( 0.f, gridAmbientDirectionality + d * ( gridDirectionality - gridAmbientDirectionality ) );
 
 		/* find appropriate style */
-		for ( j = 0; j < numStyles; j++ )
+		for ( j = 0; j < numStyles; ++j )
 		{
 			if ( gp->styles[ j ] == contributions[ i ].style ) {
 				break;
@@ -1662,7 +1662,7 @@ static void TraceGrid( int num ){
 
 
 	/* store off sample */
-	for ( i = 0; i < MAX_LIGHTMAPS; i++ )
+	for ( i = 0; i < MAX_LIGHTMAPS; ++i )
 	{
 #if 0
 		/* do some fudging to keep the ambient from being too low (2003-07-05: 0.25 -> 0.125) */
@@ -1673,7 +1673,7 @@ static void TraceGrid( int num ){
 
 		/* set minimum light and copy off to bytes */
 		Vector3 color = gp->ambient[ i ];
-		for ( j = 0; j < 3; j++ )
+		for ( j = 0; j < 3; ++j )
 			value_maximize( color[ j ], minGridLight[ j ] );
 
 		/* vortex: apply gridscale and gridambientscale here */
@@ -1721,7 +1721,7 @@ static void SetupGrid(){
 
 	/* quantize it */
 	const Vector3 oldGridSize = gridSize;
-	for ( int i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; ++i )
 		gridSize[ i ] = std::max( 8.f, std::floor( gridSize[ i ] ) );
 
 	/* ydnar: increase gridSize until grid count is smaller than max allowed */
@@ -1729,7 +1729,7 @@ static void SetupGrid(){
 	for( int j = 0; ; )
 	{
 		/* get world bounds */
-		for ( int i = 0; i < 3; i++ )
+		for ( int i = 0; i < 3; ++i )
 		{
 			gridMins[ i ] = gridSize[ i ] * ceil( bspModels[ 0 ].minmax.mins[ i ] / gridSize[ i ] );
 			const float max = gridSize[ i ] * floor( bspModels[ 0 ].minmax.maxs[ i ] / gridSize[ i ] );
@@ -1857,7 +1857,7 @@ static void WriteBSPFileAfterLight( const char *bspFileName ){
 				out.shaderNum = EmitShader( String64( lmPathStart, "nomipmaps", su ), nullptr, nullptr );
 				out.fogNum = -1;
 
-				for ( int i = 0; i < MAX_LIGHTMAPS; i++ )
+				for ( int i = 0; i < MAX_LIGHTMAPS; ++i )
 				{
 					out.lightmapNum[ i ] = -3;
 					out.lightmapStyles[ i ] = LS_NONE;

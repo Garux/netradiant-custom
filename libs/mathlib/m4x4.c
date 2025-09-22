@@ -646,7 +646,7 @@ void m4x4_multiply_by_m4x4( m4x4_t dst, const m4x4_t src ){
 #else
 
 	vec_t * p = dst;
-	for ( int i = 0; i < 4; i++ )
+	for ( int i = 0; i < 4; ++i )
 	{
 		dst1 =  src[0]  * p[0];
 		dst1 += src[1]  * p[4];
@@ -731,7 +731,7 @@ void m4x4_premultiply_by_m4x4( m4x4_t dst, const m4x4_t src ){
 #else
 
 	vec_t* p = dst;
-	for ( int i = 0; i < 4; i++ )
+	for ( int i = 0; i < 4; ++i )
 	{
 		dst1 =  src[0]  * p[0];
 		dst2 =  src[1]  * p[0];
@@ -1360,8 +1360,8 @@ void m4x4_transpose( m4x4_t matrix ){
 	int i, j;
 	float temp, *p1, *p2;
 
-	for ( i = 1; i < 4; i++ ) {
-		for ( j = 0; j < i; j++ ) {
+	for ( i = 1; i < 4; ++i ) {
+		for ( j = 0; j < i; ++j ) {
 			p1 = matrix + ( j * 4 + i );
 			p2 = matrix + ( i * 4 + j );
 			temp = *p1;
@@ -1519,7 +1519,7 @@ void m3x3_multiply_by_m3x3( m3x3_t matrix, const m3x3_t matrix_src ){
 	float out1, out2, out3;
 	int i;
 
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		out1 =  matrix_src[0] * pDest[0];
 		out1 += matrix_src[1] * pDest[3];
@@ -1593,7 +1593,7 @@ int m3_inverse( m3x3_t mr, m3x3_t ma ){
 void m4_submat( m4x4_t mr, m3x3_t mb, int i, int j ){
 	int ti, tj, idst, jdst;
 
-	for ( ti = 0; ti < 4; ti++ )
+	for ( ti = 0; ti < 4; ++ti )
 	{
 		if ( ti < i ) {
 			idst = ti;
@@ -1605,7 +1605,7 @@ void m4_submat( m4x4_t mr, m3x3_t mb, int i, int j ){
 			continue;
 		}
 
-		for ( tj = 0; tj < 4; tj++ )
+		for ( tj = 0; tj < 4; ++tj )
 		{
 			if ( tj < j ) {
 				jdst = tj;
@@ -1627,7 +1627,7 @@ float m4_det( m4x4_t mr ){
 	m3x3_t msub3;
 	int n;
 
-	for ( n = 0; n < 4; n++, i *= -1 )
+	for ( n = 0; n < 4; ++n, i *= -1 )
 	{
 		m4_submat( mr, msub3, 0, n );
 
@@ -1652,8 +1652,8 @@ int m4x4_invert( m4x4_t matrix ){
 
 	m4x4_assign( m4x4_temp, matrix );
 
-	for ( i = 0; i < 4; i++ )
-		for ( j = 0; j < 4; j++ )
+	for ( i = 0; i < 4; ++i )
+		for ( j = 0; j < 4; ++j )
 		{
 			sign = 1 - ( ( i + j ) % 2 ) * 2;
 
@@ -1676,16 +1676,16 @@ void m4x4_solve_ge( m4x4_t matrix, vec4_t x ){
 	float recip, ratio;
 	float* p;
 
-	for ( r = 0; r < 4; r++ )
+	for ( r = 0; r < 4; ++r )
 	{
 		aug[r] = 0;
 		indx[r] = r;
 	}
 
-	for ( r = 0; r < 4; r++ )
+	for ( r = 0; r < 4; ++r )
 	{
 		scale[r] = 0;
-		for ( c = 0; c < 4; c++, p++ )
+		for ( c = 0; c < 4; ++c, ++p )
 		{
 			if ( fabs( *p ) > scale[r] ) {
 				scale[r] = (float)fabs( *p );
@@ -1693,10 +1693,10 @@ void m4x4_solve_ge( m4x4_t matrix, vec4_t x ){
 		}
 	}
 
-	for ( c = 0; c < 3; c++ )
+	for ( c = 0; c < 3; ++c )
 	{
 		pivot = 0;
-		for ( r = c; r < 4; r++ )
+		for ( r = c; r < 4; ++r )
 		{
 			f = (float)fabs( matrix[( indx[r] << 2 ) + c] ) / scale[indx[r]];
 			if ( f > pivot ) {
@@ -1711,24 +1711,24 @@ void m4x4_solve_ge( m4x4_t matrix, vec4_t x ){
 
 		recip = 1 / matrix[( indx[c] << 2 ) + c];
 
-		for ( r = c + 1; r < 4; r++ )
+		for ( r = c + 1; r < 4; ++r )
 		{
 			p = matrix + ( indx[r] << 2 );
 			ratio = p[c] * recip;
 
-			for ( i = c + 1; i < 4; i++ )
+			for ( i = c + 1; i < 4; ++i )
 				p[i] -= ratio * matrix[( indx[c] << 2 ) + i];
 			aug[indx[r]] -= ratio * aug[indx[c]];
 		}
 	}
 
 	x[indx[3]] = aug[indx[3]] / matrix[( indx[3] << 2 ) + 3];
-	for ( r = 2; r >= 0; r-- )
+	for ( r = 2; r >= 0; --r )
 	{
 		f = aug[indx[r]];
 		p = matrix + ( indx[r] << 2 );
 		recip = 1 / p[r];
-		for ( c = ( r + 1 ); c < 4; c++ )
+		for ( c = ( r + 1 ); c < 4; ++c )
 		{
 			f -= ( p[c] * x[indx[c]] );
 		}
@@ -1749,16 +1749,16 @@ int matrix_solve_ge( vec_t* matrix, vec_t* aug, vec3_t x ){
 	float ratio;
 	float* p;
 
-	for ( r = 0; r < N; r++ )
+	for ( r = 0; r < N; ++r )
 	{
 		indx[r] = r;
 	}
 
-	for ( r = 0; r < N; r++ )
+	for ( r = 0; r < N; ++r )
 	{
 		p = matrix + r;
 		scale[r] = 0;
-		for ( c = 0; c < N; c++, p++ )
+		for ( c = 0; c < N; ++c, ++p )
 		{
 			if ( fabs( *p ) > scale[r] ) {
 				scale[r] = (float)fabs( *p );
@@ -1766,11 +1766,11 @@ int matrix_solve_ge( vec_t* matrix, vec_t* aug, vec3_t x ){
 		}
 	}
 
-	for ( c = 0; c < N; c++ )
+	for ( c = 0; c < N; ++c )
 	{
 		pivot = 0;
 		best = -1;
-		for ( r = c; r < N; r++ )
+		for ( r = c; r < N; ++r )
 		{
 			f = (float)fabs( matrix[( indx[r] * N ) + c] ) / scale[indx[r]];
 			if ( f > pivot ) {
@@ -1787,22 +1787,22 @@ int matrix_solve_ge( vec_t* matrix, vec_t* aug, vec3_t x ){
 		indx[c] = indx[best];
 		indx[best] = i;
 
-		for ( r = c + 1; r < N; r++ )
+		for ( r = c + 1; r < N; ++r )
 		{
 			p = matrix + ( indx[r] * N );
 			ratio = p[c] / matrix[( indx[c] * N ) + c];
 
-			for ( i = c + 1; i < N; i++ ) p[i] -= ratio * matrix[( indx[c] * N ) + i];
+			for ( i = c + 1; i < N; ++i ) p[i] -= ratio * matrix[( indx[c] * N ) + i];
 			aug[indx[r]] -= ratio * aug[indx[c]];
 		}
 	}
 
 	x[N - 1] = aug[indx[N - 1]] / matrix[( indx[N - 1] * N ) + N - 1];
-	for ( r = 1; r >= 0; r-- )
+	for ( r = 1; r >= 0; --r )
 	{
 		f = aug[indx[r]];
 		p = matrix + ( indx[r] * N );
-		for ( c = ( r + 1 ); c < N; c++ ) f -= ( p[c] * x[c] );
+		for ( c = ( r + 1 ); c < N; ++c ) f -= ( p[c] * x[c] );
 		x[r] = f / p[r];
 	}
 	return 0;
@@ -1810,12 +1810,12 @@ int matrix_solve_ge( vec_t* matrix, vec_t* aug, vec3_t x ){
 
 #ifdef YOU_WANT_IT_TO_BORK
 /* Gaussian elimination */
-for ( i = 0; i < 4; i++ )
+for ( i = 0; i < 4; ++i )
 {
-	for ( j = ( i + 1 ); j < 4; j++ )
+	for ( j = ( i + 1 ); j < 4; ++j )
 	{
 		ratio = matrix[j][i] / matrix[i][i];
-		for ( count = i; count < n; count++ ) {
+		for ( count = i; count < n; ++count ) {
 			matrix[j][count] -= ( ratio * matrix[i][count] );
 		}
 		b[j] -= ( ratio * b[i] );
@@ -1824,10 +1824,10 @@ for ( i = 0; i < 4; i++ )
 
 /* Back substitution */
 x[n - 1] = b[n - 1] / matrix[n - 1][n - 1];
-for ( i = ( n - 2 ); i >= 0; i-- )
+for ( i = ( n - 2 ); i >= 0; --i )
 {
 	temp = b[i];
-	for ( j = ( i + 1 ); j < n; j++ )
+	for ( j = ( i + 1 ); j < n; ++j )
 	{
 		temp -= ( matrix[i][j] * x[j] );
 	}

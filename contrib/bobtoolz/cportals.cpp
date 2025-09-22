@@ -67,9 +67,9 @@ bool CBspPortal::Build( char *def, unsigned int pointCnt, bool bInverse ){
 
 	point = new CBspPoint[point_count];
 
-	for ( n = 0; n < point_count; n++ )
+	for ( n = 0; n < point_count; ++n )
 	{
-		for (; *c != 0 && *c != '('; c++ ){};
+		for (; *c != 0 && *c != '('; ++c ){};
 
 		if ( *c == 0 ) {
 			return false;
@@ -195,7 +195,7 @@ void CPortals::Load(){
 	node = new CBspNode[node_count];
 
 	unsigned int i;
-	for ( i = 0; i < p_count; i++ )
+	for ( i = 0; i < p_count; ++i )
 	{
 		if ( !fgets( buf, LINE_BUF, in ) ) {
 			fclose( in );
@@ -214,7 +214,7 @@ void CPortals::Load(){
 		node[node2].portal_count++;
 	}
 
-	for ( i = 0; i < p_count2; i++ )
+	for ( i = 0; i < p_count2; ++i )
 	{
 		if ( !fgets( buf, LINE_BUF, in ) ) {
 			fclose( in );
@@ -232,7 +232,7 @@ void CPortals::Load(){
 		node[node1].portal_count++;
 	}
 
-	for ( i = 0; i < node_count; i++ )
+	for ( i = 0; i < node_count; ++i )
 		node[i].portal = new CBspPortal[node[i].portal_count];
 
 	fclose( in );
@@ -245,7 +245,7 @@ void CPortals::Load(){
 	fgets( buf, LINE_BUF, in );
 
 	unsigned int n;
-	for ( n = 0; n < p_count; n++ )
+	for ( n = 0; n < p_count; ++n )
 	{
 		if ( !fgets( buf, LINE_BUF, in ) ) {
 			fclose( in );
@@ -281,7 +281,7 @@ void CPortals::Load(){
 		}
 	}
 
-	for ( n = 0; n < p_count2; n++ )
+	for ( n = 0; n < p_count2; ++n )
 	{
 		if ( !fgets( buf, LINE_BUF, in ) ) {
 			fclose( in );

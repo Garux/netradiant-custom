@@ -167,7 +167,7 @@ static void TCModIdentity( tcMod_t& mod ){
 
 
 static void TCModMultiply( const tcMod_t& a, const tcMod_t& b, tcMod_t& out ){
-	for ( int i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; ++i )
 	{
 		out[ i ][ 0 ] = ( a[ i ][ 0 ] * b[ 0 ][ 0 ] ) + ( a[ i ][ 1 ] * b[ 1 ][ 0 ] ) + ( a[ i ][ 2 ] * b[ 2 ][ 0 ] );
 		out[ i ][ 1 ] = ( a[ i ][ 0 ] * b[ 0 ][ 1 ] ) + ( a[ i ][ 1 ] * b[ 1 ][ 1 ] ) + ( a[ i ][ 2 ] * b[ 2 ][ 1 ] );
@@ -605,9 +605,9 @@ static void FinishShader( shaderInfo_t& si ){
 	/* find pixel coordinates best matching the average color of the image */
 	float bestDist = 99999999.f;
 	const Vector2 o( 1.0f / si.shaderImage->width, 1.0f / si.shaderImage->height );
-	for ( y = 0, st[ 1 ] = 0.0f; y < si.shaderImage->height; y++, st[ 1 ] += o[ 1 ] )
+	for ( y = 0, st[ 1 ] = 0.0f; y < si.shaderImage->height; ++y, st[ 1 ] += o[ 1 ] )
 	{
-		for ( x = 0, st[ 0 ] = 0.0f; x < si.shaderImage->width; x++, st[ 0 ] += o[ 0 ] )
+		for ( x = 0, st[ 0 ] = 0.0f; x < si.shaderImage->width; ++x, st[ 0 ] += o[ 0 ] )
 		{
 			/* sample the shader image */
 			Color4f color;
@@ -692,7 +692,7 @@ static void LoadShaderImages( shaderInfo_t& si ){
 	/* create default and average colors */
 	const int count = si.lightImage->width * si.lightImage->height;
 	Color4f color( 0, 0, 0, 0 );
-	for ( int i = 0; i < count; i++ )
+	for ( int i = 0; i < count; ++i )
 	{
 		color[ 0 ] += si.lightImage->pixels[ i * 4 + 0 ];
 		color[ 1 ] += si.lightImage->pixels[ i * 4 + 1 ];
@@ -784,7 +784,7 @@ static void Parse1DMatrixAppend( ShaderTextCollector& text, int x, float *m ){
 	if ( !text.GetToken( true ) || !strEqual( token, "(" ) ) {
 		Error( "Parse1DMatrixAppend(): line %d: ( not found!\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 	}
-	for ( int i = 0; i < x; i++ )
+	for ( int i = 0; i < x; ++i )
 	{
 		if ( !text.GetToken( false ) ) {
 			Error( "Parse1DMatrixAppend(): line %d: Number not found!\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
@@ -1466,7 +1466,7 @@ static void ParseShaderFile( const char *filename ){
 					else if ( striEqual( token, "ivector" ) ) {
 						Parse1DMatrixAppend( text, 3, si.vecs[ 0 ].data() );
 						Parse1DMatrixAppend( text, 3, si.vecs[ 1 ].data() );
-						for ( size_t i = 0; i < 3; i++ )
+						for ( size_t i = 0; i < 3; ++i )
 						{
 							si.vecs[ 0 ][ i ] = si.vecs[ 0 ][ i ] ? 1.0 / si.vecs[ 0 ][ i ] : 0;
 							si.vecs[ 1 ][ i ] = si.vecs[ 1 ][ i ] ? 1.0 / si.vecs[ 1 ][ i ] : 0;
@@ -1832,7 +1832,7 @@ void LoadShaderInfo(){
 	const int count = vfsGetFileCount( filename );
 
 	/* load them all */
-	for ( int i = 0; i < count; i++ )
+	for ( int i = 0; i < count; ++i )
 	{
 		/* load shader list */
 		LoadScriptFile( filename, i );

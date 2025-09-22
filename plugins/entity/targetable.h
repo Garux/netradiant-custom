@@ -71,7 +71,7 @@ public:
 		len *= 0.0625; // half / 8
 
 		Vector3 arrow( start );
-		for ( unsigned int i = 0, count = ( len < 32 ) ? 1 : static_cast<unsigned int>( len * 0.0625 ); i < count; i++ )
+		for ( unsigned int i = 0, count = ( len < 32 ) ? 1 : static_cast<unsigned int>( len * 0.0625 ); i < count; ++i )
 		{
 			vector3_add( arrow, vector3_scaled( dir, ( len < 32 ) ? len : 32 ) );
 			gl().glVertex3fv( vector3_to_array( arrow ) );

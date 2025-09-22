@@ -882,7 +882,7 @@ void SpawnFlags_setEntityClass( EntityClass* eclass ){
 	g_spawnflag_count = 0;
 
 	// do a first pass to count the spawn flags, don't touch the widgets, we don't know in what state they are
-	for ( int i = 0; i < MAX_FLAGS; i++ )
+	for ( int i = 0; i < MAX_FLAGS; ++i )
 	{
 		if ( !string_empty( eclass->flagnames[i] ) ) {
 			spawn_table[g_spawnflag_count++] = i;
@@ -1237,7 +1237,7 @@ QWidget* EntityInspector_constructWindow( QWidget* toplevel ){
 			auto *grid = g_spawnflagsTable = new QGridLayout;
 			grid->setAlignment( Qt::AlignmentFlag::AlignLeft );
 			vbox->addLayout( grid );
-			for ( int i = 0; i < MAX_FLAGS; i++ )
+			for ( int i = 0; i < MAX_FLAGS; ++i )
 			{
 				auto *check = g_entitySpawnflagsCheck[i] = new QCheckBox;
 				grid->addWidget( check, i / 4, i % 4 );

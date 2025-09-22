@@ -123,7 +123,7 @@ static int AddTraceInfo( traceInfo_t *ti ){
 	int num;
 
 	/* find an existing info */
-	for ( num = firstTraceInfo; num < numTraceInfos; num++ )
+	for ( num = firstTraceInfo; num < numTraceInfos; ++num )
 	{
 		if ( traceInfos[ num ].si == ti->si &&
 		     traceInfos[ num ].surfaceNum == ti->surfaceNum &&
@@ -368,7 +368,7 @@ void ClipTraceWinding( traceWinding_t *tw, const Plane3f& plane, traceWinding_t 
 	back->numVerts = 0;
 
 	/* classify points */
-	for ( i = 0; i < tw->numVerts; i++ )
+	for ( i = 0; i < tw->numVerts; ++i )
 	{
 		dists[ i ] = plane3_distance_to_point( plane, tw->v[ i ].xyz );
 		if ( dists[ i ] < -TW_ON_EPSILON ) {
@@ -403,7 +403,7 @@ void ClipTraceWinding( traceWinding_t *tw, const Plane3f& plane, traceWinding_t 
 		back->numVerts = 0;
 
 		/* split the winding */
-		for ( i = 0; i < tw->numVerts; i++ )
+		for ( i = 0; i < tw->numVerts; ++i )
 		{
 			/* radix */
 			j = ( i + 1 ) % tw->numVerts;
@@ -452,7 +452,7 @@ void ClipTraceWinding( traceWinding_t *tw, const Plane3f& plane, traceWinding_t 
 
 			/* generate a split point */
 			frac = dists[ i ] / ( dists[ i ] - dists[ j ] );
-			for ( k = 0; k < 3; k++ )
+			for ( k = 0; k < 3; ++k )
 			{
 				/* minimize fp precision errors */
 				if ( plane.normal()[ k ] == 1.0f ) {
@@ -596,13 +596,13 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 	node->minmax.clear();
 	DoubleVector3 average( 0 );
 	count = 0;
-	for ( i = 0; i < node->numItems; i++ )
+	for ( i = 0; i < node->numItems; ++i )
 	{
 		/* get winding */
 		tw = &traceWindings[ node->items[ i ] ];
 
 		/* walk its verts */
-		for ( j = 0; j < tw->numVerts; j++ )
+		for ( j = 0; j < tw->numVerts; ++j )
 		{
 			node->minmax.extend( tw->v[ j ].xyz );
 			average += tw->v[ j ].xyz;
@@ -673,7 +673,7 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 	backNode->items = safe_malloc( backNode->maxItems * sizeof( *backNode->items ) );
 
 	/* filter windings into child nodes */
-	for ( i = 0; i < node->numItems; i++ )
+	for ( i = 0; i < node->numItems; ++i )
 	{
 		/* get winding */
 		tw = &traceWindings[ node->items[ i ] ];
@@ -772,7 +772,7 @@ static int TriangulateTraceNode_r( int nodeNum ){
 	node->items = safe_malloc( node->maxItems * sizeof( tt ) );
 
 	/* walk winding list */
-	for ( i = 0; i < numWindings; i++ )
+	for ( i = 0; i < numWindings; ++i )
 	{
 		/* get winding */
 		tw = &traceWindings[ windings[ i ] ];
@@ -782,7 +782,7 @@ static int TriangulateTraceNode_r( int nodeNum ){
 		tt.v[ 0 ] = tw->v[ 0 ];
 
 		/* walk vertex list */
-		for ( j = 1; j + 1 < tw->numVerts; j++ )
+		for ( j = 1; j + 1 < tw->numVerts; ++j )
 		{
 			/* set verts */
 			tt.v[ 1 ] = tw->v[ j ];
@@ -825,7 +825,7 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 
 
 	/* walk the list of surfaces in this model and fill out the info structs */
-	for ( int i = 0; i < model.numBSPSurfaces; i++ )
+	for ( int i = 0; i < model.numBSPSurfaces; ++i )
 	{
 		/* get surface and info */
 		const bspDrawSurface_t& ds = bspDrawSurfaces[ model.firstBSPSurface + i ];
@@ -907,9 +907,9 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 			const bspDrawVert_t *verts = mesh->verts;
 
 			/* subdivide each quad to place the models */
-			for ( int y = 0; y < ( mesh->height - 1 ); y++ )
+			for ( int y = 0; y < ( mesh->height - 1 ); ++y )
 			{
-				for ( int x = 0; x < ( mesh->width - 1 ); x++ )
+				for ( int x = 0; x < ( mesh->width - 1 ); ++x )
 				{
 					/* set indexes */
 					const int pw[ 5 ] = {
@@ -1219,10 +1219,10 @@ void SetupTraceNodes(){
 		file = SafeOpenWrite( filename, "wt" );
 
 		/* walk node list */
-		for ( i = 0; i < numTraceWindings; i++ )
+		for ( i = 0; i < numTraceWindings; ++i )
 		{
 			tw = &traceWindings[ i ];
-			for ( j = 0; j < tw->numVerts + 1; j++ )
+			for ( j = 0; j < tw->numVerts + 1; ++j )
 				fprintf( file, "%f %f %f\n",
 				         tw->v[ j % tw->numVerts ].xyz[ 0 ], tw->v[ j % tw->numVerts ].xyz[ 1 ], tw->v[ j % tw->numVerts ].xyz[ 2 ] );
 		}
@@ -1338,7 +1338,7 @@ static bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace 
 	/* if hitpoint is really close to trace origin (sample point), then check for self-shadowing */
 	if ( depth <= SELF_SHADOW_EPSILON ) {
 		/* don't self-shadow */
-		for ( i = 0; i < trace->numSurfaces; i++ )
+		for ( i = 0; i < trace->numSurfaces; ++i )
 		{
 			if ( ti->surfaceNum == trace->surfaces[ i ] ) {
 				return false;
@@ -1428,7 +1428,7 @@ static bool TraceWinding( traceWinding_t *tw, trace_t *trace ){
 	tt.v[ 0 ] = tw->v[ 0 ];
 
 	/* walk vertex list */
-	for ( i = 1; i + 1 < tw->numVerts; i++ )
+	for ( i = 1; i + 1 < tw->numVerts; ++i )
 	{
 		/* set verts */
 		tt.v[ 1 ] = tw->v[ i ];
@@ -1625,13 +1625,13 @@ void TraceLine( trace_t *trace ){
 	}
 
 	/* walk node list */
-	for ( i = 0; i < trace->numTestNodes; i++ )
+	for ( i = 0; i < trace->numTestNodes; ++i )
 	{
 		/* get node */
 		node = &traceNodes[ trace->testNodes[ i ] ];
 
 		/* walk node item list */
-		for ( j = 0; j < node->numItems; j++ )
+		for ( j = 0; j < node->numItems; ++j )
 		{
 			tt = &traceTriangles[ node->items[ j ] ];
 			ti = &traceInfos[ tt->infoNum ];

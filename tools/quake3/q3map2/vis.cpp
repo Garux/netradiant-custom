@@ -524,15 +524,15 @@ static fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, 
 	p1 = p2 = NULL; // stop compiler warning
 	j = 0;          //
 
-	for ( i = 0; i < f1->numpoints; i++ )
+	for ( i = 0; i < f1->numpoints; ++i )
 	{
 		p1 = &f1->points[i];
 		p2 = &f1->points[( i + 1 ) % f1->numpoints];
-		for ( j = 0; j < f2->numpoints; j++ )
+		for ( j = 0; j < f2->numpoints; ++j )
 		{
 			p3 = &f2->points[j];
 			p4 = &f2->points[( j + 1 ) % f2->numpoints];
-			for ( k = 0; k < 3; k++ )
+			for ( k = 0; k < 3; ++k )
 			{
 				if ( fabs( ( *p1 )[k] - ( *p4 )[k] ) > 0.1 ) { //EQUAL_EPSILON) //ME
 					break;
@@ -620,19 +620,19 @@ static void MergeLeafPortals(){
 
 	nummerges = 0;
 	hintsmerged = 0;
-	for ( i = 0; i < portalclusters; i++ )
+	for ( i = 0; i < portalclusters; ++i )
 	{
 		leaf = &leafs[i];
 		if ( leaf->merged >= 0 ) {
 			continue;
 		}
-		for ( j = 0; j < leaf->numportals; j++ )
+		for ( j = 0; j < leaf->numportals; ++j )
 		{
 			p1 = leaf->portals[j];
 			if ( p1->removed ) {
 				continue;
 			}
-			for ( k = j + 1; k < leaf->numportals; k++ )
+			for ( k = j + 1; k < leaf->numportals; ++k )
 			{
 				p2 = leaf->portals[k];
 				if ( p2->removed ) {

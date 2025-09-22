@@ -44,7 +44,7 @@ void R_ResampleTextureLerpLine( const byte *in, byte *out, int inwidth, int outw
 	fstep = (int) ( inwidth * 65536.0f / outwidth );
 	endx = ( inwidth - 1 );
 	if ( bytesperpixel == 4 ) {
-		for ( j = 0, f = 0; j < outwidth; j++, f += fstep )
+		for ( j = 0, f = 0; j < outwidth; ++j, f += fstep )
 		{
 			xi = f >> 16;
 			if ( xi != oldx ) {
@@ -69,7 +69,7 @@ void R_ResampleTextureLerpLine( const byte *in, byte *out, int inwidth, int outw
 		}
 	}
 	else if ( bytesperpixel == 3 ) {
-		for ( j = 0, f = 0; j < outwidth; j++, f += fstep )
+		for ( j = 0, f = 0; j < outwidth; ++j, f += fstep )
 		{
 			xi = f >> 16;
 			if ( xi != oldx ) {
@@ -129,7 +129,7 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 		R_ResampleTextureLerpLine( inrow, row1, inwidth, outwidth, bytesperpixel );
 		R_ResampleTextureLerpLine( inrow + inwidth4, row2, inwidth, outwidth, bytesperpixel );
 
-		for ( i = 0, f = 0; i < outheight; i++, f += fstep )
+		for ( i = 0, f = 0; i < outheight; ++i, f += fstep )
 		{
 			yi = f >> 16;
 			if ( yi < endy ) {
@@ -225,7 +225,7 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 		oldy = 0;
 		R_ResampleTextureLerpLine( inrow, row1, inwidth, outwidth, bytesperpixel );
 		R_ResampleTextureLerpLine( inrow + inwidth3, row2, inwidth, outwidth, bytesperpixel );
-		for ( i = 0, f = 0; i < outheight; i++, f += fstep )
+		for ( i = 0, f = 0; i < outheight; ++i, f += fstep )
 		{
 			yi = f >> 16;
 			if ( yi < endy ) {
@@ -317,9 +317,9 @@ void GL_MipReduce( byte *in, byte *out, int width, int height, int destwidth, in
 			width2 = width >> 1;
 			height2 = height >> 1;
 			nextrow = width << 2;
-			for ( y = 0; y < height2; y++ )
+			for ( y = 0; y < height2; ++y )
 			{
-				for ( x = 0; x < width2; x++ )
+				for ( x = 0; x < width2; ++x )
 				{
 					out[0] = (byte) ( ( in[0] + in[4] + in[nextrow  ] + in[nextrow + 4] ) >> 2 );
 					out[1] = (byte) ( ( in[1] + in[5] + in[nextrow + 1] + in[nextrow + 5] ) >> 2 );
@@ -335,9 +335,9 @@ void GL_MipReduce( byte *in, byte *out, int width, int height, int destwidth, in
 		{
 			// reduce width
 			width2 = width >> 1;
-			for ( y = 0; y < height; y++ )
+			for ( y = 0; y < height; ++y )
 			{
-				for ( x = 0; x < width2; x++ )
+				for ( x = 0; x < width2; ++x )
 				{
 					out[0] = (byte) ( ( in[0] + in[4] ) >> 1 );
 					out[1] = (byte) ( ( in[1] + in[5] ) >> 1 );
@@ -355,9 +355,9 @@ void GL_MipReduce( byte *in, byte *out, int width, int height, int destwidth, in
 			// reduce height
 			height2 = height >> 1;
 			nextrow = width << 2;
-			for ( y = 0; y < height2; y++ )
+			for ( y = 0; y < height2; ++y )
 			{
-				for ( x = 0; x < width; x++ )
+				for ( x = 0; x < width; ++x )
 				{
 					out[0] = (byte) ( ( in[0] + in[nextrow  ] ) >> 1 );
 					out[1] = (byte) ( ( in[1] + in[nextrow + 1] ) >> 1 );

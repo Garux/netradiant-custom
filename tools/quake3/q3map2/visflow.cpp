@@ -416,7 +416,7 @@ static void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prev
 		    pstack_t *s;
 
 		    s = &thread->pstack_head;
-		    for ( j = 0; s->next && j < sizeof( portaltrace ) / sizeof( int ) - 1; j++, s = s->next )
+		    for ( j = 0; s->next && j < sizeof( portaltrace ) / sizeof( int ) - 1; ++j, s = s->next )
 		    {
 		        if ( s->portal->num != portaltrace[j] )
 		            break;
@@ -530,7 +530,7 @@ static void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prev
 
 #ifdef SEPERATORCACHE
 		if ( stack.numseperators[0] ) {
-			for ( n = 0; n < stack.numseperators[0]; n++ )
+			for ( n = 0; n < stack.numseperators[0]; ++n )
 			{
 				stack.pass = VisChopWinding( stack.pass, &stack, stack.seperators[0][n] );
 				if ( !stack.pass ) {
@@ -554,7 +554,7 @@ static void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prev
 
 #ifdef SEPERATORCACHE
 		if ( stack.numseperators[1] ) {
-			for ( n = 0; n < stack.numseperators[1]; n++ )
+			for ( n = 0; n < stack.numseperators[1]; ++n )
 			{
 				stack.pass = VisChopWinding( stack.pass, &stack, stack.seperators[1][n] );
 				if ( !stack.pass ) {
@@ -654,7 +654,7 @@ static void RecursivePassageFlow( vportal_t *portal, threaddata_t *thread, pstac
 	passage = portal->passages;
 	nextpassage = passage;
 	// check all portals for flowing into other leafs
-	for ( i = 0; i < leaf->numportals; i++, passage = nextpassage )
+	for ( i = 0; i < leaf->numportals; ++i, passage = nextpassage )
 	{
 		p = leaf->portals[i];
 		if ( p->removed ) {
@@ -681,7 +681,7 @@ static void RecursivePassageFlow( vportal_t *portal, threaddata_t *thread, pstac
 			portalvis = (long *) p->portalflood;
 		}
 		more = 0;
-		for ( j = 0; j < portallongs; j++ )
+		for ( j = 0; j < portallongs; ++j )
 		{
 			if ( *might ) {
 				*might &= *cansee & *portalvis;
@@ -786,7 +786,7 @@ static void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread,
 	passage = portal->passages;
 	nextpassage = passage;
 	// check all portals for flowing into other leafs
-	for ( i = 0; i < leaf->numportals; i++, passage = nextpassage )
+	for ( i = 0; i < leaf->numportals; ++i, passage = nextpassage )
 	{
 		p = leaf->portals[i];
 		if ( p->removed ) {
@@ -810,7 +810,7 @@ static void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread,
 			portalvis = (long *) p->portalflood;
 		}
 		more = 0;
-		for ( j = 0; j < portallongs; j++ )
+		for ( j = 0; j < portallongs; ++j )
 		{
 			if ( *might ) {
 				*might &= *cansee & *portalvis;
@@ -900,7 +900,7 @@ static void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread,
 
 #ifdef SEPERATORCACHE
 		if ( stack.numseperators[0] ) {
-			for ( n = 0; n < stack.numseperators[0]; n++ )
+			for ( n = 0; n < stack.numseperators[0]; ++n )
 			{
 				stack.pass = VisChopWinding( stack.pass, &stack, stack.seperators[0][n] );
 				if ( !stack.pass ) {
@@ -924,7 +924,7 @@ static void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread,
 
 #ifdef SEPERATORCACHE
 		if ( stack.numseperators[1] ) {
-			for ( n = 0; n < stack.numseperators[1]; n++ )
+			for ( n = 0; n < stack.numseperators[1]; ++n )
 			{
 				stack.pass = VisChopWinding( stack.pass, &stack, stack.seperators[1][n] );
 				if ( !stack.pass ) {
@@ -1265,7 +1265,7 @@ void CreatePassages( int portalnum ){
 
 		numsee = 0;
 		//create the passage->cansee
-		for ( j = 0; j < numportals * 2; j++ )
+		for ( j = 0; j < numportals * 2; ++j )
 		{
 			p = &portals[j];
 			if ( p->removed ) {
@@ -1277,14 +1277,14 @@ void CreatePassages( int portalnum ){
 			if ( !bit_is_enabled( portal->portalflood, j ) ) {
 				continue;
 			}
-			for ( k = 0; k < numseperators; k++ )
+			for ( k = 0; k < numseperators; ++k )
 			{
 				//if completely at the back of the separator plane
 				if ( plane3_distance_to_point( seperators[k], p->origin ) < -p->radius + ON_EPSILON ) {
 					break;
 				}
 				w = p->winding;
-				for ( n = 0; n < w->numpoints; n++ )
+				for ( n = 0; n < w->numpoints; ++n )
 				{
 					//if at the front of the separator
 					if ( plane3_distance_to_point( seperators[k], w->points[n] ) > ON_EPSILON ) {
@@ -1313,7 +1313,7 @@ void CreatePassages( int portalnum ){
 			}
 
 
-			for ( k = 0; k < numseperators; k++ )
+			for ( k = 0; k < numseperators; ++k )
 			{
 				/* ydnar: this is a shitty crutch */
 				//% if ( in.numpoints > MAX_POINTS_ON_FIXED_WINDING ) Sys_Printf( "[%d]", p->winding->numpoints );

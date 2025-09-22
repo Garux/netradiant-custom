@@ -83,7 +83,7 @@ static void ConvertSurface( FILE *f, int modelNum, int surfaceNum, const Vector3
 
 	/* export vertex xyz */
 	fprintf( f, "\t\t*MESH_VERTEX_LIST\t{\r\n" );
-	for ( int i = 0; i < ds.numVerts; i++ )
+	for ( int i = 0; i < ds.numVerts; ++i )
 	{
 		const bspDrawVert_t& dv = bspDrawVerts[ ds.firstVert + i ];
 		fprintf( f, "\t\t\t*MESH_VERTEX\t%d\t%f\t%f\t%f\r\n", i, dv.xyz[ 0 ], dv.xyz[ 1 ], dv.xyz[ 2 ] );
@@ -106,7 +106,7 @@ static void ConvertSurface( FILE *f, int modelNum, int surfaceNum, const Vector3
 	/* export vertex st */
 	fprintf( f, "\t\t*MESH_NUMTVERTEX\t%d\r\n", ds.numVerts );
 	fprintf( f, "\t\t*MESH_TVERTLIST\t{\r\n" );
-	for ( int i = 0; i < ds.numVerts; i++ )
+	for ( int i = 0; i < ds.numVerts; ++i )
 	{
 		const bspDrawVert_t& dv = bspDrawVerts[ ds.firstVert + i ];
 		if ( lightmapsAsTexcoord ) {
@@ -181,7 +181,7 @@ static void ConvertModel( FILE *f, int modelNum, const Vector3& origin, const st
 	const bspModel_t& model = bspModels[ modelNum ];
 
 	/* go through each drawsurf in the model */
-	for ( int i = 0; i < model.numBSPSurfaces; i++ )
+	for ( int i = 0; i < model.numBSPSurfaces; ++i )
 	{
 		ConvertSurface( f, modelNum, model.firstBSPSurface + i, origin, lmIndices );
 	}
@@ -342,7 +342,7 @@ int ConvertBSPToASE( char *bspName ){
 	if ( lightmapsAsTexcoord ) {
 		numLightmapsASE = Convert_CountLightmaps( dirname );
 		fprintf( f, "\t*MATERIAL_COUNT\t%d\r\n", numLightmapsASE );
-		for ( int i = 0; i < numLightmapsASE; i++ )
+		for ( int i = 0; i < numLightmapsASE; ++i )
 			ConvertLightmap( f, base, i );
 		Convert_ReferenceLightmaps( base, lmIndices );
 	}

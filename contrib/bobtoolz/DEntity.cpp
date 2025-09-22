@@ -116,14 +116,14 @@ bool DEntity::LoadFromPrt( char *filename ){
 	ClearEPairs();
 
 	bool build = false;
-	for ( unsigned int i = 0; i < portals.node_count; i++ )
+	for ( unsigned int i = 0; i < portals.node_count; ++i )
 	{
 		build = false;
 		DBrush* brush = NewBrush();
 
-		for ( unsigned int j = 0; j < portals.node[i].portal_count; j++ )
+		for ( unsigned int j = 0; j < portals.node[i].portal_count; ++j )
 		{
-			for ( unsigned int k = 0; k < portals.node[i].portal[j].point_count - 2; k++ )
+			for ( unsigned int k = 0; k < portals.node[i].portal[j].point_count - 2; ++k )
 			{
 				vec3_t v1, v2, normal, n;
 				VectorSubtract( portals.node[i].portal[j].point[k + 2].p, portals.node[i].portal[j].point[k + 1].p, v1 );

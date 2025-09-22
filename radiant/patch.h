@@ -266,7 +266,7 @@ public:
 	void render( RenderStateFlags state ) const override {
 		gl().glVertexPointer( 3, GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->vertex );
 		const RenderIndex* strip_indices = m_tess.m_indices.data();
-		for ( std::size_t i = 0; i < m_tess.m_numStrips; i++, strip_indices += m_tess.m_lenStrips )
+		for ( std::size_t i = 0; i < m_tess.m_numStrips; ++i, strip_indices += m_tess.m_lenStrips )
 		{
 			gl().glDrawElements( GL_QUAD_STRIP, GLsizei( m_tess.m_lenStrips ), RenderIndexTypeID, strip_indices );
 		}
@@ -301,7 +301,7 @@ public:
 			}
 			gl().glVertexPointer( 3, GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->vertex );
 			const RenderIndex* strip_indices = m_tess.m_indices.data();
-			for ( std::size_t i = 0; i < m_tess.m_numStrips; i++, strip_indices += m_tess.m_lenStrips )
+			for ( std::size_t i = 0; i < m_tess.m_numStrips; ++i, strip_indices += m_tess.m_lenStrips )
 			{
 				gl().glDrawElements( GL_QUAD_STRIP, GLsizei( m_tess.m_lenStrips ), RenderIndexTypeID, strip_indices );
 			}
@@ -639,7 +639,7 @@ public:
 	void testSelect( Selector& selector, SelectionTest& test ){
 		SelectionIntersection best;
 		IndexPointer::index_type* pIndex = m_tess.m_indices.data();
-		for ( std::size_t s = 0; s < m_tess.m_numStrips; s++ )
+		for ( std::size_t s = 0; s < m_tess.m_numStrips; ++s )
 		{
 			test.TestQuadStrip( vertexpointer_arbitrarymeshvertex( m_tess.m_vertices.data() ), IndexPointer( pIndex, m_tess.m_lenStrips ), best );
 			pIndex += m_tess.m_lenStrips;
@@ -1081,11 +1081,11 @@ inline bool Patch_importMatrix( Patch& patch, Tokeniser& tokeniser ){
 	tokeniser.nextLine();
 	RETURN_FALSE_IF_FAIL( Tokeniser_parseToken( tokeniser, "(" ) );
 	{
-		for ( std::size_t c = 0; c < patch.getWidth(); c++ )
+		for ( std::size_t c = 0; c < patch.getWidth(); ++c )
 		{
 			tokeniser.nextLine();
 			RETURN_FALSE_IF_FAIL( Tokeniser_parseToken( tokeniser, "(" ) );
-			for ( std::size_t r = 0; r < patch.getHeight(); r++ )
+			for ( std::size_t r = 0; r < patch.getHeight(); ++r )
 			{
 				RETURN_FALSE_IF_FAIL( Tokeniser_parseToken( tokeniser, "(" ) );
 
@@ -1203,10 +1203,10 @@ inline void Patch_exportMatrix( const Patch& patch, TokenWriter& writer ){
 	// write matrix
 	writer.writeToken( "(" );
 	writer.nextLine();
-	for ( std::size_t c = 0; c < patch.getWidth(); c++ )
+	for ( std::size_t c = 0; c < patch.getWidth(); ++c )
 	{
 		writer.writeToken( "(" );
-		for ( std::size_t r = 0; r < patch.getHeight(); r++ )
+		for ( std::size_t r = 0; r < patch.getHeight(); ++r )
 		{
 			writer.writeToken( "(" );
 

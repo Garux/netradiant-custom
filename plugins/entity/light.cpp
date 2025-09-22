@@ -248,7 +248,7 @@ void drawtri( float * a, float * b, float * c, int div, Vector3 radiiPoints[SPHE
 		radiiPoints[k++] = Vector3( c[0], c[1], c[2] );
 	} else {
 		float ab[3], ac[3], bc[3];
-		for( int i = 0; i < 3; i++ ) {
+		for( int i = 0; i < 3; ++i ) {
 			ab[i] = ( a[i] + b[i] ) / 2;
 			ac[i] = ( a[i] + c[i] ) / 2;
 			bc[i] = ( b[i] + c[i] ) / 2;
@@ -265,7 +265,7 @@ void drawtri( float * a, float * b, float * c, int div, Vector3 radiiPoints[SPHE
 
 void sphere_construct_fill( Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
 	int k = 0;
-	for( int i = 0; i < 20; i++ )
+	for( int i = 0; i < 20; ++i )
 		drawtri( vdata[tindices[i][0]], vdata[tindices[i][1]], vdata[tindices[i][2]], SPHERE_FILL_DIV, radiiPoints, k );
 }
 
@@ -334,7 +334,7 @@ void sphere_draw_wire( const Vector3& origin, float radius, int sides ){
 	{
 		gl().glBegin( GL_LINE_LOOP );
 
-		for ( int i = 0; i <= sides; i++ )
+		for ( int i = 0; i <= sides; ++i )
 		{
 			double ds = sin( ( i * 2 * c_pi ) / sides );
 			double dc = cos( ( i * 2 * c_pi ) / sides );
@@ -352,7 +352,7 @@ void sphere_draw_wire( const Vector3& origin, float radius, int sides ){
 	{
 		gl().glBegin( GL_LINE_LOOP );
 
-		for ( int i = 0; i <= sides; i++ )
+		for ( int i = 0; i <= sides; ++i )
 		{
 			double ds = sin( ( i * 2 * c_pi ) / sides );
 			double dc = cos( ( i * 2 * c_pi ) / sides );
@@ -370,7 +370,7 @@ void sphere_draw_wire( const Vector3& origin, float radius, int sides ){
 	{
 		gl().glBegin( GL_LINE_LOOP );
 
-		for ( int i = 0; i <= sides; i++ )
+		for ( int i = 0; i <= sides; ++i )
 		{
 			double ds = sin( ( i * 2 * c_pi ) / sides );
 			double dc = cos( ( i * 2 * c_pi ) / sides );
@@ -406,7 +406,7 @@ void light_draw_radius_wire( const Vector3& origin, const std::array<float, 3>& 
 void sphere_construct_wire( Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
 	int k = 0;
 
-	for ( int i = 0; i < SPHERE_WIRE_SIDES; i++ )
+	for ( int i = 0; i < SPHERE_WIRE_SIDES; ++i )
 	{
 		double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
 		double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
@@ -419,7 +419,7 @@ void sphere_construct_wire( Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
 		    );
 	}
 
-	for ( int i = 0; i < SPHERE_WIRE_SIDES; i++ )
+	for ( int i = 0; i < SPHERE_WIRE_SIDES; ++i )
 	{
 		double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
 		double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
@@ -432,7 +432,7 @@ void sphere_construct_wire( Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
 		    );
 	}
 
-	for ( int i = 0; i < SPHERE_WIRE_SIDES; i++ )
+	for ( int i = 0; i < SPHERE_WIRE_SIDES; ++i )
 	{
 		double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
 		double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
@@ -453,7 +453,7 @@ void sphere_draw_wire( const Vector3& origin, float radius, const Vector3 radiiP
 		{
 			gl().glBegin( GL_LINE_LOOP );
 
-			for ( int i = 0; i < SPHERE_WIRE_SIDES; i++ )
+			for ( int i = 0; i < SPHERE_WIRE_SIDES; ++i )
 			{
 				gl().glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[k++], radius ) ) ) );
 			}

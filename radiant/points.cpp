@@ -153,7 +153,7 @@ void CPointfile::GenerateDisplayList(){
 	gl().glNewList( m_displaylist, GL_COMPILE );
 
 	gl().glBegin( GL_LINE_STRIP );
-	for ( std::size_t i = 0; i < s_num_points; i++ )
+	for ( std::size_t i = 0; i < s_num_points; ++i )
 		gl().glVertex3fv( vector3_to_array( s_pointvecs[i] ) );
 	gl().glEnd();
 	gl().glLineWidth( 1 );

@@ -300,7 +300,7 @@ void Camera_updateProjection( camera_t& camera ){
 }
 
 void Camera_updateVectors( camera_t& camera ){
-	for ( int i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; ++i )
 	{
 		camera.vright[i] = camera.modelview[( i << 2 ) + 0];
 		camera.vup[i] = camera.modelview[( i << 2 ) + 1];
@@ -2134,7 +2134,7 @@ void CamWnd::draw(){
 void CamWnd::BenchMark(){
 	Timer timer;
 	timer.start();
-	for ( int i = 0; i < 100; i++ )
+	for ( int i = 0; i < 100; ++i )
 	{
 		Vector3 angles;
 		angles[CAMERA_ROLL] = 0;

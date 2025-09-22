@@ -149,7 +149,7 @@ Image* LoadPNGBuff( unsigned char* fbuffer ){
 	row_pointers = (png_byte**) malloc( ( height ) * sizeof( png_byte* ) );
 
 	int i;
-	for ( i = 0; i < ( height ); i++ )
+	for ( i = 0; i < ( height ); ++i )
 		row_pointers[i] = (png_byte*)( image->getRGBAPixels() ) + i * 4 * ( width );
 
 	// actual read

@@ -71,7 +71,7 @@ vec_t DWinding::WindingArea(){
 	vec_t total;
 
 	total = 0;
-	for ( int i = 2; i < numpoints; i++ )
+	for ( int i = 2; i < numpoints; ++i )
 	{
 		VectorSubtract( p[i - 1], p[0], d1 );
 		VectorSubtract( p[i], p[0], d2 );
@@ -88,7 +88,7 @@ void DWinding::RemoveColinearPoints(){
 	vec3_t p2[MAX_POINTS_ON_WINDING];
 
 	int nump = 0;
-	for ( int i = 0; i < numpoints; i++ )
+	for ( int i = 0; i < numpoints; ++i )
 	{
 		int j = ( i + 1 ) % numpoints;
 		int k = ( i + numpoints - 1 ) % numpoints;
@@ -126,9 +126,9 @@ void DWinding::WindingBounds( vec3_t mins, vec3_t maxs ){
 	VectorCopy( mins, p[0] );
 	VectorCopy( maxs, p[0] );
 
-	for ( int i = 1; i < numpoints; i++ )
+	for ( int i = 1; i < numpoints; ++i )
 	{
-		for ( int j = 0; j < 3; j++ )
+		for ( int j = 0; j < 3; ++j )
 		{
 			vec_t v = p[i][j];
 			if ( v < mins[j] ) {
@@ -143,7 +143,7 @@ void DWinding::WindingBounds( vec3_t mins, vec3_t maxs ){
 
 void DWinding::WindingCentre( vec3_t centre ){
 	VectorCopy( vec3_origin, centre );
-	for ( int i = 0; i < numpoints; i++ )
+	for ( int i = 0; i < numpoints; ++i )
 		VectorAdd( p[i], centre, centre );
 
 	float scale = 1.0f / numpoints;
@@ -179,7 +179,7 @@ int DWinding::WindingOnPlaneSide( vec3_t normal, vec_t dist ){
 	bool front = false;
 	bool back = false;
 
-	for ( int i = 0; i < numpoints; i++ )
+	for ( int i = 0; i < numpoints; ++i )
 	{
 		vec_t d = DotProduct( p[i], normal ) - dist;
 		if ( d < -ON_EPSILON ) {
@@ -223,12 +223,12 @@ void DWinding::CheckWinding(){
 
 	DPlane* wPlane = WindingPlane();
 	int i;
-	for ( i = 0; i < numpoints; i++ )
+	for ( i = 0; i < numpoints; ++i )
 	{
 		p1 = p[i];
 
 		int j;
-		for ( j = 0; j < 3; j++ )
+		for ( j = 0; j < 3; ++j )
 			if ( p1[j] > BOGUS_RANGE || p1[j] < -BOGUS_RANGE ) {
 				globalWarningStream() << "CheckFace: BOGUS_RANGE: " << p1[j] << '\n';
 			}
@@ -254,7 +254,7 @@ void DWinding::CheckWinding(){
 		edgedist = DotProduct( p1, edgenormal );
 
 		// all other points must be on front side
-		for ( j = 0; j < numpoints; j++ )
+		for ( j = 0; j < numpoints; ++j )
 		{
 			if ( j == i ) {
 				continue;
@@ -274,7 +274,7 @@ DWinding* DWinding::ReverseWinding(){
 	auto *c = new DWinding;
 	c->AllocWinding( numpoints );
 
-	for ( int i = 0; i < numpoints; i++ )
+	for ( int i = 0; i < numpoints; ++i )
 		VectorCopy( p[numpoints - 1 - i], c->p[i] );
 
 	return c;
@@ -292,7 +292,7 @@ bool DWinding::ChopWindingInPlace( const DPlane* chopPlane, vec_t epsilon ){
 	}
 
 	// determine sides for each point
-	for ( int i = 0; i < numpoints; i++ )
+	for ( int i = 0; i < numpoints; ++i )
 	{
 		dists[i] = DotProduct( p[i], chopPlane->normal ) - chopPlane->_d;
 
@@ -327,7 +327,7 @@ bool DWinding::ChopWindingInPlace( const DPlane* chopPlane, vec_t epsilon ){
 	f.AllocWinding( maxpts );
 	f.numpoints = 0;
 
-	for ( int i = 0; i < numpoints; i++ )
+	for ( int i = 0; i < numpoints; ++i )
 	{
 		const vec3_t& p1 = p[i];
 
@@ -351,7 +351,7 @@ bool DWinding::ChopWindingInPlace( const DPlane* chopPlane, vec_t epsilon ){
 
 		const vec_t dot = dists[i] / ( dists[i] - dists[i + 1] );
 		vec3_t mid;
-		for ( int j = 0; j < 3; j++ )
+		for ( int j = 0; j < 3; ++j )
 		{
 			if ( chopPlane->normal[j] == 1 ) {
 				mid[j] = chopPlane->_d;
@@ -390,7 +390,7 @@ void DWinding::ClipWindingEpsilon( DPlane* chopPlane, vec_t epsilon, DWinding **
 
 // determine sides for each point
 	int i;
-	for ( i = 0; i < numpoints; i++ )
+	for ( i = 0; i < numpoints; ++i )
 	{
 		vec_t dot = -chopPlane->DistanceToPoint( p[i] );
 		dists[i] = dot;
@@ -436,7 +436,7 @@ void DWinding::ClipWindingEpsilon( DPlane* chopPlane, vec_t epsilon, DWinding **
 	*front = f;
 	*back = b;
 
-	for ( i = 0; i < numpoints; i++ )
+	for ( i = 0; i < numpoints; ++i )
 	{
 		p1 = p[i];
 
@@ -465,7 +465,7 @@ void DWinding::ClipWindingEpsilon( DPlane* chopPlane, vec_t epsilon, DWinding **
 		p2 = p[( i + 1 ) % numpoints];
 
 		vec_t dot = dists[i] / ( dists[i] - dists[i + 1] );
-		for ( int j = 0; j < 3; j++ )
+		for ( int j = 0; j < 3; ++j )
 		{
 			if ( chopPlane->normal[j] == 1 ) {
 				mid[j] = chopPlane->_d;

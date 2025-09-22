@@ -169,7 +169,7 @@ int AnalyzeBSP( Args& args ){
 	Sys_Printf( "---------------------------------------\n" );
 
 	/* analyze each lump */
-	for ( i = 0; i < 100; i++ )
+	for ( i = 0; i < 100; ++i )
 	{
 		/* call of duty swapped lump pairs */
 		if ( lumpSwap ) {
@@ -214,7 +214,7 @@ int AnalyzeBSP( Args& args ){
 			else
 			{
 				/* guess based on size/count */
-				for ( lumpTest = lumpTests; lumpTest->radix > 0; lumpTest++ )
+				for ( lumpTest = lumpTests; lumpTest->radix > 0; ++lumpTest )
 				{
 					if ( ( length % lumpTest->radix ) != 0 ) {
 						continue;

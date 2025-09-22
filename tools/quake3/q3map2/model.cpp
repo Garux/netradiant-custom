@@ -1162,7 +1162,7 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		ds->indexes = safe_calloc( ds->numIndexes * sizeof( ds->indexes[ 0 ] ) );
 // Sys_Printf( "verts %i idx %i\n", ds->numVerts, ds->numIndexes );
 		/* copy vertexes */
-		for ( i = 0; i < ds->numVerts; i++ )
+		for ( i = 0; i < ds->numVerts; ++i )
 		{
 			/* get vertex */
 			bspDrawVert_t& dv = ds->verts[ i ];
@@ -1199,7 +1199,7 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 			/* set lightmap/color bits */
 			{
 				const aiColor4D color = mesh->HasVertexColors( 0 )? mesh->mColors[0][i] : aiColor4D( 1 );
-				for ( j = 0; j < MAX_LIGHTMAPS; j++ )
+				for ( j = 0; j < MAX_LIGHTMAPS; ++j )
 				{
 					dv.lightmap[ j ] = { 0, 0 };
 					if ( spawnFlags & eColorToAlpha ) { // spawnflag 32: model color -> alpha hack
@@ -1221,7 +1221,7 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 			size_t idCopied = 0;
 			for ( const aiFace& face : Span( mesh->mFaces, mesh->mNumFaces ) ){
 				// if( face.mNumIndices == 3 )
-				for ( size_t i = 0; i < 3; i++ ){
+				for ( size_t i = 0; i < 3; ++i ){
 					ds->indexes[idCopied++] = face.mIndices[i];
 				}
 				if( transform_lefthanded ){

@@ -292,7 +292,7 @@ private:
 		for ( size_t t = 0; t < mesh->mNumFaces; ++t ){
 			const aiFace& face = mesh->mFaces[t];
 			// if( face.mNumIndices == 3 )
-			for ( size_t i = 0; i < 3; i++ ){
+			for ( size_t i = 0; i < 3; ++i ){
 				m_indices[idCopied++] = face.mIndices[i];
 			}
 		}

@@ -254,7 +254,7 @@ void CScriptParser::LoadScript( const char* pScript ) {
 }
 
 void CScriptParser::AddBreakChar( char c ) {
-	for ( int i = 0; i < SP_MAX_BREAKCHARS; i++ ) {
+	for ( int i = 0; i < SP_MAX_BREAKCHARS; ++i ) {
 		if ( !m_breakChars[i] ) {
 			m_breakChars[i] = c;
 			return;
@@ -265,7 +265,7 @@ void CScriptParser::AddBreakChar( char c ) {
 }
 
 bool CScriptParser::IsBreakChar( char c ) {
-	for ( int i = 0; i < SP_MAX_BREAKCHARS; i++ ) {
+	for ( int i = 0; i < SP_MAX_BREAKCHARS; ++i ) {
 		if ( !m_breakChars[i] ) {
 			return false;
 		}

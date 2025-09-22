@@ -107,11 +107,11 @@ public:
 
 template<typename ReadPixel>
 void ReadBMP( PointerInputStream& inputStream, byte* bmpRGBA, int rows, int columns, ReadPixel readPixel ){
-	for ( int row = rows - 1; row >= 0; row-- )
+	for ( int row = rows - 1; row >= 0; --row )
 	{
 		byte* pixbuf = bmpRGBA + row * columns * 4;
 
-		for ( int column = 0; column < columns; column++ )
+		for ( int column = 0; column < columns; ++column )
 		{
 			readPixel( inputStream, pixbuf );
 		}

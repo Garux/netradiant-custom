@@ -231,7 +231,7 @@ EntityClass *Eclass_InitFromText( const char *text ){
 			return 0;
 		}
 
-		for ( int i = 0; i < 2; i++ )
+		for ( int i = 0; i < 2; ++i )
 		{
 			while ( *text != ')' )
 			{
@@ -249,7 +249,7 @@ EntityClass *Eclass_InitFromText( const char *text ){
 		// get the flags: advance past the first \n
 		while ( *text && *text++ != '\n' ){};
 
-		for ( std::size_t i = 0; i < MAX_FLAGS; i++ )
+		for ( std::size_t i = 0; i < MAX_FLAGS; ++i )
 		{
 			p = COM_Parse( p );
 			if ( p == nullptr || p > text ) {

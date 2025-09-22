@@ -103,7 +103,7 @@ void FreeTree( tree_t& tree ){
 //===============================================================
 
 static void PrintTree_r( const node_t *node, int depth ){
-	for ( int i = 0; i < depth; i++ )
+	for ( int i = 0; i < depth; ++i )
 		Sys_Printf( "  " );
 	if ( node->planenum == PLANENUM_LEAF ) {
 		if ( node->brushlist.empty() ) {

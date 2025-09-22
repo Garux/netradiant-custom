@@ -58,7 +58,7 @@ DBobView::~DBobView(){
 void DBobView::render( RenderStateFlags state ) const {
 	gl().glBegin( GL_LINE_STRIP );
 
-	for ( int i = 0; i < nPathCount; i++ )
+	for ( int i = 0; i < nPathCount; ++i )
 		gl().glVertex3fv( path[i] );
 
 	gl().glEnd();
@@ -149,7 +149,7 @@ bool DBobView::CalculateTrajectory( vec3_t start, vec3_t apex, float multiplier,
 	path.reset( new vec3_t[points] );
 
 	float interval = multiplier * flight_time / points;
-	for ( int i = 0; i < points; i++ )
+	for ( int i = 0; i < points; ++i )
 	{
 		float ltime = interval * i;
 

@@ -79,13 +79,13 @@ int DBrush::BuildPoints(){
 		return 0;                   // with only 3 faces u can't have a bounded soild
 
 	}
-	for ( std::list<DPlane *>::const_iterator p1 = faceList.begin(); p1 != faceList.end(); p1++ )
+	for ( std::list<DPlane *>::const_iterator p1 = faceList.begin(); p1 != faceList.end(); ++p1 )
 	{
 		std::list<DPlane *>::const_iterator p2 = p1;
-		for ( p2++; p2 != faceList.end(); p2++ )
+		for ( ++p2; p2 != faceList.end(); ++p2 )
 		{
 			std::list<DPlane *>::const_iterator p3 = p2;
-			for ( p3++; p3 != faceList.end(); p3++ )
+			for ( ++p3; p3 != faceList.end(); ++p3 )
 			{
 				vec3_t pnt;
 				if ( ( *p1 )->PlaneIntersection( *p2, *p3, pnt ) ) {
@@ -201,7 +201,7 @@ int DBrush::RemoveRedundantPlanes(){
 	{
 		std::list<DPlane *>::iterator p2 = p1;
 
-		for ( p2++; p2 != faceList.end(); p2++ )
+		for ( ++p2; p2 != faceList.end(); ++p2 )
 		{
 			if ( **p1 == **p2 ) {
 				if ( !strcmp( ( *p1 )->m_shader.c_str(), "textures/common/caulk" ) ) {
@@ -345,7 +345,7 @@ bool DBrush::IsCutByPlane( DPlane *cuttingPlane ){
 		return true;
 	}
 
-	for ( chkPnt++ = pointList.begin(); chkPnt != pointList.end(); chkPnt++ )
+	for ( ++chkPnt; chkPnt != pointList.end(); ++chkPnt )
 	{
 		dist = cuttingPlane->DistanceToPoint( ( *chkPnt )->_pnt );
 
@@ -527,7 +527,7 @@ void DBrush::BuildBounds(){
 		VectorCopy( ( *first )->_pnt, bbox_max );
 
 		std::list<DPoint *>::const_iterator point = pointList.begin();
-		for ( point++; point != pointList.end(); point++ )
+		for ( ++point; point != pointList.end(); ++point )
 		{
 			if ( ( *point )->_pnt[0] > bbox_max[0] ) {
 				bbox_max[0] = ( *point )->_pnt[0];
@@ -672,13 +672,13 @@ void DBrush::BuildFromWinding( DWinding *w ){
 	DWinding* w2;
 	w2 = w->CopyWinding();
 	int i;
-	for ( i = 0; i < w2->numpoints; i++ )
+	for ( i = 0; i < w2->numpoints; ++i )
 		VectorAdd( w2->p[i], wPlane->normal, w2->p[i] );
 
 	AddFace( w2->p[0], w2->p[1], w2->p[2], NULL );
 	AddFace( w->p[2], w->p[1], w->p[0], NULL );
 
-	for ( i = 0; i < w->numpoints - 1; i++ )
+	for ( i = 0; i < w->numpoints - 1; ++i )
 		AddFace( w2->p[i], w->p[i], w->p[i + 1], NULL );
 	AddFace( w2->p[w->numpoints - 1], w->p[w->numpoints - 1], w->p[0], NULL );
 
@@ -711,7 +711,7 @@ void DBrush::SaveToFile( FILE *pFile ){
 void DBrush::Rotate( vec3_t vOrigin, vec3_t vRotation ){
 	for ( DPlane *plane : faceList )
 	{
-		for ( int i = 0; i < 3; i++ )
+		for ( int i = 0; i < 3; ++i )
 			VectorRotate( plane->points[i], vRotation, vOrigin );
 
 		plane->Rebuild();

@@ -169,7 +169,7 @@ static int AddEdge( bspDrawVert_t& dv1, bspDrawVert_t& dv2, bool createNonAxial 
  */
 
 static void AddSurfaceEdges( mapDrawSurface_t& ds ){
-	for ( int i = 0; i < ds.numVerts; i++ )
+	for ( int i = 0; i < ds.numVerts; ++i )
 	{
 		/* save the edge number in the lightmap field so we don't need to look it up again */
 		bspDrawVert_edge_index_write( ds.verts[ i ], AddEdge( ds.verts[ i ], ds.verts[ ( i + 1 ) % ds.numVerts ], false ) );

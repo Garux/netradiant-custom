@@ -231,7 +231,7 @@ int MD3Surface_read( Surface& surface, unsigned char* buffer ){
 		PointerInputStream stStream( buffer + md3Surface.ofsSt );
 
 		// read verts into vertex array - xyz, st, normal
-		for ( int i = 0; i < md3Surface.numVerts; i++ )
+		for ( int i = 0; i < md3Surface.numVerts; ++i )
 		{
 			md3XyzNormal_t md3Xyz;
 			istream_read_md3XyzNormal( xyzNormalStream, md3Xyz );
@@ -253,7 +253,7 @@ int MD3Surface_read( Surface& surface, unsigned char* buffer ){
 		surface.indices().reserve( md3Surface.numTriangles * 3 );
 
 		PointerInputStream inputStream( buffer + md3Surface.ofsTriangles );
-		for ( int i = 0; i < md3Surface.numTriangles; i++ )
+		for ( int i = 0; i < md3Surface.numTriangles; ++i )
 		{
 			md3Triangle_t md3Triangle;
 			istream_read_md3Triangle( inputStream, md3Triangle );

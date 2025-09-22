@@ -35,16 +35,16 @@ const char** g_argv;
 void args_init( int argc, char* argv[] ){
 	int i, j, k;
 
-	for ( i = 1; i < argc; i++ )
+	for ( i = 1; i < argc; ++i )
 	{
-		for ( k = i; k < argc; k++ )
+		for ( k = i; k < argc; ++k )
 			if ( argv[k] != 0 ) {
 				break;
 			}
 
 		if ( k > i ) {
 			k -= i;
-			for ( j = i + k; j < argc; j++ )
+			for ( j = i + k; j < argc; ++j )
 				argv[j - k] = argv[j];
 			argc -= k;
 		}

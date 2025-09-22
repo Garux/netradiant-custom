@@ -39,7 +39,7 @@ bool VectorIsOnAxis( vec3_t v ){
 	int i, zeroComponentCount;
 
 	zeroComponentCount = 0;
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		if ( v[i] == 0.0 ) {
 			zeroComponentCount++;
@@ -62,7 +62,7 @@ bool VectorIsOnAxis( vec3_t v ){
 bool VectorIsOnAxialPlane( vec3_t v ){
 	int i;
 
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		if ( v[i] == 0.0 ) {
 			// The zero vector will be on axial plane.
@@ -101,7 +101,7 @@ vec_t VectorLength( const vec3_t v ){
 	float length;
 
 	length = 0.0f;
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 		length += v[i] * v[i];
 	length = (float)sqrt( length );
 
@@ -111,7 +111,7 @@ vec_t VectorLength( const vec3_t v ){
 bool VectorCompare( const vec3_t v1, const vec3_t v2 ){
 	int i;
 
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 		if ( fabs( v1[i] - v2[i] ) > EQUAL_EPSILON ) {
 			return false;
 		}
@@ -252,7 +252,7 @@ void VectorRotate( vec3_t vIn, vec3_t vRotation, vec3_t out ){
 	nIndex[1][0] = 2; nIndex[1][1] = 0;
 	nIndex[2][0] = 0; nIndex[2][1] = 1;
 
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		if ( vRotation[i] != 0 ) {
 			float dAngle = vRotation[i] * Q_PI / 180.0f;
@@ -282,7 +282,7 @@ void VectorPolar( vec3_t v, float radius, float theta, float phi ){
 
 void VectorSnap( vec3_t v ){
 	int i;
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		v[i] = (vec_t)FLOAT_TO_INTEGER( v[i] );
 	}
@@ -290,7 +290,7 @@ void VectorSnap( vec3_t v ){
 
 void VectorISnap( vec3_t point, int snap ){
 	int i;
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		point[i] = (vec_t)FLOAT_SNAP( point[i], snap );
 	}
@@ -298,7 +298,7 @@ void VectorISnap( vec3_t point, int snap ){
 
 void VectorFSnap( vec3_t point, float snap ){
 	int i;
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		point[i] = (vec_t)FLOAT_SNAP( point[i], snap );
 	}
@@ -344,7 +344,7 @@ void AddPointToBounds( vec3_t v, vec3_t mins, vec3_t maxs ){
 		}
 	}
 
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		val = v[i];
 		if ( val < mins[i] ) {
@@ -552,7 +552,7 @@ void PerpendicularVector( vec3_t dst, const vec3_t src ){
 	/*
 	** find the smallest magnitude axially aligned vector
 	*/
-	for ( pos = 0, i = 0; i < 3; i++ )
+	for ( pos = 0, i = 0; i < 3; ++i )
 	{
 		if ( fabs( src[i] ) < minelem ) {
 			pos = i;
@@ -631,7 +631,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point,
 	MatrixMultiply( m, zrot, tmpmat );
 	MatrixMultiply( tmpmat, im, rot );
 
-	for ( i = 0; i < 3; i++ ) {
+	for ( i = 0; i < 3; ++i ) {
 		dst[i] = rot[i][0] * point[0] + rot[i][1] * point[1] + rot[i][2] * point[2];
 	}
 }

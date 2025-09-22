@@ -88,7 +88,7 @@ static void ConvertSurfaceToOBJ( FILE *f, int modelNum, int surfaceNum, const Ve
 	}
 
 	/* export vertex */
-	for ( int i = 0; i < ds.numVerts; i++ )
+	for ( int i = 0; i < ds.numVerts; ++i )
 	{
 		const bspDrawVert_t& dv = bspDrawVerts[ ds.firstVert + i ];
 		fprintf( f, "# vertex %d\r\n", i + objVertexCount + 1 );
@@ -129,7 +129,7 @@ static void ConvertModelToOBJ( FILE *f, int modelNum, const Vector3& origin, con
 	const bspModel_t& model = bspModels[ modelNum ];
 
 	/* go through each drawsurf in the model */
-	for ( int i = 0; i < model.numBSPSurfaces; i++ )
+	for ( int i = 0; i < model.numBSPSurfaces; ++i )
 	{
 		ConvertSurfaceToOBJ( f, modelNum, model.firstBSPSurface + i, origin, lmIndices );
 	}
@@ -152,7 +152,7 @@ static void ConvertShaderToMTL( FILE *f, const bspShader_t& shader ){
 	                : StringStream<64>( si.shaderImage->filename );
 
 	/* blender hates this, so let's not do it
-	for( char *c = filename; *c; c++ )
+	for( char *c = filename; *c; ++c )
 		if( *c == '/' )
 			*c = '\\';
 	*/
@@ -189,9 +189,9 @@ static void ConvertLightmapToMTL( FILE *f, const char *base, int lightmapNum ){
 int Convert_CountLightmaps( const char* dirname ){
 	int lightmapCount;
 	//FIXME numBSPLightmaps is 0, must be bspLightBytes / ( g_game->lightmapSize * g_game->lightmapSize * 3 )
-	for ( lightmapCount = 0; lightmapCount < numBSPLightmaps; lightmapCount++ )
+	for ( lightmapCount = 0; lightmapCount < numBSPLightmaps; ++lightmapCount )
 		;
-	for ( ; ; lightmapCount++ )
+	for ( ; ; ++lightmapCount )
 	{
 		char buf[1024];
 		std::snprintf( buf, std::size( buf ), "%s/" EXTERNAL_LIGHTMAP, dirname, lightmapCount );
@@ -322,7 +322,7 @@ int ConvertBSPToOBJ( char *bspName ){
 	}
 
 	if ( lightmapsAsTexcoord ) {
-		for ( int i = firstLightmap; i <= lastLightmap; i++ )
+		for ( int i = firstLightmap; i <= lastLightmap; ++i )
 			ConvertLightmapToMTL( fmtl, base, i );
 	}
 

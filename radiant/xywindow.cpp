@@ -735,7 +735,7 @@ void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 		}
 	}
 
-	for ( int i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; ++i )
 	{
 		if ( mins[i] == maxs[i] )
 			return; // don't create a degenerate brush

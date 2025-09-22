@@ -131,7 +131,7 @@ void ExportLightmaps(){
 	Q_mkdir( dirname );
 
 	/* iterate through the lightmaps */
-	for ( i = 0, lightmap = bspLightBytes.data(); lightmap < ( bspLightBytes.data() + bspLightBytes.size() ); i++, lightmap += ( g_game->lightmapSize * g_game->lightmapSize * 3 ) )
+	for ( i = 0, lightmap = bspLightBytes.data(); lightmap < ( bspLightBytes.data() + bspLightBytes.size() ); ++i, lightmap += ( g_game->lightmapSize * g_game->lightmapSize * 3 ) )
 	{
 		/* write a tga image out */
 		sprintf( filename, "%s/lightmap_%04d.tga", dirname, i );
@@ -212,7 +212,7 @@ int ImportLightmapsMain( Args& args ){
 	Q_mkdir( dirname );
 
 	/* iterate through the lightmaps */
-	for ( i = 0, lightmap = bspLightBytes.data(); lightmap < ( bspLightBytes.data() + bspLightBytes.size() ); i++, lightmap += ( g_game->lightmapSize * g_game->lightmapSize * 3 ) )
+	for ( i = 0, lightmap = bspLightBytes.data(); lightmap < ( bspLightBytes.data() + bspLightBytes.size() ); ++i, lightmap += ( g_game->lightmapSize * g_game->lightmapSize * 3 ) )
 	{
 		/* read a tga image */
 		sprintf( filename, "%s/lightmap_%04d.tga", dirname, i );
@@ -239,10 +239,10 @@ int ImportLightmapsMain( Args& args ){
 
 		/* copy the pixels */
 		in = pixels;
-		for ( y = 1; y <= g_game->lightmapSize; y++ )
+		for ( y = 1; y <= g_game->lightmapSize; ++y )
 		{
 			out = lightmap + ( ( g_game->lightmapSize - y ) * g_game->lightmapSize * 3 );
-			for ( x = 0; x < g_game->lightmapSize; x++, in += 4, out += 3 )
+			for ( x = 0; x < g_game->lightmapSize; ++x, in += 4, out += 3 )
 				std::copy_n( in, 3, out );
 		}
 
@@ -308,7 +308,7 @@ static void FinishRawLightmap( rawLightmap_t *lm ){
 
 	/* count clusters */
 	lm->numLightClusters = 0;
-	for ( i = 0; i < lm->numLightSurfaces; i++ )
+	for ( i = 0; i < lm->numLightSurfaces; ++i )
 	{
 		/* get surface info */
 		info = &surfaceInfos[ lightSurfaces[ lm->firstLightSurface + i ] ];
@@ -320,19 +320,19 @@ static void FinishRawLightmap( rawLightmap_t *lm ){
 	/* allocate buffer for clusters and copy */
 	lm->lightClusters = safe_malloc( lm->numLightClusters * sizeof( *lm->lightClusters ) );
 	c = 0;
-	for ( i = 0; i < lm->numLightSurfaces; i++ )
+	for ( i = 0; i < lm->numLightSurfaces; ++i )
 	{
 		/* get surface info */
 		info = &surfaceInfos[ lightSurfaces[ lm->firstLightSurface + i ] ];
 
 		/* add surface clusters */
-		for ( j = 0; j < info->numSurfaceClusters; j++ )
+		for ( j = 0; j < info->numSurfaceClusters; ++j )
 			lm->lightClusters[ c++ ] = surfaceClusters[ info->firstSurfaceCluster + j ];
 	}
 
 	/* set styles */
 	lm->styles[ 0 ] = LS_NORMAL;
-	for ( i = 1; i < MAX_LIGHTMAPS; i++ )
+	for ( i = 1; i < MAX_LIGHTMAPS; ++i )
 		lm->styles[ i ] = LS_NONE;
 
 	/* set supersampling size */
@@ -417,7 +417,7 @@ static void FinishRawLightmap( rawLightmap_t *lm ){
 	}
 	size = lm->sw * lm->sh;
 	sc = lm->superClusters;
-	for ( i = 0; i < size; i++ )
+	for ( i = 0; i < size; ++i )
 		( *sc++ ) = CLUSTER_UNMAPPED;
 
 	/* deluxemap allocation */
@@ -479,9 +479,9 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
 
 	/* find the longest distance on each row/column */
 	verts = mesh->verts;
-	for ( int y = 0; y < mesh->height; y++ )
+	for ( int y = 0; y < mesh->height; ++y )
 	{
-		for ( int x = 0; x < mesh->width; x++ )
+		for ( int x = 0; x < mesh->width; ++x )
 		{
 			/* get width */
 			if ( x + 1 < mesh->width ) {
@@ -501,7 +501,7 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
 
 	/* determine lightmap width */
 	length = 0;
-	for ( int x = 0; x < ( mesh->width - 1 ); x++ )
+	for ( int x = 0; x < ( mesh->width - 1 ); ++x )
 		length += widthTable[ x ];
 	lm->w = lm->sampleSize != 0 ? ceil( length / lm->sampleSize ) + 1 : 0;
 	value_maximize( lm->w, ds.patchWidth );
@@ -510,7 +510,7 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
 
 	/* determine lightmap height */
 	length = 0;
-	for ( int y = 0; y < ( mesh->height - 1 ); y++ )
+	for ( int y = 0; y < ( mesh->height - 1 ); ++y )
 		length += heightTable[ y ];
 	lm->h = lm->sampleSize != 0 ? ceil( length / lm->sampleSize ) + 1 : 0;
 	value_maximize( lm->h, ds.patchHeight );
@@ -524,10 +524,10 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
 	lm->wrap[ 0 ] = true;
 	lm->wrap[ 1 ] = true;
 	verts = &yDrawVerts[ ds.firstVert ];
-	for ( int y = 0; y < ds.patchHeight; y++ )
+	for ( int y = 0; y < ds.patchHeight; ++y )
 	{
 		t = ( tBasis * y ) + 0.5f;
-		for ( int x = 0; x < ds.patchWidth; x++ )
+		for ( int x = 0; x < ds.patchWidth; ++x )
 		{
 			s = ( sBasis * x ) + 0.5f;
 			verts[ ( y * ds.patchWidth ) + x ].lightmap[ 0 ][ 0 ] = s * superSample;
@@ -643,7 +643,7 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 	sampleSize = lm->sampleSize;
 
 	/* round to the lightmap resolution */
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		mins[ i ] = sampleSize * floor( lm->minmax.mins[ i ] / sampleSize );
 		maxs[ i ] = sampleSize * ceil( lm->minmax.maxs[ i ] / sampleSize );
@@ -739,7 +739,7 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 	lm->axisNum = axisNum;
 
 	/* walk the list of surfaces on this raw lightmap */
-	for ( n = 0; n < lm->numLightSurfaces; n++ )
+	for ( n = 0; n < lm->numLightSurfaces; ++n )
 	{
 		/* get surface */
 		num2 = lightSurfaces[ lm->firstLightSurface + n ];
@@ -747,7 +747,7 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 		verts = &yDrawVerts[ ds2->firstVert ];
 
 		/* set the lightmap texture coordinates in yDrawVerts in [0, superSample * lm->customWidth] space */
-		for ( i = 0; i < ds2->numVerts; i++ )
+		for ( i = 0; i < ds2->numVerts; ++i )
 		{
 			delta = verts[ i ].xyz - origin;
 			s = vector3_dot( delta, vecs[ 0 ] ) + 0.5f;
@@ -789,7 +789,7 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 		lm->vecs[ 2 ] = ds->lightmapVecs[ 2 ];
 
 		/* project stepped lightmap blocks and subtract to get planevecs */
-		for ( i = 0; i < 2; i++ )
+		for ( i = 0; i < 2; ++i )
 		{
 			normalized = vecs[ i ];
 			len = VectorNormalize( normalized );
@@ -872,7 +872,7 @@ struct CompareSurfaceInfo
 		}
 
 		/* then lightmap axis */
-		for ( int i = 0; i < 3; i++ )
+		for ( int i = 0; i < 3; ++i )
 		{
 			if ( aInfo.axis[ i ] < bInfo.axis[ i ] ) {
 				return false;
@@ -890,7 +890,7 @@ struct CompareSurfaceInfo
 			return true;
 		}
 		else if ( aInfo.plane != NULL && bInfo.plane != NULL ) {
-			for ( int i = 0; i < 3; i++ )
+			for ( int i = 0; i < 3; ++i )
 			{
 				if ( aInfo.plane->normal()[ i ] < bInfo.plane->normal()[ i ] ) {
 					return false;
@@ -909,7 +909,7 @@ struct CompareSurfaceInfo
 		}
 
 		/* then position in world */
-		for ( int i = 0; i < 3; i++ )
+		for ( int i = 0; i < 3; ++i )
 		{
 			if ( aInfo.minmax.mins[ i ] < bInfo.minmax.mins[ i ] ) {
 				return false;
@@ -961,7 +961,7 @@ void SetupSurfaceLightmaps(){
 
 	/* allocate a list for per-surface info */
 	surfaceInfos = safe_calloc( numBSPDrawSurfaces * sizeof( *surfaceInfos ) );
-	for ( i = 0; i < numBSPDrawSurfaces; i++ )
+	for ( i = 0; i < numBSPDrawSurfaces; ++i )
 		surfaceInfos[ i ].childSurfaceNum = -1;
 
 	/* allocate a list of surface indexes to be sorted */
@@ -971,7 +971,7 @@ void SetupSurfaceLightmaps(){
 	for ( const bspModel_t& model : bspModels )
 	{
 		/* walk the list of surfaces in this model and fill out the info structs */
-		for ( j = 0; j < model.numBSPSurfaces; j++ )
+		for ( j = 0; j < model.numBSPSurfaces; ++j )
 		{
 			/* make surface index */
 			num = model.firstBSPSurface + j;
@@ -1012,7 +1012,7 @@ void SetupSurfaceLightmaps(){
 
 			/* determine surface bounds */
 			info->minmax.clear();
-			for ( k = 0; k < ds->numVerts; k++ )
+			for ( k = 0; k < ds->numVerts; ++k )
 			{
 				g_mapMinmax.extend( yDrawVerts[ ds->firstVert + k ].xyz );
 				info->minmax.extend( yDrawVerts[ ds->firstVert + k ].xyz );
@@ -1027,7 +1027,7 @@ void SetupSurfaceLightmaps(){
 				}
 
 				/* test leaf surfaces */
-				for ( s = 0; s < leaf.numBSPLeafSurfaces; s++ )
+				for ( s = 0; s < leaf.numBSPLeafSurfaces; ++s )
 				{
 					if ( bspLeafSurfaces[ leaf.firstBSPLeafSurface + s ] == num ) {
 						if ( numSurfaceClusters >= maxSurfaceClusters ) {
@@ -1075,7 +1075,7 @@ void SetupSurfaceLightmaps(){
 	rawLightmaps = safe_calloc( numSurfsLightmapped * sizeof( *rawLightmaps ) );
 
 	/* walk the list of sorted surfaces */
-	for ( i = 0; i < numBSPDrawSurfaces; i++ )
+	for ( i = 0; i < numBSPDrawSurfaces; ++i )
 	{
 		/* get info and attempt early out */
 		num = sortSurfaces[ i ];
@@ -1125,7 +1125,7 @@ void SetupSurfaceLightmaps(){
 		{
 			/* walk the list of surfaces again */
 			added = false;
-			for ( j = i + 1; j < numBSPDrawSurfaces && !lm->finished; j++ )
+			for ( j = i + 1; j < numBSPDrawSurfaces && !lm->finished; ++j )
 			{
 				/* get info and attempt early out */
 				num2 = sortSurfaces[ j ];
@@ -1157,7 +1157,7 @@ void SetupSurfaceLightmaps(){
 	}
 
 	/* allocate vertex luxel storage */
-	for ( k = 0; k < MAX_LIGHTMAPS; k++ )
+	for ( k = 0; k < MAX_LIGHTMAPS; ++k )
 	{
 		vertexLuxels[ k ] = safe_calloc( bspDrawVerts.size() * sizeof( *vertexLuxels[ 0 ] ) );
 		radVertexLuxels[ k ] = safe_calloc( bspDrawVerts.size() * sizeof( *radVertexLuxels[ 0 ] ) );
@@ -1204,7 +1204,7 @@ void StitchSurfaceLightmaps(){
 
 	/* walk the list of raw lightmaps */
 	numStitched = 0;
-	for ( i = 0; i < numRawLightmaps; i++ )
+	for ( i = 0; i < numRawLightmaps; ++i )
 	{
 		/* print pacifier */
 		if ( const int f = 10 * i / numRawLightmaps; f != fOld ) {
@@ -1217,7 +1217,7 @@ void StitchSurfaceLightmaps(){
 
 		/* walk rest of lightmaps */
 		numCandidates = 0;
-		for ( j = i + 1; j < numRawLightmaps && numCandidates < MAX_STITCH_CANDIDATES; j++ )
+		for ( j = i + 1; j < numRawLightmaps && numCandidates < MAX_STITCH_CANDIDATES; ++j )
 		{
 			/* get lightmap b */
 			b = &rawLightmaps[ j ];
@@ -1232,9 +1232,9 @@ void StitchSurfaceLightmaps(){
 		}
 
 		/* walk luxels */
-		for ( y = 0; y < a->sh; y++ )
+		for ( y = 0; y < a->sh; ++y )
 		{
-			for ( x = 0; x < a->sw; x++ )
+			for ( x = 0; x < a->sw; ++x )
 			{
 				/* ignore unmapped/unlit luxels */
 				lm = a;
@@ -1251,7 +1251,7 @@ void StitchSurfaceLightmaps(){
 				const Vector3& normal = lm->getSuperNormal( x, y );
 
 				/* walk candidate list */
-				for ( j = 0; j < numCandidates; j++ )
+				for ( j = 0; j < numCandidates; ++j )
 				{
 					/* get candidate */
 					b = c[ j ];
@@ -1269,9 +1269,9 @@ void StitchSurfaceLightmaps(){
 					Vector3 average( 0 );
 					numLuxels = 0;
 					totalColor = 0.0f;
-					for ( y2 = 0; y2 < b->sh && numLuxels < MAX_STITCH_LUXELS; y2++ )
+					for ( y2 = 0; y2 < b->sh && numLuxels < MAX_STITCH_LUXELS; ++y2 )
 					{
-						for ( x2 = 0; x2 < b->sw && numLuxels < MAX_STITCH_LUXELS; x2++ )
+						for ( x2 = 0; x2 < b->sw && numLuxels < MAX_STITCH_LUXELS; ++x2 )
 						{
 							/* ignore same luxels */
 							if ( a == b && abs( x - x2 ) <= 1 && abs( y - y2 ) <= 1 ) {
@@ -1373,9 +1373,9 @@ static bool CompareBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int 
 	/* compare luxels */
 	double delta = 0.0;
 	double total = 0.0;
-	for ( int y = 0; y < a->h; y++ )
+	for ( int y = 0; y < a->h; ++y )
 	{
-		for ( int x = 0; x < a->w; x++ )
+		for ( int x = 0; x < a->w; ++x )
 		{
 			/* increment total */
 			total += 1.0;
@@ -1450,9 +1450,9 @@ static bool MergeBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int bN
 	}
 
 	/* merge luxels */
-	for ( y = 0; y < a->h; y++ )
+	for ( y = 0; y < a->h; ++y )
 	{
-		for ( x = 0; x < a->w; x++ )
+		for ( x = 0; x < a->w; ++x )
 		{
 			/* get luxels */
 			Vector3& aLuxel = a->getBspLuxel( aNum, x, y );
@@ -1497,7 +1497,7 @@ static bool ApproximateLuxel( rawLightmap_t *lm, const bspDrawVert_t& dv ){
 	const int y = std::clamp( int( dv.lightmap[ 0 ][ 1 ] / superSample ), 0, lm->h - 1 );
 
 	/* walk list */
-	for ( int lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+	for ( int lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 	{
 		/* early out */
 		if ( lm->styles[ lightmapNum ] == LS_NONE ) {
@@ -1518,7 +1518,7 @@ static bool ApproximateLuxel( rawLightmap_t *lm, const bspDrawVert_t& dv ){
 
 		/* styles are not affected by minlight */
 		if ( lightmapNum == 0 ) {
-			for ( int i = 0; i < 3; i++ )
+			for ( int i = 0; i < 3; ++i )
 			{
 				/* set min color */
 				value_maximize( color[ i ], minLight[ i ] );
@@ -1531,7 +1531,7 @@ static bool ApproximateLuxel( rawLightmap_t *lm, const bspDrawVert_t& dv ){
 		Color4b vcb( ColorToBytes( vertexColor, 1.0f ), 0 );
 
 		/* compare */
-		for ( int i = 0; i < 3; i++ )
+		for ( int i = 0; i < 3; ++i )
 		{
 			if ( abs( cb[ i ] - vcb[ i ] ) > approximateTolerance ) {
 				return false;
@@ -1562,7 +1562,7 @@ static bool ApproximateTriangle_r( rawLightmap_t *lm, const TriRef& tri ){
 	{
 		/* find the longest edge and split it */
 		float maxDist = 0;
-		for ( int i = 0; i < 3; i++ )
+		for ( int i = 0; i < 3; ++i )
 		{
 			const float dist = vector2_length( tri[ i ]->lightmap[ 0 ] - tri[ ( i + 1 ) % 3 ]->lightmap[ 0 ] );
 			if ( dist > maxDist ) {
@@ -1617,7 +1617,7 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 	}
 
 	/* don't approx lightmaps with styles */
-	for ( int i = 1; i < MAX_LIGHTMAPS; i++ )
+	for ( int i = 1; i < MAX_LIGHTMAPS; ++i )
 	{
 		if ( lm->styles[ i ] != LS_NONE ) {
 			return false;
@@ -1629,7 +1629,7 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 	bool approximated = true;
 
 	/* walk the list of surfaces on this raw lightmap */
-	for ( int n = 0; n < lm->numLightSurfaces; n++ )
+	for ( int n = 0; n < lm->numLightSurfaces; ++n )
 	{
 		/* get surface */
 		const int num = lightSurfaces[ lm->firstLightSurface + n ];
@@ -1697,9 +1697,9 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 
 			/* map the mesh quads */
 			info.approximated = true;
-			for ( int y = 0; y < ( mesh->height - 1 ) && info.approximated; y++ )
+			for ( int y = 0; y < ( mesh->height - 1 ) && info.approximated; ++y )
 			{
-				for ( int x = 0; x < ( mesh->width - 1 ) && info.approximated; x++ )
+				for ( int x = 0; x < ( mesh->width - 1 ) && info.approximated; ++x )
 				{
 					/* set indexes */
 					const int pw[ 5 ] = {
@@ -1855,7 +1855,7 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 
 
 	/* set default lightmap number (-3 = LIGHTMAP_BY_VERTEX) */
-	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		lm->outLightmapNums[ lightmapNum ] = -3;
 
 	/* can this lightmap be approximated with vertex color? */
@@ -1864,7 +1864,7 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 	}
 
 	/* walk list */
-	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 	{
 		/* early out */
 		if ( lm->styles[ lightmapNum ] == LS_NONE ) {
@@ -1880,10 +1880,10 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 		ok = false;
 		if ( lightmapNum > 0 && outLightmaps != NULL ) {
 			/* loop twice */
-			for ( j = 0; j < 2; j++ )
+			for ( j = 0; j < 2; ++j )
 			{
 				/* try identical position */
-				for ( i = 0; i < numOutLightmaps; i++ )
+				for ( i = 0; i < numOutLightmaps; ++i )
 				{
 					/* get the output lightmap */
 					olm = &outLightmaps[ i ];
@@ -1909,9 +1909,9 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 					/* try shifting */
 					else
 					{
-						for ( sy = -1; sy <= 1; sy++ )
+						for ( sy = -1; sy <= 1; ++sy )
 						{
-							for ( sx = -1; sx <= 1; sx++ )
+							for ( sx = -1; sx <= 1; ++sx )
 							{
 								x = lm->lightmapX[ 0 ] + sx * ( olm->customWidth >> 1 );  //%	lm->w;
 								y = lm->lightmapY[ 0 ] + sy * ( olm->customHeight >> 1 ); //%	lm->h;
@@ -2063,13 +2063,13 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 		olm->numLightmaps++;
 
 		/* add shaders */
-		for ( i = 0; i < lm->numLightSurfaces; i++ )
+		for ( i = 0; i < lm->numLightSurfaces; ++i )
 		{
 			/* get surface info */
 			info = &surfaceInfos[ lightSurfaces[ lm->firstLightSurface + i ] ];
 
 			/* test for shader */
-			for ( j = 0; j < olm->numShaders; j++ )
+			for ( j = 0; j < olm->numShaders; ++j )
 			{
 				if ( olm->shaders[ j ] == info->si ) {
 					break;
@@ -2096,9 +2096,9 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 		}
 
 		/* mark the bits used */
-		for ( y = 0; y < yMax; y++ )
+		for ( y = 0; y < yMax; ++y )
 		{
-			for ( x = 0; x < xMax; x++ )
+			for ( x = 0; x < xMax; ++x )
 			{
 				/* get luxel */
 				const Vector3& luxel = lm->getBspLuxel( lightmapNum, x, y );
@@ -2122,7 +2122,7 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 
 				/* styles are not affected by minlight */
 				if ( lightmapNum == 0 ) {
-					for ( i = 0; i < 3; i++ )
+					for ( i = 0; i < 3; ++i )
 					{
 						value_maximize( color[ i ], minLight[ i ] );
 					}
@@ -2170,7 +2170,7 @@ struct CompareRawLightmap
 		const int min = std::min( alm.numLightSurfaces, blm.numLightSurfaces );
 
 		/* iterate */
-		for ( int i = 0; i < min; i++ )
+		for ( int i = 0; i < min; ++i )
 		{
 			/* get surface info */
 			const surfaceInfo_t& aInfo = surfaceInfos[ lightSurfaces[ alm.firstLightSurface + i ] ];
@@ -2185,7 +2185,7 @@ struct CompareRawLightmap
 
 		/* test style count */
 		diff = 0;
-		for ( int i = 0; i < MAX_LIGHTMAPS; i++ )
+		for ( int i = 0; i < MAX_LIGHTMAPS; ++i )
 			diff += blm.styles[ i ] - alm.styles[ i ];
 		if ( diff != 0 ) {
 			return diff < 0;
@@ -2363,13 +2363,13 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 	numTwins = 0;
 	numTwinLuxels = 0;
 	numSolidLightmaps = 0;
-	for ( i = 0; i < numRawLightmaps; i++ )
+	for ( i = 0; i < numRawLightmaps; ++i )
 	{
 		/* get lightmap */
 		lm = &rawLightmaps[ i ];
 
 		/* walk individual lightmaps */
-		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		{
 			/* early outs */
 			if ( lm->superLuxels[ lightmapNum ] == NULL ) {
@@ -2392,9 +2392,9 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 			}
 
 			/* average supersampled luxels */
-			for ( y = 0; y < lm->h; y++ )
+			for ( y = 0; y < lm->h; ++y )
 			{
-				for ( x = 0; x < lm->w; x++ )
+				for ( x = 0; x < lm->w; ++x )
 				{
 					/* subsample */
 					samples = 0.0f;
@@ -2403,9 +2403,9 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					sample.set( 0 );
 					occludedSample.set( 0 );
 					dirSample.set( 0 );
-					for ( ly = 0; ly < superSample; ly++ )
+					for ( ly = 0; ly < superSample; ++ly )
 					{
-						for ( lx = 0; lx < superSample; lx++ )
+						for ( lx = 0; lx < superSample; ++lx )
 						{
 							/* sample luxel */
 							sx = x * superSample + lx;
@@ -2513,9 +2513,9 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 			MinMax colorMinmax;
 
 			/* clean up and store into bsp luxels */
-			for ( y = 0; y < lm->h; y++ )
+			for ( y = 0; y < lm->h; ++y )
 			{
-				for ( x = 0; x < lm->w; x++ )
+				for ( x = 0; x < lm->w; ++x )
 				{
 					/* get luxels */
 					const SuperLuxel& luxel = lm->getSuperLuxel( lightmapNum, x, y );
@@ -2533,7 +2533,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 						lm->used++;
 
 						/* fix negative samples */
-						for ( j = 0; j < 3; j++ )
+						for ( j = 0; j < 3; ++j )
 						{
 							value_maximize( sample[ j ], 0.0f );
 						}
@@ -2546,13 +2546,13 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 						samples = 0.0f;
 
 						/* fixme: why is this disabled?? */
-						for ( sy = ( y - 1 ); sy <= ( y + 1 ); sy++ )
+						for ( sy = ( y - 1 ); sy <= ( y + 1 ); ++sy )
 						{
 							if ( sy < 0 || sy >= lm->h ) {
 								continue;
 							}
 
-							for ( sx = ( x - 1 ); sx <= ( x + 1 ); sx++ )
+							for ( sx = ( x - 1 ); sx <= ( x + 1 ); ++sx )
 							{
 								if ( sx < 0 || sx >= lm->w || ( sx == x && sy == y ) ) {
 									continue;
@@ -2579,7 +2579,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 							lm->used++;
 
 							/* fix negative samples */
-							for ( j = 0; j < 3; j++ )
+							for ( j = 0; j < 3; ++j )
 							{
 								value_maximize( sample[ j ], 0.0f );
 							}
@@ -2632,7 +2632,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 
 				/* if all lightmaps aren't solid, then none of them are solid */
 				if ( lm->solid[ lightmapNum ] != lm->solid[ 0 ] ) {
-					for ( y = 0; y < MAX_LIGHTMAPS; y++ )
+					for ( y = 0; y < MAX_LIGHTMAPS; ++y )
 					{
 						if ( lm->solid[ y ] ) {
 							numSolidLightmaps--;
@@ -2644,7 +2644,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 
 			/* wrap bsp luxels if necessary */
 			if ( lm->wrap[ 0 ] ) {
-				for ( y = 0; y < lm->h; y++ )
+				for ( y = 0; y < lm->h; ++y )
 				{
 					Vector3& bspLuxel = lm->getBspLuxel( lightmapNum, 0, y );
 					Vector3& bspLuxel2 = lm->getBspLuxel( lightmapNum, lm->w - 1, y );
@@ -2657,7 +2657,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 				}
 			}
 			if ( lm->wrap[ 1 ] ) {
-				for ( x = 0; x < lm->w; x++ )
+				for ( x = 0; x < lm->w; ++x )
 				{
 					Vector3& bspLuxel = lm->getBspLuxel( lightmapNum, x, 0 );
 					Vector3& bspLuxel2 = lm->getBspLuxel( lightmapNum, x, lm->h - 1 );
@@ -2685,15 +2685,15 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 
 			Sys_Printf( "converting..." );
 
-			for ( i = 0; i < numRawLightmaps; i++ )
+			for ( i = 0; i < numRawLightmaps; ++i )
 			{
 				/* get lightmap */
 				lm = &rawLightmaps[ i ];
 
 				/* walk lightmap samples */
-				for ( y = 0; y < lm->sh; y++ )
+				for ( y = 0; y < lm->sh; ++y )
 				{
-					for ( x = 0; x < lm->sw; x++ )
+					for ( x = 0; x < lm->sw; ++x )
 					{
 						/* get normal and deluxel */
 						Vector3& bspDeluxel = lm->getBspDeluxel( x, y );
@@ -2755,7 +2755,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 	/* note it */
 	Sys_Printf( "blending..." );
 
-	for ( i = 0; i < numRawLightmaps; i++ )
+	for ( i = 0; i < numRawLightmaps; ++i )
 	{
 		Vector3 myColor;
 		float myBrightness;
@@ -2764,7 +2764,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		lm = &rawLightmaps[ i ];
 
 		/* walk individual lightmaps */
-		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		{
 			/* early outs */
 			if ( lm->superLuxels[ lightmapNum ] == NULL ) {
@@ -2772,9 +2772,9 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 			}
 
 			/* walk lightmap samples */
-			for ( y = 0; y < lm->sh; y++ )
+			for ( y = 0; y < lm->sh; ++y )
 			{
-				for ( x = 0; x < lm->sw; x++ )
+				for ( x = 0; x < lm->sw; ++x )
 				{
 					/* get luxel */
 					Vector3& bspLuxel = lm->getBspLuxel( lightmapNum, x, y );
@@ -2803,9 +2803,9 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		timer.start();
 
 		/* set all twin refs to null */
-		for ( i = 0; i < numRawLightmaps; i++ )
+		for ( i = 0; i < numRawLightmaps; ++i )
 		{
-			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 			{
 				rawLightmaps[ i ].twins[ lightmapNum ] = NULL;
 				rawLightmaps[ i ].twinNums[ lightmapNum ] = -1;
@@ -2814,13 +2814,13 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		}
 
 		/* walk the list of raw lightmaps */
-		for ( i = 0; i < numRawLightmaps; i++ )
+		for ( i = 0; i < numRawLightmaps; ++i )
 		{
 			/* get lightmap */
 			lm = &rawLightmaps[ i ];
 
 			/* walk lightmaps */
-			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 			{
 				/* early outs */
 				if ( lm->bspLuxels[ lightmapNum ] == NULL ||
@@ -2829,13 +2829,13 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 				}
 
 				/* find all lightmaps that are virtually identical to this one */
-				for ( j = i + 1; j < numRawLightmaps; j++ )
+				for ( j = i + 1; j < numRawLightmaps; ++j )
 				{
 					/* get lightmap */
 					lm2 = &rawLightmaps[ j ];
 
 					/* walk lightmaps */
-					for ( lightmapNum2 = 0; lightmapNum2 < MAX_LIGHTMAPS; lightmapNum2++ )
+					for ( lightmapNum2 = 0; lightmapNum2 < MAX_LIGHTMAPS; ++lightmapNum2 )
 					{
 						/* early outs */
 						if ( lm2->bspLuxels[ lightmapNum2 ] == NULL ||
@@ -2882,7 +2882,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		}
 
 		/* fill it out and sort it */
-		for ( i = 0; i < numRawLightmaps; i++ )
+		for ( i = 0; i < numRawLightmaps; ++i )
 			sortLightmaps[ i ] = i;
 		std::sort( sortLightmaps, sortLightmaps + numRawLightmaps, CompareRawLightmap() );
 
@@ -2901,7 +2901,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 
 		/* kill all existing output lightmaps */
 		if ( outLightmaps != NULL ) {
-			for ( i = 0; i < numOutLightmaps; i++ )
+			for ( i = 0; i < numOutLightmaps; ++i )
 			{
 				free( outLightmaps[ i ].lightBits );
 				free( outLightmaps[ i ].bspLightBytes );
@@ -2916,20 +2916,20 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		numExtLightmaps = 0;
 
 		/* find output lightmap */
-		for ( i = 0; i < numRawLightmaps; i++ )
+		for ( i = 0; i < numRawLightmaps; ++i )
 		{
 			lm = &rawLightmaps[ sortLightmaps[ i ] ];
 			FindOutLightmaps( lm, fastAllocate );
 		}
 
 		/* set output numbers in twinned lightmaps */
-		for ( i = 0; i < numRawLightmaps; i++ )
+		for ( i = 0; i < numRawLightmaps; ++i )
 		{
 			/* get lightmap */
 			lm = &rawLightmaps[ sortLightmaps[ i ] ];
 
 			/* walk lightmaps */
-			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 			{
 				/* get twin */
 				lm2 = lm->twins[ lightmapNum ];
@@ -2969,7 +2969,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		}
 
 		/* walk the list of output lightmaps */
-		for ( i = 0; i < numOutLightmaps; i++ )
+		for ( i = 0; i < numOutLightmaps; ++i )
 		{
 			/* get output lightmap */
 			olm = &outLightmaps[ i ];
@@ -3032,7 +3032,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		}
 
 		/* delete unused external lightmaps */
-		for ( i = numExtLightmaps; i; i++ )
+		for ( i = numExtLightmaps; i; ++i )
 		{
 			/* determine if file exists */
 			sprintf( filename, "%s/" EXTERNAL_LIGHTMAP, dirname, i );
@@ -3084,7 +3084,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 				/* set vertex data */
 				dv = &bspDrawVerts[ ds->firstVert ];
 				dvParent = &bspDrawVerts[ parent->firstVert ];
-				for ( j = 0; j < ds->numVerts; j++ )
+				for ( j = 0; j < ds->numVerts; ++j )
 				{
 					memcpy( dv[ j ].lightmap, dvParent[ j ].lightmap, sizeof( dv[ j ].lightmap ) );
 					memcpy( dv[ j ].color, dvParent[ j ].color, sizeof( dv[ j ].color ) );
@@ -3096,7 +3096,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 
 			/* handle vertex lit or approximated surfaces */
 			else if ( lm == NULL || lm->outLightmapNums[ 0 ] < 0 ) {
-				for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+				for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 				{
 					ds->lightmapNum[ lightmapNum ] = -3;
 					ds->lightmapStyles[ lightmapNum ] = ds->vertexStyles[ lightmapNum ];
@@ -3107,7 +3107,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 			else
 			{
 				/* walk lightmaps */
-				for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+				for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 				{
 					/* set style */
 					ds->lightmapStyles[ lightmapNum ] = lm->styles[ lightmapNum ];
@@ -3136,7 +3136,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					/* calc lightmap st coords */
 					dv = &bspDrawVerts[ ds->firstVert ];
 					ydv = &yDrawVerts[ ds->firstVert ];
-					for ( j = 0; j < ds->numVerts; j++ )
+					for ( j = 0; j < ds->numVerts; ++j )
 					{
 						if ( lm->solid[ lightmapNum ] ) {
 							dv[ j ].lightmap[ lightmapNum ][ 0 ] = lmx + ( 0.5f / (float) olm->customWidth );
@@ -3153,10 +3153,10 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 
 			/* store vertex colors */
 			dv = &bspDrawVerts[ ds->firstVert ];
-			for ( j = 0; j < ds->numVerts; j++ )
+			for ( j = 0; j < ds->numVerts; ++j )
 			{
 				/* walk lightmaps */
-				for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+				for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 				{
 					Vector3 color;
 					/* handle unused style */
@@ -3170,7 +3170,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 
 						/* set minimum light */
 						if ( lightmapNum == 0 ) {
-							for ( k = 0; k < 3; k++ )
+							for ( k = 0; k < 3; ++k )
 								value_maximize( color[ k ], minVertexLight[ k ] );
 						}
 					}
@@ -3195,7 +3195,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 				const bool dfEqual = ( info->si->styleMarker == 2 || info->si->implicitMap == EImplicitMap::Masked );
 
 				/* generate stages for styled lightmaps */
-				for ( lightmapNum = 1; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+				for ( lightmapNum = 1; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 				{
 					/* early out */
 					style = lm->styles[ lightmapNum ];

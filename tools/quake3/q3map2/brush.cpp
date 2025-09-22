@@ -92,7 +92,7 @@ Vector3 SnapWeldVector( const Vector3& a, const Vector3& b ){
 	Vector3 out;
 
 	/* do each element */
-	for ( int i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; ++i )
 	{
 		/* round to integer */
 		const float ai = std::rint( a[ i ] );
@@ -143,7 +143,7 @@ static DoubleVector3 SnapWeldVectorAccu( const DoubleVector3& a, const DoubleVec
 
 	DoubleVector3 out;
 
-	for ( int i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; ++i )
 	{
 		const double ai = std::rint( a[i] );
 		const double bi = std::rint( b[i] );
@@ -663,7 +663,7 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 
 	// split it for real
 	brush_t     b[2]{ brush, brush };
-	for ( int i = 0; i < 2; i++ )
+	for ( int i = 0; i < 2; ++i )
 	{
 		b[i].sides.clear();
 	}
@@ -676,7 +676,7 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 			winding_t cw[2];
 			std::tie( cw[0], cw[1] ) =
 			ClipWindingEpsilonStrict( side.winding, plane, 0 /*PLANESIDE_EPSILON*/ ); /* strict, in parallel case we get the face back because it also is the midwinding */
-			for ( int i = 0; i < 2; i++ )
+			for ( int i = 0; i < 2; ++i )
 			{
 				if ( !cw[i].empty() ) {
 					side_t& cs = b[i].sides.emplace_back( side );
@@ -688,7 +688,7 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 
 
 	// see if we have valid polygons on both sides
-	for ( int i = 0; i < 2; i++ )
+	for ( int i = 0; i < 2; ++i )
 	{
 		if ( b[i].sides.size() < 3 || !BoundBrush( b[i] ) ) {
 			if ( b[i].sides.size() >= 3 ) {
@@ -715,7 +715,7 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 	}
 
 	// add the midwinding to both sides
-	for ( int i = 0; i < 2; i++ )
+	for ( int i = 0; i < 2; ++i )
 	{
 		side_t& cs = b[i].sides.emplace_back();
 
@@ -729,7 +729,7 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 		}
 	}
 
-	for ( int i = 0; i < 2; i++ )
+	for ( int i = 0; i < 2; ++i )
 	{
 		if ( BrushVolume( b[i] ) < 1.0 ) {
 			b[i].sides.clear();

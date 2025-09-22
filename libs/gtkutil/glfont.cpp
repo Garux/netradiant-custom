@@ -35,8 +35,8 @@ void gray_to_texture( const unsigned int x_max, const unsigned int y_max, const 
 	const unsigned char backgroundColorG = 0;
 	const unsigned char backgroundColorB = 0;
 
-	for( y = 0; y < y_max; y++ ) {
-		for( x = 0; x < x_max; x++ ) {
+	for( y = 0; y < y_max; ++y ) {
+		for( x = 0; x < x_max; ++x ) {
 			const unsigned int iter = ( y * x_max + x ) * 4;
 			if( x == 0 || y == 0 || x == 1 || y == 1 ) {
 				out[iter] = fontColorB;
@@ -62,8 +62,8 @@ void gray_to_texture( const unsigned int x_max, const unsigned int y_max, const 
 	}
 
 	bitmapIter = 0;
-	for( y = 0; y < y_max; y++ ) {
-		for( x = 0; x < x_max; x++ ) {
+	for( y = 0; y < y_max; ++y ) {
+		for( x = 0; x < x_max; ++x ) {
 			const unsigned int iter = ( y * x_max + x ) * 4;
 			if( x == 0 || y == 0 || x == ( x_max - 1 ) || y == ( y_max - 1 ) ) {
 				continue;
@@ -195,7 +195,7 @@ public:
 			if( a == 1.0 ) {
 				do {
 					row -= bitmap.width;
-					for( unsigned int i = 0; i < bitmap.width; i++ )
+					for( unsigned int i = 0; i < bitmap.width; ++i )
 						*t++ = rgb | ( ( guint32 ) row[i] );
 
 				} while( row != row_end );
@@ -204,7 +204,7 @@ public:
 				do
 				{
 					row -= bitmap.width;
-					for( unsigned int i = 0; i < bitmap.width; i++ )
+					for( unsigned int i = 0; i < bitmap.width; ++i )
 						* t++ = rgb | ( ( guint32 )( a* row[i] ) );
 				} while( row != row_end );
 			}
@@ -224,8 +224,8 @@ public:
 				const unsigned char backgroundColorG = 64;
 				const unsigned char backgroundColorB = 64;
 
-				for( y = 0; y < y_max; y++ ) {
-					for( x = 0; x < x_max; x++ ) {
+				for( y = 0; y < y_max; ++y ) {
+					for( x = 0; x < x_max; ++x ) {
 						const unsigned int iter = ( y * x_max + x ) * 4;
 						if( x == 0 || y == 0 || x == ( x_max - 1 ) || y == ( y_max - 1 ) ) {
 							buf[iter] = backgroundColorB;
@@ -270,8 +270,8 @@ public:
 				unsigned char backgroundColorG = 0;
 				unsigned char backgroundColorB = 0;
 
-				for( y = 0; y < y_max; y++ ) {
-					for( x = 0; x < x_max; x++ ) {
+				for( y = 0; y < y_max; ++y ) {
+					for( x = 0; x < x_max; ++x ) {
 						const unsigned int iter = ( y * x_max + x ) * 4;
 						if( x == 0 || y == 0 || x == 1 || y == 1 ) {
 							buf[iter] = fontColorB;
@@ -297,8 +297,8 @@ public:
 				}
 
 				bitmapIter = 0;
-				for( y = 0; y < y_max; y++ ) {
-					for( x = 0; x < x_max; x++ ) {
+				for( y = 0; y < y_max; ++y ) {
+					for( x = 0; x < x_max; ++x ) {
 						const unsigned int iter = ( y * x_max + x ) * 4;
 						if( x == 0 || y == 0 || x == ( x_max - 1 ) || y == ( y_max - 1 ) ) {
 							continue;
@@ -336,8 +336,8 @@ public:
 				unsigned char fontColorG = colour[1];
 				unsigned char fontColorB = colour[2];
 
-				for( y = 0; y < y_max; y++ ) {
-					for( x = 0; x < x_max; x++ ) {
+				for( y = 0; y < y_max; ++y ) {
+					for( x = 0; x < x_max; ++x ) {
 						const unsigned int iter = ( y * x_max + x ) * 4;
 						if( x == 0 || y == 0 || x == ( x_max - 1 ) || y == ( y_max - 1 ) ) {
 							buf[iter] = fontColorB;
@@ -472,7 +472,7 @@ GLFont *glfont_create( const char* font_string ){
 	 * for each row of chars, call glXUseXFont to build the bitmaps.
 	 */
 
-	for ( i = firstrow; i <= lastrow; i++ )
+	for ( i = firstrow; i <= lastrow; ++i )
 	{
 		glXUseXFont( fontInfo->fid, firstbitmap, last - first + 1, font_list_base + firstbitmap );
 		firstbitmap += 256;

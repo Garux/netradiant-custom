@@ -40,7 +40,7 @@ static void ETC_DecodeETC1SubBlock( byte *out, bool outRGBA, int r, int g, int b
 		}
 	}
 
-	for ( i = 0; i < 8; i++ )
+	for ( i = 0; i < 8; ++i )
 	{
 		int x, y, k, delta;
 		int qr, qg, qb;

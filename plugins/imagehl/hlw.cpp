@@ -111,11 +111,11 @@ Image* LoadHLWBuff( byte* buffer ){
 
 	auto *image = new RGBAImage( columns, rows );
 
-	for ( row = 0; row < rows; row++ )
+	for ( row = 0; row < rows; ++row )
 	{
 		pixbuf = image->getRGBAPixels() + row * columns * 4;
 
-		for ( column = 0; column < columns; column++ )
+		for ( column = 0; column < columns; ++column )
 		{
 			int palIndex;
 

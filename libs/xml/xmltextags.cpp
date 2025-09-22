@@ -382,7 +382,7 @@ int XmlTagBuilder::RenameShaderTag( const char* oldtag, CopiedString newtag ){
 	}
 	xmlNodeSetPtr nodePtr = result->nodesetval;
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
-		for ( int i = 0; i < nodePtr->nodeNr; i++ )
+		for ( int i = 0; i < nodePtr->nodeNr; ++i )
 		{
 			xmlNodePtr ptrContent = nodePtr->nodeTab[i];
 			char* content = (char*)xmlNodeGetContent( ptrContent );
@@ -419,7 +419,7 @@ bool XmlTagBuilder::DeleteShaderTag( const char* shader, const char* tag ){
 	}
 
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
-		for ( int i = 0; i < nodePtr->nodeNr; i++ )
+		for ( int i = 0; i < nodePtr->nodeNr; ++i )
 		{
 			xmlNodePtr ptrContent = nodePtr->nodeTab[i];
 			char* content = (char*)(xmlChar*)xmlNodeGetContent( ptrContent );
@@ -494,7 +494,7 @@ void XmlTagBuilder::GetShaderTags( const char* shader, std::vector<CopiedString>
 	}
 
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
-		for ( int i = 0; i < nodePtr->nodeNr; i++ )
+		for ( int i = 0; i < nodePtr->nodeNr; ++i )
 		{
 			tags.push_back( CopiedString( (char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) ) );
 		}
@@ -522,7 +522,7 @@ void XmlTagBuilder::GetUntagged( std::set<CopiedString>& shaders ){
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
 		xmlNodePtr ptr;
 
-		for ( int i = 0; i < nodePtr->nodeNr; i++ )
+		for ( int i = 0; i < nodePtr->nodeNr; ++i )
 		{
 			ptr = nodePtr->nodeTab[i];
 			shaders.insert( (char*)xmlGetProp( ptr, (const xmlChar*)"path" ) );
@@ -550,7 +550,7 @@ void XmlTagBuilder::GetAllTags( std::set<CopiedString>& tags ){
 	}
 
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
-		for ( int i = 0; i < nodePtr->nodeNr; i++ )
+		for ( int i = 0; i < nodePtr->nodeNr; ++i )
 		{
 			tags.insert( CopiedString( (char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) ) );
 		}
@@ -579,7 +579,7 @@ void XmlTagBuilder::TagSearch( const char* expression, std::set<CopiedString>& p
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
 		xmlNodePtr ptr;
 		xmlChar* xmlattrib;
-		for ( int i = 0; i < nodePtr->nodeNr; i++ )
+		for ( int i = 0; i < nodePtr->nodeNr; ++i )
 		{
 			ptr = nodePtr->nodeTab[i];
 			xmlattrib = xmlGetProp( ptr, (const xmlChar*)"path" );

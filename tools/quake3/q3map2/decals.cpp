@@ -132,12 +132,12 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 		vecs[ 2 ] = -projection.normal();
 
 		/* calculate transform axis */
-		for ( i = 0; i < 3; i++ ){
+		for ( i = 0; i < 3; ++i ){
 			axis[ i ] = vecs[ i ];
 			lengths[ i ] = VectorNormalize( axis[ i ] );
 		}
-		for ( i = 0; i < 2; i++ )
-			for ( j = 0; j < 3; j++ )
+		for ( i = 0; i < 2; ++i )
+			for ( j = 0; j < 3; ++j )
 				dp->texMat[ i ][ j ] = lengths[ i ] != 0.0 ? ( axis[ i ][ j ] / lengths[ i ] ) : 0.0;
 		//%	dp->texMat[ i ][ j ] = fabs( vecs[ i ][ j ] ) > 0.0 ? ( 1.0 / vecs[ i ][ j ] ) : 0.0;
 		//%	dp->texMat[ i ][ j ] = axis[ i ][ j ] > 0.0 ? ( 1.0 / axis[ i ][ j ] ) : 0.0;
@@ -165,17 +165,17 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 		texDeltas[ 2 ] = b->st - c->st;
 
 		/* walk st */
-		for ( i = 0; i < 2; i++ )
+		for ( i = 0; i < 2; ++i )
 		{
 			/* walk xyz */
-			for ( j = 0; j < 3; j++ )
+			for ( j = 0; j < 3; ++j )
 			{
 				/* clear deltas */
 				delta = 0.0;
 				texDelta = 0.0;
 
 				/* walk deltas */
-				for ( k = 0; k < 3; k++ )
+				for ( k = 0; k < 3; ++k )
 				{
 					if ( fabs( deltas[ k ][ j ] ) > delta &&
 					     fabs( texDeltas[ k ][ i ] ) > texDelta  ) {
@@ -261,7 +261,7 @@ static void TransformDecalProjector( decalProjector_t *in, const Vector3 (&axis)
 	out->radius2 = in->radius2;
 
 	/* translate planes */
-	for ( int i = 0; i < in->numPlanes; i++ )
+	for ( int i = 0; i < in->numPlanes; ++i )
 	{
 		out->planes[ i ].a = vector3_dot( in->planes[ i ].normal(), axis[ 0 ] );
 		out->planes[ i ].b = vector3_dot( in->planes[ i ].normal(), axis[ 1 ] );
@@ -270,7 +270,7 @@ static void TransformDecalProjector( decalProjector_t *in, const Vector3 (&axis)
 	}
 
 	/* translate texture matrix */
-	for ( int i = 0; i < 2; i++ )
+	for ( int i = 0; i < 2; ++i )
 	{
 		out->texMat[ i ][ 0 ] = vector3_dot( in->texMat[ i ].vec3(), axis[ 0 ] );
 		out->texMat[ i ][ 1 ] = vector3_dot( in->texMat[ i ].vec3(), axis[ 1 ] );
@@ -317,7 +317,7 @@ static int MakeDecalProjector( shaderInfo_t *si, const Plane3f& projection, floa
 
 	/* bound the projector */
 	dp->minmax.clear();
-	for ( i = 0; i < numVerts; i++ )
+	for ( i = 0; i < numVerts; ++i )
 	{
 		dp->minmax.extend( dv[ i ]->xyz );
 		dp->minmax.extend( dv[ i ]->xyz + projection.normal() * distance );
@@ -338,7 +338,7 @@ static int MakeDecalProjector( shaderInfo_t *si, const Plane3f& projection, floa
 	dp->planes[ 1 ].dist() = vector3_dot( dv[ 0 ]->xyz + projection.normal() * distance, dp->planes[ 1 ].normal() );
 
 	/* make the side planes */
-	for ( i = 0; i < numVerts; i++ )
+	for ( i = 0; i < numVerts; ++i )
 	{
 		j = ( i + 1 ) % numVerts;
 		if ( !PlaneFromPoints( dp->planes[ i + 2 ], dv[ j ]->xyz, dv[ i ]->xyz, dv[ i ]->xyz + projection.normal() * distance ) ) {
@@ -424,9 +424,9 @@ void ProcessDecals(){
 					vert.xyz += e.origin;
 
 				/* iterate through the mesh quads */
-				for ( int y = 0; y < ( mesh->height - 1 ); y++ )
+				for ( int y = 0; y < ( mesh->height - 1 ); ++y )
 				{
-					for ( int x = 0; x < ( mesh->width - 1 ); x++ )
+					for ( int x = 0; x < ( mesh->width - 1 ); ++x )
 					{
 						/* set indexes */
 						const int pw[ 5 ] = {
@@ -518,7 +518,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	}
 
 	/* walk list of planes */
-	for ( i = 0; i < dp->numPlanes; i++ )
+	for ( i = 0; i < dp->numPlanes; ++i )
 	{
 		/* chop winding by the plane */
 		auto [front, back] = ClipWindingEpsilonStrict( w, dp->planes[ i ], 0.0625f ); /* strict, if identical plane we don't want to keep it */
@@ -556,7 +556,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	ds2->verts = safe_calloc( ds2->numVerts * sizeof( *ds2->verts ) );
 
 	/* set vertexes */
-	for ( i = 0; i < ds2->numVerts; i++ )
+	for ( i = 0; i < ds2->numVerts; ++i )
 	{
 		/* get vertex */
 		dv = &ds2->verts[ i ];
@@ -573,7 +573,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 		dv->st[ 1 ] = vector3_dot( dv->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
 
 		/* set color */
-		for ( j = 0; j < MAX_LIGHTMAPS; j++ )
+		for ( j = 0; j < MAX_LIGHTMAPS; ++j )
 		{
 			dv->color[ j ] = { 255, 255, 255, color_to_byte( alpha ) };
 		}
@@ -632,9 +632,9 @@ static void ProjectDecalOntoPatch( decalProjector_t *dp, mapDrawSurface_t *ds ){
 	FreeMesh( subdivided );
 
 	/* iterate through the mesh quads */
-	for ( int y = 0; y < ( mesh->height - 1 ); y++ )
+	for ( int y = 0; y < ( mesh->height - 1 ); ++y )
 	{
-		for ( int x = 0; x < ( mesh->width - 1 ); x++ )
+		for ( int x = 0; x < ( mesh->width - 1 ); ++x )
 		{
 			/* set indexes */
 			const int pw[ 5 ] = {
@@ -724,7 +724,7 @@ void MakeEntityDecals( const entity_t& e ){
 	Timer timer;
 
 	/* walk the list of decal projectors */
-	for ( i = 0; i < numProjectors; i++ )
+	for ( i = 0; i < numProjectors; ++i )
 	{
 		/* print pacifier */
 		if ( const int f = 10 * i / numProjectors; f != fOld ) {

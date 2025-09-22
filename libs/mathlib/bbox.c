@@ -42,7 +42,7 @@ void aabb_extend_by_point( aabb_t *aabb, const vec3_t point ){
 #if 1
 	int i;
 	vec_t min, max, displacement;
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		displacement = point[i] - aabb->origin[i];
 		if ( fabs( displacement ) > aabb->extents[i] ) {
@@ -87,7 +87,7 @@ void aabb_extend_by_point( aabb_t *aabb, const vec3_t point ){
 void aabb_extend_by_aabb( aabb_t *aabb, const aabb_t *aabb_src ){
 	int i;
 	vec_t min, max, displacement, difference;
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		displacement = aabb_src->origin[i] - aabb->origin[i];
 		difference = aabb_src->extents[i] - aabb->extents[i];
@@ -126,7 +126,7 @@ void aabb_extend_by_vec3( aabb_t *aabb, vec3_t extension ){
 
 int aabb_test_point( const aabb_t *aabb, const vec3_t point ){
 	int i;
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 		if ( fabs( point[i] - aabb->origin[i] ) >= aabb->extents[i] ) {
 			return 0;
 		}
@@ -135,7 +135,7 @@ int aabb_test_point( const aabb_t *aabb, const vec3_t point ){
 
 int aabb_test_aabb( const aabb_t *aabb, const aabb_t *aabb_src ){
 	int i;
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 		if ( fabs( aabb_src->origin[i] - aabb->origin[i] ) > ( fabs( aabb->extents[i] ) + fabs( aabb_src->extents[i] ) ) ) {
 			return 0;
 		}
@@ -184,7 +184,7 @@ int aabb_intersect_ray( const aabb_t *aabb, const ray_t *ray, vec3_t intersectio
 
 	/* Find candidate planes; this loop can be avoided if
 	   rays cast all from the eye(assume perspective view) */
-	for ( i = 0; i < NUMDIM; i++ )
+	for ( i = 0; i < NUMDIM; ++i )
 	{
 		if ( origin[i] < ( aabb->origin[i] - aabb->extents[i] ) ) {
 			quadrant[i] = LEFT;
@@ -210,7 +210,7 @@ int aabb_intersect_ray( const aabb_t *aabb, const ray_t *ray, vec3_t intersectio
 
 
 	/* Calculate T distances to candidate planes */
-	for ( i = 0; i < NUMDIM; i++ )
+	for ( i = 0; i < NUMDIM; ++i )
 	{
 		if ( quadrant[i] != MIDDLE && direction[i] != 0. ) {
 			maxT[i] = ( candidatePlane[i] - origin[i] ) / direction[i];
@@ -222,7 +222,7 @@ int aabb_intersect_ray( const aabb_t *aabb, const ray_t *ray, vec3_t intersectio
 
 	/* Get largest of the maxT's for final choice of intersection */
 	whichPlane = 0;
-	for ( i = 1; i < NUMDIM; i++ )
+	for ( i = 1; i < NUMDIM; ++i )
 		if ( maxT[whichPlane] < maxT[i] ) {
 			whichPlane = i;
 		}
@@ -231,7 +231,7 @@ int aabb_intersect_ray( const aabb_t *aabb, const ray_t *ray, vec3_t intersectio
 	if ( maxT[whichPlane] < 0. ) {
 		return 0;
 	}
-	for ( i = 0; i < NUMDIM; i++ )
+	for ( i = 0; i < NUMDIM; ++i )
 	{
 		if ( whichPlane != i ) {
 			intersection[i] = (vec_t)( origin[i] + maxT[whichPlane] * direction[i] );
@@ -314,7 +314,7 @@ void aabb_for_bbox( aabb_t *aabb, const bbox_t *bbox ){
 	VectorScale( bbox->axes[0], bbox->aabb.extents[0], temp[0] );
 	VectorScale( bbox->axes[1], bbox->aabb.extents[1], temp[1] );
 	VectorScale( bbox->axes[2], bbox->aabb.extents[2], temp[2] );
-	for ( i = 0; i < 3; i++ ) aabb->extents[i] = (vec_t)( fabs( temp[0][i] ) + fabs( temp[1][i] ) + fabs( temp[2][i] ) );
+	for ( i = 0; i < 3; ++i ) aabb->extents[i] = (vec_t)( fabs( temp[0][i] ) + fabs( temp[1][i] ) + fabs( temp[2][i] ) );
 }
 
 void aabb_for_area( aabb_t *aabb, vec3_t area_tl, vec3_t area_br, int axis ){

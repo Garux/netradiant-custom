@@ -234,9 +234,9 @@ void Brush_ConstructSphere( Brush& brush, const AABB& bounds, std::size_t sides,
 
 	double dt = 2 * c_pi / sides;
 	double dp = c_pi / sides;
-	for ( std::size_t i = 0; i < sides; i++ )
+	for ( std::size_t i = 0; i < sides; ++i )
 	{
-		for ( std::size_t j = 0; j < sides - 1; j++ )
+		for ( std::size_t j = 0; j < sides - 1; ++j )
 		{
 			double t = i * dt;
 			double p = float( j * dp - c_pi / 2 );
@@ -251,7 +251,7 @@ void Brush_ConstructSphere( Brush& brush, const AABB& bounds, std::size_t sides,
 
 	{
 		double p = ( sides - 1 ) * dp - c_pi / 2;
-		for ( std::size_t i = 0; i < sides; i++ )
+		for ( std::size_t i = 0; i < sides; ++i )
 		{
 			double t = i * dt;
 
@@ -285,7 +285,7 @@ void Brush_ConstructRock( Brush& brush, const AABB& bounds, std::size_t sides, c
 	const Vector3& mid = bounds.origin;
 	Vector3 planepts[3];
 
-	for ( std::size_t j = 0; j < sides; j++ )
+	for ( std::size_t j = 0; j < sides; ++j )
 	{
 		planepts[0][0] = rand() - ( RAND_MAX / 2 );
 		planepts[0][1] = rand() - ( RAND_MAX / 2 );
@@ -376,7 +376,7 @@ void Brush_ConstructIcosahedron( Brush& brush, const AABB& bounds, std::size_t s
 
 	std::vector<quickhull::Vector3<double>> pointCloud;
 
-	for( int i = 0; i < 20; i++ ){
+	for( int i = 0; i < 20; ++i ){
 		drawtri( vdata[tindices[i][0]], vdata[tindices[i][1]], vdata[tindices[i][2]], subdivisions, truncate, pointCloud );
 	}
 
@@ -475,7 +475,7 @@ void ConstructRegionBrushes( scene::Node* brushes[6], const Vector3& region_mins
 		const Vector3 mins( region_mins - Vector3( 32 ) );
 
 		// vary maxs
-		for ( std::size_t i = 0; i < 3; i++ )
+		for ( std::size_t i = 0; i < 3; ++i )
 		{
 			Vector3 maxs( region_maxs + Vector3( 32 ) );
 			maxs[i] = region_mins[i];
@@ -488,7 +488,7 @@ void ConstructRegionBrushes( scene::Node* brushes[6], const Vector3& region_mins
 		const Vector3 maxs( region_maxs + Vector3( 32 ) );
 
 		// vary mins
-		for ( std::size_t i = 0; i < 3; i++ )
+		for ( std::size_t i = 0; i < 3; ++i )
 		{
 			Vector3 mins( region_mins - Vector3( 32 ) );
 			mins[i] = region_maxs[i];

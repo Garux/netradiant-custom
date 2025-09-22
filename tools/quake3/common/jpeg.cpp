@@ -261,7 +261,7 @@ static void j_putRGBScanline( unsigned char* jpegline, int widthPix, unsigned ch
 	int offset = row * widthPix * 4;
 	int count;
 
-	for ( count = 0; count < widthPix; count++ )
+	for ( count = 0; count < widthPix; ++count )
 	{
 		unsigned char iRed, iBlu, iGrn;
 		unsigned char *oRed, *oBlu, *oGrn, *oAlp;
@@ -287,7 +287,7 @@ static void j_putRGBAScanline( unsigned char* jpegline, int widthPix, unsigned c
 	int offset = row * widthPix * 4;
 	int count;
 
-	for ( count = 0; count < widthPix; count++ )
+	for ( count = 0; count < widthPix; ++count )
 	{
 		unsigned char iRed, iBlu, iGrn /* , iAlp */;
 		unsigned char *oRed, *oBlu, *oGrn, *oAlp;
@@ -315,7 +315,7 @@ static void j_putGrayScanlineToRGB( unsigned char* jpegline, int widthPix, unsig
 	int offset = row * widthPix * 4;
 	int count;
 
-	for ( count = 0; count < widthPix; count++ )
+	for ( count = 0; count < widthPix; ++count )
 	{
 		unsigned char iGray;
 		unsigned char *oRed, *oBlu, *oGrn, *oAlp;

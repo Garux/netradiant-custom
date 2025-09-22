@@ -137,7 +137,7 @@ void LoadPCXBuff( byte* buffer, std::size_t len, byte **pic, byte **palette, int
 	lsize = pcx.color_planes * pcx.bytes_per_line;
 
 	/* go scanline by scanline */
-	for ( y = 0; y <= pcx.ymax; y++, pix += pcx.xmax + 1 )
+	for ( y = 0; y <= pcx.ymax; ++y, pix += pcx.xmax + 1 )
 	{
 		/* do a scanline */
 		for ( x = 0; x <= pcx.xmax; )
@@ -195,7 +195,7 @@ Image* LoadPCX32Buff( byte* buffer, std::size_t length ){
 	auto *image = new RGBAImage( width, height );
 	c = ( width ) * ( height );
 	pic32 = image->getRGBAPixels();
-	for ( i = 0; i < c; i++ )
+	for ( i = 0; i < c; ++i )
 	{
 		p = pic8[i];
 		pic32[0] = palette[p * 3];

@@ -930,9 +930,9 @@ void MakeBevel( vec3_t vMin, vec3_t vMax ){
 	   x_3[0] = 0;		x_3[1] = 0;		x_3[2] = 64;
 	   y_3[0] = 0;		y_3[1] = 64;	y_3[2] = 64;
 	   z_3[0] = 0;		z_3[1] = 32;	z_3[2] = 64;*/
-	for ( int i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; ++i )
 	{
-		for ( int j = 0; j < 3; j++ )
+		for ( int j = 0; j < 3; ++j )
 		{
 			PatchControl& p = matrix( i, j );
 			p.m_vertex[0] = x_3[i];
@@ -941,9 +941,9 @@ void MakeBevel( vec3_t vMin, vec3_t vMax ){
 		}
 	}
 	//does invert the matrix, else the patch face is on wrong side.
-	for ( int i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; ++i )
 	{
-		for ( int j = 0; j < 1; j++ )
+		for ( int j = 0; j < 1; ++j )
 		{
 			PatchControl& p = matrix( i, 2 - j );
 			PatchControl& q = matrix( i, j );
@@ -975,7 +975,7 @@ void BuildCornerStairs( vec3_t vMin, vec3_t vMax, int nSteps, const char* mainTe
 	vTop[2] = vMin[2] + height;
 
 	int i;
-	for ( i = 0; i <= nSteps; i++ )
+	for ( i = 0; i <= nSteps; ++i )
 	{
 		VectorCopy( centre, topPoints[i] );
 		VectorCopy( centre, botPoints[i] );
@@ -991,10 +991,10 @@ void BuildCornerStairs( vec3_t vMin, vec3_t vMax, int nSteps, const char* mainTe
 	}
 
 	vec3_t tp[3];
-	for ( int j = 0; j < 3; j++ )
+	for ( int j = 0; j < 3; ++j )
 		VectorCopy( topPoints[j], tp[j] );
 
-	for ( i = 0; i < nSteps; i++ )
+	for ( i = 0; i < nSteps; ++i )
 	{
 		NodeSmartReference brush( GlobalBrushCreator().createBrush() );
 		vec3_t v1, v2, v3, v5, v6, v7;
@@ -1015,7 +1015,7 @@ void BuildCornerStairs( vec3_t vMin, vec3_t vMax, int nSteps, const char* mainTe
 		AddFaceWithTexture( brush, v1, v3, v6, "textures/common/caulk", false );
 		AddFaceWithTexture( brush, v5, v6, v3, "textures/common/caulk", false );
 
-		for ( int j = 0; j < 3; j++ )
+		for ( int j = 0; j < 3; ++j )
 			tp[j][2] = vTop[2];
 
 		AddFaceWithTexture( brush, tp[2], tp[1], tp[0], mainTexture, false );

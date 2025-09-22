@@ -44,7 +44,7 @@ bspDrawVert_t LerpDrawVert( const bspDrawVert_t& a, const bspDrawVert_t& b ){
 	out.xyz = vector3_mid( a.xyz, b.xyz );
 	out.st = vector2_mid( a.st, b.st );
 
-	for ( int k = 0; k < MAX_LIGHTMAPS; k++ )
+	for ( int k = 0; k < MAX_LIGHTMAPS; ++k )
 	{
 		out.lightmap[ k ] = vector2_mid( a.lightmap[ k ], b.lightmap[ k ] );
 		for( int i = 0; i < 4; ++i )
@@ -75,7 +75,7 @@ void LerpDrawVertAmount( bspDrawVert_t *a, bspDrawVert_t *b, float amount, bspDr
 
 	out->st = a->st + ( b->st - a->st ) * amount;
 
-	for ( int k = 0; k < MAX_LIGHTMAPS; k++ )
+	for ( int k = 0; k < MAX_LIGHTMAPS; ++k )
 	{
 		out->lightmap[ k ] = a->lightmap[ k ] + ( b->lightmap[ k ] - a->lightmap[ k ] ) * amount;
 		for( int i = 0; i < 4; ++i )
@@ -422,7 +422,7 @@ int IterationsForCurve( float len, int subdivisions ){
 
 
 	/* calculate the number of subdivisions */
-	for ( iterations = 0; iterations < 3; iterations++ )
+	for ( iterations = 0; iterations < 3; ++iterations )
 	{
 		facets = subdivisions * 16 * pow( 2, iterations );
 		if ( facets >= len ) {
@@ -448,9 +448,9 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 	/* initial setup */
 	out.width = in.width;
 	out.height = in.height;
-	for ( int i = 0; i < in.width; i++ )
+	for ( int i = 0; i < in.width; ++i )
 	{
-		for ( int j = 0; j < in.height; j++ )
+		for ( int j = 0; j < in.height; ++j )
 			expand[ j ][ i ] = in.verts[ j * in.width + i ];
 	}
 
@@ -467,7 +467,7 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 
 			/* insert two columns and replace the peak */
 			out.width += 2;
-			for ( int i = 0; i < out.height; i++ )
+			for ( int i = 0; i < out.height; ++i )
 			{
 				for ( int k = out.width - 1; k > j + 3; --k )
 					expand [ i ][ k ] = expand[ i ][ k - 2 ];
@@ -489,9 +489,9 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 
 			/* insert two columns and replace the peak */
 			out.height += 2;
-			for ( int i = 0; i < out.width; i++ )
+			for ( int i = 0; i < out.width; ++i )
 			{
-				for ( int k = out.height - 1; k > j + 3; k-- )
+				for ( int k = out.height - 1; k > j + 3; --k )
 					expand[ k ][ i ] = expand[ k - 2 ][ i ];
 
 				expand[ j + 3 ][ i ] = LerpDrawVert( expand[ j + 1 ][ i ], expand[ j + 2 ][ i ] );
@@ -503,7 +503,7 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 
 	/* collapse the verts */
 	out.verts = &expand[ 0 ][ 0 ];
-	for ( int i = 1; i < out.height; i++ )
+	for ( int i = 1; i < out.height; ++i )
 		memmove( &out.verts[ i * out.width ], expand[ i ], out.width * sizeof( bspDrawVert_t ) );
 
 	/* return to sender */
@@ -572,7 +572,7 @@ mesh_t *RemoveLinearMeshColumnsRows( mesh_t *in ) {
 		if ( maxLength < 0.1 ) {
 			out.height--;
 			for ( i = 0; i < out.width; ++i ) {
-				for ( k = j; k < out.height; k++ ) {
+				for ( k = j; k < out.height; ++k ) {
 					expand[k][i] = expand[k + 1][i];
 				}
 			}

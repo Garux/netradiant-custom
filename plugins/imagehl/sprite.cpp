@@ -179,11 +179,11 @@ Image* LoadIDSPBuff( byte *buffer ){
 	spriteframe = (dspriteframe_t *)( palette + ( 256 * 3 ) + 4 ); // what are those 4 extra bytes ? what's missing ?
 	buf_p = (byte *)( spriteframe + 1 );
 
-	for ( row = 0; row < rows; row++ )
+	for ( row = 0; row < rows; ++row )
 	{
 		pixbuf = image->getRGBAPixels() + row * columns * 4;
 
-		for ( column = 0; column < columns; column++ )
+		for ( column = 0; column < columns; ++column )
 		{
 			int palIndex;
 

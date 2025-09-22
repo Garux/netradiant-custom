@@ -87,7 +87,7 @@ void CalculateSpline_r( vec3_t* v, int count, vec3_t out, float tension ) {
 
 	vec3_t* v2 = new vec3_t[count - 1];
 
-	for ( int i = 0; i < count - 1; i++ ) {
+	for ( int i = 0; i < count - 1; ++i ) {
 		VectorSubtract( v[i + 1], v[i], dist );
 		VectorMA( v[i], tension, dist, v2[i] );
 	}
@@ -203,7 +203,7 @@ public:
 				if ( control ) {
 					AddSplineControl( control, pSP );
 
-					for ( int j = 2;; j++ ) {
+					for ( int j = 2;; ++j ) {
 						char buffer[32];
 						sprintf( buffer, "control%i", j );
 

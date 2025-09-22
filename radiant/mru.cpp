@@ -90,17 +90,16 @@ void MRU_SetText( std::size_t index, const char *filename ){
 }
 
 void MRU_AddFile( const char *str ){
-	std::size_t i;
 	const char* text;
 
 	// check if file is already in our list
-	for ( i = 0; i < MRU_used; i++ )
+	for ( std::size_t i = 0; i < MRU_used; ++i )
 	{
 		text = MRU_GetText( i );
 
 		if ( strcmp( text, str ) == 0 ) {
 			// reorder menu
-			for (; i > 0; i-- )
+			for (; i > 0; --i )
 				MRU_SetText( i, MRU_GetText( i - 1 ) );
 
 			MRU_SetText( 0, str );
@@ -114,7 +113,7 @@ void MRU_AddFile( const char *str ){
 	}
 
 	// move items down
-	for ( i = MRU_used - 1; i > 0; i-- )
+	for ( std::size_t i = MRU_used - 1; i > 0; --i )
 		MRU_SetText( i, MRU_GetText( i - 1 ) );
 
 	MRU_SetText( 0, str );
@@ -152,7 +151,7 @@ void MRU_Activate( std::size_t index ){
 	{
 		MRU_used--;
 
-		for ( std::size_t i = index; i < MRU_used; i++ )
+		for ( std::size_t i = index; i < MRU_used; ++i )
 			MRU_SetText( i, MRU_GetText( i + 1 ) );
 
 		if ( MRU_used == 0 ) {

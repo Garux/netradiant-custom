@@ -264,7 +264,7 @@ void Patch::UpdateCachedData(){
 #if 0
 	{
 		Array<RenderIndex>::iterator first = m_tess.m_indices.begin();
-		for ( std::size_t s = 0; s < m_tess.m_numStrips; s++ )
+		for ( std::size_t s = 0; s < m_tess.m_numStrips; ++s )
 		{
 			Array<RenderIndex>::iterator last = first + m_tess.m_lenStrips;
 
@@ -345,10 +345,10 @@ void Patch::Redisperse( EMatrixMajor mt ){
 		return;
 	}
 
-	for ( h = 0; h < height; h++ )
+	for ( h = 0; h < height; ++h )
 	{
 		p1 = m_ctrl.data() + ( h * row_stride );
-		for ( w = 0; w < width; w++ )
+		for ( w = 0; w < width; ++w )
 		{
 			p2 = p1 + col_stride;
 			p3 = p2 + col_stride;
@@ -387,7 +387,7 @@ void Patch::Smooth( EMatrixMajor mt ){
 	}
 
 	wrap = true;
-	for ( h = 0; h < height; h++ )
+	for ( h = 0; h < height; ++h )
 	{
 		p1 = m_ctrl.data() + ( h * row_stride );
 		p2 = p1 + ( 2 * width ) * col_stride;
@@ -399,10 +399,10 @@ void Patch::Smooth( EMatrixMajor mt ){
 		}
 	}
 
-	for ( h = 0; h < height; h++ )
+	for ( h = 0; h < height; ++h )
 	{
 		p1 = m_ctrl.data() + ( h * row_stride ) + col_stride;
-		for ( w = 0; w < width - 1; w++ )
+		for ( w = 0; w < width - 1; ++w )
 		{
 			p2 = p1 + col_stride;
 			p3 = p2 + col_stride;
@@ -467,14 +467,14 @@ Patch* Patch::MakeCap( Patch* patch, EPatchCap eType, EMatrixMajor mt, bool bFir
 
 	std::size_t nIndex = ( bFirst ) ? 0 : height - 1;
 	if ( mt == ROW ) {
-		for ( i = 0; i < width; i++ )
+		for ( i = 0; i < width; ++i )
 		{
 			p[( bFirst ) ? i : ( width - 1 ) - i] = ctrlAt( nIndex, i ).m_vertex;
 		}
 	}
 	else
 	{
-		for ( i = 0; i < width; i++ )
+		for ( i = 0; i < width; ++i )
 		{
 			p[( bFirst ) ? i : ( width - 1 ) - i] = ctrlAt( i, nIndex ).m_vertex;
 		}
@@ -554,9 +554,9 @@ void Patch::SetTextureRepeat( float s, float t ){
 	const float ti = ( t == 0? 1.f : t ) / ( m_height - 1 );
 
 	PatchControl *pDest = m_ctrl.data();
-	for ( h = 0, tc = 0.0f; h < m_height; h++, tc += ti )
+	for ( h = 0, tc = 0.0f; h < m_height; ++h, tc += ti )
 	{
-		for ( w = 0, sc = 0.0f; w < m_width; w++, sc += si )
+		for ( w = 0, sc = 0.0f; w < m_width; ++w, sc += si )
 		{
 			pDest->m_texcoord[0] = sc;
 			pDest->m_texcoord[1] = tc;
@@ -1029,7 +1029,7 @@ void Patch::RemovePoints( EMatrixMajor mt, bool bFirst ){
 		++pos;
 	}
 
-	for ( std::size_t w = 0; w != width; w++ )
+	for ( std::size_t w = 0; w != width; ++w )
 	{
 		PatchControl* p1 = tmp.data() + ( w * col_stride );
 		PatchControl* p2 = m_ctrl.data() + ( w * col_stride2 );
@@ -1045,13 +1045,13 @@ void Patch::RemovePoints( EMatrixMajor mt, bool bFirst ){
 		p1 = tmp.data() + ( w * col_stride + pos * row_stride );
 		p2 = m_ctrl.data() + ( w * col_stride2 + pos * row_stride2 );
 
-		for ( std::size_t i = 0; i < 3; i++ )
+		for ( std::size_t i = 0; i < 3; ++i )
 		{
 			( p2 - row_stride2 )->m_vertex[i] = ( ( p1 + 2 * row_stride )->m_vertex[i] + ( p1 - 2 * row_stride )->m_vertex[i] ) * 0.5f;
 
 			( p2 - row_stride2 )->m_vertex[i] = ( p2 - row_stride2 )->m_vertex[i] + ( 2.0f * ( ( p1 )->m_vertex[i] - ( p2 - row_stride2 )->m_vertex[i] ) );
 		}
-		for ( std::size_t i = 0; i < 2; i++ )
+		for ( std::size_t i = 0; i < 2; ++i )
 		{
 			( p2 - row_stride2 )->m_texcoord[i] = ( ( p1 + 2 * row_stride )->m_texcoord[i] + ( p1 - 2 * row_stride )->m_texcoord[i] ) * 0.5f;
 
@@ -1276,10 +1276,10 @@ void Patch::constructPlane( const AABB& aabb, int axis, std::size_t width, std::
 	PatchControl* pCtrl = m_ctrl.data();
 
 	vTmp[y] = vStart[y];
-	for ( std::size_t h = 0; h < m_height; h++ )
+	for ( std::size_t h = 0; h < m_height; ++h )
 	{
 		vTmp[x] = vStart[x];
-		for ( std::size_t w = 0; w < m_width; w++, ++pCtrl )
+		for ( std::size_t w = 0; w < m_width; ++w, ++pCtrl )
 		{
 			pCtrl->m_vertex = vTmp;
 			vTmp[x] += xAdj;
@@ -1359,11 +1359,11 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			return;
 		}
 
-		for ( std::size_t h = 0; h < 3; h++, pStart += 9 )
+		for ( std::size_t h = 0; h < 3; ++h, pStart += 9 )
 		{
 			pIndex = pCylIndex;
 			PatchControl* pCtrl = pStart;
-			for ( std::size_t w = 0; w < 8; w++, pCtrl++ )
+			for ( std::size_t w = 0; w < 8; ++w, ++pCtrl )
 			{
 				pCtrl->m_vertex[x] = vPos[pIndex[0]][x];
 				pCtrl->m_vertex[y] = vPos[pIndex[1]][y];
@@ -1377,7 +1377,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		case EPatchPrefab::SqCylinder:
 			{
 				PatchControl* pCtrl = m_ctrl.data();
-				for ( std::size_t h = 0; h < 3; h++, pCtrl += 9 )
+				for ( std::size_t h = 0; h < 3; ++h, pCtrl += 9 )
 				{
 					pCtrl[8].m_vertex = pCtrl[0].m_vertex;
 				}
@@ -1388,7 +1388,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		case EPatchPrefab::Cylinder:
 			{
 				PatchControl* pCtrl = m_ctrl.data();
-				for ( std::size_t h = 0; h < 3; h++, pCtrl += 9 )
+				for ( std::size_t h = 0; h < 3; ++h, pCtrl += 9 )
 				{
 					pCtrl[0].m_vertex = pCtrl[8].m_vertex;
 				}
@@ -1397,14 +1397,14 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		case EPatchPrefab::Cone:
 			{
 				PatchControl* pCtrl = m_ctrl.data();
-				for ( std::size_t h = 0; h < 2; h++, pCtrl += 9 )
+				for ( std::size_t h = 0; h < 2; ++h, pCtrl += 9 )
 				{
 					pCtrl[0].m_vertex = pCtrl[8].m_vertex;
 				}
 			}
 			{
 				PatchControl* pCtrl = m_ctrl.data() + 9 * 2;
-				for ( std::size_t w = 0; w < 9; w++, pCtrl++ )
+				for ( std::size_t w = 0; w < 9; ++w, ++pCtrl )
 				{
 					pCtrl->m_vertex[x] = vPos[1][x];
 					pCtrl->m_vertex[y] = vPos[1][y];
@@ -1415,14 +1415,14 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		case EPatchPrefab::Sphere:
 			{
 				PatchControl* pCtrl = m_ctrl.data() + 9;
-				for ( std::size_t h = 0; h < 3; h++, pCtrl += 9 )
+				for ( std::size_t h = 0; h < 3; ++h, pCtrl += 9 )
 				{
 					pCtrl[0].m_vertex = pCtrl[8].m_vertex;
 				}
 			}
 			{
 				PatchControl* pCtrl = m_ctrl.data();
-				for ( std::size_t w = 0; w < 9; w++, pCtrl++ )
+				for ( std::size_t w = 0; w < 9; ++w, ++pCtrl )
 				{
 					pCtrl->m_vertex[x] = vPos[1][x];
 					pCtrl->m_vertex[y] = vPos[1][y];
@@ -1431,7 +1431,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			}
 			{
 				PatchControl* pCtrl = m_ctrl.data() + ( 9 * 4 );
-				for ( std::size_t w = 0; w < 9; w++, pCtrl++ )
+				for ( std::size_t w = 0; w < 9; ++w, ++pCtrl )
 				{
 					pCtrl->m_vertex[x] = vPos[1][x];
 					pCtrl->m_vertex[y] = vPos[1][y];
@@ -1537,10 +1537,10 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		setDims( 3, 3 );
 
 		PatchControl* pCtrl = m_ctrl.data();
-		for ( std::size_t h = 0; h < 3; h++ )
+		for ( std::size_t h = 0; h < 3; ++h )
 		{
 			pIndex = pBevIndex;
-			for ( std::size_t w = 0; w < 3; w++, pIndex += 2, pCtrl++ )
+			for ( std::size_t w = 0; w < 3; ++w, pIndex += 2, ++pCtrl )
 			{
 				pCtrl->m_vertex[x] = vPos[pIndex[0]][x];
 				pCtrl->m_vertex[y] = vPos[pIndex[1]][y];
@@ -1562,10 +1562,10 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		setDims( 5, 3 );
 
 		PatchControl* pCtrl = m_ctrl.data();
-		for ( std::size_t h = 0; h < 3; h++ )
+		for ( std::size_t h = 0; h < 3; ++h )
 		{
 			pIndex = pEndIndex;
-			for ( std::size_t w = 0; w < 5; w++, pIndex += 2, pCtrl++ )
+			for ( std::size_t w = 0; w < 5; ++w, pIndex += 2, ++pCtrl )
 			{
 				pCtrl->m_vertex[x] = vPos[pIndex[0]][x];
 				pCtrl->m_vertex[y] = vPos[pIndex[1]][y];
@@ -1590,10 +1590,10 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 }
 
 void Patch::RenderDebug( RenderStateFlags state ) const {
-	for ( std::size_t i = 0; i < m_tess.m_numStrips; i++ )
+	for ( std::size_t i = 0; i < m_tess.m_numStrips; ++i )
 	{
 		gl().glBegin( GL_QUAD_STRIP );
-		for ( std::size_t j = 0; j < m_tess.m_lenStrips; j++ )
+		for ( std::size_t j = 0; j < m_tess.m_lenStrips; ++j )
 		{
 			gl().glNormal3fv( normal3f_to_array( ( m_tess.m_vertices.data() + m_tess.m_indices[i * m_tess.m_lenStrips + j] )->normal ) );
 			gl().glTexCoord2fv( texcoord2f_to_array( ( m_tess.m_vertices.data() + m_tess.m_indices[i * m_tess.m_lenStrips + j] )->texcoord ) );
@@ -1607,9 +1607,9 @@ void RenderablePatchSolid::RenderNormals() const {
 	const std::size_t width = m_tess.m_numStrips + 1;
 	const std::size_t height = m_tess.m_lenStrips >> 1;
 	gl().glBegin( GL_LINES );
-	for ( std::size_t i = 0; i < width; i++ )
+	for ( std::size_t i = 0; i < width; ++i )
 	{
-		for ( std::size_t j = 0; j < height; j++ )
+		for ( std::size_t j = 0; j < height; ++j )
 		{
 			{
 				Vector3 vNormal(
@@ -2595,9 +2595,9 @@ void Patch::BuildVertexArray(){
 		m_tess.m_numStrips = m_tess.m_nArrayHeight - 1;
 		m_tess.m_lenStrips = m_tess.m_nArrayWidth * 2;
 
-		for ( std::size_t i = 0; i < m_tess.m_nArrayWidth; i++ )
+		for ( std::size_t i = 0; i < m_tess.m_nArrayWidth; ++i )
 		{
-			for ( std::size_t j = 0; j < m_tess.m_numStrips; j++ )
+			for ( std::size_t j = 0; j < m_tess.m_numStrips; ++j )
 			{
 				m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2] = RenderIndex( j * m_tess.m_nArrayWidth + i );
 				m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2 + 1] = RenderIndex( ( j + 1 ) * m_tess.m_nArrayWidth + i );
@@ -2612,9 +2612,9 @@ void Patch::BuildVertexArray(){
 		m_tess.m_numStrips = m_tess.m_nArrayWidth - 1;
 		m_tess.m_lenStrips = m_tess.m_nArrayHeight * 2;
 
-		for ( std::size_t i = 0; i < m_tess.m_nArrayHeight; i++ )
+		for ( std::size_t i = 0; i < m_tess.m_nArrayHeight; ++i )
 		{
-			for ( std::size_t j = 0; j < m_tess.m_numStrips; j++ )
+			for ( std::size_t j = 0; j < m_tess.m_numStrips; ++j )
 			{
 				m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2] = RenderIndex( ( ( m_tess.m_nArrayHeight - 1 ) - i ) * m_tess.m_nArrayWidth + j );
 				m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2 + 1] = RenderIndex( ( ( m_tess.m_nArrayHeight - 1 ) - i ) * m_tess.m_nArrayWidth + j + 1 );
@@ -2940,14 +2940,14 @@ void Patch::createThickenedOpposite( const Patch& sourcePatch,
 
 	//check if certain seams are required + cycling in normals calculation is needed
 	//( endpoints != startpoints ) - not a cylinder or something
-	for ( std::size_t col = 0; col < m_width; col++ ){
+	for ( std::size_t col = 0; col < m_width; ++col ){
 		if( vector3_length_squared( sourcePatch.ctrlAt( 0, col ).m_vertex - sourcePatch.ctrlAt( m_height - 1, col ).m_vertex ) > 0.1f ){
 			//globalOutputStream() << "yes12.\n";
 			no12 = false;
 			break;
 		}
 	}
-	for ( std::size_t row = 0; row < m_height; row++ ){
+	for ( std::size_t row = 0; row < m_height; ++row ){
 		if( vector3_length_squared( sourcePatch.ctrlAt( row, 0 ).m_vertex - sourcePatch.ctrlAt( row, m_width - 1 ).m_vertex ) > 0.1f ){
 			no34 = false;
 			//globalOutputStream() << "yes34.\n";
@@ -2955,9 +2955,9 @@ void Patch::createThickenedOpposite( const Patch& sourcePatch,
 		}
 	}
 
-	for ( std::size_t col = 0; col < m_width; col++ )
+	for ( std::size_t col = 0; col < m_width; ++col )
 	{
-		for ( std::size_t row = 0; row < m_height; row++ )
+		for ( std::size_t row = 0; row < m_height; ++row )
 		{
 			// The current control vertex on the other patch
 			const PatchControl& curCtrl = sourcePatch.ctrlAt( row, col );
@@ -3259,7 +3259,7 @@ void Patch::createThickenedWall( const Patch& sourcePatch,
 
 	int col = 0;
 	// Now go through the control vertices with these calculated stepsize
-	for ( int idx = start; idx <= end; idx += incr, col++ ) {
+	for ( int idx = start; idx <= end; idx += incr, ++col ) {
 		Vector3 sourceCoord = sourceCtrl[idx].m_vertex;
 		Vector3 targetCoord = targetCtrl[idx].m_vertex;
 		Vector3 middleCoord = ( sourceCoord + targetCoord ) / 2;
