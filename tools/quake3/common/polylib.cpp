@@ -805,3 +805,40 @@ void    AddWindingToConvexHull( const winding_t& w, winding_t& hull, const Vecto
 
 	hull = winding_t( hullPoints, hullPoints + numHullPoints );
 }
+
+
+// Project polygon onto an axis
+static std::pair<double, double> project_winding( const winding_t& w, const DoubleVector3& axis ) {
+	double min_proj = std::numeric_limits<double>::infinity();
+	double max_proj = -std::numeric_limits<double>::infinity();
+
+	for ( const auto& vertex : w ) {
+		const double projection = vector3_dot( vertex, axis );
+		value_minimize( min_proj, projection );
+		value_maximize( max_proj, projection );
+	}
+
+	return { min_proj, max_proj };
+}
+
+// Check intersection of two coplanar convex polygons in 3D (Separating Axis Theorem (SAT))
+bool windings_intersect_coplanar( const winding_t& w1, const winding_t& w2, const Plane3& plane ) {
+	// Collect in-plane normals for both polygons
+	std::vector<DoubleVector3> normals;
+	normals.reserve( w1.size() + w2.size() );
+
+	for( auto *w : { &w1, &w2 } )
+		for( auto prev = std::prev( w->cend() ), next = w->cbegin(); next != w->cend(); prev = next, ++next )
+			normals.push_back( VectorNormalized( vector3_cross( DoubleVector3( *next - *prev ), plane.normal() ) ) );
+
+	// Test each axis
+	for ( const auto& axis : normals ) {
+		const auto [ min1, max1 ] = project_winding( w1, axis );
+		const auto [ min2, max2 ] = project_winding( w2, axis );
+		if ( max1 < min2 + 1 || max2 < min1 + 1 ) { // epsilon to filter false positive intersections
+			return false; // Separating axis found
+		}
+	}
+
+	return true; // No separating axis, polygons intersect
+}

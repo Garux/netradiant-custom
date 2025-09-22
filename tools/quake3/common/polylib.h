@@ -70,6 +70,7 @@ void    ChopWindingInPlace( winding_t& w, const Plane3f& plane, float epsilon );
 
 void pw( const winding_t& w );
 
+bool windings_intersect_coplanar( const winding_t& w1, const winding_t& w2, const Plane3& plane );
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // Below is double-precision stuff.  This was initially needed by the base winding code

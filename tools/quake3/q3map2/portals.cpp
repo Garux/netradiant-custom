@@ -639,38 +639,6 @@ static int c_areas;
  */
 
 static void FloodAreas_r( node_t *node ){
-	int s;
-	portal_t    *p;
-
-
-	if ( node->areaportal ) {
-		if ( node->area == -1 ) {
-			node->area = c_areas;
-		}
-
-		/* this node is part of an area portal brush */
-		brush_t *b = node->brushlist.front().original;
-
-		/* if the current area has already touched this portal, we are done */
-		if ( b->portalareas[ 0 ] == c_areas || b->portalareas[ 1 ] == c_areas ) {
-			return;
-		}
-
-		// note the current area as bounding the portal
-		if ( b->portalareas[ 1 ] != -1 ) {
-			Sys_Warning( "areaportal brush %i touches > 2 areas\n", b->brushNum );
-			return;
-		}
-		if ( b->portalareas[ 0 ] != -1 ) {
-			b->portalareas[ 1 ] = c_areas;
-		}
-		else{
-			b->portalareas[ 0 ] = c_areas;
-		}
-
-		return;
-	}
-
 	if ( node->area != -1 ) {
 		return;
 	}
@@ -685,11 +653,16 @@ static void FloodAreas_r( node_t *node ){
 		skyboxArea = c_areas;
 	}
 
-	for ( p = node->portals; p; p = p->next[ s ] )
+	int s;
+	for ( portal_t *p = node->portals; p; p = p->next[ s ] )
 	{
 		s = ( p->nodes[1] == node );
 
 		/* ydnar: allow areaportal portals to block area flow */
+		/* this check alone w/o node->areaportal path seems sufficient
+		   besides when node->compileFlags are overriden by hint or struct split flush with areportal
+		   we make it persistent in FilterBrushIntoTree_r()
+		   note: node->areaportal way fails for leafs with only opaque and areaportal portals */
 		if ( p->compileFlags & C_AREAPORTAL ) {
 			continue;
 		}
@@ -717,7 +690,7 @@ static void FindAreas_r( node_t *node ){
 		return;
 	}
 
-	if ( node->opaque || node->areaportal || node->area != -1 ) {
+	if ( node->opaque || node->area != -1 ) {
 		return;
 	}
 
@@ -744,14 +717,6 @@ static void CheckAreas_r( const node_t *node ){
 	if ( node->cluster != -1 ) {
 		if ( node->area == -1 ) {
 			Sys_Warning( "cluster %d has area set to -1\n", node->cluster );
-		}
-	}
-	if ( node->areaportal ) {
-		const brush_t *b = node->brushlist.front().original;
-
-		// check if the areaportal touches two areas
-		if ( b->portalareas[0] == -1 || b->portalareas[1] == -1 ) {
-			Sys_Warning( "areaportal brush %i doesn't touch two areas\n", b->brushNum );
 		}
 	}
 }

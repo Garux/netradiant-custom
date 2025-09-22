@@ -448,18 +448,23 @@ static int FilterBrushIntoTree_r( brush_t&& b, node_t *node ){
 
 	/* add it to the leaf list */
 	if ( node->planenum == PLANENUM_LEAF ) {
-		/* something somewhere is hammering brushlist */
 		node->brushlist.push_front( std::move( b ) );
 
 		/* classify the leaf by the structural brush */
 		if ( !b.detail ) {
 			if ( b.opaque ) {
 				node->opaque = true;
-				node->areaportal = false;
 			}
-			else if ( b.compileFlags & C_AREAPORTAL ) {
-				if ( !node->opaque ) {
-					node->areaportal = true;
+			else if ( b.compileFlags & C_AREAPORTAL ) { // find and flag C_AREAPORTAL portals, this is not always passed through node->compileFlags
+				const auto side = std::ranges::find_if( b.original->sides, []( const side_t& side ){ return side.compileFlags & C_AREAPORTAL; } );
+				int s;
+				for ( portal_t *p = node->portals; p; p = p->next[ s ] )
+				{
+					s = ( p->nodes[1] == node );
+					if( p->onnode != nullptr && ( p->onnode->planenum | 1 ) == ( side->planenum | 1 ) )
+						if( windings_intersect_coplanar( ( p->onnode->planenum == side->planenum )
+						                                 ? p->winding : ReverseWinding( p->winding ), side->winding, side->plane ) )
+							p->compileFlags |= C_AREAPORTAL;
 				}
 			}
 		}

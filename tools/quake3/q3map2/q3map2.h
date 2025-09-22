@@ -720,8 +720,6 @@ struct brush_t
 	bool detail;
 	bool opaque;
 
-	int portalareas[ 2 ];
-
 	MinMax minmax;
 
 	std::vector<side_t> sides;
@@ -970,7 +968,6 @@ struct node_t
 
 	/* leafs only */
 	bool opaque;                        /* view can never be inside */
-	bool areaportal;
 	bool skybox;                        /* ydnar: a skybox leaf */
 	bool sky;                           /* ydnar: a sky leaf */
 	int cluster;                        /* for portalfile writing */

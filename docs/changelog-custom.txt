@@ -183,6 +183,7 @@ Q3map2:
 	* fix tiny structural brushes breaking bsp tree
 	* handle patch lodbounds in -shift and -scale
 	* refactor to work without -maxshaderinfo limit, improve shader search performance
+	* fix and simplify FloodAreas
 
 
 

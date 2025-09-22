@@ -542,12 +542,7 @@ static void SetBrushContents( brush_t& b ){
 	}
 
 	/* opaque? */
-	if ( compileFlags & C_TRANSLUCENT ) {
-		b.opaque = false;
-	}
-	else{
-		b.opaque = true;
-	}
+	b.opaque = !( compileFlags & C_TRANSLUCENT );
 
 	/* areaportal? */
 	if ( compileFlags & C_AREAPORTAL ) {
@@ -769,6 +764,28 @@ static void MergeOrigin( entity_t& ent, const Vector3& origin ){
 	ent.setKeyValue( "origin", string );
 }
 
+static void FixAreaportalBrush( brush_t& brush, const entity_t& mapEnt ){
+	if( std::ranges::count_if( brush.sides, []( const side_t& side ){ return side.compileFlags & C_AREAPORTAL; } ) > 1 ){
+		Sys_FPrintf( SYS_WRN, "Entity %i, Brush %i: areaportal brush with > 1 areaportal faces\nLeaving one biggest face\n",
+		             mapEnt.mapEntityNum, brush.brushNum );
+
+		side_t *bestSide{};
+		float bestArea{};
+		for( auto& side : brush.sides ){
+			if( side.compileFlags & C_AREAPORTAL ){
+				const float area = WindingArea( side.winding );
+				if( bestArea < area ){
+					bestArea = area;
+					bestSide = &side;
+				}
+			}
+		}
+		for( auto& side : brush.sides )
+			if( bestSide != &side )
+				side.compileFlags &= ~C_AREAPORTAL;
+	}
+}
+
 /*
    FinishBrush()
    produces a final brush based on the buildBrush->sides array
@@ -805,6 +822,7 @@ static void FinishBrush( bool noCollapseGroups, entity_t& mapEnt ){
 			xml_Select( "areaportals only allowed in world", mapEnt.mapEntityNum, buildBrush.brushNum, false );
 			return;
 		}
+		FixAreaportalBrush( buildBrush, mapEnt );
 	}
 
 	/* add bevel planes */
@@ -1166,9 +1184,6 @@ static void ParseBrush( bool onlyLights, bool noCollapseGroups, entity_t& mapEnt
 		return;
 	}
 
-	/* set some defaults */
-	buildBrush.portalareas[ 0 ] = -1;
-	buildBrush.portalareas[ 1 ] = -1;
 	/* set map entity and brush numbering */
 	buildBrush.entityNum = mapEnt.mapEntityNum;
 	buildBrush.brushNum = mapPrimitiveNum;
