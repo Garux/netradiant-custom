@@ -58,7 +58,7 @@ Image* LoadPNGBuff( unsigned char* fbuffer ){
 	// http://www.libpng.org/pub/png/libpng-manual.html
 
 	png_structp png_ptr = png_create_read_struct
-	                      ( PNG_LIBPNG_VER_STRING, (png_voidp)NULL,
+	                      ( PNG_LIBPNG_VER_STRING, (png_voidp)nullptr,
 	                        user_error_fn, user_warning_fn );
 	if ( !png_ptr ) {
 		globalErrorStream() << "libpng error: png_create_read_struct\n";
@@ -67,14 +67,14 @@ Image* LoadPNGBuff( unsigned char* fbuffer ){
 
 	png_infop info_ptr = png_create_info_struct( png_ptr );
 	if ( !info_ptr ) {
-		png_destroy_read_struct( &png_ptr, (png_infopp)NULL, (png_infopp)NULL );
+		png_destroy_read_struct( &png_ptr, (png_infopp)nullptr, (png_infopp)nullptr );
 		globalErrorStream() << "libpng error: png_create_info_struct (info_ptr)\n";
 		return 0;
 	}
 
 	png_infop end_info = png_create_info_struct( png_ptr );
 	if ( !end_info ) {
-		png_destroy_read_struct( &png_ptr, &info_ptr, (png_infopp)NULL );
+		png_destroy_read_struct( &png_ptr, &info_ptr, (png_infopp)nullptr );
 		globalErrorStream() << "libpng error: png_create_info_struct (end_info)\n";
 		return 0;
 	}
@@ -159,7 +159,7 @@ Image* LoadPNGBuff( unsigned char* fbuffer ){
 	png_read_end( png_ptr, info_ptr );
 
 	/* free up the memory structure */
-	png_destroy_read_struct( &png_ptr, &info_ptr, NULL );
+	png_destroy_read_struct( &png_ptr, &info_ptr, nullptr );
 
 	free( row_pointers );
 

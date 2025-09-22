@@ -93,17 +93,17 @@ namespace
 int noDrawContentFlags, noDrawSurfaceFlags, noDrawCompileFlags;
 
 int numTraceInfos = 0, maxTraceInfos = 0, firstTraceInfo = 0;
-traceInfo_t                     *traceInfos = NULL;
+traceInfo_t                     *traceInfos = nullptr;
 
 int numTraceWindings = 0, maxTraceWindings = 0, deadWinding = -1;
-traceWinding_t                  *traceWindings = NULL;
+traceWinding_t                  *traceWindings = nullptr;
 
 int numTraceTriangles = 0, maxTraceTriangles = 0, deadTriangle = -1;
-traceTriangle_t                 *traceTriangles = NULL;
+traceTriangle_t                 *traceTriangles = nullptr;
 
 int headNodeNum = 0, skyboxNodeNum = 0, maxTraceDepth = 0, numTraceLeafNodes = 0;
 int numTraceNodes = 0, maxTraceNodes = 0;
-traceNode_t                     *traceNodes = NULL;
+traceNode_t                     *traceNodes = nullptr;
 }
 
 
@@ -703,19 +703,19 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 	node->numItems = 0;
 	node->maxItems = 0;
 	free( node->items );
-	node->items = NULL;
+	node->items = nullptr;
 
 	/* check children */
 	if ( frontNode->numItems <= 0 ) {
 		frontNode->maxItems = 0;
 		free( frontNode->items );
-		frontNode->items = NULL;
+		frontNode->items = nullptr;
 	}
 
 	if ( backNode->numItems <= 0 ) {
 		backNode->maxItems = 0;
 		free( backNode->items );
-		backNode->items = NULL;
+		backNode->items = nullptr;
 	}
 
 	/* subdivide children */
@@ -830,7 +830,7 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 		/* get surface and info */
 		const bspDrawSurface_t& ds = bspDrawSurfaces[ model.firstBSPSurface + i ];
 		const surfaceInfo_t& info = surfaceInfos[ model.firstBSPSurface + i ];
-		if ( info.si == NULL ) {
+		if ( info.si == nullptr ) {
 			continue;
 		}
 
@@ -1005,7 +1005,7 @@ static void PopulateWithPicoModel( int castShadows, const std::vector<const AssM
 	{
 		/* get shader (fixme: support shader remapping) */
 		ti.si = ShaderInfoForShaderNull( mesh->getShaderName() );
-		if ( ti.si == NULL ) {
+		if ( ti.si == nullptr ) {
 			continue;
 		}
 
@@ -1064,7 +1064,7 @@ static void PopulateTraceNodes(){
 
 		/* get shadow flags */
 		int castShadows = ENTITY_CAST_SHADOWS;
-		GetEntityShadowFlags( &e, NULL, &castShadows, NULL );
+		GetEntityShadowFlags( &e, nullptr, &castShadows, nullptr );
 
 		/* early out? */
 		if ( !castShadows ) {
@@ -1356,7 +1356,7 @@ static bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace 
 
 	/* most surfaces are completely opaque */
 	if ( !( si->compileFlags & ( C_ALPHASHADOW | C_LIGHTFILTER ) ) ||
-	     si->lightImage == NULL || si->lightImage->pixels == NULL ) {
+	     si->lightImage == nullptr || si->lightImage->pixels == nullptr ) {
 		trace->hit = trace->origin + trace->direction * depth;
 		trace->color.set( 0 );
 		trace->opaque = true;

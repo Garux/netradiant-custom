@@ -71,7 +71,7 @@ public:
 	int BuildPoints();
 	void BuildBounds();
 	void BuildFromWinding( DWinding* w );
-	scene::Node* BuildInRadiant( bool allowDestruction, int* changeCnt, scene::Node* entity = NULL );
+	scene::Node* BuildInRadiant( bool allowDestruction, int* changeCnt, scene::Node* entity = nullptr );
 	void selectInRadiant() const;
 
 	void ResetChecks( const std::vector<CopiedString>& exclusionList );

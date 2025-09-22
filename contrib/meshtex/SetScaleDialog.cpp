@@ -61,13 +61,13 @@ SetScaleDialog::SetScaleVisitor::SetScaleVisitor(
 bool
 SetScaleDialog::SetScaleVisitor::Execute(MeshEntity& meshEntity) const
 {
-   if (_rowArgs != NULL)
+   if (_rowArgs != nullptr)
    {
       meshEntity.SetScale(MeshEntity::ROW_SLICE_TYPE,
                           _rowArgs->alignSlice, _rowArgs->refSlice,
                           _rowArgs->naturalScale, _rowArgs->scaleOrTiles);
    }
-   if (_colArgs != NULL)
+   if (_colArgs != nullptr)
    {
       meshEntity.SetScale(MeshEntity::COL_SLICE_TYPE,
                           _colArgs->alignSlice, _colArgs->refSlice,
@@ -309,8 +309,8 @@ SetScaleDialog::Apply()
    MeshEntity::SliceDesignation alignCol, alignRow;
    MeshEntity::RefSliceDescriptor refRow, refCol;
    SetScaleVisitor::SliceArgs row, col;
-   SetScaleVisitor::SliceArgs *rowArgs = NULL;
-   SetScaleVisitor::SliceArgs *colArgs = NULL;
+   SetScaleVisitor::SliceArgs *rowArgs = nullptr;
+   SetScaleVisitor::SliceArgs *colArgs = nullptr;
    if (sApply)
    {
       // S axis is affected, so read the S info.
@@ -326,7 +326,7 @@ SetScaleDialog::Apply()
       alignCol.maxSlice = !col_num_align->isEnabled();
       alignCol.index = col_num_align->value();
       row.alignSlice = &alignCol;
-      row.refSlice = NULL;
+      row.refSlice = nullptr;
       if ( row_ref->isChecked() )
       {
          // Reference row is specified, so get that info.
@@ -352,7 +352,7 @@ SetScaleDialog::Apply()
       alignRow.maxSlice = !row_num_align->isEnabled();
       alignRow.index = row_num_align->value();
       col.alignSlice = &alignRow;
-      col.refSlice = NULL;
+      col.refSlice = nullptr;
       if ( col_ref->isChecked() )
       {
          // Reference column is specified, so get that info.

@@ -293,7 +293,7 @@ DBrush* DShape::GetBoundingCube_Ext( vec3_t min, vec3_t max, const char *texture
 
 DBrush* DShape::GetBoundingCube( vec3_t min, vec3_t max, const char *textureName, DEntity* ent, bool* bUseFaces ){
 	DBrush* pB;
-	if ( ent == NULL ) {
+	if ( ent == nullptr ) {
 		pB = m_Container.GetWorldSpawn()->NewBrush();
 	}
 	else{
@@ -350,7 +350,7 @@ bool DShape::BuildPit( vec3_t min, vec3_t max ){
 		return false;
 	}
 
-	srand( time( NULL ) );
+	srand( time( nullptr ) );
 
 	vec3_t centre;
 	VectorAdd( min, max, centre );

@@ -61,7 +61,7 @@ static void SelectSplitPlaneNum( const node_t *node, const facelist_t& list, int
 		}
 		const float dist = blockSize[ i ] * ( floor( node->minmax.mins[ i ] / blockSize[ i ] ) + 1 );
 		if ( node->minmax.maxs[ i ] > dist ) {
-			*splitPlaneNum = FindFloatPlane( g_vector3_axes[i], dist, 0, NULL );
+			*splitPlaneNum = FindFloatPlane( g_vector3_axes[i], dist, 0, nullptr );
 			return;
 		}
 	}

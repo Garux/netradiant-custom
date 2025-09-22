@@ -265,7 +265,7 @@ void RunBSP( size_t buildIdx ){
 			globalOutputStream() << "Writing the compile script to '" << batpath << "'\n";
 			if( g_WatchBSP0_DumpLog )
 				globalOutputStream() << "The build output will be saved in '" << junkpath << "'\n";
-			Q_Exec( batpath, NULL, NULL, true, false );
+			Q_Exec( batpath, nullptr, nullptr, true, false );
 		}
 	}
 

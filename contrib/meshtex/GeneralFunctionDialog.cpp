@@ -332,8 +332,8 @@ GeneralFunctionDialog::Apply()
    // OK read the remaining info from the widgets.
 
    MeshEntity::GeneralFunctionFactors s, t;
-   MeshEntity::GeneralFunctionFactors *sFactors = NULL;
-   MeshEntity::GeneralFunctionFactors *tFactors = NULL;
+   MeshEntity::GeneralFunctionFactors *sFactors = nullptr;
+   MeshEntity::GeneralFunctionFactors *tFactors = nullptr;
    if (sApply)
    {
       // S axis is affected, so read the S factors.
@@ -362,8 +362,8 @@ GeneralFunctionDialog::Apply()
    alignCol.maxSlice = !col_num_align->isEnabled();
    alignCol.index = col_num_align->value();
    MeshEntity::RefSliceDescriptor row, col;
-   MeshEntity::RefSliceDescriptor *refRow = NULL;
-   MeshEntity::RefSliceDescriptor *refCol = NULL;
+   MeshEntity::RefSliceDescriptor *refRow = nullptr;
+   MeshEntity::RefSliceDescriptor *refCol = nullptr;
    if ( row_ref->isChecked() )
    {
       // Reference row is specified, so get that info.

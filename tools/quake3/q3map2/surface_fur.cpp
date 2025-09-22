@@ -47,7 +47,7 @@
 
 void Fur( mapDrawSurface_t *ds ){
 	/* dummy check */
-	if ( ds == NULL || ds->fur || ds->shaderInfo->furNumLayers < 1 ) {
+	if ( ds == nullptr || ds->fur || ds->shaderInfo->furNumLayers < 1 ) {
 		return;
 	}
 
@@ -75,7 +75,7 @@ void Fur( mapDrawSurface_t *ds ){
 	{
 		/* clone the surface */
 		mapDrawSurface_t *fur = CloneSurface( ds, ds->shaderInfo );
-		if ( fur == NULL ) {
+		if ( fur == nullptr ) {
 			return;
 		}
 

@@ -181,7 +181,7 @@ public:
 		const char* targetname;
 		vec3_t vOrigin;
 
-		e.SpawnString( "targetname", NULL, &targetname );
+		e.SpawnString( "targetname", nullptr, &targetname );
 		e.SpawnVector( "origin", "0 0 0", vOrigin );
 
 		if ( !strcmp( classname, "info_train_spline_main" ) ) {
@@ -190,7 +190,7 @@ public:
 				return;
 			}
 
-			e.SpawnString( "target", NULL, &target );
+			e.SpawnString( "target", nullptr, &target );
 
 			if ( !target ) {
 				drawer.AddControlPoint( targetname, vOrigin );
@@ -198,7 +198,7 @@ public:
 			else {
 				splinePoint_t* pSP = drawer.AddSplinePoint( targetname, target, vOrigin );
 
-				e.SpawnString( "control", NULL, &control );
+				e.SpawnString( "control", nullptr, &control );
 
 				if ( control ) {
 					AddSplineControl( control, pSP );
@@ -207,7 +207,7 @@ public:
 						char buffer[32];
 						sprintf( buffer, "control%i", j );
 
-						e.SpawnString( buffer, NULL, &control );
+						e.SpawnString( buffer, nullptr, &control );
 						if ( !control ) {
 							break;
 						}

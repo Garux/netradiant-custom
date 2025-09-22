@@ -47,7 +47,7 @@ static int numCustSurfaceParms;
 
 void ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVerts ){
 	/* dummy check */
-	if ( colormod == NULL || numVerts < 1 || drawVerts == NULL ) {
+	if ( colormod == nullptr || numVerts < 1 || drawVerts == nullptr ) {
 		return;
 	}
 
@@ -56,7 +56,7 @@ void ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVert
 	for ( bspDrawVert_t& dv : Span( drawVerts, numVerts ) )
 	{
 		/* walk colorMod list */
-		for ( const colorMod_t *cm = colormod; cm != NULL; cm = cm->next )
+		for ( const colorMod_t *cm = colormod; cm != nullptr; cm = cm->next )
 		{
 			float c;
 			/* default */
@@ -301,7 +301,7 @@ void WriteMapShaderFile(){
 
 	/* open shader file */
 	FILE *file = fopen( mapShaderFile.c_str(), "wt" );
-	if ( file == NULL ) {
+	if ( file == nullptr ) {
 		Sys_Warning( "Unable to open map shader file %s for writing\n", mapShaderFile.c_str() );
 		return;
 	}
@@ -352,7 +352,7 @@ const shaderInfo_t& CustomShader( const shaderInfo_t *si, const char *find, char
 
 
 	/* dummy check */
-	if ( si == NULL ) {
+	if ( si == nullptr ) {
 		return ShaderInfoForShader( "default" );
 	}
 
@@ -427,7 +427,7 @@ const shaderInfo_t& CustomShader( const shaderInfo_t *si, const char *find, char
 	}
 
 	/* default shader text */
-	else if ( srcShaderText == NULL ) {
+	else if ( srcShaderText == nullptr ) {
 		srcShaderText = temp;
 		sprintf( temp, "\n"
 		               "{ // Q3Map2 defaulted\n"
@@ -651,22 +651,22 @@ static void LoadShaderImages( shaderInfo_t& si ){
 		si.shaderImage = ImageLoad( si.editorImagePath );
 
 		/* then try shadername */
-		if ( si.shaderImage == NULL ) {
+		if ( si.shaderImage == nullptr ) {
 			si.shaderImage = ImageLoad( si.shader );
 		}
 
 		/* then try implicit image path (note: new behavior!) */
-		if ( si.shaderImage == NULL ) {
+		if ( si.shaderImage == nullptr ) {
 			si.shaderImage = ImageLoad( si.implicitImagePath );
 		}
 
 		/* then try lightimage (note: new behavior!) */
-		if ( si.shaderImage == NULL ) {
+		if ( si.shaderImage == nullptr ) {
 			si.shaderImage = ImageLoad( si.lightImagePath );
 		}
 
 		/* otherwise, use default image */
-		if ( si.shaderImage == NULL ) {
+		if ( si.shaderImage == nullptr ) {
 			si.shaderImage = ImageLoad( DEFAULT_IMAGE );
 			if ( g_warnImage && !strEqual( si.shader, "noshader" ) ) {
 				Sys_Warning( "Couldn't find image for shader %s\n", si.shader.c_str() );
@@ -678,14 +678,14 @@ static void LoadShaderImages( shaderInfo_t& si ){
 
 		/* load normalmap image (ok if this is NULL) */
 		si.normalImage = ImageLoad( si.normalImagePath );
-		if ( si.normalImage != NULL ) {
+		if ( si.normalImage != nullptr ) {
 			Sys_FPrintf( SYS_VRB, "Shader %s has\n"
 			                      "    NM %s\n", si.shader.c_str(), si.normalImagePath.c_str() );
 		}
 	}
 
 	/* if no light image, reuse shader image */
-	if ( si.lightImage == NULL ) {
+	if ( si.lightImage == nullptr ) {
 		si.lightImage = si.shaderImage;
 	}
 
@@ -723,7 +723,7 @@ static void LoadShaderImages( shaderInfo_t& si ){
 
 shaderInfo_t *ShaderInfoForShaderNull( const char *shaderName ){
 	if ( strEqual( shaderName, "noshader" ) ) {
-		return NULL;
+		return nullptr;
 	}
 	return &ShaderInfoForShader( shaderName );
 }
@@ -1494,14 +1494,14 @@ static void ParseShaderFile( const char *filename ){
 					cm = safe_calloc( sizeof( *cm ) );
 
 					/* attach to shader */
-					if ( si.colorMod == NULL ) {
+					if ( si.colorMod == nullptr ) {
 						si.colorMod = cm;
 					}
 					else
 					{
-						for ( cm2 = si.colorMod; cm2 != NULL; cm2 = cm2->next )
+						for ( cm2 = si.colorMod; cm2 != nullptr; cm2 = cm2->next )
 						{
-							if ( cm2->next == NULL ) {
+							if ( cm2->next == nullptr ) {
 								cm2->next = cm;
 								break;
 							}

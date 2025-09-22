@@ -474,7 +474,7 @@ static void SetBrushContents( brush_t& b ){
 	/* get the content/compile flags for every side in the brush */
 	for ( ++s; s != b.sides.cend(); ++s )
 	{
-		if ( s->shaderInfo == NULL ) {
+		if ( s->shaderInfo == nullptr ) {
 			continue;
 		}
 		//%	if( s->contentFlags != contentFlags || s->compileFlags != compileFlags )
@@ -627,7 +627,7 @@ void AddBrushBevels(){
 					}
 				}
 
-				s.planenum = FindFloatPlane( plane, 0, NULL );
+				s.planenum = FindFloatPlane( plane, 0, nullptr );
 				s.contentFlags = sides[ 0 ].contentFlags;
 				/* handle bevel surfaceflags */
 				for ( const side_t& side : sides ) {
@@ -839,8 +839,8 @@ static void FinishBrush( bool noCollapseGroups, entity_t& mapEnt ){
 	b.original = &b;
 
 	/* link colorMod volume brushes to the entity directly */
-	if ( b.contentShader != NULL &&
-	     b.contentShader->colorMod != NULL &&
+	if ( b.contentShader != nullptr &&
+	     b.contentShader->colorMod != nullptr &&
 	     b.contentShader->colorMod->type == EColorMod::Volume ) {
 		mapEnt.colorModBrushes.push_back( &b );
 	}
@@ -1232,7 +1232,7 @@ static void AdjustBrushesForOrigin( entity_t& ent ){
 			const float newdist = -plane3_distance_to_point( mapplanes[ side.planenum ].plane, ent.originbrush_origin );
 
 			/* find a new plane */
-			side.planenum = FindFloatPlane( mapplanes[ side.planenum ].normal(), newdist, 0, NULL );
+			side.planenum = FindFloatPlane( mapplanes[ side.planenum ].normal(), newdist, 0, nullptr );
 			side.plane.dist() = -plane3_distance_to_point( side.plane, ent.originbrush_origin );
 		}
 
@@ -1241,7 +1241,7 @@ static void AdjustBrushesForOrigin( entity_t& ent ){
 	}
 
 	/* walk patch list */
-	for ( parseMesh_t *p = ent.patches; p != NULL; p = p->next )
+	for ( parseMesh_t *p = ent.patches; p != nullptr; p = p->next )
 	{
 		for ( bspDrawVert_t& vert : Span( p->mesh.verts, p->mesh.width * p->mesh.height ) )
 			vert.xyz -= ent.originbrush_origin;
@@ -1286,14 +1286,14 @@ static void MoveBrushesToWorld( entity_t& ent ){
 	}
 
 	/* move patches */
-	if ( ent.patches != NULL ) {
+	if ( ent.patches != nullptr ) {
 		parseMesh_t *pm;
-		for ( pm = ent.patches; pm->next != NULL; pm = pm->next ){};
+		for ( pm = ent.patches; pm->next != nullptr; pm = pm->next ){};
 
 		pm->next = entities[ 0 ].patches;
 		entities[ 0 ].patches = ent.patches;
 
-		ent.patches = NULL;
+		ent.patches = nullptr;
 	}
 }
 
@@ -1347,7 +1347,7 @@ static void LoadEntityIndexMap( entity_t& e ){
 
 
 	/* this only works with bmodel ents */
-	if ( e.brushes.empty() && e.patches == NULL ) {
+	if ( e.brushes.empty() && e.patches == nullptr ) {
 		return;
 	}
 
@@ -1400,7 +1400,7 @@ static void LoadEntityIndexMap( entity_t& e ){
 	else
 	{
 		/* load it */
-		Load256Image( indexMapFilename, &pixels, NULL, &w, &h );
+		Load256Image( indexMapFilename, &pixels, nullptr, &w, &h );
 
 		/* debug code */
 		//%	Sys_Printf( "-------------------------------" );
@@ -1450,11 +1450,11 @@ static void LoadEntityIndexMap( entity_t& e ){
 		for ( int i = 0; i < 256 && !strEmpty( offset ); ++i )
 		{
 			const char *space = strchr( offset, ' ' );
-			if ( space == NULL ) {
+			if ( space == nullptr ) {
 				space = offset + strlen( offset );
 			}
 			im->offsets[ i ] = atof( String64( StringRange( offset, space ) ) );
-			if ( space == NULL ) {
+			if ( space == nullptr ) {
 				break;
 			}
 			offset = space + 1;
@@ -1464,7 +1464,7 @@ static void LoadEntityIndexMap( entity_t& e ){
 	/* store the index map in every brush/patch in the entity */
 	for ( brush_t& b : e.brushes )
 		b.im = im;
-	for ( parseMesh_t *p = e.patches; p != NULL; p = p->next )
+	for ( parseMesh_t *p = e.patches; p != nullptr; p = p->next )
 		p->im = im;
 }
 
@@ -1577,7 +1577,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 	}
 
 	/* get explicit shadow flags */
-	GetEntityShadowFlags( &mapEnt, NULL, &castShadows, &recvShadows );
+	GetEntityShadowFlags( &mapEnt, nullptr, &castShadows, &recvShadows );
 
 	/* ydnar: get lightmap scaling value for this entity */
 	const float lightmapScale = std::max( 0.f, mapEnt.floatForKey( "lightmapscale", "_lightmapscale", "_ls" ) );
@@ -1619,7 +1619,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 		brush.shadeAngleDegrees = shadeAngle;
 	}
 
-	for ( parseMesh_t *patch = mapEnt.patches; patch != NULL; patch = patch->next )
+	for ( parseMesh_t *patch = mapEnt.patches; patch != nullptr; patch = patch->next )
 	{
 		patch->entityNum = mapEnt.mapEntityNum;
 		patch->castShadows = castShadows;

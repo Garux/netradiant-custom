@@ -44,7 +44,7 @@ bool XmlTagBuilder::CreateXmlDocument( const char* savefile ){
 	writer = xmlNewTextWriterDoc( &doc, 0 );
 
 	// begin a new UTF-8 formatted xml document
-	xmlTextWriterStartDocument( writer, NULL, "UTF-8", NULL );
+	xmlTextWriterStartDocument( writer, nullptr, "UTF-8", nullptr );
 
 	// create the root node with stock and custom elements
 	xmlTextWriterStartElement( writer, (const xmlChar*)"root" );
@@ -122,8 +122,8 @@ bool XmlTagBuilder::AddShaderNode( const char* shader, TextureType textureType, 
 	   returns TRUE if the node was added successfully or FALSE when failed
 	 */
 
-	xmlNodeSetPtr nodePtr = NULL;
-	xmlXPathObjectPtr xpathPtr = NULL;
+	xmlNodeSetPtr nodePtr = nullptr;
+	xmlXPathObjectPtr xpathPtr = nullptr;
 
 	switch ( textureType )
 	{
@@ -149,11 +149,11 @@ bool XmlTagBuilder::AddShaderNode( const char* shader, TextureType textureType, 
 		switch ( nodeShaderType )
 		{
 		case NodeShaderType::SHADER:
-			newnode = xmlNewNode( NULL, (const xmlChar*)"shader" );
+			newnode = xmlNewNode( nullptr, (const xmlChar*)"shader" );
 			break;
 		case NodeShaderType::TEXTURE:
 		default:
-			newnode = xmlNewNode( NULL, (const xmlChar*)"texture" );
+			newnode = xmlNewNode( nullptr, (const xmlChar*)"texture" );
 			break;
 		};
 
@@ -161,7 +161,7 @@ bool XmlTagBuilder::AddShaderNode( const char* shader, TextureType textureType, 
 		xmlSetProp( newnode, (const xmlChar*)"path", (const xmlChar*)shader );
 		xmlNodeSetContent( newnode, (const xmlChar*)"\n    " );
 
-		if ( nodePtr->nodeTab[0]->children->next == NULL ) { // there are no shaders yet
+		if ( nodePtr->nodeTab[0]->children->next == nullptr ) { // there are no shaders yet
 			// add spaces
 			newtext = xmlNewText( (const xmlChar*)"  " );
 			xmlAddChild( nodeParent->children, newtext );
@@ -327,12 +327,12 @@ bool XmlTagBuilder::AddShaderTag( const char* shader, const char* content, NodeT
 	}
 
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) { // node was found
-		xmlNodePtr newnode = xmlNewNode( NULL, (const xmlChar*)"tag" );
+		xmlNodePtr newnode = xmlNewNode( nullptr, (const xmlChar*)"tag" );
 		xmlNodePtr nodeParent = nodePtr->nodeTab[0];
 		newnode = xmlDocCopyNode( newnode, doc, 1 );
 		xmlNodeSetContent( newnode, (const xmlChar*)content );
 
-		if ( nodePtr->nodeTab[0]->children->next == NULL ) { // shader node has NO children
+		if ( nodePtr->nodeTab[0]->children->next == nullptr ) { // shader node has NO children
 			// add spaces
 			xmlNodePtr newtext = xmlNewText( (const xmlChar*)"  " );
 			xmlAddChild( nodeParent->children, newtext );
@@ -476,7 +476,7 @@ void XmlTagBuilder::GetShaderTags( const char* shader, std::vector<CopiedString>
 
 	const char* expression;
 
-	if ( shader == NULL ) { // get all tags from all shaders
+	if ( shader == nullptr ) { // get all tags from all shaders
 		expression = "/root/*/*/tag";
 	}
 	else {

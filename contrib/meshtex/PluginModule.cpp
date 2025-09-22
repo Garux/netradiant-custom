@@ -100,7 +100,7 @@ const char *
 PluginModule::QERPluginGetCommandList()
 {
    // Bail out if the plugin menu doesn't exist.
-   if (UIInstance().MainMenu() == NULL)
+   if (UIInstance().MainMenu() == nullptr)
    {
       return "";
    }
@@ -118,7 +118,7 @@ const char *
 PluginModule::QERPluginGetCommandTitleList()
 {
    // Bail out if the plugin menu doesn't exist.
-   if (UIInstance().MainMenu() == NULL)
+   if (UIInstance().MainMenu() == nullptr)
    {
       return "";
    }
@@ -143,7 +143,7 @@ PluginModule::QERPluginDispatch(const char *command,
                                 bool bSingleBrush)
 {
    // Bail out if the plugin menu doesn't exist.
-   if (UIInstance().MainMenu() == NULL)
+   if (UIInstance().MainMenu() == nullptr)
    {
       // XXX This shouldn't happen; might as well drop an ASSERT or error
       // message in here. First make sure there's no odd Radiant-exiting

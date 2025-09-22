@@ -33,8 +33,8 @@
  * subclasses of GenericPluginUI can be created.
  */
 GenericPluginUI::GenericPluginUI() :
-   _window(NULL),
-   _mainMenu(NULL)
+   _window(nullptr),
+   _mainMenu(nullptr)
 {
 }
 
@@ -45,7 +45,7 @@ GenericPluginUI::GenericPluginUI() :
 GenericPluginUI::~GenericPluginUI()
 {
    // Remove any reference to the menu object.
-   if (_mainMenu != NULL)
+   if (_mainMenu != nullptr)
    {
       delete _mainMenu;
    }
@@ -92,7 +92,7 @@ GenericPluginUI::SetWindow(QWidget *window)
    // Set it as the parent for every dialog window.
    for ( const auto& [name, ptr] : _dialogMap )
    {
-      if (ptr.get() != NULL)
+      if (ptr.get() != nullptr)
       {
          ptr->SetWindow(window);
       }
@@ -107,9 +107,9 @@ GenericPluginUI::SetWindow(QWidget *window)
 GenericMainMenu *
 GenericPluginUI::MainMenu()
 {
-   if (_mainMenu == NULL)
+   if (_mainMenu == nullptr)
    {
-      return NULL;
+      return nullptr;
    }
    return _mainMenu->get();
 }
@@ -127,7 +127,7 @@ GenericPluginUI::Dialog(const std::string& key)
    DialogMap::const_iterator dialogMapIter = _dialogMap.find(key);
    if (dialogMapIter == _dialogMap.end())
    {
-      return NULL;
+      return nullptr;
    }
    return dialogMapIter->second;
 }

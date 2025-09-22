@@ -99,7 +99,7 @@ inline name_t name_read( const char* name ){
 	const char* end = name + strlen( name );
 	for ( const char* p = end; end != name; --p )
 	{
-		if ( strrchr( "1234567890", *p ) == NULL ) {
+		if ( strrchr( "1234567890", *p ) == nullptr ) {
 			break;
 		}
 		end = p;

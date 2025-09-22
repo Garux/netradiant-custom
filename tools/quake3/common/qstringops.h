@@ -29,7 +29,7 @@ inline bool strEmpty( const char* string ){
 	return *string == '\0';
 }
 inline bool strEmptyOrNull( const char* string ){
-	return string == NULL || *string == '\0';
+	return string == nullptr || *string == '\0';
 }
 inline void strClear( char* string ){
 	*string = '\0';
@@ -94,7 +94,7 @@ inline const char *strIstr( const char* haystack, const char* needle ) {
 			return haystack;
 		}
 	} while ( *haystack++ );
-	return NULL;
+	return nullptr;
 }
 
 inline char *strIstr( char* haystack, const char* needle ) {

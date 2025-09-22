@@ -56,7 +56,7 @@ bool read_var( const char *filename, const char *section, const char *key, char 
 
 	rc = fopen( filename, "rt" );
 
-	if ( rc == NULL ) {
+	if ( rc == nullptr ) {
 		return false;
 	}
 
@@ -75,7 +75,7 @@ bool read_var( const char *filename, const char *section, const char *key, char 
 			{
 				ptr = strchr( line, '=' );
 
-				if ( ptr == NULL ) {
+				if ( ptr == nullptr ) {
 					// reached the end of the section
 					fclose( rc );
 					return false;
@@ -112,7 +112,7 @@ bool save_var( const char *filename, const char *section, const char *key, const
 
 	rc = fopen( filename, "rb" );
 
-	if ( rc != NULL ) {
+	if ( rc != nullptr ) {
 		unsigned int len;
 		void *buf;
 
@@ -130,13 +130,13 @@ bool save_var( const char *filename, const char *section, const char *key, const
 	// TTimo: changed to binary writing. It doesn't seem to affect linux version, and win32 version was happending a lot of '\n'
 	rc = fopen( filename, "wb" );
 
-	if ( rc == NULL ) {
+	if ( rc == nullptr ) {
 		return false;
 	}
 
 	// First we need to find the section
 	found = false;
-	while ( old_rc.ReadString( line, 1024 ) != NULL )
+	while ( old_rc.ReadString( line, 1024 ) != nullptr )
 	{
 		fputs( line, rc );
 
@@ -158,11 +158,11 @@ bool save_var( const char *filename, const char *section, const char *key, const
 
 	fprintf( rc, "%s=%s\n", key, value );
 
-	while ( old_rc.ReadString( line, 1024 ) != NULL )
+	while ( old_rc.ReadString( line, 1024 ) != nullptr )
 	{
 		ptr = strchr( line, '=' );
 
-		if ( ptr != NULL ) {
+		if ( ptr != nullptr ) {
 			*ptr = '\0';
 
 			if ( strcmp( line, key ) == 0 ) {
@@ -179,7 +179,7 @@ bool save_var( const char *filename, const char *section, const char *key, const
 		}
 	}
 
-	while ( old_rc.ReadString( line, 1024 ) != NULL )
+	while ( old_rc.ReadString( line, 1024 ) != nullptr )
 		fputs( line, rc );
 
 	fclose( rc );
@@ -213,7 +213,7 @@ bool profile_save_buffer( const char * rc_path, const char *name, void *buffer, 
 
 	f = fopen( filename, "wb" );
 
-	if ( f != NULL ) {
+	if ( f != nullptr ) {
 		if ( fwrite( buffer, size, 1, f ) == 1 ) {
 			ret = true;
 		}
@@ -233,7 +233,7 @@ bool profile_load_buffer( const char * rc_path, const char *name, void *buffer, 
 
 	f = fopen( filename, "rb" );
 
-	if ( f != NULL ) {
+	if ( f != nullptr ) {
 		fseek( f, 0, SEEK_END );
 		len = ftell( f );
 		rewind( f );

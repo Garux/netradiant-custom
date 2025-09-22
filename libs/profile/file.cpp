@@ -50,7 +50,7 @@ MemStream::MemStream(){
 	m_nPosition = 0;
 	m_nBufferSize = 0;
 	m_nFileSize = 0;
-	m_pBuffer = NULL;
+	m_pBuffer = nullptr;
 	m_bAutoDelete = true;
 }
 
@@ -59,14 +59,14 @@ MemStream::MemStream( size_type nLen ){
 	m_nPosition = 0;
 	m_nBufferSize = 0;
 	m_nFileSize = 0;
-	m_pBuffer = NULL;
+	m_pBuffer = nullptr;
 	m_bAutoDelete = true;
 
 	GrowFile( nLen );
 }
 
 FileStream::FileStream(){
-	m_hFile = NULL;
+	m_hFile = nullptr;
 	m_bCloseOnDelete = false;
 }
 
@@ -82,7 +82,7 @@ MemStream::~MemStream(){
 }
 
 FileStream::~FileStream(){
-	if ( m_hFile != NULL && m_bCloseOnDelete ) {
+	if ( m_hFile != nullptr && m_bCloseOnDelete ) {
 		Close();
 	}
 }
@@ -95,10 +95,10 @@ char* MemStream::ReadString( char* pBuf, size_type nMax ){
 	unsigned char ch;
 
 	if ( nMax <= 0 ) {
-		return NULL;
+		return nullptr;
 	}
 	if ( m_nPosition >= m_nFileSize ) {
-		return NULL;
+		return nullptr;
 	}
 
 	while ( ( --nMax ) )
@@ -235,7 +235,7 @@ bool FileStream::Open( const char *filename, const char *mode ){
 	m_hFile = fopen( filename, mode );
 	m_bCloseOnDelete = true;
 
-	return ( m_hFile != NULL );
+	return ( m_hFile != nullptr );
 }
 
 void MemStream::Close(){
@@ -246,15 +246,15 @@ void MemStream::Close(){
 	if ( m_pBuffer && m_bAutoDelete ) {
 		free( m_pBuffer );
 	}
-	m_pBuffer = NULL;
+	m_pBuffer = nullptr;
 }
 
 void FileStream::Close(){
-	if ( m_hFile != NULL ) {
+	if ( m_hFile != nullptr ) {
 		fclose( m_hFile );
 	}
 
-	m_hFile = NULL;
+	m_hFile = nullptr;
 	m_bCloseOnDelete = false;
 }
 
@@ -304,7 +304,7 @@ void MemStream::GrowFile( size_type nNewLen ){
 
 		// allocate new buffer
 		unsigned char* lpNew;
-		if ( m_pBuffer == NULL ) {
+		if ( m_pBuffer == nullptr ) {
 			lpNew = static_cast<unsigned char*>( malloc( nNewBufferSize ) );
 		}
 		else{
@@ -321,7 +321,7 @@ void MemStream::Flush(){
 }
 
 void FileStream::Flush(){
-	if ( m_hFile == NULL ) {
+	if ( m_hFile == nullptr ) {
 		return;
 	}
 
@@ -333,12 +333,12 @@ void MemStream::Abort(){
 }
 
 void FileStream::Abort(){
-	if ( m_hFile != NULL ) {
+	if ( m_hFile != nullptr ) {
 		// close but ignore errors
 		if ( m_bCloseOnDelete ) {
 			fclose( m_hFile );
 		}
-		m_hFile = NULL;
+		m_hFile = nullptr;
 		m_bCloseOnDelete = false;
 	}
 }

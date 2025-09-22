@@ -67,7 +67,7 @@ static inline void tex2list( StrList& texlist, const StrList& EXtex, const StrLi
 	/* exclude */
 	if( !StrList_find( texlist, token ) &&
 	    !StrList_find( EXtex, token ) &&
-	    ( rEXtex == NULL ||
+	    ( rEXtex == nullptr ||
 	      !StrList_find( *rEXtex, token ) ) ){
 		texlist.emplace_back( token );
 	}
@@ -443,7 +443,7 @@ int pk3BSPMain( Args& args ){
 							/* get an image */
 							GetToken( false );
 							if ( token[ 0 ] != '*' && token[ 0 ] != '$' ) {
-								tex2list( pk3Textures, ex.textures, NULL );
+								tex2list( pk3Textures, ex.textures, nullptr );
 							}
 						}
 						else if ( striEqual( token, "animMap" ) ||
@@ -452,14 +452,14 @@ int pk3BSPMain( Args& args ){
 							GetToken( false );// skip num
 							while ( TokenAvailable() ){
 								GetToken( false );
-								tex2list( pk3Textures, ex.textures, NULL );
+								tex2list( pk3Textures, ex.textures, nullptr );
 							}
 						}
 						else if ( striEqual( token, "videoMap" ) ){
 							hasmap = true;
 							GetToken( false );
 							FixDOSName( token );
-							if ( strchr( token, '/' ) == NULL ){
+							if ( strchr( token, '/' ) == nullptr ){
 								strcpy( token, stream( "video/", token ) );
 							}
 							if( !StrList_find( pk3Videos, token ) &&
@@ -486,7 +486,7 @@ int pk3BSPMain( Args& args ){
 						char* const skysidestring = token + strcatQ( token, "_@@.tga", std::size( token ) ) - 6;
 						for( const auto *side : { "up", "dn", "lf", "rt", "bk", "ft" } ){
 							memcpy( skysidestring, side, 2 );
-							tex2list( pk3Textures, ex.textures, NULL );
+							tex2list( pk3Textures, ex.textures, nullptr );
 						}
 					}
 					/* skip rest of line */
@@ -788,7 +788,7 @@ int repackBSPMain( Args& args ){
 			if( dbg )
 				Sys_Printf( "%s\n", token );
 
-			if ( strchr( token, '\\') != NULL  ){
+			if ( strchr( token, '\\') != nullptr  ){
 				Sys_FPrintf( SYS_WRN, "WARNING1: %s : %s : shader name with backslash\n", file.c_str(), token );
 			}
 
@@ -839,7 +839,7 @@ int repackBSPMain( Args& args ){
 							hasmap = true;
 							text.GetToken( false );
 							FixDOSName( token );
-							if ( strchr( token, '/' ) == NULL ){
+							if ( strchr( token, '/' ) == nullptr ){
 								strcpy( token, stream( "video/", token ) );
 							}
 							if( !StrList_find( pk3Videos, token ) &&
@@ -913,7 +913,7 @@ int repackBSPMain( Args& args ){
 //pure textures (shader ones are done)
 	for ( auto& s : pk3Shaders ){
 		if ( !s.empty() ){
-			if ( strchr( s, '\\') != NULL  ){
+			if ( strchr( s, '\\') != nullptr ){
 				Sys_FPrintf( SYS_WRN, "WARNING2: %s : bsp shader path with backslash\n", s.c_str() );
 				s = stream( PathCleaned( s ) );
 				//what if theres properly slashed one in the list?

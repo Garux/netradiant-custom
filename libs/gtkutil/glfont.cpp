@@ -437,16 +437,16 @@ GLFont *glfont_create( const char* font_string ){
 	int firstbitmap;
 
 	fontInfo = XLoadQueryFont( dpy, "-*-fixed-*-*-*-*-8-*-*-*-*-*-*-*" );
-	if ( fontInfo == NULL ) {
+	if ( fontInfo == nullptr ) {
 		// try to load other fonts
 		fontInfo = XLoadQueryFont( dpy, "-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*" );
 
 		// any font will do !
-		if ( fontInfo == NULL ) {
+		if ( fontInfo == nullptr ) {
 			fontInfo = XLoadQueryFont( dpy, "-*-*-*-*-*-*-*-*-*-*-*-*-*-*" );
 		}
 
-		if ( fontInfo == NULL ) {
+		if ( fontInfo == nullptr ) {
 			ERROR_MESSAGE( "couldn't create font" );
 		}
 	}
@@ -585,7 +585,7 @@ public:
 #else
 		font_ascent_pango_units = pango_layout_get_baseline( layout );
 #endif
-		pango_layout_get_extents( layout, NULL, &log_rect );
+		pango_layout_get_extents( layout, nullptr, &log_rect );
 		g_object_unref( G_OBJECT( layout ) );
 		font_descent_pango_units = log_rect.height - font_ascent_pango_units;
 
@@ -630,7 +630,7 @@ public:
 		layout = pango_layout_new( ft2_context );
 		pango_layout_set_width( layout, -1 );   // -1 no wrapping.  All text on one line.
 		pango_layout_set_text( layout, s, -1 );   // -1 null-terminated string.
-		pango_layout_get_extents( layout, NULL, &log_rect );
+		pango_layout_get_extents( layout, nullptr, &log_rect );
 
 		if ( log_rect.width > 0 && log_rect.height > 0 ) {
 			bitmap.rows = font_ascent + font_descent;

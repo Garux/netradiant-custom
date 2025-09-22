@@ -14,17 +14,17 @@ int numbrushes;
 int numbrushsides;
 int numleafbrushes;
 
-byte          *visBytes =         NULL;
-dnode_t       *dnodes =           NULL;
-dplane_t      *dplanes =          NULL;
-dleaf_t       *dleafs =           NULL;
-qdrawVert_t   *drawVerts =        NULL;
-int           *drawVertsIndices = NULL;
-dsurface_t    *drawSurfaces =     NULL;
-int           *dleafsurfaces =    NULL;
-dbrush_t      *dbrushes =         NULL;
-dbrushside_t  *dbrushsides =      NULL;
-int           *dleafbrushes =     NULL;
+byte          *visBytes =         nullptr;
+dnode_t       *dnodes =           nullptr;
+dplane_t      *dplanes =          nullptr;
+dleaf_t       *dleafs =           nullptr;
+qdrawVert_t   *drawVerts =        nullptr;
+int           *drawVertsIndices = nullptr;
+dsurface_t    *drawSurfaces =     nullptr;
+int           *dleafsurfaces =    nullptr;
+dbrush_t      *dbrushes =         nullptr;
+dbrushside_t  *dbrushsides =      nullptr;
+int           *dleafbrushes =     nullptr;
 
 #define IBSP_IDENT   ( ( 'P' << 24 ) + ( 'S' << 16 ) + ( 'B' << 8 ) + 'I' )
 #define IBSP_VERSION_Q3         46

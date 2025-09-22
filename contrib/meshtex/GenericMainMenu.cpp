@@ -80,7 +80,7 @@ GenericMainMenu::CommandDialogShow(const std::string& commandString)
    // than an assert.
    GenericDialog *dialog;
    if (dialogMapIter == _dialogMap.end() ||
-       (dialog = dialogMapIter->second) == NULL)
+       (dialog = dialogMapIter->second) == nullptr)
    {
       std::string message(commandString + ": " + DIALOG_INTERNAL_ERROR);
       GenericPluginUI::ErrorReportDialog(DIALOG_ERROR_TITLE, message.c_str());

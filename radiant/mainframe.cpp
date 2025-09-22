@@ -185,10 +185,10 @@ void HomePaths_Realise(){
 				qSHGetKnownFolderPath = (qSHGetKnownFolderPath_t *) GetProcAddress( shfolder, "SHGetKnownFolderPath" );
 			}
 			else{
-				qSHGetKnownFolderPath = NULL;
+				qSHGetKnownFolderPath = nullptr;
 			}
-			CoInitializeEx( NULL, COINIT_APARTMENTTHREADED );
-			if ( qSHGetKnownFolderPath && qSHGetKnownFolderPath( qFOLDERID_SavedGames, qKF_FLAG_CREATE | qKF_FLAG_NO_ALIAS, NULL, &mydocsdirw ) == S_OK ) {
+			CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+			if ( qSHGetKnownFolderPath && qSHGetKnownFolderPath( qFOLDERID_SavedGames, qKF_FLAG_CREATE | qKF_FLAG_NO_ALIAS, nullptr, &mydocsdirw ) == S_OK ) {
 				memset( mydocsdir, 0, sizeof( mydocsdir ) );
 				wcstombs( mydocsdir, mydocsdirw, sizeof( mydocsdir ) - 1 );
 				CoTaskMemFree( mydocsdirw );
@@ -204,7 +204,7 @@ void HomePaths_Realise(){
 			if ( shfolder ) {
 				FreeLibrary( shfolder );
 			}
-			if ( SUCCEEDED( SHGetFolderPath( NULL, CSIDL_PERSONAL, NULL, 0, mydocsdir ) ) ) {
+			if ( SUCCEEDED( SHGetFolderPath( nullptr, CSIDL_PERSONAL, nullptr, 0, mydocsdir ) ) ) {
 				path( DirectoryCleaned( mydocsdir ), "My Games/", ( prefix + 1 ), '/' );
 				// win32: only add it if it already exists
 				if ( file_is_directory( path ) ) {
@@ -642,12 +642,12 @@ void Radiant_Restart(){
 		const auto mapname = StringStream( makeQuoted( Map_Name( g_map ) ) );
 
 		char *argv[] = { string_clone( environment_get_app_filepath() ),
-	                     Map_Unnamed( g_map )? NULL : string_clone( mapname ),
-	                     NULL };
+	                     Map_Unnamed( g_map )? nullptr : string_clone( mapname ),
+	                     nullptr };
 #ifdef WIN32
 		const int status = !_spawnv( P_NOWAIT, argv[0], argv );
 #else
-		const int status = posix_spawn( NULL, argv[0], NULL, NULL, argv, environ );
+		const int status = posix_spawn( nullptr, argv[0], nullptr, nullptr, argv, environ );
 #endif
 
 		// quit if radiant successfully started

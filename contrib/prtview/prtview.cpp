@@ -173,7 +173,7 @@ static const char *PLUGIN_COMMANDS =
     Q3R_CMD_LOAD;
 
 
-QWidget *g_pRadiantWnd = NULL;
+QWidget *g_pRadiantWnd = nullptr;
 
 const char* QERPlug_Init( void *hApp, void* pMainWidget ){
 	g_pRadiantWnd = static_cast<QWidget*>( pMainWidget );

@@ -41,7 +41,7 @@
 
 int EmitShader( const char *shader, const int *contentFlags, const int *surfaceFlags ){
 	/* handle special cases */
-	if ( shader == NULL ) {
+	if ( shader == nullptr ) {
 		shader = "noshader";
 	}
 
@@ -49,10 +49,10 @@ int EmitShader( const char *shader, const int *contentFlags, const int *surfaceF
 	for ( size_t i = 0; i < bspShaders.size(); ++i )
 	{
 		/* ydnar: handle custom surface/content flags */
-		if ( surfaceFlags != NULL && bspShaders[ i ].surfaceFlags != *surfaceFlags ) {
+		if ( surfaceFlags != nullptr && bspShaders[ i ].surfaceFlags != *surfaceFlags ) {
 			continue;
 		}
-		if ( contentFlags != NULL && bspShaders[ i ].contentFlags != *contentFlags ) {
+		if ( contentFlags != nullptr && bspShaders[ i ].contentFlags != *contentFlags ) {
 			continue;
 		}
 		if ( !doingBSP ){
@@ -76,13 +76,13 @@ int EmitShader( const char *shader, const int *contentFlags, const int *surfaceF
 
 	strcpy( bspShader.shader, si.shader );
 	/* handle custom content/surface flags */
-	bspShader.surfaceFlags = ( surfaceFlags != NULL )? *surfaceFlags : si.surfaceFlags;
-	bspShader.contentFlags = ( contentFlags != NULL )? *contentFlags : si.contentFlags;
+	bspShader.surfaceFlags = ( surfaceFlags != nullptr )? *surfaceFlags : si.surfaceFlags;
+	bspShader.contentFlags = ( contentFlags != nullptr )? *contentFlags : si.contentFlags;
 
 	/* recursively emit any damage shaders */
 	if ( !strEmptyOrNull( si.damageShader ) ) {
 		Sys_FPrintf( SYS_VRB, "Shader %s has damage shader %s\n", si.shader.c_str(), si.damageShader );
-		EmitShader( si.damageShader, NULL, NULL );
+		EmitShader( si.damageShader, nullptr, nullptr );
 	}
 
 	/* return index */
@@ -364,10 +364,10 @@ void EndBSPFile( bool do_write ){
 
 void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
 	/* set initial brush */
-	if ( firstBrush != NULL ) {
+	if ( firstBrush != nullptr ) {
 		*firstBrush = bspBrushes.size();
 	}
-	if ( numBrushes != NULL ) {
+	if ( numBrushes != nullptr ) {
 		*numBrushes = 0;
 	}
 
@@ -377,7 +377,7 @@ void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
 		/* get bsp brush */
 		b.outputNum = bspBrushes.size();
 		bspBrush_t& db = bspBrushes.emplace_back();
-		if ( numBrushes != NULL ) {
+		if ( numBrushes != nullptr ) {
 			( *numBrushes )++;
 		}
 
@@ -402,10 +402,10 @@ void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
 				cp.shaderNum = EmitShader( side.shaderInfo->shader, &side.shaderInfo->contentFlags, &side.shaderInfo->surfaceFlags );
 			}
 			else if( side.bevel ) { /* emit surfaceFlags for bevels to get correct physics at walkable brush edges and vertices */
-				cp.shaderNum = EmitShader( NULL, NULL, &side.surfaceFlags );
+				cp.shaderNum = EmitShader( nullptr, nullptr, &side.surfaceFlags );
 			}
 			else{
-				cp.shaderNum = EmitShader( NULL, NULL, NULL );
+				cp.shaderNum = EmitShader( nullptr, nullptr, nullptr );
 			}
 		}
 	}
@@ -428,7 +428,7 @@ void EmitFogs(){
 		strcpy( bspFog.shader, fog.si->shader );
 
 		/* global fog doesn't have an associated brush */
-		if ( fog.brush == NULL ) {
+		if ( fog.brush == nullptr ) {
 			bspFog.brushNum = -1;
 			bspFog.visibleSide = -1;
 		}

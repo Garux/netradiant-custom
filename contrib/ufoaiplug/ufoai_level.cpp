@@ -55,7 +55,7 @@ public:
  * @brief
  */
 Entity* Scene_FindEntityByClass( const char* name ){
-	Entity* entity = NULL;
+	Entity* entity = nullptr;
 	GlobalSceneGraph().traverse( EntityFindByClassname( name, entity ) );
 	return entity;
 }
@@ -206,21 +206,21 @@ void check_map_values( const char **returnMsg ){
 
 	// singleplayer map?
 	count = 0;
-	get_team_count( "info_human_start", &count, NULL );
+	get_team_count( "info_human_start", &count, nullptr );
 	if ( !count ) {
 		strncat( message, "No singleplayer start positions (info_human_start)\n", sizeof( message ) - strlen( message ) - 1 );
 	}
 
 	// singleplayer map?
 	count = 0;
-	get_team_count( "info_2x2_start", &count, NULL );
+	get_team_count( "info_2x2_start", &count, nullptr );
 	if ( !count ) {
 		strncat( message, "No singleplayer start positions for 2x2 units (info_2x2_start)\n", sizeof( message ) - strlen( message ) - 1 );
 	}
 
 	// search for civilians
 	count = 0;
-	get_team_count( "info_civilian_start", &count, NULL );
+	get_team_count( "info_civilian_start", &count, nullptr );
 	if ( !count ) {
 		strncat( message, "No civilian start positions (info_civilian_start)\n", sizeof( message ) - strlen( message ) - 1 );
 	}

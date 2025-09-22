@@ -46,7 +46,7 @@
 
 sideRef_t *AllocSideRef( const side_t *side, sideRef_t *next ){
 	/* dummy check */
-	if ( side == NULL ) {
+	if ( side == nullptr ) {
 		return next;
 	}
 
@@ -720,7 +720,7 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 		side_t& cs = b[i].sides.emplace_back();
 
 		cs.planenum = planenum ^ i ^ 1;
-		cs.shaderInfo = NULL;
+		cs.shaderInfo = nullptr;
 		if ( i == 0 ) {
 			cs.winding = midwinding; // copy
 		}

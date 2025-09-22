@@ -208,7 +208,7 @@ public:
 		case 11: return "";
 		case 12: return "bobtoolz_turnedge.png";
 		}
-		return NULL;
+		return nullptr;
 	}
 	virtual EType getType() const override {
 		switch ( mIndex ) {
@@ -234,7 +234,7 @@ public:
 		case 10: return "Split Patch Columns";
 		case 12: return "Flip Terrain";
 		}
-		return NULL;
+		return nullptr;
 	}
 	virtual const char* getTooltip() const override {
 		switch ( mIndex ) {
@@ -250,7 +250,7 @@ public:
 		case 10: return "Split Patch Columns";
 		case 12: return "Flip Terrain (Turn Edge)";
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	virtual void activate() const override {

@@ -21,10 +21,10 @@
 #include <cstring>
 
 CScriptParser::CScriptParser() :
-	m_pScript( NULL ),
-	m_pScriptSection( NULL ),
-	m_pLastScriptSection( NULL ),
-	m_pToken( NULL ) {
+	m_pScript( nullptr ),
+	m_pScriptSection( nullptr ),
+	m_pLastScriptSection( nullptr ),
+	m_pToken( nullptr ) {
 	ClearBuffer();
 }
 
@@ -35,21 +35,21 @@ CScriptParser::~CScriptParser() {
 void CScriptParser::ClearBuffer() {
 	if ( m_pScript ) {
 		delete[] m_pScript;
-		m_pScript = NULL;
+		m_pScript = nullptr;
 	}
 	if ( m_pToken ) {
 		delete[] m_pToken;
-		m_pToken = NULL;
+		m_pToken = nullptr;
 	}
-	m_pScriptSection = NULL;
-	m_pLastScriptSection = NULL;
+	m_pScriptSection = nullptr;
+	m_pLastScriptSection = nullptr;
 	memset( m_breakChars, 0, sizeof( m_breakChars ) );
 }
 
 const char* CScriptParser::MakeToken( const char* pToken ) {
 	if ( m_pToken ) {
 		delete[] m_pToken;
-		m_pToken = NULL;
+		m_pToken = nullptr;
 	}
 
 	if ( !pToken ) {
@@ -207,7 +207,7 @@ void CScriptParser::UndoGetToken() {
 		return;
 	}
 	m_pScriptSection = m_pLastScriptSection;
-	m_pLastScriptSection = NULL;
+	m_pLastScriptSection = nullptr;
 }
 
 void CScriptParser::ResetParseSession() {
@@ -216,12 +216,12 @@ void CScriptParser::ResetParseSession() {
 	}
 
 	m_pScriptSection = m_pScript;
-	m_pLastScriptSection = NULL;
+	m_pLastScriptSection = nullptr;
 }
 
 char* CScriptParser::GetBufferCopy() {
 	if ( !m_pScript ) {
-		return NULL;
+		return nullptr;
 	}
 
 	int len = static_cast<int>( strlen( m_pScript ) );

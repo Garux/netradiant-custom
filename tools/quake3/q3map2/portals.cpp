@@ -158,7 +158,7 @@ static void MakeHeadnodePortals( tree_t& tree ){
 
 	tree.outside_node.planenum = PLANENUM_LEAF;
 	tree.outside_node.brushlist.clear();
-	tree.outside_node.portals = NULL;
+	tree.outside_node.portals = nullptr;
 	tree.outside_node.opaque = false;
 
 	for ( int i = 0; i < 3; ++i )
@@ -385,7 +385,7 @@ static void SplitNodePortals( node_t *node ){
 		}
 	}
 
-	node->portals = NULL;
+	node->portals = nullptr;
 }
 
 
@@ -554,7 +554,7 @@ EFloodEntities FloodEntities( tree_t& tree ){
 		}
 #endif
 		/* also allow bmodel entities outside, as they could be on a moving path that will go into the map */
-		if ( !e.brushes.empty() || e.patches != NULL || e.classname_is( "_decal" ) ) { //_decal primitive is freed at this point
+		if ( !e.brushes.empty() || e.patches != nullptr || e.classname_is( "_decal" ) ) { //_decal primitive is freed at this point
 			continue;
 		}
 

@@ -53,7 +53,7 @@
 DEntity::DEntity( const char *classname, int ID ){
 	SetClassname( classname );
 	m_nID = ID;
-	QER_Entity = NULL;
+	QER_Entity = nullptr;
 }
 
 DEntity::~DEntity(){
@@ -152,7 +152,7 @@ bool DEntity::LoadFromPrt( char *filename ){
 			}
 		}
 		if ( build ) {
-			brush->BuildInRadiant( false, NULL );
+			brush->BuildInRadiant( false, nullptr );
 		}
 	}
 
@@ -267,7 +267,7 @@ bool* DEntity::BuildDuplicateList(){
 }
 
 void DEntity::SelectBrushes( bool *selectList ){
-	if ( selectList == NULL ) {
+	if ( selectList == nullptr ) {
 		return;
 	}
 
@@ -385,7 +385,7 @@ void DEntity::BuildInRadiant( bool allowDestruction ){
 		Node_getTraversable( GlobalSceneGraph().root() )->insert( node );
 
 		for ( DBrush *brush : brushList )
-			brush->BuildInRadiant( allowDestruction, NULL, node.get_pointer() );
+			brush->BuildInRadiant( allowDestruction, nullptr, node.get_pointer() );
 
 		for ( DPatch *patch : patchList )
 			patch->BuildInRadiant( node.get_pointer() );
@@ -395,7 +395,7 @@ void DEntity::BuildInRadiant( bool allowDestruction ){
 	else
 	{
 		for ( DBrush *brush : brushList )
-			brush->BuildInRadiant( allowDestruction, NULL );
+			brush->BuildInRadiant( allowDestruction, nullptr );
 
 		for ( DPatch *patch : patchList )
 			patch->BuildInRadiant();
@@ -473,7 +473,7 @@ bool DEntity::ResetTextures( const char* textureName, float fScale[2],     float
 			reset = true;
 			if ( rebuild ) {
 				Node_getTraversable( *brush->QER_entity )->erase( *brush->QER_brush );
-				brush->BuildInRadiant( false, NULL, brush->QER_entity );
+				brush->BuildInRadiant( false, nullptr, brush->QER_entity );
 			}
 		}
 	}
@@ -507,7 +507,7 @@ DEPair* DEntity::FindEPairByKey( const char* keyname ){
 void DEntity::RemoveFromRadiant(){
 	Node_getTraversable( GlobalSceneGraph().root() )->erase( *QER_Entity );
 
-	QER_Entity = NULL;
+	QER_Entity = nullptr;
 }
 
 void DEntity::SpawnString( const char* key, const char* defaultstring, const char** out ){
@@ -560,5 +560,5 @@ DBrush* DEntity::FindBrushByPointer( scene::Node& brush ) {
 			return pBrush;
 		}
 	}
-	return NULL;
+	return nullptr;
 }

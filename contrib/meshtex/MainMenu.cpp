@@ -74,7 +74,7 @@ MainMenu::MainMenu(SmartPointer<GenericDialog>& setScaleDialog,
    _commandMeshVisitor(*this)
 {
    // Like _commandMeshVisitor, the callbacks for the Help and About commands
-   // also specify functions on this object. 
+   // also specify functions on this object.
    const CommandCallbackMethod
       <MainMenu, &MainMenu::CommandHelp> commandHelp(*this);
    const CommandCallbackMethod
@@ -92,7 +92,7 @@ MainMenu::MainMenu(SmartPointer<GenericDialog>& setScaleDialog,
    // The next few groups of commands are all similar "preset function"
    // commands. They will each trigger the CommandMeshVisitor callback when
    // selected in the menu. CommandMeshVisitor needs a visitor object to apply
-   // to the selected meshes, which we are specifying here. 
+   // to the selected meshes, which we are specifying here.
    AddMeshVisitorEntry("S&T Align Auto", "STMinMaxAlignAuto",
                        SmartPointer<MeshVisitor>(
                           new PresetFuncVisitor(&MeshEntity::MinMaxAlignAutoScale,
@@ -168,7 +168,7 @@ MainMenu::CommandMeshVisitor(const std::string& commandString)
    VisitorMap::const_iterator visitorMapIter = _visitorMap.find(commandString);
    MeshVisitor *meshVisitor;
    if (visitorMapIter == _visitorMap.end() ||
-       (meshVisitor = visitorMapIter->second) == NULL)
+       (meshVisitor = visitorMapIter->second) == nullptr)
    {
       // That's odd, there isn't one. Bail out.
       std::string message(commandString + ": " + DIALOG_INTERNAL_ERROR);
@@ -183,7 +183,7 @@ MainMenu::CommandMeshVisitor(const std::string& commandString)
    GlobalSelectionSystem().foreachSelected(*meshVisitor);
    if (meshVisitor->GetVisitedCount() == 0)
    {
-      // Warn if there weren't any meshes selected (so nothing happened). 
+      // Warn if there weren't any meshes selected (so nothing happened).
       GenericPluginUI::WarningReportDialog(DIALOG_WARNING_TITLE,
                                            DIALOG_NOMESHES_MSG);
    }

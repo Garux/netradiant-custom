@@ -157,7 +157,7 @@ void SafeRead( FILE *f, MemBuffer& buffer ){
 
 
 void SafeWrite( FILE *f, const void *buffer, int count ){
-	if ( buffer != NULL && fwrite( buffer, 1, count, f ) != (size_t)count ) {
+	if ( buffer != nullptr && fwrite( buffer, 1, count, f ) != (size_t)count ) {
 		Error( "File write failure" );
 	}
 }

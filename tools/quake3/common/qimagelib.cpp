@@ -202,8 +202,8 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
 	int chunktype, chunklength;
 
 // qiet compiler warnings
-	picbuffer = NULL;
-	cmapbuffer = NULL;
+	picbuffer = nullptr;
+	cmapbuffer = nullptr;
 
 //
 // load the LBM
@@ -892,7 +892,7 @@ void LoadTGABuffer( const byte *f, const size_t dataSize, byte **pic, int *width
 	unsigned char palette[256 * 4];
 	const byte * const enddata = f + dataSize;
 
-	*pic = NULL;
+	*pic = nullptr;
 
 	// abort if it is too small to parse
 	if ( dataSize < 19 ) {
@@ -1357,7 +1357,7 @@ static const KTX_UncompressedFormat_t KTX_UncompressedFormats[] =
 	{ KTX_TYPE_UNSIGNED_SHORT_4_4_4_4, KTX_FORMAT_RGBA, 2, KTX_DecodeRGBA4 },
 	{ KTX_TYPE_UNSIGNED_SHORT_5_5_5_1, KTX_FORMAT_RGBA, 2, KTX_DecodeRGBA5 },
 	{ KTX_TYPE_UNSIGNED_SHORT_5_6_5, KTX_FORMAT_RGB, 2, KTX_DecodeRGB5 },
-	{ 0, 0, 0, NULL }
+	{ 0, 0, 0, nullptr }
 };
 
 static bool KTX_DecodeETC1( const byte* in, size_t inSize, unsigned int width, unsigned int height, byte* out ){

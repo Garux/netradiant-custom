@@ -172,7 +172,7 @@ bool RadSampleImage( const byte *pixels, int width, int height, const Vector2& s
 	color.set( 255 );
 
 	/* dummy check */
-	if ( pixels == NULL || width < 1 || height < 1 ) {
+	if ( pixels == nullptr || width < 1 || height < 1 ) {
 		return false;
 	}
 
@@ -223,7 +223,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 	alpha = 0;
 
 	/* dummy check */
-	if ( rw == NULL || rw->numVerts < 3 ) {
+	if ( rw == nullptr || rw->numVerts < 3 ) {
 		return;
 	}
 
@@ -231,7 +231,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 	samples = 0;
 
 	/* sample vertex colors if no lightmap or this is the initial pass */
-	if ( lm == NULL || lm->radLuxels[ lightmapNum ] == NULL || !bouncing ) {
+	if ( lm == nullptr || lm->radLuxels[ lightmapNum ] == nullptr || !bouncing ) {
 		for ( samples = 0; samples < rw->numVerts; ++samples )
 		{
 			/* multiply by texture color */
@@ -366,7 +366,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 
 
 	/* dummy check */
-	if ( rw == NULL || rw->numVerts < 3 ) {
+	if ( rw == nullptr || rw->numVerts < 3 ) {
 		return;
 	}
 

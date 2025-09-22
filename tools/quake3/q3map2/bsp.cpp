@@ -43,9 +43,9 @@ static void autocaulk_write(){
 	FILE* file = SafeOpenWrite( filename, "wt" );
 
 	int fslime = 0;
-	ApplySurfaceParm( "slime", &fslime, NULL, NULL );
+	ApplySurfaceParm( "slime", &fslime, nullptr, nullptr );
 	int flava = 0;
-	ApplySurfaceParm( "lava", &flava, NULL, NULL );
+	ApplySurfaceParm( "lava", &flava, nullptr, nullptr );
 	// many setups have nodraw shader nonsolid, including vQ3; and nondrawnonsolid also... fall back to caulk in such case
 	// it would be better to decide in Radiant, as it has configurable per game common shaders, but it has no solidity info
 	const bool nodraw_is_solid = ShaderInfoForShader( "textures/common/nodraw" ).compileFlags & C_SOLID;
@@ -156,7 +156,7 @@ static void SetCloneModelNumbers(){
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* only entities with brushes or patches get a model number */
-		if ( entities[ i ].brushes.empty() && entities[ i ].patches == NULL ) {
+		if ( entities[ i ].brushes.empty() && entities[ i ].patches == nullptr ) {
 			continue;
 		}
 
@@ -176,7 +176,7 @@ static void SetCloneModelNumbers(){
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* only entities with brushes or patches get a model number */
-		if ( entities[ i ].brushes.empty() && entities[ i ].patches == NULL ) {
+		if ( entities[ i ].brushes.empty() && entities[ i ].patches == nullptr ) {
 			continue;
 		}
 
@@ -207,7 +207,7 @@ static void SetCloneModelNumbers(){
 
 				/* nuke the brushes/patches for this entity (fixme: leak!) */
 				auto *leak = new brushlist_t( std::move( entities[ i ].brushes ) ); // are brushes referenced elsewhere, so we do not nuke them really?
-				entities[ i ].patches = NULL;
+				entities[ i ].patches = nullptr;
 			}
 		}
 	}
@@ -234,10 +234,10 @@ static void FixBrushSides( const entity_t& e ){
 		}
 
 		/* walk sideref list */
-		for ( const sideRef_t *sideRef = ds.sideRef; sideRef != NULL; sideRef = sideRef->next )
+		for ( const sideRef_t *sideRef = ds.sideRef; sideRef != nullptr; sideRef = sideRef->next )
 		{
 			/* get bsp brush side */
-			if ( sideRef->side == NULL || sideRef->side->outputNum < 0 ) {
+			if ( sideRef->side == nullptr || sideRef->side->outputNum < 0 ) {
 				continue;
 			}
 			bspBrushSide_t& side = bspBrushSides[ sideRef->side->outputNum ];
@@ -406,7 +406,7 @@ static void ProcessWorldModel( entity_t& e ){
 			/* get light */
 			if ( light.classname_is( "light" ) ) {
 				/* get flare shader */
-				const char *flareShader = NULL;
+				const char *flareShader = nullptr;
 				if ( light.read_keyvalue( flareShader, "_flareshader" ) || light.boolForKey( "_flare" ) ) {
 					/* get specifics */
 					const Vector3 origin( light.vectorForKey( "origin" ) );
@@ -418,7 +418,7 @@ static void ProcessWorldModel( entity_t& e ){
 					if ( light.read_keyvalue( value, "target" ) ) {
 						/* get target light */
 						const entity_t *target = FindTargetEntity( value );
-						if ( target != NULL ) {
+						if ( target != nullptr ) {
 							normal = VectorNormalized( target->vectorForKey( "origin" ) - origin );
 						}
 					}
@@ -544,7 +544,7 @@ static void ProcessModels(){
 	{
 		/* get entity */
 		entity_t& entity = entities[ entityNum ];
-		if ( entity.brushes.empty() && entity.patches == NULL ) {
+		if ( entity.brushes.empty() && entity.patches == nullptr ) {
 			continue;
 		}
 

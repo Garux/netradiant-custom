@@ -107,7 +107,7 @@ void CPortals::Purge(){
 	if ( node ) {
 		delete[] node;
 	}
-	node = NULL;
+	node = nullptr;
 	node_count = 0;
 }
 
@@ -124,7 +124,7 @@ void CPortals::Load(){
 
 	in = fopen( fn, "rt" );
 
-	if ( in == NULL ) {
+	if ( in == nullptr ) {
 		globalErrorStream() << "  ERROR - could not open file.\n";
 
 		return;
@@ -311,13 +311,13 @@ void CPortals::Load(){
 }
 
 CBspNode::CBspNode(){
-	portal = NULL;
+	portal = nullptr;
 	portal_count = 0;
 	portal_next = 0;
 }
 
 CBspNode::~CBspNode(){
-	if ( portal != NULL ) {
+	if ( portal != nullptr ) {
 		delete[] portal;
 	}
 }

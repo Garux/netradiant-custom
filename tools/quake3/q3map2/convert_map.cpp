@@ -268,7 +268,7 @@ static void ConvertBrushFast( FILE *f, int bspBrushNum, const Vector3& origin, b
 		const plane_t& buildPlane = mapplanes[ buildSide.planenum ];
 
 		/* dummy check */
-		if ( buildSide.shaderInfo == NULL || buildSide.winding.empty() ) {
+		if ( buildSide.shaderInfo == nullptr || buildSide.winding.empty() ) {
 			continue;
 		}
 
@@ -360,7 +360,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 		const plane_t& buildPlane = mapplanes[ buildSide.planenum ];
 
 		/* dummy check */
-		if ( buildSide.shaderInfo == NULL || buildSide.winding.empty() ) {
+		if ( buildSide.shaderInfo == nullptr || buildSide.winding.empty() ) {
 			continue;
 		}
 

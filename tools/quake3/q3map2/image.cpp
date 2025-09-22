@@ -53,7 +53,7 @@ static void LoadDDSBuffer( byte *buffer, int size, byte **pixels, int *width, in
 
 
 	/* dummy check */
-	if ( buffer == NULL || size <= 0 || pixels == NULL || width == NULL || height == NULL ) {
+	if ( buffer == nullptr || size <= 0 || pixels == nullptr || width == nullptr || height == nullptr ) {
 		return;
 	}
 
@@ -126,7 +126,7 @@ static void LoadPNGBuffer( byte *buffer, int size, byte **pixels, int *width, in
 	byte        **rowPointers;
 
 	/* dummy check */
-	if ( buffer == NULL || size <= 0 || pixels == NULL || width == NULL || height == NULL ) {
+	if ( buffer == nullptr || size <= 0 || pixels == nullptr || width == nullptr || height == nullptr ) {
 		return;
 	}
 
@@ -142,23 +142,23 @@ static void LoadPNGBuffer( byte *buffer, int size, byte **pixels, int *width, in
 	}
 
 	/* create png structs */
-	png = png_create_read_struct( PNG_LIBPNG_VER_STRING, NULL, NULL, NULL );
-	if ( png == NULL ) {
+	png = png_create_read_struct( PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr );
+	if ( png == nullptr ) {
 		Sys_Warning( "Unable to create PNG read struct\n" );
 		return;
 	}
 
 	info = png_create_info_struct( png );
-	if ( info == NULL ) {
+	if ( info == nullptr ) {
 		Sys_Warning( "Unable to create PNG info struct\n" );
-		png_destroy_read_struct( &png, NULL, NULL );
+		png_destroy_read_struct( &png, nullptr, nullptr );
 		return;
 	}
 
 	end = png_create_info_struct( png );
-	if ( end == NULL ) {
+	if ( end == nullptr ) {
 		Sys_Warning( "Unable to create PNG end info struct\n" );
-		png_destroy_read_struct( &png, &info, NULL );
+		png_destroy_read_struct( &png, &info, nullptr );
 		return;
 	}
 
@@ -183,7 +183,7 @@ static void LoadPNGBuffer( byte *buffer, int size, byte **pixels, int *width, in
 
 	/* read image header chunk */
 	png_get_IHDR( png, info,
-	              &w, &h, &bitDepth, &colorType, NULL, NULL, NULL );
+	              &w, &h, &bitDepth, &colorType, nullptr, nullptr, nullptr );
 
 	/* the following will probably bork on certain types of png images, but hey... */
 
@@ -243,7 +243,7 @@ static struct construct_default_image
 static const image_t *ImageFind( const char *name ){
 	/* dummy check */
 	if ( strEmptyOrNull( name ) ) {
-		return NULL;
+		return nullptr;
 	}
 
 	/* search list */
@@ -255,7 +255,7 @@ static const image_t *ImageFind( const char *name ){
 	}
 
 	/* no matching image found */
-	return NULL;
+	return nullptr;
 }
 
 

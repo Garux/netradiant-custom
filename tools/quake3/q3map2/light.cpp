@@ -487,7 +487,7 @@ static void CreateEntityLights(){
 		if ( e.read_keyvalue( target, "target" ) ) {
 			/* get target */
 			const entity_t *e2 = FindTargetEntity( target );
-			if ( e2 == NULL ) {
+			if ( e2 == nullptr ) {
 				Sys_Warning( "light at (%i %i %i) has missing target\n",
 				             (int) light.origin[ 0 ], (int) light.origin[ 1 ], (int) light.origin[ 2 ] );
 				light.photons *= pointScale;
@@ -1189,7 +1189,7 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&c
 	}
 
 	/* ydnar: trace to all the list of lights pre-stored in tw */
-	for ( i = 0; i < trace->numLights && trace->lights[ i ] != NULL; ++i )
+	for ( i = 0; i < trace->numLights && trace->lights[ i ] != nullptr; ++i )
 	{
 		/* set light */
 		trace->light = trace->lights[ i ];
@@ -1503,9 +1503,9 @@ static void TraceGrid( int num ){
 	trace.forceSunlight = false;
 	trace.recvShadows = WORLDSPAWN_RECV_SHADOWS;
 	trace.numSurfaces = 0;
-	trace.surfaces = NULL;
+	trace.surfaces = nullptr;
 	trace.numLights = 0;
-	trace.lights = NULL;
+	trace.lights = nullptr;
 
 	/* clear */
 	numCon = 0;
@@ -1821,7 +1821,7 @@ static void WriteBSPFileAfterLight( const char *bspFileName ){
 
 				/* open shader file */
 				FILE *file = fopen( mapShaderFile.c_str(), "at" ); // append to existing file
-				if ( file == NULL ) {
+				if ( file == nullptr ) {
 					Sys_Warning( "Unable to open map shader file %s for writing\n", mapShaderFile.c_str() );
 					return;
 				}

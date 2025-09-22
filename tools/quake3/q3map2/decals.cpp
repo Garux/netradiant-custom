@@ -376,7 +376,7 @@ void ProcessDecals(){
 		}
 
 		/* any patches? */
-		if ( e.patches == NULL ) {
+		if ( e.patches == nullptr ) {
 			Sys_Warning( "Decal entity without any patch meshes, ignoring.\n" );
 			e.epairs.clear();
 			continue;
@@ -386,13 +386,13 @@ void ProcessDecals(){
 		e2 = FindTargetEntity( e.valueForKey( "target" ) );
 
 		/* no target? */
-		if ( e2 == NULL ) {
+		if ( e2 == nullptr ) {
 			Sys_Warning( "Decal entity without a valid target, ignoring.\n" );
 			continue;
 		}
 
 		/* walk entity patches */
-		for ( parseMesh_t *p = e.patches; p != NULL; p = e.patches )
+		for ( parseMesh_t *p = e.patches; p != nullptr; p = e.patches )
 		{
 			/* setup projector */
 			Vector3 origin;
@@ -589,7 +589,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 
 static void ProjectDecalOntoFace( decalProjector_t *dp, mapDrawSurface_t *ds ){
 	/* dummy check */
-	if ( ds->sideRef == NULL || ds->sideRef->side == NULL ) {
+	if ( ds->sideRef == nullptr || ds->sideRef->side == nullptr ) {
 		return;
 	}
 
@@ -677,7 +677,7 @@ static void ProjectDecalOntoPatch( decalProjector_t *dp, mapDrawSurface_t *ds ){
 static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *ds ){
 
 	/* triangle surfaces without shaders don't get marks by default */
-	if ( ds->type == ESurfaceType::Triangles && ds->shaderInfo->shaderText == NULL ) {
+	if ( ds->type == ESurfaceType::Triangles && ds->shaderInfo->shaderText == nullptr ) {
 		return;
 	}
 

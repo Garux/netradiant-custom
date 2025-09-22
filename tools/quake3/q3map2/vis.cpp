@@ -521,7 +521,7 @@ static fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, 
 	//
 	// find a common edge
 	//
-	p1 = p2 = NULL; // stop compiler warning
+	p1 = p2 = nullptr; // stop compiler warning
 	j = 0;          //
 
 	for ( i = 0; i < f1->numpoints; ++i )
@@ -551,7 +551,7 @@ static fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, 
 	}
 
 	if ( i == f1->numpoints ) {
-		return NULL;            // no matching edges
+		return nullptr;            // no matching edges
 
 	}
 	//
@@ -564,7 +564,7 @@ static fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, 
 	back = &f2->points[( j + 2 ) % f2->numpoints];
 	dot = vector3_dot( *back - *p1, normal );
 	if ( dot > CONTINUOUS_EPSILON ) {
-		return NULL;            // not a convex polygon
+		return nullptr;            // not a convex polygon
 	}
 	keep1 = ( dot < -CONTINUOUS_EPSILON );
 
@@ -574,7 +574,7 @@ static fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, 
 	back = &f2->points[( j + f2->numpoints - 1 ) % f2->numpoints];
 	dot = vector3_dot( *back - *p2, normal );
 	if ( dot > CONTINUOUS_EPSILON ) {
-		return NULL;            // not a convex polygon
+		return nullptr;            // not a convex polygon
 	}
 	keep2 = ( dot < -CONTINUOUS_EPSILON );
 

@@ -157,7 +157,7 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 	/* get shader */
 	shaderInfo_t *si = src->shaderInfo;
-	if ( si == NULL || si->foliage.empty() ) {
+	if ( si == nullptr || si->foliage.empty() ) {
 		return;
 	}
 
@@ -251,7 +251,7 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 		const int oldNumMapDrawSurfs = numMapDrawSurfs;
 
 		/* add the model to the bsp */
-		InsertModel( foliage.model.c_str(), NULL, 0, matrix4_scale_for_vec3( Vector3( foliage.scale ) ), NULL, NULL, entity, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, clipDepthGlobal );
+		InsertModel( foliage.model.c_str(), nullptr, 0, matrix4_scale_for_vec3( Vector3( foliage.scale ) ), nullptr, nullptr, entity, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, clipDepthGlobal );
 
 		/* walk each new surface */
 		for ( int i = oldNumMapDrawSurfs; i < numMapDrawSurfs; ++i )

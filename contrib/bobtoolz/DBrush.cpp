@@ -48,8 +48,8 @@
 
 DBrush::DBrush(){
 	bBoundsBuilt = false;
-	QER_entity = NULL;
-	QER_brush = NULL;
+	QER_entity = nullptr;
+	QER_brush = nullptr;
 }
 
 DBrush::~DBrush(){
@@ -315,7 +315,7 @@ DPlane* DBrush::HasPlane( DPlane* chkPlane ) const {
 			return plane;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 bool DBrush::IsCutByPlane( DPlane *cuttingPlane ){
@@ -380,14 +380,14 @@ scene::Node* DBrush::BuildInRadiant( bool allowDestruction, int* changeCnt, scen
 			}
 		}
 		if ( kill ) {
-			return NULL;
+			return nullptr;
 		}
 	}
 
 	//+djbob: fixed bug when brush had no faces "phantom brush" in radiant.
 	if ( faceList.size() < 4 ) {
 		globalErrorStream() << "Possible Phantom Brush Found, will not rebuild\n";
-		return NULL;
+		return nullptr;
 	}
 	//-djbob
 
@@ -420,8 +420,8 @@ void DBrush::selectInRadiant() const {
 
 void DBrush::CutByPlane( DPlane *cutPlane, DBrush **newBrush1, DBrush **newBrush2 ){
 	if ( !IsCutByPlane( cutPlane ) ) {
-		*newBrush1 = NULL;
-		*newBrush2 = NULL;
+		*newBrush1 = nullptr;
+		*newBrush2 = nullptr;
 		return;
 	}
 
@@ -430,12 +430,12 @@ void DBrush::CutByPlane( DPlane *cutPlane, DBrush **newBrush1, DBrush **newBrush
 
 	for ( DPlane *plane : faceList )
 	{
-		b1->AddFace( plane->points[0], plane->points[1], plane->points[2], NULL );
-		b2->AddFace( plane->points[0], plane->points[1], plane->points[2], NULL );
+		b1->AddFace( plane->points[0], plane->points[1], plane->points[2], nullptr );
+		b2->AddFace( plane->points[0], plane->points[1], plane->points[2], nullptr );
 	}
 
-	b1->AddFace( cutPlane->points[0], cutPlane->points[1], cutPlane->points[2], NULL );
-	b2->AddFace( cutPlane->points[2], cutPlane->points[1], cutPlane->points[0], NULL );
+	b1->AddFace( cutPlane->points[0], cutPlane->points[1], cutPlane->points[2], nullptr );
+	b2->AddFace( cutPlane->points[2], cutPlane->points[1], cutPlane->points[0], nullptr );
 
 	b1->RemoveRedundantPlanes();
 	b2->RemoveRedundantPlanes();
@@ -636,7 +636,7 @@ DPlane* DBrush::HasPlaneInverted( DPlane *chkPlane ){
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 bool DBrush::HasTexture( const char *textureName ){
@@ -675,12 +675,12 @@ void DBrush::BuildFromWinding( DWinding *w ){
 	for ( i = 0; i < w2->numpoints; ++i )
 		VectorAdd( w2->p[i], wPlane->normal, w2->p[i] );
 
-	AddFace( w2->p[0], w2->p[1], w2->p[2], NULL );
-	AddFace( w->p[2], w->p[1], w->p[0], NULL );
+	AddFace( w2->p[0], w2->p[1], w2->p[2], nullptr );
+	AddFace( w->p[2], w->p[1], w->p[0], nullptr );
 
 	for ( i = 0; i < w->numpoints - 1; ++i )
-		AddFace( w2->p[i], w->p[i], w->p[i + 1], NULL );
-	AddFace( w2->p[w->numpoints - 1], w->p[w->numpoints - 1], w->p[0], NULL );
+		AddFace( w2->p[i], w->p[i], w->p[i + 1], nullptr );
+	AddFace( w2->p[w->numpoints - 1], w->p[w->numpoints - 1], w->p[0], nullptr );
 
 	delete wPlane;
 	delete w2;
@@ -821,7 +821,7 @@ DPlane* DBrush::AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, cons
 
 DPlane* DBrush::FindPlaneWithClosestNormal( vec_t* normal ) {
 	vec_t bestDot = -2;
-	DPlane* bestDotPlane = NULL;
+	DPlane* bestDotPlane = nullptr;
 	for ( DPlane *plane : faceList ) {
 		vec_t dot = DotProduct( plane->normal, normal );
 		if ( dot > bestDot ) {

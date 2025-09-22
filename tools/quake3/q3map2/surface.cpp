@@ -70,12 +70,12 @@ static void FinishSurface( mapDrawSurface_t *ds ){
 
 
 	/* dummy check */
-	if ( ds == NULL || ds->shaderInfo == NULL ) {
+	if ( ds == nullptr || ds->shaderInfo == nullptr ) {
 		return;
 	}
 
 	/* ydnar: rocking tek-fu celshading */
-	if ( ds->celShader != NULL ) {
+	if ( ds->celShader != nullptr ) {
 		MakeCelSurface( ds, ds->celShader );
 	}
 
@@ -108,21 +108,21 @@ mapDrawSurface_t *CloneSurface( mapDrawSurface_t *src, shaderInfo_t *si ){
 
 
 	/* dummy check */
-	if ( src == NULL || si == NULL ) {
-		return NULL;
+	if ( src == nullptr || si == nullptr ) {
+		return nullptr;
 	}
 
 	/* allocate a new surface */
 	ds = AllocDrawSurface( src->type );
-	if ( ds == NULL ) {
-		return NULL;
+	if ( ds == nullptr ) {
+		return nullptr;
 	}
 
 	/* copy it */
 	memcpy( ds, src, sizeof( *ds ) );
 
 	/* destroy side reference */
-	ds->sideRef = NULL;
+	ds->sideRef = nullptr;
 
 	/* set shader */
 	ds->shaderInfo = si;
@@ -152,26 +152,26 @@ mapDrawSurface_t *CloneSurface( mapDrawSurface_t *src, shaderInfo_t *si ){
 
 static mapDrawSurface_t *MakeCelSurface( mapDrawSurface_t *src, shaderInfo_t *si ){
 	/* dummy check */
-	if ( src == NULL || si == NULL ) {
-		return NULL;
+	if ( src == nullptr || si == nullptr ) {
+		return nullptr;
 	}
 
 	/* don't create cel surfaces for certain types of shaders */
 	if ( ( src->shaderInfo->compileFlags & C_TRANSLUCENT ) ||
 	     ( src->shaderInfo->compileFlags & C_SKY ) ) {
-		return NULL;
+		return nullptr;
 	}
 
 	/* make a copy */
 	mapDrawSurface_t *ds = CloneSurface( src, si );
-	if ( ds == NULL ) {
-		return NULL;
+	if ( ds == nullptr ) {
+		return nullptr;
 	}
 
 	/* do some fixups for celshading */
 	ds->planar = false;
 	ds->planeNum = -1;
-	ds->celShader = NULL; /* don't cel shade cels :P */
+	ds->celShader = nullptr; /* don't cel shade cels :P */
 
 	/* return the surface */
 	return ds;
@@ -186,14 +186,14 @@ static mapDrawSurface_t *MakeCelSurface( mapDrawSurface_t *src, shaderInfo_t *si
 
 static mapDrawSurface_t *MakeSkyboxSurface( mapDrawSurface_t *src ){
 	/* dummy check */
-	if ( src == NULL ) {
-		return NULL;
+	if ( src == nullptr ) {
+		return nullptr;
 	}
 
 	/* make a copy */
 	mapDrawSurface_t *ds = CloneSurface( src, src->shaderInfo );
-	if ( ds == NULL ) {
-		return NULL;
+	if ( ds == nullptr ) {
+		return nullptr;
 	}
 
 	/* set parent */
@@ -229,10 +229,10 @@ void ClearSurface( mapDrawSurface_t *ds ){
 	ds->planeNum = -1;
 	ds->numVerts = 0;
 	free( ds->verts );
-	ds->verts = NULL;
+	ds->verts = nullptr;
 	ds->numIndexes = 0;
 	free( ds->indexes );
-	ds->indexes = NULL;
+	ds->indexes = nullptr;
 }
 
 
@@ -244,7 +244,7 @@ void ClearSurface( mapDrawSurface_t *ds ){
 
 void TidyEntitySurfaces( const entity_t& e ){
 	int i, j, deleted;
-	mapDrawSurface_t    *out, *in = NULL;
+	mapDrawSurface_t    *out, *in = nullptr;
 
 
 	/* note it */
@@ -571,7 +571,7 @@ void ClassifyEntitySurfaces( const entity_t& e ){
 
 static byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax, const Vector3& point ){
 	/* early out if no indexmap */
-	if ( im == NULL ) {
+	if ( im == nullptr ) {
 		return 0;
 	}
 
@@ -620,7 +620,7 @@ static byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax,
 
 static shaderInfo_t& GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im, int numPoints, byte *shaderIndexes ){
 	/* early out if bad data */
-	if ( im == NULL || numPoints <= 0 || shaderIndexes == NULL ) {
+	if ( im == nullptr || numPoints <= 0 || shaderIndexes == nullptr ) {
 		return ShaderInfoForShader( "default" );
 	}
 
@@ -706,7 +706,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 
 	/* ydnar: don't make a drawsurf for culled sides */
 	if ( s.culled ) {
-		return NULL;
+		return nullptr;
 	}
 
 	/* range check */
@@ -718,7 +718,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 	si = s.shaderInfo;
 
 	/* ydnar: gs mods: check for indexed shader */
-	if ( si->indexed && b.im != NULL ) {
+	if ( si->indexed && b.im != nullptr ) {
 		/* indexed */
 		indexed = true;
 
@@ -757,7 +757,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 
 	ds->shaderInfo = si;
 	ds->mapBrush = &b;
-	ds->sideRef = AllocSideRef( &s, NULL );
+	ds->sideRef = AllocSideRef( &s, nullptr );
 	ds->fogNum = -1;
 	ds->sampleSize = b.lightmapSampleSize;
 	ds->lightmapScale = b.lightmapScale;
@@ -861,12 +861,12 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t *p, mesh_t 
 
 
 	/* get mesh and shader shader */
-	if ( mesh == NULL ) {
+	if ( mesh == nullptr ) {
 		mesh = &p->mesh;
 	}
 	si = p->shaderInfo;
-	if ( mesh == NULL || si == NULL ) {
-		return NULL;
+	if ( mesh == nullptr || si == nullptr ) {
+		return nullptr;
 	}
 
 	/* get vertex count */
@@ -901,7 +901,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t *p, mesh_t 
 	FreeMesh( copy );
 
 	/* ydnar: gs mods: check for indexed shader */
-	if ( si->indexed && p->im != NULL ) {
+	if ( si->indexed && p->im != nullptr ) {
 		/* indexed */
 		indexed = true;
 
@@ -1030,7 +1030,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t *p, mesh_t 
 mapDrawSurface_t *DrawSurfaceForFlare( int entNum, const Vector3& origin, const Vector3& normal, const Vector3& color, const char *flareShader, int lightStyle ){
 	/* emit flares? */
 	if ( !emitFlares ) {
-		return NULL;
+		return nullptr;
 	}
 
 	/* allocate drawsurface */
@@ -1187,7 +1187,7 @@ void SubdivideFaceSurfaces( const entity_t& e ){
 	for ( mapDrawSurface_t& ds : Span( mapDrawSurfs + e.firstDrawSurf, mapDrawSurfs + numMapDrawSurfs ) )
 	{
 		/* only subdivide brush sides */
-		if ( ds.type != ESurfaceType::Face || ds.mapBrush == NULL || ds.sideRef == NULL || ds.sideRef->side == NULL ) {
+		if ( ds.type != ESurfaceType::Face || ds.mapBrush == nullptr || ds.sideRef == nullptr || ds.sideRef->side == nullptr ) {
 			continue;
 		}
 
@@ -1197,7 +1197,7 @@ void SubdivideFaceSurfaces( const entity_t& e ){
 
 		/* check subdivision for shader */
 		const shaderInfo_t *si = side.shaderInfo;
-		if ( si == NULL ) {
+		if ( si == nullptr ) {
 			continue;
 		}
 
@@ -1287,7 +1287,7 @@ static int g_numHiddenFaces, g_numCoinFaces;
 
 static bool SideInBrush( side_t& side, const brush_t& b ){
 	/* ignore sides w/o windings or shaders */
-	if ( side.winding.empty() || side.shaderInfo == NULL ) {
+	if ( side.winding.empty() || side.shaderInfo == nullptr ) {
 		return true;
 	}
 
@@ -1358,7 +1358,7 @@ static void CullSides( entity_t& e ){
 			}
 
 			/* original check */
-			if ( b1->original == b2->original && b1->original != NULL ) {
+			if ( b1->original == b2->original && b1->original != nullptr ) {
 				continue;
 			}
 
@@ -1382,7 +1382,7 @@ static void CullSides( entity_t& e ){
 					continue;
 				}
 				const int numPoints = w1.size();
-				if ( side1.shaderInfo == NULL ) {
+				if ( side1.shaderInfo == nullptr ) {
 					continue;
 				}
 
@@ -1394,7 +1394,7 @@ static void CullSides( entity_t& e ){
 					if ( w2.empty() ) {
 						continue;
 					}
-					if ( side2.shaderInfo == NULL ) {
+					if ( side2.shaderInfo == nullptr ) {
 						continue;
 					}
 					if ( w1.size() != w2.size() ) {
@@ -1539,7 +1539,7 @@ void ClipSidesIntoTree( entity_t& e, const tree_t& tree ){
 
 			/* shader? */
 			const shaderInfo_t *si = side.shaderInfo;
-			if ( si == NULL ) {
+			if ( si == nullptr ) {
 				continue;
 			}
 
@@ -1631,7 +1631,7 @@ static int AddReferenceToTree_r( mapDrawSurface_t *ds, node_t *node, bool skybox
 
 
 	/* dummy check */
-	if ( node == NULL ) {
+	if ( node == nullptr ) {
 		return 0;
 	}
 
@@ -1742,7 +1742,7 @@ static int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t *ds, node_t *
 	const shaderInfo_t *si = ds->shaderInfo;
 
 	/* ydnar: is this the head node? */
-	if ( node->parent == NULL && si != NULL && si->minmax.valid() ) {
+	if ( node->parent == nullptr && si != nullptr && si->minmax.valid() ) {
 		static bool warned = false;
 		if ( !warned ) {
 			Sys_Warning( "this map uses the deformVertexes move hack\n" );
@@ -2050,7 +2050,7 @@ static int FindDrawIndexes( int numIndexes, const int *indexes ){
 
 
 	/* dummy check */
-	if ( numIndexes < 3 || numBSPDrawIndexes < numIndexes || indexes == NULL ) {
+	if ( numIndexes < 3 || numBSPDrawIndexes < numIndexes || indexes == nullptr ) {
 		return numBSPDrawIndexes;
 	}
 
@@ -2216,14 +2216,14 @@ static void EmitPatchSurface( const entity_t& e, mapDrawSurface_t *ds ){
 	/* set it up */
 	out.surfaceType = MST_PATCH;
 	if ( debugSurfaces ) {
-		out.shaderNum = EmitShader( "debugsurfaces", NULL, NULL );
+		out.shaderNum = EmitShader( "debugsurfaces", nullptr, nullptr );
 	}
 	else if ( patchMeta || forcePatchMeta ) {
 		/* patch meta requires that we have nodraw patches for collision */
 		int surfaceFlags = ds->shaderInfo->surfaceFlags;
 		int contentFlags = ds->shaderInfo->contentFlags;
-		ApplySurfaceParm( "nodraw", &contentFlags, &surfaceFlags, NULL );
-		ApplySurfaceParm( "pointlight", &contentFlags, &surfaceFlags, NULL );
+		ApplySurfaceParm( "nodraw", &contentFlags, &surfaceFlags, nullptr );
+		ApplySurfaceParm( "pointlight", &contentFlags, &surfaceFlags, nullptr );
 
 		/* we don't want this patch getting lightmapped */
 		ds->lightmapVecs[ 2 ].set( 0 );
@@ -2525,7 +2525,7 @@ static void EmitTriangleSurface( mapDrawSurface_t *ds ){
 
 	/* set it up */
 	if ( debugSurfaces ) {
-		out.shaderNum = EmitShader( "debugsurfaces", NULL, NULL );
+		out.shaderNum = EmitShader( "debugsurfaces", nullptr, nullptr );
 	}
 	else{
 		out.shaderNum = EmitShader( ds->shaderInfo->shader, &ds->shaderInfo->contentFlags, &ds->shaderInfo->surfaceFlags );
@@ -2648,7 +2648,7 @@ static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t& si ){
 			mapDrawSurface_t *ds = AllocDrawSurface( ESurfaceType::Face );
 			ds->shaderInfo = &si;
 			ds->planar = true;
-			ds->planeNum = FindFloatPlane( p->plane.plane, 0, NULL );
+			ds->planeNum = FindFloatPlane( p->plane.plane, 0, nullptr );
 			ds->lightmapVecs[ 2 ] = p->plane.normal();
 			ds->fogNum = -1;
 			ds->numVerts = w.size();
@@ -2865,7 +2865,7 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceMode
 			}
 
 			/* insert the model */
-			InsertModel( model.model.c_str(), NULL, 0, transform, NULL, ds->celShader, entity, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0, clipDepthGlobal );
+			InsertModel( model.model.c_str(), nullptr, 0, transform, nullptr, ds->celShader, entity, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0, clipDepthGlobal );
 
 			/* return to sender */
 			return 1;
@@ -2906,7 +2906,7 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceMode
 
 static int AddSurfaceModels( mapDrawSurface_t *ds, entity_t& entity ){
 	/* dummy check */
-	if ( ds == NULL || ds->shaderInfo == NULL || ds->shaderInfo->surfaceModels.empty() ) {
+	if ( ds == nullptr || ds->shaderInfo == nullptr || ds->shaderInfo->surfaceModels.empty() ) {
 		return 0;
 	}
 

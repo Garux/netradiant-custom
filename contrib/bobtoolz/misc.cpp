@@ -194,7 +194,7 @@ void StartBSP(){
 	char command[1024];
 	sprintf( command, "%s -nowater -fulldetail %s", exename, mapname );
 
-	Q_Exec( NULL, command, NULL, false, true );
+	Q_Exec( nullptr, command, nullptr, false, true );
 }
 
 class EntityWriteMiniPrt

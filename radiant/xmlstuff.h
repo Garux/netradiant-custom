@@ -69,7 +69,7 @@ public:
 	virtual void saxEndElement( message_info_t* ctx, const xmlChar* name ) = 0;
 	virtual void saxCharacters( message_info_t* ctx, const xmlChar* ch, int len ) = 0;
 	virtual const char* getName(){
-		return NULL;
+		return nullptr;
 	}
 	virtual IGL2DWindow* Highlight(){
 		return 0;

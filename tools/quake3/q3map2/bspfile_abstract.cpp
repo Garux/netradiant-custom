@@ -59,7 +59,7 @@
 
 void SwapBlock( int *block, int size ){
 	/* dummy check */
-	if ( block == NULL ) {
+	if ( block == nullptr ) {
 		return;
 	}
 
@@ -192,7 +192,7 @@ static void SwapBSPFile(){
 
 void LoadBSPFile( const char *filename ){
 	/* dummy check */
-	if ( g_game == NULL || g_game->load == NULL ) {
+	if ( g_game == nullptr || g_game->load == nullptr ) {
 		Error( "LoadBSPFile: unsupported BSP file format" );
 	}
 
@@ -208,7 +208,7 @@ void LoadBSPFile( const char *filename ){
 
 void LoadBSPFilePartially( const char *filename ){
 	/* dummy check */
-	if ( g_game == NULL || g_game->load == NULL ) {
+	if ( g_game == nullptr || g_game->load == nullptr ) {
 		Error( "LoadBSPFile: unsupported BSP file format" );
 	}
 
@@ -230,7 +230,7 @@ void WriteBSPFile( const char *filename ){
 	Sys_Printf( "Writing %s\n", filename );
 
 	/* dummy check */
-	if ( g_game == NULL || g_game->write == NULL ) {
+	if ( g_game == nullptr || g_game->write == nullptr ) {
 		Error( "WriteBSPFile: unsupported BSP file format" );
 	}
 
@@ -617,7 +617,7 @@ entity_t *FindTargetEntity( const char *target ){
 	}
 
 	/* nada */
-	return NULL;
+	return nullptr;
 }
 
 
@@ -630,25 +630,25 @@ entity_t *FindTargetEntity( const char *target ){
 
 void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castShadows, int *recvShadows ){
 	/* get cast shadows */
-	if ( castShadows != NULL ) {
-		( ent != NULL && ent->read_keyvalue( *castShadows, "_castShadows", "_cs" ) ) ||
-		( ent2 != NULL && ent2->read_keyvalue( *castShadows, "_castShadows", "_cs" ) );
+	if ( castShadows != nullptr ) {
+		( ent != nullptr && ent->read_keyvalue( *castShadows, "_castShadows", "_cs" ) ) ||
+		( ent2 != nullptr && ent2->read_keyvalue( *castShadows, "_castShadows", "_cs" ) );
 	}
 
 	/* receive */
-	if ( recvShadows != NULL ) {
-		( ent != NULL && ent->read_keyvalue( *recvShadows, "_receiveShadows", "_rs" ) ) ||
-		( ent2 != NULL && ent2->read_keyvalue( *recvShadows, "_receiveShadows", "_rs" ) );
+	if ( recvShadows != nullptr ) {
+		( ent != nullptr && ent->read_keyvalue( *recvShadows, "_receiveShadows", "_rs" ) ) ||
+		( ent2 != nullptr && ent2->read_keyvalue( *recvShadows, "_receiveShadows", "_rs" ) );
 	}
 
 	/* vortex: game-specific default entity keys */
 	if ( striEqual( g_game->magic, "dq" ) || striEqual( g_game->magic, "prophecy" ) ) {
 		/* vortex: deluxe quake default shadow flags */
 		if ( ent->classname_is( "func_wall" ) ) {
-			if ( recvShadows != NULL ) {
+			if ( recvShadows != nullptr ) {
 				*recvShadows = 1;
 			}
-			if ( castShadows != NULL ) {
+			if ( castShadows != nullptr ) {
 				*castShadows = 1;
 			}
 		}

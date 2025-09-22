@@ -35,7 +35,7 @@ public:
 	typedef NullType Type;
 	STRING_CONSTANT( Name, "" );
 	void* getTable(){
-		return NULL;
+		return nullptr;
 	}
 };
 

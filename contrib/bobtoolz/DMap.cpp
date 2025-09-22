@@ -76,7 +76,7 @@ void DMap::ClearEntities(){
 }
 
 DEntity* DMap::GetEntityForID( int ID ){
-	DEntity* findEntity = NULL;
+	DEntity* findEntity = nullptr;
 
 	for ( DEntity *entity : entityList )
 	{

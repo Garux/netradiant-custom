@@ -105,7 +105,7 @@ char g_strLoadedFileLocation[1024];
 
 static void vfsInitPakFile( const char *filename ){
 	unzFile uf = unzOpen( filename );
-	if ( uf != NULL ) {
+	if ( uf != nullptr ) {
 		VFS_PAK& pak = g_paks.emplace_front( uf, filename );
 
 		if ( unzGoToFirstFile( uf ) == UNZ_OK ) {
@@ -113,7 +113,7 @@ static void vfsInitPakFile( const char *filename ){
 				char filename_inzip[256];
 				unz_file_info file_info;
 
-				if ( unzGetCurrentFileInfo( uf, &file_info, filename_inzip, std::size( filename_inzip ), NULL, 0, NULL, 0 ) != UNZ_OK ) {
+				if ( unzGetCurrentFileInfo( uf, &file_info, filename_inzip, std::size( filename_inzip ), nullptr, 0, nullptr, 0 ) != UNZ_OK ) {
 					break;
 				}
 
@@ -160,9 +160,9 @@ void vfsInitDirectory( const char *path ){
 	const CopiedString pathCleaned = g_strDirs.emplace_back( StringStream( DirectoryCleaned( path ) ) );
 
 	if ( g_bUsePak ) {
-		dir = g_dir_open( path, 0, NULL );
+		dir = g_dir_open( path, 0, nullptr );
 
-		if ( dir != NULL ) {
+		if ( dir != nullptr ) {
 			std::vector<StringOutputStream> paks;
 			const char* name;
 			while ( ( name = g_dir_read_name( dir ) ) )
@@ -205,9 +205,9 @@ std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath ){
 	};
 	/* search in dirs */
 	for ( const auto& strdir : g_strDirs ){
-		GDir *dir = g_dir_open( StringStream( strdir, shaderPath, '/' ), 0, NULL );
+		GDir *dir = g_dir_open( StringStream( strdir, shaderPath, '/' ), 0, nullptr );
 
-		if ( dir != NULL ) {
+		if ( dir != nullptr ) {
 			const char* name;
 			while ( ( name = g_dir_read_name( dir ) ) )
 			{
@@ -271,7 +271,7 @@ MemBuffer vfsLoadFile( const char *filename, int index /* = 0 */ ){
 		MemBuffer buffer;
 
 		FILE *f = fopen( filename, "rb" );
-		if ( f != NULL ) {
+		if ( f != nullptr ) {
 			fseek( f, 0, SEEK_END );
 			buffer = MemBuffer( ftell( f ) );
 			rewind( f );

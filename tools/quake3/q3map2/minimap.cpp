@@ -482,7 +482,7 @@ int MiniMapBSPMain( Args& args ){
 
 	autolevel = false;
 	minimap.samples = 1;
-	minimap.sample_offsets = NULL;
+	minimap.sample_offsets = nullptr;
 	minimap.boost = 1.0;
 	minimap.brightness = 0.0;
 	minimap.contrast = 1.0;
@@ -508,7 +508,7 @@ int MiniMapBSPMain( Args& args ){
 			minimap.samples = atoi( args.takeNext() );
 			Sys_Printf( "Random samples set to %i\n", minimap.samples );
 			free( minimap.sample_offsets );
-			minimap.sample_offsets = NULL;
+			minimap.sample_offsets = nullptr;
 		}
 		while( args.takeArg( "-border" ) ) {
 			border = atof( args.takeNext() );

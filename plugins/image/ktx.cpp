@@ -324,7 +324,7 @@ Image* LoadKTXBuff( PointerInputStream& istream ){
 	auto *image = new RGBAImage( width, height );
 
 	if ( type ) {
-		KTX_Decoder* decoder = NULL;
+		KTX_Decoder* decoder = nullptr;
 		switch ( type )
 		{
 		case KTX_TYPE_UNSIGNED_BYTE:

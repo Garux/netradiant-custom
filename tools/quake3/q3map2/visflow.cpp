@@ -92,7 +92,7 @@ static fixedWinding_t *AllocStackWinding( pstack_t *stack ){
 
 	Error( "AllocStackWinding: failed" );
 
-	return NULL;
+	return nullptr;
 }
 
 static void FreeStackWinding( fixedWinding_t *w, pstack_t *stack ){
@@ -148,7 +148,7 @@ static fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, con
 	}
 	if ( !counts[0] ) {
 		FreeStackWinding( in, stack );
-		return NULL;
+		return nullptr;
 	}
 
 	sides[i] = sides[0];
@@ -345,7 +345,7 @@ static fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t
 			d = plane3_distance_to_point( plane, stack->portal->origin );
 			//if completely at the back of the separator plane
 			if ( d < -stack->portal->radius ) {
-				return NULL;
+				return nullptr;
 			}
 			//if completely on the front of the separator plane
 			if ( d > stack->portal->radius ) {
@@ -357,7 +357,7 @@ static fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t
 			//
 			target = VisChopWinding( target, stack, plane );
 			if ( !target ) {
-				return NULL;        // target is not visible
+				return nullptr;        // target is not visible
 
 			}
 			break;      // optimization by Antony Suter
@@ -389,9 +389,9 @@ static void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prev
 
 	prevstack->next = &stack;
 
-	stack.next = NULL;
+	stack.next = nullptr;
 	stack.leaf = leaf;
-	stack.portal = NULL;
+	stack.portal = nullptr;
 	stack.depth = prevstack->depth + 1;
 
 #ifdef SEPERATORCACHE
@@ -460,7 +460,7 @@ static void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prev
 		backplane = plane3_flipped( p->plane );
 
 		stack.portal = p;
-		stack.next = NULL;
+		stack.next = nullptr;
 		stack.freewindings[0] = 1;
 		stack.freewindings[1] = 1;
 		stack.freewindings[2] = 1;
@@ -579,7 +579,7 @@ static void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prev
 		// flow through it for real
 		RecursiveLeafFlow( p->leaf, thread, &stack );
 		//
-		stack.next = NULL;
+		stack.next = nullptr;
 	}
 }
 
@@ -646,7 +646,7 @@ static void RecursivePassageFlow( vportal_t *portal, threaddata_t *thread, pstac
 
 	prevstack->next = &stack;
 
-	stack.next = NULL;
+	stack.next = nullptr;
 	stack.depth = prevstack->depth + 1;
 
 	vis = (long *)thread->base->portalvis;
@@ -700,7 +700,7 @@ static void RecursivePassageFlow( vportal_t *portal, threaddata_t *thread, pstac
 		// flow through it for real
 		RecursivePassageFlow( p, thread, &stack );
 
-		stack.next = NULL;
+		stack.next = nullptr;
 	}
 }
 
@@ -771,9 +771,9 @@ static void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread,
 
 	prevstack->next = &stack;
 
-	stack.next = NULL;
+	stack.next = nullptr;
 	stack.leaf = leaf;
-	stack.portal = NULL;
+	stack.portal = nullptr;
 	stack.depth = prevstack->depth + 1;
 
 #ifdef SEPERATORCACHE
@@ -830,7 +830,7 @@ static void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread,
 		backplane = plane3_flipped( p->plane );
 
 		stack.portal = p;
-		stack.next = NULL;
+		stack.next = nullptr;
 		stack.freewindings[0] = 1;
 		stack.freewindings[1] = 1;
 		stack.freewindings[2] = 1;
@@ -949,7 +949,7 @@ static void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread,
 		// flow through it for real
 		RecursivePassagePortalFlow( p, thread, &stack );
 		//
-		stack.next = NULL;
+		stack.next = nullptr;
 	}
 }
 
@@ -1032,7 +1032,7 @@ static fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *o
 
 	}
 	if ( !counts[0] ) {
-		return NULL;
+		return nullptr;
 	}
 
 	sides[i] = sides[0];
@@ -1243,7 +1243,7 @@ void CreatePassages( int portalnum ){
 		return;
 	}
 
-	lastpassage = NULL;
+	lastpassage = nullptr;
 	for ( const vportal_t *target : Span( leafs[portal->leaf].portals, leafs[portal->leaf].numportals ) )
 	{
 		if ( target->removed ) {
@@ -1254,7 +1254,7 @@ void CreatePassages( int portalnum ){
 		numseperators = AddSeperators( portal->winding, target->winding, false, seperators, MAX_SEPERATORS * 2 );
 		numseperators += AddSeperators( target->winding, portal->winding, true, &seperators[numseperators], MAX_SEPERATORS * 2 - numseperators );
 
-		passage->next = NULL;
+		passage->next = nullptr;
 		if ( lastpassage ) {
 			lastpassage->next = passage;
 		}
@@ -1325,7 +1325,7 @@ void CreatePassages( int portalnum ){
 				}
 
 
-				if ( res == NULL ) {
+				if ( res == nullptr ) {
 					break;
 				}
 			}

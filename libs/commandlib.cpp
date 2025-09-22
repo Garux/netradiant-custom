@@ -50,7 +50,7 @@ bool Q_Exec( const char *cmd, char *cmdline, const char *, bool, bool waitfor ){
 	{
 	default:
 		if ( waitfor ) {
-			waitpid( pid, NULL, 0 );
+			waitpid( pid, nullptr, 0 );
 		}
 		break;
 	case -1:
@@ -60,7 +60,7 @@ bool Q_Exec( const char *cmd, char *cmdline, const char *, bool, bool waitfor ){
 		// XXX : if we run q3map2 with '-connect' - redirect stdout and stderr
 		//		 to /dev/null - aka build monitoring - as it's already going to
 		//		 be written to stdout via 'radiant/console.cpp → Sys_print
-		if ( cmdline != NULL && ( strstr( cmdline, "q3map2" ) != NULL ) && ( strstr( cmdline, "-connect" ) != NULL ) ) {
+		if ( cmdline != nullptr && ( strstr( cmdline, "q3map2" ) != nullptr ) && ( strstr( cmdline, "-connect" ) != nullptr ) ) {
 			int devNullFd = open( "/dev/null", 0 );
 			if ( devNullFd != -1 ) {
 				dup2( devNullFd, 1 );
@@ -128,11 +128,11 @@ bool Q_Exec( const char *cmd, char *cmdline, const char *execdir, bool bCreateCo
 	if ( CreateProcess(
 	         pCmd,
 	         pCmdline,
-	         NULL,
-	         NULL,
+	         nullptr,
+	         nullptr,
 	         FALSE,
 	         dwCreationFlags,
-	         NULL,
+	         nullptr,
 	         execdir,
 	         &startupinfo,
 	         &ProcessInformation

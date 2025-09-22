@@ -90,8 +90,8 @@ static void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, 
 			}
 		}
 
-		*front = NULL;
-		*back = NULL;
+		*front = nullptr;
+		*back = nullptr;
 
 		if ( !c_front ) {
 			*back = in;
@@ -359,7 +359,7 @@ static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t *ds, con
 
 
 	/* dummy check */
-	if ( ds->sideRef == NULL || ds->sideRef->side == NULL ) {
+	if ( ds->sideRef == nullptr || ds->sideRef->side == nullptr ) {
 		return false;
 	}
 
@@ -417,7 +417,7 @@ static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t *ds, con
 
 	/* build a drawsurf for it */
 	newds = DrawSurfaceForSide( e, *ds->mapBrush, *s, w );
-	if ( newds == NULL ) {
+	if ( newds == nullptr ) {
 		return false;
 	}
 
@@ -470,7 +470,7 @@ void FogDrawSurfaces( const entity_t& e ){
 			}
 
 			/* global fog doesn't have a brush */
-			if ( fog.brush == NULL ) {
+			if ( fog.brush == nullptr ) {
 				/* don't re-fog already fogged surfaces */
 				if ( ds->fogNum >= 0 ) {
 					continue;
@@ -545,7 +545,7 @@ int FogForPoint( const Vector3& point, float epsilon ){
 	for ( size_t i = 0; i < mapFogs.size(); ++i )
 	{
 		/* sof2: global fog doesn't reference a brush */
-		if ( mapFogs[ i ].brush == NULL ) {
+		if ( mapFogs[ i ].brush == nullptr ) {
 			fogNum = i;
 			continue;
 		}
@@ -591,7 +591,7 @@ int FogForBounds( const MinMax& minmax, float epsilon ){
 	for ( size_t i = 0; i < mapFogs.size(); ++i )
 	{
 		/* sof2: global fog doesn't reference a brush */
-		if ( mapFogs[ i ].brush == NULL ) {
+		if ( mapFogs[ i ].brush == nullptr ) {
 			fogNum = i;
 			continue;
 		}
@@ -683,10 +683,10 @@ void CreateMapFogs(){
 		/* set up fog */
 		fog_t& fog = mapFogs.emplace_back();
 		fog.si = ShaderInfoForShaderNull( globalFog );
-		if ( fog.si == NULL ) {
+		if ( fog.si == nullptr ) {
 			Error( "Invalid shader \"%s\" referenced trying to add global fog", globalFog );
 		}
-		fog.brush = NULL;
+		fog.brush = nullptr;
 		fog.visibleSide = -1;
 
 		/* set as default fog */
@@ -694,7 +694,7 @@ void CreateMapFogs(){
 
 		/* mark all worldspawn brushes as fogged */
 		for ( brush_t& brush : entities[ 0 ].brushes )
-			ApplySurfaceParm( "fog", &brush.contentFlags, NULL, &brush.compileFlags );
+			ApplySurfaceParm( "fog", &brush.contentFlags, nullptr, &brush.compileFlags );
 	}
 
 	/* emit some stats */

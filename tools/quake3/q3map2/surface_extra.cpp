@@ -68,7 +68,7 @@ void SetSurfaceExtra( const mapDrawSurface_t& ds ){
 	/* copy out the relevant bits */
 	se.mds = &ds;
 	se.si = ds.shaderInfo;
-	se.parentSurfaceNum = ds.parent != NULL ? ds.parent->outputNum : -1;
+	se.parentSurfaceNum = ds.parent != nullptr ? ds.parent->outputNum : -1;
 	se.entityNum = ds.entityNum;
 	se.castShadows = ds.castShadows;
 	se.recvShadows = ds.recvShadows;
@@ -130,7 +130,7 @@ void WriteSurfaceExtraFile( const char *path ){
 		}
 
 		/* valid map drawsurf? */
-		if ( se->mds == NULL ) {
+		if ( se->mds == nullptr ) {
 			fprintf( sf, "\n" );
 		}
 		else
@@ -146,7 +146,7 @@ void WriteSurfaceExtraFile( const char *path ){
 		fprintf( sf, "{\n" );
 
 		/* shader */
-		if ( se->si != NULL ) {
+		if ( se->si != nullptr ) {
 			fprintf( sf, "\tshader %s\n", se->si->shader.c_str() );
 		}
 

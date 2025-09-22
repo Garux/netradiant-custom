@@ -67,7 +67,7 @@ public:
 	scene::Node* QER_entity{};
 	scene::Node* QER_brush{};
 	void LoadFromPatch( scene::Instance& patch );
-	void BuildInRadiant( scene::Node* entity = NULL );
+	void BuildInRadiant( scene::Node* entity = nullptr );
 	void SetTexture( const char* textureName );
 	char texture[256];
 	int width = MIN_PATCH_WIDTH, height = MIN_PATCH_HEIGHT;

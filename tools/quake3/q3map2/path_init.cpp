@@ -56,7 +56,7 @@ static CopiedString LokiGetHomeDir(){
 	const char *home = getenv( "HOME" );
 
 	/* look up home dir in password database */
-	if( home == NULL )
+	if( home == nullptr )
 	{
 		struct passwd   pw, *pwp;
 		char buf[ 4096 ];
@@ -96,7 +96,7 @@ static void LokiInitPaths( const char *argv0, CopiedString& homePath, CopiedStri
 	auto temp = StringStream( argv0 );
 
 	/* do some path divining */
-	if ( strEmpty( path_get_last_separator( temp ) ) && path != NULL ) {
+	if ( strEmpty( path_get_last_separator( temp ) ) && path != nullptr ) {
 
 		/*
 		   This code has a special behavior when q3map2 is a symbolic link.
@@ -127,7 +127,7 @@ static void LokiInitPaths( const char *argv0, CopiedString& homePath, CopiedStri
 
 			/* find next chunk */
 			last = strchr( path, ':' );
-			if ( last == NULL ) {
+			if ( last == nullptr ) {
 				last = path + strlen( path );
 			}
 
@@ -177,7 +177,7 @@ static void LokiInitPaths( const char *argv0, CopiedString& homePath, CopiedStri
 const game_t *GetGame( const char *arg ){
 	/* dummy check */
 	if ( strEmptyOrNull( arg ) ) {
-		return NULL;
+		return nullptr;
 	}
 
 	/* joke */
@@ -202,7 +202,7 @@ const game_t *GetGame( const char *arg ){
 	/* no matching game */
 	Sys_Warning( "Game \"%s\" is unknown.\n", arg );
 	HelpGames();
-	return NULL;
+	return nullptr;
 }
 
 
@@ -314,7 +314,7 @@ void InitPaths( Args& args ){
 		/* -game */
 		while ( args.takeArg( "-game" ) ) {
 			g_game = GetGame( args.takeNext() );
-			if ( g_game == NULL ) {
+			if ( g_game == nullptr ) {
 				g_game = &g_games[ 0 ];
 			}
 		}

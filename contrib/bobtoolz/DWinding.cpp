@@ -114,7 +114,7 @@ void DWinding::RemoveColinearPoints(){
 }
 
 DPlane* DWinding::WindingPlane(){
-	auto *newPlane = new DPlane( p[0], p[1], p[2], NULL );
+	auto *newPlane = new DPlane( p[0], p[1], p[2], nullptr );
 	return newPlane;
 }
 
@@ -410,7 +410,7 @@ void DWinding::ClipWindingEpsilon( DPlane* chopPlane, vec_t epsilon, DWinding **
 	sides[i] = sides[0];
 	dists[i] = dists[0];
 
-	*front = *back = NULL;
+	*front = *back = nullptr;
 
 	if ( !counts[0] ) {
 		*back = CopyWinding();
@@ -509,7 +509,7 @@ bool DWinding::ChopWinding( DPlane* chopPlane ){
 
 	delete[] p;
 	p = f->p;
-	f->p = NULL;
+	f->p = nullptr;
 	numpoints = f->numpoints;
 	delete f;
 

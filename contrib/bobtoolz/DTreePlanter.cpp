@@ -58,8 +58,8 @@ SignalHandlerResult DTreePlanter::mouseDown( const WindowVector& position, Butto
 
 		if ( m_autoLink ) {
 
-			const scene::Path* pLastEntity = NULL;
-			const scene::Path* pThisEntity = NULL;
+			const scene::Path* pLastEntity = nullptr;
+			const scene::Path* pThisEntity = nullptr;
 
 			int entpos;
 			for ( int i = 0; i < 256; ++i ) {

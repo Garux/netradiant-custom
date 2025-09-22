@@ -488,7 +488,7 @@ static int ClusterForPointExtFilter( const Vector3& point, float epsilon, int nu
 	cluster = ClusterForPointExt( point, epsilon );
 
 	/* check if filtering is necessary */
-	if ( cluster < 0 || numClusters <= 0 || clusters == NULL ) {
+	if ( cluster < 0 || numClusters <= 0 || clusters == nullptr ) {
 		return cluster;
 	}
 
@@ -709,16 +709,16 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 	const int y = std::clamp( int( dv.lightmap[ 0 ][ 1 ] ), 0, lm->sh - 1 );
 
 	/* set shader and cluster list */
-	if ( info != NULL ) {
+	if ( info != nullptr ) {
 		si = info->si;
 		numClusters = info->numSurfaceClusters;
 		clusters = &surfaceClusters[ info->firstSurfaceCluster ];
 	}
 	else
 	{
-		si = NULL;
+		si = nullptr;
 		numClusters = 0;
-		clusters = NULL;
+		clusters = nullptr;
 	}
 
 	/* get luxel, origin, cluster, and normal */
@@ -728,14 +728,14 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 	int& cluster = lm->getSuperCluster( x, y );
 
 	/* don't attempt to remap occluded luxels for planar surfaces */
-	if ( cluster == CLUSTER_OCCLUDED && lm->plane != NULL ) {
+	if ( cluster == CLUSTER_OCCLUDED && lm->plane != nullptr ) {
 		return cluster;
 	}
 
 	/* only average the normal for premapped luxels */
 	else if ( cluster >= 0 ) {
 		/* do bumpmap calculations */
-		if ( stv != NULL ) {
+		if ( stv != nullptr ) {
 			PerturbNormal( dv, si, pNormal, stv, ttv );
 		}
 		else{
@@ -753,7 +753,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 	/* get origin */
 
 	/* axial lightmap projection */
-	if ( lm->vecs != NULL ) {
+	if ( lm->vecs != nullptr ) {
 		/* calculate an origin for the sample from the lightmap vectors */
 		origin = lm->origin;
 		for ( i = 0; i < 3; ++i )
@@ -779,7 +779,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 	//1) Test the sample origin to see if it lays on the wrong side of any edge (x/y)
 	//2) if it does, nudge it onto the correct side.
 
-	if ( worldverts != NULL && lightmapTriangleCheck ) {
+	if ( worldverts != nullptr && lightmapTriangleCheck ) {
 		Plane3f hostplane;
 		PlaneFromPoints( hostplane, worldverts[0], worldverts[1], worldverts[2] );
 
@@ -809,7 +809,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 	////////////////////////
 
 	/* planar surfaces have precalculated lightmap vectors for nudging */
-	if ( lm->plane != NULL ) {
+	if ( lm->plane != nullptr ) {
 		vecs[ 0 ] = lm->vecs[ 0 ];
 		vecs[ 1 ] = lm->vecs[ 1 ];
 		vecs[ 2 ] = lm->plane->normal();
@@ -818,7 +818,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 	/* non-planar surfaces must calculate them */
 	else
 	{
-		if ( plane != NULL ) {
+		if ( plane != nullptr ) {
 			vecs[ 2 ] = plane->normal();
 		}
 		else{
@@ -828,7 +828,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 	}
 
 	/* push the origin off the surface a bit */
-	if ( si != NULL ) {
+	if ( si != nullptr ) {
 		lightmapSampleOffset = si->lightmapSampleOffset;
 	}
 	else{
@@ -876,7 +876,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 	}
 
 	/* as a last resort, if still in solid, try drawvert origin offset by normal (except in dark mode) */
-	if ( pointCluster < 0 && si != NULL && !dark ) {
+	if ( pointCluster < 0 && si != nullptr && !dark ) {
 		nudged = dv.xyz + dv.normal * lightmapSampleOffset;
 		pointCluster = ClusterForPointExtFilter( nudged, LUXEL_EPSILON, numClusters, clusters );
 		if ( pointCluster >= 0 ) {
@@ -987,7 +987,7 @@ static void MapTriangle_r( rawLightmap_t *lm, const surfaceInfo_t *info, const T
 static bool MapTriangle( rawLightmap_t *lm, const surfaceInfo_t *info, const TriRef& tri, bool mapNonAxial ){
 	Plane3f plane;
 	/* get plane if possible */
-	if ( lm->plane != NULL ) {
+	if ( lm->plane != nullptr ) {
 		plane = *lm->plane;
 	}
 	/* otherwise make one from the points */
@@ -996,21 +996,21 @@ static bool MapTriangle( rawLightmap_t *lm, const surfaceInfo_t *info, const Tri
 	}
 
 	/* this must not happen in the first place, but it does and spreads result of division by zero in MapSingleLuxel all over the map during -bounce */
-	if( lm->vecs != NULL && plane.normal()[lm->axisNum] == 0 ){
+	if( lm->vecs != nullptr && plane.normal()[lm->axisNum] == 0 ){
 		Sys_Warning( "plane[lm->axisNum] == 0\n" );
 		return false;
 	}
 
 	Vector3          *stv, *ttv, stvStatic[ 3 ], ttvStatic[ 3 ];
 	/* check to see if we need to calculate texture->world tangent vectors */
-	if ( info->si->normalImage != NULL && CalcTangentVectors( tri, stvStatic, ttvStatic ) ) {
+	if ( info->si->normalImage != nullptr && CalcTangentVectors( tri, stvStatic, ttvStatic ) ) {
 		stv = stvStatic;
 		ttv = ttvStatic;
 	}
 	else
 	{
-		stv = NULL;
-		ttv = NULL;
+		stv = nullptr;
+		ttv = nullptr;
 	}
 
 	const Vector3 worldverts[ 3 ] = { tri[ 0 ]->xyz, tri[ 1 ]->xyz, tri[ 2 ]->xyz };
@@ -1085,8 +1085,8 @@ static void MapQuad_r( rawLightmap_t *lm, const surfaceInfo_t *info, const QuadR
 		LerpDrawVert( *quad[ max + 2 ], *quad[ ( max + 3 ) % 4 ] ) };
 
 	/* map the vertexes */
-	MapSingleLuxel( lm, info, mid[ 0 ], plane, 1, stv, ttv, NULL );
-	MapSingleLuxel( lm, info, mid[ 1 ], plane, 1, stv, ttv, NULL );
+	MapSingleLuxel( lm, info, mid[ 0 ], plane, 1, stv, ttv, nullptr );
+	MapSingleLuxel( lm, info, mid[ 1 ], plane, 1, stv, ttv, nullptr );
 
 	/* 0 and 2 */
 	if ( max == 0 ) {
@@ -1121,7 +1121,7 @@ static void MapQuad_r( rawLightmap_t *lm, const surfaceInfo_t *info, const QuadR
 static bool MapQuad( rawLightmap_t *lm, const surfaceInfo_t *info, const QuadRef& quad ){
 	Plane3f plane;
 	/* get plane if possible */
-	if ( lm->plane != NULL ) {
+	if ( lm->plane != nullptr ) {
 		plane = *lm->plane;
 	}
 	/* otherwise make one from the points */
@@ -1136,21 +1136,21 @@ static bool MapQuad( rawLightmap_t *lm, const surfaceInfo_t *info, const QuadRef
 
 	Vector3          *stv, *ttv, stvStatic[ 4 ], ttvStatic[ 4 ];
 	/* check to see if we need to calculate texture->world tangent vectors */
-	if ( info->si->normalImage != NULL && CalcTangentVectors( quad, stvStatic, ttvStatic ) ) {
+	if ( info->si->normalImage != nullptr && CalcTangentVectors( quad, stvStatic, ttvStatic ) ) {
 		stv = stvStatic;
 		ttv = ttvStatic;
 	}
 	else
 	{
-		stv = NULL;
-		ttv = NULL;
+		stv = nullptr;
+		ttv = nullptr;
 	}
 
 	/* map the vertexes */
-	MapSingleLuxel( lm, info, *quad[ 0 ], &plane, 1, stv, ttv, NULL );
-	MapSingleLuxel( lm, info, *quad[ 1 ], &plane, 1, stv, ttv, NULL );
-	MapSingleLuxel( lm, info, *quad[ 2 ], &plane, 1, stv, ttv, NULL );
-	MapSingleLuxel( lm, info, *quad[ 3 ], &plane, 1, stv, ttv, NULL );
+	MapSingleLuxel( lm, info, *quad[ 0 ], &plane, 1, stv, ttv, nullptr );
+	MapSingleLuxel( lm, info, *quad[ 1 ], &plane, 1, stv, ttv, nullptr );
+	MapSingleLuxel( lm, info, *quad[ 2 ], &plane, 1, stv, ttv, nullptr );
+	MapSingleLuxel( lm, info, *quad[ 3 ], &plane, 1, stv, ttv, nullptr );
 
 	/* subdivide the quad */
 	MapQuad_r( lm, info, quad, &plane, stv, ttv );
@@ -1374,7 +1374,7 @@ void MapRawLightmap( int rawLightmapNum ){
 	}
 
 	/* non-planar surfaces stop here */
-	if ( lm->plane == NULL ) {
+	if ( lm->plane == nullptr ) {
 		return;
 	}
 
@@ -1440,7 +1440,7 @@ void MapRawLightmap( int rawLightmapNum ){
 				}
 
 				/* map the fake vert */
-				MapSingleLuxel( lm, NULL, fake, lm->plane, pass, NULL, NULL, NULL );
+				MapSingleLuxel( lm, nullptr, fake, lm->plane, pass, nullptr, nullptr, nullptr );
 			}
 		}
 	}
@@ -1576,7 +1576,7 @@ static float DirtForSample( trace_t *trace ){
 	if ( !dirty ) {
 		return 1.0f;
 	}
-	if ( trace == NULL || trace->cluster < 0 ) {
+	if ( trace == nullptr || trace->cluster < 0 ) {
 		return 0.0f;
 	}
 
@@ -1975,7 +1975,7 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, const Vector
 			if ( cluster[ b ] < 0 ) {
 				continue;
 			}
-			SubsampleRawLuxel_r( lm, trace, origin[ b ], x, y, ( bias * 0.5f ), luxel[ b ], lightDeluxel ? &deluxel[ b ] : NULL );
+			SubsampleRawLuxel_r( lm, trace, origin[ b ], x, y, ( bias * 0.5f ), luxel[ b ], lightDeluxel ? &deluxel[ b ] : nullptr );
 		}
 	}
 
@@ -2093,7 +2093,7 @@ static void CreateTraceLightsForBounds( const MinMax& minmax, const Vector3 *nor
 	const float radius = vector3_length( minmax.maxs - origin );
 
 	/* get length of normal vector */
-	if ( normal != NULL ) {
+	if ( normal != nullptr ) {
 		length = vector3_length( *normal );
 	}
 	else
@@ -2125,7 +2125,7 @@ static void CreateTraceLightsForBounds( const MinMax& minmax, const Vector3 *nor
 			}
 
 			/* check against pvs cluster */
-			if ( numClusters > 0 && clusters != NULL ) {
+			if ( numClusters > 0 && clusters != nullptr ) {
 				for ( i = 0; i < numClusters; ++i )
 				{
 					if ( ClusterVisible( light.cluster, clusters[ i ] ) ) {
@@ -2175,7 +2175,7 @@ static void CreateTraceLightsForBounds( const MinMax& minmax, const Vector3 *nor
 	}
 
 	/* make last night null */
-	trace->lights[ trace->numLights ] = NULL;
+	trace->lights[ trace->numLights ] = nullptr;
 }
 
 
@@ -2267,7 +2267,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 	}
 
 	/* create a culled light list for this raw lightmap */
-	CreateTraceLightsForBounds( lm->minmax, ( lm->plane == NULL? NULL : &lm->plane->normal() ), lm->numLightClusters, lm->lightClusters, LightFlags::Surfaces, &trace );
+	CreateTraceLightsForBounds( lm->minmax, ( lm->plane == nullptr? nullptr : &lm->plane->normal() ), lm->numLightClusters, lm->lightClusters, LightFlags::Surfaces, &trace );
 
 	/* -----------------------------------------------------------------
 	   fill pass
@@ -2347,7 +2347,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 			tmplm.superDeluxels = safe_malloc( ldSize );
 		}
 		else{
-			tmplm.superDeluxels = NULL;
+			tmplm.superDeluxels = nullptr;
 		}
 
 		/* clear luxels */
@@ -2384,7 +2384,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 		size = lm->sw * lm->sh * sizeof( *lm->superLuxels[0] );
 		for ( lightmapNum = 1; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		{
-			if ( lm->superLuxels[ lightmapNum ] != NULL ) {
+			if ( lm->superLuxels[ lightmapNum ] != nullptr ) {
 				memset( lm->superLuxels[ lightmapNum ], 0, size );
 			}
 		}
@@ -2433,7 +2433,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 			/* allocate sampling flags storage */
 			if ( lightSamples > 1 || lightRandomSamples ) {
 				size = lm->sw * lm->sh * sizeof( *lm->superFlags );
-				if ( lm->superFlags == NULL ) {
+				if ( lm->superFlags == nullptr ) {
 					lm->superFlags = safe_malloc( size );
 				}
 				memset( lm->superFlags, 0, size );
@@ -2569,10 +2569,10 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 
 								/* subsample it */
 								if ( lightRandomSamples ) {
-									RandomSubsampleRawLuxel( lm, &trace, origin, sx, sy, 0.5f * lightSamplesSearchBoxSize, lightLuxel, deluxemap ? lightDeluxel : NULL );
+									RandomSubsampleRawLuxel( lm, &trace, origin, sx, sy, 0.5f * lightSamplesSearchBoxSize, lightLuxel, deluxemap ? lightDeluxel : nullptr );
 								}
 								else{
-									SubsampleRawLuxel_r( lm, &trace, origin, sx, sy, 0.25f * lightSamplesSearchBoxSize, lightLuxel, deluxemap ? lightDeluxel : NULL );
+									SubsampleRawLuxel_r( lm, &trace, origin, sx, sy, 0.25f * lightSamplesSearchBoxSize, lightLuxel, deluxemap ? lightDeluxel : nullptr );
 								}
 
 								flag |= FLAG_ALREADY_SUBSAMPLED;
@@ -2604,7 +2604,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 			}
 
 			/* allocate sampling lightmap storage */
-			if ( lm->superLuxels[ lightmapNum ] == NULL ) {
+			if ( lm->superLuxels[ lightmapNum ] == nullptr ) {
 				/* allocate sampling lightmap storage */
 				size = lm->sw * lm->sh * sizeof( *lm->superLuxels[0] );
 				lm->superLuxels[ lightmapNum ] = safe_calloc( size );
@@ -2743,7 +2743,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		{
 			/* early out */
-			if ( lm->superLuxels[ lightmapNum ] == NULL ) {
+			if ( lm->superLuxels[ lightmapNum ] == nullptr ) {
 				continue;
 			}
 
@@ -2770,7 +2770,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		{
 			/* early out */
-			if ( lm->superLuxels[ lightmapNum ] == NULL ) {
+			if ( lm->superLuxels[ lightmapNum ] == nullptr ) {
 				continue;
 			}
 
@@ -2807,7 +2807,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 	{
 		/* early out */
-		if ( lm->superLuxels[ lightmapNum ] == NULL ) {
+		if ( lm->superLuxels[ lightmapNum ] == nullptr ) {
 			continue;
 		}
 
@@ -2910,7 +2910,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 	{
 		/* early out */
-		if ( lm->superLuxels[ lightmapNum ] == NULL ) {
+		if ( lm->superLuxels[ lightmapNum ] == nullptr ) {
 			continue;
 		}
 		for ( y = 0; y < lm->sh; ++y )
@@ -2977,9 +2977,9 @@ void IlluminateVertexes( int num ){
 	   ----------------------------------------------------------------- */
 
 	/* calculate vertex lighting for surfaces without lightmaps */
-	if ( lm == NULL || cpmaHack ) {
+	if ( lm == nullptr || cpmaHack ) {
 		/* setup trace */
-		trace.testOcclusion = ( cpmaHack && lm != NULL ) ? false : !noTrace;
+		trace.testOcclusion = ( cpmaHack && lm != nullptr ) ? false : !noTrace;
 		trace.forceSunlight = info->si->forceSunlight;
 		trace.recvShadows = info->recvShadows;
 		trace.numSurfaces = 1;
@@ -3225,7 +3225,7 @@ void IlluminateVertexes( int num ){
 		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		{
 			/* early out */
-			if ( lm->superLuxels[ lightmapNum ] == NULL ) {
+			if ( lm->superLuxels[ lightmapNum ] == nullptr ) {
 				continue;
 			}
 
@@ -3359,7 +3359,7 @@ void SetupBrushesFlags( int mask_any, int test_any, int mask_all, int test_all )
 
 			/* get shader info */
 			const shaderInfo_t *si = ShaderInfoForShaderNull( bspShaders[ side.shaderNum ].shader );
-			if ( si == NULL ) {
+			if ( si == nullptr ) {
 				continue;
 			}
 
@@ -3772,7 +3772,7 @@ float FloodLightForSample( trace_t *trace, float floodLightDistance, bool floodL
 	/* dummy check */
 	//if( !dirty )
 	//	return 1.0f;
-	if ( trace == NULL || trace->cluster < 0 ) {
+	if ( trace == nullptr || trace->cluster < 0 ) {
 		return 0.0f;
 	}
 
@@ -4031,7 +4031,7 @@ static void FloodlightIlluminateLightmap( rawLightmap_t *lm ){
 	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 	{
 		/* early out */
-		if ( lm->superLuxels[ lightmapNum ] == NULL ) {
+		if ( lm->superLuxels[ lightmapNum ] == nullptr ) {
 			continue;
 		}
 

@@ -310,7 +310,7 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
 			/* build a metatriangle */
 			metaTriangle_t src;
 			src.si = ds->shaderInfo;
-			src.side = ( ds->sideRef != NULL ? ds->sideRef->side : NULL );
+			src.side = ( ds->sideRef != nullptr ? ds->sideRef->side : nullptr );
 			src.entityNum = ds->entityNum;
 			src.surfaceNum = ds->surfaceNum;
 			src.planeNum = ds->planeNum;
@@ -742,7 +742,7 @@ void StripFaceSurface( mapDrawSurface_t *ds ){
 	{
 		/* ydnar: find smallest coordinate */
 		int least = 0;
-		if ( ds->shaderInfo != NULL && !ds->shaderInfo->autosprite ) {
+		if ( ds->shaderInfo != nullptr && !ds->shaderInfo->autosprite ) {
 			for ( int i = 0; i < ds->numVerts; ++i )
 			{
 				/* get points */
@@ -1522,7 +1522,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 	for ( auto& seed : metaTriangles )
 	{
 		/* skip this triangle if it has already been merged */
-		if ( seed.si == NULL ) {
+		if ( seed.si == nullptr ) {
 			continue;
 		}
 
@@ -1545,7 +1545,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 		ds->verts = verts;
 		ds->indexes = indexes;
 		ds->lightmapAxis = seed.lightmapAxis;
-		ds->sideRef = AllocSideRef( seed.side, NULL );
+		ds->sideRef = AllocSideRef( seed.side, nullptr );
 
 		ds->minmax.clear();
 
@@ -1574,7 +1574,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 				}
 			}
 			/* mark triangle as used */
-			triangle.si = NULL;
+			triangle.si = nullptr;
 			/* remove from cloud */
 			if( auto it = std::ranges::find( testCloud, &triangle ); it != testCloud.cend() ){
 				testCloud.erase( it );
@@ -1615,7 +1615,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 			for ( metaTriangle_t *test : testCloud )
 			{
 				/* skip this triangle if it has already been merged */
-				if ( test->si == NULL ) {
+				if ( test->si == nullptr ) {
 					continue;
 				}
 

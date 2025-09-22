@@ -47,7 +47,7 @@ public:
 
 	void Commit();
 private:
-	DBrush* GetBoundingCube( vec3_t min, vec3_t max, const char* textureName, DEntity* ent = NULL, bool* bUseFaces = bFacesAll );
+	DBrush* GetBoundingCube( vec3_t min, vec3_t max, const char* textureName, DEntity* ent = nullptr, bool* bUseFaces = bFacesAll );
 
 	DMap m_Container;
 };

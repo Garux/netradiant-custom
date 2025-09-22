@@ -253,7 +253,7 @@ void CDbgDlg::Init(){
 		e->Release();
 	m_feedbackElements.clear();
 
-	if ( m_clist != NULL ) {
+	if ( m_clist != nullptr ) {
 		m_clist->clear();
 	}
 }

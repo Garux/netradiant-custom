@@ -224,11 +224,11 @@ int ImportLightmapsMain( Args& args ){
 		}
 
 		/* parse file into an image */
-		pixels = NULL;
+		pixels = nullptr;
 		LoadTGABuffer( buffer.data(), buffer.size(), &pixels, &width, &height );
 
 		/* sanity check it */
-		if ( pixels == NULL ) {
+		if ( pixels == nullptr ) {
 			Sys_Warning( "Unable to load image %s\n", filename );
 			continue;
 		}
@@ -295,10 +295,10 @@ static void FinishRawLightmap( rawLightmap_t *lm ){
 		const shaderInfo_t *bsi = surfaceInfos[ b ].si;
 
 		/* dummy check */
-		if ( asi == NULL ) {
+		if ( asi == nullptr ) {
 			return true;
 		}
-		if ( bsi == NULL ) {
+		if ( bsi == nullptr ) {
 			return false;
 		}
 
@@ -340,7 +340,7 @@ static void FinishRawLightmap( rawLightmap_t *lm ){
 	lm->sh = lm->h * superSample;
 
 	/* manipulate origin/vecs for supersampling */
-	if ( superSample > 1 && lm->vecs != NULL ) {
+	if ( superSample > 1 && lm->vecs != nullptr ) {
 		/* calc inverse supersample */
 		is = 1.0f / superSample;
 
@@ -361,7 +361,7 @@ static void FinishRawLightmap( rawLightmap_t *lm ){
 
 	/* allocate bsp lightmap storage */
 	size = lm->w * lm->h * sizeof( *( lm->bspLuxels[ 0 ] ) );
-	if ( lm->bspLuxels[ 0 ] == NULL ) {
+	if ( lm->bspLuxels[ 0 ] == nullptr ) {
 		lm->bspLuxels[ 0 ] = safe_malloc( size );
 	}
 	memset( lm->bspLuxels[ 0 ], 0, size );
@@ -369,7 +369,7 @@ static void FinishRawLightmap( rawLightmap_t *lm ){
 	/* allocate radiosity lightmap storage */
 	if ( bounce ) {
 		size = lm->w * lm->h * sizeof( *lm->radLuxels[ 0 ] );
-		if ( lm->radLuxels[ 0 ] == NULL ) {
+		if ( lm->radLuxels[ 0 ] == nullptr ) {
 			lm->radLuxels[ 0 ] = safe_malloc( size );
 		}
 		memset( lm->radLuxels[ 0 ], 0, size );
@@ -377,42 +377,42 @@ static void FinishRawLightmap( rawLightmap_t *lm ){
 
 	/* allocate sampling lightmap storage */
 	size = lm->sw * lm->sh * sizeof( *lm->superLuxels[ 0 ] );
-	if ( lm->superLuxels[ 0 ] == NULL ) {
+	if ( lm->superLuxels[ 0 ] == nullptr ) {
 		lm->superLuxels[ 0 ] = safe_malloc( size );
 	}
 	memset( lm->superLuxels[ 0 ], 0, size );
 
 	/* allocate origin map storage */
 	size = lm->sw * lm->sh * sizeof( *lm->superOrigins );
-	if ( lm->superOrigins == NULL ) {
+	if ( lm->superOrigins == nullptr ) {
 		lm->superOrigins = safe_malloc( size );
 	}
 	memset( lm->superOrigins, 0, size );
 
 	/* allocate normal map storage */
 	size = lm->sw * lm->sh * sizeof( *lm->superNormals );
-	if ( lm->superNormals == NULL ) {
+	if ( lm->superNormals == nullptr ) {
 		lm->superNormals = safe_malloc( size );
 	}
 	memset( lm->superNormals, 0, size );
 
 	/* allocate dirt map storage */
 	size = lm->sw * lm->sh * sizeof( *lm->superDirt );
-	if ( lm->superDirt == NULL ) {
+	if ( lm->superDirt == nullptr ) {
 		lm->superDirt = safe_malloc( size );
 	}
 	memset( lm->superDirt, 0, size );
 
 	/* allocate floodlight map storage */
 	size = lm->sw * lm->sh * sizeof( *lm->superFloodLight );
-	if ( lm->superFloodLight == NULL ) {
+	if ( lm->superFloodLight == nullptr ) {
 		lm->superFloodLight = safe_malloc( size );
 	}
 	memset( lm->superFloodLight, 0, size );
 
 	/* allocate cluster map storage */
 	size = lm->sw * lm->sh * sizeof( *lm->superClusters );
-	if ( lm->superClusters == NULL ) {
+	if ( lm->superClusters == nullptr ) {
 		lm->superClusters = safe_malloc( size );
 	}
 	size = lm->sw * lm->sh;
@@ -424,14 +424,14 @@ static void FinishRawLightmap( rawLightmap_t *lm ){
 	if ( deluxemap ) {
 		/* allocate sampling deluxel storage */
 		size = lm->sw * lm->sh * sizeof( *lm->superDeluxels );
-		if ( lm->superDeluxels == NULL ) {
+		if ( lm->superDeluxels == nullptr ) {
 			lm->superDeluxels = safe_malloc( size );
 		}
 		memset( lm->superDeluxels, 0, size );
 
 		/* allocate bsp deluxel storage */
 		size = lm->w * lm->h * sizeof( *lm->bspDeluxels );
-		if ( lm->bspDeluxels == NULL ) {
+		if ( lm->bspDeluxels == nullptr ) {
 			lm->bspDeluxels = safe_malloc( size );
 		}
 		memset( lm->bspDeluxels, 0, size );
@@ -609,7 +609,7 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 
 		/* plane check (fixme: allow merging of nonplanars) */
 		if ( !info->si->lmMergable ) {
-			if ( info->plane == NULL || lm->plane == NULL ) {
+			if ( info->plane == nullptr || lm->plane == nullptr ) {
 				return false;
 			}
 
@@ -626,8 +626,8 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 	}
 
 	/* set plane */
-	if ( info->plane == NULL ) {
-		lm->plane = NULL;
+	if ( info->plane == nullptr ) {
+		lm->plane = nullptr;
 	}
 
 	/* add surface to lightmap bounds */
@@ -689,7 +689,7 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 	lm->actualSampleSize = sampleSize;
 
 	/* fixme: copy rounded mins/maxes to lightmap record? */
-	if ( lm->plane == NULL ) {
+	if ( lm->plane == nullptr ) {
 		lm->minmax = { mins, maxs };
 	}
 
@@ -800,19 +800,19 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 	else
 	{
 		/* lightmap vectors are useless on a non-planar surface */
-		lm->vecs = NULL;
+		lm->vecs = nullptr;
 	}
 
 	/* add to counts */
 	if ( ds->surfaceType == MST_PATCH ) {
 		numPatchesLightmapped++;
-		if ( lm->plane != NULL ) {
+		if ( lm->plane != nullptr ) {
 			numPlanarPatchesLightmapped++;
 		}
 	}
 	else
 	{
-		if ( lm->plane != NULL ) {
+		if ( lm->plane != nullptr ) {
 			numPlanarsLightmapped++;
 		}
 		else{
@@ -883,13 +883,13 @@ struct CompareSurfaceInfo
 		}
 
 		/* then plane */
-		if ( aInfo.plane == NULL && bInfo.plane != NULL ) {
+		if ( aInfo.plane == nullptr && bInfo.plane != nullptr ) {
 			return false;
 		}
-		else if ( aInfo.plane != NULL && bInfo.plane == NULL ) {
+		else if ( aInfo.plane != nullptr && bInfo.plane == nullptr ) {
 			return true;
 		}
-		else if ( aInfo.plane != NULL && bInfo.plane != NULL ) {
+		else if ( aInfo.plane != nullptr && bInfo.plane != nullptr ) {
 			for ( int i = 0; i < 3; ++i )
 			{
 				if ( aInfo.plane->normal()[ i ] < bInfo.plane->normal()[ i ] ) {
@@ -985,14 +985,14 @@ void SetupSurfaceLightmaps(){
 
 			/* basic setup */
 			info->modelindex = i;
-			info->lm = NULL;
-			info->plane = NULL;
+			info->lm = nullptr;
+			info->plane = nullptr;
 			info->firstSurfaceCluster = numSurfaceClusters;
 
 			{ /* get extra data */
 				const surfaceExtra_t& se = GetSurfaceExtra( num );
 				info->si = se.si;
-				if ( info->si == NULL ) {
+				if ( info->si == nullptr ) {
 					info->si = &ShaderInfoForShader( bspShaders[ ds->shaderNum ].shader );
 				}
 				info->parentSurfaceNum = se.parentSurfaceNum;
@@ -1080,7 +1080,7 @@ void SetupSurfaceLightmaps(){
 		/* get info and attempt early out */
 		num = sortSurfaces[ i ];
 		info = &surfaceInfos[ num ];
-		if ( !info->hasLightmap || info->lm != NULL || info->parentSurfaceNum >= 0 ) {
+		if ( !info->hasLightmap || info->lm != nullptr || info->parentSurfaceNum >= 0 ) {
 			continue;
 		}
 
@@ -1130,7 +1130,7 @@ void SetupSurfaceLightmaps(){
 				/* get info and attempt early out */
 				num2 = sortSurfaces[ j ];
 				info2 = &surfaceInfos[ num2 ];
-				if ( !info2->hasLightmap || info2->lm != NULL ) {
+				if ( !info2->hasLightmap || info2->lm != nullptr ) {
 					continue;
 				}
 
@@ -1350,7 +1350,7 @@ static bool CompareBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int 
 	if ( a->customWidth != b->customWidth || a->customHeight != b->customHeight ||
 	     a->brightness != b->brightness ||
 	     a->solid[ aNum ] != b->solid[ bNum ] ||
-	     a->bspLuxels[ aNum ] == NULL || b->bspLuxels[ bNum ] == NULL ) {
+	     a->bspLuxels[ aNum ] == nullptr || b->bspLuxels[ bNum ] == nullptr ) {
 		return false;
 	}
 
@@ -1427,7 +1427,7 @@ static bool MergeBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int bN
 	if ( a->customWidth != b->customWidth || a->customHeight != b->customHeight ||
 	     a->brightness != b->brightness ||
 	     a->solid[ aNum ] != b->solid[ bNum ] ||
-	     a->bspLuxels[ aNum ] == NULL || b->bspLuxels[ bNum ] == NULL ) {
+	     a->bspLuxels[ aNum ] == nullptr || b->bspLuxels[ bNum ] == nullptr ) {
 		return false;
 	}
 
@@ -1802,7 +1802,7 @@ static bool TestOutLightmapStamp( rawLightmap_t *lm, int lightmapNum, outLightma
 
 static void SetupOutLightmap( rawLightmap_t *lm, outLightmap_t *olm ){
 	/* dummy check */
-	if ( lm == NULL || olm == NULL ) {
+	if ( lm == nullptr || olm == nullptr ) {
 		return;
 	}
 
@@ -1872,13 +1872,13 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 		}
 
 		/* don't store twinned lightmaps */
-		if ( lm->twins[ lightmapNum ] != NULL ) {
+		if ( lm->twins[ lightmapNum ] != nullptr ) {
 			continue;
 		}
 
 		/* if this is a styled lightmap, try some normalized locations first */
 		ok = false;
-		if ( lightmapNum > 0 && outLightmaps != NULL ) {
+		if ( lightmapNum > 0 && outLightmaps != nullptr ) {
 			/* loop twice */
 			for ( j = 0; j < 2; ++j )
 			{
@@ -2030,7 +2030,7 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 			numOutLightmaps += LIGHTMAP_RESERVE_COUNT;
 			olm = safe_malloc( numOutLightmaps * sizeof( outLightmap_t ) );
 
-			if ( outLightmaps != NULL && numOutLightmaps > LIGHTMAP_RESERVE_COUNT ) {
+			if ( outLightmaps != nullptr && numOutLightmaps > LIGHTMAP_RESERVE_COUNT ) {
 				memcpy( olm, outLightmaps, ( numOutLightmaps - LIGHTMAP_RESERVE_COUNT ) * sizeof( outLightmap_t ) );
 				free( outLightmaps );
 			}
@@ -2205,9 +2205,9 @@ static void FillOutLightmap( outLightmap_t *olm ){
 	int x, y;
 	int ofs;
 	int cnt, filled;
-	byte *lightBitsNew = NULL;
-	Vector3b *lightBytesNew = NULL;
-	Vector3b *dirBytesNew = NULL;
+	byte *lightBitsNew = nullptr;
+	Vector3b *lightBytesNew = nullptr;
+	Vector3b *dirBytesNew = nullptr;
 	const size_t size = olm->customWidth * olm->customHeight * sizeof( Vector3b );
 
 	lightBitsNew = safe_malloc( ( olm->customWidth * olm->customHeight + 8 ) / 8 );
@@ -2372,12 +2372,12 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		{
 			/* early outs */
-			if ( lm->superLuxels[ lightmapNum ] == NULL ) {
+			if ( lm->superLuxels[ lightmapNum ] == nullptr ) {
 				continue;
 			}
 
 			/* allocate bsp luxel storage */
-			if ( lm->bspLuxels[ lightmapNum ] == NULL ) {
+			if ( lm->bspLuxels[ lightmapNum ] == nullptr ) {
 				const size_t size = lm->w * lm->h * sizeof( *( lm->bspLuxels[ 0 ] ) );
 				lm->bspLuxels[ lightmapNum ] = safe_calloc( size );
 			}
@@ -2385,7 +2385,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 			/* allocate radiosity lightmap storage */
 			if ( bounce ) {
 				const size_t size = lm->w * lm->h * sizeof( *lm->radLuxels[ 0 ] );
-				if ( lm->radLuxels[ lightmapNum ] == NULL ) {
+				if ( lm->radLuxels[ lightmapNum ] == nullptr ) {
 					lm->radLuxels[ lightmapNum ] = safe_malloc( size );
 				}
 				memset( lm->radLuxels[ lightmapNum ], 0, size );
@@ -2767,7 +2767,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		{
 			/* early outs */
-			if ( lm->superLuxels[ lightmapNum ] == NULL ) {
+			if ( lm->superLuxels[ lightmapNum ] == nullptr ) {
 				continue;
 			}
 
@@ -2807,7 +2807,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		{
 			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 			{
-				rawLightmaps[ i ].twins[ lightmapNum ] = NULL;
+				rawLightmaps[ i ].twins[ lightmapNum ] = nullptr;
 				rawLightmaps[ i ].twinNums[ lightmapNum ] = -1;
 				rawLightmaps[ i ].numStyledTwins = 0;
 			}
@@ -2823,8 +2823,8 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 			{
 				/* early outs */
-				if ( lm->bspLuxels[ lightmapNum ] == NULL ||
-				     lm->twins[ lightmapNum ] != NULL ) {
+				if ( lm->bspLuxels[ lightmapNum ] == nullptr ||
+				     lm->twins[ lightmapNum ] != nullptr ) {
 					continue;
 				}
 
@@ -2838,8 +2838,8 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					for ( lightmapNum2 = 0; lightmapNum2 < MAX_LIGHTMAPS; ++lightmapNum2 )
 					{
 						/* early outs */
-						if ( lm2->bspLuxels[ lightmapNum2 ] == NULL ||
-						     lm2->twins[ lightmapNum2 ] != NULL ) {
+						if ( lm2->bspLuxels[ lightmapNum2 ] == nullptr ||
+						     lm2->twins[ lightmapNum2 ] != nullptr ) {
 							continue;
 						}
 
@@ -2877,7 +2877,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		timer.start();
 
 		/* allocate a new sorted list */
-		if ( sortLightmaps == NULL ) {
+		if ( sortLightmaps == nullptr ) {
 			sortLightmaps = safe_malloc( numRawLightmaps * sizeof( int ) );
 		}
 
@@ -2900,14 +2900,14 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		timer.start();
 
 		/* kill all existing output lightmaps */
-		if ( outLightmaps != NULL ) {
+		if ( outLightmaps != nullptr ) {
 			for ( i = 0; i < numOutLightmaps; ++i )
 			{
 				free( outLightmaps[ i ].lightBits );
 				free( outLightmaps[ i ].bspLightBytes );
 			}
 			free( outLightmaps );
-			outLightmaps = NULL;
+			outLightmaps = nullptr;
 		}
 
 		numLightmapShaders = 0;
@@ -2933,7 +2933,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 			{
 				/* get twin */
 				lm2 = lm->twins[ lightmapNum ];
-				if ( lm2 == NULL ) {
+				if ( lm2 == nullptr ) {
 					continue;
 				}
 				lightmapNum2 = lm->twinNums[ lightmapNum ];
@@ -3064,7 +3064,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 			ds = &bspDrawSurfaces[ i ];
 			info = &surfaceInfos[ i ];
 			lm = info->lm;
-			olm = NULL;
+			olm = nullptr;
 
 			/* handle surfaces with identical parent */
 			if ( info->parentSurfaceNum >= 0 ) {
@@ -3095,7 +3095,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 			}
 
 			/* handle vertex lit or approximated surfaces */
-			else if ( lm == NULL || lm->outLightmapNums[ 0 ] < 0 ) {
+			else if ( lm == nullptr || lm->outLightmapNums[ 0 ] < 0 ) {
 				for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 				{
 					ds->lightmapNum[ lightmapNum ] = -3;
@@ -3183,7 +3183,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 			}
 
 			/* surfaces with styled lightmaps and a style marker get a custom generated shader (fixme: make this work with external lightmaps) */
-			if ( olm != NULL && lm != NULL && lm->styles[ 1 ] != LS_NONE && g_game->load != LoadRBSPFile ) { //%	info->si->styleMarker > 0 )
+			if ( olm != nullptr && lm != nullptr && lm->styles[ 1 ] != LS_NONE && g_game->load != LoadRBSPFile ) { //%	info->si->styleMarker > 0 )
 				char key[ 32 ], styleStage[ 512 ], styleStages[ 4096 ], rgbGen[ 128 ], alphaGen[ 128 ];
 
 
@@ -3215,7 +3215,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					}
 
 					/* get rgbgen string */
-					if ( rgbGenValues[ style ] == NULL ) {
+					if ( rgbGenValues[ style ] == nullptr ) {
 						sprintf( key, "_style%drgbgen", style );
 						rgbGenValues[ style ] = entities[ 0 ].valueForKey( key );
 						if ( strEmpty( rgbGenValues[ style ] ) ) {
@@ -3231,7 +3231,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					}
 
 					/* get alphagen string */
-					if ( alphaGenValues[ style ] == NULL ) {
+					if ( alphaGenValues[ style ] == nullptr ) {
 						sprintf( key, "_style%dalphagen", style );
 						alphaGenValues[ style ] = entities[ 0 ].valueForKey( key );
 					}
@@ -3298,7 +3298,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 			}
 
 			/* devise a custom shader for this surface (fixme: make this work with light styles) */
-			else if ( olm != NULL && lm != NULL && !externalLightmaps &&
+			else if ( olm != nullptr && lm != nullptr && !externalLightmaps &&
 			          ( olm->customWidth != g_game->lightmapSize || olm->customHeight != g_game->lightmapSize ) ) {
 				/* get output lightmap */
 				olm = &outLightmaps[ lm->outLightmapNums[ 0 ] ];

@@ -60,7 +60,7 @@ public:
 		case 10: return "ufoai_weaponclip.png";
 		case 11: return "ufoai_nodraw.png";
 		}
-		return NULL;
+		return nullptr;
 	}
 	virtual EType getType() const override {
 		switch ( mIndex )
@@ -89,7 +89,7 @@ public:
 		case 10: return "WeaponClip";
 		case 11: return "NoDraw";
 		}
-		return NULL;
+		return nullptr;
 	}
 	virtual const char* getTooltip() const override {
 		switch ( mIndex )
@@ -107,7 +107,7 @@ public:
 		case 10: return "Hide weaponClip brushes";
 		case 11: return "Hide noDraw brushes";
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	virtual void activate() const override {
@@ -149,5 +149,5 @@ const IToolbarButton* GetToolbarButton( std::size_t index ){
  * @brief
  */
 const IToolbarButton* GetToolbarNoButton( std::size_t index ){
-	return NULL;
+	return nullptr;
 }

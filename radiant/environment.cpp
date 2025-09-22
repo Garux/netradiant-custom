@@ -126,10 +126,10 @@ void gamedetect(){
 		{
 			// TODO add more games to this
 
-			if ( gamedetect_check_game( "q3.game", "baseq3/pak0.pk3", NULL, buf, p - buf ) ) {
+			if ( gamedetect_check_game( "q3.game", "baseq3/pak0.pk3", nullptr, buf, p - buf ) ) {
 				return;
 			}
-			if ( gamedetect_check_game( "q1.game", "id1/pak0.pak", NULL, buf, p - buf ) ) {
+			if ( gamedetect_check_game( "q1.game", "id1/pak0.pak", nullptr, buf, p - buf ) ) {
 				return;
 			}
 			// try to detect Nexuiz installs
@@ -145,12 +145,12 @@ void gamedetect(){
 			}
 
 			// try to detect Q2World installs
-			if ( gamedetect_check_game( "q2w.game", "default/quake2world.version", NULL, buf, p - buf ) ) {
+			if ( gamedetect_check_game( "q2w.game", "default/quake2world.version", nullptr, buf, p - buf ) ) {
 				return;
 			}
 
 			// try to detect Warsow installs
-			if ( gamedetect_check_game( "warsow.game", "basewsw/dedicated_autoexec.cfg", NULL, buf, p - buf ) ) {
+			if ( gamedetect_check_game( "warsow.game", "basewsw/dedicated_autoexec.cfg", nullptr, buf, p - buf ) ) {
 				return;
 			}
 

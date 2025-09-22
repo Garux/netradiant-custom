@@ -135,7 +135,7 @@ int AnalyzeBSP( Args& args ){
 		{ 128 * 128 * 3,                1,      "IBSP LUMP_LIGHTMAPS" },
 		{ 256 * 256 * 3,                1,      "IBSP LUMP_LIGHTMAPS (256 x 256)" },
 		{ 512 * 512 * 3,                1,      "IBSP LUMP_LIGHTMAPS (512 x 512)" },
-		{ 0, 0, NULL }
+		{ 0, 0, nullptr }
 	};
 
 
@@ -973,7 +973,7 @@ static void PseudoCompileBSP( bool need_tree ){
 	{
 		/* get entity */
 		entity_t& entity = entities[ entityNum ];
-		if ( entity.brushes.empty() && entity.patches == NULL ) {
+		if ( entity.brushes.empty() && entity.patches == nullptr ) {
 			continue;
 		}
 
@@ -1011,7 +1011,7 @@ static void PseudoCompileBSP( bool need_tree ){
 					continue;
 				}
 				/* shader? */
-				if ( side.shaderInfo == NULL ) {
+				if ( side.shaderInfo == nullptr ) {
 					continue;
 				}
 				/* save this winding as a visible surface */
@@ -1050,7 +1050,7 @@ int ConvertBSPMain( Args& args ){
 
 	/* set default */
 	convertFunc = ConvertBSPToASE;
-	convertGame = NULL;
+	convertGame = nullptr;
 	map_allowed = false;
 	force_bsp = false;
 	force_map = false;
@@ -1087,7 +1087,7 @@ int ConvertBSPMain( Args& args ){
 			{
 				convertGame = GetGame( fmt );
 				map_allowed = false;
-				if ( convertGame == NULL ) {
+				if ( convertGame == nullptr ) {
 					Sys_Printf( "Unknown conversion format \"%s\". Defaulting to ASE.\n", fmt );
 				}
 			}
@@ -1143,8 +1143,8 @@ int ConvertBSPMain( Args& args ){
 		}
 		path_set_extension( source, ".map" );
 		Sys_Printf( "Loading %s\n", source );
-		LoadMapFile( source, false, convertGame == NULL );
-		PseudoCompileBSP( convertGame != NULL );
+		LoadMapFile( source, false, convertGame == nullptr );
+		PseudoCompileBSP( convertGame != nullptr );
 	}
 	else
 	{
@@ -1155,7 +1155,7 @@ int ConvertBSPMain( Args& args ){
 	}
 
 	/* bsp format convert? */
-	if ( convertGame != NULL ) {
+	if ( convertGame != nullptr ) {
 		/* set global game */
 		g_game = convertGame;
 

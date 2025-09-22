@@ -34,7 +34,7 @@
 #include <cstdlib>
 #include "stream/textstream.h"
 
-static byte *row1 = NULL, *row2 = NULL;
+static byte *row1 = nullptr, *row2 = nullptr;
 static int rowsize = 0;
 
 void R_ResampleTextureLerpLine( const byte *in, byte *out, int inwidth, int outwidth, int bytesperpixel ){

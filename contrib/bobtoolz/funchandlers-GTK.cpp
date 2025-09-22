@@ -226,7 +226,7 @@ void DoResetTextures(){
 
 	const char* texName;
 	if ( 1 /*g_SelectedFaceTable.m_pfnGetSelectedFaceCount() != 1*/ ) {
-		texName = NULL;
+		texName = nullptr;
 	}
 	else
 	{
@@ -664,7 +664,7 @@ void DoCaulkSelection() {
 
 	world.LoadSelectedBrushes();
 	world.LoadSelectedPatches();
-	world.ResetTextures( NULL, fScale, fShift, 0, "textures/common/caulk", true, bResetScale, bResetShift, false, true );
+	world.ResetTextures( nullptr, fScale, fShift, 0, "textures/common/caulk", true, bResetScale, bResetShift, false, true );
 }
 
 void DoTreePlanter() {
@@ -865,7 +865,7 @@ void DoFlipTerrain() {
 
 	for ( i = 0; i < 2; ++i ) {
 		newBrushes[i]->RemoveRedundantPlanes();
-		newBrushes[i]->BuildInRadiant( false, NULL, brushes[i]->path().parent().get_pointer() );
+		newBrushes[i]->BuildInRadiant( false, nullptr, brushes[i]->path().parent().get_pointer() );
 		Path_deleteTop( brushes[i]->path() );
 		delete newBrushes[i];
 	}

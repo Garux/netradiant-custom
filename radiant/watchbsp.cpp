@@ -91,10 +91,10 @@ private:
 public:
 	CWatchBSP(){
 		m_bBSPPlugin = false;
-		m_pListenSocket = NULL;
-		m_pInSocket = NULL;
+		m_pListenSocket = nullptr;
+		m_pInSocket = nullptr;
 		m_eState = EIdle;
-		m_xmlInputBuffer = NULL;
+		m_xmlInputBuffer = nullptr;
 		m_bNeedCtxtInit = true;
 		m_monitoring_timer.callOnTimeout( [this](){ RoutineProcessing(); } );
 		m_monitoring_timer.setInterval( 25 );
@@ -274,8 +274,7 @@ void BuildMonitor_Construct(){
 }
 
 void BuildMonitor_Destroy(){
-	delete g_pWatchBSP;
-	g_pWatchBSP = NULL;
+	delete std::exchange( g_pWatchBSP, nullptr );
 }
 
 CWatchBSP *GetWatchBSP(){
@@ -531,15 +530,15 @@ static xmlSAXHandler saxParser = {
 void CWatchBSP::Reset(){
 	if ( m_pInSocket ) {
 		Net_Disconnect( m_pInSocket );
-		m_pInSocket = NULL;
+		m_pInSocket = nullptr;
 	}
 	if ( m_pListenSocket ) {
 		Net_Disconnect( m_pListenSocket );
-		m_pListenSocket = NULL;
+		m_pListenSocket = nullptr;
 	}
 	if ( m_xmlInputBuffer ) {
 		xmlFreeParserInputBuffer( m_xmlInputBuffer );
-		m_xmlInputBuffer = NULL;
+		m_xmlInputBuffer = nullptr;
 	}
 	m_eState = EIdle;
 	m_monitoring_timer.stop();
@@ -555,7 +554,7 @@ bool CWatchBSP::SetupListening(){
 	globalOutputStream() << "Setting up\n";
 	Net_Setup();
 	m_pListenSocket = Net_ListenSocket( 39000 );
-	if ( m_pListenSocket == NULL ) {
+	if ( m_pListenSocket == nullptr ) {
 		return false;
 	}
 	globalOutputStream() << "Listening...\n";
@@ -577,7 +576,7 @@ void CWatchBSP::DoEBeginStep(){
 		globalOutputStream() << "=== running build command ===\n"
 		                     << m_commands[m_iCurrentStep] << '\n';
 
-		if ( !Q_Exec( NULL, const_cast<char*>( m_commands[m_iCurrentStep].c_str() ), NULL, true, false ) ) {
+		if ( !Q_Exec( nullptr, const_cast<char*>( m_commands[m_iCurrentStep].c_str() ), nullptr, true, false ) ) {
 			const auto msg = StringStream( "Failed to execute the following command: ", m_commands[m_iCurrentStep],
 			                               "\nCheck that the file exists and that you don't run out of system resources.\n" );
 			globalOutputStream() << msg;
@@ -655,10 +654,10 @@ void CWatchBSP::RoutineProcessing(){
 					//        unsigned int size = msg.size; //++timo just a check
 					strcpy( m_xmlBuf, NMSG_ReadString( &msg ) );
 					if ( m_bNeedCtxtInit ) {
-						m_xmlParserCtxt = NULL;
-						m_xmlParserCtxt = xmlCreatePushParserCtxt( &saxParser, &m_message_info, m_xmlBuf, static_cast<int>( strlen( m_xmlBuf ) ), NULL );
+						m_xmlParserCtxt = nullptr;
+						m_xmlParserCtxt = xmlCreatePushParserCtxt( &saxParser, &m_message_info, m_xmlBuf, static_cast<int>( strlen( m_xmlBuf ) ), nullptr );
 
-						if ( m_xmlParserCtxt == NULL ) {
+						if ( m_xmlParserCtxt == nullptr ) {
 							globalErrorStream() << "Failed to create the XML parser (incoming stream began with: " << m_xmlBuf << ")\n";
 							EndMonitoringLoop();
 						}
@@ -674,7 +673,7 @@ void CWatchBSP::RoutineProcessing(){
 					// error or connection closed/reset
 					// NOTE: if we get an error down the XML stream we don't reach here
 					Net_Disconnect( m_pInSocket );
-					m_pInSocket = NULL;
+					m_pInSocket = nullptr;
 					globalOutputStream() << "Connection closed.\n";
 #if 0
 					if ( m_bBSPPlugin ) {

@@ -405,7 +405,7 @@ static void make_brush_sides( const Plane3f plane, const Plane3f (&p)[3], const 
 		buildBrush.sides[0].shaderInfo = &si;
 		buildBrush.sides[0].surfaceFlags = si.surfaceFlags;
 		for ( size_t i = 1; i < N; ++i )
-			buildBrush.sides[i].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+			buildBrush.sides[i].shaderInfo = nullptr;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 	}
 
 	points[3] = points[0]; // for cyclic usage
@@ -415,7 +415,7 @@ static void make_brush_sides( const Plane3f plane, const Plane3f (&p)[3], const 
 	buildBrush.sides[2].planenum = FindFloatPlane( p[1], 2, &points[1] ); // p[1] contains points[1] and points[2]
 	buildBrush.sides[3].planenum = FindFloatPlane( p[2], 2, &points[2] ); // p[2] contains points[2] and points[0] (copied to points[3])
 	if constexpr( N == 5 )
-		buildBrush.sides[4].planenum = FindFloatPlane( reverse, 0, NULL );
+		buildBrush.sides[4].planenum = FindFloatPlane( reverse, 0, nullptr );
 }
 
 static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const mapDrawSurface_t *ds, const char *modelName, entity_t& entity ){
@@ -960,7 +960,7 @@ default_CLIPMODEL:
 				/* add to entity */
 				if ( CreateBrushWindings( buildBrush ) ) {
 					AddBrushBevels();
-					//%	EmitBrushes( buildBrush, NULL, NULL );
+					//%	EmitBrushes( buildBrush, nullptr, nullptr );
 					brush_t& newBrush = entity.brushes.emplace_front( buildBrush );
 					newBrush.original = &newBrush;
 					entity.numBrushes++;
@@ -994,7 +994,7 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 
 	/* get model */
 	model = LoadModel( name, frame );
-	if ( model == NULL ) {
+	if ( model == nullptr ) {
 		return;
 	}
 
@@ -1017,7 +1017,7 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 				char format[64];
 
 				skinfilenextptr = strchr( skinfileptr, '\r' );
-				if ( skinfilenextptr != NULL ) {
+				if ( skinfilenextptr != nullptr ) {
 					strClear( skinfilenextptr++ );
 					if( *skinfilenextptr == '\n' ) // handle \r\n
 						++skinfilenextptr;
@@ -1025,7 +1025,7 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 				else
 				{
 					skinfilenextptr = strchr( skinfileptr, '\n' );
-					if ( skinfilenextptr != NULL ) {
+					if ( skinfilenextptr != nullptr ) {
 						strClear( skinfilenextptr++ );
 					}
 					else{
@@ -1080,7 +1080,7 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 
 		/* handle .skin file */
 		if ( !skins.empty() ) {
-			picoShaderName = NULL;
+			picoShaderName = nullptr;
 			for( const auto& skin : skins )
 			{
 				if ( striEqual( surface.m_shader.c_str(), skin.from ) ) {
@@ -1089,15 +1089,15 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 					break;
 				}
 			}
-			if ( picoShaderName == NULL ) {
+			if ( picoShaderName == nullptr ) {
 				Sys_FPrintf( SYS_VRB, "Skin file: not mapping %s\n", surface.m_shader.c_str() );
 				continue;
 			}
 		}
 
 		/* handle shader remapping */
-		if( remaps != NULL ){
-			const char* to = NULL;
+		if( remaps != nullptr ){
+			const char* to = nullptr;
 			size_t fromlen = 0;
 			for( const auto& rm : *remaps )
 			{
@@ -1109,7 +1109,7 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 					fromlen = strlen( rm.from );
 				}
 			}
-			if( to != NULL ){
+			if( to != nullptr ){
 				Sys_FPrintf( SYS_VRB, ( fromlen == 0? "Globbing '%s' to '%s'\n" : "Remapping '%s' to '%s'\n" ), picoShaderName, to );
 				picoShaderName = to;
 			}
@@ -1331,7 +1331,7 @@ void AddTriangleModels( entity_t& eparent ){
 
 				/* split the string */
 				char *split = strchr( remap.from, ';' );
-				if ( split == NULL ) {
+				if ( split == nullptr ) {
 					Sys_Warning( "Shader _remap key found in misc_model without a ; character: '%s'\n", remap.from );
 					continue;
 				}

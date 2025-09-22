@@ -63,7 +63,7 @@ static xmlNodePtr LeakFile( const tree_t& tree ){
 	xmlNodePtr xml_node, point;
 
 	if ( !tree.outside_node.occupied ) {
-		return NULL;
+		return nullptr;
 	}
 
 	Sys_FPrintf( SYS_VRB, "--- LeakFile ---\n" );
@@ -74,7 +74,7 @@ static xmlNodePtr LeakFile( const tree_t& tree ){
 	const auto filename = StringStream( source, ".lin" );
 	linefile = SafeOpenWrite( filename, "wt" );
 
-	xml_node = xmlNewNode( NULL, (const xmlChar*)"polyline" );
+	xml_node = xmlNewNode( nullptr, (const xmlChar*)"polyline" );
 
 	count = 0;
 	node = &tree.outside_node;
@@ -123,7 +123,7 @@ void Leak_feedback( const tree_t& tree ){
 	Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "******* leaked *******\n" );
 	Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "**********************\n" );
 	xmlNodePtr polyline = LeakFile( tree );
-	xmlNodePtr leaknode = xmlNewNode( NULL, (const xmlChar*)"message" );
+	xmlNodePtr leaknode = xmlNewNode( nullptr, (const xmlChar*)"message" );
 	xmlNodeAddContent( leaknode, (const xmlChar*)"MAP LEAKED\n" );
 	xmlAddChild( leaknode, polyline );
 	char level[ 2 ];

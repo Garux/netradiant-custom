@@ -1595,7 +1595,7 @@ tryDecompile:
 		str << ' ' << makeQuoted( filename );
 
 		// run
-		Q_Exec( NULL, str.c_str(), NULL, false, true );
+		Q_Exec( nullptr, str.c_str(), nullptr, false, true );
 
 		// rebuild filename as "filenamewithoutext_converted.map"
 		str( PathExtensionless( filename ), "_converted.map" );
@@ -2263,7 +2263,7 @@ void map_autocaulk_selected(){
 		    << " -autocaulk -fulldetail "
 		    << makeQuoted( filename );
 		// run
-		Q_Exec( NULL, str.c_str(), NULL, false, true );
+		Q_Exec( nullptr, str.c_str(), nullptr, false, true );
 	}
 
 	typedef std::map<std::size_t, CopiedString> CaulkMap;

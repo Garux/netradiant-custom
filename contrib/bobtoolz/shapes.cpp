@@ -574,7 +574,7 @@ void BuildDoorsX2( vec3_t min, vec3_t max,
 		Node_getEntity( pEDoor2 )->setKeyValue( "angle", "90" );
 	}
 
-	srand( (unsigned)time( NULL ) );
+	srand( (unsigned)time( nullptr ) );
 
 	char teamname[256];
 	sprintf( teamname, "t%i", rand() );
@@ -679,7 +679,7 @@ void BuildApertureDoors( scene::Instance& brushinstance, const class ApertureDoo
 				g_vector3_axes[ vector3_min_abs_component_index( normal ) ],
 				g_vector3_axes[ vector3_max_abs_component_index( normal ) ] ) ) * radius + vector3_from_array( center );
 
-			srand( (unsigned)time( NULL ) );
+			srand( (unsigned)time( nullptr ) );
 			char teamname[256];
 			sprintf( teamname, "t%i", rand() );
 			EntityClass* doorClass = GlobalEntityClassManager().findOrInsert( "func_door", true );
