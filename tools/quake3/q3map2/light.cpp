@@ -1855,7 +1855,7 @@ static void WriteBSPFileAfterLight( const char *bspFileName ){
 
 				out.surfaceType = MST_FLARE;
 				out.shaderNum = EmitShader( String64( lmPathStart, "nomipmaps", su ), nullptr, nullptr );
-				out.fogNum = -1;
+				out.fogNum = FOG_INVALID;
 
 				for ( int i = 0; i < MAX_LIGHTMAPS; ++i )
 				{

@@ -1853,7 +1853,8 @@ inline MinMax g_mapMinmax;
 
 inline const MinMax c_worldMinmax( Vector3( MIN_WORLD_COORD ), Vector3( MAX_WORLD_COORD ) );
 
-inline int defaultFogNum = -1;                  /* ydnar: cleaner fog handling */
+constexpr int FOG_INVALID = -1;
+inline int defaultFogNum = FOG_INVALID;                  /* ydnar: cleaner fog handling */
 inline std::vector<fog_t> mapFogs;
 
 inline brush_t            buildBrush;

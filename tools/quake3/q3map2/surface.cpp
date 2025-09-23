@@ -758,7 +758,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 	ds->shaderInfo = si;
 	ds->mapBrush = &b;
 	ds->sideRef = AllocSideRef( &s, nullptr );
-	ds->fogNum = -1;
+	ds->fogNum = FOG_INVALID;
 	ds->sampleSize = b.lightmapSampleSize;
 	ds->lightmapScale = b.lightmapScale;
 	ds->numVerts = w.size();
@@ -937,7 +937,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t *p, mesh_t 
 	ds->verts = safe_malloc( ds->numVerts * sizeof( *ds->verts ) );
 	memcpy( ds->verts, mesh->verts, ds->numVerts * sizeof( *ds->verts ) );
 
-	ds->fogNum = -1;
+	ds->fogNum = FOG_INVALID;
 	ds->planeNum = -1;
 
 	ds->longestCurve = p->longestCurve;
@@ -2650,7 +2650,7 @@ static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t& si ){
 			ds->planar = true;
 			ds->planeNum = FindFloatPlane( p->plane.plane, 0, nullptr );
 			ds->lightmapVecs[ 2 ] = p->plane.normal();
-			ds->fogNum = -1;
+			ds->fogNum = FOG_INVALID;
 			ds->numVerts = w.size();
 			ds->verts = safe_calloc( ds->numVerts * sizeof( *ds->verts ) );
 
@@ -2723,7 +2723,7 @@ void MakeFogHullSurfs( const char *shader ){
 	/* allocate a drawsurface */
 	mapDrawSurface_t *ds = AllocDrawSurface( ESurfaceType::Foghull );
 	ds->shaderInfo = &ShaderInfoForShader( shader );
-	ds->fogNum = -1;
+	ds->fogNum = FOG_INVALID;
 	ds->numVerts = 8;
 	ds->verts = safe_calloc( ds->numVerts * sizeof( *ds->verts ) );
 	ds->numIndexes = 36;

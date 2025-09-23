@@ -472,7 +472,7 @@ void FogDrawSurfaces( const entity_t& e ){
 			/* global fog doesn't have a brush */
 			if ( fog.brush == nullptr ) {
 				/* don't re-fog already fogged surfaces */
-				if ( ds->fogNum >= 0 ) {
+				if ( ds->fogNum > FOG_INVALID ) {
 					continue;
 				}
 				fogged = 1;
@@ -579,10 +579,8 @@ int FogForPoint( const Vector3& point, float epsilon ){
  */
 
 int FogForBounds( const MinMax& minmax, float epsilon ){
-	int fogNum;
-
 	/* start with bogus fog num */
-	fogNum = defaultFogNum;
+	int fogNum = defaultFogNum;
 
 	/* init */
 	float bestVolume = 0.0f;
