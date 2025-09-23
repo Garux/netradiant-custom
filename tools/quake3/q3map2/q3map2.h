@@ -131,6 +131,7 @@
 #define PLANESIDE_EPSILON       0.001f
 #define PLANENUM_LEAF           -1
 constexpr int AREA_INVALID    = -1;
+constexpr int CLUSTER_OPAQUE  = -1;
 
 enum class EBrushType
 {
@@ -166,6 +167,7 @@ enum class EBrushType
 #define DEFAULT_LIGHTMAP_SAMPLE_OFFSET  1.0f
 #define DEFAULT_SUBDIVIDE_THRESHOLD     1.0f
 
+#define CLUSTER_NORMAL           0
 #define CLUSTER_UNMAPPED        -1
 #define CLUSTER_OCCLUDED        -2
 #define CLUSTER_FLOODED         -3

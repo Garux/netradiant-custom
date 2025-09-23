@@ -633,7 +633,7 @@ static void FloodAreas_r( node_t *node ){
 	if ( node->area != AREA_INVALID ) {
 		return;
 	}
-	if ( node->cluster == -1 ) {
+	if ( node->cluster == CLUSTER_OPAQUE ) {
 		return;
 	}
 
@@ -702,7 +702,7 @@ static void CheckAreas_r( const node_t *node ){
 		return;
 	}
 
-	if ( node->cluster != -1 ) {
+	if ( node->cluster != CLUSTER_OPAQUE ) {
 		if ( node->area == AREA_INVALID ) {
 			Sys_Warning( "cluster %d has area set to -1\n", node->cluster );
 		}

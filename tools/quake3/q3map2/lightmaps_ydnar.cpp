@@ -2430,7 +2430,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 							}
 
 							/* handle debug */
-							else if ( debug && cluster < 0 ) {
+							else if ( debug && cluster < CLUSTER_NORMAL ) {
 								if ( cluster == CLUSTER_UNMAPPED ) {
 									luxel.value = { 255, 204, 0 };
 								}
@@ -2447,7 +2447,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 							/* normal luxel handling */
 							else if ( luxel.count > 0.0f ) {
 								/* handle lit or flooded luxels */
-								if ( cluster > 0 || cluster == CLUSTER_FLOODED ) {
+								if ( cluster > CLUSTER_NORMAL || cluster == CLUSTER_FLOODED ) {
 									sample += luxel.value;
 									samples += luxel.count;
 								}

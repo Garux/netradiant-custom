@@ -322,7 +322,7 @@ static int SetupTraceNodes_r( int bspNodeNum ){
 			traceNodes[ nodeNum ].children[ i ] = newNode;
 			/* have to do this separately, as gcc first executes LHS, then RHS, and if a realloc took place, this fails */
 
-			if ( bspLeafs[ bspLeafNum ].cluster == -1 ) {
+			if ( bspLeafs[ bspLeafNum ].cluster == CLUSTER_OPAQUE ) {
 				traceNodes[ traceNodes[ nodeNum ].children[ i ] ].type = TRACE_LEAF_SOLID;
 			}
 		}

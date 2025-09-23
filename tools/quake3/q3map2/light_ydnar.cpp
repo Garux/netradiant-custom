@@ -306,7 +306,7 @@ void SmoothNormals(){
 
 bool ClusterVisible( int a, int b ){
 	/* dummy check */
-	if ( a < 0 || b < 0 ) {
+	if ( a < CLUSTER_NORMAL || b < CLUSTER_NORMAL ) {
 		return false;
 	}
 
@@ -353,7 +353,7 @@ static int PointInLeafNum_r( const Vector3& point, int nodenum ){
 		else
 		{
 			leafnum = PointInLeafNum_r( point, node.children[eFront] );
-			if ( bspLeafs[ leafnum ].cluster != -1 ) {
+			if ( bspLeafs[ leafnum ].cluster != CLUSTER_OPAQUE ) {
 				return leafnum;
 			}
 			nodenum = node.children[eBack];
@@ -383,13 +383,10 @@ static int PointInLeafNum( const Vector3& point ){
  */
 
 static int ClusterForPoint( const Vector3& point ){
-	int leafNum;
-
-
 	/* get leafNum for point */
-	leafNum = PointInLeafNum( point );
+	const int leafNum = PointInLeafNum( point );
 	if ( leafNum < 0 ) {
-		return -1;
+		return CLUSTER_OPAQUE;
 	}
 
 	/* return the cluster */
@@ -404,12 +401,9 @@ static int ClusterForPoint( const Vector3& point ){
  */
 
 static bool ClusterVisibleToPoint( const Vector3& point, int cluster ){
-	int pointCluster;
-
-
 	/* get leafNum for point */
-	pointCluster = ClusterForPoint( point );
-	if ( pointCluster < 0 ) {
+	const int pointCluster = ClusterForPoint( point );
+	if ( pointCluster <= CLUSTER_OPAQUE ) {
 		return false;
 	}
 
@@ -428,14 +422,14 @@ int ClusterForPointExt( const Vector3& point, float epsilon ){
 	/* get leaf for point */
 	const int leafNum = PointInLeafNum( point );
 	if ( leafNum < 0 ) {
-		return -1;
+		return CLUSTER_OPAQUE;
 	}
 	const bspLeaf_t& leaf = bspLeafs[ leafNum ];
 
 	/* get the cluster */
 	const int cluster = leaf.cluster;
-	if ( cluster < 0 ) {
-		return -1;
+	if ( cluster <= CLUSTER_OPAQUE ) {
+		return CLUSTER_OPAQUE;
 	}
 
 	/* transparent leaf, so check point against all brushes in the leaf */
@@ -465,7 +459,7 @@ int ClusterForPointExt( const Vector3& point, float epsilon ){
 
 		/* if inside, return bogus cluster */
 		if ( inside ) {
-			return -1 - b;
+			return CLUSTER_OPAQUE - b;
 		}
 	}
 
@@ -481,19 +475,16 @@ int ClusterForPointExt( const Vector3& point, float epsilon ){
  */
 
 static int ClusterForPointExtFilter( const Vector3& point, float epsilon, int numClusters, int *clusters ){
-	int i, cluster;
-
-
 	/* get cluster for point */
-	cluster = ClusterForPointExt( point, epsilon );
+	const int cluster = ClusterForPointExt( point, epsilon );
 
 	/* check if filtering is necessary */
-	if ( cluster < 0 || numClusters <= 0 || clusters == nullptr ) {
+	if ( cluster <= CLUSTER_OPAQUE || numClusters <= 0 || clusters == nullptr ) {
 		return cluster;
 	}
 
 	/* filter */
-	for ( i = 0; i < numClusters; ++i )
+	for ( int i = 0; i < numClusters; ++i )
 	{
 		if ( cluster == clusters[ i ] || ClusterVisible( cluster, clusters[ i ] ) ) {
 			return cluster;
@@ -501,7 +492,7 @@ static int ClusterForPointExtFilter( const Vector3& point, float epsilon, int nu
 	}
 
 	/* failed */
-	return -1;
+	return CLUSTER_OPAQUE;
 }
 
 
@@ -733,7 +724,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 	}
 
 	/* only average the normal for premapped luxels */
-	else if ( cluster >= 0 ) {
+	else if ( cluster >= CLUSTER_NORMAL ) {
 		/* do bumpmap calculations */
 		if ( stv != nullptr ) {
 			PerturbNormal( dv, si, pNormal, stv, ttv );
@@ -856,10 +847,10 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 	luxel.value[ 1 ] = 0.0f;
 
 	/* point in solid? (except in dark mode) */
-	if ( pointCluster < 0 && !dark ) {
+	if ( pointCluster <= CLUSTER_OPAQUE && !dark ) {
 		/* nudge the the location around */
 		nudge = nudges[ 0 ];
-		while ( nudge[ 0 ] > BOGUS_NUDGE && pointCluster < 0 )
+		while ( nudge[ 0 ] > BOGUS_NUDGE && pointCluster <= CLUSTER_OPAQUE )
 		{
 			/* nudge the vector around a bit */
 			/* set nudged point*/
@@ -868,7 +859,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 
 			/* get pvs cluster */
 			pointCluster = ClusterForPointExtFilter( nudged, LUXEL_EPSILON, numClusters, clusters ); //% + 0.625 );
-			if ( pointCluster >= 0 ) {
+			if ( pointCluster > CLUSTER_OPAQUE ) {
 				origin = nudged;
 			}
 			luxel.value[ 1 ] += 1.0f;
@@ -876,17 +867,17 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 	}
 
 	/* as a last resort, if still in solid, try drawvert origin offset by normal (except in dark mode) */
-	if ( pointCluster < 0 && si != nullptr && !dark ) {
+	if ( pointCluster <= CLUSTER_OPAQUE && si != nullptr && !dark ) {
 		nudged = dv.xyz + dv.normal * lightmapSampleOffset;
 		pointCluster = ClusterForPointExtFilter( nudged, LUXEL_EPSILON, numClusters, clusters );
-		if ( pointCluster >= 0 ) {
+		if ( pointCluster > CLUSTER_OPAQUE ) {
 			origin = nudged;
 		}
 		luxel.value[ 1 ] += 1.0f;
 	}
 
 	/* valid? */
-	if ( pointCluster < 0 ) {
+	if ( pointCluster <= CLUSTER_OPAQUE ) {
 		cluster = CLUSTER_OCCLUDED;
 		origin.set( 0 );
 		normal.set( 0 );
@@ -1194,7 +1185,7 @@ void MapRawLightmap( int rawLightmapNum ){
 				{
 					/* get cluster */
 					int& cluster = lm->getSuperCluster( x, y );
-					if ( cluster < 0 ) {
+					if ( cluster < CLUSTER_NORMAL ) {
 						cluster = CLUSTER_UNMAPPED;
 					}
 				}
@@ -1359,7 +1350,7 @@ void MapRawLightmap( int rawLightmapNum ){
 			SuperLuxel& luxel = lm->getSuperLuxel( 0, x, y );
 
 			/* only look at mapped luxels */
-			if ( lm->getSuperCluster( x, y ) < 0 ) {
+			if ( lm->getSuperCluster( x, y ) < CLUSTER_NORMAL ) {
 				continue;
 			}
 
@@ -1416,7 +1407,7 @@ void MapRawLightmap( int rawLightmapNum ){
 						const SuperLuxel& luxel = lm->getSuperLuxel( 0, sx, sy );
 
 						/* only consider luxels mapped in previous passes */
-						if ( lm->getSuperCluster( sx, sy ) < 0 || luxel.value[ 0 ] >= pass ) {
+						if ( lm->getSuperCluster( sx, sy ) < CLUSTER_NORMAL || luxel.value[ 0 ] >= pass ) {
 							continue;
 						}
 
@@ -1458,7 +1449,7 @@ void MapRawLightmap( int rawLightmapNum ){
 			SuperLuxel& luxel = lm->getSuperLuxel( 0, x, y );
 
 			/* only look at mapped luxels */
-			if ( lm->getSuperCluster( x, y ) < 0 ) {
+			if ( lm->getSuperCluster( x, y ) < CLUSTER_NORMAL ) {
 				continue;
 			}
 
@@ -1483,7 +1474,7 @@ void MapRawLightmap( int rawLightmapNum ){
 			const Vector3& origin = lm->getSuperOrigin( x, y );
 			const SuperLuxel& luxel = lm->getSuperLuxel( 0, x, y );
 
-			if ( cluster < 0 ) {
+			if ( cluster < CLUSTER_NORMAL ) {
 				continue;
 			}
 
@@ -1576,7 +1567,7 @@ static float DirtForSample( trace_t *trace ){
 	if ( !dirty ) {
 		return 1.0f;
 	}
-	if ( trace == nullptr || trace->cluster < 0 ) {
+	if ( trace == nullptr || trace->cluster < CLUSTER_NORMAL ) {
 		return 0.0f;
 	}
 
@@ -1750,7 +1741,7 @@ void DirtyRawLightmap( int rawLightmapNum ){
 			dirt = 0.0f;
 
 			/* only look at mapped luxels */
-			if ( cluster < 0 ) {
+			if ( cluster < CLUSTER_NORMAL ) {
 				continue;
 			}
 
@@ -1798,7 +1789,7 @@ void DirtyRawLightmap( int rawLightmapNum ){
 
 					/* get neighboring luxel */
 					const float dirt2 = lm->getSuperDirt( sx, sy );
-					if ( lm->getSuperCluster( sx, sy ) < 0 || dirt2 <= 0.0f ) {
+					if ( lm->getSuperCluster( sx, sy ) < CLUSTER_NORMAL || dirt2 <= 0.0f ) {
 						continue;
 					}
 
@@ -1840,11 +1831,11 @@ static bool SubmapRawLuxel( const rawLightmap_t *lm, int x, int y, float bx, flo
 	if ( ( x < ( lm->sw - 1 ) && bx >= 0.0f ) || ( x == 0 && bx <= 0.0f ) ) {
 		origin = &lm->getSuperOrigin( x, y );
 		//%	normal = SUPER_NORMAL( x, y );
-		origin2 = lm->getSuperCluster( x + 1, y ) < 0 ? &lm->getSuperOrigin( x, y ) : &lm->getSuperOrigin( x + 1, y );
+		origin2 = lm->getSuperCluster( x + 1, y ) < CLUSTER_NORMAL ? &lm->getSuperOrigin( x, y ) : &lm->getSuperOrigin( x + 1, y );
 		//%	normal2 = *cluster2 < 0 ? SUPER_NORMAL( x, y ) : SUPER_NORMAL( x + 1, y );
 	}
 	else if ( ( x > 0 && bx <= 0.0f ) || ( x == ( lm->sw - 1 ) && bx >= 0.0f ) ) {
-		origin = lm->getSuperCluster( x - 1, y ) < 0 ? &lm->getSuperOrigin( x, y ) : &lm->getSuperOrigin( x - 1, y );
+		origin = lm->getSuperCluster( x - 1, y ) < CLUSTER_NORMAL ? &lm->getSuperOrigin( x, y ) : &lm->getSuperOrigin( x - 1, y );
 		//%	normal = *cluster < 0 ? SUPER_NORMAL( x, y ) : SUPER_NORMAL( x - 1, y );
 		origin2 = &lm->getSuperOrigin( x, y );
 		//%	normal2 = SUPER_NORMAL( x, y );
@@ -1861,11 +1852,11 @@ static bool SubmapRawLuxel( const rawLightmap_t *lm, int x, int y, float bx, flo
 	if ( ( y < ( lm->sh - 1 ) && bx >= 0.0f ) || ( y == 0 && bx <= 0.0f ) ) {
 		origin = &lm->getSuperOrigin( x, y );
 		//%	normal = SUPER_NORMAL( x, y );
-		origin2 = lm->getSuperCluster( x, y + 1 ) < 0 ? &lm->getSuperOrigin( x, y ) : &lm->getSuperOrigin( x, y + 1 );
+		origin2 = lm->getSuperCluster( x, y + 1 ) < CLUSTER_NORMAL ? &lm->getSuperOrigin( x, y ) : &lm->getSuperOrigin( x, y + 1 );
 		//%	normal2 = *cluster2 < 0 ? SUPER_NORMAL( x, y ) : SUPER_NORMAL( x, y + 1 );
 	}
 	else if ( ( y > 0 && bx <= 0.0f ) || ( y == ( lm->sh - 1 ) && bx >= 0.0f ) ) {
-		origin = lm->getSuperCluster( x, y - 1 ) < 0 ? &lm->getSuperOrigin( x, y ) : &lm->getSuperOrigin( x, y - 1 );
+		origin = lm->getSuperCluster( x, y - 1 ) < CLUSTER_NORMAL ? &lm->getSuperOrigin( x, y ) : &lm->getSuperOrigin( x, y - 1 );
 		//%	normal = *cluster < 0 ? SUPER_NORMAL( x, y ) : SUPER_NORMAL( x, y - 1 );
 		origin2 = &lm->getSuperOrigin( x, y );
 		//%	normal2 = SUPER_NORMAL( x, y );
@@ -1884,7 +1875,7 @@ static bool SubmapRawLuxel( const rawLightmap_t *lm, int x, int y, float bx, flo
 
 	/* get cluster */
 	sampleCluster = ClusterForPointExtFilter( sampleOrigin, ( LUXEL_EPSILON * 2 ), lm->numLightClusters, lm->lightClusters );
-	if ( sampleCluster < 0 ) {
+	if ( sampleCluster <= CLUSTER_OPAQUE ) {
 		return false;
 	}
 
@@ -1932,7 +1923,7 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, const Vector
 
 		/* calculate position */
 		if ( !SubmapRawLuxel( lm, x, y, ( bias * biasDirs[ b ][ 0 ] ), ( bias * biasDirs[ b ][ 1 ] ), cluster[ b ], origin[ b ], normal[ b ] ) ) {
-			cluster[ b ] = -1;
+			cluster[ b ] = CLUSTER_UNMAPPED;
 			continue;
 		}
 		mapped++;
@@ -1972,7 +1963,7 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, const Vector
 	     lighted != 0 && lighted != mapped ) {
 		for ( b = 0; b < 4; ++b )
 		{
-			if ( cluster[ b ] < 0 ) {
+			if ( cluster[ b ] < CLUSTER_NORMAL ) {
 				continue;
 			}
 			SubsampleRawLuxel_r( lm, trace, origin[ b ], x, y, ( bias * 0.5f ), luxel[ b ], lightDeluxel ? &deluxel[ b ] : nullptr );
@@ -1989,7 +1980,7 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, const Vector
 	samples = 1;
 	for ( b = 0; b < 4; ++b )
 	{
-		if ( cluster[ b ] < 0 ) {
+		if ( cluster[ b ] < CLUSTER_NORMAL ) {
 			continue;
 		}
 		color += luxel[ b ].value;
@@ -2042,7 +2033,7 @@ static void RandomSubsampleRawLuxel( rawLightmap_t *lm, trace_t *trace, const Ve
 
 		/* calculate position */
 		if ( !SubmapRawLuxel( lm, x, y, dx, dy, cluster, origin, normal ) ) {
-			cluster = -1;
+			cluster = CLUSTER_UNMAPPED;
 			continue;
 		}
 		mapped++;
@@ -2287,7 +2278,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				const int cluster = lm->getSuperCluster( x, y );
 
 				/* only fill mapped luxels */
-				if ( cluster < 0 ) {
+				if ( cluster < CLUSTER_NORMAL ) {
 					continue;
 				}
 
@@ -2362,7 +2353,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				SuperLuxel& luxel = lm->getSuperLuxel( 0, x, y );
 
 				/* blacken unmapped clusters */
-				if ( lm->getSuperCluster( x, y ) < 0 ) {
+				if ( lm->getSuperCluster( x, y ) < CLUSTER_NORMAL ) {
 					luxel.value.set( 0 );
 				}
 				/* set ambient */
@@ -2446,7 +2437,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				{
 					/* get cluster */
 					const int cluster = lm->getSuperCluster( x, y );
-					if ( cluster < 0 ) {
+					if ( cluster < CLUSTER_NORMAL ) {
 						continue;
 					}
 
@@ -2519,7 +2510,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 							sy = y + tests[ t ][ 1 ];
 
 							/* get cluster */
-							if ( lm->getSuperCluster( sx, sy ) < 0 ) {
+							if ( lm->getSuperCluster( sx, sy ) < CLUSTER_NORMAL ) {
 								continue;
 							}
 							mapped++;
@@ -2552,7 +2543,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 								sy = y + tests[ t ][ 1 ];
 
 								/* get luxel */
-								if ( lm->getSuperCluster( sx, sy ) < 0 ) {
+								if ( lm->getSuperCluster( sx, sy ) < CLUSTER_NORMAL ) {
 									continue;
 								}
 								byte& flag = lm->getSuperFlag( sx, sy );
@@ -2593,7 +2584,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 					for ( x = 0; x < lm->sw; ++x )
 					{
 						/* get cluster  */
-						if ( lm->getSuperCluster( x, y ) < 0 ) {
+						if ( lm->getSuperCluster( x, y ) < CLUSTER_NORMAL ) {
 							continue;
 						}
 
@@ -2622,7 +2613,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				for ( x = 0; x < lm->sw; ++x )
 				{
 					/* get cluster and origin */
-					if ( lm->getSuperCluster( x, y ) < 0 ) {
+					if ( lm->getSuperCluster( x, y ) < CLUSTER_NORMAL ) {
 						continue;
 					}
 
@@ -2647,7 +2638,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 								}
 
 								/* get particulars */
-								if ( lm->getSuperCluster( sx, sy ) < 0 ) {
+								if ( lm->getSuperCluster( sx, sy ) < CLUSTER_NORMAL ) {
 									continue;
 								}
 
@@ -2752,7 +2743,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				for ( x = 0; x < lm->sw; ++x )
 				{
 					/* get cluster */
-					//%	if( lm->getSuperCluster( x, y ) < 0 )
+					//%	if( lm->getSuperCluster( x, y ) < CLUSTER_NORMAL )
 					//%		continue;
 
 					lm->getSuperLuxel( lightmapNum, x, y ).value = lm->getSuperNormal( x, y ) * 127 + Vector3( 127 );
@@ -2780,7 +2771,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				for ( x = 0; x < lm->sw; ++x )
 				{
 					/* get cluster */
-					//%	if( lm->getSuperCluster( x, y ) < 0 ) // TODO why not do this check? These pixels should be zero anyway
+					//%	if( lm->getSuperCluster( x, y ) < CLUSTER_NORMAL ) // TODO why not do this check? These pixels should be zero anyway
 					//%		continue;
 
 					/* get particulars */
@@ -2823,14 +2814,14 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				/* determine if filtering is necessary */
 				filterColor = false;
 				filterDir = false;
-				if ( cluster < 0 ||
+				if ( cluster < CLUSTER_NORMAL ||
 				     ( lm->splotchFix && ( luxel.value[ 0 ] <= ambientColor[ 0 ]
 				                        || luxel.value[ 1 ] <= ambientColor[ 1 ]
 				                        || luxel.value[ 2 ] <= ambientColor[ 2 ] ) ) ) {
 					filterColor = true;
 				}
 
-				if ( deluxemap && lightmapNum == 0 && ( cluster < 0 || filter ) ) {
+				if ( deluxemap && lightmapNum == 0 && ( cluster < CLUSTER_NORMAL || filter ) ) {
 					filterDir = true;
 				}
 
@@ -2860,7 +2851,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 						const SuperLuxel& luxel2 = lm->getSuperLuxel( lightmapNum, sx, sy );
 
 						/* ignore unmapped/unlit luxels */
-						if ( lm->getSuperCluster( sx, sy ) < 0 || luxel2.count == 0.0f ||
+						if ( lm->getSuperCluster( sx, sy ) < CLUSTER_NORMAL || luxel2.count == 0.0f ||
 						     ( lm->splotchFix && VectorCompare( luxel2.value, ambientColor ) ) ) {
 							continue;
 						}
@@ -2897,7 +2888,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				}
 
 				/* set cluster to -3 */
-				if ( cluster < 0 ) {
+				if ( cluster < CLUSTER_NORMAL ) {
 					cluster = CLUSTER_FLOODED;
 				}
 			}
@@ -3037,7 +3028,7 @@ void IlluminateVertexes( int num ){
 				trace.normal = verts[ i ].normal;
 				/* try at initial origin */
 				trace.cluster = ClusterForPointExtFilter( verts[ i ].xyz, VERTEX_EPSILON, info->numSurfaceClusters, &surfaceClusters[ info->firstSurfaceCluster ] );
-				if ( trace.cluster >= 0 ) {
+				if ( trace.cluster >= CLUSTER_NORMAL ) {
 					/* setup trace */
 					trace.origin = verts[ i ].xyz;
 
@@ -3099,7 +3090,7 @@ void IlluminateVertexes( int num ){
 
 								/* try at nudged origin */
 								trace.cluster = ClusterForPointExtFilter( trace.origin, VERTEX_EPSILON, info->numSurfaceClusters, &surfaceClusters[ info->firstSurfaceCluster ] );
-								if ( trace.cluster < 0 ) {
+								if ( trace.cluster < CLUSTER_NORMAL ) {
 									continue;
 								}
 
@@ -3278,7 +3269,7 @@ void IlluminateVertexes( int num ){
 
 							/* get luxel particulars */
 							const SuperLuxel& luxel = lm->getSuperLuxel( lightmapNum, sx, sy );
-							if ( lm->getSuperCluster( sx, sy ) < 0 ) {
+							if ( lm->getSuperCluster( sx, sy ) < CLUSTER_NORMAL ) {
 								continue;
 							}
 
@@ -3448,7 +3439,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 			light->cluster = ClusterForPointExt( light->origin, LIGHT_EPSILON );
 
 			/* invalid cluster? */
-			if ( light->cluster < 0 ) {
+			if ( light->cluster <= CLUSTER_OPAQUE ) {
 				/* nudge the sample point around a bit */
 				for ( int x = 0; x < 4; ++x )
 				{
@@ -3468,7 +3459,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 
 							/* try at nudged origin */
 							light->cluster = ClusterForPointExt( origin, LIGHT_EPSILON );
-							if ( light->cluster < 0 ) {
+							if ( light->cluster <= CLUSTER_OPAQUE ) {
 								continue;
 							}
 
@@ -3480,7 +3471,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 			}
 
 			/* only calculate for lights in pvs and outside of opaque brushes */
-			if ( light->cluster >= 0 ) {
+			if ( light->cluster > CLUSTER_OPAQUE ) {
 				/* set light fast flag */
 				if ( fastFlag ) {
 					light->flags |= LightFlags::FastTemp;
@@ -3581,7 +3572,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 					for ( const bspLeaf_t& leaf : bspLeafs )
 					{
 						/* in pvs? */
-						if ( leaf.cluster < 0 ) {
+						if ( leaf.cluster <= CLUSTER_OPAQUE ) {
 							continue;
 						}
 						if ( !ClusterVisible( light->cluster, leaf.cluster ) ) { /* ydnar: thanks Arnout for exposing my stupid error (this never failed before) */
@@ -3639,7 +3630,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 			}
 
 			/* culled? */
-			if ( light->cluster < 0 || light->envelope <= 0.0f ) {
+			if ( light->cluster <= CLUSTER_OPAQUE || light->envelope <= 0.0f ) {
 				/* debug code */
 				//%	Sys_Printf( "Culling light: Cluster: %d Envelope: %f\n", light->cluster, light->envelope );
 
@@ -3772,7 +3763,7 @@ float FloodLightForSample( trace_t *trace, float floodLightDistance, bool floodL
 	/* dummy check */
 	//if( !dirty )
 	//	return 1.0f;
-	if ( trace == nullptr || trace->cluster < 0 ) {
+	if ( trace == nullptr || trace->cluster < CLUSTER_NORMAL ) {
 		return 0.0f;
 	}
 
@@ -3913,7 +3904,7 @@ static void FloodLightRawLightmapPass( rawLightmap_t *lm, Vector3& lmFloodLightR
 			floodlight.value[0] = 0.0f;
 
 			/* only look at mapped luxels */
-			if ( cluster < 0 ) {
+			if ( cluster < CLUSTER_NORMAL ) {
 				continue;
 			}
 
@@ -3961,7 +3952,7 @@ static void FloodLightRawLightmapPass( rawLightmap_t *lm, Vector3& lmFloodLightR
 
 					/* get neighboring luxel */
 					const SuperFloodLight& floodlight2 = lm->getSuperFloodLight( sx, sy );
-					if ( lm->getSuperCluster( sx, sy ) < 0 || floodlight2.value[0] <= 0.0f ) {
+					if ( lm->getSuperCluster( sx, sy ) < CLUSTER_NORMAL || floodlight2.value[0] <= 0.0f ) {
 						continue;
 					}
 
@@ -4050,7 +4041,7 @@ static void FloodlightIlluminateLightmap( rawLightmap_t *lm ){
 				}
 
 				/* only process mapped luxels */
-				if ( lm->getSuperCluster( x, y ) < 0 ) {
+				if ( lm->getSuperCluster( x, y ) < CLUSTER_NORMAL ) {
 					continue;
 				}
 

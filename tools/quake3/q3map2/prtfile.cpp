@@ -278,7 +278,7 @@ static void NumberLeafs_r( node_t *node, int c ){
 
 	if ( node->opaque ) {
 		// solid block, viewpoint never inside
-		node->cluster = -1;
+		node->cluster = CLUSTER_OPAQUE;
 		return;
 	}
 

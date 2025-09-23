@@ -1475,7 +1475,7 @@ static void TraceGrid( int num ){
 
 	/* find point cluster */
 	trace.cluster = ClusterForPointExt( trace.origin, GRID_EPSILON );
-	if ( trace.cluster < 0 ) {
+	if ( trace.cluster < CLUSTER_NORMAL ) {
 		/* try to nudge the origin around to find a valid point */
 		const Vector3 baseOrigin( trace.origin );
 		for ( step = 0; ( step += 0.005 ) <= 1.0; )
@@ -1487,7 +1487,7 @@ static void TraceGrid( int num ){
 
 			/* ydnar: changed to find cluster num */
 			trace.cluster = ClusterForPointExt( trace.origin, VERTEX_EPSILON );
-			if ( trace.cluster >= 0 ) {
+			if ( trace.cluster >= CLUSTER_NORMAL ) {
 				break;
 			}
 		}
