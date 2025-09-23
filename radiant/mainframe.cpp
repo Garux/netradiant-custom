@@ -1680,19 +1680,22 @@ void MainFrame::Create(){
 
 	{
 		{
-			QToolBar *toolbar = window->addToolBar( "Main Toolbar" );
-			toolbar->setObjectName( "Main Toolbar" );
+			auto *toolbar = new QToolBar( "Main Toolbar" );
+			toolbar->setObjectName( "Main Toolbar" ); // required for proper state save/restore
+			window->addToolBar( Qt::ToolBarArea::TopToolBarArea, toolbar );
 			create_main_toolbar( toolbar, CurrentStyle() );
 		}
 		{
-			QToolBar *toolbar = window->addToolBar( "Filter Toolbar" );
-			toolbar->setObjectName( "Filter Toolbar" );
-			create_filter_toolbar( toolbar );
+			auto *toolbar = new QToolBar( "Plugin Toolbar" );
+			toolbar->setObjectName( "Plugin Toolbar" ); // required for proper state save/restore
+			window->addToolBar( Qt::ToolBarArea::RightToolBarArea, toolbar );
+			create_plugin_toolbar( toolbar );
 		}
 		{
-			QToolBar *toolbar = window->addToolBar( "Plugin Toolbar" );
-			toolbar->setObjectName( "Plugin Toolbar" );
-			create_plugin_toolbar( toolbar );
+			auto *toolbar = new QToolBar( "Filter Toolbar" );
+			toolbar->setObjectName( "Filter Toolbar" ); // required for proper state save/restore
+			window->addToolBar( Qt::ToolBarArea::RightToolBarArea, toolbar );
+			create_filter_toolbar( toolbar );
 		}
 	}
 
