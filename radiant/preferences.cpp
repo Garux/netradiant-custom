@@ -368,6 +368,7 @@ void CGameDialog::Init(){
 	if ( !currentGameDescription ) {
 		Create( nullptr );
 		DoGameDialog();
+		Destroy(); // destroy the window immediately, doing so in destructor of static object is too late
 		// use m_nComboSelect to identify the game to run as and set the globals
 		currentGameDescription = GameDescriptionForComboItem();
 		ASSERT_NOTNULL( currentGameDescription );
