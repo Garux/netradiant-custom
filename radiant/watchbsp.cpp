@@ -54,48 +54,42 @@
 class CWatchBSP
 {
 private:
-// a flag we have set to true when using an external BSP plugin
-// the resulting code with that is a bit dirty, cleaner solution would be to separate the succession of commands from the listening loop
-// (in two separate classes probably)
-	bool m_bBSPPlugin;
+	// a flag we have set to true when using an external BSP plugin
+	// the resulting code with that is a bit dirty, cleaner solution would be to separate the succession of commands from the listening loop
+	// (in two separate classes probably)
+	bool m_bBSPPlugin{};
 
-// EIdle: we are not listening
-//   DoMonitoringLoop will change state to EBeginStep
-// EBeginStep: the socket is up for listening, we are expecting incoming connection
-//   incoming connection will change state to EWatching
-// EWatching: we have a connection, monitor it
-//   connection closed will see if we start a new step (EBeginStep) or launch Quake3 and end (EIdle)
-	enum EWatchBSPState { EIdle, EBeginStep, EWatching } m_eState;
-	socket_t *m_pListenSocket;
-	socket_t *m_pInSocket;
+	// EIdle: we are not listening
+	//   DoMonitoringLoop will change state to EBeginStep
+	// EBeginStep: the socket is up for listening, we are expecting incoming connection
+	//   incoming connection will change state to EWatching
+	// EWatching: we have a connection, monitor it
+	//   connection closed will see if we start a new step (EBeginStep) or launch Quake3 and end (EIdle)
+	enum EWatchBSPState { EIdle, EBeginStep, EWatching } m_eState = EIdle;
+	socket_t *m_pListenSocket{};
+	socket_t *m_pInSocket{};
 	netmessage_t msg;
 	std::vector<CopiedString> m_commands;
-// used to timeout EBeginStep
+	// used to timeout EBeginStep
 	Timer m_timeout_timer;
 	std::size_t m_iCurrentStep;
 	QTimer m_monitoring_timer;
-// name of the map so we can run the engine
+	// name of the map so we can run the engine
 	CopiedString m_sBSPName;
-// buffer we use in push mode to receive data directly from the network
-	xmlParserInputBufferPtr m_xmlInputBuffer;
+	// buffer we use in push mode to receive data directly from the network
+	xmlParserInputBufferPtr m_xmlInputBuffer{};
 	xmlParserCtxtPtr m_xmlParserCtxt;
-// call this to switch the set listening mode
+	// call this to switch the set listening mode
 	bool SetupListening();
-// start a new EBeginStep
+	// start a new EBeginStep
 	void DoEBeginStep();
-// the xml and sax parser state
+	// the xml and sax parser state
 	char m_xmlBuf[MAX_NETMESSAGE];
-	bool m_bNeedCtxtInit;
+	bool m_bNeedCtxtInit = true;
 	message_info_t m_message_info;
 
 public:
 	CWatchBSP(){
-		m_bBSPPlugin = false;
-		m_pListenSocket = nullptr;
-		m_pInSocket = nullptr;
-		m_eState = EIdle;
-		m_xmlInputBuffer = nullptr;
-		m_bNeedCtxtInit = true;
 		m_monitoring_timer.callOnTimeout( [this](){ RoutineProcessing(); } );
 		m_monitoring_timer.setInterval( 25 );
 	}
@@ -104,21 +98,20 @@ public:
 		Net_Shutdown();
 	}
 
-	bool HasBSPPlugin() const
-	{
+	bool HasBSPPlugin() const {
 		return m_bBSPPlugin;
 	}
 
-// called regularly to keep listening
+	// called regularly to keep listening
 	void RoutineProcessing();
-// start a monitoring loop with the following steps
+	// start a monitoring loop with the following steps
 	void DoMonitoringLoop( const std::vector<CopiedString>& commands, const char *sBSPName );
 	void EndMonitoringLoop(){
 		Reset();
 	}
-// close everything - may be called from the outside to abort the process
+	// close everything - may be called from the outside to abort the process
 	void Reset();
-// start a listening loop for an external process, possibly a BSP plugin
+	// start a listening loop for an external process, possibly a BSP plugin
 	void ExternalListen();
 };
 
@@ -703,12 +696,14 @@ void CWatchBSP::RoutineProcessing(){
 							}();
 
 							auto cmd = StringStream( '"', EnginePath_get(), exe, '"', ' ' );
-
-							if( const char *map = strstr( args.c_str(), "%mapname%" ) )
-								cmd << StringRange( args.c_str(), map ) << m_sBSPName << ( map + strlen( "%mapname%" ) );
-							else
-								cmd << args;
-
+							{ // substitute "%mapname%"
+								const char *a = args.c_str();
+								while( const char *map = strstr( a, "%mapname%" ) ){
+									cmd << StringRange( a, map ) << m_sBSPName;
+									a = map + strlen( "%mapname%" );
+								}
+								cmd << a;
+							}
 							globalOutputStream() << cmd << '\n';
 
 							// execute now

@@ -357,13 +357,8 @@ void CGameDialog::Init(){
 
 	if ( !m_bGamePrompt ) {
 		// search by .game name
-		for ( auto *game : mGames )
-		{
-			if ( game->mGameFile == m_sGameFile.m_value ) {
-				currentGameDescription = game;
-				break;
-			}
-		}
+		if( auto found = std::ranges::find( mGames, m_sGameFile.m_value, &CGameDescription::mGameFile ); found != mGames.end() )
+			currentGameDescription = *found;
 	}
 	if ( !currentGameDescription ) {
 		Create( nullptr );
@@ -734,8 +729,7 @@ public:
 	typedef PreferenceSystem Type;
 	STRING_CONSTANT( Name, "*" );
 
-	PreferenceSystemAPI(){
-		m_preferencesystem = &GetPreferenceSystem();
+	PreferenceSystemAPI() : m_preferencesystem( &GetPreferenceSystem() ){
 	}
 	PreferenceSystem* getTable(){
 		return m_preferencesystem;

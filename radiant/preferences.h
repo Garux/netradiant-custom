@@ -244,7 +244,7 @@ public:
 	}
 	virtual ~CGameDialog();
 
-	void AddPacksURL( StringOutputStream &s );
+	void AddPacksURL( StringOutputStream &URL );
 
 	/*!
 	   initialize the game dialog, called at CPrefsDlg::Init

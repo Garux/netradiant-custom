@@ -25,7 +25,6 @@
 
 #include "generic/callback.h"
 #include "gtkutil/dialog.h"
-#include "generic/callback.h"
 #include "string/string.h"
 
 inline void BoolImport( bool& self, bool value ){
@@ -135,42 +134,42 @@ public:
 
 	QCheckBox* addCheckBox( QGridLayout *grid, const char* name, const char* flag, const BoolImportCallback& importCallback, const BoolExportCallback& exportCallback );
 	QCheckBox* addCheckBox( QGridLayout *grid, const char* name, const char* flag, bool& data );
-	QComboBox* addCombo( QGridLayout *grid, const char* name, StringArrayRange values, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	QComboBox* addCombo( QGridLayout *grid, const char* name, int& data, StringArrayRange values );
-	void addSlider( QGridLayout *grid, const char* name, int& data, int lower, int upper, int step_increment, int page_increment );
-	void addSlider( QGridLayout *grid, const char* name, float& data, double lower, double upper, double step_increment, double page_increment );
-	void addRadio( QGridLayout *grid, const char* name, StringArrayRange names, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	void addRadio( QGridLayout *grid, const char* name, int& data, StringArrayRange names );
-	void addRadioIcons( QGridLayout *grid, const char* name, StringArrayRange icons, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	void addRadioIcons( QGridLayout *grid, const char* name, int& data, StringArrayRange icons );
-	QWidget* addTextEntry( QGridLayout *grid, const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
-	QWidget* addEntry( QGridLayout *grid, const char* name, CopiedString& data ){
+	QComboBox* addCombo   ( QGridLayout *grid, const char* name, StringArrayRange values, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	QComboBox* addCombo   ( QGridLayout *grid, const char* name, int& data, StringArrayRange values );
+	void addSlider        ( QGridLayout *grid, const char* name, int& data, int lower, int upper, int step_increment, int page_increment );
+	void addSlider        ( QGridLayout *grid, const char* name, float& data, double lower, double upper, double step_increment, double page_increment );
+	void addRadio         ( QGridLayout *grid, const char* name, StringArrayRange names, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	void addRadio         ( QGridLayout *grid, const char* name, int& data, StringArrayRange names );
+	void addRadioIcons    ( QGridLayout *grid, const char* name, StringArrayRange icons, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	void addRadioIcons    ( QGridLayout *grid, const char* name, int& data, StringArrayRange icons );
+	QWidget* addTextEntry ( QGridLayout *grid, const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
+	QWidget* addEntry     ( QGridLayout *grid, const char* name, CopiedString& data ){
 		return addTextEntry( grid, name, StringImportCallback( StringImportCaller( data ) ), StringExportCallback( StringExportCaller( data ) ) );
 	}
-	void addPathEntry( QGridLayout *grid, const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
-	void addPathEntry( QGridLayout *grid, const char* name, CopiedString& data, bool directory );
-	QWidget* addSpinner( QGridLayout *grid, const char* name, int& data, int lower, int upper );
-	QWidget* addSpinner( QGridLayout *grid, const char* name, int lower, int upper, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	QWidget* addSpinner( QGridLayout *grid, const char* name, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback, int decimals );
-	QWidget* addSpinner( QGridLayout* grid, const char* name, float& data, double lower, double upper, int decimals );
+	void addPathEntry     ( QGridLayout *grid, const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
+	void addPathEntry     ( QGridLayout *grid, const char* name, CopiedString& data, bool directory );
+	QWidget* addSpinner   ( QGridLayout *grid, const char* name, int& data, int lower, int upper );
+	QWidget* addSpinner   ( QGridLayout *grid, const char* name, int lower, int upper, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	QWidget* addSpinner   ( QGridLayout *grid, const char* name, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback, int decimals );
+	QWidget* addSpinner   ( QGridLayout* grid, const char* name, float& data, double lower, double upper, int decimals );
 
 protected:
 
-	void AddBoolToggleData( QCheckBox& object, const BoolImportCallback& importCallback, const BoolExportCallback& exportCallback );
-	void AddIntRadioData( QButtonGroup& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	void AddTextEntryData( QLineEdit& object, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
-	void AddFloatSpinnerData( QDoubleSpinBox& object, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
-	void AddIntSpinnerData( QSpinBox& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	void AddIntSliderData( QSlider& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
-	void AddFloatSliderData( QSlider& object, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
-	void AddIntComboData( QComboBox& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+	void AddBoolToggleData  ( QCheckBox      &widget, const BoolImportCallback   &importCallback, const BoolExportCallback   &exportCallback );
+	void AddIntRadioData    ( QButtonGroup   &widget, const IntImportCallback    &importCallback, const IntExportCallback    &exportCallback );
+	void AddTextEntryData   ( QLineEdit      &widget, const StringImportCallback &importCallback, const StringExportCallback &exportCallback );
+	void AddFloatSpinnerData( QDoubleSpinBox &widget, const FloatImportCallback  &importCallback, const FloatExportCallback  &exportCallback );
+	void AddIntSpinnerData  ( QSpinBox       &widget, const IntImportCallback    &importCallback, const IntExportCallback    &exportCallback );
+	void AddIntSliderData   ( QSlider        &widget, const IntImportCallback    &importCallback, const IntExportCallback    &exportCallback );
+	void AddFloatSliderData ( QSlider        &widget, const FloatImportCallback  &importCallback, const FloatExportCallback  &exportCallback );
+	void AddIntComboData    ( QComboBox      &widget, const IntImportCallback    &importCallback, const IntExportCallback    &exportCallback );
 
-	void AddDialogData( QCheckBox& object, bool& data );
-	void AddDialogData( QButtonGroup& object, int& data );
-	void AddDialogData( QLineEdit& object, CopiedString& data );
-	void AddDialogData( QDoubleSpinBox& object, float& data );
-	void AddDialogData( QSpinBox& object, int& data );
-	void AddDialogData( QSlider& object, int& data );
-	void AddDialogData( QSlider& object, float& data );
-	void AddDialogData( QComboBox& object, int& data );
+	void AddDialogData( QCheckBox      &widget, bool         &data );
+	void AddDialogData( QButtonGroup   &widget, int          &data );
+	void AddDialogData( QLineEdit      &widget, CopiedString &data );
+	void AddDialogData( QDoubleSpinBox &widget, float        &data );
+	void AddDialogData( QSpinBox       &widget, int          &data );
+	void AddDialogData( QSlider        &widget, int          &data );
+	void AddDialogData( QSlider        &widget, float        &data );
+	void AddDialogData( QComboBox      &widget, int          &data );
 };

@@ -289,7 +289,7 @@ static void FinishRawLightmap( rawLightmap_t *lm ){
 
 
 	/* sort light surfaces by shader name */
-	std::sort( &lightSurfaces[ lm->firstLightSurface ], &lightSurfaces[ lm->firstLightSurface ] + lm->numLightSurfaces, []( const int a, const int b ){
+	std::ranges::sort( Span( &lightSurfaces[ lm->firstLightSurface ], lm->numLightSurfaces ), []( const int a, const int b ){
 		/* get shaders */
 		const shaderInfo_t *asi = surfaceInfos[ a ].si;
 		const shaderInfo_t *bsi = surfaceInfos[ b ].si;
@@ -1064,7 +1064,7 @@ void SetupSurfaceLightmaps(){
 	}
 
 	/* sort the surfaces info list */
-	std::sort( sortSurfaces, sortSurfaces + numBSPDrawSurfaces, CompareSurfaceInfo() );
+	std::ranges::sort( Span( sortSurfaces, numBSPDrawSurfaces ), CompareSurfaceInfo() );
 
 	/* allocate a list of surfaces that would go into raw lightmaps */
 	numLightSurfaces = 0;
@@ -2884,7 +2884,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		/* fill it out and sort it */
 		for ( i = 0; i < numRawLightmaps; ++i )
 			sortLightmaps[ i ] = i;
-		std::sort( sortLightmaps, sortLightmaps + numRawLightmaps, CompareRawLightmap() );
+		std::ranges::sort( Span( sortLightmaps, numRawLightmaps ), CompareRawLightmap() );
 
 		Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
 	}

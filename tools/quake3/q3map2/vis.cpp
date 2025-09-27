@@ -82,11 +82,8 @@ static void SortPortals(){
 	for ( int i = 0; i < numportals * 2; ++i )
 		sorted_portals[i] = &portals[i];
 
-	if ( !nosort ) {
-		std::sort( sorted_portals, sorted_portals + numportals * 2, []( vportal_t* const & a, vportal_t* const & b ){
-			return a->nummightsee < b->nummightsee;
-		} );
-	}
+	if ( !nosort )
+		std::ranges::sort( Span( sorted_portals, numportals * 2 ), {}, &vportal_t::nummightsee );
 }
 
 
