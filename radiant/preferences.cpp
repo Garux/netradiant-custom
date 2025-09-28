@@ -40,7 +40,6 @@
 #include "commandlib.h"
 
 #include "error.h"
-#include "console.h"
 #include "xywindow.h"
 #include "mainframe.h"
 #include "gtkdlgs.h"
@@ -134,7 +133,7 @@ CGameDescription *g_pGameDescription;
 #include "preferencedictionary.h"
 #include "stringio.h"
 
-const char* const PREFERENCES_VERSION = "1.0";
+constexpr const char* PREFERENCES_VERSION = "1.0";
 
 bool Preferences_Load( PreferenceDictionary& preferences, const char* filename, const char *cmdline_prefix ){
 	bool ret = false;
@@ -145,14 +144,14 @@ bool Preferences_Load( PreferenceDictionary& preferences, const char* filename, 
 		parser.exportXML( importer );
 		ret = true;
 	}
-
-	int l = strlen( cmdline_prefix );
+	// set config settings from the command line, e.g.   -global-gamefile q4.game   -q4.game-CamHeight 944
+	const size_t len = strlen( cmdline_prefix );
 	for ( int i = 1; i < g_argc - 1; ++i )
 	{
 		if ( g_argv[i][0] == '-' ) {
-			if ( !strncmp( g_argv[i] + 1, cmdline_prefix, l ) ) {
-				if ( g_argv[i][l + 1] == '-' ) {
-					preferences.importPref( g_argv[i] + l + 2, g_argv[i + 1] );
+			if ( strncmp( g_argv[i] + 1, cmdline_prefix, len ) == 0 ) {
+				if ( g_argv[i][len + 1] == '-' ) {
+					preferences.importPref( g_argv[i] + len + 2, g_argv[i + 1] );
 				}
 			}
 			++i;
@@ -192,9 +191,11 @@ void GlobalPreferences_Init(){
 	RegisterGlobalPreferences( g_global_preferences );
 }
 
+constexpr const char* PREFS_GLOBAL_FILENAME = "global.pref";
+
 void CGameDialog::LoadPrefs(){
 	// load global .pref file
-	const auto strGlobalPref = StringStream( g_Preferences.m_global_rc_path, "global.pref" );
+	const auto strGlobalPref = StringStream( g_Preferences.m_global_rc_path, PREFS_GLOBAL_FILENAME );
 
 	globalOutputStream() << "loading global preferences from " << makeQuoted( strGlobalPref ) << '\n';
 
@@ -204,7 +205,7 @@ void CGameDialog::LoadPrefs(){
 }
 
 void CGameDialog::SavePrefs(){
-	const auto strGlobalPref = StringStream( g_Preferences.m_global_rc_path, "global.pref" );
+	const auto strGlobalPref = StringStream( g_Preferences.m_global_rc_path, PREFS_GLOBAL_FILENAME );
 
 	globalOutputStream() << "saving global preferences to " << strGlobalPref << '\n';
 
@@ -331,7 +332,7 @@ void CGameDialog::Reset(){
 		InitGlobalPrefPath();
 	}
 
-	file_remove( StringStream( g_Preferences.m_global_rc_path, "global.pref" ) );
+	file_remove( StringStream( g_Preferences.m_global_rc_path, PREFS_GLOBAL_FILENAME ) );
 }
 
 void CGameDialog::Init(){
@@ -433,7 +434,7 @@ static void OnButtonClean( PrefsDlg *dlg ){
    ========
  */
 
-#define PREFS_LOCAL_FILENAME "local.pref"
+constexpr const char* PREFS_LOCAL_FILENAME = "local.pref";
 
 void PrefsDlg::Init(){
 	// m_global_rc_path has been set above
