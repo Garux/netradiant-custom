@@ -61,6 +61,7 @@
 ? undo
 	button to add a layer
 	buttons to hide/show all layers
+? tree item highlight is torn with 'default' theme in windows
 */
 
 class LayerAssignVisitor : public SelectionSystem::Visitor

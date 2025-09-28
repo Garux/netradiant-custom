@@ -38,7 +38,6 @@ enum class ETheme{
 	Darker,
 };
 
-static QActionGroup *s_theme_group;
 static ETheme s_theme = ETheme::Dark;
 
 QString load_qss( const char *filename ){
@@ -139,10 +138,10 @@ void theme_set( ETheme theme ){
 	defaults.is1stThemeApplication = false;
 }
 
-void theme_contruct_menu( class QMenu *menu ){
+void theme_construct_menu( class QMenu *menu ){
 	auto *m = menu->addMenu( "GUI Theme" );
 	m->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
-	auto *group = s_theme_group = new QActionGroup( m );
+	auto *group = new QActionGroup( m );
 
 	for( const auto *name : { "Default", "Fusion", "Dark", "Darker" } )
 	{
@@ -150,17 +149,17 @@ void theme_contruct_menu( class QMenu *menu ){
 		a->setCheckable( true );
 		group->addAction( a );
 	}
+	// init radio
+	if( const int value = static_cast<int>( s_theme ); 0 <= value && value < group->actions().size() )
+		group->actions().at( value )->setChecked( true );
 
-	QObject::connect( s_theme_group, &QActionGroup::triggered, []( QAction *action ){
-		theme_set( static_cast<ETheme>( s_theme_group->actions().indexOf( action ) ) );
+	QObject::connect( group, &QActionGroup::triggered, []( QAction *action ){
+		theme_set( static_cast<ETheme>( action->actionGroup()->actions().indexOf( action ) ) );
 	} );
 }
 
 void ThemeImport( int value ){
 	s_theme = static_cast<ETheme>( value );
-	if( s_theme_group != nullptr && 0 <= value && value < s_theme_group->actions().size() ){
-		s_theme_group->actions().at( value )->setChecked( true );
-	}
 }
 typedef FreeCaller<void(int), ThemeImport> ThemeImportCaller;
 
@@ -170,7 +169,10 @@ void ThemeExport( const IntImportCallback& importer ){
 typedef FreeCaller<void(const IntImportCallback&), ThemeExport> ThemeExportCaller;
 
 
-void theme_contruct(){
-	GlobalPreferenceSystem().registerPreference( "GUIThemeV2", makeIntStringImportCallback( ThemeImportCaller() ), makeIntStringExportCallback( ThemeExportCaller() ) );
+void theme_construct(){
 	theme_set( s_theme ); // set theme here, not in importer, so it's set on the very 1st start too (when there is no preference to load)
+}
+
+void theme_registerGlobalPreference( class PreferenceSystem& preferences ){
+	preferences.registerPreference( "GUITheme", makeIntStringImportCallback( ThemeImportCaller() ), makeIntStringExportCallback( ThemeExportCaller() ) );
 }

@@ -208,7 +208,7 @@ static void load_colors_theme( const char *filepath ){
 }
 
 void create_colours_menu( QMenu *menu ){
-	menu = menu->addMenu( "Colors" );
+	menu = menu->addMenu( "Theming" );
 
 	menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
 
@@ -227,7 +227,7 @@ void create_colours_menu( QMenu *menu ){
 
 	}
 
-	theme_contruct_menu( menu );
+	theme_construct_menu( menu );
 
 	create_menu_item_with_mnemonic( menu, "OpenGL Font...", "OpenGLFont" );
 

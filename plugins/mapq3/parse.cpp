@@ -211,7 +211,7 @@ NodeSmartReference Entity_parseTokens( Tokeniser& tokeniser, EntityCreator& enti
 void Map_Read( scene::Node& root, Tokeniser& tokeniser, EntityCreator& entityTable, const PrimitiveParser& parser ){
 	LayersParser layersParser( root );
 	if( !layersParser.read_layers( tokeniser ) ){
-		layersParser.construct_tree(); // contruct anytime to have at least one layer, e.g. when empty .map
+		layersParser.construct_tree(); // construct anytime to have at least one layer, e.g. when empty .map
 		return;
 	}
 	layersParser.construct_tree();

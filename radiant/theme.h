@@ -21,5 +21,6 @@
 
 #pragma once
 
-void theme_contruct_menu( class QMenu *menu );
-void theme_contruct();
+void theme_construct_menu( class QMenu *menu );
+void theme_construct();
+void theme_registerGlobalPreference( class PreferenceSystem& preferences );

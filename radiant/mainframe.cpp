@@ -115,7 +115,6 @@
 #include "referencecache.h"
 
 #include "colors.h"
-#include "theme.h"
 #include "tools.h"
 #include "filterbar.h"
 
@@ -1870,7 +1869,6 @@ void MainFrame::Create(){
 	PreferencesDialog_constructWindow( window );
 	FindTextureDialog_constructWindow( window );
 	SurfaceInspector_constructWindow( window );
-	theme_contruct();
 
 	SetActiveXY( m_pXYWnd );
 

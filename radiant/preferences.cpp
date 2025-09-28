@@ -44,6 +44,7 @@
 #include "xywindow.h"
 #include "mainframe.h"
 #include "gtkdlgs.h"
+#include "theme.h"
 
 #include <QCoreApplication>
 #include <QGridLayout>
@@ -181,6 +182,7 @@ bool Preferences_Save_Safe( PreferenceDictionary& preferences, const char* filen
 void RegisterGlobalPreferences( PreferenceSystem& preferences ){
 	preferences.registerPreference( "gamefile", makeCopiedStringStringImportCallback( LatchedAssignCaller( g_GamesDialog.m_sGameFile ) ), CopiedStringExportStringCaller( g_GamesDialog.m_sGameFile.m_latched ) );
 	preferences.registerPreference( "gamePrompt", BoolImportStringCaller( g_GamesDialog.m_bGamePrompt ), BoolExportStringCaller( g_GamesDialog.m_bGamePrompt ) );
+	theme_registerGlobalPreference( preferences );
 }
 
 
@@ -241,15 +243,8 @@ void CGameDialog::GameFileImport( int value ){
 
 void CGameDialog::GameFileExport( const IntImportCallback& importCallback ) const {
 	// use m_sGameFile to set value
-	int i = 0;
-	for ( const auto *game : mGames )
-	{
-		if ( game->mGameFile == m_sGameFile.m_latched ) {
-			m_nComboSelect = i;
-			break;
-		}
-		i++;
-	}
+	if( const auto found = std::ranges::find( mGames, m_sGameFile.m_latched, &CGameDescription::mGameFile ); found != mGames.cend() )
+		m_nComboSelect = std::distance( mGames.cbegin(), found );
 	importCallback( m_nComboSelect );
 }
 
@@ -342,6 +337,7 @@ void CGameDialog::Reset(){
 void CGameDialog::Init(){
 	InitGlobalPrefPath();
 	LoadPrefs();
+	theme_construct(); // after global prefs, b4 any normal windows
 	ScanForGames();
 	if ( mGames.empty() ) {
 		Error( "Didn't find any valid game file descriptions, aborting\n" );
