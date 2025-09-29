@@ -1145,6 +1145,8 @@ misc...
 	* new icons by Julius, high dpi scaling support
 	* improved GUI themes, new unmodified Fusion theme, external .qss file
 	* render camera crosshair sharply independently of viewport size, with shadow
+	* support mixture of monitored and unmonitored build commands (do unmonitored run after 1st such command)
+	* do Run Engine After Compile also after unmonitored builds
 
 
 

@@ -64,8 +64,6 @@ QEGlobals_t g_qeglobals;
 #include <sys/stat.h> // chmod
 #endif
 
-#define RADIANT_MONITOR_ADDRESS "127.0.0.1:39000"
-
 
 void QE_InitVFS(){
 	// VFS initialization -----------------------
@@ -179,17 +177,13 @@ void build_init_variables(){
 	build_set_variable( "MapName", stream( PathFilename( mapname ) ) );
 }
 
-void bsp_shutdown(){
-	build_clear_variables();
-}
-
 class BatchCommandListener
 {
 	TextOutputStream& m_file;
-	std::size_t m_commandCount;
+	std::size_t m_commandCount{};
 	const char* m_outputRedirect;
 public:
-	BatchCommandListener( TextOutputStream& file, const char* outputRedirect ) : m_file( file ), m_commandCount( 0 ), m_outputRedirect( outputRedirect ){
+	BatchCommandListener( TextOutputStream& file, const char* outputRedirect ) : m_file( file ), m_outputRedirect( outputRedirect ){
 	}
 
 	void execute( const char* command ){
@@ -202,6 +196,40 @@ public:
 		++m_commandCount;
 	}
 };
+
+void RunBatch( const std::vector<CopiedString>& commands ){
+	const auto junkpath = StringStream( SettingsPath_get(), "junk.txt" );
+
+#if defined( POSIX )
+	const auto batpath = StringStream( SettingsPath_get(), "qe3bsp.sh" );
+#elif defined( WIN32 )
+	const auto batpath = StringStream( SettingsPath_get(), "qe3bsp.bat" );
+#else
+#error "unsupported platform"
+#endif
+	bool written = false;
+	{
+		TextFileOutputStream batchFile( batpath );
+		if ( !batchFile.failed() ) {
+#if defined ( POSIX )
+			batchFile << "#!/bin/sh \n\n";
+#endif
+			BatchCommandListener listener( batchFile, g_WatchBSP0_DumpLog? junkpath.c_str() : nullptr );
+			for( const auto& command : commands )
+				listener.execute( command.c_str() );
+			written = true;
+		}
+	}
+	if ( written ) {
+#if defined ( POSIX )
+		chmod( batpath, 0744 );
+#endif
+		globalOutputStream() << "Writing the compile script to '" << batpath << "'\n";
+		if( g_WatchBSP0_DumpLog )
+			globalOutputStream() << "The build output will be saved in '" << junkpath << "'\n";
+		Q_Exec( batpath, nullptr, nullptr, true, false );
+	}
+}
 
 
 void RunBSP( size_t buildIdx ){
@@ -223,53 +251,9 @@ void RunBSP( size_t buildIdx ){
 
 	Pointfile_Delete();
 
-	const std::vector<CopiedString> commands = build_construct_commands( buildIdx );
-	const bool monitor = std::ranges::any_of( commands, []( const CopiedString& command ){
-		return strstr( command.c_str(), RADIANT_MONITOR_ADDRESS ) != 0;
-	} );
-
-	if ( g_WatchBSP_Enabled && monitor ) {
-		// grab the file name for engine running
-		const char* fullname = Map_Name( g_map );
-		const auto bspname = StringStream<64>( PathFilename( fullname ) );
-		BuildMonitor_Run( commands, bspname );
-	}
-	else
-	{
-		const auto junkpath = StringStream( SettingsPath_get(), "junk.txt" );
-
-#if defined( POSIX )
-		const auto batpath = StringStream( SettingsPath_get(), "qe3bsp.sh" );
-#elif defined( WIN32 )
-		const auto batpath = StringStream( SettingsPath_get(), "qe3bsp.bat" );
-#else
-#error "unsupported platform"
-#endif
-		bool written = false;
-		{
-			TextFileOutputStream batchFile( batpath );
-			if ( !batchFile.failed() ) {
-#if defined ( POSIX )
-				batchFile << "#!/bin/sh \n\n";
-#endif
-				BatchCommandListener listener( batchFile, g_WatchBSP0_DumpLog? junkpath.c_str() : nullptr );
-				for( const auto& command : commands )
-					listener.execute( command.c_str() );
-				written = true;
-			}
-		}
-		if ( written ) {
-#if defined ( POSIX )
-			chmod( batpath, 0744 );
-#endif
-			globalOutputStream() << "Writing the compile script to '" << batpath << "'\n";
-			if( g_WatchBSP0_DumpLog )
-				globalOutputStream() << "The build output will be saved in '" << junkpath << "'\n";
-			Q_Exec( batpath, nullptr, nullptr, true, false );
-		}
-	}
-
-	bsp_shutdown();
+	std::vector<CopiedString> commands = build_construct_commands( buildIdx );
+	const auto bspname = StringStream<64>( PathFilename( Map_Name( g_map ) ) ); // grab the file name for engine running
+	BuildMonitor_Run( commands, bspname );
 }
 
 // =============================================================================

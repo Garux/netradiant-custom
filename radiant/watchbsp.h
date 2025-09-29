@@ -36,8 +36,10 @@
 void BuildMonitor_Construct();
 void BuildMonitor_Destroy();
 
-void BuildMonitor_Run( const std::vector<CopiedString>& commands, const char* mapName );
+void BuildMonitor_Run( std::vector<CopiedString>& commands, const char* mapName );
 
 extern bool g_WatchBSP_Enabled;
 extern bool g_WatchBSP_LeakStop;
 extern bool g_WatchBSP0_DumpLog;
+
+inline constexpr const char* RADIANT_MONITOR_ADDRESS = "127.0.0.1:39000";

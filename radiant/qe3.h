@@ -22,15 +22,15 @@
 #pragma once
 
 #include "string/string.h"
+#include <vector>
 
 //
 // system functions
 //
 void    Sys_SetTitle( const char *text, bool modified );
 
-
 void RunBSP( size_t buildIdx );
-
+void RunBatch( const std::vector<CopiedString>& commands );
 
 void QE_InitVFS();
 

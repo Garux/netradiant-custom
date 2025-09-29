@@ -25,7 +25,6 @@
 #include "string/string.h"
 
 void build_set_variable( const char* name, const char* value );
-void build_clear_variables();
 
 std::vector<CopiedString> build_construct_commands( size_t buildIdx );
 

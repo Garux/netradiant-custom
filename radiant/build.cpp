@@ -488,7 +488,7 @@ std::vector<CopiedString> build_construct_commands( size_t buildIdx ){
 	{
 		globalErrorStream() << "build #" << buildIdx << " not defined";
 	}
-
+	build_clear_variables();
 	return commands;
 }
 

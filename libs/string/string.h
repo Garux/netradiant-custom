@@ -306,10 +306,7 @@ inline const char* string_in_string_nocase( const char* haystack, const char* ne
 class StringTokeniser
 {
 	bool istoken( char c ) const {
-		if ( strchr( m_delimiters, c ) != 0 ) {
-			return false;
-		}
-		return true;
+		return strchr( m_delimiters, c ) == 0;
 	}
 	const char* advance(){
 		const char* token = m_pos;
@@ -399,7 +396,7 @@ public:
 		return *this;
 	}
 
-	void swap( String& other ){
+	void swap( String& other ) noexcept {
 		Buffer::swap( other );
 	}
 
@@ -443,7 +440,7 @@ namespace std
 /// \brief Swaps the values of \p self and \p other.
 /// Overloads std::swap.
 template<typename Buffer>
-inline void swap( String<Buffer>& self, String<Buffer>& other ){
+inline void swap( String<Buffer>& self, String<Buffer>& other ) noexcept {
 	self.swap( other );
 }
 }
@@ -488,7 +485,7 @@ public:
 	const char* c_str() const {
 		return m_string;
 	}
-	void swap( CopiedBuffer& other ){
+	void swap( CopiedBuffer& other ) noexcept {
 		string_swap( m_string, other.m_string );
 	}
 };
@@ -531,7 +528,7 @@ public:
 	const char* c_str() const {
 		return m_string;
 	}
-	void swap( DefaultCopiedBuffer& other ){
+	void swap( DefaultCopiedBuffer& other ) noexcept {
 		string_swap( m_string, other.m_string );
 	}
 };
@@ -608,7 +605,7 @@ public:
 	const char* c_str() const {
 		return m_buffer + sizeof( std::size_t );
 	}
-	void swap( SmartBuffer& other ){
+	void swap( SmartBuffer& other ) noexcept {
 		string_swap( m_buffer, other.m_buffer );
 	}
 };
