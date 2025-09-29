@@ -401,6 +401,11 @@ textures/eerie/ironcrosslt2_10000
 	<dt>sample_color</dt><dd>Default = 1: sample color of each individual light from skybox images, if they are present. 0: use shader color, set by <a href="q3map-global-directives.html#q3map_lightRGB">q3map_lightRGB</a>/<a href="q3map-global-directives.html#q3map_lightImage">q3map_lightImage</a>/<a href="general-directives.html#skyParms">_up skybox image</a>/<a href="quake-editor-radiant-directives.html#qer_editorImage">qer_editorImage</a>.</dd>
 </dl>
 
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>Normally, all suns and skylights are emitted from all sky surfaces in a map. If you wish to restrict them to being emitted from surfaces carrying the exact shader that defined them, e.g. to have different sun/sky lighting in different areas of the map, compile your map with the -multiSun keyword in the light stage.</p>
+</blockquote>
+
 <h2 id="q3map_splotchFix">q3map_splotchFix</h2>
 <p>This is used on lightmapped model shaders if splotched lighting artifacts appear. Any shadows at the ambient/dark level will be flooded from neighbouring luxels. This gets rid of shadow acne, but a surface must be more or less uniformly lit or this looks ugly. Try using <a href="q3map-global-directives.html#q3map_lightmapSampleOffset">q3map_lightmapSampleOffset</a> first before using this as a last resort.</p>
 
@@ -428,6 +433,8 @@ textures/eerie/ironcrosslt2_10000
 	<p>Sky shaders should probably still have a <a href="q3map-global-directives.html#q3map_surfaceLight">q3map_surfaceLight</a> or preferred <a href="q3map-global-directives.html#q3map_skylight">q3map_skylight</a> value. The "sun" gives a strong directional light, but doesn't necessarily give the fill light needed to soften and illuminate shadows. Skies with clouds should probably have a weaker <a href="q3map-global-directives.html#q3map_sun">q3map_sun</a> value and a higher <a href="q3map-global-directives.html#q3map_surfaceLight">q3map_surfaceLight</a> or <a href="q3map-global-directives.html#q3map_skylight">q3map_skylight</a> value. Heavy clouds diffuse light and weaken shadows. The opposite is true of a cloudless or nearly cloudless sky. In such cases, the "sun" or "moon" will cast stronger shadows that have a greater degree of contrast. This is also why q3map_sunExt is preferred. It gives the designer greater control over shadow contrast with a penumbra effect.</p>
 	<h4>Design Notes:</h4>
 	<p>Not certain what color formula you want to use for the sun's light? Try this. Create a light entity. Use the Radiant editor's color selection tools to pick a color. The light's _color key's value will be the normalized RGB formula. Copy it from the value line in the editor (CTRL+c) and paste it into your shader.</p>
+	<h4>Design Notes:</h4>
+	<p>Normally, all suns and skylights are emitted from all sky surfaces in a map. If you wish to restrict them to being emitted from surfaces carrying the exact shader that defined them, e.g. to have different sun/sky lighting in different areas of the map, compile your map with the -multiSun keyword in the light stage.</p>
 </blockquote>
 
 <h2 id="q3map_surfaceLight">q3map_surfaceLight value</h2>

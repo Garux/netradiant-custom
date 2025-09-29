@@ -155,6 +155,9 @@ enum class EBrushType
 
 
 /* light */
+#define MULTISUN_MAX			2048 // TA: multi sun. this is how many separate suns can be drawn separately and only where they should
+#define MULTISUN_MAX_BYTES		(MULTISUN_MAX/8) // it's a bitmask. 256 bytes in the end.
+
 #define MAX_TRACE_TEST_NODES    256
 #define DEFAULT_INHIBIT_RADIUS  1.5f
 
@@ -414,6 +417,7 @@ struct sun_t
 	Vector3 direction, color;
 	float photons, deviance, filterRadius;
 	int numSamples, style;
+	int environmentLightIndex = -1;
 };
 
 struct skylight_t
@@ -423,6 +427,7 @@ struct skylight_t
 	int horizon_min = 0;
 	int horizon_max = 90;
 	bool sample_color = true;
+	int environmentLightIndex = -1;
 };
 
 
@@ -579,6 +584,7 @@ struct shaderInfo_t_data
 
 	std::vector<skylight_t>  skylights;                 /* ydnar */
 	std::vector<sun_t>  suns;                           /* ydnar */
+	int	environmentEmitterIndex = -1;           		/* TA: multisun: shaders that end up being used and actually emit sunlight get a unique emitter index */
 
 	Vector3 color{ 0 };                                 /* normalized color */
 	Color4f averageColor = { 0, 0, 0, 0 };
@@ -1083,6 +1089,8 @@ struct light_t
 
 	float falloffTolerance;             /* ydnar: minimum attenuation threshold */
 	float filterRadius;                 /* ydnar: lightmap filter radius in world units, 0 == default */
+
+	int environmentLightIndex = -1;		/* TA: For sun/skylights. Check if particular sky triangle emits a given light  */
 };
 
 
@@ -1106,8 +1114,11 @@ struct trace_t
 	float inhibitRadius;                /* sphere in which occluding geometry is ignored */
 
 	/* per-light input */
-	const light_t             *light;
+	const light_t             *light = nullptr;
 	Vector3 end;
+
+	/* TA: multisun support */
+	byte	skyEnvironmentLightIndices[MULTISUN_MAX_BYTES];
 
 	/* calculated input */
 	Vector3 displacement, direction;
@@ -2025,6 +2036,10 @@ inline float falloffTolerance = 1.0f;
 inline const bool exactPointToPolygon = true;
 inline const float formFactorValueScale = 3.0f;
 inline const float linearScale = 1.0f / 8000.0f;
+
+/* TA: multisun stuff (ability to have mutliple skyboxes with separate suns/skylights). May not handle _skybox properly */
+inline bool multiSun = false;
+inline int nextEnvironmentLightIndex = 0; // each shader environment light (sun/sky) gets a unique index. thus we can check whether a sky surface should be considered as a successful trace
 
 inline std::list<light_t> lights;
 inline int numPointLights;
