@@ -1351,6 +1351,9 @@ static bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace 
 
 	/* don't trace against sky */
 	if ( si->compileFlags & C_SKY ) {
+		if(multiSun && trace->light && trace->light->environmentLightIndex != -1 && si->environmentEmitterIndex != -1 && si->environmentEmitterIndex < MULTISUN_MAX){
+			bit_enable(trace->skyEnvironmentLightIndices,si->environmentEmitterIndex);
+		}
 		return false;
 	}
 
@@ -1597,6 +1600,9 @@ void TraceLine( trace_t *trace ){
 	trace->passSolid = false;
 	trace->opaque = false;
 	trace->compileFlags = 0;
+	if(multiSun){
+		memset(trace->skyEnvironmentLightIndices,0,sizeof(trace->skyEnvironmentLightIndices));
+	}
 	trace->numTestNodes = 0;
 
 	/* early outs */

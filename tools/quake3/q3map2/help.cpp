@@ -226,6 +226,7 @@ static void HelpLight()
 		{ "-lomem", "Low memory but slower lighting mode" },
 		{ "-lowquality", "Low quality floodlight (appears to currently break floodlight)" },
 		{ "-minsamplesize <N>", "Sets minimum lightmap resolution in luxels/qu" },
+		{ "-multisun", "Restrict sun and skylights to being emitted from surfaces carrying the shader they were defined in (as opposed to globally)" },
 		{ "-nobouncestore", "Do not store BSP, lightmap and shader files between bounces" },
 		{ "-nocollapse", "Do not collapse identical lightmaps" },
 		{ "-nodeluxe, -nodeluxemap", "Disable deluxemapping" },
