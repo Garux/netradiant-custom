@@ -47,7 +47,6 @@
 #include <QPushButton>
 #include <QToolButton>
 #include <QKeyEvent>
-#include <QApplication>
 #include <QButtonGroup>
 #include <QToolTip>
 #include "gtkutil/combobox.h"
@@ -66,6 +65,7 @@
 #include "gtkutil/filechooser.h"
 #include "gtkutil/nonmodal.h"
 #include "gtkutil/entry.h"
+#include "gtkutil/image.h"
 
 #include "qe3.h"
 #include "gtkmisc.h"
@@ -244,7 +244,7 @@ public:
 		m_key( key ),
 		m_entry( new NonModalEntry( ApplyCaller( *this ), UpdateCaller( *this ) ) ){
 		m_entry->setValidator( new KeyValueValidator( m_entry ) );
-		auto *button = m_entry->addAction( QApplication::style()->standardIcon( QStyle::SP_ArrowRight ), QLineEdit::ActionPosition::TrailingPosition );
+		auto *button = m_entry->addAction( new_local_icon( "ellipsis.png" ), QLineEdit::ActionPosition::TrailingPosition );
 		QObject::connect( button, &QAction::triggered, [this](){ browse(); } );
 	}
 	void release() override {
@@ -283,7 +283,7 @@ public:
 		m_key( key ),
 		m_entry( new NonModalEntry( ApplyCaller( *this ), UpdateCaller( *this ) ) ){
 		m_entry->setValidator( new KeyValueValidator( m_entry ) );
-		auto *button = m_entry->addAction( QApplication::style()->standardIcon( QStyle::SP_DialogOpenButton ), QLineEdit::ActionPosition::TrailingPosition );
+		auto *button = m_entry->addAction( new_local_icon( "ellipsis.png" ), QLineEdit::ActionPosition::TrailingPosition );
 		QObject::connect( button, &QAction::triggered, [this](){ browse(); } );
 	}
 	void release() override {
@@ -347,7 +347,7 @@ public:
 		m_key( key ),
 		m_entry( new NonModalEntry( ApplyCaller( *this ), UpdateCaller( *this ) ) ){
 		m_entry->setValidator( new KeyValueValidator( m_entry ) );
-		auto *button = m_entry->addAction( QApplication::style()->standardIcon( QStyle::SP_MediaVolume ), QLineEdit::ActionPosition::TrailingPosition );
+		auto *button = m_entry->addAction( new_local_icon( "ellipsis.png" ), QLineEdit::ActionPosition::TrailingPosition );
 		QObject::connect( button, &QAction::triggered, [this](){ browse(); } );
 	}
 	void release() override {
@@ -1287,7 +1287,7 @@ QWidget* EntityInspector_constructWindow( QWidget* toplevel ){
 			/* select by key/value buttons */
 			{
 				auto *b = new QToolButton;
-				b->setText( "+" );
+				b->setIcon( new_local_icon( "select.png" ) );
 				b->setToolTip( "Select by key" );
 				grid->addWidget( b, 0, 2 );
 				QObject::connect( b, &QAbstractButton::clicked, [](){
@@ -1296,7 +1296,7 @@ QWidget* EntityInspector_constructWindow( QWidget* toplevel ){
 			}
 			{
 				auto *b = new QToolButton;
-				b->setText( "+" );
+				b->setIcon( new_local_icon( "select.png" ) );
 				b->setToolTip( "Select by value" );
 				grid->addWidget( b, 1, 2 );
 				QObject::connect( b, &QAbstractButton::clicked, [](){
@@ -1305,7 +1305,7 @@ QWidget* EntityInspector_constructWindow( QWidget* toplevel ){
 			}
 			{
 				auto *b = new QToolButton;
-				b->setText( "+" );
+				b->setIcon( new_local_icon( "select.png" ) );
 				b->setToolTip( "Select by key + value" );
 				grid->addWidget( b, 0, 3, 2, 1 );
 				QObject::connect( b, &QAbstractButton::clicked, [](){
@@ -1330,23 +1330,24 @@ QWidget* EntityInspector_constructWindow( QWidget* toplevel ){
 			{
 				auto *b = new QToolButton;
 				hbox->addWidget( b );
-				b->setText( "<" );
+				b->setIcon( new_local_icon( "arrow_left.png" ) );
 				b->setToolTip( "Select targeting entities" );
 				QObject::connect( b, &QAbstractButton::clicked, [](){ Select_ConnectedEntities( true, false, g_focusToggleButton->isChecked() ); } );
 			}
 			{
 				auto *b = new QToolButton;
 				hbox->addWidget( b );
-				b->setText( ">" );
-				b->setToolTip( "Select targets" );
-				QObject::connect( b, &QAbstractButton::clicked, [](){ Select_ConnectedEntities( false, true, g_focusToggleButton->isChecked() ); } );
+				b->setIconSize( QSize( b->iconSize().width() * 2, b->iconSize().height() ) );
+				b->setIcon( new_local_icon( "arrow_left_right.png" ) );
+				b->setToolTip( "Select connected entities" );
+				QObject::connect( b, &QAbstractButton::clicked, [](){ Select_ConnectedEntities( true, true, g_focusToggleButton->isChecked() ); } );
 			}
 			{
 				auto *b = new QToolButton;
 				hbox->addWidget( b );
-				b->setText( "<->" );
-				b->setToolTip( "Select connected entities" );
-				QObject::connect( b, &QAbstractButton::clicked, [](){ Select_ConnectedEntities( true, true, g_focusToggleButton->isChecked() ); } );
+				b->setIcon( new_local_icon( "arrow_right.png" ) );
+				b->setToolTip( "Select targets" );
+				QObject::connect( b, &QAbstractButton::clicked, [](){ Select_ConnectedEntities( false, true, g_focusToggleButton->isChecked() ); } );
 			}
 			{
 				auto *b = g_focusToggleButton = new QToolButton;

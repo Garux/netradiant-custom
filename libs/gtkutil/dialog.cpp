@@ -28,8 +28,7 @@
 #include <QHBoxLayout>
 #include <QRadioButton>
 #include <QLineEdit>
-#include <QApplication>
-#include <QStyle>
+#include "gtkutil/image.h"
 
 
 RadioHBox RadioHBox_new( StringArrayRange names ){
@@ -49,7 +48,7 @@ RadioHBox RadioHBox_new( StringArrayRange names ){
 
 PathEntry PathEntry_new(){
 	auto *entry = new QLineEdit;
-	auto *button = entry->addAction( QApplication::style()->standardIcon( QStyle::SP_DialogOpenButton ), QLineEdit::ActionPosition::TrailingPosition );
+	auto *button = entry->addAction( new_local_icon( "ellipsis.png" ), QLineEdit::ActionPosition::TrailingPosition );
 	return PathEntry( entry, button );
 }
 

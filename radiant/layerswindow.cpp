@@ -379,7 +379,7 @@ void context_menu( const QPoint& pos ){
 		layer_new( item, layer, layers, tree );
 	} );
 
-	menu->addAction( QApplication::style()->standardIcon( QStyle::SP_DialogCloseButton ), "Delete", [&](){
+	menu->addAction( new_local_icon( "delete.png" ), "Delete", [&](){
 		auto dels = item_getLayers( item );
 		auto it = item_getLayerIterator( item );
 
