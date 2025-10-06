@@ -441,7 +441,7 @@ public:
 #else
 #error "unsupported platform"
 #endif
-				const auto text = StringStream( "Select directory, where game executable sits (typically ", makeQuoted( engine ), ")\n" );
+				const auto text = StringStream( "Select directory, where game executable sits (typically ", Quoted( engine ), ")\n" );
 				grid->addWidget( new QLabel( text.c_str() ), 0, 0, 1, 2 );
 			}
 			{
@@ -638,7 +638,7 @@ extern char **environ;
 #endif
 void Radiant_Restart(){
 	if( ConfirmModified( "Restart Radiant" ) ){
-		const auto mapname = StringStream( makeQuoted( Map_Name( g_map ) ) );
+		const auto mapname = StringStream( Quoted( Map_Name( g_map ) ) );
 
 		char *argv[] = { string_clone( environment_get_app_filepath() ),
 	                     Map_Unnamed( g_map )? nullptr : string_clone( mapname ),

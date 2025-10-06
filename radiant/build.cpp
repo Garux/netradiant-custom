@@ -46,7 +46,7 @@ const char* build_get_variable( const char* name ){
 	if ( i != g_build_variables.end() ) {
 		return ( *i ).second.c_str();
 	}
-	globalErrorStream() << "undefined build variable: " << makeQuoted( name ) << '\n';
+	globalErrorStream() << "undefined build variable: " << Quoted( name ) << '\n';
 	return "";
 }
 
@@ -192,7 +192,7 @@ public:
 		return length;
 	}
 	XMLElementParser& pushElement( const XMLElement& element ) override {
-		ERROR_MESSAGE( "parse error: invalid element " << makeQuoted( element.name() ) );
+		ERROR_MESSAGE( "parse error: invalid element " << Quoted( element.name() ) );
 		return *this;
 	}
 	void popElement( const char* name ) override {
@@ -214,7 +214,7 @@ public:
 		return length;
 	}
 	XMLElementParser& pushElement( const XMLElement& element ) override {
-		ERROR_MESSAGE( "parse error: invalid element " << makeQuoted( element.name() ) );
+		ERROR_MESSAGE( "parse error: invalid element " << Quoted( element.name() ) );
 		return *this;
 	}
 	void popElement( const char* name ) override {
@@ -246,7 +246,7 @@ public:
 		}
 		else
 		{
-			ERROR_MESSAGE( "parse error: invalid element " << makeQuoted( element.name() ) );
+			ERROR_MESSAGE( "parse error: invalid element " << Quoted( element.name() ) );
 			return *this;
 		}
 	}
@@ -421,7 +421,7 @@ public:
 		}
 		else
 		{
-			//ERROR_MESSAGE( "parse error: invalid element " << makeQuoted( element.name() ) );
+			//ERROR_MESSAGE( "parse error: invalid element " << Quoted( element.name() ) );
 			return *this;
 		}
 	}
@@ -443,7 +443,7 @@ bool g_tools_changed = false;
 }
 
 void build_error_undefined_tool( const char* build, const char* tool ){
-	globalErrorStream() << "build " << makeQuoted( build ) << " refers to undefined tool " << makeQuoted( tool ) << '\n';
+	globalErrorStream() << "build " << Quoted( build ) << " refers to undefined tool " << Quoted( tool ) << '\n';
 }
 
 void project_verify( Project& project, Tools& tools ){
@@ -533,7 +533,7 @@ bool build_commands_parse( const char* filename ){
 
 			return true;
 		}
-		globalErrorStream() << "failed to parse build menu: " << makeQuoted( filename ) << '\n';
+		globalErrorStream() << "failed to parse build menu: " << Quoted( filename ) << '\n';
 	}
 	return false;
 }

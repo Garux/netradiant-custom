@@ -154,7 +154,7 @@ void createShader( GLuint program, const char* filename, GLenum type ){
 	{
 		std::size_t size = file_size( filename );
 		FileInputStream file( filename );
-		ASSERT_MESSAGE( !file.failed(), "failed to open " << makeQuoted( filename ) );
+		ASSERT_MESSAGE( !file.failed(), "failed to open " << Quoted( filename ) );
 		Array<GLchar> buffer( size );
 		size = file.read( reinterpret_cast<StreamBase::byte_type*>( buffer.data() ), size );
 
@@ -174,7 +174,7 @@ void createShader( GLuint program, const char* filename, GLenum type ){
 			printShaderLog( shader );
 		}
 
-		ASSERT_MESSAGE( compiled, "shader compile failed: " << makeQuoted( filename ) );
+		ASSERT_MESSAGE( compiled, "shader compile failed: " << Quoted( filename ) );
 	}
 
 	// attach shader
@@ -854,7 +854,7 @@ public:
 	~OpenGLShaderCache(){
 		for ( auto& shader : m_shaders )
 		{
-			globalOutputStream() << "leaked shader: " << makeQuoted( shader.key ) << '\n';
+			globalOutputStream() << "leaked shader: " << Quoted( shader.key ) << '\n';
 		}
 	}
 	Shader* capture( const char* name ) override {
@@ -863,15 +863,15 @@ public:
 		                || *name == '<'
 		                || *name == '('
 		                || *name == '{'
-		                || strchr( name, '\\' ) == 0, "shader name contains invalid characters: " << makeQuoted( name ) );
+		                || strchr( name, '\\' ) == 0, "shader name contains invalid characters: " << Quoted( name ) );
 #if DEBUG_SHADERS
-		globalOutputStream() << "shaders capture: " << makeQuoted( name ) << '\n';
+		globalOutputStream() << "shaders capture: " << Quoted( name ) << '\n';
 #endif
 		return m_shaders.capture( name ).get();
 	}
 	void release( const char *name ) override {
 #if DEBUG_SHADERS
-		globalOutputStream() << "shaders release: " << makeQuoted( name ) << '\n';
+		globalOutputStream() << "shaders release: " << Quoted( name ) << '\n';
 #endif
 		m_shaders.release( name );
 	}

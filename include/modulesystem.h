@@ -132,7 +132,7 @@ public:
 			m_module = globalModuleServer().findModule( Type::Name, Type::Version, name );
 			if ( m_module == 0 ) {
 				globalModuleServer().setError( true );
-				globalErrorStream() << "ModuleRef::initialise: type=" << makeQuoted( Type::Name ) << " version=" << makeQuoted( Type::Version ) << " name=" << makeQuoted( name ) << " - not found\n";
+				globalErrorStream() << "ModuleRef::initialise: type=" << Quoted( Type::Name ) << " version=" << Quoted( Type::Version ) << " name=" << Quoted( name ) << " - not found\n";
 			}
 			else
 			{
@@ -150,7 +150,7 @@ public:
 	}
 	Type* getTable(){
 #if defined( _DEBUG )
-		ASSERT_MESSAGE( m_table != 0, "ModuleRef::getTable: type=" << makeQuoted( Type::Name ) << " version=" << makeQuoted( Type::Version ) << " - module-reference used without being initialised" );
+		ASSERT_MESSAGE( m_table != 0, "ModuleRef::getTable: type=" << Quoted( Type::Name ) << " version=" << Quoted( Type::Version ) << " - module-reference used without being initialised" );
 #endif
 		return m_table;
 	}
@@ -175,13 +175,13 @@ public:
 		m_module = globalModuleServer().findModule( Type::Name, Type::Version, name );
 		if ( m_module == 0 ) {
 			globalModuleServer().setError( true );
-			globalErrorStream() << "SingletonModuleRef::initialise: type=" << makeQuoted( Type::Name ) << " version=" << makeQuoted( Type::Version ) << " name=" << makeQuoted( name ) << " - not found\n";
+			globalErrorStream() << "SingletonModuleRef::initialise: type=" << Quoted( Type::Name ) << " version=" << Quoted( Type::Version ) << " name=" << Quoted( name ) << " - not found\n";
 		}
 	}
 
 	Type* getTable(){
 #if defined( _DEBUG )
-		ASSERT_MESSAGE( m_table != 0, "SingletonModuleRef::getTable: type=" << makeQuoted( Type::Name ) << " version=" << makeQuoted( Type::Version ) << " - module-reference used without being initialised" );
+		ASSERT_MESSAGE( m_table != 0, "SingletonModuleRef::getTable: type=" << Quoted( Type::Name ) << " version=" << Quoted( Type::Version ) << " - module-reference used without being initialised" );
 #endif
 		return m_table;
 	}

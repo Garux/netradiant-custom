@@ -712,7 +712,7 @@ GLFont *glfont_create( const char* family, int fontSize, const char* appPath ){
 		else if( !string_empty( family ) )
 			font.setFamily( family );
 	}
-	globalOutputStream() << "Using OpenGL font " << makeQuoted( font.toString().toLatin1().constData() ) << '\n';
+	globalOutputStream() << "Using OpenGL font " << Quoted( font.toString().toLatin1().constData() ) << '\n';
 
 	QFontMetrics metrics( font );
 

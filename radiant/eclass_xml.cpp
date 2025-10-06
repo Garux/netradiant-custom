@@ -123,7 +123,7 @@
 #include "stringio.h"
 #include <map>
 
-#define PARSE_ERROR( elementName, name ) makeQuoted( elementName ) << " is not a valid child of " << makeQuoted( name )
+#define PARSE_ERROR( elementName, name ) Quoted( elementName ) << " is not a valid child of " << Quoted( name )
 
 class IgnoreBreaks
 {
@@ -527,7 +527,7 @@ const char* GetExtension(){
 void ScanFile( EntityClassCollector& collector, const char *filename ){
 	TextFileInputStream inputFile( filename );
 	if ( !inputFile.failed() ) {
-		globalOutputStream() << "parsing entity classes from " << makeQuoted( filename ) << '\n';
+		globalOutputStream() << "parsing entity classes from " << Quoted( filename ) << '\n';
 
 		XMLStreamParser parser( inputFile );
 

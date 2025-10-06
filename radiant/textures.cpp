@@ -477,13 +477,13 @@ public:
 	}
 	qtexture_t* capture( const LoadImageCallback& loader, const char* name ) override {
 #if DEBUG_TEXTURES
-		globalOutputStream() << "textures capture: " << makeQuoted( name ) << '\n';
+		globalOutputStream() << "textures capture: " << Quoted( name ) << '\n';
 #endif
 		return m_qtextures.capture( TextureKey( loader, name ) ).get();
 	}
 	void release( qtexture_t* texture ) override {
 #if DEBUG_TEXTURES
-		globalOutputStream() << "textures release: " << makeQuoted( texture->name ) << '\n';
+		globalOutputStream() << "textures release: " << Quoted( texture->name ) << '\n';
 #endif
 		m_qtextures.release( TextureKey( texture->load, texture->name ) );
 	}

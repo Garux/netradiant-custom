@@ -173,7 +173,7 @@ std::array g_ColoursMenu{
 static void load_colors_theme( const char *filepath ){
 	TextFileInputStream file( filepath );
 	if( file.failed() ){
-		globalErrorStream() << "File " << makeQuoted( filepath ) << " reading failed.\n";
+		globalErrorStream() << "File " << Quoted( filepath ) << " reading failed.\n";
 		return;
 	}
 
@@ -183,20 +183,20 @@ static void load_colors_theme( const char *filepath ){
 	rapidjson::Document doc;
 	doc.Parse( str.c_str() );
 	if( doc.HasParseError() ){
-		globalErrorStream() << "File " << makeQuoted( filepath ) << " parsing failed.\n";
+		globalErrorStream() << "File " << Quoted( filepath ) << " parsing failed.\n";
 		return;
 	}
 
 	for( const auto& colour : g_ColoursMenu ){
 		const auto it = doc.GetObj().FindMember( colour.m_saveName );
 		if( it == doc.GetObj().MemberEnd() ){
-			globalWarningStream() << makeQuoted( colour.m_saveName ) << " not found in file " << makeQuoted( filepath ) << '\n';
+			globalWarningStream() << Quoted( colour.m_saveName ) << " not found in file " << Quoted( filepath ) << '\n';
 		}
 		else if( !it->value.IsArray() ){
-			globalWarningStream() << makeQuoted( colour.m_saveName ) << " is not an array in file " << makeQuoted( filepath ) << '\n';
+			globalWarningStream() << Quoted( colour.m_saveName ) << " is not an array in file " << Quoted( filepath ) << '\n';
 		}
 		else if( it->value.GetArray().Size() != 3 ){
-			globalWarningStream() << makeQuoted( colour.m_saveName ) << " array.size != 3 in file " << makeQuoted( filepath ) << '\n';
+			globalWarningStream() << Quoted( colour.m_saveName ) << " array.size != 3 in file " << Quoted( filepath ) << '\n';
 		}
 		else{
 			Vector3 clr( 0 );

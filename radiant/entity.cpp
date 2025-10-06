@@ -306,7 +306,7 @@ void Entity_moveSelectedPrimitives( bool toLast ){
 	scene::Node& node = ( !Node_isEntity( path.top() ) && path.size() > 1 )? path.parent() : path.top();
 
 	if ( Node_isEntity( node ) && node_is_group( node ) ) {
-		const auto command = StringStream<64>( "movePrimitivesToEntity ", makeQuoted( Node_getEntity( node )->getClassName() ) );
+		const auto command = StringStream<64>( "movePrimitivesToEntity ", Quoted( Node_getEntity( node )->getClassName() ) );
 		UndoableCommand undo( command );
 		Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), node );
 	}

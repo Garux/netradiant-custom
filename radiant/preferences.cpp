@@ -97,7 +97,7 @@ CGameDescription::CGameDescription( xmlDocPtr pDoc, const CopiedString& gameFile
 
 	mGameToolsPath = StringStream( AppPath_get(), "gamepacks/", gameFile, '/' );
 
-	ASSERT_MESSAGE( file_exists( mGameToolsPath.c_str() ), "game directory not found: " << makeQuoted( mGameToolsPath ) );
+	ASSERT_MESSAGE( file_exists( mGameToolsPath.c_str() ), "game directory not found: " << Quoted( mGameToolsPath ) );
 
 	mGameFile = gameFile;
 
@@ -116,10 +116,10 @@ CGameDescription::CGameDescription( xmlDocPtr pDoc, const CopiedString& gameFile
 }
 
 void CGameDescription::Dump(){
-	globalOutputStream() << "game description file: " << makeQuoted( mGameFile ) << '\n';
+	globalOutputStream() << "game description file: " << Quoted( mGameFile ) << '\n';
 	for ( const auto& [ key, value ] : m_gameDescription )
 	{
-		globalOutputStream() << key << " = " << makeQuoted( value ) << '\n';
+		globalOutputStream() << key << " = " << Quoted( value ) << '\n';
 	}
 }
 
@@ -197,7 +197,7 @@ void CGameDialog::LoadPrefs(){
 	// load global .pref file
 	const auto strGlobalPref = StringStream( g_Preferences.m_global_rc_path, PREFS_GLOBAL_FILENAME );
 
-	globalOutputStream() << "loading global preferences from " << makeQuoted( strGlobalPref ) << '\n';
+	globalOutputStream() << "loading global preferences from " << Quoted( strGlobalPref ) << '\n';
 
 	if ( !Preferences_Load( g_global_preferences, strGlobalPref, "global" ) ) {
 		globalOutputStream() << "failed to load global preferences from " << strGlobalPref << '\n';

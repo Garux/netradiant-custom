@@ -126,7 +126,7 @@ const char* file_dialog( QWidget* parent, bool open, const char* title, const ch
 	const GTKMasks masks( typelist );
 
 	if ( path != 0 && !string_empty( path ) ) {
-		ASSERT_MESSAGE( path_is_absolute( path ), "file_dialog_show: path not absolute: " << makeQuoted( path ) );
+		ASSERT_MESSAGE( path_is_absolute( path ), "file_dialog_show: path not absolute: " << Quoted( path ) );
 	}
 
 	// we should add all important paths as shortcut folder...
@@ -165,7 +165,7 @@ const char* file_dialog( QWidget* parent, bool open, const char* title, const ch
 		if( !string_empty( extension ) ){ // validate it
 			const auto check = [extension]( const CopiedString& filter ){ return extension_equal( extension, path_get_extension( filter.c_str() ) ); };
 			if( !std::ranges::any_of( masks.m_filters, check ) ) {
-				qt_MessageBox( parent, StringStream<64>( makeQuoted( extension ), " is unsupported file type for requested operation\n" ), extension, EMessageBoxType::Error );
+				qt_MessageBox( parent, StringStream<64>( Quoted( extension ), " is unsupported file type for requested operation\n" ), extension, EMessageBoxType::Error );
 				g_file_dialog_file.clear();
 			}
 		}

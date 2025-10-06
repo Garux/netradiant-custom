@@ -707,12 +707,12 @@ void TextureBrowser_ShowDirectory( const char* directory ){
 		Archive* archive = GlobalFileSystem().getArchive( directory );
 		//ASSERT_NOTNULL( archive );
 		if( archive ){
-			globalOutputStream() << "Loading " << makeQuoted( directory ) << " wad file.\n";
+			globalOutputStream() << "Loading " << Quoted( directory ) << " wad file.\n";
 			LoadShaderVisitor visitor;
 			archive->forEachFile( Archive::VisitorFunc( visitor, Archive::eFiles, 0 ), "textures/" );
 		}
 		else{
-			globalErrorStream() << "Attempted to load " << makeQuoted( directory ) << " wad file.\n";
+			globalErrorStream() << "Attempted to load " << Quoted( directory ) << " wad file.\n";
 		}
 	}
 	else

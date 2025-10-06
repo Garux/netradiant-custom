@@ -70,12 +70,12 @@ Commands g_commands;
 
 void GlobalCommands_insert( const char* name, const Callback<void()>& callback, const QKeySequence& accelerator ){
 	bool added = g_commands.insert( Commands::value_type( name, Command( callback, GlobalShortcuts_insert( name, accelerator ) ) ) ).second;
-	ASSERT_MESSAGE( added, "command already registered: " << makeQuoted( name ) );
+	ASSERT_MESSAGE( added, "command already registered: " << Quoted( name ) );
 }
 
 const Command& GlobalCommands_find( const char* command ){
 	Commands::iterator i = g_commands.find( command );
-	ASSERT_MESSAGE( i != g_commands.end(), "failed to lookup command " << makeQuoted( command ) );
+	ASSERT_MESSAGE( i != g_commands.end(), "failed to lookup command " << Quoted( command ) );
 	return ( *i ).second;
 }
 
@@ -86,11 +86,11 @@ Toggles g_toggles;
 
 void GlobalToggles_insert( const char* name, const Callback<void()>& callback, const BoolExportCallback& exportCallback, const QKeySequence& accelerator ){
 	bool added = g_toggles.insert( Toggles::value_type( name, Toggle( callback, GlobalShortcuts_insert( name, accelerator ), exportCallback ) ) ).second;
-	ASSERT_MESSAGE( added, "toggle already registered: " << makeQuoted( name ) );
+	ASSERT_MESSAGE( added, "toggle already registered: " << Quoted( name ) );
 }
 const Toggle& GlobalToggles_find( const char* name ){
 	Toggles::iterator i = g_toggles.find( name );
-	ASSERT_MESSAGE( i != g_toggles.end(), "failed to lookup toggle " << makeQuoted( name ) );
+	ASSERT_MESSAGE( i != g_toggles.end(), "failed to lookup toggle " << Quoted( name ) );
 	return ( *i ).second;
 }
 
@@ -101,11 +101,11 @@ KeyEvents g_keyEvents;
 
 void GlobalKeyEvents_insert( const char* name, const Callback<void()>& keyDown, const Callback<void()>& keyUp, const QKeySequence& accelerator ){
 	bool added = g_keyEvents.insert( KeyEvents::value_type( name, KeyEvent( GlobalShortcuts_insert( name, accelerator ), keyDown, keyUp ) ) ).second;
-	ASSERT_MESSAGE( added, "command already registered: " << makeQuoted( name ) );
+	ASSERT_MESSAGE( added, "command already registered: " << Quoted( name ) );
 }
 const KeyEvent& GlobalKeyEvents_find( const char* name ){
 	KeyEvents::iterator i = g_keyEvents.find( name );
-	ASSERT_MESSAGE( i != g_keyEvents.end(), "failed to lookup keyEvent " << makeQuoted( name ) );
+	ASSERT_MESSAGE( i != g_keyEvents.end(), "failed to lookup keyEvent " << Quoted( name ) );
 	return ( *i ).second;
 }
 
@@ -240,7 +240,7 @@ static void accelerator_alter( QTreeWidgetItem *item, const QKeySequence acceler
 
 	Shortcuts::iterator thisShortcutIterator = g_shortcuts.find( commandName.constData() );
 	if ( thisShortcutIterator == g_shortcuts.end() ) {
-		globalErrorStream() << "commandName " << makeQuoted( commandName.constData() ) << " not found in g_shortcuts.\n";
+		globalErrorStream() << "commandName " << Quoted( commandName.constData() ) << " not found in g_shortcuts.\n";
 		return;
 	}
 
@@ -471,7 +471,7 @@ public:
 				}
 				else
 				{
-					globalWarningStream() << "WARNING: failed to parse user command " << makeQuoted( name ) << ": unknown key " << makeQuoted( *value ) << '\n';
+					globalWarningStream() << "WARNING: failed to parse user command " << Quoted( name ) << ": unknown key " << Quoted( *value ) << '\n';
 				}
 			}
 		}
@@ -485,7 +485,7 @@ void LoadCommandMap( const char* path ){
 	const auto strINI = StringStream( path, "shortcuts.ini" );
 
 	if ( IniFile ini; ini.read( strINI ) ) {
-		globalOutputStream() << "loading custom shortcuts list from " << makeQuoted( strINI ) << '\n';
+		globalOutputStream() << "loading custom shortcuts list from " << Quoted( strINI ) << '\n';
 
 		const Version version = version_parse( COMMANDS_VERSION );
 		const Version dataVersion = version_parse( ini.getValue( "Version", "number" ).value_or( "" ) );
@@ -503,6 +503,6 @@ void LoadCommandMap( const char* path ){
 	}
 	else
 	{
-		globalWarningStream() << "failed to load custom shortcuts from " << makeQuoted( strINI ) << '\n';
+		globalWarningStream() << "failed to load custom shortcuts from " << Quoted( strINI ) << '\n';
 	}
 }

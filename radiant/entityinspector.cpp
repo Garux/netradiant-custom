@@ -100,7 +100,7 @@ const char* SelectedEntity_getValueForKey( const char* key ){
 }
 
 void Scene_EntitySetKeyValue_Selected_Undoable( const char* key, const char* value ){
-	const auto command = StringStream( "entitySetKeyValue -key ", makeQuoted( key ), " -value ", makeQuoted( value ) );
+	const auto command = StringStream( "entitySetKeyValue -key ", Quoted( key ), " -value ", Quoted( value ) );
 	UndoableCommand undo( command );
 	Scene_EntitySetKeyValue_Selected( key, value );
 }

@@ -2354,7 +2354,7 @@ class TextEditor : public QObject
 		FILE *f = fopen( m_filename.c_str(), "wb" ); //write in binary mode to preserve line feeds
 
 		if ( f == nullptr ) {
-			globalErrorStream() << "Error saving file" << makeQuoted( m_filename ) << '\n';
+			globalErrorStream() << "Error saving file" << Quoted( m_filename ) << '\n';
 			return;
 		}
 
@@ -2479,7 +2479,7 @@ void DoShaderView( const char *shaderFileName, const char *shaderName, bool exte
 #endif
 		}
 		else{
-			auto command = StringStream( g_TextEditor_editorCommand, ' ', makeQuoted( pathFull ) );
+			auto command = StringStream( g_TextEditor_editorCommand, ' ', Quoted( pathFull ) );
 			globalOutputStream() << "Launching: " << command << '\n';
 			// note: linux does not return false if the command failed so it will assume success
 			if ( !Q_Exec( 0, command.c_str(), 0, true, false ) )

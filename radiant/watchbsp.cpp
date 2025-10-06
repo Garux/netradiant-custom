@@ -335,7 +335,7 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 	if ( attrs != 0 ) {
 		for ( const xmlChar** p = attrs; *p != 0; p += 2 )
 		{
-			globalOutputStream() << ' ' << p[0] << '=' << makeQuoted( p[1] );
+			globalOutputStream() << ' ' << p[0] << '=' << Quoted( p[1] );
 		}
 	}
 	globalOutputStream() << ">\n";

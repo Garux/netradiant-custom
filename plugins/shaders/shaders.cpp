@@ -455,7 +455,7 @@ bool parseShaderParameters( Tokeniser& tokeniser, ShaderParameters& params ){
 bool ShaderTemplate::parseTemplate( Tokeniser& tokeniser ){
 	m_Name = tokeniser.getToken();
 	if ( !parseShaderParameters( tokeniser, m_params ) ) {
-		globalErrorStream() << "shader template: " << makeQuoted( m_Name ) << ": parameter parse failed\n";
+		globalErrorStream() << "shader template: " << Quoted( m_Name ) << ": parameter parse failed\n";
 		return false;
 	}
 
@@ -703,18 +703,18 @@ bool parseTemplateInstance( Tokeniser& tokeniser, const char* filename ){
 	const char* templateName = tokeniser.getToken();
 	ShaderTemplate* shaderTemplate = findTemplate( templateName );
 	if ( shaderTemplate == 0 ) {
-		globalErrorStream() << "shader instance: " << makeQuoted( name ) << ": shader template not found: " << makeQuoted( templateName ) << '\n';
+		globalErrorStream() << "shader instance: " << Quoted( name ) << ": shader template not found: " << Quoted( templateName ) << '\n';
 	}
 
 	ShaderArguments args;
 	if ( !parseShaderParameters( tokeniser, args ) ) {
-		globalErrorStream() << "shader instance: " << makeQuoted( name ) << ": argument parse failed\n";
+		globalErrorStream() << "shader instance: " << Quoted( name ) << ": argument parse failed\n";
 		return false;
 	}
 
 	if ( shaderTemplate != 0 ) {
 		if ( !g_shaderDefinitions.insert( ShaderDefinitionMap::value_type( name, ShaderDefinition( shaderTemplate, args, filename ) ) ).second ) {
-			globalErrorStream() << "shader instance: " << makeQuoted( name ) << ": already exists, second definition ignored\n";
+			globalErrorStream() << "shader instance: " << Quoted( name ) << ": already exists, second definition ignored\n";
 		}
 	}
 	return true;
@@ -777,7 +777,7 @@ float evaluateFloat( const ShaderValue& value, const ShaderParameters& params, c
 	const char* result = evaluateShaderValue( value.c_str(), params, args );
 	float f;
 	if ( !string_parse_float( result, f ) ) {
-		globalErrorStream() << "parsing float value failed: " << makeQuoted( result ) << '\n';
+		globalErrorStream() << "parsing float value failed: " << Quoted( result ) << '\n';
 		return 1.f;
 	}
 	return f;
@@ -820,7 +820,7 @@ BlendFactor evaluateBlendFactor( const ShaderValue& value, const ShaderParameter
 		return BLEND_SRC_ALPHA_SATURATE;
 	}
 
-	globalErrorStream() << "parsing blend-factor value failed: " << makeQuoted( result ) << '\n';
+	globalErrorStream() << "parsing blend-factor value failed: " << Quoted( result ) << '\n';
 	return BLEND_ZERO;
 }
 
@@ -1016,7 +1016,7 @@ public:
 					}
 					else
 					{
-						globalErrorStream() << "parsing blend value failed: " << makeQuoted( blend ) << '\n';
+						globalErrorStream() << "parsing blend value failed: " << Quoted( blend ) << '\n';
 					}
 				}
 			}
@@ -1420,7 +1420,7 @@ void parseGuideFile( Tokeniser& tokeniser, const char* filename ){
 			ShaderTemplatePointer shaderTemplate( new ShaderTemplate );
 			shaderTemplate->parseTemplate( tokeniser );
 			if ( !g_shaderTemplates.insert( ShaderTemplateMap::value_type( shaderTemplate->getName(), shaderTemplate ) ).second ) {
-				globalErrorStream() << "guide " << makeQuoted( shaderTemplate->getName() ) << ": already defined, second definition ignored\n";
+				globalErrorStream() << "guide " << Quoted( shaderTemplate->getName() ) << ": already defined, second definition ignored\n";
 			}
 		}
 		else if ( string_equal( token, "inlineGuide" ) ) {

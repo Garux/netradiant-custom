@@ -67,7 +67,7 @@ void EntityClassFGD_clear(){
 EntityClass* EntityClassFGD_insertUniqueBase( EntityClass* entityClass ){
 	auto [ it, inserted ] = g_EntityClassFGD_bases.insert( BaseClasses::value_type( entityClass->name(), entityClass ) );
 	if ( !inserted ) {
-		globalErrorStream() << "duplicate base class: " << makeQuoted( entityClass->name() ) << '\n';
+		globalErrorStream() << "duplicate base class: " << Quoted( entityClass->name() ) << '\n';
 		eclass_capture_state( entityClass );
 		entityClass->free( entityClass );
 	}
@@ -77,7 +77,7 @@ EntityClass* EntityClassFGD_insertUniqueBase( EntityClass* entityClass ){
 EntityClass* EntityClassFGD_insertUnique( EntityClass* entityClass ){
 	auto [ it, inserted ] = g_EntityClassFGD_classes.insert( EntityClasses::value_type( entityClass->name(), entityClass ) );
 	if ( !inserted ) {
-		globalErrorStream() << "duplicate entity class: " << makeQuoted( entityClass->name() ) << '\n';
+		globalErrorStream() << "duplicate entity class: " << Quoted( entityClass->name() ) << '\n';
 		eclass_capture_state( entityClass );
 		entityClass->free( entityClass );
 	}
@@ -92,7 +92,7 @@ inline bool EntityClassFGD_parseToken( Tokeniser& tokeniser, const char* token )
 	const bool w = s_fgd_warned;
 	const bool ok = string_equal( tokeniser.getToken(), token );
 	if( !ok ){
-		globalErrorStream() << PARSE_ERROR << "\nExpected " << makeQuoted( token ) << '\n';
+		globalErrorStream() << PARSE_ERROR << "\nExpected " << Quoted( token ) << '\n';
 		s_fgd_warned = true;
 	}
 	return w || ok;
@@ -524,7 +524,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 		}
 		else
 		{
-			ERROR_FGD( "unknown key type: " << makeQuoted( type ) );
+			ERROR_FGD( "unknown key type: " << Quoted( type ) );
 		}
 		tokeniser.nextLine();
 	}
@@ -580,7 +580,7 @@ void EntityClassFGD_parse( TextInputStream& inputStream, const char* path ){
 		}
 		else
 		{
-			ERROR_FGD( "unknown block type: " << makeQuoted( blockType ) );
+			ERROR_FGD( "unknown block type: " << Quoted( blockType ) );
 		}
 	}
 
@@ -591,7 +591,7 @@ void EntityClassFGD_parse( TextInputStream& inputStream, const char* path ){
 void EntityClassFGD_loadFile( const char* filename ){
 	TextFileInputStream file( filename );
 	if ( !file.failed() ) {
-		globalOutputStream() << "parsing entity classes from " << makeQuoted( filename ) << '\n';
+		globalOutputStream() << "parsing entity classes from " << Quoted( filename ) << '\n';
 
 		EntityClassFGD_parse( file, filename );
 	}
@@ -612,7 +612,7 @@ void EntityClassFGD_resolveInheritance( EntityClass* derivedClass ){
 			if ( i == g_EntityClassFGD_bases.end() ) {
 				i = g_EntityClassFGD_classes.find( parentName.c_str() );
 				if ( i == g_EntityClassFGD_classes.end() ) {
-					globalErrorStream() << "failed to find entityDef " << makeQuoted( parentName.c_str() ) << " inherited by " << makeQuoted( derivedClass->name() ) << '\n';
+					globalErrorStream() << "failed to find entityDef " << Quoted( parentName.c_str() ) << " inherited by " << Quoted( derivedClass->name() ) << '\n';
 					continue;
 				}
 			}
@@ -662,10 +662,10 @@ void EClass_finalize_fgd( EntityClassCollector& collector ){
 		EntityClassFGD_resolveInheritance( eclass );
 		if ( eclass->fixedsize && eclass->m_modelpath.empty() ) {
 			if ( !eclass->sizeSpecified ) {
-				globalErrorStream() << "size not specified for entity class: " << makeQuoted( eclass->name() ) << '\n';
+				globalErrorStream() << "size not specified for entity class: " << Quoted( eclass->name() ) << '\n';
 			}
 			if ( !eclass->colorSpecified ) {
-				globalErrorStream() << "color not specified for entity class: " << makeQuoted( eclass->name() ) << '\n';
+				globalErrorStream() << "color not specified for entity class: " << Quoted( eclass->name() ) << '\n';
 			}
 		}
 	}

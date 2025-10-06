@@ -138,7 +138,7 @@ public:
 	void parseFile( const char* name ){
 		ArchiveTextFile* file = GlobalFileSystem().openTextFile( StringStream<64>( "skins/", name ) );
 		if ( file != 0 ) {
-			globalOutputStream() << "parsing skins from " << makeQuoted( name ) << '\n';
+			globalOutputStream() << "parsing skins from " << Quoted( name ) << '\n';
 			{
 				Tokeniser& tokeniser = GlobalScriptLibrary().m_pfnNewSimpleTokeniser( file->getInputStream() );
 				parseTokens( tokeniser );
@@ -148,7 +148,7 @@ public:
 		}
 		else
 		{
-			globalErrorStream() << "failed to open " << makeQuoted( name ) << '\n';
+			globalErrorStream() << "failed to open " << Quoted( name ) << '\n';
 		}
 	}
 

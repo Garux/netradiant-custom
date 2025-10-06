@@ -467,7 +467,7 @@ void ConstructRegionBrushes( scene::Node* brushes[6], const Vector3& region_mins
 	                     ? texdef_name_default()
 	                     : texdef_name_valid( g_regionBoxShader.c_str() )
 	                     ? g_regionBoxShader.c_str()
-	                     : ( globalWarningStream() << "g_regionBoxShader " << makeQuoted( g_regionBoxShader ) << " !texdef_name_valid()\n"
+	                     : ( globalWarningStream() << "g_regionBoxShader " << Quoted( g_regionBoxShader ) << " !texdef_name_valid()\n"
 	                     , texdef_name_default() );
 
 	{

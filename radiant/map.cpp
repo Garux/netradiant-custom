@@ -75,13 +75,13 @@ class NameObserver
 
 	void construct(){
 		if ( !empty() ) {
-			//globalOutputStream() << "construct " << makeQuoted( c_str() ) << '\n';
+			//globalOutputStream() << "construct " << Quoted( c_str() ) << '\n';
 			m_names.insert( name_read( c_str() ) );
 		}
 	}
 	void destroy(){
 		if ( !empty() ) {
-			//globalOutputStream() << "destroy " << makeQuoted( c_str() ) << '\n';
+			//globalOutputStream() << "destroy " << Quoted( c_str() ) << '\n';
 			m_names.erase( name_read( c_str() ) );
 		}
 	}
@@ -159,7 +159,7 @@ public:
 			char buffer[1024];
 			name_write( buffer, uniqueName );
 
-			//globalOutputStream() << "renaming " << makeQuoted( name.c_str() ) << " to " << makeQuoted( buffer ) << '\n';
+			//globalOutputStream() << "renaming " << Quoted( name.c_str() ) << " to " << Quoted( buffer ) << '\n';
 
 			for ( const NameCallback& nameCallback : setNameCallbacks )
 			{
@@ -340,7 +340,7 @@ bool Map_Unnamed( const Map& map ){
 inline const MapFormat& MapFormat_forFile( const char* filename ){
 	const char* moduleName = findModuleName( GetFileTypeRegistry(), MapFormat::Name, path_get_extension( filename ) );
 	MapFormat* format = Radiant_getMapModules().findModule( moduleName );
-	ASSERT_MESSAGE( format != 0, "map format not found for file " << makeQuoted( filename ) );
+	ASSERT_MESSAGE( format != 0, "map format not found for file " << Quoted( filename ) );
 	return *format;
 }
 
@@ -1585,14 +1585,14 @@ tryDecompile:
 		StringOutputStream str( 256 );
 		str << AppPath_get() << "q3map2." << RADIANT_EXECUTABLE
 		    << " -v -game " << ( ( type && *type ) ? type : "quake3" )
-		    << " -fs_basepath " << makeQuoted( EnginePath_get() )
-		    << " -fs_homepath " << makeQuoted( g_qeglobals.m_userEnginePath )
+		    << " -fs_basepath " << Quoted( EnginePath_get() )
+		    << " -fs_homepath " << Quoted( g_qeglobals.m_userEnginePath )
 		    << " -fs_game " << gamename_get()
 		    << " -convert -format " << ( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ) == TEXDEFTYPEID_QUAKE ? "map" : "map_bp" );
 		if ( path_extension_is( filename, "map" ) ) {
 			str << " -readmap ";
 		}
-		str << ' ' << makeQuoted( filename );
+		str << ' ' << Quoted( filename );
 
 		// run
 		Q_Exec( nullptr, str.c_str(), nullptr, false, true );
@@ -2257,11 +2257,11 @@ void map_autocaulk_selected(){
 		StringOutputStream str( 256 );
 		str << AppPath_get() << "q3map2." << RADIANT_EXECUTABLE
 		    << " -game quake3"
-		    << " -fs_basepath " << makeQuoted( EnginePath_get() )
-		    << " -fs_homepath " << makeQuoted( g_qeglobals.m_userEnginePath )
+		    << " -fs_basepath " << Quoted( EnginePath_get() )
+		    << " -fs_homepath " << Quoted( g_qeglobals.m_userEnginePath )
 		    << " -fs_game " << gamename_get()
 		    << " -autocaulk -fulldetail "
-		    << makeQuoted( filename );
+		    << Quoted( filename );
 		// run
 		Q_Exec( nullptr, str.c_str(), nullptr, false, true );
 	}

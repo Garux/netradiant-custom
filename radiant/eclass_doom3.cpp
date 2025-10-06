@@ -123,7 +123,7 @@ bool EntityClassDoom3_parseUnknown( Tokeniser& tokeniser ){
 	//const char* name =
 	PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser ) );
 
-	//globalOutputStream() << "parsing unknown block " << makeQuoted( name ) << '\n';
+	//globalOutputStream() << "parsing unknown block " << Quoted( name ) << '\n';
 
 	PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser, "{" ) );
 	tokeniser.nextLine();
@@ -275,7 +275,7 @@ bool EntityClassDoom3_parseModel( Tokeniser& tokeniser ){
 		}
 		else
 		{
-			globalErrorStream() << "unknown model parameter: " << makeQuoted( parameter ) << '\n';
+			globalErrorStream() << "unknown model parameter: " << Quoted( parameter ) << '\n';
 			return false;
 		}
 		tokeniser.nextLine();
@@ -502,16 +502,16 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 		else
 		{
 			CopiedString tmp( key );
-			//ASSERT_MESSAGE( !string_equal_n( key, "editor_", 7 ), "unsupported editor key: " << makeQuoted( key ) );
+			//ASSERT_MESSAGE( !string_equal_n( key, "editor_", 7 ), "unsupported editor key: " << Quoted( key ) );
 			if ( string_equal_n( key, "editor_", 7 ) ) {
-				globalErrorStream() << "unsupported editor key " << makeQuoted( key );
+				globalErrorStream() << "unsupported editor key " << Quoted( key );
 			}
 			EntityClassAttribute& attribute = EntityClass_insertAttribute( entityClass, key ).second;
 			attribute.m_type = "string";
 			const char* value;
 			PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseString( tokeniser, value ) );
 			if ( string_equal( value, "}" ) ) { // hack for quake4 powerups.def bug
-				globalErrorStream() << "entityDef " << makeQuoted( entityClass.name() ) << " key " << makeQuoted( tmp ) << " has no value\n";
+				globalErrorStream() << "entityDef " << Quoted( entityClass.name() ) << " key " << Quoted( tmp ) << " has no value\n";
 				break;
 			}
 			else
@@ -613,7 +613,7 @@ bool EntityClassDoom3_parse( TextInputStream& inputStream, const char* filename 
 
 
 void EntityClassDoom3_loadFile( const char* filename ){
-	globalOutputStream() << "parsing entity classes from " << makeQuoted( filename ) << '\n';
+	globalOutputStream() << "parsing entity classes from " << Quoted( filename ) << '\n';
 
 	const auto fullname = StringStream( "def/", filename );
 
@@ -654,7 +654,7 @@ void EntityClass_resolveInheritance( EntityClass* derivedClass ){
 		derivedClass->inheritanceResolved = true;
 		EntityClasses::iterator i = g_EntityClassDoom3_classes.find( derivedClass->m_parent.front().c_str() );
 		if ( i == g_EntityClassDoom3_classes.end() ) {
-			globalErrorStream() << "failed to find entityDef " << makeQuoted( derivedClass->m_parent.front() ) << " inherited by "  << makeQuoted( derivedClass->name() ) << '\n';
+			globalErrorStream() << "failed to find entityDef " << Quoted( derivedClass->m_parent.front() ) << " inherited by "  << Quoted( derivedClass->name() ) << '\n';
 		}
 		else
 		{
@@ -688,7 +688,7 @@ public:
 	}
 	void realise() override {
 		if ( --m_unrealised == 0 ) {
-			globalOutputStream() << "searching vfs directory " << makeQuoted( "def" ) << " for *.def\n";
+			globalOutputStream() << "searching vfs directory " << Quoted( "def" ) << " for *.def\n";
 			GlobalFileSystem().forEachFile( "def/", "def", makeCallbackF( EntityClassDoom3_loadFile ) );
 
 			{

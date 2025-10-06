@@ -89,14 +89,14 @@ NodeSmartReference MapResource_load( const MapFormat& format, const char* path, 
 	}
 	else
 	{
-		globalErrorStream() << "map path is not fully qualified: " << makeQuoted( fullpath ) << '\n';
+		globalErrorStream() << "map path is not fully qualified: " << Quoted( fullpath ) << '\n';
 	}
 
 	return root;
 }
 
 bool MapResource_saveFile( const MapFormat& format, scene::Node& root, GraphTraversalFunc traverse, const char* filename ){
-	//ASSERT_MESSAGE( path_is_absolute( filename ), "MapResource_saveFile: path is not absolute: " << makeQuoted( filename ) );
+	//ASSERT_MESSAGE( path_is_absolute( filename ), "MapResource_saveFile: path is not absolute: " << Quoted( filename ) );
 	globalOutputStream() << "Open file " << filename << " for write...";
 	TextFileOutputStream file( filename );
 	if ( !file.failed() ) {
@@ -119,7 +119,7 @@ bool file_saveBackup( const char* path ){
 	if ( !file_exists( path ) ) {
 		return true; // nothing to move, no wonder it failed
 	}
-	globalErrorStream() << "map path (or backup path) is not writable: " << makeQuoted( path ) << '\n';
+	globalErrorStream() << "map path (or backup path) is not writable: " << Quoted( path ) << '\n';
 	return false;
 }
 
@@ -134,11 +134,11 @@ bool MapResource_save( const MapFormat& format, scene::Node& root, const char* p
 			return MapResource_saveFile( format, root, Map_Traverse, fullpath );
 		}
 
-		globalErrorStream() << "failed to save map file: " << makeQuoted( fullpath ) << '\n';
+		globalErrorStream() << "failed to save map file: " << Quoted( fullpath ) << '\n';
 		return false;
 	}
 
-	globalErrorStream() << "map path is not fully qualified: " << makeQuoted( fullpath ) << '\n';
+	globalErrorStream() << "map path is not fully qualified: " << Quoted( fullpath ) << '\n';
 	return false;
 }
 
@@ -347,7 +347,7 @@ struct ModelResource final : public Resource
 		if ( realised() ) {
 			unrealise();
 		}
-		ASSERT_MESSAGE( !realised(), "ModelResource::~ModelResource: resource reference still realised: " << makeQuoted( m_name ) );
+		ASSERT_MESSAGE( !realised(), "ModelResource::~ModelResource: resource reference still realised: " << Quoted( m_name ) );
 	}
 	// NOT COPYABLE
 	ModelResource( const ModelResource& ) = delete;

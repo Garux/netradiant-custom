@@ -508,7 +508,7 @@ MapQ2Module g_MapQ2Module;
 #define PARSE_ERROR "error parsing VMF"
 
 inline void parseToken( Tokeniser& tokeniser, const char* token ){
-	ASSERT_MESSAGE( Tokeniser_parseToken( tokeniser, token ), "error parsing vmf: token not found: " << makeQuoted( token ) );
+	ASSERT_MESSAGE( Tokeniser_parseToken( tokeniser, token ), "error parsing vmf: token not found: " << Quoted( token ) );
 }
 
 
@@ -590,7 +590,7 @@ void VMF_parseBlock( Tokeniser& tokeniser, const VMFBlock& block ){
 		tokeniser.nextLine();
 		if ( string_equal( value, "{" ) ) {
 			VMFBlock::const_iterator i = VMFBlock_find( block, tmp.c_str() );
-			ASSERT_MESSAGE( i != block.end(), "error parsing vmf block " << makeQuoted( block.name() ) << ": unknown block: " << makeQuoted( tmp ) );
+			ASSERT_MESSAGE( i != block.end(), "error parsing vmf block " << Quoted( block.name() ) << ": unknown block: " << Quoted( tmp ) );
 			if ( string_equal( tmp.c_str(), "solid" ) ) {
 				++g_vmf_brushes;
 			}

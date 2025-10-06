@@ -298,11 +298,6 @@ public:
 	}
 };
 
-template<typename Type>
-inline Quoted<Type> makeQuoted( const Type& type ){
-	return Quoted<Type>( type );
-}
-
 /// \brief Writes any type to \p ostream with a quotation mark character before and after it.
 template<typename TextOutputStreamType, typename Type>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const Quoted<Type>& quoted ){

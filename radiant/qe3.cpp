@@ -158,7 +158,7 @@ void build_init_variables(){
 	build_set_variable( "UserEnginePath", g_qeglobals.m_userEnginePath.c_str() );
 	for( const auto& path : ExtraResourcePaths_get() )
 		if( !path.empty() )
-			stream << " -fs_pakpath " << makeQuoted( path );
+			stream << " -fs_pakpath " << Quoted( path );
 	build_set_variable( "ExtraResourcePaths", stream );
 	build_set_variable( "MonitorAddress", ( g_WatchBSP_Enabled ) ? RADIANT_MONITOR_ADDRESS : "" );
 	build_set_variable( "GameName", gamename_get() );
@@ -190,7 +190,7 @@ public:
 		m_file << command;
 		if( m_outputRedirect ){
 			m_file << ( m_commandCount == 0? " > " : " >> " );
-			m_file << makeQuoted( m_outputRedirect );
+			m_file << Quoted( m_outputRedirect );
 		}
 		m_file << '\n';
 		++m_commandCount;
