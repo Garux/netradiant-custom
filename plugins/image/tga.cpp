@@ -298,7 +298,7 @@ Image* Targa_decodeImageData( const TargaHeader& targa_header, PointerInputStrea
 			image_fix_fully_transparent_alpha( *image );
 			break;
 		default:
-			globalErrorStream() << "LoadTGA: illegal pixel_size '" << targa_header.pixel_size << "'\n";
+			globalErrorStream() << "LoadTGA: illegal pixel_size " << SingleQuoted( targa_header.pixel_size ) << '\n';
 			image->release();
 			return 0;
 		}
@@ -317,7 +317,7 @@ Image* Targa_decodeImageData( const TargaHeader& targa_header, PointerInputStrea
 			image_fix_fully_transparent_alpha( *image );
 			break;
 		default:
-			globalErrorStream() << "LoadTGA: illegal pixel_size '" << targa_header.pixel_size << "'\n";
+			globalErrorStream() << "LoadTGA: illegal pixel_size " << SingleQuoted( targa_header.pixel_size ) << '\n';
 			image->release();
 			return 0;
 		}
@@ -333,7 +333,7 @@ Image* Targa_decodeImageData( const TargaHeader& targa_header, PointerInputStrea
 			image_fix_fully_transparent_alpha( *image );
 			break;
 		default:
-			globalErrorStream() << "LoadTGA: illegal colormap_size '" << targa_header.colormap_size << "'\n";
+			globalErrorStream() << "LoadTGA: illegal colormap_size " << SingleQuoted( targa_header.colormap_size ) << '\n';
 			image->release();
 			return 0;
 		}
@@ -349,7 +349,7 @@ Image* Targa_decodeImageData( const TargaHeader& targa_header, PointerInputStrea
 			image_fix_fully_transparent_alpha( *image );
 			break;
 		default:
-			globalErrorStream() << "LoadTGA: illegal colormap_size '" << targa_header.colormap_size << "'\n";
+			globalErrorStream() << "LoadTGA: illegal colormap_size " << SingleQuoted( targa_header.colormap_size ) << '\n';
 			image->release();
 			return 0;
 		}

@@ -2475,7 +2475,7 @@ void DoShaderView( const char *shaderFileName, const char *shaderName, bool exte
 #ifdef WIN32
 			ShellExecute( (HWND)MainFrame_getWindow()->effectiveWinId(), 0, pathFull.c_str(), 0, 0, SW_SHOWNORMAL );
 #else
-			globalWarningStream() << "Failed to open '" << pathFull << "'\nSet Shader Editor Command in preferences\n";
+			globalWarningStream() << "Failed to open " << SingleQuoted( pathFull ) << "\nSet Shader Editor Command in preferences\n";
 #endif
 		}
 		else{

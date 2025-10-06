@@ -678,11 +678,11 @@ void Select_RotateTexture( float amt ){
 // expects shader names at input, comparison relies on shader names .. texture names no longer relevant
 void FindReplaceTextures( const char* pFind, const char* pReplace, bool bSelected ){
 	if ( !texdef_name_valid( pFind ) ) {
-		globalErrorStream() << "FindReplaceTextures: invalid texture name: '" << pFind << "', aborted\n";
+		globalErrorStream() << "FindReplaceTextures: invalid texture name: " << SingleQuoted( pFind ) << ", aborted\n";
 		return;
 	}
 	if ( !texdef_name_valid( pReplace ) ) {
-		globalErrorStream() << "FindReplaceTextures: invalid texture name: '" << pReplace << "', aborted\n";
+		globalErrorStream() << "FindReplaceTextures: invalid texture name: " << SingleQuoted( pReplace ) << ", aborted\n";
 		return;
 	}
 

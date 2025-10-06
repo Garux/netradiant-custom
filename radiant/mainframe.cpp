@@ -544,7 +544,7 @@ void Radiant_loadModules( const char* path ){
 		ASSERT_MESSAGE( strlen( path ) + strlen( name ) < 1024, "" );
 		strcpy( fullname, path );
 		strcat( fullname, name );
-		globalOutputStream() << "Found '" << fullname << "'\n";
+		globalOutputStream() << "Found " << SingleQuoted( fullname ) << '\n';
 		GlobalModuleServer_loadModule( fullname );
 	}));
 }

@@ -224,9 +224,9 @@ void RunBatch( const std::vector<CopiedString>& commands ){
 #if defined ( POSIX )
 		chmod( batpath, 0744 );
 #endif
-		globalOutputStream() << "Writing the compile script to '" << batpath << "'\n";
+		globalOutputStream() << "Writing the compile script to " << SingleQuoted( batpath ) << '\n';
 		if( g_WatchBSP0_DumpLog )
-			globalOutputStream() << "The build output will be saved in '" << junkpath << "'\n";
+			globalOutputStream() << "The build output will be saved in " << SingleQuoted( junkpath ) << '\n';
 		Q_Exec( batpath, nullptr, nullptr, true, false );
 	}
 }

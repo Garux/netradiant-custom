@@ -254,7 +254,7 @@ inline bool check_plane_is_integer( const PlanePoints& planePoints ){
 
 inline void brush_check_shader( const char* name ){
 	if ( !texdef_name_valid( name ) ) {
-		globalErrorStream() << "brush face has invalid texture name: '" << name << "'\n";
+		globalErrorStream() << "brush face has invalid texture name: " << SingleQuoted( name ) << '\n';
 	}
 }
 

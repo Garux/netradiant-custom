@@ -983,7 +983,7 @@ private:
 
 	void check_shader(){
 		if ( !texdef_name_valid( GetShader() ) ) {
-			globalErrorStream() << "patch has invalid texture name: '" << GetShader() << "'\n";
+			globalErrorStream() << "patch has invalid texture name: " << SingleQuoted( GetShader() ) << '\n';
 		}
 	}
 

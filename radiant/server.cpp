@@ -127,7 +127,7 @@ public:
 	DynamicLibrary( const char* filename ){
 		m_library = LoadLibrary( filename );
 		if ( m_library == 0 ) {
-			globalErrorStream() << "LoadLibrary failed: '" << filename << "'\n";
+			globalErrorStream() << "LoadLibrary failed: " << SingleQuoted( filename ) << '\n';
 			globalErrorStream() << "GetLastError: " << FormatGetLastError();
 		}
 	}
@@ -142,7 +142,7 @@ public:
 	FunctionPointer findSymbol( const char* symbol ){
 		FunctionPointer address = (FunctionPointer) GetProcAddress( m_library, symbol );
 		if ( address == 0 ) {
-			globalErrorStream() << "GetProcAddress failed: '" << symbol << "'\n";
+			globalErrorStream() << "GetProcAddress failed: " << SingleQuoted( symbol ) << '\n';
 			globalErrorStream() << "GetLastError: " << FormatGetLastError();
 		}
 		return address;
@@ -162,7 +162,7 @@ public:
 	DynamicLibrary( const char* filename ){
 		m_library = dlopen( filename, RTLD_NOW );
 		if ( failed() ) {
-			globalErrorStream() << "LoadLibrary failed: '" << filename << "'\n";
+			globalErrorStream() << "LoadLibrary failed: " << SingleQuoted( filename ) << '\n';
 			globalErrorStream() << "Module dlopen(3) Error: " << dlerror() << '\n';
 		}
 	}

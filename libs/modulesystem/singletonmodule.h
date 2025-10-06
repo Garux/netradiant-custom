@@ -100,16 +100,16 @@ public:
 	}
 	void capture() override {
 		if ( ++m_refcount == 1 ) {
-			globalOutputStream() << "Module Initialising: '" << Type::Name << "' '" << APIConstructor::getName() << "'\n";
+			globalOutputStream() << "Module Initialising: " << SingleQuoted( Type::Name ) << ' ' << SingleQuoted( APIConstructor::getName() ) << '\n';
 			m_dependencies = new Dependencies();
 			m_dependencyCheck = !globalModuleServer().getError();
 			if ( m_dependencyCheck ) {
 				m_api = APIConstructor::constructAPI( *m_dependencies );
-				globalOutputStream() << "Module Ready: '" << Type::Name << "' '" << APIConstructor::getName() << "'\n";
+				globalOutputStream() << "Module Ready: " << SingleQuoted( Type::Name ) << ' ' << SingleQuoted( APIConstructor::getName() ) << '\n';
 			}
 			else
 			{
-				globalErrorStream() << "Module Dependencies Failed: '" << Type::Name << "' '" << APIConstructor::getName() << "'\n";
+				globalErrorStream() << "Module Dependencies Failed: " << SingleQuoted( Type::Name ) << ' ' << SingleQuoted( APIConstructor::getName() ) << '\n';
 			}
 			m_cycleCheck = true;
 		}

@@ -187,7 +187,7 @@ public:
 			for ( const auto& [ postfix, index ] : postfixes.m_postfixes )
 			{
 				postfix.write( buf );
-				globalErrorStream() << " '" << buf << "'";
+				globalErrorStream() << ' ' << SingleQuoted( buf );
 			}
 			globalErrorStream() << '\n';
 		}

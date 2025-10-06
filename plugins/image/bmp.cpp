@@ -181,7 +181,7 @@ Image* LoadBMPBuff( PointerInputStream& inputStream, std::size_t length ){
 		ReadBMP( inputStream, image->getRGBAPixels(), rows, columns, ReadPixel32() );
 		break;
 	default:
-		globalErrorStream() << "LoadBMP: illegal pixel_size '" << bmpHeader.bitsPerPixel << "'\n";
+		globalErrorStream() << "LoadBMP: illegal pixel_size " << SingleQuoted( bmpHeader.bitsPerPixel ) << '\n';
 		image->release();
 		return 0;
 	}

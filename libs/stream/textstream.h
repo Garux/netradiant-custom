@@ -304,6 +304,22 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 	return ostream << '"' << quoted.m_type << '"';
 }
 
+template<typename Type>
+class SingleQuoted
+{
+public:
+	const Type& m_type;
+	SingleQuoted( const Type& type )
+		: m_type( type ){
+	}
+};
+
+/// \brief Writes any type to \p ostream with a quotation mark character before and after it.
+template<typename TextOutputStreamType, typename Type>
+inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const SingleQuoted<Type>& quoted ){
+	return ostream << '\'' << quoted.m_type << '\'';
+}
+
 
 class LowerCase
 {

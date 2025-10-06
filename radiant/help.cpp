@@ -54,7 +54,7 @@ void process_xlink( const char* filename, const char *menu_name, const char *bas
 	if ( file_exists( filename ) ) {
 		xmlDocPtr pDoc = xmlParseFile( filename );
 		if ( pDoc ) {
-			globalOutputStream() << "Processing .xlink file '" << filename << "'\n";
+			globalOutputStream() << "Processing .xlink file " << SingleQuoted( filename ) << '\n';
 			// create sub menu
 			menu = menu->addMenu( menu_name );
 
@@ -100,12 +100,12 @@ void process_xlink( const char* filename, const char *menu_name, const char *bas
 		}
 		else
 		{
-			globalWarningStream() << "'" << filename << "' parse failed\n";
+			globalWarningStream() << SingleQuoted( filename ) << " parse failed\n";
 		}
 	}
 	else
 	{
-		globalWarningStream() << "'" << filename << "' not found\n";
+		globalWarningStream() << SingleQuoted( filename ) << " not found\n";
 	}
 }
 

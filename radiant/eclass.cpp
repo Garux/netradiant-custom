@@ -142,14 +142,14 @@ public:
 		if ( filterMode.filter_mp_sp ) {
 			if ( string_empty( GlobalRadiant().getGameMode() ) || string_equal( GlobalRadiant().getGameMode(), "sp" ) ) {
 				if ( string_equal_n( name, filterMode.sp_ignore_prefix, strlen( filterMode.sp_ignore_prefix ) ) ) {
-					globalOutputStream() << "Ignoring '" << name << "'\n";
+					globalOutputStream() << "Ignoring " << SingleQuoted( name ) << '\n';
 					return;
 				}
 			}
 			else
 			{
 				if ( string_equal_n( name, filterMode.mp_ignore_prefix, strlen( filterMode.mp_ignore_prefix ) ) ) {
-					globalOutputStream() << "Ignoring '" << name << "'\n";
+					globalOutputStream() << "Ignoring " << SingleQuoted( name ) << '\n';
 					return;
 				}
 			}

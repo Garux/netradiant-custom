@@ -1013,7 +1013,7 @@ void SurfaceInspector::ApplyShader(){
 
 	// TTimo: detect and refuse invalid texture names (at least the ones with spaces)
 	if ( !texdef_name_valid( name ) ) {
-		globalErrorStream() << "invalid texture name '" << name << "'\n";
+		globalErrorStream() << "invalid texture name " << SingleQuoted( name ) << '\n';
 		SurfaceInspector_queueDraw();
 		return;
 	}
