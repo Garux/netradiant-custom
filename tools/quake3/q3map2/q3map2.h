@@ -155,9 +155,6 @@ enum class EBrushType
 
 
 /* light */
-#define MULTISUN_MAX			2048 // TA: multi sun. this is how many separate suns can be drawn separately and only where they should
-#define MULTISUN_MAX_BYTES		(MULTISUN_MAX/8) // it's a bitmask. 256 bytes in the end.
-
 #define MAX_TRACE_TEST_NODES    256
 #define DEFAULT_INHIBIT_RADIUS  1.5f
 
@@ -175,8 +172,10 @@ enum class EBrushType
 #define CLUSTER_OCCLUDED        -2
 #define CLUSTER_FLOODED         -3
 
-#define FLAG_FORCE_SUBSAMPLING 1
+#define FLAG_FORCE_SUBSAMPLING  1
 #define FLAG_ALREADY_SUBSAMPLED 2
+
+#define MAX_SKIES               32 // how many light emitting skies can shine separately and only where they should
 
 
 /* -------------------------------------------------------------------------------
@@ -417,7 +416,7 @@ struct sun_t
 	Vector3 direction, color;
 	float photons, deviance, filterRadius;
 	int numSamples, style;
-	int environmentLightIndex = -1;
+	int skyIndex = -1;
 };
 
 struct skylight_t
@@ -427,7 +426,7 @@ struct skylight_t
 	int horizon_min = 0;
 	int horizon_max = 90;
 	bool sample_color = true;
-	int environmentLightIndex = -1;
+	int skyIndex = -1;
 };
 
 
@@ -584,7 +583,7 @@ struct shaderInfo_t_data
 
 	std::vector<skylight_t>  skylights;                 /* ydnar */
 	std::vector<sun_t>  suns;                           /* ydnar */
-	int	environmentEmitterIndex = -1;           		/* TA: multisun: shaders that end up being used and actually emit sunlight get a unique emitter index */
+	int	skyIndex = -1;                                  /* shaders that are used and emit sun/skylight get unique emitter index */
 
 	Vector3 color{ 0 };                                 /* normalized color */
 	Color4f averageColor = { 0, 0, 0, 0 };
@@ -1090,7 +1089,7 @@ struct light_t
 	float falloffTolerance;             /* ydnar: minimum attenuation threshold */
 	float filterRadius;                 /* ydnar: lightmap filter radius in world units, 0 == default */
 
-	int environmentLightIndex = -1;		/* TA: For sun/skylights. Check if particular sky triangle emits a given light  */
+	int skyIndex = -1;                  /* For sun/skylights. Check if particular sky triangle emits a given light. -1 = always emits */
 };
 
 
@@ -1117,8 +1116,8 @@ struct trace_t
 	const light_t             *light = nullptr;
 	Vector3 end;
 
-	/* TA: multisun support */
-	byte	skyEnvironmentLightIndices[MULTISUN_MAX_BYTES];
+	/* multisky support */
+	byte skyIndices[ ( MAX_SKIES + 7 ) / 8 ];
 
 	/* calculated input */
 	Vector3 displacement, direction;
@@ -1960,6 +1959,7 @@ inline int lightSamplesSearchBoxSize = 1;
 inline bool filter;
 inline bool dark;
 inline bool sunOnly;
+inline bool g_oneSky; /* fallback to old behavior: any sky emits total of all suns/skylights in the map */
 inline int approximateTolerance;
 inline bool noCollapse;
 inline int lightmapSearchBlockSize;
@@ -2036,10 +2036,6 @@ inline float falloffTolerance = 1.0f;
 inline const bool exactPointToPolygon = true;
 inline const float formFactorValueScale = 3.0f;
 inline const float linearScale = 1.0f / 8000.0f;
-
-/* TA: multisun stuff (ability to have mutliple skyboxes with separate suns/skylights). May not handle _skybox properly */
-inline bool multiSun = false;
-inline int nextEnvironmentLightIndex = 0; // each shader environment light (sun/sky) gets a unique index. thus we can check whether a sky surface should be considered as a successful trace
 
 inline std::list<light_t> lights;
 inline int numPointLights;

@@ -100,7 +100,7 @@ static void CreateSunLight( sun_t& sun ){
 		light.falloffTolerance = falloffTolerance;
 		light.filterRadius = sun.filterRadius / sun.numSamples;
 		light.style = noStyles ? LS_NORMAL : sun.style;
-		light.environmentLightIndex = sun.environmentLightIndex;
+		light.skyIndex = sun.skyIndex;
 
 		/* set the light's position out to infinity */
 		light.origin = direction * ( MAX_WORLD_COORD * 8.0f );    /* MAX_WORLD_COORD * 2.0f */
@@ -235,7 +235,7 @@ static void CreateSkyLights( const skylight_t& skylight, const Vector3& color, f
 	sun.deviance = 0.0f;
 	sun.filterRadius = filterRadius;
 	sun.numSamples = 1;
-	sun.environmentLightIndex = skylight.environmentLightIndex;
+	sun.skyIndex = skylight.skyIndex;
 	sun.style = noStyles ? LS_NORMAL : style;
 
 	/* setup */
@@ -597,19 +597,24 @@ static void CreateSurfaceLights(){
 		surfaceInfo_t *info = &surfaceInfos[ i ];
 		const shaderInfo_t *si = info->si;
 
+		// each environment light shader (with sun/sky) gets an unique index. thus we can check whether a sky surface should be considered as a successful trace
+		const auto assign_sky_index = []( shaderInfo_t *si ){
+			static int skyIndex;
+			if( si->skyIndex == -1 ){ // this shader is actually emitting sun/skylight now, so give it an environment emitter index
+				if( skyIndex == MAX_SKIES )
+					Sys_Warning( "MAX_SKIES(%i) reached\n", MAX_SKIES );
+				else
+					si->skyIndex = skyIndex++;
+			}
+		};
 		/* sunlight? */
 		if ( !si->suns.empty() && !nss ) {
-			auto* si_ = const_cast<shaderInfo_t*>( si );   /* FIXME: hack! */
+			auto *si_ = const_cast<shaderInfo_t*>( si );   /* FIXME: hack! */
 			Sys_FPrintf( SYS_VRB, "Sun: %s\n", si->shader.c_str() );
-			if(multiSun){
-				if(si->environmentEmitterIndex == -1){
-					// this shader is actually emitting sun/skylight now, so give it an environment emitter index
-					si_->environmentEmitterIndex = nextEnvironmentLightIndex++;
-				}
-				// let the suns know
-				for( auto sunIt = si_->suns.begin(); sunIt != si_->suns.end(); sunIt++ ){
-					sunIt->environmentLightIndex = si_->environmentEmitterIndex;
-				}
+			if( !g_oneSky ){
+				assign_sky_index( si_ );
+				for( auto& sun : si_->suns ) // let the suns know
+					sun.skyIndex = si->skyIndex;
 			}
 			std::ranges::for_each( si_->suns, CreateSunLight );
 			si_->suns.clear();   /* FIXME: hack! */
@@ -617,21 +622,16 @@ static void CreateSurfaceLights(){
 
 		/* sky light? */
 		if ( !si->skylights.empty() ) {
+			auto *si_ = const_cast<shaderInfo_t*>( si );   /* FIXME: hack! */
 			Sys_FPrintf( SYS_VRB, "Sky: %s\n", si->shader.c_str() );
-			if(multiSun){
-				shaderInfo_t* si_ = const_cast<shaderInfo_t*>( si );   /* FIXME: hack! */
-				if(si->environmentEmitterIndex == -1){
-					// this shader is actually emitting sun/skylight now, so give it an environment emitter index
-					si_->environmentEmitterIndex = nextEnvironmentLightIndex++;
-				}
-				// let the skies know
-				for( auto skyIt = si_->skylights.begin(); skyIt != si_->skylights.end(); skyIt++ ){
-					skyIt->environmentLightIndex = si_->environmentEmitterIndex;
-				}
+			if( !g_oneSky ){
+				assign_sky_index( si_ );
+				for( auto& skylight : si_->skylights ) // let the skylights know
+					skylight.skyIndex = si->skyIndex;
 			}
 			for( const skylight_t& skylight : si->skylights )
 				CreateSkyLights( skylight, si->color, si->lightFilterRadius, si->lightStyle, si->skyParmsImageBase );
-			const_cast<shaderInfo_t*>( si )->skylights.clear();   /* FIXME: hack! */
+			si_->skylights.clear();   /* FIXME: hack! */
 		}
 
 		/* try to early out */
@@ -1121,7 +1121,8 @@ int LightContributionToSample( trace_t *trace ){
 			/* trace */
 			TraceLine( trace );
 			trace->forceSubsampling *= add;
-			if ( !( trace->compileFlags & C_SKY ) || trace->opaque || multiSun && light->environmentLightIndex != -1 && light->environmentLightIndex < MULTISUN_MAX && !bit_is_enabled(trace->skyEnvironmentLightIndices,light->environmentLightIndex) ) {
+			if ( !( trace->compileFlags & C_SKY ) || trace->opaque
+			|| ( !g_oneSky && light->skyIndex != -1 && !bit_is_enabled( trace->skyIndices, light->skyIndex ) ) ) {
 				trace->color.set( 0 );
 				trace->directionContribution.set( 0 );
 
@@ -1417,7 +1418,8 @@ static bool LightContributionToPoint( trace_t *trace ){
 		if ( trace->testOcclusion && !trace->forceSunlight ) {
 			/* trace */
 			TraceLine( trace );
-			if ( !( trace->compileFlags & C_SKY ) || trace->opaque || multiSun && light->environmentLightIndex != -1 && light->environmentLightIndex < MULTISUN_MAX && !bit_is_enabled(trace->skyEnvironmentLightIndices,light->environmentLightIndex) ) {
+			if ( !( trace->compileFlags & C_SKY ) || trace->opaque
+			|| ( !g_oneSky && light->skyIndex != -1 && !bit_is_enabled( trace->skyIndices, light->skyIndex ) ) ) {
 				trace->color.set( 0 );
 				return false;
 			}
@@ -2519,9 +2521,9 @@ int LightMain( Args& args ){
 				Sys_Printf( "Approximating lightmaps within a byte tolerance of %d\n", approximateTolerance );
 			}
 		}
-		while ( args.takeArg( "-multisun" ) ) {
-			multiSun = true;
-			Sys_Printf( "Multi-sun support activated\n" );
+		while ( args.takeArg( "-onesky" ) ) {
+			g_oneSky = true;
+			Sys_Printf( "Disabling multi sky lighting\n" );
 		}
 		while ( args.takeArg( "-deluxe", "-deluxemap" ) ) {
 			deluxemap = true;
