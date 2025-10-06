@@ -172,7 +172,7 @@ ModelLoader* ModelLoader_forType( const char* type ){
 		}
 		else
 		{
-			globalErrorStream() << "ERROR: Model type incorrectly registered: \"" << moduleName << "\"\n";
+			globalErrorStream() << "ERROR: Model type incorrectly registered: " << Quoted( moduleName ) << '\n';
 			return &g_NullModelLoader;
 		}
 	}
@@ -188,13 +188,13 @@ NodeSmartReference ModelResource_load( ModelLoader* loader, const char* name ){
 		ArchiveFile* file = GlobalFileSystem().openFile( name );
 
 		if ( file != 0 ) {
-			globalOutputStream() << "Loaded Model: \"" << name << "\"\n";
+			globalOutputStream() << "Loaded Model: " << Quoted( name ) << '\n';
 			model = loader->loadModel( *file );
 			file->release();
 		}
 		else
 		{
-			globalErrorStream() << "Model load failed: \"" << name << "\"\n";
+			globalErrorStream() << "Model load failed: " << Quoted( name ) << '\n';
 		}
 	}
 
@@ -290,14 +290,14 @@ NodeSmartReference Model_load( ModelLoader* loader, const char* path, const char
 			}
 			else
 			{
-				globalErrorStream() << "ERROR: Map type incorrectly registered: \"" << moduleName << "\"\n";
+				globalErrorStream() << "ERROR: Map type incorrectly registered: " << Quoted( moduleName ) << '\n';
 				return g_nullModel;
 			}
 		}
 		else
 		{
 			if ( string_not_empty( type ) ) {
-				globalErrorStream() << "Model type not supported: \"" << name << "\"\n";
+				globalErrorStream() << "Model type not supported: " << Quoted( name ) << '\n';
 			}
 			return g_nullModel;
 		}
@@ -556,12 +556,12 @@ public:
 	}
 
 	Resource* capture( const char* path ) override {
-		//globalOutputStream() << "capture: \"" << path << "\"\n";
+		//globalOutputStream() << "capture: " << Quoted( path ) << '\n';
 		return m_references.capture( CopiedString( path ) ).get();
 	}
 	void release( const char* path ) override {
 		m_references.release( CopiedString( path ) );
-		//globalOutputStream() << "release: \"" << path << "\"\n";
+		//globalOutputStream() << "release: " << Quoted( path ) << '\n';
 	}
 
 	void setEntityCreator( EntityCreator& entityCreator ) override {

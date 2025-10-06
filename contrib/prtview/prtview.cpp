@@ -195,7 +195,7 @@ const char* QERPlug_GetCommandTitleList(){
 
 
 void QERPlug_Dispatch( const char* p, float* vMin, float* vMax, bool bSingleBrush ){
-	globalOutputStream() << MSG_PREFIX "Command \"" << p << "\"\n";
+	globalOutputStream() << MSG_PREFIX "Command " << Quoted( p ) << '\n';
 
 	if ( !strcmp( p, Q3R_CMD_ABOUT ) ) {
 		DoAboutDlg();

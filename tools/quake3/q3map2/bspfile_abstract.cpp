@@ -481,7 +481,7 @@ void UnparseEntities(){
 		for ( const auto& ep : e.epairs )
 		{
 			/* copy and clean */
-			data << '\"' << StripTrailing( ep.key.c_str() ) << "\" \"" << StripTrailing( ep.value.c_str() ) << "\"\n";
+			data << Quoted( StripTrailing( ep.key.c_str() ) ) << ' ' << Quoted( StripTrailing( ep.value.c_str() ) ) << '\n';
 		}
 
 		/* add trailing brace */

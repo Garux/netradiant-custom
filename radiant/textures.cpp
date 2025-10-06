@@ -342,12 +342,12 @@ void qtexture_realise( qtexture_t& texture, const TextureKey& key ){
 				texture.contentFlags = image->getContentFlags();
 				texture.value = image->getValue();
 				image->release();
-				globalOutputStream() << "Loaded Texture: \"" << key.second << "\"\n";
+				globalOutputStream() << "Loaded Texture: " << Quoted( key.second ) << '\n';
 				GlobalOpenGL_debugAssertNoErrors();
 			}
 			else
 			{
-				globalErrorStream() << "Texture load failed: \"" << key.second << "\"\n";
+				globalErrorStream() << "Texture load failed: " << Quoted( key.second ) << '\n';
 			}
 		}
 		else {
@@ -386,12 +386,12 @@ void qtexture_realise( qtexture_t& texture, const TextureKey& key ){
 				}
 
 				gl().glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );
-				globalOutputStream() << "Loaded Skybox: \"" << key.second << "\"\n";
+				globalOutputStream() << "Loaded Skybox: " << Quoted( key.second ) << '\n';
 				GlobalOpenGL_debugAssertNoErrors();
 			}
 			else
 			{
-				globalErrorStream() << "Skybox load failed: \"" << key.second << "\"\n";
+				globalErrorStream() << "Skybox load failed: " << Quoted( key.second ) << '\n';
 			}
 
 			std::for_each_n( images, std::size( images ), []( Image *img ){ if( img != nullptr ) img->release(); } );

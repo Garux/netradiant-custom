@@ -55,7 +55,7 @@ scene::Node& createPrimitive( const char* name ){
 		return GlobalPatchCreator().createPatch();
 	}
 
-	ASSERT_MESSAGE( 0, PARSE_ERROR << ": primitive type not supported: \"" << name << "\"\n" );
+	ASSERT_MESSAGE( 0, PARSE_ERROR << ": primitive type not supported: " << Quoted( name ) << '\n' );
 	scene::Node* node = 0;
 	return *node;
 }

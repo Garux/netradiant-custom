@@ -1566,7 +1566,7 @@ void ShaderList_addShaderFile( const char* dirstring ){
 	{
 		if ( string_equal_nocase( dirstring, sh.c_str() ) ) {
 			found = true;
-			globalOutputStream() << "duplicate entry \"" << sh << "\" in shaderlist.txt\n";
+			globalOutputStream() << "duplicate entry " << Quoted( sh ) << " in shaderlist.txt\n";
 			break;
 		}
 	}
