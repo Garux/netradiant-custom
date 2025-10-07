@@ -61,12 +61,12 @@ QScrollBar::handle:hover {
 }
 
 QMainWindow > QToolBar:horizontal {
-	background: rgb( 70, 70, 70 ); /* darker than window */
+	background: rgb( 32, 32, 32 ); /* darker than window */
 	border-right: 4px solid transparent;
 	border-left: 4px solid transparent;
 	border-bottom: 4px solid qlineargradient( x1:0, y1:0, x2:0, y2:1,
 	                         stop: 0.5 rgba( 0, 0, 0, 0 ),
-	                         stop: 0.75 rgba( 32, 32, 32, 255 ),
+	                         stop: 0.75 rgba( 8, 8, 8, 255 ),
 	                         stop: 1 rgba( 200, 200, 200, 255 ) );
 	border-top: 4px solid qlineargradient( x1:0, y1:1, x2:0, y2:0,
 	                         stop: 0.75 rgba( 0, 0, 0, 0 ),
@@ -77,13 +77,13 @@ QMainWindow > QToolBar:horizontal {
 	spacing: 0px; /* space between buttons */
 }
 QMainWindow > QToolBar:right {
-	background: rgb( 70, 70, 70 ); /* darker than window */
+	background: rgb( 32, 32, 32 ); /* darker than window */
 	border-bottom: 4px solid transparent;
 	border-top: 4px solid transparent;
 	border-right: 4px solid transparent;
 	border-left: 4px solid qlineargradient( x1:1, y1:0, x2:0, y2:0,
 	                         stop: 0.5 rgba( 0, 0, 0, 0 ),
-	                         stop: 0.75 rgba( 32, 32, 32, 255 ),
+	                         stop: 0.75 rgba( 8, 8, 8, 255 ),
 	                         stop: 1 rgba( 200, 200, 200, 255 ) );
 	border-radius: none;
 	margin: 0px;
@@ -91,13 +91,13 @@ QMainWindow > QToolBar:right {
 	spacing: 0px; /* space between buttons */
 }
 QMainWindow > QToolBar:left {
-	background: rgb( 70, 70, 70 ); /* darker than window */
+	background: rgb( 32, 32, 32 ); /* darker than window */
 	border-bottom: 4px solid transparent;
 	border-top: 4px solid transparent;
 	border-left: 4px solid transparent;
 	border-right: 4px solid qlineargradient( x1:0, y1:0, x2:1, y2:0,
 	                         stop: 0.5 rgba( 0, 0, 0, 0 ),
-	                         stop: 0.75 rgba( 32, 32, 32, 255 ),
+	                         stop: 0.75 rgba( 8, 8, 8, 255 ),
 	                         stop: 1 rgba( 200, 200, 200, 255 ) );
 	border-radius: none;
 	margin: 0px;
@@ -105,7 +105,7 @@ QMainWindow > QToolBar:left {
 	spacing: 0px; /* space between buttons */
 }
 QMainWindow > QToolBar QToolButton {
-	background: rgb( 110, 110, 110 ); /* brighter than window */
+	background: rgb( 64, 64, 64 ); /* brighter than window */
 }
 QToolBar::separator:horizontal {
 	width: 8px;
@@ -126,10 +126,10 @@ QToolButton:checked {
 }
 /* non QToolBar QToolButtons hover */
 .QWidget > QToolButton:hover:!checked, .QDialog > QToolButton:hover:!checked {
-	background: rgb( 128, 128, 128 );
+	background: rgb( 70, 70, 70 );
 }
 QPushButton:hover {
-	background: rgb( 128, 128, 128 );
+	background: rgb( 70, 70, 70 );
 }
 
 QCheckBox:hover {

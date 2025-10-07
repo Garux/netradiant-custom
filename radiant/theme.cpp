@@ -132,7 +132,7 @@ void theme_set( ETheme theme ){
 
 		qApp->setPalette( darkPalette );
 
-		qApp->setStyleSheet( load_qss( "dark.qss" ) );
+		qApp->setStyleSheet( load_qss( "darker.qss" ) );
 	}
 
 	defaults.is1stThemeApplication = false;
