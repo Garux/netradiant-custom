@@ -203,7 +203,6 @@ void DoPolygons(){
 			else{
 				poly.BuildRegularPrism( vMin, vMax, rs.nSides, rs.bAlignTop );
 			}
-
 		}
 
 		poly.Commit();

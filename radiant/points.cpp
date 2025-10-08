@@ -290,7 +290,6 @@ void Pointfile_Parse( CPointfile& pointfile ){
 
 			while ( *data && *data != '\n' )
 				data++;
-
 		}
 		while ( *data == '\n' )
 		{

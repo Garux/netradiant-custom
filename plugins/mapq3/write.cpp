@@ -75,7 +75,6 @@ void Entity_ExportTokens( const Entity& entity, TokenWriter& writer ){
 			m_writer.writeString( value );
 			m_writer.nextLine();
 		}
-
 	} visitor( writer );
 
 	entity.forEachKeyValue( visitor );

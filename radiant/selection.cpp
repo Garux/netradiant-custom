@@ -4512,7 +4512,6 @@ public:
 							};
 							Scene_forEachVisibleSelectedPlaneselectable( gatherPolygonsByPlane );
 						}
-
 					}
 					else{ // alt vertices drag
 						SelectionIntersection intersection;
@@ -5581,7 +5580,6 @@ private:
 			}
 		}
 		return false;
-
 	}
 public:
 	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& pivot2world ) override {

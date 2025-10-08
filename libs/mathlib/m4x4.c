@@ -270,7 +270,6 @@ void m4x4_rotation_for_vec3( m4x4_t matrix, const vec3_t euler, eulerOrder_t ord
 
 #endif
 		break;
-
 	}
 }
 

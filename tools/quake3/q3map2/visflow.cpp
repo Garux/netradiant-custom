@@ -100,7 +100,6 @@ static void FreeStackWinding( fixedWinding_t *w, pstack_t *stack ){
 
 	if ( i < 0 || i > 2 ) {
 		return;     // not from local
-
 	}
 	if ( stack->freewindings[i] ) {
 		Error( "FreeStackWinding: already free" );
@@ -144,7 +143,6 @@ static fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, con
 
 	if ( !counts[1] ) {
 		return in;      // completely on front side
-
 	}
 	if ( !counts[0] ) {
 		FreeStackWinding( in, stack );
@@ -311,7 +309,6 @@ static fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t
 			}
 			if ( k != pass->numpoints ) {
 				continue;   // points on negative side, not a separating plane
-
 			}
 			if ( !counts[0] ) {
 				continue;   // planar with separating plane
@@ -358,7 +355,6 @@ static fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t
 			target = VisChopWinding( target, stack, plane );
 			if ( !target ) {
 				return nullptr;        // target is not visible
-
 			}
 			break;      // optimization by Antony Suter
 		}
@@ -797,7 +793,6 @@ static void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread,
 
 		if ( !bit_is_enabled( prevstack->mightsee, pnum ) ) {
 			continue;   // can't possibly see it
-
 		}
 		prevmight = (long *)prevstack->mightsee;
 		cansee = (long *)passage->cansee;
@@ -1029,7 +1024,6 @@ static fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *o
 
 	if ( !counts[1] ) {
 		return in;      // completely on front side
-
 	}
 	if ( !counts[0] ) {
 		return nullptr;
@@ -1179,7 +1173,6 @@ static int AddSeperators( const fixedWinding_t *source, const fixedWinding_t *pa
 			}
 			if ( k != pass->numpoints ) {
 				continue;   // points on negative side, not a separating plane
-
 			}
 			if ( !counts[0] ) {
 				continue;   // planar with separating plane
@@ -1488,7 +1481,6 @@ void BasePortalVis( int portalnum ){
 				if ( vector3_length( p->origin - tp->origin ) - p->radius - tp->radius > farPlaneDist )
 					continue;
 			}
-
 		}
 
 
@@ -1501,7 +1493,6 @@ void BasePortalVis( int portalnum ){
 		}
 		if ( k == w->numpoints ) {
 			continue;   // no points on front
-
 		}
 		w = p->winding;
 		for ( k = 0; k < w->numpoints; ++k )
@@ -1512,7 +1503,6 @@ void BasePortalVis( int portalnum ){
 		}
 		if ( k == w->numpoints ) {
 			continue;   // no points on front
-
 		}
 		bit_enable( p->portalfront, j );
 	}
@@ -1573,7 +1563,6 @@ static void RecursiveLeafBitFlow( int leafnum, byte *mightsee, byte *cansee ){
 
 		if ( !more ) {
 			continue;   // can't see anything new
-
 		}
 		bit_enable( cansee, pnum );
 

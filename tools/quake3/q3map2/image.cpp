@@ -220,7 +220,6 @@ static void LoadPNGBuffer( byte *buffer, int size, byte **pixels, int *width, in
 	/* clean up */
 	free( rowPointers );
 	png_destroy_read_struct( &png, &info, &end );
-
 }
 
 

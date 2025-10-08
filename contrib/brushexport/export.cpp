@@ -318,7 +318,6 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 			}
 			outMtl << "Kd " << clr.x() << ' ' << clr.y() << ' ' << clr.z() << '\n';
 			outMtl << "map_Kd " << str.c_str() << '\n';
-
 		}
 	}
 

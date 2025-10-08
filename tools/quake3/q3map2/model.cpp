@@ -213,7 +213,6 @@ struct AssModel
 							Sys_Printf( "texname: %s\n", texname.C_Str() );
 #endif
 				m_shader = StringStream<64>( PathCleaned( PathExtensionless( texname.C_Str() ) ) );
-
 			}
 			else{
 				m_shader = StringStream<64>( PathCleaned( PathExtensionless( matname.C_Str() ) ) );

@@ -455,7 +455,6 @@ void DEntity::LoadEPairList( Entity *epl ){
 				m_entity->AddEPair( key, value );
 			}
 		}
-
 	} load_epairs( this );
 
 	epl->forEachKeyValue( load_epairs );

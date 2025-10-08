@@ -144,7 +144,6 @@ typedef struct
 	int ofs_frames;             // offset for first md2Frame_t
 	int ofs_glcmds;
 	int ofs_end;                // end of file
-
 } md2Header_t;
 
 void istream_read_md2Header( PointerInputStream& inputStream, md2Header_t& header ){

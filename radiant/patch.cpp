@@ -2240,7 +2240,6 @@ void Patch::TesselateSubMatrix( const BezierCurveTree *BX, const BezierCurveTree
 			                    bTranspose );
 		}
 	}
-
 }
 
 void Patch::BuildTesselationCurves( EMatrixMajor major ){
@@ -2621,7 +2620,6 @@ void Patch::BuildVertexArray(){
 				// reverse because radiant uses CULL_FRONT
 				//m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2 + 1] = RenderIndex( ( ( m_tess.m_nArrayHeight - 1 ) - i ) * m_tess.m_nArrayWidth + j );
 				//m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2 ] = RenderIndex( ( ( m_tess.m_nArrayHeight - 1 ) - i ) * m_tess.m_nArrayWidth + j + 1 );
-
 			}
 		}
 	}
@@ -3110,7 +3108,6 @@ void Patch::createThickenedOpposite( const Patch& sourcePatch,
 				}
 				if( vector3_length_squared( rowTangent[0] ) == 0 || vector3_length_squared( colTangent[0] ) == 0 ){
 					normal = extrudeAxis;
-
 				}
 				else{
 					// If two column + two row tangents are available, take the length-corrected average
@@ -3126,7 +3123,6 @@ void Patch::createThickenedOpposite( const Patch& sourcePatch,
 						globalOutputStream() << normal1 << '\n';
 						globalOutputStream() << normal2 << '\n';
 						globalOutputStream() << normal << '\n';*/
-
 					}
 					// If two column tangents are available, take the length-corrected average
 					else if ( ( fabs( colTangent[1][0] ) + fabs( colTangent[1][1] ) + fabs( colTangent[1][2] ) ) > 0)
@@ -3140,7 +3136,6 @@ void Patch::createThickenedOpposite( const Patch& sourcePatch,
 						globalOutputStream() << normal1 << '\n';
 						globalOutputStream() << normal2 << '\n';
 						globalOutputStream() << normal << '\n';*/
-
 					}
 					else
 					{
@@ -3159,7 +3154,6 @@ void Patch::createThickenedOpposite( const Patch& sourcePatch,
 							globalOutputStream() << normal1 << '\n';
 							globalOutputStream() << normal2 << '\n';
 							globalOutputStream() << normal << '\n';*/
-
 						}
 						else
 						{

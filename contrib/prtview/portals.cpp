@@ -174,7 +174,6 @@ void CPortals::Load(){
 			GETLINE; //clusters count
 			GETLINE; //portals count
 			sscanf( buf, "%u", &portal_count );
-
 		}
 		break;
 	case PRT1AM:

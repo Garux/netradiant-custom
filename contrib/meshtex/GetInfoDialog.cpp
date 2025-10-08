@@ -121,7 +121,6 @@ GetInfoDialog::GetInfoDialog(const std::string& key,
          CreateApplyButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Apply ) );
          CreateCancelButtonCallback( buttons->addButton( QDialogButtonBox::StandardButton::Cancel ) );
       }
-
    }
 }
 

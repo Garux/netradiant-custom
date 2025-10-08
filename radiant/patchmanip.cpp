@@ -171,7 +171,6 @@ void Scene_PatchDeform( scene::Graph& graph, const int deform, const int axis )
 	{
 		Patch_deform( *Node_getPatch( i->path().top() ), *i, deform, axis );
 	}
-
 }
 
 void Patch_thicken( Patch& patch, scene::Instance& instance, const float thickness, bool seams, const int axis ){
@@ -246,7 +245,6 @@ void Scene_PatchThicken( scene::Graph& graph, const int thickness, bool seams, c
 	{
 		Patch_thicken( *Node_getPatch( i->path().top() ), *i, thickness, seams, axis );
 	}
-
 }
 
 Patch* Scene_GetUltimateSelectedVisiblePatch(){
@@ -809,7 +807,6 @@ void Patch_constructMenu( QMenu* menu ){
 		create_menu_item_with_mnemonic( submenu, "Naturalize", "NaturalizePatch" );
 		create_menu_item_with_mnemonic( submenu, "Invert X", "InvertCurveTextureX" );
 		create_menu_item_with_mnemonic( submenu, "Invert Y", "InvertCurveTextureY" );
-
 	}
 //	menu->addSeparator();
 //	{ //unfinished
@@ -1187,7 +1184,6 @@ void Patch_SetTexdef( const float* hShift, const float* vShift, const float* hSc
 				Scene_PatchScaleTexture_Selected( GlobalSceneGraph(), 0, *vScale > 0? .5 : -.5 );
 			if( rotation )
 				Scene_PatchRotateTexture_Selected( GlobalSceneGraph(), *rotation > 0? 15 : -15 );
-
 		}
 		Patch_textureChanged();
 	} );

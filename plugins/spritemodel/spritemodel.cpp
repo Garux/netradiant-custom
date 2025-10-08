@@ -47,7 +47,6 @@ void LoadSpriteModel( entity_interfaces_t *interfaces, const char *name ){
 	interfaces->pSelect = NULL;
 	interfaces->pEdit = NULL;
 	model->DecRef();
-
 }
 
 void CSpriteModel::Construct( IShader *pShader ){

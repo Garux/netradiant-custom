@@ -150,7 +150,6 @@ struct _QERFuncTable_1
 	PFN_QERAPP_DIRDIALOG m_pfnDirDialog;
 	PFN_QERAPP_COLORDIALOG m_pfnColorDialog;
 	PFN_QERAPP_NEWICON m_pfnNewIcon;
-
 };
 
 #include "modulesystem.h"

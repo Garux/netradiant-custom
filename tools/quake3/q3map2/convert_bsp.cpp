@@ -611,7 +611,6 @@ int ShiftBSPMain( Args& args ){
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
 			e.setKeyValue( "origin", str );
 		}
-
 	}
 
 	/* shift models */

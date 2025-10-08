@@ -205,7 +205,6 @@ void Brush::buildBRep(){
 						m_uniqueEdgePoints[i] = pointvertex_for_windingpoint( edge, colour_vertex );
 					}
 				}
-
 			}
 
 

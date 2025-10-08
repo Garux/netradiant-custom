@@ -224,7 +224,6 @@ void create_colours_menu( QMenu *menu ){
 				load_colors_theme( path.c_str() );
 			} );
 		}));
-
 	}
 
 	theme_construct_menu( menu );

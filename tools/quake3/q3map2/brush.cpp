@@ -429,7 +429,6 @@ void WriteBSPBrushMap( const char *name, const brushlist_t& list ){
 	fprintf( f, "}\n" );
 
 	fclose( f );
-
 }
 
 

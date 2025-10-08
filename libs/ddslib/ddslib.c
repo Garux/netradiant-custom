@@ -379,7 +379,6 @@ static void DDSDecodeAlphaExplicit( unsigned int *pixel, ddsAlphaBlockExplicit_t
 			*pixel |= *( (unsigned int*) &color );
 			word >>= 4;     /* move next bits to lowest 4 */
 			pixel++;        /* move to next pixel in the row */
-
 		}
 	}
 }

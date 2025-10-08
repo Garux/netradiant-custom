@@ -270,7 +270,6 @@ void XYWnd::FocusOnBounds( const AABB& bounds ){
 	NDIM1NDIM2( m_viewType )
 	SetScale( std::min( Width() / ( 3.f * std::max( 128.f, bounds.extents[ nDim1 ] ) ),
 	                    Height() / ( 3.f * std::max( 128.f, bounds.extents[ nDim2 ] ) ) ) );
-
 }
 
 VIEWTYPE GlobalXYWnd_getCurrentViewType(){
@@ -1441,7 +1440,6 @@ void XYWnd::XY_DrawGrid() {
 			sprintf( text, "%g", y );
 			GlobalOpenGL().drawString( text );
 		}
-
 	}
 
 	if ( g_xywindow_globals_private.show_axis ){

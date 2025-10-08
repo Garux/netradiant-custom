@@ -359,7 +359,6 @@ void InitPaths( Args& args ){
 		while ( args.takeArg( "-fs_pakpath" ) ) {
 			insert_unique( pakPaths, stream( DirectoryCleaned( args.takeNext() ) ) );
 		}
-
 	}
 
 	/* add standard game path */

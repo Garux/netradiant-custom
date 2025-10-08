@@ -408,7 +408,6 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 	else {
 		// just rotate the vertexes
 		c_rotate++;
-
 	}
 
 	free( ds.verts );

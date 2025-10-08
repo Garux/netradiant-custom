@@ -230,7 +230,6 @@ public:
 				}
 
 				n += ( m_tess.m_arrayHeight[i] * m_tess.m_nArrayWidth );
-
 			}
 		}
 
@@ -729,7 +728,6 @@ public:
 		default:
 			ERROR_MESSAGE( "parse error" );
 		}
-
 	}
 	void popElement( const char* name ) override {
 		switch ( m_xml_state.back().state() )

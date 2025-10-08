@@ -1121,7 +1121,6 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 					table->setItem( table->rowCount() - 1, 0, new QTableWidgetItem( icon, '[' + QString( name.c_str() ) + ']' ) );
 					table->setItem( table->rowCount() - 1, 1, new QTableWidgetItem( var.c_str() ) );
 				}
-
 			}
 			build_init_tools();
 			{ // mutable 'Tool' variables

@@ -88,7 +88,6 @@ SignalHandlerResult DTreePlanter::mouseDown( const WindowVector& position, Butto
 				e2.RemoveFromRadiant();
 				e2.BuildInRadiant( false );
 			}
-
 		}
 
 		if ( m_setAngles ) {

@@ -104,7 +104,6 @@ void DTrainDrawer::render( RenderStateFlags state ) const {
 			gl().glVertex3fv( v._pnt );
 		}
 		gl().glEnd();
-
 	}
 }
 

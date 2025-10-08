@@ -201,7 +201,6 @@ struct FixedWinding
 		//ASSERT_MESSAGE( index < MAX_POINTS_ON_WINDING, "winding: index out of bounds" );
 		return points[index];
 	}
-
 };
 
 

@@ -102,7 +102,6 @@ void PluginToolbar_populate(){
 				PlugInToolbar_AddButton( m_toolbar, table.m_pfnGetToolbarButton( i ), name );
 			}
 		}
-
 	} visitor( g_plugin_toolbar );
 
 	Radiant_getToolbarModules().foreachModule( visitor );

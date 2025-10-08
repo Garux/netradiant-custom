@@ -529,7 +529,6 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 		}
 		else if ( ds->sampleSize <= 0 ) { /* may contain the entity asigned value */
 			ds->sampleSize = sampleSize; /* otherwise use global default */
-
 		}
 		if ( ds->lightmapScale > 0.0f ) { /* apply surface lightmap scaling factor */
 			ds->sampleSize = ds->lightmapScale * (float)ds->sampleSize;

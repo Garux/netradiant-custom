@@ -118,7 +118,6 @@ fail:
 	globalWarningStream() << windingTestInfinity_planeOuttaWorld << " windingTestInfinity_planeOuttaWorld\n";
 	globalWarningStream() << windingTestInfinity_OK << " windingTestInfinity_OK\n";
 	globalWarningStream() << windingTestInfinity_FAIL << " windingTestInfinity_FAIL\n";
-
 }
 #endif
 

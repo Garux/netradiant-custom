@@ -51,7 +51,6 @@ typedef struct
 	   cache for m_userEnginePath + mod subdirectory.
 	 */
 	CopiedString m_userGamePath;
-
 } QEGlobals_t;
 
 extern QEGlobals_t g_qeglobals;

@@ -1675,17 +1675,14 @@ static void ParseShaderFile( const char *filename ){
 				/* q3map_vertexshadows */
 				else if ( striEqual( token, "q3map_vertexShadows" ) ) {
 					si.vertexShadows = true;  /* ydnar */
-
 				}
 				/* q3map_novertexshadows */
 				else if ( striEqual( token, "q3map_noVertexShadows" ) ) {
 					si.vertexShadows = false; /* ydnar */
-
 				}
 				/* q3map_splotchfix (filter dark lightmap luxels on lightmapped models) */
 				else if ( striEqual( token, "q3map_splotchfix" ) ) {
 					si.splotchFix = true; /* ydnar */
-
 				}
 				/* q3map_forcesunlight */
 				else if ( striEqual( token, "q3map_forceSunlight" ) ) {

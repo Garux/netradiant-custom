@@ -767,7 +767,6 @@ public:
 	void visit( const char* key, const char* value ) override {
 		m_keyvalues.insert( KeyValues::value_type( CopiedString( key ), CopiedString( value ) ) );
 	}
-
 };
 
 void Entity_GetKeyValues( const Entity& entity, KeyValues& keyvalues, KeyValues& defaultValues ){

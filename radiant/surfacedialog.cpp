@@ -1429,7 +1429,6 @@ void Face_setTexture( Face& face, const char* shader, const FaceTexture& clipboa
 			CopiedString dummy;
 			Face_getTexture( face, dummy, g_faceTextureClipboard );
 		}
-
 	}
 }
 typedef Function<void(Face&, const char*, const FaceTexture&, EPasteMode, bool), Face_setTexture> FaceSetTexture;

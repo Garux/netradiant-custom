@@ -171,10 +171,8 @@ byte  *LBMRLEDecompress( byte *source, byte *unpacked, int bpwidth ){
 		}
 		else{
 			rept = 0;               // rept of 0x80 is NOP
-
 		}
 		count += rept;
-
 	} while ( count < bpwidth );
 
 	if ( count > bpwidth ) {
@@ -279,7 +277,6 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
 						body_p += Align( bmhd.w );
 					}
 				}
-
 			}
 			else
 			{
@@ -367,7 +364,6 @@ void WriteLBMfile( const char *filename, byte *data,
 	*bmhdlength = BigLong( length );
 	if ( length & 1 ) {
 		*lbmptr++ = 0;          // pad chunk to even offset
-
 	}
 //
 // write CMAP
@@ -387,7 +383,6 @@ void WriteLBMfile( const char *filename, byte *data,
 	*cmaplength = BigLong( length );
 	if ( length & 1 ) {
 		*lbmptr++ = 0;          // pad chunk to even offset
-
 	}
 //
 // write BODY
@@ -407,7 +402,6 @@ void WriteLBMfile( const char *filename, byte *data,
 	*bodylength = BigLong( length );
 	if ( length & 1 ) {
 		*lbmptr++ = 0;          // pad chunk to even offset
-
 	}
 //
 // done
@@ -416,7 +410,6 @@ void WriteLBMfile( const char *filename, byte *data,
 	*formlength = BigLong( length );
 	if ( length & 1 ) {
 		*lbmptr++ = 0;          // pad chunk to even offset
-
 	}
 //
 // write output file

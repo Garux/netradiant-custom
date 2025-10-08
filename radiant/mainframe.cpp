@@ -408,7 +408,6 @@ void Paths_constructPage( PreferenceGroup& group ){
 		                      StringImportCallback( EnginePathImportCaller( extraPath ) ),
 		                      StringExportCallback( StringExportCaller( extraPath ) )
 		                    );
-
 }
 void Paths_registerPreferencesPage(){
 	PreferencesDialog_addGamePage( makeCallbackF( Paths_constructPage ) );
@@ -1534,7 +1533,6 @@ void MainFrame::SetActiveXY( XYWnd* p ){
 	if ( m_pActiveXY ) {
 		m_pActiveXY->SetActive( true );
 	}
-
 }
 
 #ifdef WIN32

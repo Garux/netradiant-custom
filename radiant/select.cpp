@@ -1101,7 +1101,6 @@ void Selection_RotateAnticlockwise(){
 		Select_RotateAxis( 0, 90 );
 		break;
 	}
-
 }
 
 

@@ -264,7 +264,6 @@ public:
 							else
 								assign_plane( plane2 );
 						}
-
 					}
 				}
 			}
@@ -305,7 +304,6 @@ public:
 				return;
 			}
 		}
-
 	}
 
 	AABB evaluateResize( const Vector3& translation ) const {

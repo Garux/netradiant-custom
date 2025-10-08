@@ -268,7 +268,6 @@ public:
 			}
 		};
 		menu->installEventFilter( new Filter( menu ) );
-
 	}
 	void push_back( ToolbarItem&& item ){
 		m_toolbarItems.push_back( std::move( item ) );

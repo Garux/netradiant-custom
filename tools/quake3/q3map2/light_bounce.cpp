@@ -552,7 +552,6 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 //			splash.flags |= LightFlags::Twosided;
 		}
 #endif
-
 	}
 	else
 	{

@@ -580,7 +580,6 @@ void ChopWindingInPlace( winding_t& inout, const Plane3f& plane, float epsilon )
 	}
 	if ( !counts[eSideBack] ) {
 		return;     // inout stays the same
-
 	}
 
 	winding_t f = AllocWinding( in.size() + 4 ); // cant use counts[0]+2 because of fp grouping errors

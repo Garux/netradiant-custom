@@ -393,7 +393,6 @@ struct game_wolf : game_default
 			{ "monsterslickeast",   0,                      0,                          W_SURF_MONSLICK_E,          0,                          C_TRANSLUCENT,              0 },
 			{ "monsterslicksouth",  0,                      0,                          W_SURF_MONSLICK_S,          0,                          C_TRANSLUCENT,              0 },
 			{ "monsterslickwest",   0,                      0,                          W_SURF_MONSLICK_W,          0,                          C_TRANSLUCENT,              0 },
-
 		} );
 		brushBevelsSurfaceFlagsMask |= ( W_SURF_CERAMIC | W_SURF_METAL | W_SURF_WOOD | W_SURF_GRASS | W_SURF_GRAVEL | W_SURF_GLASS | W_SURF_SNOW | W_SURF_ROOF | W_SURF_RUBBLE | W_SURF_CARPET | W_SURF_MONSTERSLICK | W_SURF_MONSLICK_W | W_SURF_MONSLICK_N | W_SURF_MONSLICK_E | W_SURF_MONSLICK_S );
 	}

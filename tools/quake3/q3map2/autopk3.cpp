@@ -204,7 +204,6 @@ struct Exclusions
 		Sys_Printf( "\n\tExVideos....%zu\n", videos.size() );
 		for ( const auto& s : videos )
 			Sys_Printf( "%s\n", s.c_str() );
-
 	}
 };
 

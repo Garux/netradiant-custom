@@ -2899,7 +2899,6 @@ int LightMain( Args& args ){
 		{
 			Sys_Warning( "Unknown argument \"%s\"\n", args.takeFront() );
 		}
-
 	}
 
 	/* fix up falloff tolerance for sRGB */

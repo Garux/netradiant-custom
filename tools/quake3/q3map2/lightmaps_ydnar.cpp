@@ -905,7 +905,6 @@ struct CompareSurfaceInfo
 			else if ( aInfo.plane->dist() > bInfo.plane->dist() ) {
 				return true;
 			}
-
 		}
 
 		/* then position in world */
@@ -3276,7 +3275,6 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 						         rgbGen,
 						         alphaGen,
 						         lmxy.x(), lmxy.y() );
-
 					}
 
 					/* concatenate */

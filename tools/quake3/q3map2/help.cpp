@@ -467,7 +467,6 @@ static void HelpCommon()
 	};
 
 	HelpOptions( "Common Options", 0, 80, options );
-
 }
 
 void HelpGames(){

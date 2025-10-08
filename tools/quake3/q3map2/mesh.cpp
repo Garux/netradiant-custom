@@ -352,7 +352,6 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 
 		// back up and recheck this set again, it may need more subdivision
 		j -= 2;
-
 	}
 
 	// vertical subdivisions
@@ -396,7 +395,6 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 
 		// back up and recheck this set again, it may need more subdivision
 		j -= 2;
-
 	}
 
 	// collapse the verts
@@ -476,7 +474,6 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
 				expand[ i ][ j + 1 ] = LerpDrawVert( expand[ i ][ j + 0 ], expand[ i ][ j + 1 ] );
 				expand[ i ][ j + 2 ] = LerpDrawVert( expand[ i ][ j + 1 ], expand[ i ][ j + 3 ] );
 			}
-
 		}
 
 		/* vertical subdivisions */

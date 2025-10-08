@@ -362,7 +362,6 @@ public:
 			if( getRotation() != c_quaternion_identity ){
 				m_contained.rotate( getRotation() );
 			}
-
 		}
 	}
 	void applyTransform(){

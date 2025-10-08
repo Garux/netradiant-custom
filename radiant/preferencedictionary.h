@@ -247,7 +247,6 @@ public:
 				break;
 			}
 		}
-
 	}
 	void popElement( const char* name ) override {
 		if ( m_xml_stack.back().m_tag == xml_state_t::tag_epair ) {

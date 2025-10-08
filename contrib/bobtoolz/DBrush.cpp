@@ -77,7 +77,6 @@ int DBrush::BuildPoints(){
 
 	if ( faceList.size() <= 3 ) {  // if less than 3 faces, there can be no points
 		return 0;                   // with only 3 faces u can't have a bounded soild
-
 	}
 	for ( std::list<DPlane *>::const_iterator p1 = faceList.begin(); p1 != faceList.end(); ++p1 )
 	{
@@ -448,13 +447,11 @@ bool DBrush::IntersectsWith( DBrush *chkBrush ){
 	if ( pointList.size() == 0 ) {
 		if ( BuildPoints() == 0 ) {
 			return false;   // invalid brush!!!!
-
 		}
 	}
 	if ( chkBrush->pointList.size() == 0 ) {
 		if ( chkBrush->BuildPoints() == 0 ) {
 			return false;   // invalid brush!!!!
-
 		}
 	}
 	if ( !BBoxCollision( chkBrush ) ) {
@@ -645,7 +642,6 @@ bool DBrush::HasTexture( const char *textureName ){
 		if ( strstr( plane->m_shader.c_str(), textureName ) ) {
 			return true;
 		}
-
 	}
 	return false;
 }
@@ -656,7 +652,6 @@ bool DBrush::IsDetail(){
 		if ( plane->texInfo.contents & FACE_DETAIL ) {
 			return true;
 		}
-
 	}
 	return false;
 }
@@ -851,7 +846,6 @@ int DBrush::FindPointsForPlane( DPlane* plane, DPoint** pnts, int maxpnts ) {
 			if ( numpnts >= maxpnts ) {
 				return numpnts;
 			}
-
 		}
 	}
 

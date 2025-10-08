@@ -211,7 +211,6 @@ void DVisDrawer::ui_create(){
 			QObject::connect( butt, &QPushButton::clicked, []( bool ){ DoVisAnalyse(); } );
 		}
 	}
-
 }
 
 void DVisDrawer::ui_leaf_add( int leafnum, int nleafs, int nsurfs, int nshaders ){

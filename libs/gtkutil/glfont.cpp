@@ -197,7 +197,6 @@ public:
 					row -= bitmap.width;
 					for( unsigned int i = 0; i < bitmap.width; ++i )
 						*t++ = rgb | ( ( guint32 ) row[i] );
-
 				} while( row != row_end );
 			} else
 			{

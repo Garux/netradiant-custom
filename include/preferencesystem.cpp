@@ -156,7 +156,6 @@ public:
 			void onChanged(){
 				int bleh = 0;
 			}
-
 		} int_observer;
 		IntPreference int1( int_observer );
 		int1.importString( "23" );
@@ -166,7 +165,6 @@ public:
 
 		LoadPrefs( preferences, "test.pref" );
 		SavePrefs( preferences, "test.pref" );
-
 	}
 };
 

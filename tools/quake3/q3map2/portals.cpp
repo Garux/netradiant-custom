@@ -251,7 +251,6 @@ static void MakeNodePortal( node_t *node ){
 		else{
 			Error( "CutNodePortals_r: mislinked portal" );
 		}
-
 	}
 
 	if ( w.empty() ) {
@@ -784,7 +783,6 @@ static void FillOutside_r( node_t *node ){
 	else {
 		c_inside++;
 	}
-
 }
 
 /*

@@ -537,7 +537,6 @@ void ScanFile( EntityClassCollector& collector, const char *filename ){
 	}
 }
 
-
 }
 
 #include "modulesystem/singletonmodule.h"

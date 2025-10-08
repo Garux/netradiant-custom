@@ -183,7 +183,6 @@ static void CalcPortalVis(){
 #else
 	RunThreadsOnIndividual( numportals * 2, true, PortalFlow );
 #endif
-
 }
 
 /*
@@ -549,7 +548,6 @@ static fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, 
 
 	if ( i == f1->numpoints ) {
 		return nullptr;            // no matching edges
-
 	}
 	//
 	// check slope of connected lines

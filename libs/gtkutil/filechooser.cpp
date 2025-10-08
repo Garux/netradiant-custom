@@ -110,7 +110,6 @@ public:
 		}
 		return filetype_pair_t();
 	}
-
 };
 
 static QByteArray g_file_dialog_file;

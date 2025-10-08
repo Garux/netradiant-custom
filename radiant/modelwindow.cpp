@@ -166,7 +166,6 @@ public:
 	void clear(){
 		DeleteSubgraph( root() );
 	}
-
 };
 
 /* specialized copy of class TraversableNodeSet */

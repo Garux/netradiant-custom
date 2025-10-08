@@ -444,7 +444,6 @@ void sphere_construct_wire( Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
 		        static_cast<float>( ds )
 		    );
 	}
-
 }
 
 void sphere_draw_wire( const Vector3& origin, float radius, const Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
@@ -670,7 +669,6 @@ void light_draw( const AABB& aabb_light, RenderStateFlags state ){
 		gl().glVertex3fv( e->origin );
 		gl().glVertex3fv( vTemp );
 		gl().glEnd();
-
 	}
 #endif
 }
