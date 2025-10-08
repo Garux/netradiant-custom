@@ -59,8 +59,8 @@ QScrollBar::sub-line:horizontal {
 QScrollBar::handle:hover {
 	background: rgb( 250, 203, 129 );
 }
-
-QMainWindow > QToolBar:horizontal {
+/* QMainWindow > QToolBar QToolButton - spacing: 0 - is 1 after normal editor start */
+QToolBar:horizontal {
 	background: rgb( 32, 32, 32 ); /* darker than window */
 	border-right: 4px solid transparent;
 	border-left: 4px solid transparent;
@@ -76,7 +76,7 @@ QMainWindow > QToolBar:horizontal {
 	padding: 0px;
 	spacing: 0px; /* space between buttons */
 }
-QMainWindow > QToolBar:right {
+QToolBar:right {
 	background: rgb( 32, 32, 32 ); /* darker than window */
 	border-bottom: 4px solid transparent;
 	border-top: 4px solid transparent;
@@ -90,7 +90,7 @@ QMainWindow > QToolBar:right {
 	padding: 0px;
 	spacing: 0px; /* space between buttons */
 }
-QMainWindow > QToolBar:left {
+QToolBar:left {
 	background: rgb( 32, 32, 32 ); /* darker than window */
 	border-bottom: 4px solid transparent;
 	border-top: 4px solid transparent;
@@ -104,8 +104,14 @@ QMainWindow > QToolBar:left {
 	padding: 0px;
 	spacing: 0px; /* space between buttons */
 }
+/* non QMainWindow toolbars */
+QSplitter QToolBar:horizontal {
+	spacing: 1px; /* space between buttons */
+}
+/* QMainWindow > QToolBar:horizontal QToolButton - doesnt' work; would like horizontal only & vertical only padding */
 QMainWindow > QToolBar QToolButton {
 	background: rgb( 64, 64, 64 ); /* brighter than window */
+	padding: 1;
 }
 QToolBar::separator:horizontal {
 	width: 8px;
