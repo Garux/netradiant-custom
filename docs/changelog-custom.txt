@@ -332,6 +332,7 @@ binds...
 	* add alt + m1 selection style to transform manipulator for scaling in 3D
 	* ctrl + shift + p: Shortcuts dialog (keyboard commands palette)
 	* m2 in texBro: context menu
+	* del: DeleteSelection3 as most expected deletion bind
 
 menus...
 	* smartified content basically

@@ -2279,7 +2279,7 @@ void XYWindow_Construct(){
 	GlobalToggles_insert( "ToggleSideView", ToggleShown::ToggleCaller( g_yz_side_shown ), ToggleItem::AddCallbackCaller( g_yz_side_shown.m_item ) );
 	GlobalToggles_insert( "ToggleFrontView", ToggleShown::ToggleCaller( g_xz_front_shown ), ToggleItem::AddCallbackCaller( g_xz_front_shown.m_item ) );
 	GlobalCommands_insert( "NextView", makeCallbackF( XY_NextView ), QKeySequence( "Ctrl+Tab" ) );
-	GlobalCommands_insert( "ZoomIn", makeCallbackF( XY_ZoomIn ), QKeySequence( "Delete" ) );
+	GlobalCommands_insert( "ZoomIn", makeCallbackF( XY_ZoomIn ) );
 	GlobalCommands_insert( "ZoomOut", makeCallbackF( XY_ZoomOut ), QKeySequence( "Insert" ) );
 	GlobalCommands_insert( "ViewTop", makeCallbackF( XY_Top ), QKeySequence( +Qt::Key_7 + Qt::KeypadModifier ) );
 	GlobalCommands_insert( "ViewFront", makeCallbackF( XY_Front ), QKeySequence( +Qt::Key_1 + Qt::KeypadModifier ) );
