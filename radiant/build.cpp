@@ -1092,9 +1092,11 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 			containerWidget->hide();
 			QObject::connect( expander, &QGroupBox::clicked, containerWidget, &QWidget::setVisible );
 			auto *vbox = new QVBoxLayout( containerWidget );
+			vbox->setContentsMargins( 0, 0, 0, 0 );
 
 			build_init_variables();
 			{ // immutable variables
+				vbox->addWidget( new QLabel( "Constants:" ) );
 				QIcon icon = new_local_icon( "copy.png" );
 				auto *table = new QTableWidget( 0, 2 );
 				vbox->addWidget( table );
@@ -1124,9 +1126,11 @@ EMessageBoxReturn BuildMenuDialog_construct( ProjectList& projectList ){
 			}
 			build_init_tools();
 			{ // mutable 'Tool' variables
+				vbox->addWidget( new QLabel( "Editables:" ) );
 				auto *table = new QTableWidget( 0, 2 );
 				vbox->addWidget( table );
-				table->setHorizontalHeaderLabels( { "Name", "Variable" } );
+				table->horizontalHeader()->hide();
+				// table->setHorizontalHeaderLabels( { "Name", "Variable" } );
 				table->setSelectionMode( QAbstractItemView::SelectionMode::SingleSelection );
 				table->horizontalHeader()->setStretchLastSection( true );
 				table->setWordWrap( true );
