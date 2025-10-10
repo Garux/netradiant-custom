@@ -22,6 +22,7 @@
 #pragma once
 
 void BitmapsPath_set( const char* path );
+void Bitmaps_generateLight( const char *appPath );
 
 #include <QPixmap>
 #include <QIcon>

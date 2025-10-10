@@ -1150,6 +1150,7 @@ misc...
 	* do Run Engine After Compile also after unmonitored builds
 	* support distinct lighting from different sky shaders in one map (by Tom Arrow)
 	* -onesky: fallback to old behavior: any sky emits total of all suns/skylights in the map
+	* adjust icons in light GUI themes for better visibility
 
 
 

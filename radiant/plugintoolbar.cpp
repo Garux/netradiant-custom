@@ -24,6 +24,7 @@
 
 #include "itoolbar.h"
 #include "gtkmisc.h"
+#include "gtkutil/image.h"
 #include "modulesystem.h"
 
 #include "stream/stringstream.h"
@@ -55,7 +56,7 @@ void toolbar_insert( QToolBar *toolbar, const char* icon, const char* text, cons
 		return;
 	case IToolbarButton::eButton:
 		{
-			toolbar_append_button( toolbar, tooltip, new_plugin_icon( icon ), plugin_construct_command_name( pluginName, text ).c_str() );
+			toolbar_append_button( toolbar, tooltip, new_local_icon( icon ), plugin_construct_command_name( pluginName, text ).c_str() );
 			// QAction *button = toolbar->addAction( new_plugin_icon( icon ), text, [ibutton](){ ibutton->activate(); } );
 			// button->setToolTip( tooltip );
 		}
@@ -65,7 +66,7 @@ void toolbar_insert( QToolBar *toolbar, const char* icon, const char* text, cons
 			//. fixme need consistent plugin command names (same in menu and toolbar) for the current command system
 			// now they are defined in 3 places, also must be used in menu to work in toolbar
 			// also no defined toggle menu item support (->setCheckable( true ) is some workaround now)
-			toolbar_append_button( toolbar, tooltip, new_plugin_icon( icon ), plugin_construct_command_name( pluginName, text ).c_str() )->setCheckable( true );
+			toolbar_append_button( toolbar, tooltip, new_local_icon( icon ), plugin_construct_command_name( pluginName, text ).c_str() )->setCheckable( true );
 			// toolbar_append_toggle_button( toolbar, tooltip, new_plugin_icon( icon ), plugin_construct_command_name( pluginName, text ).c_str() );
 			// QAction *button = toolbar->addAction( new_plugin_icon( icon ), text, [ibutton](){ ibutton->activate(); } );
 			// button->setToolTip( tooltip );

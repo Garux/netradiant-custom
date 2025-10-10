@@ -1,0 +1,16 @@
+[Icon Theme]
+Name=LightIcons
+Comment=LightIcons
+Directories=.,../plugins/bitmaps
+
+[.]
+Size=32
+Type=Scalable
+MinSize=8
+MaxSize=256
+
+[../plugins/bitmaps_light]
+Size=32
+Type=Scalable
+MinSize=8
+MaxSize=256

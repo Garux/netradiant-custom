@@ -29,6 +29,8 @@
 #include "mainframe.h"
 #include "preferencesystem.h"
 #include "stringio.h"
+#include "stream/stringstream.h"
+#include "gtkutil/image.h"
 
 
 enum class ETheme{
@@ -46,6 +48,14 @@ QString load_qss( const char *filename ){
 	return {};
 }
 
+void set_icon_theme( bool light ){
+	static auto init = ( Bitmaps_generateLight( AppPath_get() ), QIcon::setThemeSearchPaths( QIcon::themeSearchPaths() << AppPath_get() ), 1 );
+	(void)init;
+
+	BitmapsPath_set( StringStream( AppPath_get(), light? "bitmaps_light/" : "bitmaps/" ) );
+	QIcon::setThemeName( light? "bitmaps_light" : "bitmaps" );
+}
+
 void theme_set( ETheme theme ){
 	s_theme = theme;
 #ifdef WIN32
@@ -61,6 +71,7 @@ void theme_set( ETheme theme ){
 	defaults;
 
 	if( theme == ETheme::Default ){
+		set_icon_theme( true );
 		if( !defaults.is1stThemeApplication ){
 			qApp->setPalette( defaults.palette );
 			qApp->setStyleSheet( QString() );
@@ -68,11 +79,13 @@ void theme_set( ETheme theme ){
 		}
 	}
 	else if( theme == ETheme::Fusion ){
+		set_icon_theme( true );
 		qApp->setPalette( defaults.palette );
 		qApp->setStyleSheet( load_qss( "fusion.qss" ) ); //missing, stub to load custom qss
 		qApp->setStyle( "Fusion" );
 	}
 	else if( theme == ETheme::Dark ){
+		set_icon_theme( false );
 		qApp->setStyle( "Fusion" );
 		QPalette darkPalette;
 		const QColor darkColor = QColor( 83, 84, 81 );
@@ -104,6 +117,7 @@ void theme_set( ETheme theme ){
 		qApp->setStyleSheet( load_qss( "dark.qss" ) );
 	}
 	else if( theme == ETheme::Darker ){
+		set_icon_theme( false );
 		qApp->setStyle( "Fusion" );
 		QPalette darkPalette;
 		const QColor darkColor = QColor( 45, 45, 45 );

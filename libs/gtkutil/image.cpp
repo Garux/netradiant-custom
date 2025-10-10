@@ -25,6 +25,7 @@
 #include "os/path.h"
 #include "string/string.h"
 #include "stream/stringstream.h"
+#include <QDir>
 
 
 namespace
@@ -34,6 +35,34 @@ CopiedString g_bitmapsPath;
 
 void BitmapsPath_set( const char* path ){
 	g_bitmapsPath = path;
+}
+
+void Bitmaps_generateLight( const char *appPath ){
+	for( const char *root : { "", "plugins/" } )
+	{
+		QDir from( QString( appPath ) + root + "bitmaps/" );
+		QDir to( QString( appPath ) + root + "bitmaps_light/" );
+		for( auto *d : { &from, &to } ){
+			d->setNameFilters( QStringList() << "*.svg" << "*.png" << "*.ico" );
+			d->setFilter( QDir::Filter::Files );
+		}
+
+		if( to.count() < from.count() ){
+			to.mkpath( to.absolutePath() );
+			for( const QFileInfo& fileinfo : from.entryInfoList() )
+			{
+				QFile file( fileinfo.absoluteFilePath() );
+				if( file.open( QIODevice::OpenModeFlag::ReadOnly ) ){
+					QByteArray data( file.readAll() );
+					if( fileinfo.suffix() == "svg" )
+						data.replace( "#C0C0C0", "#575757" );
+					QFile outfile( to.absolutePath() + '/' + fileinfo.fileName() );
+					if( outfile.open( QIODevice::OpenModeFlag::WriteOnly ) )
+						outfile.write( data );
+				}
+			}
+		}
+	}
 }
 
 QPixmap new_local_image( const char* filename ){
@@ -47,6 +76,9 @@ QPixmap new_local_image( const char* filename ){
 }
 
 QIcon new_local_icon( const char* filename ){
+	if( QString name( CopiedString( PathExtensionless( filename ) ).c_str() ); QIcon::hasThemeIcon( name ) )
+		return QIcon::fromTheme( name );
+
 	StringOutputStream fullpath( 256 );
 
 	for( const auto *ext : { ".svg", ".png", ".ico" } )
