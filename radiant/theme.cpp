@@ -49,10 +49,12 @@ QString load_qss( const char *filename ){
 }
 
 void set_icon_theme( bool light ){
-	static auto init = ( Bitmaps_generateLight( AppPath_get() ), QIcon::setThemeSearchPaths( QIcon::themeSearchPaths() << AppPath_get() ), 1 );
+	static auto init = ( Bitmaps_generateLight( AppPath_get(), SettingsPath_get() ),
+	                     QIcon::setThemeSearchPaths( QIcon::themeSearchPaths() << AppPath_get() << SettingsPath_get() ), 1 );
 	(void)init;
 
-	BitmapsPath_set( StringStream( AppPath_get(), light? "bitmaps_light/" : "bitmaps/" ) );
+	BitmapsPath_set( light? StringStream( SettingsPath_get(), "bitmaps_light/" )
+	                      : StringStream( AppPath_get(), "bitmaps/" ) );
 	QIcon::setThemeName( light? "bitmaps_light" : "bitmaps" );
 }
 

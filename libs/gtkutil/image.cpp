@@ -37,13 +37,15 @@ void BitmapsPath_set( const char* path ){
 	g_bitmapsPath = path;
 }
 
-void Bitmaps_generateLight( const char *appPath ){
-	for( const char *root : { "", "plugins/" } )
+/* generate in settings path, app path may have no write permission */
+void Bitmaps_generateLight( const char *appPath, const char *settingsPath ){
+	const char *fromto[][2] = { { "bitmaps/", "bitmaps_light/" }, { "plugins/bitmaps/", "plugins/bitmaps/" } };
+	for( const auto [ f, t ] : fromto )
 	{
-		QDir from( QString( appPath ) + root + "bitmaps/" );
-		QDir to( QString( appPath ) + root + "bitmaps_light/" );
+		QDir from( QString( appPath ) + f );
+		QDir to( QString( settingsPath ) + t );
 		for( auto *d : { &from, &to } ){
-			d->setNameFilters( QStringList() << "*.svg" << "*.png" << "*.ico" );
+			d->setNameFilters( QStringList() << "*.svg" << "*.png" << "*.ico" << "*.theme" );
 			d->setFilter( QDir::Filter::Files );
 		}
 
