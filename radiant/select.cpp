@@ -823,6 +823,11 @@ void Scene_EntityGetPropertyValues( scene::Graph& graph, const char *prop, Prope
 	graph.traverse( EntityGetSelectedPropertyValuesWalker( prop, propertyvalues ) );
 }
 
+void Scene_BrushPatchSelectByShader( const char *shader ){
+	Scene_BrushSelectByShader( GlobalSceneGraph(), shader );
+	Scene_PatchSelectByShader( GlobalSceneGraph(), shader );
+}
+
 void Select_AllOfType(){
 	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent ) {
 		if ( GlobalSelectionSystem().ComponentMode() == SelectionSystem::eFace ) {
@@ -830,20 +835,15 @@ void Select_AllOfType(){
 			Scene_BrushSelectByShader_Component( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
 		}
 	}
-	else
-	{
+	else{
 		PropertyValues propertyvalues;
 		const char *prop = "classname";
 		Scene_EntityGetPropertyValues( GlobalSceneGraph(), prop, propertyvalues );
 		GlobalSelectionSystem().setSelectedAll( false );
-		if ( !propertyvalues.empty() ) {
+		if ( !propertyvalues.empty() )
 			Scene_EntitySelectByPropertyValues( GlobalSceneGraph(), prop, propertyvalues );
-		}
 		else
-		{
-			Scene_BrushSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
-			Scene_PatchSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
-		}
+			Scene_BrushPatchSelectByShader( TextureBrowser_GetSelectedShader() );
 	}
 }
 
@@ -886,9 +886,12 @@ void Select_EntitiesByKeyValue( const char* key, const char* value ){
 	}
 }
 
-void Select_FacesAndPatchesByShader(){
-	Scene_BrushFacesSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
-	Scene_PatchSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
+void Select_FacesAndPatchesByShader( const char *shader ){
+	Scene_BrushFacesSelectByShader( GlobalSceneGraph(), shader );
+	Scene_PatchSelectByShader( GlobalSceneGraph(), shader );
+}
+void Select_FacesAndPatchesByShader_(){
+	Select_FacesAndPatchesByShader( TextureBrowser_GetSelectedShader() );
 }
 
 void Select_Inside(){
@@ -1851,7 +1854,7 @@ void Select_registerCommands(){
 	GlobalCommands_insert( "RotateSelectionClockwise", makeCallbackF( Selection_RotateClockwise ) );
 	GlobalCommands_insert( "RotateSelectionAnticlockwise", makeCallbackF( Selection_RotateAnticlockwise ) );
 
-	GlobalCommands_insert( "SelectTextured", makeCallbackF( Select_FacesAndPatchesByShader ), QKeySequence( "Ctrl+Shift+A" ) );
+	GlobalCommands_insert( "SelectTextured", makeCallbackF( Select_FacesAndPatchesByShader_ ), QKeySequence( "Ctrl+Shift+A" ) );
 
 	GlobalCommands_insert( "Undo", makeCallbackF( Undo ), QKeySequence( "Ctrl+Z" ) );
 	GlobalCommands_insert( "Redo", makeCallbackF( Redo ), QKeySequence( "Ctrl+Shift+Z" ) );

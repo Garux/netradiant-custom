@@ -184,6 +184,8 @@ Q3map2:
 	* handle patch lodbounds in -shift and -scale
 	* refactor to work without -maxshaderinfo limit, improve shader search performance
 	* fix and simplify FloodAreas
+	* support distinct lighting from different sky shaders in one map (by Tom Arrow)
+	* -onesky: fallback to old behavior: any sky emits total of all suns/skylights in the map
 
 
 
@@ -377,6 +379,7 @@ menus...
 	* shift + q: move-to LayersMenu
 	* context menu for toolbar buttons configuration
 	* Copy All in console context menu
+	* texBro.context menu: Select Textured Objects, Select Textured Surfaces
 
 misc...
 	* removed note to save before going to preferences, project settings
@@ -1148,8 +1151,6 @@ misc...
 	* render camera crosshair sharply independently of viewport size, with shadow
 	* support mixture of monitored and unmonitored build commands (do unmonitored run after 1st such command)
 	* do Run Engine After Compile also after unmonitored builds
-	* support distinct lighting from different sky shaders in one map (by Tom Arrow)
-	* -onesky: fallback to old behavior: any sky emits total of all suns/skylights in the map
 	* adjust icons in light GUI themes for better visibility
 
 

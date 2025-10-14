@@ -1608,6 +1608,15 @@ void TextureBrowser_ContextMenu( TextureBrowser& texBro, qreal deviceScale ){
 
 	menu->addSeparator();
 
+	menu->addAction( "Select Textured Objects", [&](){
+		Scene_BrushPatchSelectByShader( shader->getName() );
+	} );
+	menu->addAction( "Select Textured Surfaces", [&](){
+		Select_FacesAndPatchesByShader( shader->getName() );
+	} );
+
+	menu->addSeparator();
+
 	auto *subMenu = menu->addMenu( "-> Recent" );
 	for( const auto& folder : texBro.m_recent_folders ){
 		subMenu->addAction( folder.c_str(), [&texBro, folder = folder.c_str()](){
