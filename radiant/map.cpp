@@ -872,8 +872,7 @@ public:
 		: m_ents_ingame( ents_ingame ), m_groupents( groupents ), m_groupents_ingame( groupents_ingame ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
-		Entity* entity = Node_getEntity( path.top() );
-		if ( entity != 0 ){
+		if ( Entity* entity = Node_getEntity( path.top() ) ){
 			const char* classname = entity->getClassName();
 			if( entity->isContainer() ){
 				++m_groupents;
@@ -883,10 +882,10 @@ public:
 					++m_groupents_ingame;
 					++m_ents_ingame;
 				}
-				return true;
 			}
-			if( !string_equal_nocase_n( "light", classname, 5 ) &&
-			    !string_equal_nocase( "misc_model", classname ) ){
+			else if( !string_equal_nocase_n( "light", classname, 5 ) &&
+			         !string_equal_nocase( "misc_model", classname ) &&
+			         !string_equal_nocase( "info_null", classname ) ){
 				++m_ents_ingame;
 			}
 		}
