@@ -62,7 +62,7 @@ jobs:
     - name: Install tools
       run: |
           sudo apt-get -qq update
-          sudo apt-get -y install mesa-common-dev qtbase5-dev libglib2.0-dev libjpeg-dev libpng-dev
+          sudo apt-get -y install mesa-common-dev qtbase5-dev libqt5svg5-dev libglib2.0-dev libjpeg-dev libpng-dev
     - uses: actions/checkout@v4
       with:
         submodules: recursive
