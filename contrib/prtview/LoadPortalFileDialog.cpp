@@ -53,7 +53,7 @@ bool DoLoadPortalFileDialog(){
 			vbox->addWidget( line = new QLineEdit );
 			auto *button = line->addAction( QApplication::style()->standardIcon( QStyle::SP_DialogOpenButton ), QLineEdit::ActionPosition::TrailingPosition );
 			QObject::connect( button, &QAction::triggered, [line](){
-				if ( const char* filename = GlobalRadiant().m_pfnFileDialog( g_pRadiantWnd, true, "Locate portal (.prt) file", line->text().toLatin1().constData(), 0, true, false, false ) )
+				if ( const char* filename = GlobalRadiant().m_pfnFileDialog( g_pRadiantWnd, true, "Locate portal (.prt) file", line->text().toLatin1().constData(), "*.prt", true, false, false ) )
 					line->setText( filename );
 			} );
 		}

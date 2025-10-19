@@ -34,7 +34,7 @@ void OnExportClicked( bool choose_path ){
 			}
 		}
 
-		const char* cpath = GlobalRadiant().m_pfnFileDialog( g_dialog.window, false, "Save as Obj", buffer, 0, false, false, true );
+		const char* cpath = GlobalRadiant().m_pfnFileDialog( g_dialog.window, false, "Save as Obj", buffer, "*.obj", false, false, true );
 		if ( !cpath ) {
 			return;
 		}

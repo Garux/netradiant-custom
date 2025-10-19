@@ -57,18 +57,14 @@ class FileTypeList : public IFileTypeList
 		CopiedString m_pattern;
 	};
 
-	typedef std::list<filetype_copy_t> Types;
-	Types m_types;
+	std::list<filetype_copy_t> m_types;
 public:
-
-	typedef Types::const_iterator const_iterator;
-	const_iterator begin() const {
-		return m_types.begin();
+	auto begin() const {
+		return m_types.cbegin();
 	}
-	const_iterator end() const {
-		return m_types.end();
+	auto end() const {
+		return m_types.cend();
 	}
-
 	std::size_t size() const {
 		return m_types.size();
 	}
@@ -81,34 +77,27 @@ public:
 
 class GTKMasks
 {
-	const FileTypeList& m_types;
 public:
 	std::vector<CopiedString> m_filters;
 	std::vector<CopiedString> m_masks;
 
-	GTKMasks( const FileTypeList& types ) : m_types( types ){
-		m_masks.reserve( m_types.size() );
+	GTKMasks( const FileTypeList& types ){
+		m_masks.reserve( types.size() );
+		m_filters.reserve( types.size() );
 		for ( const auto& type : types )
 		{
 			m_masks.push_back( StringStream<64>( type.m_name, " (", type.m_pattern, ')' ).c_str() );
-		}
-
-		m_filters.reserve( m_types.size() );
-		for ( const auto& type : types )
-		{
 			m_filters.push_back( type.m_pattern );
 		}
 	}
-
-	filetype_pair_t GetTypeForGTKMask( const char *mask ) const {
-		std::vector<CopiedString>::const_iterator j = m_masks.begin();
-		for ( FileTypeList::const_iterator i = m_types.begin(); i != m_types.end(); ++i, ++j )
+	GTKMasks( const char *patterns ){
+		while( ( patterns = strstr( patterns, "*." ) ) )
 		{
-			if ( string_equal( ( *j ).c_str(), mask ) ) {
-				return filetype_pair_t( ( *i ).m_moduleName.c_str(), filetype_t( ( *i ).m_name.c_str(), ( *i ).m_pattern.c_str() ) );
-			}
+			const char *end = patterns + 1;
+			while( std::isalnum( *++end ) ){}
+			m_filters.push_back( StringRange( patterns, end ) );
+			patterns = end;
 		}
-		return filetype_pair_t();
 	}
 };
 
@@ -122,7 +111,7 @@ const char* file_dialog( QWidget* parent, bool open, const char* title, const ch
 	FileTypeList typelist;
 	GlobalFiletypes().getTypeList( pattern, &typelist, want_load, want_import, want_save );
 
-	const GTKMasks masks( typelist );
+	const auto masks = typelist.size()? GTKMasks( typelist ) : GTKMasks( pattern ); // pattern is moduleType or explicit patterns
 
 	if ( path != 0 && !string_empty( path ) ) {
 		ASSERT_MESSAGE( path_is_absolute( path ), "file_dialog_show: path not absolute: " << Quoted( path ) );
@@ -133,21 +122,26 @@ const char* file_dialog( QWidget* parent, bool open, const char* title, const ch
 
 	QString filter;
 
-	if ( open && masks.m_filters.size() > 1 ){ // e.g.: All supported formats ( *.map *.reg)
-		filter += "All supported formats (";
-		for ( const auto& f : masks.m_filters )
-		{
-			filter += ' ';
-			filter += f.c_str();
+	if( typelist.size() ){ // pattern is moduleType
+		if ( open && masks.m_filters.size() > 1 ){ // e.g.: All supported formats ( *.map *.reg)
+			filter += "All supported formats (";
+			for ( const auto& f : masks.m_filters )
+			{
+				filter += ' ';
+				filter += f.c_str();
+			}
+			filter += ')';
 		}
-		filter += ')';
-	}
 
-	for ( const auto& mask : masks.m_masks ) // e.g.: quake3 maps (*.map);;quake3 region (*.reg)
-	{
-		if( !filter.isEmpty() )
-			filter += ";;";
-		filter += mask.c_str();
+		for ( const auto& mask : masks.m_masks ) // e.g.: quake3 maps (*.map);;quake3 region (*.reg)
+		{
+			if( !filter.isEmpty() )
+				filter += ";;";
+			filter += mask.c_str();
+		}
+	}
+	else{ // explicit patterns
+		filter = pattern;
 	}
 	// this handles backslashes as input and returns forwardly slashed path
 	// input path may be either folder or file
