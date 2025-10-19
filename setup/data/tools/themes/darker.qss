@@ -107,8 +107,8 @@ QScrollBar::sub-line:horizontal { /* not visible */
 }
 
 QScrollBar::handle:hover {
-	background: rgb( 250, 203, 129 ); /* Orange */
-	border-color: rgb( 206, 169, 114 );
+	background: rgb( 42, 130, 218 ); /* Blue */
+	border-color: rgb( 89, 172, 255 ); /* light-Blue */
 }
 
 /* ---- QToolBar + QToolButton ---- */

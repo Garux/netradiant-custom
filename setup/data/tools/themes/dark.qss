@@ -171,17 +171,17 @@ QToolBar QToolButton:hover {
 }
 
 QToolBar QToolButton:pressed {
-	background: rgba( 250, 203, 129, 30% ); /* same as ON */
+	background: palette( base ); /* darker than toolbar bg */ /* same as ON */
 	border-color: rgba( 250, 203, 129, 75% ); /* same as ON */
 }
 
 QToolBar QToolButton:on {
-	background: rgba( 250, 203, 129, 30% ); /* Orange */
+	background: palette( base ); /* darker than toolbar bg */ /* same as ON */
 	border-color: rgba( 250, 203, 129, 75% );
 }
 
 QToolBar QToolButton:on:hover {
-	background: rgba( 250, 203, 129, 40% ); /* Orange */
+	background: rgb( 70, 79, 82 );
 	border-color: rgba( 250, 203, 129, 95% );
 }
 
@@ -223,11 +223,11 @@ QToolButton:pressed {
 }
 
 QToolButton:on {
-	background: rgb( 166, 125, 60 ); /* Orange */
+	background: palette( base );
 }
 
 QToolButton:on:hover {
-	background: rgb( 191, 144, 69 ); /* Orange */
+	background: rgb( 70, 79, 82 );
 }
 
 QToolButton:on:pressed {
