@@ -107,6 +107,7 @@ GPL crlf=input
 *.h crlf=input
 *.hs crlf=input
 *.htaccess crlf=input
+*.htm crlf=input
 *.html crlf=input
 *.html-part crlf=input
 *.icns -diff -crlf
