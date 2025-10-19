@@ -167,7 +167,7 @@ Q3map2:
 	* -keepmodels in -bsp / _keepModels on worldspawn: keep misc_model entities in the BSP file after compile
 	* fix: don't turn lights with targetname to styled for IBSP, as they are not switchable there
 	* fix RBSP style keys on -exportents and decompilation, so that they are alright for -onlyents and compilation
-	* -nobouncestore: Do not store BSP, lightmap and shader files between bounces
+	* -nobouncestore: Store BSP, lightmap and shader files only once after last bounce
 	* fix custom shaders generation for lightstyles and external lightmaps hacks for :q3map suffixed shaders
 	* -maxmapdrawsurfs <N>: Sets max amount of mapDrawSurfs, used during .map compilation (-bsp, -convert), default = 131072
 	* -maxshaderinfo <N>: Sets max amount of shaderInfo, default = 8192

@@ -2620,7 +2620,7 @@ int LightMain( Args& args ){
 
 		while ( args.takeArg( "-nobouncestore" ) ) {
 			bounceStore = false;
-			Sys_Printf( "Not storing BSP, lightmap and shader files between bounces\n" );
+			Sys_Printf( "Storing BSP, lightmap and shader files only once after last bounce\n" );
 		}
 
 		while ( args.takeArg( "-nocollapse" ) ) {
