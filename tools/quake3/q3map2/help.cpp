@@ -323,6 +323,7 @@ static void HelpConvert()
 		{ "-readbsp", "Force converting bsp to selected format" },
 		{ "-readmap", "Force converting map to selected format" },
 		{ "-shadersasbitmap", "Save shader names as bitmap names in the model so it works as a prefab (only when writing ase and obj)" },
+		{ "-wtf", "During bsp to map conversion use common/WTF on faces with failed texture alignment deduction" },
 	};
 
 	HelpOptions( "Converting & Decompiling", 0, 80, options );

@@ -594,7 +594,8 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 		}
 		else
 		{
-			if ( !striEqualPrefix( buildSide.shaderInfo->shader, "textures/common/" )
+			if ( g_decompile_wtf
+			  && !striEqualPrefix( buildSide.shaderInfo->shader, "textures/common/" )
 			  && !striEqualPrefix( buildSide.shaderInfo->shader, "textures/system/" )
 			  &&        !strEqual( buildSide.shaderInfo->shader, "noshader" )
 			  &&        !strEqual( buildSide.shaderInfo->shader, "default" ) ) {
