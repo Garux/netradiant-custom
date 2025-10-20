@@ -199,11 +199,8 @@ static void bspBrush_to_buildBrush( const bspBrush_t& brush ){
 	if ( force ){
 		int notNoShader = 0;
 		modelclip = true;
-		for ( int i = 0; i < brush.numSides; ++i )
+		for ( const bspBrushSide_t& side : Span( &bspBrushSides[ brush.firstSide ], brush.numSides ) )
 		{
-			/* get side */
-			const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + i ];
-
 			/* get shader */
 			if ( side.shaderNum < 0 || side.shaderNum >= int( bspShaders.size() ) ) {
 				continue;
@@ -221,11 +218,8 @@ static void bspBrush_to_buildBrush( const bspBrush_t& brush ){
 	}
 
 	/* iterate through bsp brush sides */
-	for ( int i = 0; i < brush.numSides; ++i )
+	for ( const bspBrushSide_t& side : Span( &bspBrushSides[ brush.firstSide ], brush.numSides ) )
 	{
-		/* get side */
-		const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + i ];
-
 		/* get shader */
 		if ( side.shaderNum < 0 || side.shaderNum >= int( bspShaders.size() ) ) {
 			continue;
@@ -342,8 +336,8 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 	if( !( bspShaders[bspBrushes[bspBrushNum].shaderNum].contentFlags & GetRequiredSurfaceParm<"structural">().contentFlags ) ){ // sort out structural transparent brushes, e.g. hints
 		for( const auto& leaf : bspLeafs ){
 			if( leaf.cluster > CLUSTER_OPAQUE )
-				for( auto id = bspLeafBrushes.cbegin() + leaf.firstBSPLeafBrush, end = id + leaf.numBSPLeafBrushes; id != end; ++id ){
-					if( *id == bspBrushNum ){
+				for( const int id : Span( &bspLeafBrushes[ leaf.firstBSPLeafBrush ], leaf.numBSPLeafBrushes ) ){
+					if( id == bspBrushNum ){
 						contentFlag = C_DETAIL;
 						break;
 					}

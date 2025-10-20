@@ -932,7 +932,7 @@ struct CompareSurfaceInfo
  */
 
 void SetupSurfaceLightmaps(){
-	int i, j, k, s, num, num2;
+	int i, j, k, num, num2;
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info, *info2;
 	rawLightmap_t       *lm;
@@ -1011,10 +1011,10 @@ void SetupSurfaceLightmaps(){
 
 			/* determine surface bounds */
 			info->minmax.clear();
-			for ( k = 0; k < ds->numVerts; ++k )
+			for ( const bspDrawVert_t& dv : Span( &yDrawVerts[ ds->firstVert ], ds->numVerts ) )
 			{
-				g_mapMinmax.extend( yDrawVerts[ ds->firstVert + k ].xyz );
-				info->minmax.extend( yDrawVerts[ ds->firstVert + k ].xyz );
+				g_mapMinmax.extend( dv.xyz );
+				info->minmax.extend( dv.xyz );
 			}
 
 			/* find all the bsp clusters the surface falls into */
@@ -1026,9 +1026,9 @@ void SetupSurfaceLightmaps(){
 				}
 
 				/* test leaf surfaces */
-				for ( s = 0; s < leaf.numBSPLeafSurfaces; ++s )
+				for ( const int s : Span( &bspLeafSurfaces[ leaf.firstBSPLeafSurface ], leaf.numBSPLeafSurfaces ) )
 				{
-					if ( bspLeafSurfaces[ leaf.firstBSPLeafSurface + s ] == num ) {
+					if ( s == num ) {
 						if ( numSurfaceClusters >= maxSurfaceClusters ) {
 							Error( "maxSurfaceClusters exceeded" );
 						}

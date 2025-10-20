@@ -710,15 +710,12 @@ static void SetEntityOrigins(){
 		}
 
 		/* set origin for all surfaces for this model */
-		for ( int j = 0; j < dm.numBSPSurfaces; ++j )
+		for ( const bspDrawSurface_t& ds : Span( &bspDrawSurfaces[ dm.firstBSPSurface ], dm.numBSPSurfaces ) )
 		{
-			/* get drawsurf */
-			const bspDrawSurface_t& ds = bspDrawSurfaces[ dm.firstBSPSurface + j ];
-
 			/* set its verts */
-			for ( int k = 0; k < ds.numVerts; ++k )
+			for ( bspDrawVert_t& dv : Span( &yDrawVerts[ ds.firstVert ], ds.numVerts ) )
 			{
-				yDrawVerts[ ds.firstVert + k ].xyz += origin;
+				dv.xyz += origin;
 			}
 		}
 	}

@@ -698,44 +698,26 @@ int MergeBSPMain( Args& args ){
 	LoadBSPFile( source );
 	ParseEntities();
 
-	struct bsp
+	struct
 	{
-		std::vector<entity_t> entities;
-		std::vector<bspModel_t> bspModels;
-		std::vector<bspShader_t> bspShaders;
-		std::vector<bspLeaf_t> bspLeafs;
-		std::vector<bspPlane_t> bspPlanes;
-		std::vector<bspNode_t> bspNodes;
-		std::vector<int> bspLeafSurfaces;
-		std::vector<int> bspLeafBrushes;
-		std::vector<bspBrush_t> bspBrushes;
-		std::vector<bspBrushSide_t> bspBrushSides;
-		std::vector<byte> bspLightBytes;
-		std::vector<bspGridPoint_t> bspGridPoints;
-		std::vector<byte> bspVisBytes;
-		std::vector<bspDrawVert_t> bspDrawVerts;
-		std::vector<int> bspDrawIndexes;
-		std::vector<bspDrawSurface_t> bspDrawSurfaces;
-		std::vector<bspFog_t> bspFogs;
+		decltype( entities        ) entities        = std::move( ::entities );
+		decltype( bspModels       ) bspModels       = std::move( ::bspModels );
+		decltype( bspShaders      ) bspShaders      = std::move( ::bspShaders );
+		decltype( bspLeafs        ) bspLeafs        = std::move( ::bspLeafs );
+		decltype( bspPlanes       ) bspPlanes       = std::move( ::bspPlanes );
+		decltype( bspNodes        ) bspNodes        = std::move( ::bspNodes );
+		decltype( bspLeafSurfaces ) bspLeafSurfaces = std::move( ::bspLeafSurfaces );
+		decltype( bspLeafBrushes  ) bspLeafBrushes  = std::move( ::bspLeafBrushes );
+		decltype( bspBrushes      ) bspBrushes      = std::move( ::bspBrushes );
+		decltype( bspBrushSides   ) bspBrushSides   = std::move( ::bspBrushSides );
+		decltype( bspLightBytes   ) bspLightBytes   = std::move( ::bspLightBytes );
+		decltype( bspGridPoints   ) bspGridPoints   = std::move( ::bspGridPoints );
+		decltype( bspVisBytes     ) bspVisBytes     = std::move( ::bspVisBytes );
+		decltype( bspDrawVerts    ) bspDrawVerts    = std::move( ::bspDrawVerts );
+		decltype( bspDrawIndexes  ) bspDrawIndexes  = std::move( ::bspDrawIndexes );
+		decltype( bspDrawSurfaces ) bspDrawSurfaces = std::move( ::bspDrawSurfaces );
+		decltype( bspFogs         ) bspFogs         = std::move( ::bspFogs );
 	} bsp;
-
-	bsp.entities = std::move( entities );
-	bsp.bspModels = std::move( bspModels );
-	bsp.bspShaders = std::move( bspShaders );
-	bsp.bspLeafs = std::move( bspLeafs );
-	bsp.bspPlanes = std::move( bspPlanes );
-	bsp.bspNodes = std::move( bspNodes );
-	bsp.bspLeafSurfaces = std::move( bspLeafSurfaces );
-	bsp.bspLeafBrushes = std::move( bspLeafBrushes );
-	bsp.bspBrushes = std::move( bspBrushes );
-	bsp.bspBrushSides = std::move( bspBrushSides );
-	bsp.bspLightBytes = std::move( bspLightBytes );
-	bsp.bspGridPoints = std::move( bspGridPoints );
-	bsp.bspVisBytes = std::move( bspVisBytes );
-	bsp.bspDrawVerts = std::move( bspDrawVerts );
-	bsp.bspDrawIndexes = std::move( bspDrawIndexes );
-	bsp.bspDrawSurfaces = std::move( bspDrawSurfaces );
-	bsp.bspFogs = std::move( bspFogs );
 
 	/* do some path mangling */
 	strcpy( source, ExpandArg( fileName1 ) );
@@ -894,8 +876,8 @@ int MergeBSPMain( Args& args ){
 				minmax = { surf->lightmapVecs[0], surf->lightmapVecs[1] };
 			}
 			else{
-				for( int i = 0; i < surf->numIndexes; ++i )
-					minmax.extend( bspDrawVerts[surf->firstVert + bspDrawIndexes[surf->firstIndex + i]].xyz );
+				for( const int i : Span( &bspDrawIndexes[surf->firstIndex], surf->numIndexes ) )
+					minmax.extend( bspDrawVerts[surf->firstVert + i].xyz );
 			}
 
 			for( auto&& leaf : bspLeafs ){
@@ -920,9 +902,9 @@ int MergeBSPMain( Args& args ){
 		for( auto end = bspBrushes.cbegin() + bspModels[0].firstBSPBrush + bspModels[0].numBSPBrushes,
 		          brush = end - brushes.size(); brush != end; ++brush ){
 			buildBrush.sides.clear();
-			for( auto side = bspBrushSides.cbegin() + brush->firstSide, end = side + brush->numSides; side != end; ++side ){
+			for( const bspBrushSide_t& side : Span( &bspBrushSides[ brush->firstSide ], brush->numSides ) ){
 				auto& s = buildBrush.sides.emplace_back();
-				s.planenum = side->planeNum;
+				s.planenum = side.planeNum;
 			}
 			if( CreateBrushWindings( buildBrush ) ){
 				// cheap minmax test

@@ -433,12 +433,8 @@ int ClusterForPointExt( const Vector3& point, float epsilon ){
 	}
 
 	/* transparent leaf, so check point against all brushes in the leaf */
-	const int *brushes = &bspLeafBrushes[ leaf.firstBSPLeafBrush ];
-	const int numBSPBrushes = leaf.numBSPLeafBrushes;
-	for ( int i = 0; i < numBSPBrushes; ++i )
+	for ( const int b : Span( &bspLeafBrushes[ leaf.firstBSPLeafBrush ], leaf.numBSPLeafBrushes ) )
 	{
-		/* get parts */
-		const int b = brushes[ i ];
 		if ( b > maxOpaqueBrush ) {
 			continue;
 		}
@@ -449,11 +445,12 @@ int ClusterForPointExt( const Vector3& point, float epsilon ){
 		const bspBrush_t& brush = bspBrushes[ b ];
 		/* check point against all planes */
 		bool inside = true;
-		for ( int j = 0; j < brush.numSides && inside; ++j )
+		for ( const bspBrushSide_t& side : Span( &bspBrushSides[ brush.firstSide ], brush.numSides ) )
 		{
-			const bspPlane_t& plane = bspPlanes[ bspBrushSides[ brush.firstSide + j ].planeNum ];
+			const bspPlane_t& plane = bspPlanes[ side.planeNum ];
 			if ( plane3_distance_to_point( plane, point ) > epsilon ) {
 				inside = false;
+				break;
 			}
 		}
 
@@ -518,23 +515,21 @@ static int ShaderForPointInLeaf( const Vector3& point, int leafNum, float epsilo
 	const bspLeaf_t& leaf = bspLeafs[ leafNum ];
 
 	/* transparent leaf, so check point against all brushes in the leaf */
-	const int *brushes = &bspLeafBrushes[ leaf.firstBSPLeafBrush ];
-	const int numBSPBrushes = leaf.numBSPLeafBrushes;
-	for ( int i = 0; i < numBSPBrushes; ++i )
+	for ( const int b : Span( &bspLeafBrushes[ leaf.firstBSPLeafBrush ], leaf.numBSPLeafBrushes ) )
 	{
 		/* get parts */
-		const bspBrush_t& brush = bspBrushes[ brushes[ i ] ];
+		const bspBrush_t& brush = bspBrushes[ b ];
 
 		/* check point against all planes */
 		bool inside = true;
 		allSurfaceFlags = 0;
 		allContentFlags = 0;
-		for ( int j = 0; j < brush.numSides && inside; ++j )
+		for ( const bspBrushSide_t& side : Span( &bspBrushSides[ brush.firstSide ], brush.numSides ) )
 		{
-			const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + j ];
 			const bspPlane_t& plane = bspPlanes[ side.planeNum ];
 			if ( plane3_distance_to_point( plane, point ) > epsilon ) {
 				inside = false;
+				break;
 			}
 			else
 			{
@@ -2189,9 +2184,8 @@ static void CreateTraceLightsForSurface( int num, trace_t *trace ){
 	/* get the mins/maxs for the dsurf */
 	MinMax minmax;
 	Vector3 normal = bspDrawVerts[ ds.firstVert ].normal;
-	for ( int i = 0; i < ds.numVerts; ++i )
+	for ( const bspDrawVert_t& dv : Span( &yDrawVerts[ ds.firstVert ], ds.numVerts ) )
 	{
-		const bspDrawVert_t& dv = yDrawVerts[ ds.firstVert + i ];
 		minmax.extend( dv.xyz );
 		if ( !VectorCompare( dv.normal, normal ) ) {
 			normal.set( 0 );
@@ -3343,11 +3337,8 @@ void SetupBrushesFlags( int mask_any, int test_any, int mask_all, int test_all )
 		/* check all sides */
 		compileFlags = 0;
 		allCompileFlags = ~( 0 );
-		for ( int j = 0; j < brush.numSides; ++j )
+		for ( const bspBrushSide_t& side : Span( &bspBrushSides[ brush.firstSide ], brush.numSides ) )
 		{
-			/* do bsp shader calculations */
-			const bspBrushSide_t& side = bspBrushSides[ brush.firstSide + j ];
-
 			/* get shader info */
 			const shaderInfo_t *si = ShaderInfoForShaderNull( bspShaders[ side.shaderNum ].shader );
 			if ( si == nullptr ) {
