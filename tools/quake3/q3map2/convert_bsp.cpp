@@ -700,23 +700,23 @@ int MergeBSPMain( Args& args ){
 
 	struct
 	{
-		decltype( entities        ) entities        = std::move( ::entities );
-		decltype( bspModels       ) bspModels       = std::move( ::bspModels );
-		decltype( bspShaders      ) bspShaders      = std::move( ::bspShaders );
-		decltype( bspLeafs        ) bspLeafs        = std::move( ::bspLeafs );
-		decltype( bspPlanes       ) bspPlanes       = std::move( ::bspPlanes );
-		decltype( bspNodes        ) bspNodes        = std::move( ::bspNodes );
-		decltype( bspLeafSurfaces ) bspLeafSurfaces = std::move( ::bspLeafSurfaces );
-		decltype( bspLeafBrushes  ) bspLeafBrushes  = std::move( ::bspLeafBrushes );
-		decltype( bspBrushes      ) bspBrushes      = std::move( ::bspBrushes );
-		decltype( bspBrushSides   ) bspBrushSides   = std::move( ::bspBrushSides );
-		decltype( bspLightBytes   ) bspLightBytes   = std::move( ::bspLightBytes );
-		decltype( bspGridPoints   ) bspGridPoints   = std::move( ::bspGridPoints );
-		decltype( bspVisBytes     ) bspVisBytes     = std::move( ::bspVisBytes );
-		decltype( bspDrawVerts    ) bspDrawVerts    = std::move( ::bspDrawVerts );
-		decltype( bspDrawIndexes  ) bspDrawIndexes  = std::move( ::bspDrawIndexes );
-		decltype( bspDrawSurfaces ) bspDrawSurfaces = std::move( ::bspDrawSurfaces );
-		decltype( bspFogs         ) bspFogs         = std::move( ::bspFogs );
+		decltype( ::entities        ) entities        = std::move( ::entities );
+		decltype( ::bspModels       ) bspModels       = std::move( ::bspModels );
+		decltype( ::bspShaders      ) bspShaders      = std::move( ::bspShaders );
+		decltype( ::bspLeafs        ) bspLeafs        = std::move( ::bspLeafs );
+		decltype( ::bspPlanes       ) bspPlanes       = std::move( ::bspPlanes );
+		decltype( ::bspNodes        ) bspNodes        = std::move( ::bspNodes );
+		decltype( ::bspLeafSurfaces ) bspLeafSurfaces = std::move( ::bspLeafSurfaces );
+		decltype( ::bspLeafBrushes  ) bspLeafBrushes  = std::move( ::bspLeafBrushes );
+		decltype( ::bspBrushes      ) bspBrushes      = std::move( ::bspBrushes );
+		decltype( ::bspBrushSides   ) bspBrushSides   = std::move( ::bspBrushSides );
+		decltype( ::bspLightBytes   ) bspLightBytes   = std::move( ::bspLightBytes );
+		decltype( ::bspGridPoints   ) bspGridPoints   = std::move( ::bspGridPoints );
+		decltype( ::bspVisBytes     ) bspVisBytes     = std::move( ::bspVisBytes );
+		decltype( ::bspDrawVerts    ) bspDrawVerts    = std::move( ::bspDrawVerts );
+		decltype( ::bspDrawIndexes  ) bspDrawIndexes  = std::move( ::bspDrawIndexes );
+		decltype( ::bspDrawSurfaces ) bspDrawSurfaces = std::move( ::bspDrawSurfaces );
+		decltype( ::bspFogs         ) bspFogs         = std::move( ::bspFogs );
 	} bsp;
 
 	/* do some path mangling */
