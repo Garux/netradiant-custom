@@ -195,8 +195,8 @@ static void bspBrush_to_buildBrush( const bspBrush_t& brush ){
 	buildBrush.sides.clear();
 
 	bool modelclip = false;
-	/* try to guess if thats model clip */
-	if ( force ){
+	/* try to guess if this is model clip */
+	if ( g_decompile_modelClip ){
 		int notNoShader = 0;
 		modelclip = true;
 		for ( const bspBrushSide_t& side : Span( &bspBrushSides[ brush.firstSide ], brush.numSides ) )

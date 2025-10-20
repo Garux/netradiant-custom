@@ -186,6 +186,7 @@ Q3map2:
 	* fix and simplify FloodAreas
 	* support distinct lighting from different sky shaders in one map (by Tom Arrow)
 	* -onesky: fallback to old behavior: any sky emits total of all suns/skylights in the map
+	* -modelclip: Decompile model autoclip brushes during bsp to map conversion (they are skipped by default)
 
 
 

@@ -1107,6 +1107,9 @@ int ConvertBSPMain( Args& args ){
 		while ( args.takeArg( "-fast" ) ) {
 			fast = true;
 		}
+		while ( args.takeArg( "-modelclip" ) ) {
+			g_decompile_modelClip = true;
+		}
 	}
 
 	LoadShaderInfo();

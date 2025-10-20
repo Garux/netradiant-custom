@@ -1776,6 +1776,8 @@ inline bool doingBSP;
 // for .ase conversion
 inline bool shadersAsBitmap;
 inline bool lightmapsAsTexcoord;
+// bsp to map conversion
+inline bool g_decompile_modelClip;
 
 /* general commandline arguments */
 inline bool force;

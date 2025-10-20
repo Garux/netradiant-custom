@@ -317,6 +317,7 @@ static void HelpConvert()
 		{ "-format <converter>", "Select the converter, default ase (available: map, map_bp, ase, obj, or game names)" },
 		{ "-lightmapsastexcoord", "Save lightmap names and texcoords instead of textures (only when writing ase and obj)" },
 		{ "-meta", "Combine adjacent triangles of the same texture to surfaces (only when reading map)" },
+		{ "-modelclip", "Decompile model autoclip brushes during bsp to map conversion (they are skipped by default)" },
 		{ "-ne <F>", "Normal epsilon for the conversion (only when reading map)" },
 		{ "-patchmeta", "Turn patches into triangle meshes for display (only when reading map)" },
 		{ "-readbsp", "Force converting bsp to selected format" },
@@ -450,7 +451,7 @@ static void HelpCommon()
 {
 	const std::vector<HelpOption> options = {
 		{ "-connect <address>", "Talk to a NetRadiant instance using a specific XML based protocol" },
-		{ "-force", "Allow reading some broken/unsupported BSP files e.g. when decompiling, may crash. Also enables decompilation of model autoclip brushes." },
+		{ "-force", "Allow reading some broken/unsupported BSP files e.g. when decompiling, may crash" },
 		{ "-fs_basepath <path>", "Sets the given path as main directory of the game (can be used more than once to look in multiple paths)" },
 		{ "-fs_forbiddenpath <pattern>", "Pattern to ignore directories, pk3, and pk3dir; example pak?.pk3 (can be used more than once to look for multiple patterns)" },
 		{ "-fs_game <gamename>", "Sets extra game directory name to additionally load mod's resources from at higher priority (by default for Q3A 'baseq3' is loaded, -fs_game cpma will also load 'cpma'; can be used more than once)" },

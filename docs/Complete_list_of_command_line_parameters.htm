@@ -104,7 +104,7 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 	<h2 id="Common-options">Common options<a href="#Common-options" class="wiki-anchor">&para;</a></h2>
 	<ul>
 		<li><strong><code>-connect</code> address:</strong> Talk to a NetRadiant instance using a specific XML based protocol</li>
-		<li><strong><code>-force</code>:</strong> Allow reading some broken/unsupported BSP files e.g. when decompiling, may crash. Also enables decompilation of model autoclip brushes.</li>
+		<li><strong><code>-force</code>:</strong> Allow reading some broken/unsupported BSP files e.g. when decompiling, may crash</li>
 		<li><strong><code>-fs_basepath</code> path:</strong> Sets the given path as main directory of the game (can be used more than once to look in multiple paths)</li>
 		<li><strong><code>-fs_forbiddenpath</code> pattern:</strong> Pattern to ignore directories, pk3, and pk3dir; example pak?.pk3 (can be used more than once to look for multiple patterns)</li>
 		<li><strong><code>-fs_game</code> gamename:</strong> Sets extra game directory name to additionally load mod's resources from at higher priority (by default for Q3A 'baseq3' is loaded, -fs_game cpma will also load 'cpma'; can be used more than once)</li>
@@ -325,6 +325,7 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>-format</code> converter:</strong> Select the converter, default ase (available: map, map_bp, ase, obj, or game names)</li>
 		<li><strong><code>-lightmapsastexcoord</code>:</strong> Save lightmap names and texcoords instead of textures (only when writing ase and obj)</li>
 		<li><strong><code>-meta</code>:</strong> Combine adjacent triangles of the same texture to surfaces (only when reading map)</li>
+		<li><strong><code>-modelclip</code>:</strong> Decompile model autoclip brushes during bsp to map conversion (they are skipped by default)</li>
 		<li><strong><code>-ne</code> F:</strong> Normal epsilon for the conversion (only when reading map)</li>
 		<li><strong><code>-patchmeta</code>:</strong> Turn patches into triangle meshes for display (only when reading map)</li>
 		<li><strong><code>-readbsp</code>:</strong> Force converting bsp to selected format</li>
