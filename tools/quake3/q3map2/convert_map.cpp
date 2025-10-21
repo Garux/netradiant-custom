@@ -48,7 +48,7 @@ inline double Det3x3( double a00, double a01, double a02,
 	    +   a02 * ( a10 * a21 - a11 * a20 );
 }
 
-static TriRef GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide ){
+static TriRef GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, const bspModel_t& model ){
 	float best = 0;
 	float thisarea;
 	const plane_t& buildPlane = mapplanes[buildSide.planenum];
@@ -57,8 +57,8 @@ static TriRef GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide )
 	// first, start out with NULLs
 	TriRef bestVert{ nullptr };
 
-	// brute force through all surfaces
-	for ( const bspDrawSurface_t& s : bspDrawSurfaces )
+	// brute force through all bmodel surfaces
+	for ( const bspDrawSurface_t& s : Span( &bspDrawSurfaces[ model.firstBSPSurface ], model.numBSPSurfaces ) )
 	{
 		if ( s.surfaceType != MST_PLANAR && s.surfaceType != MST_TRIANGLE_SOUP ) {
 			continue;
@@ -238,7 +238,7 @@ static void bspBrush_to_buildBrush( const bspBrush_t& brush ){
 	}
 }
 
-static void ConvertBrushFast( FILE *f, int bspBrushNum, const Vector3& origin, bool brushPrimitives ){
+static void ConvertBrushFast( FILE *f, const bspModel_t& model, int bspBrushNum, const Vector3& origin, bool brushPrimitives ){
 
 	bspBrush_to_buildBrush( bspBrushes[bspBrushNum] );
 
@@ -313,7 +313,7 @@ static void ConvertBrushFast( FILE *f, int bspBrushNum, const Vector3& origin, b
 	fprintf( f, "\t}\n\n" );
 }
 
-static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool brushPrimitives ){
+static void ConvertBrush( FILE *f, const bspModel_t& model, int bspBrushNum, const Vector3& origin, bool brushPrimitives ){
 
 	bspBrush_to_buildBrush( bspBrushes[bspBrushNum] );
 
@@ -368,7 +368,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 		//   - meshverts point in pairs of three into verts
 		//   - (triangles)
 		//   - find the triangle that has most in common with our
-		const TriRef vert = GetBestSurfaceTriangleMatchForBrushside( buildSide );
+		const TriRef vert = GetBestSurfaceTriangleMatchForBrushside( buildSide, model );
 
 		/* get texture name */
 		const char *texture = striEqualPrefix( buildSide.shaderInfo->shader, "textures/" )
@@ -419,6 +419,11 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 		}
 
 		if ( vert[0] != nullptr && vert[1] != nullptr && vert[2] != nullptr ) {
+			const Vector3 verts[3] = { vert[0]->xyz + origin,
+			                           vert[1]->xyz + origin,
+			                           vert[2]->xyz + origin };
+			const Vector2 sts[3] = { vert[0]->st, vert[1]->st, vert[2]->st };
+
 			if ( brushPrimitives ) {
 				BasicVector2<double> xyI, xyJ, xyK;
 				BasicVector2<double> stI, stJ, stK;
@@ -426,15 +431,15 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				DoubleVector3 texX, texY;
 				ComputeAxisBase( buildPlane.normal(), texX, texY );
 
-				xyI[0] = vector3_dot( vert[0]->xyz, texX );
-				xyI[1] = vector3_dot( vert[0]->xyz, texY );
-				xyJ[0] = vector3_dot( vert[1]->xyz, texX );
-				xyJ[1] = vector3_dot( vert[1]->xyz, texY );
-				xyK[0] = vector3_dot( vert[2]->xyz, texX );
-				xyK[1] = vector3_dot( vert[2]->xyz, texY );
-				stI = vert[0]->st;
-				stJ = vert[1]->st;
-				stK = vert[2]->st;
+				xyI[0] = vector3_dot( verts[0], texX );
+				xyI[1] = vector3_dot( verts[0], texY );
+				xyJ[0] = vector3_dot( verts[1], texX );
+				xyJ[1] = vector3_dot( verts[1], texY );
+				xyK[0] = vector3_dot( verts[2], texX );
+				xyK[1] = vector3_dot( verts[2], texY );
+				stI = sts[0];
+				stJ = sts[1];
+				stK = sts[2];
 
 				//   - solve linear equations:
 				//     - (x, y) := xyz . (texX, texY)
@@ -495,7 +500,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				int sv, tv;
 				BasicVector2<double> stI, stJ, stK;
 				double D, D0, D1, D2;
-				DoubleVector3 sts[2];
+				DoubleVector3 texMat[2];
 				float shift[2], scale[2];
 				float rotate;
 
@@ -505,44 +510,44 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				tv = vecs[1][0]? 0
 				   : vecs[1][1]? 1: 2;
 
-				stI[0] = vert[0]->st[0] * buildSide.shaderInfo->shaderWidth;
-				stI[1] = vert[0]->st[1] * buildSide.shaderInfo->shaderHeight;
-				stJ[0] = vert[1]->st[0] * buildSide.shaderInfo->shaderWidth;
-				stJ[1] = vert[1]->st[1] * buildSide.shaderInfo->shaderHeight;
-				stK[0] = vert[2]->st[0] * buildSide.shaderInfo->shaderWidth;
-				stK[1] = vert[2]->st[1] * buildSide.shaderInfo->shaderHeight;
+				stI[0] = sts[0][0] * buildSide.shaderInfo->shaderWidth;
+				stI[1] = sts[0][1] * buildSide.shaderInfo->shaderHeight;
+				stJ[0] = sts[1][0] * buildSide.shaderInfo->shaderWidth;
+				stJ[1] = sts[1][1] * buildSide.shaderInfo->shaderHeight;
+				stK[0] = sts[2][0] * buildSide.shaderInfo->shaderWidth;
+				stK[1] = sts[2][1] * buildSide.shaderInfo->shaderHeight;
 
 				D = Det3x3(
-				        vert[0]->xyz[sv], vert[0]->xyz[tv], 1,
-				        vert[1]->xyz[sv], vert[1]->xyz[tv], 1,
-				        vert[2]->xyz[sv], vert[2]->xyz[tv], 1
+				        verts[0][sv], verts[0][tv], 1,
+				        verts[1][sv], verts[1][tv], 1,
+				        verts[2][sv], verts[2][tv], 1
 				    );
 				if ( D != 0 ) {
 					for ( int i = 0; i < 2; ++i )
 					{
 						D0 = Det3x3(
-						         stI[i], vert[0]->xyz[tv], 1,
-						         stJ[i], vert[1]->xyz[tv], 1,
-						         stK[i], vert[2]->xyz[tv], 1
+						         stI[i], verts[0][tv], 1,
+						         stJ[i], verts[1][tv], 1,
+						         stK[i], verts[2][tv], 1
 						     );
 						D1 = Det3x3(
-						         vert[0]->xyz[sv], stI[i], 1,
-						         vert[1]->xyz[sv], stJ[i], 1,
-						         vert[2]->xyz[sv], stK[i], 1
+						         verts[0][sv], stI[i], 1,
+						         verts[1][sv], stJ[i], 1,
+						         verts[2][sv], stK[i], 1
 						     );
 						D2 = Det3x3(
-						         vert[0]->xyz[sv], vert[0]->xyz[tv], stI[i],
-						         vert[1]->xyz[sv], vert[1]->xyz[tv], stJ[i],
-						         vert[2]->xyz[sv], vert[2]->xyz[tv], stK[i]
+						         verts[0][sv], verts[0][tv], stI[i],
+						         verts[1][sv], verts[1][tv], stJ[i],
+						         verts[2][sv], verts[2][tv], stK[i]
 						     );
-						sts[i] = { D0 / D, D1 / D, D2 / D };
-						//Sys_Printf( "%.3f %.3f %.3f \n", sts[i][0], sts[i][1], sts[i][2] );
+						texMat[i] = { D0 / D, D1 / D, D2 / D };
+						//Sys_Printf( "%.3f %.3f %.3f \n", texMat[i][0], texMat[i][1], texMat[i][2] );
 					}
 				}
 				else{
 					fprintf( stderr, "degenerate triangle found when solving texDef equations\n" ); // FIXME add stuff here
-					sts[0] = { 2.0, 0.0, 0.0 };
-					sts[1] = { 0.0, -2.0, 0.0 };
+					texMat[0] = { 2.0, 0.0, 0.0 };
+					texMat[1] = { 0.0, -2.0, 0.0 };
 				}
 				// now we must solve:
 				//	// now we must invert:
@@ -558,26 +563,26 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				//	vecsrotscaled[1][sv] = ns / scale[1];
 				//	vecsrotscaled[1][tv] = nt / scale[1];
 #if 0
-				scale[0] = 1.0 / vector2_length( sts[0].vec2() );
-				scale[1] = 1.0 / vector2_length( sts[1].vec2() );
-				rotate = radians_to_degrees( atan2( sts[0][1] * vecs[0][sv] - sts[1][0] * vecs[1][tv], sts[0][0] * vecs[0][sv] + sts[1][1] * vecs[1][tv] ) );
-				shift[0] = buildSide.shaderInfo->shaderWidth * FRAC( sts[0][2] / buildSide.shaderInfo->shaderWidth );
-				shift[1] = buildSide.shaderInfo->shaderHeight * FRAC( sts[1][2] / buildSide.shaderInfo->shaderHeight );
+				scale[0] = 1.0 / vector2_length( texMat[0].vec2() );
+				scale[1] = 1.0 / vector2_length( texMat[1].vec2() );
+				rotate = radians_to_degrees( atan2( texMat[0][1] * vecs[0][sv] - texMat[1][0] * vecs[1][tv], texMat[0][0] * vecs[0][sv] + texMat[1][1] * vecs[1][tv] ) );
+				shift[0] = buildSide.shaderInfo->shaderWidth * FRAC( texMat[0][2] / buildSide.shaderInfo->shaderWidth );
+				shift[1] = buildSide.shaderInfo->shaderHeight * FRAC( texMat[1][2] / buildSide.shaderInfo->shaderHeight );
 #else			// Texdef_fromTransform() from brush_primit.cpp, flawless unlike upper
-				scale[0] = 1.0 / vector2_length( sts[0].vec2() );
-				scale[1] = 1.0 / vector2_length( sts[1].vec2() );
+				scale[0] = 1.0 / vector2_length( texMat[0].vec2() );
+				scale[1] = 1.0 / vector2_length( texMat[1].vec2() );
 
-				rotate = -radians_to_degrees( atan2( -sts[0][1], sts[0][0] ) );
+				rotate = -radians_to_degrees( atan2( -texMat[0][1], texMat[0][0] ) );
 
 				if ( rotate == -180.0f ) {
 					rotate = 180.0f;
 				}
 
-				shift[0] = buildSide.shaderInfo->shaderWidth * FRAC( sts[0][2] / buildSide.shaderInfo->shaderWidth );
-				shift[1] = buildSide.shaderInfo->shaderHeight * FRAC( sts[1][2] / buildSide.shaderInfo->shaderHeight );
+				shift[0] = buildSide.shaderInfo->shaderWidth * FRAC( texMat[0][2] / buildSide.shaderInfo->shaderWidth );
+				shift[1] = buildSide.shaderInfo->shaderHeight * FRAC( texMat[1][2] / buildSide.shaderInfo->shaderHeight );
 
 				// If the 2d cross-product of the x and y axes is positive, one of the axes has a negative scale.
-				if ( vector2_cross( Vector2( sts[0][0], sts[0][1] ), Vector2( sts[1][0], sts[1][1] ) ) > 0 ) {
+				if ( vector2_cross( Vector2( texMat[0][0], texMat[0][1] ), Vector2( texMat[1][0], texMat[1][1] ) ) > 0 ) {
 					if ( rotate >= 180.0f ) {
 						rotate -= 180.0f;
 						scale[0] = -scale[0];
@@ -791,9 +796,9 @@ static void ConvertModel( FILE *f, const bspModel_t& model, const Vector3& origi
 	for ( int i = 0; i < model.numBSPBrushes; ++i )
 	{
 		if( fast )
-			ConvertBrushFast( f, model.firstBSPBrush + i, origin, brushPrimitives );
+			ConvertBrushFast( f, model, model.firstBSPBrush + i, origin, brushPrimitives );
 		else
-			ConvertBrush( f, model.firstBSPBrush + i, origin, brushPrimitives );
+			ConvertBrush( f, model, model.firstBSPBrush + i, origin, brushPrimitives );
 	}
 
 	/* go through each drawsurf in the model */
