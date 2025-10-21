@@ -1530,8 +1530,8 @@ double Det3x3( double a00, double a01, double a02,
 }
 
 void BP_from_ST( brushprimit_texdef_t& bp, const PlanePoints& points, const DoubleVector3 st[3], const DoubleVector3& normal, const bool normalize /*= true*/ ){
-	double xyI[2], xyJ[2], xyK[2];
-	double stI[2], stJ[2], stK[2];
+	BasicVector2<double> xyI, xyJ, xyK;
+	BasicVector2<double> stI, stJ, stK;
 	double D, D0, D1, D2;
 	DoubleVector3 texX, texY;
 	ComputeAxisBase( normal, texX, texY );
@@ -1542,9 +1542,9 @@ void BP_from_ST( brushprimit_texdef_t& bp, const PlanePoints& points, const Doub
 	xyJ[1] = vector3_dot( points[1], texY );
 	xyK[0] = vector3_dot( points[2], texX );
 	xyK[1] = vector3_dot( points[2], texY );
-	stI[0] = st[0][0]; stI[1] = st[0][1];
-	stJ[0] = st[1][0]; stJ[1] = st[1][1];
-	stK[0] = st[2][0]; stK[1] = st[2][1];
+	stI = st[0].vec2();
+	stJ = st[1].vec2();
+	stK = st[2].vec2();
 
 	//   - solve linear equations:
 	//     - (x, y) := xyz . (texX, texY)
@@ -2111,10 +2111,34 @@ void Texdef_from_ST( TextureProjection& projection, const PlanePoints& points, c
 	else
 		projection.m_brushprimit_texdef = bp;
 	if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ){
+#if 0	// generic alternative, not so practically precise
+		const auto axis = projectionaxis_for_normal( plane.normal() );
+		// reuse BP_from_ST(); project points to AP plane
+		PlanePoints pointsAP( points );
+		pointsAP[0][axis] = 0;
+		pointsAP[1][axis] = 0;
+		pointsAP[2][axis] = 0;
+		DoubleVector3 normal( 0 );
+		normal[axis] = std::copysign( 1, plane.normal()[axis] );
+		BP_from_ST( bp, pointsAP, st, normal );
+		projection.m_brushprimit_texdef = bp;
+
+		const TexdefTypeId tmp = g_bp_globals.m_texdefTypeId;
+		g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_BRUSHPRIMITIVES;
+		Matrix4 local2tex;
+		Texdef_Construct_local2tex( projection, width, height, normal, local2tex );
+		g_bp_globals.m_texdefTypeId = tmp;
+
+		Matrix4 basis;
+		Normal_GetTransform( normal, basis );
+		matrix4_transpose( basis );
+		Texdef_fromTransform( projection.m_texdef, width, height, matrix4_multiplied_by_matrix4( local2tex, basis ) );
+#else
 		const TexdefTypeId tmp = g_bp_globals.m_texdefTypeId;
 		g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_BRUSHPRIMITIVES;
 		AP_from_BP( projection, plane, width, height );
 		g_bp_globals.m_texdefTypeId = tmp;
+#endif
 	}
 	else if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ){
 		Valve220_from_BP( projection, plane, width, height );

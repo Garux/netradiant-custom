@@ -188,6 +188,7 @@ Q3map2:
 	* -onesky: fallback to old behavior: any sky emits total of all suns/skylights in the map
 	* -modelclip: Decompile model autoclip brushes during bsp to map conversion (they are skipped by default)
 	* -wtf: During bsp to map conversion use common/WTF on faces with failed texture alignment deduction
+	* fix AP texture alignment deduction during bsp to map decompilation
 
 
 

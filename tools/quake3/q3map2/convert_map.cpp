@@ -39,9 +39,9 @@
    exports a map brush
  */
 
-inline float Det3x3( float a00, float a01, float a02,
-                     float a10, float a11, float a12,
-                     float a20, float a21, float a22 ){
+inline double Det3x3( double a00, double a01, double a02,
+                      double a10, double a11, double a12,
+                      double a20, double a21, double a22 ){
 	return
 	        a00 * ( a11 * a22 - a12 * a21 )
 	    -   a01 * ( a10 * a22 - a12 * a20 )
@@ -420,12 +420,10 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 
 		if ( vert[0] != nullptr && vert[1] != nullptr && vert[2] != nullptr ) {
 			if ( brushPrimitives ) {
-				int i;
-				Vector3 texX, texY;
-				Vector2 xyI, xyJ, xyK;
-				Vector2 stI, stJ, stK;
-				float D, D0, D1, D2;
-
+				BasicVector2<double> xyI, xyJ, xyK;
+				BasicVector2<double> stI, stJ, stK;
+				double D, D0, D1, D2;
+				DoubleVector3 texX, texY;
 				ComputeAxisBase( buildPlane.normal(), texX, texY );
 
 				xyI[0] = vector3_dot( vert[0]->xyz, texX );
@@ -448,7 +446,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				        xyK[0], xyK[1], 1
 				    );
 				if ( D != 0 ) {
-					for ( i = 0; i < 2; ++i )
+					for ( int i = 0; i < 2; ++i )
 					{
 						D0 = Det3x3(
 						         stI[i], xyI[1], 1,
@@ -465,7 +463,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 						         xyJ[0], xyJ[1], stJ[i],
 						         xyK[0], xyK[1], stK[i]
 						     );
-						buildSide.texMat[i] = { D0 / D, D1 / D, D2 / D };
+						buildSide.texMat[i] = Vector3( D0 / D, D1 / D, D2 / D );
 					}
 				}
 				else{
@@ -494,33 +492,18 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 			else
 			{
 				// invert QuakeTextureVecs
-				int i;
 				int sv, tv;
-				float stI[2], stJ[2], stK[2];
-				Vector3 sts[2];
+				BasicVector2<double> stI, stJ, stK;
+				double D, D0, D1, D2;
+				DoubleVector3 sts[2];
 				float shift[2], scale[2];
 				float rotate;
-				float D, D0, D1, D2;
 
 				const auto vecs = TextureAxisFromPlane( buildPlane );
-				if ( vecs[0][0] ) {
-					sv = 0;
-				}
-				else if ( vecs[0][1] ) {
-					sv = 1;
-				}
-				else{
-					sv = 2;
-				}
-				if ( vecs[1][0] ) {
-					tv = 0;
-				}
-				else if ( vecs[1][1] ) {
-					tv = 1;
-				}
-				else{
-					tv = 2;
-				}
+				sv = vecs[0][0]? 0
+				   : vecs[0][1]? 1: 2;
+				tv = vecs[1][0]? 0
+				   : vecs[1][1]? 1: 2;
 
 				stI[0] = vert[0]->st[0] * buildSide.shaderInfo->shaderWidth;
 				stI[1] = vert[0]->st[1] * buildSide.shaderInfo->shaderHeight;
@@ -535,7 +518,7 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				        vert[2]->xyz[sv], vert[2]->xyz[tv], 1
 				    );
 				if ( D != 0 ) {
-					for ( i = 0; i < 2; ++i )
+					for ( int i = 0; i < 2; ++i )
 					{
 						D0 = Det3x3(
 						         stI[i], vert[0]->xyz[tv], 1,
@@ -558,8 +541,8 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				}
 				else{
 					fprintf( stderr, "degenerate triangle found when solving texDef equations\n" ); // FIXME add stuff here
-					sts[0] = { 2.f, 0.f, 0.f };
-					sts[1] = { 0.f, -2.f, 0.f };
+					sts[0] = { 2.0, 0.0, 0.0 };
+					sts[1] = { 0.0, -2.0, 0.0 };
 				}
 				// now we must solve:
 				//	// now we must invert:
@@ -574,12 +557,37 @@ static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, bool 
 				//	nt =  cosv * vecs[1][tv];
 				//	vecsrotscaled[1][sv] = ns / scale[1];
 				//	vecsrotscaled[1][tv] = nt / scale[1];
-				scale[0] = 1.0 / sqrt( sts[0][0] * sts[0][0] + sts[0][1] * sts[0][1] );
-				scale[1] = 1.0 / sqrt( sts[1][0] * sts[1][0] + sts[1][1] * sts[1][1] );
+#if 0
+				scale[0] = 1.0 / vector2_length( sts[0].vec2() );
+				scale[1] = 1.0 / vector2_length( sts[1].vec2() );
 				rotate = radians_to_degrees( atan2( sts[0][1] * vecs[0][sv] - sts[1][0] * vecs[1][tv], sts[0][0] * vecs[0][sv] + sts[1][1] * vecs[1][tv] ) );
 				shift[0] = buildSide.shaderInfo->shaderWidth * FRAC( sts[0][2] / buildSide.shaderInfo->shaderWidth );
 				shift[1] = buildSide.shaderInfo->shaderHeight * FRAC( sts[1][2] / buildSide.shaderInfo->shaderHeight );
+#else			// Texdef_fromTransform() from brush_primit.cpp, flawless unlike upper
+				scale[0] = 1.0 / vector2_length( sts[0].vec2() );
+				scale[1] = 1.0 / vector2_length( sts[1].vec2() );
 
+				rotate = -radians_to_degrees( atan2( -sts[0][1], sts[0][0] ) );
+
+				if ( rotate == -180.0f ) {
+					rotate = 180.0f;
+				}
+
+				shift[0] = buildSide.shaderInfo->shaderWidth * FRAC( sts[0][2] / buildSide.shaderInfo->shaderWidth );
+				shift[1] = buildSide.shaderInfo->shaderHeight * FRAC( sts[1][2] / buildSide.shaderInfo->shaderHeight );
+
+				// If the 2d cross-product of the x and y axes is positive, one of the axes has a negative scale.
+				if ( vector2_cross( Vector2( sts[0][0], sts[0][1] ), Vector2( sts[1][0], sts[1][1] ) ) > 0 ) {
+					if ( rotate >= 180.0f ) {
+						rotate -= 180.0f;
+						scale[0] = -scale[0];
+					}
+					else
+					{
+						scale[1] = -scale[1];
+					}
+				}
+#endif
 				/* print brush side */
 				/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
 				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %s %.8f %.8f %.8f %.8f %.8f %d 0 0\n",
