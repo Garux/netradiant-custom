@@ -304,7 +304,7 @@ textures/eerie/ironcrosslt2_10000
 </pre>
 
 <h2 id="q3map_lightmapAxis">q3map_lightmapAxis axis</h2>
-<p>Takes a single argument: either X, Y or Z as the direction from which the lightmap is projected from. The directive <a href="q3map-global-directives.html#q3map_terrain">q3map_terrain</a> has an implicit (read default) q3map_lightmapAxis defined as Z. This directive is not recommended for things like caves or arches which have undersides.</p>
+<p>Takes a single argument: either X, Y or Z as the direction from which the lightmap is projected from. This directive is not recommended for things like caves or arches which have undersides.</p>
 
 <h2 id="q3map_lightmapBrightness">q3map_lightmapBrightness N.N</h2>
 <p>Lightmap brightness scaling. A value of 2.0 will be twice as bright (linearly) and a value of 0.5 will be half as bright.</p>
@@ -471,10 +471,14 @@ textures/eerie/ironcrosslt2_10000
 <p>Alphamap terrain shaders (typically textures/common/terrain and terrain2) must have the q3map_terrain directive. Terrain is handled completely differently from previous versions. Q3Map2 no longer looks for the word terrain in the shader name to determine whether or not it is an indexed shader. It looks for <a href="q3map-global-directives.html#q3map_indexed">q3map_indexed</a>, or q3map_terrain, which then sets off a bunch of stuff shoehorned into it, like: the lightmap axis, texture projection, etc.</p>
 <p>By default, q3map_terrain sets the following:</p>
 <pre>
-q3map_tcGen ivector ( 32 0 0 ) ( 0 32 0 )
-q3map_lightmapAxis z
+// texture width/height are grabbed from "q3map_textureSize" if it's set,
+// otherwise the actual texture dimensions are used
+q3map_tcGen ivector ( [ textureWidth / 2 ] 0 0 ) ( 0 [ textureHeight / 2 ] 0 )
 q3map_nonplanar
-q3map_shadeAngle 180 //(maybe 175?)
+q3map_shadeAngle 179
+q3map_noTJunc
+q3map_noClip
+q3map_forceMeta
 q3map_indexed
 </pre>
 
