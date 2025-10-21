@@ -189,6 +189,7 @@ Q3map2:
 	* -modelclip: Decompile model autoclip brushes during bsp to map conversion (they are skipped by default)
 	* -wtf: During bsp to map conversion use common/WTF on faces with failed texture alignment deduction
 	* fix AP texture alignment deduction during bsp to map decompilation
+	* -format map_220: bsp to map of Valve220 format conversion
 
 
 

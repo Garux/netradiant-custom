@@ -1443,6 +1443,7 @@ int                         ConvertBSPMain( Args& args );
 /* convert_map.c */
 int                         ConvertBSPToMap( char *bspName );
 int                         ConvertBSPToMap_BP( char *bspName );
+int                         ConvertBSPToMap_220( char *bspName );
 
 
 /* convert_ase.c */

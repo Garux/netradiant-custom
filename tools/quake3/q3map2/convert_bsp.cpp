@@ -1038,7 +1038,7 @@ int ConvertBSPMain( Args& args ){
 
 	/* arg checking */
 	if ( args.empty() ) {
-		Sys_Printf( "Usage: q3map2 -convert [-format <ase|obj|map_bp|map|game name>] [-shadersasbitmap|-lightmapsastexcoord|-deluxemapsastexcoord] [-readbsp|-readmap [-meta|-patchmeta]] [-v] <mapname>\n" );
+		Sys_Printf( "Usage: q3map2 -convert [-format <ase|obj|map|map_bp|map_220|game name>] [-shadersasbitmap|-lightmapsastexcoord|-deluxemapsastexcoord] [-readbsp|-readmap [-meta|-patchmeta]] [-v] <mapname>\n" );
 		return 0;
 	}
 
@@ -1056,12 +1056,16 @@ int ConvertBSPMain( Args& args ){
 				convertFunc = ConvertBSPToOBJ;
 				map_allowed = false;
 			}
+			else if ( striEqual( fmt, "map" ) ) {
+				convertFunc = ConvertBSPToMap;
+				map_allowed = true;
+			}
 			else if ( striEqual( fmt, "map_bp" ) ) {
 				convertFunc = ConvertBSPToMap_BP;
 				map_allowed = true;
 			}
-			else if ( striEqual( fmt, "map" ) ) {
-				convertFunc = ConvertBSPToMap;
+			else if ( striEqual( fmt, "map_220" ) ) {
+				convertFunc = ConvertBSPToMap_220;
 				map_allowed = true;
 			}
 			else

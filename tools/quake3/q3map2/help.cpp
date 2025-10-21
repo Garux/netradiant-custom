@@ -314,7 +314,7 @@ static void HelpConvert()
 		{ "-deluxemapsastexcoord", "Save deluxemap names and texcoords instead of textures (only when writing ase and obj)" },
 		{ "-de <F>", "Distance epsilon for the conversion (only when reading map)" },
 		{ "-fast", "fast bsp to map conversion mode (without texture alignments)" },
-		{ "-format <converter>", "Select the converter, default ase (available: map, map_bp, ase, obj, or game names)" },
+		{ "-format <converter>", "Select the converter, default ase (available: map, map_bp, map_220, ase, obj, or game names)" },
 		{ "-lightmapsastexcoord", "Save lightmap names and texcoords instead of textures (only when writing ase and obj)" },
 		{ "-meta", "Combine adjacent triangles of the same texture to surfaces (only when reading map)" },
 		{ "-modelclip", "Decompile model autoclip brushes during bsp to map conversion (they are skipped by default)" },
