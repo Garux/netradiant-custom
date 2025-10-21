@@ -2292,8 +2292,10 @@ camera_draw_mode CamWnd_GetMode(){
 	return camera_t::draw_mode;
 }
 void CamWnd_SetMode( camera_draw_mode mode ){
-	ShaderCache_setBumpEnabled( mode == cd_lighting );
-	camera_t::draw_mode = mode;
+	// workaround cd_lighting not being correctly applied on start (fixme?)
+	camera_t::draw_mode = ( g_camwnd == 0 && mode == cd_lighting )? cd_texture : mode;
+
+	ShaderCache_setBumpEnabled( camera_t::draw_mode == cd_lighting );
 	if ( g_camwnd != 0 ) {
 		CamWnd_Update( *g_camwnd );
 	}
@@ -2353,7 +2355,7 @@ void GlobalCamera_LookThroughCamera(){
 
 
 void RenderModeImport( int value ){
-	CamWnd_SetMode( static_cast<camera_draw_mode>( ( value < 0 || value >= camera_draw_mode_count)? 2 : value ) );
+	CamWnd_SetMode( static_cast<camera_draw_mode>( ( value < 0 || value >= camera_draw_mode_count )? cd_texture : value ) );
 }
 typedef FreeCaller<void(int), RenderModeImport> RenderModeImportCaller;
 

@@ -1029,16 +1029,12 @@ public:
 		setLightingEnabled( m_lightingEnabled );
 	}
 	void setLightingEnabled( bool enabled ){
-		const bool refresh = ( m_lightingEnabled != enabled );
-
-		if ( refresh ) {
+		if ( m_lightingEnabled != enabled ) {
 			unrealise();
 			GlobalShaderSystem().setLightingEnabled( enabled );
-		}
 
-		m_lightingEnabled = enabled;
+			m_lightingEnabled = enabled;
 
-		if ( refresh ) {
 			realise();
 		}
 	}
