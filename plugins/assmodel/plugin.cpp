@@ -303,28 +303,19 @@ extern "C" void RADIANT_DLLEXPORT Radiant_RegisterModules( ModuleServer& server 
 
 	aiString extensions;
 	s_assImporter->GetExtensionList( extensions ); // "*.3ds;*.obj;*.dae"
-	const char *c = extensions.C_Str();
-	while( !string_empty( c ) ){
-		StringOutputStream ext( 16 );
-		do{
-			if( *c == '*' && *( c + 1 ) == '.' ){
-				c += 2;
-				continue;
-			}
-			else if( *c == ';' ){
-				++c;
-				break;
-			}
-			else{
-				ext << *c;
-				++c;
-			}
-		} while( !string_empty( c ) );
+	for( char *start, *end = extensions.data; end && ( start = strchr( ++end, '.' ) )++; )
+	{
+		if( ( end = strchr( start, ';' ) ) )
+			*end = '\0';
 
-		g_PicoModelModules.push_back( PicoModelModule( PicoModelAPIConstructor( ext ) ) );
-		g_PicoModelModules.back().selfRegister();
-
-//		globalOutputStream() << ext << '\n';
+		if( !string_equal( start, "bsp" ) // loader does not work, also avoid model browser pollution
+		 && !string_equal( start, "pk3" ) // loader does not work
+		 && !string_equal( start, "md5anim" ) // makes no sense
+		 && !string_equal( start, "md5camera" ) // makes no sense
+		 && !string_equal( start, "ogex" ) ){ // all sample models crash
+			g_PicoModelModules.push_back( PicoModelModule( PicoModelAPIConstructor( start ) ) );
+			g_PicoModelModules.back().selfRegister();
+		}
 	}
 
 	g_ImageMDLModule.selfRegister();
