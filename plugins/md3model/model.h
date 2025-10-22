@@ -548,7 +548,7 @@ inline void Model_constructNull( Model& model ){
 		surface.indices().insert( *i );
 	}
 
-	surface.setShader( "" );
+	surface.setShader( "nomodel" );
 
 	surface.updateAABB();
 

@@ -955,7 +955,10 @@ public:
 		if ( m_pTexture->texture_number == 0 ) {
 			m_notfound = m_pTexture;
 
-			const auto name = StringStream( GlobalRadiant().getAppPath(), "bitmaps/", ( IsDefault() ? "notex.png" : "shadernotex.png" ) );
+			const auto name = StringStream( GlobalRadiant().getAppPath(), "bitmaps/",
+				( string_equal( m_template.getName(), "nomodel" )? "nomodel.png"
+				: IsDefault() ? "notex.png"
+				: "shadernotex.png" ) );
 			m_pTexture = GlobalTexturesCache().capture( LoadImageCallback( 0, loadBitmap ), name );
 		}
 

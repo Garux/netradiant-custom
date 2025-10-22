@@ -354,7 +354,7 @@ private:
 			*j++ = i;
 		}
 
-		m_shader = "";
+		m_shader = "nomodel";
 
 		UpdateAABB();
 	}

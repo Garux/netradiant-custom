@@ -47,10 +47,10 @@ class NullModel :
 	RenderableWireframeAABB m_aabb_wire;
 public:
 	NullModel() : m_aabb_local( Vector3( 0, 0, 0 ), Vector3( 8, 8, 8 ) ), m_aabb_solid( m_aabb_local ), m_aabb_wire( m_aabb_local ){
-		m_state = GlobalShaderCache().capture( "" );
+		m_state = GlobalShaderCache().capture( "nomodel" );
 	}
 	~NullModel(){
-		GlobalShaderCache().release( "" );
+		GlobalShaderCache().release( "nomodel" );
 	}
 
 	VolumeIntersectionValue intersectVolume( const VolumeTest& volume, const Matrix4& localToWorld ) const override {
