@@ -86,6 +86,16 @@ CPPFLAGS_QTSVG     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt
 LIBS_QTSVG         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Svg --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_QTSVG     := $(CPPFLAGS_QTSVG)
 LIBS_QTSVG         := $(LIBS_QTSVG)
+ASSIMP_INTERNAL    ?= no
+CPPFLAGS_ASSIMP    ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) assimp --cflags $(STDERR_TO_DEVNULL))
+LIBS_ASSIMP        ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) assimp --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+ifneq ($(ASSIMP_INTERNAL),yes)
+CPPFLAGS_ASSIMP    := $(CPPFLAGS_ASSIMP)
+LIBS_ASSIMP        := $(LIBS_ASSIMP)
+else
+CPPFLAGS_ASSIMP    := -Ilibs/assimp/include
+LIBS_ASSIMP        := -lassimp_
+endif
 CPPFLAGS_GL        ?=
 LIBS_GL            ?= -lGL # -lopengl32 on Win32
 CPPFLAGS_DL        ?=
@@ -392,6 +402,7 @@ dependencies-check:
 	checkheader Qt5Gui QGuiApplication QGuiApplication::exec "$(CPPFLAGS_QTGUI)" "$(LIBS_QTGUI)"; \
 	checkheader Qt5Widgets QApplication QApplication::exec "$(CPPFLAGS_QTWIDGETS)" "$(LIBS_QTWIDGETS)"; \
 	checkheader Qt5Svg QSvgWidget QSvgWidget::mouseGrabber "$(CPPFLAGS_QTSVG)" "$(LIBS_QTSVG)"; \
+	[ "$(ASSIMP_INTERNAL)" != "yes" ] && checkheader libassimp-dev assimp/Importer.hpp Assimp::Importer::MaxLenHint "$(CPPFLAGS_ASSIMP)" "$(LIBS_ASSIMP)"; \
 	[ "$(OS)" != "Win32" ] && checkheader libc6-dev dlfcn.h dlopen "$(CPPFLAGS_DL)" "$(LIBS_DL)"; \
 	checkheader zlib1g-dev zlib.h zlibVersion "$(CPPFLAGS_ZLIB)" "$(LIBS_ZLIB)"; \
 	[ "$$failed" = "0" ] && $(ECHO) All required libraries have been found!
@@ -527,10 +538,12 @@ $(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA := -Wl,--stack,4194304
 endif
 endif
 ifneq ($(OS),Win32)
+ifeq ($(ASSIMP_INTERNAL),yes)
 $(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA += -Wl,-rpath '-Wl,$$ORIGIN'
 endif
-$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB) -lassimp_ -L$(INSTALLDIR)
-$(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) $(CPPFLAGS_JPEG) -Itools/quake3/common -Ilibs -Iinclude -Ilibs/assimp/include
+endif
+$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB) $(LIBS_ASSIMP) -L$(INSTALLDIR)
+$(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) $(CPPFLAGS_JPEG) -Itools/quake3/common -Ilibs -Iinclude $(CPPFLAGS_ASSIMP)
 $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
 	tools/quake3/common/qimagelib.o \
@@ -593,7 +606,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	libfilematch.$(A) \
 	libl_net.$(A) \
 	$(if $(findstring Win32,$(OS)),icons/q3map2.o,) \
-	| $(INSTALLDIR)/libassimp_.$(DLL) \
+	| $(if $(findstring yes,$(ASSIMP_INTERNAL)),$(INSTALLDIR)/libassimp_.$(DLL),) \
 
 libmathlib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libmathlib.$(A): \
@@ -1067,15 +1080,17 @@ $(INSTALLDIR)/modules/mapxml.$(DLL): \
 	plugins/mapxml/xmlwrite.o \
 
 ifneq ($(OS),Win32)
+ifeq ($(ASSIMP_INTERNAL),yes)
 $(INSTALLDIR)/modules/assmodel.$(DLL): LDFLAGS_EXTRA := -Wl,-rpath '-Wl,$$ORIGIN/..'
 endif
-$(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := -lassimp_ -L$(INSTALLDIR)
-$(INSTALLDIR)/modules/assmodel.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude -Ilibs/assimp/include $(CPPFLAGS_QTGUI)
+endif
+$(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := $(LIBS_ASSIMP) -L$(INSTALLDIR)
+$(INSTALLDIR)/modules/assmodel.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude $(CPPFLAGS_ASSIMP) $(CPPFLAGS_QTGUI)
 $(INSTALLDIR)/modules/assmodel.$(DLL): \
 	plugins/assmodel/mdlimage.o \
 	plugins/assmodel/model.o \
 	plugins/assmodel/plugin.o \
-	| $(INSTALLDIR)/libassimp_.$(DLL) \
+	| $(if $(findstring yes,$(ASSIMP_INTERNAL)),$(INSTALLDIR)/libassimp_.$(DLL),) \
 
 $(INSTALLDIR)/modules/shaders.$(DLL): LIBS_EXTRA := $(LIBS_GLIB)
 $(INSTALLDIR)/modules/shaders.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) -Ilibs -Iinclude

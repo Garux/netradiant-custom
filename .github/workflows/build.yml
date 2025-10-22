@@ -27,7 +27,7 @@ jobs:
     steps:
     - uses: msys2/setup-msys2@v2
       with:
-        install: base-devel ${{ matrix.prefix }}-toolchain ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-qt5-svg ${{ matrix.prefix }}-libxml2 git unzip p7zip
+        install: base-devel ${{ matrix.prefix }}-toolchain ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-qt5-svg ${{ matrix.prefix }}-assimp ${{ matrix.prefix }}-libxml2 git unzip p7zip
         msystem: ${{ matrix.msystem }}
         path-type: minimal
         release: false
@@ -62,7 +62,7 @@ jobs:
     - name: Install tools
       run: |
           sudo apt-get -qq update
-          sudo apt-get -y install mesa-common-dev qtbase5-dev libqt5svg5-dev libglib2.0-dev libjpeg-dev libpng-dev
+          sudo apt-get -y install mesa-common-dev qtbase5-dev libqt5svg5-dev libglib2.0-dev libjpeg-dev libpng-dev libassimp-dev
     - uses: actions/checkout@v4
       with:
         submodules: recursive
