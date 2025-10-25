@@ -411,6 +411,7 @@ static void ProcessWorldModel( entity_t& e ){
 					/* get specifics */
 					const Vector3 origin( light.vectorForKey( "origin" ) );
 					Vector3 color( light.vectorForKey( "_color" ) );
+					ColorFromSRGB( color );
 					const int lightStyle = light.intForKey( "_style", "style" );
 					Vector3 normal;
 
@@ -425,12 +426,6 @@ static void ProcessWorldModel( entity_t& e ){
 					else{
 						//%	normal.set( 0 );
 						normal = -g_vector3_axis_z;
-					}
-
-					if ( colorsRGB ) {
-						color[0] = Image_LinearFloatFromsRGBFloat( color[0] );
-						color[1] = Image_LinearFloatFromsRGBFloat( color[1] );
-						color[2] = Image_LinearFloatFromsRGBFloat( color[2] );
 					}
 
 					/* create the flare surface (note shader defaults automatically) */

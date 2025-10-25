@@ -1064,11 +1064,7 @@ static void ParseShaderFile( const char *filename ){
 				text.GetToken( false );
 				sun.color[ 2 ] = atof( token );
 
-				if ( colorsRGB ) {
-					sun.color[0] = Image_LinearFloatFromsRGBFloat( sun.color[0] );
-					sun.color[1] = Image_LinearFloatFromsRGBFloat( sun.color[1] );
-					sun.color[2] = Image_LinearFloatFromsRGBFloat( sun.color[2] );
-				}
+				ColorFromSRGB( sun.color );
 
 				/* normalize it */
 				ColorNormalize( sun.color );
@@ -1236,11 +1232,7 @@ static void ParseShaderFile( const char *filename ){
 					si.color[ 1 ] = atof( token );
 					text.GetToken( false );
 					si.color[ 2 ] = atof( token );
-					if ( colorsRGB ) {
-						si.color[0] = Image_LinearFloatFromsRGBFloat( si.color[0] );
-						si.color[1] = Image_LinearFloatFromsRGBFloat( si.color[1] );
-						si.color[2] = Image_LinearFloatFromsRGBFloat( si.color[2] );
-					}
+					ColorFromSRGB( si.color );
 					ColorNormalize( si.color );
 				}
 
@@ -1273,11 +1265,7 @@ static void ParseShaderFile( const char *filename ){
 					si.floodlightIntensity = atof( token );
 					text.GetToken( false );
 					si.floodlightDirectionScale = atof( token );
-					if ( colorsRGB ) {
-						si.floodlightRGB[0] = Image_LinearFloatFromsRGBFloat( si.floodlightRGB[0] );
-						si.floodlightRGB[1] = Image_LinearFloatFromsRGBFloat( si.floodlightRGB[1] );
-						si.floodlightRGB[2] = Image_LinearFloatFromsRGBFloat( si.floodlightRGB[2] );
-					}
+					ColorFromSRGB( si.floodlightRGB );
 					ColorNormalize( si.floodlightRGB );
 				}
 

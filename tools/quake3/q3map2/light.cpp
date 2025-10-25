@@ -460,11 +460,7 @@ static void CreateEntityLights(){
 
 		/* set light color */
 		if ( e.read_keyvalue( light.color, "_color" ) ) {
-			if ( colorsRGB ) {
-				light.color[0] = Image_LinearFloatFromsRGBFloat( light.color[0] );
-				light.color[1] = Image_LinearFloatFromsRGBFloat( light.color[1] );
-				light.color[2] = Image_LinearFloatFromsRGBFloat( light.color[2] );
-			}
+			ColorFromSRGB( light.color );
 			if ( !( light.flags & LightFlags::Unnormalized ) ) {
 				ColorNormalize( light.color );
 			}
@@ -1956,18 +1952,13 @@ static void LightWorld( bool fastAllocate, bool bounceStore ){
 
 	/* find the optional minimum lighting values */
 	color = entities[ 0 ].vectorForKey( "_color" );
-	if ( colorsRGB ) {
-		color[0] = Image_LinearFloatFromsRGBFloat( color[0] );
-		color[1] = Image_LinearFloatFromsRGBFloat( color[1] );
-		color[2] = Image_LinearFloatFromsRGBFloat( color[2] );
-	}
-	if ( vector3_length( color ) == 0.0f ) {
+	if ( color == g_vector3_identity )
 		color.set( 1 );
-	}
+	else
+		ColorFromSRGB( color );
 
 	/* ambient */
-	f = entities[ 0 ].floatForKey( "_ambient", "ambient" );
-	ambientColor = color * f;
+	ambientColor = color * entities[ 0 ].floatForKey( "_ambient", "ambient" );
 
 	/* minvertexlight */
 	if ( ( minVertex = entities[ 0 ].read_keyvalue( f, "_minvertexlight" ) ) ) {

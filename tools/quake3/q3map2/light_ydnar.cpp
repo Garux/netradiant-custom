@@ -3664,22 +3664,20 @@ static Vector3 floodVectors[ FLOODLIGHT_NUM_VECTORS ];
 static int numFloodVectors = 0;
 
 void SetupFloodLight(){
-	int i, j;
-	float angle, elevation, angleStep, elevationStep;
-
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- SetupFloodLight ---\n" );
 
 	/* calculate angular steps */
-	angleStep = degrees_to_radians( 360.0f / FLOODLIGHT_NUM_ANGLE_STEPS );
-	elevationStep = degrees_to_radians( FLOODLIGHT_CONE_ANGLE / FLOODLIGHT_NUM_ELEVATION_STEPS );
+	const float angleStep = degrees_to_radians( 360.0f / FLOODLIGHT_NUM_ANGLE_STEPS );
+	const float elevationStep = degrees_to_radians( FLOODLIGHT_CONE_ANGLE / FLOODLIGHT_NUM_ELEVATION_STEPS );
 
 	/* iterate angle */
-	angle = 0.0f;
-	for ( i = 0, angle = 0.0f; i < FLOODLIGHT_NUM_ANGLE_STEPS; ++i, angle += angleStep )
+	float angle = 0.0f;
+	for ( int i = 0; i < FLOODLIGHT_NUM_ANGLE_STEPS; ++i, angle += angleStep )
 	{
 		/* iterate elevation */
-		for ( j = 0, elevation = elevationStep * 0.5f; j < FLOODLIGHT_NUM_ELEVATION_STEPS; ++j, elevation += elevationStep )
+		float elevation = elevationStep * 0.5f;
+		for ( int j = 0; j < FLOODLIGHT_NUM_ELEVATION_STEPS; ++j, elevation += elevationStep )
 		{
 			floodVectors[ numFloodVectors ][ 0 ] = sin( elevation ) * cos( angle );
 			floodVectors[ numFloodVectors ][ 1 ] = sin( elevation ) * sin( angle );
@@ -3692,8 +3690,7 @@ void SetupFloodLight(){
 	Sys_FPrintf( SYS_VRB, "%9d numFloodVectors\n", numFloodVectors );
 
 	/* floodlight */
-	const char  *value;
-	if ( entities[ 0 ].read_keyvalue( value, "_floodlight" ) ) {
+	if ( const char  *value; entities[ 0 ].read_keyvalue( value, "_floodlight" ) ) {
 		double v1, v2, v3, v4, v5, v6;
 		v1 = v2 = v3 = 0;
 		v4 = floodlightDistance;
@@ -3704,23 +3701,13 @@ void SetupFloodLight(){
 
 		floodlightRGB = Vector3( v1, v2, v3 );
 
-		if ( vector3_length( floodlightRGB ) == 0 ) {
+		if ( floodlightRGB == g_vector3_identity ) {
 			floodlightRGB = { 0.94, 0.94, 1.0 };
 		}
 
-		if ( v4 < 1 ) {
-			v4 = 1024;
-		}
-		if ( v5 < 1 ) {
-			v5 = 128;
-		}
-		if ( v6 < 0 ) {
-			v6 = 1;
-		}
-
-		floodlightDistance = v4;
-		floodlightIntensity = v5;
-		floodlightDirectionScale = v6;
+		floodlightDistance = v4 < 1? 1024 : v4;
+		floodlightIntensity = v5 < 1? 128 : v5;
+		floodlightDirectionScale = v6 < 0? 1 : v6;
 
 		floodlighty = true;
 		Sys_Printf( "FloodLighting enabled via worldspawn _floodlight key.\n" );
@@ -3729,11 +3716,7 @@ void SetupFloodLight(){
 	{
 		floodlightRGB = { 0.94, 0.94, 1.0 };
 	}
-	if ( colorsRGB ) {
-		floodlightRGB[0] = Image_LinearFloatFromsRGBFloat( floodlightRGB[0] );
-		floodlightRGB[1] = Image_LinearFloatFromsRGBFloat( floodlightRGB[1] );
-		floodlightRGB[2] = Image_LinearFloatFromsRGBFloat( floodlightRGB[2] );
-	}
+	ColorFromSRGB( floodlightRGB );
 	ColorNormalize( floodlightRGB );
 }
 
