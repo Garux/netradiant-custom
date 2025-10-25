@@ -772,7 +772,6 @@ static void RadLight( int num ){
 	float scale, subdivide;
 	int contentFlags, surfaceFlags, compileFlags;
 	bspDrawSurface_t    *ds;
-	surfaceInfo_t       *info;
 	rawLightmap_t       *lm;
 	const shaderInfo_t  *si;
 	clipWork_t cw;
@@ -780,9 +779,9 @@ static void RadLight( int num ){
 
 	/* get drawsurface, lightmap, and shader info */
 	ds = &bspDrawSurfaces[ num ];
-	info = &surfaceInfos[ num ];
-	lm = info->lm;
-	si = info->si;
+	surfaceInfo_t& info = surfaceInfos[ num ];
+	lm = info.lm;
+	si = info.si;
 	scale = si->bounceScale;
 
 	/* find nodraw bit */

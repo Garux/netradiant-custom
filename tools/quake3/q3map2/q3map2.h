@@ -1654,7 +1654,7 @@ int                         VisMain( Args& args );
 /* light.c  */
 float                       PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, const winding_t& w );
 int                         LightContributionToSample( trace_t *trace );
-void                        LightingAtSample( trace_t * trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ], const Vector3& ambientColor );
+void                        LightingAtSample( trace_t * trace, byte (&styles)[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ], const Vector3& ambientColor );
 int                         LightMain( Args& args );
 
 

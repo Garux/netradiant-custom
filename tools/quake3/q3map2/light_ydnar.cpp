@@ -1671,10 +1671,7 @@ static float DirtForSample( trace_t *trace ){
  */
 
 void DirtyRawLightmap( int rawLightmapNum ){
-	int i, x, y, sx, sy;
 	float               average, samples;
-	rawLightmap_t       *lm;
-	surfaceInfo_t       *info;
 	trace_t trace;
 	bool noDirty;
 
@@ -1685,52 +1682,52 @@ void DirtyRawLightmap( int rawLightmapNum ){
 	}
 
 	/* get lightmap */
-	lm = &rawLightmaps[ rawLightmapNum ];
+	rawLightmap_t& lm = rawLightmaps[ rawLightmapNum ];
 
 	/* setup trace */
 	trace.testOcclusion = true;
 	trace.forceSunlight = false;
-	trace.recvShadows = lm->recvShadows;
-	trace.numSurfaces = lm->numLightSurfaces;
-	trace.surfaces = &lightSurfaces[ lm->firstLightSurface ];
+	trace.recvShadows = lm.recvShadows;
+	trace.numSurfaces = lm.numLightSurfaces;
+	trace.surfaces = &lightSurfaces[ lm.firstLightSurface ];
 	trace.inhibitRadius = 0.0f;
 	trace.testAll = false;
 
 	/* twosided lighting (may or may not be a good idea for lightmapped stuff) */
 	trace.twoSided = false;
-	for ( i = 0; i < trace.numSurfaces; ++i )
+	for ( int i : Span( trace.surfaces, trace.numSurfaces ) )
 	{
 		/* get surface */
-		info = &surfaceInfos[ trace.surfaces[ i ] ];
+		const surfaceInfo_t& info = surfaceInfos[ i ];
 
 		/* check twosidedness */
-		if ( info->si->twoSided ) {
+		if ( info.si->twoSided ) {
 			trace.twoSided = true;
 			break;
 		}
 	}
 
 	noDirty = false;
-	for ( i = 0; i < trace.numSurfaces; ++i )
+	for ( int i : Span( trace.surfaces, trace.numSurfaces ) )
 	{
 		/* get surface */
-		info = &surfaceInfos[ trace.surfaces[ i ] ];
+		const surfaceInfo_t& info = surfaceInfos[ i ];
 
 		/* check twosidedness */
-		if ( info->si->noDirty ) {
+		if ( info.si->noDirty ) {
 			noDirty = true;
 			break;
 		}
 	}
 
 	/* gather dirt */
-	for ( y = 0; y < lm->sh; ++y )
+	for ( int y = 0; y < lm.sh; ++y )
 	{
-		for ( x = 0; x < lm->sw; ++x )
+		for ( int x = 0; x < lm.sw; ++x )
 		{
 			/* get luxel */
-			const int cluster = lm->getSuperCluster( x, y );
-			float& dirt = lm->getSuperDirt( x, y );
+			const int cluster = lm.getSuperCluster( x, y );
+			float& dirt = lm.getSuperDirt( x, y );
 
 			/* set default dirt */
 			dirt = 0.0f;
@@ -1748,8 +1745,8 @@ void DirtyRawLightmap( int rawLightmapNum ){
 
 			/* copy to trace */
 			trace.cluster = cluster;
-			trace.origin = lm->getSuperOrigin( x, y );
-			trace.normal = lm->getSuperNormal( x, y );
+			trace.origin = lm.getSuperOrigin( x, y );
+			trace.normal = lm.getSuperNormal( x, y );
 
 			/* get dirt */
 			dirt = DirtForSample( &trace );
@@ -1760,31 +1757,31 @@ void DirtyRawLightmap( int rawLightmapNum ){
 	//%	return;
 
 	/* filter dirt */
-	for ( y = 0; y < lm->sh; ++y )
+	for ( int y = 0; y < lm.sh; ++y )
 	{
-		for ( x = 0; x < lm->sw; ++x )
+		for ( int x = 0; x < lm.sw; ++x )
 		{
 			/* get luxel */
-			float& dirt = lm->getSuperDirt( x, y );
+			float& dirt = lm.getSuperDirt( x, y );
 
 			/* filter dirt by adjacency to unmapped luxels */
 			average = dirt;
 			samples = 1.0f;
-			for ( sy = ( y - 1 ); sy <= ( y + 1 ); ++sy )
+			for ( int sy = ( y - 1 ); sy <= ( y + 1 ); ++sy )
 			{
-				if ( sy < 0 || sy >= lm->sh ) {
+				if ( sy < 0 || sy >= lm.sh ) {
 					continue;
 				}
 
-				for ( sx = ( x - 1 ); sx <= ( x + 1 ); ++sx )
+				for ( int sx = ( x - 1 ); sx <= ( x + 1 ); ++sx )
 				{
-					if ( sx < 0 || sx >= lm->sw || ( sx == x && sy == y ) ) {
+					if ( sx < 0 || sx >= lm.sw || ( sx == x && sy == y ) ) {
 						continue;
 					}
 
 					/* get neighboring luxel */
-					const float dirt2 = lm->getSuperDirt( sx, sy );
-					if ( lm->getSuperCluster( sx, sy ) < CLUSTER_NORMAL || dirt2 <= 0.0f ) {
+					const float dirt2 = lm.getSuperDirt( sx, sy );
+					if ( lm.getSuperCluster( sx, sy ) < CLUSTER_NORMAL || dirt2 <= 0.0f ) {
 						continue;
 					}
 
@@ -2209,10 +2206,9 @@ inline void FreeTraceLights( trace_t *trace ){
 static void FloodlightIlluminateLightmap( rawLightmap_t *lm );
 
 void IlluminateRawLightmap( int rawLightmapNum ){
-	int i, t, x, y, sx, sy, size, luxelFilterRadius, lightmapNum;
+	int t, x, y, sx, sy, size, luxelFilterRadius, lightmapNum;
 	int                 mapped, lighted, totalLighted;
 	rawLightmap_t       *lm;
-	surfaceInfo_t       *info;
 	bool filterColor, filterDir;
 	float               samples, filterRadius, weight;
 	Vector3 averageColor, averageDir;
@@ -2239,13 +2235,13 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 
 	/* twosided lighting (may or may not be a good idea for lightmapped stuff) */
 	trace.twoSided = false;
-	for ( i = 0; i < trace.numSurfaces; ++i )
+	for ( int i : Span( trace.surfaces, trace.numSurfaces ) )
 	{
 		/* get surface */
-		info = &surfaceInfos[ trace.surfaces[ i ] ];
+		const surfaceInfo_t& info = surfaceInfos[ i ];
 
 		/* check twosidedness */
-		if ( info->si->twoSided ) {
+		if ( info.si->twoSided ) {
 			trace.twoSided = true;
 			break;
 		}
@@ -2379,7 +2375,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 		//%		Sys_Printf( "Lightmap %9d: 0 lights, axis: %.2f, %.2f, %.2f\n", rawLightmapNum, lm->axis[ 0 ], lm->axis[ 1 ], lm->axis[ 2 ] );
 
 		/* walk light list */
-		for ( i = 0; i < trace.numLights; ++i )
+		for ( int i = 0; i < trace.numLights; ++i )
 		{
 			/* setup trace */
 			trace.light = trace.lights[ i ];
@@ -2943,9 +2939,6 @@ void IlluminateVertexes( int num ){
 	int lightmapNum, numAvg;
 	float samples, dirt;
 	Vector3 colors[ MAX_LIGHTMAPS ], avgColors[ MAX_LIGHTMAPS ];
-	bspDrawSurface_t    *ds;
-	surfaceInfo_t       *info;
-	rawLightmap_t       *lm;
 	bspDrawVert_t       *verts;
 	trace_t trace;
 	float floodLightAmount;
@@ -2953,9 +2946,9 @@ void IlluminateVertexes( int num ){
 
 
 	/* get surface, info, and raw lightmap */
-	ds = &bspDrawSurfaces[ num ];
-	info = &surfaceInfos[ num ];
-	lm = info->lm;
+	bspDrawSurface_t& ds = bspDrawSurfaces[ num ];
+	const surfaceInfo_t& info = surfaceInfos[ num ];
+	rawLightmap_t *lm = info.lm;
 
 	/* -----------------------------------------------------------------
 	   illuminate the vertexes
@@ -2965,28 +2958,28 @@ void IlluminateVertexes( int num ){
 	if ( lm == nullptr || cpmaHack ) {
 		/* setup trace */
 		trace.testOcclusion = ( cpmaHack && lm != nullptr ) ? false : !noTrace;
-		trace.forceSunlight = info->si->forceSunlight;
-		trace.recvShadows = info->recvShadows;
+		trace.forceSunlight = info.si->forceSunlight;
+		trace.recvShadows = info.recvShadows;
 		trace.numSurfaces = 1;
 		trace.surfaces = &num;
 		trace.inhibitRadius = DEFAULT_INHIBIT_RADIUS;
 
 		/* twosided lighting */
-		trace.twoSided = info->si->twoSided;
+		trace.twoSided = info.si->twoSided;
 
 		/* make light list for this surface */
 		CreateTraceLightsForSurface( num, &trace );
 
 		/* setup */
-		verts = &yDrawVerts[ ds->firstVert ];
+		verts = &yDrawVerts[ ds.firstVert ];
 		numAvg = 0;
 		memset( avgColors, 0, sizeof( avgColors ) );
 
 		/* walk the surface verts */
-		for ( i = 0; i < ds->numVerts; ++i )
+		for ( i = 0; i < ds.numVerts; ++i )
 		{
 			/* get vertex luxel */
-			Vector3& radVertLuxel = getRadVertexLuxel( 0, ds->firstVert + i );
+			Vector3& radVertLuxel = getRadVertexLuxel( 0, ds.firstVert + i );
 
 			/* color the luxel with raw lightmap num? */
 			if ( debugSurfaces ) {
@@ -2995,9 +2988,9 @@ void IlluminateVertexes( int num ){
 
 			/* color the luxel with luxel origin? */
 			else if ( debugOrigin ) {
-				const Vector3 temp = ( info->minmax.maxs - info->minmax.mins ) * ( 1.0f / 255.0f );
-				const Vector3 temp2 = verts[ i ].xyz - info->minmax.mins;
-				radVertLuxel = info->minmax.mins + ( temp * temp2 );
+				const Vector3 temp = ( info.minmax.maxs - info.minmax.mins ) * ( 1.0f / 255.0f );
+				const Vector3 temp2 = verts[ i ].xyz - info.minmax.mins;
+				radVertLuxel = info.minmax.mins + ( temp * temp2 );
 			}
 
 			/* color the luxel with the normal */
@@ -3005,7 +2998,7 @@ void IlluminateVertexes( int num ){
 				radVertLuxel = ( verts[ i ].normal + Vector3( 1 ) ) * 127.5f;
 			}
 
-			else if ( info->si->noVertexLight ) {
+			else if ( info.si->noVertexLight ) {
 				radVertLuxel.set( 127.5f );
 			}
 
@@ -3021,7 +3014,7 @@ void IlluminateVertexes( int num ){
 				/* setup trace */
 				trace.normal = verts[ i ].normal;
 				/* try at initial origin */
-				trace.cluster = ClusterForPointExtFilter( verts[ i ].xyz, VERTEX_EPSILON, info->numSurfaceClusters, &surfaceClusters[ info->firstSurfaceCluster ] );
+				trace.cluster = ClusterForPointExtFilter( verts[ i ].xyz, VERTEX_EPSILON, info.numSurfaceClusters, &surfaceClusters[ info.firstSurfaceCluster ] );
 				if ( trace.cluster >= CLUSTER_NORMAL ) {
 					/* setup trace */
 					trace.origin = verts[ i ].xyz;
@@ -3043,7 +3036,7 @@ void IlluminateVertexes( int num ){
 					}
 
 					/* trace */
-					LightingAtSample( &trace, ds->vertexStyles, colors, info->ambientColor );
+					LightingAtSample( &trace, ds.vertexStyles, colors, info.ambientColor );
 
 					/* store */
 					for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
@@ -3055,7 +3048,7 @@ void IlluminateVertexes( int num ){
 						colors[ lightmapNum ] += floodColor;
 
 						/* store */
-						getRadVertexLuxel( lightmapNum, ds->firstVert + i ) = colors[ lightmapNum ];
+						getRadVertexLuxel( lightmapNum, ds.firstVert + i ) = colors[ lightmapNum ];
 						colors[ lightmapNum ] += avgColors[ lightmapNum ];
 					}
 				}
@@ -3064,7 +3057,7 @@ void IlluminateVertexes( int num ){
 				const auto vector3_component_greater = []( const Vector3& greater, const Vector3& lesser ){
 					return greater[0] > lesser[0] || greater[1] > lesser[1] || greater[2] > lesser[2];
 				};
-				if ( !vector3_component_greater( getRadVertexLuxel( 0, ds->firstVert + i ), info->ambientColor ) ) {
+				if ( !vector3_component_greater( getRadVertexLuxel( 0, ds.firstVert + i ), info.ambientColor ) ) {
 					/* nudge the sample point around a bit */
 					for ( x = 0; x < 5; ++x )
 					{
@@ -3083,7 +3076,7 @@ void IlluminateVertexes( int num ){
 								trace.origin = verts[ i ].xyz + Vector3( x1, y1, z1 ) * VERTEX_NUDGE;
 
 								/* try at nudged origin */
-								trace.cluster = ClusterForPointExtFilter( trace.origin, VERTEX_EPSILON, info->numSurfaceClusters, &surfaceClusters[ info->firstSurfaceCluster ] );
+								trace.cluster = ClusterForPointExtFilter( trace.origin, VERTEX_EPSILON, info.numSurfaceClusters, &surfaceClusters[ info.firstSurfaceCluster ] );
 								if ( trace.cluster < CLUSTER_NORMAL ) {
 									continue;
 								}
@@ -3105,7 +3098,7 @@ void IlluminateVertexes( int num ){
 								}
 
 								/* trace */
-								LightingAtSample( &trace, ds->vertexStyles, colors, info->ambientColor );
+								LightingAtSample( &trace, ds.vertexStyles, colors, info.ambientColor );
 
 								/* store */
 								for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
@@ -3117,11 +3110,11 @@ void IlluminateVertexes( int num ){
 									colors[ lightmapNum ] += floodColor;
 
 									/* store */
-									getRadVertexLuxel( lightmapNum, ds->firstVert + i ) = colors[ lightmapNum ];
+									getRadVertexLuxel( lightmapNum, ds.firstVert + i ) = colors[ lightmapNum ];
 								}
 
 								/* bright enough? */
-								if ( vector3_component_greater( getRadVertexLuxel( 0, ds->firstVert + i ), info->ambientColor ) ) {
+								if ( vector3_component_greater( getRadVertexLuxel( 0, ds.firstVert + i ), info.ambientColor ) ) {
 									x = y = z = 1000;
 								}
 							}
@@ -3130,11 +3123,11 @@ void IlluminateVertexes( int num ){
 				}
 
 				/* add to average? */
-				if ( vector3_component_greater( getRadVertexLuxel( 0, ds->firstVert + i ), info->ambientColor ) ) {
+				if ( vector3_component_greater( getRadVertexLuxel( 0, ds.firstVert + i ), info.ambientColor ) ) {
 					numAvg++;
 					for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 					{
-						avgColors[ lightmapNum ] += getRadVertexLuxel( lightmapNum, ds->firstVert + i );
+						avgColors[ lightmapNum ] += getRadVertexLuxel( lightmapNum, ds.firstVert + i );
 					}
 				}
 			}
@@ -3150,20 +3143,20 @@ void IlluminateVertexes( int num ){
 		}
 		else
 		{
-			avgColors[ 0 ] = info->ambientColor;
+			avgColors[ 0 ] = info.ambientColor;
 		}
 
 		/* clean up and store vertex color */
-		for ( i = 0; i < ds->numVerts; ++i )
+		for ( i = 0; i < ds.numVerts; ++i )
 		{
 			/* store average in occluded vertexes */
-			if ( getRadVertexLuxel( 0, ds->firstVert + i )[ 0 ] < 0.0f ) {
+			if ( getRadVertexLuxel( 0, ds.firstVert + i )[ 0 ] < 0.0f ) {
 				for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 				{
-					getRadVertexLuxel( lightmapNum, ds->firstVert + i ) = avgColors[ lightmapNum ];
+					getRadVertexLuxel( lightmapNum, ds.firstVert + i ) = avgColors[ lightmapNum ];
 
 					/* debug code */
-					//%	getRadVertexLuxel( lightmapNum, ds->firstVert + i ) = { 255.0f, 0.0f, 0.0f };
+					//%	getRadVertexLuxel( lightmapNum, ds.firstVert + i ) = { 255.0f, 0.0f, 0.0f };
 				}
 			}
 
@@ -3171,15 +3164,15 @@ void IlluminateVertexes( int num ){
 			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 			{
 				/* get luxels */
-				Vector3& vertLuxel = getVertexLuxel( lightmapNum, ds->firstVert + i );
-				const Vector3& radVertLuxel = getRadVertexLuxel( lightmapNum, ds->firstVert + i );
+				Vector3& vertLuxel = getVertexLuxel( lightmapNum, ds.firstVert + i );
+				const Vector3& radVertLuxel = getRadVertexLuxel( lightmapNum, ds.firstVert + i );
 
 				/* store */
 				if ( bouncing || bounce == 0 || !bounceOnly ) {
 					vertLuxel += radVertLuxel;
 				}
-				if ( !info->si->noVertexLight ) {
-					verts[ i ].color[ lightmapNum ].rgb() = ColorToBytes( vertLuxel, info->si->vertexScale );
+				if ( !info.si->noVertexLight ) {
+					verts[ i ].color[ lightmapNum ].rgb() = ColorToBytes( vertLuxel, info.si->vertexScale );
 				}
 			}
 		}
@@ -3197,14 +3190,14 @@ void IlluminateVertexes( int num ){
 
 	/* set styles from lightmap */
 	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
-		ds->vertexStyles[ lightmapNum ] = lm->styles[ lightmapNum ];
+		ds.vertexStyles[ lightmapNum ] = lm->styles[ lightmapNum ];
 
 	/* get max search radius */
 	maxRadius = std::max( lm->sw, lm->sh );
 
 	/* walk the surface verts */
-	verts = &yDrawVerts[ ds->firstVert ];
-	for ( i = 0; i < ds->numVerts; ++i )
+	verts = &yDrawVerts[ ds.firstVert ];
+	for ( i = 0; i < ds.numVerts; ++i )
 	{
 		/* do each lightmap */
 		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
@@ -3219,8 +3212,8 @@ void IlluminateVertexes( int num ){
 			y = std::clamp( int( verts[ i ].lightmap[ 0 ][ 1 ] ), 0, lm->sh - 1 );
 
 			/* get vertex luxels */
-			Vector3& vertLuxel = getVertexLuxel( lightmapNum, ds->firstVert + i );
-			Vector3& radVertLuxel = getRadVertexLuxel( lightmapNum, ds->firstVert + i );
+			Vector3& vertLuxel = getVertexLuxel( lightmapNum, ds.firstVert + i );
+			Vector3& radVertLuxel = getRadVertexLuxel( lightmapNum, ds.firstVert + i );
 
 			/* color the luxel with the normal? */
 			if ( normalmap ) {
@@ -3232,7 +3225,7 @@ void IlluminateVertexes( int num ){
 				radVertLuxel = debugColors[ num % 12 ];
 			}
 
-			else if ( info->si->noVertexLight ) {
+			else if ( info.si->noVertexLight ) {
 				radVertLuxel.set( 127.5f );
 			}
 
@@ -3268,7 +3261,7 @@ void IlluminateVertexes( int num ){
 							}
 
 							/* testing: must be brigher than ambient color */
-							//%	if( luxel[ 0 ] <= info->ambientColor[ 0 ] || luxel[ 1 ] <= info->ambientColor[ 1 ] || luxel[ 2 ] <= info->ambientColor[ 2 ] )
+							//%	if( luxel[ 0 ] <= info.ambientColor[ 0 ] || luxel[ 1 ] <= info.ambientColor[ 1 ] || luxel[ 2 ] <= info.ambientColor[ 2 ] )
 							//%		continue;
 
 							/* add its distinctiveness to our own */
@@ -3283,7 +3276,7 @@ void IlluminateVertexes( int num ){
 					radVertLuxel *= ( 1.f / samples );
 				}
 				else{
-					radVertLuxel = info->ambientColor;
+					radVertLuxel = info.ambientColor;
 				}
 			}
 
@@ -3292,7 +3285,7 @@ void IlluminateVertexes( int num ){
 			numVertsIlluminated++;
 
 			/* store into bytes (for vertex approximation) */
-			if ( !info->si->noVertexLight ) {
+			if ( !info.si->noVertexLight ) {
 				verts[ i ].color[ lightmapNum ].rgb() = ColorToBytes( vertLuxel, 1.0f );
 			}
 		}
@@ -3832,8 +3825,6 @@ float FloodLightForSample( trace_t *trace, float floodLightDistance, bool floodL
 
 // floodlight pass on a lightmap
 static void FloodLightRawLightmapPass( rawLightmap_t *lm, Vector3& lmFloodLightRGB, float lmFloodLightIntensity, float lmFloodLightDistance, bool lmFloodLightLowQuality, float floodlightDirectionScale ){
-	int i, x, y;
-	surfaceInfo_t       *info;
 	trace_t trace;
 	// int sx, sy;
 	// float samples, average, *floodlight2;
@@ -3853,22 +3844,22 @@ static void FloodLightRawLightmapPass( rawLightmap_t *lm, Vector3& lmFloodLightR
 
 	/* twosided lighting (may or may not be a good idea for lightmapped stuff) */
 	//trace.twoSided = false;
-	for ( i = 0; i < trace.numSurfaces; ++i )
+	for ( int i : Span( trace.surfaces, trace.numSurfaces ) )
 	{
 		/* get surface */
-		info = &surfaceInfos[ trace.surfaces[ i ] ];
+		const surfaceInfo_t& info = surfaceInfos[ i ];
 
 		/* check twosidedness */
-		if ( info->si->twoSided ) {
+		if ( info.si->twoSided ) {
 			trace.twoSided = true;
 			break;
 		}
 	}
 
 	/* gather floodlight */
-	for ( y = 0; y < lm->sh; ++y )
+	for ( int y = 0; y < lm->sh; ++y )
 	{
-		for ( x = 0; x < lm->sw; ++x )
+		for ( int x = 0; x < lm->sw; ++x )
 		{
 			/* get luxel */
 			const int cluster = lm->getSuperCluster( x, y );
@@ -3902,9 +3893,9 @@ static void FloodLightRawLightmapPass( rawLightmap_t *lm, Vector3& lmFloodLightR
 #if 0
 
 	/* filter "dirt" */
-	for ( y = 0; y < lm->sh; ++y )
+	for ( int y = 0; y < lm->sh; ++y )
 	{
-		for ( x = 0; x < lm->sw; ++x )
+		for ( int x = 0; x < lm->sw; ++x )
 		{
 			/* get luxel */
 			SuperFloodLight& floodlight = lm->getSuperFloodLight( x, y );
@@ -3912,13 +3903,13 @@ static void FloodLightRawLightmapPass( rawLightmap_t *lm, Vector3& lmFloodLightR
 			/* filter dirt by adjacency to unmapped luxels */
 			average = floodlight.value[0];
 			samples = 1.0f;
-			for ( sy = ( y - 1 ); sy <= ( y + 1 ); ++sy )
+			for ( int sy = ( y - 1 ); sy <= ( y + 1 ); ++sy )
 			{
 				if ( sy < 0 || sy >= lm->sh ) {
 					continue;
 				}
 
-				for ( sx = ( x - 1 ); sx <= ( x + 1 ); ++sx )
+				for ( int sx = ( x - 1 ); sx <= ( x + 1 ); ++sx )
 				{
 					if ( sx < 0 || sx >= lm->sw || ( sx == x && sy == y ) ) {
 						continue;

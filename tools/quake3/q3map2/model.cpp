@@ -1113,9 +1113,9 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		/* allocate a surface (ydnar: gs mods) */
 		ds = AllocDrawSurface( ESurfaceType::Triangles );
 		ds->entityNum = entity.mapEntityNum;
-		ds->castShadows = params.castShadows;
-		ds->recvShadows = params.recvShadows;
-		ds->celShader = params.celShader;
+		ds->castShadows  = params.castShadows;
+		ds->recvShadows  = params.recvShadows;
+		ds->celShader    = params.celShader;
 		ds->ambientColor = params.ambientColor;
 
 		/* set shader */

@@ -256,9 +256,9 @@ static void TransformDecalProjector( decalProjector_t *in, const Vector3 (&axis)
 	/* translate bounding box and sphere (note: rotated projector bounding box will be invalid!) */
 	out->minmax.mins = in->minmax.mins - origin;
 	out->minmax.maxs = in->minmax.maxs - origin;
-	out->center = in->center - origin;
-	out->radius = in->radius;
-	out->radius2 = in->radius2;
+	out->center      = in->center - origin;
+	out->radius      = in->radius;
+	out->radius2     = in->radius2;
 
 	/* translate planes */
 	for ( int i = 0; i < in->numPlanes; ++i )
@@ -492,12 +492,6 @@ void ProcessDecals(){
  */
 
 static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds, winding_t& w ){
-	int i, j;
-	mapDrawSurface_t    *ds2;
-	bspDrawVert_t       *dv;
-	Plane3f plane;
-
-
 	/* dummy check */
 	if ( w.size() < 3 ) {
 		return;
@@ -508,6 +502,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 		p += entityOrigin;
 
 	/* make a plane from the winding */
+	Plane3f plane;
 	if ( !PlaneFromPoints( plane, w.data() ) ) {
 		return;
 	}
@@ -518,7 +513,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	}
 
 	/* walk list of planes */
-	for ( i = 0; i < dp->numPlanes; ++i )
+	for ( int i = 0; i < dp->numPlanes; ++i )
 	{
 		/* chop winding by the plane */
 		auto [front, back] = ClipWindingEpsilonStrict( w, dp->planes[ i ], 0.0625f ); /* strict, if identical plane we don't want to keep it */
@@ -542,25 +537,25 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	numDecalSurfaces++;
 
 	/* make a new surface */
-	ds2 = AllocDrawSurface( ESurfaceType::Decal );
+	mapDrawSurface_t *ds2 = AllocDrawSurface( ESurfaceType::Decal );
 
 	/* set it up */
-	ds2->entityNum = ds->entityNum;
-	ds2->castShadows = ds->castShadows;
-	ds2->recvShadows = ds->recvShadows;
+	ds2->entityNum         = ds->entityNum;
+	ds2->castShadows       = ds->castShadows;
+	ds2->recvShadows       = ds->recvShadows;
 	ds2->shaderInfo = dp->si;
-	ds2->fogNum = ds->fogNum;   /* why was this -1? */
-	ds2->lightmapScale = ds->lightmapScale;
+	ds2->fogNum            = ds->fogNum;   /* why was this -1? */
+	ds2->lightmapScale     = ds->lightmapScale;
 	ds2->shadeAngleDegrees = ds->shadeAngleDegrees;
-	ds2->ambientColor = ds->ambientColor;
+	ds2->ambientColor      = ds->ambientColor;
 	ds2->numVerts = w.size();
 	ds2->verts = safe_calloc( ds2->numVerts * sizeof( *ds2->verts ) );
 
 	/* set vertexes */
-	for ( i = 0; i < ds2->numVerts; ++i )
+	for ( int i = 0; i < ds2->numVerts; ++i )
 	{
 		/* get vertex */
-		dv = &ds2->verts[ i ];
+		bspDrawVert_t& dv = ds2->verts[ i ];
 
 		/* set alpha */
 		const float d = plane3_distance_to_point( dp->planes[ 0 ], w[ i ] );
@@ -568,15 +563,15 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 		const float alpha = 255.0f * d2 / ( d + d2 );
 
 		/* set misc */
-		dv->xyz = w[ i ] - entityOrigin;
-		dv->normal = plane.normal();
-		dv->st[ 0 ] = vector3_dot( dv->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
-		dv->st[ 1 ] = vector3_dot( dv->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
+		dv.xyz = w[ i ] - entityOrigin;
+		dv.normal = plane.normal();
+		dv.st[ 0 ] = vector3_dot( dv.xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
+		dv.st[ 1 ] = vector3_dot( dv.xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
 
 		/* set color */
-		for ( j = 0; j < MAX_LIGHTMAPS; ++j )
+		for ( int j = 0; j < MAX_LIGHTMAPS; ++j )
 		{
-			dv->color[ j ] = { 255, 255, 255, color_to_byte( alpha ) };
+			dv.color[ j ] = { 255, 255, 255, color_to_byte( alpha ) };
 		}
 	}
 }

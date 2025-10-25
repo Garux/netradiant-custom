@@ -636,12 +636,12 @@ int BSPMain( Args& args ){
 
 	/* set standard game flags */
 	maxLMSurfaceVerts = g_game->maxLMSurfaceVerts;
-	maxSurfaceVerts = g_game->maxSurfaceVerts;
+	maxSurfaceVerts   = g_game->maxSurfaceVerts;
 	maxSurfaceIndexes = g_game->maxSurfaceIndexes;
-	emitFlares = g_game->emitFlares;
-	texturesRGB = g_game->texturesRGB;
-	colorsRGB = g_game->colorsRGB;
-	keepLights = g_game->keepLights;
+	emitFlares        = g_game->emitFlares;
+	texturesRGB       = g_game->texturesRGB;
+	colorsRGB         = g_game->colorsRGB;
+	keepLights        = g_game->keepLights;
 
 	/* process arguments */
 	/* fixme: print more useful usage here */

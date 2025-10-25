@@ -71,12 +71,12 @@ void SetSurfaceExtra( const mapDrawSurface_t& ds ){
 
 	/* copy out the relevant bits */
 	se.mds = &ds;
-	se.si = ds.shaderInfo;
+	se.si           = ds.shaderInfo;
 	se.parentSurfaceNum = ds.parent != nullptr ? ds.parent->outputNum : -1;
-	se.entityNum = ds.entityNum;
-	se.castShadows = ds.castShadows;
-	se.recvShadows = ds.recvShadows;
-	se.sampleSize = ds.sampleSize;
+	se.entityNum    = ds.entityNum;
+	se.castShadows  = ds.castShadows;
+	se.recvShadows  = ds.recvShadows;
+	se.sampleSize   = ds.sampleSize;
 	se.ambientColor = ds.ambientColor;
 	se.longestCurve = ds.longestCurve;
 	se.lightmapAxis = ds.lightmapAxis;

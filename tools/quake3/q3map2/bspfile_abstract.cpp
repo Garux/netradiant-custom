@@ -138,14 +138,14 @@ static void SwapBSPFile(){
 	/* drawverts (don't swap colors) */
 	for ( bspDrawVert_t& v : bspDrawVerts )
 	{
-		v.xyz[ 0 ] = LittleFloat( v.xyz[ 0 ] );
-		v.xyz[ 1 ] = LittleFloat( v.xyz[ 1 ] );
-		v.xyz[ 2 ] = LittleFloat( v.xyz[ 2 ] );
+		v.xyz[ 0 ]    = LittleFloat( v.xyz[ 0 ] );
+		v.xyz[ 1 ]    = LittleFloat( v.xyz[ 1 ] );
+		v.xyz[ 2 ]    = LittleFloat( v.xyz[ 2 ] );
 		v.normal[ 0 ] = LittleFloat( v.normal[ 0 ] );
 		v.normal[ 1 ] = LittleFloat( v.normal[ 1 ] );
 		v.normal[ 2 ] = LittleFloat( v.normal[ 2 ] );
-		v.st[ 0 ] = LittleFloat( v.st[ 0 ] );
-		v.st[ 1 ] = LittleFloat( v.st[ 1 ] );
+		v.st[ 0 ]     = LittleFloat( v.st[ 0 ] );
+		v.st[ 1 ]     = LittleFloat( v.st[ 1 ] );
 		for ( Vector2& lm : v.lightmap )
 		{
 			lm[ 0 ] = LittleFloat( lm[ 0 ] );

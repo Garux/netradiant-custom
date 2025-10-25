@@ -475,10 +475,11 @@ int MiniMapBSPMain( Args& args ){
 
 	strClear( minimapFilename );
 	minimapSharpen = g_game->miniMapSharpen;
-	minimap.width = minimap.height = g_game->miniMapSize;
-	border = g_game->miniMapBorder;
-	keepaspect = g_game->miniMapKeepAspect;
-	mode = g_game->miniMapMode;
+	minimap.width  =
+	minimap.height = g_game->miniMapSize;
+	border         = g_game->miniMapBorder;
+	keepaspect     = g_game->miniMapKeepAspect;
+	mode           = g_game->miniMapMode;
 
 	autolevel = false;
 	minimap.samples = 1;

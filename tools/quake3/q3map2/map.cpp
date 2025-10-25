@@ -1027,7 +1027,7 @@ static void ParseRawBrush( bool onlyLights ){
 		side.surfaceFlags = si.surfaceFlags;
 		side.contentFlags = si.contentFlags;
 		side.compileFlags = si.compileFlags;
-		side.value = si.value;
+		side.value        = si.value;
 
 		/* AP or 220? */
 		if ( g_brushType == EBrushType::Undefined ){

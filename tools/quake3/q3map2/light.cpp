@@ -1186,13 +1186,10 @@ int LightContributionToSample( trace_t *trace ){
    determines the amount of light reaching a sample (luxel or vertex)
  */
 
-void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ], const Vector3& ambientColor ){
-	int i, lightmapNum;
-
-
+void LightingAtSample( trace_t *trace, byte (&styles)[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ], const Vector3& ambientColor ){
 	/* clear colors */
-	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
-		colors[ lightmapNum ].set( 0 );
+	for ( Vector3& color : colors )
+		color.set( 0 );
 
 	/* ydnar: normalmap */
 	if ( normalmap ) {
@@ -1203,13 +1200,14 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&c
 	colors[ 0 ] = ambientColor;
 
 	/* ydnar: trace to all the list of lights pre-stored in tw */
-	for ( i = 0; i < trace->numLights && trace->lights[ i ] != nullptr; ++i )
+	for ( int i = 0; i < trace->numLights && trace->lights[ i ] != nullptr; ++i )
 	{
 		/* set light */
 		trace->light = trace->lights[ i ];
 
 		/* style check */
-		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
+		int lightmapNum = 0;
+		for ( ; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		{
 			if ( styles[ lightmapNum ] == trace->light->style ||
 			     styles[ lightmapNum ] == LS_NONE ) {

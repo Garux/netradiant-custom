@@ -195,13 +195,13 @@ struct CompareMetaTriangles
 	}
 	/* equal in terms of mergeability */
 	static bool equal( const metaTriangle_t& a, const metaTriangle_t& b ) {
-		return ( a.si == b.si )
-		&& ( a.fogNum == b.fogNum )
-		&& ( a.entityNum == b.entityNum )
-		&& ( a.castShadows == b.castShadows )
-		&& ( a.recvShadows == b.recvShadows )
-		&& ( a.sampleSize == b.sampleSize )
-		&& ( a.ambientColor == b.ambientColor );
+		return ( a.si           == b.si )
+		    && ( a.fogNum       == b.fogNum )
+		    && ( a.entityNum    == b.entityNum )
+		    && ( a.castShadows  == b.castShadows )
+		    && ( a.recvShadows  == b.recvShadows )
+		    && ( a.sampleSize   == b.sampleSize )
+		    && ( a.ambientColor == b.ambientColor );
 	}
 };
 
@@ -311,8 +311,8 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
 		for ( int i = 0; i < ds->numIndexes; i += 3 )
 		{
 			/* sanity check the indexes */
-			if ( ds->indexes[ i ] == ds->indexes[ i + 1 ] ||
-			     ds->indexes[ i ] == ds->indexes[ i + 2 ] ||
+			if ( ds->indexes[ i     ] == ds->indexes[ i + 1 ] ||
+			     ds->indexes[ i     ] == ds->indexes[ i + 2 ] ||
 			     ds->indexes[ i + 1 ] == ds->indexes[ i + 2 ] ) {
 				//%	Sys_Printf( "%d! ", ds->numVerts );
 				continue;
@@ -320,18 +320,18 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
 
 			/* build a metatriangle */
 			metaTriangle_t src;
-			src.si = ds->shaderInfo;
+			src.si                = ds->shaderInfo;
 			src.side = ( ds->sideRef != nullptr ? ds->sideRef->side : nullptr );
-			src.entityNum = ds->entityNum;
-			src.surfaceNum = ds->surfaceNum;
-			src.planeNum = ds->planeNum;
-			src.castShadows = ds->castShadows;
-			src.recvShadows = ds->recvShadows;
-			src.fogNum = ds->fogNum;
-			src.sampleSize = ds->sampleSize;
+			src.entityNum         = ds->entityNum;
+			src.surfaceNum        = ds->surfaceNum;
+			src.planeNum          = ds->planeNum;
+			src.castShadows       = ds->castShadows;
+			src.recvShadows       = ds->recvShadows;
+			src.fogNum            = ds->fogNum;
+			src.sampleSize        = ds->sampleSize;
 			src.shadeAngleDegrees = ds->shadeAngleDegrees;
-			src.ambientColor = ds->ambientColor;
-			src.lightmapAxis = ds->lightmapAxis;
+			src.ambientColor      = ds->ambientColor;
+			src.lightmapAxis      = ds->lightmapAxis;
 
 			metaTriangle_insert( src, { ds->verts[ ds->indexes[ i ] ],
 			                            ds->verts[ ds->indexes[ i + 1 ] ],
@@ -1544,20 +1544,20 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 
 		/* start a new drawsurface */
 		mapDrawSurface_t *ds = AllocDrawSurface( ESurfaceType::Meta );
-		ds->entityNum = seed.entityNum;
-		ds->surfaceNum = seed.surfaceNum;
-		ds->castShadows = seed.castShadows;
-		ds->recvShadows = seed.recvShadows;
+		ds->entityNum         = seed.entityNum;
+		ds->surfaceNum        = seed.surfaceNum;
+		ds->castShadows       = seed.castShadows;
+		ds->recvShadows       = seed.recvShadows;
 
-		ds->shaderInfo = seed.si;
-		ds->planeNum = seed.planeNum;
-		ds->fogNum = seed.fogNum;
-		ds->sampleSize = seed.sampleSize;
+		ds->shaderInfo        = seed.si;
+		ds->planeNum          = seed.planeNum;
+		ds->fogNum            = seed.fogNum;
+		ds->sampleSize        = seed.sampleSize;
 		ds->shadeAngleDegrees = seed.shadeAngleDegrees;
-		ds->ambientColor = seed.ambientColor;
+		ds->ambientColor      = seed.ambientColor;
 		ds->verts = verts;
 		ds->indexes = indexes;
-		ds->lightmapAxis = seed.lightmapAxis;
+		ds->lightmapAxis      = seed.lightmapAxis;
 		ds->sideRef = AllocSideRef( seed.side, nullptr );
 
 		ds->minmax.clear();

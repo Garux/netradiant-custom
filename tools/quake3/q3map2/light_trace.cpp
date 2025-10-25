@@ -1254,7 +1254,6 @@ void SetupTraceNodes(){
 #define SELF_SHADOW_EPSILON     0.5f
 
 static bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
-	int i;
 	Vector3 tvec, pvec, qvec;
 	float det, invDet, depth;
 	float u, v, w, s, t;
@@ -1338,9 +1337,9 @@ static bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace 
 	/* if hitpoint is really close to trace origin (sample point), then check for self-shadowing */
 	if ( depth <= SELF_SHADOW_EPSILON ) {
 		/* don't self-shadow */
-		for ( i = 0; i < trace->numSurfaces; ++i )
+		for ( int i : Span( trace->surfaces, trace->numSurfaces ) )
 		{
-			if ( ti->surfaceNum == trace->surfaces[ i ] ) {
+			if ( ti->surfaceNum == i ) {
 				return false;
 			}
 		}
