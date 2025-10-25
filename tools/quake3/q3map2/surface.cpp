@@ -760,6 +760,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 	ds->fogNum = FOG_INVALID;
 	ds->sampleSize = b.lightmapSampleSize;
 	ds->lightmapScale = b.lightmapScale;
+	ds->ambientColor = b.ambientColor;
 	ds->numVerts = w.size();
 	ds->verts = safe_calloc( ds->numVerts * sizeof( *ds->verts ) );
 
@@ -930,6 +931,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t *p, mesh_t 
 	ds->mapMesh = p;
 	ds->sampleSize = p->lightmapSampleSize;
 	ds->lightmapScale = p->lightmapScale;   /* ydnar */
+	ds->ambientColor = p->ambientColor;
 	ds->patchWidth = mesh->width;
 	ds->patchHeight = mesh->height;
 	ds->numVerts = ds->patchWidth * ds->patchHeight;
@@ -2864,8 +2866,16 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceMode
 			}
 
 			/* insert the model */
-			InsertModel( model.model.c_str(), nullptr, 0, transform, nullptr, ds->celShader, entity, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0, clipDepthGlobal );
-
+			InsertModel( model.model.c_str(), nullptr, 0, transform, nullptr, entity, 0, clipDepthGlobal,
+				EntityCompileParams{
+					.castShadows = ds->castShadows,
+					.recvShadows = ds->recvShadows,
+					.celShader = ds->celShader,
+					.lightmapSampleSize = 0,
+					.lightmapScale = ds->lightmapScale,
+					.shadeAngle = 0,
+					.ambientColor = ds->ambientColor
+				} );
 			/* return to sender */
 			return 1;
 		}

@@ -2353,10 +2353,10 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				/* set ambient */
 				else
 				{
-					luxel.value = ambientColor;
+					luxel.value = lm->ambientColor;
 					if ( deluxemap ) {
 						// use AT LEAST this amount of contribution from ambient for the deluxemap, fixes points that receive ZERO light
-						const float brightness = std::max( 0.00390625f, RGBTOGRAY( ambientColor ) * ( 1.0f / 255.0f ) );
+						const float brightness = std::max( 0.00390625f, RGBTOGRAY( lm->ambientColor ) * ( 1.0f / 255.0f ) );
 
 						lm->getSuperDeluxel( x, y ) = lm->getSuperNormal( x, y ) * brightness;
 					}
@@ -2809,9 +2809,9 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				filterColor = false;
 				filterDir = false;
 				if ( cluster < CLUSTER_NORMAL ||
-				     ( lm->splotchFix && ( luxel.value[ 0 ] <= ambientColor[ 0 ]
-				                        || luxel.value[ 1 ] <= ambientColor[ 1 ]
-				                        || luxel.value[ 2 ] <= ambientColor[ 2 ] ) ) ) {
+				     ( lm->splotchFix && ( luxel.value[ 0 ] <= lm->ambientColor[ 0 ]
+				                        || luxel.value[ 1 ] <= lm->ambientColor[ 1 ]
+				                        || luxel.value[ 2 ] <= lm->ambientColor[ 2 ] ) ) ) {
 					filterColor = true;
 				}
 
@@ -2846,7 +2846,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 
 						/* ignore unmapped/unlit luxels */
 						if ( lm->getSuperCluster( sx, sy ) < CLUSTER_NORMAL || luxel2.count == 0.0f ||
-						     ( lm->splotchFix && VectorCompare( luxel2.value, ambientColor ) ) ) {
+						     ( lm->splotchFix && VectorCompare( luxel2.value, lm->ambientColor ) ) ) {
 							continue;
 						}
 
@@ -2867,7 +2867,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				/* dark lightmap seams */
 				if ( dark ) {
 					if ( lightmapNum == 0 ) {
-						averageColor += ambientColor * 2;
+						averageColor += lm->ambientColor * 2;
 					}
 					samples += 2.0f;
 				}
@@ -3043,7 +3043,7 @@ void IlluminateVertexes( int num ){
 					}
 
 					/* trace */
-					LightingAtSample( &trace, ds->vertexStyles, colors );
+					LightingAtSample( &trace, ds->vertexStyles, colors, info->ambientColor );
 
 					/* store */
 					for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
@@ -3064,7 +3064,7 @@ void IlluminateVertexes( int num ){
 				const auto vector3_component_greater = []( const Vector3& greater, const Vector3& lesser ){
 					return greater[0] > lesser[0] || greater[1] > lesser[1] || greater[2] > lesser[2];
 				};
-				if ( !vector3_component_greater( getRadVertexLuxel( 0, ds->firstVert + i ), ambientColor ) ) {
+				if ( !vector3_component_greater( getRadVertexLuxel( 0, ds->firstVert + i ), info->ambientColor ) ) {
 					/* nudge the sample point around a bit */
 					for ( x = 0; x < 5; ++x )
 					{
@@ -3105,7 +3105,7 @@ void IlluminateVertexes( int num ){
 								}
 
 								/* trace */
-								LightingAtSample( &trace, ds->vertexStyles, colors );
+								LightingAtSample( &trace, ds->vertexStyles, colors, info->ambientColor );
 
 								/* store */
 								for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
@@ -3121,7 +3121,7 @@ void IlluminateVertexes( int num ){
 								}
 
 								/* bright enough? */
-								if ( vector3_component_greater( getRadVertexLuxel( 0, ds->firstVert + i ), ambientColor ) ) {
+								if ( vector3_component_greater( getRadVertexLuxel( 0, ds->firstVert + i ), info->ambientColor ) ) {
 									x = y = z = 1000;
 								}
 							}
@@ -3130,7 +3130,7 @@ void IlluminateVertexes( int num ){
 				}
 
 				/* add to average? */
-				if ( vector3_component_greater( getRadVertexLuxel( 0, ds->firstVert + i ), ambientColor ) ) {
+				if ( vector3_component_greater( getRadVertexLuxel( 0, ds->firstVert + i ), info->ambientColor ) ) {
 					numAvg++;
 					for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 					{
@@ -3150,7 +3150,7 @@ void IlluminateVertexes( int num ){
 		}
 		else
 		{
-			avgColors[ 0 ] = ambientColor;
+			avgColors[ 0 ] = info->ambientColor;
 		}
 
 		/* clean up and store vertex color */
@@ -3268,7 +3268,7 @@ void IlluminateVertexes( int num ){
 							}
 
 							/* testing: must be brigher than ambient color */
-							//%	if( luxel[ 0 ] <= ambientColor[ 0 ] || luxel[ 1 ] <= ambientColor[ 1 ] || luxel[ 2 ] <= ambientColor[ 2 ] )
+							//%	if( luxel[ 0 ] <= info->ambientColor[ 0 ] || luxel[ 1 ] <= info->ambientColor[ 1 ] || luxel[ 2 ] <= info->ambientColor[ 2 ] )
 							//%		continue;
 
 							/* add its distinctiveness to our own */
@@ -3283,7 +3283,7 @@ void IlluminateVertexes( int num ){
 					radVertLuxel *= ( 1.f / samples );
 				}
 				else{
-					radVertLuxel = ambientColor;
+					radVertLuxel = info->ambientColor;
 				}
 			}
 

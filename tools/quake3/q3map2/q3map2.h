@@ -720,6 +720,7 @@ struct brush_t
 	int lightmapSampleSize;                 /* jal : entity based _lightmapsamplesize */
 	float lightmapScale;
 	float shadeAngleDegrees;                /* jal : entity based _shadeangle */
+	Vector3 ambientColor;
 	MinMax eMinmax;
 	indexMap_t          *im;
 
@@ -767,12 +768,25 @@ struct parseMesh_t
 	/* ydnar: gs mods */
 	int lightmapSampleSize;                     /* jal : entity based _lightmapsamplesize */
 	float lightmapScale;
+	Vector3 ambientColor;
 	MinMax eMinmax;
 	indexMap_t          *im;
 
 	/* grouping */
 	float longestCurve;
 	int maxIterations;
+};
+
+
+struct EntityCompileParams
+{
+	int castShadows;
+	int recvShadows;
+	shaderInfo_t        *celShader;
+	int lightmapSampleSize;
+	float lightmapScale;
+	float shadeAngle;
+	Vector3 ambientColor;
 };
 
 
@@ -859,6 +873,9 @@ struct mapDrawSurface_t
 
 	/* jal: per-surface (per-entity, actually) shadeangle */
 	float shadeAngleDegrees;
+
+	/* per-surface (per-entity, actually) ambientColor */
+	Vector3 ambientColor;
 
 	/* ydnar: surface classification */
 	MinMax minmax;
@@ -1202,6 +1219,8 @@ struct rawLightmap_t
 
 	int sampleSize, actualSampleSize, axisNum;
 
+	Vector3 ambientColor;
+
 	/* vortex: per-surface floodlight */
 	float floodlightDirectionScale;
 	Vector3 floodlightRGB;
@@ -1322,6 +1341,7 @@ struct surfaceInfo_t
 	rawLightmap_t       *lm;
 	int parentSurfaceNum, childSurfaceNum;
 	int entityNum, castShadows, recvShadows, sampleSize, patchIterations;
+	Vector3 ambientColor;
 	float longestCurve;
 	Plane3f               *plane;
 	Vector3 axis;
@@ -1492,6 +1512,7 @@ inline int                  FindFloatPlane( const Vector3& normal, float dist, i
 }
 bool                        PlaneEqual( const plane_t& p, const Plane3f& plane );
 void                        AddBrushBevels();
+EntityCompileParams         ParseEntityCompileParams( const entity_t& e, const entity_t *eparent, bool worldShadowGroup );
 
 
 /* portals.c */
@@ -1568,7 +1589,8 @@ tree_t                      FaceBSP( facelist_t& list );
 
 /* model.c */
 void                        assimp_init();
-void                        InsertModel( const char *name, const char *skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, entity_t& entity, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth );
+void                        InsertModel( const char *name, const char *skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps,
+                                         entity_t& entity, int spawnFlags, float clipDepth, const EntityCompileParams& params );
 void                        AddTriangleModels( entity_t& eparent );
 
 
@@ -1612,6 +1634,7 @@ void                        EmitMetaStats(); // vortex: print meta statistics ev
 
 /* surface_extra.c */
 void                        SetDefaultSampleSize( int sampleSize );
+void                        SetDefaultAmbientColor( const Vector3& color );
 void                        SetSurfaceExtra( const mapDrawSurface_t& ds );
 void                        WriteSurfaceExtraFile( const char *path );
 void                        LoadSurfaceExtraFile( const char *path );
@@ -1631,7 +1654,7 @@ int                         VisMain( Args& args );
 /* light.c  */
 float                       PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, const winding_t& w );
 int                         LightContributionToSample( trace_t *trace );
-void                        LightingAtSample( trace_t * trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ] );
+void                        LightingAtSample( trace_t * trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ], const Vector3& ambientColor );
 int                         LightMain( Args& args );
 
 
@@ -2064,7 +2087,6 @@ inline std::vector<bspDrawVert_t> yDrawVerts;
 
 inline const int defaultLightSubdivide = 999;
 
-inline Vector3 ambientColor;
 inline Vector3 minLight, minVertexLight, minGridLight;
 inline float maxLight = 255.f;
 

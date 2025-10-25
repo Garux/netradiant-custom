@@ -1468,6 +1468,65 @@ static void LoadEntityIndexMap( entity_t& e ){
 		p->im = im;
 }
 
+EntityCompileParams ParseEntityCompileParams( const entity_t& e, const entity_t *eparent, bool worldShadowGroup ){
+	EntityCompileParams params;
+	const char *classname = e.classname();
+
+	/* worldspawn (and func_groups) default to cast/recv shadows in worldspawn group */
+	if ( worldShadowGroup ) { // or misc_model without non world "_target", "target"
+		//%	Sys_Printf( "World:  %d\n", e.mapEntityNum );
+		params.castShadows = WORLDSPAWN_CAST_SHADOWS;
+		params.recvShadows = WORLDSPAWN_RECV_SHADOWS;
+	}
+	else{    /* other entities don't cast any shadows, but recv worldspawn shadows */
+		//%	Sys_Printf( "Entity: %d\n", e.mapEntityNum );
+		params.castShadows = ENTITY_CAST_SHADOWS;
+		params.recvShadows = ENTITY_RECV_SHADOWS;
+	}
+
+	/* get explicit shadow flags */
+	GetEntityShadowFlags( &e, eparent, &params.castShadows, &params.recvShadows );
+
+	/* ydnar: get lightmap scaling value for this entity */
+	params.lightmapScale = std::max( 0.f, e.floatForKey( "lightmapscale", "_lightmapscale", "_ls" ) );
+	if ( params.lightmapScale != 0 )
+		Sys_Printf( "Entity %d (%s) has lightmap scale of %.4f\n", e.mapEntityNum, classname, params.lightmapScale );
+
+	/* ydnar: get cel shader :) for this entity */
+	if( const char *value; e.read_keyvalue( value, "_celshader" ) ||
+	           entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
+		params.celShader = &ShaderInfoForShader( String64( "textures/", value ) );
+		Sys_Printf( "Entity %d (%s) has cel shader %s\n", e.mapEntityNum, classname, params.celShader->shader.c_str() );
+	}
+	else{
+		params.celShader = globalCelShader.empty() ? nullptr : &ShaderInfoForShader( globalCelShader );
+	}
+
+	/* jal : entity based _shadeangle */
+	params.shadeAngle = std::max( 0.f, e.floatForKey( "_shadeangle",
+	                                      "_smoothnormals", "_sn", "_sa", "_smooth" ) ); /* vortex' aliases */
+	if ( params.shadeAngle != 0 )
+		Sys_Printf( "Entity %d (%s) has shading angle of %.4f\n", e.mapEntityNum, classname, params.shadeAngle );
+
+	/* jal : entity based _samplesize */
+	params.lightmapSampleSize = std::max( 0, e.intForKey( "_lightmapsamplesize", "_samplesize", "_ss" ) );
+	if ( params.lightmapSampleSize != 0 )
+		Sys_Printf( "Entity %d (%s) has lightmap sample size of %d\n", e.mapEntityNum, classname, params.lightmapSampleSize );
+
+	/* ambient */
+	params.ambientColor = e.vectorForKey( "_color" );
+	if ( params.ambientColor == g_vector3_identity )
+		params.ambientColor.set( 1 );
+	else
+		ColorFromSRGB( params.ambientColor );
+
+	params.ambientColor *= e.floatForKey( "_ambient", "ambient" );
+	if ( params.ambientColor != g_vector3_identity )
+		Sys_Printf( "Entity %d (%s) has ambient of %f %f %f\n", e.mapEntityNum, classname,
+		            params.ambientColor[0], params.ambientColor[1], params.ambientColor[2] );
+
+	return params;
+}
 
 
 
@@ -1563,70 +1622,33 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 	/* ydnar: determine if this is a func_group */
 	const bool funcGroup = striEqual( "func_group", classname );
 
-	/* worldspawn (and func_groups) default to cast/recv shadows in worldspawn group */
-	int castShadows, recvShadows;
-	if ( funcGroup || mapEnt.mapEntityNum == 0 ) {
-		//%	Sys_Printf( "World:  %d\n", mapEnt.mapEntityNum );
-		castShadows = WORLDSPAWN_CAST_SHADOWS;
-		recvShadows = WORLDSPAWN_RECV_SHADOWS;
-	}
-	else{    /* other entities don't cast any shadows, but recv worldspawn shadows */
-		//%	Sys_Printf( "Entity: %d\n", mapEnt.mapEntityNum );
-		castShadows = ENTITY_CAST_SHADOWS;
-		recvShadows = ENTITY_RECV_SHADOWS;
-	}
+	const EntityCompileParams params = ParseEntityCompileParams( mapEnt, nullptr, funcGroup || mapEnt.mapEntityNum == 0 );
 
-	/* get explicit shadow flags */
-	GetEntityShadowFlags( &mapEnt, nullptr, &castShadows, &recvShadows );
-
-	/* ydnar: get lightmap scaling value for this entity */
-	const float lightmapScale = std::max( 0.f, mapEnt.floatForKey( "lightmapscale", "_lightmapscale", "_ls" ) );
-	if ( lightmapScale != 0 )
-		Sys_Printf( "Entity %d (%s) has lightmap scale of %.4f\n", mapEnt.mapEntityNum, classname, lightmapScale );
-
-	/* ydnar: get cel shader :) for this entity */
-	shaderInfo_t *celShader;
-	const char *value;
-	if( mapEnt.read_keyvalue( value, "_celshader" ) ||
-	    entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
-		celShader = &ShaderInfoForShader( String64( "textures/", value ) );
-		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt.mapEntityNum, classname, celShader->shader.c_str() );
-	}
-	else{
-		celShader = globalCelShader.empty() ? nullptr : &ShaderInfoForShader( globalCelShader );
-	}
-
-	/* jal : entity based _shadeangle */
-	const float shadeAngle = std::max( 0.f, mapEnt.floatForKey( "_shadeangle",
-	                                      "_smoothnormals", "_sn", "_sa", "_smooth" ) ); /* vortex' aliases */
-	if ( shadeAngle != 0 )
-		Sys_Printf( "Entity %d (%s) has shading angle of %.4f\n", mapEnt.mapEntityNum, classname, shadeAngle );
-
-	/* jal : entity based _samplesize */
-	const int lightmapSampleSize = std::max( 0, mapEnt.intForKey( "_lightmapsamplesize", "_samplesize", "_ss" ) );
-	if ( lightmapSampleSize != 0 )
-		Sys_Printf( "Entity %d (%s) has lightmap sample size of %d\n", mapEnt.mapEntityNum, classname, lightmapSampleSize );
+	if( mapEnt.mapEntityNum == 0 )
+		SetDefaultAmbientColor( params.ambientColor );
 
 	/* attach stuff to everything in the entity */
 	for ( brush_t& brush : mapEnt.brushes )
 	{
 		brush.entityNum = mapEnt.mapEntityNum;
-		brush.castShadows = castShadows;
-		brush.recvShadows = recvShadows;
-		brush.lightmapSampleSize = lightmapSampleSize;
-		brush.lightmapScale = lightmapScale;
-		brush.celShader = celShader;
-		brush.shadeAngleDegrees = shadeAngle;
+		brush.castShadows        = params.castShadows;
+		brush.recvShadows        = params.recvShadows;
+		brush.lightmapSampleSize = params.lightmapSampleSize;
+		brush.lightmapScale      = params.lightmapScale;
+		brush.celShader          = params.celShader;
+		brush.shadeAngleDegrees  = params.shadeAngle;
+		brush.ambientColor       = params.ambientColor;
 	}
 
 	for ( parseMesh_t *patch = mapEnt.patches; patch != nullptr; patch = patch->next )
 	{
 		patch->entityNum = mapEnt.mapEntityNum;
-		patch->castShadows = castShadows;
-		patch->recvShadows = recvShadows;
-		patch->lightmapSampleSize = lightmapSampleSize;
-		patch->lightmapScale = lightmapScale;
-		patch->celShader = celShader;
+		patch->castShadows        = params.castShadows;
+		patch->recvShadows        = params.recvShadows;
+		patch->lightmapSampleSize = params.lightmapSampleSize;
+		patch->lightmapScale      = params.lightmapScale;
+		patch->celShader          = params.celShader;
+		patch->ambientColor       = params.ambientColor;
 	}
 
 	/* ydnar: gs mods: set entity bounds */

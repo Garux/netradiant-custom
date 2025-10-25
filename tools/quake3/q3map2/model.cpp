@@ -982,7 +982,8 @@ default_CLIPMODEL:
    adds a picomodel into the bsp
  */
 
-void InsertModel( const char *name, const char *skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, entity_t& entity, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth ){
+void InsertModel( const char *name, const char *skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps,
+                  entity_t& entity, int spawnFlags, float clipDepth, const EntityCompileParams& params ){
 	int i, j;
 	const Matrix4 nTransform( matrix4_for_normal_transform( transform ) );
 	const bool transform_lefthanded = MATRIX4_LEFTHANDED == matrix4_handedness( transform );
@@ -1057,16 +1058,6 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 	   uncomment the following line with old m4x4_t (non 1.3/spog_branch) code */
 	//%	m4x4_transpose( transform );
 
-	/* fix bogus lightmap scale */
-	if ( lightmapScale <= 0.0f ) {
-		lightmapScale = 1.0f;
-	}
-
-	/* fix bogus shade angle */
-	if ( shadeAngle <= 0.0f ) {
-		shadeAngle = 0.0f;
-	}
-
 	/* each surface on the model will become a new map drawsurface */
 	//%	Sys_FPrintf( SYS_VRB, "Model %s has %d surfaces\n", name, numSurfaces );
 	for ( const auto& surface : model->m_meshes )
@@ -1122,8 +1113,10 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		/* allocate a surface (ydnar: gs mods) */
 		ds = AllocDrawSurface( ESurfaceType::Triangles );
 		ds->entityNum = entity.mapEntityNum;
-		ds->castShadows = castShadows;
-		ds->recvShadows = recvShadows;
+		ds->castShadows = params.castShadows;
+		ds->recvShadows = params.recvShadows;
+		ds->celShader = params.celShader;
+		ds->ambientColor = params.ambientColor;
 
 		/* set shader */
 		ds->shaderInfo = &si;
@@ -1134,23 +1127,23 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		}
 
 		/* fix the surface's normals (jal: conditioned by shader info) */
-		if ( !( spawnFlags & eNoSmooth ) && ( shadeAngle == 0.0f || ds->type != ESurfaceType::ForcedMeta ) ) {
+		if ( !( spawnFlags & eNoSmooth ) && ( params.shadeAngle == 0.0f || ds->type != ESurfaceType::ForcedMeta ) ) {
 			// PicoFixSurfaceNormals( surface );
 		}
 
 		/* set sample size */
-		if ( lightmapSampleSize > 0.0f ) {
-			ds->sampleSize = lightmapSampleSize;
+		if ( params.lightmapSampleSize > 0.0f ) {
+			ds->sampleSize = params.lightmapSampleSize;
 		}
 
 		/* set lightmap scale */
-		if ( lightmapScale > 0.0f ) {
-			ds->lightmapScale = lightmapScale;
+		if ( params.lightmapScale > 0.0f ) {
+			ds->lightmapScale = params.lightmapScale;
 		}
 
 		/* set shading angle */
-		if ( shadeAngle > 0.0f ) {
-			ds->shadeAngleDegrees = shadeAngle;
+		if ( params.shadeAngle > 0.0f ) {
+			ds->shadeAngleDegrees = params.shadeAngle;
 		}
 
 		/* set particulars */
@@ -1229,9 +1222,6 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 			}
 		}
 
-		/* set cel shader */
-		ds->celShader = celShader;
-
 		ClipModel( spawnFlags, clipDepth, si, ds, name, entity );
 	}
 }
@@ -1283,19 +1273,6 @@ void AddTriangleModels( entity_t& eparent ){
 
 		/* get model frame */
 		const int frame = e.intForKey( "_frame", "frame" );
-
-		int castShadows, recvShadows;
-		if ( &eparent == &entities[0] ) {    /* worldspawn (and func_groups) default to cast/recv shadows in worldspawn group */
-			castShadows = WORLDSPAWN_CAST_SHADOWS;
-			recvShadows = WORLDSPAWN_RECV_SHADOWS;
-		}
-		else{                   /* other entities don't cast any shadows, but recv worldspawn shadows */
-			castShadows = ENTITY_CAST_SHADOWS;
-			recvShadows = ENTITY_RECV_SHADOWS;
-		}
-
-		/* get explicit shadow flags */
-		GetEntityShadowFlags( &e, &eparent, &castShadows, &recvShadows );
 
 		/* get spawnflags */
 		const int spawnFlags = e.intForKey( "spawnflags" );
@@ -1357,32 +1334,6 @@ void AddTriangleModels( entity_t& eparent ){
 			}
 		}
 
-		/* ydnar: cel shader support */
-		shaderInfo_t *celShader;
-		if( const char *value; e.read_keyvalue( value, "_celshader" ) ||
-		    entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
-			celShader = &ShaderInfoForShader( String64( "textures/", value ) );
-		}
-		else{
-			celShader = globalCelShader.empty() ? nullptr : &ShaderInfoForShader( globalCelShader );
-		}
-
-		/* jal : entity based _samplesize */
-		const int lightmapSampleSize = std::max( 0, e.intForKey( "_lightmapsamplesize", "_samplesize", "_ss" ) );
-		if ( lightmapSampleSize != 0 )
-			Sys_Printf( "misc_model has lightmap sample size of %.d\n", lightmapSampleSize );
-
-		/* get lightmap scale */
-		const float lightmapScale = std::max( 0.f, e.floatForKey( "lightmapscale", "_lightmapscale", "_ls" ) );
-		if ( lightmapScale != 0 )
-			Sys_Printf( "misc_model has lightmap scale of %.4f\n", lightmapScale );
-
-		/* jal : entity based _shadeangle */
-		const float shadeAngle = std::max( 0.f, e.floatForKey( "_shadeangle",
-		                                        "_smoothnormals", "_sn", "_sa", "_smooth" ) ); /* vortex' aliases */
-		if ( shadeAngle != 0 )
-			Sys_Printf( "misc_model has shading angle of %.4f\n", shadeAngle );
-
 		const char *skin = nullptr;
 		e.read_keyvalue( skin, "_skin", "skin" );
 
@@ -1390,8 +1341,9 @@ void AddTriangleModels( entity_t& eparent ){
 		if ( e.read_keyvalue( clipDepth, "_clipdepth" ) )
 			Sys_Printf( "misc_model %s has autoclip depth of %.3f\n", model, clipDepth );
 
+		const EntityCompileParams params = ParseEntityCompileParams( e, &eparent, &eparent == &entities[ 0 ] );
 
 		/* insert the model */
-		InsertModel( model, skin, frame, transform, &remaps, celShader, eparent, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle, clipDepth );
+		InsertModel( model, skin, frame, transform, &remaps, eparent, spawnFlags, clipDepth, params );
 	}
 }

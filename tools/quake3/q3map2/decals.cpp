@@ -552,6 +552,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	ds2->fogNum = ds->fogNum;   /* why was this -1? */
 	ds2->lightmapScale = ds->lightmapScale;
 	ds2->shadeAngleDegrees = ds->shadeAngleDegrees;
+	ds2->ambientColor = ds->ambientColor;
 	ds2->numVerts = w.size();
 	ds2->verts = safe_calloc( ds2->numVerts * sizeof( *ds2->verts ) );
 

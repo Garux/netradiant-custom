@@ -73,6 +73,7 @@ struct metaTriangle_t
 	const side_t        *side;
 	int entityNum, surfaceNum, planeNum, fogNum, sampleSize, castShadows, recvShadows;
 	float shadeAngleDegrees;
+	Vector3 ambientColor;
 	Plane3f plane;
 	Vector3 lightmapAxis;
 	std::array<metaVertex_t*, 3> m_vertices;
@@ -174,6 +175,15 @@ struct CompareMetaTriangles
 		else if ( a.sampleSize != b.sampleSize ) {
 			return a.sampleSize < b.sampleSize;
 		}
+		else if ( a.ambientColor[0] != b.ambientColor[0] ) { // may be different inside one entityNum for attached misc_models
+			return a.ambientColor[0] < b.ambientColor[0];
+		}
+		else if ( a.ambientColor[1] != b.ambientColor[1] ) {
+			return a.ambientColor[1] < b.ambientColor[1];
+		}
+		else if ( a.ambientColor[2] != b.ambientColor[2] ) {
+			return a.ambientColor[2] < b.ambientColor[2];
+		}
 
 		/* then position in world */
 		if constexpr ( sort_spatially ){
@@ -190,7 +200,8 @@ struct CompareMetaTriangles
 		&& ( a.entityNum == b.entityNum )
 		&& ( a.castShadows == b.castShadows )
 		&& ( a.recvShadows == b.recvShadows )
-		&& ( a.sampleSize == b.sampleSize );
+		&& ( a.sampleSize == b.sampleSize )
+		&& ( a.ambientColor == b.ambientColor );
 	}
 };
 
@@ -319,6 +330,7 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
 			src.fogNum = ds->fogNum;
 			src.sampleSize = ds->sampleSize;
 			src.shadeAngleDegrees = ds->shadeAngleDegrees;
+			src.ambientColor = ds->ambientColor;
 			src.lightmapAxis = ds->lightmapAxis;
 
 			metaTriangle_insert( src, { ds->verts[ ds->indexes[ i ] ],
@@ -1542,6 +1554,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 		ds->fogNum = seed.fogNum;
 		ds->sampleSize = seed.sampleSize;
 		ds->shadeAngleDegrees = seed.shadeAngleDegrees;
+		ds->ambientColor = seed.ambientColor;
 		ds->verts = verts;
 		ds->indexes = indexes;
 		ds->lightmapAxis = seed.lightmapAxis;

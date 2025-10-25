@@ -592,6 +592,7 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 
 		/* match identical attributes */
 		if ( info->sampleSize != lm->sampleSize ||
+		     info->ambientColor != lm->ambientColor || // may be different inside one entityNum for attached misc_models
 		     info->entityNum != lm->entityNum ||
 		     info->recvShadows != lm->recvShadows ||
 		     info->si->lmCustomWidth != lm->customWidth ||
@@ -999,6 +1000,7 @@ void SetupSurfaceLightmaps(){
 				info->castShadows = se.castShadows;
 				info->recvShadows = se.recvShadows;
 				info->sampleSize = se.sampleSize;
+				info->ambientColor = se.ambientColor;
 				info->longestCurve = se.longestCurve;
 				info->patchIterations = IterationsForCurve( info->longestCurve, patchSubdivisions );
 				info->axis = se.lightmapAxis;
@@ -1103,6 +1105,7 @@ void SetupSurfaceLightmaps(){
 		lm->recvShadows = info->recvShadows;
 		lm->brightness = info->si->lmBrightness;
 		lm->filterRadius = info->si->lmFilterRadius;
+		lm->ambientColor = info->ambientColor;
 		lm->floodlightRGB = info->si->floodlightRGB;
 		lm->floodlightDistance = info->si->floodlightDistance;
 		lm->floodlightIntensity = info->si->floodlightIntensity;
@@ -2490,7 +2493,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					/* if any samples were mapped in any way, store ambient color */
 					else if ( mappedSamples > 0 ) {
 						if ( lightmapNum == 0 ) {
-							luxel.value = ambientColor;
+							luxel.value = lm->ambientColor;
 						}
 						else{
 							luxel.value.set( 0 );

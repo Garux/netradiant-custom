@@ -54,6 +54,10 @@ void SetDefaultSampleSize( int sampleSize ){
 	seDefault.sampleSize = sampleSize;
 }
 
+void SetDefaultAmbientColor( const Vector3& color ){
+	seDefault.ambientColor = color;
+}
+
 
 
 /*
@@ -73,6 +77,7 @@ void SetSurfaceExtra( const mapDrawSurface_t& ds ){
 	se.castShadows = ds.castShadows;
 	se.recvShadows = ds.recvShadows;
 	se.sampleSize = ds.sampleSize;
+	se.ambientColor = ds.ambientColor;
 	se.longestCurve = ds.longestCurve;
 	se.lightmapAxis = ds.lightmapAxis;
 
@@ -173,6 +178,10 @@ void WriteSurfaceExtraFile( const char *path ){
 		/* lightmap sample size */
 		if ( se->sampleSize != seDefault.sampleSize || se == &seDefault ) {
 			fprintf( sf, "\tsampleSize %d\n", se->sampleSize );
+		}
+
+		if ( se->ambientColor != seDefault.ambientColor || se == &seDefault ) {
+			fprintf( sf, "\tambientColor ( %f %f %f )\n", se->ambientColor[0], se->ambientColor[1], se->ambientColor[2] );
 		}
 
 		/* longest curve */
@@ -277,6 +286,10 @@ void LoadSurfaceExtraFile( const char *path ){
 			else if ( striEqual( token, "sampleSize" ) ) {
 				GetToken( false );
 				se->sampleSize = atoi( token );
+			}
+
+			else if ( striEqual( token, "ambientColor" ) ) {
+				Parse1DMatrix( 3, se->ambientColor.data() );
 			}
 
 			/* longest curve */

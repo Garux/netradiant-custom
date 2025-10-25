@@ -251,7 +251,16 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 		const int oldNumMapDrawSurfs = numMapDrawSurfs;
 
 		/* add the model to the bsp */
-		InsertModel( foliage.model.c_str(), nullptr, 0, matrix4_scale_for_vec3( Vector3( foliage.scale ) ), nullptr, nullptr, entity, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, clipDepthGlobal );
+		InsertModel( foliage.model.c_str(), nullptr, 0, matrix4_scale_for_vec3( Vector3( foliage.scale ) ), nullptr, entity, 0, clipDepthGlobal,
+			EntityCompileParams {
+				.castShadows = src->castShadows,
+				.recvShadows = src->recvShadows,
+				.celShader = nullptr,
+				.lightmapSampleSize = 0,
+				.lightmapScale = src->lightmapScale,
+				.shadeAngle = 0,
+				.ambientColor = src->ambientColor
+			} );
 
 		/* walk each new surface */
 		for ( int i = oldNumMapDrawSurfs; i < numMapDrawSurfs; ++i )

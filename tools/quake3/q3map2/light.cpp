@@ -1186,7 +1186,7 @@ int LightContributionToSample( trace_t *trace ){
    determines the amount of light reaching a sample (luxel or vertex)
  */
 
-void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ] ){
+void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ], const Vector3& ambientColor ){
 	int i, lightmapNum;
 
 
@@ -1200,10 +1200,7 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&c
 		return;
 	}
 
-	/* ydnar: don't bounce ambient all the time */
-	if ( !bouncing ) {
-		colors[ 0 ] = ambientColor;
-	}
+	colors[ 0 ] = ambientColor;
 
 	/* ydnar: trace to all the list of lights pre-stored in tw */
 	for ( i = 0; i < trace->numLights && trace->lights[ i ] != nullptr; ++i )
@@ -1728,7 +1725,7 @@ static void TraceGrid( int num ){
    calculates the size of the lightgrid and allocates memory
  */
 
-static void SetupGrid(){
+static void SetupGrid( const Vector3& ambientColor ){
 	/* don't do this if not grid lighting */
 	if ( noGridLighting ) {
 		return;
@@ -1958,7 +1955,7 @@ static void LightWorld( bool fastAllocate, bool bounceStore ){
 		ColorFromSRGB( color );
 
 	/* ambient */
-	ambientColor = color * entities[ 0 ].floatForKey( "_ambient", "ambient" );
+	const Vector3 ambientColor = color * entities[ 0 ].floatForKey( "_ambient", "ambient" );
 
 	/* minvertexlight */
 	if ( ( minVertex = entities[ 0 ].read_keyvalue( f, "_minvertexlight" ) ) ) {
@@ -1986,7 +1983,7 @@ static void LightWorld( bool fastAllocate, bool bounceStore ){
 
 	/* determine the number of grid points */
 	Sys_Printf( "--- SetupGrid ---\n" );
-	SetupGrid(); // uses ambientColor read above
+	SetupGrid( ambientColor );
 
 	/* create world lights */
 	Sys_FPrintf( SYS_VRB, "--- CreateLights ---\n" );
@@ -2075,7 +2072,11 @@ static void LightWorld( bool fastAllocate, bool bounceStore ){
 
 		/* flag bouncing */
 		bouncing = true;
-		ambientColor.set( 0 );
+		/* ydnar: don't bounce ambient all the time */
+		for( rawLightmap_t& lm : Span( rawLightmaps, numRawLightmaps ) )
+			lm.ambientColor.set( 0 );
+		for( surfaceInfo_t& info : Span( surfaceInfos, bspDrawSurfaces.size() ) )
+			info.ambientColor.set( 0 );
 		floodlighty = false;
 
 		/* delete any existing lights, freeing up memory for the next bounce */
