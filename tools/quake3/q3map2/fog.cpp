@@ -43,12 +43,12 @@ static int numFogPatchFragments;
    converts a patch drawsurface to a mesh_t
  */
 
-static mesh_t *DrawSurfToMesh( mapDrawSurface_t *ds ){
+static mesh_t *DrawSurfToMesh( const mapDrawSurface_t& ds ){
 	mesh_t *m = safe_malloc( sizeof( *m ) );
-	m->width = ds->patchWidth;
-	m->height = ds->patchHeight;
+	m->width = ds.patchWidth;
+	m->height = ds.patchHeight;
 	m->verts = safe_malloc( sizeof( m->verts[ 0 ] ) * m->width * m->height );
-	memcpy( m->verts, ds->verts, sizeof( m->verts[ 0 ] ) * m->width * m->height );
+	memcpy( m->verts, ds.verts, sizeof( m->verts[ 0 ] ) * m->width * m->height );
 
 	return m;
 }
@@ -241,7 +241,7 @@ static void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, 
    chops a patch up by a fog brush
  */
 
-static bool ChopPatchSurfaceByBrush( mapDrawSurface_t *ds, const brush_t *b ){
+static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 	int i, j;
 	mesh_t      *outside[MAX_BRUSH_SIDES];
 	int numOutside;
@@ -285,13 +285,13 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t *ds, const brush_t *b ){
 		InvertMesh( outside[ i ] );
 
 		/* ydnar: do this the hacky right way */
-		mapDrawSurface_t *newds = AllocDrawSurface( ESurfaceType::Patch );
-		memcpy( newds, ds, sizeof( *ds ) );
-		newds->patchWidth = outside[ i ]->width;
-		newds->patchHeight = outside[ i ]->height;
-		newds->numVerts = outside[ i ]->width * outside[ i ]->height;
-		newds->verts = safe_malloc( newds->numVerts * sizeof( *newds->verts ) );
-		memcpy( newds->verts, outside[ i ]->verts, newds->numVerts * sizeof( *newds->verts ) );
+		mapDrawSurface_t& newds = AllocDrawSurface( ESurfaceType::Patch );
+		newds = ds;
+		newds.patchWidth = outside[ i ]->width;
+		newds.patchHeight = outside[ i ]->height;
+		newds.numVerts = outside[ i ]->width * outside[ i ]->height;
+		newds.verts = safe_malloc( newds.numVerts * sizeof( *newds.verts ) );
+		memcpy( newds.verts, outside[ i ]->verts, newds.numVerts * sizeof( *newds.verts ) );
 
 		/* free the source mesh */
 		FreeMesh( outside[ i ] );
@@ -305,12 +305,12 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t *ds, const brush_t *b ){
 		InvertMesh( m );
 
 		/* replace ds with m */
-		ds->patchWidth = m->width;
-		ds->patchHeight = m->height;
-		ds->numVerts = m->width * m->height;
-		free( ds->verts );
-		ds->verts = safe_malloc( ds->numVerts * sizeof( *ds->verts ) );
-		memcpy( ds->verts, m->verts, ds->numVerts * sizeof( *ds->verts ) );
+		ds.patchWidth = m->width;
+		ds.patchHeight = m->height;
+		ds.numVerts = m->width * m->height;
+		free( ds.verts );
+		ds.verts = safe_malloc( ds.numVerts * sizeof( *ds.verts ) );
+		memcpy( ds.verts, m->verts, ds.numVerts * sizeof( *ds.verts ) );
 	}
 
 	/* free the source mesh and return */
@@ -325,22 +325,22 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t *ds, const brush_t *b ){
    creates a winding from a surface's verts
  */
 
-winding_t WindingFromDrawSurf( const mapDrawSurface_t *ds ){
+winding_t WindingFromDrawSurf( const mapDrawSurface_t& ds ){
 	// we use the first point of the surface, maybe something more clever would be useful
 	// (actually send the whole draw surface would be cool?)
-	if ( ds->numVerts >= MAX_POINTS_ON_WINDING ) {
-		const int max = std::min( ds->numVerts, 256 );
+	if ( ds.numVerts >= MAX_POINTS_ON_WINDING ) {
+		const int max = std::min( ds.numVerts, 256 );
 		Vector3 p[256];
 
 		for ( int i = 0; i < max; ++i ) {
-			p[i] = ds->verts[i].xyz;
+			p[i] = ds.verts[i].xyz;
 		}
 
 		xml_Winding( "WindingFromDrawSurf failed: MAX_POINTS_ON_WINDING exceeded", p, max, true );
 	}
 
-	winding_t w = AllocWinding( ds->numVerts );
-	for ( const bspDrawVert_t& vert : Span( ds->verts, ds->numVerts ) ) {
+	winding_t w = AllocWinding( ds.numVerts );
+	for ( const bspDrawVert_t& vert : Span( ds.verts, ds.numVerts ) ) {
 		w.push_back( vert.xyz );
 	}
 	return w;
@@ -353,13 +353,13 @@ winding_t WindingFromDrawSurf( const mapDrawSurface_t *ds ){
    chops up a face drawsurface by a fog brush, with a potential fragment left inside
  */
 
-static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t *ds, const brush_t *b ){
+static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t& ds, const brush_t *b ){
 	std::list<winding_t> outside;
 	mapDrawSurface_t    *newds;
 
 
 	/* dummy check */
-	if ( ds->sideRef == nullptr || ds->sideRef->side == nullptr ) {
+	if ( ds.sideRef == nullptr || ds.sideRef->side == nullptr ) {
 		return false;
 	}
 
@@ -373,12 +373,12 @@ static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t *ds, con
 		const plane_t& plane = mapplanes[ side.planenum ];
 
 		/* handle coplanar outfacing (don't fog) */
-		if ( ds->sideRef->side->planenum == side.planenum ) {
+		if ( ds.sideRef->side->planenum == side.planenum ) {
 			return false;
 		}
 
 		/* handle coplanar infacing (keep inside) */
-		if ( ( ds->sideRef->side->planenum ^ 1 ) == side.planenum ) {
+		if ( ( ds.sideRef->side->planenum ^ 1 ) == side.planenum ) {
 			continue;
 		}
 
@@ -404,11 +404,11 @@ static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t *ds, con
 
 	/* all of outside fragments become separate drawsurfs */
 	numFogFragments += outside.size();
-	const side_t *s = ds->sideRef->side;
+	const side_t *s = ds.sideRef->side;
 	for ( const winding_t& wi : outside )
 	{
-		newds = DrawSurfaceForSide( e, *ds->mapBrush, *s, wi );
-		newds->fogNum = ds->fogNum;
+		newds = DrawSurfaceForSide( e, *ds.mapBrush, *s, wi );
+		newds->fogNum = ds.fogNum;
 	}
 
 	/* ydnar: the old code neglected to snap to 0.125 for the fragment
@@ -416,14 +416,14 @@ static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t *ds, con
 	          the right thing and uses the original surface's brush side */
 
 	/* build a drawsurf for it */
-	newds = DrawSurfaceForSide( e, *ds->mapBrush, *s, w );
+	newds = DrawSurfaceForSide( e, *ds.mapBrush, *s, w );
 	if ( newds == nullptr ) {
 		return false;
 	}
 
 	/* copy new to original */
 	ClearSurface( ds );
-	memcpy( ds, newds, sizeof( mapDrawSurface_t ) );
+	ds = *newds;
 
 	/* didn't really add a new drawsurface... :) */
 	numMapDrawSurfs--;
@@ -462,17 +462,17 @@ void FogDrawSurfaces( const entity_t& e ){
 		for ( int i = 0; i < numBaseDrawSurfs; ++i )
 		{
 			/* get the drawsurface */
-			mapDrawSurface_t *ds = &mapDrawSurfs[ i ];
+			mapDrawSurface_t& ds = mapDrawSurfs[ i ];
 
 			/* no fog? */
-			if ( ds->shaderInfo->noFog ) {
+			if ( ds.shaderInfo->noFog ) {
 				continue;
 			}
 
 			/* global fog doesn't have a brush */
 			if ( fog.brush == nullptr ) {
 				/* don't re-fog already fogged surfaces */
-				if ( ds->fogNum > FOG_INVALID ) {
+				if ( ds.fogNum > FOG_INVALID ) {
 					continue;
 				}
 				fogged = 1;
@@ -481,7 +481,7 @@ void FogDrawSurfaces( const entity_t& e ){
 			{
 				/* find drawsurface bounds */
 				MinMax minmax;
-				for ( const bspDrawVert_t& vert : Span( ds->verts, ds->numVerts ) )
+				for ( const bspDrawVert_t& vert : Span( ds.verts, ds.numVerts ) )
 					minmax.extend( vert.xyz );
 
 				/* check against the fog brush */
@@ -490,7 +490,7 @@ void FogDrawSurfaces( const entity_t& e ){
 				}
 
 				/* ydnar: gs mods: handle the various types of surfaces */
-				switch ( ds->type )
+				switch ( ds.type )
 				{
 				/* handle brush faces */
 				case ESurfaceType::Face:
@@ -519,7 +519,7 @@ void FogDrawSurfaces( const entity_t& e ){
 			/* is this surface fogged? */
 			if ( fogged ) {
 				numFogged += fogged;
-				ds->fogNum = fogNum;
+				ds.fogNum = fogNum;
 			}
 		}
 	}

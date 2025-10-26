@@ -45,23 +45,23 @@
    runs the fur processing algorithm on a map drawsurface
  */
 
-void Fur( mapDrawSurface_t *ds ){
+void Fur( mapDrawSurface_t& ds ){
 	/* dummy check */
-	if ( ds == nullptr || ds->fur || ds->shaderInfo->furNumLayers < 1 ) {
+	if ( ds.fur || ds.shaderInfo->furNumLayers < 1 ) {
 		return;
 	}
 
 	/* get basic info */
-	const int numLayers = ds->shaderInfo->furNumLayers;
-	const float offset = ds->shaderInfo->furOffset;
-	const float fade = ds->shaderInfo->furFade * 255.0f;
+	const int numLayers = ds.shaderInfo->furNumLayers;
+	const float offset = ds.shaderInfo->furOffset;
+	const float fade = ds.shaderInfo->furFade * 255.0f;
 
 	/* debug code */
 	//%	Sys_FPrintf( SYS_VRB, "Fur():  layers: %d  offset: %f   fade: %f  %s\n",
-	//%		numLayers, offset, fade, ds->shaderInfo->shader );
+	//%		numLayers, offset, fade, ds.shaderInfo->shader );
 
 	/* initial offset */
-	for ( bspDrawVert_t& dv : Span( ds->verts, ds->numVerts ) )
+	for ( bspDrawVert_t& dv : Span( ds.verts, ds.numVerts ) )
 	{
 		/* offset is scaled by original vertex alpha */
 		const float a = dv.color[ 0 ].alpha() / 255.0;
@@ -74,7 +74,7 @@ void Fur( mapDrawSurface_t *ds ){
 	for ( int i = 1; i < numLayers; ++i )
 	{
 		/* clone the surface */
-		mapDrawSurface_t *fur = CloneSurface( ds, ds->shaderInfo );
+		mapDrawSurface_t *fur = CloneSurface( ds, ds.shaderInfo );
 		if ( fur == nullptr ) {
 			return;
 		}
@@ -86,7 +86,7 @@ void Fur( mapDrawSurface_t *ds ){
 		for ( int j = 0; j < fur->numVerts; ++j )
 		{
 			/* offset is scaled by original vertex alpha */
-			const float a = ds->verts[ j ].color[ 0 ].alpha() / 255.0;
+			const float a = ds.verts[ j ].color[ 0 ].alpha() / 255.0;
 
 			/* get fur vert */
 			bspDrawVert_t& dv = fur->verts[ j ];

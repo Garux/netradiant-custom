@@ -573,7 +573,7 @@ void FixTJunctions( const entity_t& ent ){
 			FixSurfaceJunctions( ds );
 			if ( !FixBrokenSurface( ds ) ) {
 				c_broken++;
-				ClearSurface( &ds );
+				ClearSurface( ds );
 			}
 			break;
 

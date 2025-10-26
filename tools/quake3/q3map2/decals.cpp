@@ -491,7 +491,7 @@ void ProcessDecals(){
    projects a decal onto a winding
  */
 
-static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds, winding_t& w ){
+static void ProjectDecalOntoWinding( decalProjector_t& dp, const mapDrawSurface_t& ds, winding_t& w ){
 	/* dummy check */
 	if ( w.size() < 3 ) {
 		return;
@@ -508,15 +508,15 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	}
 
 	/* backface check */
-	if ( vector3_dot( dp->planes[ 0 ].normal(), plane.normal() ) < -0.0001f ) {
+	if ( vector3_dot( dp.planes[ 0 ].normal(), plane.normal() ) < -0.0001f ) {
 		return;
 	}
 
 	/* walk list of planes */
-	for ( int i = 0; i < dp->numPlanes; ++i )
+	for ( int i = 0; i < dp.numPlanes; ++i )
 	{
 		/* chop winding by the plane */
-		auto [front, back] = ClipWindingEpsilonStrict( w, dp->planes[ i ], 0.0625f ); /* strict, if identical plane we don't want to keep it */
+		auto [front, back] = ClipWindingEpsilonStrict( w, dp.planes[ i ], 0.0625f ); /* strict, if identical plane we don't want to keep it */
 
 		/* lose the front fragment */
 		/* if nothing left in back, then bail */
@@ -537,36 +537,36 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	numDecalSurfaces++;
 
 	/* make a new surface */
-	mapDrawSurface_t *ds2 = AllocDrawSurface( ESurfaceType::Decal );
+	mapDrawSurface_t& ds2 = AllocDrawSurface( ESurfaceType::Decal );
 
 	/* set it up */
-	ds2->entityNum         = ds->entityNum;
-	ds2->castShadows       = ds->castShadows;
-	ds2->recvShadows       = ds->recvShadows;
-	ds2->shaderInfo = dp->si;
-	ds2->fogNum            = ds->fogNum;   /* why was this -1? */
-	ds2->lightmapScale     = ds->lightmapScale;
-	ds2->shadeAngleDegrees = ds->shadeAngleDegrees;
-	ds2->ambientColor      = ds->ambientColor;
-	ds2->numVerts = w.size();
-	ds2->verts = safe_calloc( ds2->numVerts * sizeof( *ds2->verts ) );
+	ds2.entityNum         = ds.entityNum;
+	ds2.castShadows       = ds.castShadows;
+	ds2.recvShadows       = ds.recvShadows;
+	ds2.shaderInfo = dp.si;
+	ds2.fogNum            = ds.fogNum;   /* why was this -1? */
+	ds2.lightmapScale     = ds.lightmapScale;
+	ds2.shadeAngleDegrees = ds.shadeAngleDegrees;
+	ds2.ambientColor      = ds.ambientColor;
+	ds2.numVerts = w.size();
+	ds2.verts = safe_calloc( ds2.numVerts * sizeof( *ds2.verts ) );
 
 	/* set vertexes */
-	for ( int i = 0; i < ds2->numVerts; ++i )
+	for ( int i = 0; i < ds2.numVerts; ++i )
 	{
 		/* get vertex */
-		bspDrawVert_t& dv = ds2->verts[ i ];
+		bspDrawVert_t& dv = ds2.verts[ i ];
 
 		/* set alpha */
-		const float d = plane3_distance_to_point( dp->planes[ 0 ], w[ i ] );
-		const float d2 = plane3_distance_to_point( dp->planes[ 1 ], w[ i ] );
+		const float d = plane3_distance_to_point( dp.planes[ 0 ], w[ i ] );
+		const float d2 = plane3_distance_to_point( dp.planes[ 1 ], w[ i ] );
 		const float alpha = 255.0f * d2 / ( d + d2 );
 
 		/* set misc */
 		dv.xyz = w[ i ] - entityOrigin;
 		dv.normal = plane.normal();
-		dv.st[ 0 ] = vector3_dot( dv.xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
-		dv.st[ 1 ] = vector3_dot( dv.xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
+		dv.st[ 0 ] = vector3_dot( dv.xyz, dp.texMat[ 0 ].vec3() ) + dp.texMat[ 0 ][ 3 ];
+		dv.st[ 1 ] = vector3_dot( dv.xyz, dp.texMat[ 1 ].vec3() ) + dp.texMat[ 1 ][ 3 ];
 
 		/* set color */
 		for ( int j = 0; j < MAX_LIGHTMAPS; ++j )
@@ -583,15 +583,15 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
    projects a decal onto a brushface surface
  */
 
-static void ProjectDecalOntoFace( decalProjector_t *dp, mapDrawSurface_t *ds ){
+static void ProjectDecalOntoFace( decalProjector_t& dp, const mapDrawSurface_t& ds ){
 	/* dummy check */
-	if ( ds->sideRef == nullptr || ds->sideRef->side == nullptr ) {
+	if ( ds.sideRef == nullptr || ds.sideRef->side == nullptr ) {
 		return;
 	}
 
 	/* backface check */
-	if ( ds->planar ) {
-		if ( vector3_dot( dp->planes[ 0 ].normal(), mapplanes[ ds->planeNum ].normal() ) < -0.0001f ) {
+	if ( ds.planar ) {
+		if ( vector3_dot( dp.planes[ 0 ].normal(), mapplanes[ ds.planeNum ].normal() ) < -0.0001f ) {
 			return;
 		}
 	}
@@ -608,18 +608,18 @@ static void ProjectDecalOntoFace( decalProjector_t *dp, mapDrawSurface_t *ds ){
    projects a decal onto a patch surface
  */
 
-static void ProjectDecalOntoPatch( decalProjector_t *dp, mapDrawSurface_t *ds ){
+static void ProjectDecalOntoPatch( decalProjector_t& dp, const mapDrawSurface_t& ds ){
 	/* backface check */
-	if ( ds->planar )
-		if ( vector3_dot( dp->planes[ 0 ].normal(), mapplanes[ ds->planeNum ].normal() ) < -0.0001f )
+	if ( ds.planar )
+		if ( vector3_dot( dp.planes[ 0 ].normal(), mapplanes[ ds.planeNum ].normal() ) < -0.0001f )
 			return;
 
 	/* tesselate the patch */
 	mesh_t src;
-	src.width = ds->patchWidth;
-	src.height = ds->patchHeight;
-	src.verts = ds->verts;
-	const int iterations = IterationsForCurve( ds->longestCurve, patchSubdivisions );
+	src.width = ds.patchWidth;
+	src.height = ds.patchHeight;
+	src.verts = ds.verts;
+	const int iterations = IterationsForCurve( ds.longestCurve, patchSubdivisions );
 	mesh_t *subdivided = SubdivideMesh2( src, iterations );
 
 	/* fit it to the curve and remove colinear verts on rows/columns */
@@ -670,28 +670,28 @@ static void ProjectDecalOntoPatch( decalProjector_t *dp, mapDrawSurface_t *ds ){
    projects a decal onto a triangle surface
  */
 
-static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *ds ){
+static void ProjectDecalOntoTriangles( decalProjector_t& dp, const mapDrawSurface_t& ds ){
 
 	/* triangle surfaces without shaders don't get marks by default */
-	if ( ds->type == ESurfaceType::Triangles && ds->shaderInfo->shaderText == nullptr ) {
+	if ( ds.type == ESurfaceType::Triangles && ds.shaderInfo->shaderText == nullptr ) {
 		return;
 	}
 
 	/* backface check */
-	if ( ds->planar ) {
-		if ( vector3_dot( dp->planes[ 0 ].normal(), mapplanes[ ds->planeNum ].normal() ) < -0.0001f ) {
+	if ( ds.planar ) {
+		if ( vector3_dot( dp.planes[ 0 ].normal(), mapplanes[ ds.planeNum ].normal() ) < -0.0001f ) {
 			return;
 		}
 	}
 
 	/* iterate through triangles */
-	for ( int i = 0; i < ds->numIndexes; i += 3 )
+	for ( int i = 0; i < ds.numIndexes; i += 3 )
 	{
 		/* generate decal */
 		winding_t w{
-			ds->verts[ ds->indexes[ i + 0 ] ].xyz,
-			ds->verts[ ds->indexes[ i + 1 ] ].xyz,
-			ds->verts[ ds->indexes[ i + 2 ] ].xyz };
+			ds.verts[ ds.indexes[ i + 0 ] ].xyz,
+			ds.verts[ ds.indexes[ i + 1 ] ].xyz,
+			ds.verts[ ds.indexes[ i + 2 ] ].xyz };
 		ProjectDecalOntoWinding( dp, ds, w );
 	}
 }
@@ -706,7 +706,6 @@ static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *d
 void MakeEntityDecals( const entity_t& e ){
 	int i, j, fOld;
 	decalProjector_t dp;
-	mapDrawSurface_t    *ds;
 
 
 	/* note it */
@@ -735,36 +734,36 @@ void MakeEntityDecals( const entity_t& e ){
 		for ( j = e.firstDrawSurf; j < numMapDrawSurfs; ++j )
 		{
 			/* get surface */
-			ds = &mapDrawSurfs[ j ];
-			if ( ds->numVerts <= 0 ) {
+			mapDrawSurface_t& ds = mapDrawSurfs[ j ];
+			if ( ds.numVerts <= 0 ) {
 				continue;
 			}
 
 			/* ignore autosprite or nomarks */
-			if ( ds->shaderInfo->autosprite || ( ds->shaderInfo->compileFlags & C_NOMARKS ) ) {
+			if ( ds.shaderInfo->autosprite || ( ds.shaderInfo->compileFlags & C_NOMARKS ) ) {
 				continue;
 			}
 
 			/* bounds check */
-			if ( !ds->minmax.test( dp.center, dp.radius ) ) {
+			if ( !ds.minmax.test( dp.center, dp.radius ) ) {
 				continue;
 			}
 
 			/* switch on type */
-			switch ( ds->type )
+			switch ( ds.type )
 			{
 			case ESurfaceType::Face:
-				ProjectDecalOntoFace( &dp, ds );
+				ProjectDecalOntoFace( dp, ds );
 				break;
 
 			case ESurfaceType::Patch:
-				ProjectDecalOntoPatch( &dp, ds );
+				ProjectDecalOntoPatch( dp, ds );
 				break;
 
 			case ESurfaceType::Triangles:
 			case ESurfaceType::ForcedMeta:
 			case ESurfaceType::Meta:
-				ProjectDecalOntoTriangles( &dp, ds );
+				ProjectDecalOntoTriangles( dp, ds );
 				break;
 
 			default:

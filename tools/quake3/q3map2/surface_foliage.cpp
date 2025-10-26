@@ -45,7 +45,7 @@ static foliageInstance_t foliageInstances[ MAX_FOLIAGE_INSTANCES ];
    the desired density, then pseudo-randomly sets a point
  */
 
-static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& foliage, const TriRef& tri ){
+static void SubdivideFoliageTriangle_r( const foliage_t& foliage, const TriRef& tri ){
 	int max;
 
 
@@ -139,12 +139,12 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 	/* recurse to first triangle */
 	TriRef tri2 = tri;
 	tri2[ max ] = &mid;
-	SubdivideFoliageTriangle_r( ds, foliage, tri2 );
+	SubdivideFoliageTriangle_r( foliage, tri2 );
 
 	/* recurse to second triangle */
 	tri2 = tri;
 	tri2[ ( max + 1 ) % 3 ] = &mid;
-	SubdivideFoliageTriangle_r( ds, foliage, tri2 );
+	SubdivideFoliageTriangle_r( foliage, tri2 );
 }
 
 
@@ -154,9 +154,9 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
    generates a foliage file for a bsp
  */
 
-void Foliage( mapDrawSurface_t *src, entity_t& entity ){
+void Foliage( mapDrawSurface_t& src, entity_t& entity ){
 	/* get shader */
-	shaderInfo_t *si = src->shaderInfo;
+	shaderInfo_t *si = src.shaderInfo;
 	if ( si == nullptr || si->foliage.empty() ) {
 		return;
 	}
@@ -168,21 +168,21 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 		numFoliageInstances = 0;
 
 		/* map the surface onto the lightmap origin/cluster/normal buffers */
-		switch ( src->type )
+		switch ( src.type )
 		{
 		case ESurfaceType::Meta:
 		case ESurfaceType::ForcedMeta:
 		case ESurfaceType::Triangles:
 		{
 			/* get verts */
-			const bspDrawVert_t *verts = src->verts;
+			const bspDrawVert_t *verts = src.verts;
 
 			/* map the triangles */
-			for ( int i = 0; i < src->numIndexes; i += 3 )
-				SubdivideFoliageTriangle_r( src, foliage, TriRef{
-					&verts[ src->indexes[ i + 0 ] ],
-					&verts[ src->indexes[ i + 1 ] ],
-					&verts[ src->indexes[ i + 2 ] ]
+			for ( int i = 0; i < src.numIndexes; i += 3 )
+				SubdivideFoliageTriangle_r( foliage, TriRef{
+					&verts[ src.indexes[ i + 0 ] ],
+					&verts[ src.indexes[ i + 1 ] ],
+					&verts[ src.indexes[ i + 2 ] ]
 				} );
 			break;
 		}
@@ -190,9 +190,9 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 		{
 			/* make a mesh from the drawsurf */
 			mesh_t srcMesh;
-			srcMesh.width = src->patchWidth;
-			srcMesh.height = src->patchHeight;
-			srcMesh.verts = src->verts;
+			srcMesh.width = src.patchWidth;
+			srcMesh.height = src.patchHeight;
+			srcMesh.verts = src.verts;
 			mesh_t *subdivided = SubdivideMesh( srcMesh, 8, 512 );
 
 			/* fit it to the curve and remove colinear verts on rows/columns */
@@ -220,13 +220,13 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 					const int r = ( x + y ) & 1;
 
 					/* get drawverts and map first triangle */
-					SubdivideFoliageTriangle_r( src, foliage, TriRef{
+					SubdivideFoliageTriangle_r( foliage, TriRef{
 						&verts[ pw[ r + 0 ] ],
 						&verts[ pw[ r + 1 ] ],
 						&verts[ pw[ r + 2 ] ]
 					} );
 					/* get drawverts and map second triangle */
-					SubdivideFoliageTriangle_r( src, foliage, TriRef{
+					SubdivideFoliageTriangle_r( foliage, TriRef{
 						&verts[ pw[ r + 0 ] ],
 						&verts[ pw[ r + 2 ] ],
 						&verts[ pw[ r + 3 ] ]
@@ -253,13 +253,13 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 		/* add the model to the bsp */
 		InsertModel( foliage.model.c_str(), nullptr, 0, matrix4_scale_for_vec3( Vector3( foliage.scale ) ), nullptr, entity, 0, clipDepthGlobal,
 			EntityCompileParams {
-				.castShadows = src->castShadows,
-				.recvShadows = src->recvShadows,
+				.castShadows   = src.castShadows,
+				.recvShadows   = src.recvShadows,
 				.celShader = nullptr,
 				.lightmapSampleSize = 0,
-				.lightmapScale = src->lightmapScale,
+				.lightmapScale = src.lightmapScale,
 				.shadeAngle = 0,
-				.ambientColor = src->ambientColor
+				.ambientColor  = src.ambientColor
 			} );
 
 		/* walk each new surface */
@@ -277,7 +277,7 @@ void Foliage( mapDrawSurface_t *src, entity_t& entity ){
 			ds.patchHeight = ds.numVerts;
 
 			/* set fog to be same as source surface */
-			ds.fogNum = src->fogNum;
+			ds.fogNum = src.fogNum;
 
 			/* add a drawvert for every instance */
 			bspDrawVert_t *verts = safe_calloc( ( ds.numVerts + ds.numFoliageInstances ) * sizeof( *verts ) );

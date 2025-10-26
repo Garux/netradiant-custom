@@ -417,7 +417,7 @@ static void make_brush_sides( const Plane3f plane, const Plane3f (&p)[3], const 
 		buildBrush.sides[4].planenum = FindFloatPlane( reverse, 0, nullptr );
 }
 
-static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const mapDrawSurface_t *ds, const char *modelName, entity_t& entity ){
+static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const mapDrawSurface_t& ds, const char *modelName, entity_t& entity ){
 	const int spf = ( spawnFlags & ( eClipFlags & ~eClipModel ) );
 
 	/* ydnar: giant hack land: generate clipping brushes for model triangles */
@@ -467,9 +467,9 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 
 		if ( ( spf & eMaxExtrude ) || ( spf & eExtrudeTerrain ) ){
 
-			for ( i = 0; i < ds->numIndexes; i += 3 ){
+			for ( i = 0; i < ds.numIndexes; i += 3 ){
 				for ( j = 0; j < 3; ++j ){
-					points[j] = ds->verts[ds->indexes[i + j]].xyz;
+					points[j] = ds.verts[ds.indexes[i + j]].xyz;
 				}
 				if ( PlaneFromPoints( plane, points ) ){
 					if ( spf & eExtrudeTerrain )
@@ -498,11 +498,11 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 		buildBrush.detail = true;
 
 		/* walk triangle list */
-		for ( i = 0; i < ds->numIndexes; i += 3 ){
+		for ( i = 0; i < ds.numIndexes; i += 3 ){
 			/* make points */
 			for ( j = 0; j < 3; ++j ){
 				/* copy xyz */
-				points[j] = ds->verts[ds->indexes[i + j] ].xyz;
+				points[j] = ds.verts[ds.indexes[i + j] ].xyz;
 			}
 
 			/* make plane for triangle */
@@ -799,7 +799,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 					/* get vertex normals */
 					for ( j = 0; j < 3; ++j ){
 						/* copy normal */
-						Vnorm[j] = ds->verts[ds->indexes[i + j]].normal;
+						Vnorm[j] = ds.verts[ds.indexes[i + j]].normal;
 					}
 
 					//avg normals for side planes
@@ -988,7 +988,6 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 	const Matrix4 nTransform( matrix4_for_normal_transform( transform ) );
 	const bool transform_lefthanded = MATRIX4_LEFTHANDED == matrix4_handedness( transform );
 	AssModel            *model;
-	mapDrawSurface_t    *ds;
 	const char          *picoShaderName;
 
 
@@ -1111,53 +1110,53 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 			: ShaderInfoForShader( picoShaderName );
 
 		/* allocate a surface (ydnar: gs mods) */
-		ds = AllocDrawSurface( ESurfaceType::Triangles );
-		ds->entityNum = entity.mapEntityNum;
-		ds->castShadows  = params.castShadows;
-		ds->recvShadows  = params.recvShadows;
-		ds->celShader    = params.celShader;
-		ds->ambientColor = params.ambientColor;
+		mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Triangles );
+		ds.entityNum = entity.mapEntityNum;
+		ds.castShadows  = params.castShadows;
+		ds.recvShadows  = params.recvShadows;
+		ds.celShader    = params.celShader;
+		ds.ambientColor = params.ambientColor;
 
 		/* set shader */
-		ds->shaderInfo = &si;
+		ds.shaderInfo = &si;
 
 		/* force to meta? */
 		if ( si.forceMeta || ( spawnFlags & eForceMeta ) ) { /* 3rd bit */
-			ds->type = ESurfaceType::ForcedMeta;
+			ds.type = ESurfaceType::ForcedMeta;
 		}
 
 		/* fix the surface's normals (jal: conditioned by shader info) */
-		if ( !( spawnFlags & eNoSmooth ) && ( params.shadeAngle == 0.0f || ds->type != ESurfaceType::ForcedMeta ) ) {
+		if ( !( spawnFlags & eNoSmooth ) && ( params.shadeAngle == 0.0f || ds.type != ESurfaceType::ForcedMeta ) ) {
 			// PicoFixSurfaceNormals( surface );
 		}
 
 		/* set sample size */
 		if ( params.lightmapSampleSize > 0.0f ) {
-			ds->sampleSize = params.lightmapSampleSize;
+			ds.sampleSize = params.lightmapSampleSize;
 		}
 
 		/* set lightmap scale */
 		if ( params.lightmapScale > 0.0f ) {
-			ds->lightmapScale = params.lightmapScale;
+			ds.lightmapScale = params.lightmapScale;
 		}
 
 		/* set shading angle */
 		if ( params.shadeAngle > 0.0f ) {
-			ds->shadeAngleDegrees = params.shadeAngle;
+			ds.shadeAngleDegrees = params.shadeAngle;
 		}
 
 		/* set particulars */
-		ds->numVerts = mesh->mNumVertices;
-		ds->verts = safe_calloc( ds->numVerts * sizeof( ds->verts[ 0 ] ) );
+		ds.numVerts = mesh->mNumVertices;
+		ds.verts = safe_calloc( ds.numVerts * sizeof( ds.verts[ 0 ] ) );
 
-		ds->numIndexes = mesh->mNumFaces * 3;
-		ds->indexes = safe_calloc( ds->numIndexes * sizeof( ds->indexes[ 0 ] ) );
-// Sys_Printf( "verts %i idx %i\n", ds->numVerts, ds->numIndexes );
+		ds.numIndexes = mesh->mNumFaces * 3;
+		ds.indexes = safe_calloc( ds.numIndexes * sizeof( ds.indexes[ 0 ] ) );
+// Sys_Printf( "verts %i idx %i\n", ds.numVerts, ds.numIndexes );
 		/* copy vertexes */
-		for ( i = 0; i < ds->numVerts; ++i )
+		for ( i = 0; i < ds.numVerts; ++i )
 		{
 			/* get vertex */
-			bspDrawVert_t& dv = ds->verts[ i ];
+			bspDrawVert_t& dv = ds.verts[ i ];
 
 			/* xyz and normal */
 			dv.xyz = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
@@ -1214,10 +1213,10 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 			for ( const aiFace& face : Span( mesh->mFaces, mesh->mNumFaces ) ){
 				// if( face.mNumIndices == 3 )
 				for ( size_t i = 0; i < 3; ++i ){
-					ds->indexes[idCopied++] = face.mIndices[i];
+					ds.indexes[idCopied++] = face.mIndices[i];
 				}
 				if( transform_lefthanded ){
-					std::swap( ds->indexes[idCopied - 1], ds->indexes[idCopied - 2] );
+					std::swap( ds.indexes[idCopied - 1], ds.indexes[idCopied - 2] );
 				}
 			}
 		}

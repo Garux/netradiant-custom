@@ -1574,7 +1574,7 @@ void                        FixTJunctions( const entity_t& e );
 
 
 /* fog.c */
-winding_t                   WindingFromDrawSurf( const mapDrawSurface_t *ds );
+winding_t                   WindingFromDrawSurf( const mapDrawSurface_t& ds );
 void                        FogDrawSurfaces( const entity_t& e );
 int                         FogForPoint( const Vector3& point, float epsilon );
 int                         FogForBounds( const MinMax& minmax, float epsilon );
@@ -1595,17 +1595,17 @@ void                        AddTriangleModels( entity_t& eparent );
 
 
 /* surface.c */
-mapDrawSurface_t            *AllocDrawSurface( ESurfaceType type );
-void                        StripFaceSurface( mapDrawSurface_t *ds );
-void                        MaxAreaFaceSurface( mapDrawSurface_t *ds );
+mapDrawSurface_t&           AllocDrawSurface( ESurfaceType type );
+void                        StripFaceSurface( mapDrawSurface_t& ds );
+void                        MaxAreaFaceSurface( mapDrawSurface_t& ds );
 Vector3                     CalcLightmapAxis( const Vector3& normal );
-void                        ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds );
+void                        ClassifySurface( mapDrawSurface_t& ds );
 void                        ClassifyEntitySurfaces( const entity_t& e );
 void                        TidyEntitySurfaces( const entity_t& e );
-mapDrawSurface_t            *CloneSurface( mapDrawSurface_t *src, shaderInfo_t *si );
-void                        ClearSurface( mapDrawSurface_t *ds );
+mapDrawSurface_t            *CloneSurface( const mapDrawSurface_t& src, shaderInfo_t *si );
+void                        ClearSurface( mapDrawSurface_t& ds );
 mapDrawSurface_t            *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const side_t& s, const winding_t& w );
-mapDrawSurface_t            *DrawSurfaceForMesh( const entity_t& e, parseMesh_t *p, mesh_t *mesh );
+mapDrawSurface_t            *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t *mesh );
 mapDrawSurface_t            *DrawSurfaceForFlare( int entNum, const Vector3& origin, const Vector3& normal, const Vector3& color, const char *flareShader, int lightStyle );
 void                        ClipSidesIntoTree( entity_t& e, const tree_t& tree );
 void                        MakeDebugPortalSurfs( const tree_t& tree );
@@ -1616,11 +1616,11 @@ void                        FilterDrawsurfsIntoTree( entity_t& e, tree_t& tree )
 
 
 /* surface_fur.c */
-void                        Fur( mapDrawSurface_t *src );
+void                        Fur( mapDrawSurface_t& src );
 
 
 /* surface_foliage.c */
-void                        Foliage( mapDrawSurface_t *src, entity_t& entity );
+void                        Foliage( mapDrawSurface_t& src, entity_t& entity );
 
 
 /* ydnar: surface_meta.c */
