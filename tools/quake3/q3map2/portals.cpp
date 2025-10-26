@@ -463,9 +463,7 @@ static void FloodPortals( node_t *startNode, bool skybox ){
 	std::vector<node_t*> nodes{ startNode }, nodes2;
 	while( !nodes.empty() ){
 		for( node_t *node : nodes ){
-			if ( skybox ) {
-				node->skybox = skybox;
-			}
+			node->skybox |= skybox;
 
 			if ( node->opaque || ( node->occupied && node->occupied <= dist ) ) { // also reprocess occupied nodes for shorter leak line
 				continue;
@@ -497,10 +495,8 @@ static void FloodPortals( node_t *startNode, bool skybox ){
  */
 
 static bool PlaceOccupant( node_t *headnode, const Vector3& origin, const entity_t *occupant, bool skybox ){
-	node_t  *node;
-
 	// find the leaf to start in
-	node = headnode;
+	node_t *node = headnode;
 	while ( node->planenum != PLANENUM_LEAF )
 	{
 		if ( plane3_distance_to_point( mapplanes[ node->planenum ].plane, origin ) >= 0 ) {
@@ -515,7 +511,7 @@ static bool PlaceOccupant( node_t *headnode, const Vector3& origin, const entity
 		return false;
 	}
 	node->occupant = occupant;
-	node->skybox = skybox;
+	node->skybox |= skybox;
 
 	FloodPortals( node, skybox );
 
@@ -531,14 +527,12 @@ static bool PlaceOccupant( node_t *headnode, const Vector3& origin, const entity
  */
 
 EFloodEntities FloodEntities( tree_t& tree ){
-	bool r, inside, skybox;
-
-
 	Sys_FPrintf( SYS_VRB, "--- FloodEntities ---\n" );
-	inside = false;
-	tree.outside_node.occupied = 0;
 
+	bool inside = false;
+	tree.outside_node.occupied = 0;
 	c_floodedleafs = 0;
+
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* get entity */
@@ -558,9 +552,8 @@ EFloodEntities FloodEntities( tree_t& tree ){
 		}
 
 		/* handle skybox entities */
-		if ( e.classname_is( "_skybox" ) ) {
-			skybox = true;
-
+		const bool skybox = e.classname_is( "_skybox" );
+		if ( skybox ) {
 			/* get scale */
 			Vector3 scale( 64 );
 			if( !e.read_keyvalue( scale, "_scale" ) )
@@ -576,9 +569,6 @@ EFloodEntities FloodEntities( tree_t& tree ){
 			skyboxTransform = g_matrix4_identity;
 			matrix4_pivoted_transform_by_euler_xyz_degrees( skyboxTransform, -origin, angles, scale, origin );
 		}
-		else{
-			skybox = false;
-		}
 
 		/* nudge off floor */
 		origin[ 2 ] += 1;
@@ -588,13 +578,10 @@ EFloodEntities FloodEntities( tree_t& tree ){
 		//%		origin[ 2 ] += 4096;
 
 		/* find leaf */
-		r = PlaceOccupant( tree.headnode, origin, &e, skybox );
-		if ( r ) {
+		if ( PlaceOccupant( tree.headnode, origin, &e, skybox ) )
 			inside = true;
-		}
-		else {
+		else
 			Sys_FPrintf( SYS_WRN, "Entity %i (%s): Entity in solid\n", e.mapEntityNum, e.classname() );
-		}
 	}
 
 	Sys_FPrintf( SYS_VRB, "%9d flooded leafs\n", c_floodedleafs );
@@ -647,7 +634,7 @@ static void FloodAreas_r( node_t *node ){
 	{
 		/* ydnar: allow areaportal portals to block area flow */
 		/* this check alone w/o node->areaportal path seems sufficient
-		   besides when node->compileFlags are overriden by hint or struct split flush with areportal
+		   besides when node->compileFlags are overriden by hint or struct split flush with areaportal
 		   we make it persistent in FilterBrushIntoTree_r()
 		   note: node->areaportal way fails for leafs with only opaque and areaportal portals */
 		if ( p->compileFlags & C_AREAPORTAL ) {
@@ -716,10 +703,6 @@ static void CheckAreas_r( const node_t *node ){
  */
 
 static void FloodSkyboxArea_r( node_t *node ){
-	if ( skyboxArea == AREA_INVALID ) {
-		return;
-	}
-
 	if ( node->planenum != PLANENUM_LEAF ) {
 		FloodSkyboxArea_r( node->children[ 0 ] );
 		FloodSkyboxArea_r( node->children[ 1 ] );
@@ -745,7 +728,8 @@ void FloodAreas( tree_t& tree ){
 	FindAreas_r( tree.headnode );
 
 	/* ydnar: flood all skybox nodes */
-	FloodSkyboxArea_r( tree.headnode );
+	if ( skyboxArea != AREA_INVALID )
+		FloodSkyboxArea_r( tree.headnode );
 
 	/* check for areaportal brushes that don't touch two areas */
 	/* ydnar: fix this rather than just silence the warnings */

@@ -1628,9 +1628,6 @@ static int AddReferenceToLeaf( mapDrawSurface_t *ds, node_t *node ){
  */
 
 static int AddReferenceToTree_r( mapDrawSurface_t *ds, node_t *node, bool skybox ){
-	int refs = 0;
-
-
 	/* dummy check */
 	if ( node == nullptr ) {
 		return 0;
@@ -1639,6 +1636,7 @@ static int AddReferenceToTree_r( mapDrawSurface_t *ds, node_t *node, bool skybox
 	/* is this a decision node? */
 	if ( node->planenum != PLANENUM_LEAF ) {
 		/* add to child nodes and return */
+		int refs = 0;
 		refs += AddReferenceToTree_r( ds, node->children[ 0 ], skybox );
 		refs += AddReferenceToTree_r( ds, node->children[ 1 ], skybox );
 		return refs;
@@ -1668,17 +1666,13 @@ static int AddReferenceToTree_r( mapDrawSurface_t *ds, node_t *node, bool skybox
  */
 
 static int FilterPointIntoTree_r( const Vector3& point, mapDrawSurface_t *ds, node_t *node ){
-	float d;
-	int refs = 0;
-
-
 	/* is this a decision node? */
 	if ( node->planenum != PLANENUM_LEAF ) {
 		/* classify the point in relation to the plane */
-		d = plane3_distance_to_point( mapplanes[ node->planenum ].plane, point );
+		const float d = plane3_distance_to_point( mapplanes[ node->planenum ].plane, point );
 
 		/* filter by this plane */
-		refs = 0;
+		int refs = 0;
 		if ( d >= -ON_EPSILON ) {
 			refs += FilterPointIntoTree_r( point, ds, node->children[eFront] );
 		}
@@ -1737,8 +1731,6 @@ static int FilterPointConvexHullIntoTree_r( const std::array<Vector3, 16>& point
  */
 
 static int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t *ds, node_t *node ){
-	int refs = 0;
-
 	/* get shaderinfo */
 	const shaderInfo_t *si = ds->shaderInfo;
 
@@ -1813,7 +1805,7 @@ static int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t *ds, node_t *
 		auto [front, back] = ClipWindingEpsilonStrict( w, plane1, ON_EPSILON ); /* strict; we handle the "winding disappeared" case */
 
 		/* filter by this plane */
-		refs = 0;
+		int refs = 0;
 		if ( front.empty() && back.empty() ) {
 			/* same plane, this is an ugly hack */
 			/* but better too many than too few refs */
