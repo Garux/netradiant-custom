@@ -349,7 +349,6 @@ int ScaleBSPMain( Args& args ){
 	float f, a;
 	Vector3 scale;
 	Vector3 vec;
-	char str[ 1024 ];
 	int axis;
 	bool texscale;
 	std::vector<bspDrawVert_t> old_xyzst;
@@ -414,8 +413,7 @@ int ScaleBSPMain( Args& args ){
 			if ( e.classname_prefixed( "info_player_" ) ) {
 				vec[2] -= spawn_ref;
 			}
-			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
-			e.setKeyValue( "origin", str );
+			e.setKeyValue( "origin", vec );
 		}
 
 		a = e.floatForKey( "angle" );
@@ -432,15 +430,13 @@ int ScaleBSPMain( Args& args ){
 		/* scale door lip */
 		if ( e.read_keyvalue( f, "lip" ) ) {
 			f *= scale[axis];
-			sprintf( str, "%f", f );
-			e.setKeyValue( "lip", str );
+			e.setKeyValue( "lip", f );
 		}
 
 		/* scale plat height */
 		if ( e.read_keyvalue( f, "height" ) ) {
 			f *= scale[2];
-			sprintf( str, "%f", f );
-			e.setKeyValue( "height", str );
+			e.setKeyValue( "height", f );
 		}
 
 		// TODO maybe allow a definition file for entities to specify which values are scaled how?
@@ -543,8 +539,7 @@ int ScaleBSPMain( Args& args ){
 		vec = gridSize;
 	}
 	vec *= scale;
-	sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
-	entities[ 0 ].setKeyValue( "gridsize", str );
+	entities[ 0 ].setKeyValue( "gridsize", vec );
 
 	/* inject command line parameters */
 	InjectCommandLine( "-scale", argsToInject );
@@ -567,7 +562,6 @@ int ScaleBSPMain( Args& args ){
 int ShiftBSPMain( Args& args ){
 	Vector3 shift;
 	Vector3 vec;
-	char str[ 1024 ];
 
 
 	/* arg checking */
@@ -608,8 +602,7 @@ int ShiftBSPMain( Args& args ){
 		/* shift origin */
 		if ( e.read_keyvalue( vec, "origin" ) ) { // fixme: this doesn't consider originless point entities; group entities with origin will be wrong too
 			vec += shift;
-			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
-			e.setKeyValue( "origin", str );
+			e.setKeyValue( "origin", vec );
 		}
 	}
 
@@ -773,7 +766,7 @@ int MergeBSPMain( Args& args ){
 		{
 			const char *model = e.valueForKey( "model" );
 			if( model[0] == '*' ){
-				e.setKeyValue( "model", StringStream<8>( '*', atoi( model + 1 ) + bspModels.size() - 1 ) ); // -1 : minus world
+				e.setKeyValue( "model", atoi( model + 1 ) + bspModels.size() - 1, "*%i" ); // -1 : minus world
 			}
 		}
 		/* make target/targetname names unique */
@@ -942,7 +935,6 @@ int MergeBSPMain( Args& args ){
  */
 static void PseudoCompileBSP( bool need_tree ){
 	int models = 1;
-	char modelValue[16];
 	facelist_t faces;
 	tree_t tree{};
 
@@ -959,8 +951,7 @@ static void PseudoCompileBSP( bool need_tree ){
 		}
 
 		if ( entityNum != 0 ) {
-			sprintf( modelValue, "*%d", models++ );
-			entity.setKeyValue( "model", modelValue );
+			entity.setKeyValue( "model", models++, "*%i" );
 		}
 
 		/* process the model */

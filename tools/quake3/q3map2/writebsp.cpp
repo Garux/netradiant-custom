@@ -208,10 +208,7 @@ void SetModelNumbers(){
 	int models = 1;
 	for ( std::size_t i = 1; i < entities.size(); ++i ) {
 		if ( !entities[i].brushes.empty() || !entities[i].patches.empty() ) {
-			char value[16];
-			sprintf( value, "*%i", models );
-			models++;
-			entities[i].setKeyValue( "model", value );
+			entities[i].setKeyValue( "model", models++, "*%i" );
 		}
 	}
 }
@@ -226,7 +223,6 @@ void SetModelNumbers(){
 
 void SetLightStyles(){
 	int j, numStyles;
-	char value[ 10 ];
 	char lightTargets[ MAX_SWITCHED_LIGHTS ][ 64 ];
 	int lightStyles[ MAX_SWITCHED_LIGHTS ];
 	int numStrippedLights = 0;
@@ -283,13 +279,11 @@ void SetLightStyles(){
 		}
 
 		/* set explicit style */
-		sprintf( value, "%d", MAX_SWITCHED_LIGHTS + j );
-		e.setKeyValue( "style", value );
+		e.setKeyValue( "style", MAX_SWITCHED_LIGHTS + j );
 
 		/* set old style */
 		if ( style != LS_NORMAL ) {
-			sprintf( value, "%d", style );
-			e.setKeyValue( "switch_style", value );
+			e.setKeyValue( "switch_style", style );
 		}
 	}
 
@@ -301,9 +295,7 @@ void SetLightStyles(){
 void UnSetLightStyles(){
 	for ( entity_t& e : entities ){
 		if ( e.classname_prefixed( "light" ) && !strEmpty( e.valueForKey( "targetname" ) ) && !strEmpty( e.valueForKey( "style" ) ) ) {
-			char value[ 10 ];
-			sprintf( value, "%d", e.intForKey( "switch_style" ) ); // value or 0, latter is fine too
-			e.setKeyValue( "style", value );
+			e.setKeyValue( "style", e.intForKey( "switch_style" ) ); // value or 0, latter is fine too
 		}
 	}
 }

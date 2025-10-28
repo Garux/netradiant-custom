@@ -146,13 +146,11 @@ static void ProcessAdvertisements() {
  */
 
 static void SetCloneModelNumbers(){
-	int models;
-	char modelValue[ 16 ];
 	const char  *value, *value2, *value3;
 
 
 	/* start with 1 (worldspawn is model 0) */
-	models = 1;
+	int models = 1;
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* only entities with brushes or patches get a model number */
@@ -165,11 +163,7 @@ static void SetCloneModelNumbers(){
 			continue;
 
 		/* add the model key */
-		sprintf( modelValue, "*%d", models );
-		entities[ i ].setKeyValue( "model", modelValue );
-
-		/* increment model count */
-		models++;
+		entities[ i ].setKeyValue( "model", models++, "*%i" );
 	}
 
 	/* fix up clones */
@@ -202,8 +196,7 @@ static void SetCloneModelNumbers(){
 				models = atoi( &value3[ 1 ] );
 
 				/* add the model key */
-				sprintf( modelValue, "*%d", models );
-				entities[ i ].setKeyValue( "model", modelValue );
+				entities[ i ].setKeyValue( "model", models, "*%i" );
 
 				/* nuke the brushes/patches for this entity (fixme: leak!) */
 				auto *leak = new brushlist_t( std::move( entities[ i ].brushes ) ); // are brushes referenced elsewhere, so we do not nuke them really?

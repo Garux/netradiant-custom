@@ -753,15 +753,12 @@ void AddBrushBevels(){
 
 
 static void MergeOrigin( entity_t& ent, const Vector3& origin ){
-	char string[128];
-
 	/* we have not parsed the brush completely yet... */
 	ent.origin = ent.vectorForKey( "origin" ) + origin - ent.originbrush_origin;
 
 	ent.originbrush_origin = origin;
 
-	sprintf( string, "%f %f %f", ent.origin[0], ent.origin[1], ent.origin[2] );
-	ent.setKeyValue( "origin", string );
+	ent.setKeyValue( "origin", ent.origin );
 }
 
 static void FixAreaportalBrush( brush_t& brush, const entity_t& mapEnt ){

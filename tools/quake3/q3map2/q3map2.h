@@ -923,6 +923,9 @@ struct entity_t
 	Vector3 originbrush_origin{ 0 };
 
 	void setKeyValue( const char *key, const char *value );
+	void setKeyValue( const char *key, int value, const char *format = "%i" );
+	void setKeyValue( const char *key, float value );
+	void setKeyValue( const char *key, const Vector3& value );
 	const char *valueForKey( const char *key ) const;
 
 	template<typename ... Keys>

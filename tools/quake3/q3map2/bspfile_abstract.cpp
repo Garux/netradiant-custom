@@ -545,6 +545,24 @@ const char *entity_t::valueForKey( const char *key ) const {
 	return "";
 }
 
+
+void entity_t::setKeyValue( const char *key, int value, const char *format /* = "%i" */ ){
+	char buf[ 16 ];
+	std::snprintf( buf, std::size( buf ), format, value );
+	setKeyValue( key, buf );
+}
+void entity_t::setKeyValue( const char *key, float value ){
+	char buf[ 32 ];
+	std::snprintf( buf, std::size( buf ), "%f", value );
+	setKeyValue( key, buf );
+}
+void entity_t::setKeyValue( const char *key, const Vector3& value ){
+	char buf[ 128 ];
+	std::snprintf( buf, std::size( buf ), "%f %f %f", value[0], value[1], value[2] );
+	setKeyValue( key, buf );
+}
+
+
 bool entity_t::read_keyvalue_( bool &bool_value, std::initializer_list<const char*>&& keys ) const {
 	for( const char* key : keys ){
 		const char* value = valueForKey( key );
