@@ -337,6 +337,7 @@ static void ProcessWorldModel( entity_t& e ){
 		/* flood again to discard portals in the void (also required for _skybox) */
 		FloodEntities( tree );
 		FillOutside( tree.headnode );
+		FlagEntitiesInSkybox( tree );
 	}
 
 	/* save out information for visibility processing */
@@ -505,6 +506,26 @@ static void ProcessSubModel( entity_t& e ){
 	SmoothMetaTriangles();
 	FixMetaTJunctions();
 	MergeMetaTriangles();
+
+	if( e.inSkybox ){
+		tree.headnode->skybox = e.inSkybox;
+		bspModels.back().minmax.clear();
+		if( e.origin != g_vector3_identity ){
+			// Sys_Warning( "&&&&&&&&&& origin %s\n", e.valueForKey( "origin" ) );
+			// Sys_Warning( "&&&&&&&&&& origin %f %f %f\n", e.origin[0], e.origin[1], e.origin[2] );
+			// Sys_Warning( "&&&&&&&&&& originbrush_origin %f %f %f\n", e.originbrush_origin[0], e.originbrush_origin[1], e.originbrush_origin[2] );
+			Matrix4 tra( skyboxTransform );
+			Vector3 diff = -matrix4_full_inverse( skyboxTransform ).t().vec3() + e.origin;
+			// Sys_Warning( "&&&&&&&&&& diff %f %f %f\n", diff[0], diff[1], diff[2] );
+			// Sys_Warning( "&&&&&&&&&& skyboxTransform.t().vec3() %f %f %f\n", skyboxTransform.t().vec3()[0], skyboxTransform.t().vec3()[1], skyboxTransform.t().vec3()[2] );
+			tra.t().vec3().set( 0 );
+			matrix4_multiply_by_matrix4( tra, matrix4_translation_for_vec3( diff ) );
+			char string[128];
+			sprintf( string, "%f %f %f", tra.tx(), tra.ty(), tra.tz() );
+			e.setKeyValue( "origin", string );
+			// Sys_Warning( "&&&&&&&&&& origin %s %s\n", e.classname(), e.valueForKey( "origin" ) );
+		}
+	}
 
 	/* add references to the final drawsurfs in the appropriate clusters */
 	FilterDrawsurfsIntoTree( e, tree );

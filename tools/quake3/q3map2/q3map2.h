@@ -924,6 +924,7 @@ struct entity_t
 	int firstBrush, numBrushes;                     /* only valid during BSP compile */
 	std::list<epair_t> epairs;
 	Vector3 originbrush_origin{ 0 };
+	bool inSkybox{};
 
 	void setKeyValue( const char *key, const char *value );
 	const char *valueForKey( const char *key ) const;
@@ -1528,6 +1529,7 @@ enum class EFloodEntities
 EFloodEntities              FloodEntities( tree_t& tree );
 void                        FillOutside( node_t *headnode );
 void                        FloodAreas( tree_t& tree );
+void                        FlagEntitiesInSkybox( tree_t& tree );
 inline portal_t             *AllocPortal(){ return new portal_t(); }
 inline void                 FreePortal( portal_t *p ){ delete p; }
 

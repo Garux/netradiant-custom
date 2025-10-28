@@ -518,6 +518,37 @@ static bool PlaceOccupant( node_t *headnode, const Vector3& origin, const entity
 	return true;
 }
 
+void FlagEntitiesInSkybox( tree_t& tree ){
+	for ( std::size_t i = 1; i < entities.size(); ++i )
+	{
+		entity_t& e = entities[ i ];
+		// Sys_Warning( "######### %s ## %s #### %f %f %f\n", e.valueForKey( "origin" ), e.classname(), e.origin[0], e.origin[1], e.origin[2] );
+		if( !e.brushes.empty() || e.patches || e.classname_is( "path_corner" ) ){
+			const Vector3 origin = !e.brushes.empty()? e.brushes.front().eMinmax.origin()
+			                       : e.patches? e.patches->eMinmax.origin()
+			                       : e.origin;
+
+			node_t *node = tree.headnode;
+			while ( node->planenum != PLANENUM_LEAF )
+			{
+				node = node->children[plane3_distance_to_point( mapplanes[ node->planenum ].plane, origin ) < 0];
+			}
+
+			e.inSkybox = node->skybox;
+			if( e.inSkybox ){
+				if( e.classname_is( "path_corner" ) ){
+					Vector3 origin( matrix4_transformed_point( skyboxTransform, e.origin ) );
+					char string[128];
+					sprintf( string, "%f %f %f", origin.x(), origin.y(), origin.z() );
+					e.setKeyValue( "origin", string );
+					// Sys_Warning("^^^^^^^^^^^^ %s\n", e.valueForKey("origin"));
+				}
+			}
+			// Sys_Warning( "######### %s ## \n", e.classname() );
+		}
+	}
+}
+
 /*
    =============
    FloodEntities
