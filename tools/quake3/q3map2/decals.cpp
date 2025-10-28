@@ -362,7 +362,6 @@ static int MakeDecalProjector( shaderInfo_t *si, const Plane3f& projection, floa
 void ProcessDecals(){
 	float distance;
 	Plane3f projection, plane;
-	entity_t            *e2;
 
 
 	/* note it */
@@ -376,14 +375,14 @@ void ProcessDecals(){
 		}
 
 		/* any patches? */
-		if ( e.patches == nullptr ) {
+		if ( e.patches.empty() ) {
 			Sys_Warning( "Decal entity without any patch meshes, ignoring.\n" );
 			e.epairs.clear();
 			continue;
 		}
 
 		/* find target */
-		e2 = FindTargetEntity( e.valueForKey( "target" ) );
+		entity_t *e2 = FindTargetEntity( e.valueForKey( "target" ) );
 
 		/* no target? */
 		if ( e2 == nullptr ) {
@@ -392,12 +391,12 @@ void ProcessDecals(){
 		}
 
 		/* walk entity patches */
-		for ( parseMesh_t *p = e.patches; p != nullptr; p = e.patches )
+		for ( parseMesh_t& p : e.patches )
 		{
 			/* setup projector */
 			Vector3 origin;
 			if ( VectorCompare( e.origin, g_vector3_identity ) ) {
-				origin = p->eMinmax.origin();
+				origin = p.eMinmax.origin();
 			}
 			else{
 				origin = e.origin;
@@ -411,8 +410,8 @@ void ProcessDecals(){
 			/* create projectors */
 			if ( distance > 0.125f ) {
 				/* tesselate the patch */
-				const int iterations = IterationsForCurve( p->longestCurve, patchSubdivisions );
-				mesh_t *subdivided = SubdivideMesh2( p->mesh, iterations );
+				const int iterations = IterationsForCurve( p.longestCurve, patchSubdivisions );
+				mesh_t *subdivided = SubdivideMesh2( p.mesh, iterations );
 
 				/* fit it to the curve and remove colinear verts on rows/columns */
 				PutMeshOnCurve( *subdivided );
@@ -450,17 +449,17 @@ void ProcessDecals(){
 						if ( 0 && PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz ) &&
 						     fabs( plane3_distance_to_point( plane, dv[ 1 ]->xyz ) ) <= PLANAR_EPSILON ) {
 							/* make a quad projector */
-							MakeDecalProjector( p->shaderInfo, projection, distance, 4, dv );
+							MakeDecalProjector( p.shaderInfo, projection, distance, 4, dv );
 						}
 						else
 						{
 							/* make first triangle */
-							MakeDecalProjector( p->shaderInfo, projection, distance, 3, dv );
+							MakeDecalProjector( p.shaderInfo, projection, distance, 3, dv );
 
 							/* make second triangle */
 							dv[ 1 ] = dv[ 2 ];
 							dv[ 2 ] = dv[ 3 ];
-							MakeDecalProjector( p->shaderInfo, projection, distance, 3, dv );
+							MakeDecalProjector( p.shaderInfo, projection, distance, 3, dv );
 						}
 					}
 				}
@@ -468,16 +467,14 @@ void ProcessDecals(){
 				/* clean up */
 				free( mesh );
 			}
-
-			/* remove patch from entity (fixme: leak!) */
-			e.patches = p->next;
-
-			/* push patch to worldspawn (enable this to debug projectors) */
-			#if 0
-			p->next = entities[ 0 ].patches;
-			entities[ 0 ].patches = p;
-			#endif
 		}
+		/* remove patches from entity */
+		e.patches.clear();
+
+		/* push patch to worldspawn (enable this to debug projectors) */
+		#if 0
+		entities[ 0 ].patches.splice_after( entities[ 0 ].patches.cbefore_begin(), e.patches );
+		#endif
 	}
 
 	/* emit some stats */

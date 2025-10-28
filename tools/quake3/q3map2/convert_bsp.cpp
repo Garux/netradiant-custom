@@ -954,7 +954,7 @@ static void PseudoCompileBSP( bool need_tree ){
 	{
 		/* get entity */
 		entity_t& entity = entities[ entityNum ];
-		if ( entity.brushes.empty() && entity.patches == nullptr ) {
+		if ( entity.brushes.empty() && entity.patches.empty() ) {
 			continue;
 		}
 

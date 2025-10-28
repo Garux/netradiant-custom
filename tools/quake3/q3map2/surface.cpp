@@ -887,7 +887,6 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 	ds.recvShadows = p.recvShadows;
 
 	ds.shaderInfo = si;
-	ds.mapMesh = &p;
 	ds.sampleSize = p.lightmapSampleSize;
 	ds.lightmapScale = p.lightmapScale;   /* ydnar */
 	ds.ambientColor = p.ambientColor;

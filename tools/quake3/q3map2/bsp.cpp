@@ -156,7 +156,7 @@ static void SetCloneModelNumbers(){
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* only entities with brushes or patches get a model number */
-		if ( entities[ i ].brushes.empty() && entities[ i ].patches == nullptr ) {
+		if ( entities[ i ].brushes.empty() && entities[ i ].patches.empty() ) {
 			continue;
 		}
 
@@ -176,7 +176,7 @@ static void SetCloneModelNumbers(){
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* only entities with brushes or patches get a model number */
-		if ( entities[ i ].brushes.empty() && entities[ i ].patches == nullptr ) {
+		if ( entities[ i ].brushes.empty() && entities[ i ].patches.empty() ) {
 			continue;
 		}
 
@@ -207,7 +207,7 @@ static void SetCloneModelNumbers(){
 
 				/* nuke the brushes/patches for this entity (fixme: leak!) */
 				auto *leak = new brushlist_t( std::move( entities[ i ].brushes ) ); // are brushes referenced elsewhere, so we do not nuke them really?
-				entities[ i ].patches = nullptr;
+				entities[ i ].patches.clear();
 			}
 		}
 	}
@@ -539,7 +539,7 @@ static void ProcessModels(){
 	{
 		/* get entity */
 		entity_t& entity = entities[ entityNum ];
-		if ( entity.brushes.empty() && entity.patches == nullptr ) {
+		if ( entity.brushes.empty() && entity.patches.empty() ) {
 			continue;
 		}
 

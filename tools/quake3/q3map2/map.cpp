@@ -1241,9 +1241,9 @@ static void AdjustBrushesForOrigin( entity_t& ent ){
 	}
 
 	/* walk patch list */
-	for ( parseMesh_t *p = ent.patches; p != nullptr; p = p->next )
+	for ( parseMesh_t& p : ent.patches )
 	{
-		for ( bspDrawVert_t& vert : Span( p->mesh.verts, p->mesh.width * p->mesh.height ) )
+		for ( bspDrawVert_t& vert : Span( p.mesh.verts, p.mesh.width * p.mesh.height ) )
 			vert.xyz -= ent.originbrush_origin;
 	}
 }
@@ -1286,15 +1286,7 @@ static void MoveBrushesToWorld( entity_t& ent ){
 	}
 
 	/* move patches */
-	if ( ent.patches != nullptr ) {
-		parseMesh_t *pm;
-		for ( pm = ent.patches; pm->next != nullptr; pm = pm->next ){};
-
-		pm->next = entities[ 0 ].patches;
-		entities[ 0 ].patches = ent.patches;
-
-		ent.patches = nullptr;
-	}
+	entities[ 0 ].patches.splice_after( entities[ 0 ].patches.cbefore_begin(), ent.patches );
 }
 
 
@@ -1312,9 +1304,9 @@ static void SetEntityBounds( entity_t& e ){
 	{
 		minmax.extend( b.minmax );
 	}
-	for ( const parseMesh_t *p = e.patches; p; p = p->next )
+	for ( const parseMesh_t& p : e.patches )
 	{
-		for ( const bspDrawVert_t& vert : Span( p->mesh.verts, p->mesh.width * p->mesh.height ) )
+		for ( const bspDrawVert_t& vert : Span( p.mesh.verts, p.mesh.width * p.mesh.height ) )
 			minmax.extend( vert.xyz );
 	}
 
@@ -1327,9 +1319,9 @@ static void SetEntityBounds( entity_t& e ){
 	{
 		b.eMinmax = minmax;
 	}
-	for ( parseMesh_t *p = e.patches; p; p = p->next )
+	for ( parseMesh_t& p : e.patches )
 	{
-		p->eMinmax = minmax;
+		p.eMinmax = minmax;
 	}
 }
 
@@ -1347,7 +1339,7 @@ static void LoadEntityIndexMap( entity_t& e ){
 
 
 	/* this only works with bmodel ents */
-	if ( e.brushes.empty() && e.patches == nullptr ) {
+	if ( e.brushes.empty() && e.patches.empty() ) {
 		return;
 	}
 
@@ -1464,8 +1456,8 @@ static void LoadEntityIndexMap( entity_t& e ){
 	/* store the index map in every brush/patch in the entity */
 	for ( brush_t& b : e.brushes )
 		b.im = im;
-	for ( parseMesh_t *p = e.patches; p != nullptr; p = p->next )
-		p->im = im;
+	for ( parseMesh_t& p : e.patches )
+		p.im = im;
 }
 
 EntityCompileParams ParseEntityCompileParams( const entity_t& e, const entity_t *eparent, bool worldShadowGroup ){
@@ -1640,15 +1632,15 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 		brush.ambientColor       = params.ambientColor;
 	}
 
-	for ( parseMesh_t *patch = mapEnt.patches; patch != nullptr; patch = patch->next )
+	for ( parseMesh_t& patch : mapEnt.patches )
 	{
-		patch->entityNum = mapEnt.mapEntityNum;
-		patch->castShadows        = params.castShadows;
-		patch->recvShadows        = params.recvShadows;
-		patch->lightmapSampleSize = params.lightmapSampleSize;
-		patch->lightmapScale      = params.lightmapScale;
-		patch->celShader          = params.celShader;
-		patch->ambientColor       = params.ambientColor;
+		patch.entityNum = mapEnt.mapEntityNum;
+		patch.castShadows        = params.castShadows;
+		patch.recvShadows        = params.recvShadows;
+		patch.lightmapSampleSize = params.lightmapSampleSize;
+		patch.lightmapScale      = params.lightmapScale;
+		patch.celShader          = params.celShader;
+		patch.ambientColor       = params.ambientColor;
 	}
 
 	/* ydnar: gs mods: set entity bounds */

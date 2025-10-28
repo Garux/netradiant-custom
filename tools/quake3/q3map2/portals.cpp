@@ -547,7 +547,7 @@ EFloodEntities FloodEntities( tree_t& tree ){
 		}
 #endif
 		/* also allow bmodel entities outside, as they could be on a moving path that will go into the map */
-		if ( !e.brushes.empty() || e.patches != nullptr || e.classname_is( "_decal" ) ) { //_decal primitive is freed at this point
+		if ( !e.brushes.empty() || !e.patches.empty() || e.classname_is( "_decal" ) ) { //_decal primitive is freed at this point
 			continue;
 		}
 

@@ -753,8 +753,6 @@ struct mesh_t
 
 struct parseMesh_t
 {
-	parseMesh_t  *next;
-
 	int entityNum, brushNum;                    /* ydnar: editor numbering */
 
 	/* ydnar: for shadowcasting entities */
@@ -768,7 +766,7 @@ struct parseMesh_t
 	/* ydnar: gs mods */
 	int lightmapSampleSize;                     /* jal : entity based _lightmapsamplesize */
 	float lightmapScale;
-	Vector3 ambientColor;
+	Vector3 ambientColor{ 0 };
 	MinMax eMinmax;
 	indexMap_t          *im;
 
@@ -853,7 +851,6 @@ struct mapDrawSurface_t
 	shaderInfo_t        *shaderInfo;
 	shaderInfo_t        *celShader;
 	const brush_t       *mapBrush;
-	parseMesh_t         *mapMesh;
 	sideRef_t           *sideRef;
 
 	int fogNum;
@@ -918,7 +915,7 @@ struct entity_t
 	Vector3 origin{ 0 };
 	brushlist_t brushes;
 	std::vector<brush_t*>  colorModBrushes;
-	parseMesh_t         *patches;
+	std::forward_list<parseMesh_t> patches;
 	int mapEntityNum;                               /* .map file entities numbering */
 	int firstDrawSurf;
 	int firstBrush, numBrushes;                     /* only valid during BSP compile */
@@ -1528,7 +1525,7 @@ enum class EFloodEntities
 EFloodEntities              FloodEntities( tree_t& tree );
 void                        FillOutside( node_t *headnode );
 void                        FloodAreas( tree_t& tree );
-inline portal_t             *AllocPortal(){ return new portal_t(); }
+inline portal_t             *AllocPortal(){ return new portal_t(); } // zero initializes
 inline void                 FreePortal( portal_t *p ){ delete p; }
 
 void                        MakeTreePortals( tree_t& tree );
@@ -1561,7 +1558,7 @@ void                        EndModel( const entity_t& e, node_t *headnode );
 
 /* tree.c */
 void                        FreeTree( tree_t& tree );
-inline node_t               *AllocNode(){ return new node_t(); }
+inline node_t               *AllocNode(){ return new node_t(); } // zero initializes
 
 
 /* patch.c */

@@ -311,25 +311,21 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 	}
 
 	/* allocate patch mesh */
-	parseMesh_t *pm = safe_calloc( sizeof( *pm ) );
+	parseMesh_t& pm = mapEnt.patches.emplace_front(); // zero initialize
 
 	/* ydnar: add entity/brush numbering */
-	pm->entityNum = mapEnt.mapEntityNum;
-	pm->brushNum = mapPrimitiveNum;
+	pm.entityNum = mapEnt.mapEntityNum;
+	pm.brushNum = mapPrimitiveNum;
 
 	/* set shader */
-	pm->shaderInfo = &ShaderInfoForShader( shader );
+	pm.shaderInfo = &ShaderInfoForShader( shader );
 
 	/* set mesh */
-	pm->mesh = m;
+	pm.mesh = m;
 
 	/* set longest curve */
-	pm->longestCurve = longestCurve;
-	pm->maxIterations = maxIterations;
-
-	/* link to the entity */
-	pm->next = mapEnt.patches;
-	mapEnt.patches = pm;
+	pm.longestCurve = longestCurve;
+	pm.maxIterations = maxIterations;
 }
 
 
@@ -382,8 +378,8 @@ void PatchMapDrawSurfs( entity_t& e ){
 	Sys_FPrintf( SYS_VRB, "--- PatchMapDrawSurfs ---\n" );
 
 	std::vector<groupMesh_t> meshes;
-	for ( parseMesh_t *pm = e.patches; pm; pm = pm->next ){
-		meshes.push_back( { .mesh = *pm, .grouped = false } );
+	for ( parseMesh_t& pm : e.patches ){
+		meshes.push_back( { .mesh = pm, .grouped = false } );
 	}
 	if ( meshes.empty() ) {
 		return;

@@ -207,7 +207,7 @@ static int EmitDrawNode_r( node_t *node ){
 void SetModelNumbers(){
 	int models = 1;
 	for ( std::size_t i = 1; i < entities.size(); ++i ) {
-		if ( !entities[i].brushes.empty() || entities[i].patches ) {
+		if ( !entities[i].brushes.empty() || !entities[i].patches.empty() ) {
 			char value[16];
 			sprintf( value, "*%i", models );
 			models++;
@@ -501,9 +501,9 @@ void BeginModel( const entity_t& e ){
 	}
 
 	/* bound patches */
-	for ( const parseMesh_t *p = e.patches; p; p = p->next )
+	for ( const parseMesh_t& p : e.patches )
 	{
-		for ( const bspDrawVert_t& vert : Span( p->mesh.verts, p->mesh.width * p->mesh.height ) )
+		for ( const bspDrawVert_t& vert : Span( p.mesh.verts, p.mesh.width * p.mesh.height ) )
 			minmax.extend( vert.xyz );
 	}
 
