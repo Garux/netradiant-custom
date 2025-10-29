@@ -130,7 +130,8 @@ public:
 		scene::Node& node = path.top().get();
 		if( Node_isEntity( node ) ) // unhide group entity labels, when their content is partially visible
 			if( scene::Traversable* traversable = Node_getTraversable( node ) )
-				if( Traversable_any_of_children( traversable, []( const scene::Node& node ){ return !node.excluded( scene::Node::eLayerHidden ); } ) )
+				if( Traversable_any_of_children( traversable, []( const scene::Node& node ){
+				return !node.excluded( scene::Node::eLayerHidden ) && !node.isRoot(); } ) ) // also not misc_model content node
 					node.disable( scene::Node::eLayerHidden );
 	}
 };
