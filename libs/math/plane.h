@@ -32,7 +32,8 @@ class Plane3___
 public:
 	T a, b, c, d;
 
-	Plane3___() = default;
+	Plane3___(){
+	}
 	Plane3___( double _a, double _b, double _c, double _d )
 		: a( _a ), b( _b ), c( _c ), d( _d ){
 	}

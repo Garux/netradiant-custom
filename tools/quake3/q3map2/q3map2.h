@@ -386,7 +386,8 @@ struct image_t
 	int width, height;
 	byte *pixels = nullptr;
 
-	image_t() = default;
+	image_t(){
+	}
 	image_t( const char *name, const char *filename, int width, int height, byte *pixels ) :
 		name( name ),
 		filename( filename ),
@@ -720,7 +721,7 @@ struct brush_t
 	int lightmapSampleSize;                 /* jal : entity based _lightmapsamplesize */
 	float lightmapScale;
 	float shadeAngleDegrees;                /* jal : entity based _shadeangle */
-	Vector3 ambientColor;
+	Vector3 ambientColor{ 0 };
 	MinMax eMinmax;
 	indexMap_t          *im;
 

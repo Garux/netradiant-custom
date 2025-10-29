@@ -277,7 +277,8 @@ struct Colour4b
 {
 	unsigned char r, g, b, a;
 
-	Colour4b() = default;
+	Colour4b(){
+	}
 
 	Colour4b( unsigned char _r, unsigned char _g, unsigned char _b, unsigned char _a )
 		: r( _r ), g( _g ), b( _b ), a( _a ){

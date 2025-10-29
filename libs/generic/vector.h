@@ -8,7 +8,8 @@ class BasicVector2
 {
 	Element m_elements[2];
 public:
-	BasicVector2() = default;
+	BasicVector2(){
+	}
 	template<typename OtherElement>
 	BasicVector2( const BasicVector2<OtherElement>& other ){
 		x() = static_cast<Element>( other.x() );
@@ -54,7 +55,8 @@ class BasicVector3
 	Element m_elements[3];
 public:
 
-	BasicVector3() = default;
+	BasicVector3(){
+	}
 	template<typename OtherElement>
 	BasicVector3( const BasicVector3<OtherElement>& other ){
 		x() = static_cast<Element>( other.x() );
@@ -124,7 +126,8 @@ class BasicVector4
 	Element m_elements[4];
 public:
 
-	BasicVector4() = default;
+	BasicVector4(){
+	}
 	BasicVector4( Element x_, Element y_, Element z_, Element w_ ){
 		x() = x_;
 		y() = y_;

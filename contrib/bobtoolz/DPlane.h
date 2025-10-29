@@ -50,7 +50,8 @@ public:
 	vec_t DistanceToPoint( const vec3_t pnt ) const;
 
 	DPlane( const vec3_t va, const vec3_t vb, const vec3_t vc, const _QERFaceData* texData );
-	DPlane() = default;
+	DPlane(){
+	}
 
 	bool m_bChkOk;
 	_QERFaceData texInfo;

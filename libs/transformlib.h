@@ -79,7 +79,8 @@ struct Skew
 	std::size_t index;
 	float amount;
 
-	Skew() = default;
+	Skew(){
+	}
 	Skew( std::size_t index_, float amount_ ) : index( index_ ), amount( amount_ ){
 	}
 	bool operator!= ( const Skew& other ) const {

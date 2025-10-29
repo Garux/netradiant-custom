@@ -59,7 +59,8 @@ class ESide
 {
 	bool m_value;
 public:
-	ESide() = default;
+	ESide(){
+	}
 	ESide( bool value ) : m_value( value ){}
 	operator bool() const {
 		return m_value;

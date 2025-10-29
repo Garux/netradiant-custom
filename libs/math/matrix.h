@@ -38,7 +38,8 @@ class Matrix4
 {
 	float m_elements[16];
 public:
-	Matrix4() = default;
+	Matrix4(){
+	}
 	Matrix4( float xx_, float xy_, float xz_, float xw_,
 	         float yx_, float yy_, float yz_, float yw_,
 	         float zx_, float zy_, float zz_, float zw_,

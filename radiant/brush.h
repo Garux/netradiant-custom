@@ -271,7 +271,8 @@ typedef ReferencePair<FaceShaderObserver> FaceShaderObserverPair;
 class ContentsFlagsValue
 {
 public:
-	ContentsFlagsValue() = default;
+	ContentsFlagsValue(){
+	}
 	ContentsFlagsValue( int surfaceFlags, int contentFlags, int value, bool specified ) :
 		m_surfaceFlags( surfaceFlags ),
 		m_contentFlags( contentFlags ),
