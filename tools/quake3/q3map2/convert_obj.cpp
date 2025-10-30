@@ -216,7 +216,7 @@ void Convert_ReferenceLightmaps( const char* base, std::vector<int>& lmIndices )
 		/* handle { } section */
 		if ( !( GetToken( true ) && strEqual( token, "{" ) ) )
 			Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
-			       shaderfile, scriptline, token, g_strLoadedFileLocation );
+			       shaderfile, scriptline, token, g_loadedScriptLocation.c_str() );
 		while ( GetToken( true ) && !strEqual( token, "}" ) )
 		{
 			/* parse stage directives */

@@ -98,7 +98,7 @@ static std::forward_list<VFS_PAKFILE>  g_pakFiles;
 static std::vector<CopiedString> g_strDirs;
 std::vector<CopiedString> g_strForbiddenDirs;
 static constexpr bool g_bUsePak = true;
-char g_strLoadedFileLocation[1024];
+StringOutputStream g_loadedScriptLocation;
 
 // =============================================================================
 // Static functions
@@ -262,11 +262,11 @@ int vfsGetFileCount( const char *filename ){
 }
 
 // NOTE: when loading a file, you have to allocate one extra byte and set it to \0
-MemBuffer vfsLoadFile( const char *filename, int index /* = 0 */ ){
+MemBuffer vfsLoadFile( const char *filename, int index /* = 0 */, bool script /* = false */ ){
 
-	const auto load_full_path = [] ( const char *filename ) -> MemBuffer
+	const auto load_full_path = [script] ( const char *filename ) -> MemBuffer
 	{
-		strcpy( g_strLoadedFileLocation, filename );
+		if( script ) g_loadedScriptLocation( filename );
 
 		MemBuffer buffer;
 
@@ -308,7 +308,7 @@ MemBuffer vfsLoadFile( const char *filename, int index /* = 0 */ ){
 	{
 		if ( strEqual( file.name.c_str(), fixedname ) && 0 == index-- )
 		{
-			std::snprintf( g_strLoadedFileLocation, std::size( g_strLoadedFileLocation ), "%s :: %s", file.pak.unzFilePath.c_str(), filename );
+			if( script ) g_loadedScriptLocation( file.pak.unzFilePath.c_str(), " :: ", filename );
 
 			unzFile zipfile = file.pak.zipfile;
 			*(unz_s*)zipfile = file.zipinfo;

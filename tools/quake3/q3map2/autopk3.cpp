@@ -381,7 +381,7 @@ int pk3BSPMain( Args& args ){
 				/* handle { } section */
 				if ( !( GetToken( true ) && strEqual( token, "{" ) ) ) {
 					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
-					       scriptFile.c_str(), scriptline, token, g_strLoadedFileLocation );
+					       scriptFile.c_str(), scriptline, token, g_loadedScriptLocation.c_str() );
 				}
 
 				while ( GetToken( true ) && !strEqual( token, "}" ) )
@@ -410,7 +410,7 @@ int pk3BSPMain( Args& args ){
 			/* handle { } section */
 			if ( !( GetToken( true ) && strEqual( token, "{" ) ) ) {
 				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
-				       scriptFile.c_str(), scriptline, token, g_strLoadedFileLocation );
+				       scriptFile.c_str(), scriptline, token, g_loadedScriptLocation.c_str() );
 			}
 
 			bool hasmap = false;
@@ -797,7 +797,7 @@ int repackBSPMain( Args& args ){
 			/* handle { } section */
 			if ( !( text.GetToken( true ) && strEqual( token, "{" ) ) ) {
 				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
-				       scriptFile.c_str(), scriptline, token, g_strLoadedFileLocation );
+				       scriptFile.c_str(), scriptline, token, g_loadedScriptLocation.c_str() );
 			}
 
 			bool hasmap = false;

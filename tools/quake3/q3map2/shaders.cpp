@@ -782,17 +782,17 @@ shaderInfo_t& ShaderInfoForShader( const char *shaderName ){
 static void Parse1DMatrixAppend( ShaderTextCollector& text, int x, float *m ){
 
 	if ( !text.GetToken( true ) || !strEqual( token, "(" ) ) {
-		Error( "Parse1DMatrixAppend(): line %d: ( not found!\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
+		Error( "Parse1DMatrixAppend(): line %d: ( not found!\nFile location be: %s\n", scriptline, g_loadedScriptLocation.c_str() );
 	}
 	for ( int i = 0; i < x; ++i )
 	{
 		if ( !text.GetToken( false ) ) {
-			Error( "Parse1DMatrixAppend(): line %d: Number not found!\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
+			Error( "Parse1DMatrixAppend(): line %d: Number not found!\nFile location be: %s\n", scriptline, g_loadedScriptLocation.c_str() );
 		}
 		m[ i ] = atof( token );
 	}
 	if ( !text.GetToken( true ) || !strEqual( token, ")" ) ) {
-		Error( "Parse1DMatrixAppend(): line %d: ) not found!\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
+		Error( "Parse1DMatrixAppend(): line %d: ) not found!\nFile location be: %s\n", scriptline, g_loadedScriptLocation.c_str() );
 	}
 }
 
@@ -823,7 +823,7 @@ static void ParseShaderFile( const char *filename ){
 		/* handle { } section */
 		if ( !( text.GetToken( true ) && strEqual( token, "{" ) ) ) {
 			Error( "ParseShaderFile(): %s, line %d: { not found!\nFound instead: %s\nLast known shader: %s\nFile location be: %s\n",
-			       filename, scriptline, token, si.shader.c_str(), g_strLoadedFileLocation );
+			       filename, scriptline, token, si.shader.c_str(), g_loadedScriptLocation.c_str() );
 		}
 
 		while ( text.GetToken( true ) && !strEqual( token, "}" ) )

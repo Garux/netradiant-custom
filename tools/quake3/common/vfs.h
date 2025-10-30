@@ -39,10 +39,10 @@ int vfsGetFileCount( const char *filename );
 /// \param[in] index -1: \p filename is absolute path
 /// \param[in] index >= 0: \p filename is relative path in VSF, Nth occurrence of file
 /// \return non-empty \c MemBuffer on success
-MemBuffer vfsLoadFile( const char *filename, int index = 0 );
+MemBuffer vfsLoadFile( const char *filename, int index = 0, bool script = false );
 std::vector<CopiedString> vfsListShaderFiles( const char *shaderPath );
 bool vfsPackFile( const char *filename, const char *packname, const int compLevel );
 bool vfsPackFile_Absolute_Path( const char *filepath, const char *filename, const char *packname, const int compLevel );
 
 extern std::vector<CopiedString> g_strForbiddenDirs;
-extern char g_strLoadedFileLocation[1024];
+extern class StringOutputStream g_loadedScriptLocation;
