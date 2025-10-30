@@ -615,37 +615,45 @@ static int c_areas;
    floods through leaf portals to tag leafs with an area
  */
 
-static void FloodAreas_r( node_t *node ){
-	if ( node->area != AREA_INVALID ) {
-		return;
-	}
-	if ( node->cluster == CLUSTER_OPAQUE ) {
-		return;
-	}
+static void FloodAreas( node_t *startNode ){
+	std::vector<node_t*> nodes{ startNode }, nodes2;
+	while( !nodes.empty() ){
+		for( node_t *node : nodes )
+		{
+			if ( node->area != AREA_INVALID ) {
+				continue;
+			}
+			if ( node->cluster == CLUSTER_OPAQUE ) {
+				continue;
+			}
 
-	node->area = c_areas;
+			node->area = c_areas;
 
-	/* ydnar: skybox nodes set the skybox area */
-	if ( node->skybox ) {
-		skyboxArea = c_areas;
-	}
+			/* ydnar: skybox nodes set the skybox area */
+			if ( node->skybox ) {
+				skyboxArea = c_areas;
+			}
 
-	for ( const portal_t *p = node->portals; p; p = p->nextPortal( node ) )
-	{
-		/* ydnar: allow areaportal portals to block area flow */
-		/* this check alone w/o node->areaportal path seems sufficient
-		   besides when node->compileFlags are overriden by hint or struct split flush with areaportal
-		   we make it persistent in FilterBrushIntoTree_r()
-		   note: node->areaportal way fails for leafs with only opaque and areaportal portals */
-		if ( p->compileFlags & C_AREAPORTAL ) {
-			continue;
+			for ( const portal_t *p = node->portals; p; p = p->nextPortal( node ) )
+			{
+				/* ydnar: allow areaportal portals to block area flow */
+				/* this check alone w/o node->areaportal path seems sufficient
+				   besides when node->compileFlags are overriden by hint or struct split flush with areaportal
+				   we make it persistent in FilterBrushIntoTree_r()
+				   note: node->areaportal way fails for leafs with only opaque and areaportal portals */
+				if ( p->compileFlags & C_AREAPORTAL ) {
+					continue;
+				}
+
+				if ( !PortalPassable( p ) ) {
+					continue;
+				}
+
+				nodes2.push_back( p->otherNode( node ) );
+			}
 		}
-
-		if ( !PortalPassable( p ) ) {
-			continue;
-		}
-
-		FloodAreas_r( p->otherNode( node ) );
+		nodes.swap( nodes2 );
+		nodes2.clear();
 	}
 }
 
@@ -668,7 +676,7 @@ static void FindAreas_r( node_t *node ){
 		return;
 	}
 
-	FloodAreas_r( node );
+	FloodAreas( node );
 	c_areas++;
 }
 
