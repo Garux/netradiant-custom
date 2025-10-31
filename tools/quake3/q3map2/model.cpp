@@ -1052,11 +1052,6 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		}
 	}
 
-	/* hack: Stable-1_2 and trunk have differing row/column major matrix order
-	   this transpose is necessary with Stable-1_2
-	   uncomment the following line with old m4x4_t (non 1.3/spog_branch) code */
-	//%	m4x4_transpose( transform );
-
 	/* each surface on the model will become a new map drawsurface */
 	//%	Sys_FPrintf( SYS_VRB, "Model %s has %d surfaces\n", name, numSurfaces );
 	for ( const auto& surface : model->m_meshes )
@@ -1226,6 +1221,27 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 }
 
 
+Matrix4 ModelGetTransform( const entity_t& e, const Vector3& parent_origin /* = g_vector3_identity */ ){
+	/* get origin */
+	const Vector3 origin = e.vectorForKey( "origin" ) - parent_origin;    /* offset by parent, it will be added ingame */
+
+	/* get scale */
+	Vector3 scale( 1 );
+	if( !e.read_keyvalue( scale, "modelscale_vec" ) )
+		if( e.read_keyvalue( scale[0], "modelscale" ) )
+			scale[1] = scale[2] = scale[0];
+
+	/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
+	Vector3 angles( 0 );
+	if ( e.read_keyvalue( angles, "angles" ) || e.read_keyvalue( angles.y(), "angle" ) )
+		angles = angles_pyr2rpy( angles );
+
+	/* set transform matrix (thanks spog) */
+	Matrix4 transform( g_matrix4_identity );
+	matrix4_transform_by_euler_xyz_degrees( transform, origin, angles, scale );
+	return transform;
+}
+
 
 /*
    AddTriangleModels()
@@ -1276,24 +1292,6 @@ void AddTriangleModels( entity_t& eparent ){
 		/* get spawnflags */
 		const int spawnFlags = e.intForKey( "spawnflags" );
 
-		/* get origin */
-		const Vector3 origin = e.vectorForKey( "origin" ) - eparent.origin;    /* offset by parent */
-
-		/* get scale */
-		Vector3 scale( 1 );
-		if( !e.read_keyvalue( scale, "modelscale_vec" ) )
-			if( e.read_keyvalue( scale[0], "modelscale" ) )
-				scale[1] = scale[2] = scale[0];
-
-		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
-		Vector3 angles( 0 );
-		if ( e.read_keyvalue( angles, "angles" ) || e.read_keyvalue( angles.y(), "angle" ) )
-			angles = angles_pyr2rpy( angles );
-
-		/* set transform matrix (thanks spog) */
-		Matrix4 transform( g_matrix4_identity );
-		matrix4_transform_by_euler_xyz_degrees( transform, origin, angles, scale );
-
 		/* get shader remappings */
 		std::list<remap_t> remaps;
 		for ( const auto& ep : e.epairs )
@@ -1343,6 +1341,6 @@ void AddTriangleModels( entity_t& eparent ){
 		const EntityCompileParams params = ParseEntityCompileParams( e, &eparent, &eparent == &entities[ 0 ] );
 
 		/* insert the model */
-		InsertModel( model, skin, frame, transform, &remaps, eparent, spawnFlags, clipDepth, params );
+		InsertModel( model, skin, frame, ModelGetTransform( e, eparent.origin ), &remaps, eparent, spawnFlags, clipDepth, params );
 	}
 }

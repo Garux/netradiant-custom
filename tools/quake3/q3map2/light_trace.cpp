@@ -1053,8 +1053,7 @@ static void PopulateTraceNodes(){
 
 
 	/* add worldspawn triangles */
-	Matrix4 transform( g_matrix4_identity );
-	PopulateWithBSPModel( bspModels[ 0 ], transform );
+	PopulateWithBSPModel( bspModels[ 0 ], g_matrix4_identity );
 
 	/* walk each entity list */
 	for ( std::size_t i = 1; i < entities.size(); ++i )
@@ -1070,29 +1069,6 @@ static void PopulateTraceNodes(){
 		if ( !castShadows ) {
 			continue;
 		}
-
-		/* get entity origin */
-		const Vector3 origin( e.vectorForKey( "origin" ) );
-
-		/* get scale */
-		Vector3 scale( 1 );
-		if( !e.read_keyvalue( scale, "modelscale_vec" ) )
-			if( e.read_keyvalue( scale[0], "modelscale" ) )
-				scale[1] = scale[2] = scale[0];
-
-		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
-		Vector3 angles( 0 );
-		if ( e.read_keyvalue( angles, "angles" ) || e.read_keyvalue( angles.y(), "angle" ) )
-			angles = angles_pyr2rpy( angles );
-
-		/* set transform matrix (thanks spog) */
-		transform = g_matrix4_identity;
-		matrix4_transform_by_euler_xyz_degrees( transform, origin, angles, scale );
-
-		/* hack: Stable-1_2 and trunk have differing row/column major matrix order
-		   this transpose is necessary with Stable-1_2
-		   uncomment the following line with old m4x4_t (non 1.3/spog_branch) code */
-		//%	m4x4_transpose( transform );
 
 		/* get model */
 		value = e.valueForKey( "model" );
@@ -1111,12 +1087,12 @@ static void PopulateTraceNodes(){
 				continue;
 			}
 			// using only origin for bmodels transform; only exception in vq3 is func_pendulum transform determined by angle/angles
-			PopulateWithBSPModel( bspModels[ m ], matrix4_translation_for_vec3( origin ) );
+			PopulateWithBSPModel( bspModels[ m ], matrix4_translation_for_vec3( e.vectorForKey( "origin" ) ) );
 			break;
 
 		/* external model */
 		default:
-			PopulateWithPicoModel( castShadows, LoadModelWalker( value, e.intForKey( "_frame", "frame" ) ), transform );
+			PopulateWithPicoModel( castShadows, LoadModelWalker( value, e.intForKey( "_frame", "frame" ) ), ModelGetTransform( e ) );
 			continue;
 		}
 
@@ -1136,12 +1112,12 @@ static void PopulateTraceNodes(){
 			if ( m <= 0 || m >= bspModels.size() ) {
 				continue;
 			}
-			PopulateWithBSPModel( bspModels[ m ], matrix4_translation_for_vec3( origin ) );
+			PopulateWithBSPModel( bspModels[ m ], matrix4_translation_for_vec3( e.vectorForKey( "origin" ) ) );
 			break;
 
 		/* external model */
 		default:
-			PopulateWithPicoModel( castShadows, LoadModelWalker( value, e.intForKey( "_frame2" ) ), transform );
+			PopulateWithPicoModel( castShadows, LoadModelWalker( value, e.intForKey( "_frame2" ) ), ModelGetTransform( e ) );
 			continue;
 		}
 	}

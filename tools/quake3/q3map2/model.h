@@ -25,6 +25,8 @@
 #include <functional>
 #include "generic/vector.h"
 
+Matrix4 ModelGetTransform( const entity_t& e, const Vector3& parent_origin = g_vector3_identity );
+
 class AssMeshWalker
 {
 public:
