@@ -1110,7 +1110,8 @@ static void PopulateTraceNodes(){
 			if ( m <= 0 || m >= bspModels.size() ) {
 				continue;
 			}
-			PopulateWithBSPModel( bspModels[ m ], transform );
+			// using only origin for bmodels transform; only exception in vq3 is func_pendulum transform determined by angle/angles
+			PopulateWithBSPModel( bspModels[ m ], matrix4_translation_for_vec3( origin ) );
 			break;
 
 		/* external model */
@@ -1135,7 +1136,7 @@ static void PopulateTraceNodes(){
 			if ( m <= 0 || m >= bspModels.size() ) {
 				continue;
 			}
-			PopulateWithBSPModel( bspModels[ m ], transform );
+			PopulateWithBSPModel( bspModels[ m ], matrix4_translation_for_vec3( origin ) );
 			break;
 
 		/* external model */
