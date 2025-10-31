@@ -1232,7 +1232,8 @@ void create_main_menu( QMenuBar *menubar, MainFrame::EViewStyle style ){
 	create_misc_menu( menubar );
 	create_entity_menu( menubar );
 	create_brush_menu( menubar );
-	create_patch_menu( menubar );
+	if ( !string_equal( g_pGameDescription->getKeyValue( "no_patch" ), "1" ) )
+		create_patch_menu( menubar );
 	create_plugins_menu( menubar );
 	create_help_menu( menubar );
 }
