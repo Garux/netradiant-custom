@@ -180,7 +180,7 @@ void WriteSurfaceExtraFile( const char *path ){
 			fprintf( sf, "\tsampleSize %d\n", se->sampleSize );
 		}
 
-		if ( se->ambientColor != seDefault.ambientColor || se == &seDefault ) {
+		if ( ( se->ambientColor != g_vector3_identity && se->ambientColor != seDefault.ambientColor ) || se == &seDefault ) { // 0 == use global
 			fprintf( sf, "\tambientColor ( %f %f %f )\n", se->ambientColor[0], se->ambientColor[1], se->ambientColor[2] );
 		}
 
