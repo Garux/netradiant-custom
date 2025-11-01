@@ -76,6 +76,7 @@ static bool AddScriptToStack( const char *filename, int index, bool verbose ){
 		}
 
 		scriptstack.emplace_back( filename, std::move( buffer ) );
+		scriptline = 1;
 		return true;
 	}
 	else
@@ -112,6 +113,7 @@ void ParseFromMemory( const char *buffer, size_t size ){
 	MemBuffer bu( size );
 	memcpy( bu.data(), buffer, size );
 	scriptstack.emplace_back( "memory buffer", std::move( bu ) );
+	scriptline = 1;
 }
 
 
