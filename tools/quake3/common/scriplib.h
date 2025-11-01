@@ -32,7 +32,7 @@ extern int scriptline;
 /// \param[in] index >= 0: \p filename is relative path in VSF, Nth occurrence of file
 /// \return true on success
 bool LoadScriptFile( const char *filename, int index = 0, bool verbose = true );
-void ParseFromMemory( char *buffer, size_t size );
+void ParseFromMemory( const char *buffer, size_t size );
 
 /// \param[in] crossline true: write next token to \c token or return false on EOF
 /// \param[in] crossline false: find next token on the current line or emit \c Error

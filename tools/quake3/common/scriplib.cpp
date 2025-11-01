@@ -106,7 +106,7 @@ bool LoadScriptFile( const char *filename, int index /* = 0 */, bool verbose /* 
    ParseFromMemory
    ==============
  */
-void ParseFromMemory( char *buffer, size_t size ){
+void ParseFromMemory( const char *buffer, size_t size ){
 	scriptstack.clear();
 	tokenready = false;
 	MemBuffer bu( size );

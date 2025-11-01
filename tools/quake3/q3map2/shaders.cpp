@@ -1094,7 +1094,7 @@ static void ParseShaderFile( const char *filename ){
 					sun.numSamples = atoi( token );
 				}
 
-				/* apply sky surfaceparm */
+				/* apply sky surfaceparm, this is required by ELightType::Sun to work */
 				ApplySurfaceParm( "sky", &si.contentFlags, &si.surfaceFlags, &si.compileFlags );
 
 				/* don't process any more tokens on this line */
@@ -1179,13 +1179,12 @@ static void ParseShaderFile( const char *filename ){
 				else if ( striEqual( token, "q3map_skyLight" )  ) {
 					skylight_t& skylight = si.skylights.emplace_back();
 					text.GetToken( false );
-					skylight.value = atof( token );
+					skylight.value = std::max( atof( token ), 0.0 );
 					text.GetToken( false );
-					skylight.iterations = atoi( token );
+					skylight.iterations = std::max( atoi( token ), 2 );
 
-					/* clamp */
-					value_maximize( skylight.value, 0.0f );
-					value_maximize( skylight.iterations, 2 );
+					/* apply sky surfaceparm, this is required by ELightType::Sun to work */
+					ApplySurfaceParm( "sky", &si.contentFlags, &si.surfaceFlags, &si.compileFlags );
 
 					/* read optional extension: horizon_min horizon_max sample_color*/
 					if( TokenAvailable() ){
