@@ -186,7 +186,7 @@ public:
 		const AABB& other( instance.worldAABB() );
 		for ( Unsigned i = 0; i < 3; ++i )
 		{
-			if ( fabsf( box.origin[i] - other.origin[i] ) > ( box.extents[i] + other.extents[i] ) ) {
+			if ( std::fabs( box.origin[i] - other.origin[i] ) > ( box.extents[i] + other.extents[i] ) ) {
 				return false;
 			}
 		}
@@ -205,7 +205,7 @@ public:
 		const AABB& other( instance.worldAABB() );
 		for ( Unsigned i = 0; i < 3; ++i )
 		{
-			if ( fabsf( box.origin[i] - other.origin[i] ) > ( box.extents[i] - other.extents[i] ) ) {
+			if ( std::fabs( box.origin[i] - other.origin[i] ) > ( box.extents[i] - other.extents[i] ) ) {
 				return false;
 			}
 		}

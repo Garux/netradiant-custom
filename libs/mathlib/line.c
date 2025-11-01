@@ -27,10 +27,8 @@ void line_construct_for_vec3( line_t *line, const vec3_t start, const vec3_t end
 }
 
 int line_test_plane( const line_t* line, const vec4_t plane ){
-	float fDist;
-
 	// calc distance of origin from plane
-	fDist = DotProduct( plane, line->origin ) + plane[3];
+	const float fDist = DotProduct( plane, line->origin ) + plane[3];
 
 	// accept if origin is less than or equal to this distance
 	if ( fabs( fDist ) < fabs( DotProduct( plane, line->extents ) ) ) {

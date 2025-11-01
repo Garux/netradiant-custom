@@ -160,7 +160,7 @@ inline void planepts_quantise( PlanePoints& planepts, double snap ){
 }
 
 inline float vector3_max_abs_component( const Vector3& vec3 ){
-	return std::max( fabsf( vec3[0] ), std::max( fabsf( vec3[1] ), fabsf( vec3[2] ) ) );
+	return std::max( std::fabs( vec3[0] ), std::max( std::fabs( vec3[1] ), std::fabs( vec3[2] ) ) );
 }
 
 inline void edge_snap( Vector3& edge, double snap ){

@@ -24,7 +24,7 @@
 // we use memcpy and memset
 #include <memory.h>
 
-const vec3_t vec3_origin = { 0.0f, 0.0f, 0.0f };
+const vec3_t vec3_origin = { 0, 0, 0 };
 
 const vec3_t g_vec3_axis_x = { 1, 0, 0, };
 const vec3_t g_vec3_axis_y = { 0, 1, 0, };
@@ -36,22 +36,17 @@ const vec3_t g_vec3_axis_z = { 0, 0, 1, };
    ================
  */
 bool VectorIsOnAxis( vec3_t v ){
-	int i, zeroComponentCount;
+	int zeroComponentCount = 0;
 
-	zeroComponentCount = 0;
-	for ( i = 0; i < 3; ++i )
+	for ( int i = 0; i < 3; ++i )
 	{
-		if ( v[i] == 0.0 ) {
+		if ( v[i] == 0 ) {
 			zeroComponentCount++;
 		}
 	}
 
-	if ( zeroComponentCount > 1 ) {
-		// The zero vector will be on axis.
-		return true;
-	}
-
-	return false;
+	// The zero vector will be on axis.
+	return zeroComponentCount > 1;
 }
 
 /*
@@ -105,9 +100,7 @@ vec_t VectorLength( const vec3_t v ){
 }
 
 bool VectorCompare( const vec3_t v1, const vec3_t v2 ){
-	int i;
-
-	for ( i = 0; i < 3; ++i )
+	for ( int i = 0; i < 3; ++i )
 		if ( fabs( v1[i] - v2[i] ) > EQUAL_EPSILON ) {
 			return false;
 		}
@@ -168,11 +161,11 @@ vec_t VectorAccurateNormalize( const vec3_t in, vec3_t out ) {
 		return 0;
 	}
 
-	out[0] = (vec_t) ( x / length );
-	out[1] = (vec_t) ( y / length );
-	out[2] = (vec_t) ( z / length );
+	out[0] = x / length;
+	out[1] = y / length;
+	out[2] = z / length;
 
-	return (vec_t) length;
+	return length;
 }
 
 vec_t VectorFastNormalize_( const vec3_t in, vec3_t out ) {
@@ -240,7 +233,6 @@ void VectorScale ( vec3_t v, vec_t scale, vec3_t out )
 void VectorRotate( vec3_t vIn, vec3_t vRotation, vec3_t out ){
 	vec3_t vWork, va;
 	int nIndex[3][2];
-	int i;
 
 	VectorCopy( vIn, va );
 	VectorCopy( va, vWork );
@@ -248,12 +240,12 @@ void VectorRotate( vec3_t vIn, vec3_t vRotation, vec3_t out ){
 	nIndex[1][0] = 2; nIndex[1][1] = 0;
 	nIndex[2][0] = 0; nIndex[2][1] = 1;
 
-	for ( i = 0; i < 3; ++i )
+	for ( int i = 0; i < 3; ++i )
 	{
 		if ( vRotation[i] != 0 ) {
 			float dAngle = vRotation[i] * Q_PI / 180.0f;
-			float c = (vec_t)cos( dAngle );
-			float s = (vec_t)sin( dAngle );
+			float c = cos( dAngle );
+			float s = sin( dAngle );
 			vWork[nIndex[i][0]] = va[nIndex[i][0]] * c - va[nIndex[i][1]] * s;
 			vWork[nIndex[i][1]] = va[nIndex[i][0]] * s + va[nIndex[i][1]] * c;
 		}
@@ -277,26 +269,23 @@ void VectorPolar( vec3_t v, float radius, float theta, float phi ){
 }
 
 void VectorSnap( vec3_t v ){
-	int i;
-	for ( i = 0; i < 3; ++i )
+	for ( int i = 0; i < 3; ++i )
 	{
-		v[i] = (vec_t)FLOAT_TO_INTEGER( v[i] );
+		v[i] = FLOAT_TO_INTEGER( v[i] );
 	}
 }
 
 void VectorISnap( vec3_t point, int snap ){
-	int i;
-	for ( i = 0; i < 3; ++i )
+	for ( int i = 0; i < 3; ++i )
 	{
-		point[i] = (vec_t)FLOAT_SNAP( point[i], snap );
+		point[i] = FLOAT_SNAP( point[i], snap );
 	}
 }
 
 void VectorFSnap( vec3_t point, float snap ){
-	int i;
-	for ( i = 0; i < 3; ++i )
+	for ( int i = 0; i < 3; ++i )
 	{
-		point[i] = (vec_t)FLOAT_SNAP( point[i], snap );
+		point[i] = FLOAT_SNAP( point[i], snap );
 	}
 }
 
@@ -354,18 +343,17 @@ void AddPointToBounds( vec3_t v, vec3_t mins, vec3_t maxs ){
 
 void AngleVectors( vec3_t angles, vec3_t forward, vec3_t right, vec3_t up ){
 	float angle;
-	static float sr, sp, sy, cr, cp, cy;
-	// static to help MS compiler fp bugs
+	float sr, sp, sy, cr, cp, cy;
 
 	angle = angles[YAW] * ( Q_PI * 2.0f / 360.0f );
-	sy = (vec_t)sin( angle );
-	cy = (vec_t)cos( angle );
+	sy = sin( angle );
+	cy = cos( angle );
 	angle = angles[PITCH] * ( Q_PI * 2.0f / 360.0f );
-	sp = (vec_t)sin( angle );
-	cp = (vec_t)cos( angle );
+	sp = sin( angle );
+	cp = cos( angle );
 	angle = angles[ROLL] * ( Q_PI * 2.0f / 360.0f );
-	sr = (vec_t)sin( angle );
-	cr = (vec_t)cos( angle );
+	sr = sin( angle );
+	cr = cos( angle );
 
 	if ( forward ) {
 		forward[0] = cp * cy;
@@ -400,13 +388,13 @@ void VectorToAngles( vec3_t vec, vec3_t angles ){
 	}
 	else
 	{
-		yaw = (vec_t)atan2( vec[ 1 ], vec[ 0 ] ) * 180 / Q_PI;
+		yaw = atan2( vec[ 1 ], vec[ 0 ] ) * 180 / Q_PI;
 		if ( yaw < 0 ) {
 			yaw += 360;
 		}
 
-		forward = ( float )sqrt( vec[ 0 ] * vec[ 0 ] + vec[ 1 ] * vec[ 1 ] );
-		pitch = (vec_t)atan2( vec[ 2 ], forward ) * 180 / Q_PI;
+		forward = sqrt( vec[ 0 ] * vec[ 0 ] + vec[ 1 ] * vec[ 1 ] );
+		pitch = atan2( vec[ 2 ], forward ) * 180 / Q_PI;
 		if ( pitch < 0 ) {
 			pitch += 360;
 		}
@@ -460,12 +448,10 @@ void NormalToLatLong( const vec3_t normal, byte bytes[2] ) {
 		}
 	}
 	else {
-		int a, b;
-
-		a = (int)( RAD2DEG( atan2( normal[1], normal[0] ) ) * ( 255.0f / 360.0f ) );
+		int a = RAD2DEG( atan2( normal[1], normal[0] ) ) * ( 255.0f / 360.0f );
 		a &= 0xff;
 
-		b = (int)( RAD2DEG( acos( normal[2] ) ) * ( 255.0f / 360.0f ) );
+		int b = RAD2DEG( acos( normal[2] ) ) * ( 255.0f / 360.0f );
 		b &= 0xff;
 
 		bytes[0] = b;   // longitude
@@ -523,7 +509,7 @@ void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal ){
 	vec3_t n;
 	float inv_denom;
 
-	inv_denom = 1.0F / DotProduct( normal, normal );
+	inv_denom = 1.f / DotProduct( normal, normal );
 
 	d = DotProduct( normal, p ) * inv_denom;
 
@@ -542,7 +528,7 @@ void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal ){
 void PerpendicularVector( vec3_t dst, const vec3_t src ){
 	int pos;
 	int i;
-	vec_t minelem = 1.0F;
+	vec_t minelem = 1;
 	vec3_t tempvec;
 
 	/*
@@ -552,11 +538,11 @@ void PerpendicularVector( vec3_t dst, const vec3_t src ){
 	{
 		if ( fabs( src[i] ) < minelem ) {
 			pos = i;
-			minelem = (vec_t)fabs( src[i] );
+			minelem = fabs( src[i] );
 		}
 	}
-	tempvec[0] = tempvec[1] = tempvec[2] = 0.0F;
-	tempvec[pos] = 1.0F;
+	tempvec[0] = tempvec[1] = tempvec[2] = 0;
+	tempvec[pos] = 1;
 
 	/*
 	** project the point onto the plane defined by src
@@ -616,13 +602,13 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point,
 	im[2][1] = m[1][2];
 
 	memset( zrot, 0, sizeof( zrot ) );
-	zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
+	zrot[0][0] = zrot[1][1] = zrot[2][2] = 1;
 
 	rad = DEG2RAD( degrees );
-	zrot[0][0] = (vec_t)cos( rad );
-	zrot[0][1] = (vec_t)sin( rad );
-	zrot[1][0] = (vec_t)-sin( rad );
-	zrot[1][1] = (vec_t)cos( rad );
+	zrot[0][0] = cos( rad );
+	zrot[0][1] = sin( rad );
+	zrot[1][0] = -sin( rad );
+	zrot[1][1] = cos( rad );
 
 	MatrixMultiply( m, zrot, tmpmat );
 	MatrixMultiply( tmpmat, im, rot );
@@ -646,7 +632,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point,
    =================
  */
 vec_accu_t VectorLengthAccu( const vec3_accu_t v ){
-	return (vec_accu_t) sqrt( ( v[0] * v[0] ) + ( v[1] * v[1] ) + ( v[2] * v[2] ) );
+	return sqrt( ( v[0] * v[0] ) + ( v[1] * v[1] ) + ( v[2] * v[2] ) );
 }
 
 /*
@@ -719,7 +705,7 @@ void CrossProductAccu( const vec3_accu_t a, const vec3_accu_t b, vec3_accu_t out
    =================
  */
 vec_accu_t Q_rintAccu( vec_accu_t val ){
-	return (vec_accu_t) floor( val + 0.5 );
+	return floor( val + 0.5 );
 }
 
 /*
@@ -728,9 +714,9 @@ vec_accu_t Q_rintAccu( vec_accu_t val ){
    =================
  */
 void VectorCopyAccuToRegular( const vec3_accu_t in, vec3_t out ){
-	out[0] = (vec_t) in[0];
-	out[1] = (vec_t) in[1];
-	out[2] = (vec_t) in[2];
+	out[0] = in[0];
+	out[1] = in[1];
+	out[2] = in[2];
 }
 
 /*
@@ -739,9 +725,9 @@ void VectorCopyAccuToRegular( const vec3_accu_t in, vec3_t out ){
    =================
  */
 void VectorCopyRegularToAccu( const vec3_t in, vec3_accu_t out ){
-	out[0] = (vec_accu_t) in[0];
-	out[1] = (vec_accu_t) in[1];
-	out[2] = (vec_accu_t) in[2];
+	out[0] = in[0];
+	out[1] = in[1];
+	out[2] = in[2];
 }
 
 /*
@@ -755,9 +741,7 @@ vec_accu_t VectorNormalizeAccu( const vec3_accu_t in, vec3_accu_t out ){
 	// I don't see a reason why using a double outright (instead of using the
 	// vec_accu_t alias for example) could possibly be frowned upon.
 
-	vec_accu_t length;
-
-	length = (vec_accu_t) sqrt( ( in[0] * in[0] ) + ( in[1] * in[1] ) + ( in[2] * in[2] ) );
+	const vec_accu_t length = sqrt( ( in[0] * in[0] ) + ( in[1] * in[1] ) + ( in[2] * in[2] ) );
 	if ( length == 0 ) {
 		VectorClear( out );
 		return 0;
