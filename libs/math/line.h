@@ -83,7 +83,7 @@ inline Segment segment_for_startend( const Vector3& start, const Vector3& end ){
 inline unsigned int segment_classify_plane( const Segment& segment, const Plane3& plane ){
 	double distance_origin = vector3_dot( plane.normal(), segment.origin ) + plane.dist();
 
-	if ( fabs( distance_origin ) < fabs( vector3_dot( plane.normal(), segment.extents ) ) ) {
+	if ( std::fabs( distance_origin ) < std::fabs( vector3_dot( plane.normal(), segment.extents ) ) ) {
 		return 1; // partially inside
 	}
 	else if ( distance_origin < 0 ) {

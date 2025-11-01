@@ -286,9 +286,9 @@ Vector3 CalcLightmapAxis( const Vector3& normal ){
 	}
 
 	/* get absolute normal */
-	const Vector3 absolute( fabs( normal[ 0 ] ),
-	                        fabs( normal[ 1 ] ),
-	                        fabs( normal[ 2 ] ) );
+	const Vector3 absolute( std::fabs( normal[ 0 ] ),
+	                        std::fabs( normal[ 1 ] ),
+	                        std::fabs( normal[ 2 ] ) );
 
 	/* test and return */
 	if ( absolute[ 2 ] > absolute[ 0 ] - 0.0001f && absolute[ 2 ] > absolute[ 1 ] - 0.0001f ) {
@@ -401,10 +401,10 @@ void ClassifySurface( mapDrawSurface_t& ds ){
 			for ( const bspDrawVert_t& vert : Span( ds.verts, ds.numVerts ) )
 			{
 				/* point-plane test */
-				if ( fabs( plane3_distance_to_point( plane, vert.xyz ) ) > PLANAR_EPSILON ) {
+				if ( std::fabs( plane3_distance_to_point( plane, vert.xyz ) ) > PLANAR_EPSILON ) {
 					//%	if( ds.planeNum >= 0 )
 					//%	{
-					//%		Sys_Warning( "Planar surface marked unplanar (%f > %f)\n", fabs( dist ), PLANAR_EPSILON );
+					//%		Sys_Warning( "Planar surface marked unplanar (%f > %f)\n", std::fabs( dist ), PLANAR_EPSILON );
 					//%		ds.verts[ i ].color[ 0 ][ 0 ] = ds.verts[ i ].color[ 0 ][ 2 ] = 0;
 					//%	}
 					ds.planar = false;
@@ -921,7 +921,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 		}
 
 		/* point-plane test */
-		if ( fabs( plane3_distance_to_point( plane, mesh->verts[ i ].xyz ) ) > EQUAL_EPSILON ) {
+		if ( std::fabs( plane3_distance_to_point( plane, mesh->verts[ i ].xyz ) ) > EQUAL_EPSILON ) {
 			planar = false;
 		}
 	}
@@ -1740,10 +1740,10 @@ static int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t& ds, node_t *
 			const Plane3f reverse = plane3_flipped( plane2 );
 
 			/* compare planes */
-			if ( vector3_dot( plane1.normal(), plane2.normal() ) > 0.999f && fabs( plane1.dist() - plane2.dist() ) < 0.001f ) {
+			if ( vector3_dot( plane1.normal(), plane2.normal() ) > 0.999f && std::fabs( plane1.dist() - plane2.dist() ) < 0.001f ) {
 				return FilterWindingIntoTree_r( w, ds, node->children[ 0 ] );
 			}
-			if ( vector3_dot( plane1.normal(), reverse.normal() ) > 0.999f && fabs( plane1.dist() - reverse.dist() ) < 0.001f ) {
+			if ( vector3_dot( plane1.normal(), reverse.normal() ) > 0.999f && std::fabs( plane1.dist() - reverse.dist() ) < 0.001f ) {
 				return FilterWindingIntoTree_r( w, ds, node->children[ 1 ] );
 			}
 			#else

@@ -781,7 +781,7 @@ void BuildApertureDoors( scene::Instance& brushinstance, const class ApertureDoo
 
 							AddFaceWithTexture( b, r1.data(), r2.data(), r2_.data(), rs.innerTextureTrim.get(), false );
 
-							if( double dot = fabs( vector3_dot( vector3_normalised( rot2 - cent ), vector3_normalised( r2 - cent ) ) ); dot < mindot ){
+							if( double dot = std::fabs( vector3_dot( vector3_normalised( rot2 - cent ), vector3_normalised( r2 - cent ) ) ); dot < mindot ){
 								mindot = dot;
 								r = r2;
 							}
@@ -901,7 +901,7 @@ void BuildApertureDoors( scene::Instance& brushinstance, const class ApertureDoo
 					// const double speed = rs.speed / sin( ( c_pi - acos( vector3_dot( vector3_normalised( rot2 - cent ), vector3_normalised( rot1 - cent ) ) ) ) / 2 );
 					Node_getEntity( door )->setKeyValue( "speed", float2string( speed ) );
 
-					const DoubleVector3 abs_dir( fabs( dir[0] ), fabs( dir[1] ), fabs( dir[2] ) );
+					const DoubleVector3 abs_dir( std::fabs( dir[0] ), std::fabs( dir[1] ), std::fabs( dir[2] ) );
 					const auto fullDistance = vector3_dot( abs_dir, DoubleVector3( 2 ) + bounds.extents * 2 ); //there is +2 to bounds in engine somewhere 🧩
 //					distance = DotProduct( abs_movedir, size ) - lip;   // game code
 //					VectorMA( ent->pos1, distance, ent->movedir, ent->pos2 );

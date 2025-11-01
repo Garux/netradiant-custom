@@ -72,8 +72,8 @@ const unsigned int BRUSH_DETAIL_MASK = ( 1 << BRUSH_DETAIL_FLAG );
 #define Update_move_planepts_vertex 0
 
 inline bool texdef_sane( const texdef_t& texdef ){
-	return fabs( texdef.shift[0] ) < ( 1 << 16 )
-	    && fabs( texdef.shift[1] ) < ( 1 << 16 );
+	return std::fabs( texdef.shift[0] ) < ( 1 << 16 )
+	    && std::fabs( texdef.shift[1] ) < ( 1 << 16 );
 }
 
 inline void Winding_DrawWireframe( const Winding& winding ){
@@ -164,7 +164,7 @@ inline float vector3_max_abs_component( const Vector3& vec3 ){
 }
 
 inline void edge_snap( Vector3& edge, double snap ){
-	float scale = static_cast<float>( ceil( fabs( snap / vector3_max_abs_component( edge ) ) ) );
+	const float scale = ceil( std::fabs( snap / vector3_max_abs_component( edge ) ) );
 	if ( scale > 0.0f ) {
 		vector3_scale( edge, scale );
 	}
@@ -3175,7 +3175,7 @@ public:
 		if( matrix4_clip_line_by_nearplane( test.getVolume().GetViewMatrix(), line ) == 2 ){
 			const Vector3 point_new = line_closest_point( line, g_vector3_identity );
 			const float dist_new = vector3_length_squared( point_new );
-			const float dot_new = fabs( vector3_dot( vector3_normalised( point_new ), vector3_normalised( line.end - line.start ) ) );
+			const float dot_new = std::fabs( vector3_dot( vector3_normalised( point_new ), vector3_normalised( line.end - line.start ) ) );
 			if( planeData.m_dist - dist_new > 1e-6f // new dist noticeably smaller
 			 || ( float_equal_epsilon( dist_new, planeData.m_dist, 1e-6f ) && dot_new < dot ) ){ // or ambiguous case. Resolve it by dot comparison
 				const Plane3& plane1 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
@@ -3195,8 +3195,8 @@ public:
 					else if( plane3_distance_to_point( plane2, test.getVolume().getViewer() ) <= 0 )
 						assign_plane( plane2 );
 				}
-				else if( fabs( vector3_length_squared( line.end - line.start ) ) > 1e-3 ){
-					if( fabs( vector3_dot( plane1.normal(), test.getVolume().getViewDir() ) ) < fabs( vector3_dot( plane2.normal(), test.getVolume().getViewDir() ) ) )
+				else if( std::fabs( vector3_length_squared( line.end - line.start ) ) > 1e-3 ){
+					if( std::fabs( vector3_dot( plane1.normal(), test.getVolume().getViewDir() ) ) < std::fabs( vector3_dot( plane2.normal(), test.getVolume().getViewDir() ) ) )
 						assign_plane( plane1 );
 					else
 						assign_plane( plane2 );
@@ -3832,14 +3832,14 @@ public:
 			if( !fi.trySelectPlane( test ) ){
 				continue;
 			}
-			const double dot = fabs( vector3_dot( fi.getFace().plane3().normal(), viewdir ) );
+			const double dot = std::fabs( vector3_dot( fi.getFace().plane3().normal(), viewdir ) );
 			const double diff = bestDot - dot;
 			if( diff > 0.03 ){
 				bestDot = dot;
 				bestInstances.clear();
 				bestInstances.push_back( &fi );
 			}
-			else if( fabs( diff ) <= 0.03 ){
+			else if( std::fabs( diff ) <= 0.03 ){
 				bestInstances.push_back( &fi );
 			}
 		}

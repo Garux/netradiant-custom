@@ -39,7 +39,7 @@ enum ProjectionAxis
 const float ProjectionAxisEpsilon = static_cast<float>( 0.0001 );
 
 inline bool projectionaxis_better( float axis, float other ){
-	return fabs( axis ) > fabs( other ) + ProjectionAxisEpsilon;
+	return std::fabs( axis ) > std::fabs( other ) + ProjectionAxisEpsilon;
 }
 
 /// \brief Texture axis precedence: Z > X > Y

@@ -147,7 +147,7 @@ int DBrush::PointPosition( vec3_t pnt ){
 		if ( dist > MAX_ROUND_ERROR ) {
 			return POINT_OUT_BRUSH;     // if point is in front of plane, it CANT be in the brush
 		}
-		else if ( fabs( dist ) < MAX_ROUND_ERROR ) {
+		else if ( std::fabs( dist ) < MAX_ROUND_ERROR ) {
 			state = POINT_ON_BRUSH;     // if point is ON plane point is either ON the brush
 		}
 		// or outside it, it can no longer be in it
@@ -628,7 +628,7 @@ DPlane* DBrush::HasPlaneInverted( DPlane *chkPlane ){
 	for ( DPlane *plane : faceList )
 	{
 		if ( *plane != *chkPlane ) {
-			if ( fabs( plane->_d + chkPlane->_d ) < 0.1 ) {
+			if ( std::fabs( plane->_d + chkPlane->_d ) < 0.1f ) {
 				return plane;
 			}
 		}
@@ -839,7 +839,7 @@ int DBrush::FindPointsForPlane( DPlane* plane, DPoint** pnts, int maxpnts ) {
 
 	for ( DPoint *point : pointList )
 	{
-		if ( fabs( plane->DistanceToPoint( point->_pnt ) ) < MAX_ROUND_ERROR ) {
+		if ( std::fabs( plane->DistanceToPoint( point->_pnt ) ) < MAX_ROUND_ERROR ) {
 			pnts[numpnts] = point;
 			numpnts++;
 

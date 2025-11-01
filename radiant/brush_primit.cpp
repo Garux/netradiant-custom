@@ -145,7 +145,7 @@ inline void Texdef_toTransform( const TextureProjection& projection, float width
 
 // handles degenerate cases, just in case library atan2 doesn't
 inline double arctangent_yx( double y, double x ){
-	if ( fabs( x ) > 1.0E-6 ) {
+	if ( std::fabs( x ) > 1.0E-6 ) {
 		return atan2( y, x );
 	}
 	else if ( y > 0 ) {
@@ -366,7 +366,7 @@ void Texdef_Assign( texdef_t& td, const float* hShift, const float* vShift, cons
 		td.shift[1] = *vShift;
 	}
 	if( hScale ){
-		if( fabs( *hScale ) > 1e-5 ){
+		if( std::fabs( *hScale ) > 1e-5f ){
 			td.scale[0] = *hScale;
 		}
 		else{
@@ -374,7 +374,7 @@ void Texdef_Assign( texdef_t& td, const float* hShift, const float* vShift, cons
 		}
 	}
 	if( vScale ){
-		if( fabs( *vScale ) > 1e-5 ){
+		if( std::fabs( *vScale ) > 1e-5f ){
 			td.scale[1] = *vScale;
 		}
 		else{
@@ -394,13 +394,13 @@ void Texdef_Shift( texdef_t& td, float s, float t ){
 }
 
 void Texdef_Scale( texdef_t& td, float s, float t ){
-	if( fabs( td.scale[0] + s ) > 1e-5 ){
+	if( std::fabs( td.scale[0] + s ) > 1e-5f ){
 		td.scale[0] += s;
 	}
 	else{
 		td.scale[0] = -td.scale[0];
 	}
-	if( fabs( td.scale[1] + t ) > 1e-5 ){
+	if( std::fabs( td.scale[1] + t ) > 1e-5f ){
 		td.scale[1] += t;
 	}
 	else{
@@ -567,8 +567,8 @@ void EmitBrushPrimitTextureCoordinates( face_t * f, Winding * w ){
 			// check we compute the same ST as the traditional texture computation used before
 			float S = f->brushprimit_texdef.coords[0][0] * x + f->brushprimit_texdef.coords[0][1] * y + f->brushprimit_texdef.coords[0][2];
 			float T = f->brushprimit_texdef.coords[1][0] * x + f->brushprimit_texdef.coords[1][1] * y + f->brushprimit_texdef.coords[1][2];
-			if ( fabs( S - w.point_at( i )[3] ) > 1e-2 || fabs( T - w.point_at( i )[4] ) > 1e-2 ) {
-				if ( fabs( S - w.point_at( i )[3] ) > 1e-4 || fabs( T - w.point_at( i )[4] ) > 1e-4 ) {
+			if ( std::fabs( S - w.point_at( i )[3] ) > 1e-2 || std::fabs( T - w.point_at( i )[4] ) > 1e-2 ) {
+				if ( std::fabs( S - w.point_at( i )[3] ) > 1e-4 || std::fabs( T - w.point_at( i )[4] ) > 1e-4 ) {
 					globalWarningStream() << "Warning : precision loss in brush -> brush primitive texture computation\n";
 				}
 				else{
@@ -745,7 +745,7 @@ void ComputeBest2DVector( Vector3& v, Vector3& X, Vector3& Y, int &x, int &y ){
 	double sx,sy;
 	sx = vector3_dot( v, X );
 	sy = vector3_dot( v, Y );
-	if ( fabs( sy ) > fabs( sx ) ) {
+	if ( std::fabs( sy ) > std::fabs( sx ) ) {
 		x = 0;
 		if ( sy > 0.0 ) {
 			y =  1;
@@ -1067,10 +1067,10 @@ void BPTexdef_Scale( brushprimit_texdef_t& bp_td, float s, float t ){
 
 	float scaleS = -1.f;
 	float scaleT = -1.f;
-	if( fabs( texdef.scale[0] + s ) > 1e-5 ){
+	if( std::fabs( texdef.scale[0] + s ) > 1e-5f ){
 		scaleS = texdef.scale[0] / ( texdef.scale[0] + s );
 	}
-	if( fabs( texdef.scale[1] + t ) > 1e-5 ){
+	if( std::fabs( texdef.scale[1] + t ) > 1e-5f ){
 		scaleT = texdef.scale[1] / ( texdef.scale[1] + t );
 	}
 	bp_td.coords[0][0] *= scaleS;
@@ -1116,7 +1116,7 @@ void BPTexdef_Assign( brushprimit_texdef_t& bp_td, const float* hShift, const fl
 	}
 	if( hScale ){
 		float scaleS = -1.f;
-		if( fabs( *hScale ) > 1e-5 ){
+		if( std::fabs( *hScale ) > 1e-5f ){
 			scaleS = texdef.scale[0] / *hScale;
 		}
 		bp_td.coords[0][0] *= scaleS;
@@ -1124,7 +1124,7 @@ void BPTexdef_Assign( brushprimit_texdef_t& bp_td, const float* hShift, const fl
 	}
 	if( vScale ){
 		float scaleT = -1.f;
-		if( fabs( *vScale ) > 1e-5 ){
+		if( std::fabs( *vScale ) > 1e-5f ){
 			scaleT = texdef.scale[1] / *vScale;
 		}
 		bp_td.coords[1][0] *= scaleT;

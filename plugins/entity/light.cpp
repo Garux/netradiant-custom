@@ -171,8 +171,8 @@ void light_draw_radius_fill( const Vector3& origin, const std::array<float, 3>& 
 
 
 void cartesian( const double Long, const double Lat, float cart[3] ) {
-	cart[0] = cos( Long ) * fabs( cos( Lat ) );
-	cart[1] = sin( Long ) * fabs( cos( Lat ) );
+	cart[0] = cos( Long ) * std::fabs( cos( Lat ) );
+	cart[1] = sin( Long ) * std::fabs( cos( Lat ) );
 	cart[2] = sin( Lat );
 }
 
@@ -1604,15 +1604,15 @@ public:
 		return aabb_intersects_aabb( other, AABB(
 		                                 bounds.origin,
 		                                 Vector3(
-		                                     static_cast<float>( fabs( m_rotation[0] * bounds.extents[0] )
-		                                                       + fabs( m_rotation[3] * bounds.extents[1] )
-		                                                       + fabs( m_rotation[6] * bounds.extents[2] ) ),
-		                                     static_cast<float>( fabs( m_rotation[1] * bounds.extents[0] )
-		                                                       + fabs( m_rotation[4] * bounds.extents[1] )
-		                                                       + fabs( m_rotation[7] * bounds.extents[2] ) ),
-		                                     static_cast<float>( fabs( m_rotation[2] * bounds.extents[0] )
-		                                                       + fabs( m_rotation[5] * bounds.extents[1] )
-		                                                       + fabs( m_rotation[8] * bounds.extents[2] ) )
+		                                     std::fabs( m_rotation[0] * bounds.extents[0] )
+		                                   + std::fabs( m_rotation[3] * bounds.extents[1] )
+		                                   + std::fabs( m_rotation[6] * bounds.extents[2] ),
+		                                     std::fabs( m_rotation[1] * bounds.extents[0] )
+		                                   + std::fabs( m_rotation[4] * bounds.extents[1] )
+		                                   + std::fabs( m_rotation[7] * bounds.extents[2] ),
+		                                     std::fabs( m_rotation[2] * bounds.extents[0] )
+		                                   + std::fabs( m_rotation[5] * bounds.extents[1] )
+		                                   + std::fabs( m_rotation[8] * bounds.extents[2] )
 		                                 )
 		                             ) );
 	}

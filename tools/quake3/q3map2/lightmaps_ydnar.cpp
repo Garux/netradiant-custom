@@ -696,9 +696,9 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t& lm ){
 	origin = lm.minmax.mins;
 
 	/* make absolute axis */
-	faxis[ 0 ] = fabs( lm.axis[ 0 ] );
-	faxis[ 1 ] = fabs( lm.axis[ 1 ] );
-	faxis[ 2 ] = fabs( lm.axis[ 2 ] );
+	faxis[ 0 ] = std::fabs( lm.axis[ 0 ] );
+	faxis[ 1 ] = std::fabs( lm.axis[ 1 ] );
+	faxis[ 2 ] = std::fabs( lm.axis[ 2 ] );
 
 	/* clear out lightmap vectors */
 	memset( vecs, 0, sizeof( vecs ) );
@@ -1392,7 +1392,7 @@ static bool CompareBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int 
 			/* compare (fixme: take into account perceptual differences) */
 			Vector3 diff = aLuxel - bLuxel;
 			for( int i = 0; i < 3; ++i )
-				diff[i] = fabs( diff[i] );
+				diff[i] = std::fabs( diff[i] );
 			delta += vector3_dot( diff, Vector3( LUXEL_COLOR_FRAC ) );
 
 			/* is the change too high? */

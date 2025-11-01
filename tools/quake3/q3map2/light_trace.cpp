@@ -521,13 +521,13 @@ static void FilterTraceWindingIntoNodes_r( traceWinding_t *tw, int nodeNum ){
 		reverse = plane3_flipped( plane2 );
 
 		/* front only */
-		if ( vector3_dot( plane1.normal(), plane2.normal() ) > 0.999f && fabs( plane1.dist() - plane2.dist() ) < 0.001f ) {
+		if ( vector3_dot( plane1.normal(), plane2.normal() ) > 0.999f && std::fabs( plane1.dist() - plane2.dist() ) < 0.001f ) {
 			FilterTraceWindingIntoNodes_r( tw, node->children[ 0 ] );
 			return;
 		}
 
 		/* back only */
-		if ( vector3_dot( plane1.normal(), reverse.normal() ) > 0.999f && fabs( plane1.dist() - reverse.dist() ) < 0.001f ) {
+		if ( vector3_dot( plane1.normal(), reverse.normal() ) > 0.999f && std::fabs( plane1.dist() - reverse.dist() ) < 0.001f ) {
 			FilterTraceWindingIntoNodes_r( tw, node->children[ 1 ] );
 			return;
 		}
@@ -1282,7 +1282,7 @@ static bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace 
 	det = vector3_dot( tt->edge1, pvec );
 
 	/* the non-culling branch */
-	if ( fabs( det ) < COPLANAR_EPSILON ) {
+	if ( std::fabs( det ) < COPLANAR_EPSILON ) {
 		return false;
 	}
 	invDet = 1.0f / det;

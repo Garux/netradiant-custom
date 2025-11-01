@@ -149,7 +149,7 @@ winding_accu_t BaseWindingForPlaneAccu( const Plane3& plane ){
 
 	x = -1;
 	for ( i = 0; i < 3; ++i ) {
-		v = fabs( plane.normal()[i] );
+		v = std::fabs( plane.normal()[i] );
 		if ( v > max ) {
 			x = i;
 			max = v;
@@ -245,7 +245,7 @@ winding_t BaseWindingForPlane( const Plane3f& plane ){
 	x = -1;
 	for ( i = 0; i < 3; ++i )
 	{
-		v = fabs( plane.normal()[i] );
+		v = std::fabs( plane.normal()[i] );
 		if ( v > max ) {
 			x = i;
 			max = v;
@@ -658,7 +658,7 @@ void CheckWinding( const winding_t& w ){
 		}
 
 		// check the point is on the face plane
-		if ( fabs( plane3_distance_to_point( faceplane, p1 ) ) > ON_EPSILON ) {
+		if ( std::fabs( plane3_distance_to_point( faceplane, p1 ) ) > ON_EPSILON ) {
 			Error( "CheckWinding: point off plane" );
 		}
 

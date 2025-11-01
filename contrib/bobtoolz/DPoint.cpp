@@ -31,7 +31,7 @@
 bool DPoint::operator ==( vec3_t other ){
 	vec3_t test;
 	VectorSubtract( other, _pnt, test );
-	if ( fabs( VectorLength( test ) ) > MAX_ROUND_ERROR ) {
+	if ( std::fabs( VectorLength( test ) ) > MAX_ROUND_ERROR ) {
 		return false;
 	}
 	return true;

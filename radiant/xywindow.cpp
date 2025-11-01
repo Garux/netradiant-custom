@@ -650,7 +650,7 @@ void XYWnd_OrientCamera( XYWnd* xywnd, int x, int y, CamWnd& camwnd ){
 		if( angles[CAMERA_YAW] < 0 )
 			angles[CAMERA_YAW] += 360;
 		if ( nAngle == CAMERA_PITCH ){
-			if( fabs( angles[CAMERA_PITCH] ) > 90 ){
+			if( std::fabs( angles[CAMERA_PITCH] ) > 90 ){
 				angles[CAMERA_PITCH] = ( angles[CAMERA_PITCH] > 0 ) ? ( -angles[CAMERA_PITCH] + 180 ) : ( -angles[CAMERA_PITCH] - 180 );
 				if( viewtype == YZ ){
 					if( angles[CAMERA_YAW] < 180 ){
@@ -726,7 +726,7 @@ void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 	}
 
 	if( square || cube ){
-		const float squaresize = std::max( fabs( maxs[nDim1] - mins[nDim1] ), fabs( maxs[nDim2] - mins[nDim2] ) );
+		const float squaresize = std::max( std::fabs( maxs[nDim1] - mins[nDim1] ), std::fabs( maxs[nDim2] - mins[nDim2] ) );
 		for( auto i : { nDim1, nDim2 } )
 			maxs[i] = mins[i] + std::copysign( squaresize, maxs[i] - mins[i] );
 		if( cube ){

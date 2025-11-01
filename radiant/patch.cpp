@@ -670,9 +670,9 @@ void Patch::CapTexture(){
 			vector3_add( normal, tmp );
 		}
 	}
-	normal[0] = fabs( normal[0] );
-	normal[1] = fabs( normal[1] );
-	normal[2] = fabs( normal[2] );
+	normal[0] = std::fabs( normal[0] );
+	normal[1] = std::fabs( normal[1] );
+	normal[2] = std::fabs( normal[2] );
 
 	ProjectTexture( texture_axis( normal ) );
 #else
@@ -711,7 +711,7 @@ void Patch::NaturalTexture(){
 				for ( std::size_t h = 0; h < m_height; ++h, pHeight += m_width )
 				{
 					const double length = tex + ( vector3_length( pHeight->m_vertex - ( pHeight + 1 )->m_vertex ) / texSize );
-					if ( fabs( length ) > fabs( texBest ) ) { // comparing abs values supports possible negative Texdef_getDefaultTextureScale()
+					if ( std::fabs( length ) > std::fabs( texBest ) ) { // comparing abs values supports possible negative Texdef_getDefaultTextureScale()
 						texBest = length;
 					}
 				}
@@ -744,7 +744,7 @@ void Patch::NaturalTexture(){
 				for ( std::size_t w = 0; w < m_width; ++w, ++pWidth )
 				{
 					const double length = tex + ( vector3_length( pWidth->m_vertex - ( pWidth + m_width )->m_vertex ) / texSize );
-					if ( fabs( length ) > fabs( texBest ) ) {
+					if ( std::fabs( length ) > std::fabs( texBest ) ) {
 						texBest = length;
 					}
 				}
@@ -2431,7 +2431,7 @@ inline void tangents_remove_degenerate( Vector3 tangents[6], Vector2 textureTang
 }
 
 void bestTangents00( unsigned int degenerateFlags, double dot, double length, std::size_t& index0, std::size_t& index1 ){
-	if ( fabs( dot + length ) < 0.001 ) { // opposing direction = degenerate
+	if ( std::fabs( dot + length ) < 0.001 ) { // opposing direction = degenerate
 		if ( !( degenerateFlags & DEGEN_1a ) ) { // if this tangent is degenerate we cannot use it
 			index0 = 2;
 			index1 = 0;
@@ -2446,7 +2446,7 @@ void bestTangents00( unsigned int degenerateFlags, double dot, double length, st
 			index1 = 0;
 		}
 	}
-	else if ( fabs( dot - length ) < 0.001 ) { // same direction = degenerate
+	else if ( std::fabs( dot - length ) < 0.001 ) { // same direction = degenerate
 		if ( degenerateFlags & DEGEN_0b ) {
 			index0 = 0;
 			index1 = 1;
@@ -2460,7 +2460,7 @@ void bestTangents00( unsigned int degenerateFlags, double dot, double length, st
 }
 
 void bestTangents01( unsigned int degenerateFlags, double dot, double length, std::size_t& index0, std::size_t& index1 ){
-	if ( fabs( dot - length ) < 0.001 ) { // same direction = degenerate
+	if ( std::fabs( dot - length ) < 0.001 ) { // same direction = degenerate
 		if ( !( degenerateFlags & DEGEN_1a ) ) { // if this tangent is degenerate we cannot use it
 			index0 = 2;
 			index1 = 1;
@@ -2475,7 +2475,7 @@ void bestTangents01( unsigned int degenerateFlags, double dot, double length, st
 			index1 = 1;
 		}
 	}
-	else if ( fabs( dot + length ) < 0.001 ) { // opposing direction = degenerate
+	else if ( std::fabs( dot + length ) < 0.001 ) { // opposing direction = degenerate
 		if ( degenerateFlags & DEGEN_2b ) {
 			index0 = 4;
 			index1 = 0;
@@ -2489,7 +2489,7 @@ void bestTangents01( unsigned int degenerateFlags, double dot, double length, st
 }
 
 void bestTangents10( unsigned int degenerateFlags, double dot, double length, std::size_t& index0, std::size_t& index1 ){
-	if ( fabs( dot - length ) < 0.001 ) { // same direction = degenerate
+	if ( std::fabs( dot - length ) < 0.001 ) { // same direction = degenerate
 		if ( !( degenerateFlags & DEGEN_1b ) ) { // if this tangent is degenerate we cannot use it
 			index0 = 3;
 			index1 = 4;
@@ -2504,7 +2504,7 @@ void bestTangents10( unsigned int degenerateFlags, double dot, double length, st
 			index1 = 4;
 		}
 	}
-	else if ( fabs( dot + length ) < 0.001 ) { // opposing direction = degenerate
+	else if ( std::fabs( dot + length ) < 0.001 ) { // opposing direction = degenerate
 		if ( degenerateFlags & DEGEN_0a ) {
 			index0 = 1;
 			index1 = 5;
@@ -2518,7 +2518,7 @@ void bestTangents10( unsigned int degenerateFlags, double dot, double length, st
 }
 
 void bestTangents11( unsigned int degenerateFlags, double dot, double length, std::size_t& index0, std::size_t& index1 ){
-	if ( fabs( dot + length ) < 0.001 ) { // opposing direction = degenerate
+	if ( std::fabs( dot + length ) < 0.001 ) { // opposing direction = degenerate
 		if ( !( degenerateFlags & DEGEN_1b ) ) { // if this tangent is degenerate we cannot use it
 			index0 = 3;
 			index1 = 5;
@@ -2533,7 +2533,7 @@ void bestTangents11( unsigned int degenerateFlags, double dot, double length, st
 			index1 = 5;
 		}
 	}
-	else if ( fabs( dot - length ) < 0.001 ) { // same direction = degenerate
+	else if ( std::fabs( dot - length ) < 0.001 ) { // same direction = degenerate
 		if ( degenerateFlags & DEGEN_2a ) {
 			index0 = 5;
 			index1 = 4;
@@ -3111,8 +3111,8 @@ void Patch::createThickenedOpposite( const Patch& sourcePatch,
 				}
 				else{
 					// If two column + two row tangents are available, take the length-corrected average
-					if ( ( fabs( colTangent[1][0] ) + fabs( colTangent[1][1] ) + fabs( colTangent[1][2] ) ) > 0 &&
-					     ( fabs( rowTangent[1][0] ) + fabs( rowTangent[1][1] ) + fabs( rowTangent[1][2] ) ) > 0 )
+					if ( ( std::fabs( colTangent[1][0] ) + std::fabs( colTangent[1][1] ) + std::fabs( colTangent[1][2] ) ) > 0 &&
+					     ( std::fabs( rowTangent[1][0] ) + std::fabs( rowTangent[1][1] ) + std::fabs( rowTangent[1][2] ) ) > 0 )
 					{
 						// Two column normals to calculate
 						Vector3 normal1 = vector3_normalised( vector3_cross( rowTangent[0], colTangent[0] ) );
@@ -3125,7 +3125,7 @@ void Patch::createThickenedOpposite( const Patch& sourcePatch,
 						globalOutputStream() << normal << '\n';*/
 					}
 					// If two column tangents are available, take the length-corrected average
-					else if ( ( fabs( colTangent[1][0] ) + fabs( colTangent[1][1] ) + fabs( colTangent[1][2] ) ) > 0)
+					else if ( ( std::fabs( colTangent[1][0] ) + std::fabs( colTangent[1][1] ) + std::fabs( colTangent[1][2] ) ) > 0)
 					{
 						// Two column normals to calculate
 						Vector3 normal1 = vector3_normalised( vector3_cross( rowTangent[0], colTangent[0] ) );
@@ -3140,7 +3140,7 @@ void Patch::createThickenedOpposite( const Patch& sourcePatch,
 					else
 					{
 						// One column tangent available, maybe we have a second rowtangent?
-						if ( ( fabs( rowTangent[1][0] ) + fabs( rowTangent[1][1] ) + fabs( rowTangent[1][2] ) ) > 0)
+						if ( ( std::fabs( rowTangent[1][0] ) + std::fabs( rowTangent[1][1] ) + std::fabs( rowTangent[1][2] ) ) > 0)
 						{
 							// Two row normals to calculate
 							Vector3 normal1 = vector3_normalised( vector3_cross( rowTangent[0], colTangent[0] ) );

@@ -52,7 +52,7 @@ int num_solidfaces;
 }
 
 inline void WriteFloat( FILE *f, float v ){
-	if ( fabs( v - std::rint( v ) ) < 0.001 ) {
+	if ( std::fabs( v - std::rint( v ) ) < 0.001f ) {
 		fprintf( f, "%li ", std::lrint( v ) );
 	}
 	else{

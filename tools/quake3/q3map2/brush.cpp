@@ -107,7 +107,7 @@ Vector3 SnapWeldVector( const Vector3& a, const Vector3& b ){
 		}
 
 		/* use nearest */
-		else if ( fabs( ai - a[ i ] ) < fabs( bi - b[ i ] ) ) {
+		else if ( std::fabs( ai - a[ i ] ) < std::fabs( bi - b[ i ] ) ) {
 			out[ i ] = a[ i ];
 		}
 		else{
@@ -116,7 +116,7 @@ Vector3 SnapWeldVector( const Vector3& a, const Vector3& b ){
 
 		/* snap */
 		const float outi = std::rint( out[ i ] );
-		if ( fabs( outi - out[ i ] ) <= SNAP_EPSILON ) {
+		if ( std::fabs( outi - out[ i ] ) <= SNAP_EPSILON ) {
 			out[ i ] = outi;
 		}
 	}
@@ -147,8 +147,8 @@ static DoubleVector3 SnapWeldVectorAccu( const DoubleVector3& a, const DoubleVec
 	{
 		const double ai = std::rint( a[i] );
 		const double bi = std::rint( b[i] );
-		const double ad = fabs( ai - a[i] );
-		const double bd = fabs( bi - b[i] );
+		const double ad = std::fabs( ai - a[i] );
+		const double bd = std::fabs( bi - b[i] );
 
 		if ( ad < bd ) {
 			if ( ad < SNAP_EPSILON ) {

@@ -420,7 +420,7 @@ int ScaleBSPMain( Args& args ){
 		if ( a == -1 || a == -2 ) { // z scale
 			axis = 2;
 		}
-		else if ( fabs( sin( degrees_to_radians( a ) ) ) < 0.707 ) {
+		else if ( std::fabs( sin( degrees_to_radians( a ) ) ) < 0.707 ) {
 			axis = 0;
 		}
 		else{

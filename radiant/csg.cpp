@@ -600,9 +600,9 @@ public:
 				const DoubleVector3& n2 = b->getPlane().plane3().normal();
 				const ProjectionAxis p1 = projectionaxis_for_normal( n1 );
 				const ProjectionAxis p2 = projectionaxis_for_normal( n2 );
-				return float_equal_epsilon( fabs( n1[ p1 ] ), fabs( n2[ p2 ] ), c_PLANE_NORMAL_EPSILON )
+				return float_equal_epsilon( std::fabs( n1[ p1 ] ), std::fabs( n2[ p2 ] ), c_PLANE_NORMAL_EPSILON )
 				? p1 > p2 // Z > Y > X
-				: fabs( n1[ p1 ] ) > fabs( n2[ p2 ] ); // or most axial
+				: std::fabs( n1[ p1 ] ) > std::fabs( n2[ p2 ] ); // or most axial
 			} );
 
 			auto it = faces.cbegin(), found = it; // traverse projections and craft more fortunate splits order in non trivial cases
@@ -627,10 +627,10 @@ public:
 					const ProjectionAxis p2 = projectionaxis_for_normal( n2 );
 					if( p1 == p2 // same projection
 					&& n1[p1] * n2[p2] < 0 // opposite projection facing
-					&& ( fabs( n2[p2] ) > bestmax + c_PLANE_NORMAL_EPSILON // definitely better proj direction
-					   || ( fabs( n2[p2] ) > bestmax - c_PLANE_NORMAL_EPSILON // or similar proj direction
+					&& ( std::fabs( n2[p2] ) > bestmax + c_PLANE_NORMAL_EPSILON // definitely better proj direction
+					   || ( std::fabs( n2[p2] ) > bestmax - c_PLANE_NORMAL_EPSILON // or similar proj direction
 					     && vector3_dot( n1, n2 ) < bestdot ) ) ){ // + more opposing normal direction
-						bestmax = fabs( n2[p2] );
+						bestmax = std::fabs( n2[p2] );
 						bestdot = vector3_dot( n1, n2 );
 						more = face;
 					}

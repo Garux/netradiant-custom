@@ -1037,7 +1037,7 @@ void FixMetaTJunctions(){
 			const Vector3 pt = metaVerts[ j ].xyz;
 
 			/* determine if point lies in the triangle's plane */
-			if ( fabs( plane3_distance_to_point( plane, pt ) ) > TJ_PLANE_EPSILON ) {
+			if ( std::fabs( plane3_distance_to_point( plane, pt ) ) > TJ_PLANE_EPSILON ) {
 				continue;
 			}
 
@@ -1056,12 +1056,12 @@ void FixMetaTJunctions(){
 			for ( k = 0; k < 3; ++k )
 			{
 				/* ignore bogus edges */
-				if ( fabs( edges[ k ].kingpinLength ) < TJ_EDGE_EPSILON ) {
+				if ( std::fabs( edges[ k ].kingpinLength ) < TJ_EDGE_EPSILON ) {
 					continue;
 				}
 
 				/* determine if point lies on the edge */
-				if ( fabs( plane3_distance_to_point( edges[ k ].plane, pt ) ) > TJ_EDGE_EPSILON ) {
+				if ( std::fabs( plane3_distance_to_point( edges[ k ].plane, pt ) ) > TJ_EDGE_EPSILON ) {
 					continue;
 				}
 

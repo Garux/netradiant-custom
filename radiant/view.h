@@ -121,7 +121,7 @@ public:
 		m_viewport = g_matrix4_identity;
 		m_viewport[0] = float( width / 2 );
 		m_viewport[5] = float( height / 2 );
-		if ( fabs( m_projection[11] ) > 0.0000001 ) {
+		if ( std::fabs( m_projection[11] ) > 0.0000001f ) {
 			m_viewport[10] = m_projection[0] * m_viewport[0];
 		}
 		else{

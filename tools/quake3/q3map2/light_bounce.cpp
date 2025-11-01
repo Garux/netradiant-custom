@@ -697,7 +697,7 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 			Plane3f plane;
 			bool planar = PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz );
 			if ( planar ) {
-				if ( fabs( plane3_distance_to_point( plane, dv[ 1 ]->xyz ) ) > PLANAR_EPSILON ) {
+				if ( std::fabs( plane3_distance_to_point( plane, dv[ 1 ]->xyz ) ) > PLANAR_EPSILON ) {
 					planar = false;
 				}
 			}

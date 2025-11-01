@@ -375,7 +375,7 @@ inline void nonax_clip_dbg( const Plane3f (&p)[3] ){
 	for ( int j = 0; j < 3; ++j ){
 		for ( int k = 0; k < 3; ++k ){
 			const Vector3& n = p[j].normal();
-			if ( fabs( n[k] ) < 0.00025 && n[k] != 0 ){
+			if ( std::fabs( n[k] ) < 0.00025f && n[k] != 0 ){
 				Sys_Printf( "nonax nrm %6.17f %6.17f %6.17f\n", n[0], n[1], n[2] );
 			}
 		}
@@ -513,8 +513,8 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 				bool snpd = false;
 				for ( j = 0; j < 3; ++j )
 				{
-					if ( fabs( plane.normal()[j] ) < 0.00025 && fabs( plane.normal()[( j + 1) % 3] ) < 0.00025
-					&& ( plane.normal()[j] != 0.0 || plane.normal()[( j + 1 ) % 3] != 0.0 ) ){
+					if ( std::fabs( plane.normal()[j] ) < 0.00025f && std::fabs( plane.normal()[( j + 1) % 3] ) < 0.00025f
+					&& ( plane.normal()[j] != 0 || plane.normal()[( j + 1 ) % 3] != 0 ) ){
 						const Vector3 cnt = ( points[0] + points[1] + points[2] ) / 3.0;
 						points[0][( j + 2 ) % 3] = points[1][( j + 2 ) % 3] = points[2][( j + 2 ) % 3] = cnt[( j + 2 ) % 3];
 						snpd = true;
@@ -528,7 +528,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 					const Vector3 nrm = VectorNormalized( points[j] - points[( j + 1 ) % 3] );
 					for ( k = 0; k < 3; ++k )
 					{
-						if ( nrm[k] != 0.0 && fabs( nrm[k] ) < 0.00025 ){
+						if ( nrm[k] != 0 && std::fabs( nrm[k] ) < 0.00025f ){
 							//Sys_Printf( "b4(%6.6f %6.6f %6.6f)(%6.6f %6.6f %6.6f)\n", points[j][0], points[j][1], points[j][2], points[(j+1)%3][0], points[(j+1)%3][1], points[(j+1)%3][2] );
 							points[j][k] = points[( j + 1 ) % 3][k] = ( points[j][k] + points[( j + 1 ) % 3][k] ) / 2.0;
 							//Sys_Printf( "sn(%6.6f %6.6f %6.6f)(%6.6f %6.6f %6.6f)\n", points[j][0], points[j][1], points[j][2], points[(j+1)%3][0], points[(j+1)%3][1], points[(j+1)%3][2] );
@@ -545,8 +545,8 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 				//vector-is-close-to-be-on-axis check again, happens after previous code sometimes
 				for ( j = 0; j < 3; ++j )
 				{
-					if ( fabs( plane.normal()[j] ) < 0.00025 && fabs( plane.normal()[( j + 1 ) % 3] ) < 0.00025
-					&& ( plane.normal()[j] != 0.0 || plane.normal()[( j + 1 ) % 3] != 0.0 ) ){
+					if ( std::fabs( plane.normal()[j] ) < 0.00025f && std::fabs( plane.normal()[( j + 1 ) % 3] ) < 0.00025f
+					&& ( plane.normal()[j] != 0 || plane.normal()[( j + 1 ) % 3] != 0 ) ){
 						const Vector3 cnt = ( points[0] + points[1] + points[2] ) / 3.0;
 						points[0][( j + 2 ) % 3] = points[1][( j + 2 ) % 3] = points[2][( j + 2 ) % 3] = cnt[( j + 2 ) % 3];
 						PlaneFromPoints( plane, points );
@@ -557,7 +557,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 				//snap single snappable normal components
 				for ( j = 0; j < 3; ++j )
 				{
-					if ( plane.normal()[j] != 0 && fabs( plane.normal()[j] ) < 0.00005 ){
+					if ( plane.normal()[j] != 0 && std::fabs( plane.normal()[j] ) < 0.00005f ){
 						plane.normal()[j] = 0;
 						snpd = true;
 					}
@@ -592,7 +592,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 				if ( spf == ( ePyramidaClip | eAxialBackplane ) ){ // pyramid with 3 of 4 sides axial (->small bsp)
 
 					for ( j = 0; j < 3; ++j )
-						if ( fabs( plane.normal()[j] ) < 0.05 && fabs( plane.normal()[( j + 1 ) % 3] ) < 0.05 ) //no way, close to lay on two axes
+						if ( std::fabs( plane.normal()[j] ) < 0.05f && std::fabs( plane.normal()[( j + 1 ) % 3] ) < 0.05f ) //no way, close to lay on two axes
 							goto default_CLIPMODEL;
 
 					// best axial normal
@@ -774,7 +774,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 						snpd = false;
 						for ( k = 0; k < 3; ++k )
 						{
-							if ( fabs( p[j].normal()[k] ) < 0.00025 && p[j].normal()[k] != 0.0 ){
+							if ( std::fabs( p[j].normal()[k] ) < 0.00025f && p[j].normal()[k] != 0 ){
 								p[j].normal()[k] = 0.0;
 								snpd = true;
 							}
@@ -831,7 +831,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 						snpd = false;
 						for ( k = 0; k < 3; ++k )
 						{
-							if ( fabs( p[j].normal()[k] ) < 0.00025 && p[j].normal()[k] != 0.0 ){
+							if ( std::fabs( p[j].normal()[k] ) < 0.00025f && p[j].normal()[k] != 0 ){
 								//Sys_Printf( "init plane %6.8f %6.8f %6.8f %6.8f\n", p[j].a, p[j].b, p[j].c, p[j].d );
 								p[j].normal()[k] = 0.0;
 								snpd = true;
@@ -864,7 +864,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 						snpd = false;
 						for ( k = 0; k < 3; ++k )
 						{
-							if ( fabs( p[j].normal()[k] ) < 0.00025 && p[j].normal()[k] != 0.0 ){
+							if ( std::fabs( p[j].normal()[k] ) < 0.00025f && p[j].normal()[k] != 0 ){
 								//Sys_Printf( "init plane %6.8f %6.8f %6.8f %6.8f\n", p[j].a, p[j].b, p[j].c, p[j].d );
 								p[j].normal()[k] = 0.0;
 								snpd = true;
@@ -903,15 +903,15 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 					    PlaneFromPoints( p[2], points[0], points[2], cnt ) ) {
 
 						//check for dangerous planes
-						while( ( ( p[0].a != 0.0 || p[0].b != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].b ) < 0.00025 ) ||
-						       ( ( p[0].a != 0.0 || p[0].c != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].c ) < 0.00025 ) ||
-						       ( ( p[0].c != 0.0 || p[0].b != 0.0 ) && fabs( p[0].c ) < 0.00025 && fabs( p[0].b ) < 0.00025 ) ||
-						       ( ( p[1].a != 0.0 || p[1].b != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].b ) < 0.00025 ) ||
-						       ( ( p[1].a != 0.0 || p[1].c != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].c ) < 0.00025 ) ||
-						       ( ( p[1].c != 0.0 || p[1].b != 0.0 ) && fabs( p[1].c ) < 0.00025 && fabs( p[1].b ) < 0.00025 ) ||
-						       ( ( p[2].a != 0.0 || p[2].b != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].b ) < 0.00025 ) ||
-						       ( ( p[2].a != 0.0 || p[2].c != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].c ) < 0.00025 ) ||
-						       ( ( p[2].c != 0.0 || p[2].b != 0.0 ) && fabs( p[2].c ) < 0.00025 && fabs( p[2].b ) < 0.00025 ) ) {
+						while( ( ( p[0].a != 0 || p[0].b != 0 ) && std::fabs( p[0].a ) < 0.00025f && std::fabs( p[0].b ) < 0.00025f ) ||
+						       ( ( p[0].a != 0 || p[0].c != 0 ) && std::fabs( p[0].a ) < 0.00025f && std::fabs( p[0].c ) < 0.00025f ) ||
+						       ( ( p[0].c != 0 || p[0].b != 0 ) && std::fabs( p[0].c ) < 0.00025f && std::fabs( p[0].b ) < 0.00025f ) ||
+						       ( ( p[1].a != 0 || p[1].b != 0 ) && std::fabs( p[1].a ) < 0.00025f && std::fabs( p[1].b ) < 0.00025f ) ||
+						       ( ( p[1].a != 0 || p[1].c != 0 ) && std::fabs( p[1].a ) < 0.00025f && std::fabs( p[1].c ) < 0.00025f ) ||
+						       ( ( p[1].c != 0 || p[1].b != 0 ) && std::fabs( p[1].c ) < 0.00025f && std::fabs( p[1].b ) < 0.00025f ) ||
+						       ( ( p[2].a != 0 || p[2].b != 0 ) && std::fabs( p[2].a ) < 0.00025f && std::fabs( p[2].b ) < 0.00025f ) ||
+						       ( ( p[2].a != 0 || p[2].c != 0 ) && std::fabs( p[2].a ) < 0.00025f && std::fabs( p[2].c ) < 0.00025f ) ||
+						       ( ( p[2].c != 0 || p[2].b != 0 ) && std::fabs( p[2].c ) < 0.00025f && std::fabs( p[2].b ) < 0.00025f ) ) {
 							cnt -= plane.normal() * 0.1f;
 							//	Sys_Printf( "shifting pyramid point\n" );
 							PlaneFromPoints( p[0], points[1], points[0], cnt );

@@ -45,10 +45,10 @@ public:
 			return other.m_indirect; //m_distance < other.m_distance;
 		}
 		else if( m_indirect && other.m_indirect ){
-			if( fabs( m_distance - other.m_distance ) > 1e-3f /*0.00002f*/ ){
+			if( std::fabs( m_distance - other.m_distance ) > 1e-3f /*0.00002f*/ ){
 				return m_distance < other.m_distance;
 			}
-			else if( fabs( m_depth - other.m_depth ) > 1e-6f ){
+			else if( std::fabs( m_depth - other.m_depth ) > 1e-6f ){
 				return m_depth < other.m_depth;
 			}
 			else{

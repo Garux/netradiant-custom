@@ -233,14 +233,14 @@ inline void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<O
 	}
 #else
 	/* do some cleaning */
-	if ( fabs( normal[ 0 ] ) < 1e-6 ) {
-		normal[ 0 ] = 0.0f;
+	if ( std::fabs( normal[ 0 ] ) < 1e-6 ) {
+		normal[ 0 ] = 0;
 	}
-	if ( fabs( normal[ 1 ] ) < 1e-6 ) {
-		normal[ 1 ] = 0.0f;
+	if ( std::fabs( normal[ 1 ] ) < 1e-6 ) {
+		normal[ 1 ] = 0;
 	}
-	if ( fabs( normal[ 2 ] ) < 1e-6 ) {
-		normal[ 2 ] = 0.0f;
+	if ( std::fabs( normal[ 2 ] ) < 1e-6 ) {
+		normal[ 2 ] = 0;
 	}
 
 	/* compute the two rotations around y and z to rotate x to normal */

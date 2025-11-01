@@ -1129,7 +1129,7 @@ public:
 	bool valid() const {
 		return !( !std::isfinite( m_local2tex[0] ) //nan
 		       || !std::isfinite( m_tex2local[0] ) //nan
-		       || fabs( vector3_dot( m_plane.normal(), m_tex2local.z().vec3() ) ) < 1e-6 //projected along face
+		       || std::fabs( vector3_dot( m_plane.normal(), m_tex2local.z().vec3() ) ) < 1e-6 //projected along face
 		       || vector3_length_squared( m_tex2local.x().vec3() ) < .01 //srsly scaled down, limit at max 10 textures per world unit
 		       || vector3_length_squared( m_tex2local.y().vec3() ) < .01
 		       || vector3_length_squared( m_tex2local.x().vec3() ) > 1e9 //very upscaled or product of nearly nan

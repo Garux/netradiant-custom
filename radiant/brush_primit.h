@@ -166,11 +166,11 @@ inline void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<O
 	float RotY, RotZ;
 	// do some cleaning
 	/*
-	   if ( fabs( normal[0] ) < 1e-6 )
+	   if ( std::fabs( normal[0] ) < 1e-6 )
 	      normal[0] = 0.0f;
-	   if ( fabs( normal[1] ) < 1e-6 )
+	   if ( std::fabs( normal[1] ) < 1e-6 )
 	      normal[1] = 0.0f;
-	   if ( fabs( normal[2] ) < 1e-6 )
+	   if ( std::fabs( normal[2] ) < 1e-6 )
 	      normal[2] = 0.0f;
 	 */
 	RotY = -atan2( normal[2], sqrt( normal[1] * normal[1] + normal[0] * normal[0] ) );

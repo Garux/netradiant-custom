@@ -103,7 +103,7 @@ bool DPlane::IsRedundant( std::list<DPoint*>& pointList ){
 
 	for ( const auto *point : pointList )
 	{
-		if ( fabs( DistanceToPoint( point->_pnt ) ) < MAX_ROUND_ERROR ) {
+		if ( std::fabs( DistanceToPoint( point->_pnt ) ) < MAX_ROUND_ERROR ) {
 			cnt++;
 		}
 
@@ -117,11 +117,11 @@ bool DPlane::IsRedundant( std::list<DPoint*>& pointList ){
 bool DPlane::operator ==( const DPlane& other ) const {
 	vec3_t chk;
 	VectorSubtract( other.normal, normal, chk );
-	if ( fabs( VectorLength( chk ) ) > MAX_ROUND_ERROR ) {
+	if ( std::fabs( VectorLength( chk ) ) > MAX_ROUND_ERROR ) {
 		return false;
 	}
 
-	if ( fabs( other._d - _d ) > MAX_ROUND_ERROR ) {
+	if ( std::fabs( other._d - _d ) > MAX_ROUND_ERROR ) {
 		return false;
 	}
 
@@ -131,7 +131,7 @@ bool DPlane::operator ==( const DPlane& other ) const {
 bool DPlane::operator !=( DPlane& other ){
 	vec3_t chk;
 	VectorAdd( other.normal, normal, chk );
-	if ( fabs( VectorLength( chk ) ) > MAX_ROUND_ERROR ) {
+	if ( std::fabs( VectorLength( chk ) ) > MAX_ROUND_ERROR ) {
 		return false;
 	}
 
@@ -149,7 +149,7 @@ DWinding DPlane::BaseWindingForPlane() const {
 	x = -1;
 	for ( i = 0; i < 3; ++i )
 	{
-		v = fabs( normal[i] );
+		v = std::fabs( normal[i] );
 		if ( v > max ) {
 			x = i;
 			max = v;

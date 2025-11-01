@@ -67,10 +67,10 @@ bool PlaneEqual( const plane_t& p, const Plane3f& plane ){
 	// (the epsilons may be zero).  We want to use '<' instead of '<=' to be
 	// consistent with the true meaning of "epsilon", and also because other
 	// parts of the code uses this inequality.
-	if ( ( p.dist() == plane.dist() || fabs( p.dist() - plane.dist() ) < de ) &&
-	     ( p.normal()[0] == plane.normal()[0] || fabs( p.normal()[0] - plane.normal()[0] ) < ne ) &&
-	     ( p.normal()[1] == plane.normal()[1] || fabs( p.normal()[1] - plane.normal()[1] ) < ne ) &&
-	     ( p.normal()[2] == plane.normal()[2] || fabs( p.normal()[2] - plane.normal()[2] ) < ne ) ) {
+	if ( ( p.dist() == plane.dist() || std::fabs( p.dist() - plane.dist() ) < de ) &&
+	     ( p.normal()[0] == plane.normal()[0] || std::fabs( p.normal()[0] - plane.normal()[0] ) < ne ) &&
+	     ( p.normal()[1] == plane.normal()[1] || std::fabs( p.normal()[1] - plane.normal()[1] ) < ne ) &&
+	     ( p.normal()[2] == plane.normal()[2] || std::fabs( p.normal()[2] - plane.normal()[2] ) < ne ) ) {
 		return true;
 	}
 
@@ -85,7 +85,7 @@ bool PlaneEqual( const plane_t& p, const Plane3f& plane ){
  */
 
 inline void AddPlaneToHash( plane_t& p ){
-	const int hash = ( PLANE_HASHES - 1 ) & (int) fabs( p.dist() );
+	const int hash = ( PLANE_HASHES - 1 ) & (int) std::fabs( p.dist() );
 
 	p.hash_chain = planehash[hash];
 	planehash[hash] = &p - mapplanes.data() + 1;
@@ -152,16 +152,16 @@ static bool SnapNormal( Vector3& normal ){
 	//they cause precision errors
 
 
-	if ( ( normal[0] != 0.0 || normal[1] != 0.0 ) && fabs( normal[0] ) < 0.00025 && fabs( normal[1] ) < 0.00025){
-		normal[0] = normal[1] = 0.0;
+	if ( ( normal[0] != 0 || normal[1] != 0 ) && std::fabs( normal[0] ) < 0.00025f && std::fabs( normal[1] ) < 0.00025f ){
+		normal[0] = normal[1] = 0;
 		adjusted = true;
 	}
-	else if ( ( normal[0] != 0.0 || normal[2] != 0.0 ) && fabs( normal[0] ) < 0.00025 && fabs( normal[2] ) < 0.00025){
-		normal[0] = normal[2] = 0.0;
+	else if ( ( normal[0] != 0 || normal[2] != 0 ) && std::fabs( normal[0] ) < 0.00025f && std::fabs( normal[2] ) < 0.00025f ){
+		normal[0] = normal[2] = 0;
 		adjusted = true;
 	}
-	else if ( ( normal[2] != 0.0 || normal[1] != 0.0 ) && fabs( normal[2] ) < 0.00025 && fabs( normal[1] ) < 0.00025){
-		normal[2] = normal[1] = 0.0;
+	else if ( ( normal[2] != 0 || normal[1] != 0 ) && std::fabs( normal[2] ) < 0.00025f && std::fabs( normal[1] ) < 0.00025f ){
+		normal[2] = normal[1] = 0;
 		adjusted = true;
 	}
 
@@ -237,12 +237,12 @@ static bool SnapNormal( Vector3& normal ){
 
 	for ( i = 0; i < 3; ++i )
 	{
-		if ( fabs( normal[ i ] - 1 ) < normalEpsilon ) {
+		if ( std::fabs( normal[ i ] - 1 ) < normalEpsilon ) {
 			normal.set( 0 );
 			normal[ i ] = 1;
 			return true;
 		}
-		if ( fabs( normal[ i ] - -1 ) < normalEpsilon ) {
+		if ( std::fabs( normal[ i ] - -1 ) < normalEpsilon ) {
 			normal.set( 0 );
 			normal[ i ] = -1;
 			return true;
@@ -290,7 +290,7 @@ static void SnapPlane( Plane3f& plane ){
 	// solve so that we can better engineer it (I'm not saying that SnapPlane()
 	// should be removed altogether).  Fix all this snapping code at some point!
 
-	if ( fabs( plane.dist() - std::rint( plane.dist() ) ) < distanceEpsilon ) {
+	if ( std::fabs( plane.dist() - std::rint( plane.dist() ) ) < distanceEpsilon ) {
 		plane.dist() = std::rint( plane.dist() );
 	}
 }
@@ -343,7 +343,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 	SnapPlane( plane );
 #endif
 	/* hash the plane */
-	const int hash = ( PLANE_HASHES - 1 ) & (int) fabs( plane.dist() );
+	const int hash = ( PLANE_HASHES - 1 ) & (int) std::fabs( plane.dist() );
 
 	/* search the border bins as well */
 	for ( int i = -1; i <= 1; ++i )
@@ -370,7 +370,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 				// very small when world coordinates extend to 2^16.  Making the
 				// dot product here in 64 bit land will not really help the situation
 				// because the error will already be carried in dist.
-				const double d = fabs( plane3_distance_to_point( p.plane, points[ j ] ) );
+				const double d = std::fabs( plane3_distance_to_point( p.plane, points[ j ] ) );
 				if ( d != 0.0 && d >= distanceEpsilon ) {
 					break; // Point is too far from plane.
 				}
@@ -411,7 +411,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 		/* ydnar: test supplied points against this plane */
 		for ( j = 0; j < numPoints; ++j )
 		{
-			if ( fabs( plane3_distance_to_point( p->plane, points[ j ] ) ) > distanceEpsilon ) {
+			if ( std::fabs( plane3_distance_to_point( p->plane, points[ j ] ) ) > distanceEpsilon ) {
 				break;
 			}
 		}
@@ -632,7 +632,7 @@ void AddBrushBevels(){
 				/* handle bevel surfaceflags */
 				for ( const side_t& side : sides ) {
 					for ( const Vector3& point : side.winding ) {
-						if ( fabs( plane.dist() - point[axis] ) < .1f ) {
+						if ( std::fabs( plane.dist() - point[axis] ) < .1f ) {
 							s.surfaceFlags |= ( side.surfaceFlags & surfaceFlagsMask );
 							break;
 						}

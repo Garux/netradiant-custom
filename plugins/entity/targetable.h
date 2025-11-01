@@ -199,9 +199,9 @@ public:
 				if ( dir[i] < 0 ){
 					hack[i] *= -1.f;
 				}
-				if ( fabs( dir[i] ) > max ){
+				if ( std::fabs( dir[i] ) > max ){
 					maxI = i;
-					max = fabs( dir[i] );
+					max = std::fabs( dir[i] );
 				}
 			}
 			hack[maxI] *= -1.f;

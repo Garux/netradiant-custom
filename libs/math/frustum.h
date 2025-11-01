@@ -449,9 +449,9 @@ inline Frustum frustum_inverse_transformed( const Frustum& frustum, const Matrix
 
 inline bool viewproj_test_point( const Matrix4& viewproj, const Vector3& point ){
 	Vector4 hpoint( matrix4_transformed_vector4( viewproj, Vector4( point, 1.0f ) ) );
-	if ( fabs( hpoint[0] ) < fabs( hpoint[3] )
-	  && fabs( hpoint[1] ) < fabs( hpoint[3] )
-	  && fabs( hpoint[2] ) < fabs( hpoint[3] ) ) {
+	if ( std::fabs( hpoint[0] ) < std::fabs( hpoint[3] )
+	  && std::fabs( hpoint[1] ) < std::fabs( hpoint[3] )
+	  && std::fabs( hpoint[2] ) < std::fabs( hpoint[3] ) ) {
 		return true;
 	}
 	return false;
@@ -548,9 +548,9 @@ inline double plane_distance_to_point( const Plane3& plane, const Vector3& point
 }
 
 inline double plane_distance_to_oriented_extents( const Plane3& plane, const Vector3& extents, const Matrix4& orientation ){
-	return fabs( extents[0] * vector3_dot( plane.normal(), orientation.x().vec3() ) )
-	     + fabs( extents[1] * vector3_dot( plane.normal(), orientation.y().vec3() ) )
-	     + fabs( extents[2] * vector3_dot( plane.normal(), orientation.z().vec3() ) );
+	return std::fabs( extents[0] * vector3_dot( plane.normal(), orientation.x().vec3() ) )
+	     + std::fabs( extents[1] * vector3_dot( plane.normal(), orientation.y().vec3() ) )
+	     + std::fabs( extents[2] * vector3_dot( plane.normal(), orientation.z().vec3() ) );
 }
 
 /// \brief Return false if \p aabb with \p orientation is partially or completely outside \p plane.

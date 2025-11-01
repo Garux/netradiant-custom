@@ -583,7 +583,7 @@ bool CalcTangentVectors( const std::array<const bspDrawVert_t *, numVerts>& dv, 
 
 	/* calculate barycentric basis for the triangle */
 	bb = ( dv[ 1 ]->st[ 0 ] - dv[ 0 ]->st[ 0 ] ) * ( dv[ 2 ]->st[ 1 ] - dv[ 0 ]->st[ 1 ] ) - ( dv[ 2 ]->st[ 0 ] - dv[ 0 ]->st[ 0 ] ) * ( dv[ 1 ]->st[ 1 ] - dv[ 0 ]->st[ 1 ] );
-	if ( fabs( bb ) < 0.00000001f ) {
+	if ( std::fabs( bb ) < 0.00000001f ) {
 		return false;
 	}
 
@@ -1116,7 +1116,7 @@ static bool MapQuad( rawLightmap_t *lm, const surfaceInfo_t *info, const QuadRef
 	}
 
 	/* 4th point must fall on the plane */
-	if ( fabs( plane3_distance_to_point( plane, quad[ 3 ]->xyz ) ) > QUAD_PLANAR_EPSILON ) {
+	if ( std::fabs( plane3_distance_to_point( plane, quad[ 3 ]->xyz ) ) > QUAD_PLANAR_EPSILON ) {
 		return false;
 	}
 

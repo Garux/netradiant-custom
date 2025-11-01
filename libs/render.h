@@ -1184,11 +1184,11 @@ inline void ArbitraryMeshTriangle_calcTangents( const ArbitraryMeshVertex& a, co
 		    )
 		);
 
-		if ( fabs( cross.x() ) > 0.000001f ) {
+		if ( std::fabs( cross.x() ) > 0.000001f ) {
 			s.x() = -cross.y() / cross.x();
 		}
 
-		if ( fabs( cross.x() ) > 0.000001f ) {
+		if ( std::fabs( cross.x() ) > 0.000001f ) {
 			t.x() = -cross.z() / cross.x();
 		}
 	}
@@ -1207,11 +1207,11 @@ inline void ArbitraryMeshTriangle_calcTangents( const ArbitraryMeshVertex& a, co
 		    )
 		);
 
-		if ( fabs( cross.x() ) > 0.000001f ) {
+		if ( std::fabs( cross.x() ) > 0.000001f ) {
 			s.y() = -cross.y() / cross.x();
 		}
 
-		if ( fabs( cross.x() ) > 0.000001f ) {
+		if ( std::fabs( cross.x() ) > 0.000001f ) {
 			t.y() = -cross.z() / cross.x();
 		}
 	}
@@ -1230,11 +1230,11 @@ inline void ArbitraryMeshTriangle_calcTangents( const ArbitraryMeshVertex& a, co
 		    )
 		);
 
-		if ( fabs( cross.x() ) > 0.000001f ) {
+		if ( std::fabs( cross.x() ) > 0.000001f ) {
 			s.z() = -cross.y() / cross.x();
 		}
 
-		if ( fabs( cross.x() ) > 0.000001f ) {
+		if ( std::fabs( cross.x() ) > 0.000001f ) {
 			t.z() = -cross.z() / cross.x();
 		}
 	}

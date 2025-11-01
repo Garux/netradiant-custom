@@ -83,7 +83,7 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 
 		/* calculate barycentric basis for the triangle */
 		bb = ( b->st[ 0 ] - a->st[ 0 ] ) * ( c->st[ 1 ] - a->st[ 1 ] ) - ( c->st[ 0 ] - a->st[ 0 ] ) * ( b->st[ 1 ] - a->st[ 1 ] );
-		if ( fabs( bb ) < 0.00000001 ) {
+		if ( std::fabs( bb ) < 0.00000001 ) {
 			return false;
 		}
 
@@ -139,7 +139,7 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 		for ( i = 0; i < 2; ++i )
 			for ( j = 0; j < 3; ++j )
 				dp->texMat[ i ][ j ] = lengths[ i ] != 0.0 ? ( axis[ i ][ j ] / lengths[ i ] ) : 0.0;
-		//%	dp->texMat[ i ][ j ] = fabs( vecs[ i ][ j ] ) > 0.0 ? ( 1.0 / vecs[ i ][ j ] ) : 0.0;
+		//%	dp->texMat[ i ][ j ] = std::fabs( vecs[ i ][ j ] ) > 0.0 ? ( 1.0 / vecs[ i ][ j ] ) : 0.0;
 		//%	dp->texMat[ i ][ j ] = axis[ i ][ j ] > 0.0 ? ( 1.0 / axis[ i ][ j ] ) : 0.0;
 
 		/* calculalate translation component */
@@ -177,15 +177,15 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 				/* walk deltas */
 				for ( k = 0; k < 3; ++k )
 				{
-					if ( fabs( deltas[ k ][ j ] ) > delta &&
-					     fabs( texDeltas[ k ][ i ] ) > texDelta  ) {
+					if ( std::fabs( deltas[ k ][ j ] ) > delta &&
+					     std::fabs( texDeltas[ k ][ i ] ) > texDelta  ) {
 						delta = deltas[ k ][ j ];
 						texDelta = texDeltas[ k ][ i ];
 					}
 				}
 
 				/* set texture matrix component */
-				if ( fabs( delta ) > 0.0 ) {
+				if ( std::fabs( delta ) > 0.0 ) {
 					dp->texMat[ i ][ j ] = texDelta / delta;
 				}
 				else{
@@ -447,7 +447,7 @@ void ProcessDecals(){
 						};
 						/* planar? (nuking this optimization as it doesn't work on non-rectangular quads) */
 						if ( 0 && PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz ) &&
-						     fabs( plane3_distance_to_point( plane, dv[ 1 ]->xyz ) ) <= PLANAR_EPSILON ) {
+						     std::fabs( plane3_distance_to_point( plane, dv[ 1 ]->xyz ) ) <= PLANAR_EPSILON ) {
 							/* make a quad projector */
 							MakeDecalProjector( p.shaderInfo, projection, distance, 4, dv );
 						}

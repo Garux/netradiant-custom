@@ -397,7 +397,7 @@ static void ConvertBrush( FILE *f, const bspModel_t& model, int bspBrushNum, con
 		/* recheck and fix winding points, fails occur somehow */
 		int match = 0;
 		for ( const Vector3& p : buildSide.winding ){
-			if ( fabs( plane3_distance_to_point( buildPlane.plane, p ) ) < distanceEpsilon ) {
+			if ( std::fabs( plane3_distance_to_point( buildPlane.plane, p ) ) < distanceEpsilon ) {
 				pts[ match ] = p;
 				match++;
 				/* got 3 fine points? */

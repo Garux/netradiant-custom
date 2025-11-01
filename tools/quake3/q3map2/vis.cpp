@@ -530,10 +530,10 @@ static fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, 
 			p4 = &f2->points[( j + 1 ) % f2->numpoints];
 			for ( k = 0; k < 3; ++k )
 			{
-				if ( fabs( ( *p1 )[k] - ( *p4 )[k] ) > 0.1 ) { //EQUAL_EPSILON) //ME
+				if ( std::fabs( ( *p1 )[k] - ( *p4 )[k] ) > 0.1f ) { //EQUAL_EPSILON) //ME
 					break;
 				}
-				if ( fabs( ( *p2 )[k] - ( *p3 )[k] ) > 0.1 ) { //EQUAL_EPSILON) //ME
+				if ( std::fabs( ( *p2 )[k] - ( *p3 )[k] ) > 0.1f ) { //EQUAL_EPSILON) //ME
 					break;
 				}
 			}

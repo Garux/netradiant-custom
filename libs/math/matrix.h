@@ -976,7 +976,7 @@ inline Vector3 matrix4_get_rotation_euler_xyz( const Matrix4& self ){
 	double a = asin( -self[2] );
 	double ca = cos( a );
 
-	if ( fabs( ca ) > 0.005 ) { // Gimbal lock?
+	if ( std::fabs( ca ) > 0.005 ) { // Gimbal lock?
 		return Vector3(
 		           static_cast<float>( atan2( self[6] / ca, self[10] / ca ) ),
 		           static_cast<float>( a ),
@@ -1004,7 +1004,7 @@ inline Vector3 matrix4_get_rotation_euler_yxz( const Matrix4& self ){
 	double a = asin( self[6] );
 	double ca = cos( a );
 
-	if ( fabs( ca ) > 0.005 ) { // Gimbal lock?
+	if ( std::fabs( ca ) > 0.005 ) { // Gimbal lock?
 		return Vector3(
 		           static_cast<float>( a ),
 		           static_cast<float>( atan2( -self[2] / ca, self[10] / ca ) ),
@@ -1032,7 +1032,7 @@ inline Vector3 matrix4_get_rotation_euler_zxy( const Matrix4& self ){
 	double a = asin( -self[9] );
 	double ca = cos( a );
 
-	if ( fabs( ca ) > 0.005 ) { // Gimbal lock?
+	if ( std::fabs( ca ) > 0.005 ) { // Gimbal lock?
 		return Vector3(
 		           static_cast<float>( a ),
 		           static_cast<float>( atan2( self[8] / ca, self[10] / ca ) ),
@@ -1060,7 +1060,7 @@ inline Vector3 matrix4_get_rotation_euler_zyx( const Matrix4& self ){
 	double a = asin( self[8] );
 	double ca = cos( a );
 
-	if ( fabs( ca ) > 0.005 ) { // Gimbal lock?
+	if ( std::fabs( ca ) > 0.005 ) { // Gimbal lock?
 		return Vector3(
 		           static_cast<float>( atan2( -self[9] / ca, self[10] / ca ) ),
 		           static_cast<float>( a ),

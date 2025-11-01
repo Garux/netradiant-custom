@@ -277,7 +277,7 @@ public:
 	}
 	void Construct( const Matrix4& device2manip, const DeviceVector device_point, const AABB& bounds, const Vector3& transform_origin ) override {
 		const float dot = vector3_dot( m_axis, m_view->fill()? vector3_normalised( m_view->getViewer() - transform_origin ) : m_view->getViewDir() );
-		m_plane_way = fabs( dot ) > 0.1;
+		m_plane_way = std::fabs( dot ) > 0.1f;
 
 		if( m_plane_way ){
 			m_origin = transform_origin;
@@ -325,12 +325,12 @@ void aabb_snap_translation( Vector3& move, const AABB& bounds ){
 	const Vector3 mins( bounds.origin - bounds.extents );
 //	globalOutputStream() << "move: " << move << '\n';
 	for( std::size_t i = 0; i < 3; ++i ){
-		if( fabs( move[i] ) > 1e-2f ){
+		if( std::fabs( move[i] ) > 1e-2f ){
 			const float snapto1 = float_snapped( maxs[i] + move[i], GetSnapGridSize() );
 			const float snapto2 = float_snapped( mins[i] + move[i], GetSnapGridSize() );
 
-			const float dist1 = fabs( fabs( maxs[i] + move[i] ) - fabs( snapto1 ) );
-			const float dist2 = fabs( fabs( mins[i] + move[i] ) - fabs( snapto2 ) );
+			const float dist1 = std::fabs( std::fabs( maxs[i] + move[i] ) - std::fabs( snapto1 ) );
+			const float dist2 = std::fabs( std::fabs( mins[i] + move[i] ) - std::fabs( snapto2 ) );
 
 //			globalOutputStream() << "maxs[i] + move[i]: " << maxs[i] + move[i]  << "    snapto1: " << snapto1 << "   dist1: " << dist1 << '\n';
 //			globalOutputStream() << "mins[i] + move[i]: " << mins[i] + move[i]  << "    snapto2: " << snapto2 << "   dist2: " << dist2 << '\n';
@@ -539,7 +539,7 @@ public:
 		float bestDist = FLT_MAX;
 		for( size_t axis : { 0, 1, 2 } )
 			for( int sign : { -1, 1 } )
-				if( const float dist = fabs( m_0[axis] - ( m_bounds.origin[axis] + std::copysign( m_bounds.extents[axis], sign ) ) ); dist < bestDist ){
+				if( const float dist = std::fabs( m_0[axis] - ( m_bounds.origin[axis] + std::copysign( m_bounds.extents[axis], sign ) ) ); dist < bestDist ){
 					bestDist = dist;
 					m_roatateAxis = axis;
 					m_rotateSign = sign;
@@ -829,14 +829,14 @@ public:
 		if( g_modifiers.shift() ){ // snap 2 axes equally
 			float bestscale = ignore_axis != 0 ? scale[0] : scale[1];
 			for( std::size_t i = ignore_axis != 0 ? 1 : 2; i < 3; ++i ){
-				if( ignore_axis != i && fabs( scale[i] ) < fabs( bestscale ) ){
+				if( ignore_axis != i && std::fabs( scale[i] ) < std::fabs( bestscale ) ){
 					bestscale = scale[i];
 				}
 				//globalOutputStream() << "bestscale: " << bestscale << '\n';
 			}
 			for( std::size_t i = 0; i < 3; ++i ){
 				if( ignore_axis != i ){
-					scale[i] = ( scale[i] < 0.f ) ? -fabs( bestscale ) : fabs( bestscale );
+					scale[i] = ( scale[i] < 0.f ) ? -std::fabs( bestscale ) : fabs( bestscale );
 				}
 			}
 		}
@@ -939,7 +939,7 @@ public:
 			return;
 
 		if( g_modifiers.shift() || g_modifiers.ctrl() ){ // square or cube
-			const float squaresize = std::max( fabs( diff.x() ), fabs( diff.y() ) );
+			const float squaresize = std::max( std::fabs( diff.x() ), std::fabs( diff.y() ) );
 			diff.x() = diff.x() > 0? squaresize : -squaresize; //square
 			diff.y() = diff.y() > 0? squaresize : -squaresize;
 			if( g_modifiers.ctrl() && !g_modifiers.alt() ) //cube
@@ -1057,7 +1057,7 @@ public:
 
 		vector3_snap( current, GetSnapGridSize() );
 
-		const float offset = fabs( m_planeSelected.normal()[m_axisZ] ) * std::copysign(
+		const float offset = std::fabs( m_planeSelected.normal()[m_axisZ] ) * std::copysign(
 		                              std::max( static_cast<double>( GetGridSize() ), vector3_length( current ) ),
 		                              vector3_dot( current, m_planeSelected.normal() ) );
 
@@ -2433,7 +2433,7 @@ public:
 	}
 
 	bool manipulator_show_axis( const Pivot2World& pivot, const Vector3& axis ){
-		return fabs( vector3_dot( pivot.m_axis_screen, axis ) ) < 0.95;
+		return std::fabs( vector3_dot( pivot.m_axis_screen, axis ) ) < 0.95;
 	}
 
 	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& pivot2world ) override {
@@ -2998,7 +2998,7 @@ public:
 								m_pivot2world = matrix4_translation_for_vec3( origin );
 							}
 							/* set radius */
-							if( fabs( vector3_dot( m_pivot.m_axis_screen, g_vector3_axes[i] ) ) < 0.2 ){
+							if( std::fabs( vector3_dot( m_pivot.m_axis_screen, g_vector3_axes[i] ) ) < 0.2 ){
 								Vector3 origin = matrix4_get_translation_vec3( m_pivot2world );
 								Vector3 point = m_bounds_draw.origin + m_point.m_point.vertex * m_bounds_draw.extents;
 								const Matrix4 inv = matrix4_affine_inverse( m_pivot.m_worldSpace );
@@ -4655,10 +4655,10 @@ public:
 		m_viewdir = ( viewdir[maxi] > 0 )? g_vector3_axes[maxi] : -g_vector3_axes[maxi];
 	}
 	void viewdir_fixup(){
-		if( fabs( vector3_length( m_points[1].m_point - m_points[0].m_point ) ) > 1e-3 //two non coincident points
-		 && fabs( vector3_dot( m_viewdir, vector3_normalised( m_points[1].m_point - m_points[0].m_point ) ) ) > 0.999 ){ //on axis = m_viewdir
+		if( std::fabs( vector3_length( m_points[1].m_point - m_points[0].m_point ) ) > 1e-3 //two non coincident points
+		 && std::fabs( vector3_dot( m_viewdir, vector3_normalised( m_points[1].m_point - m_points[0].m_point ) ) ) > 0.999 ){ //on axis = m_viewdir
 			viewdir_set( m_view->getViewDir() );
-			if( fabs( vector3_dot( m_viewdir, vector3_normalised( m_points[1].m_point - m_points[0].m_point ) ) ) > 0.999 ){
+			if( std::fabs( vector3_dot( m_viewdir, vector3_normalised( m_points[1].m_point - m_points[0].m_point ) ) ) > 0.999 ){
 				const Matrix4 screen2world( matrix4_full_inverse( m_view->GetViewMatrix() ) );
 				Vector3 p[2];
 				for( std::size_t i = 0; i < 2; ++i ){
@@ -4677,7 +4677,7 @@ public:
 		const std::size_t maxi = vector3_max_abs_component_index( plane.normal() );
 		if( plane3_valid( plane )
 		 && aabb_valid( m_bounds )
-		 && fabs( plane.normal()[maxi] ) > 0.999 ){ //axial plane
+		 && std::fabs( plane.normal()[maxi] ) > 0.999 ){ //axial plane
 			const double anchor = plane.normal()[maxi] * plane.dist();
 			if( anchor > m_bounds.origin[maxi] ){
 				if( ( anchor - ( m_bounds.origin[maxi] + m_bounds.extents[maxi] ) ) > -0.1 )
@@ -5230,7 +5230,7 @@ private:
 	bool projection_valid() const {
 		return !( !std::isfinite( m_local2tex[0] ) //nan
 		       || !std::isfinite( m_tex2local[0] ) //nan
-		       || fabs( vector3_dot( m_plane.normal(), m_tex2local.z().vec3() ) ) < 1e-6 //projected along face
+		       || std::fabs( vector3_dot( m_plane.normal(), m_tex2local.z().vec3() ) ) < 1e-6 //projected along face
 		       || vector3_length_squared( m_tex2local.x().vec3() ) < .01 //srsly scaled down, limit at max 10 textures per world unit
 		       || vector3_length_squared( m_tex2local.y().vec3() ) < .01
 		       || vector3_length_squared( m_tex2local.x().vec3() ) > 1e9 //very upscaled or product of nearly nan
@@ -5319,7 +5319,7 @@ private:
 						p1 = &m_patch->ctrlAt( m_patchHeight - 1, col );
 						p2 = distW0 > distW1? &m_patch->ctrlAt( row, 0 ) : &m_patch->ctrlAt( row, m_patchWidth - 1 );
 						v0 = m_patch->localAABB().origin
-						     + hDir * vector3_dot( m_patch->localAABB().extents, Vector3( fabs( hDir.x() ), fabs( hDir.y() ), fabs( hDir.z() ) ) ) * 1.1
+						     + hDir * vector3_dot( m_patch->localAABB().extents, Vector3( std::fabs( hDir.x() ), std::fabs( hDir.y() ), std::fabs( hDir.z() ) ) ) * 1.1
 						     + wDir * ( distW0 - wLength / 2 );
 						v1 = v0 + hDir * hLength;
 						v2 = v0 + hDir * distH0 + ( distW0 > distW1? ( wDir * -distW0 ) : ( wDir * distW1 ) );
@@ -5329,7 +5329,7 @@ private:
 						p1 = &m_patch->ctrlAt( row, m_patchWidth - 1 );
 						p2 = distH0 > distH1? &m_patch->ctrlAt( 0, col ) : &m_patch->ctrlAt( m_patchHeight - 1, col );
 						v0 = m_patch->localAABB().origin
-						     + wDir * vector3_dot( m_patch->localAABB().extents, Vector3( fabs( wDir.x() ), fabs( wDir.y() ), fabs( wDir.z() ) ) ) * 1.1
+						     + wDir * vector3_dot( m_patch->localAABB().extents, Vector3( std::fabs( wDir.x() ), std::fabs( wDir.y() ), std::fabs( wDir.z() ) ) ) * 1.1
 						     + hDir * ( distH0 - hLength / 2 );
 						v1 = v0 + wDir * wLength;
 						v2 = v0 + wDir * distW0 + ( distH0 > distH1? ( hDir * -distH0 ) : ( hDir * distH1 ) );
@@ -5700,7 +5700,7 @@ V line center| - -  tex U center - -
 			                                      vector4_projected( matrix4_transformed_vector4( screen2world, BasicVector4<double>( 0, 0, 1, 1 ) ) ) );
 			const DoubleVector3 hit = ray_intersect_plane( ray, m_plane );
 			const Vector3 uvhit = matrix4_transformed_point( m_faceLocal2tex, hit );
-			if( fabs( vector3_dot( ray.direction, m_plane.normal() ) ) > 1e-6
+			if( std::fabs( vector3_dot( ray.direction, m_plane.normal() ) ) > 1e-6
 			 && !m_Ulines.m_lines.empty()
 			 && !m_Vlines.m_lines.empty()
 			 && matrix4_transformed_vector4( view.GetViewMatrix(), Vector4( hit, 1 ) ).w() > 0 ){
@@ -6005,26 +6005,26 @@ public:
 				float snapToU = 0;
 				float snapToV = 0;
 				for( std::vector<PointVertex>::const_iterator i = m_Ulines.m_lines.begin(); i != m_Ulines.m_lines.end(); ++++i ){
-					const float dist = fabs( ( *i ).vertex.y() - uv_origin.y() );
+					const float dist = std::fabs( ( *i ).vertex.y() - uv_origin.y() );
 					if( dist < bestDistU ){
 						bestDistU = dist;
 						snapToU = ( *i ).vertex.y();
 					}
 				}
 				for( std::vector<PointVertex>::const_iterator i = m_Vlines.m_lines.begin(); i != m_Vlines.m_lines.end(); ++++i ){
-					const float dist = fabs( ( *i ).vertex.x() - uv_origin.x() );
+					const float dist = std::fabs( ( *i ).vertex.x() - uv_origin.x() );
 					if( dist < bestDistV ){
 						bestDistV = dist;
 						snapToV = ( *i ).vertex.x();
 					}
 				}
 				forEachUVPoint( [&]( const Vector3& point ){
-					const float distU = fabs( point.y() - uv_origin.y() );
+					const float distU = std::fabs( point.y() - uv_origin.y() );
 					if( distU < bestDistU ){
 						bestDistU = distU;
 						snapToU = point.y();
 					}
-					const float distV = fabs( point.x() - uv_origin.x() );
+					const float distV = std::fabs( point.x() - uv_origin.x() );
 					if( distV < bestDistV ){
 						bestDistV = distV;
 						snapToV = point.x();
@@ -6055,14 +6055,14 @@ public:
 				float bestDist = FLT_MAX;
 				float snapTo = 0;
 				for( std::vector<PointVertex>::const_iterator i = m_Ulines.m_lines.begin(); i != m_Ulines.m_lines.end(); ++++i ){
-					const float dist = fabs( ( *i ).vertex.y() - uv_origin.y() );
+					const float dist = std::fabs( ( *i ).vertex.y() - uv_origin.y() );
 					if( dist < bestDist ){
 						bestDist = dist;
 						snapTo = ( *i ).vertex.y();
 					}
 				}
 				forEachUVPoint( [&]( const Vector3& point ){
-					const float dist = fabs( point.y() - uv_origin.y() );
+					const float dist = std::fabs( point.y() - uv_origin.y() );
 					if( dist < bestDist ){
 						bestDist = dist;
 						snapTo = point.y();
@@ -6087,14 +6087,14 @@ public:
 				float bestDist = FLT_MAX;
 				float snapTo = 0;
 				for( std::vector<PointVertex>::const_iterator i = m_Vlines.m_lines.begin(); i != m_Vlines.m_lines.end(); ++++i ){
-					const float dist = fabs( ( *i ).vertex.x() - uv_origin.x() );
+					const float dist = std::fabs( ( *i ).vertex.x() - uv_origin.x() );
 					if( dist < bestDist ){
 						bestDist = dist;
 						snapTo = ( *i ).vertex.x();
 					}
 				}
 				forEachUVPoint( [&]( const Vector3& point ){
-					const float dist = fabs( point.x() - uv_origin.x() );
+					const float dist = std::fabs( point.x() - uv_origin.x() );
 					if( dist < bestDist ){
 						bestDist = dist;
 						snapTo = point.x();
@@ -6194,13 +6194,13 @@ public:
 					forEachEdge( [&]( const Vector3& point0, const Vector3& point1 ){
 						Vector3 vec( point1 - point0 );
 						constrain_to_axis( vec, m_tex2local.z().vec3() );
-						const float dotU = fabs( vector3_dot( uvec, vec ) );
+						const float dotU = std::fabs( vector3_dot( uvec, vec ) );
 						if( dotU > bestDot ){
 							bestDot = dotU;
 							bestTo = vector3_dot( uvec, vec ) > 0? vec : -vec;
 							V = false;
 						}
-						const float dotV = fabs( vector3_dot( vvec, vec ) );
+						const float dotV = std::fabs( vector3_dot( vvec, vec ) );
 						if( dotV > bestDot ){
 							bestDot = dotV;
 							bestTo = vector3_dot( vvec, vec ) > 0? vec : -vec;
@@ -6241,7 +6241,7 @@ public:
 				float bestDist = FLT_MAX;
 				float snapTo = 0;
 				forEachUVPoint( [&]( const Vector3& point ){
-					const float dist = fabs( point.y() - uv_current.y() );
+					const float dist = std::fabs( point.y() - uv_current.y() );
 					if( dist < bestDist ){
 						bestDist = dist;
 						snapTo = point.y();
@@ -6254,7 +6254,7 @@ public:
 				result.y() = ( result.y() - uv_origin.y() ) / ( uv_start.y() - uv_origin.y() );
 
 				if( snap )
-					result.x() = fabs( result.y() );
+					result.x() = std::fabs( result.y() );
 
 				/* prevent scaling to 0, limit at max 10 textures per world unit */
 				if( vector3_length_squared( m_tex2local.y().vec3() * result.y() ) < .01 )
@@ -6281,7 +6281,7 @@ public:
 				float bestDist = FLT_MAX;
 				float snapTo = 0;
 				forEachUVPoint( [&]( const Vector3& point ){
-					const float dist = fabs( point.x() - uv_current.x() );
+					const float dist = std::fabs( point.x() - uv_current.x() );
 					if( dist < bestDist ){
 						bestDist = dist;
 						snapTo = point.x();
@@ -6294,7 +6294,7 @@ public:
 				result.x() = ( result.x() - uv_origin.x() ) / ( uv_start.x() - uv_origin.x() );
 
 				if( snap )
-					result.y() = fabs( result.x() );
+					result.y() = std::fabs( result.x() );
 
 				/* prevent scaling to 0, limit at max 10 textures per world unit */
 				if( vector3_length_squared( m_tex2local.x().vec3() * result.x() ) < .01 )
@@ -6325,12 +6325,12 @@ public:
 				float bestDistV = FLT_MAX;
 				float snapToV = 0;
 				forEachUVPoint( [&]( const Vector3& point ){
-					const float distU = fabs( point.y() - uv_current.y() );
+					const float distU = std::fabs( point.y() - uv_current.y() );
 					if( distU < bestDistU ){
 						bestDistU = distU;
 						snapToU = point.y();
 					}
-					const float distV = fabs( point.x() - uv_current.x() );
+					const float distV = std::fabs( point.x() - uv_current.x() );
 					if( distV < bestDistV ){
 						bestDistV = distV;
 						snapToV = point.x();
@@ -6349,7 +6349,7 @@ public:
 				result.x() = ( result.x() - uv_origin.x() ) / ( uv_start.x() - uv_origin.x() );
 
 				if( snap ){
-					const std::size_t best = fabs( result.x() ) > fabs( result.y() )? 0 : 1;
+					const std::size_t best = std::fabs( result.x() ) > std::fabs( result.y() )? 0 : 1;
 					result[( best + 1 ) % 2] = std::copysign( result[best], result[( best + 1 ) % 2] );
 				}
 
@@ -6383,8 +6383,8 @@ public:
 				float bestDist = FLT_MAX;
 				Vector3 bestTo;
 				const auto snap_to_edge = [&]( const Vector3 edge ){
-					if( fabs( edge.y() ) > 1e-5 ){ // don't snap so, that one axis = the other
-						const float dist = fabs( edge.x() * uv_y_measure_dist / edge.y() - skewed.x() * uv_y_measure_dist / skewed.y() );
+					if( std::fabs( edge.y() ) > 1e-5f ){ // don't snap so, that one axis = the other
+						const float dist = std::fabs( edge.x() * uv_y_measure_dist / edge.y() - skewed.x() * uv_y_measure_dist / skewed.y() );
 						if( dist < bestDist ){
 							bestDist = dist;
 							bestTo = edge;
@@ -6433,8 +6433,8 @@ public:
 				float bestDist = FLT_MAX;
 				Vector3 bestTo;
 				const auto snap_to_edge = [&]( const Vector3 edge ){
-					if( fabs( edge.x() ) > 1e-5 ){ // don't snap so, that one axis = the other
-						const float dist = fabs( edge.y() * uv_x_measure_dist / edge.x() - skewed.y() * uv_x_measure_dist / skewed.x() );
+					if( std::fabs( edge.x() ) > 1e-5f ){ // don't snap so, that one axis = the other
+						const float dist = std::fabs( edge.y() * uv_x_measure_dist / edge.x() - skewed.y() * uv_x_measure_dist / skewed.x() );
 						if( dist < bestDist ){
 							bestDist = dist;
 							bestTo = edge;
@@ -6484,15 +6484,15 @@ public:
 				const auto functor = [&]( const Vector3& point ){
 					for( auto it = m_Ulines.m_lines.cbegin(); it != m_Ulines.m_lines.cend(); ++++it ){
 						const float dist = point.y() - ( ( *it ).vertex.y() + uvmove.y() );
-						if( fabs( dist ) < bestDistU ){
-							bestDistU = fabs( dist );
+						if( std::fabs( dist ) < bestDistU ){
+							bestDistU = std::fabs( dist );
 							snapMoveU = uvmove.y() + dist;
 						}
 					}
 					for( auto it = m_Vlines.m_lines.cbegin(); it != m_Vlines.m_lines.cend(); ++++it ){
 						const float dist = point.x() - ( ( *it ).vertex.x() + uvmove.x() );
-						if( fabs( dist ) < bestDistV ){
-							bestDistV = fabs( dist );
+						if( std::fabs( dist ) < bestDistV ){
+							bestDistV = std::fabs( dist );
 							snapMoveV = uvmove.x() + dist;
 						}
 					}
@@ -6509,8 +6509,8 @@ public:
 				}
 
 				if( snap ){
-					auto& smaller = fabs( uvmove.x() * vector3_length( m_faceTex2local.x().vec3() ) ) <
-					                fabs( uvmove.y() * vector3_length( m_faceTex2local.y().vec3() ) )? result.x() : result.y();
+					auto& smaller = std::fabs( uvmove.x() * vector3_length( m_faceTex2local.x().vec3() ) ) <
+					                std::fabs( uvmove.y() * vector3_length( m_faceTex2local.y().vec3() ) )? result.x() : result.y();
 					smaller = 0;
 				}
 
@@ -6548,30 +6548,30 @@ public:
 				for( std::size_t index : indices ){
 					for( std::vector<PointVertex>::const_iterator i = m_Ulines.m_lines.begin(); i != m_Ulines.m_lines.end(); ++++i ){
 						const float dist = m_patchCtrl[index].m_texcoord.y() + uvmove.y() - ( *i ).vertex.y();
-						if( fabs( dist ) < bestDistU ){
-							bestDistU = fabs( dist );
+						if( std::fabs( dist ) < bestDistU ){
+							bestDistU = std::fabs( dist );
 							snapMoveU = uvmove.y() - dist;
 						}
 					}
 					for( std::vector<PointVertex>::const_iterator i = m_Vlines.m_lines.begin(); i != m_Vlines.m_lines.end(); ++++i ){
 						const float dist = m_patchCtrl[index].m_texcoord.x() + uvmove.x() - ( *i ).vertex.x();
-						if( fabs( dist ) < bestDistV ){
-							bestDistV = fabs( dist );
+						if( std::fabs( dist ) < bestDistV ){
+							bestDistV = std::fabs( dist );
 							snapMoveV = uvmove.x() - dist;
 						}
 					}
 					const Vector3 origin = matrix4_transformed_point( m_faceLocal2tex, m_origin );
 					{
 						const float dist = m_patchCtrl[index].m_texcoord.y() + uvmove.y() - origin.y();
-						if( fabs( dist ) < bestDistU ){
-							bestDistU = fabs( dist );
+						if( std::fabs( dist ) < bestDistU ){
+							bestDistU = std::fabs( dist );
 							snapMoveU = uvmove.y() - dist;
 						}
 					}
 					{
 						const float dist = m_patchCtrl[index].m_texcoord.x() + uvmove.x() - origin.x();
-						if( fabs( dist ) < bestDistV ){
-							bestDistV = fabs( dist );
+						if( std::fabs( dist ) < bestDistV ){
+							bestDistV = std::fabs( dist );
 							snapMoveV = uvmove.x() - dist;
 						}
 					}
@@ -6586,8 +6586,8 @@ public:
 				}
 
 				if( snap ){
-					auto& smaller = fabs( uvmove.x() * vector3_length( m_faceTex2local.x().vec3() ) ) <
-					                fabs( uvmove.y() * vector3_length( m_faceTex2local.y().vec3() ) )? result.x() : result.y();
+					auto& smaller = std::fabs( uvmove.x() * vector3_length( m_faceTex2local.x().vec3() ) ) <
+					                std::fabs( uvmove.y() * vector3_length( m_faceTex2local.y().vec3() ) )? result.x() : result.y();
 					smaller = 0;
 				}
 
@@ -6689,18 +6689,18 @@ public:
 
 		if( g_modifiers.shift() ){ // snap to axis
 			for ( std::size_t i = 0; i < 3; ++i ){
-				if( fabs( current[i] ) >= fabs( current[( i + 1 ) % 3] ) ){
-					current[( i + 1 ) % 3] = 0.f;
+				if( std::fabs( current[i] ) >= std::fabs( current[( i + 1 ) % 3] ) ){
+					current[( i + 1 ) % 3] = 0;
 				}
 				else{
-					current[i] = 0.f;
+					current[i] = 0;
 				}
 			}
 		}
 
 		bool set[3] = { true, true, true };
 		for ( std::size_t i = 0; i < 3; ++i ){
-			if( fabs( current[i] ) < 1e-3f ){
+			if( std::fabs( current[i] ) < 1e-3f ){
 				set[i] = false;
 			}
 		}
@@ -7283,7 +7283,7 @@ public:
 
 	void SelectPoint( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon, RadiantSelectionSystem::EModifier modifier, bool face ){
 		//globalOutputStream() << device_point[0] << "   " << device_point[1] << '\n';
-		ASSERT_MESSAGE( fabs( device_point[0] ) <= 1.f && fabs( device_point[1] ) <= 1.f, "point-selection error" );
+		ASSERT_MESSAGE( std::fabs( device_point[0] ) <= 1.f && std::fabs( device_point[1] ) <= 1.f, "point-selection error" );
 
 		if ( modifier == eReplace ) {
 			deselectComponentsOrAll( face );
@@ -7400,7 +7400,7 @@ public:
 
 	RadiantSelectionSystem::EModifier
 	SelectPoint_InitPaint( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon, bool face ){
-		ASSERT_MESSAGE( fabs( device_point[0] ) <= 1.f && fabs( device_point[1] ) <= 1.f, "point-selection error" );
+		ASSERT_MESSAGE( std::fabs( device_point[0] ) <= 1.f && std::fabs( device_point[1] ) <= 1.f, "point-selection error" );
 #if defined ( DEBUG_SELECTION )
 		g_render_clipped.destroy();
 #endif
@@ -8135,19 +8135,19 @@ void RadiantSelectionSystem::setCustomTransformOrigin( const Vector3& origin, co
 		for( std::size_t i = 0; i < 3; ++i ){
 			float value = origin[i];
 			if( set[i] ){
-				float bestsnapDist = fabs( m_bounds.origin[i] - value );
+				float bestsnapDist = std::fabs( m_bounds.origin[i] - value );
 				float bestsnapTo = m_bounds.origin[i];
-				float othersnapDist = fabs( m_bounds.origin[i] + m_bounds.extents[i] - value );
+				float othersnapDist = std::fabs( m_bounds.origin[i] + m_bounds.extents[i] - value );
 				if( othersnapDist < bestsnapDist ){
 					bestsnapDist = othersnapDist;
 					bestsnapTo = m_bounds.origin[i] + m_bounds.extents[i];
 				}
-				othersnapDist = fabs( m_bounds.origin[i] - m_bounds.extents[i] - value );
+				othersnapDist = std::fabs( m_bounds.origin[i] - m_bounds.extents[i] - value );
 				if( othersnapDist < bestsnapDist ){
 					bestsnapDist = othersnapDist;
 					bestsnapTo = m_bounds.origin[i] - m_bounds.extents[i];
 				}
-				othersnapDist = fabs( float_snapped( value, GetSnapGridSize() ) - value );
+				othersnapDist = std::fabs( float_snapped( value, GetSnapGridSize() ) - value );
 				if( othersnapDist < bestsnapDist ){
 					bestsnapDist = othersnapDist;
 					bestsnapTo = float_snapped( value, GetSnapGridSize() );
@@ -8679,7 +8679,7 @@ public:
 		if( move > m_moveEpsilon )
 			return true;
 		const DeviceVector devicePosition( device( position ) );
-		const float currentMove = std::max( fabs( devicePosition.x() - moveStart.x() ), fabs( devicePosition.y() - moveStart.y() ) );
+		const float currentMove = std::max( std::fabs( devicePosition.x() - moveStart.x() ), std::fabs( devicePosition.y() - moveStart.y() ) );
 		move = std::max( move, currentMove );
 	//	globalOutputStream() << move << " move\n";
 		return move > m_moveEpsilon;

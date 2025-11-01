@@ -628,7 +628,7 @@ inline Quaternion quaternion_for_axis90( axis_t axis, sign_t sign ){
 }
 
 void Select_RotateAxis( int axis, float deg ){
-	if ( fabs( deg ) == 90.f ) {
+	if ( std::fabs( deg ) == 90.f ) {
 		GlobalSelectionSystem().rotateSelected( quaternion_for_axis90( (axis_t)axis, ( deg > 0 ) ? eSignPositive : eSignNegative ), true );
 	}
 	else
@@ -1457,11 +1457,11 @@ void Texdef_Rotate( float angle ){
 // these are actually {Anti,}Clockwise in BP mode only (AP/220 - 50/50)
 // TODO is possible to make really {Anti,}Clockwise
 void Texdef_RotateClockwise(){
-	Texdef_Rotate( static_cast<float>( -fabs( g_si_globals.rotate ) ) );
+	Texdef_Rotate( -std::fabs( g_si_globals.rotate ) );
 }
 
 void Texdef_RotateAntiClockwise(){
-	Texdef_Rotate( static_cast<float>( fabs( g_si_globals.rotate ) ) );
+	Texdef_Rotate( std::fabs( g_si_globals.rotate ) );
 }
 
 void Texdef_Scale( float x, float y ){
