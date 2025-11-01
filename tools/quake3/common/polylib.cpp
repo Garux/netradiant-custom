@@ -186,7 +186,7 @@ winding_accu_t BaseWindingForPlaneAccu( const Plane3& plane ){
 	// We're relying on the fact that MAX_WORLD_COORD is a power of 2 to keep
 	// our calculation precise and relatively free of floating point error.
 	// [However, the code will still work fine if that's not the case.]
-	vright *= ( (double) MAX_WORLD_COORD ) * 4.0;
+	vright *= MAX_WORLD_COORD * 4.0;
 
 	// At time time of this writing, MAX_WORLD_COORD was 65536 (2^16).  Therefore
 	// the length of vright at this point is at least 185364.  In comparison, a
@@ -461,7 +461,7 @@ void ChopWindingInPlaceAccu( winding_accu_t& inout, const Plane3& plane, float c
 	// VEC_SMALLEST_EPSILON_AROUND_ONE, you would be guaranteed at least 2000 "ticks" in
 	// 64-bit land inside of the epsilon for all numbers we're dealing with.
 
-	static const double smallestEpsilonAllowed = ( (double) VEC_SMALLEST_EPSILON_AROUND_ONE ) * 0.5;
+	constexpr double smallestEpsilonAllowed = ( (double) VEC_SMALLEST_EPSILON_AROUND_ONE ) * 0.5;
 	const double fineEpsilon = std::max( smallestEpsilonAllowed, (double) crudeEpsilon );
 
 	for ( size_t i = 0; i < inout.size(); ++i )

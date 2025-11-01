@@ -311,8 +311,8 @@ static void CalcVis(){
 				Sys_FPrintf( SYS_VRB, "%4i clusters have exactly %4i visible clusters\n", clustersizehistogram[i], i );
 			}
 			/* cast is to prevent integer overflow */
-			totalvis  += ( (double) i )                * ( (double) clustersizehistogram[i] );
-			totalvis2 += ( (double) i ) * ( (double) i ) * ( (double) clustersizehistogram[i] );
+			totalvis  += (double) i     * clustersizehistogram[i];
+			totalvis2 += (double) i * i * clustersizehistogram[i];
 
 			if ( minvis < 0 ) {
 				minvis = i;

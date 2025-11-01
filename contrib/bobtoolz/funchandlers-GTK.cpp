@@ -303,7 +303,7 @@ void DoBuildStairs(){
 			{
 
 				// Get Step Dimensions
-				float stairHeight = (float)rs.stairHeight;
+				float stairHeight = rs.stairHeight;
 				float stairWidth;
 				if ( ( rs.direction == MOVE_EAST ) || ( rs.direction == MOVE_WEST ) ) {
 					stairWidth = ( size[0] ) / numSteps;

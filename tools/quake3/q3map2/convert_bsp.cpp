@@ -186,8 +186,8 @@ int AnalyzeBSP( Args& args ){
 
 		/* extract data */
 		lump = (byte*) header + offset;
-		lumpInt = LittleLong( (int) *( (int*) lump ) );
-		lumpFloat = LittleFloat( (float) *( (float*) lump ) );
+		lumpInt = LittleLong( *( (int*) lump ) );
+		lumpFloat = LittleFloat( *( (float*) lump ) );
 		memcpy( lumpString, (char*) lump, std::min( (size_t)length, std::size( lumpString ) - 1 ) );
 		lumpString[ std::size( lumpString ) - 1 ] = '\0';
 

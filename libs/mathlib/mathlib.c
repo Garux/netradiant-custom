@@ -99,7 +99,7 @@ vec_t VectorLength( const vec3_t v ){
 
 	for ( int i = 0; i < 3; ++i )
 		length += v[i] * v[i];
-	length = (float)sqrt( length );
+	length = sqrt( length );
 
 	return length;
 }
@@ -158,9 +158,9 @@ vec_t VectorAccurateNormalize( const vec3_t in, vec3_t out ) {
 
 	double x, y, z, length;
 
-	x = (double) in[0];
-	y = (double) in[1];
-	z = (double) in[2];
+	x = in[0];
+	y = in[1];
+	z = in[2];
 
 	length = sqrt( ( x * x ) + ( y * y ) + ( z * z ) );
 	if ( length == 0 ) {
@@ -271,9 +271,9 @@ void VectorRotateOrigin( vec3_t vIn, vec3_t vRotation, vec3_t vOrigin, vec3_t ou
 }
 
 void VectorPolar( vec3_t v, float radius, float theta, float phi ){
-	v[0] = (float)( radius * cos( theta ) * cos( phi ) );
-	v[1] = (float)( radius * sin( theta ) * cos( phi ) );
-	v[2] = (float)( radius * sin( phi ) );
+	v[0] = radius * cos( theta ) * cos( phi );
+	v[1] = radius * sin( theta ) * cos( phi );
+	v[2] = radius * sin( phi );
 }
 
 void VectorSnap( vec3_t v ){
@@ -618,7 +618,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point,
 	memset( zrot, 0, sizeof( zrot ) );
 	zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
 
-	rad = (float)DEG2RAD( degrees );
+	rad = DEG2RAD( degrees );
 	zrot[0][0] = (vec_t)cos( rad );
 	zrot[0][1] = (vec_t)sin( rad );
 	zrot[1][0] = (vec_t)-sin( rad );

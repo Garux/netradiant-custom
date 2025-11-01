@@ -1348,7 +1348,7 @@ bool point_test_polygon_2d( const point_t& P, point_iterator_t start, point_iter
 		if ( ( ( ( *prev )[1] <= P[1] ) && ( ( *cur )[1] > P[1] ) ) // an upward crossing
 		  || ( ( ( *prev )[1] > P[1] ) && ( ( *cur )[1] <= P[1] ) ) ) { // a downward crossing
 			// compute the actual edge-ray intersect x-coordinate
-			float vt = (float)( P[1] - ( *prev )[1] ) / ( ( *cur )[1] - ( *prev )[1] );
+			const float vt = ( P[1] - ( *prev )[1] ) / ( ( *cur )[1] - ( *prev )[1] );
 			if ( P[0] < ( *prev )[0] + vt * ( ( *cur )[0] - ( *prev )[0] ) ) { // P[0] < intersect
 				++crossings; // a valid crossing of y=P[1] right of P[0]
 			}

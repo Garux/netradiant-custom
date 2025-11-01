@@ -267,22 +267,22 @@ int aabb_test_ray( const aabb_t* aabb, const ray_t* ray ){
 		return 0;
 	}
 
-	ray_absolute[0] = (float)fabs( ray->direction[0] );
-	ray_absolute[1] = (float)fabs( ray->direction[1] );
-	ray_absolute[2] = (float)fabs( ray->direction[2] );
+	ray_absolute[0] = fabs( ray->direction[0] );
+	ray_absolute[1] = fabs( ray->direction[1] );
+	ray_absolute[2] = fabs( ray->direction[2] );
 
 	f = ray->direction[1] * displacement[2] - ray->direction[2] * displacement[1];
-	if ( (float)fabs( f ) > aabb->extents[1] * ray_absolute[2] + aabb->extents[2] * ray_absolute[1] ) {
+	if ( fabs( f ) > aabb->extents[1] * ray_absolute[2] + aabb->extents[2] * ray_absolute[1] ) {
 		return 0;
 	}
 
 	f = ray->direction[2] * displacement[0] - ray->direction[0] * displacement[2];
-	if ( (float)fabs( f ) > aabb->extents[0] * ray_absolute[2] + aabb->extents[2] * ray_absolute[0] ) {
+	if ( fabs( f ) > aabb->extents[0] * ray_absolute[2] + aabb->extents[2] * ray_absolute[0] ) {
 		return 0;
 	}
 
 	f = ray->direction[0] * displacement[1] - ray->direction[1] * displacement[0];
-	if ( (float)fabs( f ) > aabb->extents[0] * ray_absolute[1] + aabb->extents[1] * ray_absolute[0] ) {
+	if ( fabs( f ) > aabb->extents[0] * ray_absolute[1] + aabb->extents[1] * ray_absolute[0] ) {
 		return 0;
 	}
 

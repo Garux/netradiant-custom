@@ -71,7 +71,7 @@ extern bool bFacesAll[];
 ************************/
 
 float Deg2Rad( float angle ){
-	return (float)( angle * Q_PI / 180 );
+	return angle * Q_PI / 180;
 }
 // points in CCW order
 void AddFaceWithTexture( scene::Node& brush, const vec3_accu_t va, const vec3_accu_t vb, const vec3_accu_t vc, const char* texture, bool detail ){
@@ -107,14 +107,14 @@ void AddFaceWithTextureScaled( scene::Node& brush, vec3_t va, vec3_t vb, vec3_t 
 			float width = maxX - minX;
 
 			scale[0] = width / pqtTexInfo->width;
-			shift[0] = -(float)( (int)maxX % (int)width ) / scale[0];
+			shift[0] = -( (int)maxX % (int)width ) / scale[0];
 		}
 
 		if ( bVertScale ) {
 			float height = maxY - minY;
 
 			scale[1] = height / pqtTexInfo->height;
-			shift[1] = (float)( (int)minY % (int)height ) / scale[1];
+			shift[1] = ( (int)minY % (int)height ) / scale[1];
 		}
 
 		_QERFaceData addFace;

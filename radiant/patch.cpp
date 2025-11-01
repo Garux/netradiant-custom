@@ -1268,8 +1268,8 @@ void Patch::constructPlane( const AABB& aabb, int axis, std::size_t width, std::
 	vStart[y] = aabb.origin[y] - aabb.extents[y];
 	vStart[z] = aabb.origin[z] + aabb.extents[z];
 
-	float xAdj = fabsf( ( vStart[x] - ( aabb.origin[x] + aabb.extents[x] ) ) / (float)( m_width - 1 ) );
-	float yAdj = fabsf( ( vStart[y] - ( aabb.origin[y] + aabb.extents[y] ) ) / (float)( m_height - 1 ) );
+	const float xAdj = std::fabs( ( vStart[x] - ( aabb.origin[x] + aabb.extents[x] ) ) / ( m_width - 1 ) );
+	const float yAdj = std::fabs( ( vStart[y] - ( aabb.origin[y] + aabb.extents[y] ) ) / ( m_height - 1 ) );
 
 	Vector3 vTmp;
 	vTmp[z] = vStart[z];
@@ -1456,14 +1456,13 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		float f = 1 / cos( M_PI / n );
 		for ( i = 0; i < width; ++i )
 		{
-			float angle = ( M_PI * i ) / n; // 0 to 2pi
-			float x_ = vPos[1][x] + ( vPos[2][x] - vPos[1][x] ) * cos( angle ) * ( ( i & 1 ) ? f : 1.0f );
-			float y_ = vPos[1][y] + ( vPos[2][y] - vPos[1][y] ) * sin( angle ) * ( ( i & 1 ) ? f : 1.0f );
+			const float angle = ( M_PI * i ) / n; // 0 to 2pi
+			const float x_ = vPos[1][x] + ( vPos[2][x] - vPos[1][x] ) * cos( angle ) * ( ( i & 1 ) ? f : 1.0f );
+			const float y_ = vPos[1][y] + ( vPos[2][y] - vPos[1][y] ) * sin( angle ) * ( ( i & 1 ) ? f : 1.0f );
 			for ( j = 0; j < height; ++j )
 			{
-				float z_ = vPos[0][z] + ( vPos[2][z] - vPos[0][z] ) * ( j / (float)( height - 1 ) );
-				PatchControl *v;
-				v = &m_ctrl.data()[j * width + i];
+				const float z_ = vPos[0][z] + ( vPos[2][z] - vPos[0][z] ) * ( j / (float)( height - 1 ) );
+				PatchControl *v = &m_ctrl.data()[j * width + i];
 				v->m_vertex[x] = x_;
 				v->m_vertex[y] = y_;
 				v->m_vertex[z] = z_;
@@ -3160,7 +3159,7 @@ void Patch::createThickenedOpposite( const Patch& sourcePatch,
 							if ( vector3_length_squared( vector3_cross( rowTangent[0], colTangent[0] ) ) > 0 ){
 								normal = vector3_normalised( vector3_cross( rowTangent[0], colTangent[0] ) );
 								/*globalOutputStream() << "3\n";
-								globalOutputStream() << (float)vector3_length_squared( vector3_cross( rowTangent[0], colTangent[0] ) ) << '\n';
+								globalOutputStream() << vector3_length_squared( vector3_cross( rowTangent[0], colTangent[0] ) ) << '\n';
 								globalOutputStream() << normal << '\n';*/
 							}
 							else{

@@ -137,7 +137,7 @@ bool DBobView::CalculateTrajectory( vec3_t start, vec3_t apex, float multiplier,
 	vec3_t dist, speed;
 	VectorSubtract( apex, start, dist );
 
-	vec_t speed_z = (float)sqrt( -2 * LOCAL_GRAVITY * dist[2] );
+	vec_t speed_z = sqrt( -2 * LOCAL_GRAVITY * dist[2] );
 	float flight_time = -speed_z / LOCAL_GRAVITY;
 
 

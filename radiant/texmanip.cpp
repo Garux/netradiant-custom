@@ -41,7 +41,7 @@ void R_ResampleTextureLerpLine( const byte *in, byte *out, int inwidth, int outw
 	int j, xi, oldx = 0, f, fstep, endx, lerp;
 #define LERPBYTE( i ) out[i] = (byte) ( ( ( ( row2[i] - row1[i] ) * lerp ) >> 16 ) + row1[i] )
 
-	fstep = (int) ( inwidth * 65536.0f / outwidth );
+	fstep = inwidth * 65536.0f / outwidth;
 	endx = ( inwidth - 1 );
 	if ( bytesperpixel == 4 ) {
 		for ( j = 0, f = 0; j < outwidth; ++j, f += fstep )
@@ -121,7 +121,7 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 		const byte *inrow;
 		byte *out;
 		out = (byte *)outdata;
-		fstep = (int) ( inheight * 65536.0f / outheight );
+		fstep = inheight * 65536.0f / outheight;
 #define LERPBYTE( i ) out[i] = (byte) ( ( ( ( row2[i] - row1[i] ) * lerp ) >> 16 ) + row1[i] )
 
 		inrow = (const byte *)indata;
@@ -218,7 +218,7 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 		const byte *inrow;
 		byte *out;
 		out = (byte *)outdata;
-		fstep = (int) ( inheight * 65536.0f / outheight );
+		fstep = inheight * 65536.0f / outheight;
 #define LERPBYTE( i ) out[i] = (byte) ( ( ( ( row2[i] - row1[i] ) * lerp ) >> 16 ) + row1[i] )
 
 		inrow = (const byte *)indata;

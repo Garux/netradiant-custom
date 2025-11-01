@@ -2063,9 +2063,9 @@ void CamWnd::Cam_Draw(){
 	gl().glDisable( GL_BLEND );
 	gl().glMatrixMode( GL_PROJECTION );
 	gl().glLoadIdentity();
-	gl().glOrtho( 0, (float)m_Camera.width, 0, (float)m_Camera.height, -100, 100 );
+	gl().glOrtho( 0, m_Camera.width, 0, m_Camera.height, -100, 100 );
 	gl().glScalef( 1, -1, 1 );
-	gl().glTranslatef( 0, -(float)m_Camera.height, 0 );
+	gl().glTranslatef( 0, -m_Camera.height, 0 );
 	gl().glMatrixMode( GL_MODELVIEW );
 	gl().glLoadIdentity();
 

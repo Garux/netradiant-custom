@@ -5,7 +5,7 @@
 #include "math/plane.h"
 
 
-#define RGBTOGRAY( x ) ( (float)( ( x )[0] ) * 0.2989f + (float)( ( x )[1] ) * 0.5870f + (float)( ( x )[2] ) * 0.1140f )
+#define RGBTOGRAY( x ) ( ( ( x )[0] ) * 0.2989f + ( ( x )[1] ) * 0.5870f + ( ( x )[2] ) * 0.1140f )
 
 #define VectorFastNormalize VectorNormalize
 

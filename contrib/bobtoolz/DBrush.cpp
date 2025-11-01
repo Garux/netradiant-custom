@@ -750,7 +750,7 @@ bool DBrush::ResetTextures( const char* textureName, const float fScale[2],     
 				}
 
 				if ( bResetRotation ) {
-					plane->texInfo.m_texdef.rotate = (float)rotation;
+					plane->texInfo.m_texdef.rotate = rotation;
 				}
 
 				changed = true;
@@ -781,7 +781,7 @@ bool DBrush::ResetTextures( const char* textureName, const float fScale[2],     
 			}
 
 			if ( bResetRotation ) {
-				plane->texInfo.m_texdef.rotate = (float)rotation;
+				plane->texInfo.m_texdef.rotate = rotation;
 			}
 		}
 		return true;

@@ -47,10 +47,10 @@ void windingTestInfinity(){
 	while( windingTestInfinityI < iterations )
 	{
 		Plane3 plane;
-		plane.d = ( (double)rand() / (double)RAND_MAX ) * maxWorldCoord * 2;
-		plane.a = ( (double)rand() / (double)RAND_MAX );
-		plane.b = ( (double)rand() / (double)RAND_MAX );
-		plane.c = ( (double)rand() / (double)RAND_MAX );
+		plane.d = ( (double)rand() / RAND_MAX ) * maxWorldCoord * 2;
+		plane.a = ( (double)rand() / RAND_MAX );
+		plane.b = ( (double)rand() / RAND_MAX );
+		plane.c = ( (double)rand() / RAND_MAX );
 		if( vector3_length( plane.normal() ) != 0 ){
 			vector3_normalise( plane.normal() );
 		}

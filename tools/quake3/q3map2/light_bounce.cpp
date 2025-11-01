@@ -177,9 +177,9 @@ bool RadSampleImage( const byte *pixels, int width, int height, const Vector2& s
 	}
 
 	/* get offsets */
-	x = ( (float) width * Modulo1IfNegative( st[ 0 ] ) ) + 0.5f;
+	x = width * Modulo1IfNegative( st[ 0 ] ) + 0.5f;
 	x %= width;
-	y = ( (float) height * Modulo1IfNegative( st[ 1 ] ) ) + 0.5f;
+	y = height * Modulo1IfNegative( st[ 1 ] ) + 0.5f;
 	y %= height;
 
 	/* get pixel */

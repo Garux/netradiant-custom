@@ -263,7 +263,7 @@ void Texdef_basisForNormal( const TextureProjection& projection, const Vector3& 
 }
 
 void Texdef_Construct_local2tex( const TextureProjection& projection, std::size_t width, std::size_t height, const Vector3& normal, Matrix4& local2tex ){
-	Texdef_toTransform( projection, (float)width, (float)height, local2tex );
+	Texdef_toTransform( projection, width, height, local2tex );
 	{
 		Matrix4 xyz2st;
 		Texdef_basisForNormal( projection, normal, xyz2st );
@@ -278,15 +278,15 @@ void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::si
 	//globalOutputStream() << "normal: " << normal << '\n';
 
 	Matrix4 local2tex;
-	Texdef_toTransform( projection, (float)width, (float)height, local2tex );
+	Texdef_toTransform( projection, width, height, local2tex );
 	//globalOutputStream() << "texdef: " << local2tex.x().vec3() << local2tex.y().vec3() << '\n';
 
 #if 0
 	{
 		TextureProjection tmp;
-		Texdef_fromTransform( tmp, (float)width, (float)height, local2tex );
+		Texdef_fromTransform( tmp, width, height, local2tex );
 		Matrix4 tmpTransform;
-		Texdef_toTransform( tmp, (float)width, (float)height, tmpTransform );
+		Texdef_toTransform( tmp, width, height, tmpTransform );
 		ASSERT_MESSAGE( matrix4_equal_epsilon( local2tex, tmpTransform, 0.0001f ), "bleh" );
 	}
 #endif
@@ -1207,7 +1207,7 @@ void Texdef_FitTexture( TextureProjection& projection, std::size_t width, std::s
 	}
 
 	Matrix4 st2tex;
-	Texdef_toTransform( projection, (float)width, (float)height, st2tex );
+	Texdef_toTransform( projection, width, height, st2tex );
 
 	// the current texture transform
 	Matrix4 local2tex = st2tex;
@@ -1268,12 +1268,12 @@ void Texdef_FitTexture( TextureProjection& projection, std::size_t width, std::s
 	// apply the difference to the current texture transform
 	matrix4_premultiply_by_matrix4( st2tex, matrix );
 
-	Texdef_fromTransform( projection, (float)width, (float)height, st2tex );
-	//Texdef_normalise( projection, (float)width, (float)height );
+	Texdef_fromTransform( projection, width, height, st2tex );
+	//Texdef_normalise( projection, width, height );
 	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES )
 		BPTexdef_normalise( projection.m_brushprimit_texdef, 1, 1 ); /* scaleApplied is! */
 	else
-		Texdef_normalise( projection.m_texdef, (float)width, (float)height );
+		Texdef_normalise( projection.m_texdef, width, height );
 }
 
 float Texdef_getDefaultTextureScale(){
@@ -1679,7 +1679,7 @@ void AP_from_axes( const Vector3& axisX, const Vector3& axisY, const DoubleVecto
 	texdef.scale[0] = scale[0];
 	texdef.scale[1] = scale[1];
 	texdef.rotate = radians_to_degrees( rad );
-	Texdef_normalise( texdef, (float)width, (float)height );
+	Texdef_normalise( texdef, width, height );
 }
 
 
@@ -1808,13 +1808,13 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		Matrix4 stTransformed2identity( matrix4_affine_inverse( matrix4_multiplied_by_matrix4( transformed2stTransformed, identity2transformed ) ) ); //QNAN here, if some scale = 0
 
 		Matrix4 stIdentity2stOriginal;
-		Texdef_toTransform( projection, (float)width, (float)height, stIdentity2stOriginal );
+		Texdef_toTransform( projection, width, height, stIdentity2stOriginal );
 		Matrix4 identity2stOriginal( matrix4_multiplied_by_matrix4( stIdentity2stOriginal, identity2stIdentity ) );
 
 		Matrix4 stTransformed2stOriginal = matrix4_multiplied_by_matrix4( identity2stOriginal, stTransformed2identity );
 		if( stTransformed2stOriginal[0] == stTransformed2stOriginal[0] ){ /* catch QNAN: happens when projecting along plane */
-			Texdef_fromTransform( projection, (float)width, (float)height, stTransformed2stOriginal );
-			Texdef_normalise( projection, (float)width, (float)height );
+			Texdef_fromTransform( projection, width, height, stTransformed2stOriginal );
+			Texdef_normalise( projection, width, height );
 
 			projection.m_texdef.scale[0] /= vector3_length( projection.m_basis_s );
 			projection.m_texdef.scale[1] /= vector3_length( projection.m_basis_t );
@@ -1903,7 +1903,7 @@ void Q3_to_BP( const texdef_t& texdef, float width, float height, const Vector3&
 
 /// for arbitrary texture projections
 void Texdef_Construct_local2tex4projection( const texdef_t& texdef, std::size_t width, std::size_t height, const Vector3& normal, const Vector3* direction, Matrix4& local2tex ){
-	Texdef_toTransform( texdef, (float)width, (float)height, local2tex );
+	Texdef_toTransform( texdef, width, height, local2tex );
 	{
 		if( direction ){ //arbitrary
 			Matrix4 basis = g_matrix4_identity;
@@ -2022,8 +2022,8 @@ void Valve220_from_BP( TextureProjection& projection, const Plane3& plane, std::
 #if 0
 	projection.m_texdef.scale[0] = 1.0 / ( vector2_length( Vector2( projection.m_brushprimit_texdef.coords[0][0], projection.m_brushprimit_texdef.coords[0][1] ) ) * (double)width );
 	projection.m_texdef.scale[1] = 1.0 / ( vector2_length( Vector2( projection.m_brushprimit_texdef.coords[1][0], projection.m_brushprimit_texdef.coords[1][1] ) ) * (double)height );
-	projection.m_texdef.shift[0] = projection.m_brushprimit_texdef.coords[0][2] * (float)width;
-	projection.m_texdef.shift[1] = projection.m_brushprimit_texdef.coords[1][2] * (float)height;
+	projection.m_texdef.shift[0] = projection.m_brushprimit_texdef.coords[0][2] * width;
+	projection.m_texdef.shift[1] = projection.m_brushprimit_texdef.coords[1][2] * height;
 	projection.m_texdef.rotate = -radians_to_degrees( arctangent_yx( projection.m_brushprimit_texdef.coords[0][1], projection.m_brushprimit_texdef.coords[0][0] ) );
 	if( projection.m_brushprimit_texdef.coords[0][0] * projection.m_brushprimit_texdef.coords[1][1] < 0 )
 		projection.m_texdef.rotate = -projection.m_texdef.rotate;

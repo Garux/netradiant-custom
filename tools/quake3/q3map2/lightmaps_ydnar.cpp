@@ -506,7 +506,7 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t& lm ){
 	lm.w = lm.sampleSize != 0 ? ceil( length / lm.sampleSize ) + 1 : 0;
 	value_maximize( lm.w, ds.patchWidth );
 	value_minimize( lm.w, lm.customWidth );
-	sBasis = (float) ( lm.w - 1 ) / (float) ( ds.patchWidth - 1 );
+	sBasis = (float) ( lm.w - 1 ) / ( ds.patchWidth - 1 );
 
 	/* determine lightmap height */
 	length = 0;
@@ -515,7 +515,7 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t& lm ){
 	lm.h = lm.sampleSize != 0 ? ceil( length / lm.sampleSize ) + 1 : 0;
 	value_maximize( lm.h, ds.patchHeight );
 	value_minimize( lm.h, lm.customHeight );
-	tBasis = (float) ( lm.h - 1 ) / (float) ( ds.patchHeight - 1 );
+	tBasis = (float) ( lm.h - 1 ) / ( ds.patchHeight - 1 );
 
 	/* free the temporary mesh */
 	FreeMesh( mesh );
@@ -754,7 +754,7 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t& lm ){
 			verts[ i ].lightmap[ 0 ][ 0 ] = s * superSample;
 			verts[ i ].lightmap[ 0 ][ 1 ] = t * superSample;
 
-			if ( s > (float) lm.w || t > (float) lm.h ) {
+			if ( s > lm.w || t > lm.h ) {
 				Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: Lightmap texture coords out of range: S %1.4f > %3d || T %1.4f > %3d\n",
 				             s, lm.w, t, lm.h );
 			}
@@ -3125,8 +3125,8 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					}
 
 					/* calc lightmap origin in texture space */
-					lmx = (float) lm->lightmapX[ lightmapNum ] / (float) olm->customWidth;
-					lmy = (float) lm->lightmapY[ lightmapNum ] / (float) olm->customHeight;
+					lmx = (float) lm->lightmapX[ lightmapNum ] / olm->customWidth;
+					lmy = (float) lm->lightmapY[ lightmapNum ] / olm->customHeight;
 
 					/* calc lightmap st coords */
 					dv = &bspDrawVerts[ ds->firstVert ];
@@ -3134,8 +3134,8 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					for ( j = 0; j < ds->numVerts; ++j )
 					{
 						if ( lm->solid[ lightmapNum ] ) {
-							dv[ j ].lightmap[ lightmapNum ][ 0 ] = lmx + ( 0.5f / (float) olm->customWidth );
-							dv[ j ].lightmap[ lightmapNum ][ 1 ] = lmy + ( 0.5f / (float) olm->customWidth );
+							dv[ j ].lightmap[ lightmapNum ][ 0 ] = lmx + ( 0.5f / olm->customWidth );
+							dv[ j ].lightmap[ lightmapNum ][ 1 ] = lmy + ( 0.5f / olm->customWidth );
 						}
 						else
 						{
@@ -3330,7 +3330,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 		numStored = bspLightBytes.size() / 3;
 		efficiency = ( numStored <= 0 )
 	                 ? 0
-	                 : (float) numUsed / (float) numStored;
+	                 : (float) numUsed / numStored;
 
 		/* print stats */
 		Sys_Printf( "%9d luxels used\n", numUsed );

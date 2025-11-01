@@ -1723,7 +1723,7 @@ void LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups )
 
 		/* get brush counts */
 		const int numMapBrushes = entities[ 0 ].brushes.size();
-		if ( (float) c_detail / (float) numMapBrushes < 0.10f && numMapBrushes > 500 ) {
+		if ( (float) c_detail / numMapBrushes < 0.10f && numMapBrushes > 500 ) {
 			Sys_Warning( "Over 90 percent structural map detected. Compile time may be adversely affected.\n" );
 		}
 

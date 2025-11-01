@@ -1505,12 +1505,12 @@ void quat_normalise( vec4_t quat ){
 void quat_for_axisangle( vec4_t quat, const vec3_t axis, double angle ){
 	angle *= 0.5;
 
-	quat[3] = (float)sin( angle );
+	quat[3] = sin( angle );
 
 	quat[0] = axis[0] * quat[3];
 	quat[1] = axis[1] * quat[3];
 	quat[2] = axis[2] * quat[3];
-	quat[3] = (float)cos( angle );
+	quat[3] = cos( angle );
 }
 
 void m3x3_multiply_by_m3x3( m3x3_t matrix, const m3x3_t matrix_src ){
@@ -1760,7 +1760,7 @@ int matrix_solve_ge( vec_t* matrix, vec_t* aug, vec3_t x ){
 		for ( c = 0; c < N; ++c, ++p )
 		{
 			if ( fabs( *p ) > scale[r] ) {
-				scale[r] = (float)fabs( *p );
+				scale[r] = fabs( *p );
 			}
 		}
 	}
@@ -1771,7 +1771,7 @@ int matrix_solve_ge( vec_t* matrix, vec_t* aug, vec3_t x ){
 		best = -1;
 		for ( r = c; r < N; ++r )
 		{
-			f = (float)fabs( matrix[( indx[r] * N ) + c] ) / scale[indx[r]];
+			f = fabs( matrix[( indx[r] * N ) + c] ) / scale[indx[r]];
 			if ( f > pivot ) {
 				pivot = f;
 				best = r;

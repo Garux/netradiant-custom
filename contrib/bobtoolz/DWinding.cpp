@@ -495,7 +495,7 @@ void DWinding::ClipWindingEpsilon( DPlane* chopPlane, vec_t epsilon, DWinding **
 bool DWinding::ChopWinding( DPlane* chopPlane ){
 	DWinding *f, *b;
 
-	ClipWindingEpsilon( chopPlane, (float)ON_EPSILON, &f, &b );
+	ClipWindingEpsilon( chopPlane, (vec_t)ON_EPSILON, &f, &b );
 
 	if ( b ) {
 		delete ( b );

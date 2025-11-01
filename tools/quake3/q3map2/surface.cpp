@@ -492,7 +492,7 @@ void ClassifySurface( mapDrawSurface_t& ds ){
 			ds.sampleSize = sampleSize; /* otherwise use global default */
 		}
 		if ( ds.lightmapScale > 0 ) { /* apply surface lightmap scaling factor */
-			ds.sampleSize = ds.lightmapScale * (float)ds.sampleSize;
+			ds.sampleSize = ds.lightmapScale * ds.sampleSize;
 			ds.lightmapScale = 0; /* applied */
 		}
 
