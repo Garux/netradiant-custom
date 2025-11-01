@@ -73,7 +73,7 @@ void ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVert
 				break;
 
 			case EColorMod::AlphaSet:
-				mult.alpha() = 0.0f;
+				mult.alpha() = 0;
 				add.alpha() = cm->data[ 0 ] * 255.0f;
 				break;
 
@@ -160,9 +160,9 @@ void TCMod( const tcMod_t& mod, Vector2& st ){
 
 
 static void TCModIdentity( tcMod_t& mod ){
-	mod[ 0 ][ 0 ] = 1.0f;   mod[ 0 ][ 1 ] = 0.0f;   mod[ 0 ][ 2 ] = 0.0f;
-	mod[ 1 ][ 0 ] = 0.0f;   mod[ 1 ][ 1 ] = 1.0f;   mod[ 1 ][ 2 ] = 0.0f;
-	mod[ 2 ][ 0 ] = 0.0f;   mod[ 2 ][ 1 ] = 0.0f;   mod[ 2 ][ 2 ] = 1.0f;   /* this row is only used for multiples, not transformation */
+	mod[ 0 ][ 0 ] = 1;   mod[ 0 ][ 1 ] = 0;   mod[ 0 ][ 2 ] = 0;
+	mod[ 1 ][ 0 ] = 0;   mod[ 1 ][ 1 ] = 1;   mod[ 1 ][ 2 ] = 0;
+	mod[ 2 ][ 0 ] = 0;   mod[ 2 ][ 1 ] = 0;   mod[ 2 ][ 2 ] = 1;   /* this row is only used for multiples, not transformation */
 }
 
 
@@ -550,7 +550,7 @@ static shaderInfo_t& AllocShaderInfo( const char *shaderName ){
 
 	si.polygonOffset = false;
 
-	si.shadeAngleDegrees = 0.0f;
+	si.shadeAngleDegrees = 0;
 	si.lightmapSampleSize = 0;
 	si.lightmapSampleOffset = DEFAULT_LIGHTMAP_SAMPLE_OFFSET;
 	si.patchShadows = false;
@@ -605,9 +605,9 @@ static void FinishShader( shaderInfo_t& si ){
 	/* find pixel coordinates best matching the average color of the image */
 	float bestDist = 99999999.f;
 	const Vector2 o( 1.0f / si.shaderImage->width, 1.0f / si.shaderImage->height );
-	for ( y = 0, st[ 1 ] = 0.0f; y < si.shaderImage->height; ++y, st[ 1 ] += o[ 1 ] )
+	for ( y = 0, st[ 1 ] = 0; y < si.shaderImage->height; ++y, st[ 1 ] += o[ 1 ] )
 	{
-		for ( x = 0, st[ 0 ] = 0.0f; x < si.shaderImage->width; ++x, st[ 0 ] += o[ 0 ] )
+		for ( x = 0, st[ 0 ] = 0; x < si.shaderImage->width; ++x, st[ 0 ] += o[ 0 ] )
 		{
 			/* sample the shader image */
 			Color4f color;
@@ -700,7 +700,7 @@ static void LoadShaderImages( shaderInfo_t& si ){
 		color[ 3 ] += si.lightImage->pixels[ i * 4 + 3 ];
 	}
 
-	if ( vector3_length( si.color ) == 0.0f ) {
+	if ( vector3_length( si.color ) == 0 ) {
 		si.color = color.rgb();
 		ColorNormalize( si.color );
 		si.averageColor = color / count;
@@ -708,7 +708,7 @@ static void LoadShaderImages( shaderInfo_t& si ){
 	else
 	{
 		si.averageColor.rgb() = si.color;
-		si.averageColor.alpha() = 1.0f;
+		si.averageColor.alpha() = 1;
 	}
 }
 
@@ -1334,7 +1334,7 @@ static void ParseShaderFile( const char *filename ){
 					text.GetToken( false );
 					si.lmBrightness *= atof( token );
 					if ( si.lmBrightness < 0 ) {
-						si.lmBrightness = 1.0;
+						si.lmBrightness = 1;
 					}
 				}
 

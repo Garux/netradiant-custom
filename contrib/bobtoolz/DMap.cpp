@@ -137,18 +137,18 @@ int DMap::FixBrushes(){
 	return count;
 }
 
-void DMap::ResetTextures( const char* textureName, float fScale[2],      float fShift[2],      int rotation, const char* newTextureName,
-                          bool bResetTextureName,  bool bResetScale[2],  bool bResetShift[2],  bool bResetRotation ){
+void DMap::ResetTextures( const char* textureName, const float fScale[2],     const float fShift[2],     int rotation, const char* newTextureName,
+                          bool bResetTextureName,  const bool bResetScale[2], const bool bResetShift[2], bool bResetRotation ){
 	for ( DEntity *entity : entityList )
 	{
 		if ( string_equal_nocase( "worldspawn", entity->m_Classname.c_str() ) ) {
-			entity->ResetTextures( textureName,        fScale,       fShift,       rotation, newTextureName,
-			                       bResetTextureName,  bResetScale,  bResetShift,  bResetRotation, true );
+			entity->ResetTextures( textureName,       fScale,      fShift,      rotation, newTextureName,
+			                       bResetTextureName, bResetScale, bResetShift, bResetRotation, true );
 		}
 		else
 		{
-			if ( entity->ResetTextures( textureName,        fScale,       fShift,       rotation, newTextureName,
-			                            bResetTextureName,  bResetScale,  bResetShift,  bResetRotation, false ) ) {
+			if ( entity->ResetTextures( textureName,       fScale,      fShift,      rotation, newTextureName,
+			                            bResetTextureName, bResetScale, bResetShift, bResetRotation, false ) ) {
 				RebuildEntity( entity );
 			}
 		}

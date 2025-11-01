@@ -36,9 +36,9 @@ class SelectionIntersection
 public:
 	SelectionIntersection() : m_depth( 1 ), m_distance( 2 ), m_depth2( -1 ), m_indirect( true ){
 	}
-	SelectionIntersection( float depth, float distance ) : m_depth( depth ), m_distance( distance ), m_depth2( -1 ), m_indirect( distance != 0.f ){
+	SelectionIntersection( float depth, float distance ) : m_depth( depth ), m_distance( distance ), m_depth2( -1 ), m_indirect( distance != 0 ){
 	}
-	SelectionIntersection( float depth, float distance, float depth2 ) : m_depth( depth ), m_distance( distance ), m_depth2( depth2 ), m_indirect( distance != 0.f ){
+	SelectionIntersection( float depth, float distance, float depth2 ) : m_depth( depth ), m_distance( distance ), m_depth2( depth2 ), m_indirect( distance != 0 ){
 	}
 	bool operator<( const SelectionIntersection& other ) const {
 		if( m_indirect != other.m_indirect ){

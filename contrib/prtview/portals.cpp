@@ -96,7 +96,7 @@ bool CBspPortal::Build( char *def ){
 	fp_color_random[0] = ( rand() & 0xff ) / 255.0f;
 	fp_color_random[1] = ( rand() & 0xff ) / 255.0f;
 	fp_color_random[2] = ( rand() & 0xff ) / 255.0f;
-	fp_color_random[3] = 1.0f;
+	fp_color_random[3] = 1;
 
 	return true;
 }
@@ -373,17 +373,17 @@ void CPortals::FixColors(){
 	fp_color_2d[0] = RGB_UNPACK_R( color_2d ) / 255.0f;
 	fp_color_2d[1] = RGB_UNPACK_G( color_2d ) / 255.0f;
 	fp_color_2d[2] = RGB_UNPACK_B( color_2d ) / 255.0f;
-	fp_color_2d[3] = 1.0f;
+	fp_color_2d[3] = 1;
 
 	fp_color_3d[0] = RGB_UNPACK_R( color_3d ) / 255.0f;
 	fp_color_3d[1] = RGB_UNPACK_G( color_3d ) / 255.0f;
 	fp_color_3d[2] = RGB_UNPACK_B( color_3d ) / 255.0f;
-	fp_color_3d[3] = 1.0f;
+	fp_color_3d[3] = 1;
 
 	fp_color_fog[0] = RGB_UNPACK_R( color_fog ) / 255.0f;
 	fp_color_fog[1] = RGB_UNPACK_G( color_fog ) / 255.0f;
 	fp_color_fog[2] = RGB_UNPACK_B( color_fog ) / 255.0f;
-	fp_color_fog[3] = 1.0f;
+	fp_color_fog[3] = 1;
 }
 
 void CPortalsRender::renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {

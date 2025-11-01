@@ -392,7 +392,7 @@ void Patch::Smooth( EMatrixMajor mt ){
 		p1 = m_ctrl.data() + ( h * row_stride );
 		p2 = p1 + ( 2 * width ) * col_stride;
 		//globalErrorStream() << "compare " << p1->m_vertex << " and " << p2->m_vertex << '\n';
-		if ( vector3_length_squared( vector3_subtracted( p1->m_vertex, p2->m_vertex ) ) > 1.0 ) {
+		if ( vector3_length_squared( vector3_subtracted( p1->m_vertex, p2->m_vertex ) ) > 1 ) {
 			//globalErrorStream() << "too far\n";
 			wrap = false;
 			break;
@@ -554,9 +554,9 @@ void Patch::SetTextureRepeat( float s, float t ){
 	const float ti = ( t == 0? 1.f : t ) / ( m_height - 1 );
 
 	PatchControl *pDest = m_ctrl.data();
-	for ( h = 0, tc = 0.0f; h < m_height; ++h, tc += ti )
+	for ( h = 0, tc = 0; h < m_height; ++h, tc += ti )
 	{
-		for ( w = 0, sc = 0.0f; w < m_width; ++w, sc += si )
+		for ( w = 0, sc = 0; w < m_width; ++w, sc += si )
 		{
 			pDest->m_texcoord[0] = sc;
 			pDest->m_texcoord[1] = tc;
@@ -575,8 +575,8 @@ void Patch::SetTextureRepeat( float s, float t ){
 		TranslateTexture( pt->getShift()[0], pt->getShift()[1] );
 	else if( pt->getScale()[0] || pt->getScale()[1] )
 	{
-		if( pt->getScale()[0] == 0.0f ) pt->setScale( 0, 1.0f );
-		if( pt->getScale()[1] == 0.0f ) pt->setScale( 1, 1.0f );
+		if( pt->getScale()[0] == 0 ) pt->setScale( 0, 1.0f );
+		if( pt->getScale()[1] == 0 ) pt->setScale( 1, 1.0f );
 		ScaleTexture ( pt->getScale()[0], pt->getScale()[1] );
 	}
 	else if( pt->rotate )
@@ -2887,8 +2887,8 @@ Vector3 getAverageNormal( const Vector3& normal1, const Vector3& normal2 )
 	// of the two normals
 	/* float factor = cos(n1.angle(n2) * 0.5); */
 	float factor = vector3_dot( normal1, normal2 );
-	if ( factor > 1.0 ) factor = 1;
-	if ( factor < -1.0 ) factor = -1;
+	if ( factor > 1 ) factor = 1;
+	if ( factor < -1 ) factor = -1;
 	factor = acos( factor );
 
 	factor = cos( factor * 0.5 );

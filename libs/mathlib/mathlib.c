@@ -60,11 +60,9 @@ bool VectorIsOnAxis( vec3_t v ){
    ================
  */
 bool VectorIsOnAxialPlane( vec3_t v ){
-	int i;
-
-	for ( i = 0; i < 3; ++i )
+	for ( int i = 0; i < 3; ++i )
 	{
-		if ( v[i] == 0.0 ) {
+		if ( v[i] == 0 ) {
 			// The zero vector will be on axial plane.
 			return true;
 		}
@@ -97,11 +95,9 @@ void MakeNormalVectors( vec3_t forward, vec3_t right, vec3_t up ){
 }
 
 vec_t VectorLength( const vec3_t v ){
-	int i;
-	float length;
+	float length = 0;
 
-	length = 0.0f;
-	for ( i = 0; i < 3; ++i )
+	for ( int i = 0; i < 3; ++i )
 		length += v[i] * v[i];
 	length = (float)sqrt( length );
 
@@ -215,7 +211,7 @@ vec_t ColorNormalize( const vec3_t in, vec3_t out ) {
 	}
 
 	if ( max == 0 ) {
-		out[0] = out[1] = out[2] = 1.0;
+		out[0] = out[1] = out[2] = 1;
 		return 0;
 	}
 
@@ -483,13 +479,13 @@ void NormalToLatLong( const vec3_t normal, byte bytes[2] ) {
    =================
  */
 int PlaneTypeForNormal( vec3_t normal ) {
-	if ( normal[0] == 1.0 || normal[0] == -1.0 ) {
+	if ( normal[0] == 1 || normal[0] == -1 ) {
 		return PLANE_X;
 	}
-	if ( normal[1] == 1.0 || normal[1] == -1.0 ) {
+	if ( normal[1] == 1 || normal[1] == -1 ) {
 		return PLANE_Y;
 	}
-	if ( normal[2] == 1.0 || normal[2] == -1.0 ) {
+	if ( normal[2] == 1 || normal[2] == -1 ) {
 		return PLANE_Z;
 	}
 

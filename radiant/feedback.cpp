@@ -130,7 +130,7 @@ void CPointMsg::DropHighlight(){
 void CPointMsg::Draw2D( VIEWTYPE vt ){
 	NDIM1NDIM2( vt )
 	gl().glPointSize( 4 );
-	gl().glColor3f( 1.0f, 0.0f, 0.0f );
+	gl().glColor3f( 1, 0, 0 );
 	gl().glBegin( GL_POINTS );
 	gl().glVertex2f( pt[nDim1], pt[nDim2] );
 	gl().glEnd();
@@ -201,7 +201,7 @@ void CWindingMsg::Draw2D( VIEWTYPE vt ){
 	int i;
 
 	NDIM1NDIM2( vt )
-	gl().glColor3f( 1.0f, 0.f, 0.0f );
+	gl().glColor3f( 1, 0, 0 );
 
 	gl().glPointSize( 4 );
 	gl().glBegin( GL_POINTS );

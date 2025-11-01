@@ -313,8 +313,8 @@ public:
 		gl().glUniform3f( u_view_origin, localViewer.x(), localViewer.y(), localViewer.z() );
 		gl().glUniform3f( u_light_origin, localLight.x(), localLight.y(), localLight.z() );
 		gl().glUniform3f( u_light_color, colour.x(), colour.y(), colour.z() );
-		gl().glUniform1f( u_bump_scale, 1.0 );
-		gl().glUniform1f( u_specular_exponent, 32.0 );
+		gl().glUniform1f( u_bump_scale, 1.f );
+		gl().glUniform1f( u_specular_exponent, 32.f );
 
 		gl().glActiveTexture( GL_TEXTURE3 );
 		gl().glClientActiveTexture( GL_TEXTURE3 );
@@ -1718,7 +1718,7 @@ void OpenGLShader::construct( const char* name ){
 	{
 	case '{':	//add
 		sscanf( name, "{%g %g %g}", &state.m_colour[0], &state.m_colour[1], &state.m_colour[2] );
-		state.m_colour[3] = 1.0f;
+		state.m_colour[3] = 1;
 		state.m_state = RENDER_CULLFACE | RENDER_DEPTHTEST | RENDER_BLEND | RENDER_FILL | RENDER_COLOURWRITE /*| RENDER_DEPTHWRITE */| RENDER_LIGHTING;
 		state.m_blend_src = GL_ONE;
 		state.m_blend_dst = GL_ONE;
@@ -1731,7 +1731,7 @@ void OpenGLShader::construct( const char* name ){
 
 	case '(':	//fill
 		sscanf( name, "(%g %g %g)", &state.m_colour[0], &state.m_colour[1], &state.m_colour[2] );
-		state.m_colour[3] = 1.0f;
+		state.m_colour[3] = 1;
 		state.m_state = RENDER_FILL | RENDER_LIGHTING | RENDER_DEPTHTEST | RENDER_CULLFACE | RENDER_COLOURWRITE | RENDER_DEPTHWRITE;
 		state.m_sort = OpenGLState::eSortFullbright;
 		break;

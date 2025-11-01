@@ -165,7 +165,7 @@ inline float vector3_max_abs_component( const Vector3& vec3 ){
 
 inline void edge_snap( Vector3& edge, double snap ){
 	const float scale = ceil( std::fabs( snap / vector3_max_abs_component( edge ) ) );
-	if ( scale > 0.0f ) {
+	if ( scale > 0 ) {
 		vector3_scale( edge, scale );
 	}
 	vector3_snap( edge, snap );

@@ -739,7 +739,7 @@ int BSPMain( Args& args ){
 		}
 		while ( args.takeArg( "-np" ) ) {
 			npDegrees = std::max( 0.0, atof( args.takeNext() ) );
-			if ( npDegrees > 0.0f ) {
+			if ( npDegrees > 0 ) {
 				Sys_Printf( "Forcing nonplanar surfaces with a breaking angle of %f degrees\n", npDegrees );
 			}
 		}

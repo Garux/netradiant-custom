@@ -71,7 +71,7 @@ static void ExpandLongestCurve( float *longestCurve, const Vector3& a, const Vec
 
 	/* determine length */
 	last = a;
-	for ( i = 0, len = 0.0f, t = 0.0f; i < APPROX_SUBDIVISION; ++i, t += ( 1.0f / APPROX_SUBDIVISION ) )
+	for ( i = 0, len = 0, t = 0; i < APPROX_SUBDIVISION; ++i, t += ( 1.0f / APPROX_SUBDIVISION ) )
 	{
 		/* calculate delta */
 		delta = ab * ( 1.0f - t ) + bc * t;
@@ -166,7 +166,7 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, const Vector3
 		const float len2 = VectorNormalize( delta2 );
 
 		/* if either edge is degenerate, then eliminate it */
-		if ( len < 0.0625f || len2 < 0.0625f || vector3_dot( delta, delta2 ) >= 1.0f ) {
+		if ( len < 0.0625f || len2 < 0.0625f || vector3_dot( delta, delta2 ) >= 1 ) {
 			for ( j = i + 1; j + 1 < numPoints; ++j )
 				points[ j ] = points[ j + 1 ];
 			numPoints--;
@@ -297,7 +297,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 	}
 
 	/* find longest curve on the mesh */
-	longestCurve = 0.0f;
+	longestCurve = 0;
 	maxIterations = 0;
 	for ( int j = 0; j + 2 < m.width; j += 2 )
 	{

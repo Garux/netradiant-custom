@@ -197,14 +197,14 @@ public:
 			float max = 0;
 			for ( int i = 0; i < 3; ++i ){
 				if ( dir[i] < 0 ){
-					hack[i] *= -1.f;
+					hack[i] *= -1;
 				}
 				if ( std::fabs( dir[i] ) > max ){
 					maxI = i;
 					max = std::fabs( dir[i] );
 				}
 			}
-			hack[maxI] *= -1.f;
+			hack[maxI] *= -1;
 
 			const Vector3 ort( vector3_cross( dir, hack ) );
 			//vector3_normalise( ort );

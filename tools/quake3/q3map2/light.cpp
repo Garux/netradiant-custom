@@ -96,7 +96,7 @@ static void CreateSunLight( sun_t& sun ){
 		/* initialize the light */
 		light.flags = LightFlags::DefaultSun;
 		light.type = ELightType::Sun;
-		light.fade = 1.0f;
+		light.fade = 1;
 		light.falloffTolerance = falloffTolerance;
 		light.filterRadius = sun.filterRadius / sun.numSamples;
 		light.style = noStyles ? LS_NORMAL : sun.style;
@@ -221,7 +221,7 @@ public:
 
 static void CreateSkyLights( const skylight_t& skylight, const Vector3& color, float filterRadius, int style, const String64& skyParmsImageBase ){
 	/* dummy check */
-	if ( skylight.value <= 0.0f || skylight.iterations < 2 || skylight.horizon_min > skylight.horizon_max ) {
+	if ( skylight.value <= 0 || skylight.iterations < 2 || skylight.horizon_min > skylight.horizon_max ) {
 		return;
 	}
 
@@ -232,7 +232,7 @@ static void CreateSkyLights( const skylight_t& skylight, const Vector3& color, f
 	sun_t sun;
 	std::vector<sun_t> suns;
 	sun.color = color;
-	sun.deviance = 0.0f;
+	sun.deviance = 0;
 	sun.filterRadius = filterRadius;
 	sun.numSamples = 1;
 	sun.skyIndex = skylight.skyIndex;
@@ -257,7 +257,7 @@ static void CreateSkyLights( const skylight_t& skylight, const Vector3& color, f
 
 	/* iterate elevation */
 	float elevation = degrees_to_radians( std::min( eleMin, float( skylight.horizon_max ) ) );
-	float angle = 0.0f;
+	float angle = 0;
 	for ( int i = 0; i < elevationSteps; ++i )
 	{
 		/* iterate angle */
@@ -414,17 +414,17 @@ static void CreateEntityLights(){
 		light.flags = flags;
 
 		/* ydnar: set fade key (from wolf) */
-		light.fade = 1.0f;
+		light.fade = 1;
 		if ( light.flags & LightFlags::AttenLinear ) {
 			light.fade = e.floatForKey( "fade" );
-			if ( light.fade == 0.0f ) {
-				light.fade = 1.0f;
+			if ( light.fade == 0 ) {
+				light.fade = 1;
 			}
 		}
 
 		/* ydnar: set angle scaling (from vlight) */
 		light.angleScale = e.floatForKey( "_anglescale" );
-		if ( light.angleScale != 0.0f ) {
+		if ( light.angleScale != 0 ) {
 			light.flags |= LightFlags::AttenAngle;
 		}
 
@@ -438,13 +438,13 @@ static void CreateEntityLights(){
 		/* set light intensity */
 		float intensity = 300.f;
 		e.read_keyvalue( intensity, "_light", "light" );
-		if ( intensity == 0.0f ) {
+		if ( intensity == 0 ) {
 			intensity = 300.0f;
 		}
 
 		{	/* ydnar: set light scale (sof2) */
 			float scale;
-			if( e.read_keyvalue( scale, "scale" ) && scale != 0.f )
+			if( e.read_keyvalue( scale, "scale" ) && scale != 0 )
 				intensity *= scale;
 		}
 
@@ -512,7 +512,7 @@ static void CreateEntityLights(){
 				/* ydnar: wolf mods: spotlights always use nonlinear + angle attenuation */
 				light.flags &= ~LightFlags::AttenLinear;
 				light.flags |= LightFlags::AttenAngle;
-				light.fade = 1.0f;
+				light.fade = 1;
 
 				/* ydnar: is this a sun? */
 				if ( e.boolForKey( "_sun" ) ) {
@@ -644,7 +644,7 @@ static void CreateSurfaceLights(){
 			light.flags = LightFlags::DefaultQ3A;
 			light.type = ELightType::Point;
 			light.photons = si->value * pointScale;
-			light.fade = 1.0f;
+			light.fade = 1;
 			light.si = si;
 			light.origin = info->minmax.origin();
 			light.color = si->color;
@@ -761,7 +761,7 @@ float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, con
 
 		/* ydnar: this was throwing too many errors with radiosity + crappy maps. ignoring it. */
 		if ( total > 6.3 || total < -6.3 ) {
-			return 0.0f;
+			return 0;
 		}
 	}
 
@@ -781,7 +781,7 @@ int LightContributionToSample( trace_t *trace ){
 	float angle;
 	float add;
 	float dist;
-	float addDeluxe = 0.0f, addDeluxeBounceScale = 0.25f;
+	float addDeluxe = 0, addDeluxeBounceScale = 0.25f;
 	bool angledDeluxe = true;
 	float colorBrightness;
 	bool doAddDeluxe = true;
@@ -790,14 +790,14 @@ int LightContributionToSample( trace_t *trace ){
 	const light_t *light = trace->light;
 
 	/* clear color */
-	trace->forceSubsampling = 0.0f; /* to make sure */
+	trace->forceSubsampling = 0; /* to make sure */
 	trace->color.set( 0 );
 	trace->directionContribution.set( 0 );
 
 	colorBrightness = RGBTOGRAY( light->color ) * ( 1.0f / 255.0f );
 
 	/* ydnar: early out */
-	if ( !( light->flags & LightFlags::Surfaces ) || light->envelope <= 0.0f ) {
+	if ( !( light->flags & LightFlags::Surfaces ) || light->envelope <= 0 ) {
 		return 0;
 	}
 
@@ -805,7 +805,7 @@ int LightContributionToSample( trace_t *trace ){
 	if ( light->type != ELightType::Sun ) {
 		/* MrE: if the light is behind the surface */
 		if ( !trace->twoSided ) {
-			if ( vector3_dot( light->origin, trace->normal ) - vector3_dot( trace->origin, trace->normal ) < 0.0f ) {
+			if ( vector3_dot( light->origin, trace->normal ) - vector3_dot( trace->origin, trace->normal ) < 0 ) {
 				return 0;
 			}
 		}
@@ -826,7 +826,7 @@ int LightContributionToSample( trace_t *trace ){
 		d = vector3_dot( trace->origin, light->normal ) - light->dist;
 		if ( d < 3.0f ) {
 			/* sample point behind plane? */
-			if ( !( light->flags & LightFlags::Twosided ) && d < -1.0f ) {
+			if ( !( light->flags & LightFlags::Twosided ) && d < -1 ) {
 				return 0;
 			}
 
@@ -867,10 +867,10 @@ int LightContributionToSample( trace_t *trace ){
 
 			/* attenuate */
 			angle *= -vector3_dot( light->normal, trace->direction );
-			if ( angle == 0.0f ) {
+			if ( angle == 0 ) {
 				return 0;
 			}
-			else if ( angle < 0.0f &&
+			else if ( angle < 0 &&
 			          ( trace->twoSided || ( light->flags & LightFlags::Twosided ) ) ) {
 				angle = -angle;
 
@@ -896,10 +896,10 @@ int LightContributionToSample( trace_t *trace ){
 		{
 			/* calculate the contribution */
 			factor = PointToPolygonFormFactor( pushedOrigin, trace->normal, light->w );
-			if ( factor == 0.0f ) {
+			if ( factor == 0 ) {
 				return 0;
 			}
-			else if ( factor < 0.0f ) {
+			else if ( factor < 0 ) {
 				/* twosided lighting */
 				if ( trace->twoSided || ( light->flags & LightFlags::Twosided ) ) {
 					factor = -factor;
@@ -974,10 +974,10 @@ int LightContributionToSample( trace_t *trace ){
 			angle = dot;
 		}
 		else{
-			angle = 1.0f;
+			angle = 1;
 		}
 
-		if ( light->angleScale != 0.0f ) {
+		if ( light->angleScale != 0 ) {
 			angle /= light->angleScale;
 			value_minimize( angle, 1.0f );
 		}
@@ -1017,7 +1017,7 @@ int LightContributionToSample( trace_t *trace ){
 		if ( light->type == ELightType::Spot ) {
 			/* do cone calculation */
 			const float distByNormal = -vector3_dot( trace->displacement, light->normal );
-			if ( distByNormal < 0.0f ) {
+			if ( distByNormal < 0 ) {
 				return 0;
 			}
 			const Vector3 pointAtDist = light->origin + light->normal * distByNormal;
@@ -1075,7 +1075,7 @@ int LightContributionToSample( trace_t *trace ){
 			angle = dot;
 		}
 		else{
-			angle = 1.0f;
+			angle = 1;
 		}
 
 		/* attenuate */
@@ -1092,7 +1092,7 @@ int LightContributionToSample( trace_t *trace ){
 			value_maximize( addDeluxe, 0.0f );
 		}
 
-		if ( add <= 0.0f ) {
+		if ( add <= 0 ) {
 			return 0;
 		}
 
@@ -1131,7 +1131,7 @@ int LightContributionToSample( trace_t *trace ){
 	}
 
 	/* ydnar: changed to a variable number */
-	if ( add <= 0.0f || ( add <= light->falloffTolerance && ( light->flags & LightFlags::FastActual ) ) ) {
+	if ( add <= 0 || ( add <= light->falloffTolerance && ( light->flags & LightFlags::FastActual ) ) ) {
 		return 0;
 	}
 
@@ -1265,7 +1265,7 @@ static bool LightContributionToPoint( trace_t *trace ){
 	trace->color.set( 0 );
 
 	/* ydnar: early out */
-	if ( !( light->flags & LightFlags::Grid ) || light->envelope <= 0.0f ) {
+	if ( !( light->flags & LightFlags::Grid ) || light->envelope <= 0 ) {
 		return false;
 	}
 
@@ -1322,7 +1322,7 @@ static bool LightContributionToPoint( trace_t *trace ){
 
 		/* see if the point is behind the light */
 		d = vector3_dot( trace->origin, light->normal ) - light->dist;
-		if ( !( light->flags & LightFlags::Twosided ) && d < -1.0f ) {
+		if ( !( light->flags & LightFlags::Twosided ) && d < -1 ) {
 			return false;
 		}
 
@@ -1337,10 +1337,10 @@ static bool LightContributionToPoint( trace_t *trace ){
 
 		/* calculate the contribution (ydnar 2002-10-21: [bug 642] bad normal calc) */
 		factor = PointToPolygonFormFactor( pushedOrigin, trace->direction, light->w );
-		if ( factor == 0.0f ) {
+		if ( factor == 0 ) {
 			return false;
 		}
-		else if ( factor < 0.0f ) {
+		else if ( factor < 0 ) {
 			if ( light->flags & LightFlags::Twosided ) {
 				factor = -factor;
 			}
@@ -1370,7 +1370,7 @@ static bool LightContributionToPoint( trace_t *trace ){
 		if ( light->type == ELightType::Spot ) {
 			/* do cone calculation */
 			const float distByNormal = -vector3_dot( trace->displacement, light->normal );
-			if ( distByNormal < 0.0f ) {
+			if ( distByNormal < 0 ) {
 				return false;
 			}
 			const Vector3 pointAtDist = light->origin + light->normal * distByNormal;
@@ -1394,7 +1394,7 @@ static bool LightContributionToPoint( trace_t *trace ){
 	else if ( light->type == ELightType::Sun ) {
 		/* attenuate */
 		add = light->photons;
-		if ( add <= 0.0f ) {
+		if ( add <= 0 ) {
 			return false;
 		}
 
@@ -1423,7 +1423,7 @@ static bool LightContributionToPoint( trace_t *trace ){
 	}
 
 	/* ydnar: changed to a variable number */
-	if ( add <= 0.0f || ( add <= light->falloffTolerance && ( light->flags & LightFlags::FastActual ) ) ) {
+	if ( add <= 0 || ( add <= light->falloffTolerance && ( light->flags & LightFlags::FastActual ) ) ) {
 		return false;
 	}
 
@@ -1462,7 +1462,6 @@ struct contribution_t
 
 static void TraceGrid( int num ){
 	int i, j, x, y, z, mod, numCon, numStyles;
-	float d, step;
 	Vector3 cheapColor, thisdir;
 	rawGridPoint_t          *gp;
 	bspGridPoint_t          *bgp;
@@ -1491,7 +1490,8 @@ static void TraceGrid( int num ){
 	if ( trace.cluster < CLUSTER_NORMAL ) {
 		/* try to nudge the origin around to find a valid point */
 		const Vector3 baseOrigin( trace.origin );
-		for ( step = 0; ( step += 0.005 ) <= 1.0; )
+		double step = 0;
+		while ( ( step += 0.005 ) <= 1 )
 		{
 			trace.origin = baseOrigin;
 			trace.origin[ 0 ] += step * ( Random() - 0.5 ) * gridSize[0];
@@ -1506,7 +1506,7 @@ static void TraceGrid( int num ){
 		}
 
 		/* can't find a valid point at all */
-		if ( step > 1.0 ) {
+		if ( step > 1 ) {
 			return;
 		}
 	}
@@ -1618,7 +1618,7 @@ static void TraceGrid( int num ){
 	for ( i = 0; i < numCon; ++i )
 	{
 		/* get relative directed strength */
-		d = vector3_dot( contributions[ i ].dir, thisdir );
+		float d = vector3_dot( contributions[ i ].dir, thisdir );
 		/* we map 1 to gridDirectionality, and 0 to gridAmbientDirectionality */
 		d = std::max( 0.f, gridAmbientDirectionality + d * ( gridDirectionality - gridAmbientDirectionality ) );
 
@@ -2412,8 +2412,8 @@ int LightMain( Args& args ){
 
 		while ( args.takeArg( "-compensate" ) ) {
 			f = atof( args.takeNext() );
-			if ( f <= 0.0f ) {
-				f = 1.0f;
+			if ( f <= 0 ) {
+				f = 1;
 			}
 			lightmapCompensate = f;
 			Sys_Printf( "Lighting compensation set to 1/%f\n", lightmapCompensate );
@@ -2486,7 +2486,7 @@ int LightMain( Args& args ){
 
 		while ( args.takeArg( "-shadeangle" ) ) {
 			shadeAngleDegrees = std::max( 0.0, atof( args.takeNext() ) );
-			if ( shadeAngleDegrees > 0.0f ) {
+			if ( shadeAngleDegrees > 0 ) {
 				shade = true;
 				Sys_Printf( "Phong shading enabled with a breaking angle of %f degrees\n", shadeAngleDegrees );
 			}
@@ -2849,22 +2849,22 @@ int LightMain( Args& args ){
 		}
 		while ( args.takeArg( "-dirtdepth" ) ) {
 			dirtDepth = atof( args.takeNext() );
-			if ( dirtDepth <= 0.0f ) {
+			if ( dirtDepth <= 0 ) {
 				dirtDepth = 128.0f;
 			}
 			Sys_Printf( "Dirtmapping depth set to %.1f\n", dirtDepth );
 		}
 		while ( args.takeArg( "-dirtscale" ) ) {
 			dirtScale = atof( args.takeNext() );
-			if ( dirtScale <= 0.0f ) {
-				dirtScale = 1.0f;
+			if ( dirtScale <= 0 ) {
+				dirtScale = 1;
 			}
 			Sys_Printf( "Dirtmapping scale set to %.1f\n", dirtScale );
 		}
 		while ( args.takeArg( "-dirtgain" ) ) {
 			dirtGain = atof( args.takeNext() );
-			if ( dirtGain <= 0.0f ) {
-				dirtGain = 1.0f;
+			if ( dirtGain <= 0 ) {
+				dirtGain = 1;
 			}
 			Sys_Printf( "Dirtmapping gain set to %.1f\n", dirtGain );
 		}

@@ -42,7 +42,7 @@ vec_t ray_intersect_point( const ray_t *ray, const vec3_t point, vec_t epsilon, 
 	VectorSubtract( point, ray->origin, displacement );
 	// calc length of displacement vector along ray direction
 	depth = DotProduct( displacement, ray->direction );
-	if ( depth < 0.0f ) {
+	if ( depth < 0 ) {
 		return (vec_t)FLT_MAX;
 	}
 	// calc position of closest point on ray to test point
@@ -50,7 +50,7 @@ vec_t ray_intersect_point( const ray_t *ray, const vec3_t point, vec_t epsilon, 
 	// calc displacement of test point from closest point
 	VectorSubtract( point, displacement, displacement );
 	// calc length of displacement, subtract depth-dependant epsilon
-	if ( VectorLength( displacement ) - ( epsilon + ( depth * divergence ) ) > 0.0f ) {
+	if ( VectorLength( displacement ) - ( epsilon + ( depth * divergence ) ) > 0 ) {
 		return (vec_t)FLT_MAX;
 	}
 	return depth;
@@ -86,7 +86,7 @@ vec_t ray_intersect_triangle( const ray_t *ray, bool bCullBack, const vec3_t ver
 
 		// calculate U parameter and test bounds
 		u = DotProduct( tvec, pvec );
-		if ( u < 0.0 || u > det ) {
+		if ( u < 0 || u > det ) {
 			return depth;
 		}
 
@@ -95,7 +95,7 @@ vec_t ray_intersect_triangle( const ray_t *ray, bool bCullBack, const vec3_t ver
 
 		// calculate V parameter and test bounds
 		v = DotProduct( ray->direction, qvec );
-		if ( v < 0.0 || u + v > det ) {
+		if ( v < 0 || u + v > det ) {
 			return depth;
 		}
 
@@ -119,7 +119,7 @@ vec_t ray_intersect_triangle( const ray_t *ray, bool bCullBack, const vec3_t ver
 
 		/* calculate U parameter and test bounds */
 		u = DotProduct( tvec, pvec ) * inv_det;
-		if ( u < 0.0 || u > 1.0 ) {
+		if ( u < 0 || u > 1 ) {
 			return depth;
 		}
 
@@ -128,7 +128,7 @@ vec_t ray_intersect_triangle( const ray_t *ray, bool bCullBack, const vec3_t ver
 
 		/* calculate V parameter and test bounds */
 		v = DotProduct( ray->direction, qvec ) * inv_det;
-		if ( v < 0.0 || u + v > 1.0 ) {
+		if ( v < 0 || u + v > 1 ) {
 			return depth;
 		}
 

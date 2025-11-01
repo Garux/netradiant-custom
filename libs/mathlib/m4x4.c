@@ -325,16 +325,16 @@ void m4x4_rotation_for_quat( m4x4_t matrix, const vec4_t quat ){
 	const double wy = quat[3] * y2;
 	const double wz = quat[3] * z2;
 
-	matrix[0] = (vec_t)( 1.0 - ( yy + zz ) );
-	matrix[4] = (vec_t)( xy - wz );
-	matrix[8] = (vec_t)( xz + wy );
+	matrix[0]  = (vec_t)( 1.0 - ( yy + zz ) );
+	matrix[4]  = (vec_t)( xy - wz );
+	matrix[8]  = (vec_t)( xz + wy );
 
-	matrix[1] = (vec_t)( xy + wz );
-	matrix[5] = (vec_t)( 1.0 - ( xx + zz ) );
-	matrix[9] = (vec_t)( yz - wx );
+	matrix[1]  = (vec_t)( xy + wz );
+	matrix[5]  = (vec_t)( 1.0 - ( xx + zz ) );
+	matrix[9]  = (vec_t)( yz - wx );
 
-	matrix[2] = (vec_t)( xz - wy );
-	matrix[6] = (vec_t)( yz + wx );
+	matrix[2]  = (vec_t)( xz - wy );
+	matrix[6]  = (vec_t)( yz + wx );
 	matrix[10] = (vec_t)( 1.0 - ( xx + yy ) );
 #endif
 
@@ -1443,15 +1443,15 @@ int m4x4_orthogonal_invert( m4x4_t matrix ){
 		}
 
 		det = 1.0f / det;
-		matrix[0] = (  ( src[5] * src[10] - src[6] * src[9] ) * det );
-		matrix[1] = ( -( src[1] * src[10] - src[2] * src[9] ) * det );
-		matrix[2] = (  ( src[1] * src[6] - src[2] * src[5] ) * det );
-		matrix[4] = ( -( src[4] * src[10] - src[6] * src[8] ) * det );
-		matrix[5] = (  ( src[0] * src[10] - src[2] * src[8] ) * det );
-		matrix[6] = ( -( src[0] * src[6] - src[2] * src[4] ) * det );
-		matrix[8] = (  ( src[4] * src[9] - src[5] * src[8] ) * det );
-		matrix[9] = ( -( src[0] * src[9] - src[1] * src[8] ) * det );
-		matrix[10] = (  ( src[0] * src[5] - src[1] * src[4] ) * det );
+		matrix[0]  = (  ( src[5] * src[10] - src[6] * src[9] ) * det );
+		matrix[1]  = ( -( src[1] * src[10] - src[2] * src[9] ) * det );
+		matrix[2]  = (  ( src[1] * src[6]  - src[2] * src[5] ) * det );
+		matrix[4]  = ( -( src[4] * src[10] - src[6] * src[8] ) * det );
+		matrix[5]  = (  ( src[0] * src[10] - src[2] * src[8] ) * det );
+		matrix[6]  = ( -( src[0] * src[6]  - src[2] * src[4] ) * det );
+		matrix[8]  = (  ( src[4] * src[9]  - src[5] * src[8] ) * det );
+		matrix[9]  = ( -( src[0] * src[9]  - src[1] * src[8] ) * det );
+		matrix[10] = (  ( src[0] * src[5]  - src[1] * src[4] ) * det );
 	}
 
 	/* Do the translation part */

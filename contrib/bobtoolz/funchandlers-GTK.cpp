@@ -655,11 +655,11 @@ void DoCaulkSelection() {
 	UndoableCommand undo( "bobToolz.caulkSelection" );
 	DEntity world;
 
-	float fScale[2] = { 0.5f, 0.5f };
-	float fShift[2] = { 0.0f, 0.0f };
+	const float fScale[2] = { 0.5f, 0.5f };
+	const float fShift[2] = { 0.0f, 0.0f };
 
-	bool bResetScale[2] = { false, false };
-	bool bResetShift[2] = { false, false };
+	const bool bResetScale[2] = { false, false };
+	const bool bResetShift[2] = { false, false };
 
 	world.LoadSelectedBrushes();
 	world.LoadSelectedPatches();
@@ -701,7 +701,7 @@ typedef DPoint* pntTripple[3];
 
 void DoFlipTerrain() {
 	UndoableCommand undo( "bobToolz.flipTerrain" );
-	vec3_t vUp = { 0.f, 0.f, 1.f };
+	const vec3_t vUp = { 0, 0, 1 };
 	int i;
 
 	// ensure we have something selected

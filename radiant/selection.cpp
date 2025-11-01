@@ -171,7 +171,7 @@ inline void constrain_to_axis( Vector3& vec, const Vector3& axis ){
 
 //! a and b are unit vectors .. a and b must be orthogonal to axis .. returns angle in radians
 inline float angle_for_axis( const Vector3& a, const Vector3& b, const Vector3& axis ){
-	if ( vector3_dot( axis, vector3_cross( a, b ) ) > 0.0 ) {
+	if ( vector3_dot( axis, vector3_cross( a, b ) ) > 0 ) {
 		return angle_between( a, b );
 	}
 	else{
@@ -254,7 +254,7 @@ public:
 
 		if( g_modifiers.shift() )
 			for( std::size_t i = 0; i < 3; ++i )
-				if( current[i] == 0.f )
+				if( current[i] == 0 )
 					return m_rotatable.rotate( quaternion_for_axisangle( g_vector3_axes[i], float_snapped( angle_for_axis( m_start, current, g_vector3_axes[i] ), static_cast<float>( c_pi / 12.0 ) ) ) );
 
 		m_rotatable.rotate( quaternion_for_unit_vectors( m_start, current ) );
@@ -725,9 +725,9 @@ public:
 		vector3_snap( delta, GetSnapGridSize() );
 		vector3_scale( delta, m_axis );
 
-		Vector3 start( vector3_snapped( m_start, GetSnapGridSize() != 0.f ? GetSnapGridSize() : 1e-3f ) );
+		Vector3 start( vector3_snapped( m_start, GetSnapGridSize() != 0 ? GetSnapGridSize() : 1e-3f ) );
 		for ( std::size_t i = 0; i < 3; ++i ){ //prevent snapping to 0 with big gridsize
-			if( float_snapped( m_start[i], 1e-3f ) != 0.f && start[i] == 0.f ){
+			if( float_snapped( m_start[i], 1e-3f ) != 0 && start[i] == 0 ){
 				start[i] = GetSnapGridSize();
 			}
 		}
@@ -740,7 +740,7 @@ public:
 		);
 		/* try bbox way */
 		for( std::size_t i = 0; i < 3; ++i ){
-			if( m_chosen_extent[i] > 0.0625f && m_axis[i] != 0.f ){ //epsilon to prevent super high scale for set of models, having really small extent, formed by origins
+			if( m_chosen_extent[i] > 0.0625f && m_axis[i] != 0 ){ //epsilon to prevent super high scale for set of models, having really small extent, formed by origins
 				scale[i] = ( m_chosen_extent[i] + delta[i] ) / m_chosen_extent[i];
 				if( g_modifiers.ctrl() ){ // snap bbox dimension size to grid
 					const float snappdwidth = float_snapped( scale[i] * m_bounds.extents[i] * 2.f, GetSnapGridSize() );
@@ -750,7 +750,7 @@ public:
 		}
 		if( g_modifiers.shift() ){ // scale all axes equally
 			for( std::size_t i = 0; i < 3; ++i ){
-				if( m_axis[i] == 0.f ){
+				if( m_axis[i] == 0 ){
 					scale[i] = vector3_dot( scale, vector3_scaled( m_axis, m_axis ) );
 				}
 			}
@@ -798,16 +798,16 @@ public:
 		if( m_axis != g_vector3_identity )
 			delta = vector3_scaled( delta, m_axis ) + vector3_scaled( delta, m_axis2 );
 
-		Vector3 start( vector3_snapped( m_start, GetSnapGridSize() != 0.f ? GetSnapGridSize() : 1e-3f ) );
+		Vector3 start( vector3_snapped( m_start, GetSnapGridSize() != 0 ? GetSnapGridSize() : 1e-3f ) );
 		for ( std::size_t i = 0; i < 3; ++i ){ //prevent snapping to 0 with big gridsize
-			if( float_snapped( m_start[i], 1e-3f ) != 0.f && start[i] == 0.f ){
+			if( float_snapped( m_start[i], 1e-3f ) != 0 && start[i] == 0 ){
 				start[i] = GetSnapGridSize();
 			}
 		}
 
 		const std::size_t ignore_axis = vector3_min_abs_component_index( m_start );
 		if( g_modifiers.shift() )
-			start[ignore_axis] = 0.f;
+			start[ignore_axis] = 0;
 
 		Vector3 scale(
 		    start[0] == 0 ? 1 : 1 + delta[0] / start[0],
@@ -817,7 +817,7 @@ public:
 
 		//globalOutputStream() << "m_start: " << m_start << "   start: " << start << "   delta: " << delta << '\n';
 		for( std::size_t i = 0; i < 3; ++i ){
-			if( m_chosen_extent[i] > 0.0625f && start[i] != 0.f ){
+			if( m_chosen_extent[i] > 0.0625f && start[i] != 0 ){
 				scale[i] = ( m_chosen_extent[i] + delta[i] ) / m_chosen_extent[i];
 				if( g_modifiers.ctrl() ){ // snap bbox dimension size to grid
 					const float snappdwidth = float_snapped( scale[i] * m_bounds.extents[i] * 2.f, GetSnapGridSize() );
@@ -836,7 +836,7 @@ public:
 			}
 			for( std::size_t i = 0; i < 3; ++i ){
 				if( ignore_axis != i ){
-					scale[i] = ( scale[i] < 0.f ) ? -std::fabs( bestscale ) : fabs( bestscale );
+					scale[i] = ( scale[i] < 0 ) ? -std::fabs( bestscale ) : fabs( bestscale );
 				}
 			}
 		}
@@ -888,7 +888,7 @@ public:
 	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point ) override {
 		const Vector3 current = point_on_plane( m_planeZ, m_view->GetViewMatrix(), device_point ) - m_0;
 	//	globalOutputStream() << m_axis_which << " by axis " << m_axis_by << '\n';
-		m_skewable.skew( Skew( m_axis_by * 4 + m_axis_which, m_axis_by_extent != 0.f? float_snapped( current[m_axis_which], GetSnapGridSize() ) / m_axis_by_extent : 0 ) );
+		m_skewable.skew( Skew( m_axis_by * 4 + m_axis_which, m_axis_by_extent != 0? float_snapped( current[m_axis_which], GetSnapGridSize() ) / m_axis_by_extent : 0 ) );
 	}
 	void SetAxes( int axis_which, int axis_by, int axis_by_sign ){
 		m_axis_which = axis_which;
@@ -4200,7 +4200,7 @@ DoubleVector3 testSelected_scene_snapped_point( const SelectionVolume& test, Sce
 				}
 			}
 		}
-		if( selector.best().distance() == 0.f ){ /* try plane, if pointing inside of polygon */
+		if( selector.best().distance() == 0 ){ /* try plane, if pointing inside of polygon */
 			const std::size_t maxi = vector3_max_abs_component_index( face.plane3().normal() );
 			DoubleVector3 planePoint( vector3_snapped( point, GetSnapGridSize() ) );
 			// face.plane3().normal().dot( point snapped ) = face.plane3().dist()
@@ -7283,7 +7283,7 @@ public:
 
 	void SelectPoint( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon, RadiantSelectionSystem::EModifier modifier, bool face ){
 		//globalOutputStream() << device_point[0] << "   " << device_point[1] << '\n';
-		ASSERT_MESSAGE( std::fabs( device_point[0] ) <= 1.f && std::fabs( device_point[1] ) <= 1.f, "point-selection error" );
+		ASSERT_MESSAGE( std::fabs( device_point[0] ) <= 1 && std::fabs( device_point[1] ) <= 1, "point-selection error" );
 
 		if ( modifier == eReplace ) {
 			deselectComponentsOrAll( face );
@@ -7400,7 +7400,7 @@ public:
 
 	RadiantSelectionSystem::EModifier
 	SelectPoint_InitPaint( const View& view, const DeviceVector device_point, const DeviceVector device_epsilon, bool face ){
-		ASSERT_MESSAGE( std::fabs( device_point[0] ) <= 1.f && std::fabs( device_point[1] ) <= 1.f, "point-selection error" );
+		ASSERT_MESSAGE( std::fabs( device_point[0] ) <= 1 && std::fabs( device_point[1] ) <= 1, "point-selection error" );
 #if defined ( DEBUG_SELECTION )
 		g_render_clipped.destroy();
 #endif
@@ -8423,7 +8423,7 @@ class Selector_
 			}
 		}
 
-		m_start = m_current = DeviceVector( 0.f, 0.f );
+		m_start = m_current = DeviceVector( 0, 0 );
 		draw_area();
 	}
 
@@ -8440,8 +8440,8 @@ public:
 
 	Selector_( const DeviceVector& epsilon ) :
 		m_epsilon( epsilon ),
-		m_start( 0.f, 0.f ),
-		m_current( 0.f, 0.f ),
+		m_start( 0, 0 ),
+		m_current( 0, 0 ),
 		m_mouse2( false ),
 		m_mouseMoved( false ),
 		m_mouseMovedWhilePressed( false ){
@@ -8475,7 +8475,7 @@ public:
 			m2testSelect( device_constrained( position ) );
 		}
 		else{
-			m_start = m_current = DeviceVector( 0.0f, 0.0f );
+			m_start = m_current = DeviceVector( 0, 0 );
 		}
 	}
 	typedef MemberCaller<Selector_, void(DeviceVector), &Selector_::mouseUp> MouseUpCaller;
@@ -8621,7 +8621,7 @@ public:
 		}
 
 		m_moveStart = devicePosition;
-		m_movePressed = 0.f;
+		m_movePressed = 0;
 	}
 	void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ) override {
 		m_selector.m_mouseMoved = mouse_moved_epsilon( position, m_moveEnd, m_move );
@@ -8660,7 +8660,7 @@ public:
 		m_selector.m_mouseMovedWhilePressed = false;
 		m_manipulator.m_mouseMovedWhilePressed = false;
 		m_moveEnd = device( position );
-		m_move = 0.f;
+		m_move = 0;
 	}
 	void onModifierDown( ModifierFlags type ) override {
 		g_modifiers = bitfield_enable( g_modifiers, type );

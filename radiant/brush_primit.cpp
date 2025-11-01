@@ -747,7 +747,7 @@ void ComputeBest2DVector( Vector3& v, Vector3& X, Vector3& Y, int &x, int &y ){
 	sy = vector3_dot( v, Y );
 	if ( std::fabs( sy ) > std::fabs( sx ) ) {
 		x = 0;
-		if ( sy > 0.0 ) {
+		if ( sy > 0 ) {
 			y =  1;
 		}
 		else{
@@ -757,7 +757,7 @@ void ComputeBest2DVector( Vector3& v, Vector3& X, Vector3& Y, int &x, int &y ){
 	else
 	{
 		y = 0;
-		if ( sx > 0.0 ) {
+		if ( sx > 0 ) {
 			x =  1;
 		}
 		else{
@@ -987,9 +987,9 @@ void ShiftTextureRelative_Camera( face_t *f, int x, int y ){
 	int i;
 	for ( i = 0; i < f->face_winding->numpoints; ++i )
 	{
-		VectorAdd( C,f->face_winding->point_at( i ),C );
+		VectorAdd( C, f->face_winding->point_at( i ), C );
 	}
-	VectorScale( C,1.0 / f->face_winding->numpoints,C );
+	VectorScale( C, 1.0 / f->face_winding->numpoints, C );
 
 	pCam = g_pParentWnd->GetCamWnd();
 	pCam->MatchViewAxes( C, vecS, axis[0], sgn[0] );
@@ -1065,8 +1065,8 @@ void BPTexdef_Scale( brushprimit_texdef_t& bp_td, float s, float t ){
 	texdef_t texdef;
 	TexMatToFakeTexCoords( bp_td, texdef );
 
-	float scaleS = -1.f;
-	float scaleT = -1.f;
+	float scaleS = -1;
+	float scaleT = -1;
 	if( std::fabs( texdef.scale[0] + s ) > 1e-5f ){
 		scaleS = texdef.scale[0] / ( texdef.scale[0] + s );
 	}
@@ -1115,7 +1115,7 @@ void BPTexdef_Assign( brushprimit_texdef_t& bp_td, const float* hShift, const fl
 		bp_td.coords[1][2] = *vShift;
 	}
 	if( hScale ){
-		float scaleS = -1.f;
+		float scaleS = -1;
 		if( std::fabs( *hScale ) > 1e-5f ){
 			scaleS = texdef.scale[0] / *hScale;
 		}
@@ -1123,7 +1123,7 @@ void BPTexdef_Assign( brushprimit_texdef_t& bp_td, const float* hShift, const fl
 		bp_td.coords[0][1] *= scaleS;
 	}
 	if( vScale ){
-		float scaleT = -1.f;
+		float scaleT = -1;
 		if( std::fabs( *vScale ) > 1e-5f ){
 			scaleT = texdef.scale[1] / *vScale;
 		}
@@ -1136,8 +1136,8 @@ void BPTexdef_Assign( brushprimit_texdef_t& bp_td, const float* hShift, const fl
 }
 #if 0
 void BPTexdef_Construct( brushprimit_texdef_t& bp_td, std::size_t width, std::size_t height ){
-	bp_td.coords[0][0] = 1.0f;
-	bp_td.coords[1][1] = 1.0f;
+	bp_td.coords[0][0] = 1;
+	bp_td.coords[1][1] = 1;
 	ConvertTexMatWithDimensions( bp_td.coords, 2, 2, bp_td.coords, width, height );
 }
 #endif
@@ -1271,7 +1271,7 @@ void Texdef_FitTexture( TextureProjection& projection, std::size_t width, std::s
 	Texdef_fromTransform( projection, (float)width, (float)height, st2tex );
 	//Texdef_normalise( projection, (float)width, (float)height );
 	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES )
-		BPTexdef_normalise( projection.m_brushprimit_texdef, 1.f, 1.f ); /* scaleApplied is! */
+		BPTexdef_normalise( projection.m_brushprimit_texdef, 1, 1 ); /* scaleApplied is! */
 	else
 		Texdef_normalise( projection.m_texdef, (float)width, (float)height );
 }
@@ -1582,18 +1582,18 @@ void BP_from_ST( brushprimit_texdef_t& bp, const PlanePoints& points, const Doub
 }
 
 const Vector3 BaseAxes[] = {
-	Vector3( 0.0,  0.0,  1.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0, -1.0,  0.0),
-	Vector3( 0.0,  0.0, -1.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0, -1.0,  0.0),
-	Vector3( 1.0,  0.0,  0.0), Vector3( 0.0,  1.0,  0.0), Vector3( 0.0,  0.0, -1.0),
-	Vector3(-1.0,  0.0,  0.0), Vector3( 0.0,  1.0,  0.0), Vector3( 0.0,  0.0, -1.0),
-	Vector3( 0.0,  1.0,  0.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0,  0.0, -1.0),
-	Vector3( 0.0, -1.0,  0.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0,  0.0, -1.0),
+	Vector3( 0,  0,  1), Vector3( 1,  0,  0), Vector3( 0, -1,  0),
+	Vector3( 0,  0, -1), Vector3( 1,  0,  0), Vector3( 0, -1,  0),
+	Vector3( 1,  0,  0), Vector3( 0,  1,  0), Vector3( 0,  0, -1),
+	Vector3(-1,  0,  0), Vector3( 0,  1,  0), Vector3( 0,  0, -1),
+	Vector3( 0,  1,  0), Vector3( 1,  0,  0), Vector3( 0,  0, -1),
+	Vector3( 0, -1,  0), Vector3( 1,  0,  0), Vector3( 0,  0, -1),
 };
 
 std::size_t planeNormalIndex( const Vector3& normal ) {
 #if 0
 	std::size_t bestIndex = 0;
-	float bestDot = 0.f;
+	float bestDot = 0;
 	for( std::size_t i = 0; i < 6; ++i ) {
 		const float dot = vector3_dot( normal, BaseAxes[i * 3] );
 		if( dot > bestDot ) { // no need to use -altaxis for qbsp, but -oldaxis is necessary
@@ -1639,19 +1639,19 @@ void AP_from_axes( const Vector3& axisX, const Vector3& axisY, const DoubleVecto
 	float cosY = vector3_dot( yAxis, normalizedYAxis );
 
 	float radX = std::acos( cosX );
-	if( vector3_dot( vector3_cross( xAxis, normalizedXAxis ), zAxis ) < 0.0 )
-		radX *= -1.0f;
+	if( vector3_dot( vector3_cross( xAxis, normalizedXAxis ), zAxis ) < 0 )
+		radX *= -1;
 
 	float radY = std::acos( cosY );
-	if( vector3_dot( vector3_cross( yAxis, normalizedYAxis ), zAxis ) < 0.0 )
-		radY *= -1.0f;
+	if( vector3_dot( vector3_cross( yAxis, normalizedYAxis ), zAxis ) < 0 )
+		radY *= -1;
 
 	// choosing between the X and Y axis rotations
 	float rad = width >= height ? radX : radY;
 
 	// for some reason, when the texture plane normal is the Y axis, we must rotation clockwise
 	if( ( index / 2 ) * 6 == 12 )
-		rad *= -1.0f;
+		rad *= -1;
 
 	//	doSetRotation( newNormal, newRotation, newRotation );
 	const Matrix4 rotmat = matrix4_rotation_for_axisangle( vector3_cross( yAxis, xAxis ), rad );
@@ -1664,9 +1664,9 @@ void AP_from_axes( const Vector3& axisX, const Vector3& axisY, const DoubleVecto
 
 	// the sign of the scaling factors depends on the angle between the new texture axis and the projected transformed axis
 	if( vector3_dot( xAxis, normalizedXAxis ) < 0 )
-		scale[0] *= -1.0f;
+		scale[0] *= -1;
 	if( vector3_dot( yAxis, normalizedYAxis ) < 0 )
-		scale[1] *= -1.0f;
+		scale[1] *= -1;
 
 	// determine the new texture coordinates of the transformed center of the face, sans offsets
 	const Vector2 newInvariantTexCoords( vector3_dot( xAxis / scale[0], invariant ),
@@ -1719,7 +1719,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 //			globalOutputStream() << "\t\t***: " << invariant << '\n';
 //			globalOutputStream() << "identity2transformed: " << identity2transformed << '\n';
 //			printAP( projection );
-		if( projection.m_texdef.scale[0] == 0.0f || projection.m_texdef.scale[1] == 0.0f ) {
+		if( projection.m_texdef.scale[0] == 0 || projection.m_texdef.scale[1] == 0 ) {
 			return;
 		}
 
@@ -1776,12 +1776,12 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 //			globalOutputStream() << "identity2transformed: " << identity2transformed << '\n';
 		/* hack: is often broken with niggative scale */
 		if( projection.m_texdef.scale[0] < 0 ){
-			projection.m_texdef.scale[0] *= -1.f;
-			projection.m_basis_s *= -1.f;
+			projection.m_texdef.scale[0] *= -1;
+			projection.m_basis_s *= -1;
 		}
 		if( projection.m_texdef.scale[1] < 0 ){
-			projection.m_texdef.scale[1] *= -1.f;
-			projection.m_basis_t *= -1.f;
+			projection.m_texdef.scale[1] *= -1;
+			projection.m_basis_t *= -1;
 		}
 
 		//globalOutputStream() << "plane.normal(): " << plane.normal() << '\n';
@@ -1837,7 +1837,7 @@ void Texdef_transform( TextureProjection& projection, std::size_t width, std::si
 //			globalOutputStream() << "\t\t***: " << invariant << '\n';
 //			globalOutputStream() << "identity2transformed: " << identity2transformed << '\n';
 //			printAP( projection );
-		if( projection.m_texdef.scale[0] == 0.0f || projection.m_texdef.scale[1] == 0.0f ) {
+		if( projection.m_texdef.scale[0] == 0 || projection.m_texdef.scale[1] == 0 ) {
 			return;
 		}
 
@@ -2048,11 +2048,11 @@ void Valve220_from_BP( TextureProjection& projection, const Plane3& plane, std::
 	projection.m_basis_t = vector3_normalised( texX * projection.m_brushprimit_texdef.coords[1][0] + texY * projection.m_brushprimit_texdef.coords[1][1] );
 	projection.m_brushprimit_texdef.removeScale( width, height );
 	TexMatToFakeTexCoords( projection.m_brushprimit_texdef, projection.m_texdef );
-	projection.m_texdef.shift[0] *= -1.f;
+	projection.m_texdef.shift[0] *= -1;
 	if( projection.m_brushprimit_texdef.coords[0][0] < 0 )
-		projection.m_basis_s *= -1.f;
+		projection.m_basis_s *= -1;
 	if( projection.m_brushprimit_texdef.coords[1][1] < 0 )
-		projection.m_basis_t *= -1.f;
+		projection.m_basis_t *= -1;
 	projection.m_brushprimit_texdef.addScale( width, height );
 #endif
 //		print220( projection );

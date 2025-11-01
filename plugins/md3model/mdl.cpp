@@ -70,7 +70,7 @@ inline ArbitraryMeshVertex MDLVertex_construct( const mdlHeader_t& header, const
 	           ),
 	           TexCoord2f(
 	               ( (float)st.s / header.skinwidth ) + ( ( st.onseam == MDL_ONSEAM && !facesfront ) ? 0.5f : 0.0f ),
-	               (float)st.t / header.skinheight
+	                 (float)st.t / header.skinheight
 	           )
 	       );
 }

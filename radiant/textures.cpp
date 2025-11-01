@@ -77,7 +77,7 @@ struct texture_globals_t
 
 	texture_globals_t( GLint components ) :
 		m_nTextureCompressionFormat( TEXTURECOMPRESSION_NONE ),
-		fGamma( 1.0f ),
+		fGamma( 1 ),
 		bTextureCompressionSupported( false ),
 		texture_components( components ),
 		m_bOpenGLCompressionSupported( false ),
@@ -134,7 +134,7 @@ bool g_TextureAnisotropy = true;
 
 byte g_gammatable[256];
 void ResampleGamma( float fGamma ){
-	if ( fGamma == 1.0 ) {
+	if ( fGamma == 1 ) {
 		for ( int i = 0; i < 256; ++i )
 			g_gammatable[i] = i;
 	}
@@ -165,7 +165,7 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
 	q->width = nWidth;
 	q->height = nHeight;
 
-	total[0] = total[1] = total[2] = 0.0f;
+	total[0] = total[1] = total[2] = 0;
 
 	// resample texture gamma according to user settings
 	for ( int i = 0; i < ( nCount * 4 ); i += 4 )
@@ -269,7 +269,7 @@ void Texture_InitPalette( byte *pal ){
 
 	gamma = g_texture_globals.fGamma;
 
-	if ( gamma == 1.0 ) {
+	if ( gamma == 1 ) {
 		for ( i = 0; i < 256; ++i )
 			gammatable[i] = i;
 	}

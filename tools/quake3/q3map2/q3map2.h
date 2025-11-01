@@ -2007,8 +2007,8 @@ inline bool dirty;
 inline bool dirtDebug;
 inline int dirtMode;
 inline float dirtDepth = 128.0f;
-inline float dirtScale = 1.0f;
-inline float dirtGain = 1.0f;
+inline float dirtScale = 1;
+inline float dirtGain = 1;
 
 /* 27: floodlighting */
 inline bool debugnormals;
@@ -2017,7 +2017,7 @@ inline bool floodlight_lowquality;
 inline Vector3 floodlightRGB;
 inline float floodlightIntensity = 128.0f;
 inline float floodlightDistance = 1024.0f;
-inline float floodlightDirectionScale = 1.0f;
+inline float floodlightDirectionScale = 1;
 
 inline bool dump;
 inline bool debug;
@@ -2031,36 +2031,36 @@ inline int debugSampleSize; // 1=warn; 0=warn if lmsize>128
 inline float pointScale = 7500.0f;
 inline float spotScale = 7500.0f;
 inline float areaScale = 0.25f;
-inline float skyScale = 1.0f;
+inline float skyScale = 1;
 inline float bounceScale = 0.25f;
-inline float bounceColorRatio = 1.0f;
-inline float vertexglobalscale = 1.0f;
-inline float g_backsplashFractionScale = 1.0f;
+inline float bounceColorRatio = 1;
+inline float vertexglobalscale = 1;
+inline float g_backsplashFractionScale = 1;
 inline float g_backsplashDistance = -999.0f;
 
 /* jal: alternative angle attenuation curve */
 inline bool lightAngleHL;
 
 /* vortex: gridscale and gridambientscale */
-inline float gridScale = 1.0f;
-inline float gridAmbientScale = 1.0f;
-inline float gridDirectionality = 1.0f;
+inline float gridScale = 1;
+inline float gridAmbientScale = 1;
+inline float gridDirectionality = 1;
 inline float gridAmbientDirectionality;
 inline bool inGrid;
 
 /* ydnar: lightmap gamma/compensation */
-inline float lightmapGamma = 1.0f;
+inline float lightmapGamma = 1;
 inline float lightmapsRGB;
 inline float texturesRGB;
 inline float colorsRGB;
 inline float lightmapExposure;
-inline float lightmapCompensate = 1.0f;
-inline float lightmapBrightness = 1.0f;
-inline float lightmapContrast = 1.0f;
+inline float lightmapCompensate = 1;
+inline float lightmapBrightness = 1;
+inline float lightmapContrast = 1;
 inline float g_lightmapSaturation = 1;
 
 /* ydnar: for runtime tweaking of falloff tolerance */
-inline float falloffTolerance = 1.0f;
+inline float falloffTolerance = 1;
 inline const bool exactPointToPolygon = true;
 inline const float formFactorValueScale = 3.0f;
 inline const float linearScale = 1.0f / 8000.0f;

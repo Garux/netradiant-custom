@@ -57,7 +57,7 @@ public:
 	DPlane* HasPlane( DPlane* chkPlane ) const;
 	DPlane* AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, const _QERFaceData* texData );
 
-	bool ResetTextures( const char* textureName, float fScale[2], float fShift[2], int rotation, const char* newTextureName, bool bResetTextureName, bool bResetScale[2], bool bResetShift[2], bool bResetRotation );
+	bool ResetTextures( const char* textureName, const float fScale[2], const float fShift[2], int rotation, const char* newTextureName, bool bResetTextureName, const bool bResetScale[2], const bool bResetShift[2], bool bResetRotation );
 	bool IsDetail();
 	bool HasTexture( const char* textureName );
 	bool IntersectsWith( DBrush *chkBrush );
@@ -89,7 +89,7 @@ public:
 	void LoadFromBrush( scene::Instance& brush, bool textured );
 	void AddPoint( vec3_t pnt );
 
-	DPlane* FindPlaneWithClosestNormal( vec_t* normal );
+	DPlane* FindPlaneWithClosestNormal( const vec_t* normal );
 	int FindPointsForPlane( DPlane* plane, DPoint** pnts, int maxpnts );
 
 	DBrush();

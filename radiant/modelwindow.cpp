@@ -793,15 +793,15 @@ void ModelBrowser_render(){
 	m_projection[5] = 1.0f / ( H / 2.f );
 	m_projection[10] = 1.0f / ( 9999 );
 
-	m_projection[12] = 0.0f;
-	m_projection[13] = 0.0f;
-	m_projection[14] = -1.0f;
+	m_projection[12] = 0;
+	m_projection[13] = 0;
+	m_projection[14] = -1;
 
 	m_projection[1] = m_projection[2] = m_projection[3] =
 	m_projection[4] = m_projection[6] = m_projection[7] =
-	m_projection[8] = m_projection[9] = m_projection[11] = 0.0f;
+	m_projection[8] = m_projection[9] = m_projection[11] = 0;
 
-	m_projection[15] = 1.0f;
+	m_projection[15] = 1;
 
 
 	Matrix4 m_modelview;
@@ -888,9 +888,9 @@ void ModelBrowser_render(){
 			GLfloat inverse_cam_dir[4], ambient[4], diffuse[4];
 
 			ambient[0] = ambient[1] = ambient[2] = 0.4f;
-			ambient[3] = 1.0f;
+			ambient[3] = 1;
 			diffuse[0] = diffuse[1] = diffuse[2] = 0.4f;
-			diffuse[3] = 1.0f;
+			diffuse[3] = 1;
 
 			inverse_cam_dir[0] = -m_view.getViewDir()[0];
 			inverse_cam_dir[1] = -m_view.getViewDir()[1];

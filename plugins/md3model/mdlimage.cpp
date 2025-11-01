@@ -45,11 +45,9 @@ void Texture_InitPalette( byte *pal ){
 	int i;
 	int inf;
 	byte gammatable[256];
-	double gamma;
+	double gamma = 1; //g_qeglobals.d_savedinfo.fGamma;
 
-	gamma = 1.0; //g_qeglobals.d_savedinfo.fGamma;
-
-	if ( gamma == 1.0 ) {
+	if ( gamma == 1 ) {
 		for ( i = 0; i < 256; ++i )
 			gammatable[i] = i;
 	}

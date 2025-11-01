@@ -200,7 +200,7 @@ void Patch_thicken( Patch& patch, scene::Instance& instance, const float thickne
 		selectPath( path, true );
 	}
 
-	if( seams && thickness != 0.0f ){
+	if( seams && thickness != 0 ){
 		int i = no12? 2 : 0;
 		int iend = no34? 2 : 4;
 		// Now create the four walls

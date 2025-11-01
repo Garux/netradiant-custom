@@ -164,7 +164,7 @@ inline bool VectorIsOnAxis( const Vector3& v ){
 	int zeroComponentCount = 0;
 	for ( int i = 0; i < 3; ++i )
 	{
-		if ( v[i] == 0.0 ) {
+		if ( v[i] == 0 ) {
 			zeroComponentCount++;
 		}
 	}
@@ -327,13 +327,13 @@ enum EPlaneType : int
 };
 
 inline EPlaneType PlaneTypeForNormal( const Vector3& normal ) {
-	if ( normal[0] == 1.0 || normal[0] == -1.0 ) {
+	if ( normal[0] == 1 || normal[0] == -1 ) {
 		return ePlaneX;
 	}
-	if ( normal[1] == 1.0 || normal[1] == -1.0 ) {
+	if ( normal[1] == 1 || normal[1] == -1 ) {
 		return ePlaneY;
 	}
-	if ( normal[2] == 1.0 || normal[2] == -1.0 ) {
+	if ( normal[2] == 1 || normal[2] == -1 ) {
 		return ePlaneZ;
 	}
 

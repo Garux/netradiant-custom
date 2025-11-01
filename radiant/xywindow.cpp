@@ -1310,7 +1310,7 @@ void XYWnd::XY_DrawGrid() {
 	while ( ( stepy * m_fScale ) <= 32.0f ) // text step y must be at least 32
 		stepy *= 2;
 
-	const float a = ( ( GetSnapGridSize() > 0.0f ) ? 1.0f : 0.3f );
+	const float a = ( ( GetSnapGridSize() > 0 ) ? 1.0f : 0.3f );
 
 	gl().glDisable( GL_TEXTURE_2D );
 	gl().glDisable( GL_TEXTURE_1D );
@@ -1426,7 +1426,7 @@ void XYWnd::XY_DrawGrid() {
 
 	// draw coordinate text if needed
 	if ( g_xywindow_globals_private.show_coordinates ) {
-		gl().glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridtext, 1.0f ) ) );
+		gl().glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridtext, 1 ) ) );
 		const float offx = m_vOrigin[nDim2] + h - ( 1 + GlobalOpenGL().m_font->getPixelHeight() ) / m_fScale;
 		const float offy = m_vOrigin[nDim1] - w +  4                                            / m_fScale;
 		const float fontDescent = ( GlobalOpenGL().m_font->getPixelDescent() - 1 ) / m_fScale;
@@ -1454,7 +1454,7 @@ void XYWnd::XY_DrawGrid() {
 	// show current work zone?
 	// the work zone is used to place dropped points and brushes
 	if ( g_xywindow_globals_private.show_workzone ) {
-		gl().glColor4f( 1.0f, 0.0f, 0.0f, 1.0f );
+		gl().glColor4f( 1, 0, 0, 1 );
 		gl().glBegin( GL_LINES );
 		gl().glVertex2f( xb, Select_getWorkZone().d_work_min[nDim2] );
 		gl().glVertex2f( xe, Select_getWorkZone().d_work_min[nDim2] );
@@ -1717,15 +1717,15 @@ void XYWnd::updateProjection(){
 	m_projection[5] = 1.0f / ( m_nHeight / 2 );
 	m_projection[10] = 1.0f / ( g_MaxWorldCoord * m_fScale );
 
-	m_projection[12] = 0.0f;
-	m_projection[13] = 0.0f;
-	m_projection[14] = -1.0f;
+	m_projection[12] = 0;
+	m_projection[13] = 0;
+	m_projection[14] = -1;
 
 	m_projection[1] = m_projection[2] = m_projection[3] =
 	m_projection[4] = m_projection[6] = m_projection[7] =
-	m_projection[8] = m_projection[9] = m_projection[11] = 0.0f;
+	m_projection[8] = m_projection[9] = m_projection[11] = 0;
 
-	m_projection[15] = 1.0f;
+	m_projection[15] = 1;
 
 	m_view.Construct( m_projection, m_modelview, m_nWidth, m_nHeight );
 }
@@ -1916,7 +1916,7 @@ void XYWnd::XY_Draw(){
 
 		gl().glColor3fv( vector3_to_array( g_xywindow_globals.color_viewname ) );
 
-		gl().glRasterPos3f( 2.f, 0.f, 0.0f );
+		gl().glRasterPos3f( 2, 0, 0 );
 		extern const char* Renderer_GetStats( int frame2frame );
 		GlobalOpenGL().drawString( Renderer_GetStats( m_render_time.elapsed_msec() ) );
 		m_render_time.start();

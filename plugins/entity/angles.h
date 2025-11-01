@@ -93,13 +93,13 @@ inline void write_angles( const Vector3& angles, Entity* entity ){
 }
 
 inline Matrix4 matrix4_rotation_for_euler_xyz_degrees_quantised( const Vector3& angles ){
-	if( angles[0] == 0.f && angles[1] == 0.f ){
+	if( angles[0] == 0 && angles[1] == 0 ){
 		return matrix4_rotation_for_z_degrees( angles[2] );
 	}
-	else if( angles[0] == 0.f && angles[2] == 0.f ){
+	else if( angles[0] == 0 && angles[2] == 0 ){
 		return matrix4_rotation_for_y_degrees( angles[1] );
 	}
-	else if( angles[1] == 0.f && angles[2] == 0.f ){
+	else if( angles[1] == 0 && angles[2] == 0 ){
 		return matrix4_rotation_for_x_degrees( angles[0] );
 	}
 	return matrix4_rotation_for_euler_xyz_degrees( angles );

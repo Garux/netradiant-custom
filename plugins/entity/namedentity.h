@@ -130,7 +130,7 @@ public:
 				return;
 		}
 
-		Vector4 position( m_position, 1.f );
+		Vector4 position( m_position, 1 );
 		Matrix4 object2screen( volume.GetViewMatrix() );
 		matrix4_multiply_by_matrix4( object2screen, localToWorld );
 		matrix4_transform_vector4( object2screen, position );

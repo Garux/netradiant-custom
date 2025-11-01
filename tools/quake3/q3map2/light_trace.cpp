@@ -455,10 +455,10 @@ void ClipTraceWinding( traceWinding_t *tw, const Plane3f& plane, traceWinding_t 
 			for ( k = 0; k < 3; ++k )
 			{
 				/* minimize fp precision errors */
-				if ( plane.normal()[ k ] == 1.0f ) {
+				if ( plane.normal()[ k ] == 1 ) {
 					mid.xyz[ k ] = plane.dist();
 				}
-				else if ( plane.normal()[ k ] == -1.0f ) {
+				else if ( plane.normal()[ k ] == -1 ) {
 					mid.xyz[ k ] = -plane.dist();
 				}
 				else{
@@ -659,7 +659,7 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 
 	/* attach children */
 	node->type = type;
-	node->plane.normal()[ type ] = 1.0f;
+	node->plane.normal()[ type ] = 1;
 	node->plane.dist() = dist;
 	node->children[ 0 ] = frontNum;
 	node->children[ 1 ] = backNum;
@@ -1342,7 +1342,7 @@ static bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace 
 	}
 
 	/* force subsampling because the lighting is texture dependent */
-	trace->forceSubsampling = 1.0;
+	trace->forceSubsampling = 1;
 
 	/* try to avoid double shadows near triangle seams */
 	if ( u < -ASLF_EPSILON || u > ( 1.0f + ASLF_EPSILON ) ||

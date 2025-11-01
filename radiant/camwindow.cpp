@@ -152,8 +152,8 @@ struct camwindow_globals_private_t
 	int m_time_toMaxSpeed = 200;
 	int m_nScrollMoveSpeed = 100;
 	bool m_bZoomToPointer = true;
-	float m_strafeSpeed = 1.f;
-	float m_angleSpeed = 3.f;
+	float m_strafeSpeed = 1;
+	float m_angleSpeed = 3;
 	bool m_bCamInverseMouse = false;
 	bool m_bCamDiscrete = true;
 	bool m_bCubicClipping = false;
@@ -253,7 +253,7 @@ struct camera_t
 		angles( 0, 0, 0 ),
 		color( 0, 0, 0 ),
 		movementflags( 0 ),
-		m_keymove_speed_current( 0.f ),
+		m_keymove_speed_current( 0 ),
 		m_mouseMove( [this]( int x, int y, const QMouseEvent& event ){ Camera_mouseMove( *this, x, y, event ); } ),
 		m_view( view ),
 		m_update( update ),
@@ -263,7 +263,7 @@ struct camera_t
 };
 
 float camera_t::fieldOfView = 100.0f;
-const float camera_t::near_z = 1.f;
+const float camera_t::near_z = 1;
 camera_draw_mode camera_t::draw_mode = cd_texture;
 
 inline Matrix4 projection_for_camera( float near_z, float far_z, float fieldOfView, int width, int height ){
@@ -1255,7 +1255,7 @@ two alt solutions:
 		Vector3 normalized;
 		normalized[0] = ( ( 2.0f * x ) / cam.width ) - 1.0f; // window_to_normalised_device
 		normalized[1] = ( ( 2.0f * ( cam.height - 1 - y ) ) / cam.height ) - 1.0f;
-		normalized[2] = -1.f;
+		normalized[2] = -1;
 		normalized = vector4_projected( matrix4_transformed_vector4( screen2world, Vector4( normalized, 1 ) ) );
 */
 static void camera_zoom( CamWnd& camwnd, float x, float y, float step ){
@@ -1269,10 +1269,10 @@ static void camera_zoom( CamWnd& camwnd, float x, float y, float step ){
 
 		Vector3 normalized;
 
-		normalized[0] = 2.0f * x / cam.width - 1.0f;
-		normalized[1] = 2.0f * y / cam.height - 1.0f;
-		normalized[1] *= -1.f;
-		normalized[2] = 0.f;
+		normalized[0] = 2.f * x / cam.width - 1.f;
+		normalized[1] = 2.f * y / cam.height - 1.f;
+		normalized[1] *= -1;
+		normalized[2] = 0;
 
 		normalized *= ( camera_t::near_z * 2.f );
 			//globalOutputStream() << normalized << " normalized    ";
@@ -1969,11 +1969,11 @@ void CamWnd::Cam_Draw(){
 		GLfloat inverse_cam_dir[4], ambient[4], diffuse[4]; //, material[4];
 
 		ambient[0] = ambient[1] = ambient[2] = 0.4f;
-		ambient[3] = 1.0f;
+		ambient[3] = 1;
 		diffuse[0] = diffuse[1] = diffuse[2] = 0.4f;
-		diffuse[3] = 1.0f;
+		diffuse[3] = 1;
 		//material[0] = material[1] = material[2] = 0.8f;
-		//material[3] = 1.0f;
+		//material[3] = 1;
 
 		inverse_cam_dir[0] = m_Camera.vpn[0];
 		inverse_cam_dir[1] = m_Camera.vpn[1];
@@ -2105,12 +2105,12 @@ void CamWnd::Cam_Draw(){
 	}
 
 	if ( g_camwindow_globals.m_showStats ) {
-		gl().glRasterPos3f( 1.0f, m_Camera.height, 0.0f );
+		gl().glRasterPos3f( 1, m_Camera.height, 0 );
 		extern const char* Renderer_GetStats( int frame2frame );
 		GlobalOpenGL().drawString( Renderer_GetStats( m_render_time.elapsed_msec() ) );
 		m_render_time.start();
 
-		gl().glRasterPos3f( 1.0f, m_Camera.height - GlobalOpenGL().m_font->getPixelHeight(), 0.0f );
+		gl().glRasterPos3f( 1, m_Camera.height - GlobalOpenGL().m_font->getPixelHeight(), 0 );
 		extern const char* Cull_GetStats();
 		GlobalOpenGL().drawString( Cull_GetStats() );
 	}

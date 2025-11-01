@@ -188,8 +188,8 @@ static bool SnapNormal( Vector3& normal ){
 
 	for ( i = 0; i < 3; ++i )
 	{
-		if ( normal[i] != 0.0 && -normalEpsilon < normal[i] && normal[i] < normalEpsilon ) {
-			normal[i] = 0.0;
+		if ( normal[i] != 0 && -normalEpsilon < normal[i] && normal[i] < normalEpsilon ) {
+			normal[i] = 0;
 			adjusted = true;
 		}
 	}
@@ -371,7 +371,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 				// dot product here in 64 bit land will not really help the situation
 				// because the error will already be carried in dist.
 				const double d = std::fabs( plane3_distance_to_point( p.plane, points[ j ] ) );
-				if ( d != 0.0 && d >= distanceEpsilon ) {
+				if ( d != 0 && d >= distanceEpsilon ) {
 					break; // Point is too far from plane.
 				}
 			}
@@ -590,8 +590,8 @@ void AddBrushBevels(){
 					}
 				}
 				#else
-				if ( ( dir > 0 && mapplanes[ sides[i].planenum ].normal()[ axis ] == 1.0f ) ||
-				     ( dir < 0 && mapplanes[ sides[i].planenum ].normal()[ axis ] == -1.0f ) ) {
+				if ( ( dir > 0 && mapplanes[ sides[i].planenum ].normal()[ axis ] == 1 ) ||
+				     ( dir < 0 && mapplanes[ sides[i].planenum ].normal()[ axis ] == -1 ) ) {
 					break;
 				}
 				#endif
@@ -664,9 +664,9 @@ void AddBrushBevels(){
 				continue;
 			}
 			SnapNormal( vec );
-			if ( vec[0] == -1.0f || vec[0] == 1.0f || ( vec[0] == 0.0f && vec[1] == 0.0f )
-			  || vec[1] == -1.0f || vec[1] == 1.0f || ( vec[1] == 0.0f && vec[2] == 0.0f )
-			  || vec[2] == -1.0f || vec[2] == 1.0f || ( vec[2] == 0.0f && vec[0] == 0.0f ) ) {
+			if ( vec[0] == -1 || vec[0] == 1 || ( vec[0] == 0 && vec[1] == 0 )
+			  || vec[1] == -1 || vec[1] == 1 || ( vec[1] == 0 && vec[2] == 0 )
+			  || vec[2] == -1 || vec[2] == 1 || ( vec[2] == 0 && vec[0] == 0 ) ) {
 				continue; // axial, only test non-axial edges
 			}
 
@@ -703,7 +703,7 @@ void AddBrushBevels(){
 						if ( w2.empty() ) {
 							continue;
 						}
-						float minBack = 0.0f;
+						float minBack = 0;
 						const auto point_in_front = [&w2, &plane, &minBack](){
 							for ( const Vector3& point : w2 ) {
 								const float d = plane3_distance_to_point( plane, point );
@@ -1079,8 +1079,8 @@ static void ParseRawBrush( bool onlyLights ){
 			GetToken( false );
 			scale[ 1 ] = atof( token );
 
-			if ( !scale[0] ) scale[0] = 1.f;
-			if ( !scale[1] ) scale[1] = 1.f;
+			if ( !scale[0] ) scale[0] = 1;
+			if ( !scale[1] ) scale[1] = 1;
 			for ( int axis = 0; axis < 2; ++axis )
 				side.vecs[axis].vec3() /= scale[axis];
 		}

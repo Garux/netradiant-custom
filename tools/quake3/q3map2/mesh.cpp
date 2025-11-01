@@ -178,7 +178,7 @@ void MakeMeshNormals( mesh_t in ){
 
 	wrapWidth = false;
 	for ( i = 0; i < in.height; ++i ) {
-		if ( vector3_length( in.verts[i * in.width].xyz - in.verts[i * in.width + in.width - 1].xyz ) > 1.0 ) {
+		if ( vector3_length( in.verts[i * in.width].xyz - in.verts[i * in.width + in.width - 1].xyz ) > 1 ) {
 			break;
 		}
 	}
@@ -188,7 +188,7 @@ void MakeMeshNormals( mesh_t in ){
 
 	wrapHeight = false;
 	for ( i = 0; i < in.width; ++i ) {
-		if ( vector3_length( in.verts[i].xyz - in.verts[i + ( in.height - 1 ) * in.width].xyz ) > 1.0 ) {
+		if ( vector3_length( in.verts[i].xyz - in.verts[i + ( in.height - 1 ) * in.width].xyz ) > 1 ) {
 			break;
 		}
 	}

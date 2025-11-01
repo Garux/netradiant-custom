@@ -448,7 +448,7 @@ inline Frustum frustum_inverse_transformed( const Frustum& frustum, const Matrix
 }
 
 inline bool viewproj_test_point( const Matrix4& viewproj, const Vector3& point ){
-	Vector4 hpoint( matrix4_transformed_vector4( viewproj, Vector4( point, 1.0f ) ) );
+	Vector4 hpoint( matrix4_transformed_vector4( viewproj, Vector4( point, 1 ) ) );
 	if ( std::fabs( hpoint[0] ) < std::fabs( hpoint[3] )
 	  && std::fabs( hpoint[1] ) < std::fabs( hpoint[3] )
 	  && std::fabs( hpoint[2] ) < std::fabs( hpoint[3] ) ) {

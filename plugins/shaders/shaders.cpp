@@ -134,20 +134,20 @@ Image& convertHeightmapToNormalmap( Image& heightmap, float scale ){
 	// 3x3 Prewitt
 	const int kernelSize = 6;
 	KernelElement kernel_du[kernelSize] = {
-		{-1, 1,-1.0f },
-		{-1, 0,-1.0f },
-		{-1,-1,-1.0f },
-		{ 1, 1, 1.0f },
-		{ 1, 0, 1.0f },
-		{ 1,-1, 1.0f }
+		{-1, 1,-1 },
+		{-1, 0,-1 },
+		{-1,-1,-1 },
+		{ 1, 1, 1 },
+		{ 1, 0, 1 },
+		{ 1,-1, 1 }
 	};
 	KernelElement kernel_dv[kernelSize] = {
-		{-1, 1, 1.0f },
-		{ 0, 1, 1.0f },
-		{ 1, 1, 1.0f },
-		{-1,-1,-1.0f },
-		{ 0,-1,-1.0f },
-		{ 1,-1,-1.0f }
+		{-1, 1, 1 },
+		{ 0, 1, 1 },
+		{ 1, 1, 1 },
+		{-1,-1,-1 },
+		{ 0,-1,-1 },
+		{ 1,-1,-1 }
 	};
 #endif
 
@@ -170,7 +170,7 @@ Image& convertHeightmapToNormalmap( Image& heightmap, float scale ){
 
 			float nx = -du * scale;
 			float ny = -dv * scale;
-			float nz = 1.0;
+			float nz = 1;
 
 			// Normalize
 			float norm = 1.0 / sqrt( nx * nx + ny * ny + nz * nz );
@@ -294,7 +294,7 @@ public:
 	ShaderTemplate() :
 		m_refcount( 0 ){
 		m_nFlags = 0;
-		m_fTrans = 1.0f;
+		m_fTrans = 1;
 	}
 
 	void IncRef(){
@@ -778,7 +778,7 @@ float evaluateFloat( const ShaderValue& value, const ShaderParameters& params, c
 	float f;
 	if ( !string_parse_float( result, f ) ) {
 		globalErrorStream() << "parsing float value failed: " << Quoted( result ) << '\n';
-		return 1.f;
+		return 1;
 	}
 	return f;
 }
@@ -1280,7 +1280,7 @@ bool ShaderTemplate::parseQuake3( Tokeniser& tokeniser ){
 				if ( string_equal_nocase( surfaceparm, "fog" ) ) {
 					m_nFlags |= QER_FOG;
 					m_nFlags |= QER_TRANS;
-					if ( m_fTrans == 1.0f ) { // has not been explicitly set by qer_trans
+					if ( m_fTrans == 1 ) { // has not been explicitly set by qer_trans
 						m_fTrans = 0.35f;
 					}
 				}

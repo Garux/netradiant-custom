@@ -43,7 +43,7 @@ public:
 const float c_aabb_max = FLT_MAX;
 
 inline bool extents_valid( float f ){
-	return f >= 0.0f && f <= c_aabb_max;
+	return f >= 0 && f <= c_aabb_max;
 }
 
 inline bool origin_valid( float f ){
@@ -73,8 +73,8 @@ public:
 	static void apply( AABB& aabb, const Vector3& point ){
 		const float displacement = point[Index] - aabb.origin[Index];
 		const float half_difference = 0.5f * ( std::fabs( displacement ) - aabb.extents[Index] );
-		if ( half_difference > 0.0f ) {
-			aabb.origin[Index] += ( displacement >= 0.0f ) ? half_difference : -half_difference;
+		if ( half_difference > 0 ) {
+			aabb.origin[Index] += ( displacement >= 0 ) ? half_difference : -half_difference;
 			aabb.extents[Index] += half_difference;
 		}
 	}
@@ -82,13 +82,13 @@ public:
 		const float displacement = other.origin[Index] - aabb.origin[Index];
 		const float difference = other.extents[Index] - aabb.extents[Index];
 		if ( std::fabs( displacement ) > std::fabs( difference ) ) {
-			float half_difference = 0.5f * ( std::fabs( displacement ) + difference );
-			if ( half_difference > 0.0f ) {
-				aabb.origin[Index] += ( displacement >= 0.0f ) ? half_difference : -half_difference;
+			const float half_difference = 0.5f * ( std::fabs( displacement ) + difference );
+			if ( half_difference > 0 ) {
+				aabb.origin[Index] += ( displacement >= 0 ) ? half_difference : -half_difference;
 				aabb.extents[Index] += half_difference;
 			}
 		}
-		else if ( difference > 0.0f ) {
+		else if ( difference > 0 ) {
 			aabb.origin[Index] = other.origin[Index];
 			aabb.extents[Index] = other.extents[Index];
 		}

@@ -181,7 +181,7 @@ void sphere_construct_fill( Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
 	int k = 0;
 	const double step = c_pi / SPHERE_FILL_SIDES;
 
-	radiiPoints[k++] = Vector3( 0.0, 0.0, -1.0 );
+	radiiPoints[k++] = Vector3( 0, 0, -1 );
 	for( int i = 0; i < SPHERE_FILL_SIDES * 2; i += 2 ) {
 		for( int j = -SPHERE_FILL_SIDES / 2 + 1; j < SPHERE_FILL_SIDES / 2; ++j ) {
 			cartesian( step * i, step * j, cart );
@@ -189,14 +189,14 @@ void sphere_construct_fill( Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
 			cartesian( step * ( i + 1 ), step * j, cart );
 			radiiPoints[k++] = Vector3( cart[0], cart[1], cart[2] );
 		}
-		radiiPoints[k++] = Vector3( 0.0, 0.0, 1.0 );
+		radiiPoints[k++] = Vector3( 0, 0, 1 );
 		for( int j = SPHERE_FILL_SIDES / 2 - 1; j > -SPHERE_FILL_SIDES / 2; --j ) {
 			cartesian( step * ( i + 1 ), step * j, cart );
 			radiiPoints[k++] = Vector3( cart[0], cart[1], cart[2] );
 			cartesian( step * ( i + 2 ), step * j, cart );
 			radiiPoints[k++] = Vector3( cart[0], cart[1], cart[2] );
 		}
-		radiiPoints[k++] = Vector3( 0.0, 0.0, -1.0 );
+		radiiPoints[k++] = Vector3( 0, 0, -1 );
 	}
 	//globalOutputStream() << k << "!!!!!!!!!!!!\n";
 }
@@ -223,15 +223,15 @@ void sphere_draw_fill( const Vector3& origin, float radius, const Vector3 radiiP
 #define Z .850650808352039932
 
 static float vdata[12][3] = {
-	{ -X, 0.0, Z}, {X, 0.0, Z}, { -X, 0.0, -Z}, {X, 0.0, -Z},
-	{0.0, Z, X}, {0.0, Z, -X}, {0.0, -Z, X}, {0.0, -Z, -X},
-	{Z, X, 0.0}, { -Z, X, 0.0}, {Z, -X, 0.0}, { -Z, -X, 0.0}
+	{-X, 0, Z}, { X, 0, Z}, {-X, 0,-Z}, { X, 0,-Z},
+	{ 0, Z, X}, { 0, Z,-X}, { 0,-Z, X}, { 0,-Z,-X},
+	{ Z, X, 0}, {-Z, X, 0}, { Z,-X, 0}, {-Z,-X, 0}
 };
 static unsigned int tindices[20][3] = {
-	{0, 4, 1}, {0, 9, 4}, {9, 5, 4}, {4, 5, 8}, {4, 8, 1},
-	{8, 10, 1}, {8, 3, 10}, {5, 3, 8}, {5, 2, 3}, {2, 7, 3},
-	{7, 10, 3}, {7, 6, 10}, {7, 11, 6}, {11, 0, 6}, {0, 1, 6},
-	{6, 1, 10}, {9, 0, 11}, {9, 11, 2}, {9, 2, 5}, {7, 2, 11}
+	{0,  4,  1}, {0, 9,  4}, {9,  5, 4}, { 4, 5, 8}, {4, 8,  1},
+	{8, 10,  1}, {8, 3, 10}, {5,  3, 8}, { 5, 2, 3}, {2, 7,  3},
+	{7, 10,  3}, {7, 6, 10}, {7, 11, 6}, {11, 0, 6}, {0, 1,  6},
+	{6,  1, 10}, {9, 0, 11}, {9, 11, 2}, { 9, 2, 5}, {7, 2, 11}
 };
 
 void normalize( float * a ) {
@@ -408,41 +408,26 @@ void sphere_construct_wire( Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
 
 	for ( int i = 0; i < SPHERE_WIRE_SIDES; ++i )
 	{
-		const double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
-		const double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		const float ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		const float dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
 
-		radiiPoints[k++] =
-		    Vector3(
-		        dc,
-		        ds,
-		        0.f
-		    );
+		radiiPoints[k++] = Vector3( dc, ds, 0 );
 	}
 
 	for ( int i = 0; i < SPHERE_WIRE_SIDES; ++i )
 	{
-		const double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
-		const double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		const float ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		const float dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
 
-		radiiPoints[k++] =
-		    Vector3(
-		        dc,
-		        0.f,
-		        ds
-		    );
+		radiiPoints[k++] = Vector3( dc, 0, ds );
 	}
 
 	for ( int i = 0; i < SPHERE_WIRE_SIDES; ++i )
 	{
-		const double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
-		const double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		const float ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		const float dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
 
-		radiiPoints[k++] =
-		    Vector3(
-		        0.f,
-		        dc,
-		        ds
-		    );
+		radiiPoints[k++] = Vector3( 0, dc, ds );
 	}
 }
 
@@ -778,8 +763,8 @@ public:
 	typedef MemberCaller<LightRadii, void(const char*), &LightRadii::secondaryIntensityChanged> SecondaryIntensityChangedCaller;
 	void scaleChanged( const char* value ){
 		m_scale = string_read_float( value );
-		if ( m_scale <= 0.0f ) {
-			m_scale = 1.0f;
+		if ( m_scale <= 0 ) {
+			m_scale = 1;
 		}
 		calculateRadii();
 		SceneChangeNotify();
@@ -787,8 +772,8 @@ public:
 	typedef MemberCaller<LightRadii, void(const char*), &LightRadii::scaleChanged> ScaleChangedCaller;
 	void fadeChanged( const char* value ){
 		m_fade = string_read_float( value );
-		if ( m_fade <= 0.0f ) {
-			m_fade = 1.0f;
+		if ( m_fade <= 0 ) {
+			m_fade = 1;
 		}
 		calculateRadii();
 		SceneChangeNotify();
@@ -808,8 +793,8 @@ public:
 
 		if ( isLinear() ) {
 			r[0] = radius + 47.0f / m_fade;
-			if( r[0] < 1.f ){ // prevent transform to <=0, as we use r[0] to calculate intensity
-				r[0] = 1.f;
+			if( r[0] < 1 ){ // prevent transform to <=0, as we use r[0] to calculate intensity
+				r[0] = 1;
 				r[1] = r[2] = 1.f - 47.0f / m_fade; // this is called once again after minimizing already minimal radii, so calculate correct r[1]
 			}
 			else{
@@ -820,8 +805,8 @@ public:
 		else
 		{
 			r[0] = radius * sqrt( 48.f );
-			if( r[0] < 1.f ){
-				r[0] = 1.f;
+			if( r[0] < 1 ){
+				r[0] = 1;
 				r[1] = r[2] = 0;
 			}
 			else{
@@ -833,8 +818,8 @@ public:
 	}
 	float calculateIntensityFromRadii() const {
 		return std::copysign( isLinear() // keep intensity sign, while adjusting it via radii
-		                      ? light_intensity_linear( m_radii_transformed[0] * m_fade, 1.f ) / m_scale
-		                      : light_intensity( m_radii_transformed[0], 1.f ) / m_scale
+		                      ? light_intensity_linear( m_radii_transformed[0] * m_fade, 1 ) / m_scale
+		                      : light_intensity( m_radii_transformed[0], 1 ) / m_scale
 		                      , getIntensity() );
 	}
 	bool isLinear() const {
@@ -1751,7 +1736,7 @@ public:
 		m_doom3Frustum.front = lightProject[3];
 
 		m_doom3Frustum.back = lightProject[3];
-		m_doom3Frustum.back.dist() -= 1.0f;
+		m_doom3Frustum.back.dist() -= 1;
 		m_doom3Frustum.back = plane3_flipped( m_doom3Frustum.back );
 
 		Matrix4 test( matrix4_from_planes( m_doom3Frustum.left, m_doom3Frustum.right, m_doom3Frustum.bottom, m_doom3Frustum.top, m_doom3Frustum.front, m_doom3Frustum.back ) );

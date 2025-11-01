@@ -1464,7 +1464,7 @@ void BasePortalVis( int portalnum ){
 		   }
 		 */
 
-		if ( !p->sky && !tp->sky && farPlaneDist != 0.0f ) {
+		if ( !p->sky && !tp->sky && farPlaneDist != 0 ) {
 			if( farPlaneDistMode == 'o' ){
 				if( vector3_length( p->origin - tp->origin ) > farPlaneDist )
 					continue;

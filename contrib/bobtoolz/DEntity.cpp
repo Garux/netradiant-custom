@@ -460,8 +460,8 @@ void DEntity::LoadEPairList( Entity *epl ){
 	epl->forEachKeyValue( load_epairs );
 }
 
-bool DEntity::ResetTextures( const char* textureName, float fScale[2],     float fShift[2],     int rotation, const char* newTextureName,
-                             bool bResetTextureName,  bool bResetScale[2], bool bResetShift[2], bool bResetRotation, bool rebuild ){
+bool DEntity::ResetTextures( const char* textureName, const float fScale[2],     const float fShift[2],     int rotation, const char* newTextureName,
+                             bool bResetTextureName,  const bool bResetScale[2], const bool bResetShift[2], bool bResetRotation, bool rebuild ){
 	bool reset = false;
 
 	for ( DBrush *brush : brushList )

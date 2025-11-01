@@ -326,7 +326,7 @@ static void OnBtnMatchGrid(){
 	const float hscale = getSurfaceInspector().m_hscaleIncrement.m_spin->value();
 	const float vscale = getSurfaceInspector().m_vscaleIncrement.m_spin->value();
 
-	if ( hscale == 0.0f || vscale == 0.0f ) {
+	if ( hscale == 0 || vscale == 0 ) {
 		globalErrorStream() << "ERROR: unexpected scale == 0.0f\n";
 		return;
 	}
@@ -1284,7 +1284,7 @@ static std::vector<const PatchControl*> Patch_getClosestTriangle( const PatchDat
 	*/
 
 	const auto triangle_ok = []( const PatchControl& p0, const PatchControl& p1, const PatchControl& p2 ){
-		return vector3_length_squared( vector3_cross( p1.m_vertex - p0.m_vertex, p2.m_vertex - p0.m_vertex ) ) > 1.0;
+		return vector3_length_squared( vector3_cross( p1.m_vertex - p0.m_vertex, p2.m_vertex - p0.m_vertex ) ) > 1;
 	};
 
 	const double eps = .25;

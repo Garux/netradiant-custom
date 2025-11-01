@@ -49,11 +49,11 @@ void DShape::BuildRegularPrism( vec3_t min, vec3_t max, int nSides, bool bAlignT
 	VectorAdd( max, min, origin );
 	VectorScale( origin, 0.5f, origin );
 
-	float phase = 0.0f;
+	float phase = 0;
 
 	if ( bAlignTop ) {
 		phase = -( Q_PI / nSides );
-		VectorScale( radius, static_cast<float>( 1.0 / cos( phase ) ), radius );
+		VectorScale( radius, 1.0 / cos( phase ), radius );
 	}
 
 	//----- Build Polygon Vertices -----
@@ -106,11 +106,11 @@ void DShape::BuildInversePrism( vec3_t min, vec3_t max, int nSides, bool bAlignT
 	VectorAdd( max, min, origin );
 	VectorScale( origin, 0.5f, origin );
 
-	float phase = 0.0f;
+	float phase = 0;
 
 	if ( bAlignTop ) {
 		phase = -( Q_PI / nSides );
-		VectorScale( radius, static_cast<float>( 1.0 / cos( phase ) ), radius );
+		VectorScale( radius, 1.0 / cos( phase ), radius );
 	}
 
 	//----- Build Polygon Vertices -----
@@ -182,11 +182,11 @@ void DShape::BuildBorderedPrism( vec3_t min, vec3_t max, int nSides, int nBorder
 		return;
 	}
 
-	float phase = 0.0f;
+	float phase = 0;
 
 	if ( bAlignTop ) {
 		phase = -( Q_PI / nSides );
-		VectorScale( radius, static_cast<float>( 1.0 / cos( phase ) ), radius );
+		VectorScale( radius, 1.0 / cos( phase ), radius );
 	}
 
 	//----- Build Polygon Vertices -----

@@ -220,7 +220,7 @@ public:
 		const bool some_extent_zero = aabb.extents[0] == 0 || aabb.extents[1] == 0 || aabb.extents[2] == 0;
 		for ( std::size_t i = 0; i < 24; ++++i ){
 			Line line( corners[edges[i]], corners[edges[i + 1]] );
-			if( aabb.extents[i / 8] != 0.f && matrix4_clip_line_by_nearplane( test.getVolume().GetViewMatrix(), line ) == 2 ){
+			if( aabb.extents[i / 8] != 0 && matrix4_clip_line_by_nearplane( test.getVolume().GetViewMatrix(), line ) == 2 ){
 				const Vector3 point_new = line_closest_point( line, g_vector3_identity );
 				const float dist_new = vector3_length_squared( point_new );
 				const float dot_new = std::fabs( vector3_dot( vector3_normalised( point_new ), vector3_normalised( line.end - line.start ) ) );

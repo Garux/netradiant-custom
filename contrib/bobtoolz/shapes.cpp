@@ -62,7 +62,7 @@
     Global Variables
 ************************/
 
-vec3_t g_Origin = {0.0f, 0.0f, 0.0f};
+vec3_t g_Origin = { 0.0f, 0.0f, 0.0f };
 
 extern bool bFacesAll[];
 

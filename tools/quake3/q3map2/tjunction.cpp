@@ -125,7 +125,7 @@ static int AddEdge( bspDrawVert_t& dv1, bspDrawVert_t& dv2, bool createNonAxial 
 	}
 
 	if ( !createNonAxial ) {
-		if ( std::fabs( dir[0] + dir[1] + dir[2] ) != 1.f ) {
+		if ( std::fabs( dir[0] + dir[1] + dir[2] ) != 1 ) {
 			originalEdges.push_back( originalEdge_t{ .length = d, .dv1 = &dv1, .dv2 = &dv2 } );
 			return -1;
 		}

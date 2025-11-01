@@ -724,8 +724,8 @@ void DBrush::RotateAboutCentre( vec3_t vRotation ){
 	Rotate( centre, vRotation );
 }
 
-bool DBrush::ResetTextures( const char* textureName, float fScale[2],     float fShift[2],     int rotation, const char* newTextureName,
-                            bool bResetTextureName,  bool bResetScale[2], bool bResetShift[2], bool bResetRotation ){
+bool DBrush::ResetTextures( const char* textureName, const float fScale[2],     const float fShift[2],     int rotation, const char* newTextureName,
+                            bool bResetTextureName,  const bool bResetScale[2], const bool bResetShift[2], bool bResetRotation ){
 	if ( textureName ) {
 		bool changed = false;
 		for ( DPlane *plane : faceList )
@@ -814,11 +814,11 @@ DPlane* DBrush::AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, cons
 	return newFace;
 }
 
-DPlane* DBrush::FindPlaneWithClosestNormal( vec_t* normal ) {
+DPlane* DBrush::FindPlaneWithClosestNormal( const vec_t* normal ) {
 	vec_t bestDot = -2;
 	DPlane* bestDotPlane = nullptr;
 	for ( DPlane *plane : faceList ) {
-		vec_t dot = DotProduct( plane->normal, normal );
+		const vec_t dot = DotProduct( plane->normal, normal );
 		if ( dot > bestDot ) {
 			bestDot = dot;
 			bestDotPlane = plane;

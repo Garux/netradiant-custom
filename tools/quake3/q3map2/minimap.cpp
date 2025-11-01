@@ -331,16 +331,16 @@ static bool MiniMapEvaluateSampleOffsets( int *bestj, int *bestk, float *bestval
 		{
 			dx = minimap.sample_offsets[2 * j + 0] - minimap.sample_offsets[2 * k + 0];
 			dy = minimap.sample_offsets[2 * j + 1] - minimap.sample_offsets[2 * k + 1];
-			if ( dx > +0.5 ) {
+			if ( dx > +0.5f ) {
 				dx -= 1;
 			}
-			if ( dx < -0.5 ) {
+			if ( dx < -0.5f ) {
 				dx += 1;
 			}
-			if ( dy > +0.5 ) {
+			if ( dy > +0.5f ) {
 				dy -= 1;
 			}
-			if ( dy < -0.5 ) {
+			if ( dy < -0.5f ) {
 				dy += 1;
 			}
 			val = dx * dx + dy * dy;
@@ -484,9 +484,9 @@ int MiniMapBSPMain( Args& args ){
 	autolevel = false;
 	minimap.samples = 1;
 	minimap.sample_offsets = nullptr;
-	minimap.boost = 1.0;
-	minimap.brightness = 0.0;
-	minimap.contrast = 1.0;
+	minimap.boost = 1;
+	minimap.brightness = 0;
+	minimap.contrast = 1;
 
 	/* process arguments */
 	{
@@ -612,7 +612,7 @@ int MiniMapBSPMain( Args& args ){
 		}
 	}
 
-	if ( minimap.boost != 1.0 ) {
+	if ( minimap.boost != 1 ) {
 		Sys_Printf( "\n--- MiniMapContrastBoost (%d) ---\n", minimap.height );
 		RunThreadsOnIndividual( minimap.height, true, MiniMapContrastBoost );
 	}

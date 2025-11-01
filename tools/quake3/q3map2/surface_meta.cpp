@@ -237,7 +237,7 @@ static void metaTriangle_insert( metaTriangle_t& src, std::array<bspDrawVert_t, 
 
 	/* ydnar 2002-10-03: repair any bogus normals (busted ase import kludge) */
 	for( auto& ve : verts )
-		if ( vector3_length( ve.normal ) == 0.0f )
+		if ( vector3_length( ve.normal ) == 0 )
 			ve.normal = src.plane.normal();
 
 	/* ydnar 2002-10-04: set lightmap axis if not already set */
@@ -1067,7 +1067,7 @@ void FixMetaTJunctions(){
 
 				/* determine how far along the edge the point lies */
 				amount = ( pt[ edges[ k ].kingpin ] - edges[ k ].origin[ edges[ k ].kingpin ] ) / edges[ k ].kingpinLength;
-				if ( amount <= 0.0f || amount >= 1.0f ) {
+				if ( amount <= 0 || amount >= 1 ) {
 					continue;
 				}
 
@@ -1169,7 +1169,7 @@ void SmoothMetaTriangles(){
 
 	for( auto& [ d, list ] : metaVerts ){
 		if( list.size() > 1 || ( list.size() == 1 && list.front().m_triangles.size() > 1 ) ){
-			float maxShadeAngle = 0.f;
+			float maxShadeAngle = 0;
 
 			struct VT{ metaVertex_t *vertex; metaTriangle_t *triangle; float angle{}; bool skipped{}; bool smoothed{}; Vector3 newnormal{ 0 }; };
 			std::vector<VT> verts;
@@ -1181,11 +1181,11 @@ void SmoothMetaTriangles(){
 			{
 				float shadeAngle = defaultShadeAngle;
 				/* get shade angle from shader */
-				if ( v.triangle->si->shadeAngleDegrees > 0.0f ) {
+				if ( v.triangle->si->shadeAngleDegrees > 0 ) {
 					shadeAngle = degrees_to_radians( v.triangle->si->shadeAngleDegrees );
 				}
 				/* get shade angle from entity */
-				else if ( v.triangle->shadeAngleDegrees > 0.0f ) {
+				else if ( v.triangle->shadeAngleDegrees > 0 ) {
 					shadeAngle = degrees_to_radians( v.triangle->shadeAngleDegrees );
 				}
 
@@ -1380,7 +1380,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t& ds, const metaTriangle_t&
 	#endif
 
 	/* planar surfaces will only merge with triangles in the same plane */
-	if ( npDegrees == 0.0f && !ds.shaderInfo->nonplanar && ds.planeNum >= 0 ) {
+	if ( npDegrees == 0 && !ds.shaderInfo->nonplanar && ds.planeNum >= 0 ) {
 		if ( tri.planeNum >= 0 && tri.planeNum != ds.planeNum ) {
 			return 0;
 		}

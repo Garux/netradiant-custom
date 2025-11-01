@@ -628,12 +628,12 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 		}
 	}
 
-	if ( d_front < 0.1 ) { // PLANESIDE_EPSILON)
+	if ( d_front < 0.1f ) { // PLANESIDE_EPSILON)
 		// only on back
 		return { {}, brush };
 	}
 
-	if ( d_back > -0.1 ) { // PLANESIDE_EPSILON)
+	if ( d_back > -0.1f ) { // PLANESIDE_EPSILON)
 		// only on front
 		return { brush, {} };
 	}
@@ -730,7 +730,7 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 
 	for ( int i = 0; i < 2; ++i )
 	{
-		if ( BrushVolume( b[i] ) < 1.0 ) {
+		if ( BrushVolume( b[i] ) < 1 ) {
 			b[i].sides.clear();
 			//			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "tiny volume after clip\n" );
 		}

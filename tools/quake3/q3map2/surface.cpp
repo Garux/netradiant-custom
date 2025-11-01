@@ -292,7 +292,7 @@ Vector3 CalcLightmapAxis( const Vector3& normal ){
 
 	/* test and return */
 	if ( absolute[ 2 ] > absolute[ 0 ] - 0.0001f && absolute[ 2 ] > absolute[ 1 ] - 0.0001f ) {
-		if ( normal[ 2 ] > 0.0f ) {
+		if ( normal[ 2 ] > 0 ) {
 			return g_vector3_axis_z;
 		}
 		else{
@@ -300,7 +300,7 @@ Vector3 CalcLightmapAxis( const Vector3& normal ){
 		}
 	}
 	else if ( absolute[ 0 ] > absolute[ 1 ] - 0.0001f && absolute[ 0 ] > absolute[ 2 ] - 0.0001f ) {
-		if ( normal[ 0 ] > 0.0f ) {
+		if ( normal[ 0 ] > 0 ) {
 			return g_vector3_axis_x;
 		}
 		else{
@@ -309,7 +309,7 @@ Vector3 CalcLightmapAxis( const Vector3& normal ){
 	}
 	else
 	{
-		if ( normal[ 1 ] > 0.0f ) {
+		if ( normal[ 1 ] > 0 ) {
 			return g_vector3_axis_y;
 		}
 		else{
@@ -388,7 +388,7 @@ void ClassifySurface( mapDrawSurface_t& ds ){
 		}
 
 		/* test for bogus plane */
-		if ( vector3_length( plane.normal() ) == 0.0f ) {
+		if ( vector3_length( plane.normal() ) == 0 ) {
 			ds.planar = false;
 			ds.planeNum = -1;
 		}
@@ -491,7 +491,7 @@ void ClassifySurface( mapDrawSurface_t& ds ){
 		else if ( ds.sampleSize <= 0 ) { /* may contain the entity asigned value */
 			ds.sampleSize = sampleSize; /* otherwise use global default */
 		}
-		if ( ds.lightmapScale > 0.0f ) { /* apply surface lightmap scaling factor */
+		if ( ds.lightmapScale > 0 ) { /* apply surface lightmap scaling factor */
 			ds.sampleSize = ds.lightmapScale * (float)ds.sampleSize;
 			ds.lightmapScale = 0; /* applied */
 		}
@@ -620,7 +620,7 @@ static shaderInfo_t& GetIndexedShader( const shaderInfo_t *parent, const indexMa
 	if ( parent->nonplanar ) {
 		si.nonplanar = true;
 	}
-	if ( si.shadeAngleDegrees == 0.0 ) {
+	if ( si.shadeAngleDegrees == 0 ) {
 		si.shadeAngleDegrees = parent->shadeAngleDegrees;
 	}
 	if ( parent->tcGen && !si.tcGen ) {
@@ -792,7 +792,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 	ds.celShader = b.celShader;
 
 	/* set shade angle */
-	if ( b.shadeAngleDegrees > 0.0f ) {
+	if ( b.shadeAngleDegrees > 0 ) {
 		ds.shadeAngleDegrees = b.shadeAngleDegrees;
 	}
 
@@ -1167,7 +1167,7 @@ void SubdivideFaceSurfaces( const entity_t& e ){
 
 		/* get subdivisions from shader */
 		const float subdivisions = si->subdivisions;
-		if ( subdivisions < 1.0f ) {
+		if ( subdivisions < 1 ) {
 			continue;
 		}
 
@@ -1967,7 +1967,7 @@ static void EmitDrawVerts( const mapDrawSurface_t& ds, bspDrawSurface_t& out ){
 		bspDrawVert_t& dv = bspDrawVerts.emplace_back( vert );
 
 		/* offset? */
-		if ( offset != 0.0f ) {
+		if ( offset != 0 ) {
 			dv.xyz += dv.normal * offset;
 		}
 
@@ -2460,7 +2460,7 @@ static void EmitTriangleSurface( mapDrawSurface_t& ds ){
 	}
 
 	/* ydnar: gs mods: handle lightmapped terrain (force to planar type) */
-	//%	else if( vector3_length( ds.lightmapAxis ) <= 0.0f || ds.type == ESurfaceType::Triangles || ds.type == ESurfaceType::Foghull || debugSurfaces )
+	//%	else if( vector3_length( ds.lightmapAxis ) == 0 || ds.type == ESurfaceType::Triangles || ds.type == ESurfaceType::Foghull || debugSurfaces )
 	else if ( ( ds.lightmapAxis == g_vector3_identity && !ds.planar ) ||
 	          ds.type == ESurfaceType::Triangles ||
 	          ds.type == ESurfaceType::Foghull ||
@@ -2736,7 +2736,7 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t& ds, const surfaceMode
 	{
 		/* find the longest edge and split it */
 		max = -1;
-		float maxDist = 0.0f;
+		float maxDist = 0;
 		for ( int i = 0; i < 3; ++i )
 		{
 			/* get dist */
@@ -2782,7 +2782,7 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t& ds, const surfaceMode
 			if ( model.oriented ) {
 				/* calculate average normal */
 				axis[ 2 ] = tri[ 0 ]->normal + tri[ 1 ]->normal + tri[ 2 ]->normal;
-				if ( VectorNormalize( axis[ 2 ] ) == 0.0f ) {
+				if ( VectorNormalize( axis[ 2 ] ) == 0 ) {
 					axis[ 2 ] = tri[ 0 ]->normal;
 				}
 
@@ -2885,7 +2885,7 @@ static int AddSurfaceModels( mapDrawSurface_t& ds, entity_t& entity ){
 			/* calculate centroid */
 			bspDrawVert_t centroid;
 			memset( &centroid, 0, sizeof( centroid ) );
-			float alpha = 0.0f;
+			float alpha = 0;
 
 			/* walk verts */
 			for ( const bspDrawVert_t& vert : Span( ds.verts, ds.numVerts ) )
@@ -2898,7 +2898,7 @@ static int AddSurfaceModels( mapDrawSurface_t& ds, entity_t& entity ){
 
 			/* average */
 			centroid.xyz /= ds.numVerts;
-			if ( VectorNormalize( centroid.normal ) == 0.0f ) {
+			if ( VectorNormalize( centroid.normal ) == 0 ) {
 				centroid.normal = ds.verts[ 0 ].normal;
 			}
 			centroid.st /= ds.numVerts;
@@ -3047,7 +3047,7 @@ static void VolumeColorMods( const entity_t& e, mapDrawSurface_t& ds ){
 		for ( bspDrawVert_t& vert : Span( ds.verts, ds.numVerts ) )
 		{
 			if( std::ranges::none_of( b->sides, [&vert]( const side_t& side ){
-				return plane3_distance_to_point( mapplanes[ side.planenum ].plane, vert.xyz ) > 1.0f; /* point-plane test */
+				return plane3_distance_to_point( mapplanes[ side.planenum ].plane, vert.xyz ) > 1; /* point-plane test */
 			} ) )
 				/* apply colormods */
 				ColorMod( b->contentShader->colorMod, 1, &vert );

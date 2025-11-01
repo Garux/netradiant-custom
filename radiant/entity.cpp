@@ -52,7 +52,7 @@
 
 struct entity_globals_t
 {
-	Vector3 color_entity = Vector3( 1.0f );
+	Vector3 color_entity = Vector3( 1 );
 };
 
 entity_globals_t g_entity_globals;

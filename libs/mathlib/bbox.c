@@ -253,17 +253,17 @@ int aabb_test_ray( const aabb_t* aabb, const ray_t* ray ){
 	vec_t f;
 
 	displacement[0] = ray->origin[0] - aabb->origin[0];
-	if ( fabs( displacement[0] ) > aabb->extents[0] && displacement[0] * ray->direction[0] >= 0.0f ) {
+	if ( fabs( displacement[0] ) > aabb->extents[0] && displacement[0] * ray->direction[0] >= 0 ) {
 		return 0;
 	}
 
 	displacement[1] = ray->origin[1] - aabb->origin[1];
-	if ( fabs( displacement[1] ) > aabb->extents[1] && displacement[1] * ray->direction[1] >= 0.0f ) {
+	if ( fabs( displacement[1] ) > aabb->extents[1] && displacement[1] * ray->direction[1] >= 0 ) {
 		return 0;
 	}
 
 	displacement[2] = ray->origin[2] - aabb->origin[2];
-	if ( fabs( displacement[2] ) > aabb->extents[2] && displacement[2] * ray->direction[2] >= 0.0f ) {
+	if ( fabs( displacement[2] ) > aabb->extents[2] && displacement[2] * ray->direction[2] >= 0 ) {
 		return 0;
 	}
 

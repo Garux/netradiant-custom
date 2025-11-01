@@ -190,21 +190,21 @@ inline Matrix4 matrix4_rotation_for_quaternion_quantised( const Quaternion& quat
 	  && quaternion.z() == 0
 	  && quaternion_component_is_90( quaternion.x() )
 	  && quaternion_component_is_90( quaternion.w() ) ) {
-		return matrix4_rotation_for_sincos_x( ( quaternion.x() > 0 ) ? 1.f : -1.f, 0 );
+		return matrix4_rotation_for_sincos_x( ( quaternion.x() > 0 ) ? 1 : -1, 0 );
 	}
 
 	if ( quaternion.x() == 0
 	  && quaternion.z() == 0
 	  && quaternion_component_is_90( quaternion.y() )
 	  && quaternion_component_is_90( quaternion.w() ) ) {
-		return matrix4_rotation_for_sincos_y( ( quaternion.y() > 0 ) ? 1.f : -1.f, 0 );
+		return matrix4_rotation_for_sincos_y( ( quaternion.y() > 0 ) ? 1 : -1, 0 );
 	}
 
 	if ( quaternion.x() == 0
 	  && quaternion.y() == 0
 	  && quaternion_component_is_90( quaternion.z() )
 	  && quaternion_component_is_90( quaternion.w() ) ) {
-		return matrix4_rotation_for_sincos_z( ( quaternion.z() > 0 ) ? 1.f : -1.f, 0 );
+		return matrix4_rotation_for_sincos_z( ( quaternion.z() > 0 ) ? 1 : -1, 0 );
 	}
 
 	return matrix4_rotation_for_quaternion( quaternion );

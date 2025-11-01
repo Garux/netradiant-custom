@@ -89,8 +89,8 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 
 		/* calculate texture origin */
 		#if 0
-		s = 0.0;
-		t = 0.0;
+		s = 0;
+		t = 0;
 		bary[ 0 ] = ( ( b->st[ 0 ] - s ) * ( c->st[ 1 ] - t ) - ( c->st[ 0 ] - s ) * ( b->st[ 1 ] - t ) ) / bb;
 		bary[ 1 ] = ( ( c->st[ 0 ] - s ) * ( a->st[ 1 ] - t ) - ( a->st[ 0 ] - s ) * ( c->st[ 1 ] - t ) ) / bb;
 		bary[ 2 ] = ( ( a->st[ 0 ] - s ) * ( b->st[ 1 ] - t ) - ( b->st[ 0 ] - s ) * ( a->st[ 1 ] - t ) ) / bb;
@@ -138,9 +138,9 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 		}
 		for ( i = 0; i < 2; ++i )
 			for ( j = 0; j < 3; ++j )
-				dp->texMat[ i ][ j ] = lengths[ i ] != 0.0 ? ( axis[ i ][ j ] / lengths[ i ] ) : 0.0;
-		//%	dp->texMat[ i ][ j ] = std::fabs( vecs[ i ][ j ] ) > 0.0 ? ( 1.0 / vecs[ i ][ j ] ) : 0.0;
-		//%	dp->texMat[ i ][ j ] = axis[ i ][ j ] > 0.0 ? ( 1.0 / axis[ i ][ j ] ) : 0.0;
+				dp->texMat[ i ][ j ] = lengths[ i ] != 0 ? ( axis[ i ][ j ] / lengths[ i ] ) : 0.0;
+		//%	dp->texMat[ i ][ j ] = std::fabs( vecs[ i ][ j ] ) > 0 ? ( 1.0 / vecs[ i ][ j ] ) : 0.0;
+		//%	dp->texMat[ i ][ j ] = axis[ i ][ j ] > 0 ? ( 1.0 / axis[ i ][ j ] ) : 0.0;
 
 		/* calculalate translation component */
 		dp->texMat[ 0 ][ 3 ] = a->st[ 0 ] - vector3_dot( a->xyz, dp->texMat[ 0 ].vec3() );
@@ -171,8 +171,8 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 			for ( j = 0; j < 3; ++j )
 			{
 				/* clear deltas */
-				delta = 0.0;
-				texDelta = 0.0;
+				delta = 0;
+				texDelta = 0;
 
 				/* walk deltas */
 				for ( k = 0; k < 3; ++k )
@@ -185,11 +185,11 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 				}
 
 				/* set texture matrix component */
-				if ( std::fabs( delta ) > 0.0 ) {
+				if ( std::fabs( delta ) > 0 ) {
 					dp->texMat[ i ][ j ] = texDelta / delta;
 				}
 				else{
-					dp->texMat[ i ][ j ] = 0.0;
+					dp->texMat[ i ][ j ] = 0;
 				}
 			}
 

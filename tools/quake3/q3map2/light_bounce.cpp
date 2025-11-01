@@ -155,7 +155,7 @@ static void RadClipWindingEpsilon( radWinding_t *in, const Vector3& normal, floa
 
 
 inline float Modulo1IfNegative( float f ){
-	return f < 0.0f ? f - floor( f ) : f;
+	return f < 0 ? f - floor( f ) : f;
 }
 
 
@@ -279,7 +279,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 						/* create a blended sample */
 						Vector2 st( 0, 0 );
 						Vector2 lightmap( 0, 0 );
-						alphaI = 0.0f;
+						alphaI = 0;
 						for ( l = 0; l < 3; ++l )
 						{
 							st += rv[ l ]->st * blend[ l ];
@@ -295,7 +295,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 						const Vector3& radLuxel = lm->getRadLuxel( lightmapNum, x, y );
 
 						/* ignore unlit/unused luxels */
-						if ( radLuxel[ 0 ] < 0.0f ) {
+						if ( radLuxel[ 0 ] < 0 ) {
 							continue;
 						}
 
@@ -396,12 +396,12 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 	}
 
 	/* check area */
-	area = 0.0f;
+	area = 0;
 	for ( i = 2; i < rw->numVerts; ++i )
 	{
 		area += 0.5f * vector3_length( vector3_cross( rw->verts[ i - 1 ].xyz - rw->verts[ 0 ].xyz, rw->verts[ i ].xyz - rw->verts[ 0 ].xyz ) );
 	}
-	if ( area < 1.0f || area > 20000000.0f ) {
+	if ( area < 1 || area > 20000000.0f ) {
 		return;
 	}
 
@@ -425,7 +425,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 		normal += vert.normal;
 	}
 	normal /= rw->numVerts;
-	if ( VectorNormalize( normal ) == 0.0f ) {
+	if ( VectorNormalize( normal ) == 0 ) {
 		return;
 	}
 
@@ -465,7 +465,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 	light.flags = LightFlags::DefaultArea;
 	light.type = ELightType::Area;
 	light.si = si;
-	light.fade = 1.0f;
+	light.fade = 1;
 	/* create a regular winding */
 	light.w = AllocWinding( rw->numVerts );
 	for ( const radVert_t& vert : Span( rw->verts, rw->numVerts ) )
@@ -507,7 +507,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 			splash.type = ELightType::Point;
 			splash.photons = light.photons * si->backsplashFraction;
 
-			splash.fade = 1.0f;
+			splash.fade = 1;
 			splash.si = si;
 			splash.origin = normal * si->backsplashDistance + light.origin;
 			splash.color = si->color;
@@ -534,7 +534,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 			splash.type = ELightType::Area;
 			splash.photons = light.photons * 7.0f * si->backsplashFraction;
 			splash.add = light.add * 7.0f * si->backsplashFraction;
-			splash.fade = 1.0f;
+			splash.fade = 1;
 			splash.si = si;
 			splash.color = si->color;
 			splash.falloffTolerance = falloffTolerance;
@@ -792,7 +792,7 @@ static void RadLight( int num ){
 	ApplySurfaceParm( "trans", &contentFlags, &surfaceFlags, &compileFlags );
 
 	/* early outs? */
-	if ( scale <= 0.0f || ( si->compileFlags & C_SKY ) || si->autosprite ||
+	if ( scale <= 0 || ( si->compileFlags & C_SKY ) || si->autosprite ||
 	     ( bspShaders[ ds->shaderNum ].contentFlags & contentFlags ) || ( bspShaders[ ds->shaderNum ].surfaceFlags & surfaceFlags ) ||
 	     ( si->compileFlags & compileFlags ) ) {
 		return;

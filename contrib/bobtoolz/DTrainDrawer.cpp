@@ -275,7 +275,7 @@ void DTrainDrawer::BuildPaths() {
 		}
 		VectorCopy( sp->pTarget->vOrigin, v[i] );
 
-		for ( float tension = 0.0f; tension <= 1.f; tension += 0.01f ) {
+		for ( float tension = 0; tension <= 1; tension += 0.01f ) {
 			CalculateSpline_r( v, static_cast<int>( count ), out._pnt, tension );
 			sp->m_vertexList.push_front( out );
 		}

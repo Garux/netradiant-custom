@@ -76,7 +76,7 @@ static void SubdivideFoliageTriangle_r( const foliage_t& foliage, const TriRef& 
 
 		/* find the longest edge and split it */
 		max = -1;
-		float maxDist = 0.0f;
+		float maxDist = 0;
 		fi->xyz.set( 0 );
 		fi->normal.set( 0 );
 		for ( int i = 0; i < 3; ++i )
@@ -101,7 +101,7 @@ static void SubdivideFoliageTriangle_r( const foliage_t& foliage, const TriRef& 
 
 			/* get average alpha */
 			if ( foliage.inverseAlpha == 2 ) {
-				alpha = 1.0f;
+				alpha = 1;
 			}
 			else
 			{
@@ -123,7 +123,7 @@ static void SubdivideFoliageTriangle_r( const foliage_t& foliage, const TriRef& 
 
 			/* scale centroid */
 			fi->xyz *= 0.33333333f;
-			if ( VectorNormalize( fi->normal ) == 0.0f ) {
+			if ( VectorNormalize( fi->normal ) == 0 ) {
 				return;
 			}
 

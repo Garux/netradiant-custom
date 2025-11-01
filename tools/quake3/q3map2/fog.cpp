@@ -583,7 +583,7 @@ int FogForBounds( const MinMax& minmax, float epsilon ){
 	int fogNum = defaultFogNum;
 
 	/* init */
-	float bestVolume = 0.0f;
+	float bestVolume = 0;
 
 	/* walk the list of fog volumes */
 	for ( size_t i = 0; i < mapFogs.size(); ++i )

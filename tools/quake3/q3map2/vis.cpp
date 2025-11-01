@@ -264,7 +264,7 @@ static void CalcVis(){
 	                                        "distancecull" ) ){      /* sof2 compatibility */
 		farPlaneDist = atof( value );
 		farPlaneDistMode = value[strlen( value ) - 1 ];
-		if ( farPlaneDist != 0.0f ) {
+		if ( farPlaneDist != 0 ) {
 			Sys_Printf( "farplane distance = %.1f\n", farPlaneDist );
 			if ( farPlaneDistMode == 'o' )
 				Sys_Printf( "farplane Origin2Origin mode on\n" );

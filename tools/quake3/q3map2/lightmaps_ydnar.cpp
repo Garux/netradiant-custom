@@ -646,12 +646,12 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t& lm ){
 	{
 		mins[ i ] = sampleSize * floor( lm.minmax.mins[ i ] / sampleSize );
 		maxs[ i ] = sampleSize * ceil( lm.minmax.maxs[ i ] / sampleSize );
-		size[ i ] = ( maxs[ i ] - mins[ i ] ) / sampleSize + 1.0f;
+		size[ i ] = ( maxs[ i ] - mins[ i ] ) / sampleSize + 1;
 
 		/* hack (god this sucks) */
 		if ( size[ i ] > lm.customWidth || size[ i ] > lm.customHeight  || ( lmLimitSize && size[i] > lmLimitSize ) ) {
 			i = -1;
-			sampleSize += 1.0f;
+			sampleSize += 1;
 		}
 	}
 
@@ -728,7 +728,7 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t& lm ){
 	}
 
 	/* check for bogus axis */
-	if ( faxis[ axisNum ] == 0.0f ) {
+	if ( faxis[ axisNum ] == 0 ) {
 		Sys_Warning( "ProjectSurfaceLightmap: Chose a 0 valued axis\n" );
 		lm.w = lm.h = 0;
 		return false;
@@ -1036,7 +1036,7 @@ void SetupSurfaceLightmaps(){
 			}
 
 			/* determine if surface is planar */
-			if ( vector3_length( ds.lightmapVecs[ 2 ] ) != 0.0f ) {
+			if ( vector3_length( ds.lightmapVecs[ 2 ] ) != 0 ) {
 				/* make a plane */
 				info.plane = safe_malloc( sizeof( *( info.plane ) ) );
 				info.plane->normal() = ds.lightmapVecs[ 2 ];
@@ -1237,7 +1237,7 @@ void StitchSurfaceLightmaps(){
 					continue;
 				}
 				SuperLuxel& luxel = lm->getSuperLuxel( 0, x, y );
-				if ( luxel.count <= 0.0f ) {
+				if ( luxel.count <= 0 ) {
 					continue;
 				}
 
@@ -1263,7 +1263,7 @@ void StitchSurfaceLightmaps(){
 					/* walk candidate luxels */
 					Vector3 average( 0 );
 					numLuxels = 0;
-					totalColor = 0.0f;
+					totalColor = 0;
 					for ( y2 = 0; y2 < b->sh && numLuxels < MAX_STITCH_LUXELS; ++y2 )
 					{
 						for ( x2 = 0; x2 < b->sw && numLuxels < MAX_STITCH_LUXELS; ++x2 )
@@ -1278,7 +1278,7 @@ void StitchSurfaceLightmaps(){
 								continue;
 							}
 							const SuperLuxel& luxel2 = lm->getSuperLuxel( 0, x2, y2 );
-							if ( luxel2.count <= 0.0f ) {
+							if ( luxel2.count <= 0 ) {
 								continue;
 							}
 
@@ -1311,7 +1311,7 @@ void StitchSurfaceLightmaps(){
 
 					/* scale average */
 					luxel.value = average * ( 1.0f / totalColor );
-					luxel.count = 1.0f;
+					luxel.count = 1;
 					numStitched++;
 				}
 			}
@@ -1366,8 +1366,8 @@ static bool CompareBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int 
 	}
 
 	/* compare luxels */
-	double delta = 0.0;
-	double total = 0.0;
+	double delta = 0;
+	double total = 0;
 	for ( int y = 0; y < a->h; ++y )
 	{
 		for ( int x = 0; x < a->w; ++x )
@@ -1396,7 +1396,7 @@ static bool CompareBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int 
 			delta += vector3_dot( diff, Vector3( LUXEL_COLOR_FRAC ) );
 
 			/* is the change too high? */
-			if ( total > 0.0 && ( ( delta / total ) > LUXEL_TOLERANCE ) ) {
+			if ( total > 0 && ( ( delta / total ) > LUXEL_TOLERANCE ) ) {
 				return false;
 			}
 		}
@@ -1454,10 +1454,10 @@ static bool MergeBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int bN
 			Vector3& bLuxel = b->getBspLuxel( bNum, x, y );
 
 			/* handle occlusion mismatch */
-			if ( aLuxel[ 0 ] < 0.0f ) {
+			if ( aLuxel[ 0 ] < 0 ) {
 				aLuxel = bLuxel;
 			}
-			else if ( bLuxel[ 0 ] < 0.0f ) {
+			else if ( bLuxel[ 0 ] < 0 ) {
 				bLuxel = aLuxel;
 			}
 			else
@@ -1503,7 +1503,7 @@ static bool ApproximateLuxel( rawLightmap_t *lm, const bspDrawVert_t& dv ){
 		const Vector3& luxel = lm->getBspLuxel( lightmapNum, x, y );
 
 		/* ignore occluded luxels */
-		if ( luxel[ 0 ] < 0.0f || luxel[ 1 ] < 0.0f || luxel[ 2 ] < 0.0f ) {
+		if ( luxel[ 0 ] < 0 || luxel[ 1 ] < 0 || luxel[ 2 ] < 0 ) {
 			return true;
 		}
 
@@ -1522,8 +1522,8 @@ static bool ApproximateLuxel( rawLightmap_t *lm, const bspDrawVert_t& dv ){
 		}
 
 		/* set to bytes */
-		Color4b cb( ColorToBytes( color, 1.0f ), 0 );
-		Color4b vcb( ColorToBytes( vertexColor, 1.0f ), 0 );
+		Color4b cb( ColorToBytes( color, 1 ), 0 );
+		Color4b vcb( ColorToBytes( vertexColor, 1 ), 0 );
 
 		/* compare */
 		for ( int i = 0; i < 3; ++i )
@@ -1771,7 +1771,7 @@ static bool TestOutLightmapStamp( rawLightmap_t *lm, int lightmapNum, outLightma
 		for ( int sx = 0; sx < lm->w; ++sx )
 		{
 			/* get luxel */
-			if ( lm->getBspLuxel( lightmapNum, sx, sy )[ 0 ] < 0.0f ) {
+			if ( lm->getBspLuxel( lightmapNum, sx, sy )[ 0 ] < 0 ) {
 				continue;
 			}
 
@@ -2097,7 +2097,7 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 			{
 				/* get luxel */
 				const Vector3& luxel = lm->getBspLuxel( lightmapNum, x, y );
-				if ( luxel[ 0 ] < 0.0f && !lm->solid[ lightmapNum ] ) {
+				if ( luxel[ 0 ] < 0 && !lm->solid[ lightmapNum ] ) {
 					continue;
 				}
 				Vector3 color;
@@ -2392,8 +2392,8 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 				for ( x = 0; x < lm->w; ++x )
 				{
 					/* subsample */
-					samples = 0.0f;
-					occludedSamples = 0.0f;
+					samples = 0;
+					occludedSamples = 0;
 					mappedSamples = 0;
 					sample.set( 0 );
 					occludedSample.set( 0 );
@@ -2419,9 +2419,9 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 							}
 
 							/* handle lightmap border? */
-							if ( lightmapBorder && ( sx == 0 || sx == ( lm->sw - 1 ) || sy == 0 || sy == ( lm->sh - 1 ) ) && luxel.count > 0.0f ) {
+							if ( lightmapBorder && ( sx == 0 || sx == ( lm->sw - 1 ) || sy == 0 || sy == ( lm->sh - 1 ) ) && luxel.count > 0 ) {
 								sample = { 255, 0, 0 };
-								samples += 1.0f;
+								samples += 1;
 							}
 
 							/* handle debug */
@@ -2436,11 +2436,11 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 									luxel.value = { 0, 32, 255 };
 								}
 								occludedSample += luxel.value;
-								occludedSamples += 1.0f;
+								occludedSamples += 1;
 							}
 
 							/* normal luxel handling */
-							else if ( luxel.count > 0.0f ) {
+							else if ( luxel.count > 0 ) {
 								/* handle lit or flooded luxels */
 								if ( cluster > CLUSTER_NORMAL || cluster == CLUSTER_FLOODED ) {
 									sample += luxel.value;
@@ -2464,7 +2464,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					}
 
 					/* only use occluded samples if necessary */
-					if ( samples <= 0.0f ) {
+					if ( samples <= 0 ) {
 						sample = occludedSample;
 						samples = occludedSamples;
 					}
@@ -2480,7 +2480,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					/* store the sample back in super luxels */
 					if ( samples > 0.01f ) {
 						luxel.value = sample * ( 1.0f / samples );
-						luxel.count = 1.0f;
+						luxel.count = 1;
 					}
 
 					/* if any samples were mapped in any way, store ambient color */
@@ -2491,14 +2491,14 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 						else{
 							luxel.value.set( 0 );
 						}
-						luxel.count = 1.0f;
+						luxel.count = 1;
 					}
 
 					/* store a bogus value to be fixed later */
 					else
 					{
 						luxel.value.set( 0 );
-						luxel.count = -1.0f;
+						luxel.count = -1;
 					}
 				}
 			}
@@ -2521,7 +2521,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					}
 
 					/* is this a valid sample? */
-					if ( luxel.count > 0.0f ) {
+					if ( luxel.count > 0 ) {
 						sample = luxel.value;
 						samples = luxel.count;
 						numUsed++;
@@ -2538,7 +2538,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 						/* nick an average value from the neighbors */
 						sample.set( 0 );
 						dirSample.set( 0 );
-						samples = 0.0f;
+						samples = 0;
 
 						/* fixme: why is this disabled?? */
 						for ( sy = ( y - 1 ); sy <= ( y + 1 ); ++sy )
@@ -2555,7 +2555,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 
 								/* get neighbor's particulars */
 								const SuperLuxel& luxel = lm->getSuperLuxel( lightmapNum, sx, sy );
-								if ( luxel.count < 0.0f ) {
+								if ( luxel.count < 0 ) {
 									continue;
 								}
 								sample += luxel.value;
@@ -2564,9 +2564,9 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 						}
 
 						/* no samples? */
-						if ( samples == 0.0f ) {
+						if ( samples == 0 ) {
 							sample.set( -1 );
-							samples = 1.0f;
+							samples = 1;
 						}
 						else
 						{
@@ -2603,7 +2603,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					}
 
 					/* add color to bounds for solid checking */
-					if ( samples > 0.0f ) {
+					if ( samples > 0 ) {
 						colorMinmax.extend( bspLuxel );
 					}
 				}
@@ -2698,12 +2698,12 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 
 						/* get tangent vectors */
 						Vector3 myTangent, myBinormal;
-						if ( myNormal[ 0 ] == 0.0f && myNormal[ 1 ] == 0.0f ) {
-							if ( myNormal.z() == 1.0f ) {
+						if ( myNormal[ 0 ] == 0 && myNormal[ 1 ] == 0 ) {
+							if ( myNormal.z() == 1 ) {
 								myTangent = g_vector3_axis_x;
 								myBinormal = g_vector3_axis_y;
 							}
-							else if ( myNormal.z() == -1.0f ) {
+							else if ( myNormal.z() == -1 ) {
 								myTangent = -g_vector3_axis_x;
 								myBinormal = g_vector3_axis_y;
 							}
@@ -3241,7 +3241,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 					const Vector2 lmxy = dv[ 0 ].lightmap[ lightmapNum ] - dv[ 0 ].lightmap[ 0 ];
 
 					/* create additional stage */
-					if ( lmxy.x() == 0.0f && lmxy.y() == 0.0f ) {
+					if ( lmxy.x() == 0 && lmxy.y() == 0 ) {
 						sprintf( styleStage, "\t{\n"
 						                     "\t\tmap %s\n"                                      /* lightmap */
 						                     "\t\tblendFunc GL_SRC_ALPHA GL_ONE\n"

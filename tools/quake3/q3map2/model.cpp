@@ -643,7 +643,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 						}
 						value_minimize( mindist, bestdist );
 					}
-					if ( ( limDepth != 0.0 ) && ( mindist > limDepth ) )
+					if ( ( limDepth != 0 ) && ( mindist > limDepth ) )
 						goto default_CLIPMODEL;
 
 					nonax_clip_dbg( p );
@@ -725,7 +725,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 							}
 							reverse.dist() += clipDepth;
 						}
-						if ( limDepth != 0.0 ){
+						if ( limDepth != 0 ){
 							Vector3 cnt = points[0];
 							if ( bestNormal[axis] > 0 ){
 								for ( j = 1; j < 3; ++j ){
@@ -775,7 +775,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 						for ( k = 0; k < 3; ++k )
 						{
 							if ( std::fabs( p[j].normal()[k] ) < 0.00025f && p[j].normal()[k] != 0 ){
-								p[j].normal()[k] = 0.0;
+								p[j].normal()[k] = 0;
 								snpd = true;
 							}
 						}
@@ -833,7 +833,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 						{
 							if ( std::fabs( p[j].normal()[k] ) < 0.00025f && p[j].normal()[k] != 0 ){
 								//Sys_Printf( "init plane %6.8f %6.8f %6.8f %6.8f\n", p[j].a, p[j].b, p[j].c, p[j].d );
-								p[j].normal()[k] = 0.0;
+								p[j].normal()[k] = 0;
 								snpd = true;
 							}
 						}
@@ -866,7 +866,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 						{
 							if ( std::fabs( p[j].normal()[k] ) < 0.00025f && p[j].normal()[k] != 0 ){
 								//Sys_Printf( "init plane %6.8f %6.8f %6.8f %6.8f\n", p[j].a, p[j].b, p[j].c, p[j].d );
-								p[j].normal()[k] = 0.0;
+								p[j].normal()[k] = 0;
 								snpd = true;
 							}
 						}
@@ -1121,22 +1121,22 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		}
 
 		/* fix the surface's normals (jal: conditioned by shader info) */
-		if ( !( spawnFlags & eNoSmooth ) && ( params.shadeAngle == 0.0f || ds.type != ESurfaceType::ForcedMeta ) ) {
+		if ( !( spawnFlags & eNoSmooth ) && ( params.shadeAngle == 0 || ds.type != ESurfaceType::ForcedMeta ) ) {
 			// PicoFixSurfaceNormals( surface );
 		}
 
 		/* set sample size */
-		if ( params.lightmapSampleSize > 0.0f ) {
+		if ( params.lightmapSampleSize > 0 ) {
 			ds.sampleSize = params.lightmapSampleSize;
 		}
 
 		/* set lightmap scale */
-		if ( params.lightmapScale > 0.0f ) {
+		if ( params.lightmapScale > 0 ) {
 			ds.lightmapScale = params.lightmapScale;
 		}
 
 		/* set shading angle */
-		if ( params.shadeAngle > 0.0f ) {
+		if ( params.shadeAngle > 0 ) {
 			ds.shadeAngleDegrees = params.shadeAngle;
 		}
 
