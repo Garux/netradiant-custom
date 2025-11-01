@@ -29,21 +29,21 @@
 inline void FaceTexdef_BP_importXML( FaceTexdef& texdef, const char* xmlContent ){
 	StringTokeniser content( xmlContent );
 
-	texdef.m_projection.m_brushprimit_texdef.coords[0][0] = static_cast<float>( atof( content.getToken() ) );
-	texdef.m_projection.m_brushprimit_texdef.coords[0][1] = static_cast<float>( atof( content.getToken() ) );
-	texdef.m_projection.m_brushprimit_texdef.coords[0][2] = static_cast<float>( atof( content.getToken() ) );
-	texdef.m_projection.m_brushprimit_texdef.coords[1][0] = static_cast<float>( atof( content.getToken() ) );
-	texdef.m_projection.m_brushprimit_texdef.coords[1][1] = static_cast<float>( atof( content.getToken() ) );
-	texdef.m_projection.m_brushprimit_texdef.coords[1][2] = static_cast<float>( atof( content.getToken() ) );
+	texdef.m_projection.m_brushprimit_texdef.coords[0][0] = atof( content.getToken() );
+	texdef.m_projection.m_brushprimit_texdef.coords[0][1] = atof( content.getToken() );
+	texdef.m_projection.m_brushprimit_texdef.coords[0][2] = atof( content.getToken() );
+	texdef.m_projection.m_brushprimit_texdef.coords[1][0] = atof( content.getToken() );
+	texdef.m_projection.m_brushprimit_texdef.coords[1][1] = atof( content.getToken() );
+	texdef.m_projection.m_brushprimit_texdef.coords[1][2] = atof( content.getToken() );
 }
 inline void FaceTexdef_importXML( FaceTexdef& texdef, const char* xmlContent ){
 	StringTokeniser content( xmlContent );
 
-	texdef.m_projection.m_texdef.shift[0] = static_cast<float>( atof( content.getToken() ) );
-	texdef.m_projection.m_texdef.shift[1] = static_cast<float>( atof( content.getToken() ) );
-	texdef.m_projection.m_texdef.rotate = static_cast<float>( atof( content.getToken() ) );
-	texdef.m_projection.m_texdef.scale[0] = static_cast<float>( atof( content.getToken() ) );
-	texdef.m_projection.m_texdef.scale[1] = static_cast<float>( atof( content.getToken() ) );
+	texdef.m_projection.m_texdef.shift[0] = atof( content.getToken() );
+	texdef.m_projection.m_texdef.shift[1] = atof( content.getToken() );
+	texdef.m_projection.m_texdef.rotate   = atof( content.getToken() );
+	texdef.m_projection.m_texdef.scale[0] = atof( content.getToken() );
+	texdef.m_projection.m_texdef.scale[1] = atof( content.getToken() );
 
 	ASSERT_MESSAGE( texdef_sane( texdef.m_projection.m_texdef ), "FaceTexdef_importXML: bad texdef" );
 }

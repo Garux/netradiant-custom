@@ -166,7 +166,7 @@ void Brush_Construct( EBrushType type ){
 	g_texdef_default_scale = 0.5f;
 	const char* value = g_pGameDescription->getKeyValue( "default_scale" );
 	if ( !string_empty( value ) ) {
-		float scale = static_cast<float>( atof( value ) );
+		const float scale = atof( value );
 		if ( scale != 0 ) {
 			g_texdef_default_scale = scale;
 		}

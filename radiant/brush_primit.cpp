@@ -100,12 +100,12 @@ inline void Texdef_toTransform( const texdef_t& texdef, float width, float heigh
 	inverse_scale[1] = 1 / ( texdef.scale[1] * -height );
 	transform[12] = texdef.shift[0] / width;
 	transform[13] = -texdef.shift[1] / -height;
-	double c = cos( degrees_to_radians( -texdef.rotate ) );
-	double s = sin( degrees_to_radians( -texdef.rotate ) );
-	transform[0] = static_cast<float>( c * inverse_scale[0] );
-	transform[1] = static_cast<float>( s * inverse_scale[1] );
-	transform[4] = static_cast<float>( -s * inverse_scale[0] );
-	transform[5] = static_cast<float>( c * inverse_scale[1] );
+	const double c = cos( degrees_to_radians( -texdef.rotate ) );
+	const double s = sin( degrees_to_radians( -texdef.rotate ) );
+	transform[0] = c * inverse_scale[0];
+	transform[1] = s * inverse_scale[1];
+	transform[4] = -s * inverse_scale[0];
+	transform[5] = c * inverse_scale[1];
 	transform[2] = transform[3] = transform[6] = transform[7] = transform[8] = transform[9] = transform[11] = transform[14] = 0;
 	transform[10] = transform[15] = 1;
 }
@@ -158,10 +158,10 @@ inline double arctangent_yx( double y, double x ){
 }
 
 inline void Texdef_fromTransform( texdef_t& texdef, float width, float height, const Matrix4& transform ){
-	texdef.scale[0] = static_cast<float>( ( 1.0 / vector2_length( Vector2( transform[0], transform[4] ) ) ) / width );
-	texdef.scale[1] = static_cast<float>( ( 1.0 / vector2_length( Vector2( transform[1], transform[5] ) ) ) / height );
+	texdef.scale[0] = ( 1.0 / vector2_length( Vector2( transform[0], transform[4] ) ) ) / width;
+	texdef.scale[1] = ( 1.0 / vector2_length( Vector2( transform[1], transform[5] ) ) ) / height;
 
-	texdef.rotate = static_cast<float>( -radians_to_degrees( arctangent_yx( -transform[4], transform[0] ) ) );
+	texdef.rotate = -radians_to_degrees( arctangent_yx( -transform[4], transform[0] ) );
 
 	if ( texdef.rotate == -180.0f ) {
 		texdef.rotate = 180.0f;
@@ -279,7 +279,7 @@ void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::si
 
 	Matrix4 local2tex;
 	Texdef_toTransform( projection, (float)width, (float)height, local2tex );
-	//globalOutputStream() << "texdef: " << static_cast<const Vector3&>( local2tex.x() ) << static_cast<const Vector3&>( local2tex.y() ) << '\n';
+	//globalOutputStream() << "texdef: " << local2tex.x().vec3() << local2tex.y().vec3() << '\n';
 
 #if 0
 	{
@@ -295,7 +295,7 @@ void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::si
 		Matrix4 xyz2st;
 		// we don't care if it's not normalised...
 		Texdef_basisForNormal( projection, matrix4_transformed_direction( localToWorld, normal ), xyz2st );
-		//globalOutputStream() << "basis: " << static_cast<const Vector3&>( xyz2st.x() ) << static_cast<const Vector3&>( xyz2st.y() ) << static_cast<const Vector3&>( xyz2st.z() ) << '\n';
+		//globalOutputStream() << "basis: " << xyz2st.x().vec3() << xyz2st.y().vec3() << xyz2st.z().vec3() << '\n';
 		matrix4_multiply_by_matrix4( local2tex, xyz2st );
 	}
 
@@ -628,10 +628,10 @@ void ConvertTexMatWithQTexture( const brushprimit_texdef_t *texMat1, const qtext
 
 void TexMatToFakeTexCoords( const brushprimit_texdef_t& bp_texdef, texdef_t& texdef ){
 #if 0
-	texdef.scale[0] = static_cast<float>( 1.0 / vector2_length( Vector2( bp_texdef.coords[0][0], bp_texdef.coords[1][0] ) ) );
-	texdef.scale[1] = static_cast<float>( 1.0 / vector2_length( Vector2( bp_texdef.coords[0][1], bp_texdef.coords[1][1] ) ) );
+	texdef.scale[0] = 1.0 / vector2_length( Vector2( bp_texdef.coords[0][0], bp_texdef.coords[1][0] ) );
+	texdef.scale[1] = 1.0 / vector2_length( Vector2( bp_texdef.coords[0][1], bp_texdef.coords[1][1] ) );
 
-	texdef.rotate = -static_cast<float>( radians_to_degrees( arctangent_yx( bp_texdef.coords[1][0], bp_texdef.coords[0][0] ) ) );
+	texdef.rotate = -radians_to_degrees( arctangent_yx( bp_texdef.coords[1][0], bp_texdef.coords[0][0] ) );
 
 	texdef.shift[0] = -bp_texdef.coords[0][2];
 	texdef.shift[1] = bp_texdef.coords[1][2];
@@ -653,8 +653,8 @@ void TexMatToFakeTexCoords( const brushprimit_texdef_t& bp_texdef, texdef_t& tex
 		}
 	}
 #else
-	texdef.scale[0] = static_cast<float>( 1.0 / vector2_length( Vector2( bp_texdef.coords[0][0], bp_texdef.coords[0][1] ) ) );
-	texdef.scale[1] = static_cast<float>( 1.0 / vector2_length( Vector2( bp_texdef.coords[1][0], bp_texdef.coords[1][1] ) ) );
+	texdef.scale[0] = 1.0 / vector2_length( Vector2( bp_texdef.coords[0][0], bp_texdef.coords[0][1] ) );
+	texdef.scale[1] = 1.0 / vector2_length( Vector2( bp_texdef.coords[1][0], bp_texdef.coords[1][1] ) );
 	if( bp_texdef.coords[0][0] < 0 ){
 		texdef.scale[0] = -texdef.scale[0];
 	}
@@ -662,12 +662,12 @@ void TexMatToFakeTexCoords( const brushprimit_texdef_t& bp_texdef, texdef_t& tex
 		texdef.scale[1] = -texdef.scale[1];
 	}
 #if 1
-	texdef.rotate = static_cast<float>( radians_to_degrees( acos( vector2_normalised( Vector2( bp_texdef.coords[0][0], bp_texdef.coords[0][1] ) )[0] ) ) );
+	texdef.rotate = radians_to_degrees( acos( vector2_normalised( Vector2( bp_texdef.coords[0][0], bp_texdef.coords[0][1] ) )[0] ) );
 	if( bp_texdef.coords[0][1] > 0 ){
 		texdef.rotate = -texdef.rotate;
 	}
 #else
-	texdef.rotate = static_cast<float>( radians_to_degrees( arctangent_yx( bp_texdef.coords[0][1], bp_texdef.coords[0][0] ) ) );
+	texdef.rotate = radians_to_degrees( arctangent_yx( bp_texdef.coords[0][1], bp_texdef.coords[0][0] ) );
 #endif
 	texdef.shift[0] = -bp_texdef.coords[0][2];
 	texdef.shift[1] = bp_texdef.coords[1][2];
@@ -681,10 +681,10 @@ void FakeTexCoordsToTexMat( const texdef_t& texdef, brushprimit_texdef_t& bp_tex
 	double s = sin( r );
 	double x = 1.0f / texdef.scale[0];
 	double y = 1.0f / texdef.scale[1];
-	bp_texdef.coords[0][0] = static_cast<float>( x * c );
-	bp_texdef.coords[1][0] = static_cast<float>( x * s );
-	bp_texdef.coords[0][1] = static_cast<float>( y * -s );
-	bp_texdef.coords[1][1] = static_cast<float>( y * c );
+	bp_texdef.coords[0][0] = x * c;
+	bp_texdef.coords[1][0] = x * s;
+	bp_texdef.coords[0][1] = y * -s;
+	bp_texdef.coords[1][1] = y * c;
 	bp_texdef.coords[0][2] = -texdef.shift[0];
 	bp_texdef.coords[1][2] = texdef.shift[1];
 //	globalOutputStream() << "[ " << bp_texdef.coords[0][0] << ' ' << bp_texdef.coords[0][1] << " ][ " << bp_texdef.coords[1][0] << ' ' << bp_texdef.coords[1][1] << " ]\n";
@@ -2004,7 +2004,7 @@ void AP_from_BP( TextureProjection& projection, const Plane3& plane, std::size_t
 		return;
 	}
 
-	const Vector3 invariant( static_cast<Vector3>( plane.normal() * plane.dist() ) );
+	const Vector3 invariant( plane.normal() * plane.dist() );
 
 	Matrix4 local2tex;
 	Texdef_Construct_local2tex( projection, width, height, plane.normal(), local2tex );
@@ -2024,14 +2024,14 @@ void Valve220_from_BP( TextureProjection& projection, const Plane3& plane, std::
 	projection.m_texdef.scale[1] = 1.0 / ( vector2_length( Vector2( projection.m_brushprimit_texdef.coords[1][0], projection.m_brushprimit_texdef.coords[1][1] ) ) * (double)height );
 	projection.m_texdef.shift[0] = projection.m_brushprimit_texdef.coords[0][2] * (float)width;
 	projection.m_texdef.shift[1] = projection.m_brushprimit_texdef.coords[1][2] * (float)height;
-	projection.m_texdef.rotate = static_cast<float>( -radians_to_degrees( arctangent_yx( projection.m_brushprimit_texdef.coords[0][1], projection.m_brushprimit_texdef.coords[0][0] ) ) );
+	projection.m_texdef.rotate = -radians_to_degrees( arctangent_yx( projection.m_brushprimit_texdef.coords[0][1], projection.m_brushprimit_texdef.coords[0][0] ) );
 	if( projection.m_brushprimit_texdef.coords[0][0] * projection.m_brushprimit_texdef.coords[1][1] < 0 )
 		projection.m_texdef.rotate = -projection.m_texdef.rotate;
 
 	DoubleVector3 texX, texY;
 	ComputeAxisBase( plane.normal(), texX, texY );
-	projection.m_basis_s = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[0][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[0][1] ) );
-	projection.m_basis_t = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[1][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[1][1] ) );
+	projection.m_basis_s = vector3_normalised( texX * projection.m_brushprimit_texdef.coords[0][0] + texY * projection.m_brushprimit_texdef.coords[0][1] );
+	projection.m_basis_t = vector3_normalised( texX * projection.m_brushprimit_texdef.coords[1][0] + texY * projection.m_brushprimit_texdef.coords[1][1] );
 #else
 	/* more reliable values this way */
 	DoubleVector3 texX, texY;
@@ -2044,8 +2044,8 @@ void Valve220_from_BP( TextureProjection& projection, const Plane3& plane, std::
 		projection.m_texdef.scale[1] = Texdef_getDefaultTextureScale();
 		return;
 	}
-	projection.m_basis_s = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[0][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[0][1] ) );
-	projection.m_basis_t = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[1][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[1][1] ) );
+	projection.m_basis_s = vector3_normalised( texX * projection.m_brushprimit_texdef.coords[0][0] + texY * projection.m_brushprimit_texdef.coords[0][1] );
+	projection.m_basis_t = vector3_normalised( texX * projection.m_brushprimit_texdef.coords[1][0] + texY * projection.m_brushprimit_texdef.coords[1][1] );
 	projection.m_brushprimit_texdef.removeScale( width, height );
 	TexMatToFakeTexCoords( projection.m_brushprimit_texdef, projection.m_texdef );
 	projection.m_texdef.shift[0] *= -1.f;

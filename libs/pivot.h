@@ -139,9 +139,9 @@ inline void ConstructDevice2Object( Matrix4& device2object, const Matrix4& objec
 //! S =  ( Inverse(Object2Screen *post ScaleOf(Object2Screen) ) *post Object2Screen
 inline void pivot_scale( Matrix4& scale, const Matrix4& pivot2screen ){
 	Matrix4 pre_scale( g_matrix4_identity );
-	pre_scale[0] = static_cast<float>( vector3_length( pivot2screen.x().vec3() ) );
-	pre_scale[5] = static_cast<float>( vector3_length( pivot2screen.y().vec3() ) );
-	pre_scale[10] = static_cast<float>( vector3_length( pivot2screen.z().vec3() ) );
+	pre_scale[0]  = vector3_length( pivot2screen.x().vec3() );
+	pre_scale[5]  = vector3_length( pivot2screen.y().vec3() );
+	pre_scale[10] = vector3_length( pivot2screen.z().vec3() );
 
 	scale = pivot2screen;
 	matrix4_multiply_by_matrix4( scale, pre_scale );

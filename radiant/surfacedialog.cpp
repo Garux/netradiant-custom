@@ -305,8 +305,8 @@ si_globals_t g_si_globals;
 // For regular it's 0.5f (128 pixels cover 64 world units), for BP it's simply 1.0f
 // see fenris #2810
 void DoSnapTToGrid( float hscale, float vscale ){
-	g_si_globals.shift[0] = static_cast<float>( float_to_integer( static_cast<float>( GetGridSize() ) / hscale ) );
-	g_si_globals.shift[1] = static_cast<float>( float_to_integer( static_cast<float>( GetGridSize() ) / vscale ) );
+	g_si_globals.shift[0] = float_to_integer( GetGridSize() / hscale );
+	g_si_globals.shift[1] = float_to_integer( GetGridSize() / vscale );
 	getSurfaceInspector().queueDraw();
 }
 
@@ -1072,7 +1072,7 @@ void SurfaceInspector::ApplyTexdef_VScale(){
 
 void SurfaceInspector::ApplyTexdef_Rotation(){
 	const float value = m_rotateIncrement.m_spin->value();
-	const auto command = StringStream<64>( "textureProjectionSetSelected -rotation ", static_cast<float>( float_to_integer( value * 100.f ) ) / 100.f );
+	const auto command = StringStream<64>( "textureProjectionSetSelected -rotation ", float_to_integer( value * 100.f ) / 100.f );
 	UndoableCommand undo( command );
 	Select_SetTexdef( 0, 0, 0, 0, &value );
 	Patch_SetTexdef( 0, 0, 0, 0, &value );

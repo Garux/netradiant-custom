@@ -33,7 +33,7 @@ inline void default_angle( float& angle ){
 	angle = ANGLEKEY_IDENTITY;
 }
 inline void normalise_angle( float& angle ){
-	angle = static_cast<float>( float_mod( angle, 360.0 ) );
+	angle = float_mod( angle, 360.0 );
 }
 inline void read_angle( float& angle, const char* value ){
 	if ( !string_parse_float( value, angle ) ) {

@@ -789,8 +789,8 @@ void ModelBrowser_render(){
 
 	Matrix4 m_projection;
 
-	m_projection[0] = 1.0f / static_cast<float>( W / 2.f );
-	m_projection[5] = 1.0f / static_cast<float>( H / 2.f );
+	m_projection[0] = 1.0f / ( W / 2.f );
+	m_projection[5] = 1.0f / ( H / 2.f );
 	m_projection[10] = 1.0f / ( 9999 );
 
 	m_projection[12] = 0.0f;

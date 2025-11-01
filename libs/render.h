@@ -676,9 +676,9 @@ inline spherical_t spherical_from_normal3f( const Normal3f& normal ){
 
 inline Normal3f normal3f_from_spherical( const spherical_t& spherical ){
 	return Normal3f(
-	           static_cast<float>( cos( spherical.longditude ) * sin( spherical.latitude ) ),
-	           static_cast<float>( sin( spherical.longditude ) * sin( spherical.latitude ) ),
-	           static_cast<float>( cos( spherical.latitude ) )
+	           cos( spherical.longditude ) * sin( spherical.latitude ),
+	           sin( spherical.longditude ) * sin( spherical.latitude ),
+	           cos( spherical.latitude )
 	       );
 }
 
@@ -1045,8 +1045,8 @@ inline void draw_circle( const std::size_t segments, const float radius, PointVe
 
 		{
 			const double theta = increment * count;
-			x = static_cast<float>( radius * cos( theta ) );
-			y = static_cast<float>( radius * sin( theta ) );
+			x = radius * cos( theta );
+			y = radius * sin( theta );
 		}
 
 		remap_policy::set( j->vertex, y,-x, 0 );

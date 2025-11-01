@@ -37,9 +37,9 @@ inline void default_angles( Vector3& angles ){
 	angles = ANGLESKEY_IDENTITY;
 }
 inline void normalise_angles( Vector3& angles ){
-	angles[0] = static_cast<float>( float_mod( angles[0], 360 ) );
-	angles[1] = static_cast<float>( float_mod( angles[1], 360 ) );
-	angles[2] = static_cast<float>( float_mod( angles[2], 360 ) );
+	angles[0] = float_mod( angles[0], 360 );
+	angles[1] = float_mod( angles[1], 360 );
+	angles[2] = float_mod( angles[2], 360 );
 }
 inline void read_angle( Vector3& angles, const char* value ){
 	if ( !string_parse_float( value, angles[2] ) ) {

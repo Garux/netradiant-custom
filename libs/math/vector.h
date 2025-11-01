@@ -545,9 +545,9 @@ inline void vector3_snap_to_zero( BasicVector3<Element>& self, const OtherElemen
 
 inline Vector3 vector3_for_spherical( double theta, double phi ){
 	return Vector3(
-	           static_cast<float>( cos( theta ) * cos( phi ) ),
-	           static_cast<float>( sin( theta ) * cos( phi ) ),
-	           static_cast<float>( sin( phi ) )
+	           cos( theta ) * cos( phi ),
+	           sin( theta ) * cos( phi ),
+	           sin( phi )
 	       );
 }
 

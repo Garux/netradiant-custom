@@ -646,7 +646,7 @@ void XYWnd_OrientCamera( XYWnd* xywnd, int x, int y, CamWnd& camwnd ){
 	const int nAngle = ( viewtype == XY ) ? CAMERA_YAW : CAMERA_PITCH;
 	if ( point[nDim2] || point[nDim1] ) {
 		Vector3 angles( Camera_getAngles( camwnd ) );
-		angles[nAngle] = static_cast<float>( radians_to_degrees( atan2( point[nDim2], point[nDim1] ) ) );
+		angles[nAngle] = radians_to_degrees( atan2( point[nDim2], point[nDim1] ) );
 		if( angles[CAMERA_YAW] < 0 )
 			angles[CAMERA_YAW] += 360;
 		if ( nAngle == CAMERA_PITCH ){
@@ -1585,9 +1585,9 @@ void XYWnd::DrawCameraIcon( const Vector3& origin, const Vector3& angles ){
 	gl().glEnd();
 
 	gl().glBegin( GL_LINE_STRIP );
-	gl().glVertex3f( x + static_cast<float>( fov * cos( a + c_pi / 4 ) ), y + static_cast<float>( fov * sin( a + c_pi / 4 ) ), 0 );
+	gl().glVertex3f( x + fov * cos( a + c_pi / 4 ), y + fov * sin( a + c_pi / 4 ), 0 );
 	gl().glVertex3f( x, y, 0 );
-	gl().glVertex3f( x + static_cast<float>( fov * cos( a - c_pi / 4 ) ), y + static_cast<float>( fov * sin( a - c_pi / 4 ) ), 0 );
+	gl().glVertex3f( x + fov * cos( a - c_pi / 4 ), y + fov * sin( a - c_pi / 4 ), 0 );
 	gl().glEnd();
 }
 
@@ -1713,8 +1713,8 @@ private:
 };
 
 void XYWnd::updateProjection(){
-	m_projection[0] = 1.0f / static_cast<float>( m_nWidth / 2 );
-	m_projection[5] = 1.0f / static_cast<float>( m_nHeight / 2 );
+	m_projection[0] = 1.0f / ( m_nWidth / 2 );
+	m_projection[5] = 1.0f / ( m_nHeight / 2 );
 	m_projection[10] = 1.0f / ( g_MaxWorldCoord * m_fScale );
 
 	m_projection[12] = 0.0f;

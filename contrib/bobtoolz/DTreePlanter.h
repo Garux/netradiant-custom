@@ -171,12 +171,12 @@ public:
 				GT;
 				CT;
 
-				m_minScale = static_cast<float>( atof( pToken ) );
+				m_minScale = atof( pToken );
 
 				GT;
 				CT;
 
-				m_maxScale = static_cast<float>( atof( pToken ) );
+				m_maxScale = atof( pToken );
 
 				m_useScale = true;
 			}

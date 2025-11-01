@@ -267,7 +267,7 @@ const float camera_t::near_z = 1.f;
 camera_draw_mode camera_t::draw_mode = cd_texture;
 
 inline Matrix4 projection_for_camera( float near_z, float far_z, float fieldOfView, int width, int height ){
-	float half_width = static_cast<float>( near_z * tan( degrees_to_radians( fieldOfView * 0.5 ) ) );
+	float half_width = near_z * tan( degrees_to_radians( fieldOfView * 0.5 ) );
 	const bool swap = height > width;
 	if( swap )
 		std::swap( width, height );
@@ -329,8 +329,8 @@ void Camera_Move_updateAxes( camera_t& camera ){
 	double ya = degrees_to_radians( camera.angles[CAMERA_YAW] );
 
 	// the movement matrix is kept 2d
-	camera.forward[0] = static_cast<float>( cos( ya ) );
-	camera.forward[1] = static_cast<float>( sin( ya ) );
+	camera.forward[0] = cos( ya );
+	camera.forward[1] = sin( ya );
 	camera.forward[2] = 0;
 	camera.right[0] = camera.forward[1];
 	camera.right[1] = -camera.forward[0];
@@ -1217,7 +1217,7 @@ static void selection_button_release_freemove( QWidget* widget, const QMouseEven
 }
 
 void CamWnd::selection_motion_freemove( const MotionDeltaValues& delta ){
-	m_rightClickMove += sqrt( static_cast<double>( delta.x * delta.x + delta.y * delta.y ) );
+	m_rightClickMove += sqrt( delta.x * delta.x + delta.y * delta.y );
 	m_window_observer->incMouseMove( WindowVector( delta.x, delta.y ) );
 	m_window_observer->onMouseMotion( windowvector_for_widget_centre( m_gl_widget ), modifiers_for_state( delta.mouseMoveEvent.modifiers() ) );
 }
@@ -1231,7 +1231,7 @@ void camera_orbit_scroll( camera_t& camera ){
 	float offset = vector3_length( camera.m_orbit_center - camera.m_orbit_initial_pos );
 	const int off = camera.m_orbit_offset;
 	if( off < 0 || off > 16 ){
-		offset -= offset * off / 8 * pow( 2.0f, static_cast<float>( off < 0 ? -off : off - 16 ) / 8.f );
+		offset -= offset * off / 8 * pow( 2.0f, ( off < 0 ? -off : off - 16 ) / 8.f );
 	}
 	else if( off == 8 ){
 		offset = std::min( 8.f, offset / 16.f ); //prevent zero offset, resulting in NAN viewvector in the next scroll step
@@ -2105,12 +2105,12 @@ void CamWnd::Cam_Draw(){
 	}
 
 	if ( g_camwindow_globals.m_showStats ) {
-		gl().glRasterPos3f( 1.0f, static_cast<float>( m_Camera.height ), 0.0f );
+		gl().glRasterPos3f( 1.0f, m_Camera.height, 0.0f );
 		extern const char* Renderer_GetStats( int frame2frame );
 		GlobalOpenGL().drawString( Renderer_GetStats( m_render_time.elapsed_msec() ) );
 		m_render_time.start();
 
-		gl().glRasterPos3f( 1.0f, static_cast<float>( m_Camera.height ) - GlobalOpenGL().m_font->getPixelHeight(), 0.0f );
+		gl().glRasterPos3f( 1.0f, m_Camera.height - GlobalOpenGL().m_font->getPixelHeight(), 0.0f );
 		extern const char* Cull_GetStats();
 		GlobalOpenGL().drawString( Cull_GetStats() );
 	}
@@ -2139,7 +2139,7 @@ void CamWnd::BenchMark(){
 		Vector3 angles;
 		angles[CAMERA_ROLL] = 0;
 		angles[CAMERA_PITCH] = 0;
-		angles[CAMERA_YAW] = static_cast<float>( i * ( 360.0 / 100.0 ) );
+		angles[CAMERA_YAW] = i * ( 360.0 / 100.0 );
 		Camera_setAngles( *this, angles );
 	}
 	globalOutputStream() << timer.elapsed_msec() << " milliseconds\n";
@@ -2150,7 +2150,7 @@ void GlobalCamera_ResetAngles(){
 	CamWnd& camwnd = *g_camwnd;
 	Vector3 angles;
 	angles[CAMERA_ROLL] = angles[CAMERA_PITCH] = 0;
-	angles[CAMERA_YAW] = static_cast<float>( 22.5 * floor( ( Camera_getAngles( camwnd )[CAMERA_YAW] + 11 ) / 22.5 ) );
+	angles[CAMERA_YAW] = 22.5 * floor( ( Camera_getAngles( camwnd )[CAMERA_YAW] + 11 ) / 22.5 );
 	Camera_setAngles( camwnd, angles );
 }
 
@@ -2198,7 +2198,7 @@ Vector3 Camera_getFocusPos( camera_t& camera ){
 
 	const int off = camera.m_focus_offset;
 	if( off < 0 || off > 16 ){
-		offset -= offset * off / 8 * pow( 2.0f, static_cast<float>( off < 0 ? -off : off - 16 ) / 8.f );
+		offset -= offset * off / 8 * pow( 2.0f, ( off < 0 ? -off : off - 16 ) / 8.f );
 	}
 	else{
 		offset -= offset * off / 8;

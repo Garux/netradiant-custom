@@ -47,11 +47,11 @@ void ClampFloat( float* p ){
 	}
 
 	if ( std::fabs( *p - ceil( *p ) ) < MAX_ROUND_ERROR ) {
-		*p = static_cast<float>( ceil( *p ) );
+		*p = ceil( *p );
 	}
 
 	if ( std::fabs( *p - floor( *p ) ) < MAX_ROUND_ERROR ) {
-		*p = static_cast<float>( floor( *p ) );
+		*p = floor( *p );
 	}
 }
 

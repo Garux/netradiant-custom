@@ -179,7 +179,7 @@ void cartesian( const double Long, const double Lat, float cart[3] ) {
 void sphere_construct_fill( Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
 	float cart[3];
 	int k = 0;
-	const double step = c_pi / static_cast<double>( SPHERE_FILL_SIDES );
+	const double step = c_pi / SPHERE_FILL_SIDES;
 
 	radiiPoints[k++] = Vector3( 0.0, 0.0, -1.0 );
 	for( int i = 0; i < SPHERE_FILL_SIDES * 2; i += 2 ) {
@@ -408,40 +408,40 @@ void sphere_construct_wire( Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
 
 	for ( int i = 0; i < SPHERE_WIRE_SIDES; ++i )
 	{
-		double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
-		double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		const double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		const double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
 
 		radiiPoints[k++] =
 		    Vector3(
-		        static_cast<float>( dc ),
-		        static_cast<float>( ds ),
+		        dc,
+		        ds,
 		        0.f
 		    );
 	}
 
 	for ( int i = 0; i < SPHERE_WIRE_SIDES; ++i )
 	{
-		double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
-		double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		const double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		const double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
 
 		radiiPoints[k++] =
 		    Vector3(
-		        static_cast<float>( dc ),
+		        dc,
 		        0.f,
-		        static_cast<float>( ds )
+		        ds
 		    );
 	}
 
 	for ( int i = 0; i < SPHERE_WIRE_SIDES; ++i )
 	{
-		double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
-		double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		const double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		const double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
 
 		radiiPoints[k++] =
 		    Vector3(
 		        0.f,
-		        static_cast<float>( dc ),
-		        static_cast<float>( ds )
+		        dc,
+		        ds
 		    );
 	}
 }

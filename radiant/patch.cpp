@@ -528,8 +528,8 @@ void Patch::ScaleTexture( float s, float t ){
 void Patch::RotateTexture( float angle ){
 	undoSave();
 
-	const float s = static_cast<float>( sin( degrees_to_radians( angle ) ) );
-	const float c = static_cast<float>( cos( degrees_to_radians( angle ) ) );
+	const float s = sin( degrees_to_radians( angle ) );
+	const float c = cos( degrees_to_radians( angle ) );
 
 	for ( PatchControlIter i = m_ctrl.data(); i != m_ctrl.data() + m_ctrl.size(); ++i )
 	{
@@ -699,7 +699,7 @@ void Patch::NaturalTexture(){
 			{
 				PatchControl* pHeight = pWidth;
 				for ( std::size_t h = 0; h < m_height; ++h, pHeight += m_width )
-					pHeight->m_texcoord[0] = static_cast<float>( tex );
+					pHeight->m_texcoord[0] = tex;
 			}
 
 			if ( w + 1 == m_width ) {
@@ -732,7 +732,7 @@ void Patch::NaturalTexture(){
 			{
 				PatchControl* pWidth = pHeight;
 				for ( std::size_t w = 0; w < m_width; ++w, ++pWidth )
-					pWidth->m_texcoord[1] = static_cast<float>( tex );
+					pWidth->m_texcoord[1] = tex;
 			}
 
 			if ( h + 1 == m_height ) {

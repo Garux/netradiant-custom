@@ -218,9 +218,9 @@ inline void planepts_snap( PlanePoints& planepts, double snap ){
 inline PointVertex pointvertex_for_planept( const DoubleVector3& point, const Colour4b& colour ){
 	return PointVertex(
 	           Vertex3f(
-	               static_cast<float>( point.x() ),
-	               static_cast<float>( point.y() ),
-	               static_cast<float>( point.z() )
+	               point.x(),
+	               point.y(),
+	               point.z()
 	           ),
 	           colour
 	       );

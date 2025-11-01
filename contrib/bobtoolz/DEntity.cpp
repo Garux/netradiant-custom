@@ -532,10 +532,10 @@ void DEntity::SpawnInt( const char* key, const char* defaultstring, int* out ){
 void DEntity::SpawnFloat( const char* key, const char* defaultstring, float* out ){
 	DEPair* pEP = FindEPairByKey( key );
 	if ( pEP ) {
-		*out = static_cast<float>( atof( pEP->value.c_str() ) );
+		*out = atof( pEP->value.c_str() );
 	}
 	else {
-		*out = static_cast<float>( atof( defaultstring ) );
+		*out = atof( defaultstring );
 	}
 }
 

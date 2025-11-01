@@ -270,7 +270,7 @@ float profile_load_float( const char *filename, const char *section, const char 
 	char value[1024];
 
 	if ( read_var( filename, section, key, value ) ) {
-		return static_cast<float>( atof( value ) );
+		return atof( value );
 	}
 	else{
 		return default_value;

@@ -32,21 +32,21 @@
 
 inline Matrix4 matrix4_frustum( float left, float right, float bottom, float top, float nearval, float farval ){
 	return Matrix4(
-	           static_cast<float>( ( 2 * nearval ) / ( right - left ) ),
+	           ( 2 * nearval ) / ( right - left ),
 	           0,
 	           0,
 	           0,
 	           0,
-	           static_cast<float>( ( 2 * nearval ) / ( top - bottom ) ),
+	           ( 2 * nearval ) / ( top - bottom ),
 	           0,
 	           0,
-	           static_cast<float>( ( right + left ) / ( right - left ) ),
-	           static_cast<float>( ( top + bottom ) / ( top - bottom ) ),
-	           static_cast<float>( -( farval + nearval ) / ( farval - nearval ) ),
+	           ( right + left ) / ( right - left ),
+	           ( top + bottom ) / ( top - bottom ),
+	           -( farval + nearval ) / ( farval - nearval ),
 	           -1,
 	           0,
 	           0,
-	           static_cast<float>( -( 2 * farval * nearval ) / ( farval - nearval ) ),
+	           -( 2 * farval * nearval ) / ( farval - nearval ),
 	           0
 	       );
 }
@@ -106,12 +106,12 @@ public:
 			if ( b0 ^ b1 ) {
 				*out = vector4_subtracted( *next, *i );
 
-				double scale = ClipPlane::scale( *i, *out );
+				const double scale = ClipPlane::scale( *i, *out );
 
-				( *out )[0] = static_cast<float>( ( *i )[0] + scale * ( ( *out )[0] ) );
-				( *out )[1] = static_cast<float>( ( *i )[1] + scale * ( ( *out )[1] ) );
-				( *out )[2] = static_cast<float>( ( *i )[2] + scale * ( ( *out )[2] ) );
-				( *out )[3] = static_cast<float>( ( *i )[3] + scale * ( ( *out )[3] ) );
+				( *out )[0] = ( *i )[0] + scale * ( ( *out )[0] );
+				( *out )[1] = ( *i )[1] + scale * ( ( *out )[1] );
+				( *out )[2] = ( *i )[2] + scale * ( ( *out )[2] );
+				( *out )[3] = ( *i )[3] + scale * ( ( *out )[3] );
 
 				++out;
 			}
@@ -231,12 +231,12 @@ inline std::size_t homogenous_clip_line( Vector4 clipped[2] ){
 		if ( index ^ CLIP_X_LT_W( p1 ) ) {
 			Vector4 clip( vector4_subtracted( p1, p0 ) );
 
-			double scale = ( p0[0] - p0[3] ) / ( clip[3] - clip[0] );
+			const double scale = ( p0[0] - p0[3] ) / ( clip[3] - clip[0] );
 
-			clip[0] = static_cast<float>( p0[0] + scale * clip[0] );
-			clip[1] = static_cast<float>( p0[1] + scale * clip[1] );
-			clip[2] = static_cast<float>( p0[2] + scale * clip[2] );
-			clip[3] = static_cast<float>( p0[3] + scale * clip[3] );
+			clip[0] = p0[0] + scale * clip[0];
+			clip[1] = p0[1] + scale * clip[1];
+			clip[2] = p0[2] + scale * clip[2];
+			clip[3] = p0[3] + scale * clip[3];
 
 			clipped[index] = clip;
 		}
@@ -250,12 +250,12 @@ inline std::size_t homogenous_clip_line( Vector4 clipped[2] ){
 		if ( index ^ CLIP_X_GT_W( p1 ) ) {
 			Vector4 clip( vector4_subtracted( p1, p0 ) );
 
-			double scale = ( p0[0] + p0[3] ) / ( -clip[3] - clip[0] );
+			const double scale = ( p0[0] + p0[3] ) / ( -clip[3] - clip[0] );
 
-			clip[0] = static_cast<float>( p0[0] + scale * clip[0] );
-			clip[1] = static_cast<float>( p0[1] + scale * clip[1] );
-			clip[2] = static_cast<float>( p0[2] + scale * clip[2] );
-			clip[3] = static_cast<float>( p0[3] + scale * clip[3] );
+			clip[0] = p0[0] + scale * clip[0];
+			clip[1] = p0[1] + scale * clip[1];
+			clip[2] = p0[2] + scale * clip[2];
+			clip[3] = p0[3] + scale * clip[3];
 
 			clipped[index] = clip;
 		}
@@ -269,12 +269,12 @@ inline std::size_t homogenous_clip_line( Vector4 clipped[2] ){
 		if ( index ^ CLIP_Y_LT_W( p1 ) ) {
 			Vector4 clip( vector4_subtracted( p1, p0 ) );
 
-			double scale = ( p0[1] - p0[3] ) / ( clip[3] - clip[1] );
+			const double scale = ( p0[1] - p0[3] ) / ( clip[3] - clip[1] );
 
-			clip[0] = static_cast<float>( p0[0] + scale * clip[0] );
-			clip[1] = static_cast<float>( p0[1] + scale * clip[1] );
-			clip[2] = static_cast<float>( p0[2] + scale * clip[2] );
-			clip[3] = static_cast<float>( p0[3] + scale * clip[3] );
+			clip[0] = p0[0] + scale * clip[0];
+			clip[1] = p0[1] + scale * clip[1];
+			clip[2] = p0[2] + scale * clip[2];
+			clip[3] = p0[3] + scale * clip[3];
 
 			clipped[index] = clip;
 		}
@@ -288,12 +288,12 @@ inline std::size_t homogenous_clip_line( Vector4 clipped[2] ){
 		if ( index ^ CLIP_Y_GT_W( p1 ) ) {
 			Vector4 clip( vector4_subtracted( p1, p0 ) );
 
-			double scale = ( p0[1] + p0[3] ) / ( -clip[3] - clip[1] );
+			const double scale = ( p0[1] + p0[3] ) / ( -clip[3] - clip[1] );
 
-			clip[0] = static_cast<float>( p0[0] + scale * clip[0] );
-			clip[1] = static_cast<float>( p0[1] + scale * clip[1] );
-			clip[2] = static_cast<float>( p0[2] + scale * clip[2] );
-			clip[3] = static_cast<float>( p0[3] + scale * clip[3] );
+			clip[0] = p0[0] + scale * clip[0];
+			clip[1] = p0[1] + scale * clip[1];
+			clip[2] = p0[2] + scale * clip[2];
+			clip[3] = p0[3] + scale * clip[3];
 
 			clipped[index] = clip;
 		}
@@ -307,12 +307,12 @@ inline std::size_t homogenous_clip_line( Vector4 clipped[2] ){
 		if ( index ^ CLIP_Z_LT_W( p1 ) ) {
 			Vector4 clip( vector4_subtracted( p1, p0 ) );
 
-			double scale = ( p0[2] - p0[3] ) / ( clip[3] - clip[2] );
+			const double scale = ( p0[2] - p0[3] ) / ( clip[3] - clip[2] );
 
-			clip[0] = static_cast<float>( p0[0] + scale * clip[0] );
-			clip[1] = static_cast<float>( p0[1] + scale * clip[1] );
-			clip[2] = static_cast<float>( p0[2] + scale * clip[2] );
-			clip[3] = static_cast<float>( p0[3] + scale * clip[3] );
+			clip[0] = p0[0] + scale * clip[0];
+			clip[1] = p0[1] + scale * clip[1];
+			clip[2] = p0[2] + scale * clip[2];
+			clip[3] = p0[3] + scale * clip[3];
 
 			clipped[index] = clip;
 		}
@@ -326,12 +326,12 @@ inline std::size_t homogenous_clip_line( Vector4 clipped[2] ){
 		if ( index ^ CLIP_Z_GT_W( p1 ) ) {
 			Vector4 clip( vector4_subtracted( p1, p0 ) );
 
-			double scale = ( p0[2] + p0[3] ) / ( -clip[3] - clip[2] );
+			const double scale = ( p0[2] + p0[3] ) / ( -clip[3] - clip[2] );
 
-			clip[0] = static_cast<float>( p0[0] + scale * clip[0] );
-			clip[1] = static_cast<float>( p0[1] + scale * clip[1] );
-			clip[2] = static_cast<float>( p0[2] + scale * clip[2] );
-			clip[3] = static_cast<float>( p0[3] + scale * clip[3] );
+			clip[0] = p0[0] + scale * clip[0];
+			clip[1] = p0[1] + scale * clip[1];
+			clip[2] = p0[2] + scale * clip[2];
+			clip[3] = p0[3] + scale * clip[3];
 
 			clipped[index] = clip;
 		}
@@ -388,12 +388,12 @@ inline std::size_t matrix4_clip_line_by_nearplane( const Matrix4& self, Line& li
 		if ( index ^ CLIP_Z_GT_W( p1 ) ) {
 			Vector4 clip( vector4_subtracted( p1, p0 ) );
 
-			double scale = ( p0[2] + p0[3] ) / ( -clip[3] - clip[2] );
+			const double scale = ( p0[2] + p0[3] ) / ( -clip[3] - clip[2] );
 
-			clip[0] = static_cast<float>( p0[0] + scale * clip[0] );
-			clip[1] = static_cast<float>( p0[1] + scale * clip[1] );
-			clip[2] = static_cast<float>( p0[2] + scale * clip[2] );
-			clip[3] = static_cast<float>( p0[3] + scale * clip[3] );
+			clip[0] = p0[0] + scale * clip[0];
+			clip[1] = p0[1] + scale * clip[1];
+			clip[2] = p0[2] + scale * clip[2];
+			clip[3] = p0[3] + scale * clip[3];
 
 			points[index] = clip;
 		}

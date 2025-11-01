@@ -448,24 +448,24 @@ inline Matrix4 matrix4_affine_inverse( const Matrix4& self ){
 	double det
 	      = self[0] * ( self[5] * self[10] - self[9] * self[6] )
 	      - self[1] * ( self[4] * self[10] - self[8] * self[6] )
-	      + self[2] * ( self[4] * self[9] - self[8] * self[5] );
+	      + self[2] * ( self[4] * self[9]  - self[8] * self[5] );
 
 	// throw exception here if (det*det < 1e-25)
 
 	// invert rotation submatrix
 	det = 1.0 / det;
 
-	result[0] = static_cast<float>(  ( self[5] * self[10] - self[6] * self[9] ) * det );
-	result[1] = static_cast<float>( -( self[1] * self[10] - self[2] * self[9] ) * det );
-	result[2] = static_cast<float>(  ( self[1] * self[6] - self[2] * self[5] ) * det );
-	result[3] = 0;
-	result[4] = static_cast<float>( -( self[4] * self[10] - self[6] * self[8] ) * det );
-	result[5] = static_cast<float>(  ( self[0] * self[10] - self[2] * self[8] ) * det );
-	result[6] = static_cast<float>( -( self[0] * self[6] - self[2] * self[4] ) * det );
-	result[7] = 0;
-	result[8] = static_cast<float>(  ( self[4] * self[9] - self[5] * self[8] ) * det );
-	result[9] = static_cast<float>( -( self[0] * self[9] - self[1] * self[8] ) * det );
-	result[10] = static_cast<float>(  ( self[0] * self[5] - self[1] * self[4] ) * det );
+	result[0]  =  ( self[5] * self[10] - self[6] * self[9] ) * det;
+	result[1]  = -( self[1] * self[10] - self[2] * self[9] ) * det;
+	result[2]  =  ( self[1] * self[6]  - self[2] * self[5] ) * det;
+	result[3]  = 0;
+	result[4]  = -( self[4] * self[10] - self[6] * self[8] ) * det;
+	result[5]  =  ( self[0] * self[10] - self[2] * self[8] ) * det;
+	result[6]  = -( self[0] * self[6]  - self[2] * self[4] ) * det;
+	result[7]  = 0;
+	result[8]  =  ( self[4] * self[9] - self[5] * self[8] ) * det;
+	result[9]  = -( self[0] * self[9] - self[1] * self[8] ) * det;
+	result[10] =  ( self[0] * self[5] - self[1] * self[4] ) * det;
 	result[11] = 0;
 
 	// multiply translation part by rotation
@@ -535,25 +535,25 @@ inline double matrix4_determinant( const Matrix4& self ){
 /// \brief Returns the inverse of \p self using the Adjoint method.
 /// \todo Throw an exception if the determinant is zero.
 inline Matrix4 matrix4_full_inverse( const Matrix4& self ){
-	double determinant = 1.0 / matrix4_determinant( self );
+	const double determinant = 1.0 / matrix4_determinant( self );
 
 	return Matrix4(
-	           static_cast<float>(  Matrix4Cofactor< Cofactor4<0>, Cofactor4<0> >::apply( self ) * determinant ),
-	           static_cast<float>( -Matrix4Cofactor< Cofactor4<1>, Cofactor4<0> >::apply( self ) * determinant ),
-	           static_cast<float>(  Matrix4Cofactor< Cofactor4<2>, Cofactor4<0> >::apply( self ) * determinant ),
-	           static_cast<float>( -Matrix4Cofactor< Cofactor4<3>, Cofactor4<0> >::apply( self ) * determinant ),
-	           static_cast<float>( -Matrix4Cofactor< Cofactor4<0>, Cofactor4<1> >::apply( self ) * determinant ),
-	           static_cast<float>(  Matrix4Cofactor< Cofactor4<1>, Cofactor4<1> >::apply( self ) * determinant ),
-	           static_cast<float>( -Matrix4Cofactor< Cofactor4<2>, Cofactor4<1> >::apply( self ) * determinant ),
-	           static_cast<float>(  Matrix4Cofactor< Cofactor4<3>, Cofactor4<1> >::apply( self ) * determinant ),
-	           static_cast<float>(  Matrix4Cofactor< Cofactor4<0>, Cofactor4<2> >::apply( self ) * determinant ),
-	           static_cast<float>( -Matrix4Cofactor< Cofactor4<1>, Cofactor4<2> >::apply( self ) * determinant ),
-	           static_cast<float>(  Matrix4Cofactor< Cofactor4<2>, Cofactor4<2> >::apply( self ) * determinant ),
-	           static_cast<float>( -Matrix4Cofactor< Cofactor4<3>, Cofactor4<2> >::apply( self ) * determinant ),
-	           static_cast<float>( -Matrix4Cofactor< Cofactor4<0>, Cofactor4<3> >::apply( self ) * determinant ),
-	           static_cast<float>(  Matrix4Cofactor< Cofactor4<1>, Cofactor4<3> >::apply( self ) * determinant ),
-	           static_cast<float>( -Matrix4Cofactor< Cofactor4<2>, Cofactor4<3> >::apply( self ) * determinant ),
-	           static_cast<float>(  Matrix4Cofactor< Cofactor4<3>, Cofactor4<3> >::apply( self ) * determinant )
+	            Matrix4Cofactor< Cofactor4<0>, Cofactor4<0> >::apply( self ) * determinant,
+	           -Matrix4Cofactor< Cofactor4<1>, Cofactor4<0> >::apply( self ) * determinant,
+	            Matrix4Cofactor< Cofactor4<2>, Cofactor4<0> >::apply( self ) * determinant,
+	           -Matrix4Cofactor< Cofactor4<3>, Cofactor4<0> >::apply( self ) * determinant,
+	           -Matrix4Cofactor< Cofactor4<0>, Cofactor4<1> >::apply( self ) * determinant,
+	            Matrix4Cofactor< Cofactor4<1>, Cofactor4<1> >::apply( self ) * determinant,
+	           -Matrix4Cofactor< Cofactor4<2>, Cofactor4<1> >::apply( self ) * determinant,
+	            Matrix4Cofactor< Cofactor4<3>, Cofactor4<1> >::apply( self ) * determinant,
+	            Matrix4Cofactor< Cofactor4<0>, Cofactor4<2> >::apply( self ) * determinant,
+	           -Matrix4Cofactor< Cofactor4<1>, Cofactor4<2> >::apply( self ) * determinant,
+	            Matrix4Cofactor< Cofactor4<2>, Cofactor4<2> >::apply( self ) * determinant,
+	           -Matrix4Cofactor< Cofactor4<3>, Cofactor4<2> >::apply( self ) * determinant,
+	           -Matrix4Cofactor< Cofactor4<0>, Cofactor4<3> >::apply( self ) * determinant,
+	            Matrix4Cofactor< Cofactor4<1>, Cofactor4<3> >::apply( self ) * determinant,
+	           -Matrix4Cofactor< Cofactor4<2>, Cofactor4<3> >::apply( self ) * determinant,
+	            Matrix4Cofactor< Cofactor4<3>, Cofactor4<3> >::apply( self ) * determinant
 	       );
 }
 
@@ -608,24 +608,24 @@ inline Matrix4 matrix4_translated_by_vec3( const Matrix4& self, const Vector3& t
 /// \brief Returns \p angle modulated by the range [0, 360).
 /// \p angle must be in the range [-360, 360).
 inline float angle_modulate_degrees_range( float angle ){
-	return static_cast<float>( float_mod_range( angle, 360.0 ) );
+	return float_mod_range( angle, 360.0 );
 }
 
 /// \brief Returns \p euler angles converted from radians to degrees.
 inline Vector3 euler_radians_to_degrees( const Vector3& euler ){
 	return Vector3(
-	           static_cast<float>( radians_to_degrees( euler.x() ) ),
-	           static_cast<float>( radians_to_degrees( euler.y() ) ),
-	           static_cast<float>( radians_to_degrees( euler.z() ) )
+	           radians_to_degrees( euler.x() ),
+	           radians_to_degrees( euler.y() ),
+	           radians_to_degrees( euler.z() )
 	       );
 }
 
 /// \brief Returns \p euler angles converted from degrees to radians.
 inline Vector3 euler_degrees_to_radians( const Vector3& euler ){
 	return Vector3(
-	           static_cast<float>( degrees_to_radians( euler.x() ) ),
-	           static_cast<float>( degrees_to_radians( euler.y() ) ),
-	           static_cast<float>( degrees_to_radians( euler.z() ) )
+	           degrees_to_radians( euler.x() ),
+	           degrees_to_radians( euler.y() ),
+	           degrees_to_radians( euler.z() )
 	       );
 }
 
@@ -643,7 +643,7 @@ inline Matrix4 matrix4_rotation_for_sincos_x( float s, float c ){
 
 /// \brief Constructs a pure-rotation matrix about the x axis from an angle in radians.
 inline Matrix4 matrix4_rotation_for_x( double x ){
-	return matrix4_rotation_for_sincos_x( static_cast<float>( sin( x ) ), static_cast<float>( cos( x ) ) );
+	return matrix4_rotation_for_sincos_x( sin( x ), cos( x ) );
 }
 
 /// \brief Constructs a pure-rotation matrix about the x axis from an angle in degrees.
@@ -663,7 +663,7 @@ inline Matrix4 matrix4_rotation_for_sincos_y( float s, float c ){
 
 /// \brief Constructs a pure-rotation matrix about the y axis from an angle in radians.
 inline Matrix4 matrix4_rotation_for_y( double y ){
-	return matrix4_rotation_for_sincos_y( static_cast<float>( sin( y ) ), static_cast<float>( cos( y ) ) );
+	return matrix4_rotation_for_sincos_y( sin( y ), cos( y ) );
 }
 
 /// \brief Constructs a pure-rotation matrix about the y axis from an angle in degrees.
@@ -683,7 +683,7 @@ inline Matrix4 matrix4_rotation_for_sincos_z( float s, float c ){
 
 /// \brief Constructs a pure-rotation matrix about the z axis from an angle in radians.
 inline Matrix4 matrix4_rotation_for_z( double z ){
-	return matrix4_rotation_for_sincos_z( static_cast<float>( sin( z ) ), static_cast<float>( cos( z ) ) );
+	return matrix4_rotation_for_sincos_z( sin( z ), cos( z ) );
 }
 
 /// \brief Constructs a pure-rotation matrix about the z axis from an angle in degrees.
@@ -717,25 +717,25 @@ inline Matrix4 matrix4_rotation_for_z_degrees( float z ){
 inline Matrix4 matrix4_rotation_for_euler_xyz( const Vector3& euler ){
 #if 1
 
-	double cx = cos( euler[0] );
-	double sx = sin( euler[0] );
-	double cy = cos( euler[1] );
-	double sy = sin( euler[1] );
-	double cz = cos( euler[2] );
-	double sz = sin( euler[2] );
+	const double cx = cos( euler[0] );
+	const double sx = sin( euler[0] );
+	const double cy = cos( euler[1] );
+	const double sy = sin( euler[1] );
+	const double cz = cos( euler[2] );
+	const double sz = sin( euler[2] );
 
 	return Matrix4(
-	           static_cast<float>( cy * cz ),
-	           static_cast<float>( cy * sz ),
-	           static_cast<float>( -sy ),
+	           cy * cz,
+	           cy * sz,
+	           -sy,
 	           0,
-	           static_cast<float>( sx * sy * cz + cx * -sz ),
-	           static_cast<float>( sx * sy * sz + cx * cz ),
-	           static_cast<float>( sx * cy ),
+	           sx * sy * cz + cx * -sz,
+	           sx * sy * sz + cx * cz,
+	           sx * cy,
 	           0,
-	           static_cast<float>( cx * sy * cz + sx * sz ),
-	           static_cast<float>( cx * sy * sz + -sx * cz ),
-	           static_cast<float>( cx * cy ),
+	           cx * sy * cz + sx * sz,
+	           cx * sy * sz + -sx * cz,
+	           cx * cy,
 	           0,
 	           0,
 	           0,
@@ -809,25 +809,25 @@ inline Matrix4 matrix4_rotation_for_euler_xzy_degrees( const Vector3& euler ){
 inline Matrix4 matrix4_rotation_for_euler_yxz( const Vector3& euler ){
 #if 1
 
-	double cx = cos( euler[0] );
-	double sx = sin( euler[0] );
-	double cy = cos( euler[1] );
-	double sy = sin( euler[1] );
-	double cz = cos( euler[2] );
-	double sz = sin( euler[2] );
+	const double cx = cos( euler[0] );
+	const double sx = sin( euler[0] );
+	const double cy = cos( euler[1] );
+	const double sy = sin( euler[1] );
+	const double cz = cos( euler[2] );
+	const double sz = sin( euler[2] );
 
 	return Matrix4(
-	           static_cast<float>( cy * cz + sx * sy * -sz ),
-	           static_cast<float>( cy * sz + sx * sy * cz ),
-	           static_cast<float>( -cx * sy ),
+	           cy * cz + sx * sy * -sz,
+	           cy * sz + sx * sy * cz,
+	           -cx * sy,
 	           0,
-	           static_cast<float>( cx * -sz ),
-	           static_cast<float>( cx * cz ),
-	           static_cast<float>( sx ),
+	           cx * -sz,
+	           cx * cz,
+	           sx,
 	           0,
-	           static_cast<float>( sy * cz + -sx * cy * -sz ),
-	           static_cast<float>( sy * sz + -sx * cy * cz ),
-	           static_cast<float>( cx * cy ),
+	           sy * cz + -sx * cy * -sz,
+	           sy * sz + -sx * cy * cz,
+	           cx * cy,
 	           0,
 	           0,
 	           0,
@@ -876,25 +876,25 @@ inline Matrix4 matrix4_rotation_for_euler_zxy( const Vector3& euler ){
 	           matrix4_rotation_for_y( euler[1] )
 	       );
 #else
-	double cx = cos( euler[0] );
-	double sx = sin( euler[0] );
-	double cy = cos( euler[1] );
-	double sy = sin( euler[1] );
-	double cz = cos( euler[2] );
-	double sz = sin( euler[2] );
+	const double cx = cos( euler[0] );
+	const double sx = sin( euler[0] );
+	const double cy = cos( euler[1] );
+	const double sy = sin( euler[1] );
+	const double cz = cos( euler[2] );
+	const double sz = sin( euler[2] );
 
 	return Matrix4(
-	           static_cast<float>( cz * cy + sz * sx * sy ),
-	           static_cast<float>( sz * cx ),
-	           static_cast<float>( cz * -sy + sz * sx * cy ),
+	           cz * cy + sz * sx * sy,
+	           sz * cx,
+	           cz * -sy + sz * sx * cy,
 	           0,
-	           static_cast<float>( -sz * cy + cz * sx * sy ),
-	           static_cast<float>( cz * cx ),
-	           static_cast<float>( -sz * -sy + cz * cx * cy ),
+	           -sz * cy + cz * sx * sy,
+	           cz * cx,
+	           -sz * -sy + cz * cx * cy,
 	           0,
-	           static_cast<float>( cx * sy ),
-	           static_cast<float>( -sx ),
-	           static_cast<float>( cx * cy ),
+	           cx * sy,
+	           -sx,
+	           cx * cy,
 	           0,
 	           0,
 	           0,
@@ -925,25 +925,25 @@ inline void matrix4_rotate_by_euler_zxy_degrees( Matrix4& self, const Vector3& e
 inline Matrix4 matrix4_rotation_for_euler_zyx( const Vector3& euler ){
 #if 1
 
-	double cx = cos( euler[0] );
-	double sx = sin( euler[0] );
-	double cy = cos( euler[1] );
-	double sy = sin( euler[1] );
-	double cz = cos( euler[2] );
-	double sz = sin( euler[2] );
+	const double cx = cos( euler[0] );
+	const double sx = sin( euler[0] );
+	const double cy = cos( euler[1] );
+	const double sy = sin( euler[1] );
+	const double cz = cos( euler[2] );
+	const double sz = sin( euler[2] );
 
 	return Matrix4(
-	           static_cast<float>( cy * cz ),
-	           static_cast<float>( sx * sy * cz + cx * sz ),
-	           static_cast<float>( cx * -sy * cz + sx * sz ),
+	           cy * cz,
+	           sx * sy * cz + cx * sz,
+	           cx * -sy * cz + sx * sz,
 	           0,
-	           static_cast<float>( cy * -sz ),
-	           static_cast<float>( sx * sy * -sz + cx * cz ),
-	           static_cast<float>( cx * -sy * -sz + sx * cz ),
+	           cy * -sz,
+	           sx * sy * -sz + cx * cz,
+	           cx * -sy * -sz + sx * cz,
 	           0,
-	           static_cast<float>( sy ),
-	           static_cast<float>( -sx * cy ),
-	           static_cast<float>( cx * cy ),
+	           sy,
+	           -sx * cy,
+	           cx * cy,
 	           0,
 	           0,
 	           0,
@@ -978,16 +978,16 @@ inline Vector3 matrix4_get_rotation_euler_xyz( const Matrix4& self ){
 
 	if ( std::fabs( ca ) > 0.005 ) { // Gimbal lock?
 		return Vector3(
-		           static_cast<float>( atan2( self[6] / ca, self[10] / ca ) ),
-		           static_cast<float>( a ),
-		           static_cast<float>( atan2( self[1] / ca, self[0] / ca ) )
+		           atan2( self[6] / ca, self[10] / ca ),
+		           a,
+		           atan2( self[1] / ca, self[0] / ca )
 		       );
 	}
 	else // Gimbal lock has occurred
 	{
 		return Vector3(
-		           static_cast<float>( atan2( -self[9], self[5] ) ),
-		           static_cast<float>( a ),
+		           atan2( -self[9], self[5] ),
+		           a,
 		           0
 		       );
 	}
@@ -1006,16 +1006,16 @@ inline Vector3 matrix4_get_rotation_euler_yxz( const Matrix4& self ){
 
 	if ( std::fabs( ca ) > 0.005 ) { // Gimbal lock?
 		return Vector3(
-		           static_cast<float>( a ),
-		           static_cast<float>( atan2( -self[2] / ca, self[10] / ca ) ),
-		           static_cast<float>( atan2( -self[4] / ca, self[5] / ca ) )
+		           a,
+		           atan2( -self[2] / ca, self[10] / ca ),
+		           atan2( -self[4] / ca, self[5] / ca )
 		       );
 	}
 	else // Gimbal lock has occurred
 	{
 		return Vector3(
-		           static_cast<float>( a ),
-		           static_cast<float>( atan2( self[8], self[0] ) ),
+		           a,
+		           atan2( self[8], self[0] ),
 		           0
 		       );
 	}
@@ -1029,22 +1029,22 @@ inline Vector3 matrix4_get_rotation_euler_yxz_degrees( const Matrix4& self ){
 /// \brief Calculates and returns a set of euler angles that produce the rotation component of \p self when applied in the order (z, x, y).
 /// \p self must be affine and orthonormal (unscaled) to produce a meaningful result.
 inline Vector3 matrix4_get_rotation_euler_zxy( const Matrix4& self ){
-	double a = asin( -self[9] );
-	double ca = cos( a );
+	const double a = asin( -self[9] );
+	const double ca = cos( a );
 
 	if ( std::fabs( ca ) > 0.005 ) { // Gimbal lock?
 		return Vector3(
-		           static_cast<float>( a ),
-		           static_cast<float>( atan2( self[8] / ca, self[10] / ca ) ),
-		           static_cast<float>( atan2( self[1] / ca, self[5] / ca ) )
+		           a,
+		           atan2( self[8] / ca, self[10] / ca ),
+		           atan2( self[1] / ca, self[5] / ca )
 		       );
 	}
 	else // Gimbal lock has occurred
 	{
 		return Vector3(
-		           static_cast<float>( a ),
+		           a,
 		           0,
-		           static_cast<float>( atan2( -self[4], self[0] ) )
+		           atan2( -self[4], self[0] )
 		       );
 	}
 }
@@ -1057,22 +1057,22 @@ inline Vector3 matrix4_get_rotation_euler_zxy_degrees( const Matrix4& self ){
 /// \brief Calculates and returns a set of euler angles that produce the rotation component of \p self when applied in the order (z, y, x).
 /// \p self must be affine and orthonormal (unscaled) to produce a meaningful result.
 inline Vector3 matrix4_get_rotation_euler_zyx( const Matrix4& self ){
-	double a = asin( self[8] );
-	double ca = cos( a );
+	const double a = asin( self[8] );
+	const double ca = cos( a );
 
 	if ( std::fabs( ca ) > 0.005 ) { // Gimbal lock?
 		return Vector3(
-		           static_cast<float>( atan2( -self[9] / ca, self[10] / ca ) ),
-		           static_cast<float>( a ),
-		           static_cast<float>( atan2( -self[4] / ca, self[0] / ca ) )
+		           atan2( -self[9] / ca, self[10] / ca ),
+		           a,
+		           atan2( -self[4] / ca, self[0] / ca )
 		       );
 	}
 	else // Gimbal lock has occurred
 	{
 		return Vector3(
 		           0,
-		           static_cast<float>( a ),
-		           static_cast<float>( atan2( self[1], self[5] ) )
+		           a,
+		           atan2( self[1], self[5] )
 		       );
 	}
 }
@@ -1105,9 +1105,9 @@ inline Matrix4 matrix4_scale_for_vec3( const Vector3& scale ){
 /// \p self must be affine and orthogonal to produce a meaningful result.
 inline Vector3 matrix4_get_scale_vec3( const Matrix4& self ){
 	return Vector3(
-	           static_cast<float>( vector3_length( self.x().vec3() ) ),
-	           static_cast<float>( vector3_length( self.y().vec3() ) ),
-	           static_cast<float>( vector3_length( self.z().vec3() ) )
+	           vector3_length( self.x().vec3() ),
+	           vector3_length( self.y().vec3() ),
+	           vector3_length( self.z().vec3() )
 	       );
 }
 
@@ -1116,9 +1116,9 @@ inline Vector3 matrix4_get_scale_vec3( const Matrix4& self ){
 /// \p self must not contain rotation to produce meaningful signs.
 inline Vector3 matrix4_get_scale_vec3_signed( const Matrix4& self ){
 	return Vector3(
-	           static_cast<float>( std::copysign( vector3_length( self.x().vec3() ), vector3_dot( self.x().vec3(), g_vector3_axis_x ) ) ),
-	           static_cast<float>( std::copysign( vector3_length( self.y().vec3() ), vector3_dot( self.y().vec3(), g_vector3_axis_y ) ) ),
-	           static_cast<float>( std::copysign( vector3_length( self.z().vec3() ), vector3_dot( self.z().vec3(), g_vector3_axis_z ) ) )
+	           std::copysign( vector3_length( self.x().vec3() ), vector3_dot( self.x().vec3(), g_vector3_axis_x ) ),
+	           std::copysign( vector3_length( self.y().vec3() ), vector3_dot( self.y().vec3(), g_vector3_axis_y ) ),
+	           std::copysign( vector3_length( self.z().vec3() ), vector3_dot( self.z().vec3(), g_vector3_axis_z ) )
 	       );
 }
 

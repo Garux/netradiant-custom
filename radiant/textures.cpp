@@ -134,23 +134,15 @@ bool g_TextureAnisotropy = true;
 
 byte g_gammatable[256];
 void ResampleGamma( float fGamma ){
-	int i, inf;
 	if ( fGamma == 1.0 ) {
-		for ( i = 0; i < 256; ++i )
+		for ( int i = 0; i < 256; ++i )
 			g_gammatable[i] = i;
 	}
 	else
 	{
-		for ( i = 0; i < 256; ++i )
+		for ( int i = 0; i < 256; ++i )
 		{
-			inf = (int)( 255 * pow( static_cast<double>( ( i + 0.5 ) / 255.5 ), static_cast<double>( fGamma ) ) + 0.5 );
-			if ( inf < 0 ) {
-				inf = 0;
-			}
-			if ( inf > 255 ) {
-				inf = 255;
-			}
-			g_gammatable[i] = inf;
+			g_gammatable[i] = std::clamp( (int)( 255 * pow( ( i + 0.5 ) / 255.5, fGamma ) + 0.5 ), 0, 255 );
 		}
 	}
 }

@@ -143,10 +143,10 @@ inline Vector3 point_on_plane( const Plane3& plane, const Matrix4& object2device
 
 //! a and b are unit vectors .. returns angle in radians
 inline float angle_between( const Vector3& a, const Vector3& b ){
-	return static_cast<float>( 2.0 * atan2(
-	                               vector3_length( vector3_subtracted( a, b ) ),
-	                               vector3_length( vector3_added( a, b ) )
-	                           ) );
+	return 2.0 * atan2(
+	           vector3_length( vector3_subtracted( a, b ) ),
+	           vector3_length( vector3_added( a, b ) )
+	       );
 }
 
 
@@ -180,7 +180,7 @@ inline float angle_for_axis( const Vector3& a, const Vector3& b, const Vector3& 
 }
 
 inline float distance_for_axis( const Vector3& a, const Vector3& b, const Vector3& axis ){
-	return static_cast<float>( vector3_dot( b, axis ) - vector3_dot( a, axis ) );
+	return vector3_dot( b, axis ) - vector3_dot( a, axis );
 }
 
 
@@ -1370,7 +1370,7 @@ enum clipcull_t
 
 
 inline SelectionIntersection select_point_from_clipped( Vector4& clipped ){
-	return SelectionIntersection( clipped[2] / clipped[3], static_cast<float>( vector3_length_squared( Vector3( clipped[0] / clipped[3], clipped[1] / clipped[3], 0 ) ) ) );
+	return SelectionIntersection( clipped[2] / clipped[3], vector3_length_squared( Vector3( clipped[0] / clipped[3], clipped[1] / clipped[3], 0 ) ) );
 }
 
 void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& best, clipcull_t cull, const Plane3* plane = 0 ){
@@ -1409,9 +1409,9 @@ void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& be
 		for ( point_iterator_t previous = end - 1, current = normalised; current != end; previous = current, ++current )
 		{
 			Vector3 point = line_closest_point( Line( *previous, *current ), Vector3( 0, 0, 0 ) );
-			float depth = point.z();
+			const float depth = point.z();
 			point.z() = 0;
-			float distance = static_cast<float>( vector3_length_squared( point ) );
+			const float distance = vector3_length_squared( point );
 
 			if( plane->c == 0 ){
 				assign_if_closer( best, SelectionIntersection( depth, distance ) );
@@ -1421,10 +1421,10 @@ void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& be
 				                      Ray( Vector3( 0, 0, 0 ), Vector3( 0, 0, 1 ) ),
 				                      *plane
 				                  ) ) );
-//										globalOutputStream() << static_cast<float>( ray_distance_to_plane(
+//										globalOutputStream() << ray_distance_to_plane(
 //										Ray( Vector3( 0, 0, 0 ), Vector3( 0, 0, 1 ) ),
 //										plane
-//										) ) << '\n';
+//										) << '\n';
 			}
 		}
 	}
@@ -1920,8 +1920,8 @@ inline void draw_semicircle( const std::size_t segments, const float radius, Poi
 
 		{
 			const double theta = increment * count;
-			x = static_cast<float>( radius * cos( theta ) );
-			y = static_cast<float>( radius * sin( theta ) );
+			x = radius * cos( theta );
+			y = radius * sin( theta );
 		}
 
 		remap_policy::set( j->vertex, y,-x, 0 );
@@ -2234,11 +2234,11 @@ inline void draw_arrowhead( const std::size_t segments, const float length, Flat
 		{
 			FlatShadedVertex& point = vertices[i * 6 + 0];
 			VertexRemap::x( point.vertex ) = length - arrowhead_length;
-			VertexRemap::y( point.vertex ) = arrowhead_radius * static_cast<float>( cos( i * head_segment ) );
-			VertexRemap::z( point.vertex ) = arrowhead_radius * static_cast<float>( sin( i * head_segment ) );
+			VertexRemap::y( point.vertex ) = arrowhead_radius * cos( i * head_segment );
+			VertexRemap::z( point.vertex ) = arrowhead_radius * sin( i * head_segment );
 			NormalRemap::x( point.normal ) = arrowhead_radius / arrowhead_length;
-			NormalRemap::y( point.normal ) = static_cast<float>( cos( i * head_segment ) );
-			NormalRemap::z( point.normal ) = static_cast<float>( sin( i * head_segment ) );
+			NormalRemap::y( point.normal ) = cos( i * head_segment );
+			NormalRemap::z( point.normal ) = sin( i * head_segment );
 		}
 		{
 			FlatShadedVertex& point = vertices[i * 6 + 1];
@@ -2246,17 +2246,17 @@ inline void draw_arrowhead( const std::size_t segments, const float length, Flat
 			VertexRemap::y( point.vertex ) = 0;
 			VertexRemap::z( point.vertex ) = 0;
 			NormalRemap::x( point.normal ) = arrowhead_radius / arrowhead_length;
-			NormalRemap::y( point.normal ) = static_cast<float>( cos( ( i + 0.5 ) * head_segment ) );
-			NormalRemap::z( point.normal ) = static_cast<float>( sin( ( i + 0.5 ) * head_segment ) );
+			NormalRemap::y( point.normal ) = cos( ( i + 0.5 ) * head_segment );
+			NormalRemap::z( point.normal ) = sin( ( i + 0.5 ) * head_segment );
 		}
 		{
 			FlatShadedVertex& point = vertices[i * 6 + 2];
 			VertexRemap::x( point.vertex ) = length - arrowhead_length;
-			VertexRemap::y( point.vertex ) = arrowhead_radius * static_cast<float>( cos( ( i + 1 ) * head_segment ) );
-			VertexRemap::z( point.vertex ) = arrowhead_radius * static_cast<float>( sin( ( i + 1 ) * head_segment ) );
+			VertexRemap::y( point.vertex ) = arrowhead_radius * cos( ( i + 1 ) * head_segment );
+			VertexRemap::z( point.vertex ) = arrowhead_radius * sin( ( i + 1 ) * head_segment );
 			NormalRemap::x( point.normal ) = arrowhead_radius / arrowhead_length;
-			NormalRemap::y( point.normal ) = static_cast<float>( cos( ( i + 1 ) * head_segment ) );
-			NormalRemap::z( point.normal ) = static_cast<float>( sin( ( i + 1 ) * head_segment ) );
+			NormalRemap::y( point.normal ) = cos( ( i + 1 ) * head_segment );
+			NormalRemap::z( point.normal ) = sin( ( i + 1 ) * head_segment );
 		}
 
 		{
@@ -2271,8 +2271,8 @@ inline void draw_arrowhead( const std::size_t segments, const float length, Flat
 		{
 			FlatShadedVertex& point = vertices[i * 6 + 4];
 			VertexRemap::x( point.vertex ) = length - arrowhead_length;
-			VertexRemap::y( point.vertex ) = arrowhead_radius * static_cast<float>( cos( i * head_segment ) );
-			VertexRemap::z( point.vertex ) = arrowhead_radius * static_cast<float>( sin( i * head_segment ) );
+			VertexRemap::y( point.vertex ) = arrowhead_radius * cos( i * head_segment );
+			VertexRemap::z( point.vertex ) = arrowhead_radius * sin( i * head_segment );
 			NormalRemap::x( point.normal ) = -1;
 			NormalRemap::y( point.normal ) = 0;
 			NormalRemap::z( point.normal ) = 0;
@@ -2280,8 +2280,8 @@ inline void draw_arrowhead( const std::size_t segments, const float length, Flat
 		{
 			FlatShadedVertex& point = vertices[i * 6 + 5];
 			VertexRemap::x( point.vertex ) = length - arrowhead_length;
-			VertexRemap::y( point.vertex ) = arrowhead_radius * static_cast<float>( cos( ( i + 1 ) * head_segment ) );
-			VertexRemap::z( point.vertex ) = arrowhead_radius * static_cast<float>( sin( ( i + 1 ) * head_segment ) );
+			VertexRemap::y( point.vertex ) = arrowhead_radius * cos( ( i + 1 ) * head_segment );
+			VertexRemap::z( point.vertex ) = arrowhead_radius * sin( ( i + 1 ) * head_segment );
 			NormalRemap::x( point.normal ) = -1;
 			NormalRemap::y( point.normal ) = 0;
 			NormalRemap::z( point.normal ) = 0;

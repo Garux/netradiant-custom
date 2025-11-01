@@ -30,7 +30,7 @@
 #include "generic/callback.h"
 
 inline float string_read_float( const char* string ){
-	return static_cast<float>( atof( string ) );
+	return atof( string );
 }
 
 inline int string_read_int( const char* string ){
