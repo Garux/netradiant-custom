@@ -512,8 +512,8 @@ struct shaderInfo_t_data
 	char                *remapShader;                   /* ydnar: remap a shader in final stage */
 	char                *deprecateShader;               /* vortex: shader is deprecated and replaced by this on use */
 
-	std::list<surfaceModel_t> surfaceModels;            /* ydnar: for distribution of models */
-	std::list<foliage_t>      foliage;                  /* ydnar/splash damage: wolf et foliage */
+	std::forward_list<surfaceModel_t> surfaceModels;    /* ydnar: for distribution of models */
+	std::forward_list<foliage_t>      foliage;          /* ydnar/splash damage: wolf et foliage */
 
 	float subdivisions;                                 /* from a "tesssize xxx" */
 	float backsplashFraction;                           /* floating point value, usually 0.05 */

@@ -1125,7 +1125,7 @@ static void ParseShaderFile( const char *filename ){
 				/* ydnar: q3map_surfacemodel <path to model> <density> <min scale> <max scale> <min angle> <max angle> <oriented (0 or 1)> */
 				else if ( striEqual( token, "q3map_surfacemodel" ) ) {
 					/* allocate new model and attach it */
-					surfaceModel_t& model = si.surfaceModels.emplace_back();
+					surfaceModel_t& model = si.surfaceModels.emplace_front();
 
 					/* get parameters */
 					text.GetToken( false );
@@ -1153,7 +1153,7 @@ static void ParseShaderFile( const char *filename ){
 				/* ydnar/sd: q3map_foliage <path to model> <scale> <density> <odds> <invert alpha (1 or 0)> */
 				else if ( striEqual( token, "q3map_foliage" ) ) {
 					/* allocate new foliage struct and attach it */
-					foliage_t& foliage = si.foliage.emplace_back();
+					foliage_t& foliage = si.foliage.emplace_front();
 
 					/* get parameters */
 					text.GetToken( false );
