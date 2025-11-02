@@ -940,10 +940,10 @@ public:
 
 		if( g_modifiers.shift() || g_modifiers.ctrl() ){ // square or cube
 			const float squaresize = std::max( std::fabs( diff.x() ), std::fabs( diff.y() ) );
-			diff.x() = diff.x() > 0? squaresize : -squaresize; //square
-			diff.y() = diff.y() > 0? squaresize : -squaresize;
+			diff.x() = std::copysign( squaresize, diff.x() ); //square
+			diff.y() = std::copysign( squaresize, diff.y() );
 			if( g_modifiers.ctrl() && !g_modifiers.alt() ) //cube
-				diff.z() = diff.z() > 0? squaresize : -squaresize;
+				diff.z() = std::copysign( squaresize, diff.z() );
 		}
 
 		m_size = diff;

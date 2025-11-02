@@ -74,7 +74,7 @@ public:
 		const float displacement = point[Index] - aabb.origin[Index];
 		const float half_difference = 0.5f * ( std::fabs( displacement ) - aabb.extents[Index] );
 		if ( half_difference > 0 ) {
-			aabb.origin[Index] += ( displacement >= 0 ) ? half_difference : -half_difference;
+			aabb.origin[Index] += std::copysign( half_difference, displacement );
 			aabb.extents[Index] += half_difference;
 		}
 	}
@@ -84,7 +84,7 @@ public:
 		if ( std::fabs( displacement ) > std::fabs( difference ) ) {
 			const float half_difference = 0.5f * ( std::fabs( displacement ) + difference );
 			if ( half_difference > 0 ) {
-				aabb.origin[Index] += ( displacement >= 0 ) ? half_difference : -half_difference;
+				aabb.origin[Index] += std::copysign( half_difference, displacement );
 				aabb.extents[Index] += half_difference;
 			}
 		}

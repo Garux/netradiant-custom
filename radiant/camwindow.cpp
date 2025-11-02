@@ -388,12 +388,7 @@ void Camera_FreeMove( camera_t& camera, int dx, int dy ){
 
 		camera.angles[CAMERA_YAW] += dx * dtime * g_camwindow_globals_private.m_angleSpeed;
 
-		if ( camera.angles[CAMERA_PITCH] > 90 ) {
-			camera.angles[CAMERA_PITCH] = 90;
-		}
-		else if ( camera.angles[CAMERA_PITCH] < -90 ) {
-			camera.angles[CAMERA_PITCH] = -90;
-		}
+		camera.angles[CAMERA_PITCH] = std::clamp( camera.angles[CAMERA_PITCH], -90.f, 90.f );
 
 		if ( camera.angles[CAMERA_YAW] >= 360 ) {
 			camera.angles[CAMERA_YAW] -= 360;

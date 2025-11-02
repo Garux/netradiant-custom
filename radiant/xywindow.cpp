@@ -647,29 +647,20 @@ void XYWnd_OrientCamera( XYWnd* xywnd, int x, int y, CamWnd& camwnd ){
 	if ( point[nDim2] || point[nDim1] ) {
 		Vector3 angles( Camera_getAngles( camwnd ) );
 		angles[nAngle] = radians_to_degrees( atan2( point[nDim2], point[nDim1] ) );
-		if( angles[CAMERA_YAW] < 0 )
-			angles[CAMERA_YAW] += 360;
+		float &p = angles[CAMERA_PITCH], &y = angles[CAMERA_YAW];
+		if( y < 0 ) // normalize yaw to 0..360
+			y += 360;
 		if ( nAngle == CAMERA_PITCH ){
-			if( std::fabs( angles[CAMERA_PITCH] ) > 90 ){
-				angles[CAMERA_PITCH] = ( angles[CAMERA_PITCH] > 0 ) ? ( -angles[CAMERA_PITCH] + 180 ) : ( -angles[CAMERA_PITCH] - 180 );
-				if( viewtype == YZ ){
-					if( angles[CAMERA_YAW] < 180 ){
-						angles[CAMERA_YAW] = 360 - angles[CAMERA_YAW];
-					}
-				}
-				else if( angles[CAMERA_YAW] < 90 || angles[CAMERA_YAW] > 270 ){
-					angles[CAMERA_YAW] = 180 - angles[CAMERA_YAW];
-				}
+			const bool flipPitch = std::fabs( p ) > 90;
+			if( flipPitch )
+				p = -p + std::copysign( 180, p );
+
+			if( viewtype == YZ ){
+				if( ( y < 180 ) == flipPitch ) // mirror yaw along X
+					y = 360 - y;
 			}
-			else{
-				if( viewtype == YZ ){
-					if( angles[CAMERA_YAW] > 180 ){
-						angles[CAMERA_YAW] = 360 - angles[CAMERA_YAW];
-					}
-				}
-				else if( angles[CAMERA_YAW] > 90 && angles[CAMERA_YAW] < 270 ){
-					angles[CAMERA_YAW] = 180 - angles[CAMERA_YAW];
-				}
+			else if( ( y < 90 || y > 270 ) == flipPitch ){  // mirror yaw along Y
+				y = 180 - y;
 			}
 		}
 		Camera_setAngles( camwnd, angles );
