@@ -836,9 +836,9 @@ static void FinishBrush( bool noCollapseGroups, entity_t& mapEnt ){
 	b.original = &b;
 
 	/* link colorMod volume brushes to the entity directly */
-	if ( b.contentShader != nullptr &&
-	     b.contentShader->colorMod != nullptr &&
-	     b.contentShader->colorMod->type == EColorMod::Volume ) {
+	if ( b.contentShader != nullptr
+	 && !b.contentShader->colorMod.empty()
+	 &&  b.contentShader->colorMod.front().type == EColorMod::Volume ) {
 		mapEnt.colorModBrushes.push_back( &b );
 	}
 }

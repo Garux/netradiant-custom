@@ -45,9 +45,9 @@ static int numCustSurfaceParms;
    routines for dealing with vertex color/alpha modification
  */
 
-void ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVerts ){
+void ColorMod( const std::forward_list<colorMod_t>& colormod, int numVerts, bspDrawVert_t *drawVerts ){
 	/* dummy check */
-	if ( colormod == nullptr || numVerts < 1 || drawVerts == nullptr ) {
+	if ( colormod.empty() || numVerts < 1 || drawVerts == nullptr ) {
 		return;
 	}
 
@@ -56,16 +56,16 @@ void ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVert
 	for ( bspDrawVert_t& dv : Span( drawVerts, numVerts ) )
 	{
 		/* walk colorMod list */
-		for ( const colorMod_t *cm = colormod; cm != nullptr; cm = cm->next )
+		for ( const colorMod_t& cm : colormod )
 		{
 			float c;
 			/* default */
 			Color4f mult( 1, 1, 1, 1 );
 			Color4f add( 0, 0, 0, 0 );
 
-			const Vector3 cm_vec3 = vector3_from_array( cm->data );
+			const Vector3 cm_vec3 = vector3_from_array( cm.data );
 			/* switch on type */
-			switch ( cm->type )
+			switch ( cm.type )
 			{
 			case EColorMod::ColorSet:
 				mult.rgb().set( 0 );
@@ -74,7 +74,7 @@ void ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVert
 
 			case EColorMod::AlphaSet:
 				mult.alpha() = 0;
-				add.alpha() = cm->data[ 0 ] * 255.0f;
+				add.alpha() = cm.data[ 0 ] * 255.0f;
 				break;
 
 			case EColorMod::ColorScale:
@@ -82,7 +82,7 @@ void ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVert
 				break;
 
 			case EColorMod::AlphaScale:
-				mult.alpha() = cm->data[ 0 ];
+				mult.alpha() = cm.data[ 0 ];
 				break;
 
 			case EColorMod::ColorDotProduct:
@@ -92,7 +92,7 @@ void ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVert
 
 			case EColorMod::ColorDotProductScale:
 				c = vector3_dot( dv.normal, cm_vec3 );
-				c = ( c - cm->data[3] ) / ( cm->data[4] - cm->data[3] );
+				c = ( c - cm.data[3] ) / ( cm.data[4] - cm.data[3] );
 				mult.rgb().set( c );
 				break;
 
@@ -102,7 +102,7 @@ void ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVert
 
 			case EColorMod::AlphaDotProductScale:
 				c = vector3_dot( dv.normal, cm_vec3 );
-				c = ( c - cm->data[3] ) / ( cm->data[4] - cm->data[3] );
+				c = ( c - cm.data[3] ) / ( cm.data[4] - cm.data[3] );
 				mult.alpha() = c;
 				break;
 
@@ -115,7 +115,7 @@ void ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVert
 			case EColorMod::ColorDotProduct2Scale:
 				c = vector3_dot( dv.normal, cm_vec3 );
 				c *= c;
-				c = ( c - cm->data[3] ) / ( cm->data[4] - cm->data[3] );
+				c = ( c - cm.data[3] ) / ( cm.data[4] - cm.data[3] );
 				mult.rgb().set( c );
 				break;
 
@@ -127,7 +127,7 @@ void ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVert
 			case EColorMod::AlphaDotProduct2Scale:
 				c = vector3_dot( dv.normal, cm_vec3 );
 				c *= c;
-				c = ( c - cm->data[3] ) / ( cm->data[4] - cm->data[3] );
+				c = ( c - cm.data[3] ) / ( cm.data[4] - cm.data[3] );
 				mult.alpha() = c;
 				break;
 
@@ -1471,29 +1471,13 @@ static void ParseShaderFile( const char *filename ){
 				else if ( striEqual( token, "q3map_colorGen" ) || striEqual( token, "q3map_colorMod" ) ||
 				          striEqual( token, "q3map_rgbGen" ) || striEqual( token, "q3map_rgbMod" ) ||
 				          striEqual( token, "q3map_alphaGen" ) || striEqual( token, "q3map_alphaMod" ) ) {
-					colorMod_t  *cm, *cm2;
-
-
 					/* alphamods are colormod + 1 */
 					const bool alpha = striEqual( token, "q3map_alphaGen" ) || striEqual( token, "q3map_alphaMod" );
 
 					/* allocate new colormod */
-					cm = safe_calloc( sizeof( *cm ) );
-
-					/* attach to shader */
-					if ( si.colorMod == nullptr ) {
-						si.colorMod = cm;
-					}
-					else
-					{
-						for ( cm2 = si.colorMod; cm2 != nullptr; cm2 = cm2->next )
-						{
-							if ( cm2->next == nullptr ) {
-								cm2->next = cm;
-								break;
-							}
-						}
-					}
+					auto cm = si.colorMod.before_begin();
+					while( std::next( cm ) != si.colorMod.end() ) ++cm;
+					cm = si.colorMod.emplace_after( cm );
 
 					/* get type */
 					text.GetToken( false );

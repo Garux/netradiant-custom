@@ -483,7 +483,6 @@ enum class EColorMod
 
 struct colorMod_t
 {
-	colorMod_t   *next;
 	EColorMod type;
 	float data[ 16 ];
 };
@@ -542,7 +541,7 @@ struct shaderInfo_t_data
 	Vector3 vecs[ 2 ];                                  /* ydnar: explicit texture vectors for [0,1] texture space */
 	tcMod_t mod;                                        /* ydnar: q3map_tcMod matrix for djbob :) */
 	Vector3 lightmapAxis{ 0 };                          /* ydnar: explicit lightmap axis projection */
-	colorMod_t          *colorMod;                      /* ydnar: q3map_rgb/color/alpha/Set/Mod support */
+	std::forward_list<colorMod_t> colorMod;             /* ydnar: q3map_rgb/color/alpha/Set/Mod support */
 
 	int furNumLayers;                                   /* ydnar: number of fur layers */
 	float furOffset;                                    /* ydnar: offset of each layer */
@@ -1715,7 +1714,7 @@ const image_t               *ImageLoad( const char *name );
 
 
 /* shaders.c */
-void                        ColorMod( const colorMod_t *colormod, int numVerts, bspDrawVert_t *drawVerts );
+void                        ColorMod( const std::forward_list<colorMod_t>& colormod, int numVerts, bspDrawVert_t *drawVerts );
 
 void                        TCMod( const tcMod_t& mod, Vector2& st );
 
