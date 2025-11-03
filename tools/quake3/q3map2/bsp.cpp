@@ -230,10 +230,10 @@ static void FixBrushSides( const entity_t& e ){
 		for ( const sideRef_t *sideRef = ds.sideRef; sideRef != nullptr; sideRef = sideRef->next )
 		{
 			/* get bsp brush side */
-			if ( sideRef->side == nullptr || sideRef->side->outputNum < 0 ) {
+			if ( sideRef->side.outputNum < 0 ) {
 				continue;
 			}
-			bspBrushSide_t& side = bspBrushSides[ sideRef->side->outputNum ];
+			bspBrushSide_t& side = bspBrushSides[ sideRef->side.outputNum ];
 
 			/* set drawsurface */
 			side.surfaceNum = ds.outputNum;

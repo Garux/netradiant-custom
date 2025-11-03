@@ -582,7 +582,7 @@ static void ProjectDecalOntoWinding( decalProjector_t& dp, const mapDrawSurface_
 
 static void ProjectDecalOntoFace( decalProjector_t& dp, const mapDrawSurface_t& ds ){
 	/* dummy check */
-	if ( ds.sideRef == nullptr || ds.sideRef->side == nullptr ) {
+	if ( ds.sideRef == nullptr ) {
 		return;
 	}
 

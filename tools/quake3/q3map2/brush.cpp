@@ -40,28 +40,6 @@
    ------------------------------------------------------------------------------- */
 
 /*
-   AllocSideRef() - ydnar
-   allocates and assigns a brush side reference
- */
-
-sideRef_t *AllocSideRef( const side_t *side, sideRef_t *next ){
-	/* dummy check */
-	if ( side == nullptr ) {
-		return next;
-	}
-
-	/* allocate and return */
-	sideRef_t *sideRef = safe_malloc( sizeof( *sideRef ) );
-	sideRef->side = side;
-	sideRef->next = next;
-	return sideRef;
-}
-
-
-
-
-
-/*
    BoundBrush()
    sets the mins/maxs based on the windings
    returns false if the brush doesn't enclose a valid volume

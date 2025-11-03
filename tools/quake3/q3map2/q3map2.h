@@ -688,7 +688,9 @@ struct side_t
 struct sideRef_t
 {
 	sideRef_t           *next;
-	const side_t        *side;
+	const side_t        &side;
+	sideRef_t( sideRef_t *next, const side_t &side ) : next( next ), side( side ){
+	}
 };
 
 
@@ -894,6 +896,12 @@ struct mapDrawSurface_t
 	/* ydnar: editor/useful numbering */
 	int entityNum;
 	int surfaceNum;
+
+	void addSideRef( const side_t *side ){
+		if ( side != nullptr ) {
+			sideRef = new sideRef_t( sideRef, *side );
+		}
+	}
 };
 
 
@@ -1477,7 +1485,6 @@ int                         ConvertJsonMain( Args& args );
 
 
 /* brush.c */
-sideRef_t                   *AllocSideRef( const side_t *side, sideRef_t *next );
 Vector3                     SnapWeldVector( const Vector3& a, const Vector3& b );
 bool                        CreateBrushWindings( brush_t& brush );
 void                        WriteBSPBrushMap( const char *name, const brushlist_t& list );

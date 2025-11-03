@@ -70,7 +70,7 @@ struct MinMax1D
 struct metaTriangle_t
 {
 	shaderInfo_t        *si;
-	const side_t        *side;
+	const side_t        *side; // can be nullptr
 	int entityNum, surfaceNum, planeNum, fogNum, sampleSize, castShadows, recvShadows;
 	float shadeAngleDegrees;
 	Vector3 ambientColor;
@@ -321,7 +321,7 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t& ds ){
 			/* build a metatriangle */
 			metaTriangle_t src;
 			src.si                = ds.shaderInfo;
-			src.side = ( ds.sideRef != nullptr ? ds.sideRef->side : nullptr );
+			src.side = ( ds.sideRef != nullptr ? &ds.sideRef->side : nullptr );
 			src.entityNum         = ds.entityNum;
 			src.surfaceNum        = ds.surfaceNum;
 			src.planeNum          = ds.planeNum;
@@ -1503,7 +1503,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t& ds, const metaTriangle_t&
 		texMinMax = newTexMinMax;
 
 		/* add a side reference */
-		ds.sideRef = AllocSideRef( tri.side, ds.sideRef );
+		ds.addSideRef( tri.side );
 
 		for( const auto id : { ai, bi, ci } ){
 			if( id >= numVerts_original )
@@ -1555,7 +1555,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 		ds.verts = verts;
 		ds.indexes = indexes;
 		ds.lightmapAxis      = seed.lightmapAxis;
-		ds.sideRef = AllocSideRef( seed.side, nullptr );
+		ds.addSideRef( seed.side );
 
 		ds.minmax.clear();
 

@@ -716,7 +716,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 
 	ds.shaderInfo = si;
 	ds.mapBrush = &b;
-	ds.sideRef = AllocSideRef( &s, nullptr );
+	ds.addSideRef( &s );
 	ds.fogNum = FOG_INVALID;
 	ds.sampleSize = b.lightmapSampleSize;
 	ds.lightmapScale = b.lightmapScale;
@@ -1146,13 +1146,13 @@ void SubdivideFaceSurfaces( const entity_t& e ){
 	for ( mapDrawSurface_t& ds : Span( mapDrawSurfs + e.firstDrawSurf, mapDrawSurfs + numMapDrawSurfs ) )
 	{
 		/* only subdivide brush sides */
-		if ( ds.type != ESurfaceType::Face || ds.mapBrush == nullptr || ds.sideRef == nullptr || ds.sideRef->side == nullptr ) {
+		if ( ds.type != ESurfaceType::Face || ds.mapBrush == nullptr || ds.sideRef == nullptr ) {
 			continue;
 		}
 
 		/* get bits */
 		const brush_t *brush = ds.mapBrush;
-		const side_t& side = *ds.sideRef->side;
+		const side_t& side = ds.sideRef->side;
 
 		/* check subdivision for shader */
 		const shaderInfo_t *si = side.shaderInfo;

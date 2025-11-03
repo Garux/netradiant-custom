@@ -359,9 +359,10 @@ static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t& ds, con
 
 
 	/* dummy check */
-	if ( ds.sideRef == nullptr || ds.sideRef->side == nullptr ) {
+	if ( ds.sideRef == nullptr ) {
 		return false;
 	}
+	const side_t& sideRef = ds.sideRef->side;
 
 	/* initial setup */
 	winding_t w = WindingFromDrawSurf( ds );
@@ -373,12 +374,12 @@ static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t& ds, con
 		const plane_t& plane = mapplanes[ side.planenum ];
 
 		/* handle coplanar outfacing (don't fog) */
-		if ( ds.sideRef->side->planenum == side.planenum ) {
+		if ( sideRef.planenum == side.planenum ) {
 			return false;
 		}
 
 		/* handle coplanar infacing (keep inside) */
-		if ( ( ds.sideRef->side->planenum ^ 1 ) == side.planenum ) {
+		if ( ( sideRef.planenum ^ 1 ) == side.planenum ) {
 			continue;
 		}
 
@@ -404,10 +405,9 @@ static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t& ds, con
 
 	/* all of outside fragments become separate drawsurfs */
 	numFogFragments += outside.size();
-	const side_t *s = ds.sideRef->side;
 	for ( const winding_t& wi : outside )
 	{
-		newds = DrawSurfaceForSide( e, *ds.mapBrush, *s, wi );
+		newds = DrawSurfaceForSide( e, *ds.mapBrush, sideRef, wi );
 		newds->fogNum = ds.fogNum;
 	}
 
@@ -416,7 +416,7 @@ static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t& ds, con
 	          the right thing and uses the original surface's brush side */
 
 	/* build a drawsurf for it */
-	newds = DrawSurfaceForSide( e, *ds.mapBrush, *s, w );
+	newds = DrawSurfaceForSide( e, *ds.mapBrush, sideRef, w );
 	if ( newds == nullptr ) {
 		return false;
 	}
