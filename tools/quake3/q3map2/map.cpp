@@ -1421,8 +1421,7 @@ static void LoadEntityIndexMap( entity_t& e ){
 	}
 
 	/* create a new index map */
-	indexMap_t *im = safe_malloc( sizeof( *im ) );
-	new ( im ) indexMap_t{}; // placement new
+	indexMap_t *im = new indexMap_t{};
 
 	/* set it up */
 	im->w = w;

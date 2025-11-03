@@ -41,7 +41,7 @@
 mapDrawSurface_t& AllocDrawSurface( ESurfaceType type ){
 	/* bounds check */
 	if ( numMapDrawSurfs >= max_map_draw_surfs ) {
-		Error( "max_map_draw_surfs (%d) exceeded, consider -maxmapdrawsurfs to increase", max_map_draw_surfs );
+		Error( "max_map_draw_surfs (%d) exceeded, consider -maxmapdrawsurfs <N> to increase", max_map_draw_surfs );
 	}
 	mapDrawSurface_t& ds = mapDrawSurfs[ numMapDrawSurfs ];
 	numMapDrawSurfs++;
@@ -529,12 +529,7 @@ void ClassifyEntitySurfaces( const entity_t& e ){
    for shader-indexed surfaces (terrain), find a matching index from the indexmap
  */
 
-static byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax, const Vector3& point ){
-	/* early out if no indexmap */
-	if ( im == nullptr ) {
-		return 0;
-	}
-
+static byte GetShaderIndexForPoint( const indexMap_t& im, const MinMax& eMinmax, const Vector3& point ){
 	/* this code is really broken */
 	#if 0
 	/* legacy precision fudges for terrain */
@@ -551,8 +546,8 @@ static byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax,
 	const float t = std::clamp( floor( maxs[ 1 ] - point[ 1 ] + 0.1f ) / size[ 1 ], 0.0, 1.0 );
 
 	/* make xy */
-	const int x = ( im->w - 1 ) * s;
-	const int y = ( im->h - 1 ) * t;
+	const int x = ( im.w - 1 ) * s;
+	const int y = ( im.h - 1 ) * t;
 	#else
 	/* get size */
 	const Vector3 size = eMinmax.maxs - eMinmax.mins;
@@ -562,12 +557,12 @@ static byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax,
 	const float t = ( eMinmax.maxs[ 1 ] - point[ 1 ] ) / size[ 1 ];
 
 	/* calc xy */
-	const int x = std::clamp( int( s * im->w ), 0, im->w - 1 );
-	const int y = std::clamp( int( t * im->h ), 0, im->h - 1 );
+	const int x = std::clamp( int( s * im.w ), 0, im.w - 1 );
+	const int y = std::clamp( int( t * im.h ), 0, im.h - 1 );
 	#endif
 
 	/* return index */
-	return im->pixels[ y * im->w + x ];
+	return im.pixels[ y * im.w + x ];
 }
 
 
@@ -578,9 +573,9 @@ static byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax,
    this combines a couple different functions from terrain.c
  */
 
-static shaderInfo_t& GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im, int numPoints, byte *shaderIndexes ){
+static shaderInfo_t& GetIndexedShader( const shaderInfo_t *parent, const indexMap_t& im, int numPoints, byte *shaderIndexes ){
 	/* early out if bad data */
-	if ( im == nullptr || numPoints <= 0 || shaderIndexes == nullptr ) {
+	if ( numPoints <= 0 || shaderIndexes == nullptr ) {
 		return ShaderInfoForShader( "default" );
 	}
 
@@ -607,8 +602,8 @@ static shaderInfo_t& GetIndexedShader( const shaderInfo_t *parent, const indexMa
 
 	/* get the shader */
 	shaderInfo_t& si = ShaderInfoForShader( ( minShaderIndex == maxShaderIndex )
-	                          ? String64( "textures/", im->shader, '_', int( maxShaderIndex ) )
-	                          : String64( "textures/", im->shader, '_', int( minShaderIndex ), "to", int( maxShaderIndex ) ) );
+	                          ? String64( "textures/", im.shader, '_', int( maxShaderIndex ) )
+	                          : String64( "textures/", im.shader, '_', int( minShaderIndex ), "to", int( maxShaderIndex ) ) );
 
 	/* inherit a few things from parent shader */
 	if ( parent->globalTexture ) {
@@ -658,7 +653,6 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 	Vector3 texX, texY;
 	float x, y;
 	Vector3 vTranslated;
-	bool indexed;
 	byte shaderIndexes[ 256 ];
 	float offsets[ 256 ];
 
@@ -677,24 +671,19 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 	si = s.shaderInfo;
 
 	/* ydnar: gs mods: check for indexed shader */
-	if ( si->indexed && b.im != nullptr ) {
-		/* indexed */
-		indexed = true;
-
+	const bool indexed = ( si->indexed && b.im != nullptr );
+	if ( indexed ) {
 		/* get shader indexes for each point */
 		for ( size_t i = 0; i < w.size(); ++i )
 		{
-			shaderIndexes[ i ] = GetShaderIndexForPoint( b.im, b.eMinmax, w[ i ] );
+			shaderIndexes[ i ] = GetShaderIndexForPoint( *b.im, b.eMinmax, w[ i ] );
 			offsets[ i ] = b.im->offsets[ shaderIndexes[ i ] ];
 			//%	Sys_Printf( "%f ", offsets[ i ] );
 		}
 
 		/* get matching shader and set alpha */
 		parent = si;
-		si = &GetIndexedShader( parent, b.im, w.size(), shaderIndexes );
-	}
-	else{
-		indexed = false;
+		si = &GetIndexedShader( parent, *b.im, w.size(), shaderIndexes );
 	}
 
 	/* ydnar: sky hack/fix for GL_CLAMP borders on ati cards */
@@ -814,7 +803,6 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 	shaderInfo_t        *si, *parent;
 	bspDrawVert_t       *dv;
 	mesh_t              *copy;
-	bool indexed;
 	byte shaderIndexes[ MAX_EXPANDED_AXIS * MAX_EXPANDED_AXIS ];
 	float offsets[ MAX_EXPANDED_AXIS * MAX_EXPANDED_AXIS ];
 
@@ -860,23 +848,18 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 	FreeMesh( copy );
 
 	/* ydnar: gs mods: check for indexed shader */
-	if ( si->indexed && p.im != nullptr ) {
-		/* indexed */
-		indexed = true;
-
+	const bool indexed = ( si->indexed && p.im != nullptr );
+	if ( indexed ) {
 		/* get shader indexes for each point */
 		for ( i = 0; i < numVerts; ++i )
 		{
-			shaderIndexes[ i ] = GetShaderIndexForPoint( p.im, p.eMinmax, mesh->verts[ i ].xyz );
+			shaderIndexes[ i ] = GetShaderIndexForPoint( *p.im, p.eMinmax, mesh->verts[ i ].xyz );
 			offsets[ i ] = p.im->offsets[ shaderIndexes[ i ] ];
 		}
 
 		/* get matching shader and set alpha */
 		parent = si;
-		si = &GetIndexedShader( parent, p.im, numVerts, shaderIndexes );
-	}
-	else{
-		indexed = false;
+		si = &GetIndexedShader( parent, *p.im, numVerts, shaderIndexes );
 	}
 
 
