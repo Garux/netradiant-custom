@@ -309,8 +309,20 @@ struct bspDrawVert_t
 	Color4b color[ MAX_LIGHTMAPS ];             /* RBSP */
 };
 
+inline const bspDrawVert_t c_bspDrawVert_t0 =
+{
+	.xyz{ 0 },
+	.st{ 0, 0 },
+	.lightmap{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
+	.normal{ 0 },
+	.color{ { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } }
+};
+
 using TriRef = std::array<const bspDrawVert_t *, 3>;
 using QuadRef = std::array<const bspDrawVert_t *, 4>;
+
+using DrawVerts = std::vector<bspDrawVert_t>;
+using DrawIndexes = std::vector<int>;
 
 
 enum bspSurfaceType_t
@@ -840,7 +852,7 @@ struct mapDrawSurface_t
 {
 	ESurfaceType type;
 	bool planar;
-	int outputNum;                          /* ydnar: to match this sort of thing up */
+	int outputNum = -1;                     /* ydnar: to match this sort of thing up */
 
 	bool fur;                               /* ydnar: this is kind of a hack, but hey... */
 	bool skybox;                            /* ydnar: yet another fun hack */
@@ -857,14 +869,17 @@ struct mapDrawSurface_t
 
 	int fogNum;
 
-	int numVerts;                           /* vertexes and triangles */
-	bspDrawVert_t       *verts;
-	int numIndexes;
-	int                 *indexes;
+	/* vertexes and triangles */
+	DrawVerts verts;
+	DrawIndexes indexes;
 
-	int planeNum;
-	Vector3 lightmapOrigin;                 /* also used for flares */
-	Vector3 lightmapVecs[ 3 ];              /* also used for flares */
+	int numVerts() const {
+		return verts.size();
+	};
+
+	int planeNum = -1;
+	Vector3 lightmapOrigin{ 0 };            /* also used for flares */
+	Vector3 lightmapVecs[ 3 ]{ Vector3( 0 ), Vector3( 0 ), Vector3( 0 ) };              /* also used for flares */
 	int lightStyle;                         /* used for flares */
 
 	/* ydnar: per-surface (per-entity, actually) lightmap sample size scaling */
@@ -874,11 +889,11 @@ struct mapDrawSurface_t
 	float shadeAngleDegrees;
 
 	/* per-surface (per-entity, actually) ambientColor */
-	Vector3 ambientColor;
+	Vector3 ambientColor{ 0 };
 
 	/* ydnar: surface classification */
 	MinMax minmax;
-	Vector3 lightmapAxis;
+	Vector3 lightmapAxis{ 0 };
 	int sampleSize;
 
 	/* ydnar: shadow group support */
@@ -1721,7 +1736,7 @@ const image_t               *ImageLoad( const char *name );
 
 
 /* shaders.c */
-void                        ColorMod( const std::forward_list<colorMod_t>& colormod, int numVerts, bspDrawVert_t *drawVerts );
+void                        ColorMod( const std::forward_list<colorMod_t>& colormod, const Span<bspDrawVert_t> drawVerts );
 
 void                        TCMod( const tcMod_t& mod, Vector2& st );
 
@@ -2090,7 +2105,7 @@ inline const float minDiffuseSubdivide = 64.0f;
 inline int numDiffuseSurfaces;
 
 /* ydnar: general purpose extra copy of drawvert list */
-inline std::vector<bspDrawVert_t> yDrawVerts;
+inline DrawVerts yDrawVerts;
 
 inline const int defaultLightSubdivide = 999;
 
@@ -2193,9 +2208,9 @@ inline std::vector<bspGridPoint_t> bspGridPoints;
 
 inline std::vector<byte> bspVisBytes; // MAX_MAP_VISIBILITY
 
-inline std::vector<bspDrawVert_t> bspDrawVerts;
+inline DrawVerts bspDrawVerts;
 
-inline std::vector<int> bspDrawIndexes;
+inline DrawIndexes bspDrawIndexes;
 
 inline std::vector<bspDrawSurface_t> bspDrawSurfaces; // MAX_MAP_DRAW_SURFS
 

@@ -174,15 +174,12 @@ void Foliage( mapDrawSurface_t& src, entity_t& entity ){
 		case ESurfaceType::ForcedMeta:
 		case ESurfaceType::Triangles:
 		{
-			/* get verts */
-			const bspDrawVert_t *verts = src.verts;
-
 			/* map the triangles */
-			for ( int i = 0; i < src.numIndexes; i += 3 )
+			for ( auto i = src.indexes.cbegin(); i != src.indexes.cend(); i += 3 )
 				SubdivideFoliageTriangle_r( foliage, TriRef{
-					&verts[ src.indexes[ i + 0 ] ],
-					&verts[ src.indexes[ i + 1 ] ],
-					&verts[ src.indexes[ i + 2 ] ]
+					&src.verts[ *( i + 0 ) ],
+					&src.verts[ *( i + 1 ) ],
+					&src.verts[ *( i + 2 ) ]
 				} );
 			break;
 		}
@@ -192,7 +189,7 @@ void Foliage( mapDrawSurface_t& src, entity_t& entity ){
 			mesh_t srcMesh;
 			srcMesh.width = src.patchWidth;
 			srcMesh.height = src.patchHeight;
-			srcMesh.verts = src.verts;
+			srcMesh.verts = src.verts.data();
 			mesh_t *subdivided = SubdivideMesh( srcMesh, 8, 512 );
 
 			/* fit it to the curve and remove colinear verts on rows/columns */
@@ -274,36 +271,30 @@ void Foliage( mapDrawSurface_t& src, entity_t& entity ){
 
 			/* a wee hack */
 			ds.patchWidth = ds.numFoliageInstances;
-			ds.patchHeight = ds.numVerts;
+			ds.patchHeight = ds.verts.size();
 
 			/* set fog to be same as source surface */
 			ds.fogNum = src.fogNum;
 
 			/* add a drawvert for every instance */
-			bspDrawVert_t *verts = safe_calloc( ( ds.numVerts + ds.numFoliageInstances ) * sizeof( *verts ) );
-			memcpy( verts, ds.verts, ds.numVerts * sizeof( *verts ) );
-			free( ds.verts );
-			ds.verts = verts;
+			ds.verts.reserve( ds.verts.size() + ds.numFoliageInstances );
 
 			/* copy the verts */
-			for ( int j = 0; j < ds.numFoliageInstances; ++j )
+			for ( const foliageInstance_t& fi : Span( foliageInstances, ds.numFoliageInstances ) )
 			{
 				/* get vert (foliage instance) */
-				bspDrawVert_t& fi = ds.verts[ ds.numVerts + j ];
+				bspDrawVert_t& dv = ds.verts.emplace_back( c_bspDrawVert_t0 );
 
 				/* copy xyz and normal */
-				fi.xyz = foliageInstances[ j ].xyz;
-				fi.normal = foliageInstances[ j ].normal;
+				dv.xyz = fi.xyz;
+				dv.normal = fi.normal;
 
 				/* ydnar: set color */
-				for ( auto& color : fi.color )
+				for ( auto& color : dv.color )
 				{
 					color.set( 255 );
 				}
 			}
-
-			/* increment */
-			ds.numVerts += ds.numFoliageInstances;
 		}
 	}
 }

@@ -306,14 +306,14 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t& ds ){
 	}
 
 	/* only handle valid surfaces */
-	if ( ds.type != ESurfaceType::Bad && ds.numVerts >= 3 && ds.numIndexes >= 3 ) {
+	if ( ds.type != ESurfaceType::Bad && ds.verts.size() >= 3 && ds.indexes.size() >= 3 ) {
 		/* walk the indexes and create triangles */
-		for ( int i = 0; i < ds.numIndexes; i += 3 )
+		for ( auto i = ds.indexes.cbegin(); i != ds.indexes.cend(); i += 3 )
 		{
 			/* sanity check the indexes */
-			if ( ds.indexes[ i     ] == ds.indexes[ i + 1 ] ||
-			     ds.indexes[ i     ] == ds.indexes[ i + 2 ] ||
-			     ds.indexes[ i + 1 ] == ds.indexes[ i + 2 ] ) {
+			if ( *( i + 0 ) == *( i + 1 ) ||
+			     *( i + 0 ) == *( i + 2 ) ||
+			     *( i + 1 ) == *( i + 2 ) ) {
 				//%	Sys_Printf( "%d! ", ds.numVerts );
 				continue;
 			}
@@ -333,9 +333,9 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t& ds ){
 			src.ambientColor      = ds.ambientColor;
 			src.lightmapAxis      = ds.lightmapAxis;
 
-			metaTriangle_insert( src, { ds.verts[ ds.indexes[ i ] ],
-			                            ds.verts[ ds.indexes[ i + 1 ] ],
-			                            ds.verts[ ds.indexes[ i + 2 ] ] }, ds.planeNum );
+			metaTriangle_insert( src, { ds.verts[ *( i + 0 ) ],
+			                            ds.verts[ *( i + 1 ) ],
+			                            ds.verts[ *( i + 2 ) ] }, ds.planeNum );
 		}
 
 		/* add to count */
@@ -358,14 +358,14 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 	const bool forcePatchMeta = e.boolForKey( "_patchMeta", "patchMeta" );
 
 	/* try to early out */
-	if ( ds.numVerts == 0 || ds.type != ESurfaceType::Patch || ( !patchMeta && !forcePatchMeta ) ) {
+	if ( ds.verts.empty() || ds.type != ESurfaceType::Patch || ( !patchMeta && !forcePatchMeta ) ) {
 		return;
 	}
 	/* make a mesh from the drawsurf */
 	mesh_t src;
 	src.width = ds.patchWidth;
 	src.height = ds.patchHeight;
-	src.verts = ds.verts;
+	src.verts = ds.verts.data();
 	//%	mesh_t *subdivided = SubdivideMesh( src, 8, 999 );
 
 	int iterations;
@@ -396,12 +396,11 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 
 	/* basic transmogrification */
 	dsNew.type = ESurfaceType::Meta;
-	dsNew.numIndexes = 0;
-	dsNew.indexes = safe_malloc( mesh->width * mesh->height * 6 * sizeof( int ) );
+	dsNew.indexes.clear();
+	dsNew.indexes.reserve( ( mesh->width - 1 ) * ( mesh->height - 1 ) * 6 );
 
 	/* copy the verts in */
-	dsNew.numVerts = ( mesh->width * mesh->height );
-	dsNew.verts = mesh->verts;
+	dsNew.verts.assign( mesh->verts, mesh->verts + mesh->width * mesh->height );
 
 	/* iterate through the mesh quads */
 	for ( int y = 0; y < ( mesh->height - 1 ); ++y )
@@ -420,19 +419,18 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 			const int r = ( x + y ) & 1;
 
 			/* make first triangle */
-			dsNew.indexes[ dsNew.numIndexes++ ] = pw[ r + 0 ];
-			dsNew.indexes[ dsNew.numIndexes++ ] = pw[ r + 1 ];
-			dsNew.indexes[ dsNew.numIndexes++ ] = pw[ r + 2 ];
+			dsNew.indexes.push_back( pw[ r + 0 ] );
+			dsNew.indexes.push_back( pw[ r + 1 ] );
+			dsNew.indexes.push_back( pw[ r + 2 ] );
 
 			/* make second triangle */
-			dsNew.indexes[ dsNew.numIndexes++ ] = pw[ r + 0 ];
-			dsNew.indexes[ dsNew.numIndexes++ ] = pw[ r + 2 ];
-			dsNew.indexes[ dsNew.numIndexes++ ] = pw[ r + 3 ];
+			dsNew.indexes.push_back( pw[ r + 0 ] );
+			dsNew.indexes.push_back( pw[ r + 2 ] );
+			dsNew.indexes.push_back( pw[ r + 3 ] );
 		}
 	}
 
-	/* free the mesh, but not the verts */
-	free( mesh );
+	FreeMesh( mesh );
 
 	/* add to count */
 	numPatchMetaSurfaces++;
@@ -443,7 +441,7 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 
 #define TINY_AREA   1.0
 #define MAXAREA_MAXTRIES 8
-static int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
+static int MaxAreaIndexes( const bspDrawVert_t *vert, int cnt, int *indexes ){
 	int r, s, t, bestR = 0, bestS = 1, bestT = 2;
 	int i, j;
 	double A, bestA = -1, V, bestV = -1;
@@ -608,35 +606,28 @@ static int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
  */
 
 void MaxAreaFaceSurface( mapDrawSurface_t& ds ){
-	int n;
 	/* try to early out  */
-	if ( !ds.numVerts || ( ds.type != ESurfaceType::Face && ds.type != ESurfaceType::Decal ) ) {
+	if ( ds.verts.empty() || ( ds.type != ESurfaceType::Face && ds.type != ESurfaceType::Decal ) ) {
 		return;
 	}
 
 	/* is this a simple triangle? */
-	if ( ds.numVerts == 3 ) {
-		ds.numIndexes = 3;
-		ds.indexes = safe_malloc( ds.numIndexes * sizeof( int ) );
-		ds.indexes[0] = 0;
-		ds.indexes[1] = 1;
-		ds.indexes[2] = 2;
+	if ( ds.verts.size() == 3 ) {
+		ds.indexes.assign( { 0, 1, 2 } );
 		numMaxAreaSurfaces++;
 		return;
 	}
 
 	/* do it! */
-	ds.numIndexes = 3 * ds.numVerts - 6;
-	ds.indexes = safe_malloc( ds.numIndexes * sizeof( int ) );
-	n = MaxAreaIndexes( ds.verts, ds.numVerts, ds.indexes );
+	ds.indexes.resize( 3 * ds.verts.size() - 6 );
+	const int n = MaxAreaIndexes( ds.verts.data(), ds.verts.size(), ds.indexes.data() );
 	if ( n < 0 ) {
 		/* whatever we do, it's degenerate */
-		free( ds.indexes );
-		ds.numIndexes = 0;
+		ds.indexes.clear();
 		StripFaceSurface( ds );
 		return;
 	}
-	ds.numIndexes = n;
+	ds.indexes.resize( n );
 
 	/* add to count */
 	numMaxAreaSurfaces++;
@@ -653,66 +644,52 @@ void MaxAreaFaceSurface( mapDrawSurface_t& ds ){
  */
 
 static void FanFaceSurface( mapDrawSurface_t& ds ){
-	int i, k, a, b, c;
-	Color4f color[ MAX_LIGHTMAPS ];
-	for ( auto& co : color )
-		co.set( 0 );
-	bspDrawVert_t   *verts, *centroid, *dv;
-	double iv;
-
-
 	/* try to early out */
-	if ( !ds.numVerts || ( ds.type != ESurfaceType::Face && ds.type != ESurfaceType::Decal ) ) {
+	if ( ds.verts.empty() || ( ds.type != ESurfaceType::Face && ds.type != ESurfaceType::Decal ) ) {
 		return;
 	}
 
-	/* add a new vertex at the beginning of the surface */
-	verts = safe_malloc( ( ds.numVerts + 1 ) * sizeof( bspDrawVert_t ) );
-	memset( verts, 0, sizeof( bspDrawVert_t ) );
-	memcpy( &verts[ 1 ], ds.verts, ds.numVerts * sizeof( bspDrawVert_t ) );
-	free( ds.verts );
-	ds.verts = verts;
+	Color4f color[ MAX_LIGHTMAPS ];
+	for ( auto& co : color )
+		co.set( 0 );
 
 	/* add up the drawverts to create a centroid */
-	centroid = &verts[ 0 ];
-	for ( i = 1, dv = &verts[ 1 ]; i < ( ds.numVerts + 1 ); ++i, ++dv )
+	bspDrawVert_t centroid = c_bspDrawVert_t0;
+	for ( const bspDrawVert_t& dv : ds.verts )
 	{
-		centroid->xyz += dv->xyz;
-		centroid->normal += dv->normal;
-		centroid->st += dv->st;
-		for ( k = 0; k < MAX_LIGHTMAPS; ++k ){
-			color[ k ] += dv->color[ k ];
-			centroid->lightmap[ k ] += dv->lightmap[ k ];
+		centroid.xyz += dv.xyz;
+		centroid.normal += dv.normal;
+		centroid.st += dv.st;
+		for ( int k = 0; k < MAX_LIGHTMAPS; ++k ){
+			color[ k ] += dv.color[ k ];
+			centroid.lightmap[ k ] += dv.lightmap[ k ];
 		}
 	}
 
 	/* average the centroid */
-	iv = 1.0f / ds.numVerts;
-	centroid->xyz *= iv;
-	if ( VectorNormalize( centroid->normal ) == 0 ) {
-		centroid->normal = verts[ 1 ].normal;
+	const double iv = 1.0 / ds.verts.size();
+	centroid.xyz *= iv;
+	if ( VectorNormalize( centroid.normal ) == 0 ) {
+		centroid.normal = ds.verts[ 0 ].normal;
 	}
-	centroid->st *= iv;
-	for ( k = 0; k < MAX_LIGHTMAPS; ++k ){
-		centroid->lightmap[ k ] *= iv;
-		centroid->color[ k ] = color_to_byte( color[ k ] / ds.numVerts );
+	centroid.st *= iv;
+	for ( int k = 0; k < MAX_LIGHTMAPS; ++k ){
+		centroid.lightmap[ k ] *= iv;
+		centroid.color[ k ] = color_to_byte( color[ k ] / ds.verts.size() );
 	}
 
-	/* add to vert count */
-	ds.numVerts++;
+	/* add a new vertex at the beginning of the surface */
+	ds.verts.insert( ds.verts.cbegin(), centroid );
 
 	/* fill indexes in triangle fan order */
-	ds.numIndexes = 0;
-	ds.indexes = safe_malloc( ds.numVerts * 3 * sizeof( int ) );
-	for ( i = 1; i < ds.numVerts; ++i )
+	ds.indexes.clear();
+	ds.indexes.reserve( ( ds.verts.size() - 1 ) * 3 );
+
+	for ( size_t prev = ds.verts.size() - 1, next = 1; next != ds.verts.size(); prev = next, ++next )
 	{
-		a = 0;
-		b = i;
-		c = ( i + 1 ) % ds.numVerts;
-		c = c ? c : 1;
-		ds.indexes[ ds.numIndexes++ ] = a;
-		ds.indexes[ ds.numIndexes++ ] = b;
-		ds.indexes[ ds.numIndexes++ ] = c;
+		ds.indexes.push_back( 0 );
+		ds.indexes.push_back( prev );
+		ds.indexes.push_back( next );
 	}
 
 	/* add to count */
@@ -736,12 +713,12 @@ void StripFaceSurface( mapDrawSurface_t& ds ){
 	int numIndexes, indexes[ MAX_INDEXES ];
 
 	/* try to early out  */
-	if ( !ds.numVerts || ( ds.type != ESurfaceType::Face && ds.type != ESurfaceType::Decal ) ) {
+	if ( ds.verts.empty() || ( ds.type != ESurfaceType::Face && ds.type != ESurfaceType::Decal ) ) {
 		return;
 	}
 
 	/* is this a simple triangle? */
-	if ( ds.numVerts == 3 ) {
+	if ( ds.verts.size() == 3 ) {
 		numIndexes = 3;
 		indexes[0] = 0;
 		indexes[1] = 1;
@@ -752,7 +729,7 @@ void StripFaceSurface( mapDrawSurface_t& ds ){
 		/* ydnar: find smallest coordinate */
 		int least = 0;
 		if ( ds.shaderInfo != nullptr && !ds.shaderInfo->autosprite ) {
-			for ( int i = 0; i < ds.numVerts; ++i )
+			for ( size_t i = 0; i < ds.verts.size(); ++i )
 			{
 				/* get points */
 				const Vector3& v1 = ds.verts[ i ].xyz;
@@ -768,9 +745,9 @@ void StripFaceSurface( mapDrawSurface_t& ds ){
 		}
 
 		/* determine the triangle strip order */
-		numIndexes = ( ds.numVerts - 2 ) * 3;
+		numIndexes = ( ds.verts.size() - 2 ) * 3;
 		if ( numIndexes > MAX_INDEXES ) {
-			Error( "MAX_INDEXES exceeded for surface (%d > %d) (%d verts)", numIndexes, MAX_INDEXES, ds.numVerts );
+			Error( "MAX_INDEXES exceeded for surface (%d > %d) (%zu verts)", numIndexes, MAX_INDEXES, ds.verts.size() );
 		}
 
 		class TriEval
@@ -791,12 +768,12 @@ void StripFaceSurface( mapDrawSurface_t& ds ){
 			void reset(){
 				*this = TriEval( m_verts );
 			}
-		} triEval( ds.verts );
+		} triEval( ds.verts.data() );
 
-		const auto idx = [n = ds.numVerts]( int i ){ return i < 0? i + n : i < n? i : i - n; };
+		const auto idx = [n = ds.numVerts()]( int i ){ return i < 0? i + n : i < n? i : i - n; };
 
 		/* try all possible orderings of the points looking for a non-degenerate strip order */
-		for ( int r = 0; r < ds.numVerts; ++r )
+		for ( int r = 0; r < ds.numVerts(); ++r )
 		{
 			triEval.reset();
 			/* walk the winding in both directions */
@@ -823,9 +800,7 @@ void StripFaceSurface( mapDrawSurface_t& ds ){
 	}
 okej:
 	/* copy strip triangle indexes */
-	ds.numIndexes = numIndexes;
-	ds.indexes = safe_malloc( ds.numIndexes * sizeof( int ) );
-	memcpy( ds.indexes, indexes, ds.numIndexes * sizeof( int ) );
+	ds.indexes.assign( indexes, indexes + numIndexes );
 
 	/* add to count */
 	numStripSurfaces++;
@@ -875,7 +850,7 @@ void MakeEntityMetaTriangles( const entity_t& e ){
 
 		/* get surface */
 		mapDrawSurface_t& ds = mapDrawSurfs[ i ];
-		if ( ds.numVerts <= 0 ) {
+		if ( ds.verts.empty() ) {
 			continue;
 		}
 
@@ -1301,13 +1276,13 @@ int>;   // index of bspDrawVert_t in mapDrawSurface_t::verts array
    returns the index of that vert (or < 0 on failure)
  */
 
-static int AddMetaVertToSurface( mapDrawSurface_t& ds, const bspDrawVert_t& dv1, const Sorted_indices& sorted_indices, int *coincident ){
+static int AddMetaVertToSurface( const mapDrawSurface_t& ds, const bspDrawVert_t& dv1, DrawVerts& verts, const Sorted_indices& sorted_indices, int *coincident ){
 	/* go through the verts and find a suitable candidate */
 	const auto begin = sorted_indices.lower_bound( spatial_distance( dv1.xyz ) - c_spatial_EQUAL_EPSILON );
 	const auto end = sorted_indices.upper_bound( spatial_distance( dv1.xyz ) + c_spatial_EQUAL_EPSILON );
 	for( auto it = begin; it != end; ++it ){
 		/* get test vert */
-		const bspDrawVert_t& dv2 = ds.verts[ it->second ];
+		const bspDrawVert_t& dv2 = verts[ it->second ];
 
 		/* compare xyz and normal */
 		if ( !VectorCompare( dv1.xyz, dv2.xyz ) ) {
@@ -1334,13 +1309,13 @@ static int AddMetaVertToSurface( mapDrawSurface_t& ds, const bspDrawVert_t& dv1,
 	}
 
 	/* overflow check */
-	if ( ds.numVerts >= ( ( ds.shaderInfo->compileFlags & C_VERTEXLIT ) ? maxSurfaceVerts : maxLMSurfaceVerts ) ) {
+	if ( int( verts.size() ) >= ( ( ds.shaderInfo->compileFlags & C_VERTEXLIT ) ? maxSurfaceVerts : maxLMSurfaceVerts ) ) {
 		return VERTS_EXCEEDED;
 	}
 
 	/* made it this far, add the vert and return */
-	ds.verts[ ds.numVerts ] = dv1;
-	return ds.numVerts++;
+	verts.push_back( dv1 );
+	return verts.size() - 1;
 }
 
 
@@ -1366,8 +1341,8 @@ static int AddMetaVertToSurface( mapDrawSurface_t& ds, const bspDrawVert_t& dv1,
 #define ADEQUATE_SCORE          ( metaAdequateScore >= 0 ? metaAdequateScore : DEFAULT_ADEQUATE_SCORE )
 #define GOOD_SCORE              ( metaGoodScore     >= 0 ? metaGoodScore     : DEFAULT_GOOD_SCORE )
 
-static int AddMetaTriangleToSurface( mapDrawSurface_t& ds, const metaTriangle_t& tri, MinMax& texMinMax, Sorted_indices& sorted_indices, bool testAdd ){
-	int i, score, coincident, ai, bi, ci;
+static int AddMetaTriangleToSurface( mapDrawSurface_t& ds, const metaTriangle_t& tri, DrawVerts& verts, DrawIndexes& indexes, MinMax& texMinMax, Sorted_indices& sorted_indices, bool testAdd ){
+	int score;
 
 
 	/* test the triangle */
@@ -1400,19 +1375,17 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t& ds, const metaTriangle_t&
 		score += AXIS_SCORE * vector3_dot( ds.lightmapAxis, tri.plane.normal() );
 	}
 
-	/* preserve old drawsurface if this fails */
-	mapDrawSurface_t old( ds );
-
 	/* attempt to add the verts */
-	const int numVerts_original = ds.numVerts;
-	coincident = 0;
-	ai = AddMetaVertToSurface( ds, *tri.m_vertices[ 0 ], sorted_indices, &coincident );
-	bi = AddMetaVertToSurface( ds, *tri.m_vertices[ 1 ], sorted_indices, &coincident );
-	ci = AddMetaVertToSurface( ds, *tri.m_vertices[ 2 ], sorted_indices, &coincident );
+	/* preserve size if this fails */
+	const int numVerts_original = verts.size();
+	int coincident = 0;
+	const int ai = AddMetaVertToSurface( ds, *tri.m_vertices[ 0 ], verts, sorted_indices, &coincident );
+	const int bi = AddMetaVertToSurface( ds, *tri.m_vertices[ 1 ], verts, sorted_indices, &coincident );
+	const int ci = AddMetaVertToSurface( ds, *tri.m_vertices[ 2 ], verts, sorted_indices, &coincident );
 
 	/* check vertex underflow */
 	if ( ai < 0 || bi < 0 || ci < 0 ) {
-		ds = old;
+		verts.resize( numVerts_original );
 		return 0;
 	}
 
@@ -1427,16 +1400,16 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t& ds, const metaTriangle_t&
 
 	/* check lightmap bounds overflow (after at least 1 triangle has been added) */
 	if ( !( ds.shaderInfo->compileFlags & C_VERTEXLIT ) &&
-	     ds.numIndexes > 0 && ds.lightmapAxis != g_vector3_identity &&
+	     !indexes.empty() && ds.lightmapAxis != g_vector3_identity &&
 	     ( !VectorCompare( ds.minmax.mins, minmax.mins ) || !VectorCompare( ds.minmax.maxs, minmax.maxs ) ) ) {
 		/* set maximum size before lightmap scaling (normally 2032 units) */
 		/* 2004-02-24: scale lightmap test size by 2 to catch larger brush faces */
 		/* 2004-04-11: reverting to actual lightmap size */
 		const float lmMax = ( ds.sampleSize * ( ds.shaderInfo->lmCustomWidth - 1 ) );
-		for ( i = 0; i < 3; ++i )
+		for ( int i = 0; i < 3; ++i )
 		{
 			if ( ( minmax.maxs[ i ] - minmax.mins[ i ] ) > lmMax ) {
-				ds = old;
+				verts.resize( numVerts_original );
 				return 0;
 			}
 		}
@@ -1474,30 +1447,27 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t& ds, const metaTriangle_t&
 
 
 	/* check index overflow */
-	if ( ds.numIndexes + 3 > maxSurfaceIndexes  ) {
-		ds = old;
+	if ( int( indexes.size() + 3 ) > maxSurfaceIndexes  ) {
+		verts.resize( numVerts_original );
 		return 0;
-	}
-	else{ /* add the triangle indexes */
-		ds.indexes[ ds.numIndexes++ ] = ai;
-		ds.indexes[ ds.numIndexes++ ] = bi;
-		ds.indexes[ ds.numIndexes++ ] = ci;
 	}
 
 	/* sanity check the indexes */
-	if ( ds.numIndexes >= 3 &&
-	     ( ds.indexes[ ds.numIndexes - 3 ] == ds.indexes[ ds.numIndexes - 2 ] ||
-	       ds.indexes[ ds.numIndexes - 3 ] == ds.indexes[ ds.numIndexes - 1 ] ||
-	       ds.indexes[ ds.numIndexes - 2 ] == ds.indexes[ ds.numIndexes - 1 ] ) ) {
-		Sys_Printf( "DEG:%d! ", ds.numVerts );
+	if ( ai == bi || ai == ci || bi == ci ) {
+		Sys_Printf( "DEG:%zu! ", verts.size() );
 	}
 
 	/* testing only? */
 	if ( testAdd ) {
-		ds = old;
+		verts.resize( numVerts_original );
 	}
 	else
-	{
+	{ /* note modding ds & indexes only at this point */
+		/* add the triangle indexes */
+		indexes.push_back( ai );
+		indexes.push_back( bi );
+		indexes.push_back( ci );
+
 		/* store new bounds */
 		ds.minmax = minmax;
 		texMinMax = newTexMinMax;
@@ -1505,9 +1475,9 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t& ds, const metaTriangle_t&
 		/* add a side reference */
 		ds.addSideRef( tri.side );
 
-		for( const auto id : { ai, bi, ci } ){
+		for( const int id : { ai, bi, ci } ){
 			if( id >= numVerts_original )
-				sorted_indices.emplace( spatial_distance( ds.verts[id].xyz ), id );
+				sorted_indices.emplace( spatial_distance( verts[id].xyz ), id );
 		}
 	}
 
@@ -1524,8 +1494,8 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t& ds, const metaTriangle_t&
 
 static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 	/* allocate arrays */
-	bspDrawVert_t *verts = safe_malloc( sizeof( *verts ) * maxSurfaceVerts );
-	int *indexes = safe_malloc( sizeof( *indexes ) * maxSurfaceIndexes );
+	DrawVerts verts;
+	DrawIndexes indexes;
 
 	/* walk the list of triangles */
 	for ( auto& seed : metaTriangles )
@@ -1552,12 +1522,13 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 		ds.sampleSize        = seed.sampleSize;
 		ds.shadeAngleDegrees = seed.shadeAngleDegrees;
 		ds.ambientColor      = seed.ambientColor;
-		ds.verts = verts;
-		ds.indexes = indexes;
 		ds.lightmapAxis      = seed.lightmapAxis;
 		ds.addSideRef( seed.side );
 
 		ds.minmax.clear();
+
+		verts.clear();
+		indexes.clear();
 
 		MinMax texMinMax;
 
@@ -1598,7 +1569,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 		};
 
 		/* add the first triangle */
-		if ( AddMetaTriangleToSurface( ds, seed, texMinMax, sorted_indices, false ) ) {
+		if ( AddMetaTriangleToSurface( ds, seed, verts, indexes, texMinMax, sorted_indices, false ) ) {
 			( *numAdded )++;
 		}
 		expand_cloud( seed );
@@ -1630,7 +1601,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 				}
 
 				/* score this triangle */
-				const int score = AddMetaTriangleToSurface( ds, *test, texMinMax, sorted_indices, true );
+				const int score = AddMetaTriangleToSurface( ds, *test, verts, indexes, texMinMax, sorted_indices, true );
 				if ( score > bestScore ) {
 					best = test;
 					bestScore = score;
@@ -1645,7 +1616,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 
 			/* add best candidate */
 			if ( best != nullptr && bestScore > ADEQUATE_SCORE ) {
-				if ( AddMetaTriangleToSurface( ds, *best, texMinMax, sorted_indices, false ) ) {
+				if ( AddMetaTriangleToSurface( ds, *best, verts, indexes, texMinMax, sorted_indices, false ) ) {
 					( *numAdded )++;
 					expand_cloud( *best );
 				}
@@ -1656,10 +1627,8 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 		}
 
 		/* copy the verts and indexes to the new surface */
-		ds.verts = safe_malloc( ds.numVerts * sizeof( bspDrawVert_t ) );
-		memcpy( ds.verts, verts, ds.numVerts * sizeof( bspDrawVert_t ) );
-		ds.indexes = safe_malloc( ds.numIndexes * sizeof( int ) );
-		memcpy( ds.indexes, indexes, ds.numIndexes * sizeof( int ) );
+		ds.verts = verts;
+		ds.indexes = indexes;
 
 		/* classify the surface */
 		ClassifySurface( ds );
@@ -1672,10 +1641,6 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 		/* add to count */
 		numMergedSurfaces++;
 	}
-
-	/* free arrays */
-	free( verts );
-	free( indexes );
 }
 
 

@@ -442,7 +442,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 	  || spf == ( eExtrudeDownwards | eExtrudeUpwards | eAxialBackplane )
 	  || spf == ( eExtrudeUpwards | eMaxExtrude )
 	  || spf == ( eExtrudeUpwards | eAxialBackplane ) ){
-		int i, j, k;
+		int j, k;
 		//int ok=0, notok=0;
 		float limDepth = 0;
 		if ( clipDepth < 0 ){
@@ -467,9 +467,9 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 
 		if ( ( spf & eMaxExtrude ) || ( spf & eExtrudeTerrain ) ){
 
-			for ( i = 0; i < ds.numIndexes; i += 3 ){
+			for ( auto i = ds.indexes.cbegin(); i != ds.indexes.cend(); i += 3 ){
 				for ( j = 0; j < 3; ++j ){
-					points[j] = ds.verts[ds.indexes[i + j]].xyz;
+					points[j] = ds.verts[ *( i + j ) ].xyz;
 				}
 				if ( PlaneFromPoints( plane, points ) ){
 					if ( spf & eExtrudeTerrain )
@@ -498,11 +498,11 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 		buildBrush.detail = true;
 
 		/* walk triangle list */
-		for ( i = 0; i < ds.numIndexes; i += 3 ){
+		for ( auto i = ds.indexes.cbegin(); i != ds.indexes.cend(); i += 3 ){
 			/* make points */
 			for ( j = 0; j < 3; ++j ){
 				/* copy xyz */
-				points[j] = ds.verts[ds.indexes[i + j] ].xyz;
+				points[j] = ds.verts[ *( i + j ) ].xyz;
 			}
 
 			/* make plane for triangle */
@@ -799,7 +799,7 @@ static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const 
 					/* get vertex normals */
 					for ( j = 0; j < 3; ++j ){
 						/* copy normal */
-						Vnorm[j] = ds.verts[ds.indexes[i + j]].normal;
+						Vnorm[j] = ds.verts[ *( i + j ) ].normal;
 					}
 
 					//avg normals for side planes
@@ -984,7 +984,7 @@ default_CLIPMODEL:
 
 void InsertModel( const char *name, const char *skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps,
                   entity_t& entity, int spawnFlags, float clipDepth, const EntityCompileParams& params ){
-	int i, j;
+
 	const Matrix4 nTransform( matrix4_for_normal_transform( transform ) );
 	const bool transform_lefthanded = MATRIX4_LEFTHANDED == matrix4_handedness( transform );
 	AssModel            *model;
@@ -1141,14 +1141,11 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		}
 
 		/* set particulars */
-		ds.numVerts = mesh->mNumVertices;
-		ds.verts = safe_calloc( ds.numVerts * sizeof( ds.verts[ 0 ] ) );
-
-		ds.numIndexes = mesh->mNumFaces * 3;
-		ds.indexes = safe_calloc( ds.numIndexes * sizeof( ds.indexes[ 0 ] ) );
-// Sys_Printf( "verts %i idx %i\n", ds.numVerts, ds.numIndexes );
+		ds.verts.resize( mesh->mNumVertices, c_bspDrawVert_t0 );
+		ds.indexes.resize( mesh->mNumFaces * 3 );
+// Sys_Printf( "verts %zu idx %zu\n", ds.verts.size(), ds.indexes.size() );
 		/* copy vertexes */
-		for ( i = 0; i < ds.numVerts; ++i )
+		for ( size_t i = 0; i < ds.verts.size(); ++i )
 		{
 			/* get vertex */
 			bspDrawVert_t& dv = ds.verts[ i ];
@@ -1185,20 +1182,17 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 			/* set lightmap/color bits */
 			{
 				const aiColor4D color = mesh->HasVertexColors( 0 )? mesh->mColors[0][i] : aiColor4D( 1 );
-				for ( j = 0; j < MAX_LIGHTMAPS; ++j )
-				{
-					dv.lightmap[ j ] = { 0, 0 };
-					if ( spawnFlags & eColorToAlpha ) { // spawnflag 32: model color -> alpha hack
-						dv.color[ j ] = { 255, 255, 255, color_to_byte( RGBTOGRAY( color ) * 255 ) };
-					}
-					else
-					{
-						dv.color[ j ] = { color_to_byte( color[0] * 255 ),
-						                  color_to_byte( color[1] * 255 ),
-						                  color_to_byte( color[2] * 255 ),
-						                  color_to_byte( color[3] * 255 ) };
-					}
+				if ( spawnFlags & eColorToAlpha ) { // spawnflag 32: model color -> alpha hack
+					dv.color[ 0 ] = { 255, 255, 255, color_to_byte( RGBTOGRAY( color ) * 255 ) };
 				}
+				else
+				{
+					dv.color[ 0 ] = { color_to_byte( color[0] * 255 ),
+					                  color_to_byte( color[1] * 255 ),
+					                  color_to_byte( color[2] * 255 ),
+					                  color_to_byte( color[3] * 255 ) };
+				}
+				dv.color[ 1 ] = dv.color[ 2 ] = dv.color[ 3 ] = dv.color[ 0 ];
 			}
 		}
 

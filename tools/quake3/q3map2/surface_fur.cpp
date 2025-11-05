@@ -61,7 +61,7 @@ void Fur( mapDrawSurface_t& ds ){
 	//%		numLayers, offset, fade, ds.shaderInfo->shader );
 
 	/* initial offset */
-	for ( bspDrawVert_t& dv : Span( ds.verts, ds.numVerts ) )
+	for ( bspDrawVert_t& dv : ds.verts )
 	{
 		/* offset is scaled by original vertex alpha */
 		const float a = dv.color[ 0 ].alpha() / 255.0;
@@ -83,7 +83,7 @@ void Fur( mapDrawSurface_t& ds ){
 		fur->fur = true;
 
 		/* walk the verts */
-		for ( int j = 0; j < fur->numVerts; ++j )
+		for ( size_t j = 0; j < fur->verts.size(); ++j )
 		{
 			/* offset is scaled by original vertex alpha */
 			const float a = ds.verts[ j ].color[ 0 ].alpha() / 255.0;

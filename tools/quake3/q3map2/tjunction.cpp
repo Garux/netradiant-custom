@@ -169,10 +169,10 @@ static int AddEdge( bspDrawVert_t& dv1, bspDrawVert_t& dv2, bool createNonAxial 
  */
 
 static void AddSurfaceEdges( mapDrawSurface_t& ds ){
-	for ( int i = 0; i < ds.numVerts; ++i )
+	for ( auto prev = std::prev( ds.verts.end() ), next = ds.verts.begin(); next != ds.verts.end(); prev = next, ++next )
 	{
 		/* save the edge number in the lightmap field so we don't need to look it up again */
-		bspDrawVert_edge_index_write( ds.verts[ i ], AddEdge( ds.verts[ i ], ds.verts[ ( i + 1 ) % ds.numVerts ], false ) );
+		bspDrawVert_edge_index_write( *prev, AddEdge( *prev, *next, false ) );
 	}
 }
 
@@ -269,7 +269,7 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 	int numVerts = 0;
 
 
-	for ( int i = 0; i < ds.numVerts; ++i )
+	for ( size_t i = 0; i < ds.verts.size(); ++i )
 	{
 		counts[i] = 0;
 
@@ -283,7 +283,7 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 
 		// check to see if there are any t junctions before the next vert
 		const bspDrawVert_t& v1 = ds.verts[i];
-		const bspDrawVert_t& v2 = ds.verts[ ( i + 1 ) % ds.numVerts ];
+		const bspDrawVert_t& v2 = ds.verts[ ( i + 1 ) % ds.verts.size() ];
 
 		const int j = bspDrawVert_edge_index_read( ds.verts[ i ] );
 		if ( j == -1 ) {
@@ -353,7 +353,7 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 		}
 	}
 
-	c_addedVerts += numVerts - ds.numVerts;
+	c_addedVerts += numVerts - ds.verts.size();
 	c_totalVerts += numVerts;
 
 
@@ -379,10 +379,7 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 		// fine the way it is
 		c_natural++;
 
-		free( ds.verts );
-		ds.numVerts = numVerts;
-		ds.verts = safe_malloc( numVerts * sizeof( *ds.verts ) );
-		memcpy( ds.verts, verts, numVerts * sizeof( *ds.verts ) );
+		ds.verts.assign( verts, verts + numVerts );
 
 		return;
 	}
@@ -410,13 +407,9 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 		c_rotate++;
 	}
 
-	free( ds.verts );
-	ds.numVerts = numVerts;
-	ds.verts = safe_malloc( numVerts * sizeof( *ds.verts ) );
-
-	for ( int j = 0; j < ds.numVerts; ++j ) {
-		ds.verts[j] = verts[ ( j + i ) % ds.numVerts ];
-	}
+	ds.verts.reserve( numVerts );
+	ds.verts.assign( verts + 1, verts + numVerts );
+	ds.verts.push_back( verts[ 0 ] );
 }
 
 
@@ -438,11 +431,11 @@ static bool FixBrokenSurface( mapDrawSurface_t& ds ){
 	}
 
 	/* check all verts */
-	for ( int i = 0; i < ds.numVerts; ++i )
+	for ( size_t i = 0; i < ds.verts.size(); ++i )
 	{
 		/* get verts */
 		bspDrawVert_t& dv1 = ds.verts[ i ];
-		bspDrawVert_t& dv2 = ds.verts[ ( i + 1 ) % ds.numVerts ];
+		bspDrawVert_t& dv2 = ds.verts[ ( i + 1 ) % ds.verts.size() ];
 		bspDrawVert_t avg;
 
 		/* degenerate edge? */
@@ -472,11 +465,7 @@ static bool FixBrokenSurface( mapDrawSurface_t& ds ){
 			dv1 = avg;
 
 			/* move the remaining verts */
-			for ( int k = i + 2; k < ds.numVerts; ++k )
-			{
-				ds.verts[ k - 1 ] = ds.verts[ k ];
-			}
-			ds.numVerts--;
+			ds.verts.erase( ds.verts.cbegin() + ( i + 1 ) % ds.verts.size() );
 
 			/* after welding, we have to consider the same vertex again, as it now has a new neighbor dv2 */
 			--i;
@@ -486,7 +475,7 @@ static bool FixBrokenSurface( mapDrawSurface_t& ds ){
 	}
 
 	/* one last check and return */
-	return ds.numVerts >= 3;
+	return ds.verts.size() >= 3;
 }
 
 
@@ -516,7 +505,7 @@ void FixTJunctions( const entity_t& ent ){
 		/* get surface and early out if possible */
 		mapDrawSurface_t& ds = mapDrawSurfs[ i ];
 		const shaderInfo_t *si = ds.shaderInfo;
-		if ( ( si->compileFlags & C_NODRAW ) || si->autosprite || si->notjunc || ds.numVerts == 0 ) {
+		if ( ( si->compileFlags & C_NODRAW ) || si->autosprite || si->notjunc || ds.verts.empty() ) {
 			continue;
 		}
 
@@ -561,7 +550,7 @@ void FixTJunctions( const entity_t& ent ){
 		/* get surface and early out if possible */
 		mapDrawSurface_t& ds = mapDrawSurfs[ i ];
 		const shaderInfo_t *si = ds.shaderInfo;
-		if ( ( si->compileFlags & C_NODRAW ) || si->autosprite || si->notjunc || ds.numVerts == 0 || ds.type != ESurfaceType::Face ) {
+		if ( ( si->compileFlags & C_NODRAW ) || si->autosprite || si->notjunc || ds.verts.empty() || ds.type != ESurfaceType::Face ) {
 			continue;
 		}
 

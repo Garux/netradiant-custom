@@ -545,11 +545,10 @@ static void ProjectDecalOntoWinding( decalProjector_t& dp, const mapDrawSurface_
 	ds2.lightmapScale     = ds.lightmapScale;
 	ds2.shadeAngleDegrees = ds.shadeAngleDegrees;
 	ds2.ambientColor      = ds.ambientColor;
-	ds2.numVerts = w.size();
-	ds2.verts = safe_calloc( ds2.numVerts * sizeof( *ds2.verts ) );
+	ds2.verts.resize( w.size(), c_bspDrawVert_t0 );
 
 	/* set vertexes */
-	for ( int i = 0; i < ds2.numVerts; ++i )
+	for ( size_t i = 0; i < w.size(); ++i )
 	{
 		/* get vertex */
 		bspDrawVert_t& dv = ds2.verts[ i ];
@@ -605,7 +604,7 @@ static void ProjectDecalOntoFace( decalProjector_t& dp, const mapDrawSurface_t& 
    projects a decal onto a patch surface
  */
 
-static void ProjectDecalOntoPatch( decalProjector_t& dp, const mapDrawSurface_t& ds ){
+static void ProjectDecalOntoPatch( decalProjector_t& dp, mapDrawSurface_t& ds ){
 	/* backface check */
 	if ( ds.planar )
 		if ( vector3_dot( dp.planes[ 0 ].normal(), mapplanes[ ds.planeNum ].normal() ) < -0.0001f )
@@ -615,7 +614,7 @@ static void ProjectDecalOntoPatch( decalProjector_t& dp, const mapDrawSurface_t&
 	mesh_t src;
 	src.width = ds.patchWidth;
 	src.height = ds.patchHeight;
-	src.verts = ds.verts;
+	src.verts = ds.verts.data();
 	const int iterations = IterationsForCurve( ds.longestCurve, patchSubdivisions );
 	mesh_t *subdivided = SubdivideMesh2( src, iterations );
 
@@ -682,13 +681,13 @@ static void ProjectDecalOntoTriangles( decalProjector_t& dp, const mapDrawSurfac
 	}
 
 	/* iterate through triangles */
-	for ( int i = 0; i < ds.numIndexes; i += 3 )
+	for ( auto i = ds.indexes.cbegin(); i != ds.indexes.cend(); i += 3 )
 	{
 		/* generate decal */
 		winding_t w{
-			ds.verts[ ds.indexes[ i + 0 ] ].xyz,
-			ds.verts[ ds.indexes[ i + 1 ] ].xyz,
-			ds.verts[ ds.indexes[ i + 2 ] ].xyz };
+			ds.verts[ *( i + 0 ) ].xyz,
+			ds.verts[ *( i + 1 ) ].xyz,
+			ds.verts[ *( i + 2 ) ].xyz };
 		ProjectDecalOntoWinding( dp, ds, w );
 	}
 }
@@ -732,7 +731,7 @@ void MakeEntityDecals( const entity_t& e ){
 		{
 			/* get surface */
 			mapDrawSurface_t& ds = mapDrawSurfs[ j ];
-			if ( ds.numVerts <= 0 ) {
+			if ( ds.verts.empty() ) {
 				continue;
 			}
 

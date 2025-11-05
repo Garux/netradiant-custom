@@ -351,7 +351,7 @@ int ScaleBSPMain( Args& args ){
 	Vector3 vec;
 	int axis;
 	bool texscale;
-	std::vector<bspDrawVert_t> old_xyzst;
+	DrawVerts old_xyzst;
 	float spawn_ref = 0;
 
 

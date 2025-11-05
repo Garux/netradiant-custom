@@ -114,7 +114,7 @@ mesh_t *CopyMesh( mesh_t *mesh ) {
 	out->width = mesh->width;
 	out->height = mesh->height;
 
-	const int size = out->width * out->height * sizeof( *out->verts );
+	const size_t size = out->width * out->height * sizeof( *out->verts );
 	out->verts = safe_malloc( size );
 	memcpy( out->verts, mesh->verts, size );
 

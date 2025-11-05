@@ -48,7 +48,7 @@ static mesh_t *DrawSurfToMesh( const mapDrawSurface_t& ds ){
 	m->width = ds.patchWidth;
 	m->height = ds.patchHeight;
 	m->verts = safe_malloc( sizeof( m->verts[ 0 ] ) * m->width * m->height );
-	memcpy( m->verts, ds.verts, sizeof( m->verts[ 0 ] ) * m->width * m->height );
+	memcpy( m->verts, ds.verts.data(), sizeof( m->verts[ 0 ] ) * m->width * m->height );
 
 	return m;
 }
@@ -289,9 +289,7 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 		newds = ds;
 		newds.patchWidth = outside[ i ]->width;
 		newds.patchHeight = outside[ i ]->height;
-		newds.numVerts = outside[ i ]->width * outside[ i ]->height;
-		newds.verts = safe_malloc( newds.numVerts * sizeof( *newds.verts ) );
-		memcpy( newds.verts, outside[ i ]->verts, newds.numVerts * sizeof( *newds.verts ) );
+		newds.verts.assign( outside[ i ]->verts, outside[ i ]->verts + newds.patchWidth * newds.patchHeight );
 
 		/* free the source mesh */
 		FreeMesh( outside[ i ] );
@@ -307,10 +305,7 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 		/* replace ds with m */
 		ds.patchWidth = m->width;
 		ds.patchHeight = m->height;
-		ds.numVerts = m->width * m->height;
-		free( ds.verts );
-		ds.verts = safe_malloc( ds.numVerts * sizeof( *ds.verts ) );
-		memcpy( ds.verts, m->verts, ds.numVerts * sizeof( *ds.verts ) );
+		ds.verts.assign( m->verts, m->verts + ds.patchWidth * ds.patchHeight );
 	}
 
 	/* free the source mesh and return */
@@ -328,8 +323,8 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 winding_t WindingFromDrawSurf( const mapDrawSurface_t& ds ){
 	// we use the first point of the surface, maybe something more clever would be useful
 	// (actually send the whole draw surface would be cool?)
-	if ( ds.numVerts >= MAX_POINTS_ON_WINDING ) {
-		const int max = std::min( ds.numVerts, 256 );
+	if ( ds.verts.size() >= MAX_POINTS_ON_WINDING ) {
+		const int max = std::min( ds.numVerts(), 256 );
 		Vector3 p[256];
 
 		for ( int i = 0; i < max; ++i ) {
@@ -339,8 +334,8 @@ winding_t WindingFromDrawSurf( const mapDrawSurface_t& ds ){
 		xml_Winding( "WindingFromDrawSurf failed: MAX_POINTS_ON_WINDING exceeded", p, max, true );
 	}
 
-	winding_t w = AllocWinding( ds.numVerts );
-	for ( const bspDrawVert_t& vert : Span( ds.verts, ds.numVerts ) ) {
+	winding_t w = AllocWinding( ds.verts.size() );
+	for ( const bspDrawVert_t& vert : ds.verts ) {
 		w.push_back( vert.xyz );
 	}
 	return w;
@@ -481,7 +476,7 @@ void FogDrawSurfaces( const entity_t& e ){
 			{
 				/* find drawsurface bounds */
 				MinMax minmax;
-				for ( const bspDrawVert_t& vert : Span( ds.verts, ds.numVerts ) )
+				for ( const bspDrawVert_t& vert : ds.verts )
 					minmax.extend( vert.xyz );
 
 				/* check against the fog brush */

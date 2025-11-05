@@ -140,10 +140,10 @@ void WriteSurfaceExtraFile( const char *path ){
 		}
 		else
 		{
-			fprintf( sf, " // %s V: %d I: %d %s\n",
+			fprintf( sf, " // %s V: %zu I: %zu %s\n",
 			         surfaceTypeName( se->mds->type ),
-			         se->mds->numVerts,
-			         se->mds->numIndexes,
+			         se->mds->verts.size(),
+			         se->mds->indexes.size(),
 			         ( se->mds->planar ? "planar" : "" ) );
 		}
 

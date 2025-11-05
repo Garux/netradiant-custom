@@ -45,15 +45,15 @@ static int numCustSurfaceParms;
    routines for dealing with vertex color/alpha modification
  */
 
-void ColorMod( const std::forward_list<colorMod_t>& colormod, int numVerts, bspDrawVert_t *drawVerts ){
+void ColorMod( const std::forward_list<colorMod_t>& colormod, const Span<bspDrawVert_t> drawVerts ){
 	/* dummy check */
-	if ( colormod.empty() || numVerts < 1 || drawVerts == nullptr ) {
+	if ( colormod.empty() || drawVerts.empty() ) {
 		return;
 	}
 
 
 	/* walk vertex list */
-	for ( bspDrawVert_t& dv : Span( drawVerts, numVerts ) )
+	for ( bspDrawVert_t& dv : drawVerts )
 	{
 		/* walk colorMod list */
 		for ( const colorMod_t& cm : colormod )
