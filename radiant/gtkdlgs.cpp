@@ -2351,7 +2351,7 @@ class TextEditor : public QObject
 		hbox->addWidget( m_searchEntry );
 	}
 	void editor_save(){
-		FILE *f = fopen( m_filename.c_str(), "wb" ); //write in binary mode to preserve line feeds
+		FILE *f = fopen( m_filename.c_str(), "wt" );
 
 		if ( f == nullptr ) {
 			globalErrorStream() << "Error saving file" << Quoted( m_filename ) << '\n';
