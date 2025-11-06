@@ -891,56 +891,43 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 		case MST_PATCH:
 		{
 			/* subdivide the surface */
-			mesh_t srcMesh;
-			srcMesh.width = ds.patchWidth;
-			srcMesh.height = ds.patchHeight;
-			srcMesh.verts = &bspDrawVerts[ ds.firstVert ];
-			//%	mesh_t *subdivided = SubdivideMesh( srcMesh, 8, 512 );
-			mesh_t *subdivided = SubdivideMesh2( srcMesh, info.patchIterations );
-
-			/* fit it to the curve and remove colinear verts on rows/columns */
-			PutMeshOnCurve( *subdivided );
-			mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
-			FreeMesh( subdivided );
-
-			/* set verts */
-			const bspDrawVert_t *verts = mesh->verts;
+			mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, &bspDrawVerts[ ds.firstVert ] ), info.patchIterations );
 
 			/* subdivide each quad to place the models */
-			for ( int y = 0; y < ( mesh->height - 1 ); ++y )
+			for ( int y = 0; y < ( mesh.height - 1 ); ++y )
 			{
-				for ( int x = 0; x < ( mesh->width - 1 ); ++x )
+				for ( int x = 0; x < ( mesh.width - 1 ); ++x )
 				{
 					/* set indexes */
 					const int pw[ 5 ] = {
-						x + ( y * mesh->width ),
-						x + ( ( y + 1 ) * mesh->width ),
-						x + 1 + ( ( y + 1 ) * mesh->width ),
-						x + 1 + ( y * mesh->width ),
-						x + ( y * mesh->width )      /* same as pw[ 0 ] */
+						x + ( y * mesh.width ),
+						x + ( ( y + 1 ) * mesh.width ),
+						x + 1 + ( ( y + 1 ) * mesh.width ),
+						x + 1 + ( y * mesh.width ),
+						x + ( y * mesh.width )      /* same as pw[ 0 ] */
 					};
 					/* set radix */
 					const int r = ( x + y ) & 1;
 
 					/* make first triangle */
-					tw.v[ 0 ].xyz = verts[ pw[ r + 0 ] ].xyz;
-					tw.v[ 0 ].st  = verts[ pw[ r + 0 ] ].st;
-					tw.v[ 1 ].xyz = verts[ pw[ r + 1 ] ].xyz;
-					tw.v[ 1 ].st  = verts[ pw[ r + 1 ] ].st;
-					tw.v[ 2 ].xyz = verts[ pw[ r + 2 ] ].xyz;
-					tw.v[ 2 ].st  = verts[ pw[ r + 2 ] ].st;
+					tw.v[ 0 ].xyz = mesh.verts[ pw[ r + 0 ] ].xyz;
+					tw.v[ 0 ].st  = mesh.verts[ pw[ r + 0 ] ].st;
+					tw.v[ 1 ].xyz = mesh.verts[ pw[ r + 1 ] ].xyz;
+					tw.v[ 1 ].st  = mesh.verts[ pw[ r + 1 ] ].st;
+					tw.v[ 2 ].xyz = mesh.verts[ pw[ r + 2 ] ].xyz;
+					tw.v[ 2 ].st  = mesh.verts[ pw[ r + 2 ] ].st;
 					matrix4_transform_point( transform, tw.v[ 0 ].xyz );
 					matrix4_transform_point( transform, tw.v[ 1 ].xyz );
 					matrix4_transform_point( transform, tw.v[ 2 ].xyz );
 					FilterTraceWindingIntoNodes_r( &tw, nodeNum );
 
 					/* make second triangle */
-					tw.v[ 0 ].xyz = verts[ pw[ r + 0 ] ].xyz;
-					tw.v[ 0 ].st  = verts[ pw[ r + 0 ] ].st;
-					tw.v[ 1 ].xyz = verts[ pw[ r + 2 ] ].xyz;
-					tw.v[ 1 ].st  = verts[ pw[ r + 2 ] ].st;
-					tw.v[ 2 ].xyz = verts[ pw[ r + 3 ] ].xyz;
-					tw.v[ 2 ].st  = verts[ pw[ r + 3 ] ].st;
+					tw.v[ 0 ].xyz = mesh.verts[ pw[ r + 0 ] ].xyz;
+					tw.v[ 0 ].st  = mesh.verts[ pw[ r + 0 ] ].st;
+					tw.v[ 1 ].xyz = mesh.verts[ pw[ r + 2 ] ].xyz;
+					tw.v[ 1 ].st  = mesh.verts[ pw[ r + 2 ] ].st;
+					tw.v[ 2 ].xyz = mesh.verts[ pw[ r + 3 ] ].xyz;
+					tw.v[ 2 ].st  = mesh.verts[ pw[ r + 3 ] ].st;
 					matrix4_transform_point( transform, tw.v[ 0 ].xyz );
 					matrix4_transform_point( transform, tw.v[ 1 ].xyz );
 					matrix4_transform_point( transform, tw.v[ 2 ].xyz );
@@ -949,7 +936,7 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 			}
 
 			/* free the subdivided mesh */
-			FreeMesh( mesh );
+			mesh.freeVerts();
 			break;
 		}
 		/* handle triangle surfaces */

@@ -648,22 +648,13 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 
 	/* build a subdivided mesh identical to shadow facets for this patch */
 	/* this MUST MATCH FacetsForPatch() identically! */
-	mesh_t src;
-	src.width = ds.patchWidth;
-	src.height = ds.patchHeight;
-	src.verts = bogus;
-	//%	mesh_t *subdivided = SubdivideMesh( src, 8, 512 );
-	mesh_t *subdivided = SubdivideMesh2( src, info.patchIterations );
-	PutMeshOnCurve( *subdivided );
-	//%	MakeMeshNormals( *subdivided );
-	mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
-	FreeMesh( subdivided );
+	mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, bogus ), info.patchIterations );
 	free( bogus );
 
 	/* FIXME: build interpolation table into color[ 1 ] */
 
 	/* fix up color indexes */
-	for ( bspDrawVert_t& vert : Span( mesh->verts, mesh->width * mesh->height ) )
+	for ( bspDrawVert_t& vert : Span( mesh.verts, mesh.numVerts() ) )
 	{
 		if ( vert.color[ 0 ][ 0 ] >= ds.numVerts ) {
 			vert.color[ 0 ][ 0 ] = ds.numVerts - 1;
@@ -671,27 +662,27 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 	}
 
 	/* iterate through the mesh quads */
-	for ( int y = 0; y < ( mesh->height - 1 ); ++y )
+	for ( int y = 0; y < ( mesh.height - 1 ); ++y )
 	{
-		for ( int x = 0; x < ( mesh->width - 1 ); ++x )
+		for ( int x = 0; x < ( mesh.width - 1 ); ++x )
 		{
 			/* set indexes */
 			const int pw[ 5 ] = {
-				x + ( y * mesh->width ),
-				x + ( ( y + 1 ) * mesh->width ),
-				x + 1 + ( ( y + 1 ) * mesh->width ),
-				x + 1 + ( y * mesh->width ),
-				x + ( y * mesh->width )    /* same as pw[ 0 ] */
+				x + ( y * mesh.width ),
+				x + ( ( y + 1 ) * mesh.width ),
+				x + 1 + ( ( y + 1 ) * mesh.width ),
+				x + 1 + ( y * mesh.width ),
+				x + ( y * mesh.width )    /* same as pw[ 0 ] */
 			};
 			/* set radix */
 			const int r = ( x + y ) & 1;
 
 			/* get drawverts */
 			const bspDrawVert_t *dv[ 4 ] = {
-				&mesh->verts[ pw[ r + 0 ] ],
-				&mesh->verts[ pw[ r + 1 ] ],
-				&mesh->verts[ pw[ r + 2 ] ],
-				&mesh->verts[ pw[ r + 3 ] ]
+				&mesh.verts[ pw[ r + 0 ] ],
+				&mesh.verts[ pw[ r + 1 ] ],
+				&mesh.verts[ pw[ r + 2 ] ],
+				&mesh.verts[ pw[ r + 3 ] ]
 			};
 			/* planar? */
 			Plane3f plane;
@@ -756,7 +747,7 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shader
 	}
 
 	/* free the mesh */
-	FreeMesh( mesh );
+	mesh.freeVerts();
 }
 
 

@@ -186,53 +186,47 @@ void Foliage( mapDrawSurface_t& src, entity_t& entity ){
 		case ESurfaceType::Patch:
 		{
 			/* make a mesh from the drawsurf */
-			mesh_t srcMesh;
-			srcMesh.width = src.patchWidth;
-			srcMesh.height = src.patchHeight;
-			srcMesh.verts = src.verts.data();
-			mesh_t *subdivided = SubdivideMesh( srcMesh, 8, 512 );
+			mesh_t srcMesh( src.patchWidth, src.patchHeight, src.verts.data() );
+			mesh_t subdivided = SubdivideMesh( srcMesh, 8, 512 );
 
 			/* fit it to the curve and remove colinear verts on rows/columns */
-			PutMeshOnCurve( *subdivided );
-			mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
-			FreeMesh( subdivided );
-
-			/* get verts */
-			const bspDrawVert_t *verts = mesh->verts;
+			PutMeshOnCurve( subdivided );
+			mesh_t mesh = RemoveLinearMeshColumnsRows( subdivided );
+			subdivided.freeVerts();
 
 			/* map the mesh quads */
-			for ( int y = 0; y < ( mesh->height - 1 ); ++y )
+			for ( int y = 0; y < ( mesh.height - 1 ); ++y )
 			{
-				for ( int x = 0; x < ( mesh->width - 1 ); ++x )
+				for ( int x = 0; x < ( mesh.width - 1 ); ++x )
 				{
 					/* set indexes */
 					const int pw[ 5 ] = {
-						x + ( y * mesh->width ),
-						x + ( ( y + 1 ) * mesh->width ),
-						x + 1 + ( ( y + 1 ) * mesh->width ),
-						x + 1 + ( y * mesh->width ),
-						x + ( y * mesh->width )      /* same as pw[ 0 ] */
+						x + ( y * mesh.width ),
+						x + ( ( y + 1 ) * mesh.width ),
+						x + 1 + ( ( y + 1 ) * mesh.width ),
+						x + 1 + ( y * mesh.width ),
+						x + ( y * mesh.width )      /* same as pw[ 0 ] */
 					};
 					/* set radix */
 					const int r = ( x + y ) & 1;
 
 					/* get drawverts and map first triangle */
 					SubdivideFoliageTriangle_r( foliage, TriRef{
-						&verts[ pw[ r + 0 ] ],
-						&verts[ pw[ r + 1 ] ],
-						&verts[ pw[ r + 2 ] ]
+						&mesh.verts[ pw[ r + 0 ] ],
+						&mesh.verts[ pw[ r + 1 ] ],
+						&mesh.verts[ pw[ r + 2 ] ]
 					} );
 					/* get drawverts and map second triangle */
 					SubdivideFoliageTriangle_r( foliage, TriRef{
-						&verts[ pw[ r + 0 ] ],
-						&verts[ pw[ r + 2 ] ],
-						&verts[ pw[ r + 3 ] ]
+						&mesh.verts[ pw[ r + 0 ] ],
+						&mesh.verts[ pw[ r + 2 ] ],
+						&mesh.verts[ pw[ r + 3 ] ]
 					} );
 				}
 			}
 
 			/* free the mesh */
-			FreeMesh( mesh );
+			mesh.freeVerts();
 			break;
 		}
 		default:

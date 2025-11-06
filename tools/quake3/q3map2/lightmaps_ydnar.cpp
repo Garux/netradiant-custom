@@ -452,7 +452,6 @@ static void FinishRawLightmap( rawLightmap_t& lm ){
  */
 
 static bool AddPatchToRawLightmap( int num, rawLightmap_t& lm ){
-	bspDrawVert_t       *verts, *a, *b;
 	float sBasis, tBasis, s, t;
 	float length, widthTable[ MAX_EXPANDED_AXIS ] = {0}, heightTable[ MAX_EXPANDED_AXIS ] = {0};
 
@@ -465,43 +464,32 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t& lm ){
 	const surfaceInfo_t& info = surfaceInfos[ num ];
 
 	/* make a temporary mesh from the drawsurf */
-	mesh_t src;
-	src.width = ds.patchWidth;
-	src.height = ds.patchHeight;
-	src.verts = &yDrawVerts[ ds.firstVert ];
-	//%	mesh_t *subdivided = SubdivideMesh( src, 8, 512 );
-	mesh_t *subdivided = SubdivideMesh2( src, info.patchIterations );
-
-	/* fit it to the curve and remove colinear verts on rows/columns */
-	PutMeshOnCurve( *subdivided );
-	mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
-	FreeMesh( subdivided );
+	mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, &yDrawVerts[ ds.firstVert ] ), info.patchIterations );
 
 	/* find the longest distance on each row/column */
-	verts = mesh->verts;
-	for ( int y = 0; y < mesh->height; ++y )
+	for ( int y = 0; y < mesh.height; ++y )
 	{
-		for ( int x = 0; x < mesh->width; ++x )
+		for ( int x = 0; x < mesh.width; ++x )
 		{
 			/* get width */
-			if ( x + 1 < mesh->width ) {
-				a = &verts[ ( y * mesh->width ) + x ];
-				b = &verts[ ( y * mesh->width ) + x + 1 ];
-				value_maximize( widthTable[ x ], (float)vector3_length( a->xyz - b->xyz ) );
+			if ( x + 1 < mesh.width ) {
+				const bspDrawVert_t& a = mesh.verts[ ( y * mesh.width ) + x ];
+				const bspDrawVert_t& b = mesh.verts[ ( y * mesh.width ) + x + 1 ];
+				value_maximize( widthTable[ x ], (float)vector3_length( a.xyz - b.xyz ) );
 			}
 
 			/* get height */
-			if ( y + 1 < mesh->height ) {
-				a = &verts[ ( y * mesh->width ) + x ];
-				b = &verts[ ( ( y + 1 ) * mesh->width ) + x ];
-				value_maximize( heightTable[ y ], (float)vector3_length( a->xyz - b->xyz ) );
+			if ( y + 1 < mesh.height ) {
+				const bspDrawVert_t& a = mesh.verts[ ( y * mesh.width ) + x ];
+				const bspDrawVert_t& b = mesh.verts[ ( ( y + 1 ) * mesh.width ) + x ];
+				value_maximize( heightTable[ y ], (float)vector3_length( a.xyz - b.xyz ) );
 			}
 		}
 	}
 
 	/* determine lightmap width */
 	length = 0;
-	for ( int x = 0; x < ( mesh->width - 1 ); ++x )
+	for ( int x = 0; x < ( mesh.width - 1 ); ++x )
 		length += widthTable[ x ];
 	lm.w = lm.sampleSize != 0 ? ceil( length / lm.sampleSize ) + 1 : 0;
 	value_maximize( lm.w, ds.patchWidth );
@@ -510,7 +498,7 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t& lm ){
 
 	/* determine lightmap height */
 	length = 0;
-	for ( int y = 0; y < ( mesh->height - 1 ); ++y )
+	for ( int y = 0; y < ( mesh.height - 1 ); ++y )
 		length += heightTable[ y ];
 	lm.h = lm.sampleSize != 0 ? ceil( length / lm.sampleSize ) + 1 : 0;
 	value_maximize( lm.h, ds.patchHeight );
@@ -518,12 +506,12 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t& lm ){
 	tBasis = (float) ( lm.h - 1 ) / ( ds.patchHeight - 1 );
 
 	/* free the temporary mesh */
-	FreeMesh( mesh );
+	mesh.freeVerts();
 
 	/* set the lightmap texture coordinates in yDrawVerts */
 	lm.wrap[ 0 ] = true;
 	lm.wrap[ 1 ] = true;
-	verts = &yDrawVerts[ ds.firstVert ];
+	bspDrawVert_t *verts = &yDrawVerts[ ds.firstVert ];
 	for ( int y = 0; y < ds.patchHeight; ++y )
 	{
 		t = ( tBasis * y ) + 0.5f;
@@ -1675,56 +1663,43 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 		case MST_PATCH:
 		{
 			/* make a mesh from the drawsurf */
-			mesh_t src;
-			src.width = ds.patchWidth;
-			src.height = ds.patchHeight;
-			src.verts = &yDrawVerts[ ds.firstVert ];
-			//%	mesh_t *subdivided = SubdivideMesh( src, 8, 512 );
-			mesh_t *subdivided = SubdivideMesh2( src, info.patchIterations );
-
-			/* fit it to the curve and remove colinear verts on rows/columns */
-			PutMeshOnCurve( *subdivided );
-			mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
-			FreeMesh( subdivided );
-
-			/* get verts */
-			const bspDrawVert_t *verts = mesh->verts;
+			mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, &yDrawVerts[ ds.firstVert ] ), info.patchIterations );
 
 			/* map the mesh quads */
 			info.approximated = true;
-			for ( int y = 0; y < ( mesh->height - 1 ) && info.approximated; ++y )
+			for ( int y = 0; y < ( mesh.height - 1 ) && info.approximated; ++y )
 			{
-				for ( int x = 0; x < ( mesh->width - 1 ) && info.approximated; ++x )
+				for ( int x = 0; x < ( mesh.width - 1 ) && info.approximated; ++x )
 				{
 					/* set indexes */
 					const int pw[ 5 ] = {
-						x + ( y * mesh->width ),
-						x + ( ( y + 1 ) * mesh->width ),
-						x + 1 + ( ( y + 1 ) * mesh->width ),
-						x + 1 + ( y * mesh->width ),
-						x + ( y * mesh->width )      /* same as pw[ 0 ] */
+						x + ( y * mesh.width ),
+						x + ( ( y + 1 ) * mesh.width ),
+						x + 1 + ( ( y + 1 ) * mesh.width ),
+						x + 1 + ( y * mesh.width ),
+						x + ( y * mesh.width )      /* same as pw[ 0 ] */
 					};
 					/* set radix */
 					const int r = ( x + y ) & 1;
 
 					/* get drawverts and map first triangle */
 					info.approximated = ApproximateTriangle_r( lm, TriRef{
-						&verts[ pw[ r + 0 ] ],
-						&verts[ pw[ r + 1 ] ],
-						&verts[ pw[ r + 2 ] ] } );
+						&mesh.verts[ pw[ r + 0 ] ],
+						&mesh.verts[ pw[ r + 1 ] ],
+						&mesh.verts[ pw[ r + 2 ] ] } );
 
 					/* get drawverts and map second triangle */
 					if ( info.approximated ) {
 						info.approximated = ApproximateTriangle_r( lm, TriRef{
-							&verts[ pw[ r + 0 ] ],
-							&verts[ pw[ r + 2 ] ],
-							&verts[ pw[ r + 3 ] ] } );
+							&mesh.verts[ pw[ r + 0 ] ],
+							&mesh.verts[ pw[ r + 2 ] ],
+							&mesh.verts[ pw[ r + 3 ] ] } );
 					}
 				}
 			}
 
 			/* free the mesh */
-			FreeMesh( mesh );
+			mesh.freeVerts();
 			break;
 		}
 		default:

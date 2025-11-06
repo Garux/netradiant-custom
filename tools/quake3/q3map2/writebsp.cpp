@@ -495,7 +495,7 @@ void BeginModel( const entity_t& e ){
 	/* bound patches */
 	for ( const parseMesh_t& p : e.patches )
 	{
-		for ( const bspDrawVert_t& vert : Span( p.mesh.verts, p.mesh.width * p.mesh.height ) )
+		for ( const bspDrawVert_t& vert : Span( p.mesh.verts, p.mesh.numVerts() ) )
 			minmax.extend( vert.xyz );
 	}
 

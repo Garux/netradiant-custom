@@ -410,40 +410,34 @@ void ProcessDecals(){
 			/* create projectors */
 			if ( distance > 0.125f ) {
 				/* tesselate the patch */
-				const int iterations = IterationsForCurve( p.longestCurve, patchSubdivisions );
-				mesh_t *subdivided = SubdivideMesh2( p.mesh, iterations );
-
-				/* fit it to the curve and remove colinear verts on rows/columns */
-				PutMeshOnCurve( *subdivided );
-				mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
-				FreeMesh( subdivided );
+				mesh_t mesh = TessellatedMesh( p.mesh, IterationsForCurve( p.longestCurve, patchSubdivisions ) );
 
 				/* offset by projector origin */
-				for ( bspDrawVert_t& vert : Span( mesh->verts, mesh->width * mesh->height ) )
+				for ( bspDrawVert_t& vert : Span( mesh.verts, mesh.numVerts() ) )
 					vert.xyz += e.origin;
 
 				/* iterate through the mesh quads */
-				for ( int y = 0; y < ( mesh->height - 1 ); ++y )
+				for ( int y = 0; y < ( mesh.height - 1 ); ++y )
 				{
-					for ( int x = 0; x < ( mesh->width - 1 ); ++x )
+					for ( int x = 0; x < ( mesh.width - 1 ); ++x )
 					{
 						/* set indexes */
 						const int pw[ 5 ] = {
-							x + ( y * mesh->width ),
-							x + ( ( y + 1 ) * mesh->width ),
-							x + 1 + ( ( y + 1 ) * mesh->width ),
-							x + 1 + ( y * mesh->width ),
-							x + ( y * mesh->width )    /* same as pw[ 0 ] */
+							x + ( y * mesh.width ),
+							x + ( ( y + 1 ) * mesh.width ),
+							x + 1 + ( ( y + 1 ) * mesh.width ),
+							x + 1 + ( y * mesh.width ),
+							x + ( y * mesh.width )    /* same as pw[ 0 ] */
 						};
 						/* set radix */
 						const int r = ( x + y ) & 1;
 
 						/* get drawverts */
 						const bspDrawVert_t *dv[ 4 ] = {
-							&mesh->verts[ pw[ r + 0 ] ],
-							&mesh->verts[ pw[ r + 1 ] ],
-							&mesh->verts[ pw[ r + 2 ] ],
-							&mesh->verts[ pw[ r + 3 ] ]
+							&mesh.verts[ pw[ r + 0 ] ],
+							&mesh.verts[ pw[ r + 1 ] ],
+							&mesh.verts[ pw[ r + 2 ] ],
+							&mesh.verts[ pw[ r + 3 ] ]
 						};
 						/* planar? (nuking this optimization as it doesn't work on non-rectangular quads) */
 						if ( 0 && PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz ) &&
@@ -465,7 +459,7 @@ void ProcessDecals(){
 				}
 
 				/* clean up */
-				free( mesh );
+				mesh.freeVerts();
 			}
 		}
 		/* remove patches from entity */
@@ -611,52 +605,42 @@ static void ProjectDecalOntoPatch( decalProjector_t& dp, mapDrawSurface_t& ds ){
 			return;
 
 	/* tesselate the patch */
-	mesh_t src;
-	src.width = ds.patchWidth;
-	src.height = ds.patchHeight;
-	src.verts = ds.verts.data();
-	const int iterations = IterationsForCurve( ds.longestCurve, patchSubdivisions );
-	mesh_t *subdivided = SubdivideMesh2( src, iterations );
-
-	/* fit it to the curve and remove colinear verts on rows/columns */
-	PutMeshOnCurve( *subdivided );
-	mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
-	FreeMesh( subdivided );
+	mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, ds.verts.data() ), IterationsForCurve( ds.longestCurve, patchSubdivisions ) );
 
 	/* iterate through the mesh quads */
-	for ( int y = 0; y < ( mesh->height - 1 ); ++y )
+	for ( int y = 0; y < ( mesh.height - 1 ); ++y )
 	{
-		for ( int x = 0; x < ( mesh->width - 1 ); ++x )
+		for ( int x = 0; x < ( mesh.width - 1 ); ++x )
 		{
 			/* set indexes */
 			const int pw[ 5 ] = {
-				x + ( y * mesh->width ),
-				x + ( ( y + 1 ) * mesh->width ),
-				x + 1 + ( ( y + 1 ) * mesh->width ),
-				x + 1 + ( y * mesh->width ),
-				x + ( y * mesh->width )    /* same as pw[ 0 ] */
+				x + ( y * mesh.width ),
+				x + ( ( y + 1 ) * mesh.width ),
+				x + 1 + ( ( y + 1 ) * mesh.width ),
+				x + 1 + ( y * mesh.width ),
+				x + ( y * mesh.width )    /* same as pw[ 0 ] */
 			};
 			/* set radix */
 			const int r = ( x + y ) & 1;
 
 			/* generate decal for first triangle */
 			winding_t w{
-				mesh->verts[ pw[ r + 0 ] ].xyz,
-				mesh->verts[ pw[ r + 1 ] ].xyz,
-				mesh->verts[ pw[ r + 2 ] ].xyz };
+				mesh.verts[ pw[ r + 0 ] ].xyz,
+				mesh.verts[ pw[ r + 1 ] ].xyz,
+				mesh.verts[ pw[ r + 2 ] ].xyz };
 			ProjectDecalOntoWinding( dp, ds, w );
 
 			/* generate decal for second triangle */
 			winding_t w2{
-				mesh->verts[ pw[ r + 0 ] ].xyz,
-				mesh->verts[ pw[ r + 2 ] ].xyz,
-				mesh->verts[ pw[ r + 3 ] ].xyz };
+				mesh.verts[ pw[ r + 0 ] ].xyz,
+				mesh.verts[ pw[ r + 2 ] ].xyz,
+				mesh.verts[ pw[ r + 3 ] ].xyz };
 			ProjectDecalOntoWinding( dp, ds, w2 );
 		}
 	}
 
 	/* clean up */
-	free( mesh );
+	mesh.freeVerts();
 }
 
 

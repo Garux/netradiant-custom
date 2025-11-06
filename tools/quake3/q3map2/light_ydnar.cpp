@@ -1218,20 +1218,7 @@ void MapRawLightmap( int rawLightmapNum ){
 		case MST_PATCH:
 		{
 			/* make a mesh from the drawsurf */
-			mesh_t src;
-			src.width = ds.patchWidth;
-			src.height = ds.patchHeight;
-			src.verts = &yDrawVerts[ ds.firstVert ];
-			//%	mesh_t *subdivided = SubdivideMesh( src, 8, 512 );
-			mesh_t *subdivided = SubdivideMesh2( src, info->patchIterations );
-
-			/* fit it to the curve and remove colinear verts on rows/columns */
-			PutMeshOnCurve( *subdivided );
-			mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
-			FreeMesh( subdivided );
-
-			/* get verts */
-			const bspDrawVert_t *verts = mesh->verts;
+			mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, &yDrawVerts[ ds.firstVert ] ), info->patchIterations );
 
 			/* debug code */
 #if 0
@@ -1248,59 +1235,59 @@ void MapRawLightmap( int rawLightmapNum ){
 
 			for ( mapNonAxial = 0; mapNonAxial < 2; ++mapNonAxial )
 			{
-				for ( y = 0; y < ( mesh->height - 1 ); ++y )
+				for ( y = 0; y < ( mesh.height - 1 ); ++y )
 				{
-					for ( x = 0; x < ( mesh->width - 1 ); ++x )
+					for ( x = 0; x < ( mesh.width - 1 ); ++x )
 					{
 						/* set indexes */
 						const int pw[ 5 ] = {
-							x + ( y * mesh->width ),
-							x + ( ( y + 1 ) * mesh->width ),
-							x + 1 + ( ( y + 1 ) * mesh->width ),
-							x + 1 + ( y * mesh->width ),
-							x + ( y * mesh->width )      /* same as pw[ 0 ] */
+							x + ( y * mesh.width ),
+							x + ( ( y + 1 ) * mesh.width ),
+							x + 1 + ( ( y + 1 ) * mesh.width ),
+							x + 1 + ( y * mesh.width ),
+							x + ( y * mesh.width )      /* same as pw[ 0 ] */
 						};
 						/* set radix */
 						const int r = ( x + y ) & 1;
 
 						/* get drawverts and map first triangle */
 						MapTriangle( lm, info, TriRef{
-							&verts[ pw[ r + 0 ] ],
-							&verts[ pw[ r + 1 ] ],
-							&verts[ pw[ r + 2 ] ] }, mapNonAxial );
+							&mesh.verts[ pw[ r + 0 ] ],
+							&mesh.verts[ pw[ r + 1 ] ],
+							&mesh.verts[ pw[ r + 2 ] ] }, mapNonAxial );
 
 						/* get drawverts and map second triangle */
 						MapTriangle( lm, info, TriRef{
-							&verts[ pw[ r + 0 ] ],
-							&verts[ pw[ r + 2 ] ],
-							&verts[ pw[ r + 3 ] ] }, mapNonAxial );
+							&mesh.verts[ pw[ r + 0 ] ],
+							&mesh.verts[ pw[ r + 2 ] ],
+							&mesh.verts[ pw[ r + 3 ] ] }, mapNonAxial );
 					}
 				}
 			}
 
 #else
 
-			for ( y = 0; y < ( mesh->height - 1 ); ++y )
+			for ( y = 0; y < ( mesh.height - 1 ); ++y )
 			{
-				for ( x = 0; x < ( mesh->width - 1 ); ++x )
+				for ( x = 0; x < ( mesh.width - 1 ); ++x )
 				{
 					/* set indexes */
 					const int pw[ 5 ] = {
-						x + ( y * mesh->width ),
-						x + ( ( y + 1 ) * mesh->width ),
-						x + 1 + ( ( y + 1 ) * mesh->width ),
-						x + 1 + ( y * mesh->width ),
-						x + ( y * mesh->width )      /* same as pw[ 0 ] */
+						x + ( y * mesh.width ),
+						x + ( ( y + 1 ) * mesh.width ),
+						x + 1 + ( ( y + 1 ) * mesh.width ),
+						x + 1 + ( y * mesh.width ),
+						x + ( y * mesh.width )      /* same as pw[ 0 ] */
 					};
 					/* set radix */
 					const int r = ( x + y ) & 1;
 
 					/* attempt to map quad first */
 					if ( MapQuad( lm, info, QuadRef{
-						&verts[ pw[ r + 0 ] ],
-						&verts[ pw[ r + 1 ] ],
-						&verts[ pw[ r + 2 ] ],
-						&verts[ pw[ r + 3 ] ] } ) ) {
+						&mesh.verts[ pw[ r + 0 ] ],
+						&mesh.verts[ pw[ r + 1 ] ],
+						&mesh.verts[ pw[ r + 2 ] ],
+						&mesh.verts[ pw[ r + 3 ] ] } ) ) {
 						continue;
 					}
 
@@ -1308,15 +1295,15 @@ void MapRawLightmap( int rawLightmapNum ){
 					{
 						/* get drawverts and map first triangle */
 						MapTriangle( lm, info, TriRef{
-							&verts[ pw[ r + 0 ] ],
-							&verts[ pw[ r + 1 ] ],
-							&verts[ pw[ r + 2 ] ] }, mapNonAxial );
+							&mesh.verts[ pw[ r + 0 ] ],
+							&mesh.verts[ pw[ r + 1 ] ],
+							&mesh.verts[ pw[ r + 2 ] ] }, mapNonAxial );
 
 						/* get drawverts and map second triangle */
 						MapTriangle( lm, info, TriRef{
-							&verts[ pw[ r + 0 ] ],
-							&verts[ pw[ r + 2 ] ],
-							&verts[ pw[ r + 3 ] ] }, mapNonAxial );
+							&mesh.verts[ pw[ r + 0 ] ],
+							&mesh.verts[ pw[ r + 2 ] ],
+							&mesh.verts[ pw[ r + 3 ] ] }, mapNonAxial );
 					}
 				}
 			}
@@ -1324,7 +1311,7 @@ void MapRawLightmap( int rawLightmapNum ){
 #endif
 
 			/* free the mesh */
-			FreeMesh( mesh );
+			mesh.freeVerts();
 			break;
 		}
 		default:

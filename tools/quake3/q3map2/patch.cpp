@@ -210,8 +210,8 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 	Parse1DMatrix( 5, info );
 	m.width = info[0];
 	m.height = info[1];
-	const int size = ( m.width * m.height );
-	bspDrawVert_t *verts = m.verts = safe_malloc( size * sizeof( m.verts[0] ) );
+	const int numVerts = m.numVerts();
+	bspDrawVert_t *verts = m.verts = safe_malloc( numVerts * sizeof( m.verts[0] ) );
 
 	if ( m.width < 0 || m.width > MAX_PATCH_SIZE || m.height < 0 || m.height > MAX_PATCH_SIZE ) {
 		Error( "ParsePatch: bad size" );
@@ -259,7 +259,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 	degenerate = true;
 
 	/* find first valid vector */
-	for ( int i = 1; i < size && delta[ 3 ] == 0; ++i )
+	for ( int i = 1; i < numVerts && delta[ 3 ] == 0; ++i )
 	{
 		delta.vec3() = m.verts[ 0 ].xyz - m.verts[ i ].xyz;
 		delta[ 3 ] = VectorNormalize( delta.vec3() );
@@ -272,7 +272,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 	else
 	{
 		/* if all vectors match this or are zero, then this is a degenerate patch */
-		for ( int i = 1; i < size && degenerate; ++i )
+		for ( int i = 1; i < numVerts && degenerate; ++i )
 		{
 			Vector4 delta2( m.verts[ 0 ].xyz - m.verts[ i ].xyz, 0 );
 			delta2[ 3 ] = VectorNormalize( delta2.vec3() );
@@ -292,7 +292,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 	/* warn and select degenerate patch */
 	if ( degenerate ) {
 		xml_Select( "degenerate patch", mapEnt.mapEntityNum, mapPrimitiveNum, false );
-		free( m.verts );
+		m.freeVerts();
 		return;
 	}
 
@@ -400,8 +400,8 @@ void PatchMapDrawSurfs( entity_t& e ){
 
 			meshes[m1].bordering[m2] =
 			meshes[m2].bordering[m1] =
-				std::ranges::any_of( Span( mesh1.verts, mesh1.width * mesh1.height ), [mesh2]( const bspDrawVert_t& v1 ){
-					return std::ranges::any_of( Span( mesh2.verts, mesh2.width * mesh2.height ), [v1]( const bspDrawVert_t& v2 ){
+				std::ranges::any_of( Span( mesh1.verts, mesh1.numVerts() ), [mesh2]( const bspDrawVert_t& v1 ){
+					return std::ranges::any_of( Span( mesh2.verts, mesh2.numVerts() ), [v1]( const bspDrawVert_t& v2 ){
 						return vector3_equal_epsilon( v1.xyz, v2.xyz, 1.f );
 					} );
 				} );
@@ -428,7 +428,7 @@ void PatchMapDrawSurfs( entity_t& e ){
 		{
 			if ( m.group ) {
 				m.grouped = true;
-				std::for_each_n( m.mesh.mesh.verts, m.mesh.mesh.width * m.mesh.mesh.height,
+				std::for_each_n( m.mesh.mesh.verts, m.mesh.mesh.numVerts(),
 					[&bounds]( const bspDrawVert_t& v ){ bounds.extend( v.xyz ); } );
 			}
 		}

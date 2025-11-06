@@ -1240,7 +1240,7 @@ static void AdjustBrushesForOrigin( entity_t& ent ){
 	/* walk patch list */
 	for ( parseMesh_t& p : ent.patches )
 	{
-		for ( bspDrawVert_t& vert : Span( p.mesh.verts, p.mesh.width * p.mesh.height ) )
+		for ( bspDrawVert_t& vert : Span( p.mesh.verts, p.mesh.numVerts() ) )
 			vert.xyz -= ent.originbrush_origin;
 	}
 }
@@ -1303,7 +1303,7 @@ static void SetEntityBounds( entity_t& e ){
 	}
 	for ( const parseMesh_t& p : e.patches )
 	{
-		for ( const bspDrawVert_t& vert : Span( p.mesh.verts, p.mesh.width * p.mesh.height ) )
+		for ( const bspDrawVert_t& vert : Span( p.mesh.verts, p.mesh.numVerts() ) )
 			minmax.extend( vert.xyz );
 	}
 

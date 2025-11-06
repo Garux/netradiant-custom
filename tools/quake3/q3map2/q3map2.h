@@ -762,6 +762,15 @@ struct mesh_t
 {
 	int width, height;
 	bspDrawVert_t       *verts;
+
+	mesh_t() = default;
+	mesh_t( int width, int height, bspDrawVert_t *verts ) : width( width ), height( height ), verts( verts ){}
+	size_t numVerts() const {
+		return width * height;
+	}
+	void freeVerts(){
+		free( verts );
+	}
 };
 
 
@@ -1513,17 +1522,17 @@ bool                        WindingIsTiny( const winding_t& w );
 /* mesh.c */
 bspDrawVert_t               LerpDrawVert( const bspDrawVert_t& a, const bspDrawVert_t& b );
 void                        LerpDrawVertAmount( bspDrawVert_t *a, bspDrawVert_t *b, float amount, bspDrawVert_t *out );
-void                        FreeMesh( mesh_t *m );
-mesh_t                      *CopyMesh( mesh_t *mesh );
-void                        PrintMesh( mesh_t *m );
-mesh_t                      *TransposeMesh( mesh_t *in );
-void                        InvertMesh( mesh_t *m );
-mesh_t                      *SubdivideMesh( mesh_t in, float maxError, float minLength );
+mesh_t                      CopyMesh( const mesh_t m );
+void                        PrintMesh( const mesh_t m );
+void                        TransposeMesh( mesh_t& m );
+void                        InvertMesh( mesh_t& m );
+mesh_t                      SubdivideMesh( const mesh_t in, float maxError, float minLength );
 int                         IterationsForCurve( float len, int subdivisions );
-mesh_t                      *SubdivideMesh2( mesh_t in, int iterations );
-mesh_t                      *RemoveLinearMeshColumnsRows( mesh_t *in );
-void                        MakeMeshNormals( mesh_t in );
-void                        PutMeshOnCurve( mesh_t in );
+mesh_t                      SubdivideMesh2( const mesh_t in, int iterations );
+mesh_t                      RemoveLinearMeshColumnsRows( const mesh_t in );
+mesh_t                      TessellatedMesh( const mesh_t in, int iterations );
+void                        MakeMeshNormals( mesh_t& in );
+void                        PutMeshOnCurve( mesh_t& in );
 
 
 /* map.c */

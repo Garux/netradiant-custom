@@ -773,7 +773,6 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t *mesh ){
 	Plane3f plane;
 	shaderInfo_t        *si, *parent;
-	mesh_t              *copy;
 	byte shaderIndexes[ MAX_EXPANDED_AXIS * MAX_EXPANDED_AXIS ];
 	float offsets[ MAX_EXPANDED_AXIS * MAX_EXPANDED_AXIS ];
 
@@ -788,35 +787,35 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 	}
 
 	/* get vertex count */
-	const int numVerts = mesh->width * mesh->height;
+	const int numVerts = mesh->numVerts();
 
 	/* to make valid normals for patches with degenerate edges,
 	   we need to make a copy of the mesh and put the aproximating
 	   points onto the curve */
 
 	/* create a copy of the mesh */
-	copy = CopyMesh( mesh );
+	mesh_t copy = CopyMesh( *mesh );
 
 	/* store off the original (potentially bad) normals */
-	MakeMeshNormals( *copy );
+	MakeMeshNormals( copy );
 	for ( int i = 0; i < numVerts; ++i )
-		mesh->verts[ i ].normal = copy->verts[ i ].normal;
+		mesh->verts[ i ].normal = copy.verts[ i ].normal;
 
 	/* put the mesh on the curve */
-	PutMeshOnCurve( *copy );
+	PutMeshOnCurve( copy );
 
 	/* find new normals (to take into account degenerate/flipped edges */
-	MakeMeshNormals( *copy );
+	MakeMeshNormals( copy );
 	for ( int i = 0; i < numVerts; ++i )
 	{
 		/* ydnar: only copy normals that are significantly different from the originals */
-		if ( vector3_dot( copy->verts[ i ].normal, mesh->verts[ i ].normal ) < 0.75f ) {
-			mesh->verts[ i ].normal = copy->verts[ i ].normal;
+		if ( vector3_dot( copy.verts[ i ].normal, mesh->verts[ i ].normal ) < 0.75f ) {
+			mesh->verts[ i ].normal = copy.verts[ i ].normal;
 		}
 	}
 
 	/* free the old mesh */
-	FreeMesh( copy );
+	copy.freeVerts();
 
 	/* ydnar: gs mods: check for indexed shader */
 	const bool indexed = ( si->indexed && p.im != nullptr );
@@ -2844,40 +2843,29 @@ static int AddSurfaceModels( mapDrawSurface_t& ds, entity_t& entity ){
 		case ESurfaceType::Patch:
 		{
 			/* subdivide the surface */
-			mesh_t src;
-			src.width = ds.patchWidth;
-			src.height = ds.patchHeight;
-			src.verts = ds.verts.data();
-			//%	mesh_t *subdivided = SubdivideMesh( src, 8.0f, 512 );
-			const int iterations = IterationsForCurve( ds.longestCurve, patchSubdivisions );
-			mesh_t *subdivided = SubdivideMesh2( src, iterations );
-
-			/* fit it to the curve and remove colinear verts on rows/columns */
-			PutMeshOnCurve( *subdivided );
-			mesh_t *mesh = RemoveLinearMeshColumnsRows( subdivided );
-			FreeMesh( subdivided );
+			mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, ds.verts.data() ), IterationsForCurve( ds.longestCurve, patchSubdivisions ) );
 
 			/* subdivide each quad to place the models */
-			for ( int y = 0; y < ( mesh->height - 1 ); ++y )
+			for ( int y = 0; y < ( mesh.height - 1 ); ++y )
 			{
-				for ( int x = 0; x < ( mesh->width - 1 ); ++x )
+				for ( int x = 0; x < ( mesh.width - 1 ); ++x )
 				{
 					/* set indexes */
 					const int pw[ 5 ] = {
-						x + ( y * mesh->width ),
-						x + ( ( y + 1 ) * mesh->width ),
-						x + 1 + ( ( y + 1 ) * mesh->width ),
-						x + 1 + ( y * mesh->width ),
-						x + ( y * mesh->width ),      /* same as pw[ 0 ] */
+						x + ( y * mesh.width ),
+						x + ( ( y + 1 ) * mesh.width ),
+						x + 1 + ( ( y + 1 ) * mesh.width ),
+						x + 1 + ( y * mesh.width ),
+						x + ( y * mesh.width ),      /* same as pw[ 0 ] */
 					};
 					/* set radix */
 					const int r = ( x + y ) & 1;
 
 					/* triangle 1 */
 					const int n = AddSurfaceModelsToTriangle_r( ds, model, TriRef{
-						&mesh->verts[ pw[ r + 0 ] ],
-						&mesh->verts[ pw[ r + 1 ] ],
-						&mesh->verts[ pw[ r + 2 ] ] }, entity );
+						&mesh.verts[ pw[ r + 0 ] ],
+						&mesh.verts[ pw[ r + 1 ] ],
+						&mesh.verts[ pw[ r + 2 ] ] }, entity );
 					if ( n < 0 ) {
 						return n;
 					}
@@ -2885,9 +2873,9 @@ static int AddSurfaceModels( mapDrawSurface_t& ds, entity_t& entity ){
 
 					/* triangle 2 */
 					const int n2 = AddSurfaceModelsToTriangle_r( ds, model, TriRef{
-						&mesh->verts[ pw[ r + 0 ] ],
-						&mesh->verts[ pw[ r + 2 ] ],
-						&mesh->verts[ pw[ r + 3 ] ] }, entity );
+						&mesh.verts[ pw[ r + 0 ] ],
+						&mesh.verts[ pw[ r + 2 ] ],
+						&mesh.verts[ pw[ r + 3 ] ] }, entity );
 					if ( n2 < 0 ) {
 						return n2;
 					}
@@ -2896,7 +2884,7 @@ static int AddSurfaceModels( mapDrawSurface_t& ds, entity_t& entity ){
 			}
 
 			/* free the subdivided mesh */
-			FreeMesh( mesh );
+			mesh.freeVerts();
 			break;
 		}
 		/* handle triangle surfaces */
