@@ -1151,7 +1151,7 @@ static bool MapQuad( rawLightmap_t *lm, const surfaceInfo_t *info, const QuadRef
  */
 
 void MapRawLightmap( int rawLightmapNum ){
-	int n, i, x, y, sx, sy, mapNonAxial;
+	int n, i, x, y, sx, sy;
 	float               samples, radius, pass;
 	rawLightmap_t       *lm;
 	bspDrawVert_t fake;
@@ -1207,7 +1207,7 @@ void MapRawLightmap( int rawLightmapNum ){
 			const bspDrawVert_t *verts = &yDrawVerts[ ds.firstVert ];
 
 			/* map the triangles */
-			for ( mapNonAxial = 0; mapNonAxial < 2; ++mapNonAxial )
+			for ( int mapNonAxial = 0; mapNonAxial < 2; ++mapNonAxial )
 				for ( i = 0; i < ds.numIndexes; i += 3 )
 					MapTriangle( lm, info, TriRef{
 						&verts[ bspDrawIndexes[ ds.firstIndex + i ] ],
@@ -1232,82 +1232,24 @@ void MapRawLightmap( int rawLightmapNum ){
 
 			/* map the mesh quads */
 #if 0
-
-			for ( mapNonAxial = 0; mapNonAxial < 2; ++mapNonAxial )
+			for ( int mapNonAxial = 0; mapNonAxial < 2; ++mapNonAxial )
 			{
-				for ( y = 0; y < ( mesh.height - 1 ); ++y )
-				{
-					for ( x = 0; x < ( mesh.width - 1 ); ++x )
-					{
-						/* set indexes */
-						const int pw[ 5 ] = {
-							x + ( y * mesh.width ),
-							x + ( ( y + 1 ) * mesh.width ),
-							x + 1 + ( ( y + 1 ) * mesh.width ),
-							x + 1 + ( y * mesh.width ),
-							x + ( y * mesh.width )      /* same as pw[ 0 ] */
-						};
-						/* set radix */
-						const int r = ( x + y ) & 1;
-
-						/* get drawverts and map first triangle */
-						MapTriangle( lm, info, TriRef{
-							&mesh.verts[ pw[ r + 0 ] ],
-							&mesh.verts[ pw[ r + 1 ] ],
-							&mesh.verts[ pw[ r + 2 ] ] }, mapNonAxial );
-
-						/* get drawverts and map second triangle */
-						MapTriangle( lm, info, TriRef{
-							&mesh.verts[ pw[ r + 0 ] ],
-							&mesh.verts[ pw[ r + 2 ] ],
-							&mesh.verts[ pw[ r + 3 ] ] }, mapNonAxial );
-					}
+				for( MeshQuadIterator it( mesh ); it; ++it ){
+					for( const TriRef& tri : it.tris() )
+						MapTriangle( lm, info, tri, mapNonAxial );
 				}
 			}
-
 #else
-
-			for ( y = 0; y < ( mesh.height - 1 ); ++y )
-			{
-				for ( x = 0; x < ( mesh.width - 1 ); ++x )
-				{
-					/* set indexes */
-					const int pw[ 5 ] = {
-						x + ( y * mesh.width ),
-						x + ( ( y + 1 ) * mesh.width ),
-						x + 1 + ( ( y + 1 ) * mesh.width ),
-						x + 1 + ( y * mesh.width ),
-						x + ( y * mesh.width )      /* same as pw[ 0 ] */
-					};
-					/* set radix */
-					const int r = ( x + y ) & 1;
-
-					/* attempt to map quad first */
-					if ( MapQuad( lm, info, QuadRef{
-						&mesh.verts[ pw[ r + 0 ] ],
-						&mesh.verts[ pw[ r + 1 ] ],
-						&mesh.verts[ pw[ r + 2 ] ],
-						&mesh.verts[ pw[ r + 3 ] ] } ) ) {
-						continue;
-					}
-
-					for ( mapNonAxial = 0; mapNonAxial < 2; ++mapNonAxial )
+			for( MeshQuadIterator it( mesh ); it; ++it ){
+				/* attempt to map quad first */
+				if ( !MapQuad( lm, info, it.quad() ) ) {
+					for ( int mapNonAxial = 0; mapNonAxial < 2; ++mapNonAxial )
 					{
-						/* get drawverts and map first triangle */
-						MapTriangle( lm, info, TriRef{
-							&mesh.verts[ pw[ r + 0 ] ],
-							&mesh.verts[ pw[ r + 1 ] ],
-							&mesh.verts[ pw[ r + 2 ] ] }, mapNonAxial );
-
-						/* get drawverts and map second triangle */
-						MapTriangle( lm, info, TriRef{
-							&mesh.verts[ pw[ r + 0 ] ],
-							&mesh.verts[ pw[ r + 2 ] ],
-							&mesh.verts[ pw[ r + 3 ] ] }, mapNonAxial );
+						for( const TriRef& tri : it.tris() )
+							MapTriangle( lm, info, tri, mapNonAxial );
 					}
 				}
 			}
-
 #endif
 
 			/* free the mesh */

@@ -195,35 +195,9 @@ void Foliage( mapDrawSurface_t& src, entity_t& entity ){
 			subdivided.freeVerts();
 
 			/* map the mesh quads */
-			for ( int y = 0; y < ( mesh.height - 1 ); ++y )
-			{
-				for ( int x = 0; x < ( mesh.width - 1 ); ++x )
-				{
-					/* set indexes */
-					const int pw[ 5 ] = {
-						x + ( y * mesh.width ),
-						x + ( ( y + 1 ) * mesh.width ),
-						x + 1 + ( ( y + 1 ) * mesh.width ),
-						x + 1 + ( y * mesh.width ),
-						x + ( y * mesh.width )      /* same as pw[ 0 ] */
-					};
-					/* set radix */
-					const int r = ( x + y ) & 1;
-
-					/* get drawverts and map first triangle */
-					SubdivideFoliageTriangle_r( foliage, TriRef{
-						&mesh.verts[ pw[ r + 0 ] ],
-						&mesh.verts[ pw[ r + 1 ] ],
-						&mesh.verts[ pw[ r + 2 ] ]
-					} );
-					/* get drawverts and map second triangle */
-					SubdivideFoliageTriangle_r( foliage, TriRef{
-						&mesh.verts[ pw[ r + 0 ] ],
-						&mesh.verts[ pw[ r + 2 ] ],
-						&mesh.verts[ pw[ r + 3 ] ]
-					} );
-				}
-			}
+			for( MeshQuadIterator it( mesh ); it; ++it )
+				for( const TriRef& tri : it.tris() )
+					SubdivideFoliageTriangle_r( foliage, tri );
 
 			/* free the mesh */
 			mesh.freeVerts();

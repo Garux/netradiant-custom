@@ -177,7 +177,7 @@ static int AllocTraceNode(){
    adds a winding to the raytracing pool
  */
 
-static int AddTraceWinding( traceWinding_t *tw ){
+static int AddTraceWinding( const traceWinding_t& tw ){
 	int num;
 
 	/* check for a dead winding */
@@ -194,7 +194,7 @@ static int AddTraceWinding( traceWinding_t *tw ){
 	}
 
 	/* add the winding */
-	memcpy( &traceWindings[ num ], tw, sizeof( *traceWindings ) );
+	memcpy( &traceWindings[ num ], &tw, sizeof( *traceWindings ) );
 	if ( num == numTraceWindings ) {
 		numTraceWindings++;
 	}
@@ -354,23 +354,23 @@ static int SetupTraceNodes_r( int bspNodeNum ){
 
 #define TW_ON_EPSILON   0.25f
 
-void ClipTraceWinding( traceWinding_t *tw, const Plane3f& plane, traceWinding_t *front, traceWinding_t *back ){
+void ClipTraceWinding( const traceWinding_t& tw, const Plane3f& plane, traceWinding_t& front, traceWinding_t& back ){
 	int i, j, k;
 	EPlaneSide sides[ MAX_TW_VERTS ];
 	int counts[ 3 ] = { 0, 0, 0 };
 	float dists[ MAX_TW_VERTS ];
 	float frac;
-	traceVert_t     *a, *b, mid;
+	traceVert_t mid;
 
 
 	/* clear front and back */
-	front->numVerts = 0;
-	back->numVerts = 0;
+	front.numVerts = 0;
+	back.numVerts = 0;
 
 	/* classify points */
-	for ( i = 0; i < tw->numVerts; ++i )
+	for ( i = 0; i < tw.numVerts; ++i )
 	{
-		dists[ i ] = plane3_distance_to_point( plane, tw->v[ i ].xyz );
+		dists[ i ] = plane3_distance_to_point( plane, tw.v[ i ].xyz );
 		if ( dists[ i ] < -TW_ON_EPSILON ) {
 			sides[ i ] = eSideBack;
 		}
@@ -385,56 +385,56 @@ void ClipTraceWinding( traceWinding_t *tw, const Plane3f& plane, traceWinding_t 
 
 	/* entirely on front? */
 	if ( counts[ eSideBack ] == 0 ) {
-		memcpy( front, tw, sizeof( *front ) );
+		memcpy( &front, &tw, sizeof( front ) );
 	}
 
 	/* entirely on back? */
 	else if ( counts[ eSideFront ] == 0 ) {
-		memcpy( back, tw, sizeof( *back ) );
+		memcpy( &back, &tw, sizeof( back ) );
 	}
 
 	/* straddles the plane */
 	else
 	{
 		/* setup front and back */
-		memcpy( front, tw, sizeof( *front ) );
-		front->numVerts = 0;
-		memcpy( back, tw, sizeof( *back ) );
-		back->numVerts = 0;
+		memcpy( &front, &tw, sizeof( front ) );
+		front.numVerts = 0;
+		memcpy( &back, &tw, sizeof( back ) );
+		back.numVerts = 0;
 
 		/* split the winding */
-		for ( i = 0; i < tw->numVerts; ++i )
+		for ( i = 0; i < tw.numVerts; ++i )
 		{
 			/* radix */
-			j = ( i + 1 ) % tw->numVerts;
+			j = ( i + 1 ) % tw.numVerts;
 
 			/* get verts */
-			a = &tw->v[ i ];
-			b = &tw->v[ j ];
+			const traceVert_t& a = tw.v[ i ];
+			const traceVert_t& b = tw.v[ j ];
 
 			/* handle points on the splitting plane */
 			switch ( sides[ i ] )
 			{
 			case eSideFront:
-				if ( front->numVerts >= MAX_TW_VERTS ) {
+				if ( front.numVerts >= MAX_TW_VERTS ) {
 					Error( "MAX_TW_VERTS (%d) exceeded", MAX_TW_VERTS );
 				}
-				front->v[ front->numVerts++ ] = *a;
+				front.v[ front.numVerts++ ] = a;
 				break;
 
 			case eSideBack:
-				if ( back->numVerts >= MAX_TW_VERTS ) {
+				if ( back.numVerts >= MAX_TW_VERTS ) {
 					Error( "MAX_TW_VERTS (%d) exceeded", MAX_TW_VERTS );
 				}
-				back->v[ back->numVerts++ ] = *a;
+				back.v[ back.numVerts++ ] = a;
 				break;
 
 			case eSideOn:
-				if ( front->numVerts >= MAX_TW_VERTS || back->numVerts >= MAX_TW_VERTS ) {
+				if ( front.numVerts >= MAX_TW_VERTS || back.numVerts >= MAX_TW_VERTS ) {
 					Error( "MAX_TW_VERTS (%d) exceeded", MAX_TW_VERTS );
 				}
-				front->v[ front->numVerts++ ] = *a;
-				back->v[ back->numVerts++ ] = *a;
+				front.v[ front.numVerts++ ] = a;
+				back.v[ back.numVerts++ ] = a;
 				continue;
 			case eSideCross: // unused here, suppress warning
 				break;
@@ -446,7 +446,7 @@ void ClipTraceWinding( traceWinding_t *tw, const Plane3f& plane, traceWinding_t 
 			}
 
 			/* check limit */
-			if ( front->numVerts >= MAX_TW_VERTS || back->numVerts >= MAX_TW_VERTS ) {
+			if ( front.numVerts >= MAX_TW_VERTS || back.numVerts >= MAX_TW_VERTS ) {
 				Error( "MAX_TW_VERTS (%d) exceeded", MAX_TW_VERTS );
 			}
 
@@ -462,15 +462,15 @@ void ClipTraceWinding( traceWinding_t *tw, const Plane3f& plane, traceWinding_t 
 					mid.xyz[ k ] = -plane.dist();
 				}
 				else{
-					mid.xyz[ k ] = a->xyz[ k ] + frac * ( b->xyz[ k ] - a->xyz[ k ] );
+					mid.xyz[ k ] = a.xyz[ k ] + frac * ( b.xyz[ k ] - a.xyz[ k ] );
 				}
 			}
 			/* set texture coordinates */
-			mid.st = a->st + ( b->st - a->st ) * frac;
+			mid.st = a.st + ( b.st - a.st ) * frac;
 
 			/* copy midpoint to front and back polygons */
-			front->v[ front->numVerts++ ] = mid;
-			back->v[ back->numVerts++ ] = mid;
+			front.v[ front.numVerts++ ] = mid;
+			back.v[ back.numVerts++ ] = mid;
 		}
 	}
 }
@@ -482,7 +482,7 @@ void ClipTraceWinding( traceWinding_t *tw, const Plane3f& plane, traceWinding_t 
    filters a trace winding into the raytracing tree
  */
 
-static void FilterTraceWindingIntoNodes_r( traceWinding_t *tw, int nodeNum ){
+static void FilterTraceWindingIntoNodes_r( traceWinding_t& tw, int nodeNum ){
 	int num;
 	Plane3f plane1, plane2, reverse;
 	traceNode_t     *node;
@@ -501,7 +501,7 @@ static void FilterTraceWindingIntoNodes_r( traceWinding_t *tw, int nodeNum ){
 	if ( node->type >= 0 ) {
 		/* create winding plane if necessary, filtering out bogus windings as well */
 		if ( nodeNum == headNodeNum ) {
-			if ( !PlaneFromPoints( tw->plane, tw->v[ 0 ].xyz, tw->v[ 1 ].xyz, tw->v[ 2 ].xyz ) ) {
+			if ( !PlaneFromPoints( tw.plane, tw.v[ 0 ].xyz, tw.v[ 1 ].xyz, tw.v[ 2 ].xyz ) ) {
 				return;
 			}
 		}
@@ -515,7 +515,7 @@ static void FilterTraceWindingIntoNodes_r( traceWinding_t *tw, int nodeNum ){
 		plane1 = node->plane;
 
 		/* get winding plane */
-		plane2 = tw->plane;
+		plane2 = tw.plane;
 
 		/* invert surface plane */
 		reverse = plane3_flipped( plane2 );
@@ -533,14 +533,14 @@ static void FilterTraceWindingIntoNodes_r( traceWinding_t *tw, int nodeNum ){
 		}
 
 		/* clip the winding by node plane */
-		ClipTraceWinding( tw, plane1, &front, &back );
+		ClipTraceWinding( tw, plane1, front, back );
 
 		/* filter by node plane */
 		if ( front.numVerts >= 3 ) {
-			FilterTraceWindingIntoNodes_r( &front, node->children[ 0 ] );
+			FilterTraceWindingIntoNodes_r( front, node->children[ 0 ] );
 		}
 		if ( back.numVerts >= 3 ) {
-			FilterTraceWindingIntoNodes_r( &back, node->children[ 1 ] );
+			FilterTraceWindingIntoNodes_r( back, node->children[ 1 ] );
 		}
 
 		/* return to caller */
@@ -563,7 +563,7 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 	int i, j, count, num, frontNum, backNum, type;
 	float dist;
 	traceNode_t     *node, *frontNode, *backNode;
-	traceWinding_t  *tw, front, back;
+	traceWinding_t  front, back;
 
 
 	/* dummy check */
@@ -599,13 +599,13 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 	for ( i = 0; i < node->numItems; ++i )
 	{
 		/* get winding */
-		tw = &traceWindings[ node->items[ i ] ];
+		const traceWinding_t& tw = traceWindings[ node->items[ i ] ];
 
 		/* walk its verts */
-		for ( j = 0; j < tw->numVerts; ++j )
+		for ( j = 0; j < tw.numVerts; ++j )
 		{
-			node->minmax.extend( tw->v[ j ].xyz );
-			average += tw->v[ j ].xyz;
+			node->minmax.extend( tw.v[ j ].xyz );
+			average += tw.v[ j ].xyz;
 			count++;
 		}
 	}
@@ -676,10 +676,10 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 	for ( i = 0; i < node->numItems; ++i )
 	{
 		/* get winding */
-		tw = &traceWindings[ node->items[ i ] ];
+		const traceWinding_t& tw = traceWindings[ node->items[ i ] ];
 
 		/* clip the winding by the new split plane */
-		ClipTraceWinding( tw, node->plane, &front, &back );
+		ClipTraceWinding( tw, node->plane, front, back );
 
 		/* kill the existing winding */
 		if ( front.numVerts >= 3 || back.numVerts >= 3 ) {
@@ -688,13 +688,13 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 
 		/* add front winding */
 		if ( front.numVerts >= 3 ) {
-			num = AddTraceWinding( &front );
+			num = AddTraceWinding( front );
 			AddItemToTraceNode( frontNode, num );
 		}
 
 		/* add back winding */
 		if ( back.numVerts >= 3 ) {
-			num = AddTraceWinding( &back );
+			num = AddTraceWinding( back );
 			AddItemToTraceNode( backNode, num );
 		}
 	}
@@ -894,44 +894,14 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 			mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, &bspDrawVerts[ ds.firstVert ] ), info.patchIterations );
 
 			/* subdivide each quad to place the models */
-			for ( int y = 0; y < ( mesh.height - 1 ); ++y )
-			{
-				for ( int x = 0; x < ( mesh.width - 1 ); ++x )
-				{
-					/* set indexes */
-					const int pw[ 5 ] = {
-						x + ( y * mesh.width ),
-						x + ( ( y + 1 ) * mesh.width ),
-						x + 1 + ( ( y + 1 ) * mesh.width ),
-						x + 1 + ( y * mesh.width ),
-						x + ( y * mesh.width )      /* same as pw[ 0 ] */
-					};
-					/* set radix */
-					const int r = ( x + y ) & 1;
-
-					/* make first triangle */
-					tw.v[ 0 ].xyz = mesh.verts[ pw[ r + 0 ] ].xyz;
-					tw.v[ 0 ].st  = mesh.verts[ pw[ r + 0 ] ].st;
-					tw.v[ 1 ].xyz = mesh.verts[ pw[ r + 1 ] ].xyz;
-					tw.v[ 1 ].st  = mesh.verts[ pw[ r + 1 ] ].st;
-					tw.v[ 2 ].xyz = mesh.verts[ pw[ r + 2 ] ].xyz;
-					tw.v[ 2 ].st  = mesh.verts[ pw[ r + 2 ] ].st;
-					matrix4_transform_point( transform, tw.v[ 0 ].xyz );
-					matrix4_transform_point( transform, tw.v[ 1 ].xyz );
-					matrix4_transform_point( transform, tw.v[ 2 ].xyz );
-					FilterTraceWindingIntoNodes_r( &tw, nodeNum );
-
-					/* make second triangle */
-					tw.v[ 0 ].xyz = mesh.verts[ pw[ r + 0 ] ].xyz;
-					tw.v[ 0 ].st  = mesh.verts[ pw[ r + 0 ] ].st;
-					tw.v[ 1 ].xyz = mesh.verts[ pw[ r + 2 ] ].xyz;
-					tw.v[ 1 ].st  = mesh.verts[ pw[ r + 2 ] ].st;
-					tw.v[ 2 ].xyz = mesh.verts[ pw[ r + 3 ] ].xyz;
-					tw.v[ 2 ].st  = mesh.verts[ pw[ r + 3 ] ].st;
-					matrix4_transform_point( transform, tw.v[ 0 ].xyz );
-					matrix4_transform_point( transform, tw.v[ 1 ].xyz );
-					matrix4_transform_point( transform, tw.v[ 2 ].xyz );
-					FilterTraceWindingIntoNodes_r( &tw, nodeNum );
+			for( MeshQuadIterator it( mesh ); it; ++it ){
+				for( const TriRef& tri : it.tris() ){
+					for( int i = 0; i < 3; ++i )
+					{
+						tw.v[ i ].xyz = matrix4_transformed_point( transform, tri[ i ]->xyz );
+						tw.v[ i ].st  = tri[ i ]->st;
+					}
+					FilterTraceWindingIntoNodes_r( tw, nodeNum );
 				}
 			}
 
@@ -950,16 +920,13 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 			/* walk the triangle list */
 			for ( int j = 0; j < ds.numIndexes; j += 3 )
 			{
-				tw.v[ 0 ].xyz = verts[ indexes[ j + 0 ] ].xyz;
-				tw.v[ 0 ].st  = verts[ indexes[ j + 0 ] ].st;
-				tw.v[ 1 ].xyz = verts[ indexes[ j + 1 ] ].xyz;
-				tw.v[ 1 ].st  = verts[ indexes[ j + 1 ] ].st;
-				tw.v[ 2 ].xyz = verts[ indexes[ j + 2 ] ].xyz;
-				tw.v[ 2 ].st  = verts[ indexes[ j + 2 ] ].st;
-				matrix4_transform_point( transform, tw.v[ 0 ].xyz );
-				matrix4_transform_point( transform, tw.v[ 1 ].xyz );
-				matrix4_transform_point( transform, tw.v[ 2 ].xyz );
-				FilterTraceWindingIntoNodes_r( &tw, nodeNum );
+				for( int i = 0; i < 3; ++i )
+				{
+					const bspDrawVert_t& v = verts[ indexes[ j + i ] ];
+					tw.v[ i ].xyz = matrix4_transformed_point( transform, v.xyz );
+					tw.v[ i ].st  = v.st;
+				}
+				FilterTraceWindingIntoNodes_r( tw, nodeNum );
 			}
 			break;
 		}
@@ -1018,11 +985,11 @@ static void PopulateWithPicoModel( int castShadows, const std::vector<const AssM
 
 		/* walk the triangle list */
 		mesh->forEachFace( [&tw, &transform]( const Vector3 ( &xyz )[3], const Vector2 ( &st )[3] ){
-			for( size_t i = 0; i < 3; ++i ){
+			for( int i = 0; i < 3; ++i ){
 				tw.v[ i ].xyz = matrix4_transformed_point( transform, xyz[ i ] );
 				tw.v[ i ].st = st[ i ];
 			}
-			FilterTraceWindingIntoNodes_r( &tw, headNodeNum );
+			FilterTraceWindingIntoNodes_r( tw, headNodeNum );
 		} );
 	}
 }

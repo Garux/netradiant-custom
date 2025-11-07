@@ -1667,33 +1667,11 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 
 			/* map the mesh quads */
 			info.approximated = true;
-			for ( int y = 0; y < ( mesh.height - 1 ) && info.approximated; ++y )
-			{
-				for ( int x = 0; x < ( mesh.width - 1 ) && info.approximated; ++x )
+			for( MeshQuadIterator it( mesh ); it && info.approximated; ++it ){
+				for( const TriRef& tri : it.tris() )
 				{
-					/* set indexes */
-					const int pw[ 5 ] = {
-						x + ( y * mesh.width ),
-						x + ( ( y + 1 ) * mesh.width ),
-						x + 1 + ( ( y + 1 ) * mesh.width ),
-						x + 1 + ( y * mesh.width ),
-						x + ( y * mesh.width )      /* same as pw[ 0 ] */
-					};
-					/* set radix */
-					const int r = ( x + y ) & 1;
-
-					/* get drawverts and map first triangle */
-					info.approximated = ApproximateTriangle_r( lm, TriRef{
-						&mesh.verts[ pw[ r + 0 ] ],
-						&mesh.verts[ pw[ r + 1 ] ],
-						&mesh.verts[ pw[ r + 2 ] ] } );
-
-					/* get drawverts and map second triangle */
 					if ( info.approximated ) {
-						info.approximated = ApproximateTriangle_r( lm, TriRef{
-							&mesh.verts[ pw[ r + 0 ] ],
-							&mesh.verts[ pw[ r + 2 ] ],
-							&mesh.verts[ pw[ r + 3 ] ] } );
+						info.approximated = ApproximateTriangle_r( lm, tri );
 					}
 				}
 			}

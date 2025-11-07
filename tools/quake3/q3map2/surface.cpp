@@ -2846,40 +2846,15 @@ static int AddSurfaceModels( mapDrawSurface_t& ds, entity_t& entity ){
 			mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, ds.verts.data() ), IterationsForCurve( ds.longestCurve, patchSubdivisions ) );
 
 			/* subdivide each quad to place the models */
-			for ( int y = 0; y < ( mesh.height - 1 ); ++y )
-			{
-				for ( int x = 0; x < ( mesh.width - 1 ); ++x )
+			for( MeshQuadIterator it( mesh ); it; ++it ){
+				for( const TriRef& tri : it.tris() )
 				{
-					/* set indexes */
-					const int pw[ 5 ] = {
-						x + ( y * mesh.width ),
-						x + ( ( y + 1 ) * mesh.width ),
-						x + 1 + ( ( y + 1 ) * mesh.width ),
-						x + 1 + ( y * mesh.width ),
-						x + ( y * mesh.width ),      /* same as pw[ 0 ] */
-					};
-					/* set radix */
-					const int r = ( x + y ) & 1;
-
-					/* triangle 1 */
-					const int n = AddSurfaceModelsToTriangle_r( ds, model, TriRef{
-						&mesh.verts[ pw[ r + 0 ] ],
-						&mesh.verts[ pw[ r + 1 ] ],
-						&mesh.verts[ pw[ r + 2 ] ] }, entity );
+					const int n = AddSurfaceModelsToTriangle_r( ds, model, tri, entity );
 					if ( n < 0 ) {
+						mesh.freeVerts();
 						return n;
 					}
 					localNumSurfaceModels += n;
-
-					/* triangle 2 */
-					const int n2 = AddSurfaceModelsToTriangle_r( ds, model, TriRef{
-						&mesh.verts[ pw[ r + 0 ] ],
-						&mesh.verts[ pw[ r + 2 ] ],
-						&mesh.verts[ pw[ r + 3 ] ] }, entity );
-					if ( n2 < 0 ) {
-						return n2;
-					}
-					localNumSurfaceModels += n2;
 				}
 			}
 

@@ -391,31 +391,16 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 	dsNew.verts.assign( mesh.verts, mesh.verts + mesh.numVerts() );
 
 	/* iterate through the mesh quads */
-	for ( int y = 0; y < ( mesh.height - 1 ); ++y )
-	{
-		for ( int x = 0; x < ( mesh.width - 1 ); ++x )
-		{
-			/* set indexes */
-			const int pw[ 5 ] = {
-				x + ( y * mesh.width ),
-				x + ( ( y + 1 ) * mesh.width ),
-				x + 1 + ( ( y + 1 ) * mesh.width ),
-				x + 1 + ( y * mesh.width ),
-				x + ( y * mesh.width )    /* same as pw[ 0 ] */
-			};
-			/* set radix */
-			const int r = ( x + y ) & 1;
+	for( MeshQuadIterator it( mesh ); it; ++it ){
+		/* make first triangle */
+		dsNew.indexes.push_back( it.idx()[0] );
+		dsNew.indexes.push_back( it.idx()[1] );
+		dsNew.indexes.push_back( it.idx()[2] );
 
-			/* make first triangle */
-			dsNew.indexes.push_back( pw[ r + 0 ] );
-			dsNew.indexes.push_back( pw[ r + 1 ] );
-			dsNew.indexes.push_back( pw[ r + 2 ] );
-
-			/* make second triangle */
-			dsNew.indexes.push_back( pw[ r + 0 ] );
-			dsNew.indexes.push_back( pw[ r + 2 ] );
-			dsNew.indexes.push_back( pw[ r + 3 ] );
-		}
+		/* make second triangle */
+		dsNew.indexes.push_back( it.idx()[0] );
+		dsNew.indexes.push_back( it.idx()[2] );
+		dsNew.indexes.push_back( it.idx()[3] );
 	}
 
 	mesh.freeVerts();

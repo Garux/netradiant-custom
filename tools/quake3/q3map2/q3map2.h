@@ -1534,6 +1534,64 @@ mesh_t                      TessellatedMesh( const mesh_t in, int iterations );
 void                        MakeMeshNormals( mesh_t& in );
 void                        PutMeshOnCurve( mesh_t& in );
 
+class MeshQuadIterator
+{
+	const mesh_t m;
+	int y, x;
+	std::array<int, 4> _idx;
+	void update_idx(){
+		/* set indexes */
+		const int pw[ 5 ] = {
+			x + ( y * m.width ),
+			x + ( ( y + 1 ) * m.width ),
+			x + 1 + ( ( y + 1 ) * m.width ),
+			x + 1 + ( y * m.width ),
+			x + ( y * m.width )    /* same as pw[ 0 ] */
+		};
+		/* set radix */
+		const int r = ( x + y ) & 1;
+
+		_idx = { pw[ r + 0 ],
+		         pw[ r + 1 ],
+		         pw[ r + 2 ],
+		         pw[ r + 3 ] };
+	}
+public:
+	MeshQuadIterator( const mesh_t m ) : m( m ), y( 0 ), x( 0 ) {
+		update_idx();
+	}
+	void operator++(){
+		/* iterate through the mesh quads */
+		// for ( int y = 0; y < ( m.height - 1 ); ++y )
+			// for ( int x = 0; x < ( m.width - 1 ); ++x )
+		if( ++x >= ( m.width - 1 ) ){
+			x = 0;
+			++y;
+		}
+		update_idx();
+	}
+	operator bool() const {
+		return y < ( m.height - 1 );
+	}
+	const std::array<int, 4>& idx() const {
+		return _idx;
+	}
+	QuadRef quad() const {
+		return { m.verts + _idx[0],
+		         m.verts + _idx[1],
+		         m.verts + _idx[2],
+		         m.verts + _idx[3] };
+	}
+	std::array<TriRef, 2> tris() const {
+		return { TriRef{ m.verts + _idx[0],
+		                 m.verts + _idx[1],
+		                 m.verts + _idx[2] },
+		         TriRef{ m.verts + _idx[0],
+		                 m.verts + _idx[2],
+		                 m.verts + _idx[3] } };
+	}
+};
+
 
 /* map.c */
 void                        LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups );
