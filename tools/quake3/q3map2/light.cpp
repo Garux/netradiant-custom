@@ -579,9 +579,6 @@ static void CreateEntityLights(){
 #define APPROX_BOUNCE   1.0f
 
 static void CreateSurfaceLights(){
-	clipWork_t cw;
-
-
 	/* get sun shader suppressor */
 	const bool nss = entities[ 0 ].boolForKey( "_noshadersun" );
 
@@ -589,67 +586,67 @@ static void CreateSurfaceLights(){
 	for ( size_t i = 0; i < bspDrawSurfaces.size(); ++i )
 	{
 		/* get surface and other bits */
-		bspDrawSurface_t *ds = &bspDrawSurfaces[ i ];
-		surfaceInfo_t *info = &surfaceInfos[ i ];
-		const shaderInfo_t *si = info->si;
+		const bspDrawSurface_t& ds = bspDrawSurfaces[ i ];
+		const surfaceInfo_t& info = surfaceInfos[ i ];
+		const shaderInfo_t& si = *info.si;
 
 		// each environment light shader (with sun/sky) gets an unique index. thus we can check whether a sky surface should be considered as a successful trace
-		const auto assign_sky_index = []( shaderInfo_t *si ){
+		const auto assign_sky_index = []( shaderInfo_t& si ){
 			static int skyIndex;
-			if( si->skyIndex == -1 ){ // this shader is actually emitting sun/skylight now, so give it an environment emitter index
+			if( si.skyIndex == -1 ){ // this shader is actually emitting sun/skylight now, so give it an environment emitter index
 				if( skyIndex == MAX_SKIES )
 					Sys_Warning( "MAX_SKIES(%i) reached\n", MAX_SKIES );
 				else
-					si->skyIndex = skyIndex++;
+					si.skyIndex = skyIndex++;
 			}
 		};
 		/* sunlight? */
-		if ( !si->suns.empty() && !nss ) {
-			auto *si_ = const_cast<shaderInfo_t*>( si );   /* FIXME: hack! */
-			Sys_FPrintf( SYS_VRB, "Sun: %s\n", si->shader.c_str() );
+		if ( !si.suns.empty() && !nss ) {
+			auto& si_ = const_cast<shaderInfo_t&>( si );   /* FIXME: hack! */
+			Sys_FPrintf( SYS_VRB, "Sun: %s\n", si.shader.c_str() );
 			if( !g_oneSky ){
 				assign_sky_index( si_ );
-				for( auto& sun : si_->suns ) // let the suns know
-					sun.skyIndex = si->skyIndex;
+				for( auto& sun : si_.suns ) // let the suns know
+					sun.skyIndex = si.skyIndex;
 			}
-			std::ranges::for_each( si_->suns, CreateSunLight );
-			si_->suns.clear();   /* FIXME: hack! */
+			std::ranges::for_each( si_.suns, CreateSunLight );
+			si_.suns.clear();   /* FIXME: hack! */
 		}
 
 		/* sky light? */
-		if ( !si->skylights.empty() ) {
-			auto *si_ = const_cast<shaderInfo_t*>( si );   /* FIXME: hack! */
-			Sys_FPrintf( SYS_VRB, "Sky: %s\n", si->shader.c_str() );
+		if ( !si.skylights.empty() ) {
+			auto& si_ = const_cast<shaderInfo_t&>( si );   /* FIXME: hack! */
+			Sys_FPrintf( SYS_VRB, "Sky: %s\n", si.shader.c_str() );
 			if( !g_oneSky ){
 				assign_sky_index( si_ );
-				for( auto& skylight : si_->skylights ) // let the skylights know
-					skylight.skyIndex = si->skyIndex;
+				for( auto& skylight : si_.skylights ) // let the skylights know
+					skylight.skyIndex = si.skyIndex;
 			}
-			for( const skylight_t& skylight : si->skylights )
-				CreateSkyLights( skylight, si->color, si->lightFilterRadius, si->lightStyle, si->skyParmsImageBase );
-			si_->skylights.clear();   /* FIXME: hack! */
+			for( const skylight_t& skylight : si.skylights )
+				CreateSkyLights( skylight, si.color, si.lightFilterRadius, si.lightStyle, si.skyParmsImageBase );
+			si_.skylights.clear();   /* FIXME: hack! */
 		}
 
 		/* try to early out */
-		if ( si->value <= 0 ) {
+		if ( si.value <= 0 ) {
 			continue;
 		}
 
 		/* autosprite shaders become point lights */
-		if ( si->autosprite ) {
+		if ( si.autosprite ) {
 			/* create a light */
 			light_t& light = lights.emplace_front();
 
 			/* set it up */
 			light.flags = LightFlags::DefaultQ3A;
 			light.type = ELightType::Point;
-			light.photons = si->value * pointScale;
+			light.photons = si.value * pointScale;
 			light.fade = 1;
-			light.si = si;
-			light.origin = info->minmax.origin();
-			light.color = si->color;
+			light.si = &si;
+			light.origin = info.minmax.origin();
+			light.color = si.color;
 			light.falloffTolerance = falloffTolerance;
-			light.style = si->lightStyle;
+			light.style = si.lightStyle;
 
 			/* add to point light count and continue */
 			numPointLights++;
@@ -657,18 +654,18 @@ static void CreateSurfaceLights(){
 		}
 
 		/* get subdivision amount */
-		const float subdivide = si->lightSubdivide > 0? si->lightSubdivide : defaultLightSubdivide;
+		const float subdivide = si.lightSubdivide > 0? si.lightSubdivide : defaultLightSubdivide;
 
 		/* switch on type */
-		switch ( ds->surfaceType )
+		switch ( ds.surfaceType )
 		{
 		case MST_PLANAR:
 		case MST_TRIANGLE_SOUP:
-			RadLightForTriangles( i, 0, info->lm, si, APPROX_BOUNCE, subdivide, &cw );
+			RadLightForTriangles( i, 0, info.lm, si, APPROX_BOUNCE, subdivide );
 			break;
 
 		case MST_PATCH:
-			RadLightForPatch( i, 0, info->lm, si, APPROX_BOUNCE, subdivide, &cw );
+			RadLightForPatch( i, 0, info.lm, si, APPROX_BOUNCE, subdivide );
 			break;
 
 		default:

@@ -1189,32 +1189,6 @@ struct trace_t
 };
 
 
-/* must be identical to bspDrawVert_t except for float color! */
-struct radVert_t
-{
-	Vector3 xyz;
-	Vector2 st;
-	Vector2 lightmap[ MAX_LIGHTMAPS ];
-	Vector3 normal;
-	Color4f color[ MAX_LIGHTMAPS ];
-};
-
-
-struct radWinding_t
-{
-	int numVerts;
-	radVert_t verts[ MAX_POINTS_ON_WINDING ];
-};
-
-
-/* crutch for poor local allocations in win32 smp */
-struct clipWork_t
-{
-	float dists[ MAX_POINTS_ON_WINDING + 4 ];
-	EPlaneSide sides[ MAX_POINTS_ON_WINDING + 4 ];
-};
-
-
 /* ydnar: new lightmap handling code */
 struct outLightmap_t
 {
@@ -1755,8 +1729,8 @@ float                       SetupTrace( trace_t *trace );
 
 /* light_bounce.c */
 bool                        RadSampleImage( const byte * pixels, int width, int height, const Vector2& st, Color4f& color );
-void                        RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, const shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw );
-void                        RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, const shaderInfo_t *si, float scale, float subdivide, clipWork_t *cw );
+void                        RadLightForTriangles( int num, int lightmapNum, const rawLightmap_t *lm, const shaderInfo_t& si, float scale, float subdivide );
+void                        RadLightForPatch( int num, int lightmapNum, const rawLightmap_t *lm, const shaderInfo_t& si, float scale, float subdivide );
 void                        RadCreateDiffuseLights();
 
 
