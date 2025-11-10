@@ -398,7 +398,7 @@ void ClassifySurface( mapDrawSurface_t& ds ){
 		/* find map plane if necessary */
 		if ( ds.planar ) {
 			if ( ds.planeNum < 0 ) {
-				ds.planeNum = FindFloatPlane( plane, 1, &ds.verts[ 0 ].xyz );
+				ds.planeNum = FindFloatPlane( plane, Span( &ds.verts[ 0 ].xyz, 1 ) );
 			}
 			ds.lightmapVecs[ 2 ] = plane.normal();
 		}
@@ -873,7 +873,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 	/* add a map plane */
 	if ( planar ) {
 		/* make a map plane */
-		ds.planeNum = FindFloatPlane( plane, 1, &mesh->verts[ 0 ].xyz );
+		ds.planeNum = FindFloatPlane( plane, Span( &mesh->verts[ 0 ].xyz, 1 ) );
 		ds.lightmapVecs[ 2 ] = plane.normal();
 
 		/* push this normal to all verts (ydnar 2003-02-14: bad idea, small patches get screwed up) */
@@ -2524,7 +2524,7 @@ static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t& si ){
 			mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Face );
 			ds.shaderInfo = &si;
 			ds.planar = true;
-			ds.planeNum = FindFloatPlane( p->plane.plane, 0, nullptr );
+			ds.planeNum = FindFloatPlane( p->plane.plane, {} );
 			ds.lightmapVecs[ 2 ] = p->plane.normal();
 			ds.fogNum = FOG_INVALID;
 			ds.verts.resize( w.size(), c_bspDrawVert_t0 );

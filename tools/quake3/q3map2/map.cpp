@@ -299,16 +299,16 @@ static void SnapPlane( Plane3f& plane ){
    SnapPlaneImproved()
    snaps a plane to normal/distance epsilons, improved code
  */
-static void SnapPlaneImproved( Plane3f& plane, int numPoints, const Vector3 *points ){
+void SnapPlaneImproved( Plane3f& plane, const Span<const Vector3>& points ){
 	if ( SnapNormal( plane.normal() ) ) {
-		if ( numPoints > 0 ) {
+		if ( !points.empty() ) {
 			// Adjust the dist so that the provided points don't drift away.
 			DoubleVector3 center( 0 );
-			for ( const Vector3& point : Span( points, numPoints ) )
+			for ( const Vector3& point : points )
 			{
 				center += point;
 			}
-			center /= numPoints;
+			center /= points.size();
 			plane.dist() = vector3_dot( plane.normal(), center );
 		}
 	}
@@ -331,14 +331,14 @@ static void SnapPlaneImproved( Plane3f& plane, int numPoints, const Vector3 *poi
    must be within an epsilon distance of the plane
  */
 
-int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points ) // NOTE: this has a side effect on the normal. Good or bad?
+int FindFloatPlane( const Plane3f& inplane, const Span<const Vector3>& points ) // NOTE: this has a side effect on the normal. Good or bad?
 
 #ifdef USE_HASHING
 
 {
 	Plane3f plane( inplane );
 #if Q3MAP2_EXPERIMENTAL_SNAP_PLANE_FIX
-	SnapPlaneImproved( plane, numPoints, points );
+	SnapPlaneImproved( plane, points );
 #else
 	SnapPlane( plane );
 #endif
@@ -362,24 +362,17 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 			//%	return p - mapplanes;
 
 			/* ydnar: test supplied points against this plane */
-			int j;
-			for ( j = 0; j < numPoints; ++j )
-			{
+			if( std::ranges::all_of( points, [&]( const Vector3& point ){ // true for empty
 				// NOTE: When dist approaches 2^16, the resolution of 32 bit floating
 				// point number is greatly decreased.  The distanceEpsilon cannot be
 				// very small when world coordinates extend to 2^16.  Making the
 				// dot product here in 64 bit land will not really help the situation
 				// because the error will already be carried in dist.
-				const double d = std::fabs( plane3_distance_to_point( p.plane, points[ j ] ) );
-				if ( d != 0 && d >= distanceEpsilon ) {
-					break; // Point is too far from plane.
-				}
-			}
-
-			/* found a matching plane */
-			if ( j >= numPoints ) {
-				return pidx;
-			}
+				const double d = std::fabs( plane3_distance_to_point( p.plane, point ) );
+				//% if( d > 0.2 ) Sys_Warning( "plane3_distance_to_point( p.plane, point ) %f\n", d );
+				return d == 0 || d < distanceEpsilon; // Point is not too far from plane.
+			} ) )
+				return pidx; /* found a matching plane */
 		}
 	}
 
@@ -390,16 +383,16 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 #else
 
 {
-	int i, j;
+	int i;
 	plane_t *p;
-	Plane3f plane( innormal, dist );
+	Plane3f plane( inplane );
 
 #if Q3MAP2_EXPERIMENTAL_SNAP_PLANE_FIX
-	SnapPlaneImproved( plane, numPoints, points );
+	SnapPlaneImproved( plane, points );
 #else
 	SnapPlane( plane );
 #endif
-	for ( i = 0, p = mapplanes; i < nummapplanes; ++i, ++p )
+	for ( i = 0, p = mapplanes.data(); i < mapplanes.size(); ++i, ++p )
 	{
 		if ( !PlaneEqual( *p, plane ) ) {
 			continue;
@@ -409,17 +402,11 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 		//%	return i;
 
 		/* ydnar: test supplied points against this plane */
-		for ( j = 0; j < numPoints; ++j )
-		{
-			if ( std::fabs( plane3_distance_to_point( p->plane, points[ j ] ) ) > distanceEpsilon ) {
-				break;
-			}
-		}
+		if( std::ranges::all_of( points, [&]( const Vector3& point ){ // true for empty
+			return std::fabs( plane3_distance_to_point( p->plane, point ) ) <= distanceEpsilon;
+		} ) )
+			return i; /* found a matching plane */
 
-		/* found a matching plane */
-		if ( j >= numPoints ) {
-			return i;
-		}
 		// TODO: Note that the non-USE_HASHING code does not compute epsilons
 		// for the provided points.  It should do that.  I think this code
 		// is unmaintained because nobody sets USE_HASHING to off.
@@ -445,11 +432,12 @@ inline int MapPlaneFromPoints( DoubleVector3 p[3] ){
 	// if the plane is 2^16 units away from the origin (the "epsilon" approaches
 	// 0.01 in that case).
 	const Vector3 points[3] = { p[0], p[1], p[2] };
-	return FindFloatPlane( Plane3f( plane ), 3, points );
+	return FindFloatPlane( Plane3f( plane ), points );
 #else
 	Plane3f plane;
 	PlaneFromPoints( plane, p );
-	return FindFloatPlane( plane, 3, p );
+	const Vector3 points[3] = { p[0], p[1], p[2] };
+	return FindFloatPlane( plane, points );
 #endif
 }
 
@@ -627,7 +615,7 @@ void AddBrushBevels(){
 					}
 				}
 
-				s.planenum = FindFloatPlane( plane, 0, nullptr );
+				s.planenum = FindFloatPlane( plane, {} );
 				s.contentFlags = sides[ 0 ].contentFlags;
 				/* handle bevel surfaceflags */
 				for ( const side_t& side : sides ) {
@@ -739,7 +727,7 @@ void AddBrushBevels(){
 					}
 					side_t& s2 = sides.emplace_back();
 
-					s2.planenum = FindFloatPlane( plane, 1, &sides[i].winding[ j ] );
+					s2.planenum = FindFloatPlane( plane, Span( &sides[i].winding[ j ], 1 ) );
 					s2.contentFlags = sides[0].contentFlags;
 					s2.surfaceFlags = ( sides[i].surfaceFlags & surfaceFlagsMask ); /* handle bevel surfaceflags */
 					s2.bevel = true;
@@ -1229,7 +1217,7 @@ static void AdjustBrushesForOrigin( entity_t& ent ){
 			const float newdist = -plane3_distance_to_point( mapplanes[ side.planenum ].plane, ent.originbrush_origin );
 
 			/* find a new plane */
-			side.planenum = FindFloatPlane( mapplanes[ side.planenum ].normal(), newdist, 0, nullptr );
+			side.planenum = FindFloatPlane( mapplanes[ side.planenum ].normal(), newdist, {} );
 			side.plane.dist() = -plane3_distance_to_point( side.plane, ent.originbrush_origin );
 		}
 

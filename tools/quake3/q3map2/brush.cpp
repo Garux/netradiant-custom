@@ -333,10 +333,10 @@ static brush_t BrushFromBounds( const Vector3& mins, const Vector3& maxs ){
 	for ( int i = 0; i < 3; ++i )
 	{
 		float dist = maxs[i];
-		b.sides[i].planenum = FindFloatPlane( g_vector3_axes[i], dist, 1, &maxs );
+		b.sides[i].planenum = FindFloatPlane( g_vector3_axes[i], dist, Span( &maxs, 1 ) );
 
 		dist = -mins[i];
-		b.sides[3 + i].planenum = FindFloatPlane( -g_vector3_axes[i], dist, 1, &mins );
+		b.sides[3 + i].planenum = FindFloatPlane( -g_vector3_axes[i], dist, Span( &mins, 1 ) );
 	}
 
 	CreateBrushWindings( b );
