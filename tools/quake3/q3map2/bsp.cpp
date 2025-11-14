@@ -350,7 +350,7 @@ static void ProcessWorldModel( entity_t& e ){
 	AddEntitySurfaceModels( e );
 
 	/* generate bsp brushes from map brushes */
-	EmitBrushes( e.brushes, &e.firstBrush, &e.numBrushes );
+	EmitBrushes( e );
 
 	/* add references to the detail brushes */
 	FilterDetailBrushesIntoTree( e, tree );
@@ -472,7 +472,7 @@ static void ProcessSubModel( entity_t& e ){
 	AddEntitySurfaceModels( e );
 
 	/* generate bsp brushes from map brushes */
-	EmitBrushes( e.brushes, &e.firstBrush, &e.numBrushes );
+	EmitBrushes( e );
 
 	/* just put all the brushes in headnode */
 	tree.headnode->brushlist = e.brushes;

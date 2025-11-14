@@ -1003,7 +1003,7 @@ static void PseudoCompileBSP( bool need_tree ){
 		FilterStructuralBrushesIntoTree( entity, tree );
 		FilterDetailBrushesIntoTree( entity, tree );
 
-		EmitBrushes( entity.brushes, &entity.firstBrush, &entity.numBrushes );
+		EmitBrushes( entity );
 		EndModel( entity, tree.headnode );
 	}
 	EndBSPFile( false );

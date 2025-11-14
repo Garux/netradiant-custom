@@ -1616,7 +1616,7 @@ int                         EmitShader( const char *shader, const int *contentFl
 
 void                        BeginBSPFile();
 void                        EndBSPFile( bool do_write );
-void                        EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes );
+void                        EmitBrushes( entity_t& e );
 void                        EmitFogs();
 
 void                        BeginModel( const entity_t& e );

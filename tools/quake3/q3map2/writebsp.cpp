@@ -350,42 +350,31 @@ void EndBSPFile( bool do_write ){
 
 /*
    EmitBrushes()
-   writes the brush list to the bsp
+   writes the entity brush list to the bsp
  */
 
-void EmitBrushes( brushlist_t& brushes, int *firstBrush, int *numBrushes ){
+void EmitBrushes( entity_t& e ){
 	/* set initial brush */
-	if ( firstBrush != nullptr ) {
-		*firstBrush = bspBrushes.size();
-	}
-	if ( numBrushes != nullptr ) {
-		*numBrushes = 0;
-	}
+	e.firstBrush = bspBrushes.size();
+	e.numBrushes = e.brushes.size();
 
 	/* walk list of brushes */
-	for ( brush_t& b : brushes )
+	for ( brush_t& b : e.brushes )
 	{
 		/* get bsp brush */
 		b.outputNum = bspBrushes.size();
 		bspBrush_t& db = bspBrushes.emplace_back();
-		if ( numBrushes != nullptr ) {
-			( *numBrushes )++;
-		}
 
 		db.shaderNum = EmitShader( b.contentShader->shader, &b.contentShader->contentFlags, &b.contentShader->surfaceFlags );
 		db.firstSide = bspBrushSides.size();
+		db.numSides = b.sides.size();
 
 		/* walk sides */
-		db.numSides = 0;
 		for ( side_t& side : b.sides )
 		{
-			/* set output number to bogus initially */
-			side.outputNum = -1;
-
 			/* emit side */
 			side.outputNum = bspBrushSides.size();
 			bspBrushSide_t& cp = bspBrushSides.emplace_back();
-			db.numSides++;
 			cp.planeNum = side.planenum;
 
 			/* emit shader */
