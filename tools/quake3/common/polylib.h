@@ -31,6 +31,10 @@ template<class T>
 size_t winding_next( const std::vector<BasicVector3<T>>& w, size_t index ){
 	return ++index == w.size()? 0 : index;
 }
+template<class T>
+const BasicVector3<T>& winding_next_point( const std::vector<BasicVector3<T>>& w, size_t index ){
+	return w[ winding_next( w, index ) ];
+}
 // it < w.end()
 template<class T>
 std::vector<BasicVector3<T>>::iterator winding_next( std::vector<BasicVector3<T>>& w, typename std::vector<BasicVector3<T>>::iterator it ){

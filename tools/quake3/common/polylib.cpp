@@ -58,12 +58,12 @@ winding_t   AllocWinding( int points ){
 void    RemoveColinearPoints( winding_t& w ){
 	winding_t p = AllocWinding( w.size() );
 
-	for ( size_t i = 0; i < w.size(); ++i )
+	for ( auto i = w.begin(); i != w.end(); ++i )
 	{
-		const size_t j = winding_next( w, i );
-		const size_t k = winding_next( w, j );
-		if ( vector3_dot( VectorNormalized( w[k] - w[j] ), VectorNormalized( w[k] - w[i] ) ) < 0.999 ) {
-			p.push_back( w[i] );
+		const auto j = winding_next( w, i );
+		const auto k = winding_next( w, j );
+		if ( vector3_dot( VectorNormalized( *k - *j ), VectorNormalized( *k - *i ) ) < 0.999 ) {
+			p.push_back( *i );
 		}
 	}
 
@@ -376,7 +376,7 @@ std::pair<winding_t, winding_t>    ClipWindingEpsilonStrict( const winding_t& in
 		}
 
 		// generate a split point
-		const Vector3& p2 = in[winding_next( in, i )];
+		const Vector3& p2 = winding_next_point( in, i );
 		const double dot = dists[i] / ( dists[i] - dists[i + 1] );
 		Vector3 mid;
 		for ( size_t j = 0; j < 3; ++j )
@@ -602,7 +602,7 @@ void ChopWindingInPlace( winding_t& inout, const Plane3f& plane, float epsilon )
 		}
 
 		// generate a split point
-		const Vector3& p2 = in[winding_next( in, i )];
+		const Vector3& p2 = winding_next_point( in, i );
 
 		const double dot = dists[i] / ( dists[i] - dists[i + 1] );
 		Vector3 mid;
@@ -663,7 +663,7 @@ void CheckWinding( const winding_t& w ){
 		}
 
 		// check the edge isnt degenerate
-		const Vector3& p2 = w[winding_next( w, i )];
+		const Vector3& p2 = winding_next_point( w, i );
 		const Vector3 dir = p2 - p1;
 
 		if ( vector3_length( dir ) < ON_EPSILON ) {
