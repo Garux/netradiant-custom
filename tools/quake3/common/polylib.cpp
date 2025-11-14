@@ -32,7 +32,7 @@
 
 void pw( const winding_t& w ){
 	for ( const Vector3& p : w )
-		Sys_Printf( "(%5.1f, %5.1f, %5.1f)\n", p[0], p[1], p[2] );
+		Sys_Printf( "%5.1f %5.1f %5.1f\n", p[0], p[1], p[2] );
 }
 
 
@@ -644,7 +644,7 @@ void CheckWinding( const winding_t& w ){
 
 	const float area = WindingArea( w );
 	if ( area < 1 ) {
-		Error( "CheckWinding: %f area", area );
+		Sys_Warning( "CheckWinding: %f area\n", area );
 	}
 
 	const Plane3f faceplane = WindingPlane( w );
@@ -680,7 +680,8 @@ void CheckWinding( const winding_t& w ){
 				continue;
 			}
 			if ( vector3_dot( w[j], edgenormal ) > edgedist ) {
-				Error( "CheckWinding: non-convex" );
+				Sys_Warning( "CheckWinding: non-convex %f\n", vector3_dot( w[j], edgenormal ) - edgedist );
+				pw( w );
 			}
 		}
 	}

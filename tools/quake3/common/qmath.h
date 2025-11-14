@@ -155,9 +155,9 @@ BasicVector3<T> VectorNormalized( const BasicVector3<T>& vector ) {
 }
 
 const float EQUAL_EPSILON = 0.001;
-
-inline bool VectorCompare( const Vector3& v1, const Vector3& v2 ){
-	return vector3_equal_epsilon( v1, v2, EQUAL_EPSILON );
+template<typename T>
+bool VectorCompare( const BasicVector3<T>& v1, const BasicVector3<T>& v2 ){
+	return vector3_equal_epsilon( v1, v2, static_cast<T>( EQUAL_EPSILON ) );
 }
 
 inline bool VectorIsOnAxis( const Vector3& v ){

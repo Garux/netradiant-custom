@@ -27,12 +27,19 @@
 using winding_t = std::vector<Vector3>;
 
 // index < w.size()
-inline size_t winding_next( const winding_t& w, size_t index ){
+template<class T>
+size_t winding_next( const std::vector<BasicVector3<T>>& w, size_t index ){
 	return ++index == w.size()? 0 : index;
 }
 // it < w.end()
-inline winding_t::iterator winding_next( winding_t& w, winding_t::iterator it ){
+template<class T>
+std::vector<BasicVector3<T>>::iterator winding_next( std::vector<BasicVector3<T>>& w, typename std::vector<BasicVector3<T>>::iterator it ){
 	return ++it == w.end()? w.begin() : it;
+}
+// it < w.end()
+template<class T>
+std::vector<BasicVector3<T>>::iterator winding_prev( std::vector<BasicVector3<T>>& w, typename std::vector<BasicVector3<T>>::iterator it ){
+	return it == w.begin()? w.end() - 1 : --it;
 }
 
 #define MAX_POINTS_ON_WINDING   512

@@ -362,12 +362,12 @@ enum EModelFlags{
 	eColorToAlpha = 1 << 5,
 	eNoSmooth = 1 << 6,
 	eExtrudeVertexNormals = 1 << 7,
-	ePyramidaClip = 1 << 8,
+	ePyramidalClip = 1 << 8,
 	eExtrudeDownwards = 1 << 9,
 	eExtrudeUpwards = 1 << 10,
 	eMaxExtrude = 1 << 11,
 	eAxialBackplane = 1 << 12,
-	eClipFlags = eClipModel | eExtrudeFaceNormals | eExtrudeTerrain | eExtrudeVertexNormals | ePyramidaClip | eExtrudeDownwards | eExtrudeUpwards | eMaxExtrude | eAxialBackplane,
+	eClipFlags = eClipModel | eExtrudeFaceNormals | eExtrudeTerrain | eExtrudeVertexNormals | ePyramidalClip | eExtrudeDownwards | eExtrudeUpwards | eMaxExtrude | eAxialBackplane,
 };
 
 inline size_t normal_make_axial( Vector3& normal ){
@@ -384,8 +384,22 @@ struct ClipSides
 	winding_t bw; // back winding
 	std::vector<Plane3f> splanes; // side planes, using fw[i], fw[i + 1] points, size = fw.size
 
-	/* construct front and allocates sides, requires fw */
+	shaderInfo_t &si;
+	entity_t& entity;
+	const float clipDepth;
+	ClipSides( shaderInfo_t& si, entity_t& entity, float clipDepth ) : si( si ), entity( entity ), clipDepth( clipDepth ){
+	}
+
+	/* construct front and allocate sides, requires fw */
 	bool construct(){
+		/* prepare a brush */
+		buildBrush.sides.reserve( MAX_BUILD_SIDES );
+		buildBrush.entityNum = entity.mapEntityNum;
+		buildBrush.contentShader = &si;
+		buildBrush.compileFlags = si.compileFlags;
+		buildBrush.contentFlags = si.contentFlags;
+		buildBrush.detail = true;
+
 		if( !PlaneFromPoints( fplane, fw.data() ) )
 			return false;
 
@@ -393,6 +407,7 @@ struct ClipSides
 		// precision suffers a lot, when two of normal values are under .00025 (often no collision, knocking up effect in ioq3)
 		// also broken drawsurfs in case of normal brushes
 		// ? worth to snap nearly axial edges (or on nearly axial plane) beforehand or SnapPlaneImproved is nuff good for sides
+		// latter seems good nuff, no noticeable difference
 		const Plane3f pln = fplane;
 		SnapPlaneImproved( fplane, fw );
 		if( pln.normal() != fplane.normal() || pln.dist() != fplane.dist() ){
@@ -410,7 +425,7 @@ struct ClipSides
 		return true;
 	}
 
-	void add_back_plane( float clipDepth, const Vector3& bestNormal ){
+	void add_back_plane( const Vector3& bestNormal ){
 		bplane = plane3_flipped( fplane );
 		bplane.dist() += vector3_dot( bestNormal, fplane.normal() ) * clipDepth;
 		bw = fw;
@@ -418,7 +433,7 @@ struct ClipSides
 			v -= bestNormal * clipDepth;
 	}
 
-	void make_brush_sides( shaderInfo_t& si ) const {
+	bool create_brush() const {
 		const bool doBack = bplane.normal() != g_vector3_identity;
 		/* set up brush sides */
 		buildBrush.sides.clear(); // clear, so resize() will value-initialize elements
@@ -442,378 +457,506 @@ struct ClipSides
 		}
 		if( doBack )
 			buildBrush.sides.back().planenum = FindFloatPlane( bplane, bw );
+
+		/* add to entity */
+		if ( CreateBrushWindings( buildBrush ) ) {
+			AddBrushBevels();
+			brush_t& newBrush = entity.brushes.emplace_front( buildBrush );
+			newBrush.original = &newBrush;
+			return true;
+		}
+		return false;
 	}
 };
 
 
-static void ClipModel( int spawnFlags, float clipDepth, shaderInfo_t& si, const mapDrawSurface_t& ds, const char *modelName, entity_t& entity ){
-	const int spf = ( spawnFlags & ( eClipFlags & ~eClipModel ) );
+static void clipModel_default( ClipSides& cs ){
+	// axial normal
+	Vector3 bestNormal = cs.fplane.normal();
+	normal_make_axial( bestNormal );
 
-	/* ydnar: giant hack land: generate clipping brushes for model triangles */
-	if ( ( si.clipModel && spf == 0 ) // default CLIPMODEL
-	  || ( spawnFlags & eClipFlags ) == eClipModel //default CLIPMODEL
-	  || spf == eExtrudeFaceNormals
-	  || spf == eExtrudeTerrain
-	  || spf == eExtrudeVertexNormals
-	  || spf == ePyramidaClip
-	  || spf == eExtrudeDownwards
-	  || spf == eExtrudeUpwards
-	  || spf == eAxialBackplane // default sides + axial backplane
-	  || spf == ( eExtrudeFaceNormals | ePyramidaClip ) // extrude 45
-	  || spf == ( eExtrudeTerrain | eMaxExtrude )
-	  || spf == ( eExtrudeTerrain | eAxialBackplane )
-	  || spf == ( eExtrudeVertexNormals | ePyramidaClip ) // vertex normals + don't check for sides, sticking outwards
-	  || spf == ( ePyramidaClip | eAxialBackplane ) // pyramid with 3 of 4 sides axial (->small bsp)
-	  || spf == ( eExtrudeDownwards | eExtrudeUpwards )
-	  || spf == ( eExtrudeDownwards | eMaxExtrude )
-	  || spf == ( eExtrudeDownwards | eAxialBackplane )
-	  || spf == ( eExtrudeDownwards | eExtrudeUpwards | eMaxExtrude )
-	  || spf == ( eExtrudeDownwards | eExtrudeUpwards | eAxialBackplane )
-	  || spf == ( eExtrudeUpwards | eMaxExtrude )
-	  || spf == ( eExtrudeUpwards | eAxialBackplane ) ){
-		float limDepth = 0;
-		if ( clipDepth < 0 ){
-			limDepth = -clipDepth;
-			clipDepth = 2.f;
-		}
-		MinMax minmax;
-		Vector3 avgDirection( 0 );
-		size_t axis;
-
-		/* temp hack */
-		if ( !si.clipModel && !( si.compileFlags & C_SOLID ) ) {
-			return;
-		}
-
-		//wont snap these in normal way, or will explode
-		// const double normalEpsilon_save = normalEpsilon;
-		//normalEpsilon = 0.000001;
-
-
-		if ( ( spf & eMaxExtrude ) || ( spf & eExtrudeTerrain ) ){
-
-			for ( auto idx = ds.indexes.cbegin(); idx != ds.indexes.cend(); idx += 3 ){
-				const Vector3 points[3]{ ds.verts[*( idx + 0 )].xyz,
-				                         ds.verts[*( idx + 1 )].xyz,
-				                         ds.verts[*( idx + 2 )].xyz };
-				Plane3f plane;
-				if ( PlaneFromPoints( plane, points ) ){
-					if ( spf & eExtrudeTerrain )
-						avgDirection += plane.normal();	// calculate average mesh facing direction
-
-					for ( const auto& p : points ) // get min/max
-						minmax.extend( p );
-				}
-			}
-			//unify avg direction
-			if ( spf & eExtrudeTerrain ){
-				if ( vector3_length( avgDirection ) == 0 )
-					avgDirection = g_vector3_axis_z;
-				axis = normal_make_axial( avgDirection );
-			}
-		}
-
-		/* prepare a brush */
-		buildBrush.sides.reserve( MAX_BUILD_SIDES );
-		buildBrush.entityNum = entity.mapEntityNum;
-		buildBrush.contentShader = &si;
-		buildBrush.compileFlags = si.compileFlags;
-		buildBrush.contentFlags = si.contentFlags;
-		buildBrush.detail = true;
-
-		/* walk triangle list */
-		for ( auto idx = ds.indexes.cbegin(); idx != ds.indexes.cend(); idx += 3 ){
-			ClipSides cs;
-			/* make points */
-			for ( int i = 0; i < 3; ++i ){
-				/* copy xyz */
-				cs.fw.push_back( ds.verts[*( idx + i )].xyz );
-			}
-
-			/* make plane for triangle */
-			if ( cs.construct() ) {
-
-				if ( spf == ( ePyramidaClip | eAxialBackplane ) ){ // pyramid with 3 of 4 sides axial (->small bsp)
-
-					for ( int i = 0; i < 3; ++i )
-						if ( std::fabs( cs.fplane.normal()[i] ) < 0.05f && std::fabs( cs.fplane.normal()[( i + 1 ) % 3] ) < 0.05f ) //no way, close to lay on two axes
-							goto default_CLIPMODEL;
-
-					// best axial normal
-					Vector3 bestNormal = cs.fplane.normal();
-					axis = normal_make_axial( bestNormal );
-
-					float mindist = 999999;
-
-					for ( size_t i = 0; i < cs.fw.size(); ++i ){ // planes
-						float bestdist = 999999, bestangle = 1;
-
-						for ( size_t j = 0; j < 3; ++j ){ // axes
-							Plane3f pln;
-							Vector3 nrm = cs.fw[winding_next( cs.fw, i )] - cs.fw[i];
-							if ( j == axis ){
-								pln.normal() = VectorNormalized( vector3_cross( bestNormal, nrm ) );
-							}
-							else{
-								Vector3 vnrm( 0 );
-								if ( ( j + 1 ) % 3 == axis ){
-									if ( nrm[( j + 2 ) % 3] == 0 )
-										continue;
-									vnrm[( j + 2 ) % 3] = nrm[( j + 2 ) % 3];
-								}
-								else{
-									if ( nrm[( j + 1 ) % 3] == 0 )
-										continue;
-									vnrm[( j + 1 ) % 3] = nrm[( j + 1 ) % 3];
-								}
-								const Vector3 enrm = vector3_cross( bestNormal, vnrm );
-								pln.normal() = VectorNormalized( vector3_cross( enrm, nrm ) );
-							}
-							pln.dist() = vector3_dot( cs.fw[i], pln.normal() );
-							//check facing, thickness
-							const float currdist = -plane3_distance_to_point( pln, cs.fw[( i + 2 ) % cs.fw.size()] );
-							const float currangle = vector3_dot( pln.normal(), cs.fplane.normal() );
-							if ( ( ( currdist > 0.1 ) && ( currdist < bestdist ) && ( currangle < 0 ) ) ||
-							     ( ( currangle >= 0 ) && ( currangle <= bestangle ) ) ){
-								bestangle = currangle;
-								if ( currangle < 0 )
-									bestdist = currdist;
-								cs.splanes[i] = pln;
-							}
-						}
-						if ( bestdist == 999999 && bestangle == 1 ){
-							// Sys_Printf( "default_CLIPMODEL\n" );
-							goto default_CLIPMODEL;
-						}
-						value_minimize( mindist, bestdist );
-					}
-					if ( ( limDepth != 0 ) && ( mindist > limDepth ) )
-						goto default_CLIPMODEL;
-
-					cs.make_brush_sides( si );
-				}
-
-				else if ( spf == eExtrudeTerrain
-				       || spf == eExtrudeDownwards
-				       || spf == eExtrudeUpwards
-				       || spf == eAxialBackplane
-				       || spf == ( eExtrudeTerrain | eMaxExtrude )
-				       || spf == ( eExtrudeTerrain | eAxialBackplane )
-				       || spf == ( eExtrudeDownwards | eExtrudeUpwards )
-				       || spf == ( eExtrudeDownwards | eMaxExtrude )
-				       || spf == ( eExtrudeDownwards | eAxialBackplane )
-				       || spf == ( eExtrudeDownwards | eExtrudeUpwards | eMaxExtrude )
-				       || spf == ( eExtrudeDownwards | eExtrudeUpwards | eAxialBackplane )
-				       || spf == ( eExtrudeUpwards | eMaxExtrude )
-				       || spf == ( eExtrudeUpwards | eAxialBackplane ) ){
-
-					Vector3 bestNormal;
-
-					if ( spf & eExtrudeTerrain ){ //autodirection
-						bestNormal = avgDirection;
-					}
-					else{
-						axis = 2;
-						if ( ( spf & eExtrudeDownwards ) && ( spf & eExtrudeUpwards ) ){
-							bestNormal = cs.fplane.normal().z() >= 0? g_vector3_axis_z : -g_vector3_axis_z;
-						}
-						else if ( spf & eExtrudeDownwards ){
-							bestNormal = g_vector3_axis_z;
-						}
-						else if ( spf & eExtrudeUpwards ){
-							bestNormal = -g_vector3_axis_z;
-						}
-						else{ // best axial normal
-							bestNormal = cs.fplane.normal();
-							axis = normal_make_axial( bestNormal );
-						}
-					}
-
-					if ( vector3_dot( cs.fplane.normal(), bestNormal ) < 0.05 ){
-						goto default_CLIPMODEL;
-					}
-
-
-					/* make side planes */
-					for ( size_t i = 0; i < cs.fw.size(); ++i )
-					{
-						cs.splanes[i].normal() = VectorNormalized( vector3_cross( bestNormal, cs.fw[winding_next( cs.fw, i )] - cs.fw[i] ) );
-						cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
-					}
-
-					/* make back plane */
-					if ( spf & eMaxExtrude ){ //max extrude
-						cs.bplane.normal() = -bestNormal;
-						if ( bestNormal[axis] > 0 )
-							cs.bplane.dist() = -minmax.mins[axis] + clipDepth;
-						else
-							cs.bplane.dist() = minmax.maxs[axis] + clipDepth;
-					}
-					else if ( spf & eAxialBackplane ){ //axial backplane
-						cs.bplane.normal() = -bestNormal;
-						cs.bplane.dist() = cs.fw[0][axis];
-						if ( bestNormal[axis] > 0 ){
-							for ( size_t i = 1; i < cs.fw.size(); ++i ){
-								value_minimize( cs.bplane.dist(), cs.fw[i][axis] );
-							}
-							cs.bplane.dist() = -cs.bplane.dist() + clipDepth;
-						}
-						else{
-							for ( size_t i = 1; i < cs.fw.size(); ++i ){
-								value_maximize( cs.bplane.dist(), cs.fw[i][axis] );
-							}
-							cs.bplane.dist() += clipDepth;
-						}
-						if ( limDepth != 0 ){
-							Vector3 cnt = cs.fw[0];
-							if ( bestNormal[axis] > 0 ){
-								for ( size_t i = 1; i < cs.fw.size(); ++i )
-									if ( cs.fw[i][axis] > cnt[axis] )
-										cnt = cs.fw[i];
-							}
-							else {
-								for ( size_t i = 1; i < cs.fw.size(); ++i )
-									if ( cs.fw[i][axis] < cnt[axis] )
-										cnt = cs.fw[i];
-							}
-							cnt = plane3_project_point( cs.bplane, cnt );
-							if ( -plane3_distance_to_point( cs.fplane, cnt ) > limDepth ){	//normal backplane
-								cs.add_back_plane( clipDepth, cs.fplane.normal() );
-							}
-						}
-					}
-					else{	//normal backplane
-						cs.add_back_plane( clipDepth, cs.fplane.normal() );
-					}
-
-					cs.make_brush_sides( si );
-				}
-
-				else if ( spf == ( eExtrudeFaceNormals | ePyramidaClip ) ){	// extrude 45
-					/* 45 degrees normals for side planes */
-					for ( size_t i = 0; i < cs.fw.size(); ++i )
-					{
-						const Vector3 enrm = VectorNormalized( vector3_cross( cs.fplane.normal(), cs.fw[winding_next( cs.fw, i )] - cs.fw[i] ) );
-						/* make side planes */
-						cs.splanes[i].normal() = VectorNormalized( enrm - cs.fplane.normal() );
-						cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
-					}
-
-					/* make back plane */
-					cs.add_back_plane( clipDepth, cs.fplane.normal() );
-
-					cs.make_brush_sides( si );
-				}
-
-				else if ( spf == eExtrudeVertexNormals
-				       || spf == ( eExtrudeVertexNormals | ePyramidaClip ) ){ // vertex normals + don't check for sides, sticking outwards
-					Vector3 Vnorm[3], Enorm[3];
-					/* get vertex normals */
-					for ( int i = 0; i < 3; ++i ){
-						/* copy normal */
-						Vnorm[i] = ds.verts[*( idx + i )].normal;
-					}
-
-					//avg normals for side planes
-					for ( int i = 0; i < 3; ++i )
-					{
-						Enorm[i] = VectorNormalized( Vnorm[i] + Vnorm[( i + 1 ) % 3] );
-						//check fuer bad ones
-						const Vector3 nrm = VectorNormalized( vector3_cross( cs.fplane.normal(), cs.fw[( i + 1 ) % 3] - cs.fw[i] ) );
-						//check for negative or outside direction
-						if ( vector3_dot( Enorm[i], cs.fplane.normal() ) > 0.1 ){
-							if ( ( vector3_dot( Enorm[i], nrm ) > -0.2 ) || ( spf & ePyramidaClip ) ){
-								//ok++;
-								continue;
-							}
-						}
-						//notok++;
-						//Sys_Printf( "faulty Enormal %i/%i\n", notok, ok );
-						//use 45 normal
-						Enorm[i] = VectorNormalized( cs.fplane.normal() + nrm );
-					}
-
-					/* make side planes */
-					for ( int i = 0; i < 3; ++i )
-					{
-						cs.splanes[i].normal() = VectorNormalized( vector3_cross( Enorm[i], cs.fw[( i + 1 ) % 3] - cs.fw[i] ) );
-						cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
-					}
-
-					/* make back plane */
-					cs.add_back_plane( clipDepth, cs.fplane.normal() );
-
-					cs.make_brush_sides( si );
-				}
-
-				else if ( spf == eExtrudeFaceNormals ){
-					/* make side planes */
-					for ( size_t i = 0; i < cs.fw.size(); ++i )
-					{
-						cs.splanes[i].normal() = VectorNormalized( vector3_cross( cs.fplane.normal(), cs.fw[winding_next( cs.fw, i )] - cs.fw[i] ) );
-						cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
-					}
-
-					/* make back plane */
-					cs.add_back_plane( clipDepth, cs.fplane.normal() );
-
-					cs.make_brush_sides( si );
-				}
-
-				else if ( spf == ePyramidaClip ){
-					/* calculate center */
-					Vector3 cnt = ( cs.fw[0] + cs.fw[1] + cs.fw[2] ) / 3.0;
-					/* make back pyramid point */
-					cnt -= cs.fplane.normal() * clipDepth; // might want to shift this, if produces sus sides, since extreme angle with front
-
-					/* make 3 more planes */
-					for ( size_t i = 0; i < cs.fw.size(); ++i )
-					{
-						PlaneFromPoints( cs.splanes[i], cs.fw[winding_next( cs.fw, i )], cs.fw[i], cnt );
-					}
-
-					cs.make_brush_sides( si );
-				}
-
-				else if ( ( si.clipModel && spf == 0 ) || ( spawnFlags & eClipFlags ) == eClipModel ){	//default CLIPMODEL
-default_CLIPMODEL:
-					// axial normal
-					Vector3 bestNormal = cs.fplane.normal();
-					normal_make_axial( bestNormal );
-
-					/* make side planes */
-					for ( size_t i = 0; i < cs.fw.size(); ++i )
-					{
-						cs.splanes[i].normal() = VectorNormalized( vector3_cross( bestNormal, cs.fw[winding_next( cs.fw, i )] - cs.fw[i] ) );
-						cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
-					}
-
-					/* make back plane */
-					cs.add_back_plane( clipDepth, bestNormal );
-
-					cs.make_brush_sides( si );
-				}
-
-
-				/* add to entity */
-				if ( CreateBrushWindings( buildBrush ) ) {
-					AddBrushBevels();
-					//%	EmitBrushes( buildBrush, nullptr, nullptr );
-					brush_t& newBrush = entity.brushes.emplace_front( buildBrush );
-					newBrush.original = &newBrush;
-					entity.numBrushes++;
-					continue;
-				}
-			}
-			Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
-			             cs.fw[0][0], cs.fw[0][1], cs.fw[0][2],
-			             cs.fw[1][0], cs.fw[1][1], cs.fw[1][2],
-			             cs.fw[2][0], cs.fw[2][1], cs.fw[2][2], modelName );
-		}
-		// normalEpsilon = normalEpsilon_save;
+	/* make side planes */
+	for ( size_t i = 0; i < cs.fw.size(); ++i )
+	{
+		cs.splanes[i].normal() = VectorNormalized( vector3_cross( bestNormal, cs.fw[winding_next( cs.fw, i )] - cs.fw[i] ) );
+		cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
 	}
-	else if ( spawnFlags & eClipFlags ){
+
+	/* make back plane */
+	cs.add_back_plane( bestNormal );
+}
+
+static void clipModel_pyramidal( ClipSides& cs ){
+	/* calculate center */
+	DoubleVector3 cnt{ 0 };
+	for( const Vector3 v : cs.fw )
+		cnt += v;
+	cnt /= cs.fw.size();
+	/* make back pyramid point */
+	cnt -= cs.fplane.normal() * cs.clipDepth;
+
+	/* make side planes */
+	for ( size_t i = 0; i < cs.fw.size(); ++i )
+	{
+		PlaneFromPoints( cs.splanes[i], cs.fw[winding_next( cs.fw, i )], cs.fw[i], Vector3( cnt ) );
+#if 0 // no definite profit, problems are rather triggered by windings more complex than simple triangle
+		const auto susNormal = []( float a, float b ){ return ( a != 0 || b != 0 ) && std::fabs( a ) < .00025f && std::fabs( b ) < .00025f; };
+		if( susNormal( cs.splanes[i].a, cs.splanes[i].b )
+		 || susNormal( cs.splanes[i].a, cs.splanes[i].c )
+		 || susNormal( cs.splanes[i].b, cs.splanes[i].c ) ){
+			cnt -= cs.fplane.normal() * .1f; // shift, if produces sus sides, since extreme angle with front
+			i = -1; // restart loop
+		 }
+#endif
+	}
+}
+
+static void clipModel_faceNormals( ClipSides& cs ){
+	/* make side planes */
+	for ( size_t i = 0; i < cs.fw.size(); ++i )
+	{
+		cs.splanes[i].normal() = VectorNormalized( vector3_cross( cs.fplane.normal(), cs.fw[winding_next( cs.fw, i )] - cs.fw[i] ) );
+		cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
+	}
+
+	/* make back plane */
+	cs.add_back_plane( cs.fplane.normal() );
+}
+
+static void clipModel_vertexNormals( ClipSides& cs, const std::array<Vector3, 3>& Vnorm, bool noOutwardsCheck ){
+	std::array<Vector3, 3> Enorm;
+
+	//avg normals for side planes
+	for ( int i = 0; i < 3; ++i )
+	{
+		Enorm[i] = VectorNormalized( Vnorm[i] + Vnorm[( i + 1 ) % 3] );
+		//check fuer bad ones
+		const Vector3 nrm = VectorNormalized( vector3_cross( cs.fplane.normal(), cs.fw[( i + 1 ) % 3] - cs.fw[i] ) );
+		//check for negative or outside direction
+		if ( vector3_dot( Enorm[i], cs.fplane.normal() ) > 0.1 ){
+			if ( ( vector3_dot( Enorm[i], nrm ) > -0.2 ) || noOutwardsCheck ){
+				//ok++;
+				continue;
+			}
+		}
+		//notok++;
+		//Sys_Printf( "faulty Enormal %i/%i\n", notok, ok );
+		//use 45 normal
+		Enorm[i] = VectorNormalized( cs.fplane.normal() + nrm );
+	}
+
+	/* make side planes */
+	for ( int i = 0; i < 3; ++i )
+	{
+		cs.splanes[i].normal() = VectorNormalized( vector3_cross( Enorm[i], cs.fw[( i + 1 ) % 3] - cs.fw[i] ) );
+		cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
+	}
+
+	/* make back plane */
+	cs.add_back_plane( cs.fplane.normal() );
+}
+
+static void clipModel_45( ClipSides& cs ){
+	/* 45 degrees normals for side planes */
+	for ( size_t i = 0; i < cs.fw.size(); ++i )
+	{
+		const Vector3 enrm = VectorNormalized( vector3_cross( cs.fplane.normal(), cs.fw[winding_next( cs.fw, i )] - cs.fw[i] ) );
+		/* make side planes */
+		cs.splanes[i].normal() = VectorNormalized( enrm - cs.fplane.normal() );
+		cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
+	}
+
+	/* make back plane */
+	cs.add_back_plane( cs.fplane.normal() );
+}
+
+static void clipModel_terrain( ClipSides& cs, const int spf, size_t axis, const Vector3& avgDirection, const MinMax& minmax, const float limDepth ){
+	Vector3 bestNormal;
+
+	if ( spf & eExtrudeTerrain ){ //autodirection
+		bestNormal = avgDirection;
+	}
+	else{
+		axis = 2;
+		if ( ( spf & eExtrudeDownwards ) && ( spf & eExtrudeUpwards ) ){
+			bestNormal = cs.fplane.normal().z() >= 0? g_vector3_axis_z : -g_vector3_axis_z;
+		}
+		else if ( spf & eExtrudeDownwards ){
+			bestNormal = g_vector3_axis_z;
+		}
+		else if ( spf & eExtrudeUpwards ){
+			bestNormal = -g_vector3_axis_z;
+		}
+		else{ // best axial normal
+			bestNormal = cs.fplane.normal();
+			axis = normal_make_axial( bestNormal );
+		}
+	}
+
+	if ( vector3_dot( cs.fplane.normal(), bestNormal ) < 0.05 ){
+		return clipModel_default( cs );
+	}
+
+
+	/* make side planes */
+	for ( size_t i = 0; i < cs.fw.size(); ++i )
+	{
+		cs.splanes[i].normal() = VectorNormalized( vector3_cross( bestNormal, cs.fw[winding_next( cs.fw, i )] - cs.fw[i] ) );
+		cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
+	}
+
+	/* make back plane */
+	if ( spf & eMaxExtrude ){ //max extrude
+		cs.bplane.normal() = -bestNormal;
+		if ( bestNormal[axis] > 0 )
+			cs.bplane.dist() = -minmax.mins[axis] + cs.clipDepth;
+		else
+			cs.bplane.dist() = minmax.maxs[axis] + cs.clipDepth;
+	}
+	else if ( spf & eAxialBackplane ){ //axial backplane
+		cs.bplane.normal() = -bestNormal;
+		cs.bplane.dist() = cs.fw[0][axis];
+		if ( bestNormal[axis] > 0 ){
+			for ( size_t i = 1; i < cs.fw.size(); ++i ){
+				value_minimize( cs.bplane.dist(), cs.fw[i][axis] );
+			}
+			cs.bplane.dist() = -cs.bplane.dist() + cs.clipDepth;
+		}
+		else{
+			for ( size_t i = 1; i < cs.fw.size(); ++i ){
+				value_maximize( cs.bplane.dist(), cs.fw[i][axis] );
+			}
+			cs.bplane.dist() += cs.clipDepth;
+		}
+		if ( limDepth != 0 ){
+			Vector3 cnt = cs.fw[0];
+			if ( bestNormal[axis] > 0 ){
+				for ( size_t i = 1; i < cs.fw.size(); ++i )
+					if ( cs.fw[i][axis] > cnt[axis] )
+						cnt = cs.fw[i];
+			}
+			else {
+				for ( size_t i = 1; i < cs.fw.size(); ++i )
+					if ( cs.fw[i][axis] < cnt[axis] )
+						cnt = cs.fw[i];
+			}
+			cnt = plane3_project_point( cs.bplane, cnt );
+			if ( -plane3_distance_to_point( cs.fplane, cnt ) > limDepth ){	//normal backplane
+				cs.add_back_plane( bestNormal );
+			}
+		}
+	}
+	else{	//normal backplane
+		cs.add_back_plane( bestNormal );
+	}
+}
+
+static void clipModel_axialPyramid( ClipSides& cs, const float limDepth ){
+	for ( int i = 0; i < 3; ++i )
+		if ( std::fabs( cs.fplane.normal()[i] ) < 0.05f && std::fabs( cs.fplane.normal()[( i + 1 ) % 3] ) < 0.05f ) //no way, close to lay on two axes
+			return clipModel_default( cs );
+
+	// best axial normal
+	Vector3 bestNormal = cs.fplane.normal();
+	const size_t axis = normal_make_axial( bestNormal );
+
+	float mindist = 999999;
+
+	for ( size_t i = 0; i < cs.fw.size(); ++i ){ // planes
+		float bestdist = 999999, bestangle = 1;
+
+		for ( size_t j = 0; j < 3; ++j ){ // axes
+			Plane3f pln;
+			Vector3 nrm = cs.fw[winding_next( cs.fw, i )] - cs.fw[i];
+			if ( j == axis ){
+				pln.normal() = VectorNormalized( vector3_cross( bestNormal, nrm ) );
+			}
+			else{
+				Vector3 vnrm( 0 );
+				if ( ( j + 1 ) % 3 == axis ){
+					if ( nrm[( j + 2 ) % 3] == 0 )
+						continue;
+					vnrm[( j + 2 ) % 3] = nrm[( j + 2 ) % 3];
+				}
+				else{
+					if ( nrm[( j + 1 ) % 3] == 0 )
+						continue;
+					vnrm[( j + 1 ) % 3] = nrm[( j + 1 ) % 3];
+				}
+				const Vector3 enrm = vector3_cross( bestNormal, vnrm );
+				pln.normal() = VectorNormalized( vector3_cross( enrm, nrm ) );
+			}
+			pln.dist() = vector3_dot( cs.fw[i], pln.normal() );
+			//check facing, thickness
+			const float currdist = -plane3_distance_to_point( pln, cs.fw[( i + 2 ) % cs.fw.size()] );
+			const float currangle = vector3_dot( pln.normal(), cs.fplane.normal() );
+			if ( ( ( currdist > 0.1 ) && ( currdist < bestdist ) && ( currangle < 0 ) ) ||
+			     ( ( currangle >= 0 ) && ( currangle <= bestangle ) ) ){
+				bestangle = currangle;
+				if ( currangle < 0 )
+					bestdist = currdist;
+				cs.splanes[i] = pln;
+			}
+		}
+		if ( bestdist == 999999 && bestangle == 1 ){
+			// Sys_Printf( "default_CLIPMODEL\n" );
+			return clipModel_default( cs );
+		}
+		value_minimize( mindist, bestdist );
+	}
+	if ( ( limDepth != 0 ) && ( mindist > limDepth ) )
+		return clipModel_default( cs );
+}
+
+
+struct ClipTriangle
+{
+	Plane3 plane;
+	std::array<DoubleVector3, 3> points;
+	mapDrawSurface_t *ds;
+
+	bool operator<( const ClipTriangle& other ) const {
+		return plane.dist() > other.plane.dist(); // decreasing order (to iterate from the end)
+	}
+};
+
+
+struct ClipTriangles
+{
+	// separate by surfaceFlags, contentFlags, compileFlags, sort by triangle plane distance
+	std::map<std::tuple<int, int, int>, std::vector<ClipTriangle>> triangleSets;
+	std::vector<mapDrawSurface_t*> modelSurfs;
+};
+
+
+inline bool clipflags_doClip( const shaderInfo_t& si, const int spawnFlags ){
+	const int spf = ( spawnFlags & ( eClipFlags & ~eClipModel ) ); // w/e eClipModel flag, if others are set
+
+	const bool fineFlags =
+		( si.clipModel && spf == 0 ) // default CLIPMODEL
+		|| ( spawnFlags & eClipFlags ) == eClipModel // default CLIPMODEL
+		|| spf == eExtrudeFaceNormals
+		|| spf == eExtrudeTerrain
+		|| spf == eExtrudeVertexNormals
+		|| spf == ePyramidalClip
+		|| spf == eExtrudeDownwards
+		|| spf == eExtrudeUpwards
+		|| spf == eAxialBackplane // default sides + axial backplane
+		|| spf == ( eExtrudeFaceNormals | ePyramidalClip ) // extrude 45
+		|| spf == ( eExtrudeTerrain | eMaxExtrude )
+		|| spf == ( eExtrudeTerrain | eAxialBackplane )
+		|| spf == ( eExtrudeVertexNormals | ePyramidalClip ) // vertex normals + don't check for sides, sticking outwards
+		|| spf == ( ePyramidalClip | eAxialBackplane ) // pyramid with 3 of 4 sides axial (->small bsp)
+		|| spf == ( eExtrudeDownwards | eExtrudeUpwards )
+		|| spf == ( eExtrudeDownwards | eMaxExtrude )
+		|| spf == ( eExtrudeDownwards | eAxialBackplane )
+		|| spf == ( eExtrudeDownwards | eExtrudeUpwards | eMaxExtrude )
+		|| spf == ( eExtrudeDownwards | eExtrudeUpwards | eAxialBackplane )
+		|| spf == ( eExtrudeUpwards | eMaxExtrude )
+		|| spf == ( eExtrudeUpwards | eAxialBackplane );
+
+	if( ( spawnFlags & eClipFlags ) && !fineFlags )
 		Sys_Warning( "nonexistent clipping mode selected\n" );
+
+	return ( ( si.compileFlags & C_SOLID ) || si.clipModel ) /* skip nonsolid */ && fineFlags;
+}
+
+
+/* ydnar: giant hack land: generate clipping brushes for model triangles */
+static void ClipModel( const int spawnFlags, float clipDepth, ClipTriangles& clipTriangles, const char *modelName, entity_t& entity ){
+	const int spf = ( spawnFlags & ( eClipFlags & ~eClipModel ) ); // w/e eClipModel flag, if others are set
+
+	float limDepth = 0;
+	if ( clipDepth < 0 ){
+		limDepth = -clipDepth;
+		clipDepth = 2.f;
+	}
+
+	// mergable triangles support
+	if( ( /* si.clipModel && */ spf == 0 ) // default CLIPMODEL
+		|| ( spawnFlags & eClipFlags ) == eClipModel //default CLIPMODEL
+		|| spf == eExtrudeFaceNormals
+		|| spf == ePyramidalClip
+		|| spf == ( eExtrudeFaceNormals | ePyramidalClip ) // extrude 45
+	){
+		//? consider MAX_BUILD_SIDES MAX_POINTS_ON_WINDING
+		//? try to merge windings too
+		for( auto& [ _, triSet ] : clipTriangles.triangleSets )
+		{
+			std::sort( triSet.begin(), triSet.end() );
+			while( !triSet.empty() )
+			{
+				ClipTriangle tri1st = triSet.back();
+				triSet.pop_back();
+				winding_accu_t w( tri1st.points.cbegin(), tri1st.points.cend() );
+				ClipSides cs( *tri1st.ds->shaderInfo, entity, clipDepth );
+				// try to merge some triangles
+				for( auto tri = triSet.crbegin(); tri != triSet.crend(); ++tri ){
+					// sorted by distance; break on distance range overflow
+					if( tri->plane.dist() > tri1st.plane.dist() + 1 ) // big epsilon, points still can be there
+						break;
+					// points off plane
+					// const double epsilon = distanceEpsilon * 2;
+					const double epsilon = ON_EPSILON / 2;
+					if( std::fabs( plane3_distance_to_point( tri1st.plane, tri->points[0] ) ) > epsilon
+					 || std::fabs( plane3_distance_to_point( tri1st.plane, tri->points[1] ) ) > epsilon
+					 || std::fabs( plane3_distance_to_point( tri1st.plane, tri->points[2] ) ) > epsilon )
+						continue;
+					// rough normal check; only catches inverted planes with dist 0?
+					if( !vector3_equal_epsilon( tri1st.plane.normal(), tri->plane.normal(), .1 ) )
+						continue;
+					// find matching points
+					for( auto prev = w.end() - 1, next = w.begin(); next != w.end(); prev = next++ )
+					{
+						for( auto pre = tri->points.cend() - 1, nex = tri->points.cbegin(); nex != tri->points.cend(); pre = nex++ )
+						{
+							if( VectorCompare( *prev, *nex ) && VectorCompare( *next, *pre ) ){ // source points are typically perfectly equal hence small epsilon
+							// if( vector3_equal_epsilon( *prev, *nex, ON_EPSILON ) && vector3_equal_epsilon( *next, *pre, ON_EPSILON ) ){
+								auto newPoint = ( nex + 1 != tri->points.cend() )? nex + 1 : tri->points.cbegin();
+								auto nnext = winding_next( w, next );
+								auto pprev = winding_prev( w, prev );
+								// check if new point preserves convexity
+								Plane3 pplane( VectorNormalized( vector3_cross( tri1st.plane.normal(), *newPoint - *pprev ) ), 0 );
+								pplane.dist() = vector3_dot( pplane.normal(), *pprev );
+								Plane3 nplane( VectorNormalized( vector3_cross( tri1st.plane.normal(), *nnext - *newPoint ) ), 0 );
+								nplane.dist() = vector3_dot( nplane.normal(), *nnext );
+								double pd = plane3_distance_to_point( pplane, *prev );
+								double nd = plane3_distance_to_point( nplane, *next );
+								// insert
+								if( pd > -ON_EPSILON && nd > -ON_EPSILON ){
+									auto inserted = w.insert( next, *newPoint );
+									triSet.erase( ( ++tri ).base() );
+									// inserted, restart the search
+									tri = triSet.crbegin() - 1;
+									// remove possible colinear points
+									auto inext = winding_next( w, inserted );
+									auto iprev = winding_prev( w, inserted );
+									// remove higher iterator 1st to keep lower one valid
+									if( iprev > inext ){
+										std::swap( iprev, inext );
+										std::swap( pd, nd );
+									}
+									if( std::fabs( nd ) < ON_EPSILON )
+										w.erase( inext );
+									if( std::fabs( pd ) < ON_EPSILON && w.size() > 3 )
+										w.erase( iprev );
+								}
+								goto doNextTriangle;
+							}
+						}
+					}
+					doNextTriangle:		continue;
+				}
+
+				cs.fw = CopyWindingAccuToRegular( w );
+				//% CheckWinding( cs.fw );
+
+				/* make plane for triangle */
+				if ( cs.construct() ) {
+					if ( ( /* si.clipModel && */ spf == 0 ) || ( spawnFlags & eClipFlags ) == eClipModel ){	// default CLIPMODEL
+						clipModel_default( cs );
+					}
+					else if ( spf == eExtrudeFaceNormals ){
+						clipModel_faceNormals( cs );
+					}
+					else if ( spf == ePyramidalClip ){
+						clipModel_pyramidal( cs );
+					}
+					else if ( spf == ( eExtrudeFaceNormals | ePyramidalClip ) ){ // extrude 45
+						clipModel_45( cs );
+					}
+
+					if ( cs.create_brush() ) {
+						continue; // success
+					}
+				}
+				Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
+				             cs.fw[0][0], cs.fw[0][1], cs.fw[0][2],
+				             cs.fw[1][0], cs.fw[1][1], cs.fw[1][2],
+				             cs.fw[2][0], cs.fw[2][1], cs.fw[2][2], modelName );
+			}
+		}
+	}
+	else{ // no mergable triangles support
+		for( mapDrawSurface_t *ds : clipTriangles.modelSurfs )
+		{
+			MinMax minmax;
+			Vector3 avgDirection( 0 );
+			size_t axis;
+
+			//wont snap these in normal way, or will explode
+			// const double normalEpsilon_save = normalEpsilon;
+			//normalEpsilon = 0.000001;
+
+			if ( ( spf & eMaxExtrude ) || ( spf & eExtrudeTerrain ) ){
+
+				for ( auto idx = ds->indexes.cbegin(); idx != ds->indexes.cend(); idx += 3 ){
+					const Vector3 points[3]{ ds->verts[*( idx + 0 )].xyz,
+					                         ds->verts[*( idx + 1 )].xyz,
+					                         ds->verts[*( idx + 2 )].xyz };
+					if ( Plane3f plane; PlaneFromPoints( plane, points ) ){
+						if ( spf & eExtrudeTerrain )
+							avgDirection += plane.normal();	// calculate average mesh facing direction
+
+						for ( const auto& p : points ) // get min/max
+							minmax.extend( p );
+					}
+				}
+				//unify avg direction
+				if ( spf & eExtrudeTerrain ){
+					if ( avgDirection == g_vector3_identity )
+						avgDirection = g_vector3_axis_z;
+					axis = normal_make_axial( avgDirection );
+				}
+			}
+
+			/* walk triangle list */
+			for ( auto idx = ds->indexes.cbegin(); idx != ds->indexes.cend(); idx += 3 )
+			{
+				ClipSides cs( *ds->shaderInfo, entity, clipDepth );
+				/* make points */
+				cs.fw.assign( { ds->verts[*( idx + 0 )].xyz,
+				                ds->verts[*( idx + 1 )].xyz,
+				                ds->verts[*( idx + 2 )].xyz } );
+
+				/* make plane for triangle */
+				if ( cs.construct() ) {
+					if ( spf == ( ePyramidalClip | eAxialBackplane ) ){ // pyramid with 3 of 4 sides axial (->small bsp)
+						clipModel_axialPyramid( cs, limDepth );
+					}
+					else if ( spf == eExtrudeTerrain
+					       || spf == eExtrudeDownwards
+					       || spf == eExtrudeUpwards
+					       || spf == eAxialBackplane
+					       || spf == ( eExtrudeTerrain | eMaxExtrude )
+					       || spf == ( eExtrudeTerrain | eAxialBackplane )
+					       || spf == ( eExtrudeDownwards | eExtrudeUpwards )
+					       || spf == ( eExtrudeDownwards | eMaxExtrude )
+					       || spf == ( eExtrudeDownwards | eAxialBackplane )
+					       || spf == ( eExtrudeDownwards | eExtrudeUpwards | eMaxExtrude )
+					       || spf == ( eExtrudeDownwards | eExtrudeUpwards | eAxialBackplane )
+					       || spf == ( eExtrudeUpwards | eMaxExtrude )
+					       || spf == ( eExtrudeUpwards | eAxialBackplane ) ){
+						clipModel_terrain( cs, spf, axis, avgDirection, minmax, limDepth );
+					}
+					else if ( spf == eExtrudeVertexNormals
+					       || spf == ( eExtrudeVertexNormals | ePyramidalClip ) ){ // vertex normals + don't check for sides, sticking outwards
+						clipModel_vertexNormals( cs, { ds->verts[*( idx + 0 )].normal,
+						                               ds->verts[*( idx + 1 )].normal,
+						                               ds->verts[*( idx + 2 )].normal }, spf & ePyramidalClip );
+					}
+
+					if ( cs.create_brush() ) {
+						continue; // success
+					}
+				}
+				Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
+				             cs.fw[0][0], cs.fw[0][1], cs.fw[0][2],
+				             cs.fw[1][0], cs.fw[1][1], cs.fw[1][2],
+				             cs.fw[2][0], cs.fw[2][1], cs.fw[2][2], modelName );
+			}
+			// normalEpsilon = normalEpsilon_save;
+		}
 	}
 }
 
@@ -892,6 +1035,7 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		}
 	}
 
+	ClipTriangles clipTriangles;
 	/* each surface on the model will become a new map drawsurface */
 	//%	Sys_FPrintf( SYS_VRB, "Model %s has %d surfaces\n", name, numSurfaces );
 	for ( const auto& surface : model->m_meshes )
@@ -1037,21 +1181,41 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		}
 
 		/* copy indexes */
-		{
-			size_t idCopied = 0;
-			for ( const aiFace& face : Span( mesh->mFaces, mesh->mNumFaces ) ){
-				// if( face.mNumIndices == 3 )
-				for ( size_t i = 0; i < 3; ++i ){
-					ds.indexes[idCopied++] = face.mIndices[i];
-				}
-				if( transform_lefthanded ){
-					std::swap( ds.indexes[idCopied - 1], ds.indexes[idCopied - 2] );
-				}
+		for ( size_t idCopied = 0; const aiFace& face : Span( mesh->mFaces, mesh->mNumFaces ) ){
+			// if( face.mNumIndices == 3 )
+			for ( size_t i = 0; i < 3; ++i ){
+				ds.indexes[idCopied++] = face.mIndices[i];
+			}
+			if( transform_lefthanded ){
+				std::swap( ds.indexes[idCopied - 1], ds.indexes[idCopied - 2] );
 			}
 		}
 
-		ClipModel( spawnFlags, clipDepth, si, ds, name, entity );
+		if( clipflags_doClip( si, spawnFlags) ){
+			clipTriangles.modelSurfs.push_back( &ds );
+
+			const auto key = std::tuple{ ds.shaderInfo->surfaceFlags,
+			                             ds.shaderInfo->contentFlags,
+			                             ds.shaderInfo->compileFlags };
+			auto& triangles = clipTriangles.triangleSets[ key ];
+			for ( const aiFace& face : Span( mesh->mFaces, mesh->mNumFaces ) )
+			{
+				std::array<DoubleVector3, 3> points;
+				for( size_t i = 0; i < 3; ++i ){
+					auto& v = mesh->mVertices[face.mIndices[i]];
+					points[i] = matrix4_transformed_point( transform, DoubleVector3( v.x, v.y, v.z ) );
+				}
+				if( transform_lefthanded ){
+					std::swap( points[1], points[2] );
+				}
+				if ( Plane3 plane; PlaneFromPoints( plane, points.data() ) ){
+					triangles.emplace_back( ClipTriangle{ .plane = plane, .points = points, .ds = &ds } );
+				}
+			}
+		}
 	}
+
+	ClipModel( spawnFlags, clipDepth, clipTriangles, name, entity );
 }
 
 
