@@ -606,8 +606,7 @@ inline void planepts_print( const PlanePoints& planePoints, TextOutputStream& os
 
 
 inline Plane3 Plane3_applyTranslation( const Plane3& plane, const Vector3& translation ){
-	Plane3 tmp( plane3_translated( Plane3( plane.normal(), -plane.dist() ), translation ) );
-	return Plane3( tmp.normal(), -tmp.dist() );
+	return plane3_translated( plane, translation );
 }
 
 inline Plane3 Plane3_applyTransform( const Plane3& plane, const Matrix4& matrix ){
@@ -732,11 +731,11 @@ public:
 	}
 	void offset( float offset ){
 		if ( !isDoom3Plane() ) {
-			Vector3 move( vector3_scaled( m_planeCached.normal(), -offset ) );
+			const DoubleVector3 move( m_planeCached.normal() * offset );
 
-			vector3_subtract( m_planepts[0], move );
-			vector3_subtract( m_planepts[1], move );
-			vector3_subtract( m_planepts[2], move );
+			m_planepts[0] += move;
+			m_planepts[1] += move;
+			m_planepts[2] += move;
 
 			MakePlane();
 		}

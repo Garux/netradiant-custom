@@ -75,15 +75,9 @@ inline Plane3 plane3_normalised( const Plane3& plane ){
 	       );
 }
 
-inline Plane3 plane3_translated( const Plane3& plane, const Vector3& translation ){
-	Plane3 transformed;
-	transformed.a = plane.a;
-	transformed.b = plane.b;
-	transformed.c = plane.c;
-	transformed.d = -( ( -plane.d * transformed.a + translation.x() ) * transformed.a +
-	                   ( -plane.d * transformed.b + translation.y() ) * transformed.b +
-	                   ( -plane.d * transformed.c + translation.z() ) * transformed.c );
-	return transformed;
+template<typename T>
+Plane3 plane3_translated( const Plane3& plane, const BasicVector3<T>& translation ){
+	return Plane3( plane.normal(), vector3_dot( plane.normal(), plane.normal() * plane.dist() + translation ) );
 }
 
 inline Plane3 plane3_transformed( const Plane3& plane, const Matrix4& transform ){

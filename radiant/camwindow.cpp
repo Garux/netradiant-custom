@@ -2169,10 +2169,10 @@ Vector3 Camera_getFocusPos( camera_t& camera ){
 #endif
 
 	const Plane3 frustumPlanes[4] = {
-		plane3_translated( view.getFrustum().left,   camorigin - aabb.origin ),
-		plane3_translated( view.getFrustum().right,  camorigin - aabb.origin ),
-		plane3_translated( view.getFrustum().top,    camorigin - aabb.origin ),
-		plane3_translated( view.getFrustum().bottom, camorigin - aabb.origin ),
+		plane3_translated( view.getFrustum().left,   aabb.origin - camorigin ),
+		plane3_translated( view.getFrustum().right,  aabb.origin - camorigin ),
+		plane3_translated( view.getFrustum().top,    aabb.origin - camorigin ),
+		plane3_translated( view.getFrustum().bottom, aabb.origin - camorigin ),
 	};
 	float offset = 64.0f;
 
