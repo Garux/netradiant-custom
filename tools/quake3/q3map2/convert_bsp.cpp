@@ -645,7 +645,7 @@ int ShiftBSPMain( Args& args ){
 	/* shift planes */
 	for ( bspPlane_t& plane : bspPlanes )
 	{
-		plane.dist() = vector3_dot( plane.normal(), plane.normal() * plane.dist() + shift );
+		plane = plane3_translated( plane, shift );
 	}
 
 	// fixme: engine says 'light grid mismatch', unless translation is multiple of grid size

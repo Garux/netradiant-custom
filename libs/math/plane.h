@@ -75,9 +75,9 @@ inline Plane3 plane3_normalised( const Plane3& plane ){
 	       );
 }
 
-template<typename T>
-Plane3 plane3_translated( const Plane3& plane, const BasicVector3<T>& translation ){
-	return Plane3( plane.normal(), vector3_dot( plane.normal(), plane.normal() * plane.dist() + translation ) );
+template<typename P, typename V>
+Plane3___<P> plane3_translated( const Plane3___<P>& plane, const BasicVector3<V>& translation ){
+	return Plane3___<P>( plane.normal(), plane.dist() + vector3_dot( plane.normal(), translation ) );
 }
 
 inline Plane3 plane3_transformed( const Plane3& plane, const Matrix4& transform ){
