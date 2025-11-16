@@ -1209,30 +1209,33 @@ static void ParseBrush( bool onlyLights, bool noCollapseGroups, entity_t& mapEnt
    AdjustBrushesForOrigin()
  */
 
-static void AdjustBrushesForOrigin( entity_t& ent ){
+static void AdjustBrushesForOrigin( entity_t& ent, const Vector3& offset ){
+	if( offset == g_vector3_identity )
+		return;
+
 	/* walk brush list */
 	for ( brush_t& b : ent.brushes )
 	{
-		/* offset brush planes */
+		/* offset brush planes */ // note this leaves potentially unused planes in 'mapplanes' array
 		for ( side_t& side : b.sides )
 		{
-			/* offset side plane */
-			const float newdist = -plane3_distance_to_point( mapplanes[ side.planenum ].plane, ent.originbrush_origin );
-
 			/* find a new plane */
-			side.planenum = FindFloatPlane( mapplanes[ side.planenum ].normal(), newdist, {} );
-			side.plane.dist() = -plane3_distance_to_point( side.plane, ent.originbrush_origin );
+			side.planenum = FindFloatPlane( plane3_translated( mapplanes[ side.planenum ].plane, offset ) );
+			side.plane = plane3_translated( side.plane, offset );
+
+			for( Vector3& v : side.winding )
+				v += offset;
 		}
 
 		/* rebuild brush windings (ydnar: just offsetting the winding above should be fine) */
-		CreateBrushWindings( b );
+		// CreateBrushWindings( b ); // can be desirable for higher windings precision, but handle already created bevel sides
 	}
 
 	/* walk patch list */
 	for ( parseMesh_t& p : ent.patches )
 	{
 		for ( bspDrawVert_t& vert : Span( p.mesh.verts, p.mesh.numVerts() ) )
-			vert.xyz -= ent.originbrush_origin;
+			vert.xyz += offset;
 	}
 }
 
@@ -1247,9 +1250,7 @@ static void AdjustBrushesForOrigin( entity_t& ent ){
 
 static void MoveBrushesToWorld( entity_t& ent ){
 	/* we need to undo the common/origin adjustment, and instead shift them by the entity key origin */
-	ent.originbrush_origin = -ent.origin;
-	AdjustBrushesForOrigin( ent );
-	ent.originbrush_origin.set( 0 );
+	AdjustBrushesForOrigin( ent, ent.origin );
 
 	/* move brushes */
 	for ( brushlist_t::const_iterator next, b = ent.brushes.begin(); b != ent.brushes.end(); b = next )
@@ -1638,9 +1639,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 
 	/* get entity origin and adjust brushes */
 	mapEnt.origin = mapEnt.vectorForKey( "origin" );
-	if ( mapEnt.originbrush_origin != g_vector3_identity ) {
-		AdjustBrushesForOrigin( mapEnt );
-	}
+	AdjustBrushesForOrigin( mapEnt, -mapEnt.originbrush_origin );
 
 	/* group_info entities are just for editor grouping (fixme: leak!) */
 	if ( !noCollapseGroups && striEqual( "group_info", classname ) ) {
