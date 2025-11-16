@@ -627,10 +627,11 @@ static void FanFaceSurface( mapDrawSurface_t& ds ){
 		co.set( 0 );
 
 	/* add up the drawverts to create a centroid */
+	DoubleVector3 cnt( 0 );
 	bspDrawVert_t centroid = c_bspDrawVert_t0;
 	for ( const bspDrawVert_t& dv : ds.verts )
 	{
-		centroid.xyz += dv.xyz;
+		cnt += dv.xyz;
 		centroid.normal += dv.normal;
 		centroid.st += dv.st;
 		for ( int k = 0; k < MAX_LIGHTMAPS; ++k ){
@@ -641,7 +642,7 @@ static void FanFaceSurface( mapDrawSurface_t& ds ){
 
 	/* average the centroid */
 	const double iv = 1.0 / ds.verts.size();
-	centroid.xyz *= iv;
+	centroid.xyz = cnt * iv;
 	if ( VectorNormalize( centroid.normal ) == 0 ) {
 		centroid.normal = ds.verts[ 0 ].normal;
 	}
