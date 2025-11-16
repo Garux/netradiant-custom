@@ -2524,7 +2524,7 @@ static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t& si ){
 			mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Face );
 			ds.shaderInfo = &si;
 			ds.planar = true;
-			ds.planeNum = FindFloatPlane( p->plane.plane, {} );
+			ds.planeNum = FindFloatPlane( p->plane.plane );
 			ds.lightmapVecs[ 2 ] = p->plane.normal();
 			ds.fogNum = FOG_INVALID;
 			ds.verts.resize( w.size(), c_bspDrawVert_t0 );

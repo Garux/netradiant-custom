@@ -39,7 +39,7 @@ vportal_t          *sorted_portals[ MAX_MAP_PORTALS * 2 ];
 static visPlane_t PlaneFromWinding( const fixedWinding_t *w ){
 	// calc plane
 	visPlane_t plane;
-	PlaneFromPoints( plane, w->points[0], w->points[1], w->points[2] );
+	PlaneFromPoints( plane, w->points );
 	return plane;
 }
 

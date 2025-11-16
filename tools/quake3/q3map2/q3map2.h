@@ -1569,11 +1569,9 @@ public:
 
 /* map.c */
 void                        LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups );
-void                        SnapPlaneImproved( Plane3f& plane, const Span<const Vector3>& points );
-int                         FindFloatPlane( const Plane3f& plane, const Span<const Vector3>& points );
-inline int                  FindFloatPlane( const Vector3& normal, float dist, const Span<const Vector3>& points ){
-	return FindFloatPlane( Plane3f( normal, dist ), points );
-}
+template<class T> bool      SnapPlaneImproved( Plane3f& plane, const Span<const BasicVector3<T>>& points );
+int                         FindFloatPlane( const Plane3f& plane, const Span<const Vector3>& points = {} );
+int                         FindFloatPlane( const Plane3f& plane, const Span<const DoubleVector3>& points );
 bool                        PlaneEqual( const plane_t& p, const Plane3f& plane );
 void                        AddBrushBevels();
 EntityCompileParams         ParseEntityCompileParams( const entity_t& e, const entity_t *eparent, bool worldShadowGroup );

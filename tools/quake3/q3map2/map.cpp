@@ -138,7 +138,6 @@ static int CreateNewFloatPlane( const Plane3f& plane ){
 
 static bool SnapNormal( Vector3& normal ){
 #if Q3MAP2_EXPERIMENTAL_SNAP_NORMAL_FIX
-	int i;
 	bool adjusted = false;
 
 	// A change from the original SnapNormal() is that we snap each
@@ -167,7 +166,7 @@ static bool SnapNormal( Vector3& normal ){
 
 
 	/*
-	for ( i = 0; i < 30; ++i )
+	for ( int i = 0; i < 30; ++i )
 	{
 		double x, y, z, length;
 		x = (double) 1.0;
@@ -186,7 +185,7 @@ static bool SnapNormal( Vector3& normal ){
 	Error( "vectorNormalize test completed" );
 	*/
 
-	for ( i = 0; i < 3; ++i )
+	for ( int i = 0; i < 3; ++i )
 	{
 		if ( normal[i] != 0 && -normalEpsilon < normal[i] && normal[i] < normalEpsilon ) {
 			normal[i] = 0;
@@ -194,11 +193,10 @@ static bool SnapNormal( Vector3& normal ){
 		}
 	}
 
-	if ( adjusted ) {
+	if ( adjusted )
 		VectorNormalize( normal );
-		return true;
-	}
-	return false;
+
+	return adjusted;
 #else
 	int i;
 
@@ -299,12 +297,15 @@ static void SnapPlane( Plane3f& plane ){
    SnapPlaneImproved()
    snaps a plane to normal/distance epsilons, improved code
  */
-void SnapPlaneImproved( Plane3f& plane, const Span<const Vector3>& points ){
-	if ( SnapNormal( plane.normal() ) ) {
+template<class T>
+bool SnapPlaneImproved( Plane3f& plane, const Span<const BasicVector3<T>>& points ){
+	bool adjusted;
+
+	if ( ( adjusted = SnapNormal( plane.normal() ) ) ) {
 		if ( !points.empty() ) {
 			// Adjust the dist so that the provided points don't drift away.
 			DoubleVector3 center( 0 );
-			for ( const Vector3& point : points )
+			for ( const BasicVector3<T>& point : points )
 			{
 				center += point;
 			}
@@ -319,9 +320,14 @@ void SnapPlaneImproved( Plane3f& plane, const Span<const Vector3>& points ){
 		const float distNearestInt = std::rint( plane.dist() );
 		if ( -distanceEpsilon < plane.dist() - distNearestInt && plane.dist() - distNearestInt < distanceEpsilon ) {
 			plane.dist() = distNearestInt;
+			adjusted = true;
 		}
 	}
+
+	return adjusted;
 }
+template bool SnapPlaneImproved<float>( Plane3f& plane, const Span<const BasicVector3<float>>& points );
+template bool SnapPlaneImproved<double>( Plane3f& plane, const Span<const BasicVector3<double>>& points );
 
 
 
@@ -330,8 +336,8 @@ void SnapPlaneImproved( Plane3f& plane, const Span<const Vector3>& points ){
    ydnar: changed to allow a number of test points to be supplied that
    must be within an epsilon distance of the plane
  */
-
-int FindFloatPlane( const Plane3f& inplane, const Span<const Vector3>& points ) // NOTE: this has a side effect on the normal. Good or bad?
+template<class T>
+int FindFloatPlane___( const Plane3f& inplane, const Span<const BasicVector3<T>>& points ) // NOTE: this has a side effect on the normal. Good or bad?
 
 #ifdef USE_HASHING
 
@@ -362,7 +368,7 @@ int FindFloatPlane( const Plane3f& inplane, const Span<const Vector3>& points ) 
 			//%	return p - mapplanes;
 
 			/* ydnar: test supplied points against this plane */
-			if( std::ranges::all_of( points, [&]( const Vector3& point ){ // true for empty
+			if( std::ranges::all_of( points, [&]( const BasicVector3<T>& point ){ // true for empty
 				// NOTE: When dist approaches 2^16, the resolution of 32 bit floating
 				// point number is greatly decreased.  The distanceEpsilon cannot be
 				// very small when world coordinates extend to 2^16.  Making the
@@ -416,6 +422,12 @@ int FindFloatPlane( const Plane3f& inplane, const Span<const Vector3>& points ) 
 }
 
 #endif
+int FindFloatPlane( const Plane3f& inplane, const Span<const Vector3>& points ){
+	return FindFloatPlane___( inplane, points );
+}
+int FindFloatPlane( const Plane3f& inplane, const Span<const DoubleVector3>& points ){
+	return FindFloatPlane___( inplane, points );
+}
 
 
 
@@ -424,21 +436,13 @@ int FindFloatPlane( const Plane3f& inplane, const Span<const Vector3>& points ) 
    takes 3 points and finds the plane they lie in
  */
 
-inline int MapPlaneFromPoints( DoubleVector3 p[3] ){
-#if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
+inline std::pair<int, Plane3> MapPlaneFromPoints( const DoubleVector3 (&p)[3] ){
 	Plane3 plane;
 	PlaneFromPoints( plane, p );
 	// TODO: A 32 bit float for the plane distance isn't enough resolution
 	// if the plane is 2^16 units away from the origin (the "epsilon" approaches
 	// 0.01 in that case).
-	const Vector3 points[3] = { p[0], p[1], p[2] };
-	return FindFloatPlane( Plane3f( plane ), points );
-#else
-	Plane3f plane;
-	PlaneFromPoints( plane, p );
-	const Vector3 points[3] = { p[0], p[1], p[2] };
-	return FindFloatPlane( plane, points );
-#endif
+	return { FindFloatPlane( Plane3f( plane ), p ), plane };
 }
 
 
@@ -615,7 +619,7 @@ void AddBrushBevels(){
 					}
 				}
 
-				s.planenum = FindFloatPlane( plane, {} );
+				s.planenum = FindFloatPlane( plane );
 				s.contentFlags = sides[ 0 ].contentFlags;
 				/* handle bevel surfaceflags */
 				for ( const side_t& side : sides ) {
@@ -993,8 +997,7 @@ static void ParseRawBrush( bool onlyLights ){
 		Parse1DMatrix( 3, planePoints[ 2 ].data() );
 
 		/* find the plane number */
-		side.planenum = MapPlaneFromPoints( planePoints );
-		PlaneFromPoints( side.plane, planePoints );
+		std::tie( side.planenum, side.plane ) = MapPlaneFromPoints( planePoints );
 
 		/* bp: read the texture matrix */
 		if ( g_brushType == EBrushType::Bp ) {

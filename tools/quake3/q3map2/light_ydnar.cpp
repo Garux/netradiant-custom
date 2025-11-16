@@ -767,7 +767,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, const surfaceInfo_t *info, const b
 
 	if ( worldverts != nullptr && lightmapTriangleCheck ) {
 		Plane3f hostplane;
-		PlaneFromPoints( hostplane, worldverts[0], worldverts[1], worldverts[2] );
+		PlaneFromPoints( hostplane, worldverts );
 
 		for ( j = 0; j < 3; ++j )
 		{
