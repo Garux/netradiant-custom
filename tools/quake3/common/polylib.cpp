@@ -544,7 +544,7 @@ void ChopWindingInPlaceAccu( winding_accu_t& inout, const Plane3& plane, float c
 		}
 
 		// Generate a split point.
-		const DoubleVector3& p2 = inout[( ( i + 1 ) == inout.size() ) ? 0 : ( i + 1 )];
+		const DoubleVector3& p2 = winding_next_point( inout, i );
 
 		// The divisor's absolute value is greater than the dividend's absolute value.
 		// w is in the range (0,1).
@@ -856,7 +856,7 @@ bool windings_intersect_coplanar( const winding_t& w1, const winding_t& w2, cons
 	normals.reserve( w1.size() + w2.size() );
 
 	for( auto *w : { &w1, &w2 } )
-		for( auto prev = std::prev( w->cend() ), next = w->cbegin(); next != w->cend(); prev = next, ++next )
+		for( auto prev = w->cend() - 1, next = w->cbegin(); next != w->cend(); prev = next++ )
 			normals.push_back( VectorNormalized( vector3_cross( DoubleVector3( *next - *prev ), plane.normal() ) ) );
 
 	// Test each axis

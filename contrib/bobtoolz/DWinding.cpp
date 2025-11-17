@@ -154,12 +154,13 @@ void DWinding::WindingCentroid( vec3_t centroid ) const {
 	DoubleVector3 cent( 0 ); // 3 times centroid to skip division
 	double areasum = 0;      // 2 times area to skip division
 
-	for( int i = 0; i < numpoints - 1; ++i )
+	for( int i = 1; i < numpoints - 1; ++i )
 	{
-		const DoubleVector3 po[3] = { vector3_from_array( p[ 0 ] ), vector3_from_array( p[ i ] ), vector3_from_array( p[ i + 1 ] ) };
-		const DoubleVector3 c = po[0] + po[1] + po[2];
-		const double area = vector3_length( vector3_cross( po[1] - po[0], po[2] - po[0] ) );
-		cent += c * area;
+		const DoubleVector3 a = vector3_from_array( p[ 0 ] );
+		const DoubleVector3 b = vector3_from_array( p[ i ] );
+		const DoubleVector3 c = vector3_from_array( p[ i + 1 ] );
+		const double area = vector3_length( vector3_cross( b - a, c - a ) );
+		cent += ( a + b + c ) * area;
 		areasum += area;
 	}
 

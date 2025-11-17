@@ -192,6 +192,7 @@ Q3map2:
 	* -format map_220: bsp to map of Valve220 format conversion
 	* support separated _ambient, _color per group, misc_model entities
 	* merge coplanar triangles for model autoclip in default, pyramidal, face normals, 45 modes
+	* Q3MAP2_EXPERIMENTAL_OFFSET_WINDING_CREATION for higher windings precision
 
 
 

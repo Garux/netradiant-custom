@@ -659,7 +659,7 @@ static void FanFaceSurface( mapDrawSurface_t& ds ){
 	ds.indexes.clear();
 	ds.indexes.reserve( ( ds.verts.size() - 1 ) * 3 );
 
-	for ( size_t prev = ds.verts.size() - 1, next = 1; next != ds.verts.size(); prev = next, ++next )
+	for ( size_t prev = ds.verts.size() - 1, next = 1; next != ds.verts.size(); prev = next++ )
 	{
 		ds.indexes.push_back( 0 );
 		ds.indexes.push_back( prev );

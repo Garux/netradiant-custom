@@ -2825,7 +2825,7 @@ static int AddSurfaceModels( mapDrawSurface_t& ds, entity_t& entity ){
 			centroid.color[ 0 ] = { 255, 255, 255, color_to_byte( alpha / ds.verts.size() ) };
 
 			/* walk fanned triangles */
-			for ( auto prev = std::prev( ds.verts.cend() ), next = ds.verts.cbegin(); next != ds.verts.cend(); prev = next, ++next )
+			for ( auto prev = ds.verts.cend() - 1, next = ds.verts.cbegin(); next != ds.verts.cend(); prev = next++ )
 			{
 				/* create models */
 				const int n = AddSurfaceModelsToTriangle_r( ds, model, TriRef{

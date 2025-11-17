@@ -337,7 +337,7 @@ static void CalcVis(){
    ==================
  */
 static void SetPortalSphere( vportal_t& p ){
-	Vector3 origin( 0 );
+	DoubleVector3 origin( 0 );
 
 	for ( const Vector3& point : Span( p.winding->points, p.winding->numpoints ) )
 	{

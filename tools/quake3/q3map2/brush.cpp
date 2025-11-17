@@ -220,7 +220,7 @@ static bool FixWindingAccu( winding_accu_t& w ){
 	while ( w.size() > 1 )   // Don't remove the only remaining point.
 	{
 		bool done = true;
-		for ( winding_accu_t::iterator i = w.end() - 1, j = w.begin(); j != w.end(); i = j, ++j )
+		for ( winding_accu_t::iterator i = w.end() - 1, j = w.begin(); j != w.end(); i = j++ )
 		{
 			if ( vector3_length( *i - *j ) < DEGENERATE_EPSILON ) {
 				// TODO: I think the "snap weld vector" was written before
@@ -609,14 +609,9 @@ bool WindingIsTiny( const winding_t& w ){
 */
 	int edges = 0;
 
-	for ( size_t i = w.size() - 1, j = 0; j < w.size(); i = j, ++j )
-	{
-		if ( vector3_length( w[j] - w[i] ) > EDGE_LENGTH ) {
-			if ( ++edges == 3 ) {
-				return false;
-			}
-		}
-	}
+	for ( auto prev = w.cend() - 1, next = w.cbegin(); next != w.cend(); prev = next++ )
+		if ( vector3_length( *next - *prev ) > EDGE_LENGTH && ++edges == 3 )
+			return false;
 	return true;
 }
 
