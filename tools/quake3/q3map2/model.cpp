@@ -370,7 +370,8 @@ enum EModelFlags{
 	eClipFlags = eClipModel | eExtrudeFaceNormals | eExtrudeTerrain | eExtrudeVertexNormals | ePyramidalClip | eExtrudeDownwards | eExtrudeUpwards | eMaxExtrude | eAxialBackplane,
 };
 
-inline size_t normal_make_axial( Vector3& normal ){
+template<class T>
+size_t normal_make_axial( BasicVector3<T>& normal ){
 	const size_t i = vector3_max_abs_component_index( normal );
 	normal = normal[i] >= 0? g_vector3_axes[i] : -g_vector3_axes[i];
 	return i;
@@ -379,14 +380,14 @@ inline size_t normal_make_axial( Vector3& normal ){
 struct ClipSides
 {
 	Plane3f fplane; // front plane
-	winding_t fw; // front winding
+	winding_accu_t fw; // front winding
 	Plane3f bplane{ 0, 0, 0, 0 }; // back plane, present if != 0
-	winding_t bw; // back winding
-	std::vector<Plane3f> splanes; // side planes, using fw[i], fw[i + 1] points, size = fw.size
+	winding_accu_t bw; // back winding
+	std::vector<Plane3> splanes; // side planes, using fw[i], fw[i + 1] points, size = fw.size
 
 	shaderInfo_t &si;
 	entity_t& entity;
-	const float clipDepth;
+	const double clipDepth;
 	ClipSides( shaderInfo_t& si, entity_t& entity, float clipDepth ) : si( si ), entity( entity ), clipDepth( clipDepth ){
 	}
 
@@ -400,7 +401,20 @@ struct ClipSides
 		buildBrush.contentFlags = si.contentFlags;
 		buildBrush.detail = true;
 
-		if( !PlaneFromPoints( fplane, fw.data() ) )
+		// choose decent triangle to create plane
+		using Witer = decltype( fw )::const_iterator;
+		Witer a = fw.cbegin(), b = a + 1, c = b + 1;
+		const auto perimeter = []( Witer a, Witer b, Witer c ){
+			return vector3_length_squared( *b - *a ) +
+			       vector3_length_squared( *a - *c ) +
+			       vector3_length_squared( *c - *b );
+		};
+		while( c + 1 != fw.cend() && perimeter( a, b, c + 1 ) > perimeter( a, b, c ) )
+			++c;
+		while( b + 1 != c && perimeter( a, b + 1, c ) > perimeter( a, b, c ) )
+			++b;
+
+		if( !PlaneFromPoints( fplane, *a, *b, *c ) )
 			return false;
 
 		// snap points before using them for further calculations
@@ -408,10 +422,8 @@ struct ClipSides
 		// also broken drawsurfs in case of normal brushes
 		// ? worth to snap nearly axial edges (or on nearly axial plane) beforehand or SnapPlaneImproved is nuff good for sides
 		// latter seems good nuff, no noticeable difference
-		const Plane3f pln = fplane;
-		SnapPlaneImproved( fplane, fw );
-		if( pln.normal() != fplane.normal() || pln.dist() != fplane.dist() ){
-			for( Vector3& v : fw ){
+		if( SnapPlaneImproved( fplane, Span( std::as_const( fw ) ) ) ){
+			for( DoubleVector3& v : fw ){
 				v = plane3_project_point( fplane, v );
 			}
 		}
@@ -419,7 +431,7 @@ struct ClipSides
 		splanes.resize( fw.size() );
 
 		/* sanity check */
-		if ( triangle_min_angle_squared_sin( fw[0], fw[1], fw[2] ) < 1e-8 ) // degenerate triangle
+		if ( triangle_min_angle_squared_sin( *a, *b, *c ) < 1e-8 ) // degenerate triangle
 			return false;
 
 		return true;
@@ -429,7 +441,7 @@ struct ClipSides
 		bplane = plane3_flipped( fplane );
 		bplane.dist() += vector3_dot( bestNormal, fplane.normal() ) * clipDepth;
 		bw = fw;
-		for( Vector3& v : bw )
+		for( DoubleVector3& v : bw )
 			v -= bestNormal * clipDepth;
 	}
 
@@ -452,11 +464,15 @@ struct ClipSides
 		}
 
 		buildBrush.sides[0].planenum = FindFloatPlane( fplane, fw );
+		// buildBrush.sides[0].plane = Plane3( fplane );
 		for( size_t i = 0; i < splanes.size(); ++i ){
-			buildBrush.sides[i + 1].planenum = FindFloatPlane( splanes[i], std::array{ fw[i], winding_next_point( fw, i ) } );
+			buildBrush.sides[i + 1].planenum = FindFloatPlane( Plane3f( splanes[i] ), std::array{ fw[i], winding_next_point( fw, i ) } );
+			// buildBrush.sides[i + 1].plane = splanes[i]; // this only improves debug windings quality, but it's better to respect actual bsp planes
 		}
-		if( doBack )
+		if( doBack ){
 			buildBrush.sides.back().planenum = FindFloatPlane( bplane, bw );
+			// buildBrush.sides.back().plane = Plane3( bplane );
+		}
 
 		/* add to entity */
 		if ( CreateBrushWindings( buildBrush ) ) {
@@ -472,7 +488,7 @@ struct ClipSides
 
 static void clipModel_default( ClipSides& cs ){
 	// axial normal
-	Vector3 bestNormal = cs.fplane.normal();
+	DoubleVector3 bestNormal = cs.fplane.normal();
 	normal_make_axial( bestNormal );
 
 	/* make side planes */
@@ -488,23 +504,20 @@ static void clipModel_default( ClipSides& cs ){
 
 static void clipModel_pyramidal( ClipSides& cs ){
 	/* calculate center */
-	DoubleVector3 cnt{ 0 };
-	for( const Vector3 v : cs.fw )
-		cnt += v;
-	cnt /= cs.fw.size();
+	DoubleVector3 cnt = WindingCentroid( cs.fw );
 	/* make back pyramid point */
 	cnt -= cs.fplane.normal() * cs.clipDepth;
 
 	/* make side planes */
 	for ( size_t i = 0; i < cs.fw.size(); ++i )
 	{
-		PlaneFromPoints( cs.splanes[i], winding_next_point( cs.fw, i ), cs.fw[i], Vector3( cnt ) );
-#if 0 // no definite profit, problems are rather triggered by windings more complex than simple triangle
+		PlaneFromPoints( cs.splanes[i], winding_next_point( cs.fw, i ), cs.fw[i], cnt );
+#if 0 // no definite profit
 		const auto susNormal = []( float a, float b ){ return ( a != 0 || b != 0 ) && std::fabs( a ) < .00025f && std::fabs( b ) < .00025f; };
 		if( susNormal( cs.splanes[i].a, cs.splanes[i].b )
 		 || susNormal( cs.splanes[i].a, cs.splanes[i].c )
 		 || susNormal( cs.splanes[i].b, cs.splanes[i].c ) ){
-			cnt -= cs.fplane.normal() * .1f; // shift, if produces sus sides, since extreme angle with front
+			cnt -= cs.fplane.normal() * .125; // shift, if produces sus sides, since extreme angle with front
 			i = -1; // restart loop
 		 }
 #endif
@@ -515,7 +528,7 @@ static void clipModel_faceNormals( ClipSides& cs ){
 	/* make side planes */
 	for ( size_t i = 0; i < cs.fw.size(); ++i )
 	{
-		cs.splanes[i].normal() = VectorNormalized( vector3_cross( cs.fplane.normal(), winding_next_point( cs.fw, i ) - cs.fw[i] ) );
+		cs.splanes[i].normal() = VectorNormalized( vector3_cross( DoubleVector3( cs.fplane.normal() ), winding_next_point( cs.fw, i ) - cs.fw[i] ) );
 		cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
 	}
 
@@ -548,7 +561,7 @@ static void clipModel_vertexNormals( ClipSides& cs, const std::array<Vector3, 3>
 	/* make side planes */
 	for ( int i = 0; i < 3; ++i )
 	{
-		cs.splanes[i].normal() = VectorNormalized( vector3_cross( Enorm[i], cs.fw[( i + 1 ) % 3] - cs.fw[i] ) );
+		cs.splanes[i].normal() = VectorNormalized( vector3_cross( DoubleVector3( Enorm[i] ), cs.fw[( i + 1 ) % 3] - cs.fw[i] ) );
 		cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
 	}
 
@@ -560,7 +573,7 @@ static void clipModel_45( ClipSides& cs ){
 	/* 45 degrees normals for side planes */
 	for ( size_t i = 0; i < cs.fw.size(); ++i )
 	{
-		const Vector3 enrm = VectorNormalized( vector3_cross( cs.fplane.normal(), winding_next_point( cs.fw, i ) - cs.fw[i] ) );
+		const DoubleVector3 enrm = VectorNormalized( vector3_cross( DoubleVector3( cs.fplane.normal() ), winding_next_point( cs.fw, i ) - cs.fw[i] ) );
 		/* make side planes */
 		cs.splanes[i].normal() = VectorNormalized( enrm - cs.fplane.normal() );
 		cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
@@ -601,7 +614,7 @@ static void clipModel_terrain( ClipSides& cs, const int spf, size_t axis, const 
 	/* make side planes */
 	for ( size_t i = 0; i < cs.fw.size(); ++i )
 	{
-		cs.splanes[i].normal() = VectorNormalized( vector3_cross( bestNormal, winding_next_point( cs.fw, i ) - cs.fw[i] ) );
+		cs.splanes[i].normal() = VectorNormalized( vector3_cross( DoubleVector3( bestNormal ), winding_next_point( cs.fw, i ) - cs.fw[i] ) );
 		cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
 	}
 
@@ -618,13 +631,13 @@ static void clipModel_terrain( ClipSides& cs, const int spf, size_t axis, const 
 		cs.bplane.dist() = cs.fw[0][axis];
 		if ( bestNormal[axis] > 0 ){
 			for ( size_t i = 1; i < cs.fw.size(); ++i ){
-				value_minimize( cs.bplane.dist(), cs.fw[i][axis] );
+				value_minimize( cs.bplane.dist(), float( cs.fw[i][axis] ) );
 			}
 			cs.bplane.dist() = -cs.bplane.dist() + cs.clipDepth;
 		}
 		else{
 			for ( size_t i = 1; i < cs.fw.size(); ++i ){
-				value_maximize( cs.bplane.dist(), cs.fw[i][axis] );
+				value_maximize( cs.bplane.dist(), float( cs.fw[i][axis] ) );
 			}
 			cs.bplane.dist() += cs.clipDepth;
 		}
@@ -695,7 +708,7 @@ static void clipModel_axialPyramid( ClipSides& cs, const float limDepth ){
 				bestangle = currangle;
 				if ( currangle < 0 )
 					bestdist = currdist;
-				cs.splanes[i] = pln;
+				cs.splanes[i] = Plane3( pln );
 			}
 		}
 		if ( bestdist == 999999 && bestangle == 1 ){
@@ -788,8 +801,9 @@ static void ClipModel( const int spawnFlags, float clipDepth, ClipTriangles& cli
 			{
 				ClipTriangle tri1st = triSet.back();
 				triSet.pop_back();
-				winding_accu_t w( tri1st.points.cbegin(), tri1st.points.cend() );
 				ClipSides cs( *tri1st.ds->shaderInfo, entity, clipDepth );
+				winding_accu_t& w = cs.fw;
+				w.assign( tri1st.points.cbegin(), tri1st.points.cend() );
 				// try to merge some triangles
 				for( auto tri = triSet.crbegin(); tri != triSet.crend(); ++tri ){
 					// sorted by distance; break on distance range overflow
@@ -848,8 +862,7 @@ static void ClipModel( const int spawnFlags, float clipDepth, ClipTriangles& cli
 					doNextTriangle:		continue;
 				}
 
-				cs.fw = CopyWindingAccuToRegular( w );
-				//% CheckWinding( cs.fw );
+				//% CheckWinding( CopyWindingAccuToRegular( cs.fw ) );
 
 				/* make plane for triangle */
 				if ( cs.construct() ) {

@@ -80,7 +80,8 @@ public:
 
 winding_t   AllocWinding( int points );
 float   WindingArea( const winding_t& w );
-Vector3 WindingCenter( const winding_t& w );
+template<class T> BasicVector3<T> WindingCenter( const std::vector<BasicVector3<T>>& w );
+template<class T> BasicVector3<T> WindingCentroid( const std::vector<BasicVector3<T>>& w );
 std::pair<winding_t, winding_t>    ClipWindingEpsilon( const winding_t& in, const Plane3f& plane, float epsilon ); // returns { front, back } windings pair
 std::pair<winding_t, winding_t>    ClipWindingEpsilonStrict( const winding_t& in, const Plane3f& plane, float epsilon ); // returns { front, back } windings pair
 winding_t   ReverseWinding( const winding_t& w );

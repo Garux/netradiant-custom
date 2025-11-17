@@ -110,14 +110,37 @@ void WindingExtendBounds( const winding_t& w, MinMax& minmax ){
    WindingCenter
    =============
  */
-Vector3 WindingCenter( const winding_t& w ){
-	Vector3 center( 0 );
+template<class T>
+BasicVector3<T> WindingCenter( const std::vector<BasicVector3<T>>& w ){
+	DoubleVector3 center( 0 );
 
-	for ( const Vector3& p : w )
+	for ( const BasicVector3<T>& p : w )
 		center += p;
 
 	return center / w.size();
 }
+template BasicVector3<float> WindingCenter<float>( const std::vector<BasicVector3<float>>& w );
+template BasicVector3<double> WindingCenter<double>( const std::vector<BasicVector3<double>>& w );
+
+template<class T>
+BasicVector3<T> WindingCentroid( const std::vector<BasicVector3<T>>& w ){
+	DoubleVector3 cent( 0 ); // 3 times centroid to skip division
+	double areasum = 0;      // 2 times area to skip division
+
+	for( auto it = w.cbegin() + 1; it < w.cend() - 1; ++it )
+	{
+		const DoubleVector3 a = w.front();
+		const DoubleVector3 b = *it;
+		const DoubleVector3 c = *( it + 1 );
+		const double area = vector3_length( vector3_cross( b - a, c - a ) );
+		cent += ( a + b + c ) * area;
+		areasum += area;
+	}
+
+	return cent / ( areasum * 3 );
+}
+template BasicVector3<float> WindingCentroid<float>( const std::vector<BasicVector3<float>>& w );
+template BasicVector3<double> WindingCentroid<double>( const std::vector<BasicVector3<double>>& w );
 
 /*
    =================
