@@ -217,11 +217,8 @@ static bool FixWinding( winding_t& w ){
 static bool FixWindingAccu( winding_accu_t& w ){
 	bool altered = false;
 
-	while ( true )
+	while ( w.size() > 1 )   // Don't remove the only remaining point.
 	{
-		if ( w.size() < 2 ) {
-			break;                   // Don't remove the only remaining point.
-		}
 		bool done = true;
 		for ( winding_accu_t::iterator i = w.end() - 1, j = w.begin(); j != w.end(); i = j, ++j )
 		{
@@ -252,7 +249,66 @@ static bool FixWindingAccu( winding_accu_t& w ){
 	return altered;
 }
 
+// Solve: n1·x = d1, n2·x = d2, n3·x = d3
+// Returns true if unique solution
+static bool solve3Planes( const Plane3 &p1, const Plane3 &p2, const Plane3 &p3, DoubleVector3 &out ){
+	// Build matrix: rows = normals
+	const double m[3][3] = { { p1.normal().x(), p1.normal().y(), p1.normal().z() },
+	                         { p2.normal().x(), p2.normal().y(), p2.normal().z() },
+	                         { p3.normal().x(), p3.normal().y(), p3.normal().z() } };
+	const double b[3] = { p1.dist(), p2.dist(), p3.dist() };
 
+	// Cramer's rule
+	const double det = m[0][0] * ( m[1][1] * m[2][2] - m[2][1] * m[1][2] ) -
+	                   m[0][1] * ( m[1][0] * m[2][2] - m[2][0] * m[1][2] ) +
+	                   m[0][2] * ( m[1][0] * m[2][1] - m[1][1] * m[2][0] );
+
+	if( std::fabs( det ) < 1e-9 )
+		return false; // parallel or degenerate
+
+	// x = det(mx) / det
+	const double mx[3][3] = { { b[0], m[0][1], m[0][2] },
+	                          { b[1], m[1][1], m[1][2] },
+	                          { b[2], m[2][1], m[2][2] } };
+	const double det_x = mx[0][0] * ( mx[1][1] * mx[2][2] - mx[2][1] * mx[1][2] ) -
+	                     mx[0][1] * ( mx[1][0] * mx[2][2] - mx[2][0] * mx[1][2] ) +
+	                     mx[0][2] * ( mx[1][0] * mx[2][1] - mx[1][1] * mx[2][0] );
+	// y
+	const double my[3][3] = { { m[0][0], b[0], m[0][2] },
+	                          { m[1][0], b[1], m[1][2] },
+	                          { m[2][0], b[2], m[2][2] } };
+	const double det_y = my[0][0] * ( my[1][1] * my[2][2] - my[2][1] * my[1][2] ) -
+	                     my[0][1] * ( my[1][0] * my[2][2] - my[2][0] * my[1][2] ) +
+	                     my[0][2] * ( my[1][0] * my[2][1] - my[1][1] * my[2][0] );
+	// z
+	const double mz[3][3] = { { m[0][0], m[0][1], b[0] },
+	                          { m[1][0], m[1][1], b[1] },
+	                          { m[2][0], m[2][1], b[2] } };
+	const double det_z = mz[0][0] * ( mz[1][1] * mz[2][2] - mz[2][1] * mz[1][2] ) -
+	                     mz[0][1] * ( mz[1][0] * mz[2][2] - mz[2][0] * mz[1][2] ) +
+	                     mz[0][2] * ( mz[1][0] * mz[2][1] - mz[1][1] * mz[2][0] );
+	out.x() = det_x / det;
+	out.y() = det_y / det;
+	out.z() = det_z / det;
+
+	return true;
+}
+
+static DoubleMinMax brushMinMaxFromPlanes( const std::vector<Plane3>& planes ){
+	DoubleMinMax minmax;
+
+	for ( auto i = planes.cbegin(), end = planes.cend(); i != end; ++i )
+		for ( auto j = i + 1; j != end; ++j )
+			for ( auto k = j + 1; k != end; ++k )
+				if( DoubleVector3 v; solve3Planes( *i, *j, *k, v ) )
+					// Validate against ALL planes
+					if( std::ranges::all_of( planes, [&]( const Plane3& plane ){ return plane3_distance_to_point( plane, v ) < ON_EPSILON; } ) )
+						minmax.extend( v );
+
+	return minmax;
+}
+
+#define Q3MAP2_EXPERIMENTAL_OFFSET_WINDING_CREATION 1
 /*
    CreateBrushWindings()
    makes basewindigs for sides and mins/maxs for the brush
@@ -260,17 +316,43 @@ static bool FixWindingAccu( winding_accu_t& w ){
  */
 
 bool CreateBrushWindings( brush_t& brush ){
+	std::vector<Plane3> planes;
+	planes.reserve( brush.sides.size() );
+
+	for( const side_t& side : brush.sides ){
+		ENSURE( !side.bevel );
+		planes.push_back( ( side.plane.normal() != g_vector3_identity )? side.plane : Plane3( mapplanes[ side.planenum ].plane ) );
+	}
+#if Q3MAP2_EXPERIMENTAL_OFFSET_WINDING_CREATION
+	DoubleMinMax minmax = brushMinMaxFromPlanes( planes );
+
+	if( !minmax.valid() )
+		return false;
+
+	const DoubleVector3 offset = minmax.origin();
+	minmax.maxs -= offset;
+	minmax.mins -= offset;
+	for( Plane3& p : planes )
+		p = plane3_translated( plane3_flipped( p ), -offset ); // flip for clipping
+#else
+	for( Plane3& p : planes )
+		p = plane3_flipped( p );
+#endif
 	/* walk the list of brush sides */
 	for ( size_t i = 0; i < brush.sides.size(); ++i )
 	{
 		/* get side and plane */
 		side_t& side = brush.sides[ i ];
-		const plane_t& plane = mapplanes[ side.planenum ];
 
 		/* make huge winding */
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-		winding_accu_t w = BaseWindingForPlaneAccu( ( side.plane.normal() != g_vector3_identity )? side.plane : Plane3( plane.plane ) );
+	#if Q3MAP2_EXPERIMENTAL_OFFSET_WINDING_CREATION
+		winding_accu_t w = BaseWindingForPlaneAccu( plane3_flipped( planes[ i ] ), minmax );
+	#else
+		winding_accu_t w = BaseWindingForPlaneAccu( plane3_flipped( planes[ i ] ) );
+	#endif
 #else
+		const plane_t& plane = mapplanes[ side.planenum ];
 		winding_t w = BaseWindingForPlane( plane.plane );
 #endif
 
@@ -278,15 +360,14 @@ bool CreateBrushWindings( brush_t& brush ){
 		for ( size_t j = 0; j < brush.sides.size() && !w.empty(); ++j )
 		{
 			const side_t& cside = brush.sides[ j ];
-			const plane_t& cplane = mapplanes[ cside.planenum ^ 1 ];
 			if ( i == j
-			|| cside.planenum == ( side.planenum ^ 1 ) /* back side clipaway */
-			|| cside.bevel ) {
+			|| cside.planenum == ( side.planenum ^ 1 ) ) { /* back side clipaway */
 				continue;
 			}
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-			ChopWindingInPlaceAccu( w, ( cside.plane.normal() != g_vector3_identity )? plane3_flipped( cside.plane ) : Plane3( cplane.plane ), 0 );
+			ChopWindingInPlaceAccu( w, planes[ j ], 0 );
 #else
+			const plane_t& cplane = mapplanes[ cside.planenum ^ 1 ];
 			ChopWindingInPlace( w, cplane.plane, 0 ); // CLIP_EPSILON );
 #endif
 
@@ -304,10 +385,16 @@ bool CreateBrushWindings( brush_t& brush ){
 		/* set side winding */
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
 		FixWindingAccu( w );
-		if( w.size() >= 3 )
+		if( w.size() >= 3 ){
+	#if Q3MAP2_EXPERIMENTAL_OFFSET_WINDING_CREATION
+			for( DoubleVector3& v : w )
+				v += offset;
+	#endif
 			side.winding = CopyWindingAccuToRegular( w );
-		else
+		}
+		else{
 			side.winding.clear();
+		}
 #else
 		side.winding.swap( w );
 #endif

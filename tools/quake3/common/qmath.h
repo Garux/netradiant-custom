@@ -91,6 +91,7 @@ struct MinMax___
 };
 
 using MinMax = MinMax___<float>;
+using DoubleMinMax = MinMax___<double>;
 
 
 

@@ -107,6 +107,7 @@ bool windings_intersect_coplanar( const winding_t& w1, const winding_t& w2, cons
 
 using winding_accu_t = std::vector<DoubleVector3>;
 
+winding_accu_t  BaseWindingForPlaneAccu( const Plane3& plane, const DoubleMinMax& minmax );
 winding_accu_t  BaseWindingForPlaneAccu( const Plane3& plane );
 void    ChopWindingInPlaceAccu( winding_accu_t& w, const Plane3& plane, float epsilon );
 winding_t   CopyWindingAccuToRegular( const winding_accu_t& w );

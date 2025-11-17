@@ -124,6 +124,34 @@ Vector3 WindingCenter( const winding_t& w ){
    BaseWindingForPlaneAccu
    =================
  */
+winding_accu_t BaseWindingForPlaneAccu( const Plane3& plane, const DoubleMinMax& minmax ){
+	const DoubleVector3& n = plane.normal();
+	const int z = vector3_max_abs_component_index( n );
+	const int x = ( z == 2 )? 0 : z + 1;
+	const int y = ( x == 2 )? 0 : x + 1;
+
+	if ( std::fabs( n[z] ) < 0.56 ) {
+		Error( "BaseWindingForPlaneAccu: no dominant axis found because normal is too short" );
+	}
+
+	// four points which are intersection of the plane with minmax edges
+	DoubleVector3 a, b, c, d;
+	a[x] = minmax.maxs[x];
+	a[y] = minmax.maxs[y];
+	a[z] = ( plane.dist() - a[x] * n[x] - a[y] * n[y] ) / n[z];
+	b[x] = minmax.maxs[x];
+	b[y] = minmax.mins[y];
+	b[z] = ( plane.dist() - b[x] * n[x] - b[y] * n[y] ) / n[z];
+	c[x] = minmax.mins[x];
+	c[y] = minmax.mins[y];
+	c[z] = ( plane.dist() - c[x] * n[x] - c[y] * n[y] ) / n[z];
+	d[x] = minmax.mins[x];
+	d[y] = minmax.maxs[y];
+	d[z] = ( plane.dist() - d[x] * n[x] - d[y] * n[y] ) / n[z];
+
+	return ( plane.normal()[z] > 0 )? winding_accu_t{ a, b, c, d } : winding_accu_t{ d, c, b, a };
+}
+
 winding_accu_t BaseWindingForPlaneAccu( const Plane3& plane ){
 	// The goal in this function is to replicate the behavior of the original BaseWindingForPlane()
 	// function (see below) but at the same time increasing accuracy substantially.
