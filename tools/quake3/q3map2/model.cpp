@@ -670,37 +670,33 @@ static void clipModel_axialPyramid( ClipSides& cs, const float limDepth ){
 			return clipModel_default( cs );
 
 	// best axial normal
-	Vector3 bestNormal = cs.fplane.normal();
+	DoubleVector3 bestNormal = cs.fplane.normal();
 	const size_t axis = normal_make_axial( bestNormal );
 
 	float mindist = 999999;
 
-	for ( size_t i = 0; i < cs.fw.size(); ++i ){ // planes
+	for ( size_t i = 0; i < cs.fw.size(); ++i ) // planes
+	{
 		float bestdist = 999999, bestangle = 1;
+		const DoubleVector3 edge = VectorNormalized( winding_next_point( cs.fw, i ) - cs.fw[i] );
 
-		for ( size_t j = 0; j < 3; ++j ){ // axes
-			Plane3f pln;
-			Vector3 nrm = winding_next_point( cs.fw, i ) - cs.fw[i];
-			if ( j == axis ){
-				pln.normal() = VectorNormalized( vector3_cross( bestNormal, nrm ) );
+		for ( size_t ax : { 0, 1, 2 } ) // try axes
+		{
+			Plane3 pln;
+			if ( ax == axis ){
+				pln.normal() = VectorNormalized( vector3_cross( bestNormal, edge ) );
 			}
 			else{
-				Vector3 vnrm( 0 );
-				if ( ( j + 1 ) % 3 == axis ){
-					if ( nrm[( j + 2 ) % 3] == 0 )
-						continue;
-					vnrm[( j + 2 ) % 3] = nrm[( j + 2 ) % 3];
-				}
-				else{
-					if ( nrm[( j + 1 ) % 3] == 0 )
-						continue;
-					vnrm[( j + 1 ) % 3] = nrm[( j + 1 ) % 3];
-				}
-				const Vector3 enrm = vector3_cross( bestNormal, vnrm );
-				pln.normal() = VectorNormalized( vector3_cross( enrm, nrm ) );
+				DoubleVector3 nrm( 0 );
+				if ( std::fabs( edge[ax] ) < .00025 )
+					continue;
+				nrm[ax] = edge[ax];
+				nrm = vector3_cross( bestNormal, nrm );
+				pln.normal() = VectorNormalized( vector3_cross( nrm, edge ) );
 			}
 			pln.dist() = vector3_dot( cs.fw[i], pln.normal() );
-			//check facing, thickness
+			/* check facing, thickness */
+			// for winding > triangle this point is acceptable for plane choice, but is not very correct for limDepth (best is to actually intersect side planes)
 			const float currdist = -plane3_distance_to_point( pln, cs.fw[( i + 2 ) % cs.fw.size()] );
 			const float currangle = vector3_dot( pln.normal(), cs.fplane.normal() );
 			if ( ( ( currdist > 0.1 ) && ( currdist < bestdist ) && ( currangle < 0 ) ) ||
@@ -791,6 +787,7 @@ static void ClipModel( const int spawnFlags, float clipDepth, ClipTriangles& cli
 		|| spf == eExtrudeFaceNormals
 		|| spf == ePyramidalClip
 		|| spf == ( eExtrudeFaceNormals | ePyramidalClip ) // extrude 45
+		|| spf == ( ePyramidalClip | eAxialBackplane )
 	){
 		//? consider MAX_BUILD_SIDES MAX_POINTS_ON_WINDING
 		//? try to merge windings too
@@ -878,6 +875,9 @@ static void ClipModel( const int spawnFlags, float clipDepth, ClipTriangles& cli
 					else if ( spf == ( eExtrudeFaceNormals | ePyramidalClip ) ){ // extrude 45
 						clipModel_45( cs );
 					}
+					else if ( spf == ( ePyramidalClip | eAxialBackplane ) ){ // pyramid with 3 of 4 sides axial (->small bsp)
+						clipModel_axialPyramid( cs, limDepth );
+					}
 
 					if ( cs.create_brush() ) {
 						continue; // success
@@ -934,22 +934,19 @@ static void ClipModel( const int spawnFlags, float clipDepth, ClipTriangles& cli
 
 				/* make plane for triangle */
 				if ( cs.construct() ) {
-					if ( spf == ( ePyramidalClip | eAxialBackplane ) ){ // pyramid with 3 of 4 sides axial (->small bsp)
-						clipModel_axialPyramid( cs, limDepth );
-					}
-					else if ( spf == eExtrudeTerrain
-					       || spf == eExtrudeDownwards
-					       || spf == eExtrudeUpwards
-					       || spf == eAxialBackplane
-					       || spf == ( eExtrudeTerrain | eMaxExtrude )
-					       || spf == ( eExtrudeTerrain | eAxialBackplane )
-					       || spf == ( eExtrudeDownwards | eExtrudeUpwards )
-					       || spf == ( eExtrudeDownwards | eMaxExtrude )
-					       || spf == ( eExtrudeDownwards | eAxialBackplane )
-					       || spf == ( eExtrudeDownwards | eExtrudeUpwards | eMaxExtrude )
-					       || spf == ( eExtrudeDownwards | eExtrudeUpwards | eAxialBackplane )
-					       || spf == ( eExtrudeUpwards | eMaxExtrude )
-					       || spf == ( eExtrudeUpwards | eAxialBackplane ) ){
+					if ( spf == eExtrudeTerrain
+					  || spf == eExtrudeDownwards
+					  || spf == eExtrudeUpwards
+					  || spf == eAxialBackplane
+					  || spf == ( eExtrudeTerrain | eMaxExtrude )
+					  || spf == ( eExtrudeTerrain | eAxialBackplane )
+					  || spf == ( eExtrudeDownwards | eExtrudeUpwards )
+					  || spf == ( eExtrudeDownwards | eMaxExtrude )
+					  || spf == ( eExtrudeDownwards | eAxialBackplane )
+					  || spf == ( eExtrudeDownwards | eExtrudeUpwards | eMaxExtrude )
+					  || spf == ( eExtrudeDownwards | eExtrudeUpwards | eAxialBackplane )
+					  || spf == ( eExtrudeUpwards | eMaxExtrude )
+					  || spf == ( eExtrudeUpwards | eAxialBackplane ) ){
 						clipModel_terrain( cs, spf, axis, avgDirection, minmax, limDepth );
 					}
 					else if ( spf == eExtrudeVertexNormals
