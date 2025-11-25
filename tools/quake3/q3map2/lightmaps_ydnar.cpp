@@ -464,7 +464,7 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t& lm ){
 	const surfaceInfo_t& info = surfaceInfos[ num ];
 
 	/* make a temporary mesh from the drawsurf */
-	mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, &yDrawVerts[ ds.firstVert ] ), info.patchIterations );
+	const mesh_t mesh = TessellatedMesh( mesh_view_t( ds.patchWidth, ds.patchHeight, &yDrawVerts[ ds.firstVert ] ), info.patchIterations );
 
 	/* find the longest distance on each row/column */
 	for ( int y = 0; y < mesh.height; ++y )
@@ -473,15 +473,15 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t& lm ){
 		{
 			/* get width */
 			if ( x + 1 < mesh.width ) {
-				const bspDrawVert_t& a = mesh.verts[ ( y * mesh.width ) + x ];
-				const bspDrawVert_t& b = mesh.verts[ ( y * mesh.width ) + x + 1 ];
+				const bspDrawVert_t& a = mesh[ y ][ x ];
+				const bspDrawVert_t& b = mesh[ y ][ x + 1 ];
 				value_maximize( widthTable[ x ], (float)vector3_length( a.xyz - b.xyz ) );
 			}
 
 			/* get height */
 			if ( y + 1 < mesh.height ) {
-				const bspDrawVert_t& a = mesh.verts[ ( y * mesh.width ) + x ];
-				const bspDrawVert_t& b = mesh.verts[ ( ( y + 1 ) * mesh.width ) + x ];
+				const bspDrawVert_t& a = mesh[ y ][ x ];
+				const bspDrawVert_t& b = mesh[ y + 1 ][ x ];
 				value_maximize( heightTable[ y ], (float)vector3_length( a.xyz - b.xyz ) );
 			}
 		}
@@ -504,9 +504,6 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t& lm ){
 	value_maximize( lm.h, ds.patchHeight );
 	value_minimize( lm.h, lm.customHeight );
 	tBasis = (float) ( lm.h - 1 ) / ( ds.patchHeight - 1 );
-
-	/* free the temporary mesh */
-	mesh.freeVerts();
 
 	/* set the lightmap texture coordinates in yDrawVerts */
 	lm.wrap[ 0 ] = true;
@@ -1663,7 +1660,7 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 		case MST_PATCH:
 		{
 			/* make a mesh from the drawsurf */
-			mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, &yDrawVerts[ ds.firstVert ] ), info.patchIterations );
+			const mesh_t mesh = TessellatedMesh( mesh_view_t( ds.patchWidth, ds.patchHeight, &yDrawVerts[ ds.firstVert ] ), info.patchIterations );
 
 			/* map the mesh quads */
 			info.approximated = true;
@@ -1675,9 +1672,6 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 					}
 				}
 			}
-
-			/* free the mesh */
-			mesh.freeVerts();
 			break;
 		}
 		default:

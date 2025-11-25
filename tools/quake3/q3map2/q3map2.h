@@ -758,18 +758,47 @@ struct fog_t
 };
 
 
-struct mesh_t
+struct mesh_view_t
 {
 	int width, height;
 	bspDrawVert_t       *verts;
 
-	mesh_t() = default;
-	mesh_t( int width, int height, bspDrawVert_t *verts ) : width( width ), height( height ), verts( verts ){}
+	mesh_view_t( int width, int height, bspDrawVert_t *verts ) : width( width ), height( height ), verts( verts ){
+	}
 	size_t numVerts() const {
 		return width * height;
 	}
-	void freeVerts(){
-		free( verts );
+	bspDrawVert_t* operator[]( int h ){
+		return verts + width * h;
+	}
+	const bspDrawVert_t* operator[]( int h ) const {
+		return verts + width * h;
+	}
+};
+
+struct mesh_t : public mesh_view_t
+{
+	mesh_t() : mesh_view_t( 0, 0, nullptr ) {
+	}
+	mesh_t( int width, int height ) : mesh_view_t( width, height, new bspDrawVert_t[ width * height ] ){
+	}
+	explicit mesh_t( const mesh_view_t& view ) : mesh_view_t( view.width, view.height, new bspDrawVert_t[ view.width * view.height ] ) {
+		std::copy_n( view.verts, numVerts(), verts );
+	}
+	explicit mesh_t( const mesh_t& other ) : mesh_view_t( other.width, other.height, new bspDrawVert_t[ other.width * other.height ] ) {
+		std::copy_n( other.verts, numVerts(), verts );
+	}
+	mesh_t( mesh_t&& other ) noexcept : mesh_view_t( other.width, other.height, std::exchange( other.verts, nullptr ) ) {
+	}
+	mesh_t& operator=( const mesh_t& ) = delete;
+	mesh_t& operator=( mesh_t&& ) noexcept = delete;
+	~mesh_t(){
+		delete[] verts;
+	}
+	void swap( mesh_t& other ){
+		std::swap( width, other.width );
+		std::swap( height, other.height );
+		std::swap( verts, other.verts );
 	}
 };
 
@@ -1495,22 +1524,21 @@ bool                        WindingIsTiny( const winding_t& w );
 
 /* mesh.c */
 bspDrawVert_t               LerpDrawVert( const bspDrawVert_t& a, const bspDrawVert_t& b );
-void                        LerpDrawVertAmount( bspDrawVert_t *a, bspDrawVert_t *b, float amount, bspDrawVert_t *out );
-mesh_t                      CopyMesh( const mesh_t m );
-void                        PrintMesh( const mesh_t m );
+void                        LerpDrawVertAmount( const bspDrawVert_t& a, const bspDrawVert_t& b, float amount, bspDrawVert_t& out );
+void                        PrintMesh( const mesh_t& m );
 void                        TransposeMesh( mesh_t& m );
 void                        InvertMesh( mesh_t& m );
-mesh_t                      SubdivideMesh( const mesh_t in, float maxError, float minLength );
+mesh_t                      SubdivideMesh( const mesh_view_t in, float maxError, float minLength );
 int                         IterationsForCurve( float len, int subdivisions );
-mesh_t                      SubdivideMesh2( const mesh_t in, int iterations );
-mesh_t                      RemoveLinearMeshColumnsRows( const mesh_t in );
-mesh_t                      TessellatedMesh( const mesh_t in, int iterations );
+mesh_t                      SubdivideMesh2( const mesh_view_t in, int iterations );
+mesh_t                      RemoveLinearMeshColumnsRows( const mesh_t& in );
+mesh_t                      TessellatedMesh( const mesh_view_t in, int iterations );
 void                        MakeMeshNormals( mesh_t& in );
 void                        PutMeshOnCurve( mesh_t& in );
 
 class MeshQuadIterator
 {
-	const mesh_t m;
+	const mesh_view_t m;
 	int y, x;
 	std::array<int, 4> _idx;
 	void update_idx(){
@@ -1531,7 +1559,7 @@ class MeshQuadIterator
 		         pw[ r + 3 ] };
 	}
 public:
-	MeshQuadIterator( const mesh_t m ) : m( m ), y( 0 ), x( 0 ) {
+	MeshQuadIterator( const mesh_view_t m ) : m( m ), y( 0 ), x( 0 ) {
 		update_idx();
 	}
 	void operator++(){
@@ -1667,7 +1695,7 @@ void                        TidyEntitySurfaces( const entity_t& e );
 mapDrawSurface_t            *CloneSurface( const mapDrawSurface_t& src, shaderInfo_t *si );
 void                        ClearSurface( mapDrawSurface_t& ds );
 mapDrawSurface_t            *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const side_t& s, const winding_t& w );
-mapDrawSurface_t            *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t *mesh );
+mapDrawSurface_t            *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p );
 mapDrawSurface_t            *DrawSurfaceForFlare( int entNum, const Vector3& origin, const Vector3& normal, const Vector3& color, const char *flareShader, int lightStyle );
 void                        ClipSidesIntoTree( entity_t& e, const tree_t& tree );
 void                        MakeDebugPortalSurfs( const tree_t& tree );

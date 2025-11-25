@@ -1218,7 +1218,7 @@ void MapRawLightmap( int rawLightmapNum ){
 		case MST_PATCH:
 		{
 			/* make a mesh from the drawsurf */
-			mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, &yDrawVerts[ ds.firstVert ] ), info->patchIterations );
+			const mesh_t mesh = TessellatedMesh( mesh_view_t( ds.patchWidth, ds.patchHeight, &yDrawVerts[ ds.firstVert ] ), info->patchIterations );
 
 			/* debug code */
 #if 0
@@ -1251,9 +1251,6 @@ void MapRawLightmap( int rawLightmapNum ){
 				}
 			}
 #endif
-
-			/* free the mesh */
-			mesh.freeVerts();
 			break;
 		}
 		default:

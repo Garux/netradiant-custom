@@ -355,7 +355,7 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 		iterations = IterationsForCurve( ds.longestCurve, patchSubdivisions / ( patchQuality == 0? 1 : patchQuality ) );
 	}
 	/* make a mesh from the drawsurf */
-	mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, ds.verts.data() ), iterations ); //%	ds.maxIterations
+	const mesh_t mesh = TessellatedMesh( mesh_view_t( ds.patchWidth, ds.patchHeight, ds.verts.data() ), iterations ); //%	ds.maxIterations
 
 	/* make a copy of the drawsurface */
 	mapDrawSurface_t& dsNew = AllocDrawSurface( ESurfaceType::Meta );
@@ -386,8 +386,6 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 		dsNew.indexes.push_back( it.idx()[2] );
 		dsNew.indexes.push_back( it.idx()[3] );
 	}
-
-	mesh.freeVerts();
 
 	/* add to count */
 	numPatchMetaSurfaces++;

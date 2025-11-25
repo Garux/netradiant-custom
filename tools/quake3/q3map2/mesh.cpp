@@ -69,47 +69,39 @@ bspDrawVert_t LerpDrawVert( const bspDrawVert_t& a, const bspDrawVert_t& b ){
    returns a biased interpolated vert
  */
 
-void LerpDrawVertAmount( bspDrawVert_t *a, bspDrawVert_t *b, float amount, bspDrawVert_t *out ){
+void LerpDrawVertAmount( const bspDrawVert_t& a, const bspDrawVert_t& b, float amount, bspDrawVert_t& out ){
 
-	out->xyz = a->xyz + ( b->xyz - a->xyz ) * amount;
+	out.xyz = a.xyz + ( b.xyz - a.xyz ) * amount;
 
-	out->st = a->st + ( b->st - a->st ) * amount;
+	out.st = a.st + ( b.st - a.st ) * amount;
 
 	for ( int k = 0; k < MAX_LIGHTMAPS; ++k )
 	{
-		out->lightmap[ k ] = a->lightmap[ k ] + ( b->lightmap[ k ] - a->lightmap[ k ] ) * amount;
+		out.lightmap[ k ] = a.lightmap[ k ] + ( b.lightmap[ k ] - a.lightmap[ k ] ) * amount;
 		for( int i = 0; i < 4; ++i )
-			out->color[ k ][ i ] = a->color[ k ][ i ] + amount * ( b->color[ k ][ i ] - a->color[ k ][ i ] );
+			out.color[ k ][ i ] = a.color[ k ][ i ] + amount * ( b.color[ k ][ i ] - a.color[ k ][ i ] );
 	}
 
-	out->normal = a->normal + ( b->normal - a->normal ) * amount;
+	out.normal = a.normal + ( b.normal - a.normal ) * amount;
 
 	/* if the interpolant created a bogus normal, just copy the normal from a */
-	if ( VectorNormalize( out->normal ) == 0 ) {
-		out->normal = a->normal;
+	if ( VectorNormalize( out.normal ) == 0 ) {
+		out.normal = a.normal;
 	}
 }
 
 
-void PrintMesh( const mesh_t m ) {
+void PrintMesh( const mesh_t& m ) {
 	for ( int i = 0; i < m.height; ++i ) {
 		for ( int j = 0; j < m.width; ++j ) {
 			Sys_Printf( "(%5.2f %5.2f %5.2f) "
-			            , m.verts[i * m.width + j].xyz[0]
-			            , m.verts[i * m.width + j].xyz[1]
-			            , m.verts[i * m.width + j].xyz[2] );
+			            , m[i][j].xyz[0]
+			            , m[i][j].xyz[1]
+			            , m[i][j].xyz[2] );
 		}
 		Sys_Printf( "\n" );
 	}
 	Sys_Printf( "\n" );
-}
-
-
-mesh_t CopyMesh( const mesh_t m ) {
-	const size_t size = m.numVerts() * sizeof( *m.verts );
-	mesh_t out( m.width, m.height, safe_malloc( size ) );
-	memcpy( out.verts, m.verts, size );
-	return out;
 }
 
 
@@ -119,7 +111,7 @@ mesh_t CopyMesh( const mesh_t m ) {
  */
 
 void TransposeMesh( mesh_t& m ) {
-	mesh_t out( m.height, m.width, safe_malloc( m.numVerts() * sizeof( *m.verts ) ) ); // swap width/height
+	mesh_t out( m.height, m.width ); // swap width/height
 
 	for ( int h = 0; h < m.height; ++h ) {
 		for ( int w = 0; w < m.width; ++w ) {
@@ -127,16 +119,15 @@ void TransposeMesh( mesh_t& m ) {
 		}
 	}
 
-	m.freeVerts();
-	m = out;
+	m.swap( out );
 }
 
 void InvertMesh( mesh_t& m ) {
 	for ( int h = 0; h < m.height; ++h ) {
 		for ( int w = 0; w < m.width / 2; ++w ) {
 			std::swap(
-				m.verts[ h * m.width + w ],
-				m.verts[ h * m.width + m.width - 1 - w ]
+				m[ h ][ w ],
+				m[ h ][ m.width - 1 - w ]
 			);
 		}
 	}
@@ -152,7 +143,6 @@ void MakeMeshNormals( mesh_t& in ){
 	int i, j, k, dist;
 	int count;
 	int x, y;
-	bspDrawVert_t   *dv;
 	Vector3 around[8];
 	bool good[8];
 	bool wrapWidth, wrapHeight;
@@ -165,7 +155,7 @@ void MakeMeshNormals( mesh_t& in ){
 
 	wrapWidth = false;
 	for ( i = 0; i < in.height; ++i ) {
-		if ( vector3_length( in.verts[i * in.width].xyz - in.verts[i * in.width + in.width - 1].xyz ) > 1 ) {
+		if ( vector3_length( in[i][0].xyz - in[i][in.width - 1].xyz ) > 1 ) {
 			break;
 		}
 	}
@@ -175,7 +165,7 @@ void MakeMeshNormals( mesh_t& in ){
 
 	wrapHeight = false;
 	for ( i = 0; i < in.width; ++i ) {
-		if ( vector3_length( in.verts[i].xyz - in.verts[i + ( in.height - 1 ) * in.width].xyz ) > 1 ) {
+		if ( vector3_length( in[0][i].xyz - in[in.height - 1][i].xyz ) > 1 ) {
 			break;
 		}
 	}
@@ -187,8 +177,8 @@ void MakeMeshNormals( mesh_t& in ){
 	for ( i = 0; i < in.width; ++i ) {
 		for ( j = 0; j < in.height; ++j ) {
 			count = 0;
-			dv = &in.verts[j * in.width + i];
-			const Vector3 base( dv->xyz );
+			bspDrawVert_t& dv = in[j][i];
+			const Vector3 base( dv.xyz );
 			for ( k = 0; k < 8; ++k ) {
 				around[k].set( 0 );
 				good[k] = false;
@@ -244,7 +234,7 @@ void MakeMeshNormals( mesh_t& in ){
 //Sys_Printf( "bad normal\n" );
 				count = 1;
 			}
-			dv->normal = VectorNormalized( sum );
+			dv.normal = VectorNormalized( sum );
 		}
 	}
 }
@@ -265,15 +255,15 @@ void PutMeshOnCurve( mesh_t& in ) {
 	// put all the aproximating points on the curve
 	for ( int i = 0; i < in.width; ++i )
 		for ( int j = 1; j < in.height; j += 2 )
-			lerp3( in.verts[( j - 1 ) * in.width + i],
-			       in.verts[( j + 0 ) * in.width + i],
-			       in.verts[( j + 1 ) * in.width + i] );
+			lerp3( in[ j - 1 ][ i ],
+			       in[ j + 0 ][ i ],
+			       in[ j + 1 ][ i ] );
 
 	for ( int j = 0; j < in.height; ++j )
 		for ( int i = 1; i < in.width; i += 2 )
-			lerp3( in.verts[j * in.width + i - 1],
-			       in.verts[j * in.width + i + 0],
-			       in.verts[j * in.width + i + 1] );
+			lerp3( in[ j ][ i - 1 ],
+			       in[ j ][ i + 0 ],
+			       in[ j ][ i + 1 ] );
 }
 
 
@@ -283,13 +273,13 @@ void PutMeshOnCurve( mesh_t& in ) {
 
    =================
  */
-mesh_t SubdivideMesh( const mesh_t in, float maxError, float minLength ){
+mesh_t SubdivideMesh( const mesh_view_t in, float maxError, float minLength ){
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
-	mesh_t out( in.width, in.height, expand[0] );
+	mesh_view_t out( in.width, in.height, expand[0] );
 
-
+	/* copy each row */
 	for ( int h = 0; h < in.height; ++h )
-		std::copy_n( &in.verts[h * in.width], in.width, expand[h] );
+		std::copy_n( in[h], in.width, expand[h] );
 
 	// horizontal subdivisions
 	for ( int i, j = 0; j + 2 < out.width; j += 2 ) {
@@ -381,10 +371,10 @@ mesh_t SubdivideMesh( const mesh_t in, float maxError, float minLength ){
 	// collapse the verts
 
 	for ( int i = 1; i < out.height; ++i ) {
-		memmove( &out.verts[i * out.width], expand[i], out.width * sizeof( bspDrawVert_t ) );
+		memmove( out[i], expand[i], out.width * sizeof( bspDrawVert_t ) );
 	}
 
-	return CopyMesh( out );
+	return mesh_t( out );
 }
 
 
@@ -418,14 +408,13 @@ int IterationsForCurve( float len, int subdivisions ){
    subdivides each mesh quad a specified number of times
  */
 
-mesh_t SubdivideMesh2( const mesh_t in, int iterations ){
+mesh_t SubdivideMesh2( const mesh_view_t in, int iterations ){
 	bspDrawVert_t expand[ MAX_EXPANDED_AXIS ][ MAX_EXPANDED_AXIS ];
-	mesh_t out( in.width, in.height, expand[0] );
+	mesh_view_t out( in.width, in.height, expand[0] );
 
-
-	/* initial setup */
+	/* copy each row */
 	for ( int h = 0; h < in.height; ++h )
-		std::copy_n( &in.verts[h * in.width], in.width, expand[h] );
+		std::copy_n( in[h], in.width, expand[h] );
 
 	/* keep chopping */
 	for ( ; iterations > 0; --iterations )
@@ -475,10 +464,10 @@ mesh_t SubdivideMesh2( const mesh_t in, int iterations ){
 
 	/* collapse the verts */
 	for ( int i = 1; i < out.height; ++i )
-		memmove( &out.verts[ i * out.width ], expand[ i ], out.width * sizeof( bspDrawVert_t ) );
+		memmove( out[ i ], expand[ i ], out.width * sizeof( bspDrawVert_t ) );
 
 	/* return to sender */
-	return CopyMesh( out );
+	return mesh_t( out );
 }
 
 
@@ -504,13 +493,13 @@ inline Vector3 ProjectPointOntoVector( const Vector3& point, const Vector3& vSta
    RemoveLinearMeshColumsRows
    ================
  */
-mesh_t RemoveLinearMeshColumnsRows( const mesh_t in ) {
+mesh_t RemoveLinearMeshColumnsRows( const mesh_t& in ) {
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
-	mesh_t out( in.width, in.height, expand[0] );
+	mesh_view_t out( in.width, in.height, expand[0] );
 
-
+	/* copy each row */
 	for ( int h = 0; h < in.height; ++h )
-		std::copy_n( &in.verts[h * in.width], in.width, expand[h] );
+		std::copy_n( in[h], in.width, expand[h] );
 
 	for ( int j = 1; j < out.width - 1; ++j ) {
 		double maxLength = 0;
@@ -544,21 +533,20 @@ mesh_t RemoveLinearMeshColumnsRows( const mesh_t in ) {
 	}
 	// collapse the verts
 	for ( int i = 1; i < out.height; ++i ) {
-		memmove( &out.verts[i * out.width], expand[i], out.width * sizeof( bspDrawVert_t ) );
+		memmove( out[i], expand[i], out.width * sizeof( bspDrawVert_t ) );
 	}
 
-	return CopyMesh( out );
+	return mesh_t( out );
 }
 
 
-mesh_t TessellatedMesh( const mesh_t in, int iterations ){
+mesh_t TessellatedMesh( const mesh_view_t in, int iterations ){
 	//%	mesh_t subdivided = SubdivideMesh( in, 8, 512 );
 	mesh_t subdivided = SubdivideMesh2( in, iterations );
 
 	/* fit it to the curve and remove colinear verts on rows/columns */
 	PutMeshOnCurve( subdivided );
 	mesh_t mesh = RemoveLinearMeshColumnsRows( subdivided );
-	subdivided.freeVerts();
 	//% MakeMeshNormals( mesh );
 
 	return mesh;
@@ -570,13 +558,14 @@ mesh_t TessellatedMesh( const mesh_t in, int iterations ){
    SubdivideMeshQuads
    =================
  */
-static mesh_t SubdivideMeshQuads( const mesh_t in, float minLength, int maxsize, int *widthtable, int *heighttable ){
+static mesh_t SubdivideMeshQuads( const mesh_view_t in, float minLength, int maxsize, int *widthtable, int *heighttable ){
 	int i, j, k, w, h, maxsubdivisions, subdivisions;
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
-	mesh_t out( in.width, in.height, expand[0] );
+	mesh_view_t out( in.width, in.height, expand[0] );
 
+	/* copy each row */
 	for ( int h = 0; h < in.height; ++h )
-		std::copy_n( &in.verts[h * in.width], in.width, expand[h] );
+		std::copy_n( in[h], in.width, expand[h] );
 
 	if ( maxsize > MAX_EXPANDED_AXIS ) {
 		Error( "SubdivideMeshQuads: maxsize > MAX_EXPANDED_AXIS" );
@@ -608,7 +597,7 @@ static mesh_t SubdivideMeshQuads( const mesh_t in, float minLength, int maxsize,
 			for ( k = 1; k <= subdivisions; ++k )
 			{
 				const float amount = (float) k / ( subdivisions + 1 );
-				LerpDrawVertAmount( &expand[i][j], &expand[i][j + subdivisions + 1], amount, &expand[i][j + k] );
+				LerpDrawVertAmount( expand[i][j], expand[i][j + subdivisions + 1], amount, expand[i][j + k] );
 			}
 		}
 	}
@@ -637,15 +626,15 @@ static mesh_t SubdivideMeshQuads( const mesh_t in, float minLength, int maxsize,
 			for ( k = 1; k <= subdivisions; ++k )
 			{
 				const float amount = (float) k / ( subdivisions + 1 );
-				LerpDrawVertAmount( &expand[j][i], &expand[j + subdivisions + 1][i], amount, &expand[j + k][i] );
+				LerpDrawVertAmount( expand[j][i], expand[j + subdivisions + 1][i], amount, expand[j + k][i] );
 			}
 		}
 	}
 
 	// collapse the verts
 	for ( i = 1; i < out.height; ++i ) {
-		memmove( &out.verts[i * out.width], expand[i], out.width * sizeof( bspDrawVert_t ) );
+		memmove( out[i], expand[i], out.width * sizeof( bspDrawVert_t ) );
 	}
 
-	return CopyMesh( out );
+	return mesh_t( out );
 }

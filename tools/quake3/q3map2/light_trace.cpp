@@ -891,7 +891,7 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 		case MST_PATCH:
 		{
 			/* subdivide the surface */
-			mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, &bspDrawVerts[ ds.firstVert ] ), info.patchIterations );
+			const mesh_t mesh = TessellatedMesh( mesh_view_t( ds.patchWidth, ds.patchHeight, &bspDrawVerts[ ds.firstVert ] ), info.patchIterations );
 
 			/* subdivide each quad to place the models */
 			for( MeshQuadIterator it( mesh ); it; ++it ){
@@ -904,9 +904,6 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
 					FilterTraceWindingIntoNodes_r( tw, nodeNum );
 				}
 			}
-
-			/* free the subdivided mesh */
-			mesh.freeVerts();
 			break;
 		}
 		/* handle triangle surfaces */

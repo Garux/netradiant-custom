@@ -770,7 +770,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
    moved here from patch.c
  */
 
-mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t *mesh ){
+mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
 	Plane3f plane;
 	shaderInfo_t        *si, *parent;
 	byte shaderIndexes[ MAX_EXPANDED_AXIS * MAX_EXPANDED_AXIS ];
@@ -778,28 +778,26 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 
 
 	/* get mesh and shader shader */
-	if ( mesh == nullptr ) {
-		mesh = &p.mesh;
-	}
+	mesh_t& mesh = p.mesh;
 	si = p.shaderInfo;
-	if ( mesh == nullptr || si == nullptr ) {
+	if ( si == nullptr ) {
 		return nullptr;
 	}
 
 	/* get vertex count */
-	const int numVerts = mesh->numVerts();
+	const int numVerts = mesh.numVerts();
 
 	/* to make valid normals for patches with degenerate edges,
 	   we need to make a copy of the mesh and put the aproximating
 	   points onto the curve */
 
 	/* create a copy of the mesh */
-	mesh_t copy = CopyMesh( *mesh );
+	mesh_t copy( mesh );
 
 	/* store off the original (potentially bad) normals */
 	MakeMeshNormals( copy );
 	for ( int i = 0; i < numVerts; ++i )
-		mesh->verts[ i ].normal = copy.verts[ i ].normal;
+		mesh.verts[ i ].normal = copy.verts[ i ].normal;
 
 	/* put the mesh on the curve */
 	PutMeshOnCurve( copy );
@@ -809,13 +807,10 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 	for ( int i = 0; i < numVerts; ++i )
 	{
 		/* ydnar: only copy normals that are significantly different from the originals */
-		if ( vector3_dot( copy.verts[ i ].normal, mesh->verts[ i ].normal ) < 0.75f ) {
-			mesh->verts[ i ].normal = copy.verts[ i ].normal;
+		if ( vector3_dot( copy.verts[ i ].normal, mesh.verts[ i ].normal ) < 0.75f ) {
+			mesh.verts[ i ].normal = copy.verts[ i ].normal;
 		}
 	}
-
-	/* free the old mesh */
-	copy.freeVerts();
 
 	/* ydnar: gs mods: check for indexed shader */
 	const bool indexed = ( si->indexed && p.im != nullptr );
@@ -823,7 +818,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 		/* get shader indexes for each point */
 		for ( int i = 0; i < numVerts; ++i )
 		{
-			shaderIndexes[ i ] = GetShaderIndexForPoint( *p.im, p.eMinmax, mesh->verts[ i ].xyz );
+			shaderIndexes[ i ] = GetShaderIndexForPoint( *p.im, p.eMinmax, mesh.verts[ i ].xyz );
 			offsets[ i ] = p.im->offsets[ shaderIndexes[ i ] ];
 		}
 
@@ -843,9 +838,9 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 	ds.sampleSize = p.lightmapSampleSize;
 	ds.lightmapScale = p.lightmapScale;   /* ydnar */
 	ds.ambientColor = p.ambientColor;
-	ds.patchWidth = mesh->width;
-	ds.patchHeight = mesh->height;
-	ds.verts.assign( mesh->verts, mesh->verts + numVerts );
+	ds.patchWidth = mesh.width;
+	ds.patchHeight = mesh.height;
+	ds.verts.assign( mesh.verts, mesh.verts + numVerts );
 
 	ds.fogNum = FOG_INVALID;
 	ds.planeNum = -1;
@@ -854,8 +849,8 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 	ds.maxIterations = p.maxIterations;
 
 	/* construct a plane from the first vert */
-	plane.normal() = mesh->verts[ 0 ].normal;
-	plane.dist() = vector3_dot( mesh->verts[ 0 ].xyz, plane.normal() );
+	plane.normal() = mesh.verts[ 0 ].normal;
+	plane.dist() = vector3_dot( mesh.verts[ 0 ].xyz, plane.normal() );
 
 	/* spew forth errors */
 	if ( vector3_length( plane.normal() ) < 0.001f ) {
@@ -863,7 +858,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 	}
 
 	/* test each vert */
-	const bool planar = std::ranges::none_of( Span( mesh->verts, numVerts ), [&plane]( const bspDrawVert_t& vert ){
+	const bool planar = std::ranges::none_of( Span( mesh.verts, numVerts ), [&plane]( const bspDrawVert_t& vert ){
 			/* normal test */
 		return !VectorCompare( plane.normal(), vert.normal )
 			/* point-plane test */
@@ -873,7 +868,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p, mesh_t 
 	/* add a map plane */
 	if ( planar ) {
 		/* make a map plane */
-		ds.planeNum = FindFloatPlane( plane, Span( &mesh->verts[ 0 ].xyz, 1 ) );
+		ds.planeNum = FindFloatPlane( plane, Span( &mesh.verts[ 0 ].xyz, 1 ) );
 		ds.lightmapVecs[ 2 ] = plane.normal();
 
 		/* push this normal to all verts (ydnar 2003-02-14: bad idea, small patches get screwed up) */
@@ -2843,7 +2838,7 @@ static int AddSurfaceModels( mapDrawSurface_t& ds, entity_t& entity ){
 		case ESurfaceType::Patch:
 		{
 			/* subdivide the surface */
-			mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, ds.verts.data() ), IterationsForCurve( ds.longestCurve, patchSubdivisions ) );
+			const mesh_t mesh = TessellatedMesh( mesh_view_t( ds.patchWidth, ds.patchHeight, ds.verts.data() ), IterationsForCurve( ds.longestCurve, patchSubdivisions ) );
 
 			/* subdivide each quad to place the models */
 			for( MeshQuadIterator it( mesh ); it; ++it ){
@@ -2851,15 +2846,11 @@ static int AddSurfaceModels( mapDrawSurface_t& ds, entity_t& entity ){
 				{
 					const int n = AddSurfaceModelsToTriangle_r( ds, model, tri, entity );
 					if ( n < 0 ) {
-						mesh.freeVerts();
 						return n;
 					}
 					localNumSurfaceModels += n;
 				}
 			}
-
-			/* free the subdivided mesh */
-			mesh.freeVerts();
 			break;
 		}
 		/* handle triangle surfaces */

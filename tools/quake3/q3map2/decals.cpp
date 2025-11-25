@@ -403,7 +403,7 @@ void ProcessDecals(){
 			/* create projectors */
 			if ( distance > 0.125f ) {
 				/* tesselate the patch */
-				mesh_t mesh = TessellatedMesh( p.mesh, IterationsForCurve( p.longestCurve, patchSubdivisions ) );
+				const mesh_t mesh = TessellatedMesh( p.mesh, IterationsForCurve( p.longestCurve, patchSubdivisions ) );
 
 				/* offset by projector origin */
 				for ( bspDrawVert_t& vert : Span( mesh.verts, mesh.numVerts() ) )
@@ -425,9 +425,6 @@ void ProcessDecals(){
 							MakeDecalProjector( p.shaderInfo, projection, distance, tri );
 					}
 				}
-
-				/* clean up */
-				mesh.freeVerts();
 			}
 		}
 		/* remove patches from entity */
@@ -573,7 +570,7 @@ static void ProjectDecalOntoPatch( decalProjector_t& dp, mapDrawSurface_t& ds ){
 			return;
 
 	/* tesselate the patch */
-	mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, ds.verts.data() ), IterationsForCurve( ds.longestCurve, patchSubdivisions ) );
+	const mesh_t mesh = TessellatedMesh( mesh_view_t( ds.patchWidth, ds.patchHeight, ds.verts.data() ), IterationsForCurve( ds.longestCurve, patchSubdivisions ) );
 
 	/* iterate through the mesh quads */
 	for( MeshQuadIterator it( mesh ); it; ++it ){
@@ -586,9 +583,6 @@ static void ProjectDecalOntoPatch( decalProjector_t& dp, mapDrawSurface_t& ds ){
 			ProjectDecalOntoWinding( dp, ds, w );
 		}
 	}
-
-	/* clean up */
-	mesh.freeVerts();
 }
 
 

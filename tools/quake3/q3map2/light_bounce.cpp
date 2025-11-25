@@ -647,15 +647,14 @@ void RadLightForPatch( int num, int lightmapNum, const rawLightmap_t *lm, const 
 	const surfaceInfo_t& info = surfaceInfos[ num ];
 
 	/* construct a bogus vert list with color index stuffed into color[ 0 ] */
-	bspDrawVert_t *bogus = safe_malloc( ds.numVerts * sizeof( bspDrawVert_t ) );
-	memcpy( bogus, &yDrawVerts[ ds.firstVert ], ds.numVerts * sizeof( bspDrawVert_t ) );
+	mesh_t bogus( ds.patchWidth, ds.patchHeight );
+	std::copy_n( &yDrawVerts[ ds.firstVert ], ds.numVerts, bogus.verts );
 	for ( int i = 0; i < ds.numVerts; ++i )
-		bogus[ i ].color[ 0 ][ 0 ] = i;
+		bogus.verts[ i ].color[ 0 ][ 0 ] = i;
 
 	/* build a subdivided mesh identical to shadow facets for this patch */
 	/* this MUST MATCH FacetsForPatch() identically! */
-	mesh_t mesh = TessellatedMesh( mesh_t( ds.patchWidth, ds.patchHeight, bogus ), info.patchIterations );
-	free( bogus );
+	mesh_t mesh = TessellatedMesh( bogus, info.patchIterations );
 
 	/* FIXME: build interpolation table into color[ 1 ] */
 
@@ -721,9 +720,6 @@ void RadLightForPatch( int num, int lightmapNum, const rawLightmap_t *lm, const 
 			}
 		}
 	}
-
-	/* free the mesh */
-	mesh.freeVerts();
 }
 
 

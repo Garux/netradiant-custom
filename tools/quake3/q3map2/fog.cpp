@@ -40,36 +40,21 @@ static int numFogPatchFragments;
 
 
 /*
-   DrawSurfToMesh()
-   converts a patch drawsurface to a mesh_t
- */
-
-static mesh_t DrawSurfToMesh( const mapDrawSurface_t& ds ){
-	const size_t size = sizeof( ds.verts[ 0 ] ) * ds.patchWidth * ds.patchHeight;
-	mesh_t m( ds.patchWidth, ds.patchHeight, safe_malloc( size ) );
-	memcpy( m.verts, ds.verts.data(), size );
-	return m;
-}
-
-
-
-/*
    SplitMeshByPlane()
    chops a mesh by a plane
  */
 /// \returns either {front, back} or {front, {}} or {{}, back}
 /// frees or reuses \param in
-static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane( mesh_t& in, const Plane3f& plane ){
+static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane( mesh_t&& in, const Plane3f& plane ){
 	int w, h, split;
 	float d[MAX_PATCH_SIZE][MAX_PATCH_SIZE];
-	bspDrawVert_t   *dv, *v1, *v2;
 	int c_front, c_back, c_on;
 	int i;
 	float frac;
 	int frontAprox, backAprox;
 
 	for ( i = 0; i < 2; ++i ) {
-		dv = in.verts;
+		const bspDrawVert_t *dv = in.verts;
 		c_front = 0;
 		c_back = 0;
 		c_on = 0;
@@ -89,10 +74,10 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 		}
 
 		if ( !c_front ) {
-			return { {}, in };
+			return { {}, std::move( in ) };
 		}
 		if ( !c_back ) {
-			return { in, {} };
+			return { std::move( in ), {} };
 		}
 
 		// find a split point
@@ -109,7 +94,7 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 		if ( split == -1 ) {
 			if ( i == 1 ) {
 				Sys_FPrintf( SYS_WRN | SYS_VRBflag, "No crossing points in patch\n" );
-				return { in, {} };
+				return { std::move( in ), {} };
 			}
 
 			TransposeMesh( in );
@@ -123,13 +108,13 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 				if ( ( d[h][w] < 0 ) != ( d[h][w + 1] < 0 ) ) {
 					if ( w != split ) {
 						Sys_Printf( "multiple crossing points for patch -- can't clip\n" );
-						return { in, {} };
+						return { std::move( in ), {} };
 					}
 				}
 			}
 			if ( ( d[h][split] < 0 ) == ( d[h][split + 1] < 0 ) ) {
 				Sys_Printf( "differing crossing points for patch -- can't clip\n" );
-				return { in, {} };
+				return { std::move( in ), {} };
 			}
 		}
 
@@ -138,39 +123,41 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 
 
 	// create two new meshes
-	mesh_t  f( split + 2, in.height, nullptr ), b( in.width - split, in.height, nullptr );
-	if ( !( f.width & 1 ) ) {
-		f.width++;
+	int fwidth = split + 2;
+	if ( !( fwidth & 1 ) ) {
+		fwidth++;
 		frontAprox = 1;
 	}
 	else {
 		frontAprox = 0;
 	}
-	if ( f.width > MAX_PATCH_SIZE ) {
+	if ( fwidth > MAX_PATCH_SIZE ) {
 		Error( "MAX_PATCH_SIZE after split" );
 	}
-	f.verts = safe_malloc( sizeof( f.verts[0] ) * f.numVerts() );
 
-	if ( !( b.width & 1 ) ) {
-		b.width++;
+	int bwidth = in.width - split;
+	if ( !( bwidth & 1 ) ) {
+		bwidth++;
 		backAprox = 1;
 	}
 	else {
 		backAprox = 0;
 	}
-	if ( b.width > MAX_PATCH_SIZE ) {
+	if ( bwidth > MAX_PATCH_SIZE ) {
 		Error( "MAX_PATCH_SIZE after split" );
 	}
-	b.verts = safe_malloc( sizeof( b.verts[0] ) * b.numVerts() );
+
+	mesh_t f( fwidth, in.height );
+	mesh_t b( bwidth, in.height );
 
 	// distribute the points
 	for ( w = 0; w < in.width; ++w ) {
 		for ( h = 0; h < in.height; ++h ) {
 			if ( w <= split ) {
-				f.verts[ h * f.width + w ] = in.verts[ h * in.width + w ];
+				f[ h ][ w ] = in[ h ][ w ];
 			}
 			else {
-				b.verts[ h * b.width + w - split + backAprox ] = in.verts[ h * in.width + w ];
+				b[ h ][ w - split + backAprox ] = in[ h ][ w ];
 			}
 		}
 	}
@@ -178,9 +165,9 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 	// clip the crossing line
 	for ( h = 0; h < in.height; ++h )
 	{
-		dv = &f.verts[ h * f.width + split + 1 ];
-		v1 = &in.verts[ h * in.width + split ];
-		v2 = &in.verts[ h * in.width + split + 1 ];
+		bspDrawVert_t& dv = f[ h ][ split + 1 ];
+		const bspDrawVert_t& v1 = in[ h ][ split ];
+		const bspDrawVert_t& v2 = in[ h ][ split + 1 ];
 
 		frac = d[h][split] / ( d[h][split] - d[h][split + 1] );
 
@@ -191,11 +178,11 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 		LerpDrawVertAmount( v1, v2, frac, dv );
 
 		if ( frontAprox ) {
-			f.verts[ h * f.width + split + 2 ] = *dv;
+			f[ h ][ split + 2 ] = dv;
 		}
-		b.verts[ h * b.width ] = *dv;
+		b[ h ][ 0 ] = dv;
 		if ( backAprox ) {
-			b.verts[ h * b.width + 1 ] = *dv;
+			b[ h ][ 1 ] = dv;
 		}
 	}
 
@@ -205,12 +192,10 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 	   PrintMesh( b );
 	 */
 
-	in.freeVerts();
-
 	if ( d[0][0] > 0 )
-		return { f, b };
+		return { std::move( f ), std::move( b ) };
 	else
-		return { b, f };
+		return { std::move( b ), std::move( f ) };
 
 
 }
@@ -225,7 +210,7 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 	mesh_t      outside[MAX_BRUSH_SIDES];
 	int numOutside = 0;
 
-	mesh_t m = DrawSurfToMesh( ds );
+	mesh_t m( mesh_view_t ( ds.patchWidth, ds.patchHeight, ds.verts.data() ) );
 
 	// only split by the top and bottom planes to avoid
 	// some messy patch clipping issues
@@ -233,23 +218,19 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 	for ( int i = 4; i <= 5; ++i ) {
 		const plane_t& plane = mapplanes[ b->sides[ i ].planenum ];
 
-		auto [front, back] = SplitMeshByPlane( m, plane.plane );
+		auto [front, back] = SplitMeshByPlane( std::move( m ), plane.plane );
 
 		if ( !back ) {
 			// nothing actually contained inside
-			for ( int j = 0; j < numOutside; ++j ) {
-				outside[j].freeVerts();
-			}
-			front->freeVerts();
 			return false;
 		}
-		m = *back;
+		m.swap( *back );
 
 		if ( front ) {
 			if ( numOutside == MAX_BRUSH_SIDES ) {
 				Error( "MAX_BRUSH_SIDES" );
 			}
-			outside[ numOutside ] = *front;
+			outside[ numOutside ].swap( *front );
 			numOutside++;
 		}
 	}
@@ -268,9 +249,6 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 		newds.patchWidth = outside[ i ].width;
 		newds.patchHeight = outside[ i ].height;
 		newds.verts.assign( outside[ i ].verts, outside[ i ].verts + outside[ i ].numVerts() );
-
-		/* free the source mesh */
-		outside[ i ].freeVerts();
 	}
 
 	/* only rejigger this patch if it was chopped */
@@ -286,8 +264,6 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 		ds.verts.assign( m.verts, m.verts + m.numVerts() );
 	}
 
-	/* free the source mesh and return */
-	m.freeVerts();
 	return true;
 }
 

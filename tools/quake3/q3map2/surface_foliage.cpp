@@ -186,21 +186,17 @@ void Foliage( mapDrawSurface_t& src, entity_t& entity ){
 		case ESurfaceType::Patch:
 		{
 			/* make a mesh from the drawsurf */
-			mesh_t srcMesh( src.patchWidth, src.patchHeight, src.verts.data() );
-			mesh_t subdivided = SubdivideMesh( srcMesh, 8, 512 );
+			mesh_t subdivided = SubdivideMesh( mesh_view_t( src.patchWidth, src.patchHeight, src.verts.data() ), 8, 512 );
 
 			/* fit it to the curve and remove colinear verts on rows/columns */
 			PutMeshOnCurve( subdivided );
-			mesh_t mesh = RemoveLinearMeshColumnsRows( subdivided );
-			subdivided.freeVerts();
+			const mesh_t mesh = RemoveLinearMeshColumnsRows( subdivided );
 
 			/* map the mesh quads */
 			for( MeshQuadIterator it( mesh ); it; ++it )
 				for( const TriRef& tri : it.tris() )
 					SubdivideFoliageTriangle_r( foliage, tri );
 
-			/* free the mesh */
-			mesh.freeVerts();
 			break;
 		}
 		default:
