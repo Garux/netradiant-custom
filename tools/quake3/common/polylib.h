@@ -40,10 +40,18 @@ template<class T>
 std::vector<BasicVector3<T>>::iterator winding_next( std::vector<BasicVector3<T>>& w, typename std::vector<BasicVector3<T>>::iterator it ){
 	return ++it == w.end()? w.begin() : it;
 }
+template<class T>
+std::vector<BasicVector3<T>>::const_iterator winding_next( const std::vector<BasicVector3<T>>& w, typename std::vector<BasicVector3<T>>::const_iterator it ){
+	return ++it == w.cend()? w.cbegin() : it;
+}
 // it < w.end()
 template<class T>
 std::vector<BasicVector3<T>>::iterator winding_prev( std::vector<BasicVector3<T>>& w, typename std::vector<BasicVector3<T>>::iterator it ){
 	return it == w.begin()? w.end() - 1 : --it;
+}
+template<class T>
+std::vector<BasicVector3<T>>::const_iterator winding_prev( const std::vector<BasicVector3<T>>& w, typename std::vector<BasicVector3<T>>::const_iterator it ){
+	return it == w.cbegin()? w.cend() - 1 : --it;
 }
 
 #define MAX_POINTS_ON_WINDING   512

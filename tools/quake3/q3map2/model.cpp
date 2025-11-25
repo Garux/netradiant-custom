@@ -32,6 +32,7 @@
 #include "q3map2.h"
 
 #include "model.h"
+#include "qspatial.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/importerdesc.h"
@@ -377,6 +378,48 @@ size_t normal_make_axial( BasicVector3<T>& normal ){
 	return i;
 }
 
+struct ClipWinding
+{
+	Plane3 plane;
+	winding_accu_t points;
+	int dsIdx; // index in ClipTriangles::modelSurfs array
+
+	MinMax minmax; // X is on c_spatial_sort_direction
+
+	ClipWinding( const Plane3& plane, winding_accu_t&& points, int dsIdx ) : plane( plane ), points( std::move( points ) ), dsIdx( dsIdx ){
+		for( const DoubleVector3& p : this->points )
+			minmax.extend( Vector3( spatial_distance( p ), p.y(), p.z() ) );
+	}
+
+	bool operator<( const ClipWinding& other ) const noexcept {
+		return minmax.mins.x() > other.minmax.mins.x(); // decreasing order (to iterate from the end)
+	}
+
+	// for volumetric merge
+	std::vector<ClipWinding> frontWindings;
+	Vector3 bestNormal;
+	bool isplanar() const {
+		return frontWindings.size() <= 1;
+	}
+};
+
+
+struct ClipTriangles
+{
+	// separate by surfaceFlags, contentFlags, compileFlags, sort by c_spatial_sort_direction distance
+	std::map<std::tuple<int, int, int>, std::vector<ClipWinding>> triangleSets;
+	std::vector<mapDrawSurface_t*> modelSurfs;
+	// optional arrays of terrain clip params parallel with modelSurfs
+	// allocate anytime for use simplicity
+	std::vector<MinMax> minmaxes;
+	std::vector<Vector3> avgDirections;
+
+	ClipTriangles( size_t nSurfs ) : minmaxes( nSurfs ), avgDirections( nSurfs, g_vector3_identity ){
+		modelSurfs.reserve( nSurfs );
+	}
+};
+
+
 struct ClipSides
 {
 	Plane3f fplane; // front plane
@@ -391,7 +434,7 @@ struct ClipSides
 	ClipSides( shaderInfo_t& si, entity_t& entity, float clipDepth ) : si( si ), entity( entity ), clipDepth( clipDepth ){
 	}
 
-	/* construct front and allocate sides, requires fw */
+	/* construct front plane and allocate sides, requires fw */
 	bool construct(){
 		/* prepare a brush */
 		buildBrush.sides.reserve( MAX_BUILD_SIDES );
@@ -436,6 +479,21 @@ struct ClipSides
 
 		return true;
 	}
+	bool construct_volumetric( const std::vector<ClipWinding>& frontWindings ){
+		/* prepare a brush */
+		buildBrush.sides.reserve( MAX_BUILD_SIDES );
+		buildBrush.entityNum = entity.mapEntityNum;
+		buildBrush.contentShader = &si;
+		buildBrush.compileFlags = si.compileFlags;
+		buildBrush.contentFlags = si.contentFlags;
+		buildBrush.detail = true;
+		// note this is required by eAxialBackplane + limDepth; this is wrong
+		fplane = Plane3f( frontWindings[0].plane );
+
+		splanes.resize( fw.size() );
+
+		return true;
+	}
 
 	void add_back_plane( const Vector3& bestNormal ){
 		bplane = plane3_flipped( fplane );
@@ -447,31 +505,73 @@ struct ClipSides
 
 	bool create_brush() const {
 		const bool doBack = bplane.normal() != g_vector3_identity;
+		auto& sides = buildBrush.sides;
 		/* set up brush sides */
-		buildBrush.sides.clear(); // clear, so resize() will value-initialize elements
-		buildBrush.sides.resize( splanes.size() + 1 + doBack );
+		sides.clear(); // clear, so resize() will value-initialize elements
+		sides.resize( splanes.size() + 1 + doBack );
 
 		if( debugClip ){
-			buildBrush.sides[0].shaderInfo = &ShaderInfoForShader( "debugclip2" );
-			for ( size_t i = 1; i < buildBrush.sides.size(); ++i )
-				buildBrush.sides[i].shaderInfo = &ShaderInfoForShader( "debugclip" );
+			sides[0].shaderInfo = &ShaderInfoForShader( "debugclip2" );
+			for ( size_t i = 1; i < sides.size(); ++i )
+				sides[i].shaderInfo = &ShaderInfoForShader( "debugclip" );
 		}
 		else{
-			buildBrush.sides[0].shaderInfo = &si;
-			buildBrush.sides[0].surfaceFlags = si.surfaceFlags;
-			for ( size_t i = 1; i < buildBrush.sides.size(); ++i )
-				buildBrush.sides[i].shaderInfo = nullptr;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+			sides[0].shaderInfo = &si;
+			sides[0].surfaceFlags = si.surfaceFlags;
+			for ( size_t i = 1; i < sides.size(); ++i )
+				sides[i].shaderInfo = nullptr;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 		}
 
-		buildBrush.sides[0].planenum = FindFloatPlane( fplane, fw );
-		// buildBrush.sides[0].plane = Plane3( fplane );
+		sides[0].planenum = FindFloatPlane( fplane, fw );
+		// sides[0].plane = Plane3( fplane );
 		for( size_t i = 0; i < splanes.size(); ++i ){
-			buildBrush.sides[i + 1].planenum = FindFloatPlane( Plane3f( splanes[i] ), std::array{ fw[i], winding_next_point( fw, i ) } );
-			// buildBrush.sides[i + 1].plane = splanes[i]; // this only improves debug windings quality, but it's better to respect actual bsp planes
+			sides[i + 1].planenum = FindFloatPlane( Plane3f( splanes[i] ), std::array{ fw[i], winding_next_point( fw, i ) } );
+			// sides[i + 1].plane = splanes[i]; // this only improves debug windings quality, but it's better to respect actual bsp planes
 		}
 		if( doBack ){
-			buildBrush.sides.back().planenum = FindFloatPlane( bplane, bw );
-			// buildBrush.sides.back().plane = Plane3( bplane );
+			sides.back().planenum = FindFloatPlane( bplane, bw );
+			// sides.back().plane = Plane3( bplane );
+		}
+
+		/* add to entity */
+		if ( CreateBrushWindings( buildBrush ) ) {
+			AddBrushBevels();
+			brush_t& newBrush = entity.brushes.emplace_front( buildBrush );
+			newBrush.original = &newBrush;
+			return true;
+		}
+		return false;
+	}
+	bool create_volumetric_brush( const std::vector<ClipWinding>& frontWindings ) const {
+		const bool doBack = bplane.normal() != g_vector3_identity;
+		const size_t fwsize = frontWindings.size();
+		auto& sides = buildBrush.sides;
+		/* set up brush sides */
+		sides.clear(); // clear, so resize() will value-initialize elements
+		sides.resize( splanes.size() + fwsize + doBack );
+
+		if( debugClip ){
+			for ( size_t i = 0; i < fwsize; ++i )
+				sides[i].shaderInfo = &ShaderInfoForShader( "debugclip2" );
+			for ( size_t i = fwsize; i < sides.size(); ++i )
+				sides[i].shaderInfo = &ShaderInfoForShader( "debugclip" );
+		}
+		else{
+			for ( size_t i = 0; i < fwsize; ++i ){
+				sides[i].shaderInfo = &si;
+				sides[i].surfaceFlags = si.surfaceFlags;
+			}
+			for ( size_t i = fwsize; i < sides.size(); ++i )
+				sides[i].shaderInfo = nullptr;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+		}
+
+		for ( size_t i = 0; i < fwsize; ++i )
+			sides[i].planenum = FindFloatPlane( Plane3f( frontWindings[i].plane ), frontWindings[i].points );
+		for( size_t i = 0; i < splanes.size(); ++i ){
+			sides[i + fwsize].planenum = FindFloatPlane( Plane3f( splanes[i] ), std::array{ fw[i], winding_next_point( fw, i ) } );
+		}
+		if( doBack ){
+			sides.back().planenum = FindFloatPlane( bplane, bw );
 		}
 
 		/* add to entity */
@@ -583,34 +683,44 @@ static void clipModel_45( ClipSides& cs ){
 	cs.add_back_plane( cs.fplane.normal() );
 }
 
-static void clipModel_terrain( ClipSides& cs, const int spf, size_t axis, const Vector3& avgDirection, const MinMax& minmax, const float limDepth ){
+static Vector3 clipModel_terrain_bestNormal( const int spf, const DoubleVector3& normal, const Vector3& avgDirection ){
 	Vector3 bestNormal;
-
-	if ( spf & eExtrudeTerrain ){ //autodirection
+	if ( spf & eExtrudeTerrain ){ // automatic axial direction
 		bestNormal = avgDirection;
 	}
-	else{
-		axis = 2;
-		if ( ( spf & eExtrudeDownwards ) && ( spf & eExtrudeUpwards ) ){
-			bestNormal = cs.fplane.normal().z() >= 0? g_vector3_axis_z : -g_vector3_axis_z;
-		}
-		else if ( spf & eExtrudeDownwards ){
-			bestNormal = g_vector3_axis_z;
-		}
-		else if ( spf & eExtrudeUpwards ){
-			bestNormal = -g_vector3_axis_z;
-		}
-		else{ // best axial normal
-			bestNormal = cs.fplane.normal();
-			axis = normal_make_axial( bestNormal );
-		}
+	else if ( ( spf & eExtrudeDownwards ) && ( spf & eExtrudeUpwards ) ){
+		bestNormal = ( normal.z() > 0 )? g_vector3_axis_z : -g_vector3_axis_z;
 	}
+	else if ( spf & eExtrudeDownwards ){
+		bestNormal = g_vector3_axis_z;
+	}
+	else if ( spf & eExtrudeUpwards ){
+		bestNormal = -g_vector3_axis_z;
+	}
+	else{ // best axial normal with eAxialBackplane
+		normal_make_axial( bestNormal = normal );
+	}
+	return bestNormal;
+}
 
-	if ( vector3_dot( cs.fplane.normal(), bestNormal ) < 0.05 ){
+constexpr double c_extrude_epsilon = 0.05;
+
+static void clipModel_terrain( ClipSides& cs, const DoubleVector3& bestNormal ){
+	if ( vector3_dot( cs.fplane.normal(), bestNormal ) < c_extrude_epsilon ){
 		return clipModel_default( cs );
 	}
 
+	/* make side planes */
+	for ( size_t i = 0; i < cs.fw.size(); ++i )
+	{
+		cs.splanes[i].normal() = VectorNormalized( vector3_cross( bestNormal, winding_next_point( cs.fw, i ) - cs.fw[i] ) );
+		cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
+	}
 
+	cs.add_back_plane( bestNormal );
+}
+
+static void clipModel_terrainSpecialBack( ClipSides& cs, const int spf, const Vector3& bestNormal, const MinMax& minmax, const float limDepth ){
 	/* make side planes */
 	for ( size_t i = 0; i < cs.fw.size(); ++i )
 	{
@@ -618,55 +728,40 @@ static void clipModel_terrain( ClipSides& cs, const int spf, size_t axis, const 
 		cs.splanes[i].dist() = vector3_dot( cs.fw[i], cs.splanes[i].normal() );
 	}
 
+	const size_t axis = vector3_max_abs_component_index( bestNormal );
+
 	/* make back plane */
-	if ( spf & eMaxExtrude ){ //max extrude
+	if ( spf & eMaxExtrude ){
 		cs.bplane.normal() = -bestNormal;
 		if ( bestNormal[axis] > 0 )
 			cs.bplane.dist() = -minmax.mins[axis] + cs.clipDepth;
 		else
 			cs.bplane.dist() = minmax.maxs[axis] + cs.clipDepth;
 	}
-	else if ( spf & eAxialBackplane ){ //axial backplane
+	else if ( spf & eAxialBackplane ){
 		cs.bplane.normal() = -bestNormal;
-		cs.bplane.dist() = cs.fw[0][axis];
-		if ( bestNormal[axis] > 0 ){
-			for ( size_t i = 1; i < cs.fw.size(); ++i ){
-				value_minimize( cs.bplane.dist(), float( cs.fw[i][axis] ) );
-			}
-			cs.bplane.dist() = -cs.bplane.dist() + cs.clipDepth;
-		}
-		else{
-			for ( size_t i = 1; i < cs.fw.size(); ++i ){
-				value_maximize( cs.bplane.dist(), float( cs.fw[i][axis] ) );
-			}
-			cs.bplane.dist() += cs.clipDepth;
-		}
+		const auto getCoord = [axis]( const DoubleVector3& p ){ return p[axis]; };
+		if ( bestNormal[axis] > 0 )
+			cs.bplane.dist() = -std::ranges::min( cs.fw, {}, getCoord )[axis] + cs.clipDepth;
+		else
+			cs.bplane.dist() = std::ranges::max( cs.fw, {}, getCoord )[axis] + cs.clipDepth;
+
 		if ( limDepth != 0 ){
-			Vector3 cnt = cs.fw[0];
-			if ( bestNormal[axis] > 0 ){
-				for ( size_t i = 1; i < cs.fw.size(); ++i )
-					if ( cs.fw[i][axis] > cnt[axis] )
-						cnt = cs.fw[i];
-			}
-			else {
-				for ( size_t i = 1; i < cs.fw.size(); ++i )
-					if ( cs.fw[i][axis] < cnt[axis] )
-						cnt = cs.fw[i];
-			}
-			cnt = plane3_project_point( cs.bplane, cnt );
-			if ( -plane3_distance_to_point( cs.fplane, cnt ) > limDepth ){	//normal backplane
-				cs.add_back_plane( bestNormal );
+			Vector3 farpoint = ( bestNormal[axis] > 0 )
+			                   ? std::ranges::max( cs.fw, {}, getCoord )
+			                   : std::ranges::min( cs.fw, {}, getCoord );
+			farpoint = plane3_project_point( cs.bplane, farpoint );
+			if ( -plane3_distance_to_point( cs.fplane, farpoint ) > limDepth ){
+				cs.add_back_plane( bestNormal ); // normal backplane // FIXME will fail with volumetric winding
 			}
 		}
-	}
-	else{	//normal backplane
-		cs.add_back_plane( bestNormal );
 	}
 }
 
 static void clipModel_axialPyramid( ClipSides& cs, const float limDepth ){
 	for ( int i = 0; i < 3; ++i )
-		if ( std::fabs( cs.fplane.normal()[i] ) < 0.05f && std::fabs( cs.fplane.normal()[( i + 1 ) % 3] ) < 0.05f ) //no way, close to lay on two axes
+		if ( std::fabs( cs.fplane.normal()[i] ) < c_extrude_epsilon
+		  && std::fabs( cs.fplane.normal()[( i + 1 ) % 3] ) < c_extrude_epsilon ) // no way, close to lay on two axes
 			return clipModel_default( cs );
 
 	// best axial normal
@@ -718,24 +813,158 @@ static void clipModel_axialPyramid( ClipSides& cs, const float limDepth ){
 }
 
 
-struct ClipTriangle
-{
-	Plane3 plane;
-	std::array<DoubleVector3, 3> points;
-	mapDrawSurface_t *ds;
+static bool windingMergeOthers( ClipWinding& win1st, std::vector<ClipWinding>& winSet ){
+	const size_t winSetSize = winSet.size();
 
-	bool operator<( const ClipTriangle& other ) const {
-		return plane.dist() > other.plane.dist(); // decreasing order (to iterate from the end)
+	for( auto win = winSet.crbegin(); win != winSet.crend(); ++win ){
+		// sorted spatial distance on X; break on minmax range overflow
+		if( win->minmax.mins.x() > win1st.minmax.maxs.x() + 1 )
+			break;
+		if( !win->minmax.test( win1st.minmax, 1 ) ) // minmax test
+			continue;
+		// points off plane
+		// const double epsilon = distanceEpsilon * 2;
+		const double epsilon = ON_EPSILON / 2;
+		if( std::ranges::any_of( win->points, [&]( const DoubleVector3& p ){
+			return std::fabs( plane3_distance_to_point( win1st.plane, p ) ) > epsilon;
+		} ) )
+			continue;
+		// rough normal check; catches inverted planes
+		if( !vector3_equal_epsilon( win1st.plane.normal(), win->plane.normal(), .1 ) )
+			continue;
+		// find matching points
+		winding_accu_t& w = win1st.points;
+		for( auto prev = w.cend() - 1, next = w.cbegin(); next != w.cend(); prev = next++ )
+		{
+			for( auto pre = win->points.cend() - 1, nex = win->points.cbegin(); nex != win->points.cend(); pre = nex++ )
+			{
+				if( VectorCompare( *prev, *nex ) && VectorCompare( *next, *pre ) ){ // source points are typically perfectly equal hence small epsilon
+				// if( vector3_equal_epsilon( *prev, *nex, ON_EPSILON ) && vector3_equal_epsilon( *next, *pre, ON_EPSILON ) ){
+					auto nnext = winding_next( w, next );
+					auto pprev = winding_prev( w, prev );
+					auto nnex = winding_next( win->points, nex );
+					auto ppre = winding_prev( win->points, pre );
+					// check if new point preserves convexity
+					Plane3 pplane( VectorNormalized( vector3_cross( win1st.plane.normal(), *nnex - *pprev ) ), 0 );
+					pplane.dist() = vector3_dot( pplane.normal(), *pprev );
+					Plane3 nplane( VectorNormalized( vector3_cross( win1st.plane.normal(), *nnext - *ppre ) ), 0 );
+					nplane.dist() = vector3_dot( nplane.normal(), *nnext );
+					double pd = plane3_distance_to_point( pplane, *prev );
+					double nd = plane3_distance_to_point( nplane, *next );
+					// insert
+					if( pd > -ON_EPSILON && nd > -ON_EPSILON ){
+						auto inserted = next;
+						for( auto ins = ppre; ins != nex; ins = winding_prev( win->points, ins ) )
+							inserted = w.insert( inserted, *ins );
+						// remove possible colinear points
+						auto iprev = winding_prev( w, inserted );
+						auto inext = inserted + win->points.size() - 2;
+						if( inext >= w.cend() )
+							inext -= w.size();
+						// remove higher iterator 1st to keep lower one valid
+						if( iprev > inext ){
+							std::swap( iprev, inext );
+							std::swap( pd, nd );
+						}
+						if( std::fabs( nd ) < ON_EPSILON )
+							w.erase( inext );
+						if( std::fabs( pd ) < ON_EPSILON && w.size() > 3 )
+							w.erase( iprev );
+
+						win1st.minmax.extend( win->minmax );
+						winSet.erase( ( ++win ).base() );
+						// inserted, restart the search
+						win = winSet.crbegin() - 1;
+					}
+					goto doNextWinding;
+				}
+			}
+		}
+		doNextWinding:		continue;
 	}
-};
 
+	return winSetSize != winSet.size();
+}
 
-struct ClipTriangles
-{
-	// separate by surfaceFlags, contentFlags, compileFlags, sort by triangle plane distance
-	std::map<std::tuple<int, int, int>, std::vector<ClipTriangle>> triangleSets;
-	std::vector<mapDrawSurface_t*> modelSurfs;
-};
+// win1st.points is not necessarily planar convex polygon here (but it is, when projected along bestNormal)
+static bool windingMergeConvex( ClipWinding& win1st, std::vector<ClipWinding>& winSet, const Vector3& bestNormal ){
+	const size_t winSetSize = winSet.size();
+
+	for( auto win = winSet.crbegin(); win != winSet.crend(); ++win ){
+		// sorted spatial distance on X; break on minmax range overflow
+		if( win->minmax.mins.x() > win1st.minmax.maxs.x() + 1 )
+			break;
+		if( !win->minmax.test( win1st.minmax, 1 ) ) // minmax test
+			continue;
+		if( win->isplanar()
+			? vector3_dot( win->plane.normal(), bestNormal ) < c_extrude_epsilon // triangle normal too off, can't clip with this extrusion direction
+			: win->bestNormal != bestNormal ) // winding merged with different bestNormal, may be non convex when merged with current
+			continue;
+		// check that win->frontWindings planes don't clip the volume
+		if( std::ranges::any_of( win1st.frontWindings, [win]( const ClipWinding& clipWinding ){
+			return std::ranges::any_of( clipWinding.points, [win]( const DoubleVector3& p ){
+				return std::ranges::any_of( win->frontWindings, [&p]( const ClipWinding& clipWinding ){
+					return plane3_distance_to_point( clipWinding.plane, p ) > ON_EPSILON;
+				} );
+			} );
+		} ) )
+			continue;
+
+		// find matching points
+		winding_accu_t& w = win1st.points;
+		for( auto prev = w.cend() - 1, next = w.cbegin(); next != w.cend(); prev = next++ )
+		{
+			for( auto pre = win->points.cend() - 1, nex = win->points.cbegin(); nex != win->points.cend(); pre = nex++ )
+			{
+				if( VectorCompare( *prev, *nex ) && VectorCompare( *next, *pre ) ){ // source points are typically perfectly equal hence small epsilon
+				// if( vector3_equal_epsilon( *prev, *nex, ON_EPSILON ) && vector3_equal_epsilon( *next, *pre, ON_EPSILON ) ){
+					auto nnext = winding_next( w, next );
+					auto pprev = winding_prev( w, prev );
+					auto nnex = winding_next( win->points, nex );
+					auto ppre = winding_prev( win->points, pre );
+					// check if new point preserves convexity
+					Plane3 pplane( VectorNormalized( vector3_cross( bestNormal, *nnex - *pprev ) ), 0 );
+					pplane.dist() = vector3_dot( pplane.normal(), *pprev );
+					Plane3 nplane( VectorNormalized( vector3_cross( bestNormal, *nnext - *ppre ) ), 0 );
+					nplane.dist() = vector3_dot( nplane.normal(), *nnext );
+					double pd = plane3_distance_to_point( pplane, *prev );
+					double nd = plane3_distance_to_point( nplane, *next );
+					// insert
+					if( pd > -ON_EPSILON && nd > -ON_EPSILON ){
+						auto inserted = next;
+						for( auto ins = ppre; ins != nex; ins = winding_prev( win->points, ins ) )
+							inserted = w.insert( inserted, *ins );
+						// remove possible colinear points
+						auto iprev = winding_prev( w, inserted );
+						auto inext = inserted + win->points.size() - 2;
+						if( inext >= w.cend() )
+							inext -= w.size();
+						// remove higher iterator 1st to keep lower one valid
+						if( iprev > inext ){
+							std::swap( iprev, inext );
+							std::swap( pd, nd );
+						}
+						if( std::fabs( nd ) < ON_EPSILON )
+							w.erase( inext );
+						if( std::fabs( pd ) < ON_EPSILON && w.size() > 3 )
+							w.erase( iprev );
+
+						win1st.minmax.extend( win->minmax );
+						for( const ClipWinding& cw : win->frontWindings )
+							win1st.frontWindings.push_back( std::move( cw ) );
+						winSet.erase( ( ++win ).base() );
+						// inserted, restart the search
+						win = winSet.crbegin() - 1;
+					}
+					goto doNextWinding;
+				}
+			}
+		}
+		doNextWinding:		continue;
+	}
+
+	return winSetSize != winSet.size();
+}
 
 
 inline bool clipflags_doClip( const shaderInfo_t& si, const int spawnFlags ){
@@ -744,25 +973,25 @@ inline bool clipflags_doClip( const shaderInfo_t& si, const int spawnFlags ){
 	const bool fineFlags =
 		( si.clipModel && spf == 0 ) // default CLIPMODEL
 		|| ( spawnFlags & eClipFlags ) == eClipModel // default CLIPMODEL
-		|| spf == eExtrudeFaceNormals
-		|| spf == eExtrudeTerrain
-		|| spf == eExtrudeVertexNormals
-		|| spf == ePyramidalClip
-		|| spf == eExtrudeDownwards
-		|| spf == eExtrudeUpwards
-		|| spf == eAxialBackplane // default sides + axial backplane
-		|| spf == ( eExtrudeFaceNormals | ePyramidalClip ) // extrude 45
-		|| spf == ( eExtrudeTerrain | eMaxExtrude )
-		|| spf == ( eExtrudeTerrain | eAxialBackplane )
-		|| spf == ( eExtrudeVertexNormals | ePyramidalClip ) // vertex normals + don't check for sides, sticking outwards
+		|| spf == ( ePyramidalClip )
 		|| spf == ( ePyramidalClip | eAxialBackplane ) // pyramid with 3 of 4 sides axial (->small bsp)
+		|| spf == ( eExtrudeFaceNormals )
+		|| spf == ( eExtrudeFaceNormals | ePyramidalClip ) // extrude 45
+		|| spf == ( eExtrudeTerrain ) // automatic axial direction
+		|| spf == ( eExtrudeDownwards )
+		|| spf == ( eExtrudeUpwards )
 		|| spf == ( eExtrudeDownwards | eExtrudeUpwards )
-		|| spf == ( eExtrudeDownwards | eMaxExtrude )
-		|| spf == ( eExtrudeDownwards | eAxialBackplane )
-		|| spf == ( eExtrudeDownwards | eExtrudeUpwards | eMaxExtrude )
-		|| spf == ( eExtrudeDownwards | eExtrudeUpwards | eAxialBackplane )
-		|| spf == ( eExtrudeUpwards | eMaxExtrude )
-		|| spf == ( eExtrudeUpwards | eAxialBackplane );
+		|| spf == ( eAxialBackplane ) // default sides + axial backplane
+		|| spf == ( eAxialBackplane | eExtrudeTerrain )
+		|| spf == ( eAxialBackplane | eExtrudeDownwards )
+		|| spf == ( eAxialBackplane | eExtrudeUpwards )
+		|| spf == ( eAxialBackplane | eExtrudeDownwards | eExtrudeUpwards )
+		|| spf == ( eMaxExtrude | eExtrudeTerrain )
+		|| spf == ( eMaxExtrude | eExtrudeDownwards )
+		|| spf == ( eMaxExtrude | eExtrudeUpwards )
+		|| spf == ( eMaxExtrude | eExtrudeDownwards | eExtrudeUpwards )
+		|| spf == ( eExtrudeVertexNormals )
+		|| spf == ( eExtrudeVertexNormals | ePyramidalClip ); // vertex normals + don't check for sides, sticking outwards
 
 	if( ( spawnFlags & eClipFlags ) && !fineFlags )
 		Sys_Warning( "nonexistent clipping mode selected\n" );
@@ -775,90 +1004,65 @@ inline bool clipflags_doClip( const shaderInfo_t& si, const int spawnFlags ){
 static void ClipModel( const int spawnFlags, float clipDepth, ClipTriangles& clipTriangles, const char *modelName, entity_t& entity ){
 	const int spf = ( spawnFlags & ( eClipFlags & ~eClipModel ) ); // w/e eClipModel flag, if others are set
 
-	float limDepth = 0;
+	float limDepth = 0; // for all eAxialBackplane cases
 	if ( clipDepth < 0 ){
 		limDepth = -clipDepth;
 		clipDepth = 2.f;
 	}
 
+	if ( spf & ( eExtrudeTerrain | eMaxExtrude ) ){
+		for( auto& [ _, triSet ] : clipTriangles.triangleSets ){
+			for( const ClipWinding& tri : triSet )
+			{
+				clipTriangles.avgDirections[ tri.dsIdx ] += tri.plane.normal();	// calculate average mesh facing direction for eExtrudeTerrain
+				for( const DoubleVector3& p : tri.points )  // get mesh minmax for eMaxExtrude
+					clipTriangles.minmaxes[ tri.dsIdx ].extend( p );
+			}
+		}
+		// unify avg direction
+		for( Vector3& avgDirection : clipTriangles.avgDirections ){
+			if ( avgDirection == g_vector3_identity )
+				avgDirection = g_vector3_axis_z;
+			normal_make_axial( avgDirection );
+		}
+	}
+
+	const auto printWarning = [modelName]( const winding_accu_t& w ){
+		Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
+		             w[0][0], w[0][1], w[0][2],
+		             w[1][0], w[1][1], w[1][2],
+		             w[2][0], w[2][1], w[2][2], modelName );
+	};
+
 	// mergable triangles support
 	if( ( /* si.clipModel && */ spf == 0 ) // default CLIPMODEL
 		|| ( spawnFlags & eClipFlags ) == eClipModel //default CLIPMODEL
-		|| spf == eExtrudeFaceNormals
-		|| spf == ePyramidalClip
+		|| spf == ( ePyramidalClip )
+		|| spf == ( ePyramidalClip | eAxialBackplane ) // pyramid with 3 of 4 sides axial (->small bsp)
+		|| spf == ( eExtrudeFaceNormals )
 		|| spf == ( eExtrudeFaceNormals | ePyramidalClip ) // extrude 45
-		|| spf == ( ePyramidalClip | eAxialBackplane )
+		|| spf == ( eExtrudeTerrain ) // extrusion direction control, normal backplane
+		|| spf == ( eExtrudeDownwards )
+		|| spf == ( eExtrudeUpwards )
+		|| spf == ( eExtrudeDownwards | eExtrudeUpwards )
 	){
 		//? consider MAX_BUILD_SIDES MAX_POINTS_ON_WINDING
-		//? try to merge windings too
-		for( auto& [ _, triSet ] : clipTriangles.triangleSets )
+		for( auto& [ _, winSet ] : clipTriangles.triangleSets )
 		{
-			std::sort( triSet.begin(), triSet.end() );
-			while( !triSet.empty() )
+			std::vector<ClipWinding> winSet2;
+			std::sort( winSet.begin(), winSet.end() );
+			bool somethingMerged = false;
+			while( !winSet.empty() || ( winSet.swap( winSet2 ), std::ranges::reverse( winSet ), std::exchange( somethingMerged, false ) ) )
 			{
-				ClipTriangle tri1st = triSet.back();
-				triSet.pop_back();
-				ClipSides cs( *tri1st.ds->shaderInfo, entity, clipDepth );
-				winding_accu_t& w = cs.fw;
-				w.assign( tri1st.points.cbegin(), tri1st.points.cend() );
-				// try to merge some triangles
-				for( auto tri = triSet.crbegin(); tri != triSet.crend(); ++tri ){
-					// sorted by distance; break on distance range overflow
-					if( tri->plane.dist() > tri1st.plane.dist() + 1 ) // big epsilon, points still can be there
-						break;
-					// points off plane
-					// const double epsilon = distanceEpsilon * 2;
-					const double epsilon = ON_EPSILON / 2;
-					if( std::fabs( plane3_distance_to_point( tri1st.plane, tri->points[0] ) ) > epsilon
-					 || std::fabs( plane3_distance_to_point( tri1st.plane, tri->points[1] ) ) > epsilon
-					 || std::fabs( plane3_distance_to_point( tri1st.plane, tri->points[2] ) ) > epsilon )
-						continue;
-					// rough normal check; only catches inverted planes with dist 0?
-					if( !vector3_equal_epsilon( tri1st.plane.normal(), tri->plane.normal(), .1 ) )
-						continue;
-					// find matching points
-					for( auto prev = w.end() - 1, next = w.begin(); next != w.end(); prev = next++ )
-					{
-						for( auto pre = tri->points.cend() - 1, nex = tri->points.cbegin(); nex != tri->points.cend(); pre = nex++ )
-						{
-							if( VectorCompare( *prev, *nex ) && VectorCompare( *next, *pre ) ){ // source points are typically perfectly equal hence small epsilon
-							// if( vector3_equal_epsilon( *prev, *nex, ON_EPSILON ) && vector3_equal_epsilon( *next, *pre, ON_EPSILON ) ){
-								auto newPoint = ( nex + 1 != tri->points.cend() )? nex + 1 : tri->points.cbegin();
-								auto nnext = winding_next( w, next );
-								auto pprev = winding_prev( w, prev );
-								// check if new point preserves convexity
-								Plane3 pplane( VectorNormalized( vector3_cross( tri1st.plane.normal(), *newPoint - *pprev ) ), 0 );
-								pplane.dist() = vector3_dot( pplane.normal(), *pprev );
-								Plane3 nplane( VectorNormalized( vector3_cross( tri1st.plane.normal(), *nnext - *newPoint ) ), 0 );
-								nplane.dist() = vector3_dot( nplane.normal(), *nnext );
-								double pd = plane3_distance_to_point( pplane, *prev );
-								double nd = plane3_distance_to_point( nplane, *next );
-								// insert
-								if( pd > -ON_EPSILON && nd > -ON_EPSILON ){
-									auto inserted = w.insert( next, *newPoint );
-									triSet.erase( ( ++tri ).base() );
-									// inserted, restart the search
-									tri = triSet.crbegin() - 1;
-									// remove possible colinear points
-									auto inext = winding_next( w, inserted );
-									auto iprev = winding_prev( w, inserted );
-									// remove higher iterator 1st to keep lower one valid
-									if( iprev > inext ){
-										std::swap( iprev, inext );
-										std::swap( pd, nd );
-									}
-									if( std::fabs( nd ) < ON_EPSILON )
-										w.erase( inext );
-									if( std::fabs( pd ) < ON_EPSILON && w.size() > 3 )
-										w.erase( iprev );
-								}
-								goto doNextTriangle;
-							}
-						}
-					}
-					doNextTriangle:		continue;
-				}
+				ClipWinding& win = winSet2.emplace_back( std::move( winSet.back() ) );
+				winSet.pop_back();
+				somethingMerged |= windingMergeOthers( win, winSet );
+			}
 
+			for( ClipWinding& win : winSet )
+			{
+				ClipSides cs( *clipTriangles.modelSurfs[ win.dsIdx ]->shaderInfo, entity, clipDepth );
+				cs.fw.swap( win.points );
 				//% CheckWinding( CopyWindingAccuToRegular( cs.fw ) );
 
 				/* make plane for triangle */
@@ -866,63 +1070,39 @@ static void ClipModel( const int spawnFlags, float clipDepth, ClipTriangles& cli
 					if ( ( /* si.clipModel && */ spf == 0 ) || ( spawnFlags & eClipFlags ) == eClipModel ){	// default CLIPMODEL
 						clipModel_default( cs );
 					}
-					else if ( spf == eExtrudeFaceNormals ){
-						clipModel_faceNormals( cs );
-					}
-					else if ( spf == ePyramidalClip ){
+					else if ( spf == ( ePyramidalClip ) ){
 						clipModel_pyramidal( cs );
+					}
+					else if ( spf == ( ePyramidalClip | eAxialBackplane ) ){ // pyramid with 3 of 4 sides axial (->small bsp)
+						clipModel_axialPyramid( cs, limDepth );
+					}
+					else if ( spf == ( eExtrudeFaceNormals ) ){
+						clipModel_faceNormals( cs );
 					}
 					else if ( spf == ( eExtrudeFaceNormals | ePyramidalClip ) ){ // extrude 45
 						clipModel_45( cs );
 					}
-					else if ( spf == ( ePyramidalClip | eAxialBackplane ) ){ // pyramid with 3 of 4 sides axial (->small bsp)
-						clipModel_axialPyramid( cs, limDepth );
+					else if ( spf == ( eExtrudeTerrain ) // extrusion direction control, normal backplane
+					       || spf == ( eExtrudeDownwards )
+					       || spf == ( eExtrudeUpwards )
+					       || spf == ( eExtrudeDownwards | eExtrudeUpwards ) ){
+						clipModel_terrain( cs, clipModel_terrain_bestNormal( spf, cs.fplane.normal(), clipTriangles.avgDirections[ win.dsIdx ] ) );
 					}
 
 					if ( cs.create_brush() ) {
 						continue; // success
 					}
 				}
-				Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
-				             cs.fw[0][0], cs.fw[0][1], cs.fw[0][2],
-				             cs.fw[1][0], cs.fw[1][1], cs.fw[1][2],
-				             cs.fw[2][0], cs.fw[2][1], cs.fw[2][2], modelName );
+				printWarning( cs.fw );
 			}
 		}
 	}
-	else{ // no mergable triangles support
+	// no mergable triangles support
+	else if ( spf == ( eExtrudeVertexNormals )
+	       || spf == ( eExtrudeVertexNormals | ePyramidalClip ) // vertex normals + don't check for sides, sticking outwards
+	){
 		for( mapDrawSurface_t *ds : clipTriangles.modelSurfs )
 		{
-			MinMax minmax;
-			Vector3 avgDirection( 0 );
-			size_t axis;
-
-			//wont snap these in normal way, or will explode
-			// const double normalEpsilon_save = normalEpsilon;
-			//normalEpsilon = 0.000001;
-
-			if ( ( spf & eMaxExtrude ) || ( spf & eExtrudeTerrain ) ){
-
-				for ( auto idx = ds->indexes.cbegin(); idx != ds->indexes.cend(); idx += 3 ){
-					const Vector3 points[3]{ ds->verts[*( idx + 0 )].xyz,
-					                         ds->verts[*( idx + 1 )].xyz,
-					                         ds->verts[*( idx + 2 )].xyz };
-					if ( Plane3f plane; PlaneFromPoints( plane, points ) ){
-						if ( spf & eExtrudeTerrain )
-							avgDirection += plane.normal();	// calculate average mesh facing direction
-
-						for ( const auto& p : points ) // get min/max
-							minmax.extend( p );
-					}
-				}
-				//unify avg direction
-				if ( spf & eExtrudeTerrain ){
-					if ( avgDirection == g_vector3_identity )
-						avgDirection = g_vector3_axis_z;
-					axis = normal_make_axial( avgDirection );
-				}
-			}
-
 			/* walk triangle list */
 			for ( auto idx = ds->indexes.cbegin(); idx != ds->indexes.cend(); idx += 3 )
 			{
@@ -931,41 +1111,95 @@ static void ClipModel( const int spawnFlags, float clipDepth, ClipTriangles& cli
 				cs.fw.assign( { ds->verts[*( idx + 0 )].xyz,
 				                ds->verts[*( idx + 1 )].xyz,
 				                ds->verts[*( idx + 2 )].xyz } );
-
 				/* make plane for triangle */
 				if ( cs.construct() ) {
-					if ( spf == eExtrudeTerrain
-					  || spf == eExtrudeDownwards
-					  || spf == eExtrudeUpwards
-					  || spf == eAxialBackplane
-					  || spf == ( eExtrudeTerrain | eMaxExtrude )
-					  || spf == ( eExtrudeTerrain | eAxialBackplane )
-					  || spf == ( eExtrudeDownwards | eExtrudeUpwards )
-					  || spf == ( eExtrudeDownwards | eMaxExtrude )
-					  || spf == ( eExtrudeDownwards | eAxialBackplane )
-					  || spf == ( eExtrudeDownwards | eExtrudeUpwards | eMaxExtrude )
-					  || spf == ( eExtrudeDownwards | eExtrudeUpwards | eAxialBackplane )
-					  || spf == ( eExtrudeUpwards | eMaxExtrude )
-					  || spf == ( eExtrudeUpwards | eAxialBackplane ) ){
-						clipModel_terrain( cs, spf, axis, avgDirection, minmax, limDepth );
-					}
-					else if ( spf == eExtrudeVertexNormals
-					       || spf == ( eExtrudeVertexNormals | ePyramidalClip ) ){ // vertex normals + don't check for sides, sticking outwards
-						clipModel_vertexNormals( cs, { ds->verts[*( idx + 0 )].normal,
-						                               ds->verts[*( idx + 1 )].normal,
-						                               ds->verts[*( idx + 2 )].normal }, spf & ePyramidalClip );
-					}
-
+					clipModel_vertexNormals( cs, { ds->verts[*( idx + 0 )].normal,
+					                               ds->verts[*( idx + 1 )].normal,
+					                               ds->verts[*( idx + 2 )].normal }, spf & ePyramidalClip );
 					if ( cs.create_brush() ) {
 						continue; // success
 					}
 				}
-				Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
-				             cs.fw[0][0], cs.fw[0][1], cs.fw[0][2],
-				             cs.fw[1][0], cs.fw[1][1], cs.fw[1][2],
-				             cs.fw[2][0], cs.fw[2][1], cs.fw[2][2], modelName );
+				printWarning( cs.fw );
 			}
-			// normalEpsilon = normalEpsilon_save;
+		}
+	}
+	// volumetric merge support
+	else if ( spf == ( eAxialBackplane )
+	       || spf == ( eAxialBackplane | eExtrudeTerrain )
+	       || spf == ( eAxialBackplane | eExtrudeDownwards )
+	       || spf == ( eAxialBackplane | eExtrudeUpwards )
+	       || spf == ( eAxialBackplane | eExtrudeDownwards | eExtrudeUpwards )
+	       || spf == ( eMaxExtrude | eExtrudeTerrain )
+	       || spf == ( eMaxExtrude | eExtrudeDownwards )
+	       || spf == ( eMaxExtrude | eExtrudeUpwards )
+	       || spf == ( eMaxExtrude | eExtrudeDownwards | eExtrudeUpwards )
+	){
+		for( auto& [ _, winSet ] : clipTriangles.triangleSets )
+		{
+			// merge coplanars 1st
+			std::vector<ClipWinding> winSet2;
+			std::sort( winSet.begin(), winSet.end() );
+			bool somethingMerged = false;
+			while( !winSet.empty() || ( winSet.swap( winSet2 ), std::ranges::reverse( winSet ), std::exchange( somethingMerged, false ) ) )
+			{
+				ClipWinding& win = winSet2.emplace_back( std::move( winSet.back() ) );
+				winSet.pop_back();
+				somethingMerged |= windingMergeOthers( win, winSet );
+			}
+
+			// process non clippable with choosen bestNormal
+			std::erase_if( winSet, [&]( ClipWinding& win ){
+				win.bestNormal = clipModel_terrain_bestNormal( spf, win.plane.normal(), clipTriangles.avgDirections[ win.dsIdx ] );
+				if ( vector3_dot( win.plane.normal(), win.bestNormal ) < c_extrude_epsilon ){ // can't clip with this bestNormal, fallback
+					ClipSides cs( *clipTriangles.modelSurfs[ win.dsIdx ]->shaderInfo, entity, clipDepth );
+					cs.fw.swap( win.points );
+
+					if ( cs.construct() ) {
+						clipModel_default( cs );
+
+						if ( cs.create_brush() ) {
+							return true; // success, erase
+						}
+					}
+					printWarning( cs.fw );
+					return true; // erase
+				}
+				else{ // otherwise copy self to .frontWindings for volumetric merge
+					win.frontWindings.push_back( win );
+					return false; // keep
+				}
+			} );
+
+			// volumetric merge
+			while( !winSet.empty() || ( winSet.swap( winSet2 ), std::ranges::reverse( winSet ), std::exchange( somethingMerged, false ) ) )
+			{
+				ClipWinding& win = winSet2.emplace_back( std::move( winSet.back() ) );
+				winSet.pop_back();
+				somethingMerged |= windingMergeConvex( win, winSet, win.bestNormal );
+			}
+
+			for( ClipWinding& win : winSet )
+			{
+				ClipSides cs( *clipTriangles.modelSurfs[ win.dsIdx ]->shaderInfo, entity, clipDepth );
+				cs.fw.swap( win.points );
+
+				// accumulate minmaxes for eMaxExtrude
+				MinMax minmax;
+				for( ClipWinding& w : win.frontWindings )
+					minmax.extend( clipTriangles.minmaxes[ w.dsIdx ] );
+
+				/* make plane for triangle */
+				if ( win.isplanar()? cs.construct() : cs.construct_volumetric( win.frontWindings ) ) {
+
+					clipModel_terrainSpecialBack( cs, spf, win.bestNormal, minmax, limDepth );
+
+					if ( win.isplanar()? cs.create_brush() : cs.create_volumetric_brush( win.frontWindings ) ) {
+						continue; // success
+					}
+				}
+				printWarning( cs.fw );
+			}
 		}
 	}
 }
@@ -1045,7 +1279,7 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		}
 	}
 
-	ClipTriangles clipTriangles;
+	ClipTriangles clipTriangles( model->m_meshes.size() );
 	/* each surface on the model will become a new map drawsurface */
 	//%	Sys_FPrintf( SYS_VRB, "Model %s has %d surfaces\n", name, numSurfaces );
 	for ( const auto& surface : model->m_meshes )
@@ -1202,15 +1436,12 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 		}
 
 		if( clipflags_doClip( si, spawnFlags) ){
-			clipTriangles.modelSurfs.push_back( &ds );
-
-			const auto key = std::tuple{ ds.shaderInfo->surfaceFlags,
-			                             ds.shaderInfo->contentFlags,
-			                             ds.shaderInfo->compileFlags };
-			auto& triangles = clipTriangles.triangleSets[ key ];
+			auto& triangles = clipTriangles.triangleSets[ std::tuple{ ds.shaderInfo->surfaceFlags,
+			                                                          ds.shaderInfo->contentFlags,
+			                                                          ds.shaderInfo->compileFlags } ];
 			for ( const aiFace& face : Span( mesh->mFaces, mesh->mNumFaces ) )
 			{
-				std::array<DoubleVector3, 3> points;
+				winding_accu_t points( 3 );
 				for( size_t i = 0; i < 3; ++i ){
 					auto& v = mesh->mVertices[face.mIndices[i]];
 					points[i] = matrix4_transformed_point( transform, DoubleVector3( v.x, v.y, v.z ) );
@@ -1219,9 +1450,10 @@ void InsertModel( const char *name, const char *skin, int frame, const Matrix4& 
 					std::swap( points[1], points[2] );
 				}
 				if ( Plane3 plane; PlaneFromPoints( plane, points.data() ) ){
-					triangles.emplace_back( ClipTriangle{ .plane = plane, .points = points, .ds = &ds } );
+					triangles.push_back( ClipWinding( plane, std::move( points ), clipTriangles.modelSurfs.size() ) );
 				}
 			}
+			clipTriangles.modelSurfs.push_back( &ds );
 		}
 	}
 

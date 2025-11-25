@@ -191,8 +191,9 @@ Q3map2:
 	* fix AP texture alignment deduction during bsp to map decompilation
 	* -format map_220: bsp to map of Valve220 format conversion
 	* support separated _ambient, _color per group, misc_model entities
-	* merge coplanar triangles for model autoclip in default, pyramidal, face normals, 45, axial pyramid modes
+	* merge coplanar triangles for model autoclip in default, pyramidal, face normals, 45, axial pyramid, terrain, up, down modes
 	* Q3MAP2_EXPERIMENTAL_OFFSET_WINDING_CREATION for higher windings precision
+	* volumetric merge of triangles for model autoclip in axial backplane, max extrude modes
 
 
 

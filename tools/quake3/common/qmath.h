@@ -79,6 +79,12 @@ struct MinMax___
 		return other.maxs.x() >= mins.x() && other.maxs.y() >= mins.y() && other.maxs.z() >= mins.z()
 		    && other.mins.x() <= maxs.x() && other.mins.y() <= maxs.y() && other.mins.z() <= maxs.z();
 	}
+	// true, if there is an intersection within epsilon
+	template<typename U, typename E>
+	bool test( const MinMax___<U>& other, const E epsilon ) const {
+		return other.maxs.x() >= mins.x() - epsilon && other.maxs.y() >= mins.y() - epsilon && other.maxs.z() >= mins.z() - epsilon
+		    && other.mins.x() <= maxs.x() + epsilon && other.mins.y() <= maxs.y() + epsilon && other.mins.z() <= maxs.z() + epsilon;
+	}
 	// true, if other is completely enclosed by this //! implicitly requires this->valid() or zero volume
 	template<typename U>
 	bool surrounds( const MinMax___<U>& other ) const {

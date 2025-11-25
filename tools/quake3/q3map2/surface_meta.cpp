@@ -31,16 +31,10 @@
 /* dependencies */
 #include "q3map2.h"
 #include "tjunction.h"
+#include "qspatial.h"
 #include "timer.h"
 #include <map>
 
-
-const Plane3f c_spatial_sort_plane( 0.786868, 0.316861, 0.529564, 0 );
-const float c_spatial_EQUAL_EPSILON = EQUAL_EPSILON * 2;
-
-inline float spatial_distance( const Vector3& point ){
-	return plane3_distance_to_point( c_spatial_sort_plane, point );
-}
 
 struct metaTriangle_t;
 struct metaVertex_t : public bspDrawVert_t
@@ -55,16 +49,6 @@ struct metaVertex_t : public bspDrawVert_t
 using MetaVertexGroups = std::multimap
 <float, // spatial_distance( std::list<metaVertex_t>>.front().xyz )
 std::list<metaVertex_t>>; // must be maintained non empty
-
-struct MinMax1D
-{
-	float min, max;
-	MinMax1D() : min( std::numeric_limits<float>::max() ), max( std::numeric_limits<float>::lowest() ){}
-	void extend( float val ){
-		value_minimize( min, val );
-		value_maximize( max, val );
-	}
-};
 
 /* ydnar: metasurfaces are constructed from lists of metatriangles so they can be merged in the best way */
 struct metaTriangle_t
