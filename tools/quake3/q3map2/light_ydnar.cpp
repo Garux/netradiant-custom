@@ -158,7 +158,6 @@ Vector3b ColorToBytes( const Vector3& color, float scale ){
 #define EQUAL_NORMAL_EPSILON    0.01f
 
 void SmoothNormals(){
-	int fOld;
 	float shadeAngle, defaultShadeAngle, maxShadeAngle;
 	int indexes[ MAX_SAMPLES ];
 	Vector3 votes[ MAX_SAMPLES ];
@@ -209,17 +208,14 @@ void SmoothNormals(){
 	}
 
 	/* init pacifier */
-	fOld = -1;
+	Pacifier pacifier( numBSPDrawVerts );
 	Timer timer;
 
 	/* go through the list of vertexes */
 	for ( int i = 0; i < numBSPDrawVerts; ++i )
 	{
 		/* print pacifier */
-		if ( const int f = 10 * i / numBSPDrawVerts; f != fOld ) {
-			fOld = f;
-			Sys_Printf( "%i...", f );
-		}
+		++pacifier;
 
 		/* already smoothed? */
 		if ( smoothed[ i ] ) {

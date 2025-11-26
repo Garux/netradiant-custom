@@ -1460,6 +1460,24 @@ public:
 };
 
 
+template<int printf_flag = SYS_STD>
+class Pacifier
+{
+	const int jobs;
+	int jobs_counter;
+	int counter;
+public:
+	Pacifier( int jobs ) : jobs( jobs ), jobs_counter( jobs ), counter( 0 ){
+	}
+	void operator++(){
+		if ( ( jobs_counter += 10 ) > jobs ) {
+			jobs_counter -= jobs;
+			Sys_FPrintf( printf_flag, "%d...", counter++ );
+		}
+	}
+};
+
+
 /* -------------------------------------------------------------------------------
 
    prototypes

@@ -626,7 +626,7 @@ static void ProjectDecalOntoTriangles( decalProjector_t& dp, const mapDrawSurfac
  */
 
 void MakeEntityDecals( const entity_t& e ){
-	int i, j, fOld;
+	int i, j;
 	decalProjector_t dp;
 
 
@@ -637,17 +637,14 @@ void MakeEntityDecals( const entity_t& e ){
 	entityOrigin.set( 0 );
 
 	/* init pacifier */
-	fOld = -1;
+	Pacifier<SYS_VRB> pacifier( numProjectors );
 	Timer timer;
 
 	/* walk the list of decal projectors */
 	for ( i = 0; i < numProjectors; ++i )
 	{
 		/* print pacifier */
-		if ( const int f = 10 * i / numProjectors; f != fOld ) {
-			fOld = f;
-			Sys_FPrintf( SYS_VRB, "%d...", f );
-		}
+		++pacifier;
 
 		/* get projector */
 		TransformDecalProjector( &projectors[ i ], g_vector3_axes, e.origin, &dp );

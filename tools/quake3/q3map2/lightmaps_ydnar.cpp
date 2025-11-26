@@ -1167,7 +1167,7 @@ void SetupSurfaceLightmaps(){
 
 void StitchSurfaceLightmaps(){
 	int i, j, x, y, x2, y2,
-	    numStitched, numCandidates, numLuxels, fOld;
+	    numStitched, numCandidates, numLuxels;
 	rawLightmap_t   *lm, *a, *b, *c[ MAX_STITCH_CANDIDATES ];
 	float           sampleSize, totalColor;
 
@@ -1179,7 +1179,7 @@ void StitchSurfaceLightmaps(){
 	Sys_Printf( "--- StitchSurfaceLightmaps ---\n" );
 
 	/* init pacifier */
-	fOld = -1;
+	Pacifier pacifier( numRawLightmaps );
 	Timer timer;
 
 	/* walk the list of raw lightmaps */
@@ -1187,10 +1187,7 @@ void StitchSurfaceLightmaps(){
 	for ( i = 0; i < numRawLightmaps; ++i )
 	{
 		/* print pacifier */
-		if ( const int f = 10 * i / numRawLightmaps; f != fOld ) {
-			fOld = f;
-			Sys_Printf( "%i...", f );
-		}
+		++pacifier;
 
 		/* get lightmap a */
 		a = &rawLightmaps[ i ];

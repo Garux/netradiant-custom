@@ -792,17 +792,14 @@ void MakeEntityMetaTriangles( const entity_t& e ){
 	Sys_FPrintf( SYS_VRB, "--- MakeEntityMetaTriangles ---\n" );
 
 	/* init pacifier */
-	int fOld = -1;
+	Pacifier<SYS_VRB> pacifier( numMapDrawSurfs - e.firstDrawSurf );
 	Timer timer;
 
-	/* walk the list of surfaces in the entity */
+	/* walk the list of surfaces in the entity */ /* numMapDrawSurfs increases if patchMeta */
 	for ( int i = e.firstDrawSurf; i < numMapDrawSurfs; ++i )
 	{
 		/* print pacifier */
-		if ( const int f = 10 * ( i - e.firstDrawSurf ) / ( numMapDrawSurfs - e.firstDrawSurf ); f != fOld ) {
-			fOld = f;
-			Sys_FPrintf( SYS_VRB, "%d...", f );
-		}
+		++pacifier;
 
 		/* get surface */
 		mapDrawSurface_t& ds = mapDrawSurfs[ i ];
@@ -917,7 +914,7 @@ static void CreateEdge( const Plane3f& plane, const Vector3& a, const Vector3& b
 
 void FixMetaTJunctions(){
 #if 0
-	int i, j, k, fOld, vertIndex, triIndex, numTJuncs;
+	int i, j, k, vertIndex, triIndex, numTJuncs;
 	metaTriangle_t  *tri, *newTri;
 	shaderInfo_t    *si;
 	bspDrawVert_t   *a, *b, *c, junc;
@@ -933,7 +930,7 @@ void FixMetaTJunctions(){
 	Sys_FPrintf( SYS_VRB, "--- FixMetaTJunctions ---\n" );
 
 	/* init pacifier */
-	fOld = -1;
+	Pacifier<SYS_VRB> pacifier( numMetaTriangles );
 	Timer timer;
 
 	/* walk triangle list */
@@ -944,10 +941,7 @@ void FixMetaTJunctions(){
 		tri = &metaTriangles[ i ];
 
 		/* print pacifier */
-		if ( const int f = 10 * i / numMetaTriangles; f != fOld ) {
-			fOld = f;
-			Sys_FPrintf( SYS_VRB, "%d...", f );
-		}
+		++pacifier;
 
 		/* attempt to early out */
 		si = tri->si;
@@ -1448,10 +1442,12 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t& ds, const metaTriangle_t&
    creates map drawsurface(s) from the list of possibles
  */
 
-static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
+static void MetaTrianglesToSurface(){
 	/* allocate arrays */
 	DrawVerts verts;
 	DrawIndexes indexes;
+
+	Pacifier<SYS_VRB> pacifier( metaTriangles.size() );
 
 	/* walk the list of triangles */
 	for ( auto& seed : metaTriangles )
@@ -1526,7 +1522,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 
 		/* add the first triangle */
 		if ( AddMetaTriangleToSurface( ds, seed, verts, indexes, texMinMax, sorted_indices, false ) ) {
-			( *numAdded )++;
+			++pacifier;
 		}
 		expand_cloud( seed );
 
@@ -1537,12 +1533,6 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 		/* progressively walk the list until no more triangles can be added */
 		for( bool added = true; added; )
 		{
-			/* print pacifier */
-			if ( const int f = 10 * *numAdded / metaTriangles.size(); f > *fOld ) {
-				*fOld = f;
-				Sys_FPrintf( SYS_VRB, "%d...", f );
-			}
-
 			/* reset best score */
 			metaTriangle_t *best = nullptr;
 			int bestScore = 0;
@@ -1573,7 +1563,7 @@ static void MetaTrianglesToSurface( int *fOld, int *numAdded ){
 			/* add best candidate */
 			if ( best != nullptr && bestScore > ADEQUATE_SCORE ) {
 				if ( AddMetaTriangleToSurface( ds, *best, verts, indexes, texMinMax, sorted_indices, false ) ) {
-					( *numAdded )++;
+					++pacifier;
 					expand_cloud( *best );
 				}
 
@@ -1616,9 +1606,7 @@ void MergeMetaTriangles(){
 	Sys_FPrintf( SYS_VRB, "--- MergeMetaTriangles ---\n" );
 
 	/* init pacifier */
-	int fOld = -1;
 	Timer timer;
-	int numAdded = 0;
 #if 1
 	for( metaTriangle_t& tri : metaTriangles ){
 		for( const metaVertex_t *vert : tri.m_vertices ){
@@ -1627,7 +1615,7 @@ void MergeMetaTriangles(){
 	}
 	metaTriangles.sort( CompareMetaTriangles<true>() );
 #endif
-	MetaTrianglesToSurface( &fOld, &numAdded );
+	MetaTrianglesToSurface();
 
 	/* clear meta triangle list */
 	ClearMetaTriangles();
