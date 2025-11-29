@@ -697,15 +697,6 @@ struct side_t
 };
 
 
-struct sideRef_t
-{
-	sideRef_t           *next;
-	const side_t        &side;
-	sideRef_t( sideRef_t *next, const side_t &side ) : next( next ), side( side ){
-	}
-};
-
-
 /* ydnar: generic index mapping for entities (natural extension of terrain texturing) */
 struct indexMap_t
 {
@@ -794,8 +785,10 @@ public:
 	}
 	mesh_t& operator=( const mesh_t& ) = delete;
 	mesh_t& operator=( mesh_t&& other ) noexcept {
-		std::destroy_at( this );
-		std::construct_at( this, std::move( other ) );
+		if( this != &other ){
+			std::destroy_at( this );
+			std::construct_at( this, std::move( other ) );
+		}
 		return *this;
 	};
 	~mesh_t(){
@@ -898,7 +891,7 @@ constexpr const char *surfaceTypeName( ESurfaceType type ){
 
 
 /* ydnar: this struct needs an overhaul (again, heh) */
-struct mapDrawSurface_t
+struct mapDrawSurface_t_params
 {
 	ESurfaceType type;
 	bool planar;
@@ -908,24 +901,15 @@ struct mapDrawSurface_t
 	bool skybox;                            /* ydnar: yet another fun hack */
 	bool backSide;                          /* ydnar: q3map_backShader support */
 
-	mapDrawSurface_t *parent;        /* ydnar: for cloned (skybox) surfaces to share lighting data */
-	mapDrawSurface_t *clone;         /* ydnar: for cloned surfaces */
-	mapDrawSurface_t *cel;           /* ydnar: for cloned cel surfaces */
+	class mapDrawSurface_t *parent;        /* ydnar: for cloned (skybox) surfaces to share lighting data */
+	class mapDrawSurface_t *clone;         /* ydnar: for cloned surfaces */
+	class mapDrawSurface_t *cel;           /* ydnar: for cloned cel surfaces */
 
 	shaderInfo_t        *shaderInfo;
 	shaderInfo_t        *celShader;
 	const brush_t       *mapBrush;
-	sideRef_t           *sideRef;
 
 	int fogNum;
-
-	/* vertexes and triangles */
-	DrawVerts verts;
-	DrawIndexes indexes;
-
-	int numVerts() const {
-		return verts.size();
-	};
 
 	int planeNum = -1;
 	Vector3 lightmapOrigin{ 0 };            /* also used for flares */
@@ -961,11 +945,26 @@ struct mapDrawSurface_t
 	/* ydnar: editor/useful numbering */
 	int entityNum;
 	int surfaceNum;
+};
+struct mapDrawSurface_t : public mapDrawSurface_t_params
+{
+	/* vertexes and triangles */
+	DrawVerts verts;
+	DrawIndexes indexes;
 
-	void addSideRef( const side_t *side ){
-		if ( side != nullptr ) {
-			sideRef = new sideRef_t( sideRef, *side );
-		}
+	int numVerts() const {
+		return verts.size();
+	};
+
+	std::vector<const side_t*> sideRefs;
+
+	void addSideRef( const side_t *side ){ // note might store only unique refs
+		if ( side != nullptr )
+			sideRefs.push_back( side );
+	}
+
+	void copyParams( const mapDrawSurface_t& other ){
+		static_cast<mapDrawSurface_t_params&>( *this ) = static_cast<const mapDrawSurface_t_params&>( other );
 	}
 };
 

@@ -305,7 +305,7 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t& ds ){
 			/* build a metatriangle */
 			metaTriangle_t src;
 			src.si                = ds.shaderInfo;
-			src.side = ( ds.sideRef != nullptr ? &ds.sideRef->side : nullptr );
+			src.side = ( ds.sideRefs.empty()? nullptr : ds.sideRefs.front() );
 			src.entityNum         = ds.entityNum;
 			src.surfaceNum        = ds.surfaceNum;
 			src.planeNum          = ds.planeNum;
@@ -359,7 +359,7 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 
 	/* make a copy of the drawsurface */
 	mapDrawSurface_t& dsNew = AllocDrawSurface( ESurfaceType::Meta );
-	dsNew = ds;
+	dsNew.copyParams( ds );
 
 	/* if the patch is nonsolid, then discard it */
 	if ( !( ds.shaderInfo->compileFlags & C_SOLID ) && !( ds.shaderInfo->contentFlags & GetRequiredSurfaceParm<"playerclip">().contentFlags ) ) {
@@ -368,7 +368,6 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 
 	/* basic transmogrification */
 	dsNew.type = ESurfaceType::Meta;
-	dsNew.indexes.clear();
 	dsNew.indexes.reserve( ( mesh.width - 1 ) * ( mesh.height - 1 ) * 6 );
 
 	/* copy the verts in */

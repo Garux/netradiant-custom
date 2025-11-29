@@ -243,7 +243,7 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 
 		/* ydnar: do this the hacky right way */
 		mapDrawSurface_t& newds = AllocDrawSurface( ESurfaceType::Patch );
-		newds = ds;
+		newds.copyParams( ds );
 		newds.patchWidth  = outside[ i ].width;
 		newds.patchHeight = outside[ i ].height;
 		newds.verts.assign( outside[ i ].begin(), outside[ i ].end() );
@@ -306,10 +306,10 @@ static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t& ds, con
 
 
 	/* dummy check */
-	if ( ds.sideRef == nullptr ) {
+	if ( ds.sideRefs.empty() ) {
 		return false;
 	}
-	const side_t& sideRef = ds.sideRef->side;
+	const side_t& sideRef = *ds.sideRefs.front();
 
 	/* initial setup */
 	winding_t w = WindingFromDrawSurf( ds );
@@ -369,8 +369,7 @@ static bool ChopFaceSurfaceByBrush( const entity_t& e, mapDrawSurface_t& ds, con
 	}
 
 	/* copy new to original */
-	ClearSurface( ds );
-	ds = *newds;
+	ds = std::move( *newds );
 
 	/* didn't really add a new drawsurface... :) */
 	numMapDrawSurfs--;

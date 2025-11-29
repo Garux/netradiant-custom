@@ -107,11 +107,10 @@ mapDrawSurface_t *CloneSurface( const mapDrawSurface_t& src, shaderInfo_t *si ){
 	/* allocate a new surface */
 	mapDrawSurface_t& ds = AllocDrawSurface( src.type );
 
-	/* copy it */
-	ds = src;
-
-	/* destroy side reference */
-	ds.sideRef = nullptr;
+	/* copy it besides side references */
+	ds.copyParams( src );
+	ds.verts = src.verts;
+	ds.indexes = src.indexes;
 
 	/* set shader */
 	ds.shaderInfo = si;
@@ -195,6 +194,7 @@ void ClearSurface( mapDrawSurface_t& ds ){
 	ds.planeNum = -1;
 	ds.verts = DrawVerts(); // deallocate
 	ds.indexes = DrawIndexes(); // deallocate
+	ds.sideRefs = decltype( ds.sideRefs )(); // deallocate
 }
 
 
@@ -1085,13 +1085,13 @@ void SubdivideFaceSurfaces( const entity_t& e ){
 	for ( mapDrawSurface_t& ds : Span( mapDrawSurfs + e.firstDrawSurf, mapDrawSurfs + numMapDrawSurfs ) )
 	{
 		/* only subdivide brush sides */
-		if ( ds.type != ESurfaceType::Face || ds.mapBrush == nullptr || ds.sideRef == nullptr ) {
+		if ( ds.type != ESurfaceType::Face || ds.mapBrush == nullptr || ds.sideRefs.empty() ) {
 			continue;
 		}
 
 		/* get bits */
 		const brush_t *brush = ds.mapBrush;
-		const side_t& side = ds.sideRef->side;
+		const side_t& side = *ds.sideRefs.front();
 
 		/* check subdivision for shader */
 		const shaderInfo_t *si = side.shaderInfo;
