@@ -487,7 +487,7 @@ void ClassifyEntitySurfaces( const entity_t& e ){
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- ClassifyEntitySurfaces ---\n" );
 
-	/* walk the surface list */
+	/* walk the surface list */ /* numMapDrawSurfs may grow in FinishSurface() */
 	for ( int i = e.firstDrawSurf; i < numMapDrawSurfs; ++i )
 	{
 		FinishSurface( mapDrawSurfs[ i ] );
@@ -2892,7 +2892,7 @@ void AddEntitySurfaceModels( entity_t& e ){
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- AddEntitySurfaceModels ---\n" );
 
-	/* walk the surface list */
+	/* walk the surface list */ /* numMapDrawSurfs grows here; do we want SurfaceModels on model surfaces? (can create infinite loop) */
 	for ( int i = e.firstDrawSurf; i < numMapDrawSurfs; ++i )
 		numSurfaceModels += AddSurfaceModels( mapDrawSurfs[ i ], e );
 }
@@ -2952,6 +2952,7 @@ void FilterDrawsurfsIntoTree( entity_t& e, tree_t& tree ){
 	numSurfs = 0;
 	numRefs = 0;
 	numSkyboxSurfaces = 0;
+	/* numMapDrawSurfs can grow here */
 	for ( int i = e.firstDrawSurf; i < numMapDrawSurfs; ++i )
 	{
 		/* get surface and try to early out */

@@ -500,10 +500,9 @@ void FixTJunctions( const entity_t& ent ){
 	// this actually creates axial edges, but it
 	// only creates originalEdge_t structures
 	// for non-axial edges
-	for ( int i = ent.firstDrawSurf; i < numMapDrawSurfs; ++i )
+	for ( mapDrawSurface_t& ds : Span( mapDrawSurfs + ent.firstDrawSurf, mapDrawSurfs + numMapDrawSurfs ) )
 	{
-		/* get surface and early out if possible */
-		mapDrawSurface_t& ds = mapDrawSurfs[ i ];
+		/* early out if possible */
 		const shaderInfo_t *si = ds.shaderInfo;
 		if ( ( si->compileFlags & C_NODRAW ) || si->autosprite || si->notjunc || ds.verts.empty() ) {
 			continue;
@@ -545,10 +544,9 @@ void FixTJunctions( const entity_t& ent ){
 	Sys_FPrintf( SYS_VRB, "%9d degenerate edges\n", c_degenerateEdges );
 
 	// insert any needed vertexes
-	for ( int i = ent.firstDrawSurf; i < numMapDrawSurfs; ++i )
+	for ( mapDrawSurface_t& ds : Span( mapDrawSurfs + ent.firstDrawSurf, mapDrawSurfs + numMapDrawSurfs ) )
 	{
-		/* get surface and early out if possible */
-		mapDrawSurface_t& ds = mapDrawSurfs[ i ];
+		/* early out if possible */
 		const shaderInfo_t *si = ds.shaderInfo;
 		if ( ( si->compileFlags & C_NODRAW ) || si->autosprite || si->notjunc || ds.verts.empty() || ds.type != ESurfaceType::Face ) {
 			continue;

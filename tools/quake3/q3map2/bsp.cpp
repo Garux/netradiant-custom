@@ -218,10 +218,9 @@ static void FixBrushSides( const entity_t& e ){
 	Sys_FPrintf( SYS_VRB, "--- FixBrushSides ---\n" );
 
 	/* walk list of drawsurfaces */
-	for ( int i = e.firstDrawSurf; i < numMapDrawSurfs; ++i )
+	for ( const mapDrawSurface_t& ds : Span( mapDrawSurfs + e.firstDrawSurf, mapDrawSurfs + numMapDrawSurfs ) )
 	{
-		/* get surface and try to early out */
-		const mapDrawSurface_t& ds = mapDrawSurfs[ i ];
+		/* try to early out */
 		if ( ds.outputNum < 0 ) {
 			continue;
 		}
