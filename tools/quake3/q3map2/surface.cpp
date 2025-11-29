@@ -797,7 +797,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
 	/* store off the original (potentially bad) normals */
 	MakeMeshNormals( copy );
 	for ( int i = 0; i < numVerts; ++i )
-		mesh.verts[ i ].normal = copy.verts[ i ].normal;
+		mesh.verts()[ i ].normal = copy.verts()[ i ].normal;
 
 	/* put the mesh on the curve */
 	PutMeshOnCurve( copy );
@@ -807,8 +807,8 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
 	for ( int i = 0; i < numVerts; ++i )
 	{
 		/* ydnar: only copy normals that are significantly different from the originals */
-		if ( vector3_dot( copy.verts[ i ].normal, mesh.verts[ i ].normal ) < 0.75f ) {
-			mesh.verts[ i ].normal = copy.verts[ i ].normal;
+		if ( vector3_dot( copy.verts()[ i ].normal, mesh.verts()[ i ].normal ) < 0.75f ) {
+			mesh.verts()[ i ].normal = copy.verts()[ i ].normal;
 		}
 	}
 
@@ -818,7 +818,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
 		/* get shader indexes for each point */
 		for ( int i = 0; i < numVerts; ++i )
 		{
-			shaderIndexes[ i ] = GetShaderIndexForPoint( *p.im, p.eMinmax, mesh.verts[ i ].xyz );
+			shaderIndexes[ i ] = GetShaderIndexForPoint( *p.im, p.eMinmax, mesh.verts()[ i ].xyz );
 			offsets[ i ] = p.im->offsets[ shaderIndexes[ i ] ];
 		}
 
@@ -830,27 +830,27 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
 
 	/* ydnar: gs mods */
 	mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Patch );
-	ds.entityNum = p.entityNum;
-	ds.castShadows = p.castShadows;
-	ds.recvShadows = p.recvShadows;
+	ds.entityNum    = p.entityNum;
+	ds.castShadows  = p.castShadows;
+	ds.recvShadows  = p.recvShadows;
 
 	ds.shaderInfo = si;
-	ds.sampleSize = p.lightmapSampleSize;
+	ds.sampleSize    = p.lightmapSampleSize;
 	ds.lightmapScale = p.lightmapScale;   /* ydnar */
-	ds.ambientColor = p.ambientColor;
-	ds.patchWidth = mesh.width;
+	ds.ambientColor  = p.ambientColor;
+	ds.patchWidth  = mesh.width;
 	ds.patchHeight = mesh.height;
-	ds.verts.assign( mesh.verts, mesh.verts + numVerts );
+	ds.verts.assign( mesh.begin(), mesh.end() );
 
 	ds.fogNum = FOG_INVALID;
 	ds.planeNum = -1;
 
-	ds.longestCurve = p.longestCurve;
+	ds.longestCurve  = p.longestCurve;
 	ds.maxIterations = p.maxIterations;
 
 	/* construct a plane from the first vert */
-	plane.normal() = mesh.verts[ 0 ].normal;
-	plane.dist() = vector3_dot( mesh.verts[ 0 ].xyz, plane.normal() );
+	plane.normal() = mesh.verts()[ 0 ].normal;
+	plane.dist() = vector3_dot( mesh.verts()[ 0 ].xyz, plane.normal() );
 
 	/* spew forth errors */
 	if ( vector3_length( plane.normal() ) < 0.001f ) {
@@ -858,7 +858,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
 	}
 
 	/* test each vert */
-	const bool planar = std::ranges::none_of( Span( mesh.verts, numVerts ), [&plane]( const bspDrawVert_t& vert ){
+	const bool planar = std::ranges::none_of( mesh, [&plane]( const bspDrawVert_t& vert ){
 			/* normal test */
 		return !VectorCompare( plane.normal(), vert.normal )
 			/* point-plane test */
@@ -868,7 +868,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
 	/* add a map plane */
 	if ( planar ) {
 		/* make a map plane */
-		ds.planeNum = FindFloatPlane( plane, Span( &mesh.verts[ 0 ].xyz, 1 ) );
+		ds.planeNum = FindFloatPlane( plane, Span( &mesh.verts()[ 0 ].xyz, 1 ) );
 		ds.lightmapVecs[ 2 ] = plane.normal();
 
 		/* push this normal to all verts (ydnar 2003-02-14: bad idea, small patches get screwed up) */
@@ -2641,7 +2641,7 @@ static void BiasSurfaceTextures( mapDrawSurface_t& ds ){
    adds models to a specified triangle, returns the number of models added
  */
 
-static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t& ds, const surfaceModel_t& model, const TriRef& tri, entity_t& entity ){
+static int AddSurfaceModelsToTriangle_r( const mapDrawSurface_t& ds, const surfaceModel_t& model, const TriRef& tri, entity_t& entity ){
 	int max, n, localNumSurfaceModels;
 
 
@@ -2779,7 +2779,7 @@ static int AddSurfaceModelsToTriangle_r( mapDrawSurface_t& ds, const surfaceMode
    adds a surface's shader models to the surface
  */
 
-static int AddSurfaceModels( mapDrawSurface_t& ds, entity_t& entity ){
+static int AddSurfaceModels( const mapDrawSurface_t& ds, entity_t& entity ){
 	/* dummy check */
 	if ( ds.shaderInfo == nullptr || ds.shaderInfo->surfaceModels.empty() ) {
 		return 0;

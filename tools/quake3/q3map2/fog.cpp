@@ -54,7 +54,7 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 	int frontAprox, backAprox;
 
 	for ( i = 0; i < 2; ++i ) {
-		const bspDrawVert_t *dv = in.verts;
+		const bspDrawVert_t *dv = in.verts();
 		c_front = 0;
 		c_back = 0;
 		c_on = 0;
@@ -196,8 +196,6 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 		return { std::move( f ), std::move( b ) };
 	else
 		return { std::move( b ), std::move( f ) };
-
-
 }
 
 
@@ -210,7 +208,7 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 	mesh_t      outside[MAX_BRUSH_SIDES];
 	int numOutside = 0;
 
-	mesh_t m( mesh_view_t ( ds.patchWidth, ds.patchHeight, ds.verts.data() ) );
+	mesh_t m( ds.patchWidth, ds.patchHeight, ds.verts.data() );
 
 	// only split by the top and bottom planes to avoid
 	// some messy patch clipping issues
@@ -224,13 +222,13 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 			// nothing actually contained inside
 			return false;
 		}
-		m.swap( *back );
+		m = std::move( *back );
 
 		if ( front ) {
 			if ( numOutside == MAX_BRUSH_SIDES ) {
 				Error( "MAX_BRUSH_SIDES" );
 			}
-			outside[ numOutside ].swap( *front );
+			outside[ numOutside ] = std::move( *front );
 			numOutside++;
 		}
 	}
@@ -246,9 +244,9 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 		/* ydnar: do this the hacky right way */
 		mapDrawSurface_t& newds = AllocDrawSurface( ESurfaceType::Patch );
 		newds = ds;
-		newds.patchWidth = outside[ i ].width;
+		newds.patchWidth  = outside[ i ].width;
 		newds.patchHeight = outside[ i ].height;
-		newds.verts.assign( outside[ i ].verts, outside[ i ].verts + outside[ i ].numVerts() );
+		newds.verts.assign( outside[ i ].begin(), outside[ i ].end() );
 	}
 
 	/* only rejigger this patch if it was chopped */
@@ -259,9 +257,9 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 		InvertMesh( m );
 
 		/* replace ds with m */
-		ds.patchWidth = m.width;
+		ds.patchWidth  = m.width;
 		ds.patchHeight = m.height;
-		ds.verts.assign( m.verts, m.verts + m.numVerts() );
+		ds.verts.assign( m.begin(), m.end() );
 	}
 
 	return true;

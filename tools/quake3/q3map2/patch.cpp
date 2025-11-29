@@ -258,7 +258,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 	/* find first valid vector */
 	for ( int i = 1; i < numVerts && delta[ 3 ] == 0; ++i )
 	{
-		delta.vec3() = m.verts[ 0 ].xyz - m.verts[ i ].xyz;
+		delta.vec3() = m.verts()[ 0 ].xyz - m.verts()[ i ].xyz;
 		delta[ 3 ] = VectorNormalize( delta.vec3() );
 	}
 
@@ -271,7 +271,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 		/* if all vectors match this or are zero, then this is a degenerate patch */
 		for ( int i = 1; i < numVerts && degenerate; ++i )
 		{
-			Vector4 delta2( m.verts[ 0 ].xyz - m.verts[ i ].xyz, 0 );
+			Vector4 delta2( m.verts()[ 0 ].xyz - m.verts()[ i ].xyz, 0 );
 			delta2[ 3 ] = VectorNormalize( delta2.vec3() );
 			if ( delta2[ 3 ] != 0 ) {
 				/* create inverse vector */
@@ -317,7 +317,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 	pm.shaderInfo = &ShaderInfoForShader( shader );
 
 	/* set mesh */
-	pm.mesh.swap( m );
+	pm.mesh = std::move( m );
 
 	/* set longest curve */
 	pm.longestCurve = longestCurve;
@@ -396,8 +396,8 @@ void PatchMapDrawSurfs( entity_t& e ){
 
 			meshes[m1].bordering[m2] =
 			meshes[m2].bordering[m1] =
-				std::ranges::any_of( Span( mesh1.verts, mesh1.numVerts() ), [mesh2]( const bspDrawVert_t& v1 ){
-					return std::ranges::any_of( Span( mesh2.verts, mesh2.numVerts() ), [v1]( const bspDrawVert_t& v2 ){
+				std::ranges::any_of( mesh1, [mesh2]( const bspDrawVert_t& v1 ){
+					return std::ranges::any_of( mesh2, [v1]( const bspDrawVert_t& v2 ){
 						return vector3_equal_epsilon( v1.xyz, v2.xyz, 1.f );
 					} );
 				} );
@@ -424,8 +424,8 @@ void PatchMapDrawSurfs( entity_t& e ){
 		{
 			if ( m.group ) {
 				m.grouped = true;
-				for( const bspDrawVert_t& v : Span( m.mesh.mesh.verts, m.mesh.mesh.numVerts() ) )
-					bounds.extend( v.xyz );;
+				for( const bspDrawVert_t& v : m.mesh.mesh )
+					bounds.extend( v.xyz );
 			}
 		}
 

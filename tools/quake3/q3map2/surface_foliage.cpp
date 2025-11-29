@@ -154,7 +154,7 @@ static void SubdivideFoliageTriangle_r( const foliage_t& foliage, const TriRef& 
    generates a foliage file for a bsp
  */
 
-void Foliage( mapDrawSurface_t& src, entity_t& entity ){
+void Foliage( const mapDrawSurface_t& src, entity_t& entity ){
 	/* get shader */
 	shaderInfo_t *si = src.shaderInfo;
 	if ( si == nullptr || si->foliage.empty() ) {

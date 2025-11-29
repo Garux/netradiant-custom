@@ -115,11 +115,11 @@ void TransposeMesh( mesh_t& m ) {
 
 	for ( int h = 0; h < m.height; ++h ) {
 		for ( int w = 0; w < m.width; ++w ) {
-			out.verts[ w * m.height + h ] = m.verts[ h * m.width + w ];
+			out.verts()[ w * m.height + h ] = m.verts()[ h * m.width + w ];
 		}
 	}
 
-	m.swap( out );
+	m = std::move( out );
 }
 
 void InvertMesh( mesh_t& m ) {
@@ -206,7 +206,7 @@ void MakeMeshNormals( mesh_t& in ){
 					if ( x < 0 || x >= in.width || y < 0 || y >= in.height ) {
 						break;                  // edge of patch
 					}
-					Vector3 temp = in.verts[y * in.width + x].xyz - base;
+					Vector3 temp = in[y][x].xyz - base;
 					if ( VectorNormalize( temp ) == 0 ) {
 						continue;               // degenerate edge, get more dist
 					}
@@ -275,16 +275,17 @@ void PutMeshOnCurve( mesh_t& in ) {
  */
 mesh_t SubdivideMesh( const mesh_view_t in, float maxError, float minLength ){
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
-	mesh_view_t out( in.width, in.height, expand[0] );
+	int width = in.width;
+	int height = in.height;
 
 	/* copy each row */
 	for ( int h = 0; h < in.height; ++h )
 		std::copy_n( in[h], in.width, expand[h] );
 
 	// horizontal subdivisions
-	for ( int i, j = 0; j + 2 < out.width; j += 2 ) {
+	for ( int i, j = 0; j + 2 < width; j += 2 ) {
 		// check subdivided midpoints against control points
-		for ( i = 0; i < out.height; ++i ) {
+		for ( i = 0; i < height; ++i ) {
 			const Vector3 prevxyz = expand[i][j + 1].xyz - expand[i][j].xyz;
 			const Vector3 nextxyz = expand[i][j + 2].xyz - expand[i][j + 1].xyz;
 			const Vector3 midxyz = ( expand[i][j].xyz + expand[i][j + 1].xyz * 2 + expand[i][j + 2].xyz ) * 0.25;
@@ -301,19 +302,19 @@ mesh_t SubdivideMesh( const mesh_view_t in, float maxError, float minLength ){
 			}
 		}
 
-		if ( out.width + 2 >= MAX_EXPANDED_AXIS ) {
+		if ( width + 2 >= MAX_EXPANDED_AXIS ) {
 			break;  // can't subdivide any more
 		}
 
-		if ( i == out.height ) {
+		if ( i == height ) {
 			continue;   // didn't need subdivision
 		}
 
 		// insert two columns and replace the peak
-		out.width += 2;
+		width += 2;
 
-		for ( i = 0; i < out.height; ++i ) {
-			for ( int k = out.width - 1; k > j + 3; --k ) {
+		for ( i = 0; i < height; ++i ) {
+			for ( int k = width - 1; k > j + 3; --k ) {
 				expand[i][k] = expand[i][k - 2];
 			}
 			expand[i][j + 3] = LerpDrawVert( expand[i][j + 1], expand[i][j + 2] );
@@ -326,9 +327,9 @@ mesh_t SubdivideMesh( const mesh_view_t in, float maxError, float minLength ){
 	}
 
 	// vertical subdivisions
-	for ( int i, j = 0; j + 2 < out.height; j += 2 ) {
+	for ( int i, j = 0; j + 2 < height; j += 2 ) {
 		// check subdivided midpoints against control points
-		for ( i = 0; i < out.width; ++i ) {
+		for ( i = 0; i < width; ++i ) {
 			const Vector3 prevxyz = expand[j + 1][i].xyz - expand[j][i].xyz;
 			const Vector3 nextxyz = expand[j + 2][i].xyz - expand[j + 1][i].xyz;
 			const Vector3 midxyz = ( expand[j][i].xyz + expand[j + 1][i].xyz * 2 + expand[j + 2][i].xyz ) * 0.25;
@@ -344,19 +345,19 @@ mesh_t SubdivideMesh( const mesh_view_t in, float maxError, float minLength ){
 			}
 		}
 
-		if ( out.height + 2 >= MAX_EXPANDED_AXIS ) {
+		if ( height + 2 >= MAX_EXPANDED_AXIS ) {
 			break;  // can't subdivide any more
 		}
 
-		if ( i == out.width ) {
+		if ( i == width ) {
 			continue;   // didn't need subdivision
 		}
 
 		// insert two columns and replace the peak
-		out.height += 2;
+		height += 2;
 
-		for ( i = 0; i < out.width; ++i ) {
-			for ( int k = out.height - 1; k > j + 3; --k ) {
+		for ( i = 0; i < width; ++i ) {
+			for ( int k = height - 1; k > j + 3; --k ) {
 				expand[k][i] = expand[k - 2][i];
 			}
 			expand[j + 3][i] = LerpDrawVert( expand[j + 1][i], expand[j + 2][i] );
@@ -370,11 +371,11 @@ mesh_t SubdivideMesh( const mesh_view_t in, float maxError, float minLength ){
 
 	// collapse the verts
 
-	for ( int i = 1; i < out.height; ++i ) {
-		memmove( out[i], expand[i], out.width * sizeof( bspDrawVert_t ) );
+	for ( int i = 1; i < height; ++i ) {
+		memmove( expand[0] + width * i, expand[i], width * sizeof( bspDrawVert_t ) );
 	}
 
-	return mesh_t( out );
+	return mesh_t( width, height, expand[0] );
 }
 
 
@@ -410,7 +411,8 @@ int IterationsForCurve( float len, int subdivisions ){
 
 mesh_t SubdivideMesh2( const mesh_view_t in, int iterations ){
 	bspDrawVert_t expand[ MAX_EXPANDED_AXIS ][ MAX_EXPANDED_AXIS ];
-	mesh_view_t out( in.width, in.height, expand[0] );
+	int width = in.width;
+	int height = in.height;
 
 	/* copy each row */
 	for ( int h = 0; h < in.height; ++h )
@@ -420,18 +422,18 @@ mesh_t SubdivideMesh2( const mesh_view_t in, int iterations ){
 	for ( ; iterations > 0; --iterations )
 	{
 		/* horizontal subdivisions */
-		for ( int j = 0; j + 2 < out.width; j += 4 )
+		for ( int j = 0; j + 2 < width; j += 4 )
 		{
 			/* check size limit */
-			if ( out.width + 2 >= MAX_EXPANDED_AXIS ) {
+			if ( width + 2 >= MAX_EXPANDED_AXIS ) {
 				break;
 			}
 
 			/* insert two columns and replace the peak */
-			out.width += 2;
-			for ( int i = 0; i < out.height; ++i )
+			width += 2;
+			for ( int i = 0; i < height; ++i )
 			{
-				for ( int k = out.width - 1; k > j + 3; --k )
+				for ( int k = width - 1; k > j + 3; --k )
 					expand [ i ][ k ] = expand[ i ][ k - 2 ];
 
 				expand[ i ][ j + 3 ] = LerpDrawVert( expand[ i ][ j + 1 ], expand[ i ][ j + 2 ] );
@@ -441,18 +443,18 @@ mesh_t SubdivideMesh2( const mesh_view_t in, int iterations ){
 		}
 
 		/* vertical subdivisions */
-		for ( int j = 0; j + 2 < out.height; j += 4 )
+		for ( int j = 0; j + 2 < height; j += 4 )
 		{
 			/* check size limit */
-			if ( out.height + 2 >= MAX_EXPANDED_AXIS ) {
+			if ( height + 2 >= MAX_EXPANDED_AXIS ) {
 				break;
 			}
 
 			/* insert two columns and replace the peak */
-			out.height += 2;
-			for ( int i = 0; i < out.width; ++i )
+			height += 2;
+			for ( int i = 0; i < width; ++i )
 			{
-				for ( int k = out.height - 1; k > j + 3; --k )
+				for ( int k = height - 1; k > j + 3; --k )
 					expand[ k ][ i ] = expand[ k - 2 ][ i ];
 
 				expand[ j + 3 ][ i ] = LerpDrawVert( expand[ j + 1 ][ i ], expand[ j + 2 ][ i ] );
@@ -463,11 +465,11 @@ mesh_t SubdivideMesh2( const mesh_view_t in, int iterations ){
 	}
 
 	/* collapse the verts */
-	for ( int i = 1; i < out.height; ++i )
-		memmove( out[ i ], expand[ i ], out.width * sizeof( bspDrawVert_t ) );
+	for ( int i = 1; i < height; ++i )
+		memmove( expand[0] + width * i, expand[ i ], width * sizeof( bspDrawVert_t ) );
 
 	/* return to sender */
-	return mesh_t( out );
+	return mesh_t( width, height, expand[0] );
 }
 
 
@@ -495,36 +497,37 @@ inline Vector3 ProjectPointOntoVector( const Vector3& point, const Vector3& vSta
  */
 mesh_t RemoveLinearMeshColumnsRows( const mesh_t& in ) {
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
-	mesh_view_t out( in.width, in.height, expand[0] );
+	int width = in.width;
+	int height = in.height;
 
 	/* copy each row */
 	for ( int h = 0; h < in.height; ++h )
 		std::copy_n( in[h], in.width, expand[h] );
 
-	for ( int j = 1; j < out.width - 1; ++j ) {
+	for ( int j = 1; j < width - 1; ++j ) {
 		double maxLength = 0;
-		for ( int i = 0; i < out.height; ++i ) {
+		for ( int i = 0; i < height; ++i ) {
 			value_maximize( maxLength, vector3_length( expand[i][j].xyz - ProjectPointOntoVector( expand[i][j].xyz, expand[i][j - 1].xyz, expand[i][j + 1].xyz ) ) );
 		}
 		if ( maxLength < 0.1 ) {
-			out.width--;
-			for ( int i = 0; i < out.height; ++i ) {
-				for ( int k = j; k < out.width; ++k ) {
+			width--;
+			for ( int i = 0; i < height; ++i ) {
+				for ( int k = j; k < width; ++k ) {
 					expand[i][k] = expand[i][k + 1];
 				}
 			}
 			j--;
 		}
 	}
-	for ( int j = 1; j < out.height - 1; ++j ) {
+	for ( int j = 1; j < height - 1; ++j ) {
 		double maxLength = 0;
-		for ( int i = 0; i < out.width; ++i ) {
+		for ( int i = 0; i < width; ++i ) {
 			value_maximize( maxLength, vector3_length( expand[j][i].xyz - ProjectPointOntoVector( expand[j][i].xyz, expand[j - 1][i].xyz, expand[j + 1][i].xyz ) ) );
 		}
 		if ( maxLength < 0.1 ) {
-			out.height--;
-			for ( int i = 0; i < out.width; ++i ) {
-				for ( int k = j; k < out.height; ++k ) {
+			height--;
+			for ( int i = 0; i < width; ++i ) {
+				for ( int k = j; k < height; ++k ) {
 					expand[k][i] = expand[k + 1][i];
 				}
 			}
@@ -532,11 +535,11 @@ mesh_t RemoveLinearMeshColumnsRows( const mesh_t& in ) {
 		}
 	}
 	// collapse the verts
-	for ( int i = 1; i < out.height; ++i ) {
-		memmove( out[i], expand[i], out.width * sizeof( bspDrawVert_t ) );
+	for ( int i = 1; i < height; ++i ) {
+		memmove( expand[0] + width * i, expand[i], width * sizeof( bspDrawVert_t ) );
 	}
 
-	return mesh_t( out );
+	return mesh_t( width, height, expand[0] );
 }
 
 
@@ -561,7 +564,8 @@ mesh_t TessellatedMesh( const mesh_view_t in, int iterations ){
 static mesh_t SubdivideMeshQuads( const mesh_view_t in, float minLength, int maxsize, int *widthtable, int *heighttable ){
 	int i, j, k, w, h, maxsubdivisions, subdivisions;
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
-	mesh_view_t out( in.width, in.height, expand[0] );
+	int width = in.width;
+	int height = in.height;
 
 	/* copy each row */
 	for ( int h = 0; h < in.height; ++h )
@@ -577,7 +581,7 @@ static mesh_t SubdivideMeshQuads( const mesh_view_t in, float minLength, int max
 
 	for ( w = 0, j = 0; w < in.width - 1; ++w, j += subdivisions + 1 ) {
 		double maxLength = 0;
-		for ( i = 0; i < out.height; ++i ) {
+		for ( i = 0; i < height; ++i ) {
 			value_maximize( maxLength, vector3_length( expand[i][j + 1].xyz - expand[i][j].xyz ) );
 		}
 
@@ -588,10 +592,10 @@ static mesh_t SubdivideMeshQuads( const mesh_view_t in, float minLength, int max
 			continue;
 		}
 
-		out.width += subdivisions;
+		width += subdivisions;
 
-		for ( i = 0; i < out.height; ++i ) {
-			for ( k = out.width - 1; k > j + subdivisions; --k ) {
+		for ( i = 0; i < height; ++i ) {
+			for ( k = width - 1; k > j + subdivisions; --k ) {
 				expand[i][k] = expand[i][k - subdivisions];
 			}
 			for ( k = 1; k <= subdivisions; ++k )
@@ -606,7 +610,7 @@ static mesh_t SubdivideMeshQuads( const mesh_view_t in, float minLength, int max
 
 	for ( h = 0, j = 0; h < in.height - 1; ++h, j += subdivisions + 1 ) {
 		double maxLength = 0;
-		for ( i = 0; i < out.width; ++i ) {
+		for ( i = 0; i < width; ++i ) {
 			value_maximize( maxLength, vector3_length( expand[j + 1][i].xyz - expand[j][i].xyz ) );
 		}
 
@@ -617,10 +621,10 @@ static mesh_t SubdivideMeshQuads( const mesh_view_t in, float minLength, int max
 			continue;
 		}
 
-		out.height += subdivisions;
+		height += subdivisions;
 
-		for ( i = 0; i < out.width; ++i ) {
-			for ( k = out.height - 1; k > j + subdivisions; --k ) {
+		for ( i = 0; i < width; ++i ) {
+			for ( k = height - 1; k > j + subdivisions; --k ) {
 				expand[k][i] = expand[k - subdivisions][i];
 			}
 			for ( k = 1; k <= subdivisions; ++k )
@@ -632,9 +636,9 @@ static mesh_t SubdivideMeshQuads( const mesh_view_t in, float minLength, int max
 	}
 
 	// collapse the verts
-	for ( i = 1; i < out.height; ++i ) {
-		memmove( out[i], expand[i], out.width * sizeof( bspDrawVert_t ) );
+	for ( i = 1; i < height; ++i ) {
+		memmove( expand[0] + width * i, expand[i], width * sizeof( bspDrawVert_t ) );
 	}
 
-	return mesh_t( out );
+	return mesh_t( width, height, expand[0] );
 }

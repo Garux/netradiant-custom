@@ -648,9 +648,9 @@ void RadLightForPatch( int num, int lightmapNum, const rawLightmap_t *lm, const 
 
 	/* construct a bogus vert list with color index stuffed into color[ 0 ] */
 	mesh_t bogus( ds.patchWidth, ds.patchHeight );
-	std::copy_n( &yDrawVerts[ ds.firstVert ], ds.numVerts, bogus.verts );
+	std::copy_n( &yDrawVerts[ ds.firstVert ], ds.numVerts, bogus.verts() );
 	for ( int i = 0; i < ds.numVerts; ++i )
-		bogus.verts[ i ].color[ 0 ][ 0 ] = i;
+		bogus.verts()[ i ].color[ 0 ][ 0 ] = i;
 
 	/* build a subdivided mesh identical to shadow facets for this patch */
 	/* this MUST MATCH FacetsForPatch() identically! */
@@ -659,7 +659,7 @@ void RadLightForPatch( int num, int lightmapNum, const rawLightmap_t *lm, const 
 	/* FIXME: build interpolation table into color[ 1 ] */
 
 	/* fix up color indexes */
-	for ( bspDrawVert_t& vert : Span( mesh.verts, mesh.numVerts() ) )
+	for ( bspDrawVert_t& vert : mesh )
 	{
 		if ( vert.color[ 0 ][ 0 ] >= ds.numVerts ) {
 			vert.color[ 0 ][ 0 ] = ds.numVerts - 1;

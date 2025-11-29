@@ -760,46 +760,58 @@ struct fog_t
 
 struct mesh_view_t
 {
-	int width, height;
-	bspDrawVert_t       *verts;
+	const int width, height;
+	const bspDrawVert_t * const verts;
 
-	mesh_view_t( int width, int height, bspDrawVert_t *verts ) : width( width ), height( height ), verts( verts ){
+	mesh_view_t( int width, int height, const bspDrawVert_t *verts ) : width( width ), height( height ), verts( verts ){
 	}
-	size_t numVerts() const {
-		return width * height;
-	}
-	bspDrawVert_t* operator[]( int h ){
-		return verts + width * h;
-	}
-	const bspDrawVert_t* operator[]( int h ) const {
-		return verts + width * h;
+	const bspDrawVert_t* operator[]( int row ) const {
+		return verts + width * row;
 	}
 };
 
-struct mesh_t : public mesh_view_t
+struct mesh_t
 {
-	mesh_t() : mesh_view_t( 0, 0, nullptr ) {
+	const int width, height;
+private:
+	bspDrawVert_t *m_verts;
+public:
+	mesh_t() : width( 0 ), height( 0 ), m_verts( nullptr ) {
 	}
-	mesh_t( int width, int height ) : mesh_view_t( width, height, new bspDrawVert_t[ width * height ] ){
+	mesh_t( int width, int height ) : width( width ), height( height ), m_verts( new bspDrawVert_t[ width * height ] ) {
 	}
-	explicit mesh_t( const mesh_view_t& view ) : mesh_view_t( view.width, view.height, new bspDrawVert_t[ view.width * view.height ] ) {
-		std::copy_n( view.verts, numVerts(), verts );
+	mesh_t( int width, int height, const bspDrawVert_t *verts ) : mesh_t( width, height ) {
+		std::copy_n( verts, numVerts(), m_verts );
 	}
-	explicit mesh_t( const mesh_t& other ) : mesh_view_t( other.width, other.height, new bspDrawVert_t[ other.width * other.height ] ) {
-		std::copy_n( other.verts, numVerts(), verts );
+	explicit mesh_t( const mesh_view_t& view ) : mesh_t( view.width, view.height, view.verts ) {
 	}
-	mesh_t( mesh_t&& other ) noexcept : mesh_view_t( other.width, other.height, std::exchange( other.verts, nullptr ) ) {
+	operator mesh_view_t() const {
+		return { width, height, m_verts };
+	}
+	explicit mesh_t( const mesh_t& other ) : mesh_t( other.width, other.height, other.m_verts ) {
+	}
+	mesh_t( mesh_t&& other ) noexcept : width( other.width ), height( other.height ), m_verts( std::exchange( other.m_verts, nullptr ) ) {
 	}
 	mesh_t& operator=( const mesh_t& ) = delete;
-	mesh_t& operator=( mesh_t&& ) noexcept = delete;
+	mesh_t& operator=( mesh_t&& other ) noexcept {
+		std::destroy_at( this );
+		std::construct_at( this, std::move( other ) );
+		return *this;
+	};
 	~mesh_t(){
-		delete[] verts;
+		delete[] m_verts;
 	}
-	void swap( mesh_t& other ){
-		std::swap( width, other.width );
-		std::swap( height, other.height );
-		std::swap( verts, other.verts );
+	int numVerts() const {
+		return width * height;
 	}
+	const bspDrawVert_t* operator[]( int row ) const { return m_verts + width * row; }
+	      bspDrawVert_t* operator[]( int row )       { return m_verts + width * row; }
+	const bspDrawVert_t* verts() const { return m_verts; }
+	      bspDrawVert_t* verts()       { return m_verts; }
+	const bspDrawVert_t* begin() const { return m_verts; }
+	      bspDrawVert_t* begin()       { return m_verts; }
+	const bspDrawVert_t* end() const { return m_verts + numVerts(); }
+	      bspDrawVert_t* end()       { return m_verts + numVerts(); }
 };
 
 
@@ -1728,7 +1740,7 @@ void                        Fur( mapDrawSurface_t& src );
 
 
 /* surface_foliage.c */
-void                        Foliage( mapDrawSurface_t& src, entity_t& entity );
+void                        Foliage( const mapDrawSurface_t& src, entity_t& entity );
 
 
 /* ydnar: surface_meta.c */

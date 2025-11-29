@@ -372,7 +372,7 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 	dsNew.indexes.reserve( ( mesh.width - 1 ) * ( mesh.height - 1 ) * 6 );
 
 	/* copy the verts in */
-	dsNew.verts.assign( mesh.verts, mesh.verts + mesh.numVerts() );
+	dsNew.verts.assign( mesh.begin(), mesh.end() );
 
 	/* iterate through the mesh quads */
 	for( MeshQuadIterator it( mesh ); it; ++it ){
