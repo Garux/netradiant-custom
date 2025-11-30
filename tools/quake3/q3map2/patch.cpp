@@ -433,8 +433,8 @@ void PatchMapDrawSurfs( entity_t& e ){
 		//%	Sys_Printf( "Longest curve: %f Iterations: %d\n", mesh.mesh.longestCurve, mesh.mesh.maxIterations );
 
 		/* create drawsurf */
-		mapDrawSurface_t *ds = DrawSurfaceForMesh( e, mesh.mesh );   /* ydnar */
-		ds->bounds = bounds;
+		mapDrawSurface_t& ds = DrawSurfaceForMesh( e, mesh.mesh );   /* ydnar */
+		ds.bounds = bounds;
 	}
 
 	/* emit some statistics */

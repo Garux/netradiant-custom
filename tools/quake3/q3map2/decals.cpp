@@ -38,7 +38,7 @@
 
 struct decalProjector_t
 {
-	shaderInfo_t            *si;
+	shaderInfo_t            *si; // never null
 	MinMax minmax;
 	Vector3 center;
 	float radius, radius2;
@@ -281,7 +281,7 @@ static void TransformDecalProjector( const decalProjector_t& in, const Vector3& 
    creates a new decal projector from a triangle
  */
 
-static int MakeDecalProjector( shaderInfo_t *si, const Plane3f& projection, float distance, const TriRef& tri ){
+static int MakeDecalProjector( shaderInfo_t& si, const Plane3f& projection, float distance, const TriRef& tri ){
 	/* limit check */
 	if ( numProjectors >= MAX_PROJECTORS ) {
 		Sys_Warning( "MAX_PROJECTORS (%d) exceeded, no more decal projectors available.\n", MAX_PROJECTORS );
@@ -293,7 +293,7 @@ static int MakeDecalProjector( shaderInfo_t *si, const Plane3f& projection, floa
 	memset( &dp, 0, sizeof( dp ) );
 
 	/* basic setup */
-	dp.si = si;
+	dp.si = &si;
 	dp.numPlanes = tri.size() + 2;
 
 	/* make texture matrix */
@@ -417,7 +417,7 @@ void ProcessDecals(){
 #endif
 					{
 						for( const TriRef& tri : it.tris() )
-							MakeDecalProjector( p.shaderInfo, projection, distance, tri );
+							MakeDecalProjector( *p.shaderInfo, projection, distance, tri );
 					}
 				}
 			}
@@ -488,13 +488,12 @@ static void ProjectDecalOntoWinding( const decalProjector_t& dp, const mapDrawSu
 	numDecalSurfaces++;
 
 	/* make a new surface */
-	mapDrawSurface_t& ds2 = AllocDrawSurface( ESurfaceType::Decal );
+	mapDrawSurface_t& ds2 = AllocDrawSurface( ESurfaceType::Decal, *dp.si );
 
 	/* set it up */
 	ds2.entityNum         = ds.entityNum;
 	ds2.castShadows       = ds.castShadows;
 	ds2.recvShadows       = ds.recvShadows;
-	ds2.shaderInfo = dp.si;
 	ds2.fogNum            = ds.fogNum;   /* why was this -1? */
 	ds2.lightmapScale     = ds.lightmapScale;
 	ds2.shadeAngleDegrees = ds.shadeAngleDegrees;

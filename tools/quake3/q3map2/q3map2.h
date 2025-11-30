@@ -685,7 +685,7 @@ struct side_t
 	winding_t           winding;
 	winding_t           visibleHull;        /* convex hull of all visible fragments */
 
-	shaderInfo_t        *shaderInfo;
+	shaderInfo_t        *shaderInfo;        /* may be null */
 
 	int contentFlags;                       /* from shaderInfo */
 	int surfaceFlags;                       /* from shaderInfo */
@@ -817,7 +817,7 @@ struct parseMesh_t
 	int recvShadows;
 
 	mesh_t mesh;
-	shaderInfo_t        *shaderInfo;
+	shaderInfo_t        *shaderInfo;            /* never null */
 	shaderInfo_t        *celShader;             /* :) */
 
 	/* ydnar: gs mods */
@@ -905,7 +905,7 @@ struct mapDrawSurface_t_params
 	class mapDrawSurface_t *clone;         /* ydnar: for cloned surfaces */
 	class mapDrawSurface_t *cel;           /* ydnar: for cloned cel surfaces */
 
-	shaderInfo_t        *shaderInfo;
+	shaderInfo_t        *shaderInfo;       /* never null */
 	shaderInfo_t        *celShader;
 	const brush_t       *mapBrush;
 
@@ -958,13 +958,15 @@ struct mapDrawSurface_t : public mapDrawSurface_t_params
 
 	std::vector<const side_t*> sideRefs;
 
-	void addSideRef( const side_t *side ){ // note might store only unique refs
+	void addSideRef( const side_t *side ){ // note: might try to store only unique refs
 		if ( side != nullptr )
 			sideRefs.push_back( side );
 	}
 
-	void copyParams( const mapDrawSurface_t& other ){
-		static_cast<mapDrawSurface_t_params&>( *this ) = static_cast<const mapDrawSurface_t_params&>( other );
+	void clearData(){
+		verts = DrawVerts(); // deallocate
+		indexes = DrawIndexes(); // deallocate
+		sideRefs = decltype( sideRefs )(); // deallocate
 	}
 };
 
@@ -1714,17 +1716,18 @@ void                        AddTriangleModels( entity_t& eparent );
 
 
 /* surface.c */
-mapDrawSurface_t&           AllocDrawSurface( ESurfaceType type );
+mapDrawSurface_t&           AllocDrawSurface( ESurfaceType type, shaderInfo_t& si );
+mapDrawSurface_t&           AllocDrawSurface( const mapDrawSurface_t& src );
 void                        StripFaceSurface( mapDrawSurface_t& ds );
 void                        MaxAreaFaceSurface( mapDrawSurface_t& ds );
 Vector3                     CalcLightmapAxis( const Vector3& normal );
 void                        ClassifySurface( mapDrawSurface_t& ds );
 void                        ClassifyEntitySurfaces( const entity_t& e );
 void                        TidyEntitySurfaces( const entity_t& e );
-mapDrawSurface_t            *CloneSurface( const mapDrawSurface_t& src, shaderInfo_t *si );
+mapDrawSurface_t&           CloneSurface( const mapDrawSurface_t& src, shaderInfo_t& si );
 void                        ClearSurface( mapDrawSurface_t& ds );
 mapDrawSurface_t            *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const side_t& s, const winding_t& w );
-mapDrawSurface_t            *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p );
+mapDrawSurface_t&           DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p );
 mapDrawSurface_t            *DrawSurfaceForFlare( int entNum, const Vector3& origin, const Vector3& normal, const Vector3& color, const char *flareShader, int lightStyle );
 void                        ClipSidesIntoTree( entity_t& e, const tree_t& tree );
 void                        MakeDebugPortalSurfs( const tree_t& tree );

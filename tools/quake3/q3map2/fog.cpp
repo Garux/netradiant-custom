@@ -242,8 +242,7 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 		InvertMesh( outside[ i ] );
 
 		/* ydnar: do this the hacky right way */
-		mapDrawSurface_t& newds = AllocDrawSurface( ESurfaceType::Patch );
-		newds.copyParams( ds );
+		mapDrawSurface_t& newds = AllocDrawSurface( ds );
 		newds.patchWidth  = outside[ i ].width;
 		newds.patchHeight = outside[ i ].height;
 		newds.verts.assign( outside[ i ].begin(), outside[ i ].end() );

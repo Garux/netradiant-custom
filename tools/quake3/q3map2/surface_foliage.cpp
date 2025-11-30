@@ -155,14 +155,8 @@ static void SubdivideFoliageTriangle_r( const foliage_t& foliage, const TriRef& 
  */
 
 void Foliage( const mapDrawSurface_t& src, entity_t& entity ){
-	/* get shader */
-	shaderInfo_t *si = src.shaderInfo;
-	if ( si == nullptr || si->foliage.empty() ) {
-		return;
-	}
-
 	/* do every foliage */
-	for ( const auto& foliage : si->foliage )
+	for ( const auto& foliage : src.shaderInfo->foliage )
 	{
 		/* zero out */
 		numFoliageInstances = 0;

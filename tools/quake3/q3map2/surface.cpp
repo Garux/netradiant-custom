@@ -38,147 +38,35 @@
    ydnar: gs mods: changed to force an explicit type when allocating
  */
 
-mapDrawSurface_t& AllocDrawSurface( ESurfaceType type ){
+static mapDrawSurface_t& AllocDrawSurface(){
 	/* bounds check */
 	if ( numMapDrawSurfs >= max_map_draw_surfs ) {
 		Error( "max_map_draw_surfs (%d) exceeded, consider -maxmapdrawsurfs <N> to increase", max_map_draw_surfs );
 	}
-	mapDrawSurface_t& ds = mapDrawSurfs[ numMapDrawSurfs ];
-	numMapDrawSurfs++;
+	return mapDrawSurfs[ numMapDrawSurfs++ ];
+}
+
+mapDrawSurface_t& AllocDrawSurface( ESurfaceType type, shaderInfo_t& si ){
+	mapDrawSurface_t& ds = AllocDrawSurface();
 
 	/* ydnar: do initial surface setup */
 	new ( &ds ) mapDrawSurface_t{}; // placement new
 	ds.type = type;
+	ds.shaderInfo = &si;
 	ds.fogNum = defaultFogNum;             /* ydnar 2003-02-12 */
 	ds.surfaceNum = numMapDrawSurfs - 1;   /* ydnar 2003-02-16 */
 
 	return ds;
 }
 
+mapDrawSurface_t& AllocDrawSurface( const mapDrawSurface_t& src ){
+	mapDrawSurface_t& ds = AllocDrawSurface();
 
+	/* ydnar: do initial surface setup */
+	new ( &ds ) mapDrawSurface_t_params{ src }; // placement new
+	ds.clearData(); // excess safety: must be already clean, if all kosher
 
-/*
-   FinishSurface()
-   ydnar: general surface finish pass
- */
-static void MakeCelSurface( const mapDrawSurface_t& src, shaderInfo_t *si );
-
-static void FinishSurface( mapDrawSurface_t& ds ){
-	/* dummy check */
-	if ( ds.shaderInfo == nullptr ) {
-		return;
-	}
-
-	/* ydnar: rocking tek-fu celshading */
-	if ( ds.celShader != nullptr ) {
-		MakeCelSurface( ds, ds.celShader );
-	}
-
-	/* backsides stop here */
-	if ( ds.backSide ) {
-		return;
-	}
-
-	/* ydnar: rocking surface cloning (fur baby yeah!) */
-	if ( !strEmptyOrNull( ds.shaderInfo->cloneShader ) ) {
-		CloneSurface( ds, &ShaderInfoForShader( ds.shaderInfo->cloneShader ) );
-	}
-
-	/* ydnar: q3map_backShader support */
-	if ( !strEmptyOrNull( ds.shaderInfo->backShader ) ) {
-		mapDrawSurface_t *ds2 = CloneSurface( ds, &ShaderInfoForShader( ds.shaderInfo->backShader ) );
-		ds2->backSide = true;
-	}
-}
-
-
-
-/*
-   CloneSurface()
-   clones a map drawsurface, using the specified shader
- */
-
-mapDrawSurface_t *CloneSurface( const mapDrawSurface_t& src, shaderInfo_t *si ){
-	/* dummy check */
-	if ( si == nullptr ) {
-		return nullptr;
-	}
-
-	/* allocate a new surface */
-	mapDrawSurface_t& ds = AllocDrawSurface( src.type );
-
-	/* copy it besides side references */
-	ds.copyParams( src );
-	ds.verts = src.verts;
-	ds.indexes = src.indexes;
-
-	/* set shader */
-	ds.shaderInfo = si;
-
-	/* return the surface */
-	return &ds;
-}
-
-
-
-/*
-   MakeCelSurface() - ydnar
-   makes a copy of a surface, but specific to cel shading
- */
-
-static void MakeCelSurface( const mapDrawSurface_t& src, shaderInfo_t *si ){
-	/* dummy check */
-	if ( si == nullptr ) {
-		return;
-	}
-
-	/* don't create cel surfaces for certain types of shaders */
-	if ( ( src.shaderInfo->compileFlags & C_TRANSLUCENT ) ||
-	     ( src.shaderInfo->compileFlags & C_SKY ) ) {
-		return;
-	}
-
-	/* make a copy */
-	mapDrawSurface_t *ds = CloneSurface( src, si );
-	if ( ds == nullptr ) {
-		return;
-	}
-
-	/* do some fixups for celshading */
-	ds->planar = false;
-	ds->planeNum = -1;
-	ds->celShader = nullptr; /* don't cel shade cels :P */
-}
-
-
-
-/*
-   MakeSkyboxSurface() - ydnar
-   generates a skybox surface, viewable from everywhere there is sky
- */
-
-static void MakeSkyboxSurface( mapDrawSurface_t& src ){
-	/* make a copy */
-	mapDrawSurface_t *ds = CloneSurface( src, src.shaderInfo );
-	if ( ds == nullptr ) {
-		return;
-	}
-
-	/* set parent */
-	ds->parent = &src;
-
-	/* scale the surface vertexes */
-	for ( bspDrawVert_t& vert : ds->verts )
-	{
-		matrix4_transform_point( skyboxTransform, vert.xyz );
-
-		/* debug code */
-		//%	bspDrawVerts[ bspDrawSurfaces[ ds->outputNum ].firstVert + i ].color[ 0 ][ 1 ] = 0;
-		//%	bspDrawVerts[ bspDrawSurfaces[ ds->outputNum ].firstVert + i ].color[ 0 ][ 2 ] = 0;
-	}
-
-	/* so backface culling creep doesn't bork the surface */
-	ds->lightmapVecs[ 2 ].set( 0 );
+	return ds;
 }
 
 
@@ -192,9 +80,111 @@ void ClearSurface( mapDrawSurface_t& ds ){
 	ds.type = ESurfaceType::Bad;
 	ds.planar = false;
 	ds.planeNum = -1;
-	ds.verts = DrawVerts(); // deallocate
-	ds.indexes = DrawIndexes(); // deallocate
-	ds.sideRefs = decltype( ds.sideRefs )(); // deallocate
+	ds.clearData();
+}
+
+
+
+/*
+   FinishSurface()
+   ydnar: general surface finish pass
+ */
+static void MakeCelSurface( const mapDrawSurface_t& src, shaderInfo_t& si );
+
+static void FinishSurface( mapDrawSurface_t& ds ){
+	/* ydnar: rocking tek-fu celshading */
+	if ( ds.celShader != nullptr ) {
+		MakeCelSurface( ds, *ds.celShader );
+	}
+
+	/* backsides stop here */
+	if ( ds.backSide ) {
+		return;
+	}
+
+	/* ydnar: rocking surface cloning (fur baby yeah!) */
+	if ( !strEmptyOrNull( ds.shaderInfo->cloneShader ) ) {
+		CloneSurface( ds, ShaderInfoForShader( ds.shaderInfo->cloneShader ) );
+	}
+
+	/* ydnar: q3map_backShader support */
+	if ( !strEmptyOrNull( ds.shaderInfo->backShader ) ) {
+		mapDrawSurface_t& ds2 = CloneSurface( ds, ShaderInfoForShader( ds.shaderInfo->backShader ) );
+		ds2.backSide = true;
+	}
+}
+
+
+
+/*
+   CloneSurface()
+   clones a map drawsurface, using the specified shader
+ */
+
+mapDrawSurface_t& CloneSurface( const mapDrawSurface_t& src, shaderInfo_t& si ){
+	/* allocate a new surface */
+	mapDrawSurface_t& ds = AllocDrawSurface( src );
+
+	/* copy it besides side references */
+	ds.verts = src.verts;
+	ds.indexes = src.indexes;
+
+	/* set shader */
+	ds.shaderInfo = &si;
+
+	/* return the surface */
+	return ds;
+}
+
+
+
+/*
+   MakeCelSurface() - ydnar
+   makes a copy of a surface, but specific to cel shading
+ */
+
+static void MakeCelSurface( const mapDrawSurface_t& src, shaderInfo_t& si ){
+	/* don't create cel surfaces for certain types of shaders */
+	if ( ( src.shaderInfo->compileFlags & C_TRANSLUCENT ) ||
+	     ( src.shaderInfo->compileFlags & C_SKY ) ) {
+		return;
+	}
+
+	/* make a copy */
+	mapDrawSurface_t& ds = CloneSurface( src, si );
+
+	/* do some fixups for celshading */
+	ds.planar = false;
+	ds.planeNum = -1;
+	ds.celShader = nullptr; /* don't cel shade cels :P */
+}
+
+
+
+/*
+   MakeSkyboxSurface() - ydnar
+   generates a skybox surface, viewable from everywhere there is sky
+ */
+
+static void MakeSkyboxSurface( mapDrawSurface_t& src ){
+	/* make a copy */
+	mapDrawSurface_t& ds = CloneSurface( src, *src.shaderInfo );
+
+	/* set parent */
+	ds.parent = &src;
+
+	/* scale the surface vertexes */
+	for ( bspDrawVert_t& vert : ds.verts )
+	{
+		matrix4_transform_point( skyboxTransform, vert.xyz );
+
+		/* debug code */
+		//%	bspDrawVerts[ bspDrawSurfaces[ ds->outputNum ].firstVert + i ].color[ 0 ][ 1 ] = 0;
+		//%	bspDrawVerts[ bspDrawSurfaces[ ds->outputNum ].firstVert + i ].color[ 0 ][ 2 ] = 0;
+	}
+
+	/* so backface culling creep doesn't bork the surface */
+	ds.lightmapVecs[ 2 ].set( 0 );
 }
 
 
@@ -549,7 +539,7 @@ static byte GetShaderIndexForPoint( const indexMap_t& im, const MinMax& eMinmax,
    this combines a couple different functions from terrain.c
  */
 
-static shaderInfo_t& GetIndexedShader( const shaderInfo_t *parent, const indexMap_t& im, int numPoints, byte *shaderIndexes ){
+static shaderInfo_t& GetIndexedShader( const shaderInfo_t& parent, const indexMap_t& im, int numPoints, byte *shaderIndexes ){
 	/* early out if bad data */
 	if ( numPoints <= 0 || shaderIndexes == nullptr ) {
 		return ShaderInfoForShader( "default" );
@@ -582,27 +572,27 @@ static shaderInfo_t& GetIndexedShader( const shaderInfo_t *parent, const indexMa
 	                          : String64( "textures/", im.shader, '_', int( minShaderIndex ), "to", int( maxShaderIndex ) ) );
 
 	/* inherit a few things from parent shader */
-	if ( parent->globalTexture ) {
+	if ( parent.globalTexture ) {
 		si.globalTexture = true;
 	}
-	if ( parent->forceMeta ) {
+	if ( parent.forceMeta ) {
 		si.forceMeta = true;
 	}
-	if ( parent->nonplanar ) {
+	if ( parent.nonplanar ) {
 		si.nonplanar = true;
 	}
 	if ( si.shadeAngleDegrees == 0 ) {
-		si.shadeAngleDegrees = parent->shadeAngleDegrees;
+		si.shadeAngleDegrees = parent.shadeAngleDegrees;
 	}
-	if ( parent->tcGen && !si.tcGen ) {
+	if ( parent.tcGen && !si.tcGen ) {
 		/* set xy texture projection */
 		si.tcGen = true;
-		si.vecs[ 0 ] = parent->vecs[ 0 ];
-		si.vecs[ 1 ] = parent->vecs[ 1 ];
+		si.vecs[ 0 ] = parent.vecs[ 0 ];
+		si.vecs[ 1 ] = parent.vecs[ 1 ];
 	}
-	if ( parent->lightmapAxis != g_vector3_identity && si.lightmapAxis == g_vector3_identity ) {
+	if ( parent.lightmapAxis != g_vector3_identity && si.lightmapAxis == g_vector3_identity ) {
 		/* set lightmap projection axis */
-		si.lightmapAxis = parent->lightmapAxis;
+		si.lightmapAxis = parent.lightmapAxis;
 	}
 
 	/* return the shader */
@@ -621,7 +611,7 @@ static shaderInfo_t& GetIndexedShader( const shaderInfo_t *parent, const indexMa
 const double SNAP_FLOAT_TO_INT = 8.0;
 const double SNAP_INT_TO_FLOAT = ( 1.0 / SNAP_FLOAT_TO_INT );
 
-static mapDrawSurface_t *DrawSurfaceForShader( const char *shader );
+static mapDrawSurface_t& DrawSurfaceForShader( const char *shader );
 
 mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const side_t& s, const winding_t& w ){
 	shaderInfo_t        *si, *parent;
@@ -658,7 +648,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 
 		/* get matching shader and set alpha */
 		parent = si;
-		si = &GetIndexedShader( parent, *b.im, w.size(), shaderIndexes );
+		si = &GetIndexedShader( *parent, *b.im, w.size(), shaderIndexes );
 	}
 
 	/* ydnar: sky hack/fix for GL_CLAMP borders on ati cards */
@@ -669,7 +659,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 	}
 
 	/* ydnar: gs mods */
-	mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Face );
+	mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Face, *si );
 	ds.entityNum = b.entityNum;
 	ds.castShadows = b.castShadows;
 	ds.recvShadows = b.recvShadows;
@@ -678,7 +668,6 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 	ds.planeNum = s.planenum;
 	ds.lightmapVecs[ 2 ] = mapplanes[ s.planenum ].normal();
 
-	ds.shaderInfo = si;
 	ds.mapBrush = &b;
 	ds.addSideRef( &s );
 	ds.fogNum = FOG_INVALID;
@@ -770,7 +759,7 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
    moved here from patch.c
  */
 
-mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
+mapDrawSurface_t& DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
 	Plane3f plane;
 	shaderInfo_t        *si, *parent;
 	byte shaderIndexes[ MAX_EXPANDED_AXIS * MAX_EXPANDED_AXIS ];
@@ -780,9 +769,6 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
 	/* get mesh and shader shader */
 	mesh_t& mesh = p.mesh;
 	si = p.shaderInfo;
-	if ( si == nullptr ) {
-		return nullptr;
-	}
 
 	/* get vertex count */
 	const int numVerts = mesh.numVerts();
@@ -824,17 +810,16 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
 
 		/* get matching shader and set alpha */
 		parent = si;
-		si = &GetIndexedShader( parent, *p.im, numVerts, shaderIndexes );
+		si = &GetIndexedShader( *parent, *p.im, numVerts, shaderIndexes );
 	}
 
 
 	/* ydnar: gs mods */
-	mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Patch );
-	ds.entityNum    = p.entityNum;
-	ds.castShadows  = p.castShadows;
-	ds.recvShadows  = p.recvShadows;
+	mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Patch, *si );
+	ds.entityNum     = p.entityNum;
+	ds.castShadows   = p.castShadows;
+	ds.recvShadows   = p.recvShadows;
 
-	ds.shaderInfo = si;
 	ds.sampleSize    = p.lightmapSampleSize;
 	ds.lightmapScale = p.lightmapScale;   /* ydnar */
 	ds.ambientColor  = p.ambientColor;
@@ -915,7 +900,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
 	ds.celShader = p.celShader;
 
 	/* return the drawsurface */
-	return &ds;
+	return ds;
 }
 
 
@@ -932,11 +917,10 @@ mapDrawSurface_t *DrawSurfaceForFlare( int entNum, const Vector3& origin, const 
 	}
 
 	/* allocate drawsurface */
-	mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Flare );
-	ds.entityNum = entNum;
+	mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Flare, ShaderInfoForShader( !strEmptyOrNull( flareShader )? flareShader : g_game->flareShader ) );
 
 	/* set it up */
-	ds.shaderInfo = &ShaderInfoForShader( !strEmptyOrNull( flareShader )? flareShader : g_game->flareShader );
+	ds.entityNum = entNum;
 	ds.lightmapOrigin = origin;
 	ds.lightmapVecs[ 2 ] = normal;
 	ds.lightmapVecs[ 0 ] = color;
@@ -957,26 +941,17 @@ mapDrawSurface_t *DrawSurfaceForFlare( int entNum, const Vector3& origin, const 
    creates a bogus surface to forcing the game to load a shader
  */
 
-static mapDrawSurface_t *DrawSurfaceForShader( const char *shader ){
+static mapDrawSurface_t& DrawSurfaceForShader( const char *shader ){
 	/* get shader */
-	shaderInfo_t *si = &ShaderInfoForShader( shader );
+	shaderInfo_t& si = ShaderInfoForShader( shader );
 
 	/* find existing surface */
 	for ( mapDrawSurface_t& ds : Span( mapDrawSurfs, numMapDrawSurfs ) )
-	{
-		/* check it */
-		if ( ds.shaderInfo == si ) {
-			return &ds;
-		}
-	}
+		if ( ds.shaderInfo == &si )
+			return ds;
 
 	/* create a new surface */
-	mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Shader );
-	ds.entityNum = 0;
-	ds.shaderInfo = si;
-
-	/* return to sender */
-	return &ds;
+	return AllocDrawSurface( ESurfaceType::Shader, si );
 }
 
 
@@ -1013,8 +988,6 @@ static void SubdivideFace_r( const entity_t& e, const brush_t& brush, const side
 	MinMax bounds;
 	const float epsilon = 0.1;
 	int subFloor, subCeil;
-	mapDrawSurface_t    *ds;
-
 
 	/* dummy check */
 	if ( w.empty() ) {
@@ -1063,7 +1036,7 @@ static void SubdivideFace_r( const entity_t& e, const brush_t& brush, const side
 	}
 
 	/* create a face surface */
-	ds = DrawSurfaceForSide( e, brush, side, w );
+	mapDrawSurface_t *ds = DrawSurfaceForSide( e, brush, side, w );
 
 	/* set correct fog num */
 	ds->fogNum = fogNum;
@@ -1628,11 +1601,11 @@ static int FilterPointConvexHullIntoTree_r( const std::array<Vector3, 16>& point
  */
 
 static int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t& ds, node_t *node ){
-	/* get shaderinfo */
-	const shaderInfo_t *si = ds.shaderInfo;
+	/* get minmax */
+	const MinMax& minmax = ds.shaderInfo->minmax;
 
 	/* ydnar: is this the head node? */
-	if ( node->parent == nullptr && si != nullptr && si->minmax.valid() ) {
+	if ( node->parent == nullptr && minmax.valid() ) {
 		static bool warned = false;
 		if ( !warned ) {
 			Sys_Warning( "this map uses the deformVertexes move hack\n" );
@@ -1645,12 +1618,12 @@ static int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t& ds, node_t *
 		for ( size_t i = 0; i < w.size(); ++i )
 		{
 			fat[ i ] = w[ i ];
-			fat[ i + ( w.size() + 1 ) ] = w[ i ] + si->minmax.mins;
-			fat[ i + ( w.size() + 1 ) * 2 ] = w[ i ] + si->minmax.maxs;
+			fat[ i + ( w.size() + 1 ) ] = w[ i ] + minmax.mins;
+			fat[ i + ( w.size() + 1 ) * 2 ] = w[ i ] + minmax.maxs;
 		}
 		fat[ w.size() ] = w[ 0 ];
-		fat[ w.size() * 2 ] = w[ 0 ] + si->minmax.mins;
-		fat[ w.size() * 3 ] = w[ 0 ] + si->minmax.maxs;
+		fat[ w.size() * 2 ] = w[ 0 ] + minmax.mins;
+		fat[ w.size() * 3 ] = w[ 0 ] + minmax.maxs;
 
 		/*
 		 * note: this winding is STILL not suitable for ClipWindingEpsilon, and
@@ -2516,8 +2489,7 @@ static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t& si ){
 			}
 
 			/* allocate a drawsurface */
-			mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Face );
-			ds.shaderInfo = &si;
+			mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Face, si );
 			ds.planar = true;
 			ds.planeNum = FindFloatPlane( p->plane.plane );
 			ds.lightmapVecs[ 2 ] = p->plane.normal();
@@ -2591,8 +2563,7 @@ void MakeFogHullSurfs( const char *shader ){
 	const Vector3 fogMaxs = g_mapMinmax.maxs + Vector3( 128 );
 
 	/* allocate a drawsurface */
-	mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Foghull );
-	ds.shaderInfo = &ShaderInfoForShader( shader );
+	mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Foghull, ShaderInfoForShader( shader ) );
 	ds.fogNum = FOG_INVALID;
 	ds.verts.resize( 8, c_bspDrawVert_t0 );
 
@@ -2780,11 +2751,6 @@ static int AddSurfaceModelsToTriangle_r( const mapDrawSurface_t& ds, const surfa
  */
 
 static int AddSurfaceModels( const mapDrawSurface_t& ds, entity_t& entity ){
-	/* dummy check */
-	if ( ds.shaderInfo == nullptr || ds.shaderInfo->surfaceModels.empty() ) {
-		return 0;
-	}
-
 	/* init */
 	int localNumSurfaceModels = 0;
 

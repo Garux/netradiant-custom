@@ -124,7 +124,7 @@ void WriteSurfaceExtraFile( const char *path ){
 	for ( int i = -1, size = surfaceExtras.size(); i < size; ++i )
 	{
 		/* get extra */
-		const surfaceExtra_t * const se = &GetSurfaceExtra( i );
+		const surfaceExtra_t& se = GetSurfaceExtra( i );
 
 		/* default or surface num? */
 		if ( i < 0 ) {
@@ -135,63 +135,63 @@ void WriteSurfaceExtraFile( const char *path ){
 		}
 
 		/* valid map drawsurf? */
-		if ( se->mds == nullptr ) {
+		if ( se.mds == nullptr ) {
 			fprintf( sf, "\n" );
 		}
 		else
 		{
 			fprintf( sf, " // %s V: %zu I: %zu %s\n",
-			         surfaceTypeName( se->mds->type ),
-			         se->mds->verts.size(),
-			         se->mds->indexes.size(),
-			         ( se->mds->planar ? "planar" : "" ) );
+			         surfaceTypeName( se.mds->type ),
+			         se.mds->verts.size(),
+			         se.mds->indexes.size(),
+			         ( se.mds->planar ? "planar" : "" ) );
 		}
 
 		/* open braces */
 		fprintf( sf, "{\n" );
 
 		/* shader */
-		if ( se->si != nullptr ) {
-			fprintf( sf, "\tshader %s\n", se->si->shader.c_str() );
+		if ( se.si != nullptr ) {
+			fprintf( sf, "\tshader %s\n", se.si->shader.c_str() );
 		}
 
 		/* parent surface number */
-		if ( se->parentSurfaceNum != seDefault.parentSurfaceNum ) {
-			fprintf( sf, "\tparent %d\n", se->parentSurfaceNum );
+		if ( se.parentSurfaceNum != seDefault.parentSurfaceNum ) {
+			fprintf( sf, "\tparent %d\n", se.parentSurfaceNum );
 		}
 
 		/* entity number */
-		if ( se->entityNum != seDefault.entityNum ) {
-			fprintf( sf, "\tentity %d\n", se->entityNum );
+		if ( se.entityNum != seDefault.entityNum ) {
+			fprintf( sf, "\tentity %d\n", se.entityNum );
 		}
 
 		/* cast shadows */
-		if ( se->castShadows != seDefault.castShadows || se == &seDefault ) {
-			fprintf( sf, "\tcastShadows %d\n", se->castShadows );
+		if ( se.castShadows != seDefault.castShadows || &se == &seDefault ) {
+			fprintf( sf, "\tcastShadows %d\n", se.castShadows );
 		}
 
 		/* recv shadows */
-		if ( se->recvShadows != seDefault.recvShadows || se == &seDefault ) {
-			fprintf( sf, "\treceiveShadows %d\n", se->recvShadows );
+		if ( se.recvShadows != seDefault.recvShadows || &se == &seDefault ) {
+			fprintf( sf, "\treceiveShadows %d\n", se.recvShadows );
 		}
 
 		/* lightmap sample size */
-		if ( se->sampleSize != seDefault.sampleSize || se == &seDefault ) {
-			fprintf( sf, "\tsampleSize %d\n", se->sampleSize );
+		if ( se.sampleSize != seDefault.sampleSize || &se == &seDefault ) {
+			fprintf( sf, "\tsampleSize %d\n", se.sampleSize );
 		}
 
-		if ( ( se->ambientColor != g_vector3_identity && se->ambientColor != seDefault.ambientColor ) || se == &seDefault ) { // 0 == use global
-			fprintf( sf, "\tambientColor ( %f %f %f )\n", se->ambientColor[0], se->ambientColor[1], se->ambientColor[2] );
+		if ( ( se.ambientColor != g_vector3_identity && se.ambientColor != seDefault.ambientColor ) || &se == &seDefault ) { // 0 == use global
+			fprintf( sf, "\tambientColor ( %f %f %f )\n", se.ambientColor[0], se.ambientColor[1], se.ambientColor[2] );
 		}
 
 		/* longest curve */
-		if ( se->longestCurve != seDefault.longestCurve || se == &seDefault ) {
-			fprintf( sf, "\tlongestCurve %f\n", se->longestCurve );
+		if ( se.longestCurve != seDefault.longestCurve || &se == &seDefault ) {
+			fprintf( sf, "\tlongestCurve %f\n", se.longestCurve );
 		}
 
 		/* lightmap axis vector */
-		if ( !VectorCompare( se->lightmapAxis, seDefault.lightmapAxis ) ) {
-			fprintf( sf, "\tlightmapAxis ( %f %f %f )\n", se->lightmapAxis[ 0 ], se->lightmapAxis[ 1 ], se->lightmapAxis[ 2 ] );
+		if ( !VectorCompare( se.lightmapAxis, seDefault.lightmapAxis ) ) {
+			fprintf( sf, "\tlightmapAxis ( %f %f %f )\n", se.lightmapAxis[ 0 ], se.lightmapAxis[ 1 ], se.lightmapAxis[ 2 ] );
 		}
 
 		/* close braces */

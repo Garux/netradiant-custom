@@ -53,7 +53,7 @@ std::list<metaVertex_t>>; // must be maintained non empty
 /* ydnar: metasurfaces are constructed from lists of metatriangles so they can be merged in the best way */
 struct metaTriangle_t
 {
-	shaderInfo_t        *si;
+	shaderInfo_t        *si; // only null when triangle has already been merged
 	const side_t        *side; // can be nullptr
 	int entityNum, surfaceNum, planeNum, fogNum, sampleSize, castShadows, recvShadows;
 	float shadeAngleDegrees;
@@ -358,8 +358,7 @@ static void TriangulatePatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 	const mesh_t mesh = TessellatedMesh( mesh_view_t( ds.patchWidth, ds.patchHeight, ds.verts.data() ), iterations ); //%	ds.maxIterations
 
 	/* make a copy of the drawsurface */
-	mapDrawSurface_t& dsNew = AllocDrawSurface( ESurfaceType::Meta );
-	dsNew.copyParams( ds );
+	mapDrawSurface_t& dsNew = AllocDrawSurface( ds );
 
 	/* if the patch is nonsolid, then discard it */
 	if ( !( ds.shaderInfo->compileFlags & C_SOLID ) && !( ds.shaderInfo->contentFlags & GetRequiredSurfaceParm<"playerclip">().contentFlags ) ) {
@@ -683,7 +682,7 @@ void StripFaceSurface( mapDrawSurface_t& ds ){
 	{
 		/* ydnar: find smallest coordinate */
 		int least = 0;
-		if ( ds.shaderInfo != nullptr && !ds.shaderInfo->autosprite ) {
+		if ( !ds.shaderInfo->autosprite ) {
 			for ( size_t i = 0; i < ds.verts.size(); ++i )
 			{
 				/* get points */
@@ -1461,13 +1460,12 @@ static void MetaTrianglesToSurface(){
 		   ----------------------------------------------------------------- */
 
 		/* start a new drawsurface */
-		mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Meta );
+		mapDrawSurface_t& ds = AllocDrawSurface( ESurfaceType::Meta, *seed.si );
 		ds.entityNum         = seed.entityNum;
 		ds.surfaceNum        = seed.surfaceNum;
 		ds.castShadows       = seed.castShadows;
 		ds.recvShadows       = seed.recvShadows;
 
-		ds.shaderInfo        = seed.si;
 		ds.planeNum          = seed.planeNum;
 		ds.fogNum            = seed.fogNum;
 		ds.sampleSize        = seed.sampleSize;

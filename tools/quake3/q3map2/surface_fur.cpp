@@ -74,22 +74,19 @@ void Fur( mapDrawSurface_t& ds ){
 	for ( int i = 1; i < numLayers; ++i )
 	{
 		/* clone the surface */
-		mapDrawSurface_t *fur = CloneSurface( ds, ds.shaderInfo );
-		if ( fur == nullptr ) {
-			return;
-		}
+		mapDrawSurface_t& fur = CloneSurface( ds, *ds.shaderInfo );
 
 		/* set it to fur */
-		fur->fur = true;
+		fur.fur = true;
 
 		/* walk the verts */
-		for ( size_t j = 0; j < fur->verts.size(); ++j )
+		for ( size_t j = 0; j < fur.verts.size(); ++j )
 		{
 			/* offset is scaled by original vertex alpha */
 			const float a = ds.verts[ j ].color[ 0 ].alpha() / 255.0;
 
 			/* get fur vert */
-			bspDrawVert_t& dv = fur->verts[ j ];
+			bspDrawVert_t& dv = fur.verts[ j ];
 
 			/* offset it */
 			dv.xyz += dv.normal * ( offset * a * i );
