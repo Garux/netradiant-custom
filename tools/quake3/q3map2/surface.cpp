@@ -1455,28 +1455,19 @@ void ClipSidesIntoTree( entity_t& e, const tree_t& tree ){
  */
 
 static int AddReferenceToLeaf( mapDrawSurface_t& ds, node_t *node ){
-	drawSurfRef_t   *dsr;
-	const int numBSPDrawSurfaces = bspDrawSurfaces.size();
-
-
 	/* dummy check */
 	if ( node->planenum != PLANENUM_LEAF || node->opaque ) {
 		return 0;
 	}
 
+	const int numBSPDrawSurfaces = bspDrawSurfaces.size();
+
 	/* try to find an existing reference */
-	for ( dsr = node->drawSurfReferences; dsr; dsr = dsr->nextRef )
-	{
-		if ( dsr->outputNum == numBSPDrawSurfaces ) {
-			return 0;
-		}
-	}
+	if( std::ranges::find( node->drawSurfReferences, numBSPDrawSurfaces ) != node->drawSurfReferences.cend() )
+		return 0;
 
 	/* add a new reference */
-	dsr = safe_malloc( sizeof( *dsr ) );
-	dsr->outputNum = numBSPDrawSurfaces;
-	dsr->nextRef = node->drawSurfReferences;
-	node->drawSurfReferences = dsr;
+	node->drawSurfReferences.push_back( numBSPDrawSurfaces );
 
 	/* ydnar: sky/skybox surfaces */
 	if ( node->skybox ) {

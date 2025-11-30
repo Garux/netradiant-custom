@@ -971,13 +971,6 @@ struct mapDrawSurface_t : public mapDrawSurface_t_params
 };
 
 
-struct drawSurfRef_t
-{
-	drawSurfRef_t    *nextRef;
-	int outputNum;
-};
-
-
 struct epair_t
 {
 	CopiedString key, value;
@@ -1072,7 +1065,7 @@ struct node_t
 	int cluster;                        /* for portalfile writing */
 	int area;                           /* for areaportals */
 	brushlist_t          brushlist;     /* fragments of all brushes in this leaf */
-	drawSurfRef_t       *drawSurfReferences;
+	std::vector<int>     drawSurfReferences; /* int outputNum of bspDrawSurface_t*/
 
 	int occupied;                       /* 1 or greater can reach entity */
 	const entity_t      *occupant;      /* for leak file testing */
