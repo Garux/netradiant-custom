@@ -40,6 +40,14 @@ struct radVert_t
 	Vector2 lightmap[ MAX_LIGHTMAPS ];
 	Vector3 normal;
 	Color4f color[ MAX_LIGHTMAPS ];
+
+	radVert_t() = default;
+	radVert_t( const bspDrawVert_t& dv )
+	:	xyz( dv.xyz ),
+		st( dv.st ),
+		lightmap{ dv.lightmap[0], dv.lightmap[1], dv.lightmap[2], dv.lightmap[3] },
+		normal( dv.normal )
+	{}
 };
 
 
@@ -64,7 +72,6 @@ static void RadClipWindingEpsilon( const radWinding_t& in, const Vector3& normal
 	float dists[ MAX_POINTS_ON_WINDING + 4 ];
 	EPlaneSide sides[ MAX_POINTS_ON_WINDING + 4 ];
 	int counts[ 3 ] = { 0 };
-	float dot;                  /* ydnar: changed from static b/c of threading */ /* VC 4.2 optimizer bug if not static? */
 
 
 	/* determine sides for each point */
@@ -128,7 +135,7 @@ static void RadClipWindingEpsilon( const radWinding_t& in, const Vector3& normal
 		/* generate a split vertex */
 		const radVert_t& v2 = in.verts[ ( i + 1 ) % in.numVerts ];
 
-		dot = dists[ i ] / ( dists[ i ] - dists[ i + 1 ] );
+		const float dot = dists[ i ] / ( dists[ i ] - dists[ i + 1 ] );
 
 		/* average vertex values */
 		radVert_t mid;
@@ -550,8 +557,8 @@ static void RadSubdivideDiffuseLight( int lightmapNum, const bspDrawSurface_t& d
 
 			/* create a regular winding */
 			splash.w = AllocWinding( rw.numVerts );
-			for ( int i = 0; i < rw.numVerts; ++i )
-				splash.w.push_back( rw.verts[rw.numVerts - 1 - i].xyz + normal * si.backsplashDistance );
+			for ( int i = rw.numVerts; i-- != 0; )
+				splash.w.push_back( rw.verts[i].xyz + normal * si.backsplashDistance );
 
 			splash.origin = normal * si.backsplashDistance + light.origin;
 			splash.normal = -normal;
@@ -617,7 +624,7 @@ void RadLightForTriangles( int num, int lightmapNum, const rawLightmap_t *lm, co
 			const int v = ds.firstVert + bspDrawIndexes[ ds.firstIndex + i + j ];
 
 			/* get most everything */
-			memcpy( &rw.verts[ j ], &yDrawVerts[ v ], sizeof( bspDrawVert_t ) );
+			rw.verts[ j ] = yDrawVerts[ v ];
 
 			/* fix colors */
 			for ( int k = 0; k < MAX_LIGHTMAPS; ++k )
@@ -681,7 +688,7 @@ void RadLightForPatch( int num, int lightmapNum, const rawLightmap_t *lm, const 
 			for ( int v = 0; v < 4; ++v )
 			{
 				/* get most everything */
-				memcpy( &rw.verts[ v ], quad[ v ], sizeof( bspDrawVert_t ) );
+				rw.verts[ v ] = *quad[ v ];
 
 				/* fix colors */
 				for ( int i = 0; i < MAX_LIGHTMAPS; ++i )
@@ -705,7 +712,7 @@ void RadLightForPatch( int num, int lightmapNum, const rawLightmap_t *lm, const 
 				for ( int v = 0; v < 3; ++v )
 				{
 					/* get most everything */
-					memcpy( &rw.verts[ v ], tri[ v ], sizeof( bspDrawVert_t ) );
+					rw.verts[ v ] = *tri[ v ];
 
 					/* fix colors */
 					for ( int i = 0; i < MAX_LIGHTMAPS; ++i )
