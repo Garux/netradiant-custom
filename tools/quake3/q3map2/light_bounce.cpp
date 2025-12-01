@@ -673,7 +673,7 @@ void RadLightForPatch( int num, int lightmapNum, const rawLightmap_t *lm, const 
 		/* planar? */
 		Plane3f plane;
 		const bool planar = PlaneFromPoints( plane, quad[ 0 ]->xyz, quad[ 1 ]->xyz, quad[ 2 ]->xyz )
-		                    && std::fabs( plane3_distance_to_point( plane, quad[ 1 ]->xyz ) ) < PLANAR_EPSILON;
+		                    && std::fabs( plane3_distance_to_point( plane, quad[ 3 ]->xyz ) ) < PLANAR_EPSILON;
 		/* generate a quad */
 		if ( planar ) {
 			radWinding_t rw;

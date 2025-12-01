@@ -409,7 +409,7 @@ void ProcessDecals(){
 #if 0
 					/* planar? (nuking this optimization as it doesn't work on non-rectangular quads) */
 					if ( 0 && PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz ) &&
-					     std::fabs( plane3_distance_to_point( plane, dv[ 1 ]->xyz ) ) <= PLANAR_EPSILON ) {
+					     std::fabs( plane3_distance_to_point( plane, dv[ 3 ]->xyz ) ) <= PLANAR_EPSILON ) {
 						/* make a quad projector */
 						MakeDecalProjector( p.shaderInfo, projection, distance, 4, dv );
 					}
