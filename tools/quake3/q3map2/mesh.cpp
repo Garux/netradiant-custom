@@ -113,24 +113,30 @@ void PrintMesh( const mesh_t& m ) {
 void TransposeMesh( mesh_t& m ) {
 	mesh_t out( m.height, m.width ); // swap width/height
 
-	for ( int h = 0; h < m.height; ++h ) {
-		for ( int w = 0; w < m.width; ++w ) {
-			out.verts()[ w * m.height + h ] = m.verts()[ h * m.width + w ];
-		}
-	}
+	for ( int h = 0; h < m.height; ++h )
+		for ( int w = 0; w < m.width; ++w )
+			out[ w ][ h ] = m[ h ][ w ];
+
+	m = std::move( out );
+}
+/* 90` clockwise */
+void RotateMesh( mesh_t& m ) {
+	mesh_t out( m.height, m.width ); // swap width/height
+
+	for ( int h = 0; h < m.height; ++h )
+		for ( int w = 0; w < m.width; ++w )
+			out[ w ][ m.height - 1 - h ] = m[ h ][ w ];
 
 	m = std::move( out );
 }
 
 void InvertMesh( mesh_t& m ) {
-	for ( int h = 0; h < m.height; ++h ) {
-		for ( int w = 0; w < m.width / 2; ++w ) {
+	for ( int h = 0; h < m.height; ++h )
+		for ( int w = 0; w < m.width / 2; ++w )
 			std::swap(
 				m[ h ][ w ],
 				m[ h ][ m.width - 1 - w ]
 			);
-		}
-	}
 }
 
 /*

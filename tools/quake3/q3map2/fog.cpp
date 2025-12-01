@@ -46,20 +46,17 @@ static int numFogPatchFragments;
 /// \returns either {front, back} or {front, {}} or {{}, back}
 /// frees or reuses \param in
 static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane( mesh_t&& in, const Plane3f& plane ){
-	int w, h, split;
+	int split;
 	float d[MAX_PATCH_SIZE][MAX_PATCH_SIZE];
 	int c_front, c_back, c_on;
-	int i;
-	float frac;
-	int frontAprox, backAprox;
 
-	for ( i = 0; i < 2; ++i ) {
+	for ( int i = 0; i < 2; ++i ) {
 		const bspDrawVert_t *dv = in.verts();
 		c_front = 0;
 		c_back = 0;
 		c_on = 0;
-		for ( h = 0; h < in.height; ++h ) {
-			for ( w = 0; w < in.width; ++w, ++dv ) {
+		for ( int h = 0; h < in.height; ++h ) {
+			for ( int w = 0; w < in.width; ++w, ++dv ) {
 				d[h][w] = plane3_distance_to_point( plane, dv->xyz );
 				if ( d[h][w] > ON_EPSILON ) {
 					c_front++;
@@ -82,7 +79,7 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 
 		// find a split point
 		split = -1;
-		for ( w = 0; w < in.width - 1; ++w ) {
+		for ( int w = 0; w < in.width - 1; ++w ) {
 			if ( ( d[0][w] < 0 ) != ( d[0][w + 1] < 0 ) ) {
 				if ( split == -1 ) {
 					split = w;
@@ -97,23 +94,22 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 				return { std::move( in ), {} };
 			}
 
-			TransposeMesh( in );
-			InvertMesh( in );
+			RotateMesh( in );
 			continue;
 		}
 
 		// make sure the split point stays the same for all other rows
-		for ( h = 1; h < in.height; ++h ) {
-			for ( w = 0; w < in.width - 1; ++w ) {
+		for ( int h = 1; h < in.height; ++h ) {
+			for ( int w = 0; w < in.width - 1; ++w ) {
 				if ( ( d[h][w] < 0 ) != ( d[h][w + 1] < 0 ) ) {
 					if ( w != split ) {
-						Sys_Printf( "multiple crossing points for patch -- can't clip\n" );
+						Sys_Warning( "multiple crossing points for patch -- can't clip\n" );
 						return { std::move( in ), {} };
 					}
 				}
 			}
 			if ( ( d[h][split] < 0 ) == ( d[h][split + 1] < 0 ) ) {
-				Sys_Printf( "differing crossing points for patch -- can't clip\n" );
+				Sys_Warning( "differing crossing points for patch -- can't clip\n" );
 				return { std::move( in ), {} };
 			}
 		}
@@ -123,25 +119,19 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 
 
 	// create two new meshes
-	int fwidth = split + 2;
+	int fwidth = split + 2, frontAprox = 0;
 	if ( !( fwidth & 1 ) ) {
 		fwidth++;
 		frontAprox = 1;
-	}
-	else {
-		frontAprox = 0;
 	}
 	if ( fwidth > MAX_PATCH_SIZE ) {
 		Error( "MAX_PATCH_SIZE after split" );
 	}
 
-	int bwidth = in.width - split;
+	int bwidth = in.width - split, backAprox = 0;
 	if ( !( bwidth & 1 ) ) {
 		bwidth++;
 		backAprox = 1;
-	}
-	else {
-		backAprox = 0;
 	}
 	if ( bwidth > MAX_PATCH_SIZE ) {
 		Error( "MAX_PATCH_SIZE after split" );
@@ -151,8 +141,8 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 	mesh_t b( bwidth, in.height );
 
 	// distribute the points
-	for ( w = 0; w < in.width; ++w ) {
-		for ( h = 0; h < in.height; ++h ) {
+	for ( int w = 0; w < in.width; ++w ) {
+		for ( int h = 0; h < in.height; ++h ) {
 			if ( w <= split ) {
 				f[ h ][ w ] = in[ h ][ w ];
 			}
@@ -163,13 +153,14 @@ static std::pair<std::optional<mesh_t>, std::optional<mesh_t>> SplitMeshByPlane(
 	}
 
 	// clip the crossing line
-	for ( h = 0; h < in.height; ++h )
+	// fixme if 'green' mesh point is on clipping plane, insertion of equal 'green' + 'pink' points leads to fucked up tcs in q3 engine
+	for ( int h = 0; h < in.height; ++h )
 	{
 		bspDrawVert_t& dv = f[ h ][ split + 1 ];
 		const bspDrawVert_t& v1 = in[ h ][ split ];
 		const bspDrawVert_t& v2 = in[ h ][ split + 1 ];
 
-		frac = d[h][split] / ( d[h][split] - d[h][split + 1] );
+		const float frac = d[h][split] / ( d[h][split] - d[h][split + 1] );
 
 		/* interpolate */
 		//%	for( i = 0; i < 10; ++i )
@@ -237,10 +228,6 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 	numFogPatchFragments += numOutside;
 	for ( int i = 0; i < numOutside; ++i )
 	{
-		/* transpose and invert the chopped patch (fixes potential crash. fixme: why?) */
-		TransposeMesh( outside[ i ] );
-		InvertMesh( outside[ i ] );
-
 		/* ydnar: do this the hacky right way */
 		mapDrawSurface_t& newds = AllocDrawSurface( ds );
 		newds.patchWidth  = outside[ i ].width;
@@ -251,10 +238,6 @@ static bool ChopPatchSurfaceByBrush( mapDrawSurface_t& ds, const brush_t *b ){
 	/* only rejigger this patch if it was chopped */
 	//%	Sys_Printf( "Inside: %d x %d\n", m.width, m.height );
 	if ( numOutside > 0 ) {
-		/* transpose and invert the chopped patch (fixes potential crash. fixme: why?) */
-		TransposeMesh( m );
-		InvertMesh( m );
-
 		/* replace ds with m */
 		ds.patchWidth  = m.width;
 		ds.patchHeight = m.height;

@@ -1551,6 +1551,7 @@ bspDrawVert_t               LerpDrawVert( const bspDrawVert_t& a, const bspDrawV
 void                        LerpDrawVertAmount( const bspDrawVert_t& a, const bspDrawVert_t& b, float amount, bspDrawVert_t& out );
 void                        PrintMesh( const mesh_t& m );
 void                        TransposeMesh( mesh_t& m );
+void                        RotateMesh( mesh_t& m );
 void                        InvertMesh( mesh_t& m );
 mesh_t                      SubdivideMesh( const mesh_view_t in, float maxError, float minLength );
 int                         IterationsForCurve( float len, int subdivisions );
