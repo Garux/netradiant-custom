@@ -187,6 +187,7 @@ enum class EBrushType
 #define EXTERNAL_LIGHTMAP       "lm_%04d.tga"
 
 #define MAX_LIGHTMAPS           4           /* RBSP */
+#define LIGHTMAP_BY_VERTEX      -3
 #define MAX_SWITCHED_LIGHTS     32
 #define LS_NORMAL               0x00
 #define LS_UNUSED               0xFE

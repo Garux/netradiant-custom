@@ -746,7 +746,7 @@ int MergeBSPMain( Args& args ){
 			fog.brushNum += bspBrushes.size();
 
 		/* deduce max lm index, using bspLightBytes is insufficient for native external lightmaps */
-		int maxLmIndex = -3;
+		int maxLmIndex = LIGHTMAP_BY_VERTEX;
 		for( const auto& surf : bspDrawSurfaces )
 			for( auto index : surf.lightmapNum )
 				value_maximize( maxLmIndex, index );

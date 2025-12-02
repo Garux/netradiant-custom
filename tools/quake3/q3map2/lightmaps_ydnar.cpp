@@ -1754,7 +1754,7 @@ static void SetupOutLightmap( rawLightmap_t *lm, outLightmap_t *olm ){
 		}
 	}
 	else{
-		olm->lightmapNum = -3;
+		olm->lightmapNum = LIGHTMAP_BY_VERTEX;
 	}
 
 	/* set external lightmap number */
@@ -1791,8 +1791,8 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 	int xIncrement, yIncrement;
 
 
-	/* set default lightmap number (-3 = LIGHTMAP_BY_VERTEX) */
-	lm->outLightmapNums.fill( -3 );
+	/* set default lightmap number */
+	lm->outLightmapNums.fill( LIGHTMAP_BY_VERTEX );
 
 	/* can this lightmap be approximated with vertex color? */
 	if ( ApproximateLightmap( lm ) ) {
@@ -3027,7 +3027,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 			/* handle vertex lit or approximated surfaces */
 			else if ( lm == nullptr || lm->outLightmapNums[ 0 ] < 0 ) {
 				ds.lightmapStyles = ds.vertexStyles;
-				ds.lightmapNum.fill( -3 );
+				ds.lightmapNum.fill( LIGHTMAP_BY_VERTEX );
 			}
 
 			/* handle lightmapped surfaces */
@@ -3041,7 +3041,7 @@ void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 
 					/* handle unused style */
 					if ( lm->styles[ lightmapNum ] == LS_NONE || lm->outLightmapNums[ lightmapNum ] < 0 ) {
-						ds.lightmapNum[ lightmapNum ] = -3;
+						ds.lightmapNum[ lightmapNum ] = LIGHTMAP_BY_VERTEX;
 						continue;
 					}
 

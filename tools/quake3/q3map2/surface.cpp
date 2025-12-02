@@ -2001,7 +2001,7 @@ static void EmitFlareSurface( mapDrawSurface_t& ds ){
 	/* RBSP */
 	out.lightmapStyles = { byte( ds.lightStyle ), LS_NONE, LS_NONE, LS_NONE };
 	out.vertexStyles   = { byte( ds.lightStyle ), LS_NONE, LS_NONE, LS_NONE };
-	out.lightmapNum.fill( -3 );
+	out.lightmapNum.fill( LIGHTMAP_BY_VERTEX );
 
 	out.lightmapOrigin = ds.lightmapOrigin;          /* origin */
 	out.lightmapVecs[ 0 ] = ds.lightmapVecs[ 0 ];    /* color */
@@ -2075,7 +2075,7 @@ static void EmitPatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 	/* RBSP */
 	out.lightmapStyles = { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE };
 	out.vertexStyles   = { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE };
-	out.lightmapNum.fill( -3 );
+	out.lightmapNum.fill( LIGHTMAP_BY_VERTEX );
 
 	/* ydnar: gs mods: previously, the lod bounds were stored in lightmapVecs[ 0 ] and [ 1 ], moved to bounds[ 0 ] and [ 1 ] */
 	out.lightmapOrigin = ds.lightmapOrigin;
@@ -2376,7 +2376,7 @@ static void EmitTriangleSurface( mapDrawSurface_t& ds ){
 	/* RBSP */
 	out.lightmapStyles = { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE };
 	out.vertexStyles   = { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE };
-	out.lightmapNum.fill( -3 );
+	out.lightmapNum.fill( LIGHTMAP_BY_VERTEX );
 
 	/* lightmap vectors (lod bounds for patches) */
 	out.lightmapOrigin = ds.lightmapOrigin;

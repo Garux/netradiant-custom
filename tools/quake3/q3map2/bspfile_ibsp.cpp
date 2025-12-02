@@ -142,7 +142,7 @@ struct ibspDrawSurface_t
 			.numIndexes     = numIndexes,
 			.lightmapStyles { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
 			.vertexStyles   { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
-			.lightmapNum    { lightmapNum, -3, -3, -3 },
+			.lightmapNum    { lightmapNum, LIGHTMAP_BY_VERTEX, LIGHTMAP_BY_VERTEX, LIGHTMAP_BY_VERTEX },
 			.lightmapX      { lightmapX, 0, 0, 0 },
 			.lightmapY      { lightmapY, 0, 0, 0 },
 			.lightmapWidth  = lightmapWidth,

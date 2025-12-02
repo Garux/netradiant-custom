@@ -1865,7 +1865,7 @@ static void WriteBSPFileAfterLight( const char *bspFileName ){
 
 				out.lightmapStyles.fill( LS_NONE );
 				out.vertexStyles.fill( LS_NONE );
-				out.lightmapNum.fill( -3 );
+				out.lightmapNum.fill( LIGHTMAP_BY_VERTEX );
 			}
 
 			bakDrawSurfaces.insert( bakDrawSurfaces.cend(), bspDrawSurfaces.cbegin(), bspDrawSurfaces.cend() );
@@ -1896,7 +1896,7 @@ static void WriteBSPFileAfterLight( const char *bspFileName ){
 			for( auto& ds : bspDrawSurfaces ){
 				if( ds.surfaceType == MST_PLANAR ){
 					ds.surfaceType = MST_TRIANGLE_SOUP;
-					ds.lightmapNum[ 0 ] = -3;
+					ds.lightmapNum[ 0 ] = LIGHTMAP_BY_VERTEX;
 				}
 			}
 		}
