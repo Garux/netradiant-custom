@@ -2856,11 +2856,8 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 #define VERTEX_NUDGE    4.0f
 
 void IlluminateVertexes( int num ){
-	int i, x, y, z, x1, y1, z1, sx, sy, radius, maxRadius;
-	int lightmapNum, numAvg;
+	int i, x, y, z, x1, y1, z1, sx, sy;
 	float samples, dirt;
-	Vector3 colors[ MAX_LIGHTMAPS ], avgColors[ MAX_LIGHTMAPS ];
-	bspDrawVert_t       *verts;
 	trace_t trace;
 	float floodLightAmount;
 	Vector3 floodColor;
@@ -2892,9 +2889,10 @@ void IlluminateVertexes( int num ){
 		CreateTraceLightsForSurface( num, &trace );
 
 		/* setup */
-		verts = &yDrawVerts[ ds.firstVert ];
-		numAvg = 0;
-		memset( avgColors, 0, sizeof( avgColors ) );
+		bspDrawVert_t *verts = &yDrawVerts[ ds.firstVert ];
+		int numAvg = 0;
+		Array4<Vector3> colors;
+		Array4<Vector3> avgColors = makeArray4( Vector3( 0 ) );
 
 		/* walk the surface verts */
 		for ( i = 0; i < ds.numVerts; ++i )
@@ -2960,7 +2958,7 @@ void IlluminateVertexes( int num ){
 					LightingAtSample( &trace, ds.vertexStyles, colors, info.ambientColor );
 
 					/* store */
-					for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
+					for ( int lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 					{
 						/* r7 dirt */
 						colors[ lightmapNum ] *= dirt;
@@ -3022,7 +3020,7 @@ void IlluminateVertexes( int num ){
 								LightingAtSample( &trace, ds.vertexStyles, colors, info.ambientColor );
 
 								/* store */
-								for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
+								for ( int lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 								{
 									/* r7 dirt */
 									colors[ lightmapNum ] *= dirt;
@@ -3046,7 +3044,7 @@ void IlluminateVertexes( int num ){
 				/* add to average? */
 				if ( vector3_component_greater( getRadVertexLuxel( 0, ds.firstVert + i ), info.ambientColor ) ) {
 					numAvg++;
-					for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
+					for ( int lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 					{
 						avgColors[ lightmapNum ] += getRadVertexLuxel( lightmapNum, ds.firstVert + i );
 					}
@@ -3059,7 +3057,7 @@ void IlluminateVertexes( int num ){
 
 		/* set average color */
 		if ( numAvg > 0 ) {
-			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
+			for ( int lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 				avgColors[ lightmapNum ] *= ( 1.0f / numAvg );
 		}
 		else
@@ -3072,7 +3070,7 @@ void IlluminateVertexes( int num ){
 		{
 			/* store average in occluded vertexes */
 			if ( getRadVertexLuxel( 0, ds.firstVert + i )[ 0 ] < 0 ) {
-				for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
+				for ( int lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 				{
 					getRadVertexLuxel( lightmapNum, ds.firstVert + i ) = avgColors[ lightmapNum ];
 
@@ -3082,7 +3080,7 @@ void IlluminateVertexes( int num ){
 			}
 
 			/* store it */
-			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
+			for ( int lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 			{
 				/* get luxels */
 				Vector3& vertLuxel = getVertexLuxel( lightmapNum, ds.firstVert + i );
@@ -3110,18 +3108,17 @@ void IlluminateVertexes( int num ){
 	   ----------------------------------------------------------------- */
 
 	/* set styles from lightmap */
-	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
-		ds.vertexStyles[ lightmapNum ] = lm->styles[ lightmapNum ];
+	ds.vertexStyles = lm->styles;
 
 	/* get max search radius */
-	maxRadius = std::max( lm->sw, lm->sh );
+	const int maxRadius = std::max( lm->sw, lm->sh );
 
 	/* walk the surface verts */
-	verts = &yDrawVerts[ ds.firstVert ];
+	bspDrawVert_t *verts = &yDrawVerts[ ds.firstVert ];
 	for ( i = 0; i < ds.numVerts; ++i )
 	{
 		/* do each lightmap */
-		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
+		for ( int lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; ++lightmapNum )
 		{
 			/* early out */
 			if ( lm->superLuxels[ lightmapNum ] == nullptr ) {
@@ -3160,7 +3157,7 @@ void IlluminateVertexes( int num ){
 				/* increasing radius */
 				radVertLuxel.set( 0 );
 				samples = 0;
-				for ( radius = 0; radius < maxRadius && samples <= 0; ++radius )
+				for ( int radius = 0; radius < maxRadius && samples <= 0; ++radius )
 				{
 					/* sample within radius */
 					for ( sy = ( y - radius ); sy <= ( y + radius ); ++sy )

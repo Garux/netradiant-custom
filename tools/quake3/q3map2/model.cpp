@@ -252,7 +252,7 @@ struct AssModel
 					if( m_mesh->HasTextureCoords( 0 ) )
 						st[n] = { m_mesh->mTextureCoords[0][i].x, m_mesh->mTextureCoords[0][i].y };
 					else
-						st[n] = { 0, 0 };
+						st[n] = Vector2( 0 );
 				}
 				visitor( xyz, st );
 			}

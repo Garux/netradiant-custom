@@ -1117,9 +1117,9 @@ public:
 				}
 			}
 			const PlanePoints vertices{ v0, v1, v2 };
-			const DoubleVector3 sts[3]{ DoubleVector3( p0->m_texcoord ),
-										DoubleVector3( p1->m_texcoord ),
-										DoubleVector3( p2->m_texcoord ) };
+			const DoubleVector3 sts[3]{ DoubleVector3( p0->m_texcoord, 0 ),
+										DoubleVector3( p1->m_texcoord, 0 ),
+										DoubleVector3( p2->m_texcoord, 0 ) };
 			Texdef_Construct_local2tex_from_ST( vertices, sts, m_local2tex );
 			m_tex2local = matrix4_affine_inverse( m_local2tex );
 			BP_from_ST( m_bp, vertices, sts, plane3_for_points( vertices ).normal() );
@@ -1170,7 +1170,7 @@ void Patch_SetTexdef( const float* hShift, const float* vShift, const float* hSc
 			matrix4_multiply_by_matrix4( local2tex, c.m_tex2local );
 			patch.undoSave();
 			for( auto& p : patch.getControlPoints() )
-				p.m_texcoord = matrix4_transformed_point( local2tex, Vector3( p.m_texcoord ) ).vec2();
+				p.m_texcoord = matrix4_transformed_point( local2tex, Vector3( p.m_texcoord, 0 ) ).vec2();
 			patch.controlPointsChanged();
 		}
 		else{ // fallback //. fixme: this is not cool; may be more valid cases in PatchTexdefConstructor, as in find one good triangle in problematic case

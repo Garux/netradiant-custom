@@ -320,9 +320,8 @@ static void FixSurfaceJunctions( mapDrawSurface_t& ds ) {
 					const float c = v1.color[ k ][ j ] + frac * ( v2.color[ k ][ j ] - v1.color[ k ][ j ] );
 					v.color[ k ][ j ] = color_to_byte( c );
 				}
-				v.lightmap[ k ] = { 0, 0 }; // do zero init
 			}
-			v.lightmap[ 0 ] = vector2_mid( v1.lightmap[ 0 ], v2.lightmap[ 0 ] );
+			v.lightmap = { vector2_mid( v1.lightmap[ 0 ], v2.lightmap[ 0 ] ), Vector2( 0 ), Vector2( 0 ), Vector2( 0 ) };
 			bspDrawVert_mark_tjunc( v );
 
 			/* next... */
@@ -452,11 +451,10 @@ static bool FixBrokenSurface( mapDrawSurface_t& ds ){
 			/* lightmap st/colors */
 			for ( int k = 0; k < MAX_LIGHTMAPS; ++k )
 			{
-				avg.lightmap[ k ] = { 0, 0 };
 				for ( int j = 0; j < 4; ++j )
 					avg.color[ k ][ j ] = ( dv1.color[ k ][ j ] + dv2.color[ k ][ j ] ) >> 1;
 			}
-			avg.lightmap[ 0 ] = vector2_mid( dv1.lightmap[ 0 ], dv2.lightmap[ 0 ] );
+			avg.lightmap = { vector2_mid( dv1.lightmap[ 0 ], dv2.lightmap[ 0 ] ), Vector2( 0 ), Vector2( 0 ), Vector2( 0 ) };
 
 			if( bspDrawVert_is_tjunc( dv1 ) && bspDrawVert_is_tjunc( dv2 ) )
 				bspDrawVert_mark_tjunc( avg );

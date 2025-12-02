@@ -65,7 +65,11 @@ static void ConvertSurfaceToOBJ( FILE *f, int modelNum, int surfaceNum, const Ve
 
 	/* export shader */
 	if ( lightmapsAsTexcoord ) {
-		const int lmNum = ds.lightmapNum[0] >= 0? ds.lightmapNum[0]: lmIndices[ds.shaderNum] >= 0? lmIndices[ds.shaderNum] : ds.lightmapNum[0];
+		const int lmNum = ds.lightmapNum[0] >= 0?
+		                  ds.lightmapNum[0]
+		                : lmIndices[ds.shaderNum] >= 0?
+		                  lmIndices[ds.shaderNum]
+		                : ds.lightmapNum[0];
 		if ( objLastShaderNum != lmNum ) {
 			fprintf( f, "usemtl lm_%04d\r\n", lmNum + deluxemap );
 			objLastShaderNum = lmNum + deluxemap;

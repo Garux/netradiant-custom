@@ -1407,9 +1407,9 @@ void Face_setTexture( Face& face, const char* shader, const FaceTexture& clipboa
 			if( pc.empty() )
 				return;
 			PlanePoints vertices{ pc[0]->m_vertex, pc[1]->m_vertex, pc[2]->m_vertex };
-			const DoubleVector3 sts[3]{ DoubleVector3( pc[0]->m_texcoord ),
-		                                DoubleVector3( pc[1]->m_texcoord ),
-		                                DoubleVector3( pc[2]->m_texcoord ) };
+			const DoubleVector3 sts[3]{ DoubleVector3( pc[0]->m_texcoord, 0 ),
+		                                DoubleVector3( pc[1]->m_texcoord, 0 ),
+		                                DoubleVector3( pc[2]->m_texcoord, 0 ) };
 			{ // rotate patch points to face plane
 				const Plane3 plane = plane3_for_points( vertices );
 				const DoubleRay line = plane3_intersect_plane3( face.getPlane().plane3(), plane );
@@ -1463,9 +1463,9 @@ void Patch_setTexture( Patch& patch, const char* shader, const FaceTexture& clip
 			return;
 
 		PlanePoints vertices{ pc[0]->m_vertex, pc[1]->m_vertex, pc[2]->m_vertex };
-		const DoubleVector3 sts[3]{ DoubleVector3( pc[0]->m_texcoord ),
-		                            DoubleVector3( pc[1]->m_texcoord ),
-		                            DoubleVector3( pc[2]->m_texcoord ) };
+		const DoubleVector3 sts[3]{ DoubleVector3( pc[0]->m_texcoord, 0 ),
+		                            DoubleVector3( pc[1]->m_texcoord, 0 ),
+		                            DoubleVector3( pc[2]->m_texcoord, 0 ) };
 		Matrix4 local2tex0; // face tex projection
 		{
 			TextureProjection proj0( clipboard.m_projection );
@@ -1493,7 +1493,7 @@ void Patch_setTexture( Patch& patch, const char* shader, const FaceTexture& clip
 		const Matrix4 mat = matrix4_multiplied_by_matrix4( local2tex0, tex2local ); // unproject st->world, project to new st
 		patch.undoSave();
 		for( auto& p : patch ){
-			p.m_texcoord = matrix4_transformed_point( mat, Vector3( p.m_texcoord ) ).vec2();
+			p.m_texcoord = matrix4_transformed_point( mat, Vector3( p.m_texcoord, 0 ) ).vec2();
 		}
 		patch.controlPointsChanged();
 		Patch_textureChanged();

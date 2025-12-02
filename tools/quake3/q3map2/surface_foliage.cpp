@@ -248,10 +248,7 @@ void Foliage( const mapDrawSurface_t& src, entity_t& entity ){
 				dv.normal = fi.normal;
 
 				/* ydnar: set color */
-				for ( auto& color : dv.color )
-				{
-					color.set( 255 );
-				}
+				dv.color.fill( Color4b( 255 ) );
 			}
 		}
 	}

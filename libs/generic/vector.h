@@ -11,13 +11,13 @@ public:
 	BasicVector2(){
 	}
 	template<typename OtherElement>
-	BasicVector2( const BasicVector2<OtherElement>& other ){
-		x() = static_cast<Element>( other.x() );
-		y() = static_cast<Element>( other.y() );
+	BasicVector2( const BasicVector2<OtherElement>& other ) : m_elements{
+		static_cast<Element>( other.x() ),
+		static_cast<Element>( other.y() ) }
+	{}
+	BasicVector2( const Element& x_, const Element& y_ ) : m_elements{ x_, y_ }{
 	}
-	BasicVector2( const Element& x_, const Element& y_ ){
-		x() = x_;
-		y() = y_;
+	explicit BasicVector2( const Element& value ) : m_elements{ value, value }{
 	}
 
 	Element& x(){
@@ -58,17 +58,17 @@ public:
 	BasicVector3(){
 	}
 	template<typename OtherElement>
-	BasicVector3( const BasicVector3<OtherElement>& other ){
-		x() = static_cast<Element>( other.x() );
-		y() = static_cast<Element>( other.y() );
-		z() = static_cast<Element>( other.z() );
-	}
+	BasicVector3( const BasicVector3<OtherElement>& other ) : m_elements{
+		static_cast<Element>( other.x() ),
+		static_cast<Element>( other.y() ),
+		static_cast<Element>( other.z() ) }
+	{}
 	template<typename OtherElement>
-	explicit BasicVector3( const BasicVector2<OtherElement>& vec2 ){
-		x() = static_cast<Element>( vec2.x() );
-		y() = static_cast<Element>( vec2.y() );
-		z() = 0;
-	}
+	explicit BasicVector3( const BasicVector2<OtherElement>& vec2, const Element& z_ ) : m_elements{
+		static_cast<Element>( vec2.x() ),
+		static_cast<Element>( vec2.y() ),
+		z_ }
+	{}
 	BasicVector3( const Element& x_, const Element& y_, const Element& z_ ) : m_elements{ x_, y_, z_ }{
 	}
 	explicit BasicVector3( const Element& value ) : m_elements{ value, value, value }{
@@ -128,17 +128,15 @@ public:
 
 	BasicVector4(){
 	}
-	BasicVector4( Element x_, Element y_, Element z_, Element w_ ){
-		x() = x_;
-		y() = y_;
-		z() = z_;
-		w() = w_;
+	BasicVector4( Element x_, Element y_, Element z_, Element w_ ) : m_elements{ x_, y_, z_, w_ }{
 	}
-	BasicVector4( const BasicVector3<Element>& self, Element w_ ){
-		x() = self.x();
-		y() = self.y();
-		z() = self.z();
-		w() = w_;
+	BasicVector4( const BasicVector3<Element>& vec3, Element w_ ) : m_elements{
+		vec3.x(),
+		vec3.y(),
+		vec3.z(),
+		w_ }
+	{}
+	explicit BasicVector4( const Element& value ) : m_elements{ value, value, value, value }{
 	}
 
 	Element& x(){
@@ -166,12 +164,6 @@ public:
 		return m_elements[3];
 	}
 
-	Element index( std::size_t i ) const {
-		return m_elements[i];
-	}
-	Element& index( std::size_t i ){
-		return m_elements[i];
-	}
 	Element operator[]( std::size_t i ) const {
 		return m_elements[i];
 	}

@@ -518,10 +518,7 @@ static void ProjectDecalOntoWinding( const decalProjector_t& dp, const mapDrawSu
 		dv.st[ 1 ] = vector3_dot( dv.xyz, dp.texMat[ 1 ].vec3() ) + dp.texMat[ 1 ][ 3 ];
 
 		/* set color */
-		for ( int j = 0; j < MAX_LIGHTMAPS; ++j )
-		{
-			dv.color[ j ] = { 255, 255, 255, color_to_byte( alpha ) };
-		}
+		dv.color.fill( Color4b( 255, 255, 255, color_to_byte( alpha ) ) );
 	}
 }
 

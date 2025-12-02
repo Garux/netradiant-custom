@@ -730,14 +730,10 @@ mapDrawSurface_t *DrawSurfaceForSide( const entity_t& e, const brush_t& b, const
 		dv.normal = mapplanes[ s.planenum ].normal();
 
 		/* ydnar: set color */
-		for ( auto& color : dv.color )
-		{
-			color.set( 255 );
-
-			/* ydnar: gs mods: handle indexed shader blending */
-			if( indexed )
-				color.alpha() = shaderIndexes[ j ];
-		}
+		if( indexed )
+			dv.color.fill( Color4b( 255, 255, 255, shaderIndexes[ j ] ) ); /* ydnar: gs mods: handle indexed shader blending */
+		else
+			dv.color.fill( Color4b( 255 ) );
 	}
 
 	/* set cel shader */
@@ -881,14 +877,10 @@ mapDrawSurface_t& DrawSurfaceForMesh( const entity_t& e, parseMesh_t& p ){
 		}
 
 		/* ydnar: set color */
-		for ( auto& color : dv.color )
-		{
-			color.set( 255 );
-
-			/* ydnar: gs mods: handle indexed shader blending */
-			if( indexed )
-				color.alpha() = shaderIndexes[ i ];
-		}
+		if( indexed )
+			dv.color.fill( Color4b( 255, 255, 255, shaderIndexes[ i ] ) ); /* ydnar: gs mods: handle indexed shader blending */
+		else
+			dv.color.fill( Color4b( 255 ) );
 
 		/* ydnar: offset */
 		if ( indexed ) {
@@ -2007,14 +1999,9 @@ static void EmitFlareSurface( mapDrawSurface_t& ds ){
 	out.fogNum = ds.fogNum;
 
 	/* RBSP */
-	for ( int i = 0; i < MAX_LIGHTMAPS; ++i )
-	{
-		out.lightmapNum[ i ] = -3;
-		out.lightmapStyles[ i ] = LS_NONE;
-		out.vertexStyles[ i ] = LS_NONE;
-	}
-	out.lightmapStyles[ 0 ] = ds.lightStyle;
-	out.vertexStyles[ 0 ] = ds.lightStyle;
+	out.lightmapStyles = { byte( ds.lightStyle ), LS_NONE, LS_NONE, LS_NONE };
+	out.vertexStyles   = { byte( ds.lightStyle ), LS_NONE, LS_NONE, LS_NONE };
+	out.lightmapNum.fill( -3 );
 
 	out.lightmapOrigin = ds.lightmapOrigin;          /* origin */
 	out.lightmapVecs[ 0 ] = ds.lightmapVecs[ 0 ];    /* color */
@@ -2086,14 +2073,9 @@ static void EmitPatchSurface( const entity_t& e, mapDrawSurface_t& ds ){
 	out.fogNum = ds.fogNum;
 
 	/* RBSP */
-	for ( int i = 0; i < MAX_LIGHTMAPS; ++i )
-	{
-		out.lightmapNum[ i ] = -3;
-		out.lightmapStyles[ i ] = LS_NONE;
-		out.vertexStyles[ i ] = LS_NONE;
-	}
-	out.lightmapStyles[ 0 ] = LS_NORMAL;
-	out.vertexStyles[ 0 ] = LS_NORMAL;
+	out.lightmapStyles = { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE };
+	out.vertexStyles   = { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE };
+	out.lightmapNum.fill( -3 );
 
 	/* ydnar: gs mods: previously, the lod bounds were stored in lightmapVecs[ 0 ] and [ 1 ], moved to bounds[ 0 ] and [ 1 ] */
 	out.lightmapOrigin = ds.lightmapOrigin;
@@ -2392,14 +2374,9 @@ static void EmitTriangleSurface( mapDrawSurface_t& ds ){
 	}
 
 	/* RBSP */
-	for ( int i = 0; i < MAX_LIGHTMAPS; ++i )
-	{
-		out.lightmapNum[ i ] = -3;
-		out.lightmapStyles[ i ] = LS_NONE;
-		out.vertexStyles[ i ] = LS_NONE;
-	}
-	out.lightmapStyles[ 0 ] = LS_NORMAL;
-	out.vertexStyles[ 0 ] = LS_NORMAL;
+	out.lightmapStyles = { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE };
+	out.vertexStyles   = { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE };
+	out.lightmapNum.fill( -3 );
 
 	/* lightmap vectors (lod bounds for patches) */
 	out.lightmapOrigin = ds.lightmapOrigin;
@@ -2496,12 +2473,8 @@ static void MakeDebugPortalSurfs_r( const node_t *node, shaderInfo_t& si ){
 				/* set it */
 				dv.xyz = w[ i ];
 				dv.normal = p->plane.normal();
-				dv.st = { 0, 0 };
-				for ( auto& color : dv.color )
-				{
-					color.rgb() = debugColors[ c % 12 ];
-					color.alpha() = 32;
-				}
+				dv.st = Vector2( 0 );
+				dv.color.fill( Color4b( debugColors[ c % 12 ], 32 ) );
 			}
 		}
 	}

@@ -71,7 +71,21 @@ rapidjson::Value value_for( const T (&array)[N], Allocator& allocator ){
 	return value;
 }
 template<typename T, size_t N, typename Allocator>
+rapidjson::Value value_for( const std::array<T, N>& array, Allocator& allocator ){
+	rapidjson::Value value( rapidjson::kArrayType );
+	for( auto&& val : array )
+		value.PushBack( value_for( val, allocator ), allocator );
+	return value;
+}
+template<typename T, size_t N, typename Allocator>
 rapidjson::Value value_for_array( const T (&array)[N], Allocator& allocator ){
+	rapidjson::Value value( rapidjson::kArrayType );
+	for( auto&& val : array )
+		value.PushBack( val, allocator );
+	return value;
+}
+template<typename T, size_t N, typename Allocator>
+rapidjson::Value value_for_array( const std::array<T, N>& array, Allocator& allocator ){
 	rapidjson::Value value( rapidjson::kArrayType );
 	for( auto&& val : array )
 		value.PushBack( val, allocator );
@@ -105,7 +119,21 @@ void value_to( const rapidjson::Value& value, T (&array)[N] ){
 		value_to( value.GetArray().operator[]( i ), val );
 }
 template<typename T, size_t N>
+void value_to( const rapidjson::Value& value, std::array<T, N>& array ){
+	for_indexed( auto&& val : array )
+		value_to( value.GetArray().operator[]( i ), val );
+}
+template<typename T, size_t N>
 void value_to_array( const rapidjson::Value& value, T (&array)[N] ){
+	for_indexed( auto&& val : array ){
+		if constexpr ( std::is_same_v<T, byte> )
+			val = value.GetArray().operator[]( i ).Get<int>();
+		else
+			val = value.GetArray().operator[]( i ).Get<T>();
+	}
+}
+template<typename T, size_t N>
+void value_to_array( const rapidjson::Value& value, std::array<T, N>& array ){
 	for_indexed( auto&& val : array ){
 		if constexpr ( std::is_same_v<T, byte> )
 			val = value.GetArray().operator[]( i ).Get<int>();

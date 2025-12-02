@@ -60,8 +60,8 @@ void ColorMod( const std::forward_list<colorMod_t>& colormod, const Span<bspDraw
 		{
 			float c;
 			/* default */
-			Color4f mult( 1, 1, 1, 1 );
-			Color4f add( 0, 0, 0, 0 );
+			Color4f mult( 1 );
+			Color4f add( 0 );
 
 			const Vector3 cm_vec3 = vector3_from_array( cm.data );
 			/* switch on type */
@@ -691,7 +691,7 @@ static void LoadShaderImages( shaderInfo_t& si ){
 
 	/* create default and average colors */
 	const int count = si.lightImage->width * si.lightImage->height;
-	Color4f color( 0, 0, 0, 0 );
+	Color4f color( 0 );
 	for ( int i = 0; i < count; ++i )
 	{
 		color[ 0 ] += si.lightImage->pixels[ i * 4 + 0 ];

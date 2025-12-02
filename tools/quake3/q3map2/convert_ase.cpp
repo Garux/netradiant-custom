@@ -156,7 +156,11 @@ static void ConvertSurface( FILE *f, int modelNum, int surfaceNum, const Vector3
 	fprintf( f, "\t*PROP_CASTSHADOW\t1\r\n" );
 	fprintf( f, "\t*PROP_RECVSHADOW\t1\r\n" );
 	if ( lightmapsAsTexcoord ) {
-		const int lmNum = ds.lightmapNum[0] >= 0? ds.lightmapNum[0]: lmIndices[ds.shaderNum] >= 0? lmIndices[ds.shaderNum] : ds.lightmapNum[0];
+		const int lmNum = ds.lightmapNum[0] >= 0?
+		                  ds.lightmapNum[0]
+		                : lmIndices[ds.shaderNum] >= 0?
+		                  lmIndices[ds.shaderNum]
+		                : ds.lightmapNum[0];
 		if ( lmNum >= 0 && lmNum + (int)deluxemap < numLightmapsASE ) {
 			fprintf( f, "\t*MATERIAL_REF\t%d\r\n", lmNum + deluxemap );
 		}

@@ -1183,10 +1183,9 @@ int LightContributionToSample( trace_t *trace ){
    determines the amount of light reaching a sample (luxel or vertex)
  */
 
-void LightingAtSample( trace_t *trace, byte (&styles)[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ], const Vector3& ambientColor ){
+void LightingAtSample( trace_t *trace, Array4<byte>& styles, Array4<Vector3>& colors, const Vector3& ambientColor ){
 	/* clear colors */
-	for ( Vector3& color : colors )
-		color.set( 0 );
+	colors.fill( Vector3( 0 ) );
 
 	/* ydnar: normalmap */
 	if ( normalmap ) {
@@ -1460,14 +1459,12 @@ struct contribution_t
 static void TraceGrid( int num ){
 	int i, j, x, y, z, mod, numCon, numStyles;
 	Vector3 cheapColor, thisdir;
-	rawGridPoint_t          *gp;
-	bspGridPoint_t          *bgp;
 	contribution_t contributions[ MAX_CONTRIBUTIONS ];
 	trace_t trace;
 
 	/* get grid points */
-	gp = &rawGridPoints[ num ];
-	bgp = &bspGridPoints[ num ];
+	rawGridPoint_t& gp = rawGridPoints[ num ];
+	bspGridPoint_t& bgp = bspGridPoints[ num ];
 
 	/* get grid origin */
 	mod = num;
@@ -1548,7 +1545,7 @@ static void TraceGrid( int num ){
 
 		/* push average direction around */
 		addSize = vector3_length( trace.color );
-		gp->dir += trace.direction * addSize;
+		gp.dir += trace.direction * addSize;
 
 		/* stop after a while */
 		if ( numCon >= ( MAX_CONTRIBUTIONS - 1 ) ) {
@@ -1598,7 +1595,7 @@ static void TraceGrid( int num ){
 
 			/* push average direction around */
 			addSize = vector3_length( contributions[ numCon ].color );
-			gp->dir += dir * addSize;
+			gp.dir += dir * addSize;
 
 			numCon++;
 		}
@@ -1606,7 +1603,7 @@ static void TraceGrid( int num ){
 	/////////////////////
 
 	/* normalize to get primary light direction */
-	thisdir = VectorNormalized( gp->dir );
+	thisdir = VectorNormalized( gp.dir );
 
 	/* now that we have identified the primary light direction,
 	   go back and separate all the light into directed and ambient */
@@ -1622,7 +1619,7 @@ static void TraceGrid( int num ){
 		/* find appropriate style */
 		for ( j = 0; j < numStyles; ++j )
 		{
-			if ( gp->styles[ j ] == contributions[ i ].style ) {
+			if ( gp.styles[ j ] == contributions[ i ].style ) {
 				break;
 			}
 		}
@@ -1631,8 +1628,8 @@ static void TraceGrid( int num ){
 		if ( j >= numStyles ) {
 			/* add a new style */
 			if ( numStyles < MAX_LIGHTMAPS ) {
-				gp->styles[ numStyles ] = contributions[ i ].style;
-				bgp->styles[ numStyles ] = contributions[ i ].style;
+				gp.styles[ numStyles ] = contributions[ i ].style;
+				bgp.styles[ numStyles ] = contributions[ i ].style;
 				numStyles++;
 				//%	Sys_Printf( "(%d, %d) ", num, contributions[ i ].style );
 			}
@@ -1644,7 +1641,7 @@ static void TraceGrid( int num ){
 		}
 
 		/* add the directed color */
-		gp->directed[ j ] += contributions[ i ].color * d;
+		gp.directed[ j ] += contributions[ i ].color * d;
 
 		/* ambient light will be at 1/4 the value of directed light */
 		/* (ydnar: nuke this in favor of more dramatic lighting?) */
@@ -1652,9 +1649,9 @@ static void TraceGrid( int num ){
 //		d = 0.25f;
 		/* (Hobbes: always setting it to .25 is hardly any better) */
 		d = 0.25f * ( 1.0f - d );
-		gp->ambient[ j ] += contributions[ i ].color * d;
+		gp.ambient[ j ] += contributions[ i ].color * d;
 
-		gp->ambient[ j ] += contributions[ i ].ambient;
+		gp.ambient[ j ] += contributions[ i ].ambient;
 
 /*
  * div0:
@@ -1677,40 +1674,40 @@ static void TraceGrid( int num ){
 #if 0
 		/* do some fudging to keep the ambient from being too low (2003-07-05: 0.25 -> 0.125) */
 		if ( !bouncing ) {
-			VectorMA( gp->ambient[ i ], 0.125f, gp->directed[ i ], gp->ambient[ i ] );
+			VectorMA( gp.ambient[ i ], 0.125f, gp.directed[ i ], gp.ambient[ i ] );
 		}
 #endif
 
 		/* set minimum light and copy off to bytes */
-		Vector3 color = gp->ambient[ i ];
+		Vector3 color = gp.ambient[ i ];
 		for ( j = 0; j < 3; ++j )
 			value_maximize( color[ j ], minGridLight[ j ] );
 
 		/* vortex: apply gridscale and gridambientscale here */
-		bgp->ambient[ i ] = ColorToBytes( color, gridScale * gridAmbientScale );
-		bgp->directed[ i ] = ColorToBytes( gp->directed[ i ], gridScale );
+		bgp.ambient[ i ] = ColorToBytes( color, gridScale * gridAmbientScale );
+		bgp.directed[ i ] = ColorToBytes( gp.directed[ i ], gridScale );
 		/*
 		 * HACK: if there's a non-zero directed component, this
 		 * lightgrid cell is useful. However, q3 skips grid
 		 * cells with zero ambient. So let's force ambient to be
 		 * nonzero unless directed is zero too.
 		 */
-		 if( bgp->ambient[i][0] + bgp->ambient[i][1] + bgp->ambient[i][2] == 0
-		&& bgp->directed[i][0] + bgp->directed[i][1] + bgp->directed[i][2] != 0 )
-			bgp->ambient[i].set( 1 );
+		 if( bgp.ambient[i][0] + bgp.ambient[i][1] + bgp.ambient[i][2] == 0
+		&& bgp.directed[i][0] + bgp.directed[i][1] + bgp.directed[i][2] != 0 )
+			bgp.ambient[i].set( 1 );
 	}
 
 	/* debug code */
 	#if 0
-	//%	Sys_FPrintf( SYS_VRB, "%10d %10d %10d ", &gp->ambient[ 0 ][ 0 ], &gp->ambient[ 0 ][ 1 ], &gp->ambient[ 0 ][ 2 ] );
+	//%	Sys_FPrintf( SYS_VRB, "%10d %10d %10d ", &gp.ambient[ 0 ][ 0 ], &gp.ambient[ 0 ][ 1 ], &gp.ambient[ 0 ][ 2 ] );
 	Sys_FPrintf( SYS_VRB, "%9d Amb: (%03.1f %03.1f %03.1f) Dir: (%03.1f %03.1f %03.1f)\n",
 	             num,
-	             gp->ambient[ 0 ][ 0 ], gp->ambient[ 0 ][ 1 ], gp->ambient[ 0 ][ 2 ],
-	             gp->directed[ 0 ][ 0 ], gp->directed[ 0 ][ 1 ], gp->directed[ 0 ][ 2 ] );
+	             gp.ambient[ 0 ][ 0 ], gp.ambient[ 0 ][ 1 ], gp.ambient[ 0 ][ 2 ],
+	             gp.directed[ 0 ][ 0 ], gp.directed[ 0 ][ 1 ], gp.directed[ 0 ][ 2 ] );
 	#endif
 
 	/* store direction */
-	NormalToLatLong( thisdir, bgp->latLong );
+	NormalToLatLong( thisdir, bgp.latLong );
 }
 
 
@@ -1772,17 +1769,16 @@ static void SetupGrid( const Vector3& ambientColor ){
 
 	/* allocate and clear lightgrid */
 	{
-		static_assert( MAX_LIGHTMAPS == 4 );
 		rawGridPoints = decltype( rawGridPoints )( numGridPoints, rawGridPoint_t{
-			{ ambientColor, ambientColor, ambientColor, ambientColor },
-			{ g_vector3_identity, g_vector3_identity, g_vector3_identity, g_vector3_identity },
-			g_vector3_identity,
-			{ LS_NORMAL, LS_NONE, LS_NONE, LS_NONE } } );
+			.ambient = makeArray4( ambientColor ),
+			.directed = makeArray4( Vector3( 0 ) ),
+			.dir = Vector3( 0 ),
+			.styles{ LS_NORMAL, LS_NONE, LS_NONE, LS_NONE } } );
 		bspGridPoints = decltype( bspGridPoints )( numGridPoints, bspGridPoint_t{
-			{ Vector3b( 0 ), Vector3b( 0 ), Vector3b( 0 ), Vector3b( 0 ) },
-			{ Vector3b( 0 ), Vector3b( 0 ), Vector3b( 0 ), Vector3b( 0 ) },
-			{ LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
-			{ 0, 0 } } );
+			.ambient = makeArray4( Vector3b( 0 ) ),
+			.directed = makeArray4( Vector3b( 0 ) ),
+			.styles{ LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
+			.latLong{ 0, 0 } } );
 	}
 
 	/* note it */
@@ -1867,12 +1863,9 @@ static void WriteBSPFileAfterLight( const char *bspFileName ){
 				out.shaderNum = EmitShader( String64( lmPathStart, "nomipmaps", su ), nullptr, nullptr );
 				out.fogNum = FOG_INVALID;
 
-				for ( int i = 0; i < MAX_LIGHTMAPS; ++i )
-				{
-					out.lightmapNum[ i ] = -3;
-					out.lightmapStyles[ i ] = LS_NONE;
-					out.vertexStyles[ i ] = LS_NONE;
-				}
+				out.lightmapStyles.fill( LS_NONE );
+				out.vertexStyles.fill( LS_NONE );
+				out.lightmapNum.fill( -3 );
 			}
 
 			bakDrawSurfaces.insert( bakDrawSurfaces.cend(), bspDrawSurfaces.cbegin(), bspDrawSurfaces.cend() );

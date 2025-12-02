@@ -117,7 +117,7 @@ static void AddLightGridLumps( FILE *file, rbspHeader_t& header ){
 			const bspGridPoint_t& out = gridPoints[ j ];
 
 			/* compare styles */
-			if ( memcmp( in.styles, out.styles, MAX_LIGHTMAPS ) ) {
+			if ( in.styles != out.styles ) {
 				continue;
 			}
 
@@ -137,7 +137,7 @@ static void AddLightGridLumps( FILE *file, rbspHeader_t& header ){
 			{
 				for ( int c = 0; c < 3; ++c )
 				{
-					if ( abs( (int) in.ambient[ k ][ c ] - (int) out.ambient[ k ][ c ] ) > LG_EPSILON ||
+					if ( abs( (int) in.ambient [ k ][ c ] - (int) out.ambient [ k ][ c ] ) > LG_EPSILON ||
 					     abs( (int) in.directed[ k ][ c ] - (int) out.directed[ k ][ c ] ) > LG_EPSILON ) {
 						bad = true;
 						break;

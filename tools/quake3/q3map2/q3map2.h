@@ -216,6 +216,25 @@ inline bool style_is_valid( int style ){ return LS_NORMAL <= style && style < LS
 #define LIGHTMAP_HEIGHT         128
 
 
+static_assert( MAX_LIGHTMAPS == 4 );
+
+template<class T>
+using Array4 = std::array<T, MAX_LIGHTMAPS>;
+
+template<class T>
+constexpr auto makeArray4( T&& value ){
+	return std::array<std::decay_t<T>, MAX_LIGHTMAPS>{ value, value, value, value };
+}
+
+template<std::size_t N, class T>
+constexpr auto make_array( T&& value ){
+	return [&]<std::size_t... Indices>( std::index_sequence<Indices...> ) {
+		return std::array<std::decay_t<T>, N> { ( void(Indices), value )... };
+	} ( std::make_index_sequence<N>() );
+}
+
+
+
 
 struct bspLump_t
 {
@@ -304,18 +323,18 @@ struct bspDrawVert_t
 {
 	Vector3 xyz;
 	Vector2 st;
-	Vector2 lightmap[ MAX_LIGHTMAPS ];          /* RBSP */
+	Array4<Vector2> lightmap;          /* RBSP */
 	Vector3 normal;
-	Color4b color[ MAX_LIGHTMAPS ];             /* RBSP */
+	Array4<Color4b> color;             /* RBSP */
 };
 
 inline const bspDrawVert_t c_bspDrawVert_t0 =
 {
 	.xyz{ 0 },
-	.st{ 0, 0 },
-	.lightmap{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
+	.st{ 0 },
+	.lightmap = makeArray4( Vector2( 0 ) ),
 	.normal{ 0 },
-	.color{ { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } }
+	.color = makeArray4( Color4b( 0 ) )
 };
 
 using TriRef = std::array<const bspDrawVert_t *, 3>;
@@ -338,9 +357,9 @@ enum bspSurfaceType_t
 
 struct bspGridPoint_t
 {
-	Vector3b ambient[ MAX_LIGHTMAPS ];    /* RBSP - array */
-	Vector3b directed[ MAX_LIGHTMAPS ];   /* RBSP - array */
-	byte styles[ MAX_LIGHTMAPS ];         /* RBSP - whole */
+	Array4<Vector3b> ambient;    /* RBSP - array */
+	Array4<Vector3b> directed;   /* RBSP - array */
+	Array4<byte> styles;         /* RBSP - whole */
 	byte latLong[ 2 ];
 };
 
@@ -357,14 +376,15 @@ struct bspDrawSurface_t
 	int firstIndex;
 	int numIndexes;
 
-	byte lightmapStyles[ MAX_LIGHTMAPS ];                               /* RBSP */
-	byte vertexStyles[ MAX_LIGHTMAPS ];                                 /* RBSP */
-	int lightmapNum[ MAX_LIGHTMAPS ];                                   /* RBSP */
-	int lightmapX[ MAX_LIGHTMAPS ], lightmapY[ MAX_LIGHTMAPS ];         /* RBSP */
+	Array4<byte> lightmapStyles;               /* RBSP */
+	Array4<byte> vertexStyles;                 /* RBSP */
+	Array4<int> lightmapNum;                   /* RBSP */
+	Array4<int> lightmapX;                     /* RBSP */
+	Array4<int> lightmapY;                     /* RBSP */
 	int lightmapWidth, lightmapHeight;
 
 	Vector3 lightmapOrigin;
-	Vector3 lightmapVecs[ 3 ];       /* on patches, [ 0 ] and [ 1 ] are lodbounds */
+	std::array<Vector3, 3> lightmapVecs;       /* on patches, [ 0 ] and [ 1 ] are lodbounds */
 
 	int patchWidth;
 	int patchHeight;
@@ -598,7 +618,7 @@ struct shaderInfo_t_data
 	int	skyIndex = -1;                                  /* shaders that are used and emit sun/skylight get unique emitter index */
 
 	Vector3 color{ 0 };                                 /* normalized color */
-	Color4f averageColor = { 0, 0, 0, 0 };
+	Color4f averageColor{ 0 };
 	byte lightStyle;
 
 	/* vortex: per-surface floodlight */
@@ -1275,19 +1295,20 @@ struct rawLightmap_t
 	Plane3f                   *plane;
 	int w, h, sw, sh, used;
 
-	bool solid[ MAX_LIGHTMAPS ];
-	Vector3 solidColor[ MAX_LIGHTMAPS ];
+	Array4<bool> solid;
+	Array4<Vector3> solidColor;
 
 	int numStyledTwins;
-	rawLightmap_t           *twins[ MAX_LIGHTMAPS ];
+	Array4<rawLightmap_t*>           twins;
 
-	int outLightmapNums[ MAX_LIGHTMAPS ];
-	int twinNums[ MAX_LIGHTMAPS ];
-	int lightmapX[ MAX_LIGHTMAPS ], lightmapY[ MAX_LIGHTMAPS ];
-	byte styles[ MAX_LIGHTMAPS ];
-	Vector3                 *bspLuxels[ MAX_LIGHTMAPS ];
-	Vector3                 *radLuxels[ MAX_LIGHTMAPS ];
-	SuperLuxel              *superLuxels[ MAX_LIGHTMAPS ];
+	Array4<int> outLightmapNums;
+	Array4<int> twinNums;
+	Array4<int> lightmapX;
+	Array4<int> lightmapY;
+	Array4<byte> styles;
+	Array4<Vector3*>         bspLuxels;
+	Array4<Vector3*>         radLuxels;
+	Array4<SuperLuxel*>      superLuxels;
 	byte                    *superFlags;
 	Vector3                 *superOrigins;
 	Vector3                 *superNormals;
@@ -1368,10 +1389,10 @@ struct rawLightmap_t
 
 struct rawGridPoint_t
 {
-	Vector3 ambient[ MAX_LIGHTMAPS ];
-	Vector3 directed[ MAX_LIGHTMAPS ];
+	Array4<Vector3> ambient;
+	Array4<Vector3> directed;
 	Vector3 dir;
-	byte styles[ MAX_LIGHTMAPS ];
+	Array4<byte> styles;
 };
 
 
@@ -1770,7 +1791,7 @@ int                         VisMain( Args& args );
 /* light.c  */
 float                       PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, const winding_t& w );
 int                         LightContributionToSample( trace_t *trace );
-void                        LightingAtSample( trace_t * trace, byte (&styles)[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ], const Vector3& ambientColor );
+void                        LightingAtSample( trace_t * trace, Array4<byte>& styles, Array4<Vector3>& colors, const Vector3& ambientColor );
 int                         LightMain( Args& args );
 
 
@@ -2233,8 +2254,8 @@ inline rawLightmap_t      *rawLightmaps;
 inline int                *sortLightmaps;
 
 /* vertex luxels */
-inline Vector3            *vertexLuxels[ MAX_LIGHTMAPS ];
-inline Vector3            *radVertexLuxels[ MAX_LIGHTMAPS ];
+inline Array4<Vector3*>    vertexLuxels;
+inline Array4<Vector3*>    radVertexLuxels;
 
 inline Vector3& getVertexLuxel( int lightmapNum, int vertexNum ){
 	return vertexLuxels[lightmapNum][vertexNum];

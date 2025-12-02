@@ -33,17 +33,17 @@
 #include "q3map2.h"
 
 inline void bspDrawVert_edge_index_write( bspDrawVert_t& dv, int index ){
-	dv.lightmap[MAX_LIGHTMAPS - 1][0] = index;
+	dv.lightmap.back()[0] = index;
 }
 
 inline int bspDrawVert_edge_index_read( const bspDrawVert_t& dv ){
-	return dv.lightmap[MAX_LIGHTMAPS - 1][0];
+	return dv.lightmap.back()[0];
 }
 
 inline void bspDrawVert_mark_tjunc( bspDrawVert_t& dv ){
-	dv.lightmap[MAX_LIGHTMAPS - 1][1] = 1;
+	dv.lightmap.back()[1] = 1;
 }
 
 inline bool bspDrawVert_is_tjunc( const bspDrawVert_t& dv ){
-	return dv.lightmap[MAX_LIGHTMAPS - 1][1] == 1;
+	return dv.lightmap.back()[1] == 1;
 }

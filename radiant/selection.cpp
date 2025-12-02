@@ -5212,7 +5212,7 @@ private:
 		}
 		else if( m_patch ){
 			for( const auto& v : m_patchCtrl )
-				functor( matrix4_transformed_point( m_faceTex2local, Vector3( v.m_texcoord ) ) );
+				functor( matrix4_transformed_point( m_faceTex2local, Vector3( v.m_texcoord, 0 ) ) );
 		}
 	}
 	template<typename Functor>
@@ -5224,7 +5224,7 @@ private:
 		}
 		else if( m_patch ){
 			for( const auto& v : m_patchCtrl )
-				functor( Vector3( v.m_texcoord ) );
+				functor( Vector3( v.m_texcoord, 0 ) );
 		}
 	}
 	bool projection_valid() const {
@@ -5341,9 +5341,9 @@ private:
 					}
 				}
 				const PlanePoints vertices{ v0, v1, v2 };
-				const DoubleVector3 sts[3]{ DoubleVector3( p0->m_texcoord ),
-				                            DoubleVector3( p1->m_texcoord ),
-				                            DoubleVector3( p2->m_texcoord ) };
+				const DoubleVector3 sts[3]{ DoubleVector3( p0->m_texcoord, 0 ),
+				                            DoubleVector3( p1->m_texcoord, 0 ),
+				                            DoubleVector3( p2->m_texcoord, 0 ) };
 				Texdef_Construct_local2tex_from_ST( vertices, sts, m_local2tex );
 				m_tex2local = matrix4_affine_inverse( m_local2tex );
 			}
@@ -5375,7 +5375,7 @@ private:
 			m_patchRenderPoints.m_points.clear();
 			m_patchRenderPoints.m_points.reserve( m_patchWidth * m_patchHeight );
 			for( std::size_t i = 0; i < m_patchCtrl.size(); ++i ){
-				m_patchRenderPoints.m_points.emplace_back( vertex3f_for_vector3( Vector3( m_patchCtrl[i].m_texcoord ) ), patchCtrl_isInside( i )? m_cPin : m_cGree );
+				m_patchRenderPoints.m_points.emplace_back( vertex3f_for_vector3( Vector3( m_patchCtrl[i].m_texcoord, 0 ) ), patchCtrl_isInside( i )? m_cPin : m_cGree );
 			}
 
 			m_patchRenderLattice.m_lines.clear();
@@ -5384,16 +5384,16 @@ private:
 				for ( std::size_t c = 0; c < m_patchWidth - 1; ++c ){
 					const Vector2& a = m_patch->ctrlAt( r, c ).m_texcoord;
 					const Vector2& b = m_patch->ctrlAt( r, c + 1 ).m_texcoord;
-					m_patchRenderLattice.m_lines.emplace_back( vertex3f_for_vector3( Vector3( a ) ), m_cOrang );
-					m_patchRenderLattice.m_lines.emplace_back( vertex3f_for_vector3( Vector3( b ) ), m_cOrang );
+					m_patchRenderLattice.m_lines.emplace_back( vertex3f_for_vector3( Vector3( a, 0 ) ), m_cOrang );
+					m_patchRenderLattice.m_lines.emplace_back( vertex3f_for_vector3( Vector3( b, 0 ) ), m_cOrang );
 				}
 			}
 			for ( std::size_t c = 0; c < m_patchWidth; ++c ){
 				for ( std::size_t r = 0; r < m_patchHeight - 1; ++r ){
 					const Vector2& a = m_patch->ctrlAt( r, c ).m_texcoord;
 					const Vector2& b = m_patch->ctrlAt( r + 1, c ).m_texcoord;
-					m_patchRenderLattice.m_lines.emplace_back( vertex3f_for_vector3( Vector3( a ) ), m_cOrang );
-					m_patchRenderLattice.m_lines.emplace_back( vertex3f_for_vector3( Vector3( b ) ), m_cOrang );
+					m_patchRenderLattice.m_lines.emplace_back( vertex3f_for_vector3( Vector3( a, 0 ) ), m_cOrang );
+					m_patchRenderLattice.m_lines.emplace_back( vertex3f_for_vector3( Vector3( b, 0 ) ), m_cOrang );
 				}
 			}
 
@@ -5457,7 +5457,7 @@ private:
 		} );
 
 		if( updateOrigin )
-			m_origin = matrix4_transformed_point( m_faceTex2local, Vector3( min ) );
+			m_origin = matrix4_transformed_point( m_faceTex2local, Vector3( min, 0 ) );
 
 		const Vector3 uv_origin = matrix4_transformed_point( m_faceLocal2tex, m_origin );
 
@@ -5949,7 +5949,7 @@ private:
 		else if( m_patch ){
 			const Matrix4 uvTransform = transform_local2object( matrix4_affine_inverse( transform ), m_faceLocal2tex, m_faceTex2local );
 			for( std::size_t i = 0; i < m_patchCtrl.size(); ++i ){
-				const Vector3 uv = matrix4_transformed_point( uvTransform, Vector3( m_patchCtrl[i].m_texcoord ) );
+				const Vector3 uv = matrix4_transformed_point( uvTransform, Vector3( m_patchCtrl[i].m_texcoord, 0 ) );
 				m_patch->getControlPointsTransformed()[i].m_texcoord = uv.vec2();
 			}
 //			m_patch->controlPointsChanged();
@@ -6593,7 +6593,7 @@ public:
 
 				const Matrix4 translation = matrix4_translation_for_vec3( result );
 				for( std::size_t i : indices ){
-					const Vector3 uv = matrix4_transformed_point( translation, Vector3( m_patchCtrl[i].m_texcoord ) );
+					const Vector3 uv = matrix4_transformed_point( translation, Vector3( m_patchCtrl[i].m_texcoord, 0 ) );
 					m_patch->getControlPointsTransformed()[i].m_texcoord = uv.vec2();
 					m_patchRenderPoints.m_points[i].vertex = vertex3f_for_vector3( uv );
 				}
@@ -6603,16 +6603,16 @@ public:
 					for ( std::size_t c = 0; c < m_patchWidth - 1; ++c ){
 						const Vector2& a = m_patch->getControlPointsTransformed()[r * m_patchWidth + c].m_texcoord;
 						const Vector2& b = m_patch->getControlPointsTransformed()[r * m_patchWidth + c + 1].m_texcoord;
-						m_patchRenderLattice.m_lines[( r * ( m_patchWidth - 1 ) + c ) * 2].vertex = vertex3f_for_vector3( Vector3( a ) );
-						m_patchRenderLattice.m_lines[( r * ( m_patchWidth - 1 ) + c ) * 2 + 1].vertex = vertex3f_for_vector3( Vector3( b ) );
+						m_patchRenderLattice.m_lines[( r * ( m_patchWidth - 1 ) + c ) * 2].vertex = vertex3f_for_vector3( Vector3( a, 0 ) );
+						m_patchRenderLattice.m_lines[( r * ( m_patchWidth - 1 ) + c ) * 2 + 1].vertex = vertex3f_for_vector3( Vector3( b, 0 ) );
 					}
 				}
 				for ( std::size_t c = 0; c < m_patchWidth; ++c ){
 					for ( std::size_t r = 0; r < m_patchHeight - 1; ++r ){
 						const Vector2& a = m_patch->getControlPointsTransformed()[r * m_patchWidth + c].m_texcoord;
 						const Vector2& b = m_patch->getControlPointsTransformed()[( r + 1 ) * m_patchWidth + c].m_texcoord;
-						m_patchRenderLattice.m_lines[( m_patchWidth - 1 ) * m_patchHeight * 2 + ( c * ( m_patchHeight - 1 ) + r ) * 2].vertex = vertex3f_for_vector3( Vector3( a ) );
-						m_patchRenderLattice.m_lines[( m_patchWidth - 1 ) * m_patchHeight * 2 + ( c * ( m_patchHeight - 1 ) + r ) * 2 + 1].vertex = vertex3f_for_vector3( Vector3( b ) );
+						m_patchRenderLattice.m_lines[( m_patchWidth - 1 ) * m_patchHeight * 2 + ( c * ( m_patchHeight - 1 ) + r ) * 2].vertex = vertex3f_for_vector3( Vector3( a, 0 ) );
+						m_patchRenderLattice.m_lines[( m_patchWidth - 1 ) * m_patchHeight * 2 + ( c * ( m_patchHeight - 1 ) + r ) * 2 + 1].vertex = vertex3f_for_vector3( Vector3( b, 0 ) );
 					}
 				}
 

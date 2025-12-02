@@ -602,9 +602,7 @@ static void FanFaceSurface( mapDrawSurface_t& ds ){
 		return;
 	}
 
-	Color4f color[ MAX_LIGHTMAPS ];
-	for ( auto& co : color )
-		co.set( 0 );
+	Array4<Color4f> color = makeArray4( Color4f( 0 ) );
 
 	/* add up the drawverts to create a centroid */
 	DoubleVector3 cnt( 0 );
@@ -1366,9 +1364,9 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t& ds, const metaTriangle_t&
 	/* check texture range overflow */
 	MinMax newTexMinMax( texMinMax );
 	{
-		newTexMinMax.extend( Vector3( tri.m_vertices[ 0 ]->st ) );
-		newTexMinMax.extend( Vector3( tri.m_vertices[ 1 ]->st ) );
-		newTexMinMax.extend( Vector3( tri.m_vertices[ 2 ]->st ) );
+		newTexMinMax.extend( Vector3( tri.m_vertices[ 0 ]->st, 0 ) );
+		newTexMinMax.extend( Vector3( tri.m_vertices[ 1 ]->st, 0 ) );
+		newTexMinMax.extend( Vector3( tri.m_vertices[ 2 ]->st, 0 ) );
 		if( numVerts_original == 0 || texMinMax.surrounds( newTexMinMax ) ){
 			score += 4 * ST_SCORE;
 		}

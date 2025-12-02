@@ -223,10 +223,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 			Parse1DMatrix( 5, m[ i ][ j ].xyz.data() );
 
 			/* ydnar: fix colors */
-			for ( auto& color : m[ i ][ j ].color )
-			{
-				color.set( 255 );
-			}
+			m[ i ][ j ].color.fill( Color4b( 255 ) );
 		}
 		MatchToken( ")" );
 	}
@@ -252,7 +249,7 @@ void ParsePatch( bool onlyLights, entity_t& mapEnt, int mapPrimitiveNum ){
 
 
 	/* ydnar: delete and warn about degenerate patches */
-	Vector4 delta( 0, 0, 0, 0 );
+	Vector4 delta( 0 );
 	degenerate = true;
 
 	/* find first valid vector */

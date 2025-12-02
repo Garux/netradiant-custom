@@ -109,7 +109,7 @@ struct ibspDrawSurface_t
 	int lightmapWidth, lightmapHeight;
 
 	Vector3 lightmapOrigin;
-	Vector3 lightmapVecs[ 3 ];
+	std::array<Vector3, 3> lightmapVecs;
 
 	int patchWidth;
 	int patchHeight;
@@ -127,30 +127,30 @@ struct ibspDrawSurface_t
 		lightmapWidth ( other.lightmapWidth ),
 		lightmapHeight( other.lightmapHeight ),
 		lightmapOrigin( other.lightmapOrigin ),
-		lightmapVecs  { other.lightmapVecs[0], other.lightmapVecs[1], other.lightmapVecs[2] },
+		lightmapVecs  ( other.lightmapVecs ),
 		patchWidth    ( other.patchWidth ),
-		patchHeight   ( other.patchHeight ) {}
+		patchHeight   ( other.patchHeight )
+	{}
 	operator bspDrawSurface_t() const {
-		static_assert( MAX_LIGHTMAPS == 4 );
-		return{
-			shaderNum,
-			fogNum,
-			surfaceType,
-			firstVert,
-			numVerts,
-			firstIndex,
-			numIndexes,
-			{ LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
-			{ LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
-			{ lightmapNum, -3, -3, -3 },
-			{ lightmapX, 0, 0, 0 },
-			{ lightmapY, 0, 0, 0 },
-			lightmapWidth,
-			lightmapHeight,
-			lightmapOrigin,
-			{ lightmapVecs[0], lightmapVecs[1], lightmapVecs[2] },
-			patchWidth,
-			patchHeight
+		return bspDrawSurface_t{
+			.shaderNum      = shaderNum,
+			.fogNum         = fogNum,
+			.surfaceType    = surfaceType,
+			.firstVert      = firstVert,
+			.numVerts       = numVerts,
+			.firstIndex     = firstIndex,
+			.numIndexes     = numIndexes,
+			.lightmapStyles { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
+			.vertexStyles   { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
+			.lightmapNum    { lightmapNum, -3, -3, -3 },
+			.lightmapX      { lightmapX, 0, 0, 0 },
+			.lightmapY      { lightmapY, 0, 0, 0 },
+			.lightmapWidth  = lightmapWidth,
+			.lightmapHeight = lightmapHeight,
+			.lightmapOrigin = lightmapOrigin,
+			.lightmapVecs   = lightmapVecs,
+			.patchWidth     = patchWidth,
+			.patchHeight    = patchHeight
 		};
 	}
 };
@@ -170,15 +170,15 @@ struct ibspDrawVert_t
 		st      ( other.st ),
 		lightmap( other.lightmap[0] ),
 		normal  ( other.normal ),
-		color   ( other.color[0] ) {}
+		color   ( other.color[0] )
+	{}
 	operator bspDrawVert_t() const {
-		static_assert( MAX_LIGHTMAPS == 4 );
-		return {
-			xyz,
-			st,
-			{ lightmap, Vector2( 0, 0 ), Vector2( 0, 0 ), Vector2( 0, 0 ) },
-			normal,
-			{ color, Color4b( 0, 0, 0, 0 ), Color4b( 0, 0, 0, 0 ), Color4b( 0, 0, 0, 0 ) }
+		return bspDrawVert_t{
+			.xyz     = xyz,
+			.st      = st,
+			.lightmap{ lightmap, Vector2( 0 ), Vector2( 0 ), Vector2( 0 ) },
+			.normal  = normal,
+			.color   { color, Color4b( 0 ), Color4b( 0 ), Color4b( 0 ) }
 		};
 	}
 };
@@ -194,14 +194,14 @@ struct ibspGridPoint_t
 	ibspGridPoint_t( const bspGridPoint_t& other ) :
 		ambient ( other.ambient[0] ),
 		directed( other.directed[0] ),
-		latLong { other.latLong[0], other.latLong[1] } {}
+		latLong { other.latLong[0], other.latLong[1] }
+	{}
 	operator bspGridPoint_t() const {
-		static_assert( MAX_LIGHTMAPS == 4 );
-		return {
-			{ ambient, ambient, ambient, ambient },
-			{ directed, directed, directed, directed },
-			{ LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
-			{ latLong[0], latLong[1] }
+		return bspGridPoint_t{
+			.ambient  = makeArray4( ambient ),
+			.directed = makeArray4( directed ),
+			.styles   { LS_NORMAL, LS_NONE, LS_NONE, LS_NONE },
+			.latLong  { latLong[0], latLong[1] }
 		};
 	}
 };

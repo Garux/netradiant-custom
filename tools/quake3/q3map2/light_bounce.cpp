@@ -37,15 +37,15 @@ struct radVert_t
 {
 	Vector3 xyz;
 	Vector2 st;
-	Vector2 lightmap[ MAX_LIGHTMAPS ];
+	Array4<Vector2> lightmap;
 	Vector3 normal;
-	Color4f color[ MAX_LIGHTMAPS ];
+	Array4<Color4f> color;
 
 	radVert_t() = default;
 	radVert_t( const bspDrawVert_t& dv )
 	:	xyz( dv.xyz ),
 		st( dv.st ),
-		lightmap{ dv.lightmap[0], dv.lightmap[1], dv.lightmap[2], dv.lightmap[3] },
+		lightmap( dv.lightmap ),
 		normal( dv.normal )
 	{}
 };
@@ -292,8 +292,8 @@ static void RadSample( int lightmapNum, const bspDrawSurface_t& ds, const rawLig
 						blend *= 1.0 / ( blend[ 0 ] + blend[ 1 ] + blend[ 2 ] );
 
 						/* create a blended sample */
-						Vector2 st( 0, 0 );
-						Vector2 lightmap( 0, 0 );
+						Vector2 st( 0 );
+						Vector2 lightmap( 0 );
 						alphaI = 0;
 						for ( l = 0; l < 3; ++l )
 						{
