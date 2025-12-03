@@ -34,15 +34,15 @@
 #include "model.h"
 #include "qspatial.h"
 
-#include "assimp/Importer.hpp"
-#include "assimp/importerdesc.h"
-#include "assimp/Logger.hpp"
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/IOSystem.hpp"
-#include "assimp/MemoryIOWrapper.h"
-#include "assimp/postprocess.h"
-#include "assimp/scene.h"
-#include "assimp/mesh.h"
+#include ASSIMP_INCLUDE(assimp/Importer.hpp)
+#include ASSIMP_INCLUDE(assimp/importerdesc.h)
+#include ASSIMP_INCLUDE(assimp/Logger.hpp)
+#include ASSIMP_INCLUDE(assimp/DefaultLogger.hpp)
+#include ASSIMP_INCLUDE(assimp/IOSystem.hpp)
+#include ASSIMP_INCLUDE(assimp/MemoryIOWrapper.h)
+#include ASSIMP_INCLUDE(assimp/postprocess.h)
+#include ASSIMP_INCLUDE(assimp/scene.h)
+#include ASSIMP_INCLUDE(assimp/mesh.h)
 
 #include <map>
 

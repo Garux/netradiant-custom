@@ -90,11 +90,11 @@ ASSIMP_INTERNAL    ?= no
 CPPFLAGS_ASSIMP    ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) assimp --cflags $(STDERR_TO_DEVNULL))
 LIBS_ASSIMP        ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) assimp --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
 ifneq ($(ASSIMP_INTERNAL),yes)
-CPPFLAGS_ASSIMP    := $(CPPFLAGS_ASSIMP)
+CPPFLAGS_ASSIMP    := $(CPPFLAGS_ASSIMP) -DASSIMP_INCLUDE\(x\)=\<x\>
 LIBS_ASSIMP        := $(LIBS_ASSIMP)
 else
-CPPFLAGS_ASSIMP    := -Ilibs/assimp/include
-LIBS_ASSIMP        := -lassimp_
+CPPFLAGS_ASSIMP    := -Ilibs/assimp/include -DASSIMP_INCLUDE\(x\)=\#x
+LIBS_ASSIMP        := -lassimp_ -L$(INSTALLDIR)
 endif
 CPPFLAGS_GL        ?=
 LIBS_GL            ?= -lGL # -lopengl32 on Win32
@@ -542,7 +542,7 @@ ifeq ($(ASSIMP_INTERNAL),yes)
 $(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA += -Wl,-rpath '-Wl,$$ORIGIN'
 endif
 endif
-$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB) $(LIBS_ASSIMP) -L$(INSTALLDIR)
+$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB) $(LIBS_ASSIMP)
 $(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) $(CPPFLAGS_JPEG) -Itools/quake3/common -Ilibs -Iinclude $(CPPFLAGS_ASSIMP)
 $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
@@ -1084,7 +1084,7 @@ ifeq ($(ASSIMP_INTERNAL),yes)
 $(INSTALLDIR)/modules/assmodel.$(DLL): LDFLAGS_EXTRA := -Wl,-rpath '-Wl,$$ORIGIN/..'
 endif
 endif
-$(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := $(LIBS_ASSIMP) -L$(INSTALLDIR)
+$(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := $(LIBS_ASSIMP)
 $(INSTALLDIR)/modules/assmodel.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude $(CPPFLAGS_ASSIMP) $(CPPFLAGS_QTGUI)
 $(INSTALLDIR)/modules/assmodel.$(DLL): \
 	plugins/assmodel/mdlimage.o \

@@ -40,10 +40,10 @@
 #include "traverselib.h"
 #include "render.h"
 
-#include "assimp/Importer.hpp"
-#include "assimp/postprocess.h"
-#include "assimp/scene.h"
-#include "assimp/mesh.h"
+#include ASSIMP_INCLUDE(assimp/Importer.hpp)
+#include ASSIMP_INCLUDE(assimp/postprocess.h)
+#include ASSIMP_INCLUDE(assimp/scene.h)
+#include ASSIMP_INCLUDE(assimp/mesh.h)
 #include "os/path.h"
 #include "stream/stringstream.h"
 
