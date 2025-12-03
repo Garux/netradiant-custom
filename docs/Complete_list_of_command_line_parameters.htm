@@ -147,7 +147,7 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>-meta</code>:</strong> Combine adjacent triangles of the same texture to surfaces (ALWAYS USE THIS)</li>
 		<li><strong><code>-metaadequatescore</code> N:</strong> Adequate score for adding triangles to meta surfaces</li>
 		<li><strong><code>-metagoodscore</code> N:</strong> Good score for adding triangles to meta surfaces</li>
-		<li><strong><code>-minsamplesize</code> N:</strong> Sets minimum lightmap resolution in luxels/qu</li>
+		<li><strong><code>-minsamplesize</code> N:</strong> Sets minimum lightmap resolution in qu/luxel</li>
 		<li><strong><code>-mi</code> N:</strong> Sets the maximum number of indexes per surface</li>
 		<li><strong><code>-mv</code> N:</strong> Sets the maximum number of vertices of a lightmapped surface</li>
 		<li><strong><code>-ne</code> F:</strong> Normal epsilon for plane snapping etc.</li>
@@ -168,7 +168,7 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>-onlyents</code>:</strong> Only update entities in the BSP</li>
 		<li><strong><code>-patchmeta</code>:</strong> Turn patches into triangle meshes for display</li>
 		<li><strong><code>-rename</code>:</strong> Append "\_bsp" suffix to misc\_model shaders (needed for SoF2)</li>
-		<li><strong><code>-samplesize</code> N:</strong> Sets default lightmap resolution in luxels/qu</li>
+		<li><strong><code>-samplesize</code> N:</strong> Sets default lightmap resolution in qu/luxel</li>
 		<li><strong><code>-skyfix</code>:</strong> Turn sky box into six surfaces to work around ATI problems</li>
 		<li><strong><code>-snap</code> N:</strong> Snap brush bevel planes to the given number of units</li>
 		<li><strong><code>-sRGBcolor</code>:</strong> Treat shader and light entity colors as sRGB colorspace</li>
@@ -259,7 +259,7 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>-lightmapsize</code> N:</strong> Size of lightmaps to generate (must be a power of two)</li>
 		<li><strong><code>-lomem</code>:</strong> Low memory but slower lighting mode</li>
 		<li><strong><code>-lowquality</code>:</strong> Low quality floodlight (appears to currently break floodlight)</li>
-		<li><strong><code>-minsamplesize</code> N:</strong> Sets minimum lightmap resolution in luxels/qu</li>
+		<li><strong><code>-minsamplesize</code> N:</strong> Sets minimum lightmap resolution in qu/luxel</li>
 		<li><strong><code>-nobouncestore</code>:</strong> Store BSP, lightmap and shader files only once after last bounce</li>
 		<li><strong><code>-nocollapse</code>:</strong> Do not collapse identical lightmaps</li>
 		<li><strong><code>-nodeluxe</code>, <code>-nodeluxemap</code>:</strong> Disable deluxemapping</li>
@@ -281,9 +281,9 @@ td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
 		<li><strong><code>-pointscale</code> F, <code>-point</code> F:</strong> Scaling factor for spherical and spot point lights (light entities)</li>
 		<li><strong><code>-q3</code>:</strong> Use nonlinear falloff curve by default (like Q3A)</li>
 		<li><strong><code>-randomsamples</code>:</strong> Use random sampling for lightmaps</li>
-		<li><strong><code>-rawlightmapsizelimit</code> N:</strong> Sets maximum lightmap resolution in luxels/qu (only affects patches if used -patchmeta in BSP stage)</li>
+		<li><strong><code>-rawlightmapsizelimit</code> N:</strong> Sets maximum lightmap resolution in pixels (only affects patches if used -patchmeta in BSP stage)</li>
 		<li><strong><code>-samplescale</code> F:</strong> Scales all lightmap resolutions</li>
-		<li><strong><code>-samplesize</code> N:</strong> Sets default lightmap resolution in luxels/qu</li>
+		<li><strong><code>-samplesize</code> N:</strong> Sets default lightmap resolution in qu/luxel</li>
 		<li><strong><code>-samplessearchboxsize</code> N:</strong> Search box size (1 to 4) for lightmap adaptive supersampling</li>
 		<li><strong><code>-samples</code> N:</strong> Adaptive supersampling quality</li>
 		<li><strong><code>-saturation</code> F:</strong> Lighting saturation: default = 1, &gt 1 = saturate, 0 = grayscale, &lt 0 = complementary colors</li>
