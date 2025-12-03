@@ -550,8 +550,8 @@ static bool AddPatchToRawLightmap( int num, rawLightmap_t& lm ){
 
 static bool AddSurfaceToRawLightmap( int num, rawLightmap_t& lm ){
 	int axisNum;
-	float len, sampleSize;
-	Vector3 mins, maxs, origin, faxis, size, normalized, vecs[ 2 ];
+	float sampleSize;
+	Vector3 mins, maxs, origin, faxis, size, vecs[ 2 ]{ Vector3( 0 ), Vector3( 0 ) };
 	Plane3f plane;
 	bspDrawVert_t       *verts;
 
@@ -683,9 +683,6 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t& lm ){
 	faxis[ 1 ] = std::fabs( lm.axis[ 1 ] );
 	faxis[ 2 ] = std::fabs( lm.axis[ 2 ] );
 
-	/* clear out lightmap vectors */
-	memset( vecs, 0, sizeof( vecs ) );
-
 	/* classify the plane (x y or z major) (ydnar: biased to z axis projection) */
 	if ( faxis[ 2 ] >= faxis[ 0 ] && faxis[ 2 ] >= faxis[ 1 ] ) {
 		axisNum = 2;
@@ -773,8 +770,8 @@ static bool AddSurfaceToRawLightmap( int num, rawLightmap_t& lm ){
 		/* project stepped lightmap blocks and subtract to get planevecs */
 		for ( int i = 0; i < 2; ++i )
 		{
-			normalized = vecs[ i ];
-			len = VectorNormalize( normalized );
+			Vector3 normalized = vecs[ i ];
+			const float len = VectorNormalize( normalized );
 			lm.vecs[ i ] = normalized * ( 1.0 / len );
 			lm.vecs[ i ][ axisNum ] -= vector3_dot( lm.vecs[ i ], plane.normal() ) / plane.normal()[ axisNum ];
 		}
