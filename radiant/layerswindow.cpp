@@ -531,7 +531,7 @@ class QWidget* LayersBrowser_constructWindow( QWidget* toplevel ){
 	g_lbro.m_iconSelectAdd = new_local_icon( "plus.png" );
 	g_lbro.m_iconSelectDeselect = new_local_icon( "minus.png" );
 	g_lbro.m_iconSelectMove = new_local_icon( "arrow_right.png" );
-	g_lbro.m_iconVisibleOn = new_local_icon( "eye_opened.png" );
+	g_lbro.m_iconVisibleOn = new_local_icon( "eye_open.png" );
 	g_lbro.m_iconVisibleOff = new_local_icon( "eye_closed.png" );
 
 	{

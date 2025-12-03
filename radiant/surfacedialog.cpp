@@ -821,7 +821,7 @@ void SurfaceInspector::BuildDialog(){
 				QObject::connect( b, &QAbstractButton::clicked, [](){ SurfaceInspector_ProjectTexture( eProjectCam, true ); } );
 			}
 			{
-				grid->addWidget( new QLabel( "Patch" ), 3, 0 );
+				grid->addWidget( new QLabel( "Patch:" ), 3, 0 );
 			}
 			{
 				auto *b = new QPushButton( "Natural" );

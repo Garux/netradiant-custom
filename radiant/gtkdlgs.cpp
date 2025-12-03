@@ -343,7 +343,7 @@ void DoAbout(){
 				pixmap.setDevicePixelRatio( label->devicePixelRatio() );
 				// target 0.5 of the image size
 				label->setPixmap( pixmap.scaledToHeight( pixmap.height() * label->devicePixelRatio() * pixmap.logicalDpiX() / ( 96 * 2 ), Qt::TransformationMode::SmoothTransformation ) );
-				hbox->addWidget( label );
+				hbox->addWidget( label, 0, Qt::AlignmentFlag::AlignCenter );
 			}
 
 			{
