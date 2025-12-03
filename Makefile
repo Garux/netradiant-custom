@@ -109,9 +109,9 @@ DEPEND_ON_MAKEFILE ?= yes
 DOWNLOAD_GAMEPACKS ?= allinone
 INSTALL_DLLS       ?= yes
 
-# Support CHECK_DEPENDENCIES with DOWNLOAD_GAMEPACKS semantics
-ifneq ($(CHECK_DEPENDENCIES),)
-DEPENDENCIES_CHECK = $(patsubst yes,quiet,$(patsubst no,off,$(CHECK_DEPENDENCIES)))
+# Support DEPENDENCIES_CHECK with DOWNLOAD_GAMEPACKS semantics
+ifneq ($(DEPENDENCIES_CHECK),)
+override DEPENDENCIES_CHECK := $(patsubst yes,quiet,$(patsubst no,off,$(DEPENDENCIES_CHECK)))
 else
 DEPENDENCIES_CHECK ?= quiet
 # or: off, verbose
