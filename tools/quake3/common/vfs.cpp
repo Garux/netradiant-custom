@@ -137,9 +137,7 @@ static void vfsInitPakFile( const char *filename ){
 // Global functions
 
 // reads all pak files from a dir
-void vfsInitDirectory( const char *path ){
-	GDir *dir;
-
+void vfsInitDirectory( const char *path, const char *pk3ext, const char *pk3dirext ){
 	const auto path_is_forbidden = []( const char *path ){
 		return std::ranges::any_of( g_strForbiddenDirs, [path]( const CopiedString& forbidden ){
 			return matchpattern( path_get_filename_start( path ), forbidden.c_str(), TRUE );
@@ -160,20 +158,18 @@ void vfsInitDirectory( const char *path ){
 	const CopiedString pathCleaned = g_strDirs.emplace_back( StringStream( DirectoryCleaned( path ) ) );
 
 	if ( g_bUsePak ) {
-		dir = g_dir_open( path, 0, nullptr );
-
-		if ( dir != nullptr ) {
+		if ( GDir *dir = g_dir_open( path, 0, nullptr ) ) {
 			std::vector<StringOutputStream> paks;
-			const char* name;
-			while ( ( name = g_dir_read_name( dir ) ) )
+
+			while ( const char *name = g_dir_read_name( dir ) )
 			{
 				if ( path_is_forbidden( name ) )
 					continue;
 
-				if ( path_extension_is( name, "pk3" ) ) {
+				if ( path_extension_is( name, pk3ext ) ) {
 					paks.push_back( StringStream( pathCleaned, name ) );
 				}
-				else if ( path_extension_is( name, "pk3dir" ) ) {
+				else if ( path_extension_is( name, pk3dirext ) ) {
 					g_strDirs.emplace_back( StringStream( pathCleaned, name, '/' ) );
 				}
 			}

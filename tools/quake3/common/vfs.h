@@ -32,7 +32,7 @@
 
 #include <vector>
 
-void vfsInitDirectory( const char *path );
+void vfsInitDirectory( const char *path, const char *pk3ext, const char *pk3dirext );
 void vfsShutdown();
 int vfsGetFileCount( const char *filename );
 

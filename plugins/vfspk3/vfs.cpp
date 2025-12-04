@@ -330,9 +330,9 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 					continue;
 				}
 
-				const char *ext = strrchr( name, '.' );
-
-				if ( ext && !string_compare_nocase_upper( ext, ".pk3dir" ) ) {
+				const char *ext = path_get_extension( name );
+				/* .pk3dir / .pk4dir / .dpkdir */
+				if ( string_equal_suffix_nocase( ext, "dir" ) && GetArchiveTable( archiveModules, ( const char[] ){ ext[0], ext[1], ext[2], '\0' } ) != nullptr ) {
 					if ( g_numDirs == VFS_MAXDIRS ) {
 						continue;
 					}
@@ -344,7 +344,7 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 					g_archives.push_back( archive_entry_t{ g_strDirs[g_numDirs - 1], OpenArchive( g_strDirs[g_numDirs - 1] ), false } );
 				}
 
-				if ( ( ext == 0 ) || *( ++ext ) == '\0' || GetArchiveTable( archiveModules, ext ) == 0 ) {
+				if ( GetArchiveTable( archiveModules, ext ) == nullptr ) {
 					continue;
 				}
 

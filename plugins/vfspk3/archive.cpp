@@ -90,8 +90,10 @@ public:
 				dirs.pop_back();
 				path.pop();
 			}
-			else if ( !string_equal( name, "." ) && !string_equal( name, ".." )
-			&& !( string_empty( root ) && string_equal_suffix_nocase( name, ".pk3dir" ) ) ) { //skip *.pk3dir in root, it is processed as DirectoryArchive
+			else if ( const char *ext = path_get_extension( name );
+			!string_equal( name, "." ) && !string_equal( name, ".." )
+			/* skip .pk3dir / .pk4dir / .dpkdir the in root, it is processed as DirectoryArchive */
+			&& !( string_empty( root ) && string_length( ext ) == 6 && string_equal_nocase( ext + 3, "dir" ) ) ) {
 				path.push_filename( name );
 
 				bool is_directory = file_is_directory( path.c_str() );

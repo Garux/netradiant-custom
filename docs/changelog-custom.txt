@@ -195,6 +195,7 @@ Q3map2:
 	* Q3MAP2_EXPERIMENTAL_OFFSET_WINDING_CREATION for higher windings precision
 	* volumetric merge of triangles for model autoclip in axial backplane, max extrude modes
 	* .crn image format support
+	* .dpk .dpkdir game archives support
 
 
 
@@ -1162,6 +1163,7 @@ misc...
 	* do Run Engine After Compile also after unmonitored builds
 	* adjust icons in light GUI themes for better visibility
 	* .crn image format support
+	* .dpk .dpkdir game archives support
 
 
 

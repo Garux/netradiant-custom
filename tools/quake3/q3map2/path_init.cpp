@@ -313,9 +313,8 @@ void InitPaths( Args& args ){
 	{
 		/* -game */
 		while ( args.takeArg( "-game" ) ) {
-			g_game = GetGame( args.takeNext() );
-			if ( g_game == nullptr ) {
-				g_game = &g_games[ 0 ];
+			if ( const game_t *game = GetGame( args.takeNext() ) ) {
+				g_game = game;
 			}
 		}
 
@@ -402,6 +401,9 @@ void InitPaths( Args& args ){
 	/* this only affects unix */
 	AddHomeBasePath( basePaths, homePath.c_str(), homeBasePath != nullptr? homeBasePath : g_game->homeBasePath );
 
+	/* support daemon engine nonsense */
+	const char *pk3ext = strEqual( g_game->arg, "unvanquished" )? "dpk" : "pk3";
+	const char *pk3dirext = strEqual( g_game->arg, "unvanquished" )? "dpkdir" : "pk3dir";
 	/* initialize vfs paths */
 	/* walk the list of game paths */
 	for ( const auto& gamePath : gamePaths )
@@ -410,7 +412,7 @@ void InitPaths( Args& args ){
 		for ( const auto& basePath : basePaths )
 		{
 			/* create a full path and initialize it */
-			vfsInitDirectory( stream( basePath, gamePath ) );
+			vfsInitDirectory( stream( basePath, gamePath ), pk3ext, pk3dirext );
 		}
 	}
 
@@ -418,7 +420,7 @@ void InitPaths( Args& args ){
 	for ( const auto& pakPath : pakPaths )
 	{
 		/* initialize this pak path */
-		vfsInitDirectory( pakPath.c_str() );
+		vfsInitDirectory( pakPath.c_str(), pk3ext, pk3dirext );
 	}
 
 	/* done */
