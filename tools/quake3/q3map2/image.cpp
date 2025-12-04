@@ -32,6 +32,7 @@
 #include "q3map2.h"
 #include "png.h"
 #include "ddslib.h"
+#include "crnlib/crnlib.h"
 
 
 
@@ -81,6 +82,27 @@ static void LoadDDSBuffer( byte *buffer, int size, byte **pixels, int *width, in
 
 	/* decompress the dds texture */
 	DDSDecompress( (ddsBuffer_t*) buffer, *pixels );
+}
+
+
+/*
+    LoadCRNBuffer
+    loads a crn image into a valid rgba image
+*/
+void LoadCRNBuffer( byte *buffer, int size, byte **pixels, int *width, int *height ) {
+	/* dummy check */
+	if ( buffer == nullptr || size <= 0 || pixels == nullptr || width == nullptr || height == nullptr ) {
+		return;
+	}
+	if ( !GetCRNImageSize( buffer, size, width, height ) ) {
+		Sys_Warning( "Error getting crn image dimensions.\n" );
+		return;
+	}
+	const unsigned int outBufSize = *width * *height * 4;
+	*pixels = safe_malloc( outBufSize );
+	if ( !ConvertCRNtoRGBA( buffer, size, outBufSize, *pixels ) ) {
+		Sys_Warning( "Error decoding crn image.\n" );
+	}
 }
 
 
@@ -320,6 +342,10 @@ const image_t *ImageLoad( const char *name ){
 	else if( path_set_extension( filename, ".ktx" ); ( buffer = vfsLoadFile( filename ) ) )
 	{
 		LoadKTXBufferFirstImage( buffer.data(), buffer.size(), &pixels, &width, &height );
+	}
+	else if( path_set_extension( filename, ".crn" ); ( buffer = vfsLoadFile( filename ) ) )
+	{
+		LoadCRNBuffer( buffer.data(), buffer.size(), &pixels, &width, &height );
 	}
 
 	/* make sure everything's kosher */

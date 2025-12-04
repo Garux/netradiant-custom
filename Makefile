@@ -602,6 +602,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/visflow.o \
 	tools/quake3/q3map2/vis.o \
 	tools/quake3/q3map2/writebsp.o \
+	libcrnlib.$(A) \
 	libddslib.$(A) \
 	libetclib.$(A) \
 	libfilematch.$(A) \
@@ -851,6 +852,10 @@ $(INSTALLDIR)/libassimp_.$(DLL): \
 	libs/assimp/contrib/Open3DGC/o3dgcTriangleFans.o \
 	libs/assimp/contrib/zip/src/zip.o \
 
+libcrnlib.$(A): CPPFLAGS_EXTRA := -Ilibs
+libcrnlib.$(A): \
+	libs/crnlib/crnlib.o \
+
 libddslib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libddslib.$(A): \
 	libs/ddslib/ddslib.o \
@@ -1040,12 +1045,14 @@ $(INSTALLDIR)/modules/image.$(DLL): LIBS_EXTRA := $(LIBS_JPEG)
 $(INSTALLDIR)/modules/image.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_JPEG) -Ilibs -Iinclude
 $(INSTALLDIR)/modules/image.$(DLL): \
 	plugins/image/bmp.o \
+	plugins/image/crn.o \
 	plugins/image/dds.o \
 	plugins/image/image.o \
 	plugins/image/jpeg.o \
 	plugins/image/ktx.o \
 	plugins/image/pcx.o \
 	plugins/image/tga.o \
+	libcrnlib.$(A) \
 	libddslib.$(A) \
 	libetclib.$(A) \
 
