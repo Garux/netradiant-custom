@@ -108,6 +108,7 @@ DEPEND_ON_MAKEFILE ?= yes
 # yes = download; all = even download undistributable gamepacks; no = disable; allinone = dl all-in-one compact fixed archive
 DOWNLOAD_GAMEPACKS ?= allinone
 INSTALL_DLLS       ?= yes
+INSTALL_DATA       ?= yes
 
 # Support DEPENDENCIES_CHECK with DOWNLOAD_GAMEPACKS semantics
 ifneq ($(DEPENDENCIES_CHECK),)
@@ -1359,6 +1360,7 @@ $(INSTALLDIR)/mbspc.$(EXE): \
 
 .PHONY: install-data
 install-data: binaries
+ifeq ($(INSTALL_DATA),yes)
 	$(MKDIR) $(INSTALLDIR)/gamepacks/games
 	$(FIND) $(INSTALLDIR_BASE)/ -name .svn -exec $(RM_R) {} \; -prune
 	DOWNLOAD_GAMEPACKS="$(DOWNLOAD_GAMEPACKS)" GIT="$(GIT)" SVN="$(SVN)" WGET="$(WGET)" RM_R="$(RM_R)" MV="$(MV)" UNZIPPER="$(UNZIPPER)" ECHO="$(ECHO)" SH="$(SH)" CP="$(CP)" CP_R="$(CP_R)" $(SH) install-gamepacks.sh "$(INSTALLDIR)/gamepacks"
@@ -1368,6 +1370,7 @@ install-data: binaries
 	$(MKDIR) $(INSTALLDIR)/docs
 	$(CP_R) docs/* $(INSTALLDIR)/docs/
 	$(FIND) $(INSTALLDIR_BASE)/ -name .svn -exec $(RM_R) {} \; -prune
+endif
 
 .PHONY: install-dll
 ifeq ($(OS),Win32)
