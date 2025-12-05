@@ -59,15 +59,7 @@ ArchiveModules& FileSystemQ3API_getArchiveModules();
 #include "os/path.h"
 #include "moduleobservers.h"
 #include "filematch.h"
-
-
-#define VFS_MAXDIRS 64
-
-#if defined( WIN32 )
-#define PATH_MAX 260
-#endif
-
-#define gamemode_get GlobalRadiant().getGameMode
+#include <list>
 
 
 
@@ -83,15 +75,9 @@ struct archive_entry_t
 	bool is_pakfile;
 };
 
-#include <list>
-
 using archives_t = std::list<archive_entry_t>;
 
 static archives_t g_archives;
-static char g_strDirs[VFS_MAXDIRS][PATH_MAX + 1];
-static int g_numDirs;
-static char g_strForbiddenDirs[VFS_MAXDIRS][PATH_MAX + 1];
-static int g_numForbiddenDirs = 0;
 static constexpr bool g_bUsePak = true;
 
 ModuleObservers g_observers;
@@ -100,34 +86,6 @@ using StrList = std::vector<CopiedString>;
 
 // =============================================================================
 // Static functions
-
-static void AddSlash( char *str ){
-	std::size_t n = strlen( str );
-	if ( n > 0 ) {
-		if ( str[n - 1] != '\\' && str[n - 1] != '/' ) {
-			globalWarningStream() << "WARNING: directory path does not end with separator: " << str << '\n';
-			strcat( str, "/" );
-		}
-	}
-}
-
-static void FixDOSName( char *src ){
-	if ( src == 0 || strchr( src, '\\' ) == 0 ) {
-		return;
-	}
-
-	globalWarningStream() << "WARNING: invalid path separator '\\': " << src << '\n';
-
-	while ( *src )
-	{
-		if ( *src == '\\' ) {
-			*src = '/';
-		}
-		src++;
-	}
-}
-
-
 
 const _QERArchiveTable* GetArchiveTable( ArchiveModules& archiveModules, const char* ext ){
 	return archiveModules.findModule( StringStream<16>( LowerCase( ext ) ) );
@@ -237,73 +195,48 @@ typedef std::set<CopiedString, PakLess> Archives;
 
 // reads all pak files from a dir
 void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
-	int j;
-
-	g_numForbiddenDirs = 0;
+	std::vector<CopiedString> strForbiddenDirs;
 	StringTokeniser st( GlobalRadiant().getGameDescriptionKeyValue( "forbidden_paths" ), " " );
-	for ( j = 0; j < VFS_MAXDIRS; ++j )
+	for ( const char *t; !string_empty( t = st.getToken() ); )
 	{
-		const char *t = st.getToken();
-		if ( string_empty( t ) ) {
-			break;
-		}
-		strncpy( g_strForbiddenDirs[g_numForbiddenDirs], t, PATH_MAX );
-		g_strForbiddenDirs[g_numForbiddenDirs][PATH_MAX] = '\0';
-		++g_numForbiddenDirs;
+		strForbiddenDirs.push_back( t );
 	}
 
-	for ( j = 0; j < g_numForbiddenDirs; ++j )
+	const auto path_is_forbidden = [&strForbiddenDirs]( const char *path ){
+		return std::ranges::any_of( strForbiddenDirs, [name = path_get_filename_start( path )]( const CopiedString& forbidden ){
+			return matchpattern( name, forbidden.c_str(), TRUE );
+		} );
+	};
+
 	{
-		char* dbuf = g_strdup( directory );
-		if ( *dbuf && dbuf[strlen( dbuf ) - 1] == '/' ) {
-			dbuf[strlen( dbuf ) - 1] = 0;
+		StringBuffer buf( directory );
+		if ( !buf.empty() && path_separator( buf.back() ) ) // del trailing slash
+			buf.pop_back();
+		if ( path_is_forbidden( buf.c_str() ) ){
+			printf( "Directory %s matched by forbidden dirs, removed\n", directory );
+			return;
 		}
-		const char *p = strrchr( dbuf, '/' );
-		p = ( p ? ( p + 1 ) : dbuf );
-		if ( matchpattern( p, g_strForbiddenDirs[j], TRUE ) ) {
-			g_free( dbuf );
-			break;
-		}
-		g_free( dbuf );
-	}
-	if ( j < g_numForbiddenDirs ) {
-		printf( "Directory %s matched by forbidden dirs, removed\n", directory );
-		return;
 	}
 
-	if ( g_numDirs == VFS_MAXDIRS ) {
-		return;
-	}
 
-	strncpy( g_strDirs[g_numDirs], directory, PATH_MAX );
-	g_strDirs[g_numDirs][PATH_MAX] = '\0';
-	FixDOSName( g_strDirs[g_numDirs] );
-	AddSlash( g_strDirs[g_numDirs] );
-
-	const char* path = g_strDirs[g_numDirs];
-
-	g_numDirs++;
-
-	g_archives.push_back( archive_entry_t{ path, OpenArchive( path ), false } );
+	auto stream = StringStream( DirectoryCleaned( directory ) );
+	const char *path = g_archives.emplace_back( archive_entry_t{ stream.c_str(), OpenArchive( stream ), false } ).name.c_str();
 
 	if ( g_bUsePak ) {
-		GDir* dir = g_dir_open( path, 0, 0 );
-
-		if ( dir != 0 ) {
+		if ( GDir* dir = g_dir_open( path, 0, 0 ) ) {
 			globalOutputStream() << "vfs directory: " << path << '\n';
 
 			const char* ignore_prefix = "";
 			const char* override_prefix = "";
-
 			{
 				// See if we are in "sp" or "mp" mapping mode
-				const char* gamemode = gamemode_get();
+				const char* gamemode = GlobalRadiant().getGameMode();
 
-				if ( strcmp( gamemode, "sp" ) == 0 ) {
+				if ( string_equal( gamemode, "sp" ) ) {
 					ignore_prefix = "mp_";
 					override_prefix = "sp_";
 				}
-				else if ( strcmp( gamemode, "mp" ) == 0 ) {
+				else if ( string_equal( gamemode, "mp" ) ) {
 					ignore_prefix = "sp_";
 					override_prefix = "mp_";
 				}
@@ -311,37 +244,17 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 
 			Archives archives;
 			Archives archivesOverride;
-			for (;; )
+			while ( const char* name = g_dir_read_name( dir ) )
 			{
-				const char* name = g_dir_read_name( dir );
-				if ( name == 0 ) {
-					break;
-				}
-
-				for ( j = 0; j < g_numForbiddenDirs; ++j )
-				{
-					const char *p = strrchr( name, '/' );
-					p = ( p ? ( p + 1 ) : name );
-					if ( matchpattern( p, g_strForbiddenDirs[j], TRUE ) ) {
-						break;
-					}
-				}
-				if ( j < g_numForbiddenDirs ) {
+				if ( path_is_forbidden( name ) ) {
 					continue;
 				}
 
 				const char *ext = path_get_extension( name );
-				/* .pk3dir / .pk4dir / .dpkdir */
+				/* .pk3dir / .pk4dir / .dpkdir / .pakdir / .waddir */
 				if ( string_equal_suffix_nocase( ext, "dir" ) && GetArchiveTable( archiveModules, ( const char[] ){ ext[0], ext[1], ext[2], '\0' } ) != nullptr ) {
-					if ( g_numDirs == VFS_MAXDIRS ) {
-						continue;
-					}
-					std::snprintf( g_strDirs[g_numDirs], PATH_MAX, "%s%s/", path, name );
-					FixDOSName( g_strDirs[g_numDirs] );
-					AddSlash( g_strDirs[g_numDirs] );
-					g_numDirs++;
-
-					g_archives.push_back( archive_entry_t{ g_strDirs[g_numDirs - 1], OpenArchive( g_strDirs[g_numDirs - 1] ), false } );
+					stream( path, name, '/' );
+					g_archives.push_back( archive_entry_t{ stream.c_str(), OpenArchive( stream ), false } );
 				}
 
 				if ( GetArchiveTable( archiveModules, ext ) == nullptr ) {
@@ -349,10 +262,10 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 				}
 
 				// using the same kludge as in engine to ensure consistency
-				if ( !string_empty( ignore_prefix ) && strncmp( name, ignore_prefix, strlen( ignore_prefix ) ) == 0 ) {
+				if ( !string_empty( ignore_prefix ) && string_equal_prefix( name, ignore_prefix ) ) {
 					continue;
 				}
-				if ( !string_empty( override_prefix ) && strncmp( name, override_prefix, strlen( override_prefix ) ) == 0 ) {
+				if ( !string_empty( override_prefix ) && string_equal_prefix( name, override_prefix ) ) {
 					archivesOverride.insert( name );
 					continue;
 				}
@@ -365,17 +278,11 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 			// add the entries to the vfs
 			for ( const auto& archive : archivesOverride )
 			{
-				char filename[PATH_MAX];
-				strcpy( filename, path );
-				strcat( filename, archive.c_str() );
-				InitPakFile( archiveModules, filename );
+				InitPakFile( archiveModules, stream( path, archive.c_str() ) );
 			}
 			for ( const auto& archive : archives )
 			{
-				char filename[PATH_MAX];
-				strcpy( filename, path );
-				strcat( filename, archive.c_str() );
-				InitPakFile( archiveModules, filename );
+				InitPakFile( archiveModules, stream( path, archive.c_str() ) );
 			}
 		}
 		else
@@ -394,9 +301,6 @@ void Shutdown(){
 		arch.archive->release();
 	}
 	g_archives.clear();
-
-	g_numDirs = 0;
-	g_numForbiddenDirs = 0;
 }
 
 #define VFS_SEARCH_PAK 0x1
@@ -404,11 +308,7 @@ void Shutdown(){
 
 int GetFileCount( const char *filename, int flag ){
 	int count = 0;
-	char fixed[PATH_MAX + 1];
-
-	strncpy( fixed, filename, PATH_MAX );
-	fixed[PATH_MAX] = '\0';
-	FixDOSName( fixed );
+	const auto fixed = StringStream( PathCleaned( filename ) );
 
 	if ( !flag ) {
 		flag = VFS_SEARCH_PAK | VFS_SEARCH_DIR;
@@ -455,15 +355,9 @@ ArchiveTextFile* OpenTextFile( const char* filename ){
 
 // NOTE: when loading a file, you have to allocate one extra byte and set it to \0
 std::size_t LoadFile( const char *filename, void **bufferptr, int index ){
-	char fixed[PATH_MAX + 1];
+	const auto fixed = StringStream( PathCleaned( filename ) );
 
-	strncpy( fixed, filename, PATH_MAX );
-	fixed[PATH_MAX] = '\0';
-	FixDOSName( fixed );
-
-	ArchiveFile* file = OpenFile( fixed );
-
-	if ( file != 0 ) {
+	if ( ArchiveFile* file = OpenFile( fixed ) ) {
 		*bufferptr = malloc( file->size() + 1 );
 		// we need to end the buffer with a 0
 		( (char*) ( *bufferptr ) )[file->size()] = 0;

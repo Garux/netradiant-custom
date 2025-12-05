@@ -139,8 +139,8 @@ static void vfsInitPakFile( const char *filename ){
 // reads all pak files from a dir
 void vfsInitDirectory( const char *path, const char *pk3ext, const char *pk3dirext ){
 	const auto path_is_forbidden = []( const char *path ){
-		return std::ranges::any_of( g_strForbiddenDirs, [path]( const CopiedString& forbidden ){
-			return matchpattern( path_get_filename_start( path ), forbidden.c_str(), TRUE );
+		return std::ranges::any_of( g_strForbiddenDirs, [name = path_get_filename_start( path )]( const CopiedString& forbidden ){
+			return matchpattern( name, forbidden.c_str(), TRUE );
 		} );
 	};
 
