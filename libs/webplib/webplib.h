@@ -19,33 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#pragma once
 
-#include "crn.h"
-
-#include "iarchive.h"
-#include "stream/textstream.h"
-
-#include "crnlib/crnlib.h"
-#include "imagelib.h"
-
-Image* LoadCRNBuff( const byte *buffer, int length ){
-	int width, height;
-	if ( !GetCRNImageSize( buffer, length, &width, &height ) ) {
-		globalErrorStream() << "Error getting crn image dimensions.\n";
-		return nullptr;
-	}
-
-	auto *image = new RGBAImage( width, height );
-
-	if ( !ConvertCRNtoRGBA( buffer, length, width * height, image->getRGBAPixels() ) ) {
-		globalErrorStream() << "Error decoding crn image.\n";
-		image->release();
-		return nullptr;
-	}
-	return image;
-}
-
-Image* LoadCRN( ArchiveFile& file ){
-	ScopedArchiveBuffer buffer( file );
-	return LoadCRNBuff( buffer.buffer, buffer.length );
-}
+bool GetWebpImageSize( const void *buffer, int length, int& width, int& height );
+unsigned char* ConvertWebptoRGBA( const void *buffer, int length, int& width, int& height );

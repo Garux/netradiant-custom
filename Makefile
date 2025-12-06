@@ -607,6 +607,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	libetclib.$(A) \
 	libfilematch.$(A) \
 	libl_net.$(A) \
+	libwebplib.$(A) \
 	$(if $(findstring Win32,$(OS)),icons/q3map2.o,) \
 	| $(if $(findstring yes,$(ASSIMP_INTERNAL)),$(INSTALLDIR)/libassimp_.$(DLL),) \
 
@@ -864,6 +865,10 @@ libetclib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libetclib.$(A): \
 	libs/etclib.o \
 
+libwebplib.$(A): CPPFLAGS_EXTRA := -Ilibs
+libwebplib.$(A): \
+	libs/webplib/webplib.o \
+
 $(INSTALLDIR)/radiant.$(EXE): LDFLAGS_EXTRA := $(MWINDOWS)
 $(INSTALLDIR)/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_QTWIDGETS) $(LIBS_QTSVG) $(LIBS_ZLIB)
 $(INSTALLDIR)/radiant.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_GL) $(CPPFLAGS_DL) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) $(CPPFLAGS_QTSVG) -Ilibs -Iinclude
@@ -1052,9 +1057,11 @@ $(INSTALLDIR)/modules/image.$(DLL): \
 	plugins/image/ktx.o \
 	plugins/image/pcx.o \
 	plugins/image/tga.o \
+	plugins/image/webp.o \
 	libcrnlib.$(A) \
 	libddslib.$(A) \
 	libetclib.$(A) \
+	libwebplib.$(A) \
 
 $(INSTALLDIR)/modules/imageq2.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
 $(INSTALLDIR)/modules/imageq2.$(DLL): \

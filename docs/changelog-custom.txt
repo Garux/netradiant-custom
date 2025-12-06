@@ -196,6 +196,7 @@ Q3map2:
 	* volumetric merge of triangles for model autoclip in axial backplane, max extrude modes
 	* .crn image format support
 	* .dpk .dpkdir game archives support
+	* .webp image format support
 
 
 
@@ -1164,6 +1165,7 @@ misc...
 	* adjust icons in light GUI themes for better visibility
 	* .crn image format support
 	* .dpk .dpkdir game archives support
+	* .webp image format support
 
 
 

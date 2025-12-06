@@ -20,32 +20,16 @@
  */
 
 
-#include "crn.h"
+#include "webplib.h"
 
-#include "iarchive.h"
-#include "stream/textstream.h"
+#define twp_IMPLEMENTATION
+#include "tiny_webp.h"
 
-#include "crnlib/crnlib.h"
-#include "imagelib.h"
 
-Image* LoadCRNBuff( const byte *buffer, int length ){
-	int width, height;
-	if ( !GetCRNImageSize( buffer, length, &width, &height ) ) {
-		globalErrorStream() << "Error getting crn image dimensions.\n";
-		return nullptr;
-	}
-
-	auto *image = new RGBAImage( width, height );
-
-	if ( !ConvertCRNtoRGBA( buffer, length, width * height, image->getRGBAPixels() ) ) {
-		globalErrorStream() << "Error decoding crn image.\n";
-		image->release();
-		return nullptr;
-	}
-	return image;
+bool GetWebpImageSize( const void *buffer, int length, int& width, int& height ) {
+	return twp_get_info_from_memory( const_cast<void*>( buffer ), length, &width, &height, nullptr, nullptr );
 }
 
-Image* LoadCRN( ArchiveFile& file ){
-	ScopedArchiveBuffer buffer( file );
-	return LoadCRNBuff( buffer.buffer, buffer.length );
+unsigned char* ConvertWebptoRGBA( const void *buffer, int length, int& width, int& height ) {
+	return twp_read_from_memory( const_cast<void*>( buffer ), length, &width, &height, twp_FORMAT_RGBA, 0 );
 }

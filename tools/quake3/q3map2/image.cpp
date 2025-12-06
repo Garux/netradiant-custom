@@ -33,6 +33,7 @@
 #include "png.h"
 #include "ddslib.h"
 #include "crnlib/crnlib.h"
+#include "webplib/webplib.h"
 
 
 
@@ -346,6 +347,10 @@ const image_t *ImageLoad( const char *name ){
 	else if( path_set_extension( filename, ".crn" ); ( buffer = vfsLoadFile( filename ) ) )
 	{
 		LoadCRNBuffer( buffer.data(), buffer.size(), &pixels, &width, &height );
+	}
+	else if( path_set_extension( filename, ".webp" ); ( buffer = vfsLoadFile( filename ) ) )
+	{
+		pixels = ConvertWebptoRGBA( buffer.data(), buffer.size(), width, height );
 	}
 
 	/* make sure everything's kosher */
