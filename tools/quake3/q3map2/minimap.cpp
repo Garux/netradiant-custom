@@ -271,16 +271,12 @@ static void MiniMapBrightnessContrast( int y ){
 	}
 }
 
-static void MiniMapMakeMinsMaxs( const Vector3& mins_in, const Vector3& maxs_in, float border, bool keepaspect ){
-	Vector3 mins = mins_in;
-	Vector3 maxs = maxs_in;
-	Vector3 extend;
-
+static void MiniMapMakeMinsMaxs( Vector3& mins, Vector3& maxs, float border, bool keepaspect ){
 	// line compatible to nexuiz mapinfo
 	Sys_Printf( "size %f %f %f %f %f %f\n", mins[0], mins[1], mins[2], maxs[0], maxs[1], maxs[2] );
 
 	if ( keepaspect ) {
-		extend = maxs - mins;
+		const Vector3 extend = maxs - mins;
 		if ( extend[1] > extend[0] ) {
 			mins[0] -= ( extend[1] - extend[0] ) * 0.5;
 			maxs[0] += ( extend[1] - extend[0] ) * 0.5;
@@ -295,7 +291,7 @@ static void MiniMapMakeMinsMaxs( const Vector3& mins_in, const Vector3& maxs_in,
 	/* border: amount of black area around the image */
 	/* input: border, 1-2*border, border but we need border/(1-2*border) */
 
-	extend = ( maxs - mins ) * ( border / ( 1 - 2 * border ) );
+	const Vector3 extend = ( maxs - mins ) * ( border / ( 1 - 2 * border ) );
 
 	mins -= extend;
 	maxs += extend;
@@ -710,6 +706,27 @@ int MiniMapBSPMain( Args& args ){
 	}
 
 	Sys_Printf( " done.\n" );
+
+	if( strEqual( g_game->arg, "unvanquished" ) ) {
+		const auto minimapSidecarFilename = StringStream( PathExtensionless( minimapFilename ), ".minimap" );
+		Sys_Printf( "Writing minimap sidecar to %s...", minimapSidecarFilename.c_str() );
+
+		FILE *file = SafeOpenWrite( minimapSidecarFilename, "wt" );
+		fprintf( file,
+			"{\n"
+			"\tbackgroundColor 0.0 0.0 0.0 0.333\n"
+			"\tzone {\n"
+			"\t\tbounds 0 0 0 0 0 0\n"
+			"\t\timage \"minimaps/%s\" %f %f %f %f\n"
+			"\t}\n"
+			"}\n",
+			CopiedString( PathFilename( source ) ).c_str(),
+			mins[0], mins[1],
+			maxs[0], maxs[1] );
+
+		fclose( file );
+		Sys_Printf( " done.\n" );
+	}
 
 	/* return to sender */
 	return 0;
