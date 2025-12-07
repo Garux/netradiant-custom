@@ -2276,9 +2276,8 @@ int LightMain( Args& args ){
 		}
 
 		while ( args.takeArg( "-vertexscale" ) ) {
-			f = atof( args.takeNext() );
-			vertexglobalscale *= f;
-			Sys_Printf( "Vertexlight scaled by %f to %f\n", f, vertexglobalscale );
+			g_vertexScale = atof( args.takeNext() );
+			Sys_Printf( "Vertex lighting scaled by %f\n", g_vertexScale );
 		}
 
 		while ( args.takeArg( "-backsplash" ) ) {

@@ -1810,7 +1810,7 @@ void                        RadCreateDiffuseLights();
 
 
 /* light_ydnar.c */
-Vector3b                    ColorToBytes( const Vector3& color, float scale );
+Vector3b                    ColorToBytes( const Vector3& color, float scale = 1, float lmscale = 1 );
 void                        SmoothNormals();
 
 void                        MapRawLightmap( int num );
@@ -2171,7 +2171,7 @@ inline float areaScale = 0.25f;
 inline float skyScale = 1;
 inline float bounceScale = 0.25f;
 inline float bounceColorRatio = 1;
-inline float vertexglobalscale = 1;
+inline float g_vertexScale = 1;
 inline float g_backsplashFractionScale = 1;
 inline float g_backsplashDistance = -999.0f;
 

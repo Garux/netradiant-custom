@@ -557,7 +557,7 @@ static shaderInfo_t& AllocShaderInfo( const char *shaderName ){
 	si.vertexShadows = true;  /* ydnar: changed default behavior */
 	si.forceSunlight = false;
 	si.lmBrightness = lightmapBrightness;
-	si.vertexScale = vertexglobalscale;
+	si.vertexScale = g_vertexScale;
 	si.notjunc = false;
 
 	/* ydnar: set texture coordinate transform matrix to identity */

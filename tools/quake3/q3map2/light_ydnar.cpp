@@ -54,80 +54,57 @@ static void color_saturate( Vector3& color, float saturation ){
    ColorToBytes()
    ydnar: moved to here 2001-02-04
  */
-
-Vector3b ColorToBytes( const Vector3& color, float scale ){
-	int i;
-	float max, gamma;
-	float inv, dif;
-
-
-	/* ydnar: scaling necessary for simulating r_overbrightBits on external lightmaps */
-	if ( scale <= 0 ) {
-		scale = 1;
-	}
+/*
+	Standard pipeline is Exposure->Brightness->Contrast->Gamma->Saturation->Clamp
+	lightmapExposure is something special here, doing clamp/bump, god knows what's proper order for it
+	lmscale, lightmapCompensate are applied last, since they try to emulate engine effects (bitshift, clamp)
+*/
+Vector3b ColorToBytes( const Vector3& color, float scale/* = 1*/, float lmscale/* = 1*/ ){
+	/* user inputs are not range checked, sanitize here... */
+	if ( scale <= 0 ) scale = 1;
+	if ( lmscale <= 0 ) lmscale = 1;
 
 	/* make a local copy */
-	Vector3 sample = color * scale;
-
-	if( g_lightmapSaturation != 1 )
-		color_saturate( sample, g_lightmapSaturation );
-
-	/* muck with it */
-	gamma = 1.0f / lightmapGamma;
-	for ( i = 0; i < 3; ++i )
-	{
-		/* handle negative light */
-		if ( sample[ i ] < 0 ) {
-			sample[ i ] = 0;
-			continue;
-		}
-
-		/* gamma */
-		sample[ i ] = pow( sample[ i ] / 255.0f, gamma ) * 255.0f;
-	}
-
-	if ( lightmapExposure == 0 ) {
-		/* clamp with color normalization */
-		max = vector3_max_component( sample );
-		if ( max > maxLight ) {
-			sample *= ( maxLight / max );
-		}
-	}
-	else
-	{
-		inv = 1.f / lightmapExposure;
-		//Exposure
-
-		max = vector3_max_component( sample );
-
-		dif = ( 1 -  exp( -max * inv ) )  *  255;
-
-		if ( max > 0 ) {
-			dif = dif / max;
-		}
-		else
-		{
-			dif = 0;
-		}
-
-		sample *= dif;
-	}
-
-
-	/* compensate for ingame overbrighting/bitshifting */
-	sample *= ( 1.0f / lightmapCompensate );
+	Vector3 sample = color * scale; // apply brightness
 
 	/* contrast */
-	if ( lightmapContrast != 1 ){
-		for ( i = 0; i < 3; ++i ){
-			sample[i] = std::max( 0.f, lightmapContrast * ( sample[i] - 128 ) + 128 );
-		}
-		/* clamp with color normalization */
-		max = vector3_max_component( sample );
-		if ( max > 255.0f ) {
-			sample *= ( 255.0f / max );
+	if ( lightmapContrast != 1 )
+		for ( int i = 0; i < 3; ++i )
+			sample[i] = lightmapContrast * ( sample[i] - 128 ) + 128;
+
+	/* clamp negative light (required by pow() in gamma) */
+	for ( int i = 0; i < 3; ++i )
+		value_maximize( sample[ i ], 0.f );
+
+	/* gamma */
+	if( lightmapGamma != 1 ){
+		const float gamma = 1.0f / lightmapGamma;
+		for ( int i = 0; i < 3; ++i )
+			sample[ i ] = std::pow( sample[ i ] / 255.0f, gamma ) * 255.0f;
+	}
+
+	/* Exposure */
+	if ( lightmapExposure != 0 ) {
+		if( const float max = vector3_max_component( sample ); max > 0 ){
+			const float dif = 1 - std::exp( -max / lightmapExposure );
+			sample *= ( dif * 255.0f / max );
 		}
 	}
+
+	if( g_lightmapSaturation != 1 ){
+		color_saturate( sample, g_lightmapSaturation );
+		/* clamp negative light possibly produced here */
+		for ( int i = 0; i < 3; ++i )
+			value_maximize( sample[ i ], 0.f );
+	}
+
+	/* lmscale is necessary for simulating r_mapOverbrightBits on external lightmaps */
+	/* compensate for ingame overbrighting/bitshifting */
+	sample *= ( lmscale / lightmapCompensate );
+
+	/* clamp with color normalization */
+	if ( const float max = vector3_max_component( sample ); max > maxLight )
+		sample *= ( maxLight / max );
 
 	/* sRGB lightmaps */
 	if ( lightmapsRGB ) {
@@ -3204,7 +3181,7 @@ void IlluminateVertexes( int num ){
 
 			/* store into bytes (for vertex approximation) */
 			if ( !info.si->noVertexLight ) {
-				verts[ i ].color[ lightmapNum ].rgb() = ColorToBytes( vertLuxel, 1 );
+				verts[ i ].color[ lightmapNum ].rgb() = ColorToBytes( vertLuxel );
 			}
 		}
 	}

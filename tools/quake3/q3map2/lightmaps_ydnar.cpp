@@ -1499,8 +1499,8 @@ static bool ApproximateLuxel( rawLightmap_t *lm, const bspDrawVert_t& dv ){
 		}
 
 		/* set to bytes */
-		Color4b cb( ColorToBytes( color, 1 ), 0 );
-		Color4b vcb( ColorToBytes( vertexColor, 1 ), 0 );
+		Color4b cb( ColorToBytes( color ), 0 );
+		Color4b vcb( ColorToBytes( vertexColor ), 0 );
 
 		/* compare */
 		for ( int i = 0; i < 3; ++i )
@@ -2070,7 +2070,7 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 				olm->freeLuxels--;
 
 				/* store color */
-				olm->bspLightBytes[ oy * olm->customWidth + ox] = ColorToBytes( color, lm->brightness );
+				olm->bspLightBytes[ oy * olm->customWidth + ox] = ColorToBytes( color, 1, lm->brightness );
 
 				/* store direction */
 				if ( deluxemap ) {
