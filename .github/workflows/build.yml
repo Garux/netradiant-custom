@@ -70,7 +70,9 @@ jobs:
     - name: Build
       run: |
         make CC=gcc-14 CXX=g++-14 CXXFLAGS="-Wno-deprecated-copy" -j4
-        7z a Linux-${{ matrix.arch }}.7z ./install/*
+        ./appimage.sh
+        7z a Linux-${{ matrix.arch }}.7z ./NetRadiant-Custom-x86_64.AppImage
+#        7z a Linux-${{ matrix.arch }}.7z ./install/*
 #       7z to preserve file permissions
 
     - uses: actions/upload-artifact@v4
