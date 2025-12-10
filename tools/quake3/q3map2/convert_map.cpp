@@ -136,6 +136,9 @@ static void ConvertOriginBrush( FILE *f, int num, const Vector3& origin, EBrushT
 	const int size = ext * 2;
 	const int texSize = 64; // can find out from shader
 	const float texScale = float( size ) / texSize;
+	static const char * const shader = strEqual( g_game->arg, "sof2" )
+	                                || strEqual( g_game->arg, "ja" )
+	                                || strEqual( g_game->arg, "jk2" )? "system/origin" : "common/origin";
 	// 6: +Z +Y +X -Z -Y -X
 	char pattern[6][7][4] = {
 		{ "+++", "+-+", "-++", "-  ", " + ", " - ", "-  " },
@@ -168,7 +171,7 @@ static void ConvertOriginBrush( FILE *f, int num, const Vector3& origin, EBrushT
 		       );
 		if ( brushType == EBrushType::Quake ){
 			fprintf( f, "%s %.8f %.8f 0 %.8f %.8f 0 0 0\n",
-			         "common/origin",
+			         shader,
 			         FRAC( ( S( i, 3, 0 ) * origin[0] + S( i, 3, 1 ) * origin[1] + S( i, 3, 2 ) * origin[2] ) / size + 0.5 ) * texSize,
 			         FRAC( ( S( i, 4, 0 ) * origin[0] + S( i, 4, 1 ) * origin[1] + S( i, 4, 2 ) * origin[2] ) / size + 0.5 ) * texSize,
 			         texScale, texScale
@@ -178,7 +181,7 @@ static void ConvertOriginBrush( FILE *f, int num, const Vector3& origin, EBrushT
 			const Vector3 texX( S( i, 3, 0 ), S( i, 3, 1 ), S( i, 3, 2 ) );
 			const Vector3 texY( S( i, 4, 0 ), S( i, 4, 1 ), S( i, 4, 2 ) );
 			fprintf( f, "%s [ %.8f %.8f %.8f %.8f ] [ %.8f %.8f %.8f %.8f ] 0 %.8f %.8f 0 0 0\n",
-			         "common/origin",
+			         shader,
 			         texX.x(), texX.y(), texX.z(),
 			         FRAC( ( S( i, 3, 0 ) * origin[0] + S( i, 3, 1 ) * origin[1] + S( i, 3, 2 ) * origin[2] ) / size + 0.5 ) * texSize,
 			         texY.x(), texY.y(), texY.z(),
@@ -190,7 +193,7 @@ static void ConvertOriginBrush( FILE *f, int num, const Vector3& origin, EBrushT
 			fprintf( f, "( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s 0 0 0\n",
 			         1.0f / size, 0.0f, FRAC( ( S( i, 5, 0 ) * origin[0] + S( i, 5, 1 ) * origin[1] + S( i, 5, 2 ) * origin[2] ) / size + 0.5 ),
 			         0.0f, 1.0f / size, FRAC( ( S( i, 6, 0 ) * origin[0] + S( i, 6, 1 ) * origin[1] + S( i, 6, 2 ) * origin[2] ) / size + 0.5 ),
-			         "common/origin"
+			         shader
 			       );
 		}
 	}
