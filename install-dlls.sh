@@ -67,6 +67,7 @@ $CAT > $INSTALLDIR/etc/fonts/fonts.conf <<EOF
 
 <!-- Font directory list -->
 
+	<dir>C:/WINDOWS/Fonts</dir>
 	<dir>WINDOWSFONTDIR</dir>
 	
 	<dir>~/.fonts</dir>
@@ -114,7 +115,7 @@ $CAT > $INSTALLDIR/etc/fonts/fonts.conf <<EOF
 
 <!-- Font cache directory list -->
 
-	<cachedir>WINDOWSTEMPDIR_FONTCONFIG_CACHE</cachedir>
+	<cachedir>LOCAL_APPDATA_FONTCONFIG_CACHE</cachedir>
 	<cachedir>~/.fontconfig</cachedir>
 
 	<config>

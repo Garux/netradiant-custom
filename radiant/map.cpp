@@ -1674,7 +1674,8 @@ public:
 		}
 		else if ( m_emptyOldParent ){
 			m_emptyOldParent = false;
-			if ( path.top().get_pointer() != m_world ) /* delete empty entity left */
+			/* delete empty entity left */
+			if ( path.top().get_pointer() != m_world && Node_getEntity( path.top() )->isContainer() )
 				Path_deleteTop( path );
 		}
 	}

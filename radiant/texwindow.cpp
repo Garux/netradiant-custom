@@ -1053,6 +1053,19 @@ void TextureBrowser::draw(){
 //			gl().glDisable( GL_TEXTURE_2D );
 //			gl().glColor3f( 1, 1, 1 ); //already set
 
+			// draw black shadow/outline
+			gl().glColor3f( 0, 0, 0 );
+			gl().glRasterPos2i( x + 1, y - fontHeight - fontDescent + 3 - 1 );
+			GlobalOpenGL().drawString( path_get_filename_start( shader->getName() ) );
+			gl().glRasterPos2i( x + 1, y - fontHeight - fontDescent + 3 + 1 );
+			GlobalOpenGL().drawString( path_get_filename_start( shader->getName() ) );
+			gl().glRasterPos2i( x - 1, y - fontHeight - fontDescent + 3 - 1 );
+			GlobalOpenGL().drawString( path_get_filename_start( shader->getName() ) );
+			gl().glRasterPos2i( x - 1, y - fontHeight - fontDescent + 3 + 1 );
+			GlobalOpenGL().drawString( path_get_filename_start( shader->getName() ) );
+
+			// draw white text
+			gl().glColor3f( 1, 1, 1 );
 			gl().glRasterPos2i( x, y - fontHeight - fontDescent + 3 );//+5
 
 			// don't draw the directory name

@@ -163,6 +163,7 @@ struct camwindow_globals_private_t
 	int m_MSAA = 8;
 	bool m_bShowWorkzone = true;
 	bool m_bShowSize = true;
+	bool m_bNoStippleInObjectMode = false;
 };
 
 camwindow_globals_private_t g_camwindow_globals_private;
@@ -932,6 +933,7 @@ class CamWnd
 #endif
 
 	static Shader* m_state_select0;
+	static Shader* m_state_select0_nodots;
 	static Shader* m_state_select1;
 	static Shader* m_state_wire;
 	static Shader* m_state_facewire;
@@ -976,10 +978,12 @@ public:
 		m_state_facewire = GlobalShaderCache().capture( "$CAM_FACEWIRE" );
 		m_state_wire = GlobalShaderCache().capture( "$CAM_WIRE" );
 		m_state_select0 = GlobalShaderCache().capture( "$CAM_OVERLAY" );
+		m_state_select0_nodots = GlobalShaderCache().capture( "$CAM_OVERLAY_NODOTS" );
 		m_state_select1 = GlobalShaderCache().capture( "$CAM_HIGHLIGHT" );
 	}
 	static void releaseStates(){
 		GlobalShaderCache().release( "$CAM_HIGHLIGHT" );
+		GlobalShaderCache().release( "$CAM_OVERLAY_NODOTS" );
 		GlobalShaderCache().release( "$CAM_OVERLAY" );
 		GlobalShaderCache().release( "$CAM_WIRE" );
 		GlobalShaderCache().release( "$CAM_FACEWIRE" );
@@ -1014,6 +1018,7 @@ private:
 };
 
 Shader* CamWnd::m_state_select0 = 0;
+Shader* CamWnd::m_state_select0_nodots = 0;
 Shader* CamWnd::m_state_select1 = 0;
 Shader* CamWnd::m_state_wire = 0;
 Shader* CamWnd::m_state_facewire = 0;
@@ -2036,7 +2041,7 @@ void CamWnd::Cam_Draw(){
 		CamRenderer renderer( globalstate,
 		                      g_camwindow_globals_private.m_bFaceWire ? m_state_facewire : 0,
 		                      m_Camera.draw_mode == cd_texture_plus_wire ? m_state_wire : 0,
-		                      m_state_select0,
+		                      g_camwindow_globals_private.m_bNoStippleInObjectMode && GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ? m_state_select0_nodots : m_state_select0,
 		                      g_camwindow_globals_private.m_bFaceFill ? m_state_select1 : 0,
 		                      m_view.getViewer() );
 
@@ -2423,6 +2428,11 @@ void Camera_constructPreferences( PreferencesPage& page ){
 	    BoolImportCaller( g_camwindow_globals_private.m_bFaceWire ),
 	    BoolExportCaller( g_camwindow_globals_private.m_bFaceWire )
 	);
+	page.appendCheckBox(
+	    "", "No dots in Object mode",
+	    BoolImportCaller( g_camwindow_globals_private.m_bNoStippleInObjectMode ),
+	    BoolExportCaller( g_camwindow_globals_private.m_bNoStippleInObjectMode )
+	);
 
 	const char* render_modes[]{ "Wireframe", "Flatshade", "Textured", "Textured+Wire", "Lighting" };
 	page.appendCombo(
@@ -2558,6 +2568,7 @@ void CamWnd_Construct(){
 	GlobalPreferenceSystem().registerPreference( "CameraMSAA", IntImportStringCaller( g_camwindow_globals_private.m_MSAA ), IntExportStringCaller( g_camwindow_globals_private.m_MSAA ) );
 	GlobalPreferenceSystem().registerPreference( "StrafeMode", IntImportStringCaller( g_camwindow_globals_private.m_strafeMode ), IntExportStringCaller( g_camwindow_globals_private.m_strafeMode ) );
 	GlobalPreferenceSystem().registerPreference( "CameraFaceWire", BoolImportStringCaller( g_camwindow_globals_private.m_bFaceWire ), BoolExportStringCaller( g_camwindow_globals_private.m_bFaceWire ) );
+	GlobalPreferenceSystem().registerPreference( "CameraNoStippleInObjectMode", BoolImportStringCaller( g_camwindow_globals_private.m_bNoStippleInObjectMode ), BoolExportStringCaller( g_camwindow_globals_private.m_bNoStippleInObjectMode ) );
 	GlobalPreferenceSystem().registerPreference( "CameraFaceFill", BoolImportStringCaller( g_camwindow_globals_private.m_bFaceFill ), BoolExportStringCaller( g_camwindow_globals_private.m_bFaceFill ) );
 	GlobalPreferenceSystem().registerPreference( "3DZoomInToPointer", BoolImportStringCaller( g_camwindow_globals_private.m_bZoomToPointer ), BoolExportStringCaller( g_camwindow_globals_private.m_bZoomToPointer ) );
 	GlobalPreferenceSystem().registerPreference( "fieldOfView", FloatImportStringCaller( camera_t::fieldOfView ), FloatExportStringCaller( camera_t::fieldOfView ) );

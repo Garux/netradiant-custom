@@ -1097,6 +1097,10 @@ class Light :
 	RenderLightCenter m_render_center;
 	RenderableNamedEntity m_renderName;
 
+	NamedEntity m_styled;
+	Vector3 m_styleOrigin;
+	RenderableNamedEntity m_renderStyle;
+
 	Vector3 m_lightOrigin;
 	bool m_useLightOrigin;
 	Float9 m_lightRotation;
@@ -1127,6 +1131,16 @@ class Light :
 	Callback<void()> m_boundsChanged;
 	Callback<void()> m_evaluateTransform;
 
+	void styleChanged( const char* value ){
+		if ( string_empty( value ) ) {
+			m_styled.identifierChanged( EXCLUDE_NAME );
+		}
+		else {
+			m_styled.identifierChanged( value );
+		}
+	}
+	typedef MemberCaller<Light, void(const char*), &Light::styleChanged> StyleChangedCaller;
+
 	void construct(){
 		default_rotation( m_rotation );
 		//m_aabb_light.origin = Vector3( 0, 0, 0 );
@@ -1134,6 +1148,7 @@ class Light :
 
 		m_keyObservers.insert( "classname", ClassnameFilter::ClassnameChangedCaller( m_filter ) );
 		m_keyObservers.insert( Static<KeyIsName>::instance().m_nameKey, NamedEntity::IdentifierChangedCaller( m_named ) );
+		m_keyObservers.insert( "style", StyleChangedCaller( *this ) );
 		m_keyObservers.insert( "_color", Colour::ColourChangedCaller( m_colour ) );
 		m_keyObservers.insert( "origin", OriginKey::OriginChangedCaller( m_originKey ) );
 		m_keyObservers.insert( "_light", LightRadii::PrimaryIntensityChangedCaller( m_radii ) );
@@ -1192,6 +1207,7 @@ public:
 
 	void originChanged(){
 		m_aabb_light.origin = m_useLightOrigin ? m_lightOrigin : m_originKey.m_origin;
+		m_styleOrigin = m_aabb_light.origin + Vector3( 0, 0, -24 );
 		updateOrigin();
 	}
 	typedef MemberCaller<Light, void(), &Light::originChanged> OriginChangedCaller;
@@ -1304,6 +1320,9 @@ public:
 		m_radii_box( m_aabb_light.origin ),
 		m_render_center( m_doom3Radius.m_center, m_entity.getEntityClass() ),
 		m_renderName( m_named, m_aabb_light.origin, EXCLUDE_NAME ),
+		m_styled( m_entity ),
+		m_styleOrigin( m_aabb_light.origin + Vector3( 0, 0, -24 ) ),
+		m_renderStyle( m_styled, m_styleOrigin, EXCLUDE_NAME ),
 		m_useLightOrigin( false ),
 		m_useLightRotation( false ),
 		m_renderProjection( m_doom3Projection ),
@@ -1328,6 +1347,9 @@ public:
 		m_radii_box( m_aabb_light.origin ),
 		m_render_center( m_doom3Radius.m_center, m_entity.getEntityClass() ),
 		m_renderName( m_named, m_aabb_light.origin, EXCLUDE_NAME ),
+		m_styled( m_entity ),
+		m_styleOrigin( m_aabb_light.origin + Vector3( 0, 0, -24 ) ),
+		m_renderStyle( m_styled, m_styleOrigin, EXCLUDE_NAME ),
 		m_useLightOrigin( false ),
 		m_useLightRotation( false ),
 		m_renderProjection( m_doom3Projection ),
@@ -1464,6 +1486,10 @@ public:
 		if ( m_renderName.excluded_not()
 		  && ( selected || ( g_showNames && ( volume.fill() || aabb_fits_view( m_aabb_light, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) ) {
 			m_renderName.render( renderer, volume, localToWorld, selected );
+		}
+		if ( m_renderStyle.excluded_not()
+		  && ( selected || ( g_showNames && ( volume.fill() || aabb_fits_view( m_aabb_light, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) ) {
+			m_renderStyle.render( renderer, volume, localToWorld, selected );
 		}
 	}
 	void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const {

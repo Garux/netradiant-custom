@@ -213,6 +213,25 @@ public:
 	}
 };
 
+/**
+   SelectionPolicy for SelectByBounds
+   Returns true if box and the AABB of instance intersect in 2D (height ignored)
+ */
+class SelectionPolicy_TouchingTall
+{
+public:
+	bool Evaluate( const AABB& box, scene::Instance& instance ) const {
+		const AABB& other( instance.worldAABB() );
+		for ( Unsigned i = 0; i < 2; ++i )
+		{
+			if ( std::fabs( box.origin[i] - other.origin[i] ) > ( box.extents[i] + other.extents[i] ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+};
+
 class DeleteSelected : public scene::Graph::Walker
 {
 	mutable bool m_remove;
@@ -902,6 +921,10 @@ void Select_Touching(){
 	SelectByBounds<SelectionPolicy_Touching>::DoSelection( false );
 }
 
+void Select_TouchingTall(){
+	SelectByBounds<SelectionPolicy_TouchingTall>::DoSelection( false );
+}
+
 void Select_ProjectTexture( const texdef_t& texdef, const Vector3* direction ){
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushProjectTexture_Selected( GlobalSceneGraph(), texdef, direction );
@@ -1585,7 +1608,7 @@ class RotateDialog : public QObject
 	QDoubleSpinBox *m_y;
 	QDoubleSpinBox *m_z;
 	void construct(){
-		m_window = new QWidget( MainFrame_getWindow(), Qt::Dialog | Qt::WindowCloseButtonHint );
+		m_window = new QWidget( MainFrame_getWindow(), Qt::Tool | Qt::WindowCloseButtonHint );
 		m_window->setWindowTitle( "Arbitrary rotation" );
 		m_window->installEventFilter( this );
 
@@ -1876,6 +1899,7 @@ void Select_registerCommands(){
 	GlobalCommands_insert( "InvertSelection", makeCallbackF( Select_Invert ), QKeySequence( "I" ) );
 	GlobalCommands_insert( "SelectInside", makeCallbackF( Select_Inside ) );
 	GlobalCommands_insert( "SelectTouching", makeCallbackF( Select_Touching ) );
+	GlobalCommands_insert( "SelectTouchingTall", makeCallbackF( Select_TouchingTall ) );
 	GlobalCommands_insert( "ExpandSelectionToPrimitives", makeCallbackF( Scene_ExpandSelectionToPrimitives ), QKeySequence( "Ctrl+E" ) );
 	GlobalCommands_insert( "ExpandSelectionToEntities", makeCallbackF( Scene_ExpandSelectionToEntities ), QKeySequence( "Shift+E" ) );
 	GlobalCommands_insert( "SelectConnectedEntities", makeCallbackF( SelectConnectedEntities ), QKeySequence( "Ctrl+Shift+E" ) );
