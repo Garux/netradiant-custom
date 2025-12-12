@@ -157,10 +157,22 @@ class MiscModel :
 	Callback<void()> m_transformChanged;
 	Callback<void()> m_evaluateTransform;
 
+	void modelKeyChanged( const char* ){
+		const char* model2 = m_entity.getKeyValue( "model2" );
+		if ( !string_empty( model2 ) ) {
+			m_model.modelChanged( model2 );
+		}
+		else {
+			m_model.modelChanged( m_entity.getKeyValue( m_entity.getEntityClass().miscmodel_key() ) );
+		}
+	}
+	typedef MemberCaller<MiscModel, void(const char*), &MiscModel::modelKeyChanged> ModelKeyChangedCaller;
+
 	void construct(){
 		m_keyObservers.insert( "classname", ClassnameFilter::ClassnameChangedCaller( m_filter ) );
 		m_keyObservers.insert( Static<KeyIsName>::instance().m_nameKey, NamedEntity::IdentifierChangedCaller( m_named ) );
-		m_keyObservers.insert( m_entity.getEntityClass().miscmodel_key(), SingletonModel::ModelChangedCaller( m_model ) );
+		m_keyObservers.insert( m_entity.getEntityClass().miscmodel_key(), ModelKeyChangedCaller( *this ) );
+		m_keyObservers.insert( "model2", ModelKeyChangedCaller( *this ) );
 		m_keyObservers.insert( "origin", OriginKey::OriginChangedCaller( m_originKey ) );
 		m_keyObservers.insert( "angle", m_anglesKey.getAngleChangedCallback() );
 		m_keyObservers.insert( "angles", m_anglesKey.getAnglesChangedCallback() );

@@ -1840,6 +1840,11 @@ void OpenGLShader::construct( const char* name ){
 			hiddenLine.m_linestipple_factor = 2;
 #endif
 		}
+		else if ( string_equal( name + 1, "CAM_OVERLAY_NODOTS" ) ) {
+			state.m_state = RENDER_CULLFACE | RENDER_DEPTHTEST | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_OFFSETLINE;
+			state.m_sort = OpenGLState::eSortOverlayFirst + 1;
+			state.m_depthfunc = GL_LEQUAL;
+		}
 		else if ( string_equal( name + 1, "CAM_WIRE" ) ) {
 			state.m_state = RENDER_CULLFACE | RENDER_DEPTHTEST | RENDER_COLOURWRITE;// | RENDER_OFFSETLINE;
 			state.m_colour = Vector4( 0.75, 0.75, 0.75, 1 );

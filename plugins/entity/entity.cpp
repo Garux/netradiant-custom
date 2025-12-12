@@ -356,6 +356,7 @@ public:
 		const char* value = entity.getClassName();
 		return string_equal( value, "worldspawn" )
 		    || string_equal( value, "func_group" )
+		    || string_equal( value, "func_static" )
 		    || string_equal_n( value, "func_detail", 11 );
 	}
 };
