@@ -39,7 +39,7 @@ chmod +x linuxdeploy-plugin-qt-x86_64.AppImage
 APPIMAGETOOL=./linuxdeploy-x86_64.AppImage
 
 echo "[5/5] Building AppImage..."
-"$APPIMAGETOOL" --desktop-file $APPDIR/*.desktop --icon-file=$ICON_DEST --appdir=$APPDIR --plugin qt --output appimage
+"$APPIMAGETOOL" --desktop-file $APPDIR/*.desktop --icon-file=$ICON_DEST --deploy-deps-only $APPDIR/usr/bin/modules --deploy-deps-only $APPDIR/usr/bin/plugins --appdir=$APPDIR --plugin qt --output appimage
 
 echo "Done!"
 echo "Built: ${APPNAME}-x86_64.AppImage"
