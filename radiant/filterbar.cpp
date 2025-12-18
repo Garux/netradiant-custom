@@ -197,4 +197,7 @@ void create_filter_toolbar( QToolBar *toolbar ){
 
 	button = toolbar_append_toggle_button( toolbar, "Hide Selected\nRightClick: Show Hidden", "f-hide.png", "HideSelected" );
 	handler->m_actions.emplace( button, new CommonFunc_command( "ShowHidden" ) );
+
+	button = toolbar_append_toggle_button( toolbar, "Hide Unselected\nRightClick: Show Hidden", "f-hide.png", "HideUnselected" );
+	handler->m_actions.emplace( button, new CommonFunc_command( "ShowHidden" ) );
 }

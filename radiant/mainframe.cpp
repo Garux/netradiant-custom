@@ -1035,6 +1035,7 @@ void create_view_menu( QMenuBar *menubar, MainFrame::EViewStyle style ){
 	menu->addSeparator();
 	{
 		create_check_menu_item_with_mnemonic( menu, "Hide Selected", "HideSelected" );
+		create_check_menu_item_with_mnemonic( menu, "Hide Unselected", "HideUnselected" );
 		create_menu_item_with_mnemonic( menu, "Show Hidden", "ShowHidden" );
 	}
 	menu->addSeparator();

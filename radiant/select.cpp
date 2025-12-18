@@ -988,6 +988,11 @@ void HideSelected(){
 	g_hidden_item.update();
 }
 
+void HideUnselected(){
+	Scene_Invert_Selection( GlobalSceneGraph() );
+	HideSelected();
+	Scene_Invert_Selection( GlobalSceneGraph() );
+}
 
 class HideAllWalker : public scene::Graph::Walker
 {
@@ -1840,6 +1845,7 @@ void SelectConnectedEntities(){
 void Select_registerCommands(){
 	GlobalCommands_insert( "ShowHidden", makeCallbackF( Select_ShowAllHidden ), QKeySequence( "Shift+H" ) );
 	GlobalToggles_insert( "HideSelected", makeCallbackF( HideSelected ), ToggleItem::AddCallbackCaller( g_hidden_item ), QKeySequence( "H" ) );
+	GlobalToggles_insert( "HideUnselected", makeCallbackF( HideUnselected ), ToggleItem::AddCallbackCaller( g_hidden_item ), QKeySequence( "Alt+H" ) );
 
 	GlobalCommands_insert( "MirrorSelectionX", makeCallbackF( Selection_Flipx ) );
 	GlobalCommands_insert( "RotateSelectionX", makeCallbackF( Selection_Rotatex ) );
