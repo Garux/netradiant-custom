@@ -962,7 +962,12 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	libl_net.$(A) \
 	libquickhull.$(A) \
 	libxmllib.$(A) \
+	libos.$(A) \
 	$(if $(findstring Win32,$(OS)),icons/radiant.o,) \
+
+libos.$(A): CPPFLAGS_EXTRA := $(CPPFLAGS_QTCORE) -Ilibs -Iinclude
+libos.$(A): \
+	libs/os/dir.o \
 
 libfilematch.$(A): CPPFLAGS_EXTRA := -Ilibs
 libfilematch.$(A): \
@@ -1114,13 +1119,14 @@ $(INSTALLDIR)/modules/shaders.$(DLL): \
 	plugins/shaders/shaders.o \
 	libcommandlib.$(A) \
 
-$(INSTALLDIR)/modules/vfspk3.$(DLL): LIBS_EXTRA := $(LIBS_GLIB)
-$(INSTALLDIR)/modules/vfspk3.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) -Ilibs -Iinclude
+$(INSTALLDIR)/modules/vfspk3.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTCORE) 
+$(INSTALLDIR)/modules/vfspk3.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTCORE) -Ilibs -Iinclude
 $(INSTALLDIR)/modules/vfspk3.$(DLL): \
 	plugins/vfspk3/archive.o \
 	plugins/vfspk3/vfs.o \
 	plugins/vfspk3/vfspk3.o \
 	libfilematch.$(A) \
+	libos.$(A) \
 
 $(INSTALLDIR)/plugins/bobtoolz.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
 $(INSTALLDIR)/plugins/bobtoolz.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
