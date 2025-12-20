@@ -595,8 +595,12 @@ void CWatchBSP::DoEBeginStep(){
 		return;
 	} // monitoring off or unmonitored command
 	else if( !g_WatchBSP_Enabled || strstr( m_commands[ m_iCurrentStep ].c_str(), RADIANT_MONITOR_ADDRESS ) == nullptr ){
-		if( g_WatchBSP_RunQuake )
+		if( g_WatchBSP_RunQuake ){
+#ifdef WIN32 // vanilla quake3.exe, ioquake3.x86_64.exe are sensitive to CWD, set it
+			m_commands.emplace_back( StringStream( "cd /D ", Quoted( EnginePath_get() ) ) );
+#endif
 			m_commands.emplace_back( runEngineCmd( m_sBSPName.c_str() ) );
+		}
 		m_commands.erase( m_commands.cbegin(), m_commands.cbegin() + m_iCurrentStep );
 		RunBatch( m_commands );
 		return;

@@ -92,7 +92,7 @@ public:
 			}
 			else if ( const char *ext = path_get_extension( name );
 			!string_equal( name, "." ) && !string_equal( name, ".." )
-			/* skip .pk3dir / .pk4dir / .dpkdir / .pakdir / .waddir the in root, they are processed as DirectoryArchive */
+			/* skip .pk3dir / .pk4dir / .dpkdir / .pakdir / .waddir in the root, they are processed as DirectoryArchive */
 			&& !( string_empty( root ) && string_length( ext ) == 6 && string_equal_nocase( ext + 3, "dir" ) ) ) {
 				path.push_filename( name );
 
