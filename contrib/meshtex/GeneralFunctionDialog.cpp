@@ -26,6 +26,7 @@
 #include "GenericPluginUI.h"
 #include "GeneralFunctionDialog.h"
 #include "PluginUIMessages.h"
+#include <QButtonGroup>
 
 #include "iundo.h"
 
@@ -105,13 +106,18 @@ GeneralFunctionDialog::GeneralFunctionDialog(const std::string& key) :
       {
          // Mutually exclusive "Surface values" and "Control values" radio buttons.
          {
-            auto *radio = surface = new QRadioButton( DIALOG_GEN_FUNC_SURFACE_VALUES );
-            grid->addWidget( radio, 0, 1 );
-            radio->setChecked( true );
-         }
-         {
-            auto *radio = new QRadioButton( DIALOG_GEN_FUNC_CONTROL_VALUES );
-            grid->addWidget( radio, 0, 2 );
+            auto *group = new QButtonGroup( _dialog );
+            {
+               auto *radio = surface = new QRadioButton( DIALOG_GEN_FUNC_SURFACE_VALUES );
+               grid->addWidget( radio, 0, 1 );
+               group->addButton( radio );
+               radio->setChecked( true );
+            }
+            {
+               auto *radio = new QRadioButton( DIALOG_GEN_FUNC_CONTROL_VALUES );
+               grid->addWidget( radio, 0, 2 );
+               group->addButton( radio );
+            }
          }
          {
             auto *line = new QFrame;
