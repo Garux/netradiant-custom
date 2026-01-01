@@ -24,6 +24,7 @@
 #include "qerplugin.h"
 #include "stream/stringstream.h"
 #include <libxml/parser.h>
+#include <libxml/xmlsave.h>
 
 XmlTagBuilder::~XmlTagBuilder(){
 	// clean up
@@ -106,12 +107,14 @@ bool XmlTagBuilder::SaveXmlDoc( const char* file ){
 	   returns TRUE if the document was saved successfully or FALSE when saving failed
 	 */
 
-	xmlSaveNoEmptyTags = 1;
-
-	if ( xmlSaveFile( file, doc ) != -1 ) {
-		return true;
+	xmlSaveCtxtPtr save = xmlSaveToFilename( file, nullptr, XML_SAVE_NO_EMPTY );
+	if ( !save ) {
+		return false;
 	}
-	return false;
+
+	const int result = xmlSaveDoc( save, doc );
+	xmlSaveClose( save );
+	return result != -1;
 }
 
 bool XmlTagBuilder::AddShaderNode( const char* shader, TextureType textureType, NodeShaderType nodeShaderType ){

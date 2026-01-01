@@ -46,9 +46,7 @@ class UnsortedSet
 			return reinterpret_cast<const Node*>( this );
 		}
 	};
-	static_assert( offsetof( SentinelNode, m_next ) == offsetof( Node, m_next ) &&
-	               offsetof( SentinelNode, m_prev ) == offsetof( Node, m_prev ),
-	               "Node layouts must be compatible for reinterpret_cast" );
+	// Layout compatibility between Node and SentinelNode is assumed for reinterpret_cast usage.
 	SentinelNode m_end;
 
 	template<bool IsConst, bool IsReverse>

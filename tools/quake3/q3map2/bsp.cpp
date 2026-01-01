@@ -199,7 +199,7 @@ static void SetCloneModelNumbers(){
 				entities[ i ].setKeyValue( "model", models, "*%i" );
 
 				/* nuke the brushes/patches for this entity (fixme: leak!) */
-				auto *leak = new brushlist_t( std::move( entities[ i ].brushes ) ); // are brushes referenced elsewhere, so we do not nuke them really?
+				(void)new brushlist_t( std::move( entities[ i ].brushes ) ); // are brushes referenced elsewhere, so we do not nuke them really?
 				entities[ i ].patches.clear();
 			}
 		}

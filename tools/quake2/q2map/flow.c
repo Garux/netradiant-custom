@@ -401,8 +401,6 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 	leaf = &leafs[leafnum];
 //	CheckStack (leaf, thread);
 
-	prevstack->next = &stack;
-
 	stack.next = NULL;
 	stack.leaf = leaf;
 	stack.portal = NULL;

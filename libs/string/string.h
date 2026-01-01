@@ -221,8 +221,15 @@ inline char* string_clone( const char* other, Allocator& allocator ){
 /// The returned buffer must be released with \c string_release using a matching \p allocator.
 template<typename Allocator>
 inline char* string_clone_range( StringRange range, Allocator& allocator ){
-	char* copied = string_new( range.size(), allocator );
-	*std::copy_n( range.data(), range.size(), copied ) = '\0';
+	const std::size_t length = range.size();
+	char* copied = string_new( length, allocator );
+	if ( !copied ) {
+		return nullptr;
+	}
+	if ( length != 0 ) {
+		std::copy_n( range.data(), length, copied );
+	}
+	copied[ length ] = '\0';
 	return copied;
 }
 
@@ -553,8 +560,16 @@ class SmartBuffer : private Allocator
 	char* m_buffer;
 
 	char* copy_range( StringRange range ){
-		char* buffer = Allocator::allocate( sizeof( std::size_t ) + range.size() + 1 );
-		*std::copy_n( range.data(), range.size(), buffer + sizeof( std::size_t ) ) = '\0';
+		const std::size_t length = range.size();
+		char* buffer = Allocator::allocate( sizeof( std::size_t ) + length + 1 );
+		if ( !buffer ) {
+			return nullptr;
+		}
+		char* out = buffer + sizeof( std::size_t );
+		if ( length != 0 ) {
+			std::copy_n( range.data(), length, out );
+		}
+		out[ length ] = '\0';
 		*reinterpret_cast<std::size_t*>( buffer ) = 0;
 		return buffer;
 	}

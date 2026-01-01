@@ -85,19 +85,22 @@ void xml_SendNode( xmlNodePtr node ){
 		xml_buf = xmlBufferCreate();
 		xmlNodeDump( xml_buf, doc, node, 0, 0 );
 
+		const xmlChar* xml_content = xmlBufferContent( xml_buf );
+		size_t xml_len = xmlBufferLength( xml_buf );
+
 		// the XML node might be too big to fit in a single network message
 		// l_net library defines an upper limit of MAX_NETMESSAGE
 		// there are some size check errors, so we use MAX_NETMESSAGE-10 to be safe
 		// if the size of the buffer exceeds MAX_NETMESSAGE-10 we'll send in several network messages
-		while ( pos < xml_buf->use )
+		while ( pos < xml_len )
 		{
 			// what size are we gonna send now?
-			( xml_buf->use - pos < MAX_NETMESSAGE - 10 ) ? ( size = xml_buf->use - pos ) : ( size = MAX_NETMESSAGE - 10 );
+			( xml_len - pos < MAX_NETMESSAGE - 10 ) ? ( size = xml_len - pos ) : ( size = MAX_NETMESSAGE - 10 );
 			//++timo just a debug thing
 			if ( size == MAX_NETMESSAGE - 10 ) {
 				Sys_FPrintf( SYS_NOXML, "Got to split the buffer\n" );
 			}
-			memcpy( xmlbuf, xml_buf->content + pos, size );
+			memcpy( xmlbuf, xml_content + pos, size );
 			xmlbuf[size] = '\0';
 			NMSG_Clear( &msg );
 			NMSG_WriteString( &msg, xmlbuf );
@@ -115,18 +118,17 @@ void xml_SendNode( xmlNodePtr node ){
 
 		//++timo we need to handle the case of a buffer too big to fit in a single message
 		// try without checks for now
-		if ( xml_buf->use > MAX_NETMESSAGE - 10 ) {
+		if ( xml_len > MAX_NETMESSAGE - 10 ) {
 			// if we send that we are probably gonna break the stream at the other end..
 			// and Error will call right there
 			//Error( "MAX_NETMESSAGE exceeded for XML feedback stream in FPrintf (%d)\n", xml_buf->use);
-			Sys_FPrintf( SYS_NOXML, "MAX_NETMESSAGE exceeded for XML feedback stream in FPrintf (%d)\n", xml_buf->use );
-			xml_buf->content[xml_buf->use] = '\0'; //++timo this corrupts the buffer but we don't care it's for printing
-			Sys_FPrintf( SYS_NOXML, xml_buf->content );
+			Sys_FPrintf( SYS_NOXML, "MAX_NETMESSAGE exceeded for XML feedback stream in FPrintf (%d)\n", xml_len );
+			Sys_FPrintf( SYS_NOXML, (const char*)xml_content );
 
 		}
 
-		size = xml_buf->use;
-		memcpy( xmlbuf, xml_buf->content, size );
+		size = xml_len;
+		memcpy( xmlbuf, xml_content, size );
 		xmlbuf[size] = '\0';
 		NMSG_Clear( &msg );
 		NMSG_WriteString( &msg, xmlbuf );

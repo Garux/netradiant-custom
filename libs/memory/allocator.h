@@ -65,10 +65,15 @@ public:
 		return &instance;
 	}
 	Type* allocate( size_type size, const void* = 0 ){
+		if ( size == 0 ) {
+			return nullptr;
+		}
 		return static_cast<Type*>( ::operator new( size * sizeof( Type ) ) );
 	}
 	void deallocate( pointer p, size_type ){
-		::operator delete( p );
+		if ( p ) {
+			::operator delete( p );
+		}
 	}
 	size_type max_size() const {
 		return std::size_t( -1 ) / sizeof( Type );

@@ -819,6 +819,10 @@ public:
 
 	void UpdateCachedData();
 
+	const PatchTesselation& getTesselation() const {
+		return m_tess;
+	}
+
 	const char *GetShader() const {
 		return m_shader.c_str();
 	}

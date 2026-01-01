@@ -141,8 +141,8 @@ xmlNodePtr LeakFile( tree_t *tree ){
 	while ( node->occupied > 1 )
 	{
 		int next;
-		portal_t    *p, *nextportal;
-		node_t      *nextnode;
+		portal_t    *p, *nextportal = NULL;
+		node_t      *nextnode = NULL;
 		int s;
 
 		// find the best portal exit
@@ -151,11 +151,15 @@ xmlNodePtr LeakFile( tree_t *tree ){
 		{
 			s = ( p->nodes[0] == node );
 			if ( p->nodes[s]->occupied
-				 && p->nodes[s]->occupied < next ) {
+				 && ( !nextportal || p->nodes[s]->occupied < next ) ) {
 				nextportal = p;
 				nextnode = p->nodes[s];
 				next = nextnode->occupied;
 			}
+		}
+		if ( !nextportal || !nextnode ) {
+			Error( "LeakFile: failed to find portal exit\n" );
+			return NULL;
 		}
 		node = nextnode;
 		WindingCenter( nextportal->winding, mid );

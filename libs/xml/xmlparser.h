@@ -193,7 +193,10 @@ public:
 			XMLSAXImporter sax( importer );
 
 			xmlParserCtxtPtr ctxt = xmlCreatePushParserCtxt( sax.callbacks(), sax.context(), chars, static_cast<int>( res ), 0 );
-			ctxt->replaceEntities = 1;
+			if ( !ctxt ) {
+				return;
+			}
+			xmlCtxtUseOptions( ctxt, XML_PARSE_NOENT );
 
 			while ( ( res = m_istream.read( chars, std::size( chars ) ) ) > 0 )
 			{

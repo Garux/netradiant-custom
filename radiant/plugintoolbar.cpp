@@ -40,7 +40,7 @@ QIcon new_plugin_icon( const char* filename ){
 
 	const char *rootdir[][ 2 ] = { { AppPath_get(), g_pluginsDir }, { GameToolsPath_get(), g_pluginsDir }, { AppPath_get(), g_modulesDir } };
 
-	for( const auto [ root, dir ] : rootdir )
+	for( const auto& [ root, dir ] : rootdir )
 		for( const auto *ext : { ".svg", ".png" } )
 			if( file_exists( fullpath( root, dir, "bitmaps/", PathExtensionless( filename ), ext ) ) )
 				return QIcon( fullpath.c_str() );

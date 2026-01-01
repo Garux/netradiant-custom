@@ -35,6 +35,7 @@
 #include "gtkutil/image.h"
 #include "map.h"
 #include "mainframe.h"
+#include "brushnode.h"
 #include "commands.h"
 #include "gtkmisc.h"
 #include "gtkdlgs.h"
@@ -44,6 +45,12 @@
 #include "patch.h"
 #include "grid.h"
 #include "patchdialog.h"
+#include "brush.h"
+#include "brush_primit.h"
+#include "ieclass.h"
+#include "ientity.h"
+#include "math/plane.h"
+#include "quickhull/QuickHull.hpp"
 
 PatchCreator* g_patchCreator = 0;
 
@@ -245,6 +252,252 @@ void Scene_PatchThicken( scene::Graph& graph, const int thickness, bool seams, c
 	{
 		Patch_thicken( *Node_getPatch( i->path().top() ), *i, thickness, seams, axis );
 	}
+}
+
+namespace
+{
+const double kPatchMeshPlanarEpsilon = c_PLANE_DIST_EPSILON;
+constexpr double kPatchMeshMinThickness = 1.0;
+const char* kPatchMeshNotexShader = "notex";
+
+struct PatchMeshHullPlane
+{
+	Plane3 plane;
+	PlanePoints points;
+	DoubleVector3 st[3];
+	bool textured;
+};
+
+inline DoubleVector3 quickhull_to_double( const quickhull::Vector3<double>& point ){
+	return DoubleVector3( point.x, point.y, point.z );
+}
+
+bool patchmesh_find_plane( const std::vector<quickhull::Vector3<double>>& points, Plane3& plane ){
+	if ( points.size() < 3 ) {
+		return false;
+	}
+
+	const DoubleVector3 p0 = quickhull_to_double( points.front() );
+	std::size_t i1 = 1;
+	for ( ; i1 < points.size(); ++i1 ) {
+		const DoubleVector3 p1 = quickhull_to_double( points[i1] );
+		if ( vector3_length_squared( p1 - p0 ) > 1e-6 ) {
+			break;
+		}
+	}
+	if ( i1 >= points.size() ) {
+		return false;
+	}
+	const DoubleVector3 p1 = quickhull_to_double( points[i1] );
+
+	for ( std::size_t i2 = i1 + 1; i2 < points.size(); ++i2 ) {
+		const DoubleVector3 p2 = quickhull_to_double( points[i2] );
+		Plane3 candidate = plane3_for_points( p0, p1, p2 );
+		if ( plane3_valid( candidate ) ) {
+			plane = candidate;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+scene::Node* PatchMesh_convertToBrushGroup( PatchInstance& instance ){
+	Patch& patch = instance.getPatch();
+	patch.UpdateCachedData();
+	const PatchTesselation& tess = patch.getTesselation();
+	if ( tess.m_vertices.size() < 3 ) {
+		return nullptr;
+	}
+
+	const Matrix4& localToWorld = instance.localToWorld();
+	std::vector<quickhull::Vector3<double>> points;
+	std::vector<Vector2> texcoords;
+	std::vector<bool> hasTexcoord;
+
+	points.reserve( tess.m_vertices.size() * 2 );
+	texcoords.reserve( tess.m_vertices.size() * 2 );
+	hasTexcoord.reserve( tess.m_vertices.size() * 2 );
+
+	for ( const ArbitraryMeshVertex& v : tess.m_vertices ) {
+		const Vector3 local = vertex3f_to_vector3( v.vertex );
+		const Vector3 world = matrix4_transformed_point( localToWorld, local );
+		points.emplace_back( world.x(), world.y(), world.z() );
+		texcoords.emplace_back( texcoord2f_to_vector2( v.texcoord ) );
+		hasTexcoord.emplace_back( true );
+	}
+
+	Plane3 basePlane;
+	if ( !patchmesh_find_plane( points, basePlane ) ) {
+		return nullptr;
+	}
+
+	double maxDistance = 0.0;
+	for ( const quickhull::Vector3<double>& point : points ) {
+		const DoubleVector3 p = quickhull_to_double( point );
+		maxDistance = std::max( maxDistance, std::fabs( plane3_distance_to_point( basePlane, p ) ) );
+	}
+
+	if ( maxDistance <= kPatchMeshPlanarEpsilon ) {
+		Vector3 avgNormal = patch.Calculate_AvgNormal();
+		Vector3 worldNormal = matrix4_transformed_direction( localToWorld, avgNormal );
+		if ( vector3_length_squared( worldNormal ) > 0.0 ) {
+			vector3_normalise( worldNormal );
+		}
+		DoubleVector3 extrudeDir = basePlane.normal();
+		if ( vector3_length_squared( worldNormal ) > 0.0
+		  && vector3_dot( extrudeDir, worldNormal ) < 0.0 ) {
+			extrudeDir = vector3_negated( extrudeDir );
+		}
+		const DoubleVector3 extrude = vector3_scaled( extrudeDir, -kPatchMeshMinThickness );
+		const std::size_t originalCount = points.size();
+		for ( std::size_t i = 0; i < originalCount; ++i ) {
+			const DoubleVector3 p = quickhull_to_double( points[i] );
+			const DoubleVector3 e = vector3_added( p, extrude );
+			points.emplace_back( e.x(), e.y(), e.z() );
+			texcoords.emplace_back( Vector2( 0, 0 ) );
+			hasTexcoord.emplace_back( false );
+		}
+	}
+
+	quickhull::QuickHull<double> quickhull;
+	auto hull = quickhull.getConvexHull( points, true, true );
+	const auto& indexBuffer = hull.getIndexBuffer();
+	if ( indexBuffer.size() < 12 ) {
+		return nullptr;
+	}
+
+	std::vector<PatchMeshHullPlane> planes;
+	planes.reserve( indexBuffer.size() / 3 );
+
+	for ( std::size_t i = 0; i + 2 < indexBuffer.size(); i += 3 ) {
+		const std::size_t i0 = indexBuffer[i];
+		const std::size_t i1 = indexBuffer[i + 1];
+		const std::size_t i2 = indexBuffer[i + 2];
+		const DoubleVector3 p0 = quickhull_to_double( points[i0] );
+		const DoubleVector3 p1 = quickhull_to_double( points[i1] );
+		const DoubleVector3 p2 = quickhull_to_double( points[i2] );
+
+		const Plane3 plane = plane3_for_points( p0, p1, p2 );
+		if ( !plane3_valid( plane ) ) {
+			continue;
+		}
+
+		const bool triTextured = hasTexcoord[i0] && hasTexcoord[i1] && hasTexcoord[i2];
+		auto existing = std::find_if( planes.begin(), planes.end(), [&plane]( const PatchMeshHullPlane& data ){
+			return plane3_equal( data.plane, plane );
+		} );
+
+		if ( existing == planes.end() ) {
+			PatchMeshHullPlane data;
+			data.plane = plane;
+			data.points = { p0, p1, p2 };
+			data.textured = triTextured;
+			if ( triTextured ) {
+				data.st[0] = DoubleVector3( texcoords[i0], 0 );
+				data.st[1] = DoubleVector3( texcoords[i1], 0 );
+				data.st[2] = DoubleVector3( texcoords[i2], 0 );
+			}
+			else
+			{
+				data.st[0] = DoubleVector3( 0 );
+				data.st[1] = DoubleVector3( 0 );
+				data.st[2] = DoubleVector3( 0 );
+			}
+			planes.push_back( data );
+		}
+		else if ( !existing->textured && triTextured ) {
+			existing->points = { p0, p1, p2 };
+			existing->st[0] = DoubleVector3( texcoords[i0], 0 );
+			existing->st[1] = DoubleVector3( texcoords[i1], 0 );
+			existing->st[2] = DoubleVector3( texcoords[i2], 0 );
+			existing->textured = true;
+		}
+	}
+
+	if ( planes.size() < 4 ) {
+		return nullptr;
+	}
+
+	EntityClass* groupClass = GlobalEntityClassManager().findOrInsert( "func_group", true );
+	NodeSmartReference groupNode( GlobalEntityCreator().createEntity( groupClass ) );
+	Node_getTraversable( GlobalSceneGraph().root() )->insert( groupNode );
+
+	NodeSmartReference brushNode( GlobalBrushCreator().createBrush() );
+	Node_getTraversable( groupNode.get() )->insert( brushNode );
+	Brush* brush = Node_getBrush( brushNode );
+	if ( brush == 0 ) {
+		Node_getTraversable( GlobalSceneGraph().root() )->erase( groupNode );
+		return nullptr;
+	}
+
+	const Shader* patchShader = patch.getShader();
+	const qtexture_t& texture = patchShader->getTexture();
+	const std::size_t texWidth = std::max<std::size_t>( texture.width, 1 );
+	const std::size_t texHeight = std::max<std::size_t>( texture.height, 1 );
+	const char* patchShaderName = patch.GetShader();
+
+	for ( const PatchMeshHullPlane& data : planes ) {
+		TextureProjection projection;
+		TexDef_Construct_Default( projection );
+		if ( data.textured ) {
+			Texdef_from_ST( projection, data.points, data.st, texWidth, texHeight );
+		}
+		if ( !data.textured || g_bp_globals.m_texdefTypeId != TEXDEFTYPEID_VALVE ) {
+			ComputeAxisBase( data.plane.normal(), projection.m_basis_s, projection.m_basis_t );
+		}
+
+		const char* shader = data.textured ? patchShaderName : kPatchMeshNotexShader;
+		Face* newFace = brush->addPlane( data.points[0], data.points[1], data.points[2], shader, TextureProjection() );
+		if ( newFace ) {
+			newFace->getTexdef().m_projection = projection;
+			newFace->revertTexdef();
+		}
+	}
+
+	brush->removeEmptyFaces();
+	if ( !brush->hasContributingFaces() ) {
+		Node_getTraversable( groupNode.get() )->erase( brushNode );
+		Node_getTraversable( GlobalSceneGraph().root() )->erase( groupNode );
+		return nullptr;
+	}
+
+	return &groupNode.get();
+}
+}
+
+void Patch_MeshToConvexBrushes(){
+	UndoableCommand undo( "patchMeshToConvexBrushes" );
+
+	InstanceVector instances;
+	Scene_forEachVisibleSelectedPatchInstance( PatchStoreInstance( instances ) );
+	if ( instances.empty() ) {
+		return;
+	}
+
+	std::vector<scene::Node*> groups;
+	groups.reserve( instances.size() );
+	for ( auto *instance : instances ) {
+		PatchInstance* patchInstance = Instance_getPatch( *instance );
+		if ( !patchInstance ) {
+			continue;
+		}
+		if ( scene::Node* group = PatchMesh_convertToBrushGroup( *patchInstance ) ) {
+			groups.push_back( group );
+		}
+	}
+
+	if ( groups.empty() ) {
+		return;
+	}
+
+	GlobalSelectionSystem().setSelectedAll( false );
+	for ( scene::Node* group : groups ) {
+		scene::Path path( makeReference( GlobalSceneGraph().root() ) );
+		path.push( makeReference( *group ) );
+		selectPath( path, true );
+	}
+	SceneChangeNotify();
 }
 
 Patch* Scene_GetUltimateSelectedVisiblePatch(){
@@ -729,6 +982,7 @@ void Patch_registerCommands(){
 //	GlobalCommands_insert( "ClearPatchOverlays", makeCallbackF( Patch_OverlayOff ), QKeySequence( "Ctrl+L" ) );
 	GlobalCommands_insert( "PatchDeform", makeCallbackF( Patch_Deform ) );
 	GlobalCommands_insert( "PatchThicken", makeCallbackF( Patch_Thicken ), QKeySequence( "Ctrl+T" ) );
+	GlobalCommands_insert( "PatchMeshToConvexBrushes", makeCallbackF( Patch_MeshToConvexBrushes ) );
 }
 
 void Patch_constructToolbar( QToolBar* toolbar ){
@@ -820,6 +1074,7 @@ void Patch_constructMenu( QMenu* menu ){
 	menu->addSeparator();
 	create_menu_item_with_mnemonic( menu, "Deform...", "PatchDeform" );
 	create_menu_item_with_mnemonic( menu, "Thicken...", "PatchThicken" );
+	create_menu_item_with_mnemonic( menu, "Patch Mesh to Convex Brushes", "PatchMeshToConvexBrushes" );
 }
 
 

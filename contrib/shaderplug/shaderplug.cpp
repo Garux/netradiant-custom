@@ -24,7 +24,9 @@
 #include "debugging/debugging.h"
 
 #include <ranges>
+#include <string>
 #include <vector>
+#include <cstring>
 #include "string/string.h"
 #include "modulesystem/singletonmodule.h"
 #include "stream/stringstream.h"
@@ -93,14 +95,16 @@ void loadArchiveFile( const char* filename ){
 }
 
 void LoadTextureFile( const char* filename ){
-	char buffer[256] = "textures/";
+	std::string buffer = "textures/";
 
 	// append filename without trailing file extension (.tga or .jpg for example)
-	strncat( buffer, filename, strlen( filename ) - 4 );
+	const size_t filename_len = std::strlen( filename );
+	const size_t trim_len = ( filename_len > 4 ) ? ( filename_len - 4 ) : filename_len;
+	buffer.append( filename, trim_len );
 
 	// a shader with this name already exists
-	if ( !shaders.contains( buffer ) ) {
-		textures.insert( buffer );
+	if ( !shaders.contains( buffer.c_str() ) ) {
+		textures.insert( buffer.c_str() );
 	}
 }
 

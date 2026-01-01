@@ -1,94 +1,140 @@
 
-developer documentation for NetRadiant-custom
-======================================
+NetRadiant-custom Build Instructions
+====================================
 
-getting the source
-==================
+This document covers building NetRadiant-custom from source using the
+top-level Makefile. The default build outputs are staged under ./install.
 
-The latest source is available from the git repository.
-  https://github.com/Garux/netradiant-custom.git
+Getting the source
+------------------
+git clone https://github.com/themuffinator/netradiant-custom.git
+cd netradiant-custom
 
-The git client can be obtained from the Subversion site.
-  http://git-scm.org
+Build system overview
+---------------------
+- Build entry point: top-level Makefile.
+- Default target: all (dependencies-check, binaries, install-data, install-dll).
+- Output location: INSTALLDIR (default: install).
+- Linux/macOS binaries are named with the arch suffix (radiant.<arch>) and
+  a convenience symlink install/radiant is created.
 
-To get a copy of the source using the commandline git client:
-  Change the current directory to the desired location for the source.
-  git clone https://github.com/Garux/netradiant-custom.git
-  cd netradiant-custom
+Configuration file (optional)
+-----------------------------
+The Makefile includes Makefile.conf by default. You can edit it or keep a
+separate local file and pass MAKEFILE_CONF to make.
 
+Common overrides
+----------------
+- BUILD: release (default), debug, extradebug, extradebug_quicker, profile, native
+- INSTALLDIR: output directory (default: install)
+- RADIANT_ABOUTMSG: custom about-box text
+- DEPENDENCIES_CHECK: quiet (default), verbose, off
+- DOWNLOAD_GAMEPACKS: allinone (default), yes, all, no
+- INSTALL_DATA: yes/no (stage docs + gamepacks)
+- INSTALL_DLLS: yes/no (Windows DLL staging)
+- ASSIMP_INTERNAL: yes to build bundled assimp, no to use system assimp
+- PKG_CONFIG_PATH: for nonstandard dependency prefixes
 
+Dependencies (common)
+---------------------
+Build tools:
+- gcc/g++, GNU make
+- pkg-config
+- git
+- wget and unzip (for gamepacks)
+- svn (required when DOWNLOAD_GAMEPACKS=yes or all)
+- standard shell tools: sed, find, diff, tar
 
-Linux(using X-windows)
-======================
+Libraries (development headers):
+- Qt5Core, Qt5Gui, Qt5Widgets, Qt5Svg
+- glib-2.0
+- libxml2
+- libpng
+- zlib
+- libjpeg
+- OpenGL
+- assimp (or set ASSIMP_INTERNAL=yes)
 
-environment:
-- gcc >= version 3.1 (preferably)
-- GNU make
-- svn >= 1.1 (some build steps use svn)
+The dependency checker uses pkg-config and a small compile/link test.
+Use DEPENDENCIES_CHECK=verbose to see failing commands.
 
-dependencies:
-- qt5
-- qt5-svg
-- glib
-- libxml2 >= 2.0.0
-- zlib >= 1.2.0 (for archivezip module)
-- libpng >= 1.2.0 (for imagepng module)
-- libassimp
+Linux
+-----
+1) Install build tools and dependencies with your distro's package manager.
+   The checker looks for packages equivalent to:
+     libjpeg, glib-2.0, libxml2, libpng, OpenGL, Qt5 (Core/Gui/Widgets/Svg),
+     zlib, assimp.
+2) Build:
+     make -j$(nproc)
+   Debug build:
+     make BUILD=debug -j$(nproc)
+3) Run:
+     ./install/radiant
 
-build:
-run 'make'
+Windows (MSYS2)
+---------------
+1) Install MSYS2 from https://www.msys2.org/
+2) Open a MINGW32 or MINGW64 shell (not the MSYS shell).
+3) Install dependencies:
+   32-bit:
+     pacman -S --needed base-devel
+     pacman -S --needed mingw-w64-i686-{toolchain,qt5-base,qt5-svg,assimp,libxml2}
+   64-bit:
+     pacman -S --needed base-devel
+     pacman -S --needed mingw-w64-x86_64-{toolchain,qt5-base,qt5-svg,assimp,libxml2}
+   Optional for gamepacks:
+     pacman -S --needed unzip svn git
+4) Build (release):
+     make MAKEFILE_CONF=msys2-Makefile.conf BUILD=release -j$(nproc)
+   Developer-style build example:
+     make MAKEFILE_CONF=msys2-Makefile.conf DEPENDENCIES_CHECK=off \
+         DOWNLOAD_GAMEPACKS=no INSTALL_DLLS=no BUILD=debug \
+         RADIANT_ABOUTMSG="NetRadiant custom dev build" -j$(nproc)
+5) Run:
+     .\install\radiant.exe
 
-run:
-Execute 'install/radiant.x86'
+macOS (X11/XQuartz)
+-------------------
+NetRadiant-custom relies on X11. The setup/apple directory includes
+packaging notes and a Makefile for building a .app bundle.
 
+1) Install Xcode command line tools.
+2) Install XQuartz.
+3) Install dependencies with your package manager so pkg-config can find:
+   Qt5Core/Gui/Widgets/Svg, glib-2.0, libxml2, libpng, zlib, libjpeg, assimp.
+4) Build:
+     make
+5) Run:
+     ./install/radiant
+6) Optional .app bundle:
+     cd setup/apple
+     make
+     make image
 
-OSX(using X-windows)
-====================
+Gamepacks
+---------
+The build stages gamepacks into INSTALLDIR/gamepacks when INSTALL_DATA=yes.
+By default, make runs install-gamepacks.sh, which will download packs if
+DOWNLOAD_GAMEPACKS is set:
 
-environment:
-- OS X 10.5 or 10.6
-- Xcode developer tools installed (OSX DVD)
-- X11 (from the OS X DVD)
-- MacPorts or fink or homebrew installed
-- the following packages installed:
-  Macports (reported as working in 10.15.3):
-    gtkglext pkgconfig glib2-devel libxml2 gtk2 pango atk gettext wget
-  Fink:
-    gtkglext1 pkgconfig glib2-dev libxml2 gtk+2 gtk+2-dev pango1-xft2-ft219-dev atk1 gettext-dev wget
-  homebrew (does not work due to X11->Quartz switch, requires patched gtkglext):
-    gtk+ gtkglext
+- allinone (default): download the all-in-one pack archive
+- yes: download GPL-only packs
+- all: include proprietary packs
+- no: skip downloads
 
-build:
-run 'make'
+If you skip downloads, you can fetch and install later:
 
-homebrew build:
-run 'export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/opt/X11/lib/pkgconfig
-make'
+  ./download-gamepacks.sh
+  ./install-gamepacks.sh ./install/gamepacks
 
-run:
-Switch into the install folder, and run NetRadiant.app
+Clean/rebuild
+-------------
+- make clean
+- rm -rf install
 
-
-Win32 (using MSYS2)
-==================
-
-environment:
-- MSYS2 (http://www.msys2.org/)
-- from MSYS2 MINGW32 or MSYS2 MINGW64 shell:
-  pacman -S --needed base-devel
-    32 bit:
-  pacman -S --needed mingw-w64-i686-{toolchain,qt5-base,qt5-svg,assimp,libxml2}
-    64 bit:
-  pacman -S --needed mingw-w64-x86_64-{toolchain,qt5-base,qt5-svg,assimp,libxml2}
-    these are only strictly required for gamepacks:
-  pacman -S --needed unzip svn git
-
-build:
-- Start respective mingw shell
-- Switch to the directory with NetRadiant-custom source
-- Typical release build:
-  make MAKEFILE_CONF=msys2-Makefile.conf BUILD=release -j$(nproc)
-- Typical developer's build:
-  make MAKEFILE_CONF=msys2-Makefile.conf DEPENDENCIES_CHECK=off DOWNLOAD_GAMEPACKS=no INSTALL_DLLS=no BUILD=debug RADIANT_ABOUTMSG="NetRadiant custom dev build" -j$(nproc)
-run:
-- in the "install" directory, double click radiant.exe
+Troubleshooting
+---------------
+- Missing headers/libraries: re-run with DEPENDENCIES_CHECK=verbose.
+- Nonstandard prefixes: set PKG_CONFIG_PATH to your pkg-config directory.
+- Offline builds: set DOWNLOAD_GAMEPACKS=no and INSTALL_DATA=no.
+- No system assimp: set ASSIMP_INTERNAL=yes.
