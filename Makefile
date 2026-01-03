@@ -938,6 +938,13 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/renderstate.o \
 	radiant/scenegraph.o \
 	radiant/selection.o \
+	radiant/selection_mtor_clip.o \
+	radiant/selection_mtor_drag.o \
+	radiant/selection_mtor_rotate.o \
+	radiant/selection_mtor_scale.o \
+	radiant/selection_mtor_skew.o \
+	radiant/selection_mtor_translate.o \
+	radiant/selection_mtor_uv.o \
 	radiant/select.o \
 	radiant/server.o \
 	radiant/sockets.o \
