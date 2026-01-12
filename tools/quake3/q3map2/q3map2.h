@@ -345,7 +345,7 @@ using DrawVerts = std::vector<bspDrawVert_t>;
 using DrawIndexes = std::vector<int>;
 
 
-enum bspSurfaceType_t
+enum bspSurfaceType_t : int
 {
 	MST_BAD,
 	MST_PLANAR,
@@ -369,7 +369,7 @@ struct bspDrawSurface_t
 {
 	int shaderNum;
 	int fogNum;
-	int surfaceType;
+	bspSurfaceType_t surfaceType;
 
 	int firstVert;
 	int numVerts;

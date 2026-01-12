@@ -468,6 +468,9 @@ static void RadSubdivideDiffuseLight( int lightmapNum, const bspDrawSurface_t& d
 	case MST_PATCH:
 		numPatchDiffuseLights++;
 		break;
+
+	default:
+		break;
 	}
 
 

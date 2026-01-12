@@ -79,6 +79,8 @@ static void ConvertSurface( FILE *f, int modelNum, int surfaceNum, const Vector3
 	case MST_TRIANGLE_SOUP:
 		fprintf( f, "\t\t*COMMENT\t\"SURFACETYPE\tMST_TRIANGLE_SOUP\"\r\n" );
 		break;
+	default:
+		break;
 	}
 
 	/* export vertex xyz */

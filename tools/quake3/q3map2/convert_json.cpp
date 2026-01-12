@@ -574,7 +574,7 @@ static void read_json( const char *directory, bool useFlagNames, bool skipUnknow
 			auto&& item = bspDrawSurfaces.emplace_back();
 			item.shaderNum = obj.value["shaderNum"].GetInt();
 			item.fogNum = obj.value["fogNum"].GetInt();
-			item.surfaceType = obj.value["surfaceType"].GetInt();
+			item.surfaceType = static_cast<bspSurfaceType_t>( obj.value["surfaceType"].GetInt() );
 			item.firstVert = obj.value["firstVert"].GetInt();
 			item.numVerts = obj.value["numVerts"].GetInt();
 			item.firstIndex = obj.value["firstIndex"].GetInt();

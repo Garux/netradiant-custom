@@ -512,6 +512,8 @@ int ScaleBSPMain( Args& args ){
 					    bspDrawVerts[ic] );
 				}
 				break;
+			default:
+				break;
 			}
 		}
 	}

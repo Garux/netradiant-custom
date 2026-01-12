@@ -61,6 +61,8 @@ static void ConvertSurfaceToOBJ( FILE *f, int modelNum, int surfaceNum, const Ve
 	case MST_TRIANGLE_SOUP:
 		fprintf( f, "# SURFACETYPE MST_TRIANGLE_SOUP\r\n" );
 		break;
+	default:
+		break;
 	}
 
 	/* export shader */

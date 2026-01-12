@@ -96,7 +96,7 @@ struct ibspDrawSurface_t
 {
 	int shaderNum;
 	int fogNum;
-	int surfaceType;
+	bspSurfaceType_t surfaceType;
 
 	int firstVert;
 	int numVerts;

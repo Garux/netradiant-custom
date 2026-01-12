@@ -52,11 +52,11 @@ inline double Det3x3( double a00, double a01, double a02,
 
 struct BspTriangleRef
 {
-	int surfaceType;
+	bspSurfaceType_t surfaceType;
 	TriRef tri;
 	MinMax minmax; // X is on c_spatial_sort_direction
 
-	BspTriangleRef( int surfaceType, const bspDrawVert_t& v0, const bspDrawVert_t& v1, const bspDrawVert_t& v2 )
+	BspTriangleRef( bspSurfaceType_t surfaceType, const bspDrawVert_t& v0, const bspDrawVert_t& v1, const bspDrawVert_t& v2 )
 	:	surfaceType( surfaceType ),
 		tri{ &v0, &v1, &v2 }
 	{
