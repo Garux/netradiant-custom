@@ -1229,6 +1229,8 @@ static void AdjustBrushesForOrigin( entity_t& ent, const Vector3& offset ){
 
 		/* rebuild brush windings (ydnar: just offsetting the winding above should be fine) */
 		// CreateBrushWindings( b ); // can be desirable for higher windings precision, but handle already created bevel sides
+		b.minmax.mins += offset;
+		b.minmax.maxs += offset;
 	}
 
 	/* walk patch list */
