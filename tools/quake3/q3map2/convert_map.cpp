@@ -31,6 +31,8 @@
 /* dependencies */
 #include "q3map2.h"
 #include "bspfile_rbsp.h"
+#include "qspatial.h"
+#include <map>
 
 
 
@@ -48,87 +50,140 @@ inline double Det3x3( double a00, double a01, double a02,
 	    +   a02 * ( a10 * a21 - a11 * a20 );
 }
 
-static TriRef GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide, const bspModel_t& model ){
-	float best = 0;
-	float thisarea;
-	const plane_t& buildPlane = mapplanes[buildSide.planenum];
-	int matches = 0;
+struct BspTriangleRef
+{
+	int surfaceType;
+	TriRef tri;
+	MinMax minmax; // X is on c_spatial_sort_direction
 
-	// first, start out with NULLs
-	TriRef bestVert{ nullptr };
-
-	// brute force through all bmodel surfaces
-	for ( const bspDrawSurface_t& s : Span( &bspDrawSurfaces[ model.firstBSPSurface ], model.numBSPSurfaces ) )
+	BspTriangleRef( int surfaceType, const bspDrawVert_t& v0, const bspDrawVert_t& v1, const bspDrawVert_t& v2 )
+	:	surfaceType( surfaceType ),
+		tri{ &v0, &v1, &v2 }
 	{
-		if ( s.surfaceType != MST_PLANAR && s.surfaceType != MST_TRIANGLE_SOUP ) {
-			continue;
-		}
-		if ( !strEqual( buildSide.shaderInfo->shader, bspShaders[s.shaderNum].shader ) ) {
-			continue;
-		}
-		for ( int t = 0; t + 3 <= s.numIndexes; t += 3 )
-		{
-			const TriRef vert{
-				&bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 0]],
-				&bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 1]],
-				&bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 2]]
-			};
-			if ( s.surfaceType == MST_PLANAR && VectorCompare( vert[0]->normal, vert[1]->normal ) && VectorCompare( vert[1]->normal, vert[2]->normal ) ) {
-				if ( vector3_length( vert[0]->normal - buildPlane.normal() ) >= normalEpsilon
-				  || vector3_length( vert[1]->normal - buildPlane.normal() ) >= normalEpsilon
-				  || vector3_length( vert[2]->normal - buildPlane.normal() ) >= normalEpsilon ) {
-					continue;
-				}
-			}
-			else
-			{
-				// this is more prone to roundoff errors, but with embedded
-				// models, there is no better way
-				Plane3f plane;
-				PlaneFromPoints( plane, vert[0]->xyz, vert[1]->xyz, vert[2]->xyz );
-				if ( vector3_length( plane.normal() - buildPlane.normal() ) >= normalEpsilon ) {
-					continue;
-				}
-			}
-			// fixme? better distance epsilon
-			if ( abs( plane3_distance_to_point( buildPlane.plane, vert[0]->xyz ) ) > 1
-			  || abs( plane3_distance_to_point( buildPlane.plane, vert[1]->xyz ) ) > 1
-			  || abs( plane3_distance_to_point( buildPlane.plane, vert[2]->xyz ) ) > 1 ) {
-				continue;
-			}
-			// Okay. Correct surface type, correct shader, correct plane. Let's start with the business...
-			winding_t polygon( buildSide.winding );
-			for ( int i = 0; i < 3; ++i )
-			{
-				// 0: 1, 2
-				// 1: 2, 0
-				// 2; 0, 1
-				const Vector3& v1 = vert[( i + 1 ) % 3]->xyz;
-				const Vector3& v2 = vert[( i + 2 ) % 3]->xyz;
-				// we now need to generate the plane spanned by normal and (v2 - v1).
-				Plane3f plane( vector3_cross( v2 - v1, buildPlane.normal() ), 0 );
-				plane.dist() = vector3_dot( v1, plane.normal() );
-				ChopWindingInPlace( polygon, plane, distanceEpsilon );
-				if ( polygon.empty() ) {
-					goto exwinding;
-				}
-			}
-			thisarea = WindingArea( polygon );
-			if ( thisarea > 0 ) {
-				++matches;
-			}
-			if ( thisarea > best ) {
-				best = thisarea;
-				bestVert = vert;
-			}
-exwinding:
-			;
-		}
+		minmax.extend( Vector3( spatial_distance( v0.xyz ), v0.xyz.y(), v0.xyz.z() ) );
+		minmax.extend( Vector3( spatial_distance( v1.xyz ), v1.xyz.y(), v1.xyz.z() ) );
+		minmax.extend( Vector3( spatial_distance( v2.xyz ), v2.xyz.y(), v2.xyz.z() ) );
 	}
-	//if( !striEqualPrefix( buildSide.shaderInfo->shader, "textures/common/" ) )
-	//	fprintf( stderr, "brushside with %s: %d matches (%f area)\n", buildSide.shaderInfo->shader, matches, best );
-	return bestVert;
-}
+	bool operator<( const BspTriangleRef& other ) const noexcept {
+		return minmax.maxs.x() < other.minmax.maxs.x();
+	}
+};
+
+class ModelTriangles
+{
+	std::map<CopiedString, std::vector<BspTriangleRef>> m_modelTriangles;
+public:
+	ModelTriangles( const bspModel_t& model ){
+		for ( const bspDrawSurface_t& s : Span( &bspDrawSurfaces[ model.firstBSPSurface ], model.numBSPSurfaces ) )
+		{
+			if ( s.surfaceType == MST_PLANAR || s.surfaceType == MST_TRIANGLE_SOUP ) {
+				auto& vec = m_modelTriangles[bspShaders[s.shaderNum].shader];
+				for ( int t = 0; t + 3 <= s.numIndexes; t += 3 )
+				{
+					vec.push_back( BspTriangleRef( s.surfaceType,
+						bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 0]],
+						bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 1]],
+						bspDrawVerts[s.firstVert + bspDrawIndexes[s.firstIndex + t + 2]]
+					) );
+				}
+			}
+		}
+
+		for( auto& [ k, v ] : m_modelTriangles )
+			std::sort( v.begin(), v.end() );
+	}
+	TriRef GetBestSurfaceTriangleMatchForBrushside( const side_t& buildSide ) const {
+		const float nepsilon = normalEpsilon * 100; // default target 0.005 - gives worthy results practically
+		const float depsilon = 2;
+		winding_t polygon;
+		float bestarea = 0;
+		float thisarea;
+		const plane_t& buildPlane = mapplanes[buildSide.planenum];
+		int matches = 0;
+
+		// first, start out with NULLs
+		TriRef bestVert{ nullptr };
+
+		// brute force through all bmodel surfaces
+		if( const auto triangles = m_modelTriangles.find( buildSide.shaderInfo->shader.c_str() ); triangles != m_modelTriangles.end() ){
+			MinMax minmax;
+			for( const Vector3& v : buildSide.winding )
+				minmax.extend( Vector3( spatial_distance( v ), v.y(), v.z() ) );
+			minmax.mins -= Vector3( 32, depsilon, depsilon ); // 32 helps to spot more triangles, when brush is noticeably smaller
+			minmax.maxs += Vector3( 32, depsilon, depsilon ); // e.g. produced by original model autoclip
+
+			auto tri = std::lower_bound( triangles->second.begin(), triangles->second.end(), minmax.mins.x(),
+			[]( const BspTriangleRef& tri, const float spatialMin ){
+				return tri.minmax.maxs.x() < spatialMin;
+			} );
+
+			for( const auto end = triangles->second.end(); tri != end && minmax.maxs.x() > tri->minmax.maxs.x(); ++tri )
+			{
+				if ( !minmax.test( tri->minmax ) ) {
+					continue;
+				}
+				const TriRef& vert = tri->tri;
+				if ( tri->surfaceType == MST_PLANAR
+				&& VectorCompare( vert[0]->normal, vert[1]->normal )
+				&& VectorCompare( vert[1]->normal, vert[2]->normal ) ) {
+					if ( !vector3_equal_epsilon( vert[0]->normal, buildPlane.normal(), float( nepsilon ) )
+					  || !vector3_equal_epsilon( vert[1]->normal, buildPlane.normal(), float( nepsilon ) )
+					  || !vector3_equal_epsilon( vert[2]->normal, buildPlane.normal(), float( nepsilon ) ) ) {
+						continue;
+					}
+				}
+				else
+				{
+					// this is more prone to roundoff errors, but with embedded
+					// models, there is no better way
+					Plane3f plane;
+					PlaneFromPoints( plane, vert[0]->xyz, vert[1]->xyz, vert[2]->xyz );
+					if ( !vector3_equal_epsilon( plane.normal(), buildPlane.normal(), float( nepsilon ) ) ) {
+						continue;
+					}
+				}
+
+				if ( std::fabs( plane3_distance_to_point( buildPlane.plane, vert[0]->xyz ) ) > depsilon
+				  || std::fabs( plane3_distance_to_point( buildPlane.plane, vert[1]->xyz ) ) > depsilon
+				  || std::fabs( plane3_distance_to_point( buildPlane.plane, vert[2]->xyz ) ) > depsilon ) {
+					continue;
+				}
+				// Okay. Correct surface type, correct shader, correct plane. Let's start with the business...
+				// we now need to generate the plane spanned by normal and (v2 - v1).
+				Plane3f planes[3]{
+					{ VectorNormalized( vector3_cross( vert[ 0 ]->xyz - vert[ 2 ]->xyz, buildPlane.normal() ) ), 0 },
+					{ VectorNormalized( vector3_cross( vert[ 1 ]->xyz - vert[ 0 ]->xyz, buildPlane.normal() ) ), 0 },
+					{ VectorNormalized( vector3_cross( vert[ 2 ]->xyz - vert[ 1 ]->xyz, buildPlane.normal() ) ), 0 },
+				};
+				planes[ 0 ].dist() = vector3_dot( vert[ 2 ]->xyz, planes[ 0 ].normal() );
+				planes[ 1 ].dist() = vector3_dot( vert[ 0 ]->xyz, planes[ 1 ].normal() );
+				planes[ 2 ].dist() = vector3_dot( vert[ 1 ]->xyz, planes[ 2 ].normal() );
+
+				polygon = buildSide.winding;
+				for ( const Plane3f& plane : planes )
+				{
+					ChopWindingInPlace( polygon, plane, distanceEpsilon );
+					if ( polygon.empty() ) {
+						goto exwinding;
+					}
+				}
+				thisarea = WindingArea( polygon );
+				if ( thisarea > 0 ) {
+					++matches;
+				}
+				if ( thisarea > bestarea ) {
+					bestarea = thisarea;
+					bestVert = vert;
+				}
+		exwinding:
+				;
+			}
+		}
+		//if( !striEqualPrefix( buildSide.shaderInfo->shader, "textures/common/" ) )
+		//	fprintf( stderr, "brushside with %s: %d matches (%f area)\n", buildSide.shaderInfo->shader, matches, bestarea );
+		return bestVert;
+	}
+};
 
 #define FRAC( x ) ( ( x ) - floor( x ) )
 static void ConvertOriginBrush( FILE *f, int num, const Vector3& origin, EBrushType brushType ){
@@ -254,7 +309,7 @@ static void bspBrush_to_buildBrush( const bspBrush_t& brush ){
 	}
 }
 
-static void ConvertBrushFast( FILE *f, const bspModel_t& model, int bspBrushNum, const Vector3& origin, EBrushType brushType ){
+static void ConvertBrushFast( FILE *f, int bspBrushNum, const Vector3& origin, EBrushType brushType ){
 
 	bspBrush_to_buildBrush( bspBrushes[bspBrushNum] );
 
@@ -334,7 +389,7 @@ static void ConvertBrushFast( FILE *f, const bspModel_t& model, int bspBrushNum,
 	fprintf( f, "\t}\n\n" );
 }
 
-static void ConvertBrush( FILE *f, const bspModel_t& model, int bspBrushNum, const Vector3& origin, EBrushType brushType ){
+static void ConvertBrush( FILE *f, int bspBrushNum, const Vector3& origin, EBrushType brushType, const ModelTriangles& modelTriangles ){
 
 	bspBrush_to_buildBrush( bspBrushes[bspBrushNum] );
 
@@ -389,7 +444,7 @@ static void ConvertBrush( FILE *f, const bspModel_t& model, int bspBrushNum, con
 		//   - meshverts point in pairs of three into verts
 		//   - (triangles)
 		//   - find the triangle that has most in common with our
-		const TriRef vert = GetBestSurfaceTriangleMatchForBrushside( buildSide, model );
+		const TriRef vert = modelTriangles.GetBestSurfaceTriangleMatchForBrushside( buildSide );
 
 		/* get texture name */
 		const char *texture = striEqualPrefix( buildSide.shaderInfo->shader, "textures/" )
@@ -837,12 +892,14 @@ static void ConvertModel( FILE *f, const bspModel_t& model, const Vector3& origi
 	}
 
 	/* go through each brush in the model */
-	for ( int i = 0; i < model.numBSPBrushes; ++i )
-	{
-		if( fast )
-			ConvertBrushFast( f, model, model.firstBSPBrush + i, origin, brushType );
-		else
-			ConvertBrush( f, model, model.firstBSPBrush + i, origin, brushType );
+	if( fast ){
+		for ( int i = 0; i < model.numBSPBrushes; ++i )
+			ConvertBrushFast( f, model.firstBSPBrush + i, origin, brushType );
+	}
+	else{
+		ModelTriangles modelTriangles( model );
+		for ( int i = 0; i < model.numBSPBrushes; ++i )
+			ConvertBrush( f, model.firstBSPBrush + i, origin, brushType, modelTriangles );
 	}
 
 	/* go through each drawsurf in the model */

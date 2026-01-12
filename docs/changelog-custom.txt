@@ -198,6 +198,8 @@ Q3map2:
 	* .dpk .dpkdir game archives support
 	* .webp image format support
 	* move -brightness/q3map_lightmapBrightness application to the end to match r_mapOverbrightBits effect
+	* more robust deduction of triangle for texture alignment during bsp to map decompilation
+	* more than ten times faster bsp to map decompilation
 
 
 
