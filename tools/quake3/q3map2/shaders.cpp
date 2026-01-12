@@ -299,6 +299,9 @@ void WriteMapShaderFile(){
 	Sys_FPrintf( SYS_VRB, "--- WriteMapShaderFile ---\n" );
 	Sys_FPrintf( SYS_VRB, "Writing %s", mapShaderFile.c_str() );
 
+	/* ensure folder exists */
+	Q_mkdir( StringStream( PathFilenameless( mapShaderFile.c_str() ) ) );
+
 	/* open shader file */
 	FILE *file = fopen( mapShaderFile.c_str(), "wt" );
 	if ( file == nullptr ) {
