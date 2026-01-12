@@ -350,3 +350,429 @@ void WriteIBSPFile( const char *filename ){
 	/* close the file */
 	fclose( file );
 }
+
+
+
+
+using uint = std::uint32_t;
+
+struct XbspPlane_t
+{
+	bspPlane_t plane;
+	int idk;
+	operator bspPlane_t() const {
+		return plane;
+	}
+};
+
+struct cLeaf_t
+{
+	int			cluster;
+	int			area;
+
+	int			firstLeafBrush;
+	int			numLeafBrushes;
+
+	int			firstLeafSurface;
+	int			numLeafSurfaces;
+
+	uint leafBrush;
+	uint leafSurf;
+
+	operator bspLeaf_t() const {
+		return bspLeaf_t{
+			.cluster = cluster,
+			.area = area,
+			.firstBSPLeafSurface = firstLeafSurface,
+			.numBSPLeafSurfaces = numLeafSurfaces,
+			.firstBSPLeafBrush = firstLeafBrush,
+			.numBSPLeafBrushes = numLeafBrushes
+		};
+};
+
+};
+
+struct cmodel_t
+{
+	MinMax minmax;
+	cLeaf_t		leaf;			// submodels don't reference the main tree
+};
+
+struct cbrush_t
+{
+	int			shaderNum;		// the shader that determined the contents
+	int			contents;
+	MinMax minmax;
+	int			numsides;
+	uint	sidesPTR;
+	int			checkcount;		// to avoid repeated testings
+};
+
+struct XBrushSide
+{
+	uint planePTR; //	Plane index.
+	int			surfaceFlags;
+	int			shaderNum; //	Texture index.
+};
+
+
+
+
+
+struct Clip
+{
+	char name[64];
+	int datasize;	// -8917903  4286049393
+	int nShaders;	// 67
+	int offShaders;	// 183238916		1
+	int nBSides;	// 22064
+
+	int offBSides;	// 183243740		2
+	int nPlanes;	// 11400
+	int offPlanes;	// 183508580		3
+	int nC;			// 998		sz12
+
+	int offC;		// 183736820		4
+	int nLeafs;		// 1042		sz32
+	int offLeafs;	// 183748796		5
+	int nLeafBrushes;// 7094		sz4
+
+	int offLeafbrushes;// 183782204		6
+	int nF;			// 46		sz4
+	int offF;		// 183810584		7
+	int nLeafSurfaces;// 7647		sz4
+
+	int offLeafSurfaces;// 183810768		8
+	int nH;			// 91		sz4
+	int offH;		// 183841356		9
+	int nModels;	// 43		sz56
+
+	int offModels;	// 184050596		16
+	int nBrushes;	// 2437		sz44
+	int offBrushes;	// 183841720		10
+	int nK;			// 29184
+
+	int nL;			// 456
+	int nM;			// 64
+	int offM;		// 183948992 ?vis	11
+	int nN;			// 1
+
+	int nEnts;		// 42492
+	int offEnts;	// 183978176		12
+	int nO;			// 5		sz8
+	int offO;		// 184020668		13
+
+	int offP;		// 184020708		14
+	int nSurfaces;	// 2664
+	int offSurfaces;// 184020808		15					// pointer to array of pointers to cPatch_t // non-patches will be NULL
+	int nR;			// 1
+
+	int nS;			// 0
+};
+
+
+struct XSurface
+{
+	int					viewCount;		// if == tr.viewCount, already added
+	uint				offShader;
+	int					fogIndex;
+	int					surfType;
+	int					offSurf;			// any of srf*_t
+};
+
+using XVertex = ibspDrawVert_t;
+struct XVertexPlanar
+{
+	Vector3 xyz;
+	Vector2 st;
+	Vector2 lightmap;
+//	Vector3 normal;
+	Color4b color;
+	operator bspDrawVert_t() const {
+		return bspDrawVert_t{
+			.xyz     = xyz,
+			.st      = st,
+			.lightmap{ lightmap, Vector2( 0 ), Vector2( 0 ), Vector2( 0 ) },
+			.normal  = Vector3( 0 ),
+			.color   { color, Color4b( 0 ), Color4b( 0 ), Color4b( 0 ) }
+		};
+	}
+};
+
+
+
+struct World
+{
+	char		name[64];		// ie: maps/tim_dm2.bsp
+	char		baseName[64];	// ie: tim_dm2
+//---
+	int			dataSize;
+
+	int			numShaders;
+	uint		offShaders;
+
+	int			nModels;					// 43 sz32
+//---
+	uint		offBmodels;					// 166134168	2
+
+	int			numplanes;
+	uint		offPlanes;
+
+	int			numnodes;		// includes leafs
+//---
+	int			numDecisionNodes;
+	uint		offNodes;					// 167112188	4
+
+	int			numsurfaces;				// 2664
+	uint		offSurfaces;				// 166135544	3
+//---
+	int			nummarksurfaces;
+	uint		offMarksurfaces;			// 167242748	5
+
+	int			numfogs;					// 1 sz72
+	uint		offFogs;					// 166134096	1
+//---
+	float		lightGridOrigin[3];
+	float		lightGridSize[3];
+	float		lightGridInverseSize[3];
+	int			lightGridBounds[3];
+//---
+	uint		offLightGridData;			// 167273336	6
+
+
+	int			numClusters;
+	int			clusterBytes;
+	int idk;
+//---
+	uint		offVis;			// may be passed in by CM_LoadMap to save space
+	int idk0[3];
+//---
+	uint		offNovis;			// clusterBytes of 0xff
+
+	uint		offEntityString;
+	int idk_0;
+	uint		offEntityParsePoint;		// 167582840	7
+};
+
+
+
+void LoadXboxFile( const char *filename ){
+	MemBuffer fcachemap = LoadFile( filename );
+	MemBuffer fclip = LoadFile( StringStream( PathFilenameless( filename ), "clip" ) );
+	MemBuffer fworld = LoadFile( StringStream( PathFilenameless( filename ), "world" ) );
+
+	{
+		Clip *clip = fclip.data();
+		const int OFF = clip->offShaders - 212;
+
+		bspEntData = {
+			( char* )( (byte*)fclip.data() + clip->offEnts - OFF ),
+			( char* )( (byte*)fclip.data() + clip->offEnts - OFF ) + clip->nEnts
+		};
+		bspShaders = {
+			( bspShader_t* )( (byte*)fclip.data() + clip->offShaders - OFF ),
+			( bspShader_t* )( (byte*)fclip.data() + clip->offShaders - OFF ) + clip->nShaders
+		};
+		bspPlanes = {
+			( XbspPlane_t* )( (byte*)fclip.data() + clip->offPlanes - OFF ),
+			( XbspPlane_t* )( (byte*)fclip.data() + clip->offPlanes - OFF ) + clip->nPlanes
+		};
+		bspLeafSurfaces = {
+			( int* )( (byte*)fclip.data() + clip->offLeafSurfaces - OFF ),
+			( int* )( (byte*)fclip.data() + clip->offLeafSurfaces - OFF ) + clip->nLeafSurfaces
+		};
+		bspLeafBrushes = {
+			( int* )( (byte*)fclip.data() + clip->offLeafbrushes - OFF ),
+			( int* )( (byte*)fclip.data() + clip->offLeafbrushes - OFF ) + clip->nLeafBrushes
+		};
+		bspLeafs = {
+			( cLeaf_t* )( (byte*)fclip.data() + clip->offLeafs - OFF ),
+			( cLeaf_t* )( (byte*)fclip.data() + clip->offLeafs - OFF ) + clip->nLeafs
+		};
+
+		Span cmodels( ( cmodel_t* )( (byte*)fclip.data() + clip->offModels - OFF ), clip->nModels );
+		for( auto& cmodel : cmodels ){
+			bspModels.push_back( bspModel_t{ .minmax = cmodel.minmax,
+				.firstBSPSurface = 0, .numBSPSurfaces = cmodel.leaf.numLeafSurfaces,
+				.firstBSPBrush = 0, .numBSPBrushes = cmodel.leaf.numLeafBrushes } );
+			if( cmodel.leaf.numLeafSurfaces != 0 ){
+				bspModels.back().firstBSPSurface = *( int* )( (byte*)fclip.data() + ( cmodel.leaf.leafSurf & 0x00FFFFFF ) );
+				if( bspModels.front().numBSPSurfaces > bspModels.back().firstBSPSurface || bspModels.front().numBSPSurfaces == 0 ){
+					bspModels.front().numBSPSurfaces = bspModels.back().firstBSPSurface;
+				}
+			}
+			if( cmodel.leaf.numLeafBrushes != 0 ){
+				bspModels.back().firstBSPBrush = *( int* )( (byte*)fclip.data() + ( cmodel.leaf.leafBrush & 0x00FFFFFF ) );
+				if( bspModels.front().numBSPBrushes > bspModels.back().firstBSPBrush || bspModels.front().numBSPBrushes == 0 ){
+					bspModels.front().numBSPBrushes = bspModels.back().firstBSPBrush;
+				}
+			}
+		}
+
+		Span cbrushes( ( cbrush_t* )( (byte*)fclip.data() + clip->offBrushes - OFF ), clip->nBrushes );
+		for( auto& cbrush : cbrushes ){
+			bspBrushes.push_back( bspBrush_t{ .firstSide = 0, .numSides = cbrush.numsides, .shaderNum = cbrush.shaderNum } );
+			bspBrushes.back().firstSide = ( ( cbrush.sidesPTR & 0x00FFFFFF ) - ( clip->offBSides - OFF ) ) / sizeof( XBrushSide );
+		}
+
+		Span xbrushsides( ( XBrushSide* )( (byte*)fclip.data() + clip->offBSides - OFF ), clip->nBSides );
+		for( auto& xbs : xbrushsides ){
+			bspBrushSides.push_back( bspBrushSide_t{ .planeNum = 0, .shaderNum = xbs.shaderNum, .surfaceNum = 0 } );
+			bspBrushSides.back().planeNum = ( ( xbs.planePTR & 0x00FFFFFF ) - ( clip->offPlanes - OFF ) ) / sizeof( XbspPlane_t );
+		}
+	}
+
+	{
+		World *world = fworld.data();
+		const int OFF = world->offFogs - 288;
+
+		// note this is start of 0008.block.04
+		const char *shadersSatrt = std::ranges::find_if( Span( (const char*)fcachemap.data(), fcachemap.size() ), []( const char& s ){
+			return strEqual( &s, "<default>" );
+		} ).operator->() - 572;
+
+		Span xsurfs( ( XSurface* )( (byte*)fworld.data() + world->offSurfaces - OFF ), world->numsurfaces );
+		for( auto& xsurf : xsurfs ){
+			bspDrawSurface_t& surf = bspDrawSurfaces.emplace_back( bspDrawSurface_t{ .surfaceType = xsurf.surfType - 1 } );
+			String64 shader( shadersSatrt + ( xsurf.offShader & 0x00FFFFFF ) );
+			// String64 shader( (char*)fcachemap.data() + xsurf.offShader - 2193354400u );
+			for( size_t i = 0; i != bspShaders.size(); ++i ){
+				if( strEqual( shader, bspShaders[i].shader ) ){
+					surf.shaderNum = i;
+					break;
+				}
+			}
+
+			if( surf.surfaceType == MST_PLANAR ) { // planar SF_FACE
+				struct PLANAR {
+					int surfType;
+					int idk[7];
+					int numVerts;
+					int numIndices;
+					int idk2;
+					XVertexPlanar verts; //[numVerts];
+					int indices; //[numIndices];
+				} *planar = ( PLANAR* )( (byte*)fworld.data() + xsurf.offSurf - OFF );
+				surf.numVerts = planar->numVerts;
+				surf.numIndexes = planar->numIndices;
+				surf.firstVert = bspDrawVerts.size();
+				surf.firstIndex = bspDrawIndexes.size();
+				for( auto& v : Span( &planar->verts, planar->numVerts ) )
+					bspDrawVerts.push_back( v );
+				for( auto& i : Span( (int*)( &planar->verts + planar->numVerts ), planar->numIndices ) )
+					bspDrawIndexes.push_back( i );
+			}
+			else if( surf.surfaceType == MST_PATCH ) { // patches SF_GRID
+				struct PATCH {
+					int					surfType;
+					int idk[18];
+					int width, height;
+					int idk2[2];
+					XVertex verts; //[width * height]; // !! NOTE width, height may be optimized and be even
+				} *patch = ( PATCH* )( (byte*)fworld.data() + xsurf.offSurf - OFF );
+
+				/* not a case in the maps */
+				if( ( patch->height | 1 ) >= MAX_PATCH_SIZE ){
+					Sys_Warning( "big patch %dx%d: ignoring\n", patch->width, patch->height );
+					surf.surfaceType = MST_BAD;
+					continue;
+				}
+				if( ( patch->width | 1 ) >= MAX_PATCH_SIZE ){
+					Sys_Warning( "big patch %dx%d: splitting\n", patch->width, patch->height );
+
+					mesh_t mesh( patch->width | 1, patch->height | 1 );
+
+					XVertex *v = &patch->verts;
+					for( int h = 0; h < patch->height; ++h ){
+						for( int w = 0; w < mesh.width; ++w ){
+							mesh[h][w] = *v;
+							if( !( !( patch->width & 1 ) && w == ( patch->width - 1 ) ) ){
+								++v;
+							}
+						}
+					}
+					if( !( patch->height & 1 ) ){
+						for( int w = 0; w < mesh.width; ++w )
+							mesh[patch->height][w] = mesh[patch->height - 1][w];
+					}
+
+					const int wsplit = ( mesh.width >> 1 ) | 1;
+					surf.patchWidth = wsplit;
+					surf.patchHeight = mesh.height;
+					surf.firstVert = bspDrawVerts.size();
+					for( int h = 0; h < surf.patchHeight; ++h ){
+						for( int w = 0; w < surf.patchWidth; ++w ){
+							bspDrawVerts.push_back( mesh[h][w] );
+						}
+					}
+
+					bspDrawSurface_t& surf2 = bspDrawSurfaces.emplace_back( bspDrawSurface_t( surf ) ); // avoid dead reference on realloc
+					surf2.patchWidth = mesh.width - ( wsplit - 1 );
+					surf2.patchHeight = mesh.height;
+					surf2.firstVert = bspDrawVerts.size();
+					for( int h = 0; h < surf2.patchHeight; ++h ){
+						for( int w = ( wsplit - 1 ); w < mesh.width; ++w ){
+							bspDrawVerts.push_back( mesh[h][w] );
+						}
+					}
+
+					/* fix surfaces indexing... */
+					const int surfidx = bspDrawSurfaces.size() - 2; // 1st patch index
+					// bspLeafSurfaces - skip - are not needed to decompile
+					for( auto& model : bspModels ){
+						if( model.firstBSPSurface > surfidx )
+							++model.firstBSPSurface;
+						if( model.firstBSPSurface <= surfidx
+						 && model.firstBSPSurface + model.numBSPSurfaces > surfidx )
+							++model.numBSPSurfaces;
+					}
+
+					continue;
+				}
+
+				surf.patchWidth = patch->width;
+				surf.patchHeight = patch->height;
+				surf.firstVert = bspDrawVerts.size();
+				if( patch->width & 1 && patch->height & 1 ){
+					for( auto& v : Span( &patch->verts, patch->width * patch->height ) )
+						bspDrawVerts.push_back( v );
+				}
+				else{
+					surf.patchWidth |= 1;
+					surf.patchHeight |= 1;
+					XVertex *v = &patch->verts;
+					for( int h = 0; h < patch->height; ++h ){
+						for( int w = 0; w < surf.patchWidth; ++w ){
+							bspDrawVerts.push_back( *v );
+							if( !( !( patch->width & 1 ) && w == ( patch->width - 1 ) ) ){
+								++v;
+							}
+						}
+					}
+					if( !( patch->height & 1 ) ){
+						for( int i = bspDrawVerts.size() - surf.patchWidth, end = bspDrawVerts.size(); i < end; ++i )
+							bspDrawVerts.push_back( bspDrawVert_t( bspDrawVerts[i] ) ); // avoid dead reference on realloc
+					}
+				}
+			}
+			else if( surf.surfaceType == MST_TRIANGLE_SOUP ) { // trisoup SF_TRIANGLES
+				struct TRISOUP {
+					int surfType;
+					int idk[11];
+					int numIndices;
+					int offIndices; // -OFF -> short
+					int numVerts;
+					int offVerts;   // -OFF -> XVertex
+				} *trisoup = ( TRISOUP* )( (byte*)fworld.data() + xsurf.offSurf - OFF );
+				surf.numVerts = trisoup->numVerts;
+				surf.numIndexes = trisoup->numIndices;
+				surf.firstVert = bspDrawVerts.size();
+				surf.firstIndex = bspDrawIndexes.size();
+				for( auto& v : Span( ( XVertex* )( (byte*)fworld.data() + trisoup->offVerts - OFF ), trisoup->numVerts ) )
+					bspDrawVerts.push_back( v );
+				for( auto& i : Span( ( std::int16_t* )( (byte*)fworld.data() + trisoup->offIndices - OFF ), trisoup->numIndices ) )
+					bspDrawIndexes.push_back( i );
+			}
+		}
+	}
+}

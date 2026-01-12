@@ -123,16 +123,16 @@ public:
 					continue;
 				}
 				const TriRef& vert = tri->tri;
-				if ( tri->surfaceType == MST_PLANAR
-				&& VectorCompare( vert[0]->normal, vert[1]->normal )
-				&& VectorCompare( vert[1]->normal, vert[2]->normal ) ) {
-					if ( !vector3_equal_epsilon( vert[0]->normal, buildPlane.normal(), float( nepsilon ) )
-					  || !vector3_equal_epsilon( vert[1]->normal, buildPlane.normal(), float( nepsilon ) )
-					  || !vector3_equal_epsilon( vert[2]->normal, buildPlane.normal(), float( nepsilon ) ) ) {
-						continue;
-					}
-				}
-				else
+				// if ( tri->surfaceType == MST_PLANAR
+				// && VectorCompare( vert[0]->normal, vert[1]->normal )
+				// && VectorCompare( vert[1]->normal, vert[2]->normal ) ) {
+				// 	if ( !vector3_equal_epsilon( vert[0]->normal, buildPlane.normal(), float( nepsilon ) )
+				// 	  || !vector3_equal_epsilon( vert[1]->normal, buildPlane.normal(), float( nepsilon ) )
+				// 	  || !vector3_equal_epsilon( vert[2]->normal, buildPlane.normal(), float( nepsilon ) ) ) {
+				// 		continue;
+				// 	}
+				// }
+				// else
 				{
 					// this is more prone to roundoff errors, but with embedded
 					// models, there is no better way

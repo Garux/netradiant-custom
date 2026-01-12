@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "bspfile_ibsp.h"
 
 
 
@@ -1026,6 +1027,7 @@ int ConvertBSPMain( Args& args ){
 	map_allowed = false;
 	force_bsp = false;
 	force_map = false;
+	bool force_xbox = false;
 
 	/* arg checking */
 	if ( args.empty() ) {
@@ -1092,6 +1094,9 @@ int ConvertBSPMain( Args& args ){
 		while ( args.takeArg( "-readmap" ) ) {
 			force_map = true;
 		}
+		while ( args.takeArg( "-readxbox" ) ) {
+			force_xbox = true;
+		}
 		while ( args.takeArg( "-meta" ) ) {
 			meta = true;
 		}
@@ -1119,7 +1124,12 @@ int ConvertBSPMain( Args& args ){
 		force_bsp = true;
 	}
 
-	if ( force_map || ( !force_bsp && path_extension_is( source, "map" ) && map_allowed ) ) {
+	if( force_xbox ){
+		Sys_Printf( "Loading %s\n", source );
+		LoadXboxFile( source );
+		ParseEntities();
+	}
+	else if ( force_map || ( !force_bsp && path_extension_is( source, "map" ) && map_allowed ) ) {
 		if ( !map_allowed ) {
 			Sys_Warning( "the requested conversion should not be done from .map files. Compile a .bsp first.\n" );
 		}

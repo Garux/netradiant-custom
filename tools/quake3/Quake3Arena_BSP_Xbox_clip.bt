@@ -1,0 +1,367 @@
+LittleEndian();
+
+// char    signature[4];
+// uint32  version;
+
+// typedef struct {
+//   uint32 offset;
+//   uint32 length;
+// } lump <read=ReadLumps>;
+
+// struct {
+//   lump entities;
+//   lump shaders;
+//   lump planes;
+//   lump nodes;
+//   lump leafs;
+//   lump leafSurfaces;
+//   lump leafBrushes;
+//   lump models;
+//   lump brushes;
+//   lump brushSides;
+//   lump drawVerts;
+//   lump drawIndexes;
+//   lump fogs;
+//   lump surfaces;
+//   lump lightmaps;
+//   lump lightGrid;
+//   lump visibility;
+// } lumps;
+
+struct {
+	char name[64];
+	int datasize;	// -8917903  4286049393
+	int nShaders;	// 67
+	int offShaders;	// 183238916		1
+	int nBSides;	// 22064
+
+	int offBSides;	// 183243740		2
+	int nPlanes;	// 11400
+	int offPlanes;	// 183508580		3
+	int nC;			// 998		sz12
+
+	int offC;		// 183736820		4
+	int nLeafs;		// 1042		sz32
+	int offLeafs;	// 183748796		5
+	int nLeafBrushes;// 7094		sz4
+
+	int offLeafbrushes;// 183782204		6
+	int nF;			// 46		sz4
+	int offF;		// 183810584		7
+	int nLeafSurfaces;// 7647		sz4
+
+	int offLeafSurfaces;// 183810768		8
+	int nH;			// 91		sz4
+	int offH;		// 183841356		9
+	int nModels;	// 43		sz56
+
+	int offModels;	// 184050596		16
+	int nBrushes;	// 2437		sz44
+	int offBrushes;	// 183841720		10
+	int nK;			// 29184
+
+	int nL;			// 456
+	int nM;			// 64
+	int offM;		// 183948992 ?vis	11
+	int nN;			// 1
+
+	int nEnts;		// 42492
+	int offEnts;	// 183978176		12
+	int nO;			// 5		sz8
+	int offO;		// 184020668		13
+
+	int offP;		// 184020708		14
+	int nSurfaces;	// 2664
+	int offSurfaces;// 184020808		15					// pointer to array of pointers to cPatch_t // non-patches will be NULL
+	int nR;			// 1
+
+	int nS;			// 0
+} lumps;
+
+local int OFF = lumps.offShaders - 212;
+
+Printf( "OFF: %d\n", OFF );
+
+
+FSeek( lumps.offEnts - OFF );
+
+char ents[lumps.nEnts];
+
+typedef struct {
+  char name[64];
+  int surfaceFlags;
+  int contents;
+} Shader <read=ReadShader>;
+
+FSeek( lumps.offShaders - OFF );
+Shader shader[lumps.nShaders];
+
+typedef struct {
+  float normal[3];
+  float dist;
+  int idk;
+} Plane <read=ReadPlanes>;
+
+FSeek( lumps.offPlanes - OFF );
+Plane planes[lumps.nPlanes];
+
+// typedef struct {
+//   int plane;
+//   int children[2]; //	Children indices. Negative numbers are leaf indices: -(leaf+1).
+//   int mins[3];//	Integer bounding box min coord.
+//   int maxs[3];
+// } Node <read=ReadNodes>;
+
+// FSeek( lumps.nodes.offset);
+// Node nodes[lumps.nodes.length / sizeof(Node)];
+
+// typedef struct {
+//   int cluster; //	Visdata cluster index.
+//   int area; //	Areaportal area.
+// //  int mins[3]; //	Integer bounding box min coord.
+// //  int maxs[3]; //	Integer bounding box max coord.
+//   int leafbrush; //	First leafbrush for leaf.
+//   int n_leafbrushes; //	Number of leafbrushes for leaf.
+//   int leafface;	// First leafface for leaf.
+//   int n_leaffaces; //	Number of leaffaces for leaf.
+//   int mins[1]; //	Integer bounding box min coord.      // unused?
+//   int maxs[1]; //	Integer bounding box max coord.      // unused?
+// } Leaf <read=ReadLeafs>;
+
+typedef struct {
+	int			cluster;
+	int			area;
+
+	int			firstLeafBrush;
+	int			numLeafBrushes;
+
+	int			firstLeafSurface;
+	int			numLeafSurfaces;
+
+	uint leafBrush;
+	uint leafSurf;
+} cLeaf_t;
+
+
+FSeek( lumps.offLeafs - OFF );
+cLeaf_t leafs[lumps.nLeafs];
+
+FSeek( lumps.offLeafbrushes - OFF );
+int leafBrushes[lumps.nLeafBrushes];
+
+FSeek( lumps.offLeafSurfaces - OFF );
+int leafSurfaces[lumps.nLeafSurfaces];
+
+// typedef struct {
+//   float mins[3];
+//   float maxs[3];
+//   int face1;
+//   int face_n;
+//   int brush1;
+//   int brush_n;
+// } Model;
+
+typedef struct cmodel_s {
+	float		mins[3], maxs[3];
+	cLeaf_t		leaf;			// submodels don't reference the main tree
+} cmodel_t <read=ReadModels>;
+
+FSeek( lumps.offModels - OFF );
+cmodel_t models[lumps.nModels];
+
+// typedef struct {
+//   int brushside; //	First brushside for brush.
+//   int n_brushsides; //	Number of brushsides for brush.
+//   int texture; //	Texture index.
+// } Brush <read=ReadBrushes>;
+
+typedef struct {
+	int			shaderNum;		// the shader that determined the contents
+	int			contents;
+	float mins[3];
+	float maxs[3];
+	int			numsides;
+	uint	sidesPTR;
+	int			checkcount;		// to avoid repeated testings
+} cbrush_t;
+
+FSeek( lumps.offBrushes - OFF );
+cbrush_t brushes[lumps.nBrushes];
+
+{
+	local uint umin = 4294967295, umax = 0;
+	local int i;
+	for( i = 0; i < lumps.nBrushes; ++i ){
+		if( (brushes[i].sidesPTR) < umin )
+			umin = (brushes[i].sidesPTR);
+		if( (brushes[i].sidesPTR) > umax )
+			umax = (brushes[i].sidesPTR);
+	}
+	Printf( "sidesPTR: min:%u max:%u diff:%u\n", umin, umax, umax - umin );
+
+	local int imin = 2147483647, imax = 0;
+	for( i = 0; i < lumps.nLeafSurfaces; ++i ){
+		if( (leafSurfaces[i]) < imin )
+			imin = (leafSurfaces[i]);
+		if( (leafSurfaces[i]) > imax )
+			imax = (leafSurfaces[i]);
+	}
+	Printf( "leafSurfaces: min:%u max:%u diff:%u\n", imin, imax, imax - imin );
+
+	imin = 2147483647, imax = 0;
+	for( i = 0; i < lumps.nLeafBrushes; ++i ){
+		if( (leafBrushes[i]) < imin )
+			imin = (leafBrushes[i]);
+		if( (leafBrushes[i]) > imax )
+			imax = (leafBrushes[i]);
+	}
+	Printf( "leafBrushes: min:%u max:%u diff:%u\n", imin, imax, imax - imin );
+}
+
+
+typedef struct {
+	uint planePTR; //	Plane index.
+	int			surfaceFlags;
+	int			shaderNum; //	Texture index.
+} BrushSide <read=ReadBrushSides>;
+
+FSeek( lumps.offBSides - OFF );
+BrushSide brushSides[lumps.nBSides];
+
+{
+	umin = 4294967295, umax = 0;
+	for( i = 0; i < lumps.nBSides; ++i ){
+		if( (brushSides[i].planePTR) < umin )
+			umin = (brushSides[i].planePTR);
+		if( (brushSides[i].planePTR) > umax )
+			umax = (brushSides[i].planePTR);
+	}
+	Printf( "planePTR: min:%u max:%u diff:%u\n", umin, umax, umax - umin );
+}
+
+
+FSeek( lumps.offSurfaces - OFF );
+
+int surfaces[lumps.nSurfaces];
+
+for( i = 0; i < lumps.nSurfaces; ++i ) {
+	if( surfaces[i] != 0 ) {
+		FSeek( surfaces[i] - OFF );
+		struct cPatch_s {
+			int			checkcount;				// to avoid repeated testings
+			int			surfaceFlags;
+			int			contents;
+			int offPatchCollide_s;
+		} cPatch_t;
+	}
+}
+
+
+// typedef struct {
+//   uint32 surfaceType;
+//   uint32 firstVert;
+//   uint32 numVerts;
+//   uint32 firstIndex;
+//   uint32 numIndexes;
+//   uint32 lightmapNum;
+//   uint32 fogNum;
+//   uint32 shaderNum;
+// //  uint32 lm_start[2];
+// //  uint32 lm_size[2];
+// //  uint32 lightmapOrigin[3];
+//   uint32 lightmapVecs[6]; // [9]
+//   uint32 patchWidth;
+//   uint32 patchHeight;
+// } Surface <read=ReadSurfaces>;
+
+// FSeek( lumps.surfaces.offset);
+// local int surfCount = lumps.surfaces.length / sizeof(Surface);
+// Surface surfaces[surfCount];
+
+// FSeek( lumps.drawVerts.offset);
+
+// typedef struct {
+//   float xyz[3]; // Vertex position.
+//   float st[2]; // Vertex texture coordinates.
+//   float lightmap[2]; // Vertex lightmap coordinates.
+// //float normal[3]; // Vertex normal.
+//   byte color[4]; // Vertex color. RGBA.  --  1.0 is max value
+// } Vertex;
+
+// Vertex drawVerts[lumps.drawVerts.length / sizeof(Vertex) ];
+
+
+// local int i, j;
+// for(i=0;i<surfCount;i++) {
+//     if( surfaces[i].surfaceType == 2) {
+//         for(j=0;j<surfaces[i].numVerts;j++) {
+//             FSeek(lumps.drawVerts.offset+(surfaces[i].firstVert+j)*sizeof(Vertex));
+//             struct PATCH {
+//                 float xyz[3];
+//             } patch;
+//         }
+//     }
+// }
+
+// string ReadLumps( lump &entry )
+// {
+//   string s;
+//   SPrintf( s, "%d %d", entry.offset, entry.length );
+//   return s;
+// }
+
+string ReadShader( Shader &entry )
+{
+  string s;
+  SPrintf( s, "%s", entry.name );
+  return s;
+}
+
+string ReadPlanes( Plane &entry )
+{
+  string s;
+  SPrintf( s, "%.1f: %.1f, %.1f, %.1f", entry.dist, entry.normal[0], entry.normal[1], entry.normal[2] );
+  return s;
+}
+
+// string ReadNodes( Node &entry )
+// {
+//   string s;
+//   SPrintf( s, "pln %d: %d, %d", entry.plane, entry.children[0], entry.children[1] );
+//   return s;
+// }
+
+// string ReadLeafs( Leaf &entry )
+// {
+//   string s;
+//   SPrintf( s, "leaf1 %d, leafn %d, brush1 %d, brushn : %d", entry.leafface, entry.n_leaffaces, entry.leafbrush, entry.n_leafbrushes );
+//   return s;
+// }
+
+// string ReadBrushes( Brush &entry )
+// {
+//   string s;
+//   SPrintf( s, "tex %d, brushside1 %d, brushside_n %d", entry.texture, entry.brushside, entry.n_brushsides );
+//   return s;
+// }
+
+string ReadBrushSides( BrushSide &entry )
+{
+  string s;
+  SPrintf( s, "tex %d, plane %u", entry.shaderNum, entry.planePTR );
+  return s;
+}
+
+string ReadModels( cmodel_t &entry )
+{
+  string s;
+  SPrintf( s, "brush %d, surf %d", entry.leaf.firstLeafBrush & 0x00FFFFFF, entry.leaf.firstLeafSurface & 0x00FFFFFF );
+  return s;
+}
+
+// string ReadSurfaces( Surface &entry )
+// {
+//   string s;
+//   SPrintf( s, "tex: %d, type: %d", entry.shaderNum, (int)entry.surfaceType );
+//   return s;
+// }
