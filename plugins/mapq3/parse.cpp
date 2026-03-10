@@ -33,6 +33,7 @@
 #include "stringio.h"
 #include "eclasslib.h"
 #include "layers.h"
+#include "os/path.h"
 
 class LayersParser
 {
@@ -144,10 +145,37 @@ NodeSmartReference Entity_create( EntityCreator& entityTable, EntityClass* entit
 	return NodeSmartReference( entity );
 }
 
+inline bool token_is_primitive_start( const char* token ){
+	return string_equal( token, "(" )
+	       || string_equal( token, "brushDef" )
+	       || string_equal( token, "brushDef2" )
+	       || string_equal( token, "brushDef3" )
+	       || string_equal( token, "patchDef" )
+	       || string_equal( token, "patchDef2" )
+	       || string_equal( token, "patchDef3" );
+}
+
 NodeSmartReference Entity_parseTokens( Tokeniser& tokeniser, EntityCreator& entityTable, const PrimitiveParser& parser, int index, LayersParser& layersParser ){
 	NodeSmartReference entity( g_nullNode );
 	KeyValues keyValues;
 	const char* classname = "";
+	const auto resolvedClassname = [&keyValues, &classname]() -> const char* {
+		if( !string_empty( classname ) ){
+			return classname;
+		}
+		/* Backward-compat fallback:
+		   if classname was not serialized but model points to a .map file,
+		   treat entity as misc_prefab instead of UNKNOWN_CLASS. */
+		for( const auto& [key, value] : keyValues ){
+			if( string_equal( key.c_str(), "model" ) ){
+				const char* ext = path_get_extension( value.c_str() );
+				if( !string_empty( ext ) && string_equal_nocase( ext, "map" ) ){
+					return "misc_prefab";
+				}
+			}
+		}
+		return classname;
+	};
 
 	int count_primitives = 0;
 	while ( true )
@@ -161,18 +189,50 @@ NodeSmartReference Entity_parseTokens( Tokeniser& tokeniser, EntityCreator& enti
 		if ( !strcmp( token, "}" ) ) { // end entity
 			if ( entity == g_nullNode ) {
 				// entity does not have brushes
-				entity = Entity_create( entityTable, GlobalEntityClassManager().findOrInsert( classname, false ), keyValues );
+				entity = Entity_create( entityTable, GlobalEntityClassManager().findOrInsert( resolvedClassname(), false ), keyValues );
 			}
 			return entity;
 		}
 		else if ( !strcmp( token, "{" ) ) { // begin primitive
 			if ( entity == g_nullNode ) {
 				// entity has brushes
-				entity = Entity_create( entityTable, GlobalEntityClassManager().findOrInsert( classname, true ), keyValues );
+				entity = Entity_create( entityTable, GlobalEntityClassManager().findOrInsert( resolvedClassname(), true ), keyValues );
 			}
 
 			tokeniser.nextLine();
+			const char* nestedOrPrimitive = tokeniser.getToken();
+			if( nestedOrPrimitive == nullptr ){
+				Tokeniser_unexpectedError( tokeniser, nestedOrPrimitive, "#primitive-or-nested-entity-token" );
+				return g_nullNode;
+			}
 
+			const bool allowChildInsert = Node_getEntity( entity )->isContainer()
+				|| string_equal( classname, "misc_prefab" );
+
+			if( !token_is_primitive_start( nestedOrPrimitive ) ){
+				if( string_equal( nestedOrPrimitive, "{" ) ){
+					NodeSmartReference nestedEntity( Entity_parseTokens( tokeniser, entityTable, parser, count_primitives, layersParser ) );
+					if( nestedEntity == g_nullNode ){
+						globalErrorStream() << "entity " << index << ": nested entity parse error\n";
+						return g_nullNode;
+					}
+
+					scene::Traversable* traversable = Node_getTraversable( entity );
+					if( allowChildInsert && traversable != 0 ){
+						traversable->insert( nestedEntity );
+					}
+					else{
+						globalErrorStream() << "entity " << index << ": type " << classname << ": discarding nested entity\n";
+					}
+					++count_primitives;
+					continue;
+				}
+
+				Tokeniser_unexpectedError( tokeniser, nestedOrPrimitive, "#primitive-or-nested-entity-token" );
+				return g_nullNode;
+			}
+
+			tokeniser.ungetToken();
 			NodeSmartReference primitive( parser.parsePrimitive( tokeniser ) );
 			if ( primitive == g_nullNode || !Node_getMapImporter( primitive )->importTokens( tokeniser ) ) {
 				globalErrorStream() << "brush " << count_primitives << ": parse error\n";
@@ -181,12 +241,14 @@ NodeSmartReference Entity_parseTokens( Tokeniser& tokeniser, EntityCreator& enti
 			primitive.get().m_layer = layersParser.getCurrentLayer();
 
 			scene::Traversable* traversable = Node_getTraversable( entity );
-			if ( Node_getEntity( entity )->isContainer() && traversable != 0 ) {
+			if ( allowChildInsert && traversable != 0 ) {
 				traversable->insert( primitive );
 			}
 			else
 			{
-				globalErrorStream() << "entity " << index << ": type " << classname << ": discarding brush " << count_primitives << '\n';
+				if( !string_equal( classname, "misc_prefab" ) ){
+					globalErrorStream() << "entity " << index << ": type " << classname << ": discarding brush " << count_primitives << '\n';
+				}
 			}
 			++count_primitives;
 		}

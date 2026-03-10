@@ -57,6 +57,7 @@
 #include "gtkmisc.h"
 #include "texwindow.h"
 #include "modelwindow.h"
+#include "prefabbrowser.h"
 #include "mainframe.h"
 #include "build.h"
 #include "mru.h"
@@ -259,6 +260,7 @@ public:
 		BuildMonitor_Construct();
 		TextureBrowser_Construct();
 		ModelBrowser_Construct();
+		PrefabBrowser_Construct();
 		Entity_Construct();
 		Autosave_Construct();
 		EntityInspector_construct();
@@ -278,6 +280,7 @@ public:
 		EntityInspector_destroy();
 		Autosave_Destroy();
 		Entity_Destroy();
+		PrefabBrowser_Destroy();
 		ModelBrowser_Destroy();
 		TextureBrowser_Destroy();
 		BuildMonitor_Destroy();

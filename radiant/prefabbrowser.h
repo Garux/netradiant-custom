@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2001-2006, William Joseph.
-   All Rights Reserved.
+   Copyright (C) 1999-2006 Id Software, Inc. and contributors.
+   For a list of contributors, see the accompanying CONTRIBUTORS file.
 
    This file is part of GtkRadiant.
 
@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "iscenegraph.h"
+void PrefabBrowser_Construct();
+void PrefabBrowser_Destroy();
 
-bool SceneGraph_HasTraversalRoot();
-const scene::Path* SceneGraph_GetTraversalRoot();
-void SceneGraph_SetTraversalRoot( const scene::Path& path );
-void SceneGraph_ClearTraversalRoot();
+class QWidget* PrefabBrowser_constructWindow( QWidget* toplevel );
+void PrefabBrowser_destroyWindow();
+

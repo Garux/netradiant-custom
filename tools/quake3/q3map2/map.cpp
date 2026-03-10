@@ -30,7 +30,11 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "../common/qstringops.h"
+#include "../common/scriplib.h"
+#include <algorithm>
 
+#include "../common/inout.h"
 
 
 /* FIXME: remove these vars */
@@ -48,6 +52,9 @@ int c_areaportals;
 int c_detail;
 int c_structural;
 int c_patches;
+bool g_loadingPrefabFile = false;
+Matrix4 g_prefabTransform( g_matrix4_identity );
+bool g_parsePrefabBrushTransform = false;
 }
 
 
@@ -557,6 +564,8 @@ static void SetBrushContents( brush_t& b ){
 
 void AddBrushBevels(){
 	const int surfaceFlagsMask = g_game->brushBevelsSurfaceFlagsMask;
+	const int localBevelSnap = g_parsePrefabBrushTransform ? bevelSnap : bevelSnap;
+	const float bevelPlaneEpsilon = g_parsePrefabBrushTransform ? 0.005f : 0.1f;
 	auto& sides = buildBrush.sides;
 
 	//
@@ -601,8 +610,8 @@ void AddBrushBevels(){
 
 				if ( dir == 1 ) {
 					/* ydnar: adding bevel plane snapping for fewer bsp planes */
-					if ( bevelSnap > 0 ) {
-						plane.dist() = floor( buildBrush.minmax.maxs[ axis ] / bevelSnap ) * bevelSnap;
+					if ( localBevelSnap > 0 ) {
+						plane.dist() = floor( buildBrush.minmax.maxs[ axis ] / localBevelSnap ) * localBevelSnap;
 					}
 					else{
 						plane.dist() = buildBrush.minmax.maxs[ axis ];
@@ -611,14 +620,13 @@ void AddBrushBevels(){
 				else
 				{
 					/* ydnar: adding bevel plane snapping for fewer bsp planes */
-					if ( bevelSnap > 0 ) {
-						plane.dist() = -ceil( buildBrush.minmax.mins[ axis ] / bevelSnap ) * bevelSnap;
+					if ( localBevelSnap > 0 ) {
+						plane.dist() = -ceil( buildBrush.minmax.mins[ axis ] / localBevelSnap ) * localBevelSnap;
 					}
 					else{
 						plane.dist() = -buildBrush.minmax.mins[ axis ];
 					}
 				}
-
 				s.planenum = FindFloatPlane( plane );
 				s.contentFlags = sides[ 0 ].contentFlags;
 				/* handle bevel surfaceflags */
@@ -696,10 +704,10 @@ void AddBrushBevels(){
 							continue;
 						}
 						float minBack = 0;
-						const auto point_in_front = [&w2, &plane, &minBack](){
+						const auto point_in_front = [&w2, &plane, &minBack, bevelPlaneEpsilon](){
 							for ( const Vector3& point : w2 ) {
 								const float d = plane3_distance_to_point( plane, point );
-								if ( d > 0.1f ) {
+								if ( d > bevelPlaneEpsilon ) {
 									return true;
 								}
 								value_minimize( minBack, d );
@@ -712,8 +720,8 @@ void AddBrushBevels(){
 						}
 
 						// if no points at the back then the winding is on the bevel plane
-						if ( minBack > -0.1f ) {
-							//%	Sys_Printf( "On bevel plane\n" );
+						if ( minBack > -bevelPlaneEpsilon ) {
+							Sys_Printf( "On bevel plane\n" );
 							break;
 						}
 					}
@@ -723,7 +731,9 @@ void AddBrushBevels(){
 					}
 
 					/* debug code */
-					//%	Sys_Printf( "n = %f %f %f\n", normal[ 0 ], normal[ 1 ], normal[ 2 ] );
+					if (g_parsePrefabBrushTransform) {
+					//	Sys_Printf( "n = %f %f %f\n", normal[ 0 ], normal[ 1 ], normal[ 2 ] );
+					}
 
 					// add this plane
 					if ( sides.size() == MAX_BUILD_SIDES ) {
@@ -995,9 +1005,25 @@ static void ParseRawBrush( bool onlyLights ){
 		Parse1DMatrix( 3, planePoints[ 0 ].data() );
 		Parse1DMatrix( 3, planePoints[ 1 ].data() );
 		Parse1DMatrix( 3, planePoints[ 2 ].data() );
+		Plane3 oldPlane;
+		const bool hasOldPlane = PlaneFromPoints( oldPlane, planePoints );
+
+		if( g_parsePrefabBrushTransform ){
+			for( DoubleVector3& p : planePoints ){
+				p = DoubleVector3( matrix4_transformed_point( g_prefabTransform, Vector3( p ) ) );
+			}
+		}
 
 		/* find the plane number */
-		std::tie( side.planenum, side.plane ) = MapPlaneFromPoints( planePoints );
+		if( g_parsePrefabBrushTransform && hasOldPlane ){
+			Plane3 exactPlane;
+			PlaneFromPoints( exactPlane, planePoints );
+			side.planenum = CreateNewFloatPlane( Plane3f( exactPlane ) );
+			side.plane = exactPlane;
+		}
+		else{
+			std::tie( side.planenum, side.plane ) = MapPlaneFromPoints( planePoints );
+		}
 
 		/* bp: read the texture matrix */
 		if ( g_brushType == EBrushType::Bp ) {
@@ -1052,7 +1078,15 @@ static void ParseRawBrush( bool onlyLights ){
 			}
 
 			/* get the texture mapping for this texturedef / plane combination */
-			QuakeTextureVecs( mapplanes[ side.planenum ], shift, rotate, scale, side.vecs );
+			if( g_parsePrefabBrushTransform && hasOldPlane ){
+				plane_t oldPlaneForTex{};
+				oldPlaneForTex.plane = Plane3f( oldPlane );
+				oldPlaneForTex.type = PlaneTypeForNormal( oldPlaneForTex.normal() );
+				QuakeTextureVecs( oldPlaneForTex, shift, rotate, scale, side.vecs );
+			}
+			else{
+				QuakeTextureVecs( mapplanes[ side.planenum ], shift, rotate, scale, side.vecs );
+			}
 		}
 		else if ( g_brushType == EBrushType::Valve220 ){
 			for ( int axis = 0; axis < 2; ++axis ){
@@ -1074,6 +1108,44 @@ static void ParseRawBrush( bool onlyLights ){
 			if ( !scale[1] ) scale[1] = 1;
 			for ( int axis = 0; axis < 2; ++axis )
 				side.vecs[axis].vec3() /= scale[axis];
+		}
+
+		if( g_parsePrefabBrushTransform && hasOldPlane ){
+			const Matrix4 texNormalTransform = matrix4_for_normal_transform( g_prefabTransform );
+			const Vector3 texTranslation( g_prefabTransform[12], g_prefabTransform[13], g_prefabTransform[14] );
+			const Vector3 oldNormal = oldPlane.normal();
+			const Vector3 newNormal = side.plane.normal();
+
+			if( g_brushType == EBrushType::Bp ){
+				Vector3 oldTexX, oldTexY;
+				Vector3 newTexX, newTexY;
+				ComputeAxisBase( oldNormal, oldTexX, oldTexY );
+				ComputeAxisBase( newNormal, newTexX, newTexY );
+
+				const Vector3 sdir = oldTexX * side.texMat[0][0] + oldTexY * side.texMat[0][1];
+				const Vector3 tdir = oldTexX * side.texMat[1][0] + oldTexY * side.texMat[1][1];
+				const Vector3 sdirTr = matrix4_transformed_direction( texNormalTransform, sdir );
+				const Vector3 tdirTr = matrix4_transformed_direction( texNormalTransform, tdir );
+
+				side.texMat[0][0] = vector3_dot( sdirTr, newTexX );
+				side.texMat[0][1] = vector3_dot( sdirTr, newTexY );
+				side.texMat[0][2] -= vector3_dot( texTranslation, sdirTr );
+				side.texMat[1][0] = vector3_dot( tdirTr, newTexX );
+				side.texMat[1][1] = vector3_dot( tdirTr, newTexY );
+				side.texMat[1][2] -= vector3_dot( texTranslation, tdirTr );
+			}
+			else{
+				const Vector3 sdirTr = matrix4_transformed_direction( texNormalTransform, side.vecs[0].vec3() );
+				const Vector3 tdirTr = matrix4_transformed_direction( texNormalTransform, side.vecs[1].vec3() );
+				side.vecs[0][0] = sdirTr[0];
+				side.vecs[0][1] = sdirTr[1];
+				side.vecs[0][2] = sdirTr[2];
+				side.vecs[1][0] = tdirTr[0];
+				side.vecs[1][1] = tdirTr[1];
+				side.vecs[1][2] = tdirTr[2];
+				side.vecs[0][3] -= vector3_dot( texTranslation, sdirTr );
+				side.vecs[1][3] -= vector3_dot( texTranslation, tdirTr );
+			}
 		}
 
 		/*
@@ -1209,7 +1281,7 @@ static void ParseBrush( bool onlyLights, bool noCollapseGroups, entity_t& mapEnt
    AdjustBrushesForOrigin()
  */
 
-static void AdjustBrushesForOrigin( entity_t& ent, const Vector3& offset ){
+static void AdjustBrushesForOrigin( entity_t& ent, const Vector3& offset, bool preserveTexcoords = false ){
 	if( offset == g_vector3_identity )
 		return;
 
@@ -1222,6 +1294,21 @@ static void AdjustBrushesForOrigin( entity_t& ent, const Vector3& offset ){
 			/* find a new plane */
 			side.planenum = FindFloatPlane( plane3_translated( mapplanes[ side.planenum ].plane, offset ) );
 			side.plane = plane3_translated( side.plane, offset );
+
+			if( preserveTexcoords ){
+				if( g_brushType == EBrushType::Bp ){
+					Vector3 texX, texY;
+					ComputeAxisBase( mapplanes[ side.planenum ].normal(), texX, texY );
+					const float dx = vector3_dot( offset, texX );
+					const float dy = vector3_dot( offset, texY );
+					side.texMat[0][2] -= side.texMat[0][0] * dx + side.texMat[0][1] * dy;
+					side.texMat[1][2] -= side.texMat[1][0] * dx + side.texMat[1][1] * dy;
+				}
+				else{
+					side.vecs[0][3] -= vector3_dot( side.vecs[0].vec3(), offset );
+					side.vecs[1][3] -= vector3_dot( side.vecs[1].vec3(), offset );
+				}
+			}
 
 			for( Vector3& v : side.winding )
 				v += offset;
@@ -1238,6 +1325,130 @@ static void AdjustBrushesForOrigin( entity_t& ent, const Vector3& offset ){
 	{
 		for ( bspDrawVert_t& vert : p.mesh )
 			vert.xyz += offset;
+	}
+}
+
+static Matrix4 PrefabEntityTransform( const entity_t& e ){
+	Vector3 origin = e.vectorForKey( "origin" );
+
+	Vector3 scale( 1 );
+	if( !e.read_keyvalue( scale, "modelscale_vec" ) )
+		if( e.read_keyvalue( scale[0], "modelscale" ) )
+			scale[1] = scale[2] = scale[0];
+
+	Vector3 angles( 0 );
+	if ( e.read_keyvalue( angles, "angles" ) || e.read_keyvalue( angles.y(), "angle" ) )
+		angles = angles_pyr2rpy( angles );
+
+	Matrix4 transform( g_matrix4_identity );
+	matrix4_transform_by_euler_xyz_degrees( transform, origin, angles, scale );
+	return transform;
+}
+
+static void TransformBrushesForPrefab( entity_t& ent, const Matrix4& geomTransform, const Matrix4& texTransform ){
+	const Matrix4 texNormalTransform = matrix4_for_normal_transform( texTransform );
+	const Vector3 texTranslation( texTransform[12], texTransform[13], texTransform[14] );
+	const Matrix4 geomNormalTransform = matrix4_for_normal_transform( geomTransform );
+
+	for ( brush_t& b : ent.brushes )
+	{
+		for ( side_t& side : b.sides )
+		{
+			const Plane3 oldPlane = ( side.plane.normal() != g_vector3_identity )
+				? side.plane
+				: Plane3( mapplanes[ side.planenum ].plane );
+			const Vector3 oldNormal = oldPlane.normal();
+			const Vector3 expectedNormal = vector3_normalised( matrix4_transformed_direction( geomNormalTransform, oldNormal ) );
+			const Vector3 oldPointOnPlane = oldNormal * oldPlane.dist();
+			const Vector3 newPointOnPlane = matrix4_transformed_point( geomTransform, oldPointOnPlane );
+			Plane3f newPlane( expectedNormal, vector3_dot( expectedNormal, newPointOnPlane ) );
+
+			/* Keep side orientation stable after transform (critical for convex collision hull). */
+			if ( vector3_dot( newPlane.normal(), expectedNormal ) < 0 ) {
+				newPlane = plane3_flipped( newPlane );
+			}
+			const Vector3 newNormal = newPlane.normal();
+
+			if( g_brushType == EBrushType::Bp ){
+				Vector3 oldTexX, oldTexY;
+				Vector3 newTexX, newTexY;
+				ComputeAxisBase( oldNormal, oldTexX, oldTexY );
+				ComputeAxisBase( newNormal, newTexX, newTexY );
+
+				const Vector3 sdir = oldTexX * side.texMat[0][0] + oldTexY * side.texMat[0][1];
+				const Vector3 tdir = oldTexX * side.texMat[1][0] + oldTexY * side.texMat[1][1];
+				const Vector3 sdirTr = matrix4_transformed_direction( texNormalTransform, sdir );
+				const Vector3 tdirTr = matrix4_transformed_direction( texNormalTransform, tdir );
+
+				side.texMat[0][0] = vector3_dot( sdirTr, newTexX );
+				side.texMat[0][1] = vector3_dot( sdirTr, newTexY );
+				side.texMat[0][2] -= vector3_dot( texTranslation, sdirTr );
+				side.texMat[1][0] = vector3_dot( tdirTr, newTexX );
+				side.texMat[1][1] = vector3_dot( tdirTr, newTexY );
+				side.texMat[1][2] -= vector3_dot( texTranslation, tdirTr );
+			}
+			else{
+				const Vector3 sdirTr = matrix4_transformed_direction( texNormalTransform, side.vecs[0].vec3() );
+				const Vector3 tdirTr = matrix4_transformed_direction( texNormalTransform, side.vecs[1].vec3() );
+
+				side.vecs[0][0] = sdirTr[0];
+				side.vecs[0][1] = sdirTr[1];
+				side.vecs[0][2] = sdirTr[2];
+				side.vecs[1][0] = tdirTr[0];
+				side.vecs[1][1] = tdirTr[1];
+				side.vecs[1][2] = tdirTr[2];
+				side.vecs[0][3] -= vector3_dot( texTranslation, sdirTr );
+				side.vecs[1][3] -= vector3_dot( texTranslation, tdirTr );
+			}
+
+			/* Keep transformed planes in normal map-plane flow. */
+			const std::array<Vector3, 1> pointHint{ newPointOnPlane };
+			side.planenum = FindFloatPlane( newPlane, pointHint );
+			side.plane = Plane3( newPlane.normal(), newPlane.dist() );
+		}
+
+		/* Preserve original winding topology: transform points directly instead of plane-rebuild.
+		   Plane reconstruction can flip/mutate some prefab surfaces after compile. */
+		b.minmax.clear();
+		for( side_t& side : b.sides ){
+			for( Vector3& v : side.winding ){
+				v = matrix4_transformed_point( geomTransform, v );
+			}
+			WindingExtendBounds( side.winding, b.minmax );
+		}
+
+		/* Rebuild bevel sides for collision hull from transformed non-bevel geometry. */
+		brush_t hull = b;
+		hull.sides.erase(
+			std::remove_if( hull.sides.begin(), hull.sides.end(), []( const side_t& side ){ return side.bevel; } ),
+			hull.sides.end()
+		);
+		const bool hullValid = !hull.sides.empty() && CreateBrushWindings( hull );
+		if( hullValid ){
+			buildBrush = hull;
+			const int prevBevelSnap = bevelSnap;
+			bevelSnap = 0;
+			AddBrushBevels();
+			bevelSnap = prevBevelSnap;
+			b.sides = buildBrush.sides;
+			b.minmax = buildBrush.minmax;
+		}
+	}
+
+	for ( parseMesh_t& p : ent.patches )
+	{
+		for ( bspDrawVert_t& vert : p.mesh ){
+			vert.xyz = matrix4_transformed_point( geomTransform, vert.xyz );
+		}
+	}
+}
+
+static void TransformPatchesForPrefab( entity_t& ent, const Matrix4& geomTransform ){
+	for ( parseMesh_t& p : ent.patches )
+	{
+		for ( bspDrawVert_t& vert : p.mesh ){
+			vert.xyz = matrix4_transformed_point( geomTransform, vert.xyz );
+		}
 	}
 }
 
@@ -1537,6 +1748,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 	/* setup */
 	entity_t& mapEnt = entities.emplace_back();
 	int mapPrimitiveNum = 0; /* track .map file numbering of primitives inside an entity */
+	bool parsedPrefabParseTimeBrushes = false;
 
 	/* ydnar: true entity numbering */
 	mapEnt.mapEntityNum = mapEntityNum;
@@ -1575,13 +1787,25 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 					Sys_FPrintf( SYS_VRB, "detected brushType = BRUSH PRIMITIVES\n" );
 					g_brushType = EBrushType::Bp;
 				}
+				const bool parseTransform = g_loadingPrefabFile
+					&& g_prefabTransform != g_matrix4_identity;
+				const bool prevParseTransform = g_parsePrefabBrushTransform;
+				g_parsePrefabBrushTransform = parseTransform;
 				ParseBrush( onlyLights, noCollapseGroups, mapEnt, mapPrimitiveNum );
+				g_parsePrefabBrushTransform = prevParseTransform;
+				parsedPrefabParseTimeBrushes = parsedPrefabParseTimeBrushes || parseTransform;
 			}
 			else
 			{
 				/* AP or 220 */
 				UnGetToken(); // (
+				const bool parseTransform = g_loadingPrefabFile
+					&& g_prefabTransform != g_matrix4_identity;
+				const bool prevParseTransform = g_parsePrefabBrushTransform;
+				g_parsePrefabBrushTransform = parseTransform;
 				ParseBrush( onlyLights, noCollapseGroups, mapEnt, mapPrimitiveNum );
+				g_parsePrefabBrushTransform = prevParseTransform;
+				parsedPrefabParseTimeBrushes = parsedPrefabParseTimeBrushes || parseTransform;
 			}
 			++mapPrimitiveNum;
 		}
@@ -1595,6 +1819,22 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 	/* ydnar: get classname */
 	const char *classname = mapEnt.classname();
 
+	if (striEqual("misc_prefab", classname)) {
+		const char *model = mapEnt.valueForKey("model");
+		if ( model && model[0] != '\0' ) {
+			/* mapEntityNum is not a VFS search index; use normal lookup for relative prefab paths. */
+			const int prefabLoadIndex = path_is_absolute( model ) ? -1 : 0;
+			const Matrix4 localTransform = PrefabEntityTransform( mapEnt );
+			const Matrix4 prefabTransform = g_loadingPrefabFile
+				? matrix4_multiplied_by_matrix4( localTransform, g_prefabTransform )
+				: localTransform;
+			AddPrefabToStack( model, prefabLoadIndex, onlyLights, noCollapseGroups, &prefabTransform[0] );
+		}
+		/* Compile-time helper entity only. */
+		entities.pop_back();
+		return true;
+	}
+
 	/* ydnar: only lights? */
 	if ( onlyLights && !striEqualPrefix( classname, "light" ) ) {
 		entities.pop_back();
@@ -1603,6 +1843,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 
 	/* ydnar: determine if this is a func_group */
 	const bool funcGroup = striEqual( "func_group", classname );
+	const bool prefabWorldspawn = g_loadingPrefabFile && striEqual( "worldspawn", classname );
 
 	const EntityCompileParams params = ParseEntityCompileParams( mapEnt, nullptr, funcGroup || mapEnt.mapEntityNum == 0 );
 
@@ -1633,15 +1874,42 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 		patch.ambientColor       = params.ambientColor;
 	}
 
+
+	/* get entity origin and adjust brushes */
+	mapEnt.origin = mapEnt.vectorForKey( "origin" );
+	AdjustBrushesForOrigin( mapEnt, -mapEnt.originbrush_origin );
+	if ( g_loadingPrefabFile && g_prefabTransform != g_matrix4_identity ) {
+		const bool hasOriginKey = !strEmpty( mapEnt.valueForKey( "origin" ) );
+		const bool hasOriginBrush = mapEnt.originbrush_origin != g_vector3_identity;
+		if( parsedPrefabParseTimeBrushes ){
+			TransformPatchesForPrefab( mapEnt, g_prefabTransform );
+		}
+		else{
+			/* Brush entities with origin brush (e.g. func_door_rotating) keep local geometry;
+			   moving them requires linear transform on local geometry + transformed origin key. */
+			if( striEqual( "worldspawn", classname ) || !hasOriginBrush ){
+				TransformBrushesForPrefab( mapEnt, g_prefabTransform, g_prefabTransform );
+			}
+			else{
+				Matrix4 linearOnly = g_prefabTransform;
+				linearOnly[12] = linearOnly[13] = linearOnly[14] = 0.f;
+				TransformBrushesForPrefab( mapEnt, linearOnly, g_prefabTransform );
+				mapEnt.originbrush_origin = matrix4_transformed_point( g_prefabTransform, mapEnt.originbrush_origin );
+			}
+		}
+		if( !striEqual( "worldspawn", classname )
+		    && ( hasOriginKey || hasOriginBrush || ( mapEnt.brushes.empty() && mapEnt.patches.empty() ) ) ){
+			mapEnt.origin = matrix4_transformed_point( g_prefabTransform, mapEnt.origin );
+			mapEnt.setKeyValue( "origin", mapEnt.origin );
+		}
+	}
+
+	
 	/* ydnar: gs mods: set entity bounds */
 	SetEntityBounds( mapEnt );
 
 	/* ydnar: gs mods: load shader index map (equivalent to old terrain alphamap) */
 	LoadEntityIndexMap( mapEnt );
-
-	/* get entity origin and adjust brushes */
-	mapEnt.origin = mapEnt.vectorForKey( "origin" );
-	AdjustBrushesForOrigin( mapEnt, -mapEnt.originbrush_origin );
 
 	/* group_info entities are just for editor grouping (fixme: leak!) */
 	if ( !noCollapseGroups && striEqual( "group_info", classname ) ) {
@@ -1650,7 +1918,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 	}
 
 	/* group entities are just for editor convenience, toss all brushes into worldspawn */
-	if ( !noCollapseGroups && funcGroup ) {
+	if ( !noCollapseGroups && ( funcGroup || prefabWorldspawn ) ) {
 		MoveBrushesToWorld( mapEnt );
 		entities.pop_back();
 		return true;
@@ -1660,6 +1928,86 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups, int mapEntit
 	return true;
 }
 
+
+/*
+   LoadMapFile()
+   loads a map file into a list of entities
+ */
+
+void LoadPrefabFile( const char *filename, bool onlyLights, bool noCollapseGroups, const Matrix4& prefabTransform ){
+	int oldNumEntities = 0;
+
+
+	/* note it */
+	Sys_FPrintf( SYS_VRB, "--- LoadPrefabFile ---\n" );
+
+	/* load the map file */
+	const int prefabLoadIndex = path_is_absolute( filename ) ? -1 : 0;
+	if( !LoadScriptFile( filename, prefabLoadIndex ) ) {
+		Error( "" );
+	}
+
+	/* setup */
+	if ( onlyLights ) {
+		oldNumEntities = entities.size();
+	}
+
+	/* initial setup */
+	numMapDrawSurfs = 0;
+	c_detail = 0;
+	g_brushType = EBrushType::Undefined;
+
+	/* allocate a very large temporary brush for building the brushes as they are loaded */
+	buildBrush.sides.reserve( MAX_BUILD_SIDES );
+
+	/* parse the map file */
+	int mapEntityNum = 0; /* track .map file entities numbering */
+	const bool prevLoadingPrefab = g_loadingPrefabFile;
+	const Matrix4 prevPrefabTransform = g_prefabTransform;
+	g_loadingPrefabFile = true;
+	g_prefabTransform = prefabTransform;
+	while ( ParseMapEntity( onlyLights, noCollapseGroups, mapEntityNum++ ) ){}
+	g_prefabTransform = prevPrefabTransform;
+	g_loadingPrefabFile = prevLoadingPrefab;
+
+	/* light loading */
+	if ( onlyLights ) {
+		/* emit some statistics */
+		Sys_FPrintf( SYS_VRB, "%9zu light entities\n", entities.size() - oldNumEntities );
+	}
+	else
+	{
+		/* set map bounds */
+		for ( const brush_t& brush : entities[ 0 ].brushes )
+		{
+			g_mapMinmax.extend( brush.minmax );
+		}
+
+		/* get brush counts */
+		const int numMapBrushes = entities[ 0 ].brushes.size();
+		if ( (float) c_detail / numMapBrushes < 0.10f && numMapBrushes > 500 ) {
+			Sys_Warning( "Over 90 percent structural map detected. Compile time may be adversely affected.\n" );
+		}
+
+		/* emit some statistics */
+		Sys_FPrintf( SYS_VRB, "%9d total world brushes\n", numMapBrushes );
+		Sys_FPrintf( SYS_VRB, "%9d detail brushes\n", c_detail );
+		Sys_FPrintf( SYS_VRB, "%9d patches\n", c_patches );
+		Sys_FPrintf( SYS_VRB, "%9d boxbevels\n", c_boxbevels );
+		Sys_FPrintf( SYS_VRB, "%9d edgebevels\n", c_edgebevels );
+		Sys_FPrintf( SYS_VRB, "%9zu entities\n", entities.size() );
+		Sys_FPrintf( SYS_VRB, "%9zu planes\n", mapplanes.size() );
+		Sys_Printf( "%9d areaportals\n", c_areaportals );
+		Sys_Printf( "Size: %5.0f, %5.0f, %5.0f to %5.0f, %5.0f, %5.0f\n",
+		            g_mapMinmax.mins[0], g_mapMinmax.mins[1], g_mapMinmax.mins[2],
+		            g_mapMinmax.maxs[0], g_mapMinmax.maxs[1], g_mapMinmax.maxs[2] );
+
+		/* write bogus map */
+		if ( fakemap ) {
+			WriteBSPBrushMap( "fakemap.map", entities[ 0 ].brushes );
+		}
+	}
+}
 
 
 /*
@@ -1685,6 +2033,8 @@ void LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups )
 	else{
 		entities.clear();
 	}
+	prefabStack.clear();
+	g_prefabTransform = g_matrix4_identity;
 
 	/* initial setup */
 	numMapDrawSurfs = 0;
@@ -1698,6 +2048,15 @@ void LoadMapFile( const char *filename, bool onlyLights, bool noCollapseGroups )
 	int mapEntityNum = 0; /* track .map file entities numbering */
 	while ( ParseMapEntity( onlyLights, noCollapseGroups, mapEntityNum++ ) ){};
 
+	// process prefabs
+	for (size_t i = 0; i < prefabStack.size(); ++i) {
+		const auto& prefab = prefabStack[i];
+		Matrix4 prefabTransform( g_matrix4_identity );
+		for( std::size_t k = 0; k < 16; ++k ){
+			prefabTransform[k] = prefab.transform[k];
+		}
+		LoadPrefabFile( prefab.filename.c_str(), prefab.onlyLights, prefab.noCollapseGroups, prefabTransform );
+	}
 	/* light loading */
 	if ( onlyLights ) {
 		/* emit some statistics */

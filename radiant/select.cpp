@@ -51,6 +51,7 @@
 #include "grid.h"
 #include "map.h"
 #include "csg.h"
+#include "entity.h"
 
 
 
@@ -217,6 +218,26 @@ class DeleteSelected : public scene::Graph::Walker
 {
 	mutable bool m_remove;
 	mutable bool m_removedChild;
+	static bool node_is_misc_prefab_entity( scene::Node& node ){
+		if( Entity* entity = Node_getEntity( node ); entity != 0 ){
+			return string_equal( entity->getClassName(), "misc_prefab" );
+		}
+		return false;
+	}
+	static bool path_is_within_misc_prefab( const scene::Path& path ){
+		if( Entity_isPrefabEditMode() ){
+			return false;
+		}
+		for( scene::Path::const_iterator i = path.begin(); i != path.end(); ++i ){
+			if( node_is_misc_prefab_entity( i->get() ) ){
+				return true;
+			}
+		}
+		return false;
+	}
+	static bool path_is_misc_prefab_entity_itself( const scene::Path& path ){
+		return node_is_misc_prefab_entity( path.top() );
+	}
 public:
 	DeleteSelected()
 		: m_remove( false ), m_removedChild( false ){
@@ -226,7 +247,8 @@ public:
 
 		if ( Instance_isSelected( instance )
 		     && path.size() > 1
-		     && !path.top().get().isRoot() ) {
+		     && !path.top().get().isRoot()
+		     && !( path_is_within_misc_prefab( path ) && !path_is_misc_prefab_entity_itself( path ) ) ) {
 			m_remove = true;
 
 			return false; // dont traverse into child elements
@@ -272,6 +294,26 @@ class InvertSelectionWalker : public scene::Graph::Walker
 	SelectionSystem::EMode m_mode;
 	SelectionSystem::EComponentMode m_compmode;
 	mutable Selectable* m_selectable;
+	static bool node_is_misc_prefab_entity( scene::Node& node ){
+		if( Entity* entity = Node_getEntity( node ); entity != 0 ){
+			return string_equal( entity->getClassName(), "misc_prefab" );
+		}
+		return false;
+	}
+	static bool path_is_within_misc_prefab( const scene::Path& path ){
+		if( Entity_isPrefabEditMode() ){
+			return false;
+		}
+		for( scene::Path::const_iterator i = path.begin(); i != path.end(); ++i ){
+			if( node_is_misc_prefab_entity( i->get() ) ){
+				return true;
+			}
+		}
+		return false;
+	}
+	static bool path_is_misc_prefab_entity_itself( const scene::Path& path ){
+		return node_is_misc_prefab_entity( path.top() );
+	}
 public:
 	InvertSelectionWalker( SelectionSystem::EMode mode, SelectionSystem::EComponentMode compmode )
 		: m_mode( mode ), m_compmode( compmode ), m_selectable( 0 ){
@@ -287,11 +329,21 @@ public:
 			{
 			case SelectionSystem::eEntity:
 				if ( Node_isEntity( path.top() ) != 0 ) {
-					m_selectable = path.top().get().visible() ? selectable : 0;
+					if( path_is_within_misc_prefab( path ) && !path_is_misc_prefab_entity_itself( path ) ){
+						m_selectable = 0;
+					}
+					else{
+						m_selectable = path.top().get().visible() ? selectable : 0;
+					}
 				}
 				break;
 			case SelectionSystem::ePrimitive:
-				m_selectable = path.top().get().visible() ? selectable : 0;
+				if( path_is_within_misc_prefab( path ) && !path_is_misc_prefab_entity_itself( path ) ){
+					m_selectable = 0;
+				}
+				else{
+					m_selectable = path.top().get().visible() ? selectable : 0;
+				}
 				break;
 			case SelectionSystem::eComponent:
 				BrushInstance* brushinstance = Instance_getBrush( instance );
@@ -378,83 +430,178 @@ public:
 };
 #endif
 
+namespace {
+inline bool is_worldspawn_entity( const Entity* entity ){
+	return entity != nullptr && string_equal( entity->getClassName(), "worldspawn" );
+}
+
+class ExpandSelectionTargetsVisitor : public SelectionSystem::Visitor
+{
+public:
+	mutable std::set<scene::Node*> entities;
+	static bool is_misc_prefab_entity( const scene::Node* node ){
+		if( node == nullptr ){
+			return false;
+		}
+		if( Entity* entity = Node_getEntity( const_cast<scene::Node&>( *node ) ); entity != nullptr ){
+			return string_equal( entity->getClassName(), "misc_prefab" );
+		}
+		return false;
+	}
+
+	void visit( scene::Instance& instance ) const override {
+		scene::Node* nearestEntity = nullptr;
+		const scene::Path& path = instance.path();
+		for( scene::Path::const_iterator i = path.begin(); i != path.end(); ++i ){
+			if( Node_getEntity( i->get() ) != nullptr ){
+				nearestEntity = i->get_pointer();
+			}
+		}
+		if( nearestEntity != nullptr ){
+			if( !Entity_isPrefabEditMode() && is_misc_prefab_entity( nearestEntity ) ){
+				// Outside prefab edit mode, do not expand misc_prefab into internals.
+				return;
+			}
+			entities.insert( nearestEntity );
+		}
+	}
+};
+
+class SelectionContainsMiscPrefabVisitor : public SelectionSystem::Visitor
+{
+public:
+	mutable bool found = false;
+	void visit( scene::Instance& instance ) const override {
+		if( found ){
+			return;
+		}
+		const scene::Path& path = instance.path();
+		for( scene::Path::const_iterator i = path.begin(); i != path.end(); ++i ){
+			if( Entity* entity = Node_getEntity( i->get() ); entity != nullptr
+			 && string_equal( entity->getClassName(), "misc_prefab" ) ){
+				found = true;
+				return;
+			}
+		}
+	}
+};
+
+inline bool selection_contains_misc_prefab_for_expand(){
+	SelectionContainsMiscPrefabVisitor visitor;
+	GlobalSelectionSystem().foreachSelected( visitor );
+	return visitor.found;
+}
+
 class ExpandSelectionToPrimitivesWalker : public scene::Graph::Walker
 {
-	mutable std::size_t m_depth = 0;
-	const scene::Node* m_world = Map_FindWorldspawn( g_map );
+	const std::set<scene::Node*>& m_targets;
+	mutable std::size_t m_targetDepth = 0;
 public:
+	ExpandSelectionToPrimitivesWalker( const std::set<scene::Node*>& targets )
+		: m_targets( targets ){
+	}
+
 	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
-		++m_depth;
-
-		if( !path.top().get().visible() )
+		if( !path.top().get().visible() ){
 			return false;
-
-//		if ( path.top().get_pointer() == m_world ) // ignore worldspawn
-//			return false;
-
-		if ( m_depth == 2 ) { // entity depth
-			// traverse and select children if any one is selected
-			bool beselected = false;
-			const bool isContainer = Node_getEntity( path.top() )->isContainer();
-			if ( instance.childSelected() || instance.isSelected() ) {
-				beselected = true;
-				Instance_setSelected( instance, !isContainer );
-			}
-			return isContainer && beselected;
 		}
-		else if ( m_depth == 3 ) { // primitive depth
+
+		const bool isTargetEntity = Node_getEntity( path.top() ) != nullptr
+			&& m_targets.find( path.top().get_pointer() ) != m_targets.end();
+		if( isTargetEntity ){
+			++m_targetDepth;
+		}
+
+		if( Entity* entity = Node_getEntity( path.top() ) ){
+			if( isTargetEntity ){
+				Instance_setSelected( instance, !entity->isContainer() );
+			}
+			return true;
+		}
+
+		if( m_targetDepth > 0 && ( Instance_getBrush( instance ) != nullptr || Instance_getPatch( instance ) != nullptr ) ){
 			Instance_setSelected( instance, true );
 			return false;
 		}
 		return true;
 	}
 	void post( const scene::Path& path, scene::Instance& instance ) const override {
-		--m_depth;
+		Q_UNUSED( instance );
+		const bool isTargetEntity = Node_getEntity( path.top() ) != nullptr
+			&& m_targets.find( path.top().get_pointer() ) != m_targets.end();
+		if( isTargetEntity && m_targetDepth > 0 ){
+			--m_targetDepth;
+		}
 	}
 };
-
-void Scene_ExpandSelectionToPrimitives(){
-	GlobalSceneGraph().traverse( ExpandSelectionToPrimitivesWalker() );
-}
 
 class ExpandSelectionToEntitiesWalker : public scene::Graph::Walker
 {
-	mutable std::size_t m_depth = 0;
-	const scene::Node* m_world = Map_FindWorldspawn( g_map );
+	const std::set<scene::Node*>& m_targets;
+	mutable std::size_t m_targetDepth = 0;
 public:
+	ExpandSelectionToEntitiesWalker( const std::set<scene::Node*>& targets )
+		: m_targets( targets ){
+	}
+
 	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
-		++m_depth;
-
-		if( !path.top().get().visible() )
+		if( !path.top().get().visible() ){
 			return false;
-
-//		if ( path.top().get_pointer() == m_world ) // ignore worldspawn
-//			return false;
-
-		if ( m_depth == 2 ) { // entity depth
-			// traverse and select children if any one is selected
-			bool beselected = false;
-			if ( instance.childSelected() || instance.isSelected() ) {
-				beselected = true;
-				if( path.top().get_pointer() != m_world ){ //avoid selecting world node
-					Instance_setSelected( instance, true );
-				}
-			}
-			return Node_getEntity( path.top() )->isContainer() && beselected;
 		}
-		else if ( m_depth == 3 ) { // primitive depth
+
+		const bool isTargetEntity = Node_getEntity( path.top() ) != nullptr
+			&& m_targets.find( path.top().get_pointer() ) != m_targets.end();
+		const bool active = isTargetEntity || m_targetDepth > 0;
+
+		if( Entity* entity = Node_getEntity( path.top() ) ){
+			if( active && !is_worldspawn_entity( entity ) ){
+				Instance_setSelected( instance, true );
+			}
+			if( isTargetEntity ){
+				++m_targetDepth;
+			}
+			return true;
+		}
+
+		if( active && ( Instance_getBrush( instance ) != nullptr || Instance_getPatch( instance ) != nullptr ) ){
 			Instance_setSelected( instance, true );
 			return false;
 		}
 		return true;
 	}
 	void post( const scene::Path& path, scene::Instance& instance ) const override {
-		--m_depth;
+		Q_UNUSED( instance );
+		const bool isTargetEntity = Node_getEntity( path.top() ) != nullptr
+			&& m_targets.find( path.top().get_pointer() ) != m_targets.end();
+		if( isTargetEntity && m_targetDepth > 0 ){
+			--m_targetDepth;
+		}
 	}
 };
+}
+
+void Scene_ExpandSelectionToPrimitives(){
+	if( !Entity_isPrefabEditMode() && selection_contains_misc_prefab_for_expand() ){
+		return;
+	}
+	ExpandSelectionTargetsVisitor targetsVisitor;
+	GlobalSelectionSystem().foreachSelected( targetsVisitor );
+	if( targetsVisitor.entities.empty() ){
+		return;
+	}
+	GlobalSceneGraph().traverse( ExpandSelectionToPrimitivesWalker( targetsVisitor.entities ) );
+}
 
 void Scene_ExpandSelectionToEntities(){
-	GlobalSceneGraph().traverse( ExpandSelectionToEntitiesWalker() );
+	if( !Entity_isPrefabEditMode() && selection_contains_misc_prefab_for_expand() ){
+		return;
+	}
+	ExpandSelectionTargetsVisitor targetsVisitor;
+	GlobalSelectionSystem().foreachSelected( targetsVisitor );
+	if( targetsVisitor.entities.empty() ){
+		return;
+	}
+	GlobalSceneGraph().traverse( ExpandSelectionToEntitiesWalker( targetsVisitor.entities ) );
 }
 
 
@@ -486,7 +633,41 @@ void UpdateWorkzone_ForSelectionChanged( const Selectable& selectable ){
 	//}
 }
 
+namespace {
+bool selection_contains_misc_prefab(){
+	if( Entity_isPrefabEditMode() ){
+		return false;
+	}
+	class ContainsMiscPrefab final : public SelectionSystem::Visitor
+	{
+	public:
+		mutable bool found = false;
+		void visit( scene::Instance& instance ) const override {
+			if( found ){
+				return;
+			}
+			const scene::Path& path = instance.path();
+			for( scene::Path::const_iterator i = path.begin(); i != path.end(); ++i ){
+				if( Entity* entity = Node_getEntity( i->get() ); entity != 0
+				 && string_equal( entity->getClassName(), "misc_prefab" ) ){
+					found = true;
+					return;
+				}
+			}
+		}
+	};
+
+	ContainsMiscPrefab visitor;
+	GlobalSelectionSystem().foreachSelected( visitor );
+	return visitor.found;
+}
+}
+
 void Select_SetShader( const char* shader ){
+	if( selection_contains_misc_prefab() ){
+		globalWarningStream() << "SetShader blocked for misc_prefab contents.\n";
+		return;
+	}
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushSetShader_Selected( GlobalSceneGraph(), shader );
 		Scene_PatchSetShader_Selected( GlobalSceneGraph(), shader );
@@ -502,6 +683,10 @@ void Select_SetShader_Undo( const char* shader ){
 }
 
 void Select_SetTexdef( const TextureProjection& projection, bool setBasis /*= true*/, bool resetBasis /*= false*/ ){
+	if( selection_contains_misc_prefab() ){
+		globalWarningStream() << "SetTexdef blocked for misc_prefab contents.\n";
+		return;
+	}
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushSetTexdef_Selected( GlobalSceneGraph(), projection, setBasis, resetBasis );
 	}
@@ -509,6 +694,10 @@ void Select_SetTexdef( const TextureProjection& projection, bool setBasis /*= tr
 }
 
 void Select_SetTexdef( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
+	if( selection_contains_misc_prefab() ){
+		globalWarningStream() << "SetTexdef blocked for misc_prefab contents.\n";
+		return;
+	}
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushSetTexdef_Selected( GlobalSceneGraph(), hShift, vShift, hScale, vScale, rotation );
 	}
@@ -650,6 +839,10 @@ void Select_RotateAxis( int axis, float deg ){
 
 
 void Select_ShiftTexture( float x, float y ){
+	if( selection_contains_misc_prefab() ){
+		globalWarningStream() << "ShiftTexture blocked for misc_prefab contents.\n";
+		return;
+	}
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushShiftTexdef_Selected( GlobalSceneGraph(), x, y );
 		Scene_PatchTranslateTexture_Selected( GlobalSceneGraph(), x, y );
@@ -659,6 +852,10 @@ void Select_ShiftTexture( float x, float y ){
 }
 
 void Select_ScaleTexture( float x, float y ){
+	if( selection_contains_misc_prefab() ){
+		globalWarningStream() << "ScaleTexture blocked for misc_prefab contents.\n";
+		return;
+	}
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushScaleTexdef_Selected( GlobalSceneGraph(), x, y );
 		Scene_PatchScaleTexture_Selected( GlobalSceneGraph(), x, y );
@@ -667,6 +864,10 @@ void Select_ScaleTexture( float x, float y ){
 }
 
 void Select_RotateTexture( float amt ){
+	if( selection_contains_misc_prefab() ){
+		globalWarningStream() << "RotateTexture blocked for misc_prefab contents.\n";
+		return;
+	}
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushRotateTexdef_Selected( GlobalSceneGraph(), amt );
 		Scene_PatchRotateTexture_Selected( GlobalSceneGraph(), amt );
@@ -677,6 +878,10 @@ void Select_RotateTexture( float amt ){
 // TTimo modified to handle shader architecture:
 // expects shader names at input, comparison relies on shader names .. texture names no longer relevant
 void FindReplaceTextures( const char* pFind, const char* pReplace, bool bSelected ){
+	if( selection_contains_misc_prefab() ){
+		globalWarningStream() << "FindReplaceTextures blocked for misc_prefab contents.\n";
+		return;
+	}
 	if ( !texdef_name_valid( pFind ) ) {
 		globalErrorStream() << "FindReplaceTextures: invalid texture name: " << SingleQuoted( pFind ) << ", aborted\n";
 		return;
@@ -717,6 +922,12 @@ class EntityFindByPropertyValueWalker : public scene::Graph::Walker
 {
 	const EntityMatcher& m_entityMatcher;
 	const scene::Node* m_world = Map_FindWorldspawn( g_map );
+	static bool is_worldspawn_entity( const Entity* entity ){
+		return entity != nullptr && string_equal( entity->getClassName(), "worldspawn" );
+	}
+	static bool is_misc_prefab_entity( const Entity* entity ){
+		return entity != nullptr && string_equal( entity->getClassName(), "misc_prefab" );
+	}
 public:
 	EntityFindByPropertyValueWalker( const EntityMatcher& entityMatcher ) : m_entityMatcher( entityMatcher ){
 	}
@@ -731,6 +942,13 @@ public:
 
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0 ){
+			if( is_worldspawn_entity( entity ) ){
+				return false;
+			}
+			if( Entity_isPrefabEditMode() && is_misc_prefab_entity( entity ) ){
+				// In isolated prefab edit, root misc_prefab is just a container.
+				return true;
+			}
 			if( m_entityMatcher( entity ) ) {
 				Instance_getSelectable( instance )->setSelected( true );
 				return true;
@@ -738,9 +956,12 @@ public:
 			return false;
 		}
 		else if( path.size() > 2 && !path.top().get().isRoot() ){
-			Selectable* selectable = Instance_getSelectable( instance );
-			if( selectable != 0 )
-				selectable->setSelected( true );
+			// Select only actual primitives, not intermediate roots/nodes.
+			if( Instance_getBrush( instance ) != nullptr || Instance_getPatch( instance ) != nullptr ){
+				if( Selectable* selectable = Instance_getSelectable( instance ); selectable != 0 ){
+					selectable->setSelected( true );
+				}
+			}
 		}
 		return true;
 	}
@@ -762,13 +983,23 @@ class EntityGetSelectedPropertyValuesWalker : public scene::Graph::Walker
 	PropertyValues& m_propertyvalues;
 	const char *m_prop;
 	const scene::Node* m_world = Map_FindWorldspawn( g_map );
+	static bool is_worldspawn_entity( const Entity* entity ){
+		return entity != nullptr && string_equal( entity->getClassName(), "worldspawn" );
+	}
+	static bool is_misc_prefab_entity( const Entity* entity ){
+		return entity != nullptr && string_equal( entity->getClassName(), "misc_prefab" );
+	}
 public:
 	EntityGetSelectedPropertyValuesWalker( const char *prop, PropertyValues& propertyvalues )
 		: m_propertyvalues( propertyvalues ), m_prop( prop ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( Entity* entity = Node_getEntity( path.top() ) ){
-			if( path.top().get_pointer() != m_world ){
+			if( Entity_isPrefabEditMode() && is_misc_prefab_entity( entity ) ){
+				// Skip prefab wrapper; continue into isolated subtree.
+				return true;
+			}
+			if( path.top().get_pointer() != m_world && !is_worldspawn_entity( entity ) ){
 				if ( Instance_isSelected( instance ) || instance.childSelected() ) {
 					if ( !propertyvalues_contain( m_propertyvalues, entity->getKeyValue( m_prop ) ) ) {
 						m_propertyvalues.push_back( entity->getKeyValue( m_prop ) );
