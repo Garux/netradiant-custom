@@ -23,6 +23,7 @@
 
 #include "debugging/debugging.h"
 
+#include <cstdint>
 #include <vector>
 #include <map>
 #include "os/path.h"

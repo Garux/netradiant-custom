@@ -27,6 +27,7 @@
 #include "undolib.h"
 #include "container/container.h"
 
+#include <cstdint>
 #include <list>
 #include <vector>
 #include <algorithm>

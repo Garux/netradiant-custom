@@ -22,6 +22,7 @@
 #pragma once
 
 #include <cctype>
+#include <cstdint>
 #include "string/string.h"
 #include "container/array.h"
 typedef  std::uint32_t ub4;     /* unsigned 4-byte quantities */

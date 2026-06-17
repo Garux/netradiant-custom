@@ -72,6 +72,7 @@
 #include "unsortedset.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 
 #include "maxworld.h"
