@@ -1,6 +1,7 @@
 #include "terrain_generator.h"
 
 #include <algorithm>
+#include <cstdio>
 #include "debugging/debugging.h"
 #include "iplugin.h"
 #include "string/string.h"
@@ -58,6 +59,17 @@ const char* getCommandTitleList(){
 	return "";
 }
 
+// The entity carrying terrain metadata for a selected instance: the instance's
+// node if it is an entity, otherwise its parent (a selected brush's func_group).
+static Entity* instance_entity( scene::Instance& instance ){
+	const scene::Path& p = instance.path();
+	if ( Node_isEntity( p.top() ) )
+		return Node_getEntity( p.top().get() );
+	if ( p.size() > 1 && Node_isEntity( p.parent() ) )
+		return Node_getEntity( p.parent().get() );
+	return nullptr;
+}
+
 void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush ){
 	if ( string_equal( command, "About" ) ) {
 		GlobalRadiant().m_pfnMessageBox( main_window,
@@ -69,6 +81,15 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 		return;
 	}
 	if ( string_equal( command, "Generate Terrain" ) ) {
+		// Only one generator dialog at a time. Re-running the command while
+		// it's open just raises the existing window instead of stacking new ones.
+		static QDialog* s_active_dialog = nullptr;
+		if ( s_active_dialog ) {
+			s_active_dialog->raise();
+			s_active_dialog->activateWindow();
+			return;
+		}
+
 		// Query the live selection bounds from the selection system.
 		// Called at dialog-open time, on mode switch, and on OK — so the
 		// user can make a selection while the dialog is open and retry.
@@ -90,6 +111,7 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 		// --- Build dialog ---
 		QDialog dialog( main_window, Qt::Dialog | Qt::WindowCloseButtonHint );
 		dialog.setWindowTitle( "Terrain Generator" );
+		s_active_dialog = &dialog;
 
 		dialog.setMinimumWidth( 420 );
 		auto *form = new QFormLayout( &dialog );
@@ -101,30 +123,10 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 		target_combo->setCurrentIndex( init_sel.valid ? 0 : 1 );
 		form->addRow( "Target:", target_combo );
 
-		// Selection size — live labels (left) + frozen reference labels (right).
-		// Reference is captured on the first Generate click and stays fixed.
-		// Helper: build one inline row widget with [current | ref: value]
-		auto make_sel_row = []( QLabel*& cur_lbl, QLabel*& ref_lbl ) -> QWidget* {
-			auto *w      = new QWidget;
-			auto *layout = new QHBoxLayout( w );
-			layout->setContentsMargins( 0, 0, 0, 0 );
-			layout->setSpacing( 6 );
-			cur_lbl = new QLabel;
-			ref_lbl = new QLabel;
-			ref_lbl->setStyleSheet( "color: gray;" );
-			ref_lbl->hide();
-			layout->addWidget( cur_lbl );
-			layout->addWidget( ref_lbl );
-			layout->addStretch();
-			return w;
-		};
-
-		QLabel *sel_w_label, *ref_w_label;
-		QLabel *sel_l_label, *ref_l_label;
-		QLabel *sel_h_label, *ref_h_label;
-		auto *sel_w_row = make_sel_row( sel_w_label, ref_w_label );
-		auto *sel_l_row = make_sel_row( sel_l_label, ref_l_label );
-		auto *sel_h_row = make_sel_row( sel_h_label, ref_h_label );
+		// Selection size — live, read-only labels showing the current selection.
+		auto *sel_w_label = new QLabel;
+		auto *sel_l_label = new QLabel;
+		auto *sel_h_label = new QLabel;
 
 		auto refresh_sel_labels = [&](){
 			const SelBounds s = query_sel();
@@ -134,19 +136,9 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 		};
 		refresh_sel_labels();
 
-		// Reference state — captured once on first Generate, frozen after that.
-		SelBounds ref_bounds{};
-		bool      ref_captured = false;
-
-		// "Use reference" checkbox — hidden until first Generate populates it.
-		auto *use_ref_cb = new QCheckBox( "Use reference for regeneration" );
-		use_ref_cb->setChecked( true );
-		use_ref_cb->hide();
-
-		form->addRow( "Width (X):",  sel_w_row );
-		form->addRow( "Length (Y):", sel_l_row );
-		form->addRow( "Height (Z):", sel_h_row );
-		form->addRow( "",            use_ref_cb );
+		form->addRow( "Width (X):",  sel_w_label );
+		form->addRow( "Length (Y):", sel_l_label );
+		form->addRow( "Height (Z):", sel_h_label );
 
 		// Manual size inputs (shown in Manual Size mode)
 		auto *manual_w_spin = new SpinBox( 64, 131072, 1024, 0, 64 );
@@ -236,10 +228,9 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 		} );
 		sel_timer->start();
 
-		// Poll the texture browser every 100ms; auto-update the field and
-		// (if the browser was closed before Pick opened it) auto-close it.
+		// Poll the texture browser every 100ms so picking a shader in it
+		// updates the texture field automatically.
 		QString last_polled_shader = texture_edit->text();
-		bool close_browser_on_pick = false;
 
 		auto *pick_timer = new QTimer( &dialog );
 		pick_timer->setInterval( 100 );
@@ -248,16 +239,18 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 			if ( current != last_polled_shader ) {
 				last_polled_shader = current;
 				texture_edit->setText( current );
-				if ( close_browser_on_pick ) {
-					close_browser_on_pick = false;
-					GlobalRadiant().TextureBrowser_close();
-				}
 			}
 		} );
 		pick_timer->start();
 
+		// Surface the texture browser and leave it open so the user can keep
+		// picking. Closing it automatically proved fragile and is poor UX.
+		// A tooltip covers the embedded-layout case, where there is no separate
+		// browser window to raise (it's always visible in the main window).
+		tex_pick->setToolTip( "Open the texture browser to pick a shader.\n"
+		                      "If the browser is docked in the main window layout,\n"
+		                      "select a texture there and it fills in here automatically." );
 		QObject::connect( tex_pick, &QPushButton::clicked, [&](){
-			close_browser_on_pick = !GlobalRadiant().TextureBrowser_isShown();
 			GlobalRadiant().TextureBrowser_show();
 		} );
 		form->addRow( "Texture:", tex_widget );
@@ -284,24 +277,88 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 				lbl->setVisible( visible );
 		};
 
+		// --- Per-entity persisted footprint size ------------------------------
+		// Generated terrain records the footprint SIZE it was built from as a key
+		// on its func_group(s). On regeneration we reuse that stored size (so the
+		// terrain stops growing) but take the position from the live selection (so
+		// it follows wherever the terrain was moved). The size lives on each piece
+		// of terrain, so a second brush never picks up the first one's size.
+		const char* const TERRAINGEN_KEY = "_terraingen_size";
+
+		// Fills w/l/h and returns true if any selected node (or its parent entity)
+		// carries a stored footprint size.
+		auto read_stored_size = [&]( double& w, double& l, double& h ) -> bool {
+			struct Reader : public SelectionSystem::Visitor {
+				const char* key;
+				double *w, *l, *h;
+				mutable bool found = false;
+				Reader( const char* k, double* a, double* b, double* c ) : key( k ), w( a ), l( b ), h( c ){}
+				void visit( scene::Instance& instance ) const override {
+					if ( found )
+						return;
+					Entity* e = instance_entity( instance );
+					if ( e == nullptr )
+						return;
+					const char* v = e->getKeyValue( key );
+					if ( v != nullptr && v[0] != '\0'
+					     && std::sscanf( v, "%lf %lf %lf", w, l, h ) == 3
+					     && *w >= 1.0 && *l >= 1.0 )
+						found = true;
+				}
+			} reader( TERRAINGEN_KEY, &w, &l, &h );
+			GlobalSelectionSystem().foreachSelected( reader );
+			return reader.found;
+		};
+
+		// Writes the footprint size onto the entity of every selected node (the
+		// freshly generated func_group(s), whose brushes the build step selects).
+		auto write_stored_size = [&]( const SelBounds& s ){
+			char buf[128];
+			std::snprintf( buf, sizeof( buf ), "%g %g %g",
+			               s.x1 - s.x0, s.y1 - s.y0, s.z1 - s.z0 );
+			struct Writer : public SelectionSystem::Visitor {
+				const char* key;
+				const char* value;
+				Writer( const char* k, const char* v ) : key( k ), value( v ){}
+				void visit( scene::Instance& instance ) const override {
+					if ( Entity* e = instance_entity( instance ) )
+						e->setKeyValue( key, value );
+				}
+			} writer( TERRAINGEN_KEY, buf );
+			GlobalSelectionSystem().foreachSelected( writer );
+		};
+		// ----------------------------------------------------------------------
+
 		// Shared validation + generation — returns true on success.
 		// Called by both Generate and OK.
 		auto do_generate = [&]() -> bool {
-			if ( target_combo->currentIndex() == 0 && !query_sel().valid ) {
-				GlobalRadiant().m_pfnMessageBox( main_window,
-					"No valid brush is selected.\n\n"
-					"Please select a brush in the viewport first,\n"
-					"or switch the Target to \"Manual Size\".",
-					"Terrain Generator — No Selection",
-					EMessageBoxType::Error, 0 );
-				return false;
+			if ( target_combo->currentIndex() == 0 ) {
+				if ( GlobalSelectionSystem().countSelected() == 0 ) {
+					GlobalRadiant().m_pfnMessageBox( main_window,
+						"No brush is selected.\n\n"
+						"Please select a brush in the viewport first,\n"
+						"or switch the Target to \"Manual Size\".",
+						"Terrain Generator - No Selection",
+						EMessageBoxType::Error, 0 );
+					return false;
+				}
+				if ( !query_sel().valid ) {
+					GlobalRadiant().m_pfnMessageBox( main_window,
+						"The selected brush is too small.\n\n"
+						"The terrain area must be at least 64 x 64 units.\n"
+						"Please select a larger brush,\n"
+						"or switch the Target to \"Manual Size\".",
+						"Terrain Generator - Brush Too Small",
+						EMessageBoxType::Error, 0 );
+					return false;
+				}
 			}
 			if ( texture_edit->text().trimmed().isEmpty() ) {
 				GlobalRadiant().m_pfnMessageBox( main_window,
 					"No texture specified.\n\n"
 					"Please enter a texture path or use the Pick button\n"
 					"to select one from the texture browser.",
-					"Terrain Generator — No Texture",
+					"Terrain Generator - No Texture",
 					EMessageBoxType::Error, 0 );
 				return false;
 			}
@@ -323,39 +380,61 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 			// --- Determine bounds (must happen before deleting the selection brush) ---
 			BrushData target;
 
+			// Footprint to record on the generated entities, so a later
+			// regeneration reuses it instead of growing.
+			SelBounds used_bounds{};
+			bool      used_bounds_valid = false;
+
 			if ( use_manual ) {
 				target = make_manual_brush_data( manual_w_spin->value(), manual_l_spin->value(), manual_h_spin->value() );
 			}
 			else {
-				// Use the frozen reference bounds if captured and checkbox is on,
-				// otherwise sample the live selection.
-				const bool  use_ref = ref_captured && use_ref_cb->isChecked();
-				const SelBounds s   = use_ref ? ref_bounds : query_sel( step_x < step_y ? step_x : step_y );
+				// Reuse the stored footprint size (so regeneration doesn't grow),
+				// but take the position from the live selection (so it follows the
+				// terrain if it was moved). Peaks and walls extend symmetrically,
+				// so the live center equals the footprint center; the floor sits at
+				// the live minimum Z. A fresh brush has no stored size and uses its
+				// own bounds directly.
+				double sw, sl, sh;
+				SelBounds s{};
+				if ( read_stored_size( sw, sl, sh ) ) {
+					const SelBounds live = query_sel();
+					if ( live.valid ) {
+						const double cx = ( live.x0 + live.x1 ) * 0.5;
+						const double cy = ( live.y0 + live.y1 ) * 0.5;
+						s.x0 = cx - sw * 0.5; s.x1 = cx + sw * 0.5;
+						s.y0 = cy - sl * 0.5; s.y1 = cy + sl * 0.5;
+						s.z0 = live.z0;       s.z1 = live.z0 + sh;
+						s.valid = true;
+					}
+				}
+				else {
+					s = query_sel( step_x < step_y ? step_x : step_y );
+				}
 				if ( s.valid ) {
 					target.min_x = s.x0;
 					target.max_x = s.x1;
 					target.min_y = s.y0;
 					target.max_y = s.y1;
 					target.min_z = s.z0;
-					target.max_z    = s.z0 + std::max( s.z1 - s.z0, 64.0 );
+					// Base level the terrain builds up from. Slopes use the slope
+					// height so the ramp's top rises with it while its low edge
+					// stays at the floor (z0 + 64); otherwise a steep slope sinks
+					// the low edge below the floor, clips away geometry and makes
+					// regeneration drift sideways. Other shapes use the selection
+					// height.
+					const bool is_slope = ( shape == ShapeType::Slope || shape == ShapeType::SlopeTunnel );
+					const double top_h  = is_slope ? std::max( shape_height_spin->value(), 64.0 )
+					                               : std::max( s.z1 - s.z0, 64.0 );
+					target.max_z    = s.z0 + top_h;
 					target.width_x  = target.max_x - target.min_x;
 					target.length_y = target.max_y - target.min_y;
 					target.height_z = target.max_z - target.min_z;
 
-					// Capture reference on first generation (live bounds only, not ref replay).
-					if ( !ref_captured && !use_ref ) {
-						ref_bounds   = s;
-						ref_captured = true;
-						ref_w_label->setText( "  Ref (X): " + QString::number( (int)( s.x1 - s.x0 ) ) );
-						ref_l_label->setText( "  Ref (Y): " + QString::number( (int)( s.y1 - s.y0 ) ) );
-						ref_h_label->setText( "  Ref (Z): " + QString::number( (int)std::max( s.z1 - s.z0, 64.0 ) ) );
-						ref_w_label->show();
-						ref_l_label->show();
-						ref_h_label->show();
-						use_ref_cb->show();
-						if ( target_combo->currentIndex() == 0 )
-							set_row_visible( use_ref_cb, true );
-					}
+					// Remember the footprint to record on the generated entities
+					// once the build step completes.
+					used_bounds       = s;
+					used_bounds_valid = true;
 				}
 				else {
 					target = make_manual_brush_data( manual_w_spin->value(), manual_l_spin->value(), manual_h_spin->value() );
@@ -379,22 +458,47 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 			                           ? -( shape_height_spin->value() - 64.0 )
 			                           : shape_height_spin->value();
 
+			// One undo step covering both removing the source brush and creating
+			// the generated geometry, so a single Undo restores the original
+			// brush and removes everything we added.
+			UndoableCommand undo( "terrainGenerator.generate" );
+
 			// --- Delete the selection brush now that its bounds are captured ---
 			if ( !use_manual ) {
-				const int sel_count = (int)GlobalSelectionSystem().countSelected();
-				for ( int i = 0; i < sel_count && GlobalSelectionSystem().countSelected() > 0; ++i )
-					Path_deleteTop( GlobalSelectionSystem().ultimateSelected().path() );
+				while ( GlobalSelectionSystem().countSelected() > 0 ) {
+					scene::Path path( GlobalSelectionSystem().ultimateSelected().path() );
+					scene::Path parent_path( path );
+					parent_path.pop();
+
+					Path_deleteTop( path );
+
+					// Remove a group entity left empty by the deletion, mirroring
+					// Radiant's own delete behavior (never the worldspawn or root).
+					if ( parent_path.size() > 1
+					     && Node_isEntity( parent_path.top() )
+					     && !parent_path.top().get().isRoot() ) {
+						Entity* entity = Node_getEntity( parent_path.top() );
+						scene::Traversable* children = Node_getTraversable( parent_path.top() );
+						const bool worldspawn = entity != 0 && string_equal( entity->getClassName(), "worldspawn" );
+						if ( !worldspawn && children != 0 && children->empty() )
+							Path_deleteTop( parent_path );
+					}
+				}
 				SceneChangeNotify();
 			}
 
 			adjust_bounds_to_fit_grid( target, step_x, step_y );
+
+			// Clear any leftover selection so that only the geometry we are
+			// about to generate ends up selected (the build step selects it).
+			GlobalSelectionSystem().setSelectedAll( false );
 
 			// --- Generate ---
 			const bool is_tunnel = ( shape == ShapeType::Tunnel || shape == ShapeType::SlopeTunnel );
 
 			globalOutputStream() << "TerrainGenerator: generating "
 			                     << ( is_tunnel ? "tunnel" : "terrain" )
-			                     << " — bounds ("
+			                     << " - bounds ("
 			                     << target.width_x << " x " << target.length_y << " x " << target.height_z
 			                     << "), step (" << step_x << " x " << step_y << ")"
 			                     << ", texture: " << texture << "\n";
@@ -413,6 +517,12 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 			}
 
 			globalOutputStream() << "TerrainGenerator: generation complete\n";
+
+			// Record the footprint size on the generated (now selected) entities so
+			// a future regeneration reuses it instead of the grown geometry's size.
+			if ( used_bounds_valid )
+				write_stored_size( used_bounds );
+
 			return true;
 		};
 
@@ -448,21 +558,27 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 			if ( use_sel ) {
 				refresh_sel_labels();
 				if ( slope_derived() ) {
-					const SelBounds s = query_sel();
-					if ( s.valid )
-						shape_height_spin->setValue( s.z1 - s.z0 );
+					// Derive the slope height from the stored footprint height when
+					// the selection has one, so it stays consistent with the size
+					// used for generation. Using the live (grown) selection here
+					// over-steepens the slope and pushes the floor below the base.
+					double sw, sl, sh;
+					if ( read_stored_size( sw, sl, sh ) ) {
+						shape_height_spin->setValue( sh );
+					}
+					else {
+						const SelBounds s = query_sel();
+						if ( s.valid )
+							shape_height_spin->setValue( s.z1 - s.z0 );
+					}
 				}
 			}
-			set_row_visible( sel_w_row,     use_sel );
-			set_row_visible( sel_l_row,     use_sel );
-			set_row_visible( sel_h_row,     use_sel );
+			set_row_visible( sel_w_label,   use_sel );
+			set_row_visible( sel_l_label,   use_sel );
+			set_row_visible( sel_h_label,   use_sel );
 			set_row_visible( manual_w_spin, !use_sel );
 			set_row_visible( manual_l_spin, !use_sel );
 			set_row_visible( manual_h_spin, !use_sel );
-			// Only toggle the checkbox row once a reference has been captured
-			// (it must never appear in Manual Size mode).
-			if ( ref_captured )
-				set_row_visible( use_ref_cb, use_sel );
 		};
 
 		// Advanced sub-square toggle
@@ -484,9 +600,19 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 					lbl->setText( shape_height_label[idx] );
 				// Auto-fill slope height from selection when applicable
 				if ( slope_derived() ) {
-					const SelBounds s = query_sel();
-					if ( s.valid )
-						shape_height_spin->setValue( s.z1 - s.z0 );
+					// Derive the slope height from the stored footprint height when
+					// the selection has one, so it stays consistent with the size
+					// used for generation. Using the live (grown) selection here
+					// over-steepens the slope and pushes the floor below the base.
+					double sw, sl, sh;
+					if ( read_stored_size( sw, sl, sh ) ) {
+						shape_height_spin->setValue( sh );
+					}
+					else {
+						const SelBounds s = query_sel();
+						if ( s.valid )
+							shape_height_spin->setValue( s.z1 - s.z0 );
+					}
 				}
 			}
 			set_row_visible( tunnel_height_spin, is_slope_tunnel );
@@ -514,6 +640,7 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 			QObject::connect( &dialog, &QDialog::finished, &loop, &QEventLoop::quit );
 			loop.exec();
 		}
+		s_active_dialog = nullptr;
 	}
 }
 

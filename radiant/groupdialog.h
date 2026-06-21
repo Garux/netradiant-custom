@@ -40,7 +40,6 @@ typedef ConstPointerCaller<char, void(const StringImportCallback&), RawStringExp
 QWidget* GroupDialog_addPage( const char* tabLabel, QWidget* widget, const StringExportCallback& title );
 
 bool GroupDialog_isShown();
-void GroupDialog_setShown( bool shown );
 QWidget* GroupDialog_getPage();
 void GroupDialog_showPage( QWidget* page );
 void GroupDialog_updatePageTitle( QWidget* page );

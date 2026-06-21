@@ -658,6 +658,26 @@ void Scene_BrushSetDetail_Selected( scene::Graph& graph, bool detail ){
 	SceneChangeNotify();
 }
 
+class BrushSetDetailWalker : public scene::Traversable::Walker
+{
+public:
+	bool pre( scene::Node& node ) const override {
+		if ( Brush* brush = Node_getBrush( node ) ) {
+			Brush_forEachFace( *brush, []( Face& face ){ face.setDetail( true ); } );
+		}
+		return true;
+	}
+};
+
+void Brush_setDetail( scene::Node& node ){
+	if ( Brush* brush = Node_getBrush( node ) ) {
+		Brush_forEachFace( *brush, []( Face& face ){ face.setDetail( true ); } );
+	}
+	else if ( scene::Traversable* traversable = Node_getTraversable( node ) ) {
+		traversable->traverse( BrushSetDetailWalker() );
+	}
+}
+
 bool Face_FindReplaceShader( Face& face, const char* find, const char* replace ){
 	if ( shader_equal( face.GetShader(), find ) ) {
 		face.SetShader( replace );

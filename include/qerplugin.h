@@ -153,8 +153,7 @@ struct _QERFuncTable_1
 
 	// Plugin extensions — always append new members here to preserve ABI
 	void ( *TextureBrowser_show )( );
-	bool ( *TextureBrowser_isShown )( );
-	void ( *TextureBrowser_close )( );
+	void ( *Brush_setDetail )( scene::Node& node );
 };
 
 #include "modulesystem.h"

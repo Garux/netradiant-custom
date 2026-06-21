@@ -32,8 +32,6 @@ void TextureBrowser_destroyWindow();
 
 const char* TextureBrowser_GetSelectedShader();
 void TextureBrowser_show();
-bool TextureBrowser_isShown();
-void TextureBrowser_close();
 
 void TextureBrowser_Construct();
 void TextureBrowser_Destroy();

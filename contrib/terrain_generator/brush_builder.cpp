@@ -5,7 +5,6 @@
 #include "ientity.h"
 #include "ieclass.h"
 #include "iscenegraph.h"
-#include "iundo.h"
 #include "qerplugin.h"
 #include "scenelib.h"
 
@@ -37,6 +36,17 @@ static scene::Node& create_func_group(){
 	NodeSmartReference entity( GlobalEntityCreator().createEntity( ec ) );
 	Node_getTraversable( GlobalSceneGraph().root() )->insert( entity );
 	return entity;
+}
+
+// Select a generated func_group so the user can immediately move it. For a group
+// node Entity_setSelected selects its child brushes (what the manipulator acts
+// on), which is how Radiant makes a group movable — selecting the entity instance
+// directly leaves it unmovable.
+static void select_generated( scene::Node& node ){
+	scene::Path path( makeReference( GlobalSceneGraph().root() ) );
+	path.push( makeReference( node ) );
+	if ( scene::Instance* instance = GlobalSceneGraph().find( path ) )
+		Entity_setSelected( *instance, true );
 }
 
 static void insert_brush_into( scene::Node& entity,
@@ -141,8 +151,7 @@ static void insert_brush_into( scene::Node& entity,
 void build_terrain_brushes( const BrushData& target, double step_x, double step_y,
                              const HeightMap& height_map, const char* top_texture,
                              bool split_diagonally ){
-	UndoableCommand undo( "terrainGenerator.generateTerrain" );
-
+	// Undo is started by the caller so deletion + generation form one step.
 	scene::Node& entity = create_func_group();
 
 	const char* caulk = "textures/common/caulk";
@@ -176,6 +185,8 @@ void build_terrain_brushes( const BrushData& target, double step_x, double step_
 		}
 	}
 
+	select_generated( entity );
+	GlobalRadiant().Brush_setDetail( entity );
 	SceneChangeNotify();
 }
 
@@ -354,8 +365,7 @@ static void insert_wall_brush( scene::Node& entity,
 void build_tunnel_brushes( const BrushData& target, double step_x, double step_y,
                             const TunnelMaps& maps, const char* top_texture,
                             double cave_height, double slope_height ){
-	UndoableCommand undo( "terrainGenerator.generateTunnel" );
-
+	// Undo is started by the caller so deletion + generation form one step.
 	scene::Node& floor_entity  = create_func_group();
 	scene::Node& ceil_entity   = create_func_group();
 	scene::Node& lwall_entity  = create_func_group();
@@ -382,7 +392,7 @@ void build_tunnel_brushes( const BrushData& target, double step_x, double step_y
 				auto it = m.find( { r2( kx ), r2( ky ) } );
 				if ( it == m.end() ) {
 					globalErrorStream() << "TerrainGenerator: height map missing key ("
-					                    << kx << ", " << ky << ") — using fallback\n";
+					                    << kx << ", " << ky << ") - using fallback\n";
 					return fallback;
 				}
 				return it->second;
@@ -428,7 +438,7 @@ void build_tunnel_brushes( const BrushData& target, double step_x, double step_y
 				auto it = m.find( { r2( kx ), r2( ky ) } );
 				if ( it == m.end() ) {
 					globalErrorStream() << "TerrainGenerator: wall map missing key ("
-					                    << kx << ", " << ky << ") — using fallback\n";
+					                    << kx << ", " << ky << ") - using fallback\n";
 					return fallback;
 				}
 				return it->second;
@@ -453,5 +463,13 @@ void build_tunnel_brushes( const BrushData& target, double step_x, double step_y
 		}
 	}
 
+	select_generated( floor_entity );
+	select_generated( ceil_entity );
+	select_generated( lwall_entity );
+	select_generated( rwall_entity );
+	GlobalRadiant().Brush_setDetail( floor_entity );
+	GlobalRadiant().Brush_setDetail( ceil_entity );
+	GlobalRadiant().Brush_setDetail( lwall_entity );
+	GlobalRadiant().Brush_setDetail( rwall_entity );
 	SceneChangeNotify();
 }

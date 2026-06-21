@@ -633,15 +633,6 @@ void TextureBrowser_show(){
 		GroupDialog_showPage( g_page_textures ); // switch to textures tab and show
 }
 
-
-bool TextureBrowser_isShown(){
-	return g_page_textures && GroupDialog_isShown() && GroupDialog_getPage() == g_page_textures;
-}
-
-void TextureBrowser_close(){
-	GroupDialog_setShown( false );
-}
-
 void TextureBrowser_updateTitle(){
 	GroupDialog_updatePageTitle( g_page_textures );
 }
