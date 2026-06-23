@@ -24,6 +24,7 @@
 #include "math/vector.h"
 #include "string/string.h"
 #include <vector>
+#include <cstdint>
 
 
 class CBspPortal {
