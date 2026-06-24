@@ -236,7 +236,7 @@ public:
 	}
 	bool Brush_addFace( scene::Node& brush, const _QERFaceData& faceData ) override {
 		Node_getBrush( brush )->undoSave();
-		return Node_getBrush( brush )->addPlane( faceData.m_p0, faceData.m_p1, faceData.m_p2, faceData.m_shader, TextureProjection( faceData.m_texdef, brushprimit_texdef_t(), Vector3( 0, 0, 0 ), Vector3( 0, 0, 0 ) ) ) != 0;
+		return Node_getBrush( brush )->addPlane( faceData.m_p0, faceData.m_p1, faceData.m_p2, faceData.m_shader, TextureProjection( faceData.m_texdef, brushprimit_texdef_t(), Vector3( 0, 0, 0 ), Vector3( 0, 0, 0 ) ), faceData.contents ) != 0;
 	}
 };
 

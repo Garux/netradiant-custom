@@ -143,6 +143,7 @@ struct _QERFuncTable_1
 	Vector3 ( *Camera_getOrigin )();
 
 	const char* ( *TextureBrowser_getSelectedShader )( );
+	void ( *TextureBrowser_show )( );
 
 	// Qt functions
 	PFN_QERAPP_MESSAGEBOX m_pfnMessageBox;

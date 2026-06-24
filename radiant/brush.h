@@ -1982,12 +1982,13 @@ public:
 	}
 
 	/// \brief Appends a new face constructed from the parameters to the end of the face list.
-	Face* addPlane( const DoubleVector3& p0, const DoubleVector3& p1, const DoubleVector3& p2, const char* shader, const TextureProjection& projection ){
+	Face* addPlane( const DoubleVector3& p0, const DoubleVector3& p1, const DoubleVector3& p2, const char* shader, const TextureProjection& projection, int contentFlags = 0 ){
 		if ( m_faces.size() == c_brush_maxFaces ) {
 			return 0;
 		}
 		undoSave();
 		push_back( FaceSmartPointer( new Face( p0, p1, p2, shader, projection, this ) ) );
+		m_faces.back()->getShader().m_flags.m_contentFlags = contentFlags;
 		m_faces.back()->setDetail( isDetail() );
 		planeChanged();
 		return m_faces.back();

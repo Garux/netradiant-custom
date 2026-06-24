@@ -1,0 +1,6 @@
+; terrain_generator.def : Declares the module parameters for the DLL.
+
+LIBRARY      "TERRAIN_GENERATOR"
+
+EXPORTS
+	Radiant_RegisterModules @1

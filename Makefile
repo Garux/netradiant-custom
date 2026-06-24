@@ -446,6 +446,7 @@ binaries-radiant-plugins: \
 	$(INSTALLDIR)/plugins/sunplug.$(DLL) \
 	$(INSTALLDIR)/plugins/ufoaiplug.$(DLL) \
 	$(INSTALLDIR)/plugins/meshtex.$(DLL) \
+	$(INSTALLDIR)/plugins/terrain_generator.$(DLL) \
 
 .PHONY: binaries-radiant
 binaries-radiant-core: \
@@ -1185,6 +1186,14 @@ $(INSTALLDIR)/plugins/sunplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGET
 $(INSTALLDIR)/plugins/sunplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/sunplug.$(DLL): \
 	contrib/sunplug/sunplug.o \
+
+$(INSTALLDIR)/plugins/terrain_generator.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
+$(INSTALLDIR)/plugins/terrain_generator.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/terrain_generator.$(DLL): \
+	contrib/terrain_generator/terrain_generator.o \
+	contrib/terrain_generator/noise.o \
+	contrib/terrain_generator/terrain_engine.o \
+	contrib/terrain_generator/brush_builder.o \
 
 $(INSTALLDIR)/qdata3.$(EXE): LIBS_EXTRA := $(LIBS_XML)
 $(INSTALLDIR)/qdata3.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude -Wno-format-overflow

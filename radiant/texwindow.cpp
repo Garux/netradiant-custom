@@ -624,6 +624,10 @@ void TextureBrowser_toggleShow(){
 	GroupDialog_showPage( g_page_textures );
 }
 
+void TextureBrowser_show(){
+	if ( g_page_textures != nullptr )
+		GroupDialog_showPage( g_page_textures );
+}
 
 void TextureBrowser_updateTitle(){
 	GroupDialog_updatePageTitle( g_page_textures );
