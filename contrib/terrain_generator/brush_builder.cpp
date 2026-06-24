@@ -8,6 +8,9 @@
 #include "qerplugin.h"
 #include "scenelib.h"
 
+const unsigned int BRUSH_DETAIL_FLAG = 27;
+const unsigned int BRUSH_DETAIL_MASK = ( 1 << BRUSH_DETAIL_FLAG );
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -26,7 +29,7 @@ static void fill_face( _QERFaceData& face,
 	face.m_texdef.shift[0] = 0;
 	face.m_texdef.shift[1] = 0;
 	face.m_texdef.rotate   = 0;
-	face.contents = 0;
+	face.contents = BRUSH_DETAIL_MASK;
 	face.flags    = 0;
 	face.value    = 0;
 }
@@ -186,7 +189,6 @@ void build_terrain_brushes( const BrushData& target, double step_x, double step_
 	}
 
 	select_generated( entity );
-	GlobalRadiant().Brush_setDetail( entity );
 	SceneChangeNotify();
 }
 
@@ -467,9 +469,5 @@ void build_tunnel_brushes( const BrushData& target, double step_x, double step_y
 	select_generated( ceil_entity );
 	select_generated( lwall_entity );
 	select_generated( rwall_entity );
-	GlobalRadiant().Brush_setDetail( floor_entity );
-	GlobalRadiant().Brush_setDetail( ceil_entity );
-	GlobalRadiant().Brush_setDetail( lwall_entity );
-	GlobalRadiant().Brush_setDetail( rwall_entity );
 	SceneChangeNotify();
 }

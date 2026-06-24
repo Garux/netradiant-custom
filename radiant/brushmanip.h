@@ -45,9 +45,6 @@ class Graph;
 class Node;
 }
 void Scene_BrushConstructPrefab( scene::Graph& graph, EBrushPrefab type, std::size_t sides, bool option, const char* shader );
-// Flag every brush in 'node' (a brush, or any node whose subgraph contains
-// brushes, e.g. a group entity) as detail.
-void Brush_setDetail( scene::Node& node );
 class AABB;
 void Scene_BrushResize_Cuboid( scene::Node*& node, const AABB& bounds );
 void Brush_ConstructPlacehoderCuboid( scene::Node& node, const AABB& bounds );

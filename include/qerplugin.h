@@ -143,6 +143,7 @@ struct _QERFuncTable_1
 	Vector3 ( *Camera_getOrigin )();
 
 	const char* ( *TextureBrowser_getSelectedShader )( );
+	void ( *TextureBrowser_show )( );
 
 	// Qt functions
 	PFN_QERAPP_MESSAGEBOX m_pfnMessageBox;
@@ -150,10 +151,6 @@ struct _QERFuncTable_1
 	PFN_QERAPP_DIRDIALOG m_pfnDirDialog;
 	PFN_QERAPP_COLORDIALOG m_pfnColorDialog;
 	PFN_QERAPP_NEWICON m_pfnNewIcon;
-
-	// Plugin extensions — always append new members here to preserve ABI
-	void ( *TextureBrowser_show )( );
-	void ( *Brush_setDetail )( scene::Node& node );
 };
 
 #include "modulesystem.h"

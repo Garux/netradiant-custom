@@ -58,7 +58,6 @@
 #include "texwindow.h"
 #include "modelwindow.h"
 #include "mainframe.h"
-#include "brushmanip.h"
 #include "build.h"
 #include "mru.h"
 #include "surfacedialog.h"
@@ -153,7 +152,6 @@ public:
 
 		m_radiantcore.TextureBrowser_getSelectedShader = TextureBrowser_GetSelectedShader;
 		m_radiantcore.TextureBrowser_show = TextureBrowser_show;
-		m_radiantcore.Brush_setDetail = Brush_setDetail;
 
 		m_radiantcore.m_pfnMessageBox = &qt_MessageBox;
 		m_radiantcore.m_pfnFileDialog = &file_dialog;

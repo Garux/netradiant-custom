@@ -39,7 +39,5 @@ inline void RawStringExport( const char* string, const StringImportCallback& imp
 typedef ConstPointerCaller<char, void(const StringImportCallback&), RawStringExport> RawStringExportCaller;
 QWidget* GroupDialog_addPage( const char* tabLabel, QWidget* widget, const StringExportCallback& title );
 
-bool GroupDialog_isShown();
-QWidget* GroupDialog_getPage();
 void GroupDialog_showPage( QWidget* page );
 void GroupDialog_updatePageTitle( QWidget* page );
