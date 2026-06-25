@@ -58,6 +58,7 @@
 
 #include "grid.h"
 #include "brush.h"
+#include "entity.h"
 
 
 #if defined( _DEBUG ) && !defined( _DEBUG_QUICKER )
@@ -1872,14 +1873,46 @@ class testselect_primitive_visible : public scene::Graph::Walker
 {
 	Selector& m_selector;
 	SelectionTest& m_test;
+	mutable int m_miscPrefabDepth;
+	static bool node_is_misc_prefab_entity( scene::Node& node ){
+		if( Entity_isPrefabEditMode() ){
+			return false;
+		}
+		if( Entity* entity = Node_getEntity( node ); entity != 0 ){
+			return string_equal( entity->getClassName(), "misc_prefab" );
+		}
+		return false;
+	}
+	static bool path_is_within_misc_prefab( const scene::Path& path ){
+		if( Entity_isPrefabEditMode() ){
+			return false;
+		}
+		for( scene::Path::const_iterator i = path.begin(); i != path.end(); ++i ){
+			if( Entity* entity = Node_getEntity( i->get() ); entity != 0
+			 && string_equal( entity->getClassName(), "misc_prefab" ) ){
+				return true;
+			}
+		}
+		return false;
+	}
 public:
 	testselect_primitive_visible( Selector& selector, SelectionTest& test )
-		: m_selector( selector ), m_test( test ){
+		: m_selector( selector ), m_test( test ), m_miscPrefabDepth( 0 ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
+		const bool isMiscPrefabEntity = node_is_misc_prefab_entity( path.top() );
+		const bool withinMiscPrefab = path_is_within_misc_prefab( path );
 		Selectable* selectable = Instance_getSelectable( instance );
 		if ( selectable != 0 ) {
-			m_selector.pushSelectable( *selectable );
+			// Outside prefab-edit mode, internal misc_prefab nodes must never become selection owners.
+			const bool allowPush = !withinMiscPrefab || isMiscPrefabEntity
+				|| ( withinMiscPrefab && m_miscPrefabDepth == 0 );
+			if( allowPush && m_miscPrefabDepth == 0 ){
+				m_selector.pushSelectable( *selectable );
+			}
+		}
+		if( isMiscPrefabEntity ){
+			++m_miscPrefabDepth;
 		}
 
 		SelectionTestable* selectionTestable = Instance_getSelectionTestable( instance );
@@ -1890,8 +1923,15 @@ public:
 		return true;
 	}
 	void post( const scene::Path& path, scene::Instance& instance ) const override {
+		const bool isMiscPrefabEntity = node_is_misc_prefab_entity( path.top() );
+		const bool withinMiscPrefab = path_is_within_misc_prefab( path );
+		if( isMiscPrefabEntity ){
+			--m_miscPrefabDepth;
+		}
 		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0 ) {
+		const bool allowPop = !withinMiscPrefab || isMiscPrefabEntity
+			|| ( withinMiscPrefab && m_miscPrefabDepth == 0 );
+		if ( selectable != 0 && allowPop && m_miscPrefabDepth == 0 ) {
 			m_selector.popSelectable();
 		}
 	}
@@ -1902,11 +1942,26 @@ class testselect_component_visible : public scene::Graph::Walker
 	Selector& m_selector;
 	SelectionTest& m_test;
 	SelectionSystem::EComponentMode m_mode;
+	static bool path_is_within_misc_prefab( const scene::Path& path ){
+		if( Entity_isPrefabEditMode() ){
+			return false;
+		}
+		for( scene::Path::const_iterator i = path.begin(); i != path.end(); ++i ){
+			if( Entity* entity = Node_getEntity( i->get() ); entity != 0
+			 && string_equal( entity->getClassName(), "misc_prefab" ) ){
+				return true;
+			}
+		}
+		return false;
+	}
 public:
 	testselect_component_visible( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode )
 		: m_selector( selector ), m_test( test ), m_mode( mode ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
+		if( path_is_within_misc_prefab( path ) ){
+			return true;
+		}
 		ComponentSelectionTestable* componentSelectionTestable = Instance_getComponentSelectionTestable( instance );
 		if ( componentSelectionTestable ) {
 			componentSelectionTestable->testSelectComponents( m_selector, m_test, m_mode );
@@ -1922,11 +1977,26 @@ class testselect_component_visible_selected : public scene::Graph::Walker
 	Selector& m_selector;
 	SelectionTest& m_test;
 	SelectionSystem::EComponentMode m_mode;
+	static bool path_is_within_misc_prefab( const scene::Path& path ){
+		if( Entity_isPrefabEditMode() ){
+			return false;
+		}
+		for( scene::Path::const_iterator i = path.begin(); i != path.end(); ++i ){
+			if( Entity* entity = Node_getEntity( i->get() ); entity != 0
+			 && string_equal( entity->getClassName(), "misc_prefab" ) ){
+				return true;
+			}
+		}
+		return false;
+	}
 public:
 	testselect_component_visible_selected( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode )
 		: m_selector( selector ), m_test( test ), m_mode( mode ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
+		if( path_is_within_misc_prefab( path ) ){
+			return true;
+		}
 		if ( Instance_isSelected( instance ) ) {
 			ComponentSelectionTestable* componentSelectionTestable = Instance_getComponentSelectionTestable( instance );
 			if ( componentSelectionTestable ) {

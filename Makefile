@@ -916,7 +916,9 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/mainframe.o \
 	radiant/main.o \
 	radiant/map.o \
+	radiant/mapscriptwindow.o \
 	radiant/modelwindow.o \
+	radiant/prefabbrowser.o \
 	radiant/mru.o \
 	radiant/nullmodel.o \
 	radiant/parse.o \
