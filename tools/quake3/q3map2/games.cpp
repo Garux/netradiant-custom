@@ -124,6 +124,7 @@ struct game_default : game_t
 	false,              /* cod-style lump len/ofs order */
 	LoadIBSPFile,       /* bsp load function */
 	WriteIBSPFile,      /* bsp write function */
+	"",                 /* if not null, shader parameter for disabling texture compression */
 
 	{
 		/* name             contentFlags                contentFlagsClear           surfaceFlags                surfaceFlagsClear           compileFlags                compileFlagsClear */
@@ -356,6 +357,7 @@ struct game_wolf : game_default
 		magic = "wolf";
 		wolfLight = true;
 		bspVersion = 47;
+		noCompressTextureKeyword = "nocompress";
 		surfaceParms.insert( surfaceParms.end(), {
 			/* game */
 			{ "slag",           Q_CONT_SLIME,               Q_CONT_SOLID,               0,                          0,                          C_LIQUID | C_TRANSLUCENT,   C_SOLID },
@@ -411,6 +413,7 @@ struct game_wolfet : game_wolf
 		maxLMSurfaceVerts = 1024;
 		maxSurfaceVerts = 1024;
 		maxSurfaceIndexes = 6144;
+		noCompressTextureKeyword = ""; // unnecessary, as external lightmaps are natively supported
 		surfaceParms.insert( surfaceParms.end(), {
 		{ "landmine",       0,                          0,                          W_SURF_LANDMINE,            0,                          0,                          0 },
 		{ "splash",         0,                          0,                          W_SURF_SPLASH,              0,                          0,                          0 },
@@ -556,6 +559,7 @@ struct game_qfusion : game_default
 		bspVersion = 1;
 		load = LoadRBSPFile;
 		write = WriteRBSPFile;
+		noCompressTextureKeyword = "nocompress";
 	}
 };
 
@@ -785,6 +789,7 @@ struct game_sof2 : game_t
 	false,                  /* cod-style lump len/ofs order */
 	LoadRBSPFile,           /* bsp load function */
 	WriteRBSPFile,          /* bsp write function */
+	"noTC",                 /* if not null, shader parameter for disabling texture compression */
 
 	{
 		/* name             contentFlags                contentFlagsClear           surfaceFlags                surfaceFlagsClear           compileFlags                compileFlagsClear */
