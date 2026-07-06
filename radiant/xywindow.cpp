@@ -1050,9 +1050,9 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 		m_window_observer->onMouseMotion( WindowVector( x, y ), modifiers_for_flags( buttons ) );
 
 		{
-			const auto status = StringStream<64>( "x:: ", FloatFormat( m_mousePosition[0], 6, 1 ),
-			                                    "  y:: ", FloatFormat( m_mousePosition[1], 6, 1 ),
-			                                    "  z:: ", FloatFormat( m_mousePosition[2], 6, 1 ) );
+			const auto status = StringStream<64>( "x: ", FloatFormat( m_mousePosition[0], 6, 1 ),
+			                                    "  y: ", FloatFormat( m_mousePosition[1], 6, 1 ),
+			                                    "  z: ", FloatFormat( m_mousePosition[2], 6, 1 ) );
 			g_pParentWnd->SetStatusText( c_status_position, status );
 		}
 
