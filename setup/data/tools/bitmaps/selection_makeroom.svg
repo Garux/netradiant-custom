@@ -1,10 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 128 128" enable-background="new 0 0 128 128" xml:space="preserve">
-<rect x="36" y="36" fill="none" stroke="#E59024" stroke-width="8" stroke-miterlimit="10" width="56" height="56"/>
-<rect x="28" y="8" fill="#C0C0C0" width="72" height="16"/>
-<rect x="28" y="104" fill="#C0C0C0" width="72" height="16"/>
-<rect x="8" y="28" fill="#C0C0C0" width="16" height="72"/>
-<rect x="104" y="28" fill="#C0C0C0" width="16" height="72"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="selection"
+     style="fill:#e59024;fill-opacity:1;stroke:none"
+     d="M 32,32 V 96 H 96 V 32 Z m 8,8 H 88 V 88 H 40 Z" />
+  <path
+     id="brushes"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 28,10 v 12 c 0,1 1,2 2,2 h 68 c 1,0 2,-1 2,-2 V 10 C 100,9 99,8 98,8 H 30 c -1,0 -2,1 -2,2 z M 8,30 v 68 c 0,1 1,2 2,2 h 12 c 1,0 2,-1 2,-2 V 30 c 0,-1 -1,-2 -2,-2 H 10 c -1,0 -2,1 -2,2 z m 110,-2 h -12 c -1,0 -2,1 -2,2 v 68 c 0,1 1,2 2,2 h 12 c 1,0 2,-1 2,-2 V 30 c 0,-1 -1,-2 -2,-2 z m -90,78 v 12 c 0,1 1,2 2,2 h 68 c 1,0 2,-1 2,-2 v -12 c 0,-1 -1,-2 -2,-2 H 30 c -1,0 -2,1 -2,2 z" />
 </svg>

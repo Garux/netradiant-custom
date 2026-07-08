@@ -1,12 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 128 128" enable-background="new 0 0 128 128" xml:space="preserve">
-<polyline fill="none" stroke="#E59024" stroke-width="8" stroke-miterlimit="10" points="108,40 108,84 84,108 40,108 "/>
-<polyline fill="none" stroke="#E59024" stroke-width="8" stroke-miterlimit="10" points="20,88 20,44 44,20 88,20 "/>
-<rect x="8" y="96" fill="#00EDED" width="24" height="24"/>
-<rect x="96" y="8" fill="#00EDED" width="24" height="24"/>
-<line fill="none" stroke="#00EDED" stroke-width="8" stroke-linecap="round" stroke-miterlimit="10" x1="40" y1="88" x2="48" y2="80"/>
-<line fill="none" stroke="#00EDED" stroke-width="8" stroke-linecap="round" stroke-miterlimit="10" x1="60" y1="68" x2="68" y2="60"/>
-<line fill="none" stroke="#00EDED" stroke-width="8" stroke-linecap="round" stroke-miterlimit="10" x1="80" y1="48" x2="88" y2="40"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="cube"
+     style="fill:#e59024;fill-opacity:1;stroke:none"
+     d="M 40,16 16,40 v 48 h 8 V 44 L 44,24 h 44 v -8 z m 64,24 V 84 L 84,104 H 40 v 8 H 88 L 112,88 V 40 Z" />
+  <path
+     id="cut_points"
+     style="fill:#00eded;fill-opacity:1;stroke:none"
+     d="m 100,8 c -2,0 -4,2 -4,4 v 16 c 0,2 2,4 4,4 h 16 c 2,0 4,-2 4,-4 V 12 c 0,-2 -2,-4 -4,-4 z M 12,96 c -2,0 -4,2 -4,4 v 16 c 0,2 2,4 4,4 h 16 c 2,0 4,-2 4,-4 v -16 c 0,-2 -2,-4 -4,-4 z" />
+  <path
+     id="cut_line"
+     style="fill:#00eded;fill-opacity:1;stroke:none"
+     d="M 88,34 74,48 80,54 94,40 Z M 68,54 54,68 60,74 74,60 Z M 48,74 34,88 40,94 54,80 Z" />
 </svg>

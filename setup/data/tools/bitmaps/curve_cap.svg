@@ -1,9 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_2_00000048483245256711590640000016769981278353171358_"
-	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 128 128"
-	 enable-background="new 0 0 128 128" xml:space="preserve">
-<ellipse fill="#8E8E8E" stroke="#C0C0C0" stroke-width="8" stroke-miterlimit="10" cx="65" cy="27" rx="51" ry="15"/>
-<path fill="#8E8E8E" stroke="#E59024" stroke-width="8" stroke-miterlimit="10" d="M12,54c0,0.2,0,0.4,0.02,0.58
-	C12.92,64.26,35.86,68,64,68c28.72,0,52-4.06,52-14v38v-2c0,9.94-23.28,24-52,24S12,99.94,12,90V54.4V54z"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="cylinder_fill"
+     style="fill:#e59024;fill-opacity:0.35;stroke:none"
+     d="m 16,56 c 12,6 36,8 48,8 12,0 36,-2 48,-8 v 46 c -12,8 -36,10 -48,10 -12,0 -36,-2 -48,-10 z" />
+  <path
+     id="cylinder_outline"
+     style="fill:#e59024;fill-opacity:1;stroke:none"
+     d="m 8,40 v 64 c 8,12 40,16 56,16 16,0 48,-4 56,-16 V 40 C 112,52 80,56 64,56 48,56 16,52 8,40 Z m 8,16 c 12,6 36,8 48,8 12,0 36,-2 48,-8 v 46 c -12,8 -36,10 -48,10 -12,0 -36,-2 -48,-10 z" />
+  <path
+     id="cap_fill"
+     style="fill:#c0c0c0;fill-opacity:0.35;stroke:none"
+     d="m 64,16 c 28,0 48,8 48,12 0,4 -20,12 -48,12 C 36,40 16,32 16,28 16,24 36,16 64,16 Z" />
+  <path
+     id="cap_outline"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="M 64,8 C 36,8 8,16 8,28 8,40 36,48 64,48 92,48 120,40 120,28 120,16 92,8 64,8 Z m 0,8 c 28,0 48,8 48,12 0,4 -20,12 -48,12 C 36,40 16,32 16,28 16,24 36,16 64,16 Z" />
 </svg>

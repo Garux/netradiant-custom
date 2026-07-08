@@ -1,13 +1,32 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_2_00000160188294429806274830000016183598062000136606_"
-	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 128 128"
-	 enable-background="new 0 0 128 128" xml:space="preserve">
-<g>
-	<path fill="#8E8E8E" d="M64,116.04c-21.7,0-46.06-8.2-52-26.5V23.42c10.94,8.76,31.52,12.82,52,12.82s41.06-4.06,52-12.82v66.12
-		C110.06,107.84,85.7,116.04,64,116.04z"/>
-	<path fill="#C0C0C0" d="M112,30.84V88.9c-5.66,15.98-28,23.16-48,23.16S21.66,104.9,16,88.9V30.84c12.74,6.7,31.18,9.42,48,9.42
-		S99.26,37.54,112,30.84 M120,8.3c0,15.96-28,23.94-56,23.94S8,24.26,8,8.3v81.84c6,19.92,31,29.88,56,29.88s50-9.96,56-29.88V8.3
-		L120,8.3z"/>
-</g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="patch1_outline"
+     style="fill:#e59024;fill-opacity:1;stroke:none"
+     d="m 8,8 v 72 c 8,10 24,16 40,16 16,0 32,-6 40,-16 V 8 C 80,18 64,24 48,24 32,24 16,18 8,8 Z m 8,16 c 12,6 20,8 32,8 12,0 20,-2 32,-8 V 78 C 68,86 60,88 48,88 36,88 28,86 16,78 Z" />
+  <path
+     id="patch1_fill"
+     style="fill:#e59024;fill-opacity:0.35;stroke:none"
+     d="m 16,24 c 12,6 20,8 32,8 12,0 20,-2 32,-8 V 78 C 68,86 60,88 48,88 36,88 28,86 16,78 Z" />
+  <path
+     id="plus_sign"
+     style="fill:#e59024;fill-opacity:1;stroke:none"
+     d="M 44,44 V 56 H 32 v 8 h 12 v 12 h 8 V 64 H 64 V 56 H 52 V 44 Z" />
+  <path
+     id="patch2_outline"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 120,32 c -8,8 -16,12 -24,14 v 8 c 10,-2 12,-4 16,-6 v 54 c -12,8 -20,10 -32,10 -12,0 -20,-2 -30,-8 H 40 c 8,10 24,16 40,16 16,0 32,-6 40,-16 z" />
+  <path
+     id="patch2_fill"
+     style="fill:#c0c0c0;fill-opacity:0.35;stroke:none"
+     d="m 96,54 c 10,-2 12,-4 16,-6 v 54 c -12,8 -20,10 -32,10 -12,0 -20,-2 -30,-8 18,0 38,-8 46,-22 z" />
 </svg>

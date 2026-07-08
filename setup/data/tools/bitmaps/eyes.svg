@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="left_bkgr"
+     style="fill:#000000;fill-opacity:0.75;stroke:none"
+     d="M 36,108 C 20,108 8,88 8,64 8,40 20,20 36,20 c 16,0 28,20 28,44 0,24 -12,44 -28,44 z" />
+  <path
+     id="left_eye"
+     style="fill:#bfbfbf;fill-opacity:1;stroke:none"
+     d="M 60,64 C 60,86 50,104 36,104 22,104 12,86 12,64 12,42 22,24 36,24 50,24 60,42 60,64 Z" />
+  <path
+     id="left_pupil"
+     style="fill:#000000;fill-opacity:0.75;stroke:none"
+     d="m 40,64 c 0,9 -5,16 -12,16 -7,0 -12,-7 -12,-16 0,-9 5,-16 12,-16 7,0 12,7 12,16 z" />
+  <path
+     id="right_bkgr"
+     style="fill:#000000;fill-opacity:0.75;stroke:none"
+     d="M 92,108 C 76,108 64,88 64,64 64,40 76,20 92,20 c 16,0 28,20 28,44 0,24 -12,44 -28,44 z" />
+  <path
+     id="right_eye"
+     style="fill:#bfbfbf;fill-opacity:1;stroke:none"
+     d="m 116,64 c 0,22 -10,40 -24,40 C 78,104 68,86 68,64 68,42 78,24 92,24 c 14,0 24,18 24,40 z" />
+  <path
+     id="right_pupil"
+     style="fill:#000000;fill-opacity:0.75;stroke:none"
+     d="m 96,64 c 0,9 -5,16 -12,16 -7,0 -12,-7 -12,-16 0,-9 5,-16 12,-16 7,0 12,7 12,16 z" />
+</svg>

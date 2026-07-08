@@ -1,14 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_2_00000179621536958208582260000016017537997879487167_"
-	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 128 128"
-	 enable-background="new 0 0 128 128" xml:space="preserve">
-<path fill="none" stroke="#C0C0C0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
-	M27,35l2.32-2.88C52.28,3.62,97.92,13.54,107,49l0,0"/>
-<path fill="#C0C0C0" d="M8,56h32v-4c-19.7-0.7-28.66-10.34-28-28H8V56z"/>
-<path fill="none" stroke="#C0C0C0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
-	M101,93l-2.32,2.88C75.72,124.38,30.06,114.48,21,79l0,0"/>
-<path fill="#C0C0C0" d="M120,72H88v4c19.7,0.7,28.66,10.34,28,28h4V72z"/>
-<path fill="#E59024" d="M45.34,67.34l15.34,15.34c1.84,1.84,4.82,1.84,6.66,0l15.34-15.34c1.84-1.84,1.84-4.82,0-6.66L67.34,45.34
-	c-1.84-1.84-4.82-1.84-6.66,0L45.34,60.68C43.5,62.5,43.5,65.5,45.34,67.34z"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="circle"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 64,12 c -17.25,0 -34.5,8.12 -43.88,23 -0.62,1 -0.38,2.75 0.5,3.62 l 2.75,2.75 c 0.88,0.88 2.13,0.755 2.75,-0.25 C 34.38,28.25 48.75,20 64,20 c 20.25,0 37.75,14 42.5,33.75 0.38,1.25 1.38,1.75 2.5,1.25 l 4,-2 c 1,-0.5 1.75,-1.88 1.5,-3.12 C 108.62,27 87.25,12 64,12 Z m -45,61 -4,2 c -1.25,0.62 -1.88,1.88 -1.5,3.12 C 19.38,101 40.75,116 64,116 c 17.25,0 34.5,-8.25 43.88,-23.12 0.62,-1 0.5,-2.5 -0.38,-3.38 l -2.88,-2.88 c -0.87,-0.87 -2.12,-0.75 -2.75,0.25 C 93.62,99.75 79.25,108 64,108 43.75,108 26.25,94 21.5,74.25 21.25,73.12 20,72.5 19,73 Z" />
+  <path
+     id="arrow1"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 8,56 h 32 c 3,0 3,-4 0,-4 H 32 C 24,50 21,47 19,45 17,43 14,40 12,32 v -8 c 0,-3 -4,-3 -4,0" />
+  <path
+     id="arrow2"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="M 120,72 H 88 c -3,0 -3,4 0,4 h 8 c 8,2 11,5 13,7 2,2 5,5 7,13 v 8 c 0,3 4,3 4,0" />
+  <path
+     id="brush"
+     style="fill:#e59024;fill-opacity:1;stroke:none"
+     d="m 68.002,48.002 12,12 c 3,3 3,5 0,8 l -12,12 c -3,3 -5,3 -8,0 l -12,-12 c -3,-3 -3,-5 0,-8 l 12,-12 c 3,-3 5,-3 8,0 z" />
 </svg>

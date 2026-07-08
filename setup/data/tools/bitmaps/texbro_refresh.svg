@@ -1,11 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 128 128" enable-background="new 0 0 128 128" xml:space="preserve">
-<path fill="none" stroke="#8E8E8E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
-	M11,45c0,0,0.96-32.02,37-33c37-1,54,32,54,32"/>
-<path fill="#8E8E8E" d="M120,60V26h-2c-2.8,19.42-13.62,29.94-32,32v2H120z"/>
-<path fill="none" stroke="#C0C0C0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
-	M117,83c0,0-0.96,32.02-37,33c-37,1-54-32-54-32"/>
-<path fill="#C0C0C0" d="M8,68v34h2c2.8-19.42,13.62-29.94,32-32v-2H8z"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="arrow1_tail"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="M 50,8 C 38,8 26,12 19,19 11.5,26.5 8,38 8,50 c 0,1 1,2 2,2 h 4 c 1,0 2,-1 2.04,-2 C 16,40 18.5,31.5 25,25 c 6,-6 15,-9 25,-9 14,0 30,8 42,20 3,3 5.5,6 8,9.52 0.5,0.98 1.5,0.98 2,0.48 l 4,-4 c 0.5,-0.5 0.5,-1 0,-2 -2.5,-3.5 -5,-7 -8,-10 C 84,16 67,8 50,8 Z" />
+  <path
+     id="arrow1"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="M 120,60 H 88 c -3,0 -3,-4 0,-4 h 8 c 8,-2 11,-5 13,-7 2,-2 5,-5 7,-13 v -8 c 0,-3 4,-3 4,0" />
+  <path
+     id="arrow2"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 8,68 h 32 c 3,0 3,4 0,4 h -8 c -8,2 -11,5 -13,7 -2,2 -5,5 -7,13 v 8 c 0,3 -4,3 -4,0" />
+  <path
+     id="arrow2_tail"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 78,120 c 12,0 24,-4 31,-11 7.5,-7.5 11,-19 11,-31 0,-1 -1,-2 -2,-2 h -4 c -1,0 -2,1 -2.04,2 0.04,10 -2.46,18.5 -8.96,25 -6,6 -15,9 -25,9 C 64,112 48,104 36,92 33,89 30.52,86 28,82.48 27.5,81.5 26.5,81.5 26,82 l -4,4 c -0.5,0.5 -0.5,1 0,2 2.52,3.48 5,7 8,10 14,14 31,22 48,22 z" />
 </svg>

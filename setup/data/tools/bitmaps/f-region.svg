@@ -1,12 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 128 128" enable-background="new 0 0 128 128" xml:space="preserve">
-<path fill="none" stroke="#C0C0C0" stroke-width="8" stroke-miterlimit="10" d="M12,40c0-9.34,0-18.66,0-28c9.34,0,18.66,0,28,0"/>
-<path fill="none" stroke="#C0C0C0" stroke-width="8" stroke-miterlimit="10" d="M88,12c9.34,0,18.66,0,28,0c0,9.34,0,18.66,0,28"/>
-<path fill="none" stroke="#C0C0C0" stroke-width="8" stroke-miterlimit="10" d="M116,88c0,9.34,0,18.66,0,28c-9.34,0-18.66,0-28,0"
-	/>
-<path fill="none" stroke="#C0C0C0" stroke-width="8" stroke-miterlimit="10" d="M40,116c-9.34,0-18.66,0-28,0c0-9.34,0-18.66,0-28"
-	/>
-<rect x="28" y="28" fill="none" stroke="#E59024" stroke-width="8" stroke-miterlimit="10" width="72" height="72"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="corners"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 8,8 v 32 h 8 V 16 H 40 V 8 Z m 80,0 v 8 h 24 v 24 h 8 V 8 Z M 8,88 v 32 h 32 v -8 H 16 V 88 Z m 104,0 v 24 H 88 v 8 h 32 V 88 Z" />
+  <path
+     id="square"
+     style="fill:#e59024;fill-opacity:1;stroke:none"
+     d="m 24,24 v 80 h 80 V 24 Z m 8,8 H 96 V 96 H 32 Z" />
 </svg>

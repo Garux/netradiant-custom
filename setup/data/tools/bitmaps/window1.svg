@@ -1,56 +1,96 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 144 80" enable-background="new 0 0 144 80" xml:space="preserve">
-<rect fill="#9A9A9A" width="144" height="80"/>
-<rect x="2" y="2" fill="#545454" width="140" height="76"/>
-<rect x="74" y="6" width="64" height="32"/>
-<rect x="74" y="42" width="64" height="32"/>
-<rect x="6" y="56" width="64" height="18"/>
-<rect x="6" y="6" width="64" height="46"/>
-<rect x="8" y="58" fill="#404040" width="60" height="14"/>
-<rect x="76" y="44" fill="#404040" width="60" height="28"/>
-<rect x="76" y="8" fill="#404040" width="60" height="28"/>
-<rect x="80" y="46" fill="#B4B4B4" width="24" height="24"/>
-<rect x="108" y="46" fill="#B4B4B4" width="24" height="24"/>
-<rect x="110" y="48" fill="#404040" width="20" height="20"/>
-<rect x="82" y="48" fill="#404040" width="20" height="20"/>
-<rect x="120" y="58" fill="#75B591" width="8" height="8"/>
-<rect x="112" y="50" fill="#75B591" width="8" height="8"/>
-<rect x="120" y="50" fill="#447859" width="8" height="8"/>
-<rect x="112" y="58" fill="#447859" width="8" height="8"/>
-<rect x="92" y="58" fill="#C386C3" width="8" height="8"/>
-<rect x="84" y="50" fill="#C386C3" width="8" height="8"/>
-<rect x="92" y="50" fill="#744574" width="8" height="8"/>
-<rect x="84" y="58" fill="#744574" width="8" height="8"/>
-<rect x="12" y="60" fill="#7A7A7A" width="10" height="2"/>
-<rect x="28" y="60" fill="#7A7A7A" width="20" height="2"/>
-<rect x="54" y="60" fill="#7A7A7A" width="10" height="2"/>
-<rect x="56" y="64" fill="#7A7A7A" width="8" height="2"/>
-<rect x="40" y="64" fill="#7A7A7A" width="12" height="2"/>
-<rect x="22" y="64" fill="#7A7A7A" width="14" height="2"/>
-<rect x="12" y="64" fill="#7A7A7A" width="6" height="2"/>
-<rect x="8" y="8" fill="#767676" width="60" height="42"/>
-<rect x="12" y="68" fill="#7A7A7A" width="14" height="2"/>
-<rect x="30" y="68" fill="#7A7A7A" width="14" height="2"/>
-<rect x="48" y="68" fill="#7A7A7A" width="16" height="2"/>
-<rect x="12" y="8" fill="#8C8C8C" width="2" height="42"/>
-<rect x="20" y="8" fill="#8C8C8C" width="2" height="42"/>
-<rect x="28" y="8" fill="#8C8C8C" width="2" height="42"/>
-<rect x="36" y="8" fill="#8C8C8C" width="2" height="42"/>
-<rect x="44" y="8" fill="#8C8C8C" width="2" height="42"/>
-<rect x="52" y="8" fill="#8C8C8C" width="2" height="42"/>
-<rect x="60" y="8" fill="#8C8C8C" width="2" height="42"/>
-<rect x="8" y="44" fill="#8C8C8C" width="60" height="2"/>
-<rect x="8" y="36" fill="#8C8C8C" width="60" height="2"/>
-<rect x="8" y="28" fill="#8C8C8C" width="60" height="2"/>
-<rect x="8" y="20" fill="#8C8C8C" width="60" height="2"/>
-<rect x="8" y="12" fill="#8C8C8C" width="60" height="2"/>
-<rect x="92" y="12" fill="#939393" width="20" height="4"/>
-<polygon fill="#B4B4B4" points="80,22 80,14 84,14 84,16 88,16 88,20 84,20 84,22 "/>
-<polygon fill="#7AB4B4" points="88,12 88,26 94,32 116,32 116,12 112,12 112,28 96,28 92,24 92,12 "/>
-<rect x="80" y="22" fill="#9F9F9F" width="4" height="2"/>
-<rect x="80" y="12" fill="#9F9F9F" width="4" height="2"/>
-<path fill="#B4B4B4" d="M128,12l-2,2l-8,6l-2.02-0.02L116,24h2l8,6l1.92,2H132V12H128z M128,26l-5.7-2.86
-	c-0.94-0.48-0.94-1.82,0-2.3L128,18V26z"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="144"
+   height="80"
+   viewBox="0 0 144 80"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="base_bkgr"
+     style="fill:#000000;fill-opacity:0.15;stroke:none"
+     d="M 2,2 H 142 V 78 H 2 Z" />
+  <path
+     id="base_frame"
+     style="fill:#000000;fill-opacity:1;stroke:none"
+     d="M 0,0 V 80 H 144 V 0 Z M 2,2 H 142 V 78 H 2 Z" />
+  <path
+     id="2d_bkgr"
+     style="fill:#606060;fill-opacity:1;stroke:none"
+     d="M 8,8 H 68 V 50 H 8 Z" />
+  <path
+     id="2d_frame"
+     style="fill:#000000;fill-opacity:1;stroke:none"
+     d="M 6,6 V 52 H 70 V 6 Z M 8,8 H 68 V 50 H 8 Z" />
+  <path
+     id="2d_grid"
+     style="fill:#ffffff;fill-opacity:0.25;stroke:none"
+     d="m 12,8 v 4 H 8 v 2 h 4 v 6 H 8 v 2 h 4 v 6 H 8 v 2 h 4 v 6 H 8 v 2 h 4 v 6 H 8 v 2 h 4 v 4 h 2 v -4 h 6 v 4 h 2 v -4 h 6 v 4 h 2 v -4 h 6 v 4 h 2 v -4 h 6 v 4 h 2 v -4 h 6 v 4 h 2 v -4 h 6 v 4 h 2 v -4 h 6 v -2 h -6 v -6 h 6 v -2 h -6 v -6 h 6 v -2 h -6 v -6 h 6 v -2 h -6 v -6 h 6 V 12 H 62 V 8 h -2 v 4 H 54 V 8 h -2 v 4 H 46 V 8 h -2 v 4 H 38 V 8 h -2 v 4 H 30 V 8 h -2 v 4 H 22 V 8 h -2 v 4 H 14 V 8 Z m 2,6 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m -40,8 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m -40,8 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m -40,8 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z m 8,0 h 6 v 6 h -6 z" />
+  <path
+     id="console_bkgr"
+     style="fill:#606060;fill-opacity:1;stroke:none"
+     d="M 8,58 H 68 V 72 H 8 Z" />
+  <path
+     id="console_frame"
+     style="fill:#000000;fill-opacity:1;stroke:none"
+     d="M 6,56 V 74 H 70 V 56 Z m 2,2 H 68 V 72 H 8 Z" />
+  <path
+     id="console_text"
+     style="fill:#ffffff;fill-opacity:0.25;stroke:none"
+     d="m 12,60 v 2 h 10 v -2 z m 16,0 v 2 h 20 v -2 z m 26,0 v 2 h 10 v -2 z m -42,4 v 2 h 6 v -2 z m 10,0 v 2 h 14 v -2 z m 18,0 v 2 h 12 v -2 z m 16,0 v 2 h 8 v -2 z m -44,4 v 2 h 14 v -2 z m 18,0 v 2 h 14 v -2 z m 18,0 v 2 h 16 v -2 z" />
+  <path
+     id="3d_bkgr"
+     style="fill:#606060;fill-opacity:1;stroke:none"
+     d="m 76,8 h 60 V 36 H 76 Z" />
+  <path
+     id="3d_frame"
+     style="fill:#000000;fill-opacity:1;stroke:none"
+     d="m 74,6 v 32 h 64 V 6 Z m 2,2 h 60 V 36 H 76 Z" />
+  <path
+     id="3d_cam1a"
+     style="fill:#ffffff;fill-opacity:0.50;stroke:none"
+     d="m 80,12 v 12 h 4 v -4 h 4 v -4 h -4 v -4 z" />
+  <path
+     id="3d_cam1b"
+     style="fill:#00eded;fill-opacity:0.60;stroke:none"
+     d="m 88,12 v 14 l 6,6 h 22 V 12 h -4 V 28 H 96 L 92,24 V 12 Z" />
+  <path
+     id="3d_cam1c"
+     style="fill:#ffffff;fill-opacity:0.50;stroke:none"
+     d="m 92,12 h 20 v 4 H 92 Z" />
+  <path
+     id="3d_cam1d"
+     style="fill:#ffffff;fill-opacity:0.50;stroke:none"
+     d="m 128,12 -8,8 h -4 v 4 h 4 l 8,8 h 4 V 12 Z m 0,4 v 12 l -4,-4 v -4 z" />
+  <path
+     id="tb_bkgr"
+     style="fill:#606060;fill-opacity:1;stroke:none"
+     d="m 76,44 h 60 V 72 H 76 Z" />
+  <path
+     id="tb_frame"
+     style="fill:#000000;fill-opacity:1;stroke:none"
+     d="m 74,42 v 32 h 64 V 42 Z m 2,2 h 60 V 72 H 76 Z" />
+  <path
+     id="tb_2x_frames"
+     style="fill:#000000;fill-opacity:1;stroke:none"
+     d="m 80,46 v 24 h 24 V 46 Z m 28,0 v 24 h 24 V 46 Z m -26,2 h 20 V 68 H 82 Z m 28,0 h 20 v 20 h -20 z" />
+  <path
+     id="tb_texture1a"
+     style="fill:#c386c3;fill-opacity:1;stroke:none"
+     d="m 82,48 h 20 V 68 H 82 Z" />
+  <path
+     id="tb_texture1b"
+     style="fill:#744574;fill-opacity:1;stroke:none"
+     d="m 92,48 v 10 h 10 V 48 Z m 0,10 H 82 v 10 h 10 z" />
+  <path
+     id="tb_texture2a"
+     style="fill:#75b591;fill-opacity:1;stroke:none"
+     d="m 110,48 h 20 v 20 h -20 z" />
+  <path
+     id="tb_texture2b"
+     style="fill:#447859;fill-opacity:1;stroke:none"
+     d="m 120,48 v 10 h 10 V 48 Z m 0,10 h -10 v 10 h 10 z" />
 </svg>

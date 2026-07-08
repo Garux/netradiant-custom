@@ -1,10 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_2_00000020367642450237825620000008252612899089650832_"
-	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 128 128"
-	 enable-background="new 0 0 128 128" xml:space="preserve">
-<path fill="none" stroke="#C0C0C0" stroke-width="8" stroke-miterlimit="10" d="M68,112H52c-22.1,0-40-17.9-40-40l0,0
-	c0-22.1,17.9-40,40-40h40"/>
-<polyline fill="none" stroke="#C0C0C0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" points="
-	90,54 112,32 90,10 "/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="arrow_tail"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 92,30 v 4 c 0,1 -1,2 -2,2 H 56 c -20,0 -36,16 -36,36 0,20 16,36 36,36 h 14 c 1,0 2,1 2,2 v 4 c 0,1 -1,2 -2,2 H 56 C 31.5,116 12,96.5 12,72 12,47.5 32,28 56,28 h 34 c 1,0 2,1 2,2 z" />
+  <path
+     id="arrow_head"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="M 116,32 92,56 c -2.5,2.5 -6,-1 -3.5,-3.5 L 94,47 c 5,-6 5,-12 5,-15 0,-3 0,-9 -5,-15 L 88.5,11.5 C 86,9 89.52,5.52 92,8" />
 </svg>

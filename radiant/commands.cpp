@@ -28,6 +28,7 @@
 #include "versionlib.h"
 #include "gtkutil/accelerator.h"
 #include "gtkutil/messagebox.h"
+#include "gtkutil/image.h"
 #include "gtkmisc.h"
 
 struct ShortcutValue{
@@ -378,12 +379,14 @@ void DoCommandListDlg(){
 		auto *commandLine = new QLineEdit;
 		grid->addWidget( commandLine, 0, 0 );
 		commandLine->setClearButtonEnabled( true );
-		commandLine->setPlaceholderText( QString::fromUtf8( "🔍 by command name" ) );
+		commandLine->addAction( new_local_icon( "search.png" ), QLineEdit::LeadingPosition );
+		commandLine->setPlaceholderText( "by command name" );
 
 		auto *keyLine = new QLineEdit;
 		grid->addWidget( keyLine, 0, 1 );
 		keyLine->setClearButtonEnabled( true );
-		keyLine->setPlaceholderText( QString::fromUtf8( "🔍 by keys" ) );
+		keyLine->addAction( new_local_icon( "search.png" ), QLineEdit::LeadingPosition );
+		keyLine->setPlaceholderText( "by keys" );
 
 		const auto filter = [tree]( const int column, const QString& text ){
 			for( QTreeWidgetItemIterator it( tree ); *it; ++it )

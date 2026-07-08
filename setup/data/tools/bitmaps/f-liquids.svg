@@ -1,12 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 128 128" enable-background="new 0 0 128 128" xml:space="preserve">
-<path fill="none" stroke="#8E8E8E" stroke-width="8" stroke-miterlimit="10" d="M16,112"/>
-<polygon fill="none" stroke="#C0C0C0" stroke-width="8" stroke-linecap="round" stroke-miterlimit="10" points="92,116 12,116 
-	12,36 36,12 116,12 116,92 "/>
-<path fill="none" stroke="#C0C0C0" stroke-width="8" stroke-linecap="round" stroke-miterlimit="10" d="M116,12"/>
-<rect x="24" y="40" fill="#89B6FA" width="64" height="64"/>
-<rect x="56" y="44" fill="#417ED9" width="28" height="28"/>
-<rect x="28" y="72" fill="#417ED9" width="28" height="28"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="cube"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="M 32,8 8,32 v 88 H 96 L 120,96 V 8 Z m 4,8 h 76 V 92 L 92,112 H 16 V 36 Z" />
+  <path
+     id="frame"
+     style="fill:#89b6fa;fill-opacity:1;stroke:none"
+     d="m 24,40 v 64 H 88 V 40 Z m 4,4 h 56 v 56 H 28 Z" />
+  <path
+     id="squares1"
+     style="fill:#89b6fa;fill-opacity:1;stroke:none"
+     d="M 28,44 V 72 H 56 V 44 Z m 28,28 v 28 H 84 V 72 Z" />
+  <path
+     id="squares2"
+     style="fill:#417ed9;fill-opacity:1;stroke:none"
+     d="M 84,44 V 72 H 56 V 44 Z M 56,72 v 28 H 28 V 72 Z" />
 </svg>

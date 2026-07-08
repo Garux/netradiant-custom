@@ -1,9 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_2_00000065759687395969033420000009377124875546576000_"
-	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 128 128"
-	 enable-background="new 0 0 128 128" xml:space="preserve">
-<polygon fill="#C0C0C0" points="56,116 20,116 20,40 48,12 108,12 108,64 100,64 100,20 56,20 56,48 28,48 28,108 56,108 "/>
-<circle fill="none" stroke="#8E8E8E" stroke-width="6" stroke-miterlimit="10" cx="74" cy="78" r="17"/>
-<line fill="none" stroke="#8E8E8E" stroke-width="8" stroke-miterlimit="10" x1="114" y1="118" x2="94" y2="98"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="sheet"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 20,40 v 76 h 36 v -8 H 28 V 48 H 56 V 20 h 44 v 44 h 8 V 12 H 48 Z" />
+  <path
+     id="lens"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 70,56 c -12.25,0 -22,9.75 -22,22 0,12.25 9.75,22 22,22 12.25,0 22,-9.75 22,-22 C 92,65.75 82.25,56 70,56 Z m 0,8 c 7.75,0 14,6.25 14,14 0,7.75 -6.25,14 -14,14 -7.75,0 -14,-6.25 -14,-14 0,-7.75 6.25,-14 14,-14 z" />
+  <path
+     id="handle"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 86,102 c 4,-2 6,-4 8,-8 l 18,18 c 0,4 -4,8 -8,8 z" />
 </svg>

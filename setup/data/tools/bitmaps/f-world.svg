@@ -1,15 +1,32 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_2_00000008862780734573361930000018077425388211874206_"
-	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 128 128"
-	 enable-background="new 0 0 128 128" xml:space="preserve">
-<path fill="none" stroke="#8E8E8E" stroke-width="8" stroke-linecap="round" stroke-miterlimit="10" d="M12,64
-	c0-11.04,23.28-20,52-20s52,8.96,52,20"/>
-<path fill="none" stroke="#8E8E8E" stroke-width="8" stroke-linecap="round" stroke-miterlimit="10" d="M65,12
-	c-13.8,0-25,23.28-25,52s11.2,52,25,52"/>
-<circle fill="none" stroke="#C0C0C0" stroke-width="8" stroke-linecap="round" stroke-miterlimit="10" cx="64" cy="64" r="52"/>
-<path fill="none" stroke="#C0C0C0" stroke-width="8" stroke-linecap="round" stroke-miterlimit="10" d="M65,116
-	c13.8,0,25-23.28,25-52S78.8,12,65,12"/>
-<path fill="none" stroke="#C0C0C0" stroke-width="8" stroke-linecap="round" stroke-miterlimit="10" d="M116,64
-	c0,11.04-23.28,20-52,20s-52-8.96-52-20"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="meridian1"
+     style="fill:#c0c0c0;fill-opacity:0.50;stroke:none"
+     d="M 64,8 C 48.5,8 40,33 40,64 c 0,31 8.5,56 24,56 v -8 C 53,112 48,90.5 48,64 48,37.5 53,16 64,16 Z" />
+  <path
+     id="parallel1"
+     style="fill:#c0c0c0;fill-opacity:0.50;stroke:none"
+     d="M 120,64 C 120,48.5 95,40 64,40 33,40 8,48.5 8,64 h 8 c 0,-11 21.5,-16 48,-16 26.5,0 48,5 48,16 z" />
+  <path
+     id="meridian2"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 64,8 v 8 c 11,0 16,21.5 16,48 0,26.5 -5,48 -16,48 v 8 C 79.5,120 88,95 88,64 88,33 79.5,8 64,8 Z" />
+  <path
+     id="parallel2"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 120,64 h -8 C 112,75 90.5,80 64,80 37.5,80 16,75 16,64 H 8 c 0,15.5 25,24 56,24 31,0 56,-8.5 56,-24 z" />
+  <path
+     id="sphere"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="M 64,8 C 33,8 8,33 8,64 8,95 33,120 64,120 95,120 120,95 120,64 120,33 95,8 64,8 Z m 0,8 c 26.5,0 48,21.5 48,48 0,26.5 -21.5,48 -48,48 C 37.5,112 16,90.5 16,64 16,37.5 37.5,16 64,16 Z" />
 </svg>

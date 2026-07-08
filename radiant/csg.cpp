@@ -1529,7 +1529,7 @@ void CSG_Tool(){
 				return button;
 			};
 			{
-				auto *button = g_csgtool_dialog.caulk = newCheckButton( "f-caulk.png", "Caulk some faces" );
+				auto *button = g_csgtool_dialog.caulk = newCheckButton( "csgtool_caulk.png", "Caulk some faces" );
 				grid->addWidget( button, 0, 6 );
 			}
 			{

@@ -26,6 +26,7 @@
 #include "string/string.h"
 #include "stream/stringstream.h"
 #include <QDir>
+#include <QDateTime>
 
 
 namespace
@@ -49,15 +50,20 @@ void Bitmaps_generateLight( const char *appPath, const char *settingsPath ){
 			d->setFilter( QDir::Filter::Files );
 		}
 
-		if( to.count() < from.count() ){
+		if( to.count() < from.count() || QFileInfo( to.path() ).lastModified() < QFileInfo( from.path() ).lastModified() ){
+			/* remove dir to force its time update; using dir time to surely rebuild light images on s/w update */
+			to.removeRecursively();
 			to.mkpath( to.absolutePath() );
 			for( const QFileInfo& fileinfo : from.entryInfoList() )
 			{
 				QFile file( fileinfo.absoluteFilePath() );
 				if( file.open( QIODevice::OpenModeFlag::ReadOnly ) ){
 					QByteArray data( file.readAll() );
-					if( fileinfo.suffix() == "svg" )
-						data.replace( "#C0C0C0", "#575757" );
+					if( fileinfo.suffix() == "svg" ){
+						data.replace( "#808080", "#a1a1a1" ); // statusbar grey
+						data.replace( "#c0c0c0", "#808080" ); // main grey
+						data.replace( "#f2d230", "#ccb128" ); // yellow in f-sky
+					}
 					QFile outfile( to.absolutePath() + '/' + fileinfo.fileName() );
 					if( outfile.open( QIODevice::OpenModeFlag::WriteOnly ) )
 						outfile.write( data );

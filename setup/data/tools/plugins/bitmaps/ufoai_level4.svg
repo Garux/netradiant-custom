@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="frame"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="M 8,8 V 120 H 120 V 8 Z m 8,8 h 96 v 96 H 16 Z" />
+  <path
+     id="fill"
+     style="fill:#c0c0c0;fill-opacity:0.35;stroke:none"
+     d="m 16,16 h 96 v 96 H 16 Z" />
+  <path
+     id="number"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="M 92,88 H 80 v 16 H 64 V 88 H 32 V 76 L 64,24 H 80 V 76 H 92 Z M 64,44 48,76 h 16 z" />
+</svg>

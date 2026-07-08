@@ -1,13 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 128 128" enable-background="new 0 0 128 128" xml:space="preserve">
-<polyline fill="#C0C0C0" points="24,80 24,48 6,64 24,80 "/>
-<polyline fill="#C0C0C0" points="104,80 104,48 122,64 104,80 "/>
-<polyline fill="#C0C0C0" points="48,24 80,24 64,6 48,24 "/>
-<polyline fill="#C0C0C0" points="48,104 80,104 64,122 48,104 "/>
-<polygon fill="#E59024" points="16,44 16,16 44,16 34,24 24,24 24,34 "/>
-<polygon fill="#E59024" points="112,44 112,16 84,16 94,24 104,24 104,34 "/>
-<polygon fill="#E59024" points="16,84 16,112 44,112 34,104 24,104 24,94 "/>
-<polygon fill="#E59024" points="112,84 112,112 84,112 94,104 104,104 104,94 "/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="square"
+     style="fill:#e59024;fill-opacity:1;stroke:none"
+     d="m 16,16 v 32 l 8,-8 V 24 h 16 l 8,-8 z m 64,0 8,8 h 16 v 16 l 8,8 V 16 Z M 16,80 v 32 h 32 l -8,-8 H 24 V 88 Z m 88,8 v 16 H 88 l -8,8 h 32 V 80 Z" />
+  <path
+     id="arrows"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="M 64,8 48,24 H 80 Z M 24,48 8,64 24,80 Z m 80,0 v 32 l 16,-16 z m -56,56 16,16 16,-16 z" />
 </svg>

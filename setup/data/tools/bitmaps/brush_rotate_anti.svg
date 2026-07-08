@@ -1,11 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_2_00000113330266686457132250000017291230381420366770_"
-	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 128 128"
-	 enable-background="new 0 0 128 128" xml:space="preserve">
-<path fill="none" stroke="#C0C0C0" stroke-width="8" stroke-miterlimit="10" d="M24.5,40.1C33.24,24.6,49.48,15,67,15
-	c26.88,0,49,22.58,49,50c0,20.62-12.48,39.2-31.32,46.64"/>
-<polygon fill="#C0C0C0" points="40,56 8,56 8,24 11,35 17,45 28,52 "/>
-<path fill="none" stroke="#E59024" stroke-width="10" stroke-miterlimit="10" d="M88,50C66.66,61.34,45.34,72.66,24,84
-	c0,4.66,0,13.34,0,18c21.34-10.66,42.66-21.34,64-32C88,64.66,88,55.34,88,50z"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="arrow"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 8,48 h 32 c 3,0 3,-4 0,-4 H 32 C 24,42 21,39 19,37 17,35 14,32 12,24 v -8 c 0,-3 -4,-3 -4,0" />
+  <path
+     id="arrow_tail"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none"
+     d="m 64,8 c 31,0 56,25 56,56 0,30 -24,56 -54,56 -1,0 -2,-1 -2,-2 v -4 c 0,-1 1,-2 2,-2 26,0 46,-23 46,-48 0,-26 -21,-48 -48,-48 -14,0 -27,6 -36,16 -1,1 -3,1 -4,0 L 22,30 C 21,29 21,27 22,26 33,15 48,8 64,8 Z" />
+  <path
+     id="brush"
+     style="fill:#e59024;fill-opacity:1;stroke:none"
+     d="M 92,40 V 68 L 20,104 V 76 Z M 84,52 28,80 V 92 L 84,64 Z" />
 </svg>
