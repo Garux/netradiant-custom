@@ -60,7 +60,6 @@ void Bitmaps_generateLight( const char *appPath, const char *settingsPath ){
 				if( file.open( QIODevice::OpenModeFlag::ReadOnly ) ){
 					QByteArray data( file.readAll() );
 					if( fileinfo.suffix() == "svg" ){
-						data.replace( "#808080", "#a1a1a1" ); // statusbar grey
 						data.replace( "#c0c0c0", "#808080" ); // main grey
 						data.replace( "#f2d230", "#ccb128" ); // yellow in f-sky
 					}
