@@ -51,7 +51,7 @@
 EGameType g_gameType;
 
 inline scene::Node& entity_for_eclass( EntityClass* eclass ){
-	if ( eclass->miscmodel_is ) {
+	if ( eclass->miscmodel_is || classname_equal( eclass->name(), "misc_prefab" ) ) {
 		return New_MiscModel( eclass );
 	}
 	else if ( classname_equal( eclass->name(), "light" )

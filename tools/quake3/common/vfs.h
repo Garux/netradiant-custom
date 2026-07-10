@@ -32,6 +32,8 @@
 
 #include <vector>
 
+#include "cmdlib.h"
+
 void vfsInitDirectory( const char *path, const char *pk3ext, const char *pk3dirext );
 void vfsShutdown();
 int vfsGetFileCount( const char *filename );

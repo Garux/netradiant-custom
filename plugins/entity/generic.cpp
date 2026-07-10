@@ -1,3 +1,4 @@
+
 /*
    Copyright (C) 2001-2006, William Joseph.
    All Rights Reserved.
@@ -49,6 +50,189 @@
 #include "rotation.h"
 
 #include "entity.h"
+#include "qerplugin.h"
+#include "os/file.h"
+#include "os/path.h"
+
+#include <algorithm>
+#include <cctype>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
+
+namespace {
+
+inline bool is_misc_prefab_class( const EntityKeyValues& entity ){
+	return string_equal( entity.getClassName(), "misc_prefab" );
+}
+
+inline bool starts_with_maps_prefix( const std::string& path ){
+	return path.size() > 5
+		&& ( path[0] == 'm' || path[0] == 'M' )
+		&& ( path[1] == 'a' || path[1] == 'A' )
+		&& ( path[2] == 'p' || path[2] == 'P' )
+		&& ( path[3] == 's' || path[3] == 'S' )
+		&& path[4] == '/';
+}
+
+inline std::string trim_maps_prefix( const std::string& path ){
+	return starts_with_maps_prefix( path ) ? path.substr( 5 ) : path;
+}
+
+inline bool read_all_file_text( const char* path, std::string& out ){
+	std::FILE* f = std::fopen( path, "rb" );
+	if( f == nullptr )
+		return false;
+
+	if( std::fseek( f, 0, SEEK_END ) != 0 ){
+		std::fclose( f );
+		return false;
+	}
+	const long size = std::ftell( f );
+	if( size < 0 ){
+		std::fclose( f );
+		return false;
+	}
+	if( std::fseek( f, 0, SEEK_SET ) != 0 ){
+		std::fclose( f );
+		return false;
+	}
+
+	out.clear();
+	out.resize( static_cast<std::size_t>( size ) );
+	if( size > 0 ){
+		const std::size_t read = std::fread( &out[0], 1, static_cast<std::size_t>( size ), f );
+		if( read != static_cast<std::size_t>( size ) ){
+			std::fclose( f );
+			return false;
+		}
+	}
+
+	std::fclose( f );
+	return true;
+}
+
+inline bool parse_vec3_at( const char* p, Vector3& out, const char** outNext ){
+	const char* cur = p;
+	while( *cur != '\0' && std::isspace( static_cast<unsigned char>( *cur ) ) )
+		++cur;
+	if( *cur != '(' )
+		return false;
+	++cur;
+
+	char* end = nullptr;
+	errno = 0;
+	const double x = std::strtod( cur, &end );
+	if( end == cur || errno != 0 )
+		return false;
+	cur = end;
+
+	errno = 0;
+	const double y = std::strtod( cur, &end );
+	if( end == cur || errno != 0 )
+		return false;
+	cur = end;
+
+	errno = 0;
+	const double z = std::strtod( cur, &end );
+	if( end == cur || errno != 0 )
+		return false;
+	cur = end;
+
+	while( *cur != '\0' && std::isspace( static_cast<unsigned char>( *cur ) ) )
+		++cur;
+	if( *cur != ')' )
+		return false;
+
+	++cur;
+	out = Vector3( static_cast<float>( x ), static_cast<float>( y ), static_cast<float>( z ) );
+	*outNext = cur;
+	return true;
+}
+
+inline bool parse_map_bounds_from_text( const std::string& text, AABB& outBounds ){
+	const char* p = text.c_str();
+	Vector3 mins( 0.f, 0.f, 0.f );
+	Vector3 maxs( 0.f, 0.f, 0.f );
+	bool havePoint = false;
+
+	while( *p != '\0' ){
+		if( *p != '(' ){
+			++p;
+			continue;
+		}
+
+		Vector3 point;
+		const char* next = p + 1;
+		if( parse_vec3_at( p, point, &next ) ){
+			if( !havePoint ){
+				mins = maxs = point;
+				havePoint = true;
+			}
+			else{
+				mins[0] = std::min( mins[0], point[0] );
+				mins[1] = std::min( mins[1], point[1] );
+				mins[2] = std::min( mins[2], point[2] );
+				maxs[0] = std::max( maxs[0], point[0] );
+				maxs[1] = std::max( maxs[1], point[1] );
+				maxs[2] = std::max( maxs[2], point[2] );
+			}
+			p = next;
+		}
+		else{
+			++p;
+		}
+	}
+
+	if( !havePoint )
+		return false;
+
+	outBounds = aabb_for_minmax( mins, maxs );
+	return true;
+}
+
+inline std::string resolve_prefab_map_path_for_preview( const char* prefabKey ){
+	if( prefabKey == nullptr || string_empty( prefabKey ) )
+		return {};
+
+	const std::string cleaned = StringStream( PathCleaned( prefabKey ) ).c_str();
+	if( path_is_absolute( cleaned.c_str() ) && file_exists( cleaned.c_str() ) )
+		return cleaned;
+
+	if( file_exists( cleaned.c_str() ) )
+		return cleaned;
+
+	const std::string trimmed = trim_maps_prefix( cleaned );
+	const std::string withMaps = StringStream( "maps/", trimmed ).c_str();
+
+	const auto inEngine = StringStream( DirectoryCleaned( GlobalRadiant().getEnginePath() ), PathCleaned( cleaned.c_str() ) );
+	if( file_exists( inEngine.c_str() ) )
+		return inEngine.c_str();
+
+	const auto inEngineMaps = StringStream( DirectoryCleaned( GlobalRadiant().getEnginePath() ), withMaps );
+	if( file_exists( inEngineMaps.c_str() ) )
+		return inEngineMaps.c_str();
+
+	const char* game = GlobalRadiant().getGameName();
+	if( game != nullptr && !string_empty( game ) ){
+		const auto inGame = StringStream( DirectoryCleaned( GlobalRadiant().getEnginePath() ), game, "/", withMaps );
+		if( file_exists( inGame.c_str() ) )
+			return inGame.c_str();
+	}
+
+	const char* basegame = GlobalRadiant().getRequiredGameDescriptionKeyValue( "basegame" );
+	if( basegame != nullptr && !string_empty( basegame ) ){
+		const auto inBasegame = StringStream( DirectoryCleaned( GlobalRadiant().getEnginePath() ), basegame, "/", withMaps );
+		if( file_exists( inBasegame.c_str() ) )
+			return inBasegame.c_str();
+	}
+
+	return {};
+}
+
+}
 
 
 inline void read_aabb( AABB& aabb, const EntityClass& eclass ){
@@ -95,6 +279,10 @@ class GenericEntity :
 			m_keyObservers.insert( "angle", m_anglesKey.getAngleChangedCallback() );
 		m_keyObservers.insert( "angles", m_anglesKey.getAnglesChangedCallback() );
 		m_keyObservers.insert( "origin", OriginKey::OriginChangedCaller( m_originKey ) );
+		if( is_misc_prefab_class( m_entity ) ){
+			m_keyObservers.insert( "model", PrefabChangedCaller( *this ) );
+			prefabChanged( m_entity.getKeyValue( "model" ) );
+		}
 	}
 
 // vc 2k5 compiler fix
@@ -118,6 +306,21 @@ public:
 		updateTransform();
 	}
 	typedef MemberCaller<GenericEntity, void(), &GenericEntity::anglesChanged> AnglesChangedCaller;
+	void prefabChanged( const char* value ){
+		read_aabb( m_aabb_local, m_entity.getEntityClass() );
+		const std::string path = resolve_prefab_map_path_for_preview( value );
+		if( path.empty() )
+			return;
+
+		std::string text;
+		if( !read_all_file_text( path.c_str(), text ) )
+			return;
+
+		AABB parsed;
+		if( parse_map_bounds_from_text( text, parsed ) )
+			m_aabb_local = parsed;
+	}
+	typedef MemberCaller<GenericEntity, void(const char*), &GenericEntity::prefabChanged> PrefabChangedCaller;
 public:
 
 	GenericEntity( EntityClass* eclass, scene::Node& node, const Callback<void()>& transformChanged, const Callback<void()>& evaluateTransform ) :

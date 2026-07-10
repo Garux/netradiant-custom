@@ -41,10 +41,16 @@ public:
 	}
 	bool pre( scene::Node& node ) const override {
 		m_path.push( makeReference( node ) );
-		scene::Instance* instance = Node_getInstantiable( node )->create( m_path, m_parent.top() );
-		m_observer->insert( instance );
-		Node_getInstantiable( node )->insert( m_observer, m_path, instance );
-		m_parent.push( instance );
+		if ( scene::Instantiable* instantiable = Node_getInstantiable( node ) ) {
+			scene::Instance* instance = instantiable->create( m_path, m_parent.top() );
+			m_observer->insert( instance );
+			instantiable->insert( m_observer, m_path, instance );
+			m_parent.push( instance );
+		}
+		else{
+			// Keep traversal stack balanced for non-instantiable helper nodes.
+			m_parent.push( m_parent.top() );
+		}
 		return true;
 	}
 	void post( scene::Node& node ) const override {
@@ -66,9 +72,11 @@ public:
 		return true;
 	}
 	void post( scene::Node& node ) const override {
-		scene::Instance* instance = Node_getInstantiable( node )->erase( m_observer, m_path );
-		m_observer->erase( instance );
-		delete instance;
+		if ( scene::Instantiable* instantiable = Node_getInstantiable( node ) ) {
+			scene::Instance* instance = instantiable->erase( m_observer, m_path );
+			m_observer->erase( instance );
+			delete instance;
+		}
 		m_path.pop();
 	}
 };
