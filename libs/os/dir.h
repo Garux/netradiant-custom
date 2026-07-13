@@ -24,24 +24,46 @@
 /// \file
 /// \brief OS directory-listing object.
 
-#include <glib.h>
+#include <vector>
 
-typedef GDir Directory;
+class QDir;
 
-inline bool directory_good( Directory* directory ){
-	return directory != 0;
+class Directory {
+
+	private:
+		QDir* dir;
+		size_t entry_idx = 0;
+		std::vector<const char*> entries;
+
+	public:
+		Directory(const char* name);
+		bool good();
+		void close();
+		const char* read_and_increment();
+};
+
+inline bool directory_good(Directory* directory) {
+	if(directory) {
+		return directory->good();
+	}
+	return false;
 }
 
-inline Directory* directory_open( const char* name ){
-	return g_dir_open( name, 0, 0 );
+inline Directory* directory_open(const char* name){
+	return new Directory(name);
 }
 
-inline void directory_close( Directory* directory ){
-	g_dir_close( directory );
+inline void directory_close(Directory* directory){
+	if(directory) {
+		directory->close();
+	}
 }
 
-inline const char* directory_read_and_increment( Directory* directory ){
-	return g_dir_read_name( directory );
+inline const char* directory_read_and_increment(Directory* directory) {
+	if(directory) {
+		return directory->read_and_increment();
+	}
+	return nullptr;
 }
 
 template<typename Functor>
