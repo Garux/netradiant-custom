@@ -208,6 +208,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ARCH_STRING "mips"
 #elif defined __sh__
 #define ARCH_STRING "sh"
+#elif defined(__aarch64__) // gotta add this to make it compile on Raspberry Pi - DEVIL MASTER
+#define ARCH_STRING "aarch64"
 #endif
 
 #if defined __x86_64__
