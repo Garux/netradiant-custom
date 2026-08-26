@@ -38,7 +38,8 @@
 #else
 #include <csignal>
 
-#define DEBUGGER_BREAKPOINT() raise( SIGTRAP );
+// #define DEBUGGER_BREAKPOINT() raise( SIGTRAP ); // nope, that's wrong - DEVIL MASTER
+#define DEBUGGER_BREAKPOINT() ::raise( SIGTRAP ); // that's better - DEVIL MASTER
 #endif
 
 #define STR( x )  # x
