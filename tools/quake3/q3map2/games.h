@@ -106,6 +106,7 @@ struct game_t
 	bool lumpSwap;                                      /* cod-style len/ofs order */
 	typedef void ( *bspFunc )( const char * );
 	bspFunc load, write;                                /* load/write function pointers */
+	const char          *noCompressTextureKeyword;      /* shader parameter which disables texture compression for uploaded textures (used for external hack lightmaps); null string means no such parameter exists */
 	std::vector<surfaceParm_t> surfaceParms;            /* surfaceparm array */
 	int brushBevelsSurfaceFlagsMask;                    /* apply only these surfaceflags to bevels to reduce extra bsp shaders amount; applying them to get correct physics at walkable brush edges and vertices */
 };

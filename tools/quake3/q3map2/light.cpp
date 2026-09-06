@@ -1836,9 +1836,20 @@ static void WriteBSPFileAfterLight( const char *bspFileName ){
 				fprintf( file, "\n// Shaders to force nomipmaps flag on external lightmap images:\n\n" );
 
 				/* devise les shaders: max 8 stages, max 8 maps in animmap */
+				bool hasNoCompressParm = false;
+				if ((g_game->noCompressTextureKeyword) != "")
+				{
+					/* avoid excess string comparisons later */
+					hasNoCompressParm = true;
+				}
 				size_t shaderId = 0;
 				for( auto it = lmIds.cbegin(); it != lmIds.cend(); ){
 					fprintf( file, "%s\n{\n\tnomipmaps\n", String64( lmPathStart, "nomipmaps", shaderId++ ).c_str() );
+					if (hasNoCompressParm)
+					{
+						/* don't compress hack lightmaps, if possible */
+						fprintf(file, "\t%s\n", (g_game->noCompressTextureKeyword));
+					}
 					for( size_t i = 0; i < 8 && it != lmIds.cend(); ++i ){
 						fprintf( file, "\t{\n\t\tanimmap .0042" );
 						for( size_t j = 0; j < 8 && it != lmIds.cend(); ++j, ++it ){
