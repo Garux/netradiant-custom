@@ -23,16 +23,26 @@
 
 #include "math/vectorfwd.h"
 
-void Entity_createFromSelection( const char* name, const Vector3& origin );
+void Entity_createFromSelection( const char* name, const Vector3& origin, const char* model = nullptr );
 
 void Scene_EntitySetKeyValue_Selected( const char* key, const char* value );
 void Scene_EntitySetClassname_Selected( const char* classname );
 
 
 const char* misc_model_dialog( class QWidget* parent, const char* filepath = "" );
+const char* misc_prefab_dialog( class QWidget* parent, const char* filepath = "" );
 void Entity_setColour();
 
 void Entity_constructMenu( class QMenu* menu );
+
+bool Entity_isSelectedMiscPrefab();
+void Entity_prefabCreateFromSelection();
+void Entity_StampPrefabSelected();
+void Entity_prefabEditSelected();
+void Entity_prefabLeaveSelected();
+bool Entity_prefabSaveCurrent();
+bool Entity_isPrefabEditMode();
+void Entity_prefabAbortAllEdits();
 
 void Entity_registerShortcuts();
 

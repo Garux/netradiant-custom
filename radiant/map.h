@@ -99,7 +99,9 @@ const float g_MaxWorldCoord = 64 * 1024;
 const float g_MinWorldCoord = -64 * 1024;
 
 void Map_LoadFile( const char* filename );
+bool Map_ImportFile( const char* filename );
 bool Map_SaveFile( const char* filename );
+bool Map_SaveSelected( const char* filename );
 
 void Map_New();
 void Map_Free();
@@ -116,6 +118,8 @@ void Map_SetModified( Map& map, bool modified );
 
 bool Map_Save();
 bool Map_SaveAs();
+void Map_SetTitleAddon( const char* addon );
+void Map_ClearTitleAddon();
 
 scene::Node& Node_Clone( scene::Node& node );
 scene::Node& Node_Clone_Selected( scene::Node& node );

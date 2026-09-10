@@ -41,6 +41,10 @@
 #include <QOpenGLWidget>
 #include <QMouseEvent>
 #include <QTimer>
+#include <QMimeData>
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
+#include <QDropEvent>
 
 #include "generic/callback.h"
 #include "string/string.h"
@@ -108,6 +112,7 @@ const unsigned int RAD_PRESS   = 0x08;
 const unsigned int RAD_LBUTTON = 0x10;
 const unsigned int RAD_MBUTTON = 0x20;
 const unsigned int RAD_RBUTTON = 0x40;
+constexpr const char* c_prefabMimeType = "application/x-netradiant-prefab";
 
 inline ButtonIdentifier button_for_flags( unsigned int flags ){
 	if ( flags & RAD_LBUTTON ) {
@@ -216,6 +221,21 @@ inline unsigned int buttons_for_state( const QMouseEvent& event ){
 	}
 
 	return flags;
+}
+
+static bool prefab_model_from_mime( const QMimeData* mimeData, QByteArray& outModel ){
+	if( mimeData == nullptr ){
+		return false;
+	}
+	if( mimeData->hasFormat( c_prefabMimeType ) ){
+		outModel = mimeData->data( c_prefabMimeType ).trimmed();
+		return !outModel.isEmpty();
+	}
+	if( mimeData->hasText() ){
+		outModel = mimeData->text().trimmed().toUtf8();
+		return !outModel.isEmpty();
+	}
+	return false;
 }
 
 
@@ -449,6 +469,7 @@ public:
 			} )
 	{
 		setMouseTracking( true );
+		setAcceptDrops( true );
 	}
 
 	~XYGLWidget() override {
@@ -533,6 +554,33 @@ protected:
 		else if ( event->angleDelta().y() < 0 ) {
 			m_xywnd.ZoomOutWithMouse( event->position().x() * m_scale, event->position().y() * m_scale );
 		}
+	}
+	void dragEnterEvent( QDragEnterEvent* event ) override {
+		QByteArray model;
+		if( prefab_model_from_mime( event->mimeData(), model ) ){
+			event->acceptProposedAction();
+		}
+	}
+	void dragMoveEvent( QDragMoveEvent* event ) override {
+		QByteArray model;
+		if( prefab_model_from_mime( event->mimeData(), model ) ){
+			event->acceptProposedAction();
+		}
+	}
+	void dropEvent( QDropEvent* event ) override {
+		QByteArray model;
+		if( !prefab_model_from_mime( event->mimeData(), model ) ){
+			event->ignore();
+			return;
+		}
+
+		if( !m_xywnd.Active() ){
+			g_pParentWnd->SetActiveXY( &m_xywnd );
+		}
+		const QPoint dropPos = event->pos();
+		const Vector3 point = m_xywnd.XY_ToPoint( dropPos.x() * m_scale, dropPos.y() * m_scale, true );
+		Entity_createFromSelection( "misc_prefab", point, model.constData() );
+		event->acceptProposedAction();
 	}
 
 	void focusInEvent( QFocusEvent *event ) override {
@@ -742,7 +790,15 @@ void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 
 static int g_entityCreationOffset = 0;
 
+inline bool action_is_command_action( const QAction* action ){
+	return action != nullptr && action->property( "radiant_command_action" ).toBool();
+}
+
 void entitycreate_activated( const QAction *action ){
+	if( action_is_command_action( action ) ){
+		return;
+	}
+
 	if( g_bCamEntityMenu ){
 		const Vector3 viewvector = -Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
 		const float offset_for_multiple = std::max( GetSnapGridSize(), 8.f ) * g_entityCreationOffset;
@@ -780,6 +836,9 @@ protected:
 		else if( event->button() == Qt::MouseButton::RightButton ){
 			if( QAction *action = actionAt( event->pos() ) ){
 				if( action->menu() == nullptr ){
+					if( action_is_command_action( action ) ){
+						return;
+					}
 					m_mouse_handled = true;
 					m_hide_menu = ( event->modifiers() != Qt::KeyboardModifier::ControlModifier );
 					Scene_EntitySetClassname_Selected( action->text().toLatin1().constData() );
@@ -869,8 +928,23 @@ void XYWnd::OnContextMenu(){
 //		m_mnuDrop->setTearOffEnabled( true ); // problematic mouse events override in torn off menu
 		QObject::connect( m_mnuDrop, &QMenu::triggered, entitycreate_activated ); //will receive submenu actions too
 
+
+		QMenu* prefabMenu = m_mnuDrop->addMenu( "Prefabs" );
+
+		const auto addPrefabCommand = [prefabMenu]( const char* text, const char* command ){
+			QAction* action = create_menu_item_with_mnemonic( prefabMenu, text, command );
+			action->setProperty( "radiant_command_action", true );
+		};
+		addPrefabCommand( "Save selected as new Prefab", "PrefabCreateFromSelection" );
+		addPrefabCommand( "Enter Prefab", "PrefabEnter" );
+		addPrefabCommand( "Leave Prefab", "PrefabLeave" );
+		addPrefabCommand( "Edit Prefab", "PrefabEdit" );
+		addPrefabCommand( "Stamp Prefab", "StampPrefab" );
+		m_mnuDrop->addSeparator();
+
 		EntityClassMenuInserter inserter( m_mnuDrop );
 		GlobalEntityClassManager().forEach( inserter );
+
 	}
 
 	g_entityCreationOffset = 0;

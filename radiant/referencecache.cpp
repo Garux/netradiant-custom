@@ -473,6 +473,9 @@ struct ModelResource final : public Resource
 		}
 	}
 	std::time_t modified() const {
+		if( m_path.empty() ){
+			return file_modified( m_name.c_str() );
+		}
 		return file_modified( StringStream( m_path, m_name ) );
 	}
 	void mapSave(){
@@ -490,8 +493,7 @@ struct ModelResource final : public Resource
 		return true;
 	}
 	bool isModified() const {
-		return ( ( !m_path.empty() // had or has an absolute path
-		           && m_modified != modified() ) // AND disk timestamp changed
+		return ( ( m_modified != modified() ) // disk timestamp changed
 		         || !path_equal( rootPath( m_originalName.c_str() ), m_path.c_str() ) ); // OR absolute vfs-root changed
 	}
 	void refresh() override {
@@ -606,12 +608,13 @@ public:
 	}
 	void refresh(){
 		ModelReferencesSnapshot snapshot( m_references );
+		scene::Node* currentMapRoot = Map_Valid( g_map ) ? &GlobalSceneGraph().root() : nullptr;
 		for ( auto& ref : snapshot )
 		{
 			ModelResource* resource = ref->value.get();
-			if ( !resource->isMap() ) {
-				resource->refresh();
-			}
+			if ( resource->isMap() && resource->getNode() == currentMapRoot )
+				continue; // never reload currently opened map
+			resource->refresh();
 		}
 	}
 };

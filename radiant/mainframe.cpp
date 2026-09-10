@@ -106,7 +106,9 @@
 #include "textures.h"
 #include "texwindow.h"
 #include "modelwindow.h"
+#include "prefabbrowser.h"
 #include "layerswindow.h"
+#include "mapscriptwindow.h"
 #include "url.h"
 #include "xywindow.h"
 #include "windowobservers.h"
@@ -718,10 +720,20 @@ void ModelBrowser_ToggleShow(){
 	GroupDialog_showPage( g_page_models );
 }
 
+QWidget* g_page_prefabs;
+
+void PrefabBrowser_ToggleShow(){
+	GroupDialog_showPage( g_page_prefabs );
+}
+
 QWidget* g_page_layers;
 
 void LayersBrowser_ToggleShow(){
 	GroupDialog_showPage( g_page_layers);
+}
+
+void MapScripts_ToggleShow(){
+	MapScripts_toggleShown();
 }
 
 
@@ -946,8 +958,12 @@ void create_view_menu( QMenuBar *menubar, MainFrame::EViewStyle style ){
 		create_menu_item_with_mnemonic( menu, "Texture Browser", "ToggleTextures" );
 	}
 	create_menu_item_with_mnemonic( menu, "Model Browser", "ToggleModelBrowser" );
+	create_menu_item_with_mnemonic( menu, "Prefab Browser", "TogglePrefabBrowser" );
 	create_menu_item_with_mnemonic( menu, "Entity Inspector", "ToggleEntityInspector" );
 	create_menu_item_with_mnemonic( menu, "Layers Browser", "ToggleLayersBrowser" );
+	if( MapScripts_isSupportedGame() ){
+		create_menu_item_with_mnemonic( menu, "Map Scripts", "ToggleMapScripts" );
+	}
 	create_menu_item_with_mnemonic( menu, "&Surface Inspector", "SurfaceInspector" );
 	create_menu_item_with_mnemonic( menu, "Entity List", "ToggleEntityList" );
 
@@ -1187,6 +1203,21 @@ void create_entity_menu( QMenuBar *menubar ){
 	Entity_constructMenu( menu );
 }
 
+void create_prefab_menu( QMenuBar *menubar ){
+	// Prefab menu
+	QMenu *menu = menubar->addMenu( "P&refabs" );
+
+	menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
+
+	create_menu_item_with_mnemonic( menu, "Save selected as new Prefab", "PrefabCreateFromSelection" );
+	create_menu_item_with_mnemonic( menu, "Enter Prefab", "PrefabEnter" );
+	if( QAction* leavePrefabAction = create_menu_item_with_mnemonic( menu, "Leave Prefab", "PrefabLeave" ); leavePrefabAction != nullptr ){
+		leavePrefabAction->setEnabled( Entity_isPrefabEditMode() );
+	}
+	create_menu_item_with_mnemonic( menu, "Edit Prefab", "PrefabEdit" );
+	create_menu_item_with_mnemonic( menu, "Stamp Prefab", "StampPrefab" );
+}
+
 void create_brush_menu( QMenuBar *menubar ){
 	// Brush menu
 	QMenu *menu = menubar->addMenu( "Brush" );
@@ -1231,10 +1262,11 @@ void create_main_menu( QMenuBar *menubar, MainFrame::EViewStyle style ){
 	create_grid_menu( menubar );
 	create_misc_menu( menubar );
 	create_entity_menu( menubar );
+	create_prefab_menu( menubar );
 	create_brush_menu( menubar );
 	if ( !string_equal( g_pGameDescription->getKeyValue( "no_patch" ), "1" ) )
 		create_patch_menu( menubar );
-	create_plugins_menu( menubar );
+	//create_plugins_menu( menubar );
 	create_help_menu( menubar );
 }
 
@@ -1709,6 +1741,7 @@ void MainFrame::Create(){
 	}
 
 	g_page_models = GroupDialog_addPage( "Models", ModelBrowser_constructWindow( GroupDialog_getWindow() ), RawStringExportCaller( "Models" ) );
+	g_page_prefabs = GroupDialog_addPage( "Prefabs", PrefabBrowser_constructWindow( GroupDialog_getWindow() ), RawStringExportCaller( "Prefabs" ) );
 
 	g_page_layers = GroupDialog_addPage( "Layers", LayersBrowser_constructWindow( GroupDialog_getWindow() ), RawStringExportCaller( "Layers" ) );
 
@@ -1868,6 +1901,7 @@ void MainFrame::Create(){
 	PreferencesDialog_constructWindow( window );
 	FindTextureDialog_constructWindow( window );
 	SurfaceInspector_constructWindow( window );
+	MapScripts_constructWindow( window );
 
 	SetActiveXY( m_pXYWnd );
 
@@ -1910,7 +1944,9 @@ void MainFrame::Shutdown(){
 	delete std::exchange( m_pXZWnd, nullptr );
 
 	ModelBrowser_destroyWindow();
+	PrefabBrowser_destroyWindow();
 	LayersBrowser_destroyWindow();
+	MapScripts_destroyWindow();
 	TextureBrowser_destroyWindow();
 
 	DeleteCamWnd( m_pCamWnd );
@@ -2078,7 +2114,9 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "ToggleConsole", makeCallbackF( Console_ToggleShow ), QKeySequence( "O" ) );
 	GlobalCommands_insert( "ToggleEntityInspector", makeCallbackF( EntityInspector_ToggleShow ), QKeySequence( "N" ) );
 	GlobalCommands_insert( "ToggleModelBrowser", makeCallbackF( ModelBrowser_ToggleShow ), QKeySequence( "/" ) );
+	GlobalCommands_insert( "TogglePrefabBrowser", makeCallbackF( PrefabBrowser_ToggleShow ) );
 	GlobalCommands_insert( "ToggleLayersBrowser", makeCallbackF( LayersBrowser_ToggleShow ), QKeySequence( "L" ) );
+	GlobalCommands_insert( "ToggleMapScripts", makeCallbackF( MapScripts_ToggleShow ) );
 	GlobalCommands_insert( "ToggleEntityList", makeCallbackF( EntityList_toggleShown ), QKeySequence( "Shift+L" ) );
 
 	Select_registerCommands();
@@ -2157,4 +2195,3 @@ void MainFrame_Destroy(){
 	g_patchCount.setCountChangedCallback( Callback<void()>() );
 	g_brushCount.setCountChangedCallback( Callback<void()>() );
 }
-

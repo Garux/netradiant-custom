@@ -53,14 +53,36 @@
 #include "preferences.h"
 #include "commands.h"
 #include "xywindow.h"
+#include "entity.h"
 #include "windowobservers.h"
 #include "renderstate.h"
 
 #include "timer.h"
 
 #include <QOpenGLWidget>
+#include <QMimeData>
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
+#include <QDropEvent>
 
 #include <QApplication>
+
+constexpr const char* c_prefabMimeType = "application/x-netradiant-prefab";
+
+static bool prefab_model_from_mime( const QMimeData* mimeData, QByteArray& outModel ){
+	if( mimeData == nullptr ){
+		return false;
+	}
+	if( mimeData->hasFormat( c_prefabMimeType ) ){
+		outModel = mimeData->data( c_prefabMimeType ).trimmed();
+		return !outModel.isEmpty();
+	}
+	if( mimeData->hasText() ){
+		outModel = mimeData->text().trimmed().toUtf8();
+		return !outModel.isEmpty();
+	}
+	return false;
+}
 
 // https://stackoverflow.com/questions/42566421/how-to-queue-lambda-function-into-qts-event-loop/42566867#42566867
 template <typename Fun> void postCall( QObject * obj, Fun && fun ) {
@@ -1578,6 +1600,7 @@ class CamGLWidget : public QOpenGLWidget
 public:
 	CamGLWidget( CamWnd& camwnd ) : QOpenGLWidget(), m_camwnd( camwnd ) {
 		setMouseTracking( true );
+		setAcceptDrops( true );
 	}
 
 	~CamGLWidget() override {
@@ -1658,6 +1681,47 @@ protected:
 			m_camwnd.m_parent->raise();
 		}
 		wheelmove_scroll( scaledEvent( event ), m_camwnd );
+	}
+	void dragEnterEvent( QDragEnterEvent* event ) override {
+		QByteArray model;
+		if( prefab_model_from_mime( event->mimeData(), model ) ){
+			event->acceptProposedAction();
+		}
+	}
+	void dragMoveEvent( QDragMoveEvent* event ) override {
+		QByteArray model;
+		if( prefab_model_from_mime( event->mimeData(), model ) ){
+			event->acceptProposedAction();
+		}
+	}
+	void dropEvent( QDropEvent* event ) override {
+		QByteArray model;
+		if( !prefab_model_from_mime( event->mimeData(), model ) ){
+			event->ignore();
+			return;
+		}
+
+		const camera_t& cam = m_camwnd.getCamera();
+		const QPoint dropPos = event->pos();
+		const Matrix4 screen2world = matrix4_affine_inverse( cam.m_view->GetViewMatrix() );
+		Vector3 nearPoint;
+		nearPoint[0] = 2.f * ( dropPos.x() * m_scale ) / cam.width - 1.f;
+		nearPoint[1] = 2.f * ( dropPos.y() * m_scale ) / cam.height - 1.f;
+		nearPoint[1] *= -1.f;
+		nearPoint[2] = 0.f;
+		nearPoint *= ( camera_t::near_z * 2.f );
+		matrix4_transform_point( screen2world, nearPoint );
+
+		const Vector3 origin = Camera_getOrigin( m_camwnd );
+		const Vector3 dir = vector3_normalised( nearPoint - origin );
+		float depth = vector3_dot( Camera_getFocusPos( m_camwnd.getCamera() ) - origin, Camera_getViewVector( m_camwnd ) );
+		if( depth < 32.f || depth > 65536.f ){
+			depth = 128.f;
+		}
+
+		Vector3 point = origin + dir * depth;
+		Entity_createFromSelection( "misc_prefab", point, model.constData() );
+		event->acceptProposedAction();
 	}
 private:
 	QMouseEvent scaledEvent( const QMouseEvent *event ) const {

@@ -22,17 +22,34 @@
 #pragma once
 
 #include "cmdlib.h"
+#include <list>
+#include <vector>
 
 #define MAXTOKEN    1024
 
 extern char token[MAXTOKEN];
+
 extern int scriptline;
+
+struct Prefab {
+	CopiedString filename;
+	MemBuffer buffer;
+	bool onlyLights;
+	bool noCollapseGroups;
+	int line;
+	float transform[16];
+};
+
+extern std::vector<Prefab> prefabStack;
 
 /// \param[in] index -1: \p filename is absolute path
 /// \param[in] index >= 0: \p filename is relative path in VSF, Nth occurrence of file
 /// \return true on success
 bool LoadScriptFile( const char *filename, int index = 0, bool verbose = true );
 void ParseFromMemory( const char *buffer, size_t size );
+
+bool AddPrefabToStack( const char *filename, int index, bool onlyLights, bool noCollapseGroups,
+                       const float* transform = nullptr );
 
 /// \param[in] crossline true: write next token to \c token or return false on EOF
 /// \param[in] crossline false: find next token on the current line or emit \c Error

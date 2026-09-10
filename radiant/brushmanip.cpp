@@ -26,6 +26,7 @@
 #include "gtkmisc.h"
 #include "brushnode.h"
 #include "map.h"
+#include "ientity.h"
 #include "texwindow.h"
 #include "gtkdlgs.h"
 #include "commands.h"
@@ -33,6 +34,9 @@
 #include "dialog.h"
 #include "xywindow.h"
 #include "preferences.h"
+#include "scenegraph.h"
+#include "entity.h"
+#include <cfloat>
 
 void Brush_ConstructCuboid( Brush& brush, const AABB& bounds, const char* shader, const TextureProjection& projection ){
 	const unsigned char box[3][2] = { { 0, 1 }, { 2, 0 }, { 1, 2 } };
@@ -821,14 +825,137 @@ extern bool g_brush_always_caulk;
 void Scene_BrushResize_Cuboid( scene::Node*& node, const AABB& bounds ){
 	if ( node == 0 ) {
 		NodeSmartReference node_( GlobalBrushCreator().createBrush() );
-		Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( node_ );
+		scene::Traversable* parentTraversable = nullptr;
+		scene::Path parentPath( makeReference( GlobalSceneGraph().root() ) );
 
-		scene::Path brushpath( makeReference( GlobalSceneGraph().root() ) );
-		brushpath.push( makeReference( *Map_GetWorldspawn( g_map ) ) );
+		/* In Prefab Edit mode, new brushes must be created inside the entered prefab subtree,
+		   not in the main-map worldspawn (which is outside traversal root and appears after leave). */
+		if( Entity_isPrefabEditMode() && SceneGraph_HasTraversalRoot() ){
+			if( const scene::Path* traversalRoot = SceneGraph_GetTraversalRoot(); traversalRoot != nullptr ){
+				scene::Traversable* traversable = Node_getTraversable( traversalRoot->top() );
+				if( traversable != nullptr ){
+					parentTraversable = traversable;
+					parentPath = *traversalRoot;
+
+					/* Prefab edit root is a wrapper node (single-child traversable).
+					   Insert brushes into its direct child container instead. */
+					class FindDirectChildContainerWalker : public scene::Traversable::Walker {
+					public:
+						mutable scene::Node* m_found{ nullptr };
+						mutable scene::Node* m_fallback{ nullptr };
+						bool pre( scene::Node& child ) const override {
+							if( m_found != nullptr ){
+								return false;
+							}
+							if( Node_getTraversable( child ) != nullptr ){
+								if( m_fallback == nullptr ){
+									m_fallback = &child;
+								}
+								if( Entity* entity = Node_getEntity( child ); entity != nullptr
+								 && string_equal( entity->getClassName(), "worldspawn" ) ){
+									m_found = &child; /* target true prefab worldspawn */
+								}
+							}
+							/* We only need direct children of traversal root. */
+							return false;
+						}
+					} findChildContainer;
+
+					traversable->traverse( findChildContainer );
+					scene::Node* targetChild = findChildContainer.m_found != nullptr
+						? findChildContainer.m_found
+						: findChildContainer.m_fallback;
+					if( targetChild != nullptr ){
+						if( scene::Traversable* childTraversable = Node_getTraversable( *targetChild ); childTraversable != nullptr ){
+							scene::Node* targetInsertNode = targetChild;
+
+							/* Common prefab layout is:
+							   misc_prefab (traversal root) -> map root -> worldspawn.
+							   For new brushes we must target prefab worldspawn, not map root. */
+							if( Entity* targetEntity = Node_getEntity( *targetChild );
+								targetEntity == nullptr || !string_equal( targetEntity->getClassName(), "worldspawn" ) ){
+								class FindNestedWorldspawnWalker : public scene::Traversable::Walker {
+								public:
+									mutable scene::Node* m_worldspawn{ nullptr };
+									bool pre( scene::Node& child ) const override {
+										if( m_worldspawn != nullptr ){
+											return false;
+										}
+										if( Entity* entity = Node_getEntity( child ); entity != nullptr
+										 && string_equal( entity->getClassName(), "worldspawn" ) ){
+											m_worldspawn = &child;
+										}
+										/* Direct children of map root are enough. */
+										return false;
+									}
+								} findNestedWorldspawn;
+
+								childTraversable->traverse( findNestedWorldspawn );
+								if( findNestedWorldspawn.m_worldspawn != nullptr ){
+									targetInsertNode = findNestedWorldspawn.m_worldspawn;
+								}
+							}
+
+							if( scene::Traversable* targetInsertTraversable = Node_getTraversable( *targetInsertNode ); targetInsertTraversable != nullptr ){
+								parentTraversable = targetInsertTraversable;
+								parentPath.push( makeReference( *targetChild ) );
+								if( targetInsertNode != targetChild ){
+									parentPath.push( makeReference( *targetInsertNode ) );
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if( parentTraversable == nullptr ){
+			scene::Node& world = Map_FindOrInsertWorldspawn( g_map );
+			parentTraversable = Node_getTraversable( world );
+			parentPath.push( makeReference( world ) );
+		}
+
+		parentTraversable->insert( node_ );
+
+		scene::Path brushpath( parentPath );
 		brushpath.push( makeReference( node_.get() ) );
 		selectPath( brushpath, true );
 
 		node = node_.get_pointer();
+	}
+
+	AABB localBounds = bounds;
+	if( Entity_isPrefabEditMode() ){
+		scene::Instance* brushInstance = nullptr;
+		if( GlobalSelectionSystem().countSelected() != 0 ){
+			scene::Instance& selected = GlobalSelectionSystem().ultimateSelected();
+			if( selected.path().top().get_pointer() == node ){
+				brushInstance = &selected;
+			}
+		}
+		if( brushInstance != nullptr ){
+			const Matrix4 worldToLocal = matrix4_affine_inverse( brushInstance->localToWorld() );
+			const Vector3 mins = vector3_subtracted( bounds.origin, bounds.extents );
+			const Vector3 maxs = vector3_added( bounds.origin, bounds.extents );
+			AABB transformedLocal;
+			transformedLocal.origin = g_vector3_identity;
+			transformedLocal.extents = Vector3( -FLT_MAX );
+			for( int ix = 0; ix < 2; ++ix ){
+				for( int iy = 0; iy < 2; ++iy ){
+					for( int iz = 0; iz < 2; ++iz ){
+						const Vector3 corner(
+							ix ? maxs[0] : mins[0],
+							iy ? maxs[1] : mins[1],
+							iz ? maxs[2] : mins[2]
+						);
+						aabb_extend_by_point_safe( transformedLocal, matrix4_transformed_point( worldToLocal, corner ) );
+					}
+				}
+			}
+			if( transformedLocal.extents[0] >= 0.f && transformedLocal.extents[1] >= 0.f && transformedLocal.extents[2] >= 0.f ){
+				localBounds = transformedLocal;
+			}
+		}
 	}
 
 	Brush* brush = Node_getBrush( *node );
@@ -836,7 +963,7 @@ void Scene_BrushResize_Cuboid( scene::Node*& node, const AABB& bounds ){
 		const char* shader = g_brush_always_caulk?
 		                     GetCaulkShader()
 		                     : TextureBrowser_GetSelectedShader();
-		Brush_ConstructCuboid( *brush, bounds, shader, TextureTransform_getDefault() );
+		Brush_ConstructCuboid( *brush, localBounds, shader, TextureTransform_getDefault() );
 		SceneChangeNotify();
 	}
 }

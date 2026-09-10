@@ -301,7 +301,10 @@ public:
 	}
 	typedef MemberCaller<ModelAttribute, void(), &ModelAttribute::update> UpdateCaller;
 	void browse(){
-		const char *filename = misc_model_dialog( m_entry->window(), m_entry->text().toLatin1().constData() );
+		const bool isPrefab = string_equal( SelectedEntity_getValueForKey( "classname" ), "misc_prefab" );
+		const char *filename = isPrefab
+			? misc_prefab_dialog( m_entry->window(), m_entry->text().toLatin1().constData() )
+			: misc_model_dialog( m_entry->window(), m_entry->text().toLatin1().constData() );
 
 		if ( filename != 0 ) {
 			m_entry->setText( filename );
@@ -729,6 +732,9 @@ QLineEdit* g_entityKeyEntry;
 QLineEdit* g_entityValueEntry;
 
 QToolButton* g_focusToggleButton;
+QPushButton* g_prefabCreateButton;
+QPushButton* g_prefabEditButton;
+QPushButton* g_StampPrefabButton;
 
 QTreeWidget* g_entprops_store;
 const EntityClass* g_current_flags = 0;
@@ -1050,6 +1056,20 @@ void EntityInspector_updateKeyValues(){
 	for ( EntityAttribute *attr : g_entityAttributes )
 	{
 		attr->update();
+	}
+
+	const bool isPrefab = Entity_isSelectedMiscPrefab();
+	const bool hasSelection = GlobalSelectionSystem().countSelected() != 0 && GlobalSelectionSystem().countSelectedComponents() == 0;
+	if( g_prefabCreateButton != nullptr ){
+		g_prefabCreateButton->setEnabled( hasSelection );
+	}
+	if( g_prefabEditButton != nullptr ){
+		g_prefabEditButton->setVisible( isPrefab );
+		g_prefabEditButton->setEnabled( isPrefab );
+	}
+	if( g_StampPrefabButton != nullptr ){
+		g_StampPrefabButton->setVisible( isPrefab );
+		g_StampPrefabButton->setEnabled( isPrefab );
 	}
 }
 

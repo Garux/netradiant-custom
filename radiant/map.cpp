@@ -67,6 +67,7 @@
 #include "brushmodule.h"
 #include "brush.h"
 #include "grid.h"
+#include "entity.h"
 
 class NameObserver
 {
@@ -168,6 +169,8 @@ public:
 		}
 	}
 };
+
+CopiedString g_mapTitleAddon;
 
 BasicNamespace g_defaultNamespace;
 BasicNamespace g_cloneNamespace;
@@ -362,7 +365,22 @@ void Map_SetModified( Map& map, bool modified ){
 }
 
 void Map_UpdateTitle( const Map& map ){
-	Sys_SetTitle( map.m_name.c_str(), Map_Modified( map ) );
+	if( !g_mapTitleAddon.empty() ){
+		Sys_SetTitle( StringStream( map.m_name.c_str(), " [", g_mapTitleAddon.c_str(), "]" ).c_str(), Map_Modified( map ) );
+	}
+	else{
+		Sys_SetTitle( map.m_name.c_str(), Map_Modified( map ) );
+	}
+}
+
+void Map_SetTitleAddon( const char* addon ){
+	g_mapTitleAddon = ( addon != nullptr ) ? addon : "";
+	Map_UpdateTitle( g_map );
+}
+
+void Map_ClearTitleAddon(){
+	g_mapTitleAddon = "";
+	Map_UpdateTitle( g_map );
 }
 
 
@@ -384,6 +402,9 @@ void Map_SetWorldspawn( Map& map, scene::Node* node ){
  */
 #include "modelwindow.h"
 void Map_Free(){
+	// Must run before FlushReferences(): prefab edit mode keeps temporary references alive.
+	Entity_prefabAbortAllEdits();
+
 	Map_RegionOff();
 	Select_ShowAllHidden();
 
@@ -1877,6 +1898,11 @@ void SaveMapAs(){
 }
 
 void SaveMap(){
+	if( Entity_isPrefabEditMode() ){
+		Entity_prefabSaveCurrent();
+		return;
+	}
+
 	if ( Map_Unnamed( g_map ) ) {
 		SaveMapAs();
 	}

@@ -65,19 +65,31 @@ void Entity_ExportTokens( const Entity& entity, TokenWriter& writer ){
 	class WriteKeyValue : public Entity::Visitor
 	{
 		TokenWriter& m_writer;
+		bool m_hasClassname;
 	public:
 		WriteKeyValue( TokenWriter& writer )
-			: m_writer( writer ){
+			: m_writer( writer ), m_hasClassname( false ){
 		}
 
 		void visit( const char* key, const char* value ) override {
+			if( !strcmp( key, "classname" ) ){
+				m_hasClassname = true;
+			}
 			m_writer.writeString( key );
 			m_writer.writeString( value );
 			m_writer.nextLine();
 		}
+		bool hasClassname() const {
+			return m_hasClassname;
+		}
 	} visitor( writer );
 
 	entity.forEachKeyValue( visitor );
+	if( !visitor.hasClassname() ){
+		writer.writeString( "classname" );
+		writer.writeString( entity.getClassName() );
+		writer.nextLine();
+	}
 }
 
 class WriteTokensWalker : public scene::Traversable::Walker
@@ -98,6 +110,28 @@ public:
 
 		Entity* entity = Node_getEntity( node );
 		if ( entity != 0 ) {
+			const bool isMiscPrefab = string_equal( entity->getClassName(), "misc_prefab" );
+			const bool exportPrefabContentsOnly = isMiscPrefab && entity->hasKeyValue( "_save_prefab_contents" );
+
+			if( exportPrefabContentsOnly ){
+				/* Prefab save path: replace wrapper misc_prefab with worldspawn container,
+				   then serialize children into this entity. */
+				m_writer.writeToken( "//" );
+				m_writer.writeToken( "entity" );
+				m_writer.writeUnsigned( g_count_entities++ );
+				m_writer.nextLine();
+
+				Layer_Write( node.m_layer, m_currentLayer, m_writer );
+
+				m_writer.writeToken( "{" );
+				m_writer.nextLine();
+				m_stack.top() = true;
+				m_writer.writeString( "classname" );
+				m_writer.writeString( "worldspawn" );
+				m_writer.nextLine();
+				return true;
+			}
+
 			if( entity->isContainer() && Node_getTraversable( node )->empty() && !string_equal( entity->getClassName(), "worldspawn" )
 			 && !entity->hasKeyValue( "origin" ) ){
 				globalErrorStream() << "discarding empty group entity: # = " << g_count_entities << "; classname = " << entity->getClassName() << '\n';
@@ -115,6 +149,12 @@ public:
 			m_stack.top() = true;
 
 			Entity_ExportTokens( *entity, m_writer );
+
+			if( isMiscPrefab ){
+				/* Normal map save path: keep misc_prefab entity itself in the parent map,
+				   but do not serialize runtime/editor preview children. */
+				return false;
+			}
 		}
 		else
 		{

@@ -30,6 +30,7 @@
 #include "vfs.h"
 #include <list>
 #include <cerrno>
+#include <algorithm>
 
 /*
    =============================================================================
@@ -55,9 +56,10 @@ struct script_t
 	script_t( script_t&& ) noexcept = delete;
 };
 
+std::vector<Prefab> prefabStack;
 std::list<script_t> scriptstack;
-
 int scriptline;
+int prefabLine;
 char token[MAXTOKEN];
 bool tokenready;                     // only true if UnGetToken was just called
 
@@ -90,7 +92,44 @@ static bool AddScriptToStack( const char *filename, int index, bool verbose ){
 	}
 }
 
+/*
+   ==============
+   AddPrefabToStack
+   ==============
+ */
+bool AddPrefabToStack( const char *filename, int index, bool onlyLights, bool noCollapseGroups,
+                       const float* transform ) {
+	if ( MemBuffer buffer = vfsLoadFile( filename, index, true ) ) {
 
+		if ( index > 0 ) {
+			Sys_Printf( "entering %s (%d)\n", filename, index + 1 );
+		} else {
+			Sys_Printf( "entering %s\n", filename );
+		}
+
+		Prefab prefab{ filename, std::move( buffer ), onlyLights, noCollapseGroups, scriptline, { 0 } };
+		if( transform != nullptr ){
+			std::copy_n( transform, 16, prefab.transform );
+		}
+		else{
+			prefab.transform[0] = 1.f;
+			prefab.transform[5] = 1.f;
+			prefab.transform[10] = 1.f;
+			prefab.transform[15] = 1.f;
+		}
+		prefabStack.emplace_back( std::move( prefab ) );
+		return true;
+	}
+	else
+	{
+		if( index >= 0 )
+			Sys_FPrintf( SYS_WRN, "Script file %s was not found\n", filename );
+		else
+			Sys_FPrintf( SYS_WRN, "Script file %s was not found: %s\n", filename, strerror( errno ) );
+
+		return false;
+	}
+}
 /*
    ==============
    LoadScriptFile

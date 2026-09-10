@@ -73,6 +73,7 @@
 #include "stream/stringstream.h"
 #include "grid.h"
 #include "textureentry.h"
+#include "entity.h"
 
 
 class Increment
@@ -1587,12 +1588,55 @@ class BrushGetClosestFaceVisibleWalker : public scene::Graph::Walker
 	SelectionTest& m_test;
 	Texturable& m_texturable;
 	mutable SelectionIntersection m_bestIntersection;
+	static bool path_is_within_misc_prefab( const scene::Path& path ){
+		if( Entity_isPrefabEditMode() ){
+			return false;
+		}
+		for( scene::Path::const_iterator i = path.begin(); i != path.end(); ++i ){
+			if( Entity* entity = Node_getEntity( i->get() ); entity != 0
+			 && string_equal( entity->getClassName(), "misc_prefab" ) ){
+				return true;
+			}
+		}
+		return false;
+	}
+	void occlude_by_brush( BrushInstance& brush ) const {
+		m_test.BeginMesh( brush.localToWorld() );
+		for ( const auto& face : brush.getBrush() )
+		{
+			if ( face->isFiltered() ) {
+				continue;
+			}
+			SelectionIntersection intersection;
+			face->testSelect( m_test, intersection );
+			if ( intersection.valid()
+			  && SelectionIntersection_closer( intersection, m_bestIntersection ) ) {
+				m_bestIntersection = intersection;
+			}
+		}
+	}
+	void occlude_by_instance( scene::Instance& instance ) const {
+		if ( BrushInstance* brush = Instance_getBrush( instance ); brush != 0 ) {
+			occlude_by_brush( *brush );
+			return;
+		}
+		if ( SelectionTestable* selectionTestable = Instance_getSelectionTestable( instance ); selectionTestable != 0 ) {
+			bool occluded;
+			OccludeSelector selector( m_bestIntersection, occluded );
+			selectionTestable->testSelect( selector, m_test );
+		}
+	}
 public:
 	BrushGetClosestFaceVisibleWalker( SelectionTest& test, Texturable& texturable ) : m_test( test ), m_texturable( texturable ){
 	}
 	bool pre( const scene::Path& path, scene::Instance& instance ) const override {
 		if ( !path.top().get().visible() )
 			return false;
+		if( path_is_within_misc_prefab( path ) ){
+			// Prefab contents must occlude ray casts but never become texturable targets.
+			occlude_by_instance( instance );
+			return true;
+		}
 		BrushInstance* brush = Instance_getBrush( instance );
 		if ( brush != 0 ) {
 			m_test.BeginMesh( brush->localToWorld() );
@@ -1787,4 +1831,3 @@ void SurfaceInspector_Construct(){
 void SurfaceInspector_Destroy(){
 	delete g_SurfaceInspector;
 }
-

@@ -61,6 +61,8 @@ class CompiledGraph final : public scene::Graph, public scene::Instantiable::Obs
 	scene::Instantiable::Observer* m_observer;
 	Signal0 m_boundsChanged;
 	scene::Path m_rootpath;
+	scene::Path m_traversalRoot;
+	bool m_hasTraversalRoot = false;
 	Signal0 m_sceneChangedCallbacks;
 	Layer *m_currentLayer0 = nullptr;
 	Layer **m_currentLayer = &m_currentLayer0;
@@ -121,6 +123,14 @@ public:
 	}
 
 	void traverse( const Walker& walker ) override {
+		if( m_hasTraversalRoot ){
+			InstanceMap::iterator isolated = m_instances.find( PathConstReference( m_traversalRoot ) );
+			if( isolated != m_instances.end() ){
+				traverse_subgraph( walker, isolated );
+				return;
+			}
+			m_hasTraversalRoot = false;
+		}
 		traverse_subgraph( walker, m_instances.begin() );
 	}
 
@@ -162,6 +172,20 @@ public:
 
 	TypeId getInstanceTypeId( const char* name ) override {
 		return m_instanceTypeIds.getTypeId( name );
+	}
+
+	bool hasTraversalRoot() const {
+		return m_hasTraversalRoot;
+	}
+	const scene::Path* getTraversalRoot() const {
+		return m_hasTraversalRoot ? &m_traversalRoot : nullptr;
+	}
+	void setTraversalRoot( const scene::Path& path ){
+		m_traversalRoot = path;
+		m_hasTraversalRoot = true;
+	}
+	void clearTraversalRoot(){
+		m_hasTraversalRoot = false;
 	}
 
 private:
@@ -269,3 +293,25 @@ public:
 typedef SingletonModule<SceneGraphAPI> SceneGraphModule;
 typedef Static<SceneGraphModule> StaticSceneGraphModule;
 StaticRegisterModule staticRegisterSceneGraph( StaticSceneGraphModule::instance() );
+
+bool SceneGraph_HasTraversalRoot(){
+	return g_sceneGraph != nullptr && g_sceneGraph->hasTraversalRoot();
+}
+
+const scene::Path* SceneGraph_GetTraversalRoot(){
+	return ( g_sceneGraph != nullptr ) ? g_sceneGraph->getTraversalRoot() : nullptr;
+}
+
+void SceneGraph_SetTraversalRoot( const scene::Path& path ){
+	if( g_sceneGraph != nullptr ){
+		g_sceneGraph->setTraversalRoot( path );
+		g_sceneGraph->sceneChanged();
+	}
+}
+
+void SceneGraph_ClearTraversalRoot(){
+	if( g_sceneGraph != nullptr ){
+		g_sceneGraph->clearTraversalRoot();
+		g_sceneGraph->sceneChanged();
+	}
+}
