@@ -49,6 +49,7 @@
 #include "gtkutil/fbo.h"
 #include "gtkmisc.h"
 #include "selection.h"
+#include "selection_mtor_sculpt.h"
 #include "mainframe.h"
 #include "preferences.h"
 #include "commands.h"
@@ -1657,6 +1658,8 @@ protected:
 			m_camwnd.m_parent->activateWindow();
 			m_camwnd.m_parent->raise();
 		}
+		if( Sculpt_wheelEvent( *event ) )
+			return;
 		wheelmove_scroll( scaledEvent( event ), m_camwnd );
 	}
 private:
