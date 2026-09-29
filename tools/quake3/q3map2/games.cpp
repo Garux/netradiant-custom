@@ -935,8 +935,9 @@ struct game_ncftu : game_default
 		maxSurfaceIndexes = 32768;
 
 		lightmapSize = 1024;
-		lightmapsRGB = false;
-
+		lightmapsRGB = true;
+		
+		deluxeMap = true;	
 		lightAngleHL = true;
 		noStyles = true;
 
