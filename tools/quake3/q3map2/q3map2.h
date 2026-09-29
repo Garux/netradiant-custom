@@ -29,6 +29,7 @@
 
 #pragma once
 
+//#define IM_NOT_BUILDING_FOR_IDTECH // braxi: bump some limits here and there...
 
 /* version */
 #ifndef Q3MAP_VERSION
@@ -36,7 +37,6 @@
 #endif
 #define Q3MAP_MOTD      "Your map saw the pretty lights from q3map2's BFG"
 
-#define IM_NOT_BUILDING_FOR_IDTECH
 
 /* -------------------------------------------------------------------------------
 
