@@ -322,11 +322,15 @@ static AssModel *LoadModel( const char *name, int frame ){
 	               | aiProcess_PreTransformVertices
 	               | aiProcess_RemoveComponent
 	               | aiProcess_SplitLargeMeshes;
+				   
 	// rotate the whole scene 90 degrees around the x axis to convert assimp's Y = UP to Quakes's Z = UP
-	s_assImporter->SetPropertyMatrix( AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION, aiMatrix4x4( 1, 0, 0, 0,
-	                                                                                     0, 0, -1, 0,
-	                                                                                     0, 1, 0, 0,
-	                                                                                     0, 0, 0, 1 ) ); // aiMatrix4x4::RotationX( c_half_pi )
+	// braxi: Do not rotate .SMD models
+	if( !strstr(name, ".smd") || !strstr(name, ".SMD") ) {
+		s_assImporter->SetPropertyMatrix( AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION, aiMatrix4x4( 1, 0, 0, 0,
+																							 0, 0, -1, 0,
+																							 0, 1, 0, 0,
+																							 0, 0, 0, 1 ) ); // aiMatrix4x4::RotationX( c_half_pi )
+	}
 
 	s_assImporter->SetPropertyInteger( AI_CONFIG_PP_SLM_VERTEX_LIMIT, maxSurfaceVerts ); // TODO this optimal and with respect to lightmapped/not
 	s_assImporter->SetPropertyInteger( AI_CONFIG_IMPORT_GLOBAL_KEYFRAME, frame );
