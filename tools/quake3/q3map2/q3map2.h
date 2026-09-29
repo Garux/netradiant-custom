@@ -36,8 +36,7 @@
 #endif
 #define Q3MAP_MOTD      "Your map saw the pretty lights from q3map2's BFG"
 
-
-
+#define IM_NOT_BUILDING_FOR_IDTECH
 
 /* -------------------------------------------------------------------------------
 
@@ -122,7 +121,15 @@
 
 
 /* bsp */
-#define MAX_PATCH_SIZE          31
+
+#if defined(IM_NOT_BUILDING_FOR_IDTECH) 
+	// braxi : bump the limit because large neigboring patches might get stitched together and easily overflow original limit
+	#define MAX_PATCH_SIZE          2048
+#else 
+	// matches idtech3 engine
+	#define MAX_PATCH_SIZE          31
+#endif
+
 #define MAX_BRUSH_SIDES         1024
 #define MAX_BUILD_SIDES         1024
 
