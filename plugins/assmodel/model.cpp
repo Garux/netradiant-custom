@@ -675,11 +675,18 @@ scene::Node& loadPicoModel( Assimp::Importer& importer, ArchiveFile& file ){
 	               | aiProcess_FlipUVs
 	               | aiProcess_FlipWindingOrder
 	               | aiProcess_PreTransformVertices;
-	// rotate the whole scene 90 degrees around the x axis to convert assimp's Y = UP to Quakes's Z = UP
-	importer.SetPropertyMatrix( AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION, aiMatrix4x4( 1, 0, 0, 0,
-	                                                                               0, 0, -1, 0,
-	                                                                               0, 1, 0, 0,
-	                                                                               0, 0, 0, 1 ) ); // aiMatrix4x4::RotationX( c_half_pi )
+				   
+	if( path_extension_is( file.getName(), "smd" ) ){
+		// braxi: .SMD (Source/GoldSrc) is already Z = UP so don't rotate it
+		importer.SetPropertyMatrix( AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION, aiMatrix4x4() ); // identity
+	}
+	else{
+		// rotate the whole scene 90 degrees around the x axis to convert assimp's Y = UP to Quakes's Z = UP
+		importer.SetPropertyMatrix( AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION, aiMatrix4x4( 1, 0, 0, 0,
+		                                                                               0, 0, -1, 0,
+		                                                                               0, 1, 0, 0,
+		                                                                               0, 0, 0, 1 ) ); // aiMatrix4x4::RotationX( c_half_pi )
+	}
 
 	const aiScene *scene = importer.ReadFile( file.getName(), flags );
 
