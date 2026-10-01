@@ -1493,6 +1493,7 @@ Matrix4 ModelGetTransform( const entity_t& e, const Vector3& parent_origin /* = 
  */
 
 void AddTriangleModels( entity_t& eparent ){
+	const char *model;	
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- AddTriangleModels ---\n" );
 
@@ -1513,6 +1514,17 @@ void AddTriangleModels( entity_t& eparent ){
 		/* get entity */
 		const entity_t& e = entities[ i ];
 
+		/* braxi: if this is a misc_model_ext it is not added to BSP, but it MUST have model or model2 */
+		if ( e.classname_is( "misc_model_ext" ) ) {
+			/* get model name */
+			if ( !e.read_keyvalue( model, "model" ) ) {
+				if ( !e.read_keyvalue( model, "model2" ) ) {
+					Error( "entity#%d misc_model_ext at [%.0f %.0f %.0f] without a model\n", e.mapEntityNum, e.origin[0], e.origin[1], e.origin[2] );
+				}
+			}
+			continue;
+		}
+		
 		/* convert misc_models into raw geometry */
 		if ( !e.classname_is( "misc_model" ) ) {
 			continue;
@@ -1524,9 +1536,8 @@ void AddTriangleModels( entity_t& eparent ){
 		}
 
 		/* get model name */
-		const char *model;
 		if ( !e.read_keyvalue( model, "model" ) ) {
-			Sys_Warning( "entity#%d misc_model without a model key\n", e.mapEntityNum );
+			Error( "entity#%d misc_model at [%.0f %.0f %.0f] without a model\n", e.mapEntityNum, e.origin[0], e.origin[1], e.origin[2] );
 			continue;
 		}
 
