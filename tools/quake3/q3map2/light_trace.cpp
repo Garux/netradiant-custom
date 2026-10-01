@@ -1001,6 +1001,14 @@ static void PopulateTraceNodes(){
 			continue;
 		}
 
+		// braxi: if misc_model_ext has secondary model, use it for shadows (for low poly shadow caster models)
+		if ( e.classname_is( "misc_model_ext" ) ) {		
+			value = e.valueForKey( "model2" );
+			if(value[0]){
+				goto insert_model2;
+			}
+		}
+		
 		/* get model */
 		value = e.valueForKey( "model" );
 
@@ -1026,6 +1034,8 @@ static void PopulateTraceNodes(){
 			PopulateWithPicoModel( castShadows, skipGrid, LoadModelWalker( value, e.intForKey( "_frame", "frame" ) ), ModelGetTransform( e ) );
 			continue;
 		}
+
+insert_model2:
 
 		/* get model2 */
 		value = e.valueForKey( "model2" );
