@@ -920,7 +920,7 @@ static void PopulateWithBSPModel( const bspModel_t& model, const Matrix4& transf
    filters a picomodel's surfaces into the raytracing tree
  */
 
-static void PopulateWithPicoModel( int castShadows, const std::vector<const AssMeshWalker*>& model, const Matrix4& transform ){
+static void PopulateWithPicoModel( int castShadows, int skipGrid, const std::vector<const AssMeshWalker*>& model, const Matrix4& transform ){
 	traceInfo_t ti;
 	traceWinding_t tw;
 
@@ -952,7 +952,7 @@ static void PopulateWithPicoModel( int castShadows, const std::vector<const AssM
 		/* setup trace info */
 		ti.castShadows = castShadows;
 		ti.surfaceNum = -1;
-		ti.skipGrid = true; // also ignore picomodels when skipping patches
+		ti.skipGrid = skipGrid; // "it took 25 years to notice, seems like default is fine in (inf - 1) / inf cases" - garux, 2026 AD
 
 		/* setup trace winding */
 		memset( &tw, 0, sizeof( tw ) );
@@ -993,7 +993,8 @@ static void PopulateTraceNodes(){
 
 		/* get shadow flags */
 		int castShadows = ENTITY_CAST_SHADOWS;
-		GetEntityShadowFlags( &e, nullptr, &castShadows, nullptr );
+		int skipGrid = 1;
+		GetEntityShadowFlags( &e, nullptr, &castShadows, nullptr, &skipGrid );
 
 		/* early out? */
 		if ( !castShadows ) {
@@ -1022,7 +1023,7 @@ static void PopulateTraceNodes(){
 
 		/* external model */
 		default:
-			PopulateWithPicoModel( castShadows, LoadModelWalker( value, e.intForKey( "_frame", "frame" ) ), ModelGetTransform( e ) );
+			PopulateWithPicoModel( castShadows, skipGrid, LoadModelWalker( value, e.intForKey( "_frame", "frame" ) ), ModelGetTransform( e ) );
 			continue;
 		}
 
@@ -1047,7 +1048,7 @@ static void PopulateTraceNodes(){
 
 		/* external model */
 		default:
-			PopulateWithPicoModel( castShadows, LoadModelWalker( value, e.intForKey( "_frame2" ) ), ModelGetTransform( e ) );
+			PopulateWithPicoModel( castShadows, skipGrid, LoadModelWalker( value, e.intForKey( "_frame2" ) ), ModelGetTransform( e ) );
 			continue;
 		}
 	}

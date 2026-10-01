@@ -1910,7 +1910,7 @@ void                        UnparseEntities();
 void                        PrintEntity( const entity_t *ent );
 
 entity_t                    *FindTargetEntity( const char *target );
-void                        GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castShadows, int *recvShadows );
+void                        GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castShadows, int *recvShadows, int *skipGrid );
 void                        InjectCommandLine( const char *stage, const std::vector<const char *>& args );
 
 
