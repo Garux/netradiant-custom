@@ -322,12 +322,19 @@ static AssModel *LoadModel( const char *name, int frame ){
 	               | aiProcess_PreTransformVertices
 	               | aiProcess_RemoveComponent
 	               | aiProcess_SplitLargeMeshes;
-	// rotate the whole scene 90 degrees around the x axis to convert assimp's Y = UP to Quakes's Z = UP
-	s_assImporter->SetPropertyMatrix( AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION, aiMatrix4x4( 1, 0, 0, 0,
-	                                                                                     0, 0, -1, 0,
-	                                                                                     0, 1, 0, 0,
-	                                                                                     0, 0, 0, 1 ) ); // aiMatrix4x4::RotationX( c_half_pi )
-
+				   
+	
+	if( !strstr(name, ".smd") || !strstr(name, ".SMD") ){
+		// braxi: .SMD (Source/GoldSrc) is already Z = UP so don't rotate it
+		s_assImporter->SetPropertyMatrix( AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION, aiMatrix4x4() ); // identity
+	}
+	else{
+		// rotate the whole scene 90 degrees around the x axis to convert assimp's Y = UP to Quakes's Z = UP
+		s_assImporter->SetPropertyMatrix( AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION, aiMatrix4x4( 1, 0, 0, 0,
+		                                                                               0, 0, -1, 0,
+		                                                                               0, 1, 0, 0,
+		                                                                               0, 0, 0, 1 ) ); // aiMatrix4x4::RotationX( c_half_pi )
+	}
 	s_assImporter->SetPropertyInteger( AI_CONFIG_PP_SLM_VERTEX_LIMIT, maxSurfaceVerts ); // TODO this optimal and with respect to lightmapped/not
 	s_assImporter->SetPropertyInteger( AI_CONFIG_IMPORT_GLOBAL_KEYFRAME, frame );
 
@@ -1486,6 +1493,7 @@ Matrix4 ModelGetTransform( const entity_t& e, const Vector3& parent_origin /* = 
  */
 
 void AddTriangleModels( entity_t& eparent ){
+	const char *model;	
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- AddTriangleModels ---\n" );
 
@@ -1506,6 +1514,17 @@ void AddTriangleModels( entity_t& eparent ){
 		/* get entity */
 		const entity_t& e = entities[ i ];
 
+		/* braxi: if this is a misc_model_ext it is not added to BSP, but it MUST have model or model2 */
+		if ( e.classname_is( "misc_model_ext" ) ) {
+			/* get model name */
+			if ( !e.read_keyvalue( model, "model" ) ) {
+				if ( !e.read_keyvalue( model, "model2" ) ) {
+					Error( "entity#%d misc_model_ext at [%.0f %.0f %.0f] without a model\n", e.mapEntityNum, e.origin[0], e.origin[1], e.origin[2] );
+				}
+			}
+			continue;
+		}
+		
 		/* convert misc_models into raw geometry */
 		if ( !e.classname_is( "misc_model" ) ) {
 			continue;
@@ -1517,9 +1536,8 @@ void AddTriangleModels( entity_t& eparent ){
 		}
 
 		/* get model name */
-		const char *model;
 		if ( !e.read_keyvalue( model, "model" ) ) {
-			Sys_Warning( "entity#%d misc_model without a model key\n", e.mapEntityNum );
+			Error( "entity#%d misc_model at [%.0f %.0f %.0f] without a model\n", e.mapEntityNum, e.origin[0], e.origin[1], e.origin[2] );
 			continue;
 		}
 

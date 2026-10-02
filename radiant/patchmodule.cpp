@@ -55,7 +55,14 @@ void Patch_Construct( EPatchType type ){
 	}
 	else
 	{
-		MAX_PATCH_WIDTH = MAX_PATCH_HEIGHT = 31; // matching q3map2
+#if 0	
+		// matching q3map2
+		MAX_PATCH_WIDTH = MAX_PATCH_HEIGHT = 31; 
+#else
+		// braxi : some larger terrains made out of patches may crash radiant when loading the .map
+		// so bump the limit here to avoid that
+		MAX_PATCH_WIDTH = MAX_PATCH_HEIGHT = 9999;
+#endif
 	}
 }
 

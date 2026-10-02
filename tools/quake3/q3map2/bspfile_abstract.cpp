@@ -644,9 +644,30 @@ entity_t *FindTargetEntity( const char *target ){
    GetEntityShadowFlags() - ydnar
    gets an entity's shadow flags
    note: does not set them to defaults if the keys are not found!
+   braxi: skipGrid is only used for external misc models at the moment!
  */
 
-void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castShadows, int *recvShadows ){
+void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castShadows, int *recvShadows, int *skipGrid ){
+	/* braxi: misc_model_ext is a special entity, by default it casts shadows and adds to lightgrid */
+	if ( ent != nullptr && ent->classname_is( "misc_model_ext" ) ) {
+		static const int SF_EXTMODEL_NO_STATIC_SHADOWS = 1;
+		static const int SF_EXTMODEL_NO_LIGHTGRID_CONTRIBUTION = 2;
+		
+		int spawnFlags;
+		ent->read_keyvalue( spawnFlags, "spawnflags" );
+		
+		if ( recvShadows != nullptr ) {
+			*recvShadows = 0; // these are not in BSP so this can be false
+		}
+		if ( castShadows != nullptr ) {
+			*castShadows = (spawnFlags & SF_EXTMODEL_NO_STATIC_SHADOWS) ? 0 : 1;
+		}	
+		if ( skipGrid != nullptr ) {
+			*skipGrid = (spawnFlags & SF_EXTMODEL_NO_LIGHTGRID_CONTRIBUTION) ? 1 : 0;
+		}	
+		return;
+	}
+	
 	/* get cast shadows */
 	if ( castShadows != nullptr ) {
 		( ent != nullptr && ent->read_keyvalue( *castShadows, "_castShadows", "_cs" ) ) ||
@@ -658,6 +679,11 @@ void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castS
 		( ent != nullptr && ent->read_keyvalue( *recvShadows, "_receiveShadows", "_rs" ) ) ||
 		( ent2 != nullptr && ent2->read_keyvalue( *recvShadows, "_receiveShadows", "_rs" ) );
 	}
+	
+	/* skip light grid */
+	if ( skipGrid != nullptr ) {
+		*skipGrid = 1; // braxi: default for 25 years and counting
+	}	
 
 	/* vortex: game-specific default entity keys */
 	if ( striEqual( g_game->magic, "dq" ) || striEqual( g_game->magic, "prophecy" ) ) {

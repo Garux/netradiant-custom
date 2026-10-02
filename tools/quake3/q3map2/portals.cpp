@@ -578,10 +578,14 @@ EFloodEntities FloodEntities( tree_t& tree ){
 		//%		origin[ 2 ] += 4096;
 
 		/* find leaf */
-		if ( PlaceOccupant( tree.headnode, origin, &e, skybox ) )
+		if (PlaceOccupant(tree.headnode, origin, &e, skybox)) {
 			inside = true;
-		else
-			Sys_FPrintf( SYS_WRN, "Entity %i (%s): Entity in solid\n", e.mapEntityNum, e.classname() );
+		}
+		else {
+			if(!e.classname_is("misc_model_ext"))
+				Sys_FPrintf(SYS_WRN, "Entity %i (%s): Entity in solid\n", e.mapEntityNum, e.classname());
+		}
+			
 	}
 
 	Sys_FPrintf( SYS_VRB, "%9d flooded leafs\n", c_floodedleafs );

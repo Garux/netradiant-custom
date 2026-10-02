@@ -1467,7 +1467,7 @@ EntityCompileParams ParseEntityCompileParams( const entity_t& e, const entity_t 
 	}
 
 	/* get explicit shadow flags */
-	GetEntityShadowFlags( &e, eparent, &params.castShadows, &params.recvShadows );
+	GetEntityShadowFlags( &e, eparent, &params.castShadows, &params.recvShadows, nullptr );
 
 	/* ydnar: get lightmap scaling value for this entity */
 	params.lightmapScale = std::max( 0.f, e.floatForKey( "lightmapscale", "_lightmapscale", "_ls" ) );

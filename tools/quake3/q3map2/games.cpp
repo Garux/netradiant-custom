@@ -918,6 +918,38 @@ struct game_ja : game_sof2
 };
 
 
+struct game_ncftu : game_default
+{
+	game_ncftu()
+	{
+		arg = "ncftu";
+
+		gamePath = "basecontent";
+		homeBasePath = ".ncftu";
+		magic = "ncftu";
+
+		shaderPath = "materials_source";
+
+		maxLMSurfaceVerts = 4096; 
+		maxSurfaceVerts = 16384;
+		maxSurfaceIndexes = 32768;
+
+		lightmapSize = 1024;
+		lightmapsRGB = true;
+		
+		deluxeMap = true;	
+		lightAngleHL = true;
+		noStyles = true;
+
+		keepLights = true;
+
+		patchSubdivisions = 4;
+		patchShadows = false;
+
+		bspIdent = "BBSP";
+		bspVersion = 2;
+	}
+};
 
 const std::vector<game_t> g_games = { game_quake3(),
                                       game_quakelive(),
@@ -938,5 +970,6 @@ const std::vector<game_t> g_games = { game_quake3(),
                                       game_sof2(),
                                       game_jk2(),
                                       game_ja(),
+									  game_ncftu(),
                                     };
 const game_t *g_game = &g_games[0];
