@@ -1381,7 +1381,7 @@ void Manipulators_constructToolbar( QToolBar* toolbar ){
 	toolbar_append_toggle_button( toolbar, "Transform (Q)", "select_mousetransform.png", "MouseTransform" ); // hardcoded shortcut tip of "MouseDragOrTransform"...
 //	toolbar_append_toggle_button( toolbar, "Build", "select_mouserotate.png", "MouseBuild" );
 	toolbar_append_toggle_button( toolbar, "UV Tool", "select_mouseuv.png", "MouseUV" );
-	toolbar_append_toggle_button( toolbar, "Sculpt Terrain", "select_mousesculpt.png", "MouseSculpt" );
+	toolbar_append_toggle_button( toolbar, "Sculpt\nLMB: raise\nCtrl+LMB: lower\nAlt+Wheel: radius", "select_mousesculpt.png", "MouseSculpt" );
 }
 
 extern CopiedString g_toolbarHiddenButtons;

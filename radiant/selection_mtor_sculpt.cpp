@@ -24,35 +24,65 @@
 #include "selection_selector.h"
 #include "brush.h"
 #include "grid.h"
+#include "map.h"
 #include "mainframe.h"
 #include "camwindow.h"
 #include "xywindow.h"
-#include "map.h"
+#include "stream/stringstream.h"
 #include <QWidget>
 #include <QWheelEvent>
-#include "stream/stringstream.h"
 
 #include <array>
 #include <deque>
 #include <limits>
 #include <map>
 #include <optional>
+#include <set>
+#include <tuple>
 
 
 namespace
 {
 
-std::optional<DoubleVector3> sculpt_testSelect_point( const View& view ){
-	if( !view.fill() && vector3_max_abs_component_index( view.getViewDir() ) != 2 )
-		return {};
+constexpr double c_sculpt_spacing = 0.1;
 
+constexpr float c_sculpt_radius_min = 8;
+constexpr float c_sculpt_radius_max = 4096;
+
+struct SculptHit
+{
+	DoubleVector3 point;
+	DoubleVector3 normal;
+	const BrushInstance* brush = nullptr;
+};
+
+std::optional<SculptHit> sculpt_testSelect( const View& view, bool findBrush = true ){
 	SelectionVolume test( view );
 	ScenePointSelector selector;
 	Scene_forEachVisible_testselect_scene_point_selected_brushes( view, selector, test );
 	if( !selector.isSelected() )
 		return {};
 	test.BeginMesh( g_matrix4_identity, true );
-	return DoubleVector3( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, selector.best().depth(), 1 ) ) ) );
+
+	SculptHit hit;
+	hit.point = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, selector.best().depth(), 1 ) ) );
+	if( view.fill() && selector.face() != nullptr ){
+		hit.normal = selector.face()->plane3().normal();
+	}
+	else{ // 2D: surfaces facing the viewer
+		const std::size_t axis = vector3_max_abs_component_index( view.getViewDir() );
+		hit.normal = DoubleVector3( g_vector3_axes[axis] ) * ( view.getViewDir()[axis] < 0? 1.0 : -1.0 );
+	}
+	if( findBrush && selector.face() != nullptr ){
+		Scene_forEachVisibleSelectedBrush( [&hit, face = selector.face()]( BrushInstance& brush ){
+			if( hit.brush == nullptr )
+				Brush_ForEachFaceInstance( brush, [&hit, &brush, face]( FaceInstance& faceInstance ){
+					if( &faceInstance.getFace() == face )
+						hit.brush = &brush;
+				} );
+		} );
+	}
+	return hit;
 }
 
 inline double sculpt_falloff( double t ){
@@ -65,35 +95,45 @@ inline double sculpt_steps( double offset, double snap ){
 	return steps > 0? std::ceil( steps - 1e-6 ) : std::floor( steps + 1e-6 );
 }
 
-constexpr double c_sculpt_spacing = 0.1;
+inline double distance_across( const DoubleVector3& a, const DoubleVector3& b, std::size_t axis ){
+	const std::size_t i = ( axis + 1 ) % 3, j = ( axis + 2 ) % 3;
+	return std::hypot( a[i] - b[i], a[j] - b[j] );
+}
 
-constexpr float c_sculpt_radius_min = 8;
-constexpr float c_sculpt_radius_max = 4096;
+// every vertex has a partner, differing only along the axis: the brush is built to be sculpted along it
+bool brush_has_columns( const std::vector<DoubleVector3>& vertices, std::size_t axis ){
+	return !vertices.empty() && std::ranges::all_of( vertices, [&vertices, axis]( const DoubleVector3& v ){
+		return std::ranges::any_of( vertices, [&v, axis]( const DoubleVector3& other ){
+			return distance_across( other, v, axis ) < 0.05 && std::fabs( other[axis] - v[axis] ) > 0.05;
+		} );
+	} );
+}
 
-inline double distance_xy( const DoubleVector3& a, const DoubleVector3& b ){
-	return std::hypot( a.x() - b.x(), a.y() - b.y() );
+using PositionKey = std::array<long long, 3>;
+
+inline PositionKey position_key( const DoubleVector3& v ){
+	return { std::llround( v.x() * 16 ), std::llround( v.y() * 16 ), std::llround( v.z() * 16 ) };
 }
 
 struct SculptColumn
 {
-	DoubleVector3 top;
-	double bottom;
+	DoubleVector3 outer;
+	double inner; // signed coordinate along the axis
 	std::size_t count;
 };
 
-void brush_gather_columns( const BrushInstance& brush, std::vector<SculptColumn>& columns ){
-	std::vector<DoubleVector3> vertices;
-	brush.gather_vertices( vertices );
+void gather_columns( const std::vector<DoubleVector3>& vertices, std::size_t axis, double sign, std::vector<SculptColumn>& columns ){
 	columns.clear();
 	for( const auto& v : vertices ){
-		auto column = std::ranges::find_if( columns, [&v]( const SculptColumn& c ){ return distance_xy( c.top, v ) < 0.05; } );
+		const double s = sign * v[axis];
+		auto column = std::ranges::find_if( columns, [&v, axis]( const SculptColumn& c ){ return distance_across( c.outer, v, axis ) < 0.05; } );
 		if( column == columns.end() ){
-			columns.push_back( SculptColumn{ v, v.z(), 1 } );
+			columns.push_back( SculptColumn{ v, s, 1 } );
 		}
 		else{
-			if( v.z() > column->top.z() )
-				column->top = v;
-			column->bottom = std::min( column->bottom, v.z() );
+			if( s > sign * column->outer[axis] )
+				column->outer = v;
+			column->inner = std::min( column->inner, s );
 			++column->count;
 		}
 	}
@@ -105,31 +145,33 @@ class SculptStroke
 public:
 	struct Vertex
 	{
-		double zOrig;
-		double zCurrent;
-		double zTarget;
-		double zMin;
+		double sOrig;
+		double sCurrent;
+		double sTarget;
+		double sMin;
 		double offset;
 		std::size_t dab;
 	};
 private:
-	using Key = std::pair<long long, long long>;
+	using Key = std::tuple<std::size_t, long long, long long>;
 	std::map<Key, std::deque<Vertex>> m_vertices;
-	static Key key( const DoubleVector3& v ){
-		return { std::llround( v.x() * 16 ), std::llround( v.y() * 16 ) };
+	static Key key( const DoubleVector3& v, std::size_t axis, double sign ){
+		const std::size_t i = ( axis + 1 ) % 3, j = ( axis + 2 ) % 3;
+		return { axis * 2 + ( sign > 0 ), std::llround( v[i] * 16 ), std::llround( v[j] * 16 ) };
 	}
 public:
-	Vertex* find( const DoubleVector3& v ){
-		if( auto it = m_vertices.find( key( v ) ); it != m_vertices.end() )
+	Vertex* find( const DoubleVector3& v, std::size_t axis, double sign ){
+		if( auto it = m_vertices.find( key( v, axis, sign ) ); it != m_vertices.end() )
 			for( auto& sv : it->second )
-				if( std::fabs( sv.zCurrent - v.z() ) < 0.1 )
+				if( std::fabs( sv.sCurrent - sign * v[axis] ) < 0.1 )
 					return &sv;
 		return nullptr;
 	}
-	Vertex& insert( const DoubleVector3& v ){
-		if( Vertex* sv = find( v ) )
+	Vertex& insert( const DoubleVector3& v, std::size_t axis, double sign ){
+		if( Vertex* sv = find( v, axis, sign ) )
 			return *sv;
-		return m_vertices[key( v )].emplace_back( Vertex{ v.z(), v.z(), v.z(), std::numeric_limits<double>::lowest(), 0, 0 } );
+		const double s = sign * v[axis];
+		return m_vertices[key( v, axis, sign )].emplace_back( Vertex{ s, s, s, std::numeric_limits<double>::lowest(), 0, 0 } );
 	}
 	void clear(){
 		m_vertices.clear();
@@ -144,6 +186,9 @@ class SculptManipulatorImpl final : public SculptManipulator, public Manipulatab
 	std::size_t m_dab = 0;
 	DoubleVector3 m_lastDab;
 	SculptStroke m_stroke;
+
+	std::size_t m_axis = 2;
+	double m_sign = 1;
 
 	bool m_visible = false;
 	bool m_lowerHighlight = false;
@@ -164,90 +209,155 @@ class SculptManipulatorImpl final : public SculptManipulator, public Manipulatab
 
 	void updateRenderables(){
 		const Colour4b colour = m_lowerHighlight? Colour4b( 255, 96, 64, 255 ) : g_colour_screen;
+		const DoubleVector3 u( g_vector3_axes[( m_axis + 1 ) % 3] );
+		const DoubleVector3 v( g_vector3_axes[( m_axis + 2 ) % 3] );
 		for( std::size_t i = 0; i < m_circle.m_vertices.size(); ++i ){
 			const double angle = c_2pi * i / m_circle.m_vertices.size();
-			m_circle.m_vertices[i] = PointVertex( vertex3f_for_vector3( m_center + DoubleVector3( std::cos( angle ), std::sin( angle ), 0 ) * g_sculpt_radius ), colour );
+			m_circle.m_vertices[i] = PointVertex( vertex3f_for_vector3( m_center + ( u * std::cos( angle ) + v * std::sin( angle ) ) * g_sculpt_radius ), colour );
 		}
 		m_point.m_point = PointVertex( vertex3f_for_vector3( m_center ), colour );
 		m_renderedRadius = g_sculpt_radius;
 	}
-	void setCircle( const std::optional<DoubleVector3>& point, bool lower ){
-		const bool visible = point.has_value();
+	// surface normal averaged over the brush area, as Blender's area normal
+	DoubleVector3 areaNormal( const SculptHit& hit ) const {
+		DoubleVector3 sum = hit.normal;
+		const DoubleVector3 n = vector3_normalised( hit.normal );
+		const DoubleVector3 u = vector3_normalised( vector3_cross( n, DoubleVector3( g_vector3_axes[vector3_min_abs_component_index( n )] ) ) );
+		const DoubleVector3 v = vector3_cross( n, u );
+		for( int i = 0; i < 8; ++i ){
+			const double angle = c_2pi * i / 8;
+			const DoubleVector3 p = hit.point + ( u * std::cos( angle ) + v * std::sin( angle ) ) * ( g_sculpt_radius * 0.5 );
+			const Vector4 device = matrix4_transformed_vector4( m_view->GetViewMatrix(), Vector4( Vector3( p ), 1 ) );
+			if( device.w() <= 0 )
+				continue;
+			const DeviceVector point( device.x() / device.w(), device.y() / device.w() );
+			if( std::fabs( point.x() ) > 1 || std::fabs( point.y() ) > 1 )
+				continue;
+			View scissored( *m_view );
+			ConstructSelectionTest( scissored, SelectionBoxForPoint( point, m_device_epsilon ) );
+			if( const auto sample = sculpt_testSelect( scissored, false ) )
+				sum += sample->normal;
+		}
+		return vector3_normalised( sum );
+	}
+	// axis from the column structure of the brush under the cursor, the visible end from the area normal
+	void updateDirection( const SculptHit& hit, bool fill ){
+		const DoubleVector3 normal = fill? areaNormal( hit ) : hit.normal;
+		std::size_t axis = vector3_max_abs_component_index( normal );
+		if( fill && hit.brush != nullptr ){
+			std::vector<DoubleVector3> vertices;
+			hit.brush->gather_vertices( vertices );
+			double best = -1;
+			for( std::size_t i = 0; i < 3; ++i ){
+				if( brush_has_columns( vertices, i ) && std::fabs( normal[i] ) > best ){
+					best = std::fabs( normal[i] );
+					axis = i;
+				}
+			}
+		}
+		if( std::fabs( normal[axis] ) > 0.1 )
+			m_sign = normal[axis] > 0? 1 : -1;
+		else if( axis != m_axis )
+			m_sign = 1;
+		m_axis = axis;
+	}
+	void setCircle( const std::optional<SculptHit>& hit, bool lower, bool updateDir, bool fill = true ){
+		const std::size_t axis = m_axis;
+		const double sign = m_sign;
+		if( hit && updateDir )
+			updateDirection( *hit, fill );
+		const bool visible = hit.has_value();
 		if( visible != m_visible
 		 || lower != m_lowerHighlight
 		 || m_renderedRadius != g_sculpt_radius
-		 || ( visible && *point != m_center ) ){
+		 || axis != m_axis || sign != m_sign
+		 || ( visible && hit->point != m_center ) ){
 			m_visible = visible;
 			m_lowerHighlight = lower;
 			if( visible )
-				m_center = *point;
+				m_center = hit->point;
 			updateRenderables();
 			SceneChangeNotify();
 		}
 	}
 
-	void dab( const DoubleVector3& center ){
+	void dab( const DoubleVector3& point ){
 		const double radius = g_sculpt_radius;
 		const double snap = GetSnapGridSize();
 		const double amount = ( m_lower? -GetGridSize() : GetGridSize() ) * c_sculpt_spacing / 0.25;
+		const std::size_t axis = m_axis;
+		const double sign = m_sign;
 		++m_dab;
-		m_lastDab = center;
+		m_lastDab = point;
 
-		std::vector<BrushInstance*> brushes;
-		std::vector<SculptStroke::Vertex*> touched;
-		std::vector<SculptColumn> columns;
-		Scene_forEachVisibleSelectedBrush( [&]( BrushInstance& brush ){
-			const AABB& aabb = brush.worldAABB();
-			if( std::fabs( aabb.origin.x() - center.x() ) > aabb.extents.x() + radius
-			 || std::fabs( aabb.origin.y() - center.y() ) > aabb.extents.y() + radius )
+		struct Candidate
+		{
+			BrushInstance* brush;
+			std::vector<SculptColumn> columns;
+		};
+		std::vector<Candidate> candidates;
+		std::set<PositionKey> pinned; // vertices, not moved with their brush, keep surfaces joined
+		std::vector<DoubleVector3> vertices;
+		const AABB region( point, Vector3( radius, radius, radius ) );
+		Scene_forEachVisibleBrush( GlobalSceneGraph(), [&]( BrushInstance& brush ){
+			if( !aabb_intersects_aabb( brush.worldAABB(), region ) )
 				return;
-			brush_gather_columns( brush, columns );
-			bool affected = false;
-			for( const auto& column : columns ){
-				const double dist = distance_xy( column.top, center );
-				if( dist >= radius )
+			vertices.clear();
+			brush.gather_vertices( vertices );
+			std::vector<SculptColumn> columns;
+			if( brush.isSelected() )
+				gather_columns( vertices, axis, sign, columns );
+			for( const auto& v : vertices )
+				if( std::ranges::none_of( columns, [&v]( const SculptColumn& c ){ return c.outer == v; } ) )
+					pinned.insert( position_key( v ) );
+			std::erase_if( columns, [&point, radius]( const SculptColumn& c ){ return vector3_length( c.outer - point ) >= radius; } );
+			if( !columns.empty() )
+				candidates.push_back( Candidate{ &brush, std::move( columns ) } );
+		} );
+
+		std::vector<SculptStroke::Vertex*> touched;
+		for( const auto& candidate : candidates ){
+			for( const auto& column : candidate.columns ){
+				if( pinned.contains( position_key( column.outer ) ) )
 					continue;
-				SculptStroke::Vertex& sv = m_stroke.insert( column.top );
-				sv.zMin = std::max( sv.zMin, column.bottom + 1 );
+				SculptStroke::Vertex& sv = m_stroke.insert( column.outer, axis, sign );
+				sv.sMin = std::max( sv.sMin, column.inner + 1 );
 				if( sv.dab != m_dab ){
 					sv.dab = m_dab;
-					sv.offset += amount * sculpt_falloff( dist / radius );
+					sv.offset += amount * sculpt_falloff( vector3_length( column.outer - point ) / radius );
 					touched.push_back( &sv );
 				}
-				affected = true;
 			}
-			if( affected )
-				brushes.push_back( &brush );
-		} );
+		}
 
 		bool changed = false;
 		for( SculptStroke::Vertex *sv : touched ){
-			double z = sv->zOrig + ( snap > 0? sculpt_steps( sv->offset, snap ) * snap : sv->offset );
-			if( z < sv->zMin ){
-				const double lowest = snap > 0? sv->zOrig + std::ceil( ( sv->zMin - sv->zOrig ) / snap ) * snap : sv->zMin;
-				z = std::min( lowest, sv->zCurrent );
+			double s = sv->sOrig + ( snap > 0? sculpt_steps( sv->offset, snap ) * snap : sv->offset );
+			if( s < sv->sMin ){
+				const double lowest = snap > 0? sv->sOrig + std::ceil( ( sv->sMin - sv->sOrig ) / snap ) * snap : sv->sMin;
+				s = std::min( lowest, sv->sCurrent );
 			}
-			else if( z > g_MaxWorldCoord ){
-				const double highest = snap > 0? sv->zOrig + std::floor( ( g_MaxWorldCoord - sv->zOrig ) / snap ) * snap : g_MaxWorldCoord;
-				z = std::max( highest, sv->zCurrent );
+			else if( s > g_MaxWorldCoord ){
+				const double highest = snap > 0? sv->sOrig + std::floor( ( g_MaxWorldCoord - sv->sOrig ) / snap ) * snap : g_MaxWorldCoord;
+				s = std::max( highest, sv->sCurrent );
 			}
-			sv->zTarget = z;
-			changed |= ( z != sv->zCurrent );
+			sv->sTarget = s;
+			changed |= ( s != sv->sCurrent );
 		}
 		if( !changed )
 			return;
 
-		for( BrushInstance* brush : brushes ){
-			brush->sculpt_vertices( [this]( DoubleVector3& v ){
-				if( SculptStroke::Vertex *sv = m_stroke.find( v ); sv != nullptr && sv->dab == m_dab && sv->zTarget != sv->zCurrent ){
-					v.z() = sv->zTarget;
+		for( const auto& candidate : candidates ){
+			candidate.brush->sculpt_vertices( [&]( DoubleVector3& v ){
+				if( SculptStroke::Vertex *sv = m_stroke.find( v, axis, sign ); sv != nullptr && sv->dab == m_dab && sv->sTarget != sv->sCurrent ){
+					v[axis] = sign * sv->sTarget;
 					return true;
 				}
 				return false;
 			} );
 		}
 		for( SculptStroke::Vertex *sv : touched )
-			sv->zCurrent = sv->zTarget;
+			sv->sCurrent = sv->sTarget;
 
 		SceneChangeNotify();
 	}
@@ -270,14 +380,14 @@ public:
 		renderer.addRenderable( m_point, g_matrix4_identity );
 	}
 	void highlight( const View& view, const Matrix4& pivot2world ) override {
-		setCircle( sculpt_testSelect_point( view ), g_modifiers.ctrl() );
+		setCircle( sculpt_testSelect( view ), g_modifiers.ctrl(), true, view.fill() );
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) override {
 		m_isSelected = false;
 		if( g_modifiers == c_modifierNone || g_modifiers == c_modifierControl ){
-			const auto point = sculpt_testSelect_point( view );
-			setCircle( point, g_modifiers.ctrl() );
-			m_isSelected = point.has_value();
+			const auto hit = sculpt_testSelect( view );
+			setCircle( hit, g_modifiers.ctrl(), true, view.fill() );
+			m_isSelected = hit.has_value();
 		}
 	}
 
@@ -290,10 +400,10 @@ public:
 	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const DeviceVector device_point ) override {
 		View scissored( *m_view );
 		ConstructSelectionTest( scissored, SelectionBoxForPoint( device_point, m_device_epsilon ) );
-		const auto point = sculpt_testSelect_point( scissored );
-		setCircle( point, m_lower );
-		if( point && distance_xy( *point, m_lastDab ) >= g_sculpt_radius * c_sculpt_spacing )
-			dab( *point );
+		const auto hit = sculpt_testSelect( scissored );
+		setCircle( hit, m_lower, false ); // direction stays locked during a stroke
+		if( hit && vector3_length( hit->point - m_lastDab ) >= g_sculpt_radius * c_sculpt_spacing )
+			dab( hit->point );
 	}
 
 	Manipulatable* GetManipulatable() override {
