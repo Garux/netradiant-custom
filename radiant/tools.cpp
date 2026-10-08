@@ -28,6 +28,7 @@
 #include "generic/callback.h"
 #include "signal/isignal.h"
 #include "gtkutil/widget.h"
+#include "selection_mtor_sculpt.h"
 
 
 void ModeChangeNotify(){
@@ -207,6 +208,10 @@ void UVToolExport( const BoolImportCallback& importCallback ){
 	importCallback( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eUV );
 }
 
+void SculptToolExport( const BoolImportCallback& importCallback ){
+	importCallback( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eSculpt );
+}
+
 FreeCaller<void(const BoolImportCallback&), TranslateToolExport> g_translatemode_button_caller;
 BoolExportCallback g_translatemode_button_callback( g_translatemode_button_caller );
 ToggleItem g_translatemode_button( g_translatemode_button_callback );
@@ -239,6 +244,10 @@ FreeCaller<void(const BoolImportCallback&), UVToolExport> g_uv_button_caller;
 BoolExportCallback g_uv_button_callback( g_uv_button_caller );
 ToggleItem g_uv_button( g_uv_button_callback );
 
+FreeCaller<void(const BoolImportCallback&), SculptToolExport> g_sculpt_button_caller;
+BoolExportCallback g_sculpt_button_callback( g_sculpt_button_caller );
+ToggleItem g_sculpt_button( g_sculpt_button_callback );
+
 void ToolChanged(){
 	g_translatemode_button.update();
 	g_rotatemode_button.update();
@@ -248,6 +257,7 @@ void ToolChanged(){
 	g_clipper_button.update();
 	g_build_button.update();
 	g_uv_button.update();
+	g_sculpt_button.update();
 }
 
 constexpr char c_ResizeMode_status[] = "QE4 Drag Tool: move and resize objects";
@@ -408,6 +418,36 @@ void UVMode(){
 }
 
 
+constexpr char c_SculptMode_status[] = "Sculpt Tool: LMB raise, Ctrl+LMB lower selected terrain brushes and patches; grid sets the step; Alt+Wheel changes radius";
+
+void SculptMode(){
+	if ( g_currentToolMode == SculptMode && g_defaultToolMode != SculptMode ) {
+		g_defaultToolMode();
+	}
+	else
+	{
+		g_currentToolMode = SculptMode;
+		g_currentToolModeSupportsComponentEditing = false;
+
+		SelectionSystem_DefaultMode();
+		ComponentModeChanged();
+
+		Sys_Status( c_SculptMode_status );
+		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eSculpt );
+		ToolChanged();
+		ModeChangeNotify();
+	}
+}
+
+void SculptRadiusIncrease(){
+	Sculpt_setRadius( g_sculpt_radius * 1.25f );
+}
+
+void SculptRadiusDecrease(){
+	Sculpt_setRadius( g_sculpt_radius / 1.25f );
+}
+
+
 void ToggleRotateScaleModes(){
 	return g_currentToolMode == RotateMode? ScaleMode() : RotateMode();
 }
@@ -432,6 +472,9 @@ void Tools_registerCommands(){
 	GlobalToggles_insert( "MouseDrag", makeCallbackF( DragMode ), ToggleItem::AddCallbackCaller( g_dragmode_button ) );
 	GlobalToggles_insert( "MouseBuild", makeCallbackF( BuildMode ), ToggleItem::AddCallbackCaller( g_build_button ), QKeySequence( "B" ) );
 	GlobalToggles_insert( "MouseUV", makeCallbackF( UVMode ), ToggleItem::AddCallbackCaller( g_uv_button ), QKeySequence( "G" ) );
+	GlobalToggles_insert( "MouseSculpt", makeCallbackF( SculptMode ), ToggleItem::AddCallbackCaller( g_sculpt_button ), QKeySequence( "Shift+B" ) );
+	GlobalCommands_insert( "SculptRadiusIncrease", makeCallbackF( SculptRadiusIncrease ) );
+	GlobalCommands_insert( "SculptRadiusDecrease", makeCallbackF( SculptRadiusDecrease ) );
 	GlobalCommands_insert( "MouseRotateOrScale", makeCallbackF( ToggleRotateScaleModes ) );
 	GlobalCommands_insert( "MouseDragOrTransform", makeCallbackF( ToggleDragSkewModes ), QKeySequence( "Q" ) );
 

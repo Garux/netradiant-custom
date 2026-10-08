@@ -59,6 +59,7 @@
 #include "select.h"
 #include "brushmanip.h"
 #include "selection.h"
+#include "selection_mtor_sculpt.h"
 #include "entity.h"
 #include "camwindow.h"
 #include "mainframe.h"
@@ -527,6 +528,8 @@ protected:
 		if( !m_xywnd.Active() ){
 			g_pParentWnd->SetActiveXY( &m_xywnd );
 		}
+		if( Sculpt_wheelEvent( *event ) )
+			return;
 		if ( event->angleDelta().y() > 0 ) {
 			m_xywnd.ZoomInWithMouse( event->position().x() * m_scale, event->position().y() * m_scale );
 		}

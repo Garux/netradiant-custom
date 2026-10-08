@@ -32,6 +32,7 @@
 #include "selection_mtor_skew.h"
 #include "selection_mtor_translate.h"
 #include "selection_mtor_uv.h"
+#include "selection_mtor_sculpt.h"
 #include "clippertool.h"
 #include "selection_mtable_translate.h"
 
@@ -1048,6 +1049,7 @@ private:
 	std::unique_ptr<ClipManipulator> m_clip_manipulator;
 	BuildManipulator m_build_manipulator;
 	std::unique_ptr<UVManipulator> m_uv_manipulator;
+	std::unique_ptr<SculptManipulator> m_sculpt_manipulator;
 	mutable TransformOriginManipulator m_transformOrigin_manipulator;
 
 	typedef UnsortedSet<scene::Instance*, false> selection_t;
@@ -1094,6 +1096,7 @@ public:
 		m_drag_manipulator( New_DragManipulator( *this, *this ) ),
 		m_clip_manipulator( New_ClipManipulator( m_pivot2world, m_bounds ) ),
 		m_uv_manipulator( New_UVManipulator() ),
+		m_sculpt_manipulator( New_SculptManipulator() ),
 		m_transformOrigin_manipulator( *this, m_pivotIsCustom ),
 		m_pivotChanged( false ),
 		m_pivot_moving( false ),
@@ -1134,6 +1137,8 @@ public:
 		return m_componentmode;
 	}
 	void SetManipulatorMode( EManipulatorMode mode ) override {
+		if( ( mode == eSculpt ) != ( ManipulatorMode() == eSculpt ) ) // b4 Clipper_modeChanged(), both set cursor
+			Sculpt_modeChanged( mode == eSculpt );
 		if( ( mode == eClip ) || ( ManipulatorMode() == eClip ) ){
 			m_clip_manipulator->reset( ( mode == eClip ) && ( ManipulatorMode() != eClip ) );
 			if( ( mode == eClip ) != ( ManipulatorMode() == eClip ) )
@@ -1156,6 +1161,7 @@ public:
 				m_manipulator = &m_build_manipulator; break;
 			}
 		case eUV: m_manipulator = m_uv_manipulator.get(); break;
+		case eSculpt: m_manipulator = m_sculpt_manipulator.get(); break;
 		}
 		pivotChanged();
 	}
@@ -1265,7 +1271,8 @@ public:
 		|| ManipulatorMode() == eDrag
 		|| ManipulatorMode() == eClip
 		|| ManipulatorMode() == eBuild
-		|| ManipulatorMode() == eUV ) {
+		|| ManipulatorMode() == eUV
+		|| ManipulatorMode() == eSculpt ) {
 #if defined ( DEBUG_SELECTION )
 			g_render_clipped.destroy();
 #endif
@@ -1300,8 +1307,12 @@ public:
 				Matrix4 device2manip;
 				ConstructDevice2Manip( device2manip, m_pivot2world_start, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 				if( m_pivot_moving ){
-					m_manipulator->GetManipulatable()->Construct( device2manip, device_point, m_bounds, GetPivot2World().t().vec3() );
 					m_undo_begun = false;
+					if( ManipulatorMode() == eSculpt ){
+						m_undo_begun = true;
+						GlobalUndoSystem().start();
+					}
+					m_manipulator->GetManipulatable()->Construct( device2manip, device_point, m_bounds, GetPivot2World().t().vec3() );
 				}
 				else if( movingOrigin ){
 					m_transformOrigin_manipulator.GetManipulatable()->Construct( device2manip, device_point, m_bounds, GetPivot2World().t().vec3() );
@@ -1321,7 +1332,8 @@ public:
 		     || ManipulatorMode() == eDrag
 		     || ManipulatorMode() == eClip
 		     || ManipulatorMode() == eBuild
-		     || ManipulatorMode() == eUV ) {
+		     || ManipulatorMode() == eUV
+		     || ManipulatorMode() == eSculpt ) {
 #if defined ( DEBUG_SELECTION )
 			g_render_clipped.destroy();
 #endif
@@ -1792,13 +1804,15 @@ public:
 		TranslateManipulator::m_state_wire =
 		RotateManipulator::m_state_outer =
 		SkewManipulator::m_state_wire =
-		BuildManipulator::m_state_line = GlobalShaderCache().capture( "$WIRE_OVERLAY" );
+		BuildManipulator::m_state_line =
+		SculptManipulator::m_state_line = GlobalShaderCache().capture( "$WIRE_OVERLAY" );
 		TranslateManipulator::m_state_fill =
 		SkewManipulator::m_state_fill = GlobalShaderCache().capture( "$FLATSHADE_OVERLAY" );
 		TransformOriginManipulator::m_state =
 		ClipManipulator::m_state =
 		SkewManipulator::m_state_point =
 		BuildManipulator::m_state_point =
+		SculptManipulator::m_state_point =
 		UVManipulator::m_state_point = GlobalShaderCache().capture( "$BIGPOINT" );
 		RenderablePivot::StaticShader::instance() = GlobalShaderCache().capture( "$PIVOT" );
 		UVManipulator::m_state_line = GlobalShaderCache().capture( "$BLENDLINE" );
@@ -2058,6 +2072,9 @@ bool RadiantSelectionSystem::endMove(){
 		else if ( ManipulatorMode() == eUV ) {
 			command << "UVTool";
 		}
+		else if ( ManipulatorMode() == eSculpt ) {
+			command << "sculptTool";
+		}
 
 		GlobalUndoSystem().finish( command );
 	}
@@ -2287,7 +2304,8 @@ void RadiantSelectionSystem::renderSolid( Renderer& renderer, const VolumeTest& 
 	     || ManipulatorMode() == eClip
 	     || ManipulatorMode() == eBuild
 	     || ManipulatorMode() == eUV
-	     || ManipulatorMode() == eDrag ) {
+	     || ManipulatorMode() == eDrag
+	     || ManipulatorMode() == eSculpt ) {
 		renderer.Highlight( Renderer::ePrimitive, false );
 		renderer.Highlight( Renderer::eFace, false );
 
@@ -2700,7 +2718,7 @@ public:
 			m_mouse_down = true;
 
 			const bool clipper2d( button == c_button_select && ClipManipulator::quickCondition( modifiers, *m_manipulator.m_view ) );
-			if( clipper2d && getSelectionSystem().ManipulatorMode() != SelectionSystem::eClip )
+			if( clipper2d && getSelectionSystem().ManipulatorMode() != SelectionSystem::eClip && getSelectionSystem().ManipulatorMode() != SelectionSystem::eSculpt )
 				ClipperModeQuick();
 
 			if ( button == c_button_select && m_manipulator.mouseDown( devicePosition ) ) {
@@ -2749,7 +2767,8 @@ public:
 		 && !m_manipulator.m_moving_transformOrigin
 		 && !( getSelectionSystem().Mode() == SelectionSystem::eComponent && getSelectionSystem().ManipulatorMode() == SelectionSystem::eDrag )
 		 && getSelectionSystem().ManipulatorMode() != SelectionSystem::eClip
-		 && getSelectionSystem().ManipulatorMode() != SelectionSystem::eBuild ){
+		 && getSelectionSystem().ManipulatorMode() != SelectionSystem::eBuild
+		 && getSelectionSystem().ManipulatorMode() != SelectionSystem::eSculpt ){
 			m_selector.testSelect_simpleM1( device( position ) );
 		}
 		if( getSelectionSystem().ManipulatorMode() == SelectionSystem::eClip

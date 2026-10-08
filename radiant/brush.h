@@ -3976,6 +3976,54 @@ public:
 		}
 	}
 
+	void gather_vertices( std::vector<DoubleVector3>& vertices ) const {
+		m_brush.evaluateBRep();
+		Brush::VertexModeVertices v;
+		v.reserve( m_vertexInstances.size() );
+		for ( const auto& i : m_vertexInstances )
+			i.gather( v );
+		for ( const auto& i : v )
+			vertices.push_back( i.m_vertex );
+	}
+
+	template<typename Functor>
+	bool sculpt_vertices( const Functor& functor ){
+		m_brush.evaluateBRep();
+		if( m_vertexInstances.empty() )
+			return false;
+
+		Brush::VertexModeVertices v;
+		v.reserve( m_vertexInstances.size() );
+		for ( const auto& i : m_vertexInstances )
+			i.gather( v );
+
+		std::vector<DoubleVector3> moved;
+		moved.reserve( v.size() );
+		bool changed = false;
+		for ( const auto& i : v ){
+			moved.push_back( i.m_vertex );
+			changed |= functor( moved.back() );
+		}
+		if( !changed )
+			return false;
+
+		// keep faces alive: vertexModeBuildHull() clears the brush, then copies from them
+		const Faces faces( m_brush.begin(), m_brush.end() );
+
+		m_brush.vertexModeInit();
+		m_brush.m_vertexModeVertices.reserve( v.size() );
+		for( std::size_t i = 0; i < v.size(); ++i ){
+			auto& vertex = m_brush.m_vertexModeVertices.emplace_back( v[i].m_vertex, moved[i] != v[i].m_vertex );
+			vertex.m_vertexTransformed = moved[i];
+			vertex.m_faces = std::move( v[i].m_faces );
+		}
+		m_brush.vertexModeBuildHull();
+		m_brush.vertexModeFree(); // before evaluateBRep(): don't select moved vertices as components
+		m_brush.evaluateBRep();
+		m_brush.freezeTransform();
+		return true;
+	}
+
 	void snapComponents( float snap ) override {
 		for ( const auto& fi : m_faceInstances ){
 			if( fi.selectedComponents( SelectionSystem::eVertex ) ){

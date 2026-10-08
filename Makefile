@@ -943,6 +943,7 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/selection_mtor_drag.o \
 	radiant/selection_mtor_rotate.o \
 	radiant/selection_mtor_scale.o \
+	radiant/selection_mtor_sculpt.o \
 	radiant/selection_mtor_skew.o \
 	radiant/selection_mtor_translate.o \
 	radiant/selection_mtor_uv.o \

@@ -88,6 +88,7 @@ public:
 		eClip,
 		eBuild,
 		eUV,
+		eSculpt,
 	};
 
 	virtual void SetMode( EMode mode ) = 0;
