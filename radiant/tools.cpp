@@ -418,7 +418,7 @@ void UVMode(){
 }
 
 
-constexpr char c_SculptMode_status[] = "Sculpt Tool: LMB raise, Ctrl+LMB lower selected terrain brushes; grid sets the step; Alt+Wheel changes radius";
+constexpr char c_SculptMode_status[] = "Sculpt Tool: LMB raise, Ctrl+LMB lower selected terrain brushes and patches; grid sets the step; Alt+Wheel changes radius";
 
 void SculptMode(){
 	if ( g_currentToolMode == SculptMode && g_defaultToolMode != SculptMode ) {

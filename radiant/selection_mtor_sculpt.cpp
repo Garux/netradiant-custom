@@ -23,6 +23,7 @@
 #include "selection_volume.h"
 #include "selection_selector.h"
 #include "brush.h"
+#include "patch.h"
 #include "grid.h"
 #include "map.h"
 #include "mainframe.h"
@@ -56,17 +57,45 @@ struct SculptHit
 	const BrushInstance* brush = nullptr;
 };
 
+DoubleVector3 patch_normal_at( const Patch& patch, const DoubleVector3& point, const Vector3& viewDir ){
+	const ArbitraryMeshVertex* nearest = nullptr;
+	double nearestDist = std::numeric_limits<double>::max();
+	for( const auto& v : patch.getTesselation().m_vertices ){
+		const double dist = vector3_length_squared( DoubleVector3( vertex3f_to_vector3( v.vertex ) ) - point );
+		if( dist < nearestDist ){
+			nearestDist = dist;
+			nearest = &v;
+		}
+	}
+	if( nearest == nullptr )
+		return -DoubleVector3( viewDir );
+	const DoubleVector3 normal( normal3f_to_vector3( nearest->normal ) );
+	return vector3_dot( normal, DoubleVector3( viewDir ) ) > 0? -normal : normal; // patches are two-sided
+}
+
 std::optional<SculptHit> sculpt_testSelect( const View& view, bool findBrush = true ){
 	SelectionVolume test( view );
 	ScenePointSelector selector;
 	Scene_forEachVisible_testselect_scene_point_selected_brushes( view, selector, test );
+	const Patch* patch = nullptr;
+	Scene_forEachVisibleSelectedPatchInstance( [&]( PatchInstance& instance ){
+		ScenePointSelector patchSelector;
+		instance.testSelect( patchSelector, test );
+		if( patchSelector.isSelected() && SelectionIntersection_closer( patchSelector.best(), selector.best() ) ){
+			selector.addIntersection( patchSelector.best() );
+			patch = &instance.getPatch();
+		}
+	} );
 	if( !selector.isSelected() )
 		return {};
 	test.BeginMesh( g_matrix4_identity, true );
 
 	SculptHit hit;
 	hit.point = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, selector.best().depth(), 1 ) ) );
-	if( view.fill() && selector.face() != nullptr ){
+	if( view.fill() && patch != nullptr ){
+		hit.normal = patch_normal_at( *patch, hit.point, view.getViewDir() );
+	}
+	else if( view.fill() && selector.face() != nullptr ){
 		hit.normal = selector.face()->plane3().normal();
 	}
 	else{ // 2D: surfaces facing the viewer
@@ -315,18 +344,40 @@ class SculptManipulatorImpl final : public SculptManipulator, public Manipulatab
 				candidates.push_back( Candidate{ &brush, std::move( columns ) } );
 		} );
 
+		std::vector<PatchInstance*> patches;
+		Scene_forEachVisiblePatchInstance( [&]( PatchInstance& patch ){
+			if( !aabb_intersects_aabb( patch.worldAABB(), region ) )
+				return;
+			if( patch.isSelected() )
+				patches.push_back( &patch );
+			else
+				for( const auto& ctrl : patch.getPatch().getControlPoints() )
+					pinned.insert( position_key( ctrl.m_vertex ) );
+		} );
+
 		std::vector<SculptStroke::Vertex*> touched;
+		const auto touch = [&]( const DoubleVector3& v ) -> SculptStroke::Vertex& {
+			SculptStroke::Vertex& sv = m_stroke.insert( v, axis, sign );
+			if( sv.dab != m_dab ){
+				sv.dab = m_dab;
+				sv.offset += amount * sculpt_falloff( vector3_length( v - point ) / radius );
+				touched.push_back( &sv );
+			}
+			return sv;
+		};
 		for( const auto& candidate : candidates ){
 			for( const auto& column : candidate.columns ){
-				if( pinned.contains( position_key( column.outer ) ) )
-					continue;
-				SculptStroke::Vertex& sv = m_stroke.insert( column.outer, axis, sign );
-				sv.sMin = std::max( sv.sMin, column.inner + 1 );
-				if( sv.dab != m_dab ){
-					sv.dab = m_dab;
-					sv.offset += amount * sculpt_falloff( vector3_length( column.outer - point ) / radius );
-					touched.push_back( &sv );
+				if( !pinned.contains( position_key( column.outer ) ) ){
+					SculptStroke::Vertex& sv = touch( column.outer );
+					sv.sMin = std::max( sv.sMin, column.inner + 1 );
 				}
+			}
+		}
+		for( PatchInstance* patch : patches ){
+			for( const auto& ctrl : patch->getPatch().getControlPoints() ){
+				const DoubleVector3 v( ctrl.m_vertex );
+				if( vector3_length( v - point ) < radius && !pinned.contains( position_key( v ) ) )
+					touch( v );
 			}
 		}
 
@@ -355,6 +406,20 @@ class SculptManipulatorImpl final : public SculptManipulator, public Manipulatab
 				}
 				return false;
 			} );
+		}
+		for( PatchInstance* instance : patches ){
+			Patch& patch = instance->getPatch();
+			const auto target = [&]( const PatchControl& ctrl ) -> SculptStroke::Vertex* {
+				SculptStroke::Vertex *sv = m_stroke.find( DoubleVector3( ctrl.m_vertex ), axis, sign );
+				return sv != nullptr && sv->dab == m_dab && sv->sTarget != sv->sCurrent? sv : nullptr;
+			};
+			if( std::ranges::none_of( patch.getControlPoints(), [&target]( const PatchControl& ctrl ){ return target( ctrl ) != nullptr; } ) )
+				continue;
+			patch.undoSave();
+			for( auto& ctrl : patch.getControlPoints() )
+				if( SculptStroke::Vertex *sv = target( ctrl ) )
+					ctrl.m_vertex[axis] = sign * sv->sTarget;
+			patch.controlPointsChanged();
 		}
 		for( SculptStroke::Vertex *sv : touched )
 			sv->sCurrent = sv->sTarget;

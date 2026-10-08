@@ -884,6 +884,10 @@ public:
 		return m_ctrlTransformed;
 	}
 
+	const PatchTesselation& getTesselation() const {
+		return m_tess;
+	}
+
 	void setDims( std::size_t w, std::size_t h );
 	std::size_t getWidth() const {
 		return m_width;
