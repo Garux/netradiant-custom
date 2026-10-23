@@ -1972,6 +1972,8 @@ inline int maxSurfaceIndexes = 6000;                    /* ydnar */
 inline float npDegrees;                                 /* ydnar: nonplanar degrees */
 inline int bevelSnap;                                   /* ydnar: bevel plane snap */
 inline bool g_brushSnap = true;
+/* SplitBrush discards a fragment whose volume is not above this (-microvolume); was a hard-coded 1 */
+inline float g_microVolume = 0;
 inline bool flat;
 inline bool meta;
 inline bool patchMeta;

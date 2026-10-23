@@ -1,17 +1,5 @@
 {
   "cases": {
-    "R02.rod.split": {
-      "failing": "the 4 solid probes inside the rod read no brush",
-      "mechanism": "M1",
-      "observed_on": {
-        "argv": "-bsp -game quake3 -threads 2 -meta",
-        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
-        "observed": "2026-10-23",
-        "reader": "ci/auto-pigeon/ibsp.py",
-        "source": "netradiant-custom master 8216133984031afaa9a857b56ea66dd9c3d54b26 (upstream-base/82161339), unmodified"
-      },
-      "owner": "this fork, NEW_339: P1 (SplitBrush keeps every fragment of positive volume) together with P2"
-    },
     "R04.m4.p08_nearby": {
       "failing": "the 9 drawn probes on brush 101's bore face",
       "mechanism": "M4",

@@ -787,7 +787,10 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 
 	for ( int i = 0; i < 2; ++i )
 	{
-		if ( BrushVolume( b[i] ) < 1 ) {
+		/* A split half is already known to reach PLANESIDE_EPSILON past the plane, to have a non-tiny midwinding and
+		   bounded windings; discarding it for being smaller than a fixed volume loses real material from thin walls:
+		   its leaf then lists no brush (no collision) and may stay non-opaque. Only a non-positive volume is noise. */
+		if ( BrushVolume( b[i] ) <= g_microVolume ) {
 			b[i].sides.clear();
 			//			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "tiny volume after clip\n" );
 		}
