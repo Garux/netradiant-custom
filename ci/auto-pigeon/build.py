@@ -57,9 +57,21 @@ def brew_prefix(formula=None):
     return run(["brew", "--prefix"] + ([formula] if formula else []), capture=True)[1].strip()
 
 
-def make_argv(platform, plan, jobs):
-    argv = ["make", "-j%d" % jobs, "BUILD=release", "DEPENDENCIES_CHECK=off", "Q3MAP_VERSION=" + plan["banner"]]
-    if platform.startswith("linux"):
+SANITIZE = "-O1 -fsanitize=address,undefined -fno-omit-frame-pointer"
+# a sanitizer report stops the program (exit non-zero), so a regression case that triggers one fails; q3map2 exits
+# without freeing what it allocated, by design, so leaks are not reported
+SANITIZER_ENV = {"ASAN_OPTIONS": "detect_leaks=0:halt_on_error=1", "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=1"}
+
+
+def make_argv(platform, plan, jobs, sanitize=False):
+    argv = ["make", "-j%d" % jobs, "BUILD=%s" % ("debug" if sanitize else "release"), "DEPENDENCIES_CHECK=off",
+            "Q3MAP_VERSION=" + plan["banner"]]
+    if sanitize:
+        if not platform.startswith("linux"):
+            raise Failure("the sanitizer build is a Linux job")
+        argv += ["CC=gcc-14", "CXX=g++-14", "CXXFLAGS=-Wno-deprecated-copy " + SANITIZE, "CFLAGS=" + SANITIZE,
+                 "LDFLAGS=-fsanitize=address,undefined"]
+    elif platform.startswith("linux"):
         argv += ["CC=gcc-14", "CXX=g++-14", "CXXFLAGS=-Wno-deprecated-copy"]
     elif platform.startswith("windows"):
         argv += ["MAKEFILE_CONF=msys2-Makefile.conf"]
@@ -110,6 +122,8 @@ def main():
     ap.add_argument("--report", required=True)
     ap.add_argument("--jobs", type=int, default=3)
     ap.add_argument("--no-regress", action="store_true", help="build only (a local experiment; never releasable)")
+    ap.add_argument("--sanitize", action="store_true",
+                    help="AddressSanitizer + UBSan build (Linux), every case run with a report halting q3map2; never packaged")
     args = ap.parse_args()
     platform = args.platform
     require_native(platform)
@@ -122,7 +136,7 @@ def main():
     modified = tracked_tree(src)
     env = dict(os.environ, SOURCE_DATE_EPOCH=str(plan["commit_time"]))
     start = time.monotonic()
-    run(make_argv(platform, plan, args.jobs), cwd=src, env=env)
+    run(make_argv(platform, plan, args.jobs, args.sanitize), cwd=src, env=env)
     seconds = round(time.monotonic() - start, 1)
     program = src / "install" / ("q3map2.exe" if platform.startswith("windows") else "q3map2.%s" % MACHINE[platform])
     if not program.is_file():
@@ -134,14 +148,15 @@ def main():
     report = {
         "schema": "auto-pigeon-q3map2-build-report/1", "platform": platform, "commit": plan["commit"],
         "version": plan["version"], "banner": plan["banner"], "host": {"machine": _platform.machine(), "system": _platform.system()},
-        "make": make_argv(platform, plan, args.jobs), "build_seconds": seconds, "source_date_epoch": plan["commit_time"],
+        "make": make_argv(platform, plan, args.jobs, args.sanitize), "sanitize": args.sanitize, "build_seconds": seconds, "source_date_epoch": plan["commit_time"],
         "toolchain": toolchain(platform, env), "program": str(program), "program_sha256": sha256_file(program),
         "program_size": program.stat().st_size, "tracked_files_modified": modified, "regress": None,
     }
     if not args.no_regress:
         regress_report = work / "regress-report.json"
         code, _, rs = run([sys.executable, HERE / "regress.py", "--q3map2", program, "--work", work / "regress work",
-                           "--full", "--report", regress_report], check=False)
+                           "--full", "--report", regress_report], check=False,
+                          env=dict(os.environ, **SANITIZER_ENV) if args.sanitize else None)
         r = load_json(regress_report)
         report["regress"] = {"exit": code, "seconds": rs, "counts": r["counts"], "required": r["required"],
                              "known_failures": r["known_failures"], "q3map2_sha256": r["q3map2_sha256"]}

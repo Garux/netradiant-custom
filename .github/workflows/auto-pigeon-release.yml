@@ -1,7 +1,7 @@
 # The Auto-Pigeon q3map2 fork's ONE build, test, acceptance and release path.
 #
 #   push / pull_request   scope.py decides: `docs` runs the policy checks only; `source` (compiler, build or test
-#                         files changed) adds the Linux build and every regression case
+#                         files changed) adds the Linux build and every regression case, plain and under ASan + UBSan
 #   push of a tag         auto-pigeon-q3map2-v<version>, the tag plan.py computes for that commit: every declared target
 #                         is built, tested and accepted natively, the source archive rebuilt from itself, and ONE
 #                         prerelease published after all of it passed
@@ -95,6 +95,35 @@ jobs:
           path: |
             ${{ runner.temp }}/build-report.json
             ${{ runner.temp }}/build work/regress-report.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  sanitizers:
+    name: AddressSanitizer + UBSan regressions (linux-amd64)
+    needs: plan
+    if: needs.plan.outputs.scope == 'source' || needs.plan.outputs.scope == 'release'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.plan.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: plan
+          path: ${{ runner.temp }}/plan
+      - name: Install the build dependencies
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends gcc-14 g++-14 make pkg-config libglib2.0-dev libxml2-dev libpng-dev libjpeg-dev libassimp-dev zlib1g-dev
+      - name: Build with sanitizers and run every regression case
+        run: python3 ci/auto-pigeon/build.py --platform linux-amd64 --sanitize --plan "${{ runner.temp }}/plan/plan.json" --work "${{ runner.temp }}/sanitizer work" --report "${{ runner.temp }}/sanitizer-report.json" --jobs 4
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sanitizer-report
+          path: |
+            ${{ runner.temp }}/sanitizer-report.json
+            ${{ runner.temp }}/sanitizer work/regress-report.json
           if-no-files-found: warn
           retention-days: 14
 
@@ -247,7 +276,7 @@ jobs:
   publish:
     name: Publish the prerelease
     # runs only when every job above succeeded (a failed optional target does not fail its job), for the planned tag
-    needs: [plan, build, accept, source]
+    needs: [plan, build, accept, source, sanitizers]
     if: needs.plan.outputs.publish == 'true' && startsWith(github.ref, 'refs/tags/auto-pigeon-q3map2-v')
     runs-on: ubuntu-24.04
     timeout-minutes: 20

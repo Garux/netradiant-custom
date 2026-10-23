@@ -119,7 +119,8 @@ def workflow_checks():
         rows = re.findall(r"\{ *platform: *%s,[^}]*\}" % platform, text)
         check(rows and all("candidate: true" in r for r in rows), "%s must be an optional (candidate: true) matrix row" % platform)
     publish_job = text.split("\n  publish:", 1)[1]
-    check(re.search(r"needs: \[plan, build, accept, source\]", publish_job) is not None, "publish must need plan, build, accept and source")
+    check(re.search(r"needs: \[plan, build, accept, source, sanitizers\]", publish_job) is not None,
+          "publish must need plan, build, accept, source and the sanitizer job")
     check("startsWith(github.ref, 'refs/tags/" in publish_job, "publish must run only for a pushed tag")
     others = [p for p in (REPO / ".github" / "workflows").glob("*.y*ml") if p.name != WORKFLOW.name]
     for other in others:

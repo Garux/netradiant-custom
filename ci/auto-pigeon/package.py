@@ -267,6 +267,8 @@ def main():
             raise Failure("build report %s=%r does not match the plan's %r" % (key, report[key], plan[key]))
     if report["platform"] != platform:
         raise Failure("the build report is for %s" % report["platform"])
+    if report.get("sanitize"):
+        raise Failure("a sanitizer build is never packaged")
     if report["tracked_files_modified"]:
         raise Failure("the build is from a modified tree: %s" % report["tracked_files_modified"])
     if not report["regress"] or report["regress"]["exit"] != 0:
