@@ -2439,7 +2439,9 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 									continue;
 								}
 								SuperLuxel& lightLuxel = tmplm.getSuperLuxel( 0, sx, sy );
-								Vector3* lightDeluxel = &tmplm.getSuperDeluxel( sx, sy );
+								/* no deluxels without a deluxemap: superDeluxels is null then, and binding a reference to its
+								   element is undefined behaviour (UBSan, S12.passage) even if it is never read */
+								Vector3* lightDeluxel = deluxemap ? &tmplm.getSuperDeluxel( sx, sy ) : nullptr;
 								const Vector3& origin = lm->getSuperOrigin( sx, sy );
 
 								/* only subsample shadowed luxels */
@@ -2448,10 +2450,10 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 
 								/* subsample it */
 								if ( lightRandomSamples ) {
-									RandomSubsampleRawLuxel( lm, &trace, origin, sx, sy, 0.5f * lightSamplesSearchBoxSize, lightLuxel, deluxemap ? lightDeluxel : nullptr );
+									RandomSubsampleRawLuxel( lm, &trace, origin, sx, sy, 0.5f * lightSamplesSearchBoxSize, lightLuxel, lightDeluxel );
 								}
 								else{
-									SubsampleRawLuxel_r( lm, &trace, origin, sx, sy, 0.25f * lightSamplesSearchBoxSize, lightLuxel, deluxemap ? lightDeluxel : nullptr );
+									SubsampleRawLuxel_r( lm, &trace, origin, sx, sy, 0.25f * lightSamplesSearchBoxSize, lightLuxel, lightDeluxel );
 								}
 
 								flag |= FLAG_ALREADY_SUBSAMPLED;

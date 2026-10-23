@@ -30,6 +30,7 @@ README, unchanged.
 | `q3map2: give the macOS worker threads an 8 MiB stack` | `std::thread` gets 512 KiB on macOS and `-light` needs more than 1 MiB: every `-light` died with SIGBUS. macOS workers are pthreads with 8 MiB (Linux threads already get 8 MiB, Windows ones 4 MiB). | `R01`, `R02`, `R09` with `--full` on macOS |
 
 | `q3map2: no texture axes from a plane a side does not have` | A brush side whose three points make no plane gets plane number -1 and is dropped later, but classic texture vectors were first computed from `mapplanes[-1]`: an out-of-bounds read (AddressSanitizer; release builds read garbage silently). | `R08.zeroarea` under ASan + UBSan |
+| `q3map2: no deluxel reference without a deluxemap` | `IlluminateRawLightmap` took the address of a super-sampled deluxel for every luxel it subsamples, also when no deluxemap is made and that array is null: undefined behaviour (UBSan: reference binding to a null pointer) that a release build happens to survive. It is formed only with a deluxemap now. Found by the first case whose light stage subsamples a shadow edge. | `S12.passage` with `--full` under ASan + UBSan |
 
 P1 and P2 belong together: with P1 alone the rod of `R02` is solid but the air above it is filled.
 
