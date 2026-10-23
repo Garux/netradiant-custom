@@ -23,6 +23,7 @@ README, unchanged.
 | `q3map2: filter a face consumed as ON a near-coplanar plane to the side it faces (M4)` | `BuildFaceTree_r` consumes a face lying within `ON_EPSILON` of a split plane that is not its own, so its own plane never splits the leaves behind; the surface filter then routed the face's 1/8-snapped triangles alone, and a snap past 0.1 sent them only into the opaque leaf behind that plane: the face was not drawn. `FilterWindingIntoTree_r` now also filters such a face to the side it faces, as it already did for a face on the node's own plane (references are only added). | `R04.m4.p08_nearby`, `G01.m4.inset`, `G05.m4.phase0625`, `G05.m4.phase1094`, `G05.m4.recess0095` |
 | `q3map2: split a brush with a small section for real (M3, tiny section)` | `SplitBrush` treated a brush reaching at least 0.1 past the plane on both sides as unsplit when its section had fewer than three edges longer than 0.2, and sent it whole to the side it reaches furthest into: a 3/16 rod lying across a split lost its other part's collision. It is split for real now (positive-volume halves are kept, P1). | `G02.m3.rod_along`, `G07.m3.cube.025` |
 | `q3map2: keep a brush on its inner side of a plane its side was consumed on (M3, sliver)` | The visible-face tree consumes a side lying within `ON_EPSILON` of a split plane (its VISIBLE part); `SplitBrush` decided the same question again from the brush's full 1/8-snapped windings, saw a vertex 0.104 past the plane and split for real. The sliver went to the other child, where no plane of the brush bounds it (the side that would was consumed), and made a leaf holding most of a pipe bore opaque. `BuildFaceTree_r` now records the brush on that node and `FilterBrushIntoTree_r` keeps it wholly on its inner side there. | `R11.m3.p10_nearby` |
+| `q3map2: keep a portal unless its winding is degenerate (narrow openings)` | `MakeNodePortal` and `SplitNodePortals` dropped every portal with fewer than three edges longer than 0.2 (`WindingIsTiny`, a vertex-snapping test for drawn faces). The leaf of a slot 0.125 wide exists, but its portals to the room and to the void — 0.125 x 256 rectangles — were dropped: the map read sealed, a reachable slot or a room's second half behind a narrow passage was filled. A portal is dropped now only when its winding is not a polygon at the precision it was built with: fewer than three points further apart than the tolerance, or area over longest chord (a lower bound of its width) not above it; the tolerance is `SPLIT_WINDING_EPSILON` (0.001) plus the float rounding of its coordinates. Compile-time checks pin the seam (zero-area, duplicate, collinear, 0.0005 wide vs 0.0625 wide). `WindingIsTiny` stays `SplitBrush`'s test. | `S02.off.125`, `S02.off.1875`, `S03.split.25`, `S04.turned.*`, `S05.moved.on_split`, `S05.moved.turned45`, `S07.blind`, `S11.*`, `S12.passage` |
 
 | `q3map2: append BSP entities one by one so libc++ builds it` | A build fix with no change in behaviour: libc++ (Apple clang) cannot compile a vector range insert of `entity_t`. | the macOS builds |
 | `q3map2: give the macOS worker threads an 8 MiB stack` | `std::thread` gets 512 KiB on macOS and `-light` needs more than 1 MiB: every `-light` died with SIGBUS. macOS workers are pthreads with 8 MiB (Linux threads already get 8 MiB, Windows ones 4 MiB). | `R01`, `R02`, `R09` with `--full` on macOS |
@@ -40,14 +41,8 @@ README states its own measurement.
 
 `regression_tests/auto-pigeon/known-failures.json` is the record; a release lists the same cases.
 
-- Narrow openings to the void read sealed (the `S02`–`S12` cases, `R08.slit.0125`). Measured with a portal
-  diagnostic on `3026`, two decisions close them:
-  - `portal_tiny`: the opening's leaf exists, but `MakeNodePortal`/`SplitNodePortals` drop its portals to the
-    room and to the void — finite rectangles with fewer than three edges longer than 0.2 (`WindingIsTiny`).
-    Off every split this closes up to 0.1875 (`S02.off.125`, `S02.off.1875`), turned or moved openings
-    (`S04.*`, `S05.moved.on_split`, `S05.moved.turned45`), a slot reached from the room (`S07.blind`), slots
-    behind detail or a patch (`S11.*`) and a sealed room's second half behind a narrow passage
-    (`S12.passage`); a block split halving a slot closes it up to 0.375 (`S03.split.25`).
+- Narrow openings to the void read sealed where a block split runs through them (`R08.slit.0125`,
+  `S03.split.1875`, `S05.moved.straddle`). Measured with a portal diagnostic on `3026`:
   - `block_split`: the forced 1024 block split consumes both faces of a slot lying within `ON_EPSILON` of it,
     so no leaf holds the slot's air (`R08.slit.0125`, `S03.split.1875`, `S05.moved.straddle`). The portal
     stage drops nothing there.

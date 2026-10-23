@@ -65,13 +65,13 @@ G06.pocket: an enclosed pocket: a hollow block sealed from the room
   - drawn [144, 0, 48]: the block's outside face
   - open [152, 0, 48]: room air beside the block
 
-G06.outer.025: a 0.25 slot to the void at y = 100: the narrowest opening Q3Map2 keeps
+G06.outer.025: a 0.25 slot to the void at y = 100, off every split
   map: maps/g06_outer_025.map
   mechanism: none (control)
   the source leaks
   stages: bsp
+  also: S02
 
   A full-height slot 0.25 wide through the +x wall, centred on y = 100 (no split plane through it).
-  The map leaks. Portals with fewer than three edges longer than 0.2 are dropped (portals.cpp,
-  EDGE_LENGTH), so 0.25 is the narrowest opening measured to stay open; R08.slit.0125 is the known
-  failure below that limit.
+  The map leaks. Upstream kept this one and closed the narrower ones (S02), whose portals have fewer
+  than three edges longer than 0.2.

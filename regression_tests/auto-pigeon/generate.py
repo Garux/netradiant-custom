@@ -23,7 +23,8 @@ this face is visible here with this texture coordinate — and never what an ear
     the plane has fewer than three edges longer than 0.2 wholly to the side it reaches furthest into.
   * Brush vertices are rounded to 1/8 unit when the brush is loaded (brush snap); the windings every later
     stage reads are the rounded ones.
-  * A portal with fewer than three edges longer than 0.2 (EDGE_LENGTH) is dropped (`portals.cpp`).
+  * Upstream dropped a portal with fewer than three edges longer than 0.2 (EDGE_LENGTH, `portals.cpp`); the
+    fork drops only a winding that is not a polygon at the portal stage's own precision (NEW_340A).
   * Drawn vertices are rounded to 1/8 unit (`surface.cpp`, brush snap), so a drawn probe sits more
     than 1/8 from every edge and is matched within 0.2 of its plane.
 """
@@ -632,11 +633,10 @@ def g06():
         ("+x wall, north of the slot", box_faces(x1r, centre + gap / 2, z0r, x1r + WALL, y1r, z1r, CHECK))]
     path = "G06_openings/maps/g06_outer_025.map"
     files.update(write_map(path, brushes_text(named)))
-    cases.append(case("G06.outer.025", "a 0.25 slot to the void at y = 100: the narrowest opening Q3Map2 keeps", None, path, True, [],
+    cases.append(case("G06.outer.025", "a 0.25 slot to the void at y = 100, off every split", None, path, True, [],
                       "A full-height slot 0.25 wide through the +x wall, centred on y = 100 (no split plane through it). "
-                      "The map leaks. Portals with fewer than three edges longer than 0.2 are dropped (portals.cpp, "
-                      "EDGE_LENGTH), so 0.25 is the narrowest opening measured to stay open; R08.slit.0125 is the "
-                      "known failure below that limit."))
+                      "The map leaks. Upstream kept this one and closed the narrower ones (S02), whose portals have fewer "
+                      "than three edges longer than 0.2.", extra={"aliases": ["S02"]}))
     return files, cases
 
 

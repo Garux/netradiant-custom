@@ -3871,10 +3871,13 @@
    "title": "G01 turned 45 degrees and moved"
   },
   {
+   "aliases": [
+    "S02"
+   ],
    "expect": {
     "leak": true
    },
-   "explanation": "A full-height slot 0.25 wide through the +x wall, centred on y = 100 (no split plane through it). The map leaks. Portals with fewer than three edges longer than 0.2 are dropped (portals.cpp, EDGE_LENGTH), so 0.25 is the narrowest opening measured to stay open; R08.slit.0125 is the known failure below that limit.",
+   "explanation": "A full-height slot 0.25 wide through the +x wall, centred on y = 100 (no split plane through it). The map leaks. Upstream kept this one and closed the narrower ones (S02), whose portals have fewer than three edges longer than 0.2.",
    "id": "G06.outer.025",
    "map": "G06_openings/maps/g06_outer_025.map",
    "mechanism": null,
@@ -3882,7 +3885,7 @@
    "stages": [
     "bsp"
    ],
-   "title": "a 0.25 slot to the void at y = 100: the narrowest opening Q3Map2 keeps"
+   "title": "a 0.25 slot to the void at y = 100, off every split"
   },
   {
    "expect": {
