@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Build q3map2 (and nothing else) for one target, natively, from a clean copy of the source, then run its regressions.
+"""Build q3map2 (and nothing else) for one target, natively, from a clean copy of the source, then run its regressions
+(BSP, and NORMAL VIS and LIGHT where a case declares them).
 
     python3 ci/auto-pigeon/build.py --platform linux-amd64 --plan plan.json --work <dir> --report build-report.json [--jobs 3]
 
@@ -140,7 +141,7 @@ def main():
     if not args.no_regress:
         regress_report = work / "regress-report.json"
         code, _, rs = run([sys.executable, HERE / "regress.py", "--q3map2", program, "--work", work / "regress work",
-                           "--report", regress_report], check=False)
+                           "--full", "--report", regress_report], check=False)
         r = load_json(regress_report)
         report["regress"] = {"exit": code, "seconds": rs, "counts": r["counts"], "required": r["required"],
                              "known_failures": r["known_failures"], "q3map2_sha256": r["q3map2_sha256"]}
