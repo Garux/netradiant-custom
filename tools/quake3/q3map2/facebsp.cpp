@@ -217,7 +217,9 @@ static void BuildFaceTree_r( node_t *node, facelist_t& list ){
 
 		/* switch on side */
 		if ( side == eSideCross ) {
-			auto [frontWinding, backWinding] = ClipWindingEpsilonStrict( split.w, plane.plane, CLIP_EPSILON * 2 ); /* strict; if no winding is left, we have a "virtually identical" plane and don't want to split by it */
+			/* WindingOnPlaneSide() found points beyond ON_EPSILON on BOTH sides; clipping with a wider epsilon here
+			   dropped a crossing part narrower than that from its subtree, leaving leaves that straddle the face */
+			auto [frontWinding, backWinding] = ClipWindingEpsilonStrict( split.w, plane.plane, ON_EPSILON ); /* strict; if no winding is left, we have a "virtually identical" plane and don't want to split by it */
 			if ( !frontWinding.empty() ) {
 				face_t& newFace = childLists[0].emplace_front();
 				newFace.w.swap( frontWinding );
