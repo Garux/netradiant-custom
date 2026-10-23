@@ -704,7 +704,10 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 			break;
 	}
 
-	if ( midwinding.empty() || WindingIsTiny( midwinding ) ) { // the brush isn't really split
+	/* the brush is known to reach at least 0.1 past the plane on BOTH sides here. A small section (WindingIsTiny:
+	   fewer than three edges longer than 0.2) does not make it unsplit: a 3/16 rod lying across the plane was sent
+	   whole to the side it reaches furthest into, and its part on the other side kept no brush */
+	if ( midwinding.empty() ) { // the brush isn't really split
 		if ( BrushMostlyOnSide( brush, plane ) == eSideBack ) {
 			return { {}, brush };
 		}

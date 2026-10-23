@@ -21,6 +21,7 @@ README, unchanged.
 | `q3map2: clip a crossing face at the epsilon it was classified with (P2)` | `BuildFaceTree_r` clipped a face it had classified as crossing (more than `ON_EPSILON` = 0.1 on both sides) with `CLIP_EPSILON*2` = 0.2, so a part between 0.1 and 0.2 wide vanished, the whole face went to one side, and a leaf straddling the brush turned opaque and filled room air. It now clips at `ON_EPSILON`. | `R03.cross.0148`, `R06.p4.p08_base` |
 | `q3map2: keep a split brush fragment of any positive volume (P1)` | `SplitBrush` discarded a split half smaller than 1 cubic unit: thin rods and walls lost their collision. Only a non-positive volume is discarded now; `-bsp -microvolume <F>` restores a threshold (upstream's was 1). | `R02.rod.split` |
 | `q3map2: filter a face consumed as ON a near-coplanar plane to the side it faces (M4)` | `BuildFaceTree_r` consumes a face lying within `ON_EPSILON` of a split plane that is not its own, so its own plane never splits the leaves behind; the surface filter then routed the face's 1/8-snapped triangles alone, and a snap past 0.1 sent them only into the opaque leaf behind that plane: the face was not drawn. `FilterWindingIntoTree_r` now also filters such a face to the side it faces, as it already did for a face on the node's own plane (references are only added). | `R04.m4.p08_nearby`, `G01.m4.inset`, `G05.m4.phase0625`, `G05.m4.phase1094`, `G05.m4.recess0095` |
+| `q3map2: split a brush with a small section for real (M3, tiny section)` | `SplitBrush` treated a brush reaching at least 0.1 past the plane on both sides as unsplit when its section had fewer than three edges longer than 0.2, and sent it whole to the side it reaches furthest into: a 3/16 rod lying across a split lost its other part's collision. It is split for real now (positive-volume halves are kept, P1). | `G02.m3.rod_along`, `G07.m3.cube.025` |
 
 | `q3map2: append BSP entities one by one so libc++ builds it` | A build fix with no change in behaviour: libc++ (Apple clang) cannot compile a vector range insert of `entity_t`. | the macOS builds |
 | `q3map2: give the macOS worker threads an 8 MiB stack` | `std::thread` gets 512 KiB on macOS and `-light` needs more than 1 MiB: every `-light` died with SIGBUS. macOS workers are pthreads with 8 MiB (Linux threads already get 8 MiB, Windows ones 4 MiB). | `R01`, `R02`, `R09` with `--full` on macOS |
@@ -38,8 +39,6 @@ README states its own measurement.
 
 `regression_tests/auto-pigeon/known-failures.json` is the record; a release lists the same cases.
 
-- `G02.m3.rod_along`, `G07.m3.cube.025` (M3): a brush whose section by a split plane has fewer than three
-  edges longer than 0.2 is sent whole to one side; the part on the other side keeps no brush.
 - `R11.m3.p10_nearby` (M3): a brush the visible-face tree treats as ON a split plane is split for real
   from its snapped windings; the sliver lands in a leaf of open bore and fills it.
 - `R08.slit.0125`: a 0.125-unit opening to the void is closed; the map is reported sealed although
