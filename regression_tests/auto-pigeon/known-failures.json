@@ -1,41 +1,5 @@
 {
   "cases": {
-    "R08.slit.0125": {
-      "failing": "leak verdict: sealed, the source leaks",
-      "mechanism": "block_split",
-      "observed_on": {
-        "argv": "-bsp -game quake3 -threads 2 -meta",
-        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
-        "observed": "2026-10-23",
-        "reader": "ci/auto-pigeon/ibsp.py",
-        "source": "netradiant-custom master 8216133984031afaa9a857b56ea66dd9c3d54b26 (upstream-base/82161339), unmodified"
-      },
-      "owner": "NEW_340A: repaired by the commit that removes this entry; measured on 3026 with a portal diagnostic: the portal stage drops NO portal here (NEW_340's EDGE_LENGTH attribution was wrong for this map) - block_split: the forced 1024 block split consumes both slot faces lying within ON_EPSILON of it (BuildFaceTree_r), so no leaf holds the slot's air"
-    },
-    "S03.split.1875": {
-      "failing": "leak verdict: sealed, the source leaks",
-      "mechanism": "block_split",
-      "observed_on": {
-        "argv": "-bsp -game quake3 -threads 2 -meta",
-        "build": "auto-pigeon/q3map2 release 2.5.17n-ap.3026 linux-amd64 bin/q3map2 (sha256 2cd462a0a7cbdd3094b6a1755546a7e042c875e1a413096eb88efe9e430f2fb1), GCC 14 on Ubuntu 24.04",
-        "observed": "2026-10-24",
-        "reader": "ci/auto-pigeon/regress.py + ci/auto-pigeon/ibsp.py",
-        "source": "auto-pigeon/q3map2 main 7e109335 (upstream-base/82161339 + P1 + P2 + M4 + M3)"
-      },
-      "owner": "NEW_340A: repaired by the commit that removes this entry; block_split: the forced 1024 block split consumes both slot faces lying within ON_EPSILON of it (BuildFaceTree_r), so no leaf holds the slot's air"
-    },
-    "S05.moved.straddle": {
-      "failing": "leak verdict: sealed, the source leaks",
-      "mechanism": "block_split",
-      "observed_on": {
-        "argv": "-bsp -game quake3 -threads 2 -meta",
-        "build": "auto-pigeon/q3map2 release 2.5.17n-ap.3026 linux-amd64 bin/q3map2 (sha256 2cd462a0a7cbdd3094b6a1755546a7e042c875e1a413096eb88efe9e430f2fb1), GCC 14 on Ubuntu 24.04",
-        "observed": "2026-10-24",
-        "reader": "ci/auto-pigeon/regress.py + ci/auto-pigeon/ibsp.py",
-        "source": "auto-pigeon/q3map2 main 7e109335 (upstream-base/82161339 + P1 + P2 + M4 + M3)"
-      },
-      "owner": "NEW_340A: repaired by the commit that removes this entry; block_split: the forced 1024 block split consumes both slot faces lying within ON_EPSILON of it (BuildFaceTree_r), so no leaf holds the slot's air"
-    },
     "S08.band.00625": {
       "failing": "leak verdict: sealed, the source leaks",
       "mechanism": "on_epsilon_band",

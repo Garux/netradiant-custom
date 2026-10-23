@@ -1,17 +1,16 @@
 R08_controls — Auto-Pigeon regression cases (written by ../generate.py; run by ci/auto-pigeon/regress.py)
 
-R08.slit.0125: a 0.125 slot through a wall to the void
+R08.slit.0125: a 0.125 slot through a wall to the void, centred on a block split
   map: maps/r08_slit_0125.map
-  mechanism: slit_closure
+  mechanism: block_split
   the source leaks
   stages: bsp
+  also: S01, S03
 
-  The same slot 0.125 wide. The source describes an opening, so the honest verdict is a leak, but
-  every Q3Map2 build measured closes it: a portal with fewer than three edges longer than 0.2
-  (EDGE_LENGTH) is dropped (portals.cpp MakeNodePortal/SplitNodePortals), and the block split y = 0
-  through this slot halves it again, so a slot centred on a split closes up to 0.375 and one elsewhere
-  up to 0.1875 (G06.outer.025 stays open). A representability limit of the portal stage, kept as a
-  KNOWN FAILURE rather than rewritten as an expected seal.
+  The same slot 0.125 wide, centred on the block split y = 0. The source describes an opening, so the
+  honest verdict is a leak, and the route must cross the slot. Upstream closed it: the forced block
+  split consumed both slot faces lying within ON_EPSILON of it, and no leaf held the slot's air (the
+  portal stage dropped nothing here). Repaired with S03/S05 (NEW_340A).
 
 
 R08.touch: touch

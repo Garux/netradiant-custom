@@ -61,7 +61,24 @@ static void SelectSplitPlaneNum( const node_t *node, const facelist_t& list, int
 		}
 		const float dist = blockSize[ i ] * ( floor( node->minmax.mins[ i ] / blockSize[ i ] ) + 1 );
 		if ( node->minmax.maxs[ i ] > dist ) {
-			*splitPlaneNum = FindFloatPlane( Plane3f( g_vector3_axes[i], dist ) );
+			/* a block split only balances the tree and its position is arbitrary, so it must not consume a face of
+			   ANOTHER plane lying within ON_EPSILON of it (BuildFaceTree_r): both sides of a slot narrower than
+			   2 * ON_EPSILON centred on the block boundary were consumed there, and the slot's air went to the
+			   leaves of the two wall brushes. Split on the face planes first; the children try the block again,
+			   except where it would cut off a slab no thicker than ON_EPSILON, which the portal and brush stages
+			   (ON_EPSILON-coplanar as well) cannot represent */
+			if ( node->minmax.maxs[ i ] - dist <= ON_EPSILON || dist - node->minmax.mins[ i ] <= ON_EPSILON ) {
+				continue;
+			}
+			const Plane3f blockPlane( g_vector3_axes[i], dist );
+			const int planenum = FindFloatPlane( blockPlane );
+			const bool consumes = std::ranges::any_of( list, [&]( const face_t& face ){
+				return ( face.planenum | 1 ) != ( planenum | 1 ) && WindingOnPlaneSide( face.w, blockPlane ) == eSideOn;
+			} );
+			if ( consumes ) {
+				continue;
+			}
+			*splitPlaneNum = planenum;
 			return;
 		}
 	}

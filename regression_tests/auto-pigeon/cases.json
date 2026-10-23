@@ -6307,18 +6307,37 @@
    "title": "overlap"
   },
   {
+   "aliases": [
+    "S01",
+    "S03"
+   ],
    "expect": {
     "leak": true
    },
-   "explanation": "The same slot 0.125 wide. The source describes an opening, so the honest verdict is a leak, but every Q3Map2 build measured closes it: a portal with fewer than three edges longer than 0.2 (EDGE_LENGTH) is dropped (portals.cpp MakeNodePortal/SplitNodePortals), and the block split y = 0 through this slot halves it again, so a slot centred on a split closes up to 0.375 and one elsewhere up to 0.1875 (G06.outer.025 stays open). A representability limit of the portal stage, kept as a KNOWN FAILURE rather than rewritten as an expected seal.",
+   "explanation": "The same slot 0.125 wide, centred on the block split y = 0. The source describes an opening, so the honest verdict is a leak, and the route must cross the slot. Upstream closed it: the forced block split consumed both slot faces lying within ON_EPSILON of it, and no leaf held the slot's air (the portal stage dropped nothing here). Repaired with S03/S05 (NEW_340A).",
    "id": "R08.slit.0125",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      0.0725,
+      256
+     ],
+     "min": [
+      255,
+      -0.0725,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
    "map": "R08_controls/maps/r08_slit_0125.map",
-   "mechanism": "slit_closure",
+   "mechanism": "block_split",
    "probes": [],
    "stages": [
     "bsp"
    ],
-   "title": "a 0.125 slot through a wall to the void"
+   "title": "a 0.125 slot through a wall to the void, centred on a block split"
   },
   {
    "aliases": [

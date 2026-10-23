@@ -389,7 +389,7 @@ def r07():
     files, cases = {}, []
     for cid, width, leak, mechanism, title in (
             ("R07.open.1", 1.0, True, None, "a one-unit slot through a wall to the void: a real opening"),
-            ("R08.slit.0125", 0.125, True, "slit_closure", "a 0.125 slot through a wall to the void")):
+            ("R08.slit.0125", 0.125, True, "block_split", "a 0.125 slot through a wall to the void, centred on a block split")):
         name = "r07_open_1" if width == 1 else "r08_slit_0125"
         directory = "R07_open_enclosure" if width == 1 else "R08_controls"
         body = brushes_text(room_brushes(gap=width))
@@ -398,13 +398,12 @@ def r07():
         explanation = ("The +x wall is two brushes with a full-height slot of %s units between them, open to the void. "
                        "The map leaks; a compiler that reports it sealed has closed a real opening. P1+P2 must not "
                        "change that: it keeps material, it does not invent it." % num(width)) if width == 1 else (
-                       "The same slot 0.125 wide. The source describes an opening, so the honest verdict is a leak, but "
-                       "every Q3Map2 build measured closes it: a portal with fewer than three edges longer than 0.2 "
-                       "(EDGE_LENGTH) is dropped (portals.cpp MakeNodePortal/SplitNodePortals), and the block split "
-                       "y = 0 through this slot halves it again, so a slot centred on a split closes up to 0.375 and "
-                       "one elsewhere up to 0.1875 (G06.outer.025 stays open). A representability limit of the portal "
-                       "stage, kept as a KNOWN FAILURE rather than rewritten as an expected seal.")
-        cases.append(case(cid, title, mechanism, path, leak, [], explanation, extra={"aliases": ["G06"]} if width == 1 else None))
+                       "The same slot 0.125 wide, centred on the block split y = 0. The source describes an opening, "
+                       "so the honest verdict is a leak, and the route must cross the slot. Upstream closed it: the "
+                       "forced block split consumed both slot faces lying within ON_EPSILON of it, and no leaf held the "
+                       "slot's air (the portal stage dropped nothing here). Repaired with S03/S05 (NEW_340A).")
+        cases.append(case(cid, title, mechanism, path, leak, [], explanation,
+                          extra={"aliases": ["G06"]} if width == 1 else {"aliases": ["S01", "S03"], "leak_route": slot_route(-width / 2, width / 2)}))
     return files, cases
 
 
