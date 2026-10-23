@@ -1,0 +1,3130 @@
+{
+ "cases": [
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Six 16-unit walls around 512 x 512 x 256 of air with a player start and a light. Every compiler must seal it, keep its air open, its walls solid and its six inner faces drawn. It is the positive control the other cases are variations of.",
+   "id": "R01.room",
+   "map": "R01_sealed_room/maps/r01_room.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0,
+      0,
+      128
+     ],
+     "why": "the middle of the room, on both block split planes"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "sealed room baseline"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The rod is 0.25 x 0.25 x 24 = 1.5 cubic units. Across y = 0 (a block split plane) it is cut into two halves of 0.75 cubic units each; upstream SplitBrush discards a fragment below 1 cubic unit, so both halves vanish from the tree: the leaves list no brush, the rod has no collision and the player walks through it. The uncut control (one fragment of 1.5) keeps it.",
+   "id": "R02.rod.split",
+   "map": "R02_rod/maps/r02_rod_split.map",
+   "mechanism": "M1",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      0.0625,
+      12
+     ],
+     "why": "inside the rod, +y half"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      -0.0625,
+      12
+     ],
+     "why": "inside the rod, -y half"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      0.0625,
+      1
+     ],
+     "why": "inside the rod near its foot"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      -0.0625,
+      23
+     ],
+     "why": "inside the rod near its top"
+    },
+    {
+     "kind": "open",
+     "point": [
+      64.125,
+      0.0,
+      30
+     ],
+     "why": "air 6 units above the rod"
+    },
+    {
+     "kind": "open",
+     "point": [
+      66,
+      0.0,
+      12
+     ],
+     "why": "air 1.75 units beside the rod"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      64.25,
+      0.0,
+      12
+     ],
+     "why": "the rod's +x face"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "0.25 x 0.25 x 24 rod across the y = 0 split"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Control: the same rod wholly on +y of the y = 0 split is never cut, so no fragment is discarded and every compiler keeps it solid.",
+   "id": "R02.rod.uncut",
+   "map": "R02_rod/maps/r02_rod_uncut.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      0.3125,
+      12
+     ],
+     "why": "inside the rod, +y half"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      0.1875,
+      12
+     ],
+     "why": "inside the rod, -y half"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      0.3125,
+      1
+     ],
+     "why": "inside the rod near its foot"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      0.1875,
+      23
+     ],
+     "why": "inside the rod near its top"
+    },
+    {
+     "kind": "open",
+     "point": [
+      64.125,
+      0.25,
+      30
+     ],
+     "why": "air 6 units above the rod"
+    },
+    {
+     "kind": "open",
+     "point": [
+      66,
+      0.25,
+      12
+     ],
+     "why": "air 1.75 units beside the rod"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      64.25,
+      0.25,
+      12
+     ],
+     "why": "the rod's +x face"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "the same rod moved 0.25 to +y, wholly on one side of y = 0"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "x = 0 is a block split plane, so the step's top face (z = 32, x from -64 to 0.05) crosses it. BuildFaceTree_r classifies the face as crossing when its points lie more than ON_EPSILON (0.1) on both sides, then clips it with CLIP_EPSILON*2 (0.2): a part between 0.1 and 0.2 wide is classified crossing yet clips to nothing, so the whole face goes to the back. The front subtree then has no plane at z = 32, one leaf straddles the step's strip x in [0, 0.05] and the air above it, the step's fragment makes that leaf opaque, and the room air above the strip is filled. At 0.148 this happens; at 0.25 the clip keeps a front part, at 0.05 the face is not crossing, and both controls stay correct on every build.",
+   "id": "R03.cross.005",
+   "map": "R03_crossing_face/maps/r03_cross_005.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.025,
+      0,
+      96
+     ],
+     "why": "air 64 above the strip of the step past x = 0"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.025,
+      0,
+      40
+     ],
+     "why": "air 8 above the strip of the step past x = 0"
+    },
+    {
+     "kind": "open",
+     "point": [
+      2,
+      0,
+      96
+     ],
+     "why": "air 2 units past the end of the step"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -32,
+      0,
+      16
+     ],
+     "why": "inside the step"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -32,
+      0,
+      32
+     ],
+     "why": "the step's top face"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      0.05,
+      0,
+      16
+     ],
+     "why": "the step's end face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "control: crossing by 0.05, inside ON_EPSILON"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "x = 0 is a block split plane, so the step's top face (z = 32, x from -64 to 0.148) crosses it. BuildFaceTree_r classifies the face as crossing when its points lie more than ON_EPSILON (0.1) on both sides, then clips it with CLIP_EPSILON*2 (0.2): a part between 0.1 and 0.2 wide is classified crossing yet clips to nothing, so the whole face goes to the back. The front subtree then has no plane at z = 32, one leaf straddles the step's strip x in [0, 0.148] and the air above it, the step's fragment makes that leaf opaque, and the room air above the strip is filled. At 0.148 this happens; at 0.25 the clip keeps a front part, at 0.05 the face is not crossing, and both controls stay correct on every build.",
+   "id": "R03.cross.0148",
+   "map": "R03_crossing_face/maps/r03_cross_0148.map",
+   "mechanism": "M2",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.074,
+      0,
+      96
+     ],
+     "why": "air 64 above the strip of the step past x = 0"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.074,
+      0,
+      40
+     ],
+     "why": "air 8 above the strip of the step past x = 0"
+    },
+    {
+     "kind": "open",
+     "point": [
+      2,
+      0,
+      96
+     ],
+     "why": "air 2 units past the end of the step"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -32,
+      0,
+      16
+     ],
+     "why": "inside the step"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -32,
+      0,
+      32
+     ],
+     "why": "the step's top face"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      0.148,
+      0,
+      16
+     ],
+     "why": "the step's end face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a step whose top face crosses x = 0 by 0.148: between ON_EPSILON and CLIP_EPSILON*2"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "x = 0 is a block split plane, so the step's top face (z = 32, x from -64 to 0.25) crosses it. BuildFaceTree_r classifies the face as crossing when its points lie more than ON_EPSILON (0.1) on both sides, then clips it with CLIP_EPSILON*2 (0.2): a part between 0.1 and 0.2 wide is classified crossing yet clips to nothing, so the whole face goes to the back. The front subtree then has no plane at z = 32, one leaf straddles the step's strip x in [0, 0.25] and the air above it, the step's fragment makes that leaf opaque, and the room air above the strip is filled. At 0.148 this happens; at 0.25 the clip keeps a front part, at 0.05 the face is not crossing, and both controls stay correct on every build.",
+   "id": "R03.cross.025",
+   "map": "R03_crossing_face/maps/r03_cross_025.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.125,
+      0,
+      96
+     ],
+     "why": "air 64 above the strip of the step past x = 0"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.125,
+      0,
+      40
+     ],
+     "why": "air 8 above the strip of the step past x = 0"
+    },
+    {
+     "kind": "open",
+     "point": [
+      2,
+      0,
+      96
+     ],
+     "why": "air 2 units past the end of the step"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -32,
+      0,
+      16
+     ],
+     "why": "inside the step"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -32,
+      0,
+      32
+     ],
+     "why": "the step's top face"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      0.25,
+      0,
+      16
+     ],
+     "why": "the step's end face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "control: crossing by 0.25, past CLIP_EPSILON*2"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "No source-independent reduction of M4 exists yet, so this is the shape that shows it: a 354-brush pipe whose one segment is pulled 3 units, from Auto-Pigeon's own pipe test generator (no corpus, no game data). The face of brush 101 at these points is nearly parallel to a neighbouring segment's face; BuildFaceTree_r treats it as ON that plane and discards it, and its drawn triangles filter into the neighbour's solid leaves (traced in Auto-Pigeon's compiler investigation). KNOWN FAILURE until NEW_340 repairs it: P1+P2 does not touch it, and the two attempted repairs (P3, P4) broke R05 and R06.",
+   "id": "R04.m4.p08_nearby",
+   "map": "R04_m4_near_parallel/maps/r04_p08_nearby.map",
+   "mechanism": "M4",
+   "probes": [
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -58.6043605,
+      54.64965349999999,
+      0
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -61.918280375,
+      54.504964724999994,
+      5.371289086187509
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -65.23220025,
+      54.360275949999995,
+      10.742578172375017
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -61.918280375,
+      54.504964724999994,
+      -5.371289086187509
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -65.23220025,
+      54.360275949999995,
+      -10.742578172375017
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -55.290440625,
+      54.79434227499999,
+      -5.371288999999997
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -51.97652075,
+      54.93903104999999,
+      -10.742577999999995
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -55.290440625,
+      54.79434227499999,
+      5.371288999999997
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -51.97652075,
+      54.93903104999999,
+      10.742577999999995
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "M4: a near-parallel face discarded as on another plane (pipe P08 with a nearby pull)"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A 590-brush pipe with a bend in all three axes. Upstream draws these 9 points; the rejected M4 repair P3 (never committed) lost them. Any later M4 repair must keep them drawn.",
+   "id": "R05.p3.p10_base",
+   "map": "R05_p10_shape/maps/r05_p10_base.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -763.0043579471607,
+      596.1198963907112,
+      -60.99261252911365
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -763.7384788379183,
+      605.9858021489921,
+      -69.83500112684828
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -764.4725997286757,
+      615.851707907273,
+      -78.67738972458291
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -771.2123884383853,
+      589.9579509637858,
+      -52.15022395175855
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -779.42041892961,
+      583.7960055368604,
+      -43.30783537440344
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -761.5575573656545,
+      585.9587890039622,
+      -52.15022389392387
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -760.1107567841483,
+      575.7976816172134,
+      -43.3078352587341
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -755.5090071466847,
+      602.5770434461048,
+      -69.8350011439239
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -748.0136563462086,
+      609.0341905014983,
+      -78.67738975873415
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "control: the P10 pipe whose face P3 lost"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The P08 pipe is sealed: the rejected M4 repair P4 (never committed) reported a leak here, so the leak verdict is the first assertion. The 9 face points are the M2 defect of R03 on a real shape: a wall face piece crosses a node plane by between 0.1 and 0.2, upstream sends it wholly to the back, the leaf that then straddles the wall turns opaque, and the face is not drawn there.",
+   "id": "R06.p4.p08_base",
+   "map": "R06_p08_sealed/maps/r06_p08_base.map",
+   "mechanism": "M2",
+   "probes": [
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      6.521783000000001,
+      -77.09929250000002,
+      0
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      6.168146850000001,
+      -77.13023162500001,
+      7.246933306574652
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      5.8145107000000005,
+      -77.16117075000001,
+      14.493866613149304
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      6.168146850000001,
+      -77.13023162500001,
+      -7.246933306574652
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      5.8145107000000005,
+      -77.16117075000001,
+      -14.493866613149304
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      6.875419150000001,
+      -77.06835337500002,
+      -7.246933400000002
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      7.2290553000000015,
+      -77.03741425000003,
+      -14.493866800000005
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      6.875419150000001,
+      -77.06835337500002,
+      7.246933400000002
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      7.2290553000000015,
+      -77.03741425000003,
+      14.493866800000005
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "control: the sealed P08 pipe that P4 reported as leaking; its M2 face"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The +x wall is two brushes with a full-height slot of 1 units between them, open to the void. The map leaks; a compiler that reports it sealed has closed a real opening. P1+P2 must not change that: it keeps material, it does not invent it.",
+   "id": "R07.open.1",
+   "map": "R07_open_enclosure/maps/r07_open_1.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a one-unit slot through a wall to the void: a real opening"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Box A has a flat top at z = 32 for x in [-64, 0]; box B, from x = 0 to 64, has a top that starts at z = 32 at x = 0 and rises 0.2 degrees. The two top planes differ by 0.2 degrees and meet along x = 0: a near-parallel pair of planes that are NOT the same plane. Both tops must be drawn.",
+   "id": "R08.nearparallel",
+   "map": "R08_controls/maps/r08_nearparallel.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -32,
+      0,
+      32
+     ],
+     "why": "flat top of A"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -0.0034907,
+      0,
+      0.9999939
+     ],
+     "point": [
+      32,
+      0,
+      32.1117
+     ],
+     "why": "tilted top of B"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      32,
+      0,
+      16
+     ],
+     "why": "inside B"
+    },
+    {
+     "kind": "open",
+     "point": [
+      32,
+      0,
+      40
+     ],
+     "why": "air above B"
+    },
+    {
+     "kind": "open",
+     "point": [
+      -32,
+      0,
+      40
+     ],
+     "why": "air above A"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "near-parallel"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Box B overlaps box A by 16 units and rises above it. The overlap is solid, A's top is drawn up to B, B's side is drawn above A.",
+   "id": "R08.overlap",
+   "map": "R08_controls/maps/r08_overlap.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      0,
+      0,
+      16
+     ],
+     "why": "inside both boxes"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -32,
+      0,
+      32
+     ],
+     "why": "top of A"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      32,
+      0,
+      48
+     ],
+     "why": "top of B"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -1,
+      0,
+      0
+     ],
+     "point": [
+      -8,
+      0,
+      40
+     ],
+     "why": "B's -x face above A"
+    },
+    {
+     "kind": "open",
+     "point": [
+      -20,
+      0,
+      40
+     ],
+     "why": "air above A, beside B"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "overlap"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The same slot 0.125 wide. The source describes an opening, so the honest verdict is a leak, but every Q3Map2 build measured (upstream, the shipping pin, P1+P2) closes a slot of 0.25 or less through an opaque leaf with no brush. Recorded as a KNOWN FAILURE owned by NEW_340 rather than rewritten as an expected seal.",
+   "id": "R08.slit.0125",
+   "map": "R08_controls/maps/r08_slit_0125.map",
+   "mechanism": "slit_closure",
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot through a wall to the void"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Two boxes share the face x = 0, which is also a block split plane. Both stay solid and both tops drawn.",
+   "id": "R08.touch",
+   "map": "R08_controls/maps/r08_touch.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -0.5,
+      0,
+      16
+     ],
+     "why": "box A at the shared face"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      0.5,
+      0,
+      16
+     ],
+     "why": "box B at the shared face"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -32,
+      0,
+      32
+     ],
+     "why": "top of A"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      32,
+      0,
+      32
+     ],
+     "why": "top of B"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0,
+      0,
+      40
+     ],
+     "why": "air above the seam"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "touch"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A brush whose two x faces coincide encloses no volume. The compiler must not crash, must not seal or fill the room with it, and leaves its place air.",
+   "id": "R08.zeroarea",
+   "map": "R08_controls/maps/r08_zeroarea.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      32,
+      0,
+      32
+     ],
+     "why": "where the zero-thickness brush is: it has no volume"
+    },
+    {
+     "kind": "open",
+     "point": [
+      40,
+      0,
+      32
+     ],
+     "why": "air beside it"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "zero-area"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A 3 x 3 patchDef2 bowed over the floor, every control point with its own st, and a box with a non-default classic texture shift and scale. The BSP must keep the patch's control points and st exactly as authored (the engine tessellates them) and draw the box with the texture coordinates Q3Map2's nearest-axial projection gives for that shift and scale.",
+   "id": "R09.patch",
+   "map": "R09_patch/maps/r09_patch.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "height": 3,
+     "index": 0,
+     "kind": "patch",
+     "points": [
+      [
+       -128,
+       -96,
+       16,
+       0.0,
+       0.0
+      ],
+      [
+       -128,
+       -32,
+       48,
+       0.0,
+       0.5
+      ],
+      [
+       -128,
+       32,
+       16,
+       0.0,
+       1.0
+      ],
+      [
+       -64,
+       -96,
+       32,
+       0.5,
+       0.0
+      ],
+      [
+       -64,
+       -32,
+       64,
+       0.5,
+       0.5
+      ],
+      [
+       -64,
+       32,
+       32,
+       0.5,
+       1.0
+      ],
+      [
+       0,
+       -96,
+       16,
+       1.0,
+       0.0
+      ],
+      [
+       0,
+       -32,
+       48,
+       1.0,
+       0.5
+      ],
+      [
+       0,
+       32,
+       16,
+       1.0,
+       1.0
+      ]
+     ],
+     "shader": "textures/apreg/patch",
+     "why": "the authored control points and st, unchanged",
+     "width": 3
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      96,
+      0,
+      64
+     ],
+     "shader": "textures/apreg/checker",
+     "st": [
+      3.125,
+      0.0625
+     ],
+     "why": "the box's top, classic projection"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      128,
+      8,
+      40
+     ],
+     "shader": "textures/apreg/checker",
+     "st": [
+      0.375,
+      -0.5625
+     ],
+     "why": "the box's +x side"
+    },
+    {
+     "kind": "open",
+     "point": [
+      -64,
+      -32,
+      64
+     ],
+     "why": "air above the patch"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "a patch with authored UV checker beside an ordinary brush"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "One room, written three ways. Classic and Valve 220 describe the same nearest-axial mapping (Valve 220 spells the axes out); brush primitives carry a texture matrix in each face's own basis (ComputeAxisBase). Each must compile to the same solids, with the water box CONTENTS_WATER and not solid, the clip box player clip and not drawn, the caulk face not drawn, and the box's texture coordinates exactly what its syntax describes.",
+   "id": "R10.brushprim",
+   "map": "R10_syntax/maps/r10_brushprim.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -96,
+      8,
+      64
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      0.375,
+      -2.875
+     ],
+     "why": "the textured box, brushprim"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -64,
+      8,
+      40
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      0.375,
+      -1.125
+     ],
+     "why": "the textured box, brushprim"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -100,
+      -32,
+      24
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      -3.0,
+      -0.625
+     ],
+     "why": "the textured box, brushprim"
+    },
+    {
+     "kind": "not_drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -96,
+      8,
+      0
+     ],
+     "why": "the box's caulk bottom: nodraw"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -96,
+      0,
+      32
+     ],
+     "why": "inside the textured box"
+    },
+    {
+     "has": [
+      "water"
+     ],
+     "kind": "contents",
+     "lacks": [
+      "solid"
+     ],
+     "point": [
+      96,
+      0,
+      24
+     ],
+     "why": "inside the water box"
+    },
+    {
+     "has": [
+      "playerclip"
+     ],
+     "kind": "contents",
+     "lacks": [
+      "solid"
+     ],
+     "point": [
+      176,
+      0,
+      48
+     ],
+     "why": "inside the clip box"
+    },
+    {
+     "kind": "not_drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      176,
+      0,
+      96
+     ],
+     "why": "the clip box's top: nodraw"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "brushprim brush syntax: geometry, texture mapping and material contents"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "One room, written three ways. Classic and Valve 220 describe the same nearest-axial mapping (Valve 220 spells the axes out); brush primitives carry a texture matrix in each face's own basis (ComputeAxisBase). Each must compile to the same solids, with the water box CONTENTS_WATER and not solid, the clip box player clip and not drawn, the caulk face not drawn, and the box's texture coordinates exactly what its syntax describes.",
+   "id": "R10.classic",
+   "map": "R10_syntax/maps/r10_classic.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -96,
+      8,
+      64
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      -2.875,
+      -0.125
+     ],
+     "why": "the textured box, classic"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -64,
+      8,
+      40
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      0.375,
+      -1.125
+     ],
+     "why": "the textured box, classic"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -100,
+      -32,
+      24
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      -3.0,
+      -0.625
+     ],
+     "why": "the textured box, classic"
+    },
+    {
+     "kind": "not_drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -96,
+      8,
+      0
+     ],
+     "why": "the box's caulk bottom: nodraw"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -96,
+      0,
+      32
+     ],
+     "why": "inside the textured box"
+    },
+    {
+     "has": [
+      "water"
+     ],
+     "kind": "contents",
+     "lacks": [
+      "solid"
+     ],
+     "point": [
+      96,
+      0,
+      24
+     ],
+     "why": "inside the water box"
+    },
+    {
+     "has": [
+      "playerclip"
+     ],
+     "kind": "contents",
+     "lacks": [
+      "solid"
+     ],
+     "point": [
+      176,
+      0,
+      48
+     ],
+     "why": "inside the clip box"
+    },
+    {
+     "kind": "not_drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      176,
+      0,
+      96
+     ],
+     "why": "the clip box's top: nodraw"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "classic brush syntax: geometry, texture mapping and material contents"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "One room, written three ways. Classic and Valve 220 describe the same nearest-axial mapping (Valve 220 spells the axes out); brush primitives carry a texture matrix in each face's own basis (ComputeAxisBase). Each must compile to the same solids, with the water box CONTENTS_WATER and not solid, the clip box player clip and not drawn, the caulk face not drawn, and the box's texture coordinates exactly what its syntax describes.",
+   "id": "R10.valve220",
+   "map": "R10_syntax/maps/r10_valve220.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -96,
+      8,
+      64
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      -2.875,
+      -0.125
+     ],
+     "why": "the textured box, valve220"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -64,
+      8,
+      40
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      0.375,
+      -1.125
+     ],
+     "why": "the textured box, valve220"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -100,
+      -32,
+      24
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      -3.0,
+      -0.625
+     ],
+     "why": "the textured box, valve220"
+    },
+    {
+     "kind": "not_drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -96,
+      8,
+      0
+     ],
+     "why": "the box's caulk bottom: nodraw"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -96,
+      0,
+      32
+     ],
+     "why": "inside the textured box"
+    },
+    {
+     "has": [
+      "water"
+     ],
+     "kind": "contents",
+     "lacks": [
+      "solid"
+     ],
+     "point": [
+      96,
+      0,
+      24
+     ],
+     "why": "inside the water box"
+    },
+    {
+     "has": [
+      "playerclip"
+     ],
+     "kind": "contents",
+     "lacks": [
+      "solid"
+     ],
+     "point": [
+      176,
+      0,
+      48
+     ],
+     "why": "inside the clip box"
+    },
+    {
+     "kind": "not_drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      176,
+      0,
+      96
+     ],
+     "why": "the clip box's top: nodraw"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "valve220 brush syntax: geometry, texture mapping and material contents"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's base_winding; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/base_winding",
+   "id": "U.base_winding",
+   "map": "../q3map2/base_winding/maps/base_winding.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's coarse_snap_normal; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/coarse_snap_normal",
+   "id": "U.coarse_snap_normal",
+   "map": "../q3map2/coarse_snap_normal/maps/coarse_snap_normal.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's decal_misalignment; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/decal_misalignment",
+   "id": "U.decal_misalignment",
+   "map": "../q3map2/decal_misalignment/maps/decal_misalignment.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's degenerate_winding; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/degenerate_winding",
+   "id": "U.degenerate_winding",
+   "map": "../q3map2/degenerate_winding/maps/degenerate_winding.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's degenerate_winding2; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/degenerate_winding2",
+   "id": "U.degenerate_winding2",
+   "map": "../q3map2/degenerate_winding2/maps/degenerate_winding2.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's degenerate_winding3; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/degenerate_winding3",
+   "id": "U.degenerate_winding3",
+   "map": "../q3map2/degenerate_winding3/maps/degenerate_winding3.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's disappearing_sliver; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/disappearing_sliver",
+   "id": "U.disappearing_sliver",
+   "map": "../q3map2/disappearing_sliver/maps/disappearing_sliver.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's disappearing_sliver2; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/disappearing_sliver2",
+   "id": "U.disappearing_sliver2",
+   "map": "../q3map2/disappearing_sliver2/maps/disappearing_sliver2.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's disappearing_sliver3; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/disappearing_sliver3",
+   "id": "U.disappearing_sliver3",
+   "map": "../q3map2/disappearing_sliver3/maps/disappearing_sliver3.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's duplicate_plane; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/duplicate_plane",
+   "id": "U.duplicate_plane",
+   "map": "../q3map2/duplicate_plane/maps/duplicate_plane.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's model_clipping_45_degrees; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/model_clipping_45_degrees",
+   "id": "U.model_clipping_45_degrees",
+   "map": "../q3map2/model_clipping_45_degrees/maps/model_clipping_45_degrees.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's patch_seam; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/patch_seam",
+   "id": "U.patch_seam",
+   "map": "../q3map2/patch_seam/maps/patch_seam.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's piercing_triangle; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/piercing_triangle",
+   "id": "U.piercing_triangle",
+   "map": "../q3map2/piercing_triangle/maps/piercing_triangle.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's plane_aliasing; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/plane_aliasing",
+   "id": "U.plane_aliasing",
+   "map": "../q3map2/plane_aliasing/maps/plane_aliasing.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's segmentation_fault; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/segmentation_fault",
+   "id": "U.segmentation_fault",
+   "map": "../q3map2/segmentation_fault/maps/segmentation_fault.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's snap_plane; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/snap_plane",
+   "id": "U.snap_plane",
+   "map": "../q3map2/snap_plane/maps/snap_plane.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's sparkly_seam; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/sparkly_seam",
+   "id": "U.sparkly_seam",
+   "map": "../q3map2/sparkly_seam/maps/sparkly_seam.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's tiny_structural_brush; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/tiny_structural_brush",
+   "id": "U.tiny_structural_brush",
+   "map": "../q3map2/tiny_structural_brush/maps/tiny_structural_brush.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  }
+ ],
+ "comment": "Written by generate.py; run by ci/auto-pigeon/regress.py. Known failures: known-failures.json.",
+ "gameroot": "gameroot",
+ "pipe_maps": {
+  "R04_m4_near_parallel/maps/r04_p08_nearby.map": "28b154f75417475465dab64509cd81c619c5971eb9fe9c3d98b0ff4e2b98895a",
+  "R05_p10_shape/maps/r05_p10_base.map": "4cedfb8a128baecdd220b445b58790c77346a5a5f46c752a259bb5027fc81a9f",
+  "R06_p08_sealed/maps/r06_p08_base.map": "b585fbde31e97b256393d80e297cb3ca562699a1d7d6acc3302a63652ce9825c"
+ },
+ "schema": "auto-pigeon-q3map2-regressions/1"
+}

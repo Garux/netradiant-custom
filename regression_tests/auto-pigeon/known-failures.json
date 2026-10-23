@@ -1,0 +1,66 @@
+{
+  "cases": {
+    "R02.rod.split": {
+      "failing": "the 4 solid probes inside the rod read no brush",
+      "mechanism": "M1",
+      "observed_on": {
+        "argv": "-bsp -game quake3 -threads 2 -meta",
+        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
+        "observed": "2026-10-23",
+        "reader": "ci/auto-pigeon/ibsp.py",
+        "source": "netradiant-custom master 8216133984031afaa9a857b56ea66dd9c3d54b26 (upstream-base/82161339), unmodified"
+      },
+      "owner": "this fork, NEW_339: P1 (SplitBrush keeps every fragment of positive volume) together with P2"
+    },
+    "R03.cross.0148": {
+      "failing": "the 2 open probes above the strip read an opaque leaf",
+      "mechanism": "M2",
+      "observed_on": {
+        "argv": "-bsp -game quake3 -threads 2 -meta",
+        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
+        "observed": "2026-10-23",
+        "reader": "ci/auto-pigeon/ibsp.py",
+        "source": "netradiant-custom master 8216133984031afaa9a857b56ea66dd9c3d54b26 (upstream-base/82161339), unmodified"
+      },
+      "owner": "this fork, NEW_339: P2 (BuildFaceTree_r clips a crossing face at ON_EPSILON)"
+    },
+    "R04.m4.p08_nearby": {
+      "failing": "the 9 drawn probes on brush 101's bore face",
+      "mechanism": "M4",
+      "observed_on": {
+        "argv": "-bsp -game quake3 -threads 2 -meta",
+        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
+        "observed": "2026-10-23",
+        "reader": "ci/auto-pigeon/ibsp.py",
+        "source": "netradiant-custom master 8216133984031afaa9a857b56ea66dd9c3d54b26 (upstream-base/82161339), unmodified"
+      },
+      "owner": "NEW_340 (no accepted repair: P3 and P4 were rejected)"
+    },
+    "R06.p4.p08_base": {
+      "failing": "the 9 drawn probes on brush 179's wall face",
+      "mechanism": "M2",
+      "observed_on": {
+        "argv": "-bsp -game quake3 -threads 2 -meta",
+        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
+        "observed": "2026-10-23",
+        "reader": "ci/auto-pigeon/ibsp.py",
+        "source": "netradiant-custom master 8216133984031afaa9a857b56ea66dd9c3d54b26 (upstream-base/82161339), unmodified"
+      },
+      "owner": "this fork, NEW_339: P2"
+    },
+    "R08.slit.0125": {
+      "failing": "leak verdict: sealed, the source leaks",
+      "mechanism": "slit_closure",
+      "observed_on": {
+        "argv": "-bsp -game quake3 -threads 2 -meta",
+        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
+        "observed": "2026-10-23",
+        "reader": "ci/auto-pigeon/ibsp.py",
+        "source": "netradiant-custom master 8216133984031afaa9a857b56ea66dd9c3d54b26 (upstream-base/82161339), unmodified"
+      },
+      "owner": "NEW_340 (decide: repair, or a documented minimum opening)"
+    }
+  },
+  "comment": "Cases expected to FAIL on the current main, each with its owner and the identity it was observed on. ci/auto-pigeon/regress.py reports them as known_failure, never as a pass, and fails the run if one starts passing (unexpected_pass) until this record is changed on purpose, in the commit that repairs it.",
+  "schema": "auto-pigeon-q3map2-known-failures/1"
+}
