@@ -14,6 +14,7 @@ can be fetched from that distribution.
 """
 
 import argparse
+import json
 import os
 import pathlib
 import re
@@ -135,9 +136,16 @@ def provenance(platform, path):
         raise Failure("%s is not inside a Homebrew Cellar" % path)
     formula, version = m.group(1), m.group(2)
     keg = pathlib.Path(path[:m.end()])
-    files = [str(p) for p in sorted(keg.iterdir()) if p.is_file() and re.match(r"(LICEN[CS]E|COPYING|COPYRIGHT|NOTICE)", p.name, re.I)]
-    return {"package": formula, "version": version, "license_files": files,
-            "source": "Homebrew formula %s %s (https://formulae.brew.sh/formula/%s; its source URL is in the formula)" % (formula, version, formula)}
+    licence_name = re.compile(r"(LICEN[CS]E|COPYING|COPYRIGHT|NOTICE)", re.I)
+    files = [str(p) for p in sorted(keg.iterdir()) if p.is_file() and licence_name.match(p.name)]
+    for docs in (keg / "share" / "doc", keg / "share" / "licenses"):
+        if not files and docs.is_dir():
+            files = [str(p) for p in sorted(docs.rglob("*")) if p.is_file() and licence_name.match(p.name)][:8]
+    info = json.loads(run(["brew", "info", "--json=v2", formula], capture=True)[1])["formulae"][0]
+    licence = info.get("license")
+    source_url = ((info.get("urls") or {}).get("stable") or {}).get("url")
+    return {"package": formula, "version": version, "license": licence, "license_files": files, "source_url": source_url,
+            "source": "Homebrew formula %s %s, built from %s (https://formulae.brew.sh/formula/%s)" % (formula, version, source_url, formula)}
 
 
 # ---------------------------------------------------------------- the archive text
@@ -206,6 +214,15 @@ complete corresponding source is `@SOURCE_ASSET@`, published beside this archive
 library's licence is in `licenses/` under its package name; `build-info.json` names the package,
 version and where its source comes from. SHA-256 digests are integrity checks, not signatures.
 """
+
+
+def licences_dir_notice(pkg, entry, licence, bundled_text):
+    lines = ["%s %s (Homebrew formula), shipped as %s." % (pkg, entry["version"], ", ".join(entry["libraries"])), "",
+             "Licence (as the formula declares it, SPDX): %s" % licence,
+             ("The full text of that licence is %s in this directory." % bundled_text) if bundled_text else
+             "The formula's package carries no licence file; the licence text is in the source below.",
+             "", "Corresponding source: %s" % entry.get("source_url"), "Formula: https://formulae.brew.sh/formula/%s" % pkg]
+    return "\n".join(lines) + "\n"
 
 
 def write_zip(root, zip_path, timestamp):
@@ -305,7 +322,15 @@ def main():
             shutil.copyfile(path, target)
             copied.append(target.name)
         if not copied:
-            raise Failure("no licence text for the package %s (libraries %s)" % (pkg, entry["libraries"]))
+            # The keg carries no licence file (Homebrew's glib does not): write the formula's declared licence and its
+            # exact source, and name the licence text this archive already holds when it is that text.
+            licence = entry.get("license")
+            if not licence or not platform.startswith("macos"):
+                raise Failure("no licence text for the package %s (libraries %s)" % (pkg, entry["libraries"]))
+            text_for = {"LGPL-2.1-or-later": "LGPL.txt", "LGPL-2.1-only": "LGPL.txt", "GPL-2.0-or-later": "GPL.txt"}
+            notice = licences_dir_notice(pkg, entry, licence, text_for.get(licence))
+            (licenses / ("%s.txt" % pkg)).write_text(notice, encoding="utf-8", newline="\n")
+            copied.append("%s.txt" % pkg)
         entry["license_files"] = copied
     for lib in libraries:
         lib.pop("from")
