@@ -532,6 +532,20 @@ static int FilterBrushIntoTree_r( brush_t&& b, node_t *node ){
 		return 1;
 	}
 
+	/* the face tree consumed a side of this brush as ON this node's plane (BuildFaceTree_r), so no plane below
+	   bounds the brush on that side: it lies wholly on its inner side here. Splitting it again from its 1/8-snapped
+	   windings, which can reach just past the 0.1 SplitBrush allows, cut a sliver into the other child, where it
+	   landed in a leaf no plane of the brush bounds and made that leaf opaque */
+	{
+		int inner = -1;
+		for ( const auto& [brush, side] : node->coplanarBrushes )
+			if ( brush == b.original )
+				inner = ( inner == -1 || inner == side ) ? side : -2; /* sides consumed on both sides: split as usual */
+		if ( inner >= 0 ) {
+			return FilterBrushIntoTree_r( std::move( b ), node->children[ inner ] );
+		}
+	}
+
 	/* split it by the node plane */
 	auto [front, back] = SplitBrush( b, node->planenum );
 

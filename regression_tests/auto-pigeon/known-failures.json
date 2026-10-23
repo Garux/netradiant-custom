@@ -11,18 +11,6 @@
         "source": "netradiant-custom master 8216133984031afaa9a857b56ea66dd9c3d54b26 (upstream-base/82161339), unmodified"
       },
       "owner": "not repaired (NEW_340 decision): a representability limit of the portal stage \u2014 portals.cpp drops a portal with fewer than three edges longer than EDGE_LENGTH 0.2, so an opening narrower than that in any leaf is closed"
-    },
-    "R11.m3.p10_nearby": {
-      "failing": "5 bore points read solid; 20 drawn probes on three bore faces missing",
-      "mechanism": "M3",
-      "observed_on": {
-        "argv": "-bsp -game quake3 -threads 2 -meta",
-        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
-        "observed": "2026-10-23",
-        "reader": "ci/auto-pigeon/regress.py + ci/auto-pigeon/ibsp.py",
-        "source": "auto-pigeon/q3map2 main da52bdf9 (upstream-base/82161339 + P1 + P2)"
-      },
-      "owner": "NEW_340: repaired by the commit that removes this entry"
     }
   },
   "comment": "Cases expected to FAIL on the current main, each with its owner and the identity it was observed on. ci/auto-pigeon/regress.py reports them as known_failure, never as a pass, and fails the run if one starts passing (unexpected_pass) until this record is changed on purpose, in the commit that repairs it.",

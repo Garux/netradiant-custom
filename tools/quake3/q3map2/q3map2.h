@@ -662,6 +662,7 @@ struct shaderInfo_t : public shaderInfo_t_data
 
    ------------------------------------------------------------------------------- */
 
+struct brush_t;
 struct face_t
 {
 	int planenum;
@@ -669,6 +670,8 @@ struct face_t
 	//bool			checked;
 	int compileFlags;
 	winding_t           w;
+	const brush_t       *brush;             /* original of the brush this face is a side of */
+	int sidePlanenum;                       /* that side's plane, oriented (planenum is always the even one) */
 };
 using facelist_t = std::forward_list<face_t>;
 
@@ -1095,6 +1098,10 @@ struct node_t
 	struct portal_t     *portals;       /* also on nodes during construction */
 
 	bool has_structural_children;
+
+	/* nodes only: brushes a side of which BuildFaceTree_r consumed as ON this node's plane, and the child their
+	   inside is on */
+	std::vector<std::pair<const brush_t*, int>> coplanarBrushes;
 };
 
 

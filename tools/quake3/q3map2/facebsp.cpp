@@ -226,6 +226,8 @@ static void BuildFaceTree_r( node_t *node, facelist_t& list ){
 				newFace.planenum = split.planenum;
 				newFace.priority = split.priority;
 				newFace.compileFlags = split.compileFlags;
+				newFace.brush = split.brush;
+				newFace.sidePlanenum = split.sidePlanenum;
 			}
 			if ( !backWinding.empty() ) {
 				face_t& newFace = childLists[1].emplace_front();
@@ -233,6 +235,8 @@ static void BuildFaceTree_r( node_t *node, facelist_t& list ){
 				newFace.planenum = split.planenum;
 				newFace.priority = split.priority;
 				newFace.compileFlags = split.compileFlags;
+				newFace.brush = split.brush;
+				newFace.sidePlanenum = split.sidePlanenum;
 			}
 			list.pop_front();
 		}
@@ -243,6 +247,13 @@ static void BuildFaceTree_r( node_t *node, facelist_t& list ){
 			childLists[1].splice_after( childLists[1].cbefore_begin(), list, list.cbefore_begin() );
 		}
 		else{ // eSideOn
+			/* a side of ANOTHER plane lying within ON_EPSILON of this one is consumed here: its own plane splits
+			   nothing below, and this plane bounds the brush's leaves instead. Record it, so FilterBrushIntoTree_r
+			   keeps the brush wholly on its inner side of this node like the tree does */
+			if ( split.brush != nullptr && ( split.planenum | 1 ) != ( node->planenum | 1 ) ) {
+				node->coplanarBrushes.emplace_back( split.brush,
+				                                    vector3_dot( mapplanes[ split.sidePlanenum ].normal(), plane.normal() ) > 0 ? eBack : eFront );
+			}
 			list.pop_front();
 		}
 	}
@@ -372,6 +383,8 @@ facelist_t MakeStructuralBSPFaceList( const brushlist_t& list ){
 			f.w = w;
 			f.planenum = s.planenum & ~1;
 			f.compileFlags = s.compileFlags;  /* ydnar */
+			f.brush = b.original;
+			f.sidePlanenum = s.planenum;
 			if ( b.detail ) {
 				f.compileFlags |= C_DETAIL;
 			}
@@ -430,6 +443,8 @@ facelist_t MakeVisibleBSPFaceList( const brushlist_t& list ){
 			f.w = w;
 			f.planenum = s.planenum & ~1;
 			f.compileFlags = s.compileFlags;  /* ydnar */
+			f.brush = b.original;
+			f.sidePlanenum = s.planenum;
 			if ( b.detail ) {
 				f.compileFlags |= C_DETAIL;
 			}

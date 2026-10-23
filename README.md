@@ -22,6 +22,7 @@ README, unchanged.
 | `q3map2: keep a split brush fragment of any positive volume (P1)` | `SplitBrush` discarded a split half smaller than 1 cubic unit: thin rods and walls lost their collision. Only a non-positive volume is discarded now; `-bsp -microvolume <F>` restores a threshold (upstream's was 1). | `R02.rod.split` |
 | `q3map2: filter a face consumed as ON a near-coplanar plane to the side it faces (M4)` | `BuildFaceTree_r` consumes a face lying within `ON_EPSILON` of a split plane that is not its own, so its own plane never splits the leaves behind; the surface filter then routed the face's 1/8-snapped triangles alone, and a snap past 0.1 sent them only into the opaque leaf behind that plane: the face was not drawn. `FilterWindingIntoTree_r` now also filters such a face to the side it faces, as it already did for a face on the node's own plane (references are only added). | `R04.m4.p08_nearby`, `G01.m4.inset`, `G05.m4.phase0625`, `G05.m4.phase1094`, `G05.m4.recess0095` |
 | `q3map2: split a brush with a small section for real (M3, tiny section)` | `SplitBrush` treated a brush reaching at least 0.1 past the plane on both sides as unsplit when its section had fewer than three edges longer than 0.2, and sent it whole to the side it reaches furthest into: a 3/16 rod lying across a split lost its other part's collision. It is split for real now (positive-volume halves are kept, P1). | `G02.m3.rod_along`, `G07.m3.cube.025` |
+| `q3map2: keep a brush on its inner side of a plane its side was consumed on (M3, sliver)` | The visible-face tree consumes a side lying within `ON_EPSILON` of a split plane (its VISIBLE part); `SplitBrush` decided the same question again from the brush's full 1/8-snapped windings, saw a vertex 0.104 past the plane and split for real. The sliver went to the other child, where no plane of the brush bounds it (the side that would was consumed), and made a leaf holding most of a pipe bore opaque. `BuildFaceTree_r` now records the brush on that node and `FilterBrushIntoTree_r` keeps it wholly on its inner side there. | `R11.m3.p10_nearby` |
 
 | `q3map2: append BSP entities one by one so libc++ builds it` | A build fix with no change in behaviour: libc++ (Apple clang) cannot compile a vector range insert of `entity_t`. | the macOS builds |
 | `q3map2: give the macOS worker threads an 8 MiB stack` | `std::thread` gets 512 KiB on macOS and `-light` needs more than 1 MiB: every `-light` died with SIGBUS. macOS workers are pthreads with 8 MiB (Linux threads already get 8 MiB, Windows ones 4 MiB). | `R01`, `R02`, `R09` with `--full` on macOS |
@@ -39,8 +40,6 @@ README states its own measurement.
 
 `regression_tests/auto-pigeon/known-failures.json` is the record; a release lists the same cases.
 
-- `R11.m3.p10_nearby` (M3): a brush the visible-face tree treats as ON a split plane is split for real
-  from its snapped windings; the sliver lands in a leaf of open bore and fills it.
 - `R08.slit.0125`: a 0.125-unit opening to the void is closed; the map is reported sealed although
   its source leaks. Not repaired: `portals.cpp` drops a portal with fewer than three edges longer than
   0.2 (EDGE_LENGTH), so an opening narrower than that in any leaf closes (a split plane through the
