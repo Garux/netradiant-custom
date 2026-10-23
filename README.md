@@ -21,7 +21,15 @@ README, unchanged.
 | `q3map2: clip a crossing face at the epsilon it was classified with (P2)` | `BuildFaceTree_r` clipped a face it had classified as crossing (more than `ON_EPSILON` = 0.1 on both sides) with `CLIP_EPSILON*2` = 0.2, so a part between 0.1 and 0.2 wide vanished, the whole face went to one side, and a leaf straddling the brush turned opaque and filled room air. It now clips at `ON_EPSILON`. | `R03.cross.0148`, `R06.p4.p08_base` |
 | `q3map2: keep a split brush fragment of any positive volume (P1)` | `SplitBrush` discarded a split half smaller than 1 cubic unit: thin rods and walls lost their collision. Only a non-positive volume is discarded now; `-bsp -microvolume <F>` restores a threshold (upstream's was 1). | `R02.rod.split` |
 
-The two belong together: with P1 alone the rod of `R02` is solid but the air above it is filled.
+| `q3map2: append BSP entities one by one so libc++ builds it` | A build fix with no change in behaviour: libc++ (Apple clang) cannot compile a vector range insert of `entity_t`. | the macOS builds |
+| `q3map2: give the macOS worker threads an 8 MiB stack` | `std::thread` gets 512 KiB on macOS and `-light` needs more than 1 MiB: every `-light` died with SIGBUS. macOS workers are pthreads with 8 MiB (Linux threads already get 8 MiB, Windows ones 4 MiB). | `R01`, `R02`, `R09` with `--full` on macOS |
+
+P1 and P2 belong together: with P1 alone the rod of `R02` is solid but the air above it is filled.
+
+Measured requirements of the released programs: Linux (x86-64 and arm64) glibc 2.38 and `GLIBCXX_3.4.32`
+or newer (built on Ubuntu 24.04 with GCC 14); Windows 10 or later (MSYS2 MinGW-w64 GCC); macOS 15.0 or
+newer (Apple clang 17 with Homebrew's libraries, which target the build runner's macOS). Each archive's
+README states its own measurement.
 
 ## Known defects (still failing, kept red)
 
