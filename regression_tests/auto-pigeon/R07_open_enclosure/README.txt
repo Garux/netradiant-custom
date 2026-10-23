@@ -5,6 +5,7 @@ R07.open.1: a one-unit slot through a wall to the void: a real opening
   mechanism: none (control)
   the source leaks
   stages: bsp
+  also: G06
 
   The +x wall is two brushes with a full-height slot of 1 units between them, open to the void. The
   map leaks; a compiler that reports it sealed has closed a real opening. P1+P2 must not change that:

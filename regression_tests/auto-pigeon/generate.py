@@ -18,7 +18,12 @@ this face is visible here with this texture coordinate — and never what an ear
     bounds straddle them, which is how a map can put a brush across a known split.
   * ON_EPSILON (0.1) is the distance at which a face counts as crossing a plane when the visible-face
     tree is built (`facebsp.cpp`), CLIP_EPSILON*2 (0.2) is the distance upstream then clips it at.
-  * SplitBrush (`brush.cpp`) discarded a split fragment whose volume is below 1 cubic unit.
+  * SplitBrush (`brush.cpp`) discarded a split fragment whose volume is below 1 cubic unit, kept a brush
+    that reaches less than 0.1 past a plane wholly on its other side, and sent a brush whose section by
+    the plane has fewer than three edges longer than 0.2 wholly to the side it reaches furthest into.
+  * Brush vertices are rounded to 1/8 unit when the brush is loaded (brush snap); the windings every later
+    stage reads are the rounded ones.
+  * A portal with fewer than three edges longer than 0.2 (EDGE_LENGTH) is dropped (`portals.cpp`).
   * Drawn vertices are rounded to 1/8 unit (`surface.cpp`, brush snap), so a drawn probe sits more
     than 1/8 from every edge and is matched within 0.2 of its plane.
 """
@@ -291,7 +296,8 @@ def r03():
                           "then has no plane at z = 32, one leaf straddles the step's strip x in [0, %s] and the air above "
                           "it, the step's fragment makes that leaf opaque, and the room air above the strip is filled. "
                           "At 0.148 this happens; at 0.25 the clip keeps a front part, at 0.05 the face is not crossing, "
-                          "and both controls stay correct on every build." % (num(past), num(past))))
+                          "and both controls stay correct on every build." % (num(past), num(past)),
+                          extra={"aliases": ["G04"]} if past == 0.05 else None))
     return files, cases
 
 
@@ -299,6 +305,7 @@ PIPE_MAPS = {
     "R04_m4_near_parallel/maps/r04_p08_nearby.map": "28b154f75417475465dab64509cd81c619c5971eb9fe9c3d98b0ff4e2b98895a",
     "R05_p10_shape/maps/r05_p10_base.map": "4cedfb8a128baecdd220b445b58790c77346a5a5f46c752a259bb5027fc81a9f",
     "R06_p08_sealed/maps/r06_p08_base.map": "b585fbde31e97b256393d80e297cb3ca562699a1d7d6acc3302a63652ce9825c",
+    "R11_p10_nearby_sliver/maps/r11_p10_nearby.map": "accf8b91c03950ff9e855a262f491bf058dea2d2cc71f3ddff76c286cb3da791",
 }
 # The face samples that decide these cases, from the source maps' own faces (full precision): the point and the
 # outward normal of the face, a point the source says is a visible face of that texture.
@@ -322,6 +329,22 @@ P08_BASE = [[6.521783000000001, -77.09929250000002, 0], [6.168146850000001, -77.
             [7.2290553000000015, -77.03741425000003, 14.493866800000005]]
 
 
+# R11: the P10 pipe with one segment pulled 5 degrees about z near another: three bore faces and five bore points
+P10_NEARBY_FACES = [
+    ([0.029495038440397386, -0.022977254104576298, 0.9993007998101539], "the floor face of brush 307 (map line 2739)",
+     [[65.049, 314.197, -83.871], [52.921, 302.645, -83.779], [40.793, 291.092, -83.687], [73.23, 318.143, -84.022],
+      [81.41, 322.089, -84.173], [68.996, 321.804, -83.813], [72.944, 329.411, -83.755]]),
+    ([0.02187455133668658, -0.012985732267478742, 0.9996763850173195], "the floor face of brush 308 (map line 2747)",
+     [[53.773, 292.462, -83.973], [45.591, 288.517, -83.845], [37.41, 284.572, -83.717], [49.826, 284.855, -83.985],
+      [45.88, 277.247, -83.998], [65.9, 304.016, -84.088], [78.027, 315.569, -84.203]]),
+    ([-0.43225600093241817, -0.559085263099685, 0.7075156664291394], "a slanted bore face (map line 2769)",
+     [[102.874, 357.645, -50.327], [93.583, 350.045, -62.009], [84.291, 342.445, -73.691], [109.652, 359.633, -44.615],
+      [116.429, 361.622, -38.903], [105.388, 363.256, -44.357]]),
+]
+P10_NEARBY_BORE = [[23.650396, 380.542256, -20.127506], [44.572602, 366.388518, -15.415647],
+                   [121.599811, 260.853132, -42.55114], [350.118658, 145.887534, -43.12829], [372.514138, 133.520196, -43.12829]]
+
+
 def pipes():
     drawn = lambda points, normal, why: [{"kind": "drawn", "point": p, "normal": normal, "why": why} for p in points]  # noqa: E731
     return {}, [
@@ -338,14 +361,25 @@ def pipes():
         case("R05.p3.p10_base", "control: the P10 pipe whose face P3 lost", None, "R05_p10_shape/maps/r05_p10_base.map", False,
              drawn(P10_BASE, P10_BASE_FACE, "a slanted bore face of the P10 pipe (map line 820)"),
              "A 590-brush pipe with a bend in all three axes. Upstream draws these 9 points; the rejected M4 repair "
-             "P3 (never committed) lost them. Any later M4 repair must keep them drawn."),
+             "P3 (never committed) lost them. Any later M4 repair must keep them drawn.", extra={"aliases": ["G03"]}),
         case("R06.p4.p08_base", "control: the sealed P08 pipe that P4 reported as leaking; its M2 face", "M2",
              "R06_p08_sealed/maps/r06_p08_base.map", False,
              drawn(P08_BASE, P08_BASE_FACE, "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"),
              "The P08 pipe is sealed: the rejected M4 repair P4 (never committed) reported a leak here, so the leak "
              "verdict is the first assertion. The 9 face points are the M2 defect of R03 on a real shape: a wall "
              "face piece crosses a node plane by between 0.1 and 0.2, upstream sends it wholly to the back, the leaf that "
-             "then straddles the wall turns opaque, and the face is not drawn there."),
+             "then straddles the wall turns opaque, and the face is not drawn there.", extra={"aliases": ["G04"]}),
+        case("R11.m3.p10_nearby", "M3: a split sliver the face tree has no plane for fills a pipe bore (P10, nearby pull)", "M3",
+             "R11_p10_nearby_sliver/maps/r11_p10_nearby.map", False,
+             [{"kind": "open", "point": p, "why": "declared bore air of the pipe"} for p in P10_NEARBY_BORE]
+             + [probe for normal, why, points in P10_NEARBY_FACES for probe in drawn(points, normal, why + ", seen from the bore")],
+             "A 630-brush pipe from the same generator. The visible-face tree consumes the bore face of brush 324 (map "
+             "line 2878) as ON a neighbouring segment's face plane, every point of its VISIBLE part being within "
+             "ON_EPSILON of it. SplitBrush then decides the same question from the brush's full, 1/8-snapped "
+             "windings, finds a vertex 0.104 past that plane and splits for real: the 0.1-thick sliver goes to the "
+             "bore side, where the tree has no plane bounding it (the face that would have been one was consumed), "
+             "lands in one leaf that holds most of the bore and makes it opaque. Five bore points read solid and "
+             "three bore faces lose their drawn surfaces."),
     ]
 
 
@@ -363,10 +397,12 @@ def r07():
                        "The map leaks; a compiler that reports it sealed has closed a real opening. P1+P2 must not "
                        "change that: it keeps material, it does not invent it." % num(width)) if width == 1 else (
                        "The same slot 0.125 wide. The source describes an opening, so the honest verdict is a leak, but "
-                       "every Q3Map2 build measured (upstream, the shipping pin, P1+P2) closes a slot of 0.25 or less "
-                       "through an opaque leaf with no brush. Recorded as a KNOWN FAILURE owned by NEW_340 rather than "
-                       "rewritten as an expected seal.")
-        cases.append(case(cid, title, mechanism, path, leak, [], explanation))
+                       "every Q3Map2 build measured closes it: a portal with fewer than three edges longer than 0.2 "
+                       "(EDGE_LENGTH) is dropped (portals.cpp MakeNodePortal/SplitNodePortals), and the block split "
+                       "y = 0 through this slot halves it again, so a slot centred on a split closes up to 0.375 and "
+                       "one elsewhere up to 0.1875 (G06.outer.025 stays open). A representability limit of the portal "
+                       "stage, kept as a KNOWN FAILURE rather than rewritten as an expected seal.")
+        cases.append(case(cid, title, mechanism, path, leak, [], explanation, extra={"aliases": ["G06"]} if width == 1 else None))
     return files, cases
 
 
@@ -419,7 +455,187 @@ def r08():
         path = "R08_controls/maps/r08_%s.map" % key
         files.update(write_map(path, brushes_text(named)))
         cases.append(case("R08.%s" % key, key.replace("nearparallel", "near-parallel").replace("zeroarea", "zero-area"),
-                          None, path, False, room_probes() + probes, explanation))
+                          None, path, False, room_probes() + probes, explanation,
+                          extra={"aliases": [{"touch": "G06", "overlap": "G06", "zeroarea": "G07", "nearparallel": "G07"}[key]]}))
+    return files, cases
+
+
+# ---------------------------------------------------------------- G01, G05: near-parallel faces (M4)
+
+M4_TILT = 2.5           # degrees between the wall's face normal and -y
+M4_CENTRE = (128, 92)   # the wall is turned and moved about this point
+
+
+def tilted_box(x0, x1, z0, z1, normal, dist, yback, tex=CHECK):
+    """A brush between x0..x1 and z0..z1 whose front face lies on the plane normal . p = dist (normal horizontal,
+    pointing to -y), its back face on y = yback."""
+    ya, yb = (dist - normal[0] * x0) / normal[1], (dist - normal[0] * x1) / normal[1]
+    return [Face((x1, yback, z0), (x1, yback, z1), (x0, yback, z1), tex), Face((x0, ya, z0), (x0, ya, z1), (x1, yb, z1), tex),
+            Face((x1, yb, z0), (x1, yb, z1), (x1, yback, z1), tex), Face((x0, yback, z0), (x0, yback, z1), (x0, ya, z1), tex),
+            Face((x1, yback, z1), (x1, yb, z1), (x0, ya, z1), tex), Face((x1, yb, z0), (x1, yback, z0), (x0, yback, z0), tex)]
+
+
+def turned(p, angle, move):
+    a = math.radians(angle)
+    x, y = p[0] - M4_CENTRE[0], p[1] - M4_CENTRE[1]
+    return [M4_CENTRE[0] + x * math.cos(a) - y * math.sin(a) + move[0], M4_CENTRE[1] + x * math.sin(a) + y * math.cos(a) + move[1],
+            p[2] + move[2]]
+
+
+def m4_inset(phase, recess, angle=0.0, move=(0, 0, 0)):
+    """A wall of four pieces whose faces share one plane, around an inset piece B whose face is parallel to it and
+    `recess` behind it. `phase` places B's face corner at y = 61 + phase, i.e. where the 1/8 vertex snap moves it."""
+    t = math.radians(M4_TILT)
+    n = (math.sin(t), -math.cos(t), 0)
+    d_b = n[0] * 96 + n[1] * (61 + phase)
+    d_a = d_b + recess
+    parts = [("wall piece west", tilted_box(33, 96, 0, 128, n, d_a, 128)), ("wall piece east", tilted_box(159, 222, 0, 128, n, d_a, 128)),
+             ("wall piece below", tilted_box(96, 159, 0, 32, n, d_a, 128)), ("wall piece above", tilted_box(96, 159, 96, 128, n, d_a, 128)),
+             ("inset piece B, %s behind the wall's plane" % num(recess), tilted_box(96, 159, 32, 96, n, d_b, 128))]
+    parts = [(name, [Face(*[tuple(turned(q, angle, move)) for q in f.p], f.tex) for f in faces]) for name, faces in parts]
+    a = math.radians(angle)
+    normal = [n[0] * math.cos(a) - n[1] * math.sin(a), n[0] * math.sin(a) + n[1] * math.cos(a), 0]
+    on_b = lambda x, z: turned((x, (d_b - n[0] * x) / n[1], z), angle, move)  # noqa: E731
+    probes = [{"kind": "drawn", "point": on_b(x, z), "normal": normal, "why": "the inset's face, seen from the room"}
+              for x in (112, 128, 144) for z in (48, 64, 80)]
+    probes += [{"kind": "solid", "point": turned((128, 100, 64), angle, move), "why": "inside the inset"},
+               {"kind": "open", "point": turned((128, (d_b - n[0] * 128) / n[1] - 1, 64), angle, move), "why": "air 1 unit in front of the inset"},
+               {"kind": "drawn", "point": turned((64, (d_a - n[0] * 64) / n[1], 64), angle, move), "normal": normal,
+                "why": "the west wall piece's face"}]
+    return parts, probes
+
+
+M4_EXPLANATION = ("Four wall pieces share one face plane, tilted %s degrees from the y axis; an inset piece B between them "
+                  "has a parallel face %%s behind that plane. When the visible-face tree splits on the wall's plane, "
+                  "B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the "
+                  "leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the "
+                  "snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase %%s), the "
+                  "triangles reach only the opaque leaf behind it, no visible leaf references the surface and it "
+                  "is not emitted. The face must be drawn at every phase, offset and orientation." % num(M4_TILT))
+
+
+def g01_g05():
+    files, cases = {}, []
+    rows = [("G01.m4.inset", "M4: an inset face 0.0885 behind a near-coplanar wall, its corners snapped further behind",
+             "M4", dict(phase=0.0859, recess=0.0885), "g01_m4_inset")]
+    for label, kw, title in (
+            ("phase0547", dict(phase=0.0547, recess=0.0885), "the inset at snap phase 0.0547 (the snap leaves it within 0.1)"),
+            ("phase0625", dict(phase=0.0625, recess=0.0885), "the inset at snap phase 0.0625 (first phase the snap carries past 0.1)"),
+            ("phase1094", dict(phase=0.1094, recess=0.0885), "the inset at snap phase 0.1094 (last such phase)"),
+            ("phase1172", dict(phase=0.1172, recess=0.0885), "the inset at snap phase 0.1172 (the snap leaves it within 0.1)"),
+            ("recess0050", dict(phase=0.0859, recess=0.05), "the inset 0.05 behind the wall's plane"),
+            ("recess0095", dict(phase=0.0859, recess=0.095), "the inset 0.095 behind the wall's plane"),
+            ("recess0110", dict(phase=0.0859, recess=0.11), "the inset 0.11 behind: past ON_EPSILON, a plane of its own"),
+            ("proud0885", dict(phase=0.0859, recess=-0.0885), "the inset 0.0885 in FRONT of the wall's plane"),
+            ("moved", dict(phase=0.0859, recess=0.0885, move=(-37.3, -21.45, 8.2)), "G01 moved by (-37.3, -21.45, 8.2)"),
+            ("turn15", dict(phase=0.0859, recess=0.0885, angle=15), "G01 turned 15 degrees about z"),
+            ("turn45", dict(phase=0.0859, recess=0.0885, angle=45), "G01 turned 45 degrees about z"),
+            ("turn15.moved", dict(phase=0.0859, recess=0.0885, angle=15, move=(-37.3, -21.45, 8.2)), "G01 turned 15 degrees and moved"),
+            ("turn45.moved", dict(phase=0.0859, recess=0.0885, angle=45, move=(-37.3, -21.45, 8.2)), "G01 turned 45 degrees and moved")):
+        rows.append(("G05.m4.%s" % label, title, None, kw, "g05_m4_%s" % label.replace(".", "_")))
+    for cid, title, mechanism, kw, name in rows:
+        parts, probes = m4_inset(**kw)
+        path = "G01_G05_near_parallel/maps/%s.map" % name
+        files.update(write_map(path, brushes_text(room_brushes() + parts)))
+        cases.append(case(cid, title, mechanism, path, False, room_probes() + probes,
+                          M4_EXPLANATION % (num(kw["recess"]), num(kw["phase"]))))
+    return files, cases
+
+
+# ---------------------------------------------------------------- G02, G07: sections and fragments smaller than 0.2 (M3)
+
+def g02():
+    files, cases = {}, []
+    for cid, w, title, mechanism in (
+            ("G02.m3.rod_along", 0.1875, "M3: a 3/16 rod lying along y across the y = 0 split", "M3"),
+            ("G02.rod_along.025", 0.25, "control: the same rod 1/4 thick (its section is not small)", None)):
+        x0, x1, z0, z1 = 64, 64 + w, 8, 8 + w
+        name = "g02_rod_along_%s" % num(w).replace(".", "")
+        body = brushes_text(room_brushes() + [("rod x %s..%s, y -4..8, z %s..%s" % (num(x0), num(x1), num(z0), num(z1)),
+                                                box_faces(x0, -4, z0, x1, 8, z1, CHECK))])
+        path = "G02_G07_small_sections/maps/%s.map" % name
+        files.update(write_map(path, body))
+        xc, zc = (x0 + x1) / 2, (z0 + z1) / 2
+        probes = room_probes() + [
+            {"kind": "solid", "point": [xc, -2, zc], "why": "the rod's -y part, 2 units from the split"},
+            {"kind": "solid", "point": [xc, -3.5, zc], "why": "the rod's -y part near its end"},
+            {"kind": "solid", "point": [xc, 4, zc], "why": "the rod's +y part, 4 units from the split"},
+            {"kind": "open", "point": [xc, -2, zc + 4], "why": "air 4 above the rod's -y part"},
+            {"kind": "open", "point": [xc, -6, zc], "why": "air past the rod's -y end"},
+        ]
+        cases.append(case(cid, title, mechanism, path, False, probes,
+                          "The rod is %s x %s in section and runs from y = -4 to y = 8 across the block split y = 0. Its "
+                          "section by y = 0 has only two edges longer than 0.2, so upstream SplitBrush called the brush "
+                          "'not really split' and sent it whole to the side it reaches furthest into: the 4 units on -y "
+                          "kept no brush in their leaves (no collision, and contents read as air). The whole rod must be "
+                          "solid; a 1/4 rod (four long edges) was always split and is the control." % (num(w), num(w))))
+    return files, cases
+
+
+def g07():
+    files, cases = {}, []
+    for cid, s, title, mechanism in (("G07.m3.cube.025", 0.25, "M3: a 1/4 cube across x = 0 and y = 0 (four fragments)", "M3"),
+                                     ("G07.cube.05", 0.5, "control: a 1/2 cube across x = 0 and y = 0", None)):
+        name = "g07_cube_%s" % num(s).replace(".", "")
+        body = brushes_text(room_brushes() + [("cube of %s centred on x = 0, y = 0" % num(s), box_faces(-s / 2, -s / 2, 8, s / 2, s / 2, 8 + s, CHECK))])
+        path = "G02_G07_small_sections/maps/%s.map" % name
+        files.update(write_map(path, body))
+        q = s / 4
+        probes = room_probes() + [{"kind": "solid", "point": [sx * q, sy * q, 8 + s / 2], "why": "the cube's %s%s quarter" % (
+            "+x" if sx > 0 else "-x", "+y" if sy > 0 else "-y")} for sx in (-1, 1) for sy in (-1, 1)] + [
+            {"kind": "open", "point": [0, 0, 8 + s + 1], "why": "air 1 above the cube"}]
+        cases.append(case(cid, title, mechanism, path, False, probes,
+                          "A cube of %s centred on the two block split planes x = 0 and y = 0 is cut into four quarters of "
+                          "positive volume. After the first split each half's section by the second plane is %s x %s; "
+                          "below 0.2 on a side, upstream sent each half whole to one side of the second plane and two "
+                          "quarters kept no brush. Every quarter must be solid." % (num(s), num(s / 2), num(s))))
+    return files, cases
+
+
+# ---------------------------------------------------------------- G06: openings, slits and pockets
+
+def g06():
+    files, cases = {}, []
+    for cid, w in (("G06.slit.1", 1.0), ("G06.slit.05", 0.5)):
+        name = "g06_slit_%s" % num(w).replace(".", "")
+        body = brushes_text(room_brushes() + [("block west", box_faces(32, -64, 0, 96, 64, 64, CHECK)),
+                                              ("block east, %s from the west block" % num(w), box_faces(96 + w, -64, 0, 160 + w, 64, 64, CHECK))])
+        path = "G06_openings/maps/%s.map" % name
+        files.update(write_map(path, body))
+        probes = room_probes() + [{"kind": "open", "point": [96 + w / 2, 0, 32], "why": "air in the slit"},
+                                  {"kind": "solid", "point": [64, 0, 32], "why": "the west block"},
+                                  {"kind": "solid", "point": [128 + w, 0, 32], "why": "the east block"},
+                                  {"kind": "drawn", "point": [96, 0, 32], "normal": [1, 0, 0], "why": "the west block's face in the slit"},
+                                  {"kind": "drawn", "point": [96 + w, 0, 32], "normal": [-1, 0, 0], "why": "the east block's face in the slit"}]
+        cases.append(case(cid, "a reachable slit %s wide between two blocks inside the room" % num(w), None, path, False, probes,
+                          "Two blocks %s apart inside the sealed room; the slit is open to the room above. Its air must stay "
+                          "open and both faces in it drawn: no closure of a reachable slit, no fill." % num(w)))
+    x0, y0, z0, x1, y1, z1, t = 48, -48, 0, 144, 48, 96, 8
+    walls = [("pocket floor", (x0, y0, z0, x1, y1, z0 + t)), ("pocket roof", (x0, y0, z1 - t, x1, y1, z1)),
+             ("pocket -x", (x0, y0, z0 + t, x0 + t, y1, z1 - t)), ("pocket +x", (x1 - t, y0, z0 + t, x1, y1, z1 - t)),
+             ("pocket -y", (x0 + t, y0, z0 + t, x1 - t, y0 + t, z1 - t)), ("pocket +y", (x0 + t, y1 - t, z0 + t, x1 - t, y1, z1 - t))]
+    path = "G06_openings/maps/g06_pocket.map"
+    files.update(write_map(path, brushes_text(room_brushes() + [(n, box_faces(*b, CHECK)) for n, b in walls])))
+    cases.append(case("G06.pocket", "an enclosed pocket: a hollow block sealed from the room", None, path, False,
+                      room_probes() + [{"kind": "solid", "point": [x0 + 4, 0, 48], "why": "the pocket's -x wall"},
+                                       {"kind": "drawn", "point": [x1, 0, 48], "normal": [1, 0, 0], "why": "the block's outside face"},
+                                       {"kind": "open", "point": [x1 + 8, 0, 48], "why": "room air beside the block"}],
+                      "Six 8-unit walls around 80 x 80 x 80 of air no entity can reach. The map is sealed, the walls solid "
+                      "and the room around them open. Nothing is asserted about the pocket's own air: it is unreachable, "
+                      "and Q3Map2 may fill it; a player-sized passage is the slit case, not this one."))
+    files_r, cases_r = {}, []
+    gap, centre = 0.25, 100.0
+    x0r, y0r, z0r, x1r, y1r, z1r = ROOM
+    named = [b for b in room_brushes() if b[0] != "+x wall"] + [
+        ("+x wall, south of the slot", box_faces(x1r, y0r, z0r, x1r + WALL, centre - gap / 2, z1r, CHECK)),
+        ("+x wall, north of the slot", box_faces(x1r, centre + gap / 2, z0r, x1r + WALL, y1r, z1r, CHECK))]
+    path = "G06_openings/maps/g06_outer_025.map"
+    files.update(write_map(path, brushes_text(named)))
+    cases.append(case("G06.outer.025", "a 0.25 slot to the void at y = 100: the narrowest opening Q3Map2 keeps", None, path, True, [],
+                      "A full-height slot 0.25 wide through the +x wall, centred on y = 100 (no split plane through it). "
+                      "The map leaks. Portals with fewer than three edges longer than 0.2 are dropped (portals.cpp, "
+                      "EDGE_LENGTH), so 0.25 is the narrowest opening measured to stay open; R08.slit.0125 is the "
+                      "known failure below that limit."))
     return files, cases
 
 
@@ -452,7 +668,7 @@ def r09():
                         "non-default classic texture shift and scale. The BSP must keep the patch's control points and st "
                         "exactly as authored (the engine tessellates them) and draw the box with the texture coordinates "
                         "Q3Map2's nearest-axial projection gives for that shift and scale.",
-                        stages=("bsp", "vis", "light"))]
+                        stages=("bsp", "vis", "light"), extra={"aliases": ["G08"]})]
 
 
 SIZES = {"apreg/checker": (64, 64), "apreg/wide": (64, 32), "apreg/water": (64, 64), "apreg/clip": (64, 64),
@@ -525,7 +741,7 @@ def wrap(text, width=100):
 
 def build():
     files, cases = {}, []
-    for part in (r01, r02, r03, pipes, r07, r08, r09, r10):
+    for part in (r01, r02, r03, pipes, r07, r08, r09, r10, g01_g05, g02, g06, g07):
         f, c = part()
         files.update(f)
         cases.extend(c)
@@ -535,7 +751,7 @@ def build():
             lines += ["%s: %s" % (c["id"], c["title"]), "  map: %s" % c["map"].split("/", 1)[1],
                       "  mechanism: %s" % (c["mechanism"] or "none (control)"),
                       "  the source %s" % ("leaks" if c["expect"]["leak"] else "is sealed"),
-                      "  stages: %s" % " + ".join(c["stages"]), ""]
+                      "  stages: %s" % " + ".join(c["stages"])] + (["  also: %s" % ", ".join(c["aliases"])] if c.get("aliases") else []) + [""]
             lines += ["  " + line for line in wrap(c["explanation"])] + [""]
             for p in c["probes"]:
                 lines.append("  - %s %s: %s" % (p["kind"], p.get("point", ""), p["why"]))

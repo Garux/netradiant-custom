@@ -5,6 +5,7 @@ R09.patch: a patch with authored UV checker beside an ordinary brush
   mechanism: none (control)
   the source is sealed
   stages: bsp + vis + light
+  also: G08
 
   A 3 x 3 patchDef2 bowed over the floor, every control point with its own st, and a box with a
   non-default classic texture shift and scale. The BSP must keep the patch's control points and st

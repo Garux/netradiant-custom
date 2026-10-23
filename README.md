@@ -37,10 +37,17 @@ README states its own measurement.
 
 `regression_tests/auto-pigeon/known-failures.json` is the record; a release lists the same cases.
 
-- `R04.m4.p08_nearby` (M4): a face nearly parallel to a neighbouring face is discarded as lying on its
-  plane; 9 drawn points of a pipe bore are missing. No accepted repair yet.
+- `R04.m4.p08_nearby`, `G01.m4.inset`, `G05.m4.phase0625`, `G05.m4.phase1094`, `G05.m4.recess0095` (M4):
+  a face nearly parallel to a neighbouring face is consumed as lying on its plane, and its 1/8-snapped
+  drawn triangles then reach only the solid leaf behind that plane: the face is not drawn.
+- `G02.m3.rod_along`, `G07.m3.cube.025` (M3): a brush whose section by a split plane has fewer than three
+  edges longer than 0.2 is sent whole to one side; the part on the other side keeps no brush.
+- `R11.m3.p10_nearby` (M3): a brush the visible-face tree treats as ON a split plane is split for real
+  from its snapped windings; the sliver lands in a leaf of open bore and fills it.
 - `R08.slit.0125`: a 0.125-unit opening to the void is closed; the map is reported sealed although
-  its source leaks (every Q3Map2 build measured does this for openings of 0.25 or less).
+  its source leaks. Not repaired: `portals.cpp` drops a portal with fewer than three edges longer than
+  0.2 (EDGE_LENGTH), so an opening narrower than that in any leaf closes (a split plane through the
+  opening halves it). `G06.outer.025`, 0.25 wide and off the splits, stays open.
 
 **Use `2.5.17n-ap.3020` or later.** `2.5.17n-ap.3017` was published before the sanitizer job existed; that job then
 found the out-of-bounds read the table above lists, fixed in `3020`, whose publication waited for it.

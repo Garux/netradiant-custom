@@ -63,6 +63,7 @@ R03.cross.005: control: crossing by 0.05, inside ON_EPSILON
   mechanism: none (control)
   the source is sealed
   stages: bsp
+  also: G04
 
   x = 0 is a block split plane, so the step's top face (z = 32, x from -64 to 0.05) crosses it.
   BuildFaceTree_r classifies the face as crossing when its points lie more than ON_EPSILON (0.1) on

@@ -5,6 +5,7 @@ R05.p3.p10_base: control: the P10 pipe whose face P3 lost
   mechanism: none (control)
   the source is sealed
   stages: bsp
+  also: G03
 
   A 590-brush pipe with a bend in all three axes. Upstream draws these 9 points; the rejected M4
   repair P3 (never committed) lost them. Any later M4 repair must keep them drawn.

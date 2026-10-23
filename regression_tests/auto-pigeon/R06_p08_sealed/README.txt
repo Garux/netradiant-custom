@@ -5,6 +5,7 @@ R06.p4.p08_base: control: the sealed P08 pipe that P4 reported as leaking; its M
   mechanism: M2
   the source is sealed
   stages: bsp
+  also: G04
 
   The P08 pipe is sealed: the rejected M4 repair P4 (never committed) reported a leak here, so the
   leak verdict is the first assertion. The 9 face points are the M2 defect of R03 on a real shape: a
