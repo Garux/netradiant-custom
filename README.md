@@ -24,6 +24,8 @@ README, unchanged.
 | `q3map2: append BSP entities one by one so libc++ builds it` | A build fix with no change in behaviour: libc++ (Apple clang) cannot compile a vector range insert of `entity_t`. | the macOS builds |
 | `q3map2: give the macOS worker threads an 8 MiB stack` | `std::thread` gets 512 KiB on macOS and `-light` needs more than 1 MiB: every `-light` died with SIGBUS. macOS workers are pthreads with 8 MiB (Linux threads already get 8 MiB, Windows ones 4 MiB). | `R01`, `R02`, `R09` with `--full` on macOS |
 
+| `q3map2: no texture axes from a plane a side does not have` | A brush side whose three points make no plane gets plane number -1 and is dropped later, but classic texture vectors were first computed from `mapplanes[-1]`: an out-of-bounds read (AddressSanitizer; release builds read garbage silently). | `R08.zeroarea` under ASan + UBSan |
+
 P1 and P2 belong together: with P1 alone the rod of `R02` is solid but the air above it is filled.
 
 Measured requirements of the released programs: Linux (x86-64 and arm64) glibc 2.38 and `GLIBCXX_3.4.32`
@@ -101,7 +103,7 @@ The exit status is 0 only when every required case passes and every known failur
 
 `.github/workflows/auto-pigeon-release.yml` is the one path. A documentation-only push runs the policy
 checks (`ci/auto-pigeon/selftest.py`); a change to the compiler, its build or its tests adds the Linux
-build and every regression case; pushing the release tag builds, tests and accepts **linux-amd64,
+build and every regression case, plain and under AddressSanitizer + UBSan; pushing the release tag builds, tests and accepts **linux-amd64,
 windows-amd64, macos-amd64 and macos-arm64** (required) and **linux-arm64** (optional) on native
 runners, rebuilds the source archive from itself, and publishes only after every required job passed.
 

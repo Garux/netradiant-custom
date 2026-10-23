@@ -1051,8 +1051,11 @@ static void ParseRawBrush( bool onlyLights ){
 				shift[ 1 ] -= ( floor( shift[ 1 ] / si.shaderHeight ) * si.shaderHeight );
 			}
 
-			/* get the texture mapping for this texturedef / plane combination */
-			QuakeTextureVecs( mapplanes[ side.planenum ], shift, rotate, scale, side.vecs );
+			/* get the texture mapping for this texturedef / plane combination; a side whose three points made no
+			   plane (planenum -1, removed by RemoveDuplicateBrushPlanes) has none, and mapplanes[-1] is not a plane */
+			if ( side.planenum != -1 ) {
+				QuakeTextureVecs( mapplanes[ side.planenum ], shift, rotate, scale, side.vecs );
+			}
 		}
 		else if ( g_brushType == EBrushType::Valve220 ){
 			for ( int axis = 0; axis < 2; ++axis ){
