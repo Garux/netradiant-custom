@@ -42,6 +42,9 @@ README states its own measurement.
 - `R08.slit.0125`: a 0.125-unit opening to the void is closed; the map is reported sealed although
   its source leaks (every Q3Map2 build measured does this for openings of 0.25 or less).
 
+**Use `2.5.17n-ap.3020` or later.** `2.5.17n-ap.3017` was published before the sanitizer job existed; that job then
+found the out-of-bounds read the table above lists, fixed in `3020`, whose publication waited for it.
+
 Erratum, release `2.5.17n-ap.3017`: its `release-manifest.json` says
 `rebuilt_program_equals_linux_amd64_release: false`. That compared the source rebuild with the shipped
 `bin/q3map2`, whose run path packaging rewrites; compared before packaging, the rebuild from the source
