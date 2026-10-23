@@ -71,12 +71,13 @@ def box_faces(x0, y0, z0, x1, y1, z1, tex, overrides=None):
 
 
 def classic(faces, comment=None):
-    """Quake III classic projection: `tex shiftS shiftT rotation scaleS scaleT 0 0 0`."""
+    """Quake III classic projection: `tex shiftS shiftT rotation scaleS scaleT contents 0 0` (a texture tuple's optional
+    fourth element is the content flags, e.g. CONTENTS_DETAIL)."""
     lines = (["// " + comment] if comment else []) + ["{"]
     for f in faces:
-        tex, shift, scale = f.tex if isinstance(f.tex, tuple) else (f.tex, (0, 0), (0.5, 0.5))
-        lines.append("%s %s %s %s 0 %s %s 0 0 0" % (" ".join(pt(p) for p in f.p), tex, num(shift[0]), num(shift[1]),
-                                                    num(scale[0]), num(scale[1])))
+        tex, shift, scale, contents = (f.tex + (0,))[:4] if isinstance(f.tex, tuple) else (f.tex, (0, 0), (0.5, 0.5), 0)
+        lines.append("%s %s %s %s 0 %s %s %d 0 0" % (" ".join(pt(p) for p in f.p), tex, num(shift[0]), num(shift[1]),
+                                                     num(scale[0]), num(scale[1]), contents))
     return "\n".join(lines + ["}"]) + "\n"
 
 
@@ -639,6 +640,206 @@ def g06():
     return files, cases
 
 
+# ---------------------------------------------------------------- S: narrow openings (NEW_340A)
+
+CONTENTS_DETAIL = 0x8000000
+SLOT_CENTRE = 100.0          # off every block split plane
+WINDOW = (36, 64, 164, 192)  # y0 z0 y1 z1 of the +x wall's window for a turned slot: centre (100, 128), off the splits
+
+
+def slot_wall(y_lo, y_hi):
+    """The standard room with its +x wall cut by a full-height slot from y_lo to y_hi, open to the void."""
+    x0, y0, z0, x1, y1, z1 = ROOM
+    named = [b for b in room_brushes() if b[0] != "+x wall"]
+    if y_hi > y_lo:
+        named += [("+x wall, south of the slot", box_faces(x1, y0, z0, x1 + WALL, y_lo, z1, CHECK)),
+                  ("+x wall, north of the slot", box_faces(x1, y_hi, z0, x1 + WALL, y1, z1, CHECK))]
+    return named
+
+
+def slot_route(y_lo, y_hi):
+    """The leak route must cross the slot itself: the slab of the slot's opening through the wall."""
+    x1 = ROOM[3]
+    return [{"min": [x1 - 1, y_lo - 0.01, ROOM[2]], "max": [x1 + WALL + 1, y_hi + 0.01, ROOM[5]], "why": "through the slot"}]
+
+
+def clip_polygon(points, normal, dist):
+    """Sutherland-Hodgman: keep the part of a 2D convex polygon with normal . p >= dist."""
+    out = []
+    for i, a in enumerate(points):
+        b = points[(i + 1) % len(points)]
+        da, db = normal[0] * a[0] + normal[1] * a[1] - dist, normal[0] * b[0] + normal[1] * b[1] - dist
+        if da >= 0:
+            out.append(a)
+        if (da >= 0) != (db >= 0):
+            t = da / (da - db)
+            out.append((a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])))
+    return out
+
+
+def oriented(p1, p2, p3, outward):
+    """Three points of a face ordered the way the map format reads them: (p1 - p2) x (p3 - p2) is the outward normal."""
+    a = [p1[i] - p2[i] for i in range(3)]
+    b = [p3[i] - p2[i] for i in range(3)]
+    n = (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+    return (p1, p2, p3) if sum(n[i] * outward[i] for i in range(3)) > 0 else (p3, p2, p1)
+
+
+def prism_x(polygon, xa, xb, tex=CHECK):
+    """A convex polygon of the yz plane (counter-clockwise) extruded from x = xa to x = xb, as brush faces."""
+    faces = []
+    cy = sum(p[0] for p in polygon) / len(polygon)
+    cz = sum(p[1] for p in polygon) / len(polygon)
+    for i, a in enumerate(polygon):
+        b = polygon[(i + 1) % len(polygon)]
+        ey, ez = b[0] - a[0], b[1] - a[1]
+        out = (0, ez, -ey) if (ez * (a[0] - cy) - ey * (a[1] - cz)) > 0 else (0, -ez, ey)
+        faces.append(Face(*oriented((xa, a[0], a[1]), (xb, a[0], a[1]), (xb, b[0], b[1]), out), tex))
+    p = polygon
+    faces.append(Face(*oriented((xb, p[0][0], p[0][1]), (xb, p[1][0], p[1][1]), (xb, p[2][0], p[2][1]), (1, 0, 0)), tex))
+    faces.append(Face(*oriented((xa, p[0][0], p[0][1]), (xa, p[1][0], p[1][1]), (xa, p[2][0], p[2][1]), (-1, 0, 0)), tex))
+    return faces
+
+
+def turned_slot_wall(width, angle, move=(0.0, 0.0)):
+    """The +x wall with a window closed by two plugs leaving a slot `width` wide through the window centre, turned
+    `angle` degrees about x (0 = a horizontal slot), the whole window and plugs moved by `move` (y, z)."""
+    x0, y0, z0, x1, y1, z1 = ROOM
+    wy0, wz0, wy1, wz1 = WINDOW[0] + move[0], WINDOW[1] + move[1], WINDOW[2] + move[0], WINDOW[3] + move[1]
+    cy, cz = (wy0 + wy1) / 2, (wz0 + wz1) / 2
+    named = [b for b in room_brushes() if b[0] != "+x wall"] + [
+        ("+x wall, south of the window", box_faces(x1, y0, z0, x1 + WALL, wy0, z1, CHECK)),
+        ("+x wall, north of the window", box_faces(x1, wy1, z0, x1 + WALL, y1, z1, CHECK)),
+        ("+x wall, below the window", box_faces(x1, wy0, z0, x1 + WALL, wy1, wz0, CHECK)),
+        ("+x wall, above the window", box_faces(x1, wy0, wz1, x1 + WALL, wy1, z1, CHECK))]
+    a = math.radians(angle)
+    n = (-math.sin(a), math.cos(a))
+    d = n[0] * cy + n[1] * cz
+    rect = [(wy0, wz0), (wy1, wz0), (wy1, wz1), (wy0, wz1)]
+    upper = clip_polygon(rect, n, d + width / 2)
+    lower = clip_polygon(rect, (-n[0], -n[1]), -(d - width / 2))
+    named += [("plug above the slot", prism_x(upper, x1, x1 + WALL)), ("plug below the slot", prism_x(lower, x1, x1 + WALL))]
+    route = [{"min": [x1 - 1, cy - 2, cz - 2], "max": [x1 + WALL + 1, cy + 2, cz + 2], "why": "through the slot at the window centre"}]
+    return named, route
+
+
+def s_cases():
+    files, cases = {}, []
+
+    def add(cid, title, path, named, leak, probes, explanation, mechanism=None, stages=("bsp",), extra=None, entities=None):
+        files.update(write_map(path, brushes_text(named), entities=entities))
+        cases.append(case(cid, title, mechanism, path, leak, probes, explanation, stages=stages, extra=extra))
+
+    d = "S02_S12_narrow_openings/maps/"
+    # S02: off-split slots (0.25 is G06.outer.025)
+    for w in (0.125, 0.1875, 0.5):
+        lo, hi = SLOT_CENTRE - w / 2, SLOT_CENTRE + w / 2
+        add("S02.off.%s" % num(w).replace("0.", ""), "a %s slot to the void at y = 100, off every split" % num(w),
+            d + "s02_off_%s.map" % num(w).replace(".", ""), slot_wall(lo, hi), True, [],
+            "A full-height slot %s wide through the +x wall, centred on y = 100 where no block split passes. The map leaks "
+            "and the route must cross the slot. Before NEW_340A the slot's leaf existed but its portals to the room and to "
+            "the void (%s x 256 rectangles) were dropped as 'tiny' (fewer than three edges longer than 0.2): the map read "
+            "sealed below 0.25." % (num(w), num(w)), extra={"leak_route": slot_route(lo, hi)})
+    # S03: split-centred slots (0.125 is R08.slit.0125)
+    for w in (0.1875, 0.25, 0.5):
+        add("S03.split.%s" % num(w).replace("0.", ""), "a %s slot to the void centred on the block split y = 0" % num(w),
+            d + "s03_split_%s.map" % num(w).replace(".", ""), slot_wall(-w / 2, w / 2), True, [],
+            "A full-height slot %s wide centred on y = 0, a block split plane. The map leaks through the slot. Before "
+            "NEW_340A the forced block split consumed both slot faces lying within ON_EPSILON of it (a half up to 0.1), "
+            "or split the slot into halves whose portals were dropped as 'tiny' (a half up to 0.2): sealed up to 0.375."
+            % num(w), extra={"leak_route": slot_route(-w / 2, w / 2)})
+    # S04: a 0.125 slot through a window, horizontal and turned 15 and 45 degrees about x
+    for angle in (0, 15, 45):
+        named, route = turned_slot_wall(0.125, angle)
+        add("S04.turned.%d" % angle, "a 0.125 slot through two plugs in a window, turned %d degrees" % angle,
+            d + "s04_turned_%d.map" % angle, named, True, [],
+            "The +x wall has a 128 x 128 window centred on (y, z) = (100, 128); two plugs fill it except a slot 0.125 wide "
+            "through its centre, turned %d degrees about x (0 is horizontal). The map leaks through the slot, with no "
+            "grid or epsilon change: the verdict follows the opening." % angle, extra={"leak_route": route})
+    # S05: the same openings moved across the split and rounding phases
+    for cid, lo, hi, why in (("S05.moved.on_split", 0.0, 0.125, "one face ON the block split y = 0"),
+                             ("S05.moved.straddle", -0.09375, 0.03125, "both faces within ON_EPSILON of the block split, unevenly")):
+        add(cid, "a 0.125 slot with %s" % why, d + cid.lower().replace(".", "_") + ".map", slot_wall(lo, hi), True, [],
+            "A full-height slot 0.125 wide from y = %s to %s: %s. The map leaks through the slot wherever the world's "
+            "block boundary falls." % (num(lo), num(hi), why), extra={"leak_route": slot_route(lo, hi)})
+    named, route = turned_slot_wall(0.125, 45, move=(0.3125, 0.1875))
+    add("S05.moved.turned45", "the 45-degree 0.125 slot moved by (0, 0.3125, 0.1875)", d + "s05_moved_turned45.map", named, True,
+        [], "S04.turned.45 with its window, plugs and slot moved 0.3125 in y and 0.1875 in z, off the 1/8 grid phase it had.",
+        extra={"leak_route": route})
+    # S06: touching slabs seal
+    x0, y0, z0, x1, y1, z1 = ROOM
+    for cid, at in (("S06.touch.split", 0.0), ("S06.touch.off", SLOT_CENTRE)):
+        add(cid, "the +x wall as two slabs touching at y = %s" % num(at), d + cid.lower().replace(".", "_") + ".map",
+            slot_wall(at, at) + [("+x wall, south slab", box_faces(x1, y0, z0, x1 + WALL, at, z1, CHECK)),
+                                 ("+x wall, north slab", box_faces(x1, at, z0, x1 + WALL, y1, z1, CHECK))], False,
+            room_probes() + [{"kind": "solid", "point": [x1 + 8, at - 0.03, 128], "why": "south slab at the seam"},
+                             {"kind": "solid", "point": [x1 + 8, at + 0.03, 128], "why": "north slab at the seam"},
+                             {"kind": "drawn", "point": [x1, at + 4, 128], "normal": [-1, 0, 0], "why": "+x wall beside the seam, seen from the room"}],
+            "The +x wall is two brushes sharing the face y = %s exactly: no opening, so the map is sealed and the seam "
+            "solid. A portal predicate that kept a zero-width crack would leak here." % num(at))
+    # S07: overlap, a closed thin pocket, a blind slot
+    add("S07.overlap", "the +x wall as two slabs overlapping by 0.125 at y = 0", d + "s07_overlap.map",
+        slot_wall(0, 0) + [("+x wall, south slab", box_faces(x1, y0, z0, x1 + WALL, 0.0625, z1, CHECK)),
+                           ("+x wall, north slab", box_faces(x1, -0.0625, z0, x1 + WALL, y1, z1, CHECK))], False,
+        room_probes() + [{"kind": "solid", "point": [x1 + 8, 0, 128], "why": "inside the overlap"}],
+        "Two wall slabs overlap by 0.125 across the block split: sealed, no invented route outside.")
+    lo, hi = SLOT_CENTRE - 0.0625, SLOT_CENTRE + 0.0625
+    add("S07.pocket", "a 0.125 slot closed at both ends inside the +x wall", d + "s07_pocket.map",
+        slot_wall(lo, hi)[:-2] + [("+x wall, south", box_faces(x1, y0, z0, x1 + WALL, lo, z1, CHECK)),
+                                  ("+x wall, north", box_faces(x1, hi, z0, x1 + WALL, y1, z1, CHECK)),
+                                  ("room-side cap over the slot", box_faces(x1, lo - 4, z0, x1 + 4, hi + 4, z1, CHECK)),
+                                  ("void-side cap over the slot", box_faces(x1 + 12, lo - 4, z0, x1 + WALL, hi + 4, z1, CHECK))],
+        False, room_probes() + [{"kind": "solid", "point": [x1 + 2, SLOT_CENTRE, 128], "why": "the room-side cap"},
+                                {"kind": "solid", "point": [x1 + 14, SLOT_CENTRE, 128], "why": "the void-side cap"}],
+        "A 0.125 slot inside the +x wall, capped on the room side and on the void side: a closed thin pocket nothing can "
+        "reach. Sealed; the pocket is not a leak and nothing is asserted about its own air.")
+    add("S07.blind", "a 0.125 slot from the room into the +x wall, closed on the void side", d + "s07_blind.map",
+        slot_wall(lo, hi)[:-2] + [("+x wall, south", box_faces(x1, y0, z0, x1 + WALL, lo, z1, CHECK)),
+                                  ("+x wall, north", box_faces(x1, hi, z0, x1 + WALL, y1, z1, CHECK)),
+                                  ("void-side cap over the slot", box_faces(x1 + 12, lo - 4, z0, x1 + WALL, hi + 4, z1, CHECK))],
+        False, room_probes() + [{"kind": "open", "point": [x1 + 6, SLOT_CENTRE, 128], "why": "air in the slot, reached from the room"},
+                                {"kind": "solid", "point": [x1 + 14, SLOT_CENTRE, 128], "why": "the void-side cap"}],
+        "A 0.125 slot from the room 12 units into the +x wall, capped on the void side. Sealed, and the slot's air is "
+        "reachable from the room, so it must stay open (before NEW_340A its portal to the room was dropped and the slot "
+        "filled as unreachable).")
+    # S08: an opening inside the ON_EPSILON band - a known failure that says what it is
+    lo, hi = SLOT_CENTRE - 0.03125, SLOT_CENTRE + 0.03125
+    add("S08.band.00625", "a 0.0625 slot to the void: inside the ON_EPSILON band", d + "s08_band_00625.map", slot_wall(lo, hi),
+        True, [], "A slot 0.0625 wide, off every split. The source leaks. Its two faces lie closer than ON_EPSILON (0.1): "
+        "the face tree consumes the second one as ON the first one's plane, so no leaf lies between them. The portal "
+        "stage is not involved. Kept as a KNOWN FAILURE naming that band, not rewritten as a seal.",
+        mechanism="on_epsilon_band", extra={"leak_route": slot_route(lo, hi)})
+    # S11: nonstructural surfaces over a slot do not seal it
+    lo, hi = SLOT_CENTRE - 0.0625, SLOT_CENTRE + 0.0625
+    add("S11.detail_over", "a 0.125 slot behind a detail brush", d + "s11_detail_over.map",
+        slot_wall(lo, hi) + [("detail brush over the slot, void side",
+                              box_faces(x1 + WALL, lo - 8, z0, x1 + WALL + 8, hi + 8, z1, (CHECK, (0, 0), (0.5, 0.5), CONTENTS_DETAIL)))],
+        True, [], "A 0.125 slot whose outer end is covered by a DETAIL brush. Detail does not seal: the map leaks.",
+        extra={"leak_route": slot_route(lo, hi)})
+    rows = "\n".join("( %s )" % " ".join("( %s )" % " ".join(num(v) for v in (x1 + WALL + 2, lo - 8 + 8 * c, 128 * r, c * 0.5, r * 0.5))
+                                          for r in range(3)) for c in range(3))
+    patch = "// a flat patch over the slot's outer end\n{\npatchDef2\n{\n%s\n( 3 3 0 0 0 )\n(\n%s\n)\n}\n}\n" % (PATCH, rows)
+    files.update(write_map(d + "s11_patch_over.map", brushes_text(slot_wall(lo, hi)) + patch))
+    cases.append(case("S11.patch_over", "a 0.125 slot behind a patch", None, d + "s11_patch_over.map", True, [],
+                      "A 0.125 slot whose outer end is covered by a flat patch. A patch does not seal: the map leaks.",
+                      extra={"leak_route": slot_route(lo, hi)}))
+    # S12: a sealed room in two halves joined by a narrow passage
+    px = 64
+    named = room_brushes() + [("partition, south of the passage", box_faces(px, y0, z0, px + WALL, lo, z1, CHECK)),
+                              ("partition, north of the passage", box_faces(px, hi, z0, px + WALL, y1, z1, CHECK))]
+    add("S12.passage", "a sealed room in two halves joined by a 0.125 passage", d + "s12_passage.map", named, False,
+        room_probes() + [{"kind": "open", "point": [160, -100, 128], "why": "air in the east half, reached through the passage"},
+                         {"kind": "drawn", "point": [x1, -100, 128], "normal": [-1, 0, 0], "why": "+x wall, seen from the east half"},
+                         {"kind": "drawn", "point": [px + WALL, -100, 128], "normal": [1, 0, 0], "why": "partition, seen from the east half"},
+                         {"kind": "open", "point": [px + 8, SLOT_CENTRE, 128], "why": "air in the passage"},
+                         {"kind": "solid", "point": [px + 8, SLOT_CENTRE - 1, 128], "why": "the partition beside the passage"}],
+        "A sealed room split by a full partition at x = 64..80 with one full-height passage 0.125 wide at y = 100. The "
+        "player and the light are in the west half; the east half is reached through the passage, so its air stays "
+        "open, its walls are drawn and NORMAL -vis and -light finish. Before NEW_340A the passage's portals were "
+        "dropped and the east half was filled as unreachable.", stages=("bsp", "vis", "light"))
+    return files, cases
+
+
 PATCH = "apreg/patch"
 # 3 x 3 control points of a bowed quad over the floor, as patchDef2 lists them, (x y z s t); the middle bulges up
 PATCH_POINTS = [[(-128 + 64 * c, -96 + 64 * r, 16 + (32 if r == 1 else 0) + (16 if c == 1 else 0), 0.5 * c, 0.5 * r)
@@ -741,7 +942,7 @@ def wrap(text, width=100):
 
 def build():
     files, cases = {}, []
-    for part in (r01, r02, r03, pipes, r07, r08, r09, r10, g01_g05, g02, g06, g07):
+    for part in (r01, r02, r03, pipes, r07, r08, r09, r10, g01_g05, g02, g06, g07, s_cases):
         f, c = part()
         files.update(f)
         cases.extend(c)

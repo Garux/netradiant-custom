@@ -122,6 +122,32 @@ def check_probe(bsp, probe):
     raise ValueError("unknown probe kind %r" % kind)
 
 
+def segment_meets_box(a, b, lo, hi):
+    """Slab test: does the segment a-b touch the axis-aligned box lo-hi?"""
+    t0, t1 = 0.0, 1.0
+    for i in range(3):
+        d = b[i] - a[i]
+        if abs(d) < 1e-12:
+            if a[i] < lo[i] or a[i] > hi[i]:
+                return False
+            continue
+        u, v = (lo[i] - a[i]) / d, (hi[i] - a[i]) / d
+        t0, t1 = max(t0, min(u, v)), min(t1, max(u, v))
+        if t0 > t1:
+            return False
+    return True
+
+
+def check_leak_route(lin_path, boxes):
+    """Each declared box must be crossed by the pointfile's route (the leak goes through the real opening)."""
+    if not lin_path.is_file():
+        return ["no pointfile %s" % lin_path.name]
+    points = [tuple(float(v) for v in line.split()) for line in lin_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    segments = list(zip(points, points[1:])) or [(p, p) for p in points]
+    return ["leak route does not cross %s" % box["why"] for box in boxes
+            if not any(segment_meets_box(a, b, box["min"], box["max"]) for a, b in segments)]
+
+
 def run_case(case, q3map2, work, threads, timeout, full, gameroot):
     cid = case["id"]
     case_dir = work / "cases" / cid
@@ -149,6 +175,8 @@ def run_case(case, q3map2, work, threads, timeout, full, gameroot):
         expect = case["expect"]["leak"]
         if expect is not None and leaked != expect:
             failures.append("leak verdict %s, the source %s" % ("leaked" if leaked else "sealed", "leaks" if expect else "is sealed"))
+        elif leaked and case.get("leak_route"):
+            failures += check_leak_route(map_path.with_suffix(".lin"), case["leak_route"])
         snapshot = case_dir / "after-bsp.bsp"
         shutil.copyfile(bsp_path, snapshot)
         bsp = Ibsp(snapshot)

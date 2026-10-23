@@ -40,10 +40,20 @@ README states its own measurement.
 
 `regression_tests/auto-pigeon/known-failures.json` is the record; a release lists the same cases.
 
-- `R08.slit.0125`: a 0.125-unit opening to the void is closed; the map is reported sealed although
-  its source leaks. Not repaired: `portals.cpp` drops a portal with fewer than three edges longer than
-  0.2 (EDGE_LENGTH), so an opening narrower than that in any leaf closes (a split plane through the
-  opening halves it). `G06.outer.025`, 0.25 wide and off the splits, stays open.
+- Narrow openings to the void read sealed (the `S02`–`S12` cases, `R08.slit.0125`). Measured with a portal
+  diagnostic on `3026`, two decisions close them:
+  - `portal_tiny`: the opening's leaf exists, but `MakeNodePortal`/`SplitNodePortals` drop its portals to the
+    room and to the void — finite rectangles with fewer than three edges longer than 0.2 (`WindingIsTiny`).
+    Off every split this closes up to 0.1875 (`S02.off.125`, `S02.off.1875`), turned or moved openings
+    (`S04.*`, `S05.moved.on_split`, `S05.moved.turned45`), a slot reached from the room (`S07.blind`), slots
+    behind detail or a patch (`S11.*`) and a sealed room's second half behind a narrow passage
+    (`S12.passage`); a block split halving a slot closes it up to 0.375 (`S03.split.25`).
+  - `block_split`: the forced 1024 block split consumes both faces of a slot lying within `ON_EPSILON` of it,
+    so no leaf holds the slot's air (`R08.slit.0125`, `S03.split.1875`, `S05.moved.straddle`). The portal
+    stage drops nothing there.
+- `S08.band.00625`: a slot 0.0625 wide. Its faces lie inside `ON_EPSILON` (0.1) of each other, the precision
+  band every stage of this compiler treats as one plane; the face tree consumes the second face and no leaf
+  lies between them.
 
 **Use `2.5.17n-ap.3020` or later.** `2.5.17n-ap.3017` was published before the sanitizer job existed; that job then
 found the out-of-bounds read the table above lists, fixed in `3020`, whose publication waited for it.

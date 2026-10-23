@@ -7823,6 +7823,1195 @@
   },
   {
    "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.125 wide through the +x wall, centred on y = 100 where no block split passes. The map leaks and the route must cross the slot. Before NEW_340A the slot's leaf existed but its portals to the room and to the void (0.125 x 256 rectangles) were dropped as 'tiny' (fewer than three edges longer than 0.2): the map read sealed below 0.25.",
+   "id": "S02.off.125",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.0725,
+      256
+     ],
+     "min": [
+      255,
+      99.9275,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s02_off_0125.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot to the void at y = 100, off every split"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.1875 wide through the +x wall, centred on y = 100 where no block split passes. The map leaks and the route must cross the slot. Before NEW_340A the slot's leaf existed but its portals to the room and to the void (0.1875 x 256 rectangles) were dropped as 'tiny' (fewer than three edges longer than 0.2): the map read sealed below 0.25.",
+   "id": "S02.off.1875",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.10375,
+      256
+     ],
+     "min": [
+      255,
+      99.89625,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s02_off_01875.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.1875 slot to the void at y = 100, off every split"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.5 wide through the +x wall, centred on y = 100 where no block split passes. The map leaks and the route must cross the slot. Before NEW_340A the slot's leaf existed but its portals to the room and to the void (0.5 x 256 rectangles) were dropped as 'tiny' (fewer than three edges longer than 0.2): the map read sealed below 0.25.",
+   "id": "S02.off.5",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.26,
+      256
+     ],
+     "min": [
+      255,
+      99.74,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s02_off_05.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.5 slot to the void at y = 100, off every split"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.1875 wide centred on y = 0, a block split plane. The map leaks through the slot. Before NEW_340A the forced block split consumed both slot faces lying within ON_EPSILON of it (a half up to 0.1), or split the slot into halves whose portals were dropped as 'tiny' (a half up to 0.2): sealed up to 0.375.",
+   "id": "S03.split.1875",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      0.10375,
+      256
+     ],
+     "min": [
+      255,
+      -0.10375,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s03_split_01875.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.1875 slot to the void centred on the block split y = 0"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.25 wide centred on y = 0, a block split plane. The map leaks through the slot. Before NEW_340A the forced block split consumed both slot faces lying within ON_EPSILON of it (a half up to 0.1), or split the slot into halves whose portals were dropped as 'tiny' (a half up to 0.2): sealed up to 0.375.",
+   "id": "S03.split.25",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      0.135,
+      256
+     ],
+     "min": [
+      255,
+      -0.135,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s03_split_025.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.25 slot to the void centred on the block split y = 0"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.5 wide centred on y = 0, a block split plane. The map leaks through the slot. Before NEW_340A the forced block split consumed both slot faces lying within ON_EPSILON of it (a half up to 0.1), or split the slot into halves whose portals were dropped as 'tiny' (a half up to 0.2): sealed up to 0.375.",
+   "id": "S03.split.5",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      0.26,
+      256
+     ],
+     "min": [
+      255,
+      -0.26,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s03_split_05.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.5 slot to the void centred on the block split y = 0"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The +x wall has a 128 x 128 window centred on (y, z) = (100, 128); two plugs fill it except a slot 0.125 wide through its centre, turned 0 degrees about x (0 is horizontal). The map leaks through the slot, with no grid or epsilon change: the verdict follows the opening.",
+   "id": "S04.turned.0",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      102.0,
+      130.0
+     ],
+     "min": [
+      255,
+      98.0,
+      126.0
+     ],
+     "why": "through the slot at the window centre"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s04_turned_0.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot through two plugs in a window, turned 0 degrees"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The +x wall has a 128 x 128 window centred on (y, z) = (100, 128); two plugs fill it except a slot 0.125 wide through its centre, turned 15 degrees about x (0 is horizontal). The map leaks through the slot, with no grid or epsilon change: the verdict follows the opening.",
+   "id": "S04.turned.15",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      102.0,
+      130.0
+     ],
+     "min": [
+      255,
+      98.0,
+      126.0
+     ],
+     "why": "through the slot at the window centre"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s04_turned_15.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot through two plugs in a window, turned 15 degrees"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The +x wall has a 128 x 128 window centred on (y, z) = (100, 128); two plugs fill it except a slot 0.125 wide through its centre, turned 45 degrees about x (0 is horizontal). The map leaks through the slot, with no grid or epsilon change: the verdict follows the opening.",
+   "id": "S04.turned.45",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      102.0,
+      130.0
+     ],
+     "min": [
+      255,
+      98.0,
+      126.0
+     ],
+     "why": "through the slot at the window centre"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s04_turned_45.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot through two plugs in a window, turned 45 degrees"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.125 wide from y = 0 to 0.125: one face ON the block split y = 0. The map leaks through the slot wherever the world's block boundary falls.",
+   "id": "S05.moved.on_split",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      0.135,
+      256
+     ],
+     "min": [
+      255,
+      -0.01,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s05_moved_on_split.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot with one face ON the block split y = 0"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.125 wide from y = -0.09375 to 0.03125: both faces within ON_EPSILON of the block split, unevenly. The map leaks through the slot wherever the world's block boundary falls.",
+   "id": "S05.moved.straddle",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      0.04125,
+      256
+     ],
+     "min": [
+      255,
+      -0.10375,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s05_moved_straddle.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot with both faces within ON_EPSILON of the block split, unevenly"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "S04.turned.45 with its window, plugs and slot moved 0.3125 in y and 0.1875 in z, off the 1/8 grid phase it had.",
+   "id": "S05.moved.turned45",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      102.3125,
+      130.1875
+     ],
+     "min": [
+      255,
+      98.3125,
+      126.1875
+     ],
+     "why": "through the slot at the window centre"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s05_moved_turned45.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the 45-degree 0.125 slot moved by (0, 0.3125, 0.1875)"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The +x wall is two brushes sharing the face y = 100 exactly: no opening, so the map is sealed and the seam solid. A portal predicate that kept a zero-width crack would leak here.",
+   "id": "S06.touch.off",
+   "map": "S02_S12_narrow_openings/maps/s06_touch_off.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      99.97,
+      128
+     ],
+     "why": "south slab at the seam"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      100.03,
+      128
+     ],
+     "why": "north slab at the seam"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -1,
+      0,
+      0
+     ],
+     "point": [
+      256,
+      104.0,
+      128
+     ],
+     "why": "+x wall beside the seam, seen from the room"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the +x wall as two slabs touching at y = 100"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The +x wall is two brushes sharing the face y = 0 exactly: no opening, so the map is sealed and the seam solid. A portal predicate that kept a zero-width crack would leak here.",
+   "id": "S06.touch.split",
+   "map": "S02_S12_narrow_openings/maps/s06_touch_split.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      -0.03,
+      128
+     ],
+     "why": "south slab at the seam"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      0.03,
+      128
+     ],
+     "why": "north slab at the seam"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -1,
+      0,
+      0
+     ],
+     "point": [
+      256,
+      4.0,
+      128
+     ],
+     "why": "+x wall beside the seam, seen from the room"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the +x wall as two slabs touching at y = 0"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A 0.125 slot from the room 12 units into the +x wall, capped on the void side. Sealed, and the slot's air is reachable from the room, so it must stay open (before NEW_340A its portal to the room was dropped and the slot filled as unreachable).",
+   "id": "S07.blind",
+   "map": "S02_S12_narrow_openings/maps/s07_blind.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      262,
+      100.0,
+      128
+     ],
+     "why": "air in the slot, reached from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      270,
+      100.0,
+      128
+     ],
+     "why": "the void-side cap"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot from the room into the +x wall, closed on the void side"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Two wall slabs overlap by 0.125 across the block split: sealed, no invented route outside.",
+   "id": "S07.overlap",
+   "map": "S02_S12_narrow_openings/maps/s07_overlap.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      0,
+      128
+     ],
+     "why": "inside the overlap"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the +x wall as two slabs overlapping by 0.125 at y = 0"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A 0.125 slot inside the +x wall, capped on the room side and on the void side: a closed thin pocket nothing can reach. Sealed; the pocket is not a leak and nothing is asserted about its own air.",
+   "id": "S07.pocket",
+   "map": "S02_S12_narrow_openings/maps/s07_pocket.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      258,
+      100.0,
+      128
+     ],
+     "why": "the room-side cap"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      270,
+      100.0,
+      128
+     ],
+     "why": "the void-side cap"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot closed at both ends inside the +x wall"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A slot 0.0625 wide, off every split. The source leaks. Its two faces lie closer than ON_EPSILON (0.1): the face tree consumes the second one as ON the first one's plane, so no leaf lies between them. The portal stage is not involved. Kept as a KNOWN FAILURE naming that band, not rewritten as a seal.",
+   "id": "S08.band.00625",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.04125,
+      256
+     ],
+     "min": [
+      255,
+      99.95875,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s08_band_00625.map",
+   "mechanism": "on_epsilon_band",
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.0625 slot to the void: inside the ON_EPSILON band"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A 0.125 slot whose outer end is covered by a DETAIL brush. Detail does not seal: the map leaks.",
+   "id": "S11.detail_over",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.0725,
+      256
+     ],
+     "min": [
+      255,
+      99.9275,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s11_detail_over.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot behind a detail brush"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A 0.125 slot whose outer end is covered by a flat patch. A patch does not seal: the map leaks.",
+   "id": "S11.patch_over",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.0725,
+      256
+     ],
+     "min": [
+      255,
+      99.9275,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s11_patch_over.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot behind a patch"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A sealed room split by a full partition at x = 64..80 with one full-height passage 0.125 wide at y = 100. The player and the light are in the west half; the east half is reached through the passage, so its air stays open, its walls are drawn and NORMAL -vis and -light finish. Before NEW_340A the passage's portals were dropped and the east half was filled as unreachable.",
+   "id": "S12.passage",
+   "map": "S02_S12_narrow_openings/maps/s12_passage.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      160,
+      -100,
+      128
+     ],
+     "why": "air in the east half, reached through the passage"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -1,
+      0,
+      0
+     ],
+     "point": [
+      256,
+      -100,
+      128
+     ],
+     "why": "+x wall, seen from the east half"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      80,
+      -100,
+      128
+     ],
+     "why": "partition, seen from the east half"
+    },
+    {
+     "kind": "open",
+     "point": [
+      72,
+      100.0,
+      128
+     ],
+     "why": "air in the passage"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      72,
+      99.0,
+      128
+     ],
+     "why": "the partition beside the passage"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "a sealed room in two halves joined by a 0.125 passage"
+  },
+  {
+   "expect": {
     "leak": null
    },
    "explanation": "upstream's base_winding; compile-only (exit status 0 and a BSP)",
