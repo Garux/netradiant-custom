@@ -40,6 +40,12 @@ README states its own measurement.
 - `R08.slit.0125`: a 0.125-unit opening to the void is closed; the map is reported sealed although
   its source leaks (every Q3Map2 build measured does this for openings of 0.25 or less).
 
+Erratum, release `2.5.17n-ap.3017`: its `release-manifest.json` says
+`rebuilt_program_equals_linux_amd64_release: false`. That compared the source rebuild with the shipped
+`bin/q3map2`, whose run path packaging rewrites; compared before packaging, the rebuild from the source
+archive is byte-identical (sha256 `d4dfbf88…`, the run's `source.json` against the linux-amd64
+`build-report.json`). Later releases compare like with like.
+
 ## Build `q3map2` only
 
 Upstream's Makefile, asked for the one target. The base needs GCC 14 or newer on Linux.

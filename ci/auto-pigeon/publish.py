@@ -59,6 +59,8 @@ def evaluate(platform, plan, artifacts):
     regress = report["regress"]
     return {"platform": platform, "name": asset, "path": str(zip_path), "size": zip_path.stat().st_size, "sha256": digest,
             "kind": "toolchain", "program_sha256": package["program_sha256"],
+            # the compiler's own output before packaging (patchelf / install_name_tool / codesign change the shipped file)
+            "built_program_sha256": package.get("built_program_sha256"),
             "acceptance": {"verdict": "pass", "steps_passed": len(passed)},
             "regressions": {"required_passed": regress["required"]["passed"], "required_cases": regress["required"]["cases"],
                             "known_failures_still_failing": regress["known_failures"]["still_failing"],
@@ -93,6 +95,14 @@ def reconcile(uploads, remote_digest):
                           "kept and nothing was uploaded: a second build of one commit that differs is a finding, not a "
                           "licence to replace a published binary." % (p.name, theirs, sha256_file(p)))
     return todo
+
+
+def rebuilt_matches(linux, meta):
+    """Did the source archive rebuild the linux-amd64 compiler byte for byte? Compared before packaging on both sides:
+    the shipped file has had its run path rewritten, the rebuilt one has not. None when it cannot be told."""
+    if not linux or not linux.get("built_program_sha256") or not meta.get("rebuilt_program_sha256"):
+        return None
+    return linux["built_program_sha256"] == meta["rebuilt_program_sha256"]
 
 
 def manifest_and_notes(plan, admitted, missing, source, run_url, known):
@@ -196,7 +206,7 @@ def main():
     source = {"name": source_path.name, "path": str(source_path), "size": source_path.stat().st_size, "sha256": meta["sha256"],
               "kind": "source", "files": meta["files"], "rebuilt_and_tested_from_the_archive": True,
               "rebuilt_program_sha256": meta["rebuilt_program_sha256"],
-              "rebuilt_program_equals_linux_amd64_release": bool(linux and linux["program_sha256"] == meta["rebuilt_program_sha256"])}
+              "rebuilt_program_equals_linux_amd64_release": rebuilt_matches(linux, meta)}
     known = load_json(args.known_failures)["cases"]
     manifest, notes = manifest_and_notes(plan, admitted, missing, source, args.run_url, known)
     manifest_path = out / "release-manifest.json"

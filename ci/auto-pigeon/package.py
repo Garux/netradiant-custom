@@ -384,7 +384,8 @@ def main():
     write_zip(root, zip_path, plan["commit_time"])
     package = {"schema": "auto-pigeon-q3map2-package/1", "asset": zip_path.name, "size": zip_path.stat().st_size,
                "sha256": sha256_file(zip_path), "platform": platform, "commit": plan["commit"], "version": plan["version"],
-               "banner": plan["banner"], "program_sha256": sha256_file(program), "manifest_sha256": sha256_file(root / "MANIFEST.json"),
+               "banner": plan["banner"], "program_sha256": sha256_file(program), "built_program_sha256": report["program_sha256"],
+               "manifest_sha256": sha256_file(root / "MANIFEST.json"),
                "members": len(files) + 1, "regress": report["regress"]}
     write_json(out / (stem + ".package.json"), package)
     shutil.copyfile(args.build_report, out / (stem + ".build-report.json"))

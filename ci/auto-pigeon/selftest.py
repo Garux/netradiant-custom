@@ -85,6 +85,13 @@ def publication_fixtures():
             else:
                 sys.exit("selftest: %s must refuse publication" % name)
 
+        linux = {"built_program_sha256": "1" * 64, "program_sha256": "2" * 64}
+        check(publish.rebuilt_matches(linux, {"rebuilt_program_sha256": "1" * 64}) is True,
+              "a source rebuild is compared with the build before packaging, not with the patched shipped file")
+        check(publish.rebuilt_matches(linux, {"rebuilt_program_sha256": "2" * 64}) is False, "a different rebuild is not equal")
+        check(publish.rebuilt_matches({"program_sha256": "2" * 64}, {"rebuilt_program_sha256": "2" * 64}) is None,
+              "without the pre-packaging digest the answer is unknown, never a guess")
+
         a, b = tmp / "a.zip", tmp / "b.zip"
         a.write_bytes(b"same")
         b.write_bytes(b"new")
