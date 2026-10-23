@@ -1,56 +1,8 @@
 {
   "cases": {
-    "G01.m4.inset": {
-      "failing": "the 9 drawn probes on the inset's face",
-      "mechanism": "M4",
-      "observed_on": {
-        "argv": "-bsp -game quake3 -threads 2 -meta",
-        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
-        "observed": "2026-10-23",
-        "reader": "ci/auto-pigeon/regress.py + ci/auto-pigeon/ibsp.py",
-        "source": "auto-pigeon/q3map2 main da52bdf9 (upstream-base/82161339 + P1 + P2)"
-      },
-      "owner": "NEW_340: repaired by the commit that removes this entry"
-    },
     "G02.m3.rod_along": {
       "failing": "the rod's -y part reads air (2 solid probes)",
       "mechanism": "M3",
-      "observed_on": {
-        "argv": "-bsp -game quake3 -threads 2 -meta",
-        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
-        "observed": "2026-10-23",
-        "reader": "ci/auto-pigeon/regress.py + ci/auto-pigeon/ibsp.py",
-        "source": "auto-pigeon/q3map2 main da52bdf9 (upstream-base/82161339 + P1 + P2)"
-      },
-      "owner": "NEW_340: repaired by the commit that removes this entry"
-    },
-    "G05.m4.phase0625": {
-      "failing": "the 9 drawn probes on the inset's face",
-      "mechanism": "M4",
-      "observed_on": {
-        "argv": "-bsp -game quake3 -threads 2 -meta",
-        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
-        "observed": "2026-10-23",
-        "reader": "ci/auto-pigeon/regress.py + ci/auto-pigeon/ibsp.py",
-        "source": "auto-pigeon/q3map2 main da52bdf9 (upstream-base/82161339 + P1 + P2)"
-      },
-      "owner": "NEW_340: repaired by the commit that removes this entry"
-    },
-    "G05.m4.phase1094": {
-      "failing": "the 9 drawn probes on the inset's face",
-      "mechanism": "M4",
-      "observed_on": {
-        "argv": "-bsp -game quake3 -threads 2 -meta",
-        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
-        "observed": "2026-10-23",
-        "reader": "ci/auto-pigeon/regress.py + ci/auto-pigeon/ibsp.py",
-        "source": "auto-pigeon/q3map2 main da52bdf9 (upstream-base/82161339 + P1 + P2)"
-      },
-      "owner": "NEW_340: repaired by the commit that removes this entry"
-    },
-    "G05.m4.recess0095": {
-      "failing": "the 9 drawn probes on the inset's face",
-      "mechanism": "M4",
       "observed_on": {
         "argv": "-bsp -game quake3 -threads 2 -meta",
         "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
@@ -69,18 +21,6 @@
         "observed": "2026-10-23",
         "reader": "ci/auto-pigeon/regress.py + ci/auto-pigeon/ibsp.py",
         "source": "auto-pigeon/q3map2 main da52bdf9 (upstream-base/82161339 + P1 + P2)"
-      },
-      "owner": "NEW_340: repaired by the commit that removes this entry"
-    },
-    "R04.m4.p08_nearby": {
-      "failing": "the 9 drawn probes on brush 101's bore face",
-      "mechanism": "M4",
-      "observed_on": {
-        "argv": "-bsp -game quake3 -threads 2 -meta",
-        "build": "make BUILD=release install/q3map2.x86_64, GCC 14.2 on Ubuntu 24.04 (linux-amd64)",
-        "observed": "2026-10-23",
-        "reader": "ci/auto-pigeon/ibsp.py",
-        "source": "netradiant-custom master 8216133984031afaa9a857b56ea66dd9c3d54b26 (upstream-base/82161339), unmodified"
       },
       "owner": "NEW_340: repaired by the commit that removes this entry"
     },
