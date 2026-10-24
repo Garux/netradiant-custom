@@ -7,3 +7,7 @@
 /.cache/
 /.clang*
 /compile_commands.json
+
+# Auto-Pigeon fork: Python caches of ci/auto-pigeon, and graft's local graph cache (regenerable)
+**/__pycache__
+/graft/

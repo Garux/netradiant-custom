@@ -532,6 +532,20 @@ static int FilterBrushIntoTree_r( brush_t&& b, node_t *node ){
 		return 1;
 	}
 
+	/* the face tree consumed a side of this brush as ON this node's plane (BuildFaceTree_r), so no plane below
+	   bounds the brush on that side: it lies wholly on its inner side here. Splitting it again from its 1/8-snapped
+	   windings, which can reach just past the 0.1 SplitBrush allows, cut a sliver into the other child, where it
+	   landed in a leaf no plane of the brush bounds and made that leaf opaque */
+	{
+		int inner = -1;
+		for ( const auto& [brush, side] : node->coplanarBrushes )
+			if ( brush == b.original )
+				inner = ( inner == -1 || inner == side ) ? side : -2; /* sides consumed on both sides: split as usual */
+		if ( inner >= 0 ) {
+			return FilterBrushIntoTree_r( std::move( b ), node->children[ inner ] );
+		}
+	}
+
 	/* split it by the node plane */
 	auto [front, back] = SplitBrush( b, node->planenum );
 
@@ -704,7 +718,10 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 			break;
 	}
 
-	if ( midwinding.empty() || WindingIsTiny( midwinding ) ) { // the brush isn't really split
+	/* the brush is known to reach at least 0.1 past the plane on BOTH sides here. A small section (WindingIsTiny:
+	   fewer than three edges longer than 0.2) does not make it unsplit: a 3/16 rod lying across the plane was sent
+	   whole to the side it reaches furthest into, and its part on the other side kept no brush */
+	if ( midwinding.empty() ) { // the brush isn't really split
 		if ( BrushMostlyOnSide( brush, plane ) == eSideBack ) {
 			return { {}, brush };
 		}
@@ -787,7 +804,10 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 
 	for ( int i = 0; i < 2; ++i )
 	{
-		if ( BrushVolume( b[i] ) < 1 ) {
+		/* A split half is already known to reach PLANESIDE_EPSILON past the plane, to have a non-tiny midwinding and
+		   bounded windings; discarding it for being smaller than a fixed volume loses real material from thin walls:
+		   its leaf then lists no brush (no collision) and may stay non-opaque. Only a non-positive volume is noise. */
+		if ( BrushVolume( b[i] ) <= g_microVolume ) {
 			b[i].sides.clear();
 			//			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "tiny volume after clip\n" );
 		}

@@ -1,0 +1,18 @@
+{
+  "cases": {
+    "S08.band.00625": {
+      "failing": "leak verdict: sealed, the source leaks",
+      "mechanism": "on_epsilon_band",
+      "observed_on": {
+        "argv": "-bsp -game quake3 -threads 2 -meta",
+        "build": "auto-pigeon/q3map2 release 2.5.17n-ap.3026 linux-amd64 bin/q3map2 (sha256 2cd462a0a7cbdd3094b6a1755546a7e042c875e1a413096eb88efe9e430f2fb1), GCC 14 on Ubuntu 24.04",
+        "observed": "2026-10-24",
+        "reader": "ci/auto-pigeon/regress.py + ci/auto-pigeon/ibsp.py",
+        "source": "auto-pigeon/q3map2 main 7e109335 (upstream-base/82161339 + P1 + P2 + M4 + M3)"
+      },
+      "owner": "not repaired (NEW_340A): inside the ON_EPSILON precision band every stage of the compiler shares; on_epsilon_band: the slot's faces lie 0.0625 apart, inside ON_EPSILON (0.1); BuildFaceTree_r consumes the second as ON the first's plane, so no leaf lies between them"
+    }
+  },
+  "comment": "Cases expected to FAIL on the current main, each with its owner and the identity it was observed on. ci/auto-pigeon/regress.py reports them as known_failure, never as a pass, and fails the run if one starts passing (unexpected_pass) until this record is changed on purpose, in the commit that repairs it.",
+  "schema": "auto-pigeon-q3map2-known-failures/1"
+}

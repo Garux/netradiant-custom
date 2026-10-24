@@ -113,6 +113,9 @@ void RunThreadsOnIndividual( int workcnt, bool showpacifier, void ( *func )( int
 
 #include <thread>
 #include <mutex>
+#if defined( __APPLE__ )
+#include <pthread.h>
+#endif
 
 std::mutex crit;
 static bool enter;
@@ -159,6 +162,29 @@ void RunThreadsOn( void ( *func )( int ) ){
 	{
 		threaded = true;
 
+#if defined( __APPLE__ )
+		/* std::thread cannot be given a stack size, and a macOS secondary thread gets 512 KiB: -light needs more
+		   than 1 MiB and dies with SIGBUS. Run the workers as pthreads with the 8 MiB a Linux thread gets by default
+		   (a Windows thread gets the 4 MiB the Makefile links q3map2.exe with). */
+		struct Job { void ( *func )( int ); int index; } jobs[MAX_THREADS];
+		pthread_t threads[MAX_THREADS];
+		pthread_attr_t attr;
+		if ( pthread_attr_init( &attr ) != 0 || pthread_attr_setstacksize( &attr, 8 << 20 ) != 0 ) {
+			Error( "could not give the worker threads an 8 MiB stack" );
+		}
+		for ( int i = 0; i < numthreads; ++i ){
+			jobs[i] = { func, i };
+			if ( pthread_create( &threads[i], &attr, []( void *job ) -> void * {
+				static_cast<Job *>( job )->func( static_cast<Job *>( job )->index );
+				return nullptr;
+			}, &jobs[i] ) != 0 ) {
+				Error( "pthread_create failed" );
+			}
+		}
+		for ( int i = 0; i < numthreads; ++i )
+			pthread_join( threads[i], nullptr );
+		pthread_attr_destroy( &attr );
+#else
 		std::thread threads[MAX_THREADS];
 
 		for ( int i = 0; i < numthreads; ++i )
@@ -166,6 +192,7 @@ void RunThreadsOn( void ( *func )( int ) ){
 
 		for ( int i = 0; i < numthreads; ++i )
 			threads[i].join();
+#endif
 
 		threaded = false;
 	}

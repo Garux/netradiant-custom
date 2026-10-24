@@ -1,0 +1,305 @@
+# The Auto-Pigeon q3map2 fork's ONE build, test, acceptance and release path.
+#
+#   push / pull_request   scope.py decides: `docs` runs the policy checks only; `source` (compiler, build or test
+#                         files changed) adds the Linux build and every regression case, plain and under ASan + UBSan
+#   push of a tag         auto-pigeon-q3map2-v<version>, the tag plan.py computes for that commit: every declared target
+#                         is built, tested and accepted natively, the source archive rebuilt from itself, and ONE
+#                         prerelease published after all of it passed
+#   workflow_dispatch     all_targets=true runs the whole release matrix without publishing
+#
+# Required targets: linux-amd64, windows-amd64, macos-amd64, macos-arm64. linux-arm64 is optional (candidate: true): a
+# failure there never blocks a release and is named in it. Only the publish job can write; it never compiles.
+# All logic is in ci/auto-pigeon/*.py so every step runs the same way on a workstation.
+
+name: Auto-Pigeon release
+
+on:
+  push:
+    branches: [main]
+    tags: ["auto-pigeon-q3map2-v*"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      all_targets:
+        description: Build, test and accept every declared target natively (never publishes)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  # a newer push to the same branch supersedes an older run; a release tag's run is never cancelled
+  group: auto-pigeon-release-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+env:
+  PYTHONUNBUFFERED: "1"
+  HOMEBREW_NO_AUTO_UPDATE: "1"
+  HOMEBREW_NO_INSTALL_CLEANUP: "1"
+
+jobs:
+  plan:
+    name: Policy checks and plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      commit: ${{ steps.plan.outputs.commit }}
+      version: ${{ steps.plan.outputs.version }}
+      tag: ${{ steps.plan.outputs.tag }}
+      publish: ${{ steps.plan.outputs.publish }}
+      scope: ${{ steps.scope.outputs.scope }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # the version is the commit count; the base is a tag
+          fetch-tags: true
+          persist-credentials: false
+      - name: Decide the scope
+        id: scope
+        run: python3 ci/auto-pigeon/scope.py --event "${{ github.event_name }}" --ref "$GITHUB_REF" --before "${{ github.event.before }}" --base "${{ github.event.pull_request.base.sha }}" --all-targets "${{ inputs.all_targets || 'false' }}"
+      - name: Self-test the release scripts
+        run: python3 ci/auto-pigeon/selftest.py
+      - name: Freeze the plan
+        id: plan
+        run: python3 ci/auto-pigeon/plan.py --sha "$(git rev-parse HEAD)" --ref "$GITHUB_REF" --out plan.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: plan
+          path: plan.json
+          if-no-files-found: error
+
+  linux-quick:
+    name: Linux build and regressions
+    needs: plan
+    if: needs.plan.outputs.scope == 'source'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.plan.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: plan
+          path: ${{ runner.temp }}/plan
+      - name: Install the build dependencies
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends gcc-14 g++-14 make pkg-config libglib2.0-dev libxml2-dev libpng-dev libjpeg-dev libassimp-dev zlib1g-dev patchelf
+      - name: Build and run every regression case
+        run: python3 ci/auto-pigeon/build.py --platform linux-amd64 --plan "${{ runner.temp }}/plan/plan.json" --work "${{ runner.temp }}/build work" --report "${{ runner.temp }}/build-report.json" --jobs 4
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: quick-linux-amd64
+          path: |
+            ${{ runner.temp }}/build-report.json
+            ${{ runner.temp }}/build work/regress-report.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  sanitizers:
+    name: AddressSanitizer + UBSan regressions (linux-amd64)
+    needs: plan
+    if: needs.plan.outputs.scope == 'source' || needs.plan.outputs.scope == 'release'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.plan.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: plan
+          path: ${{ runner.temp }}/plan
+      - name: Install the build dependencies
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends gcc-14 g++-14 make pkg-config libglib2.0-dev libxml2-dev libpng-dev libjpeg-dev libassimp-dev zlib1g-dev
+      - name: Build with sanitizers and run every regression case
+        run: python3 ci/auto-pigeon/build.py --platform linux-amd64 --sanitize --plan "${{ runner.temp }}/plan/plan.json" --work "${{ runner.temp }}/sanitizer work" --report "${{ runner.temp }}/sanitizer-report.json" --jobs 4
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sanitizer-report
+          path: |
+            ${{ runner.temp }}/sanitizer-report.json
+            ${{ runner.temp }}/sanitizer work/regress-report.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  build:
+    name: Build and test (${{ matrix.platform }})
+    needs: plan
+    if: needs.plan.outputs.scope == 'release'
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    # an optional target that fails stays unpublished and does not stop the required ones
+    continue-on-error: ${{ matrix.candidate }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { platform: linux-amd64, runner: ubuntu-24.04, candidate: false }
+          - { platform: windows-amd64, runner: windows-2022, candidate: false }
+          - { platform: macos-amd64, runner: macos-15-intel, candidate: false }
+          - { platform: macos-arm64, runner: macos-15, candidate: false }
+          - { platform: linux-arm64, runner: ubuntu-24.04-arm, candidate: true }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.plan.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: plan
+          path: ${{ runner.temp }}/plan
+      - name: Install the build dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends gcc-14 g++-14 make pkg-config libglib2.0-dev libxml2-dev libpng-dev libjpeg-dev libassimp-dev zlib1g-dev patchelf
+      - name: Install the build dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install glib libpng jpeg-turbo assimp pkgconf
+      - name: Install the build dependencies (Windows, MSYS2 MINGW64)
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: MINGW64
+          update: false
+          cache: true # keyed by the package list
+          install: git make mingw-w64-x86_64-gcc mingw-w64-x86_64-pkgconf mingw-w64-x86_64-python mingw-w64-x86_64-glib2 mingw-w64-x86_64-libxml2 mingw-w64-x86_64-libpng mingw-w64-x86_64-libjpeg-turbo mingw-w64-x86_64-zlib mingw-w64-x86_64-assimp
+      - name: Build, test and package (Windows)
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: |
+          python ci/auto-pigeon/build.py --platform ${{ matrix.platform }} --plan "$(cygpath -w '${{ runner.temp }}')\\plan\\plan.json" --work "$(cygpath -w '${{ runner.temp }}')\\build work" --report "$(cygpath -w '${{ runner.temp }}')\\build-report.json" --jobs 4
+          python ci/auto-pigeon/package.py --platform ${{ matrix.platform }} --plan "$(cygpath -w '${{ runner.temp }}')\\plan\\plan.json" --build-report "$(cygpath -w '${{ runner.temp }}')\\build-report.json" --out "$(cygpath -w '${{ runner.temp }}')\\dist" --dll-dir "$(cygpath -w /mingw64/bin)"
+      - name: Build, test and package (Linux, macOS)
+        if: runner.os != 'Windows'
+        run: |
+          python3 ci/auto-pigeon/build.py --platform ${{ matrix.platform }} --plan "${{ runner.temp }}/plan/plan.json" --work "${{ runner.temp }}/build work" --report "${{ runner.temp }}/build-report.json" --jobs 4
+          python3 ci/auto-pigeon/package.py --platform ${{ matrix.platform }} --plan "${{ runner.temp }}/plan/plan.json" --build-report "${{ runner.temp }}/build-report.json" --out "${{ runner.temp }}/dist"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: candidate-${{ matrix.platform }}
+          path: |
+            ${{ runner.temp }}/dist/*.zip
+            ${{ runner.temp }}/dist/*.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: failed-build-${{ matrix.platform }}
+          path: |
+            ${{ runner.temp }}/build-report.json
+            ${{ runner.temp }}/build work/regress-report.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  accept:
+    name: Accept the extracted archive (${{ matrix.platform }})
+    needs: [plan, build]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    continue-on-error: ${{ matrix.candidate }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { platform: linux-amd64, runner: ubuntu-24.04, candidate: false, python: python3 }
+          - { platform: windows-amd64, runner: windows-2022, candidate: false, python: python }
+          - { platform: macos-amd64, runner: macos-15-intel, candidate: false, python: python3 }
+          - { platform: macos-arm64, runner: macos-15, candidate: false, python: python3 }
+          - { platform: linux-arm64, runner: ubuntu-24.04-arm, candidate: true, python: python3 }
+    steps:
+      # a fresh runner: no build tree, no dependency installed; only the scripts and the regression cases
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.plan.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: plan
+          path: ${{ runner.temp }}/plan
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: candidate-${{ matrix.platform }}
+          path: ${{ runner.temp }}/candidate
+      - name: Accept
+        run: ${{ matrix.python }} ci/auto-pigeon/accept.py --platform ${{ matrix.platform }} --archive "${{ runner.temp }}/candidate/auto-pigeon-q3map2-${{ needs.plan.outputs.version }}-${{ matrix.platform }}.zip" --package-json "${{ runner.temp }}/candidate/auto-pigeon-q3map2-${{ needs.plan.outputs.version }}-${{ matrix.platform }}.package.json" --plan "${{ runner.temp }}/plan/plan.json" --work "${{ runner.temp }}/acceptance work" --report "${{ runner.temp }}/report/acceptance-${{ matrix.platform }}.json"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: acceptance-${{ matrix.platform }}
+          path: |
+            ${{ runner.temp }}/report/acceptance-${{ matrix.platform }}.json
+            ${{ runner.temp }}/acceptance work/regress-report.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  source:
+    name: Source archive, rebuilt and tested from itself
+    needs: plan
+    if: needs.plan.outputs.scope == 'release'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.plan.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: plan
+          path: ${{ runner.temp }}/plan
+      - name: Write the source archive
+        run: python3 ci/auto-pigeon/source_archive.py --plan "${{ runner.temp }}/plan/plan.json" --out "${{ runner.temp }}/dist"
+      - name: Install the build dependencies
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends gcc-14 g++-14 make pkg-config libglib2.0-dev libxml2-dev libpng-dev libjpeg-dev libassimp-dev zlib1g-dev
+      - name: Rebuild and test from the unpacked archive alone
+        run: |
+          mkdir "$RUNNER_TEMP/from source" && tar -xzf "$RUNNER_TEMP"/dist/*-source.tar.gz -C "$RUNNER_TEMP/from source"
+          cd "$RUNNER_TEMP"/from\ source/*/
+          python3 ci/auto-pigeon/build.py --platform linux-amd64 --plan ci/auto-pigeon/release-plan.json --work "$RUNNER_TEMP/source build" --report "$RUNNER_TEMP/source-build-report.json" --jobs 4
+          python3 ci/auto-pigeon/source_archive.py --mark-rebuilt "$RUNNER_TEMP/source-build-report.json" --plan ci/auto-pigeon/release-plan.json --out "$RUNNER_TEMP/dist"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: source
+          path: |
+            ${{ runner.temp }}/dist/*-source.tar.gz
+            ${{ runner.temp }}/dist/*.source.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+  publish:
+    name: Publish the prerelease
+    # runs only when every job above succeeded (a failed optional target does not fail its job), for the planned tag
+    needs: [plan, build, accept, source, sanitizers]
+    if: needs.plan.outputs.publish == 'true' && startsWith(github.ref, 'refs/tags/auto-pigeon-q3map2-v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.plan.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: ${{ runner.temp }}/artifacts
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 ci/auto-pigeon/publish.py --plan "${{ runner.temp }}/artifacts/plan/plan.json" --artifacts "${{ runner.temp }}/artifacts" --repo "${{ github.repository }}" --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --out "${{ runner.temp }}/release"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-record
+          path: |
+            ${{ runner.temp }}/release/*.json
+            ${{ runner.temp }}/release/*.md
+            ${{ runner.temp }}/release/SHA256SUMS
+          if-no-files-found: warn

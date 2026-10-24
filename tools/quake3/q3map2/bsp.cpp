@@ -748,6 +748,10 @@ int BSPMain( Args& args ){
 				Sys_Printf( "Snapping brush bevel planes to %d units\n", bevelSnap );
 			}
 		}
+		while ( args.takeArg( "-microvolume" ) ) {
+			g_microVolume = atof( args.takeNext() );
+			Sys_Printf( "Discarding split brush fragments of volume <= %f\n", g_microVolume );
+		}
 		while ( args.takeArg( "-nobrushsnap" ) ) {
 			Sys_Printf( "Brush vertices snapping disabled\n" );
 			g_brushSnap = false;

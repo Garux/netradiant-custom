@@ -1,0 +1,9315 @@
+{
+ "cases": [
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.0885 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.0859), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G01.m4.inset",
+   "map": "G01_G05_near_parallel/maps/g01_m4_inset.map",
+   "mechanism": "M4",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      128.0,
+      100.0,
+      64
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      128.0,
+      61.483050173072385,
+      64
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      64.0,
+      59.60016551429065,
+      64
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "M4: an inset face 0.0885 behind a near-coplanar wall, its corners snapped further behind"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The rod is 0.1875 x 0.1875 in section and runs from y = -4 to y = 8 across the block split y = 0. Its section by y = 0 has only two edges longer than 0.2, so upstream SplitBrush called the brush 'not really split' and sent it whole to the side it reaches furthest into: the 4 units on -y kept no brush in their leaves (no collision, and contents read as air). The whole rod must be solid; a 1/4 rod (four long edges) was always split and is the control.",
+   "id": "G02.m3.rod_along",
+   "map": "G02_G07_small_sections/maps/g02_rod_along_01875.map",
+   "mechanism": "M3",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.09375,
+      -2,
+      8.09375
+     ],
+     "why": "the rod's -y part, 2 units from the split"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.09375,
+      -3.5,
+      8.09375
+     ],
+     "why": "the rod's -y part near its end"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.09375,
+      4,
+      8.09375
+     ],
+     "why": "the rod's +y part, 4 units from the split"
+    },
+    {
+     "kind": "open",
+     "point": [
+      64.09375,
+      -2,
+      12.09375
+     ],
+     "why": "air 4 above the rod's -y part"
+    },
+    {
+     "kind": "open",
+     "point": [
+      64.09375,
+      -6,
+      8.09375
+     ],
+     "why": "air past the rod's -y end"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "M3: a 3/16 rod lying along y across the y = 0 split"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The rod is 0.25 x 0.25 in section and runs from y = -4 to y = 8 across the block split y = 0. Its section by y = 0 has only two edges longer than 0.2, so upstream SplitBrush called the brush 'not really split' and sent it whole to the side it reaches furthest into: the 4 units on -y kept no brush in their leaves (no collision, and contents read as air). The whole rod must be solid; a 1/4 rod (four long edges) was always split and is the control.",
+   "id": "G02.rod_along.025",
+   "map": "G02_G07_small_sections/maps/g02_rod_along_025.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      -2,
+      8.125
+     ],
+     "why": "the rod's -y part, 2 units from the split"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      -3.5,
+      8.125
+     ],
+     "why": "the rod's -y part near its end"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      4,
+      8.125
+     ],
+     "why": "the rod's +y part, 4 units from the split"
+    },
+    {
+     "kind": "open",
+     "point": [
+      64.125,
+      -2,
+      12.125
+     ],
+     "why": "air 4 above the rod's -y part"
+    },
+    {
+     "kind": "open",
+     "point": [
+      64.125,
+      -6,
+      8.125
+     ],
+     "why": "air past the rod's -y end"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "control: the same rod 1/4 thick (its section is not small)"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.0885 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.0859), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.moved",
+   "map": "G01_G05_near_parallel/maps/g05_m4_moved.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      74.7,
+      40.33447508653619,
+      56.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      74.7,
+      40.33447508653619,
+      72.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      74.7,
+      40.33447508653619,
+      88.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      90.7,
+      41.03305017307238,
+      56.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      90.7,
+      41.03305017307238,
+      72.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      90.7,
+      41.03305017307238,
+      88.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      106.7,
+      41.73162525960858,
+      56.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      106.7,
+      41.73162525960858,
+      72.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      106.7,
+      41.73162525960858,
+      88.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      90.7,
+      78.55,
+      72.2
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      90.7,
+      40.03305017307238,
+      72.2
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      26.700000000000003,
+      38.15016551429065,
+      72.2
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "G01 moved by (-37.3, -21.45, 8.2)"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.0885 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.0547), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.phase0547",
+   "map": "G01_G05_near_parallel/maps/g05_m4_phase0547.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.753275086536185,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.753275086536185,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.753275086536185,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.45185017307237,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.45185017307237,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.45185017307237,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.15042525960857,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.15042525960857,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.15042525960857,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      128.0,
+      100.0,
+      64
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      128.0,
+      61.45185017307237,
+      64
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      64.0,
+      59.568965514290646,
+      64
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the inset at snap phase 0.0547 (the snap leaves it within 0.1)"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.0885 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.0625), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.phase0625",
+   "map": "G01_G05_near_parallel/maps/g05_m4_phase0625.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.761075086536195,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.761075086536195,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.761075086536195,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.45965017307238,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.45965017307238,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.45965017307238,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.15822525960857,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.15822525960857,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.15822525960857,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      128.0,
+      100.0,
+      64
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      128.0,
+      61.45965017307238,
+      64
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      64.0,
+      59.576765514290656,
+      64
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the inset at snap phase 0.0625 (first phase the snap carries past 0.1)"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.0885 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.1094), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.phase1094",
+   "map": "G01_G05_near_parallel/maps/g05_m4_phase1094.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.80797508653619,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.80797508653619,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.80797508653619,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.50655017307238,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.50655017307238,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.50655017307238,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.20512525960857,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.20512525960857,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.20512525960857,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      128.0,
+      100.0,
+      64
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      128.0,
+      61.50655017307238,
+      64
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      64.0,
+      59.62366551429065,
+      64
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the inset at snap phase 0.1094 (last such phase)"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.0885 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.1172), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.phase1172",
+   "map": "G01_G05_near_parallel/maps/g05_m4_phase1172.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.81577508653619,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.81577508653619,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.81577508653619,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.51435017307238,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.51435017307238,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.51435017307238,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.21292525960857,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.21292525960857,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.21292525960857,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      128.0,
+      100.0,
+      64
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      128.0,
+      61.51435017307238,
+      64
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      64.0,
+      59.63146551429065,
+      64
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the inset at snap phase 0.1172 (the snap leaves it within 0.1)"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face -0.0885 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.0859), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.proud0885",
+   "map": "G01_G05_near_parallel/maps/g05_m4_proud0885.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      128.0,
+      100.0,
+      64
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      128.0,
+      61.483050173072385,
+      64
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      64.0,
+      59.777334139564566,
+      64
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the inset 0.0885 in FRONT of the wall's plane"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.05 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.0859), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.recess0050",
+   "map": "G01_G05_near_parallel/maps/g05_m4_recess0050.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      128.0,
+      100.0,
+      64
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      128.0,
+      61.483050173072385,
+      64
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      64.0,
+      59.63870219266945,
+      64
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the inset 0.05 behind the wall's plane"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.095 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.0859), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.recess0095",
+   "map": "G01_G05_near_parallel/maps/g05_m4_recess0095.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      128.0,
+      100.0,
+      64
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      128.0,
+      61.483050173072385,
+      64
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      64.0,
+      59.593659321837094,
+      64
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the inset 0.095 behind the wall's plane"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.11 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.0859), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.recess0110",
+   "map": "G01_G05_near_parallel/maps/g05_m4_recess0110.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      112.0,
+      61.78447508653619,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      128.0,
+      62.483050173072385,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      144.0,
+      63.18162525960857,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      128.0,
+      100.0,
+      64
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      128.0,
+      61.483050173072385,
+      64
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.043619387365336,
+      -0.9990482215818578,
+      0
+     ],
+     "point": [
+      64.0,
+      59.578645031559645,
+      64
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the inset 0.11 behind: past ON_EPSILON, a plane of its own"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.0885 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.0859), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.turn15",
+   "map": "G01_G05_near_parallel/maps/g05_m4_turn15.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      120.36554008474903,
+      58.67293940956421,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      120.36554008474903,
+      58.67293940956421,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      120.36554008474903,
+      58.67293940956421,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      135.63954876854442,
+      63.488815848891974,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      135.63954876854442,
+      63.488815848891974,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      135.63954876854442,
+      63.488815848891974,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      150.9135574523398,
+      68.30469228821973,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      150.9135574523398,
+      68.30469228821973,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      150.9135574523398,
+      68.30469228821973,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      125.92944763917984,
+      99.72740661031254,
+      64
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      135.89836781364693,
+      62.52289002260291,
+      64
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      74.56644134057065,
+      44.139744216200825,
+      64
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "G01 turned 15 degrees about z"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.0885 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.0859), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.turn15.moved",
+   "map": "G01_G05_near_parallel/maps/g05_m4_turn15_moved.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      83.06554008474903,
+      37.222939409564205,
+      56.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      83.06554008474903,
+      37.222939409564205,
+      72.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      83.06554008474903,
+      37.222939409564205,
+      88.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      98.33954876854442,
+      42.03881584889197,
+      56.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      98.33954876854442,
+      42.03881584889197,
+      72.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      98.33954876854442,
+      42.03881584889197,
+      88.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      113.6135574523398,
+      46.854692288219724,
+      56.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      113.6135574523398,
+      46.854692288219724,
+      72.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      113.6135574523398,
+      46.854692288219724,
+      88.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      88.62944763917984,
+      78.27740661031254,
+      72.2
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      98.59836781364693,
+      41.072890022602905,
+      72.2
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.3007057995042731,
+      -0.9537169507482269,
+      0
+     ],
+     "point": [
+      37.26644134057065,
+      22.689744216200825,
+      72.2
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "G01 turned 15 degrees and moved"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.0885 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.0859), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.turn45",
+   "map": "G01_G05_near_parallel/maps/g05_m4_turn45.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      138.05189406443657,
+      59.3206889375939,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      138.05189406443657,
+      59.3206889375939,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      138.05189406443657,
+      59.3206889375939,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      148.8716353825636,
+      71.12836461743639,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      148.8716353825636,
+      71.12836461743639,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      148.8716353825636,
+      71.12836461743639,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      159.69137670069065,
+      82.93604029727888,
+      48
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      159.69137670069065,
+      82.93604029727888,
+      64
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      159.69137670069065,
+      82.93604029727888,
+      80
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      122.34314575050762,
+      97.65685424949238,
+      64
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      149.57874216375015,
+      70.42125783624985,
+      64
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      105.6553086782278,
+      23.835023329894124,
+      64
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "G01 turned 45 degrees about z"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Four wall pieces share one face plane, tilted 2.5 degrees from the y axis; an inset piece B between them has a parallel face 0.0885 behind that plane. When the visible-face tree splits on the wall's plane, B's face is within ON_EPSILON (0.1) of it and is consumed there: B's own plane never splits the leaves behind. B's drawn triangles are then filtered with their 1/8-snapped vertices; when the snap carries every vertex more than 0.1 behind the wall's plane (B's corner phase 0.0859), the triangles reach only the opaque leaf behind it, no visible leaf references the surface and it is not emitted. The face must be drawn at every phase, offset and orientation.",
+   "id": "G05.m4.turn45.moved",
+   "map": "G01_G05_near_parallel/maps/g05_m4_turn45_moved.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      100.75189406443657,
+      37.8706889375939,
+      56.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      100.75189406443657,
+      37.8706889375939,
+      72.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      100.75189406443657,
+      37.8706889375939,
+      88.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      111.5716353825636,
+      49.67836461743639,
+      56.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      111.5716353825636,
+      49.67836461743639,
+      72.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      111.5716353825636,
+      49.67836461743639,
+      88.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      122.39137670069066,
+      61.486040297278876,
+      56.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      122.39137670069066,
+      61.486040297278876,
+      72.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      122.39137670069066,
+      61.486040297278876,
+      88.2
+     ],
+     "why": "the inset's face, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      85.04314575050762,
+      76.20685424949238,
+      72.2
+     ],
+     "why": "inside the inset"
+    },
+    {
+     "kind": "open",
+     "point": [
+      112.27874216375015,
+      48.97125783624985,
+      72.2
+     ],
+     "why": "air 1 unit in front of the inset"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.737277336810124,
+      -0.6755902076156602,
+      0
+     ],
+     "point": [
+      68.3553086782278,
+      2.385023329894125,
+      72.2
+     ],
+     "why": "the west wall piece's face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "G01 turned 45 degrees and moved"
+  },
+  {
+   "aliases": [
+    "S02"
+   ],
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.25 wide through the +x wall, centred on y = 100 (no split plane through it). The map leaks. Upstream kept this one and closed the narrower ones (S02), whose portals have fewer than three edges longer than 0.2.",
+   "id": "G06.outer.025",
+   "map": "G06_openings/maps/g06_outer_025.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.25 slot to the void at y = 100, off every split"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Six 8-unit walls around 80 x 80 x 80 of air no entity can reach. The map is sealed, the walls solid and the room around them open. Nothing is asserted about the pocket's own air: it is unreachable, and Q3Map2 may fill it; a player-sized passage is the slit case, not this one.",
+   "id": "G06.pocket",
+   "map": "G06_openings/maps/g06_pocket.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      52,
+      0,
+      48
+     ],
+     "why": "the pocket's -x wall"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      144,
+      0,
+      48
+     ],
+     "why": "the block's outside face"
+    },
+    {
+     "kind": "open",
+     "point": [
+      152,
+      0,
+      48
+     ],
+     "why": "room air beside the block"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "an enclosed pocket: a hollow block sealed from the room"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Two blocks 0.5 apart inside the sealed room; the slit is open to the room above. Its air must stay open and both faces in it drawn: no closure of a reachable slit, no fill.",
+   "id": "G06.slit.05",
+   "map": "G06_openings/maps/g06_slit_05.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      96.25,
+      0,
+      32
+     ],
+     "why": "air in the slit"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64,
+      0,
+      32
+     ],
+     "why": "the west block"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      128.5,
+      0,
+      32
+     ],
+     "why": "the east block"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      96,
+      0,
+      32
+     ],
+     "why": "the west block's face in the slit"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -1,
+      0,
+      0
+     ],
+     "point": [
+      96.5,
+      0,
+      32
+     ],
+     "why": "the east block's face in the slit"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a reachable slit 0.5 wide between two blocks inside the room"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Two blocks 1 apart inside the sealed room; the slit is open to the room above. Its air must stay open and both faces in it drawn: no closure of a reachable slit, no fill.",
+   "id": "G06.slit.1",
+   "map": "G06_openings/maps/g06_slit_1.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      96.5,
+      0,
+      32
+     ],
+     "why": "air in the slit"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64,
+      0,
+      32
+     ],
+     "why": "the west block"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      129.0,
+      0,
+      32
+     ],
+     "why": "the east block"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      96,
+      0,
+      32
+     ],
+     "why": "the west block's face in the slit"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -1,
+      0,
+      0
+     ],
+     "point": [
+      97.0,
+      0,
+      32
+     ],
+     "why": "the east block's face in the slit"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a reachable slit 1 wide between two blocks inside the room"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A cube of 0.5 centred on the two block split planes x = 0 and y = 0 is cut into four quarters of positive volume. After the first split each half's section by the second plane is 0.25 x 0.5; below 0.2 on a side, upstream sent each half whole to one side of the second plane and two quarters kept no brush. Every quarter must be solid.",
+   "id": "G07.cube.05",
+   "map": "G02_G07_small_sections/maps/g07_cube_05.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -0.125,
+      -0.125,
+      8.25
+     ],
+     "why": "the cube's -x-y quarter"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -0.125,
+      0.125,
+      8.25
+     ],
+     "why": "the cube's -x+y quarter"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      0.125,
+      -0.125,
+      8.25
+     ],
+     "why": "the cube's +x-y quarter"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      0.125,
+      0.125,
+      8.25
+     ],
+     "why": "the cube's +x+y quarter"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0,
+      0,
+      9.5
+     ],
+     "why": "air 1 above the cube"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "control: a 1/2 cube across x = 0 and y = 0"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A cube of 0.25 centred on the two block split planes x = 0 and y = 0 is cut into four quarters of positive volume. After the first split each half's section by the second plane is 0.125 x 0.25; below 0.2 on a side, upstream sent each half whole to one side of the second plane and two quarters kept no brush. Every quarter must be solid.",
+   "id": "G07.m3.cube.025",
+   "map": "G02_G07_small_sections/maps/g07_cube_025.map",
+   "mechanism": "M3",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -0.0625,
+      -0.0625,
+      8.125
+     ],
+     "why": "the cube's -x-y quarter"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -0.0625,
+      0.0625,
+      8.125
+     ],
+     "why": "the cube's -x+y quarter"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      0.0625,
+      -0.0625,
+      8.125
+     ],
+     "why": "the cube's +x-y quarter"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      0.0625,
+      0.0625,
+      8.125
+     ],
+     "why": "the cube's +x+y quarter"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0,
+      0,
+      9.25
+     ],
+     "why": "air 1 above the cube"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "M3: a 1/4 cube across x = 0 and y = 0 (four fragments)"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Six 16-unit walls around 512 x 512 x 256 of air with a player start and a light. Every compiler must seal it, keep its air open, its walls solid and its six inner faces drawn. It is the positive control the other cases are variations of.",
+   "id": "R01.room",
+   "map": "R01_sealed_room/maps/r01_room.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0,
+      0,
+      128
+     ],
+     "why": "the middle of the room, on both block split planes"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "sealed room baseline"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The rod is 0.25 x 0.25 x 24 = 1.5 cubic units. Across y = 0 (a block split plane) it is cut into two halves of 0.75 cubic units each; upstream SplitBrush discards a fragment below 1 cubic unit, so both halves vanish from the tree: the leaves list no brush, the rod has no collision and the player walks through it. The uncut control (one fragment of 1.5) keeps it.",
+   "id": "R02.rod.split",
+   "map": "R02_rod/maps/r02_rod_split.map",
+   "mechanism": "M1",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      0.0625,
+      12
+     ],
+     "why": "inside the rod, +y half"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      -0.0625,
+      12
+     ],
+     "why": "inside the rod, -y half"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      0.0625,
+      1
+     ],
+     "why": "inside the rod near its foot"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      -0.0625,
+      23
+     ],
+     "why": "inside the rod near its top"
+    },
+    {
+     "kind": "open",
+     "point": [
+      64.125,
+      0.0,
+      30
+     ],
+     "why": "air 6 units above the rod"
+    },
+    {
+     "kind": "open",
+     "point": [
+      66,
+      0.0,
+      12
+     ],
+     "why": "air 1.75 units beside the rod"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      64.25,
+      0.0,
+      12
+     ],
+     "why": "the rod's +x face"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "0.25 x 0.25 x 24 rod across the y = 0 split"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Control: the same rod wholly on +y of the y = 0 split is never cut, so no fragment is discarded and every compiler keeps it solid.",
+   "id": "R02.rod.uncut",
+   "map": "R02_rod/maps/r02_rod_uncut.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      0.3125,
+      12
+     ],
+     "why": "inside the rod, +y half"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      0.1875,
+      12
+     ],
+     "why": "inside the rod, -y half"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      0.3125,
+      1
+     ],
+     "why": "inside the rod near its foot"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      64.125,
+      0.1875,
+      23
+     ],
+     "why": "inside the rod near its top"
+    },
+    {
+     "kind": "open",
+     "point": [
+      64.125,
+      0.25,
+      30
+     ],
+     "why": "air 6 units above the rod"
+    },
+    {
+     "kind": "open",
+     "point": [
+      66,
+      0.25,
+      12
+     ],
+     "why": "air 1.75 units beside the rod"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      64.25,
+      0.25,
+      12
+     ],
+     "why": "the rod's +x face"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "the same rod moved 0.25 to +y, wholly on one side of y = 0"
+  },
+  {
+   "aliases": [
+    "G04"
+   ],
+   "expect": {
+    "leak": false
+   },
+   "explanation": "x = 0 is a block split plane, so the step's top face (z = 32, x from -64 to 0.05) crosses it. BuildFaceTree_r classifies the face as crossing when its points lie more than ON_EPSILON (0.1) on both sides, then clips it with CLIP_EPSILON*2 (0.2): a part between 0.1 and 0.2 wide is classified crossing yet clips to nothing, so the whole face goes to the back. The front subtree then has no plane at z = 32, one leaf straddles the step's strip x in [0, 0.05] and the air above it, the step's fragment makes that leaf opaque, and the room air above the strip is filled. At 0.148 this happens; at 0.25 the clip keeps a front part, at 0.05 the face is not crossing, and both controls stay correct on every build.",
+   "id": "R03.cross.005",
+   "map": "R03_crossing_face/maps/r03_cross_005.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.025,
+      0,
+      96
+     ],
+     "why": "air 64 above the strip of the step past x = 0"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.025,
+      0,
+      40
+     ],
+     "why": "air 8 above the strip of the step past x = 0"
+    },
+    {
+     "kind": "open",
+     "point": [
+      2,
+      0,
+      96
+     ],
+     "why": "air 2 units past the end of the step"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -32,
+      0,
+      16
+     ],
+     "why": "inside the step"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -32,
+      0,
+      32
+     ],
+     "why": "the step's top face"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      0.05,
+      0,
+      16
+     ],
+     "why": "the step's end face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "control: crossing by 0.05, inside ON_EPSILON"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "x = 0 is a block split plane, so the step's top face (z = 32, x from -64 to 0.148) crosses it. BuildFaceTree_r classifies the face as crossing when its points lie more than ON_EPSILON (0.1) on both sides, then clips it with CLIP_EPSILON*2 (0.2): a part between 0.1 and 0.2 wide is classified crossing yet clips to nothing, so the whole face goes to the back. The front subtree then has no plane at z = 32, one leaf straddles the step's strip x in [0, 0.148] and the air above it, the step's fragment makes that leaf opaque, and the room air above the strip is filled. At 0.148 this happens; at 0.25 the clip keeps a front part, at 0.05 the face is not crossing, and both controls stay correct on every build.",
+   "id": "R03.cross.0148",
+   "map": "R03_crossing_face/maps/r03_cross_0148.map",
+   "mechanism": "M2",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.074,
+      0,
+      96
+     ],
+     "why": "air 64 above the strip of the step past x = 0"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.074,
+      0,
+      40
+     ],
+     "why": "air 8 above the strip of the step past x = 0"
+    },
+    {
+     "kind": "open",
+     "point": [
+      2,
+      0,
+      96
+     ],
+     "why": "air 2 units past the end of the step"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -32,
+      0,
+      16
+     ],
+     "why": "inside the step"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -32,
+      0,
+      32
+     ],
+     "why": "the step's top face"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      0.148,
+      0,
+      16
+     ],
+     "why": "the step's end face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a step whose top face crosses x = 0 by 0.148: between ON_EPSILON and CLIP_EPSILON*2"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "x = 0 is a block split plane, so the step's top face (z = 32, x from -64 to 0.25) crosses it. BuildFaceTree_r classifies the face as crossing when its points lie more than ON_EPSILON (0.1) on both sides, then clips it with CLIP_EPSILON*2 (0.2): a part between 0.1 and 0.2 wide is classified crossing yet clips to nothing, so the whole face goes to the back. The front subtree then has no plane at z = 32, one leaf straddles the step's strip x in [0, 0.25] and the air above it, the step's fragment makes that leaf opaque, and the room air above the strip is filled. At 0.148 this happens; at 0.25 the clip keeps a front part, at 0.05 the face is not crossing, and both controls stay correct on every build.",
+   "id": "R03.cross.025",
+   "map": "R03_crossing_face/maps/r03_cross_025.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.125,
+      0,
+      96
+     ],
+     "why": "air 64 above the strip of the step past x = 0"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.125,
+      0,
+      40
+     ],
+     "why": "air 8 above the strip of the step past x = 0"
+    },
+    {
+     "kind": "open",
+     "point": [
+      2,
+      0,
+      96
+     ],
+     "why": "air 2 units past the end of the step"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -32,
+      0,
+      16
+     ],
+     "why": "inside the step"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -32,
+      0,
+      32
+     ],
+     "why": "the step's top face"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      0.25,
+      0,
+      16
+     ],
+     "why": "the step's end face"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "control: crossing by 0.25, past CLIP_EPSILON*2"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "No source-independent reduction of M4 exists yet, so this is the shape that shows it: a 354-brush pipe whose one segment is pulled 3 units, from Auto-Pigeon's own pipe test generator (no corpus, no game data). The face of brush 101 at these points is nearly parallel to a neighbouring segment's face; BuildFaceTree_r treats it as ON that plane and discards it, and its drawn triangles filter into the neighbour's solid leaves (traced in Auto-Pigeon's compiler investigation). KNOWN FAILURE until NEW_340 repairs it: P1+P2 does not touch it, and the two attempted repairs (P3, P4) broke R05 and R06.",
+   "id": "R04.m4.p08_nearby",
+   "map": "R04_m4_near_parallel/maps/r04_p08_nearby.map",
+   "mechanism": "M4",
+   "probes": [
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -58.6043605,
+      54.64965349999999,
+      0
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -61.918280375,
+      54.504964724999994,
+      5.371289086187509
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -65.23220025,
+      54.360275949999995,
+      10.742578172375017
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -61.918280375,
+      54.504964724999994,
+      -5.371289086187509
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -65.23220025,
+      54.360275949999995,
+      -10.742578172375017
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -55.290440625,
+      54.79434227499999,
+      -5.371288999999997
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -51.97652075,
+      54.93903104999999,
+      -10.742577999999995
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -55.290440625,
+      54.79434227499999,
+      5.371288999999997
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.04361935984359557,
+      -0.9990482227834825,
+      0
+     ],
+     "point": [
+      -51.97652075,
+      54.93903104999999,
+      10.742577999999995
+     ],
+     "why": "the bore face of segment brush 101 (map line 919), seen from the bore"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "M4: a near-parallel face discarded as on another plane (pipe P08 with a nearby pull)"
+  },
+  {
+   "aliases": [
+    "G03"
+   ],
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A 590-brush pipe with a bend in all three axes. Upstream draws these 9 points; the rejected M4 repair P3 (never committed) lost them. Any later M4 repair must keep them drawn.",
+   "id": "R05.p3.p10_base",
+   "map": "R05_p10_shape/maps/r05_p10_base.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -763.0043579471607,
+      596.1198963907112,
+      -60.99261252911365
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -763.7384788379183,
+      605.9858021489921,
+      -69.83500112684828
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -764.4725997286757,
+      615.851707907273,
+      -78.67738972458291
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -771.2123884383853,
+      589.9579509637858,
+      -52.15022395175855
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -779.42041892961,
+      583.7960055368604,
+      -43.30783537440344
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -761.5575573656545,
+      585.9587890039622,
+      -52.15022389392387
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -760.1107567841483,
+      575.7976816172134,
+      -43.3078352587341
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -755.5090071466847,
+      602.5770434461048,
+      -69.8350011439239
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.2707268521928833,
+      0.6535924505957189,
+      0.7067700333390031
+     ],
+     "point": [
+      -748.0136563462086,
+      609.0341905014983,
+      -78.67738975873415
+     ],
+     "why": "a slanted bore face of the P10 pipe (map line 820)"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "control: the P10 pipe whose face P3 lost"
+  },
+  {
+   "aliases": [
+    "G04"
+   ],
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The P08 pipe is sealed: the rejected M4 repair P4 (never committed) reported a leak here, so the leak verdict is the first assertion. The 9 face points are the M2 defect of R03 on a real shape: a wall face piece crosses a node plane by between 0.1 and 0.2, upstream sends it wholly to the back, the leaf that then straddles the wall turns opaque, and the face is not drawn there.",
+   "id": "R06.p4.p08_base",
+   "map": "R06_p08_sealed/maps/r06_p08_base.map",
+   "mechanism": "M2",
+   "probes": [
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      6.521783000000001,
+      -77.09929250000002,
+      0
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      6.168146850000001,
+      -77.13023162500001,
+      7.246933306574652
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      5.8145107000000005,
+      -77.16117075000001,
+      14.493866613149304
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      6.168146850000001,
+      -77.13023162500001,
+      -7.246933306574652
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      5.8145107000000005,
+      -77.16117075000001,
+      -14.493866613149304
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      6.875419150000001,
+      -77.06835337500002,
+      -7.246933400000002
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      7.2290553000000015,
+      -77.03741425000003,
+      -14.493866800000005
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      6.875419150000001,
+      -77.06835337500002,
+      7.246933400000002
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.08715566128940848,
+      -0.9961947052184156,
+      0
+     ],
+     "point": [
+      7.2290553000000015,
+      -77.03741425000003,
+      14.493866800000005
+     ],
+     "why": "the wall face y ~ -77 of brush 179 (map line 1620), seen from the room"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "control: the sealed P08 pipe that P4 reported as leaking; its M2 face"
+  },
+  {
+   "aliases": [
+    "G06"
+   ],
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The +x wall is two brushes with a full-height slot of 1 units between them, open to the void. The map leaks; a compiler that reports it sealed has closed a real opening. P1+P2 must not change that: it keeps material, it does not invent it.",
+   "id": "R07.open.1",
+   "map": "R07_open_enclosure/maps/r07_open_1.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a one-unit slot through a wall to the void: a real opening"
+  },
+  {
+   "aliases": [
+    "G07"
+   ],
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Box A has a flat top at z = 32 for x in [-64, 0]; box B, from x = 0 to 64, has a top that starts at z = 32 at x = 0 and rises 0.2 degrees. The two top planes differ by 0.2 degrees and meet along x = 0: a near-parallel pair of planes that are NOT the same plane. Both tops must be drawn.",
+   "id": "R08.nearparallel",
+   "map": "R08_controls/maps/r08_nearparallel.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -32,
+      0,
+      32
+     ],
+     "why": "flat top of A"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -0.0034907,
+      0,
+      0.9999939
+     ],
+     "point": [
+      32,
+      0,
+      32.1117
+     ],
+     "why": "tilted top of B"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      32,
+      0,
+      16
+     ],
+     "why": "inside B"
+    },
+    {
+     "kind": "open",
+     "point": [
+      32,
+      0,
+      40
+     ],
+     "why": "air above B"
+    },
+    {
+     "kind": "open",
+     "point": [
+      -32,
+      0,
+      40
+     ],
+     "why": "air above A"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "near-parallel"
+  },
+  {
+   "aliases": [
+    "G06"
+   ],
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Box B overlaps box A by 16 units and rises above it. The overlap is solid, A's top is drawn up to B, B's side is drawn above A.",
+   "id": "R08.overlap",
+   "map": "R08_controls/maps/r08_overlap.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      0,
+      0,
+      16
+     ],
+     "why": "inside both boxes"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -32,
+      0,
+      32
+     ],
+     "why": "top of A"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      32,
+      0,
+      48
+     ],
+     "why": "top of B"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -1,
+      0,
+      0
+     ],
+     "point": [
+      -8,
+      0,
+      40
+     ],
+     "why": "B's -x face above A"
+    },
+    {
+     "kind": "open",
+     "point": [
+      -20,
+      0,
+      40
+     ],
+     "why": "air above A, beside B"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "overlap"
+  },
+  {
+   "aliases": [
+    "S01",
+    "S03"
+   ],
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The same slot 0.125 wide, centred on the block split y = 0. The source describes an opening, so the honest verdict is a leak, and the route must cross the slot. Upstream closed it: the forced block split consumed both slot faces lying within ON_EPSILON of it, and no leaf held the slot's air (the portal stage dropped nothing here). Repaired with S03/S05 (NEW_340A).",
+   "id": "R08.slit.0125",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      0.0725,
+      256
+     ],
+     "min": [
+      255,
+      -0.0725,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "R08_controls/maps/r08_slit_0125.map",
+   "mechanism": "block_split",
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot through a wall to the void, centred on a block split"
+  },
+  {
+   "aliases": [
+    "G06"
+   ],
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Two boxes share the face x = 0, which is also a block split plane. Both stay solid and both tops drawn.",
+   "id": "R08.touch",
+   "map": "R08_controls/maps/r08_touch.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -0.5,
+      0,
+      16
+     ],
+     "why": "box A at the shared face"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      0.5,
+      0,
+      16
+     ],
+     "why": "box B at the shared face"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -32,
+      0,
+      32
+     ],
+     "why": "top of A"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      32,
+      0,
+      32
+     ],
+     "why": "top of B"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0,
+      0,
+      40
+     ],
+     "why": "air above the seam"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "touch"
+  },
+  {
+   "aliases": [
+    "G07"
+   ],
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A brush whose two x faces coincide encloses no volume. The compiler must not crash, must not seal or fill the room with it, and leaves its place air.",
+   "id": "R08.zeroarea",
+   "map": "R08_controls/maps/r08_zeroarea.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      32,
+      0,
+      32
+     ],
+     "why": "where the zero-thickness brush is: it has no volume"
+    },
+    {
+     "kind": "open",
+     "point": [
+      40,
+      0,
+      32
+     ],
+     "why": "air beside it"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "zero-area"
+  },
+  {
+   "aliases": [
+    "G08"
+   ],
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A 3 x 3 patchDef2 bowed over the floor, every control point with its own st, and a box with a non-default classic texture shift and scale. The BSP must keep the patch's control points and st exactly as authored (the engine tessellates them) and draw the box with the texture coordinates Q3Map2's nearest-axial projection gives for that shift and scale.",
+   "id": "R09.patch",
+   "map": "R09_patch/maps/r09_patch.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "height": 3,
+     "index": 0,
+     "kind": "patch",
+     "points": [
+      [
+       -128,
+       -96,
+       16,
+       0.0,
+       0.0
+      ],
+      [
+       -128,
+       -32,
+       48,
+       0.0,
+       0.5
+      ],
+      [
+       -128,
+       32,
+       16,
+       0.0,
+       1.0
+      ],
+      [
+       -64,
+       -96,
+       32,
+       0.5,
+       0.0
+      ],
+      [
+       -64,
+       -32,
+       64,
+       0.5,
+       0.5
+      ],
+      [
+       -64,
+       32,
+       32,
+       0.5,
+       1.0
+      ],
+      [
+       0,
+       -96,
+       16,
+       1.0,
+       0.0
+      ],
+      [
+       0,
+       -32,
+       48,
+       1.0,
+       0.5
+      ],
+      [
+       0,
+       32,
+       16,
+       1.0,
+       1.0
+      ]
+     ],
+     "shader": "textures/apreg/patch",
+     "why": "the authored control points and st, unchanged",
+     "width": 3
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      96,
+      0,
+      64
+     ],
+     "shader": "textures/apreg/checker",
+     "st": [
+      3.125,
+      0.0625
+     ],
+     "why": "the box's top, classic projection"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      128,
+      8,
+      40
+     ],
+     "shader": "textures/apreg/checker",
+     "st": [
+      0.375,
+      -0.5625
+     ],
+     "why": "the box's +x side"
+    },
+    {
+     "kind": "open",
+     "point": [
+      -64,
+      -32,
+      64
+     ],
+     "why": "air above the patch"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "a patch with authored UV checker beside an ordinary brush"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "One room, written three ways. Classic and Valve 220 describe the same nearest-axial mapping (Valve 220 spells the axes out); brush primitives carry a texture matrix in each face's own basis (ComputeAxisBase). Each must compile to the same solids, with the water box CONTENTS_WATER and not solid, the clip box player clip and not drawn, the caulk face not drawn, and the box's texture coordinates exactly what its syntax describes.",
+   "id": "R10.brushprim",
+   "map": "R10_syntax/maps/r10_brushprim.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -96,
+      8,
+      64
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      0.375,
+      -2.875
+     ],
+     "why": "the textured box, brushprim"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -64,
+      8,
+      40
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      0.375,
+      -1.125
+     ],
+     "why": "the textured box, brushprim"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -100,
+      -32,
+      24
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      -3.0,
+      -0.625
+     ],
+     "why": "the textured box, brushprim"
+    },
+    {
+     "kind": "not_drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -96,
+      8,
+      0
+     ],
+     "why": "the box's caulk bottom: nodraw"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -96,
+      0,
+      32
+     ],
+     "why": "inside the textured box"
+    },
+    {
+     "has": [
+      "water"
+     ],
+     "kind": "contents",
+     "lacks": [
+      "solid"
+     ],
+     "point": [
+      96,
+      0,
+      24
+     ],
+     "why": "inside the water box"
+    },
+    {
+     "has": [
+      "playerclip"
+     ],
+     "kind": "contents",
+     "lacks": [
+      "solid"
+     ],
+     "point": [
+      176,
+      0,
+      48
+     ],
+     "why": "inside the clip box"
+    },
+    {
+     "kind": "not_drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      176,
+      0,
+      96
+     ],
+     "why": "the clip box's top: nodraw"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "brushprim brush syntax: geometry, texture mapping and material contents"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "One room, written three ways. Classic and Valve 220 describe the same nearest-axial mapping (Valve 220 spells the axes out); brush primitives carry a texture matrix in each face's own basis (ComputeAxisBase). Each must compile to the same solids, with the water box CONTENTS_WATER and not solid, the clip box player clip and not drawn, the caulk face not drawn, and the box's texture coordinates exactly what its syntax describes.",
+   "id": "R10.classic",
+   "map": "R10_syntax/maps/r10_classic.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -96,
+      8,
+      64
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      -2.875,
+      -0.125
+     ],
+     "why": "the textured box, classic"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -64,
+      8,
+      40
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      0.375,
+      -1.125
+     ],
+     "why": "the textured box, classic"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -100,
+      -32,
+      24
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      -3.0,
+      -0.625
+     ],
+     "why": "the textured box, classic"
+    },
+    {
+     "kind": "not_drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -96,
+      8,
+      0
+     ],
+     "why": "the box's caulk bottom: nodraw"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -96,
+      0,
+      32
+     ],
+     "why": "inside the textured box"
+    },
+    {
+     "has": [
+      "water"
+     ],
+     "kind": "contents",
+     "lacks": [
+      "solid"
+     ],
+     "point": [
+      96,
+      0,
+      24
+     ],
+     "why": "inside the water box"
+    },
+    {
+     "has": [
+      "playerclip"
+     ],
+     "kind": "contents",
+     "lacks": [
+      "solid"
+     ],
+     "point": [
+      176,
+      0,
+      48
+     ],
+     "why": "inside the clip box"
+    },
+    {
+     "kind": "not_drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      176,
+      0,
+      96
+     ],
+     "why": "the clip box's top: nodraw"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "classic brush syntax: geometry, texture mapping and material contents"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "One room, written three ways. Classic and Valve 220 describe the same nearest-axial mapping (Valve 220 spells the axes out); brush primitives carry a texture matrix in each face's own basis (ComputeAxisBase). Each must compile to the same solids, with the water box CONTENTS_WATER and not solid, the clip box player clip and not drawn, the caulk face not drawn, and the box's texture coordinates exactly what its syntax describes.",
+   "id": "R10.valve220",
+   "map": "R10_syntax/maps/r10_valve220.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -96,
+      8,
+      64
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      -2.875,
+      -0.125
+     ],
+     "why": "the textured box, valve220"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -64,
+      8,
+      40
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      0.375,
+      -1.125
+     ],
+     "why": "the textured box, valve220"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -100,
+      -32,
+      24
+     ],
+     "shader": "textures/apreg/wide",
+     "st": [
+      -3.0,
+      -0.625
+     ],
+     "why": "the textured box, valve220"
+    },
+    {
+     "kind": "not_drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -96,
+      8,
+      0
+     ],
+     "why": "the box's caulk bottom: nodraw"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -96,
+      0,
+      32
+     ],
+     "why": "inside the textured box"
+    },
+    {
+     "has": [
+      "water"
+     ],
+     "kind": "contents",
+     "lacks": [
+      "solid"
+     ],
+     "point": [
+      96,
+      0,
+      24
+     ],
+     "why": "inside the water box"
+    },
+    {
+     "has": [
+      "playerclip"
+     ],
+     "kind": "contents",
+     "lacks": [
+      "solid"
+     ],
+     "point": [
+      176,
+      0,
+      48
+     ],
+     "why": "inside the clip box"
+    },
+    {
+     "kind": "not_drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      176,
+      0,
+      96
+     ],
+     "why": "the clip box's top: nodraw"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "valve220 brush syntax: geometry, texture mapping and material contents"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A 630-brush pipe from the same generator. The visible-face tree consumes the bore face of brush 324 (map line 2878) as ON a neighbouring segment's face plane, every point of its VISIBLE part being within ON_EPSILON of it. SplitBrush then decides the same question from the brush's full, 1/8-snapped windings, finds a vertex 0.104 past that plane and splits for real: the 0.1-thick sliver goes to the bore side, where the tree has no plane bounding it (the face that would have been one was consumed), lands in one leaf that holds most of the bore and makes it opaque. Five bore points read solid and three bore faces lose their drawn surfaces.",
+   "id": "R11.m3.p10_nearby",
+   "map": "R11_p10_nearby_sliver/maps/r11_p10_nearby.map",
+   "mechanism": "M3",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      23.650396,
+      380.542256,
+      -20.127506
+     ],
+     "why": "declared bore air of the pipe"
+    },
+    {
+     "kind": "open",
+     "point": [
+      44.572602,
+      366.388518,
+      -15.415647
+     ],
+     "why": "declared bore air of the pipe"
+    },
+    {
+     "kind": "open",
+     "point": [
+      121.599811,
+      260.853132,
+      -42.55114
+     ],
+     "why": "declared bore air of the pipe"
+    },
+    {
+     "kind": "open",
+     "point": [
+      350.118658,
+      145.887534,
+      -43.12829
+     ],
+     "why": "declared bore air of the pipe"
+    },
+    {
+     "kind": "open",
+     "point": [
+      372.514138,
+      133.520196,
+      -43.12829
+     ],
+     "why": "declared bore air of the pipe"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.029495038440397386,
+      -0.022977254104576298,
+      0.9993007998101539
+     ],
+     "point": [
+      65.049,
+      314.197,
+      -83.871
+     ],
+     "why": "the floor face of brush 307 (map line 2739), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.029495038440397386,
+      -0.022977254104576298,
+      0.9993007998101539
+     ],
+     "point": [
+      52.921,
+      302.645,
+      -83.779
+     ],
+     "why": "the floor face of brush 307 (map line 2739), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.029495038440397386,
+      -0.022977254104576298,
+      0.9993007998101539
+     ],
+     "point": [
+      40.793,
+      291.092,
+      -83.687
+     ],
+     "why": "the floor face of brush 307 (map line 2739), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.029495038440397386,
+      -0.022977254104576298,
+      0.9993007998101539
+     ],
+     "point": [
+      73.23,
+      318.143,
+      -84.022
+     ],
+     "why": "the floor face of brush 307 (map line 2739), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.029495038440397386,
+      -0.022977254104576298,
+      0.9993007998101539
+     ],
+     "point": [
+      81.41,
+      322.089,
+      -84.173
+     ],
+     "why": "the floor face of brush 307 (map line 2739), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.029495038440397386,
+      -0.022977254104576298,
+      0.9993007998101539
+     ],
+     "point": [
+      68.996,
+      321.804,
+      -83.813
+     ],
+     "why": "the floor face of brush 307 (map line 2739), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.029495038440397386,
+      -0.022977254104576298,
+      0.9993007998101539
+     ],
+     "point": [
+      72.944,
+      329.411,
+      -83.755
+     ],
+     "why": "the floor face of brush 307 (map line 2739), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.02187455133668658,
+      -0.012985732267478742,
+      0.9996763850173195
+     ],
+     "point": [
+      53.773,
+      292.462,
+      -83.973
+     ],
+     "why": "the floor face of brush 308 (map line 2747), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.02187455133668658,
+      -0.012985732267478742,
+      0.9996763850173195
+     ],
+     "point": [
+      45.591,
+      288.517,
+      -83.845
+     ],
+     "why": "the floor face of brush 308 (map line 2747), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.02187455133668658,
+      -0.012985732267478742,
+      0.9996763850173195
+     ],
+     "point": [
+      37.41,
+      284.572,
+      -83.717
+     ],
+     "why": "the floor face of brush 308 (map line 2747), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.02187455133668658,
+      -0.012985732267478742,
+      0.9996763850173195
+     ],
+     "point": [
+      49.826,
+      284.855,
+      -83.985
+     ],
+     "why": "the floor face of brush 308 (map line 2747), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.02187455133668658,
+      -0.012985732267478742,
+      0.9996763850173195
+     ],
+     "point": [
+      45.88,
+      277.247,
+      -83.998
+     ],
+     "why": "the floor face of brush 308 (map line 2747), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.02187455133668658,
+      -0.012985732267478742,
+      0.9996763850173195
+     ],
+     "point": [
+      65.9,
+      304.016,
+      -84.088
+     ],
+     "why": "the floor face of brush 308 (map line 2747), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0.02187455133668658,
+      -0.012985732267478742,
+      0.9996763850173195
+     ],
+     "point": [
+      78.027,
+      315.569,
+      -84.203
+     ],
+     "why": "the floor face of brush 308 (map line 2747), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -0.43225600093241817,
+      -0.559085263099685,
+      0.7075156664291394
+     ],
+     "point": [
+      102.874,
+      357.645,
+      -50.327
+     ],
+     "why": "a slanted bore face (map line 2769), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -0.43225600093241817,
+      -0.559085263099685,
+      0.7075156664291394
+     ],
+     "point": [
+      93.583,
+      350.045,
+      -62.009
+     ],
+     "why": "a slanted bore face (map line 2769), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -0.43225600093241817,
+      -0.559085263099685,
+      0.7075156664291394
+     ],
+     "point": [
+      84.291,
+      342.445,
+      -73.691
+     ],
+     "why": "a slanted bore face (map line 2769), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -0.43225600093241817,
+      -0.559085263099685,
+      0.7075156664291394
+     ],
+     "point": [
+      109.652,
+      359.633,
+      -44.615
+     ],
+     "why": "a slanted bore face (map line 2769), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -0.43225600093241817,
+      -0.559085263099685,
+      0.7075156664291394
+     ],
+     "point": [
+      116.429,
+      361.622,
+      -38.903
+     ],
+     "why": "a slanted bore face (map line 2769), seen from the bore"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -0.43225600093241817,
+      -0.559085263099685,
+      0.7075156664291394
+     ],
+     "point": [
+      105.388,
+      363.256,
+      -44.357
+     ],
+     "why": "a slanted bore face (map line 2769), seen from the bore"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "M3: a split sliver the face tree has no plane for fills a pipe bore (P10, nearby pull)"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.125 wide through the +x wall, centred on y = 100 where no block split passes. The map leaks and the route must cross the slot. Before NEW_340A the slot's leaf existed but its portals to the room and to the void (0.125 x 256 rectangles) were dropped as 'tiny' (fewer than three edges longer than 0.2): the map read sealed below 0.25.",
+   "id": "S02.off.125",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.0725,
+      256
+     ],
+     "min": [
+      255,
+      99.9275,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s02_off_0125.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot to the void at y = 100, off every split"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.1875 wide through the +x wall, centred on y = 100 where no block split passes. The map leaks and the route must cross the slot. Before NEW_340A the slot's leaf existed but its portals to the room and to the void (0.1875 x 256 rectangles) were dropped as 'tiny' (fewer than three edges longer than 0.2): the map read sealed below 0.25.",
+   "id": "S02.off.1875",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.10375,
+      256
+     ],
+     "min": [
+      255,
+      99.89625,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s02_off_01875.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.1875 slot to the void at y = 100, off every split"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.5 wide through the +x wall, centred on y = 100 where no block split passes. The map leaks and the route must cross the slot. Before NEW_340A the slot's leaf existed but its portals to the room and to the void (0.5 x 256 rectangles) were dropped as 'tiny' (fewer than three edges longer than 0.2): the map read sealed below 0.25.",
+   "id": "S02.off.5",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.26,
+      256
+     ],
+     "min": [
+      255,
+      99.74,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s02_off_05.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.5 slot to the void at y = 100, off every split"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.1875 wide centred on y = 0, a block split plane. The map leaks through the slot. Before NEW_340A the forced block split consumed both slot faces lying within ON_EPSILON of it (a half up to 0.1), or split the slot into halves whose portals were dropped as 'tiny' (a half up to 0.2): sealed up to 0.375.",
+   "id": "S03.split.1875",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      0.10375,
+      256
+     ],
+     "min": [
+      255,
+      -0.10375,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s03_split_01875.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.1875 slot to the void centred on the block split y = 0"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.25 wide centred on y = 0, a block split plane. The map leaks through the slot. Before NEW_340A the forced block split consumed both slot faces lying within ON_EPSILON of it (a half up to 0.1), or split the slot into halves whose portals were dropped as 'tiny' (a half up to 0.2): sealed up to 0.375.",
+   "id": "S03.split.25",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      0.135,
+      256
+     ],
+     "min": [
+      255,
+      -0.135,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s03_split_025.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.25 slot to the void centred on the block split y = 0"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.5 wide centred on y = 0, a block split plane. The map leaks through the slot. Before NEW_340A the forced block split consumed both slot faces lying within ON_EPSILON of it (a half up to 0.1), or split the slot into halves whose portals were dropped as 'tiny' (a half up to 0.2): sealed up to 0.375.",
+   "id": "S03.split.5",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      0.26,
+      256
+     ],
+     "min": [
+      255,
+      -0.26,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s03_split_05.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.5 slot to the void centred on the block split y = 0"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The +x wall has a 128 x 128 window centred on (y, z) = (100, 128); two plugs fill it except a slot 0.125 wide through its centre, turned 0 degrees about x (0 is horizontal). The map leaks through the slot, with no grid or epsilon change: the verdict follows the opening.",
+   "id": "S04.turned.0",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      102.0,
+      130.0
+     ],
+     "min": [
+      255,
+      98.0,
+      126.0
+     ],
+     "why": "through the slot at the window centre"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s04_turned_0.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot through two plugs in a window, turned 0 degrees"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The +x wall has a 128 x 128 window centred on (y, z) = (100, 128); two plugs fill it except a slot 0.125 wide through its centre, turned 15 degrees about x (0 is horizontal). The map leaks through the slot, with no grid or epsilon change: the verdict follows the opening.",
+   "id": "S04.turned.15",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      102.0,
+      130.0
+     ],
+     "min": [
+      255,
+      98.0,
+      126.0
+     ],
+     "why": "through the slot at the window centre"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s04_turned_15.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot through two plugs in a window, turned 15 degrees"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The +x wall has a 128 x 128 window centred on (y, z) = (100, 128); two plugs fill it except a slot 0.125 wide through its centre, turned 45 degrees about x (0 is horizontal). The map leaks through the slot, with no grid or epsilon change: the verdict follows the opening.",
+   "id": "S04.turned.45",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      102.0,
+      130.0
+     ],
+     "min": [
+      255,
+      98.0,
+      126.0
+     ],
+     "why": "through the slot at the window centre"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s04_turned_45.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot through two plugs in a window, turned 45 degrees"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.125 wide from y = 0 to 0.125: one face ON the block split y = 0. The map leaks through the slot wherever the world's block boundary falls.",
+   "id": "S05.moved.on_split",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      0.135,
+      256
+     ],
+     "min": [
+      255,
+      -0.01,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s05_moved_on_split.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot with one face ON the block split y = 0"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A full-height slot 0.125 wide from y = -0.09375 to 0.03125: both faces within ON_EPSILON of the block split, unevenly. The map leaks through the slot wherever the world's block boundary falls.",
+   "id": "S05.moved.straddle",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      0.04125,
+      256
+     ],
+     "min": [
+      255,
+      -0.10375,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s05_moved_straddle.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot with both faces within ON_EPSILON of the block split, unevenly"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "S04.turned.45 with its window, plugs and slot moved 0.3125 in y and 0.1875 in z, off the 1/8 grid phase it had.",
+   "id": "S05.moved.turned45",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      102.3125,
+      130.1875
+     ],
+     "min": [
+      255,
+      98.3125,
+      126.1875
+     ],
+     "why": "through the slot at the window centre"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s05_moved_turned45.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the 45-degree 0.125 slot moved by (0, 0.3125, 0.1875)"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The +x wall is two brushes sharing the face y = 100 exactly: no opening, so the map is sealed and the seam solid. A portal predicate that kept a zero-width crack would leak here.",
+   "id": "S06.touch.off",
+   "map": "S02_S12_narrow_openings/maps/s06_touch_off.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      99.97,
+      128
+     ],
+     "why": "south slab at the seam"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      100.03,
+      128
+     ],
+     "why": "north slab at the seam"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -1,
+      0,
+      0
+     ],
+     "point": [
+      256,
+      104.0,
+      128
+     ],
+     "why": "+x wall beside the seam, seen from the room"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the +x wall as two slabs touching at y = 100"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The +x wall is two brushes sharing the face y = 0 exactly: no opening, so the map is sealed and the seam solid. A portal predicate that kept a zero-width crack would leak here.",
+   "id": "S06.touch.split",
+   "map": "S02_S12_narrow_openings/maps/s06_touch_split.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      -0.03,
+      128
+     ],
+     "why": "south slab at the seam"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      0.03,
+      128
+     ],
+     "why": "north slab at the seam"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -1,
+      0,
+      0
+     ],
+     "point": [
+      256,
+      4.0,
+      128
+     ],
+     "why": "+x wall beside the seam, seen from the room"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the +x wall as two slabs touching at y = 0"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A 0.125 slot from the room 12 units into the +x wall, capped on the void side. Sealed, and the slot's air is reachable from the room, so it must stay open (before NEW_340A its portal to the room was dropped and the slot filled as unreachable).",
+   "id": "S07.blind",
+   "map": "S02_S12_narrow_openings/maps/s07_blind.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      262,
+      100.0,
+      128
+     ],
+     "why": "air in the slot, reached from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      270,
+      100.0,
+      128
+     ],
+     "why": "the void-side cap"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot from the room into the +x wall, closed on the void side"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "Two wall slabs overlap by 0.125 across the block split: sealed, no invented route outside.",
+   "id": "S07.overlap",
+   "map": "S02_S12_narrow_openings/maps/s07_overlap.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      0,
+      128
+     ],
+     "why": "inside the overlap"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the +x wall as two slabs overlapping by 0.125 at y = 0"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A 0.125 slot inside the +x wall, capped on the room side and on the void side: a closed thin pocket nothing can reach. Sealed; the pocket is not a leak and nothing is asserted about its own air.",
+   "id": "S07.pocket",
+   "map": "S02_S12_narrow_openings/maps/s07_pocket.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      258,
+      100.0,
+      128
+     ],
+     "why": "the room-side cap"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      270,
+      100.0,
+      128
+     ],
+     "why": "the void-side cap"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot closed at both ends inside the +x wall"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A slot 0.0625 wide, off every split. The source leaks. Its two faces lie closer than ON_EPSILON (0.1): the face tree consumes the second one as ON the first one's plane, so no leaf lies between them. The portal stage is not involved. Kept as a KNOWN FAILURE naming that band, not rewritten as a seal.",
+   "id": "S08.band.00625",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.04125,
+      256
+     ],
+     "min": [
+      255,
+      99.95875,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s08_band_00625.map",
+   "mechanism": "on_epsilon_band",
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.0625 slot to the void: inside the ON_EPSILON band"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A 0.125 slot whose outer end is covered by a DETAIL brush. Detail does not seal: the map leaks.",
+   "id": "S11.detail_over",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.0725,
+      256
+     ],
+     "min": [
+      255,
+      99.9275,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s11_detail_over.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot behind a detail brush"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "A 0.125 slot whose outer end is covered by a flat patch. A patch does not seal: the map leaks.",
+   "id": "S11.patch_over",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.0725,
+      256
+     ],
+     "min": [
+      255,
+      99.9275,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "S02_S12_narrow_openings/maps/s11_patch_over.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a 0.125 slot behind a patch"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A sealed room split by a full partition at x = 64..80 with one full-height passage 0.125 wide at y = 100. The player and the light are in the west half; the east half is reached through the passage, so its air stays open, its walls are drawn and NORMAL -vis and -light finish. Before NEW_340A the passage's portals were dropped and the east half was filled as unreachable.",
+   "id": "S12.passage",
+   "map": "S02_S12_narrow_openings/maps/s12_passage.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "open",
+     "point": [
+      160,
+      -100,
+      128
+     ],
+     "why": "air in the east half, reached through the passage"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      -1,
+      0,
+      0
+     ],
+     "point": [
+      256,
+      -100,
+      128
+     ],
+     "why": "+x wall, seen from the east half"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      80,
+      -100,
+      128
+     ],
+     "why": "partition, seen from the east half"
+    },
+    {
+     "kind": "open",
+     "point": [
+      72,
+      100.0,
+      128
+     ],
+     "why": "air in the passage"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      72,
+      99.0,
+      128
+     ],
+     "why": "the partition beside the passage"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "a sealed room in two halves joined by a 0.125 passage"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's base_winding; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/base_winding",
+   "id": "U.base_winding",
+   "map": "../q3map2/base_winding/maps/base_winding.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's coarse_snap_normal; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/coarse_snap_normal",
+   "id": "U.coarse_snap_normal",
+   "map": "../q3map2/coarse_snap_normal/maps/coarse_snap_normal.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's decal_misalignment; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/decal_misalignment",
+   "id": "U.decal_misalignment",
+   "map": "../q3map2/decal_misalignment/maps/decal_misalignment.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's degenerate_winding; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/degenerate_winding",
+   "id": "U.degenerate_winding",
+   "map": "../q3map2/degenerate_winding/maps/degenerate_winding.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's degenerate_winding2; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/degenerate_winding2",
+   "id": "U.degenerate_winding2",
+   "map": "../q3map2/degenerate_winding2/maps/degenerate_winding2.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's degenerate_winding3; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/degenerate_winding3",
+   "id": "U.degenerate_winding3",
+   "map": "../q3map2/degenerate_winding3/maps/degenerate_winding3.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's disappearing_sliver; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/disappearing_sliver",
+   "id": "U.disappearing_sliver",
+   "map": "../q3map2/disappearing_sliver/maps/disappearing_sliver.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's disappearing_sliver2; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/disappearing_sliver2",
+   "id": "U.disappearing_sliver2",
+   "map": "../q3map2/disappearing_sliver2/maps/disappearing_sliver2.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's disappearing_sliver3; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/disappearing_sliver3",
+   "id": "U.disappearing_sliver3",
+   "map": "../q3map2/disappearing_sliver3/maps/disappearing_sliver3.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's duplicate_plane; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/duplicate_plane",
+   "id": "U.duplicate_plane",
+   "map": "../q3map2/duplicate_plane/maps/duplicate_plane.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's model_clipping_45_degrees; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/model_clipping_45_degrees",
+   "id": "U.model_clipping_45_degrees",
+   "map": "../q3map2/model_clipping_45_degrees/maps/model_clipping_45_degrees.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's patch_seam; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/patch_seam",
+   "id": "U.patch_seam",
+   "map": "../q3map2/patch_seam/maps/patch_seam.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's piercing_triangle; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/piercing_triangle",
+   "id": "U.piercing_triangle",
+   "map": "../q3map2/piercing_triangle/maps/piercing_triangle.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's plane_aliasing; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/plane_aliasing",
+   "id": "U.plane_aliasing",
+   "map": "../q3map2/plane_aliasing/maps/plane_aliasing.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's segmentation_fault; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/segmentation_fault",
+   "id": "U.segmentation_fault",
+   "map": "../q3map2/segmentation_fault/maps/segmentation_fault.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's snap_plane; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/snap_plane",
+   "id": "U.snap_plane",
+   "map": "../q3map2/snap_plane/maps/snap_plane.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's sparkly_seam; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/sparkly_seam",
+   "id": "U.sparkly_seam",
+   "map": "../q3map2/sparkly_seam/maps/sparkly_seam.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  },
+  {
+   "expect": {
+    "leak": null
+   },
+   "explanation": "upstream's tiny_structural_brush; compile-only (exit status 0 and a BSP)",
+   "gameroot": "../q3map2/tiny_structural_brush",
+   "id": "U.tiny_structural_brush",
+   "map": "../q3map2/tiny_structural_brush/maps/tiny_structural_brush.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "upstream regression map compiles"
+  }
+ ],
+ "comment": "Written by generate.py; run by ci/auto-pigeon/regress.py. Known failures: known-failures.json.",
+ "gameroot": "gameroot",
+ "pipe_maps": {
+  "R04_m4_near_parallel/maps/r04_p08_nearby.map": "28b154f75417475465dab64509cd81c619c5971eb9fe9c3d98b0ff4e2b98895a",
+  "R05_p10_shape/maps/r05_p10_base.map": "4cedfb8a128baecdd220b445b58790c77346a5a5f46c752a259bb5027fc81a9f",
+  "R06_p08_sealed/maps/r06_p08_base.map": "b585fbde31e97b256393d80e297cb3ca562699a1d7d6acc3302a63652ce9825c",
+  "R11_p10_nearby_sliver/maps/r11_p10_nearby.map": "accf8b91c03950ff9e855a262f491bf058dea2d2cc71f3ddff76c286cb3da791"
+ },
+ "schema": "auto-pigeon-q3map2-regressions/1"
+}
