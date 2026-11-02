@@ -113,6 +113,10 @@ void RunThreadsOnIndividual( int workcnt, bool showpacifier, void ( *func )( int
 
 #include <thread>
 #include <mutex>
+#ifdef __APPLE__
+#include <cstdint>
+#include <pthread.h>
+#endif
 
 std::mutex crit;
 static bool enter;
@@ -159,6 +163,30 @@ void RunThreadsOn( void ( *func )( int ) ){
 	{
 		threaded = true;
 
+#ifdef __APPLE__
+		/* macOS gives secondary threads only 512 KiB of stack, which is overflowed
+		   e.g. by TraceGrid() (MAX_CONTRIBUTIONS on the stack); std::thread can not
+		   change that, so use pthreads with the 8 MiB Linux threads get by default */
+		pthread_attr_t attr;
+		pthread_attr_init( &attr );
+		if ( pthread_attr_setstacksize( &attr, 8 * 1024 * 1024 ) != 0 ) {
+			Error( "pthread_attr_setstacksize failed" );
+		}
+
+		static void ( *threadfunc )( int );
+		threadfunc = func;
+		pthread_t threads[MAX_THREADS];
+
+		for ( int i = 0; i < numthreads; ++i )
+			if ( pthread_create( &threads[i], &attr, []( void *num ) -> void* { threadfunc( (int)(intptr_t)num ); return nullptr; }, (void*)(intptr_t)i ) != 0 ) {
+				Error( "pthread_create failed" );
+			}
+
+		for ( int i = 0; i < numthreads; ++i )
+			pthread_join( threads[i], nullptr );
+
+		pthread_attr_destroy( &attr );
+#else
 		std::thread threads[MAX_THREADS];
 
 		for ( int i = 0; i < numthreads; ++i )
@@ -166,6 +194,7 @@ void RunThreadsOn( void ( *func )( int ) ){
 
 		for ( int i = 0; i < numthreads; ++i )
 			threads[i].join();
+#endif
 
 		threaded = false;
 	}
