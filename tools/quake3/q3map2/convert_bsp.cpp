@@ -807,7 +807,9 @@ int MergeBSPMain( Args& args ){
 	}
 
 	{
-		entities.insert( entities.cend(), bsp.entities.cbegin() + 1, bsp.entities.cend() ); // minus world
+		// move: bsp.entities is not used anymore; copying requires entity_t to be copy assignable,
+		// which it is not with libc++ (std::forward_list<parseMesh_t>)
+		entities.insert( entities.cend(), std::make_move_iterator( bsp.entities.begin() + 1 ), std::make_move_iterator( bsp.entities.end() ) ); // minus world
 		numBSPEntities = entities.size();
 		bspModels.insert( bspModels.cend(), bsp.bspModels.cbegin() + 1, bsp.bspModels.cend() ); // minus world
 		bspShaders.insert( bspShaders.cend(), bsp.bspShaders.cbegin(), bsp.bspShaders.cend() );
