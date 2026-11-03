@@ -1050,7 +1050,7 @@ def p_cases():
     d = "P02_P05_portal_controls/maps/"
     x1, z1 = ROOM[3], ROOM[5]
     wall_probes = room_probes() + [{"kind": "solid", "point": [x1 + 8, y, 128], "why": "inside the +x wall"} for y in (-100, 90, 110)]
-    # P02: rev 11's shape, two boards of one wall meeting at a near-parallel seam
+    # P02: a real map's shape, two boards of one wall meeting at a near-parallel seam
     tilt = math.tan(math.radians(0.18))
     add("P02.mitre.overlap", "control: two boards of a wall overlap at a near-parallel seam: closed", d + "p02_overlap.map",
         seam_wall((100.06, 0, 0.0001), (99.94, 0, -0.0001)), False, wall_probes,
@@ -1105,7 +1105,7 @@ def p_cases():
             slot_wall(lo, hi) + wedge_hints(), True, [],
             "The negative control of the repair for P01 and P05, where it works. A brush is only ever taken for solid where it "
             "is: the slot is not brush, so it stays open.", extra={"leak_route": slot_route(lo, hi)})
-    # P06: two walls meet at a mitre closed at the outer corner, rev 11's joint on a six-brush room
+    # P06: two walls meet at a mitre closed at the outer corner, a real map's joint on a six-brush room
     def room_at(ox, oy):
         return (("info_player_start", (ox + 200, oy + 200, 64)), ("light", (ox + 200, oy + 200, 128)))
 
