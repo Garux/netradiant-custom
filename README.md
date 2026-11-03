@@ -104,6 +104,7 @@ are compile-only cases.
 ```sh
 python3 ci/auto-pigeon/regress.py --q3map2 ./install/q3map2.x86_64 --work "/tmp/q3 regress" --report /tmp/regress.json
 python3 ci/auto-pigeon/regress.py --q3map2 ./install/q3map2.x86_64 --work "/tmp/q3 full" --full   # + NORMAL -vis and -light
+python3 ci/auto-pigeon/regress.py --q3map2 ./install/q3map2.x86_64 --work "/tmp/q3 smoke" --smoke  # what CI runs, 60 s per tool
 python3 regression_tests/auto-pigeon/generate.py --check   # the authored maps and cases.json are what generate.py writes
 ```
 
@@ -111,11 +112,15 @@ The exit status is 0 only when every required case passes and every known failur
 
 ## CI and releases
 
-`.github/workflows/auto-pigeon-release.yml` is the one path. A documentation-only push runs the policy
-checks (`ci/auto-pigeon/selftest.py`); a change to the compiler, its build or its tests adds the Linux
-build and every regression case, plain and under AddressSanitizer + UBSan; pushing the release tag builds, tests and accepts **linux-amd64,
-windows-amd64, macos-amd64 and macos-arm64** (required) and **linux-arm64** (optional) on native
-runners, rebuilds the source archive from itself, and publishes only after every required job passed.
+`.github/workflows/auto-pigeon-release.yml` is the one path, and it is deliberately light: every
+regression case, the sanitizers and the source rebuild run locally before integration
+(`ci/auto-pigeon/TESTING.md`). A documentation-only push runs the policy checks
+(`ci/auto-pigeon/selftest.py`); a change to the compiler, its build or its tests adds the Linux build
+and a bounded smoke check; pushing the release tag builds **linux-amd64, windows-amd64, macos-amd64 and
+macos-arm64** (required) and **linux-arm64** (optional) on native runners, smoke-checks each extracted
+archive, writes the source archive, and publishes only after every required job passed. The smoke check
+is two cases, a sealed room through BSP, VIS and LIGHT and a genuine leak, and each release says so:
+a published archive has passed those two on its own platform, not the whole regression set.
 
 ```sh
 tag=$(python3 ci/auto-pigeon/plan.py --sha HEAD --print-tag)   # the ONE tag this commit may be released as

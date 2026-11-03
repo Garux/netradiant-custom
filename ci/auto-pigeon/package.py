@@ -25,7 +25,7 @@ import zipfile
 
 import closure
 from common import (HERE, LABELS, PLATFORMS, REPO, Failure, exe, load_json, log, require_native, run, sha256_file,
-                    write_json)
+                    validated_regress, write_json)
 
 REPO_LICENSES = {"LICENSE.txt": "LICENSE", "GPL.txt": "GPL", "LGPL.txt": "LGPL"}
 MACOS_SYSTEM_PREFIXES = closure.MACOS_SYSTEM_PREFIXES
@@ -201,8 +201,7 @@ game installation through `-fs_basepath`; none is included.
 
 ## Known defects in this release
 
-Qualified against its regression cases (`regression_tests/auto-pigeon` in the source), with these
-cases still FAILING and owned by later work — this is not a claim that every map compiles correctly:
+@QUALIFICATION@
 
 @KNOWN@
 
@@ -214,6 +213,16 @@ complete corresponding source is `@SOURCE_ASSET@`, published beside this archive
 library's licence is in `licenses/` under its package name; `build-info.json` names the package,
 version and where its source comes from. SHA-256 digests are integrity checks, not signatures.
 """
+
+
+QUALIFICATION = {
+    "full": "Qualified against every regression case (`regression_tests/auto-pigeon` in the source). These cases are "
+            "recorded as still FAILING and owned by later work — this is not a claim that every map compiles correctly:",
+    "smoke": "This archive's automatic checks were a bounded smoke run only: one sealed room through BSP, NORMAL VIS and LIGHT "
+             "and one genuine leak (`ci/auto-pigeon/TESTING.md` in the source). The full regression set and the sanitizers ran "
+             "locally before integration, not on these bytes. These cases are recorded as still FAILING and owned by later "
+             "work — this is not a claim that every map compiles correctly:",
+}
 
 
 def licences_dir_notice(pkg, entry, licence, bundled_text):
@@ -271,8 +280,7 @@ def main():
         raise Failure("a sanitizer build is never packaged")
     if report["tracked_files_modified"]:
         raise Failure("the build is from a modified tree: %s" % report["tracked_files_modified"])
-    if not report["regress"] or report["regress"]["exit"] != 0:
-        raise Failure("the build's regressions did not pass; not packaging it")
+    test_mode = validated_regress(report["regress"])
     out = pathlib.Path(args.out).resolve()
     stem = plan["assets"][platform][:-len(".zip")]
     root = out / stem
@@ -349,7 +357,8 @@ def main():
                        "FORK": plan["fork_repository"], "TAG": plan["tag"], "BANNER": plan["banner"],
                        "UPSTREAM": plan["upstream"]["repository"], "BASE": plan["upstream"]["base_commit"],
                        "REQUIREMENTS": requirements(platform, closure_report), "PROGRAM": program.name,
-                       "USAGE": usage(platform, stem), "KNOWN": known_text, "SOURCE_ASSET": plan["source_asset"]}.items():
+                       "USAGE": usage(platform, stem), "KNOWN": known_text, "SOURCE_ASSET": plan["source_asset"],
+                       "QUALIFICATION": QUALIFICATION[test_mode]}.items():
         text = text.replace("@%s@" % key, value)
     (root / "README.md").write_text(text, encoding="utf-8", newline="\n")
 
@@ -388,7 +397,7 @@ def main():
                "sha256": sha256_file(zip_path), "platform": platform, "commit": plan["commit"], "version": plan["version"],
                "banner": plan["banner"], "program_sha256": sha256_file(program), "built_program_sha256": report["program_sha256"],
                "manifest_sha256": sha256_file(root / "MANIFEST.json"),
-               "members": len(files) + 1, "regress": report["regress"]}
+               "members": len(files) + 1, "test_mode": test_mode, "regress": report["regress"]}
     write_json(out / (stem + ".package.json"), package)
     shutil.copyfile(args.build_report, out / (stem + ".build-report.json"))
     log("packaged %s  %d bytes  sha256 %s  (%d libraries)" % (zip_path.name, package["size"], package["sha256"], len(libraries)))

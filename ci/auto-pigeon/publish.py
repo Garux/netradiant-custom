@@ -23,8 +23,8 @@ import pathlib
 import sys
 import tempfile
 
-from common import (ACCEPTANCE_STEPS, LABELS, PLATFORMS, REQUIRED_PLATFORMS, Failure, load_json, log,
-                    run, sha256_file, write_json)
+from common import (ACCEPTANCE_STEPS, LABELS, PLATFORMS, REQUIRED_PLATFORMS, SMOKE_CASES, TEST_MODES, Failure, load_json, log,
+                    run, sha256_file, validated_regress, write_json)
 
 
 def find(root, name):
@@ -56,15 +56,22 @@ def evaluate(platform, plan, artifacts):
     passed = [s for s in report["steps"] if s["status"] == "pass"]
     if len(passed) != ACCEPTANCE_STEPS or len(report["steps"]) != ACCEPTANCE_STEPS:
         raise Failure("%s: the acceptance report says pass with %d of %d steps passed" % (platform, len(passed), ACCEPTANCE_STEPS))
-    regress = report["regress"]
+    mode = report.get("acceptance_mode")
+    if mode not in TEST_MODES:
+        raise Failure("%s: unknown acceptance mode %r" % (platform, mode))
+    regress = report.get("regress")
+    if validated_regress(regress) != mode:
+        raise Failure("%s: a %s acceptance holds a %s regression report" % (platform, mode, regress.get("mode")))
+    if validated_regress(package.get("regress")) != package.get("test_mode"):
+        raise Failure("%s: the package's test mode %r is not what its report ran" % (platform, package.get("test_mode")))
     return {"platform": platform, "name": asset, "path": str(zip_path), "size": zip_path.stat().st_size, "sha256": digest,
             "kind": "toolchain", "program_sha256": package["program_sha256"],
             # the compiler's own output before packaging (patchelf / install_name_tool / codesign change the shipped file)
             "built_program_sha256": package.get("built_program_sha256"),
-            "acceptance": {"verdict": "pass", "steps_passed": len(passed)},
+            "acceptance": {"verdict": "pass", "mode": mode, "steps_passed": len(passed)},
             "regressions": {"required_passed": regress["required"]["passed"], "required_cases": regress["required"]["cases"],
                             "known_failures_still_failing": regress["known_failures"]["still_failing"],
-                            "cases": regress["cases"]}}, None
+                            "cases": {cid: c["status"] for cid, c in regress["cases"].items()}}}, None
 
 
 def decide(plan, artifacts):
@@ -105,17 +112,29 @@ def rebuilt_matches(linux, meta):
     return linux["built_program_sha256"] == meta["rebuilt_program_sha256"]
 
 
+def coverage(admitted):
+    """What this release's automatic checks ran, for the manifest and the notes. It states what happened, nothing more."""
+    modes = sorted({a["acceptance"]["mode"] for a in admitted})
+    if modes == ["full"]:
+        return ("every declared regression case and native archive acceptance of each published target; NOT a claim that "
+                "every map compiles: known failures are listed and still fail")
+    return ("%s of the published targets: a bounded smoke check of the extracted archive: %s. The other regression cases, the "
+            "sanitizers and any source rebuild are local qualification, not run here; NOT a claim that every map compiles"
+            % ("some" if "full" in modes else "all", " and ".join("`%s`" % c for c in SMOKE_CASES)))
+
+
 def manifest_and_notes(plan, admitted, missing, source, run_url, known):
+    smoke = any(a["acceptance"]["mode"] == "smoke" for a in admitted)
     manifest = {
         "schema": "auto-pigeon-q3map2-release-manifest/1", "tag": plan["tag"], "version": plan["version"],
         "commit": plan["commit"], "version_banner": plan["banner"], "upstream": plan["upstream"],
         "fork": plan["fork_repository"], "patch_series": plan["patch_series"], "prerelease": True, "signed": False,
         "built_by": run_url,
-        "qualification": "the declared regression cases and native archive acceptance of each published target; NOT a "
-                         "claim that every map compiles: known failures are listed and still fail",
+        "qualification": coverage(admitted),
         "known_failures": known,
         "assets": [{k: v for k, v in a.items() if k != "path"} for a in admitted + [source]],
         "targets": dict({a["platform"]: {"status": "published", "required": a["platform"] in REQUIRED_PLATFORMS,
+                                         "qualification_mode": a["acceptance"]["mode"],
                                          "asset": a["name"], "sha256": a["sha256"], "size": a["size"]} for a in admitted},
                         **{p: {"status": "not_published", "required": False, "reason": r} for p, r in missing}),
     }
@@ -137,27 +156,34 @@ def manifest_and_notes(plan, admitted, missing, source, run_url, known):
         "",
         "### Qualification boundary",
         "",
+        ("Automatic CI ran a **bounded smoke check** on a native runner of each target, from the extracted ZIP: `%s` (a tiny "
+         "sealed room through BSP, NORMAL VIS and LIGHT) and `%s` (a genuine leak that must be reported). It did **not** run the "
+         "other regression cases, sanitizers or a broad geometry sweep; those are local qualification before integration "
+         "(`ci/auto-pigeon/TESTING.md`) and this workflow does not attest them. **These cases are recorded as failing and are "
+         "not fixed in this release (the smoke check does not execute them):**" % tuple(SMOKE_CASES)) if smoke else
         "Every published archive passed, on a native runner of its own platform and from the extracted ZIP, all required "
         "regression cases (BSP; NORMAL VIS and LIGHT where declared). **These cases still FAIL and are not fixed in this "
         "release:**",
         "",
     ]
     lines += ["- `%s` (%s): %s. Owner: %s." % (cid, k["mechanism"], k["failing"], k["owner"]) for cid, k in sorted(known.items())]
-    lines += ["", "### Downloads", "", "| Target | Archive | Required regressions | Known failures (still failing) | Native acceptance |",
-              "| --- | --- | --- | --- | --- |"]
+    lines += ["", "### Downloads", "", "| Target | Archive | Coverage | Cases passed | Known failures (still failing) | Native acceptance |",
+              "| --- | --- | --- | --- | --- | --- |"]
     for a in admitted:
         r = a["regressions"]
-        lines.append("| %s | `%s` | %d of %d passed | %d | %d of %d steps, %s |" % (
-            LABELS[a["platform"]], a["name"], r["required_passed"], r["required_cases"], r["known_failures_still_failing"],
+        lines.append("| %s | `%s` | %s | %d of %d | %s | %d of %d steps, %s |" % (
+            LABELS[a["platform"]], a["name"], a["acceptance"]["mode"], r["required_passed"], r["required_cases"],
+            "not run" if a["acceptance"]["mode"] == "smoke" else r["known_failures_still_failing"],
             a["acceptance"]["steps_passed"], ACCEPTANCE_STEPS, "required target" if a["platform"] in REQUIRED_PLATFORMS else "optional target"))
     for platform, reason in missing:
-        lines.append("| %s | **not published** | | | optional target: %s |" % (LABELS[platform], reason))
+        lines.append("| %s | **not published** | | | | optional target: %s |" % (LABELS[platform], reason))
     lines += [
         "",
-        "`%s` is the complete corresponding source (this commit plus `ci/auto-pigeon/release-plan.json`); it was rebuilt "
-        "and its regressions re-run from the unpacked archive alone%s. Each archive's `build-info.json` names the "
-        "distribution package and version of every bundled library, which is where their source comes from." % (
-            source["name"], "" if source["rebuilt_and_tested_from_the_archive"] else " (**NOT verified in this run**)"),
+        "`%s` is the complete corresponding source (this commit plus `ci/auto-pigeon/release-plan.json`)%s. Each archive's "
+        "`build-info.json` names the distribution package and version of every bundled library, which is where their source "
+        "comes from." % (source["name"], "; it was rebuilt and its regressions re-run from the unpacked archive alone"
+                         if source["rebuilt_and_tested_from_the_archive"] else
+                         ". CI wrote it and **did not rebuild it**; rebuilding it is local qualification"),
         "",
         "### Verify",
         "",
@@ -165,7 +191,7 @@ def manifest_and_notes(plan, admitted, missing, source, run_url, known):
         "",
         "A SHA-256 is an integrity check, not a signature. `release-manifest.json` records every target, asset, digest and result.",
         "",
-        "Built, tested, accepted and published by %s." % run_url,
+        "Built, smoke-checked and published by %s." % run_url if smoke else "Built, tested, accepted and published by %s." % run_url,
     ]
     return manifest, "\n".join(lines) + "\n"
 
@@ -200,13 +226,12 @@ def main():
     meta = load_json(source_meta)
     if meta["commit"] != plan["commit"] or meta["sha256"] != sha256_file(source_path):
         raise Failure("the source archive does not match its record or the plan")
-    if not meta.get("rebuild_verified"):
-        raise Failure("the source archive was not rebuilt and tested from itself")
+    rebuilt = bool(meta.get("rebuild_verified"))
     linux = next((a for a in admitted if a["platform"] == "linux-amd64"), None)
     source = {"name": source_path.name, "path": str(source_path), "size": source_path.stat().st_size, "sha256": meta["sha256"],
-              "kind": "source", "files": meta["files"], "rebuilt_and_tested_from_the_archive": True,
-              "rebuilt_program_sha256": meta["rebuilt_program_sha256"],
-              "rebuilt_program_equals_linux_amd64_release": rebuilt_matches(linux, meta)}
+              "kind": "source", "files": meta["files"], "rebuilt_and_tested_from_the_archive": rebuilt,
+              "rebuilt_program_sha256": meta.get("rebuilt_program_sha256"),
+              "rebuilt_program_equals_linux_amd64_release": rebuilt_matches(linux, meta) if rebuilt else None}
     known = load_json(args.known_failures)["cases"]
     manifest, notes = manifest_and_notes(plan, admitted, missing, source, args.run_url, known)
     manifest_path = out / "release-manifest.json"

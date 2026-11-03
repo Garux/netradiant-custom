@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write the complete corresponding source of one release, and record that it rebuilt from itself.
+"""Write the complete corresponding source of one release; a local qualification records that it rebuilt from itself.
 
     python3 ci/auto-pigeon/source_archive.py --plan plan.json --out <dist>
     python3 ci/auto-pigeon/source_archive.py --mark-rebuilt <build-report.json> --plan <plan in the archive> --out <dist>
@@ -22,7 +22,7 @@ import sys
 import subprocess
 import tarfile
 
-from common import REPO, Failure, load_json, log, sha256_file, write_json
+from common import REPO, Failure, load_json, log, sha256_file, validated_regress, write_json
 
 
 def write_archive(plan, out):
@@ -68,8 +68,8 @@ def mark_rebuilt(plan, build_report, out):
     report = load_json(build_report)
     if report["commit"] != plan["commit"] or record["commit"] != plan["commit"]:
         raise Failure("the rebuild is not of the archived commit")
-    if not report["regress"] or report["regress"]["exit"] != 0:
-        raise Failure("the program rebuilt from the source archive did not pass its regressions")
+    if validated_regress(report["regress"]) != "full":
+        raise Failure("a source rebuild is qualified by the full regression set, not by a smoke run")
     record.update(rebuild_verified=True, rebuilt_on=report["platform"], rebuilt_program_sha256=report["program_sha256"],
                   rebuilt_regress=report["regress"]["counts"], rebuilt_toolchain=report["toolchain"])
     write_json(record_path, record)

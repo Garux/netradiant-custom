@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Build q3map2 (and nothing else) for one target, natively, from a clean copy of the source, then run its regressions
-(BSP, and NORMAL VIS and LIGHT where a case declares them).
+"""Build q3map2 (and nothing else) for one target, natively, from a clean copy of the source, then run its regressions.
 
     python3 ci/auto-pigeon/build.py --platform linux-amd64 --plan plan.json --work <dir> --report build-report.json [--jobs 3]
+
+`--test-mode full`, the default, runs every declared case (BSP, and NORMAL VIS and LIGHT where a case declares them):
+that is local qualification. `--test-mode smoke` is what automatic CI runs (ci/auto-pigeon/TESTING.md).
 
 The recipe is upstream's own Makefile (the one its CI and AppImage use), asked for the single target
 `install/q3map2.<machine>`: no editor, no plugins, no gamepacks. What differs per platform is only
@@ -26,7 +28,8 @@ import shutil
 import sys
 import time
 
-from common import HERE, PLATFORMS, REPO, Failure, exe, load_json, log, require_native, run, sha256_file, write_json
+from common import (HERE, PLATFORMS, REPO, TEST_MODES, Failure, exe, load_json, log, regress_summary, require_native, run, sha256_file,
+                    validated_regress, write_json)
 
 MACHINE = {"linux-amd64": "x86_64", "linux-arm64": "aarch64", "macos-amd64": "x86_64", "macos-arm64": "arm64",
            "windows-amd64": "exe"}
@@ -122,9 +125,13 @@ def main():
     ap.add_argument("--report", required=True)
     ap.add_argument("--jobs", type=int, default=3)
     ap.add_argument("--no-regress", action="store_true", help="build only (a local experiment; never releasable)")
+    ap.add_argument("--test-mode", choices=TEST_MODES, default="full",
+                    help="full: every declared case, local qualification. smoke: the declared CI subset, bounded")
     ap.add_argument("--sanitize", action="store_true",
                     help="AddressSanitizer + UBSan build (Linux), every case run with a report halting q3map2; never packaged")
     args = ap.parse_args()
+    if args.sanitize and args.test_mode != "full":
+        ap.error("a sanitizer run is full qualification: it takes no --test-mode smoke")
     platform = args.platform
     require_native(platform)
     plan = load_json(args.plan)
@@ -148,21 +155,25 @@ def main():
     report = {
         "schema": "auto-pigeon-q3map2-build-report/1", "platform": platform, "commit": plan["commit"],
         "version": plan["version"], "banner": plan["banner"], "host": {"machine": _platform.machine(), "system": _platform.system()},
-        "make": make_argv(platform, plan, args.jobs, args.sanitize), "sanitize": args.sanitize, "build_seconds": seconds, "source_date_epoch": plan["commit_time"],
+        "make": make_argv(platform, plan, args.jobs, args.sanitize), "sanitize": args.sanitize, "test_mode": args.test_mode, "build_seconds": seconds, "source_date_epoch": plan["commit_time"],
         "toolchain": toolchain(platform, env), "program": str(program), "program_sha256": sha256_file(program),
         "program_size": program.stat().st_size, "tracked_files_modified": modified, "regress": None,
     }
     if not args.no_regress:
         regress_report = work / "regress-report.json"
         code, _, rs = run([sys.executable, HERE / "regress.py", "--q3map2", program, "--work", work / "regress work",
-                           "--full", "--report", regress_report], check=False,
+                           "--" + args.test_mode, "--report", regress_report], check=False,
                           env=dict(os.environ, **SANITIZER_ENV) if args.sanitize else None)
-        r = load_json(regress_report)
-        report["regress"] = {"exit": code, "seconds": rs, "counts": r["counts"], "required": r["required"],
-                             "known_failures": r["known_failures"], "q3map2_sha256": r["q3map2_sha256"]}
-        if code != 0:
+        if not regress_report.is_file():
             write_json(args.report, report)
-            raise Failure("the regressions failed on the build tree's q3map2: %s" % r["counts"])
+            raise Failure("regress.py exited %s and wrote no report" % code)
+        r = load_json(regress_report)
+        report["regress"] = regress_summary(r, code, rs)
+        try:
+            validated_regress(report["regress"])
+        except Failure:
+            write_json(args.report, report)
+            raise
     write_json(args.report, report)
     log("built %s  %d bytes  sha256 %s  in %.1fs" % (program.name, report["program_size"], report["program_sha256"], seconds))
 

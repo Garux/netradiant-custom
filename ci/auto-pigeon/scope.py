@@ -6,9 +6,9 @@
 Prints and writes to $GITHUB_OUTPUT `scope=`:
 
   release   a pushed release tag, or a manual run asking for every target: every declared target is
-            built, tested and accepted natively, and the source archive rebuilt (a manual run never publishes)
-  source    a change that can alter the compiler, its build or its tests: the Linux build and every
-            regression case
+            built and smoke-checked natively, and the source archive written (a manual run never publishes)
+  source    a change that can alter the compiler, its build or its tests: the Linux build and the
+            bounded smoke check
   docs      anything else (prose, the editor, gamepacks): the policy checks only, nothing is built
 
 An unknown range (a new branch, a force push) counts as `source`: when in doubt, build.

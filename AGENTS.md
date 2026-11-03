@@ -23,8 +23,12 @@ a mutation target, and its handoff is written by that queue's tooling.
   testing skill, an identical copy of the canonical one. It is the testing policy here; this
   repository has no rule that runs the whole platform matrix after every commit. The split is:
   a documentation-only change runs the CI policy checks (`ci/auto-pigeon/selftest.py`) and builds
-  nothing; a compiler/build/dependency change runs the Linux build and every regression in
-  `regression_tests/auto-pigeon/`; an immutable release tag runs every declared target natively.
+  nothing; a compiler/build/dependency change runs, locally, the Linux build, every regression in
+  `regression_tests/auto-pigeon/` and the sanitizers. Automatic CI builds and smoke-checks only.
+- **Read `ci/auto-pigeon/TESTING.md` with it.** It places the verification for this fork (operator
+  decision, 2026-11-02, superseding older wording): full regressions, sanitizers, geometry sweeps and
+  the source rebuild are local wrap-up work; CI runs two bounded smoke cases. A smoke pass does not
+  establish full-regression or sanitizer coverage.
 - **A published release is immutable.** Never replace a release's assets, move a tag or rewrite
   history. The version and tag are read off `ci/auto-pigeon/plan.py` for the exact commit, never
   guessed; a correction is a new commit and a new tag.
@@ -58,7 +62,8 @@ a mutation target, and its handoff is written by that queue's tooling.
 | release plan, version, tag and banner | `ci/auto-pigeon/plan.py` |
 | build one target natively (q3map2 only) | `ci/auto-pigeon/build.py` |
 | package, accept, source archive, publish | `ci/auto-pigeon/package.py`, `accept.py`, `source_archive.py`, `publish.py` |
-| the CI scripts' own self-test | `ci/auto-pigeon/selftest.py` |
+| the CI scripts' own self-test and its negative controls | `ci/auto-pigeon/selftest.py`, `test_ci_policy.py` |
+| where each test runs: local qualification, light CI | `ci/auto-pigeon/TESTING.md` |
 | the one workflow | `.github/workflows/auto-pigeon-release.yml` |
 
 <!-- trail:start -->

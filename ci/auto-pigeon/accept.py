@@ -2,14 +2,15 @@
 """Accept one candidate ZIP on its own native host, from the EXTRACTED archive only.
 
     python3 ci/auto-pigeon/accept.py --platform linux-amd64 --archive <zip> --package-json <json> \
-        --plan plan.json --work <empty dir> --report acceptance.json
+        --plan plan.json --work <empty dir> --report acceptance.json [--smoke]
 
 Nothing here reads a build tree or needs a compiler. The archive is checked against its digest
 and manifest, unpacked into a directory with spaces, moved, and its q3map2 is run by absolute path
 from an unrelated working directory with the operating system's own search path only. Then every
 regression case runs against those extracted bytes, with NORMAL -vis and -light where a case
-declares them. The verdict is `pass` only when all ACCEPTANCE_STEPS steps passed; the exit status
-says the same.
+declares them; with `--smoke`, what automatic CI runs, only the two declared smoke cases do, and every
+tool invocation is bounded. The verdict is `pass` only when all ACCEPTANCE_STEPS steps passed; the
+exit status says the same. A smoke verdict says nothing about the other cases.
 """
 
 import argparse
@@ -21,8 +22,8 @@ import sys
 import zipfile
 
 import closure
-from common import (ACCEPTANCE_STEPS, HERE, PLATFORMS, REPO, Failure, clean_env, exe, load_json, log, require_native,
-                    run, sha256_file, write_json)
+from common import (ACCEPTANCE_STEPS, HERE, PLATFORMS, REPO, SMOKE_TOOL_SECONDS, Failure, clean_env, exe, load_json, log, regress_summary,
+                    require_native, run, sha256_file, validated_regress, write_json)
 
 REQUIRED_MEMBERS = ("README.md", "build-info.json", "MANIFEST.json", "licenses/LICENSE.txt", "licenses/GPL.txt", "licenses/LGPL.txt")
 
@@ -35,14 +36,16 @@ def main():
     ap.add_argument("--plan", required=True)
     ap.add_argument("--work", required=True)
     ap.add_argument("--report", required=True)
+    ap.add_argument("--smoke", action="store_true", help="automatic CI: the declared smoke cases, every tool invocation bounded")
     args = ap.parse_args()
+    mode = "smoke" if args.smoke else "full"
     platform = args.platform
     plan, package = load_json(args.plan), load_json(args.package_json)
     archive = pathlib.Path(args.archive).resolve()
     work = pathlib.Path(args.work).resolve()
     steps = []
     report = {"schema": "auto-pigeon-q3map2-acceptance/1", "platform": platform, "commit": plan["commit"],
-              "version": plan["version"], "banner": plan["banner"], "archive": archive.name, "steps": steps}
+              "version": plan["version"], "banner": plan["banner"], "archive": archive.name, "acceptance_mode": mode, "steps": steps}
     state = {}
 
     def step(name, fn):
@@ -124,7 +127,8 @@ def main():
     def s6_banner():
         outside = work / "an unrelated directory"
         outside.mkdir()
-        code, out, _ = run([state["program"], "-help"], cwd=outside, env=clean_env(platform), check=False, capture=True)
+        code, out, _ = run([state["program"], "-help"], cwd=outside, env=clean_env(platform), check=False, capture=True,
+                           timeout=SMOKE_TOOL_SECONDS if args.smoke else None)
         first = out.splitlines()[0].strip() if out else ""
         if first != plan["banner"]:
             raise Failure("q3map2 -help printed %r first (exit %s), expected %r" % (first, code, plan["banner"]))
@@ -145,15 +149,14 @@ def main():
         regress_report = work / "regress-report.json"
         env = clean_env(platform)
         code, out, seconds = run([sys.executable, HERE / "regress.py", "--q3map2", state["program"], "--work",
-                                  work / "regression work", "--full", "--report", regress_report], env=env, check=False, capture=True)
+                                  work / "regression work", "--" + mode, "--report", regress_report], env=env, check=False, capture=True)
         sys.stdout.write(out[-6000:])
-        r = load_json(regress_report)
-        state["regress"] = r
-        report["regress"] = {"exit": code, "seconds": seconds, "counts": r["counts"], "required": r["required"],
-                             "known_failures": r["known_failures"], "q3map2_sha256": r["q3map2_sha256"],
-                             "cases": {c["id"]: c["status"] for c in r["cases"]}}
-        if code != 0:
-            raise Failure("regressions on the extracted q3map2: %s" % r["counts"])
+        if not regress_report.is_file():
+            raise Failure("regress.py exited %s and wrote no report" % code)
+        report["regress"] = regress_summary(load_json(regress_report), code, seconds)
+        state["regress"] = report["regress"]
+        if validated_regress(report["regress"]) != mode:
+            raise Failure("the regression report is not a %s run" % mode)
         return report["regress"]["counts"]
 
     def s9_tested_is_shipped():
@@ -165,7 +168,7 @@ def main():
         for name, fn in (("archive identity", s1_identity), ("unpack into a path with spaces and move", s2_unpack_and_move),
                          ("manifest", s3_manifest), ("required members", s4_members), ("runtime closure", s5_closure),
                          ("banner from a clean environment", s6_banner), ("build-info agrees with the plan", s7_build_info),
-                         ("regressions on the extracted bytes (BSP, NORMAL VIS, LIGHT)", s8_regressions),
+                         ("%s regressions on the extracted bytes (BSP, NORMAL VIS, LIGHT)" % mode, s8_regressions),
                          ("tested bytes are shipped bytes", s9_tested_is_shipped)):
             step(name, fn)
         report["verdict"] = "pass" if len(steps) == ACCEPTANCE_STEPS else "fail"

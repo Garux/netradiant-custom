@@ -2,11 +2,17 @@
 """Compile every case of regression_tests/auto-pigeon with one q3map2 and ask each BSP its assertions.
 
     python3 ci/auto-pigeon/regress.py --q3map2 <executable> --work <empty dir> [--report report.json]
-        [--case ID ...] [--full] [--threads 2] [--timeout 900]
+        [--full | --smoke | --case ID ...] [--threads 2] [--timeout 900]
 
-`--full` adds NORMAL -vis and -light to the cases that declare those stages (positive, sealed maps);
-without it every case runs the BSP stage only. Standard library only; the maps, shaders and
-assertions are regression_tests/auto-pigeon/cases.json (written by its generate.py).
+The report names its mode, and only the first two can qualify anything (common.validated_regress):
+
+  full     `--full`: every declared case, with NORMAL -vis and -light where a case declares them
+  smoke    `--smoke`: the two declared smoke cases only, each tool invocation bounded by
+           SMOKE_TOOL_SECONDS. What automatic CI runs; never a claim about the other cases
+  partial  anything else (BSP stage only, or `--case`): a repair loop, never a qualification
+
+Standard library only; the maps, shaders and assertions are
+regression_tests/auto-pigeon/cases.json (written by its generate.py).
 
 Each case ends in exactly one state:
 
@@ -31,6 +37,7 @@ import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
+from common import SMOKE_CASES, SMOKE_TOOL_SECONDS  # noqa: E402
 from ibsp import CONTENTS, Ibsp  # noqa: E402
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -175,6 +182,8 @@ def run_case(case, q3map2, work, threads, timeout, full, gameroot):
         expect = case["expect"]["leak"]
         if expect is not None and leaked != expect:
             failures.append("leak verdict %s, the source %s" % ("leaked" if leaked else "sealed", "leaks" if expect else "is sealed"))
+        elif leaked and not map_path.with_suffix(".lin").is_file():
+            failures.append("the map leaked and wrote no pointfile")
         elif leaked and case.get("leak_route"):
             failures += check_leak_route(map_path.with_suffix(".lin"), case["leak_route"])
         snapshot = case_dir / "after-bsp.bsp"
@@ -216,9 +225,16 @@ def main():
     ap.add_argument("--report")
     ap.add_argument("--case", action="append", default=[])
     ap.add_argument("--full", action="store_true", help="add NORMAL -vis and -light where a case declares them")
+    ap.add_argument("--smoke", action="store_true", help="the declared smoke cases only, every tool invocation bounded")
     ap.add_argument("--threads", default="2")
     ap.add_argument("--timeout", type=int, default=900)
     args = ap.parse_args()
+    if args.smoke and (args.full or args.case):
+        sys.exit("regress: --smoke runs its declared cases; it takes neither --full nor --case")
+    if args.smoke:
+        args.case = list(SMOKE_CASES)
+        args.timeout = min(args.timeout, SMOKE_TOOL_SECONDS)
+    mode = "smoke" if args.smoke else "full" if args.full and not args.case else "partial"
     q3map2 = pathlib.Path(args.q3map2).resolve()
     work = pathlib.Path(args.work).resolve()
     if work.exists() and any(work.iterdir()):
@@ -227,6 +243,8 @@ def main():
     document = json.loads((CASES_DIR / "cases.json").read_text(encoding="utf-8"))
     known = json.loads((CASES_DIR / "known-failures.json").read_text(encoding="utf-8"))["cases"]
     cases = [c for c in document["cases"] if not args.case or c["id"] in args.case]
+    if not cases:
+        sys.exit("regress: no case to run")
     missing = sorted(set(args.case) - {c["id"] for c in cases})
     if missing:
         sys.exit("regress: no such case: %s" % ", ".join(missing))
@@ -234,10 +252,11 @@ def main():
     if unknown:
         sys.exit("regress: known-failures.json names cases that do not exist: %s" % ", ".join(unknown))
     gameroot = make_gameroot(work / "gameroot")
-    banner = subprocess.run([str(q3map2), "-help"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout.decode("utf-8", "replace")
+    banner = subprocess.run([str(q3map2), "-help"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            timeout=args.timeout).stdout.decode("utf-8", "replace")
     results = []
     for case in cases:
-        r = run_case(case, q3map2, work, args.threads, args.timeout, args.full, gameroot)
+        r = run_case(case, q3map2, work, args.threads, args.timeout, args.full or args.smoke, gameroot)
         if case["id"] in known:
             r["known_failure"] = known[case["id"]]
             r["status"] = "known_failure" if r["status"] == "fail" else "unexpected_pass"
@@ -249,7 +268,8 @@ def main():
         counts[r["status"]] = counts.get(r["status"], 0) + 1
     import hashlib
     report = {"schema": "auto-pigeon-q3map2-regress-report/1", "q3map2_sha256": hashlib.sha256(q3map2.read_bytes()).hexdigest(),
-              "version_line": banner.splitlines()[0] if banner else "", "full": args.full, "counts": counts,
+              "version_line": banner.splitlines()[0] if banner else "", "mode": mode, "full": args.full, "counts": counts,
+              "expected": [c["id"] for c in cases],
               "required": {"cases": sum(1 for r in results if "known_failure" not in r),
                            "passed": counts.get("pass", 0), "failed": counts.get("fail", 0)},
               "known_failures": {"cases": sum(1 for r in results if "known_failure" in r),

@@ -4,9 +4,10 @@
     python3 ci/auto-pigeon/selftest.py
 
 Covers: every script compiles; the authored regression files are what generate.py writes; the
-known-failure record names real cases; the workflow's pinning, permissions and gating; and the
-publication decision on fixtures — all targets present, an optional target absent, a required
-target absent or failed (nothing published), and a rerun meeting identical and differing bytes.
+known-failure record names real cases; the workflow's pinning, permissions, gating and light-CI
+contract; the publication decision on fixtures — all targets present, an optional target absent, a
+required target absent or failed (nothing published), and a rerun meeting identical and differing
+bytes; and test_ci_policy.py, the negative controls of smoke and full qualification.
 """
 
 import json
@@ -16,12 +17,13 @@ import re
 import subprocess
 import sys
 import tempfile
+import unittest
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import publish  # noqa: E402
-from common import (ACCEPTANCE_STEPS, OPTIONAL_PLATFORMS, PLATFORMS, REQUIRED_PLATFORMS, TAG_PREFIX, Failure,  # noqa: E402
+from common import (ACCEPTANCE_STEPS, OPTIONAL_PLATFORMS, PLATFORMS, REQUIRED_PLATFORMS, SMOKE_CASES, TAG_PREFIX, Failure,  # noqa: E402
                     write_json)
 
 REPO = HERE.parent.parent
@@ -33,6 +35,14 @@ def check(condition, message):
         sys.exit("selftest: " + message)
 
 
+def smoke_summary():
+    """A regression summary as regress.py and common.regress_summary leave it after a passing smoke run."""
+    cases = {cid: {"status": "pass", "leak": len(stages) == 1, "stages": {stage: 0 for stage in stages}} for cid, stages in SMOKE_CASES.items()}
+    return {"mode": "smoke", "exit": 0, "seconds": 1.0, "counts": {"pass": len(cases)}, "expected": list(cases), "cases": cases,
+            "required": {"cases": len(cases), "passed": len(cases), "failed": 0}, "q3map2_sha256": "0" * 64,
+            "known_failures": {"cases": 0, "still_failing": 0, "unexpected_pass": 0}}
+
+
 def fixture_artifacts(root, plan, platforms, failing=()):
     for platform in platforms:
         stem = plan["assets"][platform][:-len(".zip")]
@@ -42,13 +52,13 @@ def fixture_artifacts(root, plan, platforms, failing=()):
         z.write_bytes(("archive of %s" % platform).encode())
         digest = publish.sha256_file(z)
         write_json(d / (stem + ".package.json"), {"commit": plan["commit"], "banner": plan["banner"], "sha256": digest,
-                                                   "program_sha256": "0" * 64})
+                                                   "program_sha256": "0" * 64, "test_mode": "smoke", "regress": smoke_summary()})
         verdict = "fail" if platform in failing else "pass"
         steps = [{"status": "pass"}] * ACCEPTANCE_STEPS if verdict == "pass" else [{"status": "fail"}]
         write_json(root / ("acceptance-" + platform) / ("acceptance-%s.json" % platform),
                    {"verdict": verdict, "failure": "fixture failure", "commit": plan["commit"], "banner": plan["banner"],
-                    "archive_sha256": digest, "platform": platform, "steps": steps,
-                    "regress": {"required": {"passed": 35, "cases": 35}, "known_failures": {"still_failing": 2}, "cases": {}}})
+                    "archive_sha256": digest, "platform": platform, "steps": steps, "acceptance_mode": "smoke",
+                    "regress": smoke_summary()})
 
 
 def publication_fixtures():
@@ -67,13 +77,16 @@ def publication_fixtures():
         check([m[0] for m in missing] == list(OPTIONAL_PLATFORMS) and len(admitted) == len(REQUIRED_PLATFORMS),
               "an absent optional target is named as not published, the required ones admitted")
         manifest, notes = publish.manifest_and_notes(plan, admitted, missing, {"name": "s.tar.gz", "path": "x", "kind": "source",
-                                                                               "rebuilt_and_tested_from_the_archive": True},
+                                                                               "rebuilt_and_tested_from_the_archive": False},
                                                      "run", {"R04.m4.p08_nearby": {"mechanism": "M4", "failing": "9 points", "owner": "NEW_340"}})
         check(manifest["targets"]["linux-arm64"]["status"] == "not_published" and not manifest["targets"]["linux-arm64"]["required"],
               "the manifest must mark the missing optional target not_published")
         check(all(manifest["targets"][p]["status"] == "published" and manifest["targets"][p]["required"] for p in REQUIRED_PLATFORMS),
               "the manifest must mark every required target published and required")
-        check("R04.m4.p08_nearby" in notes and "still FAIL" in notes, "the notes must list the known failures as failing")
+        check("R04.m4.p08_nearby" in notes and "recorded as failing" in notes, "the notes must list the known failures as failing")
+        check("bounded smoke check" in notes and "did **not** run" in notes and "**did not rebuild it**" in notes,
+              "the notes must state the smoke coverage and what CI did not run")
+        check(manifest["targets"]["linux-amd64"]["qualification_mode"] == "smoke", "the manifest must name each target's coverage")
 
         for name, platforms, failing in (("no-macos-arm64", [p for p in PLATFORMS if p != "macos-arm64"], ()),
                                          ("failed-windows", PLATFORMS, ("windows-amd64",))):
@@ -106,6 +119,19 @@ def publication_fixtures():
             sys.exit("selftest: differing published bytes must stop a rerun")
 
 
+def light_ci(text):
+    """Operator decision, 2026-11-02: no full regressions, sanitizers or source rebuild in automatic CI (TESTING.md)."""
+    steps = "\n".join(line for line in text.splitlines() if not line.lstrip().startswith("#"))
+    for heavy in ("--sanitize", "--mark-rebuilt", "--full", "sanitizers:", "--no-regress"):
+        check(heavy not in steps, "automatic CI must not run %s: it is local qualification" % heavy)
+    builds = re.findall(r"build\.py --platform .*", steps)
+    check(len(builds) == 3 and all("--test-mode smoke" in b for b in builds), "every CI build must declare --test-mode smoke")
+    accepts = re.findall(r"accept\.py --platform .*", steps)
+    check(len(accepts) == 1 and accepts[0].rstrip().endswith("--smoke"), "CI acceptance must declare --smoke")
+    job = re.search(r"\n  accept:\n(.*?)\n  source:", steps, re.S).group(1)
+    check(re.search(r"timeout-minutes: 10\b", job) is not None, "the smoke-test job is bounded to ten minutes")
+
+
 def workflow_checks():
     text = WORKFLOW.read_text(encoding="utf-8")
     for use in re.findall(r"uses:\s*(\S+)", text):
@@ -119,9 +145,10 @@ def workflow_checks():
         rows = re.findall(r"\{ *platform: *%s,[^}]*\}" % platform, text)
         check(rows and all("candidate: true" in r for r in rows), "%s must be an optional (candidate: true) matrix row" % platform)
     publish_job = text.split("\n  publish:", 1)[1]
-    check(re.search(r"needs: \[plan, build, accept, source, sanitizers\]", publish_job) is not None,
-          "publish must need plan, build, accept, source and the sanitizer job")
+    check(re.search(r"needs: \[plan, build, accept, source\]", publish_job) is not None,
+          "publish must need plan, build, accept and source")
     check("startsWith(github.ref, 'refs/tags/" in publish_job, "publish must run only for a pushed tag")
+    light_ci(text)
     others = [p for p in (REPO / ".github" / "workflows").glob("*.y*ml") if p.name != WORKFLOW.name]
     for other in others:
         body = other.read_text(encoding="utf-8")
@@ -145,6 +172,8 @@ def main():
           "required and optional targets must partition the platforms")
     workflow_checks()
     publication_fixtures()
+    outcome = unittest.TextTestRunner(stream=sys.stderr, verbosity=0).run(unittest.defaultTestLoader.loadTestsFromName("test_ci_policy"))
+    check(outcome.wasSuccessful() and outcome.testsRun > 0, "the CI policy tests failed")
     print("selftest: ok")
 
 
