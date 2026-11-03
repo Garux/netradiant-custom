@@ -6267,6 +6267,167 @@
    "expect": {
     "leak": false
    },
+   "explanation": "The faces of the two walls are 0.18 degrees apart and meet exactly at the outer corner: an opening 0.14 wide at the inner corner that closes to nothing. Hint planes extend the joint past the corner, as neighbouring brushes do on a real map. Rounding alone left a portal 0.003 wide along that line, wider than the degeneracy tolerance.",
+   "id": "P06.corner.a",
+   "map": "P02_P05_portal_controls/maps/p06_corner_a.map",
+   "mechanism": "rounding",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -4664,
+      1832,
+      96
+     ],
+     "why": "room air"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -4848,
+      1732,
+      96
+     ],
+     "why": "inside the west wall"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a mitred corner closed in the source reads sealed"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The faces of the two walls are 0.18 degrees apart and meet exactly at the outer corner: an opening 0.14 wide at the inner corner that closes to nothing. Hint planes extend the joint past the corner, as neighbouring brushes do on a real map. Rounding alone left a portal 0.003 wide along that line, wider than the degeneracy tolerance.",
+   "id": "P06.corner.b",
+   "map": "P02_P05_portal_controls/maps/p06_corner_b.map",
+   "mechanism": "rounding",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      4936,
+      -3544,
+      96
+     ],
+     "why": "room air"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      4752,
+      -3644,
+      96
+     ],
+     "why": "inside the west wall"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a mitred corner closed in the source reads sealed"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The faces of the two walls are 0.18 degrees apart and meet exactly at the outer corner: an opening 0.14 wide at the inner corner that closes to nothing. Hint planes extend the joint past the corner, as neighbouring brushes do on a real map. Rounding alone left a portal 0.003 wide along that line, wider than the degeneracy tolerance.",
+   "id": "P06.corner.c",
+   "map": "P02_P05_portal_controls/maps/p06_corner_c.map",
+   "mechanism": "rounding",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -4088,
+      -2776,
+      96
+     ],
+     "why": "room air"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -4272,
+      -2876,
+      96
+     ],
+     "why": "inside the west wall"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a mitred corner closed in the source reads sealed"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The negative control of P06: move the south wall's mitre so the joint does not close, and the same map leaks.",
+   "id": "P06.corner.open",
+   "leak_route": [
+    {
+     "max": [
+      4769,
+      -3711,
+      160
+     ],
+     "min": [
+      4735,
+      -3745,
+      32
+     ],
+     "why": "through the joint"
+    }
+   ],
+   "map": "P02_P05_portal_controls/maps/p06_corner_open.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the same corner, its walls 0.25 apart at the outer corner: a real opening leaks"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The faces of the two walls are 0.18 degrees apart and meet exactly at the outer corner: an opening 0.14 wide at the inner corner that closes to nothing. Hint planes extend the joint past the corner, as neighbouring brushes do on a real map. Rounding alone left a portal 0.003 wide along that line, wider than the degeneracy tolerance.",
+   "id": "P06.corner.residual",
+   "map": "P02_P05_portal_controls/maps/p06_corner_residual.map",
+   "mechanism": "rounding",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      2056,
+      776,
+      96
+     ],
+     "why": "room air"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      1872,
+      676,
+      96
+     ],
+     "why": "inside the west wall"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a mitred corner closed in the source reads sealed"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
    "explanation": "Six 16-unit walls around 512 x 512 x 256 of air with a player start and a light. Every compiler must seal it, keep its air open, its walls solid and its six inner faces drawn. It is the positive control the other cases are variations of.",
    "id": "R01.room",
    "map": "R01_sealed_room/maps/r01_room.map",

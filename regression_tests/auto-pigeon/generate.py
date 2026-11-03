@@ -1001,6 +1001,37 @@ def wedge_hints():
             ("hint below", hint_block(((-k, 1, 0), (cross, y, 0)), around + [((0, -1, 0), (0, y - 16, 0))]))]
 
 
+def corner_room(ox, oy, apart=0.0):
+    """A room whose south and west walls meet in a mitre: the south wall's end runs at 45 degrees from the outer corner (ox, oy), the
+    west wall's 0.18 degrees off that. `apart` moves the south wall's end away from the corner, along its normal."""
+    z0, z1, x1, y1, inner = 32, 160, ox + 704, oy + 512, 32.2023
+    side = lambda a, b, c, out: Face(*oriented(a, b, c, out), CHECK)  # noqa: E731
+    shift = apart / math.sqrt(2)
+    south = [plane_face(n, p, CHECK) for n, p in (((0, -1, 0), (0, oy, 0)), ((0, 1, 0), (0, oy + 32, 0)), ((1, 0, 0), (x1, 0, 0)), ((0, 0, 1), (0, 0, z1)), ((0, 0, -1), (0, 0, z0)))]
+    south.append(side((ox + shift, oy - shift, z0), (ox + 32 + shift, oy + 32 - shift, z0), (ox + 32 + shift, oy + 32 - shift, z1), (-1, 1, 0)))
+    west = [plane_face(n, p, CHECK) for n, p in (((-1, 0, 0), (ox, 0, 0)), ((1, 0, 0), (ox + 32, 0, 0)), ((0, 1, 0), (0, y1, 0)), ((0, 0, 1), (0, 0, z1)), ((0, 0, -1), (0, 0, z0)))]
+    west.append(side((ox, oy, z0), (ox + 32, oy + inner, z0), (ox + 32, oy + inner, z1), (inner, -32, 0)))
+    return [("south wall", south), ("west wall", west), ("east wall", box_faces(x1, oy, z0, x1 + 32, y1, z1, CHECK)),
+            ("north wall", box_faces(ox, y1, z0, x1 + 32, y1 + 32, z1, CHECK)), ("floor", box_faces(ox, oy, z0 - 16, x1 + 32, y1 + 32, z0, CHECK)),
+            ("ceiling", box_faces(ox, oy, z1, x1 + 32, y1 + 32, z1 + 16, CHECK))]
+
+
+def corner_hints(ox, oy, which):
+    """Non-solid blocks in the void past the corner, each with one side on an extended plane of the joint."""
+    z0, z1, ax, ay = 40, 152, ox - 112, oy - 112
+    level = [((0, 0, 1), (0, 0, z1)), ((0, 0, -1), (0, 0, z0)), ((-1, 0, 0), (ax, 0, 0))]
+    out = []
+    if "P" in which:
+        out.append(("hint on the south wall's mitre", hint_block(((-1, 1, 0), (ox, oy, 0)), level + [((0, -1, 0), (0, ay, 0))])))
+    if "Q" in which:
+        out.append(("hint on the west wall's mitre", hint_block(((32.2023, -32, 0), (ox, oy, 0)), level + [((0, 1, 0), (0, oy + 32, 0))])))
+    if "X" in which:
+        out.append(("hint on the west wall's outer face", box_faces(ox - 32, oy - 64, z0, ox, oy - 32, z1, SKIP, {"+x": HINT})))
+    if "Y" in which:
+        out.append(("hint on the south wall's outer face", box_faces(ox - 64, oy - 32, z0, ox - 32, oy, z1, SKIP, {"+y": HINT})))
+    return out
+
+
 def p_cases():
     files, cases = {}, []
 
@@ -1074,6 +1105,24 @@ def p_cases():
             slot_wall(lo, hi) + wedge_hints(), True, [],
             "The negative control of the repair for P01 and P05, where it works. A brush is only ever taken for solid where it "
             "is: the slot is not brush, so it stays open.", extra={"leak_route": slot_route(lo, hi)})
+    # P06: two walls meet at a mitre closed at the outer corner, rev 11's joint on a six-brush room
+    def room_at(ox, oy):
+        return (("info_player_start", (ox + 200, oy + 200, 64)), ("light", (ox + 200, oy + 200, 128)))
+
+    for key, ox, oy, which in (("a", -4864, 1632, "PQXY"), ("b", 4736, -3744, "PQ"), ("c", -4288, -2976, "PQ"), ("residual", 1856, 576, "PQ")):
+        path = d + "p06_corner_%s.map" % key
+        files.update(write_map(path, brushes_text(corner_room(ox, oy) + corner_hints(ox, oy, which)), entities=room_at(ox, oy)))
+        cases.append(case("P06.corner." + key, "a mitred corner closed in the source reads sealed", "rounding", path, False,
+                          [{"kind": "open", "point": [ox + 200, oy + 200, 96], "why": "room air"},
+                           {"kind": "solid", "point": [ox + 16, oy + 100, 96], "why": "inside the west wall"}],
+                          "The faces of the two walls are 0.18 degrees apart and meet exactly at the outer corner: an opening 0.14 wide at "
+                          "the inner corner that closes to nothing. Hint planes extend the joint past the corner, as neighbouring brushes "
+                          "do on a real map. Rounding alone left a portal 0.003 wide along that line, wider than the degeneracy tolerance."))
+    ox, oy = 4736, -3744
+    files.update(write_map(d + "p06_corner_open.map", brushes_text(corner_room(ox, oy, 0.25) + corner_hints(ox, oy, "PQ")), entities=room_at(ox, oy)))
+    cases.append(case("P06.corner.open", "the same corner, its walls 0.25 apart at the outer corner: a real opening leaks", None, d + "p06_corner_open.map", True, [],
+                      "The negative control of P06: move the south wall's mitre so the joint does not close, and the same map leaks.",
+                      extra={"leak_route": [{"min": [ox - 1, oy - 1, 32], "max": [ox + 33, oy + 33, 160], "why": "through the joint"}]}))
     return files, cases
 
 

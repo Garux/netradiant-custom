@@ -327,3 +327,69 @@ P05.wedge.slot_band: the same wedge with a real slot 0.08 wide, through the wedg
 
   The negative control of the repair for P01 and P05, where it works. A brush is only ever taken for
   solid where it is: the slot is not brush, so it stays open.
+
+
+P06.corner.a: a mitred corner closed in the source reads sealed
+  map: maps/p06_corner_a.map
+  mechanism: rounding
+  the source is sealed
+  stages: bsp
+
+  The faces of the two walls are 0.18 degrees apart and meet exactly at the outer corner: an opening
+  0.14 wide at the inner corner that closes to nothing. Hint planes extend the joint past the corner,
+  as neighbouring brushes do on a real map. Rounding alone left a portal 0.003 wide along that line,
+  wider than the degeneracy tolerance.
+
+  - open [-4664, 1832, 96]: room air
+  - solid [-4848, 1732, 96]: inside the west wall
+
+P06.corner.b: a mitred corner closed in the source reads sealed
+  map: maps/p06_corner_b.map
+  mechanism: rounding
+  the source is sealed
+  stages: bsp
+
+  The faces of the two walls are 0.18 degrees apart and meet exactly at the outer corner: an opening
+  0.14 wide at the inner corner that closes to nothing. Hint planes extend the joint past the corner,
+  as neighbouring brushes do on a real map. Rounding alone left a portal 0.003 wide along that line,
+  wider than the degeneracy tolerance.
+
+  - open [4936, -3544, 96]: room air
+  - solid [4752, -3644, 96]: inside the west wall
+
+P06.corner.c: a mitred corner closed in the source reads sealed
+  map: maps/p06_corner_c.map
+  mechanism: rounding
+  the source is sealed
+  stages: bsp
+
+  The faces of the two walls are 0.18 degrees apart and meet exactly at the outer corner: an opening
+  0.14 wide at the inner corner that closes to nothing. Hint planes extend the joint past the corner,
+  as neighbouring brushes do on a real map. Rounding alone left a portal 0.003 wide along that line,
+  wider than the degeneracy tolerance.
+
+  - open [-4088, -2776, 96]: room air
+  - solid [-4272, -2876, 96]: inside the west wall
+
+P06.corner.residual: a mitred corner closed in the source reads sealed
+  map: maps/p06_corner_residual.map
+  mechanism: rounding
+  the source is sealed
+  stages: bsp
+
+  The faces of the two walls are 0.18 degrees apart and meet exactly at the outer corner: an opening
+  0.14 wide at the inner corner that closes to nothing. Hint planes extend the joint past the corner,
+  as neighbouring brushes do on a real map. Rounding alone left a portal 0.003 wide along that line,
+  wider than the degeneracy tolerance.
+
+  - open [2056, 776, 96]: room air
+  - solid [1872, 676, 96]: inside the west wall
+
+P06.corner.open: the same corner, its walls 0.25 apart at the outer corner: a real opening leaks
+  map: maps/p06_corner_open.map
+  mechanism: none (control)
+  the source leaks
+  stages: bsp
+
+  The negative control of P06: move the south wall's mitre so the joint does not close, and the same
+  map leaks.
