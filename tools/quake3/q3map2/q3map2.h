@@ -1572,6 +1572,7 @@ void                        WriteBSPBrushMap( const char *name, const brushlist_
 
 void                        FilterDetailBrushesIntoTree( const entity_t& e, tree_t& tree );
 void                        FilterStructuralBrushesIntoTree( const entity_t& e, tree_t& tree );
+bool                        CutSliverLeaves();
 
 bool                        WindingIsTiny( const winding_t& w );
 
@@ -1677,6 +1678,8 @@ inline portal_t             *AllocPortal(){ return new portal_t(); } // zero ini
 inline void                 FreePortal( portal_t *p ){ delete p; }
 
 void                        MakeTreePortals( tree_t& tree );
+void                        SplitLeafOnPlane( node_t *leaf, int planenum );
+void                        ClearFlood( tree_t& tree );
 
 
 /* leakfile.c */

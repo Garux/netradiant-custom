@@ -489,6 +489,38 @@ static void CalcNodeBounds( node_t *node ){
 
 /*
    ==================
+   SplitLeafOnPlane
+
+   A leaf becomes a node on this plane: two new leaves take its portals, with a portal between them.
+   BaseWindingForNode is exact here. MakeNodePortal goes on to chop it by the leaf's portals at CLIP_EPSILON, and across
+   a leaf thinner than that every point of the winding is ON the plane, which empties it: a passage would close.
+   ==================
+ */
+void SplitLeafOnPlane( node_t *leaf, int planenum ){
+	leaf->planenum = planenum & ~1;
+	leaf->compileFlags = 0;
+	leaf->has_structural_children = true;
+	for ( int i = 0; i < 2; ++i ) {
+		leaf->children[i] = AllocNode();
+		leaf->children[i]->parent = leaf;
+		leaf->children[i]->planenum = PLANENUM_LEAF;
+		leaf->children[i]->has_structural_children = false;
+	}
+	winding_t w = BaseWindingForNode( leaf );
+	if ( !w.empty() && !PortalWindingIsDegenerate( w ) ) {
+		portal_t *portal = AllocPortal();
+		portal->plane = mapplanes[leaf->planenum];
+		portal->onnode = leaf;
+		portal->winding.swap( w );
+		AddPortalToNodes( portal, leaf->children[eFront], leaf->children[eBack] );
+	}
+	SplitNodePortals( leaf );
+	CalcNodeBounds( leaf->children[eFront] );
+	CalcNodeBounds( leaf->children[eBack] );
+}
+
+/*
+   ==================
    MakeTreePortals_r
    ==================
  */
@@ -601,6 +633,21 @@ static bool PlaceOccupant( node_t *headnode, const Vector3& origin, const entity
 	FloodPortals( node, skybox );
 
 	return true;
+}
+
+/* forget a flood, so that a changed tree can be flooded again */
+static void ClearFlood_r( node_t *node ){
+	node->occupied = 0;
+	node->occupant = nullptr;
+	node->skybox = false;
+	if ( node->planenum != PLANENUM_LEAF ) {
+		ClearFlood_r( node->children[eFront] );
+		ClearFlood_r( node->children[eBack] );
+	}
+}
+
+void ClearFlood( tree_t& tree ){
+	ClearFlood_r( tree.headnode );
 }
 
 /*
