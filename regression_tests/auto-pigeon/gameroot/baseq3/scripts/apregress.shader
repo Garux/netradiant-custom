@@ -95,3 +95,25 @@ textures/AUPCHK1
 		rgbGen identity
 	}
 }
+
+// A hint side: its plane is taken before the faces of the structural brushes (HINT_PRIORITY), which is how a
+// case chooses the order of the tree. The brushes that carry it are not solid.
+textures/apreg/hint
+{
+	surfaceparm nodraw
+	surfaceparm nonsolid
+	surfaceparm structural
+	surfaceparm trans
+	surfaceparm noimpact
+	surfaceparm hint
+}
+
+textures/apreg/skip
+{
+	surfaceparm nodraw
+	surfaceparm nonsolid
+	surfaceparm structural
+	surfaceparm trans
+	surfaceparm noimpact
+	surfaceparm skip
+}

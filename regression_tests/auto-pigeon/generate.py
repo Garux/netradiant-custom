@@ -308,6 +308,9 @@ PIPE_MAPS = {
     "R05_p10_shape/maps/r05_p10_base.map": "4cedfb8a128baecdd220b445b58790c77346a5a5f46c752a259bb5027fc81a9f",
     "R06_p08_sealed/maps/r06_p08_base.map": "b585fbde31e97b256393d80e297cb3ca562699a1d7d6acc3302a63652ce9825c",
     "R11_p10_nearby_sliver/maps/r11_p10_nearby.map": "accf8b91c03950ff9e855a262f491bf058dea2d2cc71f3ddff76c286cb3da791",
+    "P01_bend_slivers/maps/p01_bend_a.map": "fb3c1602744f2734dd6bb9d3ee5097c997996350608c9f60b54b56bf137157d5",
+    "P01_bend_slivers/maps/p01_bend_b.map": "2a9b5b56f4c4ac27d10e6dc781df75f2c36a3f474767beeb4def9679a7eba50d",
+    "P01_bend_slivers/maps/p01_rotate.map": "ae10e73b15ad574ec9d30573d6ac4ce84bbf5de64b3b32e595a35ae152dbe2fa",
 }
 # The face samples that decide these cases, from the source maps' own faces (full precision): the point and the
 # outward normal of the face, a point the source says is a visible face of that texture.
@@ -928,6 +931,152 @@ def upstream_cases():
     return out
 
 
+# ---------------------------------------------------------------- P: portal and narrow-opening qualification (NEW_382)
+
+# Probes of the P01 corridors, read off the source planes: each solid point lies inside a declared brush, the first at
+# the deepest point of the route the false leak took through it where there is one, the others at brush centres; each
+# air point is on the interior side of that route, at least 16 from every brush.
+P01_PROBES = {'p01_bend_a.map': {'solid': [[428.711, -443.931, -246.313], [429.4, -514.212, -514.257], [545.247, -378.25, -274.702], [527.793, -415.308, -312.194]], 'air': [[418.0, -169.0, -173.0], [500.658, -312.235, -309.483], [530.438, -265.31, -276.911]]}, 'p01_bend_b.map': {'solid': [[212.495, -243.527, -247.406], [391.293, -62.55, -142.996], [373.906, -34.75, -124.531]], 'air': [[207.0, -82.0, -86.0], [222.352, -222.407, -218.694], [240.063, -214.73, -198.517]]}, 'p01_rotate.map': {'solid': [[-7.357, -235.59, 430.336], [167.646, 25.092, 617.647], [233.841, -190.074, 495.944], [127.685, 27.617, 583.416]], 'air': [[26.0, -59.0, 376.0], [-35.995, -85.867, 459.737], [0.0, -92.095, 406.668]]}}
+
+P01_EXPLANATION = (
+    "A corridor from Auto-Pigeon's own BEND test generator (no corpus, no game data), reduced brush by brush while the "
+    "release still leaked, upstream sealed and an independent solver of the source brushes found no air path: the source is "
+    "closed, to the 1e-6 the map text is written with. Two near-parallel node planes from neighbouring pieces cross a brush "
+    "and bound a wedge thinner than 0.1. SplitBrush keeps a fragment reaching less than 0.1 past a plane whole on its other "
+    "side, so every fragment stays out of the wedge and a leaf inside the brush is left non-opaque: air inside solid. "
+    "Upstream reads this sealed only because it drops the narrow portals into that leaf, and with them real openings.")
+HINT, SKIP = "apreg/hint", "apreg/skip"
+
+
+def plane_face(normal, point, tex):
+    """A brush side on the plane through point with this outward normal."""
+    length = math.sqrt(sum(v * v for v in normal))
+    n = [v / length for v in normal]
+    axis = min(range(3), key=lambda i: abs(n[i]))
+    up = [0.0, 0.0, 0.0]
+    up[axis] = 1.0
+    u = (n[1] * up[2] - n[2] * up[1], n[2] * up[0] - n[0] * up[2], n[0] * up[1] - n[1] * up[0])
+    length = math.sqrt(sum(v * v for v in u))
+    u = [v / length for v in u]
+    v = (n[1] * u[2] - n[2] * u[1], n[2] * u[0] - n[0] * u[2], n[0] * u[1] - n[1] * u[0])
+    return Face(*oriented(tuple(point[i] + 64 * u[i] for i in range(3)), tuple(point), tuple(point[i] + 64 * v[i] for i in range(3)), n), tex)
+
+
+def board(seam, north):
+    """The +x wall from its south end to the seam, or from the seam to its north end. The end face is y = a + b x + c z."""
+    x0, y0, z0, x1, y1, z1 = ROOM
+    a, b, c = seam
+    s = -1 if north else 1
+    return ("+x wall, %s of the seam" % ("north" if north else "south"),
+            [plane_face(n, p, CHECK) for n, p in (((1, 0, 0), (x1 + WALL, 0, 0)), ((-1, 0, 0), (x1, 0, 0)), ((0, 0, 1), (0, 0, z1)), ((0, 0, -1), (0, 0, z0)),
+                                                  (((0, 1, 0), (0, y1, 0)) if north else ((0, -1, 0), (0, y0, 0))), ((-b * s, s, -c * s), (0, a, 0)))])
+
+
+def seam_wall(south, north):
+    return [b for b in room_brushes() if b[0] != "+x wall"] + [board(south, False), board(north, True)]
+
+
+def hint_block(hint, sides):
+    """A non-solid block: the one side `hint` is a hint, the rest of `sides` skip."""
+    return [plane_face(hint[0], hint[1], HINT)] + [plane_face(n, p, SKIP) for n, p in sides]
+
+
+def needle_hints(width):
+    """On the axial hint plane y = 64 the traces of two hint planes, 90 degrees apart everywhere else, differ by `width`
+    over the room's height: a portal of that plane is cut to a needle 240 long and `width` wide at its base."""
+    z0, z1, y0, y1 = 8, 248, 8, 120
+    e = width / (z1 - z0)
+    around = [((0, 0, 1), (0, 0, z1)), ((0, 0, -1), (0, 0, z0)), ((0, 1, 0), (0, y1, 0)), ((0, -1, 0), (0, y0, 0))]
+    return [("hint P, x = y", hint_block(((1, -1, 0), (64, 64, z0)), around + [((-1, 0, 0), (-40, 0, 0))])),
+            ("hint Q, the needle's other side", hint_block(((-1, -1, e), (64, 64, z0)), around + [((1, 0, 0), (168, 0, 0))])),
+            ("hint plane the needle lies on, y = 64", box_faces(-32, 32, z0, 160, 64, z1, SKIP, {"+y": HINT}))]
+
+
+def wedge_hints():
+    """Two hint planes 0.1 degrees apart that cross beyond the +x wall: inside the wall they lie 0.05 to 0.08 apart."""
+    k = math.tan(math.radians(0.1)) / 2
+    z0, z1, x0, x1, cross, y = 8, 248, 8, 248, 300, 100
+    around = [((0, 0, 1), (0, 0, z1)), ((0, 0, -1), (0, 0, z0)), ((1, 0, 0), (x1, 0, 0)), ((-1, 0, 0), (x0, 0, 0))]
+    return [("hint above", hint_block(((-k, -1, 0), (cross, y, 0)), around + [((0, 1, 0), (0, y + 16, 0))])),
+            ("hint below", hint_block(((-k, 1, 0), (cross, y, 0)), around + [((0, -1, 0), (0, y - 16, 0))]))]
+
+
+def p_cases():
+    files, cases = {}, []
+
+    def add(cid, title, path, named, leak, probes, explanation, mechanism=None, stages=("bsp",), extra=None):
+        files.update(write_map(path, brushes_text(named)))
+        cases.append(case(cid, title, mechanism, path, leak, probes, explanation, stages=stages, extra=extra))
+
+    for key, title in (("p01_bend_a", "a first BEND"), ("p01_bend_b", "a first BEND, a second shape"), ("p01_rotate", "a rotated BEND")):
+        probes = P01_PROBES[key + ".map"]
+        cases.append(case("P01.sliver." + key[4:], "air inside solid: %s, closed in the source, read as leaking" % title, "sliver",
+                          "P01_bend_slivers/maps/%s.map" % key, False,
+                          [{"kind": "open", "point": p, "why": "air on the interior side of the wall"} for p in probes["air"]]
+                          + [{"kind": "solid", "point": p, "why": "inside a declared brush"} for p in probes["solid"]],
+                          P01_EXPLANATION, stages=("bsp", "vis", "light")))
+
+    d = "P02_P05_portal_controls/maps/"
+    x1, z1 = ROOM[3], ROOM[5]
+    wall_probes = room_probes() + [{"kind": "solid", "point": [x1 + 8, y, 128], "why": "inside the +x wall"} for y in (-100, 90, 110)]
+    # P02: rev 11's shape, two boards of one wall meeting at a near-parallel seam
+    tilt = math.tan(math.radians(0.18))
+    add("P02.mitre.overlap", "control: two boards of a wall overlap at a near-parallel seam: closed", d + "p02_overlap.map",
+        seam_wall((100.06, 0, 0.0001), (99.94, 0, -0.0001)), False, wall_probes,
+        "The seam faces are near-parallel and the boards overlap 0.12 to 0.17 along it. Nothing is open.", stages=("bsp", "vis", "light"))
+    add("P02.mitre.shared", "control: two boards share one tilted face: closed", d + "p02_shared.map",
+        seam_wall((100 - tilt * 64, 0, tilt / 2), (100 - tilt * 64, 0, tilt / 2)), False, wall_probes,
+        "One seam plane, 0.09 degrees off the axis, shared by both boards.")
+    for w, name in ((0.14, "014"), (0.2, "02")):
+        add("P02.mitre.open_" + name, "a real near-parallel seam, closed at the floor and %s wide at the ceiling, leaks" % num(w), d + "p02_open_%s.map" % name,
+            seam_wall((100, 0, 0), (100, 0, w / 256)), True, [],
+            "The opening traced on a real map: seam faces a fraction of a degree apart, opening with height. A slot this "
+            "shape is real, so the map leaks through the seam's wide end. Upstream drops the portals and reads it sealed; "
+            "that disagreement is the fork being right. The route must cross the seam.",
+            extra={"leak_route": [{"min": [x1 - 1, 99.5, 128], "max": [x1 + WALL + 1, 100.5, z1], "why": "through the seam"}]})
+    # P03: needles around the portal stage's degeneracy threshold
+    for w, name in ((0.0005, "00005"), (0.001, "0001"), (0.0015, "00015"), (0.002, "0002"), (0.003, "0003"), (0.05, "005")):
+        add("P03.needle.closed_" + name, "a sealed room with a needle portal %s wide stays sealed" % num(w), d + "p03_closed_%s.map" % name,
+            room_brushes() + needle_hints(w), False, wall_probes,
+            "A portal 240 long is cut to a needle around the degeneracy tolerance (portals.cpp, about 0.001 plus float "
+            "rounding). A rejected piece folds the whole portal into the other child: if a live piece past the fold could join "
+            "leaves that do not touch, as EricW's folded portal did at 0.12, this sealed room would leak.")
+    for w, name in ((0.001, "0001"), (0.002, "0002")):
+        add("P03.needle.open_" + name, "the same needle %s wide in a room with a real slot: the slot leaks" % num(w), d + "p03_open_%s.map" % name,
+            slot_wall(-200.5, -199.5) + needle_hints(w), True, [],
+            "The negative control of the sealed needles: the leak goes through the real slot.", extra={"leak_route": slot_route(-200.5, -199.5)})
+    # P04: input that is not a brush. It cannot be a sealed pass
+    room = brushes_text(room_brushes())
+    start = room.index("( ")
+    first = room[start:room.index("\n", start)]
+    points = first[:first.rindex(")") + 1].replace(") (", ")|(").split("|")
+    for key, why, broken in (("repeated", "two equal points", [points[0], points[0], points[2]]),
+                             ("collinear", "three collinear points", [points[0], points[1], "( 272 -272 16 )"]),
+                             ("nan", "a coordinate that is not a number", [points[0], "( nan 0 0 )", points[2]]),
+                             ("inf", "an infinite coordinate", [points[0], "( inf 0 0 )", points[2]]),
+                             ("huge", "a coordinate far past any world", [points[0], "( 1e300 0 0 )", points[2]]),
+                             ("garbage", "text where a number belongs", [points[0], "( abc 0 0 )", points[2]])):
+        path = d + "p04_%s.map" % key
+        files.update(write_map(path, room.replace(first, " ".join(broken) + first[first.rindex(")") + 1:], 1)))
+        cases.append(case("P04.degenerate." + key, "a floor side with %s: the outcome is a leak, never a sealed pass" % why, None, path, True, [],
+                          "The side makes no plane, so the brush cannot enclose anything and the room is open. The compiler must "
+                          "finish and report that leak: an input it cannot use must not read sealed. Upstream's base crashes "
+                          "on the repeated, collinear and huge forms."))
+    # P05: the wedge leaf that runs out through the wall
+    add("P05.wedge.through_wall", "two near-parallel hint planes cross a wall: closed, read as leaking", d + "p05_through_wall.map",
+        room_brushes() + wedge_hints(), False, wall_probes + [{"kind": "solid", "point": [x1 + 8, 100, 128], "why": "the wall, between the two planes"}],
+        "The planes are 0.05 to 0.08 apart inside the wall. The sliver mechanism of P01 on the smallest map that shows it, "
+        "except that here no plane of the wall bounds the wedge: the wall's faces, reaching less than 0.1 past the second plane, "
+        "do not enter it either, so one leaf runs from the room through the wall to the void.", mechanism="sliver")
+    for key, lo, hi, what in (("through", 99.9375, 100.0625, "through the wedge"), ("beside", 100.2, 100.325, "beside the wedge"),
+                              ("band", 99.96, 100.04, "0.08 wide, through the wedge")):
+        add("P05.wedge.slot_" + key, "the same wedge with a real slot %s: the slot leaks" % what, d + "p05_slot_%s.map" % key,
+            slot_wall(lo, hi) + wedge_hints(), True, [],
+            "The negative control of the repair for P01 and P05, where it works. A brush is only ever taken for solid where it "
+            "is: the slot is not brush, so it stays open.", extra={"leak_route": slot_route(lo, hi)})
+    return files, cases
+
+
 def wrap(text, width=100):
     lines, line = [], ""
     for word in text.split():
@@ -941,7 +1090,7 @@ def wrap(text, width=100):
 
 def build():
     files, cases = {}, []
-    for part in (r01, r02, r03, pipes, r07, r08, r09, r10, g01_g05, g02, g06, g07, s_cases):
+    for part in (r01, r02, r03, pipes, r07, r08, r09, r10, g01_g05, g02, g06, g07, s_cases, p_cases):
         f, c = part()
         files.update(f)
         cases.extend(c)

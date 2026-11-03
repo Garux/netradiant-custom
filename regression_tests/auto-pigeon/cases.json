@@ -4613,6 +4613,1660 @@
    "expect": {
     "leak": false
    },
+   "explanation": "A corridor from Auto-Pigeon's own BEND test generator (no corpus, no game data), reduced brush by brush while the release still leaked, upstream sealed and an independent solver of the source brushes found no air path: the source is closed, to the 1e-6 the map text is written with. Two near-parallel node planes from neighbouring pieces cross a brush and bound a wedge thinner than 0.1. SplitBrush keeps a fragment reaching less than 0.1 past a plane whole on its other side, so every fragment stays out of the wedge and a leaf inside the brush is left non-opaque: air inside solid. Upstream reads this sealed only because it drops the narrow portals into that leaf, and with them real openings.",
+   "id": "P01.sliver.bend_a",
+   "map": "P01_bend_slivers/maps/p01_bend_a.map",
+   "mechanism": "sliver",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      418.0,
+      -169.0,
+      -173.0
+     ],
+     "why": "air on the interior side of the wall"
+    },
+    {
+     "kind": "open",
+     "point": [
+      500.658,
+      -312.235,
+      -309.483
+     ],
+     "why": "air on the interior side of the wall"
+    },
+    {
+     "kind": "open",
+     "point": [
+      530.438,
+      -265.31,
+      -276.911
+     ],
+     "why": "air on the interior side of the wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      428.711,
+      -443.931,
+      -246.313
+     ],
+     "why": "inside a declared brush"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      429.4,
+      -514.212,
+      -514.257
+     ],
+     "why": "inside a declared brush"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      545.247,
+      -378.25,
+      -274.702
+     ],
+     "why": "inside a declared brush"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      527.793,
+      -415.308,
+      -312.194
+     ],
+     "why": "inside a declared brush"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "air inside solid: a first BEND, closed in the source, read as leaking"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A corridor from Auto-Pigeon's own BEND test generator (no corpus, no game data), reduced brush by brush while the release still leaked, upstream sealed and an independent solver of the source brushes found no air path: the source is closed, to the 1e-6 the map text is written with. Two near-parallel node planes from neighbouring pieces cross a brush and bound a wedge thinner than 0.1. SplitBrush keeps a fragment reaching less than 0.1 past a plane whole on its other side, so every fragment stays out of the wedge and a leaf inside the brush is left non-opaque: air inside solid. Upstream reads this sealed only because it drops the narrow portals into that leaf, and with them real openings.",
+   "id": "P01.sliver.bend_b",
+   "map": "P01_bend_slivers/maps/p01_bend_b.map",
+   "mechanism": "sliver",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      207.0,
+      -82.0,
+      -86.0
+     ],
+     "why": "air on the interior side of the wall"
+    },
+    {
+     "kind": "open",
+     "point": [
+      222.352,
+      -222.407,
+      -218.694
+     ],
+     "why": "air on the interior side of the wall"
+    },
+    {
+     "kind": "open",
+     "point": [
+      240.063,
+      -214.73,
+      -198.517
+     ],
+     "why": "air on the interior side of the wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      212.495,
+      -243.527,
+      -247.406
+     ],
+     "why": "inside a declared brush"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      391.293,
+      -62.55,
+      -142.996
+     ],
+     "why": "inside a declared brush"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      373.906,
+      -34.75,
+      -124.531
+     ],
+     "why": "inside a declared brush"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "air inside solid: a first BEND, a second shape, closed in the source, read as leaking"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A corridor from Auto-Pigeon's own BEND test generator (no corpus, no game data), reduced brush by brush while the release still leaked, upstream sealed and an independent solver of the source brushes found no air path: the source is closed, to the 1e-6 the map text is written with. Two near-parallel node planes from neighbouring pieces cross a brush and bound a wedge thinner than 0.1. SplitBrush keeps a fragment reaching less than 0.1 past a plane whole on its other side, so every fragment stays out of the wedge and a leaf inside the brush is left non-opaque: air inside solid. Upstream reads this sealed only because it drops the narrow portals into that leaf, and with them real openings.",
+   "id": "P01.sliver.rotate",
+   "map": "P01_bend_slivers/maps/p01_rotate.map",
+   "mechanism": "sliver",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      26.0,
+      -59.0,
+      376.0
+     ],
+     "why": "air on the interior side of the wall"
+    },
+    {
+     "kind": "open",
+     "point": [
+      -35.995,
+      -85.867,
+      459.737
+     ],
+     "why": "air on the interior side of the wall"
+    },
+    {
+     "kind": "open",
+     "point": [
+      0.0,
+      -92.095,
+      406.668
+     ],
+     "why": "air on the interior side of the wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -7.357,
+      -235.59,
+      430.336
+     ],
+     "why": "inside a declared brush"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      167.646,
+      25.092,
+      617.647
+     ],
+     "why": "inside a declared brush"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      233.841,
+      -190.074,
+      495.944
+     ],
+     "why": "inside a declared brush"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      127.685,
+      27.617,
+      583.416
+     ],
+     "why": "inside a declared brush"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "air inside solid: a rotated BEND, closed in the source, read as leaking"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The opening traced on a real map: seam faces a fraction of a degree apart, opening with height. A slot this shape is real, so the map leaks through the seam's wide end. Upstream drops the portals and reads it sealed; that disagreement is the fork being right. The route must cross the seam.",
+   "id": "P02.mitre.open_014",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.5,
+      256
+     ],
+     "min": [
+      255,
+      99.5,
+      128
+     ],
+     "why": "through the seam"
+    }
+   ],
+   "map": "P02_P05_portal_controls/maps/p02_open_014.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a real near-parallel seam, closed at the floor and 0.14 wide at the ceiling, leaks"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The opening traced on a real map: seam faces a fraction of a degree apart, opening with height. A slot this shape is real, so the map leaks through the seam's wide end. Upstream drops the portals and reads it sealed; that disagreement is the fork being right. The route must cross the seam.",
+   "id": "P02.mitre.open_02",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.5,
+      256
+     ],
+     "min": [
+      255,
+      99.5,
+      128
+     ],
+     "why": "through the seam"
+    }
+   ],
+   "map": "P02_P05_portal_controls/maps/p02_open_02.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a real near-parallel seam, closed at the floor and 0.2 wide at the ceiling, leaks"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The seam faces are near-parallel and the boards overlap 0.12 to 0.17 along it. Nothing is open.",
+   "id": "P02.mitre.overlap",
+   "map": "P02_P05_portal_controls/maps/p02_overlap.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      -100,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      90,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      110,
+      128
+     ],
+     "why": "inside the +x wall"
+    }
+   ],
+   "stages": [
+    "bsp",
+    "vis",
+    "light"
+   ],
+   "title": "control: two boards of a wall overlap at a near-parallel seam: closed"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "One seam plane, 0.09 degrees off the axis, shared by both boards.",
+   "id": "P02.mitre.shared",
+   "map": "P02_P05_portal_controls/maps/p02_shared.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      -100,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      90,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      110,
+      128
+     ],
+     "why": "inside the +x wall"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "control: two boards share one tilted face: closed"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A portal 240 long is cut to a needle around the degeneracy tolerance (portals.cpp, about 0.001 plus float rounding). A rejected piece folds the whole portal into the other child: if a live piece past the fold could join leaves that do not touch, as EricW's folded portal did at 0.12, this sealed room would leak.",
+   "id": "P03.needle.closed_00005",
+   "map": "P02_P05_portal_controls/maps/p03_closed_00005.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      -100,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      90,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      110,
+      128
+     ],
+     "why": "inside the +x wall"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a sealed room with a needle portal 0.0005 wide stays sealed"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A portal 240 long is cut to a needle around the degeneracy tolerance (portals.cpp, about 0.001 plus float rounding). A rejected piece folds the whole portal into the other child: if a live piece past the fold could join leaves that do not touch, as EricW's folded portal did at 0.12, this sealed room would leak.",
+   "id": "P03.needle.closed_0001",
+   "map": "P02_P05_portal_controls/maps/p03_closed_0001.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      -100,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      90,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      110,
+      128
+     ],
+     "why": "inside the +x wall"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a sealed room with a needle portal 0.001 wide stays sealed"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A portal 240 long is cut to a needle around the degeneracy tolerance (portals.cpp, about 0.001 plus float rounding). A rejected piece folds the whole portal into the other child: if a live piece past the fold could join leaves that do not touch, as EricW's folded portal did at 0.12, this sealed room would leak.",
+   "id": "P03.needle.closed_00015",
+   "map": "P02_P05_portal_controls/maps/p03_closed_00015.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      -100,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      90,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      110,
+      128
+     ],
+     "why": "inside the +x wall"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a sealed room with a needle portal 0.0015 wide stays sealed"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A portal 240 long is cut to a needle around the degeneracy tolerance (portals.cpp, about 0.001 plus float rounding). A rejected piece folds the whole portal into the other child: if a live piece past the fold could join leaves that do not touch, as EricW's folded portal did at 0.12, this sealed room would leak.",
+   "id": "P03.needle.closed_0002",
+   "map": "P02_P05_portal_controls/maps/p03_closed_0002.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      -100,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      90,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      110,
+      128
+     ],
+     "why": "inside the +x wall"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a sealed room with a needle portal 0.002 wide stays sealed"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A portal 240 long is cut to a needle around the degeneracy tolerance (portals.cpp, about 0.001 plus float rounding). A rejected piece folds the whole portal into the other child: if a live piece past the fold could join leaves that do not touch, as EricW's folded portal did at 0.12, this sealed room would leak.",
+   "id": "P03.needle.closed_0003",
+   "map": "P02_P05_portal_controls/maps/p03_closed_0003.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      -100,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      90,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      110,
+      128
+     ],
+     "why": "inside the +x wall"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a sealed room with a needle portal 0.003 wide stays sealed"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "A portal 240 long is cut to a needle around the degeneracy tolerance (portals.cpp, about 0.001 plus float rounding). A rejected piece folds the whole portal into the other child: if a live piece past the fold could join leaves that do not touch, as EricW's folded portal did at 0.12, this sealed room would leak.",
+   "id": "P03.needle.closed_005",
+   "map": "P02_P05_portal_controls/maps/p03_closed_005.map",
+   "mechanism": null,
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      -100,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      90,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      110,
+      128
+     ],
+     "why": "inside the +x wall"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a sealed room with a needle portal 0.05 wide stays sealed"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The negative control of the sealed needles: the leak goes through the real slot.",
+   "id": "P03.needle.open_0001",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      -199.49,
+      256
+     ],
+     "min": [
+      255,
+      -200.51,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "P02_P05_portal_controls/maps/p03_open_0001.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the same needle 0.001 wide in a room with a real slot: the slot leaks"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The negative control of the sealed needles: the leak goes through the real slot.",
+   "id": "P03.needle.open_0002",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      -199.49,
+      256
+     ],
+     "min": [
+      255,
+      -200.51,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "P02_P05_portal_controls/maps/p03_open_0002.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the same needle 0.002 wide in a room with a real slot: the slot leaks"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The side makes no plane, so the brush cannot enclose anything and the room is open. The compiler must finish and report that leak: an input it cannot use must not read sealed. Upstream's base crashes on the repeated, collinear and huge forms.",
+   "id": "P04.degenerate.collinear",
+   "map": "P02_P05_portal_controls/maps/p04_collinear.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a floor side with three collinear points: the outcome is a leak, never a sealed pass"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The side makes no plane, so the brush cannot enclose anything and the room is open. The compiler must finish and report that leak: an input it cannot use must not read sealed. Upstream's base crashes on the repeated, collinear and huge forms.",
+   "id": "P04.degenerate.garbage",
+   "map": "P02_P05_portal_controls/maps/p04_garbage.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a floor side with text where a number belongs: the outcome is a leak, never a sealed pass"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The side makes no plane, so the brush cannot enclose anything and the room is open. The compiler must finish and report that leak: an input it cannot use must not read sealed. Upstream's base crashes on the repeated, collinear and huge forms.",
+   "id": "P04.degenerate.huge",
+   "map": "P02_P05_portal_controls/maps/p04_huge.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a floor side with a coordinate far past any world: the outcome is a leak, never a sealed pass"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The side makes no plane, so the brush cannot enclose anything and the room is open. The compiler must finish and report that leak: an input it cannot use must not read sealed. Upstream's base crashes on the repeated, collinear and huge forms.",
+   "id": "P04.degenerate.inf",
+   "map": "P02_P05_portal_controls/maps/p04_inf.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a floor side with an infinite coordinate: the outcome is a leak, never a sealed pass"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The side makes no plane, so the brush cannot enclose anything and the room is open. The compiler must finish and report that leak: an input it cannot use must not read sealed. Upstream's base crashes on the repeated, collinear and huge forms.",
+   "id": "P04.degenerate.nan",
+   "map": "P02_P05_portal_controls/maps/p04_nan.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a floor side with a coordinate that is not a number: the outcome is a leak, never a sealed pass"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The side makes no plane, so the brush cannot enclose anything and the room is open. The compiler must finish and report that leak: an input it cannot use must not read sealed. Upstream's base crashes on the repeated, collinear and huge forms.",
+   "id": "P04.degenerate.repeated",
+   "map": "P02_P05_portal_controls/maps/p04_repeated.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "a floor side with two equal points: the outcome is a leak, never a sealed pass"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The negative control of the repair for P01 and P05, where it works. A brush is only ever taken for solid where it is: the slot is not brush, so it stays open.",
+   "id": "P05.wedge.slot_band",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.05000000000001,
+      256
+     ],
+     "min": [
+      255,
+      99.94999999999999,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "P02_P05_portal_controls/maps/p05_slot_band.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the same wedge with a real slot 0.08 wide, through the wedge: the slot leaks"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The negative control of the repair for P01 and P05, where it works. A brush is only ever taken for solid where it is: the slot is not brush, so it stays open.",
+   "id": "P05.wedge.slot_beside",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.33500000000001,
+      256
+     ],
+     "min": [
+      255,
+      100.19,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "P02_P05_portal_controls/maps/p05_slot_beside.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the same wedge with a real slot beside the wedge: the slot leaks"
+  },
+  {
+   "expect": {
+    "leak": true
+   },
+   "explanation": "The negative control of the repair for P01 and P05, where it works. A brush is only ever taken for solid where it is: the slot is not brush, so it stays open.",
+   "id": "P05.wedge.slot_through",
+   "leak_route": [
+    {
+     "max": [
+      273,
+      100.0725,
+      256
+     ],
+     "min": [
+      255,
+      99.9275,
+      0
+     ],
+     "why": "through the slot"
+    }
+   ],
+   "map": "P02_P05_portal_controls/maps/p05_slot_through.map",
+   "mechanism": null,
+   "probes": [],
+   "stages": [
+    "bsp"
+   ],
+   "title": "the same wedge with a real slot through the wedge: the slot leaks"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
+   "explanation": "The planes are 0.05 to 0.08 apart inside the wall. The sliver mechanism of P01 on the smallest map that shows it, except that here no plane of the wall bounds the wedge: the wall's faces, reaching less than 0.1 past the second plane, do not enter it either, so one leaf runs from the room through the wall to the void.",
+   "id": "P05.wedge.through_wall",
+   "map": "P02_P05_portal_controls/maps/p05_through_wall.map",
+   "mechanism": "sliver",
+   "probes": [
+    {
+     "kind": "open",
+     "point": [
+      -192,
+      -192,
+      128
+     ],
+     "why": "room air beside the player start"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -264,
+      -192,
+      128
+     ],
+     "why": "inside the -x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      -192,
+      -192,
+      -8
+     ],
+     "why": "inside the floor"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "point": [
+      -200,
+      -200,
+      0
+     ],
+     "why": "floor, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "point": [
+      -200,
+      -200,
+      256
+     ],
+     "why": "ceiling, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      1,
+      0,
+      0
+     ],
+     "point": [
+      -256,
+      -200,
+      64
+     ],
+     "why": "-x wall, seen from the room"
+    },
+    {
+     "kind": "drawn",
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "point": [
+      -200,
+      256,
+      64
+     ],
+     "why": "+y wall, seen from the room"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      -100,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      90,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      110,
+      128
+     ],
+     "why": "inside the +x wall"
+    },
+    {
+     "kind": "solid",
+     "point": [
+      264,
+      100,
+      128
+     ],
+     "why": "the wall, between the two planes"
+    }
+   ],
+   "stages": [
+    "bsp"
+   ],
+   "title": "two near-parallel hint planes cross a wall: closed, read as leaking"
+  },
+  {
+   "expect": {
+    "leak": false
+   },
    "explanation": "Six 16-unit walls around 512 x 512 x 256 of air with a player start and a light. Every compiler must seal it, keep its air open, its walls solid and its six inner faces drawn. It is the positive control the other cases are variations of.",
    "id": "R01.room",
    "map": "R01_sealed_room/maps/r01_room.map",
@@ -9306,6 +10960,9 @@
  "comment": "Written by generate.py; run by ci/auto-pigeon/regress.py. Known failures: known-failures.json.",
  "gameroot": "gameroot",
  "pipe_maps": {
+  "P01_bend_slivers/maps/p01_bend_a.map": "fb3c1602744f2734dd6bb9d3ee5097c997996350608c9f60b54b56bf137157d5",
+  "P01_bend_slivers/maps/p01_bend_b.map": "2a9b5b56f4c4ac27d10e6dc781df75f2c36a3f474767beeb4def9679a7eba50d",
+  "P01_bend_slivers/maps/p01_rotate.map": "ae10e73b15ad574ec9d30573d6ac4ce84bbf5de64b3b32e595a35ae152dbe2fa",
   "R04_m4_near_parallel/maps/r04_p08_nearby.map": "28b154f75417475465dab64509cd81c619c5971eb9fe9c3d98b0ff4e2b98895a",
   "R05_p10_shape/maps/r05_p10_base.map": "4cedfb8a128baecdd220b445b58790c77346a5a5f46c752a259bb5027fc81a9f",
   "R06_p08_sealed/maps/r06_p08_base.map": "b585fbde31e97b256393d80e297cb3ca562699a1d7d6acc3302a63652ce9825c",
