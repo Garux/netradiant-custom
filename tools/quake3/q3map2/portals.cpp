@@ -286,8 +286,11 @@ static void MakeHeadnodePortals( tree_t& tree ){
 #define SPLIT_WINDING_EPSILON   0.001
 static_assert( PORTAL_POINT_EPSILON == SPLIT_WINDING_EPSILON );
 
+/* in double: from a base winding of 2^16 and more, float rounding alone left a portal 0.003 wide where two planes meet in a
+   line, wider than PortalWindingIsDegenerate's tolerance, which only knows the rounding of the winding's final coordinates. On a
+   mitred corner closed in the source, that was enough for the outside fill to pass. */
 static winding_t   BaseWindingForNode( const node_t *node ){
-	winding_t w = BaseWindingForPlane( mapplanes[node->planenum].plane );
+	winding_accu_t w = BaseWindingForPlaneAccu( Plane3( mapplanes[node->planenum].plane ) );
 
 	// clip by all the parents
 	for ( const node_t *n = node->parent; n && !w.empty(); )
@@ -295,17 +298,17 @@ static winding_t   BaseWindingForNode( const node_t *node ){
 		const plane_t& plane = mapplanes[n->planenum];
 
 		if ( n->children[eFront] == node ) { // take front
-			ChopWindingInPlace( w, plane.plane, BASE_WINDING_EPSILON );
+			ChopWindingInPlaceAccu( w, Plane3( plane.plane ), BASE_WINDING_EPSILON );
 		}
 		else
 		{	// take back
-			ChopWindingInPlace( w, plane3_flipped( plane.plane ), BASE_WINDING_EPSILON );
+			ChopWindingInPlaceAccu( w, Plane3( plane3_flipped( plane.plane ) ), BASE_WINDING_EPSILON );
 		}
 		node = n;
 		n = n->parent;
 	}
 
-	return w;
+	return CopyWindingAccuToRegular( w );
 }
 
 //============================================================

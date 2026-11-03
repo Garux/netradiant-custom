@@ -1,5 +1,17 @@
 {
   "cases": {
+    "P06.corner.residual": {
+      "failing": "leak verdict leaked, the source is sealed",
+      "mechanism": "rounding",
+      "observed_on": {
+        "argv": "-bsp -game quake3 -threads 2 -meta",
+        "build": "local build of the commit below, linux-amd64, GCC 14 on Ubuntu 24.04 (sha256 221a9bfe14e96a7974d3fa5df9e40243a507ffb0964735934e62002c2598d59f)",
+        "observed": "2026-11-03",
+        "reader": "ci/auto-pigeon/regress.py + ci/auto-pigeon/ibsp.py",
+        "source": "auto-pigeon/q3map2 main 76b153bd plus BaseWindingForNode in double (NEW_382)"
+      },
+      "owner": "not repaired (NEW_382): a later split, not the base winding. SplitNodePortals clips in float with its own 0.001 band and leaves a portal 0.0023 wide at this one corner of 160 tried; the source is closed. PortalWindingIsDegenerate's tolerance is tied to that band on purpose (NEW_340A), so widening it is not the repair"
+    },
     "S08.band.00625": {
       "failing": "leak verdict: sealed, the source leaks",
       "mechanism": "on_epsilon_band",
