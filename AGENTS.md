@@ -49,6 +49,15 @@ a mutation target, and its handoff is written by that queue's tooling.
 - **Nothing private enters this public repository**: no host names or addresses, accounts,
   credentials, private corpus maps, retail game data or machine-specific paths. Fixtures here are
   authored for this repository.
+- <!-- github-issue-policy/1 --> **Deferred work is a GitHub Issue, never a backlog line** (HITL,
+  `NEW_397`). For each newly found unit of work this task cannot finish, search the owning
+  repository's open AND closed issues for a duplicate, then create or update an issue in the
+  repository its `origin` remote names, with evidence, a reproduction or failing gate, the owning
+  component, an acceptance condition, dependencies and handoff/commit links.
+  `$MAPPER_ROOT/LLM/backlog/` is read-only history: read it, never append to or delete from it. If
+  GitHub access fails or Issues are disabled (they are, on this fork, today), keep the ready-to-post draft in the handoff under
+  `GitHub issues not published` and mark that publication blocked. Policy and helper: AUT
+  `docs/agent/aut.github-issues.md`, `scripts/issue_policy.py`.
 
 ## Where things are
 
