@@ -729,8 +729,8 @@ GLFont *glfont_create( const char* family, int fontSize, const char* appPath ){
 		painter.begin( &image );
 		painter.setFont( font );
 		for( unsigned char c = 0; c < 128; ++c ){
-			const QRect rect = painter.boundingRect( QRect(), Qt::AlignmentFlag::AlignCenter, QString( c ) );
-			painter.drawText( c % 12 * wid, ( c / 12 + 1 ) * hei - metrics.descent(), QString( c ) );
+			const QRect rect = painter.boundingRect( QRect(), Qt::AlignmentFlag::AlignCenter, QString( QChar( c ) ) );
+			painter.drawText( c % 12 * wid, ( c / 12 + 1 ) * hei - metrics.descent(), QString( QChar( c ) ) );
 
 			if ( rect.width() > 0 && rect.height() > 0 ) {
 				gl().glNewList( font_list_base + c, GL_COMPILE );
@@ -752,7 +752,7 @@ GLFont *glfont_create( const char* family, int fontSize, const char* appPath ){
 				gl().glTexCoord2f( tx1, ty1 );
 				gl().glVertex2f( x1, y0 );
 				gl().glEnd();
-				gl().glTranslatef( metrics.horizontalAdvance( c ), 0, 0 );
+				gl().glTranslatef( metrics.horizontalAdvance( QChar( c ) ), 0, 0 );
 				gl().glEndList();
 			}
 		}

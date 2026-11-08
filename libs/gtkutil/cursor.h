@@ -28,21 +28,32 @@
 
 #include "debugging/debugging.h"
 
+#include <memory>
+
+// QMouseEvent is not copyable in Qt6
+inline std::unique_ptr<QMouseEvent> QMouseEvent_clone( const QMouseEvent& event ){
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 0, 0 )
+	return std::unique_ptr<QMouseEvent>( event.clone() );
+#else
+	return std::make_unique<QMouseEvent>( event );
+#endif
+}
+
 
 class DeferredMotion
 {
-	QMouseEvent m_mouseMoveEvent;
+	std::unique_ptr<QMouseEvent> m_mouseMoveEvent;
 	QTimer m_timer;
 public:
 	template<class Functor>
 	DeferredMotion( Functor func ) :
-		m_mouseMoveEvent( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() )
+		m_mouseMoveEvent( std::make_unique<QMouseEvent>( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() ) )
 	{
 		m_timer.setSingleShot( true );
-		m_timer.callOnTimeout( [this, func](){ func( m_mouseMoveEvent ); } );
+		m_timer.callOnTimeout( [this, func](){ func( *m_mouseMoveEvent ); } );
 	}
 	void motion( const QMouseEvent *event ){
-		m_mouseMoveEvent = *event;
+		m_mouseMoveEvent = QMouseEvent_clone( *event );
 		if( !m_timer.isActive() )
 			m_timer.start();
 	}
@@ -50,38 +61,38 @@ public:
 
 class DeferredMotion2
 {
-	QMouseEvent m_mouseMoveEvent;
+	std::unique_ptr<QMouseEvent> m_mouseMoveEvent;
 	const std::function<void( const QMouseEvent& )> m_func;
 public:
 	template<class Functor>
 	DeferredMotion2( Functor func ) :
-		m_mouseMoveEvent( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() ),
+		m_mouseMoveEvent( std::make_unique<QMouseEvent>( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() ) ),
 		m_func( func )
 	{
 	}
 	void motion( const QMouseEvent& event ){
-		m_mouseMoveEvent = event;
+		m_mouseMoveEvent = QMouseEvent_clone( event );
 	}
 	void invoke(){
-		m_func( m_mouseMoveEvent );
+		m_func( *m_mouseMoveEvent );
 	}
 	typedef MemberCaller<DeferredMotion2, void(), &DeferredMotion2::invoke> InvokeCaller;
 };
 
 class DeferredMotionDelta
 {
-	QMouseEvent m_mouseMoveEvent;
+	std::unique_ptr<QMouseEvent> m_mouseMoveEvent;
 	QTimer m_timer;
 	int m_delta_x = 0;
 	int m_delta_y = 0;
 public:
 	template<class Functor>
 	DeferredMotionDelta( Functor func ) :
-		m_mouseMoveEvent( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() )
+		m_mouseMoveEvent( std::make_unique<QMouseEvent>( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() ) )
 	{
 		m_timer.setSingleShot( true );
 		m_timer.callOnTimeout( [this, func](){
-			func( m_delta_x, m_delta_y, m_mouseMoveEvent );
+			func( m_delta_x, m_delta_y, *m_mouseMoveEvent );
 			m_delta_x = 0;
 			m_delta_y = 0;
 		} );
@@ -93,7 +104,7 @@ public:
 	void motion_delta( int x, int y, const QMouseEvent *event ){
 		m_delta_x += x;
 		m_delta_y += y;
-		m_mouseMoveEvent = *event;
+		m_mouseMoveEvent = QMouseEvent_clone( *event );
 		if( !m_timer.isActive() )
 			m_timer.start();
 	}
@@ -101,24 +112,24 @@ public:
 
 class DeferredMotionDelta2
 {
-	QMouseEvent m_mouseMoveEvent;
+	std::unique_ptr<QMouseEvent> m_mouseMoveEvent;
 	std::function<void( int, int, const QMouseEvent& )> m_func;
 	int m_delta_x = 0;
 	int m_delta_y = 0;
 public:
 	template<class Functor>
 	DeferredMotionDelta2( Functor func ) :
-		m_mouseMoveEvent( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() ),
+		m_mouseMoveEvent( std::make_unique<QMouseEvent>( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() ) ),
 		m_func( func )
 	{
 	}
 	void motion_delta( int x, int y, const QMouseEvent *event ){
 		m_delta_x += x;
 		m_delta_y += y;
-		m_mouseMoveEvent = *event;
+		m_mouseMoveEvent = QMouseEvent_clone( *event );
 	}
 	void invoke(){
-		m_func( m_delta_x, m_delta_y, m_mouseMoveEvent );
+		m_func( m_delta_x, m_delta_y, *m_mouseMoveEvent );
 		m_delta_x = 0;
 		m_delta_y = 0;
 	}

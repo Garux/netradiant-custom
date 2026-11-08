@@ -457,6 +457,7 @@ void DoShaderInfoDlg( const char* name, const char* filename, const char* title 
 #include <QListWidget>
 #include <QMessageBox>
 #include <QScrollBar>
+#include <QFile>
 #include <QTextStream>
 
 void DoInstallDevFilesDlg( const char *enginePath ){
@@ -2217,7 +2218,7 @@ private:
 			if( list.size() > 3 ){ // try to find long enough common prefix to reduce typing
 				int len = list[0].length();
 				for( int i = 0; i < list.size() && len > 0; ++i ){
-					len = std::min( len, list[i].length() );
+					len = std::min( len, int( list[i].length() ) );
 					for( int j = 0; j < len; ++j ){
 						if( list[0][j].toLower() != list[i][j].toLower() ){
 							len = j;

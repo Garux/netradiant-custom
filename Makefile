@@ -14,6 +14,7 @@ CXXFLAGS           ?=
 CPPFLAGS           ?=
 LIBS               ?=
 RADIANT_ABOUTMSG   ?= Custom build
+QT_VERSION         ?= 5
 
 # warning: this directory may NOT contain any files other than the ones written by this Makefile!
 # NEVER SET THIS TO A SYSTEM WIDE "bin" DIRECTORY!
@@ -70,20 +71,55 @@ CPPFLAGS_PNG       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) li
 LIBS_PNG           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_PNG       := $(CPPFLAGS_PNG)
 LIBS_PNG           := $(LIBS_PNG)
-CPPFLAGS_QTCORE    ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Core --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
-LIBS_QTCORE        ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Core --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
-CPPFLAGS_QTCORE    := $(CPPFLAGS_QTCORE)
-LIBS_QTCORE        := $(LIBS_QTCORE)
-CPPFLAGS_QTGUI     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
-LIBS_QTGUI         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
-CPPFLAGS_QTGUI     := $(CPPFLAGS_QTGUI)
-LIBS_QTGUI         := $(LIBS_QTGUI)
-CPPFLAGS_QTWIDGETS ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
-LIBS_QTWIDGETS     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
-CPPFLAGS_QTWIDGETS := $(CPPFLAGS_QTWIDGETS)
-LIBS_QTWIDGETS     := $(LIBS_QTWIDGETS)
-CPPFLAGS_QTSVG     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Svg --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
-LIBS_QTSVG         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Svg --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+ifeq ($(QT_VERSION), 6)
+	CPPFLAGS_QTCORE    ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt6Core --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+	LIBS_QTCORE        ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt6Core --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+	CPPFLAGS_QTCORE    := $(CPPFLAGS_QTCORE)
+	LIBS_QTCORE        := $(LIBS_QTCORE)
+	CPPFLAGS_QTGUI     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt6Gui --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+	LIBS_QTGUI         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt6Gui --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+	CPPFLAGS_QTGUI     := $(CPPFLAGS_QTGUI)
+	LIBS_QTGUI         := $(LIBS_QTGUI)
+	CPPFLAGS_QTWIDGETS ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt6Widgets --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+	LIBS_QTWIDGETS     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt6Widgets --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+	CPPFLAGS_QTWIDGETS := $(CPPFLAGS_QTWIDGETS)
+	LIBS_QTWIDGETS     := $(LIBS_QTWIDGETS)
+	CPPFLAGS_QTSVG     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt6SvgWidgets --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+	LIBS_QTSVG         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt6SvgWidgets --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+	CFLAGS_QTOPENGL    ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt6OpenGL --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+	CFLAGS_QTOPENGLWIDGETS ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt6OpenGLWidgets --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+	LIBS_QTOPENGLWIDGETS ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt6OpenGLWidgets --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+	QTCORE_NAME        ?= Qt6Core
+	QTGUI_NAME         ?= Qt6Gui
+	QTWIDGETS_NAME     ?= Qt6Widgets
+	QTSVG_NAME         ?= Qt6SvgWidgets
+else
+ifeq ($(QT_VERSION), 5)
+	CPPFLAGS_QTCORE    ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Core --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+	LIBS_QTCORE        ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Core --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+	CPPFLAGS_QTCORE    := $(CPPFLAGS_QTCORE)
+	LIBS_QTCORE        := $(LIBS_QTCORE)
+	CPPFLAGS_QTGUI     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+	LIBS_QTGUI         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+	CPPFLAGS_QTGUI     := $(CPPFLAGS_QTGUI)
+	LIBS_QTGUI         := $(LIBS_QTGUI)
+	CPPFLAGS_QTWIDGETS ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+	LIBS_QTWIDGETS     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+	CPPFLAGS_QTWIDGETS := $(CPPFLAGS_QTWIDGETS)
+	LIBS_QTWIDGETS     := $(LIBS_QTWIDGETS)
+	CPPFLAGS_QTSVG     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Svg --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+	LIBS_QTSVG         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Svg --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+	CFLAGS_QTOPENGL    ?=
+	CFLAGS_QTOPENGLWIDGETS ?=
+	LIBS_QTOPENGLWIDGETS ?=
+	QTCORE_NAME        ?= Qt5Core
+	QTGUI_NAME         ?= Qt5Gui
+	QTWIDGETS_NAME     ?= Qt5Widgets
+	QTSVG_NAME         ?= Qt5Svg
+else
+	$(error Unsuported QT_VERSION: $(QT_VERSION). Choose 5 or 6)
+endif
+endif
 CPPFLAGS_QTSVG     := $(CPPFLAGS_QTSVG)
 LIBS_QTSVG         := $(LIBS_QTSVG)
 ASSIMP_INTERNAL    ?= no
@@ -119,7 +155,7 @@ DEPENDENCIES_CHECK ?= quiet
 endif
 
 # these are used on Win32 only
-GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --variable=prefix $(STDERR_TO_DEVNULL))
+GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) $(QTWIDGETS_NAME) --variable=prefix $(STDERR_TO_DEVNULL))
 WHICHDLL           ?= which
 DLLINSTALL         ?= install-dlls.sh
 
@@ -399,10 +435,10 @@ dependencies-check:
 	checkheader libxml2-dev libxml/xpath.h xmlXPathInit "$(CPPFLAGS_XML)" "$(LIBS_XML)"; \
 	checkheader libpng12-dev png.h png_create_read_struct "$(CPPFLAGS_PNG)" "$(LIBS_PNG)"; \
 	checkheader "mesa-common-dev (or another OpenGL library)" GL/gl.h glClear "$(CPPFLAGS_GL)" "$(LIBS_GL)"; \
-	checkheader Qt5Core QCoreApplication QCoreApplication::exec "$(CPPFLAGS_QTCORE)" "$(LIBS_QTCORE)"; \
-	checkheader Qt5Gui QGuiApplication QGuiApplication::exec "$(CPPFLAGS_QTGUI)" "$(LIBS_QTGUI)"; \
-	checkheader Qt5Widgets QApplication QApplication::exec "$(CPPFLAGS_QTWIDGETS)" "$(LIBS_QTWIDGETS)"; \
-	checkheader Qt5Svg QSvgWidget QSvgWidget::mouseGrabber "$(CPPFLAGS_QTSVG)" "$(LIBS_QTSVG)"; \
+	checkheader $(QTCORE_NAME) QCoreApplication QCoreApplication::exec "$(CPPFLAGS_QTCORE)" "$(LIBS_QTCORE)"; \
+	checkheader $(QTGUI_NAME) QGuiApplication QGuiApplication::exec "$(CPPFLAGS_QTGUI)" "$(LIBS_QTGUI)"; \
+	checkheader $(QTWIDGETS_NAME) QApplication QApplication::exec "$(CPPFLAGS_QTWIDGETS)" "$(LIBS_QTWIDGETS)"; \
+	checkheader $(QTSVG_NAME) QSvgWidget QSvgWidget::mouseGrabber "$(CPPFLAGS_QTSVG)" "$(LIBS_QTSVG)"; \
 	[ "$(ASSIMP_INTERNAL)" != "yes" ] && checkheader libassimp-dev assimp/Importer.hpp Assimp::Importer::MaxLenHint "$(CPPFLAGS_ASSIMP)" "$(LIBS_ASSIMP)"; \
 	[ "$(OS)" != "Win32" ] && checkheader libc6-dev dlfcn.h dlopen "$(CPPFLAGS_DL)" "$(LIBS_DL)"; \
 	checkheader zlib1g-dev zlib.h zlibVersion "$(CPPFLAGS_ZLIB)" "$(LIBS_ZLIB)"; \
@@ -871,8 +907,8 @@ libwebplib.$(A): \
 	libs/webplib/webplib.o \
 
 $(INSTALLDIR)/radiant.$(EXE): LDFLAGS_EXTRA := $(MWINDOWS)
-$(INSTALLDIR)/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_QTWIDGETS) $(LIBS_QTSVG) $(LIBS_ZLIB)
-$(INSTALLDIR)/radiant.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_GL) $(CPPFLAGS_DL) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) $(CPPFLAGS_QTSVG) -Ilibs -Iinclude
+$(INSTALLDIR)/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_QTWIDGETS) $(LIBS_QTSVG) $(LIBS_QTOPENGLWIDGETS) $(LIBS_ZLIB)
+$(INSTALLDIR)/radiant.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_GL) $(CPPFLAGS_DL) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) $(CPPFLAGS_QTSVG) $(CFLAGS_QTOPENGLWIDGETS) -Ilibs -Iinclude
 $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/autosave.o \
 	radiant/brushmanip.o \
@@ -980,7 +1016,7 @@ libcommandlib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libcommandlib.$(A): \
 	libs/commandlib.o \
 
-libgtkutil.$(A): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+libgtkutil.$(A): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) $(CFLAGS_QTOPENGLWIDGETS) -Ilibs -Iinclude
 libgtkutil.$(A): \
 	libs/gtkutil/accelerator.o \
 	libs/gtkutil/clipboard.o \
@@ -1031,7 +1067,7 @@ $(INSTALLDIR)/modules/archivepak.$(DLL): \
 	plugins/archivepak/pak.o \
 	plugins/archivepak/plugin.o \
 
-$(INSTALLDIR)/modules/entity.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude $(CPPFLAGS_QTGUI)
+$(INSTALLDIR)/modules/entity.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_QTGUI) $(CFLAGS_QTOPENGL) -Ilibs -Iinclude
 $(INSTALLDIR)/modules/entity.$(DLL): \
 	plugins/entity/angle.o \
 	plugins/entity/angles.o \
@@ -1108,7 +1144,7 @@ $(INSTALLDIR)/modules/assmodel.$(DLL): LDFLAGS_EXTRA := -Wl,-rpath '-Wl,$$ORIGIN
 endif
 endif
 $(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := $(LIBS_ASSIMP)
-$(INSTALLDIR)/modules/assmodel.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude $(CPPFLAGS_ASSIMP) $(CPPFLAGS_QTGUI)
+$(INSTALLDIR)/modules/assmodel.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_ASSIMP) $(CPPFLAGS_QTGUI) $(CFLAGS_QTOPENGL) -Ilibs -Iinclude
 $(INSTALLDIR)/modules/assmodel.$(DLL): \
 	plugins/assmodel/mdlimage.o \
 	plugins/assmodel/model.o \
@@ -1131,7 +1167,7 @@ $(INSTALLDIR)/modules/vfspk3.$(DLL): \
 	libfilematch.$(A) \
 
 $(INSTALLDIR)/plugins/bobtoolz.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
-$(INSTALLDIR)/plugins/bobtoolz.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/bobtoolz.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) $(CFLAGS_QTOPENGL) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/bobtoolz.$(DLL): \
 	contrib/bobtoolz/bobToolz-GTK.o \
 	contrib/bobtoolz/bsploader.o \
@@ -1160,7 +1196,7 @@ $(INSTALLDIR)/plugins/bobtoolz.$(DLL): \
 	libmathlib.$(A) \
 
 $(INSTALLDIR)/plugins/brushexport.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
-$(INSTALLDIR)/plugins/brushexport.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/brushexport.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) $(CFLAGS_QTOPENGL) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/brushexport.$(DLL): \
 	contrib/brushexport/callbacks.o \
 	contrib/brushexport/export.o \
@@ -1168,7 +1204,7 @@ $(INSTALLDIR)/plugins/brushexport.$(DLL): \
 	contrib/brushexport/plugin.o \
 
 $(INSTALLDIR)/plugins/prtview.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
-$(INSTALLDIR)/plugins/prtview.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/prtview.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) $(CFLAGS_QTOPENGL) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/prtview.$(DLL): \
 	contrib/prtview/AboutDialog.o \
 	contrib/prtview/ConfigDialog.o \
@@ -1258,7 +1294,7 @@ $(INSTALLDIR)/q2map.$(EXE): \
 	$(if $(findstring Win32,$(OS)),icons/q2map.o,) \
 
 $(INSTALLDIR)/plugins/ufoaiplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_QTWIDGETS)
-$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_QTWIDGETS) $(CFLAGS_QTOPENGL) -Ilibs -Iinclude
 $(INSTALLDIR)/plugins/ufoaiplug.$(DLL): \
 	contrib/ufoaiplug/ufoai_filters.o \
 	contrib/ufoaiplug/ufoai_gtk.o \

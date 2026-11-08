@@ -30,6 +30,9 @@
 #include <QSurfaceFormat>
 #include <QCoreApplication>
 #include <QOpenGLWidget>
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 0, 0 )
+#include <QOpenGLVersionFunctionsFactory>
+#endif
 
 void ( *GLWidget_sharedContextCreated )() = 0;
 void ( *GLWidget_sharedContextDestroyed )() = 0;
@@ -49,7 +52,11 @@ void glwidget_context_created( QOpenGLWidget& widget ){
 	ASSERT_MESSAGE( widget.isValid(), "failed to create OpenGL widget" );
 
 	if ( ++g_context_count == 1 ) {
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 0, 0 )
+		GlobalOpenGL().funcs = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_0>( widget.context() );
+#else
 		GlobalOpenGL().funcs = widget.context()->versionFunctions<QOpenGLFunctions_2_0>();
+#endif
 		ASSERT_MESSAGE( GlobalOpenGL().funcs, "failed to initializeOpenGLFunctions" );
 		GlobalOpenGL().contextValid = true;
 
