@@ -1013,7 +1013,7 @@ public:
 			}
 
 			Tool& newtool = tools.begin()->second;
-			model->setData( index, newtool.evaluate().c_str(), Qt::ItemDataRole::DisplayRole );
+			model->setData( index, QString( newtool.evaluate().c_str() ), Qt::ItemDataRole::DisplayRole );
 			g_build_tools[ thisname.constData() ] = std::move( newtool );
 			g_tools_changed = true;
 			build_clear_variables();

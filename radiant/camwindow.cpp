@@ -188,8 +188,8 @@ void Camera_mouseMove( camera_t& camera, int x, int y, const QMouseEvent& event 
 struct MotionDeltaValues {
 	int x;
 	int y;
-	QMouseEvent mouseMoveEvent;
-	MotionDeltaValues( int x_, int y_, QMouseEvent mouseMoveEvent_ ) :
+	const QMouseEvent& mouseMoveEvent;
+	MotionDeltaValues( int x_, int y_, const QMouseEvent& mouseMoveEvent_ ) :
 		x( x_ ), y( y_ ), mouseMoveEvent( mouseMoveEvent_ ) {
 	}
 };
@@ -2506,8 +2506,8 @@ void CamWnd_Construct(){
 	GlobalCommands_insert( "CameraModeNext", makeCallbackF( CameraModeNext ), QKeySequence( "Shift+]" ) );
 	GlobalCommands_insert( "CameraModePrev", makeCallbackF( CameraModePrev ), QKeySequence( "Shift+[" ) );
 
-	GlobalCommands_insert( "CameraSpeedInc", makeCallbackF( CameraSpeed_increase ), QKeySequence( +Qt::SHIFT + Qt::Key_Plus + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "CameraSpeedDec", makeCallbackF( CameraSpeed_decrease ), QKeySequence( +Qt::SHIFT + Qt::Key_Minus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "CameraSpeedInc", makeCallbackF( CameraSpeed_increase ), QKeySequence( Qt::ShiftModifier | Qt::KeypadModifier | Qt::Key_Plus ) );
+	GlobalCommands_insert( "CameraSpeedDec", makeCallbackF( CameraSpeed_decrease ), QKeySequence( Qt::ShiftModifier | Qt::KeypadModifier | Qt::Key_Minus ) );
 
 	GlobalShortcuts_insert( "CameraForward", QKeySequence( "Up" ) );
 	GlobalShortcuts_insert( "CameraBack", QKeySequence( "Down" ) );
