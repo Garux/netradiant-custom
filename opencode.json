@@ -1,0 +1,12 @@
+{
+  "mcp": {
+    "trail": {
+      "type": "local",
+      "command": [
+        "trail",
+        "mcp"
+      ],
+      "enabled": true
+    }
+  }
+}
