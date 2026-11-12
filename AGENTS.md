@@ -49,6 +49,14 @@ a mutation target, and its handoff is written by that queue's tooling.
 - **Nothing private enters this public repository**: no host names or addresses, accounts,
   credentials, private corpus maps, retail game data or machine-specific paths. Fixtures here are
   authored for this repository.
+- <!-- task-checkpoint-route/1 --> **Required before ending a task or turn.** Follow the workspace
+  task-checkpoint rule — `../AGENTS.md` (`mapper-code/AGENTS.md`), "Task checkpoints: preserve
+  work before a turn ends". Commit your task-owned work in coherent local checkpoints before long
+  gates or planned pauses. Capture the terminal status of all required jobs in the same turn. A
+  Claude Code background completion notification does not keep a supervised runner turn alive. If
+  input backgrounds your wait, resume waiting in that turn. Before a controlled exit, finish or
+  explicitly cancel owned work, preserve unrelated files, verify Git and write a truthful handoff
+  with the checkpoint SHA and exact next action.
 - <!-- github-issue-policy/1 --> **Deferred work is a GitHub Issue, never a backlog line** (HITL,
   `NEW_397`). For each newly found unit of work this task cannot finish, search the owning
   repository's open AND closed issues for a duplicate, then create or update an issue in the
