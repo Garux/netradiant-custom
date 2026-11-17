@@ -55,8 +55,10 @@ a mutation target, and its handoff is written by that queue's tooling.
   gates or planned pauses. Capture the terminal status of all required jobs in the same turn. A
   Claude Code background completion notification does not keep a supervised runner turn alive. If
   input backgrounds your wait, resume waiting in that turn. Before a controlled exit, finish or
-  explicitly cancel owned work, preserve unrelated files, verify Git and write a truthful handoff
-  with the checkpoint SHA and exact next action.
+  explicitly cancel owned work, verify Git and write a truthful handoff with the checkpoint SHA and
+  exact next action. **Never leave a repository dirty** (HITL 2026-11-17): `run-queue.sh` fails a
+  dirty tree, so commit every leftover file (one you did not make in its own commit) or
+  `.gitignore` it.
 - <!-- github-issue-policy/1 --> **Deferred work is a GitHub Issue, never a backlog line** (HITL,
   `NEW_397`). For each newly found unit of work this task cannot finish, search the owning
   repository's open AND closed issues for a duplicate, then create or update an issue in the
