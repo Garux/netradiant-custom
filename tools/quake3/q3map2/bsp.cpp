@@ -294,6 +294,10 @@ static void ProcessWorldModel( entity_t& e ){
 
 	/* see if the bsp is completely enclosed */
 	EFloodEntities leakStatus = FloodEntities( tree );
+	if ( leakStatus == EFloodEntities::Leaked && CutSliverLeaves() ) { /* the flood may have crossed a brush it should not see through */
+		ClearFlood( tree );
+		leakStatus = FloodEntities( tree );
+	}
 	if ( ignoreLeaks && leakStatus == EFloodEntities::Leaked ) {
 		leakStatus = EFloodEntities::Good;
 	}
@@ -327,7 +331,10 @@ static void ProcessWorldModel( entity_t& e ){
 		}
 
 		/* flood again to discard portals in the void (also required for _skybox) */
-		FloodEntities( tree );
+		if ( FloodEntities( tree ) == EFloodEntities::Leaked && !leaked && CutSliverLeaves() ) { /* as above: this is another tree */
+			ClearFlood( tree );
+			FloodEntities( tree );
+		}
 		FillOutside( tree.headnode );
 	}
 
@@ -747,6 +754,10 @@ int BSPMain( Args& args ){
 			if ( bevelSnap > 0 ) {
 				Sys_Printf( "Snapping brush bevel planes to %d units\n", bevelSnap );
 			}
+		}
+		while ( args.takeArg( "-microvolume" ) ) {
+			g_microVolume = atof( args.takeNext() );
+			Sys_Printf( "Discarding split brush fragments of volume <= %f\n", g_microVolume );
 		}
 		while ( args.takeArg( "-nobrushsnap" ) ) {
 			Sys_Printf( "Brush vertices snapping disabled\n" );

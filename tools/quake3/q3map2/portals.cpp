@@ -70,6 +70,90 @@ static int c_tinyportals;
 static int c_badportals;       /* ydnar */
 
 /*
+   PortalWindingIsDegenerate
+
+   A portal is the connection between two leaves: the outside flood, the leak route, the areas and the
+   visibility file all walk it. Upstream dropped every portal with fewer than three edges longer than 0.2
+   (WindingIsTiny, a vertex-snapping test for drawn faces), which closed real openings of the map: a slot
+   0.125 wide through a wall bounded a leaf whose portals to the room and to the void were 0.125 x 256 and
+   were both dropped, so the map was reported sealed. A portal is dropped now only when its winding is not
+   a polygon at the precision it was built with:
+   - fewer than three of its points lie further apart than the tolerance, or
+   - its area over its longest chord - a lower bound of its width - does not exceed the tolerance.
+   The tolerance is SPLIT_WINDING_EPSILON, the distance at which the portal stage itself puts a point ON a
+   plane, plus the rounding of the winding's float coordinates (each within |c| * 2^-24 of the value that
+   was computed; twice that bounds a difference of two of them). Everything is computed in double, relative
+   to the first point. WindingIsTiny stays SplitBrush's test (brush.cpp).
+ */
+constexpr double PORTAL_POINT_EPSILON = 0.001; /* = SPLIT_WINDING_EPSILON, below */
+
+constexpr bool PortalPointsAreDegenerate( const double ( *points )[3], size_t count, double tolerance ){
+	const auto sub = []( const double *a, const double *b, double *out ){ for ( int i = 0; i < 3; ++i ) out[i] = a[i] - b[i]; };
+	const auto lengthSquared = []( const double *v ){ return v[0] * v[0] + v[1] * v[1] + v[2] * v[2]; };
+	const double toleranceSquared = tolerance * tolerance;
+	/* points further apart than the tolerance from every point kept before them */
+	size_t distinct = 0;
+	double diameterSquared = 0;
+	for ( size_t i = 0; i < count; ++i ){
+		bool apart = true;
+		for ( size_t j = 0; j < i; ++j ){
+			double d[3] = {};
+			sub( points[i], points[j], d );
+			const double l = lengthSquared( d );
+			apart = apart && l > toleranceSquared;
+			if ( l > diameterSquared )
+				diameterSquared = l;
+		}
+		distinct += apart;
+	}
+	if ( distinct < 3 )
+		return true;
+	/* twice the area: the length of the sum of the fan's cross products (the winding is convex and planar) */
+	double sum[3] = {};
+	for ( size_t i = 2; i < count; ++i ){
+		double a[3] = {}, b[3] = {};
+		sub( points[i - 1], points[0], a );
+		sub( points[i], points[0], b );
+		sum[0] += a[1] * b[2] - a[2] * b[1];
+		sum[1] += a[2] * b[0] - a[0] * b[2];
+		sum[2] += a[0] * b[1] - a[1] * b[0];
+	}
+	/* area / diameter <= tolerance  <=>  (2 area)^2 <= 4 tolerance^2 diameter^2 */
+	return lengthSquared( sum ) <= 4 * toleranceSquared * diameterSquared;
+}
+
+/* the predicate's own checks, evaluated by the compiler: the seam between a degenerate winding and a narrow one */
+namespace portal_degeneracy_checks
+{
+constexpr double slot[4][3] = { { 272, 0, 0 }, { 272, 0.0625, 0 }, { 272, 0.0625, 256 }, { 272, 0, 256 } };       /* half of a 0.125 slot */
+static_assert( !PortalPointsAreDegenerate( slot, 4, PORTAL_POINT_EPSILON ) );
+constexpr double slotFar[4][3] = { { 65000, 0, 0 }, { 65000, 0.0625, 0 }, { 65000, 0.0625, 256 }, { 65000, 0, 256 } };
+static_assert( !PortalPointsAreDegenerate( slotFar, 4, PORTAL_POINT_EPSILON + 65256 * 0x1p-23 ) );
+constexpr double sliver[4][3] = { { 272, 0, 0 }, { 272, 0.0005, 0 }, { 272, 0.0005, 256 }, { 272, 0, 256 } };    /* a line to the portal stage */
+static_assert( PortalPointsAreDegenerate( sliver, 4, PORTAL_POINT_EPSILON ) );
+constexpr double collinear[4][3] = { { 0, 0, 0 }, { 0, 0, 64 }, { 0, 0, 128 }, { 0, 0, 256 } };
+static_assert( PortalPointsAreDegenerate( collinear, 4, PORTAL_POINT_EPSILON ) );
+constexpr double duplicate[4][3] = { { 0, 0, 0 }, { 0, 64, 0 }, { 0, 64, 0 }, { 0, 0, 0.0001 } };                    /* two distinct points */
+static_assert( PortalPointsAreDegenerate( duplicate, 4, PORTAL_POINT_EPSILON ) );
+constexpr double zeroArea[3][3] = { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
+static_assert( PortalPointsAreDegenerate( zeroArea, 3, PORTAL_POINT_EPSILON ) );
+constexpr double triangle[4][3] = { { 0, 0, 0 }, { 0, 64, 0 }, { 0, 64, 0 }, { 0, 0, 64 } };                       /* a duplicate point in a sound triangle */
+static_assert( !PortalPointsAreDegenerate( triangle, 4, PORTAL_POINT_EPSILON ) );
+}
+
+static bool PortalWindingIsDegenerate( const winding_t& w ){
+	double points[MAX_POINTS_ON_WINDING][3];
+	const size_t count = std::min( w.size(), size_t( MAX_POINTS_ON_WINDING ) );
+	double magnitude = 0;
+	for ( size_t i = 0; i < count; ++i )
+		for ( int j = 0; j < 3; ++j ){
+			points[i][j] = double( w[i][j] ) - double( w[0][j] );
+			magnitude = std::max( magnitude, std::fabs( double( w[i][j] ) ) );
+		}
+	return PortalPointsAreDegenerate( points, count, PORTAL_POINT_EPSILON + magnitude * 0x1p-23 );
+}
+
+/*
    =============
    AddPortalToNodes
    =============
@@ -200,9 +284,13 @@ static void MakeHeadnodePortals( tree_t& tree ){
  */
 #define BASE_WINDING_EPSILON    0.001
 #define SPLIT_WINDING_EPSILON   0.001
+static_assert( PORTAL_POINT_EPSILON == SPLIT_WINDING_EPSILON );
 
+/* in double: from a base winding of 2^16 and more, float rounding alone left a portal 0.003 wide where two planes meet in a
+   line, wider than PortalWindingIsDegenerate's tolerance, which only knows the rounding of the winding's final coordinates. On a
+   mitred corner closed in the source, that was enough for the outside fill to pass. */
 static winding_t   BaseWindingForNode( const node_t *node ){
-	winding_t w = BaseWindingForPlane( mapplanes[node->planenum].plane );
+	winding_accu_t w = BaseWindingForPlaneAccu( Plane3( mapplanes[node->planenum].plane ) );
 
 	// clip by all the parents
 	for ( const node_t *n = node->parent; n && !w.empty(); )
@@ -210,17 +298,17 @@ static winding_t   BaseWindingForNode( const node_t *node ){
 		const plane_t& plane = mapplanes[n->planenum];
 
 		if ( n->children[eFront] == node ) { // take front
-			ChopWindingInPlace( w, plane.plane, BASE_WINDING_EPSILON );
+			ChopWindingInPlaceAccu( w, Plane3( plane.plane ), BASE_WINDING_EPSILON );
 		}
 		else
 		{	// take back
-			ChopWindingInPlace( w, plane3_flipped( plane.plane ), BASE_WINDING_EPSILON );
+			ChopWindingInPlaceAccu( w, Plane3( plane3_flipped( plane.plane ) ), BASE_WINDING_EPSILON );
 		}
 		node = n;
 		n = n->parent;
 	}
 
-	return w;
+	return CopyWindingAccuToRegular( w );
 }
 
 //============================================================
@@ -266,7 +354,7 @@ static void MakeNodePortal( node_t *node ){
 	}
 	#endif
 
-	if ( WindingIsTiny( w ) ) {
+	if ( PortalWindingIsDegenerate( w ) ) {
 		c_tinyportals++;
 		return;
 	}
@@ -316,7 +404,7 @@ static void SplitNodePortals( node_t *node ){
 //
 		auto [frontwinding, backwinding] = ClipWindingEpsilon( p->winding, plane.plane, SPLIT_WINDING_EPSILON ); /* not strict, we want to always keep one of them even if coplanar */
 
-		if ( !frontwinding.empty() && WindingIsTiny( frontwinding ) ) {
+		if ( !frontwinding.empty() && PortalWindingIsDegenerate( frontwinding ) ) {
 			if ( !front->tinyportals ) {
 				front->referencepoint = frontwinding[0];
 			}
@@ -330,7 +418,7 @@ static void SplitNodePortals( node_t *node ){
 			c_tinyportals++;
 		}
 
-		if ( !backwinding.empty() && WindingIsTiny( backwinding ) ) {
+		if ( !backwinding.empty() && PortalWindingIsDegenerate( backwinding ) ) {
 			if ( !back->tinyportals ) {
 				back->referencepoint = backwinding[0];
 			}
@@ -400,6 +488,38 @@ static void CalcNodeBounds( node_t *node ){
 	{
 		WindingExtendBounds( p->winding, node->minmax );
 	}
+}
+
+/*
+   ==================
+   SplitLeafOnPlane
+
+   A leaf becomes a node on this plane: two new leaves take its portals, with a portal between them.
+   BaseWindingForNode is exact here. MakeNodePortal goes on to chop it by the leaf's portals at CLIP_EPSILON, and across
+   a leaf thinner than that every point of the winding is ON the plane, which empties it: a passage would close.
+   ==================
+ */
+void SplitLeafOnPlane( node_t *leaf, int planenum ){
+	leaf->planenum = planenum & ~1;
+	leaf->compileFlags = 0;
+	leaf->has_structural_children = true;
+	for ( int i = 0; i < 2; ++i ) {
+		leaf->children[i] = AllocNode();
+		leaf->children[i]->parent = leaf;
+		leaf->children[i]->planenum = PLANENUM_LEAF;
+		leaf->children[i]->has_structural_children = false;
+	}
+	winding_t w = BaseWindingForNode( leaf );
+	if ( !w.empty() && !PortalWindingIsDegenerate( w ) ) {
+		portal_t *portal = AllocPortal();
+		portal->plane = mapplanes[leaf->planenum];
+		portal->onnode = leaf;
+		portal->winding.swap( w );
+		AddPortalToNodes( portal, leaf->children[eFront], leaf->children[eBack] );
+	}
+	SplitNodePortals( leaf );
+	CalcNodeBounds( leaf->children[eFront] );
+	CalcNodeBounds( leaf->children[eBack] );
 }
 
 /*
@@ -516,6 +636,21 @@ static bool PlaceOccupant( node_t *headnode, const Vector3& origin, const entity
 	FloodPortals( node, skybox );
 
 	return true;
+}
+
+/* forget a flood, so that a changed tree can be flooded again */
+static void ClearFlood_r( node_t *node ){
+	node->occupied = 0;
+	node->occupant = nullptr;
+	node->skybox = false;
+	if ( node->planenum != PLANENUM_LEAF ) {
+		ClearFlood_r( node->children[eFront] );
+		ClearFlood_r( node->children[eBack] );
+	}
+}
+
+void ClearFlood( tree_t& tree ){
+	ClearFlood_r( tree.headnode );
 }
 
 /*

@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include <map>
 
 
 
@@ -499,7 +500,223 @@ void WriteBSPBrushMap( const char *name, const brushlist_t& list ){
    FilterBrushIntoTree_r()
    adds brush reference to any intersecting bsp leafnode
  */
-static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenum );
+static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenum, float reach = 0.1f );
+
+/*
+   A brush fragment reaching less than 0.1 past a node plane is not split there: it stays whole on the side it
+   lies on (SplitBrush, the same band the face tree works in). What it reached into is lost, and that is normally
+   nothing: a sliver past a plane in a leaf that is mostly air must not make the leaf opaque. But two near-parallel
+   node planes crossing a brush bound a wedge narrower than the band, and every fragment of the brush then stays on
+   one side or the other of it: a leaf inside the brush holds no fragment and is not opaque. Air inside solid, and
+   once a portal into it is kept it carries the outside fill through the wall. Upstream only escaped this because
+   it dropped such narrow portals, and with them real openings (portals.cpp, PortalWindingIsDegenerate).
+
+   So the slivers are kept aside. A leaf they COVER is filled: subtracting the brushes that reached it from the leaf's
+   own volume leaves nothing, so no node changes. A leaf they only part-cover can still carry the flood across a
+   brush, so a map that leaks gets one more pass before its leak is believed (CutSliverLeaves): such a leaf is cut along
+   the brush's own planes, and the pieces inside the brush are filled. A map that does not leak never gets there.
+   Anything that is not brush stays air either way: a slit or a pocket between two brushes is a remainder, however
+   thin the leaf.
+ */
+#define LEAF_COVER_EPSILON 0.01f /* above the rounding of the windings involved, far below anything a stage can represent */
+
+static std::map<node_t*, std::vector<brush_t>> s_leafSlivers; /* of the tree being filtered, its leaves not filled yet */
+
+/* the leaf's volume as a brush: the planes of its ancestors, each clipped by all the others */
+static brush_t LeafVolume( const node_t *leaf ){
+	std::vector<int> planes;
+	for ( const node_t *n = leaf; n->parent != nullptr; n = n->parent )
+		planes.push_back( ( n->parent->planenum & ~1 ) | ( n->parent->children[eFront] == n ? 1 : 0 ) );
+
+	brush_t volume;
+	for ( const int plane : planes )
+	{
+		winding_t w = BaseWindingForPlane( mapplanes[plane].plane );
+		for ( const int other : planes )
+		{
+			if ( w.empty() ) {
+				break;
+			}
+			if ( other != plane ) {
+				ChopWindingInPlace( w, mapplanes[other ^ 1].plane, 0 );
+			}
+		}
+		if ( !w.empty() ) {
+			side_t& side = volume.sides.emplace_back();
+			side.planenum = plane;
+			side.winding.swap( w );
+		}
+	}
+	if ( volume.sides.size() < 4 || !BoundBrush( volume ) ) {
+		volume.sides.clear();
+	}
+	return volume;
+}
+
+/* is anything of piece left outside brushes[i...]? */
+static bool VolumeIsCovered( brush_t&& piece, const std::vector<const brush_t*>& brushes, size_t i ){
+	if ( piece.sides.empty() ) {
+		return true;
+	}
+	if ( i == brushes.size() ) {
+		return false;
+	}
+	for ( const side_t& side : brushes[i]->sides )
+	{
+		auto [outside, inside] = SplitBrush( piece, side.planenum, LEAF_COVER_EPSILON );
+		if ( !VolumeIsCovered( std::move( outside ), brushes, i + 1 ) ) {
+			return false;
+		}
+		if ( inside.sides.empty() ) {
+			return true;
+		}
+		piece = std::move( inside );
+	}
+	return true;
+}
+
+static void FilterSliverIntoTree_r( brush_t&& b, node_t *node ){
+	if ( b.sides.empty() ) {
+		return;
+	}
+	if ( node->planenum == PLANENUM_LEAF ) {
+		s_leafSlivers[node].push_back( std::move( b ) );
+		return;
+	}
+	auto [front, back] = SplitBrush( b, node->planenum, 0 );
+	FilterSliverIntoTree_r( std::move( front ), node->children[eFront] );
+	FilterSliverIntoTree_r( std::move( back ), node->children[eBack] );
+}
+
+/* b stays wholly on !side of the node: keep aside what it reaches past the plane */
+static void KeepSliver( const brush_t& b, const node_t *node, int side ){
+	if ( b.detail || !b.opaque ) {
+		return;
+	}
+	auto [front, back] = SplitBrush( b, node->planenum, 0 );
+	FilterSliverIntoTree_r( std::move( side == eFront ? front : back ), node->children[side] );
+}
+
+static std::vector<const brush_t*> OriginalsOf( const std::vector<brush_t>& slivers ){
+	std::vector<const brush_t*> brushes;
+	for ( const brush_t& b : slivers )
+		if ( std::ranges::find( brushes, b.original ) == brushes.end() ) {
+			brushes.push_back( b.original );
+		}
+	return brushes;
+}
+
+static void FillLeaf( node_t *leaf, std::vector<brush_t>& slivers ){
+	leaf->opaque = true;
+	for ( brush_t& b : slivers )
+		leaf->brushlist.push_front( std::move( b ) );
+}
+
+static int FillCoveredLeaves(){
+	int filled = 0;
+	for ( auto it = s_leafSlivers.begin(); it != s_leafSlivers.end(); )
+	{
+		auto& [leaf, slivers] = *it;
+		brush_t volume = leaf->opaque ? brush_t() : LeafVolume( leaf );
+		if ( leaf->opaque ) {
+			it = s_leafSlivers.erase( it );
+		}
+		else if ( !volume.sides.empty() && VolumeIsCovered( std::move( volume ), OriginalsOf( slivers ), 0 ) ) {
+			FillLeaf( leaf, slivers );
+			++filled;
+			it = s_leafSlivers.erase( it );
+		}
+		else{
+			++it;
+		}
+	}
+	return filled;
+}
+
+/* the plane to cut the leaf on, -1 for none: a side of a brush the leaf reaches past. Any such side once the leaf is known to
+   be crossed, otherwise one of two sides facing each other, which means the brush separates what lies beyond them */
+static int LeafCuttingPlane( const brush_t& volume, const std::vector<const brush_t*>& brushes, bool crossed ){
+	for ( const brush_t *brush : brushes )
+	{
+		std::vector<int> beyond;
+		for ( const side_t& side : brush->sides )
+		{
+			if ( side.bevel ) {
+				continue;
+			}
+			float out = 0, in = 0;
+			for ( const side_t& v : volume.sides )
+				for ( const Vector3& p : v.winding )
+				{
+					const float d = plane3_distance_to_point( mapplanes[side.planenum].plane, p );
+					value_maximize( out, d );
+					value_minimize( in, d );
+				}
+			if ( out > LEAF_COVER_EPSILON && in < -LEAF_COVER_EPSILON ) {
+				beyond.push_back( side.planenum );
+			}
+		}
+		if ( crossed && !beyond.empty() ) {
+			return beyond.front();
+		}
+		for ( const int x : beyond )
+			for ( const int y : beyond )
+				if ( vector3_dot( mapplanes[x].normal(), mapplanes[y].normal() ) < -0.5 ) {
+					return x;
+				}
+	}
+	return -1;
+}
+
+/* width of a leaf across its largest side: a leaf thinner than the band cannot lead the flood around a brush that crosses it */
+static bool LeafIsThin( const brush_t& volume ){
+	float largest = 0;
+	for ( const side_t& side : volume.sides )
+		value_maximize( largest, WindingArea( side.winding ) );
+	return largest > 0 && BrushVolume( volume ) <= largest * 2 * ON_EPSILON;
+}
+
+static int CutLeaf_r( node_t *leaf, std::vector<brush_t>& slivers, int depth, bool crossed ){
+	if ( slivers.empty() || !leaf->brushlist.empty() ) { /* a non-opaque brush lists here: it would have to be cut too */
+		return 0;
+	}
+	const auto brushes = OriginalsOf( slivers );
+	const brush_t volume = LeafVolume( leaf );
+	if ( volume.sides.empty() ) {
+		return 0;
+	}
+	if ( VolumeIsCovered( brush_t( volume ), brushes, 0 ) ) {
+		FillLeaf( leaf, slivers );
+		return 0;
+	}
+	const int plane = depth < 8 ? LeafCuttingPlane( volume, brushes, crossed || LeafIsThin( volume ) ) : -1;
+	if ( plane < 0 ) {
+		return 0;
+	}
+	SplitLeafOnPlane( leaf, plane );
+	std::vector<brush_t> parts[2];
+	for ( const brush_t& b : slivers )
+	{
+		auto [front, back] = SplitBrush( b, leaf->planenum, 0 );
+		if ( !front.sides.empty() ) {
+			parts[eFront].push_back( std::move( front ) );
+		}
+		if ( !back.sides.empty() ) {
+			parts[eBack].push_back( std::move( back ) );
+		}
+	}
+	return 1 + CutLeaf_r( leaf->children[eFront], parts[eFront], depth + 1, true )
+	         + CutLeaf_r( leaf->children[eBack], parts[eBack], depth + 1, true );
+}
+
+bool CutSliverLeaves(){
+	int cuts = 0;
+	for ( auto& [leaf, slivers] : s_leafSlivers )
+		cuts += CutLeaf_r( leaf, slivers, 0, false );
+	s_leafSlivers.clear();
+	Sys_FPrintf( SYS_VRB, "%9d leaf cuts on brush planes\n", cuts );
+	return cuts != 0;
+}
 
 static int FilterBrushIntoTree_r( brush_t&& b, node_t *node ){
 	/* dummy check */
@@ -532,8 +749,26 @@ static int FilterBrushIntoTree_r( brush_t&& b, node_t *node ){
 		return 1;
 	}
 
+	/* the face tree consumed a side of this brush as ON this node's plane (BuildFaceTree_r), so no plane below
+	   bounds the brush on that side: it lies wholly on its inner side here. Splitting it again from its 1/8-snapped
+	   windings, which can reach just past the 0.1 SplitBrush allows, cut a sliver into the other child, where it
+	   landed in a leaf no plane of the brush bounds and made that leaf opaque */
+	{
+		int inner = -1;
+		for ( const auto& [brush, side] : node->coplanarBrushes )
+			if ( brush == b.original )
+				inner = ( inner == -1 || inner == side ) ? side : -2; /* sides consumed on both sides: split as usual */
+		if ( inner >= 0 ) {
+			KeepSliver( b, node, !inner );
+			return FilterBrushIntoTree_r( std::move( b ), node->children[ inner ] );
+		}
+	}
+
 	/* split it by the node plane */
 	auto [front, back] = SplitBrush( b, node->planenum );
+	if ( front.sides.empty() != back.sides.empty() ) {
+		KeepSliver( b, node, front.sides.empty() ? eFront : eBack );
+	}
 
 	int c = 0;
 	c += FilterBrushIntoTree_r( std::move( front ), node->children[eFront] );
@@ -581,6 +816,7 @@ void FilterStructuralBrushesIntoTree( const entity_t& e, tree_t& tree ) {
 
 	Sys_FPrintf( SYS_VRB, "--- FilterStructuralBrushesIntoTree ---\n" );
 
+	s_leafSlivers.clear();
 	for ( const brush_t& b : e.brushes ) {
 		if ( !b.detail ) {
 			c_unique++;
@@ -588,9 +824,12 @@ void FilterStructuralBrushesIntoTree( const entity_t& e, tree_t& tree ) {
 		}
 	}
 
+	const int c_filled = FillCoveredLeaves();
+
 	/* emit some statistics */
 	Sys_FPrintf( SYS_VRB, "%9d structural brushes\n", c_unique );
 	Sys_FPrintf( SYS_VRB, "%9d cluster references\n", c_clusters );
+	Sys_FPrintf( SYS_VRB, "%9d leaves filled by slivers, %d more touched\n", c_filled, int( s_leafSlivers.size() ) );
 }
 
 
@@ -666,7 +905,7 @@ static EPlaneSide BrushMostlyOnSide( const brush_t& brush, const Plane3f& plane 
    generates two new brushes, leaving the original unchanged
  */
 
-static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenum ){
+static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenum, float reach ){
 	const Plane3f& plane = mapplanes[planenum].plane;
 
 	// check all points
@@ -685,12 +924,12 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 		}
 	}
 
-	if ( d_front < 0.1f ) { // PLANESIDE_EPSILON)
+	if ( d_front == 0 || d_front < reach ) { // PLANESIDE_EPSILON)
 		// only on back
 		return { {}, brush };
 	}
 
-	if ( d_back > -0.1f ) { // PLANESIDE_EPSILON)
+	if ( d_back == 0 || d_back > -reach ) { // PLANESIDE_EPSILON)
 		// only on front
 		return { brush, {} };
 	}
@@ -704,7 +943,10 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 			break;
 	}
 
-	if ( midwinding.empty() || WindingIsTiny( midwinding ) ) { // the brush isn't really split
+	/* the brush is known to reach at least 0.1 past the plane on BOTH sides here. A small section (WindingIsTiny:
+	   fewer than three edges longer than 0.2) does not make it unsplit: a 3/16 rod lying across the plane was sent
+	   whole to the side it reaches furthest into, and its part on the other side kept no brush */
+	if ( midwinding.empty() ) { // the brush isn't really split
 		if ( BrushMostlyOnSide( brush, plane ) == eSideBack ) {
 			return { {}, brush };
 		}
@@ -787,7 +1029,10 @@ static std::pair<brush_t, brush_t> SplitBrush( const brush_t& brush, int planenu
 
 	for ( int i = 0; i < 2; ++i )
 	{
-		if ( BrushVolume( b[i] ) < 1 ) {
+		/* A split half is already known to reach PLANESIDE_EPSILON past the plane, to have a non-tiny midwinding and
+		   bounded windings; discarding it for being smaller than a fixed volume loses real material from thin walls:
+		   its leaf then lists no brush (no collision) and may stay non-opaque. Only a non-positive volume is noise. */
+		if ( BrushVolume( b[i] ) <= g_microVolume ) {
 			b[i].sides.clear();
 			//			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "tiny volume after clip\n" );
 		}

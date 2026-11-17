@@ -662,6 +662,7 @@ struct shaderInfo_t : public shaderInfo_t_data
 
    ------------------------------------------------------------------------------- */
 
+struct brush_t;
 struct face_t
 {
 	int planenum;
@@ -669,6 +670,8 @@ struct face_t
 	//bool			checked;
 	int compileFlags;
 	winding_t           w;
+	const brush_t       *brush;             /* original of the brush this face is a side of */
+	int sidePlanenum;                       /* that side's plane, oriented (planenum is always the even one) */
 };
 using facelist_t = std::forward_list<face_t>;
 
@@ -1095,6 +1098,10 @@ struct node_t
 	struct portal_t     *portals;       /* also on nodes during construction */
 
 	bool has_structural_children;
+
+	/* nodes only: brushes a side of which BuildFaceTree_r consumed as ON this node's plane, and the child their
+	   inside is on */
+	std::vector<std::pair<const brush_t*, int>> coplanarBrushes;
 };
 
 
@@ -1565,6 +1572,7 @@ void                        WriteBSPBrushMap( const char *name, const brushlist_
 
 void                        FilterDetailBrushesIntoTree( const entity_t& e, tree_t& tree );
 void                        FilterStructuralBrushesIntoTree( const entity_t& e, tree_t& tree );
+bool                        CutSliverLeaves();
 
 bool                        WindingIsTiny( const winding_t& w );
 
@@ -1670,6 +1678,8 @@ inline portal_t             *AllocPortal(){ return new portal_t(); } // zero ini
 inline void                 FreePortal( portal_t *p ){ delete p; }
 
 void                        MakeTreePortals( tree_t& tree );
+void                        SplitLeafOnPlane( node_t *leaf, int planenum );
+void                        ClearFlood( tree_t& tree );
 
 
 /* leakfile.c */
@@ -1972,6 +1982,8 @@ inline int maxSurfaceIndexes = 6000;                    /* ydnar */
 inline float npDegrees;                                 /* ydnar: nonplanar degrees */
 inline int bevelSnap;                                   /* ydnar: bevel plane snap */
 inline bool g_brushSnap = true;
+/* SplitBrush discards a fragment whose volume is not above this (-microvolume); was a hard-coded 1 */
+inline float g_microVolume = 0;
 inline bool flat;
 inline bool meta;
 inline bool patchMeta;

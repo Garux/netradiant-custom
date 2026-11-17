@@ -1579,6 +1579,28 @@ static int FilterPointConvexHullIntoTree_r( const std::array<Vector3, 16>& point
 
 
 /*
+   WindingOnNodePlane()
+   true when every point of a planar surface's winding, taken on the surface's own plane, lies within ON_EPSILON
+   of the node plane: the test BuildFaceTree_r applies to the face before it consumes it as ON that plane
+ */
+
+static bool WindingOnNodePlane( const winding_t& w, const Plane3f& own, const Plane3f& node ){
+	if ( w.empty() ) {
+		return false;
+	}
+	for ( const Vector3& v : w )
+	{
+		const Vector3 p = v - own.normal() * plane3_distance_to_point( own, v );
+		if ( std::fabs( plane3_distance_to_point( node, p ) ) > ON_EPSILON ) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+/*
    FilterWindingIntoTree_r() - ydnar
    filters a winding from a drawsurface into the tree
  */
@@ -1654,11 +1676,22 @@ static int FilterWindingIntoTree_r( winding_t& w, mapDrawSurface_t& ds, node_t *
 			#endif
 		}
 
+		int refs = 0;
+
+		/* a face on ANOTHER plane within ON_EPSILON of this one was consumed here by BuildFaceTree_r: its own plane
+		   splits nothing below, so this plane bounds the leaves it is seen from. Filter it to the side it faces, as
+		   on its own plane above; its snapped vertices (below) can lie past ON_EPSILON behind and reach only the
+		   opaque leaf there, leaving the surface referenced by no visible leaf */
+		if ( ds.planeNum >= 0 && WindingOnNodePlane( w, mapplanes[ ds.planeNum ].plane, plane1 ) ) {
+			winding_t wcopy( w );
+			refs += FilterWindingIntoTree_r( wcopy, ds,
+			                                 node->children[ vector3_dot( mapplanes[ ds.planeNum ].normal(), plane1.normal() ) > 0 ? eFront : eBack ] );
+		}
+
 		/* clip the winding by this plane */
 		auto [front, back] = ClipWindingEpsilonStrict( w, plane1, ON_EPSILON ); /* strict; we handle the "winding disappeared" case */
 
 		/* filter by this plane */
-		int refs = 0;
 		if ( front.empty() && back.empty() ) {
 			/* same plane, this is an ugly hack */
 			/* but better too many than too few refs */

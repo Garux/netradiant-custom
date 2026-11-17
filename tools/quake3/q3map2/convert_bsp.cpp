@@ -807,7 +807,10 @@ int MergeBSPMain( Args& args ){
 	}
 
 	{
-		entities.insert( entities.cend(), bsp.entities.cbegin() + 1, bsp.entities.cend() ); // minus world
+		/* minus world; appended one by one: a range insert instantiates entity_t's copy assignment under libc++,
+		   which mesh_t deletes, while appending only copy-constructs */
+		for ( auto it = bsp.entities.cbegin() + 1; it != bsp.entities.cend(); ++it )
+			entities.push_back( *it );
 		numBSPEntities = entities.size();
 		bspModels.insert( bspModels.cend(), bsp.bspModels.cbegin() + 1, bsp.bspModels.cend() ); // minus world
 		bspShaders.insert( bspShaders.cend(), bsp.bspShaders.cbegin(), bsp.bspShaders.cend() );
