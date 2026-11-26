@@ -654,15 +654,21 @@ public:
 
 filter_patch_all g_filter_patch_all;
 filter_patch_flags g_filter_patch_clip( QER_CLIP );
-filter_patch_shader g_filter_patch_commonclip( "textures/common/clip" );
+filter_patch_shader g_filter_patch_clip_q2( "textures/clip" );
 filter_patch_shader g_filter_patch_weapclip( "textures/common/weapclip" );
+filter_patch_shader g_filter_patch_fullclip( "textures/common/fullclip" );
+filter_patch_shader g_filter_patch_commonclip( "textures/common/clip" );
+filter_patch_shader g_filter_patch_botclip( "textures/common/botclip" );
 filter_patch_flags g_filter_patch_translucent( QER_TRANS | QER_ALPHATEST );
 
 void PatchFilters_construct(){
 	add_patch_filter( g_filter_patch_all, EXCLUDE_CURVES );
 	add_patch_filter( g_filter_patch_clip, EXCLUDE_CLIP );
-	add_patch_filter( g_filter_patch_commonclip, EXCLUDE_CLIP );
+	add_patch_filter( g_filter_patch_clip_q2, EXCLUDE_CLIP );
 	add_patch_filter( g_filter_patch_weapclip, EXCLUDE_CLIP );
+	add_patch_filter( g_filter_patch_fullclip, EXCLUDE_CLIP );
+	add_patch_filter( g_filter_patch_commonclip, EXCLUDE_CLIP );
+	add_patch_filter( g_filter_patch_botclip, EXCLUDE_BOTCLIP );
 	add_patch_filter( g_filter_patch_translucent, EXCLUDE_TRANSLUCENT );
 }
 
