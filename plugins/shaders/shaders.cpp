@@ -1304,6 +1304,9 @@ bool ShaderTemplate::parseQuake3( Tokeniser& tokeniser ){
 				else if ( string_equal_nocase( surfaceparm, "botclip" ) ) {
 					m_nFlags |= QER_BOTCLIP;
 				}
+				else if ( string_equal_nocase( surfaceparm, "skip" ) ) {
+					m_nFlags |= QER_SKIP;
+				}
 			}
 		}
 	}

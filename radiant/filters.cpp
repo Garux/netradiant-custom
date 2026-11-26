@@ -169,6 +169,7 @@ void Filters_constructMenu( QMenu* menu ){
 	}
 	create_check_menu_item_with_mnemonic( menu, "Translucent", "FilterTranslucent" );
 	if ( g_pGameDescription->mGameType != "doom3" ) {
+		create_check_menu_item_with_mnemonic( menu, "Skip", "FilterSkips" );
 		create_check_menu_item_with_mnemonic( menu, "Liquids", "FilterLiquids" );
 	}
 	create_check_menu_item_with_mnemonic( menu, "Caulk", "FilterCaulk" );
@@ -220,6 +221,9 @@ void ConstructFilters(){
 		add_filter_command( EXCLUDE_AREAPORTALS, "FilterAreaportals", QKeySequence( "Alt+3" ) );
 	}
 	add_filter_command( EXCLUDE_TRANSLUCENT, "FilterTranslucent", QKeySequence( "Alt+4" ) );
+	if ( g_pGameDescription->mGameType != "doom3" ) {
+		add_filter_command( EXCLUDE_SKIP, "FilterSkips" );
+	}
 	add_filter_command( EXCLUDE_LIQUIDS, "FilterLiquids", QKeySequence( "Alt+5" ) );
 	add_filter_command( EXCLUDE_CAULK, "FilterCaulk", QKeySequence( "Alt+6" ) );
 	add_filter_command( EXCLUDE_CLIP, "FilterClips", QKeySequence( "Alt+7" ) );
