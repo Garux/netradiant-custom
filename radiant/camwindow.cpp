@@ -997,7 +997,7 @@ public:
 	void DisableFreeMove();
 	void EnableFreeMove();
 	bool m_bFreeMove;
-	bool m_bFreeMove_entering;
+	bool m_bFreeMove_entering = false;
 
 	CameraView& getCameraView(){
 		return m_cameraview;
@@ -1005,6 +1005,9 @@ public:
 
 	Timer m_rightClickTimer;
 	float m_rightClickMove;
+	bool m_rmbPending = false;
+	bool m_rmbPendingOrbit = false;
+	QPoint m_rmbPendingPressPos;
 
 	void selection_motion_freemove( const MotionDeltaValues& delta );
 
@@ -1129,49 +1132,44 @@ inline bool M2_EVENT( const QMouseEvent& event ){
 	return event.button() == Qt::MouseButton::RightButton && modifiers_for_state( event.modifiers() ) == c_modifierNone;
 }
 
-static void enable_freelook_button_press( const QMouseEvent& event, CamWnd& camwnd ){
-	const bool m2    = M2_EVENT( event );
-	const bool m2alt = ORBIT_EVENT( event );
-	if ( m2 || m2alt ) {
-		camwnd.m_bFreeMove_entering = true;
-		if( m2 && context_menu_try( camwnd ) ){
-			context_menu_show();
-		}
-		else{
-			if( m2alt )
-				camera_orbit_init( camwnd.getCamera(), Vector2( event.x(), event.y() ) );
-			camwnd.EnableFreeMove();
-			camwnd.m_rightClickTimer.start();
-			camwnd.m_rightClickMove = 0;
-		}
-	}
+static bool rmb_camera_event( const QMouseEvent& event ){
+	return M2_EVENT( event ) || ORBIT_EVENT( event );
 }
 
-static void disable_freelook_button_press( const QMouseEvent& event, CamWnd& camwnd ){
-	const bool m2    = M2_EVENT( event );
-	const bool m2alt = ORBIT_EVENT( event );
-	if ( m2 || m2alt ) {
-		camwnd.m_bFreeMove_entering = false;
-		if( m2 && context_menu_try( camwnd ) ){
-			camwnd.DisableFreeMove();
-			context_menu_show();
-		}
-		else{
-			if( m2alt )
-				camera_orbit_init( camwnd.getCamera(), Vector2( event.x(), event.y() ) );
-			camwnd.m_rightClickTimer.start();
-			camwnd.m_rightClickMove = 0;
-		}
-	}
+static void begin_rmb_pending( const QMouseEvent& event, CamWnd& camwnd ){
+	camwnd.m_rmbPending = true;
+	camwnd.m_rmbPendingOrbit = ORBIT_EVENT( event );
+	camwnd.m_rmbPendingPressPos = event.pos();
+	camwnd.m_bFreeMove_entering = !camwnd.m_bFreeMove;
+	camwnd.m_rightClickTimer.start();
+	camwnd.m_rightClickMove = 0;
+}
+
+static void clear_rmb_pending( CamWnd& camwnd ){
+	camwnd.m_rmbPending = false;
+	camwnd.m_rmbPendingOrbit = false;
+}
+
+static void activate_rmb_pending( const QPoint& pos, CamWnd& camwnd ){
+	const bool orbit = camwnd.m_rmbPendingOrbit;
+	clear_rmb_pending( camwnd );
+	if( orbit )
+		camera_orbit_init( camwnd.getCamera(), Vector2( pos.x(), pos.y() ) );
+	if( !camwnd.m_bFreeMove )
+		camwnd.EnableFreeMove();
 }
 
 static void disable_freelook_button_release( const QMouseEvent& event, CamWnd& camwnd ){
-	const bool m2    = M2_EVENT( event );
-	const bool m2alt = ORBIT_EVENT( event );
-	if ( m2 || m2alt ) {
+	if ( rmb_camera_event( event ) ) {
 		camwnd.getCamera().m_orbit = false;
-		if( ( ( camwnd.m_rightClickTimer.elapsed_msec() < 300 && camwnd.m_rightClickMove < 56 ) == !camwnd.m_bFreeMove_entering ) ){
+		const int elapsed = camwnd.m_rightClickTimer.elapsed_msec();
+		const bool quickClick = elapsed < 250 && camwnd.m_rightClickMove < 56;
+		if( quickClick == !camwnd.m_bFreeMove_entering ){
 			camwnd.DisableFreeMove();
+		}
+		else if( !camwnd.m_bFreeMove_entering && M2_EVENT( event ) && elapsed >= 250 ){
+			camwnd.DisableFreeMove();
+			context_menu_show();
 		}
 	}
 }
@@ -1625,26 +1623,51 @@ protected:
 	void mousePressEvent( QMouseEvent *event ) override {
 		if( !m_camwnd.m_bFreeMove ){
 			setFocus();
-			selection_button_press( scaledEvent( event ), m_camwnd.m_window_observer );
-			enable_freelook_button_press( scaledEvent( event ), m_camwnd );
+			if( rmb_camera_event( *event ) )
+				begin_rmb_pending( scaledEvent( event ), m_camwnd );
+			else
+				selection_button_press( scaledEvent( event ), m_camwnd.m_window_observer );
 		}
 		else{
 			selection_button_press_freemove( this, scaledEvent( event ), m_camwnd.m_window_observer );
-			disable_freelook_button_press( scaledEvent( event ), m_camwnd );
+			if( rmb_camera_event( *event ) ){
+				m_camwnd.m_bFreeMove_entering = false;
+				m_camwnd.m_rightClickTimer.start();
+				m_camwnd.m_rightClickMove = 0;
+			}
 		}
 	}
 	void mouseMoveEvent( QMouseEvent *event ) override {
 		if( !m_camwnd.m_bFreeMove ){
-			m_camwnd.m_deferred_motion.motion( scaledEvent( event ) );
-			m_camwnd.getCamera().m_idleDraw.queueDraw( DeferredMotion2::InvokeCaller( m_camwnd.m_deferred_motion ), false );
-		}
-		else{
-			;
+			if( m_camwnd.m_rmbPending ){
+				const QMouseEvent ev = scaledEvent( event );
+				const QPoint delta = ev.pos() - m_camwnd.m_rmbPendingPressPos;
+				if( ( ev.buttons() & Qt::MouseButton::RightButton )
+				 && delta.manhattanLength() > 2 ){
+					activate_rmb_pending( ev.pos(), m_camwnd );
+				}
+			}
+			else{
+				m_camwnd.m_deferred_motion.motion( scaledEvent( event ) );
+				m_camwnd.getCamera().m_idleDraw.queueDraw( DeferredMotion2::InvokeCaller( m_camwnd.m_deferred_motion ), false );
+			}
 		}
 	}
 	void mouseReleaseEvent( QMouseEvent *event ) override {
 		if( !m_camwnd.m_bFreeMove ){
-			selection_button_release( scaledEvent( event ), m_camwnd.m_window_observer );
+			if( m_camwnd.m_rmbPending && rmb_camera_event( *event ) ){
+				clear_rmb_pending( m_camwnd );
+				const int elapsed = m_camwnd.m_rightClickTimer.elapsed_msec();
+				if( M2_EVENT( *event ) && m_camwnd.m_bFreeMove_entering
+				 && elapsed < 250 && m_camwnd.m_rightClickMove < 56 ){
+					m_camwnd.EnableFreeMove();
+				}
+				else if( M2_EVENT( *event ) ){
+					context_menu_show();
+				}
+			}
+			else
+				selection_button_release( scaledEvent( event ), m_camwnd.m_window_observer );
 		}
 		else{
 			selection_button_release_freemove( this, scaledEvent( event ), m_camwnd.m_window_observer );
